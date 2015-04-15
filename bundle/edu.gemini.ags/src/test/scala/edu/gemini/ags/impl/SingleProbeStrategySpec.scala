@@ -1,5 +1,6 @@
 package edu.gemini.ags.impl
 
+import edu.gemini.ags.api.AgsStrategy.Selection
 import edu.gemini.ags.api.{AgsGuideQuality, AgsStrategy}
 import edu.gemini.ags.conf.ProbeLimitsTable
 import edu.gemini.catalog.votable.TestVoTableBackend
@@ -12,11 +13,12 @@ import edu.gemini.spModel.gemini.gmos.{InstGmosSouth, GmosOiwfsGuideProbe, InstG
 import edu.gemini.spModel.gemini.gnirs.{GnirsOiwfsGuideProbe, InstGNIRS}
 import edu.gemini.spModel.gemini.niri.{NiriOiwfsGuideProbe, InstNIRI}
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality
-import edu.gemini.spModel.guide.GuideProbe
+import edu.gemini.spModel.guide.{ValidatableGuideProbe, GuideProbe}
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.target.SPTarget
 import edu.gemini.spModel.target.env.TargetEnvironment
 import edu.gemini.spModel.target.obsComp.PwfsGuideProbe
+import org.specs2.matcher.MatchResult
 import org.specs2.time.NoTimeConversions
 import org.specs2.mutable.Specification
 
@@ -50,20 +52,7 @@ class SingleProbeStrategySpec extends Specification with NoTimeConversions {
 
       val selection = Await.result(strategy.select(ctx, magTable), 10.seconds)
 
-      // One guide star found
-      selection.map(_.assignments.size) should beSome(1)
-      selection.flatMap(_.assignments.headOption.map(_.guideProbe)) should beSome(AltairAowfsGuider.instance)
-      val guideStar = selection.flatMap(_.assignments.headOption.map(_.guideStar))
-      guideStar.map(_.name) should beSome("553-036128")
-      // Add GS to targets
-      val newCtx = selection.map(applySelection(ctx, _))
-      val analyzedSelection = ~newCtx.map(strategy.analyze(_, magTable))
-      analyzedSelection should be size 1
-      analyzedSelection.headOption.map(_.quality) should beSome(AgsGuideQuality.DeliversRequestedIq)
-
-      // Analyze Single Guide Star
-      val analyzedGS = (newCtx |@| guideStar){ strategy.analyze(_, magTable, AltairAowfsGuider.instance, _) }.flatten
-      analyzedGS.map(_.quality) should beSome(AgsGuideQuality.DeliversRequestedIq)
+      verifyGuideStarSelection(strategy, ctx, selection, "553-036128", AltairAowfsGuider.instance)
     }
     "find a guide star for NIRI+LGS, OCSADV-245" in {
       // Pal 12 target
@@ -79,20 +68,7 @@ class SingleProbeStrategySpec extends Specification with NoTimeConversions {
 
       val selection = Await.result(strategy.select(ctx, magTable), 10.seconds)
 
-      // One guide star found
-      selection.map(_.assignments.size) should beSome(1)
-      selection.flatMap(_.assignments.headOption.map(_.guideProbe)) should beSome(AltairAowfsGuider.instance)
-      val guideStar = selection.flatMap(_.assignments.headOption.map(_.guideStar))
-      guideStar.map(_.name) should beSome("344-198748")
-      // Add GS to targets
-      val newCtx = selection.map(applySelection(ctx, _))
-      val analyzedSelection = ~newCtx.map(strategy.analyze(_, magTable))
-      analyzedSelection should be size 1
-      analyzedSelection.headOption.map(_.quality) should beSome(AgsGuideQuality.DeliversRequestedIq)
-
-      // Analyze Single Guide Star
-      val analyzedGS = (newCtx |@| guideStar){ strategy.analyze(_, magTable, AltairAowfsGuider.instance, _) }.flatten
-      analyzedGS.map(_.quality) should beSome(AgsGuideQuality.DeliversRequestedIq)
+      verifyGuideStarSelection(strategy, ctx, selection, "344-198748", AltairAowfsGuider.instance)
     }
     "find a guide star for NIRI+PWFS1, OCSADV-255" in {
       // HIP 1000 target
@@ -110,20 +86,7 @@ class SingleProbeStrategySpec extends Specification with NoTimeConversions {
 
       val selection = Await.result(strategy.select(ctx, magTable), 10.seconds)
 
-      // One guide star found
-      selection.map(_.assignments.size) should beSome(1)
-      selection.flatMap(_.assignments.headOption.map(_.guideProbe)) should beSome(PwfsGuideProbe.pwfs1)
-      val guideStar = selection.flatMap(_.assignments.headOption.map(_.guideStar))
-      guideStar.map(_.name) should beSome("340-000202")
-      // Add GS to targets
-      val newCtx = selection.map(applySelection(ctx, _))
-      val analyzedSelection = ~newCtx.map(strategy.analyze(_, magTable))
-      analyzedSelection should be size 1
-      analyzedSelection.headOption.map(_.quality) should beSome(AgsGuideQuality.DeliversRequestedIq)
-
-      // Analyze Single Guide Star
-      val analyzedGS = (newCtx |@| guideStar){ strategy.analyze(_, magTable, PwfsGuideProbe.pwfs1, _) }.flatten
-      analyzedGS.map(_.quality) should beSome(AgsGuideQuality.DeliversRequestedIq)
+      verifyGuideStarSelection(strategy, ctx, selection, "340-000202", PwfsGuideProbe.pwfs1)
     }
     "find a guide star for NIRI+PWFS2, OCSADV-255" in {
       // HIP 1024 target
@@ -141,20 +104,7 @@ class SingleProbeStrategySpec extends Specification with NoTimeConversions {
 
       val selection = Await.result(strategy.select(ctx, magTable), 10.seconds)
 
-      // One guide star found
-      selection.map(_.assignments.size) should beSome(1)
-      selection.flatMap(_.assignments.headOption.map(_.guideProbe)) should beSome(PwfsGuideProbe.pwfs2)
-      val guideStar = selection.flatMap(_.assignments.headOption.map(_.guideStar))
-      guideStar.map(_.name) should beSome("458-000297")
-      // Add GS to targets
-      val newCtx = selection.map(applySelection(ctx, _))
-      val analyzedSelection = ~newCtx.map(strategy.analyze(_, magTable))
-      analyzedSelection should be size 1
-      analyzedSelection.headOption.map(_.quality) should beSome(AgsGuideQuality.DeliversRequestedIq)
-
-      // Analyze Single Guide Star
-      val analyzedGS = (newCtx |@| guideStar){ strategy.analyze(_, magTable, PwfsGuideProbe.pwfs2, _) }.flatten
-      analyzedGS.map(_.quality) should beSome(AgsGuideQuality.DeliversRequestedIq)
+      verifyGuideStarSelection(strategy, ctx, selection, "458-000297", PwfsGuideProbe.pwfs2)
     }
     "find a guide star for GMOS-N+OIWFS, OCSADV-255" in {
       // NGC 101 target
@@ -172,20 +122,7 @@ class SingleProbeStrategySpec extends Specification with NoTimeConversions {
 
       val selection = Await.result(strategy.select(ctx, magTable), 10.seconds)
 
-      // One guide star found
-      selection.map(_.assignments.size) should beSome(1)
-      selection.flatMap(_.assignments.headOption.map(_.guideProbe)) should beSome(GmosOiwfsGuideProbe.instance)
-      val guideStar = selection.flatMap(_.assignments.headOption.map(_.guideStar))
-      guideStar.map(_.name) should beSome("288-000439")
-      // Add GS to targets
-      val newCtx = selection.map(applySelection(ctx, _))
-      val analyzedSelection = ~newCtx.map(strategy.analyze(_, magTable))
-      analyzedSelection should be size 1
-      analyzedSelection.headOption.map(_.quality) should beSome(AgsGuideQuality.DeliversRequestedIq)
-
-      // Analyze Single Guide Star
-      val analyzedGS = (newCtx |@| guideStar){ strategy.analyze(_, magTable, GmosOiwfsGuideProbe.instance, _) }.flatten
-      analyzedGS.map(_.quality) should beSome(AgsGuideQuality.DeliversRequestedIq)
+      verifyGuideStarSelection(strategy, ctx, selection, "288-000439", GmosOiwfsGuideProbe.instance)
     }
     "find a guide star for GMOS-N+PWFS2, OCSADV-255" in {
       // M1 target
@@ -203,20 +140,7 @@ class SingleProbeStrategySpec extends Specification with NoTimeConversions {
 
       val selection = Await.result(strategy.select(ctx, magTable), 10.seconds)
 
-      // One guide star found
-      selection.map(_.assignments.size) should beSome(1)
-      selection.flatMap(_.assignments.headOption.map(_.guideProbe)) should beSome(PwfsGuideProbe.pwfs2)
-      val guideStar = selection.flatMap(_.assignments.headOption.map(_.guideStar))
-      guideStar.map(_.name) should beSome("560-017530")
-      // Add GS to targets
-      val newCtx = selection.map(applySelection(ctx, _))
-      val analyzedSelection = ~newCtx.map(strategy.analyze(_, magTable))
-      analyzedSelection should be size 1
-      analyzedSelection.headOption.map(_.quality) should beSome(AgsGuideQuality.DeliversRequestedIq)
-
-      // Analyze Single Guide Star
-      val analyzedGS = (newCtx |@| guideStar){ strategy.analyze(_, magTable, PwfsGuideProbe.pwfs2, _) }.flatten
-      analyzedGS.map(_.quality) should beSome(AgsGuideQuality.DeliversRequestedIq)
+      verifyGuideStarSelection(strategy, ctx, selection, "560-017530", PwfsGuideProbe.pwfs2)
     }
     "find a guide star for Flamingos2+OIWFS, OCSADV-255" in {
       // RMC 136 target
@@ -234,20 +158,7 @@ class SingleProbeStrategySpec extends Specification with NoTimeConversions {
 
       val selection = Await.result(strategy.select(ctx, magTable), 10.seconds)
 
-      // One guide star found
-      selection.map(_.assignments.size) should beSome(1)
-      selection.flatMap(_.assignments.headOption.map(_.guideProbe)) should beSome(Flamingos2OiwfsGuideProbe.instance)
-      val guideStar = selection.flatMap(_.assignments.headOption.map(_.guideStar))
-      guideStar.map(_.name) should beSome("105-014127")
-      // Add GS to targets
-      val newCtx = selection.map(applySelection(ctx, _))
-      val analyzedSelection = ~newCtx.map(strategy.analyze(_, magTable))
-      analyzedSelection should be size 1
-      analyzedSelection.headOption.map(_.quality) should beSome(AgsGuideQuality.DeliversRequestedIq)
-
-      // Analyze Single Guide Star
-      val analyzedGS = (newCtx |@| guideStar){ strategy.analyze(_, magTable, Flamingos2OiwfsGuideProbe.instance, _) }.flatten
-      analyzedGS.map(_.quality) should beSome(AgsGuideQuality.DeliversRequestedIq)
+      verifyGuideStarSelection(strategy, ctx, selection, "105-014127", Flamingos2OiwfsGuideProbe.instance)
     }
     "find a guide star for Flamingos2+PWFS2, OCSADV-255" in {
       // RMC 136 target
@@ -265,51 +176,7 @@ class SingleProbeStrategySpec extends Specification with NoTimeConversions {
 
       val selection = Await.result(strategy.select(ctx, magTable), 10.seconds)
 
-      // One guide star found
-      selection.map(_.assignments.size) should beSome(1)
-      selection.flatMap(_.assignments.headOption.map(_.guideProbe)) should beSome(PwfsGuideProbe.pwfs2)
-      val guideStar = selection.flatMap(_.assignments.headOption.map(_.guideStar))
-      guideStar.map(_.name) should beSome("105-014476")
-      // Add GS to targets
-      val newCtx = selection.map(applySelection(ctx, _))
-      val analyzedSelection = ~newCtx.map(strategy.analyze(_, magTable))
-      analyzedSelection should be size 1
-      analyzedSelection.headOption.map(_.quality) should beSome(AgsGuideQuality.DeliversRequestedIq)
-
-      // Analyze Single Guide Star
-      val analyzedGS = (newCtx |@| guideStar){ strategy.analyze(_, magTable, PwfsGuideProbe.pwfs2, _) }.flatten
-      analyzedGS.map(_.quality) should beSome(AgsGuideQuality.DeliversRequestedIq)
-    }
-    "find a guide star for Flamingos2+PWFS2, OCSADV-255" in {
-      // RMC 136 target
-      val ra = Angle.fromHMS(5, 38, 42.396).getOrElse(Angle.zero)
-      val dec = Declination.fromAngle(Angle.zero - Angle.fromDMS(69, 6, 3.36).getOrElse(Angle.zero)).getOrElse(Declination.zero)
-      val target = new SPTarget(ra.toDegrees, dec.toDegrees)
-      val guiders = Set[GuideProbe](Flamingos2OiwfsGuideProbe.instance, PwfsGuideProbe.pwfs1, PwfsGuideProbe.pwfs2)
-      val env = TargetEnvironment.create(target) |> {_.setActiveGuiders(guiders.asJava)}
-      val inst = new Flamingos2 <| {_.setPosAngle(0.0)}
-
-      val strategy = SingleProbeStrategy(Pwfs2SouthKey, SingleProbeStrategyParams.PwfsParams(Site.GS, PwfsGuideProbe.pwfs2), TestVoTableBackend("/f2_pwfs2.xml"))
-
-      val conditions = SPSiteQuality.Conditions.WORST.cc(SPSiteQuality.CloudCover.PERCENT_70)
-      val ctx = ObsContext.create(env, inst, new Some(Site.GS), conditions, null, null)
-
-      val selection = Await.result(strategy.select(ctx, magTable), 10.seconds)
-
-      // One guide star found
-      selection.map(_.assignments.size) should beSome(1)
-      selection.flatMap(_.assignments.headOption.map(_.guideProbe)) should beSome(PwfsGuideProbe.pwfs2)
-      val guideStar = selection.flatMap(_.assignments.headOption.map(_.guideStar))
-      guideStar.map(_.name) should beSome("105-014476")
-      // Add GS to targets
-      val newCtx = selection.map(applySelection(ctx, _))
-      val analyzedSelection = ~newCtx.map(strategy.analyze(_, magTable))
-      analyzedSelection should be size 1
-      analyzedSelection.headOption.map(_.quality) should beSome(AgsGuideQuality.DeliversRequestedIq)
-
-      // Analyze Single Guide Star
-      val analyzedGS = (newCtx |@| guideStar){ strategy.analyze(_, magTable, PwfsGuideProbe.pwfs2, _) }.flatten
-      analyzedGS.map(_.quality) should beSome(AgsGuideQuality.DeliversRequestedIq)
+      verifyGuideStarSelection(strategy, ctx, selection, "105-014476", PwfsGuideProbe.pwfs2)
     }
     "find a guide star for GMOS-S+OIWFS, OCSADV-255" in {
       // LMC 1 target
@@ -327,20 +194,7 @@ class SingleProbeStrategySpec extends Specification with NoTimeConversions {
 
       val selection = Await.result(strategy.select(ctx, magTable), 10.seconds)
 
-      // One guide star found
-      selection.map(_.assignments.size) should beSome(1)
-      selection.flatMap(_.assignments.headOption.map(_.guideProbe)) should beSome(GmosOiwfsGuideProbe.instance)
-      val guideStar = selection.flatMap(_.assignments.headOption.map(_.guideStar))
-      guideStar.map(_.name) should beSome("138-005574")
-      // Add GS to targets
-      val newCtx = selection.map(applySelection(ctx, _))
-      val analyzedSelection = ~newCtx.map(strategy.analyze(_, magTable))
-      analyzedSelection should be size 1
-      analyzedSelection.headOption.map(_.quality) should beSome(AgsGuideQuality.DeliversRequestedIq)
-
-      // Analyze Single Guide Star
-      val analyzedGS = (newCtx |@| guideStar){ strategy.analyze(_, magTable, GmosOiwfsGuideProbe.instance, _) }.flatten
-      analyzedGS.map(_.quality) should beSome(AgsGuideQuality.DeliversRequestedIq)
+      verifyGuideStarSelection(strategy, ctx, selection, "138-005574", GmosOiwfsGuideProbe.instance)
     }
     "find a guide star for GMOS-S+PWFS2, OCSADV-255" in {
       // Blanco 1 target
@@ -358,20 +212,7 @@ class SingleProbeStrategySpec extends Specification with NoTimeConversions {
 
       val selection = Await.result(strategy.select(ctx, magTable), 10.seconds)
 
-      // One guide star found
-      selection.map(_.assignments.size) should beSome(1)
-      selection.flatMap(_.assignments.headOption.map(_.guideProbe)) should beSome(PwfsGuideProbe.pwfs2)
-      val guideStar = selection.flatMap(_.assignments.headOption.map(_.guideStar))
-      guideStar.map(_.name) should beSome("302-000084")
-      // Add GS to targets
-      val newCtx = selection.map(applySelection(ctx, _))
-      val analyzedSelection = ~newCtx.map(strategy.analyze(_, magTable))
-      analyzedSelection should be size 1
-      analyzedSelection.headOption.map(_.quality) should beSome(AgsGuideQuality.DeliversRequestedIq)
-
-      // Analyze Single Guide Star
-      val analyzedGS = (newCtx |@| guideStar){ strategy.analyze(_, magTable, PwfsGuideProbe.pwfs2, _) }.flatten
-      analyzedGS.map(_.quality) should beSome(AgsGuideQuality.DeliversRequestedIq)
+      verifyGuideStarSelection(strategy, ctx, selection, "302-000084", PwfsGuideProbe.pwfs2)
     }
     "find a guide star for GNIRS, OCSADV-255" in {
       // Pleiades target
@@ -389,20 +230,7 @@ class SingleProbeStrategySpec extends Specification with NoTimeConversions {
 
       val selection = Await.result(strategy.select(ctx, magTable), 10.seconds)
 
-      // One guide star found
-      selection.map(_.assignments.size) should beSome(1)
-      selection.flatMap(_.assignments.headOption.map(_.guideProbe)) should beSome(PwfsGuideProbe.pwfs2)
-      val guideStar = selection.flatMap(_.assignments.headOption.map(_.guideStar))
-      guideStar.map(_.name) should beSome("571-008701")
-      // Add GS to targets
-      val newCtx = selection.map(applySelection(ctx, _))
-      val analyzedSelection = ~newCtx.map(strategy.analyze(_, magTable))
-      analyzedSelection should be size 1
-      analyzedSelection.headOption.map(_.quality) should beSome(AgsGuideQuality.DeliversRequestedIq)
-
-      // Analyze Single Guide Star
-      val analyzedGS = (newCtx |@| guideStar){ strategy.analyze(_, magTable, PwfsGuideProbe.pwfs2, _) }.flatten
-      analyzedGS.map(_.quality) should beSome(AgsGuideQuality.DeliversRequestedIq)
+      verifyGuideStarSelection(strategy, ctx, selection, "571-008701", PwfsGuideProbe.pwfs2)
     }
     "find a guide star for GNIRS Part II, OCSADV-255" in {
       // Orion target
@@ -420,21 +248,25 @@ class SingleProbeStrategySpec extends Specification with NoTimeConversions {
 
       val selection = Await.result(strategy.select(ctx, magTable), 10.seconds)
 
-      // One guide star found
-      selection.map(_.assignments.size) should beSome(1)
-      selection.flatMap(_.assignments.headOption.map(_.guideProbe)) should beSome(PwfsGuideProbe.pwfs2)
-      val guideStar = selection.flatMap(_.assignments.headOption.map(_.guideStar))
-      guideStar.map(_.name) should beSome("424-010170")
-      // Add GS to targets
-      val newCtx = selection.map(applySelection(ctx, _))
-      val analyzedSelection = ~newCtx.map(strategy.analyze(_, magTable))
-      analyzedSelection should be size 1
-      analyzedSelection.headOption.map(_.quality) should beSome(AgsGuideQuality.DeliversRequestedIq)
-
-      // Analyze Single Guide Star
-      val analyzedGS = (newCtx |@| guideStar){ strategy.analyze(_, magTable, PwfsGuideProbe.pwfs2, _) }.flatten
-      analyzedGS.map(_.quality) should beSome(AgsGuideQuality.DeliversRequestedIq)
+      verifyGuideStarSelection(strategy, ctx, selection, "424-010170", PwfsGuideProbe.pwfs2)
     }
 
+  }
+
+  def verifyGuideStarSelection(strategy: SingleProbeStrategy, ctx: ObsContext, selection: Option[Selection], expectedName: String, gp: ValidatableGuideProbe): MatchResult[Option[AgsGuideQuality]] = {
+    // One guide star found
+    selection.map(_.assignments.size) should beSome(1)
+    selection.flatMap(_.assignments.headOption.map(_.guideProbe)) should beSome(gp)
+    val guideStar = selection.flatMap(_.assignments.headOption.map(_.guideStar))
+    guideStar.map(_.name) should beSome(expectedName)
+    // Add GS to targets
+    val newCtx = selection.map(applySelection(ctx, _))
+    val analyzedSelection = ~newCtx.map(strategy.analyze(_, magTable))
+    analyzedSelection should be size 1
+    analyzedSelection.headOption.map(_.quality) should beSome(AgsGuideQuality.DeliversRequestedIq)
+
+    // Analyze Single Guide Star
+    val analyzedGS = (newCtx |@| guideStar) { strategy.analyze(_, magTable, gp, _) }.flatten
+    analyzedGS.map(_.quality) should beSome(AgsGuideQuality.DeliversRequestedIq)
   }
 }
