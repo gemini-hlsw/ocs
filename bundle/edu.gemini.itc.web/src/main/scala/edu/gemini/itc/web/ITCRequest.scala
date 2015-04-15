@@ -167,7 +167,8 @@ object ITCRequest {
     val readNoise   = r.enumParameter(classOf[Niri.ReadMode])
     val wellDepth   = r.enumParameter(classOf[Niri.WellDepth])
     val fpMask      = r.enumParameter(classOf[Niri.Mask])
-    new NiriParameters(filter, grism, camera, readNoise, wellDepth, fpMask)
+    val altair      = altairParameters(r)
+    new NiriParameters(filter, grism, camera, readNoise, wellDepth, fpMask, altair)
   }
 
   def nifsParameters(r: ITCRequest): NifsParameters = {
@@ -191,7 +192,8 @@ object ITCRequest {
         val cenY = r.parameter("ifuCenterY")
         ("", "", "", numX, numY, cenX, cenY)
     }
-    new NifsParameters(filter, grating, readNoise, centralWl, ifuMethod, offset, min, max, numX, numY, centerX, centerY)
+    val altair = altairParameters(r)
+    new NifsParameters(filter, grating, readNoise, centralWl, ifuMethod, offset, min, max, numX, numY, centerX, centerY, altair)
    }
 
   def trecsParameters(r: ITCRequest): TRecsParameters = {
@@ -210,14 +212,20 @@ object ITCRequest {
     new PlottingDetails(limits, lower, upper)
   }
 
-  def altairParameters(r: ITCRequest): AltairParameters = {
-    val guideStarSeparation  = r.doubleParameter("guideSep")
-    val guideStarMagnitude   = r.doubleParameter("guideMag")
-    val fieldLens            = r.enumParameter(classOf[AltairParams.FieldLens])
-    val wfsMode              = r.enumParameter(classOf[AltairParams.GuideStarType])
-    val wfs                  = r.enumParameter(classOf[TelescopeDetails.Wfs])
-    val altairUsed           = wfs eq TelescopeDetails.Wfs.AOWFS
-    new AltairParameters(guideStarSeparation, guideStarMagnitude, fieldLens, wfsMode, altairUsed)
+  def altairParameters(r: ITCRequest): Option[AltairParameters] = {
+    val wfs                     = r.enumParameter(classOf[TelescopeDetails.Wfs])
+    wfs match {
+      case TelescopeDetails.Wfs.AOWFS =>
+        val guideStarSeparation = r.doubleParameter("guideSep")
+        val guideStarMagnitude  = r.doubleParameter("guideMag")
+        val fieldLens           = r.enumParameter(classOf[AltairParams.FieldLens])
+        val wfsMode             = r.enumParameter(classOf[AltairParams.GuideStarType])
+        val altair              = new AltairParameters(guideStarSeparation, guideStarMagnitude, fieldLens, wfsMode)
+        new Some(altair)
+
+      case _ =>
+        None
+    }
   }
 
   def gemsParameters(r: ITCRequest): GemsParameters = {

@@ -55,11 +55,10 @@ public final class ITCniriServlet extends ITCServlet {
      */
     public void writeOutput(final ITCRequest r, PrintWriter out) {
         out.println("<a href = \"http://www.gemini.edu/sciops/instruments/integration-time-calculators/itc-help\"> Click here for help with the results page.</a>");
-        final Parameters p  = ITCRequest.parameters(r);
-        final NiriParameters ip = ITCRequest.niriParameters(r);
-        final AltairParameters altair = ITCRequest.altairParameters(r);
-        final PlottingDetails pdp = ITCRequest.plotParameters(r);
-        final NiriPrinter printer = new NiriPrinter(p, ip, altair, pdp, out);
+        final Parameters params     = ITCRequest.parameters(r);
+        final NiriParameters niri   = ITCRequest.niriParameters(r);
+        final PlottingDetails plot  = ITCRequest.plotParameters(r);
+        final NiriPrinter printer = new NiriPrinter(params, niri, plot, out);
         printer.writeOutput();
 
     }

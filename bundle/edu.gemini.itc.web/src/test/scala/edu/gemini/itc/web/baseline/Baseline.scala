@@ -110,10 +110,10 @@ object Baseline {
     cookRecipe(w => new MichellePrinter(Parameters(f.src, f.odp, f.ocp, f.tep), f.ins, f.pdp, w))
 
   def executeNifsRecipe(f: Fixture[NifsParameters]): Output =
-    cookRecipe(w => new NifsPrinter(Parameters(f.src, f.odp, f.ocp, f.tep), f.ins, f.alt.get, f.pdp, w))
+    cookRecipe(w => new NifsPrinter(Parameters(f.src, f.odp, f.ocp, f.tep), f.ins, f.pdp, w))
 
   def executeNiriRecipe(f: Fixture[NiriParameters]): Output =
-    cookRecipe(w => new NiriPrinter(Parameters(f.src, f.odp, f.ocp, f.tep), f.ins, f.alt.get, f.pdp, w))
+    cookRecipe(w => new NiriPrinter(Parameters(f.src, f.odp, f.ocp, f.tep), f.ins, f.pdp, w))
 
   def executeTrecsRecipe(f: Fixture[TRecsParameters]): Output =
     cookRecipe(w => new TRecsPrinter(Parameters(f.src, f.odp, f.ocp, f.tep), f.ins, f.pdp, w))

@@ -21,7 +21,6 @@ public final class NifsRecipe  {
     private final ObservingConditions _obsConditionParameters;
     private final NifsParameters _nifsParameters;
     private final TelescopeDetails _telescope;
-    private final AltairParameters _altairParameters;
 
     /**
      * Constructs a NifsRecipe given the parameters.
@@ -31,8 +30,7 @@ public final class NifsRecipe  {
                       final ObservationDetails obsDetailParameters,
                       final ObservingConditions obsConditionParameters,
                       final NifsParameters nifsParameters,
-                      final TelescopeDetails telescope,
-                      final AltairParameters altairParameters)
+                      final TelescopeDetails telescope)
 
     {
         _sdParameters = sdParameters;
@@ -40,7 +38,6 @@ public final class NifsRecipe  {
         _obsConditionParameters = obsConditionParameters;
         _nifsParameters = nifsParameters;
         _telescope = telescope;
-        _altairParameters = altairParameters;
 
         validateInputParameters();
     }
@@ -72,8 +69,8 @@ public final class NifsRecipe  {
         IQcalc.calculate();
 
         final Option<AOSystem> altair;
-        if (_altairParameters.altairIsUsed()) {
-            final Altair ao = new Altair(instrument.getEffectiveWavelength(), _telescope.getTelescopeDiameter(), IQcalc.getImageQuality(), _altairParameters, 0.0);
+        if (_nifsParameters.getAltair().isDefined()) {
+            final Altair ao = new Altair(instrument.getEffectiveWavelength(), _telescope.getTelescopeDiameter(), IQcalc.getImageQuality(), _nifsParameters.getAltair().get(), 0.0);
             altair = Option.apply((AOSystem) ao);
         } else {
             altair = Option.empty();
@@ -177,7 +174,7 @@ public final class NifsRecipe  {
             specS2N.setBackgroundSpectrum(calcSource.sky);
             specS2N.setHaloSpectrum(altair.isDefined() ? calcSource.halo.get() : (VisitableSampledSpectrum) calcSource.sed.clone());
             specS2N.setHaloImageQuality(IQcalc.getImageQuality());
-            if (_altairParameters.altairIsUsed())
+            if (_nifsParameters.getAltair().isDefined())
                 specS2N.setSpecHaloSourceFraction(halo_spec_source_frac);
             else
                 specS2N.setSpecHaloSourceFraction(0.0);

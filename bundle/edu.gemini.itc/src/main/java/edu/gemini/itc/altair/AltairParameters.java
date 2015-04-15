@@ -8,7 +8,6 @@ import edu.gemini.spModel.gemini.altair.AltairParams;
  */
 public final class AltairParameters {
 
-    private final boolean _altairUsed;
     private final AltairParams.GuideStarType _wfsMode;
     private final double _guideStarSeperation;
     private final double _guideStarMagnitude;
@@ -20,16 +19,14 @@ public final class AltairParameters {
      * @throws Exception if input data is not parsable.
      */
     public AltairParameters(
-            double guideStarSeperation,
-            double guideStarMagnitude,
-            AltairParams.FieldLens fieldLens,
-            AltairParams.GuideStarType wfsMode,
-            boolean altairUsed) {
+            final double guideStarSeperation,
+            final double guideStarMagnitude,
+            final AltairParams.FieldLens fieldLens,
+            final AltairParams.GuideStarType wfsMode) {
         _guideStarSeperation = guideStarSeperation;
         _guideStarMagnitude = guideStarMagnitude;
         _fieldLens = fieldLens;
         _wfsMode = wfsMode;
-        _altairUsed = altairUsed;
 
         // validation
         if (_guideStarSeperation < 0 || _guideStarSeperation > 25)
@@ -45,10 +42,6 @@ public final class AltairParameters {
             throw new IllegalArgumentException("The field Lens must be IN when Altair is in LGS mode.");
     }
 
-
-    public boolean altairIsUsed() {
-        return _altairUsed;
-    }
 
     public double getGuideStarSeperation() {
         return _guideStarSeperation;

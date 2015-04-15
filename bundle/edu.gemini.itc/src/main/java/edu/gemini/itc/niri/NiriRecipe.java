@@ -10,9 +10,8 @@ import scala.Option;
 /**
  * This class performs the calculations for Niri used for imaging.
  */
-public final class NiriRecipe {
+public final class NiriRecipe implements ImagingRecipe, SpectroscopyRecipe {
 
-    private final AltairParameters _altairParameters;
     private final NiriParameters _niriParameters;
     private final ObservingConditions _obsConditionParameters;
     private final ObservationDetails _obsDetailParameters;
@@ -22,11 +21,11 @@ public final class NiriRecipe {
     /**
      * Constructs a NiriRecipe given the parameters.
      */
-    public NiriRecipe(SourceDefinition sdParameters,
-                      ObservationDetails obsDetailParameters,
-                      ObservingConditions obsConditionParameters,
-                      NiriParameters niriParameters, TelescopeDetails telescope,
-                      AltairParameters altairParameters)
+    public NiriRecipe(final SourceDefinition sdParameters,
+                      final ObservationDetails obsDetailParameters,
+                      final ObservingConditions obsConditionParameters,
+                      final NiriParameters niriParameters,
+                      final TelescopeDetails telescope)
 
     {
         _sdParameters = sdParameters;
@@ -34,13 +33,12 @@ public final class NiriRecipe {
         _obsConditionParameters = obsConditionParameters;
         _niriParameters = niriParameters;
         _telescope = telescope;
-        _altairParameters = altairParameters;
 
         validateInputParameters();
     }
 
     private void validateInputParameters() {
-        if (_altairParameters.altairIsUsed()) {
+        if (_niriParameters.getAltair().isDefined()) {
             if (_obsDetailParameters.getMethod().isSpectroscopy()) {
                 throw new IllegalArgumentException(
                         "Altair cannot currently be used with Spectroscopy mode in the ITC.  Please deselect either altair or spectroscopy and resubmit the form.");
@@ -89,8 +87,8 @@ public final class NiriRecipe {
 
         // Altair specific section
         final Option<AOSystem> altair;
-        if (_altairParameters.altairIsUsed()) {
-            final Altair ao = new Altair(instrument.getEffectiveWavelength(), _telescope.getTelescopeDiameter(), IQcalc.getImageQuality(), _altairParameters, 0.0);
+        if (_niriParameters.getAltair().isDefined()) {
+            final Altair ao = new Altair(instrument.getEffectiveWavelength(), _telescope.getTelescopeDiameter(), IQcalc.getImageQuality(), _niriParameters.getAltair().get(), 0.0);
             altair = Option.apply((AOSystem) ao);
         } else {
             altair = Option.empty();
@@ -115,7 +113,7 @@ public final class NiriRecipe {
         // source_fraction
         // halo first
         final SourceFraction SFcalc;
-        if (_altairParameters.altairIsUsed()) {
+        if (altair.isDefined()) {
             final double aoCorrImgQual = altair.get().getAOCorrectedFWHM();
             if (_obsDetailParameters.isAutoAperture()) {
                 SFcalc = SourceFractionFactory.calculate(_sdParameters.isUniform(), _obsDetailParameters.isAutoAperture(), 1.18 * aoCorrImgQual, instrument.getPixelSize(), aoCorrImgQual);
@@ -179,7 +177,7 @@ public final class NiriRecipe {
                 instrument.getReadNoise());
         specS2N.setSourceSpectrum(calcSource.sed);
         specS2N.setBackgroundSpectrum(calcSource.sky);
-        if (_altairParameters.altairIsUsed())
+        if (altair.isDefined())
             specS2N.setSpecHaloSourceFraction(halo_spec_source_frac);
         else
             specS2N.setSpecHaloSourceFraction(0.0);
@@ -206,8 +204,8 @@ public final class NiriRecipe {
 
         // Altair specific section
         final Option<AOSystem> altair;
-        if (_altairParameters.altairIsUsed()) {
-            final Altair ao = new Altair(instrument.getEffectiveWavelength(), _telescope.getTelescopeDiameter(), IQcalc.getImageQuality(), _altairParameters, 0.0);
+        if (_niriParameters.getAltair().isDefined()) {
+            final Altair ao = new Altair(instrument.getEffectiveWavelength(), _telescope.getTelescopeDiameter(), IQcalc.getImageQuality(), _niriParameters.getAltair().get(), 0.0);
             altair = Option.apply((AOSystem) ao);
         } else {
             altair = Option.empty();
@@ -232,7 +230,7 @@ public final class NiriRecipe {
         // source_fraction
         // halo first
         final SourceFraction SFcalc;
-        if (_altairParameters.altairIsUsed()) {
+        if (altair.isDefined()) {
             final double aoCorrImgQual = altair.get().getAOCorrectedFWHM();
             if (_obsDetailParameters.isAutoAperture()) {
                 SFcalc = SourceFractionFactory.calculate(_sdParameters.isUniform(), _obsDetailParameters.isAutoAperture(), 1.18 * aoCorrImgQual, instrument.getPixelSize(), aoCorrImgQual);
@@ -252,7 +250,7 @@ public final class NiriRecipe {
 
         final double sed_integral = calcSource.sed.getIntegral();
         final double sky_integral = calcSource.sky.getIntegral();
-        final double halo_integral = _altairParameters.altairIsUsed() ? calcSource.halo.get().getIntegral() : 0.0;
+        final double halo_integral = altair.isDefined() ? calcSource.halo.get().getIntegral() : 0.0;
 
         // Calculate peak pixel flux
         final double peak_pixel_count = altair.isDefined() ?
@@ -260,7 +258,7 @@ public final class NiriRecipe {
                 PeakPixelFlux.calculate(instrument, _sdParameters, _obsDetailParameters, SFcalc, im_qual, sed_integral, sky_integral);
 
         final ImagingS2NCalculatable IS2Ncalc = ImagingS2NCalculationFactory.getCalculationInstance(_obsDetailParameters, instrument, SFcalc, sed_integral, sky_integral);
-        if (_altairParameters.altairIsUsed()) {
+        if (altair.isDefined()) {
             final SourceFraction SFcalcHalo;
             final double aoCorrImgQual = altair.get().getAOCorrectedFWHM();
             if (_obsDetailParameters.isAutoAperture()) {

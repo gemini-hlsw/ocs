@@ -24,9 +24,9 @@ public final class NiriPrinter extends PrinterBase {
     /**
      * Constructs a NiriRecipe given the parameters. Useful for testing.
      */
-    public NiriPrinter(final Parameters p, final NiriParameters ip, final AltairParameters altair, final PlottingDetails pdp, final PrintWriter out) {
+    public NiriPrinter(final Parameters p, final NiriParameters ip, final PlottingDetails pdp, final PrintWriter out) {
         super(out);
-        this.recipe    = new NiriRecipe(p.source(), p.observation(), p.conditions(), ip, p.telescope(), altair);
+        this.recipe    = new NiriRecipe(p.source(), p.observation(), p.conditions(), ip, p.telescope());
         this.isImaging = p.observation().getMethod().isImaging();
         this.pdp       = pdp;
     }

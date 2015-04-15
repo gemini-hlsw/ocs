@@ -1,7 +1,9 @@
 package edu.gemini.itc.niri;
 
+import edu.gemini.itc.altair.AltairParameters;
 import edu.gemini.itc.shared.InstrumentDetails;
 import edu.gemini.spModel.gemini.niri.Niri.*;
+import scala.Option;
 
 /**
  * NIRI parameters relevant for ITC.
@@ -13,7 +15,8 @@ public final class NiriParameters implements InstrumentDetails {
     private final Camera camera;
     private final ReadMode readMode;
     private final WellDepth wellDepth;
-    private final Mask fpMask;
+    private final Mask mask;
+    private final Option<AltairParameters> altair;
 
     /**
      * Constructs a AcquisitionCamParameters from a servlet request
@@ -23,14 +26,15 @@ public final class NiriParameters implements InstrumentDetails {
                           final Camera camera,
                           final ReadMode readMode,
                           final WellDepth wellDepth,
-                          final Mask fpMask) {
+                          final Mask mask,
+                          final Option<AltairParameters> altair) {
         this.filter = filter;
         this.grism = grism;
         this.camera = camera;
         this.readMode = readMode;
         this.wellDepth = wellDepth;
-        this.fpMask = fpMask;
-
+        this.mask = mask;
+        this.altair = altair;
     }
 
     public Filter getFilter() {
@@ -54,7 +58,11 @@ public final class NiriParameters implements InstrumentDetails {
     }
 
     public Mask getFocalPlaneMask() {
-        return fpMask;
+        return mask;
+    }
+
+    public Option<AltairParameters> getAltair() {
+        return altair;
     }
 
 }

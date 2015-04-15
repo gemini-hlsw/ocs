@@ -55,11 +55,10 @@ public final class ITCnifsServlet extends ITCServlet {
      */
     public void writeOutput(final ITCRequest r, final PrintWriter out) {
         out.println("<a href = \"http://www.gemini.edu/sciops/instruments/integration-time-calculators/itc-help\"> Click here for help with the results page.</a>");
-        final Parameters p  = ITCRequest.parameters(r);
-        final NifsParameters ip = ITCRequest.nifsParameters(r);
-        final AltairParameters altair = ITCRequest.altairParameters(r);
-        final PlottingDetails pdp = ITCRequest.plotParameters(r);
-        final NifsPrinter printer = new NifsPrinter(p, ip, altair, pdp, out);
+        final Parameters params     = ITCRequest.parameters(r);
+        final NifsParameters nifs   = ITCRequest.nifsParameters(r);
+        final PlottingDetails plot  = ITCRequest.plotParameters(r);
+        final NifsPrinter printer   = new NifsPrinter(params, nifs, plot, out);
         printer.writeOutput();
     }
 }
