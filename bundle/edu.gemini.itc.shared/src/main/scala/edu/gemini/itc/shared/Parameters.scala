@@ -19,7 +19,7 @@ sealed trait SpectralDistribution
 final case class BlackBody(temperature: Double) extends SpectralDistribution
 final case class PowerLaw(index: Double) extends SpectralDistribution
 final case class EmissionLine(wavelength: Double, width: Double, flux: Double, fluxUnits: String, continuum: Double, continuumUnits: String) extends SpectralDistribution
-final case class UserDefined(name: String, spectrum: String) extends SpectralDistribution
+final case class UserDefined(spectrum: String) extends SpectralDistribution
 sealed trait Library extends SpectralDistribution {
   val sedSpectrum: String
 }

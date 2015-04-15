@@ -54,11 +54,11 @@ public final class ITCTrecsServlet extends ITCServlet {
     /**
      * Supply the body content for the html document.
      */
-    public void writeOutput(ITCMultiPartParser mpp, PrintWriter out) {
+    public void writeOutput(final ITCRequest r, final PrintWriter out) {
         out.println("<a href = \"http://www.gemini.edu/sciops/instruments/integration-time-calculators/itc-help\"> Click here for help with the results page.</a>");
-        final Parameters p  = ITCRequest.parameters(mpp);
-        final TRecsParameters ip = ITCRequest.trecsParameters(mpp);
-        final PlottingDetails pdp = ITCRequest.plotParameters(mpp);
+        final Parameters p  = ITCRequest.parameters(r);
+        final TRecsParameters ip = ITCRequest.trecsParameters(r);
+        final PlottingDetails pdp = ITCRequest.plotParameters(r);
         final TRecsPrinter printer = new TRecsPrinter(p, ip, pdp, out);
         printer.writeOutput();
     }

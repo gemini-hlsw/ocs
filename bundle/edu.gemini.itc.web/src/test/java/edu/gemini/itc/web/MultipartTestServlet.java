@@ -42,8 +42,7 @@ public class MultipartTestServlet extends HttpServlet {
      * @param request  servlet request
      * @param response servlet response
      */
-    protected void processRequest(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, java.io.IOException {
+    protected void processRequest(final HttpServletRequest request, final HttpServletResponse response) throws ServletException, java.io.IOException {
 
         response.setContentType("text/html");
         java.io.PrintWriter out = response.getWriter();
@@ -55,13 +54,13 @@ public class MultipartTestServlet extends HttpServlet {
 
         if (request.getContentLength() < 1000000) {
             try {
-                ITCMultiPartParser parser = new ITCMultiPartParser(request, MAX_CONTENT_LENGTH);
-
-                ObservationDetails odp = ITCRequest.observationParameters(parser);
-                ObservingConditions ocp = ITCRequest.obsConditionParameters(parser);
-                SourceDefinition sdp = ITCRequest.sourceDefinitionParameters(parser);
-                TelescopeDetails tp = ITCRequest.teleParameters(parser);
-                AcquisitionCamParameters acp = ITCRequest.acqCamParameters(parser);
+                final ITCMultiPartParser parser = new ITCMultiPartParser(request, MAX_CONTENT_LENGTH);
+                final ITCRequest r = ITCRequest.from(parser);
+                ObservationDetails odp = ITCRequest.observationParameters(r);
+                ObservingConditions ocp = ITCRequest.obsConditionParameters(r);
+                SourceDefinition sdp = ITCRequest.sourceDefinitionParameters(r);
+                TelescopeDetails tp = ITCRequest.teleParameters(r);
+                AcquisitionCamParameters acp = ITCRequest.acqCamParameters(r);
 
                 out.println(odp.toString());
                 out.println("<br>");
@@ -72,8 +71,9 @@ public class MultipartTestServlet extends HttpServlet {
                 out.println(tp.toString());
                 out.println("<br>");
                 out.println(acp.toString());
+
                 String txtFileName = "";
-                Iterator it = parser.getFileNames();
+                final Iterator it = parser.getFileNames();
                 while (it.hasNext()) {
                     txtFileName = (String) it.next();
                     System.out.println(parser.getTextFile(txtFileName) + "<br>");

@@ -1,7 +1,6 @@
 package edu.gemini.itc.web.servlets;
 
 import edu.gemini.itc.gnirs.GnirsParameters;
-import edu.gemini.itc.web.ITCMultiPartParser;
 import edu.gemini.itc.shared.Parameters;
 import edu.gemini.itc.shared.PlottingDetails;
 import edu.gemini.itc.web.ITCRequest;
@@ -53,11 +52,11 @@ public final class ITCgnirsServlet extends ITCServlet {
     /**
      * Supply the body content for the html document.
      */
-    public void writeOutput(ITCMultiPartParser mpp, PrintWriter out) {
+    public void writeOutput(final ITCRequest r, final PrintWriter out) {
         out.println("<a href = \"http://www.gemini.edu/sciops/instruments/integration-time-calculators/itc-help\"> Click here for help with the results page.</a>");
-        final Parameters p  = ITCRequest.parameters(mpp);
-        final GnirsParameters ip = ITCRequest.gnirsParameters(mpp);
-        final PlottingDetails pdp = ITCRequest.plotParameters(mpp);
+        final Parameters p  = ITCRequest.parameters(r);
+        final GnirsParameters ip = ITCRequest.gnirsParameters(r);
+        final PlottingDetails pdp = ITCRequest.plotParameters(r);
         final GnirsPrinter printer = new GnirsPrinter(p, ip, pdp, out);
         printer.writeOutput();
     }

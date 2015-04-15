@@ -1,7 +1,6 @@
 package edu.gemini.itc.web.servlets;
 
 import edu.gemini.itc.michelle.MichelleParameters;
-import edu.gemini.itc.web.ITCMultiPartParser;
 import edu.gemini.itc.shared.Parameters;
 import edu.gemini.itc.shared.PlottingDetails;
 import edu.gemini.itc.web.ITCRequest;
@@ -53,11 +52,11 @@ public final class ITCMichelleServlet extends ITCServlet {
     /**
      * Supply the body content for the html document.
      */
-    public void writeOutput(ITCMultiPartParser mpp, PrintWriter out) {
+    public void writeOutput(final ITCRequest r, final PrintWriter out) {
         out.println("<a href = \"http://www.gemini.edu/sciops/instruments/integration-time-calculators/itc-help\"> Click here for help with the results page.</a>");
-        final Parameters p  = ITCRequest.parameters(mpp);
-        final MichelleParameters ip = ITCRequest.michelleParameters(mpp);
-        final PlottingDetails pdp = ITCRequest.plotParameters(mpp);
+        final Parameters p  = ITCRequest.parameters(r);
+        final MichelleParameters ip = ITCRequest.michelleParameters(r);
+        final PlottingDetails pdp = ITCRequest.plotParameters(r);
         final MichellePrinter printer = new MichellePrinter(p, ip, pdp, out);
         printer.writeOutput();
     }
