@@ -29,6 +29,8 @@ import java.io.Serializable;
 import java.util.*;
 
 import static edu.gemini.shared.skyobject.Magnitude.Band.R;
+import static edu.gemini.shared.skyobject.Magnitude.Band.r;
+import static edu.gemini.shared.skyobject.Magnitude.Band.UC;
 
 /**
  * Site Quality observation component.
@@ -190,6 +192,18 @@ public class SPSiteQuality extends AbstractDataObject implements PropertyProvide
         return None.instance();
     }
 
+    private static Magnitude adjustIf(Magnitude.Band band, Magnitude mag, double amount) {
+        return (mag.getBand() == band) ? mag.add(amount) : mag;
+    }
+
+    /**
+     * Adjust the R magnitude or r` or UC if present
+     * Note that this method is called always with a Magnitude containing a single band
+     */
+    private static Magnitude adjustRLikeMagnitude(Magnitude mag, Double adjustment) {
+        return adjustIf(r, adjustIf(R, adjustIf(UC, mag, adjustment), adjustment), adjustment);
+    }
+
     /**
      * Sky Background Options.
      */
@@ -197,8 +211,19 @@ public class SPSiteQuality extends AbstractDataObject implements PropertyProvide
 
         PERCENT_20("20%/Darkest", 20, 21.37),
         PERCENT_50("50%/Dark", 50, 20.78),
-        PERCENT_80("80%/Grey", 80, 19.61) { public Magnitude adjust(Magnitude mag) { return adjustIf(R, mag, -0.3); } },
-        ANY("Any/Bright", 100, 0)         { public Magnitude adjust(Magnitude mag) { return adjustIf(R, mag, -0.5); }
+        PERCENT_80("80%/Grey", 80, 19.61) {
+            private double adjustment = -0.3;
+            @Override
+            public Magnitude adjust(Magnitude mag) {
+                return adjustRLikeMagnitude(mag, adjustment);
+            }
+
+        },
+        ANY("Any/Bright", 100, 0)         {
+            private double adjustment = -0.5;
+            public Magnitude adjust(Magnitude mag) {
+                return adjustRLikeMagnitude(mag, adjustment);
+            }
         };
 
         /** The default SkyBackground value **/
@@ -329,10 +354,28 @@ public class SPSiteQuality extends AbstractDataObject implements PropertyProvide
      * Image Quality Options.
      */
     public static enum ImageQuality implements DisplayableSpType, SequenceableSpType, PercentageContainer {
-        PERCENT_20("20%/Best", 20) { public Magnitude adjust(Magnitude mag) { return adjustIf(R, mag,  0.5); }},
+        PERCENT_20("20%/Best", 20) {
+            private double adjustment = 0.5;
+            @Override
+            public Magnitude adjust(Magnitude mag) {
+                return adjustRLikeMagnitude(mag, adjustment);
+            }
+        },
         PERCENT_70("70%/Good", 70),
-        PERCENT_85("85%/Poor", 85) { public Magnitude adjust(Magnitude mag) { return adjustIf(R, mag, -0.5); }},
-        ANY("Any", 100)       { public Magnitude adjust(Magnitude mag) { return adjustIf(R, mag, -1.0); }},
+        PERCENT_85("85%/Poor", 85) {
+            private double adjustment = -0.5;
+            @Override
+            public Magnitude adjust(Magnitude mag) {
+                return adjustRLikeMagnitude(mag, adjustment);
+            }
+        },
+        ANY("Any", 100)       {
+            private double adjustment = -1.0;
+            @Override
+            public Magnitude adjust(Magnitude mag) {
+                return adjustRLikeMagnitude(mag, adjustment);
+            }
+        },
         ;
 
         /** The default ImageQuality value **/
@@ -493,10 +536,6 @@ public class SPSiteQuality extends AbstractDataObject implements PropertyProvide
             }
         }
 
-    }
-
-    private static Magnitude adjustIf(Magnitude.Band band, Magnitude mag, double amount) {
-        return (mag.getBand() == band) ? mag.add(amount) : mag;
     }
 
     public static final class Conditions implements Serializable {

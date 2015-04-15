@@ -2,7 +2,8 @@ package edu.gemini.ags.gems.mascot
 
 import java.util.logging.Logger
 
-import edu.gemini.spModel.core.{Coordinates, MagnitudeBand}
+import edu.gemini.ags.api.MagnitudeExtractor
+import edu.gemini.spModel.core.Coordinates
 import edu.gemini.spModel.core.Target.SiderealTarget
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.pot.ModelConverters._
@@ -35,8 +36,7 @@ object MascotGuideStar {
    * @param guideStarType CWFS or ODGW, defined in this class
    * @param posAngleTolerance allow the pos angle to change +- this amount in degrees
    * @param basePosTolerance allow the base position to change +- this amount in arcsec
-   * @param bandpass the magnitude bandpass to use for the calculations
-   *        (may be null, then uses default for guide star type)
+   * @param magnitudeExtractor extracts the magnitude to use for the calculations
    * @param factor multiply strehl min, max and average by this value (depends on instrument filter: See REL-426)
    * @param magLimits a set of optional magnitude limits used to filter the star list
    * @param progress a function(strehl, count, total) called for each asterism as it is calculated
@@ -50,18 +50,17 @@ object MascotGuideStar {
                                     guideStarType: GuideStarType,
                                     posAngleTolerance: Double = 0,
                                     basePosTolerance: Double = 0,
-                                    bandpass: Option[MagnitudeBand] = Some(Mascot.defaultBandpass),
+                                    magnitudeExtractor: MagnitudeExtractor = Mascot.defaultMagnitudeExtractor,
                                     factor: Double = Mascot.defaultFactor,
                                     magLimits: MagLimits = defaultMagLimits,
                                     progress: (Strehl, Int, Int) => Unit = Mascot.defaultProgress)
   : List[(List[Strehl], Double, Double, Double)] = {
     val center = ctx.getBaseCoordinates.toNewModel
-    val bp = bandpass.getOrElse(guideStarType.defaultBandpass)
     val simple = posAngleTolerance == 0.0 && basePosTolerance == 0.0
     val guideStarFilter = guideStarType.filter(ctx, magLimits, _: Star)
     // If no tolerances were given, we can do more filtering up front
     val filter = if (simple) guideStarFilter else magLimits.filter _
-    val (_, strehlList) = MascotCat.findBestAsterismInTargetsList(queryResult, center.ra.toAngle.toDegrees, center.dec.toAngle.toDegrees, bp, factor, progress, filter)
+    val (_, strehlList) = MascotCat.findBestAsterismInTargetsList(queryResult, center.ra.toAngle.toDegrees, center.dec.toAngle.toDegrees, magnitudeExtractor, factor, progress, filter)
     if (simple) {
       val basePos = ctx.getBaseCoordinates
       List((strehlList, ctx.getInstrument.getPosAngleDegrees, basePos.getRaDeg, basePos.getDecDeg))

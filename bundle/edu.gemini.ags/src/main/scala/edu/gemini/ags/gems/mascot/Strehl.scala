@@ -5,7 +5,7 @@ import breeze.linalg._
 import MascotUtils._
 import MascotConf._
 import Amoeba._
-import edu.gemini.spModel.core.MagnitudeBand
+import edu.gemini.ags.api.MagnitudeExtractor
 import util.Spline._
 import util.YUtils._
 import scala.collection.JavaConverters._
@@ -113,7 +113,7 @@ object Strehl {
    * @param bandpass determines which magnitudes are used in the calculations: (one of "B", "V", "R", "J", "H", "K")
    * @param factor multiply strehl min, max and average by this value (depends on instrument filter: See REL-426)
    */
-  def apply(starList: List[Star], bandpass: MagnitudeBand, factor: Double = 1.0): Strehl = {
+  def apply(starList: List[Star], bandpass: MagnitudeExtractor, factor: Double = 1.0): Strehl = {
     optimize(starList, bandpass, factor)
   }
 
@@ -127,9 +127,9 @@ object Strehl {
    * @param bandpass determines which magnitudes are used in the calculations: (one of "B", "V", "R", "J", "H", "K")
    * @param factor multiply strehl min, max and average by this value (depends on instrument filter: See REL-426)
    */
-  def optimize(starList: List[Star], bandpass: MagnitudeBand, factor: Double): Strehl = {
+  def optimize(starList: List[Star], bandpass: MagnitudeExtractor, factor: Double): Strehl = {
     val nstars = starList.size
-    val mag = (for (s <- starList) yield s.target.magnitudeIn(bandpass).map(_.value)).flatten.toArray
+    val mag = (for (s <- starList) yield bandpass(s.target).map(_.value)).flatten.toArray
     val starx = (for (s <- starList) yield s.x).toArray
     val stary = (for (s <- starList) yield s.y).toArray
 

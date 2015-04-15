@@ -45,7 +45,7 @@ public final class FactorySupportTest {
                 new FactorySupport.Builder(ID_COL, RA_COL, DEC_COL).add(J_MAG, K_MAG).build();
 
         public static final Set<Magnitude.Band> BANDS = Collections.unmodifiableSet(
-                new HashSet<Magnitude.Band>(Arrays.asList(J, K)));
+                new HashSet<>(Arrays.asList(J, K)));
 
         @Override
         public Set<Magnitude.Band> bands() { return BANDS; }
@@ -136,7 +136,7 @@ public final class FactorySupportTest {
         assertEquals(8, mag.getBrightness(), 0.000001);
         assertTrue(obj.getMagnitude(K).isEmpty());
 
-        Set set = obj.getMagnitudeBands();
+        Set<Magnitude.Band> set = obj.getMagnitudeBands();
         assertTrue(set.contains(J));
         assertFalse(set.contains(K));
         assertFalse(set.contains(H));
@@ -153,7 +153,7 @@ public final class FactorySupportTest {
         Magnitude kmag = obj.getMagnitude(K).getValue();
         assertEquals(10, kmag.getBrightness(), 0.000001);
 
-        Set set = obj.getMagnitudeBands();
+        Set<Magnitude.Band> set = obj.getMagnitudeBands();
         assertTrue(set.contains(J));
         assertTrue(set.contains(K));
         assertFalse(set.contains(H));

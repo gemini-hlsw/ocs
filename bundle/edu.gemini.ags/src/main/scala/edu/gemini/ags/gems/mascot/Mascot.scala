@@ -2,12 +2,14 @@ package edu.gemini.ags.gems.mascot
 
 import java.util.logging.Logger
 
+import edu.gemini.ags.api.MagnitudeExtractor
 import edu.gemini.ags.gems.mascot.util.AllPairsAndTriples
 import edu.gemini.ags.gems.mascot.util.YUtils._
 
 import MascotUtils._
 import MascotConf._
 import breeze.linalg._
+import edu.gemini.spModel.core.Target.SiderealTarget
 import edu.gemini.spModel.core.MagnitudeBand
 
 import scalaz._
@@ -30,22 +32,31 @@ object Mascot {
     Log.info(f"Strehl over ${s.halffield * 2}%.1f: avg=${s.avgstrehl * 100}%.1f  rms=${s.rmsstrehl * 100}%.1f  min=${s.minstrehl * 100}%.1f  max=${s.maxstrehl * 100}%.1f")
   }
 
+  private implicit class Bandpass2Extractor(val band: MagnitudeBand) extends AnyVal {
+    def toExtractor:MagnitudeExtractor = (s:SiderealTarget) => s.magnitudeIn(defaultBandpass)
+  }
+
   // The default mag bandpass
   val defaultBandpass:MagnitudeBand = MagnitudeBand.R
+  val defaultMagnitudeExtractor:MagnitudeExtractor = defaultBandpass.toExtractor
 
   // multiply strehl min, max and average by this value (depends on instrument filter: See REL-426)
   val defaultFactor = 1.0
 
+  @Deprecated
+  def computeStrehl4Java(band: MagnitudeBand, factor: Double, n1: Star, n2: Option[Star] = None, n3: Option[Star] = None): Option[Strehl] =
+    computeStrehl(band.toExtractor, factor, n1, n2)
+
   /**
    * Performs the strehl algorithm on the given 1, 2 or 3 stars (2 and 3 are optional)
-   * @param bandpass determines which magnitudes are used in the calculations: (one of "B", "V", "R", "J", "H", "K")
+   * @param magnitudeExtractor extract the magnitudes used in the calculations: (one of "B", "V", "R", "J", "H", "K")
    * @param factor multiply strehl min, max and average by this value (depends on instrument filter: See REL-426)
    * @param n1 the first star to use
    * @param n2 the optional second star to use
    * @param n3 the optional third star to use
    * @return a Some(Strehl) object containing the results of the computations, or None if the positions can't be used
    */
-  def computeStrehl(bandpass: MagnitudeBand, factor: Double, n1: Star, n2: Option[Star] = None, n3: Option[Star] = None): Option[Strehl] = {
+  def computeStrehl(magnitudeExtractor: MagnitudeExtractor, factor: Double, n1: Star, n2: Option[Star] = None, n3: Option[Star] = None): Option[Strehl] = {
     n2 match {
       case Some(v2) if !doesItFit(n1, v2, n3) =>
         Log.warning("Skipped. Does not fit.")
@@ -55,28 +66,28 @@ object Mascot {
         //          grow,sall,sdata;
         //          window,3;
         //          disp_strehl_map,sdata;
-        Strehl(List(n1.some, n2, n3).flatten, bandpass, factor).some
+        Strehl(List(n1.some, n2, n3).flatten, magnitudeExtractor, factor).some
     }
   }
 
   /**
    * Finds the best asterisms for the given list of stars.
    * @param starList unfiltered list of stars from a catalog query
-   * @param bandpass determines which magnitudes are used in the calculations: (one of "B", "V", "R", "J", "H", "K")
+   * @param magnitudeExtractor extract the magnitudes used in the calculations: (one of "B", "V", "R", "J", "H", "K")
    * @param factor multiply strehl min, max and average by this value (depends on instrument filter: See REL-426)
    * @param filter a filter function that returns false if the Star should be excluded
    * @param progress a function(strehl, count, total) called for each asterism as it is calculated
    * @return a tuple: (list of stars actually used, list of asterisms found)
    */
   def findBestAsterism(starList: List[Star],
-                       bandpass: MagnitudeBand = defaultBandpass,
+                       magnitudeExtractor: MagnitudeExtractor = defaultMagnitudeExtractor,
                        factor: Double = defaultFactor,
                        progress: (Strehl, Int, Int) => Unit = defaultProgress,
                        filter: Star => Boolean = defaultFilter)
   : (List[Star], List[Strehl]) = {
     // sort by selected mag and select
-    val sortedStarList = starList.sortWith((s1,s2) => s1.target.magnitudeIn(bandpass) < s2.target.magnitudeIn(bandpass))
-    val filteredStarList = selectStarsOnMag(sortedStarList, bandpass).filter(filter)
+    val sortedStarList = starList.sortWith((s1,s2) => magnitudeExtractor(s1.target) < magnitudeExtractor(s2.target))
+    val filteredStarList = selectStarsOnMag(sortedStarList, magnitudeExtractor).filter(filter)
 
     val ns = filteredStarList.length
     var count = 0
@@ -90,7 +101,7 @@ object Mascot {
     if (ns >= 3) {
       for ((n1, n2, n3) <- trips) {
         count += 1
-        computeStrehl(bandpass, factor, n1, n2.some, n3.some).foreach { s =>
+        computeStrehl(magnitudeExtractor, factor, n1, n2.some, n3.some).foreach { s =>
           progress(s, count, total)
           result = s :: result
         }
@@ -100,7 +111,7 @@ object Mascot {
     if (ns >= 2) {
       for ((n1, n2) <- pairs) {
         count += 1
-        computeStrehl(bandpass, factor, n1, n2.some).foreach { s =>
+        computeStrehl(magnitudeExtractor, factor, n1, n2.some).foreach { s =>
           progress(s, count, total)
           result = s :: result
         }
@@ -110,7 +121,7 @@ object Mascot {
     if (ns >= 1) {
       for (n1 <- filteredStarList) {
         count += 1
-        computeStrehl(bandpass, factor, n1).foreach { s =>
+        computeStrehl(magnitudeExtractor, factor, n1).foreach { s =>
           progress(s, count, total)
           result = s :: result
         }
@@ -134,9 +145,9 @@ object Mascot {
   //
   //  status = select_stars_not_too_close()
   //}
-  def selectStarsOnMag(starList: List[Star], bandpass: MagnitudeBand = defaultBandpass): List[Star] = {
+  def selectStarsOnMag(starList: List[Star], magnitudeExtractor: MagnitudeExtractor = defaultMagnitudeExtractor): List[Star] = {
     selectStarsNotTooClose(starList.filter(star => {
-      val mag = star.target.magnitudeIn(bandpass).map(_.value)
+      val mag = magnitudeExtractor(star.target).map(_.value)
       mag >= mag_min_threshold && mag <= mag_max_threshold
     }))
   }
@@ -215,11 +226,10 @@ object Mascot {
    * Sorts the list of asterisms by descending avg strehl values.
    * See sort_best_asterisms in yorick original.
    */
-  def sortBestAsterisms(sall: List[Strehl]) : List[Strehl] = {
+  def sortBestAsterisms(sall: List[Strehl]) : List[Strehl] =
     if (sall.size < 2)
       sall
     else
       sall.sortWith((s1, s2) => s1.avgstrehl > s2.avgstrehl)
-  }
 
 }

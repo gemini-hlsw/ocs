@@ -2,6 +2,7 @@ package edu.gemini.ags.impl
 
 import edu.gemini.ags.api.{AgsAnalysis, AgsMagnitude, AgsStrategy}
 import edu.gemini.ags.api.AgsStrategy.{Assignment, Estimate, Selection}
+import edu.gemini.ags.api.defaultProbeBands
 import edu.gemini.ags.gems._
 import edu.gemini.ags.gems.mascot.{Strehl, MascotProgress}
 import edu.gemini.catalog.api._
@@ -85,11 +86,13 @@ trait GemsStrategy extends AgsStrategy {
     futureAgsCatalogResults.map { agsCatalogResults =>
       for {
         result <- agsCatalogResults
-        angle <- anglesToTry
+        angle  <- anglesToTry
       } yield {
         val constraint = result.query
         val radiusConstraint = constraint.radiusConstraint
-        val catalogSearchCriterion = CatalogSearchCriterion("ags", constraint.magnitudeConstraints, radiusConstraint, None, angle.some)
+        val band = constraint.magnitudeConstraints.map(_.band)
+        val mr = constraint.magnitudeConstraints.map(mc => MagnitudeRange(mc.faintnessConstraint, mc.saturationConstraint))
+        val catalogSearchCriterion = CatalogSearchCriterion("ags", band.orNull, mr.orNull, radiusConstraint, None, angle.some)
         val gemsCatalogSearchCriterion = new GemsCatalogSearchCriterion(result.searchKey, catalogSearchCriterion)
         new GemsCatalogSearchResults(gemsCatalogSearchCriterion, result.catalogResult.targets.rows)
       }
@@ -137,9 +140,7 @@ trait GemsStrategy extends AgsStrategy {
     // why do we need multiple position angles?  catalog results are given in
     // a ring (limited by radius limits) around a base position ... confusion
     val posAngles   = (ctx.getPositionAngle.toNewModel :: (0 until 360 by 90).map(Angle.fromDegrees(_)).toList).toSet
-    search(GemsGuideStarSearchOptions.DEFAULT_CATALOG,
-      GemsGuideStarSearchOptions.DEFAULT_CATALOG,
-      GemsTipTiltMode.canopus, ctx, posAngles, None).map(simplifiedResult)
+    search(GemsTipTiltMode.canopus, ctx, posAngles, None).map(simplifiedResult)
   }
 
   override def estimate(ctx: ObsContext, mt: MagnitudeTable): Future[Estimate] = {
@@ -171,12 +172,12 @@ trait GemsStrategy extends AgsStrategy {
     }
   }
 
-  protected [impl] def search(opticalCatalog: String, nirCatalog: String, tipTiltMode: GemsTipTiltMode, ctx: ObsContext, posAngles: Set[Angle], nirBand: Option[MagnitudeBand]): Future[List[GemsCatalogSearchResults]] = {
+  protected [impl] def search(tipTiltMode: GemsTipTiltMode, ctx: ObsContext, posAngles: Set[Angle], nirBand: Option[MagnitudeBand]): Future[List[GemsCatalogSearchResults]] = {
     // Get the instrument: F2 or GSAOI?
     val gemsInstrument =
       (ctx.getInstrument.getType == SPComponentType.INSTRUMENT_GSAOI) ? GemsInstrument.gsaoi | GemsInstrument.flamingos2
     // Search options
-    val gemsOptions = new GemsGuideStarSearchOptions(opticalCatalog, nirCatalog, gemsInstrument, tipTiltMode, posAngles.asJava)
+    val gemsOptions = new GemsGuideStarSearchOptions(gemsInstrument, tipTiltMode, posAngles.asJava)
 
     // Perform the catalog search, using GemsStrategy's backend
     val results = GemsVoTableCatalog(backend).search(ctx, ctx.getBaseCoordinates.toNewModel, gemsOptions, nirBand, null)
@@ -197,10 +198,8 @@ trait GemsStrategy extends AgsStrategy {
   }
 
   override def select(ctx: ObsContext, mt: MagnitudeTable): Future[Option[Selection]] = {
-    val posAngles = (ctx.getPositionAngle.toNewModel :: (0 until 360 by 90).map(Angle.fromDegrees(_)).toList).toSet
-    val results = search(GemsGuideStarSearchOptions.DEFAULT_CATALOG,
-      GemsGuideStarSearchOptions.DEFAULT_CATALOG,
-      GemsTipTiltMode.canopus, ctx, posAngles, None)
+    val posAngles = Set(ctx.getPositionAngle.toNewModel)
+    val results = search(GemsTipTiltMode.canopus, ctx, posAngles, None)
     results.map { r =>
       val gemsGuideStars = findGuideStars(ctx, posAngles, r)
 
@@ -219,17 +218,13 @@ trait GemsStrategy extends AgsStrategy {
     import AgsMagnitude._
     val cond = ctx.getConditions
     val mags = magnitudes(ctx, mt).toMap
-    def lim(gp: GuideProbe): Option[MagnitudeConstraints] = {
-        val r = autoSearchLimitsCalc(mags(gp), cond)
-        // FIXME, this should use MagnitudeRange
-        Some(MagnitudeConstraints(MagnitudeBand.R, r.faintnessConstraint, r.saturationConstraint))
-      }
+    def lim(gp: GuideProbe): Option[MagnitudeRange] = autoSearchLimitsCalc(mags(gp), cond).some
 
     val odgwMagLimits = (lim(GsaoiOdgw.odgw1) /: GsaoiOdgw.values().drop(1)) { (ml, odgw) =>
-      (ml |@| lim(odgw))(_ union _).flatten
+      (ml |@| lim(odgw))(_ union _)
     }
     val canMagLimits = (lim(Canopus.Wfs.cwfs1) /: Canopus.Wfs.values().drop(1)) { (ml, can) =>
-      (ml |@| lim(can))(_ union _).flatten
+      (ml |@| lim(can))(_ union _)
     }
 
     val canopusConstraint = canMagLimits.map(c => CatalogQuery.catalogQueryForGems(CanopusTipTiltId, ctx.getBaseCoordinates.toNewModel, RadiusConstraint.between(Angle.zero, Canopus.Wfs.Group.instance.getRadiusLimits.toNewModel), c.some))
@@ -237,7 +232,7 @@ trait GemsStrategy extends AgsStrategy {
     List(canopusConstraint, odgwConstaint).flatten
   }
 
-  override val probeBands: List[MagnitudeBand] = List(MagnitudeBand.R)
+  override val probeBands: List[MagnitudeBand] = defaultProbeBands(MagnitudeBand.R)
 
   override val guideProbes: List[GuideProbe] =
     Flamingos2OiwfsGuideProbe.instance :: (GsaoiOdgw.values() ++ Canopus.Wfs.values()).toList

@@ -21,7 +21,7 @@ import java.util.*;
  */
 public class GemsGuideStarSearchOptions {
 
-    public static enum CatalogChoice {
+    public enum CatalogChoice {
         PPMXL_CDS("PPMXL@CDS", "PPMXL at CDS"),
         PPMXL_CADC("PPMXL@CADC", "PPMXL at CADC"),
         UCAC3_CDS("UCAC3@CDS", "UCAC3 at CDS"),
@@ -36,7 +36,7 @@ public class GemsGuideStarSearchOptions {
         private String _displayValue;
         private String _catalogName;
 
-        private CatalogChoice(String catalogName, String displayValue) {
+        CatalogChoice(String catalogName, String displayValue) {
             _displayValue = displayValue;
             _catalogName = catalogName;
         }
@@ -55,7 +55,7 @@ public class GemsGuideStarSearchOptions {
     }
 
 
-    public static enum NirBandChoice {
+    public enum NirBandChoice {
         J(GemsUtils4Java.toNewBand(edu.gemini.shared.skyobject.Magnitude.Band.J)),
         H(GemsUtils4Java.toNewBand(edu.gemini.shared.skyobject.Magnitude.Band.H)),
         K(GemsUtils4Java.toNewBand(edu.gemini.shared.skyobject.Magnitude.Band.K)),
@@ -65,7 +65,7 @@ public class GemsGuideStarSearchOptions {
 
         private MagnitudeBand _band;
 
-        private NirBandChoice(MagnitudeBand band) {
+        NirBandChoice(MagnitudeBand band) {
             _band = band;
         }
 
@@ -83,7 +83,7 @@ public class GemsGuideStarSearchOptions {
     }
 
 
-    public static enum AnalyseChoice {
+    public enum AnalyseChoice {
         BOTH("Canopus and GSAOI", GemsTipTiltMode.both),
         CANOPUS("Canopus", GemsTipTiltMode.canopus),
         GSAOI("GSAOI", GemsTipTiltMode.instrument),
@@ -94,7 +94,7 @@ public class GemsGuideStarSearchOptions {
         private String _displayValue;
         private GemsTipTiltMode _gemsTipTiltMode;
 
-        private AnalyseChoice(String name, GemsTipTiltMode gemsTipTiltMode) {
+        AnalyseChoice(String name, GemsTipTiltMode gemsTipTiltMode) {
             _displayValue = name;
             _gemsTipTiltMode = gemsTipTiltMode;
         }
@@ -112,19 +112,12 @@ public class GemsGuideStarSearchOptions {
         }
     }
 
+    private final GemsInstrument instrument;
+    private final GemsTipTiltMode tipTiltMode;
+    private final Set<Angle> posAngles;
 
-    public static final String DEFAULT_CATALOG = CatalogChoice.DEFAULT.catalogName();
-
-    private String opticalCatalog = DEFAULT_CATALOG;
-    private String nirCatalog = DEFAULT_CATALOG;
-    private GemsInstrument instrument;
-    private GemsTipTiltMode tipTiltMode;
-    private Set<Angle> posAngles = new HashSet<>();
-
-    public GemsGuideStarSearchOptions(final String opticalCatalog, final String nirCatalog, final GemsInstrument instrument,
+    public GemsGuideStarSearchOptions(final GemsInstrument instrument,
                                       final GemsTipTiltMode tipTiltMode, final Set<Angle> posAngles) {
-        this.opticalCatalog = opticalCatalog;
-        this.nirCatalog = nirCatalog;
         this.instrument = instrument;
         if (instrument == GemsInstrument.flamingos2) {
             // Flamingos 2 OIWFS can only ever be used for the flexure star.
@@ -141,25 +134,6 @@ public class GemsGuideStarSearchOptions {
 
     public GemsTipTiltMode getTipTiltMode() {
         return tipTiltMode;
-    }
-
-    /**
-     * @return a copy of this instance
-     */
-    public GemsGuideStarSearchOptions copy() {
-        return new GemsGuideStarSearchOptions(opticalCatalog, nirCatalog, instrument,
-                                      tipTiltMode, posAngles);
-    }
-
-    /**
-     *
-     * @param instrument
-     * @return a copy of this instance with the given instrument
-     */
-    public GemsGuideStarSearchOptions setInstrument(final GemsInstrument instrument) {
-        GemsGuideStarSearchOptions o = copy();
-        o.instrument = instrument;
-        return o;
     }
 
     /**
@@ -203,17 +177,11 @@ public class GemsGuideStarSearchOptions {
         final String name = String.format("%s %s", gGroup.getDisplayName(), gType.name());
 
         // Adjust the mag limits for the worst conditions (as is done in the ags servlet)
-        final MagnitudeConstraints magConstraints = calculator.adjustGemsMagnitudeLimitsForJava(gType, nirBand, obsContext.getConditions());
+        final MagnitudeConstraints magConstraints = calculator.adjustGemsMagnitudeRangeForJava(gType, nirBand, obsContext.getConditions());
 
         final CatalogSearchCriterion criterion = calculator.searchCriterionBuilder(name, gGroup.getRadiusLimits(), instrument, magConstraints, posAngles);
         final GemsCatalogSearchKey key = new GemsCatalogSearchKey(gType, gGroup);
         return new GemsCatalogSearchCriterion(key, criterion);
     }
 
-    public Set<String> getCatalogs() {
-        Set<String> catalogs = new HashSet<>(4);
-        catalogs.add(nirCatalog);
-        catalogs.add(opticalCatalog);
-        return catalogs;
-    }
 }

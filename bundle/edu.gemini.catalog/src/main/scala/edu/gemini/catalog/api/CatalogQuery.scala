@@ -10,14 +10,22 @@ sealed trait CatalogQuery {
   val id: Option[Int] = None
   val base: Coordinates
   val radiusConstraint: RadiusConstraint
-  val magnitudeConstraints: Option[MagnitudeConstraints]
-  val magnitudeRange: Option[MagnitudeRange]
   val catalog: CatalogName
 
   def filter: SiderealTarget => Boolean = (t) => radiusConstraint.targetsFilter(base)(t) && magnitudeConstraints.map(_.filter(t)).getOrElse(true)
-  def filterOnMagnitude: (SiderealTarget, Magnitude) => Boolean = (t, m) => radiusConstraint.targetsFilter(base)(t) && magnitudeConstraints.map(_.filter(t)).getOrElse(true) && magnitudeRange.map(_.filter(t, m)).getOrElse(true)
+  // TODO Move these filters out of CatalogQuery
+  val magnitudeConstraints: Option[MagnitudeConstraints]
+  val magnitudeRange: Option[MagnitudeRange]
+  def filterOnMagnitude(t: SiderealTarget, m:Magnitude): Boolean = radiusConstraint.targetsFilter(base)(t) && magnitudeConstraints.map(_.filter(t)).getOrElse(true) && magnitudeRange.map(_.filter(t, m)).getOrElse(true)
+  def filterOnMagnitude(t: SiderealTarget, m:Option[Magnitude]): Boolean =
+    radiusConstraint.targetsFilter(base)(t) && magnitudeConstraints.map(_.filter(t)).getOrElse(true) &&
+          m.isDefined && magnitudeRange.map(_.filter(t, m.get)).getOrElse(true)
+  def filterOnMagnitude(t: SiderealTarget, m:Option[Magnitude], rangeAdjustment: (Option[MagnitudeRange], Magnitude) => Option[MagnitudeRange]): Boolean =
+    radiusConstraint.targetsFilter(base)(t) && magnitudeConstraints.map(_.filter(t)).getOrElse(true) &&
+      m.isDefined && rangeAdjustment(magnitudeRange, m.get).map(_.filter(t, m.get)).getOrElse(true)
 
-  def withMagnitudeConstraints(magnitudeConstraints: Option[MagnitudeConstraints]): CatalogQuery
+  def withMagnitudeConstraints(magnitudeConstraints: Option[MagnitudeConstraints]): CatalogQuery = this
+  def withMagnitudeRange(magnitudeRange: Option[MagnitudeRange]): CatalogQuery = this
 
   def isSuperSetOf(c: CatalogQuery) = {
     // Angular separation, or distance between the two.
@@ -36,18 +44,16 @@ sealed trait CatalogQuery {
 object CatalogQuery {
   private case class BandConstrainedCatalogQuery(base: Coordinates, radiusConstraint: RadiusConstraint, magnitudeConstraints: Option[MagnitudeConstraints], catalog: CatalogName) extends CatalogQuery {
     override val magnitudeRange: Option[MagnitudeRange] = None
-    def withMagnitudeConstraints(magnitudeConstraints: Option[MagnitudeConstraints]): CatalogQuery = copy(magnitudeConstraints = magnitudeConstraints)
+    override def withMagnitudeConstraints(magnitudeConstraints: Option[MagnitudeConstraints]): CatalogQuery = copy(magnitudeConstraints = magnitudeConstraints)
   }
 
   private case class RangeConstrainedCatalogQuery(base: Coordinates, radiusConstraint: RadiusConstraint, magnitudeRange: Option[MagnitudeRange], catalog: CatalogName) extends CatalogQuery {
     override val magnitudeConstraints = None
-    def withMagnitudeConstraints(magnitudeConstraints: Option[MagnitudeConstraints]): CatalogQuery = this
   }
 
-  private case class GemsCatalogQuery(override val id: Option[Int], base: Coordinates, radiusConstraint: RadiusConstraint, magnitudeConstraints: Option[MagnitudeConstraints], catalog: CatalogName) extends CatalogQuery {
-    // FIXME Likely Gems should use a Magnitude Range rather than Magnitude Constraints
-    override val magnitudeRange: Option[MagnitudeRange] = None
-    def withMagnitudeConstraints(magnitudeConstraints: Option[MagnitudeConstraints]): CatalogQuery = copy(magnitudeConstraints = magnitudeConstraints)
+  private case class GemsCatalogQuery(override val id: Option[Int], base: Coordinates, radiusConstraint: RadiusConstraint, magnitudeRange: Option[MagnitudeRange], catalog: CatalogName) extends CatalogQuery {
+    override val magnitudeConstraints: Option[MagnitudeConstraints] = None
+    override def withMagnitudeRange(magnitudeRange: Option[MagnitudeRange]): CatalogQuery = copy(magnitudeRange = magnitudeRange)
   }
 
   // TODO Ensure that it makes sense to default to ucac4
@@ -57,8 +63,8 @@ object CatalogQuery {
   def catalogQueryWithoutBand(base: Coordinates, radiusConstraint: RadiusConstraint, magnitudeRange: Option[MagnitudeRange], catalog: CatalogName = ucac4): CatalogQuery
     = RangeConstrainedCatalogQuery(base, radiusConstraint, magnitudeRange, catalog)
 
-  def catalogQueryForGems(id: Int, base: Coordinates, radiusConstraint: RadiusConstraint, magnitudeConstraints: Option[MagnitudeConstraints], catalog: CatalogName = ucac4): CatalogQuery
-    = GemsCatalogQuery(Some(id), base, radiusConstraint, magnitudeConstraints, catalog)
+  def catalogQueryForGems(id: Int, base: Coordinates, radiusConstraint: RadiusConstraint, magnitudeRange: Option[MagnitudeRange], catalog: CatalogName = ucac4): CatalogQuery
+    = GemsCatalogQuery(Some(id), base, radiusConstraint, magnitudeRange, catalog)
 }
 
 sealed abstract class CatalogName(val id: String)

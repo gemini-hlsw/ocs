@@ -1,11 +1,14 @@
 package edu.gemini.ags.gems
 
 import edu.gemini.catalog.api._
+import edu.gemini.ags.api.{defaultProbeBands, magnitudeExtractor}
 import edu.gemini.catalog.votable.{RemoteBackend, VoTableBackend, CatalogException, VoTableClient}
 import edu.gemini.spModel.core.Target.SiderealTarget
 import edu.gemini.spModel.core.{Angle, Magnitude, MagnitudeBand, Coordinates}
 import edu.gemini.spModel.gemini.gems.GemsInstrument
+import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.Conditions
 import edu.gemini.spModel.obs.context.ObsContext
+import edu.gemini.pot.ModelConverters._
 
 import scala.concurrent.{Await, Future}
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -57,7 +60,7 @@ case class GemsVoTableCatalog(backend: VoTableBackend = RemoteBackend) {
 
     val resultSequence = inst match {
       case GemsInstrument.flamingos2 => searchCatalog(basePosition, criterions, statusLogger)
-      case i                         => searchOptimized(basePosition, criterions, i, statusLogger)
+      case i                         => searchOptimized(basePosition, obsContext.getConditions, criterions, i, statusLogger)
     }
 
     // sort on criteria order
@@ -70,7 +73,7 @@ case class GemsVoTableCatalog(backend: VoTableBackend = RemoteBackend) {
   private def searchCatalog(basePosition: Coordinates, criterions: List[GemsCatalogSearchCriterion], statusLogger: StatusLogger): Future[List[GemsCatalogSearchResults]] = {
     val queryArgs = for {
       c <- criterions
-      q = CatalogQuery.catalogQuery(basePosition, c.criterion.radiusLimits, c.criterion.magConstraints)
+      q = CatalogQuery.catalogQueryWithoutBand(basePosition, c.criterion.radiusLimits, c.criterion.magRange.some)
     } yield (q, c)
 
     val qm = queryArgs.toMap
@@ -88,23 +91,36 @@ case class GemsVoTableCatalog(backend: VoTableBackend = RemoteBackend) {
    * @param inst the instrument option for the search
    * @return a list of threads used for background catalog searches
    */
-  private def searchOptimized(basePosition: Coordinates, criterions: List[GemsCatalogSearchCriterion], inst: GemsInstrument, statusLogger: StatusLogger): Future[List[GemsCatalogSearchResults]] = {
+  private def searchOptimized(basePosition: Coordinates, conditions: Conditions, criterions: List[GemsCatalogSearchCriterion], inst: GemsInstrument, statusLogger: StatusLogger): Future[List[GemsCatalogSearchResults]] = {
     val radiusLimitsList = getRadiusLimits(inst, criterions)
     val magLimitsList = optimizeMagnitudeLimits(criterions)
 
     val queries = for {
       radiusLimits <- radiusLimitsList
-      magLimits <- magLimitsList
-      queryArgs = CatalogQuery.catalogQuery(basePosition, radiusLimits, magLimits.some)
+      magLimits    <- magLimitsList
+      mr            = MagnitudeRange(magLimits.faintnessConstraint, magLimits.saturationConstraint)
+      queryArgs     = (CatalogQuery.catalogQueryWithoutBand(basePosition, radiusLimits, mr.some), magLimits)
     } yield queryArgs
 
-    VoTableClient.catalogs(queries, backend).flatMap {
+    val queriesMap = queries.toMap
+
+    VoTableClient.catalogs(queries.map(_._1), backend).flatMap {
       case l if l.filter(_.result.containsError).nonEmpty =>
         Future.failed(CatalogException(l.map(_.result.problems).suml))
       case l =>
         Future.successful {
-          val targets = l.map(k => k.result.targets).suml
-          assignToCriterion(basePosition, criterions, targets.rows)
+          val targets = l.map {k =>
+            val referenceBand = queriesMap.get(k.query).map(_.band)
+
+            referenceBand.map { b =>
+              val rangeAdjustmentForConditions = (mr: Option[MagnitudeRange], mag: Magnitude) => mr.map { m =>
+                m.adjust(m => conditions.magAdjustOp().apply(mag.toOldModel).toNewModel.value)
+              }
+
+              k.result.targets.rows.filter(t => k.query.filterOnMagnitude(t, magnitudeExtractor(defaultProbeBands(b))(t), rangeAdjustmentForConditions))
+            }.getOrElse(k.result.targets.rows)
+          }.suml
+          assignToCriterion(basePosition, criterions, targets)
         }
     }
   }
@@ -113,6 +129,7 @@ case class GemsVoTableCatalog(backend: VoTableBackend = RemoteBackend) {
    * Assign targets to matching criterions
    */
   private def assignToCriterion(basePosition: Coordinates, criterions: List[GemsCatalogSearchCriterion], targets: List[SiderealTarget]): List[GemsCatalogSearchResults] = {
+
     def matchCriteria(basePosition: Coordinates, criter: GemsCatalogSearchCriterion, targets: List[SiderealTarget]): List[SiderealTarget] = {
       val matcher = criter.criterion.matcher(basePosition)
       targets.filter(matcher.matches).distinct
@@ -158,13 +175,12 @@ case class GemsVoTableCatalog(backend: VoTableBackend = RemoteBackend) {
   protected [gems] def optimizeMagnitudeLimits(criterions: List[GemsCatalogSearchCriterion]): List[MagnitudeConstraints] = {
     val magConstraints = for {
         criteria <- criterions
-        mc       <- criteria.criterion.magConstraints
-      } yield mc
+        mc       =  criteria.criterion.magRange
+      } yield (mc, criteria.criterion.referenceBand)
 
     // Calculate the max faintness per band out of the criteria
     val faintLimitPerBand = for {
-        m <- magConstraints
-        b  = m.band
+        (m, b) <- magConstraints
         fl = m.faintnessConstraint
       } yield (b, fl)
 
@@ -172,8 +188,7 @@ case class GemsVoTableCatalog(backend: VoTableBackend = RemoteBackend) {
 
     // Calculate the min saturation limit per band out of the criteria
     val saturationLimitPerBand = for {
-        m <- magConstraints
-        b = m.band
+        (m, b) <- magConstraints
         sl = m.saturationConstraint.getOrElse(SaturationConstraint(DefaultSaturationMagnitude))
       } yield (b, sl)
 

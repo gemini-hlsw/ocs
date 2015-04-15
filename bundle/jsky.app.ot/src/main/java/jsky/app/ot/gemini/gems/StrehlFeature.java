@@ -45,9 +45,6 @@ public class StrehlFeature extends TpeImageFeature implements PropertyWatcher, M
     // Current transformation
     private AffineTransform trans;
 
-    // The results of the mascot strehl calculations
-    private Strehl strehl;
-
     // Message to display
     private TpeMessage message;
 
@@ -214,7 +211,6 @@ public class StrehlFeature extends TpeImageFeature implements PropertyWatcher, M
 
     // Run the mascot strehl algorithm in a background thread, since it is too slow to run in draw()
     private void calculateStrehl() {
-        strehl = null;
         contourPlot = null;
         message = null;
 
@@ -246,9 +242,8 @@ public class StrehlFeature extends TpeImageFeature implements PropertyWatcher, M
             public void finished() {
                 Object o = getValue();
                 if (!targetListError) {
-                    // Note: targteListError may have been set in event thread while background thead was running
+                    // Note: targetListError may have been set in event thread while background thead was running
                     Trio<Strehl, TpeMessage, ContourPlot> p = (Trio<Strehl, TpeMessage, ContourPlot>) o;
-                    strehl = p._1();
                     message = p._2();
                     contourPlot = p._3();
                 }
@@ -322,7 +317,7 @@ public class StrehlFeature extends TpeImageFeature implements PropertyWatcher, M
 
     // Get list of stars to pass to strehl algorithm
     private List<SPTarget> getTargetList() {
-        List<SPTarget> targetList = new ArrayList<SPTarget>();
+        List<SPTarget> targetList = new ArrayList<>();
         Option<ObsContext> ctxOpt = _iw.getObsContext();
         if (ctxOpt.isEmpty()) return targetList;
         ObsContext ctx = ctxOpt.getValue();
@@ -334,12 +329,14 @@ public class StrehlFeature extends TpeImageFeature implements PropertyWatcher, M
         int aowfsCount = 0;
         for (GuideProbe gp : group.getReferencedGuiders()) {
             GuideProbe.Type t = gp.getType();
-            if (t == GuideProbe.Type.OIWFS || t == GuideProbe.Type.AOWFS) {
-                if (t == GuideProbe.Type.OIWFS) {
+            switch (t) {
+                case OIWFS:
                     oiwfsCount++;
-                } else if (t == GuideProbe.Type.AOWFS) {
+                    break;
+                case AOWFS:
                     aowfsCount++;
-                }
+                    break;
+                default:
             }
         }
         if ("Flamingos2".equals(ctx.getInstrument().getNarrowType())) {
@@ -352,7 +349,7 @@ public class StrehlFeature extends TpeImageFeature implements PropertyWatcher, M
             // At that point, we'll just use that information instead of guessing which is which.
             message = TpeMessage.warningMessage("Strehl: Error: Both ODGW and CWFS guide stars defined");
             targetListError = true;
-            return new ArrayList<SPTarget>();
+            return new ArrayList<>();
         } else if (oiwfsCount > 1) {
             guideProbeType = GuideProbe.Type.OIWFS;
         } else {
@@ -383,7 +380,7 @@ public class StrehlFeature extends TpeImageFeature implements PropertyWatcher, M
         Star[] starList = targetListToStarList(targetList);
 
         double factor = GemsCatalogResults.getStrehlFactor(this.getContext().obsContextJava());
-        return Mascot.computeStrehl(getBandpass(type), factor, starList[0], scala.Option.apply(starList[1]), scala.Option.apply(starList[2]));
+        return Mascot.computeStrehl4Java(getBandpass(type), factor, starList[0], scala.Option.apply(starList[1]), scala.Option.apply(starList[2]));
     }
 
 

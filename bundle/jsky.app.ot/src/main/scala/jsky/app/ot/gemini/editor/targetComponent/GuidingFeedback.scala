@@ -44,7 +44,7 @@ object GuidingFeedback {
     import ProbeLimits.{le, lim}
 
     def searchRange: String =
-      s"${lim(sat)} $le ${bands.mkString("")} $le ${lim(slow)}"
+      s"${lim(sat)} $le ${bands.mkString(", ")} $le ${lim(slow)}"
 
     def detailRange: String =
       s"${lim(sat)} $le FAST $le ${lim(fast)} < MEDIUM $le ${lim(medium)} < SLOW $le ${lim(slow)}"
