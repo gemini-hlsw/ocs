@@ -12,7 +12,6 @@ import scala.Some;
  */
 public final class GsaoiRecipe {
 
-    private final GemsParameters _gemsParameters;
     private final GsaoiParameters _gsaoiParameters;
     private final ObservingConditions _obsConditionParameters;
     private final ObservationDetails _obsDetailParameters;
@@ -26,8 +25,7 @@ public final class GsaoiRecipe {
                        final ObservationDetails obsDetailParameters,
                        final ObservingConditions obsConditionParameters,
                        final GsaoiParameters gsaoiParameters,
-                       final TelescopeDetails telescope,
-                       final GemsParameters gemsParameters)
+                       final TelescopeDetails telescope)
 
     {
         _sdParameters = sdParameters;
@@ -35,7 +33,6 @@ public final class GsaoiRecipe {
         _obsConditionParameters = obsConditionParameters;
         _gsaoiParameters = gsaoiParameters;
         _telescope = telescope;
-        _gemsParameters = gemsParameters;
 
         validateInputParameters();
     }
@@ -78,7 +75,7 @@ public final class GsaoiRecipe {
         // Gems specific section
         final Gems gems = new Gems(instrument.getEffectiveWavelength(),
                 _telescope.getTelescopeDiameter(), IQcalc.getImageQuality(),
-                _gemsParameters.getAvgStrehl(), _gemsParameters.getStrehlBand(),
+                _gsaoiParameters.getGems().getAvgStrehl(), _gsaoiParameters.getGems().getStrehlBand(),
                 _obsConditionParameters.getImageQualityPercentile(),
                 _sdParameters);
 

@@ -2,6 +2,7 @@ package edu.gemini.itc.baseline.util
 
 import edu.gemini.itc.altair.AltairParameters
 import edu.gemini.itc.gems.GemsParameters
+import edu.gemini.itc.gsaoi.GsaoiParameters
 import edu.gemini.itc.nifs.NifsParameters
 import edu.gemini.itc.niri.NiriParameters
 import edu.gemini.itc.shared.TelescopeDetails.{Coating, Wfs}
@@ -19,10 +20,9 @@ case class Fixture[T <: InstrumentDetails](
                     odp: ObservationDetails,
                     ocp: ObservingConditions,
                     tep: TelescopeDetails,
-                    gem: Option[GemsParameters],
                     pdp: PlottingDetails
                        ) {
-  val hash = Hash.calc(ins) + Hash.calc(src) + Hash.calc(ocp) + Hash.calc(odp) + Hash.calc(tep) + Fixture.altairHash(ins) + gem.fold(0)(Hash.calc) + Hash.calc(pdp)
+  val hash = Hash.calc(ins) + Hash.calc(src) + Hash.calc(ocp) + Hash.calc(odp) + Hash.calc(tep) + Fixture.altairHash(ins) + Fixture.gemsHash(ins) + Hash.calc(pdp)
 }
 
 object Fixture {
@@ -37,31 +37,34 @@ object Fixture {
     case None    => Hash.calc(new AltairParameters(0.0,  0.0, FieldLens.OUT,  GuideStarType.NGS))
     case Some(a) => Hash.calc(a)
   }
+  def gemsHash(ins: InstrumentDetails): Int = ins match {
+    case i: GsaoiParameters => Hash.calc(i.getGems)
+    case _                 => 0
+  }
   // ===
 
   // ==== Create fixtures by putting together matching sources, modes and configurations and mixing in conditions and telescope configurations
 
-  def rBandImgFixtures[T <: InstrumentDetails](configs: List[T], conds: List[ObservingConditions] = ObservingConditions, gem: List[GemsParameters] = List()) = fixtures(RBandSources, ImagingModes,      configs, conds, gem)
+  def rBandImgFixtures[T <: InstrumentDetails](configs: List[T], conds: List[ObservingConditions] = ObservingConditions) = fixtures(RBandSources, ImagingModes,      configs, conds)
 
-  def kBandSpcFixtures[T <: InstrumentDetails](configs: List[T], conds: List[ObservingConditions] = ObservingConditions, gem: List[GemsParameters] = List()) = fixtures(KBandSources, SpectroscopyModes, configs, conds, gem)
+  def kBandSpcFixtures[T <: InstrumentDetails](configs: List[T], conds: List[ObservingConditions] = ObservingConditions) = fixtures(KBandSources, SpectroscopyModes, configs, conds)
 
-  def kBandImgFixtures[T <: InstrumentDetails](configs: List[T], conds: List[ObservingConditions] = ObservingConditions, gem: List[GemsParameters] = List()) = fixtures(KBandSources, ImagingModes,      configs, conds, gem)
+  def kBandImgFixtures[T <: InstrumentDetails](configs: List[T], conds: List[ObservingConditions] = ObservingConditions) = fixtures(KBandSources, ImagingModes,      configs, conds)
 
-  def nBandSpcFixtures[T <: InstrumentDetails](configs: List[T], conds: List[ObservingConditions] = ObservingConditions, gem: List[GemsParameters] = List()) = fixtures(NBandSources, SpectroscopyModes, configs, conds, gem)
+  def nBandSpcFixtures[T <: InstrumentDetails](configs: List[T], conds: List[ObservingConditions] = ObservingConditions) = fixtures(NBandSources, SpectroscopyModes, configs, conds)
 
-  def nBandImgFixtures[T <: InstrumentDetails](configs: List[T], conds: List[ObservingConditions] = ObservingConditions, gem: List[GemsParameters] = List()) = fixtures(NBandSources, ImagingModes,      configs, conds, gem)
+  def nBandImgFixtures[T <: InstrumentDetails](configs: List[T], conds: List[ObservingConditions] = ObservingConditions) = fixtures(NBandSources, ImagingModes,      configs, conds)
 
-  def qBandSpcFixtures[T <: InstrumentDetails](configs: List[T], conds: List[ObservingConditions] = ObservingConditions, gem: List[GemsParameters] = List()) = fixtures(QBandSources, SpectroscopyModes, configs, conds, gem)
+  def qBandSpcFixtures[T <: InstrumentDetails](configs: List[T], conds: List[ObservingConditions] = ObservingConditions) = fixtures(QBandSources, SpectroscopyModes, configs, conds)
 
   // create fixtures from combinations of given input values
-  private def fixtures[T <: InstrumentDetails](sources: List[SourceDefinition], modes: List[ObservationDetails], configs: List[T], conds: List[ObservingConditions], gem: List[GemsParameters]) = for {
+  private def fixtures[T <: InstrumentDetails](sources: List[SourceDefinition], modes: List[ObservationDetails], configs: List[T], conds: List[ObservingConditions]) = for {
       src   <- sources
       odp   <- modes
       ins   <- configs
       cond  <- conds
       tele  <- TelescopeConfigurations
-      g     <- if (gem.isEmpty) List(None) else gem.map(Option(_))
-    } yield Fixture(ins, src, odp, cond, tele, g, DummyPlottingParameters)
+    } yield Fixture(ins, src, odp, cond, tele, DummyPlottingParameters)
 
 
   // ==== IMAGING ANALYSIS MODES

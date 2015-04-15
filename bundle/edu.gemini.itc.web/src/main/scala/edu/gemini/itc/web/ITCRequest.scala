@@ -148,7 +148,8 @@ object ITCRequest {
   def gsaoiParameters(r: ITCRequest): GsaoiParameters = {
     val filter      = r.enumParameter(classOf[Gsaoi.Filter])
     val readMode    = r.enumParameter(classOf[Gsaoi.ReadMode])
-    new GsaoiParameters(filter, readMode)
+    val gems        = gemsParameters(r)
+    new GsaoiParameters(filter, readMode, gems)
   }
 
   def michelleParameters(r: ITCRequest): MichelleParameters = {

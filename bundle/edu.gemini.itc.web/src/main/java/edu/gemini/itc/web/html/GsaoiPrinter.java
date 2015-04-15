@@ -18,9 +18,9 @@ public final class GsaoiPrinter extends PrinterBase {
 
     private final GsaoiRecipe recipe;
 
-    public GsaoiPrinter(final Parameters p, final GsaoiParameters ip, final GemsParameters gems, final PrintWriter out) {
+    public GsaoiPrinter(final Parameters p, final GsaoiParameters ip, final PrintWriter out) {
         super(out);
-        recipe = new GsaoiRecipe(p.source(), p.observation(), p.conditions(), ip, p.telescope(), gems);
+        recipe = new GsaoiRecipe(p.source(), p.observation(), p.conditions(), ip, p.telescope());
     }
 
     /**
