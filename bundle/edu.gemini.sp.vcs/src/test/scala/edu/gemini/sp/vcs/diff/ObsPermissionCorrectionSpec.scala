@@ -2,6 +2,7 @@ package edu.gemini.sp.vcs.diff
 
 
 import edu.gemini.pot.sp.{ISPObservation, SPNodeKey}
+import edu.gemini.pot.sp.Conflict._
 import edu.gemini.pot.sp.version._
 import edu.gemini.spModel.obs.ObsPhase2Status
 import edu.gemini.spModel.obs.ObsPhase2Status._
@@ -18,15 +19,19 @@ class ObsPermissionCorrectionSpec extends VcsSpecification {
   private def bothAre(stat: ObsPhase2Status, k: SPNodeKey, env: TestEnv): MatchResult[Any] =
     (env.local.getObsPhase2Status(k) must_== stat) and (env.remote.getObsPhase2Status(k) must_== stat)
 
+  private def localIs(stat: ObsPhase2Status, k: SPNodeKey, env: TestEnv): MatchResult[Any] =
+    env.local.getObsPhase2Status(k) must_== stat
+
   "observation permission correction" should {
     "reset observations created with an advanced status" in withVcs { env =>
       val obsKey = env.local.addObservation()
       env.local.setObsPhase2Status(obsKey, PHASE_2_COMPLETE)
       val initialVersion = env.local.nodeVersions(obsKey)
 
-      afterSync(env, PiUserPrincipal) {
-        bothAre(PI_TO_COMPLETE, obsKey, env) and
-          (env.local.nodeVersions(obsKey) must_== initialVersion.incr(env.local.lifespanId))
+      afterPull(env, PiUserPrincipal) {
+        localIs(PI_TO_COMPLETE, obsKey, env) and
+          (env.local.nodeVersions(obsKey) must_== initialVersion.incr(env.local.lifespanId)) and
+          localHasNote(new CreatePermissionFail(obsKey), env)
       }
     }
 
@@ -49,10 +54,11 @@ class ObsPermissionCorrectionSpec extends VcsSpecification {
       env.local.delete(ObsKey)
       val initialVersion = env.local.prog.getVersion
 
-      // sync and see it has been resurrected
-      afterSync(env, PiUserPrincipal) {
+      // pull and see it has been resurrected
+      afterPull(env, PiUserPrincipal) {
         (env.local.prog.children.exists(_.key == ObsKey) must beTrue) and
-          (env.local.prog.getVersion must_== initialVersion.incr(env.local.lifespanId))
+          (env.local.prog.getVersion must_== initialVersion.incr(env.local.lifespanId)) and
+          localHasNote(new DeletePermissionFail(ObsKey), env)
       }
     }
 
@@ -81,8 +87,9 @@ class ObsPermissionCorrectionSpec extends VcsSpecification {
       env.local.delete(grpKey)
 
       // sync and see it has been resurrected
-      afterSync(env, PiUserPrincipal) {
-        env.local.prog.children.exists(_.key == obsKey) must beTrue
+      afterPull(env, PiUserPrincipal) {
+        (env.local.prog.children.exists(_.key == obsKey) must beTrue) and
+          localHasNote(new DeletePermissionFail(obsKey), env)
       }
     }
 
@@ -102,7 +109,7 @@ class ObsPermissionCorrectionSpec extends VcsSpecification {
 
       // sync and see it has been resurrected and the note came back.  the
       // moved note is still there under the program but now has a new key
-      afterSync(env, PiUserPrincipal) {
+      afterPull(env, PiUserPrincipal) {
         val restoredObs  = env.local.obs(ObsKey)
         val restoredNote = restoredObs.findObsComponentByType(SPNote.SP_TYPE).get
         val dupNote      = env.local.prog.getObsComponents.get(0)
@@ -110,7 +117,8 @@ class ObsPermissionCorrectionSpec extends VcsSpecification {
         (restoredNote.key must_== noteKey) and
           (restoredNote.getDataObject.getTitle must_== "abc") and
           (dupNote.key must_!= noteKey) and
-          (dupNote.getDataObject.getTitle must_== "123")
+          (dupNote.getDataObject.getTitle must_== "123") and
+          localHasNote(new DeletePermissionFail(ObsKey), env)
       }
     }
 
@@ -129,7 +137,7 @@ class ObsPermissionCorrectionSpec extends VcsSpecification {
 
       // sync and see it has been resurrected and the note came back but with
       // the same version information, but of course the old title
-      afterSync(env, PiUserPrincipal) {
+      afterPull(env, PiUserPrincipal) {
         val restoredObs  = env.local.obs(ObsKey)
         val restoredNote = restoredObs.findObsComponentByType(SPNote.SP_TYPE).get
 
@@ -142,7 +150,10 @@ class ObsPermissionCorrectionSpec extends VcsSpecification {
     "reset remotely deleted observations with an inappropriately advanced status" in withVcs { env =>
       env.remote.delete(ObsKey)
       env.local.setObsPhase2Status(ObsKey, PHASE_2_COMPLETE)
-      afterSync(env, PiUserPrincipal) { bothAre(PI_TO_COMPLETE, ObsKey, env) }
+      afterPull(env, PiUserPrincipal) {
+        localIs(PI_TO_COMPLETE, ObsKey, env) and
+        localHasNote(new UpdatePermissionFail(ObsKey), env)
+      }
     }
 
     "allow a staff person to advance the status of a remotely deleted observation" in withVcs { env =>
@@ -158,18 +169,16 @@ class ObsPermissionCorrectionSpec extends VcsSpecification {
       // change status remotely
       env.remote.setObsPhase2Status(ObsKey, PHASE_2_COMPLETE)
 
-      afterSync(env, PiUserPrincipal) {
-        val remoteObs      = env.local.obs(ObsKey)
+      afterPull(env, PiUserPrincipal) {
         val conflictFolder = env.local.prog.getConflictFolder
         val localObs       = conflictFolder.children.head.asInstanceOf[ISPObservation]
-        val remoteNote     = remoteObs.findObsComponentByType(SPNote.SP_TYPE)
         val localNote      = localObs.findObsComponentByType(SPNote.SP_TYPE)
 
         (localObs.key must_!= ObsKey) and
-          (remoteNote must_== None) and
           (localNote.exists(_.key == noteKey) must beTrue) and
-          bothAre(PHASE_2_COMPLETE, ObsKey, env) and
-          bothAre(PI_TO_COMPLETE, localObs.key, env)
+          localIs(PHASE_2_COMPLETE, ObsKey, env) and
+          localIs(PI_TO_COMPLETE, localObs.key, env) and
+          localHasNote(new UpdatePermissionFail(localObs.key), env)
       }
     }
 
@@ -210,12 +219,15 @@ class ObsPermissionCorrectionSpec extends VcsSpecification {
 
       // now the remote version of the node is restored with its remote version,
       // and a copy of the note is made with a starting version
-      afterSync(env, PiUserPrincipal) {
-        val newNote = env.local.prog.getConflictFolder.children.head.children.find(_.getDataObject.getType == SPNote.SP_TYPE).get
+      afterPull(env, PiUserPrincipal) {
+        val localObs = env.local.prog.getConflictFolder.children.head
+        val newNote  = localObs.children.find(_.getDataObject.getType == SPNote.SP_TYPE).get
+
         (env.local.nodeVersions(noteKey) must_== rVersions) and
           (newNote.getVersion must_== EmptyNodeVersions.incr(env.local.prog.getLifespanId)) and
           (env.local.descendant(noteKey).getDataObject.getTitle must_== "123") and
-          (newNote.getDataObject.getTitle must_== "foo")
+          (newNote.getDataObject.getTitle must_== "foo") and
+          localHasNote(new UpdatePermissionFail(localObs.key), env)
       }
     }
 
@@ -233,11 +245,12 @@ class ObsPermissionCorrectionSpec extends VcsSpecification {
       // and should still be observation 1.  a copy of the locally edited
       // observation must be added to the conflict folder with observation
       // number 3
-      afterSync(env, PiUserPrincipal) {
+      afterPull(env, PiUserPrincipal) {
         val obs3 = env.local.prog.findDescendant(_.getDataObject.getTitle == "abc").get.asInstanceOf[ISPObservation]
         (env.local.obs(ObsKey).getObservationNumber must_== 1) and
           (env.local.obs(newObsKey).getObservationNumber must_== 2) and
-          (obs3.getObservationNumber must_== 3)
+          (obs3.getObservationNumber must_== 3) and
+          localHasNote(new UpdatePermissionFail(obs3.key), env)
       }
     }
 

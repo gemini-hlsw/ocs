@@ -108,8 +108,8 @@ class ProgramDiffTest extends JUnitSuite {
       (start, local, remote, pd) => {
         val obsKeys = pd.plan.update.sFoldRight(Set.empty[SPNodeKey]) { (mn, s) =>
           mn match {
-            case Modified(k, _, _, Obs(_)) => s + k
-            case _                         => s
+            case Modified(k, _, _, Obs(_), _) => s + k
+            case _                            => s
           }
         }
 

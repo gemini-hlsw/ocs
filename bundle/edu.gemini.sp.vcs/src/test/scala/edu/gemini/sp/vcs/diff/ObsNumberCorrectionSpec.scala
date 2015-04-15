@@ -24,8 +24,8 @@ class ObsNumberCorrectionSpec extends MergeCorrectionSpec {
 
     def obsNumbers(t: Tree[MergeNode]): List[Int] =
       t.subForest.map(_.rootLabel match {
-        case Modified(_, _, _, Obs(i)) => i
-        case _                         => -1
+        case Modified(_, _, _, Obs(i), _) => i
+        case _                            => -1
       }).toList
 
     val plan = MergePlan(mergeTree, Set.empty)

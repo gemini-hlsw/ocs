@@ -25,12 +25,12 @@ class TemplateNumberCorrectionSpec extends MergeCorrectionSpec {
 
     def tgNumbers(t: Tree[MergeNode]): List[VersionToken] = {
       val tf = t.subForest.find(_.rootLabel match {
-        case Modified(_, _, _: TemplateFolder, _) => true
-        case _                                    => false
+        case Modified(_, _, _: TemplateFolder, _, _) => true
+        case _                                       => false
       })
 
       tf.toList.flatMap { _.subForest.toList.map { _.rootLabel } }.collect {
-        case Modified(_, _, tg: TemplateGroup, _) => tg.getVersionToken
+        case Modified(_, _, tg: TemplateGroup, _, _) => tg.getVersionToken
       }
     }
 

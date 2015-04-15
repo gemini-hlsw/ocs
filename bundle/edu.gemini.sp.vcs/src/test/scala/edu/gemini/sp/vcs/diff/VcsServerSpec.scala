@@ -1,7 +1,7 @@
 package edu.gemini.sp.vcs.diff
 
 
-import edu.gemini.pot.sp.{DataObjectBlob, ISPFactory, ISPProgram, SPNodeKey}
+import edu.gemini.pot.sp._
 import edu.gemini.pot.sp.version._
 import edu.gemini.pot.spdb.IDBDatabaseService
 import edu.gemini.sp.vcs.diff.VcsAction._
@@ -163,7 +163,7 @@ class VcsServerSpec extends VcsSpecification {
         case \/-(pdt) =>
           val mp = pdt.decode.plan
           mp.update.rootLabel match {
-            case Modified(k, n, dob, NodeDetail.Empty) =>
+            case Modified(k, n, dob, NodeDetail.Empty, Conflicts.EMPTY) =>
               (k must_== Key) and
                 (n must_== nv) and
                 (DataObjectBlob.same(dob, env.local.prog.getDataObject) must beTrue)
@@ -193,7 +193,7 @@ class VcsServerSpec extends VcsSpecification {
 
       // create a merge plan with an updated title for the program node
       val dob    = new SPProgram <| (_.setTitle("The Myth of Sisyphus"))
-      val update = MergeNode.modified(Key, nv2, dob, NodeDetail.Empty).node()
+      val update = MergeNode.modified(Key, nv2, dob, NodeDetail.Empty, Conflicts.EMPTY).node()
       val mp     = MergePlan(update, Set.empty)
 
       val svs = new env.local.server.SecureVcsService(StaffUser)

@@ -39,7 +39,7 @@ class StaffOnlyFieldCorrection(lifespanId: LifespanId, key: SPNodeKey, pid: SPPr
 
     def correctedNode(mn: MergeNode): MergeNode =
       mn match {
-        case m@Modified(k, nv, dob: StaffProtected, _) =>
+        case m@Modified(k, nv, dob: StaffProtected, _, _) =>
           remote(k).fold(correctedNew(m, dob)) { remoteMod =>
             nv.compare(remoteMod.nv) match {
               case Newer => correctedExisting(m, dob, remoteMod.dob)
@@ -72,8 +72,8 @@ object StaffOnlyFieldCorrection {
     def contact(sp: SPProgram) = Option(sp.getContactPerson).map(_.trim.toLowerCase)
 
     mn match {
-      case Modified(_, _, sp: SPProgram, _) => contact(sp)
-      case _                                => none
+      case Modified(_, _, sp: SPProgram, _, _) => contact(sp)
+      case _                                   => none
     }
   }
 

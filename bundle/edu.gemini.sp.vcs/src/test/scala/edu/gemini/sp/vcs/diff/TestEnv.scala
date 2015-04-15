@@ -5,6 +5,7 @@ import java.io.File
 import edu.gemini.pot.sp.version.{LifespanId, EmptyNodeVersions, NodeVersions}
 import edu.gemini.pot.sp._
 import edu.gemini.pot.spdb.{DBLocalDatabase, IDBDatabaseService}
+import edu.gemini.shared.util.immutable.ScalaConverters._
 import edu.gemini.sp.vcs.diff.TestEnv._
 import edu.gemini.sp.vcs.diff.VcsFailure.{IdClash, Forbidden, NotFound, VcsException}
 import edu.gemini.sp.vcs.log.{VcsEventSet, VcsEvent, VcsOp, VcsLog}
@@ -230,11 +231,11 @@ trait VcsSpecification extends Specification {
     }
   }
 
-  def afterSync(env: TestEnv, p: Principal)(mr: => MatchResult[Any]): MatchResult[_] = {
-    expect(env.local.vcs(p).sync(Q1, DummyPeer)) {
-      case \/-(_) => mr
-    }
-  }
+  def afterPull(env: TestEnv, p: Principal)(mr: => MatchResult[Any]): MatchResult[_] =
+    expect(env.local.vcs(p).pull(Q1, DummyPeer)) { case \/-(_) => mr }
+
+  def afterSync(env: TestEnv, p: Principal)(mr: => MatchResult[Any]): MatchResult[_] =
+    expect(env.local.vcs(p).sync(Q1, DummyPeer)) { case \/-(_) => mr }
 
   def expect[A](act: VcsAction[A])(pf: PartialFunction[TryVcs[A], MatchResult[_]]): MatchResult[_] = {
     import VcsAction._
@@ -263,4 +264,8 @@ trait VcsSpecification extends Specification {
     expect(act) {
       case -\/(VcsException(rte: RuntimeException)) => rte.getMessage must_== msg
     }
+
+  def localHasNote(n: Conflict.Note, env: TestEnv): MatchResult[_] =
+    env.local.descendant(n.getNodeKey).getConflicts.notes.asScalaList.contains(n) must beTrue
+
 }

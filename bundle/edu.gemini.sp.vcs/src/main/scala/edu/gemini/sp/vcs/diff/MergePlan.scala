@@ -9,7 +9,6 @@ import edu.gemini.spModel.rich.pot.sp._
 
 import scalaz._
 import Scalaz._
-import scalaz.concurrent._
 
 /** Describes the modifications required for a local program to complete a
   * merge.
@@ -41,8 +40,8 @@ case class MergePlan(update: Tree[MergeNode], delete: Set[Missing]) {
     val vmUpdates: VersionMap = {
       val vm0 = update.foldRight(Map.empty[SPNodeKey, NodeVersions]) { (mn, m) =>
         mn match {
-          case Modified(k, nv, _, _) => m.updated(k, nv)
-          case _                     => m
+          case Modified(k, nv, _, _, _) => m.updated(k, nv)
+          case _                        => m
         }
       }
       (vm0/:delete) { case (vm1, Missing(k, nv)) => vm1.updated(k, nv) }
@@ -58,8 +57,8 @@ case class MergePlan(update: Tree[MergeNode], delete: Set[Missing]) {
   def compare(vm: VersionMap): VersionComparison = {
     val vm0 = vm.withDefaultValue(EmptyNodeVersions)
     val up  = update.foldMap {
-      case Modified(k, nv, _, _) => VersionComparison.compare(nv, vm0(k))
-      case Unmodified(_)         => VersionComparison.Same
+      case Modified(k, nv, _, _, _) => VersionComparison.compare(nv, vm0(k))
+      case Unmodified(_)            => VersionComparison.Same
     }
     val del = delete.foldMap {
       case Missing(k, nv) => VersionComparison.compare(nv, vm0(k))
@@ -73,10 +72,10 @@ case class MergePlan(update: Tree[MergeNode], delete: Set[Missing]) {
     // Tries to create an ISPNode from the information in the MergeNode.
     def create(mn: MergeNode): TryVcs[ISPNode] =
       mn match {
-        case Modified(k, _, dob, _) =>
+        case Modified(k, _, dob, _, _) =>
           NodeFactory.mkNode(f, p, dob.getType, Some(k)) \/>
             Unexpected("Could not create science program node of type: " + dob.getType)
-        case Unmodified(k)          =>
+        case Unmodified(k)             =>
           Unexpected(s"Unmodified node with key $k not found in program ${p.getProgramID}.").left
       }
 
@@ -84,8 +83,9 @@ case class MergePlan(update: Tree[MergeNode], delete: Set[Missing]) {
     def edit(t: Tree[(MergeNode, ISPNode)]): Unit = {
       t.rootLabel match {
 
-        case (Modified(_, nv, dob, det), n) =>
+        case (Modified(_, nv, dob, det, con), n) =>
           n.setDataObject(dob)
+          n.setConflicts(con)
 
           // If it is an observation, set the observation number.
           (det, n) match {

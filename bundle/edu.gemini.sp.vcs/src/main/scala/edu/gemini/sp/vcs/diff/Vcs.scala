@@ -55,11 +55,11 @@ class Vcs(user: VcsAction[Set[Principal]], server: VcsServer, service: Peer => V
 
     def evaluate(p: ISPProgram): VcsAction[MergeEval] =
       for {
-        diffs <- client.fetchDiffs(id, DiffState(p))
-        _     <- validateProgKey(p, diffs.plan)
-        mc     = MergeContext(p, diffs)
-        prelim = PreliminaryMerge.merge(mc)
-        plan  <- MergeCorrection(mc)(prelim, hasPermission)
+        diffs  <- client.fetchDiffs(id, DiffState(p))
+        _      <- validateProgKey(p, diffs.plan)
+        mc      = MergeContext(p, diffs)
+        prelim <- PreliminaryMerge.merge(mc).liftVcs
+        plan   <- MergeCorrection(mc)(prelim, hasPermission)
       } yield MergeEval(plan, p, mc.remote.vm)
 
     // Only do the merge if the merge plan has something new to offer.

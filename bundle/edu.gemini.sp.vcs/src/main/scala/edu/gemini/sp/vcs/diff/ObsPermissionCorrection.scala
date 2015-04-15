@@ -1,7 +1,8 @@
 package edu.gemini.sp.vcs.diff
 
+import edu.gemini.pot.sp.Conflict._
 import edu.gemini.pot.sp.version.{EmptyNodeVersions, VersionMap}
-import edu.gemini.pot.sp.{ISPNode, ISPProgram, SPNodeKey}
+import edu.gemini.pot.sp._
 import edu.gemini.sp.vcs.diff.MergeCorrection._
 import edu.gemini.sp.vcs.diff.ObsEdit.{Obs, ObsUpdate, ObsDelete, ObsCreate}
 import edu.gemini.spModel.core.SPProgramID
@@ -45,13 +46,13 @@ class ObsPermissionCorrection(
     def correctOne(mp: MergePlan, edit: ObsEdit): TryVcs[MergePlan] =
       edit match {
         case ObsCreate(k, _)                                            =>
-          correctCreate(mp, k)
+          correctCreate(mp, k, new CreatePermissionFail(k))
 
         case ObsDelete(k, Obs(_, obs))                                  =>
           correctDelete(mp, k, obs)
 
         case ObsUpdate(k, _, None, _)                                   =>
-          correctCreate(mp, k) // same behavior needed
+          correctCreate(mp, k, new UpdatePermissionFail(k)) // same behavior needed
 
         case ObsUpdate(k, Obs(_, localObs), Some(Obs(_, remoteObs)), _) =>
           correctUpdate(mp, k, localObs, remoteObs)
@@ -72,11 +73,12 @@ class ObsPermissionCorrection(
 
 
   // Reset the status of the merged observation to Phase2.
-  private def correctCreate(mp: MergePlan, k: SPNodeKey): TryVcs[MergePlan] =
+  private def correctCreate(mp: MergePlan, k: SPNodeKey, cn: Conflict.Note): TryVcs[MergePlan] =
     for {
       l0 <- mp.update.focus(k)
       l1 <- resetStatus(l0)
-    } yield mp.copy(update = l1.toTree)
+      l2 <- l1.addConflictNote(cn)
+    } yield mp.copy(update = l2.toTree)
 
   // Reinsert the deleted observation as it exists in the remote database.
   private def correctDelete(mp: MergePlan, k: SPNodeKey, remoteObs: Tree[MergeNode]): TryVcs[MergePlan] = {
@@ -96,12 +98,13 @@ class ObsPermissionCorrection(
       }
 
     for {
-      as  <- ancestors
-      p0  <- parent(as, mp.update.loc)
-      p1  <- p0.incr(lifespanId)
-      obs <- restoreRemote(p1, remoteObs, None)
+      as   <- ancestors
+      p0   <- parent(as, mp.update.loc)
+      p1   <- p0.incr(lifespanId)
+      obs0 <- restoreRemote(p1, remoteObs, None)
+      obs1 <- obs0.addConflictNote(new DeletePermissionFail(k))
       resurrectedKeys = remoteObs.keySet
-    } yield MergePlan(obs.toTree, mp.delete.filterNot(m => resurrectedKeys.contains(m.key)))
+    } yield MergePlan(obs1.toTree, mp.delete.filterNot(m => resurrectedKeys.contains(m.key)))
   }
 
   private def correctUpdate(mp: MergePlan, k: SPNodeKey, localObs: Tree[MergeNode], remoteObs: Tree[MergeNode]): TryVcs[MergePlan] = {
@@ -111,29 +114,30 @@ class ObsPermissionCorrection(
 
     for {
     // Find the observation that was updated and get its index
-      l    <- mp.update.focus(k)
-      i    <- l.childIndex
+      l     <- mp.update.focus(k)
+      i     <- l.childIndex
 
       // Delete the merged version and replace it with the version from the
       // remote database.
-      p0   <- l.deleteNodeFocusParent.toTryVcs("Updated orphan observation")
-      p1   <- p0.incr(lifespanId)
-      robs <- restoreRemote(p1, remoteObs, some(i))
-      p2   <- robs.parent.toTryVcs("Replaced observation has no parent")
+      p0    <- l.deleteNodeFocusParent.toTryVcs("Updated orphan observation")
+      p1    <- p0.incr(lifespanId)
+      robs  <- restoreRemote(p1, remoteObs, some(i))
+      p2    <- robs.parent.toTryVcs("Replaced observation has no parent")
 
       // Add a conflict folder and place the local version of the obs there.
       // This observation will have the same number as the remote version so we
       // reset it with `obsNumber`.
-      cf0  <- p2.getOrCreateConflictFolder(lifespanId, nodeMap)
-      cf1  <- cf0.incr(lifespanId)
-      lobs <- restoreLocal(cf1, localObs, remoteDiffs.plan.vm(local), obsNumber)
-      resurrectedKeys = robs.tree.keySet ++ lobs.tree.keySet
-    } yield MergePlan(lobs.toTree, mp.delete.filterNot(m => resurrectedKeys.contains(m.key)))
+      cf0   <- p2.getOrCreateConflictFolder(lifespanId, nodeMap)
+      cf1   <- cf0.incr(lifespanId)
+      lobs0 <- restoreLocal(cf1, localObs, remoteDiffs.plan.vm(local), obsNumber)
+      lobs1 <- lobs0.addConflictNote(new UpdatePermissionFail(lobs0.key))
+      resurrectedKeys = robs.tree.keySet ++ lobs1.tree.keySet
+    } yield MergePlan(lobs1.toTree, mp.delete.filterNot(m => resurrectedKeys.contains(m.key)))
   }
 
   private def resetStatus(obs: TreeLoc[MergeNode]): TryVcs[TreeLoc[MergeNode]] =
     (obs.getLabel match {
-      case m@Modified(_, _, o: SPObservation, _) =>
+      case m@Modified(_, _, o: SPObservation, _, _) =>
         val o0 = o.copy <| (_.setPhase2Status(ObsPhase2Status.PI_TO_COMPLETE))
         TryVcs(m.copy(dob = o0))
       case mn =>
@@ -155,7 +159,7 @@ class ObsPermissionCorrection(
       val childKeys   = t.subForest.map(_.key).toSet
 
       t.rootLabel match {
-        case Modified(k, nv, dob, det) =>
+        case Modified(k, nv, dob, det, con) =>
           val hasDuplicate = (childKeys & dups).nonEmpty
 
           val (k0,nv0) = if (isDuplicate) (new SPNodeKey, EmptyNodeVersions.incr(lifespanId))
@@ -163,7 +167,7 @@ class ObsPermissionCorrection(
 
           val nv1      = if (hasDuplicate) nv0.incr(lifespanId) else nv0
 
-          MergeNode.modified(k0, nv1, dob, det).right
+          MergeNode.modified(k0, nv1, dob, det, con).right
 
         case un@Unmodified(k)          =>
           if (isDuplicate) TryVcs.fail(s"Cannot add duplicate unmodified node $k")
@@ -187,7 +191,7 @@ class ObsPermissionCorrection(
   private def restoreRemote(parent: TreeLoc[MergeNode], remoteObs: Tree[MergeNode], index: Option[Int]): TryVcs[TreeLoc[MergeNode]] = {
     def modifiedCopy(loc: TreeLoc[MergeNode]): TryVcs[TreeLoc[MergeNode]] =
       loc.mapAsModified(nodeMap) {
-        case Modified(_, nv, dob, detail) => Modified(new SPNodeKey, EmptyNodeVersions, dob, detail)
+        case Modified(_, _, dob, detail, _) => Modified(new SPNodeKey, EmptyNodeVersions, dob, detail, Conflicts.EMPTY)
       }
 
     def replaceOne(tryRoot: TryVcs[TreeLoc[MergeNode]], dup: SPNodeKey): TryVcs[TreeLoc[MergeNode]] =

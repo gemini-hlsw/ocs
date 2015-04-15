@@ -1,8 +1,10 @@
 package edu.gemini.sp.vcs
 
-import edu.gemini.pot.sp.{ISPProgram, SPNodeKey, ISPNode}
+import edu.gemini.pot.sp._
 import edu.gemini.sp.vcs.diff.VcsFailure.{Unexpected, VcsException}
 import edu.gemini.spModel.rich.pot.sp._
+
+import edu.gemini.shared.util.immutable.ScalaConverters._
 
 import scalaz._
 import Scalaz._
@@ -77,5 +79,23 @@ package object diff {
 
   implicit class VcsEitherOps[A](e: => TryVcs[A]) {
     def liftVcs: VcsAction[A] = EitherT(Task.delay(e))
+  }
+
+  implicit val ShowConflicts = Show.shows[Conflicts] { c =>
+    def showNote(cn: Conflict.Note): String =
+      cn match {
+        case n: Conflict.Moved                  => s"Move(${n.nodeKey}, ${n.to})"
+        case n: Conflict.ResurrectedLocalDelete => s"ResurrectedLocalDelete(${n.nodeKey})"
+        case n: Conflict.ReplacedRemoteDelete   => s"ReplacedRemoteDelte(${n.nodeKey})"
+        case n: Conflict.CreatePermissionFail   => s"CreatePermissionFail(${n.nodeKey})"
+        case n: Conflict.UpdatePermissionFail   => s"UpdatePermissionFail(${n.nodeKey})"
+        case n: Conflict.DeletePermissionFail   => s"DeletePermissionFail(${n.nodeKey})"
+        case n: Conflict.ConstraintViolation    => s"ConstraintViolation(${n.nodeKey})"
+        case n: Conflict.ConflictFolder         => s"ConflictFolder(${n.nodeKey})"
+      }
+
+    val doc   = c.dataObjectConflict.asScalaOpt.map(doc => s"DataObjectConflict(${doc.dataObject.getType}, ${doc.perspective})")
+    val notes = c.notes.asScalaList.map(showNote).mkString(", ")
+    doc.map(d => s"$d, $notes") | notes
   }
 }

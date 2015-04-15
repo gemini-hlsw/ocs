@@ -1,5 +1,6 @@
 package edu.gemini.sp.vcs.diff
 
+import edu.gemini.pot.sp.Conflict.ConstraintViolation
 import edu.gemini.pot.sp.{ISPNode, SPNodeKey}
 import edu.gemini.pot.sp.validator._
 import edu.gemini.pot.sp.version.LifespanId
@@ -26,14 +27,14 @@ class ValidityCorrection(lifespanId: LifespanId, nodeMap: Map[SPNodeKey, ISPNode
 
   private def toTypeTree(t: Tree[MergeNode]): TryVcs[TypeTree] =
     t.rootLabel match {
-      case Unmodified(k)          =>
+      case Unmodified(k)             =>
         // We need the types of the immediate children of a node, even if not
         // modified.
         nodeMap.get(k).toTryVcs(s"Could not find unmodified node: $k").map { n =>
           TypeTree(NodeType.forNode(n), Some(k), Nil)
         }
 
-      case Modified(k, _, dob, _) =>
+      case Modified(k, _, dob, _, _) =>
         NodeType.forComponentType(dob.getType).toTryVcs(s"Unusable node type: ${dob.getType}").flatMap { nt =>
           t.subForest.traverseU(toTypeTree).map { cs =>
             TypeTree(nt, Some(k), cs.toList)
@@ -62,7 +63,10 @@ class ValidityCorrection(lifespanId: LifespanId, nodeMap: Map[SPNodeKey, ISPNode
       p1  <- p0.incr(lifespanId)
       cf0 <- p1.getOrCreateConflictFolder(lifespanId, nodeMap)
       cf1 <- cf0.incr(lifespanId)
-    } yield mp.copy(update = cf1.insertDownLast(l.tree).toTree)
+      l0  <- TryVcs(cf1.insertDownLast(l.tree))
+      l1  <- l0.addConflictNote(new ConstraintViolation(l0.key))
+      l2  <- l1.incr(lifespanId)
+    } yield mp.copy(update = l2.toTree)
   }
 
 }
