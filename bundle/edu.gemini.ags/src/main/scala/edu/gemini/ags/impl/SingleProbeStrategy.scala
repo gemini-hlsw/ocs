@@ -1,6 +1,5 @@
 package edu.gemini.ags.impl
 
-import edu.gemini.ags.api.AgsAnalysis.Usable
 import edu.gemini.ags.api._
 import edu.gemini.ags.api.AgsMagnitude._
 import edu.gemini.catalog.api.CatalogQuery
@@ -82,7 +81,7 @@ case class SingleProbeStrategy(key: AgsStrategyKey, params: SingleProbeStrategyP
     catalogResult(ctx, mt).map(select(ctx, mt, _))
 
   def select(ctx: ObsContext, mt: MagnitudeTable, candidates: List[SiderealTarget]): Option[AgsStrategy.Selection] = {
-    if (candidates.size == 0) None
+    if (candidates.isEmpty) None
     else {
       params.guideProbe match {
         // If vignetting, filter according to the pos angle constraint, and then for each obs context, pick the best quality with
@@ -196,7 +195,7 @@ object SingleProbeStrategy {
     val df = new DecimalFormat("0.####")
 
     val candidates = for {
-      st <- lst
+      st       <- lst
       analysis <- AgsAnalysis.analysis(ctx, mt, probe, st, params.probeBands)
     } yield {
       val vig = probe.calculateVignetting(ctx, st.coordinates)

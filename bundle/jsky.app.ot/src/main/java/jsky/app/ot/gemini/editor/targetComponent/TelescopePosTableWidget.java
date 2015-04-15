@@ -240,7 +240,7 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
             return ags.flatMap(tup -> {
                 if (guideProbe instanceof ValidatableGuideProbe) {
                     final ValidatableGuideProbe vgp = (ValidatableGuideProbe) guideProbe;
-                    return AgsRegistrar$.MODULE$.currentStrategyForJava(tup._1()).map(strategy -> {
+                    return AgsRegistrar.instance().currentStrategyForJava(tup._1()).map(strategy -> {
                         final Option<AgsAnalysis> agsAnalysis = strategy.analyzeForJava(tup._1(), tup._2(), vgp, ModelConverters.toSideralTarget(guideStar));
                         return agsAnalysis.map(AgsAnalysis::quality);
                     }).getOrElse(None.<AgsGuideQuality>instance());
