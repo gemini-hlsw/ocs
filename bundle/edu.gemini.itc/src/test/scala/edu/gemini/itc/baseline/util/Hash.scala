@@ -142,7 +142,7 @@ object Hash {
     hash(
       tp.getInstrumentPort.displayValue,
       tp.getMirrorCoating.displayValue,
-      tp.getWFS.displayValue
+      tp.getWFS.name.toLowerCase
     )
 
   def calc(ocp: ObservingConditions): Int =

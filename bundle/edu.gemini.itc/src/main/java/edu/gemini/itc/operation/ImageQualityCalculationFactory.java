@@ -4,6 +4,7 @@ import edu.gemini.itc.shared.ObservingConditions;
 import edu.gemini.itc.shared.SourceDefinition;
 import edu.gemini.itc.shared.TelescopeDetails;
 import edu.gemini.itc.shared.Instrument;
+import edu.gemini.spModel.guide.GuideProbe;
 
 public final class ImageQualityCalculationFactory {
 
@@ -25,8 +26,8 @@ public final class ImageQualityCalculationFactory {
 
             default:
                 // For AOWFS the image quality files of OIWFS are used (there are currently no files for AOWFS)
-                final TelescopeDetails.Wfs wfs =
-                        telescope.getWFS() == TelescopeDetails.Wfs.AOWFS ? TelescopeDetails.Wfs.OIWFS : telescope.getWFS();
+                final GuideProbe.Type wfs =
+                        telescope.getWFS() == GuideProbe.Type.AOWFS ? GuideProbe.Type.OIWFS : telescope.getWFS();
 
                 // Case B The Image Quality is defined by either of the
                 // Probes in conjuction with the Atmosphric Seeing.

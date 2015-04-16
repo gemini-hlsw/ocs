@@ -138,7 +138,7 @@ public final class HtmlPrinter {
     }
 
     public static String printParameterSummary(final TelescopeDetails pdp) {
-        return printParameterSummary(pdp, pdp.getWFS().displayValue());
+        return printParameterSummary(pdp, pdp.getWFS().name().toLowerCase());
     }
 
     public static String printParameterSummary(final TelescopeDetails pdp, final String wfs) {

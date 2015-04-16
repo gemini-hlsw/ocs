@@ -1,13 +1,18 @@
 package edu.gemini.itc.shared
 
+import edu.gemini.pot.sp.SPComponentType
+import edu.gemini.pot.sp.SPComponentType._
 import edu.gemini.spModel.config2.{Config, ItemKey}
 import edu.gemini.spModel.core.Site
+import edu.gemini.spModel.gemini.acqcam.AcqCamParams
 import edu.gemini.spModel.gemini.altair.AltairParams
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2
-import edu.gemini.spModel.gemini.acqcam.AcqCamParams
 import edu.gemini.spModel.gemini.gmos.GmosCommonType
 import edu.gemini.spModel.gemini.gsaoi.Gsaoi
 import edu.gemini.spModel.gemini.niri.Niri
+import edu.gemini.spModel.guide.GuideProbe
+import edu.gemini.spModel.target.env.TargetEnvironment
+import edu.gemini.spModel.telescope.IssPort
 
 import scala.reflect.ClassTag
 import scalaz.Scalaz._
@@ -32,12 +37,28 @@ object ConfigExtractor {
   private val WellDepthKey        = new ItemKey("instrument:wellDepth")
   private val MaskKey             = new ItemKey("instrument:mask")
   private val ObsWavelengthKey    = new ItemKey("instrument:observingWavelength")
+  private val PortKey             = new ItemKey("instrument:port")
 
   private val AoSystemKey         = new ItemKey("adaptive optics:aoSystem")
   private val AoFieldLensKey      = new ItemKey("adaptive optics:fieldLens")
   private val AoGuideStarTypeKey  = new ItemKey("adaptive optics:guideStarType")
 
-  def extractAcqCam(c: Config): \/[Throwable, AcquisitionCamParameters] = {
+  def extractInstrumentDetails(instrument: SPComponentType, c: Config): \/[String, InstrumentDetails] =
+    instrument match {
+      case INSTRUMENT_ACQCAM                      => ConfigExtractor.extractAcqCam(c)
+      case INSTRUMENT_FLAMINGOS2                  => ConfigExtractor.extractF2(c)
+      case INSTRUMENT_GMOS | INSTRUMENT_GMOSSOUTH => ConfigExtractor.extractGmos(c)
+      case INSTRUMENT_GSAOI                       => ConfigExtractor.extractGsaoi(c)
+      case INSTRUMENT_NIRI                        => ConfigExtractor.extractNiri(c)
+      case _                                      => "Instrument is not supported".left
+    }
+
+  def extractTelescope(port: IssPort, probe: GuideProbe.Type, targetEnv: TargetEnvironment, c: Config): \/[String, TelescopeDetails] = {
+    import TelescopeDetails._
+    new TelescopeDetails(Coating.SILVER, port, probe).right
+  }
+
+  private def extractAcqCam(c: Config): \/[String, AcquisitionCamParameters] = {
     import AcqCamParams._
     for {
       colorFilter <- extract[ColorFilter]   (c, ColorFilterKey)
@@ -45,7 +66,7 @@ object ConfigExtractor {
     } yield AcquisitionCamParameters(colorFilter, ndFilter)
   }
 
-  def extractF2(c: Config): \/[Throwable, Flamingos2Parameters] = {
+  private def extractF2(c: Config): \/[String, Flamingos2Parameters] = {
     import Flamingos2._
     for {
       filter      <- extract[Filter]        (c, FilterKey)
@@ -55,7 +76,7 @@ object ConfigExtractor {
     } yield Flamingos2Parameters(filter, grism, mask, readMode)
   }
 
-  def extractGmos(c: Config): \/[Throwable, GmosParameters] = {
+  private def extractGmos(c: Config): \/[String, GmosParameters] = {
     import GmosCommonType._
     for {
       filter      <- extract[Filter]        (c, FilterKey)
@@ -74,7 +95,7 @@ object ConfigExtractor {
 
   }
 
-  def extractGsaoi(c: Config): \/[Throwable, GsaoiParameters] = {
+  private def extractGsaoi(c: Config): \/[String, GsaoiParameters] = {
     import Gsaoi._
     for {
       filter      <- extract[Filter]        (c, FilterKey)
@@ -85,7 +106,7 @@ object ConfigExtractor {
     }
   }
 
-  def extractNiri(c: Config): \/[Throwable, NiriParameters] = {
+  private def extractNiri(c: Config): \/[String, NiriParameters] = {
     import Niri._
     for {
       filter      <- extract[Filter]        (c, FilterKey)
@@ -98,40 +119,54 @@ object ConfigExtractor {
     } yield NiriParameters(filter, grism, camera, readMode, wellDepth, mask, altair)
   }
 
-  def extractAltair(c: Config): \/[Throwable, Option[AltairParameters]] = {
+  private def extractAltair(c: Config): \/[String, Option[AltairParameters]] = {
     import AltairParams._
-    if (c.containsItem(AoSystemKey) && extract[String](c, AoSystemKey).equals("Altair")) {
+
+    def altairIsPresent =
+      c.containsItem(AoSystemKey) && extract[String](c, AoSystemKey).rightMap("Altair".equals).getOrElse(false)
+
+    if (altairIsPresent) {
       for {
         fieldLens <- extract[FieldLens]     (c, AoFieldLensKey)
         wfsMode   <- extract[GuideStarType] (c, AoGuideStarTypeKey)
       } yield {
-        val guideStarSeparation = 4.0  // TODO
-        val guideStarMagnitude  = 9.0  // TODO
+        val guideStarSeparation = 4.0 // TODO
+        val guideStarMagnitude = 9.0 // TODO
         Some(AltairParameters(guideStarSeparation, guideStarMagnitude, fieldLens, wfsMode))
       }
     } else {
       None.right
     }
   }
-  
-  def extractObservingWavelength(c: Config): \/[Throwable, Double] =
+
+  private def extractObservingWavelength(c: Config): \/[String, Double] =
     // Note: observing wavelength will only be available if instrument is configured for spectroscopy
-    if (c.containsItem(ObsWavelengthKey)) {
-      for {
-        s <- extract[String](c, ObsWavelengthKey)
-      } yield s.toDouble
-    } else {
-      0.0.right
-    }
+    if (c.containsItem(ObsWavelengthKey)) extractDoubleFromString(c, ObsWavelengthKey) else 0.0.right
+
+  // Extract a value of the given type from the configuration
+  private def extract[A](c: Config, key: ItemKey)(implicit clazz: ClassTag[A]): \/[String, A] =
+    extractWithThrowable[A](c, key).leftMap(_.getMessage)
+
+  // Extract a double value from a string in the configuration
+  private def extractDoubleFromString(c: Config, key: ItemKey): \/[String, Double] = {
+    val v = for {
+      s <- extractWithThrowable[String](c, key)
+      d <- \/.fromTryCatch(s.toDouble)
+    } yield d
+    v.leftMap(_.getMessage)
+   }
 
   // Helper method that enforces that whatever we get from the config
   // for the given key is not null and matches the type we expect.
-  private def extract[A](c: Config, key: ItemKey)(implicit ev: ClassTag[A]): \/[Throwable, A] = {
-    Option(c.getItemValue(key)).fold(nullValue[A]) { v =>
-      \/.fromTryCatch(ev.runtimeClass.cast(v).asInstanceOf[A])
-    }
-  }
+  private def extractWithThrowable[A](c: Config, key: ItemKey)(implicit clazz: ClassTag[A]): \/[Throwable, A] = {
 
-  private def nullValue[A]: \/[Throwable, A] = new NullPointerException().left
+    def missingKey[A](key: ItemKey): \/[Throwable, A] =
+      new Error("Missing config value for key ${key.getPath}").left[A]
+
+    Option(c.getItemValue(key)).fold(missingKey[A](key)) { v =>
+      \/.fromTryCatch(clazz.runtimeClass.cast(v).asInstanceOf[A])
+    }
+
+  }
 
 }

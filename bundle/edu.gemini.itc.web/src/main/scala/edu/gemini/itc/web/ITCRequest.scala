@@ -19,6 +19,7 @@ import edu.gemini.spModel.gemini.gsaoi.Gsaoi
 import edu.gemini.spModel.gemini.michelle.MichelleParams
 import edu.gemini.spModel.gemini.niri.Niri
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality
+import edu.gemini.spModel.guide.GuideProbe
 import edu.gemini.spModel.telescope.IssPort
 
 /**
@@ -81,7 +82,7 @@ object ITCRequest {
   def teleParameters(r: ITCRequest): TelescopeDetails = {
     val coating = r.enumParameter(classOf[TelescopeDetails.Coating])
     val port    = r.enumParameter(classOf[IssPort])
-    val wfs     = r.enumParameter(classOf[TelescopeDetails.Wfs])
+    val wfs     = r.enumParameter(classOf[GuideProbe.Type])
     new TelescopeDetails(coating, port, wfs)
   }
 
@@ -209,9 +210,9 @@ object ITCRequest {
   }
 
   def altairParameters(r: ITCRequest): Option[AltairParameters] = {
-    val wfs                     = r.enumParameter(classOf[TelescopeDetails.Wfs])
+    val wfs                     = r.enumParameter(classOf[GuideProbe.Type])
     wfs match {
-      case TelescopeDetails.Wfs.AOWFS =>
+      case GuideProbe.Type.AOWFS =>
         val guideStarSeparation = r.doubleParameter("guideSep")
         val guideStarMagnitude  = r.doubleParameter("guideMag")
         val fieldLens           = r.enumParameter(classOf[AltairParams.FieldLens])

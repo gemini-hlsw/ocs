@@ -3,17 +3,20 @@ package jsky.app.ot.editor.seq
 import java.awt.Color
 import javax.swing.table.AbstractTableModel
 
-import edu.gemini.itc.shared.TelescopeDetails.Wfs
+import edu.gemini.ags.api.AgsRegistrar
 import edu.gemini.itc.shared._
 import edu.gemini.pot.sp.SPComponentType
 import edu.gemini.pot.sp.SPComponentType._
 import edu.gemini.spModel.config.ConfigBridge
 import edu.gemini.spModel.config.map.ConfigValMapInstances
-import edu.gemini.spModel.config2.{Config, ConfigSequence, ItemKey}
+import edu.gemini.spModel.config2.{ConfigSequence, ItemKey}
 import edu.gemini.spModel.core.Peer
+import edu.gemini.spModel.guide.GuideProbe
+import edu.gemini.spModel.obs.context.ObsContext
+import edu.gemini.spModel.target.env.TargetEnvironment
+import edu.gemini.spModel.telescope.IssPort
 import jsky.app.ot.userprefs.observer.ObservingPeer
 import jsky.app.ot.util.OtColor
-import sun.reflect.generics.reflectiveObjects.NotImplementedException
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -73,36 +76,25 @@ trait ItcTable extends Table {
 
   protected def calculateImaging(peer: Peer, instrument: SPComponentType, c: ItcUniqueConfig): Future[ItcService.Result] = {
     val s = for {
-      ins <- extractInstrumentDetails(instrument, c.config)
+      port        <- extractPort()
+      targetEnv   <- extractTargetEnv()
+      probe       <- extractGuideProbe()
+      tele        <- ConfigExtractor.extractTelescope(port, probe, targetEnv, c.config)
+      ins         <- ConfigExtractor.extractInstrumentDetails(instrument, c.config)
     } yield {
-      calculateImaging(peer, c, ins)
+      calculateImaging(peer, c, ins, tele)
     }
 
     s match {
-      case -\/(l) => Future { List(s"Internal error: ${l.getMessage}").fail }
+      case -\/(l) => Future { List(l).fail }
       case \/-(r) => r
     }
 
   }
 
-  protected def extractInstrumentDetails(instrument: SPComponentType, c: Config): \/[Throwable, InstrumentDetails] =
-    instrument match {
-      case INSTRUMENT_ACQCAM                      => ConfigExtractor.extractAcqCam(c)
-      case INSTRUMENT_FLAMINGOS2                  => ConfigExtractor.extractF2(c)
-      case INSTRUMENT_GMOS | INSTRUMENT_GMOSSOUTH => ConfigExtractor.extractGmos(c)
-      case INSTRUMENT_GSAOI                       => ConfigExtractor.extractGsaoi(c)
-      case INSTRUMENT_NIRI                        => ConfigExtractor.extractNiri(c)
-      case _                                      => new NotImplementedException().left
-    }
-
-
-  protected def calculateImaging(peer: Peer, c: ItcUniqueConfig, ins: InstrumentDetails): Future[ItcService.Result] = {
-    val port = owner.getContextIssPort
-    //val wfs  = ??? TODO
+  protected def calculateImaging(peer: Peer, c: ItcUniqueConfig, ins: InstrumentDetails, tele: TelescopeDetails): Future[ItcService.Result] = {
     val src  = new SourceDefinition(PointSource(20.0, BrightnessUnit.MAG), LibraryStar("A0V"), WavebandDefinition.R, 0.0)
     val obs  = new ObservationDetails(ImagingSN(c.count, c.singleExposureTime, 1.0), AutoAperture(5.0))
-    val tele = new TelescopeDetails(TelescopeDetails.Coating.SILVER, port, Wfs.OIWFS)
-
     val qual = owner.getContextSiteQuality
     val cond = new ObservingConditions(qual.getImageQuality, qual.getCloudCover, qual.getWaterVapor, qual.getSkyBackground, 1.5)
 
@@ -114,6 +106,25 @@ trait ItcTable extends Table {
       case _ => Swing.onEDT(this.peer.getModel.asInstanceOf[AbstractTableModel].fireTableDataChanged())
     }
 
+  }
+
+  private def extractPort(): \/[String, IssPort] =
+    Option(owner.getContextIssPort).fold("No port information available".left[IssPort])(_.right[String])
+
+  private def extractTargetEnv(): \/[String, TargetEnvironment] =
+    Option(owner.getContextTargetEnv).fold("No target environment available".left[TargetEnvironment])(_.right[String])
+
+  private def extractGuideProbe(): \/[String, GuideProbe.Type] = {
+    val o = for {
+      observation         <- Option(owner.getContextObservation)
+      obsContext          <- Option(ObsContext.create(observation).getOrNull)
+      agsStrategy         <- AgsRegistrar.currentStrategy(obsContext)
+
+    // Except for Gems we have only one guider, so in order to decide the "type" (AOWFS, OIWFS, PWFS)
+    // we take a shortcut here and just look at the first guider we get from the strategy.
+    } yield agsStrategy.guideProbes.headOption
+
+    o.flatten.fold("Could not identify ags strategy or guide probe type".left[GuideProbe.Type]){_.getType.right[String]}
   }
 
 }

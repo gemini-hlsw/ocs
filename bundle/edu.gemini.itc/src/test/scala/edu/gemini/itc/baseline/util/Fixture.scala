@@ -1,9 +1,10 @@
 package edu.gemini.itc.baseline.util
 
 import edu.gemini.itc.nifs.NifsParameters
-import edu.gemini.itc.shared.TelescopeDetails.{Coating, Wfs}
+import edu.gemini.itc.shared.TelescopeDetails.Coating
 import edu.gemini.itc.shared._
 import edu.gemini.spModel.gemini.altair.AltairParams.{FieldLens, GuideStarType}
+import edu.gemini.spModel.guide.GuideProbe
 import edu.gemini.spModel.telescope.IssPort
 
 /**
@@ -203,7 +204,7 @@ object Fixture {
     for {
       coating       <- List(Coating.SILVER)       // don't test aluminium coating
       port          <- IssPort.values()
-      wfs           <- List(Wfs.OIWFS, Wfs.PWFS)  // don't use AOWFS (?)
+      wfs           <- List(GuideProbe.Type.OIWFS, GuideProbe.Type.PWFS)  // don't use AOWFS (?)
     } yield new TelescopeDetails(coating, port, wfs)
 
   lazy val NoAltair    = None                                                                     // use this for spectroscopy
