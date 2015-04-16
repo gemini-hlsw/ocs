@@ -103,7 +103,7 @@ public class MemoryCatalog extends DefaultTableModel
     private String _columnSeparator = "\t";
 
     /** The data types for the column values */
-    private List _columnClasses;
+    private List<Class<?>> _columnClasses;
 
     /** The filename of the local catalog, if known */
     private String _filename;
@@ -249,10 +249,6 @@ public class MemoryCatalog extends DefaultTableModel
         return _catalog;
     }
 
-    protected SkycatOutputAdapter getAdapter(BufferedReader rdr) {
-        return new DefaultOutputAdapter(rdr);
-    }
-
     /**
      * Initialize the table from the given stream, reading at most maxRows data rows.
      */
@@ -308,12 +304,12 @@ public class MemoryCatalog extends DefaultTableModel
         }
 
         int n = columnIdentifiers.size();
-        _columnClasses = new Vector(n, 1);
+        _columnClasses = new Vector<>(n, 1);
         for (int i = 0; i < n; i++)
             _columnClasses.add(null);
 
         // read the table data
-        dataVector = new Vector(1024, 256);
+        dataVector = new Vector<>(1024, 256);
         int nrows = 1;
         while (true) {
             line = adapt.readLine();
@@ -348,7 +344,7 @@ public class MemoryCatalog extends DefaultTableModel
      */
     protected Vector _parseHeading(String s) {
         StringTokenizerUtil st = new StringTokenizerUtil(s, _columnSeparator);
-        Vector<String> v = new Vector<String>(st.countTokens(), 1);
+        Vector<String> v = new Vector<>(st.countTokens(), 1);
         while (st.hasMoreTokens()) {
             v.add(st.nextToken().trim());
         }
@@ -390,11 +386,11 @@ public class MemoryCatalog extends DefaultTableModel
      * @param lineStr A string containing a line from the table.
      * @return A Vector containing the items in the row.
      */
-    protected Vector _parseRow(String lineStr) {
+    protected Vector<Object> _parseRow(String lineStr) {
         StringTokenizerUtil st = new StringTokenizerUtil(lineStr, _columnSeparator);
         int numCols = columnIdentifiers.size();
         int i = 0;
-        Vector row = new Vector(numCols, 1);
+        Vector<Object> row = new Vector<>(numCols, 1);
 
         while (st.hasMoreTokens()) {
             if (i++ >= numCols)
@@ -461,13 +457,11 @@ public class MemoryCatalog extends DefaultTableModel
      *
      * @return a vector of Strings
      */
-    protected Vector makeColumnIdentifiers(FieldDesc[] fields) {
-        Vector v = new Vector(fields.length, 1);
-        for (int i = 0; i < fields.length; i++) {
-            String label = fields[i].getName();
-            if (label == null)
-                label = "";
-            v.add(label);
+    protected Vector<String> makeColumnIdentifiers(FieldDesc[] fields) {
+        Vector<String> v = new Vector<>(fields.length, 1);
+        for (FieldDesc field : fields) {
+            String label = field.getName();
+            v.add(label != null ? label : "");
         }
         return v;
     }
@@ -573,13 +567,6 @@ public class MemoryCatalog extends DefaultTableModel
     }
 
     /**
-     * Return the number of table columns..
-     */
-    public int getNumColumns() {
-        return _fields.length;
-    }
-
-    /**
      * Return a description of the ith table column parameter.
      */
     public FieldDesc getColumnDesc(int i) {
@@ -665,9 +652,9 @@ public class MemoryCatalog extends DefaultTableModel
         }
 
         // search each row...
-        int n = 0, numRows = dataVector.size();
-        for (int i = 0; i < numRows; i++) {
-            Vector row = (Vector) dataVector.get(i);
+        int n = 0;
+        for (Object aDataVector : dataVector) {
+            Vector row = (Vector) aDataVector;
             if (compareRow(row, objectId, region, conditions, searchCols)) {
                 dataRows.add(row);
                 if (maxRows != 0 && ++n >= maxRows + 1)
@@ -735,7 +722,7 @@ public class MemoryCatalog extends DefaultTableModel
                 // check if the row coordinates are within the given region
                 Coordinates pos = _rowCoordinates.getCoordinates(row);
                 if (pos == null || !region.contains(pos))
-                    return false;	// position not found or not in region
+                    return false; // position not found or not in region
             }
 
             int idCol = _rowCoordinates.getIdCol();
@@ -749,7 +736,7 @@ public class MemoryCatalog extends DefaultTableModel
 
         // check any other conditions for column values
         if (conditions == null)
-            return true;	// no condition, just center pos/radius
+            return true; // no condition, just center pos/radius
 
         int n = conditions.length;
         if (n > 0) {
@@ -760,7 +747,7 @@ public class MemoryCatalog extends DefaultTableModel
                 }
             }
         }
-        return true;			// a match
+        return true; // a match
     }
 
 
@@ -777,18 +764,6 @@ public class MemoryCatalog extends DefaultTableModel
     /** Set the table column headings with a Vector of Strings */
     public void setColumnIdentifiers(Vector columnIdentifiers) {
         this.columnIdentifiers = columnIdentifiers;
-    }
-
-
-    /** Add a row to the table */
-    //public void addRow(Vector row) {
-    //    dataVector.add(row);
-    //}
-
-
-    /** return true if the table contains the given column */
-    public boolean hasCol(String name) {
-        return (getColumnIndex(name) >= 0);
     }
 
     /** Return the value at the given row and columm name */
@@ -822,22 +797,22 @@ public class MemoryCatalog extends DefaultTableModel
      * @return the common ancestor class of the object values in the model.
      */
     public Class getColumnClass(int columnIndex) {
-        Object o = _columnClasses.get(columnIndex);
-        if (o != null && o instanceof Class)
-            return (Class) o;
+        Class<?> o = _columnClasses.get(columnIndex);
+        if (o != null)
+            return  o;
         return String.class;
     }
 
     /** Set the data types for column values. */
-    public void setColumnClasses(List l) {
+    public void setColumnClasses(List<Class<?>> l) {
         _columnClasses = l;
     }
 
     /** Set the data types for column values. */
     public void setColumnClasses(Class[] ar) {
-        _columnClasses = new Vector(ar.length);
-        for(int i = 0; i < ar.length; i++) {
-            _columnClasses.add(ar[i]);
+        _columnClasses = new Vector<>(ar.length);
+        for (Class anAr : ar) {
+            _columnClasses.add(anAr);
         }
     }
 
@@ -875,18 +850,6 @@ public class MemoryCatalog extends DefaultTableModel
     public void setReadOnly(boolean b) {
         _readOnly = b;
     }
-
-    /**
-     * Sort the contents of the table by the given sort columns and in the
-     * given order.
-     *
-     * @param sortCols an array of column names to sort by
-     * @param sortOrder if true, sort in ascending order, otherwise descending.
-     */
-    public void sort(String[] sortCols, String sortOrder) {
-        // XXX not impl
-    }
-
 
     /** Return true if the table has coordinate columns, such as (ra, dec) */
     public boolean hasCoordinates() {
@@ -931,7 +894,6 @@ public class MemoryCatalog extends DefaultTableModel
     /** Save the table to the given stream */
     public void saveAs(OutputStream os) {
         int numCols = getColumnIdentifiers().size(),
-                numRows = dataVector.size(),
                 n = numCols - 1;
         if (numCols == 0) {
             return;
@@ -968,8 +930,8 @@ public class MemoryCatalog extends DefaultTableModel
         out.print(newline);
 
         // save the data
-        for (int row = 0; row < numRows; row++) {
-            Vector rowVec = (Vector) (dataVector.get(row));
+        for (Object aDataVector : dataVector) {
+            Vector rowVec = (Vector) aDataVector;
             for (int col = 0; col < numCols; col++) {
                 out.print(rowVec.get(col));
                 if (col < n)
@@ -1035,8 +997,7 @@ public class MemoryCatalog extends DefaultTableModel
     /** Save the table to the given filename in HTML format */
     public void saveAsHTML(String filename) throws IOException {
         FileOutputStream os = new FileOutputStream(filename);
-        int numCols = getColumnIdentifiers().size(),
-                numRows = dataVector.size();
+        int numCols = getColumnIdentifiers().size();
         if (numCols == 0)
             return;
 
@@ -1056,8 +1017,8 @@ public class MemoryCatalog extends DefaultTableModel
         out.println("</tr>");
 
         // data rows
-        for (int row = 0; row < numRows; row++) {
-            Vector rowVec = (Vector) (dataVector.get(row));
+        for (Object aDataVector : dataVector) {
+            Vector rowVec = (Vector) aDataVector;
             out.println("<tr>");
             for (int col = 0; col < numCols; col++) {
                 out.println("<td>" + rowVec.get(col) + "</td>");
@@ -1147,15 +1108,14 @@ public class MemoryCatalog extends DefaultTableModel
     /** Determine the best class to use for each column by scanning the table items. */
     protected void _initColumnClasses() {
         int numCols = getColumnIdentifiers().size();
-        int numRows = dataVector.size();
-        _columnClasses = new Vector(numCols, 1);
+        _columnClasses = new Vector<>(numCols, 1);
 
         for (int col = 0; col < numCols; col++) {
             _columnClasses.add(null);
         }
 
-        for (int row = 0; row < numRows; row++) {
-            Vector rowVec = (Vector) dataVector.get(row);
+        for (Object aDataVector : dataVector) {
+            Vector rowVec = (Vector) aDataVector;
             int n = rowVec.size();
             for (int col = 0; col < n; col++) {
                 Object o = rowVec.get(col);
@@ -1201,9 +1161,9 @@ public class MemoryCatalog extends DefaultTableModel
         }
 
         // set the table data
-        Vector rows = new Vector(numRows, 1);
+        Vector<Vector<String>> rows = new Vector<>(numRows, 1);
         for (int i = 0; i < numRows; i++) {
-            Vector cols = new Vector(numCols, 1);
+            Vector<String> cols = new Vector<>(numCols, 1);
             for (int j = 0; j < numCols; j++) {
                 cols.add("item-" + i + "," + j);
             }
