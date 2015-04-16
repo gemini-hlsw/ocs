@@ -21,8 +21,13 @@ class Votable2SkyCatalogServlet extends HttpServlet {
       t.magnitudeIn(b).map(m => f"${m.value}%3.3f").getOrElse(" ")
     }.mkString("\t")
   }
-  private def toRow(t: SiderealTarget):String = f"${t.name}%-10s\t${t.coordinates.ra.toAngle.toDegrees}%+03.07f\t${t.coordinates.dec.toDegrees}%+03.07f\t${magnitudes(t)}"
-  private def headers:String = s"4UC\tRA\tDEC\t${UCAC4.magnitudeBands.map(_.name).mkString("\t")}\n-"
+  private def properMotion(t: SiderealTarget):String = {
+    val raV = t.properMotion.map(p => f"${p.deltaRA.velocity.masPerYear}%+03.07f").getOrElse(" ")
+    val decV = t.properMotion.map(p => f"${p.deltaDec.velocity.masPerYear}%+03.07f").getOrElse(" ")
+    s"$raV\t$decV"
+  }
+  private def toRow(t: SiderealTarget):String = f"${t.name}%-10s\t${t.coordinates.ra.toAngle.toDegrees}%+03.07f\t${t.coordinates.dec.toDegrees}%+03.07f\t${properMotion(t)}\t${magnitudes(t)}"
+  private def headers:String = s"4UC\tRA\tDEC\tpmRA\tpmDEC\t${UCAC4.magnitudeBands.map(_.name).mkString("\t")}\n-"
 
   override protected def doGet(req: HttpServletRequest, resp: HttpServletResponse) {
 
