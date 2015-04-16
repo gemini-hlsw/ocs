@@ -13,6 +13,7 @@ import edu.gemini.spModel.config2.{ConfigSequence, ItemKey}
 import edu.gemini.spModel.core.Peer
 import edu.gemini.spModel.guide.GuideProbe
 import edu.gemini.spModel.obs.context.ObsContext
+import edu.gemini.spModel.rich.shared.immutable.asScalaOpt
 import edu.gemini.spModel.target.env.TargetEnvironment
 import edu.gemini.spModel.telescope.IssPort
 import jsky.app.ot.userprefs.observer.ObservingPeer
@@ -80,7 +81,7 @@ trait ItcTable extends Table {
       targetEnv   <- extractTargetEnv()
       probe       <- extractGuideProbe()
       tele        <- ConfigExtractor.extractTelescope(port, probe, targetEnv, c.config)
-      ins         <- ConfigExtractor.extractInstrumentDetails(instrument, c.config)
+      ins         <- ConfigExtractor.extractInstrumentDetails(instrument, probe, targetEnv, c.config)
     } yield {
       calculateImaging(peer, c, ins, tele)
     }
@@ -114,17 +115,17 @@ trait ItcTable extends Table {
   private def extractTargetEnv(): \/[String, TargetEnvironment] =
     Option(owner.getContextTargetEnv).fold("No target environment available".left[TargetEnvironment])(_.right[String])
 
-  private def extractGuideProbe(): \/[String, GuideProbe.Type] = {
+  private def extractGuideProbe(): \/[String, GuideProbe] = {
     val o = for {
       observation         <- Option(owner.getContextObservation)
-      obsContext          <- Option(ObsContext.create(observation).getOrNull)
+      obsContext          <- ObsContext.create(observation).asScalaOpt
       agsStrategy         <- AgsRegistrar.currentStrategy(obsContext)
 
     // Except for Gems we have only one guider, so in order to decide the "type" (AOWFS, OIWFS, PWFS)
     // we take a shortcut here and just look at the first guider we get from the strategy.
     } yield agsStrategy.guideProbes.headOption
 
-    o.flatten.fold("Could not identify ags strategy or guide probe type".left[GuideProbe.Type]){_.getType.right[String]}
+    o.flatten.fold("Could not identify ags strategy or guide probe type".left[GuideProbe]){_.right[String]}
   }
 
 }

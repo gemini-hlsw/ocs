@@ -2,8 +2,9 @@ package edu.gemini.itc.shared
 
 import edu.gemini.pot.sp.SPComponentType
 import edu.gemini.pot.sp.SPComponentType._
+import edu.gemini.shared.skyobject.Magnitude.Band
 import edu.gemini.spModel.config2.{Config, ItemKey}
-import edu.gemini.spModel.core.Site
+import edu.gemini.spModel.core._
 import edu.gemini.spModel.gemini.acqcam.AcqCamParams
 import edu.gemini.spModel.gemini.altair.AltairParams
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2
@@ -11,7 +12,10 @@ import edu.gemini.spModel.gemini.gmos.GmosCommonType
 import edu.gemini.spModel.gemini.gsaoi.Gsaoi
 import edu.gemini.spModel.gemini.niri.Niri
 import edu.gemini.spModel.guide.GuideProbe
-import edu.gemini.spModel.target.env.TargetEnvironment
+import edu.gemini.spModel.rich.shared.immutable.asScalaOpt
+import edu.gemini.spModel.target.SPTarget
+import edu.gemini.spModel.target.env.{GuideProbeTargets, TargetEnvironment}
+import edu.gemini.spModel.target.system.{ITarget, DMS}
 import edu.gemini.spModel.telescope.IssPort
 
 import scala.reflect.ClassTag
@@ -43,19 +47,19 @@ object ConfigExtractor {
   private val AoFieldLensKey      = new ItemKey("adaptive optics:fieldLens")
   private val AoGuideStarTypeKey  = new ItemKey("adaptive optics:guideStarType")
 
-  def extractInstrumentDetails(instrument: SPComponentType, c: Config): \/[String, InstrumentDetails] =
+  def extractInstrumentDetails(instrument: SPComponentType, probe: GuideProbe, targetEnv: TargetEnvironment, c: Config): \/[String, InstrumentDetails] =
     instrument match {
       case INSTRUMENT_ACQCAM                      => ConfigExtractor.extractAcqCam(c)
       case INSTRUMENT_FLAMINGOS2                  => ConfigExtractor.extractF2(c)
       case INSTRUMENT_GMOS | INSTRUMENT_GMOSSOUTH => ConfigExtractor.extractGmos(c)
       case INSTRUMENT_GSAOI                       => ConfigExtractor.extractGsaoi(c)
-      case INSTRUMENT_NIRI                        => ConfigExtractor.extractNiri(c)
+      case INSTRUMENT_NIRI                        => ConfigExtractor.extractNiri(targetEnv, probe, c)
       case _                                      => "Instrument is not supported".left
     }
 
-  def extractTelescope(port: IssPort, probe: GuideProbe.Type, targetEnv: TargetEnvironment, c: Config): \/[String, TelescopeDetails] = {
+  def extractTelescope(port: IssPort, probe: GuideProbe, targetEnv: TargetEnvironment, c: Config): \/[String, TelescopeDetails] = {
     import TelescopeDetails._
-    new TelescopeDetails(Coating.SILVER, port, probe).right
+    new TelescopeDetails(Coating.SILVER, port, probe.getType).right
   }
 
   private def extractAcqCam(c: Config): \/[String, AcquisitionCamParameters] = {
@@ -78,19 +82,24 @@ object ConfigExtractor {
 
   private def extractGmos(c: Config): \/[String, GmosParameters] = {
     import GmosCommonType._
+
+    def extractIfu(mask: GmosCommonType.FPUnit) =
+      // Note: In the future we will support more options, for now only single on-axis is supported.
+      if (mask.isIFU) Some(IfuSingle(0.0)) else None
+
     for {
       filter      <- extract[Filter]        (c, FilterKey)
       grating     <- extract[Disperser]     (c, DisperserKey)
-      fpmask      <- extract[FPUnit]        (c, FpuKey)
+      mask        <- extract[FPUnit]        (c, FpuKey)
       spatBin     <- extract[Binning]       (c, CcdXBinKey)
       specBin     <- extract[Binning]       (c, CcdYBinKey)
       ccdType     <- extract[DetectorManufacturer](c, CcdManufacturerKey)
       siteString  <- extract[String]        (c, InstrumentKey)
       wavelen     <- extractObservingWavelength(c)
     } yield {
-      val ifuMethod   =  None // TODO
-      val site = if (siteString.equals("GMOS-N")) Site.GN else Site.GS
-      GmosParameters(filter, grating, wavelen, fpmask, spatBin.getValue, specBin.getValue, ifuMethod, ccdType, site)
+      val ifuMethod = extractIfu(mask)
+      val site      = if (siteString.equals("GMOS-N")) Site.GN else Site.GS
+      GmosParameters(filter, grating, wavelen, mask, spatBin.getValue, specBin.getValue, ifuMethod, ccdType, site)
     }
 
   }
@@ -106,7 +115,7 @@ object ConfigExtractor {
     }
   }
 
-  private def extractNiri(c: Config): \/[String, NiriParameters] = {
+  private def extractNiri(targetEnv: TargetEnvironment, probe: GuideProbe, c: Config): \/[String, NiriParameters] = {
     import Niri._
     for {
       filter      <- extract[Filter]        (c, FilterKey)
@@ -115,24 +124,42 @@ object ConfigExtractor {
       readMode    <- extract[ReadMode]      (c, ReadModeKey)
       wellDepth   <- extract[WellDepth]     (c, WellDepthKey)
       mask        <- extract[Mask]          (c, MaskKey)
-      altair      <- extractAltair          (c)
+      altair      <- extractAltair          (targetEnv, probe, c)
     } yield NiriParameters(filter, grism, camera, readMode, wellDepth, mask, altair)
   }
 
-  private def extractAltair(c: Config): \/[String, Option[AltairParameters]] = {
+  private def extractAltair(targetEnv: TargetEnvironment, probe: GuideProbe, c: Config): \/[String, Option[AltairParameters]] = {
     import AltairParams._
 
     def altairIsPresent =
       c.containsItem(AoSystemKey) && extract[String](c, AoSystemKey).rightMap("Altair".equals).getOrElse(false)
 
+    def extractGroup =
+      targetEnv.getPrimaryGuideProbeTargets(probe).asScalaOpt.fold("No guide group".left[GuideProbeTargets]){_.right[String]}
+
+    def extractGuideStar(targets: GuideProbeTargets) =
+      targets.getPrimary.asScalaOpt.fold("No guide star".left[SPTarget]){_.right[String]}
+
+    def extractMagnitude(guideStar: ITarget) = {
+      val r  = guideStar.getMagnitude(Band.r)
+      val R  = guideStar.getMagnitude(Band.R)
+      val UC = guideStar.getMagnitude(Band.UC)
+      if      (r.isDefined)  r.getValue.getBrightness.right
+      else if (R.isDefined)  R.getValue.getBrightness.right
+      else if (UC.isDefined) UC.getValue.getBrightness.right
+      else "No r, R or UC magnitude defined for guide star".left
+    }
+
     if (altairIsPresent) {
       for {
+        group     <- extractGroup
+        guideStar <- extractGuideStar(group)
+        magnitude <- extractMagnitude(guideStar.getTarget)
         fieldLens <- extract[FieldLens]     (c, AoFieldLensKey)
         wfsMode   <- extract[GuideStarType] (c, AoGuideStarTypeKey)
       } yield {
-        val guideStarSeparation = 4.0 // TODO
-        val guideStarMagnitude = 9.0 // TODO
-        Some(AltairParameters(guideStarSeparation, guideStarMagnitude, fieldLens, wfsMode))
+        val separation = distance(targetEnv.getBase, guideStar)
+        Some(AltairParameters(separation, magnitude, fieldLens, wfsMode))
       }
     } else {
       None.right
@@ -167,6 +194,21 @@ object ConfigExtractor {
       \/.fromTryCatch(clazz.runtimeClass.cast(v).asInstanceOf[A])
     }
 
+  }
+
+  // Calculate distance between two coordinates in arc seconds
+  private def distance(t0: SPTarget, t1: SPTarget) = {
+    val c0 = toCoordinates(t0)
+    val c1 = toCoordinates(t1)
+    Coordinates.difference(c0, c1).distance.toArcsecs
+  }
+
+  // Turn SPTarget into new target model coordinates, note that DMS.getValue() guarantees value to be in [-90..90]
+  private def toCoordinates(t: SPTarget) = {
+    val c   = t.getTarget.getSkycalcCoordinates
+    val ra  = RightAscension.fromDegrees(c.getRaDeg)
+    val dec = Declination.fromAngle(Angle.fromDegrees(new DMS(c.getDecDeg).getValue))
+    Coordinates(ra, dec.getOrElse(Declination.zero))
   }
 
 }
