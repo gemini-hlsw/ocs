@@ -208,7 +208,7 @@ object ConfigExtractor {
     val c   = t.getTarget.getSkycalcCoordinates
     val ra  = RightAscension.fromDegrees(c.getRaDeg)
     val dec = Declination.fromAngle(Angle.fromDegrees(new DMS(c.getDecDeg).getValue))
-    Coordinates(ra, dec.getOrElse(Declination.zero))
+    Coordinates(ra, dec.get)
   }
 
 }
