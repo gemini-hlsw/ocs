@@ -47,7 +47,7 @@ object ConfigExtractor {
   private val AoFieldLensKey      = new ItemKey("adaptive optics:fieldLens")
   private val AoGuideStarTypeKey  = new ItemKey("adaptive optics:guideStarType")
 
-  def extractInstrumentDetails(instrument: SPComponentType, probe: GuideProbe, targetEnv: TargetEnvironment, c: Config): \/[String, InstrumentDetails] =
+  def extractInstrumentDetails(instrument: SPComponentType, probe: GuideProbe, targetEnv: TargetEnvironment, c: Config): String \/ InstrumentDetails =
     instrument match {
       case INSTRUMENT_ACQCAM                      => ConfigExtractor.extractAcqCam(c)
       case INSTRUMENT_FLAMINGOS2                  => ConfigExtractor.extractF2(c)
@@ -57,12 +57,12 @@ object ConfigExtractor {
       case _                                      => "Instrument is not supported".left
     }
 
-  def extractTelescope(port: IssPort, probe: GuideProbe, targetEnv: TargetEnvironment, c: Config): \/[String, TelescopeDetails] = {
+  def extractTelescope(port: IssPort, probe: GuideProbe, targetEnv: TargetEnvironment, c: Config): String \/ TelescopeDetails = {
     import TelescopeDetails._
     new TelescopeDetails(Coating.SILVER, port, probe.getType).right
   }
 
-  private def extractAcqCam(c: Config): \/[String, AcquisitionCamParameters] = {
+  private def extractAcqCam(c: Config): String \/ AcquisitionCamParameters = {
     import AcqCamParams._
     for {
       colorFilter <- extract[ColorFilter]   (c, ColorFilterKey)
@@ -70,7 +70,7 @@ object ConfigExtractor {
     } yield AcquisitionCamParameters(colorFilter, ndFilter)
   }
 
-  private def extractF2(c: Config): \/[String, Flamingos2Parameters] = {
+  private def extractF2(c: Config): String \/ Flamingos2Parameters = {
     import Flamingos2._
     for {
       filter      <- extract[Filter]        (c, FilterKey)
@@ -80,7 +80,7 @@ object ConfigExtractor {
     } yield Flamingos2Parameters(filter, grism, mask, readMode)
   }
 
-  private def extractGmos(c: Config): \/[String, GmosParameters] = {
+  private def extractGmos(c: Config): String \/ GmosParameters = {
     import GmosCommonType._
 
     def extractIfu(mask: GmosCommonType.FPUnit) =
@@ -104,7 +104,7 @@ object ConfigExtractor {
 
   }
 
-  private def extractGsaoi(c: Config): \/[String, GsaoiParameters] = {
+  private def extractGsaoi(c: Config): String \/ GsaoiParameters = {
     import Gsaoi._
     for {
       filter      <- extract[Filter]        (c, FilterKey)
@@ -115,7 +115,7 @@ object ConfigExtractor {
     }
   }
 
-  private def extractNiri(targetEnv: TargetEnvironment, probe: GuideProbe, c: Config): \/[String, NiriParameters] = {
+  private def extractNiri(targetEnv: TargetEnvironment, probe: GuideProbe, c: Config): String \/ NiriParameters = {
     import Niri._
     for {
       filter      <- extract[Filter]        (c, FilterKey)
@@ -128,17 +128,17 @@ object ConfigExtractor {
     } yield NiriParameters(filter, grism, camera, readMode, wellDepth, mask, altair)
   }
 
-  private def extractAltair(targetEnv: TargetEnvironment, probe: GuideProbe, c: Config): \/[String, Option[AltairParameters]] = {
+  private def extractAltair(targetEnv: TargetEnvironment, probe: GuideProbe, c: Config): String \/ Option[AltairParameters] = {
     import AltairParams._
 
     def altairIsPresent =
       c.containsItem(AoSystemKey) && extract[String](c, AoSystemKey).rightMap("Altair".equals).getOrElse(false)
 
     def extractGroup =
-      targetEnv.getPrimaryGuideProbeTargets(probe).asScalaOpt.fold("No guide group".left[GuideProbeTargets]){_.right[String]}
+      targetEnv.getPrimaryGuideProbeTargets(probe).asScalaOpt.fold("No guide star selected".left[GuideProbeTargets])(_.right)
 
     def extractGuideStar(targets: GuideProbeTargets) =
-      targets.getPrimary.asScalaOpt.fold("No guide star".left[SPTarget]){_.right[String]}
+      targets.getPrimary.asScalaOpt.fold("No guide star selected".left[SPTarget])(_.right)
 
     def extractMagnitude(guideStar: ITarget) = {
       val r  = guideStar.getMagnitude(Band.r)
@@ -166,16 +166,16 @@ object ConfigExtractor {
     }
   }
 
-  private def extractObservingWavelength(c: Config): \/[String, Double] =
+  private def extractObservingWavelength(c: Config): String \/ Double =
     // Note: observing wavelength will only be available if instrument is configured for spectroscopy
     if (c.containsItem(ObsWavelengthKey)) extractDoubleFromString(c, ObsWavelengthKey) else 0.0.right
 
   // Extract a value of the given type from the configuration
-  private def extract[A](c: Config, key: ItemKey)(implicit clazz: ClassTag[A]): \/[String, A] =
+  private def extract[A](c: Config, key: ItemKey)(implicit clazz: ClassTag[A]): String \/ A =
     extractWithThrowable[A](c, key).leftMap(_.getMessage)
 
   // Extract a double value from a string in the configuration
-  private def extractDoubleFromString(c: Config, key: ItemKey): \/[String, Double] = {
+  private def extractDoubleFromString(c: Config, key: ItemKey): String \/ Double = {
     val v = for {
       s <- extractWithThrowable[String](c, key)
       d <- \/.fromTryCatch(s.toDouble)
@@ -185,7 +185,7 @@ object ConfigExtractor {
 
   // Helper method that enforces that whatever we get from the config
   // for the given key is not null and matches the type we expect.
-  private def extractWithThrowable[A](c: Config, key: ItemKey)(implicit clazz: ClassTag[A]): \/[Throwable, A] = {
+  private def extractWithThrowable[A](c: Config, key: ItemKey)(implicit clazz: ClassTag[A]): Throwable \/ A = {
 
     def missingKey[A](key: ItemKey): \/[Throwable, A] =
       new Error("Missing config value for key ${key.getPath}").left[A]

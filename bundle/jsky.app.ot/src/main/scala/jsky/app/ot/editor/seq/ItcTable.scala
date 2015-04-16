@@ -109,13 +109,13 @@ trait ItcTable extends Table {
 
   }
 
-  private def extractPort(): \/[String, IssPort] =
-    Option(owner.getContextIssPort).fold("No port information available".left[IssPort])(_.right[String])
+  private def extractPort(): String \/ IssPort =
+    Option(owner.getContextIssPort).fold("No port information available".left[IssPort])(_.right)
 
-  private def extractTargetEnv(): \/[String, TargetEnvironment] =
-    Option(owner.getContextTargetEnv).fold("No target environment available".left[TargetEnvironment])(_.right[String])
+  private def extractTargetEnv(): String \/ TargetEnvironment =
+    Option(owner.getContextTargetEnv).fold("No target environment available".left[TargetEnvironment])(_.right)
 
-  private def extractGuideProbe(): \/[String, GuideProbe] = {
+  private def extractGuideProbe(): String \/ GuideProbe = {
     val o = for {
       observation         <- Option(owner.getContextObservation)
       obsContext          <- ObsContext.create(observation).asScalaOpt
@@ -125,7 +125,7 @@ trait ItcTable extends Table {
     // we take a shortcut here and just look at the first guider we get from the strategy.
     } yield agsStrategy.guideProbes.headOption
 
-    o.flatten.fold("Could not identify ags strategy or guide probe type".left[GuideProbe]){_.right[String]}
+    o.flatten.fold("Could not identify ags strategy or guide probe type".left[GuideProbe])(_.right)
   }
 
 }
