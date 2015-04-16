@@ -7,6 +7,8 @@ import java.util.{Date, TimeZone}
 import javax.swing._
 import javax.swing.event.DocumentEvent
 
+import language.implicitConversions
+
 import edu.gemini.horizons.api.HorizonsQuery.ObjectType
 import edu.gemini.pot.sp.ISPNode
 import edu.gemini.shared.gui.calendar.JCalendarPopup

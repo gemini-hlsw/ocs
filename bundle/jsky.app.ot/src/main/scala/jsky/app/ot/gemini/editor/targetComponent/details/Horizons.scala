@@ -111,8 +111,8 @@ object Horizons {
 
         nt.setSolarObject(obj)
         nt.setName(name)
-        nt.getRa .setAs(e.getRATrack,  Units.DEGREES)
-        nt.getDec.setAs(e.getDecTrack, Units.DEGREES)
+        nt.getRa .setAs(e.getCoordinates.getRaDeg,  Units.DEGREES)
+        nt.getDec.setAs(e.getCoordinates.getDecDeg, Units.DEGREES)
         nt.setDateForPosition(e.getDate)
         nt.right
 
@@ -145,6 +145,7 @@ object Horizons {
         if (r.hasOrbitalElements) {
           import OrbitalElements.Name._
           val es = r.getOrbitalElements
+          ct.getAQ         .setValue(es.getValue(A))
           ct.getEpoch      .setValue(es.getValue(EPOCH))
           ct.getEpochOfPeri.setValue(es.getValue(TP))
           ct.getANode      .setValue(es.getValue(OM))
@@ -157,8 +158,8 @@ object Horizons {
         // Set the date/time and coordinates to correspond with the first ephemeris element, if any
         if (r.hasEphemeris) {
           val e = r.getEphemeris.get(0)
-          ct.getRa .setAs(e.getRATrack,  Units.DEGREES)
-          ct.getDec.setAs(e.getDecTrack, Units.DEGREES)
+          ct.getRa .setAs(e.getCoordinates.getRaDeg,  Units.DEGREES)
+          ct.getDec.setAs(e.getCoordinates.getDecDeg, Units.DEGREES)
           ct.setDateForPosition(e.getDate)
         }
       }

@@ -57,7 +57,16 @@ public final class NamedTarget extends NonSiderealTarget {
     }
 
 
-    private NamedTarget.SolarObject _solarObject = NamedTarget.SolarObject.DEFAULT_SOLAR_OBJECT;
+    private NamedTarget.SolarObject _solarObject;
+
+    public NamedTarget(SolarObject solarObject) {
+        this._solarObject = solarObject;
+        setName(solarObject.getDisplayValue());
+    }
+
+    public NamedTarget() {
+        this(NamedTarget.SolarObject.DEFAULT_SOLAR_OBJECT);
+    }
 
     /**
      * Override equals to return true if both instances are the same.

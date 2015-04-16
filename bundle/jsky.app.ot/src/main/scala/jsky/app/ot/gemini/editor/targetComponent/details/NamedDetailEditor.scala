@@ -1,6 +1,6 @@
 package jsky.app.ot.gemini.editor.targetComponent.details
 
-import java.awt.{Insets, GridBagConstraints, GridBagLayout, BorderLayout}
+import java.awt._
 import javax.swing.{JLabel, JPanel, JComponent}
 
 import edu.gemini.pot.sp.ISPNode
@@ -10,7 +10,7 @@ import edu.gemini.spModel.target.SPTarget
 import edu.gemini.spModel.target.system.{ConicTarget, NamedTarget}
 import edu.gemini.spModel.target.system.ITarget.Tag
 import jsky.app.ot.gemini.editor.targetComponent.MagnitudeEditor
-import jsky.util.gui.{DropDownListBoxWidgetWatcher, DropDownListBoxWidget}
+import jsky.util.gui.{TextBoxWidgetWatcher, TextBoxWidget, DropDownListBoxWidgetWatcher, DropDownListBoxWidget}
 
 import scalaz._, Scalaz._
 
@@ -18,12 +18,29 @@ final class NamedDetailEditor extends TargetDetailEditor(Tag.NAMED) with Reentra
 
   private[this] var spt = new SPTarget // never null
 
+  private def nt: NamedTarget = spt.getTarget.asInstanceOf[NamedTarget]
+
   // Editors
 
   val kind   = new TargetTypeEditor
   val valid  = new NamedValidAtEditor
   val coords = new CoordinateEditor
 
+  val name = new TextBoxWidget <| { w =>
+    w.setColumns(25)
+    w.setMinimumSize(w.getPreferredSize)
+    w.addWatcher(new TextBoxWidgetWatcher {
+
+      def textBoxKeyPress(tbwe: TextBoxWidget): Unit =
+        nonreentrant {
+          spt.getTarget.setName(tbwe.getValue)
+          spt.notifyOfGenericUpdate()
+        }
+
+      def textBoxAction(tbwe: TextBoxWidget): Unit = ()
+
+    })
+  }
 
   val solarObject = new DropDownListBoxWidget {
     setChoices(NamedTarget.SolarObject.values.asInstanceOf[Array[AnyRef]])
@@ -31,7 +48,9 @@ final class NamedDetailEditor extends TargetDetailEditor(Tag.NAMED) with Reentra
       def dropDownListBoxAction(w: DropDownListBoxWidget, index: Int, value: String) {
         nonreentrant {
           val o = w.getValue.asInstanceOf[NamedTarget.SolarObject]
-          spt.getTarget.asInstanceOf[NamedTarget].setSolarObject(o)
+          nt.setSolarObject(o)
+          nt.setName(o.getDisplayValue)
+          name.setText(o.getDisplayValue) // hmm
           spt.notifyOfGenericUpdate()
         }
       }
@@ -39,7 +58,12 @@ final class NamedDetailEditor extends TargetDetailEditor(Tag.NAMED) with Reentra
   }
 
   val mags = new MagnitudeEditor {
-    getComponent.asInstanceOf[JComponent].setBorder(titleBorder("Magnitudes"))
+    getComponent.asInstanceOf[JComponent] <| { c =>
+      c.setBorder(titleBorder("Magnitudes"))
+      c.getMinimumSize <| { s =>
+        c.setMinimumSize(new Dimension(s.width, 100))
+      }
+    }
   }
 
   // Layout
@@ -65,14 +89,14 @@ final class NamedDetailEditor extends TargetDetailEditor(Tag.NAMED) with Reentra
       c.weightx = 2
     })
 
-    p.add(new JLabel("Object"), new GridBagConstraints <| { c =>
+    p.add(new JLabel("Name"), new GridBagConstraints <| { c =>
       c.gridx = 0
       c.gridy = 1
       c.fill = GridBagConstraints.HORIZONTAL
       c.insets = new Insets(2, 2, 0, 5)
     })
 
-    p.add(solarObject, new GridBagConstraints <| { c =>
+    p.add(name, new GridBagConstraints <| { c =>
       c.gridx = 1
       c.gridy = 1
       c.insets = new Insets(2, 5, 0, 2)
@@ -80,30 +104,45 @@ final class NamedDetailEditor extends TargetDetailEditor(Tag.NAMED) with Reentra
       c.weightx = 2
     })
 
-    p.add(new JLabel("Coordinates"), new GridBagConstraints <| { c =>
+    p.add(new JLabel("Object"), new GridBagConstraints <| { c =>
       c.gridx = 0
       c.gridy = 2
+      c.fill = GridBagConstraints.HORIZONTAL
+      c.insets = new Insets(2, 2, 0, 5)
+    })
+
+    p.add(solarObject, new GridBagConstraints <| { c =>
+      c.gridx = 1
+      c.gridy = 2
+      c.insets = new Insets(2, 5, 0, 2)
+      c.anchor = GridBagConstraints.WEST
+      c.weightx = 2
+    })
+
+    p.add(new JLabel("Coordinates"), new GridBagConstraints <| { c =>
+      c.gridx = 0
+      c.gridy = 3
       c.fill = GridBagConstraints.HORIZONTAL
       c.insets = new Insets(2, 2, 0, 5)
     })
 
     p.add(coords, new GridBagConstraints <| { c =>
       c.gridx = 1
-      c.gridy = 2
+      c.gridy = 3
       c.insets = new Insets(2, 5, 0, 2)
       c.anchor = GridBagConstraints.WEST
     })
 
     p.add(new JLabel("Valid At"), new GridBagConstraints <| { c =>
       c.gridx = 0
-      c.gridy = 3
+      c.gridy = 4
       c.fill = GridBagConstraints.HORIZONTAL
       c.insets = new Insets(2, 2, 0, 5)
     })
 
     p.add(valid, new GridBagConstraints <| { c =>
       c.gridx = 1
-      c.gridy = 3
+      c.gridy = 4
       c.insets = new Insets(2, 5, 0, 2)
       c.anchor = GridBagConstraints.WEST
     })
@@ -136,6 +175,7 @@ final class NamedDetailEditor extends TargetDetailEditor(Tag.NAMED) with Reentra
     this.spt = spTarget
     nonreentrant {
       solarObject.setValue(spt.getTarget.asInstanceOf[NamedTarget].getSolarObject)
+      name.setValue(spt.getTarget.getName)
     }
 
   }
