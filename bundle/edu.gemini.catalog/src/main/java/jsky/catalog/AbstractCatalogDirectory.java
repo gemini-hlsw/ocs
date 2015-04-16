@@ -240,9 +240,9 @@ public abstract class AbstractCatalogDirectory implements CatalogDirectory {
 
         // data rows
         int numCatalogs = getNumCatalogs();
-        Vector<Vector<Catalog>> rows = new Vector<>(numCatalogs, 1);
+        Vector<Vector<Object>> rows = new Vector<>(numCatalogs, 1);
         for (Catalog cat: _catalogs) {
-            Vector<Catalog> cols = new Vector<>(1, 1);
+            Vector<Object> cols = new Vector<>(1, 1);
             cols.add(cat);
             rows.add(cols);
         }
@@ -266,7 +266,7 @@ public abstract class AbstractCatalogDirectory implements CatalogDirectory {
         _url = url;
     }
 
-    // -- Inplement the Catalog interface --
+    // -- Implement the Catalog interface --
 
     /** Return the name of the catalog directory */
     public String getName() {

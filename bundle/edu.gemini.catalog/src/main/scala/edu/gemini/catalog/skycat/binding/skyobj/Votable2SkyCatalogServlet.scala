@@ -4,7 +4,7 @@ import javax.servlet.http.{HttpServletRequest, HttpServletResponse, HttpServlet}
 import edu.gemini.catalog.api.{CatalogQuery, RadiusConstraint}
 import edu.gemini.catalog.votable.VoTableClient
 import edu.gemini.spModel.core.Target.SiderealTarget
-import edu.gemini.spModel.core.{Declination, Angle, RightAscension, Coordinates}
+import edu.gemini.spModel.core._
 
 import scala.collection.JavaConverters._
 import scala.concurrent.Await
@@ -16,8 +16,13 @@ import Scalaz._
 
 @Deprecated
 class Votable2SkyCatalogServlet extends HttpServlet {
-  private def toRow(t: SiderealTarget):String = f"${t.name}%-10s\t${t.coordinates.ra.toAngle.toDegrees}%+03.07f\t${t.coordinates.dec.toDegrees}%+03.07f"
-  private def headers:String = s"4UC\tRA\tDEC\n----------\t-----------\t-----------"
+  private def magnitudes(t: SiderealTarget):String = {
+    UCAC4.magnitudeBands.map {b =>
+      t.magnitudeIn(b).map(m => f"${m.value}%3.3f").getOrElse(" ")
+    }.mkString("\t")
+  }
+  private def toRow(t: SiderealTarget):String = f"${t.name}%-10s\t${t.coordinates.ra.toAngle.toDegrees}%+03.07f\t${t.coordinates.dec.toDegrees}%+03.07f\t${magnitudes(t)}"
+  private def headers:String = s"4UC\tRA\tDEC\t${UCAC4.magnitudeBands.map(_.name).mkString("\t")}\n-"
 
   override protected def doGet(req: HttpServletRequest, resp: HttpServletResponse) {
 
