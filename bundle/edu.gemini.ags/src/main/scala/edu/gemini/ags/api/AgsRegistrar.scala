@@ -12,6 +12,9 @@ import scala.collection.JavaConverters._
  * Methods for finding strategies.
  */
 object AgsRegistrar {
+  // For Java usage
+  val instance = this
+
   def lookup(key: AgsStrategyKey): Option[AgsStrategy] = Strategy.fromKey(key)
 
   /**

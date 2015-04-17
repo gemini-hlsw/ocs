@@ -1,6 +1,5 @@
 package edu.gemini.ags.impl
 
-import edu.gemini.ags.api.AgsAnalysis.Usable
 import edu.gemini.ags.api._
 import edu.gemini.ags.api.AgsMagnitude._
 import edu.gemini.catalog.api.CatalogQuery
@@ -12,7 +11,6 @@ import edu.gemini.spModel.core.{Magnitude, MagnitudeBand, Coordinates, Angle}
 import edu.gemini.spModel.core.Target.SiderealTarget
 import edu.gemini.spModel.guide.{ValidatableGuideProbe, VignettingGuideProbe, GuideProbe}
 import edu.gemini.spModel.obs.context.ObsContext
-import edu.gemini.spModel.target.SPTarget
 import edu.gemini.spModel.target.system.CoordinateParam.Units
 import edu.gemini.spModel.target.system.HmsDegTarget
 import edu.gemini.spModel.telescope.PosAngleConstraint._
@@ -37,8 +35,11 @@ case class SingleProbeStrategy(key: AgsStrategyKey, params: SingleProbeStrategyP
   override def magnitudes(ctx: ObsContext, mt: MagnitudeTable): List[(GuideProbe, AgsMagnitude.MagnitudeCalc)] =
     params.magnitudeCalc(ctx, mt).toList.map(params.guideProbe -> _)
 
-  def analyze(ctx: ObsContext, mt: MagnitudeTable): List[AgsAnalysis] =
+  override def analyze(ctx: ObsContext, mt: MagnitudeTable): List[AgsAnalysis] =
     AgsAnalysis.analysis(ctx, mt, params.guideProbe, probeBands).toList
+
+  override protected [ags] def analyze(ctx: ObsContext, mt: MagnitudeTable, guideProbe: ValidatableGuideProbe, guideStar: SiderealTarget): Option[AgsAnalysis] =
+    AgsAnalysis.analysis(ctx, mt, guideProbe, guideStar, probeBands)
 
   private def catalogQueries(ctx: ObsContext, mt: MagnitudeTable): Option[CatalogQuery] =
     params.catalogQueries(ctx, mt)
@@ -80,7 +81,7 @@ case class SingleProbeStrategy(key: AgsStrategyKey, params: SingleProbeStrategyP
     catalogResult(ctx, mt).map(select(ctx, mt, _))
 
   def select(ctx: ObsContext, mt: MagnitudeTable, candidates: List[SiderealTarget]): Option[AgsStrategy.Selection] = {
-    if (candidates.size == 0) None
+    if (candidates.isEmpty) None
     else {
       params.guideProbe match {
         // If vignetting, filter according to the pos angle constraint, and then for each obs context, pick the best quality with
@@ -194,9 +195,8 @@ object SingleProbeStrategy {
     val df = new DecimalFormat("0.####")
 
     val candidates = for {
-      st <- lst
-      spTarget = new SPTarget(HmsDegTarget.fromSkyObject(st.toOldModel))
-      analysis <- AgsAnalysis.analysis(ctx, mt, probe, spTarget, params.probeBands)
+      st       <- lst
+      analysis <- AgsAnalysis.analysis(ctx, mt, probe, st, params.probeBands)
     } yield {
       val vig = probe.calculateVignetting(ctx, st.coordinates)
 

@@ -22,6 +22,8 @@ object ModelConverters {
 
   def toCoordinates(coords: skycalc.Coordinates): Coordinates = coords.toNewModel
 
+  def toSideralTarget(spTarget: SPTarget):SiderealTarget = spTarget.toNewModel
+
   implicit class OldAngle2New(val angle: skycalc.Angle) extends AnyVal{
     def toNewModel: Angle = Angle.fromDegrees(angle.toDegrees.getMagnitude)
   }
@@ -166,7 +168,7 @@ object ModelConverters {
       val dec         = Angle.fromDegrees(coords.getDecDeg)
       val coordinates = Coordinates(RightAscension.fromAngle(ra), Declination.fromAngle(dec).getOrElse(Declination.zero))
 
-            // Only HmsDegTargets have a proper motion and the values are in milli arcsecs/year
+      // Only HmsDegTargets have a proper motion and the values are in milli arcsecs/year
       val pm          = sp.getTarget match {
         case t:HmsDegTarget => Some(ProperMotion(RightAscensionAngularVelocity(AngularVelocity(t.getPropMotionRA)), DeclinationAngularVelocity(AngularVelocity(t.getPropMotionDec))))
         case _              => None

@@ -7,6 +7,7 @@
 package jsky.app.ot.gemini.editor.targetComponent;
 
 import edu.gemini.ags.api.*;
+import edu.gemini.pot.ModelConverters;
 import edu.gemini.pot.sp.ISPObsComponent;
 import edu.gemini.shared.skyobject.Magnitude;
 import edu.gemini.shared.util.immutable.*;
@@ -21,7 +22,6 @@ import edu.gemini.spModel.target.WatchablePos;
 import edu.gemini.spModel.target.env.*;
 import edu.gemini.spModel.target.obsComp.TargetObsComp;
 import edu.gemini.spModel.target.obsComp.TargetSelection;
-import edu.gemini.spModel.target.offset.OffsetPos;
 import edu.gemini.spModel.target.offset.OffsetPosBase;
 import edu.gemini.spModel.target.offset.OffsetPosList;
 import edu.gemini.spModel.target.offset.OffsetUtil;
@@ -237,25 +237,15 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
         }
 
         private static Option<AgsGuideQuality> guideQuality(Option<Tuple2<ObsContext, AgsMagnitude.MagnitudeTable>> ags, final GuideProbe guideProbe, final SPTarget guideStar) {
-            return ags.flatMap(new MapOp<Tuple2<ObsContext, AgsMagnitude.MagnitudeTable>, Option<AgsGuideQuality>>() {
-                @Override public Option<AgsGuideQuality> apply(final Tuple2<ObsContext, AgsMagnitude.MagnitudeTable> tup) {
-                    if (guideProbe instanceof ValidatableGuideProbe) {
-                        final ValidatableGuideProbe vgp = (ValidatableGuideProbe) guideProbe;
-
-                        return AgsRegistrar$.MODULE$.currentStrategyForJava(tup._1()).map(new Function1<AgsStrategy, Option<AgsGuideQuality>>() {
-                            @Override
-                            public Option<AgsGuideQuality> apply(AgsStrategy strategy) {
-                                final List<AgsAnalysis> agsAnalysises = strategy.analyzeForJava(tup._1(), tup._2(), vgp, guideStar);
-                                if (!agsAnalysises.isEmpty()) {
-                                    return new Some<>(agsAnalysises.get(0).quality());
-                                } else {
-                                    return None.instance();
-                                }
-                            }
-                        }).getOrElse(None.<AgsGuideQuality>instance());
-                    } else {
-                        return None.instance();
-                    }
+            return ags.flatMap(tup -> {
+                if (guideProbe instanceof ValidatableGuideProbe) {
+                    final ValidatableGuideProbe vgp = (ValidatableGuideProbe) guideProbe;
+                    return AgsRegistrar.instance().currentStrategyForJava(tup._1()).map(strategy -> {
+                        final Option<AgsAnalysis> agsAnalysis = strategy.analyzeForJava(tup._1(), tup._2(), vgp, ModelConverters.toSideralTarget(guideStar));
+                        return agsAnalysis.map(AgsAnalysis::quality);
+                    }).getOrElse(None.<AgsGuideQuality>instance());
+                } else {
+                    return None.instance();
                 }
             });
         }
