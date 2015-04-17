@@ -66,7 +66,7 @@ public class DialogUtil {
      * @param parentComponent display the dialog over the given component
      * @param e the exception containing the error information
      */
-    public static void error(Component parentComponent, Exception e) {
+    public static void error(Component parentComponent, Throwable e) {
         LOG.log(Level.WARNING, e.getMessage(), e);
 
         String s = e.getMessage();
@@ -90,7 +90,7 @@ public class DialogUtil {
      *
      * @param e the exception containing the error information
      */
-    public static void error(Exception e) {
+    public static void error(Throwable e) {
         error(null, e);
     }
 

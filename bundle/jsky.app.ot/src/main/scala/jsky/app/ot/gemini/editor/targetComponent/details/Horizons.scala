@@ -1,5 +1,7 @@
 package jsky.app.ot.gemini.editor.targetComponent.details
 
+import java.io.IOException
+import java.lang.reflect.UndeclaredThrowableException
 import java.util.Date
 
 import edu.gemini.horizons.api.HorizonsQuery.ObjectType
@@ -8,7 +10,9 @@ import edu.gemini.spModel.target.system.CoordinateParam.Units
 import edu.gemini.spModel.target.system.{ NamedTarget, ConicTarget }
 import edu.gemini.spModel.target.system.ITarget.Tag
 import jsky.app.ot.gemini.editor.horizons.HorizonsService
+import jsky.util.gui.DialogUtil
 
+import scala.annotation.tailrec
 import scalaz.{ Tag => _, _ }, Scalaz._
 import scalaz.concurrent.Task
 
@@ -17,14 +21,32 @@ object Horizons {
 
   /** The type of failures produced by HorizonsIO programs. */
   sealed abstract class HorizonsFailure(val message: String)
-  case class  UnknownError(err: Throwable) extends HorizonsFailure(err.getMessage)
-  case object EmptyName         extends HorizonsFailure("Name must be non-empty.")
+  object HorizonsFailure {
+    @tailrec
+    def fromThrowable(t: Throwable): HorizonsFailure =
+      t match {
+        case e: UndeclaredThrowableException => fromThrowable(e.getUndeclaredThrowable)
+        case e: IOException                  => IOFailure(e)
+        case e                               => UnknownError(e)
+      }
+  }
+
+  case object CancelOrError     extends HorizonsFailure("User canceled or there was a error, which was already reported to the user.")
+
+  sealed abstract class HorizonsException(t: Throwable) extends HorizonsFailure(t.getMessage)
+  case class UnknownError(e: Throwable) extends HorizonsException(e)
+  case class IOFailure(e: IOException)  extends HorizonsException(e)
+
+  case object InvalidQuery      extends HorizonsFailure("Invalid query.")
+  case object MultipleResults   extends HorizonsFailure("Multiple results were returned.")
+
+  case object EmptyName         extends HorizonsFailure("The target name must be non-empty.")
   case object NoOrbitalElements extends HorizonsFailure("Cannot resolve orbital elements for named targets.")
   case object NoService         extends HorizonsFailure("No local Horizons service is available.")
-  case object CancelOrError     extends HorizonsFailure("User canceled or there was a error, which was already reported to the user.")
   case object NoResults         extends HorizonsFailure("No results were found.")
   case object NoMinorBody       extends HorizonsFailure("Can't resolve the given ID to any minor body")
   case object Spacecraft        extends HorizonsFailure("Horizons suggests this is a spacecraft. Sorry, but OT can't use spacecrafts")
+
 
   /** The type of programs that perform Horizons lookups. */
   type HorizonsIO[A] = EitherT[Task, HorizonsFailure, A]
@@ -35,12 +57,16 @@ object Horizons {
 
   /** Syntax for HorizonsIO */
   implicit class HorizonsIOOps[A](hio: HorizonsIO[A]) {
-    def runAsyncAndReportErrors: Unit =
+    def runAsyncAndReportErrors: Unit = // TODO: swing thread, somehow
       hio.run.runAsync { e =>
-        e.leftMap[Horizons.HorizonsFailure](Horizons.UnknownError).join match {
-          case -\/(CancelOrError) => // do nothing
-          case -\/(e)      => println(e) // TODO
-          case _ => // done
+        e.leftMap[Horizons.HorizonsFailure](HorizonsFailure.fromThrowable).join match {
+          case  \/-(())                   => // success!
+          case -\/(CancelOrError)         => // do nothing!
+          case -\/(IOFailure(e))          => DialogUtil.error(e)
+          case -\/(UnknownError(t))       => DialogUtil.error(t)
+          case -\/(e @ (InvalidQuery |
+                        MultipleResults)) => DialogUtil.error("Internal error: " + e)
+          case -\/(e)                     => DialogUtil.error(e.message)
         }
       }
   }
@@ -145,13 +171,15 @@ object Horizons {
         if (r.hasOrbitalElements) {
           import OrbitalElements.Name._
           val es = r.getOrbitalElements
-          ct.getAQ         .setValue(es.getValue(A))
-          ct.getEpoch      .setValue(es.getValue(EPOCH))
-          ct.getEpochOfPeri.setValue(es.getValue(TP))
-          ct.getANode      .setValue(es.getValue(OM))
-          ct.getPerihelion .setValue(es.getValue(W))
-          ct.getInclination.setValue(es.getValue(IN))
-          ct.getLM         .setValue(es.getValue(MA))
+
+          // hm ok the es.getValue things can be null .. check
+          ct.getAQ         .setOrZero(es.getValue(A))
+          ct.getEpoch      .setOrZero(es.getValue(EPOCH))
+          ct.getEpochOfPeri.setOrZero(es.getValue(TP))
+          ct.getANode      .setOrZero(es.getValue(OM))
+          ct.getPerihelion .setOrZero(es.getValue(W))
+          ct.getInclination.setOrZero(es.getValue(IN))
+          ct.getLM         .setOrZero(es.getValue(MA))
           ct.setE(es.getValue(EC)) // just a raw double for some reason
         }
 
@@ -229,11 +257,11 @@ object Horizons {
           reply.getReplyType match {
 
             // Some error conditions
-            case null            => CancelOrError.left
-            case NO_RESULTS      => NoResults    .left
-            case SPACECRAFT      => Spacecraft   .left
-            case INVALID_QUERY   => ??? // impl error, should never happen
-            case MUTLIPLE_ANSWER => ??? // impl error, this should have been handled already
+            case null            => CancelOrError  .left
+            case NO_RESULTS      => NoResults      .left
+            case SPACECRAFT      => Spacecraft     .left
+            case INVALID_QUERY   => InvalidQuery   .left
+            case MUTLIPLE_ANSWER => MultipleResults.left
 
             // Usable results!
             case otherwise => reply.right

@@ -4,7 +4,7 @@ import javax.swing.BorderFactory._
 import javax.swing.border.Border
 
 import edu.gemini.horizons.api.HorizonsQuery.ObjectType
-import edu.gemini.spModel.target.system.{NamedTarget, NonSiderealTarget}
+import edu.gemini.spModel.target.system.{CoordinateParam, NamedTarget, NonSiderealTarget}
 import edu.gemini.spModel.target.system.ITarget.Tag
 import jsky.util.gui.{TextBoxWidget, TextBoxWidgetWatcher}
 
@@ -46,5 +46,9 @@ package object details {
     }
   }
 
+  implicit class CoordinateParamOps(p: CoordinateParam) {
+    def setOrZero(d: java.lang.Double): Unit =
+      p.setValue(if (d == null) 0.0 else d.doubleValue)
+  }
 
 }
