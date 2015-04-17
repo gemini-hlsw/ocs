@@ -5,7 +5,8 @@ import edu.gemini.pot.sp.validator.{Validator, NodeCardinality, NodeType}
 import edu.gemini.spModel.core.ProgramIdGen
 import edu.gemini.spModel.obs.{SPObservation, ObsPhase2Status}
 import edu.gemini.spModel.rich.pot.sp._
-import edu.gemini.spModel.template.TemplateParameters
+import edu.gemini.spModel.template.{SplitFunctor, TemplateGroup, TemplateParameters}
+import edu.gemini.spModel.util.VersionToken
 
 import org.scalacheck._
 import org.scalacheck.Gen._
@@ -85,15 +86,39 @@ object ProgramGen {
     }
   }
 
+  val genTemplateGroup: Gen[ProgFun[ISPTemplateGroup]] =
+    genNode(_.createTemplateGroup(_, null)).map { ftg => {
+      (f: ISPFactory, p: ISPProgram) => ftg.apply(f, p) }
+    }
+
+  val genTemplateFolder: Gen[ProgFun[ISPTemplateFolder]] = sized { size =>
+    for {
+      ftf <- genNode(_.createTemplateFolder(_, null))
+      ftg <- listOfN(size min 3, genTemplateGroup)
+    } yield { (f: ISPFactory, p: ISPProgram) =>
+      val tf  = ftf(f, p)
+      val tgs = ftg.sequenceU.apply(f, p).zipWithIndex.map { case (tg, i) =>
+        val dob = tg.getDataObject.asInstanceOf[TemplateGroup]
+        dob.setVersionToken(VersionToken.apply(Array(i+1), 1))
+        tg.setDataObject(dob)
+        tg
+      }
+      tf.children = tgs
+      tf
+    }
+  }
+
   val genProg: Gen[ISPFactory => ISPProgram] = sized { size =>
     for {
       id <- ProgramIdGen.genSomeId
       ns <- genNotes
+      tf <- listOfN(size % 2,   genTemplateFolder)
       os <- listOfN(size min 3, genObs)
       gs <- listOfN(size min 5, genGroup)
     } yield { (fact: ISPFactory) =>
       val p = fact.createProgram(null, id)
-      p.children = ns.sequenceU.apply(fact, p) ++ os.sequenceU.apply(fact, p) ++ gs.sequenceU.apply(fact, p)
+      p.children = ns.sequenceU.apply(fact, p) ++ tf.sequenceU.apply(fact, p) ++
+                   os.sequenceU.apply(fact, p) ++ gs.sequenceU.apply(fact, p)
       p
     }
   }
@@ -114,7 +139,12 @@ object ProgramGen {
   val pickNode: Gen[ISPProgram => ISPNode] = pickOne(_.nel)
 
   val maybePickObservation: Gen[ISPProgram => Option[ISPObservation]] =
-    maybePickOne(_.getProgram.getAllObservations.asScala)
+    maybePickOne(n => new ObservationIterator(n.getProgram).asScala.toList)
+
+  val maybePickTemplateGroup: Gen[ISPProgram => Option[ISPTemplateGroup]] =
+    maybePickOne(n => Option(n.getProgram.getTemplateFolder).toList.flatMap { tf =>
+      tf.getTemplateGroups.asScala.toList
+    })
 
   def collectOne[T](pf: PartialFunction[ISPNode, T]): Gen[ISPProgram => Option[T]] =
     maybePickOne(_.toStream.collect(pf))
@@ -134,6 +164,17 @@ object ProgramGen {
     } yield { (_: ISPFactory, p: ISPProgram) =>
       val n = fn(p)
       n.title = decorativeTitle(n, title)
+    }
+
+  val genEditSplitTemplateGroup: Gen[ProgEdit] =
+    for {
+      tgf <- maybePickTemplateGroup
+    } yield { (f: ISPFactory, p: ISPProgram) =>
+      tgf(p).foreach { tg =>
+        val sf    = new SplitFunctor(tg)
+        val newTg = sf.split(f)
+        tg.getParent.asInstanceOf[ISPTemplateFolder].addTemplateGroup(newTg)
+      }
     }
 
   val genEditObsPhase2Status: Gen[ProgEdit] =
@@ -235,7 +276,7 @@ object ProgramGen {
 
   val genEdit: Gen[ProgEdit] =
     oneOf(
-      frequency(7 -> genEditDataObject, 3 -> genEditObsPhase2Status),
+      frequency(6 -> genEditDataObject, 3 -> genEditObsPhase2Status, 1 -> genEditSplitTemplateGroup),
       genEditReorderChildren,
       genEditAddChild,
       genEditDeleteChild,

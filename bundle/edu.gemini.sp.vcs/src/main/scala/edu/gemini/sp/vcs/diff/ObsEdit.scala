@@ -63,7 +63,7 @@ object ObsEdit {
    * the local program.
    */
   def all(local: ISPProgram, diff: ProgramDiff): TryVcs[List[ObsEdit]] = {
-    val localObsMap = local.getAllObservations.asScala.map { o => o.key -> o }.toMap
+    val localObsMap = new ObservationIterator(local).asScala.map { o => o.key -> o }.toMap
 
     def localObs(k: SPNodeKey): Obs = {
       val lo = localObsMap(k)

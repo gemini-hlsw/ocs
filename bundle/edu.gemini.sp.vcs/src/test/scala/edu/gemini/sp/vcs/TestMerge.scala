@@ -504,9 +504,9 @@ class TestMerge {
       }).toList
 
     val actual: List[(String, Int)] =
-      (pc.sp.getAllObservations.asScala map {
+      new ObservationIterator(pc.sp).asScala.map {
         obs => pc.getTitle(obs.getNodeKey) -> obs.getObservationNumber
-      }).toList
+      }.toList
 
     assertEquals(expected, actual)
   }

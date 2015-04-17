@@ -19,7 +19,8 @@ object MergeCorrection {
       for {
         prm <- ObsPermissionCorrection(mc)(mp, hasPermission)
         on  <- ObsNumberCorrection(mc)(prm).liftVcs
-        v   <- ValidityCorrection(mc)(on).liftVcs
+        tn  <- TemplateNumberingCorrection(mc)(on).liftVcs
+        v   <- ValidityCorrection(mc)(tn).liftVcs
         sof <- StaffOnlyFieldCorrection(mc)(v, hasPermission)
       } yield sof
 }

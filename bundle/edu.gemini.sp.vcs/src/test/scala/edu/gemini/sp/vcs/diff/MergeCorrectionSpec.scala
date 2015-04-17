@@ -2,6 +2,7 @@ package edu.gemini.sp.vcs.diff
 
 import edu.gemini.pot.sp.SPNodeKey
 import edu.gemini.pot.sp.version._
+import edu.gemini.sp.vcs.diff.ProgramLocation.{Remote, Local}
 import edu.gemini.spModel.conflict.ConflictFolder
 import edu.gemini.spModel.data.ISPDataObject
 import edu.gemini.spModel.gemini.gmos.InstGmosSouth
@@ -10,7 +11,8 @@ import edu.gemini.spModel.obs.SPObservation
 import edu.gemini.spModel.obslog.{ObsQaLog, ObsExecLog}
 import edu.gemini.spModel.seqcomp.SeqBase
 import edu.gemini.spModel.target.obsComp.TargetObsComp
-import edu.gemini.spModel.template.TemplateFolder
+import edu.gemini.spModel.template.{TemplateGroup, TemplateFolder}
+import edu.gemini.spModel.util.VersionToken
 import org.specs2.matcher.{MatchResult, Expectable, Matcher}
 
 import org.specs2.mutable.Specification
@@ -20,6 +22,10 @@ import Scalaz._
 
 class MergeCorrectionSpec extends Specification {
   import NodeDetail._
+
+  val LocalOnly: Set[ProgramLocation]  = Set(Local)
+  val RemoteOnly: Set[ProgramLocation] = Set(Remote)
+  val Both: Set[ProgramLocation]       = Set(Local, Remote)
 
   val lifespanId: LifespanId = LifespanId.random
 
@@ -37,6 +43,9 @@ class MergeCorrectionSpec extends Specification {
   def prog: MergeNode = nonObs(new SPProgram)
 
   def templateFolder: MergeNode = nonObs(new TemplateFolder)
+
+  def templateGroup(vt: VersionToken): MergeNode =
+    new TemplateGroup() <| (_.setVersionToken(vt)) |> (tg => nonObs(tg))
 
   def obs(num: Int): MergeNode = mergeNode(new SPObservation, Some(num))
 

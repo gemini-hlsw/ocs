@@ -12,9 +12,6 @@ import scalaz._
 import Scalaz._
 
 class ObsNumberCorrectionSpec extends MergeCorrectionSpec {
-  val LocalOnly: Set[ProgramLocation]  = Set(Local)
-  val RemoteOnly: Set[ProgramLocation] = Set(Remote)
-  val Both: Set[ProgramLocation]       = Set(Local, Remote)
 
   def test(expected: List[Int], merged: (Int, Set[ProgramLocation])*): Boolean = {
     val obsList = merged.map { case (i,_) => obs(i).leaf }
