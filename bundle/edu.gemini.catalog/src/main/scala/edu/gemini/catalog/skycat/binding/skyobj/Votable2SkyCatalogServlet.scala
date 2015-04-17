@@ -62,6 +62,7 @@ class Votable2SkyCatalogServlet extends HttpServlet {
     val dec = params.get("dec")
     val r1 = params.get("r1")
     val r2 = params.get("r2")
+    val max = params.get("max")
 
     // Extract magnitude limits
     val lowMagLimit = params.flatMap {
@@ -104,7 +105,9 @@ class Votable2SkyCatalogServlet extends HttpServlet {
               q.result.targets.rows.filter(t => q.query.filterOnMagnitude(t, magnitudeExtractor(candidateBands(b))(t)))
             }.getOrElse(q.result.targets.rows)
 
-            s"$headers\n${rows.map(toRow).mkString("\n")}"
+            val countAdjustedRows = rows.takeRight(max.map(_.parseInt.getOrElse(Int.MaxValue)).getOrElse(Int.MaxValue))
+
+            s"$headers\n${countAdjustedRows.map(toRow).mkString("\n")}"
           }
         }
 
