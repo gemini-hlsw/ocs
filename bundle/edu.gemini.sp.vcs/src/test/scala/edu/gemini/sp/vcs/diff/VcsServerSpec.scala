@@ -1,6 +1,7 @@
 package edu.gemini.sp.vcs.diff
 
 
+import edu.gemini.pot.sp.Conflict.ReplacedRemoteDelete
 import edu.gemini.pot.sp._
 import edu.gemini.pot.sp.version._
 import edu.gemini.pot.spdb.IDBDatabaseService
@@ -188,12 +189,11 @@ class VcsServerSpec extends VcsSpecification {
 
     "update the program if there are differences" in withVcs { env =>
       val vm        = env.local.prog.getVersions
-      val nv        = vm.getOrElse(Key, EmptyNodeVersions)
-      val nv2       = nv.incr(LifespanId.random)
+      val nv        = vm.getOrElse(Key, EmptyNodeVersions).incr(LifespanId.random)
 
       // create a merge plan with an updated title for the program node
       val dob    = new SPProgram <| (_.setTitle("The Myth of Sisyphus"))
-      val update = MergeNode.modified(Key, nv2, dob, NodeDetail.Empty, Conflicts.EMPTY).node()
+      val update = MergeNode.modified(Key, nv, dob, NodeDetail.Empty, Conflicts.EMPTY).node()
       val mp     = MergePlan(update, Set.empty)
 
       val svs = new env.local.server.SecureVcsService(StaffUser)
@@ -201,6 +201,26 @@ class VcsServerSpec extends VcsSpecification {
         case \/-(true)  => env.local.progTitle must_== "The Myth of Sisyphus"
         case \/-(false) => ko("update ignored")
         case x          => ko("didn't expect: " + x)
+      }
+    }
+
+    "fail if there are conflicts in the MergePlan" in withVcs { env =>
+      val vm        = env.local.prog.getVersions
+      val nv        = vm.getOrElse(Key, EmptyNodeVersions).incr(LifespanId.random)
+
+      // create a merge plan with an updated title for the program node, but
+      // add a conflict
+      val dob    = new SPProgram <| (_.setTitle("The Myth of Sisyphus"))
+      val con    = Conflicts.EMPTY.withConflictNote(new ReplacedRemoteDelete(Key))
+      val update = MergeNode.modified(Key, nv, dob, NodeDetail.Empty, con).node()
+      val mp     = MergePlan(update, Set.empty)
+
+      val svs = new env.local.server.SecureVcsService(StaffUser)
+      svs.storeDiffs(Q1, mp.encode) match {
+        case \/-(true)        => ko("conflict ignored")
+        case \/-(false)       => ko("update and conflict ignored")
+        case -\/(HasConflict) => ok("can't update with conflicts")
+        case x                => ko("didn't expect: " + x)
       }
     }
   }

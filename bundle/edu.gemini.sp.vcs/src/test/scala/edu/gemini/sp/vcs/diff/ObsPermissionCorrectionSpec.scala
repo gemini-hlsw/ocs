@@ -159,7 +159,7 @@ class ObsPermissionCorrectionSpec extends VcsSpecification {
     "allow a staff person to advance the status of a remotely deleted observation" in withVcs { env =>
       env.remote.delete(ObsKey)
       env.local.setObsPhase2Status(ObsKey, PHASE_2_COMPLETE)
-      afterSync(env, StaffUserPrincipal) { bothAre(PHASE_2_COMPLETE, ObsKey, env) }
+      afterPull(env, StaffUserPrincipal) { localIs(PHASE_2_COMPLETE, ObsKey, env) }
     }
 
     "move inappropriately edited observations to a conflict folder" in withVcs { env =>
@@ -199,7 +199,7 @@ class ObsPermissionCorrectionSpec extends VcsSpecification {
 
       // now we expect that the note is not duplicated in the new observation
       // that is created and that it has version information from both sides
-      afterSync(env, PiUserPrincipal) {
+      afterPull(env, PiUserPrincipal) {
         env.local.nodeVersions(noteKey) must_== rVersions.sync(lVersions)
       }
     }

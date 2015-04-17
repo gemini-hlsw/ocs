@@ -66,6 +66,15 @@ case class MergePlan(update: Tree[MergeNode], delete: Set[Missing]) {
     up |+| del
   }
 
+  /** True if this plan contains non-empty `Conflicts`, false otherwise.
+   */
+  def hasConflicts: Boolean =
+    update.sFoldRight(false) { (mn, b) =>
+      b || (mn match {
+        case Modified(_, _, _, _, con) => !con.isEmpty
+        case _                         => false
+      })
+    }
 
   /** Accepts a program and edits it according to this merge plan. */
   def merge(f: ISPFactory, p: ISPProgram): VcsAction[Unit] = {
