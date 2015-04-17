@@ -1,10 +1,12 @@
 package edu.gemini.catalog.skycat.binding.skyobj
 
 import javax.servlet.http.{HttpServletRequest, HttpServletResponse, HttpServlet}
-import edu.gemini.catalog.api.{CatalogQuery, RadiusConstraint}
+import edu.gemini.catalog.api._
 import edu.gemini.catalog.votable.VoTableClient
+import edu.gemini.shared.skyobject.Magnitude.Band
 import edu.gemini.spModel.core.Target.SiderealTarget
 import edu.gemini.spModel.core._
+import edu.gemini.pot.ModelConverters._
 
 import scala.collection.JavaConverters._
 import scala.concurrent.Await
@@ -29,6 +31,30 @@ class Votable2SkyCatalogServlet extends HttpServlet {
   private def toRow(t: SiderealTarget):String = f"${t.name}%-10s\t${t.coordinates.ra.toAngle.toDegrees}%+03.07f\t${t.coordinates.dec.toDegrees}%+03.07f\t${properMotion(t)}\t${magnitudes(t)}"
   private def headers:String = s"4UC\tRA\tDEC\tpmRA\tpmDEC\t${UCAC4.magnitudeBands.map(_.name).mkString("\t")}\n-"
 
+  private val lowLimitMagRegex = """(.*)magLL""".r
+  private val highLimitMagRegex = """(.*)magHL""".r
+
+  private def extractBand(band: String, value: String) = {
+    val b = band match {
+      // Special case f.
+      case "f." => \/.right(MagnitudeBand.R)
+      case x    => \/.fromTryCatch(Band.valueOf(x)).map(_.toNewModel)
+    }
+    val v = value.parseDouble.disjunction
+    for {
+      b0 <- b
+      v0 <- v
+    } yield (b0, v0)
+  }
+
+  def magnitudeExtractor(bands: List[MagnitudeBand]) = (st: SiderealTarget) => bands.flatMap(st.magnitudeIn).headOption
+
+  def candidateBands(band: MagnitudeBand): List[MagnitudeBand] = band match {
+      case MagnitudeBand.R => List(MagnitudeBand._r, MagnitudeBand.R, MagnitudeBand.UC)
+      case _               => List(band)
+    }
+
+
   override protected def doGet(req: HttpServletRequest, resp: HttpServletResponse) {
 
     val params:Map[String, String] = req.getParameterMap.asScala.map(t => t._1.toString -> t._2.asInstanceOf[Array[String]](0)).toMap
@@ -36,6 +62,17 @@ class Votable2SkyCatalogServlet extends HttpServlet {
     val dec = params.get("dec")
     val r1 = params.get("r1")
     val r2 = params.get("r2")
+
+    // Extract magnitude limits
+    val lowMagLimit = params.flatMap {
+      case (lowLimitMagRegex(x), v) => (x, v).some
+      case _                        => None
+    }.headOption.map(Function.tupled(extractBand))
+    val highMagLimit = params.flatMap {
+      case (highLimitMagRegex(x), v) => (x, v).some
+      case _                        => None
+    }.headOption.map(Function.tupled(extractBand))
+
     val out = (ra |@| dec |@| r1 |@| r2){(r, d, ra1, ra2) =>
       for {
         raAngle      <- Angle.parseHMS(r)
@@ -47,13 +84,27 @@ class Votable2SkyCatalogServlet extends HttpServlet {
 
         val rc = RadiusConstraint.between(Angle.fromArcmin(innerRadius), Angle.fromArcmin(outterRadius))
 
-        val query = CatalogQuery.catalogQuery(coordinates, rc, None)
+        // Build magnitude range
+        val mr = (lowMagLimit |@| highMagLimit){(l, h) =>
+          for {
+            l0 <- l
+            h0 <- h
+          } yield MagnitudeRange(FaintnessConstraint(h0._2), SaturationConstraint(l0._2).some)
+        }
+        // Reference band should be the same for low and high limit
+        val referenceBand = lowMagLimit.map(x => x.map(_._1)) >>= (_.toOption)
+
+        val query = CatalogQuery.catalogQueryWithoutBand(coordinates, rc, mr >>= (_.toOption))
 
         val result = VoTableClient.catalog(query).map { q =>
           if (q.result.containsError) {
             q.result.problems.mkString(", ")
           } else {
-            s"$headers\n${q.result.targets.rows.map(toRow).mkString("\n")}"
+            val rows = referenceBand.map { b =>
+              q.result.targets.rows.filter(t => q.query.filterOnMagnitude(t, magnitudeExtractor(candidateBands(b))(t)))
+            }.getOrElse(q.result.targets.rows)
+
+            s"$headers\n${rows.map(toRow).mkString("\n")}"
           }
         }
 

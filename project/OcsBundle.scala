@@ -263,6 +263,7 @@ trait OcsBundle {
     project.in(file("bundle/edu.gemini.catalog")).dependsOn(
       bundle_edu_gemini_shared_skyobject,
       bundle_edu_gemini_shared_util,
+      bundle_edu_gemini_pot,
       bundle_edu_gemini_util_skycalc,
       bundle_edu_gemini_spModel_core         % "test->test;compile->compile",
       bundle_jsky_coords,
