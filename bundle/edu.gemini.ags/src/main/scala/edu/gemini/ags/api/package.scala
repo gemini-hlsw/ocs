@@ -11,7 +11,7 @@ package object api {
   /**
    * For a given target set of probe bands build a MagnitudeExtractor that returns the first magnitude on the target
    */
-  def magnitudeExtractor(probeBands: List[MagnitudeBand]): MagnitudeExtractor = (st: SiderealTarget) => probeBands.map(st.magnitudeIn).flatten.headOption // Picks the first available magnitude on the target
+  def magnitudeExtractor(probeBands: List[MagnitudeBand]): MagnitudeExtractor = (st: SiderealTarget) => probeBands.flatMap(st.magnitudeIn).headOption // Picks the first available magnitude on the target
 
   /**
    * Default function to find the valid probe bands from a single band.

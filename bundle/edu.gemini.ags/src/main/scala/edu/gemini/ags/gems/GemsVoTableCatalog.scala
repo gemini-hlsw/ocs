@@ -105,7 +105,7 @@ case class GemsVoTableCatalog(backend: VoTableBackend = RemoteBackend) {
     val queriesMap = queries.toMap
 
     VoTableClient.catalogs(queries.map(_._1), backend).flatMap {
-      case l if l.filter(_.result.containsError).nonEmpty =>
+      case l if l.exists(_.result.containsError) =>
         Future.failed(CatalogException(l.map(_.result.problems).suml))
       case l =>
         Future.successful {

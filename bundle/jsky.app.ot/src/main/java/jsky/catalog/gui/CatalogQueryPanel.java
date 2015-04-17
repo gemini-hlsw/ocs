@@ -11,7 +11,6 @@
 package jsky.catalog.gui;
 
 import jsky.catalog.*;
-import jsky.coords.CoordinateRadius;
 import jsky.util.Preferences;
 import jsky.util.Storeable;
 import jsky.util.gui.GridBagUtil;
@@ -250,19 +249,11 @@ public class CatalogQueryPanel extends JPanel
 
 
     /**
-     * Make and return a checkbutton
-     */
-    protected JCheckBox makeCheckBox() {
-        return new JCheckBox();
-    }
-
-
-    /**
      * Make and return a combo box with the values that the given field may have.
      */
     protected JComponent makeComboBox(FieldDesc p) {
         int n = p.getNumOptions();
-        final JComboBox cb = new JComboBox();
+        final JComboBox<String> cb = new JComboBox<>();
         String s = p.getDescription();
         if (s != null)
             cb.setToolTipText(s);
@@ -276,11 +267,7 @@ public class CatalogQueryPanel extends JPanel
             cb.addItem(p.getOptionName(i));
         }
 
-        cb.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                fireChange(cb);
-            }
-        });
+        cb.addActionListener(e -> fireChange(cb));
 
         cb.setPreferredSize(MIN_COMPONENT_SIZE);
         return cb;
@@ -525,7 +512,7 @@ public class CatalogQueryPanel extends JPanel
 
     /** Store the current settings in a serializable object and return the object. */
     public Object storeSettings() {
-        Hashtable<String, Object> map = new Hashtable<String, Object>();
+        Hashtable<String, Object> map = new Hashtable<>();
         int n = Math.min(_components.length, _catalog.getNumParams());
         for (int i = 0; i < n; i++) {
             if (_components[i] != null) {
