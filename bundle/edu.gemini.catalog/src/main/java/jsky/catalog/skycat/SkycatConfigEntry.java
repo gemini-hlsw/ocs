@@ -211,13 +211,13 @@ public class SkycatConfigEntry {
         if (cat_dir != null) {
             int mark = cat_dir.indexOf("{") + 1;
             if (mark > 0) {
-	        String envVarVal = null;
-                if (cat_dir.indexOf("}") > -1) {
+                String envVarVal;
+                if (cat_dir.contains("}")) {
                     String envVarKey = cat_dir.substring(mark, cat_dir.indexOf("}"));
                     envVarVal = System.getProperty(envVarKey);
-		    if (envVarVal == null) {
-			envVarVal = System.getProperty("jnlp."+envVarKey);
-		    }
+                    if (envVarVal == null) {
+                        envVarVal = System.getProperty("jnlp."+envVarKey);
+                    }
                     mark = cat_dir.indexOf("/");
                     cat_dir = cat_dir.substring(mark, cat_dir.length());
                     cat_dir = envVarVal + cat_dir;
@@ -303,7 +303,7 @@ public class SkycatConfigEntry {
             _paramDesc[0] = new FieldDescAdapter(OBJECT);
             _paramDesc[0].setDescription("Enter the name of the object");
         } else if (isCatalog || _servType.equals("imagesvr")) {
-            Vector params = new Vector(10, 10);
+            Vector<FieldDescAdapter> params = new Vector<>(10, 10);
             FieldDescAdapter p;
             boolean hasCoords = false;
 
@@ -317,10 +317,10 @@ public class SkycatConfigEntry {
 
                 p = new FieldDescAdapter(NAME_SERVER);
                 p.setDescription("Select the name server to use to resolve the object name");
-                List l = _configFile.getNameServers();
+                List<Catalog> l = _configFile.getNameServers();
                 NameValue[] ar = new NameValue[l.size()];
                 for (int i = 0; i < ar.length; i++) {
-                    Catalog cat = (Catalog) l.get(i);
+                    Catalog cat = l.get(i);
                     ar[i] = new NameValue(cat.getName(), cat);
                 }
                 p.setOptions(ar);
@@ -390,7 +390,7 @@ public class SkycatConfigEntry {
                 p = new FieldDescAdapter(MAX_OBJECTS);
                 p.setDescription("The maximum number of objects to return");
                 p.setFieldClass(Integer.class);
-                p.setDefaultValue(new Integer(1000));
+                p.setDefaultValue(1000);
                 params.add(p);
 
                 p = new FieldDescAdapter(FAINTEST);
@@ -423,7 +423,7 @@ public class SkycatConfigEntry {
      * Check for additional search parameters defined in the "search_cols" property
      * and add them to the given parameter description vector.
      */
-    protected void checkSearchCols(Vector params) {
+    protected void checkSearchCols(Vector<FieldDescAdapter> params) {
         String searchCols = getProperty(SkycatConfigFile.SEARCH_COLS);
         if (searchCols != null && searchCols.length() != 0) {
             // parse the tcl lists
@@ -450,10 +450,6 @@ public class SkycatConfigEntry {
                 }
             }
         }
-    }
-
-    public static NameValue[] getEquinoxOptions() {
-        return _equinoxOptions;
     }
 
     /** Return the value of the named property as a String */
@@ -514,9 +510,9 @@ public class SkycatConfigEntry {
     public FieldDesc getParamDesc(String name) {
         if (_paramDesc == null)
             determineSearchParameters();
-        for (int i = 0; i < _paramDesc.length; i++)
-            if (_paramDesc[i] != null && _paramDesc[i].getName().equals(name))
-                return _paramDesc[i];
+        for (FieldDescAdapter a_paramDesc : _paramDesc)
+            if (a_paramDesc != null && a_paramDesc.getName().equals(name))
+                return a_paramDesc;
         return null;
     }
 
@@ -598,7 +594,7 @@ public class SkycatConfigEntry {
      */
     private TablePlotSymbol[] _parsePlotSymbolInfo() {
         String symbolInfo = getProperty(SkycatConfigFile.SYMBOL);
-        String[] ar = null;
+        String[] ar;
         if (symbolInfo == null) {
             // default symbol settings
             ar = new String[]{"", "square yellow", "4"};

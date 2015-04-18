@@ -31,11 +31,12 @@ public final class MagnitudeLimits implements Serializable {
 
         protected abstract T make(double b);
 
+        @SuppressWarnings("unchecked")
         @Override public boolean equals(Object o) {
             if (this == o) return true;
             if (!(o.getClass().equals(this.getClass()))) return false;
 
-            BaseLimit baseLimit = (BaseLimit) o;
+            BaseLimit<T> baseLimit = (BaseLimit<T>) o;
             return (Double.compare(baseLimit.brightness, brightness) == 0);
         }
 

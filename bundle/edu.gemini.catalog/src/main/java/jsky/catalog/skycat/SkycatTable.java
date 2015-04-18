@@ -131,7 +131,7 @@ public class SkycatTable extends MemoryCatalog {
      * @param dataRows a vector of data rows, each of which is a vector of column values.
      * @param fields an array of objects describing the table columns
      */
-    public SkycatTable(SkycatConfigEntry configEntry, Vector dataRows, FieldDesc[] fields) {
+    public SkycatTable(SkycatConfigEntry configEntry, Vector<Vector<Object>> dataRows, FieldDesc[] fields) {
         super(fields, dataRows);
         String name = configEntry.getShortName();
         setName(name);
@@ -150,7 +150,7 @@ public class SkycatTable extends MemoryCatalog {
      * @param fields an array of objects describing the table columns
      * @param dataRows a vector of data rows, each of which is a vector of column values.
      */
-    protected SkycatTable(SkycatTable table, FieldDesc[] fields, Vector dataRows) {
+    protected SkycatTable(SkycatTable table, FieldDesc[] fields, Vector<Vector<Object>> dataRows) {
         super(fields, dataRows);
         setName(table.getName());
         setId(table.getId());
@@ -280,7 +280,7 @@ public class SkycatTable extends MemoryCatalog {
      * @param fields an array of objects describing the table columns
      * @param dataRows a vector of data rows, each of which is a vector of column values.
      */
-    protected MemoryCatalog makeQueryResult(FieldDesc[] fields, Vector dataRows) {
+    protected MemoryCatalog makeQueryResult(FieldDesc[] fields, Vector<Vector<Object>> dataRows) {
         SkycatTable table = new SkycatTable(this, fields, dataRows);
         table.setProperties(getProperties());
         return table;
@@ -294,7 +294,7 @@ public class SkycatTable extends MemoryCatalog {
     protected void _saveProperties(PrintStream out) {
         Properties properties = getProperties();
         out.println("# Begin properties");
-        for (Enumeration e = properties.propertyNames(); e.hasMoreElements();) {
+        for (Enumeration<?> e = properties.propertyNames(); e.hasMoreElements();) {
             String key = (String) e.nextElement();
             if (!(key.equals(SkycatConfigFile.LONG_NAME)
                     || key.equals(SkycatConfigFile.SHORT_NAME)

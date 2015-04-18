@@ -18,7 +18,6 @@ public abstract class AbstractSearchCondition implements SearchCondition, Serial
     /** Describes the column or parameter whose values are given here */
     private FieldDesc _fieldDesc;
 
-
     /**
      * Create a new AbstractSearchCondition for the given column or parameter description.
      */

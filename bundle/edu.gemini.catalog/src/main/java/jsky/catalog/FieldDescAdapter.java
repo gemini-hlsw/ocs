@@ -36,7 +36,7 @@ public class FieldDescAdapter implements FieldDesc, Serializable {
     private String _description;
 
     // A Class object representing the data type of the field values
-    private Class _fieldClass = String.class;
+    private Class<?> _fieldClass = String.class;
 
     // True if this field is the min value of a range
     private boolean _minFlag = false;
@@ -131,11 +131,11 @@ public class FieldDescAdapter implements FieldDesc, Serializable {
         return _description;
     }
 
-    public void setFieldClass(Class fieldClass) {
+    public void setFieldClass(Class<?> fieldClass) {
         _fieldClass = fieldClass;
     }
 
-    public Class getFieldClass() {
+    public Class<?> getFieldClass() {
         return _fieldClass;
     }
 
