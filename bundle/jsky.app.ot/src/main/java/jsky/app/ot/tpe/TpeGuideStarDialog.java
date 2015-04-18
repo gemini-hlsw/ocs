@@ -64,8 +64,9 @@ public class TpeGuideStarDialog extends TpeGuideStarDialogForm
 
     private static final String CATALOG_2MASS = "2MASS";
     private static final String CATALOG_UCAC3 = "UCAC3";
+    private static final String CATALOG_UCAC4 = "UCAC4";
 
-    private static final String OPTICAL_DEFAULT_CATALOG = CATALOG_UCAC3;
+    private static final String OPTICAL_DEFAULT_CATALOG = CATALOG_UCAC4;
 
     private static final String EMPTY_TEXT = " ";
     /**
@@ -243,7 +244,7 @@ public class TpeGuideStarDialog extends TpeGuideStarDialogForm
                     return;
                 }
             } else if (instrument.equals(GMOS_N) || instrument.equals(GMOS_S)) {
-                if (_selectDefaultCatalog(CATALOG_UCAC3, changeOption)) {
+                if (_selectDefaultCatalog(CATALOG_UCAC4, changeOption)) {
                     return;
                 }
             } else if (instrument.equals(FLAMINGOS2)) {
@@ -254,7 +255,7 @@ public class TpeGuideStarDialog extends TpeGuideStarDialogForm
                 }
             }
         } else if (tag.startsWith(PWFS) || tag.startsWith(AOWFS)) {
-             if (_selectDefaultCatalog(CATALOG_UCAC3, changeOption)) {
+             if (_selectDefaultCatalog(CATALOG_UCAC4, changeOption)) {
                  return;
              }
         }
