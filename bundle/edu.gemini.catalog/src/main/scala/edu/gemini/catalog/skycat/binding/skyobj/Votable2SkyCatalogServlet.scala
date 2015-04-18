@@ -33,10 +33,12 @@ class Votable2SkyCatalogServlet extends HttpServlet {
 
   private val lowLimitMagRegex = """(.*)magLL""".r
   private val highLimitMagRegex = """(.*)magHL""".r
+  private val magFilterRegex = """(.*)mag""".r
+  private val magRangeFilterRegex = """(.*)\.\.(.*)""".r
 
   private def extractBand(band: String, value: String) = {
     val b = band match {
-      // Special case f.
+      // Special case f. means R
       case "f." => \/.right(MagnitudeBand.R)
       case x    => \/.fromTryCatch(Band.valueOf(x)).map(_.toNewModel)
     }
@@ -53,7 +55,6 @@ class Votable2SkyCatalogServlet extends HttpServlet {
       case MagnitudeBand.R => List(MagnitudeBand._r, MagnitudeBand.R, MagnitudeBand.UC)
       case _               => List(band)
     }
-
 
   override protected def doGet(req: HttpServletRequest, resp: HttpServletResponse) {
 
@@ -74,6 +75,12 @@ class Votable2SkyCatalogServlet extends HttpServlet {
       case _                        => None
     }.headOption.map(Function.tupled(extractBand))
 
+    // Additional magnitude filters
+    val mags = params.flatMap {
+      case (magFilterRegex(b), magRangeFilterRegex(u, l)) => (b, l, u).some
+      case _                                              => None
+    }
+
     val out = (ra |@| dec |@| r1 |@| r2){(r, d, ra1, ra2) =>
       for {
         raAngle      <- Angle.parseHMS(r)
@@ -82,8 +89,9 @@ class Votable2SkyCatalogServlet extends HttpServlet {
         outterRadius <- ra2.parseDouble.disjunction
       } yield {
         val coordinates = Coordinates(RightAscension.fromAngle(raAngle), Declination.fromAngle(decAngle).getOrElse(Declination.zero))
-
         val rc = RadiusConstraint.between(Angle.fromArcmin(innerRadius), Angle.fromArcmin(outterRadius))
+        // Reference band should be the same for low and high limit
+        val referenceBand = lowMagLimit.map(x => x.map(_._1)) >>= (_.toOption)
 
         // Build magnitude range
         val mr = (lowMagLimit |@| highMagLimit){(l, h) =>
@@ -92,8 +100,17 @@ class Votable2SkyCatalogServlet extends HttpServlet {
             h0 <- h
           } yield MagnitudeRange(FaintnessConstraint(h0._2), SaturationConstraint(l0._2).some)
         }
-        // Reference band should be the same for low and high limit
-        val referenceBand = lowMagLimit.map(x => x.map(_._1)) >>= (_.toOption)
+
+        // Secondary filters
+        val magFilters = mags.collect {
+            case (b, u, l) => for {
+                u0 <- u.parseDouble.disjunction
+                l0 <- l.parseDouble.disjunction
+                b0 <- \/.fromTryCatch(Band.valueOf(b)).map(_.toNewModel)
+              } yield MagnitudeConstraints(b0, FaintnessConstraint(u0), SaturationConstraint(l0).some)
+          }.collect {
+            case \/-(mc) => mc
+          }
 
         val query = CatalogQuery.catalogQueryWithoutBand(coordinates, rc, mr >>= (_.toOption))
 
@@ -105,7 +122,12 @@ class Votable2SkyCatalogServlet extends HttpServlet {
               q.result.targets.rows.filter(t => q.query.filterOnMagnitude(t, magnitudeExtractor(candidateBands(b))(t)))
             }.getOrElse(q.result.targets.rows)
 
-            val countAdjustedRows = rows.takeRight(max.map(_.parseInt.getOrElse(Int.MaxValue)).getOrElse(Int.MaxValue))
+            // Filter on magnitudes
+            val filteredRows = magFilters.foldLeft(rows) { (r, f) =>
+              r.filter(f.filter)
+            }
+            // Adjust count
+            val countAdjustedRows = filteredRows.takeRight(max.map(_.parseInt.getOrElse(Int.MaxValue)).getOrElse(Int.MaxValue))
 
             s"$headers\n${countAdjustedRows.map(toRow).mkString("\n")}"
           }
