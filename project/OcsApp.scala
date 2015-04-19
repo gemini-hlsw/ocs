@@ -72,6 +72,10 @@ trait OcsApp { this: OcsBundle =>
     bundle_edu_gemini_itc
   )
 
+  lazy val app_seqexec = project.in(file("app/seqexec")).dependsOn(
+    bundle_edu_gemini_seqexec_client
+  )
+
   lazy val app_weather = project.in(file("app/weather")).dependsOn(
     bundle_edu_gemini_shared_ca,
     bundle_edu_gemini_spdb_reports_collection
