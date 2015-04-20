@@ -48,7 +48,7 @@ class TelescopeForm extends JPanel {
         final JPanel spacerPanel = new JPanel();
         final JScrollPane posTableScrollPane = new JScrollPane();
         positionTable = new TelescopePosTableWidget(owner);
-        coordinatesPanel = new JPanel();
+//        coordinatesPanel = new JPanel();
 //        objectGBW = new JPanel();
         guideGroupPanel = new JPanel();
         tag = new JComboBox();
@@ -231,7 +231,7 @@ class TelescopeForm extends JPanel {
 
         //======== coordinatesPanel ========
         {
-            coordinatesPanel.setLayout(new BorderLayout(0, 5));
+//            coordinatesPanel.setLayout(new BorderLayout(0, 5));
 
             //======== objectGBW ========
             {
@@ -356,7 +356,7 @@ class TelescopeForm extends JPanel {
                     GridBagConstraints.NORTH, GridBagConstraints.NONE,
                     new Insets(233, 0, 0, 0), 0, 0));
             }
-            coordinatesPanel.add(guideGroupPanel, BorderLayout.CENTER);
+//            coordinatesPanel.add(guideGroupPanel, BorderLayout.CENTER);
             guideGroupPanel.setVisible(false);
 
 //            //======== extrasFolder ========
@@ -740,9 +740,9 @@ class TelescopeForm extends JPanel {
 //            }
 //            coordinatesPanel.add(extrasFolder, BorderLayout.SOUTH);
         }
-        add(coordinatesPanel, new GridBagConstraints(0, 1, 1, 1, 1.0, 0.0,
-            GridBagConstraints.CENTER, GridBagConstraints.BOTH,
-            new Insets(5, 0, 5, 0), 0, 0));
+//        add(coordinatesPanel, new GridBagConstraints(0, 1, 1, 1, 1.0, 0.0,
+//            GridBagConstraints.CENTER, GridBagConstraints.BOTH,
+//            new Insets(5, 0, 5, 0), 0, 0));
 
         //======== guidingPanel ========
 
@@ -783,7 +783,7 @@ class TelescopeForm extends JPanel {
     JButton duplicateButton;
     JButton primaryButton;
     TelescopePosTableWidget positionTable;
-    JPanel coordinatesPanel;
+//    JPanel coordinatesPanel;
 //    JPanel objectGBW;
     JPanel guideGroupPanel;
     JComboBox<PositionType> tag;

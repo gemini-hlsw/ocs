@@ -162,20 +162,20 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 //
 //        _w.planetsPanel.setVisible(false);
 
-        // Re-wrap the coordinates panel
-        _w.remove(_w.coordinatesPanel);
-        final JPanel contentPanel = new JPanel(new GridBagLayout()) {{
-            final JPanel content = new JPanel(new BorderLayout(10, 0)) {{
-                add(_w.coordinatesPanel, BorderLayout.CENTER);
-            }};
-            add(content, new GridBagConstraints() {{
-                gridx = 0;
-                gridy = 0;
-                weightx = 1.0;
-                weighty = 1.0;
-                fill = BOTH;
-                anchor = NORTHWEST;
-            }});
+//        // Re-wrap the coordinates panel
+//        _w.remove(_w.coordinatesPanel);
+//        final JPanel contentPanel = new JPanel(new GridBagLayout()) {{
+//            final JPanel content = new JPanel(new BorderLayout(10, 0)) {{
+//                add(_w.coordinatesPanel, BorderLayout.CENTER);
+//            }};
+//            add(content, new GridBagConstraints() {{
+//                gridx = 0;
+//                gridy = 0;
+//                weightx = 1.0;
+//                weighty = 1.0;
+//                fill = BOTH;
+//                anchor = NORTHWEST;
+//            }});
 //            final JPanel buttonsPanel = new JPanel() {{
 //                setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
 //                add(_trackingButton);
@@ -211,26 +211,35 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 //                    }
 //                }
 //            });
+//
+//        }};
+//        _w.coordinatesPanel.setBorder(BorderFactory.createCompoundBorder(
+//            BorderFactory.createBevelBorder(BevelBorder.RAISED),
+//            BorderFactory.createEmptyBorder(10, 10, 10, 10)
+//        ));
+//
+//
+//        contentPanel.setBorder(BorderFactory.createLineBorder(Color.RED));
+//
+//        _w.add(contentPanel, new GridBagConstraints() {{
+//            gridx = 0;
+//            gridy = 1;
+//            fill = HORIZONTAL;
+//            weightx = 1.0;
+//            weighty = 2.0;
+//            insets = new Insets(5, 0, 5, 0);
+//        }});
 
-        }};
-        _w.coordinatesPanel.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createBevelBorder(BevelBorder.RAISED),
-            BorderFactory.createEmptyBorder(10, 10, 10, 10)
-        ));
-
-
-        contentPanel.setBorder(BorderFactory.createLineBorder(Color.RED));
-
-        _w.add(contentPanel, new GridBagConstraints() {{
+        _w.add(_detailEditor, new GridBagConstraints() {{
             gridx = 0;
             gridy = 1;
-            fill = HORIZONTAL;
-            weightx = 1.0;
+            fill = BOTH;
+            weightx = 2.0;
             weighty = 2.0;
             insets = new Insets(5, 0, 5, 0);
         }});
 
-        _w.add(_detailEditor, new GridBagConstraints() {{
+        _w.add(_w.guideGroupPanel, new GridBagConstraints() {{
             gridx = 0;
             gridy = 2;
             fill = BOTH;
@@ -1108,6 +1117,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 //                        _w.objectGBW.setVisible(false);
 //                        _w.extrasFolder.setVisible(false);
                         _w.guideGroupPanel.setVisible(true);
+                        _detailEditor.setVisible(false);
 //                        if (_trackingButton.isSelected())
 //                            _trackingButton.doClick();
 //                        _trackingButton.setVisible(false);
@@ -1251,6 +1261,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         final boolean editable = OTOptions.areRootAndCurrentObsIfAnyEditable(getProgram(), getContextObservation());
 //        _w.objectGBW.setEnabled(editable);
         _w.guideGroupPanel.setVisible(false);
+        _detailEditor.setVisible(true);
 //        _trackingButton.setVisible(!isNonSidereal);
 
         // Get all the legally available guiders in the current context.
