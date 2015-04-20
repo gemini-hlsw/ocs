@@ -66,7 +66,7 @@ class TelescopeForm extends JPanel {
         xaxis = new TextBoxWidget();
         final JLabel dec_El_STW = new JLabel();
         yaxis = new TextBoxWidget();
-        extrasFolder = new JPanel();
+//        extrasFolder = new JPanel();
 //        nonsiderealPW = new JPanel();
         epochofelUnits = new JLabel();
         orbincUnits = new JLabel();
@@ -359,12 +359,12 @@ class TelescopeForm extends JPanel {
             coordinatesPanel.add(guideGroupPanel, BorderLayout.CENTER);
             guideGroupPanel.setVisible(false);
 
-            //======== extrasFolder ========
-            {
-                extrasFolder.setLayout(new CardLayout());
-
-                //======== nonsiderealPW ========
-                {
+//            //======== extrasFolder ========
+//            {
+//                extrasFolder.setLayout(new CardLayout());
+//
+//                //======== nonsiderealPW ========
+//                {
 //                    nonsiderealPW.setLayout(new GridBagLayout());
 //                    ((GridBagLayout)nonsiderealPW.getLayout()).rowHeights = new int[] {0, 0, 0, 0, 0, 0, 11, 0, 5, 0, 6};
 //                    ((GridBagLayout)nonsiderealPW.getLayout()).columnWeights = new double[] {0.0, 1.0, 0.0, 0.0, 0.0, 0.0};
@@ -680,32 +680,32 @@ class TelescopeForm extends JPanel {
 //                    nonsiderealPW.add(planetsPanel, new GridBagConstraints(0, 7, 6, 1, 0.0, 0.0,
 //                        GridBagConstraints.CENTER, GridBagConstraints.BOTH,
 //                        new Insets(0, 0, 0, 0), 0, 0));
-
-                    //======== panel1 ========
-                    {
-                        panel1.setLayout(new FormLayout(
-                            new ColumnSpec[] {
-                                new ColumnSpec(ColumnSpec.RIGHT, Sizes.DEFAULT, FormSpec.DEFAULT_GROW),
-                                FormFactory.LABEL_COMPONENT_GAP_COLSPEC,
-                                FormFactory.DEFAULT_COLSPEC,
-                                FormFactory.LABEL_COMPONENT_GAP_COLSPEC,
-                                //FormFactory.DEFAULT_COLSPEC,
-                                ColumnSpec.decode("75dlu"),
-                                FormFactory.LABEL_COMPONENT_GAP_COLSPEC,
-                                FormFactory.DEFAULT_COLSPEC,
-                                FormFactory.LABEL_COMPONENT_GAP_COLSPEC,
-                                FormFactory.DEFAULT_COLSPEC,
-                                FormFactory.LABEL_COMPONENT_GAP_COLSPEC,
-                                FormFactory.DEFAULT_COLSPEC,
-                                FormFactory.LABEL_COMPONENT_GAP_COLSPEC,
-                                ColumnSpec.decode("min(default;80dlu)"),
-                                FormFactory.LABEL_COMPONENT_GAP_COLSPEC,
-                                ColumnSpec.decode("min(default;80dlu)"),
-                                FormFactory.LABEL_COMPONENT_GAP_COLSPEC,
-                                new ColumnSpec(ColumnSpec.FILL, Sizes.DEFAULT, FormSpec.DEFAULT_GROW)
-                            },
-                            RowSpec.decodeSpecs("default")));
-
+//
+//                    //======== panel1 ========
+//                    {
+//                        panel1.setLayout(new FormLayout(
+//                            new ColumnSpec[] {
+//                                new ColumnSpec(ColumnSpec.RIGHT, Sizes.DEFAULT, FormSpec.DEFAULT_GROW),
+//                                FormFactory.LABEL_COMPONENT_GAP_COLSPEC,
+//                                FormFactory.DEFAULT_COLSPEC,
+//                                FormFactory.LABEL_COMPONENT_GAP_COLSPEC,
+//                                //FormFactory.DEFAULT_COLSPEC,
+//                                ColumnSpec.decode("75dlu"),
+//                                FormFactory.LABEL_COMPONENT_GAP_COLSPEC,
+//                                FormFactory.DEFAULT_COLSPEC,
+//                                FormFactory.LABEL_COMPONENT_GAP_COLSPEC,
+//                                FormFactory.DEFAULT_COLSPEC,
+//                                FormFactory.LABEL_COMPONENT_GAP_COLSPEC,
+//                                FormFactory.DEFAULT_COLSPEC,
+//                                FormFactory.LABEL_COMPONENT_GAP_COLSPEC,
+//                                ColumnSpec.decode("min(default;80dlu)"),
+//                                FormFactory.LABEL_COMPONENT_GAP_COLSPEC,
+//                                ColumnSpec.decode("min(default;80dlu)"),
+//                                FormFactory.LABEL_COMPONENT_GAP_COLSPEC,
+//                                new ColumnSpec(ColumnSpec.FILL, Sizes.DEFAULT, FormSpec.DEFAULT_GROW)
+//                            },
+//                            RowSpec.decodeSpecs("default")));
+//
 //                        //---- label2 ----
 //                        label2.setText("Valid on");
 //                        panel1.add(label2, cc.xy(3, 1));
@@ -732,13 +732,13 @@ class TelescopeForm extends JPanel {
 //                        timeRangePlotButton.setText("Plot");
 //                        timeRangePlotButton.setToolTipText("Plot the ephemeris of this object starting at the given time.\nThe ephemeris will be obtained from JPL Horizons if needed. ");
 //                        panel1.add(timeRangePlotButton, cc.xy(15, 1));
-                    }
+//                    }
 //                    nonsiderealPW.add(panel1, new GridBagConstraints(0, 9, 6, 1, 0.0, 0.0,
 //                        GridBagConstraints.CENTER, GridBagConstraints.BOTH,
 //                        new Insets(0, 0, 0, 0), 0, 0));
-                }
-            }
-            coordinatesPanel.add(extrasFolder, BorderLayout.SOUTH);
+//                }
+//            }
+//            coordinatesPanel.add(extrasFolder, BorderLayout.SOUTH);
         }
         add(coordinatesPanel, new GridBagConstraints(0, 1, 1, 1, 1.0, 0.0,
             GridBagConstraints.CENTER, GridBagConstraints.BOTH,
@@ -795,7 +795,7 @@ class TelescopeForm extends JPanel {
     DropDownListBoxWidget system;
     TextBoxWidget xaxis;
     TextBoxWidget yaxis;
-    JPanel extrasFolder;
+//    JPanel extrasFolder;
 //    JPanel nonsiderealPW;
     JLabel epochofelUnits;
     JLabel orbincUnits;

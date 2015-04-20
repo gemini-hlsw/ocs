@@ -1107,7 +1107,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                         _curGroup = grp;
 
                         _w.objectGBW.setVisible(false);
-                        _w.extrasFolder.setVisible(false);
+//                        _w.extrasFolder.setVisible(false);
                         _w.guideGroupPanel.setVisible(true);
 //                        if (_trackingButton.isSelected())
 //                            _trackingButton.doClick();
@@ -1247,7 +1247,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
     private void refreshAll() {
         final boolean isNonSidereal = (_curPos.getTarget() instanceof NonSiderealTarget);
 
-        _w.extrasFolder.setVisible(true);
+//        _w.extrasFolder.setVisible(true);
         _w.objectGBW.setVisible(true);
         final boolean editable = OTOptions.areRootAndCurrentObsIfAnyEditable(getProgram(), getContextObservation());
         _w.objectGBW.setEnabled(editable);
@@ -1298,10 +1298,10 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 
         _w.tag.setRenderer(tagRenderer);
         showTargetTag();
-        final CardLayout cl = (CardLayout) _w.extrasFolder.getLayout();
-        final String tag = isNonSidereal ? "nonsidereal" : "sidereal";
-        cl.show(_w.extrasFolder, tag);
-
+//        final CardLayout cl = (CardLayout) _w.extrasFolder.getLayout();
+//        final String tag = isNonSidereal ? "nonsidereal" : "sidereal";
+//        cl.show(_w.extrasFolder, tag);
+//
 //        if (isNonSidereal) {
 //            // Tracking applies to sidereal targets.  If shown, hide.
 //            if (_trackingButton.isSelected()) _trackingButton.doClick();
