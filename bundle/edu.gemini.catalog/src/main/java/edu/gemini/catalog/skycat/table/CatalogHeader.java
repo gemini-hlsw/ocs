@@ -47,5 +47,5 @@ public interface CatalogHeader {
      *
      * @return type of the column at columnIndex
      */
-    Class getClass(int columnIndex);
+    Class<?> getClass(int columnIndex);
 }

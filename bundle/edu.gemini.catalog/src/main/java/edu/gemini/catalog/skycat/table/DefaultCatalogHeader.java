@@ -45,7 +45,7 @@ public class DefaultCatalogHeader implements CatalogHeader {
     }
 
     @Override
-    public Class getClass(int columnIndex) {
+    public Class<?> getClass(int columnIndex) {
         return columns.get(columnIndex)._2();
     }
 

@@ -21,7 +21,6 @@ import java.net.URL;
 import java.util.List;
 import java.util.Vector;
 
-
 /**
  * A generic, abstract base class for catalog directory implementations.
  *
@@ -40,7 +39,7 @@ public abstract class AbstractCatalogDirectory implements CatalogDirectory {
     private URL _url;
 
     // A vector of Catalog objects, one for each catalog in the catalog directory
-    private List _catalogs = new Vector();
+    private List<Catalog> _catalogs = new Vector<>();
 
     // Optional handler, used to report HTML format errors from servers
     private HTMLQueryResultHandler _htmlQueryResultHandler;
@@ -136,7 +135,6 @@ public abstract class AbstractCatalogDirectory implements CatalogDirectory {
         _fireTreeNodesInserted(_getTreeModelEvent(cat));
     }
 
-
     /**
      * Add the given catalog to the catalog list if it is not already there.
      * If a separate catalog with the same name is in the list, the user is asked
@@ -145,7 +143,6 @@ public abstract class AbstractCatalogDirectory implements CatalogDirectory {
     public void addCatalog(Catalog cat) {
         addCatalog(_catalogs.size(), cat);
     }
-
 
     /**
      * Remove the given catalog from the catalog list.
@@ -160,18 +157,15 @@ public abstract class AbstractCatalogDirectory implements CatalogDirectory {
         CatalogRegistry.instance.unregister(cat);
     }
 
-
     /** Replace the given old catalog with the given new catalog in the catalog list. */
     public void replaceCatalog(Catalog oldCat, Catalog newCat) {
         int i = _catalogs.indexOf(oldCat);
         if (i != -1) {
             _catalogs.set(i, newCat);
             newCat.setParent(this);
-            //System.out.println("XXX newcat path = " + TclUtil.makeList(newCat.getPath()));
             _fireTreeNodesChanged(_getTreeModelEvent(newCat));
         }
     }
-
 
     /** Move the the given catalog up or down in the tree. */
     public void moveCatalog(Catalog cat, boolean up) {
@@ -182,7 +176,6 @@ public abstract class AbstractCatalogDirectory implements CatalogDirectory {
         removeCatalog(cat);
         addCatalog(i + (up ? -1 : 1), cat);
     }
-
 
     /** Move the the given catalog all the way up or down in the tree, as far as possible. */
     public void moveCatalogToEnd(Catalog cat, boolean up) {
@@ -200,15 +193,12 @@ public abstract class AbstractCatalogDirectory implements CatalogDirectory {
 
     /** Return the named catalog, if found in this directory */
     public Catalog getCatalog(String catalogName) {
-        int n = getNumCatalogs();
-        for (int i = 0; i < n; i++) {
-            Catalog cat = getCatalog(i);
+        for (Catalog cat: _catalogs) {
             if (catalogName.equals(cat.getName()) || catalogName.equals(cat.getId()))
                 return cat;
         }
         return null;
     }
-
 
     // Methods to implement the CatalogDirectory interface
 
@@ -219,7 +209,7 @@ public abstract class AbstractCatalogDirectory implements CatalogDirectory {
 
     /** Return the ith catalog in the directory */
     public Catalog getCatalog(int i) {
-        return (Catalog) (_catalogs.get(i));
+        return _catalogs.get(i);
     }
 
     /** Return the index of the given catalog in the directory */
@@ -227,13 +217,10 @@ public abstract class AbstractCatalogDirectory implements CatalogDirectory {
         return _catalogs.indexOf(cat);
     }
 
-
     /** Set the list of catalogs in this catalog directory. */
-    public void setCatalogs(List catalogs) {
+    public void setCatalogs(List<Catalog> catalogs) {
         _catalogs = catalogs;
-        int n = _catalogs.size();
-        for (int i = 0; i < n; i++) {
-            Catalog cat = (Catalog) _catalogs.get(i);
+        for (Catalog cat: _catalogs) {
             cat.setParent(this);
             CatalogRegistry.instance.register(cat, isLocal());
         }
@@ -241,10 +228,9 @@ public abstract class AbstractCatalogDirectory implements CatalogDirectory {
     }
 
     /** Return a copy of the list of catalogs in this catalog directory. */
-    public List getCatalogs() {
-        return new Vector(_catalogs);
+    public List<Catalog> getCatalogs() {
+        return new Vector<>(_catalogs);
     }
-
 
     /** Return a memory catalog describing the list of catalogs in the directory */
     public TableQueryResult getCatalogList() {
@@ -254,10 +240,10 @@ public abstract class AbstractCatalogDirectory implements CatalogDirectory {
 
         // data rows
         int numCatalogs = getNumCatalogs();
-        Vector rows = new Vector(numCatalogs, 1);
-        for (int i = 0; i < numCatalogs; i++) {
-            Vector cols = new Vector(1, 1);
-            cols.add(getCatalog(i));
+        Vector<Vector<Object>> rows = new Vector<>(numCatalogs, 1);
+        for (Catalog cat: _catalogs) {
+            Vector<Object> cols = new Vector<>(1, 1);
+            cols.add(cat);
             rows.add(cols);
         }
 
@@ -270,7 +256,6 @@ public abstract class AbstractCatalogDirectory implements CatalogDirectory {
         return result;
     }
 
-
     /** Return the URL of the file describing this catalog directory. */
     public URL getURL() {
         return _url;
@@ -281,12 +266,7 @@ public abstract class AbstractCatalogDirectory implements CatalogDirectory {
         _url = url;
     }
 
-
-
-
-    // -- Inplement the Catalog interface --
-
-
+    // -- Implement the Catalog interface --
 
     /** Return the name of the catalog directory */
     public String getName() {
@@ -313,14 +293,12 @@ public abstract class AbstractCatalogDirectory implements CatalogDirectory {
         _id = id;
     }
 
-
     /** Return a description of the catalog, or null if not available */
     public String getDescription() {
         if (_url != null)
             return _name + " [" + _url.toString() + "]";
         return _name;
     }
-
 
     /** Return a URL pointing to documentation for the catalog, or null if not available */
     public URL getDocURL() {
@@ -386,15 +364,13 @@ public abstract class AbstractCatalogDirectory implements CatalogDirectory {
         return this;
     }
 
-
     /**
      * Return a list of name servers (Catalogs with serv_type
      * equal to "namesvr") to use to resolve astronomical object names.
      */
-    public List getNameServers() {
+    public List<Catalog> getNameServers() {
         return CatalogRegistry.instance.getCatalogsByType(Catalog.NAME_SERVER);
     }
-
 
     /**
      * Returns the root catalog directory, casted to an AbstractCatalogDirectory.
@@ -404,9 +380,7 @@ public abstract class AbstractCatalogDirectory implements CatalogDirectory {
         return (AbstractCatalogDirectory) getRoot();
     }
 
-
     // -- Implement the TreeModel interface
-
 
     /**
      * Returns the root of the tree.  Returns <code>null</code>
@@ -422,7 +396,6 @@ public abstract class AbstractCatalogDirectory implements CatalogDirectory {
         }
         return rootDir;
     }
-
 
     /**
      * Returns the child of <code>parent</code> at index <code>index</code>
@@ -445,7 +418,6 @@ public abstract class AbstractCatalogDirectory implements CatalogDirectory {
         return null;
     }
 
-
     /**
      * Returns the number of children of <code>parent</code>.
      * Returns 0 if the node
@@ -462,7 +434,6 @@ public abstract class AbstractCatalogDirectory implements CatalogDirectory {
         }
         return 0;
     }
-
 
     /**
      * Returns <code>true</code> if <code>node</code> is a leaf.
@@ -494,7 +465,6 @@ public abstract class AbstractCatalogDirectory implements CatalogDirectory {
         _fireTreeNodesChanged(_getTreeModelEvent((Catalog) newValue));
     }
 
-
     /**
      * Returns the index of child in parent.  If <code>parent</code>
      * is <code>null</code> or <code>child</code> is <code>null</code>,
@@ -513,7 +483,6 @@ public abstract class AbstractCatalogDirectory implements CatalogDirectory {
         }
         return -1;
     }
-
 
     /**
      * Adds a listener for the <code>TreeModelEvent</code>
@@ -537,7 +506,6 @@ public abstract class AbstractCatalogDirectory implements CatalogDirectory {
         _listenerList.remove(TreeModelListener.class, l);
     }
 
-
     // Return a tree model event for an operation of the given catalog
     private TreeModelEvent _getTreeModelEvent(Catalog cat) {
         Object source = this;
@@ -560,13 +528,12 @@ public abstract class AbstractCatalogDirectory implements CatalogDirectory {
         return new TreeModelEvent(source, path, childIndices, children);
     }
 
-
     /** Return an array of catalogs describing the path to the given catalog or catalog directory. */
     public Catalog[] getPath(Catalog cat) {
         if (cat == null)
             return null;
 
-        List l = new Vector();
+        List<Catalog> l = new Vector<>();
         CatalogDirectory dir;
         if (cat instanceof CatalogDirectory) {
             dir = (CatalogDirectory) cat;
@@ -582,7 +549,7 @@ public abstract class AbstractCatalogDirectory implements CatalogDirectory {
         int n = l.size();
         Catalog[] ar = new Catalog[n];
         for (int i = 0; i < n; i++)
-            ar[n - i - 1] = (Catalog) l.get(i);
+            ar[n - i - 1] = l.get(i);
 
         return ar;
     }
@@ -594,7 +561,6 @@ public abstract class AbstractCatalogDirectory implements CatalogDirectory {
     public Catalog[] getPath() {
         return getPath(this);
     }
-
 
     // Notify tree model listeners that nodes changed
     private void _fireTreeNodesChanged(TreeModelEvent e) {

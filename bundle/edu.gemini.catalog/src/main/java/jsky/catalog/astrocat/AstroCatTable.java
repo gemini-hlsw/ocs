@@ -82,7 +82,7 @@ public class AstroCatTable extends MemoryCatalog {
      * @param filename the name of the catalog file
      */
     public AstroCatTable(String filename) throws IOException {
-        super((Catalog) null, filename);
+        super(null, filename);
     }
 
 
@@ -92,9 +92,9 @@ public class AstroCatTable extends MemoryCatalog {
      *
      * @param table the source catalog table
      * @param fields an array of objects describing the table columns
-     * @param dataVector a vector of data rows, each of which is a vector of column values.
+     * @param dataRows a vector of data rows, each of which is a vector of column values.
      */
-    private AstroCatTable(AstroCatTable table, FieldDesc[] fields, Vector dataRows) {
+    private AstroCatTable(AstroCatTable table, FieldDesc[] fields, Vector<Vector<Object>> dataRows) {
         super(table, fields, dataRows);
     }
 
@@ -135,7 +135,7 @@ public class AstroCatTable extends MemoryCatalog {
      * @param fields an array of objects describing the table columns
      * @param dataRows a vector of data rows, each of which is a vector of column values.
      */
-    protected MemoryCatalog makeQueryResult(FieldDesc[] fields, Vector dataRows) {
+    protected MemoryCatalog makeQueryResult(FieldDesc[] fields, Vector<Vector<Object>> dataRows) {
         AstroCatTable table = new AstroCatTable(this, fields, dataRows);
         table.setProperties(getProperties());
         return table;
@@ -177,7 +177,7 @@ public class AstroCatTable extends MemoryCatalog {
                 AstroCatTable table = (AstroCatTable) r;
                 System.out.println("Number of result rows: " + table.getRowCount());
                 if (table.getRowCount() != 0)
-                    System.out.println("result: " + ((AstroCatTable) r).toString());
+                    System.out.println("result: " + r.toString());
             } else {
                 System.out.println("Failed search by ID");
             }
@@ -192,7 +192,7 @@ public class AstroCatTable extends MemoryCatalog {
                 AstroCatTable table = (AstroCatTable) r;
                 System.out.println("Number of result rows: " + table.getRowCount());
                 if (table.getRowCount() != 0)
-                    System.out.println("result: " + ((AstroCatTable) r).toString());
+                    System.out.println("result: " + r.toString());
             } else {
                 System.out.println("Failed search by position");
             }

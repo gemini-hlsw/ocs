@@ -21,34 +21,34 @@ import java.net.*;
  * derived from FieldDescAdatper and override as many of the methods as
  * needed.
  */
-public abstract interface FieldDesc {
+public interface FieldDesc {
 
     /** Return the Id of this field. */
-    public String getId();
+    String getId();
 
     /** Return the name of this field. */
-    public String getName();
+    String getName();
 
     /**
      * Return a string describing the semantic type of the field (for example: "ra", "dec", "radius").
      * @see #getFieldClass
      */
-    public String getType();
+    String getType();
 
     /** Return a string describing the units of the field values, if known (for example: "arcmin", "arcsec", "deg") */
-    public String getUnits();
+    String getUnits();
 
     /** Return a string describing the format of the field, if known, otherwise null */
-    public String getFormat();
+    String getFormat();
 
     /** Return a more detailed description of this field. */
-    public String getDescription();
+    String getDescription();
 
     /** Return a URL pointing to documentation for this field, or null if not available */
-    public URL getDocURL();
+    URL getDocURL();
 
     /** Return true if the field has a link pointing to more data. */
-    public boolean hasLink();
+    boolean hasLink();
 
     /**
      * Return the text to display for the link, if there is one, otherwise null.
@@ -60,7 +60,7 @@ public abstract interface FieldDesc {
      *
      * @throws RuntimeException if the field is not a link
      */
-    public String getLinkText(TableQueryResult tableQueryResult, Object value, int row, int column);
+    String getLinkText(TableQueryResult tableQueryResult, Object value, int row, int column);
 
     /**
      * If this field has a link, follow it and return the value it points to as a QueryResult.
@@ -72,56 +72,53 @@ public abstract interface FieldDesc {
      * @throws MalformedURLException if the value is not valid URL string
      * @throws RuntimeException if the value is not a string
      */
-    public QueryResult getLinkValue(TableQueryResult tableQueryResult, Object value, int row)
+    QueryResult getLinkValue(TableQueryResult tableQueryResult, Object value, int row)
             throws MalformedURLException;
 
     /** Return the class to use to store values in this field. */
-    public Class getFieldClass();
-
-    /** Return the field's default value, if there is one (may be null) */
-    //public Object getValue();
+    Class<?> getFieldClass();
 
     /** Parse the given string into the correct class type for this field and return the value. */
-    public Object getValue(String s);
+    Object getValue(String s);
 
     /** Return the default value for this field, or null if there is no default. */
-    public Object getDefaultValue();
+    Object getDefaultValue();
 
     /** If a list of options was defined for the field, return the number of options, otherwise 0. */
-    public int getNumOptions();
+    int getNumOptions();
 
     /** Return the index of the default option, or -1 if there is no default. */
-    public int getDefaultOptionIndex();
+    int getDefaultOptionIndex();
 
     /** Return the name of the ith option for this field. */
-    public String getOptionName(int i);
+    String getOptionName(int i);
 
     /** Return the value of the ith option for this field. */
-    public Object getOptionValue(int i);
+    Object getOptionValue(int i);
 
     /** Return true if the given value is valid for this field, otherwise false. */
-    public boolean isValid(Object value);
+    boolean isValid(Object value);
 
     /** Return true if this field is the unique id. */
-    public boolean isId();
+    boolean isId();
 
     /** Return true if this field contains a world coordinates RA value. */
-    public boolean isRA();
+    boolean isRA();
 
     /** Return true if this field contains a world coordinates Dec value. */
-    public boolean isDec();
+    boolean isDec();
 
     /** Return true if this field represents the min value of a range. */
-    public boolean isMin();
+    boolean isMin();
 
     /** Return true if this field represents the max value of a range. */
-    public boolean isMax();
+    boolean isMax();
 
     /** Gets the string to display. */
-    public String getDisplayString(Object v);
+    String getDisplayString(Object v);
 
     /** Parses the value entered by the user. */
-    public Object parse(String s);
+    Object parse(String s);
 }
 
 

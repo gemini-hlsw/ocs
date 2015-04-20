@@ -73,7 +73,7 @@ public class TestTableQueryResult extends MemoryCatalog {
         setDataVector(data, columnNames);
     }
 
-    public Class getColumnClass(int columnIndex) {
+    public Class<?> getColumnClass(int columnIndex) {
         if (columnIndex >= 3)
             return Double.class;
         return String.class;

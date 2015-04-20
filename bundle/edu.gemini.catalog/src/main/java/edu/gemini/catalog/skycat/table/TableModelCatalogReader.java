@@ -55,11 +55,11 @@ public class TableModelCatalogReader implements CatalogReader {
         List<Tuple2<String, Class<?>>> lst = new ArrayList<>(table.getColumnCount());
         for (int col=0; col<table.getColumnCount(); ++col) {
             String name = table.getColumnName(col);
-            Class  c    = table.getColumnClass(col);
-            lst.add(new Pair<String, Class<?>>(name, c));
+            Class<?> c    = table.getColumnClass(col);
+            lst.add(new Pair<>(name, c));
         }
 
-        return new Some<CatalogHeader>(new DefaultCatalogHeader(DefaultImList.create(lst)));
+        return new Some<>(new DefaultCatalogHeader(DefaultImList.create(lst)));
     }
 
     /**

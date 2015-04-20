@@ -263,11 +263,13 @@ trait OcsBundle {
     project.in(file("bundle/edu.gemini.catalog")).dependsOn(
       bundle_edu_gemini_shared_skyobject,
       bundle_edu_gemini_shared_util,
+      bundle_edu_gemini_pot,
       bundle_edu_gemini_util_skycalc,
       bundle_edu_gemini_spModel_core         % "test->test;compile->compile",
       bundle_jsky_coords,
       bundle_jsky_util,
-      bundle_jsky_util_gui
+      bundle_jsky_util_gui,
+      bundle_edu_gemini_util_osgi
     )
 
   lazy val bundle_edu_gemini_shared_gui = 

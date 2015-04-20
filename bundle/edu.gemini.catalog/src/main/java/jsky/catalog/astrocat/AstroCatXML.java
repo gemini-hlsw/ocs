@@ -6,6 +6,7 @@
 
 package jsky.catalog.astrocat;
 
+import edu.gemini.catalog.votable.FieldDescriptor;
 import jsky.catalog.*;
 import jsky.util.NameValue;
 import jsky.util.Resources;
@@ -39,7 +40,7 @@ import java.util.Vector;
 public final class AstroCatXML extends SaxParserUtil {
 
     // used for XML output
-    private static String VERSION = "0.1";
+    private static final String VERSION = "0.1";
     private static final String NAMESPACE = "";
     private static final String LOCAL_NAME = "";
     private static final String CDATA = "CDATA";
@@ -48,25 +49,25 @@ public final class AstroCatXML extends SaxParserUtil {
 
 
     // list of AstroCatalog objects
-    private Vector _catalogs;
+    private Vector<Catalog> _catalogs;
 
     // the current catalog object
     private AstroCatalog _catalog;
 
     // list of FieldDescAdapter objects
-    private List _params;
+    private List<FieldDesc> _params;
 
     // the current param object
     private FieldDescAdapter _param;
 
     // list of NameValue objects representing the parameter options
-    private List _options;
+    private List<NameValue> _options;
 
     // the current parameter option object
     private NameValue _option;
 
     // list of TablePlotSymbol objects
-    private List _symbols;
+    private List<TablePlotSymbol> _symbols;
 
     // the current plot symbol object
     private TablePlotSymbol _symbol;
@@ -78,20 +79,16 @@ public final class AstroCatXML extends SaxParserUtil {
     }
 
     /** Return the list of AstroCatalog definitions found in the XML file after parsing */
-    public List getCatalogs() {
+    public List<Catalog> getCatalogs() {
         return _catalogs;
     }
 
-
-
     // -- these methods are called by reflection from the base class --
-    //    (which is why they must be declared public)
-
-
+    //    (which is why they must be declared public
 
     // called for the <catalogs> start tag
     public void _catalogsStart(Attributes attrs) {
-        _catalogs = new Vector();
+        _catalogs = new Vector<>();
     }
 
     // called for the </catalogs> end tag
@@ -104,7 +101,7 @@ public final class AstroCatXML extends SaxParserUtil {
         // they are copied to the original catalog object as well.
         int n = _catalogs.size();
         for (int i = n - 1; i >= 0; i--) {
-            Catalog c = (Catalog) _catalogs.get(i);
+            Catalog c = _catalogs.get(i);
             if (c instanceof AstroCatalog) {
                 AstroCatalog catalog = (AstroCatalog) c;
                 String path = catalog.getURLPath();
@@ -121,7 +118,7 @@ public final class AstroCatXML extends SaxParserUtil {
                         _catalogs.setElementAt(cat, i);
 
                         // copy plot symbol info, if defined
-                        if (c instanceof PlotableCatalog && cat instanceof PlotableCatalog) {
+                        if (cat instanceof PlotableCatalog) {
                             PlotableCatalog pc = (PlotableCatalog) c;
                             if (pc.getNumSymbols() != 0) {
                                 PlotableCatalog pcat = (PlotableCatalog) cat;
@@ -139,7 +136,7 @@ public final class AstroCatXML extends SaxParserUtil {
     // called for the <catalog> start tag
     public void _catalogStart(Attributes attrs) {
         if (_catalogs == null)
-            _catalogs = new Vector();
+            _catalogs = new Vector<>();
 
         if (attrs != null) {
             _catalog = new AstroCatalog();
@@ -196,13 +193,13 @@ public final class AstroCatXML extends SaxParserUtil {
 
     // called for the <params> start tag
     public void _paramsStart(Attributes attrs) {
-        _params = new ArrayList();
+        _params = new ArrayList<>();
     }
 
     // called for the </params> end tag
     public void _paramsEnd() {
         if (_catalog != null && _params.size() != 0) {
-            FieldDescAdapter[] params = new FieldDescAdapter[_params.size()];
+            FieldDesc[] params = new FieldDescAdapter[_params.size()];
             _params.toArray(params);
             _catalog.setParams(params);
         }
@@ -244,7 +241,7 @@ public final class AstroCatXML extends SaxParserUtil {
 
     // called for the <options> start tag
     public void _optionsStart(Attributes attrs) {
-        _options = new ArrayList();
+        _options = new ArrayList<>();
     }
 
     // called for the </options> end tag
@@ -282,7 +279,7 @@ public final class AstroCatXML extends SaxParserUtil {
 
     // called for the <symbols> start tag
     public void _symbolsStart(Attributes attrs) {
-        _symbols = new ArrayList();
+        _symbols = new ArrayList<>();
     }
 
     // called for the </symbols> end tag
@@ -355,7 +352,7 @@ public final class AstroCatXML extends SaxParserUtil {
     // Return a CatalogDirectory object based on the settings in the given catalog object
     private CatalogDirectory _getCatalogDirectory(AstroCatalog cat) {
         String className = cat.getHandlerClass();
-        Class c = AstroCatConfig.class;
+        Class<?> c = AstroCatConfig.class;
         try {
             if (className != null)
                 c = Class.forName(className);
@@ -382,11 +379,7 @@ public final class AstroCatXML extends SaxParserUtil {
         throw new RuntimeException("Could not load catalog directory entry: " + cat.getName());
     }
 
-
-
-
     // -- output methods --
-
 
     /**
      * Save the given list of catalog descriptions in the given file.
@@ -394,8 +387,7 @@ public final class AstroCatXML extends SaxParserUtil {
      * that information is actually saved. The rest of the details are still read
      * from the original, default XML file.
      */
-    public static void save(File file, List catalogs) throws SAXException, IOException {
-        String sep = System.getProperty("file.separator");
+    public static void save(File file, List<Catalog> catalogs) throws SAXException, IOException {
         String filename = file.getPath();
         FileOutputStream out = null;
         XMLWriter xml = null;
@@ -424,14 +416,12 @@ public final class AstroCatXML extends SaxParserUtil {
     }
 
     // output the <catalogs> element
-    private static void _saveCatalogs(XMLWriter xml, List catalogs) throws SAXException {
+    private static void _saveCatalogs(XMLWriter xml, List<Catalog> catalogs) throws SAXException {
         AttributesImpl attrs = new AttributesImpl();
         _addAttr(attrs, "version", VERSION);
         xml.startElement(NAMESPACE, LOCAL_NAME, "catalogs", attrs);
 
-        Iterator it = catalogs.listIterator();
-        while (it.hasNext()) {
-            Catalog catalog = (Catalog) it.next();
+        for (Catalog catalog: catalogs) {
             _saveCatalog(xml, catalog);
         }
 
@@ -455,7 +445,7 @@ public final class AstroCatXML extends SaxParserUtil {
         _addAttr(attrs, "name", catalog.getName());
         _addAttr(attrs, "type", catalog.getType());
 
-        AstroCatalog cat = null;
+        AstroCatalog cat;
         if (catalog instanceof AstroCatalog) {
             // For AstroCatalogs, include the "path" attribute, which points to the XML
             // file with the detailed catalog description, which is searched for in the
@@ -493,8 +483,8 @@ public final class AstroCatXML extends SaxParserUtil {
         AttributesImpl attrs = new AttributesImpl();
         xml.startElement(NAMESPACE, LOCAL_NAME, "symbols", attrs);
 
-        for (int i = 0; i < symbols.length; i++) {
-            _saveSymbol(xml, symbols[i]);
+        for (TablePlotSymbol symbol : symbols) {
+            _saveSymbol(xml, symbol);
         }
 
         xml.endElement(NAMESPACE, LOCAL_NAME, "symbols");
@@ -519,13 +509,13 @@ public final class AstroCatXML extends SaxParserUtil {
         int raCol = symbol.getRaCol(), decCol = symbol.getDecCol();
         double equinox = symbol.getEquinox();
 
-        if (raCol != symbol.DEFAULT_RA_COL)
+        if (raCol != TablePlotSymbol.DEFAULT_RA_COL)
             _addAttr(attrs, "raCol", String.valueOf(raCol));
 
-        if (decCol != symbol.DEFAULT_DEC_COL)
+        if (decCol != TablePlotSymbol.DEFAULT_DEC_COL)
             _addAttr(attrs, "decCol", String.valueOf(decCol));
 
-        if (equinox != symbol.DEFAULT_EQUINOX)
+        if (equinox != TablePlotSymbol.DEFAULT_EQUINOX)
             _addAttr(attrs, "equinox", String.valueOf(equinox));
 
         xml.startElement(NAMESPACE, LOCAL_NAME, "symbol", attrs);
@@ -562,7 +552,7 @@ public final class AstroCatXML extends SaxParserUtil {
             File dir = file.getParentFile();
             if (!dir.isDirectory())
                 dir.mkdirs();
-            astroCatXML.save(file, astroCatXML.getCatalogs());
+            save(file, astroCatXML.getCatalogs());
             System.out.println("Saved results to " + file);
         } catch (Exception e) {
             e.printStackTrace();

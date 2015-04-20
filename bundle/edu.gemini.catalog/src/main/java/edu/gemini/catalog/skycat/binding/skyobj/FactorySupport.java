@@ -52,7 +52,7 @@ public final class FactorySupport implements SkyObjectFactory {
 
         public Builder epoch(String epochCol) {
             if (epochCol == null) throw new IllegalArgumentException();
-            this.epochCol = new Some<String>(epochCol);
+            this.epochCol = new Some<>(epochCol);
             return this;
         }
 
@@ -64,7 +64,7 @@ public final class FactorySupport implements SkyObjectFactory {
 
         public Builder pmRa(String pmRaCol) {
             if (pmRaCol == null) throw new IllegalArgumentException();
-            this.pmRaCol = new Some<String>(pmRaCol);
+            this.pmRaCol = new Some<>(pmRaCol);
             return this;
         }
 
@@ -76,7 +76,7 @@ public final class FactorySupport implements SkyObjectFactory {
 
         public Builder pmDec(String pmDecCol) {
             if (pmDecCol == null) throw new IllegalArgumentException();
-            this.pmDecCol = new Some<String>(pmDecCol);
+            this.pmDecCol = new Some<>(pmDecCol);
             return this;
         }
 
@@ -121,7 +121,7 @@ public final class FactorySupport implements SkyObjectFactory {
 
     @Override
     public Set<Magnitude.Band> bands() {
-        Set set = new HashSet(magDescriptors.size());
+        Set<Magnitude.Band> set = new HashSet<>(magDescriptors.size());
         for(MagnitudeDescriptor md : magDescriptors) {
             set.add(md.getBand());
         }

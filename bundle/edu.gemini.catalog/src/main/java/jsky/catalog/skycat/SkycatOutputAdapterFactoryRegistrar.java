@@ -36,38 +36,27 @@ public enum SkycatOutputAdapterFactoryRegistrar {
      * final instance.
      */
     private static final SkycatCatalogObjectRegistrar.Instantiator<SkycatOutputAdapter.Factory> INST =
-        new SkycatCatalogObjectRegistrar.Instantiator<SkycatOutputAdapter.Factory>() {
+        className -> {
+            if (className == null) return None.instance();
 
-            // Uses reflection to turn the class name into an object.  This is
-            // a bit grim, but the other options that occurred to me seemed worse:
-            // * search through the classpath looking for instances
-            // * explicitly register them by the short name that appears in the config
-            //   file
+            try {
+                Class<?> c = Class.forName(className);
+                Field f = c.getField("FACTORY");
+                if (f == null) return None.instance();
+                SkycatOutputAdapter.Factory fact;
+                fact = (SkycatOutputAdapter.Factory) f.get(null);
+                if (fact == null) return None.instance();
 
-            @Override
-            public Option<SkycatOutputAdapter.Factory> instantiate(String className) {
-                if (className == null) return None.instance();
-
-                try {
-                    Class c = Class.forName(className);
-                    Field f = c.getField("FACTORY");
-                    if (f == null) return None.instance();
-                    SkycatOutputAdapter.Factory fact;
-                    fact = (SkycatOutputAdapter.Factory) f.get(null);
-                    if (fact == null) return None.instance();
-                    Object[] enums = c.getEnumConstants();
-
-                    return new Some<SkycatOutputAdapter.Factory>(fact);
-                } catch (Exception ex) {
-                    LOG.log(Level.WARNING, "Problem extracting object from " + className, ex);
-                }
-                return None.instance();
-
+                return new Some<>(fact);
+            } catch (Exception ex) {
+                LOG.log(Level.WARNING, "Problem extracting object from " + className, ex);
             }
+            return None.instance();
+
         };
 
     private static final SkycatCatalogObjectRegistrar<SkycatOutputAdapter.Factory> reg =
-            new SkycatCatalogObjectRegistrar<SkycatOutputAdapter.Factory>(OUTPUT_ADAPTER, INST);
+            new SkycatCatalogObjectRegistrar<>(OUTPUT_ADAPTER, INST);
 
     /**
      * Finds the SkycatOutputAdapter.Factory associated with the given id, if

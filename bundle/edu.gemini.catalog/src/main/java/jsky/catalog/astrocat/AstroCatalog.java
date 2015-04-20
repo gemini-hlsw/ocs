@@ -832,7 +832,7 @@ public class AstroCatalog implements PlotableCatalog {
         }
 
         // initialize dummy parameters for search by pos/radius (for a more uniform user interface)
-        Vector<FieldDesc> params = new Vector<FieldDesc>(10, 10);
+        Vector<FieldDesc> params = new Vector<>(10, 10);
 
         if (_isCatalog || _isImageServer) {
             // Define the "standard" parameters
@@ -842,10 +842,10 @@ public class AstroCatalog implements PlotableCatalog {
 
             p = new FieldDescAdapter(NAME_SERVER);
             p.setDescription("Select the name server to use to resolve the object name");
-            List l = AstroCatConfig.getConfigFile().getNameServers();
+            List<Catalog> l = AstroCatConfig.getConfigFile().getNameServers();
             NameValue[] ar = new NameValue[l.size()];
             for (int i = 0; i < ar.length; i++) {
-                Catalog cat = (Catalog) l.get(i);
+                Catalog cat = l.get(i);
                 ar[i] = new NameValue(cat.getName(), cat);
             }
             p.setOptions(ar);
@@ -939,21 +939,19 @@ public class AstroCatalog implements PlotableCatalog {
     // Return true if the given parameter is part of a center position or radius specification
     private boolean _isPosRadiusParam(FieldDesc param) {
         String type = param.getType();
-        if (type != null && type.length() != 0) {
-            return type.equals("radec")
-                    || type.equalsIgnoreCase("ra")
-                    || type.equalsIgnoreCase("dec")
-                    || type.equalsIgnoreCase("equinox")
-                    || type.equalsIgnoreCase("epoch")
-                    || type.equalsIgnoreCase("nameserver")
-                    || type.equalsIgnoreCase("radius")
-                    || type.equalsIgnoreCase("minradius")
-                    || type.equalsIgnoreCase("maxradius")
-                    || type.equalsIgnoreCase("size")
-                    || type.equalsIgnoreCase("width")
-                    || type.equalsIgnoreCase("height");
-        }
-        return false;
+        return (type != null && type.length() != 0) && (
+                type.equals("radec")
+                || type.equalsIgnoreCase("ra")
+                || type.equalsIgnoreCase("dec")
+                || type.equalsIgnoreCase("equinox")
+                || type.equalsIgnoreCase("epoch")
+                || type.equalsIgnoreCase("nameserver")
+                || type.equalsIgnoreCase("radius")
+                || type.equalsIgnoreCase("minradius")
+                || type.equalsIgnoreCase("maxradius")
+                || type.equalsIgnoreCase("size")
+                || type.equalsIgnoreCase("width")
+                || type.equalsIgnoreCase("height"));
     }
 
 
@@ -998,7 +996,7 @@ public class AstroCatalog implements PlotableCatalog {
                 AstroCatXML astroCatXML = new AstroCatXML();
                 astroCatXML.parse(url);
 
-                List catalogs = astroCatXML.getCatalogs();
+                List<Catalog> catalogs = astroCatXML.getCatalogs();
                 if (catalogs.size() != 1)
                     throw new RuntimeException("Expected a single catalog description in: " + url);
                 AstroCatalog cat = (AstroCatalog) catalogs.get(0);
@@ -1048,13 +1046,6 @@ public class AstroCatalog implements PlotableCatalog {
                 ((AstroCatTable) queryResult).saveAs(System.out);
             else
                 System.out.println("Can't print table");
-
-            /*
-    queryArgs = new BasicQueryArgs(cat);
-    queryArgs.setRegion(new CoordinateRadius(new WorldCoords("03:19:44.44", "+41:30:58.21"), 2.));
-    queryResult = cat.query(queryargs);
-    System.out.println("result: " + queryResult);
-            */
 
         } catch (Exception e) {
             e.printStackTrace();

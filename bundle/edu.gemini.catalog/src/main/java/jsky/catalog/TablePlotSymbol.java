@@ -120,7 +120,7 @@ public class TablePlotSymbol extends DVMap {
     private int[] _colIndexes;
 
     /** A Vector of column values from the table for the current row, used to get variable values */
-    private Vector _rowVec;
+    private Vector<Object> _rowVec;
 
 
     /** The symbol's shape (one of the constants defined in this class) */
@@ -576,7 +576,7 @@ public class TablePlotSymbol extends DVMap {
     }
 
     /** Return the symbol's ratio, evaluating the expression for the given row. */
-    public double getRatio(Vector rowVec) {
+    public double getRatio(Vector<Object> rowVec) {
         if (_ratioExpr != null) {
             _rowVec = rowVec;
             try {
@@ -599,7 +599,7 @@ public class TablePlotSymbol extends DVMap {
     }
 
     /** Return the symbol's rotation angle, evaluating the expression for the given row. */
-    public double getAngle(Vector rowVec) {
+    public double getAngle(Vector<Object> rowVec) {
         if (_angleExpr != null) {
             _rowVec = rowVec;
             try {
@@ -622,7 +622,7 @@ public class TablePlotSymbol extends DVMap {
     }
 
     /** Return the symbol's label,  evaluating the expression for the given row. */
-    public String getLabel(Vector rowVec) {
+    public String getLabel(Vector<Object> rowVec) {
         if (_labelExpr != null) {
             _rowVec = rowVec;
             try {
@@ -645,7 +645,7 @@ public class TablePlotSymbol extends DVMap {
     }
 
     /** Return the condition under which the symbol will be plotted,  evaluating the expression for the given row. */
-    public boolean getCond(Vector rowVec) {
+    public boolean getCond(Vector<Object> rowVec) {
         if (_condExpr != null) {
             _rowVec = rowVec;
             try {
@@ -669,7 +669,7 @@ public class TablePlotSymbol extends DVMap {
     }
 
     /** Return the symbol's size, evaluating the size expression for the given row. */
-    public double getSize(Vector rowVec) {
+    public double getSize(Vector<Object> rowVec) {
         if (_sizeExpr != null) {
             _rowVec = rowVec;
             try {
@@ -699,7 +699,7 @@ public class TablePlotSymbol extends DVMap {
 
         for (int i = 0; i < _colNames.length; i++) {
             if (_colNames[i].equals(name)) {
-                Class c = _table.getColumnClass(_colIndexes[i]);
+                Class<?> c = _table.getColumnClass(_colIndexes[i]);
                 String className = c.getName();
                 return className.substring(className.lastIndexOf('.')+1);
             }
@@ -717,7 +717,7 @@ public class TablePlotSymbol extends DVMap {
             if (_colNames[i].equals(name)) {
                 Object value = _rowVec.get(_colIndexes[i]);
                 if (value instanceof Float)
-                    return ((Float) value).floatValue();
+                    return (Float) value;
             }
         }
         return 0.0;
@@ -732,7 +732,7 @@ public class TablePlotSymbol extends DVMap {
             if (_colNames[i].equals(name)) {
                 Object value = _rowVec.get(_colIndexes[i]);
                 if (value instanceof Double)
-                    return ((Double) value).doubleValue();
+                    return (Double) value;
             }
         }
         return 0.0;
