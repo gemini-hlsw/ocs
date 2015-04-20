@@ -59,13 +59,14 @@ class Votable2SkyCatalogServlet extends HttpServlet {
   override protected def doGet(req: HttpServletRequest, resp: HttpServletResponse) {
 
     val params:Map[String, String] = req.getParameterMap.asScala.map(t => t._1.toString -> t._2.asInstanceOf[Array[String]](0)).toMap
+    // Extract compulsory parameters
     val ra = params.get("ra")
     val dec = params.get("dec")
     val r1 = params.get("r1")
     val r2 = params.get("r2")
     val max = params.get("max")
 
-    // Extract magnitude limits
+    // Extract magnitude limits from the request
     val lowMagLimit = params.flatMap {
       case (lowLimitMagRegex(x), v) => (x, v).some
       case _                        => None
@@ -75,7 +76,7 @@ class Votable2SkyCatalogServlet extends HttpServlet {
       case _                        => None
     }.headOption.map(Function.tupled(extractBand))
 
-    // Additional magnitude filters
+    // Extract additional magnitude filters for request's parameters
     val mags = params.flatMap {
       case (magFilterRegex(b), magRangeFilterRegex(u, l)) => (b, l, u).some
       case _                                              => None
@@ -101,7 +102,7 @@ class Votable2SkyCatalogServlet extends HttpServlet {
           } yield MagnitudeRange(FaintnessConstraint(h0._2), SaturationConstraint(l0._2).some)
         }
 
-        // Secondary filters
+        // Secondary filters, ignore unparsable parameters
         val magFilters = mags.collect {
             case (b, u, l) => for {
                 u0 <- u.parseDouble.disjunction
@@ -114,19 +115,21 @@ class Votable2SkyCatalogServlet extends HttpServlet {
 
         val query = CatalogQuery.catalogQueryWithoutBand(coordinates, rc, mr >>= (_.toOption))
 
+        // Execute query
         val result = VoTableClient.catalog(query).map { q =>
           if (q.result.containsError) {
             q.result.problems.mkString(", ")
           } else {
+            // Filter rows on the main band
             val rows = referenceBand.map { b =>
               q.result.targets.rows.filter(t => q.query.filterOnMagnitude(t, magnitudeExtractor(candidateBands(b))(t)))
             }.getOrElse(q.result.targets.rows)
 
-            // Filter on magnitudes
+            // Apply additional magnitude filters
             val filteredRows = magFilters.foldLeft(rows) { (r, f) =>
               r.filter(f.filter)
             }
-            // Adjust count
+            // Adjust count of resulting rows
             val countAdjustedRows = filteredRows.takeRight(max.map(_.parseInt.getOrElse(Int.MaxValue)).getOrElse(Int.MaxValue))
 
             s"$headers\n${countAdjustedRows.map(toRow).mkString("\n")}"
