@@ -4,8 +4,8 @@ import edu.gemini.pot.sp.ISPNode
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.target.SPTarget
 import edu.gemini.shared.util.immutable.{ Option => GOption }
-import java.awt.{ GridBagConstraints, GridBagLayout, Color}
-import javax.swing.{BorderFactory, JPanel }
+import java.awt.{ GridBagConstraints, GridBagLayout }
+import javax.swing.JPanel
 import jsky.app.ot.gemini.editor.targetComponent.TelescopePosEditor
 import scalaz.syntax.id._
 
@@ -20,7 +20,6 @@ final class TargetDetailPanel extends JPanel with TelescopePosEditor with Reentr
   private[this] var tde: TargetDetailEditor = null;
 
   // Put it all together
-  setBorder(BorderFactory.createLineBorder(Color.RED))
   setLayout(new GridBagLayout)
 
   def edit(obsContext: GOption[ObsContext], spTarget: SPTarget, node: ISPNode): Unit = {
@@ -31,8 +30,6 @@ final class TargetDetailPanel extends JPanel with TelescopePosEditor with Reentr
       if (tde != null) remove(tde)
       tde = TargetDetailEditor.forTag(tag)
       add(tde, new GridBagConstraints() <| { c =>
-        c.gridx = 0
-        c.gridy = 0
         c.fill = GridBagConstraints.BOTH
       })
     }
