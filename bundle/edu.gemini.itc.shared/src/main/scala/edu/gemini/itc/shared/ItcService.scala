@@ -37,6 +37,12 @@ object ItcResult {
   /** Creates an ITC result in case of an error. */
   def forException(e: Throwable): Result = Failure(List(e.getMessage))
 
+  /** Creates an ITC result with a single problem/error message. */
+  def forMessage(msg: String): Result = Failure(List(msg))
+
+  /** Creates an ITC result with a list of problem/error messages. */
+  def forMessages(messages: List[String]): Result = Failure(messages)
+
   /** Creates an ITC result for a single CCD. */
   def forCcd(result: ItcCalcResult): Result = Success(new ItcResult { val ccds = Array(result) })
 

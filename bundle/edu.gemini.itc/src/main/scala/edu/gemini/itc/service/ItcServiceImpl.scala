@@ -3,10 +3,14 @@ package edu.gemini.itc.service
 import edu.gemini.itc.acqcam.AcqCamRecipe
 import edu.gemini.itc.flamingos2.Flamingos2Recipe
 import edu.gemini.itc.gmos.GmosRecipe
+import edu.gemini.itc.gnirs.GnirsParameters
 import edu.gemini.itc.gsaoi.GsaoiRecipe
+import edu.gemini.itc.michelle.MichelleParameters
+import edu.gemini.itc.nifs.NifsParameters
 import edu.gemini.itc.niri.NiriRecipe
 import edu.gemini.itc.operation.ImagingS2NMethodACalculation
 import edu.gemini.itc.shared._
+import edu.gemini.itc.trecs.TRecsParameters
 
 /**
  * The ITC service implementation.
@@ -34,12 +38,14 @@ class ItcServiceImpl extends ItcService {
 
   private def calculateImaging(source: SourceDefinition, obs: ObservationDetails, cond: ObservingConditions, tele: TelescopeDetails, ins: InstrumentDetails): Result =
     ins match {
-      case i: AcquisitionCamParameters  => imagingResult(new AcqCamRecipe(source, obs, cond, tele, i))
-      case i: Flamingos2Parameters      => imagingResult(new Flamingos2Recipe(source, obs, cond, i, tele))
-      case i: GmosParameters            => imagingArrayResult(new GmosRecipe(source, obs, cond, i, tele))
-      case i: GsaoiParameters           => imagingResult(new GsaoiRecipe(source, obs, cond, i, tele))
-      case i: NiriParameters            => imagingResult(new NiriRecipe(source, obs, cond, i, tele))
-      case _                            => throw new NotImplementedError
+      case i: AcquisitionCamParameters    => imagingResult(new AcqCamRecipe(source, obs, cond, tele, i))
+      case i: Flamingos2Parameters        => imagingResult(new Flamingos2Recipe(source, obs, cond, i, tele))
+      case i: GmosParameters              => imagingArrayResult(new GmosRecipe(source, obs, cond, i, tele))
+      case i: GsaoiParameters             => imagingResult(new GsaoiRecipe(source, obs, cond, i, tele))
+      case i: MichelleParameters          => ItcResult.forMessage ("Imaging not implemented.")
+      case i: NiriParameters              => imagingResult(new NiriRecipe(source, obs, cond, i, tele))
+      case i: TRecsParameters             => ItcResult.forMessage ("Imaging not implemented.")
+      case _                              => ItcResult.forMessage("This instrument does not support imaging.")
     }
 
   private def imagingResult(recipe: ImagingRecipe): Result =
@@ -56,9 +62,16 @@ class ItcServiceImpl extends ItcService {
   // === Spectroscopy
 
   private def calculateSpectroscopy(source: SourceDefinition, obs: ObservationDetails, cond: ObservingConditions, tele: TelescopeDetails, ins: InstrumentDetails): Result =
-    throw new NotImplementedError() // TODO
+    ins match {
+      case i: Flamingos2Parameters        => ItcResult.forMessage ("Spectroscopy not yet implemented.")
+      case i: GmosParameters              => ItcResult.forMessage ("Spectroscopy not yet implemented.")
+      case i: GnirsParameters             => ItcResult.forMessage ("Spectroscopy not yet implemented.")
+      case i: MichelleParameters          => ItcResult.forMessage ("Spectroscopy not implemented.")
+      case i: NifsParameters              => ItcResult.forMessage ("Spectroscopy not yet implemented.")
+      case i: NiriParameters              => ItcResult.forMessage ("Spectroscopy not yet implemented.")
+      case i: TRecsParameters             => ItcResult.forMessage ("Spectroscopy not implemented.")
+      case _                              => ItcResult.forMessage ("This instrument does not support spectroscopy.")
 
-  private def spcResult(recipe: SpectroscopyRecipe): ItcCalcResult =
-    throw new NotImplementedError() // TODO
+    }
 
 }

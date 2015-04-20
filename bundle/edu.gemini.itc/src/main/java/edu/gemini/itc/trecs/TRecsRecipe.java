@@ -7,7 +7,7 @@ import edu.gemini.spModel.core.Site;
 /**
  * This class performs the calculations for T-Recs used for imaging.
  */
-public final class TRecsRecipe {
+public final class TRecsRecipe implements ImagingRecipe, SpectroscopyRecipe {
 
     private final SourceDefinition _sdParameters;
     private final ObservationDetails _obsDetailParameters;

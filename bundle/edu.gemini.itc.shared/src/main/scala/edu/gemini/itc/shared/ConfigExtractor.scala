@@ -1,5 +1,6 @@
 package edu.gemini.itc.shared
 
+import edu.gemini.pot.ModelConverters._
 import edu.gemini.pot.sp.SPComponentType
 import edu.gemini.pot.sp.SPComponentType._
 import edu.gemini.shared.skyobject.Magnitude.Band
@@ -198,17 +199,9 @@ object ConfigExtractor {
 
   // Calculate distance between two coordinates in arc seconds
   private def distance(t0: SPTarget, t1: SPTarget) = {
-    val c0 = toCoordinates(t0)
-    val c1 = toCoordinates(t1)
+    val c0 = t0.toNewModel.coordinates
+    val c1 = t1.toNewModel.coordinates
     Coordinates.difference(c0, c1).distance.toArcsecs
-  }
-
-  // Turn SPTarget into new target model coordinates, note that DMS.getValue() guarantees value to be in [-90..90]
-  private def toCoordinates(t: SPTarget) = {
-    val c   = t.getTarget.getSkycalcCoordinates
-    val ra  = RightAscension.fromDegrees(c.getRaDeg)
-    val dec = Declination.fromAngle(Angle.fromDegrees(new DMS(c.getDecDeg).getValue))
-    Coordinates(ra, dec.get)
   }
 
 }
