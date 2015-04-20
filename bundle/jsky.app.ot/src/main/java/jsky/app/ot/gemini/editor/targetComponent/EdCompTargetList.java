@@ -1337,8 +1337,10 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
             _nonSiderealTargetSup.showNonSiderealTarget(nst);
         }
 
-        // Update target details
+        // Update target details and force enabled state update for the detail editor, whose
+        // structure may have changed (thus making the cached "enabled" value unreliable).
         _detailEditor.edit(getObsContext(env), _curPos, getNode());
+        updateEnabledState(new Component[] { _detailEditor }, editable);
 
     }
 
