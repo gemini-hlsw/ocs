@@ -101,7 +101,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
     private SPTarget        _curPos;
     private GuideGroup      _curGroup;
     private boolean         _ignorePosUpdate    = false;
-    private Option<Catalog> _selectedNameServer = None.instance();
+//    private Option<Catalog> _selectedNameServer = None.instance();
 
 
     public EdCompTargetList() {
@@ -326,30 +326,30 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 //        _w.timeRangePlotButton.addActionListener(timeRangePlotListener);
 //        _w.updateRaDecButton.addActionListener(updateRaDecListener);
 
-        setMenuStyling(_w.nameServerBar, _w.nameServer, "eclipse/menu-trimmed.gif");
+//        setMenuStyling(_w.nameServerBar, _w.nameServer, "eclipse/menu-trimmed.gif");
 
-        final SkycatConfigFile cf = SkycatConfigFile.getConfigFile();
+//        final SkycatConfigFile cf = SkycatConfigFile.getConfigFile();
 
-        // Create radio button options for each of the name servers.
-        final ButtonGroup grp = new ButtonGroup();
-        final List<Catalog> nameServers = cf.getNameServers();
-        for (final Catalog ns : nameServers) {
-            final JRadioButtonMenuItem mi = new JRadioButtonMenuItem(ns.getName()) {{
-                addActionListener(new ActionListener() {
-                    public void actionPerformed(ActionEvent actionEvent) {
-                        _selectedNameServer = new Some<>(ns);
-                    }
-                });
-            }};
-            grp.add(mi);
-            _w.nameServer.add(mi);
-        }
-
-        // Set the initial name server options
-        if (nameServers.size() > 0) {
-            _selectedNameServer = new Some<>(nameServers.get(0));
-            grp.setSelected(((JMenuItem) _w.nameServer.getMenuComponent(0)).getModel(), true);
-        }
+//        // Create radio button options for each of the name servers.
+//        final ButtonGroup grp = new ButtonGroup();
+//        final List<Catalog> nameServers = cf.getNameServers();
+//        for (final Catalog ns : nameServers) {
+//            final JRadioButtonMenuItem mi = new JRadioButtonMenuItem(ns.getName()) {{
+//                addActionListener(new ActionListener() {
+//                    public void actionPerformed(ActionEvent actionEvent) {
+//                        _selectedNameServer = new Some<>(ns);
+//                    }
+//                });
+//            }};
+//            grp.add(mi);
+//            _w.nameServer.add(mi);
+//        }
+//
+//        // Set the initial name server options
+//        if (nameServers.size() > 0) {
+//            _selectedNameServer = new Some<>(nameServers.get(0));
+//            grp.setSelected(((JMenuItem) _w.nameServer.getMenuComponent(0)).getModel(), true);
+//        }
 
         _w.targetName.setMinimumSize(_w.targetName.getPreferredSize());
         _w.targetName.addWatcher(new TextBoxWidgetWatcher() {
@@ -1310,8 +1310,8 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         }
         _trackingButton.setVisible(!isNonSidereal);
 
-        //disable the nameServer if we are a non-sidereal target
-        _w.nameServer.setEnabled(!isNonSidereal);
+//        //disable the nameServer if we are a non-sidereal target
+//        _w.nameServer.setEnabled(!isNonSidereal);
 
 //        //disable the resolve name for Named Targets
 //        _w.resolveButton.setEnabled(!(_curPos.getTarget() instanceof NamedTarget));

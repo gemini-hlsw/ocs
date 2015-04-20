@@ -57,8 +57,8 @@ class TelescopeForm extends JPanel {
         targetName = new TextBoxWidget();
         guideGroupName = new TextBoxWidget();
 //        resolveButton = new JButton();
-        nameServerBar = new JMenuBar();
-        nameServer = new JMenu();
+//        nameServerBar = new JMenuBar();
+//        nameServer = new JMenu();
         final JPanel stretchPanel = new JPanel();
         system = new DropDownListBoxWidget();
         final JLabel RA_Az_STW = new JLabel();
@@ -267,13 +267,13 @@ class TelescopeForm extends JPanel {
 //                    GridBagConstraints.CENTER, GridBagConstraints.BOTH,
 //                    new Insets(0, 2, 0, 0), 0, 0));
 
-                //---- nameServer ----
-                nameServer.setToolTipText("Select the name server for resolving the target name to RA,Dec");
-                nameServer.setFocusable(false);
-                nameServerBar.add(nameServer);
-                objectGBW.add(nameServerBar, new GridBagConstraints(5, 0, 1, 1, 0.0, 0.0,
-                    GridBagConstraints.CENTER, GridBagConstraints.VERTICAL,
-                    new Insets(0, 0, 0, 0), 0, 0));
+//                //---- nameServer ----
+//                nameServer.setToolTipText("Select the name server for resolving the target name to RA,Dec");
+//                nameServer.setFocusable(false);
+//                nameServerBar.add(nameServer);
+//                objectGBW.add(nameServerBar, new GridBagConstraints(5, 0, 1, 1, 0.0, 0.0,
+//                    GridBagConstraints.CENTER, GridBagConstraints.VERTICAL,
+//                    new Insets(0, 0, 0, 0), 0, 0));
 
                 //======== stretchPanel ========
                 {
@@ -790,8 +790,8 @@ class TelescopeForm extends JPanel {
     TextBoxWidget targetName;
     TextBoxWidget guideGroupName;
 //    JButton resolveButton;
-    JMenuBar nameServerBar;
-    JMenu nameServer;
+//    JMenuBar nameServerBar;
+//    JMenu nameServer;
     DropDownListBoxWidget system;
     TextBoxWidget xaxis;
     TextBoxWidget yaxis;
