@@ -348,23 +348,23 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 //            _selectedNameServer = new Some<>(nameServers.get(0));
 //            grp.setSelected(((JMenuItem) _w.nameServer.getMenuComponent(0)).getModel(), true);
 //        }
-
-        _w.targetName.setMinimumSize(_w.targetName.getPreferredSize());
-        _w.targetName.addWatcher(new TextBoxWidgetWatcher() {
-            public void textBoxKeyPress(TextBoxWidget tbwe) {
-                String name = tbwe.getText();
-                if (name != null) name = name.trim();
-                _curPos.deleteWatcher(posWatcher);
-                _curPos.getTarget().setName(name);
-                _curPos.notifyOfGenericUpdate();
-                _curPos.addWatcher(posWatcher);
+//
+//        _w.targetName.setMinimumSize(_w.targetName.getPreferredSize());
+//        _w.targetName.addWatcher(new TextBoxWidgetWatcher() {
+//            public void textBoxKeyPress(TextBoxWidget tbwe) {
+//                String name = tbwe.getText();
+//                if (name != null) name = name.trim();
+//                _curPos.deleteWatcher(posWatcher);
+//                _curPos.getTarget().setName(name);
+//                _curPos.notifyOfGenericUpdate();
+//                _curPos.addWatcher(posWatcher);
 //                _w.resolveButton.setEnabled(!"".equals(name));
-            }
-
-            public void textBoxAction(TextBoxWidget tbwe) {
+//            }
+//
+//            public void textBoxAction(TextBoxWidget tbwe) {
 //                resolveName(HorizonsAction.Type.GET_ORBITAL_ELEMENTS, null);
-            }
-        });
+//            }
+//        });
 
         _w.guideGroupName.setMinimumSize(_w.guideGroupName.getPreferredSize());
         _w.guideGroupName.addWatcher(new TextBoxWidgetWatcher() {
@@ -392,38 +392,38 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
             }
         });
 
-        _w.xaxis.addWatcher(axisWatcher);
-        _w.yaxis.addWatcher(axisWatcher);
-
-        _w.system.clear();
-        _w.system.addChoice(HmsDegTarget.TAG.tccName);
-        _w.system.addChoice(NON_SIDEREAL_TARGET);
-        _w.system.addWatcher(new DropDownListBoxWidgetWatcher() {
-            public void dropDownListBoxAction(DropDownListBoxWidget dd, int i, String val) {
-                final ITarget.Tag tag;
-                if (_w.system.getStringValue().equals(NON_SIDEREAL_TARGET)) {
-                    tag = ((ITarget.Tag) _w.orbitalElementFormat.getSelectedItem());
-                } else {
-                    tag = ITarget.Tag.SIDEREAL;
-                }
-                _ignorePosUpdate = true;
-                try {
-                    _curPos.setTargetType(tag);
-                } finally {
-                    _ignorePosUpdate = false;
-                }
-                refreshAll();
-                updateGuiding();
-            }
-        });
-
+//        _w.xaxis.addWatcher(axisWatcher);
+//        _w.yaxis.addWatcher(axisWatcher);
+//
+//        _w.system.clear();
+//        _w.system.addChoice(HmsDegTarget.TAG.tccName);
+//        _w.system.addChoice(NON_SIDEREAL_TARGET);
+//        _w.system.addWatcher(new DropDownListBoxWidgetWatcher() {
+//            public void dropDownListBoxAction(DropDownListBoxWidget dd, int i, String val) {
+//                final ITarget.Tag tag;
+//                if (_w.system.getStringValue().equals(NON_SIDEREAL_TARGET)) {
+//                    tag = ((ITarget.Tag) _w.orbitalElementFormat.getSelectedItem());
+//                } else {
+//                    tag = ITarget.Tag.SIDEREAL;
+//                }
+//                _ignorePosUpdate = true;
+//                try {
+//                    _curPos.setTargetType(tag);
+//                } finally {
+//                    _ignorePosUpdate = false;
+//                }
+//                refreshAll();
+//                updateGuiding();
+//            }
+//        });
+//
 //        _nonSiderealTargetSup.initOrbitalElementFormatChoices();
 //        _nonSiderealTargetSup.initListeners(nonsiderealTextBoxWidgetWatcher);
-
-        final JRadioButton[] buttons = _w.planetButtons;
-        for (JRadioButton button : buttons) {
-            button.addActionListener(solarListener);
-        }
+//
+//        final JRadioButton[] buttons = _w.planetButtons;
+//        for (JRadioButton button : buttons) {
+//            button.addActionListener(solarListener);
+//        }
 
         // *** Position Table
         _w.positionTable.addKeyListener(new KeyAdapter() {
@@ -1313,22 +1313,22 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 //
 //        //disable the resolve name for Named Targets
 //        _w.resolveButton.setEnabled(!(_curPos.getTarget() instanceof NamedTarget));
-
-        String name = _curPos.getTarget().getName();
-        if (name != null) name = name.trim();
-        _w.targetName.setValue(name);
+//
+//        String name = _curPos.getTarget().getName();
+//        if (name != null) name = name.trim();
+//        _w.targetName.setValue(name);
 //        _w.resolveButton.setEnabled(editable && !"".equals(name));
-
-        _w.xaxis.setValue(_curPos.getTarget().getRa().toString());
-        _w.yaxis.setValue(_curPos.getTarget().getDec().toString());
-
-        if (isNonSidereal) {
-            _w.system.setValue(NON_SIDEREAL_TARGET);
+//
+//        _w.xaxis.setValue(_curPos.getTarget().getRa().toString());
+//        _w.yaxis.setValue(_curPos.getTarget().getDec().toString());
+//
+//        if (isNonSidereal) {
+//            _w.system.setValue(NON_SIDEREAL_TARGET);
 //            _nonSiderealTargetSup.showOrbitalElementFormat();
-        } else {
-            _w.system.setValue(_curPos.getTarget().getTag().tccName);
-        }
-
+//        } else {
+//            _w.system.setValue(_curPos.getTarget().getTag().tccName);
+//        }
+//
 //        // update the display in the tabs
 //        if (_curPos.getTarget() instanceof NonSiderealTarget) {
 //            final NonSiderealTarget nst = (NonSiderealTarget) _curPos.getTarget();
@@ -1377,179 +1377,179 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 //    private interface ResolveNameListener {
 //        void nameResolved();
 //    }
-
-    /**
-     * An Horizon Action encapsulates the operations to be performed based on the results of an
-     * Horizons Query.
-     */
-    private interface HorizonsAction {
-        public static enum Type {
-            GET_ORBITAL_ELEMENTS,
-            UPDATE_POSITION,
-            PLOT_EPHEMERIS
-        }
-
-        /** Executes the given operation using the given <code>HorizonsReply</code> */
-        public void execute(HorizonsReply reply);
-    }
-
-    /**
-     * A container for all the Horizons Actions that will be performed based on the results of an
-     * query to the Horizons System.
-     * </p>
-     * Would have been great that actions would have been implemented as static members, so I could
-     * have done this as a set of enums with the appropriate operation. However, the actions operate
-     * on non-static member. I think it's possible to create the appropriate methods to update the
-     * relevant objects when the underlying EdCompTargetList changes, and use static methods
-     * anyway... but there is so many other things to resolve yet that this is what we get.
-     */
-    private class HorizonsActionContainer {
-
-        public HashMap<HorizonsAction.Type, HorizonsAction> getActions() {
-            final HashMap<HorizonsAction.Type, HorizonsAction> actions = new HashMap<>();
-            actions.put(HorizonsAction.Type.GET_ORBITAL_ELEMENTS,
-                    new UpdateOrbitalElements());
-            actions.put(HorizonsAction.Type.UPDATE_POSITION,
-                    new UpdatePosition());
-            actions.put(HorizonsAction.Type.PLOT_EPHEMERIS,
-                    new PlotEphemeris());
-            return actions;
-        }
-
-        /**
-         * Update the Orbital Elements of the NonSidereal object. Will update the Ra,Dec (and time)
-         * with the latest information gotten. Also, it will update the System Type of the conic
-         * target based on the type of the answer.
-         */
-        private class UpdateOrbitalElements implements HorizonsAction {
-
-            public void execute(HorizonsReply reply) {
-
-                // Alright, we're going to replace the target if we get back a comet or minor
-                // object, otherwise we do nothing. That's the old behavior.
-                final ConicTarget target;
-                final String name = _w.targetName.getText().trim();
-
-                // First construct the object and set the AQ
-                switch (reply.getReplyType()) {
-                    case COMET:
-                        target = new ConicTarget(ITarget.Tag.JPL_MINOR_BODY);
-                        if (reply.hasOrbitalElements()) {
-                            final OrbitalElements elements = reply.getOrbitalElements();
-                            target.getAQ().setValue(elements.getValue(OrbitalElements.Name.QR));
-                        }
-                        _w.orbitalElementFormat.setSelectedItem(ITarget.Tag.JPL_MINOR_BODY);
-                        _w.targetName.setText(name); //name is cleared if we move the element format
-                        break;
-
-                    case MINOR_OBJECT:
-                        target = new ConicTarget(ITarget.Tag.MPC_MINOR_PLANET);
-                        if (reply.hasOrbitalElements()) {
-                            final OrbitalElements elements = reply.getOrbitalElements();
-                            target.getAQ().setValue(elements.getValue(OrbitalElements.Name.A));
-                        }
-                        _w.orbitalElementFormat.setSelectedItem(ITarget.Tag.MPC_MINOR_PLANET);
-                        _w.targetName.setText(name); //name is cleared if we move the element format
-                        break;
-
-                    default:
-                        return; /// ***
-                }
-
-                // Store horizons info, if available
-                if (reply.hasObjectIdAndType()) {
-                    target.setHorizonsObjectId(reply.getObjectId());
-                    target.setHorizonsObjectTypeOrdinal(reply.getObjectType().ordinal());
-                }
-
-                // Set the orbital elements
-                if (reply.hasOrbitalElements()) {
-                    final OrbitalElements elements = reply.getOrbitalElements();
-                    target.getEpoch().setValue(elements.getValue(OrbitalElements.Name.EPOCH));
-                    target.getEpochOfPeri().setValue(elements.getValue(OrbitalElements.Name.TP));
-                    target.getANode().setValue(elements.getValue(OrbitalElements.Name.OM));
-                    target.getPerihelion().setValue(elements.getValue(OrbitalElements.Name.W));
-                    target.setE(elements.getValue(OrbitalElements.Name.EC));
-                    target.getInclination().setValue(elements.getValue(OrbitalElements.Name.IN));
-                    target.getLM().setValue(elements.getValue(OrbitalElements.Name.MA));
-                }
-
-                // Ok replace the target here since the ephemeris stuff updates the UI :-\
-                _curPos.setTarget(target);
-
-                //now, update current RA, Dec
-                if (reply.hasEphemeris()) {
-                    final List<EphemerisEntry> ephemeris = reply.getEphemeris();
-                    _processEphemeris(ephemeris);
-                }
-
-                // And make sure there's an update to the UI. This is so terrible.
-                _curPos.notifyOfGenericUpdate();
-
-            }
-        }
-
-        /** Action to update the position of the object */
-        private class UpdatePosition implements HorizonsAction {
-            public void execute(HorizonsReply reply) {
-                if (reply.hasEphemeris()) {
-                    _processEphemeris(reply.getEphemeris());
-                } else {
-                    DialogUtil.error("No ephemeris available for object.");
-                }
-
-            }
-        }
-
-        /** Action to plot the ephemeris for the given object */
-        private class PlotEphemeris implements HorizonsAction {
-            public void execute(HorizonsReply reply) {
-                if (reply.hasEphemeris()) {
-                    List<EphemerisEntry> ephemeris = reply.getEphemeris();
-                    //first, we need to setup the base position
-                    _processEphemeris(ephemeris);
-                    if (ephemeris != null) {
-                        HorizonsPlotter.plot(getNode(), ephemeris);
-                    }
-                } else {
-                    DialogUtil.error("No ephemeris available for object.");
-                }
-            }
-        }
-
-        /**
-         * Analyzes the ephemeris, and set the current position (and date) of the Object based on
-         * that information. If the TPE is available, will update its base position
-         */
-        private void _processEphemeris(List<EphemerisEntry> ephemeris) {
-            if (ephemeris != null) {
-                if (ephemeris.size() > 0) {
-                    final EphemerisEntry entry = ephemeris.get(0);
-                    final WorldCoords coords = entry.getCoordinates();
-                    if (_curPos.getTarget() instanceof NonSiderealTarget) {
-                        final NonSiderealTarget target = (NonSiderealTarget) _curPos.getTarget();
-                        _ignorePosUpdate = true;
-                        try {
-                            setHmsDms(_curPos, coords.getRA().toString(),
-                                    coords.getDec().toString());
-                        } finally {
-                            _ignorePosUpdate = false;
-                        }
-                        target.setDateForPosition(entry.getDate());
-                        updateGuiding();
-                    }
-                }
-            }
-        }
-    }
-
-    private static final class TrackingButton extends JToggleButton {
-        public TrackingButton() {
-            super("Tracking Details");
-            setUI(new RotatedButtonUI(RotatedButtonUI.Orientation.topToBottom));
-            setBackground(VERY_LIGHT_GREY);
-        }
-    }
+//
+//    /**
+//     * An Horizon Action encapsulates the operations to be performed based on the results of an
+//     * Horizons Query.
+//     */
+//    private interface HorizonsAction {
+//        public static enum Type {
+//            GET_ORBITAL_ELEMENTS,
+//            UPDATE_POSITION,
+//            PLOT_EPHEMERIS
+//        }
+//
+//        /** Executes the given operation using the given <code>HorizonsReply</code> */
+//        public void execute(HorizonsReply reply);
+//    }
+//
+//    /**
+//     * A container for all the Horizons Actions that will be performed based on the results of an
+//     * query to the Horizons System.
+//     * </p>
+//     * Would have been great that actions would have been implemented as static members, so I could
+//     * have done this as a set of enums with the appropriate operation. However, the actions operate
+//     * on non-static member. I think it's possible to create the appropriate methods to update the
+//     * relevant objects when the underlying EdCompTargetList changes, and use static methods
+//     * anyway... but there is so many other things to resolve yet that this is what we get.
+//     */
+//    private class HorizonsActionContainer {
+//
+//        public HashMap<HorizonsAction.Type, HorizonsAction> getActions() {
+//            final HashMap<HorizonsAction.Type, HorizonsAction> actions = new HashMap<>();
+//            actions.put(HorizonsAction.Type.GET_ORBITAL_ELEMENTS,
+//                    new UpdateOrbitalElements());
+//            actions.put(HorizonsAction.Type.UPDATE_POSITION,
+//                    new UpdatePosition());
+//            actions.put(HorizonsAction.Type.PLOT_EPHEMERIS,
+//                    new PlotEphemeris());
+//            return actions;
+//        }
+//
+//        /**
+//         * Update the Orbital Elements of the NonSidereal object. Will update the Ra,Dec (and time)
+//         * with the latest information gotten. Also, it will update the System Type of the conic
+//         * target based on the type of the answer.
+//         */
+//        private class UpdateOrbitalElements implements HorizonsAction {
+//
+//            public void execute(HorizonsReply reply) {
+//
+//                // Alright, we're going to replace the target if we get back a comet or minor
+//                // object, otherwise we do nothing. That's the old behavior.
+//                final ConicTarget target;
+//                final String name = _w.targetName.getText().trim();
+//
+//                // First construct the object and set the AQ
+//                switch (reply.getReplyType()) {
+//                    case COMET:
+//                        target = new ConicTarget(ITarget.Tag.JPL_MINOR_BODY);
+//                        if (reply.hasOrbitalElements()) {
+//                            final OrbitalElements elements = reply.getOrbitalElements();
+//                            target.getAQ().setValue(elements.getValue(OrbitalElements.Name.QR));
+//                        }
+//                        _w.orbitalElementFormat.setSelectedItem(ITarget.Tag.JPL_MINOR_BODY);
+//                        _w.targetName.setText(name); //name is cleared if we move the element format
+//                        break;
+//
+//                    case MINOR_OBJECT:
+//                        target = new ConicTarget(ITarget.Tag.MPC_MINOR_PLANET);
+//                        if (reply.hasOrbitalElements()) {
+//                            final OrbitalElements elements = reply.getOrbitalElements();
+//                            target.getAQ().setValue(elements.getValue(OrbitalElements.Name.A));
+//                        }
+//                        _w.orbitalElementFormat.setSelectedItem(ITarget.Tag.MPC_MINOR_PLANET);
+//                        _w.targetName.setText(name); //name is cleared if we move the element format
+//                        break;
+//
+//                    default:
+//                        return; /// ***
+//                }
+//
+//                // Store horizons info, if available
+//                if (reply.hasObjectIdAndType()) {
+//                    target.setHorizonsObjectId(reply.getObjectId());
+//                    target.setHorizonsObjectTypeOrdinal(reply.getObjectType().ordinal());
+//                }
+//
+//                // Set the orbital elements
+//                if (reply.hasOrbitalElements()) {
+//                    final OrbitalElements elements = reply.getOrbitalElements();
+//                    target.getEpoch().setValue(elements.getValue(OrbitalElements.Name.EPOCH));
+//                    target.getEpochOfPeri().setValue(elements.getValue(OrbitalElements.Name.TP));
+//                    target.getANode().setValue(elements.getValue(OrbitalElements.Name.OM));
+//                    target.getPerihelion().setValue(elements.getValue(OrbitalElements.Name.W));
+//                    target.setE(elements.getValue(OrbitalElements.Name.EC));
+//                    target.getInclination().setValue(elements.getValue(OrbitalElements.Name.IN));
+//                    target.getLM().setValue(elements.getValue(OrbitalElements.Name.MA));
+//                }
+//
+//                // Ok replace the target here since the ephemeris stuff updates the UI :-\
+//                _curPos.setTarget(target);
+//
+//                //now, update current RA, Dec
+//                if (reply.hasEphemeris()) {
+//                    final List<EphemerisEntry> ephemeris = reply.getEphemeris();
+//                    _processEphemeris(ephemeris);
+//                }
+//
+//                // And make sure there's an update to the UI. This is so terrible.
+//                _curPos.notifyOfGenericUpdate();
+//
+//            }
+//        }
+//
+//        /** Action to update the position of the object */
+//        private class UpdatePosition implements HorizonsAction {
+//            public void execute(HorizonsReply reply) {
+//                if (reply.hasEphemeris()) {
+//                    _processEphemeris(reply.getEphemeris());
+//                } else {
+//                    DialogUtil.error("No ephemeris available for object.");
+//                }
+//
+//            }
+//        }
+//
+//        /** Action to plot the ephemeris for the given object */
+//        private class PlotEphemeris implements HorizonsAction {
+//            public void execute(HorizonsReply reply) {
+//                if (reply.hasEphemeris()) {
+//                    List<EphemerisEntry> ephemeris = reply.getEphemeris();
+//                    //first, we need to setup the base position
+//                    _processEphemeris(ephemeris);
+//                    if (ephemeris != null) {
+//                        HorizonsPlotter.plot(getNode(), ephemeris);
+//                    }
+//                } else {
+//                    DialogUtil.error("No ephemeris available for object.");
+//                }
+//            }
+//        }
+//
+//        /**
+//         * Analyzes the ephemeris, and set the current position (and date) of the Object based on
+//         * that information. If the TPE is available, will update its base position
+//         */
+//        private void _processEphemeris(List<EphemerisEntry> ephemeris) {
+//            if (ephemeris != null) {
+//                if (ephemeris.size() > 0) {
+//                    final EphemerisEntry entry = ephemeris.get(0);
+//                    final WorldCoords coords = entry.getCoordinates();
+//                    if (_curPos.getTarget() instanceof NonSiderealTarget) {
+//                        final NonSiderealTarget target = (NonSiderealTarget) _curPos.getTarget();
+//                        _ignorePosUpdate = true;
+//                        try {
+//                            setHmsDms(_curPos, coords.getRA().toString(),
+//                                    coords.getDec().toString());
+//                        } finally {
+//                            _ignorePosUpdate = false;
+//                        }
+//                        target.setDateForPosition(entry.getDate());
+//                        updateGuiding();
+//                    }
+//                }
+//            }
+//        }
+//    }
+//
+//    private static final class TrackingButton extends JToggleButton {
+//        public TrackingButton() {
+//            super("Tracking Details");
+//            setUI(new RotatedButtonUI(RotatedButtonUI.Orientation.topToBottom));
+//            setBackground(VERY_LIGHT_GREY);
+//        }
+//    }
 
     @SuppressWarnings("FieldCanBeLocal")
     private final ActionListener removeListener = new ActionListener() {
@@ -1766,22 +1766,22 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 //            }
 //        }
 //    };
-
-    @SuppressWarnings("FieldCanBeLocal")
-    private final ActionListener solarListener = new ActionListener() {
-        public void actionPerformed(ActionEvent evt) {
-            final String cmd = evt.getActionCommand().toUpperCase();
-            if (_curPos.getTarget() instanceof NamedTarget) {
-                final NamedTarget target = (NamedTarget) _curPos.getTarget();
-                try {
-                    target.setSolarObject(NamedTarget.SolarObject.valueOf(cmd));
-                    _curPos.notifyOfGenericUpdate();
-                } catch (IllegalArgumentException ex) {
-                    DialogUtil.error("Couldn't find a Planet called " + cmd);
-                }
-            }
-        }
-    };
+//
+//    @SuppressWarnings("FieldCanBeLocal")
+//    private final ActionListener solarListener = new ActionListener() {
+//        public void actionPerformed(ActionEvent evt) {
+//            final String cmd = evt.getActionCommand().toUpperCase();
+//            if (_curPos.getTarget() instanceof NamedTarget) {
+//                final NamedTarget target = (NamedTarget) _curPos.getTarget();
+//                try {
+//                    target.setSolarObject(NamedTarget.SolarObject.valueOf(cmd));
+//                    _curPos.notifyOfGenericUpdate();
+//                } catch (IllegalArgumentException ex) {
+//                    DialogUtil.error("Couldn't find a Planet called " + cmd);
+//                }
+//            }
+//        }
+//    };
 
     @SuppressWarnings("FieldCanBeLocal")
     private final ActionListener copyListener = new ActionListener() {
@@ -1819,28 +1819,28 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
     };
 
 
-    private final TextBoxWidgetWatcher axisWatcher = new TextBoxWidgetWatcher() {
-        private void updateTargetCoordinatesFromTextWidgets() {
-            final String dec = _w.yaxis.getText().trim().replace(",", "."); // allow "," instead of "."
-            final String ra  = _w.xaxis.getText().trim().replace(",", ".");
-            if (!(dec.equals("-") || dec.equals("+"))) {
-                _ignorePosUpdate = true;
-                try {
-                    setHmsDms(_curPos, ra, dec);
-                } finally {
-                    _ignorePosUpdate = false;
-                }
-                updateGuiding();
-            }
-        }
-        public void textBoxKeyPress(TextBoxWidget tbwe) {
-            updateTargetCoordinatesFromTextWidgets();
-        }
-        public void textBoxAction(TextBoxWidget tbwe) {
-            updateTargetCoordinatesFromTextWidgets();
-        }
-    };
-
+//    private final TextBoxWidgetWatcher axisWatcher = new TextBoxWidgetWatcher() {
+//        private void updateTargetCoordinatesFromTextWidgets() {
+//            final String dec = _w.yaxis.getText().trim().replace(",", "."); // allow "," instead of "."
+//            final String ra  = _w.xaxis.getText().trim().replace(",", ".");
+//            if (!(dec.equals("-") || dec.equals("+"))) {
+//                _ignorePosUpdate = true;
+//                try {
+//                    setHmsDms(_curPos, ra, dec);
+//                } finally {
+//                    _ignorePosUpdate = false;
+//                }
+//                updateGuiding();
+//            }
+//        }
+//        public void textBoxKeyPress(TextBoxWidget tbwe) {
+//            updateTargetCoordinatesFromTextWidgets();
+//        }
+//        public void textBoxAction(TextBoxWidget tbwe) {
+//            updateTargetCoordinatesFromTextWidgets();
+//        }
+//    };
+//
 //    @SuppressWarnings("FieldCanBeLocal")
 //    private final TextBoxWidgetWatcher nonsiderealTextBoxWidgetWatcher = new TextBoxWidgetWatcher() {
 //        private void updateConicTarget(NumberBoxWidget nbw) {

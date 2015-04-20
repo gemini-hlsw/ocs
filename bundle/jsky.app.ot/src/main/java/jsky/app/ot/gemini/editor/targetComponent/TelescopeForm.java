@@ -54,59 +54,59 @@ class TelescopeForm extends JPanel {
         tag = new JComboBox();
         final JLabel nameLabel = new JLabel();
         final JLabel guideGroupNameLabel = new JLabel();
-        targetName = new TextBoxWidget();
+//        targetName = new TextBoxWidget();
         guideGroupName = new TextBoxWidget();
 //        resolveButton = new JButton();
 //        nameServerBar = new JMenuBar();
 //        nameServer = new JMenu();
         final JPanel stretchPanel = new JPanel();
-        system = new DropDownListBoxWidget();
+//        system = new DropDownListBoxWidget();
         final JLabel RA_Az_STW = new JLabel();
         final JPanel alignmentPanel = new JPanel();
-        xaxis = new TextBoxWidget();
+//        xaxis = new TextBoxWidget();
         final JLabel dec_El_STW = new JLabel();
-        yaxis = new TextBoxWidget();
+//        yaxis = new TextBoxWidget();
 //        extrasFolder = new JPanel();
 //        nonsiderealPW = new JPanel();
-        epochofelUnits = new JLabel();
-        orbincUnits = new JLabel();
-        longascnodeUnits = new JLabel();
-        longofperiUnits = new JLabel();
-        argofperiUnits = new JLabel();
-        meandistUnits = new JLabel();
-        peridistUnits = new JLabel();
-        eccentricityUnits = new JLabel();
-        meanlongUnits = new JLabel();
-        meananomUnits = new JLabel();
-        dailymotUnits = new JLabel();
-        epochofperiUnits = new JLabel();
-        epochofelLabel = new JLabel();
-        epochofel = new NumberBoxWidget();
-        peridistLabel = new JLabel();
-        peridist = new NumberBoxWidget();
-        orbincLabel = new JLabel();
-        orbinc = new NumberBoxWidget();
-        eccentricityLabel = new JLabel();
-        eccentricity = new NumberBoxWidget();
-        longascnodeLabel = new JLabel();
-        longascnode = new NumberBoxWidget();
-        meanlongLabel = new JLabel();
-        meanlong = new NumberBoxWidget();
-        longofperiLabel = new JLabel();
-        longofperi = new NumberBoxWidget();
-        meananomLabel = new JLabel();
-        meananom = new NumberBoxWidget();
-        argofperiLabel = new JLabel();
-        argofperi = new NumberBoxWidget();
-        dailymotLabel = new JLabel();
-        dailymot = new NumberBoxWidget();
-        meandistLabel = new JLabel();
-        meandist = new NumberBoxWidget();
-        epochofperiLabel = new JLabel();
-        epochofperi = new NumberBoxWidget();
+//        epochofelUnits = new JLabel();
+//        orbincUnits = new JLabel();
+//        longascnodeUnits = new JLabel();
+//        longofperiUnits = new JLabel();
+//        argofperiUnits = new JLabel();
+//        meandistUnits = new JLabel();
+//        peridistUnits = new JLabel();
+//        eccentricityUnits = new JLabel();
+//        meanlongUnits = new JLabel();
+//        meananomUnits = new JLabel();
+//        dailymotUnits = new JLabel();
+//        epochofperiUnits = new JLabel();
+//        epochofelLabel = new JLabel();
+//        epochofel = new NumberBoxWidget();
+//        peridistLabel = new JLabel();
+//        peridist = new NumberBoxWidget();
+//        orbincLabel = new JLabel();
+//        orbinc = new NumberBoxWidget();
+//        eccentricityLabel = new JLabel();
+//        eccentricity = new NumberBoxWidget();
+//        longascnodeLabel = new JLabel();
+//        longascnode = new NumberBoxWidget();
+//        meanlongLabel = new JLabel();
+//        meanlong = new NumberBoxWidget();
+//        longofperiLabel = new JLabel();
+//        longofperi = new NumberBoxWidget();
+//        meananomLabel = new JLabel();
+//        meananom = new NumberBoxWidget();
+//        argofperiLabel = new JLabel();
+//        argofperi = new NumberBoxWidget();
+//        dailymotLabel = new JLabel();
+//        dailymot = new NumberBoxWidget();
+//        meandistLabel = new JLabel();
+//        meandist = new NumberBoxWidget();
+//        epochofperiLabel = new JLabel();
+//        epochofperi = new NumberBoxWidget();
 //        final JPanel orbitalElementFormatPanel = new JPanel();
 //        final JLabel orbitalElementFormatLabel = new JLabel();
-        orbitalElementFormat = new DropDownListBoxWidget();
+//        orbitalElementFormat = new DropDownListBoxWidget();
 //        planetsPanel = new JPanel();
 //        final JLabel label1 = new JLabel();
         final JRadioButton radioButton1 = new JRadioButton();
@@ -250,14 +250,14 @@ class TelescopeForm extends JPanel {
                     GridBagConstraints.CENTER, GridBagConstraints.BOTH,
                     new Insets(0, 10, 0, 5), 0, 0));
 
-                //---- targetName ----
-                targetName.setToolTipText("Target name (type enter to resolve to RA,Dec via name server)");
-                targetName.setHorizontalAlignment(JTextField.LEFT);
-                targetName.setColumns(20);
-                objectGBW.add(targetName, new GridBagConstraints(2, 0, 2, 1, 0.0, 0.0,
-                    GridBagConstraints.WEST, GridBagConstraints.VERTICAL,
-                    new Insets(0, 0, 0, 0), 0, 0));
-
+//                //---- targetName ----
+//                targetName.setToolTipText("Target name (type enter to resolve to RA,Dec via name server)");
+//                targetName.setHorizontalAlignment(JTextField.LEFT);
+//                targetName.setColumns(20);
+//                objectGBW.add(targetName, new GridBagConstraints(2, 0, 2, 1, 0.0, 0.0,
+//                    GridBagConstraints.WEST, GridBagConstraints.VERTICAL,
+//                    new Insets(0, 0, 0, 0), 0, 0));
+//
 //                //---- resolveButton ----
 //                resolveButton.setToolTipText("Resolve the target name to RA,Dec coordinates");
 //                resolveButton.setMargin(new Insets(2, 2, 2, 2));
@@ -266,7 +266,7 @@ class TelescopeForm extends JPanel {
 //                objectGBW.add(resolveButton, new GridBagConstraints(4, 0, 1, 1, 0.0, 0.0,
 //                    GridBagConstraints.CENTER, GridBagConstraints.BOTH,
 //                    new Insets(0, 2, 0, 0), 0, 0));
-
+//
 //                //---- nameServer ----
 //                nameServer.setToolTipText("Select the name server for resolving the target name to RA,Dec");
 //                nameServer.setFocusable(false);
@@ -283,12 +283,12 @@ class TelescopeForm extends JPanel {
                     GridBagConstraints.CENTER, GridBagConstraints.BOTH,
                     new Insets(0, 0, 0, 0), 0, 0));
 
-                //---- system ----
-                system.setToolTipText("Target coordinate system");
-                system.setFocusable(false);
-                objectGBW.add(system, new GridBagConstraints(0, 1, 1, 1, 0.0, 0.0,
-                    GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
-                    new Insets(5, 0, 0, 0), 0, 0));
+//                //---- system ----
+//                system.setToolTipText("Target coordinate system");
+//                system.setFocusable(false);
+//                objectGBW.add(system, new GridBagConstraints(0, 1, 1, 1, 0.0, 0.0,
+//                    GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
+//                    new Insets(5, 0, 0, 0), 0, 0));
 
                 //---- RA_Az_STW ----
                 RA_Az_STW.setLabelFor(null);
@@ -305,12 +305,12 @@ class TelescopeForm extends JPanel {
                     ((GridBagLayout)alignmentPanel.getLayout()).columnWeights = new double[] {0.0, 0.0, 0.0, 1.0E-4};
                     ((GridBagLayout)alignmentPanel.getLayout()).rowWeights = new double[] {0.0, 1.0E-4};
 
-                    //---- xaxis ----
-                    xaxis.setToolTipText("Target RA coordinate (HH:MM:SS.sss)");
-                    xaxis.setHorizontalAlignment(JTextField.LEFT);
-                    alignmentPanel.add(xaxis, new GridBagConstraints(0, 0, 1, 1, 0.5, 0.0,
-                        GridBagConstraints.CENTER, GridBagConstraints.BOTH,
-                        new Insets(0, 0, 0, 5), 0, 0));
+//                    //---- xaxis ----
+//                    xaxis.setToolTipText("Target RA coordinate (HH:MM:SS.sss)");
+//                    xaxis.setHorizontalAlignment(JTextField.LEFT);
+//                    alignmentPanel.add(xaxis, new GridBagConstraints(0, 0, 1, 1, 0.5, 0.0,
+//                        GridBagConstraints.CENTER, GridBagConstraints.BOTH,
+//                        new Insets(0, 0, 0, 5), 0, 0));
 
                     //---- Dec_El_STW ----
                     dec_El_STW.setLabelFor(null);
@@ -319,12 +319,12 @@ class TelescopeForm extends JPanel {
                         GridBagConstraints.CENTER, GridBagConstraints.BOTH,
                         new Insets(0, 0, 0, 5), 0, 0));
 
-                    //---- yaxis ----
-                    yaxis.setToolTipText("Target Dec coordinate (DD:MM:SS.sss)");
-                    yaxis.setHorizontalAlignment(JTextField.LEFT);
-                    alignmentPanel.add(yaxis, new GridBagConstraints(2, 0, 1, 1, 0.5, 0.0,
-                        GridBagConstraints.CENTER, GridBagConstraints.BOTH,
-                        new Insets(0, 0, 0, 0), 0, 0));
+//                    //---- yaxis ----
+//                    yaxis.setToolTipText("Target Dec coordinate (DD:MM:SS.sss)");
+//                    yaxis.setHorizontalAlignment(JTextField.LEFT);
+//                    alignmentPanel.add(yaxis, new GridBagConstraints(2, 0, 1, 1, 0.5, 0.0,
+//                        GridBagConstraints.CENTER, GridBagConstraints.BOTH,
+//                        new Insets(0, 0, 0, 0), 0, 0));
                 }
                 objectGBW.add(alignmentPanel, new GridBagConstraints(2, 1, 4, 1, 0.0, 0.0,
                     GridBagConstraints.CENTER, GridBagConstraints.BOTH,
@@ -750,29 +750,29 @@ class TelescopeForm extends JPanel {
         manualGuideStarButton       = guidingControls.manualGuideStarButton().peer();
         autoGuideStarGuiderSelector = guidingControls.autoGuideStarGuiderSelector();
 
-        //---- planetButtonGroup ----
-        final ButtonGroup planetButtonGroup = new ButtonGroup();
-        planetButtonGroup.add(radioButton1);
-        planetButtonGroup.add(radioButton2);
-        planetButtonGroup.add(radioButton3);
-        planetButtonGroup.add(radioButton4);
-        planetButtonGroup.add(radioButton5);
-        planetButtonGroup.add(radioButton6);
-        planetButtonGroup.add(radioButton7);
-        planetButtonGroup.add(radioButton8);
-        planetButtonGroup.add(radioButton9);
-        // JFormDesigner - End of component initialization  //GEN-END:initComponents
-
-        planetButtons = new JRadioButton[9];
-        planetButtons[0] = radioButton1;
-        planetButtons[1] = radioButton2;
-        planetButtons[2] = radioButton3;
-        planetButtons[3] = radioButton4;
-        planetButtons[4] = radioButton5;
-        planetButtons[5] = radioButton6;
-        planetButtons[6] = radioButton7;
-        planetButtons[7] = radioButton8;
-        planetButtons[8] = radioButton9;
+//        //---- planetButtonGroup ----
+//        final ButtonGroup planetButtonGroup = new ButtonGroup();
+//        planetButtonGroup.add(radioButton1);
+//        planetButtonGroup.add(radioButton2);
+//        planetButtonGroup.add(radioButton3);
+//        planetButtonGroup.add(radioButton4);
+//        planetButtonGroup.add(radioButton5);
+//        planetButtonGroup.add(radioButton6);
+//        planetButtonGroup.add(radioButton7);
+//        planetButtonGroup.add(radioButton8);
+//        planetButtonGroup.add(radioButton9);
+//        // JFormDesigner - End of component initialization  //GEN-END:initComponents
+//
+//        planetButtons = new JRadioButton[9];
+//        planetButtons[0] = radioButton1;
+//        planetButtons[1] = radioButton2;
+//        planetButtons[2] = radioButton3;
+//        planetButtons[3] = radioButton4;
+//        planetButtons[4] = radioButton5;
+//        planetButtons[5] = radioButton6;
+//        planetButtons[6] = radioButton7;
+//        planetButtons[7] = radioButton8;
+//        planetButtons[8] = radioButton9;
     }
 
     JMenuBar newMenuBar;
@@ -787,53 +787,53 @@ class TelescopeForm extends JPanel {
     JPanel objectGBW;
     JPanel guideGroupPanel;
     JComboBox<PositionType> tag;
-    TextBoxWidget targetName;
+//    TextBoxWidget targetName;
     TextBoxWidget guideGroupName;
 //    JButton resolveButton;
 //    JMenuBar nameServerBar;
 //    JMenu nameServer;
-    DropDownListBoxWidget system;
-    TextBoxWidget xaxis;
-    TextBoxWidget yaxis;
+//    DropDownListBoxWidget system;
+//    TextBoxWidget xaxis;
+//    TextBoxWidget yaxis;
 //    JPanel extrasFolder;
 //    JPanel nonsiderealPW;
-    JLabel epochofelUnits;
-    JLabel orbincUnits;
-    JLabel longascnodeUnits;
-    JLabel longofperiUnits;
-    JLabel argofperiUnits;
-    JLabel meandistUnits;
-    JLabel peridistUnits;
-    JLabel eccentricityUnits;
-    JLabel meanlongUnits;
-    JLabel meananomUnits;
-    JLabel dailymotUnits;
-    JLabel epochofperiUnits;
-    JLabel epochofelLabel;
-    NumberBoxWidget epochofel;
-    JLabel peridistLabel;
-    NumberBoxWidget peridist;
-    JLabel orbincLabel;
-    NumberBoxWidget orbinc;
-    JLabel eccentricityLabel;
-    NumberBoxWidget eccentricity;
-    JLabel longascnodeLabel;
-    NumberBoxWidget longascnode;
-    JLabel meanlongLabel;
-    NumberBoxWidget meanlong;
-    JLabel longofperiLabel;
-    NumberBoxWidget longofperi;
-    JLabel meananomLabel;
-    NumberBoxWidget meananom;
-    JLabel argofperiLabel;
-    NumberBoxWidget argofperi;
-    JLabel dailymotLabel;
-    NumberBoxWidget dailymot;
-    JLabel meandistLabel;
-    NumberBoxWidget meandist;
-    JLabel epochofperiLabel;
-    NumberBoxWidget epochofperi;
-    DropDownListBoxWidget orbitalElementFormat;
+//    JLabel epochofelUnits;
+//    JLabel orbincUnits;
+//    JLabel longascnodeUnits;
+//    JLabel longofperiUnits;
+//    JLabel argofperiUnits;
+//    JLabel meandistUnits;
+//    JLabel peridistUnits;
+//    JLabel eccentricityUnits;
+//    JLabel meanlongUnits;
+//    JLabel meananomUnits;
+//    JLabel dailymotUnits;
+//    JLabel epochofperiUnits;
+//    JLabel epochofelLabel;
+//    NumberBoxWidget epochofel;
+//    JLabel peridistLabel;
+//    NumberBoxWidget peridist;
+//    JLabel orbincLabel;
+//    NumberBoxWidget orbinc;
+//    JLabel eccentricityLabel;
+//    NumberBoxWidget eccentricity;
+//    JLabel longascnodeLabel;
+//    NumberBoxWidget longascnode;
+//    JLabel meanlongLabel;
+//    NumberBoxWidget meanlong;
+//    JLabel longofperiLabel;
+//    NumberBoxWidget longofperi;
+//    JLabel meananomLabel;
+//    NumberBoxWidget meananom;
+//    JLabel argofperiLabel;
+//    NumberBoxWidget argofperi;
+//    JLabel dailymotLabel;
+//    NumberBoxWidget dailymot;
+//    JLabel meandistLabel;
+//    NumberBoxWidget meandist;
+//    JLabel epochofperiLabel;
+//    NumberBoxWidget epochofperi;
+//    DropDownListBoxWidget orbitalElementFormat;
 //    JPanel planetsPanel;
 //    JCalendarPopup calendarDate;
 //    JComboBox<TimeConfig> calendarTime;
@@ -842,7 +842,7 @@ class TelescopeForm extends JPanel {
     JButton setBaseButton;
     // JFormDesigner - End of variables declaration  //GEN-END:variables
 
-    JRadioButton[] planetButtons;
+//    JRadioButton[] planetButtons;
 
     // Components for the Guider panel.
     GuidingControls guidingControls;
