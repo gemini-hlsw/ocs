@@ -77,7 +77,7 @@ import static jsky.app.ot.util.OtColor.*;
 public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, TargetObsComp> {
 
     // Static constants
-    private static final Logger   LOG                 = Logger.getLogger(EdCompTargetList.class.getName());
+//    private static final Logger   LOG                 = Logger.getLogger(EdCompTargetList.class.getName());
     private static final TimeZone UTC                 = TimeZone.getTimeZone("UTC");
     private static final String   NON_SIDEREAL_TARGET = "Nonsidereal";
 
@@ -86,7 +86,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 
     // Instance constants
     private final AgsContextPublisher _agsPub           = new AgsContextPublisher();
-    private final SiderealEditor      _siderealEditor   = new SiderealEditor();
+//    private final SiderealEditor      _siderealEditor   = new SiderealEditor();
     private final TrackingEditor      _trackingEditor   = new TrackingEditor();
     private final MagnitudeEditor     _nonsideMagEditor = new MagnitudeEditor();
     private final JToggleButton       _trackingButton   = new TrackingButton();
@@ -134,7 +134,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         });
 
         // Add the sidereal editor, wrapped to make it less terrible
-        _w.extrasFolder.add(_siderealEditor.getComponent(), "sidereal");
+//        _w.extrasFolder.add(_siderealEditor.getComponent(), "sidereal");
         _w.extrasFolder.add(new JPanel(new GridBagLayout()) {{
             add(new JLabel("Brightness"), new GridBagConstraints() {{
                 gridx = 0;
@@ -505,7 +505,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                     if (_curPos != null) _curPos.deleteWatcher(posWatcher);
 
                     // Sidereal
-                    _siderealEditor.edit(ctx, _curPos, getNode());
+//                    _siderealEditor.edit(ctx, _curPos, getNode());
                     _trackingEditor.edit(ctx, _curPos, getNode());
 
                     // Nonsidereal
@@ -948,7 +948,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                 _curPos = selTarget;
 
                 // Sidereal
-                _siderealEditor.edit(ctx, selTarget, getNode());
+//                _siderealEditor.edit(ctx, selTarget, getNode());
                 _trackingEditor.edit(ctx, selTarget, getNode());
 
                 // Nonsidereal
@@ -1058,7 +1058,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         toggleAgsGuiElements();
         final Option<ObsContext> ctx = getObsContext(env);
         _w.guidingControls.update(ctx);
-        _siderealEditor.updateGuiding(ctx, _curPos, getNode());
+//        _siderealEditor.updateGuiding(ctx, _curPos, getNode());
     }
 
     private final PropertyChangeListener selectionListener = new PropertyChangeListener() {
@@ -1079,7 +1079,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                         _curPos = target;
 
                         // Sidereal
-                        _siderealEditor.edit(ctx, target, getNode());
+//                        _siderealEditor.edit(ctx, target, getNode());
                         _trackingEditor.edit(ctx, target, getNode());
 
                         // Nonsidereal
@@ -1574,7 +1574,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                         final Option<ObsContext> ctx = getObsContext(env);
                         if (_curPos != null) _curPos.deleteWatcher(posWatcher);
                         _curPos = selTarget;
-                        _siderealEditor.edit(ctx, selTarget, getNode());
+//                        _siderealEditor.edit(ctx, selTarget, getNode());
                         _trackingEditor.edit(ctx, selTarget, getNode());
                         _nonSiderealTargetSup.updatePos(_curPos);
                         _nonsideMagEditor.edit(ctx, selTarget, getNode());
