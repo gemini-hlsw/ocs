@@ -95,7 +95,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
     // More constants, but they need access to `this` so we assign in the ctor
     private final TelescopeForm            _w;
 //    private final NonSiderealTargetSupport _nonSiderealTargetSup;
-    private final TimeDocument             _timeDocument;
+//    private final TimeDocument             _timeDocument;
 //
     // Stuff that varies with time
     private SPTarget        _curPos;
@@ -109,7 +109,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         // Finish initializing our constants
         _w = new TelescopeForm(this);
 //        _nonSiderealTargetSup = new NonSiderealTargetSupport(_w, _curPos);
-        _timeDocument         = new TimeDocument((JTextField) _w.calendarTime.getEditor().getEditorComponent());
+//        _timeDocument         = new TimeDocument((JTextField) _w.calendarTime.getEditor().getEditorComponent());
 
         // Move the tag menu up onto the menu bar, with a label
         _w.tag.getParent().remove(_w.tag);
@@ -245,33 +245,33 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         // Set up the formatting on the calendar doodad
         final DateFormat timeFormatter = new SimpleDateFormat("HH:mm:ss");
         timeFormatter.setTimeZone(UTC);
-        _w.calendarTime.setModel(new DefaultComboBoxModel<>(TimeConfig.values()));
-        _w.calendarTime.setRenderer(new ListCellRenderer<TimeConfig>() {
-
-            // This is raw-typed; we use a delegate to avoid the warning
-            BasicComboBoxRenderer delegate = new BasicComboBoxRenderer() {
-                public Component getListCellRendererComponent(JList jList, Object
-                object, int index, boolean isSelected, boolean hasFocus) {
-                    final String text;
-                    if (object instanceof Date) {
-                        text = timeFormatter.format((Date) object);
-                    } else if (object instanceof TimeConfig) {
-                        text = ((TimeConfig) object).displayValue();
-                    } else {
-                        text = object.toString();
-                    }
-                    return super.getListCellRendererComponent(jList, text, index, isSelected, hasFocus);
-                }
-            };
-
-            public Component getListCellRendererComponent(JList<? extends TimeConfig> list, TimeConfig value, int index, boolean isSelected, boolean cellHasFocus) {
-                return delegate.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-            }
-
-        });
-        _timeDocument.setTime(timeFormatter.format(new Date()));
-        ((JTextField) _w.calendarTime.getEditor().getEditorComponent()).setDocument(_timeDocument);
-        _w.calendarDate.setTimeZone(UTC);
+//        _w.calendarTime.setModel(new DefaultComboBoxModel<>(TimeConfig.values()));
+//        _w.calendarTime.setRenderer(new ListCellRenderer<TimeConfig>() {
+//
+//            // This is raw-typed; we use a delegate to avoid the warning
+//            BasicComboBoxRenderer delegate = new BasicComboBoxRenderer() {
+//                public Component getListCellRendererComponent(JList jList, Object
+//                object, int index, boolean isSelected, boolean hasFocus) {
+//                    final String text;
+//                    if (object instanceof Date) {
+//                        text = timeFormatter.format((Date) object);
+//                    } else if (object instanceof TimeConfig) {
+//                        text = ((TimeConfig) object).displayValue();
+//                    } else {
+//                        text = object.toString();
+//                    }
+//                    return super.getListCellRendererComponent(jList, text, index, isSelected, hasFocus);
+//                }
+//            };
+//
+//            public Component getListCellRendererComponent(JList<? extends TimeConfig> list, TimeConfig value, int index, boolean isSelected, boolean cellHasFocus) {
+//                return delegate.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+//            }
+//
+//        });
+//        _timeDocument.setTime(timeFormatter.format(new Date()));
+//        ((JTextField) _w.calendarTime.getEditor().getEditorComponent()).setDocument(_timeDocument);
+//        _w.calendarDate.setTimeZone(UTC);
 
 
 
@@ -321,15 +321,15 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 
         _w.setBaseButton.addActionListener(setBaseListener);
 
-        _w.calendarTime.addActionListener(calendarTimeListener);
-
+//        _w.calendarTime.addActionListener(calendarTimeListener);
+//
 //        _w.timeRangePlotButton.addActionListener(timeRangePlotListener);
 //        _w.updateRaDecButton.addActionListener(updateRaDecListener);
-
+//
 //        setMenuStyling(_w.nameServerBar, _w.nameServer, "eclipse/menu-trimmed.gif");
-
+//
 //        final SkycatConfigFile cf = SkycatConfigFile.getConfigFile();
-
+//
 //        // Create radio button options for each of the name servers.
 //        final ButtonGroup grp = new ButtonGroup();
 //        final List<Catalog> nameServers = cf.getNameServers();
@@ -1739,35 +1739,35 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         }
     };
 
-    @SuppressWarnings("FieldCanBeLocal")
-    private final ActionListener calendarTimeListener = new ActionListener() {
-        final DateFormat timeFormatter = new SimpleDateFormat("HH:mm:ss");
-        {
-            timeFormatter.setTimeZone(UTC);
-        }
-        public void actionPerformed(ActionEvent evt) {
-            final Object o = _w.calendarTime.getSelectedItem();
-            if (o instanceof TimeConfig) {
-                final TimeConfig tr = (TimeConfig) o;
-                final Date d = tr.getDate();
-                final String time = timeFormatter.format(d);
-                _timeDocument.setTime(time);
-
-                // We have to set the correct day in the calendar when shortcuts are used. Because
-                // _w.calendarDate.setDate(d) doesn't work.
-                _w.panel1.remove(_w.calendarDate);
-                _w.calendarDate = new JCalendarPopup(d, TimeZone.getTimeZone("UTC"));
-                _w.panel1.add(_w.calendarDate, new CellConstraints().xy(5, 1));
-                _w.calendarDate.revalidate();
-                _w.calendarDate.repaint();
-
-                //_w.calendarDate.set
-            } else if (o instanceof String) {
-                //just update the time document
-                _timeDocument.setTime((String) o);
-            }
-        }
-    };
+//    @SuppressWarnings("FieldCanBeLocal")
+//    private final ActionListener calendarTimeListener = new ActionListener() {
+//        final DateFormat timeFormatter = new SimpleDateFormat("HH:mm:ss");
+//        {
+//            timeFormatter.setTimeZone(UTC);
+//        }
+//        public void actionPerformed(ActionEvent evt) {
+//            final Object o = _w.calendarTime.getSelectedItem();
+//            if (o instanceof TimeConfig) {
+//                final TimeConfig tr = (TimeConfig) o;
+//                final Date d = tr.getDate();
+//                final String time = timeFormatter.format(d);
+//                _timeDocument.setTime(time);
+//
+//                // We have to set the correct day in the calendar when shortcuts are used. Because
+//                // _w.calendarDate.setDate(d) doesn't work.
+//                _w.panel1.remove(_w.calendarDate);
+//                _w.calendarDate = new JCalendarPopup(d, TimeZone.getTimeZone("UTC"));
+//                _w.panel1.add(_w.calendarDate, new CellConstraints().xy(5, 1));
+//                _w.calendarDate.revalidate();
+//                _w.calendarDate.repaint();
+//
+//                //_w.calendarDate.set
+//            } else if (o instanceof String) {
+//                //just update the time document
+//                _timeDocument.setTime((String) o);
+//            }
+//        }
+//    };
 
     @SuppressWarnings("FieldCanBeLocal")
     private final ActionListener solarListener = new ActionListener() {

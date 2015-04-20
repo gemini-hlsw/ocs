@@ -119,11 +119,11 @@ class TelescopeForm extends JPanel {
         final JRadioButton radioButton8 = new JRadioButton();
         final JRadioButton radioButton9 = new JRadioButton();
         panel1 = new JPanel();
-        final JLabel label2 = new JLabel();
-        calendarDate = new JCalendarPopup(new Date(), TimeZone.getTimeZone("UTC"));
-        final JLabel label4 = new JLabel();
-        calendarTime = new JComboBox();
-        final JLabel label3 = new JLabel();
+//        final JLabel label2 = new JLabel();
+//        calendarDate = new JCalendarPopup(new Date(), TimeZone.getTimeZone("UTC"));
+//        final JLabel label4 = new JLabel();
+//        calendarTime = new JComboBox();
+//        final JLabel label3 = new JLabel();
 //        updateRaDecButton = new JButton();
 //        timeRangePlotButton = new JButton();
         setBaseButton = new JButton();
@@ -706,28 +706,28 @@ class TelescopeForm extends JPanel {
                             },
                             RowSpec.decodeSpecs("default")));
 
-                        //---- label2 ----
-                        label2.setText("Valid on");
-                        panel1.add(label2, cc.xy(3, 1));
-                        panel1.add(calendarDate, cc.xy(5, 1));
-
-                        //---- label4 ----
-                        label4.setText("at");
-                        panel1.add(label4, cc.xy(7, 1));
-
-                        //---- calendarTime ----
-                        calendarTime.setEditable(true);
-                        panel1.add(calendarTime, cc.xy(9, 1));
-
-                        //---- label3 ----
-                        label3.setText("UTC");
-                        panel1.add(label3, cc.xy(11, 1));
-
+//                        //---- label2 ----
+//                        label2.setText("Valid on");
+//                        panel1.add(label2, cc.xy(3, 1));
+//                        panel1.add(calendarDate, cc.xy(5, 1));
+//
+//                        //---- label4 ----
+//                        label4.setText("at");
+//                        panel1.add(label4, cc.xy(7, 1));
+//
+//                        //---- calendarTime ----
+//                        calendarTime.setEditable(true);
+//                        panel1.add(calendarTime, cc.xy(9, 1));
+//
+//                        //---- label3 ----
+//                        label3.setText("UTC");
+//                        panel1.add(label3, cc.xy(11, 1));
+//
 //                        //---- updateRaDecButton ----
 //                        updateRaDecButton.setText("Go");
 //                        updateRaDecButton.setToolTipText("Get the position of the object at the specified date and time ");
 //                        panel1.add(updateRaDecButton, cc.xy(13, 1));
-
+//
 //                        //---- timeRangePlotButton ----
 //                        timeRangePlotButton.setText("Plot");
 //                        timeRangePlotButton.setToolTipText("Plot the ephemeris of this object starting at the given time.\nThe ephemeris will be obtained from JPL Horizons if needed. ");
@@ -835,8 +835,8 @@ class TelescopeForm extends JPanel {
     NumberBoxWidget epochofperi;
     DropDownListBoxWidget orbitalElementFormat;
     JPanel planetsPanel;
-    JCalendarPopup calendarDate;
-    JComboBox<TimeConfig> calendarTime;
+//    JCalendarPopup calendarDate;
+//    JComboBox<TimeConfig> calendarTime;
 //    JButton updateRaDecButton;
 //    JButton timeRangePlotButton;
     JButton setBaseButton;
