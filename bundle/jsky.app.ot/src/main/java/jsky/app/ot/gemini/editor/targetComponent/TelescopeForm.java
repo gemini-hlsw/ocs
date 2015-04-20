@@ -56,7 +56,7 @@ class TelescopeForm extends JPanel {
         final JLabel guideGroupNameLabel = new JLabel();
         targetName = new TextBoxWidget();
         guideGroupName = new TextBoxWidget();
-        resolveButton = new JButton();
+//        resolveButton = new JButton();
         nameServerBar = new JMenuBar();
         nameServer = new JMenu();
         final JPanel stretchPanel = new JPanel();
@@ -124,8 +124,8 @@ class TelescopeForm extends JPanel {
         final JLabel label4 = new JLabel();
         calendarTime = new JComboBox();
         final JLabel label3 = new JLabel();
-        updateRaDecButton = new JButton();
-        timeRangePlotButton = new JButton();
+//        updateRaDecButton = new JButton();
+//        timeRangePlotButton = new JButton();
         setBaseButton = new JButton();
         final CellConstraints cc = new CellConstraints();
 
@@ -258,14 +258,14 @@ class TelescopeForm extends JPanel {
                     GridBagConstraints.WEST, GridBagConstraints.VERTICAL,
                     new Insets(0, 0, 0, 0), 0, 0));
 
-                //---- resolveButton ----
-                resolveButton.setToolTipText("Resolve the target name to RA,Dec coordinates");
-                resolveButton.setMargin(new Insets(2, 2, 2, 2));
-                resolveButton.setText("Resolve");
-                resolveButton.setFocusable(false);
-                objectGBW.add(resolveButton, new GridBagConstraints(4, 0, 1, 1, 0.0, 0.0,
-                    GridBagConstraints.CENTER, GridBagConstraints.BOTH,
-                    new Insets(0, 2, 0, 0), 0, 0));
+//                //---- resolveButton ----
+//                resolveButton.setToolTipText("Resolve the target name to RA,Dec coordinates");
+//                resolveButton.setMargin(new Insets(2, 2, 2, 2));
+//                resolveButton.setText("Resolve");
+//                resolveButton.setFocusable(false);
+//                objectGBW.add(resolveButton, new GridBagConstraints(4, 0, 1, 1, 0.0, 0.0,
+//                    GridBagConstraints.CENTER, GridBagConstraints.BOTH,
+//                    new Insets(0, 2, 0, 0), 0, 0));
 
                 //---- nameServer ----
                 nameServer.setToolTipText("Select the name server for resolving the target name to RA,Dec");
@@ -723,15 +723,15 @@ class TelescopeForm extends JPanel {
                         label3.setText("UTC");
                         panel1.add(label3, cc.xy(11, 1));
 
-                        //---- updateRaDecButton ----
-                        updateRaDecButton.setText("Go");
-                        updateRaDecButton.setToolTipText("Get the position of the object at the specified date and time ");
-                        panel1.add(updateRaDecButton, cc.xy(13, 1));
+//                        //---- updateRaDecButton ----
+//                        updateRaDecButton.setText("Go");
+//                        updateRaDecButton.setToolTipText("Get the position of the object at the specified date and time ");
+//                        panel1.add(updateRaDecButton, cc.xy(13, 1));
 
-                        //---- timeRangePlotButton ----
-                        timeRangePlotButton.setText("Plot");
-                        timeRangePlotButton.setToolTipText("Plot the ephemeris of this object starting at the given time.\nThe ephemeris will be obtained from JPL Horizons if needed. ");
-                        panel1.add(timeRangePlotButton, cc.xy(15, 1));
+//                        //---- timeRangePlotButton ----
+//                        timeRangePlotButton.setText("Plot");
+//                        timeRangePlotButton.setToolTipText("Plot the ephemeris of this object starting at the given time.\nThe ephemeris will be obtained from JPL Horizons if needed. ");
+//                        panel1.add(timeRangePlotButton, cc.xy(15, 1));
                     }
                     nonsiderealPW.add(panel1, new GridBagConstraints(0, 9, 6, 1, 0.0, 0.0,
                         GridBagConstraints.CENTER, GridBagConstraints.BOTH,
@@ -789,7 +789,7 @@ class TelescopeForm extends JPanel {
     JComboBox<PositionType> tag;
     TextBoxWidget targetName;
     TextBoxWidget guideGroupName;
-    JButton resolveButton;
+//    JButton resolveButton;
     JMenuBar nameServerBar;
     JMenu nameServer;
     DropDownListBoxWidget system;
@@ -837,8 +837,8 @@ class TelescopeForm extends JPanel {
     JPanel planetsPanel;
     JCalendarPopup calendarDate;
     JComboBox<TimeConfig> calendarTime;
-    JButton updateRaDecButton;
-    JButton timeRangePlotButton;
+//    JButton updateRaDecButton;
+//    JButton timeRangePlotButton;
     JButton setBaseButton;
     // JFormDesigner - End of variables declaration  //GEN-END:variables
 

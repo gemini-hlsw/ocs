@@ -304,10 +304,10 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         _w.primaryButton.addActionListener(primaryListener);
         ButtonFlattener.flatten(_w.primaryButton);
 
-        _w.resolveButton.addActionListener(resolveListener);
-        _w.resolveButton.setText("");
-        _w.resolveButton.setIcon(Resources.getIcon("eclipse/search.gif"));
-        ButtonFlattener.flatten(_w.resolveButton);
+//        _w.resolveButton.addActionListener(resolveListener);
+//        _w.resolveButton.setText("");
+//        _w.resolveButton.setIcon(Resources.getIcon("eclipse/search.gif"));
+//        ButtonFlattener.flatten(_w.resolveButton);
 
 
         _w.autoGuideStarGuiderSelector.addSelectionListener(new AgsSelectorControl.Listener() {
@@ -323,8 +323,8 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 
         _w.calendarTime.addActionListener(calendarTimeListener);
 
-        _w.timeRangePlotButton.addActionListener(timeRangePlotListener);
-        _w.updateRaDecButton.addActionListener(updateRaDecListener);
+//        _w.timeRangePlotButton.addActionListener(timeRangePlotListener);
+//        _w.updateRaDecButton.addActionListener(updateRaDecListener);
 
         setMenuStyling(_w.nameServerBar, _w.nameServer, "eclipse/menu-trimmed.gif");
 
@@ -360,11 +360,11 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                 _curPos.getTarget().setName(name);
                 _curPos.notifyOfGenericUpdate();
                 _curPos.addWatcher(posWatcher);
-                _w.resolveButton.setEnabled(!"".equals(name));
+//                _w.resolveButton.setEnabled(!"".equals(name));
             }
 
             public void textBoxAction(TextBoxWidget tbwe) {
-                resolveName(HorizonsAction.Type.GET_ORBITAL_ELEMENTS, null);
+//                resolveName(HorizonsAction.Type.GET_ORBITAL_ELEMENTS, null);
             }
         });
 
@@ -609,303 +609,303 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
     }
 
 
-    /**
-     * Spark off an asynchronous task to look up the target in Horizons or a catalog, depending on
-     * target type. If it's a nonsidereal target, use the passed operation type and notify when
-     * complete, if listener is non-null. Otherwise do a name lookup and ignore the arguments.
-     */
-    private void resolveName(final HorizonsAction.Type operationType, final ResolveNameListener listener) {
-        if (_w.system.getSelectedItem() == NON_SIDEREAL_TARGET) {
-            scheduleHorizonsLookup(operationType, listener);
-        } else {
-            scheduleCatalogLookup();
-        }
-    }
-
-    private void scheduleCatalogLookup() {
-        if (!_selectedNameServer.isEmpty()) {
-            final Catalog nameServer = _selectedNameServer.getValue();
-            final String name  = _w.targetName.getText().trim();
-            if (name.length() != 0) {
-                final QueryArgs queryArgs = new BasicQueryArgs(nameServer);
-                queryArgs.setId(name);
-                if (nameServer != null) {
-                    new SwingWorker() {
-                        public Object construct() {
-                            try {
-                                final String simbadCatalogShortName = "simbad";
-                                String originalUrls[] = null;
-                                if (nameServer instanceof SkycatCatalog) {
-                                    final SkycatCatalog skycat = (SkycatCatalog) nameServer;
-                                    if (skycat.getShortName().contains(simbadCatalogShortName)) {
-                                        skycat.addCatalogFilter(FullMimeSimbadCatalogFilter.getFilter());
-                                        final int n = skycat.getConfigEntry().getNumURLs();
-                                        final String[] urls = new String[n];
-                                        originalUrls = new String[n];
-                                        for (int i = 0; i < n; i++) {
-                                            String urlStr = skycat.getConfigEntry().getURL(i);
-                                            originalUrls[i] = urlStr;
-                                            urls[i] = urlStr;
-                                        }
-                                        skycat.getConfigEntry().setURLs(urls);
-                                    }
-                                }
-                                queryArgs.setMaxRows(1);
-                                final QueryResult r = nameServer.query(queryArgs);
-                                //Return the URLs to the previous state
-                                if (nameServer instanceof SkycatCatalog) {
-                                    final SkycatCatalog skycat = (SkycatCatalog) nameServer;
-                                    if (skycat.getShortName().contains(simbadCatalogShortName)) {
-                                        skycat.getConfigEntry().setURLs(originalUrls);
-                                    }
-                                }
-
-                                if (r instanceof TableQueryResult) {
-                                    final TableQueryResult tqr = (TableQueryResult) r;
-                                    if (tqr.getRowCount() > 0) {
-                                        return tqr;
-                                    }
-                                    throw new CatalogException("No objects were found.");
-                                }
-                                throw new CatalogException("Error contacting catalog server");
-                            } catch (Exception e) {
-                                return e;
-                            }
-                        }
-                        public void finished() {
-                            final Object o = getValue();
-                            if (o instanceof TableQueryResult) {
-                                final TableQueryResult tqr = (TableQueryResult) o;
-                                final int pm = tqr.getColumnIndex("pm1");
-                                if (pm >= 0) {
-                                    final Double pm1 = (Double) tqr.getValueAt(0, pm);
-                                    final Double pm2 = (Double) tqr.getValueAt(0, pm + 1);
-                                    setPM(_curPos, pm1, pm2);
-                                } else {
-                                    //SCT-301: If not found, then we reset the value to zero
-                                    setPM(_curPos, 0.0, 0.0);
-                                }
-                                if (tqr.getCoordinates(0) instanceof WorldCoords) {
-                                    final WorldCoords pos = (WorldCoords) tqr.getCoordinates(0);
-                                    _w.xaxis.setText(pos.getRA().toString());
-                                    _w.yaxis.setText(pos.getDec().toString());
-                                    axisWatcher.textBoxAction(_w.yaxis); // pretend the user did this
-                                }
-                            } else if (o instanceof Exception) {
-                                DialogUtil.error(((Exception) o).getMessage());
-                            }
-                        }
-                        private void setPM(SPTarget spt, double ra, double dec) {
-                            final ITarget it = spt.getTarget();
-                            if (it instanceof HmsDegTarget) {
-                                final HmsDegTarget t = (HmsDegTarget) it;
-                                t.setPropMotionRA(ra);
-                                t.setPropMotionDec(dec);
-                            }
-                            spt.notifyOfGenericUpdate();
-                        }
-
-                    }.start();
-                }
-            }
-        }
-    }
-
-    private void scheduleHorizonsLookup(final HorizonsAction.Type operationType, final ResolveNameListener listener) {
-        final String name;
-        if (_curPos.getTarget() instanceof NamedTarget) {
-            final NamedTarget target = (NamedTarget) _curPos.getTarget();
-            name = target.getSolarObject().getHorizonsId();
-        } else {
-            name = _w.targetName.getText().trim();
-        }
-        if (!name.isEmpty()) {
-            new AuthSwingWorker<HorizonsReply, Object>() {
-                @Override
-                protected HorizonsReply doInBackgroundWithSubject() {
-
-                    //for NamedTargets we don't resolve orbital elements
-                    if (_curPos.getTarget() instanceof NamedTarget &&
-                            operationType == HorizonsAction.Type.GET_ORBITAL_ELEMENTS) {
-                        return null;
-                    }
-
-                    //ignore events that trigger an Horizon's reply cache reset
-                    _nonSiderealTargetSup.ignoreResetCacheEvents(true);
-                    //If it's a PI, we need to figure out where to set the horizons site
-                    final HorizonsService service = HorizonsService.getInstance();
-                    if (service == null) return null;
-
-                    if (!OTOptions.isStaff(getProgram().getProgramID())) {
-                        SPProgramID id = null;
-                        try {
-                            id = getProgram().getProgramID();
-                        } catch (NullPointerException e) {
-                            //this shouldn't happen
-                        }
-                        service.setSite(id);
-                    }
-
-
-                    //Get the Date to start the query
-                    //get the appropriate date to perform the query based on the calendar widget and
-                    //the time widget
-                    final Date date1 = _w.calendarDate.getDate();
-                    //this date is at 00:00:00. Let's add the hours, minutes and sec from the time document
-
-                    final Calendar calendar = Calendar.getInstance(UTC);
-                    calendar.setTimeZone(_w.calendarDate.getTimeZone());
-                    calendar.setTime(date1);
-                    calendar.set(Calendar.HOUR_OF_DAY, _timeDocument.getHoursField());
-                    calendar.set(Calendar.MINUTE, _timeDocument.getMinutesField());
-                    calendar.set(Calendar.SECOND, _timeDocument.getSecondsField());
-
-                    final Date date = calendar.getTime();
-
-                    //lets see if we can use the existing ephemeris
-                    final HorizonsReply lastReply = service.getLastResult();
-                    if (lastReply != null && name.equals(service.getObjectId())) {
-                        //so, apparently nothing has changed
-                        boolean workable = true;
-                        if (operationType == HorizonsAction.Type.GET_ORBITAL_ELEMENTS) {
-                            if (!lastReply.hasOrbitalElements()) {
-                                //ups. This reply doesn't quite work.
-                                workable = false;
-                            }
-                        }
-
-                        //let's see if we have ephemeris, and with that we are
-                        //okay (the ephemeris is usable for operations that doesn't
-                        //involve updating orbital elements.
-                        if (lastReply.hasEphemeris() && workable) {
-                            final EphemerisEntry firstEntry = lastReply.getEphemeris().get(0);
-                            if (date.equals(firstEntry.getDate())) {
-                                //Same results
-                                return lastReply;
-                            }
-                        }
-
-                    }
-
-                    service.setInitialDate(date);
-                    service.setObjectId(name);
-                    service.setObjectType(null);
-
-                    final ITarget.Tag tag = (ITarget.Tag) _w.orbitalElementFormat.getSelectedItem();
-                    switch (tag) {
-                        case JPL_MINOR_BODY:   service.setObjectType(HorizonsQuery.ObjectType.COMET);      break;
-                        case MPC_MINOR_PLANET: service.setObjectType(HorizonsQuery.ObjectType.MINOR_BODY); break;
-                        case NAMED:            service.setObjectType(HorizonsQuery.ObjectType.MAJOR_BODY); break;
-                    }
-                    _nonSiderealTargetSup.ignoreResetCacheEvents(false);
-
-                    HorizonsReply reply = service.execute();
-
-                    if (reply == null || reply.getReplyType() == HorizonsReply.ReplyType.MAJOR_PLANET) {
-                        if (service.getObjectType() == HorizonsQuery.ObjectType.COMET) {
-                            service.setObjectType(HorizonsQuery.ObjectType.MINOR_BODY);
-                            reply = service.execute();
-                        } else if (service.getObjectType() == HorizonsQuery.ObjectType.MINOR_BODY) {
-                            service.setObjectType(HorizonsQuery.ObjectType.COMET);
-                            reply = service.execute();
-                        }
-                    }
-
-                    return reply;
-                }
-
-                @Override
-                public void done() {
-                    final HorizonsReply reply;
-                    try {
-                        reply = get();
-                    } catch (InterruptedException ex) {
-                        return;
-                    } catch (ExecutionException ex) {
-                        final String message = "An error occurred fetching results for: " + name.toUpperCase();
-                        LOG.log(Level.WARNING, message, ex);
-                        DialogUtil.message(message);
-                        return;
-                    }
-
-                    if ((reply == null) || (reply.getReplyType() == HorizonsReply.ReplyType.NO_RESULTS)) {
-                        DialogUtil.message("No results were found for: " + name.toUpperCase());
-                        return;
-                    }
-
-                    if (reply.getReplyType() == HorizonsReply.ReplyType.MAJOR_PLANET
-                            && !(_curPos.getTarget() instanceof NamedTarget)) {
-                        DialogUtil.message("Can't solve the given ID to any minor body");
-                        return;
-                    }
-
-                    if (reply.getReplyType() == HorizonsReply.ReplyType.SPACECRAFT) {
-                        DialogUtil.message("Horizons suggests this is a spacecraft. Sorry, but OT can't use spacecrafts");
-                        return;
-                    }
-
-                    if (reply.getObjectType() == null) {//it will be null if you press "cancel" in the window with multiple responses
-                        return;
-                    }
-
-                    if ((_curPos.getTarget() instanceof NamedTarget) && ((NamedTarget) _curPos.getTarget()).getSolarObject() == NamedTarget.SolarObject.PLUTO) {
-                        reply.setReplyType(HorizonsReply.ReplyType.MAJOR_PLANET);
-                    }
-
-
-                    //ignore events that would reset the Horizons results cache
-                    _nonSiderealTargetSup.ignoreResetCacheEvents(true);
-                    //if a multiple answer was executed, then we need to recover the Id used
-                    final HorizonsService service = HorizonsService.getInstance();
-                    if (service != null) {
-                        final String objectId = service.getObjectId();
-                        _curPos.getTarget().setName(objectId);
-                        _curPos.notifyOfGenericUpdate();
-                    }
-
-                    final HorizonsAction action = new HorizonsActionContainer().getActions().get(operationType);
-                    try {
-                        action.execute(reply);
-                    } catch (NullPointerException ex) {
-                        final Logger LOG1 = Logger.getLogger(EdCompTargetList.class.getName());
-                        LOG1.log(Level.INFO, "Probable problem parsing the reply from JPL", ex);
-                        return;
-                    }
-                    if (_curPos.getTarget() instanceof NonSiderealTarget) {
-                        final NonSiderealTarget oldTarget = (NonSiderealTarget) _curPos.getTarget();
-                        switch (reply.getObjectType()) {
-                            case COMET: {
-                                final ConicTarget target = getOrCreateTargetWithTag(ITarget.Tag.JPL_MINOR_BODY);
-                                _nonSiderealTargetSup.showNonSiderealTarget(target);
-                                _w.orbitalElementFormat.setValue(ITarget.Tag.JPL_MINOR_BODY);
-                                _curPos.setTarget(target);
-                            }
-                            break;
-                            case MINOR_BODY: {
-                                final ConicTarget target = getOrCreateTargetWithTag(ITarget.Tag.MPC_MINOR_PLANET);
-                                _nonSiderealTargetSup.showNonSiderealTarget(target);
-                                _w.orbitalElementFormat.setValue(ITarget.Tag.MPC_MINOR_PLANET);
-                                _curPos.setTarget(target);
-                            }
-                            break;
-                            case MAJOR_BODY: {
-                                final NamedTarget target = (oldTarget instanceof NamedTarget) ? (NamedTarget) oldTarget : new NamedTarget();
-                                _nonSiderealTargetSup.showNonSiderealTarget(target);
-                                _w.orbitalElementFormat.setValue(ITarget.Tag.NAMED);
-                                _curPos.setTarget(target);
-                            }
-                            break;
-                        }
-
-                    }
-                    _nonSiderealTargetSup.ignoreResetCacheEvents(false);
-                    if (listener != null) {
-                        listener.nameResolved();
-                    }
-                }
-            }.execute();
-        }
-    }
+//    /**
+//     * Spark off an asynchronous task to look up the target in Horizons or a catalog, depending on
+//     * target type. If it's a nonsidereal target, use the passed operation type and notify when
+//     * complete, if listener is non-null. Otherwise do a name lookup and ignore the arguments.
+//     */
+//    private void resolveName(final HorizonsAction.Type operationType, final ResolveNameListener listener) {
+//        if (_w.system.getSelectedItem() == NON_SIDEREAL_TARGET) {
+//            scheduleHorizonsLookup(operationType, listener);
+//        } else {
+//            scheduleCatalogLookup();
+//        }
+//    }
+//
+//    private void scheduleCatalogLookup() {
+//        if (!_selectedNameServer.isEmpty()) {
+//            final Catalog nameServer = _selectedNameServer.getValue();
+//            final String name  = _w.targetName.getText().trim();
+//            if (name.length() != 0) {
+//                final QueryArgs queryArgs = new BasicQueryArgs(nameServer);
+//                queryArgs.setId(name);
+//                if (nameServer != null) {
+//                    new SwingWorker() {
+//                        public Object construct() {
+//                            try {
+//                                final String simbadCatalogShortName = "simbad";
+//                                String originalUrls[] = null;
+//                                if (nameServer instanceof SkycatCatalog) {
+//                                    final SkycatCatalog skycat = (SkycatCatalog) nameServer;
+//                                    if (skycat.getShortName().contains(simbadCatalogShortName)) {
+//                                        skycat.addCatalogFilter(FullMimeSimbadCatalogFilter.getFilter());
+//                                        final int n = skycat.getConfigEntry().getNumURLs();
+//                                        final String[] urls = new String[n];
+//                                        originalUrls = new String[n];
+//                                        for (int i = 0; i < n; i++) {
+//                                            String urlStr = skycat.getConfigEntry().getURL(i);
+//                                            originalUrls[i] = urlStr;
+//                                            urls[i] = urlStr;
+//                                        }
+//                                        skycat.getConfigEntry().setURLs(urls);
+//                                    }
+//                                }
+//                                queryArgs.setMaxRows(1);
+//                                final QueryResult r = nameServer.query(queryArgs);
+//                                //Return the URLs to the previous state
+//                                if (nameServer instanceof SkycatCatalog) {
+//                                    final SkycatCatalog skycat = (SkycatCatalog) nameServer;
+//                                    if (skycat.getShortName().contains(simbadCatalogShortName)) {
+//                                        skycat.getConfigEntry().setURLs(originalUrls);
+//                                    }
+//                                }
+//
+//                                if (r instanceof TableQueryResult) {
+//                                    final TableQueryResult tqr = (TableQueryResult) r;
+//                                    if (tqr.getRowCount() > 0) {
+//                                        return tqr;
+//                                    }
+//                                    throw new CatalogException("No objects were found.");
+//                                }
+//                                throw new CatalogException("Error contacting catalog server");
+//                            } catch (Exception e) {
+//                                return e;
+//                            }
+//                        }
+//                        public void finished() {
+//                            final Object o = getValue();
+//                            if (o instanceof TableQueryResult) {
+//                                final TableQueryResult tqr = (TableQueryResult) o;
+//                                final int pm = tqr.getColumnIndex("pm1");
+//                                if (pm >= 0) {
+//                                    final Double pm1 = (Double) tqr.getValueAt(0, pm);
+//                                    final Double pm2 = (Double) tqr.getValueAt(0, pm + 1);
+//                                    setPM(_curPos, pm1, pm2);
+//                                } else {
+//                                    //SCT-301: If not found, then we reset the value to zero
+//                                    setPM(_curPos, 0.0, 0.0);
+//                                }
+//                                if (tqr.getCoordinates(0) instanceof WorldCoords) {
+//                                    final WorldCoords pos = (WorldCoords) tqr.getCoordinates(0);
+//                                    _w.xaxis.setText(pos.getRA().toString());
+//                                    _w.yaxis.setText(pos.getDec().toString());
+//                                    axisWatcher.textBoxAction(_w.yaxis); // pretend the user did this
+//                                }
+//                            } else if (o instanceof Exception) {
+//                                DialogUtil.error(((Exception) o).getMessage());
+//                            }
+//                        }
+//                        private void setPM(SPTarget spt, double ra, double dec) {
+//                            final ITarget it = spt.getTarget();
+//                            if (it instanceof HmsDegTarget) {
+//                                final HmsDegTarget t = (HmsDegTarget) it;
+//                                t.setPropMotionRA(ra);
+//                                t.setPropMotionDec(dec);
+//                            }
+//                            spt.notifyOfGenericUpdate();
+//                        }
+//
+//                    }.start();
+//                }
+//            }
+//        }
+//    }
+//
+//    private void scheduleHorizonsLookup(final HorizonsAction.Type operationType, final ResolveNameListener listener) {
+//        final String name;
+//        if (_curPos.getTarget() instanceof NamedTarget) {
+//            final NamedTarget target = (NamedTarget) _curPos.getTarget();
+//            name = target.getSolarObject().getHorizonsId();
+//        } else {
+//            name = _w.targetName.getText().trim();
+//        }
+//        if (!name.isEmpty()) {
+//            new AuthSwingWorker<HorizonsReply, Object>() {
+//                @Override
+//                protected HorizonsReply doInBackgroundWithSubject() {
+//
+//                    //for NamedTargets we don't resolve orbital elements
+//                    if (_curPos.getTarget() instanceof NamedTarget &&
+//                            operationType == HorizonsAction.Type.GET_ORBITAL_ELEMENTS) {
+//                        return null;
+//                    }
+//
+//                    //ignore events that trigger an Horizon's reply cache reset
+//                    _nonSiderealTargetSup.ignoreResetCacheEvents(true);
+//                    //If it's a PI, we need to figure out where to set the horizons site
+//                    final HorizonsService service = HorizonsService.getInstance();
+//                    if (service == null) return null;
+//
+//                    if (!OTOptions.isStaff(getProgram().getProgramID())) {
+//                        SPProgramID id = null;
+//                        try {
+//                            id = getProgram().getProgramID();
+//                        } catch (NullPointerException e) {
+//                            //this shouldn't happen
+//                        }
+//                        service.setSite(id);
+//                    }
+//
+//
+//                    //Get the Date to start the query
+//                    //get the appropriate date to perform the query based on the calendar widget and
+//                    //the time widget
+//                    final Date date1 = _w.calendarDate.getDate();
+//                    //this date is at 00:00:00. Let's add the hours, minutes and sec from the time document
+//
+//                    final Calendar calendar = Calendar.getInstance(UTC);
+//                    calendar.setTimeZone(_w.calendarDate.getTimeZone());
+//                    calendar.setTime(date1);
+//                    calendar.set(Calendar.HOUR_OF_DAY, _timeDocument.getHoursField());
+//                    calendar.set(Calendar.MINUTE, _timeDocument.getMinutesField());
+//                    calendar.set(Calendar.SECOND, _timeDocument.getSecondsField());
+//
+//                    final Date date = calendar.getTime();
+//
+//                    //lets see if we can use the existing ephemeris
+//                    final HorizonsReply lastReply = service.getLastResult();
+//                    if (lastReply != null && name.equals(service.getObjectId())) {
+//                        //so, apparently nothing has changed
+//                        boolean workable = true;
+//                        if (operationType == HorizonsAction.Type.GET_ORBITAL_ELEMENTS) {
+//                            if (!lastReply.hasOrbitalElements()) {
+//                                //ups. This reply doesn't quite work.
+//                                workable = false;
+//                            }
+//                        }
+//
+//                        //let's see if we have ephemeris, and with that we are
+//                        //okay (the ephemeris is usable for operations that doesn't
+//                        //involve updating orbital elements.
+//                        if (lastReply.hasEphemeris() && workable) {
+//                            final EphemerisEntry firstEntry = lastReply.getEphemeris().get(0);
+//                            if (date.equals(firstEntry.getDate())) {
+//                                //Same results
+//                                return lastReply;
+//                            }
+//                        }
+//
+//                    }
+//
+//                    service.setInitialDate(date);
+//                    service.setObjectId(name);
+//                    service.setObjectType(null);
+//
+//                    final ITarget.Tag tag = (ITarget.Tag) _w.orbitalElementFormat.getSelectedItem();
+//                    switch (tag) {
+//                        case JPL_MINOR_BODY:   service.setObjectType(HorizonsQuery.ObjectType.COMET);      break;
+//                        case MPC_MINOR_PLANET: service.setObjectType(HorizonsQuery.ObjectType.MINOR_BODY); break;
+//                        case NAMED:            service.setObjectType(HorizonsQuery.ObjectType.MAJOR_BODY); break;
+//                    }
+//                    _nonSiderealTargetSup.ignoreResetCacheEvents(false);
+//
+//                    HorizonsReply reply = service.execute();
+//
+//                    if (reply == null || reply.getReplyType() == HorizonsReply.ReplyType.MAJOR_PLANET) {
+//                        if (service.getObjectType() == HorizonsQuery.ObjectType.COMET) {
+//                            service.setObjectType(HorizonsQuery.ObjectType.MINOR_BODY);
+//                            reply = service.execute();
+//                        } else if (service.getObjectType() == HorizonsQuery.ObjectType.MINOR_BODY) {
+//                            service.setObjectType(HorizonsQuery.ObjectType.COMET);
+//                            reply = service.execute();
+//                        }
+//                    }
+//
+//                    return reply;
+//                }
+//
+//                @Override
+//                public void done() {
+//                    final HorizonsReply reply;
+//                    try {
+//                        reply = get();
+//                    } catch (InterruptedException ex) {
+//                        return;
+//                    } catch (ExecutionException ex) {
+//                        final String message = "An error occurred fetching results for: " + name.toUpperCase();
+//                        LOG.log(Level.WARNING, message, ex);
+//                        DialogUtil.message(message);
+//                        return;
+//                    }
+//
+//                    if ((reply == null) || (reply.getReplyType() == HorizonsReply.ReplyType.NO_RESULTS)) {
+//                        DialogUtil.message("No results were found for: " + name.toUpperCase());
+//                        return;
+//                    }
+//
+//                    if (reply.getReplyType() == HorizonsReply.ReplyType.MAJOR_PLANET
+//                            && !(_curPos.getTarget() instanceof NamedTarget)) {
+//                        DialogUtil.message("Can't solve the given ID to any minor body");
+//                        return;
+//                    }
+//
+//                    if (reply.getReplyType() == HorizonsReply.ReplyType.SPACECRAFT) {
+//                        DialogUtil.message("Horizons suggests this is a spacecraft. Sorry, but OT can't use spacecrafts");
+//                        return;
+//                    }
+//
+//                    if (reply.getObjectType() == null) {//it will be null if you press "cancel" in the window with multiple responses
+//                        return;
+//                    }
+//
+//                    if ((_curPos.getTarget() instanceof NamedTarget) && ((NamedTarget) _curPos.getTarget()).getSolarObject() == NamedTarget.SolarObject.PLUTO) {
+//                        reply.setReplyType(HorizonsReply.ReplyType.MAJOR_PLANET);
+//                    }
+//
+//
+//                    //ignore events that would reset the Horizons results cache
+//                    _nonSiderealTargetSup.ignoreResetCacheEvents(true);
+//                    //if a multiple answer was executed, then we need to recover the Id used
+//                    final HorizonsService service = HorizonsService.getInstance();
+//                    if (service != null) {
+//                        final String objectId = service.getObjectId();
+//                        _curPos.getTarget().setName(objectId);
+//                        _curPos.notifyOfGenericUpdate();
+//                    }
+//
+//                    final HorizonsAction action = new HorizonsActionContainer().getActions().get(operationType);
+//                    try {
+//                        action.execute(reply);
+//                    } catch (NullPointerException ex) {
+//                        final Logger LOG1 = Logger.getLogger(EdCompTargetList.class.getName());
+//                        LOG1.log(Level.INFO, "Probable problem parsing the reply from JPL", ex);
+//                        return;
+//                    }
+//                    if (_curPos.getTarget() instanceof NonSiderealTarget) {
+//                        final NonSiderealTarget oldTarget = (NonSiderealTarget) _curPos.getTarget();
+//                        switch (reply.getObjectType()) {
+//                            case COMET: {
+//                                final ConicTarget target = getOrCreateTargetWithTag(ITarget.Tag.JPL_MINOR_BODY);
+//                                _nonSiderealTargetSup.showNonSiderealTarget(target);
+//                                _w.orbitalElementFormat.setValue(ITarget.Tag.JPL_MINOR_BODY);
+//                                _curPos.setTarget(target);
+//                            }
+//                            break;
+//                            case MINOR_BODY: {
+//                                final ConicTarget target = getOrCreateTargetWithTag(ITarget.Tag.MPC_MINOR_PLANET);
+//                                _nonSiderealTargetSup.showNonSiderealTarget(target);
+//                                _w.orbitalElementFormat.setValue(ITarget.Tag.MPC_MINOR_PLANET);
+//                                _curPos.setTarget(target);
+//                            }
+//                            break;
+//                            case MAJOR_BODY: {
+//                                final NamedTarget target = (oldTarget instanceof NamedTarget) ? (NamedTarget) oldTarget : new NamedTarget();
+//                                _nonSiderealTargetSup.showNonSiderealTarget(target);
+//                                _w.orbitalElementFormat.setValue(ITarget.Tag.NAMED);
+//                                _curPos.setTarget(target);
+//                            }
+//                            break;
+//                        }
+//
+//                    }
+//                    _nonSiderealTargetSup.ignoreResetCacheEvents(false);
+//                    if (listener != null) {
+//                        listener.nameResolved();
+//                    }
+//                }
+//            }.execute();
+//        }
+//    }
 
 
 
@@ -1313,13 +1313,13 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         //disable the nameServer if we are a non-sidereal target
         _w.nameServer.setEnabled(!isNonSidereal);
 
-        //disable the resolve name for Named Targets
-        _w.resolveButton.setEnabled(!(_curPos.getTarget() instanceof NamedTarget));
+//        //disable the resolve name for Named Targets
+//        _w.resolveButton.setEnabled(!(_curPos.getTarget() instanceof NamedTarget));
 
         String name = _curPos.getTarget().getName();
         if (name != null) name = name.trim();
         _w.targetName.setValue(name);
-        _w.resolveButton.setEnabled(editable && !"".equals(name));
+//        _w.resolveButton.setEnabled(editable && !"".equals(name));
 
         _w.xaxis.setValue(_curPos.getTarget().getRa().toString());
         _w.yaxis.setValue(_curPos.getTarget().getDec().toString());
@@ -1375,10 +1375,10 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         }
     };
 
-    // Used to notify listener when the resolveName() thread is done
-    private interface ResolveNameListener {
-        void nameResolved();
-    }
+//    // Used to notify listener when the resolveName() thread is done
+//    private interface ResolveNameListener {
+//        void nameResolved();
+//    }
 
     /**
      * An Horizon Action encapsulates the operations to be performed based on the results of an
@@ -1646,43 +1646,43 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         }
     };
 
-    @SuppressWarnings("FieldCanBeLocal")
-    private final ActionListener resolveListener = new ActionListener() {
-        public void actionPerformed(ActionEvent evt) {
-            // REL-1063 Fix OT nonsidereal Solar System Object Horizons name resolution
-            if (_curPos.getTarget() instanceof NamedTarget) {
-                // For named objects like Moon, Saturn, etc don't get the orbital elements, just the position
-                resolveName(HorizonsAction.Type.UPDATE_POSITION, null);
-            } else {
-                resolveName(HorizonsAction.Type.GET_ORBITAL_ELEMENTS, null);
-            }
-        }
-    };
-
-    @SuppressWarnings("FieldCanBeLocal")
-    private final ActionListener timeRangePlotListener = new ActionListener() {
-        public void actionPerformed(ActionEvent evt) {
-            resolveName(HorizonsAction.Type.PLOT_EPHEMERIS, null);
-        }
-    };
-
-    @SuppressWarnings("FieldCanBeLocal")
-    private final ActionListener updateRaDecListener = new ActionListener() {
-        public void actionPerformed(ActionEvent evt) {
-            // REL-1063 Fix OT nonsidereal Solar System Object Horizons name resolution
-            if (_curPos.getTarget() instanceof NamedTarget) {
-                // For named objects like Moon, Saturn, etc don't get the orbital elements, just the position
-                resolveName(HorizonsAction.Type.UPDATE_POSITION, null);
-            } else {
-                // REL-343: Force nonsidereal target name resolution on coordinate updates
-                resolveName(HorizonsAction.Type.GET_ORBITAL_ELEMENTS, new ResolveNameListener() {
-                    public void nameResolved() {
-                        resolveName(HorizonsAction.Type.UPDATE_POSITION, null);
-                    }
-                });
-            }
-        }
-    };
+//    @SuppressWarnings("FieldCanBeLocal")
+//    private final ActionListener resolveListener = new ActionListener() {
+//        public void actionPerformed(ActionEvent evt) {
+//            // REL-1063 Fix OT nonsidereal Solar System Object Horizons name resolution
+//            if (_curPos.getTarget() instanceof NamedTarget) {
+//                // For named objects like Moon, Saturn, etc don't get the orbital elements, just the position
+//                resolveName(HorizonsAction.Type.UPDATE_POSITION, null);
+//            } else {
+//                resolveName(HorizonsAction.Type.GET_ORBITAL_ELEMENTS, null);
+//            }
+//        }
+//    };
+//
+//    @SuppressWarnings("FieldCanBeLocal")
+//    private final ActionListener timeRangePlotListener = new ActionListener() {
+//        public void actionPerformed(ActionEvent evt) {
+//            resolveName(HorizonsAction.Type.PLOT_EPHEMERIS, null);
+//        }
+//    };
+//
+//    @SuppressWarnings("FieldCanBeLocal")
+//    private final ActionListener updateRaDecListener = new ActionListener() {
+//        public void actionPerformed(ActionEvent evt) {
+//            // REL-1063 Fix OT nonsidereal Solar System Object Horizons name resolution
+//            if (_curPos.getTarget() instanceof NamedTarget) {
+//                // For named objects like Moon, Saturn, etc don't get the orbital elements, just the position
+//                resolveName(HorizonsAction.Type.UPDATE_POSITION, null);
+//            } else {
+//                // REL-343: Force nonsidereal target name resolution on coordinate updates
+//                resolveName(HorizonsAction.Type.GET_ORBITAL_ELEMENTS, new ResolveNameListener() {
+//                    public void nameResolved() {
+//                        resolveName(HorizonsAction.Type.UPDATE_POSITION, null);
+//                    }
+//                });
+//            }
+//        }
+//    };
 
     @SuppressWarnings("FieldCanBeLocal")
     private final ActionListener duplicateListener = new ActionListener() {
