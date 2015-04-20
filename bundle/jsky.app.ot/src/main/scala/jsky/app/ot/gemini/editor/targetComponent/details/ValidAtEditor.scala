@@ -3,7 +3,7 @@ package jsky.app.ot.gemini.editor.targetComponent.details
 import java.awt._
 import java.awt.event.{ActionEvent, ActionListener, ItemEvent, ItemListener}
 import java.text.SimpleDateFormat
-import java.util.{Date, TimeZone}
+import java.util.{Calendar, Date, TimeZone}
 import javax.swing._
 import javax.swing.event.DocumentEvent
 
@@ -16,7 +16,7 @@ import edu.gemini.shared.gui.text.AbstractDocumentListener
 import edu.gemini.shared.util.immutable.{ Option => GOption }
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.target.SPTarget
-import edu.gemini.spModel.target.system.{NamedTarget, ITarget, ConicTarget}
+import edu.gemini.spModel.target.system.{NonSiderealTarget, NamedTarget, ITarget, ConicTarget}
 import jsky.app.ot.gemini.editor.horizons.HorizonsPlotter
 import jsky.app.ot.gemini.editor.targetComponent.{TimeConfig, TelescopePosEditor}
 import jsky.app.ot.ui.util.TimeDocument
@@ -39,42 +39,49 @@ abstract class ValidAtEditor[A <: ITarget](empty: A) extends JPanel with Telesco
     c.setMinimumSize(c.getPreferredSize)
   }
 
-  val timeConfig = new JComboBox[TimeConfig]() <| { w =>
+  val timeConfig = new JComboBox[TimeConfig] {
 
     val timeFormatter = new SimpleDateFormat("HH:mm:ss") <| (_.setTimeZone(UTC))
-    val textField = w.getEditor.getEditorComponent.asInstanceOf[JTextField] // ugh
-    val textDoc = new TimeDocument(textField) <| (_.setTime(timeFormatter.format(new Date)))
+    val textField     = getEditor.getEditorComponent.asInstanceOf[JTextField] // ugh
+    val textDoc       = new TimeDocument(textField) <| (_.setTime(timeFormatter.format(new Date)))
+
     textField.setDocument(textDoc) // tie the knot
 
-    w.setEditable(true)
-    w.setModel(new DefaultComboBoxModel(TimeConfig.values))
-    w.setRenderer(new ListCellRenderer[TimeConfig] {
-      val delegate = w.getRenderer // N.B. we can't implement this in Scala, but we delegate to the old one
+    setEditable(true)
+    setModel(new DefaultComboBoxModel(TimeConfig.values))
+    setRenderer(new ListCellRenderer[TimeConfig] {
+      val delegate = getRenderer // N.B. we can't implement this in Scala, but we delegate to the old one
       override def getListCellRendererComponent(list: JList[_ <: TimeConfig], value: TimeConfig, index: Int, isSelected: Boolean, cellHasFocus: Boolean): Component =
         delegate.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus) match {
           case label: JLabel => label <| (_.setText(value.displayValue))
         }
     })
 
-    w.addItemListener(new ItemListener {
+    addItemListener(new ItemListener {
       override def itemStateChanged(e: ItemEvent): Unit =
         if (e.getStateChange == ItemEvent.SELECTED) {
-          e.getItem match {
-            case tc: TimeConfig => textDoc.setTime(timeFormatter.format(tc.getDate))
-            case ts: String     => // String is selected; what to do?
+          nonreentrant {
+            e.getItem match {
+              case tc: TimeConfig => setTime(tc.getDate)
+              case ts: String     => textDoc.setTime(ts) // I don't think this ever happens
+            }
           }
         }
     })
 
     textDoc.addDocumentListener(new AbstractDocumentListener {
       override def textChanged(docEvent: DocumentEvent, newText: String): Unit =
-        println("Change! " + newText)
+        nonreentrant(textDoc.setTime(newText))
+
     })
+
+    def setTime(d: Date): Unit =
+      textDoc.setTime(timeFormatter.format(d))
 
   }
 
-  val go   = new JButton("Go")   <| { _.addActionListener(LookupListener(false)) }
-  val plot = new JButton("Plot") <| { _.addActionListener(LookupListener(true))  }
+  val go   = new JButton("Go")   <| { _.addActionListener(LookupListener(plot = false)) }
+  val plot = new JButton("Plot") <| { _.addActionListener(LookupListener(plot = true))  }
 
   /**
    * An action listener that performs a catalog lookup, replacing the current target on success, and
@@ -82,7 +89,7 @@ abstract class ValidAtEditor[A <: ITarget](empty: A) extends JPanel with Telesco
    */
   case class LookupListener(plot: Boolean) extends ActionListener {
     override def actionPerformed(e: ActionEvent): Unit =
-      lookupAndSet(plot, true /* use cached results here */).runAsyncAndReportErrors
+      lookupAndSet(plot, useCache = true).runAsyncAndReportErrors
   }
 
   setLayout(new GridBagLayout)
@@ -126,7 +133,13 @@ abstract class ValidAtEditor[A <: ITarget](empty: A) extends JPanel with Telesco
   override def edit(context: GOption[ObsContext], target: SPTarget, node0: ISPNode): Unit = {
     spt = target
     node = node0
-    // TODO: update controls ...
+    nonreentrant {
+      val nst = spt.getTarget.asInstanceOf[NonSiderealTarget]
+      Option(nst.getDateForPosition).foreach { d =>
+        calendar.setDate(d)
+        timeConfig.setTime(d)
+      }
+    }
   }
 
   def objectTypeForTag(tag: ITarget.Tag): ObjectType =
@@ -141,8 +154,15 @@ abstract class ValidAtEditor[A <: ITarget](empty: A) extends JPanel with Telesco
   ///
 
   /** A program that returns the editor's current date and time. */
-  def dateTime: HorizonsIO[Date] =
-    HorizonsIO.delay(new Date) // TODO: get from controls
+  def dateTime: HorizonsIO[Date] = {
+    val cal = Calendar.getInstance(UTC)
+    cal.setTimeZone(calendar.getTimeZone)
+    cal.setTime(calendar.getDate)
+    cal.set(Calendar.HOUR_OF_DAY, timeConfig.textDoc.getHoursField)
+    cal.set(Calendar.MINUTE,      timeConfig.textDoc.getMinutesField)
+    cal.set(Calendar.SECOND,      timeConfig.textDoc.getSecondsField)
+    HorizonsIO.delay(cal.getTime)
+  }
 
   /** A program that returns the editor's current target. */
   val target: HorizonsIO[A] =
