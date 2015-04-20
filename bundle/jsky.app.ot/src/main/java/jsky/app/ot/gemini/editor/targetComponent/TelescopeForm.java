@@ -49,22 +49,22 @@ class TelescopeForm extends JPanel {
         final JScrollPane posTableScrollPane = new JScrollPane();
         positionTable = new TelescopePosTableWidget(owner);
         coordinatesPanel = new JPanel();
-        objectGBW = new JPanel();
+//        objectGBW = new JPanel();
         guideGroupPanel = new JPanel();
         tag = new JComboBox();
-        final JLabel nameLabel = new JLabel();
+//        final JLabel nameLabel = new JLabel();
         final JLabel guideGroupNameLabel = new JLabel();
 //        targetName = new TextBoxWidget();
         guideGroupName = new TextBoxWidget();
 //        resolveButton = new JButton();
 //        nameServerBar = new JMenuBar();
 //        nameServer = new JMenu();
-        final JPanel stretchPanel = new JPanel();
+//        final JPanel stretchPanel = new JPanel();
 //        system = new DropDownListBoxWidget();
-        final JLabel RA_Az_STW = new JLabel();
-        final JPanel alignmentPanel = new JPanel();
+//        final JLabel RA_Az_STW = new JLabel();
+//        final JPanel alignmentPanel = new JPanel();
 //        xaxis = new TextBoxWidget();
-        final JLabel dec_El_STW = new JLabel();
+//        final JLabel dec_El_STW = new JLabel();
 //        yaxis = new TextBoxWidget();
 //        extrasFolder = new JPanel();
 //        nonsiderealPW = new JPanel();
@@ -235,21 +235,21 @@ class TelescopeForm extends JPanel {
 
             //======== objectGBW ========
             {
-                objectGBW.setLayout(new GridBagLayout());
+//                objectGBW.setLayout(new GridBagLayout());
 
                 //---- tag ----
                 tag.setToolTipText("Target Type");
-                objectGBW.add(tag, new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0,
-                    GridBagConstraints.CENTER, GridBagConstraints.BOTH,
-                    new Insets(0, 0, 0, 0), 0, 0));
-
-                //---- nameLabel ----
-                nameLabel.setLabelFor(null);
-                nameLabel.setText("Name");
-                objectGBW.add(nameLabel, new GridBagConstraints(1, 0, 1, 1, 0.0, 0.0,
-                    GridBagConstraints.CENTER, GridBagConstraints.BOTH,
-                    new Insets(0, 10, 0, 5), 0, 0));
-
+//                objectGBW.add(tag, new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0,
+//                    GridBagConstraints.CENTER, GridBagConstraints.BOTH,
+//                    new Insets(0, 0, 0, 0), 0, 0));
+//
+//                //---- nameLabel ----
+//                nameLabel.setLabelFor(null);
+//                nameLabel.setText("Name");
+//                objectGBW.add(nameLabel, new GridBagConstraints(1, 0, 1, 1, 0.0, 0.0,
+//                    GridBagConstraints.CENTER, GridBagConstraints.BOTH,
+//                    new Insets(0, 10, 0, 5), 0, 0));
+//
 //                //---- targetName ----
 //                targetName.setToolTipText("Target name (type enter to resolve to RA,Dec via name server)");
 //                targetName.setHorizontalAlignment(JTextField.LEFT);
@@ -274,63 +274,63 @@ class TelescopeForm extends JPanel {
 //                objectGBW.add(nameServerBar, new GridBagConstraints(5, 0, 1, 1, 0.0, 0.0,
 //                    GridBagConstraints.CENTER, GridBagConstraints.VERTICAL,
 //                    new Insets(0, 0, 0, 0), 0, 0));
-
-                //======== stretchPanel ========
-                {
-                    stretchPanel.setLayout(new FlowLayout());
-                }
-                objectGBW.add(stretchPanel, new GridBagConstraints(6, 0, 1, 1, 1.0, 0.0,
-                    GridBagConstraints.CENTER, GridBagConstraints.BOTH,
-                    new Insets(0, 0, 0, 0), 0, 0));
-
+//
+//                //======== stretchPanel ========
+//                {
+//                    stretchPanel.setLayout(new FlowLayout());
+//                }
+//                objectGBW.add(stretchPanel, new GridBagConstraints(6, 0, 1, 1, 1.0, 0.0,
+//                    GridBagConstraints.CENTER, GridBagConstraints.BOTH,
+//                    new Insets(0, 0, 0, 0), 0, 0));
+//
 //                //---- system ----
 //                system.setToolTipText("Target coordinate system");
 //                system.setFocusable(false);
 //                objectGBW.add(system, new GridBagConstraints(0, 1, 1, 1, 0.0, 0.0,
 //                    GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
 //                    new Insets(5, 0, 0, 0), 0, 0));
-
-                //---- RA_Az_STW ----
-                RA_Az_STW.setLabelFor(null);
-                RA_Az_STW.setText("RA");
-                objectGBW.add(RA_Az_STW, new GridBagConstraints(1, 1, 1, 1, 0.0, 0.0,
-                    GridBagConstraints.EAST, GridBagConstraints.NONE,
-                    new Insets(5, 10, 5, 5), 0, 0));
-
-                //======== alignmentPanel ========
-                {
-                    alignmentPanel.setLayout(new GridBagLayout());
-                    ((GridBagLayout)alignmentPanel.getLayout()).columnWidths = new int[] {0, 0, 0, 0};
-                    ((GridBagLayout)alignmentPanel.getLayout()).rowHeights = new int[] {0, 0};
-                    ((GridBagLayout)alignmentPanel.getLayout()).columnWeights = new double[] {0.0, 0.0, 0.0, 1.0E-4};
-                    ((GridBagLayout)alignmentPanel.getLayout()).rowWeights = new double[] {0.0, 1.0E-4};
-
+//
+//                //---- RA_Az_STW ----
+//                RA_Az_STW.setLabelFor(null);
+//                RA_Az_STW.setText("RA");
+//                objectGBW.add(RA_Az_STW, new GridBagConstraints(1, 1, 1, 1, 0.0, 0.0,
+//                    GridBagConstraints.EAST, GridBagConstraints.NONE,
+//                    new Insets(5, 10, 5, 5), 0, 0));
+//
+//                //======== alignmentPanel ========
+//                {
+//                    alignmentPanel.setLayout(new GridBagLayout());
+//                    ((GridBagLayout)alignmentPanel.getLayout()).columnWidths = new int[] {0, 0, 0, 0};
+//                    ((GridBagLayout)alignmentPanel.getLayout()).rowHeights = new int[] {0, 0};
+//                    ((GridBagLayout)alignmentPanel.getLayout()).columnWeights = new double[] {0.0, 0.0, 0.0, 1.0E-4};
+//                    ((GridBagLayout)alignmentPanel.getLayout()).rowWeights = new double[] {0.0, 1.0E-4};
+//
 //                    //---- xaxis ----
 //                    xaxis.setToolTipText("Target RA coordinate (HH:MM:SS.sss)");
 //                    xaxis.setHorizontalAlignment(JTextField.LEFT);
 //                    alignmentPanel.add(xaxis, new GridBagConstraints(0, 0, 1, 1, 0.5, 0.0,
 //                        GridBagConstraints.CENTER, GridBagConstraints.BOTH,
 //                        new Insets(0, 0, 0, 5), 0, 0));
-
-                    //---- Dec_El_STW ----
-                    dec_El_STW.setLabelFor(null);
-                    dec_El_STW.setText("Dec");
-                    alignmentPanel.add(dec_El_STW, new GridBagConstraints(1, 0, 1, 1, 0.0, 0.0,
-                        GridBagConstraints.CENTER, GridBagConstraints.BOTH,
-                        new Insets(0, 0, 0, 5), 0, 0));
-
+//
+//                    //---- Dec_El_STW ----
+//                    dec_El_STW.setLabelFor(null);
+//                    dec_El_STW.setText("Dec");
+//                    alignmentPanel.add(dec_El_STW, new GridBagConstraints(1, 0, 1, 1, 0.0, 0.0,
+//                        GridBagConstraints.CENTER, GridBagConstraints.BOTH,
+//                        new Insets(0, 0, 0, 5), 0, 0));
+//
 //                    //---- yaxis ----
 //                    yaxis.setToolTipText("Target Dec coordinate (DD:MM:SS.sss)");
 //                    yaxis.setHorizontalAlignment(JTextField.LEFT);
 //                    alignmentPanel.add(yaxis, new GridBagConstraints(2, 0, 1, 1, 0.5, 0.0,
 //                        GridBagConstraints.CENTER, GridBagConstraints.BOTH,
 //                        new Insets(0, 0, 0, 0), 0, 0));
-                }
-                objectGBW.add(alignmentPanel, new GridBagConstraints(2, 1, 4, 1, 0.0, 0.0,
-                    GridBagConstraints.CENTER, GridBagConstraints.BOTH,
-                    new Insets(5, 0, 5, 0), 0, 0));
+//                }
+//                objectGBW.add(alignmentPanel, new GridBagConstraints(2, 1, 4, 1, 0.0, 0.0,
+//                    GridBagConstraints.CENTER, GridBagConstraints.BOTH,
+//                    new Insets(5, 0, 5, 0), 0, 0));
             }
-            coordinatesPanel.add(objectGBW, BorderLayout.NORTH);
+//            coordinatesPanel.add(objectGBW, BorderLayout.NORTH);
 
             //======== guideGroupPanel ========
             {
@@ -784,7 +784,7 @@ class TelescopeForm extends JPanel {
     JButton primaryButton;
     TelescopePosTableWidget positionTable;
     JPanel coordinatesPanel;
-    JPanel objectGBW;
+//    JPanel objectGBW;
     JPanel guideGroupPanel;
     JComboBox<PositionType> tag;
 //    TextBoxWidget targetName;

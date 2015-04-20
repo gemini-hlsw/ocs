@@ -78,8 +78,8 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 
     // Static constants
 //    private static final Logger   LOG                 = Logger.getLogger(EdCompTargetList.class.getName());
-    private static final TimeZone UTC                 = TimeZone.getTimeZone("UTC");
-    private static final String   NON_SIDEREAL_TARGET = "Nonsidereal";
+//    private static final TimeZone UTC                 = TimeZone.getTimeZone("UTC");
+//    private static final String   NON_SIDEREAL_TARGET = "Nonsidereal";
 
     // Global variables \o/
     private static TargetClipboard clipboard;
@@ -100,8 +100,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
     // Stuff that varies with time
     private SPTarget        _curPos;
     private GuideGroup      _curGroup;
-    private boolean         _ignorePosUpdate    = false;
-//    private Option<Catalog> _selectedNameServer = None.instance();
+    //    private Option<Catalog> _selectedNameServer = None.instance();
 
 
     public EdCompTargetList() {
@@ -112,7 +111,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 //        _timeDocument         = new TimeDocument((JTextField) _w.calendarTime.getEditor().getEditorComponent());
 
         // Move the tag menu up onto the menu bar, with a label
-        _w.tag.getParent().remove(_w.tag);
+//        _w.tag.getParent().remove(_w.tag);
         _w.buttonPanel.add(new JPanel() {{
             setOpaque(false);
             setLayout(new FlowLayout() {{
@@ -240,9 +239,9 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
             insets = new Insets(5, 0, 5, 0);
         }});
 
-        // Set up the formatting on the calendar doodad
-        final DateFormat timeFormatter = new SimpleDateFormat("HH:mm:ss");
-        timeFormatter.setTimeZone(UTC);
+//        // Set up the formatting on the calendar doodad
+//        final DateFormat timeFormatter = new SimpleDateFormat("HH:mm:ss");
+//        timeFormatter.setTimeZone(UTC);
 //        _w.calendarTime.setModel(new DefaultComboBoxModel<>(TimeConfig.values()));
 //        _w.calendarTime.setRenderer(new ListCellRenderer<TimeConfig>() {
 //
@@ -446,22 +445,22 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 
     }
 
-    /**
-     * Set the contained target's RA and Dec from Strings in HMS/DMS format and notify listeners.
-     * Invalid values are replaced with 00:00:00.
-     */
-    private static void setHmsDms(SPTarget spTarget, final String hms, final String dms) {
-        try {
-            spTarget.getTarget().getRa().setValue(hms);
-        } catch (final IllegalArgumentException ex) {
-            spTarget.getTarget().getRa().setValue("00:00:00.0");
-        }
-        try {
-            spTarget.getTarget().getDec().setValue(dms);
-        } catch( final IllegalArgumentException ex) {
-            spTarget.getTarget().getDec().setValue("00:00:00.0");
-        }
-    }
+//    /**
+//     * Set the contained target's RA and Dec from Strings in HMS/DMS format and notify listeners.
+//     * Invalid values are replaced with 00:00:00.
+//     */
+//    private static void setHmsDms(SPTarget spTarget, final String hms, final String dms) {
+//        try {
+//            spTarget.getTarget().getRa().setValue(hms);
+//        } catch (final IllegalArgumentException ex) {
+//            spTarget.getTarget().getRa().setValue("00:00:00.0");
+//        }
+//        try {
+//            spTarget.getTarget().getDec().setValue(dms);
+//        } catch( final IllegalArgumentException ex) {
+//            spTarget.getTarget().getDec().setValue("00:00:00.0");
+//        }
+//    }
 
     @Override protected void updateEnabledState(boolean enabled) {
         super.updateEnabledState(enabled);
@@ -904,20 +903,20 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 //            }.execute();
 //        }
 //    }
-
-
-
-    /**
-     * Returns the current target if its system type matches the specified one, otherwise constructs
-     * and returns a new conic target of the specified type.
-     */
-    private ConicTarget getOrCreateTargetWithTag(ITarget.Tag tag) {
-        final ITarget old = _curPos.getTarget();
-        if (old instanceof ConicTarget && old.getTag() == tag)
-            return (ConicTarget) old;
-        else
-            return (ConicTarget) ITarget.forTag(tag);
-    }
+//
+//
+//
+//    /**
+//     * Returns the current target if its system type matches the specified one, otherwise constructs
+//     * and returns a new conic target of the specified type.
+//     */
+//    private ConicTarget getOrCreateTargetWithTag(ITarget.Tag tag) {
+//        final ITarget old = _curPos.getTarget();
+//        if (old instanceof ConicTarget && old.getTag() == tag)
+//            return (ConicTarget) old;
+//        else
+//            return (ConicTarget) ITarget.forTag(tag);
+//    }
 
     // OtItemEditor
     public JPanel getWindow() {
@@ -939,7 +938,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
             final TargetEnvironment env2 = getDataObject().getTargetEnvironment();
             if (env2.getTargets().contains(selTarget)) {
 
-                final Option<ObsContext> ctx = getObsContext(env2);
+//                final Option<ObsContext> ctx = getObsContext(env2);
 
                 if (_curPos != null) _curPos.deleteWatcher(posWatcher);
 
@@ -1070,7 +1069,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                     final TargetEnvironment env1 = getDataObject().getTargetEnvironment();
                     if (env1.getTargets().contains(target)) {
 
-                        final Option<ObsContext> ctx = getObsContext(env1);
+//                        final Option<ObsContext> ctx = getObsContext(env1);
 
                         if (_curPos != null) _curPos.deleteWatcher(posWatcher);
 
@@ -1106,7 +1105,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                         _curPos = null;
                         _curGroup = grp;
 
-                        _w.objectGBW.setVisible(false);
+//                        _w.objectGBW.setVisible(false);
 //                        _w.extrasFolder.setVisible(false);
                         _w.guideGroupPanel.setVisible(true);
 //                        if (_trackingButton.isSelected())
@@ -1245,12 +1244,12 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
     }
 
     private void refreshAll() {
-        final boolean isNonSidereal = (_curPos.getTarget() instanceof NonSiderealTarget);
-
+//        final boolean isNonSidereal = (_curPos.getTarget() instanceof NonSiderealTarget);
+//
 //        _w.extrasFolder.setVisible(true);
-        _w.objectGBW.setVisible(true);
+//        _w.objectGBW.setVisible(true);
         final boolean editable = OTOptions.areRootAndCurrentObsIfAnyEditable(getProgram(), getContextObservation());
-        _w.objectGBW.setEnabled(editable);
+//        _w.objectGBW.setEnabled(editable);
         _w.guideGroupPanel.setVisible(false);
 //        _trackingButton.setVisible(!isNonSidereal);
 
@@ -1359,9 +1358,10 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 
     private final TelescopePosWatcher posWatcher = new TelescopePosWatcher() {
         public void telescopePosUpdate(WatchablePos tp) {
-            if (_ignorePosUpdate)
-                return;
-
+//            boolean _ignorePosUpdate = false;
+//            if (_ignorePosUpdate)
+//                return;
+//
             if (tp != _curPos) {
                 // This shouldn't happen ...
                 System.out.println(getClass().getName() + ": received a position " +
