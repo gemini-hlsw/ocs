@@ -92,11 +92,17 @@ object ItcUniqueConfig {
   // Creates a text label based on the spans of steps covered by the steps.
   // E.g. ((1,2,3),(10,11),(15)) is turned into "001-003, 010-011, 015"
   private def labels(cs: Seq[Config]): String = {
-    val ls = cs.map(_.getItemValue(DATALABEL_KEY).asInstanceOf[String].toInt).sorted
+    val ls = cs.map(labelIndex).sorted
     findSpans(ls).map {
       case i :: Nil => i.toString
       case i :: is => f"$i%03d-${is.last}%03d"
     }.mkString(", ")
+  }
+
+  // Only the number at the very end is relevant
+  private def labelIndex(c: Config): Int = {
+    val label = c.getItemValue(DATALABEL_KEY).asInstanceOf[String]
+    label.split('-').last.toInt
   }
 
   // Finds spans of int values that immediately follow each other.
