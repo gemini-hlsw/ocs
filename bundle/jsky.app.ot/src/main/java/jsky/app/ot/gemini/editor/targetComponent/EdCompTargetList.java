@@ -135,14 +135,14 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 
         // Add the sidereal editor, wrapped to make it less terrible
 //        _w.extrasFolder.add(_siderealEditor.getComponent(), "sidereal");
-        _w.extrasFolder.add(new JPanel(new GridBagLayout()) {{
-            add(new JLabel("Brightness"), new GridBagConstraints() {{
-                gridx = 0;
-                gridy = 0;
-                anchor = WEST;
-                fill = HORIZONTAL;
-                insets = new Insets(0, 0, 5, 20);
-            }});
+//        _w.extrasFolder.add(new JPanel(new GridBagLayout()) {{
+//            add(new JLabel("Brightness"), new GridBagConstraints() {{
+//                gridx = 0;
+//                gridy = 0;
+//                anchor = WEST;
+//                fill = HORIZONTAL;
+//                insets = new Insets(0, 0, 5, 20);
+//            }});
 //            add(_nonsideMagEditor.getComponent(), new GridBagConstraints() {{
 //                gridx = 0;
 //                gridy = 1;
@@ -151,19 +151,17 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 //                weighty = 1.0;
 //                insets = new Insets(0, 0, 0, 20);
 //            }});
-            add(_w.nonsiderealPW, new GridBagConstraints() {{
-                gridx = 1;
-                gridy = 0;
-                gridheight = 2;
-                fill = BOTH;
-                weightx = 1.0;
-                weighty = 1.0;
-            }});
-        }}, "nonsidereal");
-
-        _w.extrasFolder.setBorder(BorderFactory.createLineBorder(Color.GREEN));
-
-        _w.planetsPanel.setVisible(false);
+//            add(_w.nonsiderealPW, new GridBagConstraints() {{
+//                gridx = 1;
+//                gridy = 0;
+//                gridheight = 2;
+//                fill = BOTH;
+//                weightx = 1.0;
+//                weighty = 1.0;
+//            }});
+//        }}, "nonsidereal");
+//
+//        _w.planetsPanel.setVisible(false);
 
         // Re-wrap the coordinates panel
         _w.remove(_w.coordinatesPanel);

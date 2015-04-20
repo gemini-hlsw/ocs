@@ -67,7 +67,7 @@ class TelescopeForm extends JPanel {
         final JLabel dec_El_STW = new JLabel();
         yaxis = new TextBoxWidget();
         extrasFolder = new JPanel();
-        nonsiderealPW = new JPanel();
+//        nonsiderealPW = new JPanel();
         epochofelUnits = new JLabel();
         orbincUnits = new JLabel();
         longascnodeUnits = new JLabel();
@@ -104,11 +104,11 @@ class TelescopeForm extends JPanel {
         meandist = new NumberBoxWidget();
         epochofperiLabel = new JLabel();
         epochofperi = new NumberBoxWidget();
-        final JPanel orbitalElementFormatPanel = new JPanel();
-        final JLabel orbitalElementFormatLabel = new JLabel();
+//        final JPanel orbitalElementFormatPanel = new JPanel();
+//        final JLabel orbitalElementFormatLabel = new JLabel();
         orbitalElementFormat = new DropDownListBoxWidget();
-        planetsPanel = new JPanel();
-        final JLabel label1 = new JLabel();
+//        planetsPanel = new JPanel();
+//        final JLabel label1 = new JLabel();
         final JRadioButton radioButton1 = new JRadioButton();
         final JRadioButton radioButton2 = new JRadioButton();
         final JRadioButton radioButton3 = new JRadioButton();
@@ -365,321 +365,321 @@ class TelescopeForm extends JPanel {
 
                 //======== nonsiderealPW ========
                 {
-                    nonsiderealPW.setLayout(new GridBagLayout());
-                    ((GridBagLayout)nonsiderealPW.getLayout()).rowHeights = new int[] {0, 0, 0, 0, 0, 0, 11, 0, 5, 0, 6};
-                    ((GridBagLayout)nonsiderealPW.getLayout()).columnWeights = new double[] {0.0, 1.0, 0.0, 0.0, 0.0, 0.0};
-
-                    //---- epochofelUnits ----
-                    epochofelUnits.setText("JD");
-                    nonsiderealPW.add(epochofelUnits, new GridBagConstraints(2, 2, 1, 1, 0.0, 0.0,
-                        GridBagConstraints.WEST, GridBagConstraints.NONE,
-                        new Insets(6, 3, 0, 11), 0, 0));
-
-                    //---- orbincUnits ----
-                    orbincUnits.setText("deg");
-                    nonsiderealPW.add(orbincUnits, new GridBagConstraints(2, 3, 1, 1, 0.0, 0.0,
-                        GridBagConstraints.WEST, GridBagConstraints.NONE,
-                        new Insets(6, 3, 0, 11), 0, 0));
-
-                    //---- longascnodeUnits ----
-                    longascnodeUnits.setText("deg");
-                    nonsiderealPW.add(longascnodeUnits, new GridBagConstraints(2, 4, 1, 1, 0.0, 0.0,
-                        GridBagConstraints.WEST, GridBagConstraints.NONE,
-                        new Insets(6, 3, 0, 11), 0, 0));
-
-                    //---- longofperiUnits ----
-                    longofperiUnits.setText("deg");
-                    nonsiderealPW.add(longofperiUnits, new GridBagConstraints(2, 5, 1, 1, 0.0, 0.0,
-                        GridBagConstraints.WEST, GridBagConstraints.NONE,
-                        new Insets(6, 3, 0, 11), 0, 0));
-
-                    //---- argofperiUnits ----
-                    argofperiUnits.setText("deg");
-                    nonsiderealPW.add(argofperiUnits, new GridBagConstraints(2, 6, 1, 1, 0.0, 0.0,
-                        GridBagConstraints.WEST, GridBagConstraints.NONE,
-                        new Insets(6, 3, 0, 11), 0, 0));
-
-                    //---- meandistUnits ----
-                    meandistUnits.setVisible(false);
-                    meandistUnits.setText("AU");
-                    nonsiderealPW.add(meandistUnits, new GridBagConstraints(2, 10, 1, 1, 0.0, 0.0,
-                        GridBagConstraints.WEST, GridBagConstraints.NONE,
-                        new Insets(0, 3, 0, 11), 0, 0));
-
-                    //---- peridistUnits ----
-                    peridistUnits.setText("AU");
-                    nonsiderealPW.add(peridistUnits, new GridBagConstraints(5, 2, 1, 1, 0.0, 0.0,
-                        GridBagConstraints.WEST, GridBagConstraints.NONE,
-                        new Insets(6, 3, 0, 11), 0, 0));
-
-                    //---- eccentricityUnits ----
-                    eccentricityUnits.setRequestFocusEnabled(true);
-                    eccentricityUnits.setText("");
-                    nonsiderealPW.add(eccentricityUnits, new GridBagConstraints(5, 3, 1, 1, 0.0, 0.0,
-                        GridBagConstraints.WEST, GridBagConstraints.NONE,
-                        new Insets(0, 0, 0, 11), 0, 0));
-
-                    //---- meanlongUnits ----
-                    meanlongUnits.setText("deg");
-                    nonsiderealPW.add(meanlongUnits, new GridBagConstraints(5, 4, 1, 1, 0.0, 0.0,
-                        GridBagConstraints.WEST, GridBagConstraints.NONE,
-                        new Insets(6, 3, 0, 11), 0, 0));
-
-                    //---- meananomUnits ----
-                    meananomUnits.setText("deg");
-                    nonsiderealPW.add(meananomUnits, new GridBagConstraints(5, 5, 1, 1, 0.0, 0.0,
-                        GridBagConstraints.WEST, GridBagConstraints.NONE,
-                        new Insets(6, 3, 0, 11), 0, 0));
-
-                    //---- dailymotUnits ----
-                    dailymotUnits.setVisible(false);
-                    dailymotUnits.setText("deg");
-                    nonsiderealPW.add(dailymotUnits, new GridBagConstraints(5, 6, 1, 1, 0.0, 0.0,
-                        GridBagConstraints.WEST, GridBagConstraints.NONE,
-                        new Insets(0, 3, 0, 11), 0, 0));
-
-                    //---- epochofperiUnits ----
-                    epochofperiUnits.setVisible(false);
-                    epochofperiUnits.setText("JD");
-                    nonsiderealPW.add(epochofperiUnits, new GridBagConstraints(5, 10, 1, 1, 0.0, 0.0,
-                        GridBagConstraints.WEST, GridBagConstraints.NONE,
-                        new Insets(0, 3, 0, 11), 0, 0));
-
-                    //---- epochofelLabel ----
-                    epochofelLabel.setText("epochofel:");
-                    nonsiderealPW.add(epochofelLabel, new GridBagConstraints(0, 2, 1, 1, 0.0, 0.0,
-                        GridBagConstraints.EAST, GridBagConstraints.NONE,
-                        new Insets(6, 11, 0, 0), 0, 0));
-
-                    //---- epochofel ----
-                    epochofel.setText("");
-                    nonsiderealPW.add(epochofel, new GridBagConstraints(1, 2, 1, 1, 1.0, 0.0,
-                        GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
-                        new Insets(6, 5, 0, 0), 0, 0));
-
-                    //---- peridistLabel ----
-                    peridistLabel.setText("peridist:");
-                    nonsiderealPW.add(peridistLabel, new GridBagConstraints(3, 2, 1, 1, 0.0, 0.0,
-                        GridBagConstraints.EAST, GridBagConstraints.NONE,
-                        new Insets(6, 11, 0, 0), 0, 0));
-
-                    //---- peridist ----
-                    peridist.setText("");
-                    nonsiderealPW.add(peridist, new GridBagConstraints(4, 2, 1, 1, 1.0, 0.0,
-                        GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
-                        new Insets(6, 5, 0, 0), 0, 0));
-
-                    //---- orbincLabel ----
-                    orbincLabel.setText("orbinc:");
-                    nonsiderealPW.add(orbincLabel, new GridBagConstraints(0, 3, 1, 1, 0.0, 0.0,
-                        GridBagConstraints.EAST, GridBagConstraints.NONE,
-                        new Insets(6, 11, 0, 0), 0, 0));
-
-                    //---- orbinc ----
-                    orbinc.setText("");
-                    nonsiderealPW.add(orbinc, new GridBagConstraints(1, 3, 1, 1, 1.0, 0.0,
-                        GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
-                        new Insets(6, 5, 0, 0), 0, 0));
-
-                    //---- eccentricityLabel ----
-                    eccentricityLabel.setText("eccentricity:");
-                    nonsiderealPW.add(eccentricityLabel, new GridBagConstraints(3, 3, 1, 1, 0.0, 0.0,
-                        GridBagConstraints.EAST, GridBagConstraints.NONE,
-                        new Insets(6, 11, 0, 0), 0, 0));
-
-                    //---- eccentricity ----
-                    eccentricity.setText("");
-                    nonsiderealPW.add(eccentricity, new GridBagConstraints(4, 3, 1, 1, 1.0, 0.0,
-                        GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
-                        new Insets(6, 5, 0, 0), 0, 0));
-
-                    //---- longascnodeLabel ----
-                    longascnodeLabel.setText("longascnode:");
-                    nonsiderealPW.add(longascnodeLabel, new GridBagConstraints(0, 4, 1, 1, 0.0, 0.0,
-                        GridBagConstraints.EAST, GridBagConstraints.NONE,
-                        new Insets(6, 11, 0, 0), 0, 0));
-
-                    //---- longascnode ----
-                    longascnode.setText("");
-                    nonsiderealPW.add(longascnode, new GridBagConstraints(1, 4, 1, 1, 1.0, 0.0,
-                        GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
-                        new Insets(6, 5, 0, 0), 0, 0));
-
-                    //---- meanlongLabel ----
-                    meanlongLabel.setText("meanlong:");
-                    nonsiderealPW.add(meanlongLabel, new GridBagConstraints(3, 4, 1, 1, 0.0, 0.0,
-                        GridBagConstraints.EAST, GridBagConstraints.NONE,
-                        new Insets(6, 11, 0, 0), 0, 0));
-
-                    //---- meanlong ----
-                    meanlong.setText("");
-                    nonsiderealPW.add(meanlong, new GridBagConstraints(4, 4, 1, 1, 1.0, 0.0,
-                        GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
-                        new Insets(6, 5, 0, 0), 0, 0));
-
-                    //---- longofperiLabel ----
-                    longofperiLabel.setText("longofperi:");
-                    nonsiderealPW.add(longofperiLabel, new GridBagConstraints(0, 5, 1, 1, 0.0, 0.0,
-                        GridBagConstraints.EAST, GridBagConstraints.NONE,
-                        new Insets(6, 11, 0, 0), 0, 0));
-
-                    //---- longofperi ----
-                    longofperi.setText("");
-                    nonsiderealPW.add(longofperi, new GridBagConstraints(1, 5, 1, 1, 1.0, 0.0,
-                        GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
-                        new Insets(6, 5, 0, 0), 0, 0));
-
-                    //---- meananomLabel ----
-                    meananomLabel.setText("meananom:");
-                    nonsiderealPW.add(meananomLabel, new GridBagConstraints(3, 5, 1, 1, 0.0, 0.0,
-                        GridBagConstraints.EAST, GridBagConstraints.NONE,
-                        new Insets(6, 11, 0, 0), 0, 0));
-
-                    //---- meananom ----
-                    meananom.setText("");
-                    nonsiderealPW.add(meananom, new GridBagConstraints(4, 5, 1, 1, 1.0, 0.0,
-                        GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
-                        new Insets(6, 5, 0, 1), 0, 0));
-
-                    //---- argofperiLabel ----
-                    argofperiLabel.setVisible(false);
-                    argofperiLabel.setText("argofperi:");
-                    nonsiderealPW.add(argofperiLabel, new GridBagConstraints(0, 6, 1, 1, 0.0, 0.0,
-                        GridBagConstraints.EAST, GridBagConstraints.NONE,
-                        new Insets(6, 11, 0, 0), 0, 0));
-
-                    //---- argofperi ----
-                    argofperi.setVisible(false);
-                    argofperi.setText("");
-                    nonsiderealPW.add(argofperi, new GridBagConstraints(1, 6, 1, 1, 1.0, 0.0,
-                        GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
-                        new Insets(6, 5, 0, 0), 0, 0));
-
-                    //---- dailymotLabel ----
-                    dailymotLabel.setVisible(false);
-                    dailymotLabel.setText("dailymot:");
-                    nonsiderealPW.add(dailymotLabel, new GridBagConstraints(3, 6, 1, 1, 0.0, 0.0,
-                        GridBagConstraints.EAST, GridBagConstraints.NONE,
-                        new Insets(6, 11, 0, 0), 0, 0));
-
-                    //---- dailymot ----
-                    dailymot.setVisible(false);
-                    dailymot.setText("");
-                    nonsiderealPW.add(dailymot, new GridBagConstraints(4, 6, 1, 1, 1.0, 0.0,
-                        GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
-                        new Insets(6, 5, 0, 1), 0, 0));
-
-                    //---- meandistLabel ----
-                    meandistLabel.setVisible(false);
-                    meandistLabel.setText("meandist:");
-                    nonsiderealPW.add(meandistLabel, new GridBagConstraints(0, 10, 1, 1, 0.0, 0.0,
-                        GridBagConstraints.EAST, GridBagConstraints.NONE,
-                        new Insets(6, 11, 0, 0), 0, 0));
-
-                    //---- meandist ----
-                    meandist.setVisible(false);
-                    meandist.setText("");
-                    nonsiderealPW.add(meandist, new GridBagConstraints(1, 10, 1, 1, 1.0, 0.0,
-                        GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
-                        new Insets(6, 5, 0, 0), 0, 0));
-
-                    //---- epochofperiLabel ----
-                    epochofperiLabel.setVisible(false);
-                    epochofperiLabel.setText("epochofperi:");
-                    nonsiderealPW.add(epochofperiLabel, new GridBagConstraints(3, 10, 1, 1, 0.0, 0.0,
-                        GridBagConstraints.EAST, GridBagConstraints.NONE,
-                        new Insets(6, 11, 0, 0), 0, 0));
-
-                    //---- epochofperi ----
-                    epochofperi.setVisible(false);
-                    epochofperi.setText("");
-                    nonsiderealPW.add(epochofperi, new GridBagConstraints(4, 10, 1, 1, 1.0, 0.0,
-                        GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
-                        new Insets(6, 5, 0, 1), 0, 0));
-
-                    //======== orbitalElementFormatPanel ========
-                    {
-                        orbitalElementFormatPanel.setLayout(new FlowLayout());
-
-                        //---- orbitalElementFormatLabel ----
-                        orbitalElementFormatLabel.setText("Orbital Element Format:");
-                        orbitalElementFormatPanel.add(orbitalElementFormatLabel);
-                        orbitalElementFormatPanel.add(orbitalElementFormat);
-                    }
-                    nonsiderealPW.add(orbitalElementFormatPanel, new GridBagConstraints(0, 0, 6, 1, 0.0, 0.0,
-                        GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
-                        new Insets(0, 0, 0, 0), 0, 0));
-
-                    //======== planetsPanel ========
-                    {
-                        planetsPanel.setLayout(new FormLayout(
-                            new ColumnSpec[] {
-                                new ColumnSpec(ColumnSpec.FILL, Sizes.DEFAULT, FormSpec.DEFAULT_GROW),
-                                new ColumnSpec(ColumnSpec.LEFT, Sizes.DLUX9, FormSpec.NO_GROW),
-                                FormFactory.DEFAULT_COLSPEC,
-                                new ColumnSpec(ColumnSpec.LEFT, Sizes.DLUX9, FormSpec.NO_GROW),
-                                FormFactory.DEFAULT_COLSPEC,
-                                new ColumnSpec(ColumnSpec.LEFT, Sizes.DLUX9, FormSpec.NO_GROW),
-                                FormFactory.DEFAULT_COLSPEC,
-                                FormFactory.LABEL_COMPONENT_GAP_COLSPEC,
-                                new ColumnSpec(ColumnSpec.FILL, Sizes.DEFAULT, FormSpec.DEFAULT_GROW)
-                            },
-                            new RowSpec[] {
-                                FormFactory.DEFAULT_ROWSPEC,
-                                FormFactory.LINE_GAP_ROWSPEC,
-                                new RowSpec(RowSpec.CENTER, Sizes.DEFAULT, FormSpec.DEFAULT_GROW),
-                                FormFactory.LINE_GAP_ROWSPEC,
-                                new RowSpec(RowSpec.FILL, Sizes.DEFAULT, FormSpec.DEFAULT_GROW),
-                                FormFactory.PARAGRAPH_GAP_ROWSPEC,
-                                new RowSpec(RowSpec.FILL, Sizes.DEFAULT, FormSpec.NO_GROW),
-                                FormFactory.PARAGRAPH_GAP_ROWSPEC,
-                                new RowSpec(RowSpec.FILL, Sizes.DEFAULT, FormSpec.NO_GROW)
-                            }));
-
-                        //---- label1 ----
-                        label1.setText("Select Solar System Object");
-                        planetsPanel.add(label1, cc.xywh(3, 1, 5, 1, CellConstraints.CENTER, CellConstraints.DEFAULT));
-
-                        //---- radioButton1 ----
-                        radioButton1.setText("Moon");
-                        radioButton1.setSelected(true);
-                        planetsPanel.add(radioButton1, cc.xy(3, 5));
-
-                        //---- radioButton2 ----
-                        radioButton2.setText("Mercury");
-                        planetsPanel.add(radioButton2, cc.xy(5, 5));
-
-                        //---- radioButton3 ----
-                        radioButton3.setText("Venus");
-                        planetsPanel.add(radioButton3, cc.xy(7, 5));
-
-                        //---- radioButton4 ----
-                        radioButton4.setText("Mars");
-                        planetsPanel.add(radioButton4, cc.xy(3, 7));
-
-                        //---- radioButton5 ----
-                        radioButton5.setText("Jupiter");
-                        planetsPanel.add(radioButton5, cc.xy(5, 7));
-
-                        //---- radioButton6 ----
-                        radioButton6.setText("Saturn");
-                        planetsPanel.add(radioButton6, cc.xy(7, 7));
-
-                        //---- radioButton7 ----
-                        radioButton7.setText("Uranus");
-                        planetsPanel.add(radioButton7, cc.xy(3, 9));
-
-                        //---- radioButton8 ----
-                        radioButton8.setText("Neptune");
-                        planetsPanel.add(radioButton8, cc.xy(5, 9));
-
-                        //---- radioButton9 ----
-                        radioButton9.setText("Pluto");
-                        planetsPanel.add(radioButton9, cc.xy(7, 9));
-                    }
-                    nonsiderealPW.add(planetsPanel, new GridBagConstraints(0, 7, 6, 1, 0.0, 0.0,
-                        GridBagConstraints.CENTER, GridBagConstraints.BOTH,
-                        new Insets(0, 0, 0, 0), 0, 0));
+//                    nonsiderealPW.setLayout(new GridBagLayout());
+//                    ((GridBagLayout)nonsiderealPW.getLayout()).rowHeights = new int[] {0, 0, 0, 0, 0, 0, 11, 0, 5, 0, 6};
+//                    ((GridBagLayout)nonsiderealPW.getLayout()).columnWeights = new double[] {0.0, 1.0, 0.0, 0.0, 0.0, 0.0};
+//
+//                    //---- epochofelUnits ----
+//                    epochofelUnits.setText("JD");
+//                    nonsiderealPW.add(epochofelUnits, new GridBagConstraints(2, 2, 1, 1, 0.0, 0.0,
+//                        GridBagConstraints.WEST, GridBagConstraints.NONE,
+//                        new Insets(6, 3, 0, 11), 0, 0));
+//
+//                    //---- orbincUnits ----
+//                    orbincUnits.setText("deg");
+//                    nonsiderealPW.add(orbincUnits, new GridBagConstraints(2, 3, 1, 1, 0.0, 0.0,
+//                        GridBagConstraints.WEST, GridBagConstraints.NONE,
+//                        new Insets(6, 3, 0, 11), 0, 0));
+//
+//                    //---- longascnodeUnits ----
+//                    longascnodeUnits.setText("deg");
+//                    nonsiderealPW.add(longascnodeUnits, new GridBagConstraints(2, 4, 1, 1, 0.0, 0.0,
+//                        GridBagConstraints.WEST, GridBagConstraints.NONE,
+//                        new Insets(6, 3, 0, 11), 0, 0));
+//
+//                    //---- longofperiUnits ----
+//                    longofperiUnits.setText("deg");
+//                    nonsiderealPW.add(longofperiUnits, new GridBagConstraints(2, 5, 1, 1, 0.0, 0.0,
+//                        GridBagConstraints.WEST, GridBagConstraints.NONE,
+//                        new Insets(6, 3, 0, 11), 0, 0));
+//
+//                    //---- argofperiUnits ----
+//                    argofperiUnits.setText("deg");
+//                    nonsiderealPW.add(argofperiUnits, new GridBagConstraints(2, 6, 1, 1, 0.0, 0.0,
+//                        GridBagConstraints.WEST, GridBagConstraints.NONE,
+//                        new Insets(6, 3, 0, 11), 0, 0));
+//
+//                    //---- meandistUnits ----
+//                    meandistUnits.setVisible(false);
+//                    meandistUnits.setText("AU");
+//                    nonsiderealPW.add(meandistUnits, new GridBagConstraints(2, 10, 1, 1, 0.0, 0.0,
+//                        GridBagConstraints.WEST, GridBagConstraints.NONE,
+//                        new Insets(0, 3, 0, 11), 0, 0));
+//
+//                    //---- peridistUnits ----
+//                    peridistUnits.setText("AU");
+//                    nonsiderealPW.add(peridistUnits, new GridBagConstraints(5, 2, 1, 1, 0.0, 0.0,
+//                        GridBagConstraints.WEST, GridBagConstraints.NONE,
+//                        new Insets(6, 3, 0, 11), 0, 0));
+//
+//                    //---- eccentricityUnits ----
+//                    eccentricityUnits.setRequestFocusEnabled(true);
+//                    eccentricityUnits.setText("");
+//                    nonsiderealPW.add(eccentricityUnits, new GridBagConstraints(5, 3, 1, 1, 0.0, 0.0,
+//                        GridBagConstraints.WEST, GridBagConstraints.NONE,
+//                        new Insets(0, 0, 0, 11), 0, 0));
+//
+//                    //---- meanlongUnits ----
+//                    meanlongUnits.setText("deg");
+//                    nonsiderealPW.add(meanlongUnits, new GridBagConstraints(5, 4, 1, 1, 0.0, 0.0,
+//                        GridBagConstraints.WEST, GridBagConstraints.NONE,
+//                        new Insets(6, 3, 0, 11), 0, 0));
+//
+//                    //---- meananomUnits ----
+//                    meananomUnits.setText("deg");
+//                    nonsiderealPW.add(meananomUnits, new GridBagConstraints(5, 5, 1, 1, 0.0, 0.0,
+//                        GridBagConstraints.WEST, GridBagConstraints.NONE,
+//                        new Insets(6, 3, 0, 11), 0, 0));
+//
+//                    //---- dailymotUnits ----
+//                    dailymotUnits.setVisible(false);
+//                    dailymotUnits.setText("deg");
+//                    nonsiderealPW.add(dailymotUnits, new GridBagConstraints(5, 6, 1, 1, 0.0, 0.0,
+//                        GridBagConstraints.WEST, GridBagConstraints.NONE,
+//                        new Insets(0, 3, 0, 11), 0, 0));
+//
+//                    //---- epochofperiUnits ----
+//                    epochofperiUnits.setVisible(false);
+//                    epochofperiUnits.setText("JD");
+//                    nonsiderealPW.add(epochofperiUnits, new GridBagConstraints(5, 10, 1, 1, 0.0, 0.0,
+//                        GridBagConstraints.WEST, GridBagConstraints.NONE,
+//                        new Insets(0, 3, 0, 11), 0, 0));
+//
+//                    //---- epochofelLabel ----
+//                    epochofelLabel.setText("epochofel:");
+//                    nonsiderealPW.add(epochofelLabel, new GridBagConstraints(0, 2, 1, 1, 0.0, 0.0,
+//                        GridBagConstraints.EAST, GridBagConstraints.NONE,
+//                        new Insets(6, 11, 0, 0), 0, 0));
+//
+//                    //---- epochofel ----
+//                    epochofel.setText("");
+//                    nonsiderealPW.add(epochofel, new GridBagConstraints(1, 2, 1, 1, 1.0, 0.0,
+//                        GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
+//                        new Insets(6, 5, 0, 0), 0, 0));
+//
+//                    //---- peridistLabel ----
+//                    peridistLabel.setText("peridist:");
+//                    nonsiderealPW.add(peridistLabel, new GridBagConstraints(3, 2, 1, 1, 0.0, 0.0,
+//                        GridBagConstraints.EAST, GridBagConstraints.NONE,
+//                        new Insets(6, 11, 0, 0), 0, 0));
+//
+//                    //---- peridist ----
+//                    peridist.setText("");
+//                    nonsiderealPW.add(peridist, new GridBagConstraints(4, 2, 1, 1, 1.0, 0.0,
+//                        GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
+//                        new Insets(6, 5, 0, 0), 0, 0));
+//
+//                    //---- orbincLabel ----
+//                    orbincLabel.setText("orbinc:");
+//                    nonsiderealPW.add(orbincLabel, new GridBagConstraints(0, 3, 1, 1, 0.0, 0.0,
+//                        GridBagConstraints.EAST, GridBagConstraints.NONE,
+//                        new Insets(6, 11, 0, 0), 0, 0));
+//
+//                    //---- orbinc ----
+//                    orbinc.setText("");
+//                    nonsiderealPW.add(orbinc, new GridBagConstraints(1, 3, 1, 1, 1.0, 0.0,
+//                        GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
+//                        new Insets(6, 5, 0, 0), 0, 0));
+//
+//                    //---- eccentricityLabel ----
+//                    eccentricityLabel.setText("eccentricity:");
+//                    nonsiderealPW.add(eccentricityLabel, new GridBagConstraints(3, 3, 1, 1, 0.0, 0.0,
+//                        GridBagConstraints.EAST, GridBagConstraints.NONE,
+//                        new Insets(6, 11, 0, 0), 0, 0));
+//
+//                    //---- eccentricity ----
+//                    eccentricity.setText("");
+//                    nonsiderealPW.add(eccentricity, new GridBagConstraints(4, 3, 1, 1, 1.0, 0.0,
+//                        GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
+//                        new Insets(6, 5, 0, 0), 0, 0));
+//
+//                    //---- longascnodeLabel ----
+//                    longascnodeLabel.setText("longascnode:");
+//                    nonsiderealPW.add(longascnodeLabel, new GridBagConstraints(0, 4, 1, 1, 0.0, 0.0,
+//                        GridBagConstraints.EAST, GridBagConstraints.NONE,
+//                        new Insets(6, 11, 0, 0), 0, 0));
+//
+//                    //---- longascnode ----
+//                    longascnode.setText("");
+//                    nonsiderealPW.add(longascnode, new GridBagConstraints(1, 4, 1, 1, 1.0, 0.0,
+//                        GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
+//                        new Insets(6, 5, 0, 0), 0, 0));
+//
+//                    //---- meanlongLabel ----
+//                    meanlongLabel.setText("meanlong:");
+//                    nonsiderealPW.add(meanlongLabel, new GridBagConstraints(3, 4, 1, 1, 0.0, 0.0,
+//                        GridBagConstraints.EAST, GridBagConstraints.NONE,
+//                        new Insets(6, 11, 0, 0), 0, 0));
+//
+//                    //---- meanlong ----
+//                    meanlong.setText("");
+//                    nonsiderealPW.add(meanlong, new GridBagConstraints(4, 4, 1, 1, 1.0, 0.0,
+//                        GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
+//                        new Insets(6, 5, 0, 0), 0, 0));
+//
+//                    //---- longofperiLabel ----
+//                    longofperiLabel.setText("longofperi:");
+//                    nonsiderealPW.add(longofperiLabel, new GridBagConstraints(0, 5, 1, 1, 0.0, 0.0,
+//                        GridBagConstraints.EAST, GridBagConstraints.NONE,
+//                        new Insets(6, 11, 0, 0), 0, 0));
+//
+//                    //---- longofperi ----
+//                    longofperi.setText("");
+//                    nonsiderealPW.add(longofperi, new GridBagConstraints(1, 5, 1, 1, 1.0, 0.0,
+//                        GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
+//                        new Insets(6, 5, 0, 0), 0, 0));
+//
+//                    //---- meananomLabel ----
+//                    meananomLabel.setText("meananom:");
+//                    nonsiderealPW.add(meananomLabel, new GridBagConstraints(3, 5, 1, 1, 0.0, 0.0,
+//                        GridBagConstraints.EAST, GridBagConstraints.NONE,
+//                        new Insets(6, 11, 0, 0), 0, 0));
+//
+//                    //---- meananom ----
+//                    meananom.setText("");
+//                    nonsiderealPW.add(meananom, new GridBagConstraints(4, 5, 1, 1, 1.0, 0.0,
+//                        GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
+//                        new Insets(6, 5, 0, 1), 0, 0));
+//
+//                    //---- argofperiLabel ----
+//                    argofperiLabel.setVisible(false);
+//                    argofperiLabel.setText("argofperi:");
+//                    nonsiderealPW.add(argofperiLabel, new GridBagConstraints(0, 6, 1, 1, 0.0, 0.0,
+//                        GridBagConstraints.EAST, GridBagConstraints.NONE,
+//                        new Insets(6, 11, 0, 0), 0, 0));
+//
+//                    //---- argofperi ----
+//                    argofperi.setVisible(false);
+//                    argofperi.setText("");
+//                    nonsiderealPW.add(argofperi, new GridBagConstraints(1, 6, 1, 1, 1.0, 0.0,
+//                        GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
+//                        new Insets(6, 5, 0, 0), 0, 0));
+//
+//                    //---- dailymotLabel ----
+//                    dailymotLabel.setVisible(false);
+//                    dailymotLabel.setText("dailymot:");
+//                    nonsiderealPW.add(dailymotLabel, new GridBagConstraints(3, 6, 1, 1, 0.0, 0.0,
+//                        GridBagConstraints.EAST, GridBagConstraints.NONE,
+//                        new Insets(6, 11, 0, 0), 0, 0));
+//
+//                    //---- dailymot ----
+//                    dailymot.setVisible(false);
+//                    dailymot.setText("");
+//                    nonsiderealPW.add(dailymot, new GridBagConstraints(4, 6, 1, 1, 1.0, 0.0,
+//                        GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
+//                        new Insets(6, 5, 0, 1), 0, 0));
+//
+//                    //---- meandistLabel ----
+//                    meandistLabel.setVisible(false);
+//                    meandistLabel.setText("meandist:");
+//                    nonsiderealPW.add(meandistLabel, new GridBagConstraints(0, 10, 1, 1, 0.0, 0.0,
+//                        GridBagConstraints.EAST, GridBagConstraints.NONE,
+//                        new Insets(6, 11, 0, 0), 0, 0));
+//
+//                    //---- meandist ----
+//                    meandist.setVisible(false);
+//                    meandist.setText("");
+//                    nonsiderealPW.add(meandist, new GridBagConstraints(1, 10, 1, 1, 1.0, 0.0,
+//                        GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
+//                        new Insets(6, 5, 0, 0), 0, 0));
+//
+//                    //---- epochofperiLabel ----
+//                    epochofperiLabel.setVisible(false);
+//                    epochofperiLabel.setText("epochofperi:");
+//                    nonsiderealPW.add(epochofperiLabel, new GridBagConstraints(3, 10, 1, 1, 0.0, 0.0,
+//                        GridBagConstraints.EAST, GridBagConstraints.NONE,
+//                        new Insets(6, 11, 0, 0), 0, 0));
+//
+//                    //---- epochofperi ----
+//                    epochofperi.setVisible(false);
+//                    epochofperi.setText("");
+//                    nonsiderealPW.add(epochofperi, new GridBagConstraints(4, 10, 1, 1, 1.0, 0.0,
+//                        GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
+//                        new Insets(6, 5, 0, 1), 0, 0));
+//
+//                    //======== orbitalElementFormatPanel ========
+//                    {
+//                        orbitalElementFormatPanel.setLayout(new FlowLayout());
+//
+//                        //---- orbitalElementFormatLabel ----
+//                        orbitalElementFormatLabel.setText("Orbital Element Format:");
+//                        orbitalElementFormatPanel.add(orbitalElementFormatLabel);
+//                        orbitalElementFormatPanel.add(orbitalElementFormat);
+//                    }
+//                    nonsiderealPW.add(orbitalElementFormatPanel, new GridBagConstraints(0, 0, 6, 1, 0.0, 0.0,
+//                        GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL,
+//                        new Insets(0, 0, 0, 0), 0, 0));
+//
+//                    //======== planetsPanel ========
+//                    {
+//                        planetsPanel.setLayout(new FormLayout(
+//                            new ColumnSpec[] {
+//                                new ColumnSpec(ColumnSpec.FILL, Sizes.DEFAULT, FormSpec.DEFAULT_GROW),
+//                                new ColumnSpec(ColumnSpec.LEFT, Sizes.DLUX9, FormSpec.NO_GROW),
+//                                FormFactory.DEFAULT_COLSPEC,
+//                                new ColumnSpec(ColumnSpec.LEFT, Sizes.DLUX9, FormSpec.NO_GROW),
+//                                FormFactory.DEFAULT_COLSPEC,
+//                                new ColumnSpec(ColumnSpec.LEFT, Sizes.DLUX9, FormSpec.NO_GROW),
+//                                FormFactory.DEFAULT_COLSPEC,
+//                                FormFactory.LABEL_COMPONENT_GAP_COLSPEC,
+//                                new ColumnSpec(ColumnSpec.FILL, Sizes.DEFAULT, FormSpec.DEFAULT_GROW)
+//                            },
+//                            new RowSpec[] {
+//                                FormFactory.DEFAULT_ROWSPEC,
+//                                FormFactory.LINE_GAP_ROWSPEC,
+//                                new RowSpec(RowSpec.CENTER, Sizes.DEFAULT, FormSpec.DEFAULT_GROW),
+//                                FormFactory.LINE_GAP_ROWSPEC,
+//                                new RowSpec(RowSpec.FILL, Sizes.DEFAULT, FormSpec.DEFAULT_GROW),
+//                                FormFactory.PARAGRAPH_GAP_ROWSPEC,
+//                                new RowSpec(RowSpec.FILL, Sizes.DEFAULT, FormSpec.NO_GROW),
+//                                FormFactory.PARAGRAPH_GAP_ROWSPEC,
+//                                new RowSpec(RowSpec.FILL, Sizes.DEFAULT, FormSpec.NO_GROW)
+//                            }));
+//
+//                        //---- label1 ----
+//                        label1.setText("Select Solar System Object");
+//                        planetsPanel.add(label1, cc.xywh(3, 1, 5, 1, CellConstraints.CENTER, CellConstraints.DEFAULT));
+//
+//                        //---- radioButton1 ----
+//                        radioButton1.setText("Moon");
+//                        radioButton1.setSelected(true);
+//                        planetsPanel.add(radioButton1, cc.xy(3, 5));
+//
+//                        //---- radioButton2 ----
+//                        radioButton2.setText("Mercury");
+//                        planetsPanel.add(radioButton2, cc.xy(5, 5));
+//
+//                        //---- radioButton3 ----
+//                        radioButton3.setText("Venus");
+//                        planetsPanel.add(radioButton3, cc.xy(7, 5));
+//
+//                        //---- radioButton4 ----
+//                        radioButton4.setText("Mars");
+//                        planetsPanel.add(radioButton4, cc.xy(3, 7));
+//
+//                        //---- radioButton5 ----
+//                        radioButton5.setText("Jupiter");
+//                        planetsPanel.add(radioButton5, cc.xy(5, 7));
+//
+//                        //---- radioButton6 ----
+//                        radioButton6.setText("Saturn");
+//                        planetsPanel.add(radioButton6, cc.xy(7, 7));
+//
+//                        //---- radioButton7 ----
+//                        radioButton7.setText("Uranus");
+//                        planetsPanel.add(radioButton7, cc.xy(3, 9));
+//
+//                        //---- radioButton8 ----
+//                        radioButton8.setText("Neptune");
+//                        planetsPanel.add(radioButton8, cc.xy(5, 9));
+//
+//                        //---- radioButton9 ----
+//                        radioButton9.setText("Pluto");
+//                        planetsPanel.add(radioButton9, cc.xy(7, 9));
+//                    }
+//                    nonsiderealPW.add(planetsPanel, new GridBagConstraints(0, 7, 6, 1, 0.0, 0.0,
+//                        GridBagConstraints.CENTER, GridBagConstraints.BOTH,
+//                        new Insets(0, 0, 0, 0), 0, 0));
 
                     //======== panel1 ========
                     {
@@ -733,9 +733,9 @@ class TelescopeForm extends JPanel {
 //                        timeRangePlotButton.setToolTipText("Plot the ephemeris of this object starting at the given time.\nThe ephemeris will be obtained from JPL Horizons if needed. ");
 //                        panel1.add(timeRangePlotButton, cc.xy(15, 1));
                     }
-                    nonsiderealPW.add(panel1, new GridBagConstraints(0, 9, 6, 1, 0.0, 0.0,
-                        GridBagConstraints.CENTER, GridBagConstraints.BOTH,
-                        new Insets(0, 0, 0, 0), 0, 0));
+//                    nonsiderealPW.add(panel1, new GridBagConstraints(0, 9, 6, 1, 0.0, 0.0,
+//                        GridBagConstraints.CENTER, GridBagConstraints.BOTH,
+//                        new Insets(0, 0, 0, 0), 0, 0));
                 }
             }
             coordinatesPanel.add(extrasFolder, BorderLayout.SOUTH);
@@ -796,7 +796,7 @@ class TelescopeForm extends JPanel {
     TextBoxWidget xaxis;
     TextBoxWidget yaxis;
     JPanel extrasFolder;
-    JPanel nonsiderealPW;
+//    JPanel nonsiderealPW;
     JLabel epochofelUnits;
     JLabel orbincUnits;
     JLabel longascnodeUnits;
@@ -834,7 +834,7 @@ class TelescopeForm extends JPanel {
     JLabel epochofperiLabel;
     NumberBoxWidget epochofperi;
     DropDownListBoxWidget orbitalElementFormat;
-    JPanel planetsPanel;
+//    JPanel planetsPanel;
 //    JCalendarPopup calendarDate;
 //    JComboBox<TimeConfig> calendarTime;
 //    JButton updateRaDecButton;
