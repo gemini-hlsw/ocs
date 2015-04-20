@@ -94,7 +94,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 
     // More constants, but they need access to `this` so we assign in the ctor
     private final TelescopeForm            _w;
-    private final NonSiderealTargetSupport _nonSiderealTargetSup;
+//    private final NonSiderealTargetSupport _nonSiderealTargetSup;
     private final TimeDocument             _timeDocument;
 //
     // Stuff that varies with time
@@ -108,7 +108,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 
         // Finish initializing our constants
         _w = new TelescopeForm(this);
-        _nonSiderealTargetSup = new NonSiderealTargetSupport(_w, _curPos);
+//        _nonSiderealTargetSup = new NonSiderealTargetSupport(_w, _curPos);
         _timeDocument         = new TimeDocument((JTextField) _w.calendarTime.getEditor().getEditorComponent());
 
         // Move the tag menu up onto the menu bar, with a label
@@ -419,8 +419,8 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
             }
         });
 
-        _nonSiderealTargetSup.initOrbitalElementFormatChoices();
-        _nonSiderealTargetSup.initListeners(nonsiderealTextBoxWidgetWatcher);
+//        _nonSiderealTargetSup.initOrbitalElementFormatChoices();
+//        _nonSiderealTargetSup.initListeners(nonsiderealTextBoxWidgetWatcher);
 
         final JRadioButton[] buttons = _w.planetButtons;
         for (JRadioButton button : buttons) {
@@ -509,7 +509,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 //                    _trackingEditor.edit(ctx, _curPos, getNode());
 
                     // Nonsidereal
-                    _nonSiderealTargetSup.updatePos(_curPos);
+//                    _nonSiderealTargetSup.updatePos(_curPos);
 //                    _nonsideMagEditor.edit(ctx, _curPos, getNode());
 
                     // Detail
@@ -947,12 +947,12 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 
                 _curPos = selTarget;
 
-                // Sidereal
+//              // Sidereal
 //                _siderealEditor.edit(ctx, selTarget, getNode());
 //                _trackingEditor.edit(ctx, selTarget, getNode());
-
-                // Nonsidereal
-                _nonSiderealTargetSup.updatePos(_curPos);
+//
+//              // Nonsidereal
+//                _nonSiderealTargetSup.updatePos(_curPos);
 //                _nonsideMagEditor.edit(ctx, selTarget, getNode());
 
                 if (_curPos != null) {
@@ -1078,12 +1078,12 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 
                         _curPos = target;
 
-                        // Sidereal
+//                        // Sidereal
 //                        _siderealEditor.edit(ctx, target, getNode());
 //                        _trackingEditor.edit(ctx, target, getNode());
-
-                        // Nonsidereal
-                        _nonSiderealTargetSup.updatePos(_curPos);
+//
+//                        // Nonsidereal
+//                        _nonSiderealTargetSup.updatePos(_curPos);
 //                        _nonsideMagEditor.edit(ctx, target, getNode());
 
                         if (_curPos != null) {
@@ -1326,16 +1326,16 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 
         if (isNonSidereal) {
             _w.system.setValue(NON_SIDEREAL_TARGET);
-            _nonSiderealTargetSup.showOrbitalElementFormat();
+//            _nonSiderealTargetSup.showOrbitalElementFormat();
         } else {
             _w.system.setValue(_curPos.getTarget().getTag().tccName);
         }
 
-        // update the display in the tabs
-        if (_curPos.getTarget() instanceof NonSiderealTarget) {
-            final NonSiderealTarget nst = (NonSiderealTarget) _curPos.getTarget();
-            _nonSiderealTargetSup.showNonSiderealTarget(nst);
-        }
+//        // update the display in the tabs
+//        if (_curPos.getTarget() instanceof NonSiderealTarget) {
+//            final NonSiderealTarget nst = (NonSiderealTarget) _curPos.getTarget();
+//            _nonSiderealTargetSup.showNonSiderealTarget(nst);
+//        }
 
         // Update target details and force enabled state update for the detail editor, whose
         // structure may have changed (thus making the cached "enabled" value unreliable).
@@ -1576,7 +1576,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                         _curPos = selTarget;
 //                        _siderealEditor.edit(ctx, selTarget, getNode());
 //                        _trackingEditor.edit(ctx, selTarget, getNode());
-                        _nonSiderealTargetSup.updatePos(_curPos);
+//                        _nonSiderealTargetSup.updatePos(_curPos);
 //                        _nonsideMagEditor.edit(ctx, selTarget, getNode());
                         if (_curPos != null) {
                             _curPos.addWatcher(posWatcher);
@@ -1843,26 +1843,26 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         }
     };
 
-    @SuppressWarnings("FieldCanBeLocal")
-    private final TextBoxWidgetWatcher nonsiderealTextBoxWidgetWatcher = new TextBoxWidgetWatcher() {
-        private void updateConicTarget(NumberBoxWidget nbw) {
-            final ConicTarget target = (ConicTarget) _curPos.getTarget();
-            _ignorePosUpdate = true;
-            try {
-                _nonSiderealTargetSup.setConicPos(target, nbw);
-                _curPos.notifyOfGenericUpdate();
-                updateGuiding();
-            } finally {
-                _ignorePosUpdate = false;
-            }
-        }
-        public void textBoxKeyPress(TextBoxWidget tbw) {
-            updateConicTarget((NumberBoxWidget) tbw);
-        }
-        public void textBoxAction(TextBoxWidget tbw) {
-            updateConicTarget((NumberBoxWidget) tbw);
-        }
-    };
+//    @SuppressWarnings("FieldCanBeLocal")
+//    private final TextBoxWidgetWatcher nonsiderealTextBoxWidgetWatcher = new TextBoxWidgetWatcher() {
+//        private void updateConicTarget(NumberBoxWidget nbw) {
+//            final ConicTarget target = (ConicTarget) _curPos.getTarget();
+//            _ignorePosUpdate = true;
+//            try {
+//                _nonSiderealTargetSup.setConicPos(target, nbw);
+//                _curPos.notifyOfGenericUpdate();
+//                updateGuiding();
+//            } finally {
+//                _ignorePosUpdate = false;
+//            }
+//        }
+//        public void textBoxKeyPress(TextBoxWidget tbw) {
+//            updateConicTarget((NumberBoxWidget) tbw);
+//        }
+//        public void textBoxAction(TextBoxWidget tbw) {
+//            updateConicTarget((NumberBoxWidget) tbw);
+//        }
+//    };
 
 }
 
