@@ -87,9 +87,9 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
     // Instance constants
     private final AgsContextPublisher _agsPub           = new AgsContextPublisher();
 //    private final SiderealEditor      _siderealEditor   = new SiderealEditor();
-    private final TrackingEditor      _trackingEditor   = new TrackingEditor();
-    private final MagnitudeEditor     _nonsideMagEditor = new MagnitudeEditor();
-    private final JToggleButton       _trackingButton   = new TrackingButton();
+//    private final TrackingEditor      _trackingEditor   = new TrackingEditor();
+//    private final MagnitudeEditor     _nonsideMagEditor = new MagnitudeEditor();
+//    private final JToggleButton       _trackingButton   = new TrackingButton();
     private final TargetDetailPanel   _detailEditor     = new TargetDetailPanel();
 
     // More constants, but they need access to `this` so we assign in the ctor
@@ -143,14 +143,14 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                 fill = HORIZONTAL;
                 insets = new Insets(0, 0, 5, 20);
             }});
-            add(_nonsideMagEditor.getComponent(), new GridBagConstraints() {{
-                gridx = 0;
-                gridy = 1;
-                anchor = WEST;
-                fill = BOTH;
-                weighty = 1.0;
-                insets = new Insets(0, 0, 0, 20);
-            }});
+//            add(_nonsideMagEditor.getComponent(), new GridBagConstraints() {{
+//                gridx = 0;
+//                gridy = 1;
+//                anchor = WEST;
+//                fill = BOTH;
+//                weighty = 1.0;
+//                insets = new Insets(0, 0, 0, 20);
+//            }});
             add(_w.nonsiderealPW, new GridBagConstraints() {{
                 gridx = 1;
                 gridy = 0;
@@ -179,41 +179,41 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                 fill = BOTH;
                 anchor = NORTHWEST;
             }});
-            final JPanel buttonsPanel = new JPanel() {{
-                setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
-                add(_trackingButton);
-            }};
-            add(buttonsPanel, new GridBagConstraints() {{
-                gridx = 1;
-                gridy = 0;
-                anchor = NORTH;
-                insets = new Insets(0, 1, 0, 0);
-            }});
-            final JPanel panel = new JPanel(new BorderLayout()) {{
-                setBackground(LIGHT_GREY);
-                setBorder(BorderFactory.createCompoundBorder(
-                        BorderFactory.createLineBorder(DARKER_BG_GREY),
-                        BorderFactory.createEmptyBorder(5, 5, 5, 5)
-                ));
-                add(_trackingEditor.getComponent(), BorderLayout.CENTER);
-            }};
-            // When the tracking details button is pressed, show the tracking
-            // details panel to the side of the normal content _w.coordinatesPanel
-            _trackingButton.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    final JToggleButton tb = (JToggleButton) e.getSource();
-                    if (tb.isSelected()) {
-                        tb.setBackground(LIGHT_ORANGE);
-                        content.add(panel, BorderLayout.EAST);
-                        content.validate();
-                    } else {
-                        tb.setBackground(VERY_LIGHT_GREY);
-                        content.remove(panel);
-                        content.validate();
-                    }
-                }
-            });
+//            final JPanel buttonsPanel = new JPanel() {{
+//                setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
+//                add(_trackingButton);
+//            }};
+//            add(buttonsPanel, new GridBagConstraints() {{
+//                gridx = 1;
+//                gridy = 0;
+//                anchor = NORTH;
+//                insets = new Insets(0, 1, 0, 0);
+//            }});
+//            final JPanel panel = new JPanel(new BorderLayout()) {{
+//                setBackground(LIGHT_GREY);
+//                setBorder(BorderFactory.createCompoundBorder(
+//                        BorderFactory.createLineBorder(DARKER_BG_GREY),
+//                        BorderFactory.createEmptyBorder(5, 5, 5, 5)
+//                ));
+//                add(_trackingEditor.getComponent(), BorderLayout.CENTER);
+//            }};
+//          // When the tracking details button is pressed, show the tracking
+//          // details panel to the side of the normal content _w.coordinatesPanel
+//            _trackingButton.addActionListener(new ActionListener() {
+//                @Override
+//                public void actionPerformed(ActionEvent e) {
+//                    final JToggleButton tb = (JToggleButton) e.getSource();
+//                    if (tb.isSelected()) {
+//                        tb.setBackground(LIGHT_ORANGE);
+//                        content.add(panel, BorderLayout.EAST);
+//                        content.validate();
+//                    } else {
+//                        tb.setBackground(VERY_LIGHT_GREY);
+//                        content.remove(panel);
+//                        content.validate();
+//                    }
+//                }
+//            });
 
         }};
         _w.coordinatesPanel.setBorder(BorderFactory.createCompoundBorder(
@@ -506,11 +506,11 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 
                     // Sidereal
 //                    _siderealEditor.edit(ctx, _curPos, getNode());
-                    _trackingEditor.edit(ctx, _curPos, getNode());
+//                    _trackingEditor.edit(ctx, _curPos, getNode());
 
                     // Nonsidereal
                     _nonSiderealTargetSup.updatePos(_curPos);
-                    _nonsideMagEditor.edit(ctx, _curPos, getNode());
+//                    _nonsideMagEditor.edit(ctx, _curPos, getNode());
 
                     // Detail
                     _detailEditor.edit(ctx, _curPos, getNode());
@@ -949,11 +949,11 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 
                 // Sidereal
 //                _siderealEditor.edit(ctx, selTarget, getNode());
-                _trackingEditor.edit(ctx, selTarget, getNode());
+//                _trackingEditor.edit(ctx, selTarget, getNode());
 
                 // Nonsidereal
                 _nonSiderealTargetSup.updatePos(_curPos);
-                _nonsideMagEditor.edit(ctx, selTarget, getNode());
+//                _nonsideMagEditor.edit(ctx, selTarget, getNode());
 
                 if (_curPos != null) {
                     _curPos.addWatcher(posWatcher);
@@ -1080,11 +1080,11 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 
                         // Sidereal
 //                        _siderealEditor.edit(ctx, target, getNode());
-                        _trackingEditor.edit(ctx, target, getNode());
+//                        _trackingEditor.edit(ctx, target, getNode());
 
                         // Nonsidereal
                         _nonSiderealTargetSup.updatePos(_curPos);
-                        _nonsideMagEditor.edit(ctx, target, getNode());
+//                        _nonsideMagEditor.edit(ctx, target, getNode());
 
                         if (_curPos != null) {
                             _curPos.addWatcher(posWatcher);
@@ -1111,9 +1111,9 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                         _w.objectGBW.setVisible(false);
                         _w.extrasFolder.setVisible(false);
                         _w.guideGroupPanel.setVisible(true);
-                        if (_trackingButton.isSelected())
-                            _trackingButton.doClick();
-                        _trackingButton.setVisible(false);
+//                        if (_trackingButton.isSelected())
+//                            _trackingButton.doClick();
+//                        _trackingButton.setVisible(false);
 
                         // N.B. don't trim, otherwise user can't include space in group name
                         final String name = _curGroup.getName().getOrElse("");
@@ -1254,7 +1254,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         final boolean editable = OTOptions.areRootAndCurrentObsIfAnyEditable(getProgram(), getContextObservation());
         _w.objectGBW.setEnabled(editable);
         _w.guideGroupPanel.setVisible(false);
-        _trackingButton.setVisible(!isNonSidereal);
+//        _trackingButton.setVisible(!isNonSidereal);
 
         // Get all the legally available guiders in the current context.
         final Set<GuideProbe> avail = GuideProbeUtil.instance.getAvailableGuiders(getContextObservation());
@@ -1304,15 +1304,15 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         final String tag = isNonSidereal ? "nonsidereal" : "sidereal";
         cl.show(_w.extrasFolder, tag);
 
-        if (isNonSidereal) {
-            // Tracking applies to sidereal targets.  If shown, hide.
-            if (_trackingButton.isSelected()) _trackingButton.doClick();
-        }
-        _trackingButton.setVisible(!isNonSidereal);
-
+//        if (isNonSidereal) {
+//            // Tracking applies to sidereal targets.  If shown, hide.
+//            if (_trackingButton.isSelected()) _trackingButton.doClick();
+//        }
+//        _trackingButton.setVisible(!isNonSidereal);
+//
 //        //disable the nameServer if we are a non-sidereal target
 //        _w.nameServer.setEnabled(!isNonSidereal);
-
+//
 //        //disable the resolve name for Named Targets
 //        _w.resolveButton.setEnabled(!(_curPos.getTarget() instanceof NamedTarget));
 
@@ -1575,9 +1575,9 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                         if (_curPos != null) _curPos.deleteWatcher(posWatcher);
                         _curPos = selTarget;
 //                        _siderealEditor.edit(ctx, selTarget, getNode());
-                        _trackingEditor.edit(ctx, selTarget, getNode());
+//                        _trackingEditor.edit(ctx, selTarget, getNode());
                         _nonSiderealTargetSup.updatePos(_curPos);
-                        _nonsideMagEditor.edit(ctx, selTarget, getNode());
+//                        _nonsideMagEditor.edit(ctx, selTarget, getNode());
                         if (_curPos != null) {
                             _curPos.addWatcher(posWatcher);
                             refreshAll();
