@@ -122,7 +122,7 @@ class SingleProbeStrategySpec extends Specification with NoTimeConversions {
 
       val selection = Await.result(strategy.select(ctx, magTable), 10.seconds)
 
-      verifyGuideStarSelection(strategy, ctx, selection, "288-000439", GmosOiwfsGuideProbe.instance)
+      verifyGuideStarSelection(strategy, ctx, selection, "288-000438", GmosOiwfsGuideProbe.instance)
     }
     "find a guide star for GMOS-N+PWFS2, OCSADV-255" in {
       // M1 target

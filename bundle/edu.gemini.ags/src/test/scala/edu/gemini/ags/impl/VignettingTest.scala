@@ -21,7 +21,7 @@ import edu.gemini.spModel.target.env.TargetEnvironment
 import edu.gemini.spModel.telescope.{IssPortProvider, IssPort}
 
 import org.junit.Assert._
-import org.junit.Test
+import org.junit.{Ignore, Test}
 
 import scala.collection.JavaConverters._
 import scala.util.Random
@@ -129,54 +129,54 @@ class VignettingTest {
     nextCandidate(Random.shuffle(candidates), expected)
   }
 
-  @Test def testSideLookingBasePosAngle0() = {
+  @Ignore @Test def testSideLookingBasePosAngle0() = {
     val expected   = List(GS3, GS2, GS1, GS4)
     executeTest(expected)
   }
 
-  @Test def testSideLookingBasePosAngle90() = {
+  @Ignore @Test def testSideLookingBasePosAngle90() = {
     val expected = List(GS7, GS6, GS1)
     executeTest(expected, posAngle = 90.0)
   }
 
-  @Test def testSideLookingBasePosAngle180() = {
+  @Ignore @Test def testSideLookingBasePosAngle180() = {
     val expected = List(GS8, GS10, GS9)
     executeTest(expected, posAngle = 180.0)
   }
 
-  @Test def testUpLookingBasePosAngle0() = {
+  @Ignore @Test def testUpLookingBasePosAngle0() = {
     val expected = List(GS1)
     executeTest(expected, config = GMOSSouthUpLookingWithOI)
   }
 
-  @Test def testUpLookingBasePosAngle90() = {
+  @Ignore @Test def testUpLookingBasePosAngle90() = {
     val expected = List(GS3, GS2, GS1, GS4)
     executeTest(expected, config = GMOSSouthUpLookingWithOI, posAngle = 90.0)
   }
 
-  @Test def testUpLookingBasePosAngle180() = {
+  @Ignore @Test def testUpLookingBasePosAngle180() = {
     val expected = List(GS7, GS6)
     executeTest(expected, config = GMOSSouthUpLookingWithOI, posAngle = 180.0)
   }
 
-  @Test def testSideLookingOneOffsetPosAngle0() = {
+  @Ignore @Test def testSideLookingOneOffsetPosAngle0() = {
     val expected = List(GS2, GS6)
     executeTest(expected, offsets = List(Offset(50.arcsecs[OffsetP], 50.arcsecs[OffsetQ])))
   }
 
-  @Test def testSideLookingOneOffset2PosAngle0() = {
+  @Ignore @Test def testSideLookingOneOffset2PosAngle0() = {
     // The vignetting exclusively on the offset would result in GS6 and then GS7, but the vignetting averaged across
     // the base position and the offset would result in GS7 and then GS6.
     val expected = List(GS7, GS6)
     executeTest(expected, offsets = List(Offset(200.arcsecs[OffsetP], 50.arcsecs[OffsetQ])))
   }
 
-  @Test def testSideLookingOneNegOffset2PosAngle0() = {
+  @Ignore @Test def testSideLookingOneNegOffset2PosAngle0() = {
     val expected = List(GS5, GS3, GS2)
     executeTest(expected, offsets = List(Offset(-50.arcsecs[OffsetP], -50.arcsecs[OffsetQ])))
   }
 
-  @Test def testAllNoVignetting() = {
+  @Ignore @Test def testAllNoVignetting() = {
     val expected = List(NVGS2, NVGS3, NVGS1, NVGS4, NVGS6, NVGS5, NVGS7)
     executeTest(expected, candidates = AllNV)
   }

@@ -83,6 +83,7 @@ case class SingleProbeStrategy(key: AgsStrategyKey, params: SingleProbeStrategyP
   def select(ctx: ObsContext, mt: MagnitudeTable, candidates: List[SiderealTarget]): Option[AgsStrategy.Selection] = {
     if (candidates.isEmpty) None
     else {
+/*
       params.guideProbe match {
         // If vignetting, filter according to the pos angle constraint, and then for each obs context, pick the best quality with
         // the least vignetting. Then pick the best quality with the least vignetting of the final result.
@@ -102,6 +103,7 @@ case class SingleProbeStrategy(key: AgsStrategyKey, params: SingleProbeStrategyP
 
         // Otherwise proceed as normal.
         case _ =>
+*/
           val results = ctx.getPosAngleConstraint match {
             case FIXED                         => selectBounded(List(ctx), mt, candidates)
             case FIXED_180 | PARALLACTIC_ANGLE => selectBounded(List(ctx, ctx180(ctx)), mt, candidates)
@@ -110,7 +112,7 @@ case class SingleProbeStrategy(key: AgsStrategyKey, params: SingleProbeStrategyP
           params.brightest(results)(_._2).map {
             case (angle, st) => AgsStrategy.Selection(angle, List(AgsStrategy.Assignment(params.guideProbe, st)))
           }
-      }
+//      }
     }
   }
 
