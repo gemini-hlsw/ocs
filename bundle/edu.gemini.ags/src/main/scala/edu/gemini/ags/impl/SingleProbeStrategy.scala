@@ -94,7 +94,8 @@ case class SingleProbeStrategy(key: AgsStrategyKey, params: SingleProbeStrategyP
           }
           val bestPerCtx = for {
             (c, soList) <- results
-            rating      <- brightestByQualityAndVignetting(soList, mt, c, v, params)
+//            rating      <- brightestByQualityAndVignetting(soList, mt, c, v, params)
+            rating      <- brightestByQuality(soList, mt, c, v, params)
           } yield (c, rating)
           bestPerCtx.reduceOption(vignettingCtxOrder.min).map {
             case (c, (_, _, _, st)) => AgsStrategy.Selection(c.getPositionAngle.toNewModel, List(AgsStrategy.Assignment(params.guideProbe, st)))
@@ -211,6 +212,17 @@ object SingleProbeStrategy {
     }
     // TODO: Temporary code to help Andy with debugging. Remove.
     println("--- Analysis complete ---")
+
+    candidates.reduceOption(vignettingOrder.min)
+  }
+
+  def brightestByQuality(lst: List[SiderealTarget], mt: MagnitudeTable, ctx: ObsContext,
+                         probe: ValidatableGuideProbe,
+                         params: SingleProbeStrategyParams): Option[(AgsGuideQuality, Double, Option[Magnitude], SiderealTarget)] = {
+    val candidates = for {
+      st       <- lst
+      analysis <- AgsAnalysis.analysis(ctx, mt, probe, st, params.probeBands)
+    } yield (analysis.quality, 0.0, params.referenceMagnitude(st), st)
 
     candidates.reduceOption(vignettingOrder.min)
   }
