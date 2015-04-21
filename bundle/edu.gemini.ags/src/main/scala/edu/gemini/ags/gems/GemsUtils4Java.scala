@@ -32,7 +32,7 @@ object GemsUtils4Java {
    */
   def uniqueTargets(list: java.util.List[GemsCatalogSearchResults]): java.util.List[Target.SiderealTarget] = {
     import collection.breakOut
-    new java.util.ArrayList(list.asScala.map(_.results).flatten.groupBy(_.name).map(_._2.head)(breakOut).asJava)
+    new java.util.ArrayList(list.asScala.flatMap(_.results).groupBy(_.name).map(_._2.head)(breakOut).asJava)
   }
 
   def toOldBand(band: MagnitudeBand): skyobject.Magnitude.Band = band.toOldModel

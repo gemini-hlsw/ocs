@@ -26,12 +26,13 @@ public class GemsGuideStarSearchOptions {
         PPMXL_CADC("PPMXL@CADC", "PPMXL at CADC"),
         UCAC3_CDS("UCAC3@CDS", "UCAC3 at CDS"),
         UCAC3_CADC("UCAC3@CADC", "UCAC3 at CADC"),
+        UCAC4_GEMINI("UCAC4", "UCAC4 at Gemini"),
         NOMAD1_CDS("NOMAD1@CDS", "NOMAD1 at CDS"),
         NOMAD1_CADC("NOMAD1@CADC", "NOMAD1 at CADC"),
         USER_CATALOG("user", "User Catalog"),
         ;
 
-        public static CatalogChoice DEFAULT = UCAC3_CDS;
+        public static CatalogChoice DEFAULT = UCAC4_GEMINI;
 
         private String _displayValue;
         private String _catalogName;

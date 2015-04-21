@@ -25,7 +25,7 @@ class CandidateGuideStarsTableModel extends DefaultTableModel {
     // The NIR band is selected in the UI, the others are listed afterwards (UNUSED_BAND*).
     // Always including them in the table makes the SkyObjectFactory code easier later on.
     enum Cols {
-        CHECK, ID, R, NIR_BAND, RA, DEC, UNUSED_BAND1, UNUSED_BAND2
+        CHECK, ID, _r, R, UC, NIR_BAND, RA, DEC, UNUSED_BAND1, UNUSED_BAND2
     }
 
     // User interface model
@@ -55,7 +55,9 @@ class CandidateGuideStarsTableModel extends DefaultTableModel {
         Vector<String> columnNames = new Vector<>();
         columnNames.add(""); // checkbox column
         columnNames.add("Id");
+        columnNames.add("r'");
         columnNames.add("R");
+        columnNames.add("UC");
         columnNames.add(_nirBand);
         columnNames.add("RA");
         columnNames.add("Dec");
@@ -100,7 +102,7 @@ class CandidateGuideStarsTableModel extends DefaultTableModel {
             return Boolean.class;
         if (columnIndex == Cols.ID.ordinal())
             return Object.class;
-        if (columnIndex == Cols.R.ordinal() || columnIndex == Cols.NIR_BAND.ordinal()
+        if (columnIndex == Cols.R.ordinal() || columnIndex == Cols._r.ordinal() || columnIndex == Cols.UC.ordinal() || columnIndex == Cols.NIR_BAND.ordinal()
                 || columnIndex == Cols.UNUSED_BAND1.ordinal() || columnIndex == Cols.UNUSED_BAND2.ordinal())
             return Double.class;
         return String.class;

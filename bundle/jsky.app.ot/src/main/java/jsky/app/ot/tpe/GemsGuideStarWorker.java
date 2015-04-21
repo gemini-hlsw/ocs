@@ -5,7 +5,6 @@ import edu.gemini.ags.gems.mascot.Strehl;
 import edu.gemini.ags.gems.mascot.MascotProgress;
 import edu.gemini.catalog.votable.CatalogException;
 import edu.gemini.catalog.votable.RemoteBackend;
-import edu.gemini.catalog.votable.RemoteBackend$;
 import edu.gemini.pot.ModelConverters;
 import edu.gemini.skycalc.Angle;
 import edu.gemini.shared.skyobject.coords.HmsDegCoordinates;
@@ -27,9 +26,6 @@ import jsky.util.gui.SwingWorker;
 import jsky.util.gui.DialogUtil;
 import jsky.util.gui.ProgressPanel;
 import jsky.util.gui.StatusLogger;
-
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 import java.util.*;
 import java.util.concurrent.CancellationException;
@@ -68,12 +64,7 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
     public GemsGuideStarWorker() {
         ProgressPanel progressPanel = ProgressPanel.makeProgressPanel("GeMS Strehl Calculations",
                 TpeManager.create().getImageWidget());
-        progressPanel.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                interrupted = true;
-            }
-        });
+        progressPanel.addActionListener(e -> interrupted = true);
         init(progressPanel);
     }
 
@@ -200,11 +191,8 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
      * @param obsContext used to getthe current pos angle
      */
     private Set<edu.gemini.spModel.core.Angle> getPosAngles(ObsContext obsContext) {
-        Set<edu.gemini.spModel.core.Angle> posAngles = new TreeSet<>(new Comparator<edu.gemini.spModel.core.Angle>() {
-            @Override
-            public int compare(edu.gemini.spModel.core.Angle a1, edu.gemini.spModel.core.Angle a2) {
-                return Double.compare(a1.toDegrees(), a2.toDegrees());
-            }
+        Set<edu.gemini.spModel.core.Angle> posAngles = new TreeSet<>((a1, a2) -> {
+            return Double.compare(a1.toDegrees(), a2.toDegrees());
         });
 
         posAngles.add(GemsUtils4Java.toNewAngle(obsContext.getPositionAngle()));
