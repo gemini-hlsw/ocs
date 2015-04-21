@@ -145,7 +145,7 @@ class GemsVoTableCatalogSpec extends Specification with NoTimeConversions {
       val s2 = GemsCatalogSearchCriterion(key, criterion2)
       // Gets the offset from the largest offset distance (offset2 in this case)
       (~catalog.optimizeRadiusConstraint(List(s1, s2)).map(_.maxLimit) ~= (Angle.fromArcmin(15.0) + Angle.fromArcmin(13))) should beTrue
-        (~catalog.optimizeRadiusConstraint(List(s1, s2)).map(_.minLimit) ~= Angle.fromArcmin(2.0)) should beTrue
+      (~catalog.optimizeRadiusConstraint(List(s1, s2)).map(_.minLimit) ~= Angle.fromArcmin(2.0)) should beTrue
     }
   }
 }
