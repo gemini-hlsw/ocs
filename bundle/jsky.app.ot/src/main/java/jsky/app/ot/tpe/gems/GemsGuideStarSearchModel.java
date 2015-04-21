@@ -22,7 +22,7 @@ class GemsGuideStarSearchModel {
 
     private NirBandChoice _band;
     private AnalyseChoice _analyseChoice;
-    private boolean _reviewCanditatesBeforeSearch;
+    private boolean _reviewCandidatesBeforeSearch;
     private boolean _allowPosAngleAdjustments;
     private List<GemsCatalogSearchResults> _gemsCatalogSearchResults;
     private List<GemsGuideStars> _gemsGuideStars;
@@ -33,10 +33,6 @@ class GemsGuideStarSearchModel {
 
     public void setCatalog(CatalogChoice catalog) {
         _catalog = catalog;
-    }
-
-    public String getUserCatalogFileName() {
-        return _userCatalogFileName;
     }
 
     public void setUserCatalogFileName(String userCatalogFileName) {
@@ -67,12 +63,12 @@ class GemsGuideStarSearchModel {
         _analyseChoice = analyseChoice;
     }
 
-    public void setReviewCanditatesBeforeSearch(boolean reviewCanditatesBeforeSearch) {
-        _reviewCanditatesBeforeSearch = reviewCanditatesBeforeSearch;
+    public void setReviewCandidatesBeforeSearch(boolean reviewCanditatesBeforeSearch) {
+        _reviewCandidatesBeforeSearch = reviewCanditatesBeforeSearch;
     }
 
-    public boolean isReviewCanditatesBeforeSearch() {
-        return _reviewCanditatesBeforeSearch;
+    public boolean isReviewCandidatesBeforeSearch() {
+        return _reviewCandidatesBeforeSearch;
     }
 
     public void setAllowPosAngleAdjustments(boolean allowPosAngleAdjustments) {

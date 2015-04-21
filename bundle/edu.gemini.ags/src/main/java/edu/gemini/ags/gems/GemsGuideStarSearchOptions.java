@@ -132,10 +132,6 @@ public class GemsGuideStarSearchOptions {
         return instrument;
     }
 
-    public GemsTipTiltMode getTipTiltMode() {
-        return tipTiltMode;
-    }
-
     /**
      * @param nirBand      optional NIR magnitude band (default is H)
      * @return all relevant CatalogSearchCriterion instances
