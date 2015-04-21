@@ -2,11 +2,13 @@ package edu.gemini.sp.vcs.diff
 
 import java.security.Permission
 
+import edu.gemini.pot.sp.Conflict.{Moved, ResurrectedLocalDelete, ReplacedRemoteDelete}
 import edu.gemini.pot.sp.validator.Validator
 import edu.gemini.pot.sp.version.VersionMap
 import edu.gemini.pot.sp.{DataObjectBlob => DOB, _}
 import edu.gemini.shared.util.VersionComparison
 import edu.gemini.shared.util.VersionComparison.{Conflicting, Same, Newer}
+import edu.gemini.shared.util.immutable.ScalaConverters._
 import edu.gemini.sp.vcs.diff.NodeDetail.Obs
 import edu.gemini.sp.vcs.diff.ObsEdit.{ObsUpdate, ObsDelete, ObsCreate}
 import edu.gemini.sp.vcs.diff.VcsFailure.VcsException
@@ -69,9 +71,10 @@ class MergeTest extends JUnitSuite {
     val deletedKeys = p.getVersions.keySet &~ nodeMap.keySet
   }
 
-  case class PropContext(fact: ISPFactory, sp: ISPProgram, lp: ISPProgram, rp: ISPProgram, diffs: ProgramDiff, mergePlan: MergePlan) {
-    val startMap = sp.nodeMap
-    val startId  = sp.getLifespanId
+  case class PropContext(fact: ISPFactory, sp: ISPProgram, lp: ISPProgram, rp: ISPProgram, diffs: ProgramDiff, tryMergePlan: TryVcs[MergePlan]) {
+    val mergePlan = tryMergePlan.fold(f => sys.error(VcsFailure.explain(f, sp.getProgramID, "", None)), identity)
+    val startMap  = sp.nodeMap
+    val startId   = sp.getLifespanId
 
     val local  = new EditFacts(lp, startMap)
     val remote = new EditFacts(rp, startMap)
@@ -86,7 +89,7 @@ class MergeTest extends JUnitSuite {
     }
 
     val modifiedKeys = mergePlan.update.flatten.collect {
-      case Modified(k, _, _, _) => k
+      case Modified(k, _, _, _, _) => k
     }.toSet
 
     val unmodifiedKeys = mergePlan.update.flatten.collect {
@@ -94,6 +97,15 @@ class MergeTest extends JUnitSuite {
     }.toSet
 
     val deletedKeys = mergePlan.delete.map(_.key)
+
+    // Find all the merge plan node keys with a particular type of conflict
+    def actualConflictKeys(p: (Conflicts, SPNodeKey) => Boolean ): Set[SPNodeKey] =
+      mergePlan.update.sFoldRight(Set.empty[SPNodeKey]) { (mn, s) =>
+        mn match {
+          case Modified(k, _, _, _, con) if p(con, k) => s + k
+          case _                                      => s
+        }
+      }
 
     val obsEditsTry = ObsEdit.all(lp, diffs)
     val obsEdits    = obsEditsTry match {
@@ -289,8 +301,8 @@ class MergeTest extends JUnitSuite {
       (start, local, remote, pc) =>
         pc.local.dataObjectEditedNodes.filter(n => pc.compare(n.key) == Newer).forall { n =>
           pc.mergeMap.get(n.key).exists {
-            case Modified(_, _, dob, _) => DOB.same(n.getDataObject, dob)
-            case Unmodified(_)          => false
+            case Modified(_, _, dob, _, _) => DOB.same(n.getDataObject, dob)
+            case Unmodified(_)             => false
           }
         }
     ),
@@ -299,8 +311,8 @@ class MergeTest extends JUnitSuite {
       (start, local, remote, pc) =>
         pc.remote.dataObjectEditedNodes.filterNot(n => pc.compare(n.key) == Newer).forall { n =>
           pc.mergeMap.get(n.key).exists {
-            case Modified(_, _, dob, _) => DOB.same(n.getDataObject, dob)
-            case Unmodified(_)          => false
+            case Modified(_, _, dob, _, _) => DOB.same(n.getDataObject, dob)
+            case Unmodified(_)             => false
           }
         }
     ),
@@ -348,8 +360,8 @@ class MergeTest extends JUnitSuite {
               val t        = mp.update
               val emptyMap = Map.empty[Int, Set[SPNodeKey]].withDefaultValue(Set.empty[SPNodeKey])
               val obsMap   = t.foldRight(emptyMap) {
-                case (Modified(k, _, _, Obs(n)), m) => m.updated(n, m(n) + k)
-                case (_, m)                         => m
+                case (Modified(k, _, _, Obs(n), _), m) => m.updated(n, m(n) + k)
+                case (_, m)                            => m
               }
 
               val renumberedKeys = (Set.empty[SPNodeKey]/:((remoteMax + 1) to remoteMax + localKeys.size)) { (s, i) =>
@@ -386,6 +398,15 @@ class MergeTest extends JUnitSuite {
           same
         }
 
+        def conflictsMatch(nConflicts: Conflicts, tConflicts: Conflicts): Boolean =
+          (nConflicts.dataObjectConflict.asScalaOpt, tConflicts.dataObjectConflict.asScalaOpt) match {
+            case (None, None)       => true
+            case (Some(n), Some(t)) => (n.perspective == t.perspective) &&
+                                       dataObjectMatches(n.dataObject, t.dataObject) &&
+                                       nConflicts.notes.asScalaList.toSet == tConflicts.notes.asScalaList.toSet
+            case _                  => false
+          }
+
         def childrenMatch(n: List[ISPNode], t: Stream[Tree[MergeNode]]): Boolean = {
           // The order won't be the same because the Tree[MergeNode] doesn't
           // worry about ordering amongst different types of objects (e.g.,
@@ -413,10 +434,11 @@ class MergeTest extends JUnitSuite {
 
         def matchesMergePlan(n: ISPNode, t: Tree[MergeNode]): Boolean =
           t.rootLabel match {
-            case Modified(k, _, dob, det) =>
+            case Modified(k, _, dob, det, con) =>
               lazy val dobSame      = dataObjectMatches(n.getDataObject, dob)
+              lazy val conSame      = conflictsMatch(n.getConflicts, con)
               lazy val childrenSame = childrenMatch(n.children, t.subForest)
-              k == n.key && dobSame && childrenSame && obsNumSame(n, det)
+              k == n.key && dobSame && conSame && childrenSame && obsNumSame(n, det)
             case Unmodified(k)          =>
               k == n.key
           }
@@ -619,6 +641,93 @@ class MergeTest extends JUnitSuite {
           val vts = tgs.map(_.getDataObject.asInstanceOf[TemplateGroup].getVersionToken)
           vts.size == vts.toSet.size
         }.run
+      }
+    ),
+
+    ("When both local and remote data objects are edited, a conflict is added",
+      (start, local, remote, pc) => {
+        // can't intersect pc.xx.dataObjectEditedNodes because in the actual
+        // merge we don't have 3 way information.  we can't tell when the data
+        // object itself has been updated vs the children.  all we can do is know
+        // that the version data is conflicting and the data objects differ
+
+        // compute the keys that should have a data object conflict
+        val l = pc.local.editedNodes.map(_.key).toSet
+        val r = pc.remote.editedNodes.map(_.key).toSet
+        val expected = (l & r).filter { k =>
+          !DOB.same(pc.local.nodeMap(k).getDataObject, pc.remote.nodeMap(k).getDataObject)
+        }
+
+        // find the merge plan nodes that *do* have a data object conflict
+        val actual = pc.actualConflictKeys((con: Conflicts, _: SPNodeKey) => con.dataObjectConflict.isDefined)
+
+        expected == actual
+      }
+    ),
+
+    ("Conflicts are added when a remotely deleted node is replaced",
+      (start, local, remote, pc) => {
+        // allReplaced is all keys of nodes that were replaced.  we just want
+        // the root of an replaced subtree, so we filter it
+        val allReplaced = pc.mergePlan.update.keySet & pc.remote.deletedKeys
+        val expected    = allReplaced.filterNot { k =>
+          pc.mergeContext.local.parent(k).exists(allReplaced.contains)
+        }
+
+        val actual = pc.actualConflictKeys((con: Conflicts, k: SPNodeKey) =>
+          con.notes.contains(new ReplacedRemoteDelete(k))
+        )
+        
+        if (expected != actual) {
+          Console.err.println("expected: " + expected.toList.sorted.mkString(", "))
+          Console.err.println("actual..: " + actual.toList.sorted.mkString(", "))
+        }
+
+        expected == actual
+      }
+    ),
+
+    ("Conflicts are added when a locally deleted node is resurrected",
+      (start, local, remote, pc) => {
+        val allResurrected = pc.mergePlan.update.keySet & pc.local.deletedKeys
+        val expected       = allResurrected.filterNot { k =>
+          pc.mergeContext.remote.parent(k).exists(allResurrected.contains)
+        }
+
+        val actual = pc.actualConflictKeys((con: Conflicts, k: SPNodeKey) =>
+          con.notes.contains(new ResurrectedLocalDelete(k))
+        )
+
+        if (expected != actual) {
+          Console.err.println("expected: " + expected.toList.sorted.mkString(", "))
+          Console.err.println("actual..: " + actual.toList.sorted.mkString(", "))
+        }
+
+        expected == actual
+      }
+    ),
+
+    ("Conflicts are added for conflicting moves",
+      (start, local, remote, pc) => {
+        val mergeParents = pc.mergePlan.update.foldTree(Map.empty[SPNodeKey, SPNodeKey]) { (p,m) =>
+          (m/:p.subForest) { (m0, c) => m0 + (c.key -> p.key) }
+        }
+
+        val expected = pc.local.editedNodes.flatMap(p => p.children.map(c => (c.key, p.key, mergeParents.get(c.key))).collect {
+          case (child, localParent, Some(mergeParent)) if localParent != mergeParent => child -> mergeParent
+        })
+
+        val actual = pc.mergePlan.update.sFoldRight(List.empty[(SPNodeKey, SPNodeKey)]) { (mn, l) =>
+          mn match {
+            case Modified(k, _, _, _, con) =>
+              con.notes.asScalaList.collect {
+                case m: Moved => m.nodeKey -> m.getDestinationKey
+              } ++ l
+            case _                         => l
+          }
+        }
+
+        expected.toSet == actual.toSet
       }
     )
   )

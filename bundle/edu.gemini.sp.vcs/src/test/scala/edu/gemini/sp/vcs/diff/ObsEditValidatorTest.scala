@@ -1,6 +1,6 @@
 package edu.gemini.sp.vcs.diff
 
-import edu.gemini.pot.sp.SPNodeKey
+import edu.gemini.pot.sp.{Conflicts, SPNodeKey}
 import edu.gemini.pot.sp.version._
 import edu.gemini.shared.util.VersionComparison
 import edu.gemini.shared.util.VersionComparison._
@@ -36,7 +36,7 @@ object ObsEditValidatorTest {
 
   val Key           = new SPNodeKey()
   val DataObject    = new SPObservation()
-  val ObsTree       = MergeNode.modified(Key, EmptyNodeVersions, DataObject, NodeDetail.Obs(1)).node()
+  val ObsTree       = MergeNode.modified(Key, EmptyNodeVersions, DataObject, NodeDetail.Obs(1), Conflicts.EMPTY).node()
   val AllUrps       = Set(PI, NGO, STAFF)
   val AllToo        = TooType.values.toSet[TooType]
   val AllStat       = ObservationStatus.values.toSet[ObservationStatus]

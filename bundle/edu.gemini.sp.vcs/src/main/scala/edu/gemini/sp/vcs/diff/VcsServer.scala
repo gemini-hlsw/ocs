@@ -124,13 +124,22 @@ class VcsServer(odb: IDBDatabaseService, vcsLog: VcsLog) { vs =>
       }.map(_.encode).unsafeRun
 
     override def storeDiffs(id: SPProgramID, mpt: MergePlan.Transport): TryVcs[Boolean] = {
-      val mp = mpt.decode
-      vs.write[Boolean](id, user,
-        p => mp.compare(p.getVersions) match {
+      def versionCheck(p: ISPProgram, mp: MergePlan): VcsAction[Boolean] =
+        mp.compare(p.getVersions) match {
           case Newer => VcsAction(true)
           case Same  => VcsAction(false)
           case _     => VcsAction.fail(NeedsUpdate)
-        },
+        }
+
+      def conflictCheck(mp: MergePlan): VcsAction[Boolean] =
+        if (mp.hasConflicts) VcsAction.fail(HasConflict) else VcsAction(true)
+
+      val mp = mpt.decode
+      vs.write[Boolean](id, user,
+        p => for {
+          vc <- versionCheck(p, mp)
+          cc <- conflictCheck(mp)
+        } yield vc && cc,
         identity,
         (f, p, _) => (mp.merge(f, p) >> VcsAction(vcsLog.log(OpStore, id, geminiPrincipals))).as(())
       ).unsafeRun

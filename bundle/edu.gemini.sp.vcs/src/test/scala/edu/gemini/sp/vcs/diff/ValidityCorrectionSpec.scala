@@ -1,5 +1,6 @@
 package edu.gemini.sp.vcs.diff
 
+import edu.gemini.pot.sp.Conflict.ConstraintViolation
 import edu.gemini.pot.sp.SPNodeKey
 import edu.gemini.pot.spdb.DBLocalDatabase
 import edu.gemini.sp.vcs.diff.VcsFailure.Unmergeable
@@ -17,7 +18,7 @@ class ValidityCorrectionSpec extends MergeCorrectionSpec {
       case \/-(mp)               => mp.update must correspondTo(expected)
     }
 
-  "MergeValidityCorrection" should {
+  "ValidityCorrection" should {
     "not modify an already valid program" in {
       val start = prog.node(obsTree(1))
       test(start, start)
@@ -30,7 +31,7 @@ class ValidityCorrectionSpec extends MergeCorrectionSpec {
 
       val start    = p.node(tf1.leaf, tf2.leaf)
       val expected = incr(incr(p)).node(
-        incr(incr(conflictFolder)).node(tf2.leaf),
+        incr(incr(conflictFolder)).node(addConflictNote(incr(tf2), new ConstraintViolation(_)).leaf),
         tf1.leaf
       )
 
@@ -53,7 +54,7 @@ class ValidityCorrectionSpec extends MergeCorrectionSpec {
 
         val start    = p.node(un.leaf, tf2.leaf)
         val expected = incr(incr(p)).node(
-          incr(incr(conflictFolder)).node(tf2.leaf),
+          incr(incr(conflictFolder)).node(addConflictNote(incr(tf2), new ConstraintViolation(_)).leaf),
           un.leaf
         )
 
@@ -71,7 +72,9 @@ class ValidityCorrectionSpec extends MergeCorrectionSpec {
 
       val start    = p.node(tf1.leaf, tf2.leaf, tf3.leaf)
       val expected = incr(incr(incr(p))).node(
-        incr(incr(incr(conflictFolder))).node(tf2.leaf, tf3.leaf),
+        incr(incr(incr(conflictFolder))).node(
+          addConflictNote(incr(tf2), new ConstraintViolation(_)).leaf,
+          addConflictNote(incr(tf3), new ConstraintViolation(_)).leaf),
         tf1.leaf
       )
 
@@ -95,7 +98,7 @@ class ValidityCorrectionSpec extends MergeCorrectionSpec {
 
         val start    = p.node(un.leaf, tf1.leaf, tf2.leaf)
         val expected = incr(p).node(
-          incr(MergeNode.modified(cfn)).node(tf2.leaf),
+          incr(MergeNode.modified(cfn)).node(addConflictNote(incr(tf2), new ConstraintViolation(_)).leaf),
           tf1.leaf
         )
 

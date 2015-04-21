@@ -21,8 +21,10 @@ class TemplateNumberingCorrection(lifespanId: LifespanId, nodeMap: Map[SPNodeKey
     def correct(tokens: List[(VersionToken, SPNodeKey)]): TryVcs[MergePlan] = {
       def updateToken(tgLoc: TreeLoc[MergeNode], vt: VersionToken): TryVcs[TreeLoc[MergeNode]] =
         tgLoc.getLabel match {
-          case m@Modified(_, _, tg: TemplateGroup, _) => TryVcs(tgLoc.modifyLabel(_ => m.copy(dob = tg.copy <| (_.setVersionToken(vt)))))
-          case _                                      => TryVcs.fail(s"Expected a TemplateGroup for node ${tgLoc.key}")
+          case m@Modified(_, _, tg: TemplateGroup, _, _) =>
+            TryVcs(tgLoc.modifyLabel(_ => m.copy(dob = tg.copy <| (_.setVersionToken(vt)))))
+          case _                                         =>
+            TryVcs.fail(s"Expected a TemplateGroup for node ${tgLoc.key}")
         }
 
       (TryVcs(mp)/:tokens) { case (mp0, (vt, k)) =>
@@ -51,17 +53,17 @@ class TemplateNumberingCorrection(lifespanId: LifespanId, nodeMap: Map[SPNodeKey
     // Find the template folder, if modified.  Otherwise, there's nothing to
     // renumber.
     val tf = mp.update.subForest.find(_.rootLabel match {
-      case Modified(_, _, tf: TemplateFolder, _) => true
-      case _                                     => false
+      case Modified(_, _, tf: TemplateFolder, _, _) => true
+      case _                                        => false
     })
 
     // Get all the surviving template group keys and their version tokens,
     // looking up the unmodified values in the provided node map.
     tf.toList.flatMap { _.subForest.toList.map { _.rootLabel match {
-      case Modified(k, _, tg: TemplateGroup, _) =>
+      case Modified(k, _, tg: TemplateGroup, _, _) =>
         (tg.getVersionToken -> k).right
 
-      case Unmodified(k)                        =>
+      case Unmodified(k)                           =>
         for {
           n <- nodeMap.get(k).toTryVcs(s"Missing unmodified node $k")
           p <- n.getDataObject match {

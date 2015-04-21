@@ -32,9 +32,9 @@ class ObsNumberCorrection(lifespanId: LifespanId, isKnown: (ProgramLocation, SPN
       if (obsMap.isEmpty) mp // usually empty so we might as well check and save a traversal in that case
       else
         mp.copy(update = mp.update.map {
-          case m@Modified(k, nv, dob, Obs(n)) =>
+          case m@Modified(k, nv, dob, Obs(n), con) =>
             val newNum = obsMap.getOrElse(k, n)
-            if (newNum == n) m else m.copy(k, nv.incr(lifespanId), dob, Obs(newNum))
+            if (newNum == n) m else m.copy(k, nv.incr(lifespanId), dob, Obs(newNum), con)
           case lab => lab
         })
     }
@@ -44,8 +44,8 @@ class ObsNumberCorrection(lifespanId: LifespanId, isKnown: (ProgramLocation, SPN
   private def renumberedObs(mp: MergePlan): TryVcs[Map[SPNodeKey, Int]] = {
     def isExecuted(children: Stream[Tree[MergeNode]]): Boolean =
       children.toList.exists { _.rootLabel match {
-        case Modified(_, _, log: ObsExecLog, _) => !log.isEmpty
-        case _                                  => false
+        case Modified(_, _, log: ObsExecLog, _, _) => !log.isEmpty
+        case _                                     => false
       }}
 
     val localOnly0 = mp.update.foldObservations(List.empty[(SPNodeKey, Int, Boolean)]) { (mod, i, children, lst) =>

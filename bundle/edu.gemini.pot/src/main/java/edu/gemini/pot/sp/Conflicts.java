@@ -37,7 +37,7 @@ public final class Conflicts implements Serializable {
     }
 
     public Conflicts withDataObjectConflict(DataObjectConflict doc) {
-        return apply(new Some<DataObjectConflict>(doc), notes);
+        return apply(new Some<>(doc), notes);
     }
 
     public Conflicts withConflictNote(final Conflict.Note note) {
@@ -49,11 +49,7 @@ public final class Conflicts implements Serializable {
     }
 
     public Conflicts resolveConflictNote(final Conflict.Note note) {
-        ImList<Conflict.Note> lst = notes.filter(new PredicateOp<Conflict.Note>() {
-            @Override public Boolean apply(Conflict.Note conflictNote) {
-                return !conflictNote.equals(note);
-            }
-        });
+        final ImList<Conflict.Note> lst = notes.filter(cn -> !cn.equals(note));
         return (lst.size() == notes.size()) ? this : apply(dataObjectConflict, lst);
     }
 
@@ -67,16 +63,10 @@ public final class Conflicts implements Serializable {
 
         final Option<DataObjectConflict> mergedDoc = that.dataObjectConflict.orElse(dataObjectConflict);
 
-        final Set<SPNodeKey> newKeys = new HashSet<SPNodeKey>();
-        that.notes.foreach(new ApplyOp<Conflict.Note>() {
-            @Override public void apply(Conflict.Note cn) { newKeys.add(cn.getNodeKey()); }
-        });
+        final Set<SPNodeKey> newKeys = new HashSet<>();
+        that.notes.foreach(cn -> newKeys.add(cn.getNodeKey()));
 
-        final ImList<Conflict.Note> oldNotes = notes.filter(new PredicateOp<Conflict.Note>() {
-            @Override public Boolean apply(Conflict.Note cn) {
-                return !newKeys.contains(cn.getNodeKey());
-            }
-        });
+        final ImList<Conflict.Note> oldNotes = notes.filter(cn -> !newKeys.contains(cn.getNodeKey()));
 
         final ImList<Conflict.Note> mergedNotes = oldNotes.append(that.notes);
 

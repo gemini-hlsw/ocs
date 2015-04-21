@@ -1,6 +1,6 @@
 package edu.gemini.sp.vcs.diff
 
-import edu.gemini.pot.sp.SPNodeKey
+import edu.gemini.pot.sp.{Conflict, Conflicts, SPNodeKey}
 import edu.gemini.pot.sp.version._
 import edu.gemini.sp.vcs.diff.ProgramLocation.{Remote, Local}
 import edu.gemini.spModel.conflict.ConflictFolder
@@ -13,8 +13,9 @@ import edu.gemini.spModel.seqcomp.SeqBase
 import edu.gemini.spModel.target.obsComp.TargetObsComp
 import edu.gemini.spModel.template.{TemplateGroup, TemplateFolder}
 import edu.gemini.spModel.util.VersionToken
-import org.specs2.matcher.{MatchResult, Expectable, Matcher}
+import edu.gemini.shared.util.immutable.ScalaConverters._
 
+import org.specs2.matcher.{MatchResult, Expectable, Matcher}
 import org.specs2.mutable.Specification
 
 import scalaz._
@@ -33,12 +34,14 @@ class MergeCorrectionSpec extends Specification {
     new SPNodeKey(),
     EmptyNodeVersions,
     dob,
-    obsNum.fold(Empty: NodeDetail) { Obs.apply }
+    obsNum.fold(Empty: NodeDetail) { Obs.apply },
+    Conflicts.EMPTY
   )
 
   def nonObs(dob: ISPDataObject): MergeNode = mergeNode(dob, None)
 
-  def conflictFolder: MergeNode = nonObs(new ConflictFolder)
+  def conflictFolder: MergeNode =
+    addConflictNote(nonObs(new ConflictFolder), new Conflict.ConflictFolder(_))
 
   def prog: MergeNode = nonObs(new SPProgram)
 
@@ -53,6 +56,12 @@ class MergeCorrectionSpec extends Specification {
     mn match {
       case m: Modified => m.copy(nv = m.nv.incr(lifespanId))
       case _           => failure("trying to increment unmodified node")
+    }
+
+  def addConflictNote(mn: MergeNode, cn: SPNodeKey => Conflict.Note): MergeNode =
+    mn match {
+      case m: Modified => m.copy(conflicts = m.conflicts.withConflictNote(cn(mn.key)))
+      case _           => failure("trying to add a conflict note to an unmodified node")
     }
 
   def obsTree(num: Int): Tree[MergeNode] =
@@ -76,7 +85,7 @@ class MergeCorrectionSpec extends Specification {
       val a = actual.rootLabel
 
       (e, a) match {
-        case (Modified(ek, env, edob, edet), Modified(ak, anv, adob, adet)) =>
+        case (Modified(ek, env, edob, edet, econ), Modified(ak, anv, adob, adet, acon)) =>
           val ect = edob.getType
           val act = adob.getType
 
@@ -95,6 +104,33 @@ class MergeCorrectionSpec extends Specification {
           def detail: Option[String] =
             edet != adet option s"NodeDetail doesn't match for $ak. Expected: $edet, Actual: $adet"
 
+          def conflict: Option[String] = {
+            def notes(c: Conflicts): List[Conflict.Note] =
+              c.notes.asScalaList
+
+            def folder(ns: List[Conflict.Note]): Option[Conflict.ConflictFolder] =
+              ns.collectFirst { case cf: Conflict.ConflictFolder => cf }
+
+            def set(ns: List[Conflict.Note]): Set[Conflict.Note] =
+              ns.filter {
+                case _: Conflict.ConflictFolder => false
+                case _                          => true
+              }.toSet
+
+            val enotes  = notes(econ)
+            val anotes  = notes(acon)
+
+            // conflict folders are created by the corrections so we don't
+            // know what key to expect ahead of time.
+            val efolder = folder(enotes)
+            val afolder = folder(anotes)
+
+            val differs = (econ.dataObjectConflict.isDefined != acon.dataObjectConflict.isDefined) ||
+                          (efolder.isDefined != afolder.isDefined) || (set(enotes) != set(anotes))
+
+            differs option s"Conflicts don't match for $ak.  Expected: ${econ.shows}, Actual: ${acon.shows}"
+          }
+
           def childKeys(t: Tree[MergeNode]): String =
             t.subForest.map(_.key).mkString("{", ", ", "}")
 
@@ -106,7 +142,7 @@ class MergeCorrectionSpec extends Specification {
                 opt orElse compare(echild, achild)
             }
 
-          key orElse nodeVersion orElse componentType orElse detail orElse childrenSize orElse deepChildren
+          key orElse nodeVersion orElse componentType orElse detail orElse conflict orElse childrenSize orElse deepChildren
 
         case (eu: Unmodified, au: Unmodified) =>
           eu.key != au.key option s"Unmodified node keys don't match. Expected: ${eu.key}, Actual: ${au.key}"
