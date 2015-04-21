@@ -13,6 +13,7 @@ import scala.concurrent.Future
 import scala.util.{Try, Success, Failure}
 
 object Activator {
+  val ServiceStart = "edu.gemini.services.server.start"
   val Log = Logger.getLogger(classOf[Activator].getName)
 }
 
@@ -25,12 +26,15 @@ class Activator extends BundleActivator {
   var telescopeScheduleService: Option[ServiceRegistration[TelescopeScheduleService]] = None
 
   def start(ctx: BundleContext): Unit = {
-
     val site = SiteProperty.get(ctx)
     Log.info(s"Starting services bundle for site $site.")
-    
-    // register the services..
-    registerTelescopeSchedule(ctx, site)
+
+    if (Option(ctx.getProperty(ServiceStart)).forall(_.toLowerCase == "true")) {
+      // register the services..
+      registerTelescopeSchedule(ctx, site)
+    } else {
+      Log.warning(s"Skipping services start.  Set '$ServiceStart' to 'true' in bundle properties to enable.")
+    }
 
   }
 
@@ -45,7 +49,7 @@ class Activator extends BundleActivator {
 
   /** Tries to register the telescope schedule service. */
   private def registerTelescopeSchedule(ctx: BundleContext, site: Site) {
-    
+
     // only try to create services if we know the site
     if (site != null) {
 
