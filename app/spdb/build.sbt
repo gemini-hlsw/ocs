@@ -235,6 +235,7 @@ def swalker(version: Version) = AppConfig(
     "edu.gemini.dataman.xfer.tempDir.base"       -> "/Users/swalker/dataman/base/.xfer",
     "edu.gemini.dataman.xfer.tempDir.gsa"        -> "/Users/swalker/dataman/gsa/.xfer",
     "edu.gemini.datasetfile.workDir"             -> "/Users/swalker/dataman/work",
+    "edu.gemini.services.server.start"           -> "false",
     "edu.gemini.smartgcal.host"                  -> "localhost",
     "edu.gemini.spdb.dir"                        -> "/Users/swalker/.spdb/",
     "edu.gemini.util.trpc.name"                  -> "Shane's ODB (Test)"
