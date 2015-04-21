@@ -7,20 +7,22 @@ import edu.gemini.shared.util.StringUtil
 import edu.gemini.spModel.config2.ItemKey
 
 import scala.concurrent.Future
-import scala.util.{Success, Failure}
-
+import scala.swing.Table.LabelRenderer
+import scala.util.{Failure, Success}
 import scalaz.Scalaz._
 
 /** Columns in the table are defined by their header label and a function on the unique config of the row. */
-case class Column(label: String, value: (ItcUniqueConfig, Future[ItcService.Result]) => Object)
+case class Column[A](label: String, value: (ItcUniqueConfig, Future[ItcService.Result]) => Object, renderer: LabelRenderer[AnyRef] = ItcTable.AnyRenderer, tooltip: String = "")
 
 object ItcTableModel {
+  val PeakPixelTooltip = "Peak pixel value = signal + background [ADU]"
+
   /** Defines a set of header columns for all tables. */
-  val headers = Seq(
+  val Headers = Seq(
     Column("Data Labels",     (c, r) => c.labels),
-    Column("Images",          (c, r) => new java.lang.Integer(c.count)),             // must be an object for JTable
-    Column("Exposure Time",   (c, r) => new java.lang.Double(c.singleExposureTime)), // must be an object for JTable
-    Column("Total Exp. Time", (c, r) => new java.lang.Double(c.totalExposureTime))   // must be an object for JTable
+    Column("Images",          (c, r) => new java.lang.Integer(c.count),             tooltip = "Number of exposures used in S/N calculation"),
+    Column("Exposure Time",   (c, r) => new java.lang.Double(c.singleExposureTime), tooltip = "Exposure time of each image [s]"),
+    Column("Total Exp. Time", (c, r) => new java.lang.Double(c.totalExposureTime),  tooltip = "Total exposure time [s]")
   )
 }
 
@@ -31,9 +33,9 @@ object ItcTableModel {
  */
 sealed trait ItcTableModel extends AbstractTableModel {
 
-  val headers: Seq[Column]
+  val headers: Seq[Column[_]]
   val keys: Seq[ItemKey]
-  val results: Seq[Column]
+  val results: Seq[Column[_]]
 
   val uniqueSteps: Seq[ItcUniqueConfig]
   val res: Seq[Future[ItcService.Result]]
@@ -52,6 +54,18 @@ sealed trait ItcTableModel extends AbstractTableModel {
     case c if c <  headers.size             => header(col).label
     case c if c >= headers.size + keys.size => result(col).label
     case _                                  => StringUtil.toDisplayName(key(col).getName)
+  }
+
+  def renderer(col: Int): LabelRenderer[AnyRef] = col match {
+    case c if c <  headers.size             => header(col).renderer
+    case c if c >= headers.size + keys.size => result(col).renderer
+    case _                                  => ItcTable.AnyRenderer
+  }
+
+  def tooltip(col: Int): String = col match {
+    case c if c <  headers.size             => header(col).tooltip
+    case c if c >= headers.size + keys.size => result(col).tooltip
+    case _                                  => key(col).getPath
   }
 
   // Gets the ItemKey of a column (if any), this is used by the table to color code the columns.
@@ -105,40 +119,37 @@ sealed trait ItcImagingTableModel extends ItcTableModel {
       }
     }
 
-  protected def peakPixelFlux(f: Future[ItcService.Result], n: Int = 0) = prettyPrint(f, n, r => r.peakPixelFlux)
+  protected def peakPixelFlux(result: Future[ItcService.Result], ccd: Int = 0) = imagingResult(result, ccd).map(_.peakPixelFlux)
 
-  protected def singleSNRatio(f: Future[ItcService.Result], n: Int = 0) = prettyPrint(f, n, r => r.singleSNRatio)
+  protected def singleSNRatio(result: Future[ItcService.Result], ccd: Int = 0) = imagingResult(result, ccd).map(_.singleSNRatio)
 
-  protected def totalSNRatio (f: Future[ItcService.Result], n: Int = 0) = prettyPrint(f, n, r => r.totalSNRatio)
-
-  private def prettyPrint(f: Future[ItcService.Result], n: Int, v: ItcImagingResult => Double) =
-    imagingResult(f, n).fold("")(x => f"${v(x)}%.2f")
-
+  protected def totalSNRatio (result: Future[ItcService.Result], ccd: Int = 0) = imagingResult(result, ccd).map(_.totalSNRatio)
+  
 }
 
 class ItcGenericImagingTableModel(val keys: Seq[ItemKey], val uniqueSteps: Seq[ItcUniqueConfig], val res: Seq[Future[ItcService.Result]]) extends ItcImagingTableModel {
-  val headers = ItcTableModel.headers
+  val headers = ItcTableModel.Headers
   val results = Seq(
-    Column("PPF",             (c, r) => peakPixelFlux(r)),
-    Column("S/N Single",      (c, r) => singleSNRatio(r)),
-    Column("S/N Total",       (c, r) => totalSNRatio (r)),
+    Column("Peak",            (c, r) => peakPixelFlux(r),         ItcTable.IntRenderer,       tooltip = ItcTableModel.PeakPixelTooltip),
+    Column("S/N Single",      (c, r) => singleSNRatio(r),         ItcTable.DoubleRenderer),
+    Column("S/N Total",       (c, r) => totalSNRatio (r),         ItcTable.DoubleRenderer),
     Column("Messages",        (c, r) => messages(r))
   )
 }
 
 /** GMOS specific ITC imaging table model. */
 class ItcGmosImagingTableModel(val keys: Seq[ItemKey], val uniqueSteps: Seq[ItcUniqueConfig], val res: Seq[Future[ItcService.Result]]) extends ItcImagingTableModel {
-  val headers = ItcTableModel.headers
+  val headers = ItcTableModel.Headers
   val results = Seq(
-    Column("CCD1 PPF",        (c, r) => peakPixelFlux(r, 0)),
-    Column("CCD1 S/N Single", (c, r) => singleSNRatio(r, 0)),
-    Column("CCD1 S/N Total",  (c, r) => totalSNRatio (r, 0)),
-    Column("CCD2 PPF",        (c, r) => peakPixelFlux(r, 1)),
-    Column("CCD2 S/N Single", (c, r) => singleSNRatio(r, 1)),
-    Column("CCD2 S/N Total",  (c, r) => totalSNRatio (r, 1)),
-    Column("CCD3 PPF",        (c, r) => peakPixelFlux(r, 2)),
-    Column("CCD3 S/N Single", (c, r) => singleSNRatio(r, 2)),
-    Column("CCD3 S/N Total",  (c, r) => totalSNRatio (r, 2)),
+    Column("CCD1 Peak",       (c, r) => peakPixelFlux(r, ccd=0),   ItcTable.IntRenderer,      tooltip = ItcTableModel.PeakPixelTooltip + " for CCD 1"),
+    Column("CCD1 S/N Single", (c, r) => singleSNRatio(r, ccd=0),   ItcTable.DoubleRenderer),
+    Column("CCD1 S/N Total",  (c, r) => totalSNRatio (r, ccd=0),   ItcTable.DoubleRenderer),
+    Column("CCD2 Peak",       (c, r) => peakPixelFlux(r, ccd=1),   ItcTable.IntRenderer,      tooltip = ItcTableModel.PeakPixelTooltip + " for CCD 2"),
+    Column("CCD2 S/N Single", (c, r) => singleSNRatio(r, ccd=1),   ItcTable.DoubleRenderer),
+    Column("CCD2 S/N Total",  (c, r) => totalSNRatio (r, ccd=1),   ItcTable.DoubleRenderer),
+    Column("CCD3 Peak",       (c, r) => peakPixelFlux(r, ccd=2),   ItcTable.IntRenderer,      tooltip = ItcTableModel.PeakPixelTooltip + " for CCD 3"),
+    Column("CCD3 S/N Single", (c, r) => singleSNRatio(r, ccd=2),   ItcTable.DoubleRenderer),
+    Column("CCD3 S/N Total",  (c, r) => totalSNRatio (r, ccd=2),   ItcTable.DoubleRenderer),
     Column("Messages",        (c, r) => messages(r))
   )
 }
@@ -148,9 +159,8 @@ class ItcGmosImagingTableModel(val keys: Seq[ItemKey], val uniqueSteps: Seq[ItcU
 sealed trait ItcSpectroscopyTableModel extends ItcTableModel
 
 class ItcGenericSpectroscopyTableModel(val keys: Seq[ItemKey], val uniqueSteps: Seq[ItcUniqueConfig], val res: Seq[Future[ItcService.Result]]) extends ItcSpectroscopyTableModel {
-  val headers = ItcTableModel.headers
+  val headers = ItcTableModel.Headers
   val results = Seq(
     Column("Messages",        (c, r) => messages(r))
   )
 }
-

@@ -1,6 +1,6 @@
 package jsky.app.ot.editor.seq
 
-import java.awt.Color
+import javax.swing.Icon
 import javax.swing.table.AbstractTableModel
 
 import edu.gemini.ags.api.AgsRegistrar
@@ -21,14 +21,53 @@ import jsky.app.ot.util.OtColor
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import scala.swing.{Swing, Table}
+import scala.swing.Table.LabelRenderer
+import scala.swing._
 import scalaz.Scalaz._
 import scalaz._
+
+object ItcTable {
+
+  // Generic renderer for labels; deals with alignment, background color and tooltip text
+  abstract sealed class Renderer[A](alignment: Alignment.Value, f: A => (Icon, String)) extends LabelRenderer[A](f)  {
+    override def componentFor(table : Table, isSelected : Boolean, hasFocus : Boolean, a : A, row : Int, column : Int) : Component = {
+      val c = super.componentFor(table, isSelected, hasFocus, a, row, column)
+      val l = c.asInstanceOf[Label]
+      val model = table.model.asInstanceOf[ItcTableModel]
+      // Cell renderer based on the sequence cell renderer used for other sequence tables. This gives us coherent
+      // formatting and color coding throughout the different tables in the sequence node.
+      val bg = model.getKeyAt(column).map(SequenceCellRenderer.lookupColor)
+      val tt = model.tooltip(column)
+      // set horizontal alignment, bg color and tooltip as needed
+      l <|
+        (_.horizontalAlignment  = alignment)                  <|
+        (_.background           = bg.getOrElse(l.background)) <|
+        (_.tooltip              = tt)
+    }
+  }
+
+  // Render anything by turning it into a string
+  case object AnyRenderer extends Renderer(Alignment.Left, (o: AnyRef) => (null, o.toString))
+
+  // Render an optional double value as int (rounded)
+  case object IntRenderer extends Renderer(Alignment.Right, (o: AnyRef) => (null, o match {
+    case None             => ""
+    case Some(d: Double)  => f"$d%.0f"
+  }))
+
+  // Render an optional double value with two decimal digits
+  case object DoubleRenderer extends Renderer(Alignment.Right, (o: AnyRef) => (null, o match {
+    case None             => ""
+    case Some(d: Double)  => f"$d%.2f"
+  }))
+
+}
 
 /**
  * A table to display ITC calculation results to users.
  */
 trait ItcTable extends Table {
+
 
   val owner: EdIteratorFolder
   def tableModel(keys: Seq[ItemKey], seq: ConfigSequence): ItcTableModel
@@ -56,14 +95,13 @@ trait ItcTable extends Table {
       filterNot(_.getParent().equals(CALIBRATION_KEY)). // calibration settings are not relevant
       sortBy(_.getPath)
 
-    val itcModel  = tableModel(showKeys, seq)
-    val renderer  = new ItcCellRenderer(itcModel)
-    peer.setDefaultRenderer(classOf[java.lang.Object], renderer)
-    model = itcModel
+    model = tableModel(showKeys, seq)
 
-    // make all columns as wide as needed
-    SequenceTabUtil.resizeTableColumns(this.peer, itcModel)
+  }
 
+  override def rendererComponent(sel: Boolean, foc: Boolean, row: Int, col: Int) = {
+    val value = model.getValueAt(row, col)
+    model.asInstanceOf[ItcTableModel].renderer(col).componentFor(this, sel, foc, value, row, col)
   }
 
   private def sequence() = Option(owner.getContextObservation).fold(new ConfigSequence) {
@@ -104,7 +142,11 @@ trait ItcTable extends Table {
 
     // whenever service call is finished notify table to update its contents
     andThen {
-      case _ => Swing.onEDT(this.peer.getModel.asInstanceOf[AbstractTableModel].fireTableDataChanged())
+      case _ => Swing.onEDT {
+        this.peer.getModel.asInstanceOf[AbstractTableModel].fireTableDataChanged()
+        // make all columns as wide as needed
+        SequenceTabUtil.resizeTableColumns(this.peer, this.model)
+      }
     }
 
   }
@@ -160,17 +202,4 @@ class ItcSpectroscopyTable(val owner: EdIteratorFolder) extends ItcTable {
       new ItcGenericSpectroscopyTableModel(keys, uniqueConfigs, results)
   }
 
-}
-
-
-/**
- * Cell renderer based on the sequence cell renderer used for other sequence tables. This gives us coherent
- * formatting and color coding throughout the different tables in the sequence node.
- * @param model
- */
-private class ItcCellRenderer(model: ItcTableModel) extends SequenceCellRenderer {
-  override def lookupColor(row: Int, col: Int): Color = model.getKeyAt(col) match {
-    case Some(k)  => SequenceCellRenderer.lookupColor(k)
-    case None     => Color.LIGHT_GRAY
-  }
 }
