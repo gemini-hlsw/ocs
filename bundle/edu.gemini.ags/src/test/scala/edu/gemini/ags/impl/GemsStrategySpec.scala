@@ -1,12 +1,12 @@
 package edu.gemini.ags.impl
 
-import edu.gemini.ags.api.AgsStrategy
+import edu.gemini.ags.api.{AgsGuideQuality, AgsAnalysis, AgsStrategy, magnitudeExtractor, RLikeBands}
 import edu.gemini.ags.api.AgsStrategy.Estimate
 import edu.gemini.ags.conf.ProbeLimitsTable
 import edu.gemini.ags.gems._
 import edu.gemini.catalog.api._
 import edu.gemini.catalog.votable.TestVoTableBackend
-import edu.gemini.shared.util.immutable.{None => JNone, Some => JSome}
+import edu.gemini.shared.util.immutable.{Some => JSome}
 import edu.gemini.spModel.core._
 import edu.gemini.spModel.core.AngleSyntax._
 import edu.gemini.spModel.gemini.gems.Canopus.Wfs
@@ -106,32 +106,91 @@ class GemsStrategySpec extends Specification with NoTimeConversions {
       val assignments = ~selection.map(_.assignments)
       assignments should be size 4
 
-      val gp1 = assignments.find(_.guideProbe == Canopus.Wfs.cwfs1).map(_.guideProbe)
+      assignments.exists(_.guideProbe == Canopus.Wfs.cwfs1) should beTrue
       val cwfs1 = assignments.find(_.guideProbe == Canopus.Wfs.cwfs1).map(_.guideStar)
-      val gp2 = assignments.find(_.guideProbe == Canopus.Wfs.cwfs2).map(_.guideProbe)
+      assignments.exists(_.guideProbe == Canopus.Wfs.cwfs2) should beTrue
       val cwfs2 = assignments.find(_.guideProbe == Canopus.Wfs.cwfs2).map(_.guideStar)
-      val gp3 = assignments.find(_.guideProbe == Canopus.Wfs.cwfs3).map(_.guideProbe)
+      assignments.exists(_.guideProbe == Canopus.Wfs.cwfs3) should beTrue
       val cwfs3 = assignments.find(_.guideProbe == Canopus.Wfs.cwfs3).map(_.guideStar)
-      val gp4 = assignments.find(_.guideProbe == GsaoiOdgw.odgw2).map(_.guideProbe)
+      assignments.exists(_.guideProbe == GsaoiOdgw.odgw2) should beTrue
       val odgw2 = assignments.find(_.guideProbe == GsaoiOdgw.odgw2).map(_.guideStar)
+
+      // Check coordinates
       cwfs1.map(_.name) should beSome("104-014597")
-      cwfs2.map(_.name) should beSome("104-014547")
-      cwfs3.map(_.name) should beSome("104-014608")
+      cwfs2.map(_.name) should beSome("104-014608")
+      cwfs3.map(_.name) should beSome("104-014547")
       odgw2.map(_.name) should beSome("104-014556")
 
       val cwfs1x = Coordinates(RightAscension.fromAngle(Angle.fromHMS(5, 35, 32.630).getOrElse(Angle.zero)), Declination.fromAngle(Angle.zero - Angle.fromDMS(69, 15, 48.64).getOrElse(Angle.zero)).getOrElse(Declination.zero))
       cwfs1.map(_.coordinates ~= cwfs1x) should beSome(true)
-      val cwfs2x = Coordinates(RightAscension.fromAngle(Angle.fromHMS(5, 35, 18.423).getOrElse(Angle.zero)), Declination.fromAngle(Angle.zero - Angle.fromDMS(69, 16, 30.67).getOrElse(Angle.zero)).getOrElse(Declination.zero))
+      val cwfs2x = Coordinates(RightAscension.fromAngle(Angle.fromHMS(5, 35, 36.409).getOrElse(Angle.zero)), Declination.fromAngle(Angle.zero - Angle.fromDMS(69, 16, 24.17).getOrElse(Angle.zero)).getOrElse(Declination.zero))
       cwfs2.map(_.coordinates ~= cwfs2x) should beSome(true)
-      val cwfs3x = Coordinates(RightAscension.fromAngle(Angle.fromHMS(5, 35, 36.409).getOrElse(Angle.zero)), Declination.fromAngle(Angle.zero - Angle.fromDMS(69, 16, 24.17).getOrElse(Angle.zero)).getOrElse(Declination.zero))
+      val cwfs3x = Coordinates(RightAscension.fromAngle(Angle.fromHMS(5, 35, 18.423).getOrElse(Angle.zero)), Declination.fromAngle(Angle.zero - Angle.fromDMS(69, 16, 30.67).getOrElse(Angle.zero)).getOrElse(Declination.zero))
       cwfs3.map(_.coordinates ~= cwfs3x) should beSome(true)
       val odgw2x = Coordinates(RightAscension.fromAngle(Angle.fromHMS(5, 35, 23.887).getOrElse(Angle.zero)), Declination.fromAngle(Angle.zero - Angle.fromDMS(69, 16, 18.20).getOrElse(Angle.zero)).getOrElse(Declination.zero))
       odgw2.map(_.coordinates ~= odgw2x) should beSome(true)
 
-      //val newCtx = selection.map(applySelection(ctx, _)).getOrElse(ctx)
-      //println(TestGemsStrategy("/gems_sn1987A.xml").magnitudes(newCtx, ProbeLimitsTable.loadOrThrow()))
-     // TestGemsStrategy("/gems_sn1987A.xml").analyze(newCtx, ProbeLimitsTable.loadOrThrow()).forall(a => a, _.quality == )
+      // Check magnitudes are sorted correctly
+      val mag1 = cwfs1.flatMap(magnitudeExtractor(RLikeBands)).map(_.value)
+      val mag2 = cwfs2.flatMap(magnitudeExtractor(RLikeBands)).map(_.value)
+      val mag3 = cwfs3.flatMap(magnitudeExtractor(RLikeBands)).map(_.value)
+      (mag3 < mag1 && mag2 < mag1) should beTrue
+    }
+    "support search/select and analyze on TYC 8345-1155-1" in {
+      val ra = Angle.fromHMS(17, 25, 27.529).getOrElse(Angle.zero)
+      val dec = Angle.zero - Angle.fromDMS(48, 27, 24.02).getOrElse(Angle.zero)
+      val target = new SPTarget(ra.toDegrees, dec.toDegrees)
+      val env = TargetEnvironment.create(target)
+      val inst = new Gsaoi <| {_.setPosAngle(0.0)} <| {_.setIssPort(IssPort.UP_LOOKING)}
+      val conditions = SPSiteQuality.Conditions.NOMINAL.sb(SPSiteQuality.SkyBackground.ANY).wv(SPSiteQuality.WaterVapor.ANY)
+      val ctx = ObsContext.create(env, inst, new JSome(Site.GS), conditions, null, new Gems)
+      val tipTiltMode = GemsTipTiltMode.canopus
 
-    }.pendingUntilFixed
+      val posAngles = Set(GemsUtils4Java.toNewAngle(ctx.getPositionAngle), Angle.zero)
+
+      val results = Await.result(TestGemsStrategy("/gems_TYC_8345_1155_1.xml").search(tipTiltMode, ctx, posAngles, scala.None), 20.seconds)
+      results should be size 2
+
+      results.head.criterion.key should beEqualTo(GemsCatalogSearchKey(GemsGuideStarType.tiptilt, Wfs.Group.instance))
+      results.head.criterion should beEqualTo(GemsCatalogSearchCriterion(GemsCatalogSearchKey(GemsGuideStarType.tiptilt, Wfs.Group.instance), CatalogSearchCriterion("Canopus Wave Front Sensor tiptilt", MagnitudeBand.R, MagnitudeRange(FaintnessConstraint(15.0), scala.Option(SaturationConstraint(7.5))), RadiusConstraint.between(Angle.zero, Angle.fromDegrees(0.01666666666665151)), scala.Option(Offset(0.0014984027777700248.degrees[OffsetP], 0.0014984027777700248.degrees[OffsetQ])), scala.Some(Angle.zero))))
+      results(1).criterion.key should beEqualTo(GemsCatalogSearchKey(GemsGuideStarType.flexure, GsaoiOdgw.Group.instance))
+      results(1).criterion should beEqualTo(GemsCatalogSearchCriterion(GemsCatalogSearchKey(GemsGuideStarType.flexure, GsaoiOdgw.Group.instance), CatalogSearchCriterion("On-detector Guide Window flexure", MagnitudeBand.H, MagnitudeRange(FaintnessConstraint(17.0), scala.Option(SaturationConstraint(8.0))), RadiusConstraint.between(Angle.zero, Angle.fromDegrees(0.01666666666665151)), scala.Option(Offset(0.0014984027777700248.degrees[OffsetP], 0.0014984027777700248.degrees[OffsetQ])), scala.Some(Angle.zero))))
+      results.head.results should be size 29
+      results(1).results should be size 29
+
+      val selection = Await.result(TestGemsStrategy("/gems_TYC_8345_1155_1.xml").select(ctx, ProbeLimitsTable.loadOrThrow()), 2.minutes)
+      selection.map(_.posAngle) should beSome(Angle.zero)
+      val assignments = ~selection.map(_.assignments)
+      assignments should be size 4
+
+      assignments.exists(_.guideProbe == Canopus.Wfs.cwfs1) should beTrue
+      val cwfs1 = assignments.find(_.guideProbe == Canopus.Wfs.cwfs1).map(_.guideStar)
+      assignments.exists(_.guideProbe == Canopus.Wfs.cwfs2) should beTrue
+      val cwfs2 = assignments.find(_.guideProbe == Canopus.Wfs.cwfs2).map(_.guideStar)
+      assignments.exists(_.guideProbe == Canopus.Wfs.cwfs3) should beTrue
+      val cwfs3 = assignments.find(_.guideProbe == Canopus.Wfs.cwfs3).map(_.guideStar)
+      assignments.exists(_.guideProbe == GsaoiOdgw.odgw4) should beTrue
+      val odgw4 = assignments.find(_.guideProbe == GsaoiOdgw.odgw4).map(_.guideStar)
+      cwfs1.map(_.name) should beSome("208-152095")
+      cwfs2.map(_.name) should beSome("208-152215")
+      cwfs3.map(_.name) should beSome("208-152039")
+      odgw4.map(_.name) should beSome("208-152102")
+
+      val cwfs1x = Coordinates(RightAscension.fromAngle(Angle.fromHMS(17, 25, 27.151).getOrElse(Angle.zero)), Declination.fromAngle(Angle.zero - Angle.fromDMS(48, 28, 07.67).getOrElse(Angle.zero)).getOrElse(Declination.zero))
+      cwfs1.map(_.coordinates ~= cwfs1x) should beSome(true)
+      val cwfs2x = Coordinates(RightAscension.fromAngle(Angle.fromHMS(17, 25, 32.541).getOrElse(Angle.zero)), Declination.fromAngle(Angle.zero - Angle.fromDMS(48, 27, 30.06).getOrElse(Angle.zero)).getOrElse(Declination.zero))
+      cwfs2.map(_.coordinates ~= cwfs2x) should beSome(true)
+      val cwfs3x = Coordinates(RightAscension.fromAngle(Angle.fromHMS(17, 25, 24.719).getOrElse(Angle.zero)), Declination.fromAngle(Angle.zero - Angle.fromDMS(48, 26, 58.00).getOrElse(Angle.zero)).getOrElse(Declination.zero))
+      cwfs3.map(_.coordinates ~= cwfs3x) should beSome(true)
+      val odgw2x = Coordinates(RightAscension.fromAngle(Angle.fromHMS(17, 25, 27.552).getOrElse(Angle.zero)), Declination.fromAngle(Angle.zero - Angle.fromDMS(48, 27, 23.86).getOrElse(Angle.zero)).getOrElse(Declination.zero))
+      odgw4.map(_.coordinates ~= odgw2x) should beSome(true)
+
+      // Check magnitudes are sorted correctly
+      val mag1 = cwfs1.flatMap(magnitudeExtractor(RLikeBands)).map(_.value)
+      val mag2 = cwfs2.flatMap(magnitudeExtractor(RLikeBands)).map(_.value)
+      val mag3 = cwfs3.flatMap(magnitudeExtractor(RLikeBands)).map(_.value)
+      (mag3 < mag1 && mag2 < mag1) should beTrue
+
+    }
   }
 }
