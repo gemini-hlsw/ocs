@@ -17,7 +17,6 @@ class TelescopeForm extends JPanel {
         this.owner = owner;
         initComponents();
     }
-    JPanel panel1;
     final JPanel buttonPanel = new JPanel();
     private void initComponents() {
         final JPanel targetListPanel = new JPanel();
@@ -35,7 +34,6 @@ class TelescopeForm extends JPanel {
         tag = new JComboBox();
         final JLabel guideGroupNameLabel = new JLabel();
         guideGroupName = new TextBoxWidget();
-        panel1 = new JPanel();
         setBaseButton = new JButton();
         final CellConstraints cc = new CellConstraints();
 

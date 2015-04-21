@@ -731,7 +731,6 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                     getDataObject().setTargetEnvironment(env);
                     final SPTarget selTarget = TargetSelection.get(env, getNode());
                     if (env.getTargets().contains(selTarget)) {
-                        final Option<ObsContext> ctx = getObsContext(env);
                         if (_curPos != null) _curPos.deleteWatcher(posWatcher);
                         _curPos = selTarget;
                         if (_curPos != null) {
