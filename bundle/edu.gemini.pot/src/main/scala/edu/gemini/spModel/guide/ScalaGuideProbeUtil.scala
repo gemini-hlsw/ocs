@@ -30,15 +30,27 @@ object ScalaGuideProbeUtil {
           area.add(new Area(s))
           area
       }
+
+      // Base position coordinates.
+      val baseX = ctx.getBaseCoordinates.getRa.toArcsecs.getMagnitude
+      val baseY = ctx.getBaseCoordinates.getDec.toArcsecs.getMagnitude
+
       val vignettingSum = ctx.getSciencePositions.toList.foldLeft(0.0){
         case (currentSum,offset) =>
           // Find the probe arm adjustment, which consists of the arm angle and guide star location in arcsec.
           // If an adjustment exists, calculate the vignetting for this offset.
           val vignetting = probeArmGeometry.armAdjustment(ctx, coordinates, offset).map { armAdjustment =>
             // Adjust the science area for the current offset.
-            val x = -(offset.p.toNewModel.toNormalizedArcseconds)
-            val y = -(offset.q.toNewModel.toNormalizedArcseconds * flip)
-            val trans = AffineTransform.getTranslateInstance(x, y)
+            val offX = -(offset.p.toNewModel.toNormalizedArcseconds)
+            val offY = -(offset.q.toNewModel.toNormalizedArcseconds * flip)
+
+            // Instead of performing the intersection of the science area at its real position of (base pos + sci offset)
+            // and the probe arm at its real position of (base pos + guide star offset), we instead perform the
+            // intersection by factoring out the base position from both and translating the science area to sci offset
+            // and the probe arm position at guide star offset. This should always be equivalent.
+            // Since FeatureGeometry.transformScienceAreaForContext moves the science area to the base position, we
+            // move it back to (0,0) + offset in order to factor out the base position.
+            val trans = AffineTransform.getTranslateInstance(-baseX + offX, -baseY + offY)
             val adjScienceArea = scienceArea.transform(trans)
 
             val probeArmArea = probeArmShapes.foldLeft(new Area){
