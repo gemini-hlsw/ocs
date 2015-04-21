@@ -161,15 +161,15 @@ object PreliminaryMerge {
     def addDataObjectConflicts(in: Tree[MergeNode]): TryVcs[Tree[MergeNode]] = {
       val commonKeys = mc.remote.diffMap.keySet & mc.local.nodeMap.keySet
 
-      def dobConflicts(k: SPNodeKey): Boolean = {
-        lazy val local  = mc.local.nodeMap(k).getDataObject
-        lazy val remote = mc.remote.diffMap(k).rootLabel match {
-          case Modified(_, _, dob, _, _) => Some(dob)
-          case Unmodified(_)             => None
+      def dobConflicts(k: SPNodeKey): Boolean =
+        mc.local.version(k).compare(mc.remote.version(k)) === Conflicting && {
+          val local  = mc.local.nodeMap(k).getDataObject
+          val remote = mc.remote.diffMap(k).rootLabel match {
+            case Modified(_, _, dob, _, _) => Some(dob)
+            case Unmodified(_)             => None
+          }
+          remote.exists(dob => !DataObjectBlob.same(local, dob))
         }
-        mc.local.version(k).compare(mc.remote.version(k)) === Conflicting &&
-        remote.exists(dob => !DataObjectBlob.same(local, dob))
-      }
 
       val conflicts = commonKeys.collect { case k if dobConflicts(k) =>
         k -> mc.local.nodeMap(k).getDataObject
