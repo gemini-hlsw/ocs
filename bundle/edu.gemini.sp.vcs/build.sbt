@@ -18,12 +18,16 @@ osgiSettings
 
 ocsBundleSettings
 
-OsgiKeys.bundleActivator := Some("edu.gemini.sp.vcs.diff.osgi.Activator")
+OsgiKeys.bundleActivator := Some("edu.gemini.sp.vcs2.osgi.Activator")
 
 OsgiKeys.bundleSymbolicName := name.value
 
 OsgiKeys.dynamicImportPackage := Seq("")
 
+OsgiKeys.privatePackage := Seq(
+  "edu.gemini.sp.vcs2.osgi"
+)
+
 OsgiKeys.exportPackage := Seq(
   "edu.gemini.sp.vcs;-noimport:=true",
-  "edu.gemini.sp.vcs.diff")
+  "edu.gemini.sp.vcs2")
