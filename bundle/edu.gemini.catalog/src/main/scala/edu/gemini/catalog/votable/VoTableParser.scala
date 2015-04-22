@@ -62,8 +62,8 @@ case object UCAC4Filter extends MagnitudesFilter {
 
   // UCAC4 ignores A-mags
   override def ignoredMagnitudeField(v: FieldId) = v.id === "amag" || v.id === "e_amag"
-  // Magnitudes with value 20 and error over 0.9 are invalid
-  override def validMagnitude(m: Magnitude) = m.value =/= ucac4BadMagnitude || m.error.map(math.abs) < ucac4BadMagnitudeError
+  // Magnitudes with value 20 or error over or equal to 0.9 are invalid
+  override def validMagnitude(m: Magnitude) = m.value =/= ucac4BadMagnitude && m.error.map(math.abs) <= ucac4BadMagnitudeError
 
   override def findBand(id: FieldId, band: String): Option[MagnitudeBand] = (id.id, id.ucd) match {
     case ("gmag" | "e_gmag", ucd) if ucd.includes(UcdWord("em.opt.r")) => Some(MagnitudeBand._g)

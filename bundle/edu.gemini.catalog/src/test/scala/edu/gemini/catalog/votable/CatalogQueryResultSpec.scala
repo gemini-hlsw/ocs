@@ -21,21 +21,21 @@ class CatalogQueryResultSpec extends SpecificationWithJUnit {
     "be able to filter targets inside the requested range limit" in {
       val qc = CatalogQuery.catalogQuery(c, RadiusConstraint.between(Angle.zero, coneSearch), Some(noMagnitudeConstraint))
       // Filtering on search radius should give all back
-      unfiltered.filter(qc).targets.rows should be size 12
+      unfiltered.filter(qc).targets.rows should be size 11
     }
     "be able to filter targets to a specific ring" in {
       val qc = CatalogQuery.catalogQuery(c, RadiusConstraint.between(Angle.fromDegrees(0.05), coneSearch), Some(noMagnitudeConstraint))
       val filtered = unfiltered.filter(qc)
 
       // Filtering on search radius filters out 4 targets
-      filtered.targets.rows should be size 8
+      filtered.targets.rows should be size 7
     }
     "be able to filter by band" in {
       val qc = CatalogQuery.catalogQuery(c, RadiusConstraint.between(Angle.fromDegrees(0.05), coneSearch), Some(noMagnitudeConstraint))
       val filtered = unfiltered.filter(qc)
 
       // Filtering on search radius filters out 4 targets
-      filtered.targets.rows should be size 8
+      filtered.targets.rows should be size 7
     }
     "be able to filter by faintness on band j" in {
       val m = MagnitudeConstraints(MagnitudeBand.J, FaintnessConstraint(15.0), None)

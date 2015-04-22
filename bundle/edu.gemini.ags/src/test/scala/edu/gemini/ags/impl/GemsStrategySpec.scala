@@ -98,8 +98,8 @@ class GemsStrategySpec extends Specification with NoTimeConversions {
       results.head.criterion should beEqualTo(GemsCatalogSearchCriterion(GemsCatalogSearchKey(GemsGuideStarType.tiptilt, Wfs.Group.instance), CatalogSearchCriterion("Canopus Wave Front Sensor tiptilt", MagnitudeBand.R, MagnitudeRange(FaintnessConstraint(15.0), scala.Option(SaturationConstraint(7.5))), RadiusConstraint.between(Angle.zero, Angle.fromDegrees(0.01666666666665151)), scala.Option(Offset(0.0014984027777700248.degrees[OffsetP], 0.0014984027777700248.degrees[OffsetQ])), scala.Some(Angle.zero))))
       results(1).criterion.key should beEqualTo(GemsCatalogSearchKey(GemsGuideStarType.flexure, GsaoiOdgw.Group.instance))
       results(1).criterion should beEqualTo(GemsCatalogSearchCriterion(GemsCatalogSearchKey(GemsGuideStarType.flexure, GsaoiOdgw.Group.instance), CatalogSearchCriterion("On-detector Guide Window flexure", MagnitudeBand.H, MagnitudeRange(FaintnessConstraint(17.0), scala.Option(SaturationConstraint(8.0))), RadiusConstraint.between(Angle.zero, Angle.fromDegrees(0.01666666666665151)), scala.Option(Offset(0.0014984027777700248.degrees[OffsetP], 0.0014984027777700248.degrees[OffsetQ])), scala.Some(Angle.zero))))
-      results.head.results should be size 7
-      results(1).results should be size 12
+      results.head.results should be size 5
+      results(1).results should be size 9
 
       val selection = Await.result(TestGemsStrategy("/gems_sn1987A.xml").select(ctx, ProbeLimitsTable.loadOrThrow()), 2.minutes)
       selection.map(_.posAngle) should beSome(Angle.zero)
@@ -114,14 +114,14 @@ class GemsStrategySpec extends Specification with NoTimeConversions {
       val cwfs3 = assignments.find(_.guideProbe == Canopus.Wfs.cwfs3).map(_.guideStar)
       val gp4 = assignments.find(_.guideProbe == GsaoiOdgw.odgw2).map(_.guideProbe)
       val odgw2 = assignments.find(_.guideProbe == GsaoiOdgw.odgw2).map(_.guideStar)
-      cwfs1.map(_.name) should beSome("104-014547")
-      cwfs2.map(_.name) should beSome("104-014564")
+      cwfs1.map(_.name) should beSome("104-014597")
+      cwfs2.map(_.name) should beSome("104-014547")
       cwfs3.map(_.name) should beSome("104-014608")
       odgw2.map(_.name) should beSome("104-014556")
 
-      val cwfs1x = Coordinates(RightAscension.fromAngle(Angle.fromHMS(5, 35, 18.423).getOrElse(Angle.zero)), Declination.fromAngle(Angle.zero - Angle.fromDMS(69, 16, 30.67).getOrElse(Angle.zero)).getOrElse(Declination.zero))
+      val cwfs1x = Coordinates(RightAscension.fromAngle(Angle.fromHMS(5, 35, 32.630).getOrElse(Angle.zero)), Declination.fromAngle(Angle.zero - Angle.fromDMS(69, 15, 48.64).getOrElse(Angle.zero)).getOrElse(Declination.zero))
       cwfs1.map(_.coordinates ~= cwfs1x) should beSome(true)
-      val cwfs2x = Coordinates(RightAscension.fromAngle(Angle.fromHMS(5, 35, 24.994).getOrElse(Angle.zero)), Declination.fromAngle(Angle.zero - Angle.fromDMS(69, 16, 04.77).getOrElse(Angle.zero)).getOrElse(Declination.zero))
+      val cwfs2x = Coordinates(RightAscension.fromAngle(Angle.fromHMS(5, 35, 18.423).getOrElse(Angle.zero)), Declination.fromAngle(Angle.zero - Angle.fromDMS(69, 16, 30.67).getOrElse(Angle.zero)).getOrElse(Declination.zero))
       cwfs2.map(_.coordinates ~= cwfs2x) should beSome(true)
       val cwfs3x = Coordinates(RightAscension.fromAngle(Angle.fromHMS(5, 35, 36.409).getOrElse(Angle.zero)), Declination.fromAngle(Angle.zero - Angle.fromDMS(69, 16, 24.17).getOrElse(Angle.zero)).getOrElse(Declination.zero))
       cwfs3.map(_.coordinates ~= cwfs3x) should beSome(true)
