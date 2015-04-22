@@ -1,7 +1,6 @@
 package edu.gemini.itc.shared
 
 import edu.gemini.spModel.core.Peer
-import edu.gemini.util.security.auth.keychain.KeyChain
 import edu.gemini.util.trpc.client.TrpcClient
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -13,7 +12,7 @@ import scalaz.{Failure, Success, Validation}
  * Depending on the observation type (imaging vs. spectroscopy) and calculation method different results are returned.
  */
 sealed trait ItcCalcResult
-final case class ItcImagingResult(singleSNRatio: Double, totalSNRatio: Double, peakPixelFlux: Double) extends ItcCalcResult
+final case class ItcImagingResult(source: SourceDefinition, singleSNRatio: Double, totalSNRatio: Double, peakPixelFlux: Double) extends ItcCalcResult
 final case class ItcSpectroscopyResult(/*TODO*/) extends ItcCalcResult
 
 /**

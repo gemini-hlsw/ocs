@@ -16,7 +16,7 @@ import edu.gemini.spModel.guide.GuideProbe
 import edu.gemini.spModel.rich.shared.immutable.asScalaOpt
 import edu.gemini.spModel.target.SPTarget
 import edu.gemini.spModel.target.env.{GuideProbeTargets, TargetEnvironment}
-import edu.gemini.spModel.target.system.{ITarget, DMS}
+import edu.gemini.spModel.target.system.ITarget
 import edu.gemini.spModel.telescope.IssPort
 
 import scala.reflect.ClassTag
@@ -167,9 +167,21 @@ object ConfigExtractor {
     }
   }
 
-  private def extractObservingWavelength(c: Config): String \/ Double =
-    // Note: observing wavelength will only be available if instrument is configured for spectroscopy
-    if (c.containsItem(ObsWavelengthKey)) extractDoubleFromString(c, ObsWavelengthKey) else 0.0.right
+  // Gets the observing wavelength from the configuration.
+  // For imaging this corresponds to the mid point of the selected filter, for spectroscopy the value
+  // is defined by the user. Unit is micro-meter [um]. Note that for Acq Cam the observing wavelength
+  // is not defined, instead we need to get the wavelength from the color filter.
+  def extractObservingWavelength(c: Config): String \/ Double = {
+    val instrument = extract[String](c, InstrumentKey).getOrElse("")
+    instrument match {
+      case "AcqCam" =>
+        extract[AcqCamParams.ColorFilter](c, ColorFilterKey).rightMap(_.getCentralWavelength.toDouble)
+      case _ =>
+        if (c.containsItem(ObsWavelengthKey)) extractDoubleFromString(c, ObsWavelengthKey)
+        else "Observing wavelength is not defined (missing filter?)".left
+    }
+  }
+
 
   // Extract a value of the given type from the configuration
   private def extract[A](c: Config, key: ItemKey)(implicit clazz: ClassTag[A]): String \/ A =
