@@ -36,7 +36,7 @@ final class ConicNameEditor(date: HorizonsIO[Date]) extends JPanel with Telescop
         }
 
       override def textBoxAction(tbwe: TextBoxWidget): Unit =
-        lookup.runAsyncAndReportErrors
+        lookup.invokeAndWait
 
     })
   }

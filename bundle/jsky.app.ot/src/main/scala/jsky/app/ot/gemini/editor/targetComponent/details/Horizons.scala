@@ -57,17 +57,15 @@ object Horizons {
 
   /** Syntax for HorizonsIO */
   implicit class HorizonsIOOps[A](hio: HorizonsIO[A]) {
-    def runAsyncAndReportErrors: Unit = // TODO: swing thread, somehow
-      hio.run.runAsync { e =>
-        e.leftMap[Horizons.HorizonsFailure](HorizonsFailure.fromThrowable).join match {
-          case  \/-(())                   => // success!
-          case -\/(CancelOrError)         => // do nothing!
-          case -\/(IOFailure(e))          => DialogUtil.error(e)
-          case -\/(UnknownError(t))       => DialogUtil.error(t)
-          case -\/(e @ (InvalidQuery |
-                        MultipleResults)) => DialogUtil.error("Internal error: " + e)
-          case -\/(e)                     => DialogUtil.error(e.message)
-        }
+    def invokeAndWait: Unit = // TODO: swing thread, somehow
+      hio.run.attemptRun.leftMap(HorizonsFailure.fromThrowable).join match {
+        case  \/-(())                   => // success!
+        case -\/(CancelOrError)         => // do nothing!
+        case -\/(IOFailure(e))          => DialogUtil.error(e)
+        case -\/(UnknownError(t))       => DialogUtil.error(t)
+        case -\/(e @ (InvalidQuery |
+                      MultipleResults)) => DialogUtil.error("Internal error: " + e)
+        case -\/(e)                     => DialogUtil.error(e.message)
       }
   }
 

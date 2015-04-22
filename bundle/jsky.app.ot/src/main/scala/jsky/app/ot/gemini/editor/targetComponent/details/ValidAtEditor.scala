@@ -89,7 +89,7 @@ abstract class ValidAtEditor[A <: ITarget](empty: A) extends JPanel with Telesco
    */
   case class LookupListener(plot: Boolean) extends ActionListener {
     override def actionPerformed(e: ActionEvent): Unit =
-      lookupAndSet(plot, useCache = true).runAsyncAndReportErrors
+      lookupAndSet(plot, useCache = true).invokeAndWait
   }
 
   setLayout(new GridBagLayout)
