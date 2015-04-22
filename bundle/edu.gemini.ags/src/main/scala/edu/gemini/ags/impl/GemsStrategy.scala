@@ -1,5 +1,6 @@
 package edu.gemini.ags.impl
 
+import edu.gemini.ags.api.AgsAnalysis._
 import edu.gemini.ags.api.{AgsAnalysis, AgsMagnitude, AgsStrategy}
 import edu.gemini.ags.api.AgsStrategy.{Assignment, Estimate, Selection}
 import edu.gemini.ags.api.defaultProbeBands
@@ -105,8 +106,8 @@ trait GemsStrategy extends AgsStrategy {
     cans ++ odgw
   }
 
-  // TODO Implement for GEMS
-  override protected [ags] def analyze(ctx: ObsContext, mt: MagnitudeTable, guideProbe: ValidatableGuideProbe, guideStar: SiderealTarget): Option[AgsAnalysis] = None
+  override protected [ags] def analyze(ctx: ObsContext, mt: MagnitudeTable, guideProbe: ValidatableGuideProbe, guideStar: SiderealTarget): Option[AgsAnalysis] =
+    AgsAnalysis.analysis(ctx, mt, guideProbe, guideStar, probeBands)
 
   override def analyze(ctx: ObsContext, mt: MagnitudeTable): List[AgsAnalysis] = {
     import AgsAnalysis._

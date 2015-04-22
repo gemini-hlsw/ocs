@@ -4,6 +4,7 @@ import edu.gemini.ags.api.{AgsGuideQuality, AgsAnalysis, AgsStrategy, magnitudeE
 import edu.gemini.ags.api.AgsStrategy.Estimate
 import edu.gemini.ags.conf.ProbeLimitsTable
 import edu.gemini.ags.gems._
+import edu.gemini.ags.api.defaultProbeBands
 import edu.gemini.catalog.api._
 import edu.gemini.catalog.votable.TestVoTableBackend
 import edu.gemini.shared.util.immutable.{Some => JSome}
@@ -14,7 +15,7 @@ import edu.gemini.spModel.gemini.gems.{Gems, Canopus}
 import edu.gemini.spModel.gemini.gsaoi.{Gsaoi, GsaoiOdgw}
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality
 import edu.gemini.spModel.gems.{GemsGuideStarType, GemsTipTiltMode}
-import edu.gemini.spModel.guide.GuideProbe
+import edu.gemini.spModel.guide.{GuideSpeed, GuideProbe}
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.target.SPTarget
 import edu.gemini.spModel.target.env.TargetEnvironment
@@ -133,11 +134,25 @@ class GemsStrategySpec extends Specification with NoTimeConversions {
       val newCtx = selection.map(applySelection(ctx, _)).getOrElse(ctx)
       val analysis = gemsStrategy.analyze(newCtx, ProbeLimitsTable.loadOrThrow())
       analysis.collect {
-        case AgsAnalysis.Usable(Canopus.Wfs.cwfs1, st, _, AgsGuideQuality.PossiblyUnusable, _) if st.some == cwfs1    => Canopus.Wfs.cwfs1
-        case AgsAnalysis.Usable(Canopus.Wfs.cwfs2, st, _, AgsGuideQuality.DeliversRequestedIq, _) if st.some == cwfs2 => Canopus.Wfs.cwfs2
-        case AgsAnalysis.Usable(Canopus.Wfs.cwfs3, st, _, AgsGuideQuality.DeliversRequestedIq, _) if st.some == cwfs3 => Canopus.Wfs.cwfs3
-        case AgsAnalysis.Usable(GsaoiOdgw.odgw2, st, _, AgsGuideQuality.DeliversRequestedIq, _) if st.some == odgw2   => GsaoiOdgw.odgw2
+        case AgsAnalysis.Usable(Canopus.Wfs.cwfs1, st, GuideSpeed.SLOW, AgsGuideQuality.PossiblyUnusable, _) if st.some == cwfs1    => Canopus.Wfs.cwfs1
+        case AgsAnalysis.Usable(Canopus.Wfs.cwfs2, st, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq, _) if st.some == cwfs2 => Canopus.Wfs.cwfs2
+        case AgsAnalysis.Usable(Canopus.Wfs.cwfs3, st, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq, _) if st.some == cwfs3 => Canopus.Wfs.cwfs3
+        case AgsAnalysis.Usable(GsaoiOdgw.odgw2, st, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq, _) if st.some == odgw2   => GsaoiOdgw.odgw2
       } should beEqualTo(List(Canopus.Wfs.cwfs1, Canopus.Wfs.cwfs2, Canopus.Wfs.cwfs3, GsaoiOdgw.odgw2))
+
+      // Analyze per probe
+      cwfs1.map { s =>
+        gemsStrategy.analyze(newCtx, ProbeLimitsTable.loadOrThrow(), Canopus.Wfs.cwfs1, s).exists(_ == AgsAnalysis.Usable(Canopus.Wfs.cwfs1, s, GuideSpeed.SLOW, AgsGuideQuality.PossiblyUnusable, defaultProbeBands(MagnitudeBand.R)))
+      } should beSome(true)
+      cwfs2.map { s =>
+        gemsStrategy.analyze(newCtx, ProbeLimitsTable.loadOrThrow(), Canopus.Wfs.cwfs2, s).exists(_ == AgsAnalysis.Usable(Canopus.Wfs.cwfs2, s, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq, defaultProbeBands(MagnitudeBand.R)))
+      } should beSome(true)
+      cwfs3.map { s =>
+        gemsStrategy.analyze(newCtx, ProbeLimitsTable.loadOrThrow(), Canopus.Wfs.cwfs3, s).exists(_ == AgsAnalysis.Usable(Canopus.Wfs.cwfs3, s, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq, defaultProbeBands(MagnitudeBand.R)))
+      } should beSome(true)
+      odgw2.map { s =>
+        gemsStrategy.analyze(newCtx, ProbeLimitsTable.loadOrThrow(), GsaoiOdgw.odgw2, s).exists(_ == AgsAnalysis.Usable(GsaoiOdgw.odgw2, s, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq, defaultProbeBands(MagnitudeBand.R)))
+      } should beSome(true)
     }
     "support search/select and analyze on TYC 8345-1155-1" in {
       val ra = Angle.fromHMS(17, 25, 27.529).getOrElse(Angle.zero)
@@ -191,11 +206,24 @@ class GemsStrategySpec extends Specification with NoTimeConversions {
       val newCtx = selection.map(applySelection(ctx, _)).getOrElse(ctx)
       val analysis = gemsStrategy.analyze(newCtx, ProbeLimitsTable.loadOrThrow())
       analysis.collect {
-        case AgsAnalysis.Usable(Canopus.Wfs.cwfs1, st, _, AgsGuideQuality.DeliversRequestedIq, _) if st.some == cwfs1 => Canopus.Wfs.cwfs1
-        case AgsAnalysis.Usable(Canopus.Wfs.cwfs2, st, _, AgsGuideQuality.DeliversRequestedIq, _) if st.some == cwfs2 => Canopus.Wfs.cwfs2
-        case AgsAnalysis.Usable(Canopus.Wfs.cwfs3, st, _, AgsGuideQuality.DeliversRequestedIq, _) if st.some == cwfs3 => Canopus.Wfs.cwfs3
-        case AgsAnalysis.Usable(GsaoiOdgw.odgw4, st, _, AgsGuideQuality.DeliversRequestedIq, _) if st.some == odgw4   => GsaoiOdgw.odgw4
+        case AgsAnalysis.Usable(Canopus.Wfs.cwfs1, st, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq, _) if st.some == cwfs1 => Canopus.Wfs.cwfs1
+        case AgsAnalysis.Usable(Canopus.Wfs.cwfs2, st, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq, _) if st.some == cwfs2 => Canopus.Wfs.cwfs2
+        case AgsAnalysis.Usable(Canopus.Wfs.cwfs3, st, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq, _) if st.some == cwfs3 => Canopus.Wfs.cwfs3
+        case AgsAnalysis.Usable(GsaoiOdgw.odgw4, st, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq, _) if st.some == odgw4   => GsaoiOdgw.odgw4
       } should beEqualTo(List(Canopus.Wfs.cwfs1, Canopus.Wfs.cwfs2, Canopus.Wfs.cwfs3, GsaoiOdgw.odgw4))
+      // Analyze per probe
+      cwfs1.map { s =>
+        gemsStrategy.analyze(newCtx, ProbeLimitsTable.loadOrThrow(), Canopus.Wfs.cwfs1, s).exists(_ == AgsAnalysis.Usable(Canopus.Wfs.cwfs1, s, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq, defaultProbeBands(MagnitudeBand.R)))
+      } should beSome(true)
+      cwfs2.map { s =>
+        gemsStrategy.analyze(newCtx, ProbeLimitsTable.loadOrThrow(), Canopus.Wfs.cwfs2, s).exists(_ == AgsAnalysis.Usable(Canopus.Wfs.cwfs2, s, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq, defaultProbeBands(MagnitudeBand.R)))
+      } should beSome(true)
+      cwfs3.map { s =>
+        gemsStrategy.analyze(newCtx, ProbeLimitsTable.loadOrThrow(), Canopus.Wfs.cwfs3, s).exists(_ == AgsAnalysis.Usable(Canopus.Wfs.cwfs3, s, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq, defaultProbeBands(MagnitudeBand.R)))
+      } should beSome(true)
+      odgw4.map { s =>
+        gemsStrategy.analyze(newCtx, ProbeLimitsTable.loadOrThrow(), GsaoiOdgw.odgw4, s).exists(_ == AgsAnalysis.Usable(GsaoiOdgw.odgw4, s, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq, defaultProbeBands(MagnitudeBand.R)))
+      } should beSome(true)
     }
     "support search/select and analyze on M6" in {
       val ra = Angle.fromHMS(17, 40, 20.0).getOrElse(Angle.zero)
@@ -246,16 +274,30 @@ class GemsStrategySpec extends Specification with NoTimeConversions {
       val mag3 = cwfs3.flatMap(magnitudeExtractor(RLikeBands)).map(_.value)
       (mag3 < mag1 && mag2 < mag1) should beTrue
 
-            // Analyze as a whole
+      // Analyze as a whole
       val newCtx = selection.map(applySelection(ctx, _)).getOrElse(ctx)
       val analysis = gemsStrategy.analyze(newCtx, ProbeLimitsTable.loadOrThrow())
-      analysis.foreach(println)
       analysis.collect {
-        case AgsAnalysis.Usable(Canopus.Wfs.cwfs1, st, _, AgsGuideQuality.PossiblyUnusable, _) if st.some == cwfs1 => Canopus.Wfs.cwfs1
-        case AgsAnalysis.Usable(Canopus.Wfs.cwfs2, st, _, AgsGuideQuality.DeliversRequestedIq, _) if st.some == cwfs2 => Canopus.Wfs.cwfs2
-        case AgsAnalysis.Usable(Canopus.Wfs.cwfs3, st, _, AgsGuideQuality.DeliversRequestedIq, _) if st.some == cwfs3 => Canopus.Wfs.cwfs3
+        case AgsAnalysis.Usable(Canopus.Wfs.cwfs1, st, GuideSpeed.SLOW, AgsGuideQuality.PossiblyUnusable, _) if st.some == cwfs1 => Canopus.Wfs.cwfs1
+        case AgsAnalysis.Usable(Canopus.Wfs.cwfs2, st, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq, _) if st.some == cwfs2 => Canopus.Wfs.cwfs2
+        case AgsAnalysis.Usable(Canopus.Wfs.cwfs3, st, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq, _) if st.some == cwfs3 => Canopus.Wfs.cwfs3
         case AgsAnalysis.NotReachable(GsaoiOdgw.odgw2, st, _) if st.some == odgw2   => GsaoiOdgw.odgw2
       } should beEqualTo(List(Canopus.Wfs.cwfs1, Canopus.Wfs.cwfs2, Canopus.Wfs.cwfs3, GsaoiOdgw.odgw2))
+
+      // Analyze per probe
+      cwfs1.map { s =>
+        gemsStrategy.analyze(newCtx, ProbeLimitsTable.loadOrThrow(), Canopus.Wfs.cwfs1, s).exists(_ == AgsAnalysis.Usable(Canopus.Wfs.cwfs1, s, GuideSpeed.SLOW, AgsGuideQuality.PossiblyUnusable, defaultProbeBands(MagnitudeBand.R)))
+      } should beSome(true)
+      cwfs2.map { s =>
+        gemsStrategy.analyze(newCtx, ProbeLimitsTable.loadOrThrow(), Canopus.Wfs.cwfs2, s).exists(_ == AgsAnalysis.Usable(Canopus.Wfs.cwfs2, s, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq, defaultProbeBands(MagnitudeBand.R)))
+      } should beSome(true)
+      cwfs3.map { s =>
+        gemsStrategy.analyze(newCtx, ProbeLimitsTable.loadOrThrow(), Canopus.Wfs.cwfs3, s).exists(_ == AgsAnalysis.Usable(Canopus.Wfs.cwfs3, s, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq, defaultProbeBands(MagnitudeBand.R)))
+      } should beSome(true)
+      odgw2.map { s =>
+        gemsStrategy.analyze(newCtx, ProbeLimitsTable.loadOrThrow(), GsaoiOdgw.odgw2, s).exists(_ == AgsAnalysis.NotReachable(GsaoiOdgw.odgw2, s, defaultProbeBands(MagnitudeBand.R)))
+      } should beSome(true)
+
     }
   }
 
