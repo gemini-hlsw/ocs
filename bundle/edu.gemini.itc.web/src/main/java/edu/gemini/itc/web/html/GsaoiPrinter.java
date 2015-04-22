@@ -1,11 +1,10 @@
 package edu.gemini.itc.web.html;
 
 import edu.gemini.itc.gems.Gems;
-import edu.gemini.itc.gems.GemsParameters;
 import edu.gemini.itc.gsaoi.Camera;
 import edu.gemini.itc.gsaoi.Gsaoi;
-import edu.gemini.itc.gsaoi.GsaoiParameters;
 import edu.gemini.itc.gsaoi.GsaoiRecipe;
+import edu.gemini.itc.shared.GsaoiParameters;
 import edu.gemini.itc.shared.ImagingResult;
 import edu.gemini.itc.shared.Parameters;
 
@@ -18,9 +17,9 @@ public final class GsaoiPrinter extends PrinterBase {
 
     private final GsaoiRecipe recipe;
 
-    public GsaoiPrinter(final Parameters p, final GsaoiParameters ip, final GemsParameters gems, final PrintWriter out) {
+    public GsaoiPrinter(final Parameters p, final GsaoiParameters ip, final PrintWriter out) {
         super(out);
-        recipe = new GsaoiRecipe(p.source(), p.observation(), p.conditions(), ip, p.telescope(), gems);
+        recipe = new GsaoiRecipe(p.source(), p.observation(), p.conditions(), ip, p.telescope());
     }
 
     /**

@@ -3,24 +3,27 @@ package jsky.app.ot.editor.seq
 import java.awt.Color
 import javax.swing.table.AbstractTableModel
 
-import edu.gemini.itc.shared.TelescopeDetails.Wfs
+import edu.gemini.ags.api.AgsRegistrar
 import edu.gemini.itc.shared._
 import edu.gemini.pot.sp.SPComponentType
 import edu.gemini.pot.sp.SPComponentType._
 import edu.gemini.spModel.config.ConfigBridge
 import edu.gemini.spModel.config.map.ConfigValMapInstances
 import edu.gemini.spModel.config2.{ConfigSequence, ItemKey}
-import edu.gemini.spModel.core.{Peer, Site}
-import edu.gemini.spModel.gemini.gmos.GmosCommonType
-import jsky.app.ot.OT
+import edu.gemini.spModel.core.Peer
+import edu.gemini.spModel.guide.GuideProbe
+import edu.gemini.spModel.obs.context.ObsContext
+import edu.gemini.spModel.rich.shared.immutable.asScalaOpt
+import edu.gemini.spModel.target.env.TargetEnvironment
+import edu.gemini.spModel.telescope.IssPort
 import jsky.app.ot.userprefs.observer.ObservingPeer
 import jsky.app.ot.util.OtColor
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.swing.{Swing, Table}
-
 import scalaz.Scalaz._
+import scalaz._
 
 /**
  * A table to display ITC calculation results to users.
@@ -72,40 +75,57 @@ trait ItcTable extends Table {
       List("Not Implemented Yet").fail
     }
 
-  protected def calculateImaging(peer: Peer, ins: SPComponentType, c: ItcUniqueConfig): Future[ItcService.Result] =
-    ins match {
-      case INSTRUMENT_GMOS | INSTRUMENT_GMOSSOUTH => calculateImagingGmos(peer, ins, c)
-      case _                                      => Future { List("Not Implemented Yet").fail }
+  protected def calculateImaging(peer: Peer, instrument: SPComponentType, c: ItcUniqueConfig): Future[ItcService.Result] = {
+    val s = for {
+      port        <- extractPort()
+      targetEnv   <- extractTargetEnv()
+      probe       <- extractGuideProbe()
+      tele        <- ConfigExtractor.extractTelescope(port, probe, targetEnv, c.config)
+      ins         <- ConfigExtractor.extractInstrumentDetails(instrument, probe, targetEnv, c.config)
+    } yield {
+      calculateImaging(peer, c, ins, tele)
     }
 
-  protected def calculateImagingGmos(peer: Peer, ins: SPComponentType, c: ItcUniqueConfig): Future[ItcService.Result] = {
-    val port = owner.getContextIssPort
-    //val wfs  = ??? TODO
+    s match {
+      case -\/(l) => Future { List(l).fail }
+      case \/-(r) => r
+    }
+
+  }
+
+  protected def calculateImaging(peer: Peer, c: ItcUniqueConfig, ins: InstrumentDetails, tele: TelescopeDetails): Future[ItcService.Result] = {
     val src  = new SourceDefinition(PointSource(20.0, BrightnessUnit.MAG), LibraryStar("A0V"), WavebandDefinition.R, 0.0)
     val obs  = new ObservationDetails(ImagingSN(c.count, c.singleExposureTime, 1.0), AutoAperture(5.0))
-    val tele = new TelescopeDetails(TelescopeDetails.Coating.SILVER, port, Wfs.OIWFS)
-
     val qual = owner.getContextSiteQuality
     val cond = new ObservingConditions(qual.getImageQuality, qual.getCloudCover, qual.getWaterVapor, qual.getSkyBackground, 1.5)
 
-    // get the instrument configuration
-    val filter    = c.config.getItemValue(new ItemKey("instrument:filter")).asInstanceOf[GmosCommonType.Filter]
-    val grating   = c.config.getItemValue(new ItemKey("instrument:disperser")).asInstanceOf[GmosCommonType.Disperser]
-    val wavelen   = 500.0 // ??? TODO
-    val fpmask    = c.config.getItemValue(new ItemKey("instrument:fpu")).asInstanceOf[GmosCommonType.FPUnit]
-    val spatBin   = c.config.getItemValue(new ItemKey("instrument:ccdXBinning")).asInstanceOf[GmosCommonType.Binning]
-    val specBin   = c.config.getItemValue(new ItemKey("instrument:ccdYBinning")).asInstanceOf[GmosCommonType.Binning]
-    val ccdType   = c.config.getItemValue(new ItemKey("instrument:detectorManufacturer")).asInstanceOf[GmosCommonType.DetectorManufacturer]
-    val ifuMethod = None
-    val site      = if (c.config.getItemValue(new ItemKey("instrument:instrument")).equals("GMOS-N")) Site.GN else Site.GS
-    val ins       = GmosParameters(filter, grating, wavelen, fpmask, spatBin.getValue, specBin.getValue, ifuMethod, ccdType, site)
-
     // Do the service call
     ItcService.calculate(peer, src, obs, cond, tele, ins).
+
     // whenever service call is finished notify table to update its contents
     andThen {
       case _ => Swing.onEDT(this.peer.getModel.asInstanceOf[AbstractTableModel].fireTableDataChanged())
     }
+
+  }
+
+  private def extractPort(): String \/ IssPort =
+    Option(owner.getContextIssPort).fold("No port information available".left[IssPort])(_.right)
+
+  private def extractTargetEnv(): String \/ TargetEnvironment =
+    Option(owner.getContextTargetEnv).fold("No target environment available".left[TargetEnvironment])(_.right)
+
+  private def extractGuideProbe(): String \/ GuideProbe = {
+    val o = for {
+      observation         <- Option(owner.getContextObservation)
+      obsContext          <- ObsContext.create(observation).asScalaOpt
+      agsStrategy         <- AgsRegistrar.currentStrategy(obsContext)
+
+    // Except for Gems we have only one guider, so in order to decide the "type" (AOWFS, OIWFS, PWFS)
+    // we take a shortcut here and just look at the first guider we get from the strategy.
+    } yield agsStrategy.guideProbes.headOption
+
+    o.flatten.fold("Could not identify ags strategy or guide probe type".left[GuideProbe])(_.right)
   }
 
 }

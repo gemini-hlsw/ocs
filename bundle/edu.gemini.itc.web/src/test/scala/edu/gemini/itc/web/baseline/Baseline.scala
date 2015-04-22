@@ -2,17 +2,12 @@ package edu.gemini.itc.web.baseline
 
 import java.io.{ByteArrayOutputStream, File, PrintWriter}
 
-import edu.gemini.itc.acqcam.AcquisitionCamParameters
 import edu.gemini.itc.baseline.util.Fixture
-import edu.gemini.itc.flamingos2.Flamingos2Parameters
-import edu.gemini.itc.gmos.GmosRecipe
 import edu.gemini.itc.gnirs.GnirsParameters
-import edu.gemini.itc.gsaoi.{GsaoiParameters, GsaoiRecipe}
-import edu.gemini.itc.michelle.{MichelleParameters, MichelleRecipe}
-import edu.gemini.itc.nifs.{NifsParameters, NifsRecipe}
-import edu.gemini.itc.niri.{NiriParameters, NiriRecipe}
+import edu.gemini.itc.michelle.MichelleParameters
+import edu.gemini.itc.nifs.NifsParameters
 import edu.gemini.itc.shared._
-import edu.gemini.itc.trecs.{TRecsParameters, TRecsRecipe}
+import edu.gemini.itc.trecs.TRecsParameters
 import edu.gemini.itc.web.html._
 
 import scala.io.Source
@@ -106,16 +101,16 @@ object Baseline {
     cookRecipe(w => new GnirsPrinter(Parameters(f.src, f.odp, f.ocp, f.tep), f.ins, f.pdp, w))
 
   def executeGsaoiRecipe(f: Fixture[GsaoiParameters]): Output =
-    cookRecipe(w => new GsaoiPrinter(Parameters(f.src, f.odp, f.ocp, f.tep), f.ins, f.gem.get, w))
+    cookRecipe(w => new GsaoiPrinter(Parameters(f.src, f.odp, f.ocp, f.tep), f.ins, w))
 
   def executeMichelleRecipe(f: Fixture[MichelleParameters]): Output =
     cookRecipe(w => new MichellePrinter(Parameters(f.src, f.odp, f.ocp, f.tep), f.ins, f.pdp, w))
 
   def executeNifsRecipe(f: Fixture[NifsParameters]): Output =
-    cookRecipe(w => new NifsPrinter(Parameters(f.src, f.odp, f.ocp, f.tep), f.ins, f.alt.get, f.pdp, w))
+    cookRecipe(w => new NifsPrinter(Parameters(f.src, f.odp, f.ocp, f.tep), f.ins, f.pdp, w))
 
   def executeNiriRecipe(f: Fixture[NiriParameters]): Output =
-    cookRecipe(w => new NiriPrinter(Parameters(f.src, f.odp, f.ocp, f.tep), f.ins, f.alt.get, f.pdp, w))
+    cookRecipe(w => new NiriPrinter(Parameters(f.src, f.odp, f.ocp, f.tep), f.ins, f.pdp, w))
 
   def executeTrecsRecipe(f: Fixture[TRecsParameters]): Output =
     cookRecipe(w => new TRecsPrinter(Parameters(f.src, f.odp, f.ocp, f.tep), f.ins, f.pdp, w))

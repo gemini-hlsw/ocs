@@ -1,10 +1,10 @@
 package edu.gemini.itc.baseline.util
 
-import edu.gemini.itc.altair.AltairParameters
-import edu.gemini.itc.gems.GemsParameters
-import edu.gemini.itc.shared.TelescopeDetails.{Coating, Wfs}
+import edu.gemini.itc.nifs.NifsParameters
+import edu.gemini.itc.shared.TelescopeDetails.Coating
 import edu.gemini.itc.shared._
 import edu.gemini.spModel.gemini.altair.AltairParams.{FieldLens, GuideStarType}
+import edu.gemini.spModel.guide.GuideProbe
 import edu.gemini.spModel.telescope.IssPort
 
 /**
@@ -17,39 +17,51 @@ case class Fixture[T <: InstrumentDetails](
                     odp: ObservationDetails,
                     ocp: ObservingConditions,
                     tep: TelescopeDetails,
-                    alt: Option[AltairParameters],
-                    gem: Option[GemsParameters],
                     pdp: PlottingDetails
                        ) {
-  val hash = Hash.calc(ins) + Hash.calc(src) + Hash.calc(ocp) + Hash.calc(odp) + Hash.calc(tep) + alt.fold(0)(Hash.calc) + gem.fold(0)(Hash.calc) + Hash.calc(pdp)
+  val hash = Hash.calc(ins) + Hash.calc(src) + Hash.calc(ocp) + Hash.calc(odp) + Hash.calc(tep) + Fixture.altairHash(ins) + Fixture.gemsHash(ins) + Hash.calc(pdp)
 }
 
 object Fixture {
 
+  // ===  TODO: this is temporary only to mimic old behavior
+  def altairHash(ins: InstrumentDetails): Int = ins match {
+    case i: NiriParameters => altairHash(i.altair)
+    case i: NifsParameters => altairHash(i.getAltair)
+    case _                 => 0
+  }
+  def altairHash(altair: Option[AltairParameters]): Int = altair match {
+    case None    => Hash.calc(new AltairParameters(0.0,  0.0, FieldLens.OUT,  GuideStarType.NGS))
+    case Some(a) => Hash.calc(a)
+  }
+  def gemsHash(ins: InstrumentDetails): Int = ins match {
+    case i: GsaoiParameters => Hash.calc(i.gems)
+    case _                 => 0
+  }
+  // ===
+
   // ==== Create fixtures by putting together matching sources, modes and configurations and mixing in conditions and telescope configurations
 
-  def rBandImgFixtures[T <: InstrumentDetails](configs: List[T], conds: List[ObservingConditions] = ObservingConditions, alt: List[AltairParameters] = List(), gem: List[GemsParameters] = List()) = fixtures(RBandSources, ImagingModes,      configs, conds, alt, gem)
+  def rBandImgFixtures[T <: InstrumentDetails](configs: List[T], conds: List[ObservingConditions] = ObservingConditions) = fixtures(RBandSources, ImagingModes,      configs, conds)
 
-  def kBandSpcFixtures[T <: InstrumentDetails](configs: List[T], conds: List[ObservingConditions] = ObservingConditions, alt: List[AltairParameters] = List(), gem: List[GemsParameters] = List()) = fixtures(KBandSources, SpectroscopyModes, configs, conds, alt, gem)
+  def kBandSpcFixtures[T <: InstrumentDetails](configs: List[T], conds: List[ObservingConditions] = ObservingConditions) = fixtures(KBandSources, SpectroscopyModes, configs, conds)
 
-  def kBandImgFixtures[T <: InstrumentDetails](configs: List[T], conds: List[ObservingConditions] = ObservingConditions, alt: List[AltairParameters] = List(), gem: List[GemsParameters] = List()) = fixtures(KBandSources, ImagingModes,      configs, conds, alt, gem)
+  def kBandImgFixtures[T <: InstrumentDetails](configs: List[T], conds: List[ObservingConditions] = ObservingConditions) = fixtures(KBandSources, ImagingModes,      configs, conds)
 
-  def nBandSpcFixtures[T <: InstrumentDetails](configs: List[T], conds: List[ObservingConditions] = ObservingConditions, alt: List[AltairParameters] = List(), gem: List[GemsParameters] = List()) = fixtures(NBandSources, SpectroscopyModes, configs, conds, alt, gem)
+  def nBandSpcFixtures[T <: InstrumentDetails](configs: List[T], conds: List[ObservingConditions] = ObservingConditions) = fixtures(NBandSources, SpectroscopyModes, configs, conds)
 
-  def nBandImgFixtures[T <: InstrumentDetails](configs: List[T], conds: List[ObservingConditions] = ObservingConditions, alt: List[AltairParameters] = List(), gem: List[GemsParameters] = List()) = fixtures(NBandSources, ImagingModes,      configs, conds, alt, gem)
+  def nBandImgFixtures[T <: InstrumentDetails](configs: List[T], conds: List[ObservingConditions] = ObservingConditions) = fixtures(NBandSources, ImagingModes,      configs, conds)
 
-  def qBandSpcFixtures[T <: InstrumentDetails](configs: List[T], conds: List[ObservingConditions] = ObservingConditions, alt: List[AltairParameters] = List(), gem: List[GemsParameters] = List()) = fixtures(QBandSources, SpectroscopyModes, configs, conds, alt, gem)
+  def qBandSpcFixtures[T <: InstrumentDetails](configs: List[T], conds: List[ObservingConditions] = ObservingConditions) = fixtures(QBandSources, SpectroscopyModes, configs, conds)
 
   // create fixtures from combinations of given input values
-  private def fixtures[T <: InstrumentDetails](sources: List[SourceDefinition], modes: List[ObservationDetails], configs: List[T], conds: List[ObservingConditions], alt: List[AltairParameters], gem: List[GemsParameters]) = for {
+  private def fixtures[T <: InstrumentDetails](sources: List[SourceDefinition], modes: List[ObservationDetails], configs: List[T], conds: List[ObservingConditions]) = for {
       src   <- sources
       odp   <- modes
       ins   <- configs
       cond  <- conds
       tele  <- TelescopeConfigurations
-      a     <- if (alt.isEmpty) List(None) else alt.map(Option(_))
-      g     <- if (gem.isEmpty) List(None) else gem.map(Option(_))
-    } yield Fixture(ins, src, odp, cond, tele, a, g, DummyPlottingParameters)
+    } yield Fixture(ins, src, odp, cond, tele, DummyPlottingParameters)
 
 
   // ==== IMAGING ANALYSIS MODES
@@ -192,19 +204,13 @@ object Fixture {
     for {
       coating       <- List(Coating.SILVER)       // don't test aluminium coating
       port          <- IssPort.values()
-      wfs           <- List(Wfs.OIWFS, Wfs.PWFS)  // don't use AOWFS (?)
+      wfs           <- List(GuideProbe.Type.OIWFS, GuideProbe.Type.PWFS)  // don't use AOWFS (?)
     } yield new TelescopeDetails(coating, port, wfs)
 
-  lazy val AltairConfigurations = List(
-    new AltairParameters(0.0,  0.0, FieldLens.OUT,  GuideStarType.NGS, false),  // no altair
-    new AltairParameters(4.0,  9.0, FieldLens.IN,   GuideStarType.NGS, true),   // altair with NGS and field lens
-    new AltairParameters(5.0, 10.0, FieldLens.OUT,  GuideStarType.NGS, true),   // altair with NGS w/o field lens
-    new AltairParameters(6.0, 10.0, FieldLens.IN,   GuideStarType.LGS, true)    // altair with LGS (must have field lens in)
-  )
-
-  lazy val NoAltair = List(
-    new AltairParameters(0.0,  0.0,  FieldLens.OUT,  GuideStarType.NGS, false)   // use this for spectroscopy
-  )
+  lazy val NoAltair    = None                                                                     // use this for spectroscopy
+  lazy val AltairNgsFL = Some(new AltairParameters(4.0,  9.0, FieldLens.IN,   GuideStarType.NGS)) // altair with NGS and field lens
+  lazy val AltairNgs   = Some(new AltairParameters(5.0, 10.0, FieldLens.OUT,  GuideStarType.NGS)) // altair with NGS w/o field lens
+  lazy val AltairLgs   = Some(new AltairParameters(6.0, 10.0, FieldLens.IN,   GuideStarType.LGS)) // altair with LGS (must have field lens in)
 
   // ==== PLOTTING PARAMETERS
   // NOTE: These values only impact the resulting graphs which are not part of the baseline.

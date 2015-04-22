@@ -51,10 +51,10 @@ public class Niri extends Instrument {
         _mode = odp.getMethod();
 
 
-        _Filter = Filter.fromFile(getPrefix(), np.getFilter().name(), getDirectory() + "/");
+        _Filter = Filter.fromFile(getPrefix(), np.filter().name(), getDirectory() + "/");
         addFilter(_Filter);
 
-        switch (np.getFilter()) {
+        switch (np.filter()) {
             case BBF_Y:
                 //The PK50 filter is used with many NIRI narrow-band filters but has
                 //not been included until now (20100105).  Most of NIRI's filter curves don't
@@ -69,36 +69,36 @@ public class Niri extends Instrument {
         addComponent(test);
 
         // F32_PV is only meant to be used for engineering, not supported in ITC
-        switch (np.getCamera()) {
+        switch (np.camera()) {
             case F32_PV:
-                throw new RuntimeException("ITC does not support the " + np.getCamera().displayValue() + " camera.");
+                throw new RuntimeException("ITC does not support the " + np.camera().displayValue() + " camera.");
         }
 
 
         //Test to see that all conditions for Spectroscopy are met
         if (_mode.isSpectroscopy()) {
-            if (np.getGrism() == Disperser.NONE)
+            if (np.grism() == Disperser.NONE)
                 throw new RuntimeException("Spectroscopy calculation method is selected but a grism" +
                         " is not.\nPlease select a grism and a " +
                         "focal plane mask in the Instrument " +
                         "configuration section.");
 
-            if (np.getFocalPlaneMask() == Mask.MASK_IMAGING)
+            if (np.mask() == Mask.MASK_IMAGING)
                 throw new RuntimeException("Spectroscopy calculation method is selected but a focal" +
                         " plane mask is not.\nPlease select a " +
                         "grism and a " +
                         "focal plane mask in the Instrument " +
                         "configuration section.");
 
-            switch (np.getCamera()) {
+            switch (np.camera()) {
                 case F14:
-                    throw new RuntimeException("The " + np.getCamera().displayValue() + " camera cannot be used in Spectroscopy");
+                    throw new RuntimeException("The " + np.camera().displayValue() + " camera cannot be used in Spectroscopy");
                 case F32:
-                    throw new RuntimeException("ITC does currently not support the " + np.getCamera().displayValue() + " camera in Spectroscopy.");
+                    throw new RuntimeException("ITC does currently not support the " + np.camera().displayValue() + " camera in Spectroscopy.");
             }
 
 
-            _grismOptics = new GrismOptics(getDirectory() + "/", np.getGrism().name()+"-grism", np.getCamera().name(),
+            _grismOptics = new GrismOptics(getDirectory() + "/", np.grism().name()+"-grism", np.camera().name(),
                     getFPMaskOffset(),
                     getStringSlitWidth());
 
@@ -107,11 +107,11 @@ public class Niri extends Instrument {
         }
 
         if (_mode.isImaging()) {
-            if (np.getGrism() != Disperser.NONE)
+            if (np.grism() != Disperser.NONE)
                 throw new RuntimeException("Imaging calculation method is selected but a grism" +
                         " is also selected.\nPlease deselect the " +
                         "grism or change the method to spectroscopy.");
-            if (np.getFocalPlaneMask() != Mask.MASK_IMAGING)
+            if (np.mask() != Mask.MASK_IMAGING)
                 throw new RuntimeException("Imaging calculation method is selected but a Focal" +
                         " Plane Mask is also selected.\nPlease " +
                         "deselect the Focal Plane Mask" +
@@ -119,7 +119,7 @@ public class Niri extends Instrument {
         }
 
 
-        switch (np.getCamera()) {
+        switch (np.camera()) {
             case F6:    addComponent(new F6Optics(getDirectory() + "/"));  break;
             case F14:   addComponent(new F14Optics(getDirectory() + "/")); break;
             case F32:   addComponent(new F32Optics(getDirectory() + "/")); break;
@@ -139,7 +139,7 @@ public class Niri extends Instrument {
      * @return Effective wavelength in nm
      */
     public int getEffectiveWavelength() {
-        switch (params.getGrism()) {
+        switch (params.grism()) {
             case NONE:   return (int) _Filter.getEffectiveWavelength();
             default:     return (int) _grismOptics.getEffectiveWavelength();
         }
@@ -150,7 +150,7 @@ public class Niri extends Instrument {
     }
 
     public double getReadNoise() {
-        switch (params.getReadMode()) {
+        switch (params.readMode()) {
             case IMAG_SPEC_NB:      return LOW_BACK_READ_NOISE;
             case IMAG_1TO25:        return MED_BACK_READ_NOISE;
             case IMAG_SPEC_3TO5:    return HIGH_BACK_READ_NOISE;
@@ -159,11 +159,11 @@ public class Niri extends Instrument {
     }
 
     public ReadMode getReadMode() {
-        return params.getReadMode();
+        return params.readMode();
     }
 
     public Mask getFocalPlaneMask() {
-        return params.getFocalPlaneMask();
+        return params.mask();
     }
 
     /**
@@ -177,7 +177,7 @@ public class Niri extends Instrument {
     // TODO: Verify with science and use unified getObservingStart() method from the base class?
     // TODO: Left as is for now to keep regression tests working.
     public double getObservingStart() {
-        switch (params.getGrism()) {
+        switch (params.grism()) {
             case NONE:  return _Filter.getStart();
             default:    return Math.max(_Filter.getStart(), _grismOptics.getStart());
         }
@@ -187,14 +187,14 @@ public class Niri extends Instrument {
     // TODO: Verify with science and use unified getObservingStart() method from the base class?
     // TODO: Left as is for now to keep regression tests working.
     public double getObservingEnd() {
-        switch (params.getGrism()) {
+        switch (params.grism()) {
             case NONE:  return _Filter.getEnd();
             default:    return Math.min(_Filter.getEnd(), _grismOptics.getEnd());
         }
     }
 
     public double getPixelSize() {
-        switch (params.getCamera()) {
+        switch (params.camera()) {
             case F6:  return super.getPixelSize();
             case F14: return 0.05;
             case F32: return 0.022;
@@ -207,7 +207,7 @@ public class Niri extends Instrument {
     }
 
     public double getWellDepthValue() {
-        switch (params.getWellDepth()) {
+        switch (params.wellDepth()) {
             case SHALLOW:   return LOW_BACK_WELL_DEPTH;
             case DEEP:      return HIGH_BACK_WELL_DEPTH;
             default:        throw new Error();
@@ -215,12 +215,12 @@ public class Niri extends Instrument {
     }
 
     public WellDepth getWellDepth() {
-        return params.getWellDepth();
+        return params.wellDepth();
     }
 
     public double getFPMask() {
         // TODO: use size values provided by masks, this will make an update of baseline necessary
-        switch (params.getFocalPlaneMask()) {
+        switch (params.mask()) {
             case MASK_1:        // f6 2pix center
             case MASK_4:        // f6 2pix blue
                 return 0.23;
@@ -239,7 +239,7 @@ public class Niri extends Instrument {
     }
 
     private String getFPMaskOffset() {
-        switch (params.getFocalPlaneMask()) {
+        switch (params.mask()) {
             case MASK_1:
             case MASK_2:
             case MASK_3:
@@ -255,7 +255,7 @@ public class Niri extends Instrument {
 
     private String getStringSlitWidth() {
         // TODO: use size values provided by masks, this will make an update of baseline necessary
-        switch (params.getFocalPlaneMask()) {
+        switch (params.mask()) {
             case MASK_1:        // f6 2pix center
             case MASK_4:        // f6 2pix blue
                 return "023";

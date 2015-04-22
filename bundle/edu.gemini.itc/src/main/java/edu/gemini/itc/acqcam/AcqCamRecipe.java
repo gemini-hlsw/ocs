@@ -7,7 +7,7 @@ import edu.gemini.spModel.core.Site;
 /**
  * This class performs the calculations for the Acquisition Camera used for imaging.
  */
-public final class AcqCamRecipe {
+public final class AcqCamRecipe implements ImagingRecipe {
 
     private final SourceDefinition _sdParameters;
     private final ObservationDetails _obsDetailParameters;

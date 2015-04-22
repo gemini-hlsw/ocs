@@ -7,7 +7,7 @@ import edu.gemini.spModel.core.Site;
 /**
  * This class performs the calculations for Flamingos 2 used for imaging.
  */
-public final class Flamingos2Recipe {
+public final class Flamingos2Recipe implements ImagingRecipe, SpectroscopyRecipe {
 
     private final Flamingos2Parameters _flamingos2Parameters;
     private final ObservingConditions _obsConditionParameters;
@@ -38,10 +38,10 @@ public final class Flamingos2Recipe {
      */
     private void validateInputParameters() {
         if (_obsDetailParameters.getMethod().isSpectroscopy()) {
-            switch (_flamingos2Parameters.getGrism()) {
+            switch (_flamingos2Parameters.grism()) {
                 case NONE: throw new IllegalArgumentException("In spectroscopy mode, a grism must be selected");
             }
-            switch (_flamingos2Parameters.getFPMask()) {
+            switch (_flamingos2Parameters.mask()) {
                 case FPU_NONE: throw new IllegalArgumentException("In spectroscopy mode, a FP must must be selected");
             }
         }

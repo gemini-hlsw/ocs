@@ -1,6 +1,6 @@
 package edu.gemini.itc.web.servlets;
 
-import edu.gemini.itc.acqcam.AcquisitionCamParameters;
+import edu.gemini.itc.shared.AcquisitionCamParameters;
 import edu.gemini.itc.shared.Parameters;
 import edu.gemini.itc.web.ITCRequest;
 import edu.gemini.itc.web.html.AcqCamPrinter;

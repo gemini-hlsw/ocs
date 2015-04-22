@@ -1,48 +1,77 @@
 package edu.gemini.itc.service
 
+import edu.gemini.itc.acqcam.AcqCamRecipe
+import edu.gemini.itc.flamingos2.Flamingos2Recipe
 import edu.gemini.itc.gmos.GmosRecipe
+import edu.gemini.itc.gnirs.GnirsParameters
+import edu.gemini.itc.gsaoi.GsaoiRecipe
+import edu.gemini.itc.michelle.MichelleParameters
+import edu.gemini.itc.nifs.NifsParameters
+import edu.gemini.itc.niri.NiriRecipe
 import edu.gemini.itc.operation.ImagingS2NMethodACalculation
 import edu.gemini.itc.shared._
+import edu.gemini.itc.trecs.TRecsParameters
 
 /**
  * The ITC service implementation.
- * A very first, very crude approximation of a future implementation... to be continued...
- * For now only GMOS imaging is supported, trying to execute this code with anything else will fail horribly.
+ *
+ * Note that all results are repacked in simplified Scala case classes in order not to leak out any of the
+ * implementation details of the underlying ITC functionality.
  */
 class ItcServiceImpl extends ItcService {
 
   import ItcService._
 
   def calculate(source: SourceDefinition, obs: ObservationDetails, cond: ObservingConditions, tele: TelescopeDetails, ins: InstrumentDetails): Result = try {
-    ins match {
-      case i: GmosParameters  => calculateGmos(source, obs, cond, tele, i)
-      case _                  => throw new NotImplementedError // TODO: no other instruments are implemented yet
-    }
+
+    if (obs.getMethod.isImaging)  calculateImaging(source, obs, cond, tele, ins)
+    else                          calculateSpectroscopy(source, obs, cond, tele, ins)
+
   } catch {
     // TODO: for now in most cases where a validation problem should be reported to the user the ITC code throws an exception instead
     case e: Throwable =>
+      e.printStackTrace()
       ItcResult.forException(e)
   }
 
-  private def calculateGmos(source: SourceDefinition, obs: ObservationDetails, cond: ObservingConditions, tele: TelescopeDetails, ins: GmosParameters): Result = {
-    val recipe = new GmosRecipe(source, obs, cond, ins, tele)
-    // TODO: we can simplify this once all recipes have a calculate method (instead of writeOutput())
-    val results: Array[ItcCalcResult] = obs.getMethod match {
-      case m: Imaging =>
-          // Repack the result in an immutable and simplified Scala case class
-          // (We don't want to leak out any of the internal ITC craziness here and it is also a good way
-          // to keep the service independent from the actual implementation.)
-          recipe.calculateImaging().map {
-            case r: ImagingResult => r.is2nCalc match {
-              case i: ImagingS2NMethodACalculation  => ItcImagingResult(i.singleSNRatio(), i.totalSNRatio(), r.peakPixelCount)
-              case _                                => throw new NotImplementedError()
-            }
-          }
+  // === Imaging
 
-      case s: Spectroscopy =>
-        throw new NotImplementedError()
+  private def calculateImaging(source: SourceDefinition, obs: ObservationDetails, cond: ObservingConditions, tele: TelescopeDetails, ins: InstrumentDetails): Result =
+    ins match {
+      case i: AcquisitionCamParameters    => imagingResult(new AcqCamRecipe(source, obs, cond, tele, i))
+      case i: Flamingos2Parameters        => imagingResult(new Flamingos2Recipe(source, obs, cond, i, tele))
+      case i: GmosParameters              => imagingArrayResult(new GmosRecipe(source, obs, cond, i, tele))
+      case i: GsaoiParameters             => imagingResult(new GsaoiRecipe(source, obs, cond, i, tele))
+      case i: MichelleParameters          => ItcResult.forMessage ("Imaging not implemented.")
+      case i: NiriParameters              => imagingResult(new NiriRecipe(source, obs, cond, i, tele))
+      case i: TRecsParameters             => ItcResult.forMessage ("Imaging not implemented.")
+      case _                              => ItcResult.forMessage("This instrument does not support imaging.")
     }
-    ItcResult.forCcds(results)
+
+  private def imagingResult(recipe: ImagingRecipe): Result =
+    ItcResult.forCcd(imgResult(recipe.calculateImaging()))
+
+  private def imagingArrayResult(recipe: ImagingArrayRecipe): Result =
+    ItcResult.forCcds(recipe.calculateImaging().map(imgResult))
+
+  private def imgResult(result: ImagingResult): ItcCalcResult = result.is2nCalc match {
+    case i: ImagingS2NMethodACalculation  => ItcImagingResult(i.singleSNRatio(), i.totalSNRatio(), result.peakPixelCount)
+    case _                                => throw new NotImplementedError
   }
+
+  // === Spectroscopy
+
+  private def calculateSpectroscopy(source: SourceDefinition, obs: ObservationDetails, cond: ObservingConditions, tele: TelescopeDetails, ins: InstrumentDetails): Result =
+    ins match {
+      case i: Flamingos2Parameters        => ItcResult.forMessage ("Spectroscopy not yet implemented.")
+      case i: GmosParameters              => ItcResult.forMessage ("Spectroscopy not yet implemented.")
+      case i: GnirsParameters             => ItcResult.forMessage ("Spectroscopy not yet implemented.")
+      case i: MichelleParameters          => ItcResult.forMessage ("Spectroscopy not implemented.")
+      case i: NifsParameters              => ItcResult.forMessage ("Spectroscopy not yet implemented.")
+      case i: NiriParameters              => ItcResult.forMessage ("Spectroscopy not yet implemented.")
+      case i: TRecsParameters             => ItcResult.forMessage ("Spectroscopy not implemented.")
+      case _                              => ItcResult.forMessage ("This instrument does not support spectroscopy.")
+
+    }
 
 }

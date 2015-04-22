@@ -1,6 +1,8 @@
 package edu.gemini.itc.nifs;
 
+import edu.gemini.itc.shared.AltairParameters;
 import edu.gemini.itc.shared.InstrumentDetails;
+import scala.Option;
 
 /**
  * This class holds the information from the Nifs section
@@ -38,105 +40,112 @@ public final class NifsParameters implements InstrumentDetails {
     public static final String NIFS = "nifs";
 
     // Data members
-    private final String _Filter;
-    private final String _grating; // Grating or null
-    private final String _readNoise;
-    private final double _instrumentCentralWavelength;
-    private final String _IFUMethod;
-    private final String _IFUOffset;
-    private final String _IFUMinOffset;
-    private final String _IFUMaxOffset;
-    private final String _IFUnumX;
-    private final String _IFUnumY;
-    private final String _IFUcenterX;
-    private final String _IFUcenterY;
+    private final String filter;
+    private final String grating;
+    private final String readNoise;
+    private final double cenralWavelength;
+    private final String ifuMethod;
+    private final String ifuOffset;
+    private final String ifuMinOffset;
+    private final String ifuMaxOffset;
+    private final String ifuNumX;
+    private final String ifuNumY;
+    private final String ifuCenterX;
+    private final String ifuCenterY;
+    private final Option<AltairParameters> altair;
 
     /**
      * Constructs a NifsParameters from a test file.
      */
-    public NifsParameters(final String Filter,
+    public NifsParameters(final String filter,
                           final String grating,
                           final String readNoise,
-                          final double instrumentCentralWavelength,
-                          final String IFUMethod,
-                          final String IFUOffset,
-                          final String IFUMinOffset,
-                          final String IFUMaxOffset,
-                          final String IFUNumX,
-                          final String IFUNumY,
-                          final String IFUCenterX,
-                          final String IFUCenterY) {
+                          final double centralWavelength,
+                          final String ifuMethod,
+                          final String ifuOffset,
+                          final String ifuMinOffset,
+                          final String ifuMaxOffset,
+                          final String ifuNumX,
+                          final String ifuNumY,
+                          final String ifuCenterX,
+                          final String ifuCenterY,
+                          final Option<AltairParameters> altair) {
 
-        _Filter = Filter;
-        _grating = grating;
-        _readNoise = readNoise;
-        _instrumentCentralWavelength = instrumentCentralWavelength * 1000; // convert to [nm]
-        _IFUMethod = IFUMethod;
-        _IFUOffset = IFUOffset;
-        _IFUMinOffset = IFUMinOffset;
-        _IFUMaxOffset = IFUMaxOffset;
-        _IFUnumX = IFUNumX;
-        _IFUnumY = IFUNumY;
-        _IFUcenterX = IFUCenterX;
-        _IFUcenterY = IFUCenterY;
+        this.filter             = filter;
+        this.grating            = grating;
+        this.readNoise          = readNoise;
+        this.ifuMethod          = ifuMethod;
+        this.ifuOffset          = ifuOffset;
+        this.ifuMinOffset       = ifuMinOffset;
+        this.ifuMaxOffset       = ifuMaxOffset;
+        this.ifuNumX            = ifuNumX;
+        this.ifuNumY            = ifuNumY;
+        this.ifuCenterX         = ifuCenterX;
+        this.ifuCenterY         = ifuCenterY;
+        this.altair             = altair;
+        this.cenralWavelength   = centralWavelength * 1000; // convert to [nm]
     }
 
     public String getFilter() {
-        return _Filter;
+        return filter;
     }
 
     public String getGrating() {
-        return _grating;
+        return grating;
     }
 
     public String getReadNoise() {
-        return _readNoise;
+        return readNoise;
     }
 
     public double getInstrumentCentralWavelength() {
-        return _instrumentCentralWavelength;
+        return cenralWavelength;
     }
 
     public double getUnXDispCentralWavelength() {
-        return _instrumentCentralWavelength;
+        return cenralWavelength;
     }
 
 
     public String getIFUMethod() {
-        return _IFUMethod;
+        return ifuMethod;
     }
 
     public double getIFUOffset() {
-        return new Double(_IFUOffset);
+        return new Double(ifuOffset);
     }
 
     public double getIFUMinOffset() {
-        return new Double(_IFUMinOffset);
+        return new Double(ifuMinOffset);
     }
 
     public double getIFUMaxOffset() {
-        return new Double(_IFUMaxOffset);
+        return new Double(ifuMaxOffset);
     }
 
 
     public int getIFUNumX() {
-        return new Integer(_IFUnumX);
+        return new Integer(ifuNumX);
     }
 
     public int getIFUNumY() {
-        return new Integer(_IFUnumY);
+        return new Integer(ifuNumY);
     }
 
     public double getIFUCenterX() {
-        return new Double(_IFUcenterX);
+        return new Double(ifuCenterX);
     }
 
     public double getIFUCenterY() {
-        return new Double(_IFUcenterY);
+        return new Double(ifuCenterY);
     }
 
     public double getFPMask() {
         return 0.15;
+    }
+
+    public Option<AltairParameters> getAltair() {
+        return altair;
     }
 
 }

@@ -8,7 +8,7 @@ import edu.gemini.spModel.core.Site;
  * This class performs the calculations for Michelle
  * used for imaging.
  */
-public final class MichelleRecipe {
+public final class MichelleRecipe implements ImagingRecipe, SpectroscopyRecipe {
 
     // Parameters from the web page.
     private final SourceDefinition _sdParameters;

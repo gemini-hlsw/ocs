@@ -1,7 +1,6 @@
 package edu.gemini.itc.web.html;
 
 import edu.gemini.itc.altair.Altair;
-import edu.gemini.itc.altair.AltairParameters;
 import edu.gemini.itc.nifs.Nifs;
 import edu.gemini.itc.nifs.NifsParameters;
 import edu.gemini.itc.nifs.NifsRecipe;
@@ -21,9 +20,9 @@ public final class NifsPrinter extends PrinterBase {
     private final NifsRecipe recipe;
     private final PlottingDetails pdp;
 
-    public NifsPrinter(final Parameters p, final NifsParameters ip, final AltairParameters altair, final PlottingDetails pdp, final PrintWriter out) {
+    public NifsPrinter(final Parameters p, final NifsParameters ip, final PlottingDetails pdp, final PrintWriter out) {
         super(out);
-        this.recipe = new NifsRecipe(p.source(), p.observation(), p.conditions(), ip, p.telescope(), altair);
+        this.recipe = new NifsRecipe(p.source(), p.observation(), p.conditions(), ip, p.telescope());
         this.pdp    = pdp;
     }
 

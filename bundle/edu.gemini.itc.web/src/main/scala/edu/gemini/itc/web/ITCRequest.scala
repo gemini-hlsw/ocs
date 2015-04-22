@@ -2,15 +2,9 @@ package edu.gemini.itc.web
 
 import javax.servlet.http.HttpServletRequest
 
-import edu.gemini.itc.acqcam.AcquisitionCamParameters
-import edu.gemini.itc.altair.AltairParameters
-import edu.gemini.itc.flamingos2.Flamingos2Parameters
-import edu.gemini.itc.gems.GemsParameters
 import edu.gemini.itc.gnirs.GnirsParameters
-import edu.gemini.itc.gsaoi.GsaoiParameters
 import edu.gemini.itc.michelle.MichelleParameters
 import edu.gemini.itc.nifs.NifsParameters
-import edu.gemini.itc.niri.NiriParameters
 import edu.gemini.itc.shared.SourceDefinition._
 import edu.gemini.itc.shared._
 import edu.gemini.itc.trecs.TRecsParameters
@@ -25,6 +19,7 @@ import edu.gemini.spModel.gemini.gsaoi.Gsaoi
 import edu.gemini.spModel.gemini.michelle.MichelleParams
 import edu.gemini.spModel.gemini.niri.Niri
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality
+import edu.gemini.spModel.guide.GuideProbe
 import edu.gemini.spModel.telescope.IssPort
 
 /**
@@ -87,7 +82,7 @@ object ITCRequest {
   def teleParameters(r: ITCRequest): TelescopeDetails = {
     val coating = r.enumParameter(classOf[TelescopeDetails.Coating])
     val port    = r.enumParameter(classOf[IssPort])
-    val wfs     = r.enumParameter(classOf[TelescopeDetails.Wfs])
+    val wfs     = r.enumParameter(classOf[GuideProbe.Type])
     new TelescopeDetails(coating, port, wfs)
   }
 
@@ -149,7 +144,8 @@ object ITCRequest {
   def gsaoiParameters(r: ITCRequest): GsaoiParameters = {
     val filter      = r.enumParameter(classOf[Gsaoi.Filter])
     val readMode    = r.enumParameter(classOf[Gsaoi.ReadMode])
-    new GsaoiParameters(filter, readMode)
+    val gems        = gemsParameters(r)
+    new GsaoiParameters(filter, readMode, gems)
   }
 
   def michelleParameters(r: ITCRequest): MichelleParameters = {
@@ -168,7 +164,8 @@ object ITCRequest {
     val readNoise   = r.enumParameter(classOf[Niri.ReadMode])
     val wellDepth   = r.enumParameter(classOf[Niri.WellDepth])
     val fpMask      = r.enumParameter(classOf[Niri.Mask])
-    new NiriParameters(filter, grism, camera, readNoise, wellDepth, fpMask)
+    val altair      = altairParameters(r)
+    new NiriParameters(filter, grism, camera, readNoise, wellDepth, fpMask, altair)
   }
 
   def nifsParameters(r: ITCRequest): NifsParameters = {
@@ -192,7 +189,8 @@ object ITCRequest {
         val cenY = r.parameter("ifuCenterY")
         ("", "", "", numX, numY, cenX, cenY)
     }
-    new NifsParameters(filter, grating, readNoise, centralWl, ifuMethod, offset, min, max, numX, numY, centerX, centerY)
+    val altair = altairParameters(r)
+    new NifsParameters(filter, grating, readNoise, centralWl, ifuMethod, offset, min, max, numX, numY, centerX, centerY, altair)
    }
 
   def trecsParameters(r: ITCRequest): TRecsParameters = {
@@ -211,14 +209,20 @@ object ITCRequest {
     new PlottingDetails(limits, lower, upper)
   }
 
-  def altairParameters(r: ITCRequest): AltairParameters = {
-    val guideStarSeparation  = r.doubleParameter("guideSep")
-    val guideStarMagnitude   = r.doubleParameter("guideMag")
-    val fieldLens            = r.enumParameter(classOf[AltairParams.FieldLens])
-    val wfsMode              = r.enumParameter(classOf[AltairParams.GuideStarType])
-    val wfs                  = r.enumParameter(classOf[TelescopeDetails.Wfs])
-    val altairUsed           = wfs eq TelescopeDetails.Wfs.AOWFS
-    new AltairParameters(guideStarSeparation, guideStarMagnitude, fieldLens, wfsMode, altairUsed)
+  def altairParameters(r: ITCRequest): Option[AltairParameters] = {
+    val wfs                     = r.enumParameter(classOf[GuideProbe.Type])
+    wfs match {
+      case GuideProbe.Type.AOWFS =>
+        val guideStarSeparation = r.doubleParameter("guideSep")
+        val guideStarMagnitude  = r.doubleParameter("guideMag")
+        val fieldLens           = r.enumParameter(classOf[AltairParams.FieldLens])
+        val wfsMode             = r.enumParameter(classOf[AltairParams.GuideStarType])
+        val altair              = new AltairParameters(guideStarSeparation, guideStarMagnitude, fieldLens, wfsMode)
+        new Some(altair)
+
+      case _ =>
+        None
+    }
   }
 
   def gemsParameters(r: ITCRequest): GemsParameters = {

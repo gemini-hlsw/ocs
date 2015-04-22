@@ -2,6 +2,7 @@ package edu.gemini.itc.altair;
 
 import edu.gemini.itc.gems.GemsFluxAttenuationVisitor;
 import edu.gemini.itc.shared.AOSystem;
+import edu.gemini.itc.shared.AltairParameters;
 import edu.gemini.itc.shared.SampledSpectrumVisitor;
 import edu.gemini.spModel.gemini.altair.AltairParams;
 
@@ -48,19 +49,36 @@ public class Altair implements AOSystem {
         this.fwhmInst = fwhmInst;
         this.altairBackground = new AltairBackgroundVisitor();
         this.altairTransmission = new AltairTransmissionVisitor();
+
+        validateInputParameters(altair);
+    }
+
+    public void validateInputParameters(final AltairParameters p) {
+        // validation
+        if (p.guideStarSeparation() < 0 || p.guideStarSeparation() > 25)
+            throw new IllegalArgumentException(" Altair Guide star distance must be between 0 and 25 arcsecs.");
+
+        if (p.wfsMode().equals(AltairParams.GuideStarType.LGS) && p.guideStarMagnitude() > 19.5)
+            throw new IllegalArgumentException(" Altair Guide star Magnitude must be <= 19.5 in R for LGS mode. ");
+
+        if (p.wfsMode().equals(AltairParams.GuideStarType.NGS) && p.guideStarMagnitude() > 15.5)
+            throw new IllegalArgumentException(" Altair Guide star Magnitude must be <= 15.5 in R for NGS mode. ");
+
+        if (p.wfsMode().equals(AltairParams.GuideStarType.LGS) && p.fieldLens().equals(AltairParams.FieldLens.OUT))
+            throw new IllegalArgumentException("The field Lens must be IN when Altair is in LGS mode.");
     }
 
     //Methods
     public AltairParams.GuideStarType getWFSMode() {
-        return altair.getWFSMode();
+        return altair.wfsMode();
     }
 
     public double getGuideStarSeparation() {
-        return altair.getGuideStarSeperation();
+        return altair.guideStarSeparation();
     }
 
     public double getGuideStarMagnitude() {
-        return altair.getGuideStarMagnitude();
+        return altair.guideStarMagnitude();
     }
 
     public SampledSpectrumVisitor getBackgroundVisitor() {
@@ -92,7 +110,7 @@ public class Altair implements AOSystem {
         double r0power, corr;
         double r0 = getr0();
 
-        if (altair.getWFSMode().equals(AltairParams.GuideStarType.NGS)) {
+        if (altair.wfsMode().equals(AltairParams.GuideStarType.NGS)) {
             r0power = 0.96; //if NGS
             corr = 0.20; //if NGS
         } else {
@@ -113,13 +131,13 @@ public class Altair implements AOSystem {
     public double getStrehlNoiseMag() {
         double rgs0;
 
-        if (altair.getWFSMode().equals(AltairParams.GuideStarType.NGS)) {
+        if (altair.wfsMode().equals(AltairParams.GuideStarType.NGS)) {
             rgs0 = 14.0; //if NGS
         } else {
             rgs0 = 17.0; //if LGS
         }
 
-        return Math.exp(-1 * Math.pow(altair.getGuideStarMagnitude() / rgs0, 16) * Math.pow(1650 / wavelength, 2));
+        return Math.exp(-1 * Math.pow(altair.guideStarMagnitude() / rgs0, 16) * Math.pow(1650 / wavelength, 2));
     }
 
     // Calculates the strehl noise from the guide star distance
@@ -137,7 +155,7 @@ public class Altair implements AOSystem {
         }
         //double strehlNoiseDistance = Math.exp(-1*Math.pow(guideStarDistance/12.5,2)*Math.pow(1650/wavelength,2));  //Old caclulation
 
-        return Math.exp(-1 * Math.pow(altair.getGuideStarSeperation() / dgs0, dgspow) * Math.pow(1650 / wavelength, 2));
+        return Math.exp(-1 * Math.pow(altair.guideStarSeparation() / dgs0, dgspow) * Math.pow(1650 / wavelength, 2));
     }
 
     // Function that calculates the strehl from the fit, distance and magnitude
@@ -155,7 +173,7 @@ public class Altair implements AOSystem {
     }
 
     private boolean fieldLensIsIn() {
-        return altair.getFieldLens().equals(AltairParams.FieldLens.IN);
+        return altair.fieldLens().equals(AltairParams.FieldLens.IN);
     }
 
 }

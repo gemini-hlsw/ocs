@@ -9,7 +9,7 @@ import java.util.List;
 /**
  * This class performs the calculations for Gmos used for imaging.
  */
-public final class GmosRecipe {
+public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRecipe {
 
     private final SourceDefinition _sdParameters;
     private final ObservationDetails _obsDetailParameters;

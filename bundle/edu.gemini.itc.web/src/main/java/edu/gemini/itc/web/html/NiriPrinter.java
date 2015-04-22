@@ -1,12 +1,10 @@
 package edu.gemini.itc.web.html;
 
 import edu.gemini.itc.altair.Altair;
-import edu.gemini.itc.altair.AltairParameters;
 import edu.gemini.itc.niri.Niri;
-import edu.gemini.itc.niri.NiriParameters;
 import edu.gemini.itc.niri.NiriRecipe;
 import edu.gemini.itc.shared.*;
-import edu.gemini.spModel.gemini.niri.Niri.*;
+import edu.gemini.spModel.gemini.niri.Niri.Mask;
 import scala.Option;
 
 import java.io.PrintWriter;
@@ -24,9 +22,9 @@ public final class NiriPrinter extends PrinterBase {
     /**
      * Constructs a NiriRecipe given the parameters. Useful for testing.
      */
-    public NiriPrinter(final Parameters p, final NiriParameters ip, final AltairParameters altair, final PlottingDetails pdp, final PrintWriter out) {
+    public NiriPrinter(final Parameters p, final NiriParameters ip, final PlottingDetails pdp, final PrintWriter out) {
         super(out);
-        this.recipe    = new NiriRecipe(p.source(), p.observation(), p.conditions(), ip, p.telescope(), altair);
+        this.recipe    = new NiriRecipe(p.source(), p.observation(), p.conditions(), ip, p.telescope());
         this.isImaging = p.observation().getMethod().isImaging();
         this.pdp       = pdp;
     }
