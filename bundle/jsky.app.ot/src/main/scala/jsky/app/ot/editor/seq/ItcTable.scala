@@ -32,17 +32,17 @@ object ItcTable {
   abstract sealed class Renderer[A](alignment: Alignment.Value, f: A => (Icon, String)) extends LabelRenderer[A](f)  {
     override def componentFor(table : Table, isSelected : Boolean, hasFocus : Boolean, a : A, row : Int, column : Int) : Component = {
       val c = super.componentFor(table, isSelected, hasFocus, a, row, column)
-      val l = c.asInstanceOf[Label]
       val model = table.model.asInstanceOf[ItcTableModel]
       // Cell renderer based on the sequence cell renderer used for other sequence tables. This gives us coherent
       // formatting and color coding throughout the different tables in the sequence node.
       val bg = model.getKeyAt(column).map(SequenceCellRenderer.lookupColor)
       val tt = model.tooltip(column)
       // set horizontal alignment, bg color and tooltip as needed
-      l <|
-        (_.horizontalAlignment  = alignment)                  <|
-        (_.background           = bg.getOrElse(l.background)) <|
-        (_.tooltip              = tt)
+      c.asInstanceOf[Label] <| { l =>
+        l.horizontalAlignment = alignment
+        l.background = bg.getOrElse(l.background)
+        l.tooltip = tt
+      }
     }
   }
 
