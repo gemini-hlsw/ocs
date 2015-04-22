@@ -232,8 +232,8 @@ trait GemsStrategy extends AgsStrategy {
     }
 
     val canopusConstraint = canMagLimits.map(c => CatalogQuery.catalogQueryForGems(CanopusTipTiltId, ctx.getBaseCoordinates.toNewModel, RadiusConstraint.between(Angle.zero, Canopus.Wfs.Group.instance.getRadiusLimits.toNewModel), c.some))
-    val odgwConstaint     = odgwMagLimits.map(c => CatalogQuery.catalogQueryForGems(OdgwFlexureId,    ctx.getBaseCoordinates.toNewModel, RadiusConstraint.between(Angle.zero, GsaoiOdgw.Group.instance.getRadiusLimits.toNewModel), c.some))
-    List(canopusConstraint, odgwConstaint).flatten
+    val odgwConstraint     = odgwMagLimits.map(c => CatalogQuery.catalogQueryForGems(OdgwFlexureId,    ctx.getBaseCoordinates.toNewModel, RadiusConstraint.between(Angle.zero, GsaoiOdgw.Group.instance.getRadiusLimits.toNewModel), c.some))
+    List(canopusConstraint, odgwConstraint).flatten
   }
 
   override val probeBands: List[MagnitudeBand] = defaultProbeBands(MagnitudeBand.R)
