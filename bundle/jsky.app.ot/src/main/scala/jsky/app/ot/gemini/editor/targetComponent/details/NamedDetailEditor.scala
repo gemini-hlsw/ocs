@@ -61,8 +61,9 @@ final class NamedDetailEditor extends TargetDetailEditor(Tag.NAMED) with Reentra
     getComponent.asInstanceOf[JComponent] <| { c =>
       c.setBorder(titleBorder("Magnitudes"))
       c.getMinimumSize <| { s =>
-        c.setMinimumSize(new Dimension(s.width, 100))
+        c.setMinimumSize(new Dimension(s.width, 175))
       }
+      c.setPreferredSize(c.getMinimumSize)
     }
   }
 
