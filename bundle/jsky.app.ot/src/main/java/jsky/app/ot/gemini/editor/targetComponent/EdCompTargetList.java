@@ -3,9 +3,7 @@
 // See the file COPYRIGHT for complete details.
 package jsky.app.ot.gemini.editor.targetComponent;
 
-import edu.gemini.ags.api.AgsStrategy;
 import edu.gemini.pot.sp.ISPObsComponent;
-import edu.gemini.pot.sp.ISPObservation;
 import edu.gemini.shared.gui.ButtonFlattener;
 import edu.gemini.shared.skyobject.Magnitude;
 import edu.gemini.shared.util.immutable.*;
@@ -31,7 +29,6 @@ import jsky.app.ot.tpe.GuideStarSupport;
 import jsky.app.ot.tpe.TelescopePosEditor;
 import jsky.app.ot.tpe.TpeManager;
 import jsky.app.ot.util.Resources;
-import jsky.coords.WorldCoords;
 import jsky.util.gui.*;
 
 import javax.swing.*;
@@ -55,11 +52,11 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
     private static TargetClipboard clipboard;
 
     // Instance constants
-    private final AgsContextPublisher _agsPub           = new AgsContextPublisher();
-    private final TargetDetailPanel   _detailEditor     = new TargetDetailPanel();
+    private final AgsContextPublisher _agsPub       = new AgsContextPublisher();
+    private final TargetDetailPanel   _detailEditor = new TargetDetailPanel();
 
     // More constants, but they need access to `this` so we assign in the ctor
-    private final TelescopeForm            _w;
+    private final TelescopeForm _w;
 
     // Stuff that varies with time
     private SPTarget        _curPos;
@@ -83,7 +80,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
             add(_w.tag);
         }}, 6); // index is the offset from the left
 
-        //Callback for AGS visibiity
+        //Callback for AGS visibility
         _w.addComponentListener(new ComponentAdapter() {
             @Override
             public void componentShown(ComponentEvent componentEvent) {
@@ -94,22 +91,18 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         _w.add(_detailEditor, new GridBagConstraints() {{
             gridx = 0;
             gridy = 1;
-            fill = BOTH;
-            weightx = 2.0;
-            weighty = 2.0;
+            fill = HORIZONTAL;
             insets = new Insets(5, 0, 5, 0);
         }});
 
         _w.add(_w.guideGroupPanel, new GridBagConstraints() {{
             gridx = 0;
             gridy = 2;
-            fill = BOTH;
-            weightx = 2.0;
-            weighty = 2.0;
+            fill = HORIZONTAL;
             insets = new Insets(5, 0, 5, 0);
         }});
 
-        setMenuStyling(_w.newMenuBar, _w.newMenu, "eclipse/add_menu.gif");
+        setMenuStyling(_w.newMenuBar, _w.newMenu);
 
         _w.removeButton.addActionListener(removeListener);
         _w.removeButton.setText("");
@@ -136,35 +129,28 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         _w.primaryButton.addActionListener(primaryListener);
         ButtonFlattener.flatten(_w.primaryButton);
 
-        _w.autoGuideStarGuiderSelector.addSelectionListener(new AgsSelectorControl.Listener() {
-            public void agsStrategyUpdated(Option<AgsStrategy> strategy) {
-                AgsStrategyUtil.setSelection(getContextObservation(), strategy);
-            }
-        });
-        _w.autoGuideStarButton.addActionListener(autoGuideStarListener);
-        _w.manualGuideStarButton.addActionListener(manualGuideStarListener);
-
-        _w.setBaseButton.addActionListener(setBaseListener);
+        _w.guidingControls.autoGuideStarGuiderSelector().addSelectionListener(strategy ->
+            AgsStrategyUtil.setSelection(getContextObservation(), strategy)
+        );
+        _w.guidingControls.autoGuideStarButton().peer().addActionListener(autoGuideStarListener);
+        _w.guidingControls.manualGuideStarButton().peer().addActionListener(manualGuideStarListener);
 
         _w.guideGroupName.setMinimumSize(_w.guideGroupName.getPreferredSize());
         _w.guideGroupName.addWatcher(new TextBoxWidgetWatcher() {
             public void textBoxKeyPress(TextBoxWidget tbwe) {
-                SwingUtilities.invokeLater(new Runnable() {
-                    @Override
-                    public void run() {
-                        final String name = _w.guideGroupName.getText();
-                        final GuideGroup newGroup = _curGroup.setName(name);
-                        final TargetEnvironment env = getDataObject().getTargetEnvironment();
-                        final GuideEnvironment ge = env.getGuideEnvironment();
-                        final ImList<GuideGroup> options = ge.getOptions();
-                        final List<GuideGroup> list = new ArrayList<>(options.size());
-                        for (GuideGroup g : options) {
-                            list.add(g == _curGroup ? newGroup : g);
-                        }
-                        _curGroup = newGroup;
-                        getDataObject().setTargetEnvironment(env.setGuideEnvironment(ge.setOptions(DefaultImList.create(list))));
-                        _w.guideGroupName.requestFocus(); // otherwise focus is lost during event handling
+                SwingUtilities.invokeLater(() -> {
+                    final String name = _w.guideGroupName.getText();
+                    final GuideGroup newGroup = _curGroup.setName(name);
+                    final TargetEnvironment env = getDataObject().getTargetEnvironment();
+                    final GuideEnvironment ge = env.getGuideEnvironment();
+                    final ImList<GuideGroup> options = ge.getOptions();
+                    final List<GuideGroup> list = new ArrayList<>(options.size());
+                    for (GuideGroup g : options) {
+                        list.add(g == _curGroup ? newGroup : g);
                     }
+                    _curGroup = newGroup;
+                    getDataObject().setTargetEnvironment(env.setGuideEnvironment(ge.setOptions(DefaultImList.create(list))));
+                    _w.guideGroupName.requestFocus(); // otherwise focus is lost during event handling
                 });
             }
 
@@ -185,11 +171,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
             }
         });
 
-        _agsPub.subscribe(new AgsContextSubscriber() {
-            @Override public void notify(ISPObservation obs, AgsContext oldOptions, AgsContext newOptions) {
-                updateGuiding();
-            }
-        });
+        _agsPub.subscribe((obs, oldOptions, newOptions) -> updateGuiding());
 
     }
 
@@ -203,13 +185,13 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         _w.newMenu.setEnabled(enabled && inst != null);
     }
 
-    private static void setMenuStyling(JMenuBar bar, final JMenu menu, final String iconPath) {
+    private static void setMenuStyling(JMenuBar bar, final JMenu menu) {
         bar.setBorder(BorderFactory.createEmptyBorder());
         bar.setOpaque(false);
-        menu.setIcon(Resources.getIcon(iconPath));
+        menu.setIcon(Resources.getIcon("eclipse/add_menu.gif"));
         menu.setText("");
         menu.addMouseListener(new MouseAdapter() {
-            final Icon icon = Resources.getIcon(iconPath);
+            final Icon icon = Resources.getIcon("eclipse/add_menu.gif");
             @Override public void mouseEntered(MouseEvent e) {
                 menu.setIcon(menu.getRolloverIcon());
             }
@@ -412,7 +394,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
             }
         }
         _w.positionTable.reinit(getDataObject());
-        _w.manualGuideStarButton.setVisible(GuideStarSupport.supportsManualGuideStarSelection(getNode()));
+        _w.guidingControls.manualGuideStarButton().peer().setVisible(GuideStarSupport.supportsManualGuideStarSelection(getNode()));
         updateGuiding();
         _agsPub.watch(getContextObservation());
     }
@@ -432,18 +414,11 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
     }
 
     // Guider panel property change listener to modify status and magnitude limits.
-    private final PropertyChangeListener guidingPanelUpdater = new PropertyChangeListener() {
-        @Override public void propertyChange(PropertyChangeEvent evt) {
-            updateGuiding((TargetEnvironment) evt.getNewValue());
-        }
-    };
+    private final PropertyChangeListener guidingPanelUpdater = (evt) ->
+        updateGuiding((TargetEnvironment) evt.getNewValue());
 
     private Option<ObsContext> getObsContext(final TargetEnvironment env) {
-        return ObsContext.create(getContextObservation()).map(new Function1<ObsContext, ObsContext>() {
-            @Override public ObsContext apply(ObsContext obsContext) {
-                return obsContext.withTargets(env);
-            }
-        });
+        return ObsContext.create(getContextObservation()).map(obsContext -> obsContext.withTargets(env));
     }
 
     private void updateGuiding() {
@@ -468,18 +443,15 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                     if (env1.getTargets().contains(target)) {
 
                         if (_curPos != null) _curPos.deleteWatcher(posWatcher);
-
                         _curPos = target;
+                        _curPos.addWatcher(posWatcher);
+                        refreshAll();
 
-                        if (_curPos != null) {
-                            _curPos.addWatcher(posWatcher);
-                            refreshAll();
+                        // can't remove base position, so disable button
+                        final boolean editable = OTOptions.areRootAndCurrentObsIfAnyEditable(getProgram(), getContextObservation());
+                        _w.removeButton.setEnabled(_curPos != env1.getBase() && editable);
+                        _w.primaryButton.setEnabled(enablePrimary(target, env1) && editable);
 
-                            // can't remove base position, so disable button
-                            final boolean editable = OTOptions.areRootAndCurrentObsIfAnyEditable(getProgram(), getContextObservation());
-                            _w.removeButton.setEnabled(_curPos != env1.getBase() && editable);
-                            _w.primaryButton.setEnabled(enablePrimary(target, env1) && editable);
-                        }
                     }
                 }
             } else {
@@ -566,12 +538,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 
             // XXX OT-35 hack to work around recursive call to TargetObsComp.setTargetEnvironment() in
             // SPProgData.ObsContextManager.update()
-            SwingUtilities.invokeLater(new Runnable() {
-                @Override
-                public void run() {
-                    showTargetTag();
-                }
-            });
+            SwingUtilities.invokeLater(() ->  showTargetTag());
         }
     }
 
@@ -748,15 +715,13 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 
 
     @SuppressWarnings("FieldCanBeLocal")
-    private final ActionListener manualGuideStarListener = new ActionListener() {
-        public void actionPerformed(ActionEvent evt) {
-            try {
-                final TelescopePosEditor tpe = TpeManager.open();
-                tpe.reset(getNode());
-                tpe.getImageWidget().guideStarSearch(true);
-            } catch (Exception e) {
-                DialogUtil.error(e);
-            }
+    private final ActionListener manualGuideStarListener = evt -> {
+        try {
+            final TelescopePosEditor tpe = TpeManager.open();
+            tpe.reset(getNode());
+            tpe.getImageWidget().guideStarSearch(true);
+        } catch (Exception e) {
+            DialogUtil.error(e);
         }
     };
 
@@ -775,28 +740,6 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                 }
             } catch (Exception e) {
                 DialogUtil.error(e);
-            }
-        }
-    };
-
-    @SuppressWarnings("FieldCanBeLocal")
-    private final ActionListener setBaseListener = new ActionListener() {
-        public void actionPerformed(ActionEvent evt) {
-            final TargetEnvironment env = getDataObject().getTargetEnvironment();
-            final TelescopePosEditor tpe = TpeManager.get();
-            if (tpe == null) {
-                DialogUtil.message("The Position Editor must be opened for this feature to work.");
-            } else {
-                tpe.reset(getNode());
-                final WorldCoords basePos = tpe.getImageCenterLocation();
-                if (basePos == null) {
-                    DialogUtil.message("Couldn't determine the image center.");
-                } else {
-                    final SPTarget base = env.getBase();
-                    base.getTarget().getRa().setAs(basePos.getRaDeg(), CoordinateParam.Units.DEGREES);
-                    base.getTarget().getDec().setAs(basePos.getDecDeg(), CoordinateParam.Units.DEGREES);
-                    base.notifyOfGenericUpdate();
-                }
             }
         }
     };

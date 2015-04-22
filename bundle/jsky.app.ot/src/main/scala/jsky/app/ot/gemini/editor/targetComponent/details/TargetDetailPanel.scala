@@ -4,8 +4,8 @@ import edu.gemini.pot.sp.ISPNode
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.target.SPTarget
 import edu.gemini.shared.util.immutable.{ Option => GOption }
-import java.awt.{ GridBagConstraints, GridBagLayout }
-import javax.swing.JPanel
+import java.awt.{ GridBagConstraints, GridBagLayout}
+import javax.swing.{ JPanel}
 import jsky.app.ot.gemini.editor.targetComponent.TelescopePosEditor
 import scalaz.syntax.id._
 
