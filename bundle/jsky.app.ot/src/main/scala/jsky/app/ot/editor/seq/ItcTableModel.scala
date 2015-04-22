@@ -92,11 +92,6 @@ sealed trait ItcTableModel extends AbstractTableModel {
     case None    => StringUtil.toDisplayName(toKey(col).getName) // create column name for key columns
   }
 
-//  def renderer(col: Int): LabelRenderer[_] = column(col) match {
-//    case Some(c) => c.renderer
-//    case None    => ItcTable.AnyRenderer  // use "any" renderer for key columns
-//  }
-
   def tooltip(col: Int): String = column(col) match {
     case Some(c) => c.tooltip
     case None    => ""                    // no tooltip for key columns
@@ -127,7 +122,7 @@ sealed trait ItcTableModel extends AbstractTableModel {
     f.value.fold("Calculating...") {
       case Failure(t) => t <| (_.printStackTrace()) |> (_.getMessage)  // "Look mummy, there's a spaceship up in the sky!"
       case Success(s) => s match {
-        case scalaz.Failure(errs) => errs.mkString(", ") <| System.out.println
+        case scalaz.Failure(errs) => errs.mkString(", ")
         case scalaz.Success(_)    => "OK"
       }
     }
