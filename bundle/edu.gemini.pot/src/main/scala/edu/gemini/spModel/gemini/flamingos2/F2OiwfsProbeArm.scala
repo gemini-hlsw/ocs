@@ -5,24 +5,32 @@ import java.awt.geom.{Point2D, Rectangle2D}
 
 import edu.gemini.shared.util.immutable.ImPolygon
 import edu.gemini.skycalc.Offset
+import edu.gemini.spModel.core
 import edu.gemini.spModel.core.{Angle, Coordinates}
 import edu.gemini.spModel.gemini.gems.Gems
-import edu.gemini.spModel.inst.{ArmAdjustment, ProbeArmGeometry}
+import edu.gemini.spModel.inst.ProbeArmGeometry
+import edu.gemini.spModel.inst.ProbeArmGeometry.ArmAdjustment
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.rich.shared.immutable._
 
 
 // The geometry is dependent on the plate scale determined by the choice of Lyot wheel,
 // and thus we must use a class instead of an object.
-object F2OiwfsProbeArm extends ProbeArmGeometry[Flamingos2] {
+object F2OiwfsProbeArm extends ProbeArmGeometry {
   // Simplified Java access.
   val instance = this
 
   override protected val guideProbeInstance = Flamingos2OiwfsGuideProbe.instance
 
-  override def geometry(flamingos2: Flamingos2): List[Shape] = {
+  override def unadjustedGeometry(ctx: ObsContext): List[Shape] =
+    ctx.getInstrument match {
+      case f2: Flamingos2 => f2Geometry(f2)
+      case _              => Nil
+    }
+
+  private def f2Geometry(f2: Flamingos2): List[Shape] = {
     val probeArm: Shape = {
-      val plateScale = flamingos2.getLyotWheel.getPlateScale
+      val plateScale = f2.getLyotWheel.getPlateScale
       val scaledLength = ProbePickoffArmLength * plateScale
       val hm = PickoffMirrorSize * plateScale / 2.0
       val htw = ProbeArmTaperedWidth / 2.0
@@ -39,7 +47,7 @@ object F2OiwfsProbeArm extends ProbeArmGeometry[Flamingos2] {
     }
 
     val pickoffMirror: Shape = {
-      val plateScale = flamingos2.getLyotWheel.getPlateScale
+      val plateScale = f2.getLyotWheel.getPlateScale
       val scaledMirrorSize = PickoffMirrorSize * plateScale
       val xy = -scaledMirrorSize / 2.0
       new Rectangle2D.Double(xy, xy, scaledMirrorSize, scaledMirrorSize)
@@ -48,6 +56,8 @@ object F2OiwfsProbeArm extends ProbeArmGeometry[Flamingos2] {
     List(probeArm, pickoffMirror)
   }
 
+
+  /*
   override def armAdjustment(ctx0: ObsContext,
                              guideStarCoords: Coordinates,
                              offset0: Offset,
@@ -100,7 +110,7 @@ object F2OiwfsProbeArm extends ProbeArmGeometry[Flamingos2] {
 
     Angle.fromRadians(math.atan2(Q.getY, Q.getX))
   }
-
+*/
   // Size of probe arm components in mm.
   val PickoffMirrorSize          = 19.8
   val ProbePickoffArmTotalLength = 203.40
@@ -111,4 +121,14 @@ object F2OiwfsProbeArm extends ProbeArmGeometry[Flamingos2] {
   // Width and length of tapered end of probe arm in arcsec.
   val ProbeArmTaperedWidth       = 15.0
   val ProbeArmTaperedLength      = 180.0
+
+  /**
+   * For a given context, guide star coordinates, and offset, calculate the arm adjustment that will be used for the
+   * guide star at those coordinates.
+   * @param ctx       context representing the configuration
+   * @param guideStar guide star for which to calculate the adjustment
+   * @param offset    offset for which to calculate the adjustment
+   * @return          probe arm adjustments for this data
+   */
+  override def armAdjustment(ctx: ObsContext, guideStar: Coordinates, offset: core.Offset): Option[ArmAdjustment] = None
 }

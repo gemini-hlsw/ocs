@@ -6,8 +6,11 @@
 //
 package jsky.app.ot.tpe;
 
+import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
 
+import edu.gemini.spModel.core.Angle$;
+import edu.gemini.spModel.inst.FeatureGeometry;
 import jsky.coords.WorldCoords;
 import edu.gemini.spModel.util.Angle;
 
@@ -38,6 +41,16 @@ public final class TpeImageInfo {
     public TpeImageInfo() {
     }
 
+    /**
+     * Returns an AffineTransform that will map to screen coordinates.
+     */
+    public AffineTransform toScreen() {
+        return FeatureGeometry.screenTransform(
+                getBaseScreenPos(),
+                getPixelsPerArcsec(),
+                Angle$.MODULE$.fromRadians(getTheta()),
+                getFlipRA());
+    }
 
     /**
      * Return the screen coordinates of the base position.

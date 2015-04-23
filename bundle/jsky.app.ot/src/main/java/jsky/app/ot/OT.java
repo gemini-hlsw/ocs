@@ -232,6 +232,7 @@ public final class OT {
                 "jsky.app.ot.gemini.gsaoi.GsaoiOdgwFeature",
                 "jsky.app.ot.gemini.gems.StrehlFeature",
                 "jsky.app.ot.gemini.inst.OIWFS_Feature",
+                "jsky.app.ot.gemini.inst.OIWFS_FeatureTemp",
                 "jsky.app.ot.gemini.tpe.TpePWFSFeature",
                 "jsky.app.ot.gemini.inst.SciAreaFeature",
         };

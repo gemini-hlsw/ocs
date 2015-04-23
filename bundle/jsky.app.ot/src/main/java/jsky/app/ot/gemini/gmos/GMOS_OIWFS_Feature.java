@@ -220,7 +220,7 @@ public class GMOS_OIWFS_Feature extends OIWFS_FeatureBase {
         if (!GmosOiwfsGuideProbe.instance.inRange(ctx, probeArmOffset)) return;
 
         // get the additional (IFU) patrol field offset in screen coords, rotated by the position angle
-        Point2D.Double ifuOffset = new Point2D.Double(_getPatrolFieldXOffset((InstGmosCommon) _iw.getInstObsComp()), 0);
+        Point2D.Double ifuOffset = new Point2D.Double(_getPatrolFieldXOffset((InstGmosCommon) _iw.getInstObsComp()) * _pixelsPerArcsec, 0);
         edu.gemini.spModel.util.Angle.rotatePoint(ifuOffset, _posAngle);
         xc += ifuOffset.x * _flipRA;
         yc += ifuOffset.y;

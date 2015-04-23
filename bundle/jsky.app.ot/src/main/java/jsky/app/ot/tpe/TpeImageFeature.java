@@ -336,6 +336,10 @@ public abstract class TpeImageFeature implements TelescopePosWatcher {
 
             g2d.setStroke(startStroke);
         }
+
+        public Figure transform(AffineTransform xform) {
+            return new Figure(xform.createTransformedShape(shape), color, composite, stroke);
+        }
     }
     // List of Figures to draw.
     protected LinkedList<Figure> _figureList = new LinkedList<Figure>();

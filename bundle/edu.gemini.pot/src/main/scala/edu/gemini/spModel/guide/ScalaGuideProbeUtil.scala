@@ -14,7 +14,8 @@ import scala.collection.JavaConversions._
 object ScalaGuideProbeUtil {
   def calculateVignetting[I <: SPInstObsComp with VignettableScienceAreaInstrument](ctx0: ObsContext,
                                                                                     coordinates: Coordinates,
-                                                                                    probeArmGeometry0: ProbeArmGeometry[I]): Double = {
+                                                                                    probeArmGeometry0: ProbeArmGeometry): Double = {
+    /*
     for {
       ctx                 <- Option(ctx0)
       probeArmGeometry    <- Option(probeArmGeometry0)
@@ -73,4 +74,7 @@ object ScalaGuideProbeUtil {
       if (ctx.getSciencePositions.isEmpty) 0.0 else vignettingSum / ctx.getSciencePositions.size()
     }
   }.getOrElse(0.0)
+  */
+    0.0
+  }
 }

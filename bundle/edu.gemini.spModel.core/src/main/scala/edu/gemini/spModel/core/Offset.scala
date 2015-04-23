@@ -1,6 +1,11 @@
 package edu.gemini.spModel.core
 
+import AngleSyntax._
+
 import scala.math._
+
+import scalaz._
+import Scalaz._
 
 /**
  * Offset coordinates expressed as angular separations between two points, a
@@ -17,7 +22,6 @@ case class Offset(p: OffsetP, q: OffsetQ) {
    *         this offset and the given <code>other</code> offset
    */
   def distance(other: Offset): Angle = {
-    import AngleSyntax._
     val pd = p.degrees - other.p.degrees
     val qd = q.degrees - other.q.degrees
     val d = sqrt(pd*pd + qd*qd)
@@ -32,6 +36,14 @@ case class Offset(p: OffsetP, q: OffsetQ) {
    * @return angular separation between base position and offset position
    */
   def distance: Angle = distance(Offset.zero)
+
+  def +(that: Offset): Offset = Offset(p + that.p, q + that.q)
+  def -(that: Offset): Offset = Offset(p - that.p, q - that.q)
+
+  def *(scale: Double): Offset = Offset(p * scale, q * scale)
+
+  def flipP: Offset = Offset(p * -1, q)
+  def flipQ: Offset = Offset(p, q * -1)
 }
 
 object Offset {
@@ -40,4 +52,6 @@ object Offset {
   /** @group Typeclass Instances */
   implicit val equals = scalaz.Equal.equalA[Offset]
 
+  implicit val ShowOffset: Show[Offset] =
+    Show.shows[Offset] { off => s"Offset(${off.p.shows}, ${off.q.shows}" }
 }
