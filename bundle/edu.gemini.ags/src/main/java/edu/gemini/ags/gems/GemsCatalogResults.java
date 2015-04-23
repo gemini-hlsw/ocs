@@ -54,11 +54,11 @@ public class GemsCatalogResults {
         final List<GemsGuideStars> result = new ArrayList<>();
 
         for (TiptiltFlexurePair pair : TiptiltFlexurePair.pairs(results)) {
-            final GemsGuideProbeGroup tiptiltGroup = pair.getTiptiltResults().criterion().key().group();
-            final GemsGuideProbeGroup flexureGroup = pair.getFlexureResults().criterion().key().group();
-            final List<Target.SiderealTarget> tiptiltTargetsList = filter(obsContext, pair.getTiptiltResults().resultsAsJava(),
+            final GemsGuideProbeGroup tiptiltGroup = pair.tiptiltResults().criterion().key().group();
+            final GemsGuideProbeGroup flexureGroup = pair.flexureResults().criterion().key().group();
+            final List<Target.SiderealTarget> tiptiltTargetsList = filter(obsContext, pair.tiptiltResults().resultsAsJava(),
                     tiptiltGroup, posAngles);
-            final List<Target.SiderealTarget> flexureTargetsList = filter(obsContext, pair.getFlexureResults().resultsAsJava(),
+            final List<Target.SiderealTarget> flexureTargetsList = filter(obsContext, pair.flexureResults().resultsAsJava(),
                     flexureGroup, posAngles);
 
             if (tiptiltTargetsList.size() != 0 && flexureTargetsList.size() != 0) {
@@ -99,11 +99,11 @@ public class GemsCatalogResults {
         final List<GemsGuideStars> result = new ArrayList<>();
 
         for (TiptiltFlexurePair pair : TiptiltFlexurePair.pairs(results)) {
-            final GemsGuideProbeGroup tiptiltGroup = pair.getTiptiltResults().criterion().key().group();
-            final GemsGuideProbeGroup flexureGroup = pair.getFlexureResults().criterion().key().group();
-            final List<Target.SiderealTarget> tiptiltTargetsList = filter(obsContext, pair.getTiptiltResults().resultsAsJava(),
+            final GemsGuideProbeGroup tiptiltGroup = pair.tiptiltResults().criterion().key().group();
+            final GemsGuideProbeGroup flexureGroup = pair.flexureResults().criterion().key().group();
+            final List<Target.SiderealTarget> tiptiltTargetsList = filter(obsContext, pair.tiptiltResults().resultsAsJava(),
                     tiptiltGroup, posAngles);
-            final List<Target.SiderealTarget> flexureTargetsList = filter(obsContext, pair.getFlexureResults().resultsAsJava(),
+            final List<Target.SiderealTarget> flexureTargetsList = filter(obsContext, pair.flexureResults().resultsAsJava(),
                     flexureGroup, posAngles);
             if (tiptiltTargetsList.size() != 0 && flexureTargetsList.size() != 0) {
                 if (progress != null) {
