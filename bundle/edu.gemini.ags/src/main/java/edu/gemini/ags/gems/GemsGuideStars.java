@@ -125,7 +125,7 @@ public class GemsGuideStars implements Comparable<GemsGuideStars> {
     // by more than 20%. In this case, the second brightest star should be assigned to CWFS3
     // as long as the faintness limit (R=17.5) is met.
     private double getAverageStrehlForCompare() {
-        double avg = strehl.getAvg();
+        double avg = strehl.avg();
         if ("CWFS".equals(tiptiltGroup.getKey())) {
            if (!cwfs3IsBrightest()) {
                // Previous code ensures that cwfs3 is either the brightest or second brightest
@@ -172,7 +172,7 @@ public class GemsGuideStars implements Comparable<GemsGuideStars> {
         return "GemsGuideStars{" +
                 "pa=" + pa +
                 ", tiptilt=" + tiptiltGroup.getKey() +
-                ", avg Strehl=" + strehl.getAvg()*100 +
+                ", avg Strehl=" + strehl.avg()*100 +
                 ", guiders=" + sb.toString() +
                 '}';
     }

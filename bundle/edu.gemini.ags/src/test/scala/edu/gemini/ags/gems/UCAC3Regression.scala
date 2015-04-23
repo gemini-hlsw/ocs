@@ -111,7 +111,7 @@ trait UCAC3Regression {
               val sameDec = egg.getPrimary.getValue.getTarget.getDec.getAs(CoordinateParam.Units.DEGREES) == acc.getPrimary.getValue.getTarget.getDec.getAs(CoordinateParam.Units.DEGREES)
               sameGuider && sameRa && sameDec
           }
-          val sameStrehl = math.abs(expected.getStrehl.getAvg - actual.getStrehl.getAvg) < 0.0001
+          val sameStrehl = math.abs(expected.getStrehl.avg - actual.getStrehl.avg) < 0.0001
           sameStrehl && equalGroup.forall(_ == true)
         } else {
           guideGroupSizeEqual
