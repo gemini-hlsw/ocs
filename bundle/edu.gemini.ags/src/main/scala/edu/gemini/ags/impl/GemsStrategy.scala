@@ -1,6 +1,5 @@
 package edu.gemini.ags.impl
 
-import edu.gemini.ags.api.AgsAnalysis._
 import edu.gemini.ags.api.{AgsAnalysis, AgsMagnitude, AgsStrategy}
 import edu.gemini.ags.api.AgsStrategy.{Assignment, Estimate, Selection}
 import edu.gemini.ags.api.defaultProbeBands
@@ -107,7 +106,7 @@ trait GemsStrategy extends AgsStrategy {
   }
 
   override protected [ags] def analyze(ctx: ObsContext, mt: MagnitudeTable, guideProbe: ValidatableGuideProbe, guideStar: SiderealTarget): Option[AgsAnalysis] =
-    AgsAnalysis.analysis(ctx, mt, guideProbe, guideStar, probeBands)
+    AgsAnalysis.analysis(ctx, mt, guideProbe, guideStar, probeBands(guideProbe))
 
   override def analyze(ctx: ObsContext, mt: MagnitudeTable): List[AgsAnalysis] = {
     import AgsAnalysis._
@@ -118,9 +117,11 @@ trait GemsStrategy extends AgsStrategy {
         case _                         => true
       }
 
-      val probeAnalysis = grp.getMembers.asScala.toList.flatMap { analysis(ctx, mt, _, probeBands) }
+      val probeAnalysis = grp.getMembers.asScala.toList.flatMap { p => analysis(ctx, mt, p, probeBands(p)) }
       probeAnalysis.filter(hasGuideStarForProbe) match {
-        case Nil => List(NoGuideStarForGroup(grp, probeBands))
+        case Nil =>
+          // Pick the first guide probe as representative, since we are called with either Canopus or GsaoiOdwg
+          ~grp.getMembers.asScala.headOption.map {gp => List(NoGuideStarForGroup(grp, probeBands(gp)))}
         case lst => lst
       }
     }
@@ -237,6 +238,10 @@ trait GemsStrategy extends AgsStrategy {
   }
 
   override val probeBands: List[MagnitudeBand] = defaultProbeBands(MagnitudeBand.R)
+
+  // Return the band used for each probe
+  // TODO Delegate to GemsMagnitudeTable
+  private def probeBands(guideProbe: GuideProbe): List[MagnitudeBand] = if (Canopus.Wfs.Group.instance.getMembers.contains(guideProbe)) defaultProbeBands(MagnitudeBand.R) else List(MagnitudeBand.H)
 
   override val guideProbes: List[GuideProbe] =
     Flamingos2OiwfsGuideProbe.instance :: (GsaoiOdgw.values() ++ Canopus.Wfs.values()).toList
