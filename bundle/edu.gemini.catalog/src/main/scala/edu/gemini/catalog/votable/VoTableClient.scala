@@ -137,6 +137,8 @@ trait CachedBackend extends VoTableBackend {
 }
 
 case object RemoteBackend extends CachedBackend {
+  val instance = this
+
   val Log = Logger.getLogger(getClass.getName)
 
   private val timeout = 30 * 1000 // Max time to wait

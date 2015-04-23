@@ -63,7 +63,6 @@ public class TpeGuideStarDialog extends TpeGuideStarDialogForm
     private static final String AOWFS_LGS = "AOWFS LGS";
 
     private static final String CATALOG_2MASS = "2MASS";
-    private static final String CATALOG_UCAC3 = "UCAC3";
     private static final String CATALOG_UCAC4 = "UCAC4";
 
     private static final String OPTICAL_DEFAULT_CATALOG = CATALOG_UCAC4;

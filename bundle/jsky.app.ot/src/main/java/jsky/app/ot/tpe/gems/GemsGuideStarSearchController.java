@@ -2,12 +2,10 @@ package jsky.app.ot.tpe.gems;
 
 import edu.gemini.ags.gems.GemsUtils4Java;
 import edu.gemini.skycalc.Angle;
-import edu.gemini.shared.util.immutable.Some;
 import edu.gemini.spModel.core.MagnitudeBand;
 import edu.gemini.spModel.core.Target;
 import edu.gemini.spModel.gems.GemsTipTiltMode;
 import edu.gemini.ags.gems.GemsCatalogSearchResults;
-import edu.gemini.ags.gems.GemsGuideStarSearchOptions;
 import edu.gemini.ags.gems.GemsGuideStars;
 import edu.gemini.spModel.obs.context.ObsContext;
 import jsky.app.ot.tpe.GemsGuideStarWorker;
@@ -64,7 +62,7 @@ class GemsGuideStarSearchController {
             _dialog.setState(GemsGuideStarSearchDialog.State.PRE_QUERY);
         }
 
-        if (_model.isReviewCanditatesBeforeSearch()) {
+        if (_model.isReviewCandidatesBeforeSearch()) {
             _model.setGemsCatalogSearchResults(results);
         } else {
             _model.setGemsCatalogSearchResults(results);

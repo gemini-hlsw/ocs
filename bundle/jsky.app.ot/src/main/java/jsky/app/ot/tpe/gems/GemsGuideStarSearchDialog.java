@@ -1,7 +1,6 @@
 package jsky.app.ot.tpe.gems;
 
 import edu.gemini.ags.gems.GemsUtils4Java;
-import edu.gemini.shared.skyobject.SkyObject;
 import edu.gemini.ags.gems.GemsGuideStarSearchOptions.*;
 import edu.gemini.ags.gems.GemsGuideStars;
 import edu.gemini.spModel.core.Target;
@@ -34,10 +33,6 @@ import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
-import javax.swing.event.TableModelEvent;
-import javax.swing.event.TableModelListener;
-import javax.swing.event.TreeSelectionEvent;
-import javax.swing.event.TreeSelectionListener;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -158,16 +153,15 @@ public class GemsGuideStarSearchDialog extends JFrame {
     // Context dependent message (title)
     private JLabel _actionLabel;
 
-    private JComboBox _catalogComboBox;
-    private JComboBox _userCatalogComboBox;
-    private Set<String> _userCatalogSet = new TreeSet<String>();
-    private JComboBox _nirBandComboBox;
+    private JComboBox<CatalogChoice> _catalogComboBox;
+    private JComboBox<String> _userCatalogComboBox;
+    private Set<String> _userCatalogSet = new TreeSet<>();
+    private JComboBox<NirBandChoice> _nirBandComboBox;
     private JCheckBox _reviewCandidatesCheckBox;
-    private JComboBox _analyseComboBox;
+    private JComboBox<AnalyseChoice> _analyseComboBox;
     private JCheckBox _allowPosAngleChangesCheckBox;
     private JTabbedPane _tabbedPane;
     private JPanel _candidateGuideStarsPanel;
-    private JPanel _candidateAsterismsPanel;
 
     // reuse file chooser widget for opening user catalogs
     private static JFileChooser _fileChooser;
@@ -245,14 +239,14 @@ public class GemsGuideStarSearchDialog extends JFrame {
         }});
 
         JPanel catalogPanel = new JPanel();
-        _catalogComboBox = new JComboBox(CatalogChoice.values());
-        _userCatalogComboBox = new JComboBox();
+        _catalogComboBox = new JComboBox<>(CatalogChoice.values());
+        _userCatalogComboBox = new JComboBox<>();
         _userCatalogComboBox.addItem("Open...");
         _userCatalogComboBox.setToolTipText("Select a local catalog file to use.");
         _userCatalogComboBox.setVisible(false);
         _userCatalogComboBox.setRenderer(new DefaultListCellRenderer() {
             @Override
-            public Component getListCellRendererComponent(JList list, Object value, int index,
+            public Component getListCellRendererComponent(JList<?> list, Object value, int index,
                                                           boolean isSelected, boolean cellHasFocus) {
                 if (index == 0)
                     return super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
@@ -276,7 +270,7 @@ public class GemsGuideStarSearchDialog extends JFrame {
             anchor = EAST;
         }});
 
-        _nirBandComboBox = new JComboBox(NirBandChoice.values());
+        _nirBandComboBox = new JComboBox<>(NirBandChoice.values());
         panel.add(_nirBandComboBox, new GridBagConstraints() {{
             gridx = 3;
             gridy = 1;
@@ -300,7 +294,7 @@ public class GemsGuideStarSearchDialog extends JFrame {
             anchor = EAST;
         }});
 
-        _analyseComboBox = new JComboBox(AnalyseChoice.values());
+        _analyseComboBox = new JComboBox<>(AnalyseChoice.values());
         panel.add(_analyseComboBox, new GridBagConstraints() {{
             gridx = 1;
             gridy = 4;
@@ -319,7 +313,7 @@ public class GemsGuideStarSearchDialog extends JFrame {
 
         _tabbedPane = new JTabbedPane();
         _tabbedPane.add(_candidateGuideStarsPanel = makeCandidateGuideStarsPanel());
-        _tabbedPane.add(_candidateAsterismsPanel = makeCandidateAsterismsPanel());
+        _tabbedPane.add(makeCandidateAsterismsPanel());
         panel.add(_tabbedPane, new GridBagConstraints() {{
             gridx = 0;
             gridy = 6;
@@ -356,7 +350,7 @@ public class GemsGuideStarSearchDialog extends JFrame {
         // If the user edits catalog search options, the tool throws away its results and moves back
         // to Pre-Query. On the other hand, if he changes Asterism parameters or changes candidate
         // guide stars, the tool moves back to Pre-Analyze.
-        final List<JComponent> searchParams = new ArrayList<JComponent>();
+        final List<JComponent> searchParams = new ArrayList<>();
         searchParams.add(_catalogComboBox);
         searchParams.add(_nirBandComboBox);
         searchParams.add(_reviewCandidatesCheckBox);
@@ -365,20 +359,17 @@ public class GemsGuideStarSearchDialog extends JFrame {
         searchParams.add(_analyseComboBox);
         searchParams.add(_allowPosAngleChangesCheckBox);
 
-        ActionListener a = new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                _useDefaultsAction.setEnabled(!usingDefaults());
-                if (_state == State.PRE_ANALYZE) {
-                    if (searchParams.contains(e.getSource())) {
-                        setState(State.PRE_QUERY);
-                    }
-                } else if (_state == State.SELECTION) {
-                    if (searchParams.contains(e.getSource())) {
-                        setState(State.PRE_QUERY);
-                    } else {
-                        setState(State.PRE_ANALYZE);
-                    }
+        ActionListener a = e -> {
+            _useDefaultsAction.setEnabled(!usingDefaults());
+            if (_state == State.PRE_ANALYZE) {
+                if (searchParams.contains(e.getSource())) {
+                    setState(State.PRE_QUERY);
+                }
+            } else if (_state == State.SELECTION) {
+                if (searchParams.contains(e.getSource())) {
+                    setState(State.PRE_QUERY);
+                } else {
+                    setState(State.PRE_ANALYZE);
                 }
             }
         };
@@ -389,63 +380,50 @@ public class GemsGuideStarSearchDialog extends JFrame {
         _allowPosAngleChangesCheckBox.addActionListener(a);
 
         // REL-560: User catalog support
-        _catalogComboBox.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (_catalogComboBox.getSelectedItem() == CatalogChoice.USER_CATALOG) {
-                    _userCatalogComboBox.setVisible(true);
-                    if (_userCatalogComboBox.getItemCount() == 1) {
-                        loadUserCatalog();
-                    }
-                } else {
-                    _userCatalogFileName = null;
-                    _userCatalog = null;
-                    _userCatalogComboBox.setSelectedIndex(0);
-                    _userCatalogComboBox.setVisible(false);
+        _catalogComboBox.addActionListener(e -> {
+            if (_catalogComboBox.getSelectedItem() == CatalogChoice.USER_CATALOG) {
+                _userCatalogComboBox.setVisible(true);
+                if (_userCatalogComboBox.getItemCount() == 1) {
+                    loadUserCatalog();
                 }
-
+            } else {
+                _userCatalogFileName = null;
+                _userCatalog = null;
+                _userCatalogComboBox.setSelectedIndex(0);
+                _userCatalogComboBox.setVisible(false);
             }
+
         });
 
-        _userCatalogComboBox.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (_userCatalogComboBox.getSelectedIndex() == 0) {
-                    if (_catalogComboBox.getSelectedItem() == CatalogChoice.USER_CATALOG) {
-                        loadUserCatalog();
-                    }
-                } else {
-                    selectUserCatalog((String) _userCatalogComboBox.getSelectedItem());
+        _userCatalogComboBox.addActionListener(e -> {
+            if (_userCatalogComboBox.getSelectedIndex() == 0) {
+                if (_catalogComboBox.getSelectedItem() == CatalogChoice.USER_CATALOG) {
+                    loadUserCatalog();
                 }
-                setState(State.PRE_QUERY);
+            } else {
+                selectUserCatalog((String) _userCatalogComboBox.getSelectedItem());
             }
+            setState(State.PRE_QUERY);
         });
 
 
         // If unchecked, the “Candidate Guide Stars” tab should be removed.
-        _reviewCandidatesCheckBox.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (_reviewCandidatesCheckBox.isSelected()) {
-                    _tabbedPane.add(_candidateGuideStarsPanel, 0);
-                } else {
-                    _tabbedPane.remove(_candidateGuideStarsPanel);
-                }
+        _reviewCandidatesCheckBox.addActionListener(e -> {
+            if (_reviewCandidatesCheckBox.isSelected()) {
+                _tabbedPane.add(_candidateGuideStarsPanel, 0);
+            } else {
+                _tabbedPane.remove(_candidateGuideStarsPanel);
             }
         });
 
         // Selecting a group will cause it to be shown in the TPE
-        _candidateAsterismsTreeTable.getTreeSelectionModel().addTreeSelectionListener(new TreeSelectionListener() {
-            @Override
-            public void valueChanged(TreeSelectionEvent e) {
-                if (!_ignoreSelection) {
-                    _ignoreSelection = true;
-                    try {
-                        _candidateAsterismsTreeTable.selectRelatedRows();
-//                        _controller.add(_candidateAsterismsTreeTable.getSelectedGemsGuideStars());
-                    } finally {
-                        _ignoreSelection = false;
-                    }
+        _candidateAsterismsTreeTable.getTreeSelectionModel().addTreeSelectionListener(e -> {
+            if (!_ignoreSelection) {
+                _ignoreSelection = true;
+                try {
+                    _candidateAsterismsTreeTable.selectRelatedRows();
+                } finally {
+                    _ignoreSelection = false;
                 }
             }
         });
@@ -644,7 +622,7 @@ public class GemsGuideStarSearchDialog extends JFrame {
         }
         _model.setBand((NirBandChoice) _nirBandComboBox.getSelectedItem());
         _model.setAnalyseChoice((AnalyseChoice) _analyseComboBox.getSelectedItem());
-        _model.setReviewCanditatesBeforeSearch(_reviewCandidatesCheckBox.isSelected());
+        _model.setReviewCandidatesBeforeSearch(_reviewCandidatesCheckBox.isSelected());
         _model.setAllowPosAngleAdjustments(_allowPosAngleChangesCheckBox.isSelected());
         _model.setGemsCatalogSearchResults(null);
         _model.setGemsGuideStars(null);
@@ -698,15 +676,10 @@ public class GemsGuideStarSearchDialog extends JFrame {
             setState(State.PRE_QUERY);
         } else {
             _candidateGuideStarsTable.resize(); // fix column widths
-            if (_model.isReviewCanditatesBeforeSearch()) {
+            if (_model.isReviewCandidatesBeforeSearch()) {
                 setState(State.PRE_ANALYZE);
                 // Any changes in the checked candidates causes the state to change to PRE_ANALYZE
-                _candidateGuideStarsTable.getTable().getModel().addTableModelListener(new TableModelListener() {
-                    @Override
-                    public void tableChanged(TableModelEvent e) {
-                        setState(State.PRE_ANALYZE);
-                    }
-                });
+                _candidateGuideStarsTable.getTable().getModel().addTableModelListener(e -> setState(State.PRE_ANALYZE));
             } else {
                 analyzeDone();
             }
@@ -755,7 +728,7 @@ public class GemsGuideStarSearchDialog extends JFrame {
 
     private void analyzeDone() {
         CandidateAsterismsTreeTableModel treeTableModel = new CandidateAsterismsTreeTableModel(
-                _model.getGemsGuideStars(), _candidateAsterismsTreeTable, GemsUtils4Java.toOldBand(_model.getBand().getBand()));
+                _model.getGemsGuideStars(), GemsUtils4Java.toOldBand(_model.getBand().getBand()));
         _candidateAsterismsTreeTable.setTreeTableModel(treeTableModel);
         _candidateAsterismsTreeTable.expandAll();
         _candidateAsterismsTreeTable.packAll();

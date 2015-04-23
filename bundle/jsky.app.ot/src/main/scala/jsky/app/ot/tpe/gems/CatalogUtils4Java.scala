@@ -13,13 +13,15 @@ object CatalogUtils4Java {
    */
   def makeRow(siderealTarget: Target.SiderealTarget, nirBand: String, unusedBands: Array[String]): java.util.Vector[AnyRef] = {
     new java.util.Vector[AnyRef](Vector[AnyRef](
-      Boolean.box(true),
+      Boolean.box(x = true),
       siderealTarget.name,
-      siderealTarget.magnitudeIn(MagnitudeBand.R).orNull,
-      MagnitudeBand.all.find(_.name == nirBand).map(siderealTarget.magnitudeIn).flatten.orNull,
+      siderealTarget.magnitudeIn(MagnitudeBand._r).map(v => Double.box(v.value)).orNull,
+      siderealTarget.magnitudeIn(MagnitudeBand.R).map(v => Double.box(v.value)).orNull,
+      siderealTarget.magnitudeIn(MagnitudeBand.UC).map(v => Double.box(v.value)).orNull,
+      MagnitudeBand.all.find(_.name == nirBand).flatMap(siderealTarget.magnitudeIn).map(v => Double.box(v.value)).orNull,
       new HMS(siderealTarget.coordinates.ra.toAngle.toHMS.hours).toString,
-      new DMS(siderealTarget.coordinates.dec.toAngle.toDegrees).toString,
-        MagnitudeBand.all.find(_.name == unusedBands(0)).map(siderealTarget.magnitudeIn).flatten.orNull,
-        MagnitudeBand.all.find(_.name == unusedBands(1)).map(siderealTarget.magnitudeIn).flatten.orNull).asJava)
+      new DMS(siderealTarget.coordinates.dec.toDegrees).toString,
+      MagnitudeBand.all.find(_.name == unusedBands(0)).flatMap(siderealTarget.magnitudeIn).map(v => Double.box(v.value)).orNull,
+      MagnitudeBand.all.find(_.name == unusedBands(1)).flatMap(siderealTarget.magnitudeIn).map(v => Double.box(v.value)).orNull).asJava)
   }
 }
