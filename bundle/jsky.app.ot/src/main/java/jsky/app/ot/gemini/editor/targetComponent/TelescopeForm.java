@@ -1,55 +1,82 @@
 package jsky.app.ot.gemini.editor.targetComponent;
 
+import edu.gemini.shared.gui.ButtonFlattener;
+import jsky.app.ot.gemini.editor.targetComponent.details.TargetDetailPanel;
+import jsky.app.ot.util.Resources;
 import jsky.util.gui.TextBoxWidget;
 
 import javax.swing.*;
 import javax.swing.border.BevelBorder;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 class TelescopeForm extends JPanel {
 
     final GuidingControls guidingControls = new GuidingControls();
+    final TargetDetailPanel detailEditor = new TargetDetailPanel();
 
     final JMenu newMenu = new JMenu() {{
         setToolTipText("Create a new target or guide group");
         setMargin(new Insets(2, 2, 2, 2));
         setText("New");
         setFocusable(false);
+        setIcon(Resources.getIcon("eclipse/add_menu.gif"));
+        setText("");
+        addMouseListener(new MouseAdapter() {
+            final Icon icon = Resources.getIcon("eclipse/add_menu.gif");
+
+            public void mouseEntered(MouseEvent e) {
+                newMenu.setIcon(newMenu.getRolloverIcon());
+            }
+
+            public void mouseExited(MouseEvent e) {
+                newMenu.setIcon(icon);
+            }
+        });
+        ButtonFlattener.flatten(this);
     }};
 
     final JMenuBar newMenuBar = new JMenuBar() {{
+        setBorder(BorderFactory.createEmptyBorder());
+        setOpaque(false);
         add(newMenu);
     }};
 
     final JButton removeButton = new JButton() {{
         setToolTipText("Remove the selected target");
         setMargin(new Insets(2, 2, 2, 2));
-        setText("Remove");
         setFocusable(false);
+        setIcon(Resources.getIcon("eclipse/remove.gif"));
+        ButtonFlattener.flatten(this);
     }};
 
     final JButton copyButton = new JButton() {{
-        setText("Copy");
         setFocusable(false);
         setToolTipText("Copy selected target coordinates");
+        setIcon(Resources.getIcon("eclipse/copy.gif"));
+        ButtonFlattener.flatten(this);
     }};
 
     final JButton pasteButton = new JButton() {{
-        setText("Paste");
         setFocusable(false);
         setToolTipText("Paste coordinates on selected target");
+        setIcon(Resources.getIcon("eclipse/paste.gif"));
+        ButtonFlattener.flatten(this);
     }};
 
     final JButton duplicateButton = new JButton() {{
-        setText("Duplicate");
         setFocusable(false);
         setToolTipText("Duplicate selected target");
+        setIcon(Resources.getIcon("eclipse/duplicate.gif"));
+        ButtonFlattener.flatten(this);
     }};
 
     final JButton primaryButton = new JButton() {{
-        setText("Primary");
         setToolTipText("Set/unset as active guide star");
+        setIcon(Resources.getIcon("eclipse/radiobuttons.gif"));
+        ButtonFlattener.flatten(this);
     }};
 
     final JComboBox<PositionType> tag = new JComboBox<PositionType>() {{
@@ -60,6 +87,7 @@ class TelescopeForm extends JPanel {
         setToolTipText("Guide Group name (optional)");
         setHorizontalAlignment(JTextField.LEFT);
         setColumns(20);
+        setMinimumSize(getPreferredSize());
     }};
 
     final JPanel guideGroupPanel = new JPanel() {{
@@ -68,9 +96,9 @@ class TelescopeForm extends JPanel {
             setText("Guide Group Name");
         }};
         setLayout(new GridBagLayout());
-        add(guideGroupNameLabel, new GridBagConstraints(1, 0, 1, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 10, 0, 5), 0, 0));
-        add(guideGroupName, new GridBagConstraints(2, 0, 2, 1, 0.0, 0.0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
-        add(new JPanel(), new GridBagConstraints(1, 1, 3, 1, 1.0, 1.0, GridBagConstraints.NORTH, GridBagConstraints.NONE, new Insets(233, 0, 0, 0), 0, 0));
+        add(guideGroupNameLabel, new GridBagConstraints(1, 0, 1, 1, 0.0, 0.0, GridBagConstraints.WEST,  GridBagConstraints.NONE, new Insets(  0, 10, 0, 5), 0, 0));
+        add(guideGroupName,      new GridBagConstraints(2, 0, 2, 1, 0.0, 0.0, GridBagConstraints.WEST,  GridBagConstraints.NONE, new Insets(  0,  0, 0, 0), 0, 0));
+        add(new JPanel(),        new GridBagConstraints(1, 1, 3, 1, 1.0, 1.0, GridBagConstraints.NORTH, GridBagConstraints.NONE, new Insets(233,  0, 0, 0), 0, 0));
         setVisible(false);
     }};
 
@@ -78,10 +106,10 @@ class TelescopeForm extends JPanel {
         setBackground(new Color(238, 238, 238));
         setBorder(new EmptyBorder(2, 2, 2, 2));
         setLayout(new GridBagLayout() {{
-            columnWidths  = new int[]{ 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-            rowHeights    = new int[]{ 0, 0 };
-            columnWeights = new double[]{ 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0E-4 };
-            rowWeights    = new double[]{ 0.0, 1.0E-4 };
+            columnWidths  = new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+            rowHeights    = new int[] { 0, 0 };
+            columnWeights = new double[] { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0E-4 };
+            rowWeights    = new double[] { 0.0, 1.0E-4 };
         }});
         final JPanel spacerPanel = new JPanel() {{
             setBackground(null);
@@ -96,6 +124,20 @@ class TelescopeForm extends JPanel {
         add(primaryButton,          new GridBagConstraints(5, 0, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 10, 0, 0), 0, 0));
         add(spacerPanel,            new GridBagConstraints(6, 0, 1, 1, 1.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0,  0, 0, 0), 0, 0));
         add(guidingControls.peer(), new GridBagConstraints(7, 0, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0,  0, 0, 0), 0, 0));
+
+        // Insert the tag menu at index 6 ... TODO: clean this up a bit
+        add(new JPanel() {{
+            setOpaque(false);
+            setLayout(new FlowLayout() {{
+                setVgap(0);
+            }});
+            add(new JLabel("Type Tag: ") {{
+                setOpaque(false);
+                setVerticalAlignment(SwingConstants.CENTER);
+            }});
+            add(tag);
+        }}, 6);
+
     }};
 
     final TelescopePosTableWidget positionTable;
@@ -125,6 +167,20 @@ class TelescopeForm extends JPanel {
             fill = GridBagConstraints.BOTH;
             weighty = 1000;
             weightx = 1000;
+        }});
+
+        add(detailEditor, new GridBagConstraints() {{
+            gridx = 0;
+            gridy = 1;
+            fill = HORIZONTAL;
+            insets = new Insets(5, 0, 5, 0);
+        }});
+
+        add(guideGroupPanel, new GridBagConstraints() {{
+            gridx = 0;
+            gridy = 2;
+            fill = HORIZONTAL;
+            insets = new Insets(5, 0, 5, 0);
         }});
 
     }

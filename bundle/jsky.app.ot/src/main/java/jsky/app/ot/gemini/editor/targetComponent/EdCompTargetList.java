@@ -4,7 +4,6 @@
 package jsky.app.ot.gemini.editor.targetComponent;
 
 import edu.gemini.pot.sp.ISPObsComponent;
-import edu.gemini.shared.gui.ButtonFlattener;
 import edu.gemini.shared.skyobject.Magnitude;
 import edu.gemini.shared.util.immutable.*;
 import edu.gemini.spModel.guide.GuideProbe;
@@ -23,7 +22,6 @@ import edu.gemini.spModel.target.system.*;
 import jsky.app.ot.OTOptions;
 import jsky.app.ot.ags.*;
 import jsky.app.ot.editor.OtItemEditor;
-import jsky.app.ot.gemini.editor.targetComponent.details.TargetDetailPanel;
 import jsky.app.ot.tpe.AgsClient;
 import jsky.app.ot.tpe.GuideStarSupport;
 import jsky.app.ot.tpe.TelescopePosEditor;
@@ -52,10 +50,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
     private static TargetClipboard clipboard;
 
     // Instance constants
-    private final AgsContextPublisher _agsPub       = new AgsContextPublisher();
-    private final TargetDetailPanel   _detailEditor = new TargetDetailPanel();
-
-    // More constants, but they need access to `this` so we assign in the ctor
+    private final AgsContextPublisher _agsPub = new AgsContextPublisher();
     private final TelescopeForm _w;
 
     // Stuff that varies with time
@@ -64,78 +59,26 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 
     public EdCompTargetList() {
 
-        // Finish initializing our constants
         _w = new TelescopeForm(this);
 
-        // Move the tag menu up onto the menu bar, with a label
-        _w.buttonPanel.add(new JPanel() {{
-            setOpaque(false);
-            setLayout(new FlowLayout() {{
-                setVgap(0);
-            }});
-            add(new JLabel("Type Tag: ") {{
-                setOpaque(false);
-                setVerticalAlignment(SwingConstants.CENTER);
-            }});
-            add(_w.tag);
-        }}, 6); // index is the offset from the left
-
-        //Callback for AGS visibility
         _w.addComponentListener(new ComponentAdapter() {
-            @Override
             public void componentShown(ComponentEvent componentEvent) {
                 toggleAgsGuiElements();
             }
         });
 
-        _w.add(_detailEditor, new GridBagConstraints() {{
-            gridx = 0;
-            gridy = 1;
-            fill = HORIZONTAL;
-            insets = new Insets(5, 0, 5, 0);
-        }});
-
-        _w.add(_w.guideGroupPanel, new GridBagConstraints() {{
-            gridx = 0;
-            gridy = 2;
-            fill = HORIZONTAL;
-            insets = new Insets(5, 0, 5, 0);
-        }});
-
-        setMenuStyling(_w.newMenuBar, _w.newMenu);
-
-        _w.removeButton.addActionListener(removeListener);
-        _w.removeButton.setText("");
-        _w.removeButton.setIcon(Resources.getIcon("eclipse/remove.gif"));
-        ButtonFlattener.flatten(_w.removeButton);
-
-        _w.copyButton.setIcon(Resources.getIcon("eclipse/copy.gif"));
-        _w.copyButton.setText("");
-        _w.copyButton.addActionListener(copyListener);
-        ButtonFlattener.flatten(_w.copyButton);
-
-        _w.pasteButton.setIcon(Resources.getIcon("eclipse/paste.gif"));
-        _w.pasteButton.setText("");
-        _w.pasteButton.addActionListener(pasteListener);
-        ButtonFlattener.flatten(_w.pasteButton);
-
-        _w.duplicateButton.setIcon(Resources.getIcon("eclipse/duplicate.gif"));
-        _w.duplicateButton.setText("");
+        _w.removeButton   .addActionListener(removeListener);
+        _w.copyButton     .addActionListener(copyListener);
+        _w.pasteButton    .addActionListener(pasteListener);
         _w.duplicateButton.addActionListener(duplicateListener);
-        ButtonFlattener.flatten(_w.duplicateButton);
+        _w.primaryButton  .addActionListener(primaryListener);
 
-        _w.primaryButton.setIcon(Resources.getIcon("eclipse/radiobuttons.gif"));
-        _w.primaryButton.setText("");
-        _w.primaryButton.addActionListener(primaryListener);
-        ButtonFlattener.flatten(_w.primaryButton);
-
+        _w.guidingControls.autoGuideStarButton().peer().addActionListener(autoGuideStarListener);
+        _w.guidingControls.manualGuideStarButton().peer().addActionListener(manualGuideStarListener);
         _w.guidingControls.autoGuideStarGuiderSelector().addSelectionListener(strategy ->
             AgsStrategyUtil.setSelection(getContextObservation(), strategy)
         );
-        _w.guidingControls.autoGuideStarButton().peer().addActionListener(autoGuideStarListener);
-        _w.guidingControls.manualGuideStarButton().peer().addActionListener(manualGuideStarListener);
 
-        _w.guideGroupName.setMinimumSize(_w.guideGroupName.getPreferredSize());
         _w.guideGroupName.addWatcher(new TextBoxWidgetWatcher() {
             public void textBoxKeyPress(TextBoxWidget tbwe) {
                 SwingUtilities.invokeLater(() -> {
@@ -153,12 +96,10 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                     _w.guideGroupName.requestFocus(); // otherwise focus is lost during event handling
                 });
             }
-
             public void textBoxAction(TextBoxWidget tbwe) {
             }
         });
 
-        // *** Position Table
         _w.positionTable.addKeyListener(new KeyAdapter() {
             @Override public void keyPressed(KeyEvent event) {
                 switch (event.getKeyCode()) {
@@ -185,23 +126,6 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         _w.newMenu.setEnabled(enabled && inst != null);
     }
 
-    private static void setMenuStyling(JMenuBar bar, final JMenu menu) {
-        bar.setBorder(BorderFactory.createEmptyBorder());
-        bar.setOpaque(false);
-        menu.setIcon(Resources.getIcon("eclipse/add_menu.gif"));
-        menu.setText("");
-        menu.addMouseListener(new MouseAdapter() {
-            final Icon icon = Resources.getIcon("eclipse/add_menu.gif");
-            @Override public void mouseEntered(MouseEvent e) {
-                menu.setIcon(menu.getRolloverIcon());
-            }
-            @Override public void mouseExited(MouseEvent e) {
-                menu.setIcon(icon);
-            }
-        });
-        ButtonFlattener.flatten(menu);
-    }
-
     private final ActionListener _tagListener = new ActionListener() {
         public void actionPerformed(ActionEvent e) {
             final PositionType pt = (PositionType) _w.tag.getSelectedItem();
@@ -214,7 +138,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 
                     if (_curPos != null) _curPos.deleteWatcher(posWatcher);
 
-                    _detailEditor.edit(ctx, _curPos, getNode());
+                    _w.detailEditor.edit(ctx, _curPos, getNode());
 
                     if (_curPos != null) {
                         _curPos.addWatcher(posWatcher);
@@ -466,7 +390,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                         _curGroup = grp;
 
                         _w.guideGroupPanel.setVisible(true);
-                        _detailEditor.setVisible(false);
+                        _w.detailEditor.setVisible(false);
 
                         // N.B. don't trim, otherwise user can't include space in group name
                         final String name = _curGroup.getName().getOrElse("");
@@ -597,7 +521,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
     private void refreshAll() {
         final boolean editable = OTOptions.areRootAndCurrentObsIfAnyEditable(getProgram(), getContextObservation());
         _w.guideGroupPanel.setVisible(false);
-        _detailEditor.setVisible(true);
+        _w.detailEditor.setVisible(true);
 
         // Get all the legally available guiders in the current context.
         final Set<GuideProbe> avail = GuideProbeUtil.instance.getAvailableGuiders(getContextObservation());
@@ -646,8 +570,8 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 
         // Update target details and force enabled state update for the detail editor, whose
         // structure may have changed (thus making the cached "enabled" value unreliable).
-        _detailEditor.edit(getObsContext(env), _curPos, getNode());
-        updateEnabledState(new Component[] { _detailEditor }, editable);
+        _w.detailEditor.edit(getObsContext(env), _curPos, getNode());
+        updateEnabledState(new Component[] { _w.detailEditor }, editable);
 
     }
 
