@@ -1,10 +1,9 @@
 package jsky.app.ot.tpe.gems;
 
+import edu.gemini.ags.gems.GemsUtils4Java;
 import edu.gemini.shared.skyobject.Magnitude;
 import edu.gemini.shared.util.immutable.DefaultImList;
 import edu.gemini.shared.util.immutable.ImList;
-import edu.gemini.shared.util.immutable.Option;
-import edu.gemini.spModel.gemini.gems.Canopus;
 import edu.gemini.ags.gems.GemsGuideStars;
 import edu.gemini.ags.gems.GemsStrehl;
 import edu.gemini.spModel.guide.GuideProbe;
@@ -179,14 +178,7 @@ class CandidateAsterismsTreeTableModel extends AbstractTreeTableModel {
             if (_guideProbeTargets != null) {
                 if (!_guideProbeTargets.getPrimary().isEmpty()) {
                     GuideProbe guideProbe = _guideProbeTargets.getGuider();
-                    Magnitude.Band band = _band;
-                    if (Canopus.Wfs.Group.instance.getMembers().contains(guideProbe)) {
-                        band = Magnitude.Band.R;
-                    }
-                    Option<Magnitude> magOpt = _guideProbeTargets.getPrimary().getValue().getTarget().getMagnitude(band);
-                    if (!magOpt.isEmpty()) {
-                        return magOpt.getValue().getBrightness() + " (" + band.name() + ")";
-                    }
+                    return GemsUtils4Java.probeMagnitudeInUse(guideProbe, _band, _guideProbeTargets.getPrimary().getValue().getTarget());
                 }
             } else if (_gemsGuideStars != null) { // top level displays Strehl values
                 GemsStrehl strehl = _gemsGuideStars.getStrehl();
