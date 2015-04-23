@@ -94,8 +94,8 @@ object ItcUniqueConfig {
   private def labels(cs: Seq[Config]): String = {
     val ls = cs.map(labelIndex).sorted
     findSpans(ls).map {
-      case i :: Nil => i.toString
-      case i :: is => f"$i%03d-${is.last}%03d"
+      case i :: Nil => f"$i%03d"
+      case i :: is  => f"$i%03d-${is.last}%03d"
     }.mkString(", ")
   }
 

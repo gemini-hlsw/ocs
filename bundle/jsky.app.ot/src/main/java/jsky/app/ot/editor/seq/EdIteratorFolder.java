@@ -94,14 +94,16 @@ public final class EdIteratorFolder
             obs.addCompositeChangeListener(obslogUpdater);
         }
 
-        // show/hide ITC result panels depending on instrument
+        // show/hide ITC result panels depending on instrument, if applicable also re-establish selected panel
         final ISPObsComponent instrument = getContextInstrument();
+        final int activePanel = _w.tabbedPane.getSelectedIndex();
         _w.tabbedPane.remove(itcImagingPanel.peer());
         _w.tabbedPane.remove(itcSpectroscopyPanel.peer());
         if (instrument != null) {
             final SPComponentType type = instrument.getType();
             if (itcImagingPanel.visibleFor(type))      _w.tabbedPane.add("ITC Imaging",      itcImagingPanel.peer());
             if (itcSpectroscopyPanel.visibleFor(type)) _w.tabbedPane.add("ITC Spectroscopy", itcSpectroscopyPanel.peer());
+            if (_w.tabbedPane.getTabCount() > activePanel) _w.tabbedPane.setSelectedIndex(activePanel);
         }
 
 

@@ -55,7 +55,7 @@ class ItcServiceImpl extends ItcService {
     ItcResult.forCcds(recipe.calculateImaging().map(imgResult))
 
   private def imgResult(result: ImagingResult): ItcCalcResult = result.is2nCalc match {
-    case i: ImagingS2NMethodACalculation  => ItcImagingResult(i.singleSNRatio(), i.totalSNRatio(), result.peakPixelCount)
+    case i: ImagingS2NMethodACalculation  => ItcImagingResult(result.source, i.singleSNRatio(), i.totalSNRatio(), result.peakPixelCount)
     case _                                => throw new NotImplementedError
   }
 
