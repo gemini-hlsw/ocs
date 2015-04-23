@@ -728,7 +728,7 @@ public class GemsGuideStarSearchDialog extends JFrame {
 
     private void analyzeDone() {
         CandidateAsterismsTreeTableModel treeTableModel = new CandidateAsterismsTreeTableModel(
-                _model.getGemsGuideStars(), _candidateAsterismsTreeTable, GemsUtils4Java.toOldBand(_model.getBand().getBand()));
+                _model.getGemsGuideStars(), GemsUtils4Java.toOldBand(_model.getBand().getBand()));
         _candidateAsterismsTreeTable.setTreeTableModel(treeTableModel);
         _candidateAsterismsTreeTable.expandAll();
         _candidateAsterismsTreeTable.packAll();

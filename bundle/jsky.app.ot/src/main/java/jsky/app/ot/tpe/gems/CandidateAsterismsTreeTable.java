@@ -5,7 +5,6 @@ import edu.gemini.ags.gems.GemsStrehl;
 import jsky.app.ot.util.Resources;
 import org.jdesktop.swingx.JXTreeTable;
 import org.jdesktop.swingx.decorator.ColorHighlighter;
-import org.jdesktop.swingx.decorator.ComponentAdapter;
 import org.jdesktop.swingx.decorator.FontHighlighter;
 import org.jdesktop.swingx.decorator.HighlightPredicate;
 import org.jdesktop.swingx.treetable.DefaultTreeTableModel;
@@ -27,8 +26,6 @@ import javax.swing.tree.TreePath;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Font;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
@@ -130,18 +127,10 @@ class CandidateAsterismsTreeTable extends JXTreeTable {
 
         public CheckBoxTableCellEditor() {
             this(new JCheckBox());
-            _checkBox.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    selectRelatedRows();
-                    // Do later after model is updated?
-                    SwingUtilities.invokeLater(new Runnable() {
-                        @Override
-                        public void run() {
-                            addCheckedAsterisms();
-                        }
-                    });
-                }
+            _checkBox.addActionListener(e -> {
+                selectRelatedRows();
+                // Do later after model is updated?
+                SwingUtilities.invokeLater(CandidateAsterismsTreeTable.this::addCheckedAsterisms);
             });
         }
         public CheckBoxTableCellEditor(JCheckBox checkBox) {
@@ -187,7 +176,7 @@ class CandidateAsterismsTreeTable extends JXTreeTable {
                     CandidateAsterismsTreeTableModel.Row row = getSelectedModelRow();
                     if (row != null) {
                         CandidateAsterismsTreeTableModel.Row parentRow = row.getParent();
-                        if (row != null && row.isCheckBoxSelected()) {
+                        if (row.isCheckBoxSelected()) {
                             selectPrimary(row);
                         } else if (parentRow != null && parentRow.isCheckBoxSelected()) {
                             selectPrimary(parentRow);
@@ -204,14 +193,9 @@ class CandidateAsterismsTreeTable extends JXTreeTable {
 
     // Highlights even/odd sets of related parent and child rows
     private ColorHighlighter getColorHighlighter() {
-        HighlightPredicate predicate = new HighlightPredicate() {
-            public boolean isHighlighted(Component component, ComponentAdapter adapter) {
-                GemsGuideStars gemsGuideStars = getGemsGuideStars(adapter.row);
-                if (gemsGuideStars != null && _gemsGuideStarsList != null) {
-                    return _gemsGuideStarsList.indexOf(gemsGuideStars) % 2 == 0;
-                }
-                return false;
-            }
+        HighlightPredicate predicate = (component, adapter) -> {
+            GemsGuideStars gemsGuideStars = getGemsGuideStars(adapter.row);
+            return gemsGuideStars != null && _gemsGuideStarsList != null && _gemsGuideStarsList.indexOf(gemsGuideStars) % 2 == 0;
         };
         return new ColorHighlighter(predicate, HIGHLIGHTER_COLOR, null, null, null);
     }
@@ -232,9 +216,8 @@ class CandidateAsterismsTreeTable extends JXTreeTable {
      * Selects all rows related to the currently selected row
      */
     public void selectRelatedRows() {
-        int[] rows = getSelectedRows();
-        for(int i = 0; i < rows.length; i++) {
-            selectRelatedRows(getGemsGuideStars(rows[i]));
+        for (int row : getSelectedRows()) {
+            selectRelatedRows(getGemsGuideStars(row));
         }
     }
 
@@ -262,7 +245,7 @@ class CandidateAsterismsTreeTable extends JXTreeTable {
      */
     public List<GemsGuideStars> getGemsGuideStarsList() {
         int numRows = getRowCount();
-        Set<GemsGuideStars> gemsGuideStarsSet = new TreeSet<GemsGuideStars>();
+        Set<GemsGuideStars> gemsGuideStarsSet = new TreeSet<>();
         for (int i = 0; i < numRows; i++) {
             TreePath path = getPathForRow(i);
             Object o = path.getLastPathComponent();
@@ -270,7 +253,7 @@ class CandidateAsterismsTreeTable extends JXTreeTable {
                 gemsGuideStarsSet.add(((CandidateAsterismsTreeTableModel.Row)o).getGemsGuideStars());
             }
         }
-        return new ArrayList<GemsGuideStars>(gemsGuideStarsSet);
+        return new ArrayList<>(gemsGuideStarsSet);
     }
 
     /**
@@ -284,22 +267,6 @@ class CandidateAsterismsTreeTable extends JXTreeTable {
         }
         return null;
     }
-
-//    /**
-//     * Returns a list GemsGuideStars corresponding to the selected tree table rows
-//     */
-//    public List<GemsGuideStars> getSelectedGemsGuideStars() {
-//        int[] rowIndexes = getSelectedRows();
-//        Set<GemsGuideStars> gemsGuideStarsSet = new HashSet<GemsGuideStars>();
-//        for (int i = 0; i < rowIndexes.length; i++) {
-//            TreePath path = getPathForRow(rowIndexes[i]);
-//            Object o = path.getLastPathComponent();
-//            if (o instanceof CandidateAsterismsTreeTableModel.Row) {
-//                gemsGuideStarsSet.add(((CandidateAsterismsTreeTableModel.Row)o).getGemsGuideStars());
-//            }
-//        }
-//        return new ArrayList<GemsGuideStars>(gemsGuideStarsSet);
-//    }
 
     /**
      * Returns the model Row object for the selected row

@@ -10,7 +10,6 @@ import edu.gemini.ags.gems.GemsStrehl;
 import edu.gemini.spModel.guide.GuideProbe;
 import edu.gemini.spModel.target.SPTarget;
 import edu.gemini.spModel.target.env.GuideProbeTargets;
-import org.jdesktop.swingx.JXTreeTable;
 import org.jdesktop.swingx.treetable.AbstractTreeTableModel;
 
 import java.util.ArrayList;
@@ -241,22 +240,20 @@ class CandidateAsterismsTreeTableModel extends AbstractTreeTableModel {
         }
     }
 
-    // Should be final, a bug seems to prevent it
-//    private ImList<Row> _rows;
     private final ImList<String> _columnHeaders;
 
     CandidateAsterismsTreeTableModel() {
         _columnHeaders = computeColumnHeaders();
     }
 
-    CandidateAsterismsTreeTableModel(List<GemsGuideStars> gemsGuideStarsList, JXTreeTable treeTable, Magnitude.Band band) {
+    CandidateAsterismsTreeTableModel(List<GemsGuideStars> gemsGuideStarsList, Magnitude.Band band) {
         super(new ArrayList<Row>());
         _columnHeaders = computeColumnHeaders();
 
-        final List<Row> tmp = (List<Row>)getRoot();
+        final List<Row> tmp = getRows();
 
         for(GemsGuideStars gemsGuideStars : gemsGuideStarsList) {
-            final List<Row> rowList = new ArrayList<Row>();
+            final List<Row> rowList = new ArrayList<>();
             for (GuideProbeTargets guideProbeTargets : gemsGuideStars.getGuideGroup().getAll()) {
                 rowList.add(new Row(gemsGuideStars, guideProbeTargets, band));
             }
@@ -271,7 +268,7 @@ class CandidateAsterismsTreeTableModel extends AbstractTreeTableModel {
     }
 
     private static ImList<String> computeColumnHeaders() {
-        List<String> hdr = new ArrayList<String>();
+        List<String> hdr = new ArrayList<>();
         for (Col c : Col.values()) hdr.add(c.displayName());
         return DefaultImList.create(hdr);
     }
@@ -306,7 +303,7 @@ class CandidateAsterismsTreeTableModel extends AbstractTreeTableModel {
                 ((Row)node)._primary = (getPrimaryIndex(-1) == -1); // true if no others are marked primary
             } else {
                 ((Row)node)._primary = null;
-                List<Row> rowList = (List<Row>) getRoot();
+                List<Row> rowList = getRows();
                 for (Row row : rowList) {
                     if (row.isCheckBoxSelected()) {
                         row.setPrimary(true);
@@ -317,12 +314,10 @@ class CandidateAsterismsTreeTableModel extends AbstractTreeTableModel {
         } else if (column == Col.PRIMARY.ordinal() && node instanceof Row && value instanceof Boolean) {
             ((Row)node)._primary = (Boolean)value;
         }
-        // else {
-            // other columns are read-only
-        // }
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public Object getChild(Object parent, int index) {
         if (parent instanceof List) {
             List<Row> rowList = (List<Row>)parent;
@@ -340,6 +335,7 @@ class CandidateAsterismsTreeTableModel extends AbstractTreeTableModel {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public int getChildCount(Object parent) {
         if (parent instanceof List) {
             List<Row> rowList = (List<Row>)parent;
@@ -355,6 +351,7 @@ class CandidateAsterismsTreeTableModel extends AbstractTreeTableModel {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public int getIndexOfChild(Object parent, Object child) {
         List<Row> rowList = null;
         if (parent instanceof List) {
@@ -392,9 +389,9 @@ class CandidateAsterismsTreeTableModel extends AbstractTreeTableModel {
      * Returns a list of GemsGuideStars for the checked asterisms
      */
     public List<GemsGuideStars> getCheckedAsterisms() {
-        List<GemsGuideStars> result = new ArrayList<GemsGuideStars>();
+        List<GemsGuideStars> result = new ArrayList<>();
         if (getRoot() != null) {
-            List<Row> rowList = (List<Row>) getRoot();
+            List<Row> rowList = getRows();
             for (Row row : rowList) {
                 if (row.isCheckBoxSelected()) {
                     result.add(row.getGemsGuideStars());
@@ -410,7 +407,7 @@ class CandidateAsterismsTreeTableModel extends AbstractTreeTableModel {
     public int getPrimaryIndex(int defaultIndex) {
         if (getRoot() != null) {
             int i = 0;
-            List<Row> rowList = (List<Row>) getRoot();
+            List<Row> rowList = getRows();
             for (Row row : rowList) {
                 if (row.isCheckBoxSelected()) {
                     if (row.getPrimary() != null && row.getPrimary()) {
@@ -426,13 +423,18 @@ class CandidateAsterismsTreeTableModel extends AbstractTreeTableModel {
 
     void clearPrimary() {
         if (getRoot() != null) {
-            List<Row> rowList = (List<Row>) getRoot();
+            List<Row> rowList = getRows();
             for (Row row : rowList) {
                 if (row.getPrimary() != null && row.getPrimary()) {
                     row.setPrimary(false);
                 }
             }
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    private List<Row> getRows() {
+        return (List<Row>) getRoot();
     }
 
     void setPrimary(Row row) {
