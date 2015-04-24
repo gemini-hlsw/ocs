@@ -150,7 +150,7 @@ object Fixture {
   lazy val NBandSources = List(
     new SourceDefinition(
       PointSource(9.0, BrightnessUnit.ABMAG),
-      LibraryNonStar("NGC1068"),
+      LibraryNonStar.findByName("ngc1068").get,
       WavebandDefinition.N,
       0.0
     ),

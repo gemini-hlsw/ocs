@@ -7,18 +7,18 @@ import java.io.Serializable;
  */
 public final class SourceDefinition implements Serializable {
 
-    public static enum Recession {
+    public enum Recession {
         REDSHIFT,
         VELOCITY
     }
 
-    public static enum Profile {
+    public enum Profile {
         POINT,
         UNIFORM,
         GAUSSIAN
     }
 
-    public static enum Distribution {
+    public enum Distribution {
         LIBRARY_STAR,
         LIBRARY_NON_STAR,
         BBODY,

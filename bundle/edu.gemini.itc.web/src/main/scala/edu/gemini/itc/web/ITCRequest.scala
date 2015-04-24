@@ -294,8 +294,8 @@ object ITCRequest {
       case BBODY =>             BlackBody(r.doubleParameter("BBTemp"))
       case PLAW =>              PowerLaw(r.doubleParameter("powerIndex"))
       case USER_DEFINED =>      UserDefined(r.userSpectrum().get)
-      case LIBRARY_STAR =>      LibraryStar(r.parameter("stSpectrumType"))
-      case LIBRARY_NON_STAR =>  LibraryNonStar(r.parameter("nsSpectrumType"))
+      case LIBRARY_STAR =>      LibraryStar.findByName(r.parameter("stSpectrumType")).get
+      case LIBRARY_NON_STAR =>  LibraryNonStar.findByName(r.parameter("nsSpectrumType")).get
       case ELINE =>
         EmissionLine(
           r.doubleParameter("lineWavelength"),
