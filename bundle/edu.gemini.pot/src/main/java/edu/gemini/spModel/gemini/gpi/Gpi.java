@@ -355,6 +355,7 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
         }
 
         /** returns all values (OT-102) */
+        @SuppressWarnings("rawtypes")
         private static Option<ObservingMode>[] engineeringValues() {
             ObservingMode[] ar = values();
             Option<ObservingMode>[] result = new Option[ar.length];
@@ -365,6 +366,7 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
         }
 
         /** returns all values except NONSTANDARD (OT-102) */
+        @SuppressWarnings("rawtypes")
         private static Option<ObservingMode>[] nonEngineeringValues() {
             ObservingMode[] ar = values();
             Option<ObservingMode>[] result = new Option[ar.length-1];
@@ -603,12 +605,7 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
 
             ReadoutArea that = (ReadoutArea) o;
 
-            if (_detectorEndX != that._detectorEndX) return false;
-            if (_detectorEndY != that._detectorEndY) return false;
-            if (_detectorStartX != that._detectorStartX) return false;
-            if (_detectorStartY != that._detectorStartY) return false;
-
-            return true;
+            return _detectorEndX == that._detectorEndX && _detectorEndY == that._detectorEndY && _detectorStartX == that._detectorStartX && _detectorStartY == that._detectorStartY;
         }
 
         @Override
@@ -680,7 +677,7 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
         }
 
         /** values() returns all values, but MANUAL is only for use in the engineering component (OT-53) */
-        public static final DetectorReadoutArea[] nonEngineeringValues() {
+        public static DetectorReadoutArea[] nonEngineeringValues() {
             return new DetectorReadoutArea[] {FULL, CENTRAL_1024, CENTRAL_512, CENTRAL_256};
         }
     }
@@ -1131,7 +1128,7 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
 
 
     // Property descriptors
-    private static final Map<String, PropertyDescriptor> PRIVATE_PROP_MAP = new TreeMap<String, PropertyDescriptor>();
+    private static final Map<String, PropertyDescriptor> PRIVATE_PROP_MAP = new TreeMap<>();
     public static final Map<String, PropertyDescriptor> PROPERTY_MAP = Collections.unmodifiableMap(PRIVATE_PROP_MAP);
 
     /**
@@ -1486,25 +1483,17 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
                 _setLyot(observingMode.getLyot());
                 _observingModeOverride = false;
                 // OT-136 Set useAo and useCal according to the mode
-                _observingMode.foreach(new ApplyOp<ObservingMode>() {
-                    @Override
-                    public void apply(ObservingMode observingMode) {
-                        setUseAo(true);
-                        setUseCal(true);
-                        for (ObservingMode m: ObservingMode.NO_CAL_MODES) {
-                            if (m.equals(observingMode)) {
-                                setUseCal(false);
-                                break;
-                            }
+                _observingMode.foreach(obsMode -> {
+                    setUseAo(true);
+                    setUseCal(true);
+                    for (ObservingMode m: ObservingMode.NO_CAL_MODES) {
+                        if (m.equals(obsMode)) {
+                            setUseCal(false);
+                            break;
                         }
                     }
                 });
-                if (_observingMode.exists(new PredicateOp<ObservingMode>() {
-                    @Override
-                    public Boolean apply(ObservingMode observingMode) {
-                        return observingMode == ObservingMode.DARK;
-                    }
-                })) {
+                if (_observingMode.exists(obsMode -> obsMode == ObservingMode.DARK)) {
                     setUseAo(false);
                     setUseCal(false);
                 }
@@ -2153,8 +2142,8 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
      * Return a list of InstConfigInfo objects describing the instrument's
      * queryable configuration parameters.
      */
-    public static List getInstConfigInfo() {
-        List<InstConfigInfo> configInfo = new LinkedList<InstConfigInfo>();
+    public static List<InstConfigInfo> getInstConfigInfo() {
+        List<InstConfigInfo> configInfo = new LinkedList<>();
 
         configInfo.add(new InstConfigInfo(ASTROMETRIC_FIELD_ENUM_PROP));
         configInfo.add(new InstConfigInfo(DISPERSER_PROP));
