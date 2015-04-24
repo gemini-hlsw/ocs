@@ -212,4 +212,18 @@ public class GpiTest  extends TestCase {
         inst.setObservingMode(new Some<>(Gpi.ObservingMode.UNBLOCKED_H));
         assertEquals(inst.getFpm(), Gpi.FPM.SCIENCE);
     }
+
+    // REL-2229
+    public void testEntranceAndCalShutterAreIndependent() {
+        Gpi inst = new Gpi();
+        assertEquals(Gpi.Shutter.OPEN, inst.getEntranceShutter());
+        assertEquals(Gpi.Shutter.OPEN, inst.getCalEntranceShutter());
+        inst.setEntranceShutter(Gpi.Shutter.CLOSE);
+        assertEquals(Gpi.Shutter.CLOSE, inst.getEntranceShutter());
+        assertEquals(Gpi.Shutter.OPEN, inst.getCalEntranceShutter());
+
+        assertEquals(Gpi.Shutter.CLOSE, inst.getSysConfig().getParameter(Gpi.ENTRANCE_SHUTTER_PROP.getName()).getValue());
+        // REL-2229 This bug would return CLOSE in the test below
+        assertEquals(Gpi.Shutter.OPEN, inst.getSysConfig().getParameter(Gpi.CAL_ENTRANCE_SHUTTER_PROP.getName()).getValue());
+    }
 }

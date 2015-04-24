@@ -2118,7 +2118,7 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
 
         sc.putParameter(DefaultParameter.getInstance(ENTRANCE_SHUTTER_PROP, getEntranceShutter()));
         sc.putParameter(DefaultParameter.getInstance(SCIENCE_ARM_SHUTTER_PROP, getScienceArmShutter()));
-        sc.putParameter(DefaultParameter.getInstance(CAL_ENTRANCE_SHUTTER_PROP, getEntranceShutter()));
+        sc.putParameter(DefaultParameter.getInstance(CAL_ENTRANCE_SHUTTER_PROP, getCalEntranceShutter()));
         sc.putParameter(DefaultParameter.getInstance(REFERENCE_ARM_SHUTTER_PROP, getReferenceArmShutter()));
 
         sc.putParameter(DefaultParameter.getInstance(IR_LASER_LAMP_PROP, getIrLaserLampEnum()));
