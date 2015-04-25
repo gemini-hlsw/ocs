@@ -8,16 +8,12 @@ import edu.gemini.itc.shared._
 import edu.gemini.pot.sp.SPComponentType
 import edu.gemini.pot.sp.SPComponentType._
 import edu.gemini.shared.skyobject.Magnitude
-import edu.gemini.spModel.config.ConfigBridge
-import edu.gemini.spModel.config.map.ConfigValMapInstances
 import edu.gemini.spModel.config2.{Config, ConfigSequence, ItemKey}
 import edu.gemini.spModel.core.Peer
 import edu.gemini.spModel.guide.GuideProbe
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.rich.shared.immutable.asScalaOpt
-import edu.gemini.spModel.target.env.TargetEnvironment
 import edu.gemini.spModel.target.system.ITarget
-import edu.gemini.spModel.telescope.IssPort
 import jsky.app.ot.editor.seq.ItcTable.{AnyRenderer, DoubleRenderer, IntRenderer}
 import jsky.app.ot.userprefs.observer.ObservingPeer
 import jsky.app.ot.util.OtColor
@@ -27,8 +23,9 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.swing.Table.LabelRenderer
 import scala.swing._
-import scalaz.Scalaz._
+
 import scalaz._
+import Scalaz._
 
 object ItcTable {
 
@@ -71,10 +68,9 @@ object ItcTable {
  */
 trait ItcTable extends Table {
 
+  val parameters: ItcParametersProvider
 
-  val owner: EdIteratorFolder
-
-  def tableModel(keys: Seq[ItemKey], seq: ConfigSequence, conditions: ObservingConditions): ItcTableModel
+  def tableModel(keys: Seq[ItemKey], seq: ConfigSequence): ItcTableModel
 
   import jsky.app.ot.editor.seq.Keys._
 
@@ -86,8 +82,8 @@ trait ItcTable extends Table {
   peer.setColumnSelectionAllowed(false)
   peer.getTableHeader.setReorderingAllowed(false)
 
-  def update(conditions: ObservingConditions) = {
-    val seq = sequence()
+  def update() = {
+    val seq = parameters.sequence
     val allKeys = seq.getStaticKeys.toSeq ++ seq.getIteratedKeys.toSeq
     val showKeys = seq.getIteratedKeys.toSeq.
       filterNot(_.equals(DATALABEL_KEY)). // don't show the original data label (step number)
@@ -99,7 +95,7 @@ trait ItcTable extends Table {
       filterNot(_.getParent().equals(CALIBRATION_KEY)). // calibration settings are not relevant
       sortBy(_.getPath)
 
-    model = tableModel(showKeys, seq, conditions)
+    model = tableModel(showKeys, seq)
 
   }
 
@@ -111,19 +107,16 @@ trait ItcTable extends Table {
     }
   }
 
-  private def sequence() = Option(owner.getContextObservation).fold(new ConfigSequence) {
-    ConfigBridge.extractSequence(_, null, ConfigValMapInstances.IDENTITY_MAP, true)
-  }
-
-  protected def calculateSpectroscopy(peer: Peer, c: ItcUniqueConfig, cond: ObservingConditions): Future[ItcService.Result] =
+  protected def calculateSpectroscopy(peer: Peer, c: ItcUniqueConfig): Future[ItcService.Result] =
     Future {
       List("Not Implemented Yet").fail
     }
 
-  protected def calculateImaging(peer: Peer, instrument: SPComponentType, c: ItcUniqueConfig, cond: ObservingConditions): Future[ItcService.Result] = {
+  protected def calculateImaging(peer: Peer, instrument: SPComponentType, c: ItcUniqueConfig): Future[ItcService.Result] = {
     val s = for {
-      port      <- extractPort()
-      targetEnv <- extractTargetEnv()
+      cond      <- parameters.conditions
+      port      <- parameters.instrumentPort
+      targetEnv <- parameters.targetEnvironment
       probe     <- extractGuideProbe()
       src       <- extractSource(targetEnv.getBase.getTarget, c)
       tele      <- ConfigExtractor.extractTelescope(port, probe, targetEnv, c.config)
@@ -143,8 +136,6 @@ trait ItcTable extends Table {
 
   protected def calculateImaging(peer: Peer, c: ItcUniqueConfig, src: SourceDefinition, ins: InstrumentDetails, tele: TelescopeDetails, cond: ObservingConditions): Future[ItcService.Result] = {
     val obs = new ObservationDetails(ImagingSN(c.count, c.singleExposureTime, 1.0), AutoAperture(5.0))
-//    val qual = owner.getContextSiteQuality
-//    val cond = new ObservingConditions(qual.getImageQuality, qual.getCloudCover, qual.getWaterVapor, qual.getSkyBackground, 1.5)
 
     // Do the service call
     ItcService.calculate(peer, src, obs, cond, tele, ins).
@@ -160,15 +151,9 @@ trait ItcTable extends Table {
 
   }
 
-  private def extractPort(): String \/ IssPort =
-    Option(owner.getContextIssPort).fold("No port information available".left[IssPort])(_.right)
-
-  private def extractTargetEnv(): String \/ TargetEnvironment =
-    Option(owner.getContextTargetEnv).fold("No target environment available".left[TargetEnvironment])(_.right)
-
   private def extractGuideProbe(): String \/ GuideProbe = {
     val o = for {
-      observation <- Option(owner.getContextObservation)
+      observation <- parameters.observation
       obsContext  <- ObsContext.create(observation).asScalaOpt
       agsStrategy <- AgsRegistrar.currentStrategy(obsContext)
 
@@ -181,10 +166,12 @@ trait ItcTable extends Table {
 
   private def extractSource(target: ITarget, c: ItcUniqueConfig): String \/ SourceDefinition = {
     for {
-      (mag, band) <- extractSourceMagnitude(target, c.config)
+      (mag, band)     <- extractSourceMagnitude(target, c.config)
+      srcProfile      <- parameters.spatialProfile(mag)
+      srcDistribution <- parameters.spectralDistribution
+      srcRedshift     <- parameters.redshift
     } yield {
-      // TODO: definition of spectral profile and redshift
-      new SourceDefinition(PointSource(mag, BrightnessUnit.MAG), /*TODO*/LibraryStar("A0V"), band, /*TODO*/0.0)
+      new SourceDefinition(srcProfile, srcDistribution, band, srcRedshift)
     }
   }
 
@@ -237,16 +224,16 @@ trait ItcTable extends Table {
   }
 }
 
-class ItcImagingTable(val owner: EdIteratorFolder) extends ItcTable {
+class ItcImagingTable(val parameters: ItcParametersProvider) extends ItcTable {
   private val emptyTable: ItcImagingTableModel = new ItcGenericImagingTableModel(Seq(), Seq(), Seq())
 
   /** Creates a new table model for the current context (instrument) and config sequence.
     * Note that GMOS has a different table model with separate columns for its three CCDs. */
-  def tableModel(keys: Seq[ItemKey], seq: ConfigSequence, conditions: ObservingConditions): ItcImagingTableModel = {
+  def tableModel(keys: Seq[ItemKey], seq: ConfigSequence): ItcImagingTableModel = {
     ObservingPeer.getOrPrompt.fold(emptyTable) { peer =>
-      Option(owner.getContextInstrument).map(_.getType).fold(emptyTable) { ins =>
+      parameters.instrument.fold(emptyTable) { ins =>
         val uniqConfigs = ItcUniqueConfig.imagingConfigs(seq)
-        val results     = uniqConfigs.map(calculateImaging(peer, ins, _, conditions))
+        val results     = uniqConfigs.map(calculateImaging(peer, ins, _))
         ins match {
           case INSTRUMENT_GMOS | INSTRUMENT_GMOSSOUTH => new ItcGmosImagingTableModel(keys, uniqConfigs, results)
           case _                                      => new ItcGenericImagingTableModel(keys, uniqConfigs, results)
@@ -256,14 +243,14 @@ class ItcImagingTable(val owner: EdIteratorFolder) extends ItcTable {
   }
 }
 
-class ItcSpectroscopyTable(val owner: EdIteratorFolder) extends ItcTable {
+class ItcSpectroscopyTable(val parameters: ItcParametersProvider) extends ItcTable {
   private val emptyTable: ItcGenericSpectroscopyTableModel = new ItcGenericSpectroscopyTableModel(Seq(), Seq(), Seq())
 
   /** Creates a new table model for the current context and config sequence. */
-  def tableModel(keys: Seq[ItemKey], seq: ConfigSequence, conditions: ObservingConditions) =
+  def tableModel(keys: Seq[ItemKey], seq: ConfigSequence) =
     ObservingPeer.getOrPrompt.fold(emptyTable) { peer =>
       val uniqueConfigs = ItcUniqueConfig.spectroscopyConfigs(seq)
-      val results       = uniqueConfigs.map(calculateSpectroscopy(peer, _, conditions))
+      val results       = uniqueConfigs.map(calculateSpectroscopy(peer, _))
       new ItcGenericSpectroscopyTableModel(keys, uniqueConfigs, results)
   }
 

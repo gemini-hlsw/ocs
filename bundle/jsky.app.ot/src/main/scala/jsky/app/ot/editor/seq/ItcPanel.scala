@@ -1,7 +1,6 @@
 package jsky.app.ot.editor.seq
 
 import java.awt.Color
-import java.text.ParseException
 import javax.swing.BorderFactory
 
 import edu.gemini.itc.shared._
@@ -12,15 +11,18 @@ import scala.swing.GridBagPanel.{Anchor, Fill}
 import scala.swing.ListView.Renderer
 import scala.swing.ScrollPane.BarPolicy._
 import scala.swing._
-import scala.swing.event.SelectionChanged
+import scala.swing.event.{KeyEvent, SelectionChanged}
+
+import scalaz._
+import Scalaz._
 
 object ItcPanel {
 
   /** Creates a panel for ITC imaging results. */
-  def forImaging(owner: EdIteratorFolder)       = new ItcImagingPanel(owner, new ItcImagingTable(owner))
+  def forImaging(owner: EdIteratorFolder)       = new ItcImagingPanel(owner)
 
   /** Creates a panel for ITC spectroscopy results. */
-  def forSpectroscopy(owner: EdIteratorFolder)  = new ItcSpectroscopyPanel(owner, new ItcSpectroscopyTable(owner))
+  def forSpectroscopy(owner: EdIteratorFolder)  = new ItcSpectroscopyPanel(owner)
 
 }
 
@@ -34,20 +36,57 @@ sealed trait ItcPanel extends GridBagPanel {
 
   def visibleFor(t: SPComponentType): Boolean
 
+  def conditions() = currentConditions.conditions
+  def spectralDistribution() = sourceDetails.spectralDistribution
+  def spatialProfile(mag: Double) = sourceDetails.spatialProfile(mag)
+
   def update() = {
     currentConditions.update()
-    table.update(currentConditions.conditions)
+    table.update()
   }
 
   // ==== Source edit TODO: This will migrate to the new source editor once it's ready.
 
   class SourcePanel extends GridBagPanel {
 
+    /** Input field with a leading label and a tailing units string that turns red if current value is invalid. */
+    class InputField[A](labelStr: String, unitsStr: String, valueStr: A, convert: String => Option[A], columns: Int = 8)  {
+      val label = new Label(labelStr) { horizontalAlignment = Alignment.Left }
+      val units = new Label(unitsStr) { horizontalAlignment = Alignment.Left }
+      val text  = new TextField(valueStr.toString, columns) {
+        horizontalAlignment = Alignment.Right
+        listenTo(keys)
+        reactions += {
+          case e: KeyEvent => foreground = value.fold(Color.RED)(_ => Color.BLACK)
+        }
+      }
+
+      def value: Option[A] = try {
+          convert(text.text)
+        } catch {
+          case _: NumberFormatException => None
+        }
+
+    }
+
+    /** Details panel with a fixed size and a set of input fields. */
     abstract class DetailsPanel extends GridBagPanel {
-      val Insets    = new Insets(5, 5, 5, 10)
-      val Size      = new Dimension(300, 120)
+      val LabelInsets = new Insets(5, 5, 5, 10)
+      val UnitsInsets = new Insets(5, 10, 5, 5)
+      val Size = new Dimension(300, 120)
       preferredSize = Size
-      minimumSize   = Size
+      minimumSize = Size
+
+      def addField(label: String, value: Double, units: String, row: Int): InputField[Double] =
+        addField(label, value, d => Some(d.toDouble), units, row)
+
+      def addField[A](label: String, value: A, convert: String => Option[A], units: String, row: Int): InputField[A] = {
+        new InputField[A](label, units, value, convert) <| { f =>
+          layout(f.label) = new Constraints { gridx = 0; gridy = row; insets = LabelInsets; weightx = 1; fill = Fill.Horizontal }
+          layout(f.text)  = new Constraints { gridx = 1; gridy = row }
+          layout(f.units) = new Constraints { gridx = 2; gridy = row; insets = UnitsInsets; anchor = Anchor.West }
+        }
+      }
     }
     abstract class DistributionDetailsPanel extends DetailsPanel {
       def spectralDistribution: Option[SpectralDistribution]
@@ -81,40 +120,24 @@ sealed trait ItcPanel extends GridBagPanel {
       def spectralDistribution = Some(nonStars.selection.item)
     }
     private val bbodyDetails = new DistributionDetailsPanel {
-      val temperature = new TextField(10)
-      layout(new Label("Temperature [K]:")) = new Constraints { gridx = 0; gridy = 0; insets = Insets; weightx = 1; fill = Fill.Horizontal }
-      layout(temperature)                   = new Constraints { gridx = 1; gridy = 0 }
-      def spectralDistribution = try { Some(BlackBody(temperature.text.toDouble)) } catch { case _: ParseException => None }
+      val temperature = addField("Temperature:", 10000.0, "[K]", 0)
+      def spectralDistribution = temperature.value.map(BlackBody)
     }
     private val elineDetails = new DistributionDetailsPanel {
-      val wavelength = new TextField(10)
-      val width      = new TextField(10)
-      val flux       = new TextField(10)
-      val continuum  = new TextField(10)
-      layout(new Label("Wavelength:"))      = new Constraints { gridx = 0; gridy = 0; insets = Insets; weightx = 1; fill = Fill.Horizontal}
-      layout(wavelength)                    = new Constraints { gridx = 1; gridy = 0 }
-      layout(new Label("Width:"))           = new Constraints { gridx = 0; gridy = 1; insets = Insets }
-      layout(width)                         = new Constraints { gridx = 1; gridy = 1 }
-      layout(new Label("Flux:"))            = new Constraints { gridx = 0; gridy = 2; insets = Insets }
-      layout(flux)                          = new Constraints { gridx = 1; gridy = 2 }
-      layout(new Label("Continuum:"))       = new Constraints { gridx = 0; gridy = 3; insets = Insets }
-      layout(continuum)                     = new Constraints { gridx = 1; gridy = 3 }
-      def spectralDistribution = try {
-        Some(EmissionLine(
-          wavelength.text.toDouble,
-          width.text.toDouble,
-          flux.text.toDouble,
-          "watts_flux",
-          continuum.text.toDouble,
-          "watts_fd_wavelength"
-        ))
-      } catch { case _: ParseException => None }
+      val wavelength  = addField("Wavelength:", 2.2,      "[µm]",       0)
+      val width       = addField("Width:",      150.0,    "[km/s]",     1)
+      val flux        = addField("Line Flux:",  5.0e-19,  "[W/m²]",     2)
+      val continuum   = addField("Continuum:",  1.0e-16,  "[W/m²/µm]",  3)
+      def spectralDistribution = for {
+        wl <- wavelength.value
+        wd <- width.value
+        fl <- flux.value
+        co <- continuum.value
+      } yield EmissionLine(wl, wd, fl, "watts_flux", co, "watts_fd_wavelength")
     }
     private val plawDetails = new DistributionDetailsPanel {
-      val index = new TextField(10)
-      layout(new Label("Index:"))     = new Constraints { gridx = 0; gridy = 0; insets = Insets; weightx = 1; fill = Fill.Horizontal }
-      layout(index)                   = new Constraints { gridx = 1; gridy = 0 }
-      def spectralDistribution = try { Some(PowerLaw(index.text.toDouble)) } catch { case _: ParseException => None }
+      val index = addField("Index:", -1.0, "", 0)
+      def spectralDistribution = index.value.map(PowerLaw)
     }
 
     case class DistributionPanel(label: String, panel: DistributionDetailsPanel)
@@ -138,13 +161,14 @@ sealed trait ItcPanel extends GridBagPanel {
 
     case class ProfilePanel(label: String, panel: ProfileDetailsPanel)
     private val pointSourceDetails = new ProfileDetailsPanel {
-      override def spatialProfile(mag: Double): Option[SpatialProfile] = Some(PointSource(mag, BrightnessUnit.MAG))
+      def spatialProfile(mag: Double): Option[SpatialProfile] = Some(PointSource(mag, BrightnessUnit.MAG))
     }
     private val gaussianSourceDetails = new ProfileDetailsPanel {
-      override def spatialProfile(mag: Double): Option[SpatialProfile] = Some(GaussianSource(mag, BrightnessUnit.MAG, fwhm = 1.0))
+      val fwhm = addField("FWHM:", 1.0, "[arcsec]", 0)
+      def spatialProfile(mag: Double): Option[SpatialProfile] = fwhm.value.map(GaussianSource(mag, BrightnessUnit.MAG, _))
     }
     private val uniformSourceDetails = new ProfileDetailsPanel {
-      override def spatialProfile(mag: Double): Option[SpatialProfile] = Some(UniformSource(mag, BrightnessUnit.MAG))
+      def spatialProfile(mag: Double): Option[SpatialProfile] = Some(UniformSource(mag, BrightnessUnit.MAG))
     }
     private val profilePanels = List(
       ProfilePanel("Point Source",             pointSourceDetails),
@@ -201,6 +225,12 @@ sealed trait ItcPanel extends GridBagPanel {
     }
     distributions.selection.item.panel.visible = true
 
+
+    // reactions
+    listenTo(distributions.selection, profiles.selection)
+    reactions += {
+      case SelectionChanged(_) => table.update()
+    }
 
   }
 
@@ -296,7 +326,7 @@ sealed trait ItcPanel extends GridBagPanel {
 
     listenTo(sb.selection, cc.selection, iq.selection, wv.selection, am.selection)
     reactions += {
-      case SelectionChanged(_) => table.update(currentConditions.conditions)
+      case SelectionChanged(_) => table.update()
     }
 
   }
@@ -304,7 +334,9 @@ sealed trait ItcPanel extends GridBagPanel {
 }
 
 /** Panel holding the ITC imaging calculation result table. */
-class ItcImagingPanel(val owner: EdIteratorFolder, val table: ItcImagingTable) extends ItcPanel {
+class ItcImagingPanel(val owner: EdIteratorFolder) extends ItcPanel {
+
+  val table = new ItcImagingTable(ItcParametersProvider(owner, this))
 
   border = BorderFactory.createEmptyBorder(10, 10, 10, 10)
 
@@ -345,7 +377,9 @@ class ItcImagingPanel(val owner: EdIteratorFolder, val table: ItcImagingTable) e
 }
 
 /** Panel holding the ITC spectroscopy calculation result table and charts. */
-class ItcSpectroscopyPanel(val owner: EdIteratorFolder, val table: ItcSpectroscopyTable) extends ItcPanel {
+class ItcSpectroscopyPanel(val owner: EdIteratorFolder) extends ItcPanel {
+
+  val table = new ItcSpectroscopyTable(ItcParametersProvider(owner, this))
 
   border = BorderFactory.createEmptyBorder(10, 10, 10, 10)
 
