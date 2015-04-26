@@ -13,7 +13,6 @@ import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.shared.util.immutable.Some;
 import edu.gemini.spModel.gemini.trecs.InstTReCS;
 import edu.gemini.spModel.util.Angle;
-import jsky.app.ot.gemini.inst.SciAreaDragObject;
 import jsky.app.ot.gemini.inst.SciAreaFeature;
 import jsky.app.ot.gemini.inst.SciAreaFeatureBase;
 import jsky.app.ot.gemini.tpe.TpePWFSFeature;
@@ -65,7 +64,6 @@ public class TReCS_SciAreaFeature extends SciAreaFeatureBase {
     private Point2D.Double _nodChopOffset = new Point2D.Double(0., 0.);
 
     // Used for rotating the chop beams
-    private SciAreaDragObject _chopDragObject;
     private boolean _chopDragging = false;
     private int _chopDragX;
     private int _chopDragY;
@@ -265,7 +263,6 @@ public class TReCS_SciAreaFeature extends SciAreaFeatureBase {
 
         if (_chopHandle1 == null || _chopHandle2 == null) return None.instance();
 
-        _chopDragObject = null;
         _chopDragging = false;
         Shape chopHandle = null;
 
@@ -278,11 +275,10 @@ public class TReCS_SciAreaFeature extends SciAreaFeatureBase {
 
         if (chopHandle != null) {
             _basePos = tii.getBasePos();
-            _chopDragObject = new SciAreaDragObject((int) _baseScreenPos.x, (int) _baseScreenPos.y, tme.xWidget, tme.yWidget);
             _chopDragging = true;
             _chopDragX = tme.xWidget;
             _chopDragY = tme.yWidget;
-            return new Some<Object>(inst);
+            return new Some<>(inst);
         }
 
         return None.instance();
@@ -302,13 +298,12 @@ public class TReCS_SciAreaFeature extends SciAreaFeatureBase {
         InstTReCS inst = getTrecs();
         if (inst == null) return;
 
-        if (_chopDragObject != null) {
+        if (_chopDragging) {
             _chopDragX = tme.xWidget;
             _chopDragY = tme.yWidget;
 
             // update the angle
-            double radians = _chopDragObject.getAngle(_chopDragX, _chopDragY) * _tii.flipRA() + _tii.getTheta();
-            inst.setChopAngleRadians(radians);
+            inst.setChopAngleRadians(_tii.positionAngle(tme).toRadians());
 
             // get distance between base position and the mouse position in arcsec
             double dist = _basePos.dist(tme.pos) * 60;
@@ -324,10 +319,9 @@ public class TReCS_SciAreaFeature extends SciAreaFeatureBase {
     public void dragStop(TpeMouseEvent tme) {
         super.dragStop(tme);
 
-        if (_chopDragObject != null) {
-            _chopDragging = false;
+        if (_chopDragging) {
             drag(tme);
-            _chopDragObject = null;
+            _chopDragging = false;
             _iw.getContext().instrument().commit();
         }
     }

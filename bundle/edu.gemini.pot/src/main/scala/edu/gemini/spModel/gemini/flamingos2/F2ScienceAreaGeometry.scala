@@ -1,57 +1,52 @@
 package edu.gemini.spModel.gemini.flamingos2
 
+import edu.gemini.spModel.gemini.flamingos2.Flamingos2.LyotWheel.{OPEN, LOW, HIGH}
+import edu.gemini.spModel.gemini.flamingos2.Flamingos2.FPUnit.{CUSTOM_MASK, FPU_NONE}
+
+import edu.gemini.spModel.inst.ScienceAreaGeometry
+import edu.gemini.spModel.obs.context.ObsContext
+
 import java.awt.Shape
 import java.awt.geom.{Rectangle2D, Area, Ellipse2D}
 
-import edu.gemini.shared.util.immutable.DefaultImList
-import edu.gemini.spModel.gemini.flamingos2.Flamingos2.{FPUnit, LyotWheel}
-import edu.gemini.spModel.inst.ScienceAreaGeometry
-
-import scala.collection.JavaConverters._
-import scalaz.Scalaz._
 import scalaz._
+import Scalaz._
 
-class F2ScienceAreaGeometry(inst0: Flamingos2) extends ScienceAreaGeometry {
-  import F2ScienceAreaGeometry._
+object F2ScienceAreaGeometry extends ScienceAreaGeometry {
 
-  override def geometry: List[Shape] = {
-    Option(inst0).fold(List[Shape]()) { inst =>
-      lazy val plateScale = inst.getLyotWheel.getPlateScale
-      lazy val scienceAreaWidth = {
-        val scienceAreaArray = inst.getScienceArea
-        scienceAreaArray(0)
-      }
-      inst.getFpu match {
-        case Flamingos2.FPUnit.FPU_NONE    => List(imagingFOV(plateScale))
-        case Flamingos2.FPUnit.CUSTOM_MASK => List(mosFOV(plateScale))
-        case _ if inst.getFpu.isLongslit   => List(longSlitFOV(plateScale, scienceAreaWidth))
-        case _                             => Nil
-      }
+  override def unadjustedGeometry(ctx: ObsContext): List[Shape] =
+    ctx.getInstrument match {
+      case f2: Flamingos2 =>
+        val plateScale       = f2.getLyotWheel.getPlateScale
+        val scienceAreaWidth = scienceAreaDimensions(f2)._1
+        f2.getFpu match {
+          case Flamingos2.FPUnit.FPU_NONE    => List(imagingFOV(plateScale))
+          case Flamingos2.FPUnit.CUSTOM_MASK => List(mosFOV(plateScale))
+          case _ if f2.getFpu.isLongslit     => List(longSlitFOV(plateScale, scienceAreaWidth))
+          case _                             => Nil
+        }
+
+      case _              => Nil
     }
-  }
 
-  // We need to override this due to type system.
-  override def geometryAsJava: edu.gemini.shared.util.immutable.ImList[Shape] =
-    DefaultImList.create(geometry.asJava)
-
-  def scienceAreaDimensions: (Double, Double) = {
-    import LyotWheel._
-    Option(inst0).map { inst => inst.getLyotWheel match {
+  def scienceAreaDimensions(f2: Flamingos2): (Double, Double) =
+    f2.getLyotWheel match {
       case OPEN | HIGH | LOW =>
-        import FPUnit._
-        lazy val plateScale = inst.getLyotWheel.getPlateScale
-        inst.getFpu match {
+        val plateScale = f2.getLyotWheel.getPlateScale
+        f2.getFpu match {
           case FPU_NONE =>
             val size = ImagingFOVSize * plateScale
             (size, size)
           case CUSTOM_MASK =>
             (MOSFOVWidth * plateScale, ImagingFOVSize * plateScale)
           case fpu if fpu.isLongslit =>
-            (fpu.getSlitWidth * inst.getLyotWheel.getPixelScale, LongSlitFOVHeight * plateScale)
+            (fpu.getSlitWidth * f2.getLyotWheel.getPixelScale, LongSlitFOVHeight * plateScale)
         }
       case _ => (0.0, 0.0)
-    }}.getOrElse((0.0, 0.0))
-  }
+    }
+
+  def javaScienceAreaDimensions(f2: Flamingos2): Array[Double] =
+    scienceAreaDimensions(f2) |> { case (w, h) => Array(w, h) }
 
   /**
    * Create the F2 imaging field of view.
@@ -95,13 +90,10 @@ class F2ScienceAreaGeometry(inst0: Flamingos2) extends ScienceAreaGeometry {
     new Rectangle2D.Double(x, y, x + scienceAreaWidth, y + slitHeight)
   }
 
-}
-
-object F2ScienceAreaGeometry {
   // Geometry features for F2, in arcseconds.
-  val LongSlitFOVHeight   = 164.1
-  val LongSlitFOVSouthPos = 112.0
-  val LongSlitFOVNorthPos = 52.1
+  val LongSlitFOVHeight   = 164.10
+  val LongSlitFOVSouthPos = 112.00
+  val LongSlitFOVNorthPos =  52.10
   val ImagingFOVSize      = 230.12
-  val MOSFOVWidth         = 75.16
+  val MOSFOVWidth         =  75.16
 }

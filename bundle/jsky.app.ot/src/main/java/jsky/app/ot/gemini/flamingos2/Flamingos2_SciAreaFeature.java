@@ -10,7 +10,6 @@ import edu.gemini.spModel.gemini.flamingos2.Flamingos2;
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2.FPUnit;
 import edu.gemini.spModel.gemini.gems.Gems;
 import edu.gemini.spModel.obs.context.ObsContext;
-import edu.gemini.spModel.util.Angle;
 import jsky.app.ot.gemini.inst.SciAreaFeatureBase;
 import jsky.app.ot.tpe.TpeImageInfo;
 import jsky.app.ot.tpe.TpeMouseEvent;
@@ -255,14 +254,15 @@ public class Flamingos2_SciAreaFeature  extends SciAreaFeatureBase {
              return;
          }
 
-         if (_dragObject == null) return;
-         _dragX = tme.xWidget;
-         _dragY = tme.yWidget;
+         if (_dragging) {
+             _dragX = tme.xWidget;
+             _dragY = tme.yWidget;
 
-         double radians = _dragObject.getAngle(_dragX, _dragY) * _tii.flipRA() + _tii.getTheta();
-         double degrees = Math.round(Angle.radiansToDegrees(radians-_fovRotation));
-        _iw.setPosAngle(degrees);
-        _iw.repaint();
+             double radians = _tii.positionAngle(tme).toRadians() - _fovRotation;
+             double degrees = Math.round(Math.toDegrees(radians));
+             _iw.setPosAngle(degrees);
+             _iw.repaint();
+         }
      }
 
     /**

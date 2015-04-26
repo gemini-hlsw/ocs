@@ -8,41 +8,14 @@ package jsky.app.ot.gemini.inst;
 
 import edu.gemini.shared.util.immutable.None;
 import edu.gemini.shared.util.immutable.Option;
-import edu.gemini.spModel.gemini.acqcam.InstAcqCam;
-import edu.gemini.spModel.gemini.bhros.InstBHROS;
-import edu.gemini.spModel.gemini.flamingos2.Flamingos2;
-import edu.gemini.spModel.gemini.gmos.InstGmosCommon;
-import edu.gemini.spModel.gemini.gnirs.InstGNIRS;
-import edu.gemini.spModel.gemini.gpi.Gpi;
-import edu.gemini.spModel.gemini.gsaoi.Gsaoi;
-import edu.gemini.spModel.gemini.michelle.InstMichelle;
-import edu.gemini.spModel.gemini.nici.InstNICI;
-import edu.gemini.spModel.gemini.nifs.InstNIFS;
-import edu.gemini.spModel.gemini.niri.InstNIRI;
-import edu.gemini.spModel.gemini.phoenix.InstPhoenix;
-import edu.gemini.spModel.gemini.texes.InstTexes;
-import edu.gemini.spModel.gemini.trecs.InstTReCS;
+import edu.gemini.spModel.gemini.gmos.InstGmosNorth;
+import edu.gemini.spModel.gemini.gmos.InstGmosSouth;
 import edu.gemini.spModel.obscomp.SPInstObsComp;
-import jsky.app.ot.gemini.acqcam.AcqCam_SciAreaFeature;
-import jsky.app.ot.gemini.bhros.BHROS_SciAreaFeature;
-import jsky.app.ot.gemini.flamingos2.Flamingos2_SciAreaFeature;
-import jsky.app.ot.gemini.gmos.GMOS_SciAreaFeature;
-import jsky.app.ot.gemini.gnirs.GNIRS_SciAreaFeature;
-import jsky.app.ot.gemini.gpi.Gpi_SciAreaFeature;
-import jsky.app.ot.gemini.gsaoi.GsaoiDetectorArrayFeature;
-import jsky.app.ot.gemini.michelle.Michelle_SciAreaFeature;
-import jsky.app.ot.gemini.nici.NICI_SciAreaFeature;
-import jsky.app.ot.gemini.nifs.NIFS_SciAreaFeature;
-import jsky.app.ot.gemini.niri.NIRI_SciAreaFeature;
-import jsky.app.ot.gemini.phoenix.Phoenix_SciAreaFeature;
-import jsky.app.ot.gemini.texes.Texes_SciAreaFeature;
-import jsky.app.ot.gemini.trecs.TReCS_SciAreaFeature;
 import jsky.app.ot.tpe.*;
 import jsky.app.ot.util.BasicPropertyList;
 import jsky.app.ot.util.PropertyWatcher;
 
 import java.awt.*;
-import java.awt.geom.Point2D;
 
 
 /**
@@ -56,24 +29,7 @@ import java.awt.geom.Point2D;
 public class SciAreaFeatureTemp extends TpeImageFeature
         implements TpeDraggableFeature, PropertyWatcher {
 
-    // The instrument OIWFS feature
-    private SciAreaFeatureBase _feat;
-
-    // The instrument specific subclasses
-    private NIRI_SciAreaFeature _niriFeat;
-    private NIFS_SciAreaFeature _nifsFeat;
-    private BHROS_SciAreaFeature _bhrosFeat;
-    private GMOS_SciAreaFeature _gmosFeat;
-    private AcqCam_SciAreaFeature _acqCamFeat;
-    private Phoenix_SciAreaFeature _phoenixFeat;
-    private TReCS_SciAreaFeature _trecsFeat;
-    private Michelle_SciAreaFeature _michelleFeat;
-    private GNIRS_SciAreaFeature _gnirsFeat;
-    private Flamingos2_SciAreaFeature _flamingos2Feat;
-    private NICI_SciAreaFeature _niciFeat;
-    private Texes_SciAreaFeature _texesFeat;
-    private Gpi_SciAreaFeature _gpiFeat;
-    private GsaoiDetectorArrayFeature _gsaoiFeat;
+    private SciAreaPlotFeature _feat;
 
     // properties (items are displayed in the OT View menu)
     private static final BasicPropertyList _props = new BasicPropertyList(SciAreaFeatureTemp.class.getName());
@@ -112,7 +68,7 @@ public class SciAreaFeatureTemp extends TpeImageFeature
      * Construct the feature with its name and description.
      */
     public SciAreaFeatureTemp() {
-        super("Science", "Show the science FOV.");
+        super("Science (2)", "Show the science FOV.");
         _props.addWatcher(this);
     }
 
@@ -139,20 +95,6 @@ public class SciAreaFeatureTemp extends TpeImageFeature
         return _props;
     }
 
-
-    /**
-     * Turn the display of the chop beams on or off.
-     */
-    public static void setDisplayChopBeams(boolean show) {
-        _props.setBoolean(PROP_DISPLAY_CHOP_BEAMS, show);
-    }
-
-    /**
-     * Get the "Display Chop Beams" property.
-     */
-    public static boolean getDisplayChopBeams() {
-        return _props.getBoolean(PROP_DISPLAY_CHOP_BEAMS, true);
-    }
 
     /**
      * Turn on/off the drawing of the offset index.
@@ -184,16 +126,6 @@ public class SciAreaFeatureTemp extends TpeImageFeature
     }
 
     /**
-     * Return the current Nod/Chop offset in screen pixels.
-     *
-     * @see TReCS_SciAreaFeature
-     */
-    public Point2D.Double getNodChopOffset() {
-        return (_feat == null) ? new Point2D.Double() : _feat.getNodChopOffset();
-    }
-
-
-    /**
      * Reinitialize the feature.
      */
     public void reinit(TpeImageWidget iw, TpeImageInfo tii) {
@@ -204,76 +136,8 @@ public class SciAreaFeatureTemp extends TpeImageFeature
 
         SPInstObsComp inst = iw.getInstObsComp();
 
-        if (inst instanceof InstNIRI) {
-            if (_niriFeat == null) {
-                _niriFeat = new NIRI_SciAreaFeature();
-            }
-            _feat = _niriFeat;
-        } else if (inst instanceof InstNIFS) {
-            if (_nifsFeat == null) {
-                _nifsFeat = new NIFS_SciAreaFeature();
-            }
-            _feat = _nifsFeat;
-        } else if (inst instanceof InstBHROS) {
-            if (_bhrosFeat == null) {
-                _bhrosFeat = new BHROS_SciAreaFeature();
-            }
-            _feat = _bhrosFeat;
-        } else if (inst instanceof InstGmosCommon) {
-            if (_gmosFeat == null) {
-                _gmosFeat = new GMOS_SciAreaFeature();
-            }
-            _feat = _gmosFeat;
-        } else if (inst instanceof InstAcqCam) {
-            if (_acqCamFeat == null) {
-                _acqCamFeat = new AcqCam_SciAreaFeature();
-            }
-            _feat = _acqCamFeat;
-        } else if (inst instanceof InstPhoenix) {
-            if (_phoenixFeat == null) {
-                _phoenixFeat = new Phoenix_SciAreaFeature();
-            }
-            _feat = _phoenixFeat;
-        } else if (inst instanceof InstTReCS) {
-            if (_trecsFeat == null) {
-                _trecsFeat = new TReCS_SciAreaFeature();
-            }
-            _feat = _trecsFeat;
-        } else if (inst instanceof InstMichelle) {
-            if (_michelleFeat == null) {
-                _michelleFeat = new Michelle_SciAreaFeature();
-            }
-            _feat = _michelleFeat;
-        } else if (inst instanceof InstGNIRS) {
-            if (_gnirsFeat == null) {
-                _gnirsFeat = new GNIRS_SciAreaFeature();
-            }
-            _feat = _gnirsFeat;
-        } else if (inst instanceof Flamingos2) {
-            if (_flamingos2Feat == null) {
-                _flamingos2Feat = new Flamingos2_SciAreaFeature();
-            }
-            _feat = _flamingos2Feat;
-        } else if (inst instanceof InstNICI) {
-            if (_niciFeat == null) {
-                _niciFeat = new NICI_SciAreaFeature();
-            }
-            _feat = _niciFeat;
-        } else if (inst instanceof InstTexes) {
-            if (_texesFeat ==  null) {
-                _texesFeat = new Texes_SciAreaFeature();
-            }
-            _feat = _texesFeat;
-        } else if (inst instanceof Gpi) {
-            if (_gpiFeat ==  null) {
-                _gpiFeat = new Gpi_SciAreaFeature();
-            }
-            _feat = _gpiFeat;
-        } else if (inst instanceof Gsaoi) {
-            if (_gsaoiFeat == null) {
-                _gsaoiFeat = new GsaoiDetectorArrayFeature();
-            }
-            _feat = _gsaoiFeat;
+        if ((inst instanceof InstGmosNorth) || (inst instanceof InstGmosSouth)) {
+            _feat = GmosSciAreaPlotFeature$.MODULE$;
         } else {
             _feat = null;
         }
@@ -301,9 +165,9 @@ public class SciAreaFeatureTemp extends TpeImageFeature
     /**
      * Draw the science area at the given x,y (screen coordinate) offset position.
      */
-    public void drawAtOffsetPos(Graphics g, TpeImageInfo tii, double x, double y) {
-        if (_feat != null) _feat.drawAtOffsetPos(g, tii, x, y);
-    }
+//    public void drawAtOffsetPos(Graphics g, TpeImageInfo tii, double x, double y) {
+//        if (_feat != null) _feat.drawAtOffsetPos(g, tii, x, y);
+//    }
 
 
     /**

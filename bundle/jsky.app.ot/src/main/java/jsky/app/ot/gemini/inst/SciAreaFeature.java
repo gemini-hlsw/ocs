@@ -8,6 +8,7 @@ package jsky.app.ot.gemini.inst;
 
 import edu.gemini.shared.util.immutable.None;
 import edu.gemini.shared.util.immutable.Option;
+import edu.gemini.spModel.core.Offset;
 import edu.gemini.spModel.gemini.acqcam.InstAcqCam;
 import edu.gemini.spModel.gemini.bhros.InstBHROS;
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2;
@@ -26,7 +27,6 @@ import edu.gemini.spModel.obscomp.SPInstObsComp;
 import jsky.app.ot.gemini.acqcam.AcqCam_SciAreaFeature;
 import jsky.app.ot.gemini.bhros.BHROS_SciAreaFeature;
 import jsky.app.ot.gemini.flamingos2.Flamingos2_SciAreaFeature;
-import jsky.app.ot.gemini.gmos.GMOS_SciAreaFeature;
 import jsky.app.ot.gemini.gnirs.GNIRS_SciAreaFeature;
 import jsky.app.ot.gemini.gpi.Gpi_SciAreaFeature;
 import jsky.app.ot.gemini.gsaoi.GsaoiDetectorArrayFeature;
@@ -57,13 +57,12 @@ public class SciAreaFeature extends TpeImageFeature
         implements TpeDraggableFeature, PropertyWatcher {
 
     // The instrument OIWFS feature
-    private SciAreaFeatureBase _feat;
+    private TpeImageFeature _feat;
 
     // The instrument specific subclasses
     private NIRI_SciAreaFeature _niriFeat;
     private NIFS_SciAreaFeature _nifsFeat;
     private BHROS_SciAreaFeature _bhrosFeat;
-    private GMOS_SciAreaFeature _gmosFeat;
     private AcqCam_SciAreaFeature _acqCamFeat;
     private Phoenix_SciAreaFeature _phoenixFeat;
     private TReCS_SciAreaFeature _trecsFeat;
@@ -189,7 +188,9 @@ public class SciAreaFeature extends TpeImageFeature
      * @see jsky.app.ot.gemini.trecs.TReCS_SciAreaFeature
      */
     public Point2D.Double getNodChopOffset() {
-        return (_feat == null) ? new Point2D.Double() : _feat.getNodChopOffset();
+        return (_feat instanceof SciAreaFeatureBase) ?
+                ((SciAreaFeatureBase) _feat).getNodChopOffset() :
+                new Point2D.Double();
     }
 
 
@@ -220,10 +221,7 @@ public class SciAreaFeature extends TpeImageFeature
             }
             _feat = _bhrosFeat;
         } else if (inst instanceof InstGmosCommon) {
-            if (_gmosFeat == null) {
-                _gmosFeat = new GMOS_SciAreaFeature();
-            }
-            _feat = _gmosFeat;
+            _feat = GmosSciAreaPlotFeature$.MODULE$;
         } else if (inst instanceof InstAcqCam) {
             if (_acqCamFeat == null) {
                 _acqCamFeat = new AcqCam_SciAreaFeature();
@@ -299,10 +297,16 @@ public class SciAreaFeature extends TpeImageFeature
     }
 
     /**
-     * Draw the science area at the given x,y (screen coordinate) offset position.
+     * Draw the science area at the given offset.  The x/y coordinates are the
+     * screen coordinates and are used by the old SciAreaFeatureBase-based
+     * delegates.
      */
-    public void drawAtOffsetPos(Graphics g, TpeImageInfo tii, double x, double y) {
-        if (_feat != null) _feat.drawAtOffsetPos(g, tii, x, y);
+    public void drawAtOffsetPos(Graphics g, TpeImageInfo tii, Offset offset, double x, double y) {
+        if (_feat instanceof SciAreaFeatureBase) {
+            ((SciAreaFeatureBase) _feat).drawAtOffsetPos(g, tii, x, y);
+        } else if (_feat instanceof SciAreaPlotFeature) {
+            ((SciAreaPlotFeature) _feat).drawAtOffset(g, tii, offset);
+        }
     }
 
 
@@ -317,22 +321,29 @@ public class SciAreaFeature extends TpeImageFeature
      * Start dragging the object.
      */
     public Option<Object> dragStart(TpeMouseEvent tme, TpeImageInfo tii) {
-        if (_feat == null) return None.instance();
-        return _feat.dragStart(tme, tii);
+        if (_feat instanceof TpeDraggableFeature) {
+            return ((TpeDraggableFeature) _feat).dragStart(tme, tii);
+        } else {
+            return None.instance();
+        }
     }
 
     /**
      * Drag to a new location.
      */
     public void drag(TpeMouseEvent tme) {
-        if (_feat != null) _feat.drag(tme);
+        if (_feat instanceof TpeDraggableFeature) {
+            ((TpeDraggableFeature) _feat).drag(tme);
+        }
     }
 
     /**
      * Stop dragging.
      */
     public void dragStop(TpeMouseEvent tme) {
-        if (_feat != null) _feat.dragStop(tme);
+        if (_feat instanceof TpeDraggableFeature) {
+            ((TpeDraggableFeature) _feat).dragStop(tme);
+        }
     }
 
 

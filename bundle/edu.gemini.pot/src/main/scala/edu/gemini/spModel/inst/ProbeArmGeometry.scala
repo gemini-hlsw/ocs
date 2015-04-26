@@ -6,7 +6,6 @@ import edu.gemini.spModel.guide.GuideProbe
 import edu.gemini.spModel.inst.FeatureGeometry._
 import edu.gemini.spModel.inst.ProbeArmGeometry.ArmAdjustment
 import edu.gemini.spModel.obs.context.ObsContext
-import edu.gemini.spModel.obscomp.SPInstObsComp
 
 import java.awt.Shape
 import java.awt.geom.AffineTransform
@@ -32,8 +31,9 @@ trait ProbeArmGeometry {
       unadjustedGeometry(ctx).map { trans.createTransformedShape }
     }
 
-  /**
-   * Create a list of Shape representing the probe arm and all its components (e.g. pickoff mirror).
+  /** Create a list of Shape representing the probe arm and all its components
+    * (e.g. pickoff mirror).  This shape is not adjusted for position angle or
+    * offsets.
    * @return the list of shapes
    */
   def unadjustedGeometry(ctx: ObsContext): List[Shape]

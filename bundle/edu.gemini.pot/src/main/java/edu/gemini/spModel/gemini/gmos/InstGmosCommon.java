@@ -446,7 +446,7 @@ public abstract class InstGmosCommon<
      * Return the science area based upon the current camera.
      */
     public double[] getScienceArea() {
-        return new GmosScienceAreaGeometry(this).scienceAreaDimensionsAsJava();
+        return GmosScienceAreaGeometry.javaScienceAreaDimensions(this.getFPUnit());
     }
 
     /**
@@ -2037,6 +2037,6 @@ public abstract class InstGmosCommon<
 
     @Override
     public ScienceAreaGeometry getVignettableScienceArea() {
-        return new GmosScienceAreaGeometry(this);
+        return GmosScienceAreaGeometry$.MODULE$;
     }
 }

@@ -235,6 +235,7 @@ public final class OT {
                 "jsky.app.ot.gemini.inst.OIWFS_FeatureTemp",
                 "jsky.app.ot.gemini.tpe.TpePWFSFeature",
                 "jsky.app.ot.gemini.inst.SciAreaFeature",
+                "jsky.app.ot.gemini.inst.SciAreaFeatureTemp",
         };
 
         for (final String featureClass : features) {
