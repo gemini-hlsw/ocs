@@ -2,12 +2,12 @@ package jsky.app.ot.gemini.inst
 
 import edu.gemini.shared.util.immutable.{Option => JOption, ImPolygon}
 import edu.gemini.shared.util.immutable.ScalaConverters._
-import edu.gemini.spModel.core.{Angle, Offset}
+import edu.gemini.spModel.core.Offset
 import edu.gemini.spModel.inst.ScienceAreaGeometry
 import jsky.app.ot.gemini.tpe.EdIterOffsetFeature
 import jsky.app.ot.tpe.TpeImageFeature.{Figure, MARKER_SIZE}
 import jsky.app.ot.tpe._
-import jsky.app.ot.util.{PropertyWatcher, OtColor}
+import jsky.app.ot.util.PropertyWatcher
 
 import java.awt.{AlphaComposite, Color, Graphics2D, Graphics, BasicStroke, Font}
 import java.awt.geom.{AffineTransform, Point2D}
@@ -22,7 +22,7 @@ import Scalaz._
 object SciAreaPlotFeature {
   val Log = Logger.getLogger(getClass.getName)
 
-  val FovColor     = OtColor.HONEY_DEW
+  val FovColor     = Color.cyan
   val FovStroke    = new BasicStroke(1F)
   val TickStroke   = new BasicStroke(0F)
   val PosAngleFont = new Font("dialog", Font.PLAIN, 12)
@@ -47,13 +47,6 @@ class SciAreaPlotFeature(sciArea: ScienceAreaGeometry)
 
   def getFigures(tpeCtx: TpeContext, offset: Offset, color: Color): List[Figure] = {
     val shapes = tpeCtx.obsContext.toList.flatMap { obsCtx =>
-      // Extract info from the TPE context, converted to new model.
-      val posAngle = Angle.fromDegrees(tpeCtx.instrument.posAngleOrZero)
-//      val selPos   = tpeCtx.offsets.selectedPos
-//      val offset   = selPos.map { opb =>
-//        Offset(opb.getXaxis.arcsecs[OffsetP], opb.getYaxis.arcsecs[OffsetQ])
-//      } | Offset.zero
-
       sciArea.geometry(obsCtx, offset)
     }
 
@@ -63,19 +56,6 @@ class SciAreaPlotFeature(sciArea: ScienceAreaGeometry)
   // --------------------------------------------------------------
   // Everything that follows is junk required to plug into the TPE.
   // --------------------------------------------------------------
-
-  override def reinit(iw: TpeImageWidget, tii: TpeImageInfo): Unit = {
-//    _stopMonitorOffsetSelections(selectionWatcher)
-
-    super.reinit(iw, tii)
-
-//    OIWFS_Feature.getProps.deleteWatcher(this)
-//    OIWFS_Feature.getProps.addWatcher(this)
-
-//    _monitorPosList()
-//    _monitorOffsetSelections(selectionWatcher)
-//    _figureList.clear()
-  }
 
   override def draw(g: Graphics, tii: TpeImageInfo): Unit =
     g match {
@@ -100,11 +80,7 @@ class SciAreaPlotFeature(sciArea: ScienceAreaGeometry)
 
   def drawFigures(g2d: Graphics2D, o: Offset, c: Color): Unit = {
     val toScreen = _tii.toScreen
-    getFigures(_iw.getContext, o, c).foreach { fig =>
-      fig.transform(toScreen).draw(g2d, false)
-//      addFigure(fig.transform(toScreen))
-    }
-//    drawFigures(g2d, false)
+    getFigures(_iw.getContext, o, c).foreach { _.transform(toScreen).draw(g2d, false) }
   }
 
   // The tick mark indicates the position angle.  It should sit atop the
@@ -166,5 +142,4 @@ class SciAreaPlotFeature(sciArea: ScienceAreaGeometry)
 
   override def propertyChange(propName: String): Unit =
     _iw.repaint()
-
 }

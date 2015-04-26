@@ -17,7 +17,6 @@ import edu.gemini.spModel.gemini.nifs.InstNIFS;
 import edu.gemini.spModel.gemini.niri.InstNIRI;
 import edu.gemini.spModel.obscomp.SPInstObsComp;
 import jsky.app.ot.gemini.flamingos2.Flamingos2_OIWFS_Feature;
-import jsky.app.ot.gemini.gmos.GMOS_OIWFS_Feature;
 import jsky.app.ot.gemini.gnirs.GNIRS_OIWFS_Feature;
 import jsky.app.ot.gemini.nifs.NIFS_OIWFS_Feature;
 import jsky.app.ot.gemini.niri.NIRI_OIWFS_Feature;
@@ -81,9 +80,10 @@ public class OIWFS_Feature extends TpeImageFeature {
         if (inst instanceof InstNIRI) {
             if (_niriFeat == null) _niriFeat = new NIRI_OIWFS_Feature();
             _feat = _niriFeat;
-        } else if ((inst instanceof InstGmosNorth) || (inst instanceof InstGmosSouth) || (inst instanceof InstBHROS)) {
-            if (_gmosFeat == null) _gmosFeat = new GMOS_OIWFS_Feature();
-            _feat = _gmosFeat;
+        } else if (inst instanceof InstGmosNorth) {
+            _feat = GmosNorthOiwfsFeature.instance();
+        } else if ((inst instanceof InstGmosSouth) || (inst instanceof InstBHROS)) {
+            _feat = GmosSouthOiwfsFeature.instance();
         } else if (inst instanceof InstGNIRS) {
             if (_gnirsFeat == null) _gnirsFeat = new GNIRS_OIWFS_Feature();
             _feat = _gnirsFeat;

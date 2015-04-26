@@ -17,7 +17,7 @@ import jsky.app.ot.tpe._
 import jsky.app.ot.util.PropertyWatcher
 
 import java.awt.{List => _, _}
-import java.awt.BasicStroke.{CAP_BUTT, CAP_ROUND, JOIN_BEVEL, JOIN_ROUND}
+import java.awt.BasicStroke.{CAP_BUTT, JOIN_BEVEL}
 import java.beans.{PropertyChangeEvent, PropertyChangeListener}
 import java.util.logging.Logger
 
@@ -29,19 +29,18 @@ object OiwfsPlotFeature {
   val Log = Logger.getLogger(getClass.getName)
 
   // Drawing specifications.
-  val ProbeArmColor          = Color.pink // red
-  val ProbeArmStroke         = new BasicStroke(2F)
-  val Blocked                = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.5F)
+  val ProbeArmColor        = Color.red
+  val ProbeArmStroke       = new BasicStroke(2F)
+  val Blocked              = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.5F)
 
   // A TPE warning if there is no valid region.
-  val NoValidRegionWarning   = TpeMessage.warningMessage("No valid OIWFS region. Check offset positions.")
+  val NoValidRegionWarning = TpeMessage.warningMessage("No valid OIWFS region. Check offset positions.")
 
   // The color to use to draw the patrol field
-  val PatrolFieldColor       = Color.orange //green
-  val OffsetPatrolFieldColor = Color.blue.brighter //red
+  val ReachableColor       = Color.green
+  val PatrolFieldColor     = Color.red
 
   // Used to draw dashed lines
-  val DottedLineStroke  = new BasicStroke(0.5F, CAP_ROUND, JOIN_ROUND, 1F, Array[Float](2F),       1F)
   val DashedLineStroke  = new BasicStroke(0.5F, CAP_BUTT,  JOIN_BEVEL, 0F, Array[Float](12F, 12F), 0F)
   val ThickDashedStroke = new BasicStroke(2.0F, CAP_BUTT,  JOIN_BEVEL, 0F, Array[Float](12F, 12F), 0F)
 
@@ -70,7 +69,7 @@ sealed class OiwfsPlotFeature(probe: OffsetValidatingGuideProbe, probeArm: Probe
 
       // OIWFS patrol field at the given offset position.
       val patrolFieldFigs = offsetTransform(posAngle, offset) |> { xform =>
-        List(new Figure(patField.getArea, OffsetPatrolFieldColor, null, ThickDashedStroke).transform(xform))
+        List(new Figure(patField.getArea, PatrolFieldColor, null, ThickDashedStroke).transform(xform))
       }
 
       // Intersection of patrol fields at all offset positions.  This is the
@@ -84,8 +83,8 @@ sealed class OiwfsPlotFeature(probe: OffsetValidatingGuideProbe, probeArm: Probe
 
         posAngleTransform(posAngle) |> { xform =>
           List(
-            new Figure(area,  PatrolFieldColor, null, DashedLineStroke),
-            new Figure(outer, PatrolFieldColor, AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.25F), new BasicStroke(0F))
+            new Figure(area,  ReachableColor, null, DashedLineStroke),
+            new Figure(outer, ReachableColor, AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.25F), new BasicStroke(0F))
           ).map(_.transform(xform))
         }
       }
@@ -110,7 +109,7 @@ sealed class OiwfsPlotFeature(probe: OffsetValidatingGuideProbe, probeArm: Probe
         else Nil
       }
 
-       patrolFieldFigs ++ reachableFigs ++ probeArmFigs
+       reachableFigs ++ patrolFieldFigs ++ probeArmFigs
     }
 
     (for {

@@ -57,7 +57,7 @@ object F2OiwfsProbeArm extends ProbeArmGeometry {
   }
 
 
-  /*
+  /*  COMMENT OUT FOR NOW, NEEDS UPDATE AND VERIFICATION
   override def armAdjustment(ctx0: ObsContext,
                              guideStarCoords: Coordinates,
                              offset0: Offset,
