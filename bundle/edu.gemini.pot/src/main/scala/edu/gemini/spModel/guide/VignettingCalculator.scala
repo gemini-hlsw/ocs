@@ -11,7 +11,7 @@ import edu.gemini.spModel.telescope.IssPort
 
 import scala.collection.JavaConversions._
 
-object ScalaGuideProbeUtil {
+object VignettingCalculator {
   def calculateVignetting[I <: SPInstObsComp with VignettableScienceAreaInstrument](ctx0: ObsContext,
                                                                                     coordinates: Coordinates,
                                                                                     probeArmGeometry0: ProbeArmGeometry): Double = {

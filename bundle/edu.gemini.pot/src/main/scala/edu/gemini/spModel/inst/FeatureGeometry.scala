@@ -3,7 +3,10 @@ package edu.gemini.spModel.inst
 import edu.gemini.spModel.core.{OffsetP, OffsetQ, Offset, Angle}
 import edu.gemini.spModel.core.AngleSyntax._
 
-import java.awt.geom.{Point2D, AffineTransform}
+import java.awt.Shape
+import java.awt.geom.{Area, FlatteningPathIterator, Point2D, AffineTransform}
+import java.awt.geom.PathIterator.{SEG_CLOSE, SEG_LINETO, SEG_MOVETO}
+import java.util.logging.Logger
 
 import scalaz._
 import Scalaz._
@@ -13,6 +16,7 @@ import Scalaz._
  * area or a guide probe arm.
  */
 object FeatureGeometry {
+  val Log = Logger.getLogger(getClass.getName)
 
   def offsetTransform(posAngle: Angle, offset: Offset): AffineTransform =
     posAngleTransform(posAngle) <| {
@@ -49,6 +53,57 @@ object FeatureGeometry {
       posAngleTransform(posAngle).transform(o.toPoint, result)
       result.toOffset
     }
+  }
+
+  /** Approximate area of the given shape, assuming it doesn't have holes.
+    * Holes, unfortunately are double counted as if they were disjoint shapes by
+    * the algorithm. */
+  def approximateArea(s: Shape): Double =
+    // ideal flatness and recursion depth limits are unclear but we are just
+    // looking for rough estimates for the purpose of vignetting calculation
+    approximateArea(s, 0.5, 6)
+
+  def approximateArea(s: Shape, flatness: Double, depth: Int): Double = {
+    val fpi    = new FlatteningPathIterator(new Area(s).getPathIterator(null), flatness, depth)
+    val coords = Array.fill(6)(0.0) // as required by path iterator ...
+
+    case class AreaCalc(start: (Double, Double), prev: (Double, Double), sum: Double) {
+      def addPoint(next: (Double, Double)): AreaCalc = {
+        val (x0, y0) = prev
+        val (x1, y1) = next
+        AreaCalc(start, next, sum + x0 * y1 - y0 * x1)
+      }
+
+      def close: Double =
+        if (prev == start) (sum/2.0).abs
+        else addPoint(start).close
+    }
+
+    def go(area: Double, cur: Option[AreaCalc]): Double =
+      if (fpi.isDone) area
+      else {
+        val segType = fpi.currentSegment(coords)
+        fpi.next()
+        segType match {
+          case SEG_CLOSE  =>
+            go(area + (cur.map(_.close) | 0.0), None)
+
+          case SEG_MOVETO =>
+            val point = (coords(0), coords(1))
+            go(area, Some(AreaCalc(point, point, 0.0)))
+
+          case SEG_LINETO =>
+            val point = (coords(0), coords(1))
+            go(area, cur.map(_.addPoint(point)))
+
+          case _          =>
+            // presumably impossible
+            Log.severe("FlatteningPathIterator returned a curve segment!")
+            0.0
+        }
+      }
+
+    go(0, None)
   }
 }
 
