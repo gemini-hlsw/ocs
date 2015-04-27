@@ -196,7 +196,7 @@ trait VoTableClient {
 }
 
 object VoTableClient extends VoTableClient {
-  val catalogUrls = List("http://cpocatalog2.cl.gemini.edu", "http://mkocatalog2.hi.gemini.edu")
+  val catalogUrls = List("http://gscatalog.gemini.edu", "http://gncatalog.gemini.edu")
 
   /**
    * Do a query for targets, it returns a list of targets and possible problems found
