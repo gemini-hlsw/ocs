@@ -26,7 +26,7 @@ import jsky.util.gui.StatusLogger
  * The catalog search will provide the inputs to the analysis phase, which actually assigns guide stars to guiders.
  * See OT-26
  */
-case class GemsVoTableCatalog(backend: VoTableBackend = RemoteBackend) {
+case class GemsVoTableCatalog(backend: VoTableBackend = RemoteBackend, catalog: CatalogName = ucac4) {
   private val DefaultSaturationMagnitude = 0.0
 
   /**
@@ -73,7 +73,7 @@ case class GemsVoTableCatalog(backend: VoTableBackend = RemoteBackend) {
   private def searchCatalog(basePosition: Coordinates, criterions: List[GemsCatalogSearchCriterion], statusLogger: StatusLogger): Future[List[GemsCatalogSearchResults]] = {
     val queryArgs = for {
       c <- criterions
-      q = CatalogQuery.catalogQueryWithoutBand(basePosition, c.criterion.radiusLimits, c.criterion.magRange.some)
+      q = CatalogQuery.catalogQueryWithoutBand(basePosition, c.criterion.radiusLimits, c.criterion.magRange.some, catalog)
     } yield (q, c)
 
     val qm = queryArgs.toMap
@@ -99,7 +99,7 @@ case class GemsVoTableCatalog(backend: VoTableBackend = RemoteBackend) {
       radiusLimits <- radiusLimitsList
       magLimits    <- magLimitsList
       mr            = MagnitudeRange(magLimits.faintnessConstraint, magLimits.saturationConstraint)
-      queryArgs     = (CatalogQuery.catalogQueryWithoutBand(basePosition, radiusLimits, mr.some), magLimits)
+      queryArgs     = (CatalogQuery.catalogQueryWithoutBand(basePosition, radiusLimits, mr.some, catalog), magLimits)
     } yield queryArgs
 
     val queriesMap = queries.toMap

@@ -54,7 +54,7 @@ class GemsGuideStarSearchController {
         GemsTipTiltMode tipTiltMode = _model.getAnalyseChoice().getGemsTipTiltMode();
         List<GemsCatalogSearchResults> results;
         try {
-            results = _worker.search(tipTiltMode, obsContext, posAngles,
+            results = _worker.search(_model.getCatalog(), tipTiltMode, obsContext, posAngles,
                     new scala.Some<>(band));
         } catch(Exception e) {
             DialogUtil.error(_dialog, e);

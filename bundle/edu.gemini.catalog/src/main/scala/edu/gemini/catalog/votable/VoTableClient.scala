@@ -17,7 +17,7 @@ import scala.util.{Failure, Success}
 import scalaz._
 import Scalaz._
 
-trait VoTableBackend {
+sealed trait VoTableBackend {
   protected [votable] def doQuery(query: CatalogQuery, url: String): Future[QueryResult]
 }
 
