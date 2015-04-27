@@ -2,6 +2,7 @@ package jsky.app.ot.tpe.gems;
 
 import edu.gemini.ags.gems.GemsUtils4Java;
 import edu.gemini.spModel.core.Target;
+import edu.gemini.catalog.api.ucac4$;
 import jsky.catalog.Catalog;
 import jsky.catalog.FieldDesc;
 import jsky.catalog.FieldDescAdapter;
@@ -30,6 +31,7 @@ class CandidateGuideStarsTableModel extends DefaultTableModel {
 
     // User interface model
     private GemsGuideStarSearchModel _model;
+    private final boolean _isUCAC4;
 
     // The selected NIR band
     private String _nirBand;
@@ -47,6 +49,7 @@ class CandidateGuideStarsTableModel extends DefaultTableModel {
         _model = model;
         _nirBand = _model.getBand().name();
         _unusedBands = getOtherNirBands(_nirBand);
+        _isUCAC4 = model.getCatalog().catalog() == ucac4$.MODULE$;
         _columnNames = makeColumnNames();
         setDataVector(makeDataVector(), _columnNames);
     }
@@ -55,9 +58,14 @@ class CandidateGuideStarsTableModel extends DefaultTableModel {
         Vector<String> columnNames = new Vector<>();
         columnNames.add(""); // checkbox column
         columnNames.add("Id");
-        columnNames.add("r'");
-        columnNames.add("R");
-        columnNames.add("UC");
+        if (_isUCAC4) {
+            columnNames.add("r'");
+        } else {
+            columnNames.add("R");
+        }
+        if (_isUCAC4) {
+            columnNames.add("UC");
+        }
         columnNames.add(_nirBand);
         columnNames.add("RA");
         columnNames.add("Dec");
@@ -85,7 +93,11 @@ class CandidateGuideStarsTableModel extends DefaultTableModel {
         _siderealTargets = GemsUtils4Java.uniqueTargets(_model.getGemsCatalogSearchResults());
         Vector<Vector<Object>> rows = new Vector<>();
         for (Target.SiderealTarget siderealTarget : _siderealTargets) {
-            rows.add(CatalogUtils4Java.makeRow(siderealTarget, _nirBand, _unusedBands));
+            if (_isUCAC4) {
+                rows.add(CatalogUtils4Java.makeUCAC4Row(siderealTarget, _nirBand, _unusedBands));
+            } else {
+                rows.add(CatalogUtils4Java.makeRow(siderealTarget, _nirBand, _unusedBands));
+            }
         }
         return rows;
     }
