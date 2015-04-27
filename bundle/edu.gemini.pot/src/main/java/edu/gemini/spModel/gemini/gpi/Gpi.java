@@ -1114,6 +1114,9 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
     public static final double SINGLE_CHANGE_OVERHEAD_SECS = 30;
     public static final double MULTI_CHANGE_OVERHEAD_SECS = 60;
 
+    // REL-2208 Overhead to move the half wave plate
+    public static final double HALFWAVE_PLATE_CHANGE_OVERHEAD_SECS = 5;
+
     // OT-129: Science area (square) size in arcsec
     public static final double SCIENCE_AREA_ARCSEC = 2.8;
 
@@ -2187,11 +2190,25 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
 
         // OT-95: component change times: 30 for 1, 60 for more than 1 change
         int numChanges = 0;
+
+        // REL-2208 Halfwave plate changes add 5s instead of 30 seconds
+        int halfWavePlateChanges = 0;
+        final String halfWavePlateExchangeKey = HALFWAVE_PLATE_ANGLE_KEY.getName();
+
         for(ItemKey key : cur.getKeys()) {
-            if (key.getParent().getName().equals(SeqConfigNames.INSTRUMENT_KEY.getName())
+            if (key.getName().equals(halfWavePlateExchangeKey)
+                                && PlannedTime.isUpdated(cur, prev, key)) {
+                halfWavePlateChanges++;
+            } else if (key.getParent() != null && key.getParent().getName().equals(SeqConfigNames.INSTRUMENT_KEY.getName())
                     && PlannedTime.isUpdated(cur, prev, key)) {
                 numChanges++;
             }
+        }
+
+        if (halfWavePlateChanges > 0) {
+            // If there are changes add 5 secs
+            times.add(CategorizedTime.fromSeconds(Category.CONFIG_CHANGE,
+                    HALFWAVE_PLATE_CHANGE_OVERHEAD_SECS, "halfwave plate angle change"));
         }
         if (numChanges == 1) {
             times.add(CategorizedTime.fromSeconds(Category.CONFIG_CHANGE,
