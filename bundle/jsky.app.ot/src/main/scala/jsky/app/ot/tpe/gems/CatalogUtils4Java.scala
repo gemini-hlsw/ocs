@@ -19,8 +19,8 @@ object CatalogUtils4Java {
       siderealTarget.magnitudeIn(MagnitudeBand.R).map(v => Double.box(v.value)).orNull,
       siderealTarget.magnitudeIn(MagnitudeBand.UC).map(v => Double.box(v.value)).orNull,
       MagnitudeBand.all.find(_.name == nirBand).flatMap(siderealTarget.magnitudeIn).map(v => Double.box(v.value)).orNull,
-      new HMS(siderealTarget.coordinates.ra.toAngle.toHMS.hours).toString,
-      new DMS(siderealTarget.coordinates.dec.toDegrees).toString,
+      new HMS(siderealTarget.coordinates.ra.toAngle.formatHMS).toString,
+      new DMS(siderealTarget.coordinates.dec.formatDMS).toString,
       MagnitudeBand.all.find(_.name == unusedBands(0)).flatMap(siderealTarget.magnitudeIn).map(v => Double.box(v.value)).orNull,
       MagnitudeBand.all.find(_.name == unusedBands(1)).flatMap(siderealTarget.magnitudeIn).map(v => Double.box(v.value)).orNull).asJava)
   }
