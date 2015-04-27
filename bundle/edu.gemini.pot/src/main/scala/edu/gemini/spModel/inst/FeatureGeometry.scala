@@ -16,8 +16,6 @@ import Scalaz._
  * area or a guide probe arm.
  */
 object FeatureGeometry {
-  val Log = Logger.getLogger(getClass.getName)
-
   def offsetTransform(posAngle: Angle, offset: Offset): AffineTransform =
     posAngleTransform(posAngle) <| {
       _.translate(-offset.p.arcsecs, -offset.q.arcsecs)
@@ -98,7 +96,7 @@ object FeatureGeometry {
 
           case _          =>
             // presumably impossible
-            Log.severe("FlatteningPathIterator returned a curve segment!")
+            Logger.getLogger(getClass.getName).severe("FlatteningPathIterator returned a curve segment!")
             0.0
         }
       }

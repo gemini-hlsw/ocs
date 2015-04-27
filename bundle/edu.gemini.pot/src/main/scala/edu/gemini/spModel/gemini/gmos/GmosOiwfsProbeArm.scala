@@ -11,7 +11,7 @@ import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.telescope.IssPort
 
 import java.awt.Shape
-import java.awt.geom.Rectangle2D
+import java.awt.geom.{Area, Rectangle2D}
 
 import scalaz._
 import Scalaz._
@@ -23,8 +23,8 @@ class GmosOiwfsProbeArm extends ProbeArmGeometry {
 
   override protected val guideProbeInstance = GmosOiwfsGuideProbe.instance
 
-  override def unadjustedGeometry(ctx: ObsContext): List[Shape] =
-    List(probeArm, pickoffMirror)
+  override def unadjustedGeometry(ctx: ObsContext): Option[Shape] =
+    Some(new Area(probeArm) <| (_.add(new Area(pickoffMirror))))
 
   private val probeArm: Shape = {
     val hm  = PickoffMirrorSize    / 2.0
@@ -101,7 +101,6 @@ class GmosOiwfsProbeArm extends ProbeArmGeometry {
       if (MX2 > (r2 + BX2)) math.Pi - thetaP else thetaP
     }
 
-    val angle = phi - theta - alpha - math.Pi / 2.0
     Angle.fromRadians(phi - theta - alpha - math.Pi / 2.0)
   }
 }

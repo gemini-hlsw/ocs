@@ -1,7 +1,7 @@
 package edu.gemini.spModel.gemini.flamingos2
 
 import java.awt.Shape
-import java.awt.geom.{Point2D, Rectangle2D}
+import java.awt.geom.{Area, Point2D, Rectangle2D}
 
 import edu.gemini.shared.util.immutable.ImPolygon
 import edu.gemini.skycalc.Offset
@@ -13,6 +13,8 @@ import edu.gemini.spModel.inst.ProbeArmGeometry.ArmAdjustment
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.rich.shared.immutable._
 
+import scalaz._
+import Scalaz._
 
 // The geometry is dependent on the plate scale determined by the choice of Lyot wheel,
 // and thus we must use a class instead of an object.
@@ -22,13 +24,13 @@ object F2OiwfsProbeArm extends ProbeArmGeometry {
 
   override protected val guideProbeInstance = Flamingos2OiwfsGuideProbe.instance
 
-  override def unadjustedGeometry(ctx: ObsContext): List[Shape] =
+  override def unadjustedGeometry(ctx: ObsContext): Option[Shape] =
     ctx.getInstrument match {
-      case f2: Flamingos2 => f2Geometry(f2)
-      case _              => Nil
+      case f2: Flamingos2 => Some(f2Geometry(f2))
+      case _              => None
     }
 
-  private def f2Geometry(f2: Flamingos2): List[Shape] = {
+  private def f2Geometry(f2: Flamingos2): Shape = {
     val probeArm: Shape = {
       val plateScale = f2.getLyotWheel.getPlateScale
       val scaledLength = ProbePickoffArmLength * plateScale
@@ -53,7 +55,7 @@ object F2OiwfsProbeArm extends ProbeArmGeometry {
       new Rectangle2D.Double(xy, xy, scaledMirrorSize, scaledMirrorSize)
     }
 
-    List(probeArm, pickoffMirror)
+    new Area(probeArm) <| (_.add(new Area(pickoffMirror)))
   }
 
 

@@ -26,7 +26,7 @@ import scalaz._
 import Scalaz._
 
 object OiwfsPlotFeature {
-  val Log = Logger.getLogger(getClass.getName)
+  private val Log = Logger.getLogger(getClass.getName)
 
   // Drawing specifications.
   val ProbeArmColor        = Color.red
@@ -90,7 +90,7 @@ sealed class OiwfsPlotFeature(probe: OffsetValidatingGuideProbe, probeArm: Probe
       }
 
       // The OIWFS guide probe arm itself, if there is a selected guide star.
-      val probeArmFigs = {
+      val probeArmFig = {
         // this is weird behavior but matches 2015A production OT
         val showProbeArm = selPos.forall(_.isActive(probe)) &&
           probe.inRange(obsCtx, selPos.map(_.toSkycalcOffset) | edu.gemini.skycalc.Offset.ZERO_OFFSET)
@@ -101,15 +101,15 @@ sealed class OiwfsPlotFeature(probe: OffsetValidatingGuideProbe, probeArm: Probe
         } yield gs.toNewModel.coordinates // TODO: when?
 
         if (showProbeArm)
-          guideStar.toList.flatMap { gs =>
+          guideStar.flatMap { gs =>
             probeArm.geometry(obsCtx, gs, offset).map {
               new Figure(_, ProbeArmColor, Blocked, ProbeArmStroke)
             }
           }
-        else Nil
+        else None
       }
 
-       reachableFigs ++ patrolFieldFigs ++ probeArmFigs
+       reachableFigs ++ patrolFieldFigs ++ probeArmFig
     }
 
     (for {
@@ -130,7 +130,7 @@ sealed class OiwfsPlotFeature(probe: OffsetValidatingGuideProbe, probeArm: Probe
         drawFigures(g2d, fillObscuredArea)
 
       case _               =>
-        Log.warning("draw expecting Graphics2D: " + g.getClass.getName)
+        OiwfsPlotFeature.Log.warning("draw expecting Graphics2D: " + g.getClass.getName)
     }
 
   val selectionWatcher = new PropertyChangeListener {

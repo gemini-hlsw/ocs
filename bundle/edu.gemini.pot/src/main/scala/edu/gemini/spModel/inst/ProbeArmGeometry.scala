@@ -21,8 +21,8 @@ trait ProbeArmGeometry {
 
   /** Adjusted guide probe shapes in context, ready to be used in further
    * calculations or transformed to a screen plot. */
-  def geometry(ctx: ObsContext, guideStar: Coordinates, offset: Offset): List[Shape] =
-    armAdjustment(ctx, guideStar, offset).toList.flatMap { adj =>
+  def geometry(ctx: ObsContext, guideStar: Coordinates, offset: Offset): Option[Shape] =
+    armAdjustment(ctx, guideStar, offset).flatMap { adj =>
       val angle = adj.angle
       val gs    = adj.guideStar.toPoint
       val trans = AffineTransform.getRotateInstance(angle.toRadians, gs.getX, gs.getY) <|
@@ -36,7 +36,7 @@ trait ProbeArmGeometry {
     * offsets.
    * @return the list of shapes
    */
-  def unadjustedGeometry(ctx: ObsContext): List[Shape]
+  def unadjustedGeometry(ctx: ObsContext): Option[Shape]
 
   /**
    * An instance of the probe being represented by this class.
