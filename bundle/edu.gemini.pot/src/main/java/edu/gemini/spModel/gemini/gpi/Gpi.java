@@ -1106,6 +1106,8 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
     public static final boolean DEFAULT_ALWAYS_RESTORE_MODEL = false;
     public static final boolean DEFAULT_USE_AO = true;
     public static final boolean DEFAULT_USE_CAL = true;
+    public static final boolean DEFAULT_AO_OPTIMIZE = true;
+    public static final boolean DEFAULT_NO_FPM_PINHOLE = true;
 
     // OT-95: overhead times for single or multiple changes in a sequence
     public static final double SINGLE_CHANGE_OVERHEAD_SECS = 30;
@@ -1118,7 +1120,6 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
     public static final double SCIENCE_AREA_ARCSEC = 2.8;
 
     public static final ItemKey HALFWAVE_PLATE_ANGLE_KEY = new ItemKey(INSTRUMENT_KEY, "halfWavePlateAngle");
-
 
     /**
      * This obs component's SP type.
@@ -1193,6 +1194,9 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
 
     public static final PropertyDescriptor USE_AO_PROP;
     public static final PropertyDescriptor USE_CAL_PROP;
+
+    public static final PropertyDescriptor AO_OPTIMIZE_PROP;
+    public static final PropertyDescriptor NO_FPM_PINHOLE_PROP;
 
     public static final String MAG_H_PROP = "magH";
     public static final String MAG_I_PROP = "magI";
@@ -1300,6 +1304,16 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
                 query_no, iter_no);
         USE_CAL_PROP.setExpert(true);
 
+        AO_OPTIMIZE_PROP = initProp("aoOptimize",
+                "AO Optimize",
+                query_no, iter_no);
+        AO_OPTIMIZE_PROP.setExpert(true);
+
+        NO_FPM_PINHOLE_PROP = initProp("noFpmPinhole",
+                "No FPM/Pinhole",
+                query_no, iter_no);
+        NO_FPM_PINHOLE_PROP.setExpert(true);
+
     }
 
     // instrument properties
@@ -1343,6 +1357,9 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
     // OT-136 useAo and useCal
     private boolean _useAo = DEFAULT_USE_AO;
     private boolean _useCal = DEFAULT_USE_CAL;
+    // REL-2012 Ao Optimize and No FPM/Pinhole
+    private boolean _aoOptimize = DEFAULT_AO_OPTIMIZE;
+    private boolean _noFpmPinhole = DEFAULT_NO_FPM_PINHOLE;
 
     public Gpi() {
         super(SP_TYPE);
@@ -1926,6 +1943,30 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
         }
     }
 
+    public boolean isAoOptimize() {
+        return _aoOptimize;
+    }
+
+    public void setAoOptimize(boolean newValue) {
+        boolean oldValue = isAoOptimize();
+        if (oldValue != newValue) {
+            _aoOptimize = newValue;
+            firePropertyChange(AO_OPTIMIZE_PROP, oldValue, newValue);
+        }
+    }
+
+    public boolean isNoFpmPinhole() {
+        return _noFpmPinhole;
+    }
+
+    public void setNoFpmPinhole(boolean newValue) {
+        boolean oldValue = isNoFpmPinhole();
+        if (oldValue != newValue) {
+            _noFpmPinhole = newValue;
+            firePropertyChange(NO_FPM_PINHOLE_PROP, oldValue, newValue);
+        }
+    }
+
     /**
      * @return the min exposure time in seconds
      */
@@ -1984,6 +2025,8 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
         Pio.addParam(factory, paramSet, ALWAYS_RESTORE_MODEL_PROP, String.valueOf(isAlwaysRestoreModel()));
         Pio.addParam(factory, paramSet, USE_AO_PROP, String.valueOf(isUseAo()));
         Pio.addParam(factory, paramSet, USE_CAL_PROP, String.valueOf(isUseCal()));
+        Pio.addParam(factory, paramSet, AO_OPTIMIZE_PROP, String.valueOf(isAoOptimize()));
+        Pio.addParam(factory, paramSet, NO_FPM_PINHOLE_PROP, String.valueOf(isNoFpmPinhole()));
 
         return paramSet;
     }
@@ -2080,6 +2123,10 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
                 DEFAULT_USE_AO));
         setUseCal(Pio.getBooleanValue(paramSet, USE_CAL_PROP.getName(),
                 DEFAULT_USE_CAL));
+        setAoOptimize(Pio.getBooleanValue(paramSet, AO_OPTIMIZE_PROP.getName(),
+                DEFAULT_AO_OPTIMIZE));
+        setNoFpmPinhole(Pio.getBooleanValue(paramSet, NO_FPM_PINHOLE_PROP.getName(),
+                DEFAULT_NO_FPM_PINHOLE));
     }
 
     /**
@@ -2134,6 +2181,8 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
         sc.putParameter(DefaultParameter.getInstance(ALWAYS_RESTORE_MODEL_PROP, isAlwaysRestoreModel()));
         sc.putParameter(DefaultParameter.getInstance(USE_AO_PROP, isUseAo()));
         sc.putParameter(DefaultParameter.getInstance(USE_CAL_PROP, isUseCal()));
+        sc.putParameter(DefaultParameter.getInstance(AO_OPTIMIZE_PROP, isAoOptimize()));
+        sc.putParameter(DefaultParameter.getInstance(NO_FPM_PINHOLE_PROP, isNoFpmPinhole()));
 
         return sc;
     }

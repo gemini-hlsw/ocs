@@ -50,6 +50,8 @@ public class GpiTest  extends TestCase {
         assertEquals(inst.getCoadds(), InstConstants.DEF_COADDS);
         assertEquals(inst.getPosAngleDegrees(), InstConstants.DEF_POS_ANGLE, _ERROR);
         assertEquals(inst.getTotalExposureTime(), Gpi.DEFAULT_EXPOSURE_TIME, _ERROR);
+        assertEquals(inst.isAoOptimize(), Gpi.DEFAULT_AO_OPTIMIZE);
+        assertEquals(inst.isNoFpmPinhole(), Gpi.DEFAULT_NO_FPM_PINHOLE);
     }
 
     // test get/set paramset
@@ -70,6 +72,8 @@ public class GpiTest  extends TestCase {
         inst.setExposureTime(300.);
         inst.setCoadds(2);
         inst.setPosAngleDegrees(90.);
+        inst.setAoOptimize(false);
+        inst.setNoFpmPinhole(false);
 
         ParamSet p = inst.getParamSet(new PioXmlFactory());
 
@@ -119,6 +123,9 @@ public class GpiTest  extends TestCase {
         assertEquals(300., copy.getExposureTime(), _ERROR);
         assertEquals(2, copy.getCoadds(), _ERROR);
         assertEquals(90., copy.getPosAngleDegrees(), _ERROR);
+
+        assertFalse(copy.isAoOptimize());
+        assertFalse(copy.isNoFpmPinhole());
     }
 
     public void testResetASUAttenuation() {
