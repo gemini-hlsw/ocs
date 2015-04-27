@@ -14,19 +14,19 @@ import Scalaz._
 
 object F2ScienceAreaGeometry extends ScienceAreaGeometry {
 
-  override def unadjustedGeometry(ctx: ObsContext): List[Shape] =
+  override def unadjustedGeometry(ctx: ObsContext): Option[Shape] =
     ctx.getInstrument match {
       case f2: Flamingos2 =>
         val plateScale       = f2.getLyotWheel.getPlateScale
         val scienceAreaWidth = scienceAreaDimensions(f2)._1
         f2.getFpu match {
-          case Flamingos2.FPUnit.FPU_NONE    => List(imagingFOV(plateScale))
-          case Flamingos2.FPUnit.CUSTOM_MASK => List(mosFOV(plateScale))
-          case _ if f2.getFpu.isLongslit     => List(longSlitFOV(plateScale, scienceAreaWidth))
-          case _                             => Nil
+          case Flamingos2.FPUnit.FPU_NONE    => Some(imagingFOV(plateScale))
+          case Flamingos2.FPUnit.CUSTOM_MASK => Some(mosFOV(plateScale))
+          case _ if f2.getFpu.isLongslit     => Some(longSlitFOV(plateScale, scienceAreaWidth))
+          case _                             => None
         }
 
-      case _              => Nil
+      case _              => None
     }
 
   def scienceAreaDimensions(f2: Flamingos2): (Double, Double) =

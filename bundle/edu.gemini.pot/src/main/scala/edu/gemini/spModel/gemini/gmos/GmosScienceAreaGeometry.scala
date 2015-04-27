@@ -26,21 +26,21 @@ object GmosScienceAreaGeometry extends ScienceAreaGeometry {
   val LongSlitFovHeight       = 108.00
   val LongSlitFovBridgeHeight =   3.20
 
-  override def unadjustedGeometry(ctx: ObsContext): List[Shape] = {
-    def gmosGeo[P <: FPUnit](mode: FPUnitMode, fpu: P, isSouth: Boolean): List[Shape] =
+  override def unadjustedGeometry(ctx: ObsContext): Option[Shape] = {
+    def gmosGeo[P <: FPUnit](mode: FPUnitMode, fpu: P, isSouth: Boolean): Option[Shape] =
       mode match {
-        case BUILTIN if fpu.isImaging       => imagingFov.toList
-        case BUILTIN if fpu.isSpectroscopic => List(longSlitFOV(scienceAreaDimensions(fpu)._1))
-        case BUILTIN if fpu.isIFU           => List(ifuFOV(fpu, isSouth))
-        case BUILTIN if fpu.isNS            => List(nsFOV(scienceAreaDimensions(fpu)._1))
-        case CUSTOM_MASK                    => mosFov.toList
-        case _                              => Nil
+        case BUILTIN if fpu.isImaging       => Some(imagingFov.toShape)
+        case BUILTIN if fpu.isSpectroscopic => Some(longSlitFOV(scienceAreaDimensions(fpu)._1))
+        case BUILTIN if fpu.isIFU           => Some(ifuFOV(fpu, isSouth))
+        case BUILTIN if fpu.isNS            => Some(nsFOV(scienceAreaDimensions(fpu)._1))
+        case CUSTOM_MASK                    => Some(mosFov.toShape)
+        case _                              => None
       }
 
     ctx.getInstrument match {
       case gn: InstGmosNorth => gmosGeo(gn.getFPUnitMode, gn.getFPUnit, isSouth = false)
       case gs: InstGmosSouth => gmosGeo(gs.getFPUnitMode, gs.getFPUnit, isSouth = true )
-      case _                 => Nil
+      case _                 => None
     }
   }
 
@@ -54,6 +54,9 @@ object GmosScienceAreaGeometry extends ScienceAreaGeometry {
 
   case class ImagingFov(ccdLeft: Shape, ccdCenter: Shape, ccdRight: Shape) {
     def toList: List[Shape] = List(ccdLeft, ccdCenter, ccdRight)
+
+    def toShape: Shape =
+      new Area(ccdLeft) <| (_.add(new Area(ccdCenter))) <| (_.add(new Area(ccdRight)))
   }
 
   private def fov(size: Double, innerSize: Double): ImagingFov = {

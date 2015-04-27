@@ -89,11 +89,7 @@ class SciAreaPlotFeature(sciArea: ScienceAreaGeometry)
   // it is created and transformed here.
   def tickMarkFigure(tpeCtx: TpeContext, tii: TpeImageInfo): Option[Figure] =
     tpeCtx.obsContext.map { obsCtx =>
-      val yRaw = sciArea.unadjustedGeometry(obsCtx) match {
-        case Nil => 0
-        case ss  => ss.map(_.getBounds2D.getMinY).min
-      }
-
+      val yRaw  = sciArea.unadjustedGeometry(obsCtx).fold(0.0) { _.getBounds2D.getMinY }
       val y     = (yRaw * tii.getPixelsPerArcsec) min -30.0
       val tick  = tickMark(new Point2D.Double(0, y))
       val fig   = new Figure(tick, FovColor, AlphaComposite.SrcOver, TickStroke)

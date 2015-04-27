@@ -17,14 +17,12 @@ trait ScienceAreaGeometry {
 
   /** Adjusted science area shapes in context, ready to be used in further
     * calculations or transformed to a screen plot. */
-  def geometry(ctx: ObsContext, offset: Offset): List[Shape] =
+  def geometry(ctx: ObsContext, offset: Offset): Option[Shape] =
     offsetTransform(ctx.getPositionAngle.toNewModel, offset) |> { trans =>
       unadjustedGeometry(ctx).map { trans.createTransformedShape }
     }
 
-  /** Create the shapes for the science area based on the instrument
-   * configuration.  This shape is not adjusted for position angle or offsets.
-   *
-   * @return list representing the shapes, or Nil if no such shape exists */
-  def unadjustedGeometry(ctx: ObsContext): List[Shape]
+  /** Create the shape for the science area based on the instrument configuration.
+    * This shape is not adjusted for position angle or offsets. */
+  def unadjustedGeometry(ctx: ObsContext): Option[Shape]
 }
