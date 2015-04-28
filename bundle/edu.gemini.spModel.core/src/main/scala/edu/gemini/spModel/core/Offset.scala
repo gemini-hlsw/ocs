@@ -53,5 +53,5 @@ object Offset {
   implicit val equals = scalaz.Equal.equalA[Offset]
 
   implicit val ShowOffset: Show[Offset] =
-    Show.shows[Offset] { off => s"Offset(${off.p.shows}, ${off.q.shows}" }
+    Show.shows[Offset] { off => s"Offset(${off.p.shows}, ${off.q.shows})" }
 }
