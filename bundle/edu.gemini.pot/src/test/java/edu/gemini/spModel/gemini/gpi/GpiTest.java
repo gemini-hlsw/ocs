@@ -12,8 +12,6 @@ import edu.gemini.spModel.pio.ParamSet;
 import edu.gemini.spModel.pio.xml.PioXmlFactory;
 import junit.framework.TestCase;
 
-import java.util.Arrays;
-
 /**
  * Tests the GPI instrument class
  */
@@ -59,7 +57,7 @@ public class GpiTest  extends TestCase {
         Gpi inst = new Gpi();
         inst.setAstrometricField(true);
         inst.setAdc(Gpi.Adc.OUT);
-        inst.setObservingMode(new Some<Gpi.ObservingMode>(Gpi.ObservingMode.CORON_Y_BAND));
+        inst.setObservingMode(new Some<>(Gpi.ObservingMode.CORON_Y_BAND));
         inst.setDisperser(Gpi.Disperser.WOLLASTON);
         inst.setDetectorReadoutArea(Gpi.DetectorReadoutArea.CENTRAL_256);
         inst.setEntranceShutter(Gpi.Shutter.CLOSE);
@@ -84,7 +82,7 @@ public class GpiTest  extends TestCase {
         assertEquals(Gpi.Adc.OUT, copy.getAdc());
         assertEquals(inst.getAdc(), copy.getAdc());
 
-        assertEquals(new Some(Gpi.ObservingMode.NONSTANDARD), copy.getObservingMode()); // was overridden (OT-101)
+        assertEquals(new Some<>(Gpi.ObservingMode.NONSTANDARD), copy.getObservingMode()); // was overridden (OT-101)
 
         assertEquals(Gpi.Disperser.WOLLASTON, copy.getDisperser());
         assertEquals(inst.getDisperser(), copy.getDisperser());
@@ -143,7 +141,7 @@ public class GpiTest  extends TestCase {
         Gpi inst = new Gpi();
         assertTrue(inst.isUseAo());
         assertTrue(inst.isUseCal());
-        inst.setObservingMode(new Some<Gpi.ObservingMode>(Gpi.ObservingMode.DIRECT_H_BAND));
+        inst.setObservingMode(new Some<>(Gpi.ObservingMode.DIRECT_H_BAND));
         assertTrue(inst.isUseAo());
         assertFalse(inst.isUseCal());
     }
@@ -152,7 +150,7 @@ public class GpiTest  extends TestCase {
         Gpi inst = new Gpi();
         assertTrue(inst.isUseAo());
         assertTrue(inst.isUseCal());
-        inst.setObservingMode(new Some<Gpi.ObservingMode>(Gpi.ObservingMode.NRM_H));
+        inst.setObservingMode(new Some<>(Gpi.ObservingMode.NRM_H));
         assertTrue(inst.isUseAo());
         assertFalse(inst.isUseCal());
     }
@@ -211,7 +209,21 @@ public class GpiTest  extends TestCase {
 
     public void testUnblockedModes() {
         Gpi inst = new Gpi();
-        inst.setObservingMode(new Some<Gpi.ObservingMode>(Gpi.ObservingMode.UNBLOCKED_H));
+        inst.setObservingMode(new Some<>(Gpi.ObservingMode.UNBLOCKED_H));
         assertEquals(inst.getFpm(), Gpi.FPM.SCIENCE);
+    }
+
+    // REL-2229
+    public void testEntranceAndCalShutterAreIndependent() {
+        Gpi inst = new Gpi();
+        assertEquals(Gpi.Shutter.OPEN, inst.getEntranceShutter());
+        assertEquals(Gpi.Shutter.OPEN, inst.getCalEntranceShutter());
+        inst.setEntranceShutter(Gpi.Shutter.CLOSE);
+        assertEquals(Gpi.Shutter.CLOSE, inst.getEntranceShutter());
+        assertEquals(Gpi.Shutter.OPEN, inst.getCalEntranceShutter());
+
+        assertEquals(Gpi.Shutter.CLOSE, inst.getSysConfig().getParameter(Gpi.ENTRANCE_SHUTTER_PROP.getName()).getValue());
+        // REL-2229 This bug would return CLOSE in the test below
+        assertEquals(Gpi.Shutter.OPEN, inst.getSysConfig().getParameter(Gpi.CAL_ENTRANCE_SHUTTER_PROP.getName()).getValue());
     }
 }
