@@ -47,40 +47,6 @@ public final class ITCImageFileIO {
         return randomFileName.getName();
     }
 
-
-    // TODO : collapse saveSedtoDisks into one function!
-    public static void saveSedtoDisk(final String header, final SampledSpectrum sed, final String randomFilename) throws IOException {
-        final File tmpOut = new File(getImagePath() + "/" + randomFilename);
-        final FileOutputStream Outfile = new FileOutputStream(getImagePath() + "/" + randomFilename, true);  //append if exists
-        final OutputStream out = new BufferedOutputStream(Outfile);
-        try (final DataOutputStream dout = new DataOutputStream(out)) {
-            String specOutput = sed.printSpecAsString();
-            if (tmpOut.length() > 10) {
-                dout.writeBytes(specOutput);  //if the file already existed then just append spectrum to it.
-            } else {
-                dout.writeBytes(header + " \n" + specOutput);
-            }
-        }
-    }
-
-    public static void saveSedtoDisk(final String header, final SampledSpectrum sed, final String randomFilename, final int firstIndex, final int lastIndex) throws IOException {
-        final File tmpOut = new File(getImagePath() + "/" + randomFilename);
-        final FileOutputStream Outfile = new FileOutputStream(getImagePath() + "/" + randomFilename, true);  //append if exists
-        final OutputStream out = new BufferedOutputStream(Outfile);
-        try (final DataOutputStream dout = new DataOutputStream(out)) {
-            String specOutput = sed.printSpecAsString(firstIndex, lastIndex);
-            if (tmpOut.length() > 10) {
-                dout.writeBytes(specOutput);  //if the file already existed then just append spectrum to it.
-            } else {
-                dout.writeBytes(header + " \n" + specOutput);
-            }
-        }
-    }
-
-    public static String getRandomFileName(final String extension) throws IOException {
-        return File.createTempFile("SessionID", extension, _tempDir).getName();
-    }
-
     public static String getImagePath() {
         return _tempDir.getPath();
     }

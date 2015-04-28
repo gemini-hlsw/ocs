@@ -4,11 +4,13 @@ import edu.gemini.itc.altair.Altair;
 import edu.gemini.itc.niri.Niri;
 import edu.gemini.itc.niri.NiriRecipe;
 import edu.gemini.itc.shared.*;
+import edu.gemini.itc.web.servlets.ImageServlet;
 import edu.gemini.spModel.gemini.niri.Niri.Mask;
 import scala.Option;
+import scala.Tuple2;
 
 import java.io.PrintWriter;
-import java.util.Calendar;
+import java.util.UUID;
 
 /**
  * Helper class for printing NIRI calculation results to an output stream.
@@ -34,12 +36,12 @@ public final class NiriPrinter extends PrinterBase {
             final ImagingResult result = recipe.calculateImaging();
             writeImagingOutput(result);
         } else {
-            final SpectroscopyResult result = recipe.calculateSpectroscopy();
-            writeSpectroscopyOutput(result);
+            final Tuple2<UUID, SpectroscopyResult> result = cache(recipe.calculateSpectroscopy());
+            writeSpectroscopyOutput(result._1(), result._2());
         }
     }
 
-    private void writeSpectroscopyOutput(final SpectroscopyResult result) {
+    private void writeSpectroscopyOutput(final UUID id, final SpectroscopyResult result) {
 
         final Niri instrument = (Niri) result.instrument();
 
@@ -95,25 +97,20 @@ public final class NiriPrinter extends PrinterBase {
         _println(chart1.getBufferedImage(), "SigAndBack");
         _println("");
 
-        final String sigSpec = _printSpecTag("ASCII signal spectrum");
-        final String backSpec = _printSpecTag("ASCII background spectrum");
+        _printFileLink(id, ImageServlet.SigSpec, "ASCII signal spectrum");
+        _printFileLink(id, ImageServlet.BackSpec, "ASCII background spectrum");
 
         chart2.addArray(result.specS2N()[0].getExpS2NSpectrum().getData(), "Single Exp S/N");
         chart2.addArray(result.specS2N()[0].getFinalS2NSpectrum().getData(), "Final S/N  ");
         _println(chart2.getBufferedImage(), "Sig2N");
         _println("");
 
-        final String singleS2N = _printSpecTag("Single Exposure S/N ASCII data");
-        final String finalS2N = _printSpecTag("Final S/N ASCII data");
+        _printFileLink(id, ImageServlet.SingleS2N, "Single Exposure S/N ASCII data");
+        _printFileLink(id, ImageServlet.FinalS2N, "Final S/N ASCII data");
 
         printConfiguration(result.parameters(), instrument, result.aoSystem());
 
-        final String header = "# NIRI ITC: " + Calendar.getInstance().getTime() + "\n";
         _println(HtmlPrinter.printParameterSummary(pdp));
-        _println(result.specS2N()[0].getSignalSpectrum(), header, sigSpec);
-        _println(result.specS2N()[0].getBackgroundSpectrum(), header, backSpec);
-        _println(result.specS2N()[0].getExpS2NSpectrum(), header, singleS2N);
-        _println(result.specS2N()[0].getFinalS2NSpectrum(), header, finalS2N);
 
     }
 

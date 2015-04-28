@@ -179,7 +179,7 @@ public final class MichelleRecipe implements ImagingRecipe, SpectroscopyRecipe {
         final Parameters p = new Parameters(_sdParameters, _obsDetailParameters, _obsConditionParameters, _telescope);
         final SpecS2N[] specS2Narr = new SpecS2N[1];
         specS2Narr[0] = specS2N;
-        return SpectroscopyResult.apply(p, instrument, SFcalc, IQcalc, specS2Narr, st);
+        return SpectroscopyResult$.MODULE$.apply(p, instrument, SFcalc, IQcalc, specS2Narr, st);
 
 
     }

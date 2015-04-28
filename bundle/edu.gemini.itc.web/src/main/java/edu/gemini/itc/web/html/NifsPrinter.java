@@ -5,12 +5,14 @@ import edu.gemini.itc.nifs.Nifs;
 import edu.gemini.itc.nifs.NifsParameters;
 import edu.gemini.itc.nifs.NifsRecipe;
 import edu.gemini.itc.shared.*;
+import edu.gemini.itc.web.servlets.ImageServlet;
 import edu.gemini.spModel.core.Site;
+import scala.Tuple2;
 
 import java.io.PrintWriter;
-import java.util.Calendar;
 import java.util.Iterator;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Helper class for printing NIFS calculation results to an output stream.
@@ -27,11 +29,11 @@ public final class NifsPrinter extends PrinterBase {
     }
 
     public void writeOutput() {
-        final SpectroscopyResult result = recipe.calculateSpectroscopy();
-        writeSpectroscopyOutput(result);
+        final Tuple2<UUID, SpectroscopyResult> result = cache(recipe.calculateSpectroscopy());
+        writeSpectroscopyOutput(result._1(), result._2());
     }
 
-    private void writeSpectroscopyOutput(final SpectroscopyResult result) {
+    private void writeSpectroscopyOutput(final UUID id, final SpectroscopyResult result) {
 
         final Nifs instrument = (Nifs) result.instrument();
 
@@ -70,8 +72,6 @@ public final class NifsPrinter extends PrinterBase {
 
         _print("<HR align=left SIZE=3>");
 
-        String sigSpec = null, backSpec = null, singleS2N = null, finalS2N = null;
-
         final List<Double> ap_offset_list = instrument.getIFU().getApertureOffsetList();
         final Iterator<Double> ifu_offset_it = ap_offset_list.iterator();
         for (int i = 0; i < result.specS2N().length; i++) {
@@ -96,8 +96,8 @@ public final class NifsPrinter extends PrinterBase {
             _println("");
 
 
-            sigSpec = _printSpecTag("ASCII signal spectrum");
-            backSpec = _printSpecTag("ASCII background spectrum");
+            _printFileLink(id, ImageServlet.SigSpec, "ASCII signal spectrum");
+            _printFileLink(id, ImageServlet.BackSpec, "ASCII background spectrum");
 
             final String chart2Title =
                     instrument.getIFUMethod().equals(NifsParameters.SUMMED_APERTURE_IFU) ?
@@ -113,8 +113,8 @@ public final class NifsPrinter extends PrinterBase {
             _println(chart2.getBufferedImage(), "Sig2N");
             _println("");
 
-            singleS2N = _printSpecTag("Single Exposure S/N ASCII data");
-            finalS2N = _printSpecTag("Final S/N ASCII data");
+            _printFileLink(id, ImageServlet.SingleS2N, "Single Exposure S/N ASCII data");
+            _printFileLink(id, ImageServlet.FinalS2N, "Final S/N ASCII data");
         }
 
         _println("");
@@ -135,11 +135,6 @@ public final class NifsPrinter extends PrinterBase {
         _println(HtmlPrinter.printParameterSummary(result.observation()));
         _println(HtmlPrinter.printParameterSummary(pdp));
 
-        final String header = "# NIFS ITC: " + Calendar.getInstance().getTime() + "\n";
-        _println(result.specS2N()[result.specS2N().length-1].getSignalSpectrum(), header, sigSpec);
-        _println(result.specS2N()[result.specS2N().length-1].getBackgroundSpectrum(), header, backSpec);
-        _println(result.specS2N()[result.specS2N().length-1].getExpS2NSpectrum(), header, singleS2N);
-        _println(result.specS2N()[result.specS2N().length-1].getFinalS2NSpectrum(), header, finalS2N);
     }
 
     private String nifsToString(final Nifs instrument) {

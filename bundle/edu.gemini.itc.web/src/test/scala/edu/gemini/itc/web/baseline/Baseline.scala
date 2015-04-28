@@ -9,6 +9,7 @@ import edu.gemini.itc.nifs.NifsParameters
 import edu.gemini.itc.shared._
 import edu.gemini.itc.trecs.TRecsParameters
 import edu.gemini.itc.web.html._
+import edu.gemini.itc.web.servlets.ImageServlet
 
 import scala.io.Source
 
@@ -18,14 +19,29 @@ import scala.io.Source
  */
 case class Output(string: String) {
   private val DatFiles = """SessionID\d*\.dat""".r
-  val hash: Long = 37L*fixString(string).hashCode() + hashAllFiles(string)
-  private def fixString(s: String) = s.replaceAll("SessionID\\d*", "SessionIDXXX")
+  private val MemFiles = """&filename=([a-zA-Z0-9]*)&id=([a-z0-9\-]*)""".r
+  val hash: Long = {
+    val h1 = hashAllDatFiles(string)
+    val h2 = hashAllMemFiles(string)
+    //37L*fixString(string).hashCode() + hashAllFiles(string) + hashAllMemFiles(string)
+    37L*fixString(string).hashCode() + (if (h1 != 17L) h1 else 0L) + (if (h2 != 17L) h2 else 0L) + (if (h1 == 17L && h2 == 17L) 17L else 0L)
+  }
+  private def fixString(s: String) = s.
+    replaceAll("SessionID\\d*", "SessionIDXXX").
+    replaceAll("""&filename=([a-zA-Z0-9]*)&id=([a-z0-9\-]*)""", "&filename=SessionIDXXX.dat")
 
-  def hashAllFiles(s: String): Long =
+  def hashAllDatFiles(s: String): Long =
     DatFiles.
       findAllIn(s).
       map(hashDatFile).
       foldLeft(17L)((acc, s) => 37L*acc + s.hashCode.toLong)
+
+  def hashAllMemFiles(s: String): Long =
+    MemFiles.
+      findAllMatchIn(s).
+      map(m => hashMemFile(m.group(2), m.group(1))).
+      foldLeft(17L)((acc, s) => 37L*acc + s.hashCode)
+
 
   def hashDatFile(f: String): Int = {
     val path = ITCImageFileIO.getImagePath
@@ -34,6 +50,12 @@ case class Output(string: String) {
     // for testing it is safe to assume there is at least one line (header)
     file.getLines().drop(1).foldLeft(17)((acc, s) => 37*acc + s.hashCode)
   }
+
+  def hashMemFile(id: String, filename: String): Int = {
+    val file = ImageServlet.toFile(id, filename)
+    file.split('\n').drop(1).foldLeft(17)((acc, s) => 37*acc + s.hashCode)
+  }
+
 }
 
 /**

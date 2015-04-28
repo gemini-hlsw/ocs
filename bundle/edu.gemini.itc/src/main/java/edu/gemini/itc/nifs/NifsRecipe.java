@@ -184,7 +184,7 @@ public final class NifsRecipe implements SpectroscopyRecipe {
         }
 
         final Parameters p = new Parameters(_sdParameters, _obsDetailParameters, _obsConditionParameters, _telescope);
-        return new SpectroscopyResult(p, instrument, (SourceFraction) null, IQcalc, specS2Narr, (SlitThroughput) null, altair); // TODO no SFCalc and ST for Nifs
+        return new GenericSpectroscopyResult(p, instrument, (SourceFraction) null, IQcalc, specS2Narr, (SlitThroughput) null, altair); // TODO no SFCalc and ST for Nifs
     }
 
 }

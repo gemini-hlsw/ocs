@@ -4,12 +4,15 @@ import edu.gemini.itc.gmos.Gmos;
 import edu.gemini.itc.gmos.GmosRecipe;
 import edu.gemini.itc.operation.DetectorsTransmissionVisitor;
 import edu.gemini.itc.shared.*;
+import edu.gemini.itc.web.servlets.ImageServlet;
 import edu.gemini.spModel.gemini.gmos.GmosNorthType;
 import edu.gemini.spModel.gemini.gmos.GmosSouthType;
+import scala.Tuple2;
 
 import java.awt.*;
 import java.io.PrintWriter;
 import java.util.Calendar;
+import java.util.UUID;
 
 /**
  * Helper class for printing GMOS calculation results to an output stream.
@@ -28,19 +31,19 @@ public final class GmosPrinter extends PrinterBase {
     }
 
     /**
-     * Performes recipe calculation and writes results to a cached PrintWriter or to System.out.
+     * Performs recipe calculation and writes results to a cached PrintWriter or to System.out.
      */
     public void writeOutput() {
         if (isImaging) {
             final ImagingResult[] results = recipe.calculateImaging();
             writeImagingOutput(results);
         } else {
-            final SpectroscopyResult[] results = recipe.calculateSpectroscopy();
-            writeSpectroscopyOutput(results);
+            final Tuple2<UUID, SpectroscopyResult[]> results = cache(recipe.calculateSpectroscopy());
+            writeSpectroscopyOutput(results._1(), results._2());
         }
     }
 
-    private void writeSpectroscopyOutput(final SpectroscopyResult[] results) {
+    private void writeSpectroscopyOutput(final UUID id, final SpectroscopyResult[] results) {
 
         final Gmos mainInstrument = (Gmos) results[0].instrument(); // main instrument
 
@@ -61,7 +64,6 @@ public final class GmosPrinter extends PrinterBase {
         gmosChart1 = new ITCChart(chart1Title, "Wavelength (nm)", "e- per exposure per spectral pixel", pdp);
         gmosChart2 = new ITCChart(chart2Title, "Wavelength (nm)", "Signal / Noise per spectral pixel", pdp);
 
-        String sigSpec = null, backSpec = null, singleS2N = null, finalS2N = null;
         final Gmos[] ccdArray = mainInstrument.getDetectorCcdInstruments();
         final DetectorsTransmissionVisitor tv = mainInstrument.getDetectorTransmision();
         final int detectorCount = ccdArray.length;
@@ -74,10 +76,6 @@ public final class GmosPrinter extends PrinterBase {
             final Color ccdColorDarker = ccdColor == null ? null : ccdColor.darker().darker();
             final int firstCcdIndex = tv.getDetectorCcdStartIndex(ccdIndex);
             final int lastCcdIndex = tv.getDetectorCcdEndIndex(ccdIndex, detectorCount);
-            // REL-478: include the gaps in the text data output
-            final int lastCcdIndexWithGap = (ccdIndex < 2 && detectorCount > 1)
-                    ? tv.getDetectorCcdStartIndex(ccdIndex + 1)
-                    : lastCcdIndex;
 
             final SpectroscopyResult result = results[ccdIndex];
 
@@ -124,18 +122,13 @@ public final class GmosPrinter extends PrinterBase {
 
                 if (ccdIndex == 0) {
                     _println("<p style=\"page-break-inside: never\">");
-                    sigSpec = _printSpecTag("ASCII signal spectrum");
-                    backSpec = _printSpecTag("ASCII background spectrum");
-                    singleS2N = _printSpecTag("Single Exposure S/N ASCII data");
-                    finalS2N = _printSpecTag("Final S/N ASCII data");
+                    _printFileLink(id, ImageServlet.GmosSigSpec, "ASCII signal spectrum");
+                    _printFileLink(id, ImageServlet.GmosBackSpec, "ASCII background spectrum");
+                    _printFileLink(id, ImageServlet.GmosSingleS2N, "Single Exposure S/N ASCII data");
+                    _printFileLink(id, ImageServlet.GmosFinalS2N, "Final S/N ASCII data");
                 }
                 _println("");
             }
-
-            _println(result.specS2N()[result.specS2N().length - 1].getSignalSpectrum(), header, sigSpec, firstCcdIndex, lastCcdIndexWithGap);
-            _println(result.specS2N()[result.specS2N().length - 1].getBackgroundSpectrum(), header, backSpec, firstCcdIndex, lastCcdIndexWithGap);
-            _println(result.specS2N()[result.specS2N().length - 1].getExpS2NSpectrum(), header, singleS2N, firstCcdIndex, lastCcdIndexWithGap);
-            _println(result.specS2N()[result.specS2N().length - 1].getFinalS2NSpectrum(), header, finalS2N, firstCcdIndex, lastCcdIndexWithGap);
 
         }
 

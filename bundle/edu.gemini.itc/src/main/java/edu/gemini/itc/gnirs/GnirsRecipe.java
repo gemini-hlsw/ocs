@@ -3,6 +3,7 @@ package edu.gemini.itc.gnirs;
 import edu.gemini.itc.operation.*;
 import edu.gemini.itc.shared.*;
 import edu.gemini.spModel.core.Site;
+import scala.Option;
 
 /**
  * This class performs the calculations for Gnirs used for imaging.
@@ -220,7 +221,7 @@ public final class GnirsRecipe {
 
         final Parameters p = new Parameters(_sdParameters, _obsDetailParameters, _obsConditionParameters, _telescope);
         final SpecS2N[] specS2Narr = new SpecS2N[] {specS2N};
-        return new GnirsSpectroscopyResult(p, instrument, SFcalc, IQcalc, specS2Narr, st, signalOrder, backGroundOrder, finalS2NOrder);
+        return new GnirsSpectroscopyResult(p, instrument, SFcalc, IQcalc, specS2Narr, st, Option.<AOSystem>empty(), signalOrder, backGroundOrder, finalS2NOrder);
 
     }
 

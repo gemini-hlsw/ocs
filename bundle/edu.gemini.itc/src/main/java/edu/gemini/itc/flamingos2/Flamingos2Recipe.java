@@ -135,7 +135,7 @@ public final class Flamingos2Recipe implements ImagingRecipe, SpectroscopyRecipe
         specS2Narr[0] = specS2N;
 
         final Parameters p = new Parameters(_sdParameters, _obsDetailParameters, _obsConditionParameters, _telescope);
-        return SpectroscopyResult.apply(p, instrument, SFcalc, IQcalc, specS2Narr, st);
+        return SpectroscopyResult$.MODULE$.apply(p, instrument, SFcalc, IQcalc, specS2Narr, st);
     }
 
     private ImagingResult calculateImaging(final Flamingos2 instrument) {

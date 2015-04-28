@@ -10,6 +10,18 @@ import edu.gemini.itc.operation._
  * simplified result objects which helps to contain ITC internals.
  */
 
+sealed trait Result {
+  val parameters: Parameters
+  val instrument: Instrument
+
+  // Accessors for convenience.
+  val source      = parameters.source
+  val observation = parameters.observation
+  val telescope   = parameters.telescope
+  val conditions  = parameters.conditions
+
+}
+
 /* Internal object for imaging results. */
 final case class ImagingResult(
                       parameters: Parameters,
@@ -18,12 +30,7 @@ final case class ImagingResult(
                       sfCalc: SourceFraction,
                       peakPixelCount: Double,
                       is2nCalc: ImagingS2NCalculatable,
-                      aoSystem: Option[AOSystem]) {
-  val source      = parameters.source
-  val observation = parameters.observation
-  val telescope   = parameters.telescope
-  val conditions  = parameters.conditions
-}
+                      aoSystem: Option[AOSystem]) extends Result
 
 object ImagingResult {
 
@@ -35,41 +42,46 @@ object ImagingResult {
 
 }
 
-/* Internal object for spectroscopy results. */
-final case class SpectroscopyResult(
-                       parameters: Parameters,
-                       instrument: Instrument,
-                       sfCalc: SourceFraction,
-                       iqCalc: ImageQualityCalculatable,
-                       specS2N: Array[SpecS2N],
-                       st: SlitThroughput,
-                       aoSystem: Option[AOSystem]) {
-  val source      = parameters.source
-  val observation = parameters.observation
-  val telescope   = parameters.telescope
-  val conditions  = parameters.conditions
+sealed trait SpectroscopyResult extends Result {
+  val sfCalc: SourceFraction
+  val iqCalc: ImageQualityCalculatable
+  val specS2N: Array[SpecS2N]
+  val st: SlitThroughput
+  val aoSystem: Option[AOSystem]
 }
+
+/* Internal object for generic spectroscopy results (all instruments except for GNIRS). */
+final case class GenericSpectroscopyResult(
+                      parameters: Parameters,
+                      instrument: Instrument,
+                      sfCalc: SourceFraction,
+                      iqCalc: ImageQualityCalculatable,
+                      specS2N: Array[SpecS2N],
+                      st: SlitThroughput,
+                      aoSystem: Option[AOSystem]) extends SpectroscopyResult
+
+/* Internal object for GNIRS spectroscopy results.
+ * I somehow think it should be possible to unify this in a clever way with the "generic" spectroscopy result
+ * used for the other instruments, but right now I don't understand the calculations well enough to figure out
+ * how to do that in a meaningful way. */
+final case class GnirsSpectroscopyResult(
+                      parameters: Parameters,
+                      instrument: Instrument,
+                      sfCalc: SourceFraction,
+                      iqCalc: ImageQualityCalculatable,
+                      specS2N: Array[SpecS2N],
+                      st: SlitThroughput,
+                      aoSystem: Option[AOSystem],
+                      signalOrder: Array[VisitableSampledSpectrum],
+                      backGroundOrder: Array[VisitableSampledSpectrum],
+                      finalS2NOrder: Array[VisitableSampledSpectrum]) extends SpectroscopyResult
 
 object SpectroscopyResult {
 
+  def instance = this
+
   def apply(parameters: Parameters, instrument: Instrument, sfCalc: SourceFraction, iqCalc: ImageQualityCalculatable, specS2N: Array[SpecS2N], st: SlitThroughput) =
-    new SpectroscopyResult(parameters, instrument, sfCalc, iqCalc, specS2N, st, None)
+    new GenericSpectroscopyResult(parameters, instrument, sfCalc, iqCalc, specS2N, st, None)
 
 }
 
-/* Internal object for spectroscopy results. */
-final case class GnirsSpectroscopyResult(
-                                     parameters: Parameters,
-                                     instrument: Instrument,
-                                     sfCalc: SourceFraction,
-                                     iqCalc: ImageQualityCalculatable,
-                                     specS2N: Array[SpecS2N],
-                                     st: SlitThroughput,
-                                     signalOrder: Array[VisitableSampledSpectrum],
-                                     backGroundOrder: Array[VisitableSampledSpectrum],
-                                     finalS2NOrder: Array[VisitableSampledSpectrum]) {
-  val source      = parameters.source
-  val observation = parameters.observation
-  val telescope   = parameters.telescope
-  val conditions  = parameters.conditions
-}
