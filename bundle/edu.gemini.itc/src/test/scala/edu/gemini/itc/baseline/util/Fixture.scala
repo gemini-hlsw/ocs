@@ -118,7 +118,7 @@ object Fixture {
   lazy val RBandSources = List(
     new SourceDefinition(
       PointSource(20.0, BrightnessUnit.MAG),
-      LibraryStar("A0V"),
+      LibraryStar.findByName("A0V").get,
       WavebandDefinition.R,
       0.0
     ),
@@ -134,7 +134,7 @@ object Fixture {
   lazy val KBandSources = List(
     new SourceDefinition(
       PointSource(20.0, BrightnessUnit.MAG),
-      LibraryStar("A0V"),
+      LibraryStar.findByName("A0V").get,
       WavebandDefinition.K,
       0.0
     ),
@@ -150,7 +150,7 @@ object Fixture {
   lazy val NBandSources = List(
     new SourceDefinition(
       PointSource(9.0, BrightnessUnit.ABMAG),
-      LibraryNonStar("NGC1068"),
+      LibraryNonStar.findByName("ngc1068").get,
       WavebandDefinition.N,
       0.0
     ),

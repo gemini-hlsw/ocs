@@ -1,19 +1,28 @@
 package jsky.app.ot.editor.seq
 
+import java.awt.Color
 import javax.swing.BorderFactory
 
+import edu.gemini.itc.shared._
 import edu.gemini.pot.sp.SPComponentType
+import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.{CloudCover, ImageQuality, SkyBackground, WaterVapor}
 
+import scala.swing.GridBagPanel.{Anchor, Fill}
+import scala.swing.ListView.Renderer
 import scala.swing.ScrollPane.BarPolicy._
-import scala.swing.{Label, GridBagPanel, ScrollPane}
+import scala.swing._
+import scala.swing.event.{KeyEvent, SelectionChanged}
+
+import scalaz._
+import Scalaz._
 
 object ItcPanel {
 
   /** Creates a panel for ITC imaging results. */
-  def forImaging(owner: EdIteratorFolder)       = new ItcImagingPanel(owner, new ItcImagingTable(owner))
+  def forImaging(owner: EdIteratorFolder)       = new ItcImagingPanel(owner)
 
   /** Creates a panel for ITC spectroscopy results. */
-  def forSpectroscopy(owner: EdIteratorFolder)  = new ItcSpectroscopyPanel(owner, new ItcSpectroscopyTable(owner))
+  def forSpectroscopy(owner: EdIteratorFolder)  = new ItcSpectroscopyPanel(owner)
 
 }
 
@@ -21,13 +30,313 @@ object ItcPanel {
 sealed trait ItcPanel extends GridBagPanel {
   val owner: EdIteratorFolder
   val table: ItcTable
+
+  protected val currentConditions = new ConditionsPanel
+  protected val sourceDetails     = new SourcePanel
+
   def visibleFor(t: SPComponentType): Boolean
 
-  def update() = table.update()
+  def conditions() = currentConditions.conditions
+  def spectralDistribution() = sourceDetails.spectralDistribution
+  def spatialProfile(mag: Double) = sourceDetails.spatialProfile(mag)
+
+  def update() = {
+    currentConditions.update()
+    table.update()
+  }
+
+  // ==== Source edit TODO: This will migrate to the new source editor once it's ready.
+
+  class SourcePanel extends GridBagPanel {
+
+    /** Input field with a leading label and a tailing units string that turns red if current value is invalid. */
+    class InputField[A](labelStr: String, unitsStr: String, valueStr: A, convert: String => Option[A], columns: Int = 8)  {
+      val label = new Label(labelStr) { horizontalAlignment = Alignment.Left }
+      val units = new Label(unitsStr) { horizontalAlignment = Alignment.Left }
+      val text  = new TextField(valueStr.toString, columns) {
+        horizontalAlignment = Alignment.Right
+        listenTo(keys)
+        reactions += {
+          case e: KeyEvent => foreground = value.fold(Color.RED)(_ => Color.BLACK)
+        }
+      }
+
+      def value: Option[A] = try {
+          convert(text.text)
+        } catch {
+          case _: NumberFormatException => None
+        }
+
+    }
+
+    /** Details panel with a fixed size and a set of input fields. */
+    abstract class DetailsPanel extends GridBagPanel {
+      val LabelInsets = new Insets(5, 5, 5, 10)
+      val UnitsInsets = new Insets(5, 10, 5, 5)
+      val Size = new Dimension(300, 120)
+      preferredSize = Size
+      minimumSize = Size
+
+      def addField(label: String, value: Double, units: String, row: Int): InputField[Double] =
+        addField(label, value, d => Some(d.toDouble), units, row)
+
+      def addField[A](label: String, value: A, convert: String => Option[A], units: String, row: Int): InputField[A] = {
+        new InputField[A](label, units, value, convert) <| { f =>
+          layout(f.label) = new Constraints { gridx = 0; gridy = row; insets = LabelInsets; weightx = 1; fill = Fill.Horizontal }
+          layout(f.text)  = new Constraints { gridx = 1; gridy = row }
+          layout(f.units) = new Constraints { gridx = 2; gridy = row; insets = UnitsInsets; anchor = Anchor.West }
+        }
+      }
+    }
+    abstract class DistributionDetailsPanel extends DetailsPanel {
+      def spectralDistribution: Option[SpectralDistribution]
+    }
+    abstract class ProfileDetailsPanel extends DetailsPanel {
+      def spatialProfile(mag: Double): Option[SpatialProfile]
+    }
+
+    private val starDetails = new DistributionDetailsPanel {
+      val stars = new ComboBox[LibraryStar](LibraryStar.values) {
+        renderer = Renderer(_.sedSpectrum)
+      }
+      layout(stars) = new Constraints {
+        gridx   = 0
+        gridy   = 0
+        weightx = 1
+        fill    = Fill.Horizontal
+      }
+      def spectralDistribution = Some(stars.selection.item)
+    }
+    private val nonStarDetails = new DistributionDetailsPanel {
+      val nonStars = new ComboBox[LibraryNonStar](LibraryNonStar.values) {
+        renderer = Renderer(_.label)
+      }
+      layout(nonStars) = new Constraints {
+        gridx   = 0
+        gridy   = 0
+        weightx = 1
+        fill    = Fill.Horizontal
+      }
+      def spectralDistribution = Some(nonStars.selection.item)
+    }
+    private val bbodyDetails = new DistributionDetailsPanel {
+      val temperature = addField("Temperature:", 10000.0, "[K]", 0)
+      def spectralDistribution = temperature.value.map(BlackBody)
+    }
+    private val elineDetails = new DistributionDetailsPanel {
+      val wavelength  = addField("Wavelength:", 2.2,      "[µm]",       0)
+      val width       = addField("Width:",      150.0,    "[km/s]",     1)
+      val flux        = addField("Line Flux:",  5.0e-19,  "[W/m²]",     2)
+      val continuum   = addField("Continuum:",  1.0e-16,  "[W/m²/µm]",  3)
+      def spectralDistribution = for {
+        wl <- wavelength.value
+        wd <- width.value
+        fl <- flux.value
+        co <- continuum.value
+      } yield EmissionLine(wl, wd, fl, "watts_flux", co, "watts_fd_wavelength")
+    }
+    private val plawDetails = new DistributionDetailsPanel {
+      val index = addField("Index:", -1.0, "", 0)
+      def spectralDistribution = index.value.map(PowerLaw)
+    }
+
+    case class DistributionPanel(label: String, panel: DistributionDetailsPanel)
+    private val distributionPanels = List(
+      DistributionPanel("Library Star",     starDetails),
+      DistributionPanel("Library Non-Star", nonStarDetails),
+      DistributionPanel("Black Body",       bbodyDetails),
+      DistributionPanel("Emission Line",    elineDetails),
+      DistributionPanel("Power Law",        plawDetails)
+    )
+
+    private val distributions = new ComboBox[DistributionPanel](distributionPanels) {
+      renderer = Renderer(_.label)
+      listenTo(selection)
+      reactions += {
+        case SelectionChanged(_) =>
+          distributionPanels.foreach(_.panel.visible = false)
+          selection.item.panel.visible = true
+      }
+    }
+
+    case class ProfilePanel(label: String, panel: ProfileDetailsPanel)
+    private val pointSourceDetails = new ProfileDetailsPanel {
+      def spatialProfile(mag: Double): Option[SpatialProfile] = Some(PointSource(mag, BrightnessUnit.MAG))
+    }
+    private val gaussianSourceDetails = new ProfileDetailsPanel {
+      val fwhm = addField("FWHM:", 1.0, "[arcsec]", 0)
+      def spatialProfile(mag: Double): Option[SpatialProfile] = fwhm.value.map(GaussianSource(mag, BrightnessUnit.MAG, _))
+    }
+    private val uniformSourceDetails = new ProfileDetailsPanel {
+      def spatialProfile(mag: Double): Option[SpatialProfile] = Some(UniformSource(mag, BrightnessUnit.MAG))
+    }
+    private val profilePanels = List(
+      ProfilePanel("Point Source",             pointSourceDetails),
+      ProfilePanel("Extended Gaussian Source", gaussianSourceDetails),
+      ProfilePanel("Extended Uniform Source",  uniformSourceDetails)
+    )
+
+    private val profiles = new ComboBox[ProfilePanel](profilePanels) {
+      renderer = Renderer(_.label)
+      listenTo(selection)
+      reactions += {
+        case SelectionChanged(_) =>
+          profilePanels.foreach(_.panel.visible = false)
+          selection.item.panel.visible = true
+      }
+    }
+
+    // magnitude is known by source editor, we need to pass in the value from there
+    def spatialProfile(mag: Double) = profiles.selection.item.panel.spatialProfile(mag)
+
+    def spectralDistribution = distributions.selection.item.panel.spectralDistribution
+
+    border = BorderFactory.createEmptyBorder(10, 10, 10, 10)
+
+    layout(profiles) = new Constraints {
+      gridx   = 0
+      gridy   = 0
+      weightx = 0.5
+      fill    = Fill.Horizontal
+    }
+    layout(distributions) = new Constraints {
+      gridx   = 1
+      gridy   = 0
+      weightx = 0.5
+      fill    = Fill.Horizontal
+    }
+    // add all distribution panels in the same grid cell,
+    // the individual panels will be made visible/invisible as needed
+    profilePanels.foreach { p =>
+      layout(p.panel) = new Constraints {
+        gridx = 0
+        gridy = 1
+      }
+      p.panel.visible = false
+    }
+    profiles.selection.item.panel.visible = true
+
+    distributionPanels.foreach { p =>
+      layout(p.panel) = new Constraints {
+        gridx = 1
+        gridy = 1
+      }
+      p.panel.visible = false
+    }
+    distributions.selection.item.panel.visible = true
+
+
+    // reactions
+    listenTo(distributions.selection, profiles.selection)
+    reactions += {
+      case SelectionChanged(_) => table.update()
+    }
+
+  }
+
+  // ==== Conditions display and edit panels
+
+  class ConditionsPanel extends GridBagPanel {
+
+    private class ConditionCB[A](items: Seq[A], renderFunc: A => String) extends ComboBox[A](items) {
+      private var programValue = selection.item
+      tooltip  = "Select conditions for ITC calculations. Values different from program conditions are shown in red."
+      renderer = Renderer(renderFunc)
+      listenTo(selection)
+      reactions += {
+        case SelectionChanged(_) =>
+          foreground = color()
+          tooltip    = tt()
+      }
+
+      def sync(newValue: A) = {
+        if (programValue == selection.item) {
+          // if we are "in sync" with program value (i.e. the program value is currently selected), update it
+          deafTo(selection)
+          selection.item = newValue
+          listenTo(selection)
+        }
+        // set new program value and update coloring
+        programValue = newValue
+        foreground = color()
+        tooltip    = tt()
+      }
+
+      private def color() = if (inSync()) Color.BLACK else Color.RED
+
+      private def tt() = if (inSync()) "" else s"Program condition is ${renderFunc(programValue)}"
+
+      private def inSync() = programValue == selection.item
+
+    }
+
+    private val t  = new Label("Conditions:")
+    private val sb = new ConditionCB[SkyBackground]  (SkyBackground.values,                       _.displayValue())
+    private val cc = new ConditionCB[CloudCover]     (CloudCover.values.filterNot(_.isObsolete),  _.displayValue())
+    private val iq = new ConditionCB[ImageQuality]   (ImageQuality.values,                        _.displayValue())
+    private val wv = new ConditionCB[WaterVapor]     (WaterVapor.values,                          _.displayValue())
+    private val am = new ConditionCB[Double]         (List(1.0, 1.5, 2.0),                        d => f"Airmass $d%.1f")
+
+    def conditions = new ObservingConditions(
+      iq.selection.item,
+      cc.selection.item,
+      wv.selection.item,
+      sb.selection.item,
+      am.selection.item)
+
+    def update() = {
+      // Note: site quality node can be missing (i.e. null)
+      Option(owner.getContextSiteQuality).foreach { qual =>
+        sb.sync(qual.getSkyBackground)
+        cc.sync(qual.getCloudCover)
+        iq.sync(qual.getImageQuality)
+        wv.sync(qual.getWaterVapor)
+        // TODO: currently the airmass program value is fixed to 1.5am; get this value from constraints?
+        am.sync(1.5)
+        // TODO: update necessary??
+      }
+    }
+
+    border = BorderFactory.createEmptyBorder(10, 10, 10, 10)
+
+    layout(t)  = new Constraints {
+      gridx   = 0
+      gridy   = 0
+    }
+    layout(sb) = new Constraints {
+      gridx   = 1
+      gridy   = 0
+    }
+    layout(cc) = new Constraints {
+      gridx   = 2
+      gridy   = 0
+    }
+    layout(iq) = new Constraints {
+      gridx   = 3
+      gridy   = 0
+    }
+    layout(wv) = new Constraints {
+      gridx   = 4
+      gridy   = 0
+    }
+    layout(am) = new Constraints {
+      gridx   = 5
+      gridy   = 0
+    }
+
+    listenTo(sb.selection, cc.selection, iq.selection, wv.selection, am.selection)
+    reactions += {
+      case SelectionChanged(_) => table.update()
+    }
+
+  }
+
 }
 
 /** Panel holding the ITC imaging calculation result table. */
-class ItcImagingPanel(val owner: EdIteratorFolder, val table: ItcImagingTable) extends ItcPanel {
+class ItcImagingPanel(val owner: EdIteratorFolder) extends ItcPanel {
+
+  val table = new ItcImagingTable(ItcParametersProvider(owner, this))
 
   border = BorderFactory.createEmptyBorder(10, 10, 10, 10)
 
@@ -36,11 +345,20 @@ class ItcImagingPanel(val owner: EdIteratorFolder, val table: ItcImagingTable) e
     horizontalScrollBarPolicy = AsNeeded
   }
 
-  layout(scrollPane) = new Constraints {
+  layout(currentConditions) = new Constraints {
     gridx = 0
     gridy = 0
+  }
+  layout(sourceDetails) = new Constraints {
+    gridx = 1
+    gridy = 0
+  }
+  layout(scrollPane) = new Constraints {
+    gridx = 0
+    gridy = 1
     weightx = 1
     weighty = 1
+    gridwidth = 2
     fill = GridBagPanel.Fill.Both
   }
 
@@ -59,12 +377,14 @@ class ItcImagingPanel(val owner: EdIteratorFolder, val table: ItcImagingTable) e
 }
 
 /** Panel holding the ITC spectroscopy calculation result table and charts. */
-class ItcSpectroscopyPanel(val owner: EdIteratorFolder, val table: ItcSpectroscopyTable) extends ItcPanel {
+class ItcSpectroscopyPanel(val owner: EdIteratorFolder) extends ItcPanel {
+
+  val table = new ItcSpectroscopyTable(ItcParametersProvider(owner, this))
 
   border = BorderFactory.createEmptyBorder(10, 10, 10, 10)
 
   private val scrollPane = new ScrollPane(table) {
-    verticalScrollBarPolicy = AsNeeded
+    verticalScrollBarPolicy   = AsNeeded
     horizontalScrollBarPolicy = AsNeeded
   }
 
@@ -113,3 +433,4 @@ private class ItcChartsPanel extends GridBagPanel {
     fill    = GridBagPanel.Fill.Both
   }
 }
+
