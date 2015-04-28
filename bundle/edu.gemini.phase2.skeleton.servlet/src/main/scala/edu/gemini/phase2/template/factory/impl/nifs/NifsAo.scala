@@ -38,23 +38,23 @@ case class NifsAo(blueprint: SpNifsBlueprintAo, exampleTarget: Option[SPTarget])
 
   val (acq, sci) = if (!occultingDisk.isOccultingDisk) {
     (tb.collect {
-      case BT => 3
-      case MT => 4
-      case FT => 5
-    }.getOrElse(4),
+      case BT => List(3)
+      case MT => List(4)
+      case FT => List(5)
+    }.getOrElse(List(3,4,5)),
       6)
   } else {
     (tb.collect {
-      case BT => 11
-      case MT => 12
-      case FT => 12
-    }.getOrElse(12),
+      case BT => List(11)
+      case MT => List(12)
+      case FT => List(12)
+    }.getOrElse(List(11, 12)),
       13)
   }
 
   // ### Target Group
   // INCLUDE {1},{2},ACQ,SCI,{7},{8} in target-specific Scheduling Group
-  include(1, 2, sci, acq, 7, 8) in TargetGroup
+  include(List(1, 2, sci) ++ acq ++ List(7, 8): _*) in TargetGroup
 
   // # AO Mode
   // # In NGS mode target and standards use the same Altair guide mode.
@@ -95,14 +95,14 @@ case class NifsAo(blueprint: SpNifsBlueprintAo, exampleTarget: Option[SPTarget])
           addAltair(m))
 
       if (m.isLGS) {
-        forObs(sci, acq)(addAltair(m))
+        forObs(sci :: acq : _*)(addAltair(m))
         forObs(1, 2, 7, 8)(
           addAltair(NGS_FL))
       }
 
       if (occultingDisk.isOccultingDisk) {
         forGroup(TargetGroup)(
-          setFpmWithAcq(acq, occultingDisk))
+          setFpmWithAcq(acq, occultingDisk)) // hmm
       }
 
   }

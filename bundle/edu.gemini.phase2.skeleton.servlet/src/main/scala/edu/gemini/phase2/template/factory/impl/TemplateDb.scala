@@ -38,15 +38,16 @@ object TemplateDb {
     "VISITOR_BP.xml"
   ).map(PATH + _).map(classOf[TemplateDb].getResource)
 
-  def load(user: java.util.Set[Principal]):Either[String, TemplateDb] = {
+  def load(user: java.util.Set[Principal], filter: URL => Boolean = Function.const(true)):Either[String, TemplateDb] = {
     val odb = DBLocalDatabase.createTransient
-    val res = XMLS.mapM { url =>
+    val res = XMLS.filter(filter).mapM { url =>
       LOG.info(s"Loading $url")
       parse(odb)(url)
     }
     res.right foreach { _.foreach(odb.put) }
     res.right map { _ => new TemplateDb(odb, user) }
   }
+
 
   //  private def loadTemplates(odb:IDBDatabaseService):Either[String, List[ISPProgram]] = {
   //    val empty:Either[String, List[ISPProgram]] = Right(Nil)
