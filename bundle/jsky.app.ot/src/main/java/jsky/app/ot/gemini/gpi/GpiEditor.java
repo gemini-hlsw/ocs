@@ -258,7 +258,7 @@ public class GpiEditor extends ComponentEditor<ISPObsComponent, Gpi> implements 
         }
     }
 
-    // Updates the value of the useCal if it changes
+    // Updates the value of the useCal/useAo/noFpmPinhole/aoOptimize if it changes
     private final class UseLoopListener implements PropertyChangeListener {
         private final CheckboxPropertyCtrl<Gpi> ctrl;
 
@@ -322,6 +322,11 @@ public class GpiEditor extends ComponentEditor<ISPObsComponent, Gpi> implements 
     private final CheckboxPropertyCtrl<Gpi> useCalCtrl;
     private final UseLoopListener useCalUpdater;
     private final UseLoopListener useAoUpdater;
+
+    private final CheckboxPropertyCtrl<Gpi> aoOptimizeCtrl;
+    private final CheckboxPropertyCtrl<Gpi> noFpmPinholeCtrl;
+    private final UseLoopListener aoOptimizeUpdater;
+    private final UseLoopListener noFpmPinholeUpdater;
 
     private static final int halfWidth     = 3;
 
@@ -472,6 +477,12 @@ public class GpiEditor extends ComponentEditor<ISPObsComponent, Gpi> implements 
 
         useCalCtrl = new CheckboxPropertyCtrl<>(Gpi.USE_CAL_PROP);
         useCalUpdater = new UseLoopListener(useCalCtrl);
+
+        aoOptimizeCtrl = new CheckboxPropertyCtrl<>(Gpi.AO_OPTIMIZE_PROP);
+        aoOptimizeUpdater = new UseLoopListener(aoOptimizeCtrl);
+
+        noFpmPinholeCtrl = new CheckboxPropertyCtrl<>(Gpi.ALIGN_FPM_PINHOLE_BIAS_PROP);
+        noFpmPinholeUpdater = new UseLoopListener(noFpmPinholeCtrl);
     }
 
     @Override
@@ -526,6 +537,9 @@ public class GpiEditor extends ComponentEditor<ISPObsComponent, Gpi> implements 
 
         pan.add(useAoCtrl.getComponent(), propWidgetGbc(leftWidgetCol, row++, 3, 1));
         pan.add(useCalCtrl.getComponent(), propWidgetGbc(leftWidgetCol, row++, 3, 1));
+
+        pan.add(aoOptimizeCtrl.getComponent(), propWidgetGbc(leftWidgetCol, row++, 3, 1));
+        pan.add(noFpmPinholeCtrl.getComponent(), propWidgetGbc(leftWidgetCol, row++, 3, 1));
 
         // filler
         final int finalRow = row;
@@ -629,5 +643,10 @@ public class GpiEditor extends ComponentEditor<ISPObsComponent, Gpi> implements 
         inst.addPropertyChangeListener(Gpi.USE_CAL_PROP.getName(), useCalUpdater);
         inst.addPropertyChangeListener(Gpi.USE_AO_PROP.getName(), useAoUpdater);
         useCalCtrl.setBean(inst);
+
+        aoOptimizeCtrl.setBean(inst);
+        noFpmPinholeCtrl.setBean(inst);
+        inst.addPropertyChangeListener(Gpi.AO_OPTIMIZE_PROP.getName(), aoOptimizeUpdater);
+        inst.addPropertyChangeListener(Gpi.ALIGN_FPM_PINHOLE_BIAS_PROP.getName(), noFpmPinholeUpdater);
     }
 }
