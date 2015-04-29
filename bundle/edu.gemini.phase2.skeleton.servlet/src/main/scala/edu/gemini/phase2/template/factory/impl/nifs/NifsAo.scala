@@ -18,6 +18,9 @@ case class NifsAo(blueprint: SpNifsBlueprintAo, exampleTarget: Option[SPTarget])
 
   val tb = exampleTarget.flatMap(t => Option(t.getTarget.getMagnitude(Band.H).getOrNull)).map(_.getBrightness).map(TargetBrightness(_))
 
+  if (tb.isEmpty)
+    addNote("foo") in TargetGroup
+
   // # Select acquisition and science observation
   // IF OCCULTING DISK == None
   //    IF target information contains a H magnitude

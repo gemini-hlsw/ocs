@@ -14,6 +14,9 @@ case class Nifs(blueprint:SpNifsBlueprint, exampleTarget: Option[SPTarget]) exte
 
   val tb = exampleTarget.flatMap(t => Option(t.getTarget.getMagnitude(Band.H).getOrNull)).map(_.getBrightness).map(TargetBrightness(_))
 
+  if (tb.isEmpty)
+    addNote("foo") in TargetGroup
+
   // # Select acquisition and science observation
   //    IF target information contains a H magnitude
   //       if BT then ACQ={3}   # Bright Object
