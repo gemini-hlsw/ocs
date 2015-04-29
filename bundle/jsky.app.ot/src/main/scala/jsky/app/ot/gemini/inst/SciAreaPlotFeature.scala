@@ -102,14 +102,14 @@ class SciAreaPlotFeature(sciArea: ScienceAreaGeometry)
   var dragPos: Option[(Int, Int)] = None
 
   override def dragStart(tme: TpeMouseEvent, tii: TpeImageInfo): JOption[Object] = {
-    dragPos = if (isMouseOver(tme)) Some(tme.xWidget, tme.yWidget) else None
+    dragPos = if (isMouseOver(tme)) Some((tme.xWidget, tme.yWidget)) else None
     // nearly useless return value
     dragPos.as(new Object).asGeminiOpt
   }
 
   override def drag(tme: TpeMouseEvent): Unit =
     dragPos.foreach { _ =>
-      dragPos = Some(tme.xWidget, tme.yWidget)
+      dragPos = Some((tme.xWidget, tme.yWidget))
       _iw.setPosAngle(Math.round(_tii.positionAngle(tme).toDegrees))
       _iw.repaint();
     }

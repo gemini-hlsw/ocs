@@ -1,6 +1,6 @@
 package edu.gemini.spModel.inst
 
-import java.awt.geom.{Area, Rectangle2D, Point2D, AffineTransform}
+import java.awt.geom.{Point2D, AffineTransform}
 
 import edu.gemini.pot.ModelConverters._
 import edu.gemini.skycalc.{Offset => SkyCalcOffset}
