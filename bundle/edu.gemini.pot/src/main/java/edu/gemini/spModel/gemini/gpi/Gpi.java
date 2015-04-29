@@ -1107,7 +1107,7 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
     public static final boolean DEFAULT_USE_AO = true;
     public static final boolean DEFAULT_USE_CAL = true;
     public static final boolean DEFAULT_AO_OPTIMIZE = true;
-    public static final boolean DEFAULT_NO_FPM_PINHOLE = true;
+    public static final boolean DEFAULT_ALIGN_FPM_PINHOLE_BIAS = false;
 
     // OT-95: overhead times for single or multiple changes in a sequence
     public static final double SINGLE_CHANGE_OVERHEAD_SECS = 30;
@@ -1196,7 +1196,7 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
     public static final PropertyDescriptor USE_CAL_PROP;
 
     public static final PropertyDescriptor AO_OPTIMIZE_PROP;
-    public static final PropertyDescriptor NO_FPM_PINHOLE_PROP;
+    public static final PropertyDescriptor ALIGN_FPM_PINHOLE_BIAS_PROP;
 
     public static final String MAG_H_PROP = "magH";
     public static final String MAG_I_PROP = "magI";
@@ -1309,10 +1309,10 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
                 query_no, iter_no);
         AO_OPTIMIZE_PROP.setExpert(true);
 
-        NO_FPM_PINHOLE_PROP = initProp("noFpmPinhole",
-                "No FPM/Pinhole",
+        ALIGN_FPM_PINHOLE_BIAS_PROP = initProp("alignFpmPinholeBias",
+                "Align FPM/Pinhole/Bias",
                 query_no, iter_no);
-        NO_FPM_PINHOLE_PROP.setExpert(true);
+        ALIGN_FPM_PINHOLE_BIAS_PROP.setExpert(true);
 
     }
 
@@ -1357,9 +1357,9 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
     // OT-136 useAo and useCal
     private boolean _useAo = DEFAULT_USE_AO;
     private boolean _useCal = DEFAULT_USE_CAL;
-    // REL-2012 Ao Optimize and No FPM/Pinhole
+    // REL-2012 Ao Optimize and Align FPM/Pinhole/Bias
     private boolean _aoOptimize = DEFAULT_AO_OPTIMIZE;
-    private boolean _noFpmPinhole = DEFAULT_NO_FPM_PINHOLE;
+    private boolean _alignFpmPinholeBias = DEFAULT_ALIGN_FPM_PINHOLE_BIAS;
 
     public Gpi() {
         super(SP_TYPE);
@@ -1955,15 +1955,15 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
         }
     }
 
-    public boolean isNoFpmPinhole() {
-        return _noFpmPinhole;
+    public boolean isAlignFpmPinholeBias() {
+        return _alignFpmPinholeBias;
     }
 
-    public void setNoFpmPinhole(boolean newValue) {
-        boolean oldValue = isNoFpmPinhole();
+    public void setAlignFpmPinholeBias(boolean newValue) {
+        boolean oldValue = isAlignFpmPinholeBias();
         if (oldValue != newValue) {
-            _noFpmPinhole = newValue;
-            firePropertyChange(NO_FPM_PINHOLE_PROP, oldValue, newValue);
+            _alignFpmPinholeBias = newValue;
+            firePropertyChange(ALIGN_FPM_PINHOLE_BIAS_PROP, oldValue, newValue);
         }
     }
 
@@ -2026,7 +2026,7 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
         Pio.addParam(factory, paramSet, USE_AO_PROP, String.valueOf(isUseAo()));
         Pio.addParam(factory, paramSet, USE_CAL_PROP, String.valueOf(isUseCal()));
         Pio.addParam(factory, paramSet, AO_OPTIMIZE_PROP, String.valueOf(isAoOptimize()));
-        Pio.addParam(factory, paramSet, NO_FPM_PINHOLE_PROP, String.valueOf(isNoFpmPinhole()));
+        Pio.addParam(factory, paramSet, ALIGN_FPM_PINHOLE_BIAS_PROP, String.valueOf(isAlignFpmPinholeBias()));
 
         return paramSet;
     }
@@ -2125,8 +2125,8 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
                 DEFAULT_USE_CAL));
         setAoOptimize(Pio.getBooleanValue(paramSet, AO_OPTIMIZE_PROP.getName(),
                 DEFAULT_AO_OPTIMIZE));
-        setNoFpmPinhole(Pio.getBooleanValue(paramSet, NO_FPM_PINHOLE_PROP.getName(),
-                DEFAULT_NO_FPM_PINHOLE));
+        setAlignFpmPinholeBias(Pio.getBooleanValue(paramSet, ALIGN_FPM_PINHOLE_BIAS_PROP.getName(),
+                DEFAULT_ALIGN_FPM_PINHOLE_BIAS));
     }
 
     /**
@@ -2182,7 +2182,7 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
         sc.putParameter(DefaultParameter.getInstance(USE_AO_PROP, isUseAo()));
         sc.putParameter(DefaultParameter.getInstance(USE_CAL_PROP, isUseCal()));
         sc.putParameter(DefaultParameter.getInstance(AO_OPTIMIZE_PROP, isAoOptimize()));
-        sc.putParameter(DefaultParameter.getInstance(NO_FPM_PINHOLE_PROP, isNoFpmPinhole()));
+        sc.putParameter(DefaultParameter.getInstance(ALIGN_FPM_PINHOLE_BIAS_PROP, isAlignFpmPinholeBias()));
 
         return sc;
     }

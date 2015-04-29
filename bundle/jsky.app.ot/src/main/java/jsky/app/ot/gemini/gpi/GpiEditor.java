@@ -481,7 +481,7 @@ public class GpiEditor extends ComponentEditor<ISPObsComponent, Gpi> implements 
         aoOptimizeCtrl = new CheckboxPropertyCtrl<>(Gpi.AO_OPTIMIZE_PROP);
         aoOptimizeUpdater = new UseLoopListener(aoOptimizeCtrl);
 
-        noFpmPinholeCtrl = new CheckboxPropertyCtrl<>(Gpi.NO_FPM_PINHOLE_PROP);
+        noFpmPinholeCtrl = new CheckboxPropertyCtrl<>(Gpi.ALIGN_FPM_PINHOLE_BIAS_PROP);
         noFpmPinholeUpdater = new UseLoopListener(noFpmPinholeCtrl);
     }
 
@@ -647,6 +647,6 @@ public class GpiEditor extends ComponentEditor<ISPObsComponent, Gpi> implements 
         aoOptimizeCtrl.setBean(inst);
         noFpmPinholeCtrl.setBean(inst);
         inst.addPropertyChangeListener(Gpi.AO_OPTIMIZE_PROP.getName(), aoOptimizeUpdater);
-        inst.addPropertyChangeListener(Gpi.NO_FPM_PINHOLE_PROP.getName(), noFpmPinholeUpdater);
+        inst.addPropertyChangeListener(Gpi.ALIGN_FPM_PINHOLE_BIAS_PROP.getName(), noFpmPinholeUpdater);
     }
 }
