@@ -3,7 +3,6 @@ package jsky.app.ot.tpe.gems;
 import edu.gemini.ags.gems.GemsGuideStarSearchOptions.*;
 import edu.gemini.ags.gems.GemsCatalogSearchResults;
 import edu.gemini.ags.gems.GemsGuideStars;
-import jsky.catalog.TableQueryResult;
 
 import java.util.List;
 
@@ -13,12 +12,6 @@ import java.util.List;
 class GemsGuideStarSearchModel {
 
     private CatalogChoice _catalog;
-
-    // If _catalog is USER_CATALOG, this is the file name for the local catalog
-    private String _userCatalogFileName;
-
-    // If _catalog is USER_CATALOG, this is the local catalog
-    private TableQueryResult _userCatalog;
 
     private NirBandChoice _band;
     private AnalyseChoice _analyseChoice;
@@ -33,18 +26,6 @@ class GemsGuideStarSearchModel {
 
     public void setCatalog(CatalogChoice catalog) {
         _catalog = catalog;
-    }
-
-    public void setUserCatalogFileName(String userCatalogFileName) {
-        _userCatalogFileName = userCatalogFileName;
-    }
-
-    public TableQueryResult getUserCatalog() {
-        return _userCatalog;
-    }
-
-    public void setUserCatalog(TableQueryResult userCatalog) {
-        _userCatalog = userCatalog;
     }
 
     public NirBandChoice getBand() {

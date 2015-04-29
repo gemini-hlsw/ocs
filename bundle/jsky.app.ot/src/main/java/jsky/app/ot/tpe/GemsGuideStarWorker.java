@@ -208,7 +208,7 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
      *
      * @return catalog search results
      */
-    public List<GemsCatalogSearchResults> search(GemsTipTiltMode tipTiltMode,
+    public List<GemsCatalogSearchResults> search(GemsGuideStarSearchOptions.CatalogChoice catalog, GemsTipTiltMode tipTiltMode,
                                                  ObsContext obsContext, Set<edu.gemini.spModel.core.Angle> posAngles,
                                                  scala.Option<MagnitudeBand> nirBand) throws Exception {
         try {
@@ -224,7 +224,7 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
             GemsInstrument instrument = inst instanceof Flamingos2 ? GemsInstrument.flamingos2 : GemsInstrument.gsaoi;
             GemsGuideStarSearchOptions options = new GemsGuideStarSearchOptions(instrument, tipTiltMode, posAngles);
 
-            List<GemsCatalogSearchResults> results = new GemsVoTableCatalog(RemoteBackend.instance()).search4Java(obsContext, ModelConverters.toCoordinates(base), options, nirBand, statusLogger, 30);
+            List<GemsCatalogSearchResults> results = new GemsVoTableCatalog(RemoteBackend.instance(), catalog.catalog()).search4Java(obsContext, ModelConverters.toCoordinates(base), options, nirBand, statusLogger, 30);
             if (interrupted) {
                 throw new CancellationException("Canceled");
             }
@@ -249,7 +249,7 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
 //        List<GemsCatalogSearchResults> results = search(GemsGuideStarSearchOptions.DEFAULT_CATALOG,
 //                GemsGuideStarSearchOptions.DEFAULT_CATALOG, GemsTipTiltMode.both, obsContext, posAngles,
 //                None.<Magnitude.Band>instance());
-        List<GemsCatalogSearchResults> results = search(GemsTipTiltMode.canopus, obsContext, posAngles,
+        List<GemsCatalogSearchResults> results = search(GemsGuideStarSearchOptions.DEFAULT, GemsTipTiltMode.canopus, obsContext, posAngles,
                 scala.Option.<MagnitudeBand>empty());
         return findGuideStars(obsContext, posAngles, results);
     }

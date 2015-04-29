@@ -1,5 +1,8 @@
 package edu.gemini.ags.gems;
 
+import edu.gemini.catalog.api.CatalogName;
+import edu.gemini.catalog.api.ppmxl$;
+import edu.gemini.catalog.api.ucac4$;
 import edu.gemini.catalog.api.MagnitudeConstraints;
 import edu.gemini.spModel.core.Angle;
 import edu.gemini.spModel.core.MagnitudeBand;
@@ -22,11 +25,10 @@ import java.util.*;
 public class GemsGuideStarSearchOptions {
 
     public enum CatalogChoice {
-        PPMXL_CDS("PPMXL@CDS", "PPMXL at CDS"),
-        UCAC3_CDS("UCAC3@CDS", "UCAC3 at CDS"),
+        PPMXL_GEMINI("PPMXL@Gemini", "PPMXL at Gemini"),
         UCAC4_GEMINI("UCAC4", "UCAC4 at Gemini"),
-        NOMAD1_CDS("NOMAD1@CDS", "NOMAD1 at CDS"),
-        USER_CATALOG("user", "User Catalog"),
+        //NOMAD1_CDS("NOMAD1@CDS", "NOMAD1 at CDS"),
+        //USER_CATALOG("user", "User Catalog"),
         ;
 
         public static CatalogChoice DEFAULT = UCAC4_GEMINI;
@@ -41,6 +43,14 @@ public class GemsGuideStarSearchOptions {
 
         public String displayValue() {
             return _displayValue;
+        }
+
+        public CatalogName catalog() {
+            if (this == PPMXL_GEMINI) {
+                return ppmxl$.MODULE$;
+            } else {
+                return ucac4$.MODULE$;
+            }
         }
 
         public String catalogName() {
@@ -113,6 +123,7 @@ public class GemsGuideStarSearchOptions {
     private final GemsInstrument instrument;
     private final GemsTipTiltMode tipTiltMode;
     private final Set<Angle> posAngles;
+    public static final CatalogChoice DEFAULT = CatalogChoice.DEFAULT;
 
     public GemsGuideStarSearchOptions(final GemsInstrument instrument,
                                       final GemsTipTiltMode tipTiltMode, final Set<Angle> posAngles) {
