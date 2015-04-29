@@ -3,8 +3,8 @@ package edu.gemini.ags.gems
 import edu.gemini.catalog.api.MagnitudeConstraints
 import edu.gemini.pot.ModelConverters._
 import edu.gemini.shared.util.immutable.ScalaConverters._
-import edu.gemini.ags.api.defaultProbeBands
-import edu.gemini.shared.skyobject.Magnitude
+import edu.gemini.shared.util.immutable.{Option => JOption}
+import edu.gemini.ags.api._
 import edu.gemini.spModel.core.Target.SiderealTarget
 import edu.gemini.spModel.core._
 import edu.gemini.spModel.gemini.gems.Canopus
@@ -12,6 +12,7 @@ import edu.gemini.spModel.guide.GuideProbe
 import edu.gemini.spModel.target.SPTarget
 import edu.gemini.shared.skyobject
 import edu.gemini.skycalc
+import edu.gemini.spModel.target.env.GuideProbeTargets
 import edu.gemini.spModel.target.system.{ITarget, HmsDegTarget}
 import scala.collection.JavaConverters._
 
@@ -22,6 +23,22 @@ import Scalaz._
  * Utility methods for Java classes to access scala classes/methods
  */
 object GemsUtils4Java {
+  // by value only
+  implicit val MagnitudeValueOrdering: scala.math.Ordering[Magnitude] =
+    scala.math.Ordering.by(_.value)
+
+  // comparison on Option[Magnitude] that reverses the way that None is treated, i.e. None is always > Some(Magnitude).
+  // Comparison of RLike bands is done by value alone
+  val MagnitudeOptionOrdering: scala.math.Ordering[Option[Magnitude]] = new scala.math.Ordering[Option[Magnitude]] {
+    override def compare(x: Option[Magnitude], y: Option[Magnitude]): Int = (x,y) match {
+      case (Some(m1), Some(m2)) if List(m1.band, m2.band).forall(RLikeBands.contains) => MagnitudeValueOrdering.compare(m1, m2)
+      case (Some(m1), Some(m2))                                                       => Magnitude.MagnitudeOrdering.compare(m1, m2) // Magnitude.MagnitudeOrdering is probably incorrect, you cannot sort on different bunds
+      case (None,     None)                                                           => 0
+      case (_,        None)                                                           => -1
+      case (None,     _)                                                              => 1
+    }
+  }
+
   // Returns true if the target magnitude is within the given limits
   def containsMagnitudeInLimits(target: SiderealTarget, magLimits: MagnitudeConstraints): Boolean =
     target.magnitudeIn(magLimits.band).map(m => magLimits.contains(m)).getOrElse(true)
@@ -29,8 +46,25 @@ object GemsUtils4Java {
   /**
    * Sorts the targets list, putting the brightest stars first and returns the sorted array.
    */
-  def sortTargetsByBrightness(targetsList: java.util.List[SiderealTarget]): java.util.List[SiderealTarget] =
-    targetsList.asScala.sortBy(_.magnitudeIn(MagnitudeBand.R)).asJava
+  def sortTargetsByBrightness(targetsList: java.util.List[SiderealTarget]): java.util.List[SiderealTarget] = {
+    val magnitudeExtractor: MagnitudeExtractor = (st) => RLikeBands.flatMap(st.magnitudeIn).headOption
+    targetsList.asScala.sortBy(magnitudeExtractor(_))(MagnitudeOptionOrdering).asJava
+  }
+
+  /**
+   * Find on the guide probe's primary target the value of the R-like magnitude
+   */
+  def getRLikeMagnitude(gp: JOption[GuideProbeTargets], invalidMagnitude: Double): Double = {
+    def magnitudeExtractor(t: SPTarget): Option[Magnitude] = {
+      RLikeBands.flatMap(b => t.getTarget.getMagnitude(b.toOldModel).asScalaOpt.map(_.toNewModel)).headOption
+    }
+    val r = for {
+      g <- gp.asScalaOpt
+      p <- g.getPrimary.asScalaOpt
+      m <- magnitudeExtractor(p)
+    } yield m.value
+    r.getOrElse(invalidMagnitude)
+  }
 
   /**
    * Returns a list of unique targets in the given search results.
@@ -43,7 +77,7 @@ object GemsUtils4Java {
   /**
    * Outputs the target magnitudes used by the Asterism table on the Manual Search for GEMS
    */
-  def probeMagnitudeInUse(guideProbe: GuideProbe, referenceBand: Magnitude.Band, target: ITarget): String = {
+  def probeMagnitudeInUse(guideProbe: GuideProbe, referenceBand: skyobject.Magnitude.Band, target: ITarget): String = {
     val availableMagnitudes = target.getMagnitudes.asScalaList.map(_.toNewModel)
     val probeBand = if (Canopus.Wfs.Group.instance.getMembers.contains(guideProbe)) {
         MagnitudeBand.R

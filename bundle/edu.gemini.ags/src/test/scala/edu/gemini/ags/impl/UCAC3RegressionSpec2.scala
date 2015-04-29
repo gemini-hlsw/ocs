@@ -1,42 +1,33 @@
 package edu.gemini.ags.impl
 
 import edu.gemini.ags.gems._
-import edu.gemini.ags.gems.mascot.{MascotCat, Mascot}
-import edu.gemini.catalog.api.MagnitudeLimits.FaintnessLimit
 import edu.gemini.catalog.api._
 import edu.gemini.spModel.core._
 import edu.gemini.spModel.core.Target.SiderealTarget
-import edu.gemini.spModel.target.system.CoordinateParam
 
-import edu.gemini.spModel.gemini.gems.{GemsInstrument, Gems, Canopus}
-import edu.gemini.spModel.gemini.gsaoi.{Gsaoi, GsaoiOdgw}
+import edu.gemini.spModel.gemini.gems.Canopus
+import edu.gemini.spModel.gemini.gsaoi.GsaoiOdgw
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.{SkyBackground, WaterVapor}
 import edu.gemini.spModel.gems.GemsGuideStarType
-import edu.gemini.spModel.guide.GuideProbe
-import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.target.SPTarget
-import edu.gemini.spModel.target.env.{GuideProbeTargets, GuideGroup, TargetEnvironment}
-import jsky.coords.WorldCoords
+import edu.gemini.spModel.target.env.GuideGroup
 import org.specs2.mutable.Specification
 import edu.gemini.spModel.core.AngleSyntax._
 
-import edu.gemini.shared.skyobject.{Magnitude => JMagnitude}
-
-import scala.collection.JavaConverters._
 import edu.gemini.shared.util.immutable.ScalaConverters._
-import edu.gemini.shared.util.immutable.{None => JNone, Some => JSome}
-import edu.gemini.pot.ModelConverters._
+import edu.gemini.shared.util.immutable.{None => JNone}
 
 class UCAC3RegressionSpec2 extends Specification with UCAC3Regression {
+  val conditions = SPSiteQuality.Conditions.NOMINAL.wv(WaterVapor.ANY).sb(SkyBackground.ANY)
+
   "Gems Analyze" should {
     "work with legacy UCAC3 values in best conditions for TYC 8345-1155-1" in {
-      val conditions = SPSiteQuality.Conditions.NOMINAL.wv(WaterVapor.ANY).sb(SkyBackground.ANY)
       runAnalysis("17:25:27.529", "-48:27:24.02", conditions, tipTiltCriterion, flexureCriterion, tipTiltTargets, flexureTargets, expectedGuideStars) should beTrue
     }
     "work with legacy UCAC3 values in best conditions for TYC 8345-1155-1 with random R-like bands" in {
-      val conditions = SPSiteQuality.Conditions.NOMINAL.wv(WaterVapor.ANY).sb(SkyBackground.ANY)
-      runAnalysis("17:25:27.529", "-48:27:24.02", conditions, tipTiltCriterion, flexureCriterion, replaceRBands(tipTiltTargets), replaceRBands(flexureTargets), expectedGuideStars) should beTrue
+      val replacedTargets = replaceRBands(tipTiltTargets, flexureTargets)
+      runAnalysis("17:25:27.529", "-48:27:24.02", conditions, tipTiltCriterion, flexureCriterion, replacedTargets._1, replacedTargets._2, expectedGuideStars) should beTrue
     }.pendingUntilFixed
   }
 

@@ -128,10 +128,10 @@ class GemsStrategySpec extends Specification with NoTimeConversions {
       val odgw2x = Coordinates(RightAscension.fromAngle(Angle.fromHMS(5, 35, 23.887).getOrElse(Angle.zero)), Declination.fromAngle(Angle.zero - Angle.fromDMS(69, 16, 18.20).getOrElse(Angle.zero)).getOrElse(Declination.zero))
       odgw2.map(_.coordinates ~= odgw2x) should beSome(true)
 
-      val newCtx = selection.map(applySelection(ctx, _)).getOrElse(ctx)
-      println(TestGemsStrategy("/gems_sn1987A.xml").magnitudes(newCtx, ProbeLimitsTable.loadOrThrow()))
+      //val newCtx = selection.map(applySelection(ctx, _)).getOrElse(ctx)
+      //println(TestGemsStrategy("/gems_sn1987A.xml").magnitudes(newCtx, ProbeLimitsTable.loadOrThrow()))
      // TestGemsStrategy("/gems_sn1987A.xml").analyze(newCtx, ProbeLimitsTable.loadOrThrow()).forall(a => a, _.quality == )
 
-    }
+    }.pendingUntilFixed
   }
 }

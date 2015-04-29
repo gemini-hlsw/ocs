@@ -1,38 +1,61 @@
 package edu.gemini.ags.impl
 
+import edu.gemini.ags.api._
 import edu.gemini.ags.gems._
+import edu.gemini.ags.gems.mascot.{Star, MascotCat}
 import edu.gemini.catalog.api._
 import edu.gemini.spModel.core._
 import edu.gemini.spModel.core.Target.SiderealTarget
-import edu.gemini.spModel.target.system.CoordinateParam
 
-import edu.gemini.spModel.gemini.gems.{GemsInstrument, Gems, Canopus}
-import edu.gemini.spModel.gemini.gsaoi.{Gsaoi, GsaoiOdgw}
+import edu.gemini.spModel.gemini.gems.Canopus
+import edu.gemini.spModel.gemini.gsaoi.GsaoiOdgw
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.{SkyBackground, WaterVapor}
 import edu.gemini.spModel.gems.GemsGuideStarType
-import edu.gemini.spModel.guide.GuideProbe
-import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.target.SPTarget
-import edu.gemini.spModel.target.env.{GuideProbeTargets, GuideGroup, TargetEnvironment}
-import jsky.coords.WorldCoords
+import edu.gemini.spModel.target.env.GuideGroup
 import org.specs2.mutable.Specification
 import edu.gemini.spModel.core.AngleSyntax._
 
-import scala.collection.JavaConverters._
 import edu.gemini.shared.util.immutable.ScalaConverters._
-import edu.gemini.shared.util.immutable.{None => JNone, Some => JSome}
-import edu.gemini.pot.ModelConverters._
+import edu.gemini.shared.util.immutable.{None => JNone}
 
 class UCAC3RegressionSpec3 extends Specification with UCAC3Regression {
+  val conditions = SPSiteQuality.Conditions.NOMINAL.wv(WaterVapor.ANY).sb(SkyBackground.ANY)
+
   "Gems Analyze" should {
     "work with legacy UCAC3 values in nominal conditions for SN 1987A" in {
-      val conditions = SPSiteQuality.Conditions.NOMINAL.wv(WaterVapor.ANY).sb(SkyBackground.ANY)
       runAnalysis("05:35:28.020", "-69:16:11.07", conditions, tipTiltCriterion, flexureCriterion, tipTiltTargets, flexureTargets, expectedGuideStarsScn1) should beTrue
     }
     "work with legacy UCAC3 values in nominal conditions for SN 1987A with random R-like bands" in {
-      val conditions = SPSiteQuality.Conditions.NOMINAL.wv(WaterVapor.ANY).sb(SkyBackground.ANY)
-      runAnalysis("05:35:28.020", "-69:16:11.07", conditions, tipTiltCriterion, flexureCriterion, randomizeRBands(tipTiltTargets), randomizeRBands(flexureTargets), expectedGuideStarsScn1) should beTrue
+      val replacedTargets = replaceRBands(tipTiltTargets, flexureTargets)
+      runAnalysis("05:35:28.020", "-69:16:11.07", conditions, tipTiltCriterion, flexureCriterion, replacedTargets._1, replacedTargets._2, expectedGuideStarsScn1) should beTrue
+    }
+  }
+  "MascotCat" should {
+    "produce the correct stars from mascot with legacy UCAC3 values in nominal conditions for SN 1987A" in {
+      val asterisms = MascotCat.findBestAsterismInTargetsList(targetsToMascot, 83.86675000000002, -69.26974166666668, magnitudeExtractor(defaultProbeBands(MagnitudeBand.R)), 0.06)
+      asterisms._2 should be size averageStrehl.size
+      asterisms._2.zip(averageStrehl).foreach { case (a, e) =>
+        a.avgstrehl should beEqualTo(e)
+      }
+      areAsterismStarsTheSame(asterisms._1, mascotStars) should beTrue
+    }
+    "produce the correct stars from mascot with legacy UCAC3 values in nominal conditions for SN 1987A and R-like magnitudes" in {
+      val replacedTargets = replaceRBands(targetsToMascot)
+      replacedTargets should be size targetsToMascot.size
+      val targetsMap = replacedTargets.map(t => t.name -> t).toMap
+      // Replace the bands on the mascot stars
+      val replacedMascotStars = mascotStars.map { s =>
+        val replacedTarget = targetsMap.getOrElse(s.target.name, s.target)
+        s.copy(target = replacedTarget)
+      }
+      val asterisms = MascotCat.findBestAsterismInTargetsList(replacedTargets, 83.86675000000002, -69.26974166666668, magnitudeExtractor(defaultProbeBands(MagnitudeBand.R)), 0.06)
+      asterisms._2 should be size averageStrehl.size
+      asterisms._2.zip(averageStrehl).foreach { case (a, e) =>
+        a.avgstrehl should beEqualTo(e)
+      }
+      areAsterismStarsTheSame(asterisms._1, replacedMascotStars) should beTrue
     }.pendingUntilFixed
   }
 
@@ -61,6 +84,55 @@ class UCAC3RegressionSpec3 extends Specification with UCAC3Regression {
 
   val allTargets = (tipTiltTargets ::: flexureTargets).map(t => t.name -> new SPTarget(t.coordinates.ra.toAngle.toDegrees, t.coordinates.dec.toDegrees)).toMap
   val guideProbeTargetScn = guideProbeTargetsGenerator(allTargets)
+
+  val targetsToMascot = List("042-030622",
+        "042-030635",
+        "042-030696",
+        "042-030698",
+        "042-030696",
+        "042-030698",
+        "042-030622",
+        "042-030635",
+        "042-030696",
+        "042-030698",
+        "042-030696",
+        "042-030698",
+        "042-030622",
+        "042-030635",
+        "042-030696",
+        "042-030698",
+        "042-030696",
+        "042-030698",
+        "042-030622",
+        "042-030635",
+        "042-030696",
+        "042-030698",
+        "042-030696",
+        "042-030698").flatMap(n => (tipTiltTargets ::: flexureTargets).find(_.name == n))
+
+  val averageStrehl = List(
+    0.052318046270065,
+    0.05217679362303544,
+    0.052102172476695685,
+    0.051912770771051546,
+    0.045517860011822106,
+    0.04547186789961555,
+    0.045285743295802844,
+    0.04512676442290835,
+    0.042540137335741864,
+    0.034604389983834,
+    0.03346622816269737,
+    0.032270649114148946,
+    0.02537771906393025,
+    0.024399469639152186
+  )
+
+  val mascotStars = List(
+    Star(SiderealTarget("042-030698",Coordinates(RightAscension.fromAngle(Angle.fromDegrees(83.90168749999998)),Declination.fromAngle(Angle.fromDegrees(290.72664444444445)).getOrElse(Declination.zero)),None,List(new Magnitude(14.428,MagnitudeBand.J), new Magnitude(13.691,MagnitudeBand.K), new Magnitude(14.29,MagnitudeBand.H), new Magnitude(18.086,MagnitudeBand.B), new Magnitude(14.249,MagnitudeBand.R), new Magnitude(14.632,MagnitudeBand.I)),None),-44.51300737797379,-13.009999999962929,2.0),
+    Star(SiderealTarget("042-030622",Coordinates(RightAscension.fromAngle(Angle.fromDegrees(83.84953333333334)),Declination.fromAngle(Angle.fromDegrees(290.72827777777775)).getOrElse(Declination.zero)),None,List(new Magnitude(15.787,MagnitudeBand.J), new Magnitude(15.156,MagnitudeBand.K), new Magnitude(15.114,MagnitudeBand.H), new Magnitude(14.273,MagnitudeBand.R)),None),21.936983034367834,-7.130000000074688,2.0),
+    Star(SiderealTarget("042-030635",Coordinates(RightAscension.fromAngle(Angle.fromDegrees(83.85415416666666)),Declination.fromAngle(Angle.fromDegrees(290.73200833333334)).getOrElse(Declination.zero)),None,List(new Magnitude(15.71,MagnitudeBand.J), new Magnitude(14.602,MagnitudeBand.K), new Magnitude(14.589,MagnitudeBand.H), new Magnitude(14.721,MagnitudeBand.R)),None),16.052010976423862,6.300000000055661,2.0),
+    Star(SiderealTarget("042-030696",Coordinates(RightAscension.fromAngle(Angle.fromDegrees(83.9007458333333)),Declination.fromAngle(Angle.fromDegrees(290.730775)).getOrElse(Declination.zero)),None,List(new Magnitude(14.673,MagnitudeBand.J), new Magnitude(14.834,MagnitudeBand.K), new Magnitude(14.539,MagnitudeBand.H), new Magnitude(17.103,MagnitudeBand.B), new Magnitude(14.977,MagnitudeBand.R), new Magnitude(14.403,MagnitudeBand.I)),None),-43.32150491056957,1.8600000000105865,2.0)
+  )
 
   val expectedGuideStarsScn1 = List(
     new GemsGuideStars(Angle.fromDegrees(0.0), Canopus.Wfs.Group.instance, new GemsStrehl(0.052317982350356916, 0.01133819573512042, 0.05000345834757953, 0.053210007576294995), GuideGroup.create(JNone.instance[String], List(guideProbeTargetScn(Canopus.Wfs.cwfs1, "042-030635"), guideProbeTargetScn(Canopus.Wfs.cwfs2, "042-030622"), guideProbeTargetScn(Canopus.Wfs.cwfs3, "042-030698"), guideProbeTargetScn(GsaoiOdgw.odgw2, "042-030622")).asImList)),

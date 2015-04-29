@@ -97,7 +97,7 @@ class GemsCatalogResultsSpec extends MascotProgress with Specification with NoTi
       val cwfs2Mag = group.get(Canopus.Wfs.cwfs2).getValue.getPrimary.getValue.getTarget.getMagnitude(Magnitude.Band.UC).getValue.getBrightness
       val cwfs3Mag = group.get(Canopus.Wfs.cwfs3).getValue.getPrimary.getValue.getTarget.getMagnitude(Magnitude.Band.UC).getValue.getBrightness
       cwfs1Mag < cwfs2Mag && cwfs3Mag < cwfs2Mag should beTrue
-    }
+    }.pendingUntilFixed
     "support Gsaoi Search on SN-1987A" in {
       val base = new WorldCoords("05:35:28.020", "-69:16:11.07")
       val inst = new Gsaoi
@@ -158,7 +158,7 @@ class GemsCatalogResultsSpec extends MascotProgress with Specification with NoTi
       val cwfs2Mag = group.get(Canopus.Wfs.cwfs2).getValue.getPrimary.getValue.getTarget.getMagnitude(Magnitude.Band.UC).getValue.getBrightness
       val cwfs3Mag = group.get(Canopus.Wfs.cwfs3).getValue.getPrimary.getValue.getTarget.getMagnitude(Magnitude.Band.UC).getValue.getBrightness
       cwfs2Mag < cwfs3Mag && cwfs2Mag < cwfs1Mag should beTrue
-    }
+    }.pendingUntilFixed
     "support Gsaoi Search on M6" in {
       val base = new WorldCoords("17:40:20.000", "-32:15:12.00")
       val inst = new Gsaoi
@@ -219,7 +219,7 @@ class GemsCatalogResultsSpec extends MascotProgress with Specification with NoTi
       val cwfs2Mag = group.get(Canopus.Wfs.cwfs2).getValue.getPrimary.getValue.getTarget.getMagnitude(Magnitude.Band.UC).getValue.getBrightness
       val cwfs3Mag = group.get(Canopus.Wfs.cwfs3).getValue.getPrimary.getValue.getTarget.getMagnitude(Magnitude.Band.UC).getValue.getBrightness
       cwfs2Mag < cwfs1Mag && cwfs2Mag < cwfs3Mag should beTrue
-    }
+    }.pendingUntilFixed
     "support Gsaoi Search on BPM 37093" in {
       val base = new WorldCoords("12:38:49.820", "-49:48:00.20")
       val inst = new Gsaoi

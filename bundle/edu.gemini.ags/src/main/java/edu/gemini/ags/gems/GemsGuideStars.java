@@ -138,21 +138,15 @@ public class GemsGuideStars implements Comparable<GemsGuideStars> {
 
     // Returns true if cwfs3 is the brightest star in the Caanopus asterism
     private boolean cwfs3IsBrightest() {
-        double cwfs1 = getRMag(guideGroup.get(Canopus.Wfs.cwfs1));
-        double cwfs2 = getRMag(guideGroup.get(Canopus.Wfs.cwfs2));
-        double cwfs3 = getRMag(guideGroup.get(Canopus.Wfs.cwfs3));
+        double cwfs1 = getRLikeMag(guideGroup.get(Canopus.Wfs.cwfs1));
+        double cwfs2 = getRLikeMag(guideGroup.get(Canopus.Wfs.cwfs2));
+        double cwfs3 = getRLikeMag(guideGroup.get(Canopus.Wfs.cwfs3));
         return cwfs3 < cwfs2 && cwfs3 < cwfs1;
     }
 
     // Returns the R magnitude, if known, otherwise 99.
-    private double getRMag(Option<GuideProbeTargets> g) {
-        if (!g.isEmpty() && !g.getValue().getPrimary().isEmpty()) {
-            Option<Magnitude> mag = g.getValue().getPrimary().getValue().getTarget().getMagnitude(Magnitude.Band.R);
-            if (!mag.isEmpty()) {
-                return mag.getValue().getBrightness();
-            }
-        }
-        return 99.;
+    private double getRLikeMag(Option<GuideProbeTargets> g) {
+        return GemsUtils4Java.getRLikeMagnitude(g, 99.0);
     }
 
 

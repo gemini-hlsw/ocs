@@ -60,6 +60,7 @@ public class GemsCatalogResults {
                     tiptiltGroup, posAngles);
             final List<Target.SiderealTarget> flexureTargetsList = filter(obsContext, pair.getFlexureResults().resultsAsJava(),
                     flexureGroup, posAngles);
+
             if (tiptiltTargetsList.size() != 0 && flexureTargetsList.size() != 0) {
                 if (progress != null) {
                     progress.setProgressTitle("Finding asterisms for " + tiptiltGroup.getKey());
@@ -70,7 +71,7 @@ public class GemsCatalogResults {
                         tiptiltTargetsList, base.ra().toAngle().toDegrees(), base.dec().toDegrees(), bandpass, factor, progress);
                 for (Strehl strehl : strehlResults.strehlList()) {
                     result.addAll(analyzeAtAngles(obsContext, posAngles, strehl, flexureTargetsList, flexureGroup,
-                            tiptiltGroup));
+                                                tiptiltGroup));
                 }
             }
         }
@@ -148,6 +149,7 @@ public class GemsCatalogResults {
         for (Angle posAngle : posAngles) {
             List<Target.SiderealTarget> flexureList = filter(obsContext, flexureSkyObjectList, flexureGroup, posAngle);
             List<Target.SiderealTarget> flexureStars = GemsUtils4Java.sortTargetsByBrightness(flexureList);
+
             result.addAll(analyzeStrehl(obsContext, strehl, posAngle, tiptiltGroup, flexureGroup, flexureStars, true));
             if ("CWFS".equals(tiptiltGroup.getKey())) {
                 // try different order of cwfs1 and cwfs2
