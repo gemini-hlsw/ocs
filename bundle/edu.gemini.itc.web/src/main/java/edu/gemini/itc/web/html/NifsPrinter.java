@@ -72,49 +72,20 @@ public final class NifsPrinter extends PrinterBase {
 
         _print("<HR align=left SIZE=3>");
 
-        final List<Double> ap_offset_list = instrument.getIFU().getApertureOffsetList();
-        final Iterator<Double> ifu_offset_it = ap_offset_list.iterator();
         for (int i = 0; i < result.specS2N().length; i++) {
             _println("<p style=\"page-break-inside: never\">");
-            device.setPrecision(3);  // NO decimal places
-            device.clear();
 
-            final double ifu_offset = ifu_offset_it.next();
-
-            final String chart1Title =
-                    instrument.getIFUMethod().equals(NifsParameters.SUMMED_APERTURE_IFU) ?
-                            "Signal and Background (IFU summed apertures: " +
-                                    device.toString(instrument.getIFUNumX()) + "x" + device.toString(instrument.getIFUNumY()) +
-                                    ", " + device.toString(instrument.getIFUNumX() * instrument.getIFU().IFU_LEN_X) + "\"x" +
-                                    device.toString(instrument.getIFUNumY() * instrument.getIFU().IFU_LEN_Y) + "\")" :
-                            "Signal and Background (IFU element offset: " + device.toString(ifu_offset) + " arcsec)";
-
-            final ITCChart chart1 = new ITCChart(chart1Title, "Wavelength (nm)", "e- per exposure per spectral pixel", pdp);
-            chart1.addArray(result.specS2N()[i].getSignalSpectrum().getData(), "Signal ");
-            chart1.addArray(result.specS2N()[i].getBackgroundSpectrum().getData(), "SQRT(Background)  ");
-            _println(chart1.getBufferedImage(), "SigAndBack");
+            _printImageLink(id, ImageServlet.NifsSigChart, i);
             _println("");
 
+            _printFileLink(id, ImageServlet.SigSpec, i, "ASCII signal spectrum");
+            _printFileLink(id, ImageServlet.BackSpec, i, "ASCII background spectrum");
 
-            _printFileLink(id, ImageServlet.SigSpec, "ASCII signal spectrum");
-            _printFileLink(id, ImageServlet.BackSpec, "ASCII background spectrum");
-
-            final String chart2Title =
-                    instrument.getIFUMethod().equals(NifsParameters.SUMMED_APERTURE_IFU) ?
-                            "Intermediate Single Exp and Final S/N \n(IFU apertures:" +
-                                    device.toString(instrument.getIFUNumX()) + "x" + device.toString(instrument.getIFUNumY()) +
-                                    ", " + device.toString(instrument.getIFUNumX() * instrument.getIFU().IFU_LEN_X) + "\"x" +
-                                    device.toString(instrument.getIFUNumY() * instrument.getIFU().IFU_LEN_Y) + "\")" :
-                            "Intermediate Single Exp and Final S/N (IFU element offset: " + device.toString(ifu_offset) + " arcsec)";
-
-            final ITCChart chart2 = new ITCChart(chart2Title, "Wavelength (nm)", "Signal / Noise per spectral pixel", pdp);
-            chart2.addArray(result.specS2N()[i].getExpS2NSpectrum().getData(), "Single Exp S/N");
-            chart2.addArray(result.specS2N()[i].getFinalS2NSpectrum().getData(), "Final S/N  ");
-            _println(chart2.getBufferedImage(), "Sig2N");
+            _printImageLink(id, ImageServlet.NifsS2NChart, i);
             _println("");
 
-            _printFileLink(id, ImageServlet.SingleS2N, "Single Exposure S/N ASCII data");
-            _printFileLink(id, ImageServlet.FinalS2N, "Final S/N ASCII data");
+            _printFileLink(id, ImageServlet.SingleS2N, i, "Single Exposure S/N ASCII data");
+            _printFileLink(id, ImageServlet.FinalS2N, i, "Final S/N ASCII data");
         }
 
         _println("");

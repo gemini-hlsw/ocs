@@ -2,16 +2,13 @@ package edu.gemini.itc.web.html;
 
 import edu.gemini.itc.gmos.Gmos;
 import edu.gemini.itc.gmos.GmosRecipe;
-import edu.gemini.itc.operation.DetectorsTransmissionVisitor;
 import edu.gemini.itc.shared.*;
 import edu.gemini.itc.web.servlets.ImageServlet;
 import edu.gemini.spModel.gemini.gmos.GmosNorthType;
 import edu.gemini.spModel.gemini.gmos.GmosSouthType;
 import scala.Tuple2;
 
-import java.awt.*;
 import java.io.PrintWriter;
-import java.util.Calendar;
 import java.util.UUID;
 
 /**
@@ -54,29 +51,11 @@ public final class GmosPrinter extends PrinterBase {
         device.setPrecision(2); // Two decimal places
         device.clear();
 
-        // Create one chart to use for all 3 CCDS (one for Signal and Background and one for Intermediate Single Exp and Final S/N)
-        final ITCChart gmosChart1;
-        final ITCChart gmosChart2;
-        final boolean ifuAndNotUniform = mainInstrument.isIfuUsed() && !(results[0].source().isUniform());
-        final double ifu_offset = ifuAndNotUniform ? mainInstrument.getIFU().getApertureOffsetList().iterator().next() : 0.0;
-        final String chart1Title = ifuAndNotUniform ? "Signal and Background (IFU element offset: " + device.toString(ifu_offset) + " arcsec)" : "Signal and Background ";
-        final String chart2Title = ifuAndNotUniform ? "Intermediate Single Exp and Final S/N (IFU element offset: " + device.toString(ifu_offset) + " arcsec)" : "Intermediate Single Exp and Final S/N";
-        gmosChart1 = new ITCChart(chart1Title, "Wavelength (nm)", "e- per exposure per spectral pixel", pdp);
-        gmosChart2 = new ITCChart(chart2Title, "Wavelength (nm)", "Signal / Noise per spectral pixel", pdp);
-
         final Gmos[] ccdArray = mainInstrument.getDetectorCcdInstruments();
-        final DetectorsTransmissionVisitor tv = mainInstrument.getDetectorTransmision();
-        final int detectorCount = ccdArray.length;
 
         for (final Gmos instrument : ccdArray) {
 
             final int ccdIndex = instrument.getDetectorCcdIndex();
-            final String ccdName = instrument.getDetectorCcdName();
-            final Color ccdColor = instrument.getDetectorCcdColor();
-            final Color ccdColorDarker = ccdColor == null ? null : ccdColor.darker().darker();
-            final int firstCcdIndex = tv.getDetectorCcdStartIndex(ccdIndex);
-            final int lastCcdIndex = tv.getDetectorCcdEndIndex(ccdIndex, detectorCount);
-
             final SpectroscopyResult result = results[ccdIndex];
 
             final int number_exposures = results[0].observation().getNumExposures();
@@ -111,14 +90,7 @@ public final class GmosPrinter extends PrinterBase {
             }
 
             // For IFUs we can have more than one S2N result.
-            final String header = "# GMOS ITC: " + Calendar.getInstance().getTime() + "\n";
             for (int i = 0; i < result.specS2N().length; i++) {
-
-                gmosChart1.addArray(result.specS2N()[i].getSignalSpectrum().getData(firstCcdIndex, lastCcdIndex), "Signal " + ccdName, ccdColor);
-                gmosChart1.addArray(result.specS2N()[i].getBackgroundSpectrum().getData(firstCcdIndex, lastCcdIndex), "SQRT(Background) " + ccdName, ccdColorDarker);
-
-                gmosChart2.addArray(result.specS2N()[i].getExpS2NSpectrum().getData(firstCcdIndex, lastCcdIndex), "Single Exp S/N " + ccdName, ccdColor);
-                gmosChart2.addArray(result.specS2N()[i].getFinalS2NSpectrum().getData(firstCcdIndex, lastCcdIndex), "Final S/N " + ccdName, ccdColorDarker);
 
                 if (ccdIndex == 0) {
                     _println("<p style=\"page-break-inside: never\">");
@@ -132,9 +104,9 @@ public final class GmosPrinter extends PrinterBase {
 
         }
 
-        _println(gmosChart1.getBufferedImage(), "SigAndBack");
+        _printImageLink(id, ImageServlet.GmosSigChart);
         _println("");
-        _println(gmosChart2.getBufferedImage(), "Sig2N");
+        _printImageLink(id, ImageServlet.GmosS2NChart);
         _println("");
 
         printConfiguration(results[0].parameters(), mainInstrument);

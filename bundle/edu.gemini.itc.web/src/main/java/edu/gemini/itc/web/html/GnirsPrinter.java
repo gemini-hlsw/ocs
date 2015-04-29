@@ -3,27 +3,20 @@ package edu.gemini.itc.web.html;
 import edu.gemini.itc.gnirs.Gnirs;
 import edu.gemini.itc.gnirs.GnirsParameters;
 import edu.gemini.itc.gnirs.GnirsRecipe;
-import edu.gemini.itc.shared.*;
+import edu.gemini.itc.shared.GnirsSpectroscopyResult;
+import edu.gemini.itc.shared.Parameters;
+import edu.gemini.itc.shared.PlottingDetails;
+import edu.gemini.itc.shared.SpectroscopyResult;
 import edu.gemini.itc.web.servlets.ImageServlet;
-import org.jfree.chart.ChartColor;
 import scala.Tuple2;
 
-import java.awt.*;
 import java.io.PrintWriter;
-import java.util.Calendar;
 import java.util.UUID;
 
 /**
  * Helper class for printing GNIRS calculation results to an output stream.
  */
 public final class GnirsPrinter extends PrinterBase {
-
-    private static final Color[] ORDER_COLORS =
-            new Color[] {ChartColor.DARK_RED,           ChartColor.DARK_BLUE,       ChartColor.DARK_GREEN,
-                         ChartColor.DARK_MAGENTA,       ChartColor.black,           ChartColor.DARK_CYAN};
-    private static final Color[] ORDER_BG_COLORS =
-            new Color[] {ChartColor.VERY_LIGHT_RED,     ChartColor.VERY_LIGHT_BLUE, ChartColor.VERY_LIGHT_GREEN,
-                         ChartColor.VERY_LIGHT_MAGENTA, ChartColor.lightGray,       ChartColor.VERY_LIGHT_CYAN};
 
     private final PlottingDetails pdp;
     private final GnirsRecipe recipe;
@@ -93,41 +86,26 @@ public final class GnirsPrinter extends PrinterBase {
 
         if (instrument.XDisp_IsUsed()) {
 
-            final ITCChart chart1 = new ITCChart("Signal and Background in software aperture of " + result.specS2N()[0].getSpecNpix() + " pixels", "Wavelength (nm)", "e- per exposure per spectral pixel", pdp);
-            for (int i = 0; i < GnirsRecipe.ORDERS; i++) {
-                chart1.addArray(result.signalOrder()[i].getData(), "Signal Order "+(i+3), ORDER_COLORS[i]);
-                chart1.addArray(result.backGroundOrder()[i].getData(), "SQRT(Background) Order "+(i+3), ORDER_BG_COLORS[i]);
-            }
-            _println(chart1.getBufferedImage(), "SigAndBack");
+            _printImageLink(id, ImageServlet.GnirsSigChart);
             _println("");
 
             _printFileLink(id, ImageServlet.GnirsSigOrder, "ASCII signal spectrum");
             _printFileLink(id, ImageServlet.GnirsBgOrder, "ASCII background spectrum");
 
-            final ITCChart chart2 = new ITCChart("Final S/N", "Wavelength (nm)", "Signal / Noise per spectral pixel", pdp);
-            for (int i = 0; i < GnirsRecipe.ORDERS; i++) {
-                chart2.addArray(result.finalS2NOrder()[i].getData(), "Final S/N Order "+(i+3), ORDER_COLORS[i]);
-            }
-            _println(chart2.getBufferedImage(), "Sig2N");
+            _printImageLink(id, ImageServlet.GnirsS2NChart);
             _println("");
 
             _printFileLink(id, ImageServlet.GnirsFinalS2NOrder, "Final S/N ASCII data");
 
         } else {
 
-            final ITCChart chart1 = new ITCChart("Signal and Background in software aperture of " + result.specS2N()[0].getSpecNpix() + " pixels", "Wavelength (nm)", "e- per exposure per spectral pixel", pdp);
-            chart1.addArray(result.specS2N()[0].getSignalSpectrum().getData(), "Signal ");
-            chart1.addArray(result.specS2N()[0].getBackgroundSpectrum().getData(), "SQRT(Background)  ");
-            _println(chart1.getBufferedImage(), "SigAndBack");
+            _printImageLink(id, ImageServlet.SigSwApChart);
             _println("");
 
             _printFileLink(id, ImageServlet.SigSpec, "ASCII signal spectrum");
             _printFileLink(id, ImageServlet.BackSpec, "ASCII background spectrum");
 
-            final ITCChart chart2 = new ITCChart("Intermediate Single Exp and Final S/N", "Wavelength (nm)", "Signal / Noise per spectral pixel", pdp);
-            chart2.addArray(result.specS2N()[0].getExpS2NSpectrum().getData(), "Single Exp S/N");
-            chart2.addArray(result.specS2N()[0].getFinalS2NSpectrum().getData(), "Final S/N  ");
-            _println(chart2.getBufferedImage(), "Sig2N");
+            _printImageLink(id, ImageServlet.S2NChart);
             _println("");
 
             _printFileLink(id, ImageServlet.SingleS2N, "Single Exposure S/N ASCII data");

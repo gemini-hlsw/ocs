@@ -3,7 +3,10 @@ package edu.gemini.itc.web.html;
 import edu.gemini.itc.michelle.Michelle;
 import edu.gemini.itc.michelle.MichelleParameters;
 import edu.gemini.itc.michelle.MichelleRecipe;
-import edu.gemini.itc.shared.*;
+import edu.gemini.itc.shared.ImagingResult;
+import edu.gemini.itc.shared.Parameters;
+import edu.gemini.itc.shared.PlottingDetails;
+import edu.gemini.itc.shared.SpectroscopyResult;
 import edu.gemini.itc.web.servlets.ImageServlet;
 import edu.gemini.spModel.gemini.michelle.MichelleParams;
 import scala.Tuple2;
@@ -98,19 +101,13 @@ public final class MichellePrinter extends PrinterBase {
 
         _println("<p style=\"page-break-inside: never\">");
 
-        final ITCChart chart1 = new ITCChart("Signal and Background ", "Wavelength (nm)", "e- per exposure per spectral pixel", pdp);
-        chart1.addArray(result.specS2N()[0].getSignalSpectrum().getData(), "Signal ");
-        chart1.addArray(result.specS2N()[0].getBackgroundSpectrum().getData(), "SQRT(Background)  ");
-        _println(chart1.getBufferedImage(), "SigAndBack");
+        _printImageLink(id, ImageServlet.SigChart);
         _println("");
 
         _printFileLink(id, ImageServlet.SigSpec, "ASCII signal spectrum");
         _printFileLink(id, ImageServlet.BackSpec, "ASCII background spectrum");
 
-        final ITCChart chart2 = new ITCChart("Intermediate Single Exp and Final S/N", "Wavelength (nm)", "Signal / Noise per spectral pixel", pdp);
-        chart2.addArray(result.specS2N()[0].getExpS2NSpectrum().getData(), "Single Exp S/N");
-        chart2.addArray(result.specS2N()[0].getFinalS2NSpectrum().getData(), "Final S/N  ");
-        _println(chart2.getBufferedImage(), "Sig2N");
+        _printImageLink(id, ImageServlet.S2NChart);
         _println("");
 
         _printFileLink(id, ImageServlet.SingleS2N, "Single Exposure S/N ASCII data");
@@ -231,6 +228,5 @@ public final class MichellePrinter extends PrinterBase {
             s += "Pixel Size in Spectral Direction: " + instrument.getGratingDispersion_nmppix() + "nm\n";
         return s;
     }
-
 
 }

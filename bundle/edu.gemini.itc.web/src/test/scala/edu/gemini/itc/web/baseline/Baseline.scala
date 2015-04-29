@@ -1,6 +1,6 @@
 package edu.gemini.itc.web.baseline
 
-import java.io.{ByteArrayOutputStream, File, PrintWriter}
+import java.io.{ByteArrayOutputStream, PrintWriter}
 
 import edu.gemini.itc.baseline.util.Fixture
 import edu.gemini.itc.gnirs.GnirsParameters
@@ -18,41 +18,23 @@ import scala.io.Source
  * @param string
  */
 case class Output(string: String) {
-  private val DatFiles = """SessionID\d*\.dat""".r
-  private val MemFiles = """&filename=([a-zA-Z0-9]*)&id=([a-z0-9\-]*)""".r
-  val hash: Long = {
-    val h1 = hashAllDatFiles(string)
-    val h2 = hashAllMemFiles(string)
-    //37L*fixString(string).hashCode() + hashAllFiles(string) + hashAllMemFiles(string)
-    37L*fixString(string).hashCode() + (if (h1 != 17L) h1 else 0L) + (if (h2 != 17L) h2 else 0L) + (if (h1 == 17L && h2 == 17L) 17L else 0L)
-  }
+  private val DatFiles = """type=txt&filename=([a-zA-Z0-9]*)&index=([0-9]*)&id=([a-z0-9\-]*)""".r
+
+  val hash: Long = 37L*fixString(string).hashCode() + hashAllDatFiles(string)
+
   private def fixString(s: String) = s.
     replaceAll("SessionID\\d*", "SessionIDXXX").
-    replaceAll("""&filename=([a-zA-Z0-9]*)&id=([a-z0-9\-]*)""", "&filename=SessionIDXXX.dat")
+    replaceAll("""type=txt&filename=([a-zA-Z0-9]*)&index=([0-9]*)&id=([a-z0-9\-]*)""", "type=txt&filename=SessionIDXXX.dat").
+    replaceAll("""type=img&filename=([a-zA-Z0-9]*)&index=([0-9]*)&id=([a-z0-9\-]*)""", "type=img&filename=SessionIDXXX.png")
 
   def hashAllDatFiles(s: String): Long =
     DatFiles.
-      findAllIn(s).
-      map(hashDatFile).
-      foldLeft(17L)((acc, s) => 37L*acc + s.hashCode.toLong)
-
-  def hashAllMemFiles(s: String): Long =
-    MemFiles.
       findAllMatchIn(s).
-      map(m => hashMemFile(m.group(2), m.group(1))).
+      map(m => hashDatFile(m.group(3), m.group(2), m.group(1))).
       foldLeft(17L)((acc, s) => 37L*acc + s.hashCode)
 
-
-  def hashDatFile(f: String): Int = {
-    val path = ITCImageFileIO.getImagePath
-    val file = io.Source.fromFile(path + File.separator + f)
-    // first line is a comment with timestamp, don't take into account for hash!
-    // for testing it is safe to assume there is at least one line (header)
-    file.getLines().drop(1).foldLeft(17)((acc, s) => 37*acc + s.hashCode)
-  }
-
-  def hashMemFile(id: String, filename: String): Int = {
-    val file = ImageServlet.toFile(id, filename)
+  def hashDatFile(id: String, index: String, filename: String): Int = {
+    val file = ImageServlet.toFile(id, filename, index.toInt)
     file.split('\n').drop(1).foldLeft(17)((acc, s) => 37*acc + s.hashCode)
   }
 

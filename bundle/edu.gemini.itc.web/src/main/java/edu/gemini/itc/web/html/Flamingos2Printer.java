@@ -83,28 +83,15 @@ public final class Flamingos2Printer extends PrinterBase {
 
         _print("<HR align=left SIZE=3>");
 
-        final ITCChart chart1 = new ITCChart(
-                "Signal and SQRT(Background) in software aperture of " + result.specS2N()[0].getSpecNpix() + " pixels",
-                "Wavelength (nm)", "e- per exposure per spectral pixel", pdp);
-        final ITCChart chart2 = new ITCChart(
-                "Intermediate Single Exp and Final S/N",
-                "Wavelength (nm)", "Signal / Noise per spectral pixel", pdp);
-
         _println("<p style=\"page-break-inside: never\">");
-        chart1.addArray(result.specS2N()[0].getSignalSpectrum().getData(), "Signal ");
-        chart1.addArray(result.specS2N()[0].getBackgroundSpectrum().getData(), "SQRT(Background)  ");
 
-        _println(chart1.getBufferedImage(), "SigAndBack");
+        _printImageLink(id, ImageServlet.SigSwApChart);
         _println("");
 
         _printFileLink(id, ImageServlet.SigSpec, "ASCII signal spectrum");
         _printFileLink(id, ImageServlet.BackSpec, "ASCII background spectrum");
 
-
-        chart2.addArray(result.specS2N()[0].getExpS2NSpectrum().getData(), "Single Exp S/N");
-        chart2.addArray(result.specS2N()[0].getFinalS2NSpectrum().getData(), "Final S/N  ");
-
-        _println(chart2.getBufferedImage(), "Sig2N");
+        _printImageLink(id, ImageServlet.S2NChart);
         _println("");
 
         _printFileLink(id, ImageServlet.SingleS2N, "Single Exposure S/N ASCII data");

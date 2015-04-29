@@ -1,6 +1,9 @@
 package edu.gemini.itc.web.html;
 
-import edu.gemini.itc.shared.*;
+import edu.gemini.itc.shared.ImagingResult;
+import edu.gemini.itc.shared.Parameters;
+import edu.gemini.itc.shared.PlottingDetails;
+import edu.gemini.itc.shared.SpectroscopyResult;
 import edu.gemini.itc.trecs.TRecs;
 import edu.gemini.itc.trecs.TRecsParameters;
 import edu.gemini.itc.trecs.TRecsRecipe;
@@ -8,7 +11,6 @@ import edu.gemini.itc.web.servlets.ImageServlet;
 import scala.Tuple2;
 
 import java.io.PrintWriter;
-import java.util.Calendar;
 import java.util.UUID;
 
 /**
@@ -88,26 +90,15 @@ public final class TRecsPrinter extends PrinterBase {
         _println("<p style=\"page-break-inside: never\">");
 
 
-        final ITCChart chart1 = new ITCChart("Signal and Background", "Wavelength (nm)", "e- per exposure per spectral pixel", pdp);
-        final ITCChart chart2 = new ITCChart("Intermediate Single Exp and Final S/N", "Wavelength (nm)", "Signal / Noise per spectral pixel", pdp);
-
-        chart1.addArray(result.specS2N()[0].getSignalSpectrum().getData(), "Signal ");
-        chart1.addArray(result.specS2N()[0].getBackgroundSpectrum().getData(), "SQRT(Background)  ");
-        _println(chart1.getBufferedImage(), "SigAndBack");
+        _printImageLink(id, ImageServlet.SigChart);
         _println("");
 
-//        final String sigSpec = _printSpecTag("ASCII signal spectrum");
-//        final String backSpec = _printSpecTag("ASCII background spectrum");
         _printFileLink(id, ImageServlet.SigSpec, "ASCII signal spectrum");
         _printFileLink(id, ImageServlet.BackSpec, "ASCII background spectrum");
 
-        chart2.addArray(result.specS2N()[0].getExpS2NSpectrum().getData(), "Single Exp S/N");
-        chart2.addArray(result.specS2N()[0].getFinalS2NSpectrum().getData(), "Final S/N  ");
-        _println(chart2.getBufferedImage(), "Sig2N");
+        _printImageLink(id, ImageServlet.S2NChart);
         _println("");
 
-//        final String singleS2N = _printSpecTag("Single Exposure S/N ASCII data");
-//        final String finalS2N = _printSpecTag("Final S/N ASCII data");
         _printFileLink(id, ImageServlet.SingleS2N, "Single Exposure S/N ASCII data");
         _printFileLink(id, ImageServlet.FinalS2N, "Final S/N ASCII data");
 
@@ -125,11 +116,6 @@ public final class TRecsPrinter extends PrinterBase {
         _println(HtmlPrinter.printParameterSummary(result.observation()));
         _println(HtmlPrinter.printParameterSummary(pdp));
 
-//        final String header = "# T-ReCS ITC: " + Calendar.getInstance().getTime() + "\n";
-//        _println(result.specS2N()[0].getSignalSpectrum(), header, sigSpec);
-//        _println(result.specS2N()[0].getBackgroundSpectrum(), header, backSpec);
-//        _println(result.specS2N()[0].getExpS2NSpectrum(), header, singleS2N);
-//        _println(result.specS2N()[0].getFinalS2NSpectrum(), header, finalS2N);
     }
 
     private void writeImagingOutput(final ImagingResult result) {
