@@ -29,7 +29,7 @@ object GmosScienceAreaGeometry extends ScienceAreaGeometry {
   val LongSlitFovBridgeHeight =   3.20
 
   override def unadjustedGeometry(ctx: ObsContext): Option[Shape] = {
-    def gmosGeo[P <: FPUnit](mode: FPUnitMode, fpu: P, isSouth: Boolean): Option[Shape] =
+    def gmosGeo(mode: FPUnitMode, fpu: FPUnit, isSouth: Boolean): Option[Shape] =
       mode match {
         case BUILTIN if fpu.isImaging       => Some(imagingFov.toShape)
         case BUILTIN if fpu.isSpectroscopic => Some(longSlitFOV(scienceAreaDimensions(fpu)._1))
@@ -46,13 +46,13 @@ object GmosScienceAreaGeometry extends ScienceAreaGeometry {
     }
   }
 
-  def scienceAreaDimensions[P <: FPUnit](fpu: P): (Double, Double) = {
+  def scienceAreaDimensions(fpu: FPUnit): (Double, Double) = {
     val width = fpu.getWidth
     if (width != -1) (width, ImagingFovSize) else (ImagingFovSize, ImagingFovSize)
   }
 
-  def javaScienceAreaDimensions[P <: FPUnit](fpu: P): Array[Double] =
-    scienceAreaDimensions(fpu) |> { case (w,h) => Array(w,h) }
+  def javaScienceAreaDimensions(fpu: FPUnit): Array[Double] =
+    scienceAreaDimensions(fpu) match { case (w,h) => Array(w,h) }
 
   case class ImagingFov(ccdLeft: Shape, ccdCenter: Shape, ccdRight: Shape) {
     def toList: List[Shape] = List(ccdLeft, ccdCenter, ccdRight)

@@ -2,7 +2,6 @@ package jsky.app.ot.gemini.inst
 
 import edu.gemini.pot.ModelConverters._
 import edu.gemini.spModel.core._
-import edu.gemini.spModel.core.AngleSyntax._
 import edu.gemini.spModel.gemini.flamingos2.{F2OiwfsProbeArm, Flamingos2OiwfsGuideProbe}
 import edu.gemini.spModel.gemini.gmos.{GmosOiwfsProbeArm, GmosOiwfsGuideProbe}
 import edu.gemini.spModel.guide.{PatrolField, OffsetValidatingGuideProbe}
@@ -61,9 +60,7 @@ sealed class OiwfsPlotFeature(probe: OffsetValidatingGuideProbe, probeArm: Probe
       // Extract info from the TPE context, converted to new model.
       val posAngle = Angle.fromDegrees(tpeCtx.instrument.posAngleOrZero)
       val selPos   = tpeCtx.offsets.selectedPos
-      val offset   = selPos.map { opb =>
-        Offset(opb.getXaxis.arcsecs[OffsetP], opb.getYaxis.arcsecs[OffsetQ])
-      } | Offset.zero
+      val offset   = selPos.foldMap { _.toNewModel }
 
       // Create the TPE Figures
 
@@ -95,17 +92,13 @@ sealed class OiwfsPlotFeature(probe: OffsetValidatingGuideProbe, probeArm: Probe
         val showProbeArm = selPos.forall(_.isActive(probe)) &&
           probe.inRange(obsCtx, selPos.map(_.toSkycalcOffset) | edu.gemini.skycalc.Offset.ZERO_OFFSET)
 
-        val guideStar = for {
-          gpt <- tpeCtx.targets.envOrDefault.getPrimaryGuideProbeTargets(probe).asScalaOpt
-          gs  <- gpt.getPrimary.asScalaOpt
-        } yield gs.toNewModel.coordinates // TODO: when?
-
         if (showProbeArm)
-          guideStar.flatMap { gs =>
-            probeArm.geometry(obsCtx, gs, offset).map {
-              new Figure(_, ProbeArmColor, Blocked, ProbeArmStroke)
-            }
-          }
+          for {
+            gpt   <- tpeCtx.targets.envOrDefault.getPrimaryGuideProbeTargets(probe).asScalaOpt
+            gsOld <- gpt.getPrimary.asScalaOpt
+            gs     = gsOld.toNewModel.coordinates // TODO: when?
+            shape <- probeArm.geometry(obsCtx, gs, offset)
+          } yield new Figure(shape, ProbeArmColor, Blocked, ProbeArmStroke)
         else None
       }
 

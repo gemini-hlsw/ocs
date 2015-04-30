@@ -8,6 +8,7 @@ import java.awt.geom.{Area, FlatteningPathIterator, Point2D, AffineTransform}
 import java.awt.geom.PathIterator.{SEG_CLOSE, SEG_LINETO, SEG_MOVETO}
 import java.util.logging.Logger
 
+import scala.annotation.tailrec
 import scalaz._
 import Scalaz._
 
@@ -72,11 +73,13 @@ object FeatureGeometry {
         AreaCalc(start, next, sum + x0 * y1 - y0 * x1)
       }
 
-      def close: Double =
+      @tailrec
+      final def close: Double =
         if (prev == start) (sum/2.0).abs
         else addPoint(start).close
     }
 
+    @tailrec
     def go(area: Double, cur: Option[AreaCalc]): Double =
       if (fpi.isDone) area
       else {

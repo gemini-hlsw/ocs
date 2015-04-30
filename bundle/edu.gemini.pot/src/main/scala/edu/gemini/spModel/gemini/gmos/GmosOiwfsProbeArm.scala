@@ -107,7 +107,7 @@ object GmosOiwfsProbeArm extends ProbeArmGeometry {
       t + gsOffset - adj
     }.toPoint
 
-    val r     = math.sqrt(p.getX * p.getX + p.getY * p.getY)
+    val r     = math.hypot(p.getX, p.getY)
     val r2    = r * r
 
     val alpha = math.atan2(p.getX, p.getY)

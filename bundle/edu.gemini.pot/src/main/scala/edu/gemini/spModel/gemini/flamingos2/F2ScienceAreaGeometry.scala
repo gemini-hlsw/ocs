@@ -46,7 +46,7 @@ object F2ScienceAreaGeometry extends ScienceAreaGeometry {
     }
 
   def javaScienceAreaDimensions(f2: Flamingos2): Array[Double] =
-    scienceAreaDimensions(f2) |> { case (w, h) => Array(w, h) }
+    scienceAreaDimensions(f2) match { case (w, h) => Array(w, h) }
 
   /**
    * Create the F2 imaging field of view.

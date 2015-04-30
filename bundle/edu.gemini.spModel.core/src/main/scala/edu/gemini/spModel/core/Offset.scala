@@ -52,6 +52,13 @@ object Offset {
   /** @group Typeclass Instances */
   implicit val equals = scalaz.Equal.equalA[Offset]
 
+  /** @group Typeclass Instances. */
+  implicit val MonoidOffset: Monoid[Offset] =
+    new Monoid[Offset] {
+      val zero = Offset.zero
+      def append(a: Offset, b: => Offset): Offset = a + b
+    }
+
   implicit val ShowOffset: Show[Offset] =
     Show.shows[Offset] { off => s"Offset(${off.p.shows}, ${off.q.shows})" }
 }
