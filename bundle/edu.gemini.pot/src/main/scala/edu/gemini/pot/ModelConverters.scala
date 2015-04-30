@@ -7,6 +7,7 @@ import edu.gemini.spModel.core._
 import edu.gemini.spModel.core.AngleSyntax._
 import edu.gemini.spModel.rich.shared.immutable._
 import edu.gemini.spModel.target.SPTarget
+import edu.gemini.spModel.target.offset.OffsetPosBase
 import edu.gemini.spModel.target.system.HmsDegTarget
 
 import scalaz._
@@ -23,6 +24,8 @@ object ModelConverters {
   def toCoordinates(coords: skycalc.Coordinates): Coordinates = coords.toNewModel
 
   def toSideralTarget(spTarget: SPTarget):SiderealTarget = spTarget.toNewModel
+
+  def toOffset(pos: OffsetPosBase): Offset = pos.toNewModel
 
   implicit class OldAngle2New(val angle: skycalc.Angle) extends AnyVal{
     def toNewModel: Angle = Angle.fromDegrees(angle.toDegrees.getMagnitude)
@@ -47,6 +50,11 @@ object ModelConverters {
     def toNormalizedDegrees:    Double = normalize(angle.toDegrees, maxDegrees)
     def toNormalizedArcmins:    Double = normalize(angle.toArcmins, maxArcmins)
     def toNormalizedArcseconds: Double = normalize(angle.toArcsecs, maxArcsecs)
+  }
+
+  implicit class ReallyOldOffset2New(val offset: OffsetPosBase) extends AnyVal {
+    def toNewModel: Offset =
+      Offset(offset.getXaxis.arcsecs[OffsetP], offset.getYaxis.arcsecs[OffsetQ])
   }
 
   implicit class OldOffset2New(val offset: skycalc.Offset) extends AnyVal {

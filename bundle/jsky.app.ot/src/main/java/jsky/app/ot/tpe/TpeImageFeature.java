@@ -308,21 +308,21 @@ public abstract class TpeImageFeature implements TelescopePosWatcher {
 
     // === collect figures for later drawing.
     protected static class Figure {
-        final public Shape shape;
-        final public Color color;
-        final public Composite composite;
-        final public Stroke stroke;
+        public final Shape shape;
+        public final Color color;
+        public final Composite composite;
+        public final Stroke stroke;
 
         public Figure(Shape shape, Color color, Composite composite, Stroke stroke) {
-            this.shape = shape;
-            this.color = color;
+            this.shape     = shape;
+            this.color     = color;
             this.composite = composite;
-            this.stroke = stroke;
+            this.stroke    = stroke;
         }
 
         public void draw(Graphics2D g2d, boolean fillObscuredArea) {
-            Stroke startStroke = g2d.getStroke();
-            if(stroke != null){
+            final Stroke startStroke = g2d.getStroke();
+            if (stroke != null) {
                 g2d.setStroke(stroke);
             }
             g2d.setColor(color);
@@ -336,9 +336,13 @@ public abstract class TpeImageFeature implements TelescopePosWatcher {
 
             g2d.setStroke(startStroke);
         }
+
+        public Figure transform(AffineTransform xform) {
+            return new Figure(xform.createTransformedShape(shape), color, composite, stroke);
+        }
     }
     // List of Figures to draw.
-    protected LinkedList<Figure> _figureList = new LinkedList<Figure>();
+    protected LinkedList<Figure> _figureList = new LinkedList<>();
     protected void clearFigures() {
         _figureList.clear();
     }

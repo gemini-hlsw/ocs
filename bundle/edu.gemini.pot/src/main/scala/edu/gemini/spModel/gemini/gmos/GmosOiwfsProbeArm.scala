@@ -1,31 +1,53 @@
 package edu.gemini.spModel.gemini.gmos
 
-import java.awt.Shape
-import java.awt.geom.{Rectangle2D, Point2D, AffineTransform}
 
+import edu.gemini.pot.ModelConverters._
 import edu.gemini.shared.util.immutable.ImPolygon
-import edu.gemini.skycalc.Offset
-import edu.gemini.spModel.core.{Angle, Coordinates}
-import edu.gemini.spModel.inst.{ArmAdjustment, ProbeArmGeometry}
+import edu.gemini.spModel.core._
+import edu.gemini.spModel.core.AngleSyntax._
+import edu.gemini.spModel.inst.ProbeArmGeometry
+import edu.gemini.spModel.inst.ProbeArmGeometry.ArmAdjustment
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.telescope.IssPort
 
-class GmosOiwfsProbeArm[D  <: Enum[D]  with GmosCommonType.Disperser,
-                        F  <: Enum[F]  with GmosCommonType.Filter,
-                        P  <: Enum[P]  with GmosCommonType.FPUnit,
-                        SM <: Enum[SM] with GmosCommonType.StageMode]
-  extends ProbeArmGeometry[InstGmosCommon[D,F,P,SM]] {
+import java.awt.Shape
+import java.awt.geom.{Area, Rectangle2D}
 
-  import edu.gemini.spModel.inst.FeatureGeometry.transformPoint
-  import GmosOiwfsProbeArm._
+import scalaz._
+import Scalaz._
+
+object GmosOiwfsProbeArm extends ProbeArmGeometry {
+  val instance = this
+
+  // The following values (in arcsec) are used to calculate the position of the
+  // OIWFS arm and are described in the paper "Opto-Mechanical Design of the
+  // Gemini Multi-Object Spectrograph On-Instrument Wavefront Sensor".
+  // Location of base stage in arcsec
+  val PickoffArmLength      = 358.46
+  val PickoffMirrorSize     =  20.00
+  val ProbeArmLength        = PickoffArmLength - PickoffMirrorSize / 2.0
+  val ProbeArmTaperedWidth  =  15.00
+  val ProbeArmTaperedLength = 180.00
+
+  val T   = Offset(427.52.arcsecs[OffsetP], 101.84.arcsecs[OffsetQ])
+
+  // Length of stage arm in arcsec
+  val BX  = 124.89
+  val BX2 = BX * BX
+
+  // Length of pick-off arm in arcsec
+  val MX  = 358.46
+  val MX2 = MX * MX
+
+  import edu.gemini.spModel.inst.FeatureGeometry._
 
   override protected val guideProbeInstance = GmosOiwfsGuideProbe.instance
 
-  override def geometry(gmos: InstGmosCommon[D, F, P, SM]): List[Shape] =
-    List(probeArm, pickoffMirror)
+  override def unadjustedGeometry(ctx: ObsContext): Option[Shape] =
+    Some(new Area(probeArm) <| (_.add(new Area(pickoffMirror))))
 
-  private lazy val probeArm: Shape = {
-    val hm = PickoffMirrorSize / 2.0
+  private val probeArm: Shape = {
+    val hm  = PickoffMirrorSize    / 2.0
     val htw = ProbeArmTaperedWidth / 2.0
 
     val (x0, y0) = (hm, -htw)
@@ -35,82 +57,64 @@ class GmosOiwfsProbeArm[D  <: Enum[D]  with GmosCommonType.Disperser,
     val (x4, y4) = (x1, y3)
     val (x5, y5) = (x0, htw)
 
-    val points = List((x0, y0), (x1, y1), (x2, y2), (x3, y3), (x4, y4), (x5, y5))
-    ImPolygon(points)
+    ImPolygon(List((x0, y0), (x1, y1), (x2, y2), (x3, y3), (x4, y4), (x5, y5)))
   }
 
-  private lazy val pickoffMirror: Shape = {
+  private val pickoffMirror: Shape = {
     val xy = -PickoffMirrorSize / 2.0
     new Rectangle2D.Double(xy, xy, PickoffMirrorSize, PickoffMirrorSize)
   }
 
-  override def armAdjustment(ctx0: ObsContext,
-                             guideStarCoords: Coordinates,
-                             offset0: Offset,
-                             T: Point2D): Option[ArmAdjustment] = {
+  override def armAdjustment(ctx: ObsContext, guideStar: Coordinates, offset: Offset): Option[ArmAdjustment] = {
     import ProbeArmGeometry._
 
-    for {
-      ctx <- Option(ctx0)
-      offset <- Option(offset0)
-      wfsOffset <- ctx.getInstrument match {
-        case gmosn: InstGmosNorth => Some(gmosn.getFPUnit.getWFSOffset)
-        case gmoss: InstGmosSouth => Some(gmoss.getFPUnit.getWFSOffset)
-        case _ => None
-      }
-    } yield {
-      val flip = if (ctx.getIssPort == IssPort.SIDE_LOOKING) -1 else 1
-      val posAngle = ctx.getPositionAngle.toRadians.getMagnitude
-      val offsetPt = new Point2D.Double(-offset.p.toArcsecs.getMagnitude, -offset.q.toArcsecs.getMagnitude)
-      val guideStarPt = guideStarPoint(ctx, guideStarCoords)
-      val angle = armAngle(wfsOffset, posAngle, guideStarPt, offsetPt, flip)
-      ArmAdjustment(angle, guideStarPt)
+    val ifuOpt = ctx.getInstrument match {
+      case gmosn: InstGmosNorth => Some(gmosn.getFPUnit.getWFSOffset)
+      case gmoss: InstGmosSouth => Some(gmoss.getFPUnit.getWFSOffset)
+      case _                    => None
+    }
+
+    ifuOpt.map { ifu =>
+      val ifuOffset = Offset(ifu.arcsecs[OffsetP], OffsetQ.Zero)
+      val flip      = ctx.getIssPort == IssPort.SIDE_LOOKING
+      val posAngle  = ctx.getPositionAngle.toNewModel
+      val gsOffset  = guideStarOffset(ctx, guideStar)
+      val angle     = armAngle(posAngle, gsOffset,  offset, ifuOffset, flip)
+      ArmAdjustment(angle, gsOffset)
     }
   }
 
-  /**
-   * Calculate the probe arm angle at the position angle (radians) for the given guide star location
-   * and offset, specified in arcsec.
-   * @param wfsOffset the value of any WFS offset adjustment that may need to be made for the instrument configuration
-   * @param posAngle  the position angle in radians
-   * @param guideStar the guide star position in arcsec
-   * @param offset    the offset in arcsec
-   * @param flip      whether or not things should be flipped in the x-axis, i.e. if the instrument ISS port is
-   *                  side looking
-   * @return          the angle of the probe arm in radians
-   */
-  private def armAngle(wfsOffset: Double,
-                       posAngle: Double,
-                       guideStar: Point2D,
-                       offset: Point2D,
-                       flip: Int): Angle = {
+  /** Calculates the probe arm angle at the position angle for the given guide
+    * star location and offset.
+    *
+    * @param posAngle  position angle
+    * @param gsOffset  guide star position as an offset from the base
+    * @param offset    offset from the base
+    * @param ifuOffset value of any offset adjustment that may need to be made
+    *                  for the instrument configuration
+    * @param flip      flipped in the x-axis, i.e. if the instrument ISS port is
+    *                  side looking
+    * @return          angle of the probe arm
+    */
+  private def armAngle(posAngle: Angle,
+                       gsOffset: Offset,
+                       offset: Offset,
+                       ifuOffset: Offset,
+                       flip: Boolean): Angle = {
     val p = {
-      val posAngleRot = AffineTransform.getRotateInstance(-posAngle)
+      val adj = (offset - ifuOffset).rotate(posAngle)
+      val t   = (if (flip) T.flipQ else T).rotate(posAngle)
+      t + gsOffset - adj
+    }.toPoint
 
-      // The final adjusted offset as modified by the offset adjustment required by the IFU / WFS.
-      val offsetAdj = {
-        val ifuOffset = transformPoint(new Point2D.Double(wfsOffset, 0.0), posAngleRot)
-        new Point2D.Double(offset.getX - ifuOffset.getX, offset.getY - ifuOffset.getY)
-      }
+    val r     = math.hypot(p.getX, p.getY)
+    val r2    = r * r
 
-      // Flip T if necessary and rotate by the position angle.
-      val Tp = {
-        val Ttrans = transformPoint(T, AffineTransform.getScaleInstance(1, flip))
-        transformPoint(Ttrans, posAngleRot)
-      }
-
-      transformPoint(guideStar, AffineTransform.getTranslateInstance(Tp.getX + offsetAdj.getX, Tp.getY + offsetAdj.getY))
-    }
-
-    val r = math.sqrt(p.getX * p.getX + p.getY * p.getY)
-    val r2 = r * r
-
-    // Here we may need to flip y based on ISSPort?
     val alpha = math.atan2(p.getX, p.getY)
-    val phi = {
+    val phi   = {
       val acosArg = (r2 - (BX2 + MX2)) / (2 * BX * MX)
       val acosArgAdj = if (acosArg > 1.0) 1.0 else if (acosArg < -1.0) -1.0 else acosArg
-      math.acos(acosArgAdj) * flip
+      math.acos(acosArgAdj) * (if (flip) -1 else 1)
     }
     val theta = {
       val thetaP = math.asin((MX / r) * math.sin(phi))
@@ -119,35 +123,4 @@ class GmosOiwfsProbeArm[D  <: Enum[D]  with GmosCommonType.Disperser,
 
     Angle.fromRadians(phi - theta - alpha - math.Pi / 2.0)
   }
-}
-
-object GmosOiwfsProbeArm {
-  // Various measurements in arcsec.
-  private val PickoffArmLength      = 358.46
-  private val PickoffMirrorSize     =  20.0
-  private val ProbeArmLength        = PickoffArmLength - PickoffMirrorSize / 2.0
-  private val ProbeArmTaperedWidth  =  15.0
-  private val ProbeArmTaperedLength = 180.0
-
-  // The following values (in arcsec) are used to calculate the position of the OIWFS arm
-  // and are described in the paper "Opto-Mechanical Design of the Gemini Multi-Object
-  // Spectrograph On-Instrument Wavefront Sensor".
-  // Location of base stage in arcsec
-  private val T = new Point2D.Double(-427.52, -101.84)
-
-  // Length of stage arm in arcsec
-  private val BX  = 124.89
-  private val BX2 = BX * BX
-
-  // Length of pick-off arm in arcsec
-  private val MX  = 358.46
-  private val MX2 = MX * MX
-}
-
-// Instances for concrete GMOS implementations. instance member for simplified Java access.
-object GmosNorthOiwfsProbeArm extends GmosOiwfsProbeArm[GmosNorthType.DisperserNorth, GmosNorthType.FilterNorth, GmosNorthType.FPUnitNorth, GmosNorthType.StageModeNorth] {
-  val instance = this;
-}
-object GmosSouthOiwfsProbeArm extends GmosOiwfsProbeArm[GmosSouthType.DisperserSouth, GmosSouthType.FilterSouth, GmosSouthType.FPUnitSouth, GmosSouthType.StageModeSouth] {
-  val instance = this;
 }

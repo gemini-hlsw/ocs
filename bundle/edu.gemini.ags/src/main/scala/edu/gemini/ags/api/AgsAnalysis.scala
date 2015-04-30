@@ -11,6 +11,9 @@ import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.rich.shared.immutable._
 import edu.gemini.spModel.target.SPTarget
 
+import scalaz._
+import Scalaz._
+
 sealed trait AgsGuideQuality {
   def message: String
 }
@@ -34,6 +37,23 @@ object AgsGuideQuality {
 
   val All: List[AgsGuideQuality] =
     List(DeliversRequestedIq, PossibleIqDegradation, IqDegradation, PossiblyUnusable, Unusable)
+
+  private val orderByIndex = All.zipWithIndex.toMap
+
+  implicit val AgsGuideQualityOrder: Order[AgsGuideQuality] =
+    Order.orderBy(orderByIndex)
+
+  implicit val AgsGuideQualityOrdering: scala.math.Ordering[AgsGuideQuality] =
+    scala.math.Ordering.by(orderByIndex)
+
+  implicit val AgsGuideQualityShow: Show[AgsGuideQuality] =
+    Show.shows {
+      case DeliversRequestedIq   => "Delivers Requested IQ"
+      case PossibleIqDegradation => "Possible IQ Degradation"
+      case IqDegradation         => "IQ Degradation"
+      case PossiblyUnusable      => "Possibly Unusable"
+      case Unusable              => "Unusable"
+    }
 }
 
 sealed trait AgsAnalysis {

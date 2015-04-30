@@ -785,7 +785,7 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
      * be a rectangular region.
      */
     public double[] getScienceArea() {
-        return new F2ScienceAreaGeometry(this).scienceAreaDimensionsAsJava();
+        return F2ScienceAreaGeometry.javaScienceAreaDimensions(this);
     }
 
     public double getRecommendedExposureTimeSecs() {
@@ -1411,6 +1411,6 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
 
     @Override
     public ScienceAreaGeometry getVignettableScienceArea() {
-        return new F2ScienceAreaGeometry(this);
+        return F2ScienceAreaGeometry$.MODULE$;
     }
 }

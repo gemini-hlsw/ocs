@@ -6,6 +6,7 @@
 //
 package jsky.app.ot.gemini.tpe;
 
+import edu.gemini.pot.ModelConverters;
 import edu.gemini.pot.sp.ISPNode;
 import edu.gemini.shared.util.immutable.None;
 import edu.gemini.shared.util.immutable.Option;
@@ -231,6 +232,8 @@ public class EdIterOffsetFeature extends TpeImageFeature
                 final OffsetPosBase op = pme.taggedPos;
                 if (p == null || op == null) return;
 
+                final edu.gemini.spModel.core.Offset newOff = ModelConverters.toOffset(op);
+
                 double x = p.x;
                 double y = p.y;
 
@@ -238,12 +241,12 @@ public class EdIterOffsetFeature extends TpeImageFeature
                     case SciAreaFeature.SCI_AREA_SELECTED:
                         if ((selected.contains(op)) || ((selected.isEmpty()) && (op == first))) {
                             g.setColor(OFFSET_SCI_AREA_COLOR);
-                            _sciAreaFeature.drawAtOffsetPos(g, tii, x, y);
+                            _sciAreaFeature.drawAtOffsetPos(g, tii, newOff, x, y);
                         }
                         break;
                     case SciAreaFeature.SCI_AREA_ALL:
                         g.setColor(OFFSET_SCI_AREA_COLOR);
-                        _sciAreaFeature.drawAtOffsetPos(g, tii, x, y);
+                        _sciAreaFeature.drawAtOffsetPos(g, tii, newOff, x, y);
                         break;
                 }
                 final Option<ObsContext> obsCtxOpt=_iw.getObsContext();
@@ -275,7 +278,7 @@ public class EdIterOffsetFeature extends TpeImageFeature
     public Option<Object> dragStart(TpeMouseEvent tme, TpeImageInfo tii) {
         for (OffsetPosMap posMap : posMaps) {
             _dragObject = SelectedPos.find(posMap, tme);
-            if (_dragObject != null) return new Some<Object>(_dragObject.entry.taggedPos);
+            if (_dragObject != null) return new Some<>(_dragObject.entry.taggedPos);
         }
         return None.instance();
     }

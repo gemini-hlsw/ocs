@@ -1,77 +1,89 @@
 package edu.gemini.spModel.gemini.gmos
 
-import java.awt.Shape
-import java.awt.geom.{Rectangle2D, Area}
-
-import edu.gemini.shared.util.immutable.{DefaultImList, ImPolygon}
+import edu.gemini.shared.util.immutable.ImPolygon
 import edu.gemini.spModel.inst.ScienceAreaGeometry
-import edu.gemini.spModel.core.Site
+import edu.gemini.spModel.gemini.gmos.GmosCommonType._
+import edu.gemini.spModel.gemini.gmos.GmosCommonType.FPUnitMode.{BUILTIN, CUSTOM_MASK}
+import edu.gemini.spModel.obs.context.ObsContext
 
-import scala.collection.JavaConverters._
+import java.awt.Shape
+import java.awt.geom.{AffineTransform, Rectangle2D, Area}
 
-class GmosScienceAreaGeometry[I  <: InstGmosCommon[D,F,P,SM],
-                              D  <: Enum[D]  with GmosCommonType.Disperser,
-                              F  <: Enum[F]  with GmosCommonType.Filter,
-                              P  <: Enum[P]  with GmosCommonType.FPUnit,
-                              SM <: Enum[SM] with GmosCommonType.StageMode](inst0: I) extends ScienceAreaGeometry {
-  import GmosScienceAreaGeometry._
+import scalaz._
+import Scalaz._
 
-  override def geometry: List[Shape] = {
-    Option(inst0).fold(List[Shape]()) { inst =>
-      lazy val width   = inst.getScienceArea()(1)
-      lazy val isSouth = inst.getSite.contains(Site.GS)
-      inst.getFPUnitMode match {
-        case GmosCommonType.FPUnitMode.BUILTIN if inst.isImaging       => List(fov(ImagingFOVSize, ImagingFOVInnerSize))
-        case GmosCommonType.FPUnitMode.BUILTIN if inst.isSpectroscopic => List(longSlitFOV(width))
-        case GmosCommonType.FPUnitMode.BUILTIN if inst.isIFU           => List(ifuFOV(inst.getFPUnit, isSouth))
-        case GmosCommonType.FPUnitMode.BUILTIN if inst.isNS            => List(nsFOV(width))
-        case GmosCommonType.FPUnitMode.CUSTOM_MASK                     => List(fov(MOSFOVSize, MOSFOVInnerSize))
-        case _                                                         => Nil
+object GmosScienceAreaGeometry extends ScienceAreaGeometry {
+  val instance = this
+
+  // Various sizes used in the calculation of the science area in arcsec.
+  val ImagingFovSize          = 330.34
+  val ImagingFovInnerSize     = 131.33 * 2
+
+  val ImagingCenterCcdWidth   = 165.60
+  val ImagingGapWidth         =   3.00
+
+  val MosFovSize              = ImagingFovSize - 2 * 8.05
+  val MOSFovInnerSize         = 139.38 * 2
+
+  val LongSlitFovHeight       = 108.00
+  val LongSlitFovBridgeHeight =   3.20
+
+  override def unadjustedGeometry(ctx: ObsContext): Option[Shape] = {
+    def gmosGeo(mode: FPUnitMode, fpu: FPUnit, isSouth: Boolean): Option[Shape] =
+      mode match {
+        case BUILTIN if fpu.isImaging       => Some(imagingFov.toShape)
+        case BUILTIN if fpu.isSpectroscopic => Some(longSlitFOV(scienceAreaDimensions(fpu)._1))
+        case BUILTIN if fpu.isIFU           => Some(ifuFOV(fpu, isSouth))
+        case BUILTIN if fpu.isNS            => Some(nsFOV(scienceAreaDimensions(fpu)._1))
+        case CUSTOM_MASK                    => Some(mosFov.toShape)
+        case _                              => None
       }
+
+    ctx.getInstrument match {
+      case gn: InstGmosNorth => gmosGeo(gn.getFPUnitMode, gn.getFPUnit, isSouth = false)
+      case gs: InstGmosSouth => gmosGeo(gs.getFPUnitMode, gs.getFPUnit, isSouth = true )
+      case _                 => None
     }
   }
 
-  // We need to override this due to the subtypes of InstGmosCommon. Otherwise, the supermethod fails to properly
-  // be called and an exception is thrown.
-  override def geometryAsJava: edu.gemini.shared.util.immutable.ImList[Shape] =
-    DefaultImList.create(geometry.asJava)
-
-  override def scienceAreaDimensions: (Double, Double) = {
-    Option(inst0).map { inst =>
-      val width = inst.getFPUnit.getWidth
-      if (width != -1)
-        (ImagingFOVSize, width)
-      else
-        (ImagingFOVSize, ImagingFOVSize)
-    }.getOrElse((0.0, 0.0))
+  def scienceAreaDimensions(fpu: FPUnit): (Double, Double) = {
+    val width = fpu.getWidth
+    if (width != -1) (width, ImagingFovSize) else (ImagingFovSize, ImagingFovSize)
   }
 
-  /**
-   * Return a field of view for the specified size.
-   * Note that this needs to be offset by the base screen position, rotated by the position angle, and
-   * scaled by the pixels per arcsecond to represent the final field of view in the TPE.
-   * @param size            the basic size of a square, in arcsec, centred at the base pos
-   * @param innerSize       the length of a side after cutting off the corners, in arcsec
-   * @return                the shape matching the specifications
-   */
-  private def fov(size: Double, innerSize: Double): Shape = {
-    val d1         = size / 2
-    val d2         = innerSize / 2
+  def javaScienceAreaDimensions(fpu: FPUnit): Array[Double] =
+    scienceAreaDimensions(fpu) match { case (w,h) => Array(w,h) }
 
-    val cornerSize = d1 - d2
+  case class ImagingFov(ccdLeft: Shape, ccdCenter: Shape, ccdRight: Shape) {
+    def toList: List[Shape] = List(ccdLeft, ccdCenter, ccdRight)
 
-    val (x0, y0) = (-d1 + cornerSize, -d1)
-    val (x1, y1) = ( x0 + innerSize ,  y0)
-    val (x2, y2) = ( x1 + cornerSize,  y1 + cornerSize)
-    val (x3, y3) = ( x2             ,  y2 + innerSize)
-    val (x4, y4) = ( x3 - cornerSize,  y3 + cornerSize)
-    val (x5, y5) = ( x4 - innerSize ,  y4)
-    val (x6, y6) = ( x5 - cornerSize,  y5 - cornerSize)
-    val (x7, y7) = ( x6             ,  y6 - innerSize)
-    val points   = List((x0,y0), (x1,y1), (x2,y2), (x3,y3),
-                        (x4,y4), (x5,y5), (x6,y6), (x7,y7))
-    ImPolygon(points)
+    def toShape: Shape =
+      new Area(ccdLeft) <| (_.add(new Area(ccdCenter))) <| (_.add(new Area(ccdRight)))
   }
+
+  private def fov(size: Double, innerSize: Double): ImagingFov = {
+    val half     = size / 2
+    val corner   = (size - innerSize) / 2
+    val lrWidth  = (size - ImagingCenterCcdWidth - ImagingGapWidth * 2) / 2
+
+    val left = {
+      val (x0, y0) = (-half,           -half + corner)
+      val (x1, y1) = (-half + corner,  -half)
+      val (x2, y2) = (-half + lrWidth, -half)
+      val (x3, y3) = (x2,              -y2)
+      val (x4, y4) = (x1,              -y1)
+      val (x5, y5) = (x0,              -y0)
+      ImPolygon(List((x0,y0), (x1,y1), (x2,y2), (x3,y3), (x4,y4), (x5,y5)))
+    }
+
+    val right   = AffineTransform.getScaleInstance(-1.0, 1.0).createTransformedShape(left)
+    val center  = new Rectangle2D.Double(-ImagingCenterCcdWidth/2, -half, ImagingCenterCcdWidth, size)
+
+    ImagingFov(left, center, right)
+  }
+
+  val imagingFov = fov(ImagingFovSize, ImagingFovInnerSize)
+  val mosFov     = fov(MosFovSize, MOSFovInnerSize)
 
   /**
    * Create a field of view consisting of three slits along the y axis.
@@ -79,8 +91,8 @@ class GmosScienceAreaGeometry[I  <: InstGmosCommon[D,F,P,SM],
    * @return                the shape matching the specifications
    */
   private def longSlitFOV(slitWidth: Double): Shape = {
-    val slitHeight   = LongSlitFOVHeight
-    val bridgeHeight = LongSlitFOVBridgeHeight
+    val slitHeight   = LongSlitFovHeight
+    val bridgeHeight = LongSlitFovBridgeHeight
 
     val x = -slitWidth / 2
     val d = slitHeight + bridgeHeight
@@ -100,7 +112,7 @@ class GmosScienceAreaGeometry[I  <: InstGmosCommon[D,F,P,SM],
    * @return                the shape matching the specifications
    */
   private def nsFOV(slitWidth: Double): Shape = {
-    val slitHeight = LongSlitFOVHeight
+    val slitHeight = LongSlitFovHeight
     val x = -slitWidth  / 2
     val y = -slitHeight / 2
     new Rectangle2D.Double(x, y, slitWidth, slitHeight)
@@ -164,19 +176,6 @@ class GmosScienceAreaGeometry[I  <: InstGmosCommon[D,F,P,SM],
     } area.add(new Area(slit))
     area
   }
-}
-
-
-object GmosScienceAreaGeometry {
-  // Various sizes used in the calculation of the science area in arcsec.
-  val ImagingFOVSize          = 330.34
-  val ImagingFOVInnerSize     = 131.33 * 2
-
-  val MOSFOVSize              = ImagingFOVSize - 2 * 8.05
-  val MOSFOVInnerSize         = 139.38 * 2
-
-  val LongSlitFOVHeight       = 108.0
-  val LongSlitFOVBridgeHeight = 3.2
 
 
   // IFU visualisation in TPE
@@ -207,17 +206,17 @@ object GmosScienceAreaGeometry {
   // Allan: Note: For GMOS-S it is the smaller rect that is centered on the base position
   // (The display is reversed).
   // The offset from the base position and the dimensions of the IFU FOV in arcsec.
-  val IFUFOVOffset = 30.0
+  val IfuFovOffset = 30.0
 
   // The rectangles that are used to define the IFU field of view. In some cases, we do not use both,
   // hence the use method to determine if they should be used in creating the science area.
   sealed case class IFUFOVRectangle(rect: Rectangle2D) {
     def use(widthAdjust: Int): Boolean = true
   }
-  object IFUFOVSmallerRectangle extends IFUFOVRectangle(new Rectangle2D.Double(-30.0 - IFUFOVOffset, 0.0, 3.5, 5.0)) {
+  object IFUFOVSmallerRectangle extends IFUFOVRectangle(new Rectangle2D.Double(-30.0 - IfuFovOffset, 0.0, 3.5, 5.0)) {
     override def use(widthAdjust: Int): Boolean =
       widthAdjust == 0
   }
-  object IFUFOVLargerRectangle  extends IFUFOVRectangle(new Rectangle2D.Double( 30.0 - IFUFOVOffset, 0.0, 7.5, 5.0))
+  object IFUFOVLargerRectangle  extends IFUFOVRectangle(new Rectangle2D.Double( 30.0 - IfuFovOffset, 0.0, 7.5, 5.0))
   val IFUFOVs = Set(IFUFOVSmallerRectangle, IFUFOVLargerRectangle)
 }
