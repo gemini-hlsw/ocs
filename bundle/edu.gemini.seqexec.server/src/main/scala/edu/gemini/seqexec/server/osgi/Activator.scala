@@ -1,13 +1,14 @@
-package edu.gemini.seqexec.client.osgi
+package edu.gemini.seqexec.server.osgi
 
-import org.osgi.framework.{ServiceRegistration, BundleContext, BundleActivator}
+import org.osgi.framework.{BundleActivator, BundleContext, ServiceRegistration}
 
 object Activator {
-  val CommandScope    = "osgi.command.scope"
+  val CommandScope = "osgi.command.scope"
   val CommandFunction = "osgi.command.function"
 }
 
 class Activator extends BundleActivator {
+
   import Activator._
 
   private var reg: Option[ServiceRegistration[Commands]] = None
