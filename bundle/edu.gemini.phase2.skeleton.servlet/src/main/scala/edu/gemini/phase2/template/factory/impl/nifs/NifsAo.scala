@@ -32,7 +32,7 @@ case class NifsAo(blueprint: SpNifsBlueprintAo, exampleTarget: Option[SPTarget])
   //     ACQ={3,4,5,23}
   //   SCI={6}
   // ELSEIF OCCULTING DISK != None
-  //    IF target information contains a H magnitude
+  //    IF target information contains a K magnitude
   //      IF BT  then ACQ={11}   # Bright Object
   //      IF MT  then ACQ={12}   # Medium Object
   //      IF FT  then ACQ={12}   # Faint Object

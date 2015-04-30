@@ -37,7 +37,7 @@ case class Nifs(blueprint:SpNifsBlueprint, exampleTarget: Option[SPTarget]) exte
   // ### Target Group
   // INCLUDE {1},{2},ACQ,SCI,{7},{8} in target-specific Scheduling Group
 
-  include(List(1, 2, sci) ++ acq ++ List(7, 8): _*) in TargetGroup
+  include(List(1, 2) ++ acq ++ List(sci, 7, 8): _*) in TargetGroup
 
   // # Disperser
   //   SET DISPERSER from PI (all observations)
