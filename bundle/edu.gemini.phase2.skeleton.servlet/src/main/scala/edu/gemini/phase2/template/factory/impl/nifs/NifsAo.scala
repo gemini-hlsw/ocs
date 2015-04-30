@@ -109,7 +109,7 @@ case class NifsAo(blueprint: SpNifsBlueprintAo, exampleTarget: Option[SPTarget])
 
       if (occultingDisk.isOccultingDisk) {
         forGroup(TargetGroup)(
-          setFpmWithAcq(acq, occultingDisk)) // hmm
+          setFpmWithAcq(acq, occultingDisk))
       }
 
   }
