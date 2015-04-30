@@ -39,13 +39,25 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
 
-
 /**
  * This widget displays the contents of a TableQueryResult in a JTable and
  * implements scrolling, editing, searching and sorting methods.
  */
 public class TableDisplay extends JPanel
         implements QueryResultDisplay, PrintableWithDialog, SaveableAsHTML, Storeable {
+
+    private static final TableCellRenderer MagnitudeRenderer = new DefaultTableCellRenderer() {
+        {
+            setHorizontalAlignment(SwingConstants.RIGHT);
+        }
+
+        @Override
+        public void setValue(Object value) {
+            if (value instanceof Double) {
+                setText(String.format("%.2f", value));
+            }
+        }
+    };
 
     /** The table object containing the data to be displayed */
     private TableQueryResult _tableQueryResult;
@@ -90,7 +102,6 @@ public class TableDisplay extends JPanel
         _queryResultDisplay = queryResultDisplay;
         _table = new SortedJTable();
         setBackground(Color.white);
-        //_table.setIntercellSpacing(new Dimension(6, 3));
         if (tableQueryResult != null)
             setModel(tableQueryResult);
 
@@ -252,11 +263,13 @@ public class TableDisplay extends JPanel
                 Class<?> c = _tableQueryResult.getColumnClass(col);
                 if (c != null && c.isArray()) {
                     column.setCellRenderer(new ArrayTableCellRenderer(c));
-                } else if (c.equals(String.class) || c.equals(Object.class)) {
+                } else if (String.class.equals(c) || Object.class.equals(c)) {
                     // center non-numeric columns, to leave more space
                     DefaultTableCellRenderer renderer = new DefaultTableCellRenderer();
                     renderer.setHorizontalAlignment(JLabel.CENTER);
                     column.setCellRenderer(renderer);
+                } else if (Double.class.equals(c)) {
+                    column.setCellRenderer(MagnitudeRenderer);
                 }
             }
         }
