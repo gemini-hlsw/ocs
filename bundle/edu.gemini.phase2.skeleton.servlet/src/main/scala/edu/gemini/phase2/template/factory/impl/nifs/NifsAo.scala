@@ -18,8 +18,8 @@ case class NifsAo(blueprint: SpNifsBlueprintAo, exampleTarget: Option[SPTarget])
 
   val tb = exampleTarget.flatMap(t => Option(t.getTarget.getMagnitude(Band.K).getOrNull)).map(_.getBrightness).map(TargetBrightness(_))
 
-  if (tb.isEmpty)
-    addNote("foo") in TargetGroup
+  // These two notes should be included at the top of every NIFS program
+  addNote("Phase II Requirements: General Information", "Phase II  \"BEFORE Submission\" Checklist") in TargetGroup
 
   // # Select acquisition and science observation
   // IF OCCULTING DISK == None

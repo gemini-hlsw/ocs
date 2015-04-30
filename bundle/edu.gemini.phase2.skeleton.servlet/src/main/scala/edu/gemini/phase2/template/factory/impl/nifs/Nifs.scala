@@ -14,8 +14,8 @@ case class Nifs(blueprint:SpNifsBlueprint, exampleTarget: Option[SPTarget]) exte
 
   val tb = exampleTarget.flatMap(t => Option(t.getTarget.getMagnitude(Band.K).getOrNull)).map(_.getBrightness).map(TargetBrightness(_))
 
-  if (tb.isEmpty)
-    addNote("foo") in TargetGroup
+  // These two notes should be included at the top of every NIFS program
+  addNote("Phase II Requirements: General Information", "Phase II  \"BEFORE Submission\" Checklist") in TargetGroup
 
   // # Select acquisition and science observation
   //    IF target information contains a H magnitude
@@ -28,9 +28,10 @@ case class Nifs(blueprint:SpNifsBlueprint, exampleTarget: Option[SPTarget]) exte
 
   val (acq, sci) =
     (tb.collect {
-      case BT => List(3)
-      case MT => List(4)
-      case FT => List(5)
+      case BT  => List(3)
+      case MT  => List(4)
+      case FT  => List(5)
+      case BAT => List(4)
     }.getOrElse(List(3, 4, 5)),
       6)
 

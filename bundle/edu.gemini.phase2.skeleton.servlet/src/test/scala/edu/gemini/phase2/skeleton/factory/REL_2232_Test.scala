@@ -15,26 +15,20 @@ import scalaz.syntax.id._
 
 class REL_2232_Test extends Specification {
 
-  val NoteTitle = "foo"
+  val NoteTitles = List("Phase II Requirements: General Information", "Phase II  \"BEFORE Submission\" Checklist")
 
-  def incSpec(name: String, g: GroupInitializer[_], inc: Set[Int], excl: Set[Int], note: Boolean) = {
-    name should {
+  def incSpec(name: String, g: GroupInitializer[_], inc: Set[Int], excl: Set[Int]) = {
+    s"Initialized $name" should {
+      s"include obs ${inc.mkString("{",",","}")} in target group" in {
+        g.targetGroup.filter(inc).toSet must_== inc
+      }
       if (excl.nonEmpty) {
-        s"exclude ${excl.mkString("{", ",", "}")}" in {
+        s"exclude obs ${excl.mkString("{", ",", "}")} from target group" in {
           g.targetGroup.filter(excl) must beEmpty
         }
       }
-      s"include ${inc.mkString("{",",","}")}" in {
-        g.targetGroup.filter(inc).toSet must_== inc
-      }
-      if (note) {
-        "includes note" in {
-          g.notes must contain(NoteTitle)
-        }
-      } else {
-        "excludes note" in {
-          g.notes must not contain(NoteTitle)
-        }
+      s"includes notes ${NoteTitles.mkString("{'", "','", "'}")}" in {
+        g.notes must containAllOf(NoteTitles)
       }
     }
   }
@@ -43,20 +37,32 @@ class REL_2232_Test extends Specification {
   val bpAo   = new SpNifsBlueprintAo(SpAltairNone.instance, NIFSParams.Mask.CLEAR, NIFSParams.Disperser.DEFAULT)
   val bpAoOD = new SpNifsBlueprintAo(SpAltairNone.instance, NIFSParams.Mask.OD_1, NIFSParams.Disperser.DEFAULT)
 
-  val ht  = new SPTarget <| (_.getTarget.putMagnitude(new Magnitude(Band.H, 5.0))) // bright
-  val nht = new SPTarget
+  val nt  = new SPTarget
+  val ht  = new SPTarget <| (_.getTarget.putMagnitude(new Magnitude(Band.H, 5.0)))
+  def kt(m: Double)  = new SPTarget <| (_.getTarget.putMagnitude(new Magnitude(Band.K, m)))
 
-  incSpec("NIFS template with no example target",       Nifs(bp, None), Set(3, 4, 5), Set(), true)
-  incSpec("NIFS template with no H-mag",                Nifs(bp, Some(nht)), Set(3, 4, 5), Set(), true)
-  incSpec("NIFS template with h-mag",                   Nifs(bp, Some(ht)), Set(3), Set(4, 5), false)
+  incSpec("NIFS template with no example target", Nifs(bp, None),         Set(3, 4, 5), Set())
+  incSpec("NIFS template with no magnitudes",     Nifs(bp, Some(nt)),     Set(3, 4, 5), Set())
+  incSpec("NIFS template with H-mag",             Nifs(bp, Some(ht)),     Set(3, 4, 5), Set())
+  incSpec("NIFS template with K-mag BT",          Nifs(bp, Some(kt(5))),  Set(3),       Set(4, 5))
+  incSpec("NIFS template with K-mag MT",          Nifs(bp, Some(kt(10))), Set(4),       Set(3, 5))
+  incSpec("NIFS template with K-mag FT",          Nifs(bp, Some(kt(15))), Set(5),       Set(3, 4))
+  incSpec("NIFS template with K-mag BAT",         Nifs(bp, Some(kt(21))), Set(4),       Set(3, 5))
 
-  incSpec("NIFS AO template with no example target",    NifsAo(bpAo, None), Set(3, 4, 5), Set(), true)
-  incSpec("NIFS AO template with no H-mag",             NifsAo(bpAo, Some(nht)), Set(3, 4, 5), Set(), true)
-  incSpec("NIFS AO template with h-mag",                NifsAo(bpAo, Some(ht)), Set(3), Set(4, 5), false)
+  incSpec("NIFS AO template with no example target", NifsAo(bpAo, None),         Set(3, 4, 5, 23), Set())
+  incSpec("NIFS AO template with no magnitudes",     NifsAo(bpAo, Some(nt)),     Set(3, 4, 5, 23), Set())
+  incSpec("NIFS AO template with H-mag",             NifsAo(bpAo, Some(ht)),     Set(3, 4, 5, 23), Set())
+  incSpec("NIFS AO template with K-mag BT",          NifsAo(bpAo, Some(kt(5))),  Set(3),           Set(4, 5, 23))
+  incSpec("NIFS AO template with K-mag MT",          NifsAo(bpAo, Some(kt(10))), Set(4),           Set(3, 5, 23))
+  incSpec("NIFS AO template with K-mag FT",          NifsAo(bpAo, Some(kt(15))), Set(5),           Set(3, 4, 23))
+  incSpec("NIFS AO template with K-mag BAT",         NifsAo(bpAo, Some(kt(21))), Set(23),          Set(3, 4, 5))
 
-  incSpec("NIFS AO OD template with no example target", NifsAo(bpAoOD, None), Set(11, 12), Set(), true)
-  incSpec("NIFS AO OD template with no H-mag",          NifsAo(bpAoOD, Some(nht)), Set(11, 12), Set(), true)
-  incSpec("NIFS AO OD template with h-mag",             NifsAo(bpAoOD, Some(ht)), Set(11), Set(12), false)
-
+  incSpec("NIFS AO OD template with no example target", NifsAo(bpAoOD, None),         Set(11, 12), Set())
+  incSpec("NIFS AO OD template with no magnitudes",     NifsAo(bpAoOD, Some(nt)),     Set(11, 12), Set())
+  incSpec("NIFS AO OD template with H-mag",             NifsAo(bpAoOD, Some(ht)),     Set(11, 12), Set())
+  incSpec("NIFS AO OD template with K-mag BT",          NifsAo(bpAoOD, Some(kt(5))),  Set(11),     Set(12))
+  incSpec("NIFS AO OD template with K-mag MT",          NifsAo(bpAoOD, Some(kt(10))), Set(12),     Set(11))
+  incSpec("NIFS AO OD template with K-mag FT",          NifsAo(bpAoOD, Some(kt(15))), Set(12),     Set(11))
+  incSpec("NIFS AO OD template with K-mag BAT",         NifsAo(bpAoOD, Some(kt(21))), Set(12),     Set(11))
 
 }
