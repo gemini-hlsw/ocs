@@ -1,8 +1,11 @@
 package edu.gemini.itc.web.servlets;
 
 import edu.gemini.itc.gmos.Gmos;
+import edu.gemini.itc.gmos.GmosRecipe;
+import edu.gemini.itc.gnirs.GnirsRecipe;
 import edu.gemini.itc.nifs.Nifs;
 import edu.gemini.itc.nifs.NifsParameters;
+import edu.gemini.itc.nifs.NifsRecipe;
 import edu.gemini.itc.operation.DetectorsTransmissionVisitor;
 import edu.gemini.itc.shared.*;
 import edu.gemini.itc.web.html.FormatStringWriter;
@@ -15,6 +18,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
@@ -67,33 +72,25 @@ public final class ImageServlet extends HttpServlet {
     private static final int UpperLimit = 600;
 
     /** Hash map that temporarily stores calculation results which will be needed for charts and data files. */
-    private static final Map<UUID, Tuple2<Long, SpectroscopyResult[]>> cachedResult = new ConcurrentHashMap<>(UpperLimit);
+    private static final Map<UUID, Tuple2<Long, ItcSpectroscopyResult>> cachedResult = new ConcurrentHashMap<>(UpperLimit);
 
-    /** Stores a single spectroscopy result. */
-    public static Tuple2<UUID, SpectroscopyResult> cache(final SpectroscopyResult result) {
-        final SpectroscopyResult[] arr = new SpectroscopyResult[1];
-        arr[0] = result;
-        final Tuple2<UUID, SpectroscopyResult[]> stored = cache(arr);
-        return new Tuple2<>(stored._1(), result);
-    }
-
-    /** Stores an array of spectroscopy results (multiple CCDs) */
-    public static Tuple2<UUID, SpectroscopyResult[]> cache(final SpectroscopyResult[] result) {
+    /** Caches a spectroscopy result */
+    public static UUID cache(final ItcSpectroscopyResult result) {
         if (cachedResult.size() > UpperLimit) {
             cleanCache();
         }
         final UUID id = UUID.randomUUID();
         cachedResult.put(id, new Tuple2<>(System.currentTimeMillis(), result));
-        return new Tuple2<>(id, result);
+        return id;
     }
 
     /** Retrieves an array of results for multiple CCDs. */
-    private static SpectroscopyResult[] results(final String id) {
-        return results(UUID.fromString(id));
+    private static ItcSpectroscopyResult result(final String id) {
+        return result(UUID.fromString(id));
     }
 
-    private static SpectroscopyResult[] results(final UUID id) {
-        final Tuple2<Long, SpectroscopyResult[]> r = cachedResult.get(id);
+    private static ItcSpectroscopyResult result(final UUID id) {
+        final Tuple2<Long, ItcSpectroscopyResult> r = cachedResult.get(id);
         if (r == null) throw new IdTimedOutException();
         return cachedResult.get(id)._2();
 
@@ -151,121 +148,32 @@ public final class ImageServlet extends HttpServlet {
     // ===
 
     public static BufferedImage toImage(final String id, final String filename, final int index) {
-        final SpectroscopyResult[] results = results(id);
+        final ItcSpectroscopyResult results = result(id);
         final PlottingDetails pd = new PlottingDetails(PlottingDetails.PlotLimits.AUTO, 0, 1); // TODO how do we get the plot details parameters?? encode them in url??
         final ITCChart file;
         switch (filename) {
-            case SigChart:      file = PrinterBase.createSignalChart(pd, results[0], 0);   break;
-            case S2NChart:      file = PrinterBase.createS2NChart(pd, results[0], 0);      break;
-            case SigSwApChart:  file = PrinterBase.createSignalChart(pd, results[0], "Signal and SQRT(Background) in software aperture of " + results[0].specS2N()[0].getSpecNpix() + " pixels", 0);   break;
-            case NifsSigChart:  file = PrinterBase.createSignalChart(pd, results[0], getNifsSigChartTitle(results[0], index), index);   break;
-            case NifsS2NChart:  file = PrinterBase.createS2NChart(pd, results[0], getNifsS2NChartTitle(results[0], index), index);   break;
-            case GnirsSigChart: file = PrinterBase.createGnirsSignalChart(pd, (GnirsSpectroscopyResult) results[0]);   break;
-            case GnirsS2NChart: file = PrinterBase.createGnirsS2NChart(pd, (GnirsSpectroscopyResult) results[0]);  break;
-            case GmosSigChart:  file = PrinterBase.createGmosChart(pd, results, GmosSigChart);   break;
-            case GmosS2NChart:  file = PrinterBase.createGmosChart(pd, results, GmosS2NChart);  break;
+            case SigChart:      file = ITCChart.forSpcDataSet(results.dataSets().apply(0), pd);   break;
+            case S2NChart:      file = ITCChart.forSpcDataSet(results.dataSets().apply(1), pd);   break;
+            case SigSwApChart:  file = ITCChart.forSpcDataSet(results.dataSets().apply(0), pd);   break;
+            case NifsSigChart:  file = ITCChart.forSpcDataSet(results.dataSets().apply(2*index),   pd);   break;
+            case NifsS2NChart:  file = ITCChart.forSpcDataSet(results.dataSets().apply(2 * index + 1), pd); break;
+            case GnirsSigChart: file = ITCChart.forSpcDataSet(results.dataSets().apply(0), pd);   break;
+            case GnirsS2NChart: file = ITCChart.forSpcDataSet(results.dataSets().apply(1), pd);  break;
+            case GmosSigChart:  file = ITCChart.forSpcDataSet(results.dataSets().apply(0), pd);   break;
+            case GmosS2NChart:  file = ITCChart.forSpcDataSet(results.dataSets().apply(1), pd);  break;
             default:            throw new Error();
         }
         return file.getBufferedImage();
     }
 
-    private static String getNifsSigChartTitle(final SpectroscopyResult result, final int index) {
-        final FormatStringWriter device = new FormatStringWriter();
-        device.setPrecision(3);  // NO decimal places
-        device.clear();
-        final Nifs instrument = (Nifs) result.instrument();
-        final List<Double> ap_offset_list = instrument.getIFU().getApertureOffsetList();
-        return instrument.getIFUMethod().equals(NifsParameters.SUMMED_APERTURE_IFU) ?
-                "Signal and Background (IFU summed apertures: " +
-                        device.toString(instrument.getIFUNumX()) + "x" + device.toString(instrument.getIFUNumY()) +
-                        ", " + device.toString(instrument.getIFUNumX() * instrument.getIFU().IFU_LEN_X) + "\"x" +
-                        device.toString(instrument.getIFUNumY() * instrument.getIFU().IFU_LEN_Y) + "\")" :
-                "Signal and Background (IFU element offset: " + device.toString(ap_offset_list.get(index)) + " arcsec)";
-    }
-    private static String getNifsS2NChartTitle(final SpectroscopyResult result, final int index) {
-        final FormatStringWriter device = new FormatStringWriter();
-        device.setPrecision(3);  // NO decimal places
-        device.clear();
-        final Nifs instrument = (Nifs) result.instrument();
-        final List<Double> ap_offset_list = instrument.getIFU().getApertureOffsetList();
-        return instrument.getIFUMethod().equals(NifsParameters.SUMMED_APERTURE_IFU) ?
-                "Intermediate Single Exp and Final S/N \n(IFU apertures:" +
-                        device.toString(instrument.getIFUNumX()) + "x" + device.toString(instrument.getIFUNumY()) +
-                        ", " + device.toString(instrument.getIFUNumX() * instrument.getIFU().IFU_LEN_X) + "\"x" +
-                        device.toString(instrument.getIFUNumY() * instrument.getIFU().IFU_LEN_Y) + "\")" :
-                "Intermediate Single Exp and Final S/N (IFU element offset: " + device.toString(ap_offset_list.get(index)) + " arcsec)";
 
-    }
-
-
-
-    // TODO: where should this code live?
     public static String toFile(final String id, final String filename, final int index) {
-        final SpectroscopyResult[] results = results(id);
-        final String file;
-        switch (filename) {
-            case SigSpec:               file = toFile(results[0].specS2N()[index].getSignalSpectrum());             break;
-            case BackSpec:              file = toFile(results[0].specS2N()[index].getBackgroundSpectrum());         break;
-            case SingleS2N:             file = toFile(results[0].specS2N()[index].getExpS2NSpectrum());             break;
-            case FinalS2N:              file = toFile(results[0].specS2N()[index].getFinalS2NSpectrum());           break;
-            case GnirsSigOrder:         file = toFile(((GnirsSpectroscopyResult)results[0]).signalOrder());     break;
-            case GnirsBgOrder:          file = toFile(((GnirsSpectroscopyResult)results[0]).backGroundOrder()); break;
-            case GnirsFinalS2NOrder:    file = toFile(((GnirsSpectroscopyResult)results[0]).finalS2NOrder());   break;
-            case GmosSigSpec:           file = toFile(results, SigSpec);                                    break;
-            case GmosBackSpec:          file = toFile(results, BackSpec);                                   break;
-            case GmosSingleS2N:         file = toFile(results, SingleS2N);                                  break;
-            case GmosFinalS2N:          file = toFile(results, FinalS2N);                                   break;
-            default:                    throw new Error();
-        }
+        final ItcSpectroscopyResult result = result(id);
+        final String file =
+                "# ITC: " +
+                        Calendar.getInstance().getTime() + "\n \n" +
+                        result.dataFiles().apply(index).file();
         return file;
     }
 
-    protected static String toFile(final VisitableSampledSpectrum sed) {
-        return "# ITC: " +
-                Calendar.getInstance().getTime() + "\n \n" +
-               sed.printSpecAsString();
-    }
-
-    protected static String toFile(final VisitableSampledSpectrum[] sedArr) {
-        final StringBuilder sb = new StringBuilder("# ITC: " + Calendar.getInstance().getTime() + "\n \n");
-        for (final VisitableSampledSpectrum sed : sedArr){
-            sb.append(sed.printSpecAsString());
-        }
-        return sb.toString();
-    }
-
-    // TODO: this sucks, GMOS has an entirely device specific BS going on for multi CCD support
-    // TODO: can we somehow unify this??
-    protected static String toFile(final SpectroscopyResult[] results, final String filename) {
-        final Gmos mainInstrument = (Gmos) results[0].instrument(); // TODO: make sure this is indeed GMOS!
-        final DetectorsTransmissionVisitor tv = mainInstrument.getDetectorTransmision();
-        final Gmos[] ccdArray = mainInstrument.getDetectorCcdInstruments();
-
-        final StringBuilder sb = new StringBuilder("# ITC: " + Calendar.getInstance().getTime() + "\n \n");
-
-        for (final Gmos instrument : ccdArray) {
-
-            final int ccdIndex = instrument.getDetectorCcdIndex();
-            final int first = tv.getDetectorCcdStartIndex(ccdIndex);
-            final int last = tv.getDetectorCcdEndIndex(ccdIndex, ccdArray.length);
-            // REL-478: include the gaps in the text data output
-            final int lastWithGap = (ccdIndex < 2 && ccdArray.length > 1)
-                    ? tv.getDetectorCcdStartIndex(ccdIndex + 1)
-                    : last;
-
-            final SpectroscopyResult result = results[ccdIndex];
-            final VisitableSampledSpectrum sed;
-            switch (filename) {
-                // TODO: why are we using the last specS2N element only? this seems fishy..?
-                case SigSpec:   sed = result.specS2N()[result.specS2N().length - 1].getSignalSpectrum(); break;
-                case BackSpec:  sed = result.specS2N()[result.specS2N().length - 1].getBackgroundSpectrum(); break;
-                case SingleS2N: sed = result.specS2N()[result.specS2N().length - 1].getExpS2NSpectrum(); break;
-                case FinalS2N:  sed = result.specS2N()[result.specS2N().length - 1].getFinalS2NSpectrum(); break;
-                default:
-                    throw new Error();
-            }
-            sb.append(sed.printSpecAsString(first, lastWithGap));
-        }
-        return sb.toString();
-    }
 }

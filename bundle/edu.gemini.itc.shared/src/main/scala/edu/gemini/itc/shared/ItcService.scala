@@ -5,29 +5,24 @@ import edu.gemini.util.trpc.client.TrpcClient
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import scala.swing.Color
 import scalaz.{Failure, Success, Validation}
 
 /**
  * ITC calculation result for a single CCD.
  * Depending on the observation type (imaging vs. spectroscopy) and calculation method different results are returned.
  */
-sealed trait ItcCalcResult
-final case class ItcImagingResult(source: SourceDefinition, singleSNRatio: Double, totalSNRatio: Double, peakPixelFlux: Double) extends ItcCalcResult
-final case class ItcSpectroscopyResult(/*TODO*/) extends ItcCalcResult
+sealed trait ItcResult extends Serializable
 
-/**
- * ITC results.
- * Note that GMOS ITC recipes provide a separate result for each of the three CCDs while all other instruments only
- * return one result (either because they don't have more than one CCD or because all different CCDs are assumed to
- * have the same characteristics).
- */
-sealed trait ItcResult extends Serializable {
-  /** Returns the results for all CCDs. */
-  def ccds: Array[ItcCalcResult]
+// === IMAGING RESULT
+final case class ImgData(singleSNRatio: Double, totalSNRatio: Double, peakPixelFlux: Double)
+final case class ItcImagingResult(source: SourceDefinition, ccds: Seq[ImgData]) extends ItcResult
 
-  /** Returns the result for the first (and in most cases only) CCD. */
-  def ccd = ccds(0)
-}
+// === SPECTROSCOPY RESULT
+final case class SpcData(label: String, color: Color, data: Array[Array[Double]])
+final case class SpcDataSet(label: String, title: String, xAxisLabel: String, yAxisLabel: String, series: Seq[SpcData])
+final case class SpcDataFile(label: String, file: String)
+final case class ItcSpectroscopyResult(source: SourceDefinition, dataSets: Seq[SpcDataSet], dataFiles: Seq[SpcDataFile]) extends ItcResult
 
 object ItcResult {
 
@@ -42,11 +37,9 @@ object ItcResult {
   /** Creates an ITC result with a list of problem/error messages. */
   def forMessages(messages: List[String]): Result = Failure(messages)
 
-  /** Creates an ITC result for a single CCD. */
-  def forCcd(result: ItcCalcResult): Result = Success(new ItcResult { val ccds = Array(result) })
+  /** Creates an ITC result for a result. */
+  def forResult(result: ItcResult): Result = Success(result)
 
-  /** Creates an ITC result for an array of CCDs. */
-  def forCcds(results: Array[ItcCalcResult]): Result = Success(new ItcResult { val ccds = results })
 }
 
 /**

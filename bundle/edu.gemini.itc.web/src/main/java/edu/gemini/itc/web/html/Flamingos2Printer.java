@@ -34,9 +34,10 @@ public final class Flamingos2Printer extends PrinterBase {
             final ImagingResult result = recipe.calculateImaging();
             writeImagingOutput(result);
         } else {
-            final Tuple2<UUID, SpectroscopyResult> result = cache(recipe.calculateSpectroscopy());
-            writeSpectroscopyOutput(result._1(), result._2());
-            validatePlottingDetails(pdp, result._2().instrument());
+            final Tuple2<ItcSpectroscopyResult, SpectroscopyResult> r = recipe.calculateSpectroscopy();
+            final UUID id = cache(r._1());
+            writeSpectroscopyOutput(id, r._2());
+            validatePlottingDetails(pdp, r._2().instrument());
         }
     }
 
@@ -88,14 +89,14 @@ public final class Flamingos2Printer extends PrinterBase {
         _printImageLink(id, ImageServlet.SigSwApChart);
         _println("");
 
-        _printFileLink(id, ImageServlet.SigSpec, "ASCII signal spectrum");
-        _printFileLink(id, ImageServlet.BackSpec, "ASCII background spectrum");
+        _printFileLink(id, ImageServlet.SigSpec, 0, "ASCII signal spectrum");
+        _printFileLink(id, ImageServlet.BackSpec, 1, "ASCII background spectrum");
 
         _printImageLink(id, ImageServlet.S2NChart);
         _println("");
 
-        _printFileLink(id, ImageServlet.SingleS2N, "Single Exposure S/N ASCII data");
-        _printFileLink(id, ImageServlet.FinalS2N, "Final S/N ASCII data");
+        _printFileLink(id, ImageServlet.SingleS2N, 2, "Single Exposure S/N ASCII data");
+        _printFileLink(id, ImageServlet.FinalS2N, 3, "Final S/N ASCII data");
 
         printConfiguration((Flamingos2) result.instrument(), result.parameters());
 

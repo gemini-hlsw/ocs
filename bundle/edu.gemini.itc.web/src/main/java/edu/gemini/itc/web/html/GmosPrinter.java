@@ -35,8 +35,9 @@ public final class GmosPrinter extends PrinterBase {
             final ImagingResult[] results = recipe.calculateImaging();
             writeImagingOutput(results);
         } else {
-            final Tuple2<UUID, SpectroscopyResult[]> results = cache(recipe.calculateSpectroscopy());
-            writeSpectroscopyOutput(results._1(), results._2());
+            final Tuple2<ItcSpectroscopyResult, SpectroscopyResult[]> r = recipe.calculateSpectroscopy();
+            final UUID id = cache(r._1());
+            writeSpectroscopyOutput(id, r._2());
         }
     }
 
@@ -94,10 +95,10 @@ public final class GmosPrinter extends PrinterBase {
 
                 if (ccdIndex == 0) {
                     _println("<p style=\"page-break-inside: never\">");
-                    _printFileLink(id, ImageServlet.GmosSigSpec, "ASCII signal spectrum");
-                    _printFileLink(id, ImageServlet.GmosBackSpec, "ASCII background spectrum");
-                    _printFileLink(id, ImageServlet.GmosSingleS2N, "Single Exposure S/N ASCII data");
-                    _printFileLink(id, ImageServlet.GmosFinalS2N, "Final S/N ASCII data");
+                    _printFileLink(id, ImageServlet.GmosSigSpec,   0, "ASCII signal spectrum");
+                    _printFileLink(id, ImageServlet.GmosBackSpec,  1, "ASCII background spectrum");
+                    _printFileLink(id, ImageServlet.GmosSingleS2N, 2, "Single Exposure S/N ASCII data");
+                    _printFileLink(id, ImageServlet.GmosFinalS2N,  3, "Final S/N ASCII data");
                 }
                 _println("");
             }

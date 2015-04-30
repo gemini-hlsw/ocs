@@ -3,6 +3,11 @@ package edu.gemini.itc.michelle;
 import edu.gemini.itc.operation.*;
 import edu.gemini.itc.shared.*;
 import edu.gemini.spModel.core.Site;
+import scala.Tuple2;
+import scala.collection.JavaConversions;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * This class performs the calculations for Michelle
@@ -82,9 +87,20 @@ public final class MichelleRecipe implements ImagingRecipe, SpectroscopyRecipe {
 
     }
 
-    public SpectroscopyResult calculateSpectroscopy() {
+    public Tuple2<ItcSpectroscopyResult, SpectroscopyResult> calculateSpectroscopy() {
         final Michelle instrument = new Michelle(_michelleParameters, _obsDetailParameters);
-        return calculateSpectroscopy(instrument);
+        final SpectroscopyResult r = calculateSpectroscopy(instrument);
+        final List<SpcDataSet> dataSets = new ArrayList<SpcDataSet>() {{
+            add(ITCChart.createSignalChart(r, 0));
+            add(ITCChart.createS2NChart(r, 0));
+        }};
+        final List<SpcDataFile> dataFiles = new ArrayList<SpcDataFile>() {{
+            add(new SpcDataFile("", r.specS2N()[0].getSignalSpectrum().printSpecAsString()));
+            add(new SpcDataFile("", r.specS2N()[0].getBackgroundSpectrum().printSpecAsString()));
+            add(new SpcDataFile("", r.specS2N()[0].getExpS2NSpectrum().printSpecAsString()));
+            add(new SpcDataFile("", r.specS2N()[0].getFinalS2NSpectrum().printSpecAsString()));
+        }};
+        return new Tuple2<>(new ItcSpectroscopyResult(_sdParameters, JavaConversions.asScalaBuffer(dataSets), JavaConversions.asScalaBuffer(dataFiles)), r);
     }
 
     public ImagingResult calculateImaging() {

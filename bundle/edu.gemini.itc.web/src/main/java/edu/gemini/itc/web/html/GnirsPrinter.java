@@ -3,10 +3,7 @@ package edu.gemini.itc.web.html;
 import edu.gemini.itc.gnirs.Gnirs;
 import edu.gemini.itc.gnirs.GnirsParameters;
 import edu.gemini.itc.gnirs.GnirsRecipe;
-import edu.gemini.itc.shared.GnirsSpectroscopyResult;
-import edu.gemini.itc.shared.Parameters;
-import edu.gemini.itc.shared.PlottingDetails;
-import edu.gemini.itc.shared.SpectroscopyResult;
+import edu.gemini.itc.shared.*;
 import edu.gemini.itc.web.servlets.ImageServlet;
 import scala.Tuple2;
 
@@ -28,9 +25,9 @@ public final class GnirsPrinter extends PrinterBase {
     }
 
     public void writeOutput() {
-        final Tuple2<UUID, SpectroscopyResult> result = cache(recipe.calculateSpectroscopy());
-        writeSpectroscopyOutput(result._1(), (GnirsSpectroscopyResult) result._2());
-        validatePlottingDetails(pdp, result._2().instrument());
+        final Tuple2<ItcSpectroscopyResult, SpectroscopyResult> r = recipe.calculateSpectroscopy();
+        final UUID id = cache(r._1());
+        writeSpectroscopyOutput(id, (GnirsSpectroscopyResult) r._2());
     }
 
     private void writeSpectroscopyOutput(final UUID id, final GnirsSpectroscopyResult result) {
@@ -89,27 +86,27 @@ public final class GnirsPrinter extends PrinterBase {
             _printImageLink(id, ImageServlet.GnirsSigChart);
             _println("");
 
-            _printFileLink(id, ImageServlet.GnirsSigOrder, "ASCII signal spectrum");
-            _printFileLink(id, ImageServlet.GnirsBgOrder, "ASCII background spectrum");
+            _printFileLink(id, ImageServlet.GnirsSigOrder, 0, "ASCII signal spectrum");
+            _printFileLink(id, ImageServlet.GnirsBgOrder, 1, "ASCII background spectrum");
 
             _printImageLink(id, ImageServlet.GnirsS2NChart);
             _println("");
 
-            _printFileLink(id, ImageServlet.GnirsFinalS2NOrder, "Final S/N ASCII data");
+            _printFileLink(id, ImageServlet.GnirsFinalS2NOrder, 2, "Final S/N ASCII data");
 
         } else {
 
             _printImageLink(id, ImageServlet.SigSwApChart);
             _println("");
 
-            _printFileLink(id, ImageServlet.SigSpec, "ASCII signal spectrum");
-            _printFileLink(id, ImageServlet.BackSpec, "ASCII background spectrum");
+            _printFileLink(id, ImageServlet.SigSpec, 0, "ASCII signal spectrum");
+            _printFileLink(id, ImageServlet.BackSpec, 1, "ASCII background spectrum");
 
             _printImageLink(id, ImageServlet.S2NChart);
             _println("");
 
-            _printFileLink(id, ImageServlet.SingleS2N, "Single Exposure S/N ASCII data");
-            _printFileLink(id, ImageServlet.FinalS2N, "Final S/N ASCII data");
+            _printFileLink(id, ImageServlet.SingleS2N, 2, "Single Exposure S/N ASCII data");
+            _printFileLink(id, ImageServlet.FinalS2N, 3, "Final S/N ASCII data");
         }
 
         _println("");

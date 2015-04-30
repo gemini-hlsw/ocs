@@ -5,6 +5,11 @@ import edu.gemini.itc.operation.*;
 import edu.gemini.itc.shared.*;
 import edu.gemini.spModel.core.Site;
 import scala.Option;
+import scala.Tuple2;
+import scala.collection.JavaConversions;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * This class performs the calculations for Niri used for imaging.
@@ -67,9 +72,20 @@ public final class NiriRecipe implements ImagingRecipe, SpectroscopyRecipe {
         return calculateImaging(instrument);
     }
 
-    public SpectroscopyResult calculateSpectroscopy() {
+    public Tuple2<ItcSpectroscopyResult, SpectroscopyResult> calculateSpectroscopy() {
         final Niri instrument = new Niri(_niriParameters, _obsDetailParameters);
-        return calculateSpectroscopy(instrument);
+        final SpectroscopyResult r = calculateSpectroscopy(instrument);
+        final List<SpcDataSet> dataSets = new ArrayList<SpcDataSet>() {{
+            add(ITCChart.createSignalChart(r, 0));
+            add(ITCChart.createS2NChart(r, 0));
+        }};
+        final List<SpcDataFile> dataFiles = new ArrayList<SpcDataFile>() {{
+            add(new SpcDataFile("", r.specS2N()[0].getSignalSpectrum().printSpecAsString()));
+            add(new SpcDataFile("", r.specS2N()[0].getBackgroundSpectrum().printSpecAsString()));
+            add(new SpcDataFile("", r.specS2N()[0].getExpS2NSpectrum().printSpecAsString()));
+            add(new SpcDataFile("", r.specS2N()[0].getFinalS2NSpectrum().printSpecAsString()));
+        }};
+        return new Tuple2<>(new ItcSpectroscopyResult(_sdParameters, JavaConversions.asScalaBuffer(dataSets), JavaConversions.asScalaBuffer(dataFiles)), r);
     }
 
     private SpectroscopyResult calculateSpectroscopy(final Niri instrument) {

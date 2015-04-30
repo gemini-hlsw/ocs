@@ -3,6 +3,11 @@ package edu.gemini.itc.flamingos2;
 import edu.gemini.itc.operation.*;
 import edu.gemini.itc.shared.*;
 import edu.gemini.spModel.core.Site;
+import scala.Tuple2;
+import scala.collection.JavaConversions;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * This class performs the calculations for Flamingos 2 used for imaging.
@@ -50,9 +55,20 @@ public final class Flamingos2Recipe implements ImagingRecipe, SpectroscopyRecipe
         Validation.checkSourceFraction(_obsDetailParameters.getNumExposures(), _obsDetailParameters.getSourceFraction());
     }
 
-    public SpectroscopyResult calculateSpectroscopy() {
+    public Tuple2<ItcSpectroscopyResult, SpectroscopyResult> calculateSpectroscopy() {
         final Flamingos2 instrument = new Flamingos2(_flamingos2Parameters);
-        return calculateSpectroscopy(instrument);
+        final SpectroscopyResult r = calculateSpectroscopy(instrument);
+        final List<SpcDataSet> dataSets = new ArrayList<SpcDataSet>() {{
+            add(ITCChart.createSignalChart(r));
+            add(ITCChart.createS2NChart(r));
+        }};
+        final List<SpcDataFile> dataFiles = new ArrayList<SpcDataFile>() {{
+            add(new SpcDataFile("", r.specS2N()[0].getSignalSpectrum().printSpecAsString()));
+            add(new SpcDataFile("", r.specS2N()[0].getBackgroundSpectrum().printSpecAsString()));
+            add(new SpcDataFile("", r.specS2N()[0].getExpS2NSpectrum().printSpecAsString()));
+            add(new SpcDataFile("", r.specS2N()[0].getFinalS2NSpectrum().printSpecAsString()));
+        }};
+        return new Tuple2<>(new ItcSpectroscopyResult(_sdParameters, JavaConversions.asScalaBuffer(dataSets), JavaConversions.asScalaBuffer(dataFiles)), r);
     }
 
     public ImagingResult calculateImaging() {

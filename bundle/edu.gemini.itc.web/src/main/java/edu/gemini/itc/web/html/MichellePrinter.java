@@ -3,10 +3,7 @@ package edu.gemini.itc.web.html;
 import edu.gemini.itc.michelle.Michelle;
 import edu.gemini.itc.michelle.MichelleParameters;
 import edu.gemini.itc.michelle.MichelleRecipe;
-import edu.gemini.itc.shared.ImagingResult;
-import edu.gemini.itc.shared.Parameters;
-import edu.gemini.itc.shared.PlottingDetails;
-import edu.gemini.itc.shared.SpectroscopyResult;
+import edu.gemini.itc.shared.*;
 import edu.gemini.itc.web.servlets.ImageServlet;
 import edu.gemini.spModel.gemini.michelle.MichelleParams;
 import scala.Tuple2;
@@ -36,8 +33,9 @@ public final class MichellePrinter extends PrinterBase {
             final ImagingResult result = recipe.calculateImaging();
             writeImagingOutput(result);
         } else {
-            final Tuple2<UUID, SpectroscopyResult> result = cache(recipe.calculateSpectroscopy());
-            writeSpectroscopyOutput(result._1(), result._2());
+            final Tuple2<ItcSpectroscopyResult, SpectroscopyResult> r = recipe.calculateSpectroscopy();
+            final UUID id = cache(r._1());
+            writeSpectroscopyOutput(id, r._2());
         }
     }
 
@@ -104,14 +102,14 @@ public final class MichellePrinter extends PrinterBase {
         _printImageLink(id, ImageServlet.SigChart);
         _println("");
 
-        _printFileLink(id, ImageServlet.SigSpec, "ASCII signal spectrum");
-        _printFileLink(id, ImageServlet.BackSpec, "ASCII background spectrum");
+        _printFileLink(id, ImageServlet.SigSpec,  0, "ASCII signal spectrum");
+        _printFileLink(id, ImageServlet.BackSpec, 1, "ASCII background spectrum");
 
         _printImageLink(id, ImageServlet.S2NChart);
         _println("");
 
-        _printFileLink(id, ImageServlet.SingleS2N, "Single Exposure S/N ASCII data");
-        _printFileLink(id, ImageServlet.FinalS2N, "Final S/N ASCII data");
+        _printFileLink(id, ImageServlet.SingleS2N, 2, "Single Exposure S/N ASCII data");
+        _printFileLink(id, ImageServlet.FinalS2N,  3, "Final S/N ASCII data");
 
         _println("");
         device.setPrecision(2);  // TWO decimal places

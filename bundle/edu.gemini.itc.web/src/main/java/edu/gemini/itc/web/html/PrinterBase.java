@@ -1,25 +1,16 @@
 package edu.gemini.itc.web.html;
 
-import edu.gemini.itc.gmos.Gmos;
-import edu.gemini.itc.gnirs.GnirsRecipe;
-import edu.gemini.itc.operation.DetectorsTransmissionVisitor;
 import edu.gemini.itc.shared.*;
 import edu.gemini.itc.web.servlets.ImageServlet;
-import org.jfree.chart.ChartColor;
 import scala.Tuple2;
 
-import java.awt.*;
 import java.io.PrintWriter;
 import java.util.UUID;
 
 public abstract class PrinterBase {
 
-    protected Tuple2<UUID, SpectroscopyResult> cache(final SpectroscopyResult result) {
+    protected UUID cache(final ItcSpectroscopyResult result) {
         return ImageServlet.cache(result);
-    }
-
-    protected Tuple2<UUID, SpectroscopyResult[]> cache(final SpectroscopyResult[] results) {
-        return ImageServlet.cache(results);
     }
 
     public abstract void writeOutput();
@@ -64,8 +55,7 @@ public abstract class PrinterBase {
         _println("<span style=\"color:red; font-style:italic;\">" + s + "</span>");
     }
 
-    // =============
-
+    // Adds a HTML link to a file.
     protected void _printFileLink(final UUID id, final String name, final String label) {
         _printFileLink(id, name, 0, label);
     }
@@ -81,6 +71,7 @@ public abstract class PrinterBase {
                 + "\"> Click here for " + label + ". </a>");
     }
 
+    // Adds an HTML image link
     protected void _printImageLink(final UUID id, final String name) {
         _printImageLink(id, name, 0);
     }
@@ -94,126 +85,5 @@ public abstract class PrinterBase {
                 //+ "&SessionID=0" // TODO: add fake "SessionID" in order to have URL ignored in science regression tests
                 + "\" width=675 border=0>");
     }
-
-
-    // =============
-
-    // CHART CREATION
-    // Utility functions that create generic signal and signal to noise charts for several instruments.
-
-    public static ITCChart createSignalChart(final PlottingDetails pd, final SpectroscopyResult result, final int index) {
-        return createSignalChart(pd, result, "Signal and Background ", index);
-    }
-
-    public static ITCChart createSignalChart(final PlottingDetails pd, final SpectroscopyResult result, final String title, final int index) {
-        final ITCChart chart = new ITCChart(title, "Wavelength (nm)", "e- per exposure per spectral pixel", pd);
-        chart.addArray(result.specS2N()[index].getSignalSpectrum().getData(), "Signal ");
-        chart.addArray(result.specS2N()[index].getBackgroundSpectrum().getData(), "SQRT(Background)  ");
-        return chart;
-    }
-
-
-    public static ITCChart createS2NChart(final PlottingDetails pd, final SpectroscopyResult result, final int index) {
-        return createS2NChart(pd, result, "Intermediate Single Exp and Final S/N", index);
-    }
-
-    public static ITCChart createS2NChart(final PlottingDetails pd, final SpectroscopyResult result, final String title, final int index) {
-        final ITCChart chart = new ITCChart(title, "Wavelength (nm)", "Signal / Noise per spectral pixel", pd);
-        chart.addArray(result.specS2N()[index].getExpS2NSpectrum().getData(), "Single Exp S/N");
-        chart.addArray(result.specS2N()[index].getFinalS2NSpectrum().getData(), "Final S/N  ");
-        return chart;
-    }
-
-    // -- GNIRS specific
-
-    private static final Color[] ORDER_COLORS =
-            new Color[] {ChartColor.DARK_RED,      ChartColor.DARK_BLUE,       ChartColor.DARK_GREEN,
-                    ChartColor.DARK_MAGENTA,       ChartColor.black,           ChartColor.DARK_CYAN};
-    private static final Color[] ORDER_BG_COLORS =
-            new Color[] {ChartColor.VERY_LIGHT_RED,ChartColor.VERY_LIGHT_BLUE, ChartColor.VERY_LIGHT_GREEN,
-                    ChartColor.VERY_LIGHT_MAGENTA, ChartColor.lightGray,       ChartColor.VERY_LIGHT_CYAN};
-
-    public static ITCChart createGnirsSignalChart(final PlottingDetails pd, final GnirsSpectroscopyResult result) {
-        final ITCChart chart = new ITCChart("Signal and Background in software aperture of " + result.specS2N()[0].getSpecNpix() + " pixels", "Wavelength (nm)", "e- per exposure per spectral pixel", pd);
-        for (int i = 0; i < GnirsRecipe.ORDERS; i++) {
-            chart.addArray(result.signalOrder()[i].getData(), "Signal Order " + (i + 3), ORDER_COLORS[i]);
-            chart.addArray(result.backGroundOrder()[i].getData(), "SQRT(Background) Order " + (i + 3), ORDER_BG_COLORS[i]);
-        }
-        return chart;
-    }
-
-    public static ITCChart createGnirsS2NChart(final PlottingDetails pd, final GnirsSpectroscopyResult result) {
-        final ITCChart chart = new ITCChart("Final S/N", "Wavelength (nm)", "Signal / Noise per spectral pixel", pd);
-        for (int i = 0; i < GnirsRecipe.ORDERS; i++) {
-            chart.addArray(result.finalS2NOrder()[i].getData(), "Final S/N Order " + (i + 3), ORDER_COLORS[i]);
-        }
-        return chart;
-    }
-
-    // -- GMOS specific
-    // TODO: this sucks, GMOS has an entirely device specific BS going on for multi CCD support
-    // TODO: can we somehow unify this??
-    public static ITCChart createGmosChart(final PlottingDetails pd, final SpectroscopyResult[] results, final String filename) {
-        final FormatStringWriter device = new FormatStringWriter();
-        device.setPrecision(2); // Two decimal places
-        device.clear();
-
-        final Gmos mainInstrument = (Gmos) results[0].instrument(); // TODO: make sure this is indeed GMOS!
-        final DetectorsTransmissionVisitor tv = mainInstrument.getDetectorTransmision();
-        final Gmos[] ccdArray = mainInstrument.getDetectorCcdInstruments();
-
-        final boolean ifuAndNotUniform = mainInstrument.isIfuUsed() && !(results[0].source().isUniform());
-        final double ifu_offset = ifuAndNotUniform ? mainInstrument.getIFU().getApertureOffsetList().iterator().next() : 0.0;
-        final String title;
-        final String title2;
-        switch (filename) {
-            case ImageServlet.GmosSigChart:
-                title = ifuAndNotUniform ? "Signal and Background (IFU element offset: " + device.toString(ifu_offset) + " arcsec)" : "Signal and Background ";
-                title2 = "e- per exposure per spectral pixel";
-                break;
-
-            case ImageServlet.GmosS2NChart:
-                title = ifuAndNotUniform ? "Intermediate Single Exp and Final S/N (IFU element offset: " + device.toString(ifu_offset) + " arcsec)" : "Intermediate Single Exp and Final S/N";
-                title2 = "Signal / Noise per spectral pixel";
-                break;
-
-            default:
-                throw new Error();
-        }
-
-        final ITCChart chart = new ITCChart(title, "Wavelength (nm)", title2, pd);
-
-        for (final Gmos instrument : ccdArray) {
-
-            final int ccdIndex = instrument.getDetectorCcdIndex();
-            final String ccdName = instrument.getDetectorCcdName();
-            final Color ccdColor = instrument.getDetectorCcdColor();
-            final Color ccdColorDarker = ccdColor == null ? null : ccdColor.darker().darker();
-            final int first = tv.getDetectorCcdStartIndex(ccdIndex);
-            final int last = tv.getDetectorCcdEndIndex(ccdIndex, ccdArray.length);
-
-            final SpectroscopyResult result = results[ccdIndex];
-            for (int i = 0; i < result.specS2N().length; i++) {
-                switch (filename) {
-                    case ImageServlet.GmosSigChart:
-                        chart.addArray(result.specS2N()[i].getSignalSpectrum().getData(first, last), "Signal " + ccdName, ccdColor);
-                        chart.addArray(result.specS2N()[i].getBackgroundSpectrum().getData(first, last), "SQRT(Background) " + ccdName, ccdColorDarker);
-                        break;
-
-                    case ImageServlet.GmosS2NChart:
-                        chart.addArray(result.specS2N()[i].getExpS2NSpectrum().getData(first, last), "Single Exp S/N " + ccdName, ccdColor);
-                        chart.addArray(result.specS2N()[i].getFinalS2NSpectrum().getData(first, last), "Final S/N " + ccdName, ccdColorDarker);
-                        break;
-
-                    default:
-                        throw new Error();
-                }
-            }
-        }
-
-        return chart;
-    }
-
-
 
 }

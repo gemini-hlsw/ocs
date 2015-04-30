@@ -2,7 +2,7 @@ package jsky.app.ot.editor.seq
 
 import javax.swing.table.AbstractTableModel
 
-import edu.gemini.itc.shared.{ItcImagingResult, ItcResult, ItcService}
+import edu.gemini.itc.shared.{ItcSpectroscopyResult, ItcImagingResult, ItcResult, ItcService}
 import edu.gemini.shared.util.StringUtil
 import edu.gemini.spModel.config2.ItemKey
 
@@ -41,40 +41,38 @@ sealed trait ItcTableModel extends AbstractTableModel {
   val res:          Seq[Future[ItcService.Result]]
 
 
+  // Gets the imaging result from the service result future (if present).
+  protected def imagingResult(f: Future[ItcService.Result]): Option[ItcImagingResult] =
+    serviceResult(f).flatMap {
+      case img: ItcImagingResult      => Some(img)
+      case _                          => None
+    }
+
+  // Gets the spectroscopy result from the service result future (if present).
+  protected def spectroscopyResult(f: Future[ItcService.Result]): Option[ItcSpectroscopyResult] =
+    serviceResult(f).flatMap {
+      case spc: ItcSpectroscopyResult => Some(spc)
+      case _                          => None
+    }
+
   // Gets the result from the service result future (if present)
-  protected def imagingCalcResult(f: Future[ItcService.Result]): Option[ItcResult] =
+  protected def serviceResult(f: Future[ItcService.Result]): Option[ItcResult] =
     for {
       futureResult  <- f.value                // unwrap future
       serviceResult <- futureResult.toOption  // unwrap try
       calcResult    <- serviceResult.toOption // unwrap validation
     } yield calcResult
 
-  // Gets the imaging result from the service result future (if present).
-  // Note that in most cases (except for GMOS) there is only one CCD in the result, but for GMOS there can be
-  // 1 or 3 CCDs depending on the selected CCD manufacturer.
-  protected def imagingResult(f: Future[ItcService.Result], n: Int = 0): Option[ItcImagingResult] =
-    imagingCalcResult(f).flatMap { r =>
-      // For GMOS ITC returns 1 or 3 different CCD results depending on the manufacturer, the simplest way to deal
-      // with this is by just using n % #CCDs here, which means that if there is only one result it is repeated three
-      // times, and if there are 3 results, they are shown individually as expected. All instruments other than GMOS
-      // use this method with ccd index = 0.
-      r.ccds(n % r.ccds.length) match {
-        case img: ItcImagingResult => Some(img)
-        case _                     => None
-      }
-    }
 
-  protected def peakPixelFlux(result: Future[ItcService.Result], ccd: Int = 0) = imagingResult(result, ccd).map(_.peakPixelFlux.toInt)
+  protected def peakPixelFlux(result: Future[ItcService.Result], ccd: Int = 0) = imagingResult(result).map(_.ccds(ccd).peakPixelFlux.toInt)
 
-  protected def singleSNRatio(result: Future[ItcService.Result], ccd: Int = 0) = imagingResult(result, ccd).map(_.singleSNRatio)
+  protected def singleSNRatio(result: Future[ItcService.Result], ccd: Int = 0) = imagingResult(result).map(_.ccds(ccd).singleSNRatio)
 
-  protected def totalSNRatio (result: Future[ItcService.Result], ccd: Int = 0) = imagingResult(result, ccd).map(_.totalSNRatio)
+  protected def totalSNRatio (result: Future[ItcService.Result], ccd: Int = 0) = imagingResult(result).map(_.ccds(ccd).totalSNRatio)
 
-  // the source is the same for all CCDs, so we just always take the first one
-  protected def sourceMag    (result: Future[ItcService.Result]) = imagingResult(result, 0).map(_.source.profile.norm)
+  protected def sourceMag    (result: Future[ItcService.Result]) = imagingResult(result).map(_.source.profile.norm)
 
-  // the source is the same for all CCDs, so we just always take the first one
-  protected def sourceBand   (result: Future[ItcService.Result]) = imagingResult(result, 0).map(_.source.getNormBand.name)
+  protected def sourceBand   (result: Future[ItcService.Result]) = imagingResult(result).map(_.source.getNormBand.name)
 
   // ===
 

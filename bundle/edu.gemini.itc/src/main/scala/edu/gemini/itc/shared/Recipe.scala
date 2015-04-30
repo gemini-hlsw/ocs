@@ -12,9 +12,10 @@ trait ImagingArrayRecipe extends Recipe {
 
 
 trait SpectroscopyRecipe extends Recipe {
-  def calculateSpectroscopy(): SpectroscopyResult
+  def calculateSpectroscopy(): (ItcSpectroscopyResult, SpectroscopyResult)
 }
 
+
 trait SpectroscopyArrayRecipe extends Recipe {
-  def calculateSpectroscopy(): Array[SpectroscopyResult]
+  def calculateSpectroscopy(): (ItcSpectroscopyResult, Array[SpectroscopyResult])
 }

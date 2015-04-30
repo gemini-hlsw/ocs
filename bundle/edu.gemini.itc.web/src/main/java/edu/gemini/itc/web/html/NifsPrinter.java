@@ -29,8 +29,9 @@ public final class NifsPrinter extends PrinterBase {
     }
 
     public void writeOutput() {
-        final Tuple2<UUID, SpectroscopyResult> result = cache(recipe.calculateSpectroscopy());
-        writeSpectroscopyOutput(result._1(), result._2());
+        final Tuple2<ItcSpectroscopyResult, SpectroscopyResult> r = recipe.calculateSpectroscopy();
+        final UUID id = cache(r._1());
+        writeSpectroscopyOutput(id, r._2());
     }
 
     private void writeSpectroscopyOutput(final UUID id, final SpectroscopyResult result) {
@@ -78,14 +79,14 @@ public final class NifsPrinter extends PrinterBase {
             _printImageLink(id, ImageServlet.NifsSigChart, i);
             _println("");
 
-            _printFileLink(id, ImageServlet.SigSpec, i, "ASCII signal spectrum");
-            _printFileLink(id, ImageServlet.BackSpec, i, "ASCII background spectrum");
+            _printFileLink(id, ImageServlet.SigSpec, i*4, "ASCII signal spectrum");
+            _printFileLink(id, ImageServlet.BackSpec, i*4+1, "ASCII background spectrum");
 
             _printImageLink(id, ImageServlet.NifsS2NChart, i);
             _println("");
 
-            _printFileLink(id, ImageServlet.SingleS2N, i, "Single Exposure S/N ASCII data");
-            _printFileLink(id, ImageServlet.FinalS2N, i, "Final S/N ASCII data");
+            _printFileLink(id, ImageServlet.SingleS2N, i*4+2, "Single Exposure S/N ASCII data");
+            _printFileLink(id, ImageServlet.FinalS2N, i*4+3, "Final S/N ASCII data");
         }
 
         _println("");
