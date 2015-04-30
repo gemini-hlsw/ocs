@@ -9,10 +9,6 @@ import Scalaz._
 
 class VoTableParserSpec extends SpecificationWithJUnit with VoTableParser {
 
-  // TODO: remove this, use method on Angle companion
-  def fromMilliarcseconds(d: Double): Angle =
-    Angle.fromDegrees(d / (60 * 60 * 1000))
-
   "Ucd" should {
     "detect if is a superset" in {
       Ucd("stat.error;phot.mag;em.opt.i").includes(UcdWord("phot.mag")) should beTrue
@@ -368,8 +364,8 @@ class VoTableParserSpec extends SpecificationWithJUnit with VoTableParser {
         \/-(SiderealTarget("-2140404569", Coordinates(RightAscension.fromDegrees(359.749274134), Declination.fromAngle(Angle.parseDegrees("0.210251239819").getOrElse(Angle.zero)).getOrElse(Declination.zero)), None, magsTarget2, None))
       ))
       // There is only one table
-      parse(voTable).tables(0) should beEqualTo(result)
-      parse(voTable).tables(0).containsError should beFalse
+      parse(voTable).tables.head should beEqualTo(result)
+      parse(voTable).tables.head.containsError should beFalse
     }
     "be able to parse an xml into a list of SiderealTargets including magnitude errors" in {
       val magsTarget1 = List(new Magnitude(22.082, MagnitudeBand.G, 0.0960165), new Magnitude(20.3051, MagnitudeBand.I, 0.0456069), new Magnitude(13.74, MagnitudeBand.J, 0.03), new Magnitude(20.88, MagnitudeBand.R, 0.0503736), new Magnitude(23.0888, MagnitudeBand.U, 0.518214), new Magnitude(19.8812, MagnitudeBand.Z, 0.138202))
@@ -379,7 +375,7 @@ class VoTableParserSpec extends SpecificationWithJUnit with VoTableParser {
         \/-(SiderealTarget("-2140405448", Coordinates(RightAscension.fromDegrees(359.745951955), Declination.fromAngle(Angle.parseDegrees("0.209323681906").getOrElse(Angle.zero)).getOrElse(Declination.zero)), None, magsTarget1, None)),
         \/-(SiderealTarget("-2140404569", Coordinates(RightAscension.fromDegrees(359.749274134), Declination.fromAngle(Angle.parseDegrees("0.210251239819").getOrElse(Angle.zero)).getOrElse(Declination.zero)), None, magsTarget2, None))
       ))
-      parse(voTableWithErrors).tables(0) should beEqualTo(result)
+      parse(voTableWithErrors).tables.head should beEqualTo(result)
     }
     "be able to parse an xml into a list of SiderealTargets including proper motion" in {
       val magsTarget1 = List(new Magnitude(14.76, MagnitudeBand._r))
@@ -391,7 +387,7 @@ class VoTableParserSpec extends SpecificationWithJUnit with VoTableParser {
         \/-(SiderealTarget("550-001323", Coordinates(RightAscension.fromDegrees(9.897141944444456), Declination.fromAngle(Angle.parseDegrees("19.98878944444442").getOrElse(Angle.zero)).getOrElse(Declination.zero)), pm1, magsTarget1, None)),
         \/-(SiderealTarget("550-001324", Coordinates(RightAscension.fromDegrees(9.91958055555557), Declination.fromAngle(Angle.parseDegrees("19.997709722222226").getOrElse(Angle.zero)).getOrElse(Declination.zero)), pm2, magsTarget2, None))
       ))
-      parse(voTableWithProperMotion).tables(0) should beEqualTo(result)
+      parse(voTableWithProperMotion).tables.head should beEqualTo(result)
     }
     "be able to validate and parse an xml from sds9" in {
       val badXml = "votable-non-validating.xml"
@@ -406,11 +402,29 @@ class VoTableParserSpec extends SpecificationWithJUnit with VoTableParser {
       VoTableParser.parse(xmlFile, getClass.getResourceAsStream(s"/$xmlFile")).map(_.tables.forall(!_.containsError)) must beEqualTo(\/.right(true))
       VoTableParser.parse(xmlFile, getClass.getResourceAsStream(s"/$xmlFile")).getOrElse(ParsedVoResource(Nil)).tables should be size 1
     }
+    "be able to validate and parse an xml from ppmxl" in {
+      val xmlFile = "votable-ppmxl.xml"
+      VoTableParser.parse(xmlFile, getClass.getResourceAsStream(s"/$xmlFile")).map(_.tables.forall(!_.containsError)) must beEqualTo(\/.right(true))
+      VoTableParser.parse(xmlFile, getClass.getResourceAsStream(s"/$xmlFile")).getOrElse(ParsedVoResource(Nil)).tables should be size 1
+    }
+    "be able to ignore bogus magnitudes on ppmxl" in {
+      val xmlFile = "votable-ppmxl.xml"
+      // Check a well-known target containing invalid magnitude values an bands H, I, K and J
+      val result = VoTableParser.parse(xmlFile, getClass.getResourceAsStream(s"/$xmlFile")).getOrElse(ParsedVoResource(Nil)).tables.map(TargetsTable.apply).map(_.rows).flatMap(_.find(_.name == "-1471224894")).headOption
+      val magH = result >>= {_.magnitudeIn(MagnitudeBand.H)}
+      val magI = result >>= {_.magnitudeIn(MagnitudeBand.I)}
+      val magK = result >>= {_.magnitudeIn(MagnitudeBand.K)}
+      val magJ = result >>= {_.magnitudeIn(MagnitudeBand.J)}
+      magH should beNone
+      magI should beNone
+      magK should beNone
+      magJ should beNone
+    }
     "be able to filter out bad magnitudes" in {
       val xmlFile = "fmag.xml"
       VoTableParser.parse(xmlFile, getClass.getResourceAsStream(s"/$xmlFile")).map(_.tables.forall(!_.containsError)) must beEqualTo(\/.right(true))
       // The sample has only one row
-      val result = VoTableParser.parse(xmlFile, getClass.getResourceAsStream(s"/$xmlFile")).getOrElse(ParsedVoResource(Nil)).tables.headOption.map(_.rows.headOption).flatten.get
+      val result = VoTableParser.parse(xmlFile, getClass.getResourceAsStream(s"/$xmlFile")).getOrElse(ParsedVoResource(Nil)).tables.headOption.flatMap(_.rows.headOption).get
 
       val mags = result.map(_.magnitudeIn(MagnitudeBand.R))
       // Does not contain R as it is filtered out being magnitude 20 and error 99
@@ -420,7 +434,7 @@ class VoTableParserSpec extends SpecificationWithJUnit with VoTableParser {
       val xmlFile = "fmag.xml"
       VoTableParser.parse(xmlFile, getClass.getResourceAsStream(s"/$xmlFile")).map(_.tables.forall(!_.containsError)) must beEqualTo(\/.right(true))
       // The sample has only one row
-      val result = VoTableParser.parse(xmlFile, getClass.getResourceAsStream(s"/$xmlFile")).getOrElse(ParsedVoResource(Nil)).tables.headOption.map(_.rows.headOption).flatten.get
+      val result = VoTableParser.parse(xmlFile, getClass.getResourceAsStream(s"/$xmlFile")).getOrElse(ParsedVoResource(Nil)).tables.headOption.flatMap(_.rows.headOption).get
 
       val mags = result.map(_.magnitudeIn(MagnitudeBand.UC))
       // Fmag gets converted to UC
@@ -429,7 +443,7 @@ class VoTableParserSpec extends SpecificationWithJUnit with VoTableParser {
     "extract Sloan's band" in {
       val xmlFile = "sloan.xml"
       // The sample has only one row
-      val result = VoTableParser.parse(xmlFile, getClass.getResourceAsStream(s"/$xmlFile")).getOrElse(ParsedVoResource(Nil)).tables.headOption.map(_.rows.headOption).flatten.get
+      val result = VoTableParser.parse(xmlFile, getClass.getResourceAsStream(s"/$xmlFile")).getOrElse(ParsedVoResource(Nil)).tables.headOption.flatMap(_.rows.headOption).get
 
       val gmag = result.map(_.magnitudeIn(MagnitudeBand._g))
       // gmag gets converted to g'
