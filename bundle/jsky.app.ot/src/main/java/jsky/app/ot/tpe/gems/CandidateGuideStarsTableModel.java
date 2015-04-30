@@ -13,10 +13,7 @@ import jsky.catalog.skycat.SkycatConfigFile;
 import jsky.catalog.skycat.SkycatTable;
 
 import javax.swing.table.DefaultTableModel;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Properties;
-import java.util.Vector;
+import java.util.*;
 
 /**
  * OT-111: Model for {@link CandidateGuideStarsTable}
@@ -25,9 +22,12 @@ class CandidateGuideStarsTableModel extends DefaultTableModel {
 
     // The NIR band is selected in the UI, the others are listed afterwards (UNUSED_BAND*).
     // Always including them in the table makes the SkyObjectFactory code easier later on.
-    enum Cols {
+    private enum Cols {
         CHECK, ID, _r, R, UC, NIR_BAND, RA, DEC, UNUSED_BAND1, UNUSED_BAND2
     }
+
+    private final String RA_TITLE = "RA";
+    private final String DEC_TITLE = "Dec";
 
     // User interface model
     private GemsGuideStarSearchModel _model;
@@ -60,15 +60,13 @@ class CandidateGuideStarsTableModel extends DefaultTableModel {
         columnNames.add("Id");
         if (_isUCAC4) {
             columnNames.add("r'");
+            columnNames.add("UC");
         } else {
             columnNames.add("R");
         }
-        if (_isUCAC4) {
-            columnNames.add("UC");
-        }
         columnNames.add(_nirBand);
-        columnNames.add("RA");
-        columnNames.add("Dec");
+        columnNames.add(RA_TITLE);
+        columnNames.add(DEC_TITLE);
         columnNames.add(_unusedBands[0]);
         columnNames.add(_unusedBands[1]);
         return columnNames;
@@ -121,14 +119,22 @@ class CandidateGuideStarsTableModel extends DefaultTableModel {
     }
 
     public FieldDesc[] getFields() {
-        FieldDescAdapter[] ar = new FieldDescAdapter[_columnNames.size()];
-        for(int i = 0; i < ar.length; i++) {
-            ar[i] = new FieldDescAdapter(_columnNames.get(i));
+        List<FieldDescAdapter> fields = new ArrayList<>();
+        for(String columnName: _columnNames) {
+            FieldDescAdapter desc = new FieldDescAdapter(columnName);
+            if (columnName.equals(RA_TITLE)) {
+                desc.setIsRA(true);
+            }
+            if (columnName.equals(DEC_TITLE)) {
+                desc.setIsDec(true);
+            }
+            if (columnName.equals("")) {
+                desc.setIsId(true);
+            }
+            fields.add(desc);
         }
-        ar[Cols.ID.ordinal()].setIsId(true);
-        ar[Cols.RA.ordinal()].setIsRA(true);
-        ar[Cols.DEC.ordinal()].setIsDec(true);
-        return ar;
+        FieldDescAdapter[] fd = new FieldDescAdapter[_columnNames.size()];
+        return fields.toArray(fd);
     }
 
     public TableQueryResult getTableQueryResult(Catalog cat) {
@@ -142,8 +148,10 @@ class CandidateGuideStarsTableModel extends DefaultTableModel {
         }
 
         Properties props = (Properties)configEntry.getProperties().clone();
-        props.setProperty(SkycatConfigFile.RA_COL, String.valueOf(Cols.RA.ordinal()));
-        props.setProperty(SkycatConfigFile.DEC_COL, String.valueOf(Cols.DEC.ordinal()));
+        String raPosition = String.valueOf(_columnNames.indexOf(RA_TITLE));
+        String decPosition = String.valueOf(_columnNames.indexOf(DEC_TITLE));
+        props.setProperty(SkycatConfigFile.RA_COL, raPosition);
+        props.setProperty(SkycatConfigFile.DEC_COL, decPosition);
         SkycatConfigEntry entry = new SkycatConfigEntry(props);
         SkycatTable skycatTable = new SkycatTable(entry, getDataVector(), getFields()) {
             @Override
