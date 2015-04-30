@@ -80,6 +80,10 @@ case class SingleProbeStrategy(key: AgsStrategyKey, params: SingleProbeStrategyP
 
   def select(ctx: ObsContext, mt: MagnitudeTable, candidates: List[SiderealTarget]): Option[AgsStrategy.Selection] = {
 
+    // Temporary for Andy's tests.
+    def feedback(feedback: => String): Unit =
+      println(s"AGS $feedback")
+
     def selectMinVigetting(vprobe: VProbe, allValid: List[(ObsContext, List[SiderealTarget])]): Option[AgsStrategy.Selection] = {
 
       // Analyze the candidates to get magnitude and quality.
@@ -96,20 +100,40 @@ case class SingleProbeStrategy(key: AgsStrategyKey, params: SingleProbeStrategyP
       // vignettes more than a lower quality option.  Figure out what the
       // best quality is.  (Better quality compares LT worse quality.)
       val bestQuality = analyzed.flatMap { case (_, targets) => targets.map(_._3).minimum }.minimum
+      feedback { s"Quality of best candidates is '${bestQuality.map(_.shows) | "None"}'" }
 
       bestQuality.flatMap { quality =>
         // Get vignetting results per context.  Calculates a
         // List[Angle, SiderealTarget, Double] where the Angle is the
         // position angle and the Double is the percent of vignetting.
         val ctxResults = analyzed.flatMap { case (ctx0, targets) =>
+
+          feedback { f"Analyzing pos angle: ${ctx0.getPositionAngle.toDegrees.getMagnitude}%.2f degrees" }
+
           // Filter out anything but the best quality targets.
           val qualityTargets = targets.filter { case (_,_,q) => q === quality }
+
+          feedback {
+            // could have partitioned above but want to be able to just delete
+            // the feedback when the time comes
+            val msgs = targets.filter { case (_,_,q) => q =/= quality }.map { case (t,_,q) =>
+              s"${t.name}, Quality '${q.shows}'"
+            }
+            if (msgs.isEmpty) "No lower quality targets to delete."
+            else "Rejecting lower quality targets: " + msgs.mkString("\n\t", "\n\t", "")
+          }
 
           // Sort the remaining targets.
           val sortedTargets  = qualityTargets.sortBy { case (_, mag, _) => mag }
 
           // Calculate min vignetting
           val minVig         = vprobe.calculator(ctx0).minCalc(sortedTargets)(_._1.coordinates) // TODO: when?
+
+          feedback {
+            minVig.fold("-> no targets for this position angle") { case ((target, _,_ ), vig) =>
+              f"-> winner ${target.name}.  Vignettes ${vig*100}%.2f%%."
+            }
+          }
 
           // Finally extract the pos angle, sidereal target, and vignetting
           minVig.map { case ((target,_,_), vignetting) =>
@@ -118,7 +142,8 @@ case class SingleProbeStrategy(key: AgsStrategyKey, params: SingleProbeStrategyP
         }
 
         // Pick the lowest vignetting for all the context options.
-        ctxResults.minimumBy(_._3).map { case (angle, target, _) =>
+        ctxResults.minimumBy(_._3).map { case (angle, target, vig) =>
+          feedback { f"Selected ${target.name}.  Vignetting ${vig*100}%.2f%%." }
           AgsStrategy.Selection(angle, List(AgsStrategy.Assignment(params.guideProbe, target)))
         }
       }

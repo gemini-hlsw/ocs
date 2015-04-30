@@ -45,6 +45,15 @@ object AgsGuideQuality {
 
   implicit val AgsGuideQualityOrdering: scala.math.Ordering[AgsGuideQuality] =
     scala.math.Ordering.by(orderByIndex)
+
+  implicit val AgsGuideQualityShow: Show[AgsGuideQuality] =
+    Show.shows {
+      case DeliversRequestedIq   => "Delivers Requested IQ"
+      case PossibleIqDegradation => "Possible IQ Degradation"
+      case IqDegradation         => "IQ Degradation"
+      case PossiblyUnusable      => "Possibly Unusable"
+      case Unusable              => "Unusable"
+    }
 }
 
 sealed trait AgsAnalysis {

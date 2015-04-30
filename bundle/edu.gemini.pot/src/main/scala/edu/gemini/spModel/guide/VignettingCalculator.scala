@@ -1,7 +1,7 @@
 package edu.gemini.spModel.guide
 
 import edu.gemini.pot.ModelConverters._
-import edu.gemini.spModel.core.Coordinates
+import edu.gemini.spModel.core.{Declination, Angle, RightAscension, Coordinates}
 import edu.gemini.spModel.inst.{ProbeArmGeometry, ScienceAreaGeometry}
 import edu.gemini.spModel.inst.FeatureGeometry.approximateArea
 import edu.gemini.spModel.obs.context.ObsContext
@@ -44,6 +44,12 @@ sealed trait VignettingCalculator {
     *
     * @return candidate with minimum vignetting and its vignetting ratio [0, 1] */
   def minCalc[A](candidates: List[A])(f: A => Coordinates): Option[(A, Double)] = {
+
+    // To be deleted ...
+    def formatCoordinates(c: Coordinates): String = s"coordinates(${formatRa(c.ra)}, ${formatDec(c.dec)})"
+    def formatRa(ra: RightAscension): String      = Angle.formatHMS(ra.toAngle)
+    def formatDec(dec: Declination): String       = Declination.formatDMS(dec)
+
     // Explicitly recurse in order to stop if we see a 0 vignetting option,
     // which should be relatively common.
     @tailrec
@@ -53,6 +59,9 @@ sealed trait VignettingCalculator {
         case a :: as =>
           val vignetting = calc(f(a))
           if (curMin.forall(_._2 > vignetting)) {
+            curMin.foreach { case (t,d) =>
+              println(f"AGS rejecting ${formatCoordinates(f(t))}. Vignettes ${d*100}%.2f%%.")
+            }
             val newMin = Some((a, vignetting))
             if (vignetting == 0.0) newMin else go(as, newMin)
           } else go(as, curMin)
