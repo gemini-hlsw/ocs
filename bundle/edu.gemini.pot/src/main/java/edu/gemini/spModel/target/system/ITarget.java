@@ -31,20 +31,26 @@ public abstract class ITarget implements Cloneable, Serializable {
    public enum Tag {
 
        // N.B. these strings are meaningful to the TCC, catalog, and are used in PIO XML
-       SIDEREAL("J2000"),
+       SIDEREAL("J2000", "Sidereal Target"),
        NAMED("Solar system object"),
-       JPL_MINOR_BODY("JPL minor body"),
-       MPC_MINOR_PLANET("MPC minor planet");
+       JPL_MINOR_BODY("JPL minor body", "JPL minor body (Comet)"),
+       MPC_MINOR_PLANET("MPC minor planet", "MPC minor planet (Asteroid)");
 
        public final String tccName;
+       public final String friendlyName;
+
+       private Tag(String tccName, String friendlyName) {
+           this.tccName = tccName;
+           this.friendlyName = friendlyName;
+       }
 
        private Tag(String tccName) {
-           this.tccName = tccName;
+           this(tccName, tccName);
        }
 
        @Override
        public String toString() {
-           return tccName;
+           return friendlyName;
        }
 
     }

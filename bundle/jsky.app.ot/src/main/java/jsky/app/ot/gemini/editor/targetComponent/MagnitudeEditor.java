@@ -4,6 +4,7 @@
 
 package jsky.app.ot.gemini.editor.targetComponent;
 
+import edu.gemini.pot.sp.ISPNode;
 import edu.gemini.shared.skyobject.Magnitude;
 import edu.gemini.shared.util.immutable.*;
 import edu.gemini.spModel.obs.context.ObsContext;
@@ -28,7 +29,7 @@ import java.util.List;
  * Component holding magnitude information for a target position.  Provides
  * controls for editing the magnitude values.
  */
-final class MagnitudeEditor implements TelescopePosEditor {
+public class MagnitudeEditor implements TelescopePosEditor {
 
     private static final DecimalFormat MAG_FORMAT = new DecimalFormat("0.0##");
 
@@ -98,7 +99,7 @@ final class MagnitudeEditor implements TelescopePosEditor {
         // new magnitude band.
         private final ActionListener changeBandAction = new ActionListener() {
             @Override public void actionPerformed(ActionEvent e) {
-                Magnitude.Band newBand = (Magnitude.Band) cb.getSelectedItem();
+                final Magnitude.Band newBand = (Magnitude.Band) cb.getSelectedItem();
                 if (newBand == null) return;
                 if (newBand == MagEditRow.this.band) return;
                 changeBand(MagEditRow.this.band, newBand);
@@ -111,9 +112,9 @@ final class MagnitudeEditor implements TelescopePosEditor {
         // new magnitude system.
         private final ActionListener changeSystemAction = new ActionListener() {
             @Override public void actionPerformed(ActionEvent e) {
-                Magnitude.Band band = (Magnitude.Band) cb.getSelectedItem();
+                final Magnitude.Band band = (Magnitude.Band) cb.getSelectedItem();
                 if (band == null) return;
-                Magnitude.System system = (Magnitude.System) systemCb.getSelectedItem();
+                final Magnitude.System system = (Magnitude.System) systemCb.getSelectedItem();
                 if (system == null) return;
                 changeSystem(band, system);
             }
@@ -122,9 +123,9 @@ final class MagnitudeEditor implements TelescopePosEditor {
         // Action invoked when the brightness value itself is edited.
         private final PropertyChangeListener updateMagnitudeListener = new PropertyChangeListener() {
             @Override public void propertyChange(PropertyChangeEvent evt) {
-                double d;
+                final double d;
                 try {
-                    Number n = (Number) evt.getNewValue();
+                    final Number n = (Number) evt.getNewValue();
                     d = n.doubleValue();
                 } catch (Exception ex) {
                     // do nothing
@@ -148,7 +149,7 @@ final class MagnitudeEditor implements TelescopePosEditor {
                 setToolTipText("Set magnitude system");
             }};
 
-            NumberFormat nf = NumberFormat.getNumberInstance();
+            final NumberFormat nf = NumberFormat.getNumberInstance();
             nf.setMinimumFractionDigits(1);
             nf.setMinimumIntegerDigits(1);
             nf.setGroupingUsed(false);
@@ -167,7 +168,7 @@ final class MagnitudeEditor implements TelescopePosEditor {
 
             // Update visibility based upon whether the target has a
             // corresponding magnitude value for this band.
-            boolean visible = !magOpt.isEmpty();
+            final boolean visible = !magOpt.isEmpty();
             rmButton.setVisible(visible);
             cb.setVisible(visible);
             systemCb.setVisible(visible);
@@ -176,7 +177,7 @@ final class MagnitudeEditor implements TelescopePosEditor {
 
             // Update the combo-box options to show this band and exclude the
             // other used bands.
-            Set<Magnitude.Band> options = new TreeSet<Magnitude.Band>(Magnitude.Band.WAVELENGTH_COMPARATOR);
+            final Set<Magnitude.Band> options = new TreeSet<>(Magnitude.Band.WAVELENGTH_COMPARATOR);
             options.addAll(Arrays.asList(Magnitude.Band.values()));
             //noinspection ConstantConditions
             options.removeAll(target.getTarget().getMagnitudeBands());
@@ -201,11 +202,11 @@ final class MagnitudeEditor implements TelescopePosEditor {
 
         @Override
         public Option<Magnitude.Band> getMagnitudeBand() {
-            return new Some<Magnitude.Band>(band);
+            return new Some<>(band);
         }
 
-        @Override public Option<JComboBox> getBandCombo() { return new Some<JComboBox>(cb); }
-        @Override public Option<JComboBox> getSystemCombo() { return new Some<JComboBox>(systemCb); }
+        @Override public Option<JComboBox> getBandCombo() { return new Some<>(cb); }
+        @Override public Option<JComboBox> getSystemCombo() { return new Some<>(systemCb); }
         @Override public Option<JTextField> getTextField() { return new Some<JTextField>(tf); }
     }
 
@@ -223,7 +224,7 @@ final class MagnitudeEditor implements TelescopePosEditor {
         // value of "0"...
         private final ActionListener addAction = new ActionListener() {
             @Override public void actionPerformed(ActionEvent e) {
-                Magnitude.Band newBand = (Magnitude.Band) cb.getSelectedItem();
+                final Magnitude.Band newBand = (Magnitude.Band) cb.getSelectedItem();
                 if (newBand == null) return;
                 addBand(newBand);
             }
@@ -253,7 +254,7 @@ final class MagnitudeEditor implements TelescopePosEditor {
         }
 
         public void setTarget(SPTarget target, Mode mode) {
-            boolean visible = (target != null) && mode == Mode.add;
+            final boolean visible = (target != null) && mode == Mode.add;
 
             rmButton.setVisible(visible);
             tf.setVisible(visible);
@@ -266,7 +267,7 @@ final class MagnitudeEditor implements TelescopePosEditor {
 
             // Update the combo-box options to contain the unused magnitude
             // bands and show that nothing is selected.
-            Set<Magnitude.Band> options = new TreeSet<Magnitude.Band>(Magnitude.Band.WAVELENGTH_COMPARATOR);
+            final Set<Magnitude.Band> options = new TreeSet<>(Magnitude.Band.WAVELENGTH_COMPARATOR);
             options.addAll(Arrays.asList(Magnitude.Band.values()));
             options.removeAll(target.getTarget().getMagnitudeBands());
             cb.setMaximumRowCount(options.size());
@@ -282,9 +283,9 @@ final class MagnitudeEditor implements TelescopePosEditor {
             return None.instance();
         }
 
-        @Override public Option<JComboBox> getBandCombo() { return new Some<JComboBox>(cb); }
+        @Override public Option<JComboBox> getBandCombo() { return new Some<>(cb); }
         @Override public Option<JComboBox> getSystemCombo() { return None.instance(); }
-        @Override public Option<JTextField> getTextField() { return new Some<JTextField>(tf); }
+        @Override public Option<JTextField> getTextField() { return new Some<>(tf); }
     }
 
     /**
@@ -304,7 +305,7 @@ final class MagnitudeEditor implements TelescopePosEditor {
         }
 
         public void setTarget(SPTarget target, Mode mode) {
-            boolean visible = (target != null) && mode == Mode.edit;
+            final boolean visible = (target != null) && mode == Mode.edit;
             addButton.setVisible(visible);
         }
 
@@ -331,7 +332,7 @@ final class MagnitudeEditor implements TelescopePosEditor {
 
     private SPTarget target = null;
 
-    MagnitudeEditor() {
+    public MagnitudeEditor() {
         pan = new JPanel(new GridBagLayout());
 
         // Create the panel that will hold the magnitude editing widgets.
@@ -354,27 +355,27 @@ final class MagnitudeEditor implements TelescopePosEditor {
         // Place them in the content panel.
         rows.zipWithIndex().foreach(new ApplyOp<Tuple2<MagWidgetRow, Integer>>() {
             @Override public void apply(Tuple2<MagWidgetRow, Integer> tup) {
-                MagWidgetRow row = tup._1();
+                final MagWidgetRow row = tup._1();
                 final Integer  y = tup._2();
                 content.add(row.getButton(), new GridBagConstraints() {{
                     gridx=0; gridy=y; insets=new Insets(0, 0, 5, 5); fill=VERTICAL;
                 }});
 
-                Option<JTextField> tf = row.getTextField();
+                final Option<JTextField> tf = row.getTextField();
                 if (!tf.isEmpty()) {
                     content.add(tf.getValue(), new GridBagConstraints() {{
                         gridx=1; gridy=y; insets=new Insets(0, 0, 5, 5);
                     }});
                 }
 
-                Option<JComboBox> cb = row.getBandCombo();
+                final Option<JComboBox> cb = row.getBandCombo();
                 if (!cb.isEmpty()) {
                     content.add(cb.getValue(), new GridBagConstraints() {{
                         gridx=2; gridy=y; insets=new Insets(0, 0, 5, 5); fill=HORIZONTAL;
                     }});
                 }
 
-                Option<JComboBox> system = row.getSystemCombo();
+                final Option<JComboBox> system = row.getSystemCombo();
                 if (!system.isEmpty()) {
                     content.add(system.getValue(), new GridBagConstraints() {{
                         gridx=3; gridy=y; insets=new Insets(0, 0, 5, 0); fill=HORIZONTAL;
@@ -408,7 +409,7 @@ final class MagnitudeEditor implements TelescopePosEditor {
         return pan;
     }
 
-    public void edit(final Option<ObsContext> ctx, final SPTarget target) {
+    public void edit(final Option<ObsContext> ctx, final SPTarget target, ISPNode node) {
         if (this.target == target) return;
         if (this.target != null) this.target.deleteWatcher(watcher);
         if (target != null) target.addWatcher(watcher);
@@ -452,7 +453,7 @@ final class MagnitudeEditor implements TelescopePosEditor {
             // value are visible.
             SwingUtilities.invokeLater(new Runnable() {
                 @Override public void run() {
-                    JScrollBar sb = scroll.getVerticalScrollBar();
+                    final JScrollBar sb = scroll.getVerticalScrollBar();
                     sb.setValue(sb.getMaximum());
 
                     if (target.getTarget().getMagnitudes().size() > 0) {
@@ -468,7 +469,7 @@ final class MagnitudeEditor implements TelescopePosEditor {
     private void focusOn(final Magnitude.Band b) {
         final Option<MagWidgetRow> row = rows.find(new PredicateOp<MagWidgetRow>() {
             @Override public Boolean apply(MagWidgetRow tmp) {
-                Option<Magnitude.Band> tmpBand = tmp.getMagnitudeBand();
+                final Option<Magnitude.Band> tmpBand = tmp.getMagnitudeBand();
                 if (tmpBand.isEmpty()) return false;
                 return tmpBand.getValue() == b;
             }
@@ -477,7 +478,7 @@ final class MagnitudeEditor implements TelescopePosEditor {
             SwingUtilities.invokeLater(new Runnable() {
                 @Override public void run() {
                     if (pan.isVisible()) {
-                        JTextField tf = row.getValue().getTextField().getValue();
+                        final JTextField tf = row.getValue().getTextField().getValue();
                         tf.requestFocusInWindow();
                     }
                 }
@@ -495,10 +496,10 @@ final class MagnitudeEditor implements TelescopePosEditor {
     }
 
     void addBand(Magnitude.Band b) {
-        Option<Magnitude> magOpt = target.getTarget().getMagnitude(b);
+        final Option<Magnitude> magOpt = target.getTarget().getMagnitude(b);
         if (!magOpt.isEmpty()) return; // shouldn't happen ...
 
-        Magnitude newMag = new Magnitude(b, Magnitude.UNDEFINED_MAG, 0);
+        final Magnitude newMag = new Magnitude(b, Magnitude.UNDEFINED_MAG, 0);
 
         target.getTarget().setMagnitudes(target.getTarget().getMagnitudes().cons(newMag));
         target.notifyOfGenericUpdate();
@@ -511,10 +512,10 @@ final class MagnitudeEditor implements TelescopePosEditor {
     }
 
     void changeBand(Magnitude.Band from, Magnitude.Band to) {
-        Option<Magnitude> oldMagOpt = target.getTarget().getMagnitude(from);
+        final Option<Magnitude> oldMagOpt = target.getTarget().getMagnitude(from);
         if (oldMagOpt.isEmpty()) return; // shouldn't happen ...
-        Magnitude oldMag = oldMagOpt.getValue();
-        Magnitude newMag = new Magnitude(to, oldMag.getBrightness(), oldMag.getError(), oldMag.getSystem());
+        final Magnitude oldMag = oldMagOpt.getValue();
+        final Magnitude newMag = new Magnitude(to, oldMag.getBrightness(), oldMag.getError(), oldMag.getSystem());
 
         target.getTarget().setMagnitudes(
                target.getTarget().getMagnitudes().filter(new NotBand(from)).cons(newMag)
@@ -524,11 +525,11 @@ final class MagnitudeEditor implements TelescopePosEditor {
     }
 
     void changeSystem(Magnitude.Band band, Magnitude.System system) {
-        Option<Magnitude> oldMagOpt = target.getTarget().getMagnitude(band);
+        final Option<Magnitude> oldMagOpt = target.getTarget().getMagnitude(band);
         if (oldMagOpt.isEmpty()) return; // shouldn't happen ...
-        Magnitude oldMag = oldMagOpt.getValue();
+        final Magnitude oldMag = oldMagOpt.getValue();
         if (system == oldMag.getSystem()) return;
-        Magnitude newMag = new Magnitude(band, oldMag.getBrightness(), oldMag.getError(), system);
+        final Magnitude newMag = new Magnitude(band, oldMag.getBrightness(), oldMag.getError(), system);
 
         target.getTarget().setMagnitudes(
                target.getTarget().getMagnitudes().filter(new NotBand(band)).cons(newMag)
@@ -538,12 +539,12 @@ final class MagnitudeEditor implements TelescopePosEditor {
     }
 
     void updateMagnitudeValue(Magnitude.Band b, double d) {
-        Option<Magnitude> oldMagOpt = target.getTarget().getMagnitude(b);
+        final Option<Magnitude> oldMagOpt = target.getTarget().getMagnitude(b);
         if (oldMagOpt.isEmpty()) return;
-        Magnitude oldMag = oldMagOpt.getValue();
+        final Magnitude oldMag = oldMagOpt.getValue();
 
         try {
-            Magnitude newMag = new Magnitude(oldMag.getBand(), d, oldMag.getError(), oldMag.getSystem());
+            final Magnitude newMag = new Magnitude(oldMag.getBand(), d, oldMag.getError(), oldMag.getSystem());
             target.deleteWatcher(watcher);
             target.getTarget().setMagnitudes(
                    target.getTarget().getMagnitudes().filter(new NotBand(b)).cons(newMag)
