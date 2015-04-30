@@ -1,6 +1,8 @@
 Instrument : NIFS
 Blueprints : NIFS_BP.xml
-Version June 15, 2012 - updated by Atsuko N and Bryan M
+Version 2012 Jun 15 - Updated by Atsuko N and Bryan M
+Version 2014 Dec 11 - BMiller, specific setting conditions from PI (change to add science conditions to tellurics)
+Version 2015 Apr 29 - Updated to use K-band mag limits and blind-offset acquisition by Marie L.-B. and Andy S
 
 Observations identified by LibraryIDs indicated with {}.
 
@@ -9,53 +11,53 @@ AO = Adaptive Optics
 PI = Phase I
 
 TARGET BRIGHTNESS = TB
-Use H mag from target information if available
-    Bright target (H <= 9) = BT
-    Moderate target (9 < H <= 12) = MT
-    Faint target (12 < H <= 20) = FT
-    Blind acquisition target (H > 20) = BAT
+Use K magnitude from target information if available:
+IF      K <= 9  then BT = True   # Bright Target
+IF  9 < K <= 13 then MT = True   # Moderate Target
+IF 13 < K <= 20 then FT = True   # Faint Target
+IF 20 < K       then BAT = True  # Blind acquisition target
 
 # General Info about the names used in the Acq/Obs
 #
-# In acq.
+# In acquisition observations:
+#      K <= 9    NO SKY
+#  9 < K <= 13   SKY SUBTRACTION
+# 13 < K <= 20   FLIP MIRROR IN
 #
-# H<=9 =  NO SKY
-# 9<H<=12 = SKY SUBTRACTION
-# 12<H<=20 =  FLIP MIRROR IN.
-#
-# In science observations.
-#
+# In science observations:
 # BRIGHT = BRIGHT READ MODE
 # MEDIUM = MEDIUM READ MODE
 # FAINT = FAINT READ MODE
-#
 
 # Select acquisition and science observation
 IF OCCULTING DISK == None
-   IF target information contains a H magnitude
-      if BT then ACQ={3}   # Bright Object
-      if MT then ACQ={4}   # Medium Object
-      if FT then ACQ={5}   # Faint Object
-      else ACQ={4}         # Moderate Object, blind offset
-   ELSE ACQ={4}
+   IF target information contains a K magnitude
+      IF BT  then ACQ={3}  # Bright Object
+      IF MT  then ACQ={4}  # Medium Object
+      IF FT  then ACQ={5}  # Faint Object
+      IF BAT then ACQ={23}  # Blind offset
+   ELSE
+      ACQ={3,4,5,23}
    SCI={6}
 ELSEIF OCCULTING DISK != None
    IF target information contains a H magnitude
-      if BT then ACQ={11}   # Bright Object
-      if MT then ACQ={12}   # Medium Object
-      if FT then ACQ={12}   # Faint Object
-      else ACQ={12}         # Very faint
-   ELSE ACQ={12}
+      IF BT then ACQ={11}   # Bright Object
+      IF MT then ACQ={12}   # Medium Object
+      IF FT then ACQ={12}   # Faint Object
+      IF BAT then ACQ={12}  # Very faint
+   ELSE
+      ACQ={11,12}
    SCI={13}
 
 ### Target Group
 INCLUDE {1},{2},ACQ,SCI,{7},{8} in target-specific Scheduling Group
-
+    SET CONDITION FROM PI
+    
 # AO Mode
 # In NGS mode target and standards use the same Altair guide mode.
 # In LGS mode the target uses the mode from PI, standards use NGS+FieldsLens
 # Altair components are not added to dark and general daytime observations
-  IF AO mode != None AND NOT {9}, {14} - {22}
+  IF AO mode != None AND NOT {9}, {10}, {14} - {22}
     ADD Altair Adaptive Optics component AND 
     SET Guide Star Type based on:
       IF AO in PI includes "Natural Guide Star" (NGS mode) THEN SET for ALL in the group:

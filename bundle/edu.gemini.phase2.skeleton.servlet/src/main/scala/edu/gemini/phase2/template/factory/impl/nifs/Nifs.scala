@@ -12,7 +12,7 @@ case class Nifs(blueprint:SpNifsBlueprint, exampleTarget: Option[SPTarget]) exte
 
   // N.B. This is the same as NifsAo but without altair or occulting disk
 
-  val tb = exampleTarget.flatMap(t => Option(t.getTarget.getMagnitude(Band.H).getOrNull)).map(_.getBrightness).map(TargetBrightness(_))
+  val tb = exampleTarget.flatMap(t => Option(t.getTarget.getMagnitude(Band.K).getOrNull)).map(_.getBrightness).map(TargetBrightness(_))
 
   if (tb.isEmpty)
     addNote("foo") in TargetGroup
