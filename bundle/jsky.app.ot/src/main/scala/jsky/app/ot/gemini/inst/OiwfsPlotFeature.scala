@@ -4,7 +4,7 @@ import edu.gemini.pot.ModelConverters._
 import edu.gemini.spModel.core._
 import edu.gemini.spModel.core.AngleSyntax._
 import edu.gemini.spModel.gemini.flamingos2.{F2OiwfsProbeArm, Flamingos2OiwfsGuideProbe}
-import edu.gemini.spModel.gemini.gmos.{GmosSouthOiwfsProbeArm, GmosNorthOiwfsProbeArm, GmosOiwfsGuideProbe}
+import edu.gemini.spModel.gemini.gmos.{GmosOiwfsProbeArm, GmosOiwfsGuideProbe}
 import edu.gemini.spModel.guide.{PatrolField, OffsetValidatingGuideProbe}
 import edu.gemini.spModel.inst.{FeatureGeometry, ProbeArmGeometry}
 import edu.gemini.spModel.obs.context.ObsContext
@@ -186,10 +186,6 @@ object Flamingos2OiwfsFeature extends OiwfsPlotFeature(Flamingos2OiwfsGuideProbe
   val instance = this
 }
 
-object GmosNorthOiwfsFeature  extends OiwfsPlotFeature(GmosOiwfsGuideProbe.instance, GmosNorthOiwfsProbeArm) {
-  val instance = this
-}
-
-object GmosSouthOiwfsFeature  extends OiwfsPlotFeature(GmosOiwfsGuideProbe.instance, GmosSouthOiwfsProbeArm) {
+object GmosOiwfsFeature  extends OiwfsPlotFeature(GmosOiwfsGuideProbe.instance, GmosOiwfsProbeArm) {
   val instance = this
 }

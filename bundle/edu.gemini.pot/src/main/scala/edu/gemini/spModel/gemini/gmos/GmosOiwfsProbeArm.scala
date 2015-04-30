@@ -16,10 +16,30 @@ import java.awt.geom.{Area, Rectangle2D}
 import scalaz._
 import Scalaz._
 
-class GmosOiwfsProbeArm extends ProbeArmGeometry {
+object GmosOiwfsProbeArm extends ProbeArmGeometry {
+  val instance = this
+
+  // The following values (in arcsec) are used to calculate the position of the
+  // OIWFS arm and are described in the paper "Opto-Mechanical Design of the
+  // Gemini Multi-Object Spectrograph On-Instrument Wavefront Sensor".
+  // Location of base stage in arcsec
+  val PickoffArmLength      = 358.46
+  val PickoffMirrorSize     =  20.00
+  val ProbeArmLength        = PickoffArmLength - PickoffMirrorSize / 2.0
+  val ProbeArmTaperedWidth  =  15.00
+  val ProbeArmTaperedLength = 180.00
+
+  val T   = Offset(427.52.arcsecs[OffsetP], 101.84.arcsecs[OffsetQ])
+
+  // Length of stage arm in arcsec
+  val BX  = 124.89
+  val BX2 = BX * BX
+
+  // Length of pick-off arm in arcsec
+  val MX  = 358.46
+  val MX2 = MX * MX
 
   import edu.gemini.spModel.inst.FeatureGeometry._
-  import GmosOiwfsProbeArm._
 
   override protected val guideProbeInstance = GmosOiwfsGuideProbe.instance
 
@@ -103,37 +123,4 @@ class GmosOiwfsProbeArm extends ProbeArmGeometry {
 
     Angle.fromRadians(phi - theta - alpha - math.Pi / 2.0)
   }
-}
-
-object GmosOiwfsProbeArm {
-  // Various measurements in arcsec.
-  private val PickoffArmLength      = 358.46
-  private val PickoffMirrorSize     =  20.00
-  private val ProbeArmLength        = PickoffArmLength - PickoffMirrorSize / 2.0
-  private val ProbeArmTaperedWidth  =  15.00
-  private val ProbeArmTaperedLength = 180.00
-
-  // The following values (in arcsec) are used to calculate the position of the
-  // OIWFS arm and are described in the paper "Opto-Mechanical Design of the
-  // Gemini Multi-Object Spectrograph On-Instrument Wavefront Sensor".
-  // Location of base stage in arcsec
-  private val T   = Offset(427.52.arcsecs[OffsetP], 101.84.arcsecs[OffsetQ])
-
-  // Length of stage arm in arcsec
-  private val BX  = 124.89
-  private val BX2 = BX * BX
-
-  // Length of pick-off arm in arcsec
-  private val MX  = 358.46
-  private val MX2 = MX * MX
-}
-
-// Instances for concrete GMOS implementations. instance member for simplified
-// Java access.
-object GmosNorthOiwfsProbeArm extends GmosOiwfsProbeArm {
-  val instance = this
-}
-
-object GmosSouthOiwfsProbeArm extends GmosOiwfsProbeArm {
-  val instance = this
 }

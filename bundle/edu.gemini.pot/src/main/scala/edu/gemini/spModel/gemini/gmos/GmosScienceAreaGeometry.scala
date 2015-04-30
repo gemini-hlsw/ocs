@@ -13,6 +13,8 @@ import scalaz._
 import Scalaz._
 
 object GmosScienceAreaGeometry extends ScienceAreaGeometry {
+  val instance = this
+
   // Various sizes used in the calculation of the science area in arcsec.
   val ImagingFovSize          = 330.34
   val ImagingFovInnerSize     = 131.33 * 2

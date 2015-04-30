@@ -83,7 +83,7 @@ object VignettingCalcSpec extends Specification with ScalaCheck with Arbitraries
   def formatDec(dec: Declination): String = Declination.formatDMS(dec)
 
   case class TestEnv(ctx: ObsContext, candidates: List[Coordinates]) {
-    val vc = VignettingCalculator(ctx, GmosNorthOiwfsProbeArm, GmosScienceAreaGeometry)
+    val vc = VignettingCalculator(ctx, GmosOiwfsProbeArm, GmosScienceAreaGeometry)
 
     override def toString: String = {
       val gmosN = ctx.getInstrument.asInstanceOf[InstGmosNorth]
@@ -158,7 +158,7 @@ object VignettingCalcSpec extends Specification with ScalaCheck with Arbitraries
         // even further sometimes.  For spectroscopy, the slit is small
         // so we stick with 1.0 in those cases
         val gmosArea     = GmosScienceAreaGeometry.unadjustedGeometry(env.ctx).map(approximateArea)
-        val maxProbeArea = GmosNorthOiwfsProbeArm.unadjustedGeometry(env.ctx).map(approximateArea)
+        val maxProbeArea = GmosOiwfsProbeArm.unadjustedGeometry(env.ctx).map(approximateArea)
         val maxVig       = 1.0 min (maxProbeArea.get / gmosArea.get)
 
         env.candidates.forall { gs =>

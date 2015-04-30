@@ -81,9 +81,9 @@ public class OIWFS_Feature extends TpeImageFeature {
             if (_niriFeat == null) _niriFeat = new NIRI_OIWFS_Feature();
             _feat = _niriFeat;
         } else if (inst instanceof InstGmosNorth) {
-            _feat = GmosNorthOiwfsFeature.instance();
+            _feat = GmosOiwfsFeature.instance();
         } else if ((inst instanceof InstGmosSouth) || (inst instanceof InstBHROS)) {
-            _feat = GmosSouthOiwfsFeature.instance();
+            _feat = GmosOiwfsFeature.instance();
         } else if (inst instanceof InstGNIRS) {
             if (_gnirsFeat == null) _gnirsFeat = new GNIRS_OIWFS_Feature();
             _feat = _gnirsFeat;

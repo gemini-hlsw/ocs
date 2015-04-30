@@ -12,7 +12,6 @@ import edu.gemini.skycalc.Offset;
 import edu.gemini.shared.skyobject.SkyObject;
 import edu.gemini.shared.util.immutable.None;
 import edu.gemini.shared.util.immutable.Option;
-import edu.gemini.spModel.core.Site;
 import edu.gemini.spModel.guide.VignettingCalculator;
 import edu.gemini.spModel.guide.*;
 import edu.gemini.spModel.obs.context.ObsContext;
@@ -127,12 +126,10 @@ public enum GmosOiwfsGuideProbe implements ValidatableGuideProbe, OffsetValidati
     }
 
     @Override
-    public double calculateVignetting(final ObsContext ctx,
-                                      final edu.gemini.spModel.core.Coordinates guideStarCoordinates) {
-//        if (Site.GN == ctx.getSite().getOrNull())
-//            return VignettingCalculator.calculateVignetting(ctx, guideStarCoordinates, GmosNorthOiwfsProbeArm.instance());
-//        return VignettingCalculator.calculateVignetting(ctx, guideStarCoordinates, GmosSouthOiwfsProbeArm.instance());
-        return 0.0;
+    public VignettingCalculator calculator(ObsContext ctx) {
+        return VignettingCalculator$.MODULE$.apply(ctx,
+                GmosOiwfsProbeArm.instance(),
+                GmosScienceAreaGeometry.instance());
     }
 
     private PatrolField getCorrectedPatrolField(final ObsContext ctx, final PatrolField patrolField) {

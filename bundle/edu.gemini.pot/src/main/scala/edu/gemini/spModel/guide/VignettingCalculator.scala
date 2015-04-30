@@ -8,6 +8,7 @@ import edu.gemini.spModel.obs.context.ObsContext
 
 import java.awt.geom.Area
 
+import scala.annotation.tailrec
 import scala.collection.JavaConverters._
 
 import scalaz._
@@ -30,7 +31,35 @@ sealed trait VignettingCalculator {
     * No other factors are taken into account (brightness, quality, whether the
     * candidate is reachable at all offsets, etc) so the caller should filter
     * the candidates accordingly before calling. */
-  def min[A](candidates: Iterable[A])(f: A => Coordinates): Option[A]
+  def min[A](candidates: List[A])(f: A => Coordinates): Option[A] =
+    minCalc(candidates)(f).map { case (a,_) => a }
+
+  /** Selects the first candidate that least vignettes the science area.
+    * If two candidates each vignette by the same amount, the first in the given
+    * iterable is selected.
+    *
+    * No other factors are taken into account (brightness, quality, whether the
+    * candidate is reachable at all offsets, etc) so the caller should filter
+    * the candidates accordingly before calling.
+    *
+    * @return candidate with minimum vignetting and its vignetting ratio [0, 1] */
+  def minCalc[A](candidates: List[A])(f: A => Coordinates): Option[(A, Double)] = {
+    // Explicitly recurse in order to stop if we see a 0 vignetting option,
+    // which should be relatively common.
+    @tailrec
+    def go(rem: List[A], curMin: Option[(A, Double)]): Option[(A, Double)] =
+      rem match {
+        case Nil     => curMin
+        case a :: as =>
+          val vignetting = calc(f(a))
+          if (curMin.forall(_._2 > vignetting)) {
+            val newMin = Some((a, vignetting))
+            if (vignetting == 0.0) newMin else go(as, newMin)
+          } else go(as, curMin)
+      }
+
+    go(candidates, None)
+  }
 }
 
 object VignettingCalculator {
@@ -56,9 +85,5 @@ object VignettingCalculator {
             whole.map { area => approximateArea(vigShape) / area } | 0.0
           }.max
         }
-
-      override def min[A](candidates: Iterable[A])(f: A => Coordinates): Option[A] =
-        if (candidates.isEmpty) None
-        else Some(candidates.minBy(c => calc(f(c))))
     }
 }

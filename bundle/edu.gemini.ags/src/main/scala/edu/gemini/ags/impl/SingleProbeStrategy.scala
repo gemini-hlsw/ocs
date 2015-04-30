@@ -7,15 +7,13 @@ import edu.gemini.catalog.votable.{RemoteBackend, VoTableBackend, CatalogExcepti
 import edu.gemini.pot.ModelConverters._
 import edu.gemini.skycalc
 import edu.gemini.spModel.ags.AgsStrategyKey
-import edu.gemini.spModel.core.{Magnitude, MagnitudeBand, Coordinates, Angle}
+import edu.gemini.spModel.core.{MagnitudeBand, Coordinates, Angle}
 import edu.gemini.spModel.core.Target.SiderealTarget
 import edu.gemini.spModel.guide.{ValidatableGuideProbe, VignettingGuideProbe, GuideProbe}
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.target.system.CoordinateParam.Units
 import edu.gemini.spModel.target.system.HmsDegTarget
 import edu.gemini.spModel.telescope.PosAngleConstraint._
-
-import java.text.DecimalFormat
 
 import scala.collection.JavaConverters._
 import scala.concurrent._
@@ -81,29 +79,70 @@ case class SingleProbeStrategy(key: AgsStrategyKey, params: SingleProbeStrategyP
     catalogResult(ctx, mt).map(select(ctx, mt, _))
 
   def select(ctx: ObsContext, mt: MagnitudeTable, candidates: List[SiderealTarget]): Option[AgsStrategy.Selection] = {
+
+    def selectMinVigetting(vprobe: VProbe, allValid: List[(ObsContext, List[SiderealTarget])]): Option[AgsStrategy.Selection] = {
+
+      // Analyze the candidates to get magnitude and quality.
+      val analyzed = allValid.map { case (ctx0, targets) =>
+        val analyzedTargets = for {
+          target    <- targets
+          analysis  <- AgsAnalysis.analysis(ctx0, mt, vprobe, target, params.probeBands)
+          magnitude <- params.referenceMagnitude.apply(target)
+        } yield (target, magnitude, analysis.quality)
+        (ctx0, analyzedTargets)
+      }
+
+      // Now we don't care about anything but the best quality, even if it
+      // vignettes more than a lower quality option.  Figure out what the
+      // best quality is.  (Better quality compares LT worse quality.)
+      val bestQuality = analyzed.flatMap { case (_, targets) => targets.map(_._3).minimum }.minimum
+
+      bestQuality.flatMap { quality =>
+        // Get vignetting results per context.  Calculates a
+        // List[Angle, SiderealTarget, Double] where the Angle is the
+        // position angle and the Double is the percent of vignetting.
+        val ctxResults = analyzed.flatMap { case (ctx0, targets) =>
+          // Filter out anything but the best quality targets.
+          val qualityTargets = targets.filter { case (_,_,q) => q === quality }
+
+          // Sort the remaining targets.
+          val sortedTargets  = qualityTargets.sortBy { case (_, mag, _) => mag }
+
+          // Calculate min vignetting
+          val minVig         = vprobe.calculator(ctx0).minCalc(sortedTargets)(_._1.coordinates) // TODO: when?
+
+          // Finally extract the pos angle, sidereal target, and vignetting
+          minVig.map { case ((target,_,_), vignetting) =>
+            (ctx0.getPositionAngle.toNewModel, target, vignetting)
+          }
+        }
+
+        // Pick the lowest vignetting for all the context options.
+        ctxResults.minimumBy(_._3).map { case (angle, target, _) =>
+          AgsStrategy.Selection(angle, List(AgsStrategy.Assignment(params.guideProbe, target)))
+        }
+      }
+    }
+
+
     if (candidates.isEmpty) None
     else {
-/*
       params.guideProbe match {
         // If vignetting, filter according to the pos angle constraint, and then for each obs context, pick the best quality with
         // the least vignetting. Then pick the best quality with the least vignetting of the final result.
-        case v: ValidatableGuideProbe with VignettingGuideProbe =>
+        case vprobe: VProbe =>
+          // Filter for brightness constraints and reachability.
           val results = ctx.getPosAngleConstraint match {
             case FIXED                         => filterBounded(List(ctx), mt, candidates)
             case FIXED_180 | PARALLACTIC_ANGLE => filterBounded(List(ctx, ctx180(ctx)), mt, candidates)
             case UNBOUNDED                     => filterUnbounded(ctx, mt, candidates)
           }
-          val bestPerCtx = for {
-            (c, soList) <- results
-            rating      <- brightestByQualityAndVignetting(soList, mt, c, v, params)
-          } yield (c, rating)
-          bestPerCtx.reduceOption(vignettingCtxOrder.min).map {
-            case (c, (_, _, _, st)) => AgsStrategy.Selection(c.getPositionAngle.toNewModel, List(AgsStrategy.Assignment(params.guideProbe, st)))
-          }
+
+          // Select the highest quality target that vignettes the least.
+          selectMinVigetting(vprobe, results)
 
         // Otherwise proceed as normal.
         case _ =>
-*/
           val results = ctx.getPosAngleConstraint match {
             case FIXED                         => selectBounded(List(ctx), mt, candidates)
             case FIXED_180 | PARALLACTIC_ANGLE => selectBounded(List(ctx, ctx180(ctx)), mt, candidates)
@@ -112,7 +151,7 @@ case class SingleProbeStrategy(key: AgsStrategyKey, params: SingleProbeStrategyP
           params.brightest(results)(_._2).map {
             case (angle, st) => AgsStrategy.Selection(angle, List(AgsStrategy.Assignment(params.guideProbe, st)))
           }
-//      }
+      }
     }
   }
 
@@ -158,6 +197,17 @@ case class SingleProbeStrategy(key: AgsStrategyKey, params: SingleProbeStrategyP
 object SingleProbeStrategy {
   import scala.math._
 
+  type VProbe = VignettingGuideProbe with ValidatableGuideProbe
+
+  // TODO: Delete me when we upgrade scalaz
+  implicit class MinimumByOp[A](l: List[A]) {
+    def minimumBy[B](f: A => B)(implicit cmp: Ordering[B]): Option[A] =
+      l match {
+        case Nil => None
+        case as  => Some(as.minBy(f))
+      }
+  }
+
   /**
    * Calculate the position angle to a target from a specified base position.
    */
@@ -170,50 +220,5 @@ object SingleProbeStrategy {
     val raDiff = ra2 - ra1
     val angle  = atan2(sin(raDiff), cos(dec1) * tan(dec2) - sin(dec1) * cos(raDiff))
     Angle.fromRadians(angle)
-  }
-
-  lazy val vignettingOrder = implicitly[scala.math.Ordering[(Int, Double, Option[Magnitude])]].on { x: (AgsGuideQuality, Double, Option[Magnitude], SiderealTarget) =>
-    (AgsGuideQuality.All.indexOf(x._1), x._2, x._3)
-  }
-
-  lazy val vignettingCtxOrder = vignettingOrder.on { x0: (ObsContext, (AgsGuideQuality, Double, Option[Magnitude], SiderealTarget)) => x0._2 }
-
-  /**
-   * Given a list of candidates, bin them by quality and then pick the one that vignettes the
-   * science area the least and is the brightest.
-   * @param lst              the list of possible candidates
-   * @param mt               magnitude lookup table
-   * @param ctx              context information
-   * @param probe            the guide probe
-   * @return                 Some((quality, vignetting factor, guideStar) if a candidate exists that can be used, None otherwise
-   */
-  def brightestByQualityAndVignetting(lst: List[SiderealTarget], mt: MagnitudeTable, ctx: ObsContext,
-                                      probe: ValidatableGuideProbe with VignettingGuideProbe,
-                                      params: SingleProbeStrategyParams): Option[(AgsGuideQuality, Double, Option[Magnitude], SiderealTarget)] = {
-    // Create tuples (AgsQuality, vignetting factor, target) and then find the min by
-    // ordering on the first two, returning the corresponding target.
-    // TODO: Temporary code to help Andy with debugging. Remove.
-    println("*** Vignetting analysis ****")
-    val df = new DecimalFormat("0.####")
-
-    val candidates = for {
-      st       <- lst
-      analysis <- AgsAnalysis.analysis(ctx, mt, probe, st, params.probeBands)
-    } yield {
-      val vig = probe.calculateVignetting(ctx, st.coordinates)
-
-      // TODO: Temporary code to help Andy with debugging. Remove.
-      val magStr = params.referenceMagnitude(st) match {
-        case Some(m) => s"${m.band.name}=${m.value}"
-        case None    => "None"
-      }
-      println(s"name=${st.name}, quality=${analysis.quality.getClass.getSimpleName.reverse.dropWhile(_ == '$').reverse}, vignetting=${df.format(vig)}, mag=$magStr")
-
-      (analysis.quality, vig, params.referenceMagnitude(st), st)
-    }
-    // TODO: Temporary code to help Andy with debugging. Remove.
-    println("--- Analysis complete ---")
-
-    candidates.reduceOption(vignettingOrder.min)
   }
 }
