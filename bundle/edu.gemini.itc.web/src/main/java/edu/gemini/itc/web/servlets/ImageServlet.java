@@ -138,17 +138,17 @@ public final class ImageServlet extends HttpServlet {
     public static BufferedImage toImage(final String id, final String filename, final int index) {
         final ItcSpectroscopyResult results = result(id);
         final PlottingDetails pd = new PlottingDetails(PlottingDetails.PlotLimits.AUTO, 0, 1); // TODO how do we get the plot details parameters?? encode them in url??
-        final ItcChart file;
+        final ITCChart file;
         switch (filename) {
-            case SigChart:      file = ItcChart.forSpcDataSet(results.dataSets().apply(0), pd);             break;
-            case S2NChart:      file = ItcChart.forSpcDataSet(results.dataSets().apply(1), pd);             break;
-            case SigSwApChart:  file = ItcChart.forSpcDataSet(results.dataSets().apply(0), pd);             break;
-            case NifsSigChart:  file = ItcChart.forSpcDataSet(results.dataSets().apply(2 * index), pd);     break;
-            case NifsS2NChart:  file = ItcChart.forSpcDataSet(results.dataSets().apply(2 * index + 1), pd); break;
-            case GnirsSigChart: file = ItcChart.forSpcDataSet(results.dataSets().apply(0), pd);             break;
-            case GnirsS2NChart: file = ItcChart.forSpcDataSet(results.dataSets().apply(1), pd);             break;
-            case GmosSigChart:  file = ItcChart.forSpcDataSet(results.dataSets().apply(0), pd);             break;
-            case GmosS2NChart:  file = ItcChart.forSpcDataSet(results.dataSets().apply(1), pd);             break;
+            case SigChart:      file = ITCChart.forSpcDataSet(results.dataSets().apply(0), pd);             break;
+            case S2NChart:      file = ITCChart.forSpcDataSet(results.dataSets().apply(1), pd);             break;
+            case SigSwApChart:  file = ITCChart.forSpcDataSet(results.dataSets().apply(0), pd);             break;
+            case NifsSigChart:  file = ITCChart.forSpcDataSet(results.dataSets().apply(2 * index), pd);     break;
+            case NifsS2NChart:  file = ITCChart.forSpcDataSet(results.dataSets().apply(2 * index + 1), pd); break;
+            case GnirsSigChart: file = ITCChart.forSpcDataSet(results.dataSets().apply(0), pd);             break;
+            case GnirsS2NChart: file = ITCChart.forSpcDataSet(results.dataSets().apply(1), pd);             break;
+            case GmosSigChart:  file = ITCChart.forSpcDataSet(results.dataSets().apply(0), pd);             break;
+            case GmosS2NChart:  file = ITCChart.forSpcDataSet(results.dataSets().apply(1), pd);             break;
             default:            throw new Error();
         }
         return file.getBufferedImage(675, 500);

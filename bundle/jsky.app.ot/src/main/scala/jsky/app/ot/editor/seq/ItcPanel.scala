@@ -488,7 +488,7 @@ private class ItcChartsPanel(table: ItcSpectroscopyTable) extends GridBagPanel {
 
   private def update(result: ItcSpectroscopyResult): Unit = {
     charts = result.dataSets.map { ds =>
-      val chart = ItcChart.forSpcDataSet(ds, limitsPanel.plottingDetails).getBufferedImage(600, 400)
+      val chart = ITCChart.forSpcDataSet(ds, limitsPanel.plottingDetails).getBufferedImage(600, 400)
       new Label("", new ImageIcon(chart), Alignment.Center) {
         border = BorderFactory.createEmptyBorder(10, 25, 10, 25)
       }
