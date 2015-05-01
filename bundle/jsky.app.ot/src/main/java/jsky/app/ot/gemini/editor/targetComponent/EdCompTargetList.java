@@ -611,27 +611,27 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
             if (env.isBasePosition(_curPos)) {
                 DialogUtil.error("You can't remove the Base Position.");
             } else if (_curPos != null) {
-                env.removeTarget(_curPos);
+                env = env.removeTarget(_curPos);
             } else if (_curGroup != null) {
                 final GuideGroup primary = env.getOrCreatePrimaryGuideGroup();
                 if (_curGroup == primary) {
                     DialogUtil.error("You can't remove the primary guide group.");
-                } else {
-                    env = env.removeGroup(_curGroup);
-                    _curGroup = primary;
-                    getDataObject().setTargetEnvironment(env);
-                    final SPTarget selTarget = TargetSelection.get(env, getNode());
-                    if (env.getTargets().contains(selTarget)) {
-                        if (_curPos != null) _curPos.deleteWatcher(posWatcher);
-                        _curPos = selTarget;
-                        if (_curPos != null) {
-                            _curPos.addWatcher(posWatcher);
-                            refreshAll();
-                            final boolean editable = OTOptions.areRootAndCurrentObsIfAnyEditable(getProgram(), getContextObservation());
-                            _w.removeButton.setEnabled(_curPos != env.getBase() && editable);
-                            _w.primaryButton.setEnabled(enablePrimary(selTarget, env) && editable);
-                        }
-                    }
+                    return;
+                }
+                env = env.removeGroup(_curGroup);
+                _curGroup = primary;
+            }
+            getDataObject().setTargetEnvironment(env);
+            final SPTarget selTarget = TargetSelection.get(env, getNode());
+            if (env.getTargets().contains(selTarget)) {
+                if (_curPos != null) _curPos.deleteWatcher(posWatcher);
+                _curPos = selTarget;
+                if (_curPos != null) {
+                    _curPos.addWatcher(posWatcher);
+                    refreshAll();
+                    final boolean editable = OTOptions.areRootAndCurrentObsIfAnyEditable(getProgram(), getContextObservation());
+                    _w.removeButton.setEnabled(_curPos != env.getBase() && editable);
+                    _w.primaryButton.setEnabled(enablePrimary(selTarget, env) && editable);
                 }
             }
         }
