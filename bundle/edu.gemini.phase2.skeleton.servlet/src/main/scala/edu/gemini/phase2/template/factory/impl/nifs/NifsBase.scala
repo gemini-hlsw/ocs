@@ -53,9 +53,9 @@ trait NifsBase[B <: SpNifsBlueprintBase] extends GroupInitializer[B] with Templa
   def setMaskInSecondIterator(m:Mask) =
     mutateSeq.atIndex(1)(_.map(_ + (InstNIFS.MASK_PROP.getName -> m)))
 
-  // Set the FPM in the static component, unless it's the acq in which case set it in the 2nd iterator
-  def setFpmWithAcq(acq: Int, m:Mask):Mutator = { o =>
-    if (o.libraryId.forall(_ == acq.toString)) {
+  // Set the FPM in the static component, unless it's an acq in which case set it in the 2nd iterator
+  def setFpmWithAcq(acq: List[Int], m:Mask):Mutator = { o =>
+    if (o.libraryId.forall(acq.map(_.toString).contains)) {
       setMaskInSecondIterator(m)(o)
     } else {
       mutateStatic[Mask](_.setMask(_))(m)(o)

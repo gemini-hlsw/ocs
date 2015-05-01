@@ -16,45 +16,52 @@ import edu.gemini.spModel.rich.pot.sp._
 case class NifsAo(blueprint: SpNifsBlueprintAo, exampleTarget: Option[SPTarget]) extends NifsBase[SpNifsBlueprintAo] {
   import blueprint._
 
-  val tb = exampleTarget.flatMap(t => Option(t.getTarget.getMagnitude(Band.H).getOrNull)).map(_.getBrightness).map(TargetBrightness(_))
+  val tb = exampleTarget.flatMap(t => Option(t.getTarget.getMagnitude(Band.K).getOrNull)).map(_.getBrightness).map(TargetBrightness(_))
+
+  // These two notes should be included at the top of every NIFS program
+  addNote("Phase II Requirements: General Information", "Phase II  \"BEFORE Submission\" Checklist") in TargetGroup
 
   // # Select acquisition and science observation
   // IF OCCULTING DISK == None
-  //    IF target information contains a H magnitude
-  //       if BT then ACQ={3}   # Bright Object
-  //       if MT then ACQ={4}   # Medium Object
-  //       if FT then ACQ={5}   # Faint Object
-  //       else ACQ={4}           # Moderate Object, blind offset
-  //    ELSE ACQ={4}
-  //    SCI={6}
+  //   IF target information contains a K magnitude
+  //     IF BT  then ACQ={3}  # Bright Object
+  //     IF MT  then ACQ={4}  # Medium Object
+  //     IF FT  then ACQ={5}  # Faint Object
+  //     IF BAT then ACQ={23}  # Blind offset
+  //   ELSE
+  //     ACQ={3,4,5,23}
+  //   SCI={6}
   // ELSEIF OCCULTING DISK != None
-  //    IF target information contains a H magnitude
-  //       if BT then ACQ={11}   # Bright Object
-  //       if MT then ACQ={12}   # Medium Object
-  //       if FT then ACQ={12}   # Faint Object
-  //       else ACQ={12}           # Very faint
-  //    ELSE ACQ={12}
+  //    IF target information contains a K magnitude
+  //      IF BT  then ACQ={11}   # Bright Object
+  //      IF MT  then ACQ={12}   # Medium Object
+  //      IF FT  then ACQ={12}   # Faint Object
+  //      IF BAT then ACQ={12}  # Very faint
+  //    ELSE
+  //      ACQ={11,12}
   //    SCI={13}
 
   val (acq, sci) = if (!occultingDisk.isOccultingDisk) {
     (tb.collect {
-      case BT => 3
-      case MT => 4
-      case FT => 5
-    }.getOrElse(4),
+      case BT  => List(3)
+      case MT  => List(4)
+      case FT  => List(5)
+      case BAT => List(23)
+    }.getOrElse(List(3,4,5,23)),
       6)
   } else {
     (tb.collect {
-      case BT => 11
-      case MT => 12
-      case FT => 12
-    }.getOrElse(12),
+      case BT  => List(11)
+      case MT  => List(12)
+      case FT  => List(12)
+      case BAT => List(12)
+    }.getOrElse(List(11, 12)),
       13)
   }
 
   // ### Target Group
   // INCLUDE {1},{2},ACQ,SCI,{7},{8} in target-specific Scheduling Group
-  include(1, 2, sci, acq, 7, 8) in TargetGroup
+  include(List(1, 2) ++ acq ++ List(sci, 7, 8): _*) in TargetGroup
 
   // # AO Mode
   // # In NGS mode target and standards use the same Altair guide mode.
@@ -95,7 +102,7 @@ case class NifsAo(blueprint: SpNifsBlueprintAo, exampleTarget: Option[SPTarget])
           addAltair(m))
 
       if (m.isLGS) {
-        forObs(sci, acq)(addAltair(m))
+        forObs(sci :: acq : _*)(addAltair(m))
         forObs(1, 2, 7, 8)(
           addAltair(NGS_FL))
       }
