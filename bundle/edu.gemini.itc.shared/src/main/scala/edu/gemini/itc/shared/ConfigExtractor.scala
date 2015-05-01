@@ -10,6 +10,7 @@ import edu.gemini.spModel.gemini.acqcam.AcqCamParams
 import edu.gemini.spModel.gemini.altair.AltairParams
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2
 import edu.gemini.spModel.gemini.gmos.GmosCommonType
+import edu.gemini.spModel.gemini.gnirs.GNIRSParams
 import edu.gemini.spModel.gemini.gsaoi.Gsaoi
 import edu.gemini.spModel.gemini.niri.Niri
 import edu.gemini.spModel.guide.GuideProbe
@@ -170,12 +171,15 @@ object ConfigExtractor {
   // Gets the observing wavelength from the configuration.
   // For imaging this corresponds to the mid point of the selected filter, for spectroscopy the value
   // is defined by the user. Unit is micro-meter [um]. Note that for Acq Cam the observing wavelength
-  // is not defined, instead we need to get the wavelength from the color filter.
+  // is not defined, instead we need to get the wavelength from the color filter. Also some special
+  // magic is needed for GNIRS.
   def extractObservingWavelength(c: Config): String \/ Double = {
     val instrument = extract[String](c, InstrumentKey).getOrElse("")
     instrument match {
       case "AcqCam" =>
         extract[AcqCamParams.ColorFilter](c, ColorFilterKey).rightMap(_.getCentralWavelength.toDouble)
+      case "GNIRS" =>
+        extract[GNIRSParams.Wavelength](c, ObsWavelengthKey).rightMap(_.doubleValue())
       case _ =>
         if (c.containsItem(ObsWavelengthKey)) extractDoubleFromString(c, ObsWavelengthKey)
         else "Observing wavelength is not defined (missing filter?)".left

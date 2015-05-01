@@ -16,7 +16,9 @@ sealed trait ItcResult extends Serializable
 
 // === IMAGING RESULT
 final case class ImgData(singleSNRatio: Double, totalSNRatio: Double, peakPixelFlux: Double)
-final case class ItcImagingResult(source: SourceDefinition, ccds: Seq[ImgData]) extends ItcResult
+final case class ItcImagingResult(source: SourceDefinition, ccds: Seq[ImgData]) extends ItcResult {
+  def ccd(i: Int) = ccds(i % ccds.length)
+}
 
 // === SPECTROSCOPY RESULT
 final case class SpcData(label: String, color: Color, data: Array[Array[Double]])

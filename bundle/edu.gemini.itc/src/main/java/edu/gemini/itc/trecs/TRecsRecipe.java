@@ -96,8 +96,8 @@ public final class TRecsRecipe implements ImagingRecipe, SpectroscopyRecipe {
         final TRecs instrument = new TRecs(_trecsParameters, _obsDetailParameters);
         final SpectroscopyResult r = calculateSpectroscopy(instrument);
         final List<SpcDataSet> dataSets = new ArrayList<SpcDataSet>() {{
-            add(ITCChart.createSignalChart(r, 0));
-            add(ITCChart.createS2NChart(r, 0));
+            add(Recipe$.MODULE$.createSignalChart(r, 0));
+            add(Recipe$.MODULE$.createS2NChart(r, 0));
         }};
         final List<SpcDataFile> dataFiles = new ArrayList<SpcDataFile>() {{
             add(new SpcDataFile("", r.specS2N()[0].getSignalSpectrum().printSpecAsString()));
@@ -105,7 +105,7 @@ public final class TRecsRecipe implements ImagingRecipe, SpectroscopyRecipe {
             add(new SpcDataFile("", r.specS2N()[0].getExpS2NSpectrum().printSpecAsString()));
             add(new SpcDataFile("", r.specS2N()[0].getFinalS2NSpectrum().printSpecAsString()));
         }};
-        return new Tuple2<>(new ItcSpectroscopyResult(_sdParameters, JavaConversions.asScalaBuffer(dataSets), JavaConversions.asScalaBuffer(dataFiles)), r);
+        return new Tuple2<>(new ItcSpectroscopyResult(_sdParameters, JavaConversions.asScalaBuffer(dataSets).toList(), JavaConversions.asScalaBuffer(dataFiles).toList()), r);
     }
 
     public ImagingResult calculateImaging() {

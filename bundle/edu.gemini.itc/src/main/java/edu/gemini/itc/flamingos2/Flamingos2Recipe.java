@@ -59,8 +59,8 @@ public final class Flamingos2Recipe implements ImagingRecipe, SpectroscopyRecipe
         final Flamingos2 instrument = new Flamingos2(_flamingos2Parameters);
         final SpectroscopyResult r = calculateSpectroscopy(instrument);
         final List<SpcDataSet> dataSets = new ArrayList<SpcDataSet>() {{
-            add(ITCChart.createSignalChart(r));
-            add(ITCChart.createS2NChart(r));
+            add(Recipe$.MODULE$.createSignalChart(r));
+            add(Recipe$.MODULE$.createS2NChart(r));
         }};
         final List<SpcDataFile> dataFiles = new ArrayList<SpcDataFile>() {{
             add(new SpcDataFile("", r.specS2N()[0].getSignalSpectrum().printSpecAsString()));
@@ -68,7 +68,7 @@ public final class Flamingos2Recipe implements ImagingRecipe, SpectroscopyRecipe
             add(new SpcDataFile("", r.specS2N()[0].getExpS2NSpectrum().printSpecAsString()));
             add(new SpcDataFile("", r.specS2N()[0].getFinalS2NSpectrum().printSpecAsString()));
         }};
-        return new Tuple2<>(new ItcSpectroscopyResult(_sdParameters, JavaConversions.asScalaBuffer(dataSets), JavaConversions.asScalaBuffer(dataFiles)), r);
+        return new Tuple2<>(new ItcSpectroscopyResult(_sdParameters, JavaConversions.asScalaBuffer(dataSets).toList(), JavaConversions.asScalaBuffer(dataFiles).toList()), r);
     }
 
     public ImagingResult calculateImaging() {

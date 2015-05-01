@@ -74,7 +74,7 @@ public final class NifsRecipe implements SpectroscopyRecipe {
                 add(new SpcDataFile("", r.specS2N()[i].getFinalS2NSpectrum().printSpecAsString()));
             }
         }};
-        return new Tuple2<>(new ItcSpectroscopyResult(_sdParameters, JavaConversions.asScalaBuffer(dataSets), JavaConversions.asScalaBuffer(dataFiles)), r);
+        return new Tuple2<>(new ItcSpectroscopyResult(_sdParameters, JavaConversions.asScalaBuffer(dataSets).toList(), JavaConversions.asScalaBuffer(dataFiles).toList()), r);
     }
 
     private SpectroscopyResult calculateSpectroscopy(final Nifs instrument) {
@@ -214,7 +214,7 @@ public final class NifsRecipe implements SpectroscopyRecipe {
                         ", " + String.format("%.3f", instrument.getIFUNumX() * instrument.getIFU().IFU_LEN_X) + "\"x" +
                         String.format("%.3f", instrument.getIFUNumY() * instrument.getIFU().IFU_LEN_Y) + "\")" :
                 "Signal and Background (IFU element offset: " + String.format("%.3f", ap_offset_list.get(index)) + " arcsec)";
-        return ITCChart.createSignalChart(result, title, index);
+        return Recipe$.MODULE$.createSignalChart(result, title, index);
     }
 
     private static SpcDataSet createNifsS2NChart(final SpectroscopyResult result, final int index) {
@@ -226,7 +226,7 @@ public final class NifsRecipe implements SpectroscopyRecipe {
                         ", " + String.format("%.3f", instrument.getIFUNumX() * instrument.getIFU().IFU_LEN_X) + "\"x" +
                         String.format("%.3f", instrument.getIFUNumY() * instrument.getIFU().IFU_LEN_Y) + "\")" :
                 "Intermediate Single Exp and Final S/N (IFU element offset: " + String.format("%.3f", ap_offset_list.get(index)) + " arcsec)";
-        return ITCChart.createS2NChart(result, title, index);
+        return Recipe$.MODULE$.createS2NChart(result, title, index);
     }
 
 

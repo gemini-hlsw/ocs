@@ -7,7 +7,9 @@ import java.io.Serializable;
  */
 public final class PlottingDetails implements Serializable {
 
-    public static enum PlotLimits {
+    public static PlottingDetails Auto = new PlottingDetails(PlotLimits.AUTO, 0, 1);
+
+    public enum PlotLimits {
         AUTO,
         USER,
         ;

@@ -1,15 +1,6 @@
 package edu.gemini.itc.web.servlets;
 
-import edu.gemini.itc.gmos.Gmos;
-import edu.gemini.itc.gmos.GmosRecipe;
-import edu.gemini.itc.gnirs.GnirsRecipe;
-import edu.gemini.itc.nifs.Nifs;
-import edu.gemini.itc.nifs.NifsParameters;
-import edu.gemini.itc.nifs.NifsRecipe;
-import edu.gemini.itc.operation.DetectorsTransmissionVisitor;
 import edu.gemini.itc.shared.*;
-import edu.gemini.itc.web.html.FormatStringWriter;
-import edu.gemini.itc.web.html.PrinterBase;
 import org.jfree.chart.ChartUtilities;
 import scala.Tuple2;
 
@@ -18,10 +9,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
 import java.util.Calendar;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -150,20 +138,20 @@ public final class ImageServlet extends HttpServlet {
     public static BufferedImage toImage(final String id, final String filename, final int index) {
         final ItcSpectroscopyResult results = result(id);
         final PlottingDetails pd = new PlottingDetails(PlottingDetails.PlotLimits.AUTO, 0, 1); // TODO how do we get the plot details parameters?? encode them in url??
-        final ITCChart file;
+        final ItcChart file;
         switch (filename) {
-            case SigChart:      file = ITCChart.forSpcDataSet(results.dataSets().apply(0), pd);   break;
-            case S2NChart:      file = ITCChart.forSpcDataSet(results.dataSets().apply(1), pd);   break;
-            case SigSwApChart:  file = ITCChart.forSpcDataSet(results.dataSets().apply(0), pd);   break;
-            case NifsSigChart:  file = ITCChart.forSpcDataSet(results.dataSets().apply(2*index),   pd);   break;
-            case NifsS2NChart:  file = ITCChart.forSpcDataSet(results.dataSets().apply(2 * index + 1), pd); break;
-            case GnirsSigChart: file = ITCChart.forSpcDataSet(results.dataSets().apply(0), pd);   break;
-            case GnirsS2NChart: file = ITCChart.forSpcDataSet(results.dataSets().apply(1), pd);  break;
-            case GmosSigChart:  file = ITCChart.forSpcDataSet(results.dataSets().apply(0), pd);   break;
-            case GmosS2NChart:  file = ITCChart.forSpcDataSet(results.dataSets().apply(1), pd);  break;
+            case SigChart:      file = ItcChart.forSpcDataSet(results.dataSets().apply(0), pd);             break;
+            case S2NChart:      file = ItcChart.forSpcDataSet(results.dataSets().apply(1), pd);             break;
+            case SigSwApChart:  file = ItcChart.forSpcDataSet(results.dataSets().apply(0), pd);             break;
+            case NifsSigChart:  file = ItcChart.forSpcDataSet(results.dataSets().apply(2 * index), pd);     break;
+            case NifsS2NChart:  file = ItcChart.forSpcDataSet(results.dataSets().apply(2 * index + 1), pd); break;
+            case GnirsSigChart: file = ItcChart.forSpcDataSet(results.dataSets().apply(0), pd);             break;
+            case GnirsS2NChart: file = ItcChart.forSpcDataSet(results.dataSets().apply(1), pd);             break;
+            case GmosSigChart:  file = ItcChart.forSpcDataSet(results.dataSets().apply(0), pd);             break;
+            case GmosS2NChart:  file = ItcChart.forSpcDataSet(results.dataSets().apply(1), pd);             break;
             default:            throw new Error();
         }
-        return file.getBufferedImage();
+        return file.getBufferedImage(675, 500);
     }
 
 

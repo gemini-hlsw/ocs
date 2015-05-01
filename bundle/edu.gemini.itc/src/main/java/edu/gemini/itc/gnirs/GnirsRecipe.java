@@ -75,8 +75,8 @@ public final class GnirsRecipe implements SpectroscopyRecipe {
                 add(createGnirsSignalChart(r));
                 add(createGnirsS2NChart(r));
             } else {
-                add(ITCChart.createSignalChart(r));
-                add(ITCChart.createS2NChart(r));
+                add(Recipe$.MODULE$.createSignalChart(r));
+                add(Recipe$.MODULE$.createS2NChart(r));
             }
         }};
         final List<SpcDataFile> dataFiles = new ArrayList<SpcDataFile>() {{
@@ -91,7 +91,7 @@ public final class GnirsRecipe implements SpectroscopyRecipe {
                 add(new SpcDataFile("", r.specS2N()[0].getFinalS2NSpectrum().printSpecAsString()));
             }
         }};
-        return new Tuple2<>(new ItcSpectroscopyResult(_sdParameters, JavaConversions.asScalaBuffer(dataSets), JavaConversions.asScalaBuffer(dataFiles)), r);
+        return new Tuple2<>(new ItcSpectroscopyResult(_sdParameters, JavaConversions.asScalaBuffer(dataSets).toList(), JavaConversions.asScalaBuffer(dataFiles).toList()), r);
     }
 
     protected static String toFile(final VisitableSampledSpectrum[] sedArr) {
