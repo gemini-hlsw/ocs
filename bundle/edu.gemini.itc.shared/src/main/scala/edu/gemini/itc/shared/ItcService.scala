@@ -54,6 +54,8 @@ final case class SpcSeriesData(dataType: SpcDataType, title: String, color: Colo
 
 /** Charts are made up of a set of data series which are all plotted in the same XY-plot. */
 final case class SpcChartData(chartType: SpcChartType, title: String, xAxisLabel: String, yAxisLabel: String, series: Seq[SpcSeriesData]) {
+  // JFreeChart requires a unique name for each series
+  require(series.map(_.title).distinct.size == series.size, "titles of series are not unique")
 
   /** Gets a data series by type and index. Note that for a given type there can be more than one result.
     * This method will fail if the result you're looking for does not exist.

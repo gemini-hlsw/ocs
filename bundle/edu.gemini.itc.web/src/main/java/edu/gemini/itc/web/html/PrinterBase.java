@@ -66,7 +66,6 @@ public abstract class PrinterBase {
                 "&" + ImageServlet.ParamName + "=" + type.toString() +
                 "&" + ImageServlet.ParamIndex + "=" + index +
                 "&" + ImageServlet.ParamId + "=" + id +
-                //"&SessionID=0" + // TODO: add fake "SessionID" in order to have URL ignored in science regression tests
                 "\"> Click here for " + toFileLabel(type) + ". </a>");
     }
 
@@ -76,15 +75,14 @@ public abstract class PrinterBase {
     }
 
     protected void _printImageLink(final UUID id, final SpcChartType type, final int index, final PlottingDetails pd) {
-        _print("<IMG alt=\"SessionID123456.png\" height=500 src=\"" + ServerInfo.getServerURL() + // TODO: get rid of SessionID when recreating baseline
+        _print("<IMG alt=\"" + toImgAlt(type, index) + "\" height=500 src=\"" + ServerInfo.getServerURL() +
                 "itc/servlet/images" +
                 "?" + ImageServlet.ParamType + "=" + ImageServlet.TypeImg +
                 "&" + ImageServlet.ParamName + "=" + type.toString() +
                 "&" + ImageServlet.ParamIndex + "=" + index +
                 "&" + ImageServlet.ParamId + "=" + id +
                 toPlotLimits(pd) +
-                //"&SessionID=0" + // TODO: add fake "SessionID" in order to have URL ignored in science regression tests
-                "\" width=675 border=0>"); // TODO: fix missing </img>
+                "\" width=675 border=0>");
     }
 
     private String toPlotLimits(final PlottingDetails pd) {
@@ -94,6 +92,12 @@ public abstract class PrinterBase {
             return "&" + ImageServlet.ParamLoLimit + "=" + pd.getPlotWaveL() +
                    "&" + ImageServlet.ParamHiLimit + "=" + pd.getPlotWaveU();
         }
+    }
+
+    private String toImgAlt(final SpcChartType type, final int index) {
+        if      (type == SignalChart.instance())    return "Signal/Background Chart " + index;
+        else if (type == S2NChart.instance())       return "Signal to Noise Chart " + index;
+        else    throw new Error();
     }
 
     private String toFileLabel(final SpcDataType type) {

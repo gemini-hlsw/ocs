@@ -18,14 +18,15 @@ import scala.io.Source
  * @param string
  */
 case class Output(string: String) {
+  // dig out all links to data files (file type, index and session id)
   private val DatFiles = """type=txt&filename=([a-zA-Z0-9]*)&index=([0-9]*)&id=([a-z0-9\-]*)""".r
 
   val hash: Long = 37L*fixString(string).hashCode() + hashAllDatFiles(string)
 
+  // replace URLs which change every time beause of UUIDs that are used as sesssion IDs
   private def fixString(s: String) = s.
-    replaceAll("SessionID\\d*", "SessionIDXXX").
-    replaceAll("""type=txt&filename=[^"]*""", "type=txt&filename=SessionIDXXX.dat").
-    replaceAll("""type=img&filename=[^"]*""", "type=img&filename=SessionIDXXX.png")
+    replaceAll("""type=txt&filename=[^"]*""", "").
+    replaceAll("""type=img&filename=[^"]*""", "")
 
   def hashAllDatFiles(s: String): Long =
     DatFiles.

@@ -69,11 +69,11 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
     }
 
     protected static String toFile(final SpectroscopyResult[] results, final String filename) {
-        final Gmos mainInstrument = (Gmos) results[0].instrument(); // TODO: make sure this is indeed GMOS!
+        final Gmos mainInstrument = (Gmos) results[0].instrument();
         final DetectorsTransmissionVisitor tv = mainInstrument.getDetectorTransmision();
         final Gmos[] ccdArray = mainInstrument.getDetectorCcdInstruments();
 
-        final StringBuilder sb = new StringBuilder(); //"# ITC: " + Calendar.getInstance().getTime() + "\n \n");
+        final StringBuilder sb = new StringBuilder();
 
         for (final Gmos instrument : ccdArray) {
 
@@ -377,13 +377,13 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
             for (int i = 0; i < result.specS2N().length; i++) {
                 switch (index) {
                     case 0:
-                        data.add(new SpcSeriesData(SignalData.instance(),    "Signal "            + ccdName, ccdColor,       result.specS2N()[i].getSignalSpectrum().getData(first, last)));
-                        data.add(new SpcSeriesData(BackgroundData.instance(), "SQRT(Background) " + ccdName, ccdColorDarker, result.specS2N()[i].getBackgroundSpectrum().getData(first, last)));
+                        data.add(new SpcSeriesData(SignalData.instance(),    "Signal "            + ccdName + " " + i, ccdColor,       result.specS2N()[i].getSignalSpectrum().getData(first, last)));
+                        data.add(new SpcSeriesData(BackgroundData.instance(), "SQRT(Background) " + ccdName + " " + i, ccdColorDarker, result.specS2N()[i].getBackgroundSpectrum().getData(first, last)));
                         break;
 
                     case 1:
-                        data.add(new SpcSeriesData(SingleS2NData.instance(), "Single Exp S/N "    + ccdName, ccdColor,       result.specS2N()[i].getExpS2NSpectrum().getData(first, last)));
-                        data.add(new SpcSeriesData(FinalS2NData.instance(),  "Final S/N "         + ccdName, ccdColorDarker, result.specS2N()[i].getFinalS2NSpectrum().getData(first, last)));
+                        data.add(new SpcSeriesData(SingleS2NData.instance(), "Single Exp S/N "    + ccdName + " " + i, ccdColor,       result.specS2N()[i].getExpS2NSpectrum().getData(first, last)));
+                        data.add(new SpcSeriesData(FinalS2NData.instance(),  "Final S/N "         + ccdName + " " + i, ccdColorDarker, result.specS2N()[i].getFinalS2NSpectrum().getData(first, last)));
                         break;
 
                     default:
