@@ -78,11 +78,12 @@ sealed trait ItcPanel extends GridBagPanel {
   }
 
   private def updateInternal() = {
-    val selectedRow = table.selection.rows.headOption
+// TODO: keep selected table row
+//    val selectedRow = table.selection.rows.headOption
     table.update()
     // re-establish previously selected row, this is relevant
     // for charts displayed on spectroscopy panel
-    selectedRow.foreach(r => if (r < table.rowCount) table.selection.rows += r)
+//    selectedRow.foreach(r => if (r < table.rowCount) table.selection.rows += r)
   }
 
   // ==== Source edit TODO: This will migrate to the new source editor once it's ready.
@@ -487,7 +488,7 @@ private class ItcChartsPanel(table: ItcSpectroscopyTable) extends GridBagPanel {
   }
 
   private def update(result: ItcSpectroscopyResult): Unit = {
-    charts = result.dataSets.map { ds =>
+    charts = result.charts.map { ds =>
       val chart = ITCChart.forSpcDataSet(ds, limitsPanel.plottingDetails).getBufferedImage(600, 400)
       new Label("", new ImageIcon(chart), Alignment.Center) {
         border = BorderFactory.createEmptyBorder(10, 25, 10, 25)
@@ -585,7 +586,7 @@ protected class PlotDetailsPanel extends GridBagPanel {
       low    <- lowLimit.value
       high   <- highLimit.value
       (l, h) <- if (low < high) Some((low, high)) else None
-    } yield new PlottingDetails(PlotLimits.USER, l / 1000, h / 1000)
+    } yield new PlottingDetails(PlotLimits.USER, l, h)
 
 }
 

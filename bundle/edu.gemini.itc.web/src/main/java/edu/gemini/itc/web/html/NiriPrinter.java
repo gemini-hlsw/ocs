@@ -4,7 +4,6 @@ import edu.gemini.itc.altair.Altair;
 import edu.gemini.itc.niri.Niri;
 import edu.gemini.itc.niri.NiriRecipe;
 import edu.gemini.itc.shared.*;
-import edu.gemini.itc.web.servlets.ImageServlet;
 import edu.gemini.spModel.gemini.niri.Niri.Mask;
 import scala.Option;
 import scala.Tuple2;
@@ -91,17 +90,17 @@ public final class NiriPrinter extends PrinterBase {
 
         _println("<p style=\"page-break-inside: never\">");
 
-        _printImageLink(id, ImageServlet.SigSwApChart);
+        _printImageLink(id, SignalChart.instance(), pdp);
         _println("");
 
-        _printFileLink(id, ImageServlet.SigSpec, 0, "ASCII signal spectrum");
-        _printFileLink(id, ImageServlet.BackSpec, 1, "ASCII background spectrum");
+        _printFileLink(id,  SignalData.instance());
+        _printFileLink(id,  BackgroundData.instance());
 
-        _printImageLink(id, ImageServlet.S2NChart);
+        _printImageLink(id, S2NChart.instance(), pdp);
         _println("");
 
-        _printFileLink(id, ImageServlet.SingleS2N, 2, "Single Exposure S/N ASCII data");
-        _printFileLink(id, ImageServlet.FinalS2N, 3, "Final S/N ASCII data");
+        _printFileLink(id,  SingleS2NData.instance());
+        _printFileLink(id,  FinalS2NData.instance());
 
         printConfiguration(result.parameters(), instrument, result.aoSystem());
 

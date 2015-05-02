@@ -31,38 +31,38 @@ object Recipe {
   // GENERIC CHART CREATION
   // Utility functions that create generic signal and signal to noise charts for several instruments.
 
-  def createSignalChart(result: SpectroscopyResult): SpcDataSet = {
+  def createSignalChart(result: SpectroscopyResult): SpcChartData = {
     createSignalChart(result, 0)
   }
 
-  def createSignalChart(result: SpectroscopyResult, index: Int): SpcDataSet = {
+  def createSignalChart(result: SpectroscopyResult, index: Int): SpcChartData = {
     createSignalChart(result, "Signal and Background ", index)
   }
 
-  def createSigSwAppChart(result: SpectroscopyResult, index: Int): SpcDataSet = {
+  def createSigSwAppChart(result: SpectroscopyResult, index: Int): SpcChartData = {
     createSignalChart(result, "Signal and SQRT(Background) in software aperture of " + result.specS2N(index).getSpecNpix + " pixels", index)
   }
 
-  def createSignalChart(result: SpectroscopyResult, title: String, index: Int): SpcDataSet = {
-    val data: java.util.List[SpcData] = new java.util.ArrayList[SpcData]()
-    data.add(new SpcData("Signal ", Color.RED, result.specS2N(index).getSignalSpectrum.getData))
-    data.add(new SpcData("SQRT(Background)  ", Color.BLUE, result.specS2N(index).getBackgroundSpectrum.getData))
-    new SpcDataSet("Signal", title, "Wavelength (nm)", "e- per exposure per spectral pixel", JavaConversions.asScalaBuffer(data))
+  def createSignalChart(result: SpectroscopyResult, title: String, index: Int): SpcChartData = {
+    val data: java.util.List[SpcSeriesData] = new java.util.ArrayList[SpcSeriesData]()
+    data.add(new SpcSeriesData(SignalData,     "Signal ", Color.RED, result.specS2N(index).getSignalSpectrum.getData))
+    data.add(new SpcSeriesData(BackgroundData, "SQRT(Background)  ", Color.BLUE, result.specS2N(index).getBackgroundSpectrum.getData))
+    new SpcChartData(SignalChart, title, "Wavelength (nm)", "e- per exposure per spectral pixel", JavaConversions.asScalaBuffer(data))
   }
 
-  def createS2NChart(result: SpectroscopyResult): SpcDataSet = {
+  def createS2NChart(result: SpectroscopyResult): SpcChartData = {
     createS2NChart(result, 0)
   }
 
-  def createS2NChart(result: SpectroscopyResult, index: Int): SpcDataSet = {
+  def createS2NChart(result: SpectroscopyResult, index: Int): SpcChartData = {
     createS2NChart(result, "Intermediate Single Exp and Final S/N", index)
   }
 
-  def createS2NChart(result: SpectroscopyResult, title: String, index: Int): SpcDataSet = {
-    val data: java.util.List[SpcData] = new util.ArrayList[SpcData]
-    data.add(new SpcData("Single Exp S/N", Color.RED, result.specS2N(index).getExpS2NSpectrum.getData))
-    data.add(new SpcData("Final S/N  ", Color.BLUE, result.specS2N(index).getFinalS2NSpectrum.getData))
-    new SpcDataSet("S2N", title, "Wavelength (nm)", "Signal / Noise per spectral pixel", JavaConversions.asScalaBuffer(data))
+  def createS2NChart(result: SpectroscopyResult, title: String, index: Int): SpcChartData = {
+    val data: java.util.List[SpcSeriesData] = new util.ArrayList[SpcSeriesData]
+    data.add(new SpcSeriesData(SingleS2NData, "Single Exp S/N", Color.RED, result.specS2N(index).getExpS2NSpectrum.getData))
+    data.add(new SpcSeriesData(FinalS2NData,  "Final S/N  ", Color.BLUE, result.specS2N(index).getFinalS2NSpectrum.getData))
+    new SpcChartData(S2NChart, title, "Wavelength (nm)", "Signal / Noise per spectral pixel", JavaConversions.asScalaBuffer(data))
   }
 
 }

@@ -24,8 +24,8 @@ case class Output(string: String) {
 
   private def fixString(s: String) = s.
     replaceAll("SessionID\\d*", "SessionIDXXX").
-    replaceAll("""type=txt&filename=[a-zA-Z0-9]*&index=[0-9]*&id=[a-z0-9\-]*""", "type=txt&filename=SessionIDXXX.dat").
-    replaceAll("""type=img&filename=[a-zA-Z0-9]*&index=[0-9]*&id=[a-z0-9\-]*""", "type=img&filename=SessionIDXXX.png")
+    replaceAll("""type=txt&filename=[^"]*""", "type=txt&filename=SessionIDXXX.dat").
+    replaceAll("""type=img&filename=[^"]*""", "type=img&filename=SessionIDXXX.png")
 
   def hashAllDatFiles(s: String): Long =
     DatFiles.

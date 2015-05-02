@@ -61,17 +61,17 @@ public final class NifsRecipe implements SpectroscopyRecipe {
     public Tuple2<ItcSpectroscopyResult, SpectroscopyResult> calculateSpectroscopy() {
         final Nifs instrument = new Nifs(_nifsParameters, _obsDetailParameters);
         final SpectroscopyResult r = calculateSpectroscopy(instrument);
-        final List<SpcDataSet> dataSets = new ArrayList<>();
+        final List<SpcChartData> dataSets = new ArrayList<>();
         for (int i = 0; i < r.specS2N().length; i++) {
             dataSets.add(createNifsSignalChart(r, i));
             dataSets.add(createNifsS2NChart(r, i));
         }
         final List<SpcDataFile> dataFiles = new ArrayList<SpcDataFile>() {{
             for (int i = 0; i < r.specS2N().length; i++) {
-                add(new SpcDataFile("", r.specS2N()[i].getSignalSpectrum().printSpecAsString()));
-                add(new SpcDataFile("", r.specS2N()[i].getBackgroundSpectrum().printSpecAsString()));
-                add(new SpcDataFile("", r.specS2N()[i].getExpS2NSpectrum().printSpecAsString()));
-                add(new SpcDataFile("", r.specS2N()[i].getFinalS2NSpectrum().printSpecAsString()));
+                add(new SpcDataFile(SignalData.instance(),     r.specS2N()[i].getSignalSpectrum().printSpecAsString()));
+                add(new SpcDataFile(BackgroundData.instance(), r.specS2N()[i].getBackgroundSpectrum().printSpecAsString()));
+                add(new SpcDataFile(SingleS2NData.instance(),  r.specS2N()[i].getExpS2NSpectrum().printSpecAsString()));
+                add(new SpcDataFile(FinalS2NData.instance(),   r.specS2N()[i].getFinalS2NSpectrum().printSpecAsString()));
             }
         }};
         return new Tuple2<>(new ItcSpectroscopyResult(_sdParameters, JavaConversions.asScalaBuffer(dataSets).toList(), JavaConversions.asScalaBuffer(dataFiles).toList()), r);
@@ -205,7 +205,7 @@ public final class NifsRecipe implements SpectroscopyRecipe {
 
     // NIFS CHARTS
 
-    private static SpcDataSet createNifsSignalChart(final SpectroscopyResult result, final int index) {
+    private static SpcChartData createNifsSignalChart(final SpectroscopyResult result, final int index) {
         final Nifs instrument = (Nifs) result.instrument();
         final List<Double> ap_offset_list = instrument.getIFU().getApertureOffsetList();
         final String title = instrument.getIFUMethod().equals(NifsParameters.SUMMED_APERTURE_IFU) ?
@@ -217,7 +217,7 @@ public final class NifsRecipe implements SpectroscopyRecipe {
         return Recipe$.MODULE$.createSignalChart(result, title, index);
     }
 
-    private static SpcDataSet createNifsS2NChart(final SpectroscopyResult result, final int index) {
+    private static SpcChartData createNifsS2NChart(final SpectroscopyResult result, final int index) {
         final Nifs instrument = (Nifs) result.instrument();
         final List<Double> ap_offset_list = instrument.getIFU().getApertureOffsetList();
         final String title = instrument.getIFUMethod().equals(NifsParameters.SUMMED_APERTURE_IFU) ?

@@ -2,7 +2,7 @@ package jsky.app.ot.editor.seq
 
 import javax.swing.table.AbstractTableModel
 
-import edu.gemini.itc.shared.{ItcSpectroscopyResult, ItcImagingResult, ItcResult, ItcService}
+import edu.gemini.itc.shared._
 import edu.gemini.shared.util.StringUtil
 import edu.gemini.spModel.config2.ItemKey
 
@@ -57,11 +57,11 @@ sealed trait ItcTableModel extends AbstractTableModel {
 
   protected def spcSourceBand   (result: Future[ItcService.Result]) = spectroscopyResult(result).map(_.source.getNormBand.name)
 
-  // TODO: the way the values in the charts are accessed is not safe, right now I know how the data looks like, but this needs to be improved
-  // TODO: how to identify the different charts and data series? labels? This works for GMOSN/S, F2 and NIRI
-  protected def spcPeakElectrons(result: Future[ItcService.Result]) = spectroscopyResult(result).map(_.dataSets(0).series(0).data(1).max)
-  protected def spcPeakSNSingle (result: Future[ItcService.Result]) = spectroscopyResult(result).map(_.dataSets(1).series(0).data(1).max)
-  protected def spcPeakSNFinal  (result: Future[ItcService.Result]) = spectroscopyResult(result).map(_.dataSets(1).series(1).data(1).max)
+  protected def spcPeakElectrons(result: Future[ItcService.Result]) = spectroscopyResult(result).map(_.series(SignalChart, SignalData).yValues.max)
+
+  protected def spcPeakSNSingle (result: Future[ItcService.Result]) = spectroscopyResult(result).map(_.series(S2NChart, SingleS2NData).yValues.max)
+
+  protected def spcPeakSNFinal  (result: Future[ItcService.Result]) = spectroscopyResult(result).map(_.series(S2NChart, FinalS2NData).yValues.max)
 
   // Gets the result from the service result future (if present)
   protected def serviceResult(f: Future[ItcService.Result]): Option[ItcResult] =

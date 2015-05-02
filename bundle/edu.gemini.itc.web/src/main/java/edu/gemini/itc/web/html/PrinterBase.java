@@ -2,18 +2,11 @@ package edu.gemini.itc.web.html;
 
 import edu.gemini.itc.shared.*;
 import edu.gemini.itc.web.servlets.ImageServlet;
-import scala.Tuple2;
 
 import java.io.PrintWriter;
 import java.util.UUID;
 
 public abstract class PrinterBase {
-
-    protected UUID cache(final ItcSpectroscopyResult result) {
-        return ImageServlet.cache(result);
-    }
-
-    public abstract void writeOutput();
 
     private final PrintWriter _out;
 
@@ -21,10 +14,16 @@ public abstract class PrinterBase {
         _out = pr;
     }
 
+    public abstract void writeOutput();
+
+    protected UUID cache(final ItcSpectroscopyResult result) {
+        return ImageServlet.cache(result);
+    }
+
     /* TODO: this needs to be validated for spectroscopy for all instruments, find a better place to do this */
     protected void validatePlottingDetails(final PlottingDetails pdp, final Instrument instrument) {
         if (pdp != null && pdp.getPlotLimits().equals(PlottingDetails.PlotLimits.USER)) {
-            if (pdp.getPlotWaveL() > instrument.getObservingEnd() || pdp.getPlotWaveU() < instrument.getObservingStart()) {
+            if (pdp.getPlotWaveL() * 1000 > instrument.getObservingEnd() || pdp.getPlotWaveU() * 1000 < instrument.getObservingStart()) {
                 throw new IllegalArgumentException("User limits for plotting do not overlap with filter.");
             }
         }
@@ -55,35 +54,54 @@ public abstract class PrinterBase {
         _println("<span style=\"color:red; font-style:italic;\">" + s + "</span>");
     }
 
-    // Adds a HTML link to a file.
-    protected void _printFileLink(final UUID id, final String name, final String label) {
-        _printFileLink(id, name, 0, label);
+    protected void _printFileLink(final UUID id, final SpcDataType type) {
+        _printFileLink(id, type, 0);
     }
 
-    protected void _printFileLink(final UUID id, final String name, final int index, final String label) {
+    protected void _printFileLink(final UUID id, final SpcDataType type, final int index) {
         _println("<a href =" +
-                "\"" + ServerInfo.getServerURL()
-                + "itc/servlet/images?type=txt"
-                + "&filename=" + name
-                + "&index=" + index
-                + "&id=" + id
-                //+ "&SessionID=0" // TODO: add fake "SessionID" in order to have URL ignored in science regression tests
-                + "\"> Click here for " + label + ". </a>");
+                "\"" + ServerInfo.getServerURL() +
+                "itc/servlet/images" +
+                "?" + ImageServlet.ParamType + "=" + ImageServlet.TypeTxt +
+                "&" + ImageServlet.ParamName + "=" + type.toString() +
+                "&" + ImageServlet.ParamIndex + "=" + index +
+                "&" + ImageServlet.ParamId + "=" + id +
+                //"&SessionID=0" + // TODO: add fake "SessionID" in order to have URL ignored in science regression tests
+                "\"> Click here for " + toFileLabel(type) + ". </a>");
     }
 
     // Adds an HTML image link
-    protected void _printImageLink(final UUID id, final String name) {
-        _printImageLink(id, name, 0);
+    protected void _printImageLink(final UUID id, final SpcChartType type, final PlottingDetails pd) {
+        _printImageLink(id, type, 0, pd);
     }
 
-    protected void _printImageLink(final UUID id, final String name, final int index) {
-        _print("<IMG alt=\"SessionID123456.png\" height=500 src=\"" + ServerInfo.getServerURL() // TODO: get rid of SessionID when recreating baseline
-                + "itc/servlet/images?type=img"
-                + "&filename=" + name
-                + "&index=" + index
-                + "&id=" + id
-                //+ "&SessionID=0" // TODO: add fake "SessionID" in order to have URL ignored in science regression tests
-                + "\" width=675 border=0>");
+    protected void _printImageLink(final UUID id, final SpcChartType type, final int index, final PlottingDetails pd) {
+        _print("<IMG alt=\"SessionID123456.png\" height=500 src=\"" + ServerInfo.getServerURL() + // TODO: get rid of SessionID when recreating baseline
+                "itc/servlet/images" +
+                "?" + ImageServlet.ParamType + "=" + ImageServlet.TypeImg +
+                "&" + ImageServlet.ParamName + "=" + type.toString() +
+                "&" + ImageServlet.ParamIndex + "=" + index +
+                "&" + ImageServlet.ParamId + "=" + id +
+                toPlotLimits(pd) +
+                //"&SessionID=0" + // TODO: add fake "SessionID" in order to have URL ignored in science regression tests
+                "\" width=675 border=0>"); // TODO: fix missing </img>
+    }
+
+    private String toPlotLimits(final PlottingDetails pd) {
+        if (pd.getPlotLimits() == PlottingDetails.PlotLimits.AUTO) {
+            return "";
+        } else {
+            return "&" + ImageServlet.ParamLoLimit + "=" + pd.getPlotWaveL() +
+                   "&" + ImageServlet.ParamHiLimit + "=" + pd.getPlotWaveU();
+        }
+    }
+
+    private String toFileLabel(final SpcDataType type) {
+        if      (type == SignalData.instance())     return "ASCII signal spectrum";
+        else if (type == BackgroundData.instance()) return "ASCII background spectrum";
+        else if (type == SingleS2NData.instance())  return "Single Exposure S/N ASCII data";
+        else if (type == FinalS2NData.instance())   return "Final S/N ASCII data";
+        else    throw new Error();
     }
 
 }

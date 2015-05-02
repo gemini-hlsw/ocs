@@ -95,19 +95,19 @@ public final class GmosPrinter extends PrinterBase {
 
                 if (ccdIndex == 0) {
                     _println("<p style=\"page-break-inside: never\">");
-                    _printFileLink(id, ImageServlet.GmosSigSpec,   0, "ASCII signal spectrum");
-                    _printFileLink(id, ImageServlet.GmosBackSpec,  1, "ASCII background spectrum");
-                    _printFileLink(id, ImageServlet.GmosSingleS2N, 2, "Single Exposure S/N ASCII data");
-                    _printFileLink(id, ImageServlet.GmosFinalS2N,  3, "Final S/N ASCII data");
+                    _printFileLink(id, SignalData.instance());
+                    _printFileLink(id, BackgroundData.instance());
+                    _printFileLink(id, SingleS2NData.instance());
+                    _printFileLink(id, FinalS2NData.instance());
                 }
                 _println("");
             }
 
         }
 
-        _printImageLink(id, ImageServlet.GmosSigChart);
+        _printImageLink(id, SignalChart.instance(), pdp);
         _println("");
-        _printImageLink(id, ImageServlet.GmosS2NChart);
+        _printImageLink(id, S2NChart.instance(), pdp);
         _println("");
 
         printConfiguration(results[0].parameters(), mainInstrument);

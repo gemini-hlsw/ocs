@@ -22,38 +22,23 @@ import java.util.logging.Logger;
  */
 public final class ImageServlet extends HttpServlet {
 
-    public static final String SigSpec              = "sigSpec";
-    public static final String BackSpec             = "backSpec";
-    public static final String SingleS2N            = "singleS2N";
-    public static final String FinalS2N             = "finalS2N";
+    public static final String ParamType        = "type";
+    public static final String ParamId          = "id";
+    public static final String ParamName        = "filename";
+    public static final String ParamIndex       = "index";
+    public static final String ParamLoLimit     = "loLimit";
+    public static final String ParamHiLimit     = "hiLimit";
 
-    public static final String GnirsSigOrder        = "gnirsSigOrder";
-    public static final String GnirsBgOrder         = "gnirsBgOrder";
-    public static final String GnirsFinalS2NOrder   = "gnirsFinalS2NOrder";
-
-    public static final String GmosSigSpec          = "gmosSigSpec";
-    public static final String GmosBackSpec         = "gmosBackSpec";
-    public static final String GmosSingleS2N        = "gmosSingleS2N";
-    public static final String GmosFinalS2N         = "gmosFinalS2N";
-
-    public static final String SigChart             = "sigChart";
-    public static final String S2NChart             = "s2nChart";
-    public static final String SigSwApChart         = "niriSigChart";
-    public static final String NifsSigChart         = "nifsSigChart";
-    public static final String NifsS2NChart         = "nifsS2nChart";
-    public static final String GnirsSigChart        = "gnirsSigChart";
-    public static final String GnirsS2NChart        = "gnirsS2nChart";
-    public static final String GmosSigChart         = "gmosSigChart";
-    public static final String GmosS2NChart         = "gmosS2nChart";
+    public static final String TypeImg          = "img";
+    public static final String TypeTxt          = "txt";
 
     private static final Logger Log = Logger.getLogger(ImageServlet.class.getName());
-
-    private static final String IMG = "img";
-    private static final String TXT = "txt";
 
     // === Caching
     // We need to keep the results of ITC calculations in memory for a while in order to be able to serve
     // requests for images and data files (spectras) when accessing the ITC calculations through the web page.
+    // (The original ITC used to write files to /tmp but this is slower than doing all of this in memory
+    // and also can clog up the disk drive if the /tmp files linger around for too long.)
 
     public static class IdTimedOutException extends RuntimeException {}
 
@@ -62,7 +47,7 @@ public final class ImageServlet extends HttpServlet {
     /** Hash map that temporarily stores calculation results which will be needed for charts and data files. */
     private static final Map<UUID, Tuple2<Long, ItcSpectroscopyResult>> cachedResult = new ConcurrentHashMap<>(UpperLimit);
 
-    /** Caches a spectroscopy result */
+    /** Caches a spectroscopy result. Called by Printer classes when creating HTML output. */
     public static UUID cache(final ItcSpectroscopyResult result) {
         if (cachedResult.size() > UpperLimit) {
             cleanCache();
@@ -72,7 +57,7 @@ public final class ImageServlet extends HttpServlet {
         return id;
     }
 
-    /** Retrieves an array of results for multiple CCDs. */
+    /** Retrieves a cached result */
     private static ItcSpectroscopyResult result(final String id) {
         return result(UUID.fromString(id));
     }
@@ -102,21 +87,22 @@ public final class ImageServlet extends HttpServlet {
     public void doGet(final HttpServletRequest request, final HttpServletResponse response) throws IOException {
 
         try {
-            final String filename = request.getParameter("filename");
-            final String type = request.getParameter("type");
-            final String id = request.getParameter("id");
-            final int index = Integer.parseInt(request.getParameter("index"));
+            final String filename = request.getParameter(ParamName);
+            final String type     = request.getParameter(ParamType);
+            final String id       = request.getParameter(ParamId);
+            final int index       = Integer.parseInt(request.getParameter(ParamIndex));
 
             switch (type) {
 
-                case TXT:
+                case TypeTxt:
                     response.setContentType("text/plain");
                     response.getOutputStream().write(toFile(id, filename, index).getBytes());
                     break;
 
-                case IMG:
+                case TypeImg:
                     response.setContentType("image/png");
-                    ChartUtilities.writeBufferedImageAsPNG(response.getOutputStream(), toImage(id, filename, index));
+                    final PlottingDetails pd = toPlottingDetails(request);
+                    ChartUtilities.writeBufferedImageAsPNG(response.getOutputStream(), toImage(id, filename, index, pd));
                     break;
 
                 default:
@@ -127,41 +113,51 @@ public final class ImageServlet extends HttpServlet {
             Log.log(Level.WARNING, "Session has timed out, the requested result is not available anymore", e);
             response.sendError(HttpServletResponse.SC_NOT_FOUND);
 
+        } catch (NumberFormatException e) {
+            Log.log(Level.WARNING, "The request is malformed " + e.getMessage(), e);
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+
         } catch (Exception e) {
             Log.log(Level.WARNING, e.getMessage(), e);
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
     }
 
-    // ===
-
-    public static BufferedImage toImage(final String id, final String filename, final int index) {
-        final ItcSpectroscopyResult results = result(id);
-        final PlottingDetails pd = new PlottingDetails(PlottingDetails.PlotLimits.AUTO, 0, 1); // TODO how do we get the plot details parameters?? encode them in url??
-        final ITCChart file;
-        switch (filename) {
-            case SigChart:      file = ITCChart.forSpcDataSet(results.dataSets().apply(0), pd);             break;
-            case S2NChart:      file = ITCChart.forSpcDataSet(results.dataSets().apply(1), pd);             break;
-            case SigSwApChart:  file = ITCChart.forSpcDataSet(results.dataSets().apply(0), pd);             break;
-            case NifsSigChart:  file = ITCChart.forSpcDataSet(results.dataSets().apply(2 * index), pd);     break;
-            case NifsS2NChart:  file = ITCChart.forSpcDataSet(results.dataSets().apply(2 * index + 1), pd); break;
-            case GnirsSigChart: file = ITCChart.forSpcDataSet(results.dataSets().apply(0), pd);             break;
-            case GnirsS2NChart: file = ITCChart.forSpcDataSet(results.dataSets().apply(1), pd);             break;
-            case GmosSigChart:  file = ITCChart.forSpcDataSet(results.dataSets().apply(0), pd);             break;
-            case GmosS2NChart:  file = ITCChart.forSpcDataSet(results.dataSets().apply(1), pd);             break;
-            default:            throw new Error();
+    private static PlottingDetails toPlottingDetails(final HttpServletRequest request) {
+        final String loLimitStr = request.getParameter(ParamLoLimit);
+        final String upLimitStr = request.getParameter(ParamHiLimit);
+        if (loLimitStr != null && upLimitStr != null) {
+            final double loLimit = Double.parseDouble(loLimitStr);
+            final double upLimit = Double.parseDouble(upLimitStr);
+            return new PlottingDetails(PlottingDetails.PlotLimits.USER, loLimit, upLimit);
+        } else {
+            return PlottingDetails.Auto;
         }
-        return file.getBufferedImage(675, 500);
     }
 
+    private static BufferedImage toImage(final String id, final String filename, final int index, final PlottingDetails pd) {
+        final ItcSpectroscopyResult results = result(id);
+        final ITCChart chart;
+        switch (filename) {
+            case "SignalChart": chart = ITCChart.forSpcDataSet(results.chart(SignalChart.instance(), index), pd); break;
+            case "S2NChart":    chart = ITCChart.forSpcDataSet(results.chart(S2NChart.instance(),    index), pd); break;
+            default:            throw new Error();
+        }
+        return chart.getBufferedImage(675, 500);
+    }
 
+    // this is public because we use it for testing
     public static String toFile(final String id, final String filename, final int index) {
         final ItcSpectroscopyResult result = result(id);
-        final String file =
-                "# ITC: " +
-                        Calendar.getInstance().getTime() + "\n \n" +
-                        result.dataFiles().apply(index).file();
-        return file;
+        final String file;
+        switch (filename) {
+            case "SignalData":     file = result.file(SignalData.instance(), index).file(); break;
+            case "BackgroundData": file = result.file(BackgroundData.instance(), index).file(); break;
+            case "SingleS2NData":  file = result.file(SingleS2NData.instance(), index).file(); break;
+            case "FinalS2NData":   file = result.file(FinalS2NData.instance(), index).file(); break;
+            default:               throw new Error();
+        }
+        return "# ITC Data: " + Calendar.getInstance().getTime() + "\n \n" + file;
     }
 
 }

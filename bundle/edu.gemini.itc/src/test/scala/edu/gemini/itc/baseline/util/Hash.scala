@@ -169,7 +169,7 @@ object Hash {
     )
 
   def calc(pdp: PlottingDetails): Int =
-    hash(pdp.getPlotWaveL, pdp.getPlotWaveU)
+    hash(pdp.getPlotWaveL*1000, pdp.getPlotWaveU*1000)
 
   private def hash(values: Any*) =
     values.

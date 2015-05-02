@@ -17,11 +17,11 @@ public final class ITCChart {
     private final XYSeriesCollection seriesData = new XYSeriesCollection();
     private final JFreeChart chart;
 
-    public static ITCChart forSpcDataSet(SpcDataSet s, PlottingDetails plotParams) {
+    public static ITCChart forSpcDataSet(final SpcChartData s, final PlottingDetails plotParams) {
         return new ITCChart(s, plotParams);
     }
 
-    public ITCChart(final SpcDataSet s, final PlottingDetails plotParams) {
+    public ITCChart(final SpcChartData s, final PlottingDetails plotParams) {
 
         chart = ChartFactory.createXYLineChart(s.title(), s.xAxisLabel(), s.yAxisLabel(), this.seriesData, PlotOrientation.VERTICAL, true, false, false);
         chart.getLegend().setPosition(RectangleEdge.TOP);
@@ -33,12 +33,12 @@ public final class ITCChart {
             autoscale();
         }
 
-        for (final SpcData d : JavaConversions.seqAsJavaList(s.series())) {
-            addArray(d.data(), d.label(), d.color());
+        for (final SpcSeriesData d : JavaConversions.seqAsJavaList(s.series())) {
+            addArray(d.data(), d.title(), d.color());
         }
     }
 
-    public BufferedImage getBufferedImage(int width, int height)  {
+    public BufferedImage getBufferedImage(final int width, final int height)  {
         return chart.createBufferedImage(width, height);
     }
 

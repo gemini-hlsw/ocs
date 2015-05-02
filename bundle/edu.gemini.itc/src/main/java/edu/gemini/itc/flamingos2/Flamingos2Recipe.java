@@ -58,15 +58,15 @@ public final class Flamingos2Recipe implements ImagingRecipe, SpectroscopyRecipe
     public Tuple2<ItcSpectroscopyResult, SpectroscopyResult> calculateSpectroscopy() {
         final Flamingos2 instrument = new Flamingos2(_flamingos2Parameters);
         final SpectroscopyResult r = calculateSpectroscopy(instrument);
-        final List<SpcDataSet> dataSets = new ArrayList<SpcDataSet>() {{
+        final List<SpcChartData> dataSets = new ArrayList<SpcChartData>() {{
             add(Recipe$.MODULE$.createSignalChart(r));
             add(Recipe$.MODULE$.createS2NChart(r));
         }};
         final List<SpcDataFile> dataFiles = new ArrayList<SpcDataFile>() {{
-            add(new SpcDataFile("", r.specS2N()[0].getSignalSpectrum().printSpecAsString()));
-            add(new SpcDataFile("", r.specS2N()[0].getBackgroundSpectrum().printSpecAsString()));
-            add(new SpcDataFile("", r.specS2N()[0].getExpS2NSpectrum().printSpecAsString()));
-            add(new SpcDataFile("", r.specS2N()[0].getFinalS2NSpectrum().printSpecAsString()));
+            add(new SpcDataFile(SignalData.instance(),     r.specS2N()[0].getSignalSpectrum().printSpecAsString()));
+            add(new SpcDataFile(BackgroundData.instance(), r.specS2N()[0].getBackgroundSpectrum().printSpecAsString()));
+            add(new SpcDataFile(SingleS2NData.instance(),  r.specS2N()[0].getExpS2NSpectrum().printSpecAsString()));
+            add(new SpcDataFile(FinalS2NData.instance(),   r.specS2N()[0].getFinalS2NSpectrum().printSpecAsString()));
         }};
         return new Tuple2<>(new ItcSpectroscopyResult(_sdParameters, JavaConversions.asScalaBuffer(dataSets).toList(), JavaConversions.asScalaBuffer(dataFiles).toList()), r);
     }

@@ -83,30 +83,28 @@ public final class GnirsPrinter extends PrinterBase {
 
         if (instrument.XDisp_IsUsed()) {
 
-            _printImageLink(id, ImageServlet.GnirsSigChart);
+            _printImageLink(id, SignalChart.instance(), pdp);
             _println("");
 
-            _printFileLink(id, ImageServlet.GnirsSigOrder, 0, "ASCII signal spectrum");
-            _printFileLink(id, ImageServlet.GnirsBgOrder, 1, "ASCII background spectrum");
-
-            _printImageLink(id, ImageServlet.GnirsS2NChart);
+            _printFileLink(id,  SignalData.instance());
+            _printFileLink(id,  BackgroundData.instance());
+            _printImageLink(id, S2NChart.instance(), pdp);
             _println("");
 
-            _printFileLink(id, ImageServlet.GnirsFinalS2NOrder, 2, "Final S/N ASCII data");
+            _printFileLink(id,  FinalS2NData.instance());
 
         } else {
 
-            _printImageLink(id, ImageServlet.SigSwApChart);
+            _printImageLink(id, SignalChart.instance(), pdp);
             _println("");
 
-            _printFileLink(id, ImageServlet.SigSpec, 0, "ASCII signal spectrum");
-            _printFileLink(id, ImageServlet.BackSpec, 1, "ASCII background spectrum");
-
-            _printImageLink(id, ImageServlet.S2NChart);
+            _printFileLink(id,  SignalData.instance());
+            _printFileLink(id,  BackgroundData.instance());
+            _printImageLink(id, S2NChart.instance(), pdp);
             _println("");
 
-            _printFileLink(id, ImageServlet.SingleS2N, 2, "Single Exposure S/N ASCII data");
-            _printFileLink(id, ImageServlet.FinalS2N, 3, "Final S/N ASCII data");
+            _printFileLink(id,  SingleS2NData.instance());
+            _printFileLink(id,  FinalS2NData.instance());
         }
 
         _println("");

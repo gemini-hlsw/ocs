@@ -77,10 +77,18 @@ class ItcServiceImpl extends ItcService {
 
     }
 
-  def spectroscopyResult(recipe: SpectroscopyRecipe): Result =
-    ItcResult.forResult(recipe.calculateSpectroscopy()._1)
+  private def spectroscopyResult(recipe: SpectroscopyRecipe): Result =
+    resultWithoutFiles(recipe.calculateSpectroscopy()._1)
 
-  def spectroscopyResult(recipe: SpectroscopyArrayRecipe): Result =
-    ItcResult.forResult(recipe.calculateSpectroscopy()._1)
+  private def spectroscopyResult(recipe: SpectroscopyArrayRecipe): Result =
+    resultWithoutFiles(recipe.calculateSpectroscopy()._1)
+
+  // Currently the OT does not use the text files that can be downloaded from the web page. Andy S. says it is
+  // unlikely that we want to display those files in the OT, so for now, we don't send them in order to save
+  // a bit of bandwidth. If the need arises to have the files accessible in the clients just change this to
+  // send the original result.
+  private def resultWithoutFiles(result: ItcSpectroscopyResult): Result =
+    ItcResult.forResult(ItcSpectroscopyResult(result.source, result.charts, Seq()))
+
 
 }

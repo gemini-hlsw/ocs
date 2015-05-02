@@ -70,7 +70,7 @@ public final class GnirsRecipe implements SpectroscopyRecipe {
     public Tuple2<ItcSpectroscopyResult, SpectroscopyResult> calculateSpectroscopy() {
         final Gnirs instrument = new Gnirs(_gnirsParameters, _obsDetailParameters);
         final GnirsSpectroscopyResult r = calculateSpectroscopy(instrument);
-        final List<SpcDataSet> dataSets = new ArrayList<SpcDataSet>() {{
+        final List<SpcChartData> dataSets = new ArrayList<SpcChartData>() {{
             if (instrument.XDisp_IsUsed()) {
                 add(createGnirsSignalChart(r));
                 add(createGnirsS2NChart(r));
@@ -81,14 +81,14 @@ public final class GnirsRecipe implements SpectroscopyRecipe {
         }};
         final List<SpcDataFile> dataFiles = new ArrayList<SpcDataFile>() {{
             if (instrument.XDisp_IsUsed()) {
-                add(new SpcDataFile("", toFile(r.signalOrder())));
-                add(new SpcDataFile("", toFile(r.backGroundOrder())));
-                add(new SpcDataFile("", toFile(r.finalS2NOrder())));
+                add(new SpcDataFile(SignalData.instance(),     toFile(r.signalOrder())));
+                add(new SpcDataFile(BackgroundData.instance(), toFile(r.backGroundOrder())));
+                add(new SpcDataFile(FinalS2NData.instance(),   toFile(r.finalS2NOrder())));
             } else {
-                add(new SpcDataFile("", r.specS2N()[0].getSignalSpectrum().printSpecAsString()));
-                add(new SpcDataFile("", r.specS2N()[0].getBackgroundSpectrum().printSpecAsString()));
-                add(new SpcDataFile("", r.specS2N()[0].getExpS2NSpectrum().printSpecAsString()));
-                add(new SpcDataFile("", r.specS2N()[0].getFinalS2NSpectrum().printSpecAsString()));
+                add(new SpcDataFile(SignalData.instance(),     r.specS2N()[0].getSignalSpectrum().printSpecAsString()));
+                add(new SpcDataFile(BackgroundData.instance(), r.specS2N()[0].getBackgroundSpectrum().printSpecAsString()));
+                add(new SpcDataFile(SingleS2NData.instance(),  r.specS2N()[0].getExpS2NSpectrum().printSpecAsString()));
+                add(new SpcDataFile(FinalS2NData.instance(),   r.specS2N()[0].getFinalS2NSpectrum().printSpecAsString()));
             }
         }};
         return new Tuple2<>(new ItcSpectroscopyResult(_sdParameters, JavaConversions.asScalaBuffer(dataSets).toList(), JavaConversions.asScalaBuffer(dataFiles).toList()), r);
@@ -272,27 +272,27 @@ public final class GnirsRecipe implements SpectroscopyRecipe {
             new Color[] {ChartColor.VERY_LIGHT_RED,ChartColor.VERY_LIGHT_BLUE, ChartColor.VERY_LIGHT_GREEN,
                     ChartColor.VERY_LIGHT_MAGENTA, ChartColor.lightGray,       ChartColor.VERY_LIGHT_CYAN};
 
-    private static SpcDataSet createGnirsSignalChart(final GnirsSpectroscopyResult result) {
+    private static SpcChartData createGnirsSignalChart(final GnirsSpectroscopyResult result) {
         final String title = "Signal and Background in software aperture of " + result.specS2N()[0].getSpecNpix() + " pixels";
         final String xAxis = "Wavelength (nm)";
         final String yAxis = "e- per exposure per spectral pixel";
-        final List<SpcData> data = new ArrayList<>();
+        final List<SpcSeriesData> data = new ArrayList<>();
         for (int i = 0; i < GnirsRecipe.ORDERS; i++) {
-            data.add(new SpcData("Signal Order "           + (i + 3), ORDER_COLORS[i],    result.signalOrder()[i].getData()));
-            data.add(new SpcData("SQRT(Background) Order " + (i + 3), ORDER_BG_COLORS[i], result.backGroundOrder()[i].getData()));
+            data.add(new SpcSeriesData(SignalData.instance(), "Signal Order "               + (i + 3), ORDER_COLORS[i],    result.signalOrder()[i].getData()));
+            data.add(new SpcSeriesData(BackgroundData.instance(), "SQRT(Background) Order " + (i + 3), ORDER_BG_COLORS[i], result.backGroundOrder()[i].getData()));
         }
-        return new SpcDataSet("Signal", title, xAxis, yAxis, JavaConversions.asScalaBuffer(data));
+        return new SpcChartData(SignalChart.instance(), title, xAxis, yAxis, JavaConversions.asScalaBuffer(data));
     }
 
-    private static SpcDataSet createGnirsS2NChart(final GnirsSpectroscopyResult result) {
+    private static SpcChartData createGnirsS2NChart(final GnirsSpectroscopyResult result) {
         final String title = "Final S/N";
         final String xAxis = "Wavelength (nm)";
         final String yAxis = "Signal / Noise per spectral pixel";
-        final List<SpcData> data = new ArrayList<>();
+        final List<SpcSeriesData> data = new ArrayList<>();
         for (int i = 0; i < GnirsRecipe.ORDERS; i++) {
-           data.add(new SpcData("Final S/N Order "         + (i + 3), ORDER_COLORS[i],    result.finalS2NOrder()[i].getData()));
+           data.add(new SpcSeriesData(FinalS2NData.instance(), "Final S/N Order "           + (i + 3), ORDER_COLORS[i],    result.finalS2NOrder()[i].getData()));
         }
-        return new SpcDataSet("S2N", title, xAxis, yAxis, JavaConversions.asScalaBuffer(data));
+        return new SpcChartData(S2NChart.instance(), title, xAxis, yAxis, JavaConversions.asScalaBuffer(data));
     }
 
 }

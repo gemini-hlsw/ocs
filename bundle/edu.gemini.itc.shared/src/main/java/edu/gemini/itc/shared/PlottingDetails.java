@@ -38,13 +38,15 @@ public final class PlottingDetails implements Serializable {
         return plotLimits;
     }
 
+    /** Gets the upper limit in nm. */
     public double getPlotWaveU() {
-        return plotWaveU * 1000;
-    }  //convert microns to nm
+        return plotWaveU;
+    }
 
+    /** Gets the lower limit in nm. */
     public double getPlotWaveL() {
-        return plotWaveL * 1000;
-    }   //convert microns to nm
+        return plotWaveL;
+    }
 
     /**
      * Return a human-readable string for debugging

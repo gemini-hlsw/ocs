@@ -55,15 +55,15 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
 
     public Tuple2<ItcSpectroscopyResult, SpectroscopyResult[]> calculateSpectroscopy() {
         final SpectroscopyResult[] r = calculateSpectroscopy(createGmos());
-        final List<SpcDataSet> dataSets = new ArrayList<SpcDataSet>() {{
+        final List<SpcChartData> dataSets = new ArrayList<SpcChartData>() {{
             add(createGmosChart(r, 0));
             add(createGmosChart(r, 1));
         }};
         final List<SpcDataFile> dataFiles = new ArrayList<SpcDataFile>() {{
-            add(new SpcDataFile("", toFile(r, "Sig")));
-            add(new SpcDataFile("", toFile(r, "Bac")));
-            add(new SpcDataFile("", toFile(r, "Sin")));
-            add(new SpcDataFile("", toFile(r, "Fin")));
+            add(new SpcDataFile(SignalData.instance(),     toFile(r, "Sig")));
+            add(new SpcDataFile(BackgroundData.instance(), toFile(r, "Bac")));
+            add(new SpcDataFile(SingleS2NData.instance(),  toFile(r, "Sin")));
+            add(new SpcDataFile(FinalS2NData.instance(),   toFile(r, "Fin")));
         }};
         return new Tuple2<>(new ItcSpectroscopyResult(_sdParameters, JavaConversions.asScalaBuffer(dataSets).toList(), JavaConversions.asScalaBuffer(dataFiles).toList()), r);
     }
@@ -335,25 +335,25 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
 
     // == GMOS CHARTS
 
-    private static SpcDataSet createGmosChart(final SpectroscopyResult[] results, final int index) {
+    private static SpcChartData createGmosChart(final SpectroscopyResult[] results, final int index) {
         final Gmos mainInstrument = (Gmos) results[0].instrument(); // TODO: make sure this is indeed GMOS!
         final DetectorsTransmissionVisitor tv = mainInstrument.getDetectorTransmision();
         final Gmos[] ccdArray = mainInstrument.getDetectorCcdInstruments();
 
         final boolean ifuAndNotUniform = mainInstrument.isIfuUsed() && !(results[0].source().isUniform());
         final double ifu_offset = ifuAndNotUniform ? mainInstrument.getIFU().getApertureOffsetList().iterator().next() : 0.0;
-        final String label;
+        final SpcChartType type;
         final String title;
         final String yAxis;
         switch (index) {
             case 0:
-                label = "Signal";
+                type = SignalChart.instance();
                 title = ifuAndNotUniform ? "Signal and Background (IFU element offset: " + String.format("%.2f", ifu_offset) + " arcsec)" : "Signal and Background ";
                 yAxis = "e- per exposure per spectral pixel";
                 break;
 
             case 1:
-                label = "S2N";
+                type = S2NChart.instance();
                 title = ifuAndNotUniform ? "Intermediate Single Exp and Final S/N (IFU element offset: " + String.format("%.2f", ifu_offset) + " arcsec)" : "Intermediate Single Exp and Final S/N";
                 yAxis = "Signal / Noise per spectral pixel";
                 break;
@@ -362,7 +362,7 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
                 throw new Error();
         }
 
-        final List<SpcData> data = new ArrayList<>();
+        final List<SpcSeriesData> data = new ArrayList<>();
 
         for (final Gmos instrument : ccdArray) {
 
@@ -377,13 +377,13 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
             for (int i = 0; i < result.specS2N().length; i++) {
                 switch (index) {
                     case 0:
-                        data.add(new SpcData("Signal "           + ccdName, ccdColor,       result.specS2N()[i].getSignalSpectrum().getData(first, last)));
-                        data.add(new SpcData("SQRT(Background) " + ccdName, ccdColorDarker, result.specS2N()[i].getBackgroundSpectrum().getData(first, last)));
+                        data.add(new SpcSeriesData(SignalData.instance(),    "Signal "            + ccdName, ccdColor,       result.specS2N()[i].getSignalSpectrum().getData(first, last)));
+                        data.add(new SpcSeriesData(BackgroundData.instance(), "SQRT(Background) " + ccdName, ccdColorDarker, result.specS2N()[i].getBackgroundSpectrum().getData(first, last)));
                         break;
 
                     case 1:
-                        data.add(new SpcData("Single Exp S/N " + ccdName,   ccdColor,       result.specS2N()[i].getExpS2NSpectrum().getData(first, last)));
-                        data.add(new SpcData("Final S/N " + ccdName,        ccdColorDarker, result.specS2N()[i].getFinalS2NSpectrum().getData(first, last)));
+                        data.add(new SpcSeriesData(SingleS2NData.instance(), "Single Exp S/N "    + ccdName, ccdColor,       result.specS2N()[i].getExpS2NSpectrum().getData(first, last)));
+                        data.add(new SpcSeriesData(FinalS2NData.instance(),  "Final S/N "         + ccdName, ccdColorDarker, result.specS2N()[i].getFinalS2NSpectrum().getData(first, last)));
                         break;
 
                     default:
@@ -392,7 +392,7 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
             }
         }
 
-        return new SpcDataSet(label, title, "Wavelength (nm)", yAxis, JavaConversions.asScalaBuffer(data));
+        return new SpcChartData(type, title, "Wavelength (nm)", yAxis, JavaConversions.asScalaBuffer(data));
     }
 
 

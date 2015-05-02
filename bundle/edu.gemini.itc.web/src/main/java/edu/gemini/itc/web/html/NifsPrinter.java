@@ -5,13 +5,10 @@ import edu.gemini.itc.nifs.Nifs;
 import edu.gemini.itc.nifs.NifsParameters;
 import edu.gemini.itc.nifs.NifsRecipe;
 import edu.gemini.itc.shared.*;
-import edu.gemini.itc.web.servlets.ImageServlet;
 import edu.gemini.spModel.core.Site;
 import scala.Tuple2;
 
 import java.io.PrintWriter;
-import java.util.Iterator;
-import java.util.List;
 import java.util.UUID;
 
 /**
@@ -75,18 +72,14 @@ public final class NifsPrinter extends PrinterBase {
 
         for (int i = 0; i < result.specS2N().length; i++) {
             _println("<p style=\"page-break-inside: never\">");
-
-            _printImageLink(id, ImageServlet.NifsSigChart, i);
+            _printImageLink(id, SignalChart.instance(),   i, pdp);
             _println("");
-
-            _printFileLink(id, ImageServlet.SigSpec, i*4, "ASCII signal spectrum");
-            _printFileLink(id, ImageServlet.BackSpec, i*4+1, "ASCII background spectrum");
-
-            _printImageLink(id, ImageServlet.NifsS2NChart, i);
+            _printFileLink(id, SignalData.instance(),     i);
+            _printFileLink(id, BackgroundData.instance(), i);
+            _printImageLink(id, S2NChart.instance(),      i, pdp);
             _println("");
-
-            _printFileLink(id, ImageServlet.SingleS2N, i*4+2, "Single Exposure S/N ASCII data");
-            _printFileLink(id, ImageServlet.FinalS2N, i*4+3, "Final S/N ASCII data");
+            _printFileLink(id, SingleS2NData.instance(),  i);
+            _printFileLink(id, FinalS2NData.instance(),   i);
         }
 
         _println("");
