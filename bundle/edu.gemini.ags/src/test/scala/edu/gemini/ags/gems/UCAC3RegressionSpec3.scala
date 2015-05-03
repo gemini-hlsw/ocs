@@ -1,12 +1,13 @@
-package edu.gemini.ags.impl
+package edu.gemini.ags.gems
 
 import edu.gemini.ags.api._
-import edu.gemini.ags.gems._
-import edu.gemini.ags.gems.mascot.{Star, MascotCat}
+import edu.gemini.ags.gems.mascot.{MascotCat, Star}
 import edu.gemini.catalog.api._
-import edu.gemini.spModel.core._
+import edu.gemini.shared.util.immutable.ScalaConverters._
+import edu.gemini.shared.util.immutable.{None => JNone}
+import edu.gemini.spModel.core.AngleSyntax._
 import edu.gemini.spModel.core.Target.SiderealTarget
-
+import edu.gemini.spModel.core._
 import edu.gemini.spModel.gemini.gems.Canopus
 import edu.gemini.spModel.gemini.gsaoi.GsaoiOdgw
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality
@@ -15,10 +16,6 @@ import edu.gemini.spModel.gems.GemsGuideStarType
 import edu.gemini.spModel.target.SPTarget
 import edu.gemini.spModel.target.env.GuideGroup
 import org.specs2.mutable.Specification
-import edu.gemini.spModel.core.AngleSyntax._
-
-import edu.gemini.shared.util.immutable.ScalaConverters._
-import edu.gemini.shared.util.immutable.{None => JNone}
 
 /**
  * Regression test on target SN 1987A with UCAC3 data and nominal conditions

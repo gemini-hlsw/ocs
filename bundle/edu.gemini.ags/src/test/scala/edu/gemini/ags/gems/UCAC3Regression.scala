@@ -1,11 +1,13 @@
-package edu.gemini.ags.impl
+package edu.gemini.ags.gems
 
 import java.security.SecureRandom
 
 import edu.gemini.ags.gems.mascot.Star
-import edu.gemini.ags.gems.{GemsCatalogSearchCriterion, GemsCatalogResults, GemsCatalogSearchResults, GemsGuideStars}
-import edu.gemini.spModel.core.{Site, Angle, MagnitudeBand}
+import edu.gemini.pot.ModelConverters._
+import edu.gemini.shared.util.immutable.{Some => JSome}
+import edu.gemini.spModel.core.AlmostEqual._
 import edu.gemini.spModel.core.Target.SiderealTarget
+import edu.gemini.spModel.core.{Angle, MagnitudeBand, Site}
 import edu.gemini.spModel.gemini.gems.Gems
 import edu.gemini.spModel.gemini.gsaoi.Gsaoi
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality
@@ -13,17 +15,12 @@ import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.{Conditions, SkyBackgroun
 import edu.gemini.spModel.guide.GuideProbe
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.target.SPTarget
-import edu.gemini.spModel.target.env.{TargetEnvironment, GuideProbeTargets}
+import edu.gemini.spModel.target.env.{GuideProbeTargets, TargetEnvironment}
 import edu.gemini.spModel.target.system.CoordinateParam
 import jsky.coords.WorldCoords
-import edu.gemini.shared.util.immutable.{Some => JSome}
-import edu.gemini.spModel.core.AlmostEqual._
 
 import scala.collection.JavaConverters._
-import edu.gemini.pot.ModelConverters._
-
-import scalaz._
-import Scalaz._
+import scalaz.Scalaz._
 
 /**
  * Some useful functions to run regressions tests on GemsCatalogSearchResult
