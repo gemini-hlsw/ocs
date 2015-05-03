@@ -153,9 +153,10 @@ trait UCAC3Regression {
         val sameCoordinates = r.target.coordinates ~= e.target.coordinates
         val sameMagnitudes = r.target.magnitudes == e.target.magnitudes
         val sameM = math.abs(r.m - e.m) < 0.001
+        val sameR = math.abs(r.r - e.r) < 0.001
         val sameX = math.abs(r.x - e.x) < 0.001
         val sameY = math.abs(r.y - e.y) < 0.001
-        sameName && sameCoordinates && sameMagnitudes && sameM && sameX && sameY
+        sameName && sameCoordinates && sameMagnitudes && sameM && sameX && sameY && sameR
       }.forall(_ == true)
     } else {
       equalSize

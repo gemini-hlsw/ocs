@@ -29,7 +29,7 @@ class UCAC3RegressionSpec1 extends Specification with UCAC3Regression {
     "work with legacy UCAC3 values in nominal conditions on TYC 8345-1155-1 with random R-like bands" in {
       val replacedTargets = replaceRBands(tipTiltTargets, flexureTargets)
       runAnalysis("17:25:27.529", "-48:27:24.02", conditions, tipTiltCriterion, flexureCriterion, replacedTargets._1, replacedTargets._2, expectedGuideStars) should beTrue
-    }.pendingUntilFixed
+    }
   }
 
   val tipTiltCriterion = GemsCatalogSearchCriterion(GemsCatalogSearchKey(GemsGuideStarType.tiptilt, Canopus.Wfs.Group.instance), CatalogSearchCriterion("Canopus Wave Front Sensor", MagnitudeBand.R, MagnitudeRange(FaintnessConstraint(15.0), Some(SaturationConstraint(7.5))), RadiusConstraint.between(Angle.zero, Angle.fromArcmin(1.0)), Some(Offset(5.394250.arcsecs[OffsetP], 5.394250.arcsecs[OffsetQ])), None))

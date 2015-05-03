@@ -56,7 +56,7 @@ class UCAC3RegressionSpec3 extends Specification with UCAC3Regression {
         a.avgstrehl should beEqualTo(e)
       }
       areAsterismStarsTheSame(asterisms._1, replacedMascotStars) should beTrue
-    }.pendingUntilFixed
+    }
   }
 
   val tipTiltCriterion = GemsCatalogSearchCriterion(GemsCatalogSearchKey(GemsGuideStarType.tiptilt, Canopus.Wfs.Group.instance), CatalogSearchCriterion("Canopus Wave Front Sensor", MagnitudeBand.R, MagnitudeRange(FaintnessConstraint(15.0), Some(SaturationConstraint(7.5))), RadiusConstraint.between(Angle.zero, Angle.fromArcmin(1.0)), Some(Offset(5.394250.arcsecs[OffsetP], 5.394250.arcsecs[OffsetQ])), None))
@@ -128,10 +128,10 @@ class UCAC3RegressionSpec3 extends Specification with UCAC3Regression {
   )
 
   val mascotStars = List(
-    Star(SiderealTarget("042-030698",Coordinates(RightAscension.fromAngle(Angle.fromDegrees(83.90168749999998)),Declination.fromAngle(Angle.fromDegrees(290.72664444444445)).getOrElse(Declination.zero)),None,List(new Magnitude(14.428,MagnitudeBand.J), new Magnitude(13.691,MagnitudeBand.K), new Magnitude(14.29,MagnitudeBand.H), new Magnitude(18.086,MagnitudeBand.B), new Magnitude(14.249,MagnitudeBand.R), new Magnitude(14.632,MagnitudeBand.I)),None),-44.51300737797379,-13.009999999962929,2.0),
-    Star(SiderealTarget("042-030622",Coordinates(RightAscension.fromAngle(Angle.fromDegrees(83.84953333333334)),Declination.fromAngle(Angle.fromDegrees(290.72827777777775)).getOrElse(Declination.zero)),None,List(new Magnitude(15.787,MagnitudeBand.J), new Magnitude(15.156,MagnitudeBand.K), new Magnitude(15.114,MagnitudeBand.H), new Magnitude(14.273,MagnitudeBand.R)),None),21.936983034367834,-7.130000000074688,2.0),
-    Star(SiderealTarget("042-030635",Coordinates(RightAscension.fromAngle(Angle.fromDegrees(83.85415416666666)),Declination.fromAngle(Angle.fromDegrees(290.73200833333334)).getOrElse(Declination.zero)),None,List(new Magnitude(15.71,MagnitudeBand.J), new Magnitude(14.602,MagnitudeBand.K), new Magnitude(14.589,MagnitudeBand.H), new Magnitude(14.721,MagnitudeBand.R)),None),16.052010976423862,6.300000000055661,2.0),
-    Star(SiderealTarget("042-030696",Coordinates(RightAscension.fromAngle(Angle.fromDegrees(83.9007458333333)),Declination.fromAngle(Angle.fromDegrees(290.730775)).getOrElse(Declination.zero)),None,List(new Magnitude(14.673,MagnitudeBand.J), new Magnitude(14.834,MagnitudeBand.K), new Magnitude(14.539,MagnitudeBand.H), new Magnitude(17.103,MagnitudeBand.B), new Magnitude(14.977,MagnitudeBand.R), new Magnitude(14.403,MagnitudeBand.I)),None),-43.32150491056957,1.8600000000105865,2.0)
+    Star(SiderealTarget("042-030698",Coordinates(RightAscension.fromAngle(Angle.fromDegrees(83.90168749999998)),Declination.fromAngle(Angle.fromDegrees(290.72664444444445)).getOrElse(Declination.zero)),None,List(new Magnitude(14.428,MagnitudeBand.J), new Magnitude(13.691,MagnitudeBand.K), new Magnitude(14.29,MagnitudeBand.H), new Magnitude(18.086,MagnitudeBand.B), new Magnitude(14.249,MagnitudeBand.R), new Magnitude(14.632,MagnitudeBand.I)),None),-44.51300737797379,-13.009999999962929,2.0,14.249),
+    Star(SiderealTarget("042-030622",Coordinates(RightAscension.fromAngle(Angle.fromDegrees(83.84953333333334)),Declination.fromAngle(Angle.fromDegrees(290.72827777777775)).getOrElse(Declination.zero)),None,List(new Magnitude(15.787,MagnitudeBand.J), new Magnitude(15.156,MagnitudeBand.K), new Magnitude(15.114,MagnitudeBand.H), new Magnitude(14.273,MagnitudeBand.R)),None),21.936983034367834,-7.130000000074688,2.0,14.273),
+    Star(SiderealTarget("042-030635",Coordinates(RightAscension.fromAngle(Angle.fromDegrees(83.85415416666666)),Declination.fromAngle(Angle.fromDegrees(290.73200833333334)).getOrElse(Declination.zero)),None,List(new Magnitude(15.71,MagnitudeBand.J), new Magnitude(14.602,MagnitudeBand.K), new Magnitude(14.589,MagnitudeBand.H), new Magnitude(14.721,MagnitudeBand.R)),None),16.052010976423862,6.300000000055661,2.0,14.721),
+    Star(SiderealTarget("042-030696",Coordinates(RightAscension.fromAngle(Angle.fromDegrees(83.9007458333333)),Declination.fromAngle(Angle.fromDegrees(290.730775)).getOrElse(Declination.zero)),None,List(new Magnitude(14.673,MagnitudeBand.J), new Magnitude(14.834,MagnitudeBand.K), new Magnitude(14.539,MagnitudeBand.H), new Magnitude(17.103,MagnitudeBand.B), new Magnitude(14.977,MagnitudeBand.R), new Magnitude(14.403,MagnitudeBand.I)),None),-43.32150491056957,1.8600000000105865,2.0,14.977)
   )
 
   val expectedGuideStarsScn1 = List(

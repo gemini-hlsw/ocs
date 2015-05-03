@@ -3,6 +3,7 @@ package edu.gemini.ags.gems.mascot
 import MascotConf._
 
 import edu.gemini.spModel.core._
+import edu.gemini.ags.api.{magnitudeExtractor, RLikeBands}
 import edu.gemini.spModel.core.Target.SiderealTarget
 
 /**
@@ -11,9 +12,10 @@ import edu.gemini.spModel.core.Target.SiderealTarget
  * m is calculated from the mag values.
  */
 case class Star(target: SiderealTarget,
-                 x: Double, // 1 index in the original sources
-                 y: Double, // 2
-                 m: Double)
+                x: Double, // 1 index in the original sources
+                y: Double, // 2
+                m: Double,
+                r: Double)
 
 object Star {
 
@@ -23,8 +25,10 @@ object Star {
    */
   def makeStar(target: SiderealTarget, centerX: Double, centerY: Double): Star = {
     val (x, y) = calculateXy(target.coordinates.ra.toAngle.toDegrees, target.coordinates.dec.toDegrees, centerX, centerY)
-    val (m, rmag2) = calculateM(target.magnitudeIn(MagnitudeBand.B).map(_.value).getOrElse(invalidMag), target.magnitudeIn(MagnitudeBand.V).map(_.value).getOrElse(invalidMag), target.magnitudeIn(MagnitudeBand.R).map(_.value).getOrElse(invalidMag))
-    Star(target, x, y, m)
+    val rLikeMagnitude = magnitudeExtractor(RLikeBands)(target)
+    val (m, rMag) = calculateM(target.magnitudeIn(MagnitudeBand.B).map(_.value).getOrElse(invalidMag), target.magnitudeIn(MagnitudeBand.V).map(_.value).getOrElse(invalidMag), rLikeMagnitude.map(_.value).getOrElse(invalidMag))
+    Star(target, x, y, m, rMag)
+
   }
 
   /**

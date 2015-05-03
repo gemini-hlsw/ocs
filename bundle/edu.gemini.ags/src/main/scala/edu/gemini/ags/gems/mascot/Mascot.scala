@@ -86,7 +86,7 @@ object Mascot {
                        filter: Star => Boolean = defaultFilter)
   : (List[Star], List[Strehl]) = {
     // sort by selected mag and select
-    val sortedStarList = starList.sortWith((s1,s2) => magnitudeExtractor(s1.target) < magnitudeExtractor(s2.target))
+    val sortedStarList = starList.sortWith((s1,s2) => s1.r < s2.r)
     val filteredStarList = selectStarsOnMag(sortedStarList, magnitudeExtractor).filter(filter)
 
     val ns = filteredStarList.length
@@ -147,8 +147,7 @@ object Mascot {
   //}
   def selectStarsOnMag(starList: List[Star], magnitudeExtractor: MagnitudeExtractor = defaultMagnitudeExtractor): List[Star] = {
     selectStarsNotTooClose(starList.filter(star => {
-      val mag = magnitudeExtractor(star.target).map(_.value)
-      mag >= mag_min_threshold && mag <= mag_max_threshold
+      star.r >= mag_min_threshold && star.r <= mag_max_threshold
     }))
   }
 

@@ -54,7 +54,7 @@ object MascotCat {
                        filter: Star => Boolean = Mascot.defaultFilter)
   : (List[Star], List[Strehl]) = {
     val starList = list.map(Star.makeStar(_, centerRA, centerDec))
-    Mascot.findBestAsterism(starList.toList, magnitudeExtractor, factor, progress, filter)
+    Mascot.findBestAsterism(starList, magnitudeExtractor, factor, progress, filter)
   }
 
   case class StrehlResults(starList: java.util.List[Star], strehlList: java.util.List[Strehl])
@@ -73,7 +73,6 @@ object MascotCat {
                                         centerRA: Double, centerDec: Double,
                                         band: MagnitudeBand = Mascot.defaultBandpass, factor: Double,
                                         mascotProgress: MascotProgress): StrehlResults = {
-
     val progress = (s: Strehl, count: Int, total: Int) => {
       defaultProgress(s, count, total)
       if (mascotProgress != null && !mascotProgress.progress(s, count, total, true)) {
