@@ -20,20 +20,23 @@ import edu.gemini.spModel.core.AngleSyntax._
 import edu.gemini.shared.util.immutable.ScalaConverters._
 import edu.gemini.shared.util.immutable.{None => JNone}
 
+/**
+ * Regression test on target SN 1987A with UCAC3 data and nominal conditions
+ */
 class UCAC3RegressionSpec3 extends Specification with UCAC3Regression {
   val conditions = SPSiteQuality.Conditions.NOMINAL.wv(WaterVapor.ANY).sb(SkyBackground.ANY)
 
   "Gems Analyze" should {
-    "work with legacy UCAC3 values in nominal conditions for SN 1987A" in {
+    "work with legacy UCAC3 values in nominal conditions" in {
       runAnalysis("05:35:28.020", "-69:16:11.07", conditions, tipTiltCriterion, flexureCriterion, tipTiltTargets, flexureTargets, expectedGuideStarsScn1) should beTrue
     }
-    "work with legacy UCAC3 values in nominal conditions for SN 1987A with random R-like bands" in {
+    "work with legacy UCAC3 values in nominal conditions with random R-like bands" in {
       val replacedTargets = replaceRBands(tipTiltTargets, flexureTargets)
       runAnalysis("05:35:28.020", "-69:16:11.07", conditions, tipTiltCriterion, flexureCriterion, replacedTargets._1, replacedTargets._2, expectedGuideStarsScn1) should beTrue
     }
   }
   "MascotCat" should {
-    "produce the correct stars from mascot with legacy UCAC3 values in nominal conditions for SN 1987A" in {
+    "produce the correct stars from mascot with legacy UCAC3 values" in {
       val asterisms = MascotCat.findBestAsterismInTargetsList(targetsToMascot, 83.86675000000002, -69.26974166666668, magnitudeExtractor(defaultProbeBands(MagnitudeBand.R)), 0.06)
       asterisms._2 should be size averageStrehl.size
       asterisms._2.zip(averageStrehl).foreach { case (a, e) =>
@@ -41,7 +44,7 @@ class UCAC3RegressionSpec3 extends Specification with UCAC3Regression {
       }
       areAsterismStarsTheSame(asterisms._1, mascotStars) should beTrue
     }
-    "produce the correct stars from mascot with legacy UCAC3 values in nominal conditions for SN 1987A and R-like magnitudes" in {
+    "produce the correct stars from mascot with legacy UCAC3 values and R-like magnitudes" in {
       val replacedTargets = replaceRBands(targetsToMascot)
       replacedTargets should be size targetsToMascot.size
       val targetsMap = replacedTargets.map(t => t.name -> t).toMap

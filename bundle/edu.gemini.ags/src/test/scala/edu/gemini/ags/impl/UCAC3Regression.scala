@@ -25,27 +25,9 @@ import edu.gemini.pot.ModelConverters._
 import scalaz._
 import Scalaz._
 
-object UCAC3Regression {
-  // Convert targets from having band R to r', R or UC
-  def replaceRBands(targets: List[SiderealTarget]): List[SiderealTarget] = {
-    targets.zipWithIndex.collect {
-      case (t, i) if i < targets.size / 3=>
-        val mags = t.magnitudes.collect {
-          case m if m.band === MagnitudeBand.R => m.copy(band = MagnitudeBand._r)
-          case m                               => m
-        }
-        t.copy(magnitudes = mags)
-      case (t, i) if i < targets.size * 2 / 3 && i >= targets.size / 3=>
-        val mags = t.magnitudes.collect {
-          case m if m.band === MagnitudeBand.R => m.copy(band = MagnitudeBand.UC)
-          case m                               => m
-        }
-        t.copy(magnitudes = mags)
-      case (t, _) => t
-    }
-  }
-
-}
+/**
+ * Some useful functions to run regressions tests on GemsCatalogSearchResult
+ */
 trait UCAC3Regression {
 
   type GuideProbeTargetsFinder = (GuideProbe, String) => GuideProbeTargets
@@ -163,3 +145,5 @@ trait UCAC3Regression {
     }
   }
 }
+
+object UCAC3Regression extends UCAC3Regression

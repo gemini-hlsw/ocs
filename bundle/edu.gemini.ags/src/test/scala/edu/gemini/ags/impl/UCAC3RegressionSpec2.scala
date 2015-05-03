@@ -18,14 +18,17 @@ import edu.gemini.spModel.core.AngleSyntax._
 import edu.gemini.shared.util.immutable.ScalaConverters._
 import edu.gemini.shared.util.immutable.{None => JNone}
 
+/**
+ * Regression test on target TYC 8345-1155-1, with UCAC3 data and best conditions
+ */
 class UCAC3RegressionSpec2 extends Specification with UCAC3Regression {
   val conditions = SPSiteQuality.Conditions.NOMINAL.wv(WaterVapor.ANY).sb(SkyBackground.ANY)
 
   "Gems Analyze" should {
-    "work with legacy UCAC3 values in best conditions for TYC 8345-1155-1" in {
+    "work with legacy UCAC3 values" in {
       runAnalysis("17:25:27.529", "-48:27:24.02", conditions, tipTiltCriterion, flexureCriterion, tipTiltTargets, flexureTargets, expectedGuideStars) should beTrue
     }
-    "work with legacy UCAC3 values in best conditions for TYC 8345-1155-1 with random R-like bands" in {
+    "work with legacy UCAC3 values with replaced R-like bands" in {
       val replacedTargets = replaceRBands(tipTiltTargets, flexureTargets)
       runAnalysis("17:25:27.529", "-48:27:24.02", conditions, tipTiltCriterion, flexureCriterion, replacedTargets._1, replacedTargets._2, expectedGuideStars) should beTrue
     }
