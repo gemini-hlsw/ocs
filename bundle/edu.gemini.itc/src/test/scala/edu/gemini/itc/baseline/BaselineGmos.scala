@@ -111,17 +111,17 @@ object BaselineGmos {
       4,
       None,
       DetectorManufacturer.E2V,
-      Site.GS),
-    GmosParameters(
-      FilterSouth.g_G0325,
-      DisperserSouth.R400_G5325,
-      500.0,
-      FPUnitSouth.IFU_1,
-      4,
-      4,
-      Some(IfuRadial(0.0, 0.3)),
-      DetectorManufacturer.HAMAMATSU,
-      Site.GS)
+      Site.GS)//,
+//    GmosParameters(
+//      FilterSouth.g_G0325,
+//      DisperserSouth.R400_G5325,
+//      500.0,
+//      FPUnitSouth.IFU_1,
+//      4,
+//      4,
+//      Some(IfuRadial(0.0, 0.3)),
+//      DetectorManufacturer.HAMAMATSU,
+//      Site.GS)
   ))
 
 }

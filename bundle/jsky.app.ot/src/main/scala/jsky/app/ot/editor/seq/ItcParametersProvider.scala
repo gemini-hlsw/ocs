@@ -1,6 +1,6 @@
 package jsky.app.ot.editor.seq
 
-import edu.gemini.itc.shared.{ObservingConditions, SpatialProfile, SpectralDistribution}
+import edu.gemini.itc.shared.{AnalysisMethod, ObservingConditions, SpatialProfile, SpectralDistribution}
 import edu.gemini.pot.sp.{ISPObservation, SPComponentType}
 import edu.gemini.spModel.config.ConfigBridge
 import edu.gemini.spModel.config.map.ConfigValMapInstances
@@ -18,6 +18,7 @@ trait ItcParametersProvider {
   def sequence: ConfigSequence
   def instrument: Option[SPComponentType]
   def observation: Option[ISPObservation]
+  def analysisMethod: AnalysisMethod
   def conditions: String \/ ObservingConditions
   def instrumentPort: String \/ IssPort
   def targetEnvironment: String \/ TargetEnvironment
@@ -36,6 +37,9 @@ object ItcParametersProvider {
 
     def observation: Option[ISPObservation] =
       Option(owner.getContextObservation)
+
+    def analysisMethod: AnalysisMethod =
+      itcPanel.analysis()
 
     def conditions: String \/ ObservingConditions =
       itcPanel.conditions().right

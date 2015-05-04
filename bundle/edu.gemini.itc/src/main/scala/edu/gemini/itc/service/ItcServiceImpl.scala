@@ -3,10 +3,10 @@ package edu.gemini.itc.service
 import edu.gemini.itc.acqcam.AcqCamRecipe
 import edu.gemini.itc.flamingos2.Flamingos2Recipe
 import edu.gemini.itc.gmos.GmosRecipe
-import edu.gemini.itc.gnirs.GnirsParameters
+import edu.gemini.itc.gnirs.{GnirsRecipe, GnirsParameters}
 import edu.gemini.itc.gsaoi.GsaoiRecipe
 import edu.gemini.itc.michelle.MichelleParameters
-import edu.gemini.itc.nifs.NifsParameters
+import edu.gemini.itc.nifs.{NifsRecipe, NifsParameters}
 import edu.gemini.itc.niri.NiriRecipe
 import edu.gemini.itc.operation.ImagingS2NMethodACalculation
 import edu.gemini.itc.shared._
@@ -38,24 +38,27 @@ class ItcServiceImpl extends ItcService {
 
   private def calculateImaging(source: SourceDefinition, obs: ObservationDetails, cond: ObservingConditions, tele: TelescopeDetails, ins: InstrumentDetails): Result =
     ins match {
-      case i: AcquisitionCamParameters    => imagingResult(new AcqCamRecipe(source, obs, cond, tele, i))
-      case i: Flamingos2Parameters        => imagingResult(new Flamingos2Recipe(source, obs, cond, i, tele))
-      case i: GmosParameters              => imagingArrayResult(new GmosRecipe(source, obs, cond, i, tele))
-      case i: GsaoiParameters             => imagingResult(new GsaoiRecipe(source, obs, cond, i, tele))
+      case i: AcquisitionCamParameters    => imagingResult        (new AcqCamRecipe(source, obs, cond, tele, i))
+      case i: Flamingos2Parameters        => imagingResult        (new Flamingos2Recipe(source, obs, cond, i, tele))
+      case i: GmosParameters              => imagingResult        (new GmosRecipe(source, obs, cond, i, tele))
+      case i: GsaoiParameters             => imagingResult        (new GsaoiRecipe(source, obs, cond, i, tele))
       case i: MichelleParameters          => ItcResult.forMessage ("Imaging not implemented.")
-      case i: NiriParameters              => imagingResult(new NiriRecipe(source, obs, cond, i, tele))
+      case i: NiriParameters              => imagingResult        (new NiriRecipe(source, obs, cond, i, tele))
       case i: TRecsParameters             => ItcResult.forMessage ("Imaging not implemented.")
-      case _                              => ItcResult.forMessage("This instrument does not support imaging.")
+      case _                              => ItcResult.forMessage ("Imaging with this instrument is not supported by ITC.")
     }
 
   private def imagingResult(recipe: ImagingRecipe): Result =
-    ItcResult.forCcd(imgResult(recipe.calculateImaging()))
+    imagingResult(Seq(recipe.calculateImaging()))
 
-  private def imagingArrayResult(recipe: ImagingArrayRecipe): Result =
-    ItcResult.forCcds(recipe.calculateImaging().map(imgResult))
+  private def imagingResult(recipe: ImagingArrayRecipe): Result =
+    imagingResult(recipe.calculateImaging())
 
-  private def imgResult(result: ImagingResult): ItcCalcResult = result.is2nCalc match {
-    case i: ImagingS2NMethodACalculation  => ItcImagingResult(result.source, i.singleSNRatio(), i.totalSNRatio(), result.peakPixelCount)
+  private def imagingResult(r: Seq[ImagingResult]): Result =
+    ItcResult.forResult(ItcImagingResult(r.head.source, r.map(toImgData)))
+
+  private def toImgData(result: ImagingResult): ImgData = result.is2nCalc match {
+    case i: ImagingS2NMethodACalculation  => ImgData(i.singleSNRatio(), i.totalSNRatio(), result.peakPixelCount)
     case _                                => throw new NotImplementedError
   }
 
@@ -63,15 +66,29 @@ class ItcServiceImpl extends ItcService {
 
   private def calculateSpectroscopy(source: SourceDefinition, obs: ObservationDetails, cond: ObservingConditions, tele: TelescopeDetails, ins: InstrumentDetails): Result =
     ins match {
-      case i: Flamingos2Parameters        => ItcResult.forMessage ("Spectroscopy not yet implemented.")
-      case i: GmosParameters              => ItcResult.forMessage ("Spectroscopy not yet implemented.")
-      case i: GnirsParameters             => ItcResult.forMessage ("Spectroscopy not yet implemented.")
+      case i: Flamingos2Parameters        => spectroscopyResult   (new Flamingos2Recipe(source, obs, cond, i , tele))
+      case i: GmosParameters              => spectroscopyResult   (new GmosRecipe(source, obs, cond, i, tele))
+      case i: GnirsParameters             => spectroscopyResult   (new GnirsRecipe(source, obs, cond, i, tele))
       case i: MichelleParameters          => ItcResult.forMessage ("Spectroscopy not implemented.")
-      case i: NifsParameters              => ItcResult.forMessage ("Spectroscopy not yet implemented.")
-      case i: NiriParameters              => ItcResult.forMessage ("Spectroscopy not yet implemented.")
+      case i: NifsParameters              => spectroscopyResult   (new NifsRecipe(source, obs, cond, i, tele))
+      case i: NiriParameters              => spectroscopyResult   (new NiriRecipe(source, obs, cond, i, tele))
       case i: TRecsParameters             => ItcResult.forMessage ("Spectroscopy not implemented.")
-      case _                              => ItcResult.forMessage ("This instrument does not support spectroscopy.")
+      case _                              => ItcResult.forMessage ("Spectroscopy with this instrument is not supported by ITC.")
 
     }
+
+  private def spectroscopyResult(recipe: SpectroscopyRecipe): Result =
+    resultWithoutFiles(recipe.calculateSpectroscopy()._1)
+
+  private def spectroscopyResult(recipe: SpectroscopyArrayRecipe): Result =
+    resultWithoutFiles(recipe.calculateSpectroscopy()._1)
+
+  // Currently the OT does not use the text files that can be downloaded from the web page. Andy S. says it is
+  // unlikely that we want to display those files in the OT, so for now, we don't send them in order to save
+  // a bit of bandwidth. If the need arises to have the files accessible in the clients just change this to
+  // send the original result.
+  private def resultWithoutFiles(result: ItcSpectroscopyResult): Result =
+    ItcResult.forResult(ItcSpectroscopyResult(result.source, result.charts, Seq()))
+
 
 }

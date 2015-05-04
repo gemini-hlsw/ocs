@@ -7,7 +7,9 @@ import java.io.Serializable;
  */
 public final class PlottingDetails implements Serializable {
 
-    public static enum PlotLimits {
+    public static PlottingDetails Auto = new PlottingDetails(PlotLimits.AUTO, 0, 1);
+
+    public enum PlotLimits {
         AUTO,
         USER,
         ;
@@ -36,13 +38,15 @@ public final class PlottingDetails implements Serializable {
         return plotLimits;
     }
 
+    /** Gets the upper limit in nm. */
     public double getPlotWaveU() {
-        return plotWaveU * 1000;
-    }  //convert microns to nm
+        return plotWaveU;
+    }
 
+    /** Gets the lower limit in nm. */
     public double getPlotWaveL() {
-        return plotWaveL * 1000;
-    }   //convert microns to nm
+        return plotWaveL;
+    }
 
     /**
      * Return a human-readable string for debugging

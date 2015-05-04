@@ -1,7 +1,7 @@
 package jsky.app.ot.editor.seq
 
-import javax.swing.Icon
 import javax.swing.table.AbstractTableModel
+import javax.swing.{Icon, ListSelectionModel}
 
 import edu.gemini.ags.api.AgsRegistrar
 import edu.gemini.itc.shared._
@@ -23,9 +23,8 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.swing.Table.LabelRenderer
 import scala.swing._
-
+import scalaz.Scalaz._
 import scalaz._
-import Scalaz._
 
 object ItcTable {
 
@@ -72,6 +71,12 @@ trait ItcTable extends Table {
 
   def tableModel(keys: Seq[ItemKey], seq: ConfigSequence): ItcTableModel
 
+  def selectedResult(): Option[ItcSpectroscopyResult] =
+    selection.rows.headOption.flatMap(result)
+
+  def result(row: Int): Option[ItcSpectroscopyResult] =
+    model.asInstanceOf[ItcSpectroscopyTableModel].result(row)
+
   import jsky.app.ot.editor.seq.Keys._
 
   // set this to the same values as in SequenceTableUI
@@ -95,6 +100,7 @@ trait ItcTable extends Table {
       filterNot(_.getParent().equals(CALIBRATION_KEY)). // calibration settings are not relevant
       sortBy(_.getPath)
 
+    // update model with new one
     model = tableModel(showKeys, seq)
 
   }
@@ -107,12 +113,17 @@ trait ItcTable extends Table {
     }
   }
 
-  protected def calculateSpectroscopy(peer: Peer, c: ItcUniqueConfig): Future[ItcService.Result] =
-    Future {
-      List("Not Implemented Yet").fail
-    }
+  protected def calculateSpectroscopy(peer: Peer, instrument: SPComponentType, c: ItcUniqueConfig): Future[ItcService.Result] = {
+    val obs = new ObservationDetails(SpectroscopySN(c.count, c.singleExposureTime, 1.0), parameters.analysisMethod)
+    calculate(peer, instrument, c, obs)
+  }
 
   protected def calculateImaging(peer: Peer, instrument: SPComponentType, c: ItcUniqueConfig): Future[ItcService.Result] = {
+    val obs = new ObservationDetails(ImagingSN(c.count, c.singleExposureTime, 1.0), parameters.analysisMethod)
+    calculate(peer, instrument, c, obs)
+  }
+
+  protected def calculate(peer: Peer, instrument: SPComponentType, c: ItcUniqueConfig, obs: ObservationDetails): Future[ItcService.Result] = {
     val s = for {
       cond      <- parameters.conditions
       port      <- parameters.instrumentPort
@@ -122,8 +133,8 @@ trait ItcTable extends Table {
       tele      <- ConfigExtractor.extractTelescope(port, probe, targetEnv, c.config)
       ins       <- ConfigExtractor.extractInstrumentDetails(instrument, probe, targetEnv, c.config)
     } yield {
-        calculateImaging(peer, c, src, ins, tele, cond)
-      }
+        doServiceCall(peer, c, src, ins, tele, cond, obs)
+    }
 
     s match {
       case -\/(l) => Future {
@@ -134,9 +145,7 @@ trait ItcTable extends Table {
 
   }
 
-  protected def calculateImaging(peer: Peer, c: ItcUniqueConfig, src: SourceDefinition, ins: InstrumentDetails, tele: TelescopeDetails, cond: ObservingConditions): Future[ItcService.Result] = {
-    val obs = new ObservationDetails(ImagingSN(c.count, c.singleExposureTime, 1.0), AutoAperture(5.0))
-
+  protected def doServiceCall(peer: Peer, c: ItcUniqueConfig, src: SourceDefinition, ins: InstrumentDetails, tele: TelescopeDetails, cond: ObservingConditions, obs: ObservationDetails): Future[ItcService.Result] = {
     // Do the service call
     ItcService.calculate(peer, src, obs, cond, tele, ins).
 
@@ -246,12 +255,18 @@ class ItcImagingTable(val parameters: ItcParametersProvider) extends ItcTable {
 class ItcSpectroscopyTable(val parameters: ItcParametersProvider) extends ItcTable {
   private val emptyTable: ItcGenericSpectroscopyTableModel = new ItcGenericSpectroscopyTableModel(Seq(), Seq(), Seq())
 
+  // allow selection of single rows, this will display the charts
+  peer.setRowSelectionAllowed(true)
+  peer.setSelectionMode(ListSelectionModel.SINGLE_SELECTION)
+
   /** Creates a new table model for the current context and config sequence. */
   def tableModel(keys: Seq[ItemKey], seq: ConfigSequence) =
     ObservingPeer.getOrPrompt.fold(emptyTable) { peer =>
-      val uniqueConfigs = ItcUniqueConfig.spectroscopyConfigs(seq)
-      val results       = uniqueConfigs.map(calculateSpectroscopy(peer, _))
-      new ItcGenericSpectroscopyTableModel(keys, uniqueConfigs, results)
+      parameters.instrument.fold(emptyTable) { ins =>
+        val uniqueConfigs = ItcUniqueConfig.spectroscopyConfigs(seq)
+        val results = uniqueConfigs.map(calculateSpectroscopy(peer, ins, _))
+        new ItcGenericSpectroscopyTableModel(keys, uniqueConfigs, results)
+      }
   }
 
 }

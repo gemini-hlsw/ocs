@@ -2,14 +2,14 @@ package edu.gemini.itc.web.html;
 
 import edu.gemini.itc.gmos.Gmos;
 import edu.gemini.itc.gmos.GmosRecipe;
-import edu.gemini.itc.operation.DetectorsTransmissionVisitor;
 import edu.gemini.itc.shared.*;
+import edu.gemini.itc.web.servlets.ImageServlet;
 import edu.gemini.spModel.gemini.gmos.GmosNorthType;
 import edu.gemini.spModel.gemini.gmos.GmosSouthType;
+import scala.Tuple2;
 
-import java.awt.*;
 import java.io.PrintWriter;
-import java.util.Calendar;
+import java.util.UUID;
 
 /**
  * Helper class for printing GMOS calculation results to an output stream.
@@ -28,19 +28,20 @@ public final class GmosPrinter extends PrinterBase {
     }
 
     /**
-     * Performes recipe calculation and writes results to a cached PrintWriter or to System.out.
+     * Performs recipe calculation and writes results to a cached PrintWriter or to System.out.
      */
     public void writeOutput() {
         if (isImaging) {
             final ImagingResult[] results = recipe.calculateImaging();
             writeImagingOutput(results);
         } else {
-            final SpectroscopyResult[] results = recipe.calculateSpectroscopy();
-            writeSpectroscopyOutput(results);
+            final Tuple2<ItcSpectroscopyResult, SpectroscopyResult[]> r = recipe.calculateSpectroscopy();
+            final UUID id = cache(r._1());
+            writeSpectroscopyOutput(id, r._2());
         }
     }
 
-    private void writeSpectroscopyOutput(final SpectroscopyResult[] results) {
+    private void writeSpectroscopyOutput(final UUID id, final SpectroscopyResult[] results) {
 
         final Gmos mainInstrument = (Gmos) results[0].instrument(); // main instrument
 
@@ -51,34 +52,11 @@ public final class GmosPrinter extends PrinterBase {
         device.setPrecision(2); // Two decimal places
         device.clear();
 
-        // Create one chart to use for all 3 CCDS (one for Signal and Background and one for Intermediate Single Exp and Final S/N)
-        final ITCChart gmosChart1;
-        final ITCChart gmosChart2;
-        final boolean ifuAndNotUniform = mainInstrument.isIfuUsed() && !(results[0].source().isUniform());
-        final double ifu_offset = ifuAndNotUniform ? mainInstrument.getIFU().getApertureOffsetList().iterator().next() : 0.0;
-        final String chart1Title = ifuAndNotUniform ? "Signal and Background (IFU element offset: " + device.toString(ifu_offset) + " arcsec)" : "Signal and Background ";
-        final String chart2Title = ifuAndNotUniform ? "Intermediate Single Exp and Final S/N (IFU element offset: " + device.toString(ifu_offset) + " arcsec)" : "Intermediate Single Exp and Final S/N";
-        gmosChart1 = new ITCChart(chart1Title, "Wavelength (nm)", "e- per exposure per spectral pixel", pdp);
-        gmosChart2 = new ITCChart(chart2Title, "Wavelength (nm)", "Signal / Noise per spectral pixel", pdp);
-
-        String sigSpec = null, backSpec = null, singleS2N = null, finalS2N = null;
         final Gmos[] ccdArray = mainInstrument.getDetectorCcdInstruments();
-        final DetectorsTransmissionVisitor tv = mainInstrument.getDetectorTransmision();
-        final int detectorCount = ccdArray.length;
 
         for (final Gmos instrument : ccdArray) {
 
             final int ccdIndex = instrument.getDetectorCcdIndex();
-            final String ccdName = instrument.getDetectorCcdName();
-            final Color ccdColor = instrument.getDetectorCcdColor();
-            final Color ccdColorDarker = ccdColor == null ? null : ccdColor.darker().darker();
-            final int firstCcdIndex = tv.getDetectorCcdStartIndex(ccdIndex);
-            final int lastCcdIndex = tv.getDetectorCcdEndIndex(ccdIndex, detectorCount);
-            // REL-478: include the gaps in the text data output
-            final int lastCcdIndexWithGap = (ccdIndex < 2 && detectorCount > 1)
-                    ? tv.getDetectorCcdStartIndex(ccdIndex + 1)
-                    : lastCcdIndex;
-
             final SpectroscopyResult result = results[ccdIndex];
 
             final int number_exposures = results[0].observation().getNumExposures();
@@ -113,35 +91,23 @@ public final class GmosPrinter extends PrinterBase {
             }
 
             // For IFUs we can have more than one S2N result.
-            final String header = "# GMOS ITC: " + Calendar.getInstance().getTime() + "\n";
             for (int i = 0; i < result.specS2N().length; i++) {
-
-                gmosChart1.addArray(result.specS2N()[i].getSignalSpectrum().getData(firstCcdIndex, lastCcdIndex), "Signal " + ccdName, ccdColor);
-                gmosChart1.addArray(result.specS2N()[i].getBackgroundSpectrum().getData(firstCcdIndex, lastCcdIndex), "SQRT(Background) " + ccdName, ccdColorDarker);
-
-                gmosChart2.addArray(result.specS2N()[i].getExpS2NSpectrum().getData(firstCcdIndex, lastCcdIndex), "Single Exp S/N " + ccdName, ccdColor);
-                gmosChart2.addArray(result.specS2N()[i].getFinalS2NSpectrum().getData(firstCcdIndex, lastCcdIndex), "Final S/N " + ccdName, ccdColorDarker);
 
                 if (ccdIndex == 0) {
                     _println("<p style=\"page-break-inside: never\">");
-                    sigSpec = _printSpecTag("ASCII signal spectrum");
-                    backSpec = _printSpecTag("ASCII background spectrum");
-                    singleS2N = _printSpecTag("Single Exposure S/N ASCII data");
-                    finalS2N = _printSpecTag("Final S/N ASCII data");
+                    _printFileLink(id, SignalData.instance());
+                    _printFileLink(id, BackgroundData.instance());
+                    _printFileLink(id, SingleS2NData.instance());
+                    _printFileLink(id, FinalS2NData.instance());
                 }
                 _println("");
             }
 
-            _println(result.specS2N()[result.specS2N().length - 1].getSignalSpectrum(), header, sigSpec, firstCcdIndex, lastCcdIndexWithGap);
-            _println(result.specS2N()[result.specS2N().length - 1].getBackgroundSpectrum(), header, backSpec, firstCcdIndex, lastCcdIndexWithGap);
-            _println(result.specS2N()[result.specS2N().length - 1].getExpS2NSpectrum(), header, singleS2N, firstCcdIndex, lastCcdIndexWithGap);
-            _println(result.specS2N()[result.specS2N().length - 1].getFinalS2NSpectrum(), header, finalS2N, firstCcdIndex, lastCcdIndexWithGap);
-
         }
 
-        _println(gmosChart1.getBufferedImage(), "SigAndBack");
+        _printImageLink(id, SignalChart.instance(), pdp);
         _println("");
-        _println(gmosChart2.getBufferedImage(), "Sig2N");
+        _printImageLink(id, S2NChart.instance(), pdp);
         _println("");
 
         printConfiguration(results[0].parameters(), mainInstrument);

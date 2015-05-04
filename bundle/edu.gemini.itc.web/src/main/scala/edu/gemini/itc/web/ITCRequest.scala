@@ -204,8 +204,8 @@ object ITCRequest {
 
   def plotParameters(r: ITCRequest): PlottingDetails = {
     val limits  = r.enumParameter(classOf[PlottingDetails.PlotLimits])
-    val lower   = r.doubleParameter("plotWavelengthL")
-    val upper   = r.doubleParameter("plotWavelengthU")
+    val lower   = r.doubleParameter("plotWavelengthL") * 1000 // microns -> nm
+    val upper   = r.doubleParameter("plotWavelengthU") * 1000 // microns -> nm
     new PlottingDetails(limits, lower, upper)
   }
 

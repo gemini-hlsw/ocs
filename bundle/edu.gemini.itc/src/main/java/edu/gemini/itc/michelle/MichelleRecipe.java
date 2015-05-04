@@ -3,6 +3,11 @@ package edu.gemini.itc.michelle;
 import edu.gemini.itc.operation.*;
 import edu.gemini.itc.shared.*;
 import edu.gemini.spModel.core.Site;
+import scala.Tuple2;
+import scala.collection.JavaConversions;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * This class performs the calculations for Michelle
@@ -82,9 +87,20 @@ public final class MichelleRecipe implements ImagingRecipe, SpectroscopyRecipe {
 
     }
 
-    public SpectroscopyResult calculateSpectroscopy() {
+    public Tuple2<ItcSpectroscopyResult, SpectroscopyResult> calculateSpectroscopy() {
         final Michelle instrument = new Michelle(_michelleParameters, _obsDetailParameters);
-        return calculateSpectroscopy(instrument);
+        final SpectroscopyResult r = calculateSpectroscopy(instrument);
+        final List<SpcChartData> dataSets = new ArrayList<SpcChartData>() {{
+            add(Recipe$.MODULE$.createSignalChart(r, 0));
+            add(Recipe$.MODULE$.createS2NChart(r, 0));
+        }};
+        final List<SpcDataFile> dataFiles = new ArrayList<SpcDataFile>() {{
+            add(new SpcDataFile(SignalData.instance(),     r.specS2N()[0].getSignalSpectrum().printSpecAsString()));
+            add(new SpcDataFile(BackgroundData.instance(), r.specS2N()[0].getBackgroundSpectrum().printSpecAsString()));
+            add(new SpcDataFile(SingleS2NData.instance(),  r.specS2N()[0].getExpS2NSpectrum().printSpecAsString()));
+            add(new SpcDataFile(FinalS2NData.instance(),   r.specS2N()[0].getFinalS2NSpectrum().printSpecAsString()));
+        }};
+        return new Tuple2<>(new ItcSpectroscopyResult(_sdParameters, JavaConversions.asScalaBuffer(dataSets).toList(), JavaConversions.asScalaBuffer(dataFiles).toList()), r);
     }
 
     public ImagingResult calculateImaging() {
@@ -179,7 +195,7 @@ public final class MichelleRecipe implements ImagingRecipe, SpectroscopyRecipe {
         final Parameters p = new Parameters(_sdParameters, _obsDetailParameters, _obsConditionParameters, _telescope);
         final SpecS2N[] specS2Narr = new SpecS2N[1];
         specS2Narr[0] = specS2N;
-        return SpectroscopyResult.apply(p, instrument, SFcalc, IQcalc, specS2Narr, st);
+        return SpectroscopyResult$.MODULE$.apply(p, instrument, SFcalc, IQcalc, specS2Narr, st);
 
 
     }

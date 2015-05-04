@@ -5,7 +5,10 @@ import edu.gemini.itc.operation.*;
 import edu.gemini.itc.shared.*;
 import edu.gemini.spModel.core.Site;
 import scala.Option;
+import scala.Tuple2;
+import scala.collection.JavaConversions;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -55,11 +58,24 @@ public final class NifsRecipe implements SpectroscopyRecipe {
     /**
      * Performs recipe calculation.
      */
-    public SpectroscopyResult calculateSpectroscopy() {
+    public Tuple2<ItcSpectroscopyResult, SpectroscopyResult> calculateSpectroscopy() {
         final Nifs instrument = new Nifs(_nifsParameters, _obsDetailParameters);
-        return calculateSpectroscopy(instrument);
+        final SpectroscopyResult r = calculateSpectroscopy(instrument);
+        final List<SpcChartData> dataSets = new ArrayList<>();
+        for (int i = 0; i < r.specS2N().length; i++) {
+            dataSets.add(createNifsSignalChart(r, i));
+            dataSets.add(createNifsS2NChart(r, i));
+        }
+        final List<SpcDataFile> dataFiles = new ArrayList<SpcDataFile>() {{
+            for (int i = 0; i < r.specS2N().length; i++) {
+                add(new SpcDataFile(SignalData.instance(),     r.specS2N()[i].getSignalSpectrum().printSpecAsString()));
+                add(new SpcDataFile(BackgroundData.instance(), r.specS2N()[i].getBackgroundSpectrum().printSpecAsString()));
+                add(new SpcDataFile(SingleS2NData.instance(),  r.specS2N()[i].getExpS2NSpectrum().printSpecAsString()));
+                add(new SpcDataFile(FinalS2NData.instance(),   r.specS2N()[i].getFinalS2NSpectrum().printSpecAsString()));
+            }
+        }};
+        return new Tuple2<>(new ItcSpectroscopyResult(_sdParameters, JavaConversions.asScalaBuffer(dataSets).toList(), JavaConversions.asScalaBuffer(dataFiles).toList()), r);
     }
-
 
     private SpectroscopyResult calculateSpectroscopy(final Nifs instrument) {
 
@@ -184,7 +200,34 @@ public final class NifsRecipe implements SpectroscopyRecipe {
         }
 
         final Parameters p = new Parameters(_sdParameters, _obsDetailParameters, _obsConditionParameters, _telescope);
-        return new SpectroscopyResult(p, instrument, (SourceFraction) null, IQcalc, specS2Narr, (SlitThroughput) null, altair); // TODO no SFCalc and ST for Nifs
+        return new GenericSpectroscopyResult(p, instrument, (SourceFraction) null, IQcalc, specS2Narr, (SlitThroughput) null, altair); // TODO no SFCalc and ST for Nifs
     }
+
+    // NIFS CHARTS
+
+    private static SpcChartData createNifsSignalChart(final SpectroscopyResult result, final int index) {
+        final Nifs instrument = (Nifs) result.instrument();
+        final List<Double> ap_offset_list = instrument.getIFU().getApertureOffsetList();
+        final String title = instrument.getIFUMethod().equals(NifsParameters.SUMMED_APERTURE_IFU) ?
+                "Signal and Background (IFU summed apertures: " +
+                        instrument.getIFUNumX() + "x" + instrument.getIFUNumY() +
+                        ", " + String.format("%.3f", instrument.getIFUNumX() * instrument.getIFU().IFU_LEN_X) + "\"x" +
+                        String.format("%.3f", instrument.getIFUNumY() * instrument.getIFU().IFU_LEN_Y) + "\")" :
+                "Signal and Background (IFU element offset: " + String.format("%.3f", ap_offset_list.get(index)) + " arcsec)";
+        return Recipe$.MODULE$.createSignalChart(result, title, index);
+    }
+
+    private static SpcChartData createNifsS2NChart(final SpectroscopyResult result, final int index) {
+        final Nifs instrument = (Nifs) result.instrument();
+        final List<Double> ap_offset_list = instrument.getIFU().getApertureOffsetList();
+        final String title = instrument.getIFUMethod().equals(NifsParameters.SUMMED_APERTURE_IFU) ?
+                "Intermediate Single Exp and Final S/N \n(IFU apertures:" +
+                        instrument.getIFUNumX() + "x" + instrument.getIFUNumY() +
+                        ", " + String.format("%.3f", instrument.getIFUNumX() * instrument.getIFU().IFU_LEN_X) + "\"x" +
+                        String.format("%.3f", instrument.getIFUNumY() * instrument.getIFU().IFU_LEN_Y) + "\")" :
+                "Intermediate Single Exp and Final S/N (IFU element offset: " + String.format("%.3f", ap_offset_list.get(index)) + " arcsec)";
+        return Recipe$.MODULE$.createS2NChart(result, title, index);
+    }
+
 
 }

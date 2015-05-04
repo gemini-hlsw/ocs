@@ -69,13 +69,9 @@ object Hash {
       p.getFilter,
       p.getFPMask,
       p.getGrating,
-//      p.getIFUCenterX,          // TODO: results in NPE if not set..
-//      p.getIFUCenterY,
       p.getIFUMaxOffset,
       p.getIFUMethod,
       p.getIFUMinOffset,
-//      p.getIFUNumX,             // TODO: results in NPE if not set..
-//      p.getIFUNumY,
       p.getIFUOffset,
       p.getInstrumentCentralWavelength,
       p.getReadNoise,

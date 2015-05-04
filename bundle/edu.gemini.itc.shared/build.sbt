@@ -9,7 +9,8 @@ name := "edu.gemini.itc.shared"
 unmanagedJars in Compile ++= Seq(
   new File(baseDirectory.value, "../../lib/bundle/osgi.core-4.3.1.jar"),
   new File(baseDirectory.value, "../../lib/bundle/osgi.cmpn-4.3.1.jar"),
-  new File(baseDirectory.value, "../../lib/bundle/org.osgi.enterprise-5.0.0.jar")
+  new File(baseDirectory.value, "../../lib/bundle/org.osgi.enterprise-5.0.0.jar"),
+  new File(baseDirectory.value, "../../lib/bundle/org-jfree_2.10-1.0.14.jar")
 )
 
 osgiSettings

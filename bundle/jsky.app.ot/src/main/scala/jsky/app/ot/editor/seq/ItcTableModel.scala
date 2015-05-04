@@ -2,7 +2,7 @@ package jsky.app.ot.editor.seq
 
 import javax.swing.table.AbstractTableModel
 
-import edu.gemini.itc.shared.{ItcImagingResult, ItcResult, ItcService}
+import edu.gemini.itc.shared._
 import edu.gemini.shared.util.StringUtil
 import edu.gemini.spModel.config2.ItemKey
 
@@ -28,12 +28,10 @@ sealed trait ItcTableModel extends AbstractTableModel {
     Column("Data Labels",     (c, r) => c.labels),
     Column("Images",          (c, r) => new java.lang.Integer(c.count),             tooltip = "Number of exposures used in S/N calculation"),
     Column("Exposure Time",   (c, r) => new java.lang.Double(c.singleExposureTime), tooltip = "Exposure time of each image [s]"),
-    Column("Total Exp. Time", (c, r) => new java.lang.Double(c.totalExposureTime),  tooltip = "Total exposure time [s]"),
-    Column("Source Mag",      (c, r) => sourceMag(r),                               tooltip = "Source magnitude [mag]"),
-    Column("Source Band",     (c, r) => sourceBand(r),                              tooltip = "Source band")
+    Column("Total Exp. Time", (c, r) => new java.lang.Double(c.totalExposureTime),  tooltip = "Total exposure time [s]")
   )
 
-  val headers:      Seq[Column]  = Headers  // override this in case different header columns are needed..
+  val headers:      Seq[Column]
   val keys:         Seq[ItemKey]
   val results:      Seq[Column]
 
@@ -41,40 +39,48 @@ sealed trait ItcTableModel extends AbstractTableModel {
   val res:          Seq[Future[ItcService.Result]]
 
 
+  // Gets the imaging result from the service result future (if present).
+  protected def imagingResult(f: Future[ItcService.Result]): Option[ItcImagingResult] =
+    serviceResult(f).flatMap {
+      case img: ItcImagingResult      => Some(img)
+      case _                          => None
+    }
+
+  // Gets the spectroscopy result from the service result future (if present).
+  protected def spectroscopyResult(f: Future[ItcService.Result]): Option[ItcSpectroscopyResult] =
+    serviceResult(f).flatMap {
+      case spc: ItcSpectroscopyResult => Some(spc)
+      case _                          => None
+    }
+
+  protected def spcSourceMag    (result: Future[ItcService.Result]) = spectroscopyResult(result).map(_.source.profile.norm)
+
+  protected def spcSourceBand   (result: Future[ItcService.Result]) = spectroscopyResult(result).map(_.source.getNormBand.name)
+
+  protected def spcPeakElectrons(result: Future[ItcService.Result]) = spectroscopyResult(result).map(_.series(SignalChart, SignalData).yValues.max)
+
+  protected def spcPeakSNSingle (result: Future[ItcService.Result]) = spectroscopyResult(result).map(_.series(S2NChart, SingleS2NData).yValues.max)
+
+  protected def spcPeakSNFinal  (result: Future[ItcService.Result]) = spectroscopyResult(result).map(_.series(S2NChart, FinalS2NData).yValues.max)
+
   // Gets the result from the service result future (if present)
-  protected def imagingCalcResult(f: Future[ItcService.Result]): Option[ItcResult] =
+  protected def serviceResult(f: Future[ItcService.Result]): Option[ItcResult] =
     for {
       futureResult  <- f.value                // unwrap future
       serviceResult <- futureResult.toOption  // unwrap try
       calcResult    <- serviceResult.toOption // unwrap validation
     } yield calcResult
 
-  // Gets the imaging result from the service result future (if present).
-  // Note that in most cases (except for GMOS) there is only one CCD in the result, but for GMOS there can be
-  // 1 or 3 CCDs depending on the selected CCD manufacturer.
-  protected def imagingResult(f: Future[ItcService.Result], n: Int = 0): Option[ItcImagingResult] =
-    imagingCalcResult(f).flatMap { r =>
-      // For GMOS ITC returns 1 or 3 different CCD results depending on the manufacturer, the simplest way to deal
-      // with this is by just using n % #CCDs here, which means that if there is only one result it is repeated three
-      // times, and if there are 3 results, they are shown individually as expected. All instruments other than GMOS
-      // use this method with ccd index = 0.
-      r.ccds(n % r.ccds.length) match {
-        case img: ItcImagingResult => Some(img)
-        case _                     => None
-      }
-    }
 
-  protected def peakPixelFlux(result: Future[ItcService.Result], ccd: Int = 0) = imagingResult(result, ccd).map(_.peakPixelFlux.toInt)
+  protected def peakPixelFlux(result: Future[ItcService.Result], ccd: Int = 0) = imagingResult(result).map(_.ccd(ccd).peakPixelFlux.toInt)
 
-  protected def singleSNRatio(result: Future[ItcService.Result], ccd: Int = 0) = imagingResult(result, ccd).map(_.singleSNRatio)
+  protected def singleSNRatio(result: Future[ItcService.Result], ccd: Int = 0) = imagingResult(result).map(_.ccd(ccd).singleSNRatio)
 
-  protected def totalSNRatio (result: Future[ItcService.Result], ccd: Int = 0) = imagingResult(result, ccd).map(_.totalSNRatio)
+  protected def totalSNRatio (result: Future[ItcService.Result], ccd: Int = 0) = imagingResult(result).map(_.ccd(ccd).totalSNRatio)
 
-  // the source is the same for all CCDs, so we just always take the first one
-  protected def sourceMag    (result: Future[ItcService.Result]) = imagingResult(result, 0).map(_.source.profile.norm)
+  protected def sourceMag    (result: Future[ItcService.Result]) = imagingResult(result).map(_.source.profile.norm)
 
-  // the source is the same for all CCDs, so we just always take the first one
-  protected def sourceBand   (result: Future[ItcService.Result]) = imagingResult(result, 0).map(_.source.getNormBand.name)
+  protected def sourceBand   (result: Future[ItcService.Result]) = imagingResult(result).map(_.source.getNormBand.name)
 
   // ===
 
@@ -110,6 +116,8 @@ sealed trait ItcTableModel extends AbstractTableModel {
     case _                                                      => None
   }
 
+  def result(row: Int): Option[ItcSpectroscopyResult] = spectroscopyResult(res(row))
+
   // Translate overall column index into the corresponding header, column or key value.
   private def toHeader(col: Int) = headers(col)
 
@@ -133,8 +141,12 @@ sealed trait ItcTableModel extends AbstractTableModel {
 sealed trait ItcImagingTableModel extends ItcTableModel
 
 class ItcGenericImagingTableModel(val keys: Seq[ItemKey], val uniqueSteps: Seq[ItcUniqueConfig], val res: Seq[Future[ItcService.Result]]) extends ItcImagingTableModel {
+  val headers = Headers ++ Seq(
+    Column("Source Mag",      (c, r) => sourceMag(r),              tooltip = "Source magnitude [mag]"),
+    Column("Source Band",     (c, r) => sourceBand(r),             tooltip = "Source band")
+    )
   val results = Seq(
-    Column("Peak",            (c, r) => peakPixelFlux(r),         tooltip = ItcTableModel.PeakPixelTooltip),
+    Column("Peak",            (c, r) => peakPixelFlux(r),          tooltip = ItcTableModel.PeakPixelTooltip),
     Column("S/N Single",      (c, r) => singleSNRatio(r)),
     Column("S/N Total",       (c, r) => totalSNRatio (r)),
     Column("Messages",        (c, r) => messages(r))
@@ -143,6 +155,10 @@ class ItcGenericImagingTableModel(val keys: Seq[ItemKey], val uniqueSteps: Seq[I
 
 /** GMOS specific ITC imaging table model. */
 class ItcGmosImagingTableModel(val keys: Seq[ItemKey], val uniqueSteps: Seq[ItcUniqueConfig], val res: Seq[Future[ItcService.Result]]) extends ItcImagingTableModel {
+  val headers = Headers ++ Seq(
+    Column("Source Mag",      (c, r) => sourceMag(r),              tooltip = "Source magnitude [mag]"),
+    Column("Source Band",     (c, r) => sourceBand(r),             tooltip = "Source band")
+  )
   val results = Seq(
     Column("CCD1 Peak",       (c, r) => peakPixelFlux(r, ccd=0),   tooltip = ItcTableModel.PeakPixelTooltip + " for CCD 1"),
     Column("CCD1 S/N Single", (c, r) => singleSNRatio(r, ccd=0)),
@@ -162,7 +178,15 @@ class ItcGmosImagingTableModel(val keys: Seq[ItemKey], val uniqueSteps: Seq[ItcU
 sealed trait ItcSpectroscopyTableModel extends ItcTableModel
 
 class ItcGenericSpectroscopyTableModel(val keys: Seq[ItemKey], val uniqueSteps: Seq[ItcUniqueConfig], val res: Seq[Future[ItcService.Result]]) extends ItcSpectroscopyTableModel {
+  val headers = Headers ++ Seq(
+    Column("Source Mag",      (c, r) => spcSourceMag(r),           tooltip = "Source magnitude [mag]"),
+    Column("Source Band",     (c, r) => spcSourceBand(r),          tooltip = "Source band"),
+    Column("Peak",            (c, r) => spcPeakElectrons(r),       tooltip = "Peak e- per exposure"),
+    Column("S/N Single",      (c, r) => spcPeakSNSingle(r)),
+    Column("S/N Total",       (c, r) => spcPeakSNFinal(r))
+  )
   val results = Seq(
     Column("Messages",        (c, r) => messages(r))
   )
+
 }

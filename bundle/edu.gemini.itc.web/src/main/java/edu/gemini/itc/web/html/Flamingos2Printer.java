@@ -4,9 +4,10 @@ import edu.gemini.itc.flamingos2.Flamingos2;
 import edu.gemini.itc.flamingos2.Flamingos2Recipe;
 import edu.gemini.itc.shared.*;
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2.FPUnit;
+import scala.Tuple2;
 
 import java.io.PrintWriter;
-import java.util.Calendar;
+import java.util.UUID;
 
 /**
  * Helper class for printing F2 calculation results to an output stream.
@@ -32,13 +33,14 @@ public final class Flamingos2Printer extends PrinterBase {
             final ImagingResult result = recipe.calculateImaging();
             writeImagingOutput(result);
         } else {
-            final SpectroscopyResult result = recipe.calculateSpectroscopy();
-            writeSpectroscopyOutput(result);
-            validatePlottingDetails(pdp, result.instrument());
+            final Tuple2<ItcSpectroscopyResult, SpectroscopyResult> r = recipe.calculateSpectroscopy();
+            final UUID id = cache(r._1());
+            writeSpectroscopyOutput(id, r._2());
+            validatePlottingDetails(pdp, r._2().instrument());
         }
     }
 
-    private void writeSpectroscopyOutput(final SpectroscopyResult result) {
+    private void writeSpectroscopyOutput(final UUID id, final SpectroscopyResult result) {
 
         // we know this is Flamingos
         final Flamingos2 instrument = (Flamingos2) result.instrument();
@@ -81,37 +83,19 @@ public final class Flamingos2Printer extends PrinterBase {
 
         _print("<HR align=left SIZE=3>");
 
-        final ITCChart chart1 = new ITCChart(
-                "Signal and SQRT(Background) in software aperture of " + result.specS2N()[0].getSpecNpix() + " pixels",
-                "Wavelength (nm)", "e- per exposure per spectral pixel", pdp);
-        final ITCChart chart2 = new ITCChart(
-                "Intermediate Single Exp and Final S/N",
-                "Wavelength (nm)", "Signal / Noise per spectral pixel", pdp);
-
         _println("<p style=\"page-break-inside: never\">");
-        chart1.addArray(result.specS2N()[0].getSignalSpectrum().getData(), "Signal ");
-        chart1.addArray(result.specS2N()[0].getBackgroundSpectrum().getData(), "SQRT(Background)  ");
 
-        _println(chart1.getBufferedImage(), "SigAndBack");
+        _printImageLink(id, SignalChart.instance(), pdp);
         _println("");
 
-        final String sigSpec = _printSpecTag("ASCII signal spectrum");
-        final String backSpec = _printSpecTag("ASCII background spectrum");
+        _printFileLink(id, SignalData.instance());
+        _printFileLink(id, BackgroundData.instance());
 
-        chart2.addArray(result.specS2N()[0].getExpS2NSpectrum().getData(), "Single Exp S/N");
-        chart2.addArray(result.specS2N()[0].getFinalS2NSpectrum().getData(), "Final S/N  ");
-
-        _println(chart2.getBufferedImage(), "Sig2N");
+        _printImageLink(id, S2NChart.instance(), pdp);
         _println("");
 
-        final String singleS2N = _printSpecTag("Single Exposure S/N ASCII data");
-        final String finalS2N = _printSpecTag("Final S/N ASCII data");
-
-        final String header = "# Flamingos-2 ITC: " + Calendar.getInstance().getTime() + "\n";
-        _println(result.specS2N()[0].getSignalSpectrum(), header, sigSpec);
-        _println(result.specS2N()[0].getBackgroundSpectrum(), header, backSpec);
-        _println(result.specS2N()[0].getExpS2NSpectrum(), header, singleS2N);
-        _println(result.specS2N()[0].getFinalS2NSpectrum(), header, finalS2N);
+        _printFileLink(id, SingleS2NData.instance());
+        _printFileLink(id, FinalS2NData.instance());
 
         printConfiguration((Flamingos2) result.instrument(), result.parameters());
 

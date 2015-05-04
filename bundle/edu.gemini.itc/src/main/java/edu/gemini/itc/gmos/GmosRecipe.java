@@ -2,7 +2,10 @@ package edu.gemini.itc.gmos;
 
 import edu.gemini.itc.operation.*;
 import edu.gemini.itc.shared.*;
+import scala.Tuple2;
+import scala.collection.JavaConversions;
 
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -50,9 +53,54 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
         Validation.checkSourceFraction(_obsDetailParameters.getNumExposures(), _obsDetailParameters.getSourceFraction());
     }
 
-    public SpectroscopyResult[] calculateSpectroscopy() {
-        return calculateSpectroscopy(createGmos());
+    public Tuple2<ItcSpectroscopyResult, SpectroscopyResult[]> calculateSpectroscopy() {
+        final SpectroscopyResult[] r = calculateSpectroscopy(createGmos());
+        final List<SpcChartData> dataSets = new ArrayList<SpcChartData>() {{
+            add(createGmosChart(r, 0));
+            add(createGmosChart(r, 1));
+        }};
+        final List<SpcDataFile> dataFiles = new ArrayList<SpcDataFile>() {{
+            add(new SpcDataFile(SignalData.instance(),     toFile(r, "Sig")));
+            add(new SpcDataFile(BackgroundData.instance(), toFile(r, "Bac")));
+            add(new SpcDataFile(SingleS2NData.instance(),  toFile(r, "Sin")));
+            add(new SpcDataFile(FinalS2NData.instance(),   toFile(r, "Fin")));
+        }};
+        return new Tuple2<>(new ItcSpectroscopyResult(_sdParameters, JavaConversions.asScalaBuffer(dataSets).toList(), JavaConversions.asScalaBuffer(dataFiles).toList()), r);
     }
+
+    protected static String toFile(final SpectroscopyResult[] results, final String filename) {
+        final Gmos mainInstrument = (Gmos) results[0].instrument();
+        final DetectorsTransmissionVisitor tv = mainInstrument.getDetectorTransmision();
+        final Gmos[] ccdArray = mainInstrument.getDetectorCcdInstruments();
+
+        final StringBuilder sb = new StringBuilder();
+
+        for (final Gmos instrument : ccdArray) {
+
+            final int ccdIndex = instrument.getDetectorCcdIndex();
+            final int first = tv.getDetectorCcdStartIndex(ccdIndex);
+            final int last = tv.getDetectorCcdEndIndex(ccdIndex, ccdArray.length);
+            // REL-478: include the gaps in the text data output
+            final int lastWithGap = (ccdIndex < 2 && ccdArray.length > 1)
+                    ? tv.getDetectorCcdStartIndex(ccdIndex + 1)
+                    : last;
+
+            final SpectroscopyResult result = results[ccdIndex];
+            final VisitableSampledSpectrum sed;
+            switch (filename) {
+                // TODO: why are we using the last specS2N element only? this seems fishy..?
+                case "Sig": sed = result.specS2N()[result.specS2N().length - 1].getSignalSpectrum(); break;
+                case "Bac": sed = result.specS2N()[result.specS2N().length - 1].getBackgroundSpectrum(); break;
+                case "Sin": sed = result.specS2N()[result.specS2N().length - 1].getExpS2NSpectrum(); break;
+                case "Fin": sed = result.specS2N()[result.specS2N().length - 1].getFinalS2NSpectrum(); break;
+                default:
+                    throw new Error();
+            }
+            sb.append(sed.printSpecAsString(first, lastWithGap));
+        }
+        return sb.toString();
+    }
+
 
     public ImagingResult[] calculateImaging() {
         return calculateImaging(createGmos());
@@ -237,7 +285,7 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
         }
 
         final Parameters p = new Parameters(_sdParameters, _obsDetailParameters, _obsConditionParameters, _telescope);
-        return SpectroscopyResult.apply(p, instrument, SFcalc, IQcalc, specS2N, st);
+        return SpectroscopyResult$.MODULE$.apply(p, instrument, SFcalc, IQcalc, specS2N, st);
 
     }
 
@@ -284,5 +332,69 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
         return ImagingResult.apply(p, instrument, IQcalc, SFcalc, peak_pixel_count, IS2Ncalc);
 
     }
+
+    // == GMOS CHARTS
+
+    private static SpcChartData createGmosChart(final SpectroscopyResult[] results, final int index) {
+        final Gmos mainInstrument = (Gmos) results[0].instrument(); // TODO: make sure this is indeed GMOS!
+        final DetectorsTransmissionVisitor tv = mainInstrument.getDetectorTransmision();
+        final Gmos[] ccdArray = mainInstrument.getDetectorCcdInstruments();
+
+        final boolean ifuAndNotUniform = mainInstrument.isIfuUsed() && !(results[0].source().isUniform());
+        final double ifu_offset = ifuAndNotUniform ? mainInstrument.getIFU().getApertureOffsetList().iterator().next() : 0.0;
+        final SpcChartType type;
+        final String title;
+        final String yAxis;
+        switch (index) {
+            case 0:
+                type = SignalChart.instance();
+                title = ifuAndNotUniform ? "Signal and Background (IFU element offset: " + String.format("%.2f", ifu_offset) + " arcsec)" : "Signal and Background ";
+                yAxis = "e- per exposure per spectral pixel";
+                break;
+
+            case 1:
+                type = S2NChart.instance();
+                title = ifuAndNotUniform ? "Intermediate Single Exp and Final S/N (IFU element offset: " + String.format("%.2f", ifu_offset) + " arcsec)" : "Intermediate Single Exp and Final S/N";
+                yAxis = "Signal / Noise per spectral pixel";
+                break;
+
+            default:
+                throw new Error();
+        }
+
+        final List<SpcSeriesData> data = new ArrayList<>();
+
+        for (final Gmos instrument : ccdArray) {
+
+            final int ccdIndex = instrument.getDetectorCcdIndex();
+            final String ccdName = instrument.getDetectorCcdName();
+            final Color ccdColor = instrument.getDetectorCcdColor();
+            final Color ccdColorDarker = ccdColor == null ? null : ccdColor.darker().darker();
+            final int first = tv.getDetectorCcdStartIndex(ccdIndex);
+            final int last = tv.getDetectorCcdEndIndex(ccdIndex, ccdArray.length);
+
+            final SpectroscopyResult result = results[ccdIndex];
+            for (int i = 0; i < result.specS2N().length; i++) {
+                switch (index) {
+                    case 0:
+                        data.add(new SpcSeriesData(SignalData.instance(),    "Signal "            + ccdName + " " + i, ccdColor,       result.specS2N()[i].getSignalSpectrum().getData(first, last)));
+                        data.add(new SpcSeriesData(BackgroundData.instance(), "SQRT(Background) " + ccdName + " " + i, ccdColorDarker, result.specS2N()[i].getBackgroundSpectrum().getData(first, last)));
+                        break;
+
+                    case 1:
+                        data.add(new SpcSeriesData(SingleS2NData.instance(), "Single Exp S/N "    + ccdName + " " + i, ccdColor,       result.specS2N()[i].getExpS2NSpectrum().getData(first, last)));
+                        data.add(new SpcSeriesData(FinalS2NData.instance(),  "Final S/N "         + ccdName + " " + i, ccdColorDarker, result.specS2N()[i].getFinalS2NSpectrum().getData(first, last)));
+                        break;
+
+                    default:
+                        throw new Error();
+                }
+            }
+        }
+
+        return new SpcChartData(type, title, "Wavelength (nm)", yAxis, JavaConversions.asScalaBuffer(data));
+    }
+
+
 
 }

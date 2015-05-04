@@ -131,7 +131,7 @@ public final class HtmlPrinter {
         sb.append("Output:\n<LI>Spectra ");
         switch (pdp.getPlotLimits()) {
             case AUTO: sb.append("autoscaled."); break;
-            default:   sb.append("plotted over range " + pdp.getPlotWaveL() + " - " + pdp.getPlotWaveU());
+            default:   sb.append("plotted over range " + pdp.getPlotWaveL()*1000 + " - " + pdp.getPlotWaveU()*1000);
         }
         sb.append("\n");
         return sb.toString();

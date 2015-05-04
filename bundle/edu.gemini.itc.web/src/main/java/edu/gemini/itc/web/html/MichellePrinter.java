@@ -4,10 +4,12 @@ import edu.gemini.itc.michelle.Michelle;
 import edu.gemini.itc.michelle.MichelleParameters;
 import edu.gemini.itc.michelle.MichelleRecipe;
 import edu.gemini.itc.shared.*;
+import edu.gemini.itc.web.servlets.ImageServlet;
 import edu.gemini.spModel.gemini.michelle.MichelleParams;
+import scala.Tuple2;
 
 import java.io.PrintWriter;
-import java.util.Calendar;
+import java.util.UUID;
 
 /**
  * Helper class for printing Michelle calculation results to an output stream.
@@ -31,12 +33,13 @@ public final class MichellePrinter extends PrinterBase {
             final ImagingResult result = recipe.calculateImaging();
             writeImagingOutput(result);
         } else {
-            final SpectroscopyResult result = recipe.calculateSpectroscopy();
-            writeSpectroscopyOutput(result);
+            final Tuple2<ItcSpectroscopyResult, SpectroscopyResult> r = recipe.calculateSpectroscopy();
+            final UUID id = cache(r._1());
+            writeSpectroscopyOutput(id, r._2());
         }
     }
 
-    private void writeSpectroscopyOutput(final SpectroscopyResult result) {
+    private void writeSpectroscopyOutput(final UUID id, final SpectroscopyResult result) {
 
         final Michelle instrument = (Michelle) result.instrument();
 
@@ -96,23 +99,17 @@ public final class MichellePrinter extends PrinterBase {
 
         _println("<p style=\"page-break-inside: never\">");
 
-        final ITCChart chart1 = new ITCChart("Signal and Background ", "Wavelength (nm)", "e- per exposure per spectral pixel", pdp);
-        chart1.addArray(result.specS2N()[0].getSignalSpectrum().getData(), "Signal ");
-        chart1.addArray(result.specS2N()[0].getBackgroundSpectrum().getData(), "SQRT(Background)  ");
-        _println(chart1.getBufferedImage(), "SigAndBack");
+        _printImageLink(id, SignalChart.instance(), pdp);
         _println("");
 
-        final String sigSpec = _printSpecTag("ASCII signal spectrum");
-        final String backSpec = _printSpecTag("ASCII background spectrum");
+        _printFileLink(id,  SignalData.instance());
+        _printFileLink(id,  BackgroundData.instance());
 
-        final ITCChart chart2 = new ITCChart("Intermediate Single Exp and Final S/N", "Wavelength (nm)", "Signal / Noise per spectral pixel", pdp);
-        chart2.addArray(result.specS2N()[0].getExpS2NSpectrum().getData(), "Single Exp S/N");
-        chart2.addArray(result.specS2N()[0].getFinalS2NSpectrum().getData(), "Final S/N  ");
-        _println(chart2.getBufferedImage(), "Sig2N");
+        _printImageLink(id, S2NChart.instance(), pdp);
         _println("");
 
-        final String singleS2N = _printSpecTag("Single Exposure S/N ASCII data");
-        final String finalS2N = _printSpecTag("Final S/N ASCII data");
+        _printFileLink(id,  SingleS2NData.instance());
+        _printFileLink(id,  FinalS2NData.instance());
 
         _println("");
         device.setPrecision(2);  // TWO decimal places
@@ -127,12 +124,6 @@ public final class MichellePrinter extends PrinterBase {
         _println(HtmlPrinter.printParameterSummary(result.conditions()));
         _println(HtmlPrinter.printParameterSummary(result.observation()));
         _println(HtmlPrinter.printParameterSummary(pdp));
-
-        final String header = "# Michelle ITC: " + Calendar.getInstance().getTime() + "\n";
-        _println(result.specS2N()[0].getSignalSpectrum(), header, sigSpec);
-        _println(result.specS2N()[0].getBackgroundSpectrum(), header, backSpec);
-        _println(result.specS2N()[0].getExpS2NSpectrum(), header, singleS2N);
-        _println(result.specS2N()[0].getFinalS2NSpectrum(), header, finalS2N);
 
     }
 
@@ -235,6 +226,5 @@ public final class MichellePrinter extends PrinterBase {
             s += "Pixel Size in Spectral Direction: " + instrument.getGratingDispersion_nmppix() + "nm\n";
         return s;
     }
-
 
 }

@@ -5,6 +5,11 @@ import edu.gemini.itc.operation.*;
 import edu.gemini.itc.shared.*;
 import edu.gemini.spModel.core.Site;
 import scala.Option;
+import scala.Tuple2;
+import scala.collection.JavaConversions;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * This class performs the calculations for Niri used for imaging.
@@ -67,9 +72,20 @@ public final class NiriRecipe implements ImagingRecipe, SpectroscopyRecipe {
         return calculateImaging(instrument);
     }
 
-    public SpectroscopyResult calculateSpectroscopy() {
+    public Tuple2<ItcSpectroscopyResult, SpectroscopyResult> calculateSpectroscopy() {
         final Niri instrument = new Niri(_niriParameters, _obsDetailParameters);
-        return calculateSpectroscopy(instrument);
+        final SpectroscopyResult r = calculateSpectroscopy(instrument);
+        final List<SpcChartData> dataSets = new ArrayList<SpcChartData>() {{
+            add(Recipe$.MODULE$.createSignalChart(r, 0));
+            add(Recipe$.MODULE$.createS2NChart(r, 0));
+        }};
+        final List<SpcDataFile> dataFiles = new ArrayList<SpcDataFile>() {{
+            add(new SpcDataFile(SignalData.instance(),     r.specS2N()[0].getSignalSpectrum().printSpecAsString()));
+            add(new SpcDataFile(BackgroundData.instance(), r.specS2N()[0].getBackgroundSpectrum().printSpecAsString()));
+            add(new SpcDataFile(SingleS2NData.instance(),  r.specS2N()[0].getExpS2NSpectrum().printSpecAsString()));
+            add(new SpcDataFile(FinalS2NData.instance(),   r.specS2N()[0].getFinalS2NSpectrum().printSpecAsString()));
+        }};
+        return new Tuple2<>(new ItcSpectroscopyResult(_sdParameters, JavaConversions.asScalaBuffer(dataSets).toList(), JavaConversions.asScalaBuffer(dataFiles).toList()), r);
     }
 
     private SpectroscopyResult calculateSpectroscopy(final Niri instrument) {
@@ -186,7 +202,7 @@ public final class NiriRecipe implements ImagingRecipe, SpectroscopyRecipe {
         final Parameters p = new Parameters(_sdParameters, _obsDetailParameters, _obsConditionParameters, _telescope);
         final SpecS2N[] specS2Narr = new SpecS2N[1];
         specS2Narr[0] = specS2N;
-        return new SpectroscopyResult(p, instrument, SFcalc, IQcalc, specS2Narr, st, altair);
+        return new GenericSpectroscopyResult(p, instrument, SFcalc, IQcalc, specS2Narr, st, altair);
     }
 
     private ImagingResult calculateImaging(final Niri instrument) {

@@ -1,6 +1,6 @@
 package edu.gemini.itc.web.baseline
 
-import java.io.{ByteArrayOutputStream, File, PrintWriter}
+import java.io.{ByteArrayOutputStream, PrintWriter}
 
 import edu.gemini.itc.baseline.util.Fixture
 import edu.gemini.itc.gnirs.GnirsParameters
@@ -9,6 +9,7 @@ import edu.gemini.itc.nifs.NifsParameters
 import edu.gemini.itc.shared._
 import edu.gemini.itc.trecs.TRecsParameters
 import edu.gemini.itc.web.html._
+import edu.gemini.itc.web.servlets.ImageServlet
 
 import scala.io.Source
 
@@ -17,23 +18,27 @@ import scala.io.Source
  * @param string
  */
 case class Output(string: String) {
-  private val DatFiles = """SessionID\d*\.dat""".r
-  val hash: Long = 37L*fixString(string).hashCode() + hashAllFiles(string)
-  private def fixString(s: String) = s.replaceAll("SessionID\\d*", "SessionIDXXX")
+  // dig out all links to data files (file type, index and session id)
+  private val DatFiles = """type=txt&filename=([a-zA-Z0-9]*)&index=([0-9]*)&id=([a-z0-9\-]*)""".r
 
-  def hashAllFiles(s: String): Long =
+  val hash: Long = 37L*fixString(string).hashCode() + hashAllDatFiles(string)
+
+  // replace URLs which change every time beause of UUIDs that are used as sesssion IDs
+  private def fixString(s: String) = s.
+    replaceAll("""type=txt&filename=[^"]*""", "").
+    replaceAll("""type=img&filename=[^"]*""", "")
+
+  def hashAllDatFiles(s: String): Long =
     DatFiles.
-      findAllIn(s).
-      map(hashDatFile).
-      foldLeft(17L)((acc, s) => 37L*acc + s.hashCode.toLong)
+      findAllMatchIn(s).
+      map(m => hashDatFile(m.group(3), m.group(2), m.group(1))).
+      foldLeft(17L)((acc, s) => 37L*acc + s.hashCode)
 
-  def hashDatFile(f: String): Int = {
-    val path = ITCImageFileIO.getImagePath
-    val file = io.Source.fromFile(path + File.separator + f)
-    // first line is a comment with timestamp, don't take into account for hash!
-    // for testing it is safe to assume there is at least one line (header)
-    file.getLines().drop(1).foldLeft(17)((acc, s) => 37*acc + s.hashCode)
+  def hashDatFile(id: String, index: String, filename: String): Int = {
+    val file = ImageServlet.toFile(id, filename, index.toInt)
+    file.split('\n').drop(1).foldLeft(17)((acc, s) => 37*acc + s.hashCode)
   }
+
 }
 
 /**

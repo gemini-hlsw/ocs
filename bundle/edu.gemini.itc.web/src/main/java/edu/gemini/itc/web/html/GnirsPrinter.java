@@ -4,23 +4,16 @@ import edu.gemini.itc.gnirs.Gnirs;
 import edu.gemini.itc.gnirs.GnirsParameters;
 import edu.gemini.itc.gnirs.GnirsRecipe;
 import edu.gemini.itc.shared.*;
-import org.jfree.chart.ChartColor;
+import edu.gemini.itc.web.servlets.ImageServlet;
+import scala.Tuple2;
 
-import java.awt.*;
 import java.io.PrintWriter;
-import java.util.Calendar;
+import java.util.UUID;
 
 /**
  * Helper class for printing GNIRS calculation results to an output stream.
  */
 public final class GnirsPrinter extends PrinterBase {
-
-    private static final Color[] ORDER_COLORS =
-            new Color[] {ChartColor.DARK_RED,           ChartColor.DARK_BLUE,       ChartColor.DARK_GREEN,
-                         ChartColor.DARK_MAGENTA,       ChartColor.black,           ChartColor.DARK_CYAN};
-    private static final Color[] ORDER_BG_COLORS =
-            new Color[] {ChartColor.VERY_LIGHT_RED,     ChartColor.VERY_LIGHT_BLUE, ChartColor.VERY_LIGHT_GREEN,
-                         ChartColor.VERY_LIGHT_MAGENTA, ChartColor.lightGray,       ChartColor.VERY_LIGHT_CYAN};
 
     private final PlottingDetails pdp;
     private final GnirsRecipe recipe;
@@ -32,12 +25,12 @@ public final class GnirsPrinter extends PrinterBase {
     }
 
     public void writeOutput() {
-        final GnirsSpectroscopyResult result = recipe.calculateSpectroscopy();
-        writeSpectroscopyOutput(result);
-        validatePlottingDetails(pdp, result.instrument());
+        final Tuple2<ItcSpectroscopyResult, SpectroscopyResult> r = recipe.calculateSpectroscopy();
+        final UUID id = cache(r._1());
+        writeSpectroscopyOutput(id, (GnirsSpectroscopyResult) r._2());
     }
 
-    private void writeSpectroscopyOutput(final GnirsSpectroscopyResult result) {
+    private void writeSpectroscopyOutput(final UUID id, final GnirsSpectroscopyResult result) {
         _println("");
 
         final Gnirs instrument = (Gnirs) result.instrument();
@@ -88,49 +81,30 @@ public final class GnirsPrinter extends PrinterBase {
 
         _println("<p style=\"page-break-inside: never\">");
 
-        final String sigSpec, singleS2N, backSpec, finalS2N;
         if (instrument.XDisp_IsUsed()) {
 
-            final ITCChart chart1 = new ITCChart("Signal and Background in software aperture of " + result.specS2N()[0].getSpecNpix() + " pixels", "Wavelength (nm)", "e- per exposure per spectral pixel", pdp);
-            for (int i = 0; i < GnirsRecipe.ORDERS; i++) {
-                chart1.addArray(result.signalOrder()[i].getData(), "Signal Order "+(i+3), ORDER_COLORS[i]);
-                chart1.addArray(result.backGroundOrder()[i].getData(), "SQRT(Background) Order "+(i+3), ORDER_BG_COLORS[i]);
-            }
-            _println(chart1.getBufferedImage(), "SigAndBack");
+            _printImageLink(id, SignalChart.instance(), pdp);
             _println("");
 
-            sigSpec = _printSpecTag("ASCII signal spectrum");
-            backSpec = _printSpecTag("ASCII background spectrum");
-
-            final ITCChart chart2 = new ITCChart("Final S/N", "Wavelength (nm)", "Signal / Noise per spectral pixel", pdp);
-            for (int i = 0; i < GnirsRecipe.ORDERS; i++) {
-                chart2.addArray(result.finalS2NOrder()[i].getData(), "Final S/N Order "+(i+3), ORDER_COLORS[i]);
-            }
-            _println(chart2.getBufferedImage(), "Sig2N");
+            _printFileLink(id,  SignalData.instance());
+            _printFileLink(id,  BackgroundData.instance());
+            _printImageLink(id, S2NChart.instance(), pdp);
             _println("");
 
-            singleS2N = "";
-            finalS2N = _printSpecTag("Final S/N ASCII data");
+            _printFileLink(id,  FinalS2NData.instance());
 
         } else {
 
-            final ITCChart chart1 = new ITCChart("Signal and Background in software aperture of " + result.specS2N()[0].getSpecNpix() + " pixels", "Wavelength (nm)", "e- per exposure per spectral pixel", pdp);
-            chart1.addArray(result.specS2N()[0].getSignalSpectrum().getData(), "Signal ");
-            chart1.addArray(result.specS2N()[0].getBackgroundSpectrum().getData(), "SQRT(Background)  ");
-            _println(chart1.getBufferedImage(), "SigAndBack");
+            _printImageLink(id, SignalChart.instance(), pdp);
             _println("");
 
-            sigSpec = _printSpecTag("ASCII signal spectrum");
-            backSpec = _printSpecTag("ASCII background spectrum");
-
-            final ITCChart chart2 = new ITCChart("Intermediate Single Exp and Final S/N", "Wavelength (nm)", "Signal / Noise per spectral pixel", pdp);
-            chart2.addArray(result.specS2N()[0].getExpS2NSpectrum().getData(), "Single Exp S/N");
-            chart2.addArray(result.specS2N()[0].getFinalS2NSpectrum().getData(), "Final S/N  ");
-            _println(chart2.getBufferedImage(), "Sig2N");
+            _printFileLink(id,  SignalData.instance());
+            _printFileLink(id,  BackgroundData.instance());
+            _printImageLink(id, S2NChart.instance(), pdp);
             _println("");
 
-            singleS2N = _printSpecTag("Single Exposure S/N ASCII data");
-            finalS2N = _printSpecTag("Final S/N ASCII data");
+            _printFileLink(id,  SingleS2NData.instance());
+            _printFileLink(id,  FinalS2NData.instance());
         }
 
         _println("");
@@ -148,23 +122,6 @@ public final class GnirsPrinter extends PrinterBase {
         _println(HtmlPrinter.printParameterSummary(result.observation()));
         _println(HtmlPrinter.printParameterSummary(pdp));
 
-        final String header = "# GNIRS ITC: " + Calendar.getInstance().getTime() + "\n";
-        if (instrument.XDisp_IsUsed()) {
-            for (int i = 0; i < GnirsRecipe.ORDERS; i++) {
-                _println(result.signalOrder()[i], header, sigSpec);
-            }
-            for (int i = 0; i < GnirsRecipe.ORDERS; i++) {
-                _println(result.backGroundOrder()[i], header, backSpec);
-            }
-            for (int i = 0; i < GnirsRecipe.ORDERS; i++) {
-                _println(result.finalS2NOrder()[i], header, finalS2N);
-            }
-        } else {
-            _println(result.specS2N()[0].getSignalSpectrum(), header, sigSpec);
-            _println(result.specS2N()[0].getBackgroundSpectrum(), header, backSpec);
-            _println(result.specS2N()[0].getExpS2NSpectrum(), header, singleS2N);
-            _println(result.specS2N()[0].getFinalS2NSpectrum(), header, finalS2N);
-        }
     }
 
     private String gnirsToString(final Gnirs instrument, final Parameters p) {

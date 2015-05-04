@@ -1,13 +1,12 @@
 package edu.gemini.itc.web.html;
 
 import edu.gemini.itc.shared.*;
+import edu.gemini.itc.web.servlets.ImageServlet;
 
-import java.awt.image.BufferedImage;
 import java.io.PrintWriter;
+import java.util.UUID;
 
 public abstract class PrinterBase {
-
-    public abstract void writeOutput();
 
     private final PrintWriter _out;
 
@@ -15,10 +14,16 @@ public abstract class PrinterBase {
         _out = pr;
     }
 
+    public abstract void writeOutput();
+
+    protected UUID cache(final ItcSpectroscopyResult result) {
+        return ImageServlet.cache(result);
+    }
+
     /* TODO: this needs to be validated for spectroscopy for all instruments, find a better place to do this */
     protected void validatePlottingDetails(final PlottingDetails pdp, final Instrument instrument) {
         if (pdp != null && pdp.getPlotLimits().equals(PlottingDetails.PlotLimits.USER)) {
-            if (pdp.getPlotWaveL() > instrument.getObservingEnd() || pdp.getPlotWaveU() < instrument.getObservingStart()) {
+            if (pdp.getPlotWaveL() * 1000 > instrument.getObservingEnd() || pdp.getPlotWaveU() * 1000 < instrument.getObservingStart()) {
                 throw new IllegalArgumentException("User limits for plotting do not overlap with filter.");
             }
         }
@@ -36,20 +41,6 @@ public abstract class PrinterBase {
         }
     }
 
-    protected void _println(final BufferedImage image, final String imageName) {
-        try {
-            final String fileName = ITCImageFileIO.saveCharttoDisk(image);
-            _print("<IMG alt=\"" + fileName
-                    + "\" height=500 src=\"" + ServerInfo.getServerURL()
-                    + "itc/servlet/images?type=img&filename="
-                    + fileName + "\" width=675 border=0>");
-        } catch (Exception ex) {
-            System.out.println("Unable to save file");
-            _print("<br>Failed to save image " + imageName + "<br>");
-            ex.printStackTrace();
-        }
-    }
-
     protected void _println(final String s) {
         _print(s);
         if (_out == null)
@@ -63,47 +54,58 @@ public abstract class PrinterBase {
         _println("<span style=\"color:red; font-style:italic;\">" + s + "</span>");
     }
 
-    protected String _printSpecTag(final String spectrumName) {
-        String Filename = "";
-
-        try {
-            Filename = ITCImageFileIO.getRandomFileName(".dat");
-
-            _println("<a href ="
-                    +
-                    "\"" + ServerInfo.getServerURL()
-                    + "itc/servlet/images?type=txt&filename=" + Filename
-                    + "\"> Click here for " + spectrumName + ". </a>");
-        } catch (Exception ex) {
-            System.out.println("Unable to get random file");
-            ex.printStackTrace();
-        }
-        return Filename;
+    protected void _printFileLink(final UUID id, final SpcDataType type) {
+        _printFileLink(id, type, 0);
     }
 
-    protected void _println(final VisitableSampledSpectrum sed, final String header, final String spectrumName) {
-        // this will print out the VisitableSampled Spectrum as a text file to
-        // be taken by the user
-
-        try {
-            ITCImageFileIO.saveSedtoDisk(header, sed, spectrumName);
-        } catch (Exception ex) {
-            System.out.println("Unable to save file");
-            ex.printStackTrace();
-        }
+    protected void _printFileLink(final UUID id, final SpcDataType type, final int index) {
+        _println("<a href =" +
+                "\"" + ServerInfo.getServerURL() +
+                "itc/servlet/images" +
+                "?" + ImageServlet.ParamType + "=" + ImageServlet.TypeTxt +
+                "&" + ImageServlet.ParamName + "=" + type.toString() +
+                "&" + ImageServlet.ParamIndex + "=" + index +
+                "&" + ImageServlet.ParamId + "=" + id +
+                "\"> Click here for " + toFileLabel(type) + ". </a>");
     }
 
-    protected void _println(final VisitableSampledSpectrum sed, final String header, final String spectrumName, final int firstIndex, final int lastIndex) {
-        // this will print out the VisitableSampled Spectrum as a text file to
-        // be taken by the user
+    // Adds an HTML image link
+    protected void _printImageLink(final UUID id, final SpcChartType type, final PlottingDetails pd) {
+        _printImageLink(id, type, 0, pd);
+    }
 
-        try {
-            ITCImageFileIO.saveSedtoDisk(header, sed, spectrumName, firstIndex, lastIndex);
-        } catch (Exception ex) {
-            System.out.println("Unable to save file");
-            ex.printStackTrace();
+    protected void _printImageLink(final UUID id, final SpcChartType type, final int index, final PlottingDetails pd) {
+        _print("<IMG alt=\"" + toImgAlt(type, index) + "\" height=500 src=\"" + ServerInfo.getServerURL() +
+                "itc/servlet/images" +
+                "?" + ImageServlet.ParamType + "=" + ImageServlet.TypeImg +
+                "&" + ImageServlet.ParamName + "=" + type.toString() +
+                "&" + ImageServlet.ParamIndex + "=" + index +
+                "&" + ImageServlet.ParamId + "=" + id +
+                toPlotLimits(pd) +
+                "\" width=675 border=0>");
+    }
+
+    private String toPlotLimits(final PlottingDetails pd) {
+        if (pd.getPlotLimits() == PlottingDetails.PlotLimits.AUTO) {
+            return "";
+        } else {
+            return "&" + ImageServlet.ParamLoLimit + "=" + pd.getPlotWaveL() +
+                   "&" + ImageServlet.ParamHiLimit + "=" + pd.getPlotWaveU();
         }
     }
 
+    private String toImgAlt(final SpcChartType type, final int index) {
+        if      (type == SignalChart.instance())    return "Signal/Background Chart " + index;
+        else if (type == S2NChart.instance())       return "Signal to Noise Chart " + index;
+        else    throw new Error();
+    }
+
+    private String toFileLabel(final SpcDataType type) {
+        if      (type == SignalData.instance())     return "ASCII signal spectrum";
+        else if (type == BackgroundData.instance()) return "ASCII background spectrum";
+        else if (type == SingleS2NData.instance())  return "Single Exposure S/N ASCII data";
+        else if (type == FinalS2NData.instance())   return "Final S/N ASCII data";
+        else    throw new Error();
+    }
 
 }
