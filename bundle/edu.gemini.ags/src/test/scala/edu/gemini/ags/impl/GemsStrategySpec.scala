@@ -89,7 +89,7 @@ class GemsStrategySpec extends Specification with NoTimeConversions {
       val ctx = ObsContext.create(env, inst, new JSome(Site.GS), conditions, null, new Gems)
       val tipTiltMode = GemsTipTiltMode.canopus
 
-      val posAngles = Set(GemsUtils4Java.toNewAngle(ctx.getPositionAngle), Angle.zero)
+      val posAngles = Set(GemsUtils4Java.toNewAngle(ctx.getPositionAngle), Angle.zero, Angle.fromDegrees(90), Angle.fromDegrees(180), Angle.fromDegrees(270))
 
       testSearch("/gems_sn1987A.xml", ctx, tipTiltMode, posAngles, 5, 9)
 
@@ -138,7 +138,7 @@ class GemsStrategySpec extends Specification with NoTimeConversions {
       val ctx = ObsContext.create(env, inst, new JSome(Site.GS), conditions, null, new Gems)
       val tipTiltMode = GemsTipTiltMode.canopus
 
-      val posAngles = Set(GemsUtils4Java.toNewAngle(ctx.getPositionAngle), Angle.zero)
+      val posAngles = Set(GemsUtils4Java.toNewAngle(ctx.getPositionAngle), Angle.zero, Angle.fromDegrees(90), Angle.fromDegrees(180), Angle.fromDegrees(270))
 
       testSearch("/gems_TYC_8345_1155_1.xml", ctx, tipTiltMode, posAngles, 29, 29)
 
@@ -186,12 +186,12 @@ class GemsStrategySpec extends Specification with NoTimeConversions {
       val ctx = ObsContext.create(env, inst, new JSome(Site.GS), conditions, null, new Gems)
       val tipTiltMode = GemsTipTiltMode.canopus
 
-      val posAngles = Set(GemsUtils4Java.toNewAngle(ctx.getPositionAngle), Angle.zero)
+      val posAngles = Set(GemsUtils4Java.toNewAngle(ctx.getPositionAngle), Angle.zero, Angle.fromDegrees(90), Angle.fromDegrees(180), Angle.fromDegrees(270))
 
       testSearch("/gems_m6.xml", ctx, tipTiltMode, posAngles, 7, 7)
 
       val selection = Await.result(TestGemsStrategy("/gems_m6.xml").select(ctx, ProbeLimitsTable.loadOrThrow()), 2.minutes)
-      selection.map(_.posAngle) should beSome(Angle.zero)
+      selection.map(_.posAngle) should beSome(Angle.fromDegrees(90))
       val assignments = ~selection.map(_.assignments)
       assignments should be size 4
       assignments.foreach(println)
@@ -202,8 +202,8 @@ class GemsStrategySpec extends Specification with NoTimeConversions {
       val cwfs2 = assignments.find(_.guideProbe == Canopus.Wfs.cwfs2).map(_.guideStar)
       assignments.exists(_.guideProbe == Canopus.Wfs.cwfs3) should beTrue
       val cwfs3 = assignments.find(_.guideProbe == Canopus.Wfs.cwfs3).map(_.guideStar)
-      assignments.exists(_.guideProbe == GsaoiOdgw.odgw1) should beTrue
-      val odgw1 = assignments.find(_.guideProbe == GsaoiOdgw.odgw1).map(_.guideStar)
+      assignments.exists(_.guideProbe == GsaoiOdgw.odgw2) should beTrue
+      val odgw1 = assignments.find(_.guideProbe == GsaoiOdgw.odgw2).map(_.guideStar)
       cwfs1.map(_.name) should beSome("289-128891")
       cwfs2.map(_.name) should beSome("289-128878")
       cwfs3.map(_.name) should beSome("289-128908")
@@ -215,7 +215,7 @@ class GemsStrategySpec extends Specification with NoTimeConversions {
       cwfs2.map(_.coordinates ~= cwfs2x) should beSome(true)
       val cwfs3x = Coordinates(RightAscension.fromAngle(Angle.fromHMS(17, 40, 21.594).getOrElse(Angle.zero)), Declination.fromAngle(Angle.zero - Angle.fromDMS(32, 15, 50.38).getOrElse(Angle.zero)).getOrElse(Declination.zero))
       cwfs3.map(_.coordinates ~= cwfs3x) should beSome(true)
-      val odgw2x = Coordinates(RightAscension.fromAngle(Angle.fromHMS(17, 40, 16.855).getOrElse(Angle.zero)), Declination.fromAngle(Angle.zero - Angle.fromDMS(32, 15, 58.34).getOrElse(Angle.zero)).getOrElse(Declination.zero))
+      val odgw2x = Coordinates(RightAscension.fromAngle(Angle.fromHMS(17, 40, 19.295).getOrElse(Angle.zero)), Declination.fromAngle(Angle.zero - Angle.fromDMS(32, 14, 58.34).getOrElse(Angle.zero)).getOrElse(Declination.zero))
       odgw1.map(_.coordinates ~= odgw2x) should beSome(true)
 
       // Check magnitudes are sorted correctly
@@ -223,7 +223,7 @@ class GemsStrategySpec extends Specification with NoTimeConversions {
       val mag2 = cwfs2.flatMap(magnitudeExtractor(RLikeBands)).map(_.value)
       val mag3 = cwfs3.flatMap(magnitudeExtractor(RLikeBands)).map(_.value)
       (mag3 < mag1 && mag2 < mag1) should beTrue
-    }.pendingUntilFixed
+    }
   }
 
   def testSearch(file: String, ctx: ObsContext, tipTiltMode: GemsTipTiltMode, posAngles: Set[Angle], expectedTipTiltResultsCount: Int, expectedFlexureResultsCount: Int): Unit = {
