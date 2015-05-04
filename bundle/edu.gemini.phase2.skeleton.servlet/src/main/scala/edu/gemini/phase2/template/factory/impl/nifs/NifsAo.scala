@@ -19,7 +19,7 @@ case class NifsAo(blueprint: SpNifsBlueprintAo, exampleTarget: Option[SPTarget])
   val tb = exampleTarget.flatMap(t => Option(t.getTarget.getMagnitude(Band.K).getOrNull)).map(_.getBrightness).map(TargetBrightness(_))
 
   // These two notes should be included at the top of every NIFS program
-  addNote("Phase II Requirements: General Information", "Phase II  \"BEFORE Submission\" Checklist") in TargetGroup
+  addNote("Phase II Requirements: General Information", "Phase II  \"BEFORE Submission\" Checklist") in TopLevel
 
   // # Select acquisition and science observation
   // IF OCCULTING DISK == None
@@ -43,11 +43,11 @@ case class NifsAo(blueprint: SpNifsBlueprintAo, exampleTarget: Option[SPTarget])
 
   val (acq, sci) = if (!occultingDisk.isOccultingDisk) {
     (tb.collect {
-      case BT  => List(3)
-      case MT  => List(4)
-      case FT  => List(5)
-      case BAT => List(23)
-    }.getOrElse(List(3,4,5,23)),
+      case BT  => List(2)
+      case MT  => List(3)
+      case FT  => List(4)
+      case BAT => List(5)
+    }.getOrElse(List(2, 3, 4, 5)),
       6)
   } else {
     (tb.collect {
@@ -61,7 +61,7 @@ case class NifsAo(blueprint: SpNifsBlueprintAo, exampleTarget: Option[SPTarget])
 
   // ### Target Group
   // INCLUDE {1},{2},ACQ,SCI,{7},{8} in target-specific Scheduling Group
-  include(List(1, 2) ++ acq ++ List(sci, 7, 8): _*) in TargetGroup
+  include(List(0, 1) ++ acq ++ List(sci, 7, 8): _*) in TargetGroup
 
   // # AO Mode
   // # In NGS mode target and standards use the same Altair guide mode.
