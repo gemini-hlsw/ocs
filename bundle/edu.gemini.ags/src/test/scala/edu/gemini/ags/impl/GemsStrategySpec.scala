@@ -93,7 +93,8 @@ class GemsStrategySpec extends Specification with NoTimeConversions {
 
       testSearch("/gems_sn1987A.xml", ctx, tipTiltMode, posAngles, 5, 9)
 
-      val selection = Await.result(TestGemsStrategy("/gems_sn1987A.xml").select(ctx, ProbeLimitsTable.loadOrThrow()), 2.minutes)
+      val gemsStrategy = TestGemsStrategy("/gems_sn1987A.xml")
+      val selection = Await.result(gemsStrategy.select(ctx, ProbeLimitsTable.loadOrThrow()), 2.minutes)
       selection.map(_.posAngle) should beSome(Angle.zero)
       val assignments = ~selection.map(_.assignments)
       assignments should be size 4
@@ -127,6 +128,16 @@ class GemsStrategySpec extends Specification with NoTimeConversions {
       val mag2 = cwfs2.flatMap(magnitudeExtractor(RLikeBands)).map(_.value)
       val mag3 = cwfs3.flatMap(magnitudeExtractor(RLikeBands)).map(_.value)
       (mag3 < mag1 && mag2 < mag1) should beTrue
+
+      // Analyze as a whole
+      val newCtx = selection.map(applySelection(ctx, _)).getOrElse(ctx)
+      val analysis = gemsStrategy.analyze(newCtx, ProbeLimitsTable.loadOrThrow())
+      analysis.collect {
+        case AgsAnalysis.Usable(Canopus.Wfs.cwfs1, st, _, AgsGuideQuality.PossiblyUnusable, _) if st.some == cwfs1    => Canopus.Wfs.cwfs1
+        case AgsAnalysis.Usable(Canopus.Wfs.cwfs2, st, _, AgsGuideQuality.DeliversRequestedIq, _) if st.some == cwfs2 => Canopus.Wfs.cwfs2
+        case AgsAnalysis.Usable(Canopus.Wfs.cwfs3, st, _, AgsGuideQuality.DeliversRequestedIq, _) if st.some == cwfs3 => Canopus.Wfs.cwfs3
+        case AgsAnalysis.Usable(GsaoiOdgw.odgw2, st, _, AgsGuideQuality.DeliversRequestedIq, _) if st.some == odgw2   => GsaoiOdgw.odgw2
+      } should beEqualTo(List(Canopus.Wfs.cwfs1, Canopus.Wfs.cwfs2, Canopus.Wfs.cwfs3, GsaoiOdgw.odgw2))
     }
     "support search/select and analyze on TYC 8345-1155-1" in {
       val ra = Angle.fromHMS(17, 25, 27.529).getOrElse(Angle.zero)
@@ -142,7 +153,8 @@ class GemsStrategySpec extends Specification with NoTimeConversions {
 
       testSearch("/gems_TYC_8345_1155_1.xml", ctx, tipTiltMode, posAngles, 29, 29)
 
-      val selection = Await.result(TestGemsStrategy("/gems_TYC_8345_1155_1.xml").select(ctx, ProbeLimitsTable.loadOrThrow()), 2.minutes)
+      val gemsStrategy = TestGemsStrategy("/gems_TYC_8345_1155_1.xml")
+      val selection = Await.result(gemsStrategy.select(ctx, ProbeLimitsTable.loadOrThrow()), 2.minutes)
       selection.map(_.posAngle) should beSome(Angle.zero)
       val assignments = ~selection.map(_.assignments)
       assignments should be size 4
@@ -175,6 +187,15 @@ class GemsStrategySpec extends Specification with NoTimeConversions {
       val mag3 = cwfs3.flatMap(magnitudeExtractor(RLikeBands)).map(_.value)
       (mag3 < mag1 && mag2 < mag1) should beTrue
 
+      // Analyze as a whole
+      val newCtx = selection.map(applySelection(ctx, _)).getOrElse(ctx)
+      val analysis = gemsStrategy.analyze(newCtx, ProbeLimitsTable.loadOrThrow())
+      analysis.collect {
+        case AgsAnalysis.Usable(Canopus.Wfs.cwfs1, st, _, AgsGuideQuality.DeliversRequestedIq, _) if st.some == cwfs1 => Canopus.Wfs.cwfs1
+        case AgsAnalysis.Usable(Canopus.Wfs.cwfs2, st, _, AgsGuideQuality.DeliversRequestedIq, _) if st.some == cwfs2 => Canopus.Wfs.cwfs2
+        case AgsAnalysis.Usable(Canopus.Wfs.cwfs3, st, _, AgsGuideQuality.DeliversRequestedIq, _) if st.some == cwfs3 => Canopus.Wfs.cwfs3
+        case AgsAnalysis.Usable(GsaoiOdgw.odgw4, st, _, AgsGuideQuality.DeliversRequestedIq, _) if st.some == odgw4   => GsaoiOdgw.odgw4
+      } should beEqualTo(List(Canopus.Wfs.cwfs1, Canopus.Wfs.cwfs2, Canopus.Wfs.cwfs3, GsaoiOdgw.odgw4))
     }
     "support search/select and analyze on M6" in {
       val ra = Angle.fromHMS(17, 40, 20.0).getOrElse(Angle.zero)
@@ -190,7 +211,8 @@ class GemsStrategySpec extends Specification with NoTimeConversions {
 
       testSearch("/gems_m6.xml", ctx, tipTiltMode, posAngles, 7, 7)
 
-      val selection = Await.result(TestGemsStrategy("/gems_m6.xml").select(ctx, ProbeLimitsTable.loadOrThrow()), 2.minutes)
+      val gemsStrategy = TestGemsStrategy("/gems_m6.xml")
+      val selection = Await.result(gemsStrategy.select(ctx, ProbeLimitsTable.loadOrThrow()), 2.minutes)
       selection.map(_.posAngle) should beSome(Angle.fromDegrees(90))
       val assignments = ~selection.map(_.assignments)
       assignments should be size 4
@@ -203,11 +225,11 @@ class GemsStrategySpec extends Specification with NoTimeConversions {
       assignments.exists(_.guideProbe == Canopus.Wfs.cwfs3) should beTrue
       val cwfs3 = assignments.find(_.guideProbe == Canopus.Wfs.cwfs3).map(_.guideStar)
       assignments.exists(_.guideProbe == GsaoiOdgw.odgw2) should beTrue
-      val odgw1 = assignments.find(_.guideProbe == GsaoiOdgw.odgw2).map(_.guideStar)
+      val odgw2 = assignments.find(_.guideProbe == GsaoiOdgw.odgw2).map(_.guideStar)
       cwfs1.map(_.name) should beSome("289-128891")
       cwfs2.map(_.name) should beSome("289-128878")
       cwfs3.map(_.name) should beSome("289-128908")
-      odgw1.map(_.name) should beSome("289-128891")
+      odgw2.map(_.name) should beSome("289-128891")
 
       val cwfs1x = Coordinates(RightAscension.fromAngle(Angle.fromHMS(17, 40, 19.295).getOrElse(Angle.zero)), Declination.fromAngle(Angle.zero - Angle.fromDMS(32, 14, 58.34).getOrElse(Angle.zero)).getOrElse(Declination.zero))
       cwfs1.map(_.coordinates ~= cwfs1x) should beSome(true)
@@ -216,13 +238,24 @@ class GemsStrategySpec extends Specification with NoTimeConversions {
       val cwfs3x = Coordinates(RightAscension.fromAngle(Angle.fromHMS(17, 40, 21.594).getOrElse(Angle.zero)), Declination.fromAngle(Angle.zero - Angle.fromDMS(32, 15, 50.38).getOrElse(Angle.zero)).getOrElse(Declination.zero))
       cwfs3.map(_.coordinates ~= cwfs3x) should beSome(true)
       val odgw2x = Coordinates(RightAscension.fromAngle(Angle.fromHMS(17, 40, 19.295).getOrElse(Angle.zero)), Declination.fromAngle(Angle.zero - Angle.fromDMS(32, 14, 58.34).getOrElse(Angle.zero)).getOrElse(Declination.zero))
-      odgw1.map(_.coordinates ~= odgw2x) should beSome(true)
+      odgw2.map(_.coordinates ~= odgw2x) should beSome(true)
 
       // Check magnitudes are sorted correctly
       val mag1 = cwfs1.flatMap(magnitudeExtractor(RLikeBands)).map(_.value)
       val mag2 = cwfs2.flatMap(magnitudeExtractor(RLikeBands)).map(_.value)
       val mag3 = cwfs3.flatMap(magnitudeExtractor(RLikeBands)).map(_.value)
       (mag3 < mag1 && mag2 < mag1) should beTrue
+
+            // Analyze as a whole
+      val newCtx = selection.map(applySelection(ctx, _)).getOrElse(ctx)
+      val analysis = gemsStrategy.analyze(newCtx, ProbeLimitsTable.loadOrThrow())
+      analysis.foreach(println)
+      analysis.collect {
+        case AgsAnalysis.Usable(Canopus.Wfs.cwfs1, st, _, AgsGuideQuality.PossiblyUnusable, _) if st.some == cwfs1 => Canopus.Wfs.cwfs1
+        case AgsAnalysis.Usable(Canopus.Wfs.cwfs2, st, _, AgsGuideQuality.DeliversRequestedIq, _) if st.some == cwfs2 => Canopus.Wfs.cwfs2
+        case AgsAnalysis.Usable(Canopus.Wfs.cwfs3, st, _, AgsGuideQuality.DeliversRequestedIq, _) if st.some == cwfs3 => Canopus.Wfs.cwfs3
+        case AgsAnalysis.NotReachable(GsaoiOdgw.odgw2, st, _) if st.some == odgw2   => GsaoiOdgw.odgw2
+      } should beEqualTo(List(Canopus.Wfs.cwfs1, Canopus.Wfs.cwfs2, Canopus.Wfs.cwfs3, GsaoiOdgw.odgw2))
     }
   }
 
