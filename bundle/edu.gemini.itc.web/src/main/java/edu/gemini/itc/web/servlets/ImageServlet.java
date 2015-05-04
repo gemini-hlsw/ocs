@@ -111,7 +111,7 @@ public final class ImageServlet extends HttpServlet {
 
         } catch (IdTimedOutException e) {
             Log.log(Level.WARNING, "Session has timed out, the requested result is not available anymore", e);
-            response.sendError(HttpServletResponse.SC_NOT_FOUND);
+            response.sendError(HttpServletResponse.SC_REQUEST_TIMEOUT);
 
         } catch (NumberFormatException e) {
             Log.log(Level.WARNING, "The request is malformed " + e.getMessage(), e);
