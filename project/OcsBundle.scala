@@ -355,7 +355,7 @@ trait OcsBundle {
   lazy val bundle_edu_gemini_ags = 
     project.in(file("bundle/edu.gemini.ags")).dependsOn(
       bundle_edu_gemini_shared_skyobject,
-      bundle_edu_gemini_pot,
+      bundle_edu_gemini_pot          % "test->test;compile->compile",
       bundle_edu_gemini_catalog      % "test->test;compile->compile",
       bundle_edu_gemini_shared_util,
       bundle_edu_gemini_spModel_core % "test->test;compile->compile",

@@ -1,15 +1,21 @@
 package edu.gemini.ags.impl
 
+import edu.gemini.ags.api.AgsGuideQuality.{DeliversRequestedIq, PossibleIqDegradation}
 import edu.gemini.ags.api.AgsStrategy.Selection
 import edu.gemini.ags.api.{AgsGuideQuality, AgsStrategy}
 import edu.gemini.ags.conf.ProbeLimitsTable
-import edu.gemini.catalog.votable.TestVoTableBackend
+import edu.gemini.catalog.votable.{CannedBackend, TestVoTableBackend}
+import edu.gemini.pot.ModelConverters.NewAngle2Old
+import edu.gemini.skycalc.{Angle => SkycalcAngle, Offset => SkycalcOffset}
 import edu.gemini.spModel.ags.AgsStrategyKey._
-import edu.gemini.spModel.core.{Declination, Site, Angle}
+import edu.gemini.spModel.core.Target.SiderealTarget
+import edu.gemini.spModel.core.MagnitudeBand.{_r, R, UC}
+import edu.gemini.spModel.core.MagnitudeSystem.VEGA
+import edu.gemini.spModel.core._
 import edu.gemini.shared.util.immutable.Some
 import edu.gemini.spModel.gemini.altair.{AltairAowfsGuider, AltairParams, InstAltair}
 import edu.gemini.spModel.gemini.flamingos2.{Flamingos2, Flamingos2OiwfsGuideProbe}
-import edu.gemini.spModel.gemini.gmos.{InstGmosSouth, GmosOiwfsGuideProbe, InstGmosNorth}
+import edu.gemini.spModel.gemini.gmos.{GmosNorthType, InstGmosSouth, GmosOiwfsGuideProbe, InstGmosNorth}
 import edu.gemini.spModel.gemini.gnirs.{GnirsOiwfsGuideProbe, InstGNIRS}
 import edu.gemini.spModel.gemini.niri.{NiriOiwfsGuideProbe, InstNIRI}
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality
@@ -18,6 +24,9 @@ import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.target.SPTarget
 import edu.gemini.spModel.target.env.TargetEnvironment
 import edu.gemini.spModel.target.obsComp.PwfsGuideProbe
+import edu.gemini.spModel.telescope.IssPort
+import edu.gemini.spModel.telescope.PosAngleConstraint.FIXED_180
+
 import org.specs2.matcher.MatchResult
 import org.specs2.time.NoTimeConversions
 import org.specs2.mutable.Specification
@@ -34,7 +43,27 @@ class SingleProbeStrategySpec extends Specification with NoTimeConversions {
 
   private def applySelection(ctx: ObsContext, sel: AgsStrategy.Selection): ObsContext = {
     // Make a new TargetEnvironment with the guide probe assignments.
-    sel.applyTo(ctx.getTargets) |> {ctx.withTargets}
+    sel.applyTo(ctx.getTargets) |> {ctx.withTargets} |> {_.withPositionAngle(sel.posAngle.toOldModel)}
+  }
+
+  def offset(p: Int, q: Int): SkycalcOffset =
+    new SkycalcOffset(SkycalcAngle.arcsecs(p), SkycalcAngle.arcsecs(q))
+
+  def offsets(pqs: (Int, Int)*): Set[SkycalcOffset] =
+    pqs.map((offset _).tupled).toSet
+
+  def spTarget(raStr: String, decStr: String): SPTarget = {
+    val ra = Angle.parseHMS(raStr).getOrElse(sys.error("couldn't parse RA"))
+    val dec = Angle.parseDMS(decStr).getOrElse(sys.error("couldn't parse Dec"))
+    new SPTarget(ra.toDegrees, dec.toDegrees)
+  }
+
+  def candidate(name: String, raStr: String, decStr: String, mags: (Double, MagnitudeBand)*): SiderealTarget = {
+    val ra     = RightAscension.fromAngle(Angle.parseHMS(raStr).getOrElse(sys.error("couldn't parse RA")))
+    val dec    = Declination.fromAngle(Angle.parseDMS(decStr).getOrElse(sys.error("couldn't parse Dec"))).getOrElse(sys.error("invalid dec"))
+    val coords = Coordinates(ra, dec)
+    val ms     = mags.map { case (value, band) => Magnitude(value, band, None, VEGA) }.toList
+    SiderealTarget(name, coords, None, ms, None)
   }
 
   "SingleProbeStrategy" should {
@@ -123,6 +152,94 @@ class SingleProbeStrategySpec extends Specification with NoTimeConversions {
       val selection = Await.result(strategy.select(ctx, magTable), 10.seconds)
 
       verifyGuideStarSelection(strategy, ctx, selection, "288-000438", GmosOiwfsGuideProbe.instance)
+    }
+    "find a guide star for this canned example" in {
+      // This is just a random test setup that was failing in property tests.
+      // I thought I should just leave it once it was fixed.
+
+      val base    = spTarget("21:32:48.000", "-0:06:00.000")
+      val guiders = Set[GuideProbe](GmosOiwfsGuideProbe.instance)
+      val env     = TargetEnvironment.create(base) |> {_.setActiveGuiders(guiders.asJava)}
+
+      val inst    = new InstGmosNorth          <|
+        { _.setPosAngle(0.0) }                 <|
+        { _.setIssPort(IssPort.SIDE_LOOKING) } <|
+        { _.setFPUnit(GmosNorthType.FPUnitNorth.NS_5) }
+
+      val os = offsets(
+        (-25, -19),
+        ( 37,  -1),
+        ( 45,  40)
+      )
+
+      val cand       = candidate("Biff", "21:32:46.960", "-0:04:51.135", (16.94, _r), (17.0, R), (20.0, UC))
+      val voTable    = CannedBackend(List(cand))
+
+      val strategy   = SingleProbeStrategy(GmosNorthOiwfsKey, SingleProbeStrategyParams.GmosOiwfsParams(Site.GN), voTable)
+      val conditions = SPSiteQuality.Conditions.NOMINAL
+      val ctx        = ObsContext.create(env, inst, new Some(Site.GN), conditions, os.asJava, null)
+      val selection  = Await.result(strategy.select(ctx, magTable), 10.seconds)
+      verifyGuideStarSelection(strategy, ctx, selection, "Biff", GmosOiwfsGuideProbe.instance, PossibleIqDegradation)
+    }
+    "when there is equal vignetting at a given pos angle, pick the brightest option" in {
+      val base    = spTarget("12:00:00", "85:00:00.000")
+      val guiders = Set[GuideProbe](GmosOiwfsGuideProbe.instance)
+      val env     = TargetEnvironment.create(base) |> {_.setActiveGuiders(guiders.asJava)}
+
+      val inst    = new InstGmosNorth          <|
+        { _.setPosAngle(45.0) }                <|
+        { _.setIssPort(IssPort.SIDE_LOOKING) } <|
+        { _.setFPUnit(GmosNorthType.FPUnitNorth.NS_5) }
+
+      val os = offsets(
+        (-25, -25),
+        (-25,  25),
+        ( 25, -25),
+        ( 25,  25)
+      )
+
+      val dim        = candidate("Biff Dim",    "12:00:05", "85:03:30", (16.3,  R))
+      val bright     = candidate("Biff Bright", "12:00:05", "85:02:30", (16.1, UC))
+      val medium     = candidate("Biff Medium", "12:00:05", "85:02:30", (16.2, _r))
+      val voTable    = CannedBackend(List(dim, bright, medium))
+
+      val strategy   = SingleProbeStrategy(GmosNorthOiwfsKey, SingleProbeStrategyParams.GmosOiwfsParams(Site.GN), voTable)
+      val conditions = SPSiteQuality.Conditions.NOMINAL
+      val ctx        = ObsContext.create(env, inst, new Some(Site.GN), conditions, os.asJava, null)
+      val selection  = Await.result(strategy.select(ctx, magTable), 10.seconds)
+      verifyGuideStarSelection(strategy, ctx, selection, "Biff Bright", GmosOiwfsGuideProbe.instance)
+    }
+    "when there is equal vignetting at a multiple pos angles, pick the brightest option" in {
+      val base    = spTarget("12:00:00", "85:00:00.000")
+      val guiders = Set[GuideProbe](GmosOiwfsGuideProbe.instance)
+      val env     = TargetEnvironment.create(base) |> {_.setActiveGuiders(guiders.asJava)}
+
+      val inst    = new InstGmosNorth          <|
+        { _.setPosAngle(45.0) }                <|
+        { _.setIssPort(IssPort.SIDE_LOOKING) } <|
+        { _.setPosAngleConstraint(FIXED_180) } <|
+        { _.setFPUnit(GmosNorthType.FPUnitNorth.NS_5) }
+
+      val os = offsets(
+        (-25, -25),
+        (-25,  25),
+        ( 25, -25),
+        ( 25,  25)
+      )
+
+      val dim        = candidate("Biff Dim",         "12:00:05", "85:03:30", (16.3,  R))
+      val bright     = candidate("Biff Bright",      "12:00:05", "85:02:30", (16.1, UC))
+      val medium     = candidate("Biff Medium",      "12:00:05", "85:02:30", (16.2, _r))
+      val flipDim    = candidate("Biff Flip Dim",    "12:00:05", "84:58:30", (16.2, UC))
+      val flipBright = candidate("Biff Flip Bright", "12:00:05", "84:57:30", (16.0,  R))
+      val flipMedium = candidate("Biff Flip Medium", "12:00:05", "84:56:30", (16.1, _r))
+      val voTable    = CannedBackend(List(dim, bright, medium, flipMedium, flipBright, flipDim))
+
+      val strategy   = SingleProbeStrategy(GmosNorthOiwfsKey, SingleProbeStrategyParams.GmosOiwfsParams(Site.GN), voTable)
+      val conditions = SPSiteQuality.Conditions.NOMINAL
+      val ctx        = ObsContext.create(env, inst, new Some(Site.GN), conditions, os.asJava, null)
+      val selection  = Await.result(strategy.select(ctx, magTable), 10.seconds)
+      verifyGuideStarSelection(strategy, ctx, selection, "Biff Flip Bright", GmosOiwfsGuideProbe.instance)
     }
     "find a guide star for GMOS-N+PWFS2, OCSADV-255" in {
       // M1 target
@@ -251,10 +368,9 @@ class SingleProbeStrategySpec extends Specification with NoTimeConversions {
 
       verifyGuideStarSelection(strategy, ctx, selection, "424-010170", PwfsGuideProbe.pwfs2)
     }
-
   }
 
-  def verifyGuideStarSelection(strategy: SingleProbeStrategy, ctx: ObsContext, selection: Option[Selection], expectedName: String, gp: ValidatableGuideProbe): MatchResult[Option[AgsGuideQuality]] = {
+  def verifyGuideStarSelection(strategy: SingleProbeStrategy, ctx: ObsContext, selection: Option[Selection], expectedName: String, gp: ValidatableGuideProbe, quality: AgsGuideQuality = DeliversRequestedIq): MatchResult[Option[AgsGuideQuality]] = {
     // One guide star found
     selection.map(_.assignments.size) should beSome(1)
     selection.flatMap(_.assignments.headOption.map(_.guideProbe)) should beSome(gp)
@@ -264,10 +380,10 @@ class SingleProbeStrategySpec extends Specification with NoTimeConversions {
     val newCtx = selection.map(applySelection(ctx, _))
     val analyzedSelection = ~newCtx.map(strategy.analyze(_, magTable))
     analyzedSelection should be size 1
-    analyzedSelection.headOption.map(_.quality) should beSome(AgsGuideQuality.DeliversRequestedIq)
+    analyzedSelection.headOption.map(_.quality) should beSome(quality)
 
     // Analyze Single Guide Star
     val analyzedGS = (newCtx |@| guideStar) { strategy.analyze(_, magTable, gp, _) }.flatten
-    analyzedGS.map(_.quality) should beSome(AgsGuideQuality.DeliversRequestedIq)
+    analyzedGS.map(_.quality) should beSome(quality)
   }
 }

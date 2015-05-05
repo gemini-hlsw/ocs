@@ -527,48 +527,6 @@ public class GmosCommonType {
         }
     }
 
-
-    /**
-     * PosAngleMode indicates how to handle setting the
-     * GMOS Position Angle.
-     */
-    public static enum PosAngleMode implements DisplayableSpType, LoggableSpType, SequenceableSpType {
-        SET_VALUE("Set Value"),
-        AVERAGE_PARALLACTIC("Average Parallactic"),
-        FOLLOW_PARALLACTIC ("Follow Parallactic"),
-        ;
-
-        public static final PosAngleMode DEFAULT = SET_VALUE;
-
-        private String _displayValue;
-
-        private PosAngleMode(String displayValue) {
-            _displayValue = displayValue;
-        }
-
-        public String displayValue() {
-            return _displayValue;
-        }
-
-        public String sequenceValue() {
-            return _displayValue;
-        }
-
-        public String logValue() {
-            return _displayValue;
-        }
-
-        /** Return a PosAngleMode by name **/
-        public static PosAngleMode getPosAngleMode(String name) {
-            return getPosAngleMode(name, DEFAULT);
-        }
-
-        /** Return a PosAngleMode by name giving a value to return upon error **/
-        public static PosAngleMode getPosAngleMode(String name, PosAngleMode nvalue) {
-            return SpTypeUtil.oldValueOf(PosAngleMode.class, name, nvalue);
-        }
-    }
-
     public static final ROIDescription DEFAULT_BUILTIN_ROID = new ROIDescription(1, 1, 6144, 4608);
 
     /**

@@ -42,6 +42,12 @@ object Coordinates extends ((RightAscension, Declination) => Coordinates) {
   implicit val CoordinatesEqual: Equal[Coordinates] =
     Equal.equalA
 
+  /** @group Typeclass Instances. */
+  implicit val ShowCoordinates: Show[Coordinates] =
+    Show.shows { c =>
+      s"(${Angle.formatHMS(c.ra.toAngle)}, ${Declination.formatDMS(c.dec)})"
+    }
+
   case class Difference(posAngle: Angle, distance: Angle) {
     /**
      * Gets the offset coordinates relative to the base position.

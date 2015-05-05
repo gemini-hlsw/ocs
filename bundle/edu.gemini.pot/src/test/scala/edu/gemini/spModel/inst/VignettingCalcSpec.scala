@@ -1,20 +1,11 @@
 package edu.gemini.spModel.inst
 
-import java.awt.geom.{Point2D, AffineTransform}
-
 import edu.gemini.pot.ModelConverters._
-import edu.gemini.skycalc.{Offset => SkyCalcOffset}
 import edu.gemini.spModel.core._
-import edu.gemini.spModel.core.AngleSyntax._
 import edu.gemini.spModel.gemini.gmos._
-import edu.gemini.spModel.gemini.gmos.GmosCommonType.FPUnitMode.{BUILTIN, CUSTOM_MASK}
-import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.Conditions
 import edu.gemini.spModel.guide.VignettingCalculator
 import edu.gemini.spModel.inst.FeatureGeometry._
 import edu.gemini.spModel.obs.context.ObsContext
-import edu.gemini.spModel.target.SPTarget
-import edu.gemini.spModel.target.env.TargetEnvironment
-import edu.gemini.spModel.telescope.IssPort
 
 import org.scalacheck._
 import org.scalacheck.Arbitrary._
@@ -27,60 +18,7 @@ import scala.collection.JavaConverters._
 import scalaz._
 import Scalaz._
 
-object VignettingCalcSpec extends Specification with ScalaCheck with Arbitraries with Helpers {
-
-  implicit val arbTargetEnv: Arbitrary[TargetEnvironment] =
-    Arbitrary {
-      arbitrary[Coordinates].map { c =>
-        val ra  = c.ra.toAngle.toDegrees
-        val dec = c.dec.toDegrees
-        TargetEnvironment.create(new SPTarget(ra, dec))
-      }
-    }
-
-  implicit val arbGmosN: Arbitrary[InstGmosNorth] =
-    Arbitrary {
-      for {
-        fpu      <- Gen.oneOf(GmosNorthType.FPUnitNorth.values)
-        mode     <- Gen.frequency((1, CUSTOM_MASK), (9, BUILTIN))
-        port     <- Gen.oneOf(IssPort.values)
-        posAngle <- arbitrary[Angle]
-      } yield
-        new InstGmosNorth             <|
-              (_.setFPUnit(fpu))      <|
-              (_.setFPUnitMode(mode)) <|
-              (_.setIssPort(port))    <|
-              (_.setPosAngle(posAngle.toDegrees))
-    }
-
-  val genSmallOffset: Gen[SkyCalcOffset] =
-    for {
-      pi <- Gen.chooseNum(-50, 50)
-      qi <- Gen.chooseNum(-50, 50)
-    } yield Offset(pi.toDouble.arcsecs[OffsetP], qi.toDouble.arcsecs[OffsetQ]).toOldModel
-
-  implicit val arbSciencePosSet: Arbitrary[java.util.Set[SkyCalcOffset]] =
-    Arbitrary {
-      for {
-        count <- Gen.chooseNum(1, 4)
-        offs  <- Gen.listOfN(count, genSmallOffset)
-      } yield new java.util.HashSet(offs.asJava)
-    }
-
-  implicit val arbContext: Arbitrary[ObsContext] =
-    Arbitrary {
-      for {
-        env  <- arbitrary[TargetEnvironment]
-        gmos <- arbitrary[InstGmosNorth]
-        offs <- arbitrary[java.util.Set[SkyCalcOffset]]
-      } yield ObsContext.create(env, gmos, Conditions.NOMINAL, offs, null)
-    }
-
-  def formatCoordinates(c: Coordinates): String =
-    s"coordinates(${formatRa(c.ra)}, ${formatDec(c.dec)})"
-
-  def formatRa(ra: RightAscension): String = Angle.formatHMS(ra.toAngle)
-  def formatDec(dec: Declination): String = Declination.formatDMS(dec)
+object VignettingCalcSpec extends Specification with ScalaCheck with VignettingArbitraries with Helpers {
 
   case class TestEnv(ctx: ObsContext, candidates: List[Coordinates]) {
     val vc = VignettingCalculator(ctx, GmosOiwfsProbeArm, GmosScienceAreaGeometry)
@@ -89,7 +27,7 @@ object VignettingCalcSpec extends Specification with ScalaCheck with Arbitraries
       val gmosN = ctx.getInstrument.asInstanceOf[InstGmosNorth]
 
       s"""---- Test Env ----
-         |  Base        = ${formatCoordinates(ctx.getBaseCoordinates.toNewModel)}
+         |  Base        = ${ctx.getBaseCoordinates.toNewModel.shows}
          |  Instrument:
          |    Pos Angle = ${ctx.getPositionAngle}
          |    ISS Port  = ${ctx.getIssPort}
@@ -97,57 +35,17 @@ object VignettingCalcSpec extends Specification with ScalaCheck with Arbitraries
          |    IFU       = ${gmosN.getFPUnit}
          |  Offsets     = ${ctx.getSciencePositions.asScala.map(_.toNewModel.shows).mkString(",")}
          |  Candidates:
-         |    ${candidates.map(formatCoordinates).mkString("\n    ")}
+         |    ${candidates.map(_.shows).mkString("\n    ")}
       """.stripMargin
     }
   }
 
   implicit val arbTest: Arbitrary[TestEnv] =
     Arbitrary {
-      arbitrary[ObsContext].flatMap { ctx =>
-        // Get the usable area at the position angle.
-        val usable  = GmosOiwfsGuideProbe.instance.getCorrectedPatrolField(ctx).getValue.usableArea(ctx)
-
-        // Un-rotate the usable area to bring to position angle 0. Note, pos
-        // angle rotates counter clockwise whereas AffineTransform rotates
-        // clockwise.
-        val unRot   = AffineTransform.getRotateInstance(ctx.getPositionAngle.toRadians.getMagnitude)
-        val usable0 = unRot.createTransformedShape(usable).getBounds2D
-
-        // Generate a candidate that falls in (or just off) of the usable
-        // area.
-        val genCandidate =
-          for {
-            p  <- Gen.chooseNum(usable0.getMinX, usable0.getMaxX)
-            q  <- Gen.chooseNum(usable0.getMinY, usable0.getMaxY)
-          } yield {
-            // Rotate the offset in p and q by the position angle. To get the
-            // p delta and q delta (which are negated because screen coords
-            // are flipped)
-            val rot      = AffineTransform.getRotateInstance(-ctx.getPositionAngle.toRadians.getMagnitude)
-            val offsetPt = rot.transform(new Point2D.Double(p, q), new Point2D.Double())
-            val pd       = -offsetPt.getX // arcsecs
-            val qd       = -offsetPt.getY // arcsecs
-
-            // The deltaDec is just qd but we have to adjust the offset in p
-            // to take into account the declination.
-            //    p = delta RA * cos(dec)
-            // so
-            //    deltaRA = p / cos(dec)
-            val base     = ctx.getBaseCoordinates.toNewModel
-            val cos      = math.cos(math.toRadians(base.dec.toDegrees))
-            val deltaRa  = if (cos == 0) 0.0 else pd/cos
-            val deltaDec = qd
-
-            // Finally we have a candidate that falls int the usable area.
-            base.offset(Angle.fromArcsecs(deltaRa), Angle.fromArcsecs(deltaDec))
-          }
-
-        for {
-          count <- Gen.chooseNum(0, 100)
-          cands <- Gen.listOfN(count, genCandidate)
-        } yield TestEnv(ctx, cands)
-      }
+      for {
+        ctx <- arbitrary[ObsContext]
+        can <- genCandidates(ctx)
+      } yield TestEnv(ctx, can)
     }
 
   "VignettingCalculator" should {
@@ -167,7 +65,7 @@ object VignettingCalcSpec extends Specification with ScalaCheck with Arbitraries
         }
       }
 
-    "only generate 0 vignetting if the guide star does not all on the science area at any offset" !
+    "only generate 0 vignetting if the guide star does not fall on the science area at any offset" !
       forAll { (env: TestEnv) =>
         // Figure out the offset from the base of each candidate that does not
         // vignette the science area.

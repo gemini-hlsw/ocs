@@ -6,6 +6,7 @@ import java.util.logging.Logger
 
 import edu.gemini.catalog.api.CatalogQuery
 import edu.gemini.spModel.core.Angle
+import edu.gemini.spModel.core.Target.SiderealTarget
 import org.apache.commons.httpclient.{NameValuePair, HttpClient}
 import org.apache.commons.httpclient.methods.GetMethod
 
@@ -90,7 +91,7 @@ trait CachedBackend extends VoTableBackend {
      * Builds a cache with a contains function to find cache hits
      */
     def buildCache[K, V](contains: FindFunction[K, V], maxSize: Int = 100) = lruCache(Vector.empty, contains, maxSize)
-    
+
   }
 
   private val cache:Cache[SearchKey, QueryResult] = {
@@ -173,6 +174,13 @@ case object RemoteBackend extends CachedBackend {
     }
   }
 
+}
+
+case class CannedBackend(results: List[SiderealTarget]) extends VoTableBackend {
+  override protected[votable] def doQuery(query: CatalogQuery, url: String): Future[QueryResult] =
+    Future.successful {
+      QueryResult(query, CatalogQueryResult(TargetsTable(results), Nil))
+    }
 }
 
 trait VoTableClient {
