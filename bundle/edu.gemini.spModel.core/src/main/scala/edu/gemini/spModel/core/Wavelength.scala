@@ -1,5 +1,7 @@
 package edu.gemini.spModel.core
 
+import scalaz.{Order, Monoid}
+
 /** Representation of wavelengths. */
 sealed trait Wavelength extends Serializable {
 
@@ -52,15 +54,52 @@ sealed trait Wavelength extends Serializable {
 
 object Wavelength {
 
+  /**
+   * Constructs a `Wavelength` from the given value in nanometers.
+   * @group Constructors
+   */
   def fromNanometers(l: Double) = new Wavelength {
     override val toNanometers = l
   }
 
+  /**
+   * Constructs a `Wavelength` from the given value in microns (aka. micrometers).
+   * @group Constructors
+   */
   def fromMicrons(l: Double) = fromMicrometers(l)
 
+  /**
+   * Constructs a `Wavelength` from the given value in micrometers (aka. microns).
+   * @group Constructors
+   */
   def fromMicrometers(l: Double) = new Wavelength {
     override val toNanometers = l * 1000
   }
+
+  /**
+   * The zero `Wavelength`.
+   * @group Constructors
+   */
+  lazy val zero = fromNanometers(0.0)
+
+  /**
+   * Additive monoid for `Wavelength`.
+   * @group Typeclass Instances
+   */
+  implicit val WavelengthMonoid: Monoid[Wavelength] =
+    new Monoid[Wavelength] {
+      val zero = Wavelength.zero
+      def append(a: Wavelength, b: => Wavelength): Wavelength = a + b
+    }
+
+  /** @group Typeclass Instances */
+  implicit val WavelengthOrder: Order[Wavelength] =
+    Order.orderBy(_.toNanometers)
+
+  /** @group Typeclass Instances */
+  implicit val WavelengthOrdering: scala.Ordering[Wavelength] =
+    scala.Ordering.by(_.toNanometers)
+
 
 }
 
