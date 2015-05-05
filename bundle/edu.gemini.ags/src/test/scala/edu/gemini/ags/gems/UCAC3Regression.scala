@@ -44,7 +44,7 @@ trait UCAC3Regression {
     val offsets = new java.util.HashSet[edu.gemini.skycalc.Offset]
 
     val obsContext = ObsContext.create(env, new Gsaoi, new JSome(Site.GS), conditions, offsets, new Gems).withPositionAngle(Angle.zero.toOldModel)
-    val gemsResults = new GemsCatalogResults().analyze(obsContext, posAngles.asJava, results.asJava, null)
+    val gemsResults = GemsResultsAnalyzer.analyze(obsContext, posAngles.asJava, results.asJava, null)
     areGuideStarListsEqual(expectedGuideStars, gemsResults.asScala.toList)
   }
 

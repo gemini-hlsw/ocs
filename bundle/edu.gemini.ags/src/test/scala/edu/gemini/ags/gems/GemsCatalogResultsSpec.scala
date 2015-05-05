@@ -305,7 +305,7 @@ class GemsCatalogResultsSpec extends MascotProgress with Specification with NoTi
     val options = new GemsGuideStarSearchOptions(instrument, tipTiltMode, posAngles)
 
     val results = Await.result(catalog.search(obsContext, base.toNewModel, options, scala.None, null), 5.seconds)
-    val gemsResults = new GemsCatalogResults().analyze(obsContext, posAngles, results.asJava, null)
+    val gemsResults = GemsResultsAnalyzer.analyze(obsContext, posAngles, results.asJava, null)
     (results, gemsResults.asScala.toList)
   }
 

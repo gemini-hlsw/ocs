@@ -1,5 +1,6 @@
 package jsky.app.ot.gemini.gems;
 
+import edu.gemini.ags.gems.GemsResultsAnalyzer;
 import edu.gemini.ags.gems.GemsUtils4Java;
 import edu.gemini.ags.gems.mascot.Mascot;
 import edu.gemini.ags.gems.mascot.MascotConf;
@@ -12,7 +13,6 @@ import edu.gemini.shared.util.immutable.*;
 import edu.gemini.spModel.core.MagnitudeBand;
 import edu.gemini.spModel.gemini.gsaoi.Gsaoi;
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality;
-import edu.gemini.ags.gems.GemsCatalogResults;
 import edu.gemini.spModel.guide.GuideProbe;
 import edu.gemini.spModel.obs.context.ObsContext;
 import edu.gemini.spModel.obscomp.SPInstObsComp;
@@ -379,7 +379,7 @@ public class StrehlFeature extends TpeImageFeature implements PropertyWatcher, M
         if (targetList.size() == 0) return null;
         Star[] starList = targetListToStarList(targetList);
 
-        double factor = GemsCatalogResults.getStrehlFactor(this.getContext().obsContextJava());
+        double factor = GemsResultsAnalyzer.instance().getStrehlFactor(this.getContext().obsContextJava());
         return Mascot.computeStrehl4Java(getBandpass(type), factor, starList[0], scala.Option.apply(starList[1]), scala.Option.apply(starList[2]));
     }
 

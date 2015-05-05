@@ -169,7 +169,7 @@ trait GemsStrategy extends AgsStrategy {
     }
 
     // Iterate over 45 degree position angles if no asterism is found at PA = 0.
-    val gemsCatalogResults = results.map(result => new GemsCatalogResults().analyzeGoodEnough(ctx, anglesToTry.asJava, result.asJava, progressMeasurer).asScala)
+    val gemsCatalogResults = results.map(result => GemsResultsAnalyzer.analyzeGoodEnough(ctx, anglesToTry.asJava, result.asJava, progressMeasurer))
 
     // Filter out the 1-star asterisms. If anything is left, we are good to go; otherwise, no.
     gemsCatalogResults.map { x =>
@@ -198,7 +198,7 @@ trait GemsStrategy extends AgsStrategy {
 
   private def findGuideStars(ctx: ObsContext, posAngles: Set[Angle], results: List[GemsCatalogSearchResults]): Option[GemsGuideStars] = {
     // Passing in null to say we don't want a ProgressMeter.
-    val gemsResults = new GemsCatalogResults().analyze(ctx, posAngles.asJava, results.asJava, null).asScala
+    val gemsResults = GemsResultsAnalyzer.analyze(ctx, posAngles.asJava, results.asJava, null).asScala
     gemsResults.headOption
   }
 
