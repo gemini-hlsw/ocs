@@ -19,17 +19,17 @@ case class NifsAo(blueprint: SpNifsBlueprintAo, exampleTarget: Option[SPTarget])
   val tb = exampleTarget.flatMap(t => Option(t.getTarget.getMagnitude(Band.K).getOrNull)).map(_.getBrightness).map(TargetBrightness(_))
 
   // These two notes should be included at the top of every NIFS program
-  addNote("Phase II Requirements: General Information", "Phase II  \"BEFORE Submission\" Checklist") in TargetGroup
+  addNote("Phase II Requirements: General Information", "Phase II  \"BEFORE Submission\" Checklist") in TopLevel
 
   // # Select acquisition and science observation
   // IF OCCULTING DISK == None
   //   IF target information contains a K magnitude
-  //     IF BT  then ACQ={3}  # Bright Object
-  //     IF MT  then ACQ={4}  # Medium Object
-  //     IF FT  then ACQ={5}  # Faint Object
-  //     IF BAT then ACQ={23}  # Blind offset
+  //     IF BT  then ACQ={2}  # Bright Object
+  //     IF MT  then ACQ={3}  # Medium Object
+  //     IF FT  then ACQ={4}  # Faint Object
+  //     IF BAT then ACQ={5}  # Blind offset
   //   ELSE
-  //     ACQ={3,4,5,23}
+  //     ACQ={2,3,4,5}
   //   SCI={6}
   // ELSEIF OCCULTING DISK != None
   //    IF target information contains a K magnitude
@@ -43,11 +43,11 @@ case class NifsAo(blueprint: SpNifsBlueprintAo, exampleTarget: Option[SPTarget])
 
   val (acq, sci) = if (!occultingDisk.isOccultingDisk) {
     (tb.collect {
-      case BT  => List(3)
-      case MT  => List(4)
-      case FT  => List(5)
-      case BAT => List(23)
-    }.getOrElse(List(3,4,5,23)),
+      case BT  => List(2)
+      case MT  => List(3)
+      case FT  => List(4)
+      case BAT => List(5)
+    }.getOrElse(List(2, 3, 4, 5)),
       6)
   } else {
     (tb.collect {
@@ -60,8 +60,8 @@ case class NifsAo(blueprint: SpNifsBlueprintAo, exampleTarget: Option[SPTarget])
   }
 
   // ### Target Group
-  // INCLUDE {1},{2},ACQ,SCI,{7},{8} in target-specific Scheduling Group
-  include(List(1, 2) ++ acq ++ List(sci, 7, 8): _*) in TargetGroup
+  // INCLUDE {0},{1},ACQ,SCI,{7},{8} in target-specific Scheduling Group
+  include(List(0, 1) ++ acq ++ List(sci, 7, 8): _*) in TargetGroup
 
   // # AO Mode
   // # In NGS mode target and standards use the same Altair guide mode.

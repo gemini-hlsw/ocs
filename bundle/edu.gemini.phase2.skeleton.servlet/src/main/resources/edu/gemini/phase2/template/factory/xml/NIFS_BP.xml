@@ -2,7 +2,7 @@
 <!DOCTYPE document PUBLIC "-//Gemini Observatory//DTD for Storage of P1 and P2 Documents//EN" "http://ftp.gemini.edu/Support/xml/dtds/SpXML2.dtd">
 
 <document>
-  <container kind="program" type="Program" version="2015A-1" subtype="basic" key="4a786fd7-7464-4d28-a40f-33b9aa95375b" name="NIFS-BP">
+  <container kind="program" type="Program" version="2015B-1" subtype="basic" key="4a786fd7-7464-4d28-a40f-33b9aa95375b" name="NIFS-BP">
     <paramset name="Science Program" kind="dataObj">
       <param name="title" value="NIFS PHASE I/II MAPPING BPS"/>
       <param name="programMode" value="QUEUE"/>
@@ -126,7 +126,7 @@ SCIENCE DARKS:
       <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="dfe11324-c32c-4dac-a70a-06e87d8db3f6" name="NIFS-BP-1">
         <paramset name="Observation" kind="dataObj">
           <param name="title" value="Acq: Before Standard"/>
-          <param name="libraryId" value="1"/>
+          <param name="libraryId" value="0"/>
           <param name="priority" value="LOW"/>
           <param name="tooOverrideRapid" value="false"/>
           <param name="phase2Status" value="INACTIVE"/>
@@ -205,7 +205,7 @@ SCIENCE DARKS:
       <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="4be66da9-9b08-4528-a9f0-2b13c8acbe77" name="NIFS-BP-2">
         <paramset name="Observation" kind="dataObj">
           <param name="title" value="Obs: Before Standard"/>
-          <param name="libraryId" value="2"/>
+          <param name="libraryId" value="1"/>
           <param name="priority" value="LOW"/>
           <param name="tooOverrideRapid" value="false"/>
           <param name="phase2Status" value="INACTIVE"/>
@@ -289,7 +289,7 @@ SCIENCE DARKS:
       <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="e378d626-1f8b-4878-b390-b9ce8c8cda71" name="NIFS-BP-3">
         <paramset name="Observation" kind="dataObj">
           <param name="title" value="Acq: K&lt;=9"/>
-          <param name="libraryId" value="3"/>
+          <param name="libraryId" value="2"/>
           <param name="priority" value="LOW"/>
           <param name="tooOverrideRapid" value="false"/>
           <param name="phase2Status" value="INACTIVE"/>
@@ -368,7 +368,7 @@ SCIENCE DARKS:
       <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="7b57e815-e4d3-4c3e-951f-ef8ab65e2755" name="NIFS-BP-23">
         <paramset name="Observation" kind="dataObj">
           <param name="title" value="Acq: 9&lt;K&lt;=13"/>
-          <param name="libraryId" value="4"/>
+          <param name="libraryId" value="3"/>
           <param name="priority" value="LOW"/>
           <param name="tooOverrideRapid" value="false"/>
           <param name="phase2Status" value="INACTIVE"/>
@@ -459,7 +459,7 @@ SCIENCE DARKS:
       <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="c3326b57-96f5-4975-bdd5-96990ceb13bf" name="NIFS-BP-5">
         <paramset name="Observation" kind="dataObj">
           <param name="title" value="Acq: K &gt;13"/>
-          <param name="libraryId" value="5"/>
+          <param name="libraryId" value="4"/>
           <param name="priority" value="LOW"/>
           <param name="tooOverrideRapid" value="false"/>
           <param name="phase2Status" value="INACTIVE"/>
@@ -550,7 +550,7 @@ SCIENCE DARKS:
       <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="68e54c53-e2d8-4263-82e5-2564c629debd" name="NIFS-BP-24">
         <paramset name="Observation" kind="dataObj">
           <param name="title" value="Acq: Blind Offsets - ref with 9&lt;K&lt;=13"/>
-          <param name="libraryId" value="23"/>
+          <param name="libraryId" value="5"/>
           <param name="priority" value="LOW"/>
           <param name="tooOverrideRapid" value="false"/>
           <param name="phase2Status" value="INACTIVE"/>
@@ -1235,14 +1235,12 @@ http://www.gemini.edu/sciops/observing-gemini/phase-ii-and-s/w-tools/finding-cha
                 <param name="name" value="Dark"/>
                 <param name="system" value="J2000"/>
                 <param name="epoch" value="2000.0" units="years"/>
-                <param name="brightness" value=""/>
                 <param name="c1" value="00:00:00.000"/>
                 <param name="c2" value="00:00:00.00"/>
                 <param name="pm1" value="0.0" units="milli-arcsecs/year"/>
                 <param name="pm2" value="0.0" units="milli-arcsecs/year"/>
                 <param name="parallax" value="0.0" units="arcsecs"/>
                 <param name="rv" value="0.0" units="km/sec"/>
-                <param name="wavelength" value="-1.0" units="angstroms"/>
               </paramset>
               <paramset name="guideEnv">
                 <param name="active">
@@ -1323,14 +1321,12 @@ http://www.gemini.edu/sciops/observing-gemini/phase-ii-and-s/w-tools/finding-cha
                 <param name="name" value="Dark"/>
                 <param name="system" value="J2000"/>
                 <param name="epoch" value="2000.0" units="years"/>
-                <param name="brightness" value=""/>
                 <param name="c1" value="00:00:00.000"/>
                 <param name="c2" value="00:00:00.00"/>
                 <param name="pm1" value="0.0" units="milli-arcsecs/year"/>
                 <param name="pm2" value="0.0" units="milli-arcsecs/year"/>
                 <param name="parallax" value="0.0" units="arcsecs"/>
                 <param name="rv" value="0.0" units="km/sec"/>
-                <param name="wavelength" value="-1.0" units="angstroms"/>
               </paramset>
               <paramset name="guideEnv">
                 <param name="active">
@@ -1411,14 +1407,12 @@ http://www.gemini.edu/sciops/observing-gemini/phase-ii-and-s/w-tools/finding-cha
                 <param name="name" value="Dark"/>
                 <param name="system" value="J2000"/>
                 <param name="epoch" value="2000.0" units="years"/>
-                <param name="brightness" value=""/>
                 <param name="c1" value="00:00:00.000"/>
                 <param name="c2" value="00:00:00.00"/>
                 <param name="pm1" value="0.0" units="milli-arcsecs/year"/>
                 <param name="pm2" value="0.0" units="milli-arcsecs/year"/>
                 <param name="parallax" value="0.0" units="arcsecs"/>
                 <param name="rv" value="0.0" units="km/sec"/>
-                <param name="wavelength" value="-1.0" units="angstroms"/>
               </paramset>
               <paramset name="guideEnv">
                 <param name="active">
@@ -1499,14 +1493,12 @@ http://www.gemini.edu/sciops/observing-gemini/phase-ii-and-s/w-tools/finding-cha
                 <param name="name" value="GCALflats"/>
                 <param name="system" value="J2000"/>
                 <param name="epoch" value="2000.0" units="years"/>
-                <param name="brightness" value=""/>
                 <param name="c1" value="00:00:00.000"/>
                 <param name="c2" value="00:00:00.00"/>
                 <param name="pm1" value="0.0" units="milli-arcsecs/year"/>
                 <param name="pm2" value="0.0" units="milli-arcsecs/year"/>
                 <param name="parallax" value="0.0" units="arcsecs"/>
                 <param name="rv" value="0.0" units="km/sec"/>
-                <param name="wavelength" value="-1.0" units="angstroms"/>
               </paramset>
               <paramset name="guideEnv">
                 <param name="active">
@@ -1623,14 +1615,12 @@ http://www.gemini.edu/sciops/observing-gemini/phase-ii-and-s/w-tools/finding-cha
                 <param name="name" value="GCALflats"/>
                 <param name="system" value="J2000"/>
                 <param name="epoch" value="2000.0" units="years"/>
-                <param name="brightness" value=""/>
                 <param name="c1" value="00:00:00.000"/>
                 <param name="c2" value="00:00:00.00"/>
                 <param name="pm1" value="0.0" units="milli-arcsecs/year"/>
                 <param name="pm2" value="0.0" units="milli-arcsecs/year"/>
                 <param name="parallax" value="0.0" units="arcsecs"/>
                 <param name="rv" value="0.0" units="km/sec"/>
-                <param name="wavelength" value="-1.0" units="angstroms"/>
               </paramset>
               <paramset name="guideEnv">
                 <param name="active">
@@ -1765,14 +1755,12 @@ http://www.gemini.edu/sciops/observing-gemini/phase-ii-and-s/w-tools/finding-cha
                 <param name="name" value="GCALflats"/>
                 <param name="system" value="J2000"/>
                 <param name="epoch" value="2000.0" units="years"/>
-                <param name="brightness" value=""/>
                 <param name="c1" value="00:00:00.000"/>
                 <param name="c2" value="00:00:00.00"/>
                 <param name="pm1" value="0.0" units="milli-arcsecs/year"/>
                 <param name="pm2" value="0.0" units="milli-arcsecs/year"/>
                 <param name="parallax" value="0.0" units="arcsecs"/>
                 <param name="rv" value="0.0" units="km/sec"/>
-                <param name="wavelength" value="-1.0" units="angstroms"/>
               </paramset>
               <paramset name="guideEnv">
                 <param name="active">
@@ -1888,14 +1876,12 @@ http://www.gemini.edu/sciops/observing-gemini/phase-ii-and-s/w-tools/finding-cha
                 <param name="name" value="GCALflats"/>
                 <param name="system" value="J2000"/>
                 <param name="epoch" value="2000.0" units="years"/>
-                <param name="brightness" value=""/>
                 <param name="c1" value="00:00:00.000"/>
                 <param name="c2" value="00:00:00.00"/>
                 <param name="pm1" value="0.0" units="milli-arcsecs/year"/>
                 <param name="pm2" value="0.0" units="milli-arcsecs/year"/>
                 <param name="parallax" value="0.0" units="arcsecs"/>
                 <param name="rv" value="0.0" units="km/sec"/>
-                <param name="wavelength" value="-1.0" units="angstroms"/>
               </paramset>
               <paramset name="guideEnv">
                 <param name="active">
@@ -2010,14 +1996,12 @@ http://www.gemini.edu/sciops/observing-gemini/phase-ii-and-s/w-tools/finding-cha
                 <param name="name" value="GCALflats"/>
                 <param name="system" value="J2000"/>
                 <param name="epoch" value="2000.0" units="years"/>
-                <param name="brightness" value=""/>
                 <param name="c1" value="00:00:00.000"/>
                 <param name="c2" value="00:00:00.00"/>
                 <param name="pm1" value="0.0" units="milli-arcsecs/year"/>
                 <param name="pm2" value="0.0" units="milli-arcsecs/year"/>
                 <param name="parallax" value="0.0" units="arcsecs"/>
                 <param name="rv" value="0.0" units="km/sec"/>
-                <param name="wavelength" value="-1.0" units="angstroms"/>
               </paramset>
               <paramset name="guideEnv">
                 <param name="active">
@@ -2146,14 +2130,12 @@ http://www.gemini.edu/sciops/observing-gemini/phase-ii-and-s/w-tools/finding-cha
                 <param name="name" value="GCALflats"/>
                 <param name="system" value="J2000"/>
                 <param name="epoch" value="2000.0" units="years"/>
-                <param name="brightness" value=""/>
                 <param name="c1" value="00:00:00.000"/>
                 <param name="c2" value="00:00:00.00"/>
                 <param name="pm1" value="0.0" units="milli-arcsecs/year"/>
                 <param name="pm2" value="0.0" units="milli-arcsecs/year"/>
                 <param name="parallax" value="0.0" units="arcsecs"/>
                 <param name="rv" value="0.0" units="km/sec"/>
-                <param name="wavelength" value="-1.0" units="angstroms"/>
               </paramset>
               <paramset name="guideEnv">
                 <param name="active">
@@ -2282,14 +2264,12 @@ http://www.gemini.edu/sciops/observing-gemini/phase-ii-and-s/w-tools/finding-cha
                 <param name="name" value="GCALflats"/>
                 <param name="system" value="J2000"/>
                 <param name="epoch" value="2000.0" units="years"/>
-                <param name="brightness" value=""/>
                 <param name="c1" value="00:00:00.000"/>
                 <param name="c2" value="00:00:00.00"/>
                 <param name="pm1" value="0.0" units="milli-arcsecs/year"/>
                 <param name="pm2" value="0.0" units="milli-arcsecs/year"/>
                 <param name="parallax" value="0.0" units="arcsecs"/>
                 <param name="rv" value="0.0" units="km/sec"/>
-                <param name="wavelength" value="-1.0" units="angstroms"/>
               </paramset>
               <paramset name="guideEnv">
                 <param name="active">
@@ -2418,14 +2398,12 @@ http://www.gemini.edu/sciops/observing-gemini/phase-ii-and-s/w-tools/finding-cha
                 <param name="name" value="GCALflats"/>
                 <param name="system" value="J2000"/>
                 <param name="epoch" value="2000.0" units="years"/>
-                <param name="brightness" value=""/>
                 <param name="c1" value="00:00:00.000"/>
                 <param name="c2" value="00:00:00.00"/>
                 <param name="pm1" value="0.0" units="milli-arcsecs/year"/>
                 <param name="pm2" value="0.0" units="milli-arcsecs/year"/>
                 <param name="parallax" value="0.0" units="arcsecs"/>
                 <param name="rv" value="0.0" units="km/sec"/>
-                <param name="wavelength" value="-1.0" units="angstroms"/>
               </paramset>
               <paramset name="guideEnv">
                 <param name="active">
@@ -2536,6 +2514,7 @@ http://www.gemini.edu/sciops/observing-gemini/phase-ii-and-s/w-tools/finding-cha
       <param name="key" value="c3326b57-96f5-4975-bdd5-96990ceb13bf"/>
       <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
       <param name="c2cbec09-530c-4cce-bc93-cdf19f471e85" value="4"/>
+      <param name="e15b7ad0-0325-485b-8618-aa98b9d401fc" value="2"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="5bdfe02f-9f0a-458c-87f9-b3fc07ee3118"/>
@@ -2955,6 +2934,10 @@ http://www.gemini.edu/sciops/observing-gemini/phase-ii-and-s/w-tools/finding-cha
       <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
     </paramset>
     <paramset name="node">
+      <param name="key" value="bfc0a7b6-52b3-4a53-9fdd-470b4310d94a"/>
+      <param name="e15b7ad0-0325-485b-8618-aa98b9d401fc" value="3"/>
+    </paramset>
+    <paramset name="node">
       <param name="key" value="fd50dbc1-692a-4727-9be9-0cc79cbe1314"/>
       <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
     </paramset>
@@ -2978,6 +2961,7 @@ http://www.gemini.edu/sciops/observing-gemini/phase-ii-and-s/w-tools/finding-cha
       <param name="key" value="e378d626-1f8b-4878-b390-b9ce8c8cda71"/>
       <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
       <param name="c2cbec09-530c-4cce-bc93-cdf19f471e85" value="2"/>
+      <param name="e15b7ad0-0325-485b-8618-aa98b9d401fc" value="2"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="3e0f9c5c-6c9c-419e-82d7-5b4a2c3d4bf1"/>
@@ -3166,6 +3150,7 @@ http://www.gemini.edu/sciops/observing-gemini/phase-ii-and-s/w-tools/finding-cha
       <param name="key" value="dfe11324-c32c-4dac-a70a-06e87d8db3f6"/>
       <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
       <param name="cf210986-65a8-42c8-ab5d-be0fc8249aff" value="1"/>
+      <param name="e15b7ad0-0325-485b-8618-aa98b9d401fc" value="2"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="b4e372b4-1bda-48cd-93f9-df5a583de61e"/>
@@ -3183,6 +3168,7 @@ http://www.gemini.edu/sciops/observing-gemini/phase-ii-and-s/w-tools/finding-cha
       <param name="key" value="4be66da9-9b08-4528-a9f0-2b13c8acbe77"/>
       <param name="529c4698-aec6-4448-8fc9-ee13ae81d136" value="1"/>
       <param name="cf210986-65a8-42c8-ab5d-be0fc8249aff" value="1"/>
+      <param name="e15b7ad0-0325-485b-8618-aa98b9d401fc" value="2"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="0ffb87af-91b2-41c6-8127-52b45a1f7bac"/>
@@ -3196,6 +3182,7 @@ http://www.gemini.edu/sciops/observing-gemini/phase-ii-and-s/w-tools/finding-cha
       <param name="key" value="68e54c53-e2d8-4263-82e5-2564c629debd"/>
       <param name="c2cbec09-530c-4cce-bc93-cdf19f471e85" value="3"/>
       <param name="6c990ab9-f506-41b0-9005-9ca37fea82e8" value="2"/>
+      <param name="e15b7ad0-0325-485b-8618-aa98b9d401fc" value="4"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="55a9ecad-c935-4265-b5b5-306871792e69"/>
@@ -3208,6 +3195,7 @@ http://www.gemini.edu/sciops/observing-gemini/phase-ii-and-s/w-tools/finding-cha
     <paramset name="node">
       <param name="key" value="7b57e815-e4d3-4c3e-951f-ef8ab65e2755"/>
       <param name="c2cbec09-530c-4cce-bc93-cdf19f471e85" value="32"/>
+      <param name="e15b7ad0-0325-485b-8618-aa98b9d401fc" value="2"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="412100bb-2463-4848-b930-e580e41b0de8"/>
