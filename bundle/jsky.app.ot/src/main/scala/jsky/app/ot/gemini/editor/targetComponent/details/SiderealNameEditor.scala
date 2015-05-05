@@ -36,11 +36,13 @@ final class SiderealNameEditor extends JPanel with TelescopePosEditor with Reent
           spt.notifyOfGenericUpdate()
         }
 
-      override def textBoxAction(tbwe: TextBoxWidget): Unit =
-        lookupTarget(cats.getSelectedItem.asInstanceOf[Catalog], tbwe.getValue).runAsync {
+      override def textBoxAction(tbwe: TextBoxWidget): Unit = {
+        val cat = cats.getSelectedItem.asInstanceOf[Catalog]
+        forkSwingWorker(lookupTarget(cat, tbwe.getValue)) {
           case \/-(r) => processResult(r)
           case -\/(e) => DialogUtil.error(e.getMessage)
         }
+      }
 
     })
   }
@@ -71,30 +73,29 @@ final class SiderealNameEditor extends JPanel with TelescopePosEditor with Reent
     }
   }
 
-  def lookupTarget(catalog: Catalog, name: String): Task[TableQueryResult] =
-    Task {
+  def lookupTarget(catalog: Catalog, name: String): TableQueryResult = {
 
-      // If it's a SkycatCatalog lookup on simbad, add a filter. No idea why.
-      catalog match {
-        case skycat: SkycatCatalog if skycat.getShortName.contains("simbad") =>
-          skycat.addCatalogFilter(FullMimeSimbadCatalogFilter.getFilter)
-        case _ => // do nothing special
-      }
-
-      // Prepare the query
-      val queryArgs = new BasicQueryArgs(catalog) <| { as =>
-        as.setId(name)
-        as.setMaxRows(1)
-      }
-
-      // Go .. this is a blocking call
-      catalog.query(queryArgs) match {
-        case tqr: TableQueryResult => tqr
-        case e: Exception => throw e
-        case a => throw new CatalogException("Unexpected result: " + a)
-      }
-
+    // If it's a SkycatCatalog lookup on simbad, add a filter. No idea why.
+    catalog match {
+      case skycat: SkycatCatalog if skycat.getShortName.contains("simbad") =>
+        skycat.addCatalogFilter(FullMimeSimbadCatalogFilter.getFilter)
+      case _ => // do nothing special
     }
+
+    // Prepare the query
+    val queryArgs = new BasicQueryArgs(catalog) <| { as =>
+      as.setId(name)
+      as.setMaxRows(1)
+    }
+
+    // Go .. this is a blocking call
+    catalog.query(queryArgs) match {
+      case tqr: TableQueryResult => tqr
+      case e: Exception => throw e
+      case a => throw new CatalogException("Unexpected result: " + a)
+    }
+
+  }
 
 
   def processResult(tqr: TableQueryResult): Unit = {
