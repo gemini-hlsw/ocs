@@ -24,12 +24,12 @@ case class NifsAo(blueprint: SpNifsBlueprintAo, exampleTarget: Option[SPTarget])
   // # Select acquisition and science observation
   // IF OCCULTING DISK == None
   //   IF target information contains a K magnitude
-  //     IF BT  then ACQ={3}  # Bright Object
-  //     IF MT  then ACQ={4}  # Medium Object
-  //     IF FT  then ACQ={5}  # Faint Object
-  //     IF BAT then ACQ={23}  # Blind offset
+  //     IF BT  then ACQ={2}  # Bright Object
+  //     IF MT  then ACQ={3}  # Medium Object
+  //     IF FT  then ACQ={4}  # Faint Object
+  //     IF BAT then ACQ={5}  # Blind offset
   //   ELSE
-  //     ACQ={3,4,5,23}
+  //     ACQ={2,3,4,5}
   //   SCI={6}
   // ELSEIF OCCULTING DISK != None
   //    IF target information contains a K magnitude
@@ -60,7 +60,7 @@ case class NifsAo(blueprint: SpNifsBlueprintAo, exampleTarget: Option[SPTarget])
   }
 
   // ### Target Group
-  // INCLUDE {1},{2},ACQ,SCI,{7},{8} in target-specific Scheduling Group
+  // INCLUDE {0},{1},ACQ,SCI,{7},{8} in target-specific Scheduling Group
   include(List(0, 1) ++ acq ++ List(sci, 7, 8): _*) in TargetGroup
 
   // # AO Mode

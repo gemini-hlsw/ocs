@@ -37,7 +37,7 @@ case class Nifs(blueprint:SpNifsBlueprint, exampleTarget: Option[SPTarget]) exte
       6)
 
   // ### Target Group
-  // INCLUDE {1},{2},ACQ,SCI,{7},{8} in target-specific Scheduling Group
+  // INCLUDE {0},{1},ACQ,SCI,{7},{8} in target-specific Scheduling Group
 
   include(List(0, 1) ++ acq ++ List(sci, 7, 8): _*) in TargetGroup
 
