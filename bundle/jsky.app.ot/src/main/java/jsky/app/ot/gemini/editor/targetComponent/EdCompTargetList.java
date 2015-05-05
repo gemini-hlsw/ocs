@@ -568,13 +568,11 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         showTargetTag();
 
         // Update target details, and ensure that any new controls constructed via the update are
-        // correctly disabled if editing is not allowed.
-        boolean mustUpdateEnabledStatus =_w.detailEditor.willCauseStructureChange(_curPos);
+        // correctly disabled if editing is not allowed. Ordering is important!
+        boolean structChange =_w.detailEditor.willCauseStructureChange(_curPos);
         _w.detailEditor.edit(getObsContext(env), _curPos, getNode());
-        if (mustUpdateEnabledStatus) {
-            final boolean editable = OTOptions.isEditable(getProgram(), getContextObservation());
-            if (!editable)
-                updateEnabledState(new Component[]{_w.detailEditor}, editable);
+        if (structChange && !OTOptions.isEditable(getProgram(), getContextObservation())) {
+            updateEnabledState(new Component[]{_w.detailEditor}, false);
         }
 
     }
