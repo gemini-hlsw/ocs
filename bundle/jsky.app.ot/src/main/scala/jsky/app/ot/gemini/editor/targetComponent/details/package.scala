@@ -1,12 +1,15 @@
 package jsky.app.ot.gemini.editor.targetComponent
 
 import javax.swing.BorderFactory._
+
+import scalaz.\/
+
 import javax.swing.border.Border
 
 import edu.gemini.horizons.api.HorizonsQuery.ObjectType
 import edu.gemini.spModel.target.system.{CoordinateParam, NamedTarget, NonSiderealTarget}
 import edu.gemini.spModel.target.system.ITarget.Tag
-import jsky.util.gui.{TextBoxWidget, TextBoxWidgetWatcher}
+import jsky.util.gui.{SwingWorker, TextBoxWidget, TextBoxWidgetWatcher}
 
 package object details {
 
@@ -50,5 +53,11 @@ package object details {
     def setOrZero(d: java.lang.Double): Unit =
       p.setValue(if (d == null) 0.0 else d.doubleValue)
   }
+
+  def forkSwingWorker[A <: AnyRef](constructImpl: => A)(finishedImpl: Throwable \/ A => Unit): Unit =
+    new SwingWorker {
+      def construct = \/.fromTryCatch(constructImpl)
+      override def finished = finishedImpl(getValue.asInstanceOf[Throwable \/ A])
+    }.start()
 
 }
