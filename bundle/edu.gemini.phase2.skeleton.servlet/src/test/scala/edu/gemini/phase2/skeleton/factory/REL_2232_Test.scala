@@ -1,6 +1,6 @@
 package edu.gemini.phase2.skeleton.factory
 
-import edu.gemini.phase2.template.factory.impl.{TemplateDsl2, GroupInitializer}
+import edu.gemini.phase2.template.factory.impl.GroupInitializer
 import edu.gemini.phase2.template.factory.impl.nifs.{NifsAo, Nifs}
 import edu.gemini.shared.skyobject.Magnitude
 import edu.gemini.shared.skyobject.Magnitude.Band
@@ -17,7 +17,7 @@ class REL_2232_Test extends Specification {
 
   val NoteTitles = List("Phase II Requirements: General Information", "Phase II  \"BEFORE Submission\" Checklist")
 
-  def incSpec(name: String, g: GroupInitializer[_] with TemplateDsl2[_], inc: Set[Int], excl: Set[Int]) = {
+  def incSpec(name: String, g: GroupInitializer[_], inc: Set[Int], excl: Set[Int]) = {
     s"Initialized $name" should {
       s"include obs ${inc.mkString("{",",","}")} in target group" in {
         g.targetGroup.filter(inc).toSet must_== inc
