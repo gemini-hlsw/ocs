@@ -519,7 +519,6 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
     }
 
     private void refreshAll() {
-        final boolean editable = OTOptions.areRootAndCurrentObsIfAnyEditable(getProgram(), getContextObservation());
         _w.guideGroupPanel.setVisible(false);
         _w.detailEditor.setVisible(true);
 
@@ -568,10 +567,13 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         _w.tag.setRenderer(tagRenderer);
         showTargetTag();
 
-        // Update target details and force enabled state update for the detail editor, whose
-        // structure may have changed (thus making the cached "enabled" value unreliable).
+        // Update target details, and ensure that any new controls constructed via the update are
+        // correctly disabled if editing is not allowed. Ordering is important!
+        boolean structChange =_w.detailEditor.willCauseStructureChange(_curPos);
         _w.detailEditor.edit(getObsContext(env), _curPos, getNode());
-        updateEnabledState(new Component[] { _w.detailEditor }, editable);
+        if (structChange && !OTOptions.isEditable(getProgram(), getContextObservation())) {
+            updateEnabledState(new Component[]{_w.detailEditor}, false);
+        }
 
     }
 
