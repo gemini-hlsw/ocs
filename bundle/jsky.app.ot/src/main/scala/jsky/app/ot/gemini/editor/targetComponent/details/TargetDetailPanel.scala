@@ -22,6 +22,13 @@ final class TargetDetailPanel extends JPanel with TelescopePosEditor with Reentr
   // Put it all together
   setLayout(new GridBagLayout)
 
+  // Very sadly, we need to know whether or not calling `edit` will change the internal structure
+  // of the editor. If so, the editor needs to do some extra work afterwards to make sure enabled
+  // state is correct.
+  def willCauseStructureChange(spTarget: SPTarget): Boolean = {
+    tde == null || tde.getTag != spTarget.getTarget.getTag
+  }
+
   def edit(obsContext: GOption[ObsContext], spTarget: SPTarget, node: ISPNode): Unit = {
 
     // Create or replace the existing detail editor, if needed
