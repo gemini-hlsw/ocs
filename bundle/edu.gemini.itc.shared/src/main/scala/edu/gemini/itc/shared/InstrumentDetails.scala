@@ -1,6 +1,6 @@
 package edu.gemini.itc.shared
 
-import edu.gemini.spModel.core.Site
+import edu.gemini.spModel.core.{Wavelength, Site}
 import edu.gemini.spModel.gemini.acqcam.AcqCamParams
 import edu.gemini.spModel.gemini.altair.AltairParams
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2
@@ -28,7 +28,7 @@ final case class Flamingos2Parameters(
 final case class GmosParameters(
                      filter:            GmosCommonType.Filter,
                      grating:           GmosCommonType.Disperser,
-                     centralWavelength: Double,
+                     centralWavelength: Wavelength,
                      fpMask:            GmosCommonType.FPUnit,
                      spatialBinning:    Int,
                      spectralBinning:   Int,

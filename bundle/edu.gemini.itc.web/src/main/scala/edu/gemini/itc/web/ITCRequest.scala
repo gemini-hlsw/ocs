@@ -8,7 +8,7 @@ import edu.gemini.itc.nifs.NifsParameters
 import edu.gemini.itc.shared.SourceDefinition._
 import edu.gemini.itc.shared._
 import edu.gemini.itc.trecs.TRecsParameters
-import edu.gemini.spModel.core.Site
+import edu.gemini.spModel.core.{Wavelength, Site}
 import edu.gemini.spModel.gemini.acqcam.AcqCamParams
 import edu.gemini.spModel.gemini.altair.AltairParams
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2
@@ -117,7 +117,7 @@ object ITCRequest {
     val spatBinning = r.intParameter("spatBinning")
     val specBinning = r.intParameter("specBinning")
     val ccdType     = r.enumParameter(classOf[DetectorManufacturer])
-    val centralWl   = r.doubleParameter("instrumentCentralWavelength")
+    val centralWl   = Wavelength.fromNanometers(r.doubleParameter("instrumentCentralWavelength"))
     val fpMask      = if (site.equals(Site.GN)) r.enumParameter(classOf[FPUnitNorth],    "instrumentFPMask")   else r.enumParameter(classOf[FPUnitSouth],      "instrumentFPMask")
     val ifuMethod: Option[IfuMethod]   = if (fpMask.isIFU) {
       r.parameter("ifuMethod") match {
@@ -136,8 +136,8 @@ object ITCRequest {
     val camera      = r.parameter("instrumentCamera")
     val xDisp       = r.parameter("xdisp")
     val readNoise   = r.parameter("readNoise")
-    val centralWl   = r.doubleParameter("instrumentCentralWavelength")
-    val fpMask     = r.parameter("instrumentFPMask")
+    val centralWl   = Wavelength.fromMicrons(r.doubleParameter("instrumentCentralWavelength"))
+    val fpMask      = r.parameter("instrumentFPMask")
     new GnirsParameters(camera, grating, readNoise, xDisp, centralWl, fpMask)
   }
 
@@ -151,7 +151,7 @@ object ITCRequest {
   def michelleParameters(r: ITCRequest): MichelleParameters = {
     val filter      = r.parameter("instrumentFilter")
     val grating     = r.parameter("instrumentDisperser")
-    val centralWl   = r.doubleParameter("instrumentCentralWavelength")
+    val centralWl   = Wavelength.fromMicrons(r.doubleParameter("instrumentCentralWavelength"))
     val fpMask      = r.enumParameter(classOf[MichelleParams.Mask])
     val polarimetry = r.parameter("polarimetry")
     new MichelleParameters(filter, grating, centralWl, fpMask, polarimetry)
@@ -172,7 +172,7 @@ object ITCRequest {
     val filter      = r.parameter("instrumentFilter")
     val grating     = r.parameter("instrumentDisperser")
     val readNoise   = r.parameter("readNoise")
-    val centralWl   = r.doubleParameter("instrumentCentralWavelength")
+    val centralWl   = Wavelength.fromMicrons(r.doubleParameter("instrumentCentralWavelength"))
     val ifuMethod   = r.parameter("ifuMethod")
     val (offset, min, max, numX, numY, centerX, centerY) = ifuMethod match {
       case "singleIFU"  =>
@@ -197,7 +197,7 @@ object ITCRequest {
     val filter      = r.parameter("instrumentFilter")
     val window      = r.parameter("instrumentWindow")
     val grating     = r.parameter("instrumentDisperser")
-    val centralWl   = r.doubleParameter("instrumentCentralWavelength")
+    val centralWl   = Wavelength.fromMicrons(r.doubleParameter("instrumentCentralWavelength"))
     val fpMask      = r.parameter("instrumentFPMask")
     new TRecsParameters(filter, window, grating, centralWl, fpMask)
   }

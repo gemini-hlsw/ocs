@@ -2,6 +2,7 @@ package edu.gemini.itc.baseline
 
 import edu.gemini.itc.baseline.util._
 import edu.gemini.itc.nifs.NifsParameters
+import edu.gemini.spModel.core.Wavelength
 
 /**
  * NIFS baseline test fixtures.
@@ -16,7 +17,7 @@ object BaselineNifs {
       NifsParameters.HK_G0603,
       NifsParameters.K_G5605,
       NifsParameters.LOW_READ_NOISE,
-      2.1,                      // central wavelength
+      Wavelength.fromMicrons(2.1),// central wavelength
       NifsParameters.SINGLE_IFU,// IFU method
       "0",                      // offset
       "0.0",                    // min offset
@@ -31,7 +32,7 @@ object BaselineNifs {
       NifsParameters.HK_G0603,
       NifsParameters.K_G5605,
       NifsParameters.LOW_READ_NOISE,
-      2.1,                      // central wavelength
+      Wavelength.fromMicrons(2.1),// central wavelength
       NifsParameters.SINGLE_IFU,// IFU method
       "0",                      // offset
       "0.0",                    // min offset
@@ -46,7 +47,7 @@ object BaselineNifs {
       NifsParameters.HK_G0603,
       NifsParameters.K_G5605,
       NifsParameters.LOW_READ_NOISE,
-      2.1,                      // central wavelength
+      Wavelength.fromMicrons(2.1),// central wavelength
       NifsParameters.SINGLE_IFU,// IFU method
       "0",                      // offset
       "0.0",                    // min offset
@@ -63,7 +64,7 @@ object BaselineNifs {
       NifsParameters.HK_G0603,
       NifsParameters.H_G5604,
       NifsParameters.LOW_READ_NOISE,
-      2.2,                      // central wavelength
+      Wavelength.fromMicrons(2.2),// central wavelength
       NifsParameters.SUMMED_APERTURE_IFU, // IFU method
       "0",                      // offset
       "0.0",                    // min offset
@@ -78,7 +79,7 @@ object BaselineNifs {
       NifsParameters.HK_G0603,
       NifsParameters.H_G5604,
       NifsParameters.LOW_READ_NOISE,
-      2.2,                      // central wavelength
+      Wavelength.fromMicrons(2.2),// central wavelength
       NifsParameters.SUMMED_APERTURE_IFU, // IFU method
       "0",                      // offset
       "0.0",                    // min offset
@@ -93,7 +94,7 @@ object BaselineNifs {
       NifsParameters.HK_G0603,
       NifsParameters.H_G5604,
       NifsParameters.LOW_READ_NOISE,
-      2.2,                      // central wavelength
+      Wavelength.fromMicrons(2.2),// central wavelength
       NifsParameters.SUMMED_APERTURE_IFU, // IFU method
       "0",                      // offset
       "0.0",                    // min offset
@@ -110,7 +111,7 @@ object BaselineNifs {
       NifsParameters.HK_G0603,
       NifsParameters.H_G5604,
       NifsParameters.LOW_READ_NOISE,
-      2.2,                      // central wavelength
+      Wavelength.fromMicrons(2.2),// central wavelength
       NifsParameters.RADIAL_IFU,// IFU method
       "0",                      // offset
       "0.0",                    // min offset
@@ -125,7 +126,7 @@ object BaselineNifs {
       NifsParameters.HK_G0603,
       NifsParameters.H_G5604,
       NifsParameters.LOW_READ_NOISE,
-      2.2,                      // central wavelength
+      Wavelength.fromMicrons(2.2),// central wavelength
       NifsParameters.RADIAL_IFU,// IFU method
       "0",                      // offset
       "0.0",                    // min offset
@@ -140,7 +141,7 @@ object BaselineNifs {
       NifsParameters.HK_G0603,
       NifsParameters.H_G5604,
       NifsParameters.LOW_READ_NOISE,
-      2.2,                      // central wavelength
+      Wavelength.fromMicrons(2.2),// central wavelength
       NifsParameters.RADIAL_IFU,// IFU method
       "0",                      // offset
       "0.0",                    // min offset

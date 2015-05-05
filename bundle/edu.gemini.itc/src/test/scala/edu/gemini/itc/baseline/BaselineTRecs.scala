@@ -2,6 +2,7 @@ package edu.gemini.itc.baseline
 
 import edu.gemini.itc.baseline.util._
 import edu.gemini.itc.trecs.TRecsParameters
+import edu.gemini.spModel.core.Wavelength
 
 /**
  * TRecs baseline test fixtures.
@@ -19,7 +20,7 @@ object BaselineTRecs {
       "N",                                //String Filter,
       "KBr",                              //String cryostat window
       "HiRes-10",                         //String grating, ("none") for imaging
-      12,                                 //instrumentCentralWavelength
+      Wavelength.fromMicrons(12),         //instrumentCentralWavelength
       TRecsParameters.SLIT0_21            //String FP_Mask,
     )
   ), TRecsObservingConditions)

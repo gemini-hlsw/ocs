@@ -2,6 +2,7 @@ package edu.gemini.itc.nifs;
 
 import edu.gemini.itc.shared.AltairParameters;
 import edu.gemini.itc.shared.InstrumentDetails;
+import edu.gemini.spModel.core.Wavelength;
 import scala.Option;
 
 /**
@@ -43,7 +44,7 @@ public final class NifsParameters implements InstrumentDetails {
     private final String filter;
     private final String grating;
     private final String readNoise;
-    private final double cenralWavelength;
+    private final Wavelength cenralWavelength;
     private final String ifuMethod;
     private final String ifuOffset;
     private final String ifuMinOffset;
@@ -60,7 +61,7 @@ public final class NifsParameters implements InstrumentDetails {
     public NifsParameters(final String filter,
                           final String grating,
                           final String readNoise,
-                          final double centralWavelength,
+                          final Wavelength centralWavelength,
                           final String ifuMethod,
                           final String ifuOffset,
                           final String ifuMinOffset,
@@ -83,7 +84,7 @@ public final class NifsParameters implements InstrumentDetails {
         this.ifuCenterX         = ifuCenterX;
         this.ifuCenterY         = ifuCenterY;
         this.altair             = altair;
-        this.cenralWavelength   = centralWavelength * 1000; // convert to [nm]
+        this.cenralWavelength   = centralWavelength;
     }
 
     public String getFilter() {
@@ -99,11 +100,11 @@ public final class NifsParameters implements InstrumentDetails {
     }
 
     public double getInstrumentCentralWavelength() {
-        return cenralWavelength;
+        return cenralWavelength.toNanometers();
     }
 
     public double getUnXDispCentralWavelength() {
-        return cenralWavelength;
+        return cenralWavelength.toNanometers();
     }
 
 

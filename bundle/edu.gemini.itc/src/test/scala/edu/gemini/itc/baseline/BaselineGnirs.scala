@@ -2,6 +2,7 @@ package edu.gemini.itc.baseline
 
 import edu.gemini.itc.baseline.util._
 import edu.gemini.itc.gnirs.GnirsParameters
+import edu.gemini.spModel.core.Wavelength
 
 /**
  * GNIRS baseline test fixtures.
@@ -16,7 +17,7 @@ object BaselineGnirs {
       GnirsParameters.G10,
       GnirsParameters.LOW_READ_NOISE,
       GnirsParameters.X_DISP_ON,
-      2.4,
+      Wavelength.fromMicrons(2.4),
       GnirsParameters.SLIT0_1),
 
     new GnirsParameters(
@@ -24,7 +25,7 @@ object BaselineGnirs {
       GnirsParameters.G110,
       GnirsParameters.HIGH_READ_NOISE,
       GnirsParameters.X_DISP_OFF,
-      2.4,
+      Wavelength.fromMicrons(2.4),
       GnirsParameters.SLIT0_2),
 
     new GnirsParameters(
@@ -32,7 +33,7 @@ object BaselineGnirs {
       GnirsParameters.G32,
       GnirsParameters.LOW_READ_NOISE,
       GnirsParameters.X_DISP_ON,
-      2.6,
+      Wavelength.fromMicrons(2.6),
       GnirsParameters.SLIT0_675),
 
     new GnirsParameters(
@@ -40,7 +41,7 @@ object BaselineGnirs {
       GnirsParameters.G32,
       GnirsParameters.HIGH_READ_NOISE,
       GnirsParameters.X_DISP_OFF,
-      2.6,
+      Wavelength.fromMicrons(2.6),
       GnirsParameters.SLIT3_0)
 
   ))

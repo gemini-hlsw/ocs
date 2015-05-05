@@ -1,6 +1,7 @@
 package edu.gemini.itc.michelle;
 
 import edu.gemini.itc.shared.InstrumentDetails;
+import edu.gemini.spModel.core.Wavelength;
 import edu.gemini.spModel.gemini.michelle.MichelleParams.*;
 
 /**
@@ -27,7 +28,7 @@ public final class MichelleParameters implements InstrumentDetails {
     private final Mask mask;
     private final String filter;
     private final String grating;
-    private final double centralWavelength;
+    private final Wavelength centralWavelength;
     private final String polarimetry;
 
     /**
@@ -35,12 +36,12 @@ public final class MichelleParameters implements InstrumentDetails {
      */
     public MichelleParameters(final String filter,
                               final String grating,
-                              final double instrumentCentralWavelength,
+                              final Wavelength instrumentCentralWavelength,
                               final Mask mask,
                               final String polarimetry) {
         this.filter = filter;
         this.grating = grating;
-        this.centralWavelength = instrumentCentralWavelength * 1000;
+        this.centralWavelength = instrumentCentralWavelength;
         this.mask = mask;
         this.polarimetry = polarimetry;
 
@@ -59,7 +60,7 @@ public final class MichelleParameters implements InstrumentDetails {
     }
 
     public double getInstrumentCentralWavelength() {
-        return centralWavelength;
+        return centralWavelength.toNanometers();
     }
 
     public boolean polarimetryIsUsed() {
