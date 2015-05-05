@@ -58,4 +58,9 @@ object AlmostEqual {
         (a.ra ~= b.ra) && (a.dec ~= b.dec)
     }
 
+  implicit val WavelengthAlmostEqual =
+    new AlmostEqual[Wavelength] {
+      def almostEqual(a: Wavelength, b: Wavelength) =
+        a.toNanometers ~= b.toNanometers
+    }
 }

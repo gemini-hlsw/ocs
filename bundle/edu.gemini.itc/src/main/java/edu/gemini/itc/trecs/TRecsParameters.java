@@ -1,6 +1,7 @@
 package edu.gemini.itc.trecs;
 
 import edu.gemini.itc.shared.InstrumentDetails;
+import edu.gemini.spModel.core.Wavelength;
 
 /**
  * This class holds the information from the Trecs section
@@ -62,7 +63,7 @@ public final class TRecsParameters implements InstrumentDetails {
     private final String _Filter;  // filters
     private final String _InstrumentWindow;
     private final String _grating; // Grating or null
-    private final double _instrumentCentralWavelength;
+    private final Wavelength _instrumentCentralWavelength;
     private final String _FP_Mask;
 
     /**
@@ -71,12 +72,12 @@ public final class TRecsParameters implements InstrumentDetails {
     public TRecsParameters(final String Filter,
                            final String instrumentWindow,
                            final String grating,
-                           final double instrumentCentralWavelength,
+                           final Wavelength instrumentCentralWavelength,
                            final String FP_Mask) {
         _Filter = Filter;
         _InstrumentWindow = instrumentWindow;
         _grating = grating;
-        _instrumentCentralWavelength = instrumentCentralWavelength * 1000; // convert to [nm]
+        _instrumentCentralWavelength = instrumentCentralWavelength;
         _FP_Mask = FP_Mask;
     }
 
@@ -97,7 +98,7 @@ public final class TRecsParameters implements InstrumentDetails {
     }
 
     public double getInstrumentCentralWavelength() {
-        return _instrumentCentralWavelength;
+        return _instrumentCentralWavelength.toNanometers();
     }
 
 }

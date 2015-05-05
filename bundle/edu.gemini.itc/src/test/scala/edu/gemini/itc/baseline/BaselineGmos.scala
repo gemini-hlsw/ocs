@@ -1,8 +1,8 @@
 package edu.gemini.itc.baseline
 
 import edu.gemini.itc.baseline.util._
-import edu.gemini.itc.shared.{GmosParameters, IfuRadial, IfuSingle}
-import edu.gemini.spModel.core.Site
+import edu.gemini.itc.shared.{GmosParameters, IfuSingle}
+import edu.gemini.spModel.core.{Wavelength, Site}
 import edu.gemini.spModel.gemini.gmos.GmosCommonType.DetectorManufacturer
 import edu.gemini.spModel.gemini.gmos.GmosNorthType.{DisperserNorth, FPUnitNorth, FilterNorth}
 import edu.gemini.spModel.gemini.gmos.GmosSouthType.{DisperserSouth, FPUnitSouth, FilterSouth}
@@ -23,7 +23,7 @@ object BaselineGmos {
     GmosParameters(
       FilterNorth.i_G0302,
       DisperserNorth.MIRROR,
-      500.0,                        // central wavelength
+      Wavelength.fromNanometers(500.0), // central wavelength
       FPUnitNorth.FPU_NONE,
       1,
       1,
@@ -33,7 +33,7 @@ object BaselineGmos {
     GmosParameters(
       FilterNorth.i_G0302,
       DisperserNorth.MIRROR,
-      500.0,                        // central wavelength
+      Wavelength.fromNanometers(500.0), // central wavelength
       FPUnitNorth.FPU_NONE,
       2,
       2,
@@ -45,7 +45,7 @@ object BaselineGmos {
     GmosParameters(
       FilterSouth.g_G0325,
       DisperserSouth.MIRROR,
-      500.0,
+      Wavelength.fromNanometers(500.0),
       FPUnitSouth.FPU_NONE,
       2,
       4,
@@ -55,7 +55,7 @@ object BaselineGmos {
     GmosParameters(
       FilterSouth.g_G0325,
       DisperserSouth.MIRROR,
-      500.0,
+      Wavelength.fromNanometers(500.0),
       FPUnitSouth.FPU_NONE,
       4,
       4,
@@ -73,7 +73,7 @@ object BaselineGmos {
     GmosParameters(
       FilterNorth.g_G0301,
       DisperserNorth.R150_G5306,
-      500.0,
+      Wavelength.fromNanometers(500.0),
       FPUnitNorth.LONGSLIT_2,
       1,
       1,
@@ -83,7 +83,7 @@ object BaselineGmos {
     GmosParameters(
       FilterNorth.g_G0301,
       DisperserNorth.R400_G5305,
-      500.0,
+      Wavelength.fromNanometers(500.0),
       FPUnitNorth.IFU_1,
       2,
       2,
@@ -93,7 +93,7 @@ object BaselineGmos {
     GmosParameters(
       FilterNorth.g_G0301,
       DisperserNorth.R400_G5305,
-      500.0,
+      Wavelength.fromNanometers(500.0),
       FPUnitNorth.IFU_1,
       2,
       2,
@@ -105,7 +105,7 @@ object BaselineGmos {
     GmosParameters(
       FilterSouth.g_G0325,
       DisperserSouth.R150_G5326,
-      500.0,
+      Wavelength.fromNanometers(500.0),
       FPUnitSouth.LONGSLIT_2,
       2,
       4,
@@ -115,7 +115,7 @@ object BaselineGmos {
 //    GmosParameters(
 //      FilterSouth.g_G0325,
 //      DisperserSouth.R400_G5325,
-//      500.0,
+//      Wavelength.fromNanometers(500.0),
 //      FPUnitSouth.IFU_1,
 //      4,
 //      4,

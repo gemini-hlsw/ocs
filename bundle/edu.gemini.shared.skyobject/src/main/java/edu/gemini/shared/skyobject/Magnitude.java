@@ -1,12 +1,10 @@
-//
-// $
-//
-
 package edu.gemini.shared.skyobject;
 
 import edu.gemini.shared.util.immutable.None;
 import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.shared.util.immutable.Some;
+import edu.gemini.spModel.core.Wavelength;
+import edu.gemini.spModel.core.Wavelength$;
 
 import java.io.Serializable;
 import java.util.Comparator;
@@ -54,18 +52,21 @@ public final class Magnitude implements Comparable, Serializable {
         public static final Comparator<Band> WAVELENGTH_COMPARATOR =
             new Comparator<Band>() {
                 @Override public int compare(Band b1, Band b2) {
-                    int b1w = b1.wavelengthMidPoint.getOrElse(Integer.MAX_VALUE);
-                    int b2w = b2.wavelengthMidPoint.getOrElse(Integer.MAX_VALUE);
-                    int res = b1w - b2w;
-                    return res==0 ? b1.ordinal() - b2.ordinal() : res;
+                    if (b1.wavelengthMidPoint.isDefined() && b2.wavelengthMidPoint.isDefined()) {
+                        double w1 = b1.getWavelengthMidPoint().getValue().toNanometers();
+                        double w2 = b2.getWavelengthMidPoint().getValue().toNanometers();
+                        return (int) (w1 - w2);
+                    } else {
+                        return b1.ordinal() - b2.ordinal();
+                    }
                 }
             };
 
-        private final Option<Integer> wavelengthMidPoint;    // nm
+        private final Option<Wavelength> wavelengthMidPoint;
         private final Option<String> description;
 
         Band(Option<Integer> mid, Option<String> desc) {
-            this.wavelengthMidPoint = mid;
+            this.wavelengthMidPoint = mid.map(l -> Wavelength$.MODULE$.fromNanometers(l));
             this.description        = desc;
         }
 
@@ -74,7 +75,7 @@ public final class Magnitude implements Comparable, Serializable {
         }
 
         Band(int mid, String desc) {
-            this.wavelengthMidPoint = new Some<>(mid);
+            this.wavelengthMidPoint = new Some<>(Wavelength$.MODULE$.fromNanometers(mid));
             this.description = (desc == null) ? None.STRING : new Some<>(desc);
         }
 
@@ -82,7 +83,7 @@ public final class Magnitude implements Comparable, Serializable {
             return description;
         }
 
-        public Option<Integer> getWavelengthMidPoint() {
+        public Option<Wavelength> getWavelengthMidPoint() {
             return wavelengthMidPoint;
         }
 

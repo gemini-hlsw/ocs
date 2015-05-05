@@ -2,6 +2,7 @@ package edu.gemini.itc.baseline
 
 import edu.gemini.itc.baseline.util._
 import edu.gemini.itc.michelle.MichelleParameters
+import edu.gemini.spModel.core.Wavelength
 import edu.gemini.spModel.gemini.michelle.MichelleParams.Mask
 
 /**
@@ -16,7 +17,7 @@ object BaselineMichelle {
     new MichelleParameters(
       "Nprime",                           //String Filter,
       "none",                             //String grating,
-      12,                                 //instrumentCentralWavelength,
+      Wavelength.fromMicrons(12),         //instrumentCentralWavelength,
       Mask.MASK_IMAGING,                  //FP_Mask,
       MichelleParameters.ENABLED          //String polarimetry (enabled only allowed if imaging)
     )
@@ -26,7 +27,7 @@ object BaselineMichelle {
     new MichelleParameters(
       "Nprime",                           //String Filter,
       "medN2",                            //String grating,
-      11,                                 //instrumentCentralWavelength,
+      Wavelength.fromMicrons(11),         //instrumentCentralWavelength,
       Mask.MASK_2,                        //FP_Mask,
       MichelleParameters.DISABLED         //String polarimetry (enabled only allowed if imaging)
     )
@@ -36,7 +37,7 @@ object BaselineMichelle {
     new MichelleParameters(
       "Qa",                               //String Filter,
       "lowQ",                             //String grating,
-      18.2,                               //instrumentCentralWavelength,
+      Wavelength.fromMicrons(18.2),       //instrumentCentralWavelength,
       Mask.MASK_4,                        //FP_Mask,
       MichelleParameters.DISABLED         //String polarimetry (enabled only allowed if imaging)
     )

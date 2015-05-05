@@ -1,6 +1,7 @@
 package edu.gemini.itc.gnirs;
 
 import edu.gemini.itc.shared.InstrumentDetails;
+import edu.gemini.spModel.core.Wavelength;
 
 /**
  * This class holds the information from the Gnirs section
@@ -51,7 +52,7 @@ public final class GnirsParameters implements InstrumentDetails {
     private final String grating; // Grating or null
     private final String camera;
     private final String readNoise;
-    private final double instrumentCentralWavelength;
+    private final Wavelength instrumentCentralWavelength;
     private final String mask;
     private final String xDisp;
 
@@ -62,13 +63,13 @@ public final class GnirsParameters implements InstrumentDetails {
                            final String grating,
                            final String readNoise,
                            final String xDisp,
-                           final double instrumentCentralWavelength,
+                           final Wavelength instrumentCentralWavelength,
                            final String mask) {
         this.grating = grating;
         this.camera = camera;
         this.xDisp = xDisp;
         this.readNoise = readNoise;
-        this.instrumentCentralWavelength = instrumentCentralWavelength * 1000;
+        this.instrumentCentralWavelength = instrumentCentralWavelength;
         this.mask = mask;
     }
 
@@ -86,14 +87,14 @@ public final class GnirsParameters implements InstrumentDetails {
 
     public double getInstrumentCentralWavelength() {
         if (!isXDispUsed()) {
-            return instrumentCentralWavelength;
+            return instrumentCentralWavelength.toNanometers();
         } else {
             return XDISP_CENTRAL_WAVELENGTH;
         }
     }
 
     public double getUnXDispCentralWavelength() {
-        return instrumentCentralWavelength;
+        return instrumentCentralWavelength.toNanometers();
     }
 
     public String getStringSlitWidth() {

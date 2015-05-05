@@ -9,7 +9,7 @@ import edu.gemini.pot.sp.SPComponentType
 import edu.gemini.pot.sp.SPComponentType._
 import edu.gemini.shared.skyobject.Magnitude
 import edu.gemini.spModel.config2.{Config, ConfigSequence, ItemKey}
-import edu.gemini.spModel.core.Peer
+import edu.gemini.spModel.core.{Wavelength, Peer}
 import edu.gemini.spModel.guide.GuideProbe
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.rich.shared.immutable.asScalaOpt
@@ -186,10 +186,11 @@ trait ItcTable extends Table {
 
   private def extractSourceMagnitude(target: ITarget, c: Config): String \/ (Double, WavebandDefinition) = {
 
-    def closestBand(bands: List[Magnitude], wl: Double) =
-      bands.minBy(m => Math.abs(m.getBand.getWavelengthMidPoint.getValue.toDouble - wl))
+    def closestBand(bands: List[Magnitude], wl: Wavelength) =
+      // note, at this point we've filtered out all bands without a wavelength
+      bands.minBy(m => Math.abs(m.getBand.getWavelengthMidPoint.getValue.toNanometers - wl.toNanometers))
 
-    def mags(wl: Double): String \/ Magnitude = {
+    def mags(wl: Wavelength): String \/ Magnitude = {
       val bands = target.getMagnitudes.toList.asScala.toList.
         filter(_.getBand.getWavelengthMidPoint.isDefined).// ignore bands with unknown wavelengths (currently AP only)
         filterNot(_.getBand == Magnitude.Band.UC).        // ignore UC magnitudes
@@ -200,7 +201,7 @@ trait ItcTable extends Table {
 
     for {
       wl  <- ConfigExtractor.extractObservingWavelength(c)
-      mag <- mags(wl*1000) // convert wavelength from micrometer [um] to nanometer [nm]
+      mag <- mags(wl)
     } yield {
       val b = mag.getBrightness
       mag.getBand match {

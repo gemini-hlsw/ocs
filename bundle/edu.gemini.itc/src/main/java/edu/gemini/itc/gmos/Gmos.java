@@ -135,7 +135,7 @@ public abstract class Gmos extends Instrument implements BinningProvider {
         // TODO: grating is not yet defined, need to work with grating from gp, clean this up
         if (!gp.grating().equals(GmosNorthType.DisperserNorth.MIRROR) && !gp.grating().equals(GmosSouthType.DisperserSouth.MIRROR)) {
             _gratingOptics = new GmosGratingOptics(getDirectory() + "/" + getPrefix(), gp.grating(), _detector,
-                    gp.centralWavelength(),
+                    gp.centralWavelength().toNanometers(),
                     _detector.getDetectorPixels(),
                     gp.spectralBinning());
             _sampling = _gratingOptics.getGratingDispersion_nmppix();
@@ -281,7 +281,7 @@ public abstract class Gmos extends Instrument implements BinningProvider {
     }
 
     public double getCentralWavelength() {
-        return gp.centralWavelength();
+        return gp.centralWavelength().toNanometers();
     }
 
     //Abstract class for Detector Pixel Transmission  (i.e.  Create Detector gaps)
