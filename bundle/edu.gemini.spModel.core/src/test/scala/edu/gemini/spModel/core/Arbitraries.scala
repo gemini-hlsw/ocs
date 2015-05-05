@@ -131,6 +131,9 @@ trait Arbitraries {
       arbitrary[Target.NonSiderealTarget],
       arbitrary[Target.NamedTarget]))
 
+  implicit val arbWavelength: Arbitrary[Wavelength] =
+    Arbitrary(arbitrary[Short].map(n => Math.abs(n) / 1000.0).map(Wavelength.fromMicrons))
+
 }
 
 

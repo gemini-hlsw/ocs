@@ -13,7 +13,7 @@ sealed trait Wavelength extends Serializable {
   /** The wavelength as microns or micrometers.
     * @group Conversions
     */
-  def toMicrons: Double = toNanometers * 1000
+  def toMicrons: Double = toNanometers / 1000
 
   /**
    * Addition.
@@ -59,6 +59,7 @@ object Wavelength {
    * @group Constructors
    */
   def fromNanometers(l: Double) = new Wavelength {
+    require(l >= 0)
     override val toNanometers = l
   }
 
@@ -66,13 +67,8 @@ object Wavelength {
    * Constructs a `Wavelength` from the given value in microns (aka. micrometers).
    * @group Constructors
    */
-  def fromMicrons(l: Double) = fromMicrometers(l)
-
-  /**
-   * Constructs a `Wavelength` from the given value in micrometers (aka. microns).
-   * @group Constructors
-   */
-  def fromMicrometers(l: Double) = new Wavelength {
+  def fromMicrons(l: Double) = new Wavelength {
+    require(l >= 0)
     override val toNanometers = l * 1000
   }
 
