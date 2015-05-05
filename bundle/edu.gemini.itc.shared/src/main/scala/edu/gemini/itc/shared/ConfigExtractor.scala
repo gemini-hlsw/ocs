@@ -35,8 +35,8 @@ object ConfigExtractor {
   private val NdFilterKey         = new ItemKey("instrument:ndFilter")
   private val FpuKey              = new ItemKey("instrument:fpu")
   private val DisperserKey        = new ItemKey("instrument:disperser")
-  private val CcdXBinKey          = new ItemKey("instrument:ccdXBinning")
-  private val CcdYBinKey          = new ItemKey("instrument:ccdYBinning")
+  private val CcdXBinKey          = new ItemKey("instrument:ccdXBinning")           // X aka spectral binning
+  private val CcdYBinKey          = new ItemKey("instrument:ccdYBinning")           // Y aka spatial binning
   private val ReadModeKey         = new ItemKey("instrument:readMode")
   private val CcdManufacturerKey  = new ItemKey("instrument:detectorManufacturer")
   private val CameraKey           = new ItemKey("instrument:camera")
@@ -93,8 +93,8 @@ object ConfigExtractor {
       filter      <- extract[Filter]        (c, FilterKey)
       grating     <- extract[Disperser]     (c, DisperserKey)
       mask        <- extract[FPUnit]        (c, FpuKey)
-      spatBin     <- extract[Binning]       (c, CcdXBinKey)
-      specBin     <- extract[Binning]       (c, CcdYBinKey)
+      specBin     <- extract[Binning]       (c, CcdXBinKey)
+      spatBin     <- extract[Binning]       (c, CcdYBinKey)
       ccdType     <- extract[DetectorManufacturer](c, CcdManufacturerKey)
       siteString  <- extract[String]        (c, InstrumentKey)
       wavelen     <- extractObservingWavelength(c)
