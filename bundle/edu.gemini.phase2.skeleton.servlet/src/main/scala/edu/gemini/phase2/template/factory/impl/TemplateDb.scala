@@ -41,7 +41,7 @@ object TemplateDb {
   def load(user: java.util.Set[Principal]):Either[String, TemplateDb] = {
     val odb = DBLocalDatabase.createTransient
     val res = XMLS.mapM { url =>
-      LOG.info(s"Loading $url")
+      LOG.fine(s"Loading $url")
       parse(odb)(url)
     }
     res.right foreach { _.foreach(odb.put) }
