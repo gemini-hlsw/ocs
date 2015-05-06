@@ -112,6 +112,7 @@ def common(version: Version) = AppConfig(
     BundleSpec("edu.gemini.phase2.skeleton.servlet",     version),
     BundleSpec("edu.gemini.qpt.shared",                  version),
     BundleSpec("edu.gemini.services.server",             version),
+    BundleSpec("edu.gemini.seqexec.shared",              version),
     BundleSpec("edu.gemini.smartgcal.odbinit",           version),
     BundleSpec("edu.gemini.smartgcal.servlet",           version),
     BundleSpec("edu.gemini.sp.vcs.tui",                  version),
