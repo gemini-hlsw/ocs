@@ -1,0 +1,23 @@
+Instrument : GRACES
+Blueprints : GRACES_N_BP.xml
+Version : 2014 May 22
+
+Observations are identified by Library IDs indicated with {}
+
+# DEFINITIONS
+Phase I = PI
+
+R = Phase-I target R-band magnitude
+
+IF          R < 6.5 INCLUDE {1}
+ELIF 6.5 <= R < 10  INCLUDE {2}
+ELIF 10  <= R < 21  INCLUDE {3}
+ELIF 21  <= R       INCLUDE {4}
+ELSE INCLUDE {1},{2},{3},{4} # No magnitude given so include all
+
+IF   FIBER-MODE == 1 AND READ-MODE == Fast   INCLUDE {5}
+ELIF FIBER-MODE == 1 AND READ-MODE == Normal INCLUDE {6}
+ELIF FIBER-MODE == 1 AND READ-MODE == Slow   INCLUDE {7}
+ELIF FIBER-MODE == 2 AND READ-MODE == Fast   INCLUDE {8}
+ELIF FIBER-MODE == 2 AND READ-MODE == Normal INCLUDE {9}
+ELIF FIBER-MODE == 2 AND READ-MODE == Slow   INCLUDE {10}
