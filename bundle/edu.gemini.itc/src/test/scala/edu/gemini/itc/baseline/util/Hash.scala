@@ -124,13 +124,23 @@ object Hash {
       odp.getSourceFraction
     )
 
+  // TODO: simplify this again once refactoring of source/source profile/source distribution is done
   def calc(src: SourceDefinition): Int =
     hash(
       src.getProfileType.name,
-      src.profile.norm,
-      src.profile.units.name,
-      src.distribution,
-      src.normBand.name,
+      src.getDistributionType.name,
+      src.profile match {
+        case s: GaussianSource => s.fwhm
+        case _                 => 0.0
+      },
+      src.distribution match {
+        case d: BlackBody       => d.temperature
+        case d: PowerLaw        => d.index
+        case d: EmissionLine    => (d.wavelength * 1000 + d.continuum) * 1000 + d.flux
+        case d: Library         => d.sedSpectrum
+      },
+      src.profile.norm,       // this is the magnitude value
+      src.normBand.name,      // this is the magnitude band name
       src.redshift
     )
 
