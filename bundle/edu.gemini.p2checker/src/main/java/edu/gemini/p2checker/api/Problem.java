@@ -12,104 +12,78 @@ import java.io.Serializable;
  * A Problem contains the description of a condition that needs to
  * be fixed in a given <code>ISPProgramNode</code>
  */
-public class Problem implements Serializable, Comparable<Problem> {
+public class Problem implements Serializable {
 
-    public static enum Type {
-
+    public enum Type {
         NONE("None"),
         WARNING("Warning"),
         ERROR("Error");
 
-        private String _displayValue;
+        public final String displayValue;
 
-        private Type(String displayValue) {
-            _displayValue = displayValue;
+        Type(String displayValue) {
+            this.displayValue = displayValue;
         }
 
         public String getDisplayValue() {
-            return _displayValue;
+            return displayValue;
         }
     }
 
-    private Type _type;
+    public final Type type;
 
-    private String _id; // A unique id for this problem
+    public final String id; // A unique id for this problem
 
-    private String _description;
+    public final String description;
 
-    private ISPProgramNode _node; //The node that produced the problem
+    private final ISPProgramNode node; //The node that produced the problem
 
-//    public Problem(Type type, String description, ISPProgramNode n) {
-//        // XXX set ID!
-//        _type = type;
-//        _description = description;
-//        _node = n;
-//    }
-    
     public Problem(Type type, String id, String description, ISPProgramNode n) {
-        _type = type;
-        _id = id;
-        _description = description;
-        _node = n;
+        this.type        = type;
+        this.id          = id;
+        this.description = description;
+        this.node        = n;
     }
 
-    public Type getType() {
-        return _type;
+    public final Type getType() {
+        return type;
     }
 
-    public String getDescription() {
-        return _description;
+    public final String getDescription() {
+        return description;
     }
 
-    public String getId() {
-        return _id;
+    public final String getId() {
+        return id;
     }
 
-    public String toString() {
-        return _type.getDisplayValue() + ":" + _description + " at " + _node;
+    public final String toString() {
+        return type.getDisplayValue() + ":" + description + " at " + node;
     }
 
-    public ISPProgramNode getAffectedNode() {
-        return _node;
+    public final ISPProgramNode getAffectedNode() {
+        return node;
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof Problem)) return false;
+        if (o == null || getClass() != o.getClass()) return false;
 
-        Problem problem = (Problem) o;
+        final Problem that = (Problem) o;
 
-        if (_description != null ? !_description.equals(problem._description) : problem._description != null)
-            return false;
-        if (_id != null ? !_id.equals(problem._id) : problem._id != null) return false;
-        if (_node != null ? !_node.equals(problem._node) : problem._node != null) return false;
-        if (_type != problem._type) return false;
-
-        return true;
+        if (type != that.type) return false;
+        if (!id.equals(that.id)) return false;
+        if (!description.equals(that.description)) return false;
+        return node.equals(that.node);
     }
 
     @Override
     public int hashCode() {
-        int result = _description != null ? _description.hashCode() : 0;
-        result = 31 * result + (_type != null ? _type.hashCode() : 0);
-        result = 31 * result + (_node != null ? _node.hashCode() : 0);
-        result = 31 * result + (_id != null ? _id.hashCode() : 0);
-        return result;
-    }
-
-    @Override
-    public int compareTo(Problem o) {
-        int result = _id.compareTo(o._id);
-        if (result == 0) {
-            result = _description.compareTo(o._description);
-            if (result == 0) {
-                result = _type.compareTo(o._type);
-                if (result == 0) {
-                    result = _node.toString().compareTo(o._node.toString());
-                }
-            }
-        }
+        int result = type.hashCode();
+        result = 31 * result + id.hashCode();
+        result = 31 * result + description.hashCode();
+        result = 31 * result + node.hashCode();
         return result;
     }
 }
