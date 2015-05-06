@@ -1,5 +1,7 @@
 package edu.gemini.itc.shared;
 
+import edu.gemini.spModel.core.Wavelength;
+
 import java.io.Serializable;
 
 /**
@@ -111,7 +113,7 @@ public final class SourceDefinition implements Serializable {
         return ((BlackBody) distribution).temperature();
     }
 
-    public double getELineWavelength() {
+    public Wavelength getELineWavelength() {
         return ((EmissionLine) distribution).wavelength();
     }
 

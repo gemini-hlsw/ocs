@@ -3,6 +3,7 @@ package edu.gemini.itc.baseline.util
 import edu.gemini.itc.nifs.NifsParameters
 import edu.gemini.itc.shared.TelescopeDetails.Coating
 import edu.gemini.itc.shared._
+import edu.gemini.spModel.core.Wavelength
 import edu.gemini.spModel.gemini.altair.AltairParams.{FieldLens, GuideStarType}
 import edu.gemini.spModel.guide.GuideProbe
 import edu.gemini.spModel.telescope.IssPort
@@ -140,7 +141,7 @@ object Fixture {
     ),
     new SourceDefinition(
       UniformSource(22.0, BrightnessUnit.MAG_PSA),
-      EmissionLine(2.2, 250.0, 5.0e-19, "watts_flux", 1.0e-16, "watts_fd_wavelength"),
+      EmissionLine(Wavelength.fromMicrons(2.2), 250.0, 5.0e-19, "watts_flux", 1.0e-16, "watts_fd_wavelength"),
       WavebandDefinition.K,
       0.75
     )
@@ -156,7 +157,7 @@ object Fixture {
     ),
     new SourceDefinition(
       UniformSource(12.0, BrightnessUnit.MAG_PSA),
-      EmissionLine(12.8, 500, 5.0e-19, "watts_flux", 1.0e-16, "watts_fd_wavelength"), // TODO: typed units instead of strings
+      EmissionLine(Wavelength.fromMicrons(12.8), 500, 5.0e-19, "watts_flux", 1.0e-16, "watts_fd_wavelength"), // TODO: typed units instead of strings
       WavebandDefinition.N,
       1.5
     )

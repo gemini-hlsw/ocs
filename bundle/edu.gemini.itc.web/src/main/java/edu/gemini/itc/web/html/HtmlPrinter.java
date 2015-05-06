@@ -31,7 +31,7 @@ public final class HtmlPrinter {
         sb.append(" is a");
         switch (sdp.getDistributionType()) {
             case ELINE:
-                sb.append("n emission line, at a wavelength of " + device.toString(sdp.getELineWavelength()));
+                sb.append("n emission line, at a wavelength of " + device.toString(sdp.getELineWavelength().toMicrons()));
                 device.setPrecision(2);
                 device.clear();
                 sb.append(" microns, and with a width of " + device.toString(sdp.getELineWidth()) + " km/s.\n  It's total flux is " +

@@ -1,5 +1,7 @@
 package edu.gemini.itc.shared;
 
+import edu.gemini.spModel.core.Wavelength;
+
 /**
  * This class creates a EmissionLine spectrum over the interval defined by the
  * blocking filter.  The code comes from PPuxley's Mathcad Demo
@@ -14,14 +16,12 @@ public class EmissionLineSpectrum implements VisitableSampledSpectrum {
         _spectrum = spectrum;
     }
 
-    public EmissionLineSpectrum(double wavelength, double width, double flux,
+    public EmissionLineSpectrum(Wavelength wavelength, double width, double flux,
                                 double continuumFlux, String lineFluxUnits,
                                 String continuumFluxUnits, double z, double interval) {
-        double _flux;
         // convert the wavelenght to Nanometers.
-        double _wavelength = wavelength * 1000;
+        double _wavelength = wavelength.toNanometers();
         double _sampling = interval;  //0.2
-        double lambda;  // var to be used to construct sed
 
         double start = 300;//0.2*_wavelength;//.8
         double end = 30000;//1.8*_wavelength;//1.2

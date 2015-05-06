@@ -1,6 +1,6 @@
 package edu.gemini.itc.shared
 
-import edu.gemini.itc.shared
+import edu.gemini.spModel.core.Wavelength
 
 // ==== Source spatial profile
 
@@ -20,7 +20,7 @@ final case class UniformSource(norm: Double, units: BrightnessUnit) extends Spat
 sealed trait SpectralDistribution
 final case class BlackBody(temperature: Double) extends SpectralDistribution
 final case class PowerLaw(index: Double) extends SpectralDistribution
-final case class EmissionLine(wavelength: Double, width: Double, flux: Double, fluxUnits: String, continuum: Double, continuumUnits: String) extends SpectralDistribution
+final case class EmissionLine(wavelength: Wavelength, width: Double, flux: Double, fluxUnits: String, continuum: Double, continuumUnits: String) extends SpectralDistribution
 final case class UserDefined(spectrum: String) extends SpectralDistribution
 sealed trait Library extends SpectralDistribution {
   val sedSpectrum: String

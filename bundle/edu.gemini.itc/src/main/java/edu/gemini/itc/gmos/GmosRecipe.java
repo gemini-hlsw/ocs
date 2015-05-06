@@ -41,10 +41,10 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
 
     private void validateInputParamters() {
         if (_sdParameters.getDistributionType().equals(SourceDefinition.Distribution.ELINE)) {
-            if (_sdParameters.getELineWidth() < (3E5 / (_sdParameters.getELineWavelength() * 1000))) {
+            if (_sdParameters.getELineWidth() < (3E5 / (_sdParameters.getELineWavelength().toNanometers()))) {
                 throw new RuntimeException(
                         "Please use a model line width > 1 nm (or "
-                                + (3E5 / (_sdParameters.getELineWavelength() * 1000))
+                                + (3E5 / (_sdParameters.getELineWavelength().toNanometers()))
                                 + " km/s) to avoid undersampling of the line profile when convolved with the transmission response");
             }
         }

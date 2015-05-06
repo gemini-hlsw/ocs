@@ -298,7 +298,7 @@ object ITCRequest {
       case LIBRARY_NON_STAR =>  LibraryNonStar.findByName(r.parameter("nsSpectrumType")).get
       case ELINE =>
         EmissionLine(
-          r.doubleParameter("lineWavelength"),
+          Wavelength.fromMicrons(r.doubleParameter("lineWavelength")),
           r.doubleParameter("lineWidth"),
           r.doubleParameter("lineFlux"),
           r.parameter("lineFluxUnits"),

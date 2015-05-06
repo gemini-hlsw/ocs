@@ -46,8 +46,8 @@ public final class NifsRecipe implements SpectroscopyRecipe {
 
     private void validateInputParameters() {
         if (_sdParameters.getDistributionType().equals(SourceDefinition.Distribution.ELINE)) {
-            if (_sdParameters.getELineWidth() < (3E5 / (_sdParameters.getELineWavelength() * 1000 * 25))) {  // *25 b/c of increased resolutuion of transmission files
-                throw new RuntimeException("Please use a model line width > 0.04 nm (or " + (3E5 / (_sdParameters.getELineWavelength() * 1000 * 25)) + " km/s) to avoid undersampling of the line profile when convolved with the transmission response");
+            if (_sdParameters.getELineWidth() < (3E5 / (_sdParameters.getELineWavelength().toNanometers() * 25))) {  // *25 b/c of increased resolutuion of transmission files
+                throw new RuntimeException("Please use a model line width > 0.04 nm (or " + (3E5 / (_sdParameters.getELineWavelength().toNanometers() * 25)) + " km/s) to avoid undersampling of the line profile when convolved with the transmission response");
             }
         }
 
