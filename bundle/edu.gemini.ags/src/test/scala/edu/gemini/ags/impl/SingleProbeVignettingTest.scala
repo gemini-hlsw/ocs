@@ -1,8 +1,5 @@
 package edu.gemini.ags.impl
 
-
-import edu.gemini.ags.api.AgsAnalysis.Usable
-import edu.gemini.ags.api.AgsGuideQuality.Unusable
 import edu.gemini.ags.api.{AgsGuideQuality, AgsStrategy}
 import edu.gemini.ags.conf.ProbeLimitsTable
 import edu.gemini.catalog.votable.CannedBackend
@@ -93,24 +90,11 @@ object SingleProbeVignettingTest extends Specification with ScalaCheck with Vign
         List(ctx)
     }
 
-  def analyze(strategy: AgsStrategy, ctx: ObsContext, guideStar: SiderealTarget): AgsGuideQuality = {
-    val a0 = strategy.analyze(ctx, magTable, GmosOiwfsGuideProbe.instance, guideStar).get
-
-    val a = ctx.getInstrument match {
-      case paca: PosAngleConstraintAware if paca.getPosAngleConstraint == FIXED_180 =>
-        val a1 = strategy.analyze(ctx180(ctx), magTable, GmosOiwfsGuideProbe.instance, guideStar).get
-        if (a0.quality < a1.quality) a0 else a1
-      case _ => a0
-    }
-
-    a match {
-      case u: Usable => u.quality
-      case _         => Unusable
-    }
-  }
+  def analyze(strategy: AgsStrategy, ctx: ObsContext, guideStar: SiderealTarget): AgsGuideQuality =
+    strategy.analyze(ctx, magTable, GmosOiwfsGuideProbe.instance, guideStar).get.quality
 
   "SingleProbeStrategy" should {
-    // This is just a slightly different, more direct less efficient, means of
+    // This is just a slightly different, more direct/less efficient, means of
     // calculating the brightest, least vignetting star than the
     // SingleProbeStrategy uses.  Really all that is being tested here is the
     // magnitude comparison.
@@ -129,7 +113,7 @@ object SingleProbeVignettingTest extends Specification with ScalaCheck with Vign
           m  <- strategy.params.referenceMagnitude.apply(gs)
         } yield (gs, c, q, GmosOiwfsGuideProbe.instance.calculator(c).calc(gs.coordinates), m.value)
 
-         analyzedCandidates match {
+        analyzedCandidates match {
           case Nil =>
             selection.isEmpty
 
