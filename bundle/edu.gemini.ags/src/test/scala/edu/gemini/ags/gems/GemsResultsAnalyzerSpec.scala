@@ -68,9 +68,9 @@ class GemsResultsAnalyzerSpec extends MascotProgress with Specification with NoT
       gemsGuideStars should have size 247
 
       val result = gemsGuideStars.head
-      result.getPa.toDegrees should beCloseTo(0, 0.0001)
+      result.pa.toDegrees should beCloseTo(0, 0.0001)
 
-      val group = result.getGuideGroup
+      val group = result.guideGroup
       val set = group.getReferencedGuiders
       // Found a star on CWFS1, CWFS2, CWFS3 and ODWG3
       set.contains(Canopus.Wfs.cwfs1) should beTrue
@@ -129,9 +129,9 @@ class GemsResultsAnalyzerSpec extends MascotProgress with Specification with NoT
       gemsGuideStars should have size 92
 
       val result = gemsGuideStars.head
-      result.getPa.toDegrees should beCloseTo(0, 0.0001)
+      result.pa.toDegrees should beCloseTo(0, 0.0001)
 
-      val group = result.getGuideGroup
+      val group = result.guideGroup
       val set = group.getReferencedGuiders
       // Found a star on CWFS1, CWFS2, CWFS3 and ODWG2
       set.contains(Canopus.Wfs.cwfs1) should beTrue
@@ -190,9 +190,9 @@ class GemsResultsAnalyzerSpec extends MascotProgress with Specification with NoT
       gemsGuideStars should have size 214
 
       val result = gemsGuideStars.head
-      result.getPa.toDegrees should beCloseTo(90, 0.0001)
+      result.pa.toDegrees should beCloseTo(90, 0.0001)
 
-      val group = result.getGuideGroup
+      val group = result.guideGroup
       val set = group.getReferencedGuiders
       // Found a star on CWFS1, CWFS2, CWFS3 and ODWG2
       set.contains(Canopus.Wfs.cwfs1) should beTrue
@@ -251,9 +251,9 @@ class GemsResultsAnalyzerSpec extends MascotProgress with Specification with NoT
       gemsGuideStars should have size 97
 
       val result = gemsGuideStars.head
-      result.getPa.toDegrees should beCloseTo(0, 0.0001)
+      result.pa.toDegrees should beCloseTo(0, 0.0001)
 
-      val group = result.getGuideGroup
+      val group = result.guideGroup
       val set = group.getReferencedGuiders
       // Found a star on CWFS1, CWFS2, CWFS3 and ODWG2
       set.contains(Canopus.Wfs.cwfs1) should beTrue

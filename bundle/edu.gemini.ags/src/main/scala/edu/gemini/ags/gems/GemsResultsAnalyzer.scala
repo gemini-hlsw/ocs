@@ -184,7 +184,7 @@ object GemsResultsAnalyzer {
         guideProbeTargets.headOption.map { _ =>
           val guideGroup = GuideGroup.create(JNone.instance[String], guideProbeTargets.asImList)
           val gemsStrehl = GemsStrehl(strehl.avgstrehl, strehl.rmsstrehl, strehl.minstrehl, strehl.maxstrehl)
-          new GemsGuideStars(posAngle, tiptiltGroup, gemsStrehl, guideGroup)
+          GemsGuideStars(posAngle, tiptiltGroup, gemsStrehl, guideGroup)
         }.toList
       case _                                                                                     => Nil
     }

@@ -97,10 +97,10 @@ trait UCAC3Regression {
     if (equalSize) {
       // Compare each guide star
       expectedGuideStars.zip(actualGuideStars).map { case (expected, actual) =>
-        val paEqual = expected.getPa == actual.getPa
-        val tipTiltGroupEqual = expected.getTiptiltGroup == actual.getTiptiltGroup
-        val expectedGuideGroup = expected.getGuideGroup.getAll.asScala
-        val actualGuideGroup = actual.getGuideGroup.getAll.asScala
+        val paEqual = expected.pa == actual.pa
+        val tipTiltGroupEqual = expected.tiptiltGroup == actual.tiptiltGroup
+        val expectedGuideGroup = expected.guideGroup.getAll.asScala
+        val actualGuideGroup = actual.guideGroup.getAll.asScala
 
         val guideGroupSizeEqual = expectedGuideGroup.size == actualGuideGroup.size
         val guideGroupEqual = if (guideGroupSizeEqual) {
@@ -111,7 +111,7 @@ trait UCAC3Regression {
               val sameDec = egg.getPrimary.getValue.getTarget.getDec.getAs(CoordinateParam.Units.DEGREES) == acc.getPrimary.getValue.getTarget.getDec.getAs(CoordinateParam.Units.DEGREES)
               sameGuider && sameRa && sameDec
           }
-          val sameStrehl = math.abs(expected.getStrehl.avg - actual.getStrehl.avg) < 0.0001
+          val sameStrehl = math.abs(expected.strehl.avg - actual.strehl.avg) < 0.0001
           sameStrehl && equalGroup.forall(_ == true)
         } else {
           guideGroupSizeEqual

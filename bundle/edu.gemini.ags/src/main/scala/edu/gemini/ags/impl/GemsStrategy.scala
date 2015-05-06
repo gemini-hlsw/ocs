@@ -173,7 +173,7 @@ trait GemsStrategy extends AgsStrategy {
 
     // Filter out the 1-star asterisms. If anything is left, we are good to go; otherwise, no.
     gemsCatalogResults.map { x =>
-      !x.exists(_.getGuideGroup.getTargets.size() >= 3) ? AgsStrategy.Estimate.CompleteFailure | AgsStrategy.Estimate.GuaranteedSuccess
+      !x.exists(_.guideGroup.getTargets.size() >= 3) ? AgsStrategy.Estimate.CompleteFailure | AgsStrategy.Estimate.GuaranteedSuccess
     }
   }
 
@@ -210,11 +210,11 @@ trait GemsStrategy extends AgsStrategy {
 
       // Now we must convert from an Option[GemsGuideStars] to a Selection.
       gemsGuideStars.map { x =>
-        val assignments = x.getGuideGroup.getAll.asScalaList.flatMap(targets => {
+        val assignments = x.guideGroup.getAll.asScalaList.flatMap(targets => {
           val guider = targets.getGuider
           targets.getTargets.asScalaList.map(target => Assignment(guider, target.toNewModel))
         })
-        Selection(x.getPa, assignments)
+        Selection(x.pa, assignments)
       }
     }
   }

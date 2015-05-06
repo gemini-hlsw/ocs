@@ -3,7 +3,6 @@ package edu.gemini.ags.gems
 import edu.gemini.catalog.api.MagnitudeConstraints
 import edu.gemini.pot.ModelConverters._
 import edu.gemini.shared.util.immutable.ScalaConverters._
-import edu.gemini.shared.util.immutable.{Option => JOption}
 import edu.gemini.ags.api._
 import edu.gemini.spModel.core.Target.SiderealTarget
 import edu.gemini.spModel.core._
@@ -42,21 +41,6 @@ object GemsUtils4Java {
   // Returns true if the target magnitude is within the given limits
   def containsMagnitudeInLimits(target: SiderealTarget, magLimits: MagnitudeConstraints): Boolean =
     target.magnitudeIn(magLimits.band).map(m => magLimits.contains(m)).getOrElse(true)
-
-  /**
-   * Find on the guide probe's primary target the value of the R-like magnitude
-   */
-  def getRLikeMagnitude(gp: JOption[GuideProbeTargets], invalidMagnitude: Double): Double = {
-    def magnitudeExtractor(t: SPTarget): Option[Magnitude] = {
-      RLikeBands.flatMap(b => t.getTarget.getMagnitude(b.toOldModel).asScalaOpt.map(_.toNewModel)).headOption
-    }
-    val r = for {
-      g <- gp.asScalaOpt
-      p <- g.getPrimary.asScalaOpt
-      m <- magnitudeExtractor(p)
-    } yield m.value
-    r.getOrElse(invalidMagnitude)
-  }
 
   /**
    * Returns a list of unique targets in the given search results.
