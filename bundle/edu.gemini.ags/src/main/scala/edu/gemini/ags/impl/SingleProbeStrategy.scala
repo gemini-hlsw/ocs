@@ -123,8 +123,9 @@ case class SingleProbeStrategy(key: AgsStrategyKey, params: SingleProbeStrategyP
             else "Rejecting lower quality targets: " + msgs.mkString("\n\t", "\n\t", "")
           }
 
-          // Sort the remaining targets.
-          val sortedTargets  = qualityTargets.sortBy { case (_, mag, _) => mag }
+          // Sort the remaining targets (note, compare by "reference magnitude"
+          // value since the band itself may be r, R, or UC).
+          val sortedTargets  = qualityTargets.sortBy { case (_, mag, _) => mag.value }
 
           // Calculate min vignetting
           val minVig         = vprobe.calculator(ctx0).minCalc(sortedTargets)(_._1.coordinates) // TODO: when?
@@ -135,15 +136,17 @@ case class SingleProbeStrategy(key: AgsStrategyKey, params: SingleProbeStrategyP
             }
           }
 
-          // Finally extract the pos angle, sidereal target, and vignetting
-          minVig.map { case ((target,_,_), vignetting) =>
-            (ctx0.getPositionAngle.toNewModel, target, vignetting)
+          // Finally extract the pos angle, sidereal target, vignetting, and mag
+          minVig.map { case ((target,mag,_), vignetting) =>
+            (ctx0.getPositionAngle.toNewModel, target, vignetting, mag)
           }
         }
 
-        // Pick the lowest vignetting for all the context options.
-        ctxResults.minimumBy(_._3).map { case (angle, target, vig) =>
-          feedback { f"Selected ${target.name}.  Vignetting ${vig*100}%.2f%%." }
+        // Pick the lowest vignetting for all the context options.  If they
+        // are tied for lowest vignetting, go with the brightest. (Note default
+        // Magnitude sorting considers the band, so compare by .value)
+        ctxResults.minimumBy(tup => (tup._3, tup._4.value)).map { case (angle, target, vig, mag) =>
+          feedback { f"Selected ${target.name}.  Vignetting ${vig*100}%.2f%%, ${mag.shows}" }
           AgsStrategy.Selection(angle, List(AgsStrategy.Assignment(params.guideProbe, target)))
         }
       }

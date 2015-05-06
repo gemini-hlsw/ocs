@@ -1,5 +1,7 @@
 package edu.gemini.spModel.core
 
+import scalaz._
+import Scalaz._
 
 case class Magnitude(value: Double, band: MagnitudeBand, error: Option[Double], system: MagnitudeSystem) {
 
@@ -40,6 +42,12 @@ object Magnitude {
   }
 
   /** @group Typeclass Instances */
-  implicit val equals = scalaz.Equal.equalA[Magnitude]
+  implicit val equals = Equal.equalA[Magnitude]
 
+  /** group Typeclass Instances */
+  implicit val MagnitudeShow: Show[Magnitude] =
+    scalaz.Show.shows { mag =>
+      val errStr = mag.error.map { e => f" e$e%.2f " } | " "
+      f"${mag.band.name}${mag.value}%.2f$errStr(${mag.system.name})"
+    }
 }

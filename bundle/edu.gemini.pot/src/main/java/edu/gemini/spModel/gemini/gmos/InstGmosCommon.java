@@ -308,7 +308,6 @@ public abstract class InstGmosCommon<
     private F _filter;
     private GmosCommonType.Binning _xBin = GmosCommonType.Binning.DEFAULT;
     private GmosCommonType.Binning _yBin = GmosCommonType.Binning.DEFAULT;
-    private GmosCommonType.PosAngleMode _posAngleMode = GmosCommonType.PosAngleMode.DEFAULT;
     private PosAngleConstraint _posAngleConstraint = PosAngleConstraint.FIXED;
 
     //    private GmosCommonType.StageMode _stageMode = GmosCommonType.StageMode.DEFAULT;
