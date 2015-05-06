@@ -34,7 +34,7 @@ class UCAC3RegressionSpec3 extends Specification with UCAC3Regression {
   }
   "MascotCat" should {
     "produce the correct stars from mascot with legacy UCAC3 values" in {
-      val asterisms = MascotCat.findBestAsterismInTargetsList(targetsToMascot, 83.86675000000002, -69.26974166666668, magnitudeExtractor(defaultProbeBands(MagnitudeBand.R)), 0.06)
+      val asterisms = MascotCat.findBestAsterism(targetsToMascot, 83.86675000000002, -69.26974166666668, magnitudeExtractor(defaultProbeBands(MagnitudeBand.R)), 0.06)
       asterisms._2 should be size averageStrehl.size
       asterisms._2.zip(averageStrehl).foreach { case (a, e) =>
         a.avgstrehl should beEqualTo(e)
@@ -50,7 +50,7 @@ class UCAC3RegressionSpec3 extends Specification with UCAC3Regression {
         val replacedTarget = targetsMap.getOrElse(s.target.name, s.target)
         s.copy(target = replacedTarget)
       }
-      val asterisms = MascotCat.findBestAsterismInTargetsList(replacedTargets, 83.86675000000002, -69.26974166666668, magnitudeExtractor(defaultProbeBands(MagnitudeBand.R)), 0.06)
+      val asterisms = MascotCat.findBestAsterism(replacedTargets, 83.86675000000002, -69.26974166666668, magnitudeExtractor(defaultProbeBands(MagnitudeBand.R)), 0.06)
       asterisms._2 should be size averageStrehl.size
       asterisms._2.zip(averageStrehl).foreach { case (a, e) =>
         a.avgstrehl should beEqualTo(e)

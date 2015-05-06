@@ -36,28 +36,29 @@ object GemsResultsAnalyzer {
    * @param mascotProgress used to report progress of Mascot Strehl calculations and interrupt if requested
    * @return a sorted List of GemsGuideStars
    */
-  def analyze(obsContext: ObsContext, posAngles: java.util.Set[Angle], catalogSearch: java.util.List[GemsCatalogSearchResults], mascotProgress: MascotProgress): java.util.List[GemsGuideStars] = {
+  def analyze(obsContext: ObsContext, posAngles: java.util.Set[Angle], catalogSearch: java.util.List[GemsCatalogSearchResults], mascotProgress: Option[MascotProgress]): java.util.List[GemsGuideStars] = {
     val base = obsContext.getBaseCoordinates.toNewModel
     // gemsGuideStars needs to be mutable to support updates from inside mascot
-    val gemsGuideStars = new scala.collection.mutable.ListBuffer[GemsGuideStars]
-
-    for (pair <- TiptiltFlexurePair.pairs(catalogSearch).asScala) {
+    val gemsGuideStars = TiptiltFlexurePair.pairs(catalogSearch.asScala.toList).foldLeft(List.empty[GemsGuideStars]) { (gemsGuideStars, pair) =>
       val tiptiltGroup = pair.tiptiltResults.criterion.key.group
       val flexureGroup = pair.flexureResults.criterion.key.group
-      val tiptiltTargetsList = filter(obsContext, pair.tiptiltResults.results.asJava, tiptiltGroup, posAngles)
-      val flexureTargetsList = filter(obsContext, pair.flexureResults.results.asJava, flexureGroup, posAngles)
-      if (tiptiltTargetsList.asScala.nonEmpty && flexureTargetsList.asScala.nonEmpty) {
+      val tiptiltTargetsList = filter(obsContext, pair.tiptiltResults.results, tiptiltGroup, posAngles.asScala.toSet)
+      val flexureTargetsList = filter(obsContext, pair.flexureResults.results, flexureGroup, posAngles.asScala.toSet)
+      if (tiptiltTargetsList.nonEmpty && flexureTargetsList.nonEmpty) {
         // tell the UI to update
-        Option(mascotProgress).foreach {_.setProgressTitle(s"Finding asterisms for ${tiptiltGroup.getKey}")}
+        mascotProgress.foreach {_.setProgressTitle(s"Finding asterisms for ${tiptiltGroup.getKey}")}
         val band = bandpass(tiptiltGroup, obsContext.getInstrument)
         val factor = strehlFactor(new Some[ObsContext](obsContext))
-        val strehlResults = MascotCat.javaFindBestAsterismInTargetsList(tiptiltTargetsList, base.ra.toAngle.toDegrees, base.dec.toDegrees, band, factor, mascotProgress)
-        strehlResults.strehlList.asScala.foreach { strehl =>
-          gemsGuideStars ++= analyzeAtAngles(obsContext, posAngles, strehl, flexureTargetsList, flexureGroup, tiptiltGroup).asScala
+        val strehlResults = MascotCat.findBestAsterismInTargetsList(tiptiltTargetsList, base.ra.toAngle.toDegrees, base.dec.toDegrees, band, factor, mascotProgress)
+        val analyzedStars = strehlResults.strehlList.map { strehl =>
+          analyzeAtAngles(obsContext, posAngles.asScala.toSet, strehl, flexureTargetsList, flexureGroup, tiptiltGroup)
         }
+        gemsGuideStars ::: analyzedStars.flatten
+      } else {
+        gemsGuideStars
       }
     }
-    sortResultsByRanking(gemsGuideStars.asJava)
+    sortResultsByRanking(gemsGuideStars.toList).asJava
   }
 
   // Scala interfacing methods
@@ -74,34 +75,34 @@ object GemsResultsAnalyzer {
    *                 (using the results up until that point)
    * @return a sorted List of GemsGuideStars
    */
-  def analyzeGoodEnough(obsContext: ObsContext, posAngles: java.util.Set[Angle], catalogSearch: java.util.List[GemsCatalogSearchResults], mascotProgress: MascotProgress): List[GemsGuideStars] = {
+  def analyzeGoodEnough(obsContext: ObsContext, posAngles: Set[Angle], catalogSearch: List[GemsCatalogSearchResults], mascotProgress: Option[MascotProgress]): List[GemsGuideStars] = {
     val base = obsContext.getBaseCoordinates.toNewModel
     // gemsGuideStars needs to be mutable to support updates from inside mascot
     val gemsGuideStars = new scala.collection.mutable.ListBuffer[GemsGuideStars]
 
-    for (pair <- TiptiltFlexurePair.pairs(catalogSearch).asScala) {
+    for (pair <- TiptiltFlexurePair.pairs(catalogSearch)) {
       val tiptiltGroup = pair.tiptiltResults.criterion.key.group
       val flexureGroup = pair.flexureResults.criterion.key.group
-      val tiptiltTargetsList = filter(obsContext, pair.tiptiltResults.results.asJava, tiptiltGroup, posAngles)
-      val flexureTargetsList = filter(obsContext, pair.flexureResults.results.asJava, flexureGroup, posAngles)
+      val tiptiltTargetsList = filter(obsContext, pair.tiptiltResults.results, tiptiltGroup, posAngles)
+      val flexureTargetsList = filter(obsContext, pair.flexureResults.results, flexureGroup, posAngles)
 
-      if (tiptiltTargetsList.asScala.nonEmpty && flexureTargetsList.asScala.nonEmpty) {
+      if (tiptiltTargetsList.nonEmpty && flexureTargetsList.nonEmpty) {
         // tell the UI to update
-        Option(mascotProgress).foreach {_.setProgressTitle(s"Finding asterisms for ${tiptiltGroup.getKey}")}
+        mascotProgress.foreach {_.setProgressTitle(s"Finding asterisms for ${tiptiltGroup.getKey}")}
 
         // Wrap mascot progress to support cancellation
         val strehlHandler: MascotProgress = new MascotProgress() {
           def progress(strehl: Strehl, count: Int, total: Int, usable: Boolean): Boolean = {
             val subResult = analyzeAtAngles(obsContext, posAngles, strehl, flexureTargetsList, flexureGroup, tiptiltGroup)
             // Update outer collection
-            gemsGuideStars ++= subResult.asScala
+            gemsGuideStars ++= subResult
 
             // Update the UI on progress
-            Option(mascotProgress).map(_.progress(strehl, count, total, subResult.asScala.nonEmpty)).getOrElse(true)
+            mascotProgress.map(_.progress(strehl, count, total, subResult.nonEmpty)).getOrElse(true)
           }
 
           def setProgressTitle(s: String) {
-            Option(mascotProgress).foreach (_.setProgressTitle(s))
+            mascotProgress.foreach (_.setProgressTitle(s))
           }
         }
 
@@ -109,13 +110,13 @@ object GemsResultsAnalyzer {
         try {
           val band = bandpass(tiptiltGroup, obsContext.getInstrument)
           val factor = strehlFactor(obsContext.some)
-          MascotCat.javaFindBestAsterismInTargetsList(tiptiltTargetsList, base.ra.toAngle.toDegrees, base.dec.toDegrees, band, factor, strehlHandler)
+          MascotCat.findBestAsterismInTargetsList(tiptiltTargetsList, base.ra.toAngle.toDegrees, base.dec.toDegrees, band, factor, strehlHandler.some)
         } catch {
           case e: CancellationException =>
         }
       }
     }
-    sortResultsByRanking(gemsGuideStars.asJava).asScala.toList
+    sortResultsByRanking(gemsGuideStars.toList)
   }
 
   private def printResults(result: List[GemsGuideStars]) {
@@ -125,30 +126,29 @@ object GemsResultsAnalyzer {
     }
   }
 
-  protected def sortResultsByRanking(list: java.util.List[GemsGuideStars]): java.util.List[GemsGuideStars] = {
-    val set: java.util.Set[GemsGuideStars] = new java.util.TreeSet[GemsGuideStars](list)
+  private def sortResultsByRanking(list: List[GemsGuideStars]): List[GemsGuideStars] = {
+    val set: java.util.Set[GemsGuideStars] = new java.util.TreeSet[GemsGuideStars](list.asJava)
     val result: java.util.List[GemsGuideStars] = new java.util.ArrayList[GemsGuideStars](set)
     java.util.Collections.reverse(result)
     printResults(result.asScala.toList)
-    result
+    result.asScala.toList
   }
 
   // Tries the given asterism and flexure star at the given position angles and returns a list of
   // combinations that work.
-  protected def analyzeAtAngles(obsContext: ObsContext, posAngles: java.util.Set[Angle], strehl: Strehl, flexureSkyObjectList: java.util.List[SiderealTarget], flexureGroup: GemsGuideProbeGroup, tiptiltGroup: GemsGuideProbeGroup): java.util.List[GemsGuideStars] = {
-    posAngles.asScala.foldLeft(List.empty[GemsGuideStars]) { (stars, posAngle) =>
+  private def analyzeAtAngles(obsContext: ObsContext, posAngles: Set[Angle], strehl: Strehl, flexureSkyObjectList: List[SiderealTarget], flexureGroup: GemsGuideProbeGroup, tiptiltGroup: GemsGuideProbeGroup): List[GemsGuideStars] =
+    posAngles.foldLeft(List.empty[GemsGuideStars]) { (stars, posAngle) =>
       val flexureList = filter(obsContext, flexureSkyObjectList, flexureGroup, posAngle)
-      val flexureStars = GemsUtils4Java.sortTargetsByBrightness(flexureList)
+      val flexureStars = GemsUtils4Java.sortTargetsByBrightness(flexureList.asJava).asScala.toList
 
       val guideStars = if ("CWFS" == tiptiltGroup.getKey) {
         // try different order of cwfs1 and cwfs2
-        GemsResultsAnalyzer.instance.analyzeStrehl(obsContext, strehl, posAngle, tiptiltGroup, flexureGroup, flexureStars, reverseOrder = true).asScala.toList ::: GemsResultsAnalyzer.instance.analyzeStrehl(obsContext, strehl, posAngle, tiptiltGroup, flexureGroup, flexureStars, reverseOrder = false).asScala.toList
+        GemsResultsAnalyzer.instance.analyzeStrehl(obsContext, strehl, posAngle, tiptiltGroup, flexureGroup, flexureStars, reverseOrder = true) ::: GemsResultsAnalyzer.instance.analyzeStrehl(obsContext, strehl, posAngle, tiptiltGroup, flexureGroup, flexureStars, reverseOrder = false)
       } else {
-        GemsResultsAnalyzer.instance.analyzeStrehl(obsContext, strehl, posAngle, tiptiltGroup, flexureGroup, flexureStars, reverseOrder = true).asScala.toList
+        GemsResultsAnalyzer.instance.analyzeStrehl(obsContext, strehl, posAngle, tiptiltGroup, flexureGroup, flexureStars, reverseOrder = true)
       }
       stars ::: guideStars
-    }.asJava
-  }
+    }
 
   // Analyzes the given strehl object at the given position angle and returns a list of
   // GemsGuideStars objects, each containing a 1 to 3 star asterism from the given tiptiltGroup group and
@@ -157,89 +157,88 @@ object GemsResultsAnalyzer {
   //
   // If reverseOrder is true, reverse the order in which guide probes are tried (to make sure to get all
   // combinations of cwfs1 and cwfs2, since cwfs3 is otherwise fixed)
-  protected def analyzeStrehl(obsContext: ObsContext, strehl: Strehl, posAngle: Angle, tiptiltGroup: GemsGuideProbeGroup, flexureGroup: GemsGuideProbeGroup, flexureStars: java.util.List[SiderealTarget], reverseOrder: Boolean): java.util.List[GemsGuideStars] = {
+  private def analyzeStrehl(obsContext: ObsContext, strehl: Strehl, posAngle: Angle, tiptiltGroup: GemsGuideProbeGroup, flexureGroup: GemsGuideProbeGroup, flexureStars: List[SiderealTarget], reverseOrder: Boolean): List[GemsGuideStars] = {
     val tiptiltTargetList = targetListFromStrehl(strehl)
     // XXX The TPE assumes canopus tiptilt if there are only 2 stars (one of each ODGW and CWFS),
     // So don't add any items to the list that have only 2 stars and GSAOI as tiptilt.
-    val p = (tiptiltGroup, tiptiltTargetList.asScala.toList) match {
+    (tiptiltGroup, tiptiltTargetList.toList) match {
       case (GsaoiOdgw.Group.instance, _ :: Nil)                                                  => Nil
       case _ if areAllTargetsValidInGroup(obsContext, tiptiltTargetList, tiptiltGroup, posAngle) =>
-        val guideProbeTargets = assignGuideProbeTargets(obsContext, posAngle, tiptiltGroup, tiptiltTargetList, flexureGroup, flexureStars, reverseOrder).asScala
+        val guideProbeTargets = assignGuideProbeTargets(obsContext, posAngle, tiptiltGroup, tiptiltTargetList, flexureGroup, flexureStars, reverseOrder)
         guideProbeTargets.headOption.map { _ =>
-          val guideGroup = GuideGroup.create(JNone.instance[String], guideProbeTargets.toList.asImList)
+          val guideGroup = GuideGroup.create(JNone.instance[String], guideProbeTargets.asImList)
           val gemsStrehl = GemsStrehl(strehl.avgstrehl, strehl.rmsstrehl, strehl.minstrehl, strehl.maxstrehl)
           new GemsGuideStars(posAngle, tiptiltGroup, gemsStrehl, guideGroup)
         }.toList
       case _                                                                                     => Nil
     }
-    p.asJava
   }
 
   // Returns a list of GuideProbeTargets for the given tiptilt targets and flexure star.
   //
   // If reverseOrder is true, reverse the order in which guide probes are tried (to make sure to get all
   // combinations of cwfs1 and cwfs2, since cwfs3 is otherwise fixed)
-  protected def assignGuideProbeTargets(obsContext: ObsContext, posAngle: Angle, tiptiltGroup: GemsGuideProbeGroup, tiptiltTargetList: java.util.List[SiderealTarget], flexureGroup: GemsGuideProbeGroup, flexureStars: java.util.List[SiderealTarget], reverseOrder: Boolean): java.util.List[GuideProbeTargets] = {
+  private def assignGuideProbeTargets(obsContext: ObsContext, posAngle: Angle, tiptiltGroup: GemsGuideProbeGroup, tiptiltTargetList: List[SiderealTarget], flexureGroup: GemsGuideProbeGroup, flexureStars: List[SiderealTarget], reverseOrder: Boolean): List[GuideProbeTargets] = {
     // assign guide probes for tiptilt asterism
     def addTipTiltGuideProbeTargets(targets: List[SiderealTarget], result: List[GuideProbeTargets], obsContext: ObsContext):(ObsContext, List[GuideProbeTargets]) = targets match {
       case x :: Nil =>
-        val gpt = assignGuideProbeTarget(obsContext, posAngle, tiptiltGroup, x, tiptiltGroup, result.asJava, tiptiltTargetList, reverseOrder).asScalaOpt
+        val gpt = assignGuideProbeTarget(obsContext, posAngle, tiptiltGroup, x, tiptiltGroup, result, tiptiltTargetList, reverseOrder)
         // Update the ObsContext, since validation of the following targets may depend on it
         gpt.map(x => (obsContext.withTargets(obsContext.getTargets.putPrimaryGuideProbeTargets(x)), (x :: result).reverse)).getOrElse((obsContext, Nil))
       case x :: tail =>
-        val gpt = assignGuideProbeTarget(obsContext, posAngle, tiptiltGroup, x, tiptiltGroup, result.asJava, tiptiltTargetList, reverseOrder).asScalaOpt
+        val gpt = assignGuideProbeTarget(obsContext, posAngle, tiptiltGroup, x, tiptiltGroup, result, tiptiltTargetList, reverseOrder)
         gpt.map(x => addTipTiltGuideProbeTargets(tail, (x :: result).reverse, obsContext.withTargets(obsContext.getTargets.putPrimaryGuideProbeTargets(x)))).getOrElse((obsContext, Nil))
     }
-    val tipTiltGuideProbeTargets = addTipTiltGuideProbeTargets(tiptiltTargetList.asScala.toList, Nil, obsContext)
+    val tipTiltGuideProbeTargets = addTipTiltGuideProbeTargets(tiptiltTargetList, Nil, obsContext)
 
     // assign guide probe for flexure star
     def addFlexureGuideProbeTargets(targets: List[SiderealTarget], result: List[GuideProbeTargets], obsContext: ObsContext):List[GuideProbeTargets] = targets match {
         case x :: Nil =>
-          val gpt = assignGuideProbeTarget(obsContext, posAngle, flexureGroup, x, tiptiltGroup, result.asJava, tiptiltTargetList, reverseOrder = false).asScalaOpt
+          val gpt = assignGuideProbeTarget(obsContext, posAngle, flexureGroup, x, tiptiltGroup, result, tiptiltTargetList, reverseOrder = false)
           gpt.map(x => (x :: result).reverse).getOrElse(result)
         case x :: tail =>
-          val gpt = assignGuideProbeTarget(obsContext, posAngle, flexureGroup, x, tiptiltGroup, result.asJava, tiptiltTargetList, reverseOrder = false).asScalaOpt
+          val gpt = assignGuideProbeTarget(obsContext, posAngle, flexureGroup, x, tiptiltGroup, result, tiptiltTargetList, reverseOrder = false)
           gpt.map(x => (x :: result).reverse).getOrElse(addFlexureGuideProbeTargets(tail, result, obsContext))
       }
-    val flexureGuideProbeTargets = addFlexureGuideProbeTargets(flexureStars.asScala.toList, Nil, tipTiltGuideProbeTargets._1)
+    val flexureGuideProbeTargets = addFlexureGuideProbeTargets(flexureStars, Nil, tipTiltGuideProbeTargets._1)
 
     val result:List[GuideProbeTargets] = tipTiltGuideProbeTargets._2 ::: flexureGuideProbeTargets
-    (if (result.length == tiptiltTargetList.size + 1) result else Nil).asJava
+    if (result.length == tiptiltTargetList.size + 1) result else Nil
   }
 
   // Returns the GuideProbeTargets object for the given tiptilt target.
   //
   // If reverseOrder is true, reverse the order in which guide probes are tried (to make sure to get all
   // combinations of cwfs1 and cwfs2, since cwfs3 is otherwise fixed)
-  protected def assignGuideProbeTarget(obsContext: ObsContext, posAngle: Angle, group: GemsGuideProbeGroup, target: SiderealTarget, tiptiltGroup: GemsGuideProbeGroup, otherTargets: java.util.List[GuideProbeTargets], tiptiltTargetList: java.util.List[SiderealTarget], reverseOrder: Boolean): JOption[GuideProbeTargets] = {
+  private def assignGuideProbeTarget(obsContext: ObsContext, posAngle: Angle, group: GemsGuideProbeGroup, target: SiderealTarget, tiptiltGroup: GemsGuideProbeGroup, otherTargets: List[GuideProbeTargets], tiptiltTargetList: List[SiderealTarget], reverseOrder: Boolean): Option[GuideProbeTargets] = {
     // First try to assign cwfs3 to the brightest star, if applicable (assignCwfs3ToBrightest arg = true)
-    val probe = guideProbe(obsContext, target, group, posAngle, tiptiltGroup, otherTargets, tiptiltTargetList, assignCwfs3ToBrightest = true, reverseOrder = reverseOrder).asScalaOpt
+    val probe = guideProbe(obsContext, target, group, posAngle, tiptiltGroup, otherTargets, tiptiltTargetList, assignCwfs3ToBrightest = true, reverseOrder = reverseOrder)
     val gp = probe match {
       case None if "CWFS" == tiptiltGroup.getKey =>
         // if that didn't work, try to assign cwfs3 to the second brightest star (assignCwfs3ToBrightest arg = false)
-        guideProbe(obsContext, target, group, posAngle, tiptiltGroup, otherTargets, tiptiltTargetList, assignCwfs3ToBrightest = false, reverseOrder = reverseOrder).asScalaOpt
+        guideProbe(obsContext, target, group, posAngle, tiptiltGroup, otherTargets, tiptiltTargetList, assignCwfs3ToBrightest = false, reverseOrder = reverseOrder)
       case                                     _ =>
         probe
     }
-    gp.map(GuideProbeTargets.create(_, GemsUtils4Java.toSPTarget(target))).asGeminiOpt
+    gp.map(GuideProbeTargets.create(_, GemsUtils4Java.toSPTarget(target)))
   }
 
   // Returns the given targets list with any objects removed that are not valid in at least one of the
   // given position angles.
-  protected def filter(obsContext: ObsContext, targetsList: java.util.List[SiderealTarget], group: GemsGuideProbeGroup, posAngles: java.util.Set[Angle]): java.util.List[SiderealTarget] =
-    (posAngles.asScala.foldLeft(List.empty[SiderealTarget]) {(t, a) => t ++ filter(obsContext, targetsList, group, a).asScala}).asJava
+  private def filter(obsContext: ObsContext, targetsList: List[SiderealTarget], group: GemsGuideProbeGroup, posAngles: Set[Angle]): List[SiderealTarget] =
+    posAngles.foldLeft(List.empty[SiderealTarget]) {(t, a) => t ++ filter(obsContext, targetsList, group, a)}
 
   // Returns the given targets list with any objects removed that are not valid in the
   // given position angle.
-  protected def filter(obsContext: ObsContext, targetsList: java.util.List[SiderealTarget], group: GemsGuideProbeGroup, posAngle: Angle): java.util.List[SiderealTarget] =
-    targetsList.asScala.filter(isTargetValidInGroup(obsContext, _, group, posAngle)).asJava
+  private def filter(obsContext: ObsContext, targetsList: List[SiderealTarget], group: GemsGuideProbeGroup, posAngle: Angle): List[SiderealTarget] =
+    targetsList.filter(isTargetValidInGroup(obsContext, _, group, posAngle))
 
   // Returns true if all the stars in the given target list are valid for the given group
-  protected def areAllTargetsValidInGroup(obsContext: ObsContext, targetList: java.util.List[SiderealTarget], group: GemsGuideProbeGroup, posAngle: Angle): Boolean =
-    targetList.asScala.forall(isTargetValidInGroup(obsContext, _, group, posAngle))
+  private def areAllTargetsValidInGroup(obsContext: ObsContext, targetList: List[SiderealTarget], group: GemsGuideProbeGroup, posAngle: Angle): Boolean =
+    targetList.forall(isTargetValidInGroup(obsContext, _, group, posAngle))
 
   // Returns true if the given target is valid for the given group
-  protected def isTargetValidInGroup(obsContext: ObsContext, target: SiderealTarget, group: GemsGuideProbeGroup, posAngle: Angle): Boolean = {
+  private def isTargetValidInGroup(obsContext: ObsContext, target: SiderealTarget, group: GemsGuideProbeGroup, posAngle: Angle): Boolean = {
     val ctx = obsContext.withPositionAngle(GemsUtils4Java.toOldAngle(posAngle))
     val st = GemsUtils4Java.toSPTarget(target)
     group.getMembers.asScala.exists(_.validate(st, ctx))
@@ -252,7 +251,7 @@ object GemsResultsAnalyzer {
   // otherwise the second brightest (OT-27).
   // If reverseOrder is true, reverse the order in which guide probes are tried (to make sure to get all
   // combinations of cwfs1 and cwfs2, since cwfs3 is otherwise fixed)
-  protected def guideProbe(obsContext: ObsContext, target: SiderealTarget, group: GemsGuideProbeGroup, posAngle: Angle, tiptiltGroup: GemsGuideProbeGroup, otherTargets: java.util.List[GuideProbeTargets], tiptiltTargetList: java.util.List[SiderealTarget], assignCwfs3ToBrightest: Boolean, reverseOrder: Boolean): JOption[ValidatableGuideProbe] = {
+  private def guideProbe(obsContext: ObsContext, target: SiderealTarget, group: GemsGuideProbeGroup, posAngle: Angle, tiptiltGroup: GemsGuideProbeGroup, otherTargets: List[GuideProbeTargets], tiptiltTargetList: List[SiderealTarget], assignCwfs3ToBrightest: Boolean, reverseOrder: Boolean): Option[ValidatableGuideProbe] = {
     val ctx = obsContext.withPositionAngle(posAngle.toOldModel)
     val isFlexure = tiptiltGroup != group
     val isTiptilt = !isFlexure
@@ -271,17 +270,16 @@ object GemsResultsAnalyzer {
 
     // Special case:
     // If the tip tilt asterism is assigned to the GSAOI ODGW group, then the flexure star must be assigned to CWFS3.
-    val r = if (isFlexure && ("ODGW" == tiptiltGroup.getKey) && Canopus.Wfs.cwfs3.validate(GemsUtils4Java.toSPTarget(target), ctx)) {
+    if (isFlexure && ("ODGW" == tiptiltGroup.getKey) && Canopus.Wfs.cwfs3.validate(GemsUtils4Java.toSPTarget(target), ctx)) {
       Canopus.Wfs.cwfs3.some
     } else {
       val members = if (reverseOrder) group.getMembers.asScala.toList.reverse else group.getMembers.asScala.toList
       members.find(isValidGuideProbe)
     }
-    r.asGeminiOpt
   }
 
   // Returns true if the given target is valid for the given guide probe
-  protected def validate(ctx: ObsContext, target: SiderealTarget, guideProbe: GuideProbe): Boolean =
+  private def validate(ctx: ObsContext, target: SiderealTarget, guideProbe: GuideProbe): Boolean =
     guideProbe match {
       case wfs: Canopus.Wfs          =>
         // Additional check for mag range (for cwfs1 and cwfs2, since different than cwfs3 and group range)
@@ -296,10 +294,10 @@ object GemsResultsAnalyzer {
   // Returns true if the given cwfs guide probe can be assigned to the given target according to the rules in OT-27.
   // If assignCwfs3ToBrightest is true, the brightest star in the asterism (in tiptiltTargetList) is assigned to cwfs3,
   // otherwise the second brightest (OT-27).
-  protected def checkCwfs3Rule(guideProbe: GuideProbe, target: SiderealTarget, tiptiltTargetList: java.util.List[SiderealTarget], assignCwfs3ToBrightest: Boolean): Boolean = {
+  private def checkCwfs3Rule(guideProbe: GuideProbe, target: SiderealTarget, tiptiltTargetList: List[SiderealTarget], assignCwfs3ToBrightest: Boolean): Boolean = {
     val isCwfs3 = guideProbe == Canopus.Wfs.cwfs3
     // sort, put brightest stars first
-    val targets = GemsUtils4Java.sortTargetsByBrightness(tiptiltTargetList).asScala.toList
+    val targets = GemsUtils4Java.sortTargetsByBrightness(tiptiltTargetList.asJava).asScala.toList
     targets match {
       case Nil                                                                         =>
         isCwfs3 // no asterism
@@ -322,18 +320,18 @@ object GemsResultsAnalyzer {
   // of two guide stars destined for ODGW2, then it cannot be used.
   //
   // Also for Canopus: only assign one star per cwfs
-  protected def checkOtherTargets(guideProbe: GuideProbe, otherTargets: java.util.List[GuideProbeTargets]): Boolean =
-    !otherTargets.asScala.exists(_.getGuider == guideProbe)
+  private def checkOtherTargets(guideProbe: GuideProbe, otherTargets: List[GuideProbeTargets]): Boolean =
+    !otherTargets.exists(_.getGuider == guideProbe)
 
   // Returns the stars in the given asterism as a SPTarget list, sorted by R mag, brightest first.
-  protected def targetListFromStrehl(strehl: Strehl): java.util.List[SiderealTarget] =
-    GemsUtils4Java.sortTargetsByBrightness(strehl.stars.map(_.target).asJava)//.asScala.toList
+  private def targetListFromStrehl(strehl: Strehl): List[SiderealTarget] =
+    GemsUtils4Java.sortTargetsByBrightness(strehl.stars.map(_.target).asJava).asScala.toList
 
   // OT-33: If the asterism is a Canopus asterism, use R. If an ODGW asterism,
   // see OT-22 for a mapping of GSAOI filters to J, H, and K.
   // If iterating over filters, I think we can assume the filter in
   // the static component as a first pass at least.
-  protected def bandpass(group: GemsGuideProbeGroup, inst: SPInstObsComp): MagnitudeBand =
+  private def bandpass(group: GemsGuideProbeGroup, inst: SPInstObsComp): MagnitudeBand =
     (group, inst) match {
       case (GsaoiOdgw.Group.instance, gsaoi: Gsaoi) =>
         gsaoi.getFilter.getCatalogBand.asScalaOpt.map(_.toNewModel).getOrElse(MagnitudeBand.R)
@@ -355,7 +353,7 @@ object GemsResultsAnalyzer {
   //  J: IQ20=0.12 IQ70=0.06 IQ85=0.024 IQAny=0.01
   //  H: IQ20=0.18 IQ70=0.14 IQ85=0.06 IQAny=0.01
   //  K: IQ20=0.35 IQ70=0.18 IQ85=0.12 IQAny=0.01
-  protected def strehlFactor(obsContext: Option[ObsContext]): Double = {
+  private def strehlFactor(obsContext: Option[ObsContext]): Double = {
     obsContext.map(o => (o, o.getInstrument)).collect {
       case (ctx, gsaoi: Gsaoi) =>
         val band = gsaoi.getFilter.getCatalogBand.asScalaOpt.map(_.toNewModel)

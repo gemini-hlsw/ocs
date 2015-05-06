@@ -263,7 +263,7 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
         interrupted = false;
         try {
             startProgress();
-            List<GemsGuideStars> gemsResults = GemsResultsAnalyzer.instance().analyze(obsContext, posAngles, results, this);
+            List<GemsGuideStars> gemsResults = GemsResultsAnalyzer.instance().analyze(obsContext, posAngles, results, new scala.Some<>(this));
             if (interrupted && gemsResults.size() == 0) {
                 throw new CancellationException("Canceled");
             }
@@ -284,7 +284,7 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
         interrupted = false;
         try {
             startProgress();
-            List<GemsGuideStars> gemsResults = GemsResultsAnalyzer.instance().analyze(obsContext, posAngles, results, this);
+            List<GemsGuideStars> gemsResults = GemsResultsAnalyzer.instance().analyze(obsContext, posAngles, results, new scala.Some<>(this));
             if (interrupted && gemsResults.size() == 0) {
                 throw new CancellationException("Canceled");
             }

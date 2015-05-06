@@ -60,7 +60,7 @@ object MascotGuideStar {
     val guideStarFilter = guideStarType.filter(ctx, magLimits, _: Star)
     // If no tolerances were given, we can do more filtering up front
     val filter = if (simple) guideStarFilter else magLimits.filter _
-    val (_, strehlList) = MascotCat.findBestAsterismInTargetsList(queryResult, center.ra.toAngle.toDegrees, center.dec.toAngle.toDegrees, magnitudeExtractor, factor, progress, filter)
+    val (_, strehlList) = MascotCat.findBestAsterism(queryResult, center.ra.toAngle.toDegrees, center.dec.toAngle.toDegrees, magnitudeExtractor, factor, progress, filter)
     if (simple) {
       val basePos = ctx.getBaseCoordinates
       List((strehlList, ctx.getInstrument.getPosAngleDegrees, basePos.getRaDeg, basePos.getDecDeg))

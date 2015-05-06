@@ -298,14 +298,14 @@ class GemsCatalogResultsSpec extends MascotProgress with Specification with NoTi
     val baseRA = Angle.fromDegrees(coords.getRaDeg)
     val baseDec = Angle.fromDegrees(coords.getDecDeg)
     val base = new HmsDegCoordinates.Builder(baseRA.toOldModel, baseDec.toOldModel).build
-    val instrument = (if (inst.isInstanceOf[Flamingos2]) GemsInstrument.flamingos2 else GemsInstrument.gsaoi)
+    val instrument = if (inst.isInstanceOf[Flamingos2]) GemsInstrument.flamingos2 else GemsInstrument.gsaoi
 
     val posAngles = Set(Angle.zero, Angle.fromDegrees(90), Angle.fromDegrees(180), Angle.fromDegrees(270)).asJava
 
     val options = new GemsGuideStarSearchOptions(instrument, tipTiltMode, posAngles)
 
     val results = Await.result(catalog.search(obsContext, base.toNewModel, options, scala.None, null), 5.seconds)
-    val gemsResults = GemsResultsAnalyzer.analyze(obsContext, posAngles, results.asJava, null)
+    val gemsResults = GemsResultsAnalyzer.analyze(obsContext, posAngles, results.asJava, scala.None)
     (results, gemsResults.asScala.toList)
   }
 

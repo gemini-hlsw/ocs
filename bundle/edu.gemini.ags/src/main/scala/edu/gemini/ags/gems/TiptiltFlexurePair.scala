@@ -15,10 +15,10 @@ case class TiptiltFlexurePair(tiptiltResults: GemsCatalogSearchResults, flexureR
 object TiptiltFlexurePair {
   private case class TipTiltFlexure(tt: Option[GemsCatalogSearchResults], flex: Option[GemsCatalogSearchResults])
 
-  def pairs(results: java.util.List[GemsCatalogSearchResults]): java.util.List[TiptiltFlexurePair] = {
+  def pairs(results: List[GemsCatalogSearchResults]): List[TiptiltFlexurePair] = {
     val pairs = (TipTiltFlexure(None, None), TipTiltFlexure(None, None))
     // Go Over the results and assign them to buckets, it will keep the last result for each subgroup
-    val resultPair = results.asScala.foldLeft(pairs) { (p, v) =>
+    val resultPair = results.foldLeft(pairs) { (p, v) =>
       v.criterion.key match {
         case k if k.starType == GemsGuideStarType.tiptilt && k.group.getKey == "CWFS"                                    => (p._1.copy(tt = v.some), p._2)
         case k if k.starType == GemsGuideStarType.tiptilt && k.group.getKey == "ODGW"                                    => (p._1, p._2.copy(tt = v.some))
@@ -29,6 +29,6 @@ object TiptiltFlexurePair {
     // If they have valid results convert them to pairs
     List(resultPair._1, resultPair._2).collect {
       case TipTiltFlexure(Some(tt), Some(flex)) => TiptiltFlexurePair(tt, flex)
-    }.asJava
+    }
   }
 }
