@@ -2,8 +2,9 @@ package edu.gemini.ags.gems
 
 import java.util.concurrent.CancellationException
 
+import edu.gemini.ags.api._
 import edu.gemini.ags.gems.mascot.{MascotCat, MascotProgress, Strehl}
-import edu.gemini.spModel.core.{Angle, MagnitudeBand}
+import edu.gemini.spModel.core.{Magnitude, Angle, MagnitudeBand}
 import edu.gemini.spModel.core.Target.SiderealTarget
 import edu.gemini.spModel.gemini.gems.Canopus
 import edu.gemini.spModel.gemini.gsaoi.{GsaoiOdgw, Gsaoi}
@@ -23,6 +24,21 @@ import Scalaz._
 
 object GemsResultsAnalyzer {
   val instance = this
+
+  // sort by value only
+  private val MagnitudeValueOrdering: scala.math.Ordering[Magnitude] = scala.math.Ordering.by(_.value)
+
+  // comparison on Option[Magnitude] that reverses the way that None is treated, i.e. None is always > Some(Magnitude).
+  // Comparison of RLike bands is done by value alone
+  private val MagnitudeOptionOrdering: scala.math.Ordering[Option[Magnitude]] = new scala.math.Ordering[Option[Magnitude]] {
+    override def compare(x: Option[Magnitude], y: Option[Magnitude]): Int = (x,y) match {
+      case (Some(m1), Some(m2)) if List(m1.band, m2.band).forall(RLikeBands.contains) => MagnitudeValueOrdering.compare(m1, m2)
+      case (Some(m1), Some(m2))                                                       => Magnitude.MagnitudeOrdering.compare(m1, m2) // Magnitude.MagnitudeOrdering is probably incorrect, you cannot sort on different bands
+      case (None,     None)                                                           => 0
+      case (_,        None)                                                           => -1
+      case (None,     _)                                                              => 1
+    }
+  }
 
   // Java interfacing methods
   // ========================
@@ -139,7 +155,7 @@ object GemsResultsAnalyzer {
   private def analyzeAtAngles(obsContext: ObsContext, posAngles: Set[Angle], strehl: Strehl, flexureSkyObjectList: List[SiderealTarget], flexureGroup: GemsGuideProbeGroup, tiptiltGroup: GemsGuideProbeGroup): List[GemsGuideStars] =
     posAngles.foldLeft(List.empty[GemsGuideStars]) { (stars, posAngle) =>
       val flexureList = filter(obsContext, flexureSkyObjectList, flexureGroup, posAngle)
-      val flexureStars = GemsUtils4Java.sortTargetsByBrightness(flexureList.asJava).asScala.toList
+      val flexureStars = sortTargetsByBrightness(flexureList)
 
       val guideStars = if ("CWFS" == tiptiltGroup.getKey) {
         // try different order of cwfs1 and cwfs2
@@ -297,7 +313,7 @@ object GemsResultsAnalyzer {
   private def checkCwfs3Rule(guideProbe: GuideProbe, target: SiderealTarget, tiptiltTargetList: List[SiderealTarget], assignCwfs3ToBrightest: Boolean): Boolean = {
     val isCwfs3 = guideProbe == Canopus.Wfs.cwfs3
     // sort, put brightest stars first
-    val targets = GemsUtils4Java.sortTargetsByBrightness(tiptiltTargetList.asJava).asScala.toList
+    val targets = sortTargetsByBrightness(tiptiltTargetList)
     targets match {
       case Nil                                                                         =>
         isCwfs3 // no asterism
@@ -325,7 +341,7 @@ object GemsResultsAnalyzer {
 
   // Returns the stars in the given asterism as a SPTarget list, sorted by R mag, brightest first.
   private def targetListFromStrehl(strehl: Strehl): List[SiderealTarget] =
-    GemsUtils4Java.sortTargetsByBrightness(strehl.stars.map(_.target).asJava).asScala.toList
+    sortTargetsByBrightness(strehl.stars.map(_.target))
 
   // OT-33: If the asterism is a Canopus asterism, use R. If an ODGW asterism,
   // see OT-22 for a mapping of GSAOI filters to J, H, and K.
@@ -375,5 +391,14 @@ object GemsResultsAnalyzer {
         }
     }.getOrElse(0.3)
   }
+
+  /**
+   * Sorts the targets list, putting the brightest stars first and returns the sorted array.
+   */
+  protected [ags] def sortTargetsByBrightness(targetsList: List[SiderealTarget]): List[SiderealTarget] = {
+    val magnitudeExtractor: MagnitudeExtractor = (st) => RLikeBands.flatMap(st.magnitudeIn).headOption
+    targetsList.sortBy(magnitudeExtractor(_))(MagnitudeOptionOrdering)
+  }
+
 
 }

@@ -44,14 +44,6 @@ object GemsUtils4Java {
     target.magnitudeIn(magLimits.band).map(m => magLimits.contains(m)).getOrElse(true)
 
   /**
-   * Sorts the targets list, putting the brightest stars first and returns the sorted array.
-   */
-  def sortTargetsByBrightness(targetsList: java.util.List[SiderealTarget]): java.util.List[SiderealTarget] = {
-    val magnitudeExtractor: MagnitudeExtractor = (st) => RLikeBands.flatMap(st.magnitudeIn).headOption
-    targetsList.asScala.sortBy(magnitudeExtractor(_))(MagnitudeOptionOrdering).asJava
-  }
-
-  /**
    * Find on the guide probe's primary target the value of the R-like magnitude
    */
   def getRLikeMagnitude(gp: JOption[GuideProbeTargets], invalidMagnitude: Double): Double = {

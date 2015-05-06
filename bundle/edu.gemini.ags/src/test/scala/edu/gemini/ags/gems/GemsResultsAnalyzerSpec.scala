@@ -3,13 +3,15 @@ package edu.gemini.ags.gems
 import edu.gemini.ags.gems.mascot.MascotProgress
 import edu.gemini.ags.gems.mascot.Strehl
 import edu.gemini.catalog.votable.TestVoTableBackend
-import edu.gemini.shared.skyobject.Magnitude
+import edu.gemini.shared.skyobject.{Magnitude => JMagnitude}
 import edu.gemini.shared.skyobject.coords.HmsDegCoordinates
-import edu.gemini.shared.util.immutable.None
+import edu.gemini.shared.util.immutable.{None => JNone}
 import edu.gemini.skycalc.Coordinates
 import edu.gemini.skycalc.Offset
 import edu.gemini.pot.ModelConverters._
-import edu.gemini.spModel.core.{AlmostEqual, Angle, Site}
+import edu.gemini.spModel.core.Target.SiderealTarget
+import edu.gemini.spModel.core.Magnitude
+import edu.gemini.spModel.core._
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2
 import edu.gemini.spModel.gemini.gems.Canopus
 import edu.gemini.spModel.gemini.gems.Gems
@@ -39,7 +41,7 @@ import Scalaz._
 /**
  * See OT-27
  */
-class GemsCatalogResultsSpec extends MascotProgress with Specification with NoTimeConversions {
+class GemsResultsAnalyzerSpec extends MascotProgress with Specification with NoTimeConversions {
   class TestGemsVoTableCatalog(file: String) extends GemsVoTableCatalog {
     override val backend = TestVoTableBackend(file)
   }
@@ -102,9 +104,9 @@ class GemsCatalogResultsSpec extends MascotProgress with Specification with NoTi
       (Angle.fromDegrees(odgw4x.getRaDeg) ~= Angle.fromDegrees(odgw4.getSkycalcCoordinates.getRaDeg)) should beTrue
       (Angle.fromDegrees(odgw4x.getDecDeg) ~= Angle.fromDegrees(odgw4.getSkycalcCoordinates.getDecDeg)) should beTrue
 
-      val cwfs1Mag = cwfs1.getMagnitude(Magnitude.Band.r).getValue.getBrightness
-      val cwfs2Mag = cwfs2.getMagnitude(Magnitude.Band.UC).getValue.getBrightness
-      val cwfs3Mag = cwfs3.getMagnitude(Magnitude.Band.r).getValue.getBrightness
+      val cwfs1Mag = cwfs1.getMagnitude(JMagnitude.Band.r).getValue.getBrightness
+      val cwfs2Mag = cwfs2.getMagnitude(JMagnitude.Band.UC).getValue.getBrightness
+      val cwfs3Mag = cwfs3.getMagnitude(JMagnitude.Band.r).getValue.getBrightness
       cwfs3Mag < cwfs1Mag && cwfs2Mag < cwfs1Mag should beTrue
     }
     "support Gsaoi Search on SN-1987A" in {
@@ -163,9 +165,9 @@ class GemsCatalogResultsSpec extends MascotProgress with Specification with NoTi
       (Angle.fromDegrees(odgw2x.getRaDeg) ~= Angle.fromDegrees(odgw2.getSkycalcCoordinates.getRaDeg)) should beTrue
       (Angle.fromDegrees(odgw2x.getDecDeg) ~= Angle.fromDegrees(odgw2.getSkycalcCoordinates.getDecDeg)) should beTrue
 
-      val cwfs1Mag = cwfs1.getMagnitude(Magnitude.Band.UC).getValue.getBrightness
-      val cwfs2Mag = cwfs2.getMagnitude(Magnitude.Band.UC).getValue.getBrightness
-      val cwfs3Mag = cwfs3.getMagnitude(Magnitude.Band.UC).getValue.getBrightness
+      val cwfs1Mag = cwfs1.getMagnitude(JMagnitude.Band.UC).getValue.getBrightness
+      val cwfs2Mag = cwfs2.getMagnitude(JMagnitude.Band.UC).getValue.getBrightness
+      val cwfs3Mag = cwfs3.getMagnitude(JMagnitude.Band.UC).getValue.getBrightness
       cwfs3Mag < cwfs1Mag && cwfs2Mag < cwfs1Mag should beTrue
     }
     "support Gsaoi Search on M6" in {
@@ -224,9 +226,9 @@ class GemsCatalogResultsSpec extends MascotProgress with Specification with NoTi
       (Angle.fromDegrees(odgw2x.getRaDeg) ~= Angle.fromDegrees(odgw2.getSkycalcCoordinates.getRaDeg)) should beTrue
       (Angle.fromDegrees(odgw2x.getDecDeg) ~= Angle.fromDegrees(odgw2.getSkycalcCoordinates.getDecDeg)) should beTrue
 
-      val cwfs1Mag = group.get(Canopus.Wfs.cwfs1).getValue.getPrimary.getValue.getTarget.getMagnitude(Magnitude.Band.UC).getValue.getBrightness
-      val cwfs2Mag = group.get(Canopus.Wfs.cwfs2).getValue.getPrimary.getValue.getTarget.getMagnitude(Magnitude.Band.UC).getValue.getBrightness
-      val cwfs3Mag = group.get(Canopus.Wfs.cwfs3).getValue.getPrimary.getValue.getTarget.getMagnitude(Magnitude.Band.UC).getValue.getBrightness
+      val cwfs1Mag = cwfs1.getMagnitude(JMagnitude.Band.UC).getValue.getBrightness
+      val cwfs2Mag = cwfs2.getMagnitude(JMagnitude.Band.UC).getValue.getBrightness
+      val cwfs3Mag = cwfs3.getMagnitude(JMagnitude.Band.UC).getValue.getBrightness
       cwfs3Mag < cwfs1Mag && cwfs2Mag < cwfs1Mag should beTrue
     }
     "support Gsaoi Search on BPM 37093" in {
@@ -280,11 +282,64 @@ class GemsCatalogResultsSpec extends MascotProgress with Specification with NoTi
       (Angle.fromDegrees(odgw4x.getRaDeg) ~= Angle.fromDegrees(odgw4.getRaDeg)) should beTrue
       (Angle.fromDegrees(odgw4x.getDecDeg) ~= Angle.fromDegrees(odgw4.getDecDeg)) should beTrue
 
-      val cwfs1Mag = group.get(Canopus.Wfs.cwfs1).getValue.getPrimary.getValue.getTarget.getMagnitude(Magnitude.Band.r).getValue.getBrightness
-      val cwfs2Mag = group.get(Canopus.Wfs.cwfs2).getValue.getPrimary.getValue.getTarget.getMagnitude(Magnitude.Band.r).getValue.getBrightness
-      val cwfs3Mag = group.get(Canopus.Wfs.cwfs3).getValue.getPrimary.getValue.getTarget.getMagnitude(Magnitude.Band.r).getValue.getBrightness
+      val cwfs1Mag = group.get(Canopus.Wfs.cwfs1).getValue.getPrimary.getValue.getTarget.getMagnitude(JMagnitude.Band.r).getValue.getBrightness
+      val cwfs2Mag = group.get(Canopus.Wfs.cwfs2).getValue.getPrimary.getValue.getTarget.getMagnitude(JMagnitude.Band.r).getValue.getBrightness
+      val cwfs3Mag = group.get(Canopus.Wfs.cwfs3).getValue.getPrimary.getValue.getTarget.getMagnitude(JMagnitude.Band.r).getValue.getBrightness
       cwfs1Mag > cwfs2Mag && cwfs3Mag < cwfs2Mag should beTrue
     }
+    "sort targets by R magnitude" in {
+      val st1 = SiderealTarget("n", edu.gemini.spModel.core.Coordinates.zero, None, List(new Magnitude(10.0, MagnitudeBand.J)), None)
+      GemsResultsAnalyzer.sortTargetsByBrightness(List(st1)).head should beEqualTo(st1)
+
+      val st2 = SiderealTarget("n", edu.gemini.spModel.core.Coordinates.zero, None, List(new Magnitude(15.0, MagnitudeBand.J)), None)
+      GemsResultsAnalyzer.sortTargetsByBrightness(List(st1, st2)).head should beEqualTo(st1)
+      GemsResultsAnalyzer.sortTargetsByBrightness(List(st1, st2))(1) should beEqualTo(st2)
+
+      val st3 = SiderealTarget("n", edu.gemini.spModel.core.Coordinates.zero, None, List(new Magnitude(15.0, MagnitudeBand.R)), None)
+      GemsResultsAnalyzer.sortTargetsByBrightness(List(st1, st2, st3)).head should beEqualTo(st3)
+      GemsResultsAnalyzer.sortTargetsByBrightness(List(st1, st2, st3))(1) should beEqualTo(st1)
+      GemsResultsAnalyzer.sortTargetsByBrightness(List(st1, st2, st3))(2) should beEqualTo(st2)
+
+      val st4 = SiderealTarget("n", edu.gemini.spModel.core.Coordinates.zero, None, List(new Magnitude(9.0, MagnitudeBand.R)), None)
+      GemsResultsAnalyzer.sortTargetsByBrightness(List(st1, st2, st3, st4)).head should beEqualTo(st4)
+      GemsResultsAnalyzer.sortTargetsByBrightness(List(st1, st2, st3, st4))(1) should beEqualTo(st3)
+      GemsResultsAnalyzer.sortTargetsByBrightness(List(st1, st2, st3, st4))(2) should beEqualTo(st1)
+      GemsResultsAnalyzer.sortTargetsByBrightness(List(st1, st2, st3, st4))(3) should beEqualTo(st2)
+
+      val st5 = SiderealTarget("n", edu.gemini.spModel.core.Coordinates.zero, None, List(new Magnitude(19.0, MagnitudeBand.R)), None)
+      GemsResultsAnalyzer.sortTargetsByBrightness(List(st1, st2, st3, st4, st5)).head should beEqualTo(st4)
+      GemsResultsAnalyzer.sortTargetsByBrightness(List(st1, st2, st3, st4, st5))(1) should beEqualTo(st3)
+      GemsResultsAnalyzer.sortTargetsByBrightness(List(st1, st2, st3, st4, st5))(2) should beEqualTo(st5)
+      GemsResultsAnalyzer.sortTargetsByBrightness(List(st1, st2, st3, st4, st5))(3) should beEqualTo(st1)
+      GemsResultsAnalyzer.sortTargetsByBrightness(List(st1, st2, st3, st4, st5))(4) should beEqualTo(st2)
+    }
+    "sort targets by R-like magnitude" in {
+      val st1 = SiderealTarget("n", edu.gemini.spModel.core.Coordinates.zero, None, List(new Magnitude(10.0, MagnitudeBand.J)), None)
+      GemsResultsAnalyzer.sortTargetsByBrightness(List(st1)).head should beEqualTo(st1)
+
+      val st2 = SiderealTarget("n", edu.gemini.spModel.core.Coordinates.zero, None, List(new Magnitude(15.0, MagnitudeBand.J)), None)
+      GemsResultsAnalyzer.sortTargetsByBrightness(List(st1, st2)).head should beEqualTo(st1)
+      GemsResultsAnalyzer.sortTargetsByBrightness(List(st1, st2))(1) should beEqualTo(st2)
+
+      val st3 = SiderealTarget("n", edu.gemini.spModel.core.Coordinates.zero, None, List(new Magnitude(15.0, MagnitudeBand.R)), None)
+      GemsResultsAnalyzer.sortTargetsByBrightness(List(st1, st2, st3)).head should beEqualTo(st3)
+      GemsResultsAnalyzer.sortTargetsByBrightness(List(st1, st2, st3))(1) should beEqualTo(st1)
+      GemsResultsAnalyzer.sortTargetsByBrightness(List(st1, st2, st3))(2) should beEqualTo(st2)
+
+      val st4 = SiderealTarget("n", edu.gemini.spModel.core.Coordinates.zero, None, List(new Magnitude(9.0, MagnitudeBand._r)), None)
+      GemsResultsAnalyzer.sortTargetsByBrightness(List(st1, st2, st3, st4)).head should beEqualTo(st4)
+      GemsResultsAnalyzer.sortTargetsByBrightness(List(st1, st2, st3, st4))(1) should beEqualTo(st3)
+      GemsResultsAnalyzer.sortTargetsByBrightness(List(st1, st2, st3, st4))(2) should beEqualTo(st1)
+      GemsResultsAnalyzer.sortTargetsByBrightness(List(st1, st2, st3, st4))(3) should beEqualTo(st2)
+
+      val st5 = SiderealTarget("n", edu.gemini.spModel.core.Coordinates.zero, None, List(new Magnitude(19.0, MagnitudeBand.UC)), None)
+      GemsResultsAnalyzer.sortTargetsByBrightness(List(st1, st2, st3, st4, st5)).head should beEqualTo(st4)
+      GemsResultsAnalyzer.sortTargetsByBrightness(List(st1, st2, st3, st4, st5))(1) should beEqualTo(st3)
+      GemsResultsAnalyzer.sortTargetsByBrightness(List(st1, st2, st3, st4, st5))(2) should beEqualTo(st5)
+      GemsResultsAnalyzer.sortTargetsByBrightness(List(st1, st2, st3, st4, st5))(3) should beEqualTo(st1)
+      GemsResultsAnalyzer.sortTargetsByBrightness(List(st1, st2, st3, st4, st5))(4) should beEqualTo(st2)
+    }
+
   }
 
   def search(inst: SPInstObsComp, raStr: String, decStr: String, tipTiltMode: GemsTipTiltMode, conditions: Conditions, catalog: TestGemsVoTableCatalog): (List[GemsCatalogSearchResults], List[GemsGuideStars]) = {
@@ -294,7 +349,7 @@ class GemsCatalogResultsSpec extends MascotProgress with Specification with NoTi
     val baseTarget = new SPTarget(coords.getRaDeg, coords.getDecDeg)
     val env = TargetEnvironment.create(baseTarget)
     val offsets = new java.util.HashSet[Offset]
-    val obsContext = ObsContext.create(env, inst, None.instance[Site], conditions, offsets, new Gems)
+    val obsContext = ObsContext.create(env, inst, JNone.instance[Site], conditions, offsets, new Gems)
     val baseRA = Angle.fromDegrees(coords.getRaDeg)
     val baseDec = Angle.fromDegrees(coords.getDecDeg)
     val base = new HmsDegCoordinates.Builder(baseRA.toOldModel, baseDec.toOldModel).build
