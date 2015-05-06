@@ -2,6 +2,7 @@ package jsky.app.ot.viewer;
 
 import edu.gemini.p2checker.api.IP2Problems;
 import edu.gemini.p2checker.api.Problem;
+import edu.gemini.p2checker.util.P2CheckerUtil;
 import jsky.app.ot.ui.util.UIConstants;
 
 import javax.swing.JPanel;
@@ -258,7 +259,7 @@ public class SPProblemsViewer {
         private void _updateProblems() {
             //Notify the viewer of the new problems being shown, only if
             //the engine is set up
-            final IP2Problems p2Problems = _node.getProblems();
+            final IP2Problems p2Problems = _node == null ? P2CheckerUtil.NO_PROBLEMS:  _node.getProblems();
             final List<Problem> ps = new ArrayList<>(p2Problems.getProblems());
 
             // Sort by severity (in reverse so ERROR comes first) then description.
