@@ -12,6 +12,7 @@ import breeze.linalg._
 import edu.gemini.spModel.core.Target.SiderealTarget
 import edu.gemini.spModel.core.MagnitudeBand
 
+import scala.annotation.tailrec
 import scalaz._
 import Scalaz._
 
@@ -35,6 +36,10 @@ object Mascot {
     true
   }
 
+  case class StarTriple(n1: Star, n2: Option[Star], n3: Option[Star]) {
+    def toList: List[Star] = List(n1.some, n2, n3).flatten
+  }
+
   private implicit class Bandpass2Extractor(val band: MagnitudeBand) extends AnyVal {
     def toExtractor:MagnitudeExtractor = (s:SiderealTarget) => s.magnitudeIn(defaultBandpass)
   }
@@ -48,28 +53,26 @@ object Mascot {
 
   @Deprecated
   def computeStrehl4Java(band: MagnitudeBand, factor: Double, n1: Star, n2: Option[Star] = None, n3: Option[Star] = None): Option[Strehl] =
-    computeStrehl(band.toExtractor, factor, n1, n2)
+    computeStrehl(band.toExtractor, factor, StarTriple(n1, n2, n3))
 
   /**
    * Performs the strehl algorithm on the given 1, 2 or 3 stars (2 and 3 are optional)
    * @param magnitudeExtractor extract the magnitudes used in the calculations: (one of "B", "V", "R", "J", "H", "K")
    * @param factor multiply strehl min, max and average by this value (depends on instrument filter: See REL-426)
-   * @param n1 the first star to use
-   * @param n2 the optional second star to use
-   * @param n3 the optional third star to use
+   * @param A star triplet
    * @return a Some(Strehl) object containing the results of the computations, or None if the positions can't be used
    */
-  def computeStrehl(magnitudeExtractor: MagnitudeExtractor, factor: Double, n1: Star, n2: Option[Star] = None, n3: Option[Star] = None): Option[Strehl] = {
-    n2 match {
-      case Some(v2) if !doesItFit(n1, v2, n3) =>
+  def computeStrehl(magnitudeExtractor: MagnitudeExtractor, factor: Double, st: StarTriple): Option[Strehl] = {
+    st match {
+      case StarTriple(n1, Some(n2), n3) if !doesItFit(n1, n2, n3) =>
         Log.warning("Skipped. Does not fit.")
         None
-      case _                                  =>
+      case s                                  =>
         //          sdata = mascot_compute_strehl();
         //          grow,sall,sdata;
         //          window,3;
         //          disp_strehl_map,sdata;
-        Strehl(List(n1.some, n2, n3).flatten, magnitudeExtractor, factor).some
+        Strehl(s.toList, magnitudeExtractor, factor).some
     }
   }
 
@@ -101,70 +104,33 @@ object Mascot {
 
     Log.info(s"Mascot.findBestAsterism: input stars: $ns, total asterisms: $total")
 
-    // Compute strehl for sets of 3 stars
-    def doTriples(result: List[Strehl], count: Int, triple: List[(Star, Star, Star)]):AsterismSearchStage = triple match {
+    // Compute strehl for a sets of stars
+    @tailrec
+    def doStars(result: List[Strehl], count: Int, starSets: List[(Star, Option[Star], Option[Star])]):AsterismSearchStage = starSets match {
       case Nil =>
         AsterismSearchStage(result, count, continue = true)
-      case (n1, n2, n3) :: Nil =>
-        val s = computeStrehl(magnitudeExtractor, factor, n1, n2.some, n3.some)
-        val continue = s.map(progress(_, count, total))
-        AsterismSearchStage(s.map(_ :: result).getOrElse(result), count, continue.getOrElse(true))
-      case (n1, n2, n3) :: tail =>
-        val s = computeStrehl(magnitudeExtractor, factor, n1, n2.some, n3.some)
-        val continue = s.map(progress(_, count, total))
+      case s :: Nil =>
+        val strehl = computeStrehl(magnitudeExtractor, factor, (StarTriple.apply _).tupled(s))
+        // check if we continue
+        val continue = strehl.map(progress(_, count, total))
+        AsterismSearchStage(strehl.map(_ :: result).getOrElse(result), count, continue.getOrElse(true))
+      case s :: tail =>
+        val strehl = computeStrehl(magnitudeExtractor, factor, (StarTriple.apply _).tupled(s))
+        // check if we continue
+        val continue = strehl.map(progress(_, count, total))
         if (continue === false.some) {
-          AsterismSearchStage(s.map(_ :: result).getOrElse(result), count, continue = false)
+          AsterismSearchStage(strehl.map(_ :: result).getOrElse(result), count, continue = false)
         } else {
           // Continue if the position is skipped or if progress says continue
-          doTriples(s.map(_ :: result).getOrElse(result), count + 1, tail)
-        }
-    }
-
-    // Compute strehl for sets of 2 stars
-    def doDoubles(result: List[Strehl], count: Int, doubles: List[(Star, Star)]):AsterismSearchStage = doubles match {
-      case Nil =>
-        AsterismSearchStage(result, count, continue = true)
-      case (n1, n2) :: Nil =>
-        val s = computeStrehl(magnitudeExtractor, factor, n1, n2.some)
-        // last step we don't check if we continue
-        val continue = s.map(progress(_, count, total))
-        AsterismSearchStage(s.map(_ :: result).getOrElse(result), count, continue.getOrElse(true))
-      case (n1, n2) :: tail =>
-        val s = computeStrehl(magnitudeExtractor, factor, n1, n2.some)
-        val continue = s.map(progress(_, count, total))
-        if (continue === false.some) {
-          AsterismSearchStage(s.map(_ :: result).getOrElse(result), count, continue = false)
-        } else {
-          // Continue if the position is skipped or if progress says continue
-          doDoubles(s.map(_ :: result).getOrElse(result), count + 1, tail)
-        }
-    }
-
-    // Compute strehl for single stars
-    def doSingles(result: List[Strehl], count: Int, singles: List[Star]):AsterismSearchStage = singles match {
-      case Nil =>
-        AsterismSearchStage(result, count, continue = true)
-      case n1 :: Nil =>
-        val s = computeStrehl(magnitudeExtractor, factor, n1)
-        // last step we don't check if we continue
-        val continue = s.map(progress(_, count, total))
-        AsterismSearchStage(s.map(_ :: result).getOrElse(result), count, continue.getOrElse(true))
-      case n1 :: tail =>
-        val s = computeStrehl(magnitudeExtractor, factor, n1)
-        val continue = s.map(progress(_, count, total))
-        if (continue === false.some) {
-          AsterismSearchStage(s.map(_ :: result).getOrElse(result), count, continue = false)
-        } else {
-          // Continue if the position is skipped or if progress says continue
-          doSingles(s.map(_ :: result).getOrElse(result), count + 1, tail)
+          doStars(strehl.map(_ :: result).getOrElse(result), count + 1, tail)
         }
     }
 
     // Search each possible combination of triples, doubles and singles supporting cancellation
     def go(): List[Strehl] = {
-      val triples = if (ns >= 3) doTriples(Nil, 1, trips) else AsterismSearchStage(Nil, 1, continue = true)
-      val doubles = if (ns >= 2 && triples.continue) doDoubles(triples.stars, triples.count, pairs) else triples
-      val singles = if (ns >= 1 && doubles.continue) doSingles(doubles.stars, doubles.count, filteredStarList) else doubles
+      val triples = if (ns >= 3) doStars(Nil, 1, trips) else AsterismSearchStage(Nil, 1, continue = true)
+      val doubles = if (ns >= 2 && triples.continue) doStars(triples.stars, triples.count, pairs.map(t => (t._1, t._2, None))) else triples
+      val singles = if (ns >= 1 && doubles.continue) doStars(doubles.stars, doubles.count, filteredStarList.map(t => (t, None, None))) else doubles
       singles.stars
     }
 

@@ -199,13 +199,13 @@ object GemsResultsAnalyzer {
 
     // assign guide probe for flexure star
     def addFlexureGuideProbeTargets(targets: List[SiderealTarget], result: List[GuideProbeTargets], obsContext: ObsContext):List[GuideProbeTargets] = targets match {
-        case x :: Nil =>
-          val gpt = assignGuideProbeTarget(obsContext, posAngle, flexureGroup, x, tiptiltGroup, result, tiptiltTargetList, reverseOrder = false)
-          gpt.map(x => (x :: result).reverse).getOrElse(result)
-        case x :: tail =>
-          val gpt = assignGuideProbeTarget(obsContext, posAngle, flexureGroup, x, tiptiltGroup, result, tiptiltTargetList, reverseOrder = false)
-          gpt.map(x => (x :: result).reverse).getOrElse(addFlexureGuideProbeTargets(tail, result, obsContext))
-      }
+      case x :: Nil =>
+        val gpt = assignGuideProbeTarget(obsContext, posAngle, flexureGroup, x, tiptiltGroup, result, tiptiltTargetList, reverseOrder = false)
+        gpt.map(x => (x :: result).reverse).getOrElse(result)
+      case x :: tail =>
+        val gpt = assignGuideProbeTarget(obsContext, posAngle, flexureGroup, x, tiptiltGroup, result, tiptiltTargetList, reverseOrder = false)
+        gpt.map(x => (x :: result).reverse).getOrElse(addFlexureGuideProbeTargets(tail, result, obsContext))
+    }
     val flexureGuideProbeTargets = addFlexureGuideProbeTargets(flexureStars, Nil, tipTiltGuideProbeTargets._1)
 
     val result:List[GuideProbeTargets] = tipTiltGuideProbeTargets._2 ::: flexureGuideProbeTargets
