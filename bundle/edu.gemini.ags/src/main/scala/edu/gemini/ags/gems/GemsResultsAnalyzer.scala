@@ -60,13 +60,14 @@ object GemsResultsAnalyzer {
       val flexureGroup = pair.flexureResults.criterion.key.group
       val tiptiltTargetsList = filter(obsContext, pair.tiptiltResults.results, tiptiltGroup, posAngles.asScala.toSet)
       val flexureTargetsList = filter(obsContext, pair.flexureResults.results, flexureGroup, posAngles.asScala.toSet)
+
       if (tiptiltTargetsList.nonEmpty && flexureTargetsList.nonEmpty) {
         // tell the UI to update
         mascotProgress.foreach {_.setProgressTitle(s"Finding asterisms for ${tiptiltGroup.getKey}")}
         val band = bandpass(tiptiltGroup, obsContext.getInstrument)
         val factor = strehlFactor(new Some[ObsContext](obsContext))
-        val strehlResults = MascotCat.findBestAsterismInTargetsList(tiptiltTargetsList, base.ra.toAngle.toDegrees, base.dec.toDegrees, band, factor, mascotProgress)
-        val analyzedStars = strehlResults.strehlList.map { strehl =>
+        val asterisms = MascotCat.findBestAsterismInTargetsList(tiptiltTargetsList, base.ra.toAngle.toDegrees, base.dec.toDegrees, band, factor, mascotProgress)
+        val analyzedStars = asterisms.strehlList.map { strehl =>
           analyzeAtAngles(obsContext, posAngles.asScala.toSet, strehl, flexureTargetsList, flexureGroup, tiptiltGroup)
         }
         gemsGuideStars ::: analyzedStars.flatten

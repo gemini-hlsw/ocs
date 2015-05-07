@@ -9,6 +9,7 @@ import edu.gemini.catalog.votable.TestVoTableBackend
 import edu.gemini.shared.util.immutable.{Some => JSome}
 import edu.gemini.spModel.core._
 import edu.gemini.spModel.core.AngleSyntax._
+import edu.gemini.pot.ModelConverters._
 import edu.gemini.spModel.gemini.gems.Canopus.Wfs
 import edu.gemini.spModel.gemini.gems.{Gems, Canopus}
 import edu.gemini.spModel.gemini.gsaoi.{Gsaoi, GsaoiOdgw}
@@ -39,7 +40,7 @@ class GemsStrategySpec extends Specification with NoTimeConversions {
 
   private def applySelection(ctx: ObsContext, sel: AgsStrategy.Selection): ObsContext = {
     // Make a new TargetEnvironment with the guide probe assignments.
-    sel.applyTo(ctx.getTargets) |> {ctx.withTargets}
+    sel.applyTo(ctx.getTargets) |> {ctx.withTargets} |> {_.withPositionAngle(sel.posAngle.toOldModel)}
   }
 
   "GemsStrategy" should {
@@ -152,6 +153,11 @@ class GemsStrategySpec extends Specification with NoTimeConversions {
       odgw2.map { s =>
         gemsStrategy.analyze(newCtx, ProbeLimitsTable.loadOrThrow(), GsaoiOdgw.odgw2, s).exists(_ == AgsAnalysis.Usable(GsaoiOdgw.odgw2, s, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq, defaultProbeBands(MagnitudeBand.H)))
       } should beSome(true)
+
+      // Test estimate
+      val estimate = gemsStrategy.estimate(ctx, ProbeLimitsTable.loadOrThrow())
+      Await.result(estimate, 20.seconds) should beEqualTo(Estimate.GuaranteedSuccess)
+
     }
     "support search/select and analyze on SN-1987A part 2" in {
       val ra = Angle.fromHMS(5, 35, 28.020).getOrElse(Angle.zero)
@@ -213,6 +219,10 @@ class GemsStrategySpec extends Specification with NoTimeConversions {
       odgw2.map { s =>
         gemsStrategy.analyze(newCtx, ProbeLimitsTable.loadOrThrow(), GsaoiOdgw.odgw2, s).exists(_ == AgsAnalysis.Usable(GsaoiOdgw.odgw2, s, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq, defaultProbeBands(MagnitudeBand.H)))
       } should beSome(true)
+
+      // Test estimate
+      val estimate = gemsStrategy.estimate(ctx, ProbeLimitsTable.loadOrThrow())
+      Await.result(estimate, 20.seconds) should beEqualTo(Estimate.GuaranteedSuccess)
     }
     "support search/select and analyze on TYC 8345-1155-1" in {
       val ra = Angle.fromHMS(17, 25, 27.529).getOrElse(Angle.zero)
@@ -284,6 +294,10 @@ class GemsStrategySpec extends Specification with NoTimeConversions {
       odgw4.map { s =>
         gemsStrategy.analyze(newCtx, ProbeLimitsTable.loadOrThrow(), GsaoiOdgw.odgw4, s).exists(_ == AgsAnalysis.Usable(GsaoiOdgw.odgw4, s, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq, List(MagnitudeBand.H)))
       } should beSome(true)
+
+      // Test estimate
+      val estimate = gemsStrategy.estimate(ctx, ProbeLimitsTable.loadOrThrow())
+      Await.result(estimate, 20.seconds) should beEqualTo(Estimate.GuaranteedSuccess)
     }
     "support search/select and analyze on M6" in {
       val ra = Angle.fromHMS(17, 40, 20.0).getOrElse(Angle.zero)
@@ -338,10 +352,10 @@ class GemsStrategySpec extends Specification with NoTimeConversions {
       val newCtx = selection.map(applySelection(ctx, _)).getOrElse(ctx)
       val analysis = gemsStrategy.analyze(newCtx, ProbeLimitsTable.loadOrThrow())
       analysis.collect {
-        case AgsAnalysis.Usable(Canopus.Wfs.cwfs1, st, GuideSpeed.SLOW, AgsGuideQuality.PossiblyUnusable, _) if st.some == cwfs1 => Canopus.Wfs.cwfs1
+        case AgsAnalysis.Usable(Canopus.Wfs.cwfs1, st, GuideSpeed.SLOW, AgsGuideQuality.PossiblyUnusable, _) if st.some == cwfs1    => Canopus.Wfs.cwfs1
         case AgsAnalysis.Usable(Canopus.Wfs.cwfs2, st, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq, _) if st.some == cwfs2 => Canopus.Wfs.cwfs2
         case AgsAnalysis.Usable(Canopus.Wfs.cwfs3, st, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq, _) if st.some == cwfs3 => Canopus.Wfs.cwfs3
-        case AgsAnalysis.NotReachable(GsaoiOdgw.odgw2, st, _) if st.some == odgw2   => GsaoiOdgw.odgw2
+        case AgsAnalysis.Usable(GsaoiOdgw.odgw2, st, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq, _) if st.some == odgw2   => GsaoiOdgw.odgw2
       } should beEqualTo(List(Canopus.Wfs.cwfs1, Canopus.Wfs.cwfs2, Canopus.Wfs.cwfs3, GsaoiOdgw.odgw2))
 
       // Analyze per probe
@@ -355,9 +369,12 @@ class GemsStrategySpec extends Specification with NoTimeConversions {
         gemsStrategy.analyze(newCtx, ProbeLimitsTable.loadOrThrow(), Canopus.Wfs.cwfs3, s).exists(_ == AgsAnalysis.Usable(Canopus.Wfs.cwfs3, s, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq, defaultProbeBands(MagnitudeBand.R)))
       } should beSome(true)
       odgw2.map { s =>
-        gemsStrategy.analyze(newCtx, ProbeLimitsTable.loadOrThrow(), GsaoiOdgw.odgw2, s).exists(_ == AgsAnalysis.NotReachable(GsaoiOdgw.odgw2, s, List(MagnitudeBand.H)))
+        gemsStrategy.analyze(newCtx, ProbeLimitsTable.loadOrThrow(), GsaoiOdgw.odgw2, s).exists(_ == AgsAnalysis.Usable(GsaoiOdgw.odgw2, s, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq, defaultProbeBands(MagnitudeBand.H)))
       } should beSome(true)
 
+      // Test estimate
+      val estimate = gemsStrategy.estimate(ctx, ProbeLimitsTable.loadOrThrow())
+      Await.result(estimate, 20.seconds) should beEqualTo(Estimate.GuaranteedSuccess)
     }
     "support search/select and analyze on BPM 37093" in {
       val ra = Angle.fromHMS(12, 38, 49.820).getOrElse(Angle.zero)
@@ -418,6 +435,10 @@ class GemsStrategySpec extends Specification with NoTimeConversions {
       odgw4.map { s =>
         gemsStrategy.analyze(newCtx, ProbeLimitsTable.loadOrThrow(), GsaoiOdgw.odgw4, s).exists(_ == AgsAnalysis.Usable(GsaoiOdgw.odgw4, s, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq, defaultProbeBands(MagnitudeBand.H)))
       } should beSome(true)
+
+      // Test estimate
+      val estimate = gemsStrategy.estimate(ctx, ProbeLimitsTable.loadOrThrow())
+      Await.result(estimate, 20.seconds) should beEqualTo(Estimate.GuaranteedSuccess)
     }
     "support search/select and analyze on BPM 37093 part 2" in {
       val ra = Angle.fromHMS(12, 38, 49.820).getOrElse(Angle.zero)
@@ -478,6 +499,10 @@ class GemsStrategySpec extends Specification with NoTimeConversions {
       odgw4.map { s =>
         gemsStrategy.analyze(newCtx, ProbeLimitsTable.loadOrThrow(), GsaoiOdgw.odgw4, s).exists(_ == AgsAnalysis.Usable(GsaoiOdgw.odgw4, s, GuideSpeed.FAST, AgsGuideQuality.DeliversRequestedIq, defaultProbeBands(MagnitudeBand.H)))
       } should beSome(true)
+
+      // Test estimate
+      val estimate = gemsStrategy.estimate(ctx, ProbeLimitsTable.loadOrThrow())
+      Await.result(estimate, 20.seconds) should beEqualTo(Estimate.GuaranteedSuccess)
     }
   }
 
