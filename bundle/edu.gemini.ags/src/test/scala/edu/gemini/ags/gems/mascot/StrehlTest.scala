@@ -319,7 +319,7 @@ class StrehlTest {
       MascotTest.star(-32.9534, 43.4231, 14.19, 13.55, 12.63, 11.678, 11.088, 10.979, 49.9632, 41.5238),
       MascotTest.star(42.4108, 15.864, 14.71, 14.06, 13.11, 12.677, 12.144, 12.063, 49.9352, 41.5161))
 
-    val s = Strehl(starList, Mascot.defaultMagnitudeExtractor)
+    val s = Strehl(starList)
     val starmag = (for (star <- s.stars) yield star.target.magnitudeIn(MagnitudeBand.R).get.value).toArray
     val starra = (for (star <- starList) yield star.target.coordinates.ra.toAngle.toDegrees).toArray
     val stardec = (for (star <- starList) yield star.target.coordinates.dec.toDegrees).toArray

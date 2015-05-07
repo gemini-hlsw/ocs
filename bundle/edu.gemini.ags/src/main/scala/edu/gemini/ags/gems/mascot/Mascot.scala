@@ -40,29 +40,24 @@ object Mascot {
     def toList: List[Star] = List(n1.some, n2, n3).flatten
   }
 
-  private implicit class Bandpass2Extractor(val band: MagnitudeBand) extends AnyVal {
-    def toExtractor:MagnitudeExtractor = (s:SiderealTarget) => s.magnitudeIn(defaultBandpass)
-  }
 
   // The default mag bandpass
   val defaultBandpass:MagnitudeBand = MagnitudeBand.R
-  val defaultMagnitudeExtractor:MagnitudeExtractor = defaultBandpass.toExtractor
 
   // multiply strehl min, max and average by this value (depends on instrument filter: See REL-426)
   val defaultFactor = 1.0
 
   @Deprecated
   def computeStrehl4Java(band: MagnitudeBand, factor: Double, n1: Star, n2: Option[Star] = None, n3: Option[Star] = None): Option[Strehl] =
-    computeStrehl(band.toExtractor, factor, StarTriple(n1, n2, n3))
+    computeStrehl(factor, StarTriple(n1, n2, n3))
 
   /**
    * Performs the strehl algorithm on the given 1, 2 or 3 stars (2 and 3 are optional)
-   * @param magnitudeExtractor extract the magnitudes used in the calculations: (one of "B", "V", "R", "J", "H", "K")
    * @param factor multiply strehl min, max and average by this value (depends on instrument filter: See REL-426)
-   * @param A star triplet
+   * @param st star triplet
    * @return a Some(Strehl) object containing the results of the computations, or None if the positions can't be used
    */
-  def computeStrehl(magnitudeExtractor: MagnitudeExtractor, factor: Double, st: StarTriple): Option[Strehl] = {
+  def computeStrehl(factor: Double, st: StarTriple): Option[Strehl] = {
     st match {
       case StarTriple(n1, Some(n2), n3) if !doesItFit(n1, n2, n3) =>
         Log.warning("Skipped. Does not fit.")
@@ -72,7 +67,7 @@ object Mascot {
         //          grow,sall,sdata;
         //          window,3;
         //          disp_strehl_map,sdata;
-        Strehl(s.toList, magnitudeExtractor, factor).some
+        Strehl(s.toList, factor).some
     }
   }
 
@@ -81,21 +76,19 @@ object Mascot {
   /**
    * Finds the best asterisms for the given list of stars.
    * @param starList unfiltered list of stars from a catalog query
-   * @param magnitudeExtractor extract the magnitudes used in the calculations: (one of "B", "V", "R", "J", "H", "K")
    * @param factor multiply strehl min, max and average by this value (depends on instrument filter: See REL-426)
    * @param filter a filter function that returns false if the Star should be excluded
    * @param progress a function(strehl, count, total) called for each asterism as it is calculated
    * @return a tuple: (list of stars actually used, list of asterisms found)
    */
   def findBestAsterism(starList: List[Star],
-                       magnitudeExtractor: MagnitudeExtractor = defaultMagnitudeExtractor,
                        factor: Double = defaultFactor,
                        progress: ProgressFunction = defaultProgress,
                        filter: Star => Boolean = defaultFilter)
   : (List[Star], List[Strehl]) = {
     // sort by selected mag and select
     val sortedStarList = starList.sortWith((s1,s2) => s1.r < s2.r)
-    val filteredStarList = selectStarsOnMag(sortedStarList, magnitudeExtractor).filter(filter)
+    val filteredStarList = selectStarsOnMag(sortedStarList).filter(filter)
 
     val ns = filteredStarList.length
     val trips = AllPairsAndTriples.allTrips(filteredStarList)
@@ -110,12 +103,12 @@ object Mascot {
       case Nil =>
         AsterismSearchStage(result, count, continue = true)
       case s :: Nil =>
-        val strehl = computeStrehl(magnitudeExtractor, factor, (StarTriple.apply _).tupled(s))
+        val strehl = computeStrehl(factor, (StarTriple.apply _).tupled(s))
         // check if we continue
         val continue = strehl.map(progress(_, count, total))
         AsterismSearchStage(strehl.map(_ :: result).getOrElse(result), count, continue.getOrElse(true))
       case s :: tail =>
-        val strehl = computeStrehl(magnitudeExtractor, factor, (StarTriple.apply _).tupled(s))
+        val strehl = computeStrehl(factor, (StarTriple.apply _).tupled(s))
         // check if we continue
         val continue = strehl.map(progress(_, count, total))
         if (continue === false.some) {
@@ -151,7 +144,7 @@ object Mascot {
   //
   //  status = select_stars_not_too_close()
   //}
-  def selectStarsOnMag(starList: List[Star], magnitudeExtractor: MagnitudeExtractor = defaultMagnitudeExtractor): List[Star] = {
+  def selectStarsOnMag(starList: List[Star]): List[Star] = {
     selectStarsNotTooClose(starList.filter(star => {
       star.r >= mag_min_threshold && star.r <= mag_max_threshold
     }))

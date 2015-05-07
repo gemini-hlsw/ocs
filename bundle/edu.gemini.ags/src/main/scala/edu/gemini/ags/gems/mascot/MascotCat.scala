@@ -49,13 +49,12 @@ object MascotCat {
    */
   def findBestAsterism(list: List[SiderealTarget],
                        centerRA: Double, centerDec: Double,
-                       magnitudeExtractor: MagnitudeExtractor = Mascot.defaultMagnitudeExtractor,
                        factor: Double = Mascot.defaultFactor,
                        progress: ProgressFunction = defaultProgress,
                        filter: Star => Boolean = Mascot.defaultFilter)
   : (List[Star], List[Strehl]) = {
     val starList = list.map(Star.makeStar(_, centerRA, centerDec))
-    Mascot.findBestAsterism(starList, magnitudeExtractor, factor, progress, filter)
+    Mascot.findBestAsterism(starList, factor, progress, filter)
   }
 
   case class StrehlResults(starList: List[Star], strehlList: List[Strehl])
@@ -84,7 +83,7 @@ object MascotCat {
       true
     }
 
-    val (starList, strehlList) = findBestAsterism(javaList, centerRA, centerDec, magnitudeExtractor(defaultProbeBands(band)), factor, progress, Mascot.defaultFilter)
+    val (starList, strehlList) = findBestAsterism(javaList, centerRA, centerDec, factor, progress, Mascot.defaultFilter)
     StrehlResults(starList, strehlList)
   }
 
@@ -108,7 +107,7 @@ object MascotCat {
       progressCheck(s, true)
     }
 
-    val (starList, strehlList) = findBestAsterism(javaList, centerRA, centerDec, magnitudeExtractor(defaultProbeBands(band)), factor, progress, Mascot.defaultFilter)
+    val (starList, strehlList) = findBestAsterism(javaList, centerRA, centerDec, factor, progress, Mascot.defaultFilter)
     StrehlResults(starList, strehlList)
   }
 

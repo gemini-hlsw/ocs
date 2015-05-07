@@ -113,8 +113,8 @@ object Strehl {
    * @param bandpass determines which magnitudes are used in the calculations: (one of "B", "V", "R", "J", "H", "K")
    * @param factor multiply strehl min, max and average by this value (depends on instrument filter: See REL-426)
    */
-  def apply(starList: List[Star], bandpass: MagnitudeExtractor, factor: Double = 1.0): Strehl = {
-    optimize(starList, bandpass, factor)
+  def apply(starList: List[Star], factor: Double = 1.0): Strehl = {
+    optimize(starList, factor)
   }
 
   /**
@@ -127,7 +127,7 @@ object Strehl {
    * @param bandpass determines which magnitudes are used in the calculations: (one of "B", "V", "R", "J", "H", "K")
    * @param factor multiply strehl min, max and average by this value (depends on instrument filter: See REL-426)
    */
-  def optimize(starList: List[Star], bandpass: MagnitudeExtractor, factor: Double): Strehl = {
+  def optimize(starList: List[Star], factor: Double): Strehl = {
     val nstars = starList.size
     val mag = (for (s <- starList) yield s.r).toArray
     val starx = (for (s <- starList) yield s.x).toArray

@@ -37,7 +37,6 @@ object MascotGuideStar {
    * @param guideStarType CWFS or ODGW, defined in this class
    * @param posAngleTolerance allow the pos angle to change +- this amount in degrees
    * @param basePosTolerance allow the base position to change +- this amount in arcsec
-   * @param magnitudeExtractor extracts the magnitude to use for the calculations
    * @param factor multiply strehl min, max and average by this value (depends on instrument filter: See REL-426)
    * @param magLimits a set of optional magnitude limits used to filter the star list
    * @param progress a function(strehl, count, total) called for each asterism as it is calculated
@@ -51,7 +50,6 @@ object MascotGuideStar {
                                     guideStarType: GuideStarType,
                                     posAngleTolerance: Double = 0,
                                     basePosTolerance: Double = 0,
-                                    magnitudeExtractor: MagnitudeExtractor = Mascot.defaultMagnitudeExtractor,
                                     factor: Double = Mascot.defaultFactor,
                                     magLimits: MagLimits = defaultMagLimits,
                                     progress: ProgressFunction = Mascot.defaultProgress)
@@ -61,7 +59,7 @@ object MascotGuideStar {
     val guideStarFilter = guideStarType.filter(ctx, magLimits, _: Star)
     // If no tolerances were given, we can do more filtering up front
     val filter = if (simple) guideStarFilter else magLimits.filter _
-    val (_, strehlList) = MascotCat.findBestAsterism(queryResult, center.ra.toAngle.toDegrees, center.dec.toAngle.toDegrees, magnitudeExtractor, factor, progress, filter)
+    val (_, strehlList) = MascotCat.findBestAsterism(queryResult, center.ra.toAngle.toDegrees, center.dec.toAngle.toDegrees, factor, progress, filter)
     if (simple) {
       val basePos = ctx.getBaseCoordinates
       List((strehlList, ctx.getInstrument.getPosAngleDegrees, basePos.getRaDeg, basePos.getDecDeg))
