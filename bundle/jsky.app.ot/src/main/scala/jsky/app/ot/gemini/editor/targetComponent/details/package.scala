@@ -1,15 +1,18 @@
 package jsky.app.ot.gemini.editor.targetComponent
 
-import javax.swing.BorderFactory._
-
-import scalaz.\/
-
-import javax.swing.border.Border
-
 import edu.gemini.horizons.api.HorizonsQuery.ObjectType
 import edu.gemini.spModel.target.system.{CoordinateParam, NamedTarget, NonSiderealTarget}
 import edu.gemini.spModel.target.system.ITarget.Tag
+import jsky.app.ot.ui.util.FlatButtonUtil
 import jsky.util.gui.{SwingWorker, TextBoxWidget, TextBoxWidgetWatcher}
+
+import java.awt.event.{ActionEvent, ActionListener}
+import javax.swing.BorderFactory._
+import javax.swing.JButton
+import javax.swing.border.Border
+
+import scalaz.syntax.id._
+import scalaz.\/
 
 package object details {
 
@@ -25,6 +28,13 @@ package object details {
     override def textBoxKeyPress(tbwe: TextBoxWidget): Unit = textBoxAction(tbwe)
     override def textBoxAction(tbwe: TextBoxWidget): Unit = f(tbwe.getValue)
   }
+
+  def searchButton(doSearch: => Unit): JButton =
+    FlatButtonUtil.create("eclipse/search.gif") <| { b =>
+      b.addActionListener(new ActionListener() {
+        override def actionPerformed(e: ActionEvent) = doSearch
+      })
+    }
 
   implicit class NonSiderealTargetOps(nst: NonSiderealTarget) {
     def getHorizonsObjectType: ObjectType =

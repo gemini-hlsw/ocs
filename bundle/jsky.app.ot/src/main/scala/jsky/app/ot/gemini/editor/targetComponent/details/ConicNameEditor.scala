@@ -24,6 +24,15 @@ final class ConicNameEditor(date: HorizonsIO[Date]) extends JPanel with Telescop
 
   def ct: ConicTarget = spt.getTarget.asInstanceOf[ConicTarget]
 
+  /** A program to resolve the current target BY NAME and replace it. */
+  val lookup: HorizonsIO[Unit] =
+    for {
+      d  <- date
+      t0 <- HorizonsIO.delay(ct)
+      p  <- Horizons.lookupConicTargetByName(t0.getName, t0.getTag.unsafeToHorizonsObjectType, d)
+      _  <- HorizonsIO.delay(spt.setTarget(p._1))
+    } yield ()
+
   val name = new TextBoxWidget <| { w =>
     w.setColumns(25)
     w.setMinimumSize(w.getPreferredSize)
@@ -41,6 +50,8 @@ final class ConicNameEditor(date: HorizonsIO[Date]) extends JPanel with Telescop
     })
   }
 
+  val search = searchButton(lookup.invokeAndWait)
+
   val hid = new JLabel <| { a =>
     a.setForeground(Color.DARK_GRAY)
   }
@@ -54,8 +65,14 @@ final class ConicNameEditor(date: HorizonsIO[Date]) extends JPanel with Telescop
     c.weightx = 2
   })
 
-  add(hid, new GridBagConstraints <| { c =>
+  add(search, new GridBagConstraints <| { c =>
     c.gridx  = 1
+    c.gridy  = 0
+    c.insets = new Insets(0, 2, 0, 0)
+  })
+
+  add(hid, new GridBagConstraints <| { c =>
+    c.gridx  = 2
     c.gridy  = 0
     c.insets = new Insets(0, 5, 0, 0)
   })
@@ -70,13 +87,5 @@ final class ConicNameEditor(date: HorizonsIO[Date]) extends JPanel with Telescop
     }
   }
 
-  /** A program to resolve the current target BY NAME and replace it. */
-  val lookup: HorizonsIO[Unit] =
-    for {
-      d  <- date
-      t0 <- HorizonsIO.delay(ct)
-      p  <- Horizons.lookupConicTargetByName(t0.getName, t0.getTag.unsafeToHorizonsObjectType, d)
-      _  <- HorizonsIO.delay(spt.setTarget(p._1))
-    } yield ()
 
 }

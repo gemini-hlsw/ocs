@@ -16,14 +16,20 @@ import jsky.catalog.{BasicQueryArgs, TableQueryResult, Catalog}
 import jsky.coords.WorldCoords
 import jsky.util.gui.{DialogUtil, DropDownListBoxWidget, TextBoxWidgetWatcher, TextBoxWidget}
 
-import scalaz.concurrent.Task
 import scalaz.syntax.id._
 import scalaz.{ \/-, -\/ }
 
 // Name editor, with catalog lookup for sidereal targets
 final class SiderealNameEditor extends JPanel with TelescopePosEditor with ReentrancyHack {
-
   private[this] var spt = new SPTarget // never null
+
+  def forkSearch(): Unit = {
+    val cat = cats.getSelectedItem.asInstanceOf[Catalog]
+    forkSwingWorker(lookupTarget(cat, name.getValue)) {
+      case \/-(r) => processResult(r)
+      case -\/(e) => DialogUtil.error(e.getMessage)
+    }
+  }
 
   val name = new TextBoxWidget <| { w =>
     w.setColumns(20)
@@ -36,19 +42,16 @@ final class SiderealNameEditor extends JPanel with TelescopePosEditor with Reent
           spt.notifyOfGenericUpdate()
         }
 
-      override def textBoxAction(tbwe: TextBoxWidget): Unit = {
-        val cat = cats.getSelectedItem.asInstanceOf[Catalog]
-        forkSwingWorker(lookupTarget(cat, tbwe.getValue)) {
-          case \/-(r) => processResult(r)
-          case -\/(e) => DialogUtil.error(e.getMessage)
-        }
-      }
-
+      override def textBoxAction(tbwe: TextBoxWidget): Unit =
+        forkSearch()
     })
   }
 
+  val search = searchButton(forkSearch())
+
   val cats = new DropDownListBoxWidget <| { m =>
     m.setChoices(SkycatConfigFile.getConfigFile.getNameServers)
+    m.setVisible(false) // just hide this for now
   }
 
   setLayout(new GridBagLayout)
@@ -60,8 +63,14 @@ final class SiderealNameEditor extends JPanel with TelescopePosEditor with Reent
     c.weightx = 2
   })
 
+  add(search, new GridBagConstraints <| { c =>
+    c.gridx  = 1
+    c.gridy  = 0
+    c.insets = new Insets(0, 2, 0, 0)
+  })
+
   add(cats, new GridBagConstraints <| { c =>
-    c.gridx = 1
+    c.gridx = 2
     c.gridy = 0
     c.insets = new Insets(0, 2, 0, 0)
   })
