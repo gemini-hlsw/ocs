@@ -158,18 +158,13 @@ trait GemsStrategy extends AgsStrategy {
     // A way to terminate the Mascot algorithm immediately in the following cases:
     // 1. A usable 2 or 3-star asterism is found; or
     // 2. If no asterisms were found.
-    // This is unfortunately a hideous way to do anything, which could be avoided if we
-    // rewrote the GemsCatalogResults.analyzeGoodEnough method (which is only used here)
-    // to return something like a Buffer.
-    val progressMeasurer = new MascotProgress {
-      override def progress(s: Strehl, count: Int, total: Int, usable: Boolean): Boolean = {
-        !((usable && s.stars.size >= 2) || (s.stars.size < 2))
-      }
-      override def setProgressTitle(s: String): Unit = {}
+    // Returning false will stop the search
+    def progress(s: Strehl, usable: Boolean): Boolean = {
+      !((usable && s.stars.size >= 2) || (s.stars.size < 2))
     }
 
     // Iterate over 45 degree position angles if no asterism is found at PA = 0.
-    val gemsCatalogResults = results.map(result => GemsResultsAnalyzer.analyzeGoodEnough(ctx, anglesToTry, result, progressMeasurer.some))
+    val gemsCatalogResults = results.map(result => GemsResultsAnalyzer.analyzeGoodEnough(ctx, anglesToTry, result, progress))
 
     // Filter out the 1-star asterisms. If anything is left, we are good to go; otherwise, no.
     gemsCatalogResults.map { x =>

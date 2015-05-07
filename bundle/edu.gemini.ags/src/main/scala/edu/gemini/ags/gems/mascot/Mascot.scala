@@ -20,16 +20,19 @@ import Scalaz._
 object Mascot {
   val Log = Logger.getLogger(Mascot.getClass.getSimpleName)
 
+  type ProgressFunction = (Strehl, Int, Int) => Boolean
+
   // Default star filter
   val defaultFilter = (s: Star) => true
 
   // Default progress callback, called for each asterism as it is calculated
-  val defaultProgress = (s: Strehl, count: Int, total: Int) => {
+  val defaultProgress:ProgressFunction = (s: Strehl, count: Int, total: Int) => {
     Log.info(s"Asterism #$count")
-    for (i <- 0 until s.stars.size) {
+    for (i <- s.stars.indices) {
       Log.finer(s"[${s.stars(i).x}%.1f,${s.stars(i).y}%.1f]")
     }
     Log.info(f"Strehl over ${s.halffield * 2}%.1f: avg=${s.avgstrehl * 100}%.1f  rms=${s.rmsstrehl * 100}%.1f  min=${s.minstrehl * 100}%.1f  max=${s.maxstrehl * 100}%.1f")
+    true
   }
 
   private implicit class Bandpass2Extractor(val band: MagnitudeBand) extends AnyVal {
@@ -70,6 +73,8 @@ object Mascot {
     }
   }
 
+  case class AsterismSearchStage(stars: List[Strehl], count: Int, continue: Boolean)
+
   /**
    * Finds the best asterisms for the given list of stars.
    * @param starList unfiltered list of stars from a catalog query
@@ -82,7 +87,7 @@ object Mascot {
   def findBestAsterism(starList: List[Star],
                        magnitudeExtractor: MagnitudeExtractor = defaultMagnitudeExtractor,
                        factor: Double = defaultFactor,
-                       progress: (Strehl, Int, Int) => Unit = defaultProgress,
+                       progress: ProgressFunction = defaultProgress,
                        filter: Star => Boolean = defaultFilter)
   : (List[Star], List[Strehl]) = {
     // sort by selected mag and select
@@ -90,45 +95,80 @@ object Mascot {
     val filteredStarList = selectStarsOnMag(sortedStarList, magnitudeExtractor).filter(filter)
 
     val ns = filteredStarList.length
-    var count = 0
     val trips = AllPairsAndTriples.allTrips(filteredStarList)
     val pairs = AllPairsAndTriples.allPairs(filteredStarList)
     val total = trips.length + pairs.length + ns
-    var result = List[Strehl]()
 
     Log.info(s"Mascot.findBestAsterism: input stars: $ns, total asterisms: $total")
 
-    if (ns >= 3) {
-      for ((n1, n2, n3) <- trips) {
-        count += 1
-        computeStrehl(magnitudeExtractor, factor, n1, n2.some, n3.some).foreach { s =>
-          progress(s, count, total)
-          result = s :: result
+    // Compute strehl for sets of 3 stars
+    def doTriples(result: List[Strehl], count: Int, triple: List[(Star, Star, Star)]):AsterismSearchStage = triple match {
+      case Nil =>
+        AsterismSearchStage(result, count, continue = true)
+      case (n1, n2, n3) :: Nil =>
+        val s = computeStrehl(magnitudeExtractor, factor, n1, n2.some, n3.some)
+        val continue = s.map(progress(_, count, total))
+        AsterismSearchStage(s.map(_ :: result).getOrElse(result), count, continue.getOrElse(true))
+      case (n1, n2, n3) :: tail =>
+        val s = computeStrehl(magnitudeExtractor, factor, n1, n2.some, n3.some)
+        val continue = s.map(progress(_, count, total))
+        if (continue === false.some) {
+          AsterismSearchStage(s.map(_ :: result).getOrElse(result), count, continue = false)
+        } else {
+          // Continue if the position is skipped or if progress says continue
+          doTriples(s.map(_ :: result).getOrElse(result), count + 1, tail)
         }
-      }
     }
 
-    if (ns >= 2) {
-      for ((n1, n2) <- pairs) {
-        count += 1
-        computeStrehl(magnitudeExtractor, factor, n1, n2.some).foreach { s =>
-          progress(s, count, total)
-          result = s :: result
+    // Compute strehl for sets of 2 stars
+    def doDoubles(result: List[Strehl], count: Int, doubles: List[(Star, Star)]):AsterismSearchStage = doubles match {
+      case Nil =>
+        AsterismSearchStage(result, count, continue = true)
+      case (n1, n2) :: Nil =>
+        val s = computeStrehl(magnitudeExtractor, factor, n1, n2.some)
+        // last step we don't check if we continue
+        val continue = s.map(progress(_, count, total))
+        AsterismSearchStage(s.map(_ :: result).getOrElse(result), count, continue.getOrElse(true))
+      case (n1, n2) :: tail =>
+        val s = computeStrehl(magnitudeExtractor, factor, n1, n2.some)
+        val continue = s.map(progress(_, count, total))
+        if (continue === false.some) {
+          AsterismSearchStage(s.map(_ :: result).getOrElse(result), count, continue = false)
+        } else {
+          // Continue if the position is skipped or if progress says continue
+          doDoubles(s.map(_ :: result).getOrElse(result), count + 1, tail)
         }
-      }
     }
 
-    if (ns >= 1) {
-      for (n1 <- filteredStarList) {
-        count += 1
-        computeStrehl(magnitudeExtractor, factor, n1).foreach { s =>
-          progress(s, count, total)
-          result = s :: result
+    // Compute strehl for single stars
+    def doSingles(result: List[Strehl], count: Int, singles: List[Star]):AsterismSearchStage = singles match {
+      case Nil =>
+        AsterismSearchStage(result, count, continue = true)
+      case n1 :: Nil =>
+        val s = computeStrehl(magnitudeExtractor, factor, n1)
+        // last step we don't check if we continue
+        val continue = s.map(progress(_, count, total))
+        AsterismSearchStage(s.map(_ :: result).getOrElse(result), count, continue.getOrElse(true))
+      case n1 :: tail =>
+        val s = computeStrehl(magnitudeExtractor, factor, n1)
+        val continue = s.map(progress(_, count, total))
+        if (continue === false.some) {
+          AsterismSearchStage(s.map(_ :: result).getOrElse(result), count, continue = false)
+        } else {
+          // Continue if the position is skipped or if progress says continue
+          doSingles(s.map(_ :: result).getOrElse(result), count + 1, tail)
         }
-      }
     }
 
-    (filteredStarList, sortBestAsterisms(result))
+    // Search each possible combination of triples, doubles and singles supporting cancellation
+    def go(): List[Strehl] = {
+      val triples = if (ns >= 3) doTriples(Nil, 1, trips) else AsterismSearchStage(Nil, 1, continue = true)
+      val doubles = if (ns >= 2 && triples.continue) doDoubles(triples.stars, triples.count, pairs) else triples
+      val singles = if (ns >= 1 && doubles.continue) doSingles(doubles.stars, doubles.count, filteredStarList) else doubles
+      singles.stars
+    }
+
+    (filteredStarList, sortBestAsterisms(go()))
   }
 
   //func select_stars_on_mag(void)

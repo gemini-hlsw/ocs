@@ -18,9 +18,12 @@ import edu.gemini.pot.ModelConverters._
 import edu.gemini.spModel.obscomp.SPInstObsComp
 import edu.gemini.spModel.target.env.{GuideGroup, GuideProbeTargets}
 
+import scala.annotation.tailrec
 import scala.collection.JavaConverters._
 import scalaz._
 import Scalaz._
+
+case class AnalysisStage(stars: List[GemsGuideStars], continue: Boolean)
 
 object GemsResultsAnalyzer {
   val instance = this
@@ -88,51 +91,37 @@ object GemsResultsAnalyzer {
    * @param obsContext observation context
    * @param posAngles position angles to try (should contain at least one element: 0. deg)
    * @param catalogSearch results of catalog search
-   * @param mascotProgress used to report progress of Mascot Strehl calculations and interrupt if requested
-   *                 (using the results up until that point)
+   * @param progressGoodEnough used to tell Mascot Strehl calculations when it can stop
    * @return a sorted List of GemsGuideStars
    */
-  def analyzeGoodEnough(obsContext: ObsContext, posAngles: Set[Angle], catalogSearch: List[GemsCatalogSearchResults], mascotProgress: Option[MascotProgress]): List[GemsGuideStars] = {
+  def analyzeGoodEnough(obsContext: ObsContext, posAngles: Set[Angle], catalogSearch: List[GemsCatalogSearchResults], progressGoodEnough: (Strehl, Boolean) => Boolean): List[GemsGuideStars] = {
     val base = obsContext.getBaseCoordinates.toNewModel
-    // gemsGuideStars needs to be mutable to support updates from inside mascot
-    val gemsGuideStars = new scala.collection.mutable.ListBuffer[GemsGuideStars]
 
-    for (pair <- TiptiltFlexurePair.pairs(catalogSearch)) {
-      val tiptiltGroup = pair.tiptiltResults.criterion.key.group
-      val flexureGroup = pair.flexureResults.criterion.key.group
-      val tiptiltTargetsList = filter(obsContext, pair.tiptiltResults.results, tiptiltGroup, posAngles)
-      val flexureTargetsList = filter(obsContext, pair.flexureResults.results, flexureGroup, posAngles)
+    @tailrec
+    def go(stars: List[GemsGuideStars], pairs: List[TiptiltFlexurePair]):List[GemsGuideStars] = {
+      def check(pair: TiptiltFlexurePair):List[GemsGuideStars] = {
+        val tiptiltGroup = pair.tiptiltResults.criterion.key.group
+        val flexureGroup = pair.flexureResults.criterion.key.group
+        val tiptiltTargetsList = filter(obsContext, pair.tiptiltResults.results, tiptiltGroup, posAngles)
+        val flexureTargetsList = filter(obsContext, pair.flexureResults.results, flexureGroup, posAngles)
 
-      if (tiptiltTargetsList.nonEmpty && flexureTargetsList.nonEmpty) {
-        // tell the UI to update
-        mascotProgress.foreach {_.setProgressTitle(s"Finding asterisms for ${tiptiltGroup.getKey}")}
-
-        // Wrap mascot progress to support cancellation
-        val strehlHandler: MascotProgress = new MascotProgress() {
-          def progress(strehl: Strehl, count: Int, total: Int, usable: Boolean): Boolean = {
-            val subResult = analyzeAtAngles(obsContext, posAngles, strehl, flexureTargetsList, flexureGroup, tiptiltGroup)
-            // Update outer collection
-            gemsGuideStars ++= subResult
-
-            // Update the UI on progress
-            mascotProgress.map(_.progress(strehl, count, total, subResult.nonEmpty)).getOrElse(true)
-          }
-
-          def setProgressTitle(s: String) {
-            mascotProgress.foreach (_.setProgressTitle(s))
-          }
-        }
-
-        // Find asterisms with Mascot
-        try {
+        if (tiptiltTargetsList.nonEmpty && flexureTargetsList.nonEmpty) {
+          // Find asterisms with Mascot
           val band = bandpass(tiptiltGroup, obsContext.getInstrument)
           val factor = strehlFactor(obsContext.some)
-          MascotCat.findBestAsterismInTargetsList(tiptiltTargetsList, base.ra.toAngle.toDegrees, base.dec.toDegrees, band, factor, strehlHandler.some)
-        } catch {
-          case e: CancellationException =>
+          val asterisms = MascotCat.findBestAsterismInTargetsList(tiptiltTargetsList, base.ra.toAngle.toDegrees, base.dec.toDegrees, band, factor, progressGoodEnough)
+          val analyzedStars = asterisms.strehlList.map(analyzeAtAngles(obsContext, posAngles, _, flexureTargetsList, flexureGroup, tiptiltGroup))
+          stars ::: analyzedStars.flatten
+        } else {
+          stars
         }
       }
+      pairs match {
+        case x :: Nil  => check(x)
+        case x :: tail => go(check(x), tail)
+      }
     }
+    val gemsGuideStars = go(Nil, TiptiltFlexurePair.pairs(catalogSearch))
     sortResultsByRanking(gemsGuideStars.toList)
   }
 

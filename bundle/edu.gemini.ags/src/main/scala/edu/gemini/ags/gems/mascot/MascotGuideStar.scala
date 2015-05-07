@@ -3,6 +3,7 @@ package edu.gemini.ags.gems.mascot
 import java.util.logging.Logger
 
 import edu.gemini.ags.api.MagnitudeExtractor
+import edu.gemini.ags.gems.mascot.Mascot.ProgressFunction
 import edu.gemini.spModel.core.Coordinates
 import edu.gemini.spModel.core.Target.SiderealTarget
 import edu.gemini.spModel.obs.context.ObsContext
@@ -53,7 +54,7 @@ object MascotGuideStar {
                                     magnitudeExtractor: MagnitudeExtractor = Mascot.defaultMagnitudeExtractor,
                                     factor: Double = Mascot.defaultFactor,
                                     magLimits: MagLimits = defaultMagLimits,
-                                    progress: (Strehl, Int, Int) => Unit = Mascot.defaultProgress)
+                                    progress: ProgressFunction = Mascot.defaultProgress)
   : List[(List[Strehl], Double, Double, Double)] = {
     val center = ctx.getBaseCoordinates.toNewModel
     val simple = posAngleTolerance == 0.0 && basePosTolerance == 0.0
