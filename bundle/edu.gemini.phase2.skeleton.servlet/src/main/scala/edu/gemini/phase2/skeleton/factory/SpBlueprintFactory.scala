@@ -69,7 +69,7 @@ object SpBlueprintFactory {
       // Visitors blueprints
       case b: VisitorBlueprint              => VisitorHandler(b)
       case b: DssiBlueprint                 => VisitorHandler(b)
-      case b: GracesBlueprint               => Right(new SpGracesBlueprint())
+      case b: GracesBlueprint               => Graces(b)
       case _                                => Left("Unexpected blueprint: " + base)
     }
 
@@ -103,6 +103,16 @@ object SpBlueprintFactory {
     }
   }
 
+  object Graces {
+    private def readMode(rm: GracesReadMode)   = spEnum(rm, classOf[SpGracesBlueprint.ReadMode])
+    private def fiberMode(fm: GracesFiberMode) = spEnum(fm, classOf[SpGracesBlueprint.FiberMode])
+
+    def apply(b: GracesBlueprint): Either[String, SpGracesBlueprint] =
+      for {
+        r <- readMode(b.readMode).right
+        f <- fiberMode(b.fiberMode).right
+      } yield new SpGracesBlueprint(r, f)
+  }
 
   object F2 {
     private def filters(lst: List[Flamingos2Filter]) = spEnumList(lst, classOf[Flamingos2.Filter])

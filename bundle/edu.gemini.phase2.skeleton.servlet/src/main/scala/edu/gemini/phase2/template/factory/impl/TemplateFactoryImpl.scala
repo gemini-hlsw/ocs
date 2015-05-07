@@ -107,7 +107,7 @@ case class TemplateFactoryImpl(db: TemplateDb) extends TemplateFactory {
       case b: SpTexesBlueprint => Right(Texes(b))
 
       // GRACES
-      case b: SpGracesBlueprint => Right(Graces(b))
+      case b: SpGracesBlueprint => Right(Graces(b, sampleTarget))
 
       // VISITOR
       case b: SpVisitorBlueprint => Right(Visitor(b))
