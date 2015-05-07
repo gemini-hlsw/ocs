@@ -1,6 +1,6 @@
 package edu.gemini.ags.gems
 
-import java.util.concurrent.CancellationException
+import java.util.logging.Logger
 
 import edu.gemini.ags.api._
 import edu.gemini.ags.gems.mascot.{MascotCat, MascotProgress, Strehl}
@@ -27,6 +27,7 @@ case class AnalysisStage(stars: List[GemsGuideStars], continue: Boolean)
 
 object GemsResultsAnalyzer {
   val instance = this
+  val Log = Logger.getLogger(GemsResultsAnalyzer.getClass.getSimpleName)
 
   // sort by value only
   private val MagnitudeValueOrdering: scala.math.Ordering[Magnitude] = scala.math.Ordering.by(_.value)
@@ -70,9 +71,7 @@ object GemsResultsAnalyzer {
         val band = bandpass(tiptiltGroup, obsContext.getInstrument)
         val factor = strehlFactor(new Some[ObsContext](obsContext))
         val asterisms = MascotCat.findBestAsterismInTargetsList(tiptiltTargetsList, base.ra.toAngle.toDegrees, base.dec.toDegrees, band, factor, mascotProgress)
-        val analyzedStars = asterisms.strehlList.map { strehl =>
-          analyzeAtAngles(obsContext, posAngles.asScala.toSet, strehl, flexureTargetsList, flexureGroup, tiptiltGroup)
-        }
+        val analyzedStars = asterisms.strehlList.map(analyzeAtAngles(obsContext, posAngles.asScala.toSet, _, flexureTargetsList, flexureGroup, tiptiltGroup))
         gemsGuideStars ::: analyzedStars.flatten
       } else {
         gemsGuideStars
@@ -126,16 +125,18 @@ object GemsResultsAnalyzer {
   }
 
   private def printResults(result: List[GemsGuideStars]) {
-    println("Results:")
+    Log.info("Results:")
     result.zipWithIndex.foreach { case (s, i) =>
-      println(s"result #$i : $s")
+      Log.info(s"result #$i : $s")
     }
   }
 
   private def sortResultsByRanking(list: List[GemsGuideStars]): List[GemsGuideStars] = {
+    // Sorry to fall back to java, but scala's tree set works differently
     val set: java.util.Set[GemsGuideStars] = new java.util.TreeSet[GemsGuideStars](list.asJava)
     val result: java.util.List[GemsGuideStars] = new java.util.ArrayList[GemsGuideStars](set)
     java.util.Collections.reverse(result)
+    // Do we really need to print?
     printResults(result.asScala.toList)
     result.asScala.toList
   }
@@ -168,7 +169,8 @@ object GemsResultsAnalyzer {
     // XXX The TPE assumes canopus tiptilt if there are only 2 stars (one of each ODGW and CWFS),
     // So don't add any items to the list that have only 2 stars and GSAOI as tiptilt.
     (tiptiltGroup, tiptiltTargetList.toList) match {
-      case (GsaoiOdgw.Group.instance, _ :: Nil)                                                  => Nil
+      case (GsaoiOdgw.Group.instance, _ :: Nil)                                                  =>
+        Nil
       case _ if areAllTargetsValidInGroup(obsContext, tiptiltTargetList, tiptiltGroup, posAngle) =>
         val guideProbeTargets = assignGuideProbeTargets(obsContext, posAngle, tiptiltGroup, tiptiltTargetList, flexureGroup, flexureStars, reverseOrder)
         guideProbeTargets.headOption.map { _ =>
@@ -176,7 +178,8 @@ object GemsResultsAnalyzer {
           val gemsStrehl = GemsStrehl(strehl.avgstrehl, strehl.rmsstrehl, strehl.minstrehl, strehl.maxstrehl)
           GemsGuideStars(posAngle, tiptiltGroup, gemsStrehl, guideGroup)
         }.toList
-      case _                                                                                     => Nil
+      case _                                                                                     =>
+        Nil
     }
   }
 
@@ -187,7 +190,7 @@ object GemsResultsAnalyzer {
   private def assignGuideProbeTargets(obsContext: ObsContext, posAngle: Angle, tiptiltGroup: GemsGuideProbeGroup, tiptiltTargetList: List[SiderealTarget], flexureGroup: GemsGuideProbeGroup, flexureStars: List[SiderealTarget], reverseOrder: Boolean): List[GuideProbeTargets] = {
     // assign guide probes for tiptilt asterism
     def addTipTiltGuideProbeTargets(targets: List[SiderealTarget], result: List[GuideProbeTargets], obsContext: ObsContext):(ObsContext, List[GuideProbeTargets]) = targets match {
-      case x :: Nil =>
+      case x :: Nil  =>
         val gpt = assignGuideProbeTarget(obsContext, posAngle, tiptiltGroup, x, tiptiltGroup, result, tiptiltTargetList, reverseOrder)
         // Update the ObsContext, since validation of the following targets may depend on it
         gpt.map(x => (obsContext.withTargets(obsContext.getTargets.putPrimaryGuideProbeTargets(x)), (x :: result).reverse)).getOrElse((obsContext, Nil))
@@ -199,7 +202,7 @@ object GemsResultsAnalyzer {
 
     // assign guide probe for flexure star
     def addFlexureGuideProbeTargets(targets: List[SiderealTarget], result: List[GuideProbeTargets], obsContext: ObsContext):List[GuideProbeTargets] = targets match {
-      case x :: Nil =>
+      case x :: Nil  =>
         val gpt = assignGuideProbeTarget(obsContext, posAngle, flexureGroup, x, tiptiltGroup, result, tiptiltTargetList, reverseOrder = false)
         gpt.map(x => (x :: result).reverse).getOrElse(result)
       case x :: tail =>
@@ -305,9 +308,9 @@ object GemsResultsAnalyzer {
     // sort, put brightest stars first
     val targets = sortTargetsByBrightness(tiptiltTargetList)
     targets match {
-      case Nil                                                                         =>
+      case Nil                                                                      =>
         isCwfs3 // no asterism
-      case _ :: Nil                                                                    =>
+      case _ :: Nil                                                                 =>
         isCwfs3 // single star asterism must be cwfs3
       case brightest :: secondBrightest :: _ if isCwfs3 && assignCwfs3ToBrightest   =>
         brightest == target

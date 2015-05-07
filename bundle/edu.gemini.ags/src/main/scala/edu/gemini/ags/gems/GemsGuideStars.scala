@@ -16,6 +16,8 @@ import scala.annotation.tailrec
 import scalaz._
 import Scalaz._
 
+case class GemsStrehl(avg: Double = .0, rms: Double = .0, min: Double = .0, max: Double = .0)
+
 /**
  * The guideGroup should contain the designation of guide stars to guiders for the tip tilt
  * asterism computed by mascot and the flexure star.

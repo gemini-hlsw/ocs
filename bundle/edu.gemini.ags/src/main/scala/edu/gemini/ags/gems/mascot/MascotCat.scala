@@ -2,7 +2,6 @@ package edu.gemini.ags.gems.mascot
 
 import java.util.logging.Logger
 
-import edu.gemini.ags.api.{MagnitudeExtractor, magnitudeExtractor, defaultProbeBands}
 import edu.gemini.ags.gems.mascot.Mascot.ProgressFunction
 import edu.gemini.spModel.core.MagnitudeBand
 import edu.gemini.spModel.core.Target.SiderealTarget
@@ -41,7 +40,6 @@ object MascotCat {
    * @param list the list of SiderealTargets to use
    * @param centerRA the base position RA coordinate
    * @param centerDec the base position Dec coordinate
-   * @param magnitudeExtractor extracts the magnitude used in the calculations: (one of "B", "V", "R", "J", "H", "K")
    * @param factor multiply strehl min, max and average by this value (depends on instrument filter: See REL-426)
    * @param progress a function(strehl, count, total) called for each asterism as it is calculated
    * @param filter a filter function that returns false if the Star should be excluded
