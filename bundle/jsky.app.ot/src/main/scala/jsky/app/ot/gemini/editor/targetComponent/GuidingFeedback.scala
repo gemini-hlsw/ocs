@@ -4,6 +4,7 @@ import edu.gemini.ags.api.AgsAnalysis.{NoGuideStarForProbe, NoGuideStarForGroup}
 import edu.gemini.ags.api._
 import edu.gemini.ags.api.AgsGuideQuality._
 import edu.gemini.ags.api.AgsMagnitude.{MagnitudeCalc, MagnitudeTable}
+import edu.gemini.pot.ModelConverters._
 import edu.gemini.spModel.core.MagnitudeBand
 import edu.gemini.spModel.guide.{ValidatableGuideProbe, GuideSpeed, GuideProbe}
 import edu.gemini.spModel.guide.GuideSpeed._
@@ -42,7 +43,7 @@ object GuidingFeedback {
     import ProbeLimits.{le, lim}
 
     def searchRange: String =
-      s"${lim(sat)} $le ${bands.mkString(", ")} $le ${lim(slow)}"
+      s"${lim(sat)} $le ${bands.map(_.name).mkString(", ")} $le ${lim(slow)}"
 
     def detailRange: String =
       s"${lim(sat)} $le FAST $le ${lim(fast)} < MEDIUM $le ${lim(medium)} < SLOW $le ${lim(slow)}"
@@ -172,7 +173,7 @@ object GuidingFeedback {
 
   // GuidingFeedback.Row related to the given guide star itself.
   def guideStarAnalysis(ctx: ObsContext, mt: MagnitudeTable, gp: ValidatableGuideProbe, target: SPTarget): Option[Row] =
-    AgsRegistrar.currentStrategy(ctx).flatMap(_.analyze(ctx, mt).headOption.map { a =>
+    AgsRegistrar.currentStrategy(ctx).flatMap(_.analyze(ctx, mt, gp, target.toNewModel).map { a =>
       val plo = mt(ctx, gp).flatMap(ProbeLimits(a.probeBands, ctx, _))
       Row(a, plo, includeProbeName = false)
     })
