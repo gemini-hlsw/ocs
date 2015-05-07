@@ -219,7 +219,7 @@ object Horizons {
     date: Date
   ): Option[HorizonsReply] =
     Option(service.getLastResult)
-      .filter(_.getObjectId == hObjId)
+      .filter(_.getObjectId.toString === hObjId)
       .filter(_.getObjectType == hObjType)
       .filter(_.hasEphemeris)
       .filter(_.getEphemeris.get(0).getDate == date)
