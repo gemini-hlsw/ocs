@@ -169,7 +169,7 @@ class GemsStrategySpec extends Specification with NoTimeConversions {
       val ctx = ObsContext.create(env, inst, new JSome(Site.GS), conditions, null, new Gems)
       val tipTiltMode = GemsTipTiltMode.canopus
 
-      val posAngles = Set(ctx.getPositionAngle.toNewModel, Angle.zero)
+      val posAngles = Set(ctx.getPositionAngle.toNewModel, Angle.zero, Angle.fromDegrees(90), Angle.fromDegrees(180), Angle.fromDegrees(270))
 
       testSearchOnBestConditions("/gems_sn1987A.xml", ctx, tipTiltMode, posAngles, 9, 9)
 
@@ -386,7 +386,7 @@ class GemsStrategySpec extends Specification with NoTimeConversions {
       val ctx = ObsContext.create(env, inst, new JSome(Site.GS), conditions, null, new Gems)
       val tipTiltMode = GemsTipTiltMode.canopus
 
-      val posAngles = Set(ctx.getPositionAngle.toNewModel, Angle.zero)
+      val posAngles = Set(ctx.getPositionAngle.toNewModel, Angle.zero, Angle.fromDegrees(90), Angle.fromDegrees(180), Angle.fromDegrees(270))
 
       testSearchOnStandardConditions("/gems_bpm_37093.xml", ctx, tipTiltMode, posAngles, 5, 5)
 
@@ -450,7 +450,7 @@ class GemsStrategySpec extends Specification with NoTimeConversions {
       val ctx = ObsContext.create(env, inst, new JSome(Site.GS), conditions, null, new Gems)
       val tipTiltMode = GemsTipTiltMode.canopus
 
-      val posAngles = Set(ctx.getPositionAngle.toNewModel, Angle.zero)
+      val posAngles = Set(ctx.getPositionAngle.toNewModel, Angle.zero, Angle.fromDegrees(90), Angle.fromDegrees(180), Angle.fromDegrees(270))
 
       testSearchOnBestConditions("/gems_bpm_37093.xml", ctx, tipTiltMode, posAngles, 5, 5)
 
