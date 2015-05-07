@@ -27,6 +27,12 @@ object ModelConverters {
 
   def toOffset(pos: OffsetPosBase): Offset = pos.toNewModel
 
+  def toOldBand(band: MagnitudeBand): skyobject.Magnitude.Band = band.toOldModel
+
+  def toNewBand(band: skyobject.Magnitude.Band): MagnitudeBand = band.toNewModel
+
+  def toNewAngle(angle: skycalc.Angle): Angle = angle.toNewModel
+
   implicit class OldAngle2New(val angle: skycalc.Angle) extends AnyVal{
     def toNewModel: Angle = Angle.fromDegrees(angle.toDegrees.getMagnitude)
   }

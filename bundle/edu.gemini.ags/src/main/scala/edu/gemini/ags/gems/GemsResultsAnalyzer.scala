@@ -4,6 +4,7 @@ import java.util.logging.Logger
 
 import edu.gemini.ags.api._
 import edu.gemini.ags.gems.mascot.{MascotCat, MascotProgress, Strehl}
+import edu.gemini.catalog.api.MagnitudeConstraints
 import edu.gemini.spModel.core.{Magnitude, Angle, MagnitudeBand}
 import edu.gemini.spModel.core.Target.SiderealTarget
 import edu.gemini.spModel.gemini.gems.Canopus
@@ -16,7 +17,9 @@ import edu.gemini.shared.util.immutable.ScalaConverters._
 import edu.gemini.shared.util.immutable.{None => JNone, Option => JOption}
 import edu.gemini.pot.ModelConverters._
 import edu.gemini.spModel.obscomp.SPInstObsComp
+import edu.gemini.spModel.target.SPTarget
 import edu.gemini.spModel.target.env.{GuideGroup, GuideProbeTargets}
+import edu.gemini.spModel.target.system.HmsDegTarget
 
 import scala.annotation.tailrec
 import scala.collection.JavaConverters._
@@ -229,7 +232,7 @@ object GemsResultsAnalyzer {
       case                                     _ =>
         probe
     }
-    gp.map(GuideProbeTargets.create(_, GemsUtils4Java.toSPTarget(target)))
+    gp.map(GuideProbeTargets.create(_, toSPTarget(target)))
   }
 
   // Returns the given targets list with any objects removed that are not valid in at least one of the
@@ -248,8 +251,8 @@ object GemsResultsAnalyzer {
 
   // Returns true if the given target is valid for the given group
   private def isTargetValidInGroup(obsContext: ObsContext, target: SiderealTarget, group: GemsGuideProbeGroup, posAngle: Angle): Boolean = {
-    val ctx = obsContext.withPositionAngle(GemsUtils4Java.toOldAngle(posAngle))
-    val st = GemsUtils4Java.toSPTarget(target)
+    val ctx = obsContext.withPositionAngle(posAngle.toOldModel)
+    val st = toSPTarget(target)
     group.getMembers.asScala.exists(_.validate(st, ctx))
   }
 
@@ -279,7 +282,7 @@ object GemsResultsAnalyzer {
 
     // Special case:
     // If the tip tilt asterism is assigned to the GSAOI ODGW group, then the flexure star must be assigned to CWFS3.
-    if (isFlexure && ("ODGW" == tiptiltGroup.getKey) && Canopus.Wfs.cwfs3.validate(GemsUtils4Java.toSPTarget(target), ctx)) {
+    if (isFlexure && ("ODGW" == tiptiltGroup.getKey) && Canopus.Wfs.cwfs3.validate(toSPTarget(target), ctx)) {
       Canopus.Wfs.cwfs3.some
     } else {
       val members = if (reverseOrder) group.getMembers.asScala.toList.reverse else group.getMembers.asScala.toList
@@ -293,9 +296,9 @@ object GemsResultsAnalyzer {
       case wfs: Canopus.Wfs          =>
         // Additional check for mag range (for cwfs1 and cwfs2, since different than cwfs3 and group range)
         val canopusWfsCalculator = GemsMagnitudeTable.CanopusWfsMagnitudeLimitsCalculator
-        wfs.validate(GemsUtils4Java.toSPTarget(target), ctx) && GemsUtils4Java.containsMagnitudeInLimits(target, canopusWfsCalculator.getNominalMagnitudeConstraints(wfs))
+        wfs.validate(toSPTarget(target), ctx) && containsMagnitudeInLimits(target, canopusWfsCalculator.getNominalMagnitudeConstraints(wfs))
       case vp: ValidatableGuideProbe =>
-        vp.validate(GemsUtils4Java.toSPTarget(target), ctx)
+        vp.validate(toSPTarget(target), ctx)
       case _                         =>
         true
     }
@@ -393,5 +396,11 @@ object GemsResultsAnalyzer {
     targetsList.sortBy(magnitudeExtractor(_))(MagnitudeOptionOrdering)
   }
 
+  // Returns true if the target magnitude is within the given limits
+  def containsMagnitudeInLimits(target: SiderealTarget, magLimits: MagnitudeConstraints): Boolean =
+    // The true default is suspicious but changing it to false breaks backwards compatibility
+    target.magnitudeIn(magLimits.band).map(m => magLimits.contains(m)).getOrElse(true)
+
+  def toSPTarget(siderealTarget: SiderealTarget):SPTarget = new SPTarget(HmsDegTarget.fromSkyObject(siderealTarget.toOldModel))
 
 }

@@ -1,13 +1,13 @@
 package jsky.app.ot.gemini.gems;
 
 import edu.gemini.ags.gems.GemsResultsAnalyzer;
-import edu.gemini.ags.gems.GemsUtils4Java;
 import edu.gemini.ags.gems.mascot.Mascot;
 import edu.gemini.ags.gems.mascot.MascotConf;
 import edu.gemini.ags.gems.mascot.Star;
 import edu.gemini.ags.gems.mascot.Strehl;
 import edu.gemini.mascot.gui.contour.ContourPlot;
 import edu.gemini.mascot.gui.contour.StrehlContourPlot;
+import edu.gemini.pot.ModelConverters;
 import edu.gemini.shared.skyobject.Magnitude;
 import edu.gemini.shared.util.immutable.*;
 import edu.gemini.spModel.core.MagnitudeBand;
@@ -399,7 +399,7 @@ public class StrehlFeature extends TpeImageFeature implements PropertyWatcher, M
                         Gsaoi gsaoi = (Gsaoi) inst;
                         Option<Magnitude.Band> band = gsaoi.getFilter().getCatalogBand();
                         if (!band.isEmpty()) {
-                            return GemsUtils4Java.toNewBand(band.getValue());
+                            return ModelConverters.toNewBand(band.getValue());
                         }
                     }
                 default:
