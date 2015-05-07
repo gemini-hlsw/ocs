@@ -1,7 +1,5 @@
 package edu.gemini.ags.gems
 
-import java.security.SecureRandom
-
 import edu.gemini.ags.gems.mascot.Star
 import edu.gemini.pot.ModelConverters._
 import edu.gemini.shared.util.immutable.{Some => JSome}
@@ -30,8 +28,6 @@ trait UCAC3Regression {
   type GuideProbeTargetsFinder = (GuideProbe, String) => GuideProbeTargets
 
   private val defaultTarget = new SPTarget()
-
-  private val random = new SecureRandom()
 
   def runAnalysis(ra: String, dec: String, conditions: Conditions, tipTiltCriterion: GemsCatalogSearchCriterion, flexureCriterion: GemsCatalogSearchCriterion, tipTiltTargets: List[SiderealTarget], flexureTargets: List[SiderealTarget], expectedGuideStars: List[GemsGuideStars]):Boolean = {
     val results = List(GemsCatalogSearchResults(tipTiltCriterion, tipTiltTargets), GemsCatalogSearchResults(flexureCriterion, flexureTargets))

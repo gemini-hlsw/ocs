@@ -164,9 +164,6 @@ case object RemoteBackend extends CachedBackend {
     try {
       client.executeMethod(method)
       VoTableParser.parse(e.url, method.getResponseBodyAsStream).fold(p => QueryResult(e.query, CatalogQueryResult(TargetsTable.Zero, List(p))), y => {
-        // Print selected stars for debugging
-        // TODO Remove
-        CatalogQueryResult(y).targets.rows.foreach(println)
         QueryResult(e.query, CatalogQueryResult(y).filter(e.query))
       })
     } finally {
