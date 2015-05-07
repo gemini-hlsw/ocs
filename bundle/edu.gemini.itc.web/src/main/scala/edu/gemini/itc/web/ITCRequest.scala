@@ -268,20 +268,20 @@ object ITCRequest {
   def sourceDefinitionParameters(r: ITCRequest): SourceDefinition = {
     // Get the source geometry and type
     import SourceDefinition.Profile._
-    val spatialProfile = r.enumParameter(classOf[Profile]) match {
+    val (spatialProfile, norm, units) = r.enumParameter(classOf[Profile]) match {
       case POINT    =>
         val norm  = r.doubleParameter("psSourceNorm")
         val units = r.enumParameter(classOf[BrightnessUnit], "psSourceUnits")
-        PointSource(norm, units)
+        (PointSource(), norm, units)
       case GAUSSIAN =>
         val norm  = r.doubleParameter("gaussSourceNorm")
         val units = r.enumParameter(classOf[BrightnessUnit], "gaussSourceUnits")
         val fwhm  = r.doubleParameter("gaussFwhm")
-        GaussianSource(norm, units, fwhm)
+        (GaussianSource(fwhm), norm, units)
       case UNIFORM  =>
         val norm  = r.doubleParameter("usbSourceNorm")
         val units = r.enumParameter(classOf[BrightnessUnit], "usbSourceUnits")
-        UniformSource(norm, units)
+        (UniformSource(), norm, units)
     }
 
     // Get Normalization info
@@ -315,7 +315,7 @@ object ITCRequest {
     }
 
     // WOW, finally we've got everything in place..
-    new SourceDefinition(spatialProfile, sourceDefinition, normBand, redshift)
+    new SourceDefinition(spatialProfile, sourceDefinition, norm, units, normBand, redshift)
   }
 
   def parameters(r: ITCRequest): Parameters = {

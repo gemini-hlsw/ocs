@@ -139,7 +139,7 @@ object Hash {
         case d: EmissionLine    => (d.wavelength.toMicrons * 1000 + d.continuum) * 1000 + d.flux
         case d: Library         => d.sedSpectrum
       },
-      src.profile.norm,       // this is the magnitude value
+      src.norm,               // this is the magnitude value
       src.normBand.name,      // this is the magnitude band name
       src.redshift
     )

@@ -40,14 +40,14 @@ public final class HtmlPrinter {
                 break;
             case BBODY:
                 sb.append(" " + sdp.getBBTemp() + "K Blackbody, at " + sdp.getSourceNormalization() +
-                        " " + sdp.profile.units().displayValue() + " in the " + sdp.getNormBand().name + " band.");
+                        " " + sdp.units.displayValue() + " in the " + sdp.getNormBand().name + " band.");
                 break;
             case LIBRARY_STAR:
-                sb.append(" " + sdp.getSourceNormalization() + " " + sdp.profile.units().displayValue() + " " + ((Library) sdp.distribution).sedSpectrum() +
+                sb.append(" " + sdp.getSourceNormalization() + " " + sdp.units.displayValue() + " " + ((Library) sdp.distribution).sedSpectrum() +
                         " star in the " + sdp.getNormBand().name + " band.");
                 break;
             case LIBRARY_NON_STAR:
-                sb.append(" " + sdp.getSourceNormalization() + " " + sdp.profile.units().displayValue() + " " + ((Library) sdp.distribution).sedSpectrum() +
+                sb.append(" " + sdp.getSourceNormalization() + " " + sdp.units.displayValue() + " " + ((Library) sdp.distribution).sedSpectrum() +
                         " in the " + sdp.getNormBand().name + " band.");
                 break;
             case USER_DEFINED:

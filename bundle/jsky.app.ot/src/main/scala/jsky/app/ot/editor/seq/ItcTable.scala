@@ -176,11 +176,11 @@ trait ItcTable extends Table {
   private def extractSource(target: ITarget, c: ItcUniqueConfig): String \/ SourceDefinition = {
     for {
       (mag, band)     <- extractSourceMagnitude(target, c.config)
-      srcProfile      <- parameters.spatialProfile(mag)
+      srcProfile      <- parameters.spatialProfile
       srcDistribution <- parameters.spectralDistribution
       srcRedshift     <- parameters.redshift
     } yield {
-      new SourceDefinition(srcProfile, srcDistribution, band, srcRedshift)
+      new SourceDefinition(srcProfile, srcDistribution, mag, BrightnessUnit.MAG, band, srcRedshift)
     }
   }
 

@@ -23,7 +23,7 @@ trait ItcParametersProvider {
   def instrumentPort: String \/ IssPort
   def targetEnvironment: String \/ TargetEnvironment
   def spectralDistribution: String \/ SpectralDistribution
-  def spatialProfile(mag: Double): String \/ SpatialProfile
+  def spatialProfile: String \/ SpatialProfile
   def redshift: String \/ Double
 }
 
@@ -39,16 +39,16 @@ object ItcParametersProvider {
       Option(owner.getContextObservation)
 
     def analysisMethod: AnalysisMethod =
-      itcPanel.analysis()
+      itcPanel.analysis
 
     def conditions: String \/ ObservingConditions =
-      itcPanel.conditions().right
+      itcPanel.conditions.right
 
-    def spatialProfile(mag: Double): String \/ SpatialProfile =
-      itcPanel.spatialProfile(mag).fold("Spatial profile not available".left[SpatialProfile])(_.right)
+    def spatialProfile: String \/ SpatialProfile =
+      itcPanel.spatialProfile.fold("Spatial profile not available".left[SpatialProfile])(_.right)
 
     def spectralDistribution: String \/ SpectralDistribution =
-      itcPanel.spectralDistribution().fold("Spectral distribution not available".left[SpectralDistribution])(_.right)
+      itcPanel.spectralDistribution.fold("Spectral distribution not available".left[SpectralDistribution])(_.right)
 
     def instrumentPort: String \/ IssPort =
       Option(owner.getContextIssPort).fold("No port information available".left[IssPort])(_.right)

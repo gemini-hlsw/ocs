@@ -102,15 +102,15 @@ object Fixture {
   // ------- U - BAND
   lazy val UBandSources = List(
     new SourceDefinition(
-      GaussianSource(1.0e-3, BrightnessUnit.MAG, 1.0),
+      GaussianSource(1.0),
       BlackBody(10000),
-      WavebandDefinition.U,
+      1.0e-3, BrightnessUnit.MAG, WavebandDefinition.U,
       0.0
     ),
     new SourceDefinition(
-      GaussianSource(1.0e-3, BrightnessUnit.MAG, 1.0),
+      GaussianSource(1.0),
       PowerLaw(-1.0),
-      WavebandDefinition.U,
+      1.0e-3, BrightnessUnit.MAG, WavebandDefinition.U,
       0.5
     )
   )
@@ -118,15 +118,15 @@ object Fixture {
   // ------- R - BAND
   lazy val RBandSources = List(
     new SourceDefinition(
-      PointSource(20.0, BrightnessUnit.MAG),
+      PointSource(),
       LibraryStar.findByName("A0V").get,
-      WavebandDefinition.R,
+      20.0, BrightnessUnit.MAG, WavebandDefinition.R,
       0.0
     ),
     new SourceDefinition(
-      GaussianSource(1.0e-3, BrightnessUnit.JY, 1.0),
+      GaussianSource(1.0),
       BlackBody(8000),
-      WavebandDefinition.R,
+      1.0e-3, BrightnessUnit.JY, WavebandDefinition.R,
       0.75
     )
   )
@@ -134,15 +134,15 @@ object Fixture {
   // ------- K - BAND
   lazy val KBandSources = List(
     new SourceDefinition(
-      PointSource(20.0, BrightnessUnit.MAG),
+      PointSource(),
       LibraryStar.findByName("A0V").get,
-      WavebandDefinition.K,
+      20.0, BrightnessUnit.MAG, WavebandDefinition.K,
       0.0
     ),
     new SourceDefinition(
-      UniformSource(22.0, BrightnessUnit.MAG_PSA),
+      UniformSource(),
       EmissionLine(Wavelength.fromMicrons(2.2), 250.0, 5.0e-19, "watts_flux", 1.0e-16, "watts_fd_wavelength"),
-      WavebandDefinition.K,
+      22.0, BrightnessUnit.MAG_PSA, WavebandDefinition.K,
       0.75
     )
   )
@@ -150,15 +150,15 @@ object Fixture {
   // ------- N - BAND
   lazy val NBandSources = List(
     new SourceDefinition(
-      PointSource(9.0, BrightnessUnit.ABMAG),
+      PointSource(),
       LibraryNonStar.findByName("ngc1068").get,
-      WavebandDefinition.N,
+      9.0, BrightnessUnit.ABMAG, WavebandDefinition.N,
       0.0
     ),
     new SourceDefinition(
-      UniformSource(12.0, BrightnessUnit.MAG_PSA),
+      UniformSource(),
       EmissionLine(Wavelength.fromMicrons(12.8), 500, 5.0e-19, "watts_flux", 1.0e-16, "watts_fd_wavelength"), // TODO: typed units instead of strings
-      WavebandDefinition.N,
+      12.0, BrightnessUnit.MAG_PSA, WavebandDefinition.N,
       1.5
     )
   )
@@ -166,15 +166,15 @@ object Fixture {
   // ------- Q - BAND
   lazy val QBandSources = List(
     new SourceDefinition(
-      GaussianSource(1.0e-3, BrightnessUnit.MAG, 1.0),
+      GaussianSource(1.0),
       BlackBody(10000),
-      WavebandDefinition.Q,
+      1.0e-3, BrightnessUnit.MAG, WavebandDefinition.Q,
       0.0
     ),
     new SourceDefinition(
-      UniformSource(11.0, BrightnessUnit.MAG_PSA),
+      UniformSource(),
       PowerLaw(-1.0),
-      WavebandDefinition.Q,
+      11.0, BrightnessUnit.MAG_PSA, WavebandDefinition.Q,
       2.0
     )
   )

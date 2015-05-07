@@ -36,6 +36,8 @@ public final class SourceDefinition implements Serializable {
     public final SpatialProfile profile;
     public final SpectralDistribution distribution;
     public final WavebandDefinition normBand;
+    public final double norm;
+    public final BrightnessUnit units;
     public final double redshift;
     // additional java enums in order to be able to use switch statements for Scala case classes
     public final Profile profileType;
@@ -46,10 +48,14 @@ public final class SourceDefinition implements Serializable {
      */
     public SourceDefinition(final SpatialProfile profile,
                             final SpectralDistribution distribution,
+                            final double norm,
+                            final BrightnessUnit units,
                             final WavebandDefinition normBand,
                             final double redshift) {
         this.profile        = profile;
         this.distribution   = distribution;
+        this.norm           = norm;
+        this.units          = units;
         this.normBand       = normBand;
         this.redshift       = redshift;
 
@@ -86,11 +92,11 @@ public final class SourceDefinition implements Serializable {
     }
 
     public double getSourceNormalization() {
-        return profile.norm();
+        return norm;
     }
 
     public BrightnessUnit getUnits() {
-        return profile.units();
+        return units;
     }
 
     public double getFWHM() {
