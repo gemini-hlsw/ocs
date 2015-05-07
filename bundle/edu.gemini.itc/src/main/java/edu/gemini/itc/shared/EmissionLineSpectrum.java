@@ -8,64 +8,45 @@ import edu.gemini.spModel.core.Wavelength;
  * This Class implements Visitable sampled specturm to create the sed.
  */
 
-public class EmissionLineSpectrum implements VisitableSampledSpectrum {
-    private DefaultSampledSpectrum _spectrum;
+public final class EmissionLineSpectrum implements VisitableSampledSpectrum {
+
+    private final DefaultSampledSpectrum _spectrum;
 
     // Private c'tor to support clone()
-    private EmissionLineSpectrum(DefaultSampledSpectrum spectrum) {
+    private EmissionLineSpectrum(final DefaultSampledSpectrum spectrum) {
         _spectrum = spectrum;
     }
 
-    public EmissionLineSpectrum(Wavelength wavelength, double width, double flux,
-                                double continuumFlux, String lineFluxUnits,
-                                String continuumFluxUnits, double z, double interval) {
-        // convert the wavelenght to Nanometers.
-        double _wavelength = wavelength.toNanometers();
-        double _sampling = interval;  //0.2
-
-        double start = 300;//0.2*_wavelength;//.8
-        double end = 30000;//1.8*_wavelength;//1.2
-        //System.out.println("Start: "+ start +"End: " +end);
+    public EmissionLineSpectrum(final Wavelength wavelength, final double width, final EmissionLine.Flux flux,
+                                final EmissionLine.Continuum continuum, final double z, final double interval) {
 
         //shift start and end depending on redshift
-        start /= (1 + z);
-        end /= (1 + z);
+        final double start = 300 / (1 + z);
+        final double end = 30000 / (1 + z);
 
-        int n = (int) ((end - start) / _sampling + 1);
-        double[] fluxArray = new double[n];
-//System.out.println("Array: " + (n+40) + " sample "+ _sampling);
-        // convert the Units into internal units
-        if (lineFluxUnits.equals(SourceDefinition.WATTS_FLUX))
-            flux = flux * _wavelength / 1.988e-16;
-        else flux = flux * _wavelength / 1.988e-13;
+        final int n = (int) ((end - start) / interval + 1);
+        final double[] fluxArray = new double[n];
 
-        if (continuumFluxUnits.equals(SourceDefinition.WATTS))
-            continuumFlux = continuumFlux * _wavelength / 1.988e-13;
-        else continuumFlux = continuumFlux * _wavelength / 1.988e-14;
+        // convert values to internal units
+        final double _wavelength    = wavelength.toNanometers();
+        final double _flux          = flux.toWatts() * _wavelength / 1.988e-16;
+        final double _continuumFlux = continuum.toWatts() * _wavelength / 1.988e-13;
 
         // calculate sigma
-
-        double sigma = width * _wavelength / 7.05e5;
-
-
+        final double sigma = width * _wavelength / 7.05e5;
         int i = 0;
-
-        for (double lam = start; lam <= end; lam += _sampling) {
-            fluxArray[i] = _elineFlux(lam, sigma, flux, continuumFlux,
-                    _wavelength);
+        for (double lam = start; lam <= end; lam += interval) {
+            fluxArray[i] = _elineFlux(lam, sigma, _flux, _continuumFlux, _wavelength);
             i++;
-
         }
 
-        _spectrum = new DefaultSampledSpectrum(fluxArray, start, _sampling);
-
-        //_spectrum.print();
+        _spectrum = new DefaultSampledSpectrum(fluxArray, start, interval);
 
     }
 
 
-    private double _elineFlux(double lambda, double sigma, double flux,
-                              double continuumFlux, double wave) {
+    private double _elineFlux(final double lambda, final double sigma, final double flux,
+                              final double continuumFlux, final double wave) {
         //this funtion will calculate the eline spectum for a given wavelen
         // and sigme (specified by the user. The flux is just the line flux
         // of the object in question.  The units are returned internal units.
@@ -84,20 +65,20 @@ public class EmissionLineSpectrum implements VisitableSampledSpectrum {
 
     //Implements the clonable interface
     public Object clone() {
-        DefaultSampledSpectrum spectrum =
+        final DefaultSampledSpectrum spectrum =
                 (DefaultSampledSpectrum) _spectrum.clone();
         return new EmissionLineSpectrum(spectrum);
     }
 
-    public void trim(double startWavelength, double endWavelength) {
+    public void trim(final double startWavelength, final double endWavelength) {
         _spectrum.trim(startWavelength, endWavelength);
     }
 
-    public void reset(double[] s, double v, double r) {
+    public void reset(final double[] s, final double v, final double r) {
         _spectrum.reset(s, v, r);
     }
 
-    public void accept(SampledSpectrumVisitor v) {
+    public void accept(final SampledSpectrumVisitor v) {
         _spectrum.accept(v);
     }
 
@@ -138,14 +119,14 @@ public class EmissionLineSpectrum implements VisitableSampledSpectrum {
     /**
      * @return flux value in specified bin
      */
-    public double getY(int index) {
+    public double getY(final int index) {
         return _spectrum.getY(index);
     }
 
     /**
      * @return x of specified bin
      */
-    public double getX(int index) {
+    public double getX(final int index) {
         return _spectrum.getX(index);
     }
 
@@ -154,7 +135,7 @@ public class EmissionLineSpectrum implements VisitableSampledSpectrum {
      * @return y value at specified x using linear interpolation.
      * Silently returns zero if x is out of spectrum range.
      */
-    public double getY(double x) {
+    public double getY(final double x) {
         return _spectrum.getY(x);
     }
 
@@ -162,7 +143,7 @@ public class EmissionLineSpectrum implements VisitableSampledSpectrum {
     /**
      * Returns the index of the data point with largest x value less than x
      */
-    public int getLowerIndex(double x) {
+    public int getLowerIndex(final double x) {
         return _spectrum.getLowerIndex(x);
     }
 
@@ -188,14 +169,14 @@ public class EmissionLineSpectrum implements VisitableSampledSpectrum {
      * Sets y value in specified x bin.
      * If specified bin is out of range, this is a no-op.
      */
-    public void setY(int bin, double y) {
+    public void setY(final int bin, final double y) {
         _spectrum.setY(bin, y);
     }
 
     /**
      * Rescales X axis by specified factor. Doesn't change sampling size.
      */
-    public void rescaleX(double factor) {
+    public void rescaleX(final double factor) {
         _spectrum.rescaleX(factor);
     }
 
@@ -203,11 +184,11 @@ public class EmissionLineSpectrum implements VisitableSampledSpectrum {
     /**
      * Rescales Y axis by specified factor.
      */
-    public void rescaleY(double factor) {
+    public void rescaleY(final double factor) {
         _spectrum.rescaleY(factor);
     }
 
-    public void smoothY(int factor) {
+    public void smoothY(final int factor) {
         _spectrum.smoothY(factor);
     }
 
@@ -238,7 +219,7 @@ public class EmissionLineSpectrum implements VisitableSampledSpectrum {
      * Returns the sum of y values in the spectrum in
      * the specified index range.
      */
-    public double getSum(int startIndex, int endIndex) {
+    public double getSum(final int startIndex, final int endIndex) {
         return _spectrum.getSum(startIndex, endIndex);
     }
 
@@ -247,7 +228,7 @@ public class EmissionLineSpectrum implements VisitableSampledSpectrum {
      * Returns the sum of y values in the spectrum in
      * the specified range.
      */
-    public double getSum(double x_start, double x_end) {
+    public double getSum(final double x_start, final double x_end) {
         return _spectrum.getSum(x_start, x_end);
     }
 
@@ -255,7 +236,7 @@ public class EmissionLineSpectrum implements VisitableSampledSpectrum {
      * Returns the average of values in the SampledSpectrum in
      * the specified range.
      */
-    public double getAverage(double x_start, double x_end) {
+    public double getAverage(final double x_start, final double x_end) {
         return _spectrum.getAverage(x_start, x_end);
 
     }
@@ -281,7 +262,7 @@ public class EmissionLineSpectrum implements VisitableSampledSpectrum {
      *
      * @param maxXIndex data is returned up to maximum specified x bin
      */
-    public double[][] getData(int maxXIndex) {
+    public double[][] getData(final int maxXIndex) {
         return _spectrum.getData(maxXIndex);
     }
 
@@ -295,7 +276,7 @@ public class EmissionLineSpectrum implements VisitableSampledSpectrum {
      * @param minXIndex data is returned from the minimum specified x bin
      * @param maxXIndex data is returned up to maximum specified x bin
      */
-    public double[][] getData(int minXIndex, int maxXIndex) {
+    public double[][] getData(final int minXIndex, final int maxXIndex) {
         return _spectrum.getData(minXIndex, maxXIndex);
     }
 
@@ -307,7 +288,7 @@ public class EmissionLineSpectrum implements VisitableSampledSpectrum {
         return _spectrum.printSpecAsString();
     }
 
-    public String printSpecAsString(int firstIndex, int lastIndex) {
+    public String printSpecAsString(final int firstIndex, final int lastIndex) {
         return _spectrum.printSpecAsString(firstIndex, lastIndex);
     }
 

@@ -1,5 +1,6 @@
 package edu.gemini.itc.shared
 
+import edu.gemini.itc.shared.EmissionLine._
 import edu.gemini.spModel.core.Wavelength
 
 // ==== Source spatial profile
@@ -17,8 +18,9 @@ final case class UniformSource() extends SpatialProfile
 sealed trait SpectralDistribution
 final case class BlackBody(temperature: Double) extends SpectralDistribution
 final case class PowerLaw(index: Double) extends SpectralDistribution
-final case class EmissionLine(wavelength: Wavelength, width: Double, flux: Double, fluxUnits: String, continuum: Double, continuumUnits: String) extends SpectralDistribution
+final case class EmissionLine(wavelength: Wavelength, width: Double, flux: Flux, continuum: Continuum) extends SpectralDistribution
 final case class UserDefined(spectrum: String) extends SpectralDistribution
+
 sealed trait Library extends SpectralDistribution {
   val sedSpectrum: String
 }
@@ -119,6 +121,31 @@ object LibraryNonStar {
     LibraryNonStar("WR 104 (Wolf-Rayet Star + dust)",         "wr104"),
     LibraryNonStar("WR 34 (Wolf-Rayet Star)",                 "wr34")
   )
+}
+
+/** Definition of flux and continuum units and their conversions for emission lines.
+  * The units defined here are the ones supported in the ITC web application. */
+object EmissionLine {
+
+  /** Flux of an emission line. Units are per area. */
+  sealed trait Flux {
+    def toWatts: Double                   // units are W/m2
+    def toErgs: Double = toWatts * 1000   // units are ergs/s/cm2
+  }
+  object Flux {
+    def fromWatts(value: Double) = new Flux { override val toWatts = value }
+    def fromErgs(value: Double)  = new Flux { override val toWatts = value / 1000 }
+  }
+
+  /** Flux continuum of an emission line. Units are per length. */
+  sealed trait Continuum {
+    def toWatts: Double                   // units are W/m2/um
+    def toErgs: Double = toWatts / 10     // units are ergs/s/cm2/A
+  }
+  object Continuum {
+    def fromWatts(value: Double) = new Continuum { override val toWatts = value }
+    def fromErgs(value: Double)  = new Continuum { override val toWatts = value * 10 }
+  }
 }
 
 

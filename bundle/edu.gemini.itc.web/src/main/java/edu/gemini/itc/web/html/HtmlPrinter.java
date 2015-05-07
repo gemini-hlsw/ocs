@@ -35,8 +35,8 @@ public final class HtmlPrinter {
                 device.setPrecision(2);
                 device.clear();
                 sb.append(" microns, and with a width of " + device.toString(sdp.getELineWidth()) + " km/s.\n  It's total flux is " +
-                        device.toString(sdp.getELineFlux()) + " " + sdp.getELineFluxUnits() + " on a flat continuum of flux density " +
-                        device.toString(sdp.getELineContinuumFlux()) + " " + sdp.getELineContinuumFluxUnits() + ".");
+                        device.toString(sdp.getELineFlux().toWatts()) + " watts_flux on a flat continuum of flux density " +
+                        device.toString(sdp.getELineContinuumFlux().toWatts()) + " watts_fd_wavelength.");
                 break;
             case BBODY:
                 sb.append(" " + sdp.getBBTemp() + "K Blackbody, at " + sdp.getSourceNormalization() +

@@ -29,10 +29,6 @@ public final class SourceDefinition implements Serializable {
         USER_DEFINED
     }
 
-    public static final String WATTS = "watts_fd_wavelength";
-    public static final String WATTS_FLUX = "watts_flux";
-    public static final String ERGS_FLUX = "ergs_flux";
-
     public final SpatialProfile profile;
     public final SpectralDistribution distribution;
     public final WavebandDefinition normBand;
@@ -127,20 +123,12 @@ public final class SourceDefinition implements Serializable {
         return ((EmissionLine) distribution).width();
     }
 
-    public double getELineFlux() {
+    public EmissionLine.Flux getELineFlux() {
         return ((EmissionLine) distribution).flux();
     }
 
-    public double getELineContinuumFlux() {
+    public EmissionLine.Continuum getELineContinuumFlux() {
         return ((EmissionLine) distribution).continuum();
-    }
-
-    public String getELineFluxUnits() {
-        return ((EmissionLine) distribution).fluxUnits();
-    }
-
-    public String getELineContinuumFluxUnits() {
-        return ((EmissionLine) distribution).continuumUnits();
     }
 
     public double getPowerLawIndex() {

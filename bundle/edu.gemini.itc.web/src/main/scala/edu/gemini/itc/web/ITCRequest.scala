@@ -5,6 +5,7 @@ import javax.servlet.http.HttpServletRequest
 import edu.gemini.itc.gnirs.GnirsParameters
 import edu.gemini.itc.michelle.MichelleParameters
 import edu.gemini.itc.nifs.NifsParameters
+import edu.gemini.itc.shared.EmissionLine.{Continuum, Flux}
 import edu.gemini.itc.shared.SourceDefinition._
 import edu.gemini.itc.shared._
 import edu.gemini.itc.trecs.TRecsParameters
@@ -297,13 +298,14 @@ object ITCRequest {
       case LIBRARY_STAR =>      LibraryStar.findByName(r.parameter("stSpectrumType")).get
       case LIBRARY_NON_STAR =>  LibraryNonStar.findByName(r.parameter("nsSpectrumType")).get
       case ELINE =>
+        val flux = r.doubleParameter("lineFlux")
+        val cont = r.doubleParameter("lineContinuum")
         EmissionLine(
           Wavelength.fromMicrons(r.doubleParameter("lineWavelength")),
           r.doubleParameter("lineWidth"),
-          r.doubleParameter("lineFlux"),
-          r.parameter("lineFluxUnits"),
-          r.doubleParameter("lineContinuum"),
-          r.parameter("lineContinuumUnits"))
+          if (r.parameter("lineFluxUnits") == "watts_flux") Flux.fromWatts(flux) else Flux.fromErgs(flux),
+          if (r.parameter("lineContinuumUnits") == "watts_fd_wavelength") Continuum.fromWatts(cont) else Continuum.fromErgs(cont)
+        )
     }
 
     //Get Redshift

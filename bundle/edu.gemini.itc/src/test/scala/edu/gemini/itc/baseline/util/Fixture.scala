@@ -1,6 +1,7 @@
 package edu.gemini.itc.baseline.util
 
 import edu.gemini.itc.nifs.NifsParameters
+import edu.gemini.itc.shared.EmissionLine.{Continuum, Flux}
 import edu.gemini.itc.shared.TelescopeDetails.Coating
 import edu.gemini.itc.shared._
 import edu.gemini.spModel.core.Wavelength
@@ -141,7 +142,7 @@ object Fixture {
     ),
     new SourceDefinition(
       UniformSource(),
-      EmissionLine(Wavelength.fromMicrons(2.2), 250.0, 5.0e-19, "watts_flux", 1.0e-16, "watts_fd_wavelength"),
+      EmissionLine(Wavelength.fromMicrons(2.2), 250.0, Flux.fromWatts(5.0e-19), Continuum.fromWatts(1.0e-16)),
       22.0, BrightnessUnit.MAG_PSA, WavebandDefinition.K,
       0.75
     )
@@ -157,7 +158,7 @@ object Fixture {
     ),
     new SourceDefinition(
       UniformSource(),
-      EmissionLine(Wavelength.fromMicrons(12.8), 500, 5.0e-19, "watts_flux", 1.0e-16, "watts_fd_wavelength"), // TODO: typed units instead of strings
+      EmissionLine(Wavelength.fromMicrons(12.8), 500, Flux.fromWatts(5.0e-19), Continuum.fromWatts(1.0e-16)),
       12.0, BrightnessUnit.MAG_PSA, WavebandDefinition.N,
       1.5
     )

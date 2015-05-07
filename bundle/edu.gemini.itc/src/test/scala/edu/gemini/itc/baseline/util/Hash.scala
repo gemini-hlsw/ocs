@@ -136,7 +136,7 @@ object Hash {
       src.distribution match {
         case d: BlackBody       => d.temperature
         case d: PowerLaw        => d.index
-        case d: EmissionLine    => (d.wavelength.toMicrons * 1000 + d.continuum) * 1000 + d.flux
+        case d: EmissionLine    => (d.wavelength.toMicrons * 1000 + d.continuum.toWatts) * 1000 + d.flux.toWatts
         case d: Library         => d.sedSpectrum
       },
       src.norm,               // this is the magnitude value

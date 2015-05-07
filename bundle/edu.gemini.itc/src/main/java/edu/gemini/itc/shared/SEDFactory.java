@@ -98,8 +98,6 @@ public final class SEDFactory {
                         sdp.getELineWidth(),
                         sdp.getELineFlux(),
                         sdp.getELineContinuumFlux(),
-                        sdp.getELineFluxUnits(),
-                        sdp.getELineContinuumFluxUnits(),
                         sdp.getRedshift(),
                         instrument.getSampling());
 
