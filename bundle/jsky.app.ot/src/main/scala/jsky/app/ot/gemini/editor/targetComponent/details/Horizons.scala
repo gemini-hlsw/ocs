@@ -218,11 +218,13 @@ object Horizons {
     hObjType: ObjectType,
     date: Date
   ): Option[HorizonsReply] =
-    Option(service.getLastResult)
-      .filter(_.getObjectId.toString === hObjId)
-      .filter(_.getObjectType == hObjType)
-      .filter(_.hasEphemeris)
-      .filter(_.getEphemeris.get(0).getDate == date)
+    Option(service.getLastResult).filter { r =>
+      // just assume anything in the reply can be null
+      Option(r.getObjectId).exists(_.toString === hObjId) &&
+      (r.getObjectType == hObjType)                       &&
+      r.hasEphemeris                                      &&
+      Option(r.getEphemeris).filter(_.size() > 0).exists(_.get(0).getDate == date)
+    }
 
   /**
    * Construct a program to look up a target on the provided service and return the Horizons reply.

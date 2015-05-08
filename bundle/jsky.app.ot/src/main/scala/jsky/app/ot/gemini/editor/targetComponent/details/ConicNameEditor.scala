@@ -41,6 +41,10 @@ final class ConicNameEditor(date: HorizonsIO[Date]) extends JPanel with Telescop
       override def textBoxKeyPress(tbwe: TextBoxWidget): Unit =
         nonreentrant {
           spt.getTarget.setName(tbwe.getValue)
+          // editing the name so invalidate the horizons id.
+          ct.setHorizonsObjectId(null) //
+          ct.setHorizonsObjectTypeOrdinal(-1)
+          hid.setText(hidText(ct))
           spt.notifyOfGenericUpdate()
         }
 
@@ -77,13 +81,16 @@ final class ConicNameEditor(date: HorizonsIO[Date]) extends JPanel with Telescop
     c.insets = new Insets(0, 5, 0, 0)
   })
 
+  def hidText(ct: ConicTarget): String =
+    "Horizons ID: " + (ct.isHorizonsDataPopulated ?
+            s"${ct.getHorizonsObjectId}/${ct.getHorizonsObjectType}" |
+            "«unknown»")
+
   def edit(ctx: GOption[ObsContext], target: SPTarget, node: ISPNode): Unit = {
     this.spt = target
     nonreentrant {
       name.setText(ct.getName)
-      hid.setText("Horizons ID: " + (ct.isHorizonsDataPopulated ?
-        s"${ct.getHorizonsObjectId}/${ct.getHorizonsObjectType}" |
-        "«unknown»"))
+      hid.setText(hidText(ct))
     }
   }
 
