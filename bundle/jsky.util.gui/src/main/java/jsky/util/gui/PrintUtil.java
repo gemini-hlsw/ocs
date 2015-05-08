@@ -155,9 +155,9 @@ public class PrintUtil {
         String printer = Preferences.get(prefKey);
         if (printer != null) {
             PrintService[] ar = PrintServiceLookup.lookupPrintServices(null, null);
-            for (int i = 0; i < ar.length; i++) {
-                if (printer.equals(ar[i].getName())) {
-                    _printerJob.setPrintService(ar[i]);
+            for (PrintService anAr : ar) {
+                if (printer.equals(anAr.getName())) {
+                    _printerJob.setPrintService(anAr);
                     break;
                 }
             }

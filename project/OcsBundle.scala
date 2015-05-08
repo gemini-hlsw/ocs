@@ -639,7 +639,8 @@ trait OcsBundle {
 
   lazy val bundle_jsky_util_gui = 
     project.in(file("bundle/jsky.util.gui")).dependsOn(
-      bundle_jsky_util
+      bundle_jsky_util,
+      bundle_edu_gemini_util_ssl
     )
 
   // From OCS2
