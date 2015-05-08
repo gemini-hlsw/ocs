@@ -22,8 +22,8 @@ public final class EmissionLineSpectrum implements VisitableSampledSpectrum {
                                 final EmissionLine.Continuum continuum, final double z, final double interval) {
 
         //shift start and end depending on redshift
-        final double start = 300 / (1 + z);
-        final double end = 30000 / (1 + z);
+        final double start = 300 / (1 + z); //ancient, potentially obsolete comment for start value: 0.2*_wavelength;//.8
+        final double end = 30000 / (1 + z); //ancient, potentially obsolete comment for end value  : 1.8*_wavelength;//1.2
 
         final int n = (int) ((end - start) / interval + 1);
         final double[] fluxArray = new double[n];
