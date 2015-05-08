@@ -17,7 +17,7 @@ case class MagLimits private (bmag: Double,
                      kmag: Double) {
 
   // preallocate to use in filter
-  private lazy val filters = List(new Magnitude(bmag, MagnitudeBand.B), new Magnitude(vmag, MagnitudeBand.V), new Magnitude(rmag, MagnitudeBand.R), new Magnitude(rmag, MagnitudeBand.UC), new Magnitude(jmag, MagnitudeBand.J), new Magnitude(hmag, MagnitudeBand.H), new Magnitude(kmag, MagnitudeBand.K))
+  private lazy val filters = List(new Magnitude(bmag, MagnitudeBand.B), new Magnitude(vmag, MagnitudeBand.V), new Magnitude(jmag, MagnitudeBand.J), new Magnitude(hmag, MagnitudeBand.H), new Magnitude(kmag, MagnitudeBand.K))
   private lazy val RLikeFilters = RLikeBands.map(new Magnitude(rmag, _))
 
   /**
