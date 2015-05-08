@@ -170,8 +170,12 @@ public final class HorizonsService {
             handler.updateTable(_reply.getResultsTable());
             handler.show();
             String newObjectId = handler.getObjectId();
-            //try again if we have a choice
-            if (newObjectId != null) {
+            //try again if we have a choice, give up otherwise
+            if (newObjectId == null) {
+                // if cancelled we won't have an object id so don't return a
+                // half-baked reply in this case
+                _reply = null;
+            } else {
                 setObjectId(newObjectId);
                 _reply = execute();
             }
