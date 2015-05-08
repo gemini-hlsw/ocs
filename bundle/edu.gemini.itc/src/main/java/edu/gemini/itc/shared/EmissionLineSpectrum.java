@@ -1,6 +1,7 @@
 package edu.gemini.itc.shared;
 
 import edu.gemini.spModel.core.Wavelength;
+import edu.gemini.spModel.target.EmissionLine;
 
 /**
  * This class creates a EmissionLine spectrum over the interval defined by the

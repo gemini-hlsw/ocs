@@ -8,6 +8,8 @@ import edu.gemini.itc.shared._
 import edu.gemini.pot.sp.SPComponentType
 import edu.gemini.spModel.core.Wavelength
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.{CloudCover, ImageQuality, SkyBackground, WaterVapor}
+import edu.gemini.spModel.target.EmissionLine.{Continuum, Flux}
+import edu.gemini.spModel.target._
 
 import scala.swing.GridBagPanel.{Anchor, Fill}
 import scala.swing.ListView.Renderer
@@ -118,7 +120,7 @@ sealed trait ItcPanel extends GridBagPanel {
     }
 
     private val starDetails = new DistributionDetailsPanel {
-      val stars = new ComboBox[LibraryStar](LibraryStar.values) {
+      val stars = new ComboBox[LibraryStar](LibraryStar.Values) {
         renderer = Renderer(_.sedSpectrum)
       }
       layout(stars) = new Constraints {
@@ -155,7 +157,7 @@ sealed trait ItcPanel extends GridBagPanel {
         wd <- width.value
         fl <- flux.value
         co <- continuum.value
-      } yield EmissionLine(Wavelength.fromMicrons(wl), wd, fl, "watts_flux", co, "watts_fd_wavelength")
+      } yield EmissionLine(Wavelength.fromMicrons(wl), wd, Flux.fromWatts(fl), Continuum.fromWatts(co))
     }
     private val plawDetails = new DistributionDetailsPanel {
       val index = addField("Index:", -1.0, "", 0)

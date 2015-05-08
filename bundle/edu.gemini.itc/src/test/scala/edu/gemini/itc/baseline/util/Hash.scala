@@ -5,6 +5,7 @@ import edu.gemini.itc.michelle.MichelleParameters
 import edu.gemini.itc.nifs.NifsParameters
 import edu.gemini.itc.shared._
 import edu.gemini.itc.trecs.TRecsParameters
+import edu.gemini.spModel.target._
 
 // TEMPORARY helper
 // All input objects will become immutable data only objects (probably Scala case classes).

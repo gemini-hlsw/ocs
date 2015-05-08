@@ -1,11 +1,12 @@
 package jsky.app.ot.editor.seq
 
-import edu.gemini.itc.shared.{AnalysisMethod, ObservingConditions, SpatialProfile, SpectralDistribution}
+import edu.gemini.itc.shared.{AnalysisMethod, ObservingConditions}
 import edu.gemini.pot.sp.{ISPObservation, SPComponentType}
 import edu.gemini.spModel.config.ConfigBridge
 import edu.gemini.spModel.config.map.ConfigValMapInstances
 import edu.gemini.spModel.config2.ConfigSequence
 import edu.gemini.spModel.target.env.TargetEnvironment
+import edu.gemini.spModel.target.{SpatialProfile, SpectralDistribution}
 import edu.gemini.spModel.telescope.IssPort
 
 import scalaz._

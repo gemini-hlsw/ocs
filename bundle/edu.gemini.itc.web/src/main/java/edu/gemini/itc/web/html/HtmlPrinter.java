@@ -3,6 +3,7 @@ package edu.gemini.itc.web.html;
 import edu.gemini.itc.altair.Altair;
 import edu.gemini.itc.gems.Gems;
 import edu.gemini.itc.shared.*;
+import edu.gemini.spModel.target.Library;
 import edu.gemini.spModel.gemini.altair.AltairParams;
 import edu.gemini.spModel.telescope.IssPort;
 

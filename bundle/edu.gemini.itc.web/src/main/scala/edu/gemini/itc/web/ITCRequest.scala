@@ -5,11 +5,10 @@ import javax.servlet.http.HttpServletRequest
 import edu.gemini.itc.gnirs.GnirsParameters
 import edu.gemini.itc.michelle.MichelleParameters
 import edu.gemini.itc.nifs.NifsParameters
-import edu.gemini.itc.shared.EmissionLine.{Continuum, Flux}
 import edu.gemini.itc.shared.SourceDefinition._
 import edu.gemini.itc.shared._
 import edu.gemini.itc.trecs.TRecsParameters
-import edu.gemini.spModel.core.{Wavelength, Site}
+import edu.gemini.spModel.core.{Site, Wavelength}
 import edu.gemini.spModel.gemini.acqcam.AcqCamParams
 import edu.gemini.spModel.gemini.altair.AltairParams
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2
@@ -21,6 +20,8 @@ import edu.gemini.spModel.gemini.michelle.MichelleParams
 import edu.gemini.spModel.gemini.niri.Niri
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality
 import edu.gemini.spModel.guide.GuideProbe
+import edu.gemini.spModel.target.EmissionLine.{Continuum, Flux}
+import edu.gemini.spModel.target._
 import edu.gemini.spModel.telescope.IssPort
 
 /**

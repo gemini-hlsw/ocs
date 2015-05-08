@@ -1,6 +1,7 @@
 package edu.gemini.itc.shared;
 
 import edu.gemini.spModel.core.Wavelength;
+import edu.gemini.spModel.target.*;
 
 import java.io.Serializable;
 

@@ -5,12 +5,7 @@ import edu.gemini.shared.util.immutable.ImList;
 import edu.gemini.spModel.pio.ParamSet;
 import edu.gemini.spModel.pio.Pio;
 import edu.gemini.spModel.pio.PioFactory;
-import edu.gemini.spModel.target.system.ConicTarget;
-import edu.gemini.spModel.target.system.CoordinateTypes;
-import edu.gemini.spModel.target.system.HmsDegTarget;
-import edu.gemini.spModel.target.system.ITarget;
-import edu.gemini.spModel.target.system.NamedTarget;
-import edu.gemini.spModel.target.system.NonSiderealTarget;
+import edu.gemini.spModel.target.system.*;
 
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -135,6 +130,14 @@ public class SPTargetPio {
         final ImList<Magnitude> magnitudes = target.getMagnitudes();
         if (magnitudes.size() > 0) {
             paramSet.addParamSet(MagnitudePio.instance.toParamSet(factory, magnitudes));
+        }
+
+        // Add spatial profile and spectral distribution
+        if (target.getSpatialProfile().isDefined()) {
+            paramSet.addParamSet(SourcePio.toParamSet(target.getSpatialProfile().get(), factory));
+        }
+        if (target.getSpectralDistribution().isDefined()) {
+            paramSet.addParamSet(SourcePio.toParamSet(target.getSpectralDistribution().get(), factory));
         }
 
         return paramSet;
@@ -268,6 +271,10 @@ public class SPTargetPio {
                 LOGGER.log(Level.WARNING, "Could not parse target magnitudes", ex);
             }
         }
+
+        // Add spatial profile and spectral distribution
+        itarget.setSpatialProfile(SourcePio.profileFromParamSet(paramSet));
+        itarget.setSpectralDistribution(SourcePio.distributionFromParamSet(paramSet));
 
         spt.setTarget(itarget);
     }

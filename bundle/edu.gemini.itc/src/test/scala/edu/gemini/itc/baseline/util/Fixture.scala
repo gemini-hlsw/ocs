@@ -1,12 +1,13 @@
 package edu.gemini.itc.baseline.util
 
 import edu.gemini.itc.nifs.NifsParameters
-import edu.gemini.itc.shared.EmissionLine.{Continuum, Flux}
 import edu.gemini.itc.shared.TelescopeDetails.Coating
 import edu.gemini.itc.shared._
 import edu.gemini.spModel.core.Wavelength
 import edu.gemini.spModel.gemini.altair.AltairParams.{FieldLens, GuideStarType}
 import edu.gemini.spModel.guide.GuideProbe
+import edu.gemini.spModel.target.EmissionLine.{Continuum, Flux}
+import edu.gemini.spModel.target._
 import edu.gemini.spModel.telescope.IssPort
 
 /**
@@ -120,7 +121,7 @@ object Fixture {
   lazy val RBandSources = List(
     new SourceDefinition(
       PointSource(),
-      LibraryStar.findByName("A0V").get,
+      LibraryStar.A0V,
       20.0, BrightnessUnit.MAG, WavebandDefinition.R,
       0.0
     ),
@@ -136,7 +137,7 @@ object Fixture {
   lazy val KBandSources = List(
     new SourceDefinition(
       PointSource(),
-      LibraryStar.findByName("A0V").get,
+      LibraryStar.A0V,
       20.0, BrightnessUnit.MAG, WavebandDefinition.K,
       0.0
     ),
@@ -152,7 +153,7 @@ object Fixture {
   lazy val NBandSources = List(
     new SourceDefinition(
       PointSource(),
-      LibraryNonStar.findByName("ngc1068").get,
+      LibraryNonStar.NGC1068,
       9.0, BrightnessUnit.ABMAG, WavebandDefinition.N,
       0.0
     ),
