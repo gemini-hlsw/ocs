@@ -2,17 +2,13 @@ package edu.gemini.itc.web.servlets;
 
 import edu.gemini.itc.shared.*;
 import org.jfree.chart.ChartUtilities;
-import scala.Tuple2;
 
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.util.Calendar;
-import java.util.Map;
-import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -42,43 +38,28 @@ public final class ImageServlet extends HttpServlet {
 
     public static class IdTimedOutException extends RuntimeException {}
 
-    private static final int UpperLimit = 600;
+    private static class LRU extends LinkedHashMap<UUID, ItcSpectroscopyResult> {
+        private static final int CacheLimit = 300;
+        @Override protected boolean removeEldestEntry(final Map.Entry<UUID, ItcSpectroscopyResult> eldest) {
+            return size() > CacheLimit;
+        }
+    }
 
     /** Hash map that temporarily stores calculation results which will be needed for charts and data files. */
-    private static final Map<UUID, Tuple2<Long, ItcSpectroscopyResult>> cachedResult = new ConcurrentHashMap<>(UpperLimit);
+    private static final Map<UUID, ItcSpectroscopyResult> cachedResult = Collections.synchronizedMap(new LRU());
 
     /** Caches a spectroscopy result. Called by Printer classes when creating HTML output. */
     public static UUID cache(final ItcSpectroscopyResult result) {
-        if (cachedResult.size() > UpperLimit) {
-            cleanCache();
-        }
         final UUID id = UUID.randomUUID();
-        cachedResult.put(id, new Tuple2<>(System.currentTimeMillis(), result));
+        cachedResult.put(id, result);
         return id;
     }
 
-    /** Retrieves a cached result */
+    /** Retrieves a cached result from UUID string. */
     private static ItcSpectroscopyResult result(final String id) {
-        return result(UUID.fromString(id));
+        return cachedResult.get(UUID.fromString(id));
     }
-
-    private static ItcSpectroscopyResult result(final UUID id) {
-        final Tuple2<Long, ItcSpectroscopyResult> r = cachedResult.get(id);
-        if (r == null) throw new IdTimedOutException();
-        return cachedResult.get(id)._2();
-
-    }
-
-    // A very basic LRU caching strategy that tosses the oldest 1/3 elements whenever we hit the UpperLimit.
-    private static synchronized void cleanCache() {
-        if (cachedResult.size() > UpperLimit) {
-            cachedResult.keySet().stream().
-                    sorted((id1, id2) -> (int) (cachedResult.get(id1)._1() - cachedResult.get(id2)._1())).
-                    limit(UpperLimit/3).
-                    forEach(cachedResult::remove);
-        }
-    }
-
+    
     // === End of caching
 
     /**
