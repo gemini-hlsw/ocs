@@ -161,7 +161,7 @@ public class PrintableJTable extends JTable implements Printable {
         int pageNum = pageIndex + 1;
         ProgressPanel progressPanel = _printUtil.getProgressPanel();
         progressPanel.setProgress((pageNum * 100) / totalNumPages);
-        String pageNumInfo = _I18N.getString("pageOf", new Integer(pageNum), new Integer(totalNumPages));
+        String pageNumInfo = _I18N.getString("pageOf", pageNum, totalNumPages);
         progressPanel.setText(pageNumInfo);
 
         if (pageIndex >= totalNumPages)
