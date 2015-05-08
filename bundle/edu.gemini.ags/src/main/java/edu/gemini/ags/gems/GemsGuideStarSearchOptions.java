@@ -4,6 +4,7 @@ import edu.gemini.catalog.api.CatalogName;
 import edu.gemini.catalog.api.ppmxl$;
 import edu.gemini.catalog.api.ucac4$;
 import edu.gemini.catalog.api.MagnitudeConstraints;
+import edu.gemini.pot.ModelConverters;
 import edu.gemini.spModel.core.Angle;
 import edu.gemini.spModel.core.MagnitudeBand;
 import edu.gemini.spModel.gemini.gems.Canopus;
@@ -64,9 +65,9 @@ public class GemsGuideStarSearchOptions {
 
 
     public enum NirBandChoice {
-        J(GemsUtils4Java.toNewBand(edu.gemini.shared.skyobject.Magnitude.Band.J)),
-        H(GemsUtils4Java.toNewBand(edu.gemini.shared.skyobject.Magnitude.Band.H)),
-        K(GemsUtils4Java.toNewBand(edu.gemini.shared.skyobject.Magnitude.Band.K)),
+        J(ModelConverters.toNewBand(edu.gemini.shared.skyobject.Magnitude.Band.J)),
+        H(ModelConverters.toNewBand(edu.gemini.shared.skyobject.Magnitude.Band.H)),
+        K(ModelConverters.toNewBand(edu.gemini.shared.skyobject.Magnitude.Band.K)),
         ;
 
         public static NirBandChoice DEFAULT = H;

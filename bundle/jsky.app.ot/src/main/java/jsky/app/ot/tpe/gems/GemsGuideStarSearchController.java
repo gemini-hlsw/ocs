@@ -1,6 +1,6 @@
 package jsky.app.ot.tpe.gems;
 
-import edu.gemini.ags.gems.GemsUtils4Java;
+import edu.gemini.pot.ModelConverters;
 import edu.gemini.skycalc.Angle;
 import edu.gemini.spModel.core.MagnitudeBand;
 import edu.gemini.spModel.core.Target;
@@ -72,12 +72,12 @@ class GemsGuideStarSearchController {
 
     private Set<edu.gemini.spModel.core.Angle> getPosAngles(ObsContext obsContext) {
         Set<edu.gemini.spModel.core.Angle> posAngles = new HashSet<>();
-        posAngles.add(GemsUtils4Java.toNewAngle(obsContext.getPositionAngle()));
+        posAngles.add(ModelConverters.toNewAngle(obsContext.getPositionAngle()));
         if (_model.isAllowPosAngleAdjustments()) {
-            posAngles.add(GemsUtils4Java.toNewAngle(new Angle(0., Angle.Unit.DEGREES)));
-            posAngles.add(GemsUtils4Java.toNewAngle(new Angle(90., Angle.Unit.DEGREES)));
-            posAngles.add(GemsUtils4Java.toNewAngle(new Angle(180., Angle.Unit.DEGREES)));
-            posAngles.add(GemsUtils4Java.toNewAngle(new Angle(270., Angle.Unit.DEGREES)));
+            posAngles.add(ModelConverters.toNewAngle(new Angle(0., Angle.Unit.DEGREES)));
+            posAngles.add(ModelConverters.toNewAngle(new Angle(90., Angle.Unit.DEGREES)));
+            posAngles.add(ModelConverters.toNewAngle(new Angle(180., Angle.Unit.DEGREES)));
+            posAngles.add(ModelConverters.toNewAngle(new Angle(270., Angle.Unit.DEGREES)));
         }
         return posAngles;
     }

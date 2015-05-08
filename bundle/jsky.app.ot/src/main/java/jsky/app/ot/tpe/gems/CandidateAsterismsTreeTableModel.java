@@ -133,7 +133,7 @@ class CandidateAsterismsTreeTableModel extends AbstractTreeTableModel {
 
         Boolean getCheck() {
             if (_gemsGuideStars != null) {
-                GemsStrehl strehl = _gemsGuideStars.getStrehl();
+                GemsStrehl strehl = _gemsGuideStars.strehl();
                 if (strehl != null) {
                     return _checkBoxSelected;
                 }
@@ -166,9 +166,9 @@ class CandidateAsterismsTreeTableModel extends AbstractTreeTableModel {
                     return _guideProbeTargets.getPrimary().getValue().getTarget().getName();
                 }
             } else if (_gemsGuideStars != null) { // top level displays Strehl values
-                GemsStrehl strehl = _gemsGuideStars.getStrehl();
+                GemsStrehl strehl = _gemsGuideStars.strehl();
                 if (strehl != null) {
-                    return String.format("%.1f rms", _gemsGuideStars.getStrehl().getRms() * 100);
+                    return String.format("%.1f rms", _gemsGuideStars.strehl().rms() * 100);
                 }
             }
             return null;
@@ -181,9 +181,9 @@ class CandidateAsterismsTreeTableModel extends AbstractTreeTableModel {
                     return GemsUtils4Java.probeMagnitudeInUse(guideProbe, _band, _guideProbeTargets.getPrimary().getValue().getTarget());
                 }
             } else if (_gemsGuideStars != null) { // top level displays Strehl values
-                GemsStrehl strehl = _gemsGuideStars.getStrehl();
+                GemsStrehl strehl = _gemsGuideStars.strehl();
                 if (strehl != null) {
-                    return String.format("%.1f min", _gemsGuideStars.getStrehl().getMin() * 100);
+                    return String.format("%.1f min", _gemsGuideStars.strehl().min() * 100);
                 }
             }
             return null;
@@ -200,9 +200,9 @@ class CandidateAsterismsTreeTableModel extends AbstractTreeTableModel {
             if (_guideProbeTargets != null) {
                 return getTarget().getTarget().getRa().toString();
             } else if (_gemsGuideStars != null) { // top level displays Strehl values
-                GemsStrehl strehl = _gemsGuideStars.getStrehl();
+                GemsStrehl strehl = _gemsGuideStars.strehl();
                 if (strehl != null) {
-                    return String.format("%.1f max", _gemsGuideStars.getStrehl().getMax() * 100);
+                    return String.format("%.1f max", _gemsGuideStars.strehl().max() * 100);
                 }
             }
             return null;
@@ -246,7 +246,7 @@ class CandidateAsterismsTreeTableModel extends AbstractTreeTableModel {
 
         for(GemsGuideStars gemsGuideStars : gemsGuideStarsList) {
             final List<Row> rowList = new ArrayList<>();
-            for (GuideProbeTargets guideProbeTargets : gemsGuideStars.getGuideGroup().getAll()) {
+            for (GuideProbeTargets guideProbeTargets : gemsGuideStars.guideGroup().getAll()) {
                 rowList.add(new Row(gemsGuideStars, guideProbeTargets, band));
             }
             tmp.add(new Row(gemsGuideStars, rowList));

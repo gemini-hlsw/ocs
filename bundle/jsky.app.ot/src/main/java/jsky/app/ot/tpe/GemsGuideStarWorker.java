@@ -136,14 +136,14 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
         TpeContext ctx = tpe.getContext();
         SPInstObsComp inst = ctx.instrument().orNull();
         if (inst != null) {
-            inst.setPosAngleDegrees(gemsGuideStars.getPa().toDegrees());
+            inst.setPosAngleDegrees(gemsGuideStars.pa().toDegrees());
             ctx.instrument().commit();
         }
 
         TargetObsComp targetObsComp = ctx.targets().orNull();
         if (targetObsComp != null) {
             TargetEnvironment env = targetObsComp.getTargetEnvironment();
-            targetObsComp.setTargetEnvironment(env.setPrimaryGuideGroup(gemsGuideStars.getGuideGroup()));
+            targetObsComp.setTargetEnvironment(env.setPrimaryGuideGroup(gemsGuideStars.guideGroup()));
             ctx.targets().commit();
         }
     }
@@ -167,11 +167,11 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
                     // Set position angle only for first (primary) group
                     final SPInstObsComp inst = ctx.instrument().orNull();
                     if (inst != null) {
-                        inst.setPosAngle(gemsGuideStars.getPa().toDegrees());
+                        inst.setPosAngle(gemsGuideStars.pa().toDegrees());
                         ctx.instrument().commit();
                     }
                 }
-                guideGroupList.add(gemsGuideStars.getGuideGroup());
+                guideGroupList.add(gemsGuideStars.guideGroup());
             }
             if (guideGroupList.size() == 0) {
                 targetObsComp.setTargetEnvironment(env.setGuideEnvironment(env.getGuideEnvironment().setOptions(
@@ -195,11 +195,11 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
             return Double.compare(a1.toDegrees(), a2.toDegrees());
         });
 
-        posAngles.add(GemsUtils4Java.toNewAngle(obsContext.getPositionAngle()));
-        posAngles.add(GemsUtils4Java.toNewAngle(new Angle(0., Angle.Unit.DEGREES)));
-        posAngles.add(GemsUtils4Java.toNewAngle(new Angle(90., Angle.Unit.DEGREES)));
-        posAngles.add(GemsUtils4Java.toNewAngle(new Angle(180., Angle.Unit.DEGREES)));
-        posAngles.add(GemsUtils4Java.toNewAngle(new Angle(270., Angle.Unit.DEGREES)));
+        posAngles.add(ModelConverters.toNewAngle(obsContext.getPositionAngle()));
+        posAngles.add(ModelConverters.toNewAngle(new Angle(0., Angle.Unit.DEGREES)));
+        posAngles.add(ModelConverters.toNewAngle(new Angle(90., Angle.Unit.DEGREES)));
+        posAngles.add(ModelConverters.toNewAngle(new Angle(180., Angle.Unit.DEGREES)));
+        posAngles.add(ModelConverters.toNewAngle(new Angle(270., Angle.Unit.DEGREES)));
         return posAngles;
     }
 
@@ -263,7 +263,7 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
         interrupted = false;
         try {
             startProgress();
-            List<GemsGuideStars> gemsResults = new GemsCatalogResults().analyze(obsContext, posAngles, results, this);
+            List<GemsGuideStars> gemsResults = GemsResultsAnalyzer.instance().analyze(obsContext, posAngles, results, new scala.Some<>(this));
             if (interrupted && gemsResults.size() == 0) {
                 throw new CancellationException("Canceled");
             }
@@ -284,7 +284,7 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
         interrupted = false;
         try {
             startProgress();
-            List<GemsGuideStars> gemsResults = new GemsCatalogResults().analyze(obsContext, posAngles, results, this);
+            List<GemsGuideStars> gemsResults = GemsResultsAnalyzer.instance().analyze(obsContext, posAngles, results, new scala.Some<>(this));
             if (interrupted && gemsResults.size() == 0) {
                 throw new CancellationException("Canceled");
             }
@@ -301,10 +301,10 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
         if (gemsGuideStarsList.size() == 0) {
             return gemsGuideStarsList;
         }
-        edu.gemini.spModel.core.Angle positionAngle = gemsGuideStarsList.get(0).getPa();
+        edu.gemini.spModel.core.Angle positionAngle = gemsGuideStarsList.get(0).pa();
         List<GemsGuideStars> result = new ArrayList<>(gemsGuideStarsList.size());
         for (GemsGuideStars gemsGuideStars : gemsGuideStarsList) {
-            if (positionAngle.equals(gemsGuideStars.getPa())) {
+            if (positionAngle.equals(gemsGuideStars.pa())) {
                 result.add(gemsGuideStars);
             }
         }

@@ -3,6 +3,7 @@ package jsky.app.ot.tpe.gems;
 import edu.gemini.ags.gems.GemsUtils4Java;
 import edu.gemini.ags.gems.GemsGuideStarSearchOptions.*;
 import edu.gemini.ags.gems.GemsGuideStars;
+import edu.gemini.pot.ModelConverters;
 import edu.gemini.spModel.core.Target;
 import edu.gemini.spModel.target.env.TargetEnvironment;
 import edu.gemini.spModel.target.obsComp.TargetObsComp;
@@ -592,7 +593,7 @@ public class GemsGuideStarSearchDialog extends JFrame {
 
     private void analyzeDone() {
         CandidateAsterismsTreeTableModel treeTableModel = new CandidateAsterismsTreeTableModel(
-                _model.getGemsGuideStars(), GemsUtils4Java.toOldBand(_model.getBand().getBand()));
+                _model.getGemsGuideStars(), ModelConverters.toOldBand(_model.getBand().getBand()));
         _candidateAsterismsTreeTable.setTreeTableModel(treeTableModel);
         _candidateAsterismsTreeTable.expandAll();
         _candidateAsterismsTreeTable.packAll();
@@ -609,7 +610,7 @@ public class GemsGuideStarSearchDialog extends JFrame {
         if (list.size() == 0) {
             return "";
         }
-        return "Pos Angle: " + NF.format(list.get(0).getPa().toDegrees());
+        return "Pos Angle: " + NF.format(list.get(0).pa().toDegrees());
     }
 
 

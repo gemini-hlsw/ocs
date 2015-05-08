@@ -64,9 +64,9 @@ class CandidateAsterismsTreeTable extends JXTreeTable {
             if (value instanceof CandidateAsterismsTreeTableModel.Row) {
                 CandidateAsterismsTreeTableModel.Row tableDataRow = (CandidateAsterismsTreeTableModel.Row) value;
                 if (tableDataRow.isTopLevel()) {
-                    GemsStrehl strehl = tableDataRow.getGemsGuideStars().getStrehl();
+                    GemsStrehl strehl = tableDataRow.getGemsGuideStars().strehl();
                     if (strehl != null) {
-                        String s = String.format("Strehl: %.1f avg", strehl.getAvg() * 100);
+                        String s = String.format("Strehl: %.1f avg", strehl.avg() * 100);
                         lab.setText(s);
                         lab.setFont(lab.getFont().deriveFont(Font.BOLD));
                     }

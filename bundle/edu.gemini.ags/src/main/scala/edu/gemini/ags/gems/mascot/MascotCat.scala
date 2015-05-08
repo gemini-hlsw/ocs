@@ -2,10 +2,9 @@ package edu.gemini.ags.gems.mascot
 
 import java.util.logging.Logger
 
-import edu.gemini.ags.api.{MagnitudeExtractor, magnitudeExtractor, defaultProbeBands}
+import edu.gemini.ags.gems.mascot.Mascot.ProgressFunction
 import edu.gemini.spModel.core.MagnitudeBand
 import edu.gemini.spModel.core.Target.SiderealTarget
-import scala.collection.JavaConverters._
 import java.util.concurrent.CancellationException
 
 /**
@@ -27,12 +26,13 @@ object MascotCat {
   val defaultMaxRows = 1000
 
   // Default progress callback, called for each asterism as it is calculated
-  val defaultProgress = (s: Strehl, count: Int, total: Int) => {
+  val defaultProgress: ProgressFunction = (s: Strehl, count: Int, total: Int) => {
     Log.info(s"Asterism #$count")
-    for (i <- 0 until s.stars.size) {
+    for (i <- s.stars.indices) {
       Log.finer(s.stars(i).target.coordinates.toString)
     }
     Log.info(f"Strehl over ${s.halffield * 2}%.1f: avg=${s.avgstrehl * 100}%.1f rms=${s.rmsstrehl * 100}%.1f min=${s.minstrehl * 100}%.1f max=${s.maxstrehl * 100}%.1f")
+    true
   }
 
   /**
@@ -40,28 +40,26 @@ object MascotCat {
    * @param list the list of SiderealTargets to use
    * @param centerRA the base position RA coordinate
    * @param centerDec the base position Dec coordinate
-   * @param magnitudeExtractor extracts the magnitude used in the calculations: (one of "B", "V", "R", "J", "H", "K")
    * @param factor multiply strehl min, max and average by this value (depends on instrument filter: See REL-426)
    * @param progress a function(strehl, count, total) called for each asterism as it is calculated
    * @param filter a filter function that returns false if the Star should be excluded
    * @return a tuple: (list of stars actually used, list of asterisms found)
    */
-  def findBestAsterismInTargetsList(list: List[SiderealTarget],
+  def findBestAsterism(list: List[SiderealTarget],
                        centerRA: Double, centerDec: Double,
-                       magnitudeExtractor: MagnitudeExtractor = Mascot.defaultMagnitudeExtractor,
                        factor: Double = Mascot.defaultFactor,
-                       progress: (Strehl, Int, Int) => Unit = defaultProgress,
+                       progress: ProgressFunction = defaultProgress,
                        filter: Star => Boolean = Mascot.defaultFilter)
   : (List[Star], List[Strehl]) = {
     val starList = list.map(Star.makeStar(_, centerRA, centerDec))
-    Mascot.findBestAsterism(starList.toList, magnitudeExtractor, factor, progress, filter)
+    Mascot.findBestAsterism(starList, factor, progress, filter)
   }
 
-  case class StrehlResults(starList: java.util.List[Star], strehlList: java.util.List[Strehl])
+  case class StrehlResults(starList: List[Star], strehlList: List[Strehl])
 
   /**
    * Finds the best asterisms for the given list of SiderealTarget
-   * (This version is easier to call from Java).
+   *
    * @param javaList the list of SiderealTargets to use
    * @param centerRA the base position RA coordinate
    * @param centerDec the base position Dec coordinate
@@ -69,20 +67,46 @@ object MascotCat {
    * @param mascotProgress optional, called for each asterism as it is calculated, can cancel the calculations by returning false
    * @return a tuple: (list of stars actually used, list of asterisms found)
    */
-  def javaFindBestAsterismInTargetsList(javaList: java.util.List[SiderealTarget],
-                                        centerRA: Double, centerDec: Double,
-                                        band: MagnitudeBand = Mascot.defaultBandpass, factor: Double,
-                                        mascotProgress: MascotProgress): StrehlResults = {
-
-    val progress = (s: Strehl, count: Int, total: Int) => {
+  def findBestAsterismInTargetsList(javaList: List[SiderealTarget],
+                                    centerRA: Double, centerDec: Double,
+                                    band: MagnitudeBand, factor: Double,
+                                    mascotProgress: Option[MascotProgress]): StrehlResults = {
+    val progress:ProgressFunction = (s: Strehl, count: Int, total: Int) => {
       defaultProgress(s, count, total)
-      if (mascotProgress != null && !mascotProgress.progress(s, count, total, true)) {
-        throw new CancellationException("Canceled")
+      mascotProgress.foreach { p =>
+        if (!p.progress(s, count, total, true)) {
+          throw new CancellationException("Canceled")
+        }
       }
+      true
     }
 
-    val (starList, strehlList) = findBestAsterismInTargetsList(javaList.asScala.toList, centerRA, centerDec, magnitudeExtractor(defaultProbeBands(band)), factor, progress, Mascot.defaultFilter)
-    StrehlResults(starList.asJava, strehlList.asJava)
+    val (starList, strehlList) = findBestAsterism(javaList, centerRA, centerDec, factor, progress, Mascot.defaultFilter)
+    StrehlResults(starList, strehlList)
+  }
+
+  /**
+   * Finds the best asterisms for the given list of SiderealTarget
+   *
+   * @param javaList the list of SiderealTargets to use
+   * @param centerRA the base position RA coordinate
+   * @param centerDec the base position Dec coordinate
+   * @param band determines which magnitudes are used in the calculations: (one of "B", "V", "R", "J", "H", "K")
+   * @param progressCheck called for each asterism as it is calculated, can cancel the calculations by returning false
+   * @return a tuple: (list of stars actually used, list of asterisms found)
+   */
+  def findBestAsterismInTargetsList(javaList: List[SiderealTarget],
+                                    centerRA: Double, centerDec: Double,
+                                    band: MagnitudeBand, factor: Double,
+                                    progressCheck: (Strehl, Boolean) => Boolean): StrehlResults = {
+    val progress:ProgressFunction = (s: Strehl, count: Int, total: Int) => {
+      defaultProgress(s, count, total)
+      // Why usable defaults to true?
+      progressCheck(s, true)
+    }
+
+    val (starList, strehlList) = findBestAsterism(javaList, centerRA, centerDec, factor, progress, Mascot.defaultFilter)
+    StrehlResults(starList, strehlList)
   }
 
 }

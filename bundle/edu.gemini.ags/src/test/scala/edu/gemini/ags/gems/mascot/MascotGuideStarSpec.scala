@@ -1,5 +1,6 @@
 package edu.gemini.ags.gems.mascot
 
+import edu.gemini.ags.gems.UCAC3Regression
 import edu.gemini.catalog.api.{ppmxl, RadiusConstraint, CatalogQuery}
 import edu.gemini.catalog.votable.{TestVoTableBackend, VoTableClient}
 import edu.gemini.spModel.core.Target.SiderealTarget
@@ -216,6 +217,23 @@ class MascotGuideStarSpec extends Specification {
       val ctx = ObsContext.create(env, inst, JNone.instance(), SPSiteQuality.Conditions.BEST, null, null)
 
       val result = MascotGuideStar.findBestAsterismInQueryResult(loadedTargets, ctx, MascotGuideStar.CWFS, 180.0, 10.0)
+
+      val remoteAsterism = for {
+        (strehlList, pa, ra, dec) <- result
+        d = MascotGuideStar.dist(ra, dec, coordinates.ra.toAngle.toDegrees, coordinates.dec.toDegrees) * 3600.0
+      } yield List(strehlList.size, ra, dec, pa, d)
+      asterism should beEqualTo(remoteAsterism)
+    }
+    "find best asterism on r-like magnitudes" in {
+      val coordinates = Coordinates(RightAscension.fromAngle(Angle.fromHMS(3, 19, 48.2341).getOrElse(Angle.zero)), Declination.fromAngle(Angle.fromDMS(41, 30, 42.078).getOrElse(Angle.zero)).getOrElse(Declination.zero))
+      val base = new SPTarget(coordinates.ra.toAngle.toDegrees, coordinates.dec.toDegrees)
+      val env = TargetEnvironment.create(base)
+      val inst = new Gsaoi()
+      inst.setPosAngle(0.0)
+      inst.setIssPort(IssPort.SIDE_LOOKING)
+      val ctx = ObsContext.create(env, inst, JNone.instance(), SPSiteQuality.Conditions.BEST, null, null)
+
+      val result = MascotGuideStar.findBestAsterismInQueryResult(UCAC3Regression.replaceRBands(loadedTargets), ctx, MascotGuideStar.CWFS, 180.0, 10.0)
 
       val remoteAsterism = for {
         (strehlList, pa, ra, dec) <- result

@@ -335,6 +335,7 @@ public enum GsaoiOdgw implements ValidatableGuideProbe {
     public boolean validate(SPTarget guideStar, ObsContext ctx) {
         Coordinates coords = guideStar.getTarget().getSkycalcCoordinates();
         // Get the id of the detector in which the guide star lands, if any
+
         Option<GsaoiDetectorArray.Id> idOpt = GsaoiDetectorArray.instance.getId(coords, ctx);
         if (idOpt.isEmpty()) return false;
         return idOpt.getValue() == id;

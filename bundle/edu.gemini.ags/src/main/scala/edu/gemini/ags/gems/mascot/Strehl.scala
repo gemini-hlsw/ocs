@@ -113,8 +113,8 @@ object Strehl {
    * @param bandpass determines which magnitudes are used in the calculations: (one of "B", "V", "R", "J", "H", "K")
    * @param factor multiply strehl min, max and average by this value (depends on instrument filter: See REL-426)
    */
-  def apply(starList: List[Star], bandpass: MagnitudeExtractor, factor: Double = 1.0): Strehl = {
-    optimize(starList, bandpass, factor)
+  def apply(starList: List[Star], factor: Double = 1.0): Strehl = {
+    optimize(starList, factor)
   }
 
   /**
@@ -127,9 +127,9 @@ object Strehl {
    * @param bandpass determines which magnitudes are used in the calculations: (one of "B", "V", "R", "J", "H", "K")
    * @param factor multiply strehl min, max and average by this value (depends on instrument filter: See REL-426)
    */
-  def optimize(starList: List[Star], bandpass: MagnitudeExtractor, factor: Double): Strehl = {
+  def optimize(starList: List[Star], factor: Double): Strehl = {
     val nstars = starList.size
-    val mag = (for (s <- starList) yield bandpass(s.target).map(_.value)).flatten.toArray
+    val mag = (for (s <- starList) yield s.r).toArray
     val starx = (for (s <- starList) yield s.x).toArray
     val stary = (for (s <- starList) yield s.y).toArray
 
@@ -201,7 +201,7 @@ object Strehl {
     // it is indeed covariance (diagonal = variance)
 
     val nca = DenseMatrix.eye[Double](6)
-    val ttnv = wfsNoise(mag); // noise per WFS in arcsec rms
+    val ttnv = wfsNoise(mag) // noise per WFS in arcsec rms
     for (i <- 0 until nstars * 2) nca(i, i) = ttnv(i)
     val mprop0 = eem1 * (u.t * nca.t)
     val mprop = mprop0 * mprop0.t
@@ -342,12 +342,12 @@ object Strehl {
 
     if (spv(::, 0).max > sampfreq) {
       val tmp = where(spv(::, 0), _ < sampfreq)
-      val w = tmp(tmp.size - 1)
+      val w = tmp(tmp.length - 1)
       spv = spv(0 to w, ::)
     }
     val freqv = spv(::, 0)
 
-    val rmsvib = DenseVector.zeros[Double](2);
+    val rmsvib = DenseVector.zeros[Double](2)
     rmsvib(0) = (tipvibrms :^ 2.0).sum
     rmsvib(1) = (tiltvibrms :^ 2.0).sum
 

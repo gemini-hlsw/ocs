@@ -4,7 +4,7 @@ import edu.gemini.ags.api.{AgsAnalysis, AgsMagnitude, AgsStrategy}
 import edu.gemini.ags.api.AgsStrategy.{Assignment, Estimate, Selection}
 import edu.gemini.ags.api.defaultProbeBands
 import edu.gemini.ags.gems._
-import edu.gemini.ags.gems.mascot.{Strehl, MascotProgress}
+import edu.gemini.ags.gems.mascot.Strehl
 import edu.gemini.catalog.api._
 import edu.gemini.catalog.votable._
 import edu.gemini.pot.sp.SPComponentType
@@ -105,8 +105,8 @@ trait GemsStrategy extends AgsStrategy {
     cans ++ odgw
   }
 
-  // TODO Implement for GEMS
-  override protected [ags] def analyze(ctx: ObsContext, mt: MagnitudeTable, guideProbe: ValidatableGuideProbe, guideStar: SiderealTarget): Option[AgsAnalysis] = None
+  override def analyze(ctx: ObsContext, mt: MagnitudeTable, guideProbe: ValidatableGuideProbe, guideStar: SiderealTarget): Option[AgsAnalysis] =
+    AgsAnalysis.analysis(ctx, mt, guideProbe, guideStar, probeBands(guideProbe))
 
   override def analyze(ctx: ObsContext, mt: MagnitudeTable): List[AgsAnalysis] = {
     import AgsAnalysis._
@@ -117,9 +117,11 @@ trait GemsStrategy extends AgsStrategy {
         case _                         => true
       }
 
-      val probeAnalysis = grp.getMembers.asScala.toList.flatMap { analysis(ctx, mt, _, probeBands) }
+      val probeAnalysis = grp.getMembers.asScala.toList.flatMap { p => analysis(ctx, mt, p, probeBands(p)) }
       probeAnalysis.filter(hasGuideStarForProbe) match {
-        case Nil => List(NoGuideStarForGroup(grp, probeBands))
+        case Nil =>
+          // Pick the first guide probe as representative, since we are called with either Canopus or GsaoiOdwg
+          ~grp.getMembers.asScala.headOption.map {gp => List(NoGuideStarForGroup(grp, probeBands(gp)))}
         case lst => lst
       }
     }
@@ -156,22 +158,17 @@ trait GemsStrategy extends AgsStrategy {
     // A way to terminate the Mascot algorithm immediately in the following cases:
     // 1. A usable 2 or 3-star asterism is found; or
     // 2. If no asterisms were found.
-    // This is unfortunately a hideous way to do anything, which could be avoided if we
-    // rewrote the GemsCatalogResults.analyzeGoodEnough method (which is only used here)
-    // to return something like a Buffer.
-    val progressMeasurer = new MascotProgress {
-      override def progress(s: Strehl, count: Int, total: Int, usable: Boolean): Boolean = {
-        !((usable && s.stars.size >= 2) || (s.stars.size < 2))
-      }
-      override def setProgressTitle(s: String): Unit = {}
+    // Returning false will stop the search
+    def progress(s: Strehl, usable: Boolean): Boolean = {
+      !((usable && s.stars.size >= 2) || (s.stars.size < 2))
     }
 
     // Iterate over 45 degree position angles if no asterism is found at PA = 0.
-    val gemsCatalogResults = results.map(result => new GemsCatalogResults().analyzeGoodEnough(ctx, anglesToTry.asJava, result.asJava, progressMeasurer).asScala)
+    val gemsCatalogResults = results.map(result => GemsResultsAnalyzer.analyzeGoodEnough(ctx, anglesToTry, result, progress))
 
     // Filter out the 1-star asterisms. If anything is left, we are good to go; otherwise, no.
     gemsCatalogResults.map { x =>
-      x.filter(_.getGuideGroup.getTargets.size() >= 3).isEmpty? AgsStrategy.Estimate.CompleteFailure | AgsStrategy.Estimate.GuaranteedSuccess
+      !x.exists(_.guideGroup.getTargets.size() >= 3) ? AgsStrategy.Estimate.CompleteFailure | AgsStrategy.Estimate.GuaranteedSuccess
     }
   }
 
@@ -196,23 +193,23 @@ trait GemsStrategy extends AgsStrategy {
 
   private def findGuideStars(ctx: ObsContext, posAngles: Set[Angle], results: List[GemsCatalogSearchResults]): Option[GemsGuideStars] = {
     // Passing in null to say we don't want a ProgressMeter.
-    val gemsResults = new GemsCatalogResults().analyze(ctx, posAngles.asJava, results.asJava, null).asScala
+    val gemsResults = GemsResultsAnalyzer.analyze(ctx, posAngles.asJava, results.asJava, None).asScala
     gemsResults.headOption
   }
 
   override def select(ctx: ObsContext, mt: MagnitudeTable): Future[Option[Selection]] = {
-    val posAngles = Set(ctx.getPositionAngle.toNewModel)
+    val posAngles = Set(ctx.getPositionAngle.toNewModel, Angle.zero, Angle.fromDegrees(90), Angle.fromDegrees(180), Angle.fromDegrees(270))
     val results = search(GemsTipTiltMode.canopus, ctx, posAngles, None)
     results.map { r =>
       val gemsGuideStars = findGuideStars(ctx, posAngles, r)
 
       // Now we must convert from an Option[GemsGuideStars] to a Selection.
       gemsGuideStars.map { x =>
-        val assignments = x.getGuideGroup.getAll.asScalaList.flatMap(targets => {
+        val assignments = x.guideGroup.getAll.asScalaList.flatMap(targets => {
           val guider = targets.getGuider
           targets.getTargets.asScalaList.map(target => Assignment(guider, target.toNewModel))
         })
-        Selection(x.getPa, assignments)
+        Selection(x.pa, assignments)
       }
     }
   }
@@ -231,11 +228,15 @@ trait GemsStrategy extends AgsStrategy {
     }
 
     val canopusConstraint = canMagLimits.map(c => CatalogQuery.catalogQueryForGems(CanopusTipTiltId, ctx.getBaseCoordinates.toNewModel, RadiusConstraint.between(Angle.zero, Canopus.Wfs.Group.instance.getRadiusLimits.toNewModel), c.some))
-    val odgwConstaint     = odgwMagLimits.map(c => CatalogQuery.catalogQueryForGems(OdgwFlexureId,    ctx.getBaseCoordinates.toNewModel, RadiusConstraint.between(Angle.zero, GsaoiOdgw.Group.instance.getRadiusLimits.toNewModel), c.some))
-    List(canopusConstraint, odgwConstaint).flatten
+    val odgwConstraint     = odgwMagLimits.map(c => CatalogQuery.catalogQueryForGems(OdgwFlexureId,    ctx.getBaseCoordinates.toNewModel, RadiusConstraint.between(Angle.zero, GsaoiOdgw.Group.instance.getRadiusLimits.toNewModel), c.some))
+    List(canopusConstraint, odgwConstraint).flatten
   }
 
   override val probeBands: List[MagnitudeBand] = defaultProbeBands(MagnitudeBand.R)
+
+  // Return the band used for each probe
+  // TODO Delegate to GemsMagnitudeTable
+  private def probeBands(guideProbe: GuideProbe): List[MagnitudeBand] = if (Canopus.Wfs.Group.instance.getMembers.contains(guideProbe)) defaultProbeBands(MagnitudeBand.R) else List(MagnitudeBand.H)
 
   override val guideProbes: List[GuideProbe] =
     Flamingos2OiwfsGuideProbe.instance :: (GsaoiOdgw.values() ++ Canopus.Wfs.values()).toList

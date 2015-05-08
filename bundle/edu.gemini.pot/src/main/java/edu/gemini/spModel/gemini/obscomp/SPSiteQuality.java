@@ -353,7 +353,7 @@ public class SPSiteQuality extends AbstractDataObject implements PropertyProvide
     /**
      * Image Quality Options.
      */
-    public static enum ImageQuality implements DisplayableSpType, SequenceableSpType, PercentageContainer {
+    public enum ImageQuality implements DisplayableSpType, SequenceableSpType, PercentageContainer {
         PERCENT_20("20%/Best", 20) {
             private double adjustment = 0.5;
             @Override
@@ -588,11 +588,7 @@ public class SPSiteQuality extends AbstractDataObject implements PropertyProvide
         }
 
         public MapOp<Magnitude, Magnitude> magAdjustOp() {
-            return new MapOp<Magnitude, Magnitude>() {
-                @Override public Magnitude apply(Magnitude magnitude) {
-                    return adjust(magnitude);
-                }
-            };
+            return this::adjust;
         }
 
         public String toString() {
