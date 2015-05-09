@@ -1,12 +1,14 @@
 package jsky.app.ot.gemini.editor.targetComponent.details
 
+import java.awt.{GridBagConstraints, GridBagLayout}
+import javax.swing.JPanel
+
 import edu.gemini.pot.sp.ISPNode
+import edu.gemini.shared.util.immutable.{Option => GOption}
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.target.SPTarget
-import edu.gemini.shared.util.immutable.{ Option => GOption }
-import java.awt.{ GridBagConstraints, GridBagLayout}
-import javax.swing.{ JPanel}
-import jsky.app.ot.gemini.editor.targetComponent.TelescopePosEditor
+import jsky.app.ot.gemini.editor.targetComponent.{GuidingFeedbackEditor, TelescopePosEditor}
+
 import scalaz.syntax.id._
 
 final class TargetDetailPanel extends JPanel with TelescopePosEditor with ReentrancyHack {
@@ -17,10 +19,32 @@ final class TargetDetailPanel extends JPanel with TelescopePosEditor with Reentr
   val tpw = new ForwardingTelescopePosWatcher(this)
 
   // Fields
-  private[this] var tde: TargetDetailEditor = null;
+  private[this] var tde: TargetDetailEditor  = null
+  private[this] val profile                  = new SpatialProfileEditor
+  private[this] val distr                    = new SpectralDistributionEditor
+  private[this] val gfe                      = new GuidingFeedbackEditor
 
   // Put it all together
   setLayout(new GridBagLayout)
+  add(profile.peer, new GridBagConstraints() <| { c =>
+    c.gridx     = 1
+    c.gridy     = 0
+    c.weightx   = 0.5
+    c.fill      = GridBagConstraints.HORIZONTAL
+  })
+    add(distr.peer, new GridBagConstraints() <| { c =>
+    c.gridx     = 1
+    c.gridy     = 1
+    c.weightx   = 0.5
+    c.fill      = GridBagConstraints.HORIZONTAL
+  })
+  add(gfe.getComponent, new GridBagConstraints() <| { c =>
+    c.gridx     = 0
+    c.gridy     = 2
+    c.weightx   = 1
+    c.gridwidth = 2
+    c.fill      = GridBagConstraints.HORIZONTAL
+  })
 
   // Very sadly, we need to know whether or not calling `edit` will change the internal structure
   // of the editor. If so, the editor needs to do some extra work afterwards to make sure enabled
@@ -37,13 +61,20 @@ final class TargetDetailPanel extends JPanel with TelescopePosEditor with Reentr
       if (tde != null) remove(tde)
       tde = TargetDetailEditor.forTag(tag)
       add(tde, new GridBagConstraints() <| { c =>
-        c.fill = GridBagConstraints.BOTH
+        c.gridx = 0
+        c.gridy = 0
+        c.gridheight = 2
+        c.weightx = 0.5
+        c.fill = GridBagConstraints.HORIZONTAL
       })
     }
   
     // Forward the `edit` call.
-    tpw.edit(obsContext, spTarget, node)
-    tde.edit(obsContext, spTarget, node)
+    tpw.    edit(obsContext, spTarget, node)
+    tde.    edit(obsContext, spTarget, node)
+    gfe.    edit(obsContext, spTarget, node)
+    profile.edit(obsContext, spTarget, node)
+    distr.  edit(obsContext, spTarget, node)
 
   }
 

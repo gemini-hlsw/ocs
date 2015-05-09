@@ -16,7 +16,7 @@ import scalaz.syntax.id._
 import scalaz.syntax.functor._
 
 // An editor for a list of doubles, with a titled border
-case class NumericPropertySheet[A](title: String, f: SPTarget => A, props: NumericPropertySheet.Prop[A]*)
+case class NumericPropertySheet[A](title: scala.Option[String], f: SPTarget => A, props: NumericPropertySheet.Prop[A]*)
   extends JPanel with TelescopePosEditor with ReentrancyHack {
 
   private[this] var spt: SPTarget = new SPTarget // never null
@@ -32,16 +32,17 @@ case class NumericPropertySheet[A](title: String, f: SPTarget => A, props: Numer
               try nonreentrant {
                 p.g(f(spt), tbwe.getValue.toDouble)
                 spt.notifyOfGenericUpdate()
+                tbwe.requestFocus()
               }
               catch { case _: NumberFormatException => }
         })
       }
     }
 
-  setBorder(titleBorder(title));
+  title.foreach(t => setBorder(titleBorder(t)))
   setLayout(new GridBagLayout)
   pairs.zipWithIndex.foreach { case ((p, w), row) =>
-    val ins = new Insets(0, 2, 0, 2);
+    val ins = new Insets(0, 2, 0, 2)
     add(new JLabel(p.leftCaption),new GridBagConstraints <| { c =>
       c.gridx = 0
       c.gridy = row

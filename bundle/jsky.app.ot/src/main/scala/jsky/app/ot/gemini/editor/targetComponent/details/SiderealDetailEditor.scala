@@ -25,16 +25,13 @@ final class SiderealDetailEditor extends TargetDetailEditor(ITarget.Tag.SIDEREAL
     e.getComponent.asInstanceOf[JComponent].setBorder(titleBorder("Magnitudes"))
   }
 
-  val props = NumericPropertySheet[HmsDegTarget]("Motion", _.getTarget.asInstanceOf[HmsDegTarget],
+  val props = NumericPropertySheet[HmsDegTarget](Some("Motion"), _.getTarget.asInstanceOf[HmsDegTarget],
     Prop("∆ RA",     "mas/year", _.getPM1),
     Prop("∆ Dec",    "mas/year", _.getPM2),
     Prop("Epoch",    "JD",       _.getEpoch),
     Prop("Parallax", "arcsec",   _.getParallax),
     Prop("RV",       "km/sec",   _.getRV)
   )
-
-  val gfe = new GuidingFeedbackEditor
-
 
   // Layout
 
@@ -110,20 +107,12 @@ final class SiderealDetailEditor extends TargetDetailEditor(ITarget.Tag.SIDEREAL
     c.gridy = 1
   })
 
-  add(gfe.getComponent, new GridBagConstraints <| { c =>
-    c.gridx = 0
-    c.gridy = 2
-    c.gridwidth = 2
-    c.fill = GridBagConstraints.HORIZONTAL
-  })
-
   override def edit(obsContext: GOption[ObsContext], spTarget: SPTarget, node: ISPNode): Unit = {
     super .edit(obsContext, spTarget, node)
     kind  .edit(obsContext, spTarget, node)
     name  .edit(obsContext, spTarget, node)
     coords.edit(obsContext, spTarget, node)
     mags  .edit(obsContext, spTarget, node)
-    gfe   .edit(obsContext, spTarget, node)
     props .edit(obsContext, spTarget, node)
   }
 
