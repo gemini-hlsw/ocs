@@ -1,14 +1,14 @@
 package jsky.app.ot.gemini.editor.targetComponent.details
 
-import java.awt.{ Insets, GridBagConstraints, GridBagLayout }
-import javax.swing.{ JLabel, JPanel, JComponent }
+import java.awt.{GridBagConstraints, GridBagLayout, Insets}
+import javax.swing.{JComponent, JLabel, JPanel}
 
 import edu.gemini.pot.sp.ISPNode
-import edu.gemini.shared.util.immutable.{ Option => GOption }
+import edu.gemini.shared.util.immutable.{Option => GOption}
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.target.SPTarget
 import edu.gemini.spModel.target.system.{HmsDegTarget, ITarget}
-import jsky.app.ot.gemini.editor.targetComponent.{ GuidingFeedbackEditor, MagnitudeEditor}
+import jsky.app.ot.gemini.editor.targetComponent.MagnitudeEditor
 
 import scalaz.syntax.id._
 
@@ -51,9 +51,9 @@ final class SiderealDetailEditor extends TargetDetailEditor(ITarget.Tag.SIDEREAL
     p.add(kind, new GridBagConstraints <| { c =>
       c.gridx = 1
       c.gridy = 0
+      c.weightx = 1
       c.fill = GridBagConstraints.HORIZONTAL
       c.insets = new Insets(0, 5, 0, 2)
-      c.weightx = 2
     })
 
     p.add(new JLabel("Target Name"), new GridBagConstraints <| { c =>
@@ -64,11 +64,10 @@ final class SiderealDetailEditor extends TargetDetailEditor(ITarget.Tag.SIDEREAL
     })
 
     p.add(name, new GridBagConstraints <| { c =>
+      c.anchor = GridBagConstraints.WEST
       c.gridx = 1
       c.gridy = 1
-      c.fill = GridBagConstraints.HORIZONTAL
       c.insets = new Insets(2, 5, 0, 2)
-      c.weightx = 2
     })
 
     p.add(new JLabel("Coordinates"), new GridBagConstraints <| { c =>
@@ -79,21 +78,20 @@ final class SiderealDetailEditor extends TargetDetailEditor(ITarget.Tag.SIDEREAL
     })
 
     p.add(coords, new GridBagConstraints <| { c =>
+      c.anchor = GridBagConstraints.WEST
       c.gridx = 1
       c.gridy = 2
-      c.fill = GridBagConstraints.HORIZONTAL
       c.insets = new Insets(2, 5, 0, 2)
-      c.weightx = 2
     })
-
 
   }
 
   add(general, new GridBagConstraints <| { c =>
     c.gridx = 0
     c.gridy = 0
-    c.gridwidth = 2
+    c.weightx = 1
     c.fill = GridBagConstraints.HORIZONTAL
+    c.gridwidth = 2
   })
 
   add(mags.getComponent, new GridBagConstraints <| { c =>
@@ -103,8 +101,11 @@ final class SiderealDetailEditor extends TargetDetailEditor(ITarget.Tag.SIDEREAL
   })
 
   add(props, new GridBagConstraints <| { c =>
+    c.anchor = GridBagConstraints.WEST
     c.gridx = 1
     c.gridy = 1
+    c.weightx = 1
+    c.fill = GridBagConstraints.HORIZONTAL
   })
 
   override def edit(obsContext: GOption[ObsContext], spTarget: SPTarget, node: ISPNode): Unit = {

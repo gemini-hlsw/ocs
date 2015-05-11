@@ -1,6 +1,7 @@
 package jsky.app.ot.gemini.editor.targetComponent.details
 
-import java.awt.{Component, GridBagConstraints}
+import java.awt.{Component, GridBagConstraints, Insets}
+import javax.swing.JPanel
 
 import edu.gemini.pot.sp.ISPNode
 import edu.gemini.shared.util.immutable.{Option => GOption}
@@ -14,13 +15,43 @@ import jsky.app.ot.gemini.editor.targetComponent.details.NumericPropertySheet.Pr
 import scala.swing.GridBagPanel.{Anchor, Fill}
 import scala.swing.ListView.Renderer
 import scala.swing.event.{MouseClicked, SelectionChanged}
-import scala.swing.{ComboBox, Dimension, GridBagPanel}
+import scala.swing.{ComboBox, GridBagPanel, Label, Swing}
 import scalaz.Scalaz._
 
 
-final class SpectralDistributionEditor extends GridBagPanel with TelescopePosEditor {
+final class SourceDetailsEditor extends GridBagPanel with TelescopePosEditor {
+
+  // ==== The Target
 
   private[this] var spt: SPTarget = new SPTarget
+  private[this] var isBase: Boolean = false
+
+  // ==== Spatial Profile Details
+
+  private val defaultPointSource    = PointSource()
+  private val defaultUniformSource  = UniformSource()
+  private val defaultGaussianSource = GaussianSource(0.5)
+
+  private def gaussianOrDefault(t: SPTarget): GaussianSource = t.getTarget.getSpatialProfile.fold(defaultGaussianSource)(_.asInstanceOf[GaussianSource])
+
+  lazy val pointSourceDetails    = new JPanel()
+  lazy val uniformSourceDetails  = new JPanel()
+  lazy val gaussianSourceDetails = NumericPropertySheet[GaussianSource](None, t => gaussianOrDefault(t),
+    Prop("with FWHM",  "Full Width at Half Max (arcsec)", _.fwhm, (a, v) => spt.getTarget.setSpatialProfile(Some(GaussianSource(v))))
+  )
+
+  case class ProfilePanel(label: String, panel: Component, default: SpatialProfile)
+  private val profilePanels = List(
+    ProfilePanel("Point Source",             pointSourceDetails,    defaultPointSource),
+    ProfilePanel("Extended Gaussian Source", gaussianSourceDetails, defaultGaussianSource),
+    ProfilePanel("Extended Uniform Source",  uniformSourceDetails,  defaultUniformSource)
+  )
+
+  private val profiles = new ComboBox[ProfilePanel](profilePanels) {
+    renderer = Renderer(_.label)
+  }
+
+  // === Spectral Distribution Details
 
   private val defaultBlackBody    = BlackBody(10000)
   private val defaultEmissionLine = EmissionLine(Wavelength.fromMicrons(2.2), 500, Flux.fromWatts(5.0e-19), Continuum.fromWatts(1.0e-16))
@@ -29,7 +60,6 @@ final class SpectralDistributionEditor extends GridBagPanel with TelescopePosEdi
   private def blackBodyOrDefault   (t: SPTarget): BlackBody     = t.getTarget.getSpectralDistribution.fold(defaultBlackBody)(_.asInstanceOf[BlackBody])
   private def emissionLineOrDefault(t: SPTarget): EmissionLine  = t.getTarget.getSpectralDistribution.fold(defaultEmissionLine)(_.asInstanceOf[EmissionLine])
   private def powerLawOrDefault    (t: SPTarget): PowerLaw      = t.getTarget.getSpectralDistribution.fold(defaultPowerLaw)(_.asInstanceOf[PowerLaw])
-
 
   lazy val libraryStarDetails     = new ComboBox[LibraryStar](LibraryStar.Values) {
     renderer = Renderer(_.sedSpectrum)
@@ -50,11 +80,6 @@ final class SpectralDistributionEditor extends GridBagPanel with TelescopePosEdi
     Prop("Index",       "",         _.index,                (a, v) => spt.getTarget.setSpectralDistribution(Some(PowerLaw(v))))
   )
 
-
-  border = titleBorder("Spectral Distribution")
-  preferredSize = new Dimension(300, 150)
-  minimumSize   = new Dimension(300, 150)
-
   case class DistributionPanel(label: String, panel: Component, default: Option[SpectralDistribution])
   private val distributionPanels = List(
     DistributionPanel("Library Star",     libraryStarDetails.peer,    Some(libraryStarDetails.selection.item)),
@@ -69,34 +94,85 @@ final class SpectralDistributionEditor extends GridBagPanel with TelescopePosEdi
     renderer = Renderer(_.label)
   }
 
-  layout(distributions) = new Constraints {
-    anchor  = Anchor.North
+  // ==== The Layout
+
+  layout(new Label("Spatial Profile")) = new Constraints {
+    anchor  = Anchor.West
     gridx   = 0
+    gridy   = 0
+    insets = new Insets(0, 2, 10, 5)
+  }
+
+  layout(profiles) = new Constraints {
+    gridx   = 1
     gridy   = 0
     weightx = 1
     fill    = Fill.Horizontal
+    insets  = new Insets(0, 5, 0, 2)
   }
+
+  // add all profile panels in the same grid cell,
+  // the individual panels will be made visible/invisible as needed
+  profilePanels.foreach { p =>
+    peer.add(p.panel, new GridBagConstraints <| { c =>
+      c.anchor  = GridBagConstraints.WEST
+      c.gridx   = 1
+      c.gridy   = 1
+      c.insets  = new Insets(0, 5, 0, 2)
+    })
+  }
+
+  layout(new Label("Spectral Distribution")) = new Constraints {
+    anchor  = Anchor.West
+    gridx   = 0
+    gridy   = 2
+    insets = new Insets(20, 2, 10, 5)
+  }
+
+  layout(distributions) = new Constraints {
+    gridx   = 1
+    gridy   = 2
+    weightx = 1
+    fill    = Fill.Horizontal
+    insets  = new Insets(20, 5, 10, 2)
+  }
+
   // add all distribution panels in the same grid cell,
   // the individual panels will be made visible/invisible as needed
   distributionPanels.foreach { p =>
     peer.add(p.panel, new GridBagConstraints <| { c =>
-      c.gridx   = 0
-      c.gridy   = 1
-      c.weightx = 1
-      c.fill    = GridBagConstraints.HORIZONTAL
-      //      c.insets = ins
+      c.anchor  = GridBagConstraints.WEST
+      c.gridx   = 1
+      c.gridy   = 3
+      c.insets  = new Insets(0, 5, 0, 2)
     })
     p.panel.setVisible(false)
   }
-  distributions.selection.item.panel.setVisible(true)
 
-  listenTo(distributions.selection, libraryStarDetails.selection, libraryNonStarDetails.selection, mouse.clicks, distributions.mouse.clicks)
+  // occupy remaining vertical space
+  layout(Swing.VGlue) = new Constraints {
+    gridx   = 1
+    gridy   = 4
+    weighty = 1
+    fill    = Fill.Vertical
+  }
+
+  // ==== Listeners and Reactions
+
+  val editElements = List(
+    profiles.selection,
+    distributions.selection,
+    libraryStarDetails.selection,
+    libraryNonStarDetails.selection,
+    mouse.clicks
+  )
+
+  listenTo(editElements:_*)
   reactions += {
 
     case SelectionChanged(`distributions`) =>
       spt.getTarget.setSpectralDistribution(distributions.selection.item.default)
       spt.notifyOfGenericUpdate()
-      //edit(edu.gemini.shared.util.immutable.None.instance(), spt, null)
 
     case SelectionChanged(`libraryStarDetails`) =>
       spt.getTarget.setSpectralDistribution(Some(libraryStarDetails.selection.item))
@@ -106,17 +182,32 @@ final class SpectralDistributionEditor extends GridBagPanel with TelescopePosEdi
       spt.getTarget.setSpectralDistribution(Some(libraryNonStarDetails.selection.item))
       spt.notifyOfGenericUpdate()
 
-    case MouseClicked(_,_,_,_,_)      =>
-      if (!enabled) enableAll(true)
+    case SelectionChanged(`profiles`)  =>
+      spt.getTarget.setSpatialProfile(Some(profiles.selection.item.default))
+      spt.notifyOfGenericUpdate()
 
+    case MouseClicked(_,_,_,_,_)      =>
+      if (!enabled) {
+        spt.getTarget.setSpatialProfile(Some(defaultPointSource))
+        spt.getTarget.setSpectralDistribution(Some(LibraryStar.A0V))
+        spt.notifyOfGenericUpdate()
+      }
   }
 
-
+  // react to any kind of target change by updating all UI elements
   def edit(obsContext: GOption[ObsContext], spTarget: SPTarget, node: ISPNode): Unit = {
 
-    deafTo(distributions.selection, libraryStarDetails.selection, libraryNonStarDetails.selection)
+    deafTo(editElements:_*)
 
     spt = spTarget
+    isBase = if (obsContext.isDefined) obsContext.getValue.getTargets.getBase == spTarget else false
+
+    spt.getTarget.getSpatialProfile.getOrElse(defaultPointSource) match {
+      case s: PointSource => profiles.selection.item = profilePanels.head;
+      case s: GaussianSource => profiles.selection.item = profilePanels(1); profilePanels(1).panel.asInstanceOf[NumericPropertySheet[GaussianSource]].edit(obsContext, spTarget, node)
+      case s: UniformSource => profiles.selection.item = profilePanels(2);
+    }
+
     spt.getTarget.getSpectralDistribution.getOrElse(LibraryStar.A0V) match {
       case s: LibraryStar    => distributions.selection.item = distributionPanels.head; libraryStarDetails.selection.item = s
       case s: LibraryNonStar => distributions.selection.item = distributionPanels(1);   libraryNonStarDetails.selection.item = s
@@ -128,27 +219,41 @@ final class SpectralDistributionEditor extends GridBagPanel with TelescopePosEdi
 
     update()
 
-    listenTo(distributions.selection, libraryStarDetails.selection, libraryNonStarDetails.selection)
+    listenTo(editElements:_*)
+
   }
 
+  // show/hide UI elements as needed
   private def update(): Unit = {
-    distributionPanels.foreach(_.panel.setVisible(false))
-    distributions.selection.item.panel.setVisible(true)
-    enableAll(spt.getTarget.getSpectralDistribution.isDefined)
+    if (isBase) {
+      visible = true
+
+      profilePanels.foreach(_.panel.setVisible(false))
+      profiles.selection.item.panel.setVisible(true)
+
+      distributionPanels.foreach(_.panel.setVisible(false))
+      distributions.selection.item.panel.setVisible(true)
+
+      enableAll(spt.getTarget.getSpatialProfile.isDefined)
+    } else {
+      visible = false
+    }
     revalidate()
     repaint()
   }
 
+  // enable/disable UI elemens as needed
   private def enableAll(b: Boolean) = {
     enabled = b
-    distributions.enabled = b
-    distributionPanels.map(_.panel).foreach(_.setEnabled(b))
+
+    peer.getComponents.foreach(_.setEnabled(b))
+
     if (b) {
       tooltip = ""
-      border = titleBorder("Spectral Distribution")
+      border = titleBorder("Source")
     } else {
-      tooltip = "Click anywhere to activate this."
-      border = titleBorder("Spectral Distribution [Click to Activate]")
+      tooltip = "Click on title to activate this."
+      border = titleBorder("Source [Click to Activate]")
     }
   }
 

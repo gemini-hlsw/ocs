@@ -1,6 +1,6 @@
 package jsky.app.ot.gemini.editor.targetComponent.details
 
-import java.awt.{Insets, GridBagConstraints, GridBagLayout}
+import java.awt.{GridBagConstraints, GridBagLayout, Insets}
 import javax.swing.{JLabel, JPanel}
 
 import edu.gemini.pot.sp.ISPNode
@@ -9,11 +9,11 @@ import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.target.SPTarget
 import edu.gemini.spModel.target.system.CoordinateParam
 import jsky.app.ot.gemini.editor.targetComponent.TelescopePosEditor
-import jsky.util.gui.{TextBoxWidget, TextBoxWidgetWatcher, NumberBoxWidget}
+import jsky.util.gui.{NumberBoxWidget, TextBoxWidget, TextBoxWidgetWatcher}
 
 import scalaz.std.list._
-import scalaz.syntax.id._
 import scalaz.syntax.functor._
+import scalaz.syntax.id._
 
 // An editor for a list of doubles, with a titled border
 case class NumericPropertySheet[A](title: scala.Option[String], f: SPTarget => A, props: NumericPropertySheet.Prop[A]*)
@@ -57,8 +57,8 @@ case class NumericPropertySheet[A](title: scala.Option[String], f: SPTarget => A
     add(new JLabel(p.rightCaption), new GridBagConstraints <| { c =>
       c.gridx = 2
       c.gridy = row
+      c.weightx = 1
       c.fill = GridBagConstraints.HORIZONTAL
-      c.weighty = 2
       c.insets = ins
     })
   }

@@ -20,27 +20,21 @@ final class TargetDetailPanel extends JPanel with TelescopePosEditor with Reentr
 
   // Fields
   private[this] var tde: TargetDetailEditor  = null
-  private[this] val profile                  = new SpatialProfileEditor
-  private[this] val distr                    = new SpectralDistributionEditor
+  private[this] val source                   = new SourceDetailsEditor
   private[this] val gfe                      = new GuidingFeedbackEditor
 
   // Put it all together
   setLayout(new GridBagLayout)
-  add(profile.peer, new GridBagConstraints() <| { c =>
+  add(source.peer, new GridBagConstraints() <| { c =>
+    c.anchor    = GridBagConstraints.NORTH
     c.gridx     = 1
     c.gridy     = 0
-    c.weightx   = 0.5
-    c.fill      = GridBagConstraints.HORIZONTAL
-  })
-    add(distr.peer, new GridBagConstraints() <| { c =>
-    c.gridx     = 1
-    c.gridy     = 1
-    c.weightx   = 0.5
-    c.fill      = GridBagConstraints.HORIZONTAL
+    c.weighty   = 1
+    c.fill      = GridBagConstraints.VERTICAL
   })
   add(gfe.getComponent, new GridBagConstraints() <| { c =>
     c.gridx     = 0
-    c.gridy     = 2
+    c.gridy     = 1
     c.weightx   = 1
     c.gridwidth = 2
     c.fill      = GridBagConstraints.HORIZONTAL
@@ -63,18 +57,16 @@ final class TargetDetailPanel extends JPanel with TelescopePosEditor with Reentr
       add(tde, new GridBagConstraints() <| { c =>
         c.gridx = 0
         c.gridy = 0
-        c.gridheight = 2
-        c.weightx = 0.5
+        c.weightx = 1
         c.fill = GridBagConstraints.HORIZONTAL
       })
     }
   
     // Forward the `edit` call.
-    tpw.    edit(obsContext, spTarget, node)
-    tde.    edit(obsContext, spTarget, node)
-    gfe.    edit(obsContext, spTarget, node)
-    profile.edit(obsContext, spTarget, node)
-    distr.  edit(obsContext, spTarget, node)
+    tpw.   edit(obsContext, spTarget, node)
+    tde.   edit(obsContext, spTarget, node)
+    gfe.   edit(obsContext, spTarget, node)
+    source.edit(obsContext, spTarget, node)
 
   }
 
