@@ -1,18 +1,16 @@
 package jsky.app.ot.gemini.editor.targetComponent.details
 
 import java.awt._
-import java.awt.event.{ActionEvent, ActionListener, ItemEvent, ItemListener}
+import java.awt.event.{ActionEvent, ActionListener}
 import java.text.SimpleDateFormat
 import java.util.{Calendar, Date, TimeZone}
 import javax.swing._
-import javax.swing.event.DocumentEvent
 
 import language.implicitConversions
 
 import edu.gemini.horizons.api.HorizonsQuery.ObjectType
 import edu.gemini.pot.sp.ISPNode
 import edu.gemini.shared.gui.calendar.JCalendarPopup
-import edu.gemini.shared.gui.text.AbstractDocumentListener
 import edu.gemini.shared.util.immutable.{ Option => GOption }
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.target.SPTarget
@@ -57,26 +55,20 @@ abstract class ValidAtEditor[A <: ITarget](empty: A) extends JPanel with Telesco
         }
     })
 
-    addItemListener(new ItemListener {
-      override def itemStateChanged(e: ItemEvent): Unit =
-        if (e.getStateChange == ItemEvent.SELECTED) {
-          nonreentrant {
-            e.getItem match {
-              case tc: TimeConfig => setTime(tc.getDate)
-              case ts: String     => textDoc.setTime(ts) // I don't think this ever happens
-            }
+    addActionListener(new ActionListener {
+      override def actionPerformed(e: ActionEvent): Unit =
+        nonreentrant {
+          getSelectedItem match {
+            case tc: TimeConfig => setTime(tc.getDate)
+            case ts: String     => textDoc.setTime(ts) // I don't think this ever happens
           }
         }
     })
 
-    textDoc.addDocumentListener(new AbstractDocumentListener {
-      override def textChanged(docEvent: DocumentEvent, newText: String): Unit =
-        nonreentrant(textDoc.setTime(newText))
-
-    })
-
-    def setTime(d: Date): Unit =
+    def setTime(d: Date): Unit = {
+      calendar.setDate(d)
       textDoc.setTime(timeFormatter.format(d))
+    }
 
   }
 
