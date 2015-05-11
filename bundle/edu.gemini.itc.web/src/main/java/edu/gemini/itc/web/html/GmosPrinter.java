@@ -2,8 +2,8 @@ package edu.gemini.itc.web.html;
 
 import edu.gemini.itc.gmos.Gmos;
 import edu.gemini.itc.gmos.GmosRecipe;
+import edu.gemini.itc.base.*;
 import edu.gemini.itc.shared.*;
-import edu.gemini.itc.web.servlets.ImageServlet;
 import edu.gemini.spModel.gemini.gmos.GmosNorthType;
 import edu.gemini.spModel.gemini.gmos.GmosSouthType;
 import scala.Tuple2;

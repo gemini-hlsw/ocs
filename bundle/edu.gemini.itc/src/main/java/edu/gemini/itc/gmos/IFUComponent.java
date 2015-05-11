@@ -1,6 +1,6 @@
 package edu.gemini.itc.gmos;
 
-import edu.gemini.itc.shared.*;
+import edu.gemini.itc.base.*;
 
 import java.util.ArrayList;
 import java.util.List;

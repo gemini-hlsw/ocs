@@ -1,9 +1,9 @@
 package edu.gemini.itc.altair;
 
+import edu.gemini.itc.base.AOSystem;
+import edu.gemini.itc.base.SampledSpectrumVisitor;
 import edu.gemini.itc.gems.GemsFluxAttenuationVisitor;
-import edu.gemini.itc.shared.AOSystem;
 import edu.gemini.itc.shared.AltairParameters;
-import edu.gemini.itc.shared.SampledSpectrumVisitor;
 import edu.gemini.spModel.gemini.altair.AltairParams;
 
 /**

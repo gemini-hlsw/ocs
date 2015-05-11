@@ -1,7 +1,7 @@
 package edu.gemini.itc.altair;
 
-import edu.gemini.itc.shared.ITCConstants;
-import edu.gemini.itc.shared.TransmissionElement;
+import edu.gemini.itc.base.ITCConstants;
+import edu.gemini.itc.base.TransmissionElement;
 
 /**
  * The AltairTransmissionVisitor is designed to adjust the SED for the

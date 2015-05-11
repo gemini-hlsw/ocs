@@ -2,7 +2,9 @@ package edu.gemini.itc.web.html;
 
 import edu.gemini.itc.acqcam.AcqCamRecipe;
 import edu.gemini.itc.acqcam.AcquisitionCamera;
-import edu.gemini.itc.shared.*;
+import edu.gemini.itc.base.*;
+import edu.gemini.itc.shared.AcquisitionCamParameters;
+import edu.gemini.itc.shared.Parameters;
 
 import java.io.PrintWriter;
 

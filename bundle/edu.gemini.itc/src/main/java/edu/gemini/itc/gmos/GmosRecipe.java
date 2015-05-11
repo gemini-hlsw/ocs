@@ -1,5 +1,6 @@
 package edu.gemini.itc.gmos;
 
+import edu.gemini.itc.base.*;
 import edu.gemini.itc.operation.*;
 import edu.gemini.itc.shared.*;
 import scala.Tuple2;

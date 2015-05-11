@@ -1,8 +1,8 @@
 package edu.gemini.itc.operation;
 
-import edu.gemini.itc.shared.ArraySpectrum;
-import edu.gemini.itc.shared.DefaultArraySpectrum;
-import edu.gemini.itc.shared.ITCConstants;
+import edu.gemini.itc.base.ArraySpectrum;
+import edu.gemini.itc.base.DefaultArraySpectrum;
+import edu.gemini.itc.base.ITCConstants;
 import edu.gemini.spModel.guide.GuideProbe;
 
 public class ImageQualityCalculation implements ImageQualityCalculatable {

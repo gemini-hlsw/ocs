@@ -1,8 +1,8 @@
 package edu.gemini.itc.operation;
 
+import edu.gemini.itc.base.Instrument;
 import edu.gemini.itc.shared.ObservationDetails;
 import edu.gemini.itc.shared.SourceDefinition;
-import edu.gemini.itc.shared.Instrument;
 
 public final class SourceFractionFactory {
 

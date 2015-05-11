@@ -1,7 +1,7 @@
 package edu.gemini.itc.gems;
 
-import edu.gemini.itc.shared.AOSystem;
-import edu.gemini.itc.shared.SampledSpectrumVisitor;
+import edu.gemini.itc.base.AOSystem;
+import edu.gemini.itc.base.SampledSpectrumVisitor;
 import edu.gemini.itc.shared.SourceDefinition;
 
 /**

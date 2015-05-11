@@ -1,7 +1,7 @@
 package edu.gemini.itc.acqcam;
 
-import edu.gemini.itc.shared.Instrument;
-import edu.gemini.itc.shared.TransmissionElement;
+import edu.gemini.itc.base.Instrument;
+import edu.gemini.itc.base.TransmissionElement;
 import edu.gemini.spModel.gemini.acqcam.AcqCamParams;
 
 /**

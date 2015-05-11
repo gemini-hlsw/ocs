@@ -1,5 +1,8 @@
 package edu.gemini.itc.web.html;
 
+import edu.gemini.itc.base.ImagingResult;
+import edu.gemini.itc.base.SpectroscopyResult;
+import edu.gemini.itc.base.TransmissionElement;
 import edu.gemini.itc.flamingos2.Flamingos2;
 import edu.gemini.itc.flamingos2.Flamingos2Recipe;
 import edu.gemini.itc.shared.*;

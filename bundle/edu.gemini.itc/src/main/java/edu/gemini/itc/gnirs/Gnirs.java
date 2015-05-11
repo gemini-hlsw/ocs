@@ -1,8 +1,9 @@
 package edu.gemini.itc.gnirs;
 
+import edu.gemini.itc.base.*;
 import edu.gemini.itc.operation.DetectorsTransmissionVisitor;
 import edu.gemini.itc.shared.CalculationMethod;
-import edu.gemini.itc.shared.*;
+import edu.gemini.itc.shared.ObservationDetails;
 
 
 /**
@@ -126,7 +127,7 @@ public final class Gnirs extends Instrument {
 
         final CameraFactory cf = new CameraFactory(gp.getCameraLength(), gp.getCameraColor(), getDirectory());
         _camera = cf.getCamera();
-        addComponent((edu.gemini.itc.shared.TransmissionElement) _camera);
+        addComponent((edu.gemini.itc.base.TransmissionElement) _camera);
 
         _cameraLength = gp.getCameraLength();
 

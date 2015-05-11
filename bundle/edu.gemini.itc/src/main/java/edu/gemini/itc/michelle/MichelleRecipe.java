@@ -1,5 +1,6 @@
 package edu.gemini.itc.michelle;
 
+import edu.gemini.itc.base.*;
 import edu.gemini.itc.operation.*;
 import edu.gemini.itc.shared.*;
 import edu.gemini.spModel.core.Site;

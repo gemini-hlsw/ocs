@@ -1,7 +1,8 @@
 package edu.gemini.itc.gsaoi;
 
+import edu.gemini.itc.base.*;
+import edu.gemini.itc.shared.GsaoiParameters;
 import edu.gemini.itc.shared.ObservationDetails;
-import edu.gemini.itc.shared.*;
 
 /**
  * Gsaoi specification class

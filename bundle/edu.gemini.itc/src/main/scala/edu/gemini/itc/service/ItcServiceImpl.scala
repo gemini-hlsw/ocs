@@ -9,6 +9,7 @@ import edu.gemini.itc.michelle.MichelleParameters
 import edu.gemini.itc.nifs.{NifsRecipe, NifsParameters}
 import edu.gemini.itc.niri.NiriRecipe
 import edu.gemini.itc.operation.ImagingS2NMethodACalculation
+import edu.gemini.itc.base._
 import edu.gemini.itc.shared._
 import edu.gemini.itc.trecs.TRecsParameters
 

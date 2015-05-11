@@ -1,7 +1,7 @@
 package edu.gemini.itc.gmos;
 
-import edu.gemini.itc.shared.Detector;
-import edu.gemini.itc.shared.GratingOptics;
+import edu.gemini.itc.base.Detector;
+import edu.gemini.itc.base.GratingOptics;
 import edu.gemini.spModel.gemini.gmos.GmosCommonType;
 
 /**

@@ -1,6 +1,10 @@
 package edu.gemini.itc.web.html;
 
 import edu.gemini.itc.altair.Altair;
+import edu.gemini.itc.base.AOSystem;
+import edu.gemini.itc.base.ImagingResult;
+import edu.gemini.itc.base.SpectroscopyResult;
+import edu.gemini.itc.base.TransmissionElement;
 import edu.gemini.itc.niri.Niri;
 import edu.gemini.itc.niri.NiriRecipe;
 import edu.gemini.itc.shared.*;

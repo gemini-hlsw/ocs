@@ -1,6 +1,6 @@
 package edu.gemini.itc.gems;
 
-import edu.gemini.itc.shared.*;
+import edu.gemini.itc.base.*;
 
 /**
  * The GemsBackgroundVisitor class is designed to adjust the SED for the

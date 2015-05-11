@@ -1,10 +1,10 @@
 package edu.gemini.itc.operation;
 
+import edu.gemini.itc.base.DatFile;
+import edu.gemini.itc.base.ITCConstants;
+import edu.gemini.itc.base.Instrument;
 import edu.gemini.itc.shared.ObservationDetails;
 import edu.gemini.itc.shared.SourceDefinition;
-import edu.gemini.itc.shared.DatFile;
-import edu.gemini.itc.shared.ITCConstants;
-import edu.gemini.itc.shared.Instrument;
 
 public final class PeakPixelFlux {
 
@@ -17,7 +17,7 @@ public final class PeakPixelFlux {
     private final double[][] data;
 
     public static double calculate(final Instrument instrument,
-                                   final SourceDefinition  _sdParameters,
+                                   final SourceDefinition _sdParameters,
                                    final ObservationDetails _obsDetailParameters,
                                    final SourceFraction SFcalc,
                                    final double im_qual,

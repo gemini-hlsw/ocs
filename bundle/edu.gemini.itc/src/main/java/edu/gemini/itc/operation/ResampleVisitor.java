@@ -1,7 +1,7 @@
 package edu.gemini.itc.operation;
 
-import edu.gemini.itc.shared.SampledSpectrum;
-import edu.gemini.itc.shared.SampledSpectrumVisitor;
+import edu.gemini.itc.base.SampledSpectrum;
+import edu.gemini.itc.base.SampledSpectrumVisitor;
 
 /**
  * A resampling operation can move the start or end of the spectrum

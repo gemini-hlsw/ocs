@@ -1,7 +1,7 @@
 package edu.gemini.itc.operation;
 
-import edu.gemini.itc.shared.DatFile;
-import edu.gemini.itc.shared.ITCConstants;
+import edu.gemini.itc.base.DatFile;
+import edu.gemini.itc.base.ITCConstants;
 
 import java.util.Scanner;
 
