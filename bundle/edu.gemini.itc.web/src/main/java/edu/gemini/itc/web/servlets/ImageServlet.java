@@ -57,7 +57,9 @@ public final class ImageServlet extends HttpServlet {
 
     /** Retrieves a cached result from UUID string. */
     private static ItcSpectroscopyResult result(final String id) {
-        return cachedResult.get(UUID.fromString(id));
+        final ItcSpectroscopyResult r = cachedResult.get(UUID.fromString(id));
+        if (r == null) throw new IdTimedOutException();
+        return r;
     }
     
     // === End of caching
