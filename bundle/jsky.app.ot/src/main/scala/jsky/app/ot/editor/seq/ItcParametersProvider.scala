@@ -6,6 +6,7 @@ import edu.gemini.spModel.config.ConfigBridge
 import edu.gemini.spModel.config.map.ConfigValMapInstances
 import edu.gemini.spModel.config2.ConfigSequence
 import edu.gemini.spModel.target.env.TargetEnvironment
+import edu.gemini.spModel.target.system.HmsDegTarget
 import edu.gemini.spModel.target.{SpatialProfile, SpectralDistribution}
 import edu.gemini.spModel.telescope.IssPort
 
@@ -46,10 +47,16 @@ object ItcParametersProvider {
       itcPanel.conditions.right
 
     def spatialProfile: String \/ SpatialProfile =
-      itcPanel.spatialProfile.fold("Spatial profile not available".left[SpatialProfile])(_.right)
+      for {
+        tEnv <- targetEnvironment
+        sp   <- tEnv.getBase.getTarget.getSpatialProfile.fold("Spatial profile not available".left[SpatialProfile])(_.right)
+      } yield sp
 
     def spectralDistribution: String \/ SpectralDistribution =
-      itcPanel.spectralDistribution.fold("Spectral distribution not available".left[SpectralDistribution])(_.right)
+      for {
+        tEnv <- targetEnvironment
+        sp   <- tEnv.getBase.getTarget.getSpectralDistribution.fold("Spectral distribution not available".left[SpectralDistribution])(_.right)
+      } yield sp
 
     def instrumentPort: String \/ IssPort =
       Option(owner.getContextIssPort).fold("No port information available".left[IssPort])(_.right)
@@ -58,7 +65,14 @@ object ItcParametersProvider {
       Option(owner.getContextTargetEnv).fold("No target environment available".left[TargetEnvironment])(_.right)
 
     def redshift: String \/ Double =
-      0.0.right // TODO: get this from target editor!
+      for {
+        tEnv <- targetEnvironment
+      } yield {
+        tEnv.getBase.getTarget match {
+          case t: HmsDegTarget  => t.getRV.getValue / 299800.00 // turn radial velocity into z-shift
+          case _                => 0.0                          // non-sidereal targets are assumed to have z-shift 0
+        }
+      }
 
     def sequence: ConfigSequence = Option(owner.getContextObservation).fold(new ConfigSequence) {
       ConfigBridge.extractSequence(_, null, ConfigValMapInstances.IDENTITY_MAP, true)

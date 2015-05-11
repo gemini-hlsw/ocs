@@ -1,14 +1,13 @@
 package jsky.app.ot.gemini.editor.targetComponent.details
 
+import java.awt._
+import javax.swing._
+
 import edu.gemini.pot.sp.ISPNode
-import edu.gemini.shared.util.immutable.{ Option => GOption }
+import edu.gemini.shared.util.immutable.{Option => GOption}
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.target.SPTarget
 import edu.gemini.spModel.target.system.{ConicTarget, ITarget}
-
-import javax.swing._
-import java.awt._
-
 import jsky.app.ot.gemini.editor.targetComponent.MagnitudeEditor
 
 import scalaz.syntax.id._
@@ -44,14 +43,13 @@ abstract class ConicDetailEditor(tag: ITarget.Tag) extends TargetDetailEditor(ta
     })
 
     p.add(kind, new GridBagConstraints <| { c =>
+      c.anchor = GridBagConstraints.WEST
       c.gridx = 1
       c.gridy = 0
-      c.fill = GridBagConstraints.HORIZONTAL
       c.insets = new Insets(0, 5, 0, 2)
-      c.weightx = 2
     })
 
-    p.add(new JLabel("Name"), new GridBagConstraints <| { c =>
+    p.add(new JLabel("Target Name"), new GridBagConstraints <| { c =>
       c.gridx = 0
       c.gridy = 1
       c.fill = GridBagConstraints.HORIZONTAL
@@ -63,7 +61,6 @@ abstract class ConicDetailEditor(tag: ITarget.Tag) extends TargetDetailEditor(ta
       c.gridy = 1
       c.insets = new Insets(2, 5, 0, 2)
       c.anchor = GridBagConstraints.WEST
-      c.weightx = 2
     })
 
     p.add(new JLabel("Coordinates"), new GridBagConstraints <| { c =>
@@ -94,6 +91,13 @@ abstract class ConicDetailEditor(tag: ITarget.Tag) extends TargetDetailEditor(ta
       c.anchor = GridBagConstraints.WEST
     })
 
+    p.add(Box.createHorizontalGlue(), new GridBagConstraints <| { c =>
+      c.gridx = 2
+      c.gridy = 0
+      c.weightx = 1
+      c.fill = GridBagConstraints.HORIZONTAL
+    })
+
   }
 
   add(general, new GridBagConstraints <| { c =>
@@ -113,6 +117,7 @@ abstract class ConicDetailEditor(tag: ITarget.Tag) extends TargetDetailEditor(ta
   add(props, new GridBagConstraints <| { c =>
     c.gridx = 1
     c.gridy = 1
+    c.weightx = 1
     c.fill = GridBagConstraints.HORIZONTAL
   })
 

@@ -6,17 +6,13 @@ import javax.swing.{BorderFactory, ImageIcon}
 import edu.gemini.itc.shared.PlottingDetails.PlotLimits
 import edu.gemini.itc.shared._
 import edu.gemini.pot.sp.SPComponentType
-import edu.gemini.spModel.core.Wavelength
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.{CloudCover, ImageQuality, SkyBackground, WaterVapor}
-import edu.gemini.spModel.target.EmissionLine.{Continuum, Flux}
-import edu.gemini.spModel.target._
 
-import scala.swing.GridBagPanel.{Anchor, Fill}
+import scala.swing.GridBagPanel.Fill
 import scala.swing.ListView.Renderer
 import scala.swing.ScrollPane.BarPolicy._
 import scala.swing._
 import scala.swing.event.{ButtonClicked, KeyEvent, SelectionChanged, TableRowsSelected}
-import scalaz.Scalaz._
 
 object ItcPanel {
 
@@ -59,20 +55,16 @@ sealed trait ItcPanel extends GridBagPanel {
 
   protected val currentConditions = new ConditionsPanel
   protected val analysisMethod    = new AnalysisMethodPanel
-  protected val sourceDetails     = new SourcePanel
 
   def visibleFor(t: SPComponentType): Boolean
 
   def analysis = analysisMethod.analysisMethod
   def conditions = currentConditions.conditions
-  def spectralDistribution = sourceDetails.spectralDistribution
-  def spatialProfile = sourceDetails.spatialProfile
 
-  listenTo(currentConditions, analysisMethod, sourceDetails)
+  listenTo(currentConditions, analysisMethod)
   reactions += {
     case SelectionChanged(`currentConditions`)  => updateInternal()
     case SelectionChanged(`analysisMethod`)     => updateInternal()
-    case SelectionChanged(`sourceDetails`)      => updateInternal()
   }
 
   def update() = {
@@ -87,175 +79,6 @@ sealed trait ItcPanel extends GridBagPanel {
     // re-establish previously selected row, this is relevant
     // for charts displayed on spectroscopy panel
 //    selectedRow.foreach(r => if (r < table.rowCount) table.selection.rows += r)
-  }
-
-  // ==== Source edit TODO: This will migrate to the new source editor once it's ready.
-
-  class SourcePanel extends GridBagPanel {
-
-    /** Details panel with a fixed size and a set of input fields. */
-    abstract class DetailsPanel extends GridBagPanel {
-      val LabelInsets = new Insets(5, 5, 5, 10)
-      val UnitsInsets = new Insets(5, 10, 5, 5)
-      val Size = new Dimension(300, 120)
-      preferredSize = Size
-      minimumSize = Size
-
-      def addField(label: String, value: Double, units: String, row: Int): InputField[Double] =
-        addField(label, value, d => Some(d.toDouble), units, row)
-
-      def addField[A](label: String, value: A, convert: String => Option[A], units: String, row: Int): InputField[A] = {
-        new InputField[A](label, units, value, convert) <| { f =>
-          layout(f.label) = new Constraints { gridx = 0; gridy = row; insets = LabelInsets; weightx = 1; fill = Fill.Horizontal }
-          layout(f.text)  = new Constraints { gridx = 1; gridy = row }
-          layout(f.units) = new Constraints { gridx = 2; gridy = row; insets = UnitsInsets; anchor = Anchor.West }
-        }
-      }
-    }
-    abstract class DistributionDetailsPanel extends DetailsPanel {
-      def spectralDistribution: Option[SpectralDistribution]
-    }
-    abstract class ProfileDetailsPanel extends DetailsPanel {
-      def spatialProfile: Option[SpatialProfile]
-    }
-
-    private val starDetails = new DistributionDetailsPanel {
-      val stars = new ComboBox[LibraryStar](LibraryStar.Values) {
-        renderer = Renderer(_.sedSpectrum)
-      }
-      layout(stars) = new Constraints {
-        gridx   = 0
-        gridy   = 0
-        weightx = 1
-        fill    = Fill.Horizontal
-      }
-      def spectralDistribution = Some(stars.selection.item)
-    }
-    private val nonStarDetails = new DistributionDetailsPanel {
-      val nonStars = new ComboBox[LibraryNonStar](LibraryNonStar.values) {
-        renderer = Renderer(_.label)
-      }
-      layout(nonStars) = new Constraints {
-        gridx   = 0
-        gridy   = 0
-        weightx = 1
-        fill    = Fill.Horizontal
-      }
-      def spectralDistribution = Some(nonStars.selection.item)
-    }
-    private val bbodyDetails = new DistributionDetailsPanel {
-      val temperature = addField("Temperature:", 10000.0, "K", 0)
-      def spectralDistribution = temperature.value.map(BlackBody)
-    }
-    private val elineDetails = new DistributionDetailsPanel {
-      val wavelength  = addField("Wavelength:", 2.2,      "µm",       0)
-      val width       = addField("Width:",      150.0,    "km/s",     1)
-      val flux        = addField("Line Flux:",  5.0e-19,  "W/m²",     2)
-      val continuum   = addField("Continuum:",  1.0e-16,  "W/m²/µm",  3)
-      def spectralDistribution = for {
-        wl <- wavelength.value
-        wd <- width.value
-        fl <- flux.value
-        co <- continuum.value
-      } yield EmissionLine(Wavelength.fromMicrons(wl), wd, Flux.fromWatts(fl), Continuum.fromWatts(co))
-    }
-    private val plawDetails = new DistributionDetailsPanel {
-      val index = addField("Index:", -1.0, "", 0)
-      def spectralDistribution = index.value.map(PowerLaw)
-    }
-
-    case class DistributionPanel(label: String, panel: DistributionDetailsPanel)
-    private val distributionPanels = List(
-      DistributionPanel("Library Star",     starDetails),
-      DistributionPanel("Library Non-Star", nonStarDetails),
-      DistributionPanel("Black Body",       bbodyDetails),
-      DistributionPanel("Emission Line",    elineDetails),
-      DistributionPanel("Power Law",        plawDetails)
-    )
-
-    private val distributions = new ComboBox[DistributionPanel](distributionPanels) {
-      renderer = Renderer(_.label)
-      listenTo(selection)
-      reactions += {
-        case SelectionChanged(_) =>
-          distributionPanels.foreach(_.panel.visible = false)
-          selection.item.panel.visible = true
-      }
-    }
-
-    case class ProfilePanel(label: String, panel: ProfileDetailsPanel)
-    private val pointSourceDetails = new ProfileDetailsPanel {
-      def spatialProfile: Option[SpatialProfile] = Some(PointSource())
-    }
-    private val gaussianSourceDetails = new ProfileDetailsPanel {
-      val fwhm = addField("FWHM:", 1.0, "arcsec", 0)
-      def spatialProfile: Option[SpatialProfile] = fwhm.value.map(GaussianSource)
-    }
-    private val uniformSourceDetails = new ProfileDetailsPanel {
-      def spatialProfile: Option[SpatialProfile] = Some(UniformSource())
-    }
-    private val profilePanels = List(
-      ProfilePanel("Point Source",             pointSourceDetails),
-      ProfilePanel("Extended Gaussian Source", gaussianSourceDetails),
-      ProfilePanel("Extended Uniform Source",  uniformSourceDetails)
-    )
-
-    private val profiles = new ComboBox[ProfilePanel](profilePanels) {
-      renderer = Renderer(_.label)
-      listenTo(selection)
-      reactions += {
-        case SelectionChanged(_) =>
-          profilePanels.foreach(_.panel.visible = false)
-          selection.item.panel.visible = true
-      }
-    }
-
-    def spatialProfile = profiles.selection.item.panel.spatialProfile
-
-    def spectralDistribution = distributions.selection.item.panel.spectralDistribution
-
-    border = BorderFactory.createEmptyBorder(10, 10, 10, 10)
-
-    layout(profiles) = new Constraints {
-      gridx   = 0
-      gridy   = 0
-      weightx = 0.5
-      fill    = Fill.Horizontal
-    }
-    layout(distributions) = new Constraints {
-      gridx   = 1
-      gridy   = 0
-      weightx = 0.5
-      fill    = Fill.Horizontal
-    }
-    // add all distribution panels in the same grid cell,
-    // the individual panels will be made visible/invisible as needed
-    profilePanels.foreach { p =>
-      layout(p.panel) = new Constraints {
-        gridx = 0
-        gridy = 1
-      }
-      p.panel.visible = false
-    }
-    profiles.selection.item.panel.visible = true
-
-    distributionPanels.foreach { p =>
-      layout(p.panel) = new Constraints {
-        gridx = 1
-        gridy = 1
-      }
-      p.panel.visible = false
-    }
-    distributions.selection.item.panel.visible = true
-
-
-    // reactions
-    deafTo(this)
-    listenTo(distributions.selection, profiles.selection)
-    reactions += {
-      case SelectionChanged(_) => publish(SelectionChanged(this))
-    }
-
   }
 
   // ==== Conditions display and edit panels
@@ -378,17 +201,11 @@ class ItcImagingPanel(val owner: EdIteratorFolder) extends ItcPanel {
     gridx       = 0
     gridy       = 1
   }
-  layout(sourceDetails) = new Constraints {
-    gridx       = 1
-    gridy       = 0
-    gridheight  = 2
-  }
   layout(scrollPane) = new Constraints {
     gridx       = 0
     gridy       = 2
     weightx     = 1
     weighty     = 1
-    gridwidth   = 2
     fill        = Fill.Both
   }
 
@@ -434,17 +251,11 @@ class ItcSpectroscopyPanel(val owner: EdIteratorFolder) extends ItcPanel {
     gridx     = 0
     gridy     = 1
   }
-  layout(sourceDetails) = new Constraints {
-    gridx     = 1
-    gridy     = 0
-    gridheight= 2
-  }
   layout(splitPane) = new Constraints {
     gridx     = 0
     gridy     = 2
     weightx   = 1
     weighty   = 1
-    gridwidth = 2
     fill      = GridBagPanel.Fill.Both
   }
 

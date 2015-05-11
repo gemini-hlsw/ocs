@@ -145,7 +145,7 @@ object LibraryNonStar {
 object EmissionLine {
 
   /** Flux of an emission line. Units are per area. */
-  sealed trait Flux {
+  sealed trait Flux extends Serializable {
     def toWatts: Double                   // units are W/m2
     def toErgs: Double = toWatts * 1000   // units are ergs/s/cm2
 
@@ -167,7 +167,7 @@ object EmissionLine {
   }
 
   /** Flux continuum of an emission line. Units are per length. */
-  sealed trait Continuum {
+  sealed trait Continuum extends Serializable {
     def toWatts: Double                   // units are W/m2/um
     def toErgs: Double = toWatts / 10     // units are ergs/s/cm2/A
 
