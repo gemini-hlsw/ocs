@@ -1,5 +1,8 @@
 package edu.gemini.itc.shared;
 
+import edu.gemini.spModel.core.Wavelength;
+import edu.gemini.spModel.target.*;
+
 import java.io.Serializable;
 
 /**
@@ -27,13 +30,11 @@ public final class SourceDefinition implements Serializable {
         USER_DEFINED
     }
 
-    public static final String WATTS = "watts_fd_wavelength";
-    public static final String WATTS_FLUX = "watts_flux";
-    public static final String ERGS_FLUX = "ergs_flux";
-
     public final SpatialProfile profile;
     public final SpectralDistribution distribution;
     public final WavebandDefinition normBand;
+    public final double norm;
+    public final BrightnessUnit units;
     public final double redshift;
     // additional java enums in order to be able to use switch statements for Scala case classes
     public final Profile profileType;
@@ -44,10 +45,14 @@ public final class SourceDefinition implements Serializable {
      */
     public SourceDefinition(final SpatialProfile profile,
                             final SpectralDistribution distribution,
+                            final double norm,
+                            final BrightnessUnit units,
                             final WavebandDefinition normBand,
                             final double redshift) {
         this.profile        = profile;
         this.distribution   = distribution;
+        this.norm           = norm;
+        this.units          = units;
         this.normBand       = normBand;
         this.redshift       = redshift;
 
@@ -84,11 +89,11 @@ public final class SourceDefinition implements Serializable {
     }
 
     public double getSourceNormalization() {
-        return profile.norm();
+        return norm;
     }
 
     public BrightnessUnit getUnits() {
-        return profile.units();
+        return units;
     }
 
     public double getFWHM() {
@@ -111,7 +116,7 @@ public final class SourceDefinition implements Serializable {
         return ((BlackBody) distribution).temperature();
     }
 
-    public double getELineWavelength() {
+    public Wavelength getELineWavelength() {
         return ((EmissionLine) distribution).wavelength();
     }
 
@@ -119,20 +124,12 @@ public final class SourceDefinition implements Serializable {
         return ((EmissionLine) distribution).width();
     }
 
-    public double getELineFlux() {
+    public EmissionLine.Flux getELineFlux() {
         return ((EmissionLine) distribution).flux();
     }
 
-    public double getELineContinuumFlux() {
+    public EmissionLine.Continuum getELineContinuumFlux() {
         return ((EmissionLine) distribution).continuum();
-    }
-
-    public String getELineFluxUnits() {
-        return ((EmissionLine) distribution).fluxUnits();
-    }
-
-    public String getELineContinuumFluxUnits() {
-        return ((EmissionLine) distribution).continuumUnits();
     }
 
     public double getPowerLawIndex() {

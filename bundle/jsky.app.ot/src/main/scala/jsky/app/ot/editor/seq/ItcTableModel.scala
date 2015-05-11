@@ -53,7 +53,7 @@ sealed trait ItcTableModel extends AbstractTableModel {
       case _                          => None
     }
 
-  protected def spcSourceMag    (result: Future[ItcService.Result]) = spectroscopyResult(result).map(_.source.profile.norm)
+  protected def spcSourceMag    (result: Future[ItcService.Result]) = spectroscopyResult(result).map(_.source.norm)
 
   protected def spcSourceBand   (result: Future[ItcService.Result]) = spectroscopyResult(result).map(_.source.getNormBand.name)
 
@@ -78,7 +78,7 @@ sealed trait ItcTableModel extends AbstractTableModel {
 
   protected def totalSNRatio (result: Future[ItcService.Result], ccd: Int = 0) = imagingResult(result).map(_.ccd(ccd).totalSNRatio)
 
-  protected def sourceMag    (result: Future[ItcService.Result]) = imagingResult(result).map(_.source.profile.norm)
+  protected def sourceMag    (result: Future[ItcService.Result]) = imagingResult(result).map(_.source.norm)
 
   protected def sourceBand   (result: Future[ItcService.Result]) = imagingResult(result).map(_.source.getNormBand.name)
 

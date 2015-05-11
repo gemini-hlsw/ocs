@@ -8,7 +8,7 @@ import edu.gemini.itc.nifs.NifsParameters
 import edu.gemini.itc.shared.SourceDefinition._
 import edu.gemini.itc.shared._
 import edu.gemini.itc.trecs.TRecsParameters
-import edu.gemini.spModel.core.{Wavelength, Site}
+import edu.gemini.spModel.core.{Site, Wavelength}
 import edu.gemini.spModel.gemini.acqcam.AcqCamParams
 import edu.gemini.spModel.gemini.altair.AltairParams
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2
@@ -20,6 +20,8 @@ import edu.gemini.spModel.gemini.michelle.MichelleParams
 import edu.gemini.spModel.gemini.niri.Niri
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality
 import edu.gemini.spModel.guide.GuideProbe
+import edu.gemini.spModel.target.EmissionLine.{Continuum, Flux}
+import edu.gemini.spModel.target._
 import edu.gemini.spModel.telescope.IssPort
 
 /**
@@ -268,20 +270,20 @@ object ITCRequest {
   def sourceDefinitionParameters(r: ITCRequest): SourceDefinition = {
     // Get the source geometry and type
     import SourceDefinition.Profile._
-    val spatialProfile = r.enumParameter(classOf[Profile]) match {
+    val (spatialProfile, norm, units) = r.enumParameter(classOf[Profile]) match {
       case POINT    =>
         val norm  = r.doubleParameter("psSourceNorm")
         val units = r.enumParameter(classOf[BrightnessUnit], "psSourceUnits")
-        PointSource(norm, units)
+        (PointSource(), norm, units)
       case GAUSSIAN =>
         val norm  = r.doubleParameter("gaussSourceNorm")
         val units = r.enumParameter(classOf[BrightnessUnit], "gaussSourceUnits")
         val fwhm  = r.doubleParameter("gaussFwhm")
-        GaussianSource(norm, units, fwhm)
+        (GaussianSource(fwhm), norm, units)
       case UNIFORM  =>
         val norm  = r.doubleParameter("usbSourceNorm")
         val units = r.enumParameter(classOf[BrightnessUnit], "usbSourceUnits")
-        UniformSource(norm, units)
+        (UniformSource(), norm, units)
     }
 
     // Get Normalization info
@@ -297,13 +299,14 @@ object ITCRequest {
       case LIBRARY_STAR =>      LibraryStar.findByName(r.parameter("stSpectrumType")).get
       case LIBRARY_NON_STAR =>  LibraryNonStar.findByName(r.parameter("nsSpectrumType")).get
       case ELINE =>
+        val flux = r.doubleParameter("lineFlux")
+        val cont = r.doubleParameter("lineContinuum")
         EmissionLine(
-          r.doubleParameter("lineWavelength"),
+          Wavelength.fromMicrons(r.doubleParameter("lineWavelength")),
           r.doubleParameter("lineWidth"),
-          r.doubleParameter("lineFlux"),
-          r.parameter("lineFluxUnits"),
-          r.doubleParameter("lineContinuum"),
-          r.parameter("lineContinuumUnits"))
+          if (r.parameter("lineFluxUnits") == "watts_flux") Flux.fromWatts(flux) else Flux.fromErgs(flux),
+          if (r.parameter("lineContinuumUnits") == "watts_fd_wavelength") Continuum.fromWatts(cont) else Continuum.fromErgs(cont)
+        )
     }
 
     //Get Redshift
@@ -315,7 +318,7 @@ object ITCRequest {
     }
 
     // WOW, finally we've got everything in place..
-    new SourceDefinition(spatialProfile, sourceDefinition, normBand, redshift)
+    new SourceDefinition(spatialProfile, sourceDefinition, norm, units, normBand, redshift)
   }
 
   def parameters(r: ITCRequest): Parameters = {

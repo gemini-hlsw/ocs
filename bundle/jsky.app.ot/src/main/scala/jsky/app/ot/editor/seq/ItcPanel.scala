@@ -6,7 +6,10 @@ import javax.swing.{BorderFactory, ImageIcon}
 import edu.gemini.itc.shared.PlottingDetails.PlotLimits
 import edu.gemini.itc.shared._
 import edu.gemini.pot.sp.SPComponentType
+import edu.gemini.spModel.core.Wavelength
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.{CloudCover, ImageQuality, SkyBackground, WaterVapor}
+import edu.gemini.spModel.target.EmissionLine.{Continuum, Flux}
+import edu.gemini.spModel.target._
 
 import scala.swing.GridBagPanel.{Anchor, Fill}
 import scala.swing.ListView.Renderer
@@ -60,10 +63,10 @@ sealed trait ItcPanel extends GridBagPanel {
 
   def visibleFor(t: SPComponentType): Boolean
 
-  def analysis() = analysisMethod.analysisMethod
-  def conditions() = currentConditions.conditions
-  def spectralDistribution() = sourceDetails.spectralDistribution
-  def spatialProfile(mag: Double) = sourceDetails.spatialProfile(mag)
+  def analysis = analysisMethod.analysisMethod
+  def conditions = currentConditions.conditions
+  def spectralDistribution = sourceDetails.spectralDistribution
+  def spatialProfile = sourceDetails.spatialProfile
 
   listenTo(currentConditions, analysisMethod, sourceDetails)
   reactions += {
@@ -113,11 +116,11 @@ sealed trait ItcPanel extends GridBagPanel {
       def spectralDistribution: Option[SpectralDistribution]
     }
     abstract class ProfileDetailsPanel extends DetailsPanel {
-      def spatialProfile(mag: Double): Option[SpatialProfile]
+      def spatialProfile: Option[SpatialProfile]
     }
 
     private val starDetails = new DistributionDetailsPanel {
-      val stars = new ComboBox[LibraryStar](LibraryStar.values) {
+      val stars = new ComboBox[LibraryStar](LibraryStar.Values) {
         renderer = Renderer(_.sedSpectrum)
       }
       layout(stars) = new Constraints {
@@ -154,7 +157,7 @@ sealed trait ItcPanel extends GridBagPanel {
         wd <- width.value
         fl <- flux.value
         co <- continuum.value
-      } yield EmissionLine(wl, wd, fl, "watts_flux", co, "watts_fd_wavelength")
+      } yield EmissionLine(Wavelength.fromMicrons(wl), wd, Flux.fromWatts(fl), Continuum.fromWatts(co))
     }
     private val plawDetails = new DistributionDetailsPanel {
       val index = addField("Index:", -1.0, "", 0)
@@ -182,14 +185,14 @@ sealed trait ItcPanel extends GridBagPanel {
 
     case class ProfilePanel(label: String, panel: ProfileDetailsPanel)
     private val pointSourceDetails = new ProfileDetailsPanel {
-      def spatialProfile(mag: Double): Option[SpatialProfile] = Some(PointSource(mag, BrightnessUnit.MAG))
+      def spatialProfile: Option[SpatialProfile] = Some(PointSource())
     }
     private val gaussianSourceDetails = new ProfileDetailsPanel {
       val fwhm = addField("FWHM:", 1.0, "arcsec", 0)
-      def spatialProfile(mag: Double): Option[SpatialProfile] = fwhm.value.map(GaussianSource(mag, BrightnessUnit.MAG, _))
+      def spatialProfile: Option[SpatialProfile] = fwhm.value.map(GaussianSource)
     }
     private val uniformSourceDetails = new ProfileDetailsPanel {
-      def spatialProfile(mag: Double): Option[SpatialProfile] = Some(UniformSource(mag, BrightnessUnit.MAG))
+      def spatialProfile: Option[SpatialProfile] = Some(UniformSource())
     }
     private val profilePanels = List(
       ProfilePanel("Point Source",             pointSourceDetails),
@@ -207,8 +210,7 @@ sealed trait ItcPanel extends GridBagPanel {
       }
     }
 
-    // magnitude is known by source editor, we need to pass in the value from there
-    def spatialProfile(mag: Double) = profiles.selection.item.panel.spatialProfile(mag)
+    def spatialProfile = profiles.selection.item.panel.spatialProfile
 
     def spectralDistribution = distributions.selection.item.panel.spectralDistribution
 

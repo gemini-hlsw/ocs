@@ -3,6 +3,7 @@ package edu.gemini.itc.web.html;
 import edu.gemini.itc.altair.Altair;
 import edu.gemini.itc.gems.Gems;
 import edu.gemini.itc.shared.*;
+import edu.gemini.spModel.target.Library;
 import edu.gemini.spModel.gemini.altair.AltairParams;
 import edu.gemini.spModel.telescope.IssPort;
 
@@ -31,23 +32,23 @@ public final class HtmlPrinter {
         sb.append(" is a");
         switch (sdp.getDistributionType()) {
             case ELINE:
-                sb.append("n emission line, at a wavelength of " + device.toString(sdp.getELineWavelength()));
+                sb.append("n emission line, at a wavelength of " + device.toString(sdp.getELineWavelength().toMicrons()));
                 device.setPrecision(2);
                 device.clear();
                 sb.append(" microns, and with a width of " + device.toString(sdp.getELineWidth()) + " km/s.\n  It's total flux is " +
-                        device.toString(sdp.getELineFlux()) + " " + sdp.getELineFluxUnits() + " on a flat continuum of flux density " +
-                        device.toString(sdp.getELineContinuumFlux()) + " " + sdp.getELineContinuumFluxUnits() + ".");
+                        device.toString(sdp.getELineFlux().toWatts()) + " watts_flux on a flat continuum of flux density " +
+                        device.toString(sdp.getELineContinuumFlux().toWatts()) + " watts_fd_wavelength.");
                 break;
             case BBODY:
                 sb.append(" " + sdp.getBBTemp() + "K Blackbody, at " + sdp.getSourceNormalization() +
-                        " " + sdp.profile.units().displayValue() + " in the " + sdp.getNormBand().name + " band.");
+                        " " + sdp.units.displayValue() + " in the " + sdp.getNormBand().name + " band.");
                 break;
             case LIBRARY_STAR:
-                sb.append(" " + sdp.getSourceNormalization() + " " + sdp.profile.units().displayValue() + " " + ((Library) sdp.distribution).sedSpectrum() +
+                sb.append(" " + sdp.getSourceNormalization() + " " + sdp.units.displayValue() + " " + ((Library) sdp.distribution).sedSpectrum() +
                         " star in the " + sdp.getNormBand().name + " band.");
                 break;
             case LIBRARY_NON_STAR:
-                sb.append(" " + sdp.getSourceNormalization() + " " + sdp.profile.units().displayValue() + " " + ((Library) sdp.distribution).sedSpectrum() +
+                sb.append(" " + sdp.getSourceNormalization() + " " + sdp.units.displayValue() + " " + ((Library) sdp.distribution).sedSpectrum() +
                         " in the " + sdp.getNormBand().name + " band.");
                 break;
             case USER_DEFINED:

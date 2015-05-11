@@ -5,6 +5,7 @@ import edu.gemini.itc.michelle.MichelleParameters
 import edu.gemini.itc.nifs.NifsParameters
 import edu.gemini.itc.shared._
 import edu.gemini.itc.trecs.TRecsParameters
+import edu.gemini.spModel.target._
 
 // TEMPORARY helper
 // All input objects will become immutable data only objects (probably Scala case classes).
@@ -124,13 +125,23 @@ object Hash {
       odp.getSourceFraction
     )
 
+  // TODO: simplify this again once refactoring of source/source profile/source distribution is done
   def calc(src: SourceDefinition): Int =
     hash(
       src.getProfileType.name,
-      src.profile.norm,
-      src.profile.units.name,
-      src.distribution,
-      src.normBand.name,
+      src.getDistributionType.name,
+      src.profile match {
+        case s: GaussianSource => s.fwhm
+        case _                 => 0.0
+      },
+      src.distribution match {
+        case d: BlackBody       => d.temperature
+        case d: PowerLaw        => d.index
+        case d: EmissionLine    => (d.wavelength.toMicrons * 1000 + d.continuum.toWatts) * 1000 + d.flux.toWatts
+        case d: Library         => d.sedSpectrum
+      },
+      src.norm,               // this is the magnitude value
+      src.normBand.name,      // this is the magnitude band name
       src.redshift
     )
 

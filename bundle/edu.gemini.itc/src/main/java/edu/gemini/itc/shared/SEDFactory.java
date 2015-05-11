@@ -6,6 +6,7 @@ import edu.gemini.itc.nifs.Nifs;
 import edu.gemini.itc.niri.Niri;
 import edu.gemini.itc.operation.*;
 import edu.gemini.spModel.core.Site;
+import edu.gemini.spModel.target.Library;
 import scala.Option;
 
 /**
@@ -98,8 +99,6 @@ public final class SEDFactory {
                         sdp.getELineWidth(),
                         sdp.getELineFlux(),
                         sdp.getELineContinuumFlux(),
-                        sdp.getELineFluxUnits(),
-                        sdp.getELineContinuumFluxUnits(),
                         sdp.getRedshift(),
                         instrument.getSampling());
 

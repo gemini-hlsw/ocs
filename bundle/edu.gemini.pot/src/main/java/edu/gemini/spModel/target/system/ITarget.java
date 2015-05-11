@@ -7,12 +7,10 @@
 package edu.gemini.spModel.target.system;
 
 import edu.gemini.shared.skyobject.Magnitude;
-import edu.gemini.shared.util.immutable.ImCollections;
-import edu.gemini.shared.util.immutable.ImList;
-import edu.gemini.shared.util.immutable.MapOp;
-import edu.gemini.shared.util.immutable.Option;
-import edu.gemini.shared.util.immutable.PredicateOp;
+import edu.gemini.shared.util.immutable.*;
 import edu.gemini.skycalc.Coordinates;
+import edu.gemini.spModel.target.SpatialProfile;
+import edu.gemini.spModel.target.SpectralDistribution;
 import edu.gemini.spModel.target.system.CoordinateTypes.Epoch;
 
 import java.io.Serializable;
@@ -28,7 +26,7 @@ import java.util.Set;
  */
 public abstract class ITarget implements Cloneable, Serializable {
 
-   public enum Tag {
+    public enum Tag {
 
        // N.B. these strings are meaningful to the TCC, catalog, and are used in PIO XML
        SIDEREAL("J2000", "Sidereal Target"),
@@ -39,12 +37,12 @@ public abstract class ITarget implements Cloneable, Serializable {
        public final String tccName;
        public final String friendlyName;
 
-       private Tag(String tccName, String friendlyName) {
+       Tag(String tccName, String friendlyName) {
            this.tccName = tccName;
            this.friendlyName = friendlyName;
        }
 
-       private Tag(String tccName) {
+       Tag(String tccName) {
            this(tccName, tccName);
        }
 
@@ -87,7 +85,9 @@ public abstract class ITarget implements Cloneable, Serializable {
 
     // RCN: pushed across from SPTarget
 
-    private ImList<Magnitude> magnitudes = ImCollections.emptyList();
+    private ImList<Magnitude>                   magnitudes              = ImCollections.emptyList();
+    private scala.Option<SpectralDistribution>  spectralDistribution    = scala.Option.empty();
+    private scala.Option<SpatialProfile>        spatialProfile          = scala.Option.empty();
 
     /**
      * Gets all the {@link Magnitude} information associated with this target,
@@ -177,6 +177,22 @@ public abstract class ITarget implements Cloneable, Serializable {
                 return cur.getBand() != mag.getBand();
             }
         }).cons(mag);
+    }
+
+    public void setSpectralDistribution(scala.Option<SpectralDistribution> sd) {
+        spectralDistribution = sd;
+    }
+
+    public scala.Option<SpectralDistribution> getSpectralDistribution() {
+        return spectralDistribution;
+    }
+
+    public void setSpatialProfile(scala.Option<SpatialProfile> sp) {
+        spatialProfile = sp;
+    }
+
+    public scala.Option<SpatialProfile> getSpatialProfile() {
+        return spatialProfile;
     }
 
 
