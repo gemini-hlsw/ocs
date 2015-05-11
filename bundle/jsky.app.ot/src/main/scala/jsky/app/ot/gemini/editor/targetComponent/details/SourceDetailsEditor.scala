@@ -41,7 +41,7 @@ final class SourceDetailsEditor extends GridBagPanel with TelescopePosEditor {
   private val pointSourceDetails    = new JPanel()
   private val uniformSourceDetails  = new JPanel()
   private val gaussianSourceDetails = NumericPropertySheet[GaussianSource](None, t => gaussianOrDefault(t),
-    Prop("with FWHM",  "Full Width at Half Max (arcsec)", _.fwhm, (a, v) => setProfile(GaussianSource(v)))
+    Prop("with FWHM",  "arcsec", _.fwhm, (a, v) => setProfile(GaussianSource(v)))
   )
 
   private case class ProfilePanel(label: String, panel: Component, default: SpatialProfile)
@@ -77,7 +77,7 @@ final class SourceDetailsEditor extends GridBagPanel with TelescopePosEditor {
   )
   private val emissionLineDetails = NumericPropertySheet[EmissionLine](None, emissionLineOrDefault,
     Prop("Wavelength",  "µm",       _.wavelength.toMicrons, (a, v) => setDistribution(EmissionLine(Wavelength.fromMicrons(v),  a.width,  a.flux,             a.continuum))),
-    Prop("Width",       "km/s",     _.width,                (a, v) => setDistribution(EmissionLine(a.wavelength,               v,        a.flux,             a.continuum))),
+    Prop("Width",       "km/sec",   _.width,                (a, v) => setDistribution(EmissionLine(a.wavelength,               v,        a.flux,             a.continuum))),
     Prop("Flux",        "W/m²",     _.flux.toWatts,         (a, v) => setDistribution(EmissionLine(a.wavelength,               a.width,  Flux.fromWatts(v),  a.continuum))),
     Prop("Continuum",   "W/m²/µm",  _.continuum.toWatts,    (a, v) => setDistribution(EmissionLine(a.wavelength,               a.width,  a.flux,             Continuum.fromWatts(v))))
   )
@@ -104,15 +104,15 @@ final class SourceDetailsEditor extends GridBagPanel with TelescopePosEditor {
     anchor  = Anchor.West
     gridx   = 0
     gridy   = 0
-    insets = new Insets(0, 2, 10, 5)
+    insets = new Insets(0, 2, 2, 2)
   }
 
   layout(profiles) = new Constraints {
-    gridx   = 1
-    gridy   = 0
+    gridx   = 0
+    gridy   = 1
     weightx = 1
     fill    = Fill.Horizontal
-    insets  = new Insets(0, 5, 0, 2)
+    insets  = new Insets(0, 2, 10, 2)
   }
 
   // add all profile panels in the same grid cell,
@@ -120,8 +120,8 @@ final class SourceDetailsEditor extends GridBagPanel with TelescopePosEditor {
   profilePanels.foreach { p =>
     peer.add(p.panel, new GridBagConstraints <| { c =>
       c.anchor  = GridBagConstraints.WEST
-      c.gridx   = 1
-      c.gridy   = 1
+      c.gridx   = 0
+      c.gridy   = 2
       c.insets  = new Insets(0, 5, 0, 2)
     })
   }
@@ -129,16 +129,16 @@ final class SourceDetailsEditor extends GridBagPanel with TelescopePosEditor {
   layout(new Label("Spectral Distribution")) = new Constraints {
     anchor  = Anchor.West
     gridx   = 0
-    gridy   = 2
-    insets = new Insets(20, 2, 10, 5)
+    gridy   = 3
+    insets = new Insets(20, 2, 2, 2)
   }
 
   layout(distributions) = new Constraints {
-    gridx   = 1
-    gridy   = 2
+    gridx   = 0
+    gridy   = 4
     weightx = 1
     fill    = Fill.Horizontal
-    insets  = new Insets(20, 5, 10, 2)
+    insets  = new Insets(0, 2, 10, 2)
   }
 
   // add all distribution panels in the same grid cell,
@@ -146,17 +146,17 @@ final class SourceDetailsEditor extends GridBagPanel with TelescopePosEditor {
   distributionPanels.foreach { p =>
     peer.add(p.panel, new GridBagConstraints <| { c =>
       c.anchor  = GridBagConstraints.WEST
-      c.gridx   = 1
-      c.gridy   = 3
-      c.insets  = new Insets(0, 5, 0, 2)
+      c.gridx   = 0
+      c.gridy   = 5
+      c.insets  = new Insets(0, 2, 0, 2)
     })
     p.panel.setVisible(false)
   }
 
   // occupy remaining vertical space
   layout(Swing.VGlue) = new Constraints {
-    gridx   = 1
-    gridy   = 4
+    gridx   = 0
+    gridy   = 6
     weighty = 1
     fill    = Fill.Vertical
   }

@@ -1,7 +1,7 @@
 package jsky.app.ot.gemini.editor.targetComponent.details
 
 import java.awt._
-import javax.swing.{JComponent, JLabel, JPanel}
+import javax.swing.{Box, JComponent, JLabel, JPanel}
 
 import edu.gemini.pot.sp.ISPNode
 import edu.gemini.shared.util.immutable.{Option => GOption}
@@ -83,14 +83,13 @@ final class NamedDetailEditor extends TargetDetailEditor(Tag.NAMED) with Reentra
     })
 
     p.add(kind, new GridBagConstraints <| { c =>
+      c.anchor = GridBagConstraints.WEST
       c.gridx = 1
       c.gridy = 0
-      c.weightx = 1
-      c.fill = GridBagConstraints.HORIZONTAL
       c.insets = new Insets(0, 5, 0, 2)
     })
 
-    p.add(new JLabel("Name"), new GridBagConstraints <| { c =>
+    p.add(new JLabel("Target Name"), new GridBagConstraints <| { c =>
       c.gridx = 0
       c.gridy = 1
       c.fill = GridBagConstraints.HORIZONTAL
@@ -144,6 +143,13 @@ final class NamedDetailEditor extends TargetDetailEditor(Tag.NAMED) with Reentra
       c.gridy = 4
       c.insets = new Insets(2, 5, 0, 2)
       c.anchor = GridBagConstraints.WEST
+    })
+
+    p.add(Box.createHorizontalGlue(), new GridBagConstraints <| { c =>
+      c.gridx = 2
+      c.gridy = 0
+      c.weightx = 1
+      c.fill = GridBagConstraints.HORIZONTAL
     })
 
   }

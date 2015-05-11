@@ -1,7 +1,7 @@
 package jsky.app.ot.gemini.editor.targetComponent.details
 
 import java.awt.{GridBagConstraints, GridBagLayout, Insets}
-import javax.swing.{JComponent, JLabel, JPanel}
+import javax.swing.{Box, JComponent, JLabel, JPanel}
 
 import edu.gemini.pot.sp.ISPNode
 import edu.gemini.shared.util.immutable.{Option => GOption}
@@ -49,10 +49,9 @@ final class SiderealDetailEditor extends TargetDetailEditor(ITarget.Tag.SIDEREAL
     })
 
     p.add(kind, new GridBagConstraints <| { c =>
+      c.anchor = GridBagConstraints.WEST
       c.gridx = 1
       c.gridy = 0
-      c.weightx = 1
-      c.fill = GridBagConstraints.HORIZONTAL
       c.insets = new Insets(0, 5, 0, 2)
     })
 
@@ -82,6 +81,20 @@ final class SiderealDetailEditor extends TargetDetailEditor(ITarget.Tag.SIDEREAL
       c.gridx = 1
       c.gridy = 2
       c.insets = new Insets(2, 5, 0, 2)
+    })
+
+    p.add(Box.createHorizontalGlue(), new GridBagConstraints <| { c =>
+      c.gridx = 2
+      c.gridy = 0
+      c.weightx = 1
+      c.fill = GridBagConstraints.HORIZONTAL
+    })
+
+    p.add(Box.createVerticalGlue(), new GridBagConstraints <| { c =>
+      c.gridx = 0
+      c.gridy = 3
+      c.weighty = 1
+      c.fill = GridBagConstraints.VERTICAL
     })
 
   }
