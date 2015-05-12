@@ -22,6 +22,7 @@ import edu.gemini.spModel.target.system.*;
 import jsky.app.ot.OTOptions;
 import jsky.app.ot.ags.*;
 import jsky.app.ot.editor.OtItemEditor;
+import jsky.app.ot.gemini.editor.targetComponent.details.TargetDetailEditor;
 import jsky.app.ot.tpe.AgsClient;
 import jsky.app.ot.tpe.GuideStarSupport;
 import jsky.app.ot.tpe.TelescopePosEditor;
@@ -124,6 +125,16 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 
         final SPInstObsComp inst = getContextInstrumentDataObject();
         _w.newMenu.setEnabled(enabled && inst != null);
+
+        // Update enabled state for all detail widgets.  The current editor
+        // will have already been updated by the super.updateEnabledState so
+        // update the others.
+        for (final TargetDetailEditor ed : TargetDetailEditor.AllJava()) {
+            if (_w.detailEditor.curDetailEdiorJava().forall(cur -> cur != ed)) {
+                updateEnabledState(new Component[] {ed}, enabled);
+            }
+        }
+        _w.detailEditor.source().updateEnabledState(enabled);
     }
 
     private final ActionListener _tagListener = new ActionListener() {
@@ -567,14 +578,8 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         _w.tag.setRenderer(tagRenderer);
         showTargetTag();
 
-        // Update target details, and ensure that any new controls constructed via the update are
-        // correctly disabled if editing is not allowed. Ordering is important!
-        boolean structChange =_w.detailEditor.willCauseStructureChange(_curPos);
+        // Update target details
         _w.detailEditor.edit(getObsContext(env), _curPos, getNode());
-        if (structChange && !OTOptions.isEditable(getProgram(), getContextObservation())) {
-            updateEnabledState(new Component[]{_w.detailEditor}, false);
-        }
-
     }
 
 
