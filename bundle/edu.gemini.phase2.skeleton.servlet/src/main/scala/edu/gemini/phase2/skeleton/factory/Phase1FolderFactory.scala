@@ -7,7 +7,7 @@ import edu.gemini.spModel.target.SPTarget
 import edu.gemini.model.p1.immutable._
 import edu.gemini.spModel.template._
 import edu.gemini.spModel.gemini.gnirs.blueprint.SpGnirsBlueprintSpectroscopy
-import edu.gemini.spModel.gemini.nifs.blueprint.SpNifsBlueprintAo
+import edu.gemini.spModel.gemini.nifs.blueprint.SpNifsBlueprintBase
 import edu.gemini.shared.util.TimeValue
 import edu.gemini.spModel.gemini.flamingos2.blueprint.SpFlamingos2BlueprintLongslit
 
@@ -73,7 +73,7 @@ object Phase1FolderFactory {
       val groups0 = groups.flatMap { pig =>
         bMap(pig.blueprintId) match {
           case _: SpGnirsBlueprintSpectroscopy  => GnirsSpectroscopyPartitioner.partition(pig)
-          case _: SpNifsBlueprintAo             => NifsAoPartitioner.partition(pig)
+          case _: SpNifsBlueprintBase           => NifsPartitioner.partition(pig)
           case _: SpFlamingos2BlueprintLongslit => F2LongslitPartitioner.partition(pig)
           case _                                => List(pig)
         }
@@ -128,20 +128,20 @@ object GnirsSpectroscopyPartitioner extends Partitioner {
 }
 
 // TARGET BRIGHTNESS = TB
-// Use H mag from target information if available
-//     Bright target (H <= 9) = BT
-//     Moderate target (9 < H <= 12) = MT
-//     Faint target (12 < H <= 20) = FT
-//     Blind acquisition target (H > 20) = BAT
+// Use K magnitude from target information if available:
+// IF      K <= 9  then BT = True   # Bright Target
+// IF  9 < K <= 13 then MT = True   # Moderate Target
+// IF 13 < K <= 20 then FT = True   # Faint Target
+// IF 20 < K       then BAT = True  # Blind acquisition target
 
-object NifsAoPartitioner extends Partitioner {
-  import edu.gemini.shared.skyobject.Magnitude.Band.H
-  def bucket(t:SPTarget):Int = Option(t.getTarget.getMagnitude(H).getOrNull).map(_.getBrightness).map {H =>
-    if (H <= 9) 1
-    else if (H <= 12) 2
-    else if (H <= 20) 3
+object NifsPartitioner extends Partitioner {
+  import edu.gemini.shared.skyobject.Magnitude.Band.K
+  def bucket(t:SPTarget):Int = Option(t.getTarget.getMagnitude(K).getOrNull).map(_.getBrightness).map { K =>
+         if (K <= 9) 1
+    else if (K <= 13) 2
+    else if (K <= 20) 3
     else 4
-  }.getOrElse(4) // treat as very faint for now
+  }.getOrElse(5) // targets with no K-band are treated differently
 }
 
 //IF TARGET H-MAGNITUDE < 7 INCLUDE {13} # Bright, no sky subtraction
