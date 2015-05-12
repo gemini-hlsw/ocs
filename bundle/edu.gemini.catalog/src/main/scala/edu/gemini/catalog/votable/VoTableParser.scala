@@ -52,8 +52,12 @@ object VoTableParser extends VoTableParser {
 sealed trait MagnitudesFilter {
   // Indicates if a field should be ignored
   def ignoredMagnitudeField(v: FieldId): Boolean = false
+  // Indicates if a magnitude is valid
   def validMagnitude(m: Magnitude): Boolean = !(m.value.isNaN || m.error.exists(_.isNaN))
-  def findBand(id: FieldId, band: String): Option[MagnitudeBand] = None
+  // Find what band the field descriptor should represent
+  def findBand(id: FieldId, band: String): Option[MagnitudeBand] = MagnitudeBand.all.find(_.name == band)
+  // filter magnitudes as a whole
+  def filterMagnitudeFields(magnitudeFields: List[(FieldId, Magnitude)]): List[Magnitude] = magnitudeFields.map(_._2).filter(validMagnitude)
 }
 
 case object UCAC4Filter extends MagnitudesFilter {
@@ -64,12 +68,40 @@ case object UCAC4Filter extends MagnitudesFilter {
   override def ignoredMagnitudeField(v: FieldId) = v.id === "amag" || v.id === "e_amag"
   // Magnitudes with value 20 or error over or equal to 0.9 are invalid
   override def validMagnitude(m: Magnitude) = super.validMagnitude(m) && m.value =/= ucac4BadMagnitude && m.error.map(math.abs) <= ucac4BadMagnitudeError
-
+  // UCAC4 has a few special cases to map magnitudes
   override def findBand(id: FieldId, band: String): Option[MagnitudeBand] = (id.id, id.ucd) match {
     case ("gmag" | "e_gmag", ucd) if ucd.includes(UcdWord("em.opt.r")) => Some(MagnitudeBand._g)
     case ("rmag" | "e_rmag", ucd) if ucd.includes(UcdWord("em.opt.r")) => Some(MagnitudeBand._r)
     case ("imag" | "e_imag", ucd) if ucd.includes(UcdWord("em.opt.i")) => Some(MagnitudeBand._i)
     case _                                                             => MagnitudeBand.all.find(_.name == band)
+  }
+}
+
+case object PPMXLFilter extends MagnitudesFilter {
+  // PPMXL may contain two representations for bands R and B, represented with ids r1mag/r2mag or b1mag/b2mac
+  // The ids r1mag/r2mag are preferred but if they are absent we should use the alternative values
+  val primaryMagnitudesIds = List("r1mag", "b1mag")
+  val alternateMagnitudesIds = List("r2mag", "b2mag")
+  val idsMapping = primaryMagnitudesIds.zip(alternateMagnitudesIds)
+
+  override def filterMagnitudeFields(magnitudeFields: List[(FieldId, Magnitude)]): List[Magnitude] = {
+    // Alternative values if primaries are not on the list or NaN
+    val alternateMagnitudes = (for {
+        m <- magnitudeFields
+        if alternateMagnitudesIds.contains(m._1.id)
+        if validMagnitude(m._2)
+      } yield (m._1.id, m)).toMap
+    // Remove the non valid magnitudes
+    val primaryMagnitudes = magnitudeFields.filter(m => validMagnitude(m._2))
+    // Collect the magnitudes present on the primary list and not on the secondary list
+    val m = primaryMagnitudes.filter {
+      case f @ (FieldId(i, _), _) if alternateMagnitudesIds.contains(i) => false
+      case _                                                            => true
+    }
+    // In case the primary isn't present use the alternative
+    idsMapping.foldLeft(m) {
+      case (mags, (id1, id2)) => if (mags.exists(_._1.id === id1)) mags else mags ++ alternateMagnitudes.get(id2)
+    }.map(_._2)
   }
 }
 
@@ -118,7 +150,7 @@ trait VoTableParser {
   def parseDoubleValue(ucd: Ucd, s: String): CatalogProblem \/ Double =
     \/.fromTryCatch(s.toDouble).leftMap(_ => FieldValueProblem(ucd, s))
   
-  protected def parseBands[T <: MagnitudesFilter](filter: T)(p: (FieldId, String)): CatalogProblem \/ (MagnitudeBand, Double) = {
+  protected def parseBands[T <: MagnitudesFilter](filter: T)(p: (FieldId, String)): CatalogProblem \/ (FieldId, MagnitudeBand, Double) = {
     val (fieldId: FieldId, value: String) = p
 
     def parseBandToken(token: String):Option[String] = token match {
@@ -135,7 +167,7 @@ trait VoTableParser {
     for {
       b <- band.headOption.flatten \/> UnmatchedField(fieldId.ucd)
       v <- parseDoubleValue(fieldId.ucd, value)
-    } yield (b, v)
+    } yield (fieldId, b, v)
   }
 
   /**
@@ -155,8 +187,9 @@ trait VoTableParser {
    */
   protected def tableRow2Target(fields: List[FieldDescriptor])(row: TableRow): CatalogProblem \/ SiderealTarget = {
     val isUCAC4 = fields.exists(_.name === "ucac4")
+    val isPPMXL = fields.exists(_.name === "ppmxl")
 
-    val magnitudesFilter:MagnitudesFilter = if (isUCAC4) UCAC4Filter else DefaultFilter
+    val magnitudesFilter:MagnitudesFilter = if (isUCAC4) UCAC4Filter else if (isPPMXL) PPMXLFilter else DefaultFilter
     val entries = row.itemsMap
     val entriesByUcd = entries.map(x => x._1.ucd -> x._2)
 
@@ -178,19 +211,29 @@ trait VoTableParser {
       k.sequenceU
     }
 
-    def combineWithErrorsAndFilter(m: List[Magnitude], e: Map[MagnitudeBand, Double]): List[Magnitude] =
-      m.map(i => i.copy(error = e.get(i.band))).filter(magnitudesFilter.validMagnitude)
+    def combineWithErrorsAndFilter(m: List[(FieldId, MagnitudeBand, Double)], e: List[(FieldId, MagnitudeBand, Double)]): List[Magnitude] = {
+      val mags = m.collect {
+          case (f, b, d) => f -> new Magnitude(d, b)
+        }
+      val magErrors = e.collect {
+          case (_, b, d) => b -> d
+        }.toMap
+      // Filter magnitudes as a whole
+      val magnitudes = magnitudesFilter.filterMagnitudeFields(mags)
+      // Link magnitudes with their errors
+      magnitudes.map(i => i.copy(error = magErrors.get(i.band))).filter(magnitudesFilter.validMagnitude)
+    }
 
     def toSiderealTarget(id: String, ra: String, dec: String, mags: Map[FieldId, String], magErrs: Map[FieldId, String], pm: (Option[String], Option[String])): \/[CatalogProblem, SiderealTarget] = {
       for {
-        r <- Angle.parseDegrees(ra).leftMap(_ => FieldValueProblem(VoTableParser.UCD_RA, ra))
-        d <- Angle.parseDegrees(dec).leftMap(_ => FieldValueProblem(VoTableParser.UCD_DEC, dec))
-        declination <- Declination.fromAngle(d) \/> FieldValueProblem(VoTableParser.UCD_DEC, dec)
+        r             <- Angle.parseDegrees(ra).leftMap(_ => FieldValueProblem(VoTableParser.UCD_RA, ra))
+        d             <- Angle.parseDegrees(dec).leftMap(_ => FieldValueProblem(VoTableParser.UCD_DEC, dec))
+        declination   <- Declination.fromAngle(d) \/> FieldValueProblem(VoTableParser.UCD_DEC, dec)
         magnitudeErrs <- magErrs.map(parseBands(magnitudesFilter)).toList.sequenceU
-        magnitudes <- mags.map(parseBands(magnitudesFilter)).toList.sequenceU
-        properMotion <- parseProperMotion(pm)
+        magnitudes    <- mags.map(parseBands(magnitudesFilter)).toList.sequenceU
+        properMotion  <- parseProperMotion(pm)
         coordinates = Coordinates(RightAscension.fromAngle(r), declination)
-      } yield SiderealTarget(id, coordinates, properMotion, combineWithErrorsAndFilter(magnitudes.map { case (b, v) => new Magnitude(v, b) }, magnitudeErrs.toMap).sorted, None)
+      } yield SiderealTarget(id, coordinates, properMotion, combineWithErrorsAndFilter(magnitudes, magnitudeErrs).sorted, None)
     }
 
     val result = for {
