@@ -148,7 +148,8 @@ public final class ObsContext {
      */
     @SuppressWarnings("rawtypes")
     public static Option<ObsContext> create(ISPObservation obs)  {
-        Option<ObsData> opt = ObsData.extract(obs);
+        if (obs == null) return None.instance();
+        final Option<ObsData> opt = ObsData.extract(obs);
         if (opt.isEmpty()) return None.instance();
 
         final TargetObsComp target                 = opt.getValue().target;
