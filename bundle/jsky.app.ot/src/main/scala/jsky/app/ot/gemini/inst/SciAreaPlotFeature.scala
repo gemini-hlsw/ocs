@@ -3,6 +3,7 @@ package jsky.app.ot.gemini.inst
 import edu.gemini.shared.util.immutable.{Option => JOption, ImPolygon}
 import edu.gemini.shared.util.immutable.ScalaConverters._
 import edu.gemini.spModel.core.Offset
+import edu.gemini.spModel.gemini.obscomp.SPSiteQuality
 import edu.gemini.spModel.inst.ScienceAreaGeometry
 import jsky.app.ot.gemini.tpe.EdIterOffsetFeature
 import jsky.app.ot.tpe.TpeImageFeature.{Figure, MARKER_SIZE}
@@ -46,7 +47,10 @@ class SciAreaPlotFeature(sciArea: ScienceAreaGeometry)
   import SciAreaPlotFeature._
 
   def getFigures(tpeCtx: TpeContext, offset: Offset, color: Color): List[Figure] = {
-    val shapes = tpeCtx.obsContext.toList.flatMap { obsCtx =>
+    // For the purpose of plotting the science area, the site conditions are
+    // irrelevant.  Make sure the lack of site quality doesn't prevent creating
+    // an ObsContext by explicitly providing conditions.
+    val shapes = tpeCtx.obsContextWithConditions(SPSiteQuality.Conditions.NOMINAL).toList.flatMap { obsCtx =>
       sciArea.geometry(obsCtx, offset)
     }
 
