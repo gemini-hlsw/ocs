@@ -26,8 +26,8 @@ final class TargetDetailPanel extends JPanel with TelescopePosEditor with Reentr
 
   def curDetailEdiorJava: GOption[TargetDetailEditor] = curDetailEditor.asGeminiOpt
 
-  private[this] val source                   = new SourceDetailsEditor
-  private[this] val gfe                      = new GuidingFeedbackEditor
+  val source = new SourceDetailsEditor
+  val gfe    = new GuidingFeedbackEditor
 
   // Put it all together
   setLayout(new GridBagLayout)

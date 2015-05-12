@@ -9,6 +9,7 @@ import edu.gemini.spModel.core.Wavelength
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.target.EmissionLine.{Continuum, Flux}
 import edu.gemini.spModel.target._
+import jsky.app.ot.OTOptions
 import jsky.app.ot.gemini.editor.targetComponent.TelescopePosEditor
 import jsky.app.ot.gemini.editor.targetComponent.details.NumericPropertySheet.Prop
 
@@ -25,6 +26,7 @@ final class SourceDetailsEditor extends GridBagPanel with TelescopePosEditor {
 
   private[this] var spt: SPTarget = new SPTarget
   private[this] var isBase: Boolean = false
+  private[this] var node: Option[ISPNode] = None
 
   private def setDistribution(sd: SpectralDistribution) = spt.getTarget.setSpectralDistribution(Some(sd))
   private def setProfile     (sp: SpatialProfile)       = spt.getTarget.setSpatialProfile(Some(sp))
@@ -191,7 +193,7 @@ final class SourceDetailsEditor extends GridBagPanel with TelescopePosEditor {
       spt.notifyOfGenericUpdate()
 
     case MouseClicked(_,_,_,_,_)      =>
-      if (!enabled) {
+      if (!enabled && editable) {
         // first click will set profile & distribution to some default values
         // up to that moment both values are set to None
         setProfile(defaultProfile)
@@ -200,13 +202,19 @@ final class SourceDetailsEditor extends GridBagPanel with TelescopePosEditor {
       }
   }
 
+  def editable: Boolean =
+    node.exists { n =>
+      OTOptions.areRootAndCurrentObsIfAnyEditable(n.getProgram, n.getContextObservation)
+    }
+
   // react to any kind of target change by updating all UI elements
   def edit(obsContext: GOption[ObsContext], spTarget: SPTarget, node: ISPNode): Unit = {
 
     deafTo(editElements:_*)
 
-    spt = spTarget
-    isBase = if (obsContext.isDefined) obsContext.getValue.getTargets.getBase == spTarget else false
+    spt       = spTarget
+    isBase    = if (obsContext.isDefined) obsContext.getValue.getTargets.getBase == spTarget else false
+    this.node = Option(node)
 
     spt.getTarget.getSpatialProfile.getOrElse(defaultProfile) match {
       case s: PointSource => profiles.selection.item = profilePanels.head;
@@ -240,7 +248,7 @@ final class SourceDetailsEditor extends GridBagPanel with TelescopePosEditor {
       distributionPanels.foreach(_.panel.setVisible(false))
       distributions.selection.item.panel.setVisible(true)
 
-      enableAll(spt.getTarget.getSpatialProfile.isDefined)
+      updateEnabledState(editable)
     } else {
       visible = false
     }
@@ -248,18 +256,18 @@ final class SourceDetailsEditor extends GridBagPanel with TelescopePosEditor {
     repaint()
   }
 
-  // enable/disable UI elements as needed
-  private def enableAll(b: Boolean) = {
-    enabled = b
+  def updateEnabledState(b: Boolean): Unit = {
+    val hasProfile = Option(spt).exists(_.getTarget.getSpatialProfile.isDefined)
+    enabled = b && hasProfile
 
-    peer.getComponents.foreach(_.setEnabled(b))
+    peer.getComponents.foreach(_.setEnabled(enabled))
 
-    if (b) {
-      tooltip = ""
-      border = titleBorder("Source")
-    } else {
+    if (!hasProfile && editable) {
       tooltip = "Click on title to activate this."
       border = titleBorder("Source [Click to Activate]")
+    } else {
+      tooltip = ""
+      border = titleBorder("Source")
     }
   }
 

@@ -134,6 +134,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                 updateEnabledState(new Component[] {ed}, enabled);
             }
         }
+        _w.detailEditor.source().updateEnabledState(enabled);
     }
 
     private final ActionListener _tagListener = new ActionListener() {
