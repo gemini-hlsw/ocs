@@ -1,7 +1,9 @@
 package edu.gemini.itc.web.html;
 
+import edu.gemini.itc.base.*;
 import edu.gemini.itc.shared.*;
 import edu.gemini.itc.web.servlets.ImageServlet;
+import edu.gemini.itc.web.servlets.ServerInfo;
 
 import java.io.PrintWriter;
 import java.util.UUID;

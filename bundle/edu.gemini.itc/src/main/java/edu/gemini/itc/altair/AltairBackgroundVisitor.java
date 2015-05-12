@@ -1,6 +1,6 @@
 package edu.gemini.itc.altair;
 
-import edu.gemini.itc.shared.*;
+import edu.gemini.itc.base.*;
 
 /**
  * The AltairBackgroundVisitor class is designed to adjust the SED for the

@@ -1,6 +1,6 @@
 package edu.gemini.itc.gnirs;
 
-import edu.gemini.itc.shared.DatFile;
+import edu.gemini.itc.base.DatFile;
 
 import java.util.ArrayList;
 import java.util.List;

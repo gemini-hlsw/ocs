@@ -1,10 +1,11 @@
 package edu.gemini.itc.web.html;
 
+import edu.gemini.itc.base.ImagingResult;
+import edu.gemini.itc.base.SpectroscopyResult;
 import edu.gemini.itc.shared.*;
 import edu.gemini.itc.trecs.TRecs;
 import edu.gemini.itc.trecs.TRecsParameters;
 import edu.gemini.itc.trecs.TRecsRecipe;
-import edu.gemini.itc.web.servlets.ImageServlet;
 import scala.Tuple2;
 
 import java.io.PrintWriter;

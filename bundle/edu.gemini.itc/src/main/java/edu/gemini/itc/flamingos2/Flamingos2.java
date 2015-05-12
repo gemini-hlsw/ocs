@@ -1,7 +1,8 @@
 package edu.gemini.itc.flamingos2;
 
+import edu.gemini.itc.base.*;
 import edu.gemini.itc.operation.DetectorsTransmissionVisitor;
-import edu.gemini.itc.shared.*;
+import edu.gemini.itc.shared.Flamingos2Parameters;
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2.FPUnit;
 import scala.Option;
 

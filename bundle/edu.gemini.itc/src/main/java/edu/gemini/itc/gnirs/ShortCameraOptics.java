@@ -1,6 +1,6 @@
 package edu.gemini.itc.gnirs;
 
-import edu.gemini.itc.shared.TransmissionElement;
+import edu.gemini.itc.base.TransmissionElement;
 
 /**
  * This represents the transmission of the optics native to the camera.

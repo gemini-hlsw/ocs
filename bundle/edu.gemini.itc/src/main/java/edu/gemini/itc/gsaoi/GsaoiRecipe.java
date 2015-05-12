@@ -1,5 +1,6 @@
 package edu.gemini.itc.gsaoi;
 
+import edu.gemini.itc.base.*;
 import edu.gemini.itc.gems.Gems;
 import edu.gemini.itc.operation.*;
 import edu.gemini.itc.shared.*;

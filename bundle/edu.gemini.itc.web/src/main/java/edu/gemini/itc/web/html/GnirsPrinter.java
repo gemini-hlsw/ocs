@@ -1,10 +1,11 @@
 package edu.gemini.itc.web.html;
 
+import edu.gemini.itc.base.GnirsSpectroscopyResult;
+import edu.gemini.itc.base.SpectroscopyResult;
 import edu.gemini.itc.gnirs.Gnirs;
 import edu.gemini.itc.gnirs.GnirsParameters;
 import edu.gemini.itc.gnirs.GnirsRecipe;
 import edu.gemini.itc.shared.*;
-import edu.gemini.itc.web.servlets.ImageServlet;
 import scala.Tuple2;
 
 import java.io.PrintWriter;

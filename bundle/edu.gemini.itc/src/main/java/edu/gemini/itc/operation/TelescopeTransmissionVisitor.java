@@ -1,8 +1,8 @@
 package edu.gemini.itc.operation;
 
+import edu.gemini.itc.base.ITCConstants;
+import edu.gemini.itc.base.TransmissionElement;
 import edu.gemini.itc.shared.TelescopeDetails;
-import edu.gemini.itc.shared.ITCConstants;
-import edu.gemini.itc.shared.TransmissionElement;
 
 /**
  * The TelescopeTransmissionVisitor is designed to adjust the SED for the

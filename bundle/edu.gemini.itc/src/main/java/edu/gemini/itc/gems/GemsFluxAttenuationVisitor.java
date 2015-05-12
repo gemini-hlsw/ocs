@@ -1,7 +1,7 @@
 package edu.gemini.itc.gems;
 
-import edu.gemini.itc.shared.SampledSpectrum;
-import edu.gemini.itc.shared.SampledSpectrumVisitor;
+import edu.gemini.itc.base.SampledSpectrum;
+import edu.gemini.itc.base.SampledSpectrumVisitor;
 
 /**
  * The GemsFluxAttenuationVisitor class is designed to adjust the SED for the

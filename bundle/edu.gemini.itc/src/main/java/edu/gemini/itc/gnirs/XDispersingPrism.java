@@ -1,7 +1,7 @@
 package edu.gemini.itc.gnirs;
 
-import edu.gemini.itc.shared.Instrument;
-import edu.gemini.itc.shared.TransmissionElement;
+import edu.gemini.itc.base.Instrument;
+import edu.gemini.itc.base.TransmissionElement;
 
 /**
  * This represents the transmission of the optics native to the X-Disp Prism.

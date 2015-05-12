@@ -1,8 +1,8 @@
 package edu.gemini.itc.niri;
 
-import edu.gemini.itc.shared.DatFile;
-import edu.gemini.itc.shared.Instrument;
-import edu.gemini.itc.shared.TransmissionElement;
+import edu.gemini.itc.base.DatFile;
+import edu.gemini.itc.base.Instrument;
+import edu.gemini.itc.base.TransmissionElement;
 
 import java.util.*;
 

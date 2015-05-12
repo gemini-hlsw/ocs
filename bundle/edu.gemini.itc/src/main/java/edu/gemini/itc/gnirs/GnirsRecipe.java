@@ -1,14 +1,15 @@
 package edu.gemini.itc.gnirs;
 
+import edu.gemini.itc.base.*;
 import edu.gemini.itc.operation.*;
 import edu.gemini.itc.shared.*;
 import edu.gemini.spModel.core.Site;
 import org.jfree.chart.ChartColor;
 import scala.Option;
 import scala.Tuple2;
-import scala.collection.*;
+import scala.collection.JavaConversions;
 
-import java.awt.Color;
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 

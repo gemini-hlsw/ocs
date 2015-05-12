@@ -1,8 +1,8 @@
 package edu.gemini.itc.gnirs;
 
-import edu.gemini.itc.shared.DatFile;
-import edu.gemini.itc.shared.DefaultArraySpectrum;
-import edu.gemini.itc.shared.TransmissionElement;
+import edu.gemini.itc.base.DatFile;
+import edu.gemini.itc.base.DefaultArraySpectrum;
+import edu.gemini.itc.base.TransmissionElement;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;

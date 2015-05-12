@@ -1,6 +1,6 @@
 package edu.gemini.itc.gnirs;
 
-import edu.gemini.itc.shared.GratingOptics;
+import edu.gemini.itc.base.GratingOptics;
 
 /**
  * This represents the transmission and properties of the Grating optics.

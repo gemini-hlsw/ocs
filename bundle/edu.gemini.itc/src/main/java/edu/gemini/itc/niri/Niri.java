@@ -1,12 +1,13 @@
 package edu.gemini.itc.niri;
 
-import edu.gemini.itc.shared.ObservationDetails;
+import edu.gemini.itc.base.*;
 import edu.gemini.itc.shared.CalculationMethod;
-import edu.gemini.itc.shared.*;
-import edu.gemini.spModel.gemini.niri.Niri.ReadMode;
-import edu.gemini.spModel.gemini.niri.Niri.Mask;
-import edu.gemini.spModel.gemini.niri.Niri.WellDepth;
+import edu.gemini.itc.shared.NiriParameters;
+import edu.gemini.itc.shared.ObservationDetails;
 import edu.gemini.spModel.gemini.niri.Niri.Disperser;
+import edu.gemini.spModel.gemini.niri.Niri.Mask;
+import edu.gemini.spModel.gemini.niri.Niri.ReadMode;
+import edu.gemini.spModel.gemini.niri.Niri.WellDepth;
 
 /**
  * Niri specification class

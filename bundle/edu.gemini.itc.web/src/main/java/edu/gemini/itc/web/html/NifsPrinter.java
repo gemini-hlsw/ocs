@@ -4,6 +4,7 @@ import edu.gemini.itc.altair.Altair;
 import edu.gemini.itc.nifs.Nifs;
 import edu.gemini.itc.nifs.NifsParameters;
 import edu.gemini.itc.nifs.NifsRecipe;
+import edu.gemini.itc.base.*;
 import edu.gemini.itc.shared.*;
 import edu.gemini.spModel.core.Site;
 import scala.Tuple2;

@@ -1,5 +1,6 @@
 package edu.gemini.itc.web;
 
+import edu.gemini.itc.base.DatFile;
 import edu.gemini.itc.shared.*;
 
 import javax.servlet.ServletConfig;

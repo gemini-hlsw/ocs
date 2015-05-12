@@ -1,6 +1,6 @@
 package edu.gemini.itc.operation;
 
-import edu.gemini.itc.shared.Gaussian;
+import edu.gemini.itc.base.Gaussian;
 
 public final class PointSourceFraction implements SourceFraction {
 

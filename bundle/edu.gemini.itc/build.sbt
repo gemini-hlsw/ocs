@@ -20,11 +20,10 @@ OsgiKeys.bundleActivator := Some("edu.gemini.itc.osgi.Activator")
 
 OsgiKeys.bundleSymbolicName := name.value
 
-// TODO: for now export all packages
-// TODO: once we have a clearer separation of everything we shouldn't need to export everything here anymore
 OsgiKeys.exportPackage := Seq(
   "edu.gemini.itc.acqcam",
   "edu.gemini.itc.altair",
+  "edu.gemini.itc.base",
   "edu.gemini.itc.flamingos2",
   "edu.gemini.itc.gems",
   "edu.gemini.itc.gmos",

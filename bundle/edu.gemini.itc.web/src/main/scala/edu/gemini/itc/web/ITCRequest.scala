@@ -2,10 +2,11 @@ package edu.gemini.itc.web
 
 import javax.servlet.http.HttpServletRequest
 
+import edu.gemini.itc.base._
 import edu.gemini.itc.gnirs.GnirsParameters
 import edu.gemini.itc.michelle.MichelleParameters
 import edu.gemini.itc.nifs.NifsParameters
-import edu.gemini.itc.shared.SourceDefinition._
+import edu.gemini.itc.shared.SourceDefinition.{Recession, Distribution, Profile}
 import edu.gemini.itc.shared._
 import edu.gemini.itc.trecs.TRecsParameters
 import edu.gemini.spModel.core.{Site, Wavelength}

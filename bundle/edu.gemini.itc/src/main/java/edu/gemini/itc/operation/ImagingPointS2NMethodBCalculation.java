@@ -1,6 +1,6 @@
 package edu.gemini.itc.operation;
 
-import edu.gemini.itc.shared.Instrument;
+import edu.gemini.itc.base.Instrument;
 import edu.gemini.itc.shared.ObservationDetails;
 
 public final class ImagingPointS2NMethodBCalculation extends ImagingS2NCalculation {

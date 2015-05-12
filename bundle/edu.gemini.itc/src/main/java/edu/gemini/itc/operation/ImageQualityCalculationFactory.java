@@ -1,9 +1,9 @@
 package edu.gemini.itc.operation;
 
+import edu.gemini.itc.base.Instrument;
 import edu.gemini.itc.shared.ObservingConditions;
 import edu.gemini.itc.shared.SourceDefinition;
 import edu.gemini.itc.shared.TelescopeDetails;
-import edu.gemini.itc.shared.Instrument;
 import edu.gemini.spModel.guide.GuideProbe;
 
 public final class ImageQualityCalculationFactory {

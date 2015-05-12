@@ -1,6 +1,7 @@
 package edu.gemini.itc.acqcam;
 
-import edu.gemini.itc.shared.*;
+import edu.gemini.itc.base.*;
+import edu.gemini.itc.shared.AcquisitionCamParameters;
 
 /**
  * Aquisition Camera specification class

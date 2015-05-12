@@ -1,10 +1,10 @@
 package edu.gemini.itc.operation;
 
+import edu.gemini.itc.base.SampledSpectrum;
+import edu.gemini.itc.base.SampledSpectrumVisitor;
+import edu.gemini.itc.base.ZeroMagnitudeStar;
 import edu.gemini.itc.shared.BrightnessUnit;
 import edu.gemini.itc.shared.WavebandDefinition;
-import edu.gemini.itc.shared.SampledSpectrum;
-import edu.gemini.itc.shared.SampledSpectrumVisitor;
-import edu.gemini.itc.shared.ZeroMagnitudeStar;
 
 /**
  * The NormalizeVisitor class is used to perform Normalization to the SED.

@@ -1,8 +1,8 @@
 package edu.gemini.itc.operation;
 
-import edu.gemini.itc.shared.ITCConstants;
-import edu.gemini.itc.shared.SampledSpectrumVisitor;
-import edu.gemini.itc.shared.TransmissionElement;
+import edu.gemini.itc.base.ITCConstants;
+import edu.gemini.itc.base.SampledSpectrumVisitor;
+import edu.gemini.itc.base.TransmissionElement;
 import edu.gemini.spModel.core.Site;
 
 /**
