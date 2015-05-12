@@ -5,6 +5,7 @@ import javax.swing.JPanel
 
 import edu.gemini.pot.sp.ISPNode
 import edu.gemini.shared.util.immutable.{Option => GOption}
+import edu.gemini.shared.util.immutable.ScalaConverters.ScalaOptionOps
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.target.SPTarget
 import jsky.app.ot.gemini.editor.targetComponent.{GuidingFeedbackEditor, TelescopePosEditor}
@@ -20,6 +21,11 @@ final class TargetDetailPanel extends JPanel with TelescopePosEditor with Reentr
 
   // Fields
   private[this] var tde: TargetDetailEditor  = null
+
+  def curDetailEditor: Option[TargetDetailEditor] = Option(tde)
+
+  def curDetailEdiorJava: GOption[TargetDetailEditor] = curDetailEditor.asGeminiOpt
+
   private[this] val source                   = new SourceDetailsEditor
   private[this] val gfe                      = new GuidingFeedbackEditor
 
@@ -40,13 +46,6 @@ final class TargetDetailPanel extends JPanel with TelescopePosEditor with Reentr
     c.fill      = GridBagConstraints.HORIZONTAL
   })
 
-  // Very sadly, we need to know whether or not calling `edit` will change the internal structure
-  // of the editor. If so, the editor needs to do some extra work afterwards to make sure enabled
-  // state is correct.
-  def willCauseStructureChange(spTarget: SPTarget): Boolean = {
-    tde == null || tde.getTag != spTarget.getTarget.getTag
-  }
-
   def edit(obsContext: GOption[ObsContext], spTarget: SPTarget, node: ISPNode): Unit = {
 
     // Create or replace the existing detail editor, if needed
@@ -61,7 +60,7 @@ final class TargetDetailPanel extends JPanel with TelescopePosEditor with Reentr
         c.fill = GridBagConstraints.HORIZONTAL
       })
     }
-  
+
     // Forward the `edit` call.
     tpw.   edit(obsContext, spTarget, node)
     tde.   edit(obsContext, spTarget, node)
