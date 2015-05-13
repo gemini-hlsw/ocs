@@ -8,8 +8,9 @@ import edu.gemini.itc.shared._
 import edu.gemini.pot.sp.SPComponentType
 import edu.gemini.pot.sp.SPComponentType._
 import edu.gemini.shared.skyobject.Magnitude
+import edu.gemini.spModel.`type`.DisplayableSpType
 import edu.gemini.spModel.config2.{Config, ConfigSequence, ItemKey}
-import edu.gemini.spModel.core.{Wavelength, Peer}
+import edu.gemini.spModel.core.{Peer, Wavelength}
 import edu.gemini.spModel.guide.GuideProbe
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.rich.shared.immutable.asScalaOpt
@@ -35,7 +36,7 @@ object ItcTable {
       val model = table.model.asInstanceOf[ItcTableModel]
       // Use SequenceCellRenderer based background color. This gives us coherent color coding throughout
       // the different tables in the sequence node.
-      val bg = model.key(column).map(SequenceCellRenderer.lookupColor)
+      val bg = model.key(column).map(k => if (isSelected) SequenceCellRenderer.lookupColor(k).darker else SequenceCellRenderer.lookupColor(k))
       val tt = model.tooltip(column)
       // set label horizontal alignment, bg color and tooltip as needed
       c.asInstanceOf[Label] <| { l =>
@@ -50,8 +51,8 @@ object ItcTable {
   case object AnyRenderer extends Renderer(Alignment.Left, (o: AnyRef) => (null, o match {
     case null             => ""
     case None             => ""
-    case Some(s)          => s.toString
-    case x                => x.toString
+    case Some(s)          => anyToString(s)
+    case x                => anyToString(x)
   }))
 
   // Render an int value
@@ -59,6 +60,11 @@ object ItcTable {
 
   // Render a double value with two decimal digits
   case object DoubleRenderer extends Renderer[Double](Alignment.Right, d => (null, f"$d%.2f"))
+
+  private def anyToString(x: Any): String = x match {
+    case s: DisplayableSpType   => s.displayValue()
+    case s                      => s.toString
+  }
 
 }
 
@@ -70,6 +76,8 @@ trait ItcTable extends Table {
   val parameters: ItcParametersProvider
 
   def tableModel(keys: Seq[ItemKey], seq: ConfigSequence): ItcTableModel
+
+  def selected: Option[Future[ItcService.Result]] = selection.rows.headOption.map(model.asInstanceOf[ItcTableModel].res)
 
   def selectedResult(): Option[ItcSpectroscopyResult] =
     selection.rows.headOption.flatMap(result)
@@ -87,6 +95,10 @@ trait ItcTable extends Table {
   peer.setColumnSelectionAllowed(false)
   peer.getTableHeader.setReorderingAllowed(false)
 
+  // allow selection of single rows, this will display the charts
+  peer.setRowSelectionAllowed(true)
+  peer.setSelectionMode(ListSelectionModel.SINGLE_SELECTION)
+
   def update() = {
     val seq = parameters.sequence
     val allKeys = seq.getStaticKeys.toSeq ++ seq.getIteratedKeys.toSeq
@@ -100,16 +112,22 @@ trait ItcTable extends Table {
       filterNot(_.getParent().equals(CALIBRATION_KEY)). // calibration settings are not relevant
       sortBy(_.getPath)
 
-    // update model with new one
-    model = tableModel(showKeys, seq)
+    // update table model while keeping the current selection
+    restoreSelection {
+      model = tableModel(showKeys, seq)
+    }
+
+    // make all columns as wide as needed
+    SequenceTabUtil.resizeTableColumns(this.peer, this.model)
 
   }
 
   override def rendererComponent(sel: Boolean, foc: Boolean, row: Int, col: Int) = {
     model.getValueAt(row, col) match {
-      case Some(i: Int)    => IntRenderer.componentFor(this, sel, foc, i, row, col)
-      case Some(d: Double) => DoubleRenderer.componentFor(this, sel, foc, d, row, col)
-      case v               => AnyRenderer.componentFor(this, sel, foc, v, row, col)
+      case c: Component     => c
+      case Some(i: Int)     => IntRenderer.componentFor(this, sel, foc, i, row, col)
+      case Some(d: Double)  => DoubleRenderer.componentFor(this, sel, foc, d, row, col)
+      case v                => AnyRenderer.componentFor(this, sel, foc, v, row, col)
     }
   }
 
@@ -152,12 +170,29 @@ trait ItcTable extends Table {
       // whenever service call is finished notify table to update its contents
       andThen {
       case _ => Swing.onEDT {
-        this.peer.getModel.asInstanceOf[AbstractTableModel].fireTableDataChanged()
+
+        // notify table of data update while keeping the current selection
+        restoreSelection {
+          this.peer.getModel.asInstanceOf[AbstractTableModel].fireTableDataChanged()
+        }
+
         // make all columns as wide as needed
         SequenceTabUtil.resizeTableColumns(this.peer, this.model)
       }
     }
 
+  }
+
+  // execute a table update while making sure that the selected row is kept (or row 0 is chosen as default)
+  private def restoreSelection(updateTable: => Unit): Unit = {
+    val selected = peer.getSelectedRow
+
+    updateTable
+
+    if (peer.getRowCount > 0) {
+      val toSelect = if (selected < 0 || selected >= peer.getRowCount) 0 else selected
+      peer.setRowSelectionInterval(toSelect, toSelect)
+    }
   }
 
   private def extractGuideProbe(): String \/ GuideProbe = {
@@ -255,10 +290,6 @@ class ItcImagingTable(val parameters: ItcParametersProvider) extends ItcTable {
 
 class ItcSpectroscopyTable(val parameters: ItcParametersProvider) extends ItcTable {
   private val emptyTable: ItcGenericSpectroscopyTableModel = new ItcGenericSpectroscopyTableModel(Seq(), Seq(), Seq())
-
-  // allow selection of single rows, this will display the charts
-  peer.setRowSelectionAllowed(true)
-  peer.setSelectionMode(ListSelectionModel.SINGLE_SELECTION)
 
   /** Creates a new table model for the current context and config sequence. */
   def tableModel(keys: Seq[ItemKey], seq: ConfigSequence) =
