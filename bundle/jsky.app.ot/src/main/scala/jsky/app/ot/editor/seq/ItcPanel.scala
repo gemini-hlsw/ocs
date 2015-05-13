@@ -8,6 +8,7 @@ import edu.gemini.itc.shared._
 import edu.gemini.pot.sp.SPComponentType
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.{CloudCover, ImageQuality, SkyBackground, WaterVapor}
 import jsky.app.ot.util.OtColor
+import org.jfree.chart.{ChartPanel, JFreeChart}
 
 import scala.concurrent.Future
 import scala.swing.GridBagPanel.{Anchor, Fill}
@@ -246,10 +247,8 @@ private class ItcChartsPanel(table: ItcSpectroscopyTable) extends GridBagPanel {
 
   private def update(result: ItcSpectroscopyResult): Unit = {
     charts = result.charts.map { ds =>
-      val chart = ITCChart.forSpcDataSet(ds, limitsPanel.plottingDetails).getBufferedImage(600, 400)
-      new Label("", new ImageIcon(chart), Alignment.Center) {
-        border = BorderFactory.createEmptyBorder(10, 25, 10, 25)
-      }
+      val chart = ITCChart.forSpcDataSet(ds, limitsPanel.plottingDetails).getChart
+      new JFChartComponent(chart)
     }
     layout(limitsPanel) = new Constraints {
       gridx     = 0
@@ -257,13 +256,26 @@ private class ItcChartsPanel(table: ItcSpectroscopyTable) extends GridBagPanel {
       gridwidth = charts.size
       insets    = new Insets(20, 0, 20, 0)
     }
-    charts.zipWithIndex.foreach { case (l, x) =>
-      layout(l) = new Constraints {
-        gridx = x
-        gridy = 1
+    charts.zipWithIndex.foreach { case (c, x) =>
+      layout(c) = new Constraints {
+        gridx   = x
+        gridy   = 1
+        weightx = 1
+        weighty = 1
+        fill    = Fill.Both
+        insets  = new Insets(10, 25, 10, 25)
       }
     }
   }
+
+  // a very simple Scala wrapper for JFreeChart charts
+  class JFChartComponent(chart: JFreeChart) extends Component {
+    override lazy val peer = new ChartPanel(chart)
+    peer.setMaximumDrawHeight(Int.MaxValue)                       // don't limit drawing resolution
+    peer.setMaximumDrawWidth(Int.MaxValue)                        // don't limit drawing resolution
+    peer.setBackground(Color.white)
+  }
+
 }
 
 /** User element that allows to change the conditions taken for the calculations on-the-fly. */
