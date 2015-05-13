@@ -364,6 +364,11 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         toggleAgsGuiElements();
         final Option<ObsContext> ctx = getObsContext(env);
         _w.guidingControls.update(ctx);
+
+        // Update the guiding feedback.
+        final ISPObsComponent node = getContextTargetObsComp();
+        final SPTarget      target = TargetSelection.get(env, node);
+        _w.detailEditor.gfe().edit(getObsContext(env), target, node);
     }
 
     private final PropertyChangeListener selectionListener = new PropertyChangeListener() {
