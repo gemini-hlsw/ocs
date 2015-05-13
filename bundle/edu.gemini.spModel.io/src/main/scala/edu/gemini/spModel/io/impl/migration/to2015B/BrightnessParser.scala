@@ -26,7 +26,7 @@ object BrightnessParser extends RegexParsers {
 
   private val band: Parser[Band] = {
     def bandParser(b: Band): Parser[Band] = {
-      val p = (b.toString + """\s*(_mag|mag|-band|band)?""").r ^^^ b
+      val p = (b.toString + """'?\s*(_mag|mag|-band|band)?""").r ^^^ b
       p | paren(p) | paren(p, '<', '>')
     }
 

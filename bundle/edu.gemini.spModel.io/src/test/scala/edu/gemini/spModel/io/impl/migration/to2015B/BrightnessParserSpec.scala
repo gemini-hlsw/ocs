@@ -81,7 +81,9 @@ object BrightnessParserSpec extends Specification {
     "16.9 J Vega"                 -> one(16.9, J, Vega),
     "16.9 J Jy"                   -> one(16.9, J, Jy),
     "7.39 in V"                   -> one(7.39, V, Vega),
-    "13.774 in J-band "           -> one(13.774, J, Vega)
+    "13.774 in J-band "           -> one(13.774, J, Vega),
+    "L'=7.055,M=7.04"             -> NonEmptyList(mag(7.055, L, Vega), mag(7.04, M, Vega)),
+    "22.7 z'"                     -> one(22.7, z, Vega)
   )
 
   "Brightness Parser" should {
