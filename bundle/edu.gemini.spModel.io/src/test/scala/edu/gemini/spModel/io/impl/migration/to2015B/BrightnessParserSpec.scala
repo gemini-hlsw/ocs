@@ -68,7 +68,15 @@ object BrightnessParserSpec extends Specification {
     "Q(18.3) = 17.57"             -> one(17.57, Q, Vega),
     "R ~ 22 mag"                  -> one(22, R, Vega),
     "R, 10.7"                     -> one(10.7, R, Vega),
-    "U 15.45, J 13.053, K 12.542" -> NonEmptyList(mag(15.45, U, Vega), mag(13.053, J, Vega), mag(12.542, K, Vega))
+    "U 15.45, J 13.053, K 12.542" -> NonEmptyList(mag(15.45, U, Vega), mag(13.053, J, Vega), mag(12.542, K, Vega)),
+    "11.6 UC"                     -> one(11.6, UC, Vega),
+    "11.6 UCmag"                  -> one(11.6, UC, Vega),
+    "11.6 UC mag"                 -> one(11.6, UC, Vega),
+    "11.6 (UCmag)"                -> one(11.6, UC, Vega),
+    "11.6 U"                      -> one(11.6, U, Vega),
+    "11.6 Umag"                   -> one(11.6, U, Vega),
+    "11.6 U mag"                  -> one(11.6, U, Vega),
+    "11.6 (Umag)"                 -> one(11.6, U, Vega)
   )
 
   "Brightness Parser" should {
