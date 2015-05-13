@@ -356,8 +356,8 @@ class VoTableParserSpec extends SpecificationWithJUnit with VoTableParser {
       parseBands(UCAC4Filter)((FieldId("imag", iMagField), "20.3051")) should beEqualTo(\/-((FieldId("imag", iMagField), MagnitudeBand._i, 20.3051)))
     }
     "be able to parse an xml into a list of SiderealTargets list of rows with a list of fields" in {
-      val magsTarget1 = List(new Magnitude(22.082, MagnitudeBand.G), new Magnitude(20.3051, MagnitudeBand.I), new Magnitude(20.88, MagnitudeBand.R), new Magnitude(23.0888, MagnitudeBand.U), new Magnitude(19.8812, MagnitudeBand.Z))
-      val magsTarget2 = List(new Magnitude(23.0889, MagnitudeBand.G), new Magnitude(20.7891, MagnitudeBand.I), new Magnitude(21.7686, MagnitudeBand.R), new Magnitude(23.0853, MagnitudeBand.U), new Magnitude(20.0088, MagnitudeBand.Z))
+      val magsTarget1 = List(new Magnitude(23.0888, MagnitudeBand.U), new Magnitude(22.082, MagnitudeBand.G), new Magnitude(20.88, MagnitudeBand.R), new Magnitude(20.3051, MagnitudeBand.I), new Magnitude(19.8812, MagnitudeBand.Z))
+      val magsTarget2 = List(new Magnitude(23.0853, MagnitudeBand.U), new Magnitude(23.0889, MagnitudeBand.G), new Magnitude(21.7686, MagnitudeBand.R), new Magnitude(20.7891, MagnitudeBand.I), new Magnitude(20.0088, MagnitudeBand.Z))
 
       val result = ParsedTable(List(
         \/-(SiderealTarget("-2140405448", Coordinates(RightAscension.fromDegrees(359.745951955), Declination.fromAngle(Angle.parseDegrees("0.209323681906").getOrElse(Angle.zero)).getOrElse(Declination.zero)), None, magsTarget1, None)),
@@ -368,8 +368,8 @@ class VoTableParserSpec extends SpecificationWithJUnit with VoTableParser {
       parse(voTable).tables.head.containsError should beFalse
     }
     "be able to parse an xml into a list of SiderealTargets including magnitude errors" in {
-      val magsTarget1 = List(new Magnitude(22.082, MagnitudeBand.G, 0.0960165), new Magnitude(20.3051, MagnitudeBand.I, 0.0456069), new Magnitude(13.74, MagnitudeBand.J, 0.03), new Magnitude(20.88, MagnitudeBand.R, 0.0503736), new Magnitude(23.0888, MagnitudeBand.U, 0.518214), new Magnitude(19.8812, MagnitudeBand.Z, 0.138202))
-      val magsTarget2 = List(new Magnitude(23.0889, MagnitudeBand.G, 0.51784), new Magnitude(20.7891, MagnitudeBand.I, 0.161275), new Magnitude(12.023, MagnitudeBand.J, 0.02), new Magnitude(21.7686, MagnitudeBand.R, 0.252201), new Magnitude(23.0853, MagnitudeBand.U, 1.20311), new Magnitude(20.0088, MagnitudeBand.Z, 0.35873))
+      val magsTarget1 = List(new Magnitude(23.0888, MagnitudeBand.U, 0.518214), new Magnitude(22.082, MagnitudeBand.G, 0.0960165), new Magnitude(20.88, MagnitudeBand.R, 0.0503736), new Magnitude(20.3051, MagnitudeBand.I, 0.0456069), new Magnitude(19.8812, MagnitudeBand.Z, 0.138202), new Magnitude(13.74, MagnitudeBand.J, 0.03))
+      val magsTarget2 = List(new Magnitude(23.0853, MagnitudeBand.U, 1.20311), new Magnitude(23.0889, MagnitudeBand.G, 0.51784), new Magnitude(21.7686, MagnitudeBand.R, 0.252201), new Magnitude(20.7891, MagnitudeBand.I, 0.161275), new Magnitude(20.0088, MagnitudeBand.Z, 0.35873), new Magnitude(12.023, MagnitudeBand.J, 0.02))
 
       val result = ParsedTable(List(
         \/-(SiderealTarget("-2140405448", Coordinates(RightAscension.fromDegrees(359.745951955), Declination.fromAngle(Angle.parseDegrees("0.209323681906").getOrElse(Angle.zero)).getOrElse(Declination.zero)), None, magsTarget1, None)),

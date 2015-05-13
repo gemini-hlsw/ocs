@@ -14,6 +14,10 @@ import Scalaz._
 object VoTableParser extends VoTableParser {
   type CatalogResult = CatalogProblem \/ ParsedVoResource
 
+  // by band
+  private val MagnitudeOrdering: scala.math.Ordering[Magnitude] =
+    scala.math.Ordering.by(_.band)
+
   val UCD_OBJID = Ucd("meta.id;meta.main")
   val UCD_RA = Ucd("pos.eq.ra;meta.main")
   val UCD_DEC = Ucd("pos.eq.dec;meta.main")
@@ -226,7 +230,7 @@ trait VoTableParser {
         magnitudes    <- mags.map(parseBands(magnitudesFilter)).toList.sequenceU
         properMotion  <- parseProperMotion(pm)
         coordinates = Coordinates(RightAscension.fromAngle(r), declination)
-      } yield SiderealTarget(id, coordinates, properMotion, combineWithErrorsAndFilter(magnitudes, magnitudeErrs).sorted, None)
+      } yield SiderealTarget(id, coordinates, properMotion, combineWithErrorsAndFilter(magnitudes, magnitudeErrs).sorted(VoTableParser.MagnitudeOrdering), None)
     }
 
     val result = for {
