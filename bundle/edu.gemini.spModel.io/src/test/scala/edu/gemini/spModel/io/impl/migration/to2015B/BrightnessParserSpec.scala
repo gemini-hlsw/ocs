@@ -79,7 +79,9 @@ object BrightnessParserSpec extends Specification {
     "11.6 (Umag)"                 -> one(11.6, U, Vega),
     "16.9 J (Vega)"               -> one(16.9, J, Vega),
     "16.9 J Vega"                 -> one(16.9, J, Vega),
-    "16.9 J Jy"                   -> one(16.9, J, Jy)
+    "16.9 J Jy"                   -> one(16.9, J, Jy),
+    "7.39 in V"                   -> one(7.39, V, Vega),
+    "13.774 in J-band "           -> one(13.774, J, Vega)
   )
 
   "Brightness Parser" should {

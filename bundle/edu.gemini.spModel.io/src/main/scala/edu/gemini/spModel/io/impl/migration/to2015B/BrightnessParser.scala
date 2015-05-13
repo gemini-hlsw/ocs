@@ -19,7 +19,7 @@ object BrightnessParser extends RegexParsers {
     """\s*[~=,]?\s*""".r ^^^ { () }
 
   private val at: Parser[Unit] =
-    """\s*(nucleus at|at|@|/|:)?\s*""".r ^^^ { () }
+    """\s*(nucleus at|at|in|@|/|:)?\s*""".r ^^^ { () }
 
   private val num: Parser[BigDecimal] =
     """-?\d+(\.\d*)?""".r <~ """\s*(mag)?""".r ^^ (s => BigDecimal(new java.math.BigDecimal(s))) // BigDecimal.exact(s)
