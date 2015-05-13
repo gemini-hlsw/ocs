@@ -43,21 +43,24 @@ object BrightnessParser extends RegexParsers {
   private val Vega = Sys(System.Vega)
 
   private val sys:  Parser[Sys] =
-    "Jy"  ^^^ Jy  |
-    "mJy" ^^^ mJy |
-    "AB"  ^^^ AB  |
+    "Jy"   ^^^ Jy   |
+    "mJy"  ^^^ mJy  |
+    "AB"   ^^^ AB   |
+    "Vega" ^^^ Vega |
     success(Vega)
 
   private def paren[A](p: Parser[A], bra: Char = '(', ket: Char = ')'): Parser[A] =
     (bra ~> p) <~ ket
 
   private val mag: Parser[Magnitude] =
-    (band <~ equ) ~ num ~ (ows ~> sys)               ^^ { case b ~ m ~ s   => s.toMag(b, m) } |  // Band = Num Sys
-    (band <~ paren(num) <~ equ) ~ num ~ (ows ~> sys) ^^ { case b ~ m ~ s   => s.toMag(b, m) } |  // Band(nnn) = Num Sys
-     band ~ paren(sys) ~ (equ ~> num)                ^^ { case b ~ s ~ m   => s.toMag(b, m) } |  // Band(Sys)=Num
-     band ~ ('_' ~> sys) ~ (equ ~> num)              ^^ { case b ~ s ~ m   => s.toMag(b, m) } |  // Band_Sys=Num
-    (num ~ sys <~ at) ~ band                         ^^ { case m ~ s ~ b   => s.toMag(b, m) } |  // Num Sys @ Band
-     num ~ paren(band ~ sys)                         ^^ { case m ~ (b ~ s) => s.toMag(b, m) } |  // Num(Band Sys)
+    (band <~ equ) ~ num ~ (ows ~> sys)               ^^ { case b ~ m ~ s   => s.toMag(b, m) } |||  // Band = Num Sys
+    (band <~ paren(num) <~ equ) ~ num ~ (ows ~> sys) ^^ { case b ~ m ~ s   => s.toMag(b, m) } |||  // Band(nnn) = Num Sys
+     band ~ paren(sys) ~ (equ ~> num)                ^^ { case b ~ s ~ m   => s.toMag(b, m) } |||  // Band(Sys)=Num
+     band ~ ('_' ~> sys) ~ (equ ~> num)              ^^ { case b ~ s ~ m   => s.toMag(b, m) } |||  // Band_Sys=Num
+    (num ~ sys <~ at) ~ band                         ^^ { case m ~ s ~ b   => s.toMag(b, m) } |||  // Num Sys @ Band
+     num ~ band ~ sys                                ^^ { case m ~ b ~ s   => s.toMag(b, m) } |||  // Num Band Sys
+     num ~ band ~ paren(sys)                         ^^ { case m ~ b ~ s   => s.toMag(b, m) } |||  // Num Band (Sys)
+     num ~ paren(band ~ sys)                         ^^ { case m ~ (b ~ s) => s.toMag(b, m) } |||  // Num(Band Sys)
      num ~ band                                      ^^ { case m ~ b       => Vega.toMag(b, m) } // Num Band
 
   private val mags: Parser[List[Magnitude]] =
