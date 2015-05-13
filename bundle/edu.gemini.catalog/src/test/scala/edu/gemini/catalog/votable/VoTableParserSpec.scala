@@ -321,15 +321,15 @@ class VoTableParserSpec extends SpecificationWithJUnit with VoTableParser {
     "be able to parse magnitudes' band" in {
       val iMagField = Ucd("phot.mag;em.opt.i")
       // Optical band
-      parseBands(DefaultFilter)((FieldId("id", iMagField), "20.3051")) should beEqualTo(\/-((MagnitudeBand.I, 20.3051)))
+      parseBands(DefaultFilter)((FieldId("id", iMagField), "20.3051")) should beEqualTo(\/-((FieldId("id", iMagField), MagnitudeBand.I, 20.3051)))
 
       val jIRMagField = Ucd("phot.mag;em.IR.J")
       // IR band
-      parseBands(DefaultFilter)((FieldId("id", jIRMagField), "13.2349")) should beEqualTo(\/-((MagnitudeBand.J, 13.2349)))
+      parseBands(DefaultFilter)((FieldId("id", jIRMagField), "13.2349")) should beEqualTo(\/-((FieldId("id", jIRMagField), MagnitudeBand.J, 13.2349)))
 
       val jIRErrMagField = Ucd("stat.error;phot.mag;em.IR.J")
       // IR Error
-      parseBands(DefaultFilter)((FieldId("id", jIRErrMagField), "0.02")) should beEqualTo(\/-((MagnitudeBand.J, 0.02)))
+      parseBands(DefaultFilter)((FieldId("id", jIRErrMagField), "0.02")) should beEqualTo(\/-((FieldId("id", jIRErrMagField), MagnitudeBand.J, 0.02)))
 
       // No magnitude field
       val badField = Ucd("meta.name")
@@ -345,19 +345,19 @@ class VoTableParserSpec extends SpecificationWithJUnit with VoTableParser {
     "be able to map sloan magnitudes in UCAC4, OCSADV-245" in {
       val gMagField = Ucd("phot.mag;em.opt.R")
       // gmag maps to g'
-      parseBands(UCAC4Filter)((FieldId("gmag", gMagField), "20.3051")) should beEqualTo(\/-((MagnitudeBand._g, 20.3051)))
+      parseBands(UCAC4Filter)((FieldId("gmag", gMagField), "20.3051")) should beEqualTo(\/-((FieldId("gmag", gMagField), MagnitudeBand._g, 20.3051)))
 
       val rMagField = Ucd("phot.mag;em.opt.R")
       // rmag maps to r'
-      parseBands(UCAC4Filter)((FieldId("rmag", rMagField), "20.3051")) should beEqualTo(\/-((MagnitudeBand._r, 20.3051)))
+      parseBands(UCAC4Filter)((FieldId("rmag", rMagField), "20.3051")) should beEqualTo(\/-((FieldId("rmag", rMagField), MagnitudeBand._r, 20.3051)))
 
       val iMagField = Ucd("phot.mag;em.opt.I")
       // imag maps to r'
-      parseBands(UCAC4Filter)((FieldId("imag", iMagField), "20.3051")) should beEqualTo(\/-((MagnitudeBand._i, 20.3051)))
+      parseBands(UCAC4Filter)((FieldId("imag", iMagField), "20.3051")) should beEqualTo(\/-((FieldId("imag", iMagField), MagnitudeBand._i, 20.3051)))
     }
     "be able to parse an xml into a list of SiderealTargets list of rows with a list of fields" in {
-      val magsTarget1 = List(new Magnitude(22.082, MagnitudeBand.G), new Magnitude(20.3051, MagnitudeBand.I), new Magnitude(20.88, MagnitudeBand.R), new Magnitude(23.0888, MagnitudeBand.U), new Magnitude(19.8812, MagnitudeBand.Z))
-      val magsTarget2 = List(new Magnitude(23.0889, MagnitudeBand.G), new Magnitude(20.7891, MagnitudeBand.I), new Magnitude(21.7686, MagnitudeBand.R), new Magnitude(23.0853, MagnitudeBand.U), new Magnitude(20.0088, MagnitudeBand.Z))
+      val magsTarget1 = List(new Magnitude(23.0888, MagnitudeBand.U), new Magnitude(22.082, MagnitudeBand.G), new Magnitude(20.88, MagnitudeBand.R), new Magnitude(20.3051, MagnitudeBand.I), new Magnitude(19.8812, MagnitudeBand.Z))
+      val magsTarget2 = List(new Magnitude(23.0853, MagnitudeBand.U), new Magnitude(23.0889, MagnitudeBand.G), new Magnitude(21.7686, MagnitudeBand.R), new Magnitude(20.7891, MagnitudeBand.I), new Magnitude(20.0088, MagnitudeBand.Z))
 
       val result = ParsedTable(List(
         \/-(SiderealTarget("-2140405448", Coordinates(RightAscension.fromDegrees(359.745951955), Declination.fromAngle(Angle.parseDegrees("0.209323681906").getOrElse(Angle.zero)).getOrElse(Declination.zero)), None, magsTarget1, None)),
@@ -368,8 +368,8 @@ class VoTableParserSpec extends SpecificationWithJUnit with VoTableParser {
       parse(voTable).tables.head.containsError should beFalse
     }
     "be able to parse an xml into a list of SiderealTargets including magnitude errors" in {
-      val magsTarget1 = List(new Magnitude(22.082, MagnitudeBand.G, 0.0960165), new Magnitude(20.3051, MagnitudeBand.I, 0.0456069), new Magnitude(13.74, MagnitudeBand.J, 0.03), new Magnitude(20.88, MagnitudeBand.R, 0.0503736), new Magnitude(23.0888, MagnitudeBand.U, 0.518214), new Magnitude(19.8812, MagnitudeBand.Z, 0.138202))
-      val magsTarget2 = List(new Magnitude(23.0889, MagnitudeBand.G, 0.51784), new Magnitude(20.7891, MagnitudeBand.I, 0.161275), new Magnitude(12.023, MagnitudeBand.J, 0.02), new Magnitude(21.7686, MagnitudeBand.R, 0.252201), new Magnitude(23.0853, MagnitudeBand.U, 1.20311), new Magnitude(20.0088, MagnitudeBand.Z, 0.35873))
+      val magsTarget1 = List(new Magnitude(23.0888, MagnitudeBand.U, 0.518214), new Magnitude(22.082, MagnitudeBand.G, 0.0960165), new Magnitude(20.88, MagnitudeBand.R, 0.0503736), new Magnitude(20.3051, MagnitudeBand.I, 0.0456069), new Magnitude(19.8812, MagnitudeBand.Z, 0.138202), new Magnitude(13.74, MagnitudeBand.J, 0.03))
+      val magsTarget2 = List(new Magnitude(23.0853, MagnitudeBand.U, 1.20311), new Magnitude(23.0889, MagnitudeBand.G, 0.51784), new Magnitude(21.7686, MagnitudeBand.R, 0.252201), new Magnitude(20.7891, MagnitudeBand.I, 0.161275), new Magnitude(20.0088, MagnitudeBand.Z, 0.35873), new Magnitude(12.023, MagnitudeBand.J, 0.02))
 
       val result = ParsedTable(List(
         \/-(SiderealTarget("-2140405448", Coordinates(RightAscension.fromDegrees(359.745951955), Declination.fromAngle(Angle.parseDegrees("0.209323681906").getOrElse(Angle.zero)).getOrElse(Declination.zero)), None, magsTarget1, None)),
@@ -406,6 +406,15 @@ class VoTableParserSpec extends SpecificationWithJUnit with VoTableParser {
       val xmlFile = "votable-ppmxl.xml"
       VoTableParser.parse(xmlFile, getClass.getResourceAsStream(s"/$xmlFile")).map(_.tables.forall(!_.containsError)) must beEqualTo(\/.right(true))
       VoTableParser.parse(xmlFile, getClass.getResourceAsStream(s"/$xmlFile")).getOrElse(ParsedVoResource(Nil)).tables should be size 1
+    }
+    "be able to select r1mag over r2mag and b2mag when b1mag is absent in ppmxl" in {
+      val xmlFile = "votable-ppmxl.xml"
+      val result = VoTableParser.parse(xmlFile, getClass.getResourceAsStream(s"/$xmlFile")).getOrElse(ParsedVoResource(Nil)).tables.map(TargetsTable.apply).map(_.rows).flatMap(_.find(_.name == "-1471224894")).headOption
+
+      val magR = result >>= {_.magnitudeIn(MagnitudeBand.R)}
+      magR.map(_.value) should beSome(18.149999999999999)
+      val magB = result >>= {_.magnitudeIn(MagnitudeBand.B)}
+      magB.map(_.value) should beSome(17.109999999999999)
     }
     "be able to ignore bogus magnitudes on ppmxl" in {
       val xmlFile = "votable-ppmxl.xml"
