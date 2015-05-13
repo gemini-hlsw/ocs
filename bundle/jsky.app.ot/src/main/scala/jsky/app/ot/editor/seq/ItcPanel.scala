@@ -21,7 +21,6 @@ import scala.util.{Failure, Success}
 
 object ItcPanel {
 
-  val OkIcon      = new ImageIcon(classOf[ItcTableModel].getResource("/resources/images/check.png"))
   val ErrorIcon   = new ImageIcon(classOf[ItcTableModel].getResource("/resources/images/error_tsk.gif"))
   val SpinnerIcon = new ImageIcon(classOf[ItcTableModel].getResource("/resources/images/spinner16.gif"))
 
@@ -153,8 +152,7 @@ class ItcSpectroscopyPanel(val owner: EdIteratorFolder) extends ItcPanel {
   }
 }
 
-/** Panel holding some feedback.
-  * Mainly important in case something went wrong with the ITC calculations. */
+/** Panel holding some feedback, mainly in case something went wrong with the ITC calculations. */
 private class ItcFeedbackPanel(table: ItcTable) extends Label {
 
   import ItcPanel._
@@ -171,28 +169,34 @@ private class ItcFeedbackPanel(table: ItcTable) extends Label {
   }
 
   private def update(): Unit = {
-    if (table.selection.rows.isEmpty) {
-      visible = false
-    } else {
-      visible = true
-      table.selected.foreach { f =>
-        val (i, m, c) = feedback(f)
-        icon        = i
-        text        = m
-        background  = c
+    table.selected.fold {
+      visible = false                 // no table row selected, don't show feedback panel
+    } {
+      feedback(_).fold {
+        visible = false               // no feedback for this row, don't show feedback panel
+      } { case (ico, msg, col) =>
+        icon        = ico             // feedback available, show it
+        text        = msg
+        background  = col
+        visible     = true
       }
     }
     revalidate()
   }
 
-  private def feedback(f: Future[ItcService.Result]): (Icon, String, Color) =
-    f.value.fold                    ((SpinnerIcon,  "Calculating...",     BANANA)) {
-      case Failure(t)             => (ErrorIcon,    t.getMessage,         LIGHT_SALMON)
+  private def feedback(f: Future[ItcService.Result]): Option[(Icon, String, Color)] = {
+    f.value.fold {
+      feedback(SpinnerIcon, "Calculating...", BANANA)
+    } {
+      case Failure(t)               => feedback(ErrorIcon, t.getMessage, LIGHT_SALMON)
       case Success(s) => s match {
-        case scalaz.Failure(errs) => (ErrorIcon,    errs.mkString(", "),  LIGHT_SALMON)
-        case scalaz.Success(_)    => (OkIcon,       "OK",                 HONEY_DEW)
+        case scalaz.Failure(errs)   => feedback(ErrorIcon, errs.mkString(", "), LIGHT_SALMON)
+        case scalaz.Success(_)      => None
       }
     }
+  }
+
+  private def feedback(ico: Icon, msg: String, col: Color): Option[(Icon, String, Color)] = Some((ico, msg, col))
 
 }
 
