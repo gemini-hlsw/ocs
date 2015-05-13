@@ -57,7 +57,7 @@ sealed trait MagnitudesFilter {
   // Find what band the field descriptor should represent
   def findBand(id: FieldId, band: String): Option[MagnitudeBand] = MagnitudeBand.all.find(_.name == band)
   // filter magnitudes as a whole
-  def filterMagnitudeFields(magnitudeFields: List[(FieldId, Magnitude)]): List[Magnitude] = magnitudeFields.map(_._2).filter(validMagnitude)
+  def filterMagnitudeFields(magnitudeFields: List[(FieldId, Magnitude)]): List[Magnitude] = magnitudeFields.collect { case (_, mag) if validMagnitude(mag) => mag }
 }
 
 case object UCAC4Filter extends MagnitudesFilter {
@@ -85,23 +85,16 @@ case object PPMXLFilter extends MagnitudesFilter {
   val idsMapping = primaryMagnitudesIds.zip(alternateMagnitudesIds)
 
   override def filterMagnitudeFields(magnitudeFields: List[(FieldId, Magnitude)]): List[Magnitude] = {
-    // Alternative values if primaries are not on the list or NaN
-    val alternateMagnitudes = (for {
-        m <- magnitudeFields
-        if alternateMagnitudesIds.contains(m._1.id)
-        if validMagnitude(m._2)
-      } yield (m._1.id, m)).toMap
-    // Remove the non valid magnitudes
-    val primaryMagnitudes = magnitudeFields.filter(m => validMagnitude(m._2))
-    // Collect the magnitudes present on the primary list and not on the secondary list
-    val m = primaryMagnitudes.filter {
-      case f @ (FieldId(i, _), _) if alternateMagnitudesIds.contains(i) => false
-      case _                                                            => true
+    // Read all magnitudes, including duplicates
+    val magMap1 = (Map.empty[String, Magnitude]/:magnitudeFields) {
+      case (m, (FieldId(i, _), mag)) if validMagnitude(mag) => m + (i -> mag)
+      case (m, _)                                           => m
     }
-    // In case the primary isn't present use the alternative
-    idsMapping.foldLeft(m) {
-      case (mags, (id1, id2)) => if (mags.exists(_._1.id === id1)) mags else mags ++ alternateMagnitudes.get(id2)
-    }.map(_._2)
+    // Now magMap1 might have double entries for R and B.  Get rid of the alternative if so.
+    val magMap2 = (magMap1/:idsMapping) { case (m, (id1, id2)) =>
+      if (magMap1.contains(id1)) m - id2 else m
+    }
+    magMap2.values.toList
   }
 }
 
