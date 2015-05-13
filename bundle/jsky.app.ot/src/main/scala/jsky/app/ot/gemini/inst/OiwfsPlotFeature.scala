@@ -4,6 +4,7 @@ import edu.gemini.pot.ModelConverters._
 import edu.gemini.spModel.core._
 import edu.gemini.spModel.gemini.flamingos2.{F2OiwfsProbeArm, Flamingos2OiwfsGuideProbe}
 import edu.gemini.spModel.gemini.gmos.{GmosOiwfsProbeArm, GmosOiwfsGuideProbe}
+import edu.gemini.spModel.gemini.obscomp.SPSiteQuality
 import edu.gemini.spModel.guide.{PatrolField, OffsetValidatingGuideProbe}
 import edu.gemini.spModel.inst.{FeatureGeometry, ProbeArmGeometry}
 import edu.gemini.spModel.obs.context.ObsContext
@@ -105,8 +106,11 @@ sealed class OiwfsPlotFeature(probe: OffsetValidatingGuideProbe, probeArm: Probe
        reachableFigs ++ patrolFieldFigs ++ probeArmFig
     }
 
+    // For the purpose of plotting the OIWFS features, the site conditions are
+    // irrelevant.  Make sure the lack of site quality doesn't prevent creating
+    // an ObsContext by explicitly providing conditions.
     (for {
-      obsCtx   <- tpeCtx.obsContext
+      obsCtx   <- tpeCtx.obsContextWithConditions(SPSiteQuality.Conditions.NOMINAL)
       patField <- probe.getCorrectedPatrolField(obsCtx).asScalaOpt
     } yield go(obsCtx, patField)).toList.flatten
   }
