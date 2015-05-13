@@ -8,14 +8,15 @@ import edu.gemini.itc.shared._
 import edu.gemini.pot.sp.SPComponentType
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.{CloudCover, ImageQuality, SkyBackground, WaterVapor}
 import jsky.app.ot.util.OtColor
+import jsky.util.gui.{NumberBoxWidget, TextBoxWidget, TextBoxWidgetWatcher}
 import org.jfree.chart.{ChartPanel, JFreeChart}
 
 import scala.concurrent.Future
 import scala.swing.GridBagPanel.{Anchor, Fill}
 import scala.swing.ListView.Renderer
 import scala.swing.ScrollPane.BarPolicy._
+import scala.swing.event._
 import scala.swing.{ButtonGroup, _}
-import scala.swing.event.{ButtonClicked, KeyEvent, SelectionChanged, TableRowsSelected}
 import scala.util.{Failure, Success}
 
 object ItcPanel {
@@ -32,29 +33,6 @@ object ItcPanel {
 
 }
 
-/** Input field with a leading label and a tailing units string that turns red if current value is invalid. */
-class InputField[A](labelStr: String, unitsStr: String, valueStr: A, convert: String => Option[A], columns: Int = 8)  {
-  val label = new Label(labelStr) { horizontalAlignment = Alignment.Left }
-  val units = new Label(unitsStr) { horizontalAlignment = Alignment.Left }
-  val text  = new TextField(valueStr.toString, columns) {
-    horizontalAlignment = Alignment.Right
-    listenTo(keys)
-    reactions += {
-      case e: KeyEvent => foreground = value.fold(Color.RED)(_ => Color.BLACK)
-    }
-  }
-
-  def keys = text.keys
-  def enabled = text.enabled
-  def enabled_=(enabled: Boolean) = text.enabled = enabled
-
-  def value: Option[A] = try {
-    convert(text.text)
-  } catch {
-    case _: NumberFormatException => None
-  }
-}
-
 /** Base trait for different panels which are used to present ITC calculation results to the users. */
 sealed trait ItcPanel extends GridBagPanel {
 
@@ -63,9 +41,9 @@ sealed trait ItcPanel extends GridBagPanel {
   def display: Component
   def visibleFor(t: SPComponentType): Boolean
 
-  val currentConditions = new ConditionsPanel(owner)
-  val analysisMethod    = new AnalysisMethodPanel
-  val message           = new ItcFeedbackPanel(table)
+  private val currentConditions = new ConditionsPanel(owner)
+  private val analysisMethod    = new AnalysisMethodPanel
+  private val message           = new ItcFeedbackPanel(table)
 
   border = BorderFactory.createEmptyBorder(10, 10, 10, 10)
   layout(currentConditions) = new Constraints {
@@ -107,14 +85,14 @@ sealed trait ItcPanel extends GridBagPanel {
     case SelectionChanged(`analysisMethod`)     => table.update()
   }
 
-  def update() = {
+  def update(): Unit = {
     currentConditions.update()
     table.update()
   }
 
-  def analysis = analysisMethod.analysisMethod
+  def analysis: AnalysisMethod = analysisMethod.analysisMethod
 
-  def conditions = currentConditions.conditions
+  def conditions: ObservingConditions = currentConditions.conditions
 
 }
 
@@ -177,7 +155,7 @@ class ItcSpectroscopyPanel(val owner: EdIteratorFolder) extends ItcPanel {
 
 /** Panel holding some feedback.
   * Mainly important in case something went wrong with the ITC calculations. */
-class ItcFeedbackPanel(table: ItcTable) extends Label {
+private class ItcFeedbackPanel(table: ItcTable) extends Label {
 
   import ItcPanel._
   import OtColor._
@@ -279,9 +257,9 @@ private class ItcChartsPanel(table: ItcSpectroscopyTable) extends GridBagPanel {
 }
 
 /** User element that allows to change the conditions taken for the calculations on-the-fly. */
-protected class ConditionsPanel(owner: EdIteratorFolder) extends GridBagPanel {
+private class ConditionsPanel(owner: EdIteratorFolder) extends GridBagPanel {
 
-  private class ConditionCB[A](items: Seq[A], renderFunc: A => String) extends ComboBox[A](items) {
+  class ConditionCB[A](items: Seq[A], renderFunc: A => String) extends ComboBox[A](items) {
     private var programValue = selection.item
     tooltip  = "Select conditions for ITC calculations. Values different from program conditions are shown in red."
     renderer = new Renderer[A] {
@@ -291,9 +269,7 @@ protected class ConditionsPanel(owner: EdIteratorFolder) extends GridBagPanel {
     }
     listenTo(selection)
     reactions += {
-      case SelectionChanged(_) =>
-        foreground = color()
-        tooltip    = tt()
+      case SelectionChanged(_) => foreground = color()
     }
 
     def sync(newValue: A) = {
@@ -306,14 +282,11 @@ protected class ConditionsPanel(owner: EdIteratorFolder) extends GridBagPanel {
       // set new program value and update coloring
       programValue = newValue
       foreground = color()
-      tooltip    = tt()
     }
 
-    private def color() = if (inSync()) Color.BLACK else Color.RED
+    private def color()   = if (inSync()) Color.BLACK else Color.RED
 
-    private def tt() = if (inSync()) "" else s"Program condition is ${renderFunc(programValue)}"
-
-    private def inSync() = programValue == selection.item
+    private def inSync()  = programValue == selection.item
 
   }
 
@@ -382,29 +355,33 @@ protected class ConditionsPanel(owner: EdIteratorFolder) extends GridBagPanel {
   }
 
 }
-protected class AnalysisMethodPanel extends GridBagPanel {
+private class AnalysisMethodPanel extends GridBagPanel {
 
-  val autoAperture = new RadioButton("Auto") { focusable = false; selected = true }
-  val userAperture = new RadioButton("User") { focusable = false }
-  val diameter     = new InputField[Double]("Diameter ",      " arcsec",          0, d => Some(d.toDouble)) { enabled = false }
-  val skyAperture  = new InputField[Double]("Sky Aperture ",  " times target",    5, d => Some(d.toDouble))
+  val autoAperture      = new RadioButton("Auto") { focusable = false; selected = true }
+  val userAperture      = new RadioButton("User") { focusable = false }
+  val skyApertureLabel  = new Label("Sky Aperture")
+  val skyApertureUnits  = new Label("times target")
+  val skyAperture       = new NumberEdit(skyApertureLabel, skyApertureUnits, 5)
+  val diameterLabel     = new Label("Diameter")
+  val diameterUnits     = new Label("arcsec")
+  val diameter          = new NumberEdit(diameterLabel, diameterUnits, 2) { enabled = false }
   new ButtonGroup(autoAperture, userAperture)
 
   layout(new Label("Analysis Method:")) = new Constraints { gridx = 0; gridy = 0; insets = new Insets(0, 0, 0, 20) }
   layout(autoAperture)                  = new Constraints { gridx = 1; gridy = 0; insets = new Insets(0, 0, 0, 20) }
   layout(userAperture)                  = new Constraints { gridx = 1; gridy = 1; insets = new Insets(0, 0, 0, 20) }
-  layout(skyAperture.label)             = new Constraints { gridx = 2; gridy = 0; insets = new Insets(0, 0, 0, 10) }
-  layout(skyAperture.text)              = new Constraints { gridx = 3; gridy = 0; insets = new Insets(0, 0, 0, 10); fill = Fill.Horizontal }
-  layout(skyAperture.units)             = new Constraints { gridx = 4; gridy = 0 }
-  layout(diameter.label)                = new Constraints { gridx = 2; gridy = 1; insets = new Insets(0, 0, 0, 10) }
-  layout(diameter.text)                 = new Constraints { gridx = 3; gridy = 1; insets = new Insets(0, 0, 0, 10); fill = Fill.Horizontal }
-  layout(diameter.units)                = new Constraints { gridx = 4; gridy = 1 }
+  layout(skyApertureLabel)              = new Constraints { gridx = 2; gridy = 0; insets = new Insets(0, 0, 0, 10); fill = Fill.Horizontal }
+  layout(skyAperture)                   = new Constraints { gridx = 3; gridy = 0; insets = new Insets(0, 0, 0, 10); fill = Fill.Horizontal }
+  layout(skyApertureUnits)              = new Constraints { gridx = 4; gridy = 0; insets = new Insets(0, 5, 0, 0);  fill = Fill.Horizontal }
+  layout(diameterLabel)                 = new Constraints { gridx = 2; gridy = 1; insets = new Insets(0, 0, 0, 10); fill = Fill.Horizontal }
+  layout(diameter)                      = new Constraints { gridx = 3; gridy = 1; insets = new Insets(0, 0, 0, 10); fill = Fill.Horizontal }
+  layout(diameterUnits)                 = new Constraints { gridx = 4; gridy = 1; insets = new Insets(0, 5, 0, 0);  fill = Fill.Horizontal }
 
-  listenTo(autoAperture, userAperture, diameter.keys, skyAperture.keys)
+  listenTo(autoAperture, userAperture, diameter, skyAperture)
   reactions += {
     case ButtonClicked(`autoAperture`)  => diameter.enabled = false; publish(new SelectionChanged(this))
     case ButtonClicked(`userAperture`)  => diameter.enabled = true;  publish(new SelectionChanged(this))
-    case e: KeyEvent                    => publish(new SelectionChanged(this))
+    case ValueChanged(_)                => publish(new SelectionChanged(this))
   }
 
   def analysisMethod: AnalysisMethod =
@@ -424,30 +401,34 @@ protected class AnalysisMethodPanel extends GridBagPanel {
 
 }
 
-protected class PlotDetailsPanel extends GridBagPanel {
+private class PlotDetailsPanel extends GridBagPanel {
 
-  val autoLimits = new RadioButton("Auto") { focusable = false; background = Color.WHITE; selected = true }
-  val userLimits = new RadioButton("User") { focusable = false; background = Color.WHITE }
-  val lowLimit   = new InputField[Double]("Low ",  " nm",    0, d => Some(d.toDouble)) { enabled = false }
-  val highLimit  = new InputField[Double]("High ", " nm", 2000, d => Some(d.toDouble)) { enabled = false }
+  val autoLimits      = new RadioButton("Auto") { focusable = false; background = Color.WHITE; selected = true }
+  val userLimits      = new RadioButton("User") { focusable = false; background = Color.WHITE }
+  val lowLimitLabel   = new Label("Low")
+  val lowLimitUnits   = new Label("nm")
+  val lowLimit        = new NumberEdit(lowLimitLabel, lowLimitUnits, 0)       { enabled = false }
+  val highLimitLabel  = new Label("High")
+  val highLimitUnits  = new Label("nm")
+  val highLimit       = new NumberEdit(highLimitLabel, highLimitUnits, 2000)  { enabled = false }
   new ButtonGroup(autoLimits, userLimits)
 
   background = Color.WHITE
   layout(new Label("Limits:"))  = new Constraints { gridx = 0; gridy = 0; insets = new Insets(0, 0, 0, 20) }
-  layout(autoLimits)            = new Constraints { gridx = 1; gridy = 0; insets = new Insets(0, 0, 0, 20) }
+  layout(autoLimits)            = new Constraints { gridx = 1; gridy = 0; insets = new Insets(0, 0, 0, 10) }
   layout(userLimits)            = new Constraints { gridx = 2; gridy = 0; insets = new Insets(0, 0, 0, 20) }
-  layout(lowLimit.label)        = new Constraints { gridx = 3; gridy = 0 }
-  layout(lowLimit.text)         = new Constraints { gridx = 4; gridy = 0; fill = Fill.Horizontal }
-  layout(lowLimit.units)        = new Constraints { gridx = 5; gridy = 0; insets = new Insets(0, 0, 0, 20) }
-  layout(highLimit.label)       = new Constraints { gridx = 6; gridy = 0 }
-  layout(highLimit.text)        = new Constraints { gridx = 7; gridy = 0; fill = Fill.Horizontal }
-  layout(highLimit.units)       = new Constraints { gridx = 8; gridy = 0 }
+  layout(lowLimitLabel)         = new Constraints { gridx = 3; gridy = 0; insets = new Insets(0, 0, 0, 10) }
+  layout(lowLimit)              = new Constraints { gridx = 4; gridy = 0; fill = Fill.Horizontal }
+  layout(lowLimitUnits)         = new Constraints { gridx = 5; gridy = 0; insets = new Insets(0, 5, 0, 0) }
+  layout(highLimitLabel)        = new Constraints { gridx = 6; gridy = 0; insets = new Insets(0, 20, 0, 10) }
+  layout(highLimit)             = new Constraints { gridx = 7; gridy = 0; fill = Fill.Horizontal }
+  layout(highLimitUnits)        = new Constraints { gridx = 8; gridy = 0; insets = new Insets(0, 5, 0, 0) }
 
-  listenTo(autoLimits, userLimits, lowLimit.keys, highLimit.keys)
+  listenTo(autoLimits, userLimits, lowLimit, highLimit)
   reactions += {
-    case ButtonClicked(`autoLimits`)    => lowLimit.enabled = false; highLimit.enabled = false; publish(new SelectionChanged(this))
-    case ButtonClicked(`userLimits`)    => lowLimit.enabled = true;  highLimit.enabled = true;  publish(new SelectionChanged(this))
-    case e: KeyEvent                    => publish(new SelectionChanged(this))
+    case ButtonClicked(`autoLimits`)  => lowLimit.enabled = false; highLimit.enabled = false; publish(new SelectionChanged(this))
+    case ButtonClicked(`userLimits`)  => lowLimit.enabled = true;  highLimit.enabled = true;  publish(new SelectionChanged(this))
+    case ValueChanged(_)              => publish(new SelectionChanged(this))
   }
 
   def plottingDetails: PlottingDetails =
@@ -462,4 +443,38 @@ protected class PlotDetailsPanel extends GridBagPanel {
     } yield new PlottingDetails(PlotLimits.USER, l, h)
 
 }
+
+// light weight wrapper to turn NumberBoxWidget into a Scala swing component
+private class NumberEdit(label: Label, units: Label, default: Double = 0) extends Component {
+  override lazy val peer = new NumberBoxWidget {
+    setColumns(8)
+    setValue(default)
+    setMinimumSize(getPreferredSize)
+    addWatcher(new TextBoxWidgetWatcher {
+      override def textBoxKeyPress(tbwe: TextBoxWidget): Unit = textBoxAction(tbwe)
+      override def textBoxAction(tbwe: TextBoxWidget): Unit =
+        try {
+          publish(new ValueChanged(NumberEdit.this))
+          tbwe.requestFocus()
+        }
+        catch {
+          case _: NumberFormatException =>
+        }
+    })
+  }
+
+  override def enabled_=(e: Boolean) = {
+    label.enabled = e
+    peer.setEnabled(e)
+    units.enabled = e
+  }
+
+  def value: Option[Double] =
+    try {
+      Some(peer.getValue.toDouble)
+    }catch {
+      case _: NumberFormatException => None
+    }
+}
+
 
