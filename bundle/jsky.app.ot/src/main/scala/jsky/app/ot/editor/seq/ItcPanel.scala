@@ -89,7 +89,7 @@ sealed trait ItcPanel extends GridBagPanel {
     table.update()
   }
 
-  def analysis: AnalysisMethod = analysisMethod.analysisMethod
+  def analysis: Option[AnalysisMethod] = analysisMethod.analysisMethod
 
   def conditions: ObservingConditions = currentConditions.conditions
 
@@ -388,11 +388,8 @@ private class AnalysisMethodPanel extends GridBagPanel {
     case ValueChanged(_)                => publish(new SelectionChanged(this))
   }
 
-  def analysisMethod: AnalysisMethod =
-    if (autoAperture.selected) autoApertureValue.getOrElse(default)
-    else userApertureValue.getOrElse(default)
-
-  private val default = AutoAperture(5.0)
+  def analysisMethod: Option[AnalysisMethod] =
+    if (autoAperture.selected) autoApertureValue else userApertureValue
 
   private def autoApertureValue: Option[AnalysisMethod] =
     skyAperture.value.map(AutoAperture)

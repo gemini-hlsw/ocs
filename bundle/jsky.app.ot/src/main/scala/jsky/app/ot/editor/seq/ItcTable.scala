@@ -112,18 +112,15 @@ trait ItcTable extends Table {
 
   }
 
-  protected def calculateSpectroscopy(peer: Peer, instrument: SPComponentType, c: ItcUniqueConfig): Future[ItcService.Result] = {
-    val obs = new ObservationDetails(SpectroscopySN(c.count, c.singleExposureTime, 1.0), parameters.analysisMethod)
-    calculate(peer, instrument, c, obs)
-  }
+  protected def calculateSpectroscopy(peer: Peer, instrument: SPComponentType, c: ItcUniqueConfig): Future[ItcService.Result] =
+    calculate(peer, instrument, c, SpectroscopySN(c.count, c.singleExposureTime, 1.0))
 
-  protected def calculateImaging(peer: Peer, instrument: SPComponentType, c: ItcUniqueConfig): Future[ItcService.Result] = {
-    val obs = new ObservationDetails(ImagingSN(c.count, c.singleExposureTime, 1.0), parameters.analysisMethod)
-    calculate(peer, instrument, c, obs)
-  }
+  protected def calculateImaging(peer: Peer, instrument: SPComponentType, c: ItcUniqueConfig): Future[ItcService.Result] =
+    calculate(peer, instrument, c, ImagingSN(c.count, c.singleExposureTime, 1.0))
 
-  protected def calculate(peer: Peer, instrument: SPComponentType, c: ItcUniqueConfig, obs: ObservationDetails): Future[ItcService.Result] = {
+  protected def calculate(peer: Peer, instrument: SPComponentType, c: ItcUniqueConfig, cm: CalculationMethod): Future[ItcService.Result] = {
     val s = for {
+      analysis  <- parameters.analysisMethod
       cond      <- parameters.conditions
       port      <- parameters.instrumentPort
       targetEnv <- parameters.targetEnvironment
@@ -132,7 +129,7 @@ trait ItcTable extends Table {
       tele      <- ConfigExtractor.extractTelescope(port, probe, targetEnv, c.config)
       ins       <- ConfigExtractor.extractInstrumentDetails(instrument, probe, targetEnv, c.config)
     } yield {
-        doServiceCall(peer, c, src, ins, tele, cond, obs)
+        doServiceCall(peer, c, src, ins, tele, cond, new ObservationDetails(cm, analysis))
     }
 
     s match {
