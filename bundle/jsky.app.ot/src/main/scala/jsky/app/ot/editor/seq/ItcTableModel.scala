@@ -1,5 +1,6 @@
 package jsky.app.ot.editor.seq
 
+import javax.swing.Icon
 import javax.swing.table.AbstractTableModel
 
 import edu.gemini.itc.shared._
@@ -7,6 +8,7 @@ import edu.gemini.shared.util.StringUtil
 import edu.gemini.spModel.config2.ItemKey
 
 import scala.concurrent.Future
+import scala.util.{Failure, Success}
 
 /** Columns in the table are defined by their header label and a function on the unique config of the row. */
 case class Column(label: String, value: (ItcUniqueConfig, Future[ItcService.Result]) => AnyRef, tooltip: String = "")
@@ -23,10 +25,10 @@ sealed trait ItcTableModel extends AbstractTableModel {
 
   /** Defines a set of header columns for all tables. */
   val Headers = Seq(
-    Column("Data Labels",     (c, r) => c.labels),
-    Column("Images",          (c, r) => new java.lang.Integer(c.count),             tooltip = "Number of exposures used in S/N calculation"),
-    Column("Exposure Time",   (c, r) => new java.lang.Double(c.singleExposureTime), tooltip = "Exposure time of each image [s]"),
-    Column("Total Exp. Time", (c, r) => new java.lang.Double(c.totalExposureTime),  tooltip = "Total exposure time [s]")
+    Column("Data Labels",     (c, r) => (resultIcon(r).orNull, c.labels)),
+    Column("Images",          (c, r) => s"${c.count}",                      tooltip = "Number of exposures used in S/N calculation"),
+    Column("Exposure Time",   (c, r) => f"${c.singleExposureTime}%.1f",     tooltip = "Exposure time of each image [s]"),
+    Column("Total Exp. Time", (c, r) => f"${c.totalExposureTime}%.1f",      tooltip = "Total exposure time [s]")
   )
 
   val headers:      Seq[Column]
@@ -51,7 +53,18 @@ sealed trait ItcTableModel extends AbstractTableModel {
       case _                          => None
     }
 
-  protected def spcPeakElectrons(result: Future[ItcService.Result]) = spectroscopyResult(result).map(_.series(SignalChart, SignalData).yValues.max)
+  protected def resultIcon(f: Future[ItcService.Result]): Option[Icon] =
+    f.value.fold {
+      Some(ItcPanel.SpinnerIcon).asInstanceOf[Option[Icon]]
+    } {
+      case Failure(t)               => Some(ItcPanel.ErrorIcon)
+      case Success(s) => s match {
+        case scalaz.Failure(errs)   => Some(ItcPanel.ErrorIcon)
+        case scalaz.Success(_)      => None
+      }
+    }
+
+  protected def spcPeakElectrons(result: Future[ItcService.Result]) = spectroscopyResult(result).map(_.series(SignalChart, SignalData).yValues.max.toInt)
 
   protected def spcPeakSNSingle (result: Future[ItcService.Result]) = spectroscopyResult(result).map(_.series(S2NChart, SingleS2NData).yValues.max)
 
@@ -94,7 +107,7 @@ sealed trait ItcTableModel extends AbstractTableModel {
 
   def tooltip(col: Int): String = column(col) match {
     case Some(c) => c.tooltip
-    case None    => ""                    // no tooltip for key columns
+    case None    => null  // no tooltip for key columns
   }
 
   /** Gets the column description for the given {{{col}}} index. Returns {{{None}}} for dynamic key columns. */

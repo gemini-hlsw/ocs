@@ -1,25 +1,18 @@
-//
-// $Id$
-//
-
 package jsky.app.ot.editor.seq;
 
 import edu.gemini.pot.sp.ISPObservation;
-import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.spModel.config2.Config;
-import edu.gemini.spModel.data.OptionTypeUtil;
 import edu.gemini.spModel.io.SequenceOutputService;
-import edu.gemini.spModel.type.DisplayableSpType;
 import jsky.app.ot.viewer.OpenUtils;
 import jsky.util.Preferences;
 import jsky.util.gui.ExampleFileFilter;
 
 import javax.swing.*;
+import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
-import java.awt.Component;
-import java.awt.FontMetrics;
+import java.awt.*;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -103,39 +96,28 @@ final class SequenceTabUtil {
     }
 
     static void resizeTableColumns(JTable table, TableModel model) {
-        TableColumnModel colModel = table.getColumnModel();
-        FontMetrics fm = table.getFontMetrics(table.getFont());
-        int rows = model.getRowCount();
+        final TableColumnModel colModel = table.getColumnModel();
+        final FontMetrics fm = table.getFontMetrics(table.getFont());
+        final int rows = model.getRowCount();
 
         for (int col=0; col<model.getColumnCount(); ++col) {
-            String title = model.getColumnName(col);
+            final String title = model.getColumnName(col);
 
             // Start with the width of the column header
             int size = fm.stringWidth(title);
 
-            // Check the width of each item in the column to get the maximum
-            // width
+            // Check the width of each item in the column to get the maximum width
             for (int row=0; row<rows; ++row) {
-                Object val = model.getValueAt(row, col);
-                if (val == null) continue;
-
-                String strVal;
-                if (val instanceof DisplayableSpType) {
-                    strVal = ((DisplayableSpType) val).displayValue();
-                } else if (val instanceof Option) {
-                    strVal = OptionTypeUtil.toDisplayString((Option) val);
-                } else {
-                    strVal = val.toString();
-                }
-
-                int tmp = fm.stringWidth(strVal);
+                final TableCellRenderer renderer = table.getCellRenderer(row, col);
+                final Component component = table.prepareRenderer(renderer, row, col);
+                final int tmp = component.getPreferredSize().width;
                 if (tmp > size) size = tmp;
             }
 
-            size += 10; // add a bit of padding
+            size += 20; // add a bit of padding
 
             // Resize the column
-            TableColumn tc = colModel.getColumn(col);
+            final TableColumn tc = colModel.getColumn(col);
             _setColumnWidth(tc, size, size, size);
         }
     }

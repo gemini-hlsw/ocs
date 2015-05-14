@@ -15,59 +15,15 @@ import edu.gemini.spModel.guide.GuideProbe
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.rich.shared.immutable.asScalaOpt
 import edu.gemini.spModel.target.system.ITarget
-import jsky.app.ot.editor.seq.ItcTable.{AnyRenderer, DoubleRenderer, IntRenderer}
 import jsky.app.ot.userprefs.observer.ObservingPeer
 import jsky.app.ot.util.OtColor
 
 import scala.collection.JavaConverters._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import scala.swing.Table.LabelRenderer
 import scala.swing._
 import scalaz.Scalaz._
 import scalaz._
-
-object ItcTable {
-
-  // Generic renderer for labels; deals with alignment, background color and tooltip text
-  abstract sealed class Renderer[A](alignment: Alignment.Value, f: A => (Icon, String)) extends LabelRenderer[A](f)  {
-    override def componentFor(table : Table, isSelected : Boolean, hasFocus : Boolean, a : A, row : Int, column : Int) : Component = {
-      val c = super.componentFor(table, isSelected, hasFocus, a, row, column)
-      val model = table.model.asInstanceOf[ItcTableModel]
-      // Use SequenceCellRenderer based background color. This gives us coherent color coding throughout
-      // the different tables in the sequence node.
-      val bg = model.key(column).map(k => if (isSelected) SequenceCellRenderer.lookupColor(k).darker else SequenceCellRenderer.lookupColor(k))
-      val tt = model.tooltip(column)
-      // set label horizontal alignment, bg color and tooltip as needed
-      c.asInstanceOf[Label] <| { l =>
-        l.horizontalAlignment = alignment
-        l.background = bg.getOrElse(l.background)
-        l.tooltip = tt
-      }
-    }
-  }
-
-  // Render anything by turning it into a string (or ignore it if empty)
-  case object AnyRenderer extends Renderer(Alignment.Left, (o: AnyRef) => (null, o match {
-    case null             => ""
-    case None             => ""
-    case Some(s)          => anyToString(s)
-    case x                => anyToString(x)
-  }))
-
-  // Render an int value
-  case object IntRenderer extends Renderer[Int](Alignment.Right, i => (null, i.toString))
-
-  // Render a double value with two decimal digits
-  case object DoubleRenderer extends Renderer[Double](Alignment.Right, d => (null, f"$d%.2f"))
-
-  private def anyToString(x: Any): String = x match {
-    case s: DisplayableSpType   => s.displayValue()
-    case s                      => s.toString
-  }
-
-}
-
 /**
  * A table to display ITC calculation results to users.
  */
@@ -91,13 +47,12 @@ trait ItcTable extends Table {
   autoResizeMode = Table.AutoResizeMode.Off
   background = OtColor.VERY_LIGHT_GREY
   focusable = false
-  peer.setRowSelectionAllowed(false)
-  peer.setColumnSelectionAllowed(false)
-  peer.getTableHeader.setReorderingAllowed(false)
 
   // allow selection of single rows, this will display the charts
   peer.setRowSelectionAllowed(true)
+  peer.setColumnSelectionAllowed(false)
   peer.setSelectionMode(ListSelectionModel.SINGLE_SELECTION)
+  peer.getTableHeader.setReorderingAllowed(false)
 
   def update() = {
     val seq = parameters.sequence
@@ -122,13 +77,39 @@ trait ItcTable extends Table {
 
   }
 
-  override def rendererComponent(sel: Boolean, foc: Boolean, row: Int, col: Int) = {
-    model.getValueAt(row, col) match {
-      case c: Component     => c
-      case Some(i: Int)     => IntRenderer.componentFor(this, sel, foc, i, row, col)
-      case Some(d: Double)  => DoubleRenderer.componentFor(this, sel, foc, d, row, col)
-      case v                => AnyRenderer.componentFor(this, sel, foc, v, row, col)
+  // implement our own renderer that deals with alignment, formatting of double numbers, background colors etc.
+  override def rendererComponent(sel: Boolean, foc: Boolean, row: Int, col: Int): Component = {
+
+    def cellBg(m: ItcTableModel) = {
+      // Use SequenceCellRenderer based background color for key columns.
+      val keyBg = m.key(col).map(SequenceCellRenderer.lookupColor)
+      keyBg.fold {
+        if (sel) peer.getSelectionBackground else peer.getBackground
+      } {
+        bg => if (sel) bg.darker else bg
+      }
     }
+
+    // represent whatever is thrown at us with a label, try to stay close to layout of other sequence tables
+    val m = model.asInstanceOf[ItcTableModel]
+    val l = model.getValueAt(row, col) match {
+      case (null,      str: String)  => new Label(str,              null, Alignment.Left)
+      case (ico: Icon, str: String)  => new Label(str,              ico,  Alignment.Left)
+      case d: DisplayableSpType      => new Label(d.displayValue(), null, Alignment.Left)
+      case Some(i: Int)              => new Label(i.toString,       null, Alignment.Right)
+      case Some(d: Double)           => new Label(f"$d%.2f",        null, Alignment.Right)
+      case Some(s: String)           => new Label(s,                null, Alignment.Left)
+      case None | null               => new Label("")
+      case s: String                 => new Label(s,                null, Alignment.Left)
+      case x                         => new Label(x.toString,       null, Alignment.Left)
+    }
+
+    // adapt label as needed
+    l <|
+      (_.opaque      = true)          <|
+      (_.background  = cellBg(m))     <|
+      (_.tooltip     = m.tooltip(col))
+
   }
 
   protected def calculateSpectroscopy(peer: Peer, instrument: SPComponentType, c: ItcUniqueConfig): Future[ItcService.Result] = {
