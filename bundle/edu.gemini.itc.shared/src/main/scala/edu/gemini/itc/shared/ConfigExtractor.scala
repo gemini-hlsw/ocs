@@ -206,7 +206,7 @@ object ConfigExtractor {
   private def extractWithThrowable[A](c: Config, key: ItemKey)(implicit clazz: ClassTag[A]): Throwable \/ A = {
 
     def missingKey[A](key: ItemKey): \/[Throwable, A] =
-      new Error("Missing config value for key ${key.getPath}").left[A]
+      new Error(s"Missing config value for key ${key.getPath}").left[A]
 
     Option(c.getItemValue(key)).fold(missingKey[A](key)) { v =>
       \/.fromTryCatch(clazz.runtimeClass.cast(v).asInstanceOf[A])
