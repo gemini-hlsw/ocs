@@ -13,6 +13,7 @@ import edu.gemini.spModel.pio.xml.PioXmlFactory
 import edu.gemini.spModel.pio._
 import edu.gemini.spModel.target.MagnitudePio
 
+import scala.annotation.tailrec
 import scalaz._, Scalaz._
 
 /** Convert to new target model. This is side-effecty, sorry. */
@@ -43,11 +44,17 @@ object To2015B {
   val PARAM_NAME       = "name"
   val PARAM_BRIGHTNESS = "brightness"
   val PARAM_OBJECT     = "object"
+  val PARAM_TITLE      = "title"
 
-  val PARAMSET_NOTE       = "Note"
-  val PARAMSET_BASE       = "base"
-  val PARAMSET_TARGET     = "spTarget"
-  val PARAMSET_MAGNITUDES = "magnitudeList"
+  val CONTAINER_TEMPLATE_GROUP = "templateGroup"
+  val CONTAINER_OBSERVATION    = "observation"
+
+  val PARAMSET_NOTE                = "Note"
+  val PARAMSET_BASE                = "base"
+  val PARAMSET_TARGET              = "spTarget"
+  val PARAMSET_MAGNITUDES          = "magnitudeList"
+  val PARAMSET_TEMPLATE_GROUP      = "Template Group"
+  val PARAMSET_TEMPLATE_PARAMETERS = "Template Parameters"
 
   val VALUE_NAME_UNTITLED = "(untitled)"
 
@@ -90,15 +97,31 @@ object To2015B {
       ab.fold(throw _, identity)
   }
 
+  // Extract all the target paramsets, be they part of an observation or
+  // template parameters.
+  private def allTargets(d: Document): List[ParamSet] = {
+    val names = Set(PARAMSET_BASE, PARAMSET_TARGET)
+
+    val templateTargets = for {
+      cs  <- d.findContainers(SPComponentType.TEMPLATE_PARAMETERS)
+      tps <- cs.allParamSets if tps.getName == PARAMSET_TEMPLATE_PARAMETERS
+      ps  <- tps.allParamSets if names(ps.getName)
+    } yield ps
+
+    val obsTargets = for {
+      obs <- d.findContainers(SPComponentType.OBSERVATION_BASIC)
+      env <- obs.findContainers(SPComponentType.TELESCOPE_TARGETENV)
+      ps  <- env.allParamSets if names(ps.getName)
+    } yield ps
+
+    templateTargets ++ obsTargets
+  }
+
   // Convert B1950 coordinates to J2000
   private def b1950ToJ2000(d: Document): Unit = {
-    val names = Set(PARAMSET_BASE, PARAMSET_TARGET)
     for {
-      obs   <- d.findContainers(SPComponentType.OBSERVATION_BASIC)
-      env   <- obs.findContainers(SPComponentType.TELESCOPE_TARGETENV)
-      ps    <- env.allParamSets if names(ps.getName)
+      ps    <- allTargets(d)
       pSys  <- Option(ps.getParam(PARAM_SYSTEM)).toList if pSys.getValue == VALUE_SYSTEM_B1950
-
     } {
 
       // Params
@@ -133,11 +156,8 @@ object To2015B {
   // These appear only in engineering and commissioning, each only once. BNNNN is unused.
   private def uselessSystemsToJ2000(d: Document): Unit = {
     val systems = Set(VALUE_SYSTEM_JNNNN, VALUE_SYSTEM_BNNNN, VALUE_SYSTEM_APPARENT)
-    val names = Set(PARAMSET_BASE, PARAMSET_TARGET)
     for {
-      obs <- d.findContainers(SPComponentType.OBSERVATION_BASIC)
-      env <- obs.findContainers(SPComponentType.TELESCOPE_TARGETENV)
-      ps  <- env.allParamSets if names(ps.getName)
+      ps  <- allTargets(d)
       p   <- Option(ps.getParam(PARAM_SYSTEM)).toList if systems(p.getValue)
     } p.setValue(VALUE_SYSTEM_J2000)
   }
@@ -145,43 +165,65 @@ object To2015B {
   // Turn old `brightness` property into a magnitude table if none exists, if possible, recording
   // our work in a per-observation note.
   private def brightnessToMagnitude(d: Document): Unit = {
-    val names = Set(PARAMSET_BASE, PARAMSET_TARGET)
     for {
-      obs <- d.findContainers(SPComponentType.OBSERVATION_BASIC)
-      env <- obs.findContainers(SPComponentType.TELESCOPE_TARGETENV)
-      ps  <- env.allParamSets if names(ps.getName)
+      ps  <- allTargets(d)
       b   <- ps.value(PARAM_BRIGHTNESS).filter(_.nonEmpty).toList
     } (parseBrightness(b), Option(ps.getParamSet(PARAMSET_MAGNITUDES))) match {
-      case (None, _)           => appendNote(obs, ps, "failed: " + b)
-      case (Some(ms), Some(_)) => appendNote(obs, ps, "ignored: " + b)
-      case (Some(ms), None)    => appendNote(obs, ps, "parsed: " + b)
+      case (None, _)           => appendNote(ps, "failed: " + b)
+      case (Some(ms), Some(_)) => appendNote(ps, "ignored: " + b)
+      case (Some(ms), None)    => appendNote(ps, "parsed: " + b)
         ps.addParamSet(MagnitudePio.instance.toParamSet(PioFactory, ms.list.asImList))
     }
   }
 
   // Append a message to the shared magnitude note for the given obs, relating to the given target
-  private def appendNote(obs: Container, target: ParamSet, s: String): Unit = {
-    val pset  = noteText(obs)
-    val param = pset.getParam(PARAM_NOTE_TEXT)
-    val text  = param.getValue
-    val tName = target.value(PARAM_NAME).getOrElse(VALUE_NAME_UNTITLED)
-    param.setValue(s"$text  $tName $s\n")
+  private def appendNote(target: ParamSet, s: String): Unit = {
+    // Find the parent that should hold the note.
+    @tailrec
+    def noteParent(node: PioNode): Option[Container] = {
+      val names = Set(CONTAINER_OBSERVATION, CONTAINER_TEMPLATE_GROUP)
+      node match {
+        case null                             => None
+        case c: Container if names(c.getKind) => Some(c)
+        case _                                => noteParent(node.getParent)
+      }
+    }
+
+    noteParent(target).foreach { parent =>
+      val pset  = noteText(parent)
+      val param = pset.getParam(PARAM_NOTE_TEXT)
+      val text  = param.getValue
+      val tName = target.value(PARAM_NAME).getOrElse(VALUE_NAME_UNTITLED)
+      param.setValue(s"$text  $tName $s\n")
+    }
   }
 
   // Get or create the magnitude update note, returning its ParamSet
-  private def noteText(obs: Container): ParamSet =
-    findNoteText(obs).getOrElse(createNoteText(obs))
+  private def noteText(parent: Container): ParamSet =
+    findNoteText(parent).getOrElse(createNoteText(parent))
 
   // Find the [first] magnitude note and return its ParamSet, if any
-  private def findNoteText(obs: Container): Option[ParamSet] =
+  private def findNoteText(parent: Container): Option[ParamSet] =
     (for {
-      note  <- obs.findContainers(SPComponentType.INFO_NOTE)
+      note  <- parent.findContainers(SPComponentType.INFO_NOTE)
       ps    <- note.paramSets if ps.getName == PARAMSET_NOTE
       name  <- ps.value(ISPDataObject.TITLE_PROP).toList if name == MagnitudeNoteTitle
     } yield ps).headOption
 
   // Create the magnitude node and return its ParamSet
-  private def createNoteText(obs: Container): ParamSet = {
+  private def createNoteText(parent: Container): ParamSet = {
+    // If we're adding the note to a template group, fish out the template
+    // group name.  Otherwise if it is an observation the container name itself
+    // is the observation name.
+    val name =
+      if (parent.getKind == CONTAINER_TEMPLATE_GROUP) {
+        (for {
+          ps <- Option(parent.getParamSet(PARAMSET_TEMPLATE_GROUP))
+          p  <- Option(ps.getParam(PARAM_TITLE))
+          t  <- Option(p.getValue)
+        } yield t).getOrElse(parent.getName)
+      } else
+        parent.getName
 
     // Our note (easy way to get the ParamSet)
     val note = new SPNote()
@@ -189,7 +231,7 @@ object To2015B {
     note.setNote(
       s"""|The unstructured 'brightness' property for targets was deprecated in 2010B and removed
           |in 2015B. This note records the disposition of old brightness values associated with
-          |the targets in ${obs.getName}.
+          |the targets in $name.
           |
           |A "parsed" message means that the brightness value was converted into one or more
           |structured magnitude values with known pass bands. "failed" means that this process
@@ -211,7 +253,7 @@ object To2015B {
     // Hook it all up
     val ps = note.getParamSet(PioFactory)
     container.addParamSet(ps)
-    obs.addContainer(container)
+    parent.addContainer(container)
     ps
 
   }
@@ -258,11 +300,8 @@ object To2015B {
   // the target's paramset.
   private def convertSystem(to: String)(from: String*)(f: ParamSet => Unit = _ => ()): Document => Unit = { d =>
     val systems = Set(from: _*)
-    val names = Set(PARAMSET_BASE, PARAMSET_TARGET)
     for {
-      obs <- d.findContainers(SPComponentType.OBSERVATION_BASIC)
-      env <- obs.findContainers(SPComponentType.TELESCOPE_TARGETENV)
-      ps  <- env.allParamSets if names(ps.getName)
+      ps  <- allTargets(d)
       p   <- Option(ps.getParam(PARAM_SYSTEM)).toList if systems(p.getValue)
     } { p.setValue(to); f(ps) }
   }
