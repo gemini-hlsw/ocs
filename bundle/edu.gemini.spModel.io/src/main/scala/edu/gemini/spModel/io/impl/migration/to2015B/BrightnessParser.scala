@@ -19,35 +19,49 @@ object BrightnessParser extends RegexParsers {
     """\s*[~=,]?\s*""".r ^^^ { () }
 
   private val at: Parser[Unit] =
-    """\s*(nucleus at|at|@|/|:)?\s*""".r ^^^ { () }
+    """\s*(nucleus at|at|in|@|/|:)?\s*""".r ^^^ { () }
 
-  private val num: Parser[Double] =
-    """-?\d+(\.\d*)?""".r <~ """\s*(mag)?""".r ^^ (_.toDouble)
+  private val num: Parser[BigDecimal] =
+    """-?\d+(\.\d*)?""".r <~ """\s*(mag)?""".r ^^ (s => BigDecimal(new java.math.BigDecimal(s))) // BigDecimal.exact(s)
 
   private val band: Parser[Band] = {
     def bandParser(b: Band): Parser[Band] = {
-      val p = b.toString.r <~ """\s*(_mag|mag|-band|band)?""".r ^^^ b
+      val p = (b.toString + """'?\s*(_mag|mag|-band|band)?""").r ^^^ b
       p | paren(p) | paren(p, '<', '>')
     }
-    Band.values.map(bandParser).foldRight[Parser[Band]](failure("expected band"))(_ | _)
+
+    Band.values.map(bandParser).foldRight[Parser[Band]](failure("expected band"))(_ ||| _)
   }
 
-  private val sys:  Parser[System] =
-    "(mJy|Jy)".r ^^^ System.Jy |
-    "AB"         ^^^ System.AB |
-    success(System.Vega)
+  private case class Sys(s: System, scale: BigDecimal = BigDecimal(1, 0)) {
+    def toMag(b: Band, m: BigDecimal): Magnitude = new Magnitude(b, (m * scale).doubleValue(), s)
+  }
+
+  private val Jy   = Sys(System.Jy)
+  private val mJy  = Sys(System.Jy, BigDecimal(1, 3))  // 1 mJy = 0.001 Jy
+  private val AB   = Sys(System.AB)
+  private val Vega = Sys(System.Vega)
+
+  private val sys:  Parser[Sys] =
+    "Jy"   ^^^ Jy   |
+    "mJy"  ^^^ mJy  |
+    "AB"   ^^^ AB   |
+    "Vega" ^^^ Vega |
+    success(Vega)
 
   private def paren[A](p: Parser[A], bra: Char = '(', ket: Char = ')'): Parser[A] =
     (bra ~> p) <~ ket
 
   private val mag: Parser[Magnitude] =
-    (band <~ equ) ~ num ~ (ows ~> sys)               ^^ { case b ~ m ~s    => new Magnitude(b, m, s) } | // Band = Num Sys
-    (band <~ paren(num) <~ equ) ~ num ~ (ows ~> sys) ^^ { case b ~ m ~s    => new Magnitude(b, m, s) } | // Band(nnn) = Num Sys
-     band ~ paren(sys) ~ (equ ~> num)                ^^ { case b ~ s ~ m   => new Magnitude(b, m, s) } | // Band(Sys)=Num
-     band ~ ('_' ~> sys) ~ (equ ~> num)              ^^ { case b ~ s ~ m   => new Magnitude(b, m, s) } | // Band_Sys=Num
-    (num ~ sys <~ at) ~ band                         ^^ { case m ~ s ~ b   => new Magnitude(b, m, s) } | // Num Sys @ Band
-     num ~ paren(band ~ sys)                         ^^ { case m ~ (b ~ s) => new Magnitude(b, m, s) } | // Num(Band Sys)
-     num ~ band                                      ^^ { case m ~ b       => new Magnitude(b, m) }      // Num Band
+    (band <~ equ) ~ num ~ (ows ~> sys)               ^^ { case b ~ m ~ s   => s.toMag(b, m) } |||  // Band = Num Sys
+    (band <~ paren(num) <~ equ) ~ num ~ (ows ~> sys) ^^ { case b ~ m ~ s   => s.toMag(b, m) } |||  // Band(nnn) = Num Sys
+     band ~ paren(sys) ~ (equ ~> num)                ^^ { case b ~ s ~ m   => s.toMag(b, m) } |||  // Band(Sys)=Num
+     band ~ ('_' ~> sys) ~ (equ ~> num)              ^^ { case b ~ s ~ m   => s.toMag(b, m) } |||  // Band_Sys=Num
+    (num ~ sys <~ at) ~ band                         ^^ { case m ~ s ~ b   => s.toMag(b, m) } |||  // Num Sys @ Band
+     num ~ band ~ sys                                ^^ { case m ~ b ~ s   => s.toMag(b, m) } |||  // Num Band Sys
+     num ~ band ~ paren(sys)                         ^^ { case m ~ b ~ s   => s.toMag(b, m) } |||  // Num Band (Sys)
+     num ~ paren(band ~ sys)                         ^^ { case m ~ (b ~ s) => s.toMag(b, m) } |||  // Num(Band Sys)
+     num ~ band                                      ^^ { case m ~ b       => Vega.toMag(b, m) } // Num Band
 
   private val mags: Parser[List[Magnitude]] =
     rep1sep(mag, """\s*,\s*""".r)
