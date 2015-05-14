@@ -93,7 +93,8 @@ public final class ImageServlet extends HttpServlet {
             }
 
         } catch (IdTimedOutException e) {
-            Log.log(Level.WARNING, "Session has timed out, the requested result is not available anymore", e);
+            // if this messages comes up a lot we might need to tweak the cache settings
+            Log.log(Level.WARNING, "Session has timed out, the requested result is not available anymore");
             response.sendError(HttpServletResponse.SC_REQUEST_TIMEOUT);
 
         } catch (NumberFormatException e) {
