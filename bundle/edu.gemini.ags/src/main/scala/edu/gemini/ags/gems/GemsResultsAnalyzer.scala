@@ -193,6 +193,8 @@ object GemsResultsAnalyzer {
   private def assignGuideProbeTargets(obsContext: ObsContext, posAngle: Angle, tiptiltGroup: GemsGuideProbeGroup, tiptiltTargetList: List[SiderealTarget], flexureGroup: GemsGuideProbeGroup, flexureStars: List[SiderealTarget], reverseOrder: Boolean): List[GuideProbeTargets] = {
     // assign guide probes for tiptilt asterism
     def addTipTiltGuideProbeTargets(targets: List[SiderealTarget], result: List[GuideProbeTargets], obsContext: ObsContext):(ObsContext, List[GuideProbeTargets]) = targets match {
+      case Nil  =>
+        (obsContext, result)
       case x :: Nil  =>
         val gpt = assignGuideProbeTarget(obsContext, posAngle, tiptiltGroup, x, tiptiltGroup, result, tiptiltTargetList, reverseOrder)
         // Update the ObsContext, since validation of the following targets may depend on it
@@ -205,6 +207,8 @@ object GemsResultsAnalyzer {
 
     // assign guide probe for flexure star
     def addFlexureGuideProbeTargets(targets: List[SiderealTarget], result: List[GuideProbeTargets], obsContext: ObsContext):List[GuideProbeTargets] = targets match {
+      case Nil  =>
+        result
       case x :: Nil  =>
         val gpt = assignGuideProbeTarget(obsContext, posAngle, flexureGroup, x, tiptiltGroup, result, tiptiltTargetList, reverseOrder = false)
         gpt.map(x => (x :: result).reverse).getOrElse(result)
