@@ -71,8 +71,8 @@ object DatFile {
 
   def scanFile(f: String): Scanner = {
     Option(getClass.getResourceAsStream(f)).fold {
-      val msg = s"Missing data file: $f"
-      Log.severe(msg)
+      val msg = s"Unsupported configuration, missing data file $f"
+      Log.fine(msg)
       throw new IllegalArgumentException(msg)
     } {
       new Scanner(_).useDelimiter(Delimiters)
