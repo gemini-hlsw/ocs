@@ -169,17 +169,13 @@ private class ItcFeedbackPanel(table: ItcTable) extends Label {
   }
 
   private def update(): Unit = {
-    table.selected.fold {
-      visible = false                 // no table row selected, don't show feedback panel
-    } {
-      feedback(_).fold {
-        visible = false               // no feedback for this row, don't show feedback panel
-      } { case (ico, msg, col) =>
-        icon        = ico             // feedback available, show it
-        text        = msg
-        background  = col
-        visible     = true
-      }
+    table.selected.flatMap(feedback).fold {
+      visible = false                 // no table row selected or no feedback, don't show feedback panel
+    } { case (ico, msg, col) =>
+      icon        = ico               // feedback available, show it
+      text        = msg
+      background  = col
+      visible     = true
     }
     revalidate()
   }
@@ -457,8 +453,7 @@ private class NumberEdit(label: Label, units: Label, default: Double = 0) extend
         try {
           publish(new ValueChanged(NumberEdit.this))
           tbwe.requestFocus()
-        }
-        catch {
+        } catch {
           case _: NumberFormatException =>
         }
     })
@@ -473,7 +468,7 @@ private class NumberEdit(label: Label, units: Label, default: Double = 0) extend
   def value: Option[Double] =
     try {
       Some(peer.getValue.toDouble)
-    }catch {
+    } catch {
       case _: NumberFormatException => None
     }
 }
