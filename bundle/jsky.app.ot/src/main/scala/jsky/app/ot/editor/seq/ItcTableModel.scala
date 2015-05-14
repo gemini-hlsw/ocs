@@ -1,5 +1,6 @@
 package jsky.app.ot.editor.seq
 
+import javax.swing.Icon
 import javax.swing.table.AbstractTableModel
 
 import edu.gemini.itc.shared._
@@ -8,7 +9,6 @@ import edu.gemini.spModel.config2.ItemKey
 
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
-import scalaz.Scalaz._
 
 /** Columns in the table are defined by their header label and a function on the unique config of the row. */
 case class Column(label: String, value: (ItcUniqueConfig, Future[ItcService.Result]) => AnyRef, tooltip: String = "")
@@ -25,10 +25,10 @@ sealed trait ItcTableModel extends AbstractTableModel {
 
   /** Defines a set of header columns for all tables. */
   val Headers = Seq(
-    Column("Data Labels",     (c, r) => c.labels),
-    Column("Images",          (c, r) => new java.lang.Integer(c.count),             tooltip = "Number of exposures used in S/N calculation"),
-    Column("Exposure Time",   (c, r) => new java.lang.Double(c.singleExposureTime), tooltip = "Exposure time of each image [s]"),
-    Column("Total Exp. Time", (c, r) => new java.lang.Double(c.totalExposureTime),  tooltip = "Total exposure time [s]")
+    Column("Data Labels",     (c, r) => (resultIcon(r).orNull, c.labels)),
+    Column("Images",          (c, r) => s"${c.count}",                      tooltip = "Number of exposures used in S/N calculation"),
+    Column("Exposure Time",   (c, r) => f"${c.singleExposureTime}%.1f",     tooltip = "Exposure time of each image [s]"),
+    Column("Total Exp. Time", (c, r) => f"${c.totalExposureTime}%.1f",      tooltip = "Total exposure time [s]")
   )
 
   val headers:      Seq[Column]
@@ -53,15 +53,24 @@ sealed trait ItcTableModel extends AbstractTableModel {
       case _                          => None
     }
 
-  protected def spcSourceMag    (result: Future[ItcService.Result]) = spectroscopyResult(result).map(_.source.norm)
+  protected def resultIcon(f: Future[ItcService.Result]): Option[Icon] =
+    f.value.fold {
+      Some(ItcPanel.SpinnerIcon).asInstanceOf[Option[Icon]]
+    } {
+      case Failure(t)               => Some(ItcPanel.ErrorIcon)
+      case Success(s) => s match {
+        case scalaz.Failure(errs)   => Some(ItcPanel.ErrorIcon)
+        case scalaz.Success(_)      => None
+      }
+    }
 
-  protected def spcSourceBand   (result: Future[ItcService.Result]) = spectroscopyResult(result).map(_.source.getNormBand.name)
-
-  protected def spcPeakElectrons(result: Future[ItcService.Result]) = spectroscopyResult(result).map(_.series(SignalChart, SignalData).yValues.max)
+  protected def spcPeakElectrons(result: Future[ItcService.Result]) = spectroscopyResult(result).map(_.series(SignalChart, SignalData).yValues.max.toInt)
 
   protected def spcPeakSNSingle (result: Future[ItcService.Result]) = spectroscopyResult(result).map(_.series(S2NChart, SingleS2NData).yValues.max)
 
   protected def spcPeakSNFinal  (result: Future[ItcService.Result]) = spectroscopyResult(result).map(_.series(S2NChart, FinalS2NData).yValues.max)
+
+  protected def spcSourceMag    (result: Future[ItcService.Result]) = spectroscopyResult(result).map(r => toMagString(r.source))
 
   // Gets the result from the service result future (if present)
   protected def serviceResult(f: Future[ItcService.Result]): Option[ItcResult] =
@@ -72,15 +81,13 @@ sealed trait ItcTableModel extends AbstractTableModel {
     } yield calcResult
 
 
-  protected def peakPixelFlux(result: Future[ItcService.Result], ccd: Int = 0) = imagingResult(result).map(_.ccd(ccd).peakPixelFlux.toInt)
+  protected def imgPeakPixelFlux(result: Future[ItcService.Result], ccd: Int = 0) = imagingResult(result).map(_.ccd(ccd).peakPixelFlux.toInt)
 
-  protected def singleSNRatio(result: Future[ItcService.Result], ccd: Int = 0) = imagingResult(result).map(_.ccd(ccd).singleSNRatio)
+  protected def imgSingleSNRatio(result: Future[ItcService.Result], ccd: Int = 0) = imagingResult(result).map(_.ccd(ccd).singleSNRatio)
 
-  protected def totalSNRatio (result: Future[ItcService.Result], ccd: Int = 0) = imagingResult(result).map(_.ccd(ccd).totalSNRatio)
+  protected def imgTotalSNRatio (result: Future[ItcService.Result], ccd: Int = 0) = imagingResult(result).map(_.ccd(ccd).totalSNRatio)
 
-  protected def sourceMag    (result: Future[ItcService.Result]) = imagingResult(result).map(_.source.norm)
-
-  protected def sourceBand   (result: Future[ItcService.Result]) = imagingResult(result).map(_.source.getNormBand.name)
+  protected def imgSourceMag    (result: Future[ItcService.Result]) = imagingResult(result).map(r => toMagString(r.source))
 
   // ===
 
@@ -100,7 +107,7 @@ sealed trait ItcTableModel extends AbstractTableModel {
 
   def tooltip(col: Int): String = column(col) match {
     case Some(c) => c.tooltip
-    case None    => ""                    // no tooltip for key columns
+    case None    => null  // no tooltip for key columns
   }
 
   /** Gets the column description for the given {{{col}}} index. Returns {{{None}}} for dynamic key columns. */
@@ -125,15 +132,8 @@ sealed trait ItcTableModel extends AbstractTableModel {
 
   private def toResult(col: Int) = results(col - headers.size - keys.size)
 
-  // TODO: display errors/validation messages in an appropriate way in the UI, for now also print them to console
-  protected def messages(f: Future[ItcService.Result]): String =
-    f.value.fold("Calculating...") {
-      case Failure(t) => t <| (_.printStackTrace()) |> (_.getMessage)  // "Look mummy, there's a spaceship up in the sky!"
-      case Success(s) => s match {
-        case scalaz.Failure(errs) => errs.mkString(", ")
-        case scalaz.Success(_)    => "OK"
-      }
-    }
+  private def toMagString(s: SourceDefinition) = f"${s.norm}%.2f ${s.getNormBand.name}"
+
 }
 
 
@@ -142,34 +142,30 @@ sealed trait ItcImagingTableModel extends ItcTableModel
 
 class ItcGenericImagingTableModel(val keys: Seq[ItemKey], val uniqueSteps: Seq[ItcUniqueConfig], val res: Seq[Future[ItcService.Result]]) extends ItcImagingTableModel {
   val headers = Headers ++ Seq(
-    Column("Source Mag",      (c, r) => sourceMag(r),              tooltip = "Source magnitude [mag]"),
-    Column("Source Band",     (c, r) => sourceBand(r),             tooltip = "Source band")
+    Column("Source Mag",      (c, r) => imgSourceMag(r),              tooltip = "Source magnitude [mag]")
     )
   val results = Seq(
-    Column("Peak",            (c, r) => peakPixelFlux(r),          tooltip = ItcTableModel.PeakPixelTooltip),
-    Column("S/N Single",      (c, r) => singleSNRatio(r)),
-    Column("S/N Total",       (c, r) => totalSNRatio (r)),
-    Column("Messages",        (c, r) => messages(r))
+    Column("Peak",            (c, r) => imgPeakPixelFlux(r),          tooltip = ItcTableModel.PeakPixelTooltip),
+    Column("S/N Single",      (c, r) => imgSingleSNRatio(r)),
+    Column("S/N Total",       (c, r) => imgTotalSNRatio (r))
   )
 }
 
 /** GMOS specific ITC imaging table model. */
 class ItcGmosImagingTableModel(val keys: Seq[ItemKey], val uniqueSteps: Seq[ItcUniqueConfig], val res: Seq[Future[ItcService.Result]]) extends ItcImagingTableModel {
   val headers = Headers ++ Seq(
-    Column("Source Mag",      (c, r) => sourceMag(r),              tooltip = "Source magnitude [mag]"),
-    Column("Source Band",     (c, r) => sourceBand(r),             tooltip = "Source band")
+    Column("Source Mag",      (c, r) => imgSourceMag(r),              tooltip = "Source magnitude [mag]")
   )
   val results = Seq(
-    Column("CCD1 Peak",       (c, r) => peakPixelFlux(r, ccd=0),   tooltip = ItcTableModel.PeakPixelTooltip + " for CCD 1"),
-    Column("CCD1 S/N Single", (c, r) => singleSNRatio(r, ccd=0)),
-    Column("CCD1 S/N Total",  (c, r) => totalSNRatio (r, ccd=0)),
-    Column("CCD2 Peak",       (c, r) => peakPixelFlux(r, ccd=1),   tooltip = ItcTableModel.PeakPixelTooltip + " for CCD 2"),
-    Column("CCD2 S/N Single", (c, r) => singleSNRatio(r, ccd=1)),
-    Column("CCD2 S/N Total",  (c, r) => totalSNRatio (r, ccd=1)),
-    Column("CCD3 Peak",       (c, r) => peakPixelFlux(r, ccd=2),   tooltip = ItcTableModel.PeakPixelTooltip + " for CCD 3"),
-    Column("CCD3 S/N Single", (c, r) => singleSNRatio(r, ccd=2)),
-    Column("CCD3 S/N Total",  (c, r) => totalSNRatio (r, ccd=2)),
-    Column("Messages",        (c, r) => messages(r))
+    Column("CCD1 Peak",       (c, r) => imgPeakPixelFlux(r, ccd=0),   tooltip = ItcTableModel.PeakPixelTooltip + " for CCD 1"),
+    Column("CCD1 S/N Single", (c, r) => imgSingleSNRatio(r, ccd=0)),
+    Column("CCD1 S/N Total",  (c, r) => imgTotalSNRatio (r, ccd=0)),
+    Column("CCD2 Peak",       (c, r) => imgPeakPixelFlux(r, ccd=1),   tooltip = ItcTableModel.PeakPixelTooltip + " for CCD 2"),
+    Column("CCD2 S/N Single", (c, r) => imgSingleSNRatio(r, ccd=1)),
+    Column("CCD2 S/N Total",  (c, r) => imgTotalSNRatio (r, ccd=1)),
+    Column("CCD3 Peak",       (c, r) => imgPeakPixelFlux(r, ccd=2),   tooltip = ItcTableModel.PeakPixelTooltip + " for CCD 3"),
+    Column("CCD3 S/N Single", (c, r) => imgSingleSNRatio(r, ccd=2)),
+    Column("CCD3 S/N Total",  (c, r) => imgTotalSNRatio (r, ccd=2))
   )
 }
 
@@ -179,14 +175,12 @@ sealed trait ItcSpectroscopyTableModel extends ItcTableModel
 
 class ItcGenericSpectroscopyTableModel(val keys: Seq[ItemKey], val uniqueSteps: Seq[ItcUniqueConfig], val res: Seq[Future[ItcService.Result]]) extends ItcSpectroscopyTableModel {
   val headers = Headers ++ Seq(
-    Column("Source Mag",      (c, r) => spcSourceMag(r),           tooltip = "Source magnitude [mag]"),
-    Column("Source Band",     (c, r) => spcSourceBand(r),          tooltip = "Source band"),
-    Column("Peak",            (c, r) => spcPeakElectrons(r),       tooltip = "Peak e- per exposure"),
-    Column("S/N Single",      (c, r) => spcPeakSNSingle(r)),
-    Column("S/N Total",       (c, r) => spcPeakSNFinal(r))
+    Column("Source Mag",      (c, r) => spcSourceMag(r),              tooltip = "Source magnitude [mag]")
   )
   val results = Seq(
-    Column("Messages",        (c, r) => messages(r))
+    Column("Peak",            (c, r) => spcPeakElectrons(r),          tooltip = "Peak e- per exposure"),
+    Column("S/N Single",      (c, r) => spcPeakSNSingle(r)),
+    Column("S/N Total",       (c, r) => spcPeakSNFinal(r))
   )
 
 }

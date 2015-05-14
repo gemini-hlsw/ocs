@@ -38,6 +38,10 @@ public final class ITCChart {
         }
     }
 
+    public JFreeChart getChart() {
+        return chart;
+    }
+
     public BufferedImage getBufferedImage(final int width, final int height)  {
         return chart.createBufferedImage(width, height);
     }

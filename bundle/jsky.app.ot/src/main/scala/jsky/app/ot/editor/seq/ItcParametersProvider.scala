@@ -20,7 +20,7 @@ trait ItcParametersProvider {
   def sequence: ConfigSequence
   def instrument: Option[SPComponentType]
   def observation: Option[ISPObservation]
-  def analysisMethod: AnalysisMethod
+  def analysisMethod: String \/ AnalysisMethod
   def conditions: String \/ ObservingConditions
   def instrumentPort: String \/ IssPort
   def targetEnvironment: String \/ TargetEnvironment
@@ -40,8 +40,8 @@ object ItcParametersProvider {
     def observation: Option[ISPObservation] =
       Option(owner.getContextObservation)
 
-    def analysisMethod: AnalysisMethod =
-      itcPanel.analysis
+    def analysisMethod: String \/ AnalysisMethod =
+      itcPanel.analysis.fold("Analysis method is invalid".left[AnalysisMethod])(_.right)
 
     def conditions: String \/ ObservingConditions =
       itcPanel.conditions.right
