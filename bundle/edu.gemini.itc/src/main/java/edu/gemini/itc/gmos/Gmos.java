@@ -148,8 +148,14 @@ public abstract class Gmos extends Instrument implements BinningProvider {
 
     }
 
+    /**
+     * Gets the slit width for the currently selected fpu.
+     * @return
+     */
     public double getSlitWidth() {
-        return gp.fpMask().isIFU() ? 0.3 : gp.fpMask().getWidth();
+        if      (gp.fpMask().isIFU())               return 0.3;
+        else if (gp.customSlitWidth().isDefined())  return gp.customSlitWidth().get().getWidth();
+        else                                        return gp.fpMask().getWidth();
     }
 
     /**
@@ -294,33 +300,49 @@ public abstract class Gmos extends Instrument implements BinningProvider {
     private void validate() {
         //Test to see that all conditions for Spectroscopy are met
         if (odp.getMethod().isSpectroscopy()) {
+
             if (grating.isEmpty())
                 throw new RuntimeException("Spectroscopy calculation method is selected but a grating" +
                         " is not.\nPlease select a grating and a " +
                         "focal plane mask in the Instrument " +
                         "configuration section.");
+
             if (gp.fpMask().equals(GmosNorthType.FPUnitNorth.FPU_NONE) || gp.fpMask().equals(GmosSouthType.FPUnitSouth.FPU_NONE))
                 throw new RuntimeException("Spectroscopy calculation method is selected but a focal" +
                         " plane mask is not.\nPlease select a " +
                         "grating and a " +
                         "focal plane mask in the Instrument " +
                         "configuration section.");
+
+            if (gp.fpMask().equals(GmosNorthType.FPUnitNorth.CUSTOM_MASK) || gp.fpMask().equals(GmosSouthType.FPUnitSouth.CUSTOM_MASK)) {
+
+                if (gp.customSlitWidth().isEmpty())
+                    throw new RuntimeException("Custom mask is selected but custom slit width is undefined.");
+
+                if (gp.customSlitWidth().get().equals(GmosCommonType.CustomSlitWidth.OTHER))
+                    throw new RuntimeException("Slit width for the custom mask is not known.");
+            }
         }
 
         if (odp.getMethod().isImaging()) {
+
             if (filter.isEmpty())
-                throw new RuntimeException("Imaging calculation method is selected but a filter" +
-                        " is not.\n  Please select a filter and resubmit the " +
-                        "form to continue.");
+                throw new RuntimeException("Imaging calculation method is selected but a filter is not.");
+
             if (grating.isDefined())
                 throw new RuntimeException("Imaging calculation method is selected but a grating" +
                         " is also selected.\nPlease deselect the " +
                         "grating or change the method to spectroscopy.");
+
             if (!gp.fpMask().equals(GmosNorthType.FPUnitNorth.FPU_NONE) && !gp.fpMask().equals(GmosSouthType.FPUnitSouth.FPU_NONE))
                 throw new RuntimeException("Imaging calculation method is selected but a Focal" +
-                        " Plane Mask is also selected.\nPlease " +
-                        "deselect the Focal Plane Mask" +
+                        " Plane Mask is also selected.\nPlease deselect the Focal Plane Mask" +
                         " or change the method to spectroscopy.");
+
+            if (gp.customSlitWidth().isDefined())
+                throw new RuntimeException("Imaging calculation method is selected but a Custom" +
+                        " Slit Width is also selected.\n");
+
             if (isIfuUsed())
                 throw new RuntimeException("Imaging calculation method is selected but an IFU" +
                         " is also selected.\nPlease deselect the IFU or" +
