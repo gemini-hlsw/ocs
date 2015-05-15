@@ -15,7 +15,7 @@ import jsky.app.ot.gemini.editor.targetComponent.details.NumericPropertySheet.Pr
 
 import scala.swing.GridBagPanel.{Anchor, Fill}
 import scala.swing.ListView.Renderer
-import scala.swing.event.{MouseClicked, SelectionChanged}
+import scala.swing.event.SelectionChanged
 import scala.swing.{ComboBox, GridBagPanel, Label, Swing}
 import scalaz.Scalaz._
 
@@ -28,15 +28,16 @@ final class SourceDetailsEditor extends GridBagPanel with TelescopePosEditor {
   private[this] var isBase: Boolean = false
   private[this] var node: Option[ISPNode] = None
 
-  private def setDistribution(sd: SpectralDistribution) = spt.getTarget.setSpectralDistribution(Some(sd))
-  private def setProfile     (sp: SpatialProfile)       = spt.getTarget.setSpatialProfile(Some(sp))
+  private def setDistribution(sd: SpectralDistribution): Unit         = setDistribution(Some(sd))
+  private def setDistribution(sd: Option[SpectralDistribution]): Unit = spt.getTarget.setSpectralDistribution(sd)
+  private def setProfile     (sp: SpatialProfile): Unit               = setProfile(Some(sp))
+  private def setProfile     (sp: Option[SpatialProfile]): Unit       = spt.getTarget.setSpatialProfile(sp)
 
   // ==== Spatial Profile Details
 
   private val defaultPointSource    = PointSource()
   private val defaultUniformSource  = UniformSource()
   private val defaultGaussianSource = GaussianSource(0.5)
-  private val defaultProfile        = defaultPointSource
 
   private def gaussianOrDefault(t: SPTarget): GaussianSource = t.getTarget.getSpatialProfile.fold(defaultGaussianSource)(_.asInstanceOf[GaussianSource])
 
@@ -46,11 +47,12 @@ final class SourceDetailsEditor extends GridBagPanel with TelescopePosEditor {
     Prop("with FWHM",  "arcsec", _.fwhm, (a, v) => setProfile(GaussianSource(v)))
   )
 
-  private case class ProfilePanel(label: String, panel: Component, default: SpatialProfile)
+  private case class ProfilePanel(label: String, panel: Component, default: Option[SpatialProfile])
   private val profilePanels = List(
-    ProfilePanel("Point Source",             pointSourceDetails,    defaultPointSource),
-    ProfilePanel("Extended Gaussian Source", gaussianSourceDetails, defaultGaussianSource),
-    ProfilePanel("Extended Uniform Source",  uniformSourceDetails,  defaultUniformSource)
+    ProfilePanel("«undefined»",              new JPanel(),          None),
+    ProfilePanel("Point Source",             pointSourceDetails,    Some(defaultPointSource)),
+    ProfilePanel("Extended Gaussian Source", gaussianSourceDetails, Some(defaultGaussianSource)),
+    ProfilePanel("Extended Uniform Source",  uniformSourceDetails,  Some(defaultUniformSource))
   )
 
   private val profiles = new ComboBox[ProfilePanel](profilePanels) {
@@ -62,7 +64,6 @@ final class SourceDetailsEditor extends GridBagPanel with TelescopePosEditor {
   private val defaultBlackBody    = BlackBody(10000)
   private val defaultEmissionLine = EmissionLine(Wavelength.fromMicrons(2.2), 500, Flux.fromWatts(5.0e-19), Continuum.fromWatts(1.0e-16))
   private val defaultPowerLaw     = PowerLaw(1)
-  private val defaultDistribution = LibraryStar.A0V
 
   private def blackBodyOrDefault   (t: SPTarget): BlackBody     = t.getTarget.getSpectralDistribution.fold(defaultBlackBody)(_.asInstanceOf[BlackBody])
   private def emissionLineOrDefault(t: SPTarget): EmissionLine  = t.getTarget.getSpectralDistribution.fold(defaultEmissionLine)(_.asInstanceOf[EmissionLine])
@@ -87,13 +88,14 @@ final class SourceDetailsEditor extends GridBagPanel with TelescopePosEditor {
     Prop("Index",       "",         _.index,                (a, v) => setDistribution(PowerLaw(v)))
   )
 
-  private case class DistributionPanel(label: String, panel: Component, default: SpectralDistribution)
+  private case class DistributionPanel(label: String, panel: Component, default: Option[SpectralDistribution])
   private val distributionPanels = List(
-    DistributionPanel("Library Star",     libraryStarDetails.peer,    libraryStarDetails.selection.item),
-    DistributionPanel("Library Non-Star", libraryNonStarDetails.peer, libraryNonStarDetails.selection.item),
-    DistributionPanel("Black Body",       blackBodyDetails,           defaultBlackBody),
-    DistributionPanel("Emission Line",    emissionLineDetails,        defaultEmissionLine),
-    DistributionPanel("Power Law",        powerLawDetails,            defaultPowerLaw)
+    DistributionPanel("«undefined»",      new JPanel(),               None),
+    DistributionPanel("Library Star",     libraryStarDetails.peer,    Some(libraryStarDetails.selection.item)),
+    DistributionPanel("Library Non-Star", libraryNonStarDetails.peer, Some(libraryNonStarDetails.selection.item)),
+    DistributionPanel("Black Body",       blackBodyDetails,           Some(defaultBlackBody)),
+    DistributionPanel("Emission Line",    emissionLineDetails,        Some(defaultEmissionLine)),
+    DistributionPanel("Power Law",        powerLawDetails,            Some(defaultPowerLaw))
   )
 
   private val distributions = new ComboBox[DistributionPanel](distributionPanels) {
@@ -101,6 +103,8 @@ final class SourceDetailsEditor extends GridBagPanel with TelescopePosEditor {
   }
 
   // ==== The Layout
+
+  border = titleBorder("Source")
 
   layout(new Label("Spatial Profile")) = new Constraints {
     anchor  = Anchor.West
@@ -165,12 +169,11 @@ final class SourceDetailsEditor extends GridBagPanel with TelescopePosEditor {
 
   // ==== Listeners and Reactions
 
-  val editElements = List(
+  private val editElements = List(
     profiles.selection,
     distributions.selection,
     libraryStarDetails.selection,
-    libraryNonStarDetails.selection,
-    mouse.clicks
+    libraryNonStarDetails.selection
   )
 
   listenTo(editElements:_*)
@@ -192,14 +195,6 @@ final class SourceDetailsEditor extends GridBagPanel with TelescopePosEditor {
       setProfile(profiles.selection.item.default)
       spt.notifyOfGenericUpdate()
 
-    case MouseClicked(_,_,_,_,_)      =>
-      if (!enabled && editable) {
-        // first click will set profile & distribution to some default values
-        // up to that moment both values are set to None
-        setProfile(defaultProfile)
-        setDistribution(defaultDistribution)
-        spt.notifyOfGenericUpdate()
-      }
   }
 
   def editable: Boolean =
@@ -216,19 +211,21 @@ final class SourceDetailsEditor extends GridBagPanel with TelescopePosEditor {
     isBase    = if (obsContext.isDefined) obsContext.getValue.getTargets.getBase == spTarget else false
     this.node = Option(node)
 
-    spt.getTarget.getSpatialProfile.getOrElse(defaultProfile) match {
-      case s: PointSource => profiles.selection.item = profilePanels.head;
-      case s: GaussianSource => profiles.selection.item = profilePanels(1); profilePanels(1).panel.asInstanceOf[NumericPropertySheet[GaussianSource]].edit(obsContext, spTarget, node)
-      case s: UniformSource => profiles.selection.item = profilePanels(2);
+    spt.getTarget.getSpatialProfile match {
+      case None                     => profiles.selection.item = profilePanels.head
+      case Some(s: PointSource)     => profiles.selection.item = profilePanels(1);
+      case Some(s: GaussianSource)  => profiles.selection.item = profilePanels(2); profilePanels(2).panel.asInstanceOf[NumericPropertySheet[GaussianSource]].edit(obsContext, spTarget, node)
+      case Some(s: UniformSource)   => profiles.selection.item = profilePanels(3);
     }
 
-    spt.getTarget.getSpectralDistribution.getOrElse(defaultDistribution) match {
-      case s: LibraryStar    => distributions.selection.item = distributionPanels.head; libraryStarDetails.selection.item = s
-      case s: LibraryNonStar => distributions.selection.item = distributionPanels(1);   libraryNonStarDetails.selection.item = s
-      case s: BlackBody      => distributions.selection.item = distributionPanels(2);   distributionPanels(2).panel.asInstanceOf[NumericPropertySheet[BlackBody]].edit(obsContext, spTarget, node)
-      case s: EmissionLine   => distributions.selection.item = distributionPanels(3);   distributionPanels(3).panel.asInstanceOf[NumericPropertySheet[EmissionLine]].edit(obsContext, spTarget, node)
-      case s: PowerLaw       => distributions.selection.item = distributionPanels(4);   distributionPanels(4).panel.asInstanceOf[NumericPropertySheet[PowerLaw]].edit(obsContext, spTarget, node)
-      case s: UserDefined    => throw new Error("not yet supported") // at a later stage we will add support for aux files user spectras
+    spt.getTarget.getSpectralDistribution match {
+      case None                     => distributions.selection.item = distributionPanels.head;
+      case Some(s: LibraryStar)     => distributions.selection.item = distributionPanels(1); libraryStarDetails.selection.item = s
+      case Some(s: LibraryNonStar)  => distributions.selection.item = distributionPanels(2); libraryNonStarDetails.selection.item = s
+      case Some(s: BlackBody)       => distributions.selection.item = distributionPanels(3); distributionPanels(3).panel.asInstanceOf[NumericPropertySheet[BlackBody]].edit(obsContext, spTarget, node)
+      case Some(s: EmissionLine)    => distributions.selection.item = distributionPanels(4); distributionPanels(4).panel.asInstanceOf[NumericPropertySheet[EmissionLine]].edit(obsContext, spTarget, node)
+      case Some(s: PowerLaw)        => distributions.selection.item = distributionPanels(5); distributionPanels(5).panel.asInstanceOf[NumericPropertySheet[PowerLaw]].edit(obsContext, spTarget, node)
+      case Some(s: UserDefined)     => throw new Error("not yet supported") // at a later stage we will add support for aux files user spectras
     }
 
     update()
@@ -248,7 +245,6 @@ final class SourceDetailsEditor extends GridBagPanel with TelescopePosEditor {
       distributionPanels.foreach(_.panel.setVisible(false))
       distributions.selection.item.panel.setVisible(true)
 
-      updateEnabledState(editable)
     } else {
       visible = false
     }
@@ -257,18 +253,7 @@ final class SourceDetailsEditor extends GridBagPanel with TelescopePosEditor {
   }
 
   def updateEnabledState(b: Boolean): Unit = {
-    val hasProfile = Option(spt).exists(_.getTarget.getSpatialProfile.isDefined)
-    enabled = b && hasProfile
-
-    peer.getComponents.foreach(_.setEnabled(enabled))
-
-    if (!hasProfile && editable) {
-      tooltip = "Click on title to activate this."
-      border = titleBorder("Source [Click to Activate]")
-    } else {
-      tooltip = ""
-      border = titleBorder("Source")
-    }
+    peer.getComponents.foreach(_.setEnabled(b))
   }
 
 }
