@@ -60,8 +60,8 @@ trait ItcTable extends Table {
     val seq = parameters.sequence
     val allKeys = seq.getStaticKeys.toSeq ++ seq.getIteratedKeys.toSeq
     val showKeys = seq.getIteratedKeys.toSeq.
-      filterNot(k => ExcludedParentKeys.contains(k.getParent)).
-      filterNot(ExcludedKeys.contains).
+      filterNot(k => ExcludedParentKeys(k.getParent)).
+      filterNot(ExcludedKeys).
       filterNot(_.equals(INST_EXP_TIME_KEY)).   // exposure time will always be shown, don't repeat it in case it is part of the dynamic configuration
       sortBy(_.getPath)
 

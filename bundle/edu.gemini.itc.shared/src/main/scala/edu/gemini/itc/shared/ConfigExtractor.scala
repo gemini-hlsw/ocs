@@ -88,7 +88,7 @@ object ConfigExtractor {
 
     // Gets the site this GMOS belongs to
     def extractSite: String \/ Site =
-      extract[String](c, InstrumentKey).rightMap(s => if (s.equals("GMOS-N")) Site.GN else Site.GS)
+      extract[String](c, InstrumentKey).map(s => if (s.equals("GMOS-N")) Site.GN else Site.GS)
 
     // Gets the custom mask for the given site
     def customMask(s: Site): FPUnit = s match {
@@ -102,7 +102,7 @@ object ConfigExtractor {
 
     // Gets the optional custom slit width
     def extractCustomSlit: String \/ Option[CustomSlitWidth] =
-      if (c.containsItem(FpuKey)) None.right else extract[CustomSlitWidth](c, CustomSlitWidthKey).rightMap(Some(_))
+      if (c.containsItem(FpuKey)) None.right else extract[CustomSlitWidth](c, CustomSlitWidthKey).map(Some(_))
 
     // Note: In the future we will support more options, for now only single on-axis is supported.
     def extractIfu(mask: GmosCommonType.FPUnit): Option[IfuMethod] =
@@ -153,7 +153,7 @@ object ConfigExtractor {
     import AltairParams._
 
     def altairIsPresent =
-      c.containsItem(AoSystemKey) && extract[String](c, AoSystemKey).rightMap("Altair".equals).getOrElse(false)
+      c.containsItem(AoSystemKey) && extract[String](c, AoSystemKey).map("Altair".equals).getOrElse(false)
 
     def extractGroup =
       targetEnv.getPrimaryGuideProbeTargets(probe).asScalaOpt.fold("No guide star selected".left[GuideProbeTargets])(_.right)
@@ -196,14 +196,14 @@ object ConfigExtractor {
     val instrument = extract[String](c, InstrumentKey).getOrElse("")
     (instrument match {
       case "AcqCam" =>
-        extract[AcqCamParams.ColorFilter](c, ColorFilterKey).rightMap(_.getCentralWavelength.toDouble)
+        extract[AcqCamParams.ColorFilter](c, ColorFilterKey).map(_.getCentralWavelength.toDouble)
       case "GNIRS" =>
-        extract[GNIRSParams.Wavelength](c, ObsWavelengthKey).rightMap(_.doubleValue())
+        extract[GNIRSParams.Wavelength](c, ObsWavelengthKey).map(_.doubleValue())
       case _ =>
         if (c.containsItem(ObsWavelengthKey)) extractDoubleFromString(c, ObsWavelengthKey)
         else "Observing wavelength is not defined (missing filter?)".left
 
-    }).rightMap(Wavelength.fromMicrons)
+    }).map(Wavelength.fromMicrons)
   }
 
 

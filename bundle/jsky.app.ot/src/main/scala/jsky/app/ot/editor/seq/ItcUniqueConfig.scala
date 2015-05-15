@@ -42,12 +42,12 @@ object ItcUniqueConfig {
 
   /** The following keys are for configuration values which are not relevant for ITC calculations
     * and must be excluded when deciding on which configurations are unique with respect to ITC. */
-  val ExcludedParentKeys = List (
+  val ExcludedParentKeys = Set (
       CALIBRATION_KEY,
       TELESCOPE_KEY,                                // this includes P- and Q offsets
       OBSERVE_KEY                                   // this includes the data label
     )
-  val ExcludedKeys = List(
+  val ExcludedKeys = Set(
       // == device specific exceptions
       new ItemKey("instrument:dtaXOffset")          // DTA X-Offset (GMOS)
     )
@@ -94,8 +94,8 @@ object ItcUniqueConfig {
   // Creates a hash for the given config step taking into account only the values that are relevant for ITC
   // calculations, e.g. ignoring offsets and data labels.
   private def hash(step: Config): Int = step.getKeys.
-    filterNot(k => ExcludedParentKeys.contains(k.getParent)).
-    filterNot(ExcludedKeys.contains).
+    filterNot(k => ExcludedParentKeys(k.getParent)).
+    filterNot(ExcludedKeys).
     filterNot(step.getItemValue(_) == null).      // occasionally we get null values..
     map(step.getItemValue(_).hashCode()).
     foldLeft(17)((acc, h) => 37*acc + h)
