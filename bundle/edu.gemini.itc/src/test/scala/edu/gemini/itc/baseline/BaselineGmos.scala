@@ -25,6 +25,7 @@ object BaselineGmos {
       DisperserNorth.MIRROR,
       Wavelength.fromNanometers(500.0), // central wavelength
       FPUnitNorth.FPU_NONE,
+      None,
       1,
       1,
       None,                         // IFU method
@@ -35,6 +36,7 @@ object BaselineGmos {
       DisperserNorth.MIRROR,
       Wavelength.fromNanometers(500.0), // central wavelength
       FPUnitNorth.FPU_NONE,
+      None,
       2,
       2,
       None,                         // IFU method
@@ -47,6 +49,7 @@ object BaselineGmos {
       DisperserSouth.MIRROR,
       Wavelength.fromNanometers(500.0),
       FPUnitSouth.FPU_NONE,
+      None,
       2,
       4,
       None,
@@ -57,6 +60,7 @@ object BaselineGmos {
       DisperserSouth.MIRROR,
       Wavelength.fromNanometers(500.0),
       FPUnitSouth.FPU_NONE,
+      None,
       4,
       4,
       None,
@@ -75,6 +79,7 @@ object BaselineGmos {
       DisperserNorth.R150_G5306,
       Wavelength.fromNanometers(500.0),
       FPUnitNorth.LONGSLIT_2,
+      None,
       1,
       1,
       None,
@@ -85,6 +90,7 @@ object BaselineGmos {
       DisperserNorth.R400_G5305,
       Wavelength.fromNanometers(500.0),
       FPUnitNorth.IFU_1,
+      None,
       2,
       2,
       Some(IfuSingle(0.0)),
@@ -95,6 +101,7 @@ object BaselineGmos {
       DisperserNorth.R400_G5305,
       Wavelength.fromNanometers(500.0),
       FPUnitNorth.IFU_1,
+      None,
       2,
       2,
       Some(IfuSingle(0.3)),
@@ -107,6 +114,7 @@ object BaselineGmos {
       DisperserSouth.R150_G5326,
       Wavelength.fromNanometers(500.0),
       FPUnitSouth.LONGSLIT_2,
+      None,
       2,
       4,
       None,

@@ -131,7 +131,7 @@ object ITCRequest {
       None
     }
 
-    GmosParameters(filter, grating, centralWl, fpMask, spatBinning, specBinning, ifuMethod, ccdType, site)
+    GmosParameters(filter, grating, centralWl, fpMask, None, spatBinning, specBinning, ifuMethod, ccdType, site)
   }
 
   def gnirsParameters(r: ITCRequest): GnirsParameters = {

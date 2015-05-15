@@ -29,6 +29,8 @@ import scalaz._
  */
 trait ItcTable extends Table {
 
+  import ItcUniqueConfig._
+
   val parameters: ItcParametersProvider
 
   def tableModel(keys: Seq[ItemKey], seq: ConfigSequence): ItcTableModel
@@ -58,13 +60,9 @@ trait ItcTable extends Table {
     val seq = parameters.sequence
     val allKeys = seq.getStaticKeys.toSeq ++ seq.getIteratedKeys.toSeq
     val showKeys = seq.getIteratedKeys.toSeq.
-      filterNot(_.equals(DATALABEL_KEY)). // don't show the original data label (step number)
-      filterNot(_.equals(OBS_TYPE_KEY)). // don't show the type (science vs. calibration)
-      filterNot(_.equals(OBS_EXP_TIME_KEY)). // don't show observe exp time
-      filterNot(_.equals(INST_EXP_TIME_KEY)). // don't show instrument exp time
-      filterNot(_.equals(TEL_P_KEY)). // don't show offsets
-      filterNot(_.equals(TEL_Q_KEY)). // don't show offsets
-      filterNot(_.getParent().equals(CALIBRATION_KEY)). // calibration settings are not relevant
+      filterNot(k => ExcludedParentKeys(k.getParent)).
+      filterNot(ExcludedKeys).
+      filterNot(_.equals(INST_EXP_TIME_KEY)).   // exposure time will always be shown, don't repeat it in case it is part of the dynamic configuration
       sortBy(_.getPath)
 
     // update table model while keeping the current selection

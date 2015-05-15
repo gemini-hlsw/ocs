@@ -1,6 +1,6 @@
 package jsky.app.ot.editor.seq
 
-import edu.gemini.spModel.config2.{Config, ConfigSequence}
+import edu.gemini.spModel.config2.{ItemKey, Config, ConfigSequence}
 import edu.gemini.spModel.gemini.acqcam.InstAcqCam
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2
 import edu.gemini.spModel.gemini.gmos.{GmosNorthType, GmosSouthType, InstGmosNorth, InstGmosSouth}
@@ -39,6 +39,19 @@ case class ItcUniqueConfig(count: Int, labels: String, config: Config) {
  * Utility functions to get unique configurations from ConfigurationSequence objects.
  */
 object ItcUniqueConfig {
+
+  /** The following keys are for configuration values which are not relevant for ITC calculations
+    * and must be excluded when deciding on which configurations are unique with respect to ITC. */
+  val ExcludedParentKeys = Set (
+      CALIBRATION_KEY,
+      TELESCOPE_KEY,                                // this includes P- and Q offsets
+      OBSERVE_KEY                                   // this includes the data label
+    )
+  val ExcludedKeys = Set(
+      // == device specific exceptions
+      new ItemKey("instrument:dtaXOffset")          // DTA X-Offset (GMOS)
+    )
+
 
   /** Gets all unique science imaging configurations from the given sequence. */
   def imagingConfigs(seq: ConfigSequence): Seq[ItcUniqueConfig] =
@@ -81,13 +94,11 @@ object ItcUniqueConfig {
   // Creates a hash for the given config step taking into account only the values that are relevant for ITC
   // calculations, e.g. ignoring offsets and data labels.
   private def hash(step: Config): Int = step.getKeys.
-      filterNot(_.getParent.equals(CALIBRATION_KEY)).
-      filterNot(_.equals(DATALABEL_KEY)).           // don't take data label into account (step number)
-      filterNot(_.equals(TEL_P_KEY)).               // configs with different P offsets are considered as one config
-      filterNot(_.equals(TEL_Q_KEY)).               // dito for Q
-      filterNot(step.getItemValue(_) == null).      // occasionally we get null values..
-      map(step.getItemValue(_).hashCode()).
-      foldLeft(17)((acc, h) => 37*acc + h)
+    filterNot(k => ExcludedParentKeys(k.getParent)).
+    filterNot(ExcludedKeys).
+    filterNot(step.getItemValue(_) == null).      // occasionally we get null values..
+    map(step.getItemValue(_).hashCode()).
+    foldLeft(17)((acc, h) => 37*acc + h)
 
   // Creates a text label based on the spans of steps covered by the steps.
   // E.g. ((1,2,3),(10,11),(15)) is turned into "001-003, 010-011, 015"

@@ -6,7 +6,7 @@ import edu.gemini.spModel.config2.ItemKey;
 final class Keys {
     static final ItemKey CALIBRATION_KEY= new ItemKey("calibration");
     static final ItemKey INSTRUMENT_KEY = new ItemKey("instrument");
-//    static final ItemKey OBSERVE_KEY    = new ItemKey("observe");
+    static final ItemKey OBSERVE_KEY    = new ItemKey("observe");
     static final ItemKey TELESCOPE_KEY  = new ItemKey("telescope");
 
     static final ItemKey DATALABEL_KEY   = new ItemKey("observe:dataLabel");

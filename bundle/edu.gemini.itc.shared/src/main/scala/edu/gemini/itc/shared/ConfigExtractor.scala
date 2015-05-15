@@ -9,7 +9,7 @@ import edu.gemini.spModel.core._
 import edu.gemini.spModel.gemini.acqcam.AcqCamParams
 import edu.gemini.spModel.gemini.altair.AltairParams
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2
-import edu.gemini.spModel.gemini.gmos.GmosCommonType
+import edu.gemini.spModel.gemini.gmos.{GmosSouthType, GmosNorthType, GmosCommonType}
 import edu.gemini.spModel.gemini.gnirs.GNIRSParams
 import edu.gemini.spModel.gemini.gsaoi.Gsaoi
 import edu.gemini.spModel.gemini.niri.Niri
@@ -44,6 +44,7 @@ object ConfigExtractor {
   private val MaskKey             = new ItemKey("instrument:mask")
   private val ObsWavelengthKey    = new ItemKey("instrument:observingWavelength")
   private val PortKey             = new ItemKey("instrument:port")
+  private val CustomSlitWidthKey  = new ItemKey("instrument:customSlitWidth")
 
   private val AoSystemKey         = new ItemKey("adaptive optics:aoSystem")
   private val AoFieldLensKey      = new ItemKey("adaptive optics:fieldLens")
@@ -85,23 +86,41 @@ object ConfigExtractor {
   private def extractGmos(c: Config): String \/ GmosParameters = {
     import GmosCommonType._
 
-    def extractIfu(mask: GmosCommonType.FPUnit) =
-      // Note: In the future we will support more options, for now only single on-axis is supported.
+    // Gets the site this GMOS belongs to
+    def extractSite: String \/ Site =
+      extract[String](c, InstrumentKey).map(s => if (s.equals("GMOS-N")) Site.GN else Site.GS)
+
+    // Gets the custom mask for the given site
+    def customMask(s: Site): FPUnit = s match {
+      case Site.GN => GmosNorthType.FPUnitNorth.CUSTOM_MASK
+      case Site.GS => GmosSouthType.FPUnitSouth.CUSTOM_MASK
+    }
+
+    // Gets the mask, supplying the appropriate custom mask for the site if empty
+    def extractMask(s: Site): String \/ FPUnit =
+      if (c.containsItem(FpuKey)) extract[FPUnit](c, FpuKey) else customMask(s).right
+
+    // Gets the optional custom slit width
+    def extractCustomSlit: String \/ Option[CustomSlitWidth] =
+      if (c.containsItem(FpuKey)) None.right else extract[CustomSlitWidth](c, CustomSlitWidthKey).map(Some(_))
+
+    // Note: In the future we will support more options, for now only single on-axis is supported.
+    def extractIfu(mask: GmosCommonType.FPUnit): Option[IfuMethod] =
       if (mask.isIFU) Some(IfuSingle(0.0)) else None
 
     for {
+      site        <- extractSite
+      mask        <- extractMask(site)
+      customSlit  <- extractCustomSlit
       filter      <- extract[Filter]        (c, FilterKey)
       grating     <- extract[Disperser]     (c, DisperserKey)
-      mask        <- extract[FPUnit]        (c, FpuKey)
       specBin     <- extract[Binning]       (c, CcdXBinKey)
       spatBin     <- extract[Binning]       (c, CcdYBinKey)
       ccdType     <- extract[DetectorManufacturer](c, CcdManufacturerKey)
-      siteString  <- extract[String]        (c, InstrumentKey)
       wavelen     <- extractObservingWavelength(c)
     } yield {
       val ifuMethod = extractIfu(mask)
-      val site      = if (siteString.equals("GMOS-N")) Site.GN else Site.GS
-      GmosParameters(filter, grating, wavelen, mask, spatBin.getValue, specBin.getValue, ifuMethod, ccdType, site)
+      GmosParameters(filter, grating, wavelen, mask, customSlit, spatBin.getValue, specBin.getValue, ifuMethod, ccdType, site)
     }
 
   }
@@ -134,7 +153,7 @@ object ConfigExtractor {
     import AltairParams._
 
     def altairIsPresent =
-      c.containsItem(AoSystemKey) && extract[String](c, AoSystemKey).rightMap("Altair".equals).getOrElse(false)
+      c.containsItem(AoSystemKey) && extract[String](c, AoSystemKey).map("Altair".equals).getOrElse(false)
 
     def extractGroup =
       targetEnv.getPrimaryGuideProbeTargets(probe).asScalaOpt.fold("No guide star selected".left[GuideProbeTargets])(_.right)
@@ -177,14 +196,14 @@ object ConfigExtractor {
     val instrument = extract[String](c, InstrumentKey).getOrElse("")
     (instrument match {
       case "AcqCam" =>
-        extract[AcqCamParams.ColorFilter](c, ColorFilterKey).rightMap(_.getCentralWavelength.toDouble)
+        extract[AcqCamParams.ColorFilter](c, ColorFilterKey).map(_.getCentralWavelength.toDouble)
       case "GNIRS" =>
-        extract[GNIRSParams.Wavelength](c, ObsWavelengthKey).rightMap(_.doubleValue())
+        extract[GNIRSParams.Wavelength](c, ObsWavelengthKey).map(_.doubleValue())
       case _ =>
         if (c.containsItem(ObsWavelengthKey)) extractDoubleFromString(c, ObsWavelengthKey)
         else "Observing wavelength is not defined (missing filter?)".left
 
-    }).rightMap(Wavelength.fromMicrons)
+    }).map(Wavelength.fromMicrons)
   }
 
 
@@ -206,7 +225,7 @@ object ConfigExtractor {
   private def extractWithThrowable[A](c: Config, key: ItemKey)(implicit clazz: ClassTag[A]): Throwable \/ A = {
 
     def missingKey[A](key: ItemKey): \/[Throwable, A] =
-      new Error("Missing config value for key ${key.getPath}").left[A]
+      new Error(s"Missing config value for key ${key.getPath}").left[A]
 
     Option(c.getItemValue(key)).fold(missingKey[A](key)) { v =>
       \/.fromTryCatch(clazz.runtimeClass.cast(v).asInstanceOf[A])
