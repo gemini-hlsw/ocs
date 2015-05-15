@@ -75,7 +75,7 @@ final class TemplateServlet(templateFactory: TemplateFactory) extends HttpServle
     readItem("folder", items, it => Source.fromInputStream(it.getInputStream, "UTF-8").mkString)
 
   private def expandTemplates(folder: Phase1Folder): Either[Failure, TemplateFolderExpansion] =
-    TemplateFolderExpansionFactory.expand(folder, templateFactory).left map { msg =>
+    TemplateFolderExpansionFactory.expand(folder, templateFactory, false).left map { msg =>
       Failure.badRequest(msg)
     }
 

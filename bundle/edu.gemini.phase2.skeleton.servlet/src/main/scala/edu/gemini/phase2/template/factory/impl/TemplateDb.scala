@@ -21,7 +21,8 @@ object TemplateDb {
     ss.reverse.drop(2).reverse.mkString("/", "/", "/xml/")
   }
 
-  val XMLS = List(
+  // URLs of xml files, filtered by name
+  def xmls(f: String => Boolean) = List(
     "F2_BP.xml",
     "GMOS_N_BP.xml",
     "GMOS_S_BP.xml",
@@ -36,11 +37,14 @@ object TemplateDb {
     "TEXES_BP.xml",
     "TRECS_BP.xml",
     "VISITOR_BP.xml"
-  ).map(PATH + _).map(classOf[TemplateDb].getResource)
+  ).filter(f).map(PATH + _).map(classOf[TemplateDb].getResource)
 
-  def load(user: java.util.Set[Principal]):Either[String, TemplateDb] = {
+  def load(user: java.util.Set[Principal]):Either[String, TemplateDb] =
+    loadWithFilter(user, _ => true)
+
+  def loadWithFilter(user: java.util.Set[Principal], filter: String => Boolean):Either[String, TemplateDb] = {
     val odb = DBLocalDatabase.createTransient
-    val res = XMLS.mapM { url =>
+    val res = xmls(filter).mapM { url =>
       LOG.fine(s"Loading $url")
       parse(odb)(url)
     }

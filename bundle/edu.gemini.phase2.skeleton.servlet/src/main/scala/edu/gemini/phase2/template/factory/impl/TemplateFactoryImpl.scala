@@ -40,7 +40,7 @@ case class TemplateFactoryImpl(db: TemplateDb) extends TemplateFactory {
 
   type TargetId = String
 
-  def expand(blueprint: SpBlueprint, pig: Phase1Group): Either[String, BlueprintExpansion] = {
+  def expand(blueprint: SpBlueprint, pig: Phase1Group, testing: Boolean): Either[String, BlueprintExpansion] = {
     // template groups are editable and all arguments can be removed so there
     // may not be an example target
     def sampleTarget: Option[SPTarget] =
@@ -50,7 +50,7 @@ case class TemplateFactoryImpl(db: TemplateDb) extends TemplateFactory {
     for {
       ini <- initializer(blueprint, sampleTarget).right
       grp <- ini.initialize(db).right
-    } yield convert(blueprint, pig, grp, ini)
+    } yield convert(blueprint, pig, grp, ini, testing)
   }
 
   // Provide a sample target, used in some cases to get the magnitude. It is assumed that the groups are partitioned
@@ -116,7 +116,7 @@ case class TemplateFactoryImpl(db: TemplateDb) extends TemplateFactory {
     }
 
 
-  private def convert(blue: SpBlueprint, pig: Phase1Group, grp: ISPGroup, ini:GroupInitializer[_]): BlueprintExpansion = {
+  private def convert(blue: SpBlueprint, pig: Phase1Group, grp: ISPGroup, ini:GroupInitializer[_], testing: Boolean): BlueprintExpansion = {
 
     // Template obs
     val tids:Seq[String] = ini.targetGroup.map(_.toString)
@@ -131,10 +131,12 @@ case class TemplateFactoryImpl(db: TemplateDb) extends TemplateFactory {
     val (templates, cals) = grp.getObservations.asScala.partition(_.libraryId.exists(tids.contains))
 
     // Remove the library ids
-    (templates ++ cals) foreach { o =>
-      o.update(_.setLibraryId(null))
-      o.update(_.setPhase2Status(ObsPhase2Status.PI_TO_COMPLETE))
-      o.update(_.setExecStatusOverride(edu.gemini.shared.util.immutable.None.instance()))
+    if (!testing) {
+      (templates ++ cals) foreach { o =>
+        o.update(_.setLibraryId(null))
+        o.update(_.setPhase2Status(ObsPhase2Status.PI_TO_COMPLETE))
+        o.update(_.setExecStatusOverride(edu.gemini.shared.util.immutable.None.instance()))
+      }
     }
 
     // Remove the baseline calibrations from the template group.

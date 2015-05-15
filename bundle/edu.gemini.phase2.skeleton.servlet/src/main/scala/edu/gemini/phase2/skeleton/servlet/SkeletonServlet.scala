@@ -198,7 +198,7 @@ final class SkeletonServlet(odb: IDBDatabaseService, templateFactory: TemplateFa
     } yield new SkeletonShell(id.toSp, SpProgramFactory.create(p), f)).left map { Failure.badRequest }
 
   private def expandTemplates(folder: Phase1Folder): Either[Failure, TemplateFolderExpansion] =
-    TemplateFolderExpansionFactory.expand(folder, templateFactory).left map { msg =>
+    TemplateFolderExpansionFactory.expand(folder, templateFactory, false).left map { msg =>
       Failure.badRequest(msg)
     }
 

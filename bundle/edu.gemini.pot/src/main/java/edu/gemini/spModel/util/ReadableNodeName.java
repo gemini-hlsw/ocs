@@ -5,6 +5,7 @@ import edu.gemini.shared.util.TimeValue;
 import edu.gemini.spModel.core.SPProgramID;
 import edu.gemini.spModel.data.ISPDataObject;
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality;
+import edu.gemini.spModel.obs.SPObservation;
 import edu.gemini.spModel.obscomp.SPNote;
 import edu.gemini.spModel.target.SPTarget;
 import edu.gemini.spModel.target.obsComp.TargetObsComp;
@@ -75,6 +76,14 @@ public final class ReadableNodeName {
         }
 
         @Override public void visitObservation(ISPObservation node) {
+            final ISPDataObject o = node.getDataObject();
+            if (o instanceof SPObservation) {
+                final SPObservation spo = (SPObservation) o;
+                if (spo.getLibraryId() != null) {
+                    result = String.format("Observation %d (Library id %s)", node.getObservationNumber(), spo.getLibraryId());
+                    return;
+                }
+            }
             result = String.format("Observation %d", node.getObservationNumber());
         }
 
