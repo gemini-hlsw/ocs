@@ -1,8 +1,10 @@
 package edu.gemini.spModel.target
 
 import edu.gemini.spModel.core.{Wavelength, Arbitraries}
+import edu.gemini.spModel.pio.ParamSet
 import edu.gemini.spModel.pio.xml.PioXmlFactory
 import edu.gemini.spModel.target.EmissionLine.{Continuum, Flux}
+import edu.gemini.spModel.target.system.{ConicTarget, HmsDegTarget, ITarget, CoordinateParam}
 import org.scalacheck.{Arbitrary, Gen}
 import org.specs2.ScalaCheck
 import org.specs2.mutable.Specification
@@ -55,6 +57,64 @@ object SpTargetPioSpec extends Specification with ScalaCheck with Arbitraries {
         }
     }
 
+  }
+
+  val ParamRa  = "c1"
+  val ParamDec = "c2"
+
+  "SPTargetPio" should {
+    def newTargetParamSet(t: ITarget): ParamSet = {
+      val fact = new PioXmlFactory
+      val spt  = new SPTarget(t)
+      SPTargetPio.getParamSet(spt, fact)
+    }
+
+    def expect(ps: ParamSet, era: Double, edec: Double): Unit = {
+      val spt = SPTargetPio.fromParamSet(ps)
+      val ra  = spt.getTarget.getRa.getAs(CoordinateParam.Units.DEGREES)
+      val dec = spt.getTarget.getDec.getAs(CoordinateParam.Units.DEGREES)
+
+      ra  must beCloseTo(era,  0.000001)
+      dec must beCloseTo(edec, 0.000001)
+    }
+
+    def fromDegrees(t: ITarget): Unit = {
+      val ps   = newTargetParamSet(t)
+      val pRa  = ps.getParam(ParamRa)
+      val pDec = ps.getParam(ParamDec)
+
+      pRa.setValue("180.0")
+      pDec.setValue("10.0")
+
+      expect(ps, 180.0, 10.0)
+    }
+
+    def fromHmsDms(t: ITarget): Unit = {
+      val ps   = newTargetParamSet(t)
+      val pRa  = ps.getParam(ParamRa)
+      val pDec = ps.getParam(ParamDec)
+
+      pRa.setValue("180.0")
+      pDec.setValue("10.0")
+
+      expect(ps, 180.0, 10.0)
+    }
+
+    "read RA and Dec specified as degrees for sidereal targets" in {
+      fromDegrees(new HmsDegTarget)
+    }
+
+    "read RA and Dec specified as HMS/DMS for sidereal targets" in {
+      fromHmsDms(new HmsDegTarget)
+    }
+
+    "read RA and Dec specified as degrees for non-sidereal targets" in {
+      fromDegrees(new ConicTarget)
+    }
+
+    "read RA and Dec specified as HMS/DMS for non-sidereal targets" in {
+      fromHmsDms(new ConicTarget)
+    }
   }
 
 }

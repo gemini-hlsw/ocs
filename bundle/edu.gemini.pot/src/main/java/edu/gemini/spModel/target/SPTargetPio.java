@@ -143,6 +143,18 @@ public class SPTargetPio {
         return paramSet;
     }
 
+    private static void setCoordinate(ICoordinate c, String s) {
+        // We don't know whether we have HH:MM:SS (DD:MM:SS) or a double in
+        // degrees.  Try to parse as a Double and use it if that works.
+        if (s != null) {
+            try {
+                c.setAs(Double.parseDouble(s), CoordinateParam.Units.DEGREES);
+            } catch (NumberFormatException ex) {
+                c.setValue(s);
+            }
+        }
+    }
+
     public static void setParamSet(final ParamSet paramSet, final SPTarget spt) {
         if (paramSet == null) return;
 
@@ -167,8 +179,8 @@ public class SPTargetPio {
 
             final String c1 = Pio.getValue(paramSet, _C1);
             final String c2 = Pio.getValue(paramSet, _C2);
-            t.getRa().setValue(c1);
-            t.getDec().setValue(c2);
+            setCoordinate(t.getRa(), c1);
+            setCoordinate(t.getDec(), c2);
 
             final CoordinateTypes.Epoch e = new CoordinateTypes.Epoch();
             e.setParam(paramSet.getParam(_EPOCH));
@@ -202,10 +214,8 @@ public class SPTargetPio {
             // XXX FIXME: Temporary, until nonsidereal support is implemented
             final String c1 = Pio.getValue(paramSet, _C1);
             final String c2 = Pio.getValue(paramSet, _C2);
-            if (c1 != null && c2 != null) {
-                nst.getRa().setValue(c1);
-                nst.getDec().setValue(c2);
-            }
+            setCoordinate(nst.getRa(), c1);
+            setCoordinate(nst.getDec(), c2);
 
             final String dateStr = Pio.getValue(paramSet, _VALID_DATE);
             final Date validDate = parseDate(dateStr);

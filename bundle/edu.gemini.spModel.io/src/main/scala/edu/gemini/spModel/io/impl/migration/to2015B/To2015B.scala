@@ -119,10 +119,10 @@ object To2015B {
       // Set new values
       pRa.setValue(ra0.toString)
       pDec.setValue(dec0.toString)
-      pdRa.setValue((dRa0 * 60 * 60).toString)
-      pdRa.setUnits(UNITS_SECONDS_PER_YEAR)
-      pdDec.setValue((dDec0 * 60 * 60).toString)
-      pdDec.setUnits(UNITS_SECONDS_PER_YEAR)
+      pdRa.setValue((dRa0 * 1000 * 60 * 60).toString)
+      pdRa.setUnits(UNITS_MILLI_ARCSECONDS_PER_YEAR)
+      pdDec.setValue((dDec0 * 1000 * 60 * 60).toString)
+      pdDec.setUnits(UNITS_MILLI_ARCSECONDS_PER_YEAR)
       pSys.setValue(VALUE_SYSTEM_J2000)
 
     }
