@@ -45,10 +45,12 @@ public final class Flamingos2Recipe implements ImagingRecipe, SpectroscopyRecipe
     private void validateInputParameters() {
         if (_obsDetailParameters.getMethod().isSpectroscopy()) {
             switch (_flamingos2Parameters.grism()) {
-                case NONE: throw new IllegalArgumentException("In spectroscopy mode, a grism must be selected");
+                case NONE:          throw new IllegalArgumentException("In spectroscopy mode, a grism must be selected");
             }
             switch (_flamingos2Parameters.mask()) {
-                case FPU_NONE: throw new IllegalArgumentException("In spectroscopy mode, a FP must must be selected");
+                case FPU_NONE:      throw new IllegalArgumentException("In spectroscopy mode, a FP must be selected");
+                // NOTE: Currently it is not possible to set a slit width for custom masks for F2 in the OT
+                case CUSTOM_MASK:   throw new IllegalArgumentException("Custom masks with unknown slit widths are not supported");
             }
         }
 
