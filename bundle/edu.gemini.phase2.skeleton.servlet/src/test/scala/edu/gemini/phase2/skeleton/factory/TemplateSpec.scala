@@ -2,18 +2,20 @@ package edu.gemini.phase2.skeleton.factory
 
 import java.security.Principal
 
-import edu.gemini.model.p1.immutable.{NifsBlueprintBase, BlueprintBase, Target, TimeAmount, Condition, Meta, Observation, Magnitude, SiderealTarget, NifsBlueprint, ProposalIo, Proposal}
-import edu.gemini.model.p1.mutable.{MagnitudeSystem, MagnitudeBand, NifsDisperser}
+import edu.gemini.model.p1.immutable.{Target, NifsBlueprintBase, BlueprintBase, TimeAmount, Condition, Observation, Magnitude, SiderealTarget, Proposal}
+import edu.gemini.model.p1.mutable.{MagnitudeSystem, MagnitudeBand }
 import edu.gemini.phase2.core.model.SkeletonShell
 import edu.gemini.phase2.core.odb.SkeletonStoreService
 import edu.gemini.phase2.template.factory.api.TemplateFolderExpansionFactory
 import edu.gemini.phase2.template.factory.impl.{TemplateDb, TemplateFactoryImpl}
 import edu.gemini.pot.sp.{ISPTemplateGroup, ISPProgram}
 import edu.gemini.pot.spdb.DBLocalDatabase
+import edu.gemini.shared.skyobject.Magnitude.Band
 import edu.gemini.spModel.core.SPProgramID
+import edu.gemini.spModel.obscomp.SPNote
 import edu.gemini.spModel.target.SPTarget
 import edu.gemini.spModel.obs.SPObservation
-import edu.gemini.spModel.template.{TemplateGroup, TemplateFolder}
+import edu.gemini.spModel.template.{TemplateParameters }
 import org.specs2.mutable.Specification
 import scala.collection.JavaConverters._
 import scalaz._, Scalaz._
@@ -27,14 +29,19 @@ import Proposal.{ targets, observations }
  */
 abstract class TemplateSpec(xmlName: String) { this: Specification =>
 
+  // Required when constructing phase 1 proposals
   if (System.getProperty("edu.gemini.model.p1.schemaVersion") == null)
     System.setProperty("edu.gemini.model.p1.schemaVersion", "dummy") // grr
 
-  lazy val programId  = SPProgramID.toProgramID("GS-2015A-Q-1")
+  // Expensive to construct, and read-only. So we can reuse.
   lazy val templateDb = TemplateDb.loadWithFilter(java.util.Collections.emptySet[Principal], _ == xmlName).unsafeGet
 
-  implicit class EitherOps[A](e: Either[String, A]) {
+  private implicit class EitherOps[A](e: Either[String, A]) {
     def unsafeGet: A = e.fold(sys.error, identity)
+  }
+
+  private implicit class MoreIdOps[A](a:A) {
+    def execState(s: State[A, Unit]): A = s.exec(a)
   }
 
   /** 
@@ -44,8 +51,9 @@ abstract class TemplateSpec(xmlName: String) { this: Specification =>
   def expand[A](p: => Proposal)(func: (Proposal, ISPProgram) => A): A = {
     val db = DBLocalDatabase.createTransient()
     try {
+      val pid = SPProgramID.toProgramID("GS-2015A-Q-1")
       val f   = Phase1FolderFactory.create(p).unsafeGet
-      val ss  = new SkeletonShell(programId, SpProgramFactory.create(p), f)
+      val ss  = new SkeletonShell(pid, SpProgramFactory.create(p), f)
       val tf  = TemplateFactoryImpl(templateDb)
       val tfe = TemplateFolderExpansionFactory.expand(ss.folder, tf, true).unsafeGet
       func(p, SkeletonStoreService.store(ss, tfe, db).program)
@@ -80,56 +88,42 @@ abstract class TemplateSpec(xmlName: String) { this: Specification =>
       .toList
 
   /** Assert that the given library IDs are included and excluded; call within a `should`. */
-  def checkLibs(tg: ISPTemplateGroup, incl: Set[Int], excl: Set[Int]) = {
+  def checkLibs(label: String, tg: ISPTemplateGroup, incl: Set[Int], excl: Set[Int]) = {
     val ls = libs(tg)
-    s"Include library observations ${incl.mkString("{", ",", "}")}" in {
-      ls.filter(incl) == incl
-    }
-    s"Exclude library observations ${incl.mkString("{", ",", "}")}" in {
-      ls.filter(excl).isEmpty
+    s"$label should include ${incl.mkString("{", ",", "}")} and exclude ${excl.mkString("{", ",", "}")}." in {
+      ls.filter(incl) == incl && ls.filter(excl).isEmpty
     }
   }
 
-}
+  /** Retrieve the phase-2 targets from the given template group. */
+  def p2targets(g: ISPTemplateGroup): List[SPTarget] =
+    g.getTemplateParameters
+      .asScala.toList
+      .map(_.getDataObject.asInstanceOf[TemplateParameters])
+      .map(_.getTarget)
 
+  /** Retrieve the phase-2 magnitude in the given band, if any, from the given target. */
+  def p2mag(t: SPTarget, b: Band): Option[Double] =
+    Option(t.getTarget.getMagnitude(b).getOrNull).map(_.getBrightness)
 
+  /** True if a note with the given title exists at the root of the given template group. */
+  def existsNote(tg: ISPTemplateGroup, title: String) =
+    tg.getObsComponents
+      .asScala.toList
+      .map(_.getDataObject)
+      .collect { case n: SPNote => n }
+      .exists(_.getTitle == title)
 
+  /** Construct a phase-1 magnitude in the VEGA system. */
+  def p1Mag(n: Double, b: MagnitudeBand): Magnitude =
+    Magnitude(n, b, MagnitudeSystem.VEGA)
 
-
-// # Select acquisition and science observation
-// IF OCCULTING DISK == None
-//    IF target information contains a K magnitude
-//       IF BT  then ACQ={3}  # Bright Object
-//       IF MT  then ACQ={4}  # Medium Object
-//       IF FT  then ACQ={5}  # Faint Object
-//       IF BAT then ACQ={23}  # Blind offset
-//    ELSE
-//       ACQ={3,4,5,23}
-//    SCI={6}
-// ELSEIF OCCULTING DISK != None
-//    IF target information contains a K magnitude
-//       IF BT then ACQ={11}   # Bright Object
-//       IF MT then ACQ={12}   # Medium Object
-//       IF FT then ACQ={12}   # Faint Object
-//       IF BAT then ACQ={12}  # Very faint
-//    ELSE
-//       ACQ={11,12}
-//    SCI={13}
-
-object NifsBlueprintTest extends TemplateSpec("NIFS_BP.xml") with Specification {
-
-  // flip exec
-  implicit class MoreIdOps[A](a:A) {
-    def execState(s: State[A, Unit]): A = s.exec(a)
-  }
-
-  def p1Mag(n: Double): Magnitude = 
-    Magnitude(n, MagnitudeBand.K, MagnitudeSystem.VEGA)
-
+  /** Construct an empty phase-1 sidereal target with the given magnitudes. */
   def p1Target(ms: List[Magnitude]): SiderealTarget =
     SiderealTarget.empty.copy(name = "test", magnitudes = ms)
 
-  def p1Obs(bp: BlueprintBase, st: SiderealTarget): Observation =
+  /** Construct a phase-1 observation with the given blueprint and target. */
+  def p1Obs(bp: BlueprintBase, st: Target): Observation =
     Observation.empty execState {
       for {
         _ <- blueprint := Some(bp)
@@ -139,13 +133,17 @@ object NifsBlueprintTest extends TemplateSpec("NIFS_BP.xml") with Specification 
       } yield ()
     }
 
-  def proposal(bp: NifsBlueprintBase, kmags: List[Double]) = {
+  /**
+   * Construct a phase-1 proposal with a target for each magnitude in the given band, plus a target
+   * with no magnitude information, with an observation for each using the supplied blueprint.
+   */
+  def proposal(bp: NifsBlueprintBase, kmags: List[Double], band: MagnitudeBand) = {
 
-    val os: List[Observation] = 
-      p1Obs(bp, p1Target(Nil)) :: // no mags
-      kmags.map(p1Mag)
-           .map(m => p1Target(List(m)))
-           .map(p1Obs(bp, _))
+    val os: List[Observation] =
+      p1Obs(bp, p1Target(Nil)) :: // one obs with no mags
+      kmags.map(p1Mag(_, band))
+        .map(m => p1Target(List(m)))
+        .map(p1Obs(bp, _))
 
     Proposal.empty execState {
       for {
@@ -154,15 +152,6 @@ object NifsBlueprintTest extends TemplateSpec("NIFS_BP.xml") with Specification 
       } yield ()
     }
 
-  }
-
-
-  expand(proposal(NifsBlueprint(NifsDisperser.H), (0.0 to 25.0 by 0.5).toList)) { (p, sp) =>
-    "Science Program" should {
-      "have some groups" in {
-        groups(sp).length must_== 42
-      }
-    }
   }
 
 
