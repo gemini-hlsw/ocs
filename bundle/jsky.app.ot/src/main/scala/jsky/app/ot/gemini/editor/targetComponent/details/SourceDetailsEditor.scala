@@ -206,13 +206,13 @@ final class SourceDetailsEditor extends GridBagPanel with TelescopePosEditor {
 
     spt.getTarget.getSpatialProfile match {
       case None                     => profiles.selection.item = profilePanels.head
-      case Some(s: PointSource)     => profiles.selection.item = profilePanels(1);
+      case Some(s: PointSource)     => profiles.selection.item = profilePanels(1)
       case Some(s: GaussianSource)  => profiles.selection.item = profilePanels(2); profilePanels(2).panel.asInstanceOf[NumericPropertySheet[GaussianSource]].edit(obsContext, spTarget, node)
-      case Some(s: UniformSource)   => profiles.selection.item = profilePanels(3);
+      case Some(s: UniformSource)   => profiles.selection.item = profilePanels(3)
     }
 
     spt.getTarget.getSpectralDistribution match {
-      case None                     => distributions.selection.item = distributionPanels.head;
+      case None                     => distributions.selection.item = distributionPanels.head
       case Some(s: LibraryStar)     => distributions.selection.item = distributionPanels(1); libraryStarDetails.selection.item = s
       case Some(s: LibraryNonStar)  => distributions.selection.item = distributionPanels(2); libraryNonStarDetails.selection.item = s
       case Some(s: BlackBody)       => distributions.selection.item = distributionPanels(3); distributionPanels(3).panel.asInstanceOf[NumericPropertySheet[BlackBody]].edit(obsContext, spTarget, node)
