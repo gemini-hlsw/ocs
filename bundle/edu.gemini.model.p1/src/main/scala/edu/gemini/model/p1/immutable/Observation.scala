@@ -11,6 +11,7 @@ object Observation {
   val condition:Lens[Observation, Option[Condition]] = Lens.lensu((a, b) => a.copy(condition = b), _.condition)
   val target:Lens[Observation, Option[Target]] = Lens.lensu((a, b) => a.copy(target = b), _.target)
   val meta:Lens[Observation, Option[ObservationMeta]] = Lens.lensu((a, b) => a.copy(meta = b), _.meta)
+  val time:Lens[Observation, Option[TimeAmount]] = Lens.lensu((a, b) => a.copy(time = b), _.time)
 
   def apply(blueprint:Option[BlueprintBase],
             condition:Option[Condition],

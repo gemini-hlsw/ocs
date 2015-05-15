@@ -75,12 +75,12 @@ final class SkeletonServlet(odb: IDBDatabaseService, templateFactory: TemplateFa
 
     } finally {
       // Cleanup PDF attachment file.
-      eSkeleton.right foreach { s => s.attachment.delete() }
+      eSkeleton.right.toOption.flatMap(_.attachment).foreach(_.delete())
     }
   }
 
   // Contains all the information required to make the requested skeleton.
-  case class SkeletonRequest(id: StandardProgramId, prop: Proposal, attachment: File, shell: SkeletonShell, templates: TemplateFolderExpansion)
+  case class SkeletonRequest(id: StandardProgramId, prop: Proposal, attachment: Option[File], shell: SkeletonShell, templates: TemplateFolderExpansion)
 
   private def skeletonRequest(req: HttpServletRequest): Either[Failure, SkeletonRequest] =
     for {
@@ -91,7 +91,7 @@ final class SkeletonServlet(odb: IDBDatabaseService, templateFactory: TemplateFa
       i       <- programId(l, p).right
       s       <- makeSkeleton(i, p).right
       t       <- expandTemplates(s.folder).right
-      a       <- pdfAttachment(l).right
+      a       <- if (test(l)) pdfAttachment(l).right.map(Some(_)).right else Right(None).right
     } yield SkeletonRequest(i, p, a, s, t)
 
   private val up = new ServletFileUpload(new DiskFileItemFactory)
@@ -103,6 +103,10 @@ final class SkeletonServlet(odb: IDBDatabaseService, templateFactory: TemplateFa
       Right(up.parseRequest(req).asScala.toList map {
         a => a.asInstanceOf[FileItem]
       })
+
+  /** If `test` is set then the PDF file is optional and ignored if present. */
+  private def test(items: List[FileItem]): Boolean =
+    items.exists(_.getFieldName == "test")
 
   private def proposalString(items: List[FileItem]): Either[Failure, String] =
     readItem("proposal", items, it => Source.fromInputStream(it.getInputStream, "UTF-8").mkString)
@@ -194,7 +198,7 @@ final class SkeletonServlet(odb: IDBDatabaseService, templateFactory: TemplateFa
     } yield new SkeletonShell(id.toSp, SpProgramFactory.create(p), f)).left map { Failure.badRequest }
 
   private def expandTemplates(folder: Phase1Folder): Either[Failure, TemplateFolderExpansion] =
-    TemplateFolderExpansionFactory.expand(folder, templateFactory).left map { msg =>
+    TemplateFolderExpansionFactory.expand(folder, templateFactory, false).left map { msg =>
       Failure.badRequest(msg)
     }
 
@@ -219,12 +223,13 @@ final class SkeletonServlet(odb: IDBDatabaseService, templateFactory: TemplateFa
 
   private def parseConvert(convert: Option[String]): Either[Failure, Boolean] = Right(convert.isDefined)
 
-  private def writeAuxfiles(req: SkeletonRequest): Either[Failure, List[AuxFile]] = {
-    val dir = new File(auxfileRoot, req.id.toString)
-    SkeletonAuxfileWriter.write(req.id.toSp, req.prop, req.attachment, dir, copier).left map { err =>
-      Failure.error(s"Problem writing auxiliary file ${err.file.getName}: ${err.exception.getMessage}")
+  private def writeAuxfiles(req: SkeletonRequest): Either[Failure, List[AuxFile]] =
+    req.attachment.fold[Either[Failure, List[AuxFile]]](Right(Nil)) { f =>
+      val dir = new File(auxfileRoot, req.id.toString)
+      SkeletonAuxfileWriter.write(req.id.toSp, req.prop, f, dir, copier).left map { err =>
+        Failure.error(s"Problem writing auxiliary file ${err.file.getName}: ${err.exception.getMessage}")
+      }
     }
-  }
 
   import edu.gemini.phase2.core.odb.SkeletonStatusService.getStatus
 
