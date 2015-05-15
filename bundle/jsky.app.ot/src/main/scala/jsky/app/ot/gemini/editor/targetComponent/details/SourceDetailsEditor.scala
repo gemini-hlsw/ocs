@@ -26,7 +26,6 @@ final class SourceDetailsEditor extends GridBagPanel with TelescopePosEditor {
 
   private[this] var spt: SPTarget = new SPTarget
   private[this] var isBase: Boolean = false
-  private[this] var node: Option[ISPNode] = None
 
   private def setDistribution(sd: SpectralDistribution): Unit         = setDistribution(Some(sd))
   private def setDistribution(sd: Option[SpectralDistribution]): Unit = spt.getTarget.setSpectralDistribution(sd)
@@ -197,11 +196,6 @@ final class SourceDetailsEditor extends GridBagPanel with TelescopePosEditor {
 
   }
 
-  def editable: Boolean =
-    node.exists { n =>
-      OTOptions.areRootAndCurrentObsIfAnyEditable(n.getProgram, n.getContextObservation)
-    }
-
   // react to any kind of target change by updating all UI elements
   def edit(obsContext: GOption[ObsContext], spTarget: SPTarget, node: ISPNode): Unit = {
 
@@ -209,7 +203,6 @@ final class SourceDetailsEditor extends GridBagPanel with TelescopePosEditor {
 
     spt       = spTarget
     isBase    = if (obsContext.isDefined) obsContext.getValue.getTargets.getBase == spTarget else false
-    this.node = Option(node)
 
     spt.getTarget.getSpatialProfile match {
       case None                     => profiles.selection.item = profilePanels.head
@@ -250,10 +243,6 @@ final class SourceDetailsEditor extends GridBagPanel with TelescopePosEditor {
     }
     revalidate()
     repaint()
-  }
-
-  def updateEnabledState(b: Boolean): Unit = {
-    peer.getComponents.foreach(_.setEnabled(b))
   }
 
 }
