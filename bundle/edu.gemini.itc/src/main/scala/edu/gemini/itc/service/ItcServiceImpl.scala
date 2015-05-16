@@ -29,10 +29,7 @@ class ItcServiceImpl extends ItcService {
     else                          calculateSpectroscopy(source, obs, cond, tele, ins)
 
   } catch {
-    // TODO: for now in most cases where a validation problem should be reported to the user the ITC code throws an exception instead
-    case e: Throwable =>
-      e.printStackTrace()
-      ItcResult.forException(e)
+    case e: Throwable => ItcResult.forException(e)
   }
 
   // === Imaging
