@@ -110,11 +110,15 @@ trait ItcTable extends Table {
 
   }
 
-  protected def calculateSpectroscopy(peer: Peer, instrument: SPInstObsComp, uc: ItcUniqueConfig): Future[ItcService.Result] =
-    calculate(peer, instrument, uc, srcFrac => SpectroscopySN(uc.count, uc.singleExposureTime, srcFrac))
+  protected def calculateSpectroscopy(peer: Peer, instrument: SPInstObsComp, uc: ItcUniqueConfig): Future[ItcService.Result] = {
+    def method(srcFraction: Double) = SpectroscopySN(uc.count * instrument.getCoadds, uc.singleExposureTime, srcFraction)
+    calculate(peer, instrument, uc, method)
+  }
 
-  protected def calculateImaging(peer: Peer, instrument: SPInstObsComp, uc: ItcUniqueConfig): Future[ItcService.Result] =
-    calculate(peer, instrument, uc, srcFrac => ImagingSN(uc.count, uc.singleExposureTime, srcFrac))
+  protected def calculateImaging(peer: Peer, instrument: SPInstObsComp, uc: ItcUniqueConfig): Future[ItcService.Result] = {
+    def method(srcFraction: Double) = ImagingSN(uc.count * instrument.getCoadds, uc.singleExposureTime, srcFraction)
+    calculate(peer, instrument, uc, method)
+  }
 
   protected def calculate(peer: Peer, instrument: SPInstObsComp, uc: ItcUniqueConfig, method: Double => CalculationMethod): Future[ItcService.Result] = {
     val s = for {
