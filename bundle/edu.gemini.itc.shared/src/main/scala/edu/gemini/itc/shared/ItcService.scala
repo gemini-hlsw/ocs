@@ -17,13 +17,16 @@ import scalaz.{Failure, Success, Validation}
   * unfortunately there is some special handling involved for some of the instruments and therefore those files
   * are created by the recipes and then added to the result data as strings. Maybe this can be unified.
   */
-sealed trait ItcResult extends Serializable
+sealed trait ItcResult extends Serializable {
+  def source:     SourceDefinition
+  def obsDetails: ObservationDetails
+}
 
 // === IMAGING RESULTS
 
 final case class ImgData(singleSNRatio: Double, totalSNRatio: Double, peakPixelFlux: Double)
 
-final case class ItcImagingResult(source: SourceDefinition, ccds: Seq[ImgData]) extends ItcResult {
+final case class ItcImagingResult(source: SourceDefinition, obsDetails: ObservationDetails, ccds: Seq[ImgData]) extends ItcResult {
   def ccd(i: Int) = ccds(i % ccds.length)
 }
 
@@ -67,7 +70,7 @@ final case class SpcChartData(chartType: SpcChartType, title: String, xAxisLabel
   * Individual charts and data series can be referenced by their types and an index. For most instruments there
   * is only one chart and data series of each type, however for NIFS for example there will be several charts
   * of each type in case of multiple IFU elements. */
-final case class ItcSpectroscopyResult(source: SourceDefinition, charts: Seq[SpcChartData], files: Seq[SpcDataFile]) extends ItcResult {
+final case class ItcSpectroscopyResult(source: SourceDefinition, obsDetails: ObservationDetails, charts: Seq[SpcChartData], files: Seq[SpcDataFile]) extends ItcResult {
 
   /** Gets a text file for a data series by type and index.
     * This method will fail if the result you're looking for does not exist.

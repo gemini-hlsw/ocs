@@ -1,10 +1,11 @@
 package jsky.app.ot.editor.seq
 
 import edu.gemini.itc.shared.{AnalysisMethod, ObservingConditions}
-import edu.gemini.pot.sp.{ISPObservation, SPComponentType}
+import edu.gemini.pot.sp.ISPObservation
 import edu.gemini.spModel.config.ConfigBridge
 import edu.gemini.spModel.config.map.ConfigValMapInstances
 import edu.gemini.spModel.config2.ConfigSequence
+import edu.gemini.spModel.obscomp.SPInstObsComp
 import edu.gemini.spModel.target.env.TargetEnvironment
 import edu.gemini.spModel.target.system.HmsDegTarget
 import edu.gemini.spModel.target.{SpatialProfile, SpectralDistribution}
@@ -18,7 +19,7 @@ import Scalaz._
   * the outside world (EdIterFolder, ItcPanel etc) from the ItcTable and ItcTableModel. */
 trait ItcParametersProvider {
   def sequence: ConfigSequence
-  def instrument: Option[SPComponentType]
+  def instrument: Option[SPInstObsComp]
   def observation: Option[ISPObservation]
   def analysisMethod: String \/ AnalysisMethod
   def conditions: String \/ ObservingConditions
@@ -34,8 +35,8 @@ object ItcParametersProvider {
   /** Creates a parameters provider that can extract ITC values from a given EdIteratorFolder and ItcPanel. */
   def apply(owner: EdIteratorFolder, itcPanel: ItcPanel) = new ItcParametersProvider {
 
-    def instrument: Option[SPComponentType] =
-      Option(owner.getContextInstrument).map(_.getType)
+    def instrument: Option[SPInstObsComp] =
+      Option(owner.getContextInstrumentDataObject)
 
     def observation: Option[ISPObservation] =
       Option(owner.getContextObservation)

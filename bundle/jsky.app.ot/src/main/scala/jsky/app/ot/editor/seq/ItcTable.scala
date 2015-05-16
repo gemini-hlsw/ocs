@@ -5,7 +5,6 @@ import javax.swing.{Icon, ListSelectionModel}
 
 import edu.gemini.ags.api.AgsRegistrar
 import edu.gemini.itc.shared._
-import edu.gemini.pot.sp.SPComponentType
 import edu.gemini.pot.sp.SPComponentType._
 import edu.gemini.shared.skyobject.Magnitude
 import edu.gemini.spModel.`type`.DisplayableSpType
@@ -13,6 +12,7 @@ import edu.gemini.spModel.config2.{Config, ConfigSequence, ItemKey}
 import edu.gemini.spModel.core.{Peer, Wavelength}
 import edu.gemini.spModel.guide.GuideProbe
 import edu.gemini.spModel.obs.context.ObsContext
+import edu.gemini.spModel.obscomp.SPInstObsComp
 import edu.gemini.spModel.rich.shared.immutable.asScalaOpt
 import edu.gemini.spModel.target.system.ITarget
 import jsky.app.ot.userprefs.observer.ObservingPeer
@@ -110,24 +110,25 @@ trait ItcTable extends Table {
 
   }
 
-  protected def calculateSpectroscopy(peer: Peer, instrument: SPComponentType, c: ItcUniqueConfig): Future[ItcService.Result] =
-    calculate(peer, instrument, c, SpectroscopySN(c.count, c.singleExposureTime, 1.0))
+  protected def calculateSpectroscopy(peer: Peer, instrument: SPInstObsComp, uc: ItcUniqueConfig): Future[ItcService.Result] =
+    calculate(peer, instrument, uc, srcFrac => SpectroscopySN(uc.count, uc.singleExposureTime, srcFrac))
 
-  protected def calculateImaging(peer: Peer, instrument: SPComponentType, c: ItcUniqueConfig): Future[ItcService.Result] =
-    calculate(peer, instrument, c, ImagingSN(c.count, c.singleExposureTime, 1.0))
+  protected def calculateImaging(peer: Peer, instrument: SPInstObsComp, uc: ItcUniqueConfig): Future[ItcService.Result] =
+    calculate(peer, instrument, uc, srcFrac => ImagingSN(uc.count, uc.singleExposureTime, srcFrac))
 
-  protected def calculate(peer: Peer, instrument: SPComponentType, c: ItcUniqueConfig, cm: CalculationMethod): Future[ItcService.Result] = {
+  protected def calculate(peer: Peer, instrument: SPInstObsComp, uc: ItcUniqueConfig, method: Double => CalculationMethod): Future[ItcService.Result] = {
     val s = for {
       analysis  <- parameters.analysisMethod
       cond      <- parameters.conditions
       port      <- parameters.instrumentPort
       targetEnv <- parameters.targetEnvironment
       probe     <- extractGuideProbe()
-      src       <- extractSource(targetEnv.getBase.getTarget, c)
-      tele      <- ConfigExtractor.extractTelescope(port, probe, targetEnv, c.config)
-      ins       <- ConfigExtractor.extractInstrumentDetails(instrument, probe, targetEnv, c.config)
+      src       <- extractSource(targetEnv.getBase.getTarget, uc)
+      tele      <- ConfigExtractor.extractTelescope(port, probe, targetEnv, uc.config)
+      ins       <- ConfigExtractor.extractInstrumentDetails(instrument, probe, targetEnv, uc.config)
+      srcFrac   <- extractSourceFraction(uc, instrument)
     } yield {
-        doServiceCall(peer, c, src, ins, tele, cond, new ObservationDetails(cm, analysis))
+        doServiceCall(peer, uc, src, ins, tele, cond, new ObservationDetails(method(srcFrac), analysis))
     }
 
     s match {
@@ -243,6 +244,30 @@ trait ItcTable extends Table {
       }
     }
   }
+
+  // Makes an educated guesstimate of the fraction of images of the given set that are on source.
+  // For imaging the field of view is the science area, for spectroscopy the slit width of the mask is used as width.
+  // Then, for every image we check if the p or q offsets are more than 0.5 times the horizontal or vertical
+  // field of view, if so, we assume that image is off-source, otherwise we assume it is on-source.
+  private def extractSourceFraction(uc: ItcUniqueConfig, instrument: SPInstObsComp): String \/ Double = {
+
+    // get science area / field of view in arcsecs of the instrument
+    // this already takes care to replace the width with the slit width of the mask for spectroscopy
+    val scienceArea = instrument.getScienceArea
+    val (w, h)      = (scienceArea(0), scienceArea(1))
+
+    // check how many images are "off-source" which is defined as having an offset > 1/2 the size of the fov
+    // this is an educated guesstimate only; ROIs are not taken into account at all (yet)
+    val offSource = uc.configs.count { c =>
+      val p = ConfigExtractor.extractDoubleFromString(c, TEL_P_KEY).getOrElse(0.0)
+      val q = ConfigExtractor.extractDoubleFromString(c, TEL_Q_KEY).getOrElse(0.0)
+      Math.abs(p) > w/2.0 || Math.abs(q) > h/2.0
+    }
+
+    ((uc.count - offSource.toDouble) / uc.count.toDouble).right
+
+  }
+
 }
 
 class ItcImagingTable(val parameters: ItcParametersProvider) extends ItcTable {
@@ -251,30 +276,45 @@ class ItcImagingTable(val parameters: ItcParametersProvider) extends ItcTable {
   /** Creates a new table model for the current context (instrument) and config sequence.
     * Note that GMOS has a different table model with separate columns for its three CCDs. */
   def tableModel(keys: Seq[ItemKey], seq: ConfigSequence): ItcImagingTableModel = {
-    ObservingPeer.getOrPrompt.fold(emptyTable) { peer =>
-      parameters.instrument.fold(emptyTable) { ins =>
-        val uniqConfigs = ItcUniqueConfig.imagingConfigs(seq)
-        val results     = uniqConfigs.map(calculateImaging(peer, ins, _))
-        ins match {
-          case INSTRUMENT_GMOS | INSTRUMENT_GMOSSOUTH => new ItcGmosImagingTableModel(keys, uniqConfigs, results)
-          case _                                      => new ItcGenericImagingTableModel(keys, uniqConfigs, results)
-        }
+
+    val table = for {
+      peer        <- ObservingPeer.getOrPrompt
+      instrument  <- parameters.instrument
+
+    } yield {
+      val uniqConfigs = ItcUniqueConfig.imagingConfigs(seq)
+      val results     = uniqConfigs.map(calculateImaging(peer, instrument, _))
+
+      instrument.getType match {
+        case INSTRUMENT_GMOS | INSTRUMENT_GMOSSOUTH => new ItcGmosImagingTableModel(keys, uniqConfigs, results)
+        case _                                      => new ItcGenericImagingTableModel(keys, uniqConfigs, results)
       }
+
     }
+
+    table.getOrElse(emptyTable)
   }
+
 }
 
 class ItcSpectroscopyTable(val parameters: ItcParametersProvider) extends ItcTable {
   private val emptyTable: ItcGenericSpectroscopyTableModel = new ItcGenericSpectroscopyTableModel(Seq(), Seq(), Seq())
 
   /** Creates a new table model for the current context and config sequence. */
-  def tableModel(keys: Seq[ItemKey], seq: ConfigSequence) =
-    ObservingPeer.getOrPrompt.fold(emptyTable) { peer =>
-      parameters.instrument.fold(emptyTable) { ins =>
-        val uniqueConfigs = ItcUniqueConfig.spectroscopyConfigs(seq)
-        val results = uniqueConfigs.map(calculateSpectroscopy(peer, ins, _))
-        new ItcGenericSpectroscopyTableModel(keys, uniqueConfigs, results)
-      }
+  def tableModel(keys: Seq[ItemKey], seq: ConfigSequence) = {
+
+    val table = for {
+      peer        <- ObservingPeer.getOrPrompt
+      instrument  <- parameters.instrument
+
+    } yield {
+      val uniqueConfigs = ItcUniqueConfig.spectroscopyConfigs(seq)
+      val results = uniqueConfigs.map(calculateSpectroscopy(peer, instrument, _))
+
+      new ItcGenericSpectroscopyTableModel(keys, uniqueConfigs, results)
+    }
+
+    table.getOrElse(emptyTable)
   }
 
 }

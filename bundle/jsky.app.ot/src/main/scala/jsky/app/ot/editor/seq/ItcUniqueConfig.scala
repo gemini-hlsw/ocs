@@ -1,6 +1,6 @@
 package jsky.app.ot.editor.seq
 
-import edu.gemini.spModel.config2.{ItemKey, Config, ConfigSequence}
+import edu.gemini.spModel.config2.{Config, ConfigSequence, ItemKey}
 import edu.gemini.spModel.gemini.acqcam.InstAcqCam
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2
 import edu.gemini.spModel.gemini.gmos.{GmosNorthType, GmosSouthType, InstGmosNorth, InstGmosSouth}
@@ -19,7 +19,9 @@ import scalaz.Scalaz._
  * Unique configurations represent sets of observes in a sequence which are done with the same
  * instrument configuration and exposure times.
  */
-case class ItcUniqueConfig(count: Int, labels: String, config: Config) {
+case class ItcUniqueConfig(count: Int, labels: String, configs: Seq[Config]) {
+
+  def config = configs.head
 
   /** Single exposure time is either the given exposure time or the time on source divided by the number of images. */
   def singleExposureTime: Double = singleTime.getOrElse(totalTime.orZero / count)
@@ -87,7 +89,7 @@ object ItcUniqueConfig {
   private def uniqueConfigs(seq: ConfigSequence, predicate: Config => Boolean): Seq[ItcUniqueConfig] = {
     val steps        = seq.getAllSteps.toSeq.filter(predicate)
     val groupedSteps = steps.groupBy(hash).toSeq
-    val mappedSteps  = groupedSteps.map{case (h, cs) => ItcUniqueConfig(cs.size, labels(cs), cs.head)}
+    val mappedSteps  = groupedSteps.map { case (h, cs) => ItcUniqueConfig(cs.size, labels(cs), cs) }
     mappedSteps.sortBy(_.config.getItemValue(DATALABEL_KEY).toString)
   }
 
@@ -103,29 +105,31 @@ object ItcUniqueConfig {
   // Creates a text label based on the spans of steps covered by the steps.
   // E.g. ((1,2,3),(10,11),(15)) is turned into "001-003, 010-011, 015"
   private def labels(cs: Seq[Config]): String = {
+
+    // Only the number at the very end is relevant
+    def labelIndex(c: Config): Int = {
+      val label = c.getItemValue(DATALABEL_KEY).asInstanceOf[String]
+      label.split('-').last.toInt
+    }
+
+    // Finds spans of int values that immediately follow each other.
+    // E.g. (1,2,3,10,11,15) is turned into ((1,2,3),(10,11),(15)).
+    // Note, this is done backwards, so we can always prepend the newest element.
+    def findSpans(ns: Seq[Int]): Seq[Seq[Int]] = {
+      val e: Seq[Seq[Int]] = Seq()
+      ns.foldRight(e) {
+        case (i, a) if a.isEmpty           => Seq(Seq(i))
+        case (i, a) if a.head.head == i+1  => (i +: a.head) +: a.tail
+        case (i, a)                        => Seq(i) +: a
+      }
+    }
+
     val ls = cs.map(labelIndex).sorted
     findSpans(ls).map {
       case i :: Nil => f"$i%03d"
       case i :: is  => f"$i%03d-${is.last}%03d"
     }.mkString(", ")
-  }
 
-  // Only the number at the very end is relevant
-  private def labelIndex(c: Config): Int = {
-    val label = c.getItemValue(DATALABEL_KEY).asInstanceOf[String]
-    label.split('-').last.toInt
-  }
-
-  // Finds spans of int values that immediately follow each other.
-  // E.g. (1,2,3,10,11,15) is turned into ((1,2,3),(10,11),(15)).
-  // Note, this is done backwards, so we can always prepend the newest element.
-  private def findSpans(ns: Seq[Int]): Seq[Seq[Int]] = {
-    val e: Seq[Seq[Int]] = Seq()
-    ns.foldRight(e) {
-      case (i, a) if a.isEmpty           => Seq(Seq(i))
-      case (i, a) if a.head.head == i+1  => (i +: a.head) +: a.tail
-      case (i, a)                        => Seq(i) +: a
-    }
   }
 
 }

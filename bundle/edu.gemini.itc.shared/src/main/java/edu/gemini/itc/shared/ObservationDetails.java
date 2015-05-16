@@ -1,7 +1,5 @@
 package edu.gemini.itc.shared;
 
-import edu.gemini.itc.shared.*;
-
 import java.io.Serializable;
 
 /**
