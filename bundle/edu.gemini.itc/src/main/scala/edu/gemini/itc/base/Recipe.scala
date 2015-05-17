@@ -1,6 +1,5 @@
 package edu.gemini.itc.base
 
-import java.awt.Color
 import java.util
 
 import edu.gemini.itc.shared._
@@ -47,8 +46,8 @@ object Recipe {
 
   def createSignalChart(result: SpectroscopyResult, title: String, index: Int): SpcChartData = {
     val data: java.util.List[SpcSeriesData] = new java.util.ArrayList[SpcSeriesData]()
-    data.add(new SpcSeriesData(SignalData,     "Signal ", Color.RED, result.specS2N(index).getSignalSpectrum.getData))
-    data.add(new SpcSeriesData(BackgroundData, "SQRT(Background)  ", Color.BLUE, result.specS2N(index).getBackgroundSpectrum.getData))
+    data.add(new SpcSeriesData(SignalData,     "Signal ",            result.specS2N(index).getSignalSpectrum.getData))
+    data.add(new SpcSeriesData(BackgroundData, "SQRT(Background)  ", result.specS2N(index).getBackgroundSpectrum.getData))
     new SpcChartData(SignalChart, title, "Wavelength (nm)", "e- per exposure per spectral pixel", JavaConversions.asScalaBuffer(data))
   }
 
@@ -62,8 +61,8 @@ object Recipe {
 
   def createS2NChart(result: SpectroscopyResult, title: String, index: Int): SpcChartData = {
     val data: java.util.List[SpcSeriesData] = new util.ArrayList[SpcSeriesData]
-    data.add(new SpcSeriesData(SingleS2NData, "Single Exp S/N", Color.RED, result.specS2N(index).getExpS2NSpectrum.getData))
-    data.add(new SpcSeriesData(FinalS2NData,  "Final S/N  ", Color.BLUE, result.specS2N(index).getFinalS2NSpectrum.getData))
+    data.add(new SpcSeriesData(SingleS2NData, "Single Exp S/N", result.specS2N(index).getExpS2NSpectrum.getData))
+    data.add(new SpcSeriesData(FinalS2NData,  "Final S/N  ",    result.specS2N(index).getFinalS2NSpectrum.getData))
     new SpcChartData(S2NChart, title, "Wavelength (nm)", "Signal / Noise per spectral pixel", JavaConversions.asScalaBuffer(data))
   }
 

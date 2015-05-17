@@ -3,6 +3,7 @@ package edu.gemini.itc.gmos;
 import edu.gemini.itc.base.*;
 import edu.gemini.itc.operation.*;
 import edu.gemini.itc.shared.*;
+import scala.Some;
 import scala.Tuple2;
 import scala.collection.JavaConversions;
 
@@ -369,22 +370,31 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
 
             final int ccdIndex = instrument.getDetectorCcdIndex();
             final String ccdName = instrument.getDetectorCcdName();
-            final Color ccdColor = instrument.getDetectorCcdColor();
-            final Color ccdColorDarker = ccdColor == null ? null : ccdColor.darker().darker();
             final int first = tv.getDetectorCcdStartIndex(ccdIndex);
             final int last = tv.getDetectorCcdEndIndex(ccdIndex, ccdArray.length);
 
+            // assign colors; CCD0 is blue, CCD1 is green, CCD2 is red
+            final Color lightColor;
+            final Color darkColor;
+            switch(ccdIndex) {
+                case 0: lightColor = ITCChart.LightBlue;  darkColor = ITCChart.DarkBlue;  break;
+                case 1: lightColor = ITCChart.LightGreen; darkColor = ITCChart.DarkGreen; break;
+                case 2: lightColor = ITCChart.LightRed;   darkColor = ITCChart.DarkRed;   break;
+                default: throw new Error();
+            }
+
+            // draw those charts
             final SpectroscopyResult result = results[ccdIndex];
             for (int i = 0; i < result.specS2N().length; i++) {
                 switch (index) {
                     case 0:
-                        data.add(new SpcSeriesData(SignalData.instance(),    "Signal "            + ccdName + " " + i, ccdColor,       result.specS2N()[i].getSignalSpectrum().getData(first, last)));
-                        data.add(new SpcSeriesData(BackgroundData.instance(), "SQRT(Background) " + ccdName + " " + i, ccdColorDarker, result.specS2N()[i].getBackgroundSpectrum().getData(first, last)));
+                        data.add(new SpcSeriesData(SignalData.instance(),     "Signal "           + ccdName, result.specS2N()[i].getSignalSpectrum().getData(first, last),     new Some<>(lightColor)));
+                        data.add(new SpcSeriesData(BackgroundData.instance(), "SQRT(Background) " + ccdName, result.specS2N()[i].getBackgroundSpectrum().getData(first, last), new Some<>(darkColor)));
                         break;
 
                     case 1:
-                        data.add(new SpcSeriesData(SingleS2NData.instance(), "Single Exp S/N "    + ccdName + " " + i, ccdColor,       result.specS2N()[i].getExpS2NSpectrum().getData(first, last)));
-                        data.add(new SpcSeriesData(FinalS2NData.instance(),  "Final S/N "         + ccdName + " " + i, ccdColorDarker, result.specS2N()[i].getFinalS2NSpectrum().getData(first, last)));
+                        data.add(new SpcSeriesData(SingleS2NData.instance(),  "Single Exp S/N "   + ccdName, result.specS2N()[i].getExpS2NSpectrum().getData(first, last),     new Some<>(lightColor)));
+                        data.add(new SpcSeriesData(FinalS2NData.instance(),   "Final S/N "        + ccdName, result.specS2N()[i].getFinalS2NSpectrum().getData(first, last),   new Some<>(darkColor)));
                         break;
 
                     default:

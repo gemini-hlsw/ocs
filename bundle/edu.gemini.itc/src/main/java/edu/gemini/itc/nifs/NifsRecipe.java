@@ -201,7 +201,8 @@ public final class NifsRecipe implements SpectroscopyRecipe {
         }
 
         final Parameters p = new Parameters(_sdParameters, _obsDetailParameters, _obsConditionParameters, _telescope);
-        return new GenericSpectroscopyResult(p, instrument, (SourceFraction) null, IQcalc, specS2Narr, (SlitThroughput) null, altair); // TODO no SFCalc and ST for Nifs
+        // TODO: no SFCalc and ST for Nifs, introduce specific result type? or optional values? work with null for now
+        return new GenericSpectroscopyResult(p, instrument, null, IQcalc, specS2Narr, null, altair);
     }
 
     // NIFS CHARTS
@@ -212,8 +213,8 @@ public final class NifsRecipe implements SpectroscopyRecipe {
         final String title = instrument.getIFUMethod().equals(NifsParameters.SUMMED_APERTURE_IFU) ?
                 "Signal and Background (IFU summed apertures: " +
                         instrument.getIFUNumX() + "x" + instrument.getIFUNumY() +
-                        ", " + String.format("%.3f", instrument.getIFUNumX() * instrument.getIFU().IFU_LEN_X) + "\"x" +
-                        String.format("%.3f", instrument.getIFUNumY() * instrument.getIFU().IFU_LEN_Y) + "\")" :
+                        ", " + String.format("%.3f", instrument.getIFUNumX() * IFUComponent.IFU_LEN_X) + "\"x" +
+                        String.format("%.3f", instrument.getIFUNumY() * IFUComponent.IFU_LEN_Y) + "\")" :
                 "Signal and Background (IFU element offset: " + String.format("%.3f", ap_offset_list.get(index)) + " arcsec)";
         return Recipe$.MODULE$.createSignalChart(result, title, index);
     }
@@ -224,8 +225,8 @@ public final class NifsRecipe implements SpectroscopyRecipe {
         final String title = instrument.getIFUMethod().equals(NifsParameters.SUMMED_APERTURE_IFU) ?
                 "Intermediate Single Exp and Final S/N \n(IFU apertures:" +
                         instrument.getIFUNumX() + "x" + instrument.getIFUNumY() +
-                        ", " + String.format("%.3f", instrument.getIFUNumX() * instrument.getIFU().IFU_LEN_X) + "\"x" +
-                        String.format("%.3f", instrument.getIFUNumY() * instrument.getIFU().IFU_LEN_Y) + "\")" :
+                        ", " + String.format("%.3f", instrument.getIFUNumX() * IFUComponent.IFU_LEN_X) + "\"x" +
+                        String.format("%.3f", instrument.getIFUNumY() * IFUComponent.IFU_LEN_Y) + "\")" :
                 "Intermediate Single Exp and Final S/N (IFU element offset: " + String.format("%.3f", ap_offset_list.get(index)) + " arcsec)";
         return Recipe$.MODULE$.createS2NChart(result, title, index);
     }

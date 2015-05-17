@@ -45,7 +45,7 @@ case object FinalS2NData   extends SpcDataType { val instance = this }  // final
 final case class SpcDataFile(dataType: SpcDataType, file: String)
 
 /** Series of (x,y) data points used to create charts and text data files. */
-final case class SpcSeriesData(dataType: SpcDataType, title: String, color: Color, data: Array[Array[Double]]) {
+final case class SpcSeriesData(dataType: SpcDataType, title: String, data: Array[Array[Double]], color: Option[Color] = None) {
   def x(i: Int): Double      = xValues(i)
   def y(i: Int): Double      = yValues(i)
   def xValues: Array[Double] = data(0)

@@ -127,7 +127,7 @@ public final class ImageServlet extends HttpServlet {
             case "S2NChart":    chart = ITCChart.forSpcDataSet(results.chart(S2NChart.instance(),    index), pd); break;
             default:            throw new Error();
         }
-        return chart.getBufferedImage(675, 500);
+        return chart.getBufferedImage(800, 600);
     }
 
     // this is public because we use it for testing

@@ -64,10 +64,10 @@ public abstract class PrinterBase {
         _println("<a href =" +
                 "\"" + ServerInfo.getServerURL() +
                 "itc/servlet/images" +
-                "?" + ImageServlet.ParamType + "=" + ImageServlet.TypeTxt +
-                "&" + ImageServlet.ParamName + "=" + type.toString() +
+                "?" + ImageServlet.ParamType  + "=" + ImageServlet.TypeTxt +
+                "&" + ImageServlet.ParamName  + "=" + type.toString() +
                 "&" + ImageServlet.ParamIndex + "=" + index +
-                "&" + ImageServlet.ParamId + "=" + id +
+                "&" + ImageServlet.ParamId    + "=" + id +
                 "\"> Click here for " + toFileLabel(type) + ". </a>");
     }
 
@@ -77,14 +77,13 @@ public abstract class PrinterBase {
     }
 
     protected void _printImageLink(final UUID id, final SpcChartType type, final int index, final PlottingDetails pd) {
-        _print("<IMG alt=\"" + toImgAlt(type, index) + "\" height=500 src=\"" + ServerInfo.getServerURL() +
+        _print("<img alt=\"" + toImgAlt(type) + "\" src=\"" + ServerInfo.getServerURL() +
                 "itc/servlet/images" +
-                "?" + ImageServlet.ParamType + "=" + ImageServlet.TypeImg +
-                "&" + ImageServlet.ParamName + "=" + type.toString() +
+                "?" + ImageServlet.ParamType  + "=" + ImageServlet.TypeImg +
+                "&" + ImageServlet.ParamName  + "=" + type.toString() +
                 "&" + ImageServlet.ParamIndex + "=" + index +
-                "&" + ImageServlet.ParamId + "=" + id +
-                toPlotLimits(pd) +
-                "\" width=675 border=0>");
+                "&" + ImageServlet.ParamId    + "=" + id +
+                toPlotLimits(pd) + "\"/>");
     }
 
     private String toPlotLimits(final PlottingDetails pd) {
@@ -96,9 +95,9 @@ public abstract class PrinterBase {
         }
     }
 
-    private String toImgAlt(final SpcChartType type, final int index) {
-        if      (type == SignalChart.instance())    return "Signal/Background Chart " + index;
-        else if (type == S2NChart.instance())       return "Signal to Noise Chart " + index;
+    private String toImgAlt(final SpcChartType type) {
+        if      (type == SignalChart.instance())    return "Signal/Background Chart";
+        else if (type == S2NChart.instance())       return "Signal to Noise Chart";
         else    throw new Error();
     }
 
