@@ -97,6 +97,7 @@ public final class EdIteratorFolder
         // show/hide ITC result panels depending on instrument, if applicable also re-establish selected panel
         final ISPObsComponent instrument = getContextInstrument();
         final int activePanel = _w.tabbedPane.getSelectedIndex();
+        _w.tabbedPane.removeChangeListener(this);                       // ignore all the panel shuffling..
         _w.tabbedPane.remove(itcImagingPanel.peer());
         _w.tabbedPane.remove(itcSpectroscopyPanel.peer());
         if (instrument != null) {
@@ -105,7 +106,7 @@ public final class EdIteratorFolder
             if (itcSpectroscopyPanel.visibleFor(type)) _w.tabbedPane.add("ITC Spectroscopy", itcSpectroscopyPanel.peer());
             if (_w.tabbedPane.getTabCount() > activePanel) _w.tabbedPane.setSelectedIndex(activePanel);
         }
-
+        _w.tabbedPane.addChangeListener(this);                          // ok, listen to panel changes again
 
         _origSequenceTab.init(this);
 
@@ -116,6 +117,7 @@ public final class EdIteratorFolder
             _w.title.setText("Sequence");
         }
 
+        // make sure that whichever panel is selected now gets updated
         stateChanged(null);
     }
 
