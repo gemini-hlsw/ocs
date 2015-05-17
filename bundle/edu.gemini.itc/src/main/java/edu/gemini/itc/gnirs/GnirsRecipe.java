@@ -5,6 +5,7 @@ import edu.gemini.itc.operation.*;
 import edu.gemini.itc.shared.*;
 import edu.gemini.spModel.core.Site;
 import scala.Option;
+import scala.Some;
 import scala.Tuple2;
 import scala.collection.JavaConversions;
 
@@ -270,8 +271,8 @@ public final class GnirsRecipe implements SpectroscopyRecipe {
         final String yAxis = "e- per exposure per spectral pixel";
         final List<SpcSeriesData> data = new ArrayList<>();
         for (int i = 0; i < GnirsRecipe.ORDERS; i++) {
-            data.add(new SpcSeriesData(SignalData.instance(),     "Signal Order "           + (i + 3), result.signalOrder()[i].getData(),     Option.empty()));
-            data.add(new SpcSeriesData(BackgroundData.instance(), "SQRT(Background) Order " + (i + 3), result.backGroundOrder()[i].getData(), Option.empty()));
+            data.add(new SpcSeriesData(SignalData.instance(),     "Signal Order "           + (i + 3), result.signalOrder()[i].getData(),     new Some<>(ITCChart.colorByIndex(2*i    ))));
+            data.add(new SpcSeriesData(BackgroundData.instance(), "SQRT(Background) Order " + (i + 3), result.backGroundOrder()[i].getData(), new Some<>(ITCChart.colorByIndex(2*i + 1))));
         }
         return new SpcChartData(SignalChart.instance(), title, xAxis, yAxis, JavaConversions.asScalaBuffer(data));
     }
@@ -282,7 +283,7 @@ public final class GnirsRecipe implements SpectroscopyRecipe {
         final String yAxis = "Signal / Noise per spectral pixel";
         final List<SpcSeriesData> data = new ArrayList<>();
         for (int i = 0; i < GnirsRecipe.ORDERS; i++) {
-           data.add(new SpcSeriesData(FinalS2NData.instance(),   "Final S/N Order "        + (i + 3), result.finalS2NOrder()[i].getData(),     Option.empty()));
+           data.add(new SpcSeriesData(FinalS2NData.instance(),   "Final S/N Order "        + (i + 3), result.finalS2NOrder()[i].getData(),     new Some<>(ITCChart.colorByIndex(2*i))));
         }
         return new SpcChartData(S2NChart.instance(), title, xAxis, yAxis, JavaConversions.asScalaBuffer(data));
     }
