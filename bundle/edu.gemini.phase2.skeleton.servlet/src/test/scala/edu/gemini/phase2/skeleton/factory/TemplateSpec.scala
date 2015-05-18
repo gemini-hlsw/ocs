@@ -2,7 +2,7 @@ package edu.gemini.phase2.skeleton.factory
 
 import java.security.Principal
 
-import edu.gemini.model.p1.immutable.{Target, NifsBlueprintBase, BlueprintBase, TimeAmount, Condition, Observation, Magnitude, SiderealTarget, Proposal}
+import edu.gemini.model.p1.immutable.{Target, BlueprintBase, TimeAmount, Condition, Observation, Magnitude, SiderealTarget, Proposal}
 import edu.gemini.model.p1.mutable.{MagnitudeSystem, MagnitudeBand }
 import edu.gemini.phase2.core.model.SkeletonShell
 import edu.gemini.phase2.core.odb.SkeletonStoreService
@@ -15,7 +15,7 @@ import edu.gemini.spModel.core.SPProgramID
 import edu.gemini.spModel.obscomp.SPNote
 import edu.gemini.spModel.target.SPTarget
 import edu.gemini.spModel.obs.SPObservation
-import edu.gemini.spModel.template.{TemplateParameters }
+import edu.gemini.spModel.template.TemplateParameters
 import org.specs2.mutable.Specification
 import scala.collection.JavaConverters._
 import scalaz._, Scalaz._
@@ -137,7 +137,7 @@ abstract class TemplateSpec(xmlName: String) { this: Specification =>
    * Construct a phase-1 proposal with a target for each magnitude in the given band, plus a target
    * with no magnitude information, with an observation for each using the supplied blueprint.
    */
-  def proposal(bp: NifsBlueprintBase, kmags: List[Double], band: MagnitudeBand) = {
+  def proposal(bp: BlueprintBase, kmags: List[Double], band: MagnitudeBand) = {
 
     val os: List[Observation] =
       p1Obs(bp, p1Target(Nil)) :: // one obs with no mags
