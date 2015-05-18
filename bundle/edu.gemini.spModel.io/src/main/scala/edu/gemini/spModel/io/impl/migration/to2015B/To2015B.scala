@@ -40,6 +40,7 @@ object To2015B {
   val PARAM_DEC        = "c2"
   val PARAM_DELTA_RA   = "pm1"
   val PARAM_DELTA_DEC  = "pm2"
+  val PARAM_EPOCH      = "epoch"
   val PARAM_NOTE_TEXT  = "NoteText"
   val PARAM_NAME       = "name"
   val PARAM_BRIGHTNESS = "brightness"
@@ -67,6 +68,7 @@ object To2015B {
   val UNITS_SECONDS_PER_YEAR          = "seconds/year"
   val UNITS_ARCSECONDS_PER_YEAR       = "arcsecs/year"
   val UNITS_MILLI_ARCSECONDS_PER_YEAR = "milli-arcsecs/year"
+  val UNITS_YEARS                     = "years"
 
   val SYS_ASA_MAJOR_PLANET = "AsA major planet"
   val SYS_ASA_MINOR_PLANET = "AsA minor planet"
@@ -125,10 +127,11 @@ object To2015B {
     } {
 
       // Params
-      val pRa   = ps.getParam(PARAM_RA)
-      val pDec  = ps.getParam(PARAM_DEC)
-      val pdRa  = ps.getParam(PARAM_DELTA_RA)
-      val pdDec = ps.getParam(PARAM_DELTA_DEC)
+      val pRa    = ps.getParam(PARAM_RA)
+      val pDec   = ps.getParam(PARAM_DEC)
+      val pdRa   = ps.getParam(PARAM_DELTA_RA)
+      val pdDec  = ps.getParam(PARAM_DELTA_DEC)
+      val pEpoch = ps.getParam(PARAM_EPOCH)
 
       // Get coords in degrees and PM in degrees/yr
       val ra   = parseHmsOrDegrees(pRa.getValue).unsafeExtract
@@ -146,8 +149,9 @@ object To2015B {
       pdRa.setUnits(UNITS_MILLI_ARCSECONDS_PER_YEAR)
       pdDec.setValue((dDec0 * 1000 * 60 * 60).toString)
       pdDec.setUnits(UNITS_MILLI_ARCSECONDS_PER_YEAR)
+      pEpoch.setValue("2000")
+      pEpoch.setUnits(UNITS_YEARS)
       pSys.setValue(VALUE_SYSTEM_J2000)
-
     }
 
   }
