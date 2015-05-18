@@ -100,8 +100,8 @@ public final class TargetObsComp extends AbstractDataObject implements GuideProb
                 switch (t.getTag()) {
                     case JPL_MINOR_BODY:   return "Comet: " + name;
                     case MPC_MINOR_PLANET: return "Minor Planet: " + name;
-                    case NAMED:            return "Solar System Object: " + name;
-                    case SIDEREAL:         return "Sidereal: " + name;
+                    case NAMED:            return "Solar System: " + name;
+                    case SIDEREAL:         return "Target: " + name;
                 }
             }
         }
