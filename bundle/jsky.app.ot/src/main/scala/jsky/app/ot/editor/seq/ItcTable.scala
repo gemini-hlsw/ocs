@@ -22,8 +22,10 @@ import scala.collection.JavaConverters._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.swing._
-import scalaz.Scalaz._
+
 import scalaz._
+import Scalaz._
+
 /**
  * A table to display ITC calculation results to users.
  */
@@ -262,7 +264,7 @@ trait ItcTable extends Table {
 
     // check how many images are "off-source" which is defined as having an offset > 1/2 the size of the fov
     // this is an educated guesstimate only; ROIs are not taken into account at all (yet)
-    val offSource = uc.configs.count { c =>
+    val offSource = uc.configs.toList.count { c =>
       val p = ConfigExtractor.extractDoubleFromString(c, TEL_P_KEY).getOrElse(0.0)
       val q = ConfigExtractor.extractDoubleFromString(c, TEL_Q_KEY).getOrElse(0.0)
       Math.abs(p) > w/2.0 || Math.abs(q) > h/2.0

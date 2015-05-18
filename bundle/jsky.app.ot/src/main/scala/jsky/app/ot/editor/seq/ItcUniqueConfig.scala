@@ -13,13 +13,14 @@ import edu.gemini.spModel.gemini.trecs.{InstTReCS, TReCSParams}
 import edu.gemini.spModel.obscomp.InstConstants
 import jsky.app.ot.editor.seq.Keys._
 
-import scalaz.Scalaz._
+import scalaz._
+import Scalaz._
 
 /**
  * Unique configurations represent sets of observes in a sequence which are done with the same
  * instrument configuration and exposure times.
  */
-case class ItcUniqueConfig(count: Int, labels: String, configs: Seq[Config]) {
+case class ItcUniqueConfig(count: Int, labels: String, configs: NonEmptyList[Config]) {
 
   def config = configs.head
 
@@ -87,9 +88,9 @@ object ItcUniqueConfig {
   // Gets all "unique configs" (i.e. configs that are relevant for ITC) from the given sequence. The predicate
   // defines which steps have to be taken into account, i.e. spectroscopy vs imaging and no calibrations.
   private def uniqueConfigs(seq: ConfigSequence, predicate: Config => Boolean): Seq[ItcUniqueConfig] = {
-    val steps        = seq.getAllSteps.toSeq.filter(predicate)
-    val groupedSteps = steps.groupBy(hash).toSeq
-    val mappedSteps  = groupedSteps.map { case (h, cs) => ItcUniqueConfig(cs.size, labels(cs), cs) }
+    val steps        = seq.getAllSteps.toList.filter(predicate)
+    val groupedSteps = steps.groupBy(hash).toList
+    val mappedSteps  = groupedSteps.map { case (h, cs) => ItcUniqueConfig(cs.size, labels(cs), NonEmptyList(cs.head, cs:_*)) }
     mappedSteps.sortBy(_.config.getItemValue(DATALABEL_KEY).toString)
   }
 
