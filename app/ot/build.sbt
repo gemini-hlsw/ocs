@@ -1,7 +1,9 @@
 
 import OcsKeys._
+import edu.gemini.osgi.tools.Version
 import edu.gemini.osgi.tools.app.{ Configuration => AppConfig, _ }
 import edu.gemini.osgi.tools.app.Configuration.Distribution.{ Test => TestDistro, _ }
+import OcsCredentials.Ot._
 
 ocsAppSettings
 
@@ -67,7 +69,7 @@ def common(version: Version) = AppConfig(
     BundleSpec("org.apache.commons.logging",   Version(1, 1, 0))
   ),
   spec = Some(file("app/ot/dist/RPM64/ot.spec.template"))
-) extending List()
+) extending List(common_credentials(version))
 
 // WITH-TEST-DBS
 def with_test_dbs(version: Version) = AppConfig(

@@ -14,7 +14,7 @@ object MacDistHandler {
 
 case class MacDistHandler(jre: Option[String], jreName: String) extends DistHandler {
 
-  def build(outDir: File, jreDir: Option[File], meta: ApplicationMeta, version:String, config: Configuration, d: Configuration.Distribution, solution: Map[BundleSpec, (File, Manifest)], appProjectBaseDir: File) {
+  def build(outDir: File, jreDir: Option[File], meta: ApplicationMeta, version:String, config: Configuration, d: Configuration.Distribution, solution: Map[BundleSpec, (File, Manifest)], log: sbt.Logger, appProjectBaseDir: File) {
 
     // Output dirs
     val name = meta.osxVisibleName(version)
@@ -63,8 +63,8 @@ case class MacDistHandler(jre: Option[String], jreName: String) extends DistHand
     val args = Array("hdiutil", "create", "-srcfolder", appDir.getPath, "-volname", volname, dest)
     val result = Runtime.getRuntime.exec(args).waitFor()
     if (result != 0) {
-      println("*** " + args.mkString(" "))
-      println("*** HDIUTIL RETURNED " + result)
+      log.error("*** " + args.mkString(" "))
+      log.error("*** HDIUTIL RETURNED " + result)
     }
 
     // And remove the app

@@ -6,7 +6,7 @@ import java.util.jar.Manifest
 
 class GenericUnixDistHandler(compress: Boolean, jre: Option[String]) extends DistHandler {
 
-  def build(wd: File, jreDir: Option[File], meta: ApplicationMeta, version:String, config: Configuration, d: Configuration.Distribution, solution: Map[BundleSpec, (File, Manifest)], appProjectBaseDir: File) {
+  def build(wd: File, jreDir: Option[File], meta: ApplicationMeta, version:String, config: Configuration, d: Configuration.Distribution, solution: Map[BundleSpec, (File, Manifest)], log: sbt.Logger, appProjectBaseDir: File) {
 
     // Work in a subdir if we're compressing
     val scriptName = meta.executableName(version)
