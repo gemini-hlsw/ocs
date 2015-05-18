@@ -8,7 +8,7 @@ object Configuration {
   }
   type Distribution = this.Distribution.Value
 
-  case class HostInfo(hostname: String, username: String, password: String, port: Int = 22, timeout: Int = 5000)
+  case class HostInfo(hostname: String, username: String, password: String, port: Int = 22, timeout: Int = 15000)
 }
 
 case class Configuration(
