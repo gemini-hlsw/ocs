@@ -91,8 +91,10 @@ class SciAreaPlotFeature(sciArea: ScienceAreaGeometry)
   // science area figure pointing away from the base.  It isn't scaled with
   // the image but rather should always be an absolute size.  For that reason
   // it is created and transformed here.
+  // Note, the site quality conditions are irrelevant so we supply nominal
+  // conditions here rather than risk not having an ObsContext to work with.
   def tickMarkFigure(tpeCtx: TpeContext, tii: TpeImageInfo): Option[Figure] =
-    tpeCtx.obsContext.map { obsCtx =>
+    tpeCtx.obsContextWithConditions(SPSiteQuality.Conditions.NOMINAL).map { obsCtx =>
       val yRaw  = sciArea.unadjustedGeometry(obsCtx).fold(0.0) { _.getBounds2D.getMinY }
       val y     = (yRaw * tii.getPixelsPerArcsec) min -30.0
       val tick  = tickMark(new Point2D.Double(0, y))
