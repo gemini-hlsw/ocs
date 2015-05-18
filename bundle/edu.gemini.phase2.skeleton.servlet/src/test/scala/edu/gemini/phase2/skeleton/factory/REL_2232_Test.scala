@@ -42,7 +42,7 @@ object REL_2232_Test extends TemplateSpec("NIFS_BP.xml") with Specification {
         }
         "There should be a template group for each target brightness bucket." in {
           val found = groups(sp).map(groupBucket).toSet
-          buckets.foreach(found)
+          buckets.forall(found)
         }
         "All groups should include all notes" in {
           List(
