@@ -8,8 +8,6 @@ import edu.gemini.spModel.gemini.gmos.GmosNorthType;
 import edu.gemini.spModel.gemini.gmos.GmosSouthType;
 import scala.Option;
 
-import java.awt.*;
-
 /**
  * Gmos specification class
  */
@@ -20,9 +18,6 @@ public abstract class Gmos extends Instrument implements BinningProvider {
     public static final double HAM_PLATE_SCALE = 0.080778;
 
     protected DetectorsTransmissionVisitor _dtv;
-
-    // Colors to use for charts corresponding to the detectorCcdIndex
-    protected static final Color[] DETECTOR_CCD_COLORS = {Color.blue, Color.green, Color.red};
 
     /**
      * Related files will be in this subdir of lib
@@ -101,8 +96,7 @@ public abstract class Gmos extends Instrument implements BinningProvider {
             case HAMAMATSU:
                 String fileName = getCcdFiles()[detectorCcdIndex];
                 String name = getCcdNames()[detectorCcdIndex];
-                Color color = DETECTOR_CCD_COLORS[detectorCcdIndex];
-                _detector = new Detector(getDirectory() + "/", getPrefix(), fileName, "Hamamatsu array", name, color);
+                _detector = new Detector(getDirectory() + "/", getPrefix(), fileName, "Hamamatsu array", name);
                 _detector.setDetectorPixels(DETECTOR_PIXELS);
                 if (detectorCcdIndex == 0)
                     _instruments = createCcdArray();
@@ -181,13 +175,6 @@ public abstract class Gmos extends Instrument implements BinningProvider {
      */
     public String getDetectorCcdName() {
         return _detector.getName();
-    }
-
-    /**
-     * Returns the color to use in plots of the detector CCD
-     */
-    public Color getDetectorCcdColor() {
-        return _detector.getColor();
     }
 
     /**
