@@ -26,12 +26,6 @@
   <catalog name="GSC-2 at ESO"/>
   <catalog name="GSC-2 at STScI"/>
 
-<!-- Skycat Archives (should be defined in the skycat.cfg file) -->
-
-  <catalog name="CFHT Archive at CADC"/>
-  <catalog name="HST Archive at CADC"/>
-  <catalog name="NTT Archive at ESO"/>
-
 <!-- Skycat Image Servers (should be defined in the skycat.cfg file) -->
   <catalog name="Digitized Sky at Gemini North"/>
   <catalog name="Digitized Sky at Gemini South"/>

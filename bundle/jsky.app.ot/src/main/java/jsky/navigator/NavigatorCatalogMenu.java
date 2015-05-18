@@ -43,9 +43,6 @@ public class NavigatorCatalogMenu extends JMenu implements TreeModelListener {
     /** Catalog submenu */
     private JMenu _catalogMenu;
 
-    /** Archive submenu */
-    private JMenu _archiveMenu;
-
     /** Image server submenu */
     private JMenu _imageServerMenu;
 
@@ -95,8 +92,6 @@ public class NavigatorCatalogMenu extends JMenu implements TreeModelListener {
         dir.addTreeModelListener(this);
 
         _catalogMenu = _createCatalogSubMenu(this, _catalogMenu, true, dir, Catalog.CATALOG, _I18N.getString("catalogs"));
-
-        _archiveMenu = _createCatalogSubMenu(this, _archiveMenu, true, dir, Catalog.ARCHIVE, _I18N.getString("archives"));
 
         _imageServerMenu = _createCatalogSubMenu(this, _imageServerMenu, true, dir, Catalog.IMAGE_SERVER, _I18N.getString("imageServers"));
 
