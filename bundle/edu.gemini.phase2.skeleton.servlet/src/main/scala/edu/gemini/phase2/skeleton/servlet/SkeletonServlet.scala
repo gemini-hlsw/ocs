@@ -142,11 +142,11 @@ final class SkeletonServlet(odb: IDBDatabaseService, templateFactory: TemplateFa
     }
 
   private def readItacGeminiId(p: Proposal): Option[StandardProgramId] =
-     for {
-       i <- p.proposalClass.itac
-       s <- i.decision.right.map(_.programId).right.toOption
-       p <- ProgramId.parseStandardId(s)
-     } yield p
+    for {
+      i <- p.proposalClass.itac
+      s <- i.decision.right.map(_.programId).right.toOption
+      p <- ProgramId.parseStandardId(s)
+    } yield p
 
   private def pdfAttachment(items: List[FileItem]): Either[Failure, File] =
     readItem("attachment", items, it => {
@@ -194,7 +194,7 @@ final class SkeletonServlet(odb: IDBDatabaseService, templateFactory: TemplateFa
     } yield new SkeletonShell(id.toSp, SpProgramFactory.create(p), f)).left map { Failure.badRequest }
 
   private def expandTemplates(folder: Phase1Folder): Either[Failure, TemplateFolderExpansion] =
-    TemplateFolderExpansionFactory.expand(folder, templateFactory).left map { msg =>
+    TemplateFolderExpansionFactory.expand(folder, templateFactory, false).left map { msg =>
       Failure.badRequest(msg)
     }
 

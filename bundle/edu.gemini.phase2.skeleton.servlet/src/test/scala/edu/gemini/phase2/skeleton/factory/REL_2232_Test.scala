@@ -1,68 +1,92 @@
 package edu.gemini.phase2.skeleton.factory
 
-import edu.gemini.phase2.template.factory.impl.GroupInitializer
-import edu.gemini.phase2.template.factory.impl.nifs.{NifsAo, Nifs}
-import edu.gemini.shared.skyobject.Magnitude
+import edu.gemini.phase2.template.factory.impl.nifs.{ TargetBrightness, BAT, BT, FT, MT }
+import edu.gemini.pot.sp.{ISPProgram, ISPTemplateGroup}
 import edu.gemini.shared.skyobject.Magnitude.Band
-import edu.gemini.spModel.gemini.altair.blueprint.SpAltairNone
-import edu.gemini.spModel.gemini.nifs.NIFSParams
-import edu.gemini.spModel.gemini.nifs.blueprint.{SpNifsBlueprintAo, SpNifsBlueprint}
-import edu.gemini.spModel.target.SPTarget
-
 import org.specs2.mutable.Specification
+import edu.gemini.model.p1.immutable.{AltairNGS, Altair, NifsBlueprintAo, NifsBlueprintBase, NifsBlueprint}
+import edu.gemini.model.p1.mutable.{NifsOccultingDisk, MagnitudeBand, NifsDisperser}
+import org.specs2.specification.Example
 
-import scalaz.syntax.id._
+object REL_2232_Test extends TemplateSpec("NIFS_BP.xml") with Specification {
 
-class REL_2232_Test extends Specification {
+  // All possible TargetBrightness buckets
+  val buckets: List[Option[TargetBrightness]] =
+    None :: List(BAT, FT, MT, BT).map(Some(_))
 
-  val NoteTitles = List("Phase II Requirements: General Information", "Phase II  \"BEFORE Submission\" Checklist")
+  // Return the TargetBrightness buckets for the targets in this template group. The returned
+  // list should always have size = 1 but we will check that in a test below.
+  def groupBuckets(g: ISPTemplateGroup): List[Option[TargetBrightness]] =
+    p2targets(g)
+      .map(p2mag(_, Band.K))
+      .map(_.map(TargetBrightness(_)))
 
-  def incSpec(name: String, g: GroupInitializer[_], inc: Set[Int], excl: Set[Int]) = {
-    s"Initialized $name" should {
-      s"include obs ${inc.mkString("{",",","}")} in target group" in {
-        g.targetGroup.filter(inc).toSet must_== inc
-      }
-      if (excl.nonEmpty) {
-        s"exclude obs ${excl.mkString("{", ",", "}")} from target group" in {
-          g.targetGroup.filter(excl) must beEmpty
+  // Return the TargetBrightness bucket for the first target in the given group. We establish by
+  // testing groupBuckets above that this will return the one and only bucket for this group.
+  def groupBucket(g: ISPTemplateGroup): Option[TargetBrightness] =
+    groupBuckets(g).headOption.flatten
+
+  // A map from TargetBrightness to group. We establish that this is a 1:1 mapping in the first
+  // few tests below.
+  def bucketMap(sp: ISPProgram): Map[Option[TargetBrightness], ISPTemplateGroup] =
+    groups(sp)
+      .map { g => groupBucket(g) -> g }
+      .toMap
+
+  // Our common tests for NIFS blueprint expansion
+  def nifsTest(title: String, bp: NifsBlueprintBase)(more: ISPProgram => Example): Unit =
+    expand(proposal(bp, (0.0 to 25.0 by 0.5).toList, MagnitudeBand.K)) { (p, sp) =>
+      title >> {
+        "All targets in a given group should be in the same target brightness bucket." in {
+          groups(sp).map(groupBuckets).forall(_.distinct.size must_== 1)
         }
-      }
-      s"includes notes ${NoteTitles.mkString("{'", "','", "'}")}" in {
-        g.notes must containAllOf(NoteTitles)
+        "There should be a template group for each target brightness bucket." in {
+          val found = groups(sp).map(groupBucket).toSet
+          buckets.foreach(found)
+        }
+        "All groups should include all notes" in {
+          List(
+            "Phase II Requirements: General Information",
+            "Phase II  \"BEFORE Submission\" Checklist"
+          ).forall(n => groups(sp).forall(g => existsNote(g, n)))
+        }
+        more(sp)
       }
     }
+
+  val nifs = NifsBlueprint(NifsDisperser.H)
+  nifsTest("Non-AO NIFS Blueprint Expansion", nifs) { sp =>
+    val map = bucketMap(sp)
+    checkLibs("BT group",  map(Some(BT)),  Set(2), Set(3, 4, 5))
+    checkLibs("MT group",  map(Some(MT)),  Set(3), Set(2, 4, 5))
+    checkLibs("FT group",  map(Some(FT)),  Set(4), Set(2, 3, 5))
+    checkLibs("BAT group", map(Some(BAT)), Set(5), Set(2, 3, 4))
+    checkLibs("Missing K-band group", map(None), Set(2, 3, 4, 5), Set())
   }
 
-  val bp     = new SpNifsBlueprint(NIFSParams.Disperser.DEFAULT)
-  val bpAo   = new SpNifsBlueprintAo(SpAltairNone.instance, NIFSParams.Mask.CLEAR, NIFSParams.Disperser.DEFAULT)
-  val bpAoOD = new SpNifsBlueprintAo(SpAltairNone.instance, NIFSParams.Mask.OD_1, NIFSParams.Disperser.DEFAULT)
+  val nifsAO = NifsBlueprintAo(AltairNGS(false), NifsOccultingDisk.CLEAR, NifsDisperser.H)
+  nifsTest("NIFS AO without Occulting Disk Blueprint Expansion", nifsAO) { sp =>
+    val map = bucketMap(sp)
+    checkLibs("BT group",  map(Some(BT)),  Set(2), Set(3, 4, 5))
+    checkLibs("MT group",  map(Some(MT)),  Set(3), Set(2, 4, 5))
+    checkLibs("FT group",  map(Some(FT)),  Set(4), Set(2, 3, 5))
+    checkLibs("BAT group", map(Some(BAT)), Set(5), Set(2, 3, 4))
+    checkLibs("Missing K-band group", map(None), Set(2, 3, 4, 5), Set())
+  }
 
-  val nt  = new SPTarget
-  val ht  = new SPTarget <| (_.getTarget.putMagnitude(new Magnitude(Band.H, 5.0)))
-  def kt(m: Double)  = new SPTarget <| (_.getTarget.putMagnitude(new Magnitude(Band.K, m)))
-
-  incSpec("NIFS template with no example target",       Nifs(bp, None),              Set(2, 3, 4, 5), Set())
-  incSpec("NIFS template with no magnitudes",           Nifs(bp, Some(nt)),          Set(2, 3, 4, 5), Set())
-  incSpec("NIFS template with H-mag",                   Nifs(bp, Some(ht)),          Set(2, 3, 4, 5), Set())
-  incSpec("NIFS template with K-mag BT",                Nifs(bp, Some(kt(5))),       Set(2),          Set(3, 4, 5))
-  incSpec("NIFS template with K-mag MT",                Nifs(bp, Some(kt(10))),      Set(3),          Set(2, 4, 5))
-  incSpec("NIFS template with K-mag FT",                Nifs(bp, Some(kt(15))),      Set(4),          Set(2, 3, 5))
-  incSpec("NIFS template with K-mag BAT",               Nifs(bp, Some(kt(21))),      Set(5),          Set(2, 3, 4))
-
-  incSpec("NIFS AO template with no example target",    NifsAo(bpAo, None),          Set(2, 3, 4, 5), Set())
-  incSpec("NIFS AO template with no magnitudes",        NifsAo(bpAo, Some(nt)),      Set(2, 3, 4, 5), Set())
-  incSpec("NIFS AO template with H-mag",                NifsAo(bpAo, Some(ht)),      Set(2, 3, 4, 5), Set())
-  incSpec("NIFS AO template with K-mag BT",             NifsAo(bpAo, Some(kt(5))),   Set(2),          Set(3, 4, 5))
-  incSpec("NIFS AO template with K-mag MT",             NifsAo(bpAo, Some(kt(10))),  Set(3),          Set(2, 4, 5))
-  incSpec("NIFS AO template with K-mag FT",             NifsAo(bpAo, Some(kt(15))),  Set(4),          Set(2, 3, 5))
-  incSpec("NIFS AO template with K-mag BAT",            NifsAo(bpAo, Some(kt(21))),  Set(5),          Set(2, 3, 4))
-
-  incSpec("NIFS AO OD template with no example target", NifsAo(bpAoOD, None),         Set(11, 12), Set())
-  incSpec("NIFS AO OD template with no magnitudes",     NifsAo(bpAoOD, Some(nt)),     Set(11, 12), Set())
-  incSpec("NIFS AO OD template with H-mag",             NifsAo(bpAoOD, Some(ht)),     Set(11, 12), Set())
-  incSpec("NIFS AO OD template with K-mag BT",          NifsAo(bpAoOD, Some(kt(5))),  Set(11),     Set(12))
-  incSpec("NIFS AO OD template with K-mag MT",          NifsAo(bpAoOD, Some(kt(10))), Set(12),     Set(11))
-  incSpec("NIFS AO OD template with K-mag FT",          NifsAo(bpAoOD, Some(kt(15))), Set(12),     Set(11))
-  incSpec("NIFS AO OD template with K-mag BAT",         NifsAo(bpAoOD, Some(kt(21))), Set(12),     Set(11))
+  val nifsAO_OD = NifsBlueprintAo(AltairNGS(false), NifsOccultingDisk.OD_2, NifsDisperser.H)
+  nifsTest("NIFS AO with Occulting Disk Blueprint Expansion", nifsAO_OD) { sp =>
+    val map = bucketMap(sp)
+    checkLibs("BT group",  map(Some(BT)),  Set(11), Set(12))
+    checkLibs("MT group",  map(Some(MT)),  Set(12), Set(11))
+    checkLibs("FT group",  map(Some(FT)),  Set(12), Set(11))
+    checkLibs("BAT group", map(Some(BAT)), Set(12), Set(11))
+    checkLibs("Missing K-band group", map(None), Set(11, 12), Set())
+  }
 
 }
+
+
+
+
+
