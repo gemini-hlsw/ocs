@@ -166,9 +166,9 @@ object F2LongslitPartitioner extends Partitioner {
 object GracesPartitioner extends Partitioner {
   import edu.gemini.shared.skyobject.Magnitude.Band.R
   def bucket(t:SPTarget):Int = Option(t.getTarget.getMagnitude(R).getOrNull).map(_.getBrightness).map {R =>
-    if (R <= 6.5) 1
-    else if (R <= 10) 2
-    else if (R <= 21) 3
-    else 4
+         if (R <= 6.5) 1
+    else if (R <= 10)  2
+    else if (R <= 21)  3
+    else               4
   }.getOrElse(5) // no R-mag is treated differently
 }
