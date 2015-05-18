@@ -81,6 +81,25 @@ object To2015B {
   val SYS_SOLAR_OBJECT     = "Solar system object"
 
   private val MagnitudeNoteTitle = "2015B Magnitude Updates"
+  private val MagnitudeNoteText  = (name: String) =>
+    s"""|The unstructured 'brightness' property for targets was deprecated in 2010B and removed
+        |in 2015B. This note records the disposition of old brightness values associated with
+        |the targets in $name.
+        |
+        |A "parsed" message means that the brightness value was converted into one or more
+        |structured magnitude values with known pass bands. "failed" means that this process
+        |failed, so you may wish to update the magnitude table manually. "ignored" means that
+        |a structured magnitude table was already present and parsing was skipped.
+        |
+        |""".stripMargin
+
+  private val PrecessionNoteTitle = "2015B Target Precession"
+  private val PrecessionNoteText  = (name: String) =>
+    s"""B1950 targets have been precessed to J2000 for 2015B.  This note records the original
+       |B1950 coordinates associated with the targets in $name.
+       |
+     """.stripMargin
+
   private val PioFactory = new PioXmlFactory()
 
   // These will be applied in the given order
@@ -120,7 +139,7 @@ object To2015B {
   }
 
   // Convert B1950 coordinates to J2000
-  private def b1950ToJ2000(d: Document): Unit = {
+  private def b1950ToJ2000(d: Document): Unit =
     for {
       ps    <- allTargets(d)
       pSys  <- Option(ps.getParam(PARAM_SYSTEM)).toList if pSys.getValue == VALUE_SYSTEM_B1950
@@ -132,6 +151,9 @@ object To2015B {
       val pdRa   = ps.getParam(PARAM_DELTA_RA)
       val pdDec  = ps.getParam(PARAM_DELTA_DEC)
       val pEpoch = ps.getParam(PARAM_EPOCH)
+
+      // Record the original B1950 RA/Dec for the note.
+      val coordsString = s"(${pRa.getValue}, ${pDec.getValue}) \u0394(${pdRa.getValue}, ${pdDec.getValue})"
 
       // Get coords in degrees and PM in degrees/yr
       val ra   = parseHmsOrDegrees(pRa.getValue).unsafeExtract
@@ -152,9 +174,9 @@ object To2015B {
       pEpoch.setValue("2000")
       pEpoch.setUnits(UNITS_YEARS)
       pSys.setValue(VALUE_SYSTEM_J2000)
-    }
 
-  }
+      appendNote(ps, coordsString, PrecessionNoteTitle, PrecessionNoteText)
+    }
 
   // Remove JNNNN and APPARENT coordinate systems and replace unceremoniously with J2000.
   // These appear only in engineering and commissioning, each only once. BNNNN is unused.
@@ -173,15 +195,18 @@ object To2015B {
       ps  <- allTargets(d)
       b   <- ps.value(PARAM_BRIGHTNESS).filter(_.nonEmpty).toList
     } (parseBrightness(b), Option(ps.getParamSet(PARAMSET_MAGNITUDES))) match {
-      case (None, _)           => appendNote(ps, "failed: " + b)
-      case (Some(ms), Some(_)) => appendNote(ps, "ignored: " + b)
-      case (Some(ms), None)    => appendNote(ps, "parsed: " + b)
+      case (None, _)           => appendMagNote(ps, "failed: " + b)
+      case (Some(ms), Some(_)) => appendMagNote(ps, "ignored: " + b)
+      case (Some(ms), None)    => appendMagNote(ps, "parsed: " + b)
         ps.addParamSet(MagnitudePio.instance.toParamSet(PioFactory, ms.list.asImList))
     }
   }
 
   // Append a message to the shared magnitude note for the given obs, relating to the given target
-  private def appendNote(target: ParamSet, s: String): Unit = {
+  private def appendMagNote(target: ParamSet, s: String): Unit =
+    appendNote(target, s, MagnitudeNoteTitle, MagnitudeNoteText)
+
+  private def appendNote(target: ParamSet, s: String, title: String, text: String => String): Unit = {
     // Find the parent that should hold the note.
     @tailrec
     def noteParent(node: PioNode): Option[Container] = {
@@ -194,28 +219,28 @@ object To2015B {
     }
 
     noteParent(target).foreach { parent =>
-      val pset  = noteText(parent)
-      val param = pset.getParam(PARAM_NOTE_TEXT)
-      val text  = param.getValue
-      val tName = target.value(PARAM_NAME).getOrElse(VALUE_NAME_UNTITLED)
-      param.setValue(s"$text  $tName $s\n")
+      val pset  = noteText(parent, title, text)
+      val param   = pset.getParam(PARAM_NOTE_TEXT)
+      val curText = param.getValue
+      val tName   = target.value(PARAM_NAME).getOrElse(VALUE_NAME_UNTITLED)
+      param.setValue(s"$curText  $tName $s\n")
     }
   }
 
   // Get or create the magnitude update note, returning its ParamSet
-  private def noteText(parent: Container): ParamSet =
-    findNoteText(parent).getOrElse(createNoteText(parent))
+  private def noteText(parent: Container, title: String, text: String => String): ParamSet =
+    findNoteText(parent, title).getOrElse(createNoteText(parent, title, text))
 
   // Find the [first] magnitude note and return its ParamSet, if any
-  private def findNoteText(parent: Container): Option[ParamSet] =
+  private def findNoteText(parent: Container, title: String): Option[ParamSet] =
     (for {
       note  <- parent.findContainers(SPComponentType.INFO_NOTE)
       ps    <- note.paramSets if ps.getName == PARAMSET_NOTE
-      name  <- ps.value(ISPDataObject.TITLE_PROP).toList if name == MagnitudeNoteTitle
+      name  <- ps.value(ISPDataObject.TITLE_PROP).toList if name == title
     } yield ps).headOption
 
   // Create the magnitude node and return its ParamSet
-  private def createNoteText(parent: Container): ParamSet = {
+  private def createNoteText(parent: Container, title: String, text: String => String): ParamSet = {
     // If we're adding the note to a template group, fish out the template
     // group name.  Otherwise if it is an observation the container name itself
     // is the observation name.
@@ -231,18 +256,8 @@ object To2015B {
 
     // Our note (easy way to get the ParamSet)
     val note = new SPNote()
-    note.setTitle(MagnitudeNoteTitle)
-    note.setNote(
-      s"""|The unstructured 'brightness' property for targets was deprecated in 2010B and removed
-          |in 2015B. This note records the disposition of old brightness values associated with
-          |the targets in $name.
-          |
-          |A "parsed" message means that the brightness value was converted into one or more
-          |structured magnitude values with known pass bands. "failed" means that this process
-          |failed, so you may wish to update the magnitude table manually. "ignored" means that
-          |a structured magnitude table was already present and parsing was skipped.
-          |
-          |""".stripMargin)
+    note.setTitle(title)
+    note.setNote(text(name))
 
     // Container for ISPObsComponent
     val container = PioFactory.createContainer(

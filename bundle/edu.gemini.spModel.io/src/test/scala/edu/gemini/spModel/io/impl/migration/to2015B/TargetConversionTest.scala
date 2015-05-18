@@ -110,11 +110,16 @@ class TargetConversionTest {
     val dra   = rigel.getPropMotionRA
     val ddec  = rigel.getPropMotionDec
     val epoch = rigel.getEpoch.getValue
-    
+
     assertEquals("05:14:32.269", (new HMSFormat).format(ra))
     assertEquals("-08:12:05.86", (new DMSFormat).format(dec))
     assertEquals("1.30", f"$dra%.2f")
     assertEquals("0.50", f"$ddec%.2f")
     assertEquals(2000.0000, epoch, 0.0000001)
+
+    // Check for the note.
+    val noteComp = obs.getObsComponents.asScala.find(_.getType == SPComponentType.INFO_NOTE).get
+    val text     = noteComp.getDataObject.asInstanceOf[SPNote].getNote
+    assertTrue(text.contains("Rigel"))
   }
 }
