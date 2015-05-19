@@ -38,6 +38,7 @@ case class Flamingos2Imaging(blueprint:SpFlamingos2BlueprintImaging) extends Fla
   val exposureTimes: Map[Flamingos2.Filter, Double] = {
     import Flamingos2.Filter._
     Map(H       -> 10.0,
+        K_LONG  -> 30.0,
         K_SHORT -> 30.0) withDefaultValue 60.0
   }
 
