@@ -366,11 +366,13 @@ private class ConditionsPanel(owner: EdIteratorFolder) extends GridBagPanel {
 
 private class AnalysisMethodPanel(owner: EdIteratorFolder) extends GridBagPanel {
 
+  var userSkyValue: Option[Double] = None // temporary, this will go away, see Note regarding OCSADV-345 below
+
   val autoAperture  = new RadioButton("Auto") { focusable = false; selected = true }
   val userAperture  = new RadioButton("User") { focusable = false }
   val skyLabel      = new Label("Sky Aperture")
   val skyUnits      = new Label("x target aperture")
-  val sky           = new NumberEdit(skyLabel, skyUnits, 5)
+  val sky           = new NumberEdit(skyLabel, skyUnits, 5.0)
   val targetLabel   = new Label("Target Aperture")
   val targetUnits   = new Label("arcsec")
   val target        = new NumberEdit(targetLabel, targetUnits, 2) { enabled = false; targetLabel.enabled = true }
@@ -395,9 +397,21 @@ private class AnalysisMethodPanel(owner: EdIteratorFolder) extends GridBagPanel 
 
   def update() = {
     // OCSADV-345: Don't allow users to change sky aperture for NIRI, F2 and GSAOI, this functionality has not been verified for these instruments.
+    // In the future, those values will be stored in the observation, for now they are not made persistent and are used on-the-fly.
+    // However, out of courtesy to the users, we do keep the value they've entered for the sky aperture and restore it after the value
+    // has been set to 1.0 for NIRI, F2 and GSAOI.
     Option(owner.getContextInstrumentDataObject).foreach { _.getType match {
-      case InstNIRI.SP_TYPE | Flamingos2.SP_TYPE | Gsaoi.SP_TYPE  => sky.enabled = false; skyLabel.enabled = true; sky.peer.setValue(1.0)
-      case _                                                      => sky.enabled = true;
+      case InstNIRI.SP_TYPE | Flamingos2.SP_TYPE | Gsaoi.SP_TYPE  =>
+        userSkyValue      = Some(sky.peer.getDoubleValue(5.0))
+        sky.tooltip       = "This instrument does not support user defined values for the sky aperture. 1.0 is used."
+        sky.enabled       = false
+        skyLabel.enabled  = true
+        sky.peer.setValue(1.0)
+      case _  =>
+        sky.tooltip       = null
+        sky.enabled       = true
+        userSkyValue.foreach(sky.peer.setValue) // when coming back from F2, NIRI, GSAOI -> restore user value
+        userSkyValue      = None
     }}
   }
 
