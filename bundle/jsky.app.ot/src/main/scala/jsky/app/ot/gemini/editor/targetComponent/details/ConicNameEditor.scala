@@ -30,7 +30,11 @@ final class ConicNameEditor(date: HorizonsIO[Date]) extends JPanel with Telescop
       d  <- date
       t0 <- HorizonsIO.delay(ct)
       p  <- Horizons.lookupConicTargetByName(t0.getName, t0.getTag.unsafeToHorizonsObjectType, d)
-      _  <- HorizonsIO.delay(spt.setTarget(p._1))
+      _  <- HorizonsIO.delay(spt.setTarget {
+        p._1 <| (_.setMagnitudes(ct.getMagnitudes)) <|
+                (_.setSpatialProfile(ct.getSpatialProfile)) <|
+                (_.setSpectralDistribution(ct.getSpectralDistribution))
+      })
     } yield ()
 
   val name = new TextBoxWidget <| { w =>

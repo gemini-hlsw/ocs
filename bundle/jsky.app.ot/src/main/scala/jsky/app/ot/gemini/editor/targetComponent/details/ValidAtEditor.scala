@@ -172,7 +172,14 @@ abstract class ValidAtEditor[A <: ITarget](empty: A) extends JPanel with Telesco
    * editor being replaced entirely. This is ok!
    */
   def updateSPTarget(t: ITarget): HorizonsIO[Unit] =
-    HorizonsIO.delay(spt.setTarget(t))
+    HorizonsIO.delay {
+      val old = spt.getTarget
+      spt.setTarget {
+        t <| (_.setMagnitudes(old.getMagnitudes)) <|
+             (_.setSpatialProfile(old.getSpatialProfile)) <|
+             (_.setSpectralDistribution(old.getSpectralDistribution))
+      }
+    }
 
   /**
    * Program that implements the "go" button behavior: it looks up a conic target in Horizons based
