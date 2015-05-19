@@ -1,11 +1,12 @@
 package edu.gemini.spModel.io.impl.migration.to2015B
 
 import edu.gemini.spModel.obscomp.SPNote
-import edu.gemini.spModel.target.system.{NonSiderealTarget, HmsDegTarget}
+import edu.gemini.spModel.target.obsComp.TargetObsComp
+import edu.gemini.spModel.target.system.{DMSFormat, HMSFormat, CoordinateParam, NonSiderealTarget, HmsDegTarget}
 
 import java.io.{StringReader, StringWriter, InputStreamReader}
 
-import edu.gemini.pot.sp.{ISPTemplateFolder, ISPTemplateGroup, ISPProgram}
+import edu.gemini.pot.sp.{SPComponentType, ISPObservation, ISPTemplateFolder, ISPTemplateGroup, ISPProgram}
 import edu.gemini.pot.spdb.{IDBDatabaseService, DBLocalDatabase}
 import edu.gemini.spModel.io.impl.{PioSpXmlWriter, PioSpXmlParser}
 import edu.gemini.spModel.template.{TemplateParameters, TemplateGroup}
@@ -17,7 +18,7 @@ import scala.collection.JavaConverters._
 
 // a rudimentary test to make sure it doesn't blow up
 
-class TemplateTargetConversionTest {
+class TargetConversionTest {
   private def withTestOdb(block: IDBDatabaseService => Unit): Unit = {
     val odb = DBLocalDatabase.createTransient()
     try {
@@ -29,7 +30,7 @@ class TemplateTargetConversionTest {
 
   private def withTestProgram(block: (IDBDatabaseService, ISPProgram) => Unit): Unit = withTestOdb { odb =>
     val parser = new PioSpXmlParser(odb.getFactory)
-    parser.parseDocument(new InputStreamReader(getClass.getResourceAsStream("AsAcomet.xml"))) match {
+    parser.parseDocument(new InputStreamReader(getClass.getResourceAsStream("GS-2015B-T-1.xml"))) match {
       case p: ISPProgram => block(odb, p)
       case _             => fail("Expecting a science program")
     }
@@ -55,6 +56,11 @@ class TemplateTargetConversionTest {
     }
 
   private def validateProgram(p: ISPProgram): Unit = {
+    validateTemplateFolder(p.getTemplateFolder)
+    validateB1950(p.getObservations.asScala.find(_.getDataObject.getTitle == "Rigel").get)
+  }
+
+  private def validateTemplateFolder(tf: ISPTemplateFolder): Unit = {
     def validateGroup(g: ISPTemplateGroup): Unit = {
       g.getDataObject match {
         case tg: TemplateGroup =>
@@ -87,12 +93,33 @@ class TemplateTargetConversionTest {
       }
     }
 
-    def validateFolder(f: ISPTemplateFolder): Unit =
-      f.getTemplateGroups.asScala.toList match {
-        case List(g1, g2) => validateGroup(g2)
-        case _            => fail("expecting two template groups")
-      }
+    tf.getTemplateGroups.asScala.toList match {
+      case List(g1, g2) => validateGroup(g2)
+      case _            => fail("expecting two template groups")
+    }
+  }
 
-    validateFolder(p.getTemplateFolder)
+  def validateB1950(obs: ISPObservation): Unit = {
+    // unsafe extravaganza!
+    val targetComp = obs.getObsComponents.asScala.find(_.getType == SPComponentType.TELESCOPE_TARGETENV).get
+    val toc        = targetComp.getDataObject.asInstanceOf[TargetObsComp]
+    val rigel      = toc.getBase.getTarget.asInstanceOf[HmsDegTarget]
+
+    val ra    = rigel.getRa.getAs(CoordinateParam.Units.DEGREES)
+    val dec   = rigel.getDec.getAs(CoordinateParam.Units.DEGREES)
+    val dra   = rigel.getPropMotionRA
+    val ddec  = rigel.getPropMotionDec
+    val epoch = rigel.getEpoch.getValue
+
+    assertEquals("05:14:32.269", (new HMSFormat).format(ra))
+    assertEquals("-08:12:05.86", (new DMSFormat).format(dec))
+    assertEquals("1.30", f"$dra%.2f")
+    assertEquals("0.50", f"$ddec%.2f")
+    assertEquals(2000.0000, epoch, 0.0000001)
+
+    // Check for the note.
+    val noteComp = obs.getObsComponents.asScala.find(_.getType == SPComponentType.INFO_NOTE).get
+    val text     = noteComp.getDataObject.asInstanceOf[SPNote].getNote
+    assertTrue(text.contains("Rigel"))
   }
 }
