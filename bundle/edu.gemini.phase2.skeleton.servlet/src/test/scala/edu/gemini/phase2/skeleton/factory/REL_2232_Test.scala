@@ -4,7 +4,7 @@ import edu.gemini.phase2.template.factory.impl.nifs.{ TargetBrightness, BAT, BT,
 import edu.gemini.pot.sp.{ISPProgram, ISPTemplateGroup}
 import edu.gemini.shared.skyobject.Magnitude.Band
 import org.specs2.mutable.Specification
-import edu.gemini.model.p1.immutable.{AltairNGS, Altair, NifsBlueprintAo, NifsBlueprintBase, NifsBlueprint}
+import edu.gemini.model.p1.immutable.{ProposalIo, AltairNGS, NifsBlueprintAo, NifsBlueprintBase, NifsBlueprint}
 import edu.gemini.model.p1.mutable.{NifsOccultingDisk, MagnitudeBand, NifsDisperser}
 import org.specs2.specification.Example
 
@@ -84,8 +84,185 @@ object REL_2232_Test extends TemplateSpec("NIFS_BP.xml") with Specification {
     checkLibs("Missing K-band group", map(None), Set(11, 12), Set())
   }
 
-}
+  // There was a problem with expanding LGS blueprints; verifying fix here
+  "NIFS-phase1b.xml" should {
+    "Parse and expand without error" in {
+      expand(ProposalIo.read(andyXml.toString)) { (p1, p2) => true }
+    }
+  }
 
+  // NIFS-phase1b.xml from http://swgserv01.cl.gemini.edu:8080/browse/REL-2232
+  lazy val andyXml =
+    <proposal schemaVersion="2015.2.1" tacCategory="Extragalactic">
+      <meta band3optionChosen="true">
+        <attachment>/home/astephens/bin/PIT/proposals/GeminiAttachment.pdf</attachment>
+      </meta>
+      <semester year="2015" half="B"/>
+      <title>NIFS Template Tests</title>
+      <abstract>We propose to observe a small sample of weak-continuum, dwarf galaxies to investigate the excitation of molecular hydrogen in massive star-forming complexes.  In the usable fraction of our previous allocation we were able to observe one of our targets, NGC5461.  This dataset unambiguously shows that the gas is excited in low density photo-dissociation regions, contrary to the widespread assumption in the literature that the H2 in galaxies is predominantly shock excited.  The weakness of the dwarf galaxy continua permits detection of the higher level H2 transitions which are essential to determine the gas excitation and relative contributions of thermal and UV-excited gas. </abstract>
+      <keywords>
+        <keyword>Dwarf galaxies</keyword>
+        <keyword>Emission lines</keyword>
+        <keyword>Starburst galaxies</keyword>
+      </keywords>
+      <investigators>
+        <pi id="investigator-0">
+          <firstName>Marie</firstName>
+          <lastName>Lemoine-Busserolle</lastName>
+          <status>PhD</status>
+          <email>mbussreo@gemini.edu</email>
+          <phone></phone>
+          <address>
+            <institution>Gemini Observatory - North</institution>
+            <address>Gemini Observatory
+              670 N. Aohoku Place
+              Hilo
+              HI
+              96720</address>
+            <country>USA</country>
+          </address>
+        </pi>
+      </investigators>
+      <targets>
+        <sidereal epoch="J2000" id="target-0">
+          <name>K=undefined</name>
+          <degDeg>
+            <ra>0.000004166666864572714</ra>
+            <dec>0.00000027777779097151425</dec>
+          </degDeg>
+          <magnitudes/>
+        </sidereal>
+        <sidereal epoch="J2000" id="target-1">
+          <name>K=16</name>
+          <degDeg>
+            <ra>240.0</ra>
+            <dec>16.0</dec>
+          </degDeg>
+          <magnitudes>
+            <magnitude band="K" system="Vega">16.0</magnitude>
+          </magnitudes>
+        </sidereal>
+        <sidereal epoch="J2000" id="target-2">
+          <name>K=21</name>
+          <degDeg>
+            <ra>315.0</ra>
+            <dec>21.0</dec>
+          </degDeg>
+          <magnitudes>
+            <magnitude band="K" system="Vega">21.0</magnitude>
+          </magnitudes>
+        </sidereal>
+        <sidereal epoch="J2000" id="target-3">
+          <name>K=14</name>
+          <degDeg>
+            <ra>210.0</ra>
+            <dec>14.0</dec>
+          </degDeg>
+          <magnitudes>
+            <magnitude band="K" system="Vega">14.0</magnitude>
+          </magnitudes>
+        </sidereal>
+        <sidereal epoch="J2000" id="target-4">
+          <name>K=12</name>
+          <degDeg>
+            <ra>180.0</ra>
+            <dec>12.0</dec>
+          </degDeg>
+          <magnitudes>
+            <magnitude band="K" system="Vega">12.0</magnitude>
+          </magnitudes>
+        </sidereal>
+        <sidereal epoch="J2000" id="target-5">
+          <name>K=9</name>
+          <degDeg>
+            <ra>135.0</ra>
+            <dec>9.0</dec>
+          </degDeg>
+          <magnitudes>
+            <magnitude band="K" system="Vega">9.0</magnitude>
+          </magnitudes>
+        </sidereal>
+        <sidereal epoch="J2000" id="target-6">
+          <name>K=8</name>
+          <degDeg>
+            <ra>120.0</ra>
+            <dec>8.0</dec>
+          </degDeg>
+          <magnitudes>
+            <magnitude band="K" system="Vega">8.0</magnitude>
+          </magnitudes>
+        </sidereal>
+        <sidereal epoch="J2000" id="target-7">
+          <name>K=18</name>
+          <degDeg>
+            <ra>270.0</ra>
+            <dec>18.0</dec>
+          </degDeg>
+          <magnitudes>
+            <magnitude band="K" system="Vega">18.0</magnitude>
+          </magnitudes>
+        </sidereal>
+        <sidereal epoch="J2000" id="target-8">
+          <name>K=13</name>
+          <degDeg>
+            <ra>195.0</ra>
+            <dec>13.0</dec>
+          </degDeg>
+          <magnitudes>
+            <magnitude band="K" system="Vega">13.0</magnitude>
+          </magnitudes>
+        </sidereal>
+      </targets>
+      <conditions>
+        <condition id="condition-0">
+          <name>CC 50%/Clear, IQ 70%/Good, SB Any/Bright, WV Any</name>
+          <cc>50%/Clear</cc>
+          <iq>70%/Good</iq>
+          <sb>Any/Bright</sb>
+          <wv>Any</wv>
+        </condition>
+      </conditions>
+      <blueprints>
+        <nifs>
+          <ao id="blueprint-0">
+            <name>NIFS LGS None H (1.49 - 1.80um)</name>
+            <visitor>false</visitor>
+            <disperser>H (1.49 - 1.80um)</disperser>
+            <altair>
+              <lgs pwfs1="false" aowfs="false" oiwfs="false"/>
+            </altair>
+            <occultingDisk>None</occultingDisk>
+          </ao>
+        </nifs>
+      </blueprints>
+      <observations>
+        <observation band="Band 1/2" enabled="true" target="target-1" condition="condition-0" blueprint="blueprint-0">
+          <time units="hr">1.0</time>
+          <meta ck="">
+            <guiding>
+              <percentage>100</percentage>
+              <evaluation>Success</evaluation>
+            </guiding>
+            <visibility>Bad</visibility>
+            <gsa>0</gsa>
+          </meta>
+        </observation>
+      </observations>
+      <proposalClass>
+        <queue tooOption="None">
+          <ngo partnerLead="investigator-0">
+            <request>
+              <time units="hr">9.0</time>
+              <minTime units="hr">4.0</minTime>
+            </request>
+            <partner>us</partner>
+          </ngo>
+        </queue>
+      </proposalClass>
+    </proposal>
+
+
+}
 
 
 
