@@ -51,6 +51,11 @@ class CoordinateEditor extends JPanel with TelescopePosEditor with ReentrancyHac
     c.weightx = 2
   })
 
+  add(new JLabel("(J2000)"), new GridBagConstraints <| { c =>
+    c.gridx = 4
+    c.insets = new Insets(0, 5, 0, 0)
+    c.weighty = 0
+  })
 
   ra.addWatcher(watcher { s =>
     nonreentrant {
