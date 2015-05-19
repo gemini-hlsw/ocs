@@ -95,8 +95,8 @@ object To2015B {
 
   private val PrecessionNoteTitle = "2015B Target Precession"
   private val PrecessionNoteText  = (name: String) =>
-    s"""B1950 targets have been precessed to J2000 for 2015B.  This note records the original
-       |B1950 coordinates associated with the targets in $name.
+    s"""At the start of the 2015B semester all B1950 coordinates were precessed to J2000.  The
+       |original B1950 coordinates and proper motions of the targets in $name are:
        |
      """.stripMargin
 
