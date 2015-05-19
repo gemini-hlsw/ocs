@@ -6,6 +6,9 @@ import javax.swing._
 import edu.gemini.itc.shared.PlottingDetails.PlotLimits
 import edu.gemini.itc.shared._
 import edu.gemini.pot.sp.SPComponentType
+import edu.gemini.spModel.gemini.flamingos2.Flamingos2
+import edu.gemini.spModel.gemini.gsaoi.Gsaoi
+import edu.gemini.spModel.gemini.niri.InstNIRI
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.{CloudCover, ImageQuality, SkyBackground, WaterVapor}
 import jsky.app.ot.util.OtColor
 import jsky.util.gui.{NumberBoxWidget, TextBoxWidget, TextBoxWidgetWatcher}
@@ -41,7 +44,7 @@ sealed trait ItcPanel extends GridBagPanel {
   def visibleFor(t: SPComponentType): Boolean
 
   private val currentConditions = new ConditionsPanel(owner)
-  private val analysisMethod    = new AnalysisMethodPanel
+  private val analysisMethod    = new AnalysisMethodPanel(owner)
   private val message           = new ItcFeedbackPanel(table)
 
   border = BorderFactory.createEmptyBorder(5, 10, 5, 10)
@@ -84,8 +87,11 @@ sealed trait ItcPanel extends GridBagPanel {
   }
 
   def update(): Unit = {
+    deafTo(currentConditions, analysisMethod)
     currentConditions.update()
+    analysisMethod.update()
     table.update()
+    listenTo(currentConditions, analysisMethod)
   }
 
   def analysis: Option[AnalysisMethod] = analysisMethod.analysisMethod
@@ -276,9 +282,7 @@ private class ConditionsPanel(owner: EdIteratorFolder) extends GridBagPanel {
     def sync(newValue: A) = {
       if (programValue == selection.item) {
         // if we are "in sync" with program value (i.e. the program value is currently selected), update it
-        deafTo(selection)
         selection.item = newValue
-        listenTo(selection)
       }
       // set new program value and update coloring
       programValue = newValue
@@ -359,7 +363,8 @@ private class ConditionsPanel(owner: EdIteratorFolder) extends GridBagPanel {
   }
 
 }
-private class AnalysisMethodPanel extends GridBagPanel {
+
+private class AnalysisMethodPanel(owner: EdIteratorFolder) extends GridBagPanel {
 
   val autoAperture  = new RadioButton("Auto") { focusable = false; selected = true }
   val userAperture  = new RadioButton("User") { focusable = false }
@@ -386,6 +391,14 @@ private class AnalysisMethodPanel extends GridBagPanel {
     case ButtonClicked(`autoAperture`)  => target.enabled = false; targetLabel.enabled = true; publish(new SelectionChanged(this))
     case ButtonClicked(`userAperture`)  => target.enabled = true;  publish(new SelectionChanged(this))
     case ValueChanged(_)                => publish(new SelectionChanged(this))
+  }
+
+  def update() = {
+    // OCSADV-345: Don't allow users to change sky aperture for NIRI, F2 and GSAOI, this functionality has not been verified for these instruments.
+    Option(owner.getContextInstrumentDataObject).foreach { _.getType match {
+      case InstNIRI.SP_TYPE | Flamingos2.SP_TYPE | Gsaoi.SP_TYPE  => sky.enabled = false; skyLabel.enabled = true; sky.peer.setValue(1.0)
+      case _                                                      => sky.enabled = true;
+    }}
   }
 
   def analysisMethod: Option[AnalysisMethod] =
