@@ -83,9 +83,9 @@ class RPMDistHandler(jre: Option[String]) extends DistHandler {
     val specPath = new File(wd, "rpm.spec")
 
     // Set up an SSH connection to the Linux VM where rpmbuild will be run.
-    if (config.remoteBuildInfo.isEmpty)
-      log.error("no remote build info: update OcsCredentials?")
-    val remoteBuildInfo = config.remoteBuildInfo.get
+    val remoteBuildInfo = config.remoteBuildInfo.getOrElse {
+      sys.error("no remote build info: update OcsCredentials?")
+    }
 
     log.info(s"establishing ssh session to ${remoteBuildInfo.hostname}")
     JSch.setConfig("StrictHostKeyChecking", "no")
@@ -101,7 +101,7 @@ class RPMDistHandler(jre: Option[String]) extends DistHandler {
     sftp.connect(remoteBuildInfo.timeout)
 
     // ChannelSftp.mkdir fails with an SftpException if a directory already exists: handle this by allowing this exception.
-    def rmkdir(dir: String): Unit =
+    def remoteMkdir(dir: String): Unit =
       try {
 	sftp.mkdir(dir)
       } catch {
@@ -109,9 +109,9 @@ class RPMDistHandler(jre: Option[String]) extends DistHandler {
       }
 
     log.info("creating remote directories")
-    rmkdir(rpmBuildDir)
+    remoteMkdir(rpmBuildDir)
     sftp.cd(rpmBuildDir)
-    rmkdir("SOURCES")
+    remoteMkdir("SOURCES")
 
     log.info("copying tarball")
     sftp.put(archiveName.getAbsolutePath, s"SOURCES/${name}.tar.gz")
