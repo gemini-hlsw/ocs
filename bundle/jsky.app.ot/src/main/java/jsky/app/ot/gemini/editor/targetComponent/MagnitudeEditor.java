@@ -243,11 +243,16 @@ public class MagnitudeEditor implements TelescopePosEditor {
             // passband combo box.  It is never editable but appears to become
             // editable after the user selects a passband and the MagAddRow
             // is replaced with a MagEditRow.  \u2192 is an right pointing arrow
-            tf = new JTextField("Select \u2192") {{
-                setColumns(5);
-                setEnabled(false);
-                setMinimumSize(getPreferredSize());
-            }};
+            tf = new JTextField("Select \u2192") {
+                {
+                    setColumns(5);
+                    setEnabled(false);
+                    setMinimumSize(getPreferredSize());
+                }
+                @Override public void setEnabled(boolean enabled) {
+                    super.setEnabled(false); // never enable
+                }
+            };
             cb = new JComboBox() {{
                 setToolTipText("Set passband for the new magnitude value");
             }};
