@@ -43,9 +43,9 @@ case class Graces(blueprint: SpGracesBlueprint, exampleTarget: Option[SPTarget])
   // ELIF 21  <= R       INCLUDE {4}
   // ELSE INCLUDE {1},{2},{3},{4} # No magnitude given so include all
   val acq = rMag.map { r =>
-         if (r < 6.5) List(1)
-    else if (r < 10)  List(2)
-    else if (r < 21)  List(3)
+         if (r <= 6.5) List(1)
+    else if (r <= 10)  List(2)
+    else if (r <= 21)  List(3)
     else              List(4)
   } .getOrElse(List(1, 2, 3, 4))
 
