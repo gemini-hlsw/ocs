@@ -2,10 +2,12 @@ package jsky.app.ot.vcs
 
 import edu.gemini.spModel.core.{SPProgramID, Peer}
 import jsky.app.ot.userprefs.observer.ObservingPeer
+import jsky.app.ot.viewer.SPViewer
 
-import java.awt.Color
+import java.awt.{Point, Toolkit, Color}
 import javax.swing.{UIManager, BorderFactory}
 
+import scala.collection.JavaConverters._
 import scala.swing._
 import scala.swing.GridBagPanel.Anchor._
 import scala.swing.GridBagPanel.Fill._
@@ -52,7 +54,24 @@ class VcsPeerSelectionDialog(c: Option[Component], pid: SPProgramID, allPeers: L
   modal     = true
   resizable = false
 
-  c.foreach { comp => location = comp.locationOnScreen }
+  private def loc(comp: Option[java.awt.Component]): Point = {
+    def safeLocation(c0: java.awt.Component): Option[Point] =
+      \/.fromTryCatch(c0.getLocationOnScreen).toOption
+
+    def viewer: Option[SPViewer] =
+      SPViewer.instances().asScala.find { v =>
+        Option(v.getProgram).exists(_.getProgramID == pid)
+      }
+
+    def center: Point =
+      Toolkit.getDefaultToolkit.getScreenSize |> { dim =>
+        new Point(dim.getWidth.toInt/2, dim.getHeight.toInt/2)
+      }
+
+    (comp.flatMap(safeLocation) orElse viewer.flatMap(safeLocation)) | center
+  }
+
+  location = loc(c.map(_.peer))
 
   private def peerForDefaultSite = Option(pid.site).flatMap { site =>
     allPeers.find(p => Option(p.site).exists(_ == site))
