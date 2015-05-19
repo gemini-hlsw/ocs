@@ -59,6 +59,8 @@ final class TargetDetailPanel extends JPanel with TelescopePosEditor with Reentr
         c.weightx = 1
         c.fill = GridBagConstraints.HORIZONTAL
       })
+      revalidate()  // REL-2331?  revalidate/repaint for good measure
+      repaint()
     }
 
     // Forward the `edit` call.
