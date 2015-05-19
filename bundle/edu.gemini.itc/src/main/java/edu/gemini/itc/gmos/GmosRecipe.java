@@ -67,7 +67,7 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
             add(new SpcDataFile(SingleS2NData.instance(),  toFile(r, "Sin")));
             add(new SpcDataFile(FinalS2NData.instance(),   toFile(r, "Fin")));
         }};
-        return new Tuple2<>(new ItcSpectroscopyResult(_sdParameters, JavaConversions.asScalaBuffer(dataSets).toList(), JavaConversions.asScalaBuffer(dataFiles).toList()), r);
+        return new Tuple2<>(new ItcSpectroscopyResult(_sdParameters, _obsDetailParameters, JavaConversions.asScalaBuffer(dataSets).toList(), JavaConversions.asScalaBuffer(dataFiles).toList()), r);
     }
 
     protected static String toFile(final SpectroscopyResult[] results, final String filename) {

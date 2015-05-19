@@ -1,7 +1,6 @@
 package edu.gemini.itc.shared
 
 import edu.gemini.pot.ModelConverters._
-import edu.gemini.pot.sp.SPComponentType
 import edu.gemini.pot.sp.SPComponentType._
 import edu.gemini.shared.skyobject.Magnitude.Band
 import edu.gemini.spModel.config2.{Config, ItemKey}
@@ -9,11 +8,12 @@ import edu.gemini.spModel.core._
 import edu.gemini.spModel.gemini.acqcam.AcqCamParams
 import edu.gemini.spModel.gemini.altair.AltairParams
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2
-import edu.gemini.spModel.gemini.gmos.{GmosSouthType, GmosNorthType, GmosCommonType}
+import edu.gemini.spModel.gemini.gmos.{GmosCommonType, GmosNorthType, GmosSouthType, InstGmosNorth}
 import edu.gemini.spModel.gemini.gnirs.GNIRSParams
 import edu.gemini.spModel.gemini.gsaoi.Gsaoi
 import edu.gemini.spModel.gemini.niri.Niri
 import edu.gemini.spModel.guide.GuideProbe
+import edu.gemini.spModel.obscomp.SPInstObsComp
 import edu.gemini.spModel.rich.shared.immutable.asScalaOpt
 import edu.gemini.spModel.target.SPTarget
 import edu.gemini.spModel.target.env.{GuideProbeTargets, TargetEnvironment}
@@ -50,8 +50,8 @@ object ConfigExtractor {
   private val AoFieldLensKey      = new ItemKey("adaptive optics:fieldLens")
   private val AoGuideStarTypeKey  = new ItemKey("adaptive optics:guideStarType")
 
-  def extractInstrumentDetails(instrument: SPComponentType, probe: GuideProbe, targetEnv: TargetEnvironment, c: Config): String \/ InstrumentDetails =
-    instrument match {
+  def extractInstrumentDetails(instrument: SPInstObsComp, probe: GuideProbe, targetEnv: TargetEnvironment, c: Config): String \/ InstrumentDetails =
+    instrument.getType match {
       case INSTRUMENT_ACQCAM                      => ConfigExtractor.extractAcqCam(c)
       case INSTRUMENT_FLAMINGOS2                  => ConfigExtractor.extractF2(c)
       case INSTRUMENT_GMOS | INSTRUMENT_GMOSSOUTH => ConfigExtractor.extractGmos(c)
@@ -88,7 +88,7 @@ object ConfigExtractor {
 
     // Gets the site this GMOS belongs to
     def extractSite: String \/ Site =
-      extract[String](c, InstrumentKey).map(s => if (s.equals("GMOS-N")) Site.GN else Site.GS)
+      extract[String](c, InstrumentKey).map(s => if (s.equals(InstGmosNorth.INSTRUMENT_NAME_PROP)) Site.GN else Site.GS)
 
     // Gets the custom mask for the given site
     def customMask(s: Site): FPUnit = s match {
@@ -208,11 +208,11 @@ object ConfigExtractor {
 
 
   // Extract a value of the given type from the configuration
-  private def extract[A](c: Config, key: ItemKey)(implicit clazz: ClassTag[A]): String \/ A =
+  def extract[A](c: Config, key: ItemKey)(implicit clazz: ClassTag[A]): String \/ A =
     extractWithThrowable[A](c, key).leftMap(_.getMessage)
 
   // Extract a double value from a string in the configuration
-  private def extractDoubleFromString(c: Config, key: ItemKey): String \/ Double = {
+  def extractDoubleFromString(c: Config, key: ItemKey): String \/ Double = {
     val v = for {
       s <- extractWithThrowable[String](c, key)
       d <- \/.fromTryCatch(s.toDouble)
