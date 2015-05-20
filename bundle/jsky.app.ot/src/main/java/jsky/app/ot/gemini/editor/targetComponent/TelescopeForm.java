@@ -105,39 +105,21 @@ class TelescopeForm extends JPanel {
     final JPanel buttonPanel = new JPanel() {{
         setBackground(new Color(238, 238, 238));
         setBorder(new EmptyBorder(2, 2, 2, 2));
-        setLayout(new GridBagLayout() {{
-            columnWidths  = new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-            rowHeights    = new int[] { 0, 0 };
-            columnWeights = new double[] { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0E-4 };
-            rowWeights    = new double[] { 0.0, 1.0E-4 };
-        }});
+        setLayout(new GridBagLayout());
         final JPanel spacerPanel = new JPanel() {{
             setBackground(null);
             setOpaque(false);
             setLayout(new BorderLayout());
         }};
-        add(newMenuBar,             new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0,  0, 0, 0), 0, 0));
-        add(removeButton,           new GridBagConstraints(1, 0, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0,  0, 0, 0), 0, 0));
-        add(copyButton,             new GridBagConstraints(2, 0, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 10, 0, 0), 0, 0));
-        add(pasteButton,            new GridBagConstraints(3, 0, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0,  0, 0, 0), 0, 0));
-        add(duplicateButton,        new GridBagConstraints(4, 0, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0,  0, 0, 0), 0, 0));
-        add(primaryButton,          new GridBagConstraints(5, 0, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 10, 0, 0), 0, 0));
-        add(spacerPanel,            new GridBagConstraints(6, 0, 1, 1, 1.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0,  0, 0, 0), 0, 0));
-        add(guidingControls.peer(), new GridBagConstraints(7, 0, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0,  0, 0, 0), 0, 0));
-
-        // Insert the tag menu at index 6 ... TODO: clean this up a bit
-        add(new JPanel() {{
-            setOpaque(false);
-            setLayout(new FlowLayout() {{
-                setVgap(0);
-            }});
-            add(new JLabel("Type Tag: ") {{
-                setOpaque(false);
-                setVerticalAlignment(SwingConstants.CENTER);
-            }});
-            add(tag);
-        }}, 6);
-
+        add(newMenuBar,             new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0,  0, 0, 0), 0, 0));
+        add(removeButton,           new GridBagConstraints(1, 0, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0,  0, 0, 0), 0, 0));
+        add(copyButton,             new GridBagConstraints(2, 0, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0, 10, 0, 0), 0, 0));
+        add(pasteButton,            new GridBagConstraints(3, 0, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0,  0, 0, 0), 0, 0));
+        add(duplicateButton,        new GridBagConstraints(4, 0, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0,  0, 0, 0), 0, 0));
+        add(primaryButton,          new GridBagConstraints(5, 0, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0, 10, 0, 0), 0, 0));
+        add(tag,                    new GridBagConstraints(6, 0, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0, 10, 0, 0), 0, 0));
+        add(spacerPanel,            new GridBagConstraints(7, 0, 1, 1, 1.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0,  0, 0, 0), 0, 0));
+        add(guidingControls.peer(), new GridBagConstraints(8, 0, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(0,  0, 0, 0), 0, 0));
     }};
 
     final TelescopePosTableWidget positionTable;
