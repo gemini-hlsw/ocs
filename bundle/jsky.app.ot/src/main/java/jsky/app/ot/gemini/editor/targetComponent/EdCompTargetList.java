@@ -129,7 +129,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         // Update enabled state for all detail widgets.  The current editor
         // will have already been updated by the super.updateEnabledState so
         // update the others.
-        for (final TargetDetailEditor ed : TargetDetailEditor.AllJava()) {
+        for (final TargetDetailEditor ed : _w.detailEditor.allEditorsJava()) {
             if (_w.detailEditor.curDetailEdiorJava().forall(cur -> cur != ed)) {
                 updateEnabledState(new Component[] {ed}, enabled);
             }
