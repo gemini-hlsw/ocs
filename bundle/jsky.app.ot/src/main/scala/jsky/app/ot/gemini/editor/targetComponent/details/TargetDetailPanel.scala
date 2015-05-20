@@ -2,7 +2,7 @@ package jsky.app.ot.gemini.editor.targetComponent.details
 
 import edu.gemini.spModel.target.system.ITarget.Tag
 
-import java.awt.{GridBagConstraints, GridBagLayout}
+import java.awt.{Insets, GridBagConstraints, GridBagLayout}
 import javax.swing.JPanel
 
 import edu.gemini.pot.sp.ISPNode
@@ -64,6 +64,7 @@ final class TargetDetailPanel extends JPanel with TelescopePosEditor with Reentr
     c.gridy     = 1
     c.weightx   = 1
     c.gridwidth = 2
+    c.insets    = new Insets(0,4,0,4)
     c.fill      = GridBagConstraints.HORIZONTAL
   })
 
