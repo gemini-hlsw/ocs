@@ -4,7 +4,7 @@ import java.util
 
 import edu.gemini.itc.shared._
 
-import scala.collection.JavaConversions
+import scala.collection.JavaConversions._
 
 sealed trait Recipe
 
@@ -48,7 +48,7 @@ object Recipe {
     val data: java.util.List[SpcSeriesData] = new java.util.ArrayList[SpcSeriesData]()
     data.add(new SpcSeriesData(SignalData,     "Signal ",            result.specS2N(index).getSignalSpectrum.getData))
     data.add(new SpcSeriesData(BackgroundData, "SQRT(Background)  ", result.specS2N(index).getBackgroundSpectrum.getData))
-    new SpcChartData(SignalChart, title, "Wavelength (nm)", "e- per exposure per spectral pixel", JavaConversions.asScalaBuffer(data))
+    new SpcChartData(SignalChart, title, "Wavelength (nm)", "e- per exposure per spectral pixel", data.toList)
   }
 
   def createS2NChart(result: SpectroscopyResult): SpcChartData = {
@@ -63,7 +63,7 @@ object Recipe {
     val data: java.util.List[SpcSeriesData] = new util.ArrayList[SpcSeriesData]
     data.add(new SpcSeriesData(SingleS2NData, "Single Exp S/N", result.specS2N(index).getExpS2NSpectrum.getData))
     data.add(new SpcSeriesData(FinalS2NData,  "Final S/N  ",    result.specS2N(index).getFinalS2NSpectrum.getData))
-    new SpcChartData(S2NChart, title, "Wavelength (nm)", "Signal / Noise per spectral pixel", JavaConversions.asScalaBuffer(data))
+    new SpcChartData(S2NChart, title, "Wavelength (nm)", "Signal / Noise per spectral pixel", data.toList)
   }
 
 }

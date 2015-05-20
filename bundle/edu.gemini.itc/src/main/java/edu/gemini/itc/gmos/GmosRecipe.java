@@ -403,7 +403,7 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
             }
         }
 
-        return new SpcChartData(type, title, "Wavelength (nm)", yAxis, JavaConversions.asScalaBuffer(data));
+        return new SpcChartData(type, title, "Wavelength (nm)", yAxis, JavaConversions.asScalaBuffer(data).toList());
     }
 
 
