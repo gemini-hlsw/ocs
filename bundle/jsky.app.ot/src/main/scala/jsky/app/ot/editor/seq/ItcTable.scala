@@ -64,7 +64,8 @@ trait ItcTable extends Table {
     val showKeys = seq.getIteratedKeys.toSeq.
       filterNot(k => ExcludedParentKeys(k.getParent)).
       filterNot(ExcludedKeys).
-      filterNot(_.equals(INST_EXP_TIME_KEY)).   // exposure time will always be shown, don't repeat it in case it is part of the dynamic configuration
+      filterNot(_.equals(INST_EXP_TIME_KEY)).   // exposure time will always be shown, don't repeat in case it is part of the dynamic configuration
+      filterNot(_.equals(INST_COADDS_KEY)).     // coadds will always be shown for instruments that support them, don't repeat in case it is part of the dynamic configuration
       sortBy(_.getPath)
 
     // update table model while keeping the current selection
@@ -113,12 +114,12 @@ trait ItcTable extends Table {
   }
 
   protected def calculateSpectroscopy(peer: Peer, instrument: SPInstObsComp, uc: ItcUniqueConfig): Future[ItcService.Result] = {
-    def method(srcFraction: Double) = SpectroscopySN(uc.count * instrument.getCoadds, uc.singleExposureTime, srcFraction)
+    def method(srcFraction: Double) = SpectroscopySN(uc.count * uc.coadds.getOrElse(1), uc.singleExposureTime, srcFraction)
     calculate(peer, instrument, uc, method)
   }
 
   protected def calculateImaging(peer: Peer, instrument: SPInstObsComp, uc: ItcUniqueConfig): Future[ItcService.Result] = {
-    def method(srcFraction: Double) = ImagingSN(uc.count * instrument.getCoadds, uc.singleExposureTime, srcFraction)
+    def method(srcFraction: Double) = ImagingSN(uc.count * uc.coadds.getOrElse(1), uc.singleExposureTime, srcFraction)
     calculate(peer, instrument, uc, method)
   }
 
@@ -292,8 +293,14 @@ class ItcImagingTable(val parameters: ItcParametersProvider) extends ItcTable {
       val results     = uniqConfigs.map(calculateImaging(peer, instrument, _))
 
       instrument.getType match {
-        case INSTRUMENT_GMOS | INSTRUMENT_GMOSSOUTH => new ItcGmosImagingTableModel(keys, uniqConfigs, results)
-        case _                                      => new ItcGenericImagingTableModel(keys, uniqConfigs, results)
+        case INSTRUMENT_GMOS | INSTRUMENT_GMOSSOUTH =>
+          new ItcGmosImagingTableModel(keys, uniqConfigs, results)
+
+        case INSTRUMENT_GNIRS | INSTRUMENT_GSAOI | INSTRUMENT_NIFS | INSTRUMENT_NIRI =>
+          new ItcGenericImagingTableModel(keys, uniqConfigs, results, showCoadds = true)
+
+        case _ =>
+          new ItcGenericImagingTableModel(keys, uniqConfigs, results, showCoadds = false)
       }
 
     }
@@ -317,7 +324,13 @@ class ItcSpectroscopyTable(val parameters: ItcParametersProvider) extends ItcTab
       val uniqueConfigs = ItcUniqueConfig.spectroscopyConfigs(seq)
       val results = uniqueConfigs.map(calculateSpectroscopy(peer, instrument, _))
 
-      new ItcGenericSpectroscopyTableModel(keys, uniqueConfigs, results)
+      instrument.getType match {
+        case INSTRUMENT_GNIRS | INSTRUMENT_GSAOI | INSTRUMENT_NIFS | INSTRUMENT_NIRI =>
+          new ItcGenericSpectroscopyTableModel(keys, uniqueConfigs, results, showCoadds = true)
+
+        case _ =>
+          new ItcGenericSpectroscopyTableModel(keys, uniqueConfigs, results, showCoadds = false)
+      }
     }
 
     table.getOrElse(emptyTable)

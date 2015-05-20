@@ -1,5 +1,6 @@
 package jsky.app.ot.editor.seq
 
+import edu.gemini.itc.shared.ConfigExtractor
 import edu.gemini.spModel.config2.{Config, ConfigSequence, ItemKey}
 import edu.gemini.spModel.gemini.acqcam.InstAcqCam
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2
@@ -24,11 +25,14 @@ case class ItcUniqueConfig(count: Int, labels: String, configs: NonEmptyList[Con
 
   def config = configs.head
 
-  /** Single exposure time is either the given exposure time or the time on source divided by the number of images. */
-  def singleExposureTime: Double = singleTime.getOrElse(totalTime.orZero / count)
+  /** Single exposure time is either the given exposure time or the time on source divided by the number of images and coadds. */
+  def singleExposureTime: Double = singleTime.getOrElse(totalTime.orZero / (count * coadds.getOrElse(1)))
 
-  /** Total exposure time is either total time on source (TReCS/Michelle) or the single exposure time times the number of images. */
-  def totalExposureTime: Double = totalTime.getOrElse(singleTime.orZero * count)
+  /** Total exposure time is either total time on source (TReCS/Michelle) or the single exposure time times the number of images and coadds. */
+  def totalExposureTime: Double = totalTime.getOrElse(singleTime.orZero * (count * coadds.getOrElse(1)))
+
+  /** The coadds for this step. */
+  def coadds: Option[Int] = ConfigExtractor.extractOptionalInteger(config, INST_COADDS_KEY)
 
   /** TReCS and Michelle have an optional total time on source. */
   private val totalTime = Option(config.getItemValue(INST_TIME_ON_SRC_KEY)).map(_.asInstanceOf[Double])

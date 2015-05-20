@@ -206,6 +206,9 @@ object ConfigExtractor {
     }).map(Wavelength.fromMicrons)
   }
 
+  // Extract an optional integer, values in the configuration are Java objects
+  def extractOptionalInteger(c: Config, key: ItemKey): Option[Int] =
+    extract[java.lang.Integer](c, key).map(_.toInt).toOption
 
   // Extract a value of the given type from the configuration
   def extract[A](c: Config, key: ItemKey)(implicit clazz: ClassTag[A]): String \/ A =

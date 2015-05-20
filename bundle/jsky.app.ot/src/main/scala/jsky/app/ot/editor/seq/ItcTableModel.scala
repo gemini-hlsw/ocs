@@ -23,15 +23,19 @@ object ItcTableModel {
   */
 sealed trait ItcTableModel extends AbstractTableModel {
 
-  /** Defines a set of header columns for all tables. */
-  val Headers = Seq(
-    Column("Data Labels",     (c, r) => (resultIcon(r).orNull, c.labels)),
-    Column("Images",          (c, r) => s"${c.count}",                      tooltip = "Number of exposures used in S/N calculation"),
-    Column("Exposure Time",   (c, r) => f"${c.singleExposureTime}%.1f",     tooltip = "Exposure time of each image [s]"),
-    Column("Total Exp. Time", (c, r) => f"${c.totalExposureTime}%.1f",      tooltip = "Total exposure time [s]"),
-    Column("Source Mag",      (c, r) => sourceMag(r),                       tooltip = "Source magnitude [mag]"),
-    Column("Source Fraction", (c, r) => sourceFraction(r),                  tooltip = "Fraction of images on source")
-  )
+  /// Define some generic columns. Values are rendered as strings in order to have them left aligned, similar to other sequence tables.
+  val LabelsColumn  = Column("Data Labels",     (c, r) => (resultIcon(r).orNull, c.labels))
+  val ImagesColumn  = Column("Images",          (c, r) => s"${c.count}",                      tooltip = "Number of exposures used in S/N calculation")
+  val CoaddsColumn  = Column("Coadds",          (c, r) => s"${c.coadds.getOrElse(1.0)}",      tooltip = "Number of coadds")
+  val ExpTimeColumn = Column("Exposure Time",   (c, r) => f"${c.singleExposureTime}%.1f",     tooltip = "Exposure time of each image [s]")
+  val TotTimeColumn = Column("Total Exp. Time", (c, r) => f"${c.totalExposureTime}%.1f",      tooltip = "Total exposure time [s]")
+  val SrcMagColumn  = Column("Source Mag",      (c, r) => sourceMag(r),                       tooltip = "Source magnitude [mag]")
+  val SrcFracColumn = Column("Source Fraction", (c, r) => sourceFraction(r),                  tooltip = "Fraction of images on source")
+
+
+  // Define different sets of columns as headers
+  val Headers           = Seq(LabelsColumn, ImagesColumn, ExpTimeColumn, TotTimeColumn, SrcMagColumn, SrcFracColumn)
+  val HeadersWithCoadds = Seq(LabelsColumn, ImagesColumn, CoaddsColumn, ExpTimeColumn, TotTimeColumn, SrcMagColumn, SrcFracColumn)
 
   val headers:      Seq[Column]
   val keys:         Seq[ItemKey]
@@ -141,8 +145,8 @@ sealed trait ItcTableModel extends AbstractTableModel {
 /** Generic ITC imaging tables model. */
 sealed trait ItcImagingTableModel extends ItcTableModel
 
-class ItcGenericImagingTableModel(val keys: Seq[ItemKey], val uniqueSteps: Seq[ItcUniqueConfig], val res: Seq[Future[ItcService.Result]]) extends ItcImagingTableModel {
-  val headers = Headers
+class ItcGenericImagingTableModel(val keys: Seq[ItemKey], val uniqueSteps: Seq[ItcUniqueConfig], val res: Seq[Future[ItcService.Result]], showCoadds: Boolean = false) extends ItcImagingTableModel {
+  val headers = if (showCoadds) HeadersWithCoadds else Headers
   val results = Seq(
     Column("Peak",            (c, r) => imgPeakPixelFlux(r),          tooltip = ItcTableModel.PeakPixelTooltip),
     Column("S/N Single",      (c, r) => imgSingleSNRatio(r)),
@@ -170,8 +174,8 @@ class ItcGmosImagingTableModel(val keys: Seq[ItemKey], val uniqueSteps: Seq[ItcU
 /** Generic ITC spectroscopy table model. */
 sealed trait ItcSpectroscopyTableModel extends ItcTableModel
 
-class ItcGenericSpectroscopyTableModel(val keys: Seq[ItemKey], val uniqueSteps: Seq[ItcUniqueConfig], val res: Seq[Future[ItcService.Result]]) extends ItcSpectroscopyTableModel {
-  val headers = Headers
+class ItcGenericSpectroscopyTableModel(val keys: Seq[ItemKey], val uniqueSteps: Seq[ItcUniqueConfig], val res: Seq[Future[ItcService.Result]], showCoadds: Boolean = false) extends ItcSpectroscopyTableModel {
+  val headers = if (showCoadds) HeadersWithCoadds else Headers
   val results = Seq(
     Column("Peak",            (c, r) => spcPeakElectrons(r),          tooltip = "Peak e- per exposure"),
     Column("S/N Single",      (c, r) => spcPeakSNSingle(r)),
