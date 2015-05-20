@@ -8,6 +8,7 @@ import edu.gemini.shared.util.immutable.Pair;
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2;
 import edu.gemini.spModel.telescope.IssPort;
 import org.junit.Test;
+import scala.actors.threadpool.Arrays;
 
 import static edu.gemini.spModel.gemini.flamingos2.Flamingos2.Disperser;
 import static edu.gemini.spModel.gemini.flamingos2.Flamingos2.Filter;
