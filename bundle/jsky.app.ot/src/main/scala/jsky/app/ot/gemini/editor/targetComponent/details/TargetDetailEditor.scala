@@ -8,27 +8,6 @@ import edu.gemini.spModel.target.SPTarget
 import edu.gemini.spModel.target.system.ITarget.Tag
 import jsky.app.ot.gemini.editor.targetComponent.TelescopePosEditor
 
-import scala.collection.JavaConverters._
-
-object TargetDetailEditor {
-  val JplMinorBody   = new JplMinorBodyDetailEditor
-  val MpcMinorPlanet = new MpcMinorPlanetDetailEditor
-  val Named          = new NamedDetailEditor
-  val Sidereal       = new SiderealDetailEditor
-
-  val All = List(JplMinorBody, MpcMinorPlanet, Named, Sidereal)
-
-  val AllJava = All.asJava
-
-  def forTag(t: Tag): TargetDetailEditor =
-    t match {
-      case Tag.JPL_MINOR_BODY   => JplMinorBody
-      case Tag.MPC_MINOR_PLANET => MpcMinorPlanet
-      case Tag.NAMED            => Named
-      case Tag.SIDEREAL         => Sidereal
-    }
-}
-
 abstract class TargetDetailEditor(val getTag: Tag) extends JPanel with TelescopePosEditor {
   def edit(ctx: GOption[ObsContext], spTarget: SPTarget, node: ISPNode): Unit = {
     require(ctx      != null, "obsContext should never be null")
