@@ -35,10 +35,13 @@ case class Flamingos2Imaging(blueprint:SpFlamingos2BlueprintImaging) extends Fla
   val science = Seq(1, 2)
   val cal     = Seq(3)
 
-  val exposureTimes: Map[Flamingos2.Filter, Double] = {
+  def exposureTimes(filter: Flamingos2.Filter): Double = {
     import Flamingos2.Filter._
-    Map(H       -> 10.0,
-        K_SHORT -> 30.0) withDefaultValue 60.0
+    filter match {
+      case H                => 10.0
+      case K_LONG | K_SHORT => 30.0
+      case _                => 60.0
+    }
   }
 
   def initialize(grp:ISPGroup, db:TemplateDb): Maybe[Unit] = for {
