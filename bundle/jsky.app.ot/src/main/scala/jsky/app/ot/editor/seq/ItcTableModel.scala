@@ -83,11 +83,11 @@ sealed trait ItcTableModel extends AbstractTableModel {
   protected def sourceFraction  (result: Future[ItcService.Result]) = serviceResult(result).map(r => f"${r.obsDetails.getSourceFraction}%.2f")
 
 
-  protected def spcPeakElectrons(result: Future[ItcService.Result]) = spectroscopyResult(result).map(_.series(SignalChart, SignalData).yValues.max.toInt)
+  protected def spcPeakElectrons(result: Future[ItcService.Result]) = spectroscopyResult(result).map(_.allSeries(SignalChart, SignalData).map(_.yValues.max).max.toInt)
 
-  protected def spcPeakSNSingle (result: Future[ItcService.Result]) = spectroscopyResult(result).map(_.series(S2NChart, SingleS2NData).yValues.max)
+  protected def spcPeakSNSingle (result: Future[ItcService.Result]) = spectroscopyResult(result).map(_.allSeries(S2NChart, SingleS2NData).map(_.yValues.max).max)
 
-  protected def spcPeakSNFinal  (result: Future[ItcService.Result]) = spectroscopyResult(result).map(_.series(S2NChart, FinalS2NData).yValues.max)
+  protected def spcPeakSNFinal  (result: Future[ItcService.Result]) = spectroscopyResult(result).map(_.allSeries(S2NChart, FinalS2NData).map(_.yValues.max).max)
 
 
   protected def imgPeakPixelFlux(result: Future[ItcService.Result], ccd: Int = 0) = imagingResult(result).map(_.ccd(ccd).peakPixelFlux.toInt)

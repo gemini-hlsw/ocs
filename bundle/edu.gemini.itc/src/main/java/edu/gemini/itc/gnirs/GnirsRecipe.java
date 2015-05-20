@@ -274,7 +274,7 @@ public final class GnirsRecipe implements SpectroscopyRecipe {
             data.add(new SpcSeriesData(SignalData.instance(),     "Signal Order "           + (i + 3), result.signalOrder()[i].getData(),     new Some<>(ITCChart.colorByIndex(2*i    ))));
             data.add(new SpcSeriesData(BackgroundData.instance(), "SQRT(Background) Order " + (i + 3), result.backGroundOrder()[i].getData(), new Some<>(ITCChart.colorByIndex(2*i + 1))));
         }
-        return new SpcChartData(SignalChart.instance(), title, xAxis, yAxis, JavaConversions.asScalaBuffer(data));
+        return new SpcChartData(SignalChart.instance(), title, xAxis, yAxis, JavaConversions.asScalaBuffer(data).toList());
     }
 
     private static SpcChartData createGnirsS2NChart(final GnirsSpectroscopyResult result) {
@@ -285,7 +285,7 @@ public final class GnirsRecipe implements SpectroscopyRecipe {
         for (int i = 0; i < GnirsRecipe.ORDERS; i++) {
            data.add(new SpcSeriesData(FinalS2NData.instance(),   "Final S/N Order "        + (i + 3), result.finalS2NOrder()[i].getData(),     new Some<>(ITCChart.colorByIndex(2*i))));
         }
-        return new SpcChartData(S2NChart.instance(), title, xAxis, yAxis, JavaConversions.asScalaBuffer(data));
+        return new SpcChartData(S2NChart.instance(), title, xAxis, yAxis, JavaConversions.asScalaBuffer(data).toList());
     }
 
 }
