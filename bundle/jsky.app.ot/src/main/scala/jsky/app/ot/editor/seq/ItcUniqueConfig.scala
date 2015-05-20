@@ -61,11 +61,11 @@ object ItcUniqueConfig {
 
 
   /** Gets all unique science imaging configurations from the given sequence. */
-  def imagingConfigs(seq: ConfigSequence): Seq[ItcUniqueConfig] =
+  def imagingConfigs(seq: ConfigSequence): List[ItcUniqueConfig] =
     uniqueConfigs(seq, c => isScience(c) && isImaging(c))
 
   /** Gets all unique spectroscopy configurations from the given sequence. */
-  def spectroscopyConfigs(seq: ConfigSequence): Seq[ItcUniqueConfig] =
+  def spectroscopyConfigs(seq: ConfigSequence): List[ItcUniqueConfig] =
     uniqueConfigs(seq, c => isScience(c) && isSpectroscopy(c))
 
   // Checks if a config is science or not; only science observations are relevant for ITC
@@ -91,7 +91,7 @@ object ItcUniqueConfig {
 
   // Gets all "unique configs" (i.e. configs that are relevant for ITC) from the given sequence. The predicate
   // defines which steps have to be taken into account, i.e. spectroscopy vs imaging and no calibrations.
-  private def uniqueConfigs(seq: ConfigSequence, predicate: Config => Boolean): Seq[ItcUniqueConfig] = {
+  private def uniqueConfigs(seq: ConfigSequence, predicate: Config => Boolean): List[ItcUniqueConfig] = {
     val steps        = seq.getAllSteps.toList.filter(predicate)
     val groupedSteps = steps.groupBy(hash).toList
     val mappedSteps  = groupedSteps.map { case (h, cs) => ItcUniqueConfig(cs.size, labels(cs), NonEmptyList(cs.head, cs.tail:_*)) }

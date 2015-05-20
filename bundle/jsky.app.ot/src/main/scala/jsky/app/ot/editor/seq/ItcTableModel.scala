@@ -34,15 +34,15 @@ sealed trait ItcTableModel extends AbstractTableModel {
 
 
   // Define different sets of columns as headers
-  val Headers           = Seq(LabelsColumn, ImagesColumn, ExpTimeColumn, TotTimeColumn, SrcMagColumn, SrcFracColumn)
-  val HeadersWithCoadds = Seq(LabelsColumn, ImagesColumn, CoaddsColumn, ExpTimeColumn, TotTimeColumn, SrcMagColumn, SrcFracColumn)
+  val Headers           = List(LabelsColumn, ImagesColumn, ExpTimeColumn, TotTimeColumn, SrcMagColumn, SrcFracColumn)
+  val HeadersWithCoadds = List(LabelsColumn, ImagesColumn, CoaddsColumn, ExpTimeColumn, TotTimeColumn, SrcMagColumn, SrcFracColumn)
 
-  val headers:      Seq[Column]
-  val keys:         Seq[ItemKey]
-  val results:      Seq[Column]
+  val headers:      List[Column]
+  val keys:         List[ItemKey]
+  val results:      List[Column]
 
-  val uniqueSteps:  Seq[ItcUniqueConfig]
-  val res:          Seq[Future[ItcService.Result]]
+  val uniqueSteps:  List[ItcUniqueConfig]
+  val res:          List[Future[ItcService.Result]]
 
 
   // Gets the imaging result from the service result future (if present).
@@ -145,9 +145,9 @@ sealed trait ItcTableModel extends AbstractTableModel {
 /** Generic ITC imaging tables model. */
 sealed trait ItcImagingTableModel extends ItcTableModel
 
-class ItcGenericImagingTableModel(val keys: Seq[ItemKey], val uniqueSteps: Seq[ItcUniqueConfig], val res: Seq[Future[ItcService.Result]], showCoadds: Boolean = false) extends ItcImagingTableModel {
+class ItcGenericImagingTableModel(val keys: List[ItemKey], val uniqueSteps: List[ItcUniqueConfig], val res: List[Future[ItcService.Result]], showCoadds: Boolean = false) extends ItcImagingTableModel {
   val headers = if (showCoadds) HeadersWithCoadds else Headers
-  val results = Seq(
+  val results = List(
     Column("Peak",            (c, r) => imgPeakPixelFlux(r),          tooltip = ItcTableModel.PeakPixelTooltip),
     Column("S/N Single",      (c, r) => imgSingleSNRatio(r)),
     Column("S/N Total",       (c, r) => imgTotalSNRatio (r))
@@ -155,9 +155,9 @@ class ItcGenericImagingTableModel(val keys: Seq[ItemKey], val uniqueSteps: Seq[I
 }
 
 /** GMOS specific ITC imaging table model. */
-class ItcGmosImagingTableModel(val keys: Seq[ItemKey], val uniqueSteps: Seq[ItcUniqueConfig], val res: Seq[Future[ItcService.Result]]) extends ItcImagingTableModel {
+class ItcGmosImagingTableModel(val keys: List[ItemKey], val uniqueSteps: List[ItcUniqueConfig], val res: List[Future[ItcService.Result]]) extends ItcImagingTableModel {
   val headers = Headers
-  val results = Seq(
+  val results = List(
     Column("CCD1 Peak",       (c, r) => imgPeakPixelFlux(r, ccd=0),   tooltip = ItcTableModel.PeakPixelTooltip + " for CCD 1"),
     Column("CCD1 S/N Single", (c, r) => imgSingleSNRatio(r, ccd=0)),
     Column("CCD1 S/N Total",  (c, r) => imgTotalSNRatio (r, ccd=0)),
@@ -174,9 +174,9 @@ class ItcGmosImagingTableModel(val keys: Seq[ItemKey], val uniqueSteps: Seq[ItcU
 /** Generic ITC spectroscopy table model. */
 sealed trait ItcSpectroscopyTableModel extends ItcTableModel
 
-class ItcGenericSpectroscopyTableModel(val keys: Seq[ItemKey], val uniqueSteps: Seq[ItcUniqueConfig], val res: Seq[Future[ItcService.Result]], showCoadds: Boolean = false) extends ItcSpectroscopyTableModel {
+class ItcGenericSpectroscopyTableModel(val keys: List[ItemKey], val uniqueSteps: List[ItcUniqueConfig], val res: List[Future[ItcService.Result]], showCoadds: Boolean = false) extends ItcSpectroscopyTableModel {
   val headers = if (showCoadds) HeadersWithCoadds else Headers
-  val results = Seq(
+  val results = List(
     Column("Peak",            (c, r) => spcPeakElectrons(r),          tooltip = "Peak e- per exposure"),
     Column("S/N Single",      (c, r) => spcPeakSNSingle(r)),
     Column("S/N Total",       (c, r) => spcPeakSNFinal(r))
