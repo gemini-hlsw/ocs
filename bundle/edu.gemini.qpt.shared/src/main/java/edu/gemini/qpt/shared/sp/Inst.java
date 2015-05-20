@@ -65,9 +65,9 @@ public enum Inst {
             false, true, true, Canopus.Wfs.values(), Canopus.Wfs.values()),
 
     FLAMINGOS2(Flamingos2.SP_TYPE, false, true, false,
-            join(Flamingos2.FPUnit.values(), new Enum[]{Flamingos2OiwfsGuideProbe.instance}),
-            join(arrayOf(Flamingos2.FPUnit.FPU_NONE, Flamingos2.FPUnit.CUSTOM_MASK), new Enum[]{Flamingos2OiwfsGuideProbe.instance}),
-            join(Flamingos2.Disperser.values(), Flamingos2.Filter.values(), PreImagingType.values())),
+            join(Flamingos2.FPUnit.values(), Flamingos2.Filter.values(), new Enum[]{Flamingos2OiwfsGuideProbe.instance}),
+            join(arrayOf(Flamingos2.FPUnit.FPU_NONE, Flamingos2.FPUnit.CUSTOM_MASK), Flamingos2.Filter.values(), new Enum[]{Flamingos2OiwfsGuideProbe.instance}),
+            join(Flamingos2.Disperser.values(), PreImagingType.values())),
 
     GMOS_NORTH(InstGmosNorth.SP_TYPE, true, false, true,
             join(FPUnitNorth.values(),
@@ -147,6 +147,9 @@ public enum Inst {
     // the category will be null (which is ok).
     private static final Map<Class<? extends Enum>, String> CATEGORY_MAP = new HashMap<Class<? extends Enum>, String>();
     static {
+
+        CATEGORY_MAP.put(Flamingos2.FPUnit.class, "Focal Plane Units");
+        CATEGORY_MAP.put(Flamingos2.Filter.class, "Filters");
 
         // GMOS-N
         CATEGORY_MAP.put(FPUnitNorth.class, "Focal Plane Units");
