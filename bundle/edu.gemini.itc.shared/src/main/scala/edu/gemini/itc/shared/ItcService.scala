@@ -6,7 +6,9 @@ import edu.gemini.util.trpc.client.TrpcClient
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.swing.Color
-import scalaz.{Failure, Success, Validation}
+
+import scalaz._
+import Scalaz._
 
 /** The data structures here are an attempt to unify the results produced by the different instrument recipes.
   * Results are either a few simple numbers in case of imaging or a set of charts made up by data series with (x,y)
@@ -18,6 +20,7 @@ import scalaz.{Failure, Success, Validation}
   * are created by the recipes and then added to the result data as strings. Maybe this can be unified.
   */
 sealed trait ItcResult extends Serializable {
+  def warnings:   List[ItcWarning] = List()
   def source:     SourceDefinition
   def obsDetails: ObservationDetails
 }
@@ -91,16 +94,13 @@ object ItcResult {
   import edu.gemini.itc.shared.ItcService._
 
   /** Creates an ITC result in case of an error. */
-  def forException(e: Throwable): Result = Failure(List(e.getMessage))
+  def forException(e: Throwable): Result = ItcError(e.getMessage).left
 
   /** Creates an ITC result with a single problem/error message. */
-  def forMessage(msg: String): Result = Failure(List(msg))
-
-  /** Creates an ITC result with a list of problem/error messages. */
-  def forMessages(messages: List[String]): Result = Failure(messages)
+  def forMessage(msg: String): Result = ItcError(msg).left
 
   /** Creates an ITC result for a result. */
-  def forResult(result: ItcResult): Result = Success(result)
+  def forResult(result: ItcResult): Result = result.right
 
 }
 
@@ -115,9 +115,13 @@ trait ItcService {
 
 }
 
+sealed trait ItcMessage
+final case class ItcError(msg: String) extends ItcMessage
+final case class ItcWarning(msg: String) extends ItcMessage
+
 object ItcService {
 
-  type Result = Validation[List[String], ItcResult]
+  type Result = ItcError \/ ItcResult
 
   /** Performs an ITC call on the given host. */
   def calculate(peer: Peer, source: SourceDefinition, obs: ObservationDetails, cond: ObservingConditions, tele: TelescopeDetails, ins: InstrumentDetails): Future[Result] =
