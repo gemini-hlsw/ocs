@@ -10,7 +10,6 @@ import edu.gemini.shared.util.immutable.*;
 import edu.gemini.spModel.obs.context.ObsContext;
 import edu.gemini.spModel.target.SPTarget;
 import edu.gemini.spModel.target.TelescopePosWatcher;
-import edu.gemini.spModel.target.WatchablePos;
 import jsky.app.ot.ui.util.FlatButtonUtil;
 
 import javax.swing.*;
@@ -59,8 +58,8 @@ public class MagnitudeEditor implements TelescopePosEditor {
     private interface MagWidgetRow {
         JButton getButton();
         Option<Magnitude.Band> getMagnitudeBand();
-        Option<JComboBox> getBandCombo();
-        Option<JComboBox> getSystemCombo();
+        Option<JComboBox<Magnitude.Band>> getBandCombo();
+        Option<JComboBox<Magnitude.System>> getSystemCombo();
         Option<JTextField> getTextField();
         void setTarget(SPTarget target, Mode mode);
     }
@@ -81,8 +80,8 @@ public class MagnitudeEditor implements TelescopePosEditor {
     private final class MagEditRow implements MagWidgetRow {
         private final Magnitude.Band band;
         private final JButton rmButton;
-        private final JComboBox cb;
-        private final JComboBox systemCb;
+        private final JComboBox<Magnitude.Band> cb;
+        private final JComboBox<Magnitude.System> systemCb;
         private final JFormattedTextField tf;
 
         // Action invoked when the remove button is pressed.  Removes the
@@ -142,10 +141,10 @@ public class MagnitudeEditor implements TelescopePosEditor {
             rmButton.addActionListener(rmButtonAction);
             rmButton.setToolTipText("Remove magnitude value");
 
-            cb = new JComboBox() {{
+            cb = new JComboBox<Magnitude.Band>() {{
                 setToolTipText("Set magnitude band");
             }};
-            systemCb = new JComboBox(Magnitude.System.values()) {{
+            systemCb = new JComboBox<Magnitude.System>(Magnitude.System.values()) {{
                 setToolTipText("Set magnitude system");
             }};
 
@@ -183,7 +182,7 @@ public class MagnitudeEditor implements TelescopePosEditor {
             options.removeAll(target.getTarget().getMagnitudeBands());
             options.add(band);
             cb.removeActionListener(changeBandAction);
-            cb.setModel(new DefaultComboBoxModel(options.toArray()));
+            cb.setModel(new DefaultComboBoxModel<>(options.toArray(new Magnitude.Band[options.size()])));
             cb.setSelectedItem(band);
             cb.setMaximumRowCount(options.size());
             cb.addActionListener(changeBandAction);
@@ -205,9 +204,9 @@ public class MagnitudeEditor implements TelescopePosEditor {
             return new Some<>(band);
         }
 
-        @Override public Option<JComboBox> getBandCombo() { return new Some<>(cb); }
-        @Override public Option<JComboBox> getSystemCombo() { return new Some<>(systemCb); }
-        @Override public Option<JTextField> getTextField() { return new Some<JTextField>(tf); }
+        @Override public Option<JComboBox<Magnitude.Band>> getBandCombo() { return new Some<>(cb); }
+        @Override public Option<JComboBox<Magnitude.System>> getSystemCombo() { return new Some<>(systemCb); }
+        @Override public Option<JTextField> getTextField() { return new Some<>(tf); }
     }
 
     /**
@@ -216,7 +215,7 @@ public class MagnitudeEditor implements TelescopePosEditor {
     private final class MagNewRow implements MagWidgetRow {
         private final JButton rmButton;
         private final JTextField tf;
-        private final JComboBox cb;
+        private final JComboBox<Magnitude.Band> cb;
 
 
         // Action invoked when the combo box is used to select a magnitude
@@ -232,11 +231,7 @@ public class MagnitudeEditor implements TelescopePosEditor {
 
         MagNewRow() {
             rmButton = FlatButtonUtil.createSmallRemoveButton();
-            rmButton.addActionListener(new ActionListener() {
-                @Override public void actionPerformed(ActionEvent e) {
-                    cancelAdd();
-                }
-            });
+            rmButton.addActionListener(e -> cancelAdd());
             rmButton.setToolTipText("Stop adding a new magnitude value");
 
             // The text field is essentially a prompt.  It points to the
@@ -253,7 +248,7 @@ public class MagnitudeEditor implements TelescopePosEditor {
                     super.setEnabled(false); // never enable
                 }
             };
-            cb = new JComboBox() {{
+            cb = new JComboBox<Magnitude.Band>() {{
                 setToolTipText("Set passband for the new magnitude value");
             }};
         }
@@ -277,7 +272,7 @@ public class MagnitudeEditor implements TelescopePosEditor {
             options.removeAll(target.getTarget().getMagnitudeBands());
             cb.setMaximumRowCount(options.size());
             cb.removeActionListener(addAction);
-            cb.setModel(new DefaultComboBoxModel(options.toArray()));
+            cb.setModel(new DefaultComboBoxModel<>(options.toArray(new Magnitude.Band[options.size()])));
             cb.setSelectedItem(null);
             cb.addActionListener(addAction);
         }
@@ -288,8 +283,8 @@ public class MagnitudeEditor implements TelescopePosEditor {
             return None.instance();
         }
 
-        @Override public Option<JComboBox> getBandCombo() { return new Some<>(cb); }
-        @Override public Option<JComboBox> getSystemCombo() { return None.instance(); }
+        @Override public Option<JComboBox<Magnitude.Band>> getBandCombo() { return new Some<>(cb); }
+        @Override public Option<JComboBox<Magnitude.System>> getSystemCombo() { return None.instance(); }
         @Override public Option<JTextField> getTextField() { return new Some<>(tf); }
     }
 
@@ -301,11 +296,7 @@ public class MagnitudeEditor implements TelescopePosEditor {
 
         MagPlusRow() {
             addButton = FlatButtonUtil.createSmallAddButton();
-            addButton.addActionListener(new ActionListener() {
-                @Override public void actionPerformed(ActionEvent e) {
-                    enableAdd();
-                }
-            });
+            addButton.addActionListener(e -> enableAdd());
             addButton.setToolTipText("Add a new magnitude value");
         }
 
@@ -315,8 +306,8 @@ public class MagnitudeEditor implements TelescopePosEditor {
         }
 
         @Override public JButton getButton() { return addButton; }
-        @Override public Option<JComboBox> getBandCombo() { return None.instance(); }
-        @Override public Option<JComboBox> getSystemCombo() { return None.instance(); }
+        @Override public Option<JComboBox<Magnitude.Band>> getBandCombo() { return None.instance(); }
+        @Override public Option<JComboBox<Magnitude.System>> getSystemCombo() { return None.instance(); }
         @Override public Option<JTextField> getTextField() { return None.instance(); }
 
         @Override public Option<Magnitude.Band> getMagnitudeBand() {
@@ -329,11 +320,7 @@ public class MagnitudeEditor implements TelescopePosEditor {
     private final ImList<MagWidgetRow> rows;
     private final MagNewRow newRow;
 
-    private final TelescopePosWatcher watcher = new TelescopePosWatcher() {
-        @Override public void telescopePosUpdate(WatchablePos tp) {
-            reinit((SPTarget)tp);
-        }
-    };
+    private final TelescopePosWatcher watcher = tp -> reinit((SPTarget)tp);
 
     private SPTarget target = null;
 
@@ -350,42 +337,36 @@ public class MagnitudeEditor implements TelescopePosEditor {
         Collections.sort(bandList, Magnitude.Band.WAVELENGTH_COMPARATOR);
         newRow = new MagNewRow();
         rows = DefaultImList.create(bandList).map(
-                new MapOp<Magnitude.Band, MagWidgetRow>() {
-                    @Override public MagEditRow apply(Magnitude.Band band) {
-                        return new MagEditRow(band);
-                    }
-                }
+                (MapOp<Magnitude.Band, MagWidgetRow>) MagEditRow::new
         ).append(newRow).append(new MagPlusRow());
 
         // Place them in the content panel.
-        rows.zipWithIndex().foreach(new ApplyOp<Tuple2<MagWidgetRow, Integer>>() {
-            @Override public void apply(Tuple2<MagWidgetRow, Integer> tup) {
-                final MagWidgetRow row = tup._1();
-                final Integer  y = tup._2();
-                content.add(row.getButton(), new GridBagConstraints() {{
-                    gridx=0; gridy=y; insets=new Insets(0, 0, 5, 5); fill=VERTICAL;
+        rows.zipWithIndex().foreach(tup -> {
+            final MagWidgetRow row = tup._1();
+            final Integer  y = tup._2();
+            content.add(row.getButton(), new GridBagConstraints() {{
+                gridx=0; gridy=y; insets=new Insets(0, 0, 5, 5); fill=VERTICAL;
+            }});
+
+            final Option<JTextField> tf = row.getTextField();
+            if (!tf.isEmpty()) {
+                content.add(tf.getValue(), new GridBagConstraints() {{
+                    gridx=1; gridy=y; insets=new Insets(0, 0, 5, 5);
                 }});
+            }
 
-                final Option<JTextField> tf = row.getTextField();
-                if (!tf.isEmpty()) {
-                    content.add(tf.getValue(), new GridBagConstraints() {{
-                        gridx=1; gridy=y; insets=new Insets(0, 0, 5, 5);
-                    }});
-                }
+            final Option<JComboBox<Magnitude.Band>> cb = row.getBandCombo();
+            if (!cb.isEmpty()) {
+                content.add(cb.getValue(), new GridBagConstraints() {{
+                    gridx=2; gridy=y; insets=new Insets(0, 0, 5, 5); fill=HORIZONTAL;
+                }});
+            }
 
-                final Option<JComboBox> cb = row.getBandCombo();
-                if (!cb.isEmpty()) {
-                    content.add(cb.getValue(), new GridBagConstraints() {{
-                        gridx=2; gridy=y; insets=new Insets(0, 0, 5, 5); fill=HORIZONTAL;
-                    }});
-                }
-
-                final Option<JComboBox> system = row.getSystemCombo();
-                if (!system.isEmpty()) {
-                    content.add(system.getValue(), new GridBagConstraints() {{
-                        gridx=3; gridy=y; insets=new Insets(0, 0, 5, 0); fill=HORIZONTAL;
-                    }});
-                }
+            final Option<JComboBox<Magnitude.System>> system = row.getSystemCombo();
+            if (!system.isEmpty()) {
+                content.add(system.getValue(), new GridBagConstraints() {{
+                    gridx=3; gridy=y; insets=new Insets(0, 0, 5, 0); fill=HORIZONTAL;
+                }});
             }
         });
 
@@ -445,25 +426,19 @@ public class MagnitudeEditor implements TelescopePosEditor {
     private void reinit(final SPTarget target, final Mode mode) {
         this.target = target;
 
-        rows.foreach(new ApplyOp<MagWidgetRow>() {
-            @Override public void apply(MagWidgetRow row) {
-                row.setTarget(target, mode);
-            }
-        });
+        rows.foreach(row -> row.setTarget(target, mode));
 
         if (mode == Mode.add) {
             // Scroll to the bottom to show the new row in the scroll pane, but
             // don't do it in this event cycle.  Wait until this event has
             // finished executing so that the widgets for adding a new magnitude
             // value are visible.
-            SwingUtilities.invokeLater(new Runnable() {
-                @Override public void run() {
-                    final JScrollBar sb = scroll.getVerticalScrollBar();
-                    sb.setValue(sb.getMaximum());
+            SwingUtilities.invokeLater(() -> {
+                final JScrollBar sb = scroll.getVerticalScrollBar();
+                sb.setValue(sb.getMaximum());
 
-                    if (target.getTarget().getMagnitudes().size() > 0) {
-                        newRow.getBandCombo().getValue().requestFocusInWindow();
-                    }
+                if (target.getTarget().getMagnitudes().size() > 0) {
+                    newRow.getBandCombo().getValue().requestFocusInWindow();
                 }
             });
         }
@@ -472,20 +447,15 @@ public class MagnitudeEditor implements TelescopePosEditor {
     }
 
     private void focusOn(final Magnitude.Band b) {
-        final Option<MagWidgetRow> row = rows.find(new PredicateOp<MagWidgetRow>() {
-            @Override public Boolean apply(MagWidgetRow tmp) {
-                final Option<Magnitude.Band> tmpBand = tmp.getMagnitudeBand();
-                if (tmpBand.isEmpty()) return false;
-                return tmpBand.getValue() == b;
-            }
+        final Option<MagWidgetRow> row = rows.find(tmp -> {
+            final Option<Magnitude.Band> tmpBand = tmp.getMagnitudeBand();
+            return !tmpBand.isEmpty() && tmpBand.getValue() == b;
         });
         if (!row.isEmpty()) {
-            SwingUtilities.invokeLater(new Runnable() {
-                @Override public void run() {
-                    if (pan.isVisible()) {
-                        final JTextField tf = row.getValue().getTextField().getValue();
-                        tf.requestFocusInWindow();
-                    }
+            SwingUtilities.invokeLater(() -> {
+                if (pan.isVisible()) {
+                    final JTextField tf = row.getValue().getTextField().getValue();
+                    tf.requestFocusInWindow();
                 }
             });
         }
