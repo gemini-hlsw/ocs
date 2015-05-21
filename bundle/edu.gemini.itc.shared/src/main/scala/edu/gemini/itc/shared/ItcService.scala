@@ -3,6 +3,7 @@ package edu.gemini.itc.shared
 import edu.gemini.spModel.core.Peer
 import edu.gemini.util.trpc.client.TrpcClient
 
+import scala.collection.JavaConversions._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.swing.Color
@@ -20,7 +21,7 @@ import Scalaz._
   * are created by the recipes and then added to the result data as strings. Maybe this can be unified.
   */
 sealed trait ItcResult extends Serializable {
-  def warnings:   List[ItcWarning] = List()
+  def warnings:   List[ItcWarning]
   def source:     SourceDefinition
   def obsDetails: ObservationDetails
 }
@@ -29,7 +30,7 @@ sealed trait ItcResult extends Serializable {
 
 final case class ImgData(singleSNRatio: Double, totalSNRatio: Double, peakPixelFlux: Double)
 
-final case class ItcImagingResult(source: SourceDefinition, obsDetails: ObservationDetails, ccds: Seq[ImgData]) extends ItcResult {
+final case class ItcImagingResult(source: SourceDefinition, obsDetails: ObservationDetails, ccds: List[ImgData], warnings: List[ItcWarning]) extends ItcResult {
   def ccd(i: Int) = ccds(i % ccds.length)
 }
 
@@ -71,7 +72,7 @@ final case class SpcChartData(chartType: SpcChartType, title: String, xAxisLabel
   * Individual charts and data series can be referenced by their types and an index. For most instruments there
   * is only one chart and data series of each type, however for NIFS for example there will be several charts
   * of each type in case of multiple IFU elements. */
-final case class ItcSpectroscopyResult(source: SourceDefinition, obsDetails: ObservationDetails, charts: Seq[SpcChartData], files: Seq[SpcDataFile]) extends ItcResult {
+final case class ItcSpectroscopyResult(source: SourceDefinition, obsDetails: ObservationDetails, charts: List[SpcChartData], files: List[SpcDataFile], warnings: List[ItcWarning]) extends ItcResult {
 
   /** Gets a text file for a data series by type and index.
     * This method will fail if the result (data) you're looking for does not exist.
@@ -87,6 +88,14 @@ final case class ItcSpectroscopyResult(source: SourceDefinition, obsDetails: Obs
     * This method will fail if the result (chart/data) you're looking for does not exist.
     */
   def allSeries(ct: SpcChartType, dt: SpcDataType): List[SpcSeriesData] = chart(ct).allSeries(dt)
+}
+
+object ItcSpectroscopyResult {
+
+  // java compatibility
+  def apply(source: SourceDefinition, obsDetails: ObservationDetails, charts: java.util.List[SpcChartData], files: java.util.List[SpcDataFile], warnings: java.util.List[ItcWarning]) =
+    new ItcSpectroscopyResult(source, obsDetails, charts.toList, files.toList, warnings.toList)
+
 }
 
 object ItcResult {

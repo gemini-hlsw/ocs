@@ -101,7 +101,7 @@ public final class MichelleRecipe implements ImagingRecipe, SpectroscopyRecipe {
             add(new SpcDataFile(SingleS2NData.instance(),  r.specS2N()[0].getExpS2NSpectrum().printSpecAsString()));
             add(new SpcDataFile(FinalS2NData.instance(),   r.specS2N()[0].getFinalS2NSpectrum().printSpecAsString()));
         }};
-        return new Tuple2<>(new ItcSpectroscopyResult(_sdParameters, _obsDetailParameters, JavaConversions.asScalaBuffer(dataSets).toList(), JavaConversions.asScalaBuffer(dataFiles).toList()), r);
+        return new Tuple2<>(ItcSpectroscopyResult.apply(_sdParameters, _obsDetailParameters, dataSets, dataFiles, new ArrayList<>()), r);
     }
 
     public ImagingResult calculateImaging() {

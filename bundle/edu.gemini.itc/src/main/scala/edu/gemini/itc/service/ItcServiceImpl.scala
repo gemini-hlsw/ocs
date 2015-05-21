@@ -47,13 +47,13 @@ class ItcServiceImpl extends ItcService {
     }
 
   private def imagingResult(recipe: ImagingRecipe): Result =
-    imagingResult(Seq(recipe.calculateImaging()))
+    imagingResult(List(recipe.calculateImaging()))
 
   private def imagingResult(recipe: ImagingArrayRecipe): Result =
-    imagingResult(recipe.calculateImaging())
+    imagingResult(recipe.calculateImaging().toList)
 
-  private def imagingResult(r: Seq[ImagingResult]): Result =
-    ItcResult.forResult(ItcImagingResult(r.head.source, r.head.observation, r.map(toImgData)))
+  private def imagingResult(r: List[ImagingResult]): Result =
+    ItcResult.forResult(ItcImagingResult(r.head.source, r.head.observation, r.map(toImgData), List()))
 
   private def toImgData(result: ImagingResult): ImgData = result.is2nCalc match {
     case i: ImagingS2NMethodACalculation  => ImgData(i.singleSNRatio(), i.totalSNRatio(), result.peakPixelCount)
@@ -86,7 +86,7 @@ class ItcServiceImpl extends ItcService {
   // a bit of bandwidth. If the need arises to have the files accessible in the clients just change this to
   // send the original result.
   private def resultWithoutFiles(result: ItcSpectroscopyResult): Result =
-    ItcResult.forResult(ItcSpectroscopyResult(result.source, result.obsDetails, result.charts, Seq()))
+    ItcResult.forResult(ItcSpectroscopyResult(result.source, result.obsDetails, result.charts, List(), result.warnings))
 
 
 }
