@@ -97,11 +97,18 @@ public class MagnitudeEditor implements TelescopePosEditor {
         // row was created and adds a new one that is identical but with the
         // new magnitude band.
         private final ActionListener changeBandAction = new ActionListener() {
+
             @Override public void actionPerformed(ActionEvent e) {
                 final Magnitude.Band newBand = (Magnitude.Band) cb.getSelectedItem();
                 if (newBand == null) return;
                 if (newBand == MagEditRow.this.band) return;
                 changeBand(MagEditRow.this.band, newBand);
+                // OCSADV-355 If the bands is one on the AB list, switch the magnitude system to AB or else to VEGA
+                if (Magnitude.Band.AB_BANDS.stream().anyMatch(b -> b.equals(newBand))) {
+                    changeSystem(newBand, Magnitude.System.AB);
+                } else {
+                    changeSystem(newBand, Magnitude.System.Vega);
+                }
             }
         };
 

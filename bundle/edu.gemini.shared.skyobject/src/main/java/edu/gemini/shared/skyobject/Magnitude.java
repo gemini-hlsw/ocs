@@ -7,7 +7,10 @@ import edu.gemini.spModel.core.Wavelength;
 import edu.gemini.spModel.core.Wavelength$;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
+import java.util.List;
 
 /**
  * Celestial object brightness information.  Magnitudes are relative to
@@ -45,6 +48,18 @@ public final class Magnitude implements Comparable, Serializable {
         AP(None.INTEGER, new Some<>("apparent"))
         ;
 
+        public static final List<Band> AB_BANDS;
+
+        static {
+            List<Band> bands = new ArrayList<>();
+            bands.add(u);
+            bands.add(g);
+            bands.add(r);
+            bands.add(i);
+            bands.add(z);
+            AB_BANDS = Collections.unmodifiableList(bands);
+        }
+
         /**
          * A Comparator of magnitude bands based upon the associated
          * wavelength.
@@ -66,7 +81,7 @@ public final class Magnitude implements Comparable, Serializable {
         private final Option<String> description;
 
         Band(Option<Integer> mid, Option<String> desc) {
-            this.wavelengthMidPoint = mid.map(l -> Wavelength$.MODULE$.fromNanometers(l));
+            this.wavelengthMidPoint = mid.map(Wavelength$.MODULE$::fromNanometers);
             this.description        = desc;
         }
 
