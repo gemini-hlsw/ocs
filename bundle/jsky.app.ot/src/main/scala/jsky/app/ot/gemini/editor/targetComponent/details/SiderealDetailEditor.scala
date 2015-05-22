@@ -26,10 +26,10 @@ final class SiderealDetailEditor extends TargetDetailEditor(ITarget.Tag.SIDEREAL
   }
 
   val props = NumericPropertySheet[HmsDegTarget](Some("Motion"), _.getTarget.asInstanceOf[HmsDegTarget],
-    Prop("∆ RA",     "mas/year", _.getPM1),
-    Prop("∆ Dec",    "mas/year", _.getPM2),
-    Prop("Epoch",    "JD",       _.getEpoch),
-    Prop("Parallax", "arcsec",   _.getParallax),
+    Prop("µ RA",     "mas/year", _.getPM1),
+    Prop("µ Dec",    "mas/year", _.getPM2),
+    Prop("Epoch",    "years",    _.getEpoch),
+    Prop("Parallax", "mas",      _.getParallax),
     Prop("RV",       "km/sec",   _.getRV)
   )
 

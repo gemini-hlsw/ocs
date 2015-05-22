@@ -6,7 +6,6 @@
 //
 package edu.gemini.spModel.target.system;
 
-import edu.gemini.spModel.target.system.CoordinateParam.Units;
 import edu.gemini.spModel.target.system.CoordinateTypes.*;
 
 /**
@@ -28,6 +27,13 @@ public final class ConicTarget extends NonSiderealTarget  {
 
     private static final double DEFAULT_E = 0.0;
 
+
+    protected CoordinateTypes.Epoch defaultEpoch() {
+        // inexplicably mutable, so always create a new value
+        return new CoordinateTypes.Epoch("0", CoordinateParam.Units.JD);
+    }
+
+
     private ANode _anode = new ANode();
     private AQ _aq = new AQ();
     private double _e = DEFAULT_E;
@@ -35,7 +41,7 @@ public final class ConicTarget extends NonSiderealTarget  {
     private LM _lm = new LM();
     private N _n = new N();
     private Perihelion _perihelion = new Perihelion();
-    private Epoch _epochOfPeri = new Epoch("2000", Units.YEARS);
+    private Epoch _epochOfPeri = defaultEpoch();
     private final Tag _tag;
 
 
@@ -178,23 +184,8 @@ public final class ConicTarget extends NonSiderealTarget  {
      * Gets the epoch of perihelion of this object.
      */
     public Epoch getEpochOfPeri() {
-        if (_epochOfPeri == null) {
-            _epochOfPeri = _createDefaultEpochOfPeri();
-        }
         return _epochOfPeri;
     }
-
-
-
-    /**
-     * Returns the current epoch of perihelion, creating it if necessary.
-     */
-    private Epoch _createDefaultEpochOfPeri() {
-        return new Epoch("2000", Units.YEARS);
-    }
-
-
-
 
     /**
      * Sets the epoch of perihelion.  The value of the parameter is not
@@ -202,6 +193,7 @@ public final class ConicTarget extends NonSiderealTarget  {
      * stored in this class.
      */
     public void setEpochOfPeri(Epoch newValue) {
+        if (newValue == null) newValue = defaultEpoch();
         _epochOfPeri = newValue;
     }
 

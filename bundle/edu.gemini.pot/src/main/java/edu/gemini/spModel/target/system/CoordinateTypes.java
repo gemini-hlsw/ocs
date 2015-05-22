@@ -242,10 +242,10 @@ public final class CoordinateTypes {
      * The Epoch parameter type.
      */
     public static final class Epoch extends CoordinateParam {
-        public static final Units[] UNITS = {Units.YEARS};
+        public static final Units[] UNITS = {Units.YEARS, Units.JD};
 
         public Object clone() {
-            return (Epoch) super.clone();
+            return super.clone();
         }
 
         public Epoch() {

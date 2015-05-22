@@ -55,6 +55,7 @@ public abstract class CoordinateParam implements Cloneable, Serializable {
         public static final int _SECS_PER_YEAR = 10;
         public static final int _YEARS = 11;
         public static final int _MILLI_ARCSECS_PER_YEAR = 12;
+        public static final int _JD = 13;
 
         public static final Units ANGSTROMS =
                 new Units(_ANGSTROMS, "angstroms");
@@ -95,6 +96,9 @@ public abstract class CoordinateParam implements Cloneable, Serializable {
         public static final Units MILLI_ARCSECS_PER_YEAR =
                 new Units(_MILLI_ARCSECS_PER_YEAR, "milli-arcsecs/year");
 
+        public static final Units JD =
+                new Units(_JD, "JD");
+
         public static final Units[] TYPES = new Units[]{
             ANGSTROMS,
             ARCSECS,
@@ -109,6 +113,7 @@ public abstract class CoordinateParam implements Cloneable, Serializable {
             SECS_PER_YEAR,
             YEARS,
             MILLI_ARCSECS_PER_YEAR,
+            JD,
         };
 
         private Units(int type, String name) {
