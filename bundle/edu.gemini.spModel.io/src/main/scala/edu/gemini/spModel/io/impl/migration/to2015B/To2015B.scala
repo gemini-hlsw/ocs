@@ -1,5 +1,7 @@
 package edu.gemini.spModel.io.impl.migration.to2015B
 
+import edu.gemini.spModel.target.system.CoordinateParam
+
 import java.util.UUID
 
 import edu.gemini.pot.sp.SPComponentType
@@ -41,6 +43,7 @@ object To2015B {
   val PARAM_DELTA_RA   = "pm1"
   val PARAM_DELTA_DEC  = "pm2"
   val PARAM_EPOCH      = "epoch"
+  val PARAM_EPOCH_PERI = "epochOfPeri"
   val PARAM_NOTE_TEXT  = "NoteText"
   val PARAM_NAME       = "name"
   val PARAM_BRIGHTNESS = "brightness"
@@ -65,6 +68,7 @@ object To2015B {
   val VALUE_SYSTEM_BNNNN    = "BNNNN"
   val VALUE_SYSTEM_APPARENT = "Apparent"
 
+  val UNITS_JD                        = CoordinateParam.Units.JD.getName
   val UNITS_SECONDS_PER_YEAR          = "seconds/year"
   val UNITS_ARCSECONDS_PER_YEAR       = "arcsecs/year"
   val UNITS_MILLI_ARCSECONDS_PER_YEAR = "milli-arcsecs/year"
@@ -306,8 +310,14 @@ object To2015B {
     }
   }
 
-  private lazy val convertComet       = convertSystem(SYS_JPL_MINOR_BODY)(SYS_ASA_COMET, SYS_MPC_COMET)()
-  private lazy val convertMinorPlanet = convertSystem(SYS_MPC_MINOR_PLANET)(SYS_ASA_MINOR_PLANET)()
+  private lazy val convertNonSidEpoch = (ps: ParamSet) => {
+    // we were storing epoch in JD but setting the units to "years"
+    Option(ps.getParam(PARAM_EPOCH)).foreach { _.setUnits(UNITS_JD) }
+    Option(ps.getParam(PARAM_EPOCH_PERI)).foreach { _.setUnits(UNITS_JD) }
+  }
+
+  private lazy val convertComet       = convertSystem(SYS_JPL_MINOR_BODY)(SYS_JPL_MINOR_BODY,SYS_ASA_COMET, SYS_MPC_COMET)(convertNonSidEpoch)
+  private lazy val convertMinorPlanet = convertSystem(SYS_MPC_MINOR_PLANET)(SYS_MPC_MINOR_PLANET,SYS_ASA_MINOR_PLANET)(convertNonSidEpoch)
 
   private lazy val convertSolar =
     convertSystem(SYS_SOLAR_OBJECT)(SYS_ASA_MAJOR_PLANET, SYS_JPL_MAJOR_PLANET) { ps =>
@@ -317,7 +327,7 @@ object To2015B {
 
   // Construct a conversion that replaces the target system and optionally makes other changes to
   // the target's paramset.
-  private def convertSystem(to: String)(from: String*)(f: ParamSet => Unit = _ => ()): Document => Unit = { d =>
+  private def convertSystem(to: String)(from: String*)(f: ParamSet => Unit): Document => Unit = { d =>
     val systems = Set(from: _*)
     for {
       ps  <- allTargets(d)

@@ -319,12 +319,12 @@ public final class HmsDegTarget extends ITarget {
 
     /** Get the PM parallax in arcsec. */
     public double getTrackingParallax() {
-        return getParallax().getValue();
+        return getParallax().arcsecs();
     }
 
     /** Set the PM parallax in arcsec. */
     public void setTrackingParallax(final double newValue) {
-        setParallax(new Parallax(newValue));
+        setParallax(new Parallax(newValue, Units.ARCSECS));
     }
 
     /** Get the PM radial velocity in km/s. */

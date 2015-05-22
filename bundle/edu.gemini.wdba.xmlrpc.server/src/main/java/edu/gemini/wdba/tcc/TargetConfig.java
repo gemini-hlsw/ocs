@@ -141,7 +141,7 @@ public final class TargetConfig extends ParamSet {
         String pmunits = target.getPM2().getUnits().getName();
         if (pmunits.equals(TccNames.OT_PMUNITS)) pmunits = TccNames.TCC_PMUNITS;
         ps.putParameter(TccNames.PMUNITS, pmunits);
-        ps.putParameter(TccNames.PARALLAX, target.getParallax().getStringValue());
+        ps.putParameter(TccNames.PARALLAX, Double.toString(target.getParallax().arcsecs()));
         ps.putParameter(TccNames.RV, target.getRV().getStringValue());
         return ps;
     }

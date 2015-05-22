@@ -1,12 +1,14 @@
 package jsky.app.ot.gemini.editor.targetComponent.details
 
+import edu.gemini.spModel.target.system.CoordinateParam.Units
+import edu.gemini.spModel.target.system.CoordinateTypes.Epoch
 import edu.gemini.spModel.target.system.{ConicTarget, ITarget}
 
 final class MpcMinorPlanetDetailEditor extends ConicDetailEditor(ITarget.Tag.MPC_MINOR_PLANET) {
   import NumericPropertySheet.Prop
 
   lazy val props = NumericPropertySheet[ConicTarget](Some("Orbital Elements"), _.getTarget.asInstanceOf[ConicTarget],
-    Prop("EPOCH", "Orbital Element Epoch (JD)",        _.getEpoch),
+    Prop("EPOCH", "Orbital Element Epoch (JD)",        _.getEpoch.getValue, (t,d) => t.setEpoch(new Epoch(d, Units.JD))),
     Prop("IN",    "Inclination (deg)",                 _.getInclination),
     Prop("OM",    "Longitude of Ascending Node (deg)", _.getANode),
     Prop("W",     "Argument of Perihelion (deg)",      _.getPerihelion),
