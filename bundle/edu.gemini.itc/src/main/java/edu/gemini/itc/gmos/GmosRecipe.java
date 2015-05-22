@@ -6,6 +6,8 @@ import edu.gemini.itc.shared.*;
 import scala.Some;
 import scala.Tuple2;
 import scala.collection.JavaConversions;
+import scalaz.NonEmptyList;
+import scalaz.NonEmptyList$;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -104,7 +106,7 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
     }
 
 
-    public ImagingResult[] calculateImaging() {
+    public NonEmptyList<ImagingResult> calculateImaging() {
         return calculateImaging(createGmos());
     }
 
@@ -118,14 +120,15 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
         return results;
     }
 
-    private ImagingResult[] calculateImaging(final Gmos mainInstrument) {
+    private NonEmptyList<ImagingResult> calculateImaging(final Gmos mainInstrument) {
         final Gmos[] ccdArray = mainInstrument.getDetectorCcdInstruments();
-        final ImagingResult[] results = new ImagingResult[ccdArray.length];
-        for (int i = 0; i < ccdArray.length; i++) {
-            final Gmos instrument = ccdArray[i];
-            results[i] = calculateImagingDo(instrument);
+        final List<ImagingResult> results = new ArrayList<>();
+        for (final Gmos instrument : ccdArray) {
+            results.add(calculateImagingDo(instrument));
         }
-        return results;
+        // we know there is at least one CCD, so we can return this as a scala non-empty list
+        final scala.collection.Seq<ImagingResult> sResults = JavaConversions.asScalaBuffer(results);
+        return NonEmptyList$.MODULE$.apply(sResults.head(), sResults.tail().toSeq());
     }
 
     private Gmos createGmos() {
@@ -326,9 +329,22 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
         final ImagingS2NCalculatable IS2Ncalc = ImagingS2NCalculationFactory.getCalculationInstance(_obsDetailParameters, instrument, SFcalc, sed_integral, sky_integral);
         IS2Ncalc.calculate();
 
-        final Parameters p = new Parameters(_sdParameters, _obsDetailParameters, _obsConditionParameters, _telescope);
-        return ImagingResult.apply(p, instrument, IQcalc, SFcalc, peak_pixel_count, IS2Ncalc);
+        final Parameters p       = new Parameters(_sdParameters, _obsDetailParameters, _obsConditionParameters, _telescope);
+        final List<ItcWarning> w = warningsForImaging(instrument, peak_pixel_count);
+        return ImagingResult.apply(p, instrument, IQcalc, SFcalc, peak_pixel_count, IS2Ncalc, JavaConversions.asScalaBuffer(w).toList());
 
+    }
+
+    private List<ItcWarning> warningsForImaging(final Gmos instrument, final double peakPixelCount) {
+        final double wellLimit     = 0.95 * instrument.getWellDepth() * instrument.getSpatialBinning() * instrument.getSpectralBinning();
+        final double lowGainLimit  = 0.95 * instrument.getADSaturation() * instrument.getLowGain();
+        final double highGainLimit = 0.95 * instrument.getADSaturation() * instrument.getHighGain();
+
+        return new ArrayList<ItcWarning>() {{
+            if (peakPixelCount > wellLimit)     add(new ItcWarning("Warning: peak pixel may be saturating the (binned) CCD full well of " + wellLimit));
+            if (peakPixelCount > lowGainLimit)  add(new ItcWarning("Warning: peak pixel may be saturating the low gain setting of " + lowGainLimit));
+            if (peakPixelCount > highGainLimit) add(new ItcWarning("Warning: peak pixel may be saturating the high gain setting " + highGainLimit));
+        }};
     }
 
     // == GMOS CHARTS

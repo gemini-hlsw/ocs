@@ -196,7 +196,7 @@ private class ItcFeedbackPanel(table: ItcTable) extends Label {
       case Failure(t)                           => feedback(ErrorIcon,    t.getMessage, LIGHT_SALMON)
       case Success(s) => s match {
         case -\/(err)                           => feedback(ErrorIcon,    err.msg,      LIGHT_SALMON)
-        case \/-(res) if res.warnings.nonEmpty  => feedback(WarningIcon,  res.warnings.mkString("<html><body>","<br>","</body></html>"), BANANA)
+        case \/-(res) if res.warnings.nonEmpty  => feedback(WarningIcon,  res.warnings.map(_.msg).mkString("<html><body>","<br>","</body></html>"), BANANA)
         case _                                  => None
       }
     }

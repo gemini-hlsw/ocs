@@ -7,6 +7,7 @@ import edu.gemini.itc.shared.*;
 import edu.gemini.spModel.gemini.gmos.GmosNorthType;
 import edu.gemini.spModel.gemini.gmos.GmosSouthType;
 import scala.Tuple2;
+import scala.collection.JavaConversions;
 
 import java.io.PrintWriter;
 import java.util.UUID;
@@ -32,7 +33,7 @@ public final class GmosPrinter extends PrinterBase {
      */
     public void writeOutput() {
         if (isImaging) {
-            final ImagingResult[] results = recipe.calculateImaging();
+            final scalaz.NonEmptyList<ImagingResult> results = recipe.calculateImaging();
             writeImagingOutput(results);
         } else {
             final Tuple2<ItcSpectroscopyResult, SpectroscopyResult[]> r = recipe.calculateSpectroscopy();
@@ -114,9 +115,9 @@ public final class GmosPrinter extends PrinterBase {
     }
 
 
-    private void writeImagingOutput(final ImagingResult[] results) {
+    private void writeImagingOutput(final scalaz.NonEmptyList<ImagingResult> results) {
 
-        final Gmos mainInstrument = (Gmos) results[0].instrument(); // main instrument
+        final Gmos mainInstrument = (Gmos) results.head().instrument(); // main instrument
 
         _println("");
 
@@ -132,13 +133,13 @@ public final class GmosPrinter extends PrinterBase {
             final String ccdName = instrument.getDetectorCcdName();
             final String forCcdName = ccdName.length() == 0 ? "" : " for " + ccdName;
 
-            final ImagingResult result = results[ccdIndex];
+            final ImagingResult result = results.list().apply(ccdIndex);
 
             if (ccdIndex == 0) {
                 _print(CalculatablePrinter.getTextResult(result.sfCalc(), device));
                 _println(CalculatablePrinter.getTextResult(result.iqCalc(), device));
                 _println("Sky subtraction aperture = "
-                        + results[0].observation().getSkyApertureDiameter()
+                        + results.head().observation().getSkyApertureDiameter()
                         + " times the software aperture.\n");
                 _println("Read noise: " + instrument.getReadNoise());
             }
@@ -149,30 +150,17 @@ public final class GmosPrinter extends PrinterBase {
 
             device.setPrecision(0); // NO decimal places
             device.clear();
-            final int binFactor = instrument.getSpatialBinning() * instrument.getSpatialBinning();
 
             _println("");
             _println("The peak pixel signal + background is " + device.toString(result.peakPixelCount()) + ". ");
 
-            if (result.peakPixelCount() > (.95 * instrument.getWellDepth() * binFactor))
-                _println("Warning: peak pixel may be saturating the (binned) CCD full well of "
-                        + .95 * instrument.getWellDepth() * binFactor);
-
-            if (result.peakPixelCount() > (.95 * instrument.getADSaturation() * instrument.getLowGain()))
-                _println("Warning: peak pixel may be saturating the low gain setting of "
-                        + .95
-                        * instrument.getADSaturation()
-                        * instrument.getLowGain());
-
-            if (result.peakPixelCount() > (.95 * instrument.getADSaturation() * instrument.getHighGain()))
-                _println("Warning: peak pixel may be saturating the high gain setting "
-                        + .95
-                        * instrument.getADSaturation()
-                        * instrument.getHighGain());
+            for (final ItcWarning warning : JavaConversions.asJavaList(result.warnings())) {
+                _println(warning.msg());
+            }
 
         }
 
-        printConfiguration(results[0].parameters(), mainInstrument);
+        printConfiguration(results.head().parameters(), mainInstrument);
     }
 
     private void printConfiguration(final Parameters p, final Gmos mainInstrument) {

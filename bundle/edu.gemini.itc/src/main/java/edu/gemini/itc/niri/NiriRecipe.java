@@ -198,7 +198,7 @@ public final class NiriRecipe implements ImagingRecipe, SpectroscopyRecipe {
         final Parameters p = new Parameters(_sdParameters, _obsDetailParameters, _obsConditionParameters, _telescope);
         final SpecS2N[] specS2Narr = new SpecS2N[1];
         specS2Narr[0] = specS2N;
-        return new GenericSpectroscopyResult(p, instrument, SFcalc, IQcalc, specS2Narr, st, altair);
+        return new GenericSpectroscopyResult(p, instrument, SFcalc, IQcalc, specS2Narr, st, altair, ImagingResult.NoWarnings());
     }
 
     private ImagingResult calculateImaging(final Niri instrument) {
@@ -283,7 +283,7 @@ public final class NiriRecipe implements ImagingRecipe, SpectroscopyRecipe {
         IS2Ncalc.calculate();
 
         final Parameters p = new Parameters(_sdParameters, _obsDetailParameters, _obsConditionParameters, _telescope);
-        return new ImagingResult(p, instrument, IQcalc, SFcalc, peak_pixel_count, IS2Ncalc, altair);
+        return new ImagingResult(p, instrument, IQcalc, SFcalc, peak_pixel_count, IS2Ncalc, altair, ImagingResult.NoWarnings());
 
     }
 

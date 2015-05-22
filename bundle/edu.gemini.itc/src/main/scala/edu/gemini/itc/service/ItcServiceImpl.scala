@@ -13,6 +13,9 @@ import edu.gemini.itc.base._
 import edu.gemini.itc.shared._
 import edu.gemini.itc.trecs.TRecsParameters
 
+import scalaz._
+import Scalaz._
+
 /**
  * The ITC service implementation.
  *
@@ -47,13 +50,20 @@ class ItcServiceImpl extends ItcService {
     }
 
   private def imagingResult(recipe: ImagingRecipe): Result =
-    imagingResult(List(recipe.calculateImaging()))
+    imagingResult(NonEmptyList(recipe.calculateImaging()))
 
   private def imagingResult(recipe: ImagingArrayRecipe): Result =
-    imagingResult(recipe.calculateImaging().toList)
+    imagingResult(recipe.calculateImaging())
 
-  private def imagingResult(r: List[ImagingResult]): Result =
-    ItcResult.forResult(ItcImagingResult(r.head.source, r.head.observation, r.map(toImgData), List()))
+  private def imagingResult(r: NonEmptyList[ImagingResult]): Result =
+    ItcResult.forResult(ItcImagingResult(r.head.source, r.head.observation, r.map(toImgData).toList, combineWarnings(r)))
+
+  // combine all warnings for the different CCDs and prepend a "CCD x:" in front of them
+  private def combineWarnings(rs: NonEmptyList[ImagingResult]): List[ItcWarning] =
+    if (rs.size > 1)
+      rs.toList.zipWithIndex.flatMap { case (r, i) => r.warnings.map(w => new ItcWarning(s"CCD $i: ${w.msg}")) }
+    else
+      rs.head.warnings
 
   private def toImgData(result: ImagingResult): ImgData = result.is2nCalc match {
     case i: ImagingS2NMethodACalculation  => ImgData(i.singleSNRatio(), i.totalSNRatio(), result.peakPixelCount)
