@@ -30,7 +30,7 @@ object BrightnessParserSpec extends Specification {
     "14.8 Jmag, 14.2 Hmag"        -> NonEmptyList(mag(14.8, J, Vega), mag(14.2, H, Vega)),
     "14.9mag at K"                -> one(14.9, K, Vega),
     "15: H"                       -> one(15, H, Vega),
-    "17.9 (i mag)"                -> one(17.9, i, Vega),
+    "17.9 (i mag)"                -> one(17.9, i, AB),
     "18.74  K"                    -> one(18.74, K, Vega),
     "19.05 (I-band)"              -> one(19.05, I, Vega),
     "19.7(iAB)"                   -> one(19.7, i, AB),
@@ -49,7 +49,7 @@ object BrightnessParserSpec extends Specification {
     "B_mag=9.4"                   -> one(9.4, B, Vega),
     "H,11.268"                    -> one(11.268, H, Vega),
     "Hband 13.07"                 -> one(13.07, H, Vega),
-    "i mag = 18.1"                -> one(18.1, i, Vega),
+    "i mag = 18.1"                -> one(18.1, i, AB),
     "I(AB)18.96"                  -> one(18.96, I, AB),
     "i(AB)=16.6"                  -> one(16.6, i, AB),
     "I_AB=19.09"                  -> one(19.09, I, AB),
@@ -83,7 +83,7 @@ object BrightnessParserSpec extends Specification {
     "7.39 in V"                   -> one(7.39, V, Vega),
     "13.774 in J-band "           -> one(13.774, J, Vega),
     "L'=7.055,M=7.04"             -> NonEmptyList(mag(7.055, L, Vega), mag(7.04, M, Vega)),
-    "22.7 z'"                     -> one(22.7, z, Vega)
+    "22.7 z'"                     -> one(22.7, z, AB)
   )
 
   "Brightness Parser" should {
