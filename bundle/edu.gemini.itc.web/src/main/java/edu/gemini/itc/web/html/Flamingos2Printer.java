@@ -8,6 +8,7 @@ import edu.gemini.itc.flamingos2.Flamingos2Recipe;
 import edu.gemini.itc.shared.*;
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2.FPUnit;
 import scala.Tuple2;
+import scala.collection.JavaConversions;
 
 import java.io.PrintWriter;
 import java.util.UUID;
@@ -133,8 +134,9 @@ public final class Flamingos2Printer extends PrinterBase {
                 + "% of the full well depth of "
                 + device.toString(instrument.getWellDepth()) + ".");
 
-        if (result.peakPixelCount() > (.8 * instrument.getWellDepth()))
-            _println("Warning: peak pixel exceeds 80% of the well depth and may be saturated");
+        for (final ItcWarning warning : JavaConversions.asJavaList(result.warnings())) {
+            _println(warning.msg());
+        }
 
         _println("");
         device.setPrecision(2); // TWO decimal places

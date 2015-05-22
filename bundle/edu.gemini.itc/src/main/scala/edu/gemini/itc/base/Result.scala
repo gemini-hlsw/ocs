@@ -48,6 +48,8 @@ object ImagingResult {
   def apply(parameters: Parameters, instrument: Instrument, IQcalc: ImageQualityCalculatable, SFcalc: SourceFraction, peakPixelCount: Double, IS2Ncalc: ImagingS2NCalculatable, warnings: List[ItcWarning]) =
     new ImagingResult(parameters, instrument, IQcalc, SFcalc, peakPixelCount, IS2Ncalc, None, warnings)
 
+  def apply(parameters: Parameters, instrument: Instrument, IQcalc: ImageQualityCalculatable, SFcalc: SourceFraction, peakPixelCount: Double, IS2Ncalc: ImagingS2NCalculatable, aoSystem: AOSystem, warnings: List[ItcWarning]) =
+    new ImagingResult(parameters, instrument, IQcalc, SFcalc, peakPixelCount, IS2Ncalc, Some(aoSystem), warnings)
 }
 
 sealed trait SpectroscopyResult extends Result {

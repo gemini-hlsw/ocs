@@ -8,6 +8,9 @@ import edu.gemini.itc.shared.ObservationDetails;
  * Gsaoi specification class
  */
 public final class Gsaoi extends Instrument {
+
+    public static final int WELL_DEPTH = 126000;
+
     /**
      * Related files will be in this subdir of lib
      */

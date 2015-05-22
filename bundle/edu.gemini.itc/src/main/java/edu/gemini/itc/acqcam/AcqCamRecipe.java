@@ -4,6 +4,10 @@ import edu.gemini.itc.base.*;
 import edu.gemini.itc.operation.*;
 import edu.gemini.itc.shared.*;
 import edu.gemini.spModel.core.Site;
+import scala.collection.JavaConversions;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * This class performs the calculations for the Acquisition Camera used for imaging.
@@ -104,9 +108,18 @@ public final class AcqCamRecipe implements ImagingRecipe {
         final ImagingS2NCalculatable IS2Ncalc = ImagingS2NCalculationFactory.getCalculationInstance(_obsDetailParameters, instrument, SFcalc, sed_integral, sky_integral);
         IS2Ncalc.calculate();
 
-        final Parameters p = new Parameters(_sdParameters, _obsDetailParameters, _obsConditionParameters, _telescope);
-        return ImagingResult.apply(p, instrument, IQcalc, SFcalc, peak_pixel_count, IS2Ncalc);
+        final Parameters        p = new Parameters(_sdParameters, _obsDetailParameters, _obsConditionParameters, _telescope);
+        final List<ItcWarning>  w = warningsForImaging(instrument, peak_pixel_count);
+        return ImagingResult.apply(p, instrument, IQcalc, SFcalc, peak_pixel_count, IS2Ncalc, JavaConversions.asScalaBuffer(w).toList());
 
+    }
+
+    // TODO: some of these warnings are similar for different instruments and could be calculated in a central place
+    private List<ItcWarning> warningsForImaging(final AcquisitionCamera instrument, final double peakPixelCount) {
+        final double wellLimit = 0.8 * instrument.getWellDepth();
+        return new ArrayList<ItcWarning>() {{
+            if (peakPixelCount > wellLimit) add(new ItcWarning("Warning: peak pixel exceeds 80% of the well depth and may be saturated"));
+        }};
     }
 
 }

@@ -197,7 +197,17 @@ public final class Flamingos2Recipe implements ImagingRecipe, SpectroscopyRecipe
         IS2Ncalc.calculate();
 
         final Parameters p = new Parameters(_sdParameters, _obsDetailParameters, _obsConditionParameters, _telescope);
-        return ImagingResult.apply(p, instrument, IQcalc, SFcalc, peak_pixel_count, IS2Ncalc);
+        final List<ItcWarning> w = warningsForImaging(instrument, peak_pixel_count);
+        return ImagingResult.apply(p, instrument, IQcalc, SFcalc, peak_pixel_count, IS2Ncalc, JavaConversions.asScalaBuffer(w).toList());
     }
+
+    // TODO: some of these warnings are similar for different instruments and could be calculated in a central place
+    private List<ItcWarning> warningsForImaging(final Flamingos2 instrument, final double peakPixelCount) {
+        final double wellLimit = 0.8 * instrument.getWellDepth();
+        return new ArrayList<ItcWarning>() {{
+            if (peakPixelCount > wellLimit) add(new ItcWarning("Warning: peak pixel exceeds 80% of the well depth and may be saturated"));
+        }};
+    }
+
 
 }

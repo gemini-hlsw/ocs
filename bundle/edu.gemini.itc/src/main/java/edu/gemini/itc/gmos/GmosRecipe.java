@@ -335,6 +335,7 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
 
     }
 
+    // TODO: some of these warnings are similar for different instruments and could be calculated in a central place
     private List<ItcWarning> warningsForImaging(final Gmos instrument, final double peakPixelCount) {
         final double wellLimit     = 0.95 * instrument.getWellDepth() * instrument.getSpatialBinning() * instrument.getSpectralBinning();
         final double lowGainLimit  = 0.95 * instrument.getADSaturation() * instrument.getLowGain();

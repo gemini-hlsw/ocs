@@ -6,6 +6,10 @@ import edu.gemini.itc.operation.*;
 import edu.gemini.itc.shared.*;
 import edu.gemini.spModel.core.Site;
 import scala.Some;
+import scala.collection.JavaConversions;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * This class performs the calculations for Gsaoi used for imaging.
@@ -125,8 +129,18 @@ public final class GsaoiRecipe implements ImagingRecipe {
         IS2Ncalc.calculate();
 
         final Parameters p = new Parameters(_sdParameters, _obsDetailParameters, _obsConditionParameters, _telescope);
-        return ImagingResult.apply(p, instrument, IQcalc, SFcalc, peak_pixel_count, IS2Ncalc, gems);
-
+        final List<ItcWarning> w = warningsForImaging(instrument, peak_pixel_count);
+        return ImagingResult.apply(p, instrument, IQcalc, SFcalc, peak_pixel_count, IS2Ncalc, gems, JavaConversions.asScalaBuffer(w).toList());
     }
+
+    // TODO: some of these warnings are similar for different instruments and could be calculated in a central place
+    private List<ItcWarning> warningsForImaging(final Gsaoi instrument, final double peakPixelCount) {
+        final int peakPixelPercent = (int) (100 * peakPixelCount / Gsaoi.WELL_DEPTH);
+        return new ArrayList<ItcWarning>() {{
+            if (peakPixelPercent > 65 && peakPixelPercent <= 85) add(new ItcWarning("Warning: the peak pixel + background level exceeds 65% of the well depth and will cause deviations from linearity of more than 5%."));
+            if (peakPixelPercent > 85)                           add(new ItcWarning("Warning: the peak pixel + background level exceeds 85% of the well depth and may cause saturation."));
+        }};
+    }
+
 
 }
