@@ -322,10 +322,18 @@ public class AbstractRuleTest {
 
     }
 
-    protected ISPSeqComponent addGmosIterator() throws Exception {
-        final ISPSeqComponent sq = fact.createSeqComponent(prog, SPComponentType.ITERATOR_GMOS, null);
+    private ISPSeqComponent addGmosIteratorFor(SPComponentType ct) throws Exception {
+        final ISPSeqComponent sq = fact.createSeqComponent(prog, ct, null);
         obs.getSeqComponent().addSeqComponent(sq);
         return sq;
+    }
+
+    protected ISPSeqComponent addGmosIterator() throws Exception {
+        return addGmosIteratorFor(SPComponentType.ITERATOR_GMOS);
+    }
+
+    protected ISPSeqComponent addGmosSouthIterator() throws Exception {
+        return addGmosIteratorFor(SPComponentType.ITERATOR_GMOSSOUTH);
     }
 
     protected ISPSeqComponent addOffsetIterator() throws Exception {
