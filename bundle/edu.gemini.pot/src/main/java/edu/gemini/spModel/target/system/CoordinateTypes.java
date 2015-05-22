@@ -6,8 +6,6 @@
 //
 package edu.gemini.spModel.target.system;
 
-import edu.gemini.spModel.target.system.CoordinateParam.Units;
-
 /**
  * A container class for localizing the various parameter types used by
  * the target coordinate systems.
@@ -137,10 +135,10 @@ public final class CoordinateTypes {
      * The Parallax parameter type.
      */
     public static final class Parallax extends CoordinateParam {
-        public static final Units[] UNITS = {Units.ARCSECS};
+        public static final Units[] UNITS = {Units.MILLI_ARCSECS, Units.ARCSECS};
 
         public Object clone() {
-            return (Parallax) super.clone();
+            return super.clone();
         }
 
         public Parallax() {
@@ -165,6 +163,14 @@ public final class CoordinateTypes {
 
         public Units[] getUnitOptions() {
             return UNITS;
+        }
+
+        public Double arcsecs() {
+            return (getUnits() == Units.MILLI_ARCSECS) ? getValue()/1000.0 : getValue();
+        }
+
+        public Double mas() {
+            return (getUnits() == Units.ARCSECS) ? getValue() * 1000.0 : getValue();
         }
     }
 
@@ -242,10 +248,10 @@ public final class CoordinateTypes {
      * The Epoch parameter type.
      */
     public static final class Epoch extends CoordinateParam {
-        public static final Units[] UNITS = {Units.YEARS};
+        public static final Units[] UNITS = {Units.YEARS, Units.JD};
 
         public Object clone() {
-            return (Epoch) super.clone();
+            return super.clone();
         }
 
         public Epoch() {

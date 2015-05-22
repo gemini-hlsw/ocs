@@ -13,7 +13,7 @@ public abstract class NonSiderealTarget extends ITarget {
     // XXX temporary, until there is conversion code
     private HMS _ra = new HMS();
     private DMS _dec = new DMS();
-    private CoordinateTypes.Epoch _epoch = new CoordinateTypes.Epoch("2000", CoordinateParam.Units.YEARS);
+    private CoordinateTypes.Epoch _epoch = defaultEpoch();
     private String _name = DEFAULT_NAME;
     private Date _date = null; // The date for which the position is valid
 
@@ -60,9 +60,6 @@ public abstract class NonSiderealTarget extends ITarget {
      * Gets the epoch of this object.
      */
     public CoordinateTypes.Epoch getEpoch() {
-        if (_epoch == null) {
-            _epoch = _createDefaultEpoch();
-        }
         return _epoch;
     }
 
@@ -73,6 +70,7 @@ public abstract class NonSiderealTarget extends ITarget {
      * stored in this class.
      */
     public void setEpoch(CoordinateTypes.Epoch newValue) {
+        if (newValue == null) newValue = defaultEpoch();
         _epoch = newValue;
     }
 
@@ -82,13 +80,6 @@ public abstract class NonSiderealTarget extends ITarget {
 
     public void setDateForPosition(Date date) {
         _date = date;
-    }
-
-    /**
-     * Returns the current epoch, creating it if necessary.
-     */
-    private CoordinateTypes.Epoch _createDefaultEpoch() {
-        return new CoordinateTypes.Epoch("2000", CoordinateParam.Units.YEARS);
     }
 
     /**
@@ -135,6 +126,10 @@ public abstract class NonSiderealTarget extends ITarget {
         result._hObjTypeOrd = _hObjTypeOrd;
         return result;
     }
+
+    // A dangerous method because it is called from the constructor yet
+    // overridden in subclasses.  Must return a constant value.
+    protected abstract CoordinateTypes.Epoch defaultEpoch();
 
     ///
     /// IHorizonsTarget Impl

@@ -12,11 +12,15 @@ public final class NamedTarget extends NonSiderealTarget {
         return TAG;
     }
 
+    protected CoordinateTypes.Epoch defaultEpoch() {
+        // inexplicably mutable, so always create a new value
+        return new CoordinateTypes.Epoch("2000", CoordinateParam.Units.YEARS);
+    }
 
     /**
      * Solar System Objects
      */
-    public static enum SolarObject {
+    public enum SolarObject {
         MOON   ("Moon",    301),
         MERCURY("Mercury", 199, 1),
         VENUS  ("Venus",   299, 2),
