@@ -7,10 +7,7 @@ import edu.gemini.spModel.core.Wavelength;
 import edu.gemini.spModel.core.Wavelength$;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
-import java.util.List;
 
 /**
  * Celestial object brightness information.  Magnitudes are relative to
@@ -18,6 +15,17 @@ import java.util.List;
  * in the measurement.
  */
 public final class Magnitude implements Comparable, Serializable {
+    /**
+     * REL-549: Magnitude information for targets and guide stars in OT must be stored in value, bandpass, system triples.
+     */
+    public enum System {
+        Vega,
+        AB,
+        Jy,
+        ;
+
+        public static final System DEFAULT = Vega;
+    }
 
     /**
      * Common wavelength bands.
@@ -25,40 +33,28 @@ public final class Magnitude implements Comparable, Serializable {
     public enum Band {
 
         // OCSADV-203
-        u(350, "UV"),
-        g(475, "green"),
-        r(630, "red"),
-        i(780, "far red"),
-        z(925, "near-infrared"),
+        u(System.AB, 350, "UV"),
+        g(System.AB, 475, "green"),
+        r(System.AB, 630, "red"),
+        i(System.AB, 780, "far red"),
+        z(System.AB, 925, "near-infrared"),
 
-        U( 365, "ultraviolet"),
-        B( 445, "blue"),
-        V( 551, "visual"),
-        UC(610, "UCAC"), // unknown FWHM
-        R( 658, "red"),
-        I( 806, "infrared"),
-        Y(1020),
-        J(1220),
-        H(1630),
-        K(2190),
-        L(3450),
-        M(4750),
-        N(10000),
-        Q(16000),
-        AP(None.INTEGER, new Some<>("apparent"))
+        U(System.Vega,  365, "ultraviolet"),
+        B(System.Vega,  445, "blue"),
+        V(System.Vega,  551, "visual"),
+        UC(System.Vega, 610, "UCAC"), // unknown FWHM
+        R(System.Vega,  658, "red"),
+        I(System.Vega,  806, "infrared"),
+        Y(System.Vega, 1020),
+        J(System.Vega, 1220),
+        H(System.Vega, 1630),
+        K(System.Vega, 2190),
+        L(System.Vega, 3450),
+        M(System.Vega, 4750),
+        N(System.Vega, 10000),
+        Q(System.Vega, 16000),
+        AP(System.Vega, None.INTEGER, new Some<>("apparent"))
         ;
-
-        public static final List<Band> AB_BANDS;
-
-        static {
-            List<Band> bands = new ArrayList<>();
-            bands.add(u);
-            bands.add(g);
-            bands.add(r);
-            bands.add(i);
-            bands.add(z);
-            AB_BANDS = Collections.unmodifiableList(bands);
-        }
 
         /**
          * A Comparator of magnitude bands based upon the associated
@@ -77,19 +73,22 @@ public final class Magnitude implements Comparable, Serializable {
                 }
             };
 
+        public final System defaultSystem;
         private final Option<Wavelength> wavelengthMidPoint;
         private final Option<String> description;
 
-        Band(Option<Integer> mid, Option<String> desc) {
+        Band(System sys, Option<Integer> mid, Option<String> desc) {
+            this.defaultSystem      = sys;
             this.wavelengthMidPoint = mid.map(Wavelength$.MODULE$::fromNanometers);
             this.description        = desc;
         }
 
-        Band(int mid) {
-            this(mid, null);
+        Band(System sys, int mid) {
+            this(sys, mid, null);
         }
 
-        Band(int mid, String desc) {
+        Band(System sys, int mid, String desc) {
+            this.defaultSystem      = sys;
             this.wavelengthMidPoint = new Some<>(Wavelength$.MODULE$.fromNanometers(mid));
             this.description = (desc == null) ? None.STRING : new Some<>(desc);
         }
@@ -104,17 +103,6 @@ public final class Magnitude implements Comparable, Serializable {
 
     }
 
-    /**
-     * REL-549: Magnitude information for targets and guide stars in OT must be stored in value, bandpass, system triples.
-     */
-    public enum System {
-        Vega,
-        AB,
-        Jy,
-        ;
-
-        public static final System DEFAULT = Vega;
-    }
 
 
     /**
