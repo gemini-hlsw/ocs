@@ -104,11 +104,7 @@ public class MagnitudeEditor implements TelescopePosEditor {
                 if (newBand == MagEditRow.this.band) return;
                 changeBand(MagEditRow.this.band, newBand);
                 // OCSADV-355 If the bands is one on the AB list, switch the magnitude system to AB or else to VEGA
-                if (Magnitude.Band.AB_BANDS.stream().anyMatch(b -> b.equals(newBand))) {
-                    changeSystem(newBand, Magnitude.System.AB);
-                } else {
-                    changeSystem(newBand, Magnitude.System.Vega);
-                }
+                changeSystem(newBand, newBand.defaultSystem);
             }
         };
 
@@ -481,7 +477,7 @@ public class MagnitudeEditor implements TelescopePosEditor {
         final Option<Magnitude> magOpt = target.getTarget().getMagnitude(b);
         if (!magOpt.isEmpty()) return; // shouldn't happen ...
 
-        final Magnitude newMag = new Magnitude(b, Magnitude.UNDEFINED_MAG, 0);
+        final Magnitude newMag = new Magnitude(b, Magnitude.UNDEFINED_MAG, 0, b.defaultSystem);
 
         target.getTarget().setMagnitudes(target.getTarget().getMagnitudes().cons(newMag));
         target.notifyOfGenericUpdate();
