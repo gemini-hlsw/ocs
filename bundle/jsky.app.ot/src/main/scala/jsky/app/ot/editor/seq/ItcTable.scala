@@ -194,16 +194,16 @@ trait ItcTable extends Table {
 
   private def extractSource(target: ITarget, c: ItcUniqueConfig): String \/ SourceDefinition = {
     for {
-      (mag, band)     <- extractSourceMagnitude(target, c.config)
-      srcProfile      <- parameters.spatialProfile
-      srcDistribution <- parameters.spectralDistribution
-      srcRedshift     <- parameters.redshift
+      (mag, band, system) <- extractSourceMagnitude(target, c.config)
+      srcProfile          <- parameters.spatialProfile
+      srcDistribution     <- parameters.spectralDistribution
+      srcRedshift         <- parameters.redshift
     } yield {
-      new SourceDefinition(srcProfile, srcDistribution, mag, BrightnessUnit.MAG, band, srcRedshift)
+      new SourceDefinition(srcProfile, srcDistribution, mag, system, band, srcRedshift)
     }
   }
 
-  private def extractSourceMagnitude(target: ITarget, c: Config): String \/ (Double, WavebandDefinition) = {
+  private def extractSourceMagnitude(target: ITarget, c: Config): String \/ (Double, WavebandDefinition, BrightnessUnit) = {
 
     def closestBand(bands: List[Magnitude], wl: Wavelength) =
       // note, at this point we've filtered out all bands without a wavelength
@@ -222,33 +222,39 @@ trait ItcTable extends Table {
       wl  <- ConfigExtractor.extractObservingWavelength(c)
       mag <- mags(wl)
     } yield {
-      val b = mag.getBrightness
-      mag.getBand match {
-        // TODO: unify band definitions from spModel core and itc shared so that we don't need this translation anymore
-        case Magnitude.Band.u  => (b, WavebandDefinition.U)
-        case Magnitude.Band.g  => (b, WavebandDefinition.g)
-        case Magnitude.Band.r  => (b, WavebandDefinition.r)
-        case Magnitude.Band.i  => (b, WavebandDefinition.i)
-        case Magnitude.Band.z  => (b, WavebandDefinition.z)
+      val value  = mag.getBrightness
+      // TODO: unify band definitions from spModel core and itc shared so that we don't need this translation anymore
+      val system = mag.getSystem match {
+        case Magnitude.System.Vega  => BrightnessUnit.MAG
+        case Magnitude.System.AB    => BrightnessUnit.ABMAG
+        case Magnitude.System.Jy    => BrightnessUnit.JY
+      }
+      val band   = mag.getBand match {
+        case Magnitude.Band.u  => WavebandDefinition.U
+        case Magnitude.Band.g  => WavebandDefinition.g
+        case Magnitude.Band.r  => WavebandDefinition.r
+        case Magnitude.Band.i  => WavebandDefinition.i
+        case Magnitude.Band.z  => WavebandDefinition.z
 
-        case Magnitude.Band.U  => (b, WavebandDefinition.U)
-        case Magnitude.Band.B  => (b, WavebandDefinition.B)
-        case Magnitude.Band.V  => (b, WavebandDefinition.V)
-        case Magnitude.Band.R  => (b, WavebandDefinition.R)
-        case Magnitude.Band.I  => (b, WavebandDefinition.I)
-        case Magnitude.Band.Y  => (b, WavebandDefinition.z)
-        case Magnitude.Band.J  => (b, WavebandDefinition.J)
-        case Magnitude.Band.H  => (b, WavebandDefinition.H)
-        case Magnitude.Band.K  => (b, WavebandDefinition.K)
-        case Magnitude.Band.L  => (b, WavebandDefinition.L)
-        case Magnitude.Band.M  => (b, WavebandDefinition.M)
-        case Magnitude.Band.N  => (b, WavebandDefinition.N)
-        case Magnitude.Band.Q  => (b, WavebandDefinition.Q)
+        case Magnitude.Band.U  => WavebandDefinition.U
+        case Magnitude.Band.B  => WavebandDefinition.B
+        case Magnitude.Band.V  => WavebandDefinition.V
+        case Magnitude.Band.R  => WavebandDefinition.R
+        case Magnitude.Band.I  => WavebandDefinition.I
+        case Magnitude.Band.Y  => WavebandDefinition.z
+        case Magnitude.Band.J  => WavebandDefinition.J
+        case Magnitude.Band.H  => WavebandDefinition.H
+        case Magnitude.Band.K  => WavebandDefinition.K
+        case Magnitude.Band.L  => WavebandDefinition.L
+        case Magnitude.Band.M  => WavebandDefinition.M
+        case Magnitude.Band.N  => WavebandDefinition.N
+        case Magnitude.Band.Q  => WavebandDefinition.Q
 
         // UC and AP are not taken into account for ITC calculations
         case Magnitude.Band.UC => throw new Error()
         case Magnitude.Band.AP => throw new Error()
       }
+      (value, band, system)
     }
   }
 
