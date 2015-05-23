@@ -3,6 +3,8 @@ package edu.gemini.itc.base
 import edu.gemini.itc.operation._
 import edu.gemini.itc.shared.{ItcWarning, Parameters}
 
+import scala.collection.JavaConversions._
+
 /*
  * Helper objects that are used to pass around results of imaging and spectroscopy calculations.
  * These objects also contain the parameter objects that were used for the calculations so that input values
@@ -45,11 +47,11 @@ object ImagingResult {
   def apply(parameters: Parameters, instrument: Instrument, IQcalc: ImageQualityCalculatable, SFcalc: SourceFraction, peakPixelCount: Double, IS2Ncalc: ImagingS2NCalculatable, aoSystem: AOSystem) =
     new ImagingResult(parameters, instrument, IQcalc, SFcalc, peakPixelCount, IS2Ncalc, Some(aoSystem))
 
-  def apply(parameters: Parameters, instrument: Instrument, IQcalc: ImageQualityCalculatable, SFcalc: SourceFraction, peakPixelCount: Double, IS2Ncalc: ImagingS2NCalculatable, warnings: List[ItcWarning]) =
-    new ImagingResult(parameters, instrument, IQcalc, SFcalc, peakPixelCount, IS2Ncalc, None, warnings)
+  def apply(parameters: Parameters, instrument: Instrument, IQcalc: ImageQualityCalculatable, SFcalc: SourceFraction, peakPixelCount: Double, IS2Ncalc: ImagingS2NCalculatable, warnings: java.util.List[ItcWarning]) =
+    new ImagingResult(parameters, instrument, IQcalc, SFcalc, peakPixelCount, IS2Ncalc, None, warnings.toList)
 
-  def apply(parameters: Parameters, instrument: Instrument, IQcalc: ImageQualityCalculatable, SFcalc: SourceFraction, peakPixelCount: Double, IS2Ncalc: ImagingS2NCalculatable, aoSystem: AOSystem, warnings: List[ItcWarning]) =
-    new ImagingResult(parameters, instrument, IQcalc, SFcalc, peakPixelCount, IS2Ncalc, Some(aoSystem), warnings)
+  def apply(parameters: Parameters, instrument: Instrument, IQcalc: ImageQualityCalculatable, SFcalc: SourceFraction, peakPixelCount: Double, IS2Ncalc: ImagingS2NCalculatable, aoSystem: AOSystem, warnings: java.util.List[ItcWarning]) =
+    new ImagingResult(parameters, instrument, IQcalc, SFcalc, peakPixelCount, IS2Ncalc, Some(aoSystem), warnings.toList)
 }
 
 sealed trait SpectroscopyResult extends Result {
@@ -92,6 +94,9 @@ object SpectroscopyResult {
 
   def apply(parameters: Parameters, instrument: Instrument, sfCalc: SourceFraction, iqCalc: ImageQualityCalculatable, specS2N: Array[SpecS2N], st: SlitThroughput) =
     new GenericSpectroscopyResult(parameters, instrument, sfCalc, iqCalc, specS2N, st, None)
+
+  def apply(parameters: Parameters, instrument: Instrument, sfCalc: SourceFraction, iqCalc: ImageQualityCalculatable, specS2N: Array[SpecS2N], st: SlitThroughput, warnings: java.util.List[ItcWarning]) =
+    new GenericSpectroscopyResult(parameters, instrument, sfCalc, iqCalc, specS2N, st, None, warnings.toList)
 
 }
 

@@ -6,7 +6,6 @@ import edu.gemini.itc.operation.*;
 import edu.gemini.itc.shared.*;
 import edu.gemini.spModel.core.Site;
 import scala.Some;
-import scala.collection.JavaConversions;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -129,8 +128,8 @@ public final class GsaoiRecipe implements ImagingRecipe {
         IS2Ncalc.calculate();
 
         final Parameters p = new Parameters(_sdParameters, _obsDetailParameters, _obsConditionParameters, _telescope);
-        final List<ItcWarning> w = warningsForImaging(instrument, peak_pixel_count);
-        return ImagingResult.apply(p, instrument, IQcalc, SFcalc, peak_pixel_count, IS2Ncalc, gems, JavaConversions.asScalaBuffer(w).toList());
+        final List<ItcWarning> warnings = warningsForImaging(instrument, peak_pixel_count);
+        return ImagingResult.apply(p, instrument, IQcalc, SFcalc, peak_pixel_count, IS2Ncalc, gems, warnings);
     }
 
     // TODO: some of these warnings are similar for different instruments and could be calculated in a central place

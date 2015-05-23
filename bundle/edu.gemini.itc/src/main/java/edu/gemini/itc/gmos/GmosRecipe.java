@@ -3,6 +3,8 @@ package edu.gemini.itc.gmos;
 import edu.gemini.itc.base.*;
 import edu.gemini.itc.operation.*;
 import edu.gemini.itc.shared.*;
+import edu.gemini.spModel.gemini.gmos.GmosNorthType;
+import edu.gemini.spModel.gemini.gmos.GmosSouthType;
 import scala.Some;
 import scala.Tuple2;
 import scala.collection.JavaConversions;
@@ -290,9 +292,19 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
         }
 
         final Parameters p = new Parameters(_sdParameters, _obsDetailParameters, _obsConditionParameters, _telescope);
-        return SpectroscopyResult$.MODULE$.apply(p, instrument, SFcalc, IQcalc, specS2N, st);
+        final List<ItcWarning> warnings = warningsForSpectroscopy(mainInstrument);
+        return SpectroscopyResult$.MODULE$.apply(p, instrument, SFcalc, IQcalc, specS2N, st, warnings);
 
     }
+
+    private List<ItcWarning> warningsForSpectroscopy(final Gmos instrument) {
+        final boolean isIfu2 = instrument.getFpMask() == GmosNorthType.FPUnitNorth.IFU_1 || instrument.getFpMask() == GmosSouthType.FPUnitSouth.IFU_1;
+        return new ArrayList<ItcWarning>() {{
+            // OCSADV-361: warn that results produced for 2 slit IFUs are not entirely correct
+            if (isIfu2) add(new ItcWarning("Warning: chip gaps are shown at the wrong wavelengths in IFU-2 mode."));
+        }};
+    }
+
 
     private ImagingResult calculateImagingDo(final Gmos instrument) {
 
@@ -329,9 +341,9 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
         final ImagingS2NCalculatable IS2Ncalc = ImagingS2NCalculationFactory.getCalculationInstance(_obsDetailParameters, instrument, SFcalc, sed_integral, sky_integral);
         IS2Ncalc.calculate();
 
-        final Parameters p       = new Parameters(_sdParameters, _obsDetailParameters, _obsConditionParameters, _telescope);
-        final List<ItcWarning> w = warningsForImaging(instrument, peak_pixel_count);
-        return ImagingResult.apply(p, instrument, IQcalc, SFcalc, peak_pixel_count, IS2Ncalc, JavaConversions.asScalaBuffer(w).toList());
+        final Parameters p = new Parameters(_sdParameters, _obsDetailParameters, _obsConditionParameters, _telescope);
+        final List<ItcWarning> warnings = warningsForImaging(instrument, peak_pixel_count);
+        return ImagingResult.apply(p, instrument, IQcalc, SFcalc, peak_pixel_count, IS2Ncalc, warnings);
 
     }
 
