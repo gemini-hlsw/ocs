@@ -51,8 +51,8 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
             }
         }
 
-        // report error if this does not come out to be an integer
-        Validation.checkSourceFraction(_obsDetailParameters.getNumExposures(), _obsDetailParameters.getSourceFraction());
+        // some general validations
+        Validation.validate(_obsDetailParameters, _sdParameters);
     }
 
     public Tuple2<ItcSpectroscopyResult, SpectroscopyResult[]> calculateSpectroscopy() {
@@ -322,10 +322,6 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
         // In this version we are bypassing morphology modules 3a-5a.
         // i.e. the output morphology is same as the input morphology.
         // Might implement these modules at a later time.
-        final int number_exposures = _obsDetailParameters.getNumExposures();
-        final double frac_with_source = _obsDetailParameters.getSourceFraction();
-        // report error if this does not come out to be an integer
-        Validation.checkSourceFraction(number_exposures, frac_with_source);
 
         final ImagingS2NCalculatable IS2Ncalc = ImagingS2NCalculationFactory.getCalculationInstance(_obsDetailParameters, instrument, SFcalc, sed_integral, sky_integral);
         IS2Ncalc.calculate();

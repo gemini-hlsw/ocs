@@ -58,8 +58,8 @@ public final class NiriRecipe implements ImagingRecipe, SpectroscopyRecipe {
                                 + " km/s) to avoid undersampling of the line profile when convolved with the transmission response");
             }
 
-        // report error if this does not come out to be an integer
-        Validation.checkSourceFraction(_obsDetailParameters.getNumExposures(), _obsDetailParameters.getSourceFraction());
+        // some general validations
+        Validation.validate(_obsDetailParameters, _sdParameters);
 
     }
 
