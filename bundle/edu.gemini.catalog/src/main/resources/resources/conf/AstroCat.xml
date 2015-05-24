@@ -16,20 +16,16 @@
 <!-- Include references to some of the Skycat catalogs (Should be defined in the skycat.cfg file) -->
 
   <catalog name="PPMXL Catalog at CDS"/>
-  <catalog name="PPMXL Catalog at CADC"/>
   <catalog name="2MASS Catalog at CDS"/>
   <catalog name="UCAC4 Catalog at Gemini"/>
   <catalog name="UCAC3 Catalog at CDS"/>
-  <catalog name="UCAC3 Catalog at CADC"/>
   <catalog name="NOMAD1 catalog at CDS"/>
-  <catalog name="NOMAD1 catalog at CADC"/>
   <catalog name="GSC-2 at ESO"/>
   <catalog name="GSC-2 at STScI"/>
 
 <!-- Skycat Image Servers (should be defined in the skycat.cfg file) -->
   <catalog name="Digitized Sky at Gemini North"/>
   <catalog name="Digitized Sky at Gemini South"/>
-  <catalog name="Digitized Sky at CADC (2nd Generation)"/>
   <catalog name="Digitized Sky at ESO"/>
   <catalog name="Digitized Sky (Version II) at ESO"/>
   <catalog name="Digitized Sky (Version II infrared) at ESO"/>
