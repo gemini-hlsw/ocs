@@ -47,8 +47,8 @@ public final class MichelleRecipe implements ImagingRecipe, SpectroscopyRecipe {
                 throw new RuntimeException("Please use a model line width > 0.2 nm (or " + (3E5 / (_sdParameters.getELineWavelength().toNanometers() * 5)) + " km/s) to avoid undersampling of the line profile when convolved with the transmission response");
             }
 
-        // report error if this does not come out to be an integer
-        Validation.checkSourceFraction(_obsDetailParameters.getNumExposures(), _obsDetailParameters.getSourceFraction());
+        // some general validations
+        Validation.validate(_obsDetailParameters, _sdParameters);
     }
 
     private ObservationDetails correctedObsDetails(final MichelleParameters mp, final ObservationDetails odp) {

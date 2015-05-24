@@ -56,8 +56,8 @@ public final class TRecsRecipe implements ImagingRecipe, SpectroscopyRecipe {
                     + "    and recalculate.");
         }
 
-        // report error if this does not come out to be an integer
-        Validation.checkSourceFraction(_obsDetailParameters.getNumExposures(), _obsDetailParameters.getSourceFraction());
+        // some general validations
+        Validation.validate(_obsDetailParameters, _sdParameters);
     }
 
     private ObservationDetails correctedObsDetails(final TRecsParameters tp, final ObservationDetails odp) {
