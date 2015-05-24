@@ -210,7 +210,7 @@ trait VoTableParser {
 
     def combineWithErrorsAndFilter(m: List[(FieldId, MagnitudeBand, Double)], e: List[(FieldId, MagnitudeBand, Double)]): List[Magnitude] = {
       val mags = m.map {
-          case (f, b, d) => f -> new Magnitude(d, b)
+          case (f, b, d) => f -> new Magnitude(d, b, b.defaultSystem)
         }
       val magErrors = e.map {
           case (_, b, d) => b -> d

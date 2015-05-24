@@ -103,8 +103,6 @@ public final class Magnitude implements Comparable, Serializable {
 
     }
 
-
-
     /**
      * Magnitudes with this brightness are undefined.
      */

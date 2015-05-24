@@ -378,8 +378,8 @@ class VoTableParserSpec extends SpecificationWithJUnit with VoTableParser {
       parse(voTableWithErrors).tables.head should beEqualTo(result)
     }
     "be able to parse an xml into a list of SiderealTargets including proper motion" in {
-      val magsTarget1 = List(new Magnitude(14.76, MagnitudeBand._r))
-      val magsTarget2 = List(new Magnitude(12.983, MagnitudeBand._r))
+      val magsTarget1 = List(new Magnitude(14.76, MagnitudeBand._r, MagnitudeSystem.AB))
+      val magsTarget2 = List(new Magnitude(12.983, MagnitudeBand._r, MagnitudeSystem.AB))
       val pm1 = ProperMotion(RightAscensionAngularVelocity(AngularVelocity(-10.199999999999999)), DeclinationAngularVelocity(AngularVelocity(-4.9000000000000004))).some
       val pm2 = ProperMotion(RightAscensionAngularVelocity(AngularVelocity(-7)), DeclinationAngularVelocity(AngularVelocity(-13.9))).some
 
@@ -456,13 +456,13 @@ class VoTableParserSpec extends SpecificationWithJUnit with VoTableParser {
 
       val gmag = result.map(_.magnitudeIn(MagnitudeBand._g))
       // gmag gets converted to g'
-      gmag should beEqualTo(\/.right(Some(Magnitude(15.0, MagnitudeBand._g, 0.39.some, MagnitudeSystem.VEGA))))
+      gmag should beEqualTo(\/.right(Some(Magnitude(15.0, MagnitudeBand._g, 0.39.some, MagnitudeSystem.AB))))
       val rmag = result.map(_.magnitudeIn(MagnitudeBand._r))
       // rmag gets converted to r'
-      rmag should beEqualTo(\/.right(Some(Magnitude(13.2, MagnitudeBand._r, 0.5.some, MagnitudeSystem.VEGA))))
+      rmag should beEqualTo(\/.right(Some(Magnitude(13.2, MagnitudeBand._r, 0.5.some, MagnitudeSystem.AB))))
       val imag = result.map(_.magnitudeIn(MagnitudeBand._i))
       // rmag gets converted to r'
-      imag should beEqualTo(\/.right(Some(Magnitude(5, MagnitudeBand._i, 0.34.some, MagnitudeSystem.VEGA))))
+      imag should beEqualTo(\/.right(Some(Magnitude(5, MagnitudeBand._i, 0.34.some, MagnitudeSystem.AB))))
     }
   }
 }
