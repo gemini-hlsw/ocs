@@ -77,7 +77,7 @@ object ModelConverters {
       system match {
         case MagnitudeSystem.AB   => skyobject.Magnitude.System.AB
         case MagnitudeSystem.VEGA => skyobject.Magnitude.System.Vega
-        case MagnitudeSystem.JY   =>skyobject.Magnitude.System.Jy
+        case MagnitudeSystem.JY   => skyobject.Magnitude.System.Jy
       }
   }
 

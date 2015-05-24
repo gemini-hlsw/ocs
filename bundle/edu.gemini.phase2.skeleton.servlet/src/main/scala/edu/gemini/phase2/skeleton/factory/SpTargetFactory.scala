@@ -60,7 +60,7 @@ object SpTargetFactory {
 
       // Add apparent magnitude, if any.
       nsid.magnitude(time)
-        .map(new SO.Magnitude(SO.Magnitude.Band.AP, _))
+        .map(new SO.Magnitude(SO.Magnitude.Band.AP, _, SO.Magnitude.System.AB))
         .foreach(spTarget.getTarget.putMagnitude)
 
       spTarget
@@ -74,7 +74,7 @@ object SpTargetFactory {
     } yield {
       val itarget  = new SP.system.HmsDegTarget()
       setRaDec(itarget, coords)
-      sid.properMotion map { pm =>
+      sid.properMotion.foreach { pm =>
         val ra  = pm.deltaRA
         val dec = pm.deltaDec
         itarget.setPM1(new SPProperMotionRA(ra,   SP.system.CoordinateParam.Units.MILLI_ARCSECS_PER_YEAR))

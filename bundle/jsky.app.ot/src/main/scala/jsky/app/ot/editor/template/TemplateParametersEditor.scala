@@ -309,7 +309,7 @@ class TemplateParametersEditor(shells: java.util.List[ISPTemplateParameters]) ex
 
     object MagnitudesPanel extends ColumnPanel {
       def magRow(band: Magnitude.Band): Row = {
-        lazy val zero = new Magnitude(band, 0.0)
+        lazy val zero = new Magnitude(band, 0.0, band.defaultSystem)
 
         def mag(tp: TemplateParameters): Option[Magnitude] =
           tp.getTarget.getTarget.getMagnitude(band).asScalaOpt

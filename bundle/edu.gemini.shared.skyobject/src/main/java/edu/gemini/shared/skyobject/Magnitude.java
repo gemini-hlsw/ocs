@@ -165,7 +165,7 @@ public final class Magnitude implements Comparable, Serializable {
      * @param brightness absolute brightness
      * @param error optional error in measurement
      */
-    public Magnitude(Band band, double brightness, Option<Double> error) {
+    protected Magnitude(Band band, double brightness, Option<Double> error) {
         this(band, brightness, error, System.DEFAULT);
     }
 
@@ -198,7 +198,7 @@ public final class Magnitude implements Comparable, Serializable {
      * its brightness adjusted by the given amount.
      */
     public Magnitude add(double brightness) {
-        return new Magnitude(band, this.brightness + brightness, error);
+        return new Magnitude(band, this.brightness + brightness, error, system);
     }
 
 
