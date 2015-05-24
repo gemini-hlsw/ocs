@@ -6,7 +6,9 @@ import edu.gemini.itc.gsaoi.Camera;
 import edu.gemini.itc.gsaoi.Gsaoi;
 import edu.gemini.itc.gsaoi.GsaoiRecipe;
 import edu.gemini.itc.shared.GsaoiParameters;
+import edu.gemini.itc.shared.ItcWarning;
 import edu.gemini.itc.shared.Parameters;
+import scala.collection.JavaConversions;
 
 import java.io.PrintWriter;
 
@@ -54,12 +56,10 @@ public final class GsaoiPrinter extends PrinterBase {
         _println("The peak pixel signal + background is " + device.toString(result.peakPixelCount()));
 
         // REL-1353
-        final int peak_pixel_percent = (int) (100 * result.peakPixelCount() / 126000);
-        _println("This is " + peak_pixel_percent + "% of the full well depth of 126000 electrons");
-        if (peak_pixel_percent > 65 && peak_pixel_percent <= 85) {
-            _error("Warning: the peak pixel + background level exceeds 65% of the well depth and will cause deviations from linearity of more than 5%.");
-        } else if (peak_pixel_percent > 85) {
-            _error("Warning: the peak pixel + background level exceeds 85% of the well depth and may cause saturation.");
+        final int peak_pixel_percent = (int) (100 * result.peakPixelCount() / Gsaoi.WELL_DEPTH);
+        _println("This is " + peak_pixel_percent + "% of the full well depth of " + Gsaoi.WELL_DEPTH + " electrons");
+        for (final ItcWarning warning : JavaConversions.asJavaList(result.warnings())) {
+            _println(warning.msg());
         }
 
         _println("");

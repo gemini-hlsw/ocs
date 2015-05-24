@@ -10,6 +10,9 @@ import edu.gemini.spModel.config2.ItemKey
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
 
+import scalaz._
+import Scalaz._
+
 /** Columns in the table are defined by their header label and a function on the unique config of the row. */
 case class Column(label: String, value: (ItcUniqueConfig, Future[ItcService.Result]) => AnyRef, tooltip: String = "")
 
@@ -67,14 +70,16 @@ sealed trait ItcTableModel extends AbstractTableModel {
       calcResult    <- serviceResult.toOption // unwrap validation
     } yield calcResult
 
+  // Gets an icon to represen the state of this result (none if all is ok)
   protected def resultIcon(f: Future[ItcService.Result]): Option[Icon] =
     f.value.fold {
       Some(ItcPanel.SpinnerIcon).asInstanceOf[Option[Icon]]
     } {
-      case Failure(t)               => Some(ItcPanel.ErrorIcon)
+      case Failure(t)                       => Some(ItcPanel.ErrorIcon)
       case Success(s) => s match {
-        case scalaz.Failure(errs)   => Some(ItcPanel.ErrorIcon)
-        case scalaz.Success(_)      => None
+        case -\/(_)                         => Some(ItcPanel.ErrorIcon)
+        case \/-(r) if r.warnings.nonEmpty  => Some(ItcPanel.WarningIcon)
+        case _                              => None
       }
     }
 

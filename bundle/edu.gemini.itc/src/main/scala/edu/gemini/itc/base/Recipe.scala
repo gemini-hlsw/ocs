@@ -6,6 +6,9 @@ import edu.gemini.itc.shared._
 
 import scala.collection.JavaConversions._
 
+import scalaz._
+import Scalaz._
+
 sealed trait Recipe
 
 trait ImagingRecipe extends Recipe {
@@ -13,7 +16,7 @@ trait ImagingRecipe extends Recipe {
 }
 
 trait ImagingArrayRecipe extends Recipe {
-  def calculateImaging(): Array[ImagingResult]
+  def calculateImaging(): NonEmptyList[ImagingResult]
 }
 
 

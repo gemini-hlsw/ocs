@@ -91,7 +91,7 @@ public final class GnirsRecipe implements SpectroscopyRecipe {
                 add(new SpcDataFile(FinalS2NData.instance(),   r.specS2N()[0].getFinalS2NSpectrum().printSpecAsString()));
             }
         }};
-        return new Tuple2<>(new ItcSpectroscopyResult(_sdParameters, _obsDetailParameters, JavaConversions.asScalaBuffer(dataSets).toList(), JavaConversions.asScalaBuffer(dataFiles).toList()), r);
+        return new Tuple2<>(ItcSpectroscopyResult.apply(_sdParameters, _obsDetailParameters, dataSets, dataFiles, new ArrayList<>()), r);
     }
 
     protected static String toFile(final VisitableSampledSpectrum[] sedArr) {
@@ -259,7 +259,7 @@ public final class GnirsRecipe implements SpectroscopyRecipe {
 
         final Parameters p = new Parameters(_sdParameters, _obsDetailParameters, _obsConditionParameters, _telescope);
         final SpecS2N[] specS2Narr = new SpecS2N[] {specS2N};
-        return new GnirsSpectroscopyResult(p, instrument, SFcalc, IQcalc, specS2Narr, st, Option.<AOSystem>empty(), signalOrder, backGroundOrder, finalS2NOrder);
+        return new GnirsSpectroscopyResult(p, instrument, SFcalc, IQcalc, specS2Narr, st, Option.<AOSystem>empty(), signalOrder, backGroundOrder, finalS2NOrder, ImagingResult.NoWarnings());
 
     }
 

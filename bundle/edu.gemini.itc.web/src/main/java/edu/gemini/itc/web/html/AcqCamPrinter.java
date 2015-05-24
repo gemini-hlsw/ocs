@@ -4,7 +4,9 @@ import edu.gemini.itc.acqcam.AcqCamRecipe;
 import edu.gemini.itc.acqcam.AcquisitionCamera;
 import edu.gemini.itc.base.*;
 import edu.gemini.itc.shared.AcquisitionCamParameters;
+import edu.gemini.itc.shared.ItcWarning;
 import edu.gemini.itc.shared.Parameters;
+import scala.collection.JavaConversions;
 
 import java.io.PrintWriter;
 
@@ -49,8 +51,9 @@ public final class AcqCamPrinter extends PrinterBase {
                 device.toString(result.peakPixelCount() / instrument.getWellDepth() * 100) +
                 "% of the full well depth of " + device.toString(instrument.getWellDepth()) + ".");
 
-        if (result.peakPixelCount() > (.8 * instrument.getWellDepth()))
-            _println("Warning: peak pixel exceeds 80% of the well depth and may be saturated");
+        for (final ItcWarning warning : JavaConversions.asJavaList(result.warnings())) {
+            _println(warning.msg());
+        }
 
         _println("");
         device.setPrecision(2);  // TWO decimal places

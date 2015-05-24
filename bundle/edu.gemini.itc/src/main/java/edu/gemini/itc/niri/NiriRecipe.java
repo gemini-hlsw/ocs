@@ -81,7 +81,7 @@ public final class NiriRecipe implements ImagingRecipe, SpectroscopyRecipe {
             add(new SpcDataFile(SingleS2NData.instance(),  r.specS2N()[0].getExpS2NSpectrum().printSpecAsString()));
             add(new SpcDataFile(FinalS2NData.instance(),   r.specS2N()[0].getFinalS2NSpectrum().printSpecAsString()));
         }};
-        return new Tuple2<>(new ItcSpectroscopyResult(_sdParameters, _obsDetailParameters, JavaConversions.asScalaBuffer(dataSets).toList(), JavaConversions.asScalaBuffer(dataFiles).toList()), r);
+        return new Tuple2<>(ItcSpectroscopyResult.apply(_sdParameters, _obsDetailParameters, dataSets, dataFiles, new ArrayList<>()), r);
     }
 
     private SpectroscopyResult calculateSpectroscopy(final Niri instrument) {
@@ -198,7 +198,7 @@ public final class NiriRecipe implements ImagingRecipe, SpectroscopyRecipe {
         final Parameters p = new Parameters(_sdParameters, _obsDetailParameters, _obsConditionParameters, _telescope);
         final SpecS2N[] specS2Narr = new SpecS2N[1];
         specS2Narr[0] = specS2N;
-        return new GenericSpectroscopyResult(p, instrument, SFcalc, IQcalc, specS2Narr, st, altair);
+        return new GenericSpectroscopyResult(p, instrument, SFcalc, IQcalc, specS2Narr, st, altair, ImagingResult.NoWarnings());
     }
 
     private ImagingResult calculateImaging(final Niri instrument) {
@@ -282,9 +282,18 @@ public final class NiriRecipe implements ImagingRecipe, SpectroscopyRecipe {
         }
         IS2Ncalc.calculate();
 
-        final Parameters p = new Parameters(_sdParameters, _obsDetailParameters, _obsConditionParameters, _telescope);
-        return new ImagingResult(p, instrument, IQcalc, SFcalc, peak_pixel_count, IS2Ncalc, altair);
+        final Parameters        p = new Parameters(_sdParameters, _obsDetailParameters, _obsConditionParameters, _telescope);
+        final List<ItcWarning>  w = warningsForImaging(instrument, peak_pixel_count);
+        return new ImagingResult(p, instrument, IQcalc, SFcalc, peak_pixel_count, IS2Ncalc, altair, JavaConversions.asScalaBuffer(w).toList());
 
+    }
+
+    // TODO: some of these warnings are similar for different instruments and could be calculated in a central place
+    private List<ItcWarning> warningsForImaging(final Niri instrument, final double peakPixelCount) {
+        final double wellLimit = 0.8 * instrument.getWellDepthValue();
+        return new ArrayList<ItcWarning>() {{
+            if (peakPixelCount > wellLimit) add(new ItcWarning("Warning: peak pixel exceeds 80% of the well depth and may be saturated"));
+        }};
     }
 
 }

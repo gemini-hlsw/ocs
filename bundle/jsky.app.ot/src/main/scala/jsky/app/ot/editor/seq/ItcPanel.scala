@@ -22,10 +22,14 @@ import scala.swing.event._
 import scala.swing.{ButtonGroup, _}
 import scala.util.{Failure, Success}
 
+import scalaz._
+import Scalaz._
+
 object ItcPanel {
 
-  val ErrorIcon   = new ImageIcon(classOf[ItcTableModel].getResource("/resources/images/error_tsk.gif"))
-  val SpinnerIcon = new ImageIcon(classOf[ItcTableModel].getResource("/resources/images/spinner16.gif"))
+  val ErrorIcon   = new ImageIcon(classOf[ItcPanel].getResource("/resources/images/error_tsk.gif"))
+  val WarningIcon = new ImageIcon(classOf[ItcPanel].getResource("/resources/images/warn_tsk.gif"))
+  val SpinnerIcon = new ImageIcon(classOf[ItcPanel].getResource("/resources/images/spinner16.gif"))
 
   /** Creates a panel for ITC imaging results. */
   def forImaging(owner: EdIteratorFolder)       = new ItcImagingPanel(owner)
@@ -185,17 +189,17 @@ private class ItcFeedbackPanel(table: ItcTable) extends Label {
     revalidate()
   }
 
-  private def feedback(f: Future[ItcService.Result]): Option[(Icon, String, Color)] = {
+  private def feedback(f: Future[ItcService.Result]): Option[(Icon, String, Color)] =
     f.value.fold {
       feedback(SpinnerIcon, "Calculating...", BANANA)
     } {
-      case Failure(t)               => feedback(ErrorIcon, t.getMessage, LIGHT_SALMON)
+      case Failure(t)                           => feedback(ErrorIcon,    t.getMessage, LIGHT_SALMON)
       case Success(s) => s match {
-        case scalaz.Failure(errs)   => feedback(ErrorIcon, errs.mkString(", "), LIGHT_SALMON)
-        case scalaz.Success(_)      => None
+        case -\/(err)                           => feedback(ErrorIcon,    err.msg,      LIGHT_SALMON)
+        case \/-(res) if res.warnings.nonEmpty  => feedback(WarningIcon,  res.warnings.map(_.msg).mkString("<html><body>","<br>","</body></html>"), BANANA)
+        case _                                  => None
       }
     }
-  }
 
   private def feedback(ico: Icon, msg: String, col: Color): Option[(Icon, String, Color)] = Some((ico, msg, col))
 

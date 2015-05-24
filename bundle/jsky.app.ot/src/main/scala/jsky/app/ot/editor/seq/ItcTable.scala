@@ -139,10 +139,8 @@ trait ItcTable extends Table {
     }
 
     s match {
-      case -\/(l) => Future {
-        List(l).fail
-      }
-      case \/-(r) => r
+      case -\/(err) => Future { ItcError(err).left }
+      case \/-(res) => res
     }
 
   }

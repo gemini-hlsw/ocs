@@ -11,6 +11,7 @@ import edu.gemini.itc.shared.*;
 import edu.gemini.spModel.gemini.niri.Niri.Mask;
 import scala.Option;
 import scala.Tuple2;
+import scala.collection.JavaConversions;
 
 import java.io.PrintWriter;
 import java.util.UUID;
@@ -148,8 +149,9 @@ public final class NiriPrinter extends PrinterBase {
                 + "% of the full well depth of "
                 + device.toString(instrument.getWellDepthValue()) + ".");
 
-        if (result.peakPixelCount() > (.8 * instrument.getWellDepthValue()))
-            _println("Warning: peak pixel exceeds 80% of the well depth and may be saturated");
+        for (final ItcWarning warning : JavaConversions.asJavaList(result.warnings())) {
+            _println(warning.msg());
+        }
 
         _println("");
 

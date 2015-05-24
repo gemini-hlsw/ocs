@@ -3,10 +3,13 @@ package edu.gemini.itc.shared
 import edu.gemini.spModel.core.Peer
 import edu.gemini.util.trpc.client.TrpcClient
 
+import scala.collection.JavaConversions._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.swing.Color
-import scalaz.{Failure, Success, Validation}
+
+import scalaz._
+import Scalaz._
 
 /** The data structures here are an attempt to unify the results produced by the different instrument recipes.
   * Results are either a few simple numbers in case of imaging or a set of charts made up by data series with (x,y)
@@ -18,6 +21,7 @@ import scalaz.{Failure, Success, Validation}
   * are created by the recipes and then added to the result data as strings. Maybe this can be unified.
   */
 sealed trait ItcResult extends Serializable {
+  def warnings:   List[ItcWarning]
   def source:     SourceDefinition
   def obsDetails: ObservationDetails
 }
@@ -26,7 +30,7 @@ sealed trait ItcResult extends Serializable {
 
 final case class ImgData(singleSNRatio: Double, totalSNRatio: Double, peakPixelFlux: Double)
 
-final case class ItcImagingResult(source: SourceDefinition, obsDetails: ObservationDetails, ccds: Seq[ImgData]) extends ItcResult {
+final case class ItcImagingResult(source: SourceDefinition, obsDetails: ObservationDetails, ccds: List[ImgData], warnings: List[ItcWarning]) extends ItcResult {
   def ccd(i: Int) = ccds(i % ccds.length)
 }
 
@@ -68,7 +72,7 @@ final case class SpcChartData(chartType: SpcChartType, title: String, xAxisLabel
   * Individual charts and data series can be referenced by their types and an index. For most instruments there
   * is only one chart and data series of each type, however for NIFS for example there will be several charts
   * of each type in case of multiple IFU elements. */
-final case class ItcSpectroscopyResult(source: SourceDefinition, obsDetails: ObservationDetails, charts: Seq[SpcChartData], files: Seq[SpcDataFile]) extends ItcResult {
+final case class ItcSpectroscopyResult(source: SourceDefinition, obsDetails: ObservationDetails, charts: List[SpcChartData], files: List[SpcDataFile], warnings: List[ItcWarning]) extends ItcResult {
 
   /** Gets a text file for a data series by type and index.
     * This method will fail if the result (data) you're looking for does not exist.
@@ -86,21 +90,26 @@ final case class ItcSpectroscopyResult(source: SourceDefinition, obsDetails: Obs
   def allSeries(ct: SpcChartType, dt: SpcDataType): List[SpcSeriesData] = chart(ct).allSeries(dt)
 }
 
+object ItcSpectroscopyResult {
+
+  // java compatibility
+  def apply(source: SourceDefinition, obsDetails: ObservationDetails, charts: java.util.List[SpcChartData], files: java.util.List[SpcDataFile], warnings: java.util.List[ItcWarning]) =
+    new ItcSpectroscopyResult(source, obsDetails, charts.toList, files.toList, warnings.toList)
+
+}
+
 object ItcResult {
 
   import edu.gemini.itc.shared.ItcService._
 
   /** Creates an ITC result in case of an error. */
-  def forException(e: Throwable): Result = Failure(List(e.getMessage))
+  def forException(e: Throwable): Result = ItcError(e.getMessage).left
 
   /** Creates an ITC result with a single problem/error message. */
-  def forMessage(msg: String): Result = Failure(List(msg))
-
-  /** Creates an ITC result with a list of problem/error messages. */
-  def forMessages(messages: List[String]): Result = Failure(messages)
+  def forMessage(msg: String): Result = ItcError(msg).left
 
   /** Creates an ITC result for a result. */
-  def forResult(result: ItcResult): Result = Success(result)
+  def forResult(result: ItcResult): Result = result.right
 
 }
 
@@ -115,9 +124,13 @@ trait ItcService {
 
 }
 
+sealed trait ItcMessage
+final case class ItcError(msg: String) extends ItcMessage
+final case class ItcWarning(msg: String) extends ItcMessage
+
 object ItcService {
 
-  type Result = Validation[List[String], ItcResult]
+  type Result = ItcError \/ ItcResult
 
   /** Performs an ITC call on the given host. */
   def calculate(peer: Peer, source: SourceDefinition, obs: ObservationDetails, cond: ObservingConditions, tele: TelescopeDetails, ins: InstrumentDetails): Future[Result] =

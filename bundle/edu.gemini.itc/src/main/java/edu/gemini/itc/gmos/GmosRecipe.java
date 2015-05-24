@@ -3,9 +3,13 @@ package edu.gemini.itc.gmos;
 import edu.gemini.itc.base.*;
 import edu.gemini.itc.operation.*;
 import edu.gemini.itc.shared.*;
+import edu.gemini.spModel.gemini.gmos.GmosNorthType;
+import edu.gemini.spModel.gemini.gmos.GmosSouthType;
 import scala.Some;
 import scala.Tuple2;
 import scala.collection.JavaConversions;
+import scalaz.NonEmptyList;
+import scalaz.NonEmptyList$;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -67,7 +71,7 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
             add(new SpcDataFile(SingleS2NData.instance(),  toFile(r, "Sin")));
             add(new SpcDataFile(FinalS2NData.instance(),   toFile(r, "Fin")));
         }};
-        return new Tuple2<>(new ItcSpectroscopyResult(_sdParameters, _obsDetailParameters, JavaConversions.asScalaBuffer(dataSets).toList(), JavaConversions.asScalaBuffer(dataFiles).toList()), r);
+        return new Tuple2<>(ItcSpectroscopyResult.apply(_sdParameters, _obsDetailParameters, dataSets, dataFiles, new ArrayList<>()), r);
     }
 
     protected static String toFile(final SpectroscopyResult[] results, final String filename) {
@@ -104,7 +108,7 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
     }
 
 
-    public ImagingResult[] calculateImaging() {
+    public NonEmptyList<ImagingResult> calculateImaging() {
         return calculateImaging(createGmos());
     }
 
@@ -118,14 +122,15 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
         return results;
     }
 
-    private ImagingResult[] calculateImaging(final Gmos mainInstrument) {
+    private NonEmptyList<ImagingResult> calculateImaging(final Gmos mainInstrument) {
         final Gmos[] ccdArray = mainInstrument.getDetectorCcdInstruments();
-        final ImagingResult[] results = new ImagingResult[ccdArray.length];
-        for (int i = 0; i < ccdArray.length; i++) {
-            final Gmos instrument = ccdArray[i];
-            results[i] = calculateImagingDo(instrument);
+        final List<ImagingResult> results = new ArrayList<>();
+        for (final Gmos instrument : ccdArray) {
+            results.add(calculateImagingDo(instrument));
         }
-        return results;
+        // we know there is at least one CCD, so we can return this as a scala non-empty list
+        final scala.collection.Seq<ImagingResult> sResults = JavaConversions.asScalaBuffer(results);
+        return NonEmptyList$.MODULE$.apply(sResults.head(), sResults.tail().toSeq());
     }
 
     private Gmos createGmos() {
@@ -287,9 +292,19 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
         }
 
         final Parameters p = new Parameters(_sdParameters, _obsDetailParameters, _obsConditionParameters, _telescope);
-        return SpectroscopyResult$.MODULE$.apply(p, instrument, SFcalc, IQcalc, specS2N, st);
+        final List<ItcWarning> warnings = warningsForSpectroscopy(mainInstrument);
+        return SpectroscopyResult$.MODULE$.apply(p, instrument, SFcalc, IQcalc, specS2N, st, warnings);
 
     }
+
+    private List<ItcWarning> warningsForSpectroscopy(final Gmos instrument) {
+        final boolean isIfu2 = instrument.getFpMask() == GmosNorthType.FPUnitNorth.IFU_1 || instrument.getFpMask() == GmosSouthType.FPUnitSouth.IFU_1;
+        return new ArrayList<ItcWarning>() {{
+            // OCSADV-361: warn that results produced for 2 slit IFUs are not entirely correct
+            if (isIfu2) add(new ItcWarning("Warning: chip gaps are shown at the wrong wavelengths in IFU-2 mode."));
+        }};
+    }
+
 
     private ImagingResult calculateImagingDo(final Gmos instrument) {
 
@@ -327,8 +342,22 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
         IS2Ncalc.calculate();
 
         final Parameters p = new Parameters(_sdParameters, _obsDetailParameters, _obsConditionParameters, _telescope);
-        return ImagingResult.apply(p, instrument, IQcalc, SFcalc, peak_pixel_count, IS2Ncalc);
+        final List<ItcWarning> warnings = warningsForImaging(instrument, peak_pixel_count);
+        return ImagingResult.apply(p, instrument, IQcalc, SFcalc, peak_pixel_count, IS2Ncalc, warnings);
 
+    }
+
+    // TODO: some of these warnings are similar for different instruments and could be calculated in a central place
+    private List<ItcWarning> warningsForImaging(final Gmos instrument, final double peakPixelCount) {
+        final double wellLimit     = 0.95 * instrument.getWellDepth() * instrument.getSpatialBinning() * instrument.getSpectralBinning();
+        final double lowGainLimit  = 0.95 * instrument.getADSaturation() * instrument.getLowGain();
+        final double highGainLimit = 0.95 * instrument.getADSaturation() * instrument.getHighGain();
+
+        return new ArrayList<ItcWarning>() {{
+            if (peakPixelCount > wellLimit)     add(new ItcWarning("Warning: peak pixel may be saturating the (binned) CCD full well of " + wellLimit));
+            if (peakPixelCount > lowGainLimit)  add(new ItcWarning("Warning: peak pixel may be saturating the low gain setting of " + lowGainLimit));
+            if (peakPixelCount > highGainLimit) add(new ItcWarning("Warning: peak pixel may be saturating the high gain setting " + highGainLimit));
+        }};
     }
 
     // == GMOS CHARTS
