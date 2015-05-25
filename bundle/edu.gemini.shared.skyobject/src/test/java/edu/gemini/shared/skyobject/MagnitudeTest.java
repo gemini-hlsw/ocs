@@ -64,7 +64,7 @@ public class MagnitudeTest {
         assertEquals(0.1, m.getError().getValue(), DELTA);
 
         try {
-            new Magnitude(null, 1.0, new Some<Double>(0.1));
+            new Magnitude(null, 1.0, new Some<>(0.1));
             fail();
         } catch (IllegalArgumentException ex) {
             // expected

@@ -122,7 +122,7 @@ public final class Magnitude implements Comparable, Serializable {
      */
     public Magnitude(Band band, double brightness) {
         //noinspection unchecked
-        this(band, brightness, None.INSTANCE, System.DEFAULT);
+        this(band, brightness, None.INSTANCE, band != null ? band.defaultSystem : System.DEFAULT);
     }
 
     /**
@@ -143,7 +143,7 @@ public final class Magnitude implements Comparable, Serializable {
      * @param error error in measurement
      */
     public Magnitude(Band band, double brightness, double error) {
-        this(band, brightness, new Some<>(error), System.DEFAULT);
+        this(band, brightness, new Some<>(error), band.defaultSystem);
     }
 
     /**
@@ -165,8 +165,8 @@ public final class Magnitude implements Comparable, Serializable {
      * @param brightness absolute brightness
      * @param error optional error in measurement
      */
-    protected Magnitude(Band band, double brightness, Option<Double> error) {
-        this(band, brightness, error, System.DEFAULT);
+    public Magnitude(Band band, double brightness, Option<Double> error) {
+        this(band, brightness, error, band != null ? band.defaultSystem : System.DEFAULT);
     }
 
     /**
