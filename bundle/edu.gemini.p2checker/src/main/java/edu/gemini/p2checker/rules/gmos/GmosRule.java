@@ -19,6 +19,7 @@ import edu.gemini.spModel.config2.ItemKey;
 import edu.gemini.spModel.core.Site;
 import edu.gemini.spModel.data.YesNoType;
 import edu.gemini.spModel.gemini.gmos.GmosCommonType.*;
+import static edu.gemini.spModel.gemini.gmos.GmosCommonType.DetectorManufacturer.HAMAMATSU;
 import edu.gemini.spModel.gemini.gmos.GmosNorthType.DisperserNorth;
 import edu.gemini.spModel.gemini.gmos.GmosNorthType.FPUnitNorth;
 import edu.gemini.spModel.gemini.gmos.GmosNorthType.FilterNorth;
@@ -453,9 +454,7 @@ public final class GmosRule implements IRule {
         public IConfigMatcher getMatcher() {
             return (config, step, elems) -> {
                 final InstGmosCommon gmos = (InstGmosCommon) elems.getInstrument();
-
-                return (gmos.getSite() == Site.SET_GS) &&
-                        (gmos.getDetectorManufacturer() == DetectorManufacturer.HAMAMATSU);
+                return gmos.getSite().equals(Site.SET_GS) && (gmos.getDetectorManufacturer() == HAMAMATSU);
             };
         }
     };
