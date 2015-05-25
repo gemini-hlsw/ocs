@@ -16,6 +16,7 @@ import edu.gemini.skycalc.Offset;
 import edu.gemini.spModel.config2.Config;
 import edu.gemini.spModel.config2.ConfigSequence;
 import edu.gemini.spModel.config2.ItemKey;
+import edu.gemini.spModel.core.Site;
 import edu.gemini.spModel.data.YesNoType;
 import edu.gemini.spModel.gemini.gmos.GmosCommonType.*;
 import edu.gemini.spModel.gemini.gmos.GmosNorthType.DisperserNorth;
@@ -56,7 +57,6 @@ public final class GmosRule implements IRule {
     private static final ItemKey GAIN_KEY = new ItemKey("instrument:gainChoice");
     private static final ItemKey CCD_X_BINNING_KEY = new ItemKey("instrument:ccdXBinning");
     private static final ItemKey CCD_Y_BINNING_KEY = new ItemKey("instrument:ccdYBinning");
-
 
     /**
      * either a filter or a grating should be defined whatever the fpu
@@ -428,6 +428,35 @@ public final class GmosRule implements IRule {
         // We only want to do this check for imaging observations.
         public IConfigMatcher getMatcher() {
             return IMAGING_MATCHER;
+        }
+    };
+
+    private static IConfigRule GMOS_S_DTA_X_RULE = new IConfigRule() {
+
+        private static final String Y1   = "The GMOS-S Hamamatsu allowed DTA X range is -4 to +6 for Ybin=1";
+        private static final String Y2_4 = "The GMOS-S Hamamatsu allowed DTA X range is -2 to +6 for Ybin=2 or 4";
+
+        public Problem check(Config config, int step, ObservationElements elems, Object state) {
+            final Binning y = (Binning) SequenceRule.getInstrumentItem(config, InstGmosCommon.CCD_Y_BIN_PROP);
+            final DTAX dtaX = (DTAX) SequenceRule.getInstrumentItem(config, InstGmosCommon.DTAX_OFFSET_PROP);
+
+            final ISPProgramNode node = SequenceRule.getInstrumentOrSequenceNode(step, elems, config);
+            if ((y == Binning.ONE) && (dtaX.intValue() < -4)) {
+                return new Problem(ERROR, PREFIX + "Y1", Y1, node);
+            } else if ((y != Binning.ONE) && (dtaX.intValue() < -2)) {
+                return new Problem(ERROR, PREFIX + "Y2_4", Y2_4, node);
+            } else {
+                return null;
+            }
+        }
+
+        public IConfigMatcher getMatcher() {
+            return (config, step, elems) -> {
+                final InstGmosCommon gmos = (InstGmosCommon) elems.getInstrument();
+
+                return (gmos.getSite() == Site.SET_GS) &&
+                        (gmos.getDetectorManufacturer() == DetectorManufacturer.HAMAMATSU);
+            };
         }
     };
 
@@ -1806,6 +1835,7 @@ public final class GmosRule implements IRule {
         GMOS_RULES.add(READMODE_SCIENCE_RULE);
         GMOS_RULES.add(GAIN_READMODE_RULE);
         GMOS_RULES.add(BINNING_RULE);
+        GMOS_RULES.add(GMOS_S_DTA_X_RULE);
         GMOS_RULES.add(SPATIAL_DITHER_IMAGING_RULE);
         GMOS_RULES.add(CCD_BIN_AND_IQ_IMAGING_RULE);
         GMOS_RULES.add(CCD_BIN_AND_ALTAIR_IMAGING_RULE);
