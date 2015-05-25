@@ -1,8 +1,5 @@
 package jsky.app.ot.gemini.editor.targetComponent.details
 
-import java.awt.{Insets, GridBagConstraints, GridBagLayout}
-import javax.swing.{JLabel, JPanel}
-
 import edu.gemini.pot.sp.ISPNode
 import edu.gemini.shared.util.immutable.{ Option => GOption }
 import edu.gemini.spModel.obs.context.ObsContext
@@ -14,8 +11,8 @@ import jsky.util.gui.TextBoxWidget
 
 import scalaz.syntax.id._
 
-// RA and Dec, side by side
-class CoordinateEditor extends JPanel with TelescopePosEditor with ReentrancyHack {
+// RA and Dec
+class CoordinateEditor extends TelescopePosEditor with ReentrancyHack {
 
   private[this] var spt = new SPTarget
 
@@ -23,39 +20,6 @@ class CoordinateEditor extends JPanel with TelescopePosEditor with ReentrancyHac
     w.setColumns(10)
     w.setMinimumSize(w.getPreferredSize)
   }
-
-  setLayout(new GridBagLayout)
-
-  add(new JLabel("RA"), new GridBagConstraints <| { c =>
-    c.gridx = 0
-    c.insets = new Insets(0, 0, 0, 5)
-    c.weighty = 0
-  })
-
-  add(ra, new GridBagConstraints <| { c =>
-    c.gridx = 1
-    c.insets = new Insets(0, 0, 0, 10)
-    c.fill = GridBagConstraints.HORIZONTAL
-    c.weightx = 2
-  })
-
-  add(new JLabel("Dec"), new GridBagConstraints <| { c =>
-    c.gridx = 2
-    c.insets = new Insets(0, 0, 0, 5)
-    c.weighty = 0
-  })
-
-  add(dec, new GridBagConstraints <| { c =>
-    c.gridx = 3
-    c.fill = GridBagConstraints.HORIZONTAL
-    c.weightx = 2
-  })
-
-  add(new JLabel("(J2000)"), new GridBagConstraints <| { c =>
-    c.gridx = 4
-    c.insets = new Insets(0, 5, 0, 0)
-    c.weighty = 0
-  })
 
   ra.addWatcher(watcher { s =>
     nonreentrant {
