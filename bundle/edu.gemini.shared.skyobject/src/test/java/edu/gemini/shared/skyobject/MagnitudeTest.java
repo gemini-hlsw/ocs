@@ -29,7 +29,7 @@ public class MagnitudeTest {
         try {
             new Magnitude(null, 1.0);
             fail();
-        } catch (IllegalArgumentException ex) {
+        } catch (RuntimeException ex) {
             // expected
         }
     }
@@ -66,14 +66,14 @@ public class MagnitudeTest {
         try {
             new Magnitude(null, 1.0, new Some<>(0.1));
             fail();
-        } catch (IllegalArgumentException ex) {
+        } catch (RuntimeException ex) {
             // expected
         }
 
         try {
             new Magnitude(Band.J, 1.0, None.INSTANCE, null);
             fail();
-        } catch (IllegalArgumentException ex) {
+        } catch (RuntimeException ex) {
             // expected
         }
     }
