@@ -9,7 +9,7 @@ import edu.gemini.pot.sp.SPComponentType._
 import edu.gemini.shared.skyobject.Magnitude
 import edu.gemini.spModel.`type`.DisplayableSpType
 import edu.gemini.spModel.config2.{Config, ConfigSequence, ItemKey}
-import edu.gemini.spModel.core.{Peer, Wavelength}
+import edu.gemini.spModel.core.{Site, Peer, Wavelength}
 import edu.gemini.spModel.guide.GuideProbe
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.obscomp.SPInstObsComp
@@ -165,6 +165,11 @@ trait ItcTable extends Table {
 
   }
 
+  // lacking a simple way to decide on the "closest" (i.e. "fastest to reach") peer we talk to the observing peer
+  // if defined and GN or GS otherwise, if no site is defined you're out of luck and the ITC tables will stay empty
+  protected def itcServicePeer: Option[Peer] =
+    ObservingPeer.get orElse ObservingPeer.peerFor(Site.GN) orElse ObservingPeer.peerFor(Site.GS) orElse None
+
   // execute a table update while making sure that the selected row is kept (or row 0 is chosen as default)
   private def restoreSelection(updateTable: => Unit): Unit = {
     val selected = peer.getSelectedRow
@@ -289,7 +294,7 @@ class ItcImagingTable(val parameters: ItcParametersProvider) extends ItcTable {
   def tableModel(keys: List[ItemKey], seq: ConfigSequence): ItcImagingTableModel = {
 
     val table = for {
-      peer        <- ObservingPeer.getOrPrompt
+      peer        <- itcServicePeer
       instrument  <- parameters.instrument
 
     } yield {
@@ -321,7 +326,7 @@ class ItcSpectroscopyTable(val parameters: ItcParametersProvider) extends ItcTab
   def tableModel(keys: List[ItemKey], seq: ConfigSequence) = {
 
     val table = for {
-      peer        <- ObservingPeer.getOrPrompt
+      peer        <- itcServicePeer
       instrument  <- parameters.instrument
 
     } yield {
