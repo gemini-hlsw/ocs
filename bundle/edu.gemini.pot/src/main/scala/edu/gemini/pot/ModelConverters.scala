@@ -63,6 +63,24 @@ object ModelConverters {
       Offset(offset.getXaxis.arcsecs[OffsetP], offset.getYaxis.arcsecs[OffsetQ])
   }
 
+  implicit class OldMagnitudeSystem2New(val system: skyobject.Magnitude.System) extends AnyVal {
+    def toNewModel: MagnitudeSystem =
+      system match {
+        case skyobject.Magnitude.System.AB   => MagnitudeSystem.AB
+        case skyobject.Magnitude.System.Vega => MagnitudeSystem.VEGA
+        case skyobject.Magnitude.System.Jy   => MagnitudeSystem.JY
+      }
+  }
+
+  implicit class NewMagnitudeSystem2Old(val system: MagnitudeSystem) extends AnyVal {
+    def toOldModel: skyobject.Magnitude.System =
+      system match {
+        case MagnitudeSystem.AB   => skyobject.Magnitude.System.AB
+        case MagnitudeSystem.VEGA => skyobject.Magnitude.System.Vega
+        case MagnitudeSystem.JY   => skyobject.Magnitude.System.Jy
+      }
+  }
+
   implicit class OldOffset2New(val offset: skycalc.Offset) extends AnyVal {
     def toNewModel: Offset =
       Offset(offset.p().toDegrees.getMagnitude.degrees[OffsetP],
@@ -135,11 +153,12 @@ object ModelConverters {
   }
 
   implicit class OldMagnitude2New(val m: skyobject.Magnitude) extends AnyVal {
-    def toNewModel: Magnitude = new Magnitude(m.getBrightness, m.getBand.toNewModel)
+    def toNewModel: Magnitude = new Magnitude(m.getBrightness, m.getBand.toNewModel, m.getSystem.toNewModel)
   }
 
   implicit class NewMagnitude2Old(val m: Magnitude) extends AnyVal {
-    def toOldModel: skyobject.Magnitude = new skyobject.Magnitude(m.band.toOldModel, m.value)
+    def toOldModel: skyobject.Magnitude =
+      new skyobject.Magnitude(m.band.toOldModel, m.value, m.system.toOldModel)
   }
 
   implicit class HmsDegCoords2Coordinates(val c: skyobject.coords.HmsDegCoordinates) extends AnyVal {

@@ -14,7 +14,7 @@ import java.util.Comparator;
  * particular wavelengths of light, and optionally are associated with an error
  * in the measurement.
  */
-public final class Magnitude implements Comparable, Serializable {
+public final class Magnitude implements Comparable<Magnitude>, Serializable {
     /**
      * REL-549: Magnitude information for targets and guide stars in OT must be stored in value, bandpass, system triples.
      */
@@ -103,8 +103,6 @@ public final class Magnitude implements Comparable, Serializable {
 
     }
 
-
-
     /**
      * Magnitudes with this brightness are undefined.
      */
@@ -124,7 +122,7 @@ public final class Magnitude implements Comparable, Serializable {
      */
     public Magnitude(Band band, double brightness) {
         //noinspection unchecked
-        this(band, brightness, None.INSTANCE, System.DEFAULT);
+        this(band, brightness, None.INSTANCE, band.defaultSystem);
     }
 
     /**
@@ -145,7 +143,7 @@ public final class Magnitude implements Comparable, Serializable {
      * @param error error in measurement
      */
     public Magnitude(Band band, double brightness, double error) {
-        this(band, brightness, new Some<>(error), System.DEFAULT);
+        this(band, brightness, new Some<>(error), band.defaultSystem);
     }
 
     /**
@@ -168,7 +166,7 @@ public final class Magnitude implements Comparable, Serializable {
      * @param error optional error in measurement
      */
     public Magnitude(Band band, double brightness, Option<Double> error) {
-        this(band, brightness, error, System.DEFAULT);
+        this(band, brightness, error, band.defaultSystem);
     }
 
     /**
@@ -200,7 +198,7 @@ public final class Magnitude implements Comparable, Serializable {
      * its brightness adjusted by the given amount.
      */
     public Magnitude add(double brightness) {
-        return new Magnitude(band, this.brightness + brightness, error);
+        return new Magnitude(band, this.brightness + brightness, error, system);
     }
 
 
@@ -233,12 +231,10 @@ public final class Magnitude implements Comparable, Serializable {
      * Compares two magnitude objects by system, band, brightness and error (in that
      * order).
      *
-     * @param o other magnitude object
+     * @param that other magnitude object
      */
     @Override
-    public int compareTo(Object o) {
-        Magnitude that = (Magnitude) o;
-
+    public int compareTo(Magnitude that) {
         int res = system.compareTo(that.system);
         if (res != 0) return res;
 
@@ -250,7 +246,7 @@ public final class Magnitude implements Comparable, Serializable {
 
         if (error.isEmpty()) {
             return that.error.isEmpty() ? 0 : -1;
-        } else if (that.error.isEmpty()){
+        } else if (that.error.isEmpty()) {
             return 1;
         } else {
             return error.getValue().compareTo(that.error.getValue());

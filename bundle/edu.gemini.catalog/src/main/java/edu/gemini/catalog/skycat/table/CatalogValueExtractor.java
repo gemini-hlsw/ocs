@@ -311,6 +311,6 @@ public final class CatalogValueExtractor {
             error = getOptionalDouble(errorColName.getValue());
         }
 
-        return new Some<>(new Magnitude(band, mag.getValue(), error));
+        return new Some<>(new Magnitude(band, mag.getValue(), error, band.defaultSystem));
     }
 }

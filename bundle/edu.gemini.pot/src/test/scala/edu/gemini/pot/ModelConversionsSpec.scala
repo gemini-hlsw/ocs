@@ -82,7 +82,7 @@ class ModelConversionsSpec extends Specification with ScalaCheck with Arbitrarie
           t.name shouldEqual "name"
           t.coordinates ~= c
           (t.properMotion |@| properMotion)(_ ~= _).getOrElse {properMotion should beNone}
-          t.magnitudeIn(mag.band) should beSome(mag.copy(error = None, system = MagnitudeSystem.VEGA))
+          t.magnitudeIn(mag.band) should beSome(mag.copy(error = None))
         }
       }
     }
@@ -97,7 +97,7 @@ class ModelConversionsSpec extends Specification with ScalaCheck with Arbitrarie
           t.name shouldEqual "name"
           t.coordinates ~= c
           (t.properMotion |@| properMotion)(_ ~= _).getOrElse {properMotion should beNone}
-          t.magnitudeIn(mag.band) should beSome(mag.copy(error = None, system = MagnitudeSystem.VEGA))
+          t.magnitudeIn(mag.band) should beSome(mag.copy(error = None))
         }
       }
     }
