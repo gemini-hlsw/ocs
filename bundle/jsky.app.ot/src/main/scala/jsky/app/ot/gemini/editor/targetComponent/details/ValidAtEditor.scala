@@ -22,8 +22,9 @@ import jsky.app.ot.ui.util.TimeDocument
 import scalaz._, Scalaz._
 import Horizons._
 
-// [DATE] at [TIME] UTC [Go] [Plot]
-abstract class ValidAtEditor[A <: ITarget](empty: A) extends JPanel with TelescopePosEditor with ReentrancyHack {
+// [DATE] [TIME] UTC
+// [Update] [Plot]
+abstract class ValidAtEditor[A <: ITarget](empty: A) extends TelescopePosEditor with ReentrancyHack {
 
   private[this] var spt: SPTarget = new SPTarget(empty)
   private[this] var node: ISPNode = null
@@ -72,8 +73,8 @@ abstract class ValidAtEditor[A <: ITarget](empty: A) extends JPanel with Telesco
 
   }
 
-  val go   = new JButton("Go")   <| { _.addActionListener(LookupListener(plot = false)) }
-  val plot = new JButton("Plot") <| { _.addActionListener(LookupListener(plot = true))  }
+  val go   = new JButton("Update") <| { _.addActionListener(LookupListener(plot = false)) }
+  val plot = new JButton("Plot")   <| { _.addActionListener(LookupListener(plot = true))  }
 
   /**
    * An action listener that performs a catalog lookup, replacing the current target on success, and
@@ -84,39 +85,20 @@ abstract class ValidAtEditor[A <: ITarget](empty: A) extends JPanel with Telesco
       lookupAndSet(plot, useCache = true).invokeAndWait
   }
 
-  setLayout(new GridBagLayout)
+  class PairPanel(c0: Component, c1: Component) extends JPanel {
+    setLayout(new GridBagLayout)
 
-  add(calendar, new GridBagConstraints <| { c =>
-    c.gridx = 0
-    c.fill = GridBagConstraints.HORIZONTAL
-    c.weightx = 2
-    c.insets = new Insets(2, 2, 0, 0)
-  })
+    add(c0, new GridBagConstraints <| { c =>
+      c.gridx   = 0
+    })
+    add(c1, new GridBagConstraints <| { c =>
+      c.gridx   = 1
+      c.insets  = new Insets(0, 5, 0, 0)
+    })
+  }
 
-  add(new JLabel("at"), new GridBagConstraints <| { c =>
-    c.gridx = 1
-    c.insets = new Insets(0, 5, 0, 0)
-  })
-
-  add(timeConfig, new GridBagConstraints <| { c =>
-    c.gridx = 2
-    c.insets = new Insets(2, 5, 0, 0)
-  })
-
-  add(new JLabel("UTC"), new GridBagConstraints <| { c =>
-    c.gridx = 3
-    c.insets = new Insets(2, 5, 0, 0)
-  })
-
-  add(go, new GridBagConstraints <| { c =>
-    c.gridx = 4
-    c.insets = new Insets(2, 5, 0, 0)
-  })
-
-  add(plot, new GridBagConstraints <| { c =>
-    c.gridx = 5
-    c.insets = new Insets(2, 2, 0, 0)
-  })
+  val dateTimePanel = new PairPanel(calendar, timeConfig)
+  val controlsPanel = new PairPanel(go, plot)
 
   ///
   /// METHODS

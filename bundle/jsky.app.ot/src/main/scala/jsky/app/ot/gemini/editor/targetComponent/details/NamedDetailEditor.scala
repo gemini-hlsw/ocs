@@ -1,7 +1,7 @@
 package jsky.app.ot.gemini.editor.targetComponent.details
 
 import java.awt._
-import javax.swing.{Box, JComponent, JLabel, JPanel}
+import javax.swing.{BorderFactory, Box, JComponent, JLabel, JPanel}
 
 import edu.gemini.pot.sp.ISPNode
 import edu.gemini.shared.util.immutable.{Option => GOption}
@@ -27,7 +27,7 @@ final class NamedDetailEditor extends TargetDetailEditor(Tag.NAMED) with Reentra
   val coords = new CoordinateEditor
 
   val name = new TextBoxWidget <| { w =>
-    w.setColumns(25)
+    w.setColumns(10)
     w.setMinimumSize(w.getPreferredSize)
     w.addWatcher(new TextBoxWidgetWatcher {
 
@@ -73,100 +73,135 @@ final class NamedDetailEditor extends TargetDetailEditor(Tag.NAMED) with Reentra
 
   val general = new JPanel <| { p =>
     p.setLayout(new GridBagLayout)
-    p.setBorder(titleBorder("General"))
+    p.setBorder(BorderFactory.createCompoundBorder(titleBorder("General"),
+                BorderFactory.createEmptyBorder(1, 2, 1, 2)))
 
-    p.add(new JLabel("Target Type"), new GridBagConstraints <| { c =>
-      c.gridx = 0
-      c.gridy = 0
-      c.fill = GridBagConstraints.HORIZONTAL
-      c.insets = new Insets(0, 2, 0, 5)
+    p.add(new JLabel("Type"), new GridBagConstraints <| { c =>
+      c.anchor = GridBagConstraints.WEST
+      c.gridx  = 0
+      c.gridy  = 0
+      c.insets = new Insets(0, 0, 0, 5)
     })
 
     p.add(kind, new GridBagConstraints <| { c =>
-      c.anchor = GridBagConstraints.WEST
-      c.gridx = 1
-      c.gridy = 0
-      c.insets = new Insets(0, 5, 0, 2)
+      c.gridx  = 1
+      c.gridy  = 0
+      c.fill   = GridBagConstraints.HORIZONTAL
+      c.insets = new Insets(0, 0, 0, 0)
     })
 
-    p.add(new JLabel("Target Name"), new GridBagConstraints <| { c =>
-      c.gridx = 0
-      c.gridy = 1
-      c.fill = GridBagConstraints.HORIZONTAL
-      c.insets = new Insets(2, 2, 0, 5)
+    p.add(new JLabel("Name"), new GridBagConstraints <| { c =>
+      c.anchor = GridBagConstraints.WEST
+      c.gridx  = 0
+      c.gridy  = 1
+      c.insets = new Insets(2, 0, 0, 5)
     })
 
     p.add(name, new GridBagConstraints <| { c =>
-      c.gridx = 1
-      c.gridy = 1
-      c.insets = new Insets(2, 5, 0, 2)
-      c.anchor = GridBagConstraints.WEST
+      c.gridx  = 1
+      c.gridy  = 1
+      c.fill   = GridBagConstraints.HORIZONTAL
+      c.insets = new Insets(2, 0, 0, 0)
     })
 
     p.add(new JLabel("Object"), new GridBagConstraints <| { c =>
-      c.gridx = 0
-      c.gridy = 2
-      c.fill = GridBagConstraints.HORIZONTAL
-      c.insets = new Insets(2, 2, 0, 5)
+      c.anchor = GridBagConstraints.WEST
+      c.gridx  = 0
+      c.gridy  = 2
+      c.insets = new Insets(2, 0, 0, 5)
     })
 
     p.add(solarObject, new GridBagConstraints <| { c =>
-      c.gridx = 1
-      c.gridy = 2
-      c.insets = new Insets(2, 5, 0, 2)
+      c.gridx  = 1
+      c.gridy  = 2
+      c.insets = new Insets(2, 0, 0, 0)
+      c.fill   = GridBagConstraints.HORIZONTAL
+    })
+
+    p.add(new JLabel("RA"), new GridBagConstraints <| { c =>
       c.anchor = GridBagConstraints.WEST
+      c.gridx  = 0
+      c.gridy  = 3
+      c.insets = new Insets(2, 0, 0, 5)
     })
 
-    p.add(new JLabel("Coordinates"), new GridBagConstraints <| { c =>
-      c.gridx = 0
-      c.gridy = 3
-      c.fill = GridBagConstraints.HORIZONTAL
-      c.insets = new Insets(2, 2, 0, 5)
+    p.add(coords.ra, new GridBagConstraints <| { c =>
+      c.gridx  = 1
+      c.gridy  = 3
+      c.fill   = GridBagConstraints.HORIZONTAL
+      c.insets = new Insets(2, 0, 0, 0)
     })
 
-    p.add(coords, new GridBagConstraints <| { c =>
-      c.gridx = 1
-      c.gridy = 3
-      c.insets = new Insets(2, 5, 0, 2)
+    p.add(new JLabel("Dec"), new GridBagConstraints <| { c =>
       c.anchor = GridBagConstraints.WEST
+      c.gridx  = 0
+      c.gridy  = 4
+      c.insets = new Insets(2, 0, 0, 5)
     })
 
-    p.add(new JLabel("Valid At"), new GridBagConstraints <| { c =>
-      c.gridx = 0
-      c.gridy = 4
-      c.fill = GridBagConstraints.HORIZONTAL
-      c.insets = new Insets(2, 2, 0, 5)
+    p.add(coords.dec, new GridBagConstraints <| { c =>
+      c.gridx  = 1
+      c.gridy  = 4
+      c.fill   = GridBagConstraints.HORIZONTAL
+      c.insets = new Insets(2, 0, 0, 0)
     })
 
-    p.add(valid, new GridBagConstraints <| { c =>
-      c.gridx = 1
-      c.gridy = 4
-      c.insets = new Insets(2, 5, 0, 2)
+    p.add(new JLabel("J2000"), new GridBagConstraints <| { c =>
+      c.anchor     = GridBagConstraints.WEST
+      c.gridx      = 2
+      c.gridy      = 3
+      c.gridheight = 2
+      c.insets     = new Insets(2, 5, 0, 0)
+    })
+
+    p.add(new JLabel("Valid"), new GridBagConstraints <| { c =>
       c.anchor = GridBagConstraints.WEST
+      c.gridx  = 0
+      c.gridy  = 5
+      c.insets = new Insets(2, 0, 0, 5)
+    })
+
+    p.add(valid.dateTimePanel, new GridBagConstraints <| { c =>
+      c.anchor = GridBagConstraints.WEST
+      c.gridx  = 1
+      c.gridy  = 5
+      c.insets = new Insets(2, 0, 0, 0)
+    })
+
+    p.add(new JLabel("UTC"), new GridBagConstraints <| { c =>
+      c.anchor = GridBagConstraints.WEST
+      c.gridx  = 2
+      c.gridy  = 5
+      c.insets = new Insets(2, 5, 0, 0)
+    })
+
+    p.add(valid.controlsPanel, new GridBagConstraints <| { c =>
+      c.anchor = GridBagConstraints.WEST
+      c.gridx  = 1
+      c.gridy  = 6
+      c.insets = new Insets(2, 0, 0, 0)
     })
 
     p.add(Box.createHorizontalGlue(), new GridBagConstraints <| { c =>
-      c.gridx = 2
-      c.gridy = 0
+      c.gridx   = 3
+      c.gridy   = 0
       c.weightx = 1
-      c.fill = GridBagConstraints.HORIZONTAL
+      c.fill    = GridBagConstraints.HORIZONTAL
     })
-
   }
 
   add(general, new GridBagConstraints <| { c =>
-    c.gridx = 0
-    c.gridy = 0
-    c.gridwidth = 2
-    c.weightx = 1
-    c.fill = GridBagConstraints.HORIZONTAL
+    c.gridx     = 0
+    c.gridy     = 0
+    c.weightx   = 1.0
+    c.fill      = GridBagConstraints.HORIZONTAL
   })
 
 
   add(mags.getComponent, new GridBagConstraints <| { c =>
-    c.gridx = 0
-    c.gridy = 1
-    c.fill = GridBagConstraints.BOTH
+    c.gridx      = 1
+    c.gridy      = 0
+    c.fill       = GridBagConstraints.VERTICAL
   })
 
   // Implementation

@@ -1,8 +1,5 @@
 package jsky.app.ot.gemini.editor.targetComponent.details
 
-import java.awt.{Insets, GridBagConstraints, GridBagLayout}
-import javax.swing.JPanel
-
 import edu.gemini.pot.sp.ISPNode
 import edu.gemini.shared.util.immutable.{ Option => GOption }
 import edu.gemini.catalog.skycat.CatalogException
@@ -20,7 +17,7 @@ import scalaz.syntax.id._
 import scalaz.{ \/-, -\/ }
 
 // Name editor, with catalog lookup for sidereal targets
-final class SiderealNameEditor extends JPanel with TelescopePosEditor with ReentrancyHack {
+final class SiderealNameEditor extends TelescopePosEditor with ReentrancyHack {
   private[this] var spt = new SPTarget // never null
 
   def forkSearch(): Unit = {
@@ -53,27 +50,6 @@ final class SiderealNameEditor extends JPanel with TelescopePosEditor with Reent
     m.setChoices(SkycatConfigFile.getConfigFile.getNameServers)
     m.setVisible(false) // just hide this for now
   }
-
-  setLayout(new GridBagLayout)
-
-  add(name, new GridBagConstraints <| { c =>
-    c.gridx = 0
-    c.gridy = 0
-    c.fill = GridBagConstraints.HORIZONTAL
-    c.weightx = 2
-  })
-
-  add(search, new GridBagConstraints <| { c =>
-    c.gridx  = 1
-    c.gridy  = 0
-    c.insets = new Insets(0, 2, 0, 0)
-  })
-
-  add(cats, new GridBagConstraints <| { c =>
-    c.gridx = 2
-    c.gridy = 0
-    c.insets = new Insets(0, 2, 0, 0)
-  })
 
   def edit(ctx: GOption[ObsContext], target: SPTarget, node: ISPNode): Unit = {
     this.spt = target

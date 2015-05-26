@@ -1,8 +1,8 @@
 package jsky.app.ot.gemini.editor.targetComponent.details
 
-import java.awt.{Insets, Color, GridBagConstraints, GridBagLayout}
+import java.awt.Color
 import java.util.Date
-import javax.swing.{JLabel, JPanel}
+import javax.swing.JLabel
 
 import edu.gemini.pot.sp.ISPNode
 import edu.gemini.shared.util.immutable.{Option => GOption}
@@ -18,7 +18,7 @@ import scalaz._, Scalaz._
 
 // N.B. in order to do a Horizons lookup, we need a way to get the "current" date, which is known
 // to a different part of the editor. So we just pass in a program that knows how to do it.
-final class ConicNameEditor(date: HorizonsIO[Date]) extends JPanel with TelescopePosEditor with ReentrancyHack {
+final class ConicNameEditor(date: HorizonsIO[Date]) extends TelescopePosEditor with ReentrancyHack {
 
   private[this] var spt = new SPTarget // never null
 
@@ -38,7 +38,6 @@ final class ConicNameEditor(date: HorizonsIO[Date]) extends JPanel with Telescop
     } yield ()
 
   val name = new TextBoxWidget <| { w =>
-    w.setColumns(25)
     w.setMinimumSize(w.getPreferredSize)
     w.addWatcher(new TextBoxWidgetWatcher {
 
@@ -63,27 +62,6 @@ final class ConicNameEditor(date: HorizonsIO[Date]) extends JPanel with Telescop
   val hid = new JLabel <| { a =>
     a.setForeground(Color.DARK_GRAY)
   }
-
-  setLayout(new GridBagLayout)
-
-  add(name, new GridBagConstraints <| { c =>
-    c.gridx   = 0
-    c.gridy   = 0
-    c.fill    = GridBagConstraints.HORIZONTAL
-    c.weightx = 2
-  })
-
-  add(search, new GridBagConstraints <| { c =>
-    c.gridx  = 1
-    c.gridy  = 0
-    c.insets = new Insets(0, 2, 0, 0)
-  })
-
-  add(hid, new GridBagConstraints <| { c =>
-    c.gridx  = 2
-    c.gridy  = 0
-    c.insets = new Insets(0, 5, 0, 0)
-  })
 
   def hidText(ct: ConicTarget): String =
     "Horizons ID: " + (ct.isHorizonsDataPopulated ?
