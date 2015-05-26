@@ -142,14 +142,15 @@ final class SiderealDetailEditor extends TargetDetailEditor(ITarget.Tag.SIDEREAL
     c.gridx      = 1
     c.gridy      = 0
     c.gridheight = 2
-    c.fill       = GridBagConstraints.VERTICAL
+    c.weightx    = 1.0
+    c.weighty    = 1.0
+    c.fill       = GridBagConstraints.BOTH
   })
 
   add(props, new GridBagConstraints <| { c =>
     c.anchor  = GridBagConstraints.WEST
     c.gridx   = 0
     c.gridy   = 1
-    c.weightx = 1
     c.fill    = GridBagConstraints.HORIZONTAL
   })
 

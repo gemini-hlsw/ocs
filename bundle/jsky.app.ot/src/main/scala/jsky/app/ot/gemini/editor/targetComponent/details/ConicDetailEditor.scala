@@ -155,14 +155,12 @@ abstract class ConicDetailEditor(tag: ITarget.Tag) extends TargetDetailEditor(ta
   add(general, new GridBagConstraints <| { c =>
     c.gridx   = 0
     c.gridy   = 0
-    c.weightx = 1.0
     c.fill    = GridBagConstraints.HORIZONTAL
   })
 
   add(props, new GridBagConstraints <| { c =>
     c.gridx   = 0
     c.gridy   = 1
-    c.weightx = 1.0
     c.fill    = GridBagConstraints.HORIZONTAL
   })
 
@@ -170,7 +168,9 @@ abstract class ConicDetailEditor(tag: ITarget.Tag) extends TargetDetailEditor(ta
     c.gridx      = 1
     c.gridy      = 0
     c.gridheight = 2
-    c.fill       = GridBagConstraints.VERTICAL
+    c.weightx    = 1.0
+    c.weighty    = 1.0
+    c.fill       = GridBagConstraints.BOTH
   })
 
   // Implementation
