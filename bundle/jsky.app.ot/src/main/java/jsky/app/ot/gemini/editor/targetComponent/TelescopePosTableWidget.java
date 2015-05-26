@@ -328,19 +328,8 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
             final Set<Magnitude.Band> bands;
             bands = new TreeSet<>(Magnitude.Band.WAVELENGTH_COMPARATOR);
 
-            // An operation that adds a target's bands to the set.
-            final ApplyOp<SPTarget> op = new ApplyOp<SPTarget>() {
-                @Override public void apply(SPTarget spTarget) {
-                    bands.addAll(spTarget.getTarget().getMagnitudeBands());
-                }
-            };
-
             // Extract all the magnitude bands from the environment.
-            bands.addAll(env.getBase().getTarget().getMagnitudeBands());
-            for (GuideProbeTargets gt : env.getOrCreatePrimaryGuideGroup()) {
-                gt.getOptions().foreach(op);
-            }
-            env.getUserTargets().foreach(op);
+            env.getTargets().foreach(spTarget -> bands.addAll(spTarget.getTarget().getMagnitudeBands()));
 
             // Create an immutable sorted list containing the results.
             return DefaultImList.create(bands);
@@ -612,6 +601,7 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
      */
     public TelescopePosTableWidget(EdCompTargetList owner) {
         this.owner = owner;
+        setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
         // disable editing by default
         setTreeTableModel(new TableData());
         setCellSelectionEnabled(false);

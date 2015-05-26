@@ -137,6 +137,7 @@ class TelescopeForm extends JPanel {
             add(feedbackAndButtonPanel, BorderLayout.SOUTH);
             final JScrollPane posTableScrollPane = new JScrollPane() {{
                 setViewportView(positionTable);
+                getViewport().setBackground(Color.WHITE);
             }};
             add(posTableScrollPane, BorderLayout.CENTER);
         }};
