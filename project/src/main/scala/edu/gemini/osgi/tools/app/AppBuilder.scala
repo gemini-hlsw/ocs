@@ -63,7 +63,7 @@ class AppBuilder(rootDir: File, solver: Configuration => Map[BundleSpec, (File, 
               rm(f)
             mkdir(dDir, c.id)
           }
-          b.build(cDir, jreDir, app.meta, v, c, d, solver(c), appProjectBaseDir)
+          b.build(cDir, jreDir, app.meta, v, c, d, solver(c), log, appProjectBaseDir)
         case None => log.warn("no application builder is available for distribution platform " + d)
       }
 
@@ -73,7 +73,7 @@ class AppBuilder(rootDir: File, solver: Configuration => Map[BundleSpec, (File, 
 
 trait DistHandler {
 
-  def build(outDir: File, jreDir: Option[File], meta: ApplicationMeta, version:String, config: Configuration, d: Distribution, solution: Map[BundleSpec, (File, Manifest)], appProjectBaseDir: File): Unit
+  def build(outDir: File, jreDir: Option[File], meta: ApplicationMeta, version:String, config: Configuration, d: Distribution, solution: Map[BundleSpec, (File, Manifest)], log: sbt.Logger, appProjectBaseDir: File): Unit
 
   protected def buildCommon(rootDir: File, meta: ApplicationMeta, version:String, config: Configuration, d: Configuration.Distribution, solution: Map[BundleSpec, (File, Manifest)], appProjectBaseDir: File) {
 

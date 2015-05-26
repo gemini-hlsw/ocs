@@ -1,5 +1,9 @@
 package edu.gemini.osgi.tools.app
 
+//import OcsCredentials._
+
+import com.jcraft.jsch.{JSch, Session, ChannelExec, ChannelSftp, SftpException}
+
 import java.io.{ File, PrintWriter, InputStream, FileInputStream, FilterInputStream }
 import java.nio.file.{Paths, Files, StandardCopyOption}
 import java.nio.charset.StandardCharsets
@@ -7,28 +11,21 @@ import scala.io.Source
 
 import java.util.jar.Manifest
 import scala.collection.JavaConversions._
+import scala.collection.mutable.StringBuilder
 
 class RPMDistHandler(jre: Option[String]) extends DistHandler {
 
-  def build(wd: File, jreDir: Option[File], meta: ApplicationMeta, version:String, config: Configuration, d: Configuration.Distribution, solution: Map[BundleSpec, (File, Manifest)], appProjectBaseDir: File) {
+  def build(wd: File, jreDir: Option[File], meta: ApplicationMeta, version:String, config: Configuration, d: Configuration.Distribution, solution: Map[BundleSpec, (File, Manifest)], log: sbt.Logger, appProjectBaseDir: File) {
     // Work in a subdir if we're compressing
-    val scriptName = meta.executableName(version)
-    val name = "%s_%s".format(meta.executableName(version), d.toString.toLowerCase)
+    val execName = meta.executableName(version)
+    val name = "%s_%s".format(execName, d.toString.toLowerCase)
     val outDir = mkdir(wd, name)
-
-    // Due to permission issues and limitations on rpmbuild we need to override .rpmmacros
-    val rpmbuild = wd // Hardcoded to avoid permission issues
-    // Set topdir and prevent the binary stripping step on RPM creation
-    val rpmmacros = s"%_topdir $rpmbuild\n%__os_install_post %{nil}\n"
-
-    // Overwrite it, it changes per project
-    val rpmmacrosFiles = new File(System.getProperty("user.home"), ".rpmmacros")
-    Files.write(rpmmacrosFiles.toPath, rpmmacros.getBytes(StandardCharsets.UTF_8))
 
     // Common part
     buildCommon(outDir, meta, version, config, d, solution, appProjectBaseDir)
 
     // Shell script
+    val scriptName = execName
     config.script foreach { s => copy(s, outDir) }
     if (config.script.isEmpty) {
       val unixFile = new File(outDir, scriptName)
@@ -82,17 +79,70 @@ class RPMDistHandler(jre: Option[String]) extends DistHandler {
     val ret = proc.waitFor
     if (ret != 0) sys.error("tar returned " + ret)
 
-    // Now create the RPM
+    // The RPM spec file.
     val specPath = new File(wd, "rpm.spec")
-    val rpmArgs = Array("rpmbuild", "-bb", s"${specPath.getAbsolutePath}")
-    val result = Runtime.getRuntime.exec(rpmArgs).waitFor()
-    if (result != 0) {
-      println("*** " + rpmArgs.mkString(" "))
-      println("*** rpmbuild returned " + result)
+
+    // Set up an SSH connection to the Linux VM where rpmbuild will be run.
+    val remoteBuildInfo = config.remoteBuildInfo.getOrElse {
+      sys.error("no remote build info: update OcsCredentials?")
+    }
+
+    log.info(s"establishing ssh session to ${remoteBuildInfo.hostname}")
+    JSch.setConfig("StrictHostKeyChecking", "no")
+    val session = new JSch().getSession(remoteBuildInfo.username, remoteBuildInfo.hostname, remoteBuildInfo.port)
+    session.setPassword(remoteBuildInfo.password)
+    session.setTimeout(remoteBuildInfo.timeout)
+    session.connect
+
+    // Create an SFTP session to transfer to / from Linux VM.
+    val rpmBuildDir = "rpmbuild"
+    log.info("opening sftp channel")
+    val sftp = session.openChannel("sftp").asInstanceOf[ChannelSftp]
+    sftp.connect(remoteBuildInfo.timeout)
+
+    // ChannelSftp.mkdir fails with an SftpException if a directory already exists: handle this by allowing this exception.
+    def remoteMkdir(dir: String): Unit =
+      try {
+	sftp.mkdir(dir)
+      } catch {
+	case e: SftpException =>
+      }
+
+    log.info("creating remote directories")
+    remoteMkdir(rpmBuildDir)
+    sftp.cd(rpmBuildDir)
+    remoteMkdir("SOURCES")
+
+    log.info("copying tarball")
+    sftp.put(archiveName.getAbsolutePath, s"SOURCES/${name}.tar.gz")
+
+    log.info("copying rpm spec file")
+    sftp.put(specPath.getAbsolutePath, "rpm.spec")
+
+    // Remote execution of rpmbuild.
+    // Note that this will not work for '-test' releases, as rpmbuild does not accept '-' characters in versions.
+    log.info("opening ssh channel")
+    val ssh = session.openChannel("exec").asInstanceOf[ChannelExec]
+    val cmd = s"cd $rpmBuildDir && rpmbuild -bb rpm.spec"
+    ssh.setCommand(cmd)
+
+    log.info("executing rpmbuild")
+    ssh.connect(remoteBuildInfo.timeout)
+
+    // Retrieve the constructed RPMs.
+    log.info("retrieving rpm")
+    val rpmOutputDir = mkdir(wd, "RPMS")
+    sftp.cd("RPMS")
+    val appName = execName.substring(0, execName.indexOf("_"))
+    sftp.ls(s"${appName}*.rpm").foreach { f =>
+      val fStr           = f.toString
+      val sourceFilename = fStr.substring(fStr.lastIndexOf(" ")+1)
+      val destFilename   = new File(rpmOutputDir, sourceFilename).toPath.toString
+      sftp.get(sourceFilename, destFilename)
     }
 
     // Move the rpm back to wd
-    val rpms = Files.newDirectoryStream(new File(rpmbuild, "RPMS").toPath, "*.rpm")
+    val rpms = Files.newDirectoryStream(new File(wd, "RPMS").toPath, "*.rpm")
     rpms.iterator.foreach { f =>
        Files.move(f, wd.getParentFile.toPath.resolve(f.getFileName), StandardCopyOption.REPLACE_EXISTING)
     }
