@@ -193,15 +193,16 @@ final class NamedDetailEditor extends TargetDetailEditor(Tag.NAMED) with Reentra
   add(general, new GridBagConstraints <| { c =>
     c.gridx     = 0
     c.gridy     = 0
-    c.weightx   = 1.0
     c.fill      = GridBagConstraints.HORIZONTAL
   })
 
 
   add(mags.getComponent, new GridBagConstraints <| { c =>
-    c.gridx      = 1
-    c.gridy      = 0
-    c.fill       = GridBagConstraints.VERTICAL
+    c.gridx     = 1
+    c.gridy     = 0
+    c.weightx   = 1.0
+    c.weighty   = 1.0
+    c.fill      = GridBagConstraints.BOTH
   })
 
   // Implementation
