@@ -9,6 +9,7 @@ import edu.gemini.spModel.core.{Peer, SPProgramID}
 import edu.gemini.util.security.auth.keychain.KeyChain
 
 import java.io.{PrintWriter, StringWriter}
+import java.util.concurrent.atomic.AtomicBoolean
 
 import scalaz._
 import Scalaz._
@@ -96,20 +97,20 @@ object Commands {
       runAndFormat(id, peer, vcs.add) { _ => s"Added $id to $peer" }
 
     val checkout: VcsOp = (id, peer) =>
-      runAndFormat(id, peer, vcs.checkout) { _ => s"Checked out $id from $peer" }
+      runAndFormat(id, peer, vcs.checkout(_, _, new AtomicBoolean(false))) { _ => s"Checked out $id from $peer" }
 
     val pull: VcsOp = (id, peer) =>
-      runAndFormat(id, peer, vcs.pull) { updated =>
+      runAndFormat(id, peer, vcs.pull(_, _, new AtomicBoolean(false))) { updated =>
         if (updated) "Updated local program." else "Already up to date."
       }
 
     val push: VcsOp = (id, peer) =>
-      runAndFormat(id, peer, vcs.push) { updated =>
+      runAndFormat(id, peer, vcs.push(_, _, new AtomicBoolean(false))) { updated =>
         if (updated) "Updated remote program." else "Already up to date."
       }
 
     val sync: VcsOp = (id, peer) =>
-      runAndFormat(id, peer, vcs.sync) {
+      runAndFormat(id, peer, vcs.sync(_, _, new AtomicBoolean(false))) {
         case Neither    => "Already up to date."
         case LocalOnly  => "Updated local program."
         case RemoteOnly => "Updated remote program."

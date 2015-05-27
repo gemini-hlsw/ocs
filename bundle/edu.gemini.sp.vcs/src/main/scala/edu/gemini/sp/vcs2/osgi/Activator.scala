@@ -32,14 +32,14 @@ class Activator extends BundleActivator{
     trackers = List(
       track[IDBDatabaseService, KeyChain, VcsLog, List[ServiceRegistration[_]]](ctx) { (odb, auth, log) =>
         // The vcs backend/server implementation itself.
-        val vcsServer = new VcsServer(odb, log)
+        val vcsServer = new VcsServer(odb)
 
         // The public service.
         val props = new util.Hashtable[String, Object]()
         props.put(PUBLISH_TRPC, "true")
         val factory = new SecureServiceFactory[VcsService] {
           def getService(b: Bundle, reg: ServiceRegistration[VcsService], ps: java.util.Set[Principal]): VcsService =
-            new vcsServer.SecureVcsService(ps.asScala.toSet)
+            new vcsServer.SecureVcsService(ps.asScala.toSet, log)
         }
 
         // Register the Vcs client and a secure service factory for making the

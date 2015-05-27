@@ -4,13 +4,14 @@ import edu.gemini.pot.sp.{SPNodeKey, ISPFactory, ISPProgram}
 import edu.gemini.pot.sp.version._
 import edu.gemini.shared.util.VersionComparison.{Conflicting, Same, Newer}
 import edu.gemini.sp.vcs2.ProgramLocation.{LocalOnly, Neither, Remote}
-import edu.gemini.sp.vcs2.VcsFailure.{IdClash, NeedsUpdate}
+import edu.gemini.sp.vcs2.VcsFailure.{Cancelled, IdClash, NeedsUpdate}
 import edu.gemini.sp.vcs.log.VcsEventSet
 import edu.gemini.spModel.core.{Peer, SPProgramID}
 import edu.gemini.spModel.rich.pot.sp._
 import edu.gemini.util.security.auth.keychain.KeyChain
 
 import java.security.{Permission, Principal}
+import java.util.concurrent.atomic.AtomicBoolean
 
 import scala.collection.JavaConverters._
 import scalaz._
@@ -26,11 +27,20 @@ class Vcs(user: VcsAction[Set[Principal]], server: VcsServer, service: Peer => V
   def hasPermission(p: Permission): VcsAction[Boolean] =
     user >>= { u => server.hasPermission(p, u) }
 
+  /** Provides access to the `VersionMap` associated with the given program in
+    * the remote peer. */
+  def version(id: SPProgramID, peer: Peer): VcsAction[VersionMap] =
+    Client(peer).version(id)
+
+  private def checkCancel(cancelled: AtomicBoolean): VcsAction[Unit] =
+    if (cancelled.get()) VcsAction.fail(Cancelled) else VcsAction.unit
+
   /** Checks-out the indicated program from the remote peer, copying it into
     * the local database. */
-  def checkout(id: SPProgramID, peer: Peer): VcsAction[ISPProgram] =
+  def checkout(id: SPProgramID, peer: Peer, cancelled: AtomicBoolean): VcsAction[ISPProgram] =
     for {
       p <- Client(peer).checkout(id)
+      _ <- checkCancel(cancelled)
       u <- user
       _ <- server.add(p, u)
     } yield p
@@ -46,7 +56,7 @@ class Vcs(user: VcsAction[Set[Principal]], server: VcsServer, service: Peer => V
   // pull0 is shared by `pull` and `sync`, since the first half of a sync is
   // to merge in changes from the remote peer.  The local merge is only
   // performed if the remote peer has something new to offer.
-  private def pull0(id: SPProgramID, client: Client): VcsAction[MergeEval] = {
+  private def pull0(id: SPProgramID, client: Client, cancelled: AtomicBoolean): VcsAction[MergeEval] = {
     def validateProgKey(local: ISPProgram, remote: MergePlan): VcsAction[Unit] = {
       val lKey = local.getProgramKey
       val rKey = remote.update.rootLabel.key
@@ -56,6 +66,7 @@ class Vcs(user: VcsAction[Set[Principal]], server: VcsServer, service: Peer => V
     def evaluate(p: ISPProgram): VcsAction[MergeEval] =
       for {
         diffs  <- client.fetchDiffs(id, DiffState(p))
+        _      <- checkCancel(cancelled)
         _      <- validateProgKey(p, diffs.plan)
         mc      = MergeContext(p, diffs)
         prelim <- PreliminaryMerge.merge(mc).liftVcs
@@ -66,7 +77,7 @@ class Vcs(user: VcsAction[Set[Principal]], server: VcsServer, service: Peer => V
     def filter(eval: MergeEval): Boolean = eval.localUpdate
 
     def update(f: ISPFactory, p: ISPProgram, eval: MergeEval): VcsAction[Unit] =
-      eval.plan.merge(f, p)
+      checkCancel(cancelled) >> eval.plan.merge(f, p)
 
     user >>= { u => server.write[MergeEval](id, u, evaluate, filter, update) }
   }
@@ -75,8 +86,8 @@ class Vcs(user: VcsAction[Set[Principal]], server: VcsServer, service: Peer => V
     * and merge them with the local program if necessary.  The action returns
     * `true` if it results in an updated local program; `false` otherwise.
     */
-  def pull(id: SPProgramID, peer: Peer): VcsAction[Boolean] =
-    pull0(id, Client(peer)).map(_.localUpdate)
+  def pull(id: SPProgramID, peer: Peer, cancelled: AtomicBoolean): VcsAction[Boolean] =
+    pull0(id, Client(peer), cancelled).map(_.localUpdate)
 
   /** Provides an action that pushes local changes to the remote peer, merging
     * them with the remote version of the program if necessary.  When performed,
@@ -85,7 +96,7 @@ class Vcs(user: VcsAction[Set[Principal]], server: VcsServer, service: Peer => V
     * Note that the push will only be possible if the local version is strictly
     * newer than the remote version. Otherwise it fails with a `NeedsUpdate`
     * `VcsFailure`. */
-  def push(id: SPProgramID, peer: Peer): VcsAction[Boolean] = {
+  def push(id: SPProgramID, peer: Peer, cancelled: AtomicBoolean): VcsAction[Boolean] = {
     def validateProgKey(lKey: SPNodeKey, remote: DiffState): VcsAction[Unit] = {
       val rKey = remote.progKey
       if (lKey === rKey) VcsAction.unit else VcsAction.fail(IdClash(id, lKey, rKey))
@@ -94,9 +105,11 @@ class Vcs(user: VcsAction[Set[Principal]], server: VcsServer, service: Peer => V
     val client = Client(peer)
     for {
       diffState <- client.diffState(id)
+      _         <- checkCancel(cancelled)
       u         <- user
       keyDiff   <- server.read(id, u) { p => (p.getProgramKey, ProgramDiff.compare(p, diffState)) }
       _         <- validateProgKey(keyDiff._1, diffState)
+      _         <- checkCancel(cancelled)
       res       <- keyDiff._2.plan.compare(diffState.vm) match {
         case Newer => client.storeDiffs(id, keyDiff._2.plan)
         case Same  => VcsAction(false)
@@ -111,10 +124,10 @@ class Vcs(user: VcsAction[Set[Principal]], server: VcsServer, service: Peer => V
    * and then sending the resulting merged program to the peer.  When performed,
    * the action returns a `ProgramLocationSet` which describes whether either
    * or both of the local and remote versions of the program were updated. */
-  def sync(id: SPProgramID, peer: Peer): VcsAction[ProgramLocationSet] = {
+  def sync(id: SPProgramID, peer: Peer, cancelled: AtomicBoolean): VcsAction[ProgramLocationSet] = {
     val client = Client(peer)
     for {
-      eval <- pull0(id, client)
+      eval <- pull0(id, client, cancelled)
       s0    = if (eval.localUpdate) LocalOnly else Neither
       res  <- eval match {
         case MergeEval(_,     _, false) =>
@@ -132,14 +145,14 @@ class Vcs(user: VcsAction[Set[Principal]], server: VcsServer, service: Peer => V
     * retrying if it fails because the program was updated remotely while
     * performing the merge locally.  Retry up to `retryCount` times if
     * necessary. */
-  def retrySync(id: SPProgramID, peer: Peer, retryCount: Int): VcsAction[ProgramLocationSet] = {
+  def retrySync(id: SPProgramID, peer: Peer, cancelled: AtomicBoolean, retryCount: Int): VcsAction[ProgramLocationSet] = {
     def retryIfNeedsUpdate(f: VcsFailure): EitherT[Task, ProgramLocationSet, VcsFailure] = f match {
       case NeedsUpdate  => if (retryCount <= 0) EitherT.right(Task.delay(NeedsUpdate))
-                           else retrySync(id, peer, retryCount - 1).swap
+                           else retrySync(id, peer, cancelled, retryCount - 1).swap
       case otherFailure => EitherT.right(Task.delay(otherFailure))
     }
 
-    (sync(id, peer).swap >>= retryIfNeedsUpdate).swap
+    (sync(id, peer, cancelled).swap >>= retryIfNeedsUpdate).swap
   }
 
   /** Provides access to (a chunk of) the VCS log. */

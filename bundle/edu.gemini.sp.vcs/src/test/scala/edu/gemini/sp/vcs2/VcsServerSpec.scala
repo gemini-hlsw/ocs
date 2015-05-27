@@ -159,7 +159,7 @@ class VcsServerSpec extends VcsSpecification {
       val vm2       = vm.updated(Key, nv2)
       val diffState = DiffState(Key, vm2, Set.empty)
 
-      val svs = new env.local.server.SecureVcsService(StaffUser)
+      val svs = new env.local.server.SecureVcsService(StaffUser, MockVcsLog)
       svs.fetchDiffs(Q1, diffState) match {
         case \/-(pdt) =>
           val mp = pdt.decode.plan
@@ -179,7 +179,7 @@ class VcsServerSpec extends VcsSpecification {
     "do nothing if there are no diffs to store" in withVcs { env =>
       val update = (Unmodified(Key): MergeNode).node()
       val mp     = MergePlan(update, Set.empty)
-      val svs    = new env.local.server.SecureVcsService(StaffUser)
+      val svs    = new env.local.server.SecureVcsService(StaffUser, MockVcsLog)
       svs.storeDiffs(Q1, mp.encode) match {
         case \/-(false) => ok("ok, nothing done")
         case \/-(true)  => ko("updated anyway")
@@ -196,7 +196,7 @@ class VcsServerSpec extends VcsSpecification {
       val update = MergeNode.modified(Key, nv, dob, NodeDetail.Empty, Conflicts.EMPTY).node()
       val mp     = MergePlan(update, Set.empty)
 
-      val svs = new env.local.server.SecureVcsService(StaffUser)
+      val svs = new env.local.server.SecureVcsService(StaffUser, MockVcsLog)
       svs.storeDiffs(Q1, mp.encode) match {
         case \/-(true)  => env.local.progTitle must_== "The Myth of Sisyphus"
         case \/-(false) => ko("update ignored")
@@ -215,7 +215,7 @@ class VcsServerSpec extends VcsSpecification {
       val update = MergeNode.modified(Key, nv, dob, NodeDetail.Empty, con).node()
       val mp     = MergePlan(update, Set.empty)
 
-      val svs = new env.local.server.SecureVcsService(StaffUser)
+      val svs = new env.local.server.SecureVcsService(StaffUser, MockVcsLog)
       svs.storeDiffs(Q1, mp.encode) match {
         case \/-(true)        => ko("conflict ignored")
         case \/-(false)       => ko("update and conflict ignored")

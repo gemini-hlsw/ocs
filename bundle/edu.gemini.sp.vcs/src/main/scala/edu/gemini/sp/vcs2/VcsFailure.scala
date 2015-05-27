@@ -52,6 +52,9 @@ object VcsFailure {
   /** Exception thrown while performing a vcs operation. */
   case class VcsException(ex: Throwable) extends VcsFailure
 
+  /** User cancelled a vcs operation. */
+  case object Cancelled extends VcsFailure
+
   def idClash(ex: DBIDClashException): VcsFailure =
     IdClash(ex.id, ex.existingKey, ex.newKey)
 
@@ -59,34 +62,34 @@ object VcsFailure {
 
     val peerName = peer.map { p => s"${p.host}:${p.port}" } | "remote host"
     val msg = f match {
-      case IdClash(i,_,_)        =>
+      case IdClash(i,_,_)                     =>
         s"There is another program in the database with ID '$i'."
 
-      case NotFound(i)           =>
+      case NotFound(i)                        =>
         s"$i is not in the database."
 
-      case Forbidden(why)        =>
+      case Forbidden(why)                     =>
         s"Denied permission to $op $id: $why"
 
-      case MissingId             =>
+      case MissingId                          =>
         "Give your program an id and try again."
 
-      case KeyAlreadyExists(i,k) =>
+      case KeyAlreadyExists(i,k)              =>
         s"Program $i cannot be added because a program with the same internal key already exists in the database."
 
-      case IdAlreadyExists(i)    =>
+      case IdAlreadyExists(i)                 =>
         s"Program $i cannot be added because a program with the same ID already exists in the database."
 
-      case NeedsUpdate           =>
+      case NeedsUpdate                        =>
         "You have to update your version of the program before you can commit changes."
 
-      case HasConflict           =>
+      case HasConflict                        =>
         "You have to resolve all conflicts in your program before you can commit changes."
 
-      case Unmergeable(m)        =>
+      case Unmergeable(m)                     =>
         s"Your program could not be merged: $m"
 
-      case Unexpected(m)         =>
+      case Unexpected(m)                      =>
         s"Internal error. The changes in the database could not be merged with your version of the program: $m"
 
       case VcsException(ex: VersionException) =>
@@ -99,6 +102,9 @@ object VcsFailure {
       case VcsException(ex)                   =>
         val m = Option(ex.getMessage) | "unknown error"
         s"Internal error. Something went wrong in the database server: $m"
+
+      case Cancelled                          =>
+        "The action was cancelled."
     }
 
     val exOpt = f match {
