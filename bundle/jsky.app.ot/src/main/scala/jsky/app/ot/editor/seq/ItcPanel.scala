@@ -120,7 +120,7 @@ class ItcImagingPanel(val owner: EdIteratorFolder) extends ItcPanel {
     case SPComponentType.INSTRUMENT_FLAMINGOS2  => true
     case SPComponentType.INSTRUMENT_GMOS        => true
     case SPComponentType.INSTRUMENT_GMOSSOUTH   => true
-    case SPComponentType.INSTRUMENT_GSAOI       => false // will add support at a later stage
+    case SPComponentType.INSTRUMENT_GSAOI       => true
     case SPComponentType.INSTRUMENT_MICHELLE    => false // may or may not be supported in OT at some point
     case SPComponentType.INSTRUMENT_NIRI        => true
     case SPComponentType.INSTRUMENT_TRECS       => false // may or may not be supported in OT at some point
