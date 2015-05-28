@@ -187,7 +187,7 @@ class ItcGsaoiImagingTableModel(val keys: List[ItemKey], val uniqueSteps: List[I
   )
 
   def gems(i: String \/ ItcInputs): Option[String] = i.toOption.map { inputs =>
-    val gems = inputs.ins.asInstanceOf[GsaoiParameters].gems
+    val gems = inputs.instr.asInstanceOf[GsaoiParameters].gems
     f"${gems.avgStrehl}%.2f ${gems.strehlBand}"
   }
 

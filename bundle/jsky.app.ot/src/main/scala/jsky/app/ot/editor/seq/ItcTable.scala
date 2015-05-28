@@ -130,30 +130,25 @@ trait ItcTable extends Table {
   protected def doServiceCall(peer: Peer, inputs: String \/ ItcInputs): Future[ItcService.Result] = inputs match {
 
     case -\/(err) =>
-      Future {
-        ItcError(err).left
-      }
+      Future.successful(ItcError(err).left).andThen { case _ => updateResults() }
 
     case \/-(inp) =>
       // Do the service call
-      ItcService.calculate(peer, inp).
-
-        // whenever service call is finished notify table to update its contents
-        andThen {
-        case _ => Swing.onEDT {
-
-          // notify table of data update while keeping the current selection
-          restoreSelection {
-            this.peer.getModel.asInstanceOf[AbstractTableModel].fireTableDataChanged()
-          }
-
-          // make all columns as wide as needed
-          SequenceTabUtil.resizeTableColumns(this.peer, this.model)
-        }
-
-      }
+      ItcService.calculate(peer, inp).andThen       { case _ => updateResults() }
 
     }
+
+  // whenever service call is finished notify table to update its contents
+  protected def updateResults() = Swing.onEDT {
+      // notify table of data update while keeping the current selection
+      restoreSelection {
+        this.peer.getModel.asInstanceOf[AbstractTableModel].fireTableDataChanged()
+      }
+
+      // make all columns as wide as needed
+      SequenceTabUtil.resizeTableColumns(this.peer, this.model)
+    }
+
 
   // lacking a simple way to decide on the "closest" (i.e. "fastest to reach") peer we talk to the observing peer
   // if defined and GN or GS otherwise, if no site is defined you're out of luck and the ITC tables will stay empty

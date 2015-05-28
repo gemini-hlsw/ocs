@@ -168,7 +168,7 @@ public class Gems implements AOSystem {
                         break;
 
                     default:
-                        throw new IllegalArgumentException("GeMS does not support band " + strehlBand);
+                        throw new IllegalArgumentException("Current ITC implementation for GeMS does not support band " + strehlBand);
                 }
                 break;
 

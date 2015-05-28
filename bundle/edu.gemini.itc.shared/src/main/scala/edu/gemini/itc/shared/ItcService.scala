@@ -118,7 +118,7 @@ trait ItcService {
 
   import edu.gemini.itc.shared.ItcService._
 
-  def calculate(source: SourceDefinition, obs: ObservationDetails, cond: ObservingConditions, tele: TelescopeDetails, ins: InstrumentDetails): Result
+  def calculate(source: SourceDefinition, obs: ObservationDetails, cond: ObservingConditions, tele: TelescopeDetails, instr: InstrumentDetails): Result
 
 }
 
@@ -126,7 +126,7 @@ sealed trait ItcMessage
 final case class ItcError(msg: String) extends ItcMessage
 final case class ItcWarning(msg: String) extends ItcMessage
 
-case class ItcInputs(src: SourceDefinition, obs: ObservationDetails, cond: ObservingConditions, tele: TelescopeDetails, ins: InstrumentDetails)
+case class ItcInputs(src: SourceDefinition, obs: ObservationDetails, cond: ObservingConditions, tele: TelescopeDetails, instr: InstrumentDetails)
 
 object ItcService {
 
@@ -135,7 +135,7 @@ object ItcService {
   /** Performs an ITC call on the given host. */
   def calculate(peer: Peer, inputs: ItcInputs): Future[Result] =
     TrpcClient(peer).withoutKeys future { r =>
-      r[ItcService].calculate(inputs.src, inputs.obs, inputs.cond, inputs.tele, inputs.ins)
+      r[ItcService].calculate(inputs.src, inputs.obs, inputs.cond, inputs.tele, inputs.instr)
     }
 
 }
