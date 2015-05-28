@@ -14,7 +14,7 @@ import scalaz._
 import Scalaz._
 
 /** Columns in the table are defined by their header label and a function on the unique config of the row. */
-case class Column(label: String, value: (ItcUniqueConfig, Future[ItcService.Result]) => AnyRef, tooltip: String = "")
+case class Column(label: String, value: (ItcUniqueConfig, String\/ItcInputs, Future[ItcService.Result]) => AnyRef, tooltip: String = "")
 
 object ItcTableModel {
   val PeakPixelTooltip = "Peak pixel value = signal + background"
@@ -27,13 +27,13 @@ object ItcTableModel {
 sealed trait ItcTableModel extends AbstractTableModel {
 
   /// Define some generic columns. Values are rendered as strings in order to have them left aligned, similar to other sequence tables.
-  val LabelsColumn  = Column("Data Labels",     (c, r) => (resultIcon(r).orNull, c.labels))
-  val ImagesColumn  = Column("Images",          (c, r) => s"${c.count}",                      tooltip = "Number of exposures used in S/N calculation")
-  val CoaddsColumn  = Column("Coadds",          (c, r) => s"${c.coadds.getOrElse(1.0)}",      tooltip = "Number of coadds")
-  val ExpTimeColumn = Column("Exposure Time",   (c, r) => f"${c.singleExposureTime}%.1f",     tooltip = "Exposure time of each image [s]")
-  val TotTimeColumn = Column("Total Exp. Time", (c, r) => f"${c.totalExposureTime}%.1f",      tooltip = "Total exposure time [s]")
-  val SrcMagColumn  = Column("Source Mag",      (c, r) => sourceMag(r),                       tooltip = "Source magnitude [mag]")
-  val SrcFracColumn = Column("Source Fraction", (c, r) => sourceFraction(r),                  tooltip = "Fraction of images on source")
+  val LabelsColumn  = Column("Data Labels",     (c, i, r) => (resultIcon(r).orNull, c.labels))
+  val ImagesColumn  = Column("Images",          (c, i, r) => s"${c.count}",                      tooltip = "Number of exposures used in S/N calculation")
+  val CoaddsColumn  = Column("Coadds",          (c, i, r) => s"${c.coadds.getOrElse(1.0)}",      tooltip = "Number of coadds")
+  val ExpTimeColumn = Column("Exposure Time",   (c, i, r) => f"${c.singleExposureTime}%.1f",     tooltip = "Exposure time of each image [s]")
+  val TotTimeColumn = Column("Total Exp. Time", (c, i, r) => f"${c.totalExposureTime}%.1f",      tooltip = "Total exposure time [s]")
+  val SrcMagColumn  = Column("Source Mag",      (c, i, r) => i.map(sourceMag).toOption,          tooltip = "Source magnitude [mag]")
+  val SrcFracColumn = Column("Source Fraction", (c, i, r) => i.map(sourceFraction).toOption,     tooltip = "Fraction of images on source")
 
 
   // Define different sets of columns as headers
@@ -46,6 +46,7 @@ sealed trait ItcTableModel extends AbstractTableModel {
 
   val uniqueSteps:  List[ItcUniqueConfig]
   val res:          List[Future[ItcService.Result]]
+  val inputs:       List[String\/ItcInputs]
 
 
   // Gets the imaging result from the service result future (if present).
@@ -83,9 +84,9 @@ sealed trait ItcTableModel extends AbstractTableModel {
       }
     }
 
-  protected def sourceMag       (result: Future[ItcService.Result]) = serviceResult(result).map(r => f"${r.source.norm}%.2f ${r.source.getNormBand.name}")
+  protected def sourceMag       (i: ItcInputs) = f"${i.src.norm}%.2f ${i.src.getNormBand.name}"
 
-  protected def sourceFraction  (result: Future[ItcService.Result]) = serviceResult(result).map(r => f"${r.obsDetails.getSourceFraction}%.2f")
+  protected def sourceFraction  (i: ItcInputs) = f"${i.obs.getSourceFraction}%.2f"
 
 
   protected def spcPeakElectrons(result: Future[ItcService.Result]) = spectroscopyResult(result).map(_.allSeries(SignalChart, SignalData).map(_.yValues.max).max.toInt)
@@ -108,7 +109,7 @@ sealed trait ItcTableModel extends AbstractTableModel {
   override def getColumnCount: Int = headers.size + keys.size + results.size
 
   override def getValueAt(row: Int, col: Int): Object = column(col) match {
-    case Some(c) => c.value(uniqueSteps(row), res(row))
+    case Some(c) => c.value(uniqueSteps(row), inputs(row), res(row))
     case None    => uniqueSteps(row).config.getItemValue(toKey(col))
   }
 
@@ -150,41 +151,58 @@ sealed trait ItcTableModel extends AbstractTableModel {
 /** Generic ITC imaging tables model. */
 sealed trait ItcImagingTableModel extends ItcTableModel
 
-class ItcGenericImagingTableModel(val keys: List[ItemKey], val uniqueSteps: List[ItcUniqueConfig], val res: List[Future[ItcService.Result]], showCoadds: Boolean = false) extends ItcImagingTableModel {
+class ItcGenericImagingTableModel(val keys: List[ItemKey], val uniqueSteps: List[ItcUniqueConfig], val inputs: List[String\/ItcInputs], val res: List[Future[ItcService.Result]], showCoadds: Boolean = false) extends ItcImagingTableModel {
   val headers = if (showCoadds) HeadersWithCoadds else Headers
   val results = List(
-    Column("Peak",            (c, r) => imgPeakPixelFlux(r),          tooltip = ItcTableModel.PeakPixelTooltip),
-    Column("S/N Single",      (c, r) => imgSingleSNRatio(r)),
-    Column("S/N Total",       (c, r) => imgTotalSNRatio (r))
+    Column("Peak",            (c, i, r) => imgPeakPixelFlux(r),          tooltip = ItcTableModel.PeakPixelTooltip),
+    Column("S/N Single",      (c, i, r) => imgSingleSNRatio(r)),
+    Column("S/N Total",       (c, i, r) => imgTotalSNRatio (r))
   )
 }
 
 /** GMOS specific ITC imaging table model. */
-class ItcGmosImagingTableModel(val keys: List[ItemKey], val uniqueSteps: List[ItcUniqueConfig], val res: List[Future[ItcService.Result]]) extends ItcImagingTableModel {
+class ItcGmosImagingTableModel(val keys: List[ItemKey], val uniqueSteps: List[ItcUniqueConfig], val inputs: List[String\/ItcInputs], val res: List[Future[ItcService.Result]]) extends ItcImagingTableModel {
   val headers = Headers
   val results = List(
-    Column("CCD1 Peak",       (c, r) => imgPeakPixelFlux(r, ccd=0),   tooltip = ItcTableModel.PeakPixelTooltip + " for CCD 1"),
-    Column("CCD1 S/N Single", (c, r) => imgSingleSNRatio(r, ccd=0)),
-    Column("CCD1 S/N Total",  (c, r) => imgTotalSNRatio (r, ccd=0)),
-    Column("CCD2 Peak",       (c, r) => imgPeakPixelFlux(r, ccd=1),   tooltip = ItcTableModel.PeakPixelTooltip + " for CCD 2"),
-    Column("CCD2 S/N Single", (c, r) => imgSingleSNRatio(r, ccd=1)),
-    Column("CCD2 S/N Total",  (c, r) => imgTotalSNRatio (r, ccd=1)),
-    Column("CCD3 Peak",       (c, r) => imgPeakPixelFlux(r, ccd=2),   tooltip = ItcTableModel.PeakPixelTooltip + " for CCD 3"),
-    Column("CCD3 S/N Single", (c, r) => imgSingleSNRatio(r, ccd=2)),
-    Column("CCD3 S/N Total",  (c, r) => imgTotalSNRatio (r, ccd=2))
+    Column("CCD1 Peak",       (c, i, r) => imgPeakPixelFlux(r, ccd=0),   tooltip = ItcTableModel.PeakPixelTooltip + " for CCD 1"),
+    Column("CCD1 S/N Single", (c, i, r) => imgSingleSNRatio(r, ccd=0)),
+    Column("CCD1 S/N Total",  (c, i, r) => imgTotalSNRatio (r, ccd=0)),
+    Column("CCD2 Peak",       (c, i, r) => imgPeakPixelFlux(r, ccd=1),   tooltip = ItcTableModel.PeakPixelTooltip + " for CCD 2"),
+    Column("CCD2 S/N Single", (c, i, r) => imgSingleSNRatio(r, ccd=1)),
+    Column("CCD2 S/N Total",  (c, i, r) => imgTotalSNRatio (r, ccd=1)),
+    Column("CCD3 Peak",       (c, i, r) => imgPeakPixelFlux(r, ccd=2),   tooltip = ItcTableModel.PeakPixelTooltip + " for CCD 3"),
+    Column("CCD3 S/N Single", (c, i, r) => imgSingleSNRatio(r, ccd=2)),
+    Column("CCD3 S/N Total",  (c, i, r) => imgTotalSNRatio (r, ccd=2))
   )
+}
+
+class ItcGsaoiImagingTableModel(val keys: List[ItemKey], val uniqueSteps: List[ItcUniqueConfig], val inputs: List[String\/ItcInputs], val res: List[Future[ItcService.Result]]) extends ItcImagingTableModel {
+  val headers = HeadersWithCoadds ++ List(
+    Column("Strehl",          (c, i, r) => gems(i),                      tooltip = "Estimated Strehl and band")
+  )
+  val results = List(
+    Column("Peak",            (c, i, r) => imgPeakPixelFlux(r),          tooltip = ItcTableModel.PeakPixelTooltip),
+    Column("S/N Single",      (c, i, r) => imgSingleSNRatio(r)),
+    Column("S/N Total",       (c, i, r) => imgTotalSNRatio (r))
+  )
+
+  def gems(i: String \/ ItcInputs): Option[String] = i.toOption.map { inputs =>
+    val gems = inputs.instr.asInstanceOf[GsaoiParameters].gems
+    f"${gems.avgStrehl}%.2f ${gems.strehlBand}"
+  }
+
 }
 
 
 /** Generic ITC spectroscopy table model. */
 sealed trait ItcSpectroscopyTableModel extends ItcTableModel
 
-class ItcGenericSpectroscopyTableModel(val keys: List[ItemKey], val uniqueSteps: List[ItcUniqueConfig], val res: List[Future[ItcService.Result]], showCoadds: Boolean = false) extends ItcSpectroscopyTableModel {
+class ItcGenericSpectroscopyTableModel(val keys: List[ItemKey], val uniqueSteps: List[ItcUniqueConfig], val inputs: List[String\/ItcInputs], val res: List[Future[ItcService.Result]], showCoadds: Boolean = false) extends ItcSpectroscopyTableModel {
   val headers = if (showCoadds) HeadersWithCoadds else Headers
   val results = List(
-    Column("Peak",            (c, r) => spcPeakElectrons(r),          tooltip = "Peak e- per exposure"),
-    Column("S/N Single",      (c, r) => spcPeakSNSingle(r)),
-    Column("S/N Total",       (c, r) => spcPeakSNFinal(r))
+    Column("Peak",            (c, i, r) => spcPeakElectrons(r),          tooltip = "Peak e- per exposure"),
+    Column("S/N Single",      (c, i, r) => spcPeakSNSingle(r)),
+    Column("S/N Total",       (c, i, r) => spcPeakSNFinal(r))
   )
 
 }

@@ -51,12 +51,12 @@ class ItcServiceImpl extends ItcService {
 
   private def imagingResult(recipe: ImagingRecipe): Result = {
     val r = recipe.calculateImaging()
-    ItcResult.forResult(ItcImagingResult(r.source, r.observation, List(toImgData(r)), r.warnings))
+    ItcResult.forResult(ItcImagingResult(List(toImgData(r)), r.warnings))
   }
 
   private def imagingResult(recipe: ImagingArrayRecipe): Result = {
     val r = recipe.calculateImaging()
-    ItcResult.forResult(ItcImagingResult(r.head.source, r.head.observation, r.map(toImgData).toList, combineWarnings(r.toList)))
+    ItcResult.forResult(ItcImagingResult(r.map(toImgData).toList, combineWarnings(r.toList)))
   }
 
   private def toImgData(result: ImagingResult): ImgData = result.is2nCalc match {
@@ -94,7 +94,7 @@ class ItcServiceImpl extends ItcService {
   // a bit of bandwidth. If the need arises to have the files accessible in the clients just change this to
   // send the original result.
   private def resultWithoutFiles(result: ItcSpectroscopyResult, warnings: List[ItcWarning]): Result =
-    ItcResult.forResult(ItcSpectroscopyResult(result.source, result.obsDetails, result.charts, List(), warnings))
+    ItcResult.forResult(ItcSpectroscopyResult(result.charts, List(), warnings))
 
 
   // combine all warnings for the different CCDs and prepend a "CCD x:" in front of them

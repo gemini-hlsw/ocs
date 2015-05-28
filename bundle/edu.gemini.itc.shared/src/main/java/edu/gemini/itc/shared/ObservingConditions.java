@@ -43,6 +43,10 @@ public final class ObservingConditions implements Serializable {
         return iq.ordinal() + 1;
     }
 
+    public ImageQuality iq() {
+        return iq;
+    }
+
     public double getImageQualityPercentile() {
         return iq.getPercentage() / 100.0;
     }

@@ -12,6 +12,7 @@ import edu.gemini.spModel.gemini.gmos.{GmosCommonType, GmosNorthType, GmosSouthT
 import edu.gemini.spModel.gemini.gnirs.GNIRSParams
 import edu.gemini.spModel.gemini.gsaoi.Gsaoi
 import edu.gemini.spModel.gemini.niri.Niri
+import edu.gemini.spModel.gemini.obscomp.SPSiteQuality
 import edu.gemini.spModel.guide.GuideProbe
 import edu.gemini.spModel.obscomp.SPInstObsComp
 import edu.gemini.spModel.rich.shared.immutable.asScalaOpt
@@ -50,12 +51,12 @@ object ConfigExtractor {
   private val AoFieldLensKey      = new ItemKey("adaptive optics:fieldLens")
   private val AoGuideStarTypeKey  = new ItemKey("adaptive optics:guideStarType")
 
-  def extractInstrumentDetails(instrument: SPInstObsComp, probe: GuideProbe, targetEnv: TargetEnvironment, c: Config): String \/ InstrumentDetails =
+  def extractInstrumentDetails(instrument: SPInstObsComp, probe: GuideProbe, targetEnv: TargetEnvironment, c: Config, cond: ObservingConditions): String \/ InstrumentDetails =
     instrument.getType match {
       case INSTRUMENT_ACQCAM                      => ConfigExtractor.extractAcqCam(c)
       case INSTRUMENT_FLAMINGOS2                  => ConfigExtractor.extractF2(c)
       case INSTRUMENT_GMOS | INSTRUMENT_GMOSSOUTH => ConfigExtractor.extractGmos(c)
-      case INSTRUMENT_GSAOI                       => ConfigExtractor.extractGsaoi(c)
+      case INSTRUMENT_GSAOI                       => ConfigExtractor.extractGsaoi(c, cond)
       case INSTRUMENT_NIRI                        => ConfigExtractor.extractNiri(targetEnv, probe, c)
       case _                                      => "Instrument is not supported".left
     }
@@ -125,13 +126,44 @@ object ConfigExtractor {
 
   }
 
-  private def extractGsaoi(c: Config): String \/ GsaoiParameters = {
+  private def extractGsaoi(c: Config, cond: ObservingConditions): String \/ GsaoiParameters = {
+
     import Gsaoi._
+    import SPSiteQuality._
+
+    val error: String \/ GemsParameters = "GSAOI filter with unknown band".left
+
+    def closestBand(band: Band) =
+      // pick the closest band that's supported by ITC
+      List(Band.J, Band.H, Band.K).minBy(b => Math.abs(b.getWavelengthMidPoint.getValue.toNanometers - band.getWavelengthMidPoint.getValue.toNanometers))
+
+
+    // a rudimentary approximation for the expected GeMS performance
+    // http://www.gemini.edu/sciops/instruments/gems/gems-performance
+    // TODO: here we should use the avg Strehl values calculated by the Mascot / AGS algorithms for better results
+    def extractGems(filter: Filter): String \/ GemsParameters =
+      filter.getCatalogBand.asScalaOpt.fold(error) { band =>
+        val iq = cond.iq
+        (band, iq) match {
+          case (Band.J, ImageQuality.PERCENT_20) => GemsParameters(0.10, "J").right
+          case (Band.J, ImageQuality.PERCENT_70) => GemsParameters(0.05, "J").right
+          case (Band.J, ImageQuality.PERCENT_85) => GemsParameters(0.02, "J").right
+          case (Band.H, ImageQuality.PERCENT_20) => GemsParameters(0.15, "H").right
+          case (Band.H, ImageQuality.PERCENT_70) => GemsParameters(0.10, "H").right
+          case (Band.H, ImageQuality.PERCENT_85) => GemsParameters(0.05, "H").right
+          case (Band.K, ImageQuality.PERCENT_20) => GemsParameters(0.30, "K").right
+          case (Band.K, ImageQuality.PERCENT_70) => GemsParameters(0.15, "K").right
+          case (Band.K, ImageQuality.PERCENT_85) => GemsParameters(0.10, "K").right
+          case (_, ImageQuality.ANY)             => "GeMS cannot be used in IQ=Any conditions".left
+          case _                                 => "ITC GeMS only supports J, H and K band".left
+        }
+    }
+
     for {
       filter      <- extract[Filter]        (c, FilterKey)
       readMode    <- extract[ReadMode]      (c, ReadModeKey)
+      gems        <- extractGems            (filter)
     } yield {
-      val gems = GemsParameters(0.3, "K") // TODO: gems
       GsaoiParameters(filter, readMode, gems)
     }
   }

@@ -9,7 +9,7 @@ import edu.gemini.pot.sp.SPComponentType._
 import edu.gemini.shared.skyobject.Magnitude
 import edu.gemini.spModel.`type`.DisplayableSpType
 import edu.gemini.spModel.config2.{Config, ConfigSequence, ItemKey}
-import edu.gemini.spModel.core.{Site, Peer, Wavelength}
+import edu.gemini.spModel.core.{Peer, Site, Wavelength}
 import edu.gemini.spModel.guide.GuideProbe
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.obscomp.SPInstObsComp
@@ -113,57 +113,42 @@ trait ItcTable extends Table {
 
   }
 
-  protected def calculateSpectroscopy(peer: Peer, instrument: SPInstObsComp, uc: ItcUniqueConfig): Future[ItcService.Result] = {
-    def method(srcFraction: Double) = SpectroscopySN(uc.count * uc.coadds.getOrElse(1), uc.singleExposureTime, srcFraction)
-    calculate(peer, instrument, uc, method)
-  }
-
-  protected def calculateImaging(peer: Peer, instrument: SPInstObsComp, uc: ItcUniqueConfig): Future[ItcService.Result] = {
-    def method(srcFraction: Double) = ImagingSN(uc.count * uc.coadds.getOrElse(1), uc.singleExposureTime, srcFraction)
-    calculate(peer, instrument, uc, method)
-  }
-
-  protected def calculate(peer: Peer, instrument: SPInstObsComp, uc: ItcUniqueConfig, method: Double => CalculationMethod): Future[ItcService.Result] = {
-    val s = for {
-      analysis  <- parameters.analysisMethod
+  protected def extractInputs(instrument: SPInstObsComp, uc: ItcUniqueConfig, method: Double => CalculationMethod): String \/ ItcInputs =
+    for {
       cond      <- parameters.conditions
       port      <- parameters.instrumentPort
       targetEnv <- parameters.targetEnvironment
+      analysis  <- parameters.analysisMethod
       probe     <- extractGuideProbe()
       src       <- extractSource(targetEnv.getBase.getTarget, uc)
       tele      <- ConfigExtractor.extractTelescope(port, probe, targetEnv, uc.config)
-      ins       <- ConfigExtractor.extractInstrumentDetails(instrument, probe, targetEnv, uc.config)
+      ins       <- ConfigExtractor.extractInstrumentDetails(instrument, probe, targetEnv, uc.config, cond)
       srcFrac   <- extractSourceFraction(uc, instrument)
-    } yield {
-        doServiceCall(peer, uc, src, ins, tele, cond, new ObservationDetails(method(srcFrac), analysis))
+
+    } yield ItcInputs(src, new ObservationDetails(method(srcFrac), analysis), cond, tele, ins)
+
+  protected def doServiceCall(peer: Peer, inputs: String \/ ItcInputs): Future[ItcService.Result] = inputs match {
+
+    case -\/(err) =>
+      Future.successful(ItcError(err).left).andThen { case _ => updateResults() }
+
+    case \/-(inp) =>
+      // Do the service call
+      ItcService.calculate(peer, inp).andThen       { case _ => updateResults() }
+
     }
 
-    s match {
-      case -\/(err) => Future { ItcError(err).left }
-      case \/-(res) => res
-    }
-
-  }
-
-  protected def doServiceCall(peer: Peer, c: ItcUniqueConfig, src: SourceDefinition, ins: InstrumentDetails, tele: TelescopeDetails, cond: ObservingConditions, obs: ObservationDetails): Future[ItcService.Result] = {
-    // Do the service call
-    ItcService.calculate(peer, src, obs, cond, tele, ins).
-
-      // whenever service call is finished notify table to update its contents
-      andThen {
-      case _ => Swing.onEDT {
-
-        // notify table of data update while keeping the current selection
-        restoreSelection {
-          this.peer.getModel.asInstanceOf[AbstractTableModel].fireTableDataChanged()
-        }
-
-        // make all columns as wide as needed
-        SequenceTabUtil.resizeTableColumns(this.peer, this.model)
+  // whenever service call is finished notify table to update its contents
+  protected def updateResults() = Swing.onEDT {
+      // notify table of data update while keeping the current selection
+      restoreSelection {
+        this.peer.getModel.asInstanceOf[AbstractTableModel].fireTableDataChanged()
       }
+
+      // make all columns as wide as needed
+      SequenceTabUtil.resizeTableColumns(this.peer, this.model)
     }
 
-  }
 
   // lacking a simple way to decide on the "closest" (i.e. "fastest to reach") peer we talk to the observing peer
   // if defined and GN or GS otherwise, if no site is defined you're out of luck and the ITC tables will stay empty
@@ -287,7 +272,7 @@ trait ItcTable extends Table {
 }
 
 class ItcImagingTable(val parameters: ItcParametersProvider) extends ItcTable {
-  private val emptyTable: ItcImagingTableModel = new ItcGenericImagingTableModel(List(), List(), List())
+  private val emptyTable: ItcImagingTableModel = new ItcGenericImagingTableModel(List(), List(), List(), List())
 
   /** Creates a new table model for the current context (instrument) and config sequence.
     * Note that GMOS has a different table model with separate columns for its three CCDs. */
@@ -298,18 +283,22 @@ class ItcImagingTable(val parameters: ItcParametersProvider) extends ItcTable {
       instrument  <- parameters.instrument
 
     } yield {
-      val uniqConfigs = ItcUniqueConfig.imagingConfigs(seq)
-      val results     = uniqConfigs.map(calculateImaging(peer, instrument, _))
+      val uniqueConfigs = ItcUniqueConfig.imagingConfigs(seq)
+      val inputs        = uniqueConfigs.map(uc => extractInputs(instrument, uc, frac => ImagingSN(uc.count * uc.coadds.getOrElse(1), uc.singleExposureTime, frac)))
+      val results       = uniqueConfigs.zip(inputs).map { case (uc, i) => doServiceCall(peer, i) }
 
       instrument.getType match {
         case INSTRUMENT_GMOS | INSTRUMENT_GMOSSOUTH =>
-          new ItcGmosImagingTableModel(keys, uniqConfigs, results)
+          new ItcGmosImagingTableModel(keys, uniqueConfigs, inputs, results)
 
-        case INSTRUMENT_GNIRS | INSTRUMENT_GSAOI | INSTRUMENT_NIFS | INSTRUMENT_NIRI =>
-          new ItcGenericImagingTableModel(keys, uniqConfigs, results, showCoadds = true)
+        case INSTRUMENT_GSAOI  =>
+          new ItcGsaoiImagingTableModel(keys, uniqueConfigs, inputs, results)
+
+        case INSTRUMENT_GNIRS | INSTRUMENT_NIFS | INSTRUMENT_NIRI =>
+          new ItcGenericImagingTableModel(keys, uniqueConfigs, inputs, results, showCoadds = true)
 
         case _ =>
-          new ItcGenericImagingTableModel(keys, uniqConfigs, results, showCoadds = false)
+          new ItcGenericImagingTableModel(keys, uniqueConfigs, inputs, results, showCoadds = false)
       }
 
     }
@@ -320,7 +309,7 @@ class ItcImagingTable(val parameters: ItcParametersProvider) extends ItcTable {
 }
 
 class ItcSpectroscopyTable(val parameters: ItcParametersProvider) extends ItcTable {
-  private val emptyTable: ItcGenericSpectroscopyTableModel = new ItcGenericSpectroscopyTableModel(List(), List(), List())
+  private val emptyTable: ItcGenericSpectroscopyTableModel = new ItcGenericSpectroscopyTableModel(List(), List(), List(), List())
 
   /** Creates a new table model for the current context and config sequence. */
   def tableModel(keys: List[ItemKey], seq: ConfigSequence) = {
@@ -331,14 +320,15 @@ class ItcSpectroscopyTable(val parameters: ItcParametersProvider) extends ItcTab
 
     } yield {
       val uniqueConfigs = ItcUniqueConfig.spectroscopyConfigs(seq)
-      val results       = uniqueConfigs.map(calculateSpectroscopy(peer, instrument, _))
+      val inputs        = uniqueConfigs.map(uc => extractInputs(instrument, uc, frac => SpectroscopySN(uc.count * uc.coadds.getOrElse(1), uc.singleExposureTime, frac)))
+      val results       = uniqueConfigs.zip(inputs).map { case (uc, i) => doServiceCall(peer, i) }
 
       instrument.getType match {
         case INSTRUMENT_GNIRS | INSTRUMENT_GSAOI | INSTRUMENT_NIFS | INSTRUMENT_NIRI =>
-          new ItcGenericSpectroscopyTableModel(keys, uniqueConfigs, results, showCoadds = true)
+          new ItcGenericSpectroscopyTableModel(keys, uniqueConfigs, inputs, results, showCoadds = true)
 
         case _ =>
-          new ItcGenericSpectroscopyTableModel(keys, uniqueConfigs, results, showCoadds = false)
+          new ItcGenericSpectroscopyTableModel(keys, uniqueConfigs, inputs, results, showCoadds = false)
       }
     }
 
