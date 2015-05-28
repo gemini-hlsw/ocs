@@ -25,7 +25,6 @@ final class SourceDetailsEditor extends GridBagPanel with TelescopePosEditor {
   // ==== The Target
 
   private[this] var spt: SPTarget = new SPTarget
-  private[this] var isBase: Boolean = false
 
   private def setDistribution(sd: SpectralDistribution): Unit         = setDistribution(Some(sd))
   private def setDistribution(sd: Option[SpectralDistribution]): Unit = spt.getTarget.setSpectralDistribution(sd)
@@ -166,6 +165,10 @@ final class SourceDetailsEditor extends GridBagPanel with TelescopePosEditor {
     fill    = Fill.Vertical
   }
 
+  // ==== hide all the panels to start with
+  profilePanels.foreach(_.panel.setVisible(false))
+  distributionPanels.foreach(_.panel.setVisible(false))
+
   // ==== Listeners and Reactions
 
   private val editElements = List(
@@ -199,50 +202,49 @@ final class SourceDetailsEditor extends GridBagPanel with TelescopePosEditor {
   // react to any kind of target change by updating all UI elements
   def edit(obsContext: GOption[ObsContext], spTarget: SPTarget, node: ISPNode): Unit = {
 
-    deafTo(editElements:_*)
+    spt = spTarget
 
-    spt       = spTarget
-    isBase    = if (obsContext.isDefined) obsContext.getValue.getTargets.getBase == spTarget else false
+    // we only show the source editor for the base/science target, and we also only need to update it if visible
+    visible = if (obsContext.isDefined) obsContext.getValue.getTargets.getBase == spTarget else false
+    if (visible) {
 
-    spt.getTarget.getSpatialProfile match {
-      case None                     => profiles.selection.item = profilePanels.head
-      case Some(s: PointSource)     => profiles.selection.item = profilePanels(1)
-      case Some(s: GaussianSource)  => profiles.selection.item = profilePanels(2); profilePanels(2).panel.asInstanceOf[NumericPropertySheet[GaussianSource]].edit(obsContext, spTarget, node)
-      case Some(s: UniformSource)   => profiles.selection.item = profilePanels(3)
+      deafTo(editElements:_*)
+
+      spt.getTarget.getSpatialProfile match {
+        case None                     => profiles.selection.item = profilePanels.head
+        case Some(s: PointSource)     => profiles.selection.item = profilePanels(1)
+        case Some(s: GaussianSource)  => profiles.selection.item = profilePanels(2); profilePanels(2).panel.asInstanceOf[NumericPropertySheet[GaussianSource]].edit(obsContext, spTarget, node)
+        case Some(s: UniformSource)   => profiles.selection.item = profilePanels(3)
+      }
+
+      spt.getTarget.getSpectralDistribution match {
+        case None                     => distributions.selection.item = distributionPanels.head
+        case Some(s: LibraryStar)     => distributions.selection.item = distributionPanels(1); libraryStarDetails.selection.item = s
+        case Some(s: LibraryNonStar)  => distributions.selection.item = distributionPanels(2); libraryNonStarDetails.selection.item = s
+        case Some(s: BlackBody)       => distributions.selection.item = distributionPanels(3); distributionPanels(3).panel.asInstanceOf[NumericPropertySheet[BlackBody]].edit(obsContext, spTarget, node)
+        case Some(s: EmissionLine)    => distributions.selection.item = distributionPanels(4); distributionPanels(4).panel.asInstanceOf[NumericPropertySheet[EmissionLine]].edit(obsContext, spTarget, node)
+        case Some(s: PowerLaw)        => distributions.selection.item = distributionPanels(5); distributionPanels(5).panel.asInstanceOf[NumericPropertySheet[PowerLaw]].edit(obsContext, spTarget, node)
+        case Some(s: UserDefined)     => throw new Error("not yet supported") // at a later stage we will add support for aux file user spectras
+      }
+
+      updateUI()
+
+      listenTo(editElements:_*)
+
     }
-
-    spt.getTarget.getSpectralDistribution match {
-      case None                     => distributions.selection.item = distributionPanels.head
-      case Some(s: LibraryStar)     => distributions.selection.item = distributionPanels(1); libraryStarDetails.selection.item = s
-      case Some(s: LibraryNonStar)  => distributions.selection.item = distributionPanels(2); libraryNonStarDetails.selection.item = s
-      case Some(s: BlackBody)       => distributions.selection.item = distributionPanels(3); distributionPanels(3).panel.asInstanceOf[NumericPropertySheet[BlackBody]].edit(obsContext, spTarget, node)
-      case Some(s: EmissionLine)    => distributions.selection.item = distributionPanels(4); distributionPanels(4).panel.asInstanceOf[NumericPropertySheet[EmissionLine]].edit(obsContext, spTarget, node)
-      case Some(s: PowerLaw)        => distributions.selection.item = distributionPanels(5); distributionPanels(5).panel.asInstanceOf[NumericPropertySheet[PowerLaw]].edit(obsContext, spTarget, node)
-      case Some(s: UserDefined)     => throw new Error("not yet supported") // at a later stage we will add support for aux files user spectras
-    }
-
-    update()
-
-    listenTo(editElements:_*)
 
   }
 
   // show/hide UI elements as needed
-  private def update(): Unit = {
-    if (isBase) {
-      visible = true
-
+  private def updateUI(): Unit = {
+    if (!profiles.selection.item.panel.isVisible) {
       profilePanels.foreach(_.panel.setVisible(false))
       profiles.selection.item.panel.setVisible(true)
-
+    }
+    if (!distributions.selection.item.panel.isVisible) {
       distributionPanels.foreach(_.panel.setVisible(false))
       distributions.selection.item.panel.setVisible(true)
-
-    } else {
-      visible = false
     }
-    revalidate()
-    repaint()
   }
 
 }
