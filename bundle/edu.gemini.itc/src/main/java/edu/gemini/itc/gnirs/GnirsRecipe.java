@@ -91,7 +91,7 @@ public final class GnirsRecipe implements SpectroscopyRecipe {
                 add(new SpcDataFile(FinalS2NData.instance(),   r.specS2N()[0].getFinalS2NSpectrum().printSpecAsString()));
             }
         }};
-        return new Tuple2<>(ItcSpectroscopyResult.apply(_sdParameters, _obsDetailParameters, dataSets, dataFiles, new ArrayList<>()), r);
+        return new Tuple2<>(ItcSpectroscopyResult.apply(dataSets, dataFiles, new ArrayList<>()), r);
     }
 
     protected static String toFile(final VisitableSampledSpectrum[] sedArr) {

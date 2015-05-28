@@ -166,6 +166,9 @@ public class Gems implements AOSystem {
                                 return 0.12;
                         }
                         break;
+
+                    default:
+                        throw new IllegalArgumentException("GeMS does not support band " + strehlBand);
                 }
                 break;
 

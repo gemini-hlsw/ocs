@@ -22,15 +22,13 @@ import Scalaz._
   */
 sealed trait ItcResult extends Serializable {
   def warnings:   List[ItcWarning]
-  def source:     SourceDefinition
-  def obsDetails: ObservationDetails
 }
 
 // === IMAGING RESULTS
 
 final case class ImgData(singleSNRatio: Double, totalSNRatio: Double, peakPixelFlux: Double)
 
-final case class ItcImagingResult(source: SourceDefinition, obsDetails: ObservationDetails, ccds: List[ImgData], warnings: List[ItcWarning]) extends ItcResult {
+final case class ItcImagingResult(ccds: List[ImgData], warnings: List[ItcWarning]) extends ItcResult {
   def ccd(i: Int) = ccds(i % ccds.length)
 }
 
@@ -72,7 +70,7 @@ final case class SpcChartData(chartType: SpcChartType, title: String, xAxisLabel
   * Individual charts and data series can be referenced by their types and an index. For most instruments there
   * is only one chart and data series of each type, however for NIFS for example there will be several charts
   * of each type in case of multiple IFU elements. */
-final case class ItcSpectroscopyResult(source: SourceDefinition, obsDetails: ObservationDetails, charts: List[SpcChartData], files: List[SpcDataFile], warnings: List[ItcWarning]) extends ItcResult {
+final case class ItcSpectroscopyResult(charts: List[SpcChartData], files: List[SpcDataFile], warnings: List[ItcWarning]) extends ItcResult {
 
   /** Gets a text file for a data series by type and index.
     * This method will fail if the result (data) you're looking for does not exist.
@@ -93,8 +91,8 @@ final case class ItcSpectroscopyResult(source: SourceDefinition, obsDetails: Obs
 object ItcSpectroscopyResult {
 
   // java compatibility
-  def apply(source: SourceDefinition, obsDetails: ObservationDetails, charts: java.util.List[SpcChartData], files: java.util.List[SpcDataFile], warnings: java.util.List[ItcWarning]) =
-    new ItcSpectroscopyResult(source, obsDetails, charts.toList, files.toList, warnings.toList)
+  def apply(charts: java.util.List[SpcChartData], files: java.util.List[SpcDataFile], warnings: java.util.List[ItcWarning]) =
+    new ItcSpectroscopyResult(charts.toList, files.toList, warnings.toList)
 
 }
 
@@ -128,14 +126,16 @@ sealed trait ItcMessage
 final case class ItcError(msg: String) extends ItcMessage
 final case class ItcWarning(msg: String) extends ItcMessage
 
+case class ItcInputs(src: SourceDefinition, obs: ObservationDetails, cond: ObservingConditions, tele: TelescopeDetails, ins: InstrumentDetails)
+
 object ItcService {
 
   type Result = ItcError \/ ItcResult
 
   /** Performs an ITC call on the given host. */
-  def calculate(peer: Peer, source: SourceDefinition, obs: ObservationDetails, cond: ObservingConditions, tele: TelescopeDetails, ins: InstrumentDetails): Future[Result] =
+  def calculate(peer: Peer, inputs: ItcInputs): Future[Result] =
     TrpcClient(peer).withoutKeys future { r =>
-      r[ItcService].calculate(source, obs, cond, tele, ins)
+      r[ItcService].calculate(inputs.src, inputs.obs, inputs.cond, inputs.tele, inputs.ins)
     }
 
 }

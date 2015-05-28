@@ -81,7 +81,7 @@ public final class NiriRecipe implements ImagingRecipe, SpectroscopyRecipe {
             add(new SpcDataFile(SingleS2NData.instance(),  r.specS2N()[0].getExpS2NSpectrum().printSpecAsString()));
             add(new SpcDataFile(FinalS2NData.instance(),   r.specS2N()[0].getFinalS2NSpectrum().printSpecAsString()));
         }};
-        return new Tuple2<>(ItcSpectroscopyResult.apply(_sdParameters, _obsDetailParameters, dataSets, dataFiles, new ArrayList<>()), r);
+        return new Tuple2<>(ItcSpectroscopyResult.apply(dataSets, dataFiles, new ArrayList<>()), r);
     }
 
     private SpectroscopyResult calculateSpectroscopy(final Niri instrument) {

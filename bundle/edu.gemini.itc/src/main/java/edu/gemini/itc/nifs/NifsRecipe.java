@@ -2,12 +2,14 @@ package edu.gemini.itc.nifs;
 
 import edu.gemini.itc.altair.Altair;
 import edu.gemini.itc.base.*;
-import edu.gemini.itc.operation.*;
+import edu.gemini.itc.operation.ImageQualityCalculatable;
+import edu.gemini.itc.operation.ImageQualityCalculationFactory;
+import edu.gemini.itc.operation.SpecS2N;
+import edu.gemini.itc.operation.SpecS2NLargeSlitVisitor;
 import edu.gemini.itc.shared.*;
 import edu.gemini.spModel.core.Site;
 import scala.Option;
 import scala.Tuple2;
-import scala.collection.JavaConversions;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -75,7 +77,7 @@ public final class NifsRecipe implements SpectroscopyRecipe {
                 add(new SpcDataFile(FinalS2NData.instance(),   r.specS2N()[i].getFinalS2NSpectrum().printSpecAsString()));
             }
         }};
-        return new Tuple2<>(ItcSpectroscopyResult.apply(_sdParameters, _obsDetailParameters, dataSets, dataFiles, new ArrayList<>()), r);
+        return new Tuple2<>(ItcSpectroscopyResult.apply(dataSets, dataFiles, new ArrayList<>()), r);
     }
 
     private SpectroscopyResult calculateSpectroscopy(final Nifs instrument) {
