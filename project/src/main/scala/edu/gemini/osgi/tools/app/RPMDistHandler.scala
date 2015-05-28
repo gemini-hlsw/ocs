@@ -49,7 +49,7 @@ class RPMDistHandler(jre: Option[String]) extends DistHandler {
     // Copy the JRE (if any)
     jre foreach { path =>
       jreDir match {
-        case None => sys.error("No JRE dir was specified.")
+        case None         => sys.error("No JRE dir was specified.")
         case Some(jreDir) =>
           val jrePath = new File(jreDir, path)
           if (!jrePath.isDirectory) sys.error("No JRE was found at " + jrePath)
@@ -84,10 +84,10 @@ class RPMDistHandler(jre: Option[String]) extends DistHandler {
 
     // Set up an SSH connection to the Linux VM where rpmbuild will be run.
     val remoteBuildInfo = config.remoteBuildInfo.getOrElse {
-      sys.error("no remote build info: update OcsCredentials?")
+      sys.error("No remote build info: update OcsCredentials?")
     }
 
-    log.info(s"establishing ssh session to ${remoteBuildInfo.hostname}")
+    log.info(s"Establishing ssh session to ${remoteBuildInfo.hostname}.")
     JSch.setConfig("StrictHostKeyChecking", "no")
     val session = new JSch().getSession(remoteBuildInfo.username, remoteBuildInfo.hostname, remoteBuildInfo.port)
     session.setPassword(remoteBuildInfo.password)
@@ -96,7 +96,7 @@ class RPMDistHandler(jre: Option[String]) extends DistHandler {
 
     // Create an SFTP session to transfer to / from Linux VM.
     val rpmBuildDir = "rpmbuild"
-    log.info("opening sftp channel")
+    log.info("Opening sftp channel.")
     val sftp = session.openChannel("sftp").asInstanceOf[ChannelSftp]
     sftp.connect(remoteBuildInfo.timeout)
 
@@ -108,38 +108,66 @@ class RPMDistHandler(jre: Option[String]) extends DistHandler {
 	case e: SftpException =>
       }
 
-    log.info("creating remote directories")
+    // Create remote directories if they don't exist and cd into rpmbuild since we do everything in here.
+    log.info("Creating remote directories.")
     remoteMkdir(rpmBuildDir)
     sftp.cd(rpmBuildDir)
     remoteMkdir("SOURCES")
 
-    log.info("copying tarball")
-    sftp.put(archiveName.getAbsolutePath, s"SOURCES/${name}.tar.gz")
+    log.info("Copying tarball.")
+    val destArchiveFile = s"SOURCES/${name}.tar.gz"
+    sftp.put(archiveName.getAbsolutePath, destArchiveFile)
 
-    log.info("copying rpm spec file")
-    sftp.put(specPath.getAbsolutePath, "rpm.spec")
+    log.info("Copying RPM spec file.")
+    val destSpecFile = "rpm.spec"
+    sftp.put(specPath.getAbsolutePath, destSpecFile)
 
     // Remote execution of rpmbuild.
     // Note that this will not work for '-test' releases, as rpmbuild does not accept '-' characters in versions.
-    log.info("opening ssh channel")
+    log.info("Opening ssh channel.")
     val ssh = session.openChannel("exec").asInstanceOf[ChannelExec]
-    val cmd = s"cd $rpmBuildDir && rpmbuild -bb rpm.spec"
+    val cmd = s"cd $rpmBuildDir && rpmbuild -bb $destSpecFile"
     ssh.setCommand(cmd)
 
-    log.info("executing rpmbuild")
+    log.info("Executing remote rpmbuild.")
     ssh.connect(remoteBuildInfo.timeout)
 
+    // Unfortunately, the only way to wait for rpmbuild to finish is to continuously poll until isClosed returns true.
+    while (!ssh.isClosed) Thread.sleep(1000)
+    ssh.disconnect
+
     // Retrieve the constructed RPMs.
-    log.info("retrieving rpm")
+    log.info("Retrieving RPM.")
     val rpmOutputDir = mkdir(wd, "RPMS")
-    sftp.cd("RPMS")
-    val appName = execName.substring(0, execName.indexOf("_"))
-    sftp.ls(s"${appName}*.rpm").foreach { f =>
+
+    val rpmName = execName.replace("_", "-")
+    sftp.ls(s"RPMS/${rpmName}*.rpm").foreach { f =>
       val fStr           = f.toString
-      val sourceFilename = fStr.substring(fStr.lastIndexOf(" ")+1)
-      val destFilename   = new File(rpmOutputDir, sourceFilename).toPath.toString
-      sftp.get(sourceFilename, destFilename)
+      val remoteRpmFilename = fStr.substring(fStr.lastIndexOf(" ")+1)
+      val remoteRpmFile     = s"RPMS/$remoteRpmFilename"
+      val localRpmFile      = new File(rpmOutputDir, remoteRpmFilename).toPath.toString
+      sftp.get(remoteRpmFile, localRpmFile)
+      sftp.rm(remoteRpmFile)
     }
+    sftp.disconnect
+
+    // Cleanup. We need another ssh session to do this properly on the build machine, because ChannelSftp has an rmdir, but
+    // if that directory contains any other files, an SftpException is thrown with a SSH_FX_FAILURE (general failure) and
+    // there is no rm -r.
+    log.info("Opening ssh channel for cleanup.")
+    val cleanupSsh = session.openChannel("exec").asInstanceOf[ChannelExec]
+    val cleanupCmd = s"""rm -rf \"${rpmBuildDir}\""""
+    cleanupSsh.setCommand(cleanupCmd)
+    log.info("Executing remote cleanup.")
+    cleanupSsh.connect(remoteBuildInfo.timeout)
+    while (!cleanupSsh.isClosed) Thread.sleep(1000)
+    cleanupSsh.disconnect
+
+    // Furthermore, JSch fails with an error SSH_FX_FAILURE (general failure) if you try to rm a directory that contains
+    // other files, and there seems to be n
+    // sftp.rm(destArchiveFile)
+    // sftp.rm(destSpecFile)
+    session.disconnect
 
     // Move the rpm back to wd
     val rpms = Files.newDirectoryStream(new File(wd, "RPMS").toPath, "*.rpm")
