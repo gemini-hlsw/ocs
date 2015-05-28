@@ -32,7 +32,6 @@ case class NumericPropertySheet[A](title: scala.Option[String], f: SPTarget => A
               try nonreentrant {
                 p.g(f(spt), tbwe.getValue.toDouble)
                 spt.notifyOfGenericUpdate()
-                tbwe.requestFocus()
               }
               catch { case _: NumberFormatException => }
         })
