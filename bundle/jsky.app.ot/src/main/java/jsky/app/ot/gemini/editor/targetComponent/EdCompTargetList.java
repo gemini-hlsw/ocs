@@ -118,22 +118,25 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
     }
 
     @Override protected void updateEnabledState(boolean enabled) {
-        super.updateEnabledState(enabled);
+        if (enabled != isEnabled()) {
+            setEnabled(enabled);
+            updateEnabledState(getWindow().getComponents(), enabled);
+
+            // Update enabled state for all detail widgets.  The current editor
+            // will have already been updated by the super.updateEnabledState so
+            // update the others.
+            for (final TargetDetailEditor ed : _w.detailEditor.allEditorsJava()) {
+                if (_w.detailEditor.curDetailEdiorJava().forall(cur -> cur != ed)) {
+                    updateEnabledState(new Component[]{ed}, enabled);
+                }
+            }
+        }
 
         final TargetEnvironment env = getDataObject().getTargetEnvironment();
         _w.tag.setEnabled(enabled && env.getBase() != _curPos);
 
         final SPInstObsComp inst = getContextInstrumentDataObject();
         _w.newMenu.setEnabled(enabled && inst != null);
-
-        // Update enabled state for all detail widgets.  The current editor
-        // will have already been updated by the super.updateEnabledState so
-        // update the others.
-        for (final TargetDetailEditor ed : _w.detailEditor.allEditorsJava()) {
-            if (_w.detailEditor.curDetailEdiorJava().forall(cur -> cur != ed)) {
-                updateEnabledState(new Component[] {ed}, enabled);
-            }
-        }
     }
 
     private final ActionListener _tagListener = new ActionListener() {
