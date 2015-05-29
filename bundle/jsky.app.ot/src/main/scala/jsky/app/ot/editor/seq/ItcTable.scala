@@ -201,8 +201,10 @@ trait ItcTable extends Table {
       val bands = target.getMagnitudes.toList.asScala.toList.
         filter(_.getBand.getWavelengthMidPoint.isDefined).// ignore bands with unknown wavelengths (currently AP only)
         filterNot(_.getBand == Magnitude.Band.UC).        // ignore UC magnitudes
-        filterNot(_.getBand == Magnitude.Band.AP)         // ignore AP magnitudes
-      if (bands.isEmpty) "No standard magnitudes for target defined; ITC can not use UC and AP magnitudes.".left[Magnitude]
+        filterNot(_.getBand == Magnitude.Band.AP).        // ignore AP magnitudes
+        filterNot(_.getBand == Magnitude.Band.Y).         // ITC currently does not support Y
+        filterNot(_.getBand == Magnitude.Band.u)          // ITC currently does not support u
+      if (bands.isEmpty) "No standard magnitudes for target defined; ITC does not support UC, AP, Y and u magnitudes.".left[Magnitude]
       else closestBand(bands, wl).right[String]
     }
 
@@ -218,7 +220,6 @@ trait ItcTable extends Table {
         case Magnitude.System.Jy    => BrightnessUnit.JY
       }
       val band   = mag.getBand match {
-        case Magnitude.Band.u  => WavebandDefinition.U
         case Magnitude.Band.g  => WavebandDefinition.g
         case Magnitude.Band.r  => WavebandDefinition.r
         case Magnitude.Band.i  => WavebandDefinition.i
@@ -229,7 +230,6 @@ trait ItcTable extends Table {
         case Magnitude.Band.V  => WavebandDefinition.V
         case Magnitude.Band.R  => WavebandDefinition.R
         case Magnitude.Band.I  => WavebandDefinition.I
-        case Magnitude.Band.Y  => WavebandDefinition.z
         case Magnitude.Band.J  => WavebandDefinition.J
         case Magnitude.Band.H  => WavebandDefinition.H
         case Magnitude.Band.K  => WavebandDefinition.K
@@ -238,7 +238,9 @@ trait ItcTable extends Table {
         case Magnitude.Band.N  => WavebandDefinition.N
         case Magnitude.Band.Q  => WavebandDefinition.Q
 
-        // UC and AP are not taken into account for ITC calculations
+        // UC and AP are not taken into account for ITC calculations; Y and u are currently not supported in ITC
+        case Magnitude.Band.u  => throw new Error()
+        case Magnitude.Band.Y  => throw new Error()
         case Magnitude.Band.UC => throw new Error()
         case Magnitude.Band.AP => throw new Error()
       }
