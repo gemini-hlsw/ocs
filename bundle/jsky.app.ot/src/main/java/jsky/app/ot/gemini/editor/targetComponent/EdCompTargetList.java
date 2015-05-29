@@ -118,22 +118,29 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
     }
 
     @Override protected void updateEnabledState(boolean enabled) {
-        super.updateEnabledState(enabled);
+        if (enabled != isEnabled()) {
+            setEnabled(enabled);
+            updateEnabledState(getWindow().getComponents(), enabled);
+
+            // Update enabled state for all detail widgets.  The current detail
+            // editor will have already been updated by the call to
+            // updateEnabledState above which updates the hierarchy of widgets
+            // rooted in the JPanel containing the target component.  Since the
+            // other detail editors are swapped in when the target type changes,
+            // update them explicitly so they behave as if they were contained
+            // in the panel.
+            for (final TargetDetailEditor ed : _w.detailEditor.allEditorsJava()) {
+                if (_w.detailEditor.curDetailEditorJava().forall(cur -> cur != ed)) {
+                    updateEnabledState(new Component[]{ed}, enabled);
+                }
+            }
+        }
 
         final TargetEnvironment env = getDataObject().getTargetEnvironment();
         _w.tag.setEnabled(enabled && env.getBase() != _curPos);
 
         final SPInstObsComp inst = getContextInstrumentDataObject();
         _w.newMenu.setEnabled(enabled && inst != null);
-
-        // Update enabled state for all detail widgets.  The current editor
-        // will have already been updated by the super.updateEnabledState so
-        // update the others.
-        for (final TargetDetailEditor ed : _w.detailEditor.allEditorsJava()) {
-            if (_w.detailEditor.curDetailEdiorJava().forall(cur -> cur != ed)) {
-                updateEnabledState(new Component[] {ed}, enabled);
-            }
-        }
     }
 
     private final ActionListener _tagListener = new ActionListener() {
