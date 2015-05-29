@@ -1289,7 +1289,7 @@ public final class GmosRule implements IRule {
 
     private static Double getLimit(final DetectorManufacturer dm, final Filter filter, final AmpGain gain, final SkyBackground sb, final Binning binning) {
         // Currently we only apply these rules for AmpGain.LOW. Note that the amp gain was originally part of
-        // the MultiKey but as long as only one values is relevant it seems overkill to have it there.
+        // the MultiKey but as long as only one value is relevant it seems overkill to have it there.
         if (gain != AmpGain.LOW) return Double.MAX_VALUE;
 
         // check if we have a max value defined
@@ -1297,23 +1297,20 @@ public final class GmosRule implements IRule {
         final Double storedLimit = getLimits(dm).get(key);
         if (storedLimit == null) return Double.MAX_VALUE;
 
+        // if so return it, taking binning into account
         switch (binning) {
-            case ONE:
-                return E2V_EXPOSURE_LIMITS.get(key);
-            case TWO:
-                return E2V_EXPOSURE_LIMITS.get(key) / 4.0;
-            case FOUR:
-                return E2V_EXPOSURE_LIMITS.get(key) / 16.0;
-            default:
-                throw new IllegalArgumentException("This should never happen, put here just so the compiler doesn't complain about a missing return statement");
+            case ONE:       return storedLimit;
+            case TWO:       return storedLimit / 4.0;
+            case FOUR:      return storedLimit / 16.0;
+            default:        throw new Error();
         }
     }
 
     private static Map<MultiKey, Double> getLimits(final DetectorManufacturer dm) {
         switch (dm) {
-            case E2V:           return E2V_EXPOSURE_LIMITS;
-            case HAMAMATSU:     return HAM_EXPOSURE_LIMITS;
-            default:            throw new Error();
+            case E2V:       return E2V_EXPOSURE_LIMITS;
+            case HAMAMATSU: return HAM_EXPOSURE_LIMITS;
+            default:        throw new Error();
         }
     }
 
@@ -1503,19 +1500,22 @@ public final class GmosRule implements IRule {
 
         @Override
         public Problem check(Config config, int step, ObservationElements elems, Object state) {
-            final InstGmosCommon inst = (InstGmosCommon) elems.getInstrument();
+            final InstGmosCommon inst     = (InstGmosCommon) elems.getInstrument();
             final DetectorManufacturer dm = getDetectorManufacturer(config);
-            final Filter filter = getFilter(config);
-            final Binning xBinning = getXBinning(config);//for imaging, binning is 1x1, 2x2 or 4x4
-            for (SPSiteQuality sq : elems.getSiteQuality()) {
-                final SkyBackground sb = sq.getSkyBackground();
-                final AmpGain gain = getGain(config);
+            final Filter filter           = getFilter(config);
+            final Binning xBinning        = getXBinning(config);//for imaging, binning is 1x1, 2x2 or 4x4
 
-                final Double expTime = getExposureTime(inst, config);
-                if (expTime != null && expTime > getLimit(dm, filter, gain, sb, xBinning)) {
+            for (SPSiteQuality sq : elems.getSiteQuality()) {
+
+                final SkyBackground sb  = sq.getSkyBackground();
+                final AmpGain gain      = getGain(config);
+                final Double expTime    = getExposureTime(inst, config);
+                final Double maxExpTime = getLimit(dm, filter, gain, sb, xBinning);
+
+                if (expTime != null && expTime > maxExpTime) {
                     return new Problem(ERROR, PREFIX + "E_FILTER_MAX_EXPOSURE_TIME_RULE", errMsg,
                             SequenceRule.getInstrumentOrSequenceNode(step, elems));
-                } else if (expTime != null && expTime > getLimit(dm, filter, gain, sb, xBinning) / 2.0) {
+                } else if (expTime != null && expTime > maxExpTime / 2.0) {
                     return new Problem(WARNING, PREFIX + "W_FILTER_MAX_EXPOSURE_TIME_RULE", warnMsg,
                             SequenceRule.getInstrumentOrSequenceNode(step, elems));
                 }
