@@ -2,7 +2,6 @@ package edu.gemini.sp.vcs2
 
 import edu.gemini.pot.sp.{Conflict, Conflicts, SPNodeKey}
 import edu.gemini.pot.sp.version._
-import edu.gemini.sp.vcs2.ProgramLocation.{Remote, Local}
 import edu.gemini.spModel.conflict.ConflictFolder
 import edu.gemini.spModel.data.ISPDataObject
 import edu.gemini.spModel.gemini.gmos.InstGmosSouth
@@ -23,10 +22,6 @@ import Scalaz._
 
 class MergeCorrectionSpec extends Specification {
   import NodeDetail._
-
-  val LocalOnly: Set[ProgramLocation]  = Set(Local)
-  val RemoteOnly: Set[ProgramLocation] = Set(Remote)
-  val Both: Set[ProgramLocation]       = Set(Local, Remote)
 
   val lifespanId: LifespanId = LifespanId.random
 

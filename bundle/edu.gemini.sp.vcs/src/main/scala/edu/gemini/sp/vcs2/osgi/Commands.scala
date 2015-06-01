@@ -1,7 +1,7 @@
 package edu.gemini.sp.vcs2.osgi
 
 import edu.gemini.pot.spdb.IDBDatabaseService
-import edu.gemini.sp.vcs2.ProgramLocation.{Both, RemoteOnly, LocalOnly, Neither}
+import edu.gemini.sp.vcs2.ProgramLocationSet.{Both, RemoteOnly, LocalOnly, Neither}
 import edu.gemini.sp.vcs2._
 import edu.gemini.sp.vcs2.VcsAction._
 import edu.gemini.sp.vcs.reg.VcsRegistrar
@@ -100,13 +100,15 @@ object Commands {
       runAndFormat(id, peer, vcs.checkout(_, _, new AtomicBoolean(false))) { _ => s"Checked out $id from $peer" }
 
     val pull: VcsOp = (id, peer) =>
-      runAndFormat(id, peer, vcs.pull(_, _, new AtomicBoolean(false))) { updated =>
-        if (updated) "Updated local program." else "Already up to date."
+      runAndFormat(id, peer, vcs.pull(_, _, new AtomicBoolean(false))) {
+        case LocalOnly => "Updated local program."
+        case Neither   => "Already up to date."
       }
 
     val push: VcsOp = (id, peer) =>
-      runAndFormat(id, peer, vcs.push(_, _, new AtomicBoolean(false))) { updated =>
-        if (updated) "Updated remote program." else "Already up to date."
+      runAndFormat(id, peer, vcs.push(_, _, new AtomicBoolean(false))) {
+        case RemoteOnly  => "Updated remote program."
+        case Neither     => "Already up to date."
       }
 
     val sync: VcsOp = (id, peer) =>

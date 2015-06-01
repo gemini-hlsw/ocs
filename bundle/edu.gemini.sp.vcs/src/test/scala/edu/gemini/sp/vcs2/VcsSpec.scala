@@ -1,6 +1,7 @@
 package edu.gemini.sp.vcs2
 
 
+import edu.gemini.sp.vcs2.ProgramLocationSet.{RemoteOnly, LocalOnly, Neither, Both}
 import edu.gemini.sp.vcs2.VcsAction._
 import edu.gemini.sp.vcs2.VcsFailure.NeedsUpdate
 import edu.gemini.spModel.core.SPProgramID
@@ -95,7 +96,7 @@ class VcsSpec extends VcsSpecification {
 
     "do nothing if the local version is the same" in withVcs { env =>
       expect(env.local.superStaffVcs.pull(Q1, DummyPeer, notCancelled)) {
-        case \/-(false) => ok("")
+        case \/-(Neither) => ok("")
       }
     }
 
@@ -103,7 +104,7 @@ class VcsSpec extends VcsSpecification {
       env.local.progTitle = "The Myth of Sisyphus"
 
       expect(env.local.superStaffVcs.pull(Q1, DummyPeer, notCancelled)) {
-        case \/-(false) => ok("")
+        case \/-(Neither) => ok("")
       } and (env.local.progTitle must_== "The Myth of Sisyphus")
     }
 
@@ -111,7 +112,7 @@ class VcsSpec extends VcsSpecification {
       env.remote.progTitle = "The Myth of Sisyphus"
 
       expect(env.local.superStaffVcs.pull(Q1, DummyPeer, notCancelled)) {
-        case \/-(true) => ok("")
+        case \/-(LocalOnly) => ok("")
       } and (env.local.progTitle must_== "The Myth of Sisyphus")
     }
 
@@ -147,7 +148,7 @@ class VcsSpec extends VcsSpecification {
 
     "do nothing if the local version is the same" in withVcs { env =>
       expect(env.local.superStaffVcs.push(Q1, DummyPeer, notCancelled)) {
-        case \/-(false) => ok("")
+        case \/-(Neither) => ok("")
       }
     }
 
@@ -163,7 +164,7 @@ class VcsSpec extends VcsSpecification {
       env.local.progTitle = "The Myth of Sisyphus"
 
       expect(env.local.superStaffVcs.push(Q1, DummyPeer, notCancelled)) {
-        case \/-(true) => ok("")
+        case \/-(RemoteOnly) => ok("")
       } and (env.remote.progTitle must_== "The Myth of Sisyphus")
     }
 
@@ -202,7 +203,7 @@ class VcsSpec extends VcsSpecification {
 
       "do nothing if both versions are the same" in withVcs { env =>
         expect(syncMethod(env.local.superStaffVcs, Q1)) {
-          case \/-(ProgramLocation.Neither) => ok("")
+          case \/-(Neither) => ok("")
         }
       }
 
@@ -210,7 +211,7 @@ class VcsSpec extends VcsSpecification {
         env.remote.progTitle = "The Myth of Sisyphus"
 
         expect(syncMethod(env.local.superStaffVcs, Q1)) {
-          case \/-(ProgramLocation.LocalOnly) => ok("")
+          case \/-(LocalOnly) => ok("")
         } and (env.local.progTitle must_== "The Myth of Sisyphus")
       }
 
@@ -218,7 +219,7 @@ class VcsSpec extends VcsSpecification {
         env.local.progTitle = "The Myth of Sisyphus"
 
         expect(syncMethod(env.local.superStaffVcs, Q1)) {
-          case \/-(ProgramLocation.RemoteOnly) => ok("")
+          case \/-(RemoteOnly) => ok("")
         } and (env.remote.progTitle must_== "The Myth of Sisyphus")
       }
 
@@ -230,7 +231,7 @@ class VcsSpec extends VcsSpecification {
         env.remote.prog.addObsComponent(note)
 
         expect(syncMethod(env.local.superStaffVcs, Q1)) {
-          case \/-(ProgramLocation.Both) => ok("")
+          case \/-(Both) => ok("")
         } and (env.remote.prog.getGroups.get(0).getNodeKey must_== group.getNodeKey) and
           (env.local.prog.getObsComponents.get(0).getNodeKey must_== note.getNodeKey)
       }

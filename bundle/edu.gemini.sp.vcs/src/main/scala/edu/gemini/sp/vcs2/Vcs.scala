@@ -3,7 +3,8 @@ package edu.gemini.sp.vcs2
 import edu.gemini.pot.sp.{SPNodeKey, ISPFactory, ISPProgram}
 import edu.gemini.pot.sp.version._
 import edu.gemini.shared.util.VersionComparison.{Conflicting, Same, Newer}
-import edu.gemini.sp.vcs2.ProgramLocation.{LocalOnly, Neither, Remote}
+import edu.gemini.sp.vcs2.ProgramLocation.Remote
+import edu.gemini.sp.vcs2.ProgramLocationSet.{LocalOnly, Neither, RemoteOnly}
 import edu.gemini.sp.vcs2.VcsFailure.{Cancelled, IdClash, NeedsUpdate}
 import edu.gemini.sp.vcs.log.VcsEventSet
 import edu.gemini.spModel.core.{Peer, SPProgramID}
@@ -86,8 +87,8 @@ class Vcs(user: VcsAction[Set[Principal]], server: VcsServer, service: Peer => V
     * and merge them with the local program if necessary.  The action returns
     * `true` if it results in an updated local program; `false` otherwise.
     */
-  def pull(id: SPProgramID, peer: Peer, cancelled: AtomicBoolean): VcsAction[Boolean] =
-    pull0(id, Client(peer), cancelled).map(_.localUpdate)
+  def pull(id: SPProgramID, peer: Peer, cancelled: AtomicBoolean): VcsAction[PullResult] =
+    pull0(id, Client(peer), cancelled).map(_.localUpdate.fold(LocalOnly, Neither))
 
   /** Provides an action that pushes local changes to the remote peer, merging
     * them with the remote version of the program if necessary.  When performed,
@@ -96,7 +97,7 @@ class Vcs(user: VcsAction[Set[Principal]], server: VcsServer, service: Peer => V
     * Note that the push will only be possible if the local version is strictly
     * newer than the remote version. Otherwise it fails with a `NeedsUpdate`
     * `VcsFailure`. */
-  def push(id: SPProgramID, peer: Peer, cancelled: AtomicBoolean): VcsAction[Boolean] = {
+  def push(id: SPProgramID, peer: Peer, cancelled: AtomicBoolean): VcsAction[PushResult] = {
     def validateProgKey(lKey: SPNodeKey, remote: DiffState): VcsAction[Unit] = {
       val rKey = remote.progKey
       if (lKey === rKey) VcsAction.unit else VcsAction.fail(IdClash(id, lKey, rKey))
@@ -111,8 +112,8 @@ class Vcs(user: VcsAction[Set[Principal]], server: VcsServer, service: Peer => V
       _         <- validateProgKey(keyDiff._1, diffState)
       _         <- checkCancel(cancelled)
       res       <- keyDiff._2.plan.compare(diffState.vm) match {
-        case Newer => client.storeDiffs(id, keyDiff._2.plan)
-        case Same  => VcsAction(false)
+        case Newer => client.storeDiffs(id, keyDiff._2.plan).map(_.fold(RemoteOnly, Neither))
+        case Same  => VcsAction(Neither)
         case _     => VcsAction.fail(NeedsUpdate)
       }
     } yield res
@@ -128,7 +129,7 @@ class Vcs(user: VcsAction[Set[Principal]], server: VcsServer, service: Peer => V
     val client = Client(peer)
     for {
       eval <- pull0(id, client, cancelled)
-      s0    = if (eval.localUpdate) LocalOnly else Neither
+      s0    = eval.localUpdate.fold(LocalOnly, Neither)
       res  <- eval match {
         case MergeEval(_,     _, false) =>
           VcsAction(s0)

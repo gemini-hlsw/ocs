@@ -2,7 +2,8 @@ package edu.gemini.sp.vcs2
 
 import edu.gemini.pot.sp.{SPObservationID, SPNodeKey}
 import edu.gemini.sp.vcs2.NodeDetail.Obs
-import edu.gemini.sp.vcs2.ProgramLocation.{Remote, Local}
+import edu.gemini.sp.vcs2.ProgramLocation.{Local, Remote}
+import edu.gemini.sp.vcs2.ProgramLocationSet.{RemoteOnly, LocalOnly, Both}
 import edu.gemini.sp.vcs2.VcsFailure.Unmergeable
 import edu.gemini.spModel.event.SlewEvent
 import edu.gemini.spModel.gemini.obscomp.SPProgram
@@ -13,13 +14,13 @@ import Scalaz._
 
 class ObsNumberCorrectionSpec extends MergeCorrectionSpec {
 
-  def test(expected: List[Int], merged: (Int, Set[ProgramLocation])*): Boolean = {
+  def test(expected: List[Int], merged: (Int, ProgramLocationSet)*): Boolean = {
     val obsList = merged.map { case (i,_) => obs(i).leaf }
 
     val mergeTree = Tree.node(prog, obsList.toStream)
 
     val known = merged.unzip._2.zip(obsList.map(_.key)).map { case (locs, key) =>
-      locs.map(loc => (loc, key))
+      locs.toSet.map(loc => (loc, key))
     }.toSet.flatten
 
     def obsNumbers(t: Tree[MergeNode]): List[Int] =
@@ -29,7 +30,7 @@ class ObsNumberCorrectionSpec extends MergeCorrectionSpec {
       }).toList
 
     val plan = MergePlan(mergeTree, Set.empty)
-    val rem  = merged.collect { case (i, s) if s.contains(Remote) => i }
+    val rem  = merged.collect { case (i, s) if s.toSet.contains(Remote) => i }
     val max  = if (rem.isEmpty) None else Some(rem.max)
     val onc  = new ObsNumberCorrection(lifespanId, Function.untupled(known.contains), max)
 
@@ -138,8 +139,7 @@ class ObsNumberCorrectionSpec extends MergeCorrectionSpec {
       val oRemote = obs(1)
 
       val onc = new ObsNumberCorrection(lifespanId, (loc: ProgramLocation, key: SPNodeKey) => {
-        (loc == ProgramLocation.Local && key == oLocal.key) ||
-          (loc == ProgramLocation.Remote && key == oRemote.key)
+        (loc == Local && key == oLocal.key) || (loc == Remote && key == oRemote.key)
       }, Some(1))
 
       val mergeTree = p.node(oLocal.leaf, oRemote.leaf)
