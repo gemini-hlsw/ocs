@@ -82,19 +82,18 @@ object Horizons {
    */
   def lookupConicTargetById(
     name:     String,
-    hObjId:   String,
+    hObjId:   String, // unused for now: see REL-2364
     hObjType: ObjectType,
     date:     Date,
     useCache: Boolean
   ): HorizonsIO[(ConicTarget, Ephemeris)] =
-    lookupConicTargetByName(name, hObjType, date) // RCN: temporary; see REL-2364
-//    for {
-//      _ <- validateName(hObjId)
-//      s <- getService
-//      r <- lookup(s, hObjId, hObjType, date, useCache)
-//      t <- extractConicTarget(r, name)
-//      e <- extractEphemeris(r)
-//    } yield (t, e)
+    for {
+      _ <- validateName(name)
+      s <- getService
+      r <- lookup(s, name, hObjType, date, useCache)
+      t <- extractConicTarget(r, name)
+      e <- extractEphemeris(r)
+    } yield (t, e)
 
   /**
    * Construct a program to look up and construct a new conic target, given a name and an object
