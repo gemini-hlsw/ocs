@@ -524,6 +524,11 @@ public final class Gsaoi extends SPInstObsComp implements PropertyProvider, Guid
         return Site.SET_GS;
     }
 
+    @Override
+    public double[] getScienceArea() {
+        return new double[]{85.0, 85.0};
+    }
+
     public String getPhaseIResourceName() {
         return "gemGSAOI";
     }

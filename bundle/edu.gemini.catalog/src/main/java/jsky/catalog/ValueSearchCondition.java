@@ -6,8 +6,6 @@
 
 package jsky.catalog;
 
-import java.io.Serializable;
-
 import jsky.util.StringUtil;
 
 
@@ -24,7 +22,7 @@ public class ValueSearchCondition extends AbstractSearchCondition {
     /**
      * Create a new ValueSearchCondition for the given column or parameter description.
      */
-    public ValueSearchCondition(FieldDesc fieldDesc, Comparable val) {
+    public ValueSearchCondition(FieldDesc fieldDesc, Comparable<?> val) {
         super(fieldDesc);
         _val = val;
     }
@@ -44,7 +42,7 @@ public class ValueSearchCondition extends AbstractSearchCondition {
     }
 
     /** Return the value (actually a Double or String) */
-    public Comparable getVal() {
+    public Comparable<?> getVal() {
         return _val;
     }
 

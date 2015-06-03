@@ -40,7 +40,6 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-
 /**
  * A dialog to choose a method for selecting a guide star. The choices
  * are to use a guide star catalog to get the best choice based on the
@@ -55,7 +54,6 @@ public class TpeGuideStarDialog extends TpeGuideStarDialogForm
     // Key used to save guide tag choice between sessions
     private static final String _GUIDE_TAG_KEY = TpeGuideStarDialog.class.getName() + ".guideTag";
 
-
     private static final String PWFS = "PWFS";
     private static final String PWFS1 = "PWFS1";
     private static final String PWFS2 = "PWFS2";
@@ -65,11 +63,9 @@ public class TpeGuideStarDialog extends TpeGuideStarDialogForm
     private static final String AOWFS_LGS = "AOWFS LGS";
 
     private static final String CATALOG_2MASS = "2MASS";
-//    private static final String CATALOG_PPMXL = "PPMXL";
-    private static final String CATALOG_UCAC3 = "UCAC3";
+    private static final String CATALOG_UCAC4 = "UCAC4";
 
-//    private static final String OPTICAL_DEFAULT_CATALOG = "Guide Star Catalog at ESO";
-    private static final String OPTICAL_DEFAULT_CATALOG = CATALOG_UCAC3;
+    private static final String OPTICAL_DEFAULT_CATALOG = CATALOG_UCAC4;
 
     private static final String EMPTY_TEXT = " ";
     /**
@@ -164,10 +160,6 @@ public class TpeGuideStarDialog extends TpeGuideStarDialogForm
         }
     }
 
-    //Check if the selected instrument is usable with the given
-    //Guide star type
-    //This code sucks, crap needs to be refactored, and use
-    //real objects!!
     /**
      * Check for potential conflicts between an instrument and a
      * given guide star.
@@ -183,8 +175,8 @@ public class TpeGuideStarDialog extends TpeGuideStarDialogForm
      * If NIFS is selected only PWFS1 and PWFS2 are allowed
      */
     private void _checkInstrumentGuideStar() {
-        String instrument = (String)instComboBox.getSelectedItem();
-        String tag = (String)typeComboBox.getSelectedItem();
+        String instrument = instComboBox.getItemAt(instComboBox.getSelectedIndex());
+        String tag = typeComboBox.getItemAt(typeComboBox.getSelectedIndex());
         boolean problem = false;
 
         if (instrument.equals(NIFS)) {
@@ -216,13 +208,6 @@ public class TpeGuideStarDialog extends TpeGuideStarDialogForm
         okButton.setEnabled(true);
     }
 
-    //
-    //This code sucks, crap needs to be refactored, and use
-    //real objects!!
-    //changeOption == true means we are allowed to change
-    //the option chosen by the user. Otherwise, only
-    //will warn the users, but won't change what the user has selected
-
     /**
      * Select default catalogs for a given set of instrument
      * and guide star types (SCT-156)
@@ -249,8 +234,8 @@ public class TpeGuideStarDialog extends TpeGuideStarDialogForm
      */
 
     private void _selectDefaultCatalog(boolean changeOption) {
-        String instrument = (String)instComboBox.getSelectedItem();
-        String tag = (String)typeComboBox.getSelectedItem();
+        String instrument = instComboBox.getItemAt(instComboBox.getSelectedIndex());
+        String tag = typeComboBox.getItemAt(typeComboBox.getSelectedIndex());
         catalogWarning.setForeground(Color.BLUE);
         if (tag.equals(OIWFS)) {
             if (instrument.equals(GNIRS) || instrument.equals(NIRI) || instrument.startsWith(NIFS) || instrument.equals(GSAOI)) {
@@ -258,61 +243,34 @@ public class TpeGuideStarDialog extends TpeGuideStarDialogForm
                     return;
                 }
             } else if (instrument.equals(GMOS_N) || instrument.equals(GMOS_S)) {
-                if (_selectDefaultCatalog(CATALOG_UCAC3, changeOption)) {
+                if (_selectDefaultCatalog(CATALOG_UCAC4, changeOption)) {
                     return;
                 }
             } else if (instrument.equals(FLAMINGOS2)) {
-                Catalog c = (Catalog)catalogComboBox.getSelectedItem();
+                Catalog c = catalogComboBox.getItemAt(catalogComboBox.getSelectedIndex());
                 if (c.getName().startsWith(CATALOG_2MASS)) {
                     catalogWarning.setText(c.getName() + " in use");
                     return;
                 }
             }
         } else if (tag.startsWith(PWFS) || tag.startsWith(AOWFS)) {
-             if (_selectDefaultCatalog(CATALOG_UCAC3, changeOption)) {
+             if (_selectDefaultCatalog(CATALOG_UCAC4, changeOption)) {
                  return;
              }
         }
-
-        // not reached anymore
-//        if (!tag.equals(OIWFS)) {
-//            Catalog c = (Catalog) catalogComboBox.getSelectedItem();
-//            if (c.getName().startsWith(CATALOG_2MASS)) {
-//                catalogWarning.setText(c.getName() + " in use");
-//                return;
-//            }
-//        }
-
         catalogWarning.setText(EMPTY_TEXT);
     }
 
-//    // OT-7 - Make PPMXL the default guide star catalog
-//    private void _selectDefaultCatalog(boolean changeOption) {
-//        if (changeOption) {
-//            //select the 2MASS catalog for the user.
-//            int n = catalogComboBox.getItemCount();
-//            for (int i = 0; i < n; i++) {
-//                Catalog c = (Catalog) catalogComboBox.getItemAt(i);
-//                if (c.getName().startsWith(CATALOG_PPMXL)) {
-//                    catalogComboBox.setSelectedItem(c);
-//                    return;
-//                }
-//            }
-//        }
-//        catalogWarning.setText(EMPTY_TEXT);
-//    }
-
-
     // Refactored from original code, returns true if the caller should return immediately
     private boolean _selectDefaultCatalog(String catalogName, boolean changeOption) {
-        Catalog c = (Catalog) catalogComboBox.getSelectedItem();
+        Catalog c = catalogComboBox.getItemAt(catalogComboBox.getSelectedIndex());
         if (c == null || !c.getName().startsWith(catalogName)) {
             if (changeOption) {
                 catalogWarning.setText(EMPTY_TEXT);
                 //select the given catalog for the user.
                 int n = catalogComboBox.getItemCount();
                 for (int i = 0; i < n; i++) {
-                    c = (Catalog) catalogComboBox.getItemAt(i);
+                    c = catalogComboBox.getItemAt(i);
                     if (c.getName().startsWith(catalogName)) {
                         catalogComboBox.setSelectedItem(c);
                         return true;
@@ -389,7 +347,6 @@ public class TpeGuideStarDialog extends TpeGuideStarDialogForm
         dir.addTreeModelListener(this);
     }
 
-
     // -- implement the TreeModelListener interface
     // (so we can update the menus whenever the catalog tree is changed)
 
@@ -409,17 +366,6 @@ public class TpeGuideStarDialog extends TpeGuideStarDialogForm
         _makeCatalogMenu();
     }
 
-
-//    // Set the selected guide tag: PWFS1, PWFS2, OIWFS, or AOWFS
-//    private void _setSelectedGuideTag(String s) {
-//        for (int i = 0; i < GUIDE_TAGS.length; i++) {
-//            if (s.equals(GUIDE_TAGS[i])) {
-//                _setSelectedIndex(typeComboBox, i);
-//                break;
-//            }
-//        }
-//    }
-
     // Called when one of the dialog buttons is pushed
     public void actionPerformed(ActionEvent e) {
         Object src = e.getSource();
@@ -427,19 +373,19 @@ public class TpeGuideStarDialog extends TpeGuideStarDialogForm
             _cancel();
         } else if (src.equals(okButton)) {
             _ok();
-        } else if (src == typeComboBox) {
+        } else if (src.equals(typeComboBox)) {
             _checkInstrumentGuideStar();
             _selectDefaultCatalog(true);
-        } else if (src == instComboBox) {
+        } else if (src.equals(instComboBox)) {
             _checkInstrumentGuideStar();
             _selectDefaultCatalog(true);
-        } else if (src == catalogComboBox) {
+        } else if (src .equals(catalogComboBox)) {
             _selectDefaultCatalog(false);
         }
     }
 
 
-    private void _setSelectedIndex(JComboBox cb, int i) {
+    private void _setSelectedIndex(JComboBox<?> cb, int i) {
         if (i != cb.getSelectedIndex()) {
             cb.setSelectedIndex(i);
         } else {
@@ -469,7 +415,6 @@ public class TpeGuideStarDialog extends TpeGuideStarDialogForm
         return ctx.instrument().dataObject().isDefined() ?
                 ctx.instrument().dataObject().get() : null;
     }
-
 
     //Check the AO system.
     //For Altair, will return true if the Field Lens is IN
@@ -515,10 +460,10 @@ public class TpeGuideStarDialog extends TpeGuideStarDialogForm
 
     // Search the given catalog for the best guide star
     private void _findGuideStar() {
-        Catalog cat = (Catalog) catalogComboBox.getSelectedItem();
+        Catalog cat = catalogComboBox.getItemAt(catalogComboBox.getSelectedIndex());
         Preferences.set(_CATALOG_KEY, cat.getName());
 
-        String guideTag = (String) typeComboBox.getSelectedItem();
+        String guideTag = typeComboBox.getItemAt(typeComboBox.getSelectedIndex());
         Preferences.set(_GUIDE_TAG_KEY, guideTag);
 
         SPInstObsComp inst = _getInst(_iw.getContext());

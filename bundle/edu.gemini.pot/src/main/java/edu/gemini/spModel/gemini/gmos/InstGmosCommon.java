@@ -26,6 +26,8 @@ import edu.gemini.spModel.gemini.calunit.calibration.CalDictionary;
 import edu.gemini.spModel.gemini.parallacticangle.ParallacticAngleSupportInst;
 import edu.gemini.spModel.guide.GuideProbe;
 import edu.gemini.spModel.guide.GuideProbeProvider;
+import edu.gemini.spModel.inst.ScienceAreaGeometry;
+import edu.gemini.spModel.inst.VignettableScienceAreaInstrument;
 import edu.gemini.spModel.obs.plannedtime.CommonStepCalculator;
 import edu.gemini.spModel.obs.plannedtime.ExposureCalculator;
 import edu.gemini.spModel.obs.plannedtime.PlannedTime.CategorizedTime;
@@ -64,7 +66,8 @@ public abstract class InstGmosCommon<
         F extends Enum<F> & GmosCommonType.Filter,
         P extends Enum<P> & GmosCommonType.FPUnit,
         SM extends Enum<SM> & GmosCommonType.StageMode>
-        extends ParallacticAngleSupportInst implements IOffsetPosListProvider<OffsetPos>, GuideProbeProvider, IssPortProvider, PosAngleConstraintAware, StepCalculator {
+        extends ParallacticAngleSupportInst implements IOffsetPosListProvider<OffsetPos>, GuideProbeProvider,
+            IssPortProvider, PosAngleConstraintAware, StepCalculator, VignettableScienceAreaInstrument {
 
     private static final Logger LOG = Logger.getLogger(InstGmosCommon.class.getName());
 
@@ -99,7 +102,6 @@ public abstract class InstGmosCommon<
     // The size of the detector in arc secs
     public static final double DETECTOR_WIDTH = 330.34;
     public static final double DETECTOR_HEIGHT = 330.34;
-
 
     // Properties
     public static final PropertyDescriptor AMP_COUNT_PROP;
@@ -306,7 +308,6 @@ public abstract class InstGmosCommon<
     private F _filter;
     private GmosCommonType.Binning _xBin = GmosCommonType.Binning.DEFAULT;
     private GmosCommonType.Binning _yBin = GmosCommonType.Binning.DEFAULT;
-    private GmosCommonType.PosAngleMode _posAngleMode = GmosCommonType.PosAngleMode.DEFAULT;
     private PosAngleConstraint _posAngleConstraint = PosAngleConstraint.FIXED;
 
     //    private GmosCommonType.StageMode _stageMode = GmosCommonType.StageMode.DEFAULT;
@@ -371,7 +372,6 @@ public abstract class InstGmosCommon<
                 }
             }
     );
-
 
     /**
      * Constructor
@@ -445,13 +445,7 @@ public abstract class InstGmosCommon<
      * Return the science area based upon the current camera.
      */
     public double[] getScienceArea() {
-        double[] size = {330.34, 330.34};
-        P fpu = getFPUnit();
-        double width = fpu.getWidth();
-        if (width != -1)
-            size[0] = width;
-
-        return size;
+        return GmosScienceAreaGeometry.javaScienceAreaDimensions(this.getFPUnit());
     }
 
     /**
@@ -2040,4 +2034,8 @@ public abstract class InstGmosCommon<
         }
     }
 
+    @Override
+    public ScienceAreaGeometry getVignettableScienceArea() {
+        return GmosScienceAreaGeometry$.MODULE$;
+    }
 }

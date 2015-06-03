@@ -20,8 +20,8 @@ import edu.gemini.spModel.target.obsComp.TargetObsComp;
 import edu.gemini.spModel.target.obsComp.TargetSelection;
 import edu.gemini.spModel.target.offset.OffsetPosSelection;
 import edu.gemini.spModel.target.system.CoordinateParam.Units;
-import edu.gemini.spModel.target.system.HmsDegTarget;
 import edu.gemini.spModel.target.system.ICoordinate;
+import edu.gemini.spModel.target.system.ITarget;
 import jsky.app.jskycat.JSkyCat;
 import jsky.app.ot.OT;
 import jsky.app.ot.ags.*;
@@ -39,7 +39,6 @@ import jsky.navigator.*;
 import jsky.util.Preferences;
 import jsky.util.gui.DialogUtil;
 
-import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Point2D;
@@ -50,7 +49,6 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.Vector;
-
 
 /**
  * Implements a telescope position editor for the Gemini telescope
@@ -113,15 +111,8 @@ public class TelescopePosEditor extends JSkyCat implements TpeMouseObserver {
 
         // get the TPE toolbar handle
         Component parent = _iw.getParentFrame();
-        if (parent instanceof TpeImageDisplayFrame) {
-            _tpeToolBar = ((TpeImageDisplayFrame) parent).getTpeToolBar();
-            _tpeMenuBar = (TpeImageDisplayMenuBar) ((TpeImageDisplayFrame) parent).getJMenuBar();
-        } else if (parent instanceof TpeImageDisplayInternalFrame) {
-            _tpeToolBar = ((TpeImageDisplayInternalFrame) parent).getTpeToolBar();
-            _tpeMenuBar = (TpeImageDisplayMenuBar) ((TpeImageDisplayInternalFrame) parent).getJMenuBar();
-        } else {
-            throw new RuntimeException("internal error");
-        }
+        _tpeToolBar = ((TpeImageDisplayFrame) parent).getTpeToolBar();
+        _tpeMenuBar = (TpeImageDisplayMenuBar) ((TpeImageDisplayFrame) parent).getJMenuBar();
 
         _tpeToolBar.getGuiderSelector().addSelectionListener(new AgsSelectorControl.Listener() {
             @Override public void agsStrategyUpdated(Option<AgsStrategy> strategy) {
@@ -188,18 +179,6 @@ public class TelescopePosEditor extends JSkyCat implements TpeMouseObserver {
                     type.equals(SPSiteQuality.SP_TYPE));
         }
         return false;
-    }
-
-    /**
-     * Make and return an internal frame for displaying the given image (may be null).
-     *
-     * @param desktop        used to display the internal frame
-     * @param imageFileOrUrl specifies the image file or URL to display
-     */
-    protected NavigatorImageDisplayInternalFrame makeNavigatorImageDisplayInternalFrame(JDesktopPane desktop, String imageFileOrUrl) {
-        TpeImageDisplayInternalFrame frame = new TpeImageDisplayInternalFrame(desktop, imageFileOrUrl);
-        _iw = (TpeImageWidget) frame.getImageDisplayControl().getImageDisplay();
-        return frame;
     }
 
     /**
@@ -303,7 +282,9 @@ public class TelescopePosEditor extends JSkyCat implements TpeMouseObserver {
             return;
         }
 
-        tp.setTargetWithJ2000(basePos.getRaDeg(), basePos.getDecDeg());
+        tp.getTarget().getRa().setAs(basePos.getRaDeg(), Units.DEGREES);
+        tp.getTarget().getDec().setAs(basePos.getDecDeg(), Units.DEGREES);
+        tp.notifyOfGenericUpdate();
     }
 
     /**
@@ -316,9 +297,9 @@ public class TelescopePosEditor extends JSkyCat implements TpeMouseObserver {
         SPTarget tp = _ctx.targets().baseOrNull();
         if (tp != null) {
             // Get the RA and Dec from the pos list.
-            HmsDegTarget target = tp.getTarget().getTargetAsJ2000();
-            ICoordinate c1 = target.getC1();
-            ICoordinate c2 = target.getC2();
+            ITarget target = tp.getTarget();
+            ICoordinate c1 = target.getRa();
+            ICoordinate c2 = target.getDec();
             ra = c1.getAs(Units.DEGREES);
             dec = c2.getAs(Units.DEGREES);
         }
@@ -345,12 +326,12 @@ public class TelescopePosEditor extends JSkyCat implements TpeMouseObserver {
         if (newBasePos == null) return oldBasePos != null;
         if (oldBasePos == null) return true;
 
-        HmsDegTarget oldBase = oldBasePos.getTarget().getTargetAsJ2000();
-        HmsDegTarget newBase = newBasePos.getTarget().getTargetAsJ2000();
+        ITarget oldBase = oldBasePos.getTarget();
+        ITarget newBase = newBasePos.getTarget();
 
-        if (oldBase.getC1().getAs(Units.DEGREES) != newBase.getC1().getAs(Units.DEGREES))
+        if (oldBase.getRa().getAs(Units.DEGREES) != newBase.getRa().getAs(Units.DEGREES))
             return true;
-        return oldBase.getC2().getAs(Units.DEGREES) != newBase.getC2().getAs(Units.DEGREES);
+        return oldBase.getDec().getAs(Units.DEGREES) != newBase.getDec().getAs(Units.DEGREES);
     }
 
     private final PropertyChangeListener obsListener = new PropertyChangeListener() {
@@ -488,9 +469,9 @@ public class TelescopePosEditor extends JSkyCat implements TpeMouseObserver {
         if (_baseTarget == null) return;
 
         // XXX FIXME: We shouldn't have to use numeric indexes here
-        queryArgs.setParamValue(2, _baseTarget.getC1().toString());
-        queryArgs.setParamValue(3, _baseTarget.getC2().toString());
-        queryArgs.setParamValue(4, _baseTarget.getCoordSysAsString());
+        queryArgs.setParamValue(2, _baseTarget.getTarget().getRa().toString());
+        queryArgs.setParamValue(3, _baseTarget.getTarget().getDec().toString());
+        queryArgs.setParamValue(4, _baseTarget.getTarget().getTag().tccName);
         if (args.length > 2) {
             //first argument must be a Double, it represent the size on AstroCatalogs
             queryArgs.setParamValue(5, Double.valueOf(args[1]));

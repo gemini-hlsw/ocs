@@ -10,6 +10,7 @@ import edu.gemini.pot.sp.*;
 import edu.gemini.shared.gui.calendar.JCalendarPopup;
 import edu.gemini.spModel.data.ISPDataObject;
 import edu.gemini.spModel.gemini.obscomp.SPProgram;
+import edu.gemini.spModel.gemini.obscomp.SPSiteQuality;
 import edu.gemini.spModel.obscomp.SPInstObsComp;
 import edu.gemini.spModel.target.env.TargetEnvironment;
 import edu.gemini.spModel.target.obsComp.TargetObsComp;
@@ -273,6 +274,16 @@ public abstract class OtItemEditor<N extends ISPNode, T extends ISPDataObject> {
             for (ISPObsComponent c : o.getObsComponents())
                 if (c.getType() == SPComponentType.TELESCOPE_TARGETENV)
                     return c;
+        }
+        return null;
+    }
+
+    public SPSiteQuality getContextSiteQuality() {
+        final ISPObservation o = getContextObservation();
+        if (o != null) {
+            for (ISPObsComponent c : o.getObsComponents())
+                if (c.getType() == SPComponentType.SCHEDULING_CONDITIONS)
+                    return (SPSiteQuality) c.getDataObject();
         }
         return null;
     }

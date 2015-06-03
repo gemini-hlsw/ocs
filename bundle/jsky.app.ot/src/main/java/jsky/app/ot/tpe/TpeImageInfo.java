@@ -6,8 +6,11 @@
 //
 package jsky.app.ot.tpe;
 
+import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
 
+import edu.gemini.spModel.core.Angle$;
+import edu.gemini.spModel.inst.FeatureGeometry;
 import jsky.coords.WorldCoords;
 import edu.gemini.spModel.util.Angle;
 
@@ -38,6 +41,16 @@ public final class TpeImageInfo {
     public TpeImageInfo() {
     }
 
+    /**
+     * Returns an AffineTransform that will map to screen coordinates.
+     */
+    public AffineTransform toScreen() {
+        return FeatureGeometry.screenTransform(
+                getBaseScreenPos(),
+                getPixelsPerArcsec(),
+                Angle$.MODULE$.fromRadians(getTheta()),
+                getFlipRA());
+    }
 
     /**
      * Return the screen coordinates of the base position.
@@ -157,6 +170,36 @@ public final class TpeImageInfo {
         return _flipRA * getPosAngleRadians() + _theta;
     }
 
+    /**
+     * Calculates the position angle (east of north) formed by the line that
+     * passes through the mouse location and the base position.
+     */
+    public edu.gemini.spModel.core.Angle positionAngle(TpeMouseEvent evt) {
+        // All the points are in screen coordinates, which means y increases down
+        // This makes x and y relative to the origin in a right side up frame.
+        final double xp = evt.xWidget - _baseScreenPos.x;
+        final double yp = _baseScreenPos.y - evt.yWidget;
+
+        final double xa = Math.abs(xp);
+        final double ya = Math.abs(yp);
+
+        final double angle;
+        if (xa == 0) {
+            angle = (yp >= 0) ? 0.0 : Math.PI;
+        } else {
+            final double a = edu.gemini.spModel.util.Angle.atanRadians(xa/ya);
+            if ((xp > 0) && (yp >= 0)) {
+                angle = Math.PI * 2.0 - a;
+            } else if ((xp < 0) && (yp >= 0)) {
+                angle = a;
+            } else if ((xp < 0) && (yp < 0)) {
+                angle = Math.PI - a;
+            } else {
+                angle = Math.PI + a;
+            }
+        }
+        return Angle$.MODULE$.fromRadians(angle * flipRA() - getTheta());
+    }
 
     /**
      * Standard debugging method.

@@ -1,6 +1,5 @@
 package jsky.app.ot.gemini.editor.targetComponent;
 
-import jsky.app.ot.OTOptions;
 import jsky.app.ot.util.DnDUtils;
 import jsky.util.gui.DialogUtil;
 
@@ -19,22 +18,19 @@ import java.io.IOException;
  *
  * @author Allan Brighton
  */
-public class TelescopePosTableDropTarget implements DropTargetListener, PropertyChangeListener {
+class TelescopePosTableDropTarget implements DropTargetListener, PropertyChangeListener {
 
     /** The position table (treetable) widget */
-    private TelescopePosTableWidget _tree;
+    private final TelescopePosTableWidget _tree;
 
     /** The drop target */
-    private DropTarget _dropTarget;
+    private final DropTarget _dropTarget;
 
     /** Indicates whether data is acceptable */
     private boolean _acceptableType;
 
     /** Initially selected rows */
     private TreePath[] _selections;
-
-    /** Initial lead selection */
-    private TreePath _leadSelection;
 
     private boolean editable = false;
 
@@ -71,7 +67,7 @@ public class TelescopePosTableDropTarget implements DropTargetListener, Property
         checkTransferType(dtde);
 
         // Accept or reject the drag.
-        boolean acceptedDrag = acceptOrRejectDrag(dtde);
+        final boolean acceptedDrag = acceptOrRejectDrag(dtde);
 
         // Do drag-under feedback
         dragUnderFeedback(dtde, acceptedDrag);
@@ -94,7 +90,7 @@ public class TelescopePosTableDropTarget implements DropTargetListener, Property
                               + DnDUtils.showActions(dtde.getDropAction()));
 
         // Accept or reject the drag
-        boolean acceptedDrag = acceptOrRejectDrag(dtde);
+        final boolean acceptedDrag = acceptOrRejectDrag(dtde);
 
         // Do drag-under feedback
         dragUnderFeedback(dtde, acceptedDrag);
@@ -106,7 +102,7 @@ public class TelescopePosTableDropTarget implements DropTargetListener, Property
                               + DnDUtils.showActions(dtde.getDropAction()));
 
         // Accept or reject the drag
-        boolean acceptedDrag = acceptOrRejectDrag(dtde);
+        final boolean acceptedDrag = acceptOrRejectDrag(dtde);
 
         // Do drag-under feedback
         dragUnderFeedback(dtde, acceptedDrag);
@@ -121,7 +117,7 @@ public class TelescopePosTableDropTarget implements DropTargetListener, Property
         if ((dtde.getDropAction() & DnDConstants.ACTION_COPY_OR_MOVE) != 0) {
             // Accept the drop and get the transfer data
             dtde.acceptDrop(dtde.getDropAction());
-            Transferable transferable = dtde.getTransferable();
+            final Transferable transferable = dtde.getTransferable();
             boolean dropSucceeded = false;
 
             try {
@@ -151,7 +147,7 @@ public class TelescopePosTableDropTarget implements DropTargetListener, Property
 
     /** PropertyChangeListener interface */
     public void propertyChange(PropertyChangeEvent evt) {
-        String propertyName = evt.getPropertyName();
+        final String propertyName = evt.getPropertyName();
         if (propertyName.equals("enabled")) {
             // Enable the drop target if the SPTree is enabled
             // and vice versa.
@@ -168,8 +164,8 @@ public class TelescopePosTableDropTarget implements DropTargetListener, Property
             return false;
         }
 
-        int dropAction = dtde.getDropAction();
-        int sourceActions = dtde.getSourceActions();
+        final int dropAction = dtde.getDropAction();
+        final int sourceActions = dtde.getSourceActions();
         boolean acceptedDrag = false;
 
         DnDUtils.debugPrintln("\tSource actions are " +
@@ -177,7 +173,7 @@ public class TelescopePosTableDropTarget implements DropTargetListener, Property
                               ", drop action is " +
                               DnDUtils.showActions(dropAction));
 
-        boolean acceptableDropLocation = isAcceptableDropLocation(dtde);
+        final boolean acceptableDropLocation = isAcceptableDropLocation(dtde);
 
         // Reject if the object being transferred
         // or the operations available are not acceptable.
@@ -201,7 +197,7 @@ public class TelescopePosTableDropTarget implements DropTargetListener, Property
     private void dragUnderFeedback(DropTargetDragEvent dtde, boolean acceptedDrag) {
         if (dtde != null) {
             if (acceptedDrag && isAcceptableDropLocation(dtde)) {
-                Point location = dtde.getLocation();
+                final Point location = dtde.getLocation();
                 _tree.setIgnoreSelection(true);
                 _tree.setSelectedNode(location);
                 _tree.setIgnoreSelection(false);
@@ -235,11 +231,11 @@ public class TelescopePosTableDropTarget implements DropTargetListener, Property
     private boolean dropNodes(int action, Transferable transferable, Point location)
             throws IOException, UnsupportedFlavorException {
 
-        TelescopePosTableDragDropObject ddo = (TelescopePosTableDragDropObject) transferable.getTransferData(TelescopePosTableDragDropObject.DATA_FLAVOR);
-        TelescopePosTableWidget ownerTW = ddo.getOwner();
-        TelescopePosTableWidget.TableData.Row[] items = ddo.getNodes();
+        final TelescopePosTableDragDropObject ddo = (TelescopePosTableDragDropObject) transferable.getTransferData(TelescopePosTableDragDropObject.DATA_FLAVOR);
+        final TelescopePosTableWidget ownerTW = ddo.getOwner();
+        final TelescopePosTableWidget.TableData.Row[] items = ddo.getNodes();
 
-        TelescopePosTableWidget.TableData.Row parent = _tree.getNode(location);
+        final TelescopePosTableWidget.TableData.Row parent = _tree.getNode(location);
         if (parent == null)
             return false;
 
@@ -274,8 +270,6 @@ public class TelescopePosTableDropTarget implements DropTargetListener, Property
             }
         } catch (Exception e) {
             DialogUtil.error(e);
-        } finally {
-//            _tree.reinit(SPProgData.);
         }
         return true;
     }
@@ -286,15 +280,15 @@ public class TelescopePosTableDropTarget implements DropTargetListener, Property
             return false;
         }
 
-        TelescopePosTableDragDropObject ddo = TelescopePosTableDragSource._dragObject;
+        final TelescopePosTableDragDropObject ddo = TelescopePosTableDragSource._dragObject;
         if (ddo == null) {
             return false;
         }
 
-        TelescopePosTableWidget.TableData.Row[] newItems = ddo.getNodes();
+        final TelescopePosTableWidget.TableData.Row[] newItems = ddo.getNodes();
 
         // get the node under the mouse
-        TelescopePosTableWidget.TableData.Row parent = _tree.getNode(dtde.getLocation());
+        final TelescopePosTableWidget.TableData.Row parent = _tree.getNode(dtde.getLocation());
         if (parent == null) {
             return false;
         }
@@ -317,7 +311,7 @@ public class TelescopePosTableDropTarget implements DropTargetListener, Property
 
     /** Save the current tree selection */
     private void saveTreeSelection() {
-        int[] rows = _tree.getSelectedRows();
+        final int[] rows = _tree.getSelectedRows();
         _selections = new TreePath[rows.length];
         for(int i = 0; i < rows.length; i++) {
             _selections[i] = _tree.getPathForRow(rows[i]);
@@ -331,7 +325,7 @@ public class TelescopePosTableDropTarget implements DropTargetListener, Property
     /** Restore the tree selection */
     private void restoreTreeSelection() {
         _tree.setIgnoreSelection(true);
-        int[] rows = new int[_selections.length];
+        final int[] rows = new int[_selections.length];
         for(int i = 0; i < rows.length; i++) {
             rows[i] = _tree.getRowForPath(_selections[i]);
         }

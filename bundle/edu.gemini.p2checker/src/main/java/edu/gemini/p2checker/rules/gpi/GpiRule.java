@@ -12,7 +12,6 @@ import edu.gemini.spModel.target.SPTarget;
 import edu.gemini.spModel.target.env.TargetEnvironment;
 import edu.gemini.spModel.target.obsComp.TargetObsComp;
 
-
 import java.util.*;
 
 /**
@@ -22,11 +21,7 @@ public class GpiRule implements IRule {
     private static final String PREFIX = "GpiRule_";
     private static final Collection<IConfigRule> GPI_RULES = new ArrayList<>();
 
-    public static final IConfigMatcher ANY_MATCHER = new IConfigMatcher() {
-        public boolean matches(Config config, int step, ObservationElements elems) {
-            return true;
-        }
-    };
+    public static final IConfigMatcher ANY_MATCHER = (config, step, elems) -> true;
 
     // OT-106: Filter iteration only allowed in Observation Modes direct and NRM
     private static IConfigRule FILTER_ITER_RULE = new IConfigRule() {
@@ -87,39 +82,35 @@ public class GpiRule implements IRule {
         }
     };
 
-    private static IRule STATIC_EXPOSURE_TIME_RULE = new IRule() {
-
-        @Override
-        public IP2Problems check(ObservationElements elements)  {
-            if (elements.getInstrument() instanceof Gpi) {
-                Gpi inst = (Gpi)elements.getInstrument();
-                double expTime = inst.getExposureTime();
-                int coadds = inst.getCoadds();
-                int maxVal = inst.getMaximumExposureTimeSecs();
-                double minVal = inst.getMinimumExposureTimeSecs();
-                P2Problems problems = new P2Problems();
-                String txt = null;
-                String id = null;
-                if (expTime > maxVal) {
-                    txt = "Exposure times of less than " + maxVal + " seconds give optimum performance.";
-                    id = "STATIC_EXPOSURE_TIME_RULE_1";
-                } else if (expTime * coadds > maxVal) {
-                    float c = 0.1F; // See OT-78
-                    int n = Math.round((float) (maxVal / (expTime + c)));
-                    txt = "Exposures longer than " + maxVal + " seconds may lead to smearing. "
-                            + n + " coadds are recommended based on the exposure time";
-                    id = "STATIC_EXPOSURE_TIME_RULE_2";
-                } else if (expTime < minVal) {
-                    txt = String.format("Below recommendation (" + "%.2f" + " sec).", minVal);
-                    id = "STATIC_EXPOSURE_TIME_RULE_3";
-                }
-                if (txt != null) {
-                    problems.addError(PREFIX+id, txt, elements.getInstrumentNode());
-                }
-                return problems;
+    private static IRule STATIC_EXPOSURE_TIME_RULE = elements -> {
+        if (elements.getInstrument() instanceof Gpi) {
+            Gpi inst = (Gpi)elements.getInstrument();
+            double expTime = inst.getExposureTime();
+            int coadds = inst.getCoadds();
+            int maxVal = inst.getMaximumExposureTimeSecs();
+            double minVal = inst.getMinimumExposureTimeSecs();
+            P2Problems problems = new P2Problems();
+            String txt = null;
+            String id = null;
+            if (expTime > maxVal) {
+                txt = "Exposure times of less than " + maxVal + " seconds give optimum performance.";
+                id = "STATIC_EXPOSURE_TIME_RULE_1";
+            } else if (expTime * coadds > maxVal) {
+                float c = 0.1F; // See OT-78
+                int n = Math.round((float) (maxVal / (expTime + c)));
+                txt = "Exposures longer than " + maxVal + " seconds may lead to smearing. "
+                        + n + " coadds are recommended based on the exposure time";
+                id = "STATIC_EXPOSURE_TIME_RULE_2";
+            } else if (expTime < minVal) {
+                txt = String.format("Below recommendation (" + "%.2f" + " sec).", minVal);
+                id = "STATIC_EXPOSURE_TIME_RULE_3";
             }
-            return null;
+            if (txt != null) {
+                problems.addError(PREFIX+id, txt, elements.getInstrumentNode());
+            }
+            return problems;
         }
+        return null;
     };
 
     // See OT-79
@@ -136,8 +127,8 @@ public class GpiRule implements IRule {
             double totalExpTime = 0;
             int step = 0;
             Config config = null;
-            for (Iterator it = seq.iterator(); it.hasNext(); ++step) {
-                config = (Config) it.next();
+            for (Iterator<Config> it = seq.iterator(); it.hasNext(); ++step) {
+                config = it.next();
                 Double expTime = SequenceRule.getExposureTime(config);
                 Integer coadds = SequenceRule.getCoadds(config);
                 Integer repeatCount = SequenceRule.getStepCount(config);
@@ -174,8 +165,8 @@ public class GpiRule implements IRule {
                 P2Problems problems = new P2Problems();
                 TargetEnvironment env = obsComp.getTargetEnvironment();
                 SPTarget base = env.getBase();
-                Option<Magnitude> imag = base.getMagnitude(Magnitude.Band.I);
-                Option<Magnitude> hmag = base.getMagnitude(Magnitude.Band.H);
+                Option<Magnitude> imag = base.getTarget().getMagnitude(Magnitude.Band.I);
+                Option<Magnitude> hmag = base.getTarget().getMagnitude(Magnitude.Band.H);
                 // OT-74
                 if (imag.isEmpty() || imag.getValue().getBrightness() == Magnitude.UNDEFINED_MAG) {
                     problems.addError(PREFIX + "MAG_BAND_MESSAGE", MAG_BAND_MESSAGE + "I-band.", elements.getTargetObsComponentNode().getValue());
@@ -190,7 +181,7 @@ public class GpiRule implements IRule {
                     if (!inst.getObservingMode().isEmpty()) {
                         Gpi.ObservingMode obsMode = inst.getObservingMode().getValue();
                         Magnitude.Band band = inst.getFilter().getBand(); // OT-102: obsMode could be NONSTANDARD
-                        Option<Magnitude> mag = base.getMagnitude(band);
+                        Option<Magnitude> mag = base.getTarget().getMagnitude(band);
                         if (mag.isEmpty() || mag.getValue().getBrightness() == Magnitude.UNDEFINED_MAG) {
                             // OT-99
                             problems.addError(PREFIX + "MAG_BAND_MESSAGE", MAG_BAND_MESSAGE + band + "-band",

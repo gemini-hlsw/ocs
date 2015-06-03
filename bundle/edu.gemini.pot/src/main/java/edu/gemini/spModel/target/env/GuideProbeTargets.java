@@ -207,7 +207,11 @@ public final class GuideProbeTargets implements Serializable, TargetContainer, O
     @Override
     public GuideProbeTargets cloneTargets() {
         Option<Integer>   primaryIndex = targetOptions.getPrimaryIndex();
-        ImList<SPTarget> clonedTargets = targetOptions.getOptions().map(SPTarget.CLONE_FUNCTION);
+        ImList<SPTarget> clonedTargets = targetOptions.getOptions().map(new Function1<SPTarget, SPTarget>() {
+            public SPTarget apply(final SPTarget target) {
+                return target.clone();
+            }
+        });
         OptionsListImpl<SPTarget> clone = OptionsListImpl.create(primaryIndex, clonedTargets);
         return new GuideProbeTargets(guider, clone);
     }

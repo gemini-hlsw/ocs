@@ -1,0 +1,17 @@
+# Average QE for the GNIRS Aladdin III detector
+# Columns are (1) wavelength in nm, (2) QE
+# The average QE comes from J. Elias sensitivity table
+# based on estimates from Mike Merrill. Zero QE at 700nm and 6000nm added.
+# Author: Bernadette Rodgers
+# Created: 30 July 2003
+# 30 Sept 03, BR: renamed file
+#
+# lambda   QE
+    700   0.0
+   1100   0.90
+   1270   0.90
+   1640   0.90
+   2230   0.90
+   3710   0.90
+   5150   0.80
+   6000   0.0

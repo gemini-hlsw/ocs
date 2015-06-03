@@ -1,0 +1,31 @@
+# Average QE for the red CCDs delivered with GMOS-N
+# Columns are (1) wavelength in nm, (2) QE
+# The average QE is derived from the QE information received from
+# Richard Wolff, NOAO, Sept 2000. Zero QE at 1050nm and 1100nm added
+# to the table.
+# Author: Inger Jorgensen
+# Created: 14 Feb 2001
+#
+# Table CCD_QE_red.tab  Wed 09:41:30 14-Feb-2001
+# lambda red_QE
+
+     300 0.3705
+     320 0.3095
+     334 0.2705
+     365 0.2785
+     380 0.3645
+     405 0.4147
+     450 0.5580
+     500 0.7143
+     550 0.8283
+     600 0.9017
+     650 0.9260
+     700 0.8837
+     750 0.7913
+     800 0.6527
+     850 0.4817
+     900 0.3170
+     950 0.1650
+    1000 0.0507
+    1050 0.0000
+    1100 0.0000

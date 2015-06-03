@@ -2,7 +2,7 @@ package edu.gemini.sp.vcs
 
 import edu.gemini.pot.sp._
 import edu.gemini.pot.sp.Conflict._
-import edu.gemini.sp.vcs.VcsFailure._
+import edu.gemini.sp.vcs.OldVcsFailure._
 import edu.gemini.spModel.gemini.obscomp.SPProgram
 import edu.gemini.spModel.rich.pot.sp._
 
@@ -16,78 +16,70 @@ class TestMerge {
 
   import TestingEnvironment._
 
-  @Test def dataObjectFromRemote() {
-    withPiTestEnv {
-      env =>
-        import env._
+  @Test def dataObjectFromRemote(): Unit =
+    piSyncTest { env =>
+      import env._
 
-        remote.setTitle("New Title (Remote)")
-        nodeVersionsEqual(key, fL = _.incr(remote.lifespanId))
+      central.setTitle("New Title (Remote)")
+      nodeVersionsEqual(key, fL = _.incr(central.lifespanId))
 
-        update(user)
+      update(user)
     }
-  }
 
-  @Test def dataObjectFromLocal() {
-    withPiTestEnv {
-      env =>
-        import env._
+  @Test def dataObjectFromLocal(): Unit =
+    piSyncTest { env =>
+      import env._
 
-        local.setTitle("New Title (Local)")
-        nodeVersionsEqual(key, fR = _.incr(local.lifespanId))
+      cloned.setTitle("New Title (Local)")
+      nodeVersionsEqual(key, fR = _.incr(cloned.lifespanId))
 
-        update(user)
-        nodeVersionsEqual(key, fR = _.incr(local.lifespanId))
+      update(user)
+      nodeVersionsEqual(key, fR = _.incr(cloned.lifespanId))
 
-        commit()
+      commit()
     }
-  }
 
-  @Test def dataObjectConflict() {
-    withPiTestEnv {
-      env =>
-        import env._
+  @Test def dataObjectConflict(): Unit =
+    piSyncTest { env =>
+      import env._
 
-        remote.setTitle("New Title (Remote)")
-        nodeVersionsEqual(key, fL = _.incr(remote.lifespanId))
+      central.setTitle("New Title (Remote)")
+      nodeVersionsEqual(key, fL = _.incr(central.lifespanId))
 
-        local.setTitle("New Title (Local)")
-        nodeVersionsEqual(key, fR = _.incr(local.lifespanId), fL = _.incr(remote.lifespanId))
+      cloned.setTitle("New Title (Local)")
+      nodeVersionsEqual(key, fR = _.incr(cloned.lifespanId), fL = _.incr(central.lifespanId))
 
-        cantCommit(NeedsUpdate)
-        update(user)
+      cantCommit(NeedsUpdate)
+      update(user)
 
-        assertTrue(local.sp.hasConflicts)
-        assertEquals(0, local.sp.getConflicts.notes.size) // no tree conflicts
-        nodeVersionsEqual(key, fR = _.incr(local.lifespanId))
+      assertTrue(cloned.sp.hasConflicts)
+      assertEquals(0, cloned.sp.getConflicts.notes.size) // no tree conflicts
+      nodeVersionsEqual(key, fR = _.incr(cloned.lifespanId))
 
-        cantCommit(HasConflict)
-        local.sp.resolveDataObjectConflict()
+      cantCommit(HasConflict)
+      cloned.sp.resolveDataObjectConflict()
 
-        commit()
+      commit()
     }
-  }
 
-  @Test def noDataObjectConflictWhenChangesAreTheSame() {
-    withPiTestEnv {
-      env =>
-        import env._
+  @Test def noDataObjectConflictWhenChangesAreTheSame(): Unit =
+    piSyncTest { env =>
+      import env._
 
-        remote.setTitle("New Title")
-        nodeVersionsEqual(key, fL = _.incr(remote.lifespanId))
+      central.setTitle("New Title")
+      nodeVersionsEqual(key, fL = _.incr(central.lifespanId))
 
-        local.setTitle("New Title")
-        nodeVersionsEqual(key, fR = _.incr(local.lifespanId), fL = _.incr(remote.lifespanId))
+      cloned.setTitle("New Title")
+      nodeVersionsEqual(key, fR = _.incr(cloned.lifespanId), fL = _.incr(central.lifespanId))
 
-        cantCommit(NeedsUpdate)
-        update(user)
+      cantCommit(NeedsUpdate)
+      update(user)
 
-        assertFalse(local.sp.hasConflicts)
-        nodeVersionsEqual(key, fR = _.incr(local.lifespanId))
+      assertFalse(cloned.sp.hasConflicts)
+      nodeVersionsEqual(key, fR = _.incr(cloned.lifespanId))
 
-        commit()
+      commit()
     }
-  }
 
   /* Disabled for now, the QA log is not mergeable any longer....
   @Test def noDataObjectConflictWhenMergeable() {
@@ -123,225 +115,207 @@ class TestMerge {
   }
   */
 
-  @Test def newNodeFromRemote() {
-    withPiTestEnv {
-      env =>
-        import env._
+  @Test def newNodeFromRemote(): Unit =
+    piSyncTest { env =>
+      import env._
 
-        val note = remote.addNote("Remote Note")
-        nodeVersionsEqual(key, fL = _.incr(remote.lifespanId))
-        nodeVersionsEqual(note.getNodeKey, fL = _.incr(remote.lifespanId))
+      val note = central.addNote("Remote Note")
+      nodeVersionsEqual(key, fL = _.incr(central.lifespanId))
+      nodeVersionsEqual(note.getNodeKey, fL = _.incr(central.lifespanId))
 
-        update(user)
+      update(user)
     }
-  }
 
-  @Test def newNodeFromLocal() {
-    withPiTestEnv {
-      env =>
-        import env._
+  @Test def newNodeFromLocal(): Unit =
+    piSyncTest { env =>
+      import env._
 
-        val note = local.addNote("Local Note")
-        nodeVersionsEqual(key, fR = _.incr(local.lifespanId))
-        nodeVersionsEqual(note.getNodeKey, fR = _.incr(local.lifespanId))
+      val note = cloned.addNote("Local Note")
+      nodeVersionsEqual(key, fR = _.incr(cloned.lifespanId))
+      nodeVersionsEqual(note.getNodeKey, fR = _.incr(cloned.lifespanId))
 
-        commit()
+      commit()
     }
-  }
 
-  @Test def rearrangeNodes() {
-    withPiTestEnv {
-      env =>
-        import env._
+  @Test def rearrangeNodes(): Unit =
+    piSyncTest { env =>
+      import env._
 
-        val note0 = local.addNote("Local Note 0")
-        val note1 = local.addNote("Local Note 1")
-        val note2 = local.addNote("Local Note 2")
+      val note0 = cloned.addNote("Local Note 0")
+      val note1 = cloned.addNote("Local Note 1")
+      val note2 = cloned.addNote("Local Note 2")
 
-        commit()
+      commit()
 
-        assertEquals(childKeys(remote.sp), keys(note0, note1, note2))
+      assertEquals(childKeys(central.sp), keys(note0, note1, note2))
 
-        local.sp.setChildren(List(note2, note0, note1).asJava)
+      cloned.sp.setChildren(List(note2, note0, note1).asJava)
 
-        commit()
+      commit()
 
-        assertEquals(childKeys(remote.sp), keys(note2, note0, note1))
+      assertEquals(childKeys(central.sp), keys(note2, note0, note1))
     }
-  }
 
 
-  @Test def newNodeNoConflict() {
-    withPiTestEnv {
-      env =>
-        import env._
+  @Test def newNodeNoConflict(): Unit =
+    piSyncTest { env =>
+      import env._
 
-        val noteR = remote.addNote("Remote Note")
-        val noteL = local.addNote("Local Note")
-        cantCommit(NeedsUpdate)
-        update(user)
+      val noteR = central.addNote("Remote Note")
+      val noteL = cloned.addNote("Local Note")
+      cantCommit(NeedsUpdate)
+      update(user)
 
-        // Keep both notes.
-        val expected = keys(noteL, noteR)
-        assertEquals(expected, childKeys(local.sp))
-        assertFalse(local.sp.hasConflicts)
+      // Keep both notes.
+      val expected = keys(noteL, noteR)
+      assertEquals(expected, childKeys(cloned.sp))
+      assertFalse(cloned.sp.hasConflicts)
 
-        commit()
-        assertEquals(expected, childKeys(remote.sp))
+      commit()
+      assertEquals(expected, childKeys(central.sp))
     }
-  }
 
-  @Test def deleteNodeBeforeKnownToLocal() {
-    withPiTestEnv {
-      env =>
-        import env._
+  @Test def deleteNodeBeforeKnownToLocal(): Unit =
+    piSyncTest { env =>
+      import env._
 
-        // Create, edit, delete a note before we ever get it in the local program
-        val note = remote.addNote("Note Text")
-        remote.setNoteText("Remote Edit", note.getNodeKey)
-        remote.delete(note.getNodeKey)
+      // Create, edit, delete a note before we ever get it in the local program
+      val note = central.addNote("Note Text")
+      central.setNoteText("Remote Edit", note.getNodeKey)
+      central.delete(note.getNodeKey)
 
-        update(user)
-        versionsEqual()
+      update(user)
+      versionsEqual()
     }
-  }
 
-  @Test def deleteNodeBeforeKnownToRemote() {
-    withPiTestEnv {
-      env =>
-        import env._
+  @Test def deleteNodeBeforeKnownToRemote(): Unit =
+    piSyncTest { env =>
+      import env._
 
-        // Create, edit, delete a note before we ever put it in the remote program
-        val note = local.addNote("Note Text")
-        local.setNoteText("Local Edit", note.getNodeKey)
-        local.delete(note.getNodeKey)
+      // Create, edit, delete a note before we ever put it in the remote program
+      val note = cloned.addNote("Note Text")
+      cloned.setNoteText("Local Edit", note.getNodeKey)
+      cloned.delete(note.getNodeKey)
 
-        commit()
-        versionsEqual()
+      commit()
+      versionsEqual()
     }
-  }
 
-  @Test def deleteNodeFromBothAfterModifications() {
-    withPiTestEnv {
-      env =>
-        import env._
+  @Test def deleteNodeFromBothAfterModifications(): Unit =
+    piSyncTest { env =>
+      import env._
 
-        val note = remote.addNote("Note Text")
-        update(user)
-        versionsEqual()
+      val note = central.addNote("Note Text")
+      update(user)
+      versionsEqual()
 
-        // Edit both versions of the note.
-        remote.setNoteText("Remote Edit", note.getNodeKey)
-        local.setNoteText("Local Edit", note.getNodeKey)
+      // Edit both versions of the note.
+      central.setNoteText("Remote Edit", note.getNodeKey)
+      cloned.setNoteText("Local Edit", note.getNodeKey)
 
-        // Delete both versions of the note.
-        remote.delete(note.getNodeKey)
-        local.delete(note.getNodeKey)
+      // Delete both versions of the note.
+      central.delete(note.getNodeKey)
+      cloned.delete(note.getNodeKey)
 
-        update(user)
-        commit()
+      update(user)
+      commit()
     }
-  }
 
-  @Test def deletedNodeFromRemote() {
-    withPiTestEnv {
-      env =>
-        import env._
+  @Test def deletedNodeFromRemote(): Unit =
+    piSyncTest { env =>
+      import env._
 
-        val noteR1 = remote.addNote("Remote Note 1")
-        val noteR2 = remote.addNote("Remote Note 2")
-        update(user)
+      val noteR1 = central.addNote("Remote Note 1")
+      val noteR2 = central.addNote("Remote Note 2")
+      update(user)
 
-        // We have them both now in both remote and local versions
-        assertEquals(keys(noteR1, noteR2), childKeys(local.sp))
-        versionsEqual()
+      // We have them both now in both remote and local versions
+      assertEquals(keys(noteR1, noteR2), childKeys(cloned.sp))
+      versionsEqual()
 
-        // Delete noteR1 in remote program
-        remote.delete(noteR1.getNodeKey)
-        assertEquals(keys(noteR2), childKeys(remote.sp))
+      // Delete noteR1 in remote program
+      central.delete(noteR1.getNodeKey)
+      assertEquals(keys(noteR2), childKeys(central.sp))
 
-        cantCommit(NeedsUpdate)
-        update(user)
+      cantCommit(NeedsUpdate)
+      update(user)
 
-        // Gone in the local program as well.
-        assertEquals(keys(noteR2), childKeys(local.sp))
+      // Gone in the local program as well.
+      assertEquals(keys(noteR2), childKeys(cloned.sp))
     }
-  }
 
-  @Test def deletedNodeFromLocal() {
-    withPiTestEnv {
-      env =>
-        import env._
+  @Test def deletedNodeFromLocal(): Unit =
+    piSyncTest { env =>
+      import env._
 
-        val noteR1 = remote.addNote("Remote Note 1")
-        val noteR2 = remote.addNote("Remote Note 2")
-        update(user)
+      val noteR1 = central.addNote("Remote Note 1")
+      val noteR2 = central.addNote("Remote Note 2")
+      update(user)
 
-        // We have them both now in both remote and local versions
-        assertEquals(keys(noteR1, noteR2), childKeys(local.sp))
-        versionsEqual()
+      // We have them both now in both remote and local versions
+      assertEquals(keys(noteR1, noteR2), childKeys(cloned.sp))
+      versionsEqual()
 
-        // Delete noteR2 in local program
-        local.delete(noteR2.getNodeKey)
-        assertEquals(keys(noteR1, noteR2), childKeys(remote.sp))
-        assertEquals(keys(noteR1), childKeys(local.sp))
+      // Delete noteR2 in local program
+      cloned.delete(noteR2.getNodeKey)
+      assertEquals(keys(noteR1, noteR2), childKeys(central.sp))
+      assertEquals(keys(noteR1), childKeys(cloned.sp))
 
-        commit()
+      commit()
 
-        // Gone in the remote program as well.
-        assertEquals(keys(noteR1), childKeys(remote.sp))
+      // Gone in the remote program as well.
+      assertEquals(keys(noteR1), childKeys(central.sp))
     }
-  }
 
   @Test def deletedNodesNoConflict() {
-    withPiTestEnv {
+    piSyncTest {
       env =>
         import env._
 
-        val noteR1 = remote.addNote("Remote Note 1")
-        val noteR2 = remote.addNote("Remote Note 2")
+        val noteR1 = central.addNote("Remote Note 1")
+        val noteR2 = central.addNote("Remote Note 2")
         update(user)
 
         // We have them both now
-        assertEquals(keys(noteR1, noteR2), childKeys(local.sp))
+        assertEquals(keys(noteR1, noteR2), childKeys(cloned.sp))
         versionsEqual()
 
         // Delete noteR1 in remote program
-        remote.delete(noteR1.getNodeKey)
-        assertEquals(keys(noteR2), childKeys(remote.sp))
+        central.delete(noteR1.getNodeKey)
+        assertEquals(keys(noteR2), childKeys(central.sp))
 
         // Delete noteR2 in local program
-        local.delete(noteR2.getNodeKey)
-        assertEquals(keys(noteR1), childKeys(local.sp))
+        cloned.delete(noteR2.getNodeKey)
+        assertEquals(keys(noteR1), childKeys(cloned.sp))
 
         cantCommit(NeedsUpdate)
         update(user)
 
         // Both gone in the local program, remote still has noteR2
-        assertEquals(Nil, childKeys(local.sp))
-        assertEquals(keys(noteR2), childKeys(remote.sp))
+        assertEquals(Nil, childKeys(cloned.sp))
+        assertEquals(keys(noteR2), childKeys(central.sp))
 
         // no conflict here
-        assertFalse(local.sp.hasConflicts)
+        assertFalse(cloned.sp.hasConflicts)
 
         // Commit to update remote so that it has no children
         commit()
-        assertEquals(Nil, childKeys(remote.sp))
-        assertFalse(remote.sp.hasConflicts)
+        assertEquals(Nil, childKeys(central.sp))
+        assertFalse(central.sp.hasConflicts)
     }
   }
 
   @Test def cannotRemoveModifiedLocalChild() {
-    withPiTestEnv {
+    piSyncTest {
       env =>
         import env._
 
         def showState(title: String) {
-          println(formatState(title, List(remote, local)))
+          println(formatState(title, List(central, cloned)))
         }
 
-        val note = remote.addNote("Remote Note")
-        showTree(remote.sp)
+        val note = central.addNote("Remote Note")
+        showTree(central.sp)
 
         update(user)
         showState("PI Updates")
@@ -349,177 +323,177 @@ class TestMerge {
         versionsEqual()
 
         // Delete note in remote program
-        remote.delete(note.getNodeKey)
+        central.delete(note.getNodeKey)
 
         showState("Note Deleted Remotely")
 
         // Modify note in local program
-        local.setNoteText("Local Note", note.getNodeKey)
+        cloned.setNoteText("Local Note", note.getNodeKey)
         cantCommit(NeedsUpdate)
         update(user)
 
         showState("PI Updates Again")
 
         // Now we have a copy of the note locally with a new key.
-        val newNote = local.sp.getObsComponents.get(0)
-        assertEquals(keys(newNote), childKeys(local.sp))
-        assertEquals(Nil, childKeys(remote.sp))
+        val newNote = cloned.sp.getObsComponents.get(0)
+        assertEquals(keys(newNote), childKeys(cloned.sp))
+        assertEquals(Nil, childKeys(central.sp))
 
-        assertTrue(local.sp.hasConflicts)
-        val List(cn) = local.conflictNotes()
+        assertTrue(cloned.sp.hasConflicts)
+        val List(cn) = cloned.conflictNotes()
         assertEquals(new ReplacedRemoteDelete(newNote.getNodeKey), cn)
 
         cantCommit(HasConflict)
-        local.sp.resolveConflict(cn)
+        cloned.sp.resolveConflict(cn)
 
         // Commit to update remote so that it has the child again
         commit()
-        assertEquals(keys(newNote), childKeys(remote.sp))
+        assertEquals(keys(newNote), childKeys(central.sp))
     }
   }
 
   @Test def cannotRemoveModifiedLocalChildWithConflict() {
-    withPiTestEnv {
+    piSyncTest {
       env =>
         import env._
 
-        val note = remote.addNote("Remote Note")
+        val note = central.addNote("Remote Note")
         update(user)
         versionsEqual()
 
         // Edit the note in the remote program to increase its version number
-        remote.setNoteText("Updated Note Text", note.getNodeKey)
+        central.setNoteText("Updated Note Text", note.getNodeKey)
         // Now delete note in remote program
-        remote.delete(note.getNodeKey)
+        central.delete(note.getNodeKey)
 
         // Modify note in local program
-        local.setNoteText("Local Note", note.getNodeKey)
+        cloned.setNoteText("Local Note", note.getNodeKey)
         cantCommit(NeedsUpdate)
         update(user)
 
         // Now we have a copy of the note locally with a new key.
-        val newNote = local.sp.getObsComponents.get(0)
-        assertEquals(keys(newNote), childKeys(local.sp))
-        assertEquals(Nil, childKeys(remote.sp))
+        val newNote = cloned.sp.getObsComponents.get(0)
+        assertEquals(keys(newNote), childKeys(cloned.sp))
+        assertEquals(Nil, childKeys(central.sp))
 
-        val List(cn) = local.conflictNotes()
+        val List(cn) = cloned.conflictNotes()
         assertEquals(new ReplacedRemoteDelete(newNote.getNodeKey), cn)
 
         cantCommit(HasConflict)
-        local.sp.resolveConflict(cn)
+        cloned.sp.resolveConflict(cn)
 
         // Commit to update remote so that it has the child again
         commit()
-        assertEquals(keys(newNote), childKeys(remote.sp))
+        assertEquals(keys(newNote), childKeys(central.sp))
     }
   }
 
   @Test def cannotRemoveModifiedRemoteChild() {
-    withPiTestEnv {
+    piSyncTest {
       env =>
         import env._
 
-        val note = remote.addNote("Remote Note")
+        val note = central.addNote("Remote Note")
         update(user)
         versionsEqual()
 
         // Delete note in local program
-        local.delete(note.getNodeKey)
-        assertEquals(Nil, childKeys(local.sp))
+        cloned.delete(note.getNodeKey)
+        assertEquals(Nil, childKeys(cloned.sp))
 
         // Modify note in remote program
-        remote.setNoteText("Remote Note Modified", note.getNodeKey)
+        central.setNoteText("Remote Note Modified", note.getNodeKey)
 
         cantCommit(NeedsUpdate)
         update(user)
 
         // Note comes back locally
-        assertEquals(keys(note), childKeys(local.sp))
+        assertEquals(keys(note), childKeys(cloned.sp))
 
-        val List(cn) = local.conflictNotes()
+        val List(cn) = cloned.conflictNotes()
         assertEquals(new ResurrectedLocalDelete(note.getNodeKey), cn)
 
         cantCommit(HasConflict)
-        local.sp.resolveConflict(cn)
+        cloned.sp.resolveConflict(cn)
 
         commit()
-        assertEquals(keys(note), childKeys(remote.sp))
+        assertEquals(keys(note), childKeys(central.sp))
     }
   }
 
   @Test def cannotRemoveNodeWithModifiedLocalChild() {
-    withPiTestEnv {
+    piSyncTest {
       env =>
         import env._
 
-        val obs = remote.addObservation()
-        val note = remote.addNote("Remote Note", obs.getNodeKey)
+        val obs = central.addObservation()
+        val note = central.addNote("Remote Note", obs.getNodeKey)
         update(user)
         versionsEqual()
 
         // Delete obs in remote program
-        remote.delete(obs.getNodeKey)
-        assertEquals(Nil, childKeys(remote.sp))
+        central.delete(obs.getNodeKey)
+        assertEquals(Nil, childKeys(central.sp))
 
         // Modify note in local program
-        local.setNoteText("Local Note", note.getNodeKey)
+        cloned.setNoteText("Local Note", note.getNodeKey)
 
         cantCommit(NeedsUpdate)
         update(user)
 
         // Now I have a copy of the observation
-        val newObs = local.sp.getObservations.get(0)
-        assertEquals(keys(newObs), childKeys(local.sp))
+        val newObs = cloned.sp.getObservations.get(0)
+        assertEquals(keys(newObs), childKeys(cloned.sp))
         val newNote = newObs.getObsComponents.get(0)
         assertTrue(childKeys(newObs).contains(newNote.getNodeKey))
 
-        val List(cn) = local.conflictNotes()
+        val List(cn) = cloned.conflictNotes()
         assertEquals(new ReplacedRemoteDelete(newObs.getNodeKey), cn)
 
         cantCommit(HasConflict)
-        local.sp.resolveConflict(cn)
+        cloned.sp.resolveConflict(cn)
 
         // After commit, the observation comes back in the remote program too
         commit()
-        assertEquals(keys(newObs), childKeys(remote.sp))
-        assertTrue(childKeys(remote.find(newObs.getNodeKey)).contains(newNote.getNodeKey))
+        assertEquals(keys(newObs), childKeys(central.sp))
+        assertTrue(childKeys(central.find(newObs.getNodeKey)).contains(newNote.getNodeKey))
     }
   }
 
   @Test def cannotRemoveNodeWithModifiedRemoteChild() {
-    withPiTestEnv {
+    piSyncTest {
       env =>
         import env._
 
-        val obs = remote.addObservation()
-        val note = remote.addNote("Remote Note", obs.getNodeKey)
+        val obs = central.addObservation()
+        val note = central.addNote("Remote Note", obs.getNodeKey)
         update(user)
         versionsEqual()
 
         // Delete obs in local program
-        local.delete(obs.getNodeKey)
-        assertEquals(Nil, childKeys(local.sp))
+        cloned.delete(obs.getNodeKey)
+        assertEquals(Nil, childKeys(cloned.sp))
 
         // Modify note in remote program
-        remote.setNoteText("Remote Note Modified", note.getNodeKey)
+        central.setNoteText("Remote Note Modified", note.getNodeKey)
 
         cantCommit(NeedsUpdate)
         update(user)
 
         // Observation comes back in the local program
-        assertEquals(keys(obs), childKeys(local.sp))
-        assertTrue(childKeys(local.find(obs.getNodeKey)).contains(note.getNodeKey))
+        assertEquals(keys(obs), childKeys(cloned.sp))
+        assertTrue(childKeys(cloned.find(obs.getNodeKey)).contains(note.getNodeKey))
 
-        val List(cn) = local.conflictNotes()
+        val List(cn) = cloned.conflictNotes()
         assertEquals(new ResurrectedLocalDelete(obs.getNodeKey), cn)
 
         cantCommit(HasConflict)
-        local.sp.resolveConflict(cn)
+        cloned.sp.resolveConflict(cn)
 
         // After commit,the observation is still in the remote program
         commit()
-        assertEquals(keys(obs), childKeys(remote.sp))
-        assertTrue(childKeys(remote.find(obs.getNodeKey)).contains(note.getNodeKey))
+        assertEquals(keys(obs), childKeys(central.sp))
+        assertTrue(childKeys(central.find(obs.getNodeKey)).contains(note.getNodeKey))
     }
   }
 
@@ -530,9 +504,9 @@ class TestMerge {
       }).toList
 
     val actual: List[(String, Int)] =
-      (pc.sp.getAllObservations.asScala map {
+      new ObservationIterator(pc.sp).asScala.map {
         obs => pc.getTitle(obs.getNodeKey) -> obs.getObservationNumber
-      }).toList
+      }.toList
 
     assertEquals(expected, actual)
   }
@@ -545,157 +519,157 @@ class TestMerge {
   }
 
   @Test def insert() {
-    withPiTestEnv { env =>
+    piSyncTest { env =>
       import env._
 
 
-      val obs1 = mkNamedObs(remote, "obs1")
-      val obs2 = mkNamedObs(remote, "obs2")
+      val obs1 = mkNamedObs(central, "obs1")
+      val obs2 = mkNamedObs(central, "obs2")
       update(user)
       versionsEqual()
 
-      val obs3 = mkNamedObs(remote, "obs3", 1)
-      val obs4 = mkNamedObs(local, "obs4", 1)
-      val obs5 = mkNamedObs(local, "obs5", 2)
+      val obs3 = mkNamedObs(central, "obs3", 1)
+      val obs4 = mkNamedObs(cloned, "obs4", 1)
+      val obs5 = mkNamedObs(cloned, "obs5", 2)
 
-      assertEquals(keys(obs1, obs3, obs2), childKeys(remote.sp))
-      assertEquals(keys(obs1, obs4, obs5, obs2), childKeys(local.sp))
+      assertEquals(keys(obs1, obs3, obs2), childKeys(central.sp))
+      assertEquals(keys(obs1, obs4, obs5, obs2), childKeys(cloned.sp))
 
       // In the remote program "obs3" is the 3rd observation whereas in the
       // local program "obs4" is the 3rd observation and "obs5" is the 4th.
-      obsNumbersEqual(remote, obs1 -> 1, obs3 -> 3, obs2 -> 2)
-      obsNumbersEqual(local, obs1 -> 1, obs4 -> 3, obs5 -> 4, obs2 -> 2)
+      obsNumbersEqual(central, obs1 -> 1, obs3 -> 3, obs2 -> 2)
+      obsNumbersEqual(cloned, obs1 -> 1, obs4 -> 3, obs5 -> 4, obs2 -> 2)
 
       update(user)
-      assertEquals(keys(obs1, obs4, obs5, obs3, obs2), childKeys(local.sp))
+      assertEquals(keys(obs1, obs4, obs5, obs3, obs2), childKeys(cloned.sp))
 
       // After the update, there would have been two observations with number
       // 3 so they had to be renumbered. In particular, "obs3" from the
       // remote program stays as number 3 but in the local program we renumbered
       // "obs4" to become obs #4 and "obs5" to become obs #5
-      obsNumbersEqual(local, obs1 -> 1, obs4 -> 4, obs5 -> 5, obs3 -> 3, obs2 -> 2)
+      obsNumbersEqual(cloned, obs1 -> 1, obs4 -> 4, obs5 -> 5, obs3 -> 3, obs2 -> 2)
 
       commit()
-      assertEquals(keys(obs1, obs4, obs5, obs3, obs2), childKeys(remote.sp))
+      assertEquals(keys(obs1, obs4, obs5, obs3, obs2), childKeys(central.sp))
 
       // After the commit in the local program, we have two new observations
       // which keep their numbers because they are unique in the remote
       // program.
-      obsNumbersEqual(remote, obs1 -> 1, obs4 -> 4, obs5 -> 5, obs3 -> 3, obs2 -> 2)
+      obsNumbersEqual(central, obs1 -> 1, obs4 -> 4, obs5 -> 5, obs3 -> 3, obs2 -> 2)
     }
   }
 
   @Test def dontRenumberWhenNotNecessary() {
-    withPiTestEnv { env =>
+    piSyncTest { env =>
       import env._
 
       update(user)
 
-      val obs1 = local.addObservation()
-      val obs2 = local.addObservation()
-      obsNumbersEqual(local, obs1 -> 1, obs2 -> 2)
+      val obs1 = cloned.addObservation()
+      val obs2 = cloned.addObservation()
+      obsNumbersEqual(cloned, obs1 -> 1, obs2 -> 2)
 
       // remove observation 1 but that shouldn't cause 2 to be renumbered
-      local.sp.removeObservation(obs1)
-      obsNumbersEqual(local, obs2 -> 2)
+      cloned.sp.removeObservation(obs1)
+      obsNumbersEqual(cloned, obs2 -> 2)
 
       update(user)
       commit()
 
-      assertEquals(1, local.sp.getObservations.size())
-      assertEquals(1, remote.sp.getObservations.size())
-      obsNumbersEqual(local, obs2 -> 2)
-      obsNumbersEqual(remote, obs2 -> 2)
+      assertEquals(1, cloned.sp.getObservations.size())
+      assertEquals(1, central.sp.getObservations.size())
+      obsNumbersEqual(cloned, obs2 -> 2)
+      obsNumbersEqual(central, obs2 -> 2)
 
       // next observation starts at 3
-      val obs3R = remote.addObservation()
-      val obs3L = local.addObservation()
+      val obs3R = central.addObservation()
+      val obs3L = cloned.addObservation()
 
-      obsNumbersEqual(remote, obs2 -> 2, obs3R -> 3)
-      obsNumbersEqual(local, obs2 -> 2, obs3L -> 3)
+      obsNumbersEqual(central, obs2 -> 2, obs3R -> 3)
+      obsNumbersEqual(cloned, obs2 -> 2, obs3L -> 3)
 
       update(user)
 
       // have to renumber here to avoid having two observation #3
-      obsNumbersEqual(local, obs2 -> 2, obs3L -> 4, obs3R -> 3)
+      obsNumbersEqual(cloned, obs2 -> 2, obs3L -> 4, obs3R -> 3)
 
       commit()
 
-      obsNumbersEqual(remote, obs2 -> 2, obs3L -> 4, obs3R -> 3)
+      obsNumbersEqual(central, obs2 -> 2, obs3L -> 4, obs3R -> 3)
     }
   }
 
   @Test def reuseObservationNumbersWhenPossible() {
-    withPiTestEnv { env =>
+    piSyncTest { env =>
       import env._
 
       update(user)
 
       (1 to 9).foreach { _ =>
-        val obs = remote.addObservation()
-        remote.sp.removeObservation(obs)
+        val obs = central.addObservation()
+        central.sp.removeObservation(obs)
       }
-      val obs10 = mkNamedObs(remote, "obs10")
+      val obs10 = mkNamedObs(central, "obs10")
 
       (1 to 8).foreach { _ =>
-        val obs = local.addObservation()
-        local.sp.removeObservation(obs)
+        val obs = cloned.addObservation()
+        cloned.sp.removeObservation(obs)
       }
 
       // 9 must become 11 after update
-      val obs9_11 = mkNamedObs(local, "obs9-11")
+      val obs9_11 = mkNamedObs(cloned, "obs9-11")
 
       // 10 and 11 "al agua"
-      local.sp.removeObservation(local.addObservation())
-      local.sp.removeObservation(local.addObservation())
+      cloned.sp.removeObservation(cloned.addObservation())
+      cloned.sp.removeObservation(cloned.addObservation())
 
       // 12, 13 can stay
-      val obs12 = mkNamedObs(local, "obs12")
-      val obs13 = mkNamedObs(local, "obs13")
+      val obs12 = mkNamedObs(cloned, "obs12")
+      val obs13 = mkNamedObs(cloned, "obs13")
 
       update(user)
 
-      obsNumbersEqual(local, obs9_11 -> 11, obs12 -> 12, obs13 -> 13, obs10 -> 10)
+      obsNumbersEqual(cloned, obs9_11 -> 11, obs12 -> 12, obs13 -> 13, obs10 -> 10)
       commit()
     }
   }
 
   @Test def bumpObservationNumbersWhenNecessary() {
-    withPiTestEnv { env =>
+    piSyncTest { env =>
       import env._
 
       update(user)
 
       (1 to 9).foreach { _ =>
-        val obs = remote.addObservation()
-        remote.sp.removeObservation(obs)
+        val obs = central.addObservation()
+        central.sp.removeObservation(obs)
       }
-      val obs10 = mkNamedObs(remote, "obs10")
+      val obs10 = mkNamedObs(central, "obs10")
 
       (1 to 8).foreach { _ =>
-        val obs = local.addObservation()
-        local.sp.removeObservation(obs)
+        val obs = cloned.addObservation()
+        cloned.sp.removeObservation(obs)
       }
 
       // 9 must become 11 after update
-      val obs9_11 = mkNamedObs(local, "obs9-11")
+      val obs9_11 = mkNamedObs(cloned, "obs9-11")
 
       // 10 "al agua"
-      local.sp.removeObservation(local.addObservation())
+      cloned.sp.removeObservation(cloned.addObservation())
 
       // 11 bumped to 12, 12 bumped to 13
-      val obs11_12 = mkNamedObs(local, "obs11-12")
-      val obs12_13 = mkNamedObs(local, "obs12-13")
+      val obs11_12 = mkNamedObs(cloned, "obs11-12")
+      val obs12_13 = mkNamedObs(cloned, "obs12-13")
 
       update(user)
 
-      obsNumbersEqual(local, obs9_11 -> 11, obs11_12 -> 12, obs12_13 -> 13, obs10 -> 10)
+      obsNumbersEqual(cloned, obs9_11 -> 11, obs11_12 -> 12, obs12_13 -> 13, obs10 -> 10)
       commit()
     }
   }
 
   @Test def move() {
-    withPiTestEnv {
+    piSyncTest {
       env =>
         import env._
 
@@ -711,34 +685,34 @@ class TestMerge {
           assertTrue(p.children.map(_.getNodeKey).toSet == childKeys)
         }
 
-        val grpOrigR = mkGroup(remote, "orig")
-        val note1 = remote.addNote("1", grpOrigR.getNodeKey)
-        val note2 = remote.addNote("2", grpOrigR.getNodeKey)
-        val note3 = remote.addNote("3", grpOrigR.getNodeKey)
+        val grpOrigR = mkGroup(central, "orig")
+        val note1 = central.addNote("1", grpOrigR.getNodeKey)
+        val note2 = central.addNote("2", grpOrigR.getNodeKey)
+        val note3 = central.addNote("3", grpOrigR.getNodeKey)
         update(user)
         versionsEqual()
 
 
-        val grpR = mkGroup(remote, "groupR")
-        val grpL = mkGroup(local, "groupL")
+        val grpR = mkGroup(central, "groupR")
+        val grpL = mkGroup(cloned, "groupL")
 
         // move note3 to grpR in remote
-        remote.move(note3.getNodeKey, grpR.getNodeKey)
+        central.move(note3.getNodeKey, grpR.getNodeKey)
 
         // move notes 2 and 3 to grpL in local
-        local.move(note3.getNodeKey, grpL.getNodeKey)
-        local.move(note2.getNodeKey, grpL.getNodeKey)
+        cloned.move(note3.getNodeKey, grpL.getNodeKey)
+        cloned.move(note2.getNodeKey, grpL.getNodeKey)
 
         // update and see all three groups in the local program
         update(user)
-        assertContainsChildren(local, local.sp, grpOrigR, grpR, grpL)
+        assertContainsChildren(cloned, cloned.sp, grpOrigR, grpR, grpL)
 
         // grpOrig should have note 1
-        assertContainsChildren(local, grpOrigR, note1)
+        assertContainsChildren(cloned, grpOrigR, note1)
 
         // grpL should have note2 and a move conflict for note3
-        assertContainsChildren(local, grpL, note2)
-        val c = local.find(grpL.getNodeKey).getConflicts
+        assertContainsChildren(cloned, grpL, note2)
+        val c = cloned.find(grpL.getNodeKey).getConflicts
         c.notes.toList.asScala.toList match {
           case List(mvConflict) =>
             assertEquals(new Conflict.Moved(note3.getNodeKey, grpR.getNodeKey), mvConflict)
@@ -746,16 +720,16 @@ class TestMerge {
         }
 
         // grpR should have note3
-        assertContainsChildren(local, grpR, note3)
+        assertContainsChildren(cloned, grpR, note3)
 
         // acknowledge the conflict and commit
-        local.find(grpL.getNodeKey).resolveConflicts()
+        cloned.find(grpL.getNodeKey).resolveConflicts()
         commit()
     }
   }
 
   @Test def conflictingMove() {
-    withPiTestEnv {
+    piSyncTest {
       env =>
         import env._
 
@@ -765,10 +739,10 @@ class TestMerge {
           grp
         }
 
-        val grp1R = mkGroup(remote, "grp1")
-        val grp2R = mkGroup(remote, "grp2")
-        val grp3R = mkGroup(remote, "grp3")
-        val obsR = remote.addObservation(grp1R.getNodeKey)
+        val grp1R = mkGroup(central, "grp1")
+        val grp2R = mkGroup(central, "grp2")
+        val grp3R = mkGroup(central, "grp3")
+        val obsR = central.addObservation(grp1R.getNodeKey)
 
         update(user)
         versionsEqual()
@@ -778,10 +752,10 @@ class TestMerge {
         grp2R.children = List(obsR)
 
         // Move obs to grp3 locally
-        val grp1L = local.find(grp1R.getNodeKey)
-        val grp2L = local.find(grp2R.getNodeKey)
-        val grp3L = local.find(grp3R.getNodeKey)
-        val obsL = local.find(obsR.getNodeKey)
+        val grp1L = cloned.find(grp1R.getNodeKey)
+        val grp2L = cloned.find(grp2R.getNodeKey)
+        val grp3L = cloned.find(grp3R.getNodeKey)
+        val obsL = cloned.find(obsR.getNodeKey)
 
         grp1L.children = Nil
         grp3L.children = List(obsL)
@@ -793,13 +767,13 @@ class TestMerge {
           def format(pc: ProgContext, key: SPNodeKey): String =
             "%s - %s".format(pc.name, pc.getTitle(key))
 
-          List((remote, grp2R), (local, grp2L)) foreach {
+          List((central, grp2R), (cloned, grp2L)) foreach {
             case (pc, grp) =>
               val key = grp.getNodeKey
               assertEquals(format(pc, key), keys(obsR), childKeys(pc.find(key)))
           }
 
-          List((remote, grp1R), (local, grp1L), (remote, grp3R), (local, grp3L)) foreach {
+          List((central, grp1R), (cloned, grp1L), (central, grp3R), (cloned, grp3L)) foreach {
             case (pc, grp) =>
               val key = grp.getNodeKey
               assertEquals(format(pc, key), Nil, childKeys(pc.find(key)))
@@ -808,7 +782,7 @@ class TestMerge {
         assertMovedToGroup2()
 
         // We expect grp3 to have a MOVED conflict.
-        val g3 = local.find(grp3L.getNodeKey)
+        val g3 = cloned.find(grp3L.getNodeKey)
         assertTrue(g3.hasConflicts)
         val cn = g3.getConflicts.notes.get(0)
         assertEquals(new Moved(obsL.getNodeKey, grp2L.getNodeKey), cn)
@@ -826,106 +800,106 @@ class TestMerge {
   }
 
   @Test def updateNodeAlreadyInConflict() {
-    withPiTestEnv {
+    piSyncTest {
       env =>
         import env._
 
-        val note = remote.addNote("Remote Note")
+        val note = central.addNote("Remote Note")
         update(user)
 
         // Delete note in local program, modify note in remote program
-        local.delete(note.getNodeKey)
-        remote.setNoteText("Remote Note Modified", note.getNodeKey)
+        cloned.delete(note.getNodeKey)
+        central.setNoteText("Remote Note Modified", note.getNodeKey)
         update(user)
 
         // Note comes back locally
-        assertEquals(keys(note), childKeys(local.sp))
+        assertEquals(keys(note), childKeys(cloned.sp))
 
         val expect = new ResurrectedLocalDelete(note.getNodeKey)
-        val List(actual0) = local.conflictNotes()
+        val List(actual0) = cloned.conflictNotes()
         assertEquals(expect, actual0)
         cantCommit(HasConflict)
 
         // Update again and we still have the conflict.
         update(user)
-        val List(actual1) = local.conflictNotes()
+        val List(actual1) = cloned.conflictNotes()
         assertEquals(expect, actual1)
         cantCommit(HasConflict)
 
         // Resolve and commit.
-        local.sp.resolveConflict(actual1)
+        cloned.sp.resolveConflict(actual1)
         commit()
-        assertEquals(keys(note), childKeys(remote.sp))
+        assertEquals(keys(note), childKeys(central.sp))
     }
   }
 
   @Test def updateWithExistingDataObjectConflict() {
-    withPiTestEnv {
+    piSyncTest {
       env =>
         import env._
 
-        remote.setTitle("New Title (Remote)")
-        local.setTitle("New Title (Local)")
+        central.setTitle("New Title (Remote)")
+        cloned.setTitle("New Title (Local)")
         cantCommit(NeedsUpdate)
         update(user)
 
-        assertTrue(local.sp.hasConflicts)
+        assertTrue(cloned.sp.hasConflicts)
 
         import DataObjectConflict.Perspective._
 
         def verifyDoc(conflictTitle: String, p: DataObjectConflict.Perspective, dObjTitle: String) {
-          val actual = local.sp.getConflicts.dataObjectConflict.getValue
+          val actual = cloned.sp.getConflicts.dataObjectConflict.getValue
           assertEquals(conflictTitle, actual.dataObject.asInstanceOf[SPProgram].getTitle)
           assertEquals(p, actual.perspective)
-          assertEquals(dObjTitle, local.sp.getDataObject.asInstanceOf[SPProgram].getTitle)
+          assertEquals(dObjTitle, cloned.sp.getDataObject.asInstanceOf[SPProgram].getTitle)
         }
 
         verifyDoc("New Title (Local)", LOCAL, "New Title (Remote)")
         cantCommit(HasConflict)
 
         // Change the remote title again and update.
-        remote.setTitle("Updated Remote Title")
+        central.setTitle("Updated Remote Title")
         update(user)
 
-        assertTrue(local.sp.hasConflicts)
+        assertTrue(cloned.sp.hasConflicts)
 
         // Here we lose the "New Title (Local)".  It's been replaced with the
         // previous update from the remote database.
         verifyDoc("New Title (Remote)", LOCAL, "Updated Remote Title")
 
         // Now toggle the data object conflict.
-        local.sp.swapDataObjectConflict()
+        cloned.sp.swapDataObjectConflict()
         verifyDoc("Updated Remote Title", REMOTE, "New Title (Remote)")
 
         // Edit it remotely again and update.
-        remote.setTitle("Final Remote Title")
+        central.setTitle("Final Remote Title")
         update(user)
         verifyDoc("New Title (Remote)", LOCAL, "Final Remote Title")
 
-        local.sp.resolveDataObjectConflict()
+        cloned.sp.resolveDataObjectConflict()
         commit()
     }
   }
 
   @Test def testMergeValidityIssue() {
-    withPiTestEnv {
+    piSyncTest {
       env =>
         import env._
 
         // ! creates and adds and observation, modifying the remote program
-        val key = remote.addObservation().getNodeKey
+        val key = central.addObservation().getNodeKey
 
         update(user)
 
         // Add a new instrument to both the remote and the local observations
-        val remoteObs = remote.sp.getObservations.get(0)
-        remoteObs.addObsComponent(remote.odb.getFactory.createObsComponent(remote.sp, SPComponentType.INSTRUMENT_GMOS, null))
-        val localObs = local.sp.getObservations.get(0)
-        localObs.addObsComponent(local.odb.getFactory.createObsComponent(local.sp, SPComponentType.INSTRUMENT_NIRI, null))
+        val remoteObs = central.sp.getObservations.get(0)
+        remoteObs.addObsComponent(central.odb.getFactory.createObsComponent(central.sp, SPComponentType.INSTRUMENT_GMOS, null))
+        val localObs = cloned.sp.getObservations.get(0)
+        localObs.addObsComponent(cloned.odb.getFactory.createObsComponent(cloned.sp, SPComponentType.INSTRUMENT_NIRI, null))
 
         // Update, which should put one of these instruments in a conflict folder
         update(user)
-        val cf = local.findObs(key).getConflictFolder
+        val cf = cloned.findObs(key).getConflictFolder
         assertNotNull(cf)
 
         val instComp = cf.children(0)
@@ -936,15 +910,13 @@ class TestMerge {
         assertTrue(instComp.asInstanceOf[ISPObsComponent].getType.broadType == SPComponentBroadType.INSTRUMENT)
 
         // remove the conflict generated by having two instruments
-        local.findObs(key).removeConflictFolder()
+        cloned.findObs(key).removeConflictFolder()
 
         // TODO: spurious conflict in target component ... have to get rid of this
-        local.sp.children(0).children find {
-          _ match {
+        cloned.sp.children(0).children.find {
             case oc: ISPObsComponent if oc.getType == SPComponentType.TELESCOPE_TARGETENV => true
             case _ => false
-          }
-        } foreach {
+        }.foreach {
           _.resolveConflicts()
         }
 
@@ -953,22 +925,22 @@ class TestMerge {
   }
 
   @Test def newTemplateFolder() {
-    withPiTestEnv {
+    piSyncTest {
       env =>
         import env._
 
-        val tf = local.odb.getFactory.createTemplateFolder(local.sp, null)
-        local.sp.setTemplateFolder(tf)
+        val tf = cloned.odb.getFactory.createTemplateFolder(cloned.sp, null)
+        cloned.sp.setTemplateFolder(tf)
         commit()
 
-        assertNotNull(local.sp.getTemplateFolder)
+        assertNotNull(cloned.sp.getTemplateFolder)
 
         update(user)
 
-        assertNotNull(local.sp.getTemplateFolder)
+        assertNotNull(cloned.sp.getTemplateFolder)
 
-        assertNotNull(remote.sp.getTemplateFolder)
-        assertEquals(local.sp.getTemplateFolder.getNodeKey, remote.sp.getTemplateFolder.getNodeKey)
+        assertNotNull(central.sp.getTemplateFolder)
+        assertEquals(cloned.sp.getTemplateFolder.getNodeKey, central.sp.getTemplateFolder.getNodeKey)
     }
   }
 }

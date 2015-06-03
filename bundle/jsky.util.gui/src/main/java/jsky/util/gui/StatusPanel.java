@@ -22,7 +22,6 @@ import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 
-
 /**
  * Displays a progress bar and a text field together in a panel and is
  * intended to be used as a status panel, displaying the status of downloads, etc.
@@ -101,12 +100,7 @@ public class StatusPanel extends JPanel implements StatusLogger, SwingConstants 
      */
     public void setText(final String s) {
         if (!SwingUtilities.isEventDispatchThread()) {
-            SwingUtilities.invokeLater(new Runnable() {
-
-                public void run() {
-                    textField.setText(s);
-                }
-            });
+            SwingUtilities.invokeLater(() -> textField.setText(s));
             return;
         }
         textField.setText(s);
@@ -121,12 +115,7 @@ public class StatusPanel extends JPanel implements StatusLogger, SwingConstants 
      */
     public void logMessage(final String msg) {
         if (!SwingUtilities.isEventDispatchThread()) {
-            SwingUtilities.invokeLater(new Runnable() {
-
-                public void run() {
-                    setText(msg);
-                }
-            });
+            SwingUtilities.invokeLater(() -> setText(msg));
             return;
         }
         setText(msg);
@@ -137,12 +126,7 @@ public class StatusPanel extends JPanel implements StatusLogger, SwingConstants 
      */
     public void setProgress(final int percent) {
         if (!SwingUtilities.isEventDispatchThread()) {
-            SwingUtilities.invokeLater(new Runnable() {
-
-                public void run() {
-                    setProgress(percent);
-                }
-            });
+            SwingUtilities.invokeLater(() -> setProgress(percent));
             return;
         }
 
@@ -226,11 +210,7 @@ public class StatusPanel extends JPanel implements StatusLogger, SwingConstants 
     public void start() {
         // make sure this is done in the event dispatch thread
         if (!SwingUtilities.isEventDispatchThread()) {
-            SwingUtilities.invokeLater(new Runnable() {
-                public void run() {
-                    start();
-                }
-            });
+            SwingUtilities.invokeLater(this::start);
             return;
         }
 
@@ -244,11 +224,7 @@ public class StatusPanel extends JPanel implements StatusLogger, SwingConstants 
     public void stop() {
         // make sure this is done in the event dispatch thread
         if (!SwingUtilities.isEventDispatchThread()) {
-            SwingUtilities.invokeLater(new Runnable() {
-                public void run() {
-                    stop();
-                }
-            });
+            SwingUtilities.invokeLater(this::stop);
             return;
         }
 

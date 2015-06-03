@@ -17,7 +17,7 @@ import java.util.Vector;
  */
 public class BasicQueryArgs implements QueryArgs {
 
-    /** Catalog we are accesing */
+    /** Catalog we are accessing */
     private Catalog _catalog;
 
     /** Array of parameter values corresponding to the catalog parameters */
@@ -259,7 +259,7 @@ public class BasicQueryArgs implements QueryArgs {
             return null;
 
         int n = _catalog.getNumParams();
-        Vector v = new Vector(n);
+        Vector<SearchCondition> v = new Vector<>(n);
         for (int i = 0; i < n; i++) {
             if (_values[i] != null) {
                 FieldDesc p = _catalog.getParamDesc(i);

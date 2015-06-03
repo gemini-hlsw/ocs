@@ -2,9 +2,9 @@ package edu.gemini.spModel.io.impl.migration.to2015A
 
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality
 import edu.gemini.spModel.io.impl.SpIOTags
-import edu.gemini.spModel.pio.xml.PioXmlFactory
+import edu.gemini.spModel.pio.xml.{PioXmlUtil, PioXmlFactory}
 import edu.gemini.spModel.pio._
-import edu.gemini.spModel.target.SPTarget
+import edu.gemini.spModel.target.{SPTargetPio, SPTarget}
 import edu.gemini.spModel.template.{TemplateParameters, TemplateGroup, TemplateFolder}
 
 import scala.collection.JavaConverters._
@@ -51,27 +51,17 @@ object To2015A {
   private def update(c: Container): Unit = {
     val tf = c.getParamSet(TemplateFolderName)
 
-    // Map from key to T (targets or conditions).  We have to potentially
-    // add multiple copies of the same target and conditions and they need
-    // to be in distinct ParamSet copies.  I don't see another easy way to
-    // do this other than conversion from and then back to ParamSet.
-    def mapParamSets[T](name: String)(f: ParamSet => T): Map[String, T] =
-      (Map.empty[String, T]/:tf.getParamSets(name).asScala) { (m, ps) =>
+    // Map from key to XML String representation of targets or conditions.  We
+    // have to potentially add multiple copies of the same target and conditions
+    // and they need to be in distinct ParamSet copies.
+    def mapParamSets(name: String): Map[String, String] =
+      (Map.empty[String, String]/:tf.getParamSets(name).asScala) { (m, ps) =>
         val key = Pio.getValue(ps, TemplateFolder.PARAM_MAP_KEY)
-        m + (key -> f(ps))
+        m + (key -> PioXmlUtil.toXmlString(ps))
       }
 
-    val targetMap = mapParamSets(SPTarget.PARAM_SET_NAME) { ps =>
-      val t = new SPTarget()
-      t.setParamSet(ps)
-      t
-    }
-
-    val condsMap  = mapParamSets(SPSiteQuality.SP_TYPE.readableStr) { ps =>
-      val c = new SPSiteQuality()
-      c.setParamSet(ps)
-      c
-    }
+    val targetMap = mapParamSets(SPTargetPio.PARAM_SET_NAME)
+    val condsMap  = mapParamSets(SPSiteQuality.SP_TYPE.readableStr)
 
     val fact = new PioXmlFactory()
 
@@ -91,8 +81,8 @@ object To2015A {
 
         // Add them back as children of this template parameters
         // data object ParamSet.
-        tp.addParamSet(targetMap(targetId).getParamSet(fact))
-        tp.addParamSet(condsMap(condsId).getParamSet(fact))
+        tp.addParamSet(PioXmlUtil.read(targetMap(targetId)).asInstanceOf[ParamSet])
+        tp.addParamSet(PioXmlUtil.read(condsMap(condsId)).asInstanceOf[ParamSet])
         Pio.addParam(fact, tp, TemplateParameters.PARAM_TIME, time)
       }
     }

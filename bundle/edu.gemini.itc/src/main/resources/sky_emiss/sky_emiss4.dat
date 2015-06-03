@@ -1,0 +1,17 @@
+# sky background for ITC
+# any conditions (bright)
+# columns are (1) wavelength in nm, (2) sky brightness
+# in UNITS
+# source: broadband filter backgrounds
+# uses Ted von Hippel's model for optical sky variation
+# assume twilight IR sky is 1 mag brighter than nominal
+# author: Phil Puxley
+# created 27Aug1999
+
+360   78.30
+440   15.93
+550    6.85
+670    4.10
+1250  18.20
+1650  62.27
+2200  42.00

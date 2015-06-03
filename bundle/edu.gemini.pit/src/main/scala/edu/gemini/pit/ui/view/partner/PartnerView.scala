@@ -59,6 +59,7 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
   // An enum for submission type, so we can filter the partner/exchange list
   object PartnerType extends Enumeration {
     val GeminiPartner  = Value("Gemini Partner Request")
+    val ExchangeCFHT   = Value("Exchange Request (CFH PIs)")
     val ExchangeKeck   = Value("Exchange Request (Keck PIs)")
     val ExchangeSubaru = Value("Exchange Request (Japanese PIs)")
   }
@@ -167,7 +168,7 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
     }
 
     // Site combo
-    object siteCombo extends ComboBox(ExchangePartner.values) with Bound[Proposal, ProposalClass] with TextRenderer[ExchangePartner] {
+    object siteCombo extends ComboBox(ExchangePartner.values.filterNot(_ == ExchangePartner.CFHT)) with Bound[Proposal, ProposalClass] with TextRenderer[ExchangePartner] {
 
       val lens = Proposal.proposalClass
 
@@ -857,8 +858,6 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
             case l:LargeProgramClass          => formatLabel(l.sub.request)
             case _                            => ""
           }
-
-
         }
 
         def formatLabel(r: SubmissionRequest): String =
@@ -882,9 +881,9 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
       var localGemini:List[NgoSubmission] = Nil
       var localKeck = ExchangeSubmission(SubmissionRequest.empty, None, ExchangePartner.KECK, InvestigatorRef.empty)
       var localSubaru = ExchangeSubmission(SubmissionRequest.empty, None, ExchangePartner.SUBARU, InvestigatorRef.empty)
+      var localCFHT = ExchangeSubmission(SubmissionRequest.empty, None, ExchangePartner.CFHT, InvestigatorRef.empty)
 
       override def refresh(m:Option[ProposalClass]) {
-
         // Enabled?
         enabled = canEdit
 
@@ -900,9 +899,11 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
           case QueueProposalClass(_, _, _, Left(ngos), _, _)                                       => localGemini = ngos
           case QueueProposalClass(_, _, _, Right(e), _, _) if e.partner == ExchangePartner.KECK    => localKeck = e
           case QueueProposalClass(_, _, _, Right(e), _, _) if e.partner == ExchangePartner.SUBARU  => localSubaru = e
+          case QueueProposalClass(_, _, _, Right(e), _, _) if e.partner == ExchangePartner.CFHT    => localCFHT = e
           case ClassicalProposalClass(_, _, _, Left(ngos), _)                                      => localGemini = ngos
           case ClassicalProposalClass(_, _, _, Right(e), _) if e.partner == ExchangePartner.KECK   => localKeck = e
           case ClassicalProposalClass(_, _, _, Right(e), _) if e.partner == ExchangePartner.SUBARU => localSubaru = e
+          case ClassicalProposalClass(_, _, _, Right(e), _) if e.partner == ExchangePartner.CFHT   => localCFHT= e
           case e:ExchangeProposalClass                                                             => localGemini = e.subs
           case _                                                                                   => // ignore
         }
@@ -912,9 +913,11 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
           case QueueProposalClass(_, _, _, Left(_), _, _)                                          => GeminiPartner
           case QueueProposalClass(_, _, _, Right(e), _, _) if e.partner == ExchangePartner.KECK    => ExchangeKeck
           case QueueProposalClass(_, _, _, Right(e), _, _) if e.partner == ExchangePartner.SUBARU  => ExchangeSubaru
+          case QueueProposalClass(_, _, _, Right(e), _, _) if e.partner == ExchangePartner.CFHT    => ExchangeCFHT
           case ClassicalProposalClass(_, _, _, Left(_), _)                                         => GeminiPartner
           case ClassicalProposalClass(_, _, _, Right(e), _) if e.partner == ExchangePartner.KECK   => ExchangeKeck
           case ClassicalProposalClass(_, _, _, Right(e), _) if e.partner == ExchangePartner.SUBARU => ExchangeSubaru
+          case ClassicalProposalClass(_, _, _, Right(e), _) if e.partner == ExchangePartner.CFHT   => ExchangeCFHT
           case _:ExchangeProposalClass                                                             => GeminiPartner
           case _:SpecialProposalClass                                                              => GeminiPartner
           case _:LargeProgramClass                                                                 => GeminiPartner
@@ -932,12 +935,14 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
                 case GeminiPartner  => q.copy(subs = Left(localGemini))
                 case ExchangeKeck   => q.copy(subs = Right(localKeck))
                 case ExchangeSubaru => q.copy(subs = Right(localSubaru))
+                case ExchangeCFHT   => q.copy(subs = Right(localCFHT))
               }
             case c:ClassicalProposalClass =>
               selection.item match {
                 case GeminiPartner  => c.copy(subs = Left(localGemini))
                 case ExchangeKeck   => c.copy(subs = Right(localKeck))
                 case ExchangeSubaru => c.copy(subs = Right(localSubaru))
+                case ExchangeCFHT   => c.copy(subs = Right(localCFHT))
               }
             case e:ExchangeProposalClass  =>
               selection.item match {

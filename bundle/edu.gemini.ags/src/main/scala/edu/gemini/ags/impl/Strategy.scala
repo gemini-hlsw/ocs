@@ -1,22 +1,28 @@
 package edu.gemini.ags.impl
 
 import edu.gemini.ags.api.{AgsRegistrar, AgsStrategy}
+import edu.gemini.catalog.votable.RemoteBackend
 import edu.gemini.pot.sp.SPComponentType
 import edu.gemini.spModel.ags.AgsStrategyKey
 import edu.gemini.spModel.ags.AgsStrategyKey._
-import edu.gemini.spModel.core.Site
+import edu.gemini.spModel.core.{MagnitudeBand, Site}
 import edu.gemini.spModel.gemini.altair.{AltairParams, InstAltair}
 import edu.gemini.spModel.gemini.gems.Canopus
 import edu.gemini.spModel.gemini.nici.NiciOiwfsGuideProbe
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.rich.shared.immutable._
+//import edu.gemini.shared.util.immutable.ScalaConverters._
 import edu.gemini.spModel.target.obsComp.PwfsGuideProbe
+import edu.gemini.spModel.target.system.NonSiderealTarget
 
 import scala.Function.const
 
 // Used to implement AgsRegistrar
 object Strategy {
   import SingleProbeStrategyParams._
+
+  // Backend for searching on catalogs
+  val backend = RemoteBackend
 
   val AltairAowfs     = SingleProbeStrategy(AltairAowfsKey,     AltairAowfsParams)
   val Flamingos2Oiwfs = SingleProbeStrategy(Flamingos2OiwfsKey, Flamingos2OiwfsParams)
@@ -29,7 +35,7 @@ object Strategy {
   val Pwfs2North      = SingleProbeStrategy(Pwfs2NorthKey,      PwfsParams(Site.GN, PwfsGuideProbe.pwfs2))
   val Pwfs1South      = SingleProbeStrategy(Pwfs1SouthKey,      PwfsParams(Site.GS, PwfsGuideProbe.pwfs1))
   val Pwfs2South      = SingleProbeStrategy(Pwfs2SouthKey,      PwfsParams(Site.GS, PwfsGuideProbe.pwfs2))
-  val NiciOiwfs       = ScienceTargetStrategy(NiciOiwfsKey,     NiciOiwfsGuideProbe.instance)
+  val NiciOiwfs       = ScienceTargetStrategy(NiciOiwfsKey,     NiciOiwfsGuideProbe.instance, List(MagnitudeBand._r, MagnitudeBand.R, MagnitudeBand.UC, MagnitudeBand.K))
 
   val All = List(
     AltairAowfs,
@@ -56,14 +62,23 @@ object Strategy {
   // in order of preference.
   //
 
-  private def itemListIfSiderealElseNil(ctx: ObsContext, strategy: AgsStrategy): List[AgsStrategy] =
-    if (isSidereal(ctx)) List(strategy) else Nil
+  private def oiStategies(ctx: ObsContext, oiStrategy: AgsStrategy): List[AgsStrategy] = {
+    val pwfs = ctx.getSite.asScalaOpt.toList.flatMap {
+      case Site.GN => List(Pwfs2North, Pwfs1North)
+      case Site.GS => List(Pwfs2South, Pwfs1South)
+    }
+    if (isSidereal(ctx)) oiStrategy :: pwfs
+    else                 pwfs :+ oiStrategy
+  }
+
+  def isSidereal(ctx: ObsContext): Boolean =
+    !ctx.getTargets.getBase.getTarget.isInstanceOf[NonSiderealTarget]
 
   val InstMap = Map[SPComponentType, ObsContext => List[AgsStrategy]](
     SPComponentType.INSTRUMENT_ACQCAM     -> const(List(Pwfs1North, Pwfs2North, Pwfs1South, Pwfs2South)),
 
     SPComponentType.INSTRUMENT_FLAMINGOS2 -> ((ctx: ObsContext) =>
-      List(GemsStrategy) ++ itemListIfSiderealElseNil(ctx, Flamingos2Oiwfs) ++  List(Pwfs2South, Pwfs1South)
+      List(GemsStrategy) ++ oiStategies(ctx, Flamingos2Oiwfs)
     ),
 
     SPComponentType.INSTRUMENT_GMOS       -> ((ctx: ObsContext) => {
@@ -72,16 +87,12 @@ object Strategy {
         ao.get.asInstanceOf[InstAltair].getMode match {
           case AltairParams.Mode.LGS_P1 => List(Pwfs1North)
           case AltairParams.Mode.LGS_OI => List(GmosNorthOiwfs)
-          case _                        => List(AltairAowfs, Pwfs1North) ++ itemListIfSiderealElseNil(ctx, GmosNorthOiwfs)
+          case _                        => List(AltairAowfs, Pwfs1North, GmosNorthOiwfs)
         }
-      } else {
-        itemListIfSiderealElseNil(ctx, GmosNorthOiwfs) ++ List(Pwfs2North, Pwfs1North)
-      }
+      } else oiStategies(ctx, GmosNorthOiwfs)
     }),
 
-    SPComponentType.INSTRUMENT_GMOSSOUTH  -> ((ctx: ObsContext) =>
-      itemListIfSiderealElseNil(ctx, GmosSouthOiwfs) ++ List(Pwfs2South, Pwfs1South)
-    ),
+    SPComponentType.INSTRUMENT_GMOSSOUTH  -> ((ctx: ObsContext) => oiStategies(ctx, GmosSouthOiwfs)),
 
     SPComponentType.INSTRUMENT_GNIRS      -> const(List(AltairAowfs, Pwfs2North, Pwfs1North, GnirsOiwfs)),
     SPComponentType.INSTRUMENT_GSAOI      -> const(List(GemsStrategy) ++ List(Pwfs1South)),
@@ -96,10 +107,10 @@ object Strategy {
 
   private def guidersAvailable(ctx: ObsContext)(s: AgsStrategy): Boolean = {
     s match {
-      case SingleProbeStrategy(_, params) => ctx.getTargets.isActive(params.guideProbe)
-      case ScienceTargetStrategy(_, gp)   => ctx.getTargets.isActive(gp)
-      case GemsStrategy => ctx.getTargets.isActive(Canopus.Wfs.cwfs3) // any canopus would serve
-      case _ => false
+      case SingleProbeStrategy(_, params, _) => ctx.getTargets.isActive(params.guideProbe)
+      case ScienceTargetStrategy(_, gp, _)   => ctx.getTargets.isActive(gp)
+      case GemsStrategy                      => ctx.getTargets.isActive(Canopus.Wfs.cwfs3) // any canopus would serve
+      case _                                 => false
     }
   }
 

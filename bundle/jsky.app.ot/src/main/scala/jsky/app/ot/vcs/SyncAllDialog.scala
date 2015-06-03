@@ -4,7 +4,7 @@ import edu.gemini.pot.sp.ISPProgram
 import edu.gemini.pot.sp.version.VersionMap
 import edu.gemini.pot.spdb.{ProgramSummoner, IDBDatabaseService}
 import edu.gemini.sp.vcs._
-import edu.gemini.sp.vcs.VcsFailure.{TryVcs, VcsException}
+import edu.gemini.sp.vcs.OldVcsFailure.{TryVcs, OldVcsException}
 import edu.gemini.sp.vcs.reg.VcsRegistrar
 import edu.gemini.spModel.core.{SPProgramID, Peer}
 import edu.gemini.spModel.rich.pot.spdb._
@@ -118,7 +118,7 @@ class SyncAllDialog private(mode: SyncMode, selectedPeer: Peer, programs: Vector
     val pids = model.programs.filter(_.state == ProgramStatusUpdating).map(_.pid)
 
     def markSyncFailed(ex: Exception): Unit =
-      pids.foreach { pid => updateModel(_.markSyncFailed(pid, some(VcsException(ex)))) }
+      pids.foreach { pid => updateModel(_.markSyncFailed(pid, some(OldVcsException(ex)))) }
 
     def updateRemoteVersions(ups: List[VmUpdate]): Unit = {
       // have to poke the state machine even if there is no actual update to the
@@ -146,7 +146,7 @@ class SyncAllDialog private(mode: SyncMode, selectedPeer: Peer, programs: Vector
 
       def ifNotCancelled[T](body: => TryVcs[T]): TryVcs[T] =
         if (!cancelled.get()) body
-        else -\/(VcsFailure.Unexpected("Cancelled."))
+        else -\/(OldVcsFailure.Unexpected("Cancelled."))
 
       def update(r: VcsServer): TryVcs[ISPProgram] =
         for {
@@ -167,9 +167,9 @@ class SyncAllDialog private(mode: SyncMode, selectedPeer: Peer, programs: Vector
             // sync, it means the program has received an exec event (or other
             // remote update) since the update succeeded.  If that is the case,
             // just retry until it works or fails for some other reason.
-            case -\/(VcsFailure.NeedsUpdate) =>
+            case -\/(OldVcsFailure.NeedsUpdate) =>
               if (i < 10) sync(r, i+1)
-              else -\/(VcsFailure.Unexpected(s"Your version of $pid appears to be incompatible."))
+              else -\/(OldVcsFailure.Unexpected(s"Your version of $pid appears to be incompatible."))
             case other                           => other
           }
         }
@@ -177,12 +177,12 @@ class SyncAllDialog private(mode: SyncMode, selectedPeer: Peer, programs: Vector
       val fut = TrpcClient(selectedPeer).withKeyChain(OT.getKeyChain).future(r => sync(r[VcsServer], 0))(executionContext)
 
       fut onFailure {
-        case x: Exception => updateModel(_.markSyncFailed(pid, some(VcsException(x))))
-        case t =>            updateModel(_.markSyncFailed(pid, some(VcsException(new RuntimeException(t)))))
+        case x: Exception => updateModel(_.markSyncFailed(pid, some(OldVcsException(x))))
+        case t =>            updateModel(_.markSyncFailed(pid, some(OldVcsException(new RuntimeException(t)))))
       }
 
       fut onSuccess {
-        case -\/(VcsFailure.HasConflict) => updateModel(_.markSyncConflict(pid))
+        case -\/(OldVcsFailure.HasConflict) => updateModel(_.markSyncConflict(pid))
         case -\/(f)                      => updateModel(_.markSyncFailed(pid, some(f)))
         case \/-(vm)                     =>
           updateModel(_.markSuccess(pid))
@@ -447,7 +447,7 @@ class SyncAllDialog private(mode: SyncMode, selectedPeer: Peer, programs: Vector
           case SyncInProgress(_)     =>
             (OtColor.BANANA, s"$pid is being synchronized with $site.")
           case SyncFailed(f)         =>
-            (OtColor.LIGHT_SALMON, f.fold("Sync failed, check your connection or try again later.")(v => VcsFailure.explain(v, ps.pid, "sync", Some(selectedPeer))))
+            (OtColor.LIGHT_SALMON, f.fold("Sync failed, check your connection or try again later.")(v => OldVcsFailure.explain(v, ps.pid, "sync", Some(selectedPeer))))
           case InSync                =>
             (OtColor.HONEY_DEW, s"$pid is in sync with $site.")
           case Conflicts             =>

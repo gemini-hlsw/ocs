@@ -12,6 +12,9 @@ import scala.collection.JavaConverters._
  * Methods for finding strategies.
  */
 object AgsRegistrar {
+  // For Java usage
+  val instance = this
+
   def lookup(key: AgsStrategyKey): Option[AgsStrategy] = Strategy.fromKey(key)
 
   /**
@@ -58,6 +61,9 @@ object AgsRegistrar {
    */
   def currentStrategy(ctx: ObsContext): Option[AgsStrategy] =
     strategyOverride(ctx).filter(validStrategies(ctx).contains) orElse defaultStrategy(ctx)
+
+  def currentStrategyForJava(ctx: ObsContext): edu.gemini.shared.util.immutable.Option[AgsStrategy] =
+    currentStrategy(ctx).asGeminiOpt
 
   def validStrategies(ctx: ObsContext): List[AgsStrategy] =
     Strategy.validStrategies(ctx)

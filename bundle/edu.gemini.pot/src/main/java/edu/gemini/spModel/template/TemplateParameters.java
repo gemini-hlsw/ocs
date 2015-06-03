@@ -12,6 +12,7 @@ import edu.gemini.spModel.pio.ParamSet;
 import edu.gemini.spModel.pio.Pio;
 import edu.gemini.spModel.pio.PioFactory;
 import edu.gemini.spModel.target.SPTarget;
+import edu.gemini.spModel.target.SPTargetPio;
 import edu.gemini.spModel.target.system.ITarget;
 
 /**
@@ -117,7 +118,7 @@ public final class TemplateParameters extends AbstractDataObject {
 
         super.setParamSet(paramSet);
 
-        final ParamSet targetPs = paramSet.getParamSet(SPTarget.PARAM_SET_NAME);
+        final ParamSet targetPs = paramSet.getParamSet(SPTargetPio.PARAM_SET_NAME);
         target = new SPTarget();
         target.setParamSet(targetPs);
 

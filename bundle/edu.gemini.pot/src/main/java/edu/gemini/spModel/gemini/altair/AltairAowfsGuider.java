@@ -101,7 +101,7 @@ public enum AltairAowfsGuider implements OffsetValidatingGuideProbe, Validatable
     }
 
     public BoundaryPosition checkBoundaries(SPTarget guideStar, ObsContext ctx) {
-        return checkBoundaries(guideStar.getSkycalcCoordinates(), ctx);
+        return checkBoundaries(guideStar.getTarget().getSkycalcCoordinates(), ctx);
     }
 
     public BoundaryPosition checkBoundaries(final Coordinates coords, final ObsContext ctx) {

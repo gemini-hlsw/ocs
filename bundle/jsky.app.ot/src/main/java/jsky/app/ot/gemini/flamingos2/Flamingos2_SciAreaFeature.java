@@ -10,7 +10,6 @@ import edu.gemini.spModel.gemini.flamingos2.Flamingos2;
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2.FPUnit;
 import edu.gemini.spModel.gemini.gems.Gems;
 import edu.gemini.spModel.obs.context.ObsContext;
-import edu.gemini.spModel.util.Angle;
 import jsky.app.ot.gemini.inst.SciAreaFeatureBase;
 import jsky.app.ot.tpe.TpeImageInfo;
 import jsky.app.ot.tpe.TpeMouseEvent;
@@ -30,6 +29,17 @@ import java.awt.geom.Point2D;
  * Draws the Science Area, the detector or slit (see OT-540).
  */
 public class Flamingos2_SciAreaFeature  extends SciAreaFeatureBase {
+
+    // The size of the imaging field of view in mm.
+    public static final double IMAGING_FOV_SIZE = 230.12;
+
+    // The width of the MOS field of view in mm
+    public static final double MOS_FOV_WIDTH = 75.16;
+
+    // The height of the long slit FOV in mm (the width is selected by the user)
+    public static final double LONG_SLIT_FOV_HEIGHT = 164.1; // SCT-297, LongSlit FOV doesn't run the full lenght of the MOS FOV
+    public static final double LONG_SLIT_FOV_SOUTH_POS = 112.0; // South position of slit when PA = 0
+    public static final double LONG_SLIT_FOV_NORTH_POS = 52.1; // North position of slit when PA = 0
 
     // OT-540:
     // Imaging field of view: 230.12mm diameter circle, centered on base position.
@@ -58,7 +68,7 @@ public class Flamingos2_SciAreaFeature  extends SciAreaFeatureBase {
      * @param plateScale plate scale in arcsec/mm
      */
     private void _addImagingFOV(double plateScale) {
-        double size = Flamingos2.IMAGING_FOV_SIZE * plateScale * _pixelsPerArcsec;
+        double size = IMAGING_FOV_SIZE * plateScale * _pixelsPerArcsec;
         double radius = size/2.;
         Ellipse2D.Double fig = new Ellipse2D.Double(_baseScreenPos.x - radius,
                                                     _baseScreenPos.y - radius,
@@ -73,8 +83,8 @@ public class Flamingos2_SciAreaFeature  extends SciAreaFeatureBase {
     private void _addMOS_FOV(double plateScale) {
 
         // Make the rectangle and circle and then take the intersection
-        double width = Flamingos2.MOS_FOV_WIDTH * plateScale * _pixelsPerArcsec;
-        double height = Flamingos2.IMAGING_FOV_SIZE * plateScale * _pixelsPerArcsec;
+        double width = MOS_FOV_WIDTH * plateScale * _pixelsPerArcsec;
+        double height = IMAGING_FOV_SIZE * plateScale * _pixelsPerArcsec;
 
         double radius = height /2.;
         Ellipse2D.Double circle = new Ellipse2D.Double(_baseScreenPos.x - radius,
@@ -104,9 +114,9 @@ public class Flamingos2_SciAreaFeature  extends SciAreaFeatureBase {
      */
     private void _addLongSlitFOV(double plateScale) {
         double slitWidth = _sciArea.getWidth();
-        double slitHeight = Flamingos2.LONG_SLIT_FOV_HEIGHT * plateScale * _pixelsPerArcsec;
+        double slitHeight = LONG_SLIT_FOV_HEIGHT * plateScale * _pixelsPerArcsec;
 
-        double slitSouth = Flamingos2.LONG_SLIT_FOV_SOUTH_POS * plateScale * _pixelsPerArcsec;
+        double slitSouth = LONG_SLIT_FOV_SOUTH_POS * plateScale * _pixelsPerArcsec;
 
         double x = _baseScreenPos.x - (slitWidth / 2);
         double y = _baseScreenPos.y + slitSouth;
@@ -244,14 +254,15 @@ public class Flamingos2_SciAreaFeature  extends SciAreaFeatureBase {
              return;
          }
 
-         if (_dragObject == null) return;
-         _dragX = tme.xWidget;
-         _dragY = tme.yWidget;
+         if (_dragging) {
+             _dragX = tme.xWidget;
+             _dragY = tme.yWidget;
 
-         double radians = _dragObject.getAngle(_dragX, _dragY) * _tii.flipRA() + _tii.getTheta();
-         double degrees = Math.round(Angle.radiansToDegrees(radians-_fovRotation));
-        _iw.setPosAngle(degrees);
-        _iw.repaint();
+             double radians = _tii.positionAngle(tme).toRadians() - _fovRotation;
+             double degrees = Math.round(Math.toDegrees(radians));
+             _iw.setPosAngle(degrees);
+             _iw.repaint();
+         }
      }
 
     /**
@@ -289,7 +300,7 @@ public class Flamingos2_SciAreaFeature  extends SciAreaFeatureBase {
 
             double plateScale = inst.getLyotWheel().getPlateScale();
             if (fpu.isLongslit()) {
-                double slitNorth = Flamingos2.LONG_SLIT_FOV_NORTH_POS * plateScale * _pixelsPerArcsec;
+                double slitNorth = LONG_SLIT_FOV_NORTH_POS * plateScale * _pixelsPerArcsec;
                 offset = new Point2D.Double(_baseScreenPos.x,
                                             _baseScreenPos.y - slitNorth);
 

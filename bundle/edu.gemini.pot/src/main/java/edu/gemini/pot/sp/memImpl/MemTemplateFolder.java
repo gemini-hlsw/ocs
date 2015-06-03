@@ -55,7 +55,7 @@ public final class MemTemplateFolder extends MemAbstractContainer implements ISP
 
     @Override protected void setTypedChildren(TypedChildren tc) throws SPNodeNotLocalException, SPTreeStateException {
         tc.verify(VALID_CHILD_TYPES);
-        setConflictFolder(tc.getChild(MemConflictFolder.class));
+        setConflictFolder(tc.getOnlyChild(MemConflictFolder.class));
         setTemplateGroups(tc.getChildren(MemTemplateGroup.class));
     }
 

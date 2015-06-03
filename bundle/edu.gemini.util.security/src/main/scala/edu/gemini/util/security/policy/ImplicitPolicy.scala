@@ -11,6 +11,7 @@ import java.security.{AccessControlException, Principal, Permission}
 import javax.security.auth.Subject
 import java.util.logging.{Level, Logger}
 
+import scala.util.Try
 import scalaz._
 import Scalaz._
 import edu.gemini.spModel.core.SPProgramID
@@ -133,7 +134,7 @@ object ImplicitPolicy {
 
   // This is a hack that says "don't check the policy more than once for a given permission during
   // processing of the same AWT event" ... this is not entirely ethical since you might try again
-  // with another set of principles, or the db might have changed. However it is a critical 
+  // with another set of principles, or the db might have changed. However it is a critical
   // optimization in the OT; everything drags if we don't do this.
   // TODO: sort this out
   private object EventCache {
@@ -141,8 +142,11 @@ object ImplicitPolicy {
     private var previousEvent: Option[AWTEvent] = None
     private val cache: collection.mutable.Map[Permission, Boolean] = collection.mutable.Map()
 
+    // EventQueue.getCurrentEvent sometimes throws a NPE, at least in headless
+    // mode, so we'll wrap it here.
+
     def check(p: Permission)(a: => Boolean): Boolean =
-      Option(EventQueue.getCurrentEvent) match {
+      Option(Try(EventQueue.getCurrentEvent).toOption.orNull) match {
         case None => a
         case o =>
           if (o != previousEvent) {
@@ -153,7 +157,7 @@ object ImplicitPolicy {
       }
 
   }
-  
+
   def hasPermission(db: IDBDatabaseService, ps: Set[Principal], p: Permission): IO[Boolean] =
     IO(EventCache.check(p)(new ImplicitPolicy(db, ps).implies(p)))
 
@@ -196,7 +200,7 @@ object ImplicitPolicyForJava {
     if (hasPermission(db, kc, p)) () else fail(p)
 
   private def fail(p: Permission): Nothing =
-    throw new AccessControlException("permission denied: " + p, p)  
+    throw new AccessControlException("permission denied: " + p, p)
 
 }
 

@@ -1,7 +1,7 @@
 package edu.gemini.sp.vcs.tui.osgi
 
 import edu.gemini.pot.spdb.IDBDatabaseService
-import edu.gemini.sp.vcs.{VcsFailure, TrpcVcsServer, VersionControlSystem}
+import edu.gemini.sp.vcs.{OldVcsFailure, TrpcVcsServer, VersionControlSystem}
 import edu.gemini.sp.vcs.log.VcsLog
 import edu.gemini.sp.vcs.reg.VcsRegistrar
 import edu.gemini.spModel.core.{Peer, SPProgramID, SPBadIDException}
@@ -99,19 +99,19 @@ class CommandsImpl(odb: IDBDatabaseService, reg: VcsRegistrar, auth: KeyChain, l
 
   val checkout: VcsIdOp = (id, vcs) =>
     vcs.checkout(id).toEither.fold(
-      f => VcsFailure.explain(f, id, "checkout", Some(locationFor(id))),
+      f => OldVcsFailure.explain(f, id, "checkout", Some(locationFor(id))),
       _ => "Checked out %s".format(id.toString)
     )
 
   val commit: VcsIdOp = (id, vcs) =>
     vcs.commit(id).toEither.fold(
-      f => VcsFailure.explain(f, id, "commit", Some(locationFor(id))),
+      f => OldVcsFailure.explain(f, id, "commit", Some(locationFor(id))),
       _ => "Commited %s".format(id.toString)
     )
 
   val status: VcsIdOp = (id, vcs) =>
     vcs.nodeStatus(id).toEither.fold(
-      f => VcsFailure.explain(f, id, "get status", Some(locationFor(id))),
+      f => OldVcsFailure.explain(f, id, "get status", Some(locationFor(id))),
       m => StatusFormat(m)
     )
 
@@ -119,13 +119,13 @@ class CommandsImpl(odb: IDBDatabaseService, reg: VcsRegistrar, auth: KeyChain, l
 
   val update: VcsIdOp = (id, vcs) =>
     vcs.update(id, auth.subject.getPrincipals.asScala.toSet).toEither.fold(
-      f => VcsFailure.explain(f, id, "update", Some(locationFor(id))),
+      f => OldVcsFailure.explain(f, id, "update", Some(locationFor(id))),
       _ => "Updated %s".format(id.toString)
     )
 
   val showlog: VcsIdOp = (id, vcs) =>
     vcs.log(id, 0, Int.MaxValue).toEither.fold(
-      f => VcsFailure.explain(f, id, "log", Some(locationFor(id))),
+      f => OldVcsFailure.explain(f, id, "log", Some(locationFor(id))),
       r => r._1.mkString("\n")
     )
 

@@ -11,6 +11,9 @@ import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.table.*;
 import java.awt.Component;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Controller for the Problem Viewer, in charge of displaying the problems found
@@ -191,7 +194,7 @@ public class SPProblemsViewer {
         }
     }
 
-    public static class ProblemsDataModel extends DefaultTableModel {
+    public static class ProblemsDataModel extends AbstractTableModel {
 
         public enum Col {
             TYPE(" ", new ProblemTypeRenderer(), Problem.class) {
@@ -235,18 +238,12 @@ public class SPProblemsViewer {
          * Reference to the viewer that's showing the observation being evaluated
          */
         private SPViewer _viewer;
-        private IP2Problems _problems;
+        private List<Problem> _problems;
         private NodeData _node; //the node whose information is shown
 
         ProblemsDataModel(SPViewer viewer) {
-            _viewer = viewer;
-        }
-
-        private IP2Problems _getProblems() {
-            if (_problems == null) {
-                _problems = P2CheckerUtil.NO_PROBLEMS;
-            }
-            return _problems;
+            _problems = Collections.emptyList();
+            _viewer   = viewer;
         }
 
         public void setNodeData(NodeData node) {
@@ -262,8 +259,17 @@ public class SPProblemsViewer {
         private void _updateProblems() {
             //Notify the viewer of the new problems being shown, only if
             //the engine is set up
-            _problems = (_node == null) ? P2CheckerUtil.NO_PROBLEMS : _node.getProblems();
-            _viewer.updateProblemToolWindow(_problems);
+            final IP2Problems p2Problems = _node == null ? P2CheckerUtil.NO_PROBLEMS:  _node.getProblems();
+            final List<Problem> ps = new ArrayList<>(p2Problems.getProblems());
+
+            // Sort by severity (in reverse so ERROR comes first) then description.
+            Collections.sort(ps, (p1, p2) -> {
+                final int t = p2.type.compareTo(p1.type);
+                return t == 0 ? (p1.description.compareTo(p2.description)) : t;
+            });
+
+            _problems = Collections.unmodifiableList(ps);
+            _viewer.updateProblemToolWindow(p2Problems);
         }
 
         public int getColumnCount() {
@@ -275,12 +281,12 @@ public class SPProblemsViewer {
         }
 
         public int getRowCount() {
-            return _getProblems().getProblemCount();
+            return _problems.size();
         }
 
         public Object getValueAt(int row, int col) {
-            if (_getProblems().getProblemCount() < row) return null;
-            Problem problem = _getProblems().getProblems().get(row);
+            if (row >= _problems.size()) return null;
+            final Problem problem = _problems.get(row);
             return Col.values()[col].getValue(problem);
         }
 
@@ -345,8 +351,8 @@ public class SPProblemsViewer {
         */
 
         public Problem getProblem(int row) {
-            if (row < 0 || row >= _getProblems().getProblemCount()) return null;
-            return _getProblems().getProblems().get(row);
+            if (row < 0 || row >= _problems.size()) return null;
+            return _problems.get(row);
         }
     }
 

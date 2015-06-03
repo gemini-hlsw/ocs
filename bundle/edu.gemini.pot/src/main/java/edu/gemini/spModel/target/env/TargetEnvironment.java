@@ -229,7 +229,7 @@ public final class TargetEnvironment implements Serializable, Iterable<SPTarget>
         Set<GuideProbe> cur = genv.getActiveGuiders();
         if (cur.contains(guider)) return this;
 
-        Set<GuideProbe> active = new HashSet<GuideProbe>(cur);
+        Set<GuideProbe> active = new HashSet<>(cur);
         active.add(guider);
         return setGuideEnvironment(genv.setActiveGuiders(active));
     }
@@ -273,7 +273,7 @@ public final class TargetEnvironment implements Serializable, Iterable<SPTarget>
         // Doesn't exist yet/anymore so initialize it.
         if (res == null) {
             res = initAllTargets();
-            allTargets = new SoftReference<ImList<SPTarget>>(res);
+            allTargets = new SoftReference<>(res);
         }
         return res;
     }
@@ -323,9 +323,13 @@ public final class TargetEnvironment implements Serializable, Iterable<SPTarget>
      */
     @Override
     public TargetEnvironment cloneTargets() {
-        SPTarget clonedBase = (SPTarget) base.clone();
+        SPTarget clonedBase = base.clone();
         GuideEnvironment clonedGuide = guide.cloneTargets();
-        ImList<SPTarget> clonedUser  = user.map(SPTarget.CLONE_FUNCTION);
+        ImList<SPTarget> clonedUser  = user.map(new Function1<SPTarget, SPTarget>() {
+            public SPTarget apply(final SPTarget target) {
+                return target.clone();
+            }
+        });
         return new TargetEnvironment(clonedBase, clonedGuide, clonedUser);
     }
 
@@ -410,8 +414,8 @@ public final class TargetEnvironment implements Serializable, Iterable<SPTarget>
         }
 
         // Parse the old pre-2010B information into a GuideEnvironment
-        Set<GuideProbe> active = new HashSet<GuideProbe>();
-        List<GuideProbeTargets> lst = new ArrayList<GuideProbeTargets>();
+        Set<GuideProbe> active = new HashSet<>();
+        List<GuideProbeTargets> lst = new ArrayList<>();
         for (ParamSet ps : guideProbeTargets) {
             GuideProbeTargets gpt = GuideProbeTargets.fromParamSet(ps);
             if (gpt == null) continue;
@@ -437,7 +441,7 @@ public final class TargetEnvironment implements Serializable, Iterable<SPTarget>
         GuideEnvironment guide = parseGuideEnvironment(parent);
 
         // Get the user targets.
-        List<SPTarget> userTargets = new ArrayList<SPTarget>();
+        List<SPTarget> userTargets = new ArrayList<>();
         ParamSet userPset = parent.getParamSet("userTargets");
         if (userPset != null) {
             for (ParamSet ps : userPset.getParamSets()) {

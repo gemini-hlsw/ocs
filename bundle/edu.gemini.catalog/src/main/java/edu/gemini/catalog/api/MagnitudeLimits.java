@@ -10,6 +10,7 @@ import java.io.Serializable;
  * Describes limits for magnitude values.
  * See OT-19.
  */
+@Deprecated
 public final class MagnitudeLimits implements Serializable {
     public static interface Limit extends Serializable {
         double getBrightness();
@@ -30,11 +31,12 @@ public final class MagnitudeLimits implements Serializable {
 
         protected abstract T make(double b);
 
+        @SuppressWarnings("unchecked")
         @Override public boolean equals(Object o) {
             if (this == o) return true;
             if (!(o.getClass().equals(this.getClass()))) return false;
 
-            BaseLimit baseLimit = (BaseLimit) o;
+            BaseLimit<T> baseLimit = (BaseLimit<T>) o;
             return (Double.compare(baseLimit.brightness, brightness) == 0);
         }
 
@@ -229,6 +231,6 @@ public final class MagnitudeLimits implements Serializable {
                 (s1.isEmpty() || s2.isEmpty()) ? None.<SaturationLimit>instance() :
                         ( s1.getValue().compareTo(s2.getValue()) < 0 ? s1 : s2 );
 
-        return new Some<MagnitudeLimits>(new MagnitudeLimits(this.getBand(), faint, sat));
+        return new Some<>(new MagnitudeLimits(this.getBand(), faint, sat));
     }
 }

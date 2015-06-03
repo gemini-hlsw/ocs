@@ -19,6 +19,7 @@ import edu.gemini.spModel.target.SPTarget;
 import edu.gemini.spModel.target.TelescopePosWatcher;
 import edu.gemini.spModel.target.WatchablePos;
 import edu.gemini.spModel.target.env.TargetEnvironment;
+import edu.gemini.spModel.target.system.ITarget;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -43,22 +44,16 @@ public final class TargetObsComp extends AbstractDataObject implements GuideProb
     public static final String TARGET_POS_PROP = "TargetPos";
 
     private static TargetEnvironment createEmptyEnvironment() {
-        SPTarget base = SPTarget.createDefaultBasePosition();
+        SPTarget base = new SPTarget();
         return TargetEnvironment.create(base);
     }
 
     private final class PcePropagator implements TelescopePosWatcher {
-        @Override public void telescopePosLocationUpdate(WatchablePos tp) {
-            propagate(tp);
-        }
 
-        @Override public void telescopePosGenericUpdate(WatchablePos tp) {
-            propagate(tp);
-        }
-
-        private void propagate(WatchablePos tp) {
+        @Override public void telescopePosUpdate(WatchablePos tp) {
             firePropertyChange(TARGET_POS_PROP, null, tp);
         }
+
     }
 
     private TargetEnvironment targetEnv;
@@ -96,14 +91,18 @@ public final class TargetObsComp extends AbstractDataObject implements GuideProb
             // assume user did not edit title manually
             TargetEnvironment env = getTargetEnvironment();
             SPTarget tp = env.getBase();
-            if (tp != null) { // base pos should always be defined, so tp should never be null
-                String name = tp.getName();
-                if (name == null || name.length() == 0) {
-                    // Use the base position
-                    return tp.getTarget().getPosition();
+            if (tp != null) {
+                ITarget t = tp.getTarget();
+                String name = t.getName();
+                if (name == null || name.trim().length() == 0) {
+                    name = "<Untitled>";
                 }
-                // Else return the name of the base position
-                return "Targets" + " (" + name + ")";
+                switch (t.getTag()) {
+                    case JPL_MINOR_BODY:   return "Comet: " + name;
+                    case MPC_MINOR_PLANET: return "Minor Planet: " + name;
+                    case NAMED:            return "Solar System: " + name;
+                    case SIDEREAL:         return "Target: " + name;
+                }
             }
         }
 

@@ -186,7 +186,8 @@ public final class Angle {
     }
 
     /*
-     * Rotate the point p by the given angle in radians about (0, 0).
+     * Rotate the point p by the negative of the given angle (-angle) in radians about (0, 0).
+     * Equivalent to executing an AffineTransform.getRotateInstance(-angle).
      */
     public static void rotatePoint(Point2D.Double p, double angle) {
         if (angle != 0.0) {

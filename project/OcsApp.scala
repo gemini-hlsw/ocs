@@ -6,6 +6,14 @@ trait OcsApp { this: OcsBundle =>
 
   lazy val app_bundle_server = project.in(file("app/bundle-server"))
 
+  lazy val app_epics_acm = project.in(file("app/epics-acm")).dependsOn(
+    bundle_edu_gemini_epics_acm
+  )
+
+  lazy val app_itc = project.in(file("app/itc")).dependsOn(
+    bundle_edu_gemini_itc
+  )
+
   lazy val app_pit = project.in(file("app/pit")).dependsOn(
     bundle_edu_gemini_pit
   )
@@ -60,7 +68,8 @@ trait OcsApp { this: OcsBundle =>
     bundle_edu_gemini_wdba_xmlrpc_server,
     bundle_edu_gemini_obslog,
     bundle_edu_gemini_services_server,
-    bundle_edu_gemini_smartgcal_servlet
+    bundle_edu_gemini_smartgcal_servlet,
+    bundle_edu_gemini_itc
   )
 
   lazy val app_weather = project.in(file("app/weather")).dependsOn(

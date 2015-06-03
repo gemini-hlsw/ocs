@@ -239,8 +239,8 @@ class TemplateParametersEditor(shells: java.util.List[ISPTemplateParameters]) ex
       val nameField = new BoundTextField[String](10)(
         read = identity,
         show = identity,
-        get  = _.getTarget.getName,
-        set  = setTarget(_.setName(_))
+        get  = _.getTarget.getTarget.getName,
+        set  = setTarget(_.getTarget.setName(_))
       )
 
       val typeCombo = new BoundNullableCombo[TargetType](AllTargetTypes)(
@@ -251,9 +251,10 @@ class TemplateParametersEditor(shells: java.util.List[ISPTemplateParameters]) ex
             case Sidereal    => new HmsDegTarget()
             case NonSidereal => new ConicTarget()
           }
-          coords.setName(target.getName)
+          coords.setName(target.getTarget.getName)
           target.setTarget(coords)
-          target.setMagnitudes(DefaultImList.create[Magnitude]())
+          target.getTarget.setMagnitudes(DefaultImList.create[Magnitude]())
+          target.notifyOfGenericUpdate()
         })}
       )
 
@@ -261,26 +262,29 @@ class TemplateParametersEditor(shells: java.util.List[ISPTemplateParameters]) ex
       val raField = new BoundTextField[HMS](10)(
         read = s => new HMS(hms.parse(s)),
         show = _.toString,
-        get  = _.getTarget.getTarget.getTargetAsJ2000.getC1.asInstanceOf[HMS],
-        set  = setTarget(_.getTarget.setC1(_))
+        get  = _.getTarget.getTarget.getRa.asInstanceOf[HMS],
+        set  = setTarget((a, b) => a.getTarget.getRa.setValue(b.toString))
       )
 
       val dms = new DMSFormat()
       val decField = new BoundTextField[DMS](10)(
         read = s => new DMS(dms.parse(s)),
         show = _.toString,
-        get  = _.getTarget.getTarget.getTargetAsJ2000.getC2.asInstanceOf[DMS],
-        set  = setTarget(_.getTarget.setC2(_))
+        get  = _.getTarget.getTarget.getDec.asInstanceOf[DMS],
+        set  = setTarget((a, b) => a.getTarget.getDec.setValue(b.toString))
       )
 
-      def pmField(getPM: SPTarget => String, setPM: (SPTarget, String) => Unit): BoundTextField[Double] =
+      def pmField(getPM: HmsDegTarget => Double, setPM: (HmsDegTarget, Double) => Unit): BoundTextField[Double] =
         new BoundTextField[Double](10)(
           read = _.toDouble,
           show = d => f"$d%.3f",
-          get  = tp => getPM(tp.getTarget).toDouble,
+          get  = tp => Option(tp.getTarget.getTarget).collect { case t: HmsDegTarget => getPM(t) } .getOrElse(0.0),
           set  = (tp, pm) => {
             val newTarget = tp.getTarget
-            setPM(newTarget, pm.toString)
+            newTarget.getTarget match {
+              case t: HmsDegTarget => setPM(t, pm); newTarget.notifyOfGenericUpdate()
+              case _               => () // do nothing
+            }
             tp.copy(newTarget)
           }
         )
@@ -305,24 +309,30 @@ class TemplateParametersEditor(shells: java.util.List[ISPTemplateParameters]) ex
 
     object MagnitudesPanel extends ColumnPanel {
       def magRow(band: Magnitude.Band): Row = {
-        lazy val zero = new Magnitude(band, 0.0)
+        lazy val zero = new Magnitude(band, 0.0, band.defaultSystem)
 
         def mag(tp: TemplateParameters): Option[Magnitude] =
-          tp.getTarget.getMagnitude(band).asScalaOpt
+          tp.getTarget.getTarget.getMagnitude(band).asScalaOpt
 
         def magOrZero(tp: TemplateParameters): Magnitude =
           mag(tp).getOrElse(zero)
 
         def setMag[A](f: (Magnitude, A) => Magnitude): (TemplateParameters, A) => TemplateParameters =
-          setTarget[A]((t, a) => t.putMagnitude(f(t.getMagnitude(band).getOrElse(zero), a)))
+          setTarget[A]{ (t, a) =>
+            t.getTarget.putMagnitude(f(t.getTarget.getMagnitude(band).getOrElse(zero), a))
+            t.notifyOfGenericUpdate()
+          }
 
         val magCheck = new BoundCheckbox(
           get = mag(_).isDefined,
           set = setTarget((target, inc) => {
-            if (inc) target.putMagnitude(zero)
-            else {
-              val mags = target.getMagnitudes.toList.asScala.filterNot(_.getBand == band)
-              target.setMagnitudes(DefaultImList.create(mags.asJava))
+            if (inc) {
+              target.getTarget.putMagnitude(zero)
+              target.notifyOfGenericUpdate()
+            } else {
+              val mags = target.getTarget.getMagnitudes.toList.asScala.filterNot(_.getBand == band)
+              target.getTarget.setMagnitudes(DefaultImList.create(mags.asJava))
+              target.notifyOfGenericUpdate()
             }}
           )
         )

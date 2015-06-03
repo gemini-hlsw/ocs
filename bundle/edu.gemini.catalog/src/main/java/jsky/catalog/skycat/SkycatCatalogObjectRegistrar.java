@@ -9,7 +9,6 @@ import jsky.catalog.Catalog;
 import jsky.catalog.CatalogRegistry;
 
 import java.util.*;
-import java.util.logging.Logger;
 
 /**
  * Registrar for objects associated with class names in the skycat config file.
@@ -18,7 +17,6 @@ import java.util.logging.Logger;
  * relying upon the skycat config file to configure it.
  */
 public final class SkycatCatalogObjectRegistrar<T> {
-    private static final Logger LOG = Logger.getLogger(SkycatCatalogObjectRegistrar.class.getName());
 
     /**
      * Encapsulates the mechanism used for turning a class name into an object.
@@ -38,7 +36,7 @@ public final class SkycatCatalogObjectRegistrar<T> {
      * the objects held in this registrar
      */
     public SkycatCatalogObjectRegistrar(String configKey, Instantiator<T> inst) {
-        Map<String, T> map = new HashMap<String, T>();
+        Map<String, T> map = new HashMap<>();
 
         for (Catalog c : CatalogRegistry.instance) {
             if (!(c instanceof SkycatCatalog)) continue;
@@ -76,9 +74,9 @@ public final class SkycatCatalogObjectRegistrar<T> {
      * @return a list of tuples(key, factory) for each known factory
      */
     public List<Tuple2<String,T>> allFactories() {
-        List result = new ArrayList<Tuple2<String,T>>();
+        List<Tuple2<String,T>> result = new ArrayList<>();
         for(String key : factoryMap.keySet()) {
-            result.add(new Pair<String,T>(key, factoryMap.get(key)));
+            result.add(new Pair<>(key, factoryMap.get(key)));
         }
         return result;
     }

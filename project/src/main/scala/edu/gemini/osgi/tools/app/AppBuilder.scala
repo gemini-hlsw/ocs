@@ -9,12 +9,12 @@ import java.util.jar.{Manifest, JarFile}
 object AppBuilder {
 
   val Instances = Map(
-    MacOS   -> MacDistHandler(Some("osx/JRE1.7"), "jre1.7.0"),
+    MacOS   -> MacDistHandler(Some("osx/JRE1.8"), "jre1.8.0"),
     Test    -> TestDistHandler,
     Windows -> WinDistHandler,
-    Linux32 -> new GenericUnixDistHandler(true, Some("linux/JRE32_1.7")),
-    Linux64 -> new GenericUnixDistHandler(true, Some("linux/JRE64_1.7")),
-    RPM64   -> new RPMDistHandler(Some("linux/JRE64_1.7"))
+    Linux32 -> new GenericUnixDistHandler(true, Some("linux/JRE32_1.8")),
+    Linux64 -> new GenericUnixDistHandler(true, Some("linux/JRE64_1.8")),
+    RPM64   -> new RPMDistHandler(Some("linux/JRE64_1.8"))
   )
 
   val LoggingPatternProp = "java.util.logging.FileHandler.pattern"
@@ -63,7 +63,7 @@ class AppBuilder(rootDir: File, solver: Configuration => Map[BundleSpec, (File, 
               rm(f)
             mkdir(dDir, c.id)
           }
-          b.build(cDir, jreDir, app.meta, v, c, d, solver(c), appProjectBaseDir)
+          b.build(cDir, jreDir, app.meta, v, c, d, solver(c), log, appProjectBaseDir)
         case None => log.warn("no application builder is available for distribution platform " + d)
       }
 
@@ -73,7 +73,7 @@ class AppBuilder(rootDir: File, solver: Configuration => Map[BundleSpec, (File, 
 
 trait DistHandler {
 
-  def build(outDir: File, jreDir: Option[File], meta: ApplicationMeta, version:String, config: Configuration, d: Distribution, solution: Map[BundleSpec, (File, Manifest)], appProjectBaseDir: File): Unit
+  def build(outDir: File, jreDir: Option[File], meta: ApplicationMeta, version:String, config: Configuration, d: Distribution, solution: Map[BundleSpec, (File, Manifest)], log: sbt.Logger, appProjectBaseDir: File): Unit
 
   protected def buildCommon(rootDir: File, meta: ApplicationMeta, version:String, config: Configuration, d: Configuration.Distribution, solution: Map[BundleSpec, (File, Manifest)], appProjectBaseDir: File) {
 

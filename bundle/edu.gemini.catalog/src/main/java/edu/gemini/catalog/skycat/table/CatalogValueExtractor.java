@@ -36,7 +36,7 @@ public final class CatalogValueExtractor {
             this.band = band;
             this.magColumn = magnitudeColumn;
             if (errorColumn != null) {
-                this.errorColumn = new Some<String>(errorColumn);
+                this.errorColumn = new Some<>(errorColumn);
             } else {
                 this.errorColumn = None.instance();
             }
@@ -61,9 +61,7 @@ public final class CatalogValueExtractor {
 
             MagnitudeDescriptor that = (MagnitudeDescriptor) o;
 
-            if (band != that.band) return false;
-            if (!errorColumn.equals(that.errorColumn)) return false;
-            return magColumn.equals(that.magColumn);
+            return band == that.band && errorColumn.equals(that.errorColumn) && magColumn.equals(that.magColumn);
         }
 
         @Override
@@ -82,47 +80,17 @@ public final class CatalogValueExtractor {
         Option<T> extract(CatalogRow row, int index) throws CatalogException;
     }
 
-    private static final Extractor<Angle> RA_EXTRACTOR = new Extractor<Angle>() {
-        @Override
-        public Option<Angle> extract(CatalogRow row, int index) throws CatalogException {
-            return row.getRa(index);
-        }
-    };
+    private static final Extractor<Angle> RA_EXTRACTOR = CatalogRow::getRa;
 
-    private static final Extractor<Angle> DEC_EXTRACTOR = new Extractor<Angle>() {
-        @Override
-        public Option<Angle> extract(CatalogRow row, int index) throws CatalogException {
-            return row.getDec(index);
-        }
-    };
+    private static final Extractor<Angle> DEC_EXTRACTOR = CatalogRow::getDec;
 
-    private static final Extractor<Angle> DEGREES_EXTRACTOR = new Extractor<Angle>() {
-        @Override
-        public Option<Angle> extract(CatalogRow row, int index) throws CatalogException {
-            return row.getDegrees(index);
-        }
-    };
+    private static final Extractor<Angle> DEGREES_EXTRACTOR = CatalogRow::getDegrees;
 
-    private static final Extractor<Double> DOUBLE_EXTRACTOR = new Extractor<Double>() {
-        @Override
-        public Option<Double> extract(CatalogRow row, int index) throws CatalogException {
-            return row.getDouble(index);
-        }
-    };
+    private static final Extractor<Double> DOUBLE_EXTRACTOR = CatalogRow::getDouble;
 
-    private static final Extractor<Integer> INTEGER_EXTRACTOR = new Extractor<Integer>() {
-        @Override
-        public Option<Integer> extract(CatalogRow row, int index) throws CatalogException {
-            return row.getInteger(index);
-        }
-    };
+    private static final Extractor<Integer> INTEGER_EXTRACTOR = CatalogRow::getInteger;
 
-    private static final Extractor<String> STRING_EXTRACTOR = new Extractor<String>() {
-        @Override
-        public Option<String> extract(CatalogRow row, int index) throws CatalogException {
-            return row.getString(index);
-        }
-    };
+    private static final Extractor<String> STRING_EXTRACTOR = CatalogRow::getString;
 
     private final CatalogHeader header;
     private final CatalogRow row;
@@ -308,17 +276,9 @@ public final class CatalogValueExtractor {
         }
     }
 
-    private static final PredicateOp<Option<Magnitude>> FILTER_OUT_EMPTY = new PredicateOp<Option<Magnitude>>() {
-        @Override public Boolean apply(Option<Magnitude> opt) {
-            return !opt.isEmpty();
-        }
-    };
+    private static final PredicateOp<Option<Magnitude>> FILTER_OUT_EMPTY = opt -> !opt.isEmpty();
 
-    private static final MapOp<Option<Magnitude>, Magnitude> EXTRACT_MAG = new MapOp<Option<Magnitude>, Magnitude>() {
-        @Override public Magnitude apply(Option<Magnitude> magnitudeOption) {
-            return magnitudeOption.getValue();
-        }
-    };
+    private static final MapOp<Option<Magnitude>, Magnitude> EXTRACT_MAG = Option::getValue;
 
     public ImList<Magnitude> getMagnitudes(ImList<MagnitudeDescriptor> descCollection) throws CatalogException {
 
@@ -339,7 +299,7 @@ public final class CatalogValueExtractor {
     }
 
     public Option<Magnitude> getOptionalMagnitude(Magnitude.Band band, String colName, String errorColName) throws CatalogException {
-        return getOptionalMagnitude(band, colName, new Some<String>(errorColName));
+        return getOptionalMagnitude(band, colName, new Some<>(errorColName));
     }
 
     private Option<Magnitude> getOptionalMagnitude(Magnitude.Band band, String colName, Option<String> errorColName) throws CatalogException {
@@ -351,6 +311,6 @@ public final class CatalogValueExtractor {
             error = getOptionalDouble(errorColName.getValue());
         }
 
-        return new Some<Magnitude>(new Magnitude(band, mag.getValue(), error));
+        return new Some<>(new Magnitude(band, mag.getValue(), error, band.defaultSystem));
     }
 }

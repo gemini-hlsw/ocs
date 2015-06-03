@@ -1,5 +1,6 @@
 package edu.gemini.phase2.skeleton.factory
 
+import edu.gemini.spModel.gemini.graces.blueprint.SpGracesBlueprint
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality
 
 import scala.collection.JavaConverters._
@@ -7,7 +8,7 @@ import edu.gemini.spModel.target.SPTarget
 import edu.gemini.model.p1.immutable._
 import edu.gemini.spModel.template._
 import edu.gemini.spModel.gemini.gnirs.blueprint.SpGnirsBlueprintSpectroscopy
-import edu.gemini.spModel.gemini.nifs.blueprint.SpNifsBlueprintAo
+import edu.gemini.spModel.gemini.nifs.blueprint.SpNifsBlueprintBase
 import edu.gemini.shared.util.TimeValue
 import edu.gemini.spModel.gemini.flamingos2.blueprint.SpFlamingos2BlueprintLongslit
 
@@ -73,8 +74,9 @@ object Phase1FolderFactory {
       val groups0 = groups.flatMap { pig =>
         bMap(pig.blueprintId) match {
           case _: SpGnirsBlueprintSpectroscopy  => GnirsSpectroscopyPartitioner.partition(pig)
-          case _: SpNifsBlueprintAo             => NifsAoPartitioner.partition(pig)
+          case _: SpNifsBlueprintBase           => NifsPartitioner.partition(pig)
           case _: SpFlamingos2BlueprintLongslit => F2LongslitPartitioner.partition(pig)
+          case _: SpGracesBlueprint             => GracesPartitioner.partition(pig)
           case _                                => List(pig)
         }
       }
@@ -119,7 +121,7 @@ trait Partitioner {
 
 object GnirsSpectroscopyPartitioner extends Partitioner {
   import edu.gemini.shared.skyobject.Magnitude.Band.H
-  def bucket(t:SPTarget):Int = Option(t.getMagnitude(H).getOrNull).map(_.getBrightness).map {H =>
+  def bucket(t:SPTarget):Int = Option(t.getTarget.getMagnitude(H).getOrNull).map(_.getBrightness).map {H =>
     if (H < 11.5) 1
     else if (H < 16) 2
     else if (H < 20) 3
@@ -128,20 +130,20 @@ object GnirsSpectroscopyPartitioner extends Partitioner {
 }
 
 // TARGET BRIGHTNESS = TB
-// Use H mag from target information if available
-//     Bright target (H <= 9) = BT
-//     Moderate target (9 < H <= 12) = MT
-//     Faint target (12 < H <= 20) = FT
-//     Blind acquisition target (H > 20) = BAT
+// Use K magnitude from target information if available:
+// IF      K <= 9  then BT = True   # Bright Target
+// IF  9 < K <= 13 then MT = True   # Moderate Target
+// IF 13 < K <= 20 then FT = True   # Faint Target
+// IF 20 < K       then BAT = True  # Blind acquisition target
 
-object NifsAoPartitioner extends Partitioner {
-  import edu.gemini.shared.skyobject.Magnitude.Band.H
-  def bucket(t:SPTarget):Int = Option(t.getMagnitude(H).getOrNull).map(_.getBrightness).map {H =>
-    if (H <= 9) 1
-    else if (H <= 12) 2
-    else if (H <= 20) 3
+object NifsPartitioner extends Partitioner {
+  import edu.gemini.shared.skyobject.Magnitude.Band.K
+  def bucket(t:SPTarget):Int = Option(t.getTarget.getMagnitude(K).getOrNull).map(_.getBrightness).map { K =>
+         if (K <= 9) 1
+    else if (K <= 13) 2
+    else if (K <= 20) 3
     else 4
-  }.getOrElse(4) // treat as very faint for now
+  }.getOrElse(5) // targets with no K-band are treated differently
 }
 
 //IF TARGET H-MAGNITUDE < 7 INCLUDE {13} # Bright, no sky subtraction
@@ -150,10 +152,23 @@ object NifsAoPartitioner extends Partitioner {
 
 object F2LongslitPartitioner extends Partitioner {
   import edu.gemini.shared.skyobject.Magnitude.Band.H
-  def bucket(t: SPTarget): Int = (Option(t.getMagnitude(H).getOrNull).map(_.getBrightness) map { h =>
+  def bucket(t: SPTarget): Int = (Option(t.getTarget.getMagnitude(H).getOrNull).map(_.getBrightness) map { h =>
     if (h <= 12.0) 1 else 2
   }).getOrElse(3)
 }
 
+// IF          R < 6.5 INCLUDE {1}
+// ELIF 6.5 <= R < 10  INCLUDE {2}
+// ELIF 10  <= R < 21  INCLUDE {3}
+// ELIF 21  <= R       INCLUDE {4}
+// ELSE INCLUDE {1},{2},{3},{4} # No magnitude given so include all
 
-
+object GracesPartitioner extends Partitioner {
+  import edu.gemini.shared.skyobject.Magnitude.Band.R
+  def bucket(t:SPTarget):Int = Option(t.getTarget.getMagnitude(R).getOrNull).map(_.getBrightness).map {R =>
+         if (R <= 6.5) 1
+    else if (R <= 10)  2
+    else if (R <= 21)  3
+    else               4
+  }.getOrElse(5) // no R-mag is treated differently
+}

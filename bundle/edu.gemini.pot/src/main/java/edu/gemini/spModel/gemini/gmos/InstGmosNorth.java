@@ -34,7 +34,8 @@ public class InstGmosNorth extends
         InstGmosCommon<GmosNorthType.DisperserNorth,
                 GmosNorthType.FilterNorth,
                 GmosNorthType.FPUnitNorth,
-                GmosNorthType.StageModeNorth> implements PropertyProvider, CalibrationKeyProvider {
+                GmosNorthType.StageModeNorth>
+        implements PropertyProvider, CalibrationKeyProvider {
     private static final Logger LOG = Logger.getLogger(InstGmosCommon.class.getName());
 
     public static final SPComponentType SP_TYPE =

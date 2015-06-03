@@ -15,7 +15,7 @@ package jsky.catalog;
  * An interface representing a search condition for values in a given table column,
  * or parameters to a catalog query.
  */
-public abstract interface SearchCondition {
+public interface SearchCondition {
 
     /**
      * Return true if the condition is true for the given value.
@@ -23,7 +23,7 @@ public abstract interface SearchCondition {
      * @param val The value to be checked against the condition.
      * @return true if the value satisfies the condition.
      */
-    public boolean isTrueFor(Comparable val);
+    boolean isTrueFor(Comparable val);
 
 
     /**
@@ -33,31 +33,31 @@ public abstract interface SearchCondition {
      * @param val The value to be checked against the condition.
      * @return true if the value satisfies the condition.
      */
-    public boolean isTrueFor(double val);
+    boolean isTrueFor(double val);
 
     /** Return the column or parameter description. */
-    public FieldDesc getFieldDesc();
+    FieldDesc getFieldDesc();
 
     /** Return the column or parameter name. */
-    public String getName();
+    String getName();
 
     /** Return the column or parameter id. */
-    public String getId();
+    String getId();
 
     /** Returns the value or values as a String in the format "value" or "val1,val2 */
-    public String getValueAsString();
+    String getValueAsString();
 
     /** Returns the value or values as a String in the format "value" or "val1<sep>val2, where <sep> is given by the argument */
-    public String getValueAsString(String sep);
+    String getValueAsString(String sep);
 
     /**
      * Returns a string representation of this class in the form "name=minVal[,maxVal]"
      */
-    public String toString();
+    String toString();
 
     /**
      * Returns a string representation of this class in the form "name=minVal[<sep>maxVal]"
      * where <sep> is the value of the sep argument.
      */
-    public String toString(String sep);
+    String toString(String sep);
 }

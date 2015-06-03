@@ -8,6 +8,7 @@ import edu.gemini.shared.util.immutable.Pair;
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2;
 import edu.gemini.spModel.telescope.IssPort;
 import org.junit.Test;
+import scala.actors.threadpool.Arrays;
 
 import static edu.gemini.spModel.gemini.flamingos2.Flamingos2.Disperser;
 import static edu.gemini.spModel.gemini.flamingos2.Flamingos2.Filter;
@@ -22,7 +23,7 @@ public final class Flamingos2SupportTest extends InstrumentSupportTestBase<Flami
     }
 
     public void testF2_SIDE() throws Exception {
-        Flamingos2 flam2 = getInstrument();
+        final Flamingos2 flam2 = getInstrument();
         flam2.setIssPort(IssPort.SIDE_LOOKING);
         assertEquals(flam2.getDisperser(), Flamingos2.Disperser.NONE);
         setInstrument(flam2);
@@ -31,7 +32,7 @@ public final class Flamingos2SupportTest extends InstrumentSupportTestBase<Flami
     }
 
     public void testF2_UP() throws Exception {
-        Flamingos2 flam2 = getInstrument();
+        final Flamingos2 flam2 = getInstrument();
         flam2.setIssPort(IssPort.UP_LOOKING);
         assertEquals(flam2.getDisperser(), Flamingos2.Disperser.NONE);
         setInstrument(flam2);
@@ -40,7 +41,7 @@ public final class Flamingos2SupportTest extends InstrumentSupportTestBase<Flami
     }
 
     public void testF2_SIDE_SPEC() throws Exception {
-        Flamingos2 flam2 = getInstrument();
+        final Flamingos2 flam2 = getInstrument();
         flam2.setIssPort(IssPort.SIDE_LOOKING);
         flam2.setDisperser(Flamingos2.Disperser.R3000);
         setInstrument(flam2);
@@ -50,7 +51,7 @@ public final class Flamingos2SupportTest extends InstrumentSupportTestBase<Flami
     }
 
     public void testF2_UP_SPEC() throws Exception {
-        Flamingos2 flam2 = getInstrument();
+        final Flamingos2 flam2 = getInstrument();
         flam2.setIssPort(IssPort.UP_LOOKING);
         flam2.setDisperser(Flamingos2.Disperser.R3000);
         setInstrument(flam2);
@@ -60,7 +61,7 @@ public final class Flamingos2SupportTest extends InstrumentSupportTestBase<Flami
     }
 
     public void testWavelength() throws Exception {
-        Flamingos2 flam2 = getInstrument();
+        final Flamingos2 flam2 = getInstrument();
         flam2.setFilter(Filter.OPEN);
         flam2.setDisperser(Disperser.NONE);
         setInstrument(flam2);
@@ -71,14 +72,14 @@ public final class Flamingos2SupportTest extends InstrumentSupportTestBase<Flami
         // Use the disperser wavelength in spectroscopy mode with no filter
         flam2.setFilter(Filter.OPEN);
 
-        Pair[] dtA = new Pair[] {
-            new Pair<Disperser, String>(Disperser.R1200JH, "1.39"),
-            new Pair<Disperser, String>(Disperser.R1200HK, "1.871"),
-            new Pair<Disperser, String>(Disperser.R3000,   "1.65"),
+        final Pair[] dtA = new Pair[] {
+            new Pair<>(Disperser.R1200JH, "1.39"),
+            new Pair<>(Disperser.R1200HK, "1.871"),
+            new Pair<>(Disperser.R3000,   "1.65"),
         };
 
         //noinspection unchecked
-        for (Pair<Disperser, String> t : (Pair<Disperser, String>[]) dtA ) {
+        for (final Pair<Disperser, String> t : (Pair<Disperser, String>[]) dtA ) {
             flam2.setDisperser(t._1());
             setInstrument(flam2);
             assertEquals(t._2(), getWavelength(getSouthResults()));
@@ -88,18 +89,19 @@ public final class Flamingos2SupportTest extends InstrumentSupportTestBase<Flami
         // filter is specified.
         flam2.setDisperser(Disperser.R3000);
 
-        Pair[] ftA = new Pair[] {
-            new Pair<Filter, String>(Filter.Y,       "1.02"),
-            new Pair<Filter, String>(Filter.J_LOW,   "1.15"),
-            new Pair<Filter, String>(Filter.J,       "1.25"),
-            new Pair<Filter, String>(Filter.H,       "1.65"),
-            new Pair<Filter, String>(Filter.K_SHORT, "2.15"),
-            new Pair<Filter, String>(Filter.JH,      "1.39"),
-            new Pair<Filter, String>(Filter.HK,      "1.871"),
+        final Pair[] ftA = new Pair[] {
+            new Pair<>(Filter.Y,       "1.02"),
+            new Pair<>(Filter.J_LOW,   "1.15"),
+            new Pair<>(Filter.J,       "1.25"),
+            new Pair<>(Filter.H,       "1.65"),
+            new Pair<>(Filter.K_LONG,  "2.0" ),
+            new Pair<>(Filter.K_SHORT, "2.15"),
+            new Pair<>(Filter.JH,      "1.39"),
+            new Pair<>(Filter.HK,      "1.871"),
         };
 
         //noinspection unchecked
-        for (Pair<Filter, String> t : (Pair<Filter, String>[]) ftA ) {
+        for (final Pair<Filter, String> t : (Pair<Filter, String>[]) ftA ) {
             flam2.setFilter(t._1());
             setInstrument(flam2);
             assertEquals(t._2(), getWavelength(getSouthResults()));
@@ -109,7 +111,7 @@ public final class Flamingos2SupportTest extends InstrumentSupportTestBase<Flami
         flam2.setDisperser(Disperser.NONE);
 
         //noinspection unchecked
-        for (Pair<Filter, String> t : (Pair<Filter, String>[]) ftA ) {
+        for (final Pair<Filter, String> t : (Pair<Filter, String>[]) ftA ) {
             flam2.setFilter(t._1());
             setInstrument(flam2);
             assertEquals(t._2(), getWavelength(getSouthResults()));
@@ -120,7 +122,7 @@ public final class Flamingos2SupportTest extends InstrumentSupportTestBase<Flami
         flam2.setFilter(Filter.DARK);
         setInstrument(flam2);
         try {
-            double d = Double.parseDouble(getWavelength(getSouthResults()));
+            Double.parseDouble(getWavelength(getSouthResults()));
         } catch (Exception ex) {
             fail("dark wavelength not set");
         }
@@ -131,7 +133,8 @@ public final class Flamingos2SupportTest extends InstrumentSupportTestBase<Flami
     }
 
     @Test public void testLgsPointOrig() throws Exception {
-        addGems(); verifyPointOrig(getSouthResults(), "lgs2f2");
+        addGems();
+        verifyPointOrig(getSouthResults(), "lgs2f2");
     }
 
 }

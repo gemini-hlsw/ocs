@@ -1,12 +1,11 @@
 package jsky.app.ot.tpe.gems;
 
+import edu.gemini.pot.ModelConverters;
 import edu.gemini.skycalc.Angle;
-import edu.gemini.shared.skyobject.Magnitude;
-import edu.gemini.shared.skyobject.SkyObject;
-import edu.gemini.shared.util.immutable.Some;
+import edu.gemini.spModel.core.MagnitudeBand;
+import edu.gemini.spModel.core.Target;
 import edu.gemini.spModel.gems.GemsTipTiltMode;
 import edu.gemini.ags.gems.GemsCatalogSearchResults;
-import edu.gemini.ags.gems.GemsGuideStarSearchOptions;
 import edu.gemini.ags.gems.GemsGuideStars;
 import edu.gemini.spModel.obs.context.ObsContext;
 import jsky.app.ot.tpe.GemsGuideStarWorker;
@@ -48,53 +47,37 @@ class GemsGuideStarSearchController {
         TpeImageWidget tpe = TpeManager.create().getImageWidget();
         WorldCoords basePos = tpe.getBasePos();
         ObsContext obsContext = _worker.getObsContext(basePos.getRaDeg(), basePos.getDecDeg());
-        Set<Angle> posAngles = getPosAngles(obsContext);
+        Set<edu.gemini.spModel.core.Angle> posAngles = getPosAngles(obsContext);
 
-        Magnitude.Band band = _model.getBand().getBand();
-        final String catName;
-        if (_model.getCatalog() == GemsGuideStarSearchOptions.CatalogChoice.USER_CATALOG) {
-            catName = _model.getUserCatalogFileName();
-        } else {
-            catName = _model.getCatalog().catalogName();
-        }
+        MagnitudeBand band = _model.getBand().getBand();
+
         GemsTipTiltMode tipTiltMode = _model.getAnalyseChoice().getGemsTipTiltMode();
         List<GemsCatalogSearchResults> results;
         try {
-            results = _worker.search(catName, catName, tipTiltMode, obsContext, posAngles,
-                    new Some<Magnitude.Band>(band));
+            results = _worker.search(_model.getCatalog(), tipTiltMode, obsContext, posAngles,
+                    new scala.Some<>(band));
         } catch(Exception e) {
             DialogUtil.error(_dialog, e);
-            results = new ArrayList<GemsCatalogSearchResults>();
+            results = new ArrayList<>();
             _dialog.setState(GemsGuideStarSearchDialog.State.PRE_QUERY);
         }
 
-        if (_model.isReviewCanditatesBeforeSearch()) {
-            _model.setGemsCatalogSearchResults(filterQueryResults(obsContext, posAngles, results));
+        if (_model.isReviewCandidatesBeforeSearch()) {
+            _model.setGemsCatalogSearchResults(results);
         } else {
             _model.setGemsCatalogSearchResults(results);
             _model.setGemsGuideStars(_worker.findAllGuideStars(obsContext, posAngles, results));
         }
     }
 
-    // Returns a copy of results with any query results removed that can not actually be used in the
-    // given context, with the given position angles and modes.
-    // (This is done again later in the call to analyze() , but can be called here to filter the list
-    // of candidate stars that the user sees, if that option is on.)
-    private List<GemsCatalogSearchResults> filterQueryResults(final ObsContext obsContext, final Set<Angle> posAngles,
-                                                  List<GemsCatalogSearchResults> results) {
-
-        // XXX TODO
-        return results;
-    }
-
-    private Set<Angle> getPosAngles(ObsContext obsContext) {
-        Set<Angle> posAngles = new HashSet<Angle>();
-        posAngles.add(obsContext.getPositionAngle());
+    private Set<edu.gemini.spModel.core.Angle> getPosAngles(ObsContext obsContext) {
+        Set<edu.gemini.spModel.core.Angle> posAngles = new HashSet<>();
+        posAngles.add(ModelConverters.toNewAngle(obsContext.getPositionAngle()));
         if (_model.isAllowPosAngleAdjustments()) {
-            posAngles.add(new Angle(0., Angle.Unit.DEGREES));
-            posAngles.add(new Angle(90., Angle.Unit.DEGREES));
-            posAngles.add(new Angle(180., Angle.Unit.DEGREES));
-            posAngles.add(new Angle(270., Angle.Unit.DEGREES));
+            posAngles.add(ModelConverters.toNewAngle(new Angle(0., Angle.Unit.DEGREES)));
+            posAngles.add(ModelConverters.toNewAngle(new Angle(90., Angle.Unit.DEGREES)));
+            posAngles.add(ModelConverters.toNewAngle(new Angle(180., Angle.Unit.DEGREES)));
+            posAngles.add(ModelConverters.toNewAngle(new Angle(270., Angle.Unit.DEGREES)));
         }
         return posAngles;
     }
@@ -103,26 +86,27 @@ class GemsGuideStarSearchController {
      * Analyzes the search results and saves a list of possible guide star configurations to the model.
      * @param excludeCandidates list of SkyObjects to exclude
      */
-    public void analyze(List<SkyObject> excludeCandidates) throws Exception {
+    // Called from the TPE
+    public void analyze(List<Target.SiderealTarget> excludeCandidates) throws Exception {
         TpeImageWidget tpe = TpeManager.create().getImageWidget();
         WorldCoords basePos = tpe.getBasePos();
         ObsContext obsContext = _worker.getObsContext(basePos.getRaDeg(), basePos.getDecDeg());
-        Set<Angle> posAngles = getPosAngles(obsContext);
+        Set<edu.gemini.spModel.core.Angle> posAngles = getPosAngles(obsContext);
         _model.setGemsGuideStars(_worker.findAllGuideStars(obsContext, posAngles,
                 filter(excludeCandidates, _model.getGemsCatalogSearchResults())));
     }
 
     // Returns a list of the given gemsCatalogSearchResults, with any SkyObjects removed that are not
     // in the candidates list.
-    private List<GemsCatalogSearchResults> filter(List<SkyObject> excludeCandidates,
+    private List<GemsCatalogSearchResults> filter(List<Target.SiderealTarget> excludeCandidates,
                                                   List<GemsCatalogSearchResults> gemsCatalogSearchResults) {
-        List<GemsCatalogSearchResults> results = new ArrayList<GemsCatalogSearchResults>();
+        List<GemsCatalogSearchResults> results = new ArrayList<>();
         for (GemsCatalogSearchResults in : gemsCatalogSearchResults) {
-            List<SkyObject> skyObjects = new ArrayList<SkyObject>(in.getResults().size());
-            skyObjects.addAll(in.getResults());
-            skyObjects = removeAll(skyObjects, excludeCandidates);
-            if (!skyObjects.isEmpty()) {
-                GemsCatalogSearchResults out = new GemsCatalogSearchResults(in.getCriterion(), skyObjects);
+            List<Target.SiderealTarget> siderealTargets = new ArrayList<>(in.results().size());
+            siderealTargets.addAll(in.resultsAsJava());
+            siderealTargets = removeAll(siderealTargets, excludeCandidates);
+            if (!siderealTargets.isEmpty()) {
+                GemsCatalogSearchResults out = new GemsCatalogSearchResults(siderealTargets, in.criterion());
                 results.add(out);
             }
         }
@@ -130,22 +114,22 @@ class GemsGuideStarSearchController {
     }
 
     // Removes all the objects in the skyObjects list that are also in the excludeCandidates list by comparing names
-    private List<SkyObject> removeAll(List<SkyObject> skyObjects, List<SkyObject> excludeCandidates) {
-        List<SkyObject> result = new ArrayList<SkyObject>();
-        for(SkyObject skyObject : skyObjects) {
-            if (!contains(excludeCandidates, skyObject)) {
-                result.add(skyObject);
+    private List<Target.SiderealTarget> removeAll(List<Target.SiderealTarget> skyObjects, List<Target.SiderealTarget> excludeCandidates) {
+        List<Target.SiderealTarget> result = new ArrayList<>();
+        for(Target.SiderealTarget siderealTarget : skyObjects) {
+            if (!contains(excludeCandidates, siderealTarget)) {
+                result.add(siderealTarget);
             }
         }
         return result;
     }
 
     // Returns true if a SkyObject with the same name is in the list
-    private boolean contains(List<SkyObject> skyObjects, SkyObject skyObject) {
-        String name = skyObject.getName();
+    private boolean contains(List<Target.SiderealTarget> targets, Target.SiderealTarget target) {
+        String name = target.name();
         if (name != null) {
-            for (SkyObject s : skyObjects) {
-                if (name.equals(s.getName())) return true;
+            for (Target.SiderealTarget s : targets) {
+                if (name.equals(s.name())) return true;
             }
         }
         return false;

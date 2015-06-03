@@ -1,0 +1,26 @@
+#parameters for GNIRS
+# copied from gmos_n and modified for GNIRS
+# 
+# Author: Bernadette Rodgers
+# Created 4 August 2003
+# 30 Sept 03, BR: Renamed file; updated sampling, plate scale
+# 29 Dec 03, PP: corrected plate scale typo, set sampling to default 0.25 (will
+# need mod for R=18000)
+
+#name
+GNIRS
+#Starting wavelength (nm)
+750
+#Ending wavelength (nm)
+5500
+#Sampling (nm)
+0.02
+#Background filename
+background.dat
+#Plate Scale, arcsecs per pixel
+#for Short Cameras; long camera = 1/3 this
+0.15
+#Read Noise, electrons
+7
+#Dark Current, electrons per pixel per second
+0.1

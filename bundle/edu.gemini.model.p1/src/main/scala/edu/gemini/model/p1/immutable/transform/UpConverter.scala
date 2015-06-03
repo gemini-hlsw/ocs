@@ -35,13 +35,14 @@ object UpConverter {
   }
 
   // Sequence of conversions for proposals from a given semester
-  val from2015AToKR:List[SemesterConverter] = List(SemesterConverterToCurrent, SemesterConverter2014BTo2015A, SemesterConverter2014BTo2014BSV, SemesterConverter2014ATo2014B, LastStepConverter(Semester(2015, SemesterOption.A)))
-  val from2014BSV:List[SemesterConverter] = List(SemesterConverterToCurrent, SemesterConverter2014BTo2015A, SemesterConverter2014BTo2014BSV, SemesterConverter2014ATo2014B, LastStepConverter(Semester(2014, SemesterOption.B)))
-  val from2014BToSV:List[SemesterConverter] = List(SemesterConverterToCurrent, SemesterConverter2014BTo2015A, SemesterConverter2014BTo2014BSV, SemesterConverter2014ATo2014B, LastStepConverter(Semester(2014, SemesterOption.B)))
-  val from2014A:List[SemesterConverter] = List(SemesterConverterToCurrent, SemesterConverter2014BTo2015A, SemesterConverter2014BTo2014BSV, SemesterConverter2014ATo2014B, LastStepConverter(Semester(2014, SemesterOption.A)))
-  val from2013B:List[SemesterConverter] = List(SemesterConverterToCurrent, SemesterConverter2014BTo2015A, SemesterConverter2014BTo2014BSV, SemesterConverter2013BTo2014A, SemesterConverter2014ATo2014B, LastStepConverter(Semester(2013, SemesterOption.B)))
-  val from2013A:List[SemesterConverter] = List(SemesterConverterToCurrent, SemesterConverter2014BTo2015A, SemesterConverter2014BTo2014BSV, SemesterConverter2013ATo2013B, SemesterConverter2013BTo2014A, SemesterConverter2014ATo2014B, LastStepConverter(Semester(2013, SemesterOption.A)))
-  val from2012B:List[SemesterConverter] = List(SemesterConverterToCurrent, SemesterConverter2014BTo2015A, SemesterConverter2014BTo2014BSV, SemesterConverter2012BTo2013A, SemesterConverter2013ATo2013B, SemesterConverter2013BTo2014A, SemesterConverter2014ATo2014B, LastStepConverter(Semester(2012, SemesterOption.B)))
+  val from2015A:List[SemesterConverter] = List(SemesterConverterToCurrent, SemesterConverter2015ATo2015B, SemesterConverter2014BTo2015A, SemesterConverter2014BTo2014BSV, SemesterConverter2014ATo2014B, LastStepConverter(Semester(2015, SemesterOption.B)))
+  val from2015AToKR:List[SemesterConverter] = List(SemesterConverterToCurrent, SemesterConverter2015ATo2015B, SemesterConverter2014BTo2015A, SemesterConverter2014BTo2014BSV, SemesterConverter2014ATo2014B, LastStepConverter(Semester(2015, SemesterOption.A)))
+  val from2014BSV:List[SemesterConverter] = List(SemesterConverterToCurrent, SemesterConverter2015ATo2015B, SemesterConverter2014BTo2015A, SemesterConverter2014BTo2014BSV, SemesterConverter2014ATo2014B, LastStepConverter(Semester(2014, SemesterOption.B)))
+  val from2014BToSV:List[SemesterConverter] = List(SemesterConverterToCurrent, SemesterConverter2015ATo2015B, SemesterConverter2014BTo2015A, SemesterConverter2014BTo2014BSV, SemesterConverter2014ATo2014B, LastStepConverter(Semester(2014, SemesterOption.B)))
+  val from2014A:List[SemesterConverter] = List(SemesterConverterToCurrent, SemesterConverter2015ATo2015B, SemesterConverter2014BTo2015A, SemesterConverter2014BTo2014BSV, SemesterConverter2014ATo2014B, LastStepConverter(Semester(2014, SemesterOption.A)))
+  val from2013B:List[SemesterConverter] = List(SemesterConverterToCurrent, SemesterConverter2015ATo2015B, SemesterConverter2014BTo2015A, SemesterConverter2014BTo2014BSV, SemesterConverter2013BTo2014A, SemesterConverter2014ATo2014B, LastStepConverter(Semester(2013, SemesterOption.B)))
+  val from2013A:List[SemesterConverter] = List(SemesterConverterToCurrent, SemesterConverter2015ATo2015B, SemesterConverter2014BTo2015A, SemesterConverter2014BTo2014BSV, SemesterConverter2013ATo2013B, SemesterConverter2013BTo2014A, SemesterConverter2014ATo2014B, LastStepConverter(Semester(2013, SemesterOption.A)))
+  val from2012B:List[SemesterConverter] = List(SemesterConverterToCurrent, SemesterConverter2015ATo2015B, SemesterConverter2014BTo2015A, SemesterConverter2014BTo2014BSV, SemesterConverter2012BTo2013A, SemesterConverter2013ATo2013B, SemesterConverter2013BTo2014A, SemesterConverter2014ATo2014B, LastStepConverter(Semester(2012, SemesterOption.B)))
 
   /**
    * Converts one version of a proposal node to the next
@@ -53,6 +54,8 @@ object UpConverter {
     case p @ <proposal>{ns @ _*}</proposal> if (p \ "@schemaVersion").text == Proposal.currentSchemaVersion =>
       StepResult(Nil, node).successNel[String]
     case p @ <proposal>{ns @ _*}</proposal> if (p \ "@schemaVersion").text == "2015.1.1"                    =>
+      from2015A.concatenate.convert(node)
+    case p @ <proposal>{ns @ _*}</proposal> if (p \ "@schemaVersion").text == "2015.1.2"                    =>
       from2015AToKR.concatenate.convert(node)
     case p @ <proposal>{ns @ _*}</proposal> if (p \ "@schemaVersion").text == "2014.2.2"                    =>
       from2014BSV.concatenate.convert(node)
@@ -120,15 +123,43 @@ case class LastStepConverter(semester: Semester) extends SemesterConverter {
 }
 
 /**
+ * This converter will upgrade to 2015B
+ */
+case object SemesterConverter2015ATo2015B extends SemesterConverter {
+  val gracesFiberTransformer: TransformFunction = {
+    case p @ <graces>{ns @ _*}</graces> if (p \\ "fiberMode").nonEmpty =>
+      val fiberMode = (p \\ "fiberMode").text
+      val gracesRegex = "(Graces )?(.*)".r
+      def transformFiberMode(name: String) = name match {
+        case gracesRegex(_, "2 fibers (target + sky, R~30000)") => "2 fibers (target+sky, R~40k)"
+        case gracesRegex(_, "1 fiber (target, R~50000)")        => "1 fiber (target only, R~67.5k)"
+        case _                                                  => name
+      }
+
+      object GracesFiberMode extends BasicTransformer {
+        override def transform(n: xml.Node): xml.NodeSeq = n match {
+          case <fiberMode>{name}</fiberMode> => <fiberMode>{transformFiberMode(name.text)}</fiberMode>
+          case <name>{name}</name>           => <name>Graces {transformFiberMode(name.text)}</name>
+          case elem: xml.Elem                => elem.copy(child = elem.child.flatMap(transform _))
+          case _                             => n
+        }
+      }
+
+      StepResult(s"Graces Fiber mode $fiberMode updated to ${transformFiberMode(fiberMode)}.", <graces>{GracesFiberMode.transform(ns)}</graces>).successNel
+  }
+
+  val transformers = List(gracesFiberTransformer)
+}
+
+/**
  * This converter is to convert to 2015A model
  */
 case object SemesterConverter2014BTo2015A extends SemesterConverter {
   val gsSubmission:TransformFunction = {
     case <ngo>{ns @ _*}</ngo> if (ns \\ "partner").text == "gs" => StepResult("Gemini Staff is no longer a valid partner and this time request has been removed", Nil).successNel
   }
-  val gracesRemoved = removeBlueprint("graces", "Graces")
   val texesRemoved = removeBlueprint("texes", "Texes")
-  override val transformers = List(gsSubmission, gracesRemoved, texesRemoved)
+  override val transformers = List(gsSubmission, texesRemoved)
 }
 /**
  * This converter is to current, as a minimum you need to convert a proposal to be the current version and semester

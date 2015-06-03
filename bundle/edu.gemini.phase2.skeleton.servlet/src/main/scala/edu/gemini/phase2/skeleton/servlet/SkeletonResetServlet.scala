@@ -78,7 +78,7 @@ final class SkeletonResetServlet(odb: IDBDatabaseService, templateFactory: Templ
     }
 
   private def expandTemplates(folder: Phase1Folder): Either[Failure, TemplateFolderExpansion] =
-    TemplateFolderExpansionFactory.expand(folder, templateFactory).left map {
+    TemplateFolderExpansionFactory.expand(folder, templateFactory, false).left map {
       msg => Failure.badRequest(msg)
     }
 

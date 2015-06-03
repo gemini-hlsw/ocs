@@ -16,6 +16,7 @@ import edu.gemini.spModel.io.impl.migration.to2010B.ToGnirsAtGn;
 import edu.gemini.spModel.io.impl.migration.to2014A.AddMissingStaticInstrumentParams;
 import edu.gemini.spModel.io.impl.migration.to2014A.To2014A;
 import edu.gemini.spModel.io.impl.migration.to2015A.To2015A;
+import edu.gemini.spModel.io.impl.migration.to2015B.To2015B;
 import edu.gemini.spModel.io.impl.migration.toPalote.Grillo2Palote;
 import edu.gemini.spModel.obs.SPObservation;
 import edu.gemini.spModel.obscomp.SPGroup;
@@ -178,6 +179,10 @@ public final class PioSpXmlParser {
         _factory = factory;
     }
 
+    public ISPRootNode parseDocument(File file) throws Exception {
+        return parseDocument(PioXmlUtil.read(file));
+    }
+
     public ISPRootNode parseDocument(Reader reader) throws Exception {
         return parseDocument(PioXmlUtil.read(reader));
     }
@@ -206,6 +211,9 @@ public final class PioSpXmlParser {
     private ISPRootNode _parseDocument(Document doc) throws Exception {
         // Mutate pre-2015A template folders to be readable.
         To2015A.updateProgram(doc);
+
+        // Update pre-2015B target model
+        To2015B.updateProgram(doc);
 
         // We will special case the Phase 1 container.
         Container p1Container = null;

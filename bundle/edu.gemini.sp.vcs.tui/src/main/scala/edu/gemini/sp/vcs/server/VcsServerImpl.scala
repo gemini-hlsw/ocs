@@ -5,7 +5,7 @@ import edu.gemini.pot.sp.version._
 import edu.gemini.pot.spdb.IDBDatabaseService
 import edu.gemini.pot.spdb.ProgramSummoner.{IdNotFound, LookupOrCreate}
 import edu.gemini.sp.vcs._
-import edu.gemini.sp.vcs.VcsFailure._
+import edu.gemini.sp.vcs.OldVcsFailure._
 import edu.gemini.spModel.core.SPProgramID
 import edu.gemini.util.security.permission.ProgramPermission
 import edu.gemini.util.security.policy.ImplicitPolicy
@@ -25,7 +25,7 @@ case class VcsServerImpl(odb: IDBDatabaseService, log: VcsLog, user: Set[Princip
   def geminiPrincipals: Set[GeminiPrincipal] =
     user.collect { case p: GeminiPrincipal => p }
 
-  private def prog(id: SPProgramID): VcsFailure \/ ISPProgram =
+  private def prog(id: SPProgramID): OldVcsFailure \/ ISPProgram =
     Option(odb.lookupProgramByID(id)).\/>(SummonFailure(IdNotFound(id)))
 
   private def accessControlled[T](id: SPProgramID)(body: => TryVcs[T]): TryVcs[T] =
@@ -55,11 +55,11 @@ case class VcsServerImpl(odb: IDBDatabaseService, log: VcsLog, user: Set[Princip
       } yield a
     }
 
-  def log(p: SPProgramID, offset: Int, length: Int): VcsFailure.TryVcs[(List[VcsEventSet], Boolean)] =
+  def log(p: SPProgramID, offset: Int, length: Int): OldVcsFailure.TryVcs[(List[VcsEventSet], Boolean)] =
     try {
       log.selectByProgram(p, offset, length).right
     } catch {
-      case e:Exception => VcsException(e).left
+      case e:Exception => OldVcsException(e).left
     }
 }
 

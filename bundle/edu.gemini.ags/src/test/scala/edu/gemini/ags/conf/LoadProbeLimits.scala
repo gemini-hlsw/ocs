@@ -11,7 +11,7 @@ import scalaz.{-\/, \/-}
 object LoadProbeLimits {
   def dump(m: Map[MagLimitsId, ProbeLimitsCalc]): Unit =
     m.foreach { case (id, c) =>
-        println(s"${id.name}, ${c.band}, ${c.saturationAdjustment}")
+        println(s"${id.name}, ${c.saturationAdjustment}")
         val rows = for {
           iq <- ImageQuality.values()
           sb <- SkyBackground.values()

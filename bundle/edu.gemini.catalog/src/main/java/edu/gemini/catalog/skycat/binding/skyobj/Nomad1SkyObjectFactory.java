@@ -22,6 +22,7 @@ import static edu.gemini.shared.skyobject.Magnitude.Band.*;
 /**
  * A {@link SkyObjectFactory} used with the NOMAD1 catalog.
  */
+@Deprecated
 public enum Nomad1SkyObjectFactory implements SkyObjectFactory {
     instance;
 

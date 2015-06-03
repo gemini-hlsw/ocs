@@ -3,6 +3,7 @@
 
 .DS_Store
 .svn/
+*~
 
 # sbt specific
 .cache/
@@ -24,6 +25,11 @@ jres.sbt
 app/**/idea
 *.iml
 *.ipr
+
+# Eclipse specific
+.project
+.settings
+.classpath
 
 # Credentials
 app/spdb/conf/gemKeystore

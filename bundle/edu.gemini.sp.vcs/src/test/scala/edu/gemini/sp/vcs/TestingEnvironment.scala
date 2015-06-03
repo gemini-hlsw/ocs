@@ -3,10 +3,11 @@ package edu.gemini.sp.vcs
 import edu.gemini.pot.sp._
 import edu.gemini.pot.sp.version._
 import edu.gemini.pot.spdb.{DBLocalDatabase, IDBDatabaseService}
-import edu.gemini.sp.vcs.VcsFailure._
+import edu.gemini.sp.vcs.OldVcsFailure._
 import edu.gemini.spModel.data.ISPDataObject
+import edu.gemini.spModel.gemini.init.ObservationNI
 import edu.gemini.spModel.obs.{ObsPhase2Status, SPObservation}
-import edu.gemini.spModel.obscomp.SPNote
+import edu.gemini.spModel.obscomp.{ProgramNote, SPNote}
 import edu.gemini.spModel.rich.pot.sp._
 import edu.gemini.spModel.util.ReadableNodeName
 import edu.gemini.util.security.principal.{UserPrincipal, AffiliatePrincipal, StaffPrincipal, ProgramPrincipal}
@@ -28,11 +29,11 @@ import Scalaz.{id => _, _}
 object TestingEnvironment {
 
   case class ProgContext(name: String, id: SPProgramID, odb: IDBDatabaseService, vcs: VersionControlSystem) {
-    def uuid: UUID = odb.getUuid
-    def sp: ISPProgram = odb.lookupProgramByID(id)
+    def uuid: UUID             = odb.getUuid
+    def sp: ISPProgram         = odb.lookupProgramByID(id)
     def lifespanId: LifespanId = sp.getLifespanId
 
-    def delete(key: SPNodeKey) {
+    def delete(key: SPNodeKey): Unit = {
       val n = find(key)
       val p = n.getParent
       p.children = p.children.filter(_.getNodeKey != key)
@@ -41,25 +42,31 @@ object TestingEnvironment {
     def getTitle(of: SPNodeKey = sp.getNodeKey): String =
       find(of).getDataObject.getTitle
 
-    def setTitle(text: String, of: SPNodeKey = sp.getNodeKey) {
+    def setTitle(text: String, of: SPNodeKey = sp.getNodeKey): Unit = {
       val n   = find(of)
       val obj = n.getDataObject
       obj.setTitle(text)
       n.setDataObject(obj)
     }
 
-    def addNote(text: String, to: SPNodeKey = sp.getNodeKey): ISPNode = {
+    private def addNote(text: String, to: SPNodeKey, noteType: SPComponentType): ISPNode = {
       val oc = find(to).asInstanceOf[ISPObsComponentContainer]
 
-      val note = odb.getFactory.createObsComponent(sp, SPNote.SP_TYPE, null)
-      val obj  = new SPNote()
+      val note = odb.getFactory.createObsComponent(sp, noteType, null)
+      val obj  = note.getDataObject.asInstanceOf[SPNote]
       obj.setNote(text)
       note.setDataObject(obj)
       oc.addObsComponent(note)
       note
     }
 
-    def setNoteText(text: String, key: SPNodeKey) {
+    def addNote(text: String, to: SPNodeKey = sp.getNodeKey): ISPNode =
+      addNote(text, to, SPNote.SP_TYPE)
+
+    def addProgramNote(text: String, to: SPNodeKey = sp.getNodeKey): ISPNode =
+      addNote(text, to, ProgramNote.SP_TYPE)
+
+    def setNoteText(text: String, key: SPNodeKey): Unit = {
       val n   = find(key)
       val obj = n.getDataObject.asInstanceOf[SPNote]
       obj.setNote(text)
@@ -82,30 +89,30 @@ object TestingEnvironment {
     def getDataObjectField[D <: ISPDataObject, T](k: SPNodeKey, f: D => T): T =
       f(find(k).getDataObject.asInstanceOf[D])
 
-    def getObsField[T](k: SPNodeKey, f: SPObservation => T): T = getDataObjectField(k, f)
+    def getObsField[T](k: SPNodeKey, f: SPObservation => T): T =
+      getDataObjectField(k, f)
 
-    def getPhase2Status(k: SPNodeKey): ObsPhase2Status = getObsField(k, _.getPhase2Status)
+    def getPhase2Status(k: SPNodeKey): ObsPhase2Status =
+      getObsField(k, _.getPhase2Status)
 
-    def setDataObjectField[D <: ISPDataObject](k: SPNodeKey, up: D => Unit) {
+    def setDataObjectField[D <: ISPDataObject](k: SPNodeKey, up: D => Unit): Unit = {
       val n = find(k)
       val dataObj = n.getDataObject.asInstanceOf[D]
       up(dataObj)
       n.setDataObject(dataObj)
     }
 
-    def setObsField(k: SPNodeKey, up: SPObservation => Unit) {
+    def setObsField(k: SPNodeKey, up: SPObservation => Unit): Unit =
       setDataObjectField(k, up)
-    }
 
-    def setPhase2Status(k: SPNodeKey, status: ObsPhase2Status) {
+    def setPhase2Status(k: SPNodeKey, status: ObsPhase2Status): Unit =
       setObsField(k, _.setPhase2Status(status))
-    }
 
-    def getExecStatusOverride(k: SPNodeKey) = getObsField(k, _.getExecStatusOverride)
+    def getExecStatusOverride(k: SPNodeKey): edu.gemini.shared.util.immutable.Option[ObsExecStatus] =
+      getObsField(k, _.getExecStatusOverride)
 
-    def setExecStatusOverride(k: SPNodeKey, status: edu.gemini.shared.util.immutable.Option[ObsExecStatus]) {
+    def setExecStatusOverride(k: SPNodeKey, status: edu.gemini.shared.util.immutable.Option[ObsExecStatus]): Unit =
       setObsField(k, _.setExecStatusOverride(status))
-    }
 
     def conflictNotes(k: SPNodeKey = sp.getNodeKey): List[Conflict.Note] =
       find(k).getConflicts.notes.toList.asScala.toList
@@ -120,14 +127,48 @@ object TestingEnvironment {
       find(k, List(sp))
     }
 
-    def findObs(k: SPNodeKey): ISPObservation = find(k).asInstanceOf[ISPObservation]
+    def findObs(k: SPNodeKey): ISPObservation =
+      find(k).asInstanceOf[ISPObservation]
 
-    def move(key: SPNodeKey, to: SPNodeKey) {
+    def move(key: SPNodeKey, to: SPNodeKey): Unit = {
       val n = find(key)
       val p = n.getParent
       p.children = p.children.filterNot(_.getNodeKey == key) // remove from parent
       val t = find(to)
       t.children = n :: t.children
+    }
+
+    // Ugh.  Makes this program context's program a copy of the given one.
+    def copyFrom(that: ProgContext): Unit = {
+
+      def init(src: ISPNode, dest: ISPNode): Unit = {
+        dest.dataObject = src.dataObject
+        dest.children   = src.children.map(copy)
+      }
+
+      def copy(src: ISPNode): ISPNode = {
+        val fact    = odb.getFactory
+        val key     = src.key
+        val dob     = src.getDataObject
+        val cType   = dob.getType
+        val newNode = src match {
+          case _: ISPGroup              => fact.createGroup(sp, key)
+          case _: ISPObsComponent       => fact.createObsComponent(sp, cType, key)
+          case o: ISPObservation        => fact.createObservation(sp, o.getObservationNumber, ObservationNI.NO_CHILDREN_INSTANCE, key)
+          case _: ISPObsExecLog         => fact.createObsExecLog(sp, key)
+          case _: ISPObsQaLog           => fact.createObsQaLog(sp, key)
+          case _: ISPSeqComponent       => fact.createSeqComponent(sp, cType, key)
+          case _: ISPTemplateFolder     => fact.createTemplateFolder(sp, key)
+          case _: ISPTemplateGroup      => fact.createTemplateGroup(sp, key)
+          case _: ISPTemplateParameters => fact.createTemplateParameters(sp, key)
+        }
+
+        init(src, newNode)
+        newNode
+      }
+
+      init(that.sp, sp)
+      sp.setVersions(that.sp.getVersions)
     }
   }
 
@@ -136,28 +177,26 @@ object TestingEnvironment {
     def version(id: SPProgramID): TryVcs[VersionMap] = prog(id).getVersions.right
     def fetch(id: SPProgramID): TryVcs[ISPProgram] = prog(id).right
     def store(p: ISPProgram): TryVcs[VersionMap] = VcsLocking(odb).merge(LookupOrFail, p, user)(Commit)
-    def log(p: SPProgramID, offset: Int, length: Int): VcsFailure.TryVcs[(List[VcsEventSet], Boolean)] = (Nil, false).right
+    def log(p: SPProgramID, offset: Int, length: Int): OldVcsFailure.TryVcs[(List[VcsEventSet], Boolean)] = (Nil, false).right
   }
 
-  def withTestEnv(block: TestingEnvironment => Unit): Unit = {
-    val env = new TestingEnvironment
-    try {
-      block(env)
-      env.versionsEqual()
-    } finally {
-      env.shutdown()
-    }
-  }
-
-  def withAuthTestEnv(p: Principal)(block: TestingEnvironment => Unit): Unit = {
+  def withTestEnv(p: Principal)(block: TestingEnvironment => Unit): Unit = {
     val env = new TestingEnvironment(p)
     try {
       block(env)
-      env.versionsEqual()
     } finally {
       env.shutdown()
     }
   }
+
+  def withPiTestEnv(block: TestingEnvironment => Unit): Unit =
+    withTestEnv(ProgramPrincipal(id))(block)
+
+  def syncTest(p: Principal)(block: TestingEnvironment => Unit): Unit =
+    withTestEnv(p) { env =>
+      block(env)
+      env.versionsEqual()
+    }
 
   def doAs[T](p: Principal)(block: Set[Principal] => T): T =
     block(Set(p))
@@ -168,14 +207,14 @@ object TestingEnvironment {
   def doAsNgo[T](block: Set[Principal] => T): T =
     doAs(AffiliatePrincipal(Affiliate.CHILE))(block)
 
-  def withPiTestEnv(block: TestingEnvironment => Unit): Unit =
-    withAuthTestEnv(ProgramPrincipal(id))(block)
+  def piSyncTest(block: TestingEnvironment => Unit): Unit =
+    syncTest(ProgramPrincipal(id))(block)
 
-  def withStaffUserTestEnv(email: String)(block: TestingEnvironment => Unit): Unit =
-    withAuthTestEnv(UserPrincipal(email))(block)
+  def staffUserSyncTest(email: String)(block: TestingEnvironment => Unit): Unit =
+    syncTest(UserPrincipal(email))(block)
 
-  def withStaffTestEnv(block: TestingEnvironment => Unit): Unit =
-    withAuthTestEnv(StaffPrincipal.Gemini)(block)
+  def staffSyncTest(block: TestingEnvironment => Unit): Unit =
+    syncTest(StaffPrincipal.Gemini)(block)
 
   def childKeys(n: ISPNode): List[SPNodeKey]  = n.children.map(_.getNodeKey)
   def keys(l: ISPNode*): List[SPNodeKey] = l.map(_.getNodeKey).toList
@@ -237,26 +276,26 @@ object TestingEnvironment {
 
 import TestingEnvironment._
 
-class TestingEnvironment(val user: Set[Principal]) {
+case class TestingEnvironment(user: Set[Principal]) {
 
   lazy val javaUser: java.util.Set[Principal] = user.asJava
 
   def this(p: Principal) = this(Set(p))
   def this() = this(Set.empty[Principal])
 
-  private val odbRemote = DBLocalDatabase.createTransient()
-  odbRemote.put(odbRemote.getFactory.createProgram(key, id))
+  private val odbCentral = DBLocalDatabase.createTransient()
+  odbCentral.put(odbCentral.getFactory.createProgram(key, id))
 
-  private def initContext(name: String, odbLocal: IDBDatabaseService = DBLocalDatabase.createTransient(), syncWith: IDBDatabaseService = odbRemote): ProgContext = {
-    val vcs = VersionControlSystem(odbLocal, TestVcsServerImpl(syncWith, user))
+  private def initContext(name: String, odbClone: IDBDatabaseService = DBLocalDatabase.createTransient(), syncWith: IDBDatabaseService = odbCentral): ProgContext = {
+    val vcs = VersionControlSystem(odbClone, TestVcsServerImpl(syncWith, user))
 
     // Side effect :/ put a copy of the empty program into the local database.
-    if (odbLocal.lookupProgramByID(id) == null) {
-      val \/-(sp) = VcsLocking(odbLocal).create(odbRemote.lookupProgramByID(id))
-      odbLocal.put(sp)
+    if (odbClone.lookupProgramByID(id) == null) {
+      val \/-(sp) = VcsLocking(odbClone).create(odbCentral.lookupProgramByID(id))
+      odbClone.put(sp)
     }
 
-    ProgContext(name, id, odbLocal, vcs)
+    ProgContext(name, id, odbClone, vcs)
   }
 
   def useContext(name: String)(block: ProgContext => Unit): Unit = {
@@ -268,31 +307,34 @@ class TestingEnvironment(val user: Set[Principal]) {
     }
   }
 
-  val local  = initContext("local")
-  val remote = initContext("remote", odbRemote, local.odb)
+  val cloned  = initContext("clone")
+  val central = initContext("central", odbCentral, cloned.odb)
 
-  assertEquals(local.sp.getVersions, remote.sp.getVersions)
+  assertEquals(cloned.sp.getVersions, central.sp.getVersions)
 
-  def nodeVersionsEqual(key: SPNodeKey, fR: NodeVersions => NodeVersions = identity, fL: NodeVersions => NodeVersions = identity) {
-    assertEquals(fR(nodeVersions(remote.sp.getVersions, key)), fL(nodeVersions(local.sp.getVersions, key)))
-  }
-  def versionsEqual() { assertEquals(remote.sp.getVersions, local.sp.getVersions) }
+  def nodeVersionsEqual(key: SPNodeKey, fR: NodeVersions => NodeVersions = identity, fL: NodeVersions => NodeVersions = identity): Unit =
+    assertEquals(fR(nodeVersions(central.sp.getVersions, key)), fL(nodeVersions(cloned.sp.getVersions, key)))
 
-  def update(user: Set[Principal]) { assertTrue(local.vcs.update(id, user).isRight) }
-  def commit() { assertTrue(local.vcs.commit(id).isRight) }
-  def cantCommit(expected: VcsFailure) {
-    local.vcs.commit(id) match {
+  def versionsEqual(): Unit =
+    assertEquals(central.sp.getVersions, cloned.sp.getVersions)
+
+  def update(user: Set[Principal]): Unit =
+    assertTrue(cloned.vcs.update(id, user).isRight)
+
+  def commit(): Unit =
+    assertTrue(cloned.vcs.commit(id).isRight)
+
+  def cantCommit(expected: OldVcsFailure): Unit =
+    cloned.vcs.commit(id) match {
       case -\/(actual) => assertEquals(expected, actual)
       case _ => fail("Shouldn't be able to commit, expecting: " + expected)
     }
-  }
 
-  def showState(title: String, ctxList: List[ProgContext] = List(remote, local)) {
+  def showState(title: String, ctxList: List[ProgContext] = List(central, cloned)): Unit =
     println(formatState(title, ctxList))
-  }
 
   def shutdown(): Unit = {
-    local.odb.getDBAdmin.shutdown()
-    remote.odb.getDBAdmin.shutdown()
+    cloned.odb.getDBAdmin.shutdown()
+    central.odb.getDBAdmin.shutdown()
   }
 }

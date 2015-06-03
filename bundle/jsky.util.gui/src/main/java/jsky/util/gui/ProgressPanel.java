@@ -29,7 +29,6 @@ import javax.swing.SwingUtilities;
 
 import jsky.util.Resources;
 
-
 /**
  * A panel to display while a download or other background operation is in
  * progress.
@@ -98,11 +97,7 @@ public class ProgressPanel extends JPanel implements ActionListener, StatusLogge
     protected void init() {
         // make sure this is done in the event dispatch thread
         if (!SwingUtilities.isEventDispatchThread()) {
-            invokeAndWait(new Runnable() {
-                public void run() {
-                    init();
-                }
-            });
+            invokeAndWait(ProgressPanel.this::init);
             return;
         }
         setLayout(new BorderLayout());
@@ -151,11 +146,7 @@ public class ProgressPanel extends JPanel implements ActionListener, StatusLogge
      */
     public void setTitle(final String title) {
         if (!SwingUtilities.isEventDispatchThread()) {
-            SwingUtilities.invokeLater(new Runnable() {
-                public void run() {
-                    setTitle(title);
-                }
-            });
+            SwingUtilities.invokeLater(() -> setTitle(title));
             return;
         }
         this._title = title;
@@ -165,11 +156,7 @@ public class ProgressPanel extends JPanel implements ActionListener, StatusLogge
     /** Log or display the given message */
     public void logMessage(final String msg) {
         if (!SwingUtilities.isEventDispatchThread()) {
-            SwingUtilities.invokeLater(new Runnable() {
-                public void run() {
-                    _statusPanel.setText(msg);
-                }
-            });
+            SwingUtilities.invokeLater(() -> _statusPanel.setText(msg));
             return;
         }
         _statusPanel.setText(msg);
@@ -178,11 +165,7 @@ public class ProgressPanel extends JPanel implements ActionListener, StatusLogge
     /** Set the status text to display. */
     public void setText(final String s) {
         if (!SwingUtilities.isEventDispatchThread()) {
-            SwingUtilities.invokeLater(new Runnable() {
-                public void run() {
-                    _statusPanel.setText(s);
-                }
-            });
+            SwingUtilities.invokeLater(() -> _statusPanel.setText(s));
             return;
         }
         _statusPanel.setText(s);
@@ -237,11 +220,7 @@ public class ProgressPanel extends JPanel implements ActionListener, StatusLogge
     public void start() {
         // make sure this is done in the event dispatch thread
         if (!SwingUtilities.isEventDispatchThread()) {
-            SwingUtilities.invokeLater(new Runnable() {
-                public void run() {
-                    start();
-                }
-            });
+            SwingUtilities.invokeLater(this::start);
             return;
         }
 
@@ -262,11 +241,7 @@ public class ProgressPanel extends JPanel implements ActionListener, StatusLogge
     public void stop() {
         // make sure this is done in the event dispatch thread
         if (!SwingUtilities.isEventDispatchThread()) {
-            SwingUtilities.invokeLater(new Runnable() {
-                public void run() {
-                    stop();
-                }
-            });
+            SwingUtilities.invokeLater(ProgressPanel.this::stop);
             return;
         }
 
@@ -292,11 +267,7 @@ public class ProgressPanel extends JPanel implements ActionListener, StatusLogge
      */
     public static ProgressPanel makeProgressPanel(final String title, final Component window) {
         if (!SwingUtilities.isEventDispatchThread()) {
-            invokeAndWait(new Runnable() {
-                public void run() {
-                    _newPanel = ProgressPanel.makeProgressPanel(title, window);
-                }
-            });
+            invokeAndWait(() -> _newPanel = ProgressPanel.makeProgressPanel(title, window));
             return _newPanel;
         }
 
@@ -392,11 +363,7 @@ public class ProgressPanel extends JPanel implements ActionListener, StatusLogge
         getStopButton().setText(buttonLabel);
         doLayout();
         getStopButton().removeActionListener(this); //removes the current action listener
-        getStopButton().addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent event) {
-                stop();
-            }
-        });
+        getStopButton().addActionListener(event -> stop());
     }
 
 }

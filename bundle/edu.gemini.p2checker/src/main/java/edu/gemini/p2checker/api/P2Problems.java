@@ -7,11 +7,7 @@ package edu.gemini.p2checker.api;
 import edu.gemini.pot.sp.ISPProgramNode;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 
 /**
  * A storage class that contains <code>Problem</code> associated to
@@ -24,7 +20,7 @@ public class P2Problems implements Serializable, IP2Problems {
 
 //    public static final String PROBLEMS_PROP = "Problems";
 
-    public static final List<Problem> NO_PROBLEM = Collections.unmodifiableList(new ArrayList<Problem>());
+    public static final List<Problem> NO_PROBLEM = Collections.unmodifiableList(new ArrayList<>());
 
 
     private Set<Problem> _problemSet;
@@ -35,7 +31,7 @@ public class P2Problems implements Serializable, IP2Problems {
 
     public P2Problems(IP2Problems copy) {
         if (copy != null) {
-            _problemSet = new TreeSet<Problem>(copy.getProblems());
+            _problemSet = new HashSet<>(copy.getProblems());
         }
     }
 
@@ -93,11 +89,11 @@ public class P2Problems implements Serializable, IP2Problems {
      */
     public List<Problem> getProblems() {
         if (_problemSet ==  null) return NO_PROBLEM;
-        return Collections.unmodifiableList(new ArrayList(_problemSet));
+        return Collections.unmodifiableList(new ArrayList<>(_problemSet));
     }
 
     private Set<Problem> _getProblems() {
-        if (_problemSet ==  null) _problemSet = new TreeSet<Problem>();
+        if (_problemSet ==  null) _problemSet = new HashSet<>();
         return _problemSet;
     }
 

@@ -16,9 +16,22 @@ import edu.gemini.skycalc.Offset;
 import edu.gemini.spModel.config2.Config;
 import edu.gemini.spModel.config2.ConfigSequence;
 import edu.gemini.spModel.config2.ItemKey;
+import edu.gemini.spModel.core.Site;
 import edu.gemini.spModel.data.YesNoType;
-import edu.gemini.spModel.gemini.gmos.*;
+import edu.gemini.spModel.gemini.gmos.GmosCommonType.*;
+import static edu.gemini.spModel.gemini.gmos.GmosCommonType.DetectorManufacturer.HAMAMATSU;
+import edu.gemini.spModel.gemini.gmos.GmosNorthType.DisperserNorth;
+import edu.gemini.spModel.gemini.gmos.GmosNorthType.FPUnitNorth;
+import edu.gemini.spModel.gemini.gmos.GmosNorthType.FilterNorth;
+import edu.gemini.spModel.gemini.gmos.GmosSouthType.DisperserSouth;
+import edu.gemini.spModel.gemini.gmos.GmosSouthType.FPUnitSouth;
+import edu.gemini.spModel.gemini.gmos.GmosSouthType.FilterSouth;
+import edu.gemini.spModel.gemini.gmos.InstGmosCommon;
+import edu.gemini.spModel.gemini.gmos.InstGmosNorth;
+import edu.gemini.spModel.gemini.gmos.InstGmosSouth;
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality;
+import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.ImageQuality;
+import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.SkyBackground;
 import edu.gemini.spModel.obsclass.ObsClass;
 import edu.gemini.spModel.obscomp.InstConstants;
 import edu.gemini.spModel.obscomp.SPInstObsComp;
@@ -29,15 +42,12 @@ import scala.runtime.AbstractFunction2;
 import java.beans.PropertyDescriptor;
 import java.util.*;
 
-import static edu.gemini.spModel.gemini.gmos.GmosCommonType.Binning;
-
-
 /**
  * GMOS Rule set
  */
 public final class GmosRule implements IRule {
     private static final String PREFIX = "GmosRule_";
-    private static Collection<IConfigRule> GMOS_RULES = new ArrayList<IConfigRule>();
+    private static Collection<IConfigRule> GMOS_RULES = new ArrayList<>();
 
     //keys to access sequence elements
     private static final ItemKey FPU_KEY = new ItemKey("instrument:fpu");
@@ -49,7 +59,6 @@ public final class GmosRule implements IRule {
     private static final ItemKey CCD_X_BINNING_KEY = new ItemKey("instrument:ccdXBinning");
     private static final ItemKey CCD_Y_BINNING_KEY = new ItemKey("instrument:ccdYBinning");
 
-
     /**
      * either a filter or a grating should be defined whatever the fpu
      * WARN if (disperser == 'Mirror' && filter == 'none'), \
@@ -59,8 +68,8 @@ public final class GmosRule implements IRule {
                 "and a filter is optional";
 
         public Problem check(Config config, int step, ObservationElements elems, Object state) {
-            GmosCommonType.Disperser disperser = getDisperser(config);
-            GmosCommonType.Filter filter = getFilter(config);
+            final Disperser disperser = getDisperser(config);
+            final Filter filter = getFilter(config);
             if (disperser == null || filter == null) return null;
 
             if (disperser.isMirror() && filter.isNone()) {
@@ -81,11 +90,11 @@ public final class GmosRule implements IRule {
         private static final String MESSAGE = "Acquisition observation should not contain grating";
 
         public Problem check(Config config, int step, ObservationElements elems, Object state) {
-            ObsClass obsClass = SequenceRule.getObsClass(config);
+            final ObsClass obsClass = SequenceRule.getObsClass(config);
             if (obsClass != ObsClass.ACQ && obsClass != ObsClass.ACQ_CAL) {
                 return null;
             }
-            GmosCommonType.Disperser disperser = getDisperser(config);
+            final Disperser disperser = getDisperser(config);
             if (!disperser.isMirror()) {
                 return new Problem(WARNING, PREFIX + "ACQUISITION_RULE", MESSAGE,
                         SequenceRule.getInstrumentOrSequenceNode(step, elems));
@@ -115,7 +124,7 @@ public final class GmosRule implements IRule {
             if (!SequenceRule.SCIENCE_MATCHER.matches(config, step, elems))
                 return false;
             if (!isSpecFPUnselected(config, elems)) return false;
-            GmosCommonType.Disperser disperser = getDisperser(config);
+            final Disperser disperser = getDisperser(config);
             return !disperser.isMirror();
         }
     };
@@ -125,8 +134,8 @@ public final class GmosRule implements IRule {
         public boolean matches(Config config, int step, ObservationElements elems) {
             if (!SPECTROSCOPY_MATCHER.matches(config, step, elems))
                 return false;
-            InstGmosCommon inst = (InstGmosCommon) elems.getInstrument();
-            return inst != null && inst.getUseNS() == GmosCommonType.UseNS.TRUE;
+            final InstGmosCommon inst = (InstGmosCommon) elems.getInstrument();
+            return inst != null && inst.getUseNS() == UseNS.TRUE;
         }
     };
 
@@ -139,12 +148,12 @@ public final class GmosRule implements IRule {
             if (!isSpecFPUnselected(config, elems)) {
                 return false;
             }
-            GmosCommonType.Disperser disperser = getDisperser(config);
+            final Disperser disperser = getDisperser(config);
             if (disperser.isMirror()) {
                 return false;
             }
-            InstGmosCommon inst = (InstGmosCommon) elems.getInstrument();
-            return inst != null && inst.getUseNS() == GmosCommonType.UseNS.TRUE;
+            final InstGmosCommon inst = (InstGmosCommon) elems.getInstrument();
+            return inst != null && inst.getUseNS() == UseNS.TRUE;
         }
     };
 
@@ -204,14 +213,14 @@ public final class GmosRule implements IRule {
                 // Get the detector manufacturer.
                 Object tmp = SequenceRule.getInstrumentItem(config, InstGmosNorth.DETECTOR_MANUFACTURER_PROP);
                 if (tmp == null) return null;
-                GmosCommonType.DetectorManufacturer man = (GmosCommonType.DetectorManufacturer) tmp;
+                final DetectorManufacturer man = (DetectorManufacturer) tmp;
 
                 // Get the amp count.
                 tmp = SequenceRule.getInstrumentItem(config, InstGmosNorth.AMP_COUNT_PROP);
                 if (tmp == null) return null;
-                GmosCommonType.AmpCount cnt = (GmosCommonType.AmpCount) tmp;
+                final AmpCount cnt = (AmpCount) tmp;
 
-                if (man == GmosCommonType.DetectorManufacturer.E2V && cnt != GmosCommonType.AmpCount.SIX) {
+                if (man == DetectorManufacturer.E2V && cnt != AmpCount.SIX) {
                     return new Problem(Problem.Type.ERROR, PREFIX + "CHECK_3_AMP_MODE", GMOS_NORTH_MESSAGE,
                             SequenceRule.getInstrumentOrSequenceNode(step, elems));
                 }
@@ -219,14 +228,14 @@ public final class GmosRule implements IRule {
                 // Get the detector manufacturer.
                 Object tmp = SequenceRule.getInstrumentItem(config, InstGmosSouth.DETECTOR_MANUFACTURER_PROP);
                 if (tmp == null) return null;
-                GmosCommonType.DetectorManufacturer man = (GmosCommonType.DetectorManufacturer) tmp;
+                final DetectorManufacturer man = (DetectorManufacturer) tmp;
 
                 // Get the amp count.
                 tmp = SequenceRule.getInstrumentItem(config, InstGmosSouth.AMP_COUNT_PROP);
                 if (tmp == null) return null;
-                GmosCommonType.AmpCount cnt = (GmosCommonType.AmpCount) tmp;
+                final AmpCount cnt = (AmpCount) tmp;
 
-                if (man == GmosCommonType.DetectorManufacturer.E2V && cnt != GmosCommonType.AmpCount.THREE) {
+                if (man == DetectorManufacturer.E2V && cnt != AmpCount.THREE) {
                     return new Problem(Problem.Type.ERROR, PREFIX + "CHECK_6_AMP_MODE", GMOS_SOUTH_MESSAGE,
                             SequenceRule.getInstrumentOrSequenceNode(step, elems));
                 }
@@ -250,7 +259,7 @@ public final class GmosRule implements IRule {
                 tmp = SequenceRule.getInstrumentItem(config, InstGmosSouth.DETECTOR_MANUFACTURER_PROP);
             }
             if (tmp == null) return null;
-            GmosCommonType.DetectorManufacturer man = (GmosCommonType.DetectorManufacturer) tmp;
+            final DetectorManufacturer man = (DetectorManufacturer) tmp;
 
             // Get the amp count.
             tmp = SequenceRule.getInstrumentItem(config, InstGmosSouth.AMP_COUNT_PROP);
@@ -258,7 +267,7 @@ public final class GmosRule implements IRule {
                 tmp = SequenceRule.getInstrumentItem(config, InstGmosNorth.AMP_COUNT_PROP);
             }
             if (tmp == null) return null;
-            GmosCommonType.AmpCount cnt = (GmosCommonType.AmpCount) tmp;
+            final AmpCount cnt = (AmpCount) tmp;
 
             // Verify that the count is supported by the CCD.  Would rather
             // turn this around and ask the manufacturer what counts it
@@ -273,38 +282,6 @@ public final class GmosRule implements IRule {
         }
     };
 
-    // See REL-1194
-//    /**
-//     * WARN if (amplifiers != 3)
-//     */
-//    private static ScienceRule AMPLIFIER_SCIENCE_RULE = new ScienceRule(
-//            new ScienceRule.IScienceChecker() {
-//                private static final String MESSAGE = "3 Amp mode is recommended for science observations";
-//
-//                public boolean check(Config config, ObservationElements elems) {
-//                    Object amp = SequenceRule.getInstrumentItem(config, InstGmosSouth.AMP_COUNT_PROP);
-//                    if (amp == null) {
-//                        amp = SequenceRule.getInstrumentItem(config, InstGmosNorth.AMP_COUNT_PROP);
-//                    }
-//                    Object detectorManufacturer = SequenceRule.getInstrumentItem(config, InstGmosSouth.DETECTOR_MANUFACTURER_PROP);
-//                    if (detectorManufacturer == null) {
-//                        detectorManufacturer = SequenceRule.getInstrumentItem(config, InstGmosNorth.DETECTOR_MANUFACTURER_PROP);
-//                    }
-//                    // REL-231 - don't warn for GMOSN
-//                    return (amp != GmosCommonType.AmpCount.THREE) && (detectorManufacturer == GmosCommonType.DetectorManufacturer.E2V);
-//                }
-//
-//                public String getMessage() {
-//                    return MESSAGE;
-//                }
-//
-//                public String getId() {
-//                    return PREFIX + "AMPLIFIER_SCIENCE_RULE";
-//                }
-//            }
-//            , SequenceRule.SCIENCE_MATCHER
-//    );
-
 
     /**
      * WARN if (gain != 'low' && !HAMAMATSU)
@@ -315,20 +292,20 @@ public final class GmosRule implements IRule {
 
                 public boolean check(Config config, ObservationElements elems) {
 
-                    GmosCommonType.DetectorManufacturer det =
-                            (GmosCommonType.DetectorManufacturer) SequenceRule.getInstrumentItem(config, InstGmosSouth.DETECTOR_MANUFACTURER_PROP);
+                    DetectorManufacturer det =
+                            (DetectorManufacturer) SequenceRule.getInstrumentItem(config, InstGmosSouth.DETECTOR_MANUFACTURER_PROP);
                     if (det == null) {
-                        det = (GmosCommonType.DetectorManufacturer) SequenceRule.getInstrumentItem(config, InstGmosNorth.DETECTOR_MANUFACTURER_PROP);
+                        det = (DetectorManufacturer) SequenceRule.getInstrumentItem(config, InstGmosNorth.DETECTOR_MANUFACTURER_PROP);
                     }
-                    if (det == GmosCommonType.DetectorManufacturer.HAMAMATSU) {
+                    if (det == DetectorManufacturer.HAMAMATSU) {
                         return false;
                     }
 
-                    GmosCommonType.AmpGain gain =
-                            (GmosCommonType.AmpGain) SequenceRule.getInstrumentItem(config, InstGmosSouth.AMP_GAIN_CHOICE_PROP);
+                    AmpGain gain =
+                            (AmpGain) SequenceRule.getInstrumentItem(config, InstGmosSouth.AMP_GAIN_CHOICE_PROP);
                     if (gain == null)
-                        gain = (GmosCommonType.AmpGain) SequenceRule.getInstrumentItem(config, InstGmosNorth.AMP_GAIN_CHOICE_PROP);
-                    return gain != GmosCommonType.AmpGain.LOW;
+                        gain = (AmpGain) SequenceRule.getInstrumentItem(config, InstGmosNorth.AMP_GAIN_CHOICE_PROP);
+                    return gain != AmpGain.LOW;
 
                 }
 
@@ -353,21 +330,21 @@ public final class GmosRule implements IRule {
 
                 public boolean check(Config config, ObservationElements elems) {
 
-                    GmosCommonType.DetectorManufacturer det =
-                            (GmosCommonType.DetectorManufacturer) SequenceRule.getInstrumentItem(config, InstGmosSouth.DETECTOR_MANUFACTURER_PROP);
+                    DetectorManufacturer det =
+                            (DetectorManufacturer) SequenceRule.getInstrumentItem(config, InstGmosSouth.DETECTOR_MANUFACTURER_PROP);
                     if (det == null) {
-                        det = (GmosCommonType.DetectorManufacturer) SequenceRule.getInstrumentItem(config, InstGmosNorth.DETECTOR_MANUFACTURER_PROP);
+                        det = (DetectorManufacturer) SequenceRule.getInstrumentItem(config, InstGmosNorth.DETECTOR_MANUFACTURER_PROP);
                     }
-                    if (det == GmosCommonType.DetectorManufacturer.HAMAMATSU) {
+                    if (det == DetectorManufacturer.HAMAMATSU) {
                         return false;
                     }
 
-                    GmosCommonType.AmpReadMode readMode =
-                            (GmosCommonType.AmpReadMode) SequenceRule.getInstrumentItem(config, InstGmosSouth.AMP_READ_MODE_PROP);
+                    AmpReadMode readMode =
+                            (AmpReadMode) SequenceRule.getInstrumentItem(config, InstGmosSouth.AMP_READ_MODE_PROP);
                     if (readMode == null)
-                        readMode = (GmosCommonType.AmpReadMode) SequenceRule.getInstrumentItem(config, InstGmosNorth.AMP_READ_MODE_PROP);
+                        readMode = (AmpReadMode) SequenceRule.getInstrumentItem(config, InstGmosNorth.AMP_READ_MODE_PROP);
 
-                    return readMode == GmosCommonType.AmpReadMode.FAST;
+                    return readMode == AmpReadMode.FAST;
                 }
 
                 public String getMessage() {
@@ -387,18 +364,18 @@ public final class GmosRule implements IRule {
         private static final String MESSAGE = "Slow readout and high gain is not recommended.";
 
         public Problem check(Config config, int step, ObservationElements elems, Object state) {
-            GmosCommonType.AmpReadMode readMode =
-                    (GmosCommonType.AmpReadMode) SequenceRule.getInstrumentItem(config, InstGmosSouth.AMP_READ_MODE_PROP);
+            AmpReadMode readMode =
+                    (AmpReadMode) SequenceRule.getInstrumentItem(config, InstGmosSouth.AMP_READ_MODE_PROP);
             if (readMode == null) {
-                readMode = (GmosCommonType.AmpReadMode) SequenceRule.getInstrumentItem(config, InstGmosNorth.AMP_READ_MODE_PROP);
+                readMode = (AmpReadMode) SequenceRule.getInstrumentItem(config, InstGmosNorth.AMP_READ_MODE_PROP);
             }
 
-            GmosCommonType.AmpGain gain =
-                    (GmosCommonType.AmpGain) SequenceRule.getInstrumentItem(config, InstGmosSouth.AMP_GAIN_CHOICE_PROP);
+            AmpGain gain =
+                    (AmpGain) SequenceRule.getInstrumentItem(config, InstGmosSouth.AMP_GAIN_CHOICE_PROP);
             if (gain == null) {
-                gain = (GmosCommonType.AmpGain) SequenceRule.getInstrumentItem(config, InstGmosNorth.AMP_GAIN_CHOICE_PROP);
+                gain = (AmpGain) SequenceRule.getInstrumentItem(config, InstGmosNorth.AMP_GAIN_CHOICE_PROP);
             }
-            if ((readMode == GmosCommonType.AmpReadMode.SLOW) && (gain == GmosCommonType.AmpGain.HIGH)) {
+            if ((readMode == AmpReadMode.SLOW) && (gain == AmpGain.HIGH)) {
                 return new Problem(WARNING, PREFIX + "GAIN_READMODE_RULE", MESSAGE,
                         SequenceRule.getInstrumentOrSequenceNode(step, elems));
             }
@@ -455,6 +432,33 @@ public final class GmosRule implements IRule {
         }
     };
 
+    private static IConfigRule GMOS_S_DTA_X_RULE = new IConfigRule() {
+
+        private static final String Y1   = "The GMOS-S Hamamatsu allowed DTA X range is -4 to +6 for Ybin=1";
+        private static final String Y2_4 = "The GMOS-S Hamamatsu allowed DTA X range is -2 to +6 for Ybin=2 or 4";
+
+        public Problem check(Config config, int step, ObservationElements elems, Object state) {
+            final Binning y = (Binning) SequenceRule.getInstrumentItem(config, InstGmosCommon.CCD_Y_BIN_PROP);
+            final DTAX dtaX = (DTAX) SequenceRule.getInstrumentItem(config, InstGmosCommon.DTAX_OFFSET_PROP);
+
+            final ISPProgramNode node = SequenceRule.getInstrumentOrSequenceNode(step, elems, config);
+            if ((y == Binning.ONE) && (dtaX.intValue() < -4)) {
+                return new Problem(ERROR, PREFIX + "Y1", Y1, node);
+            } else if ((y != Binning.ONE) && (dtaX.intValue() < -2)) {
+                return new Problem(ERROR, PREFIX + "Y2_4", Y2_4, node);
+            } else {
+                return null;
+            }
+        }
+
+        public IConfigMatcher getMatcher() {
+            return (config, step, elems) -> {
+                final InstGmosCommon gmos = (InstGmosCommon) elems.getInstrument();
+                return gmos.getSite().equals(Site.SET_GS) && (gmos.getDetectorManufacturer() == HAMAMATSU);
+            };
+        }
+    };
+
     /**
      * State used to check for the SPATIAL_DITHER_IMAGING_RULE.  If a sequence
      * contains two or more observes at distinct positions, then there should
@@ -472,7 +476,7 @@ public final class GmosRule implements IRule {
         // REL-389
         boolean foundMultipleExposurePerPerFilterChange;
         boolean foundExpTimeGreaterThan300s;
-        GmosCommonType.Filter filter;
+        Filter filter;
         int exposureCount;
 
         // Adds a warning to the problem list if necessary -- if doing science
@@ -508,12 +512,12 @@ public final class GmosRule implements IRule {
                 }
             }
             if (!gsds.foundMultipleExposurePerPerFilterChange) {
-                GmosCommonType.Filter filter = getFilter(config);
+                final Filter filter = getFilter(config);
                 if (filter != gsds.filter) {
                     gsds.filter = filter;
                     gsds.exposureCount = 0;
                 }
-                String obsType = SequenceRule.getObserveType(config);
+                final String obsType = SequenceRule.getObserveType(config);
                 if (InstConstants.SCIENCE_OBSERVE_TYPE.equals(obsType)) {
                     Integer repeatCount = SequenceRule.getStepCount(config);
                     if (repeatCount != null && repeatCount > 1) {
@@ -565,14 +569,14 @@ public final class GmosRule implements IRule {
                     for (SPSiteQuality sq : elems.getSiteQuality()) {
                         boolean hasAOComp = elems.hasAltair();
 
-                        GmosCommonType.Binning binningX =
-                                (GmosCommonType.Binning) SequenceRule.getInstrumentItem(config, InstGmosCommon.CCD_X_BIN_PROP);
-                        GmosCommonType.Binning binningY =
-                                (GmosCommonType.Binning) SequenceRule.getInstrumentItem(config, InstGmosCommon.CCD_Y_BIN_PROP);
+                        final Binning binningX =
+                                (Binning) SequenceRule.getInstrumentItem(config, InstGmosCommon.CCD_X_BIN_PROP);
+                        final Binning binningY =
+                                (Binning) SequenceRule.getInstrumentItem(config, InstGmosCommon.CCD_Y_BIN_PROP);
 
-                        return binningX == GmosCommonType.Binning.ONE &&
-                                binningY == GmosCommonType.Binning.ONE &&
-                                sq.getImageQuality() != SPSiteQuality.ImageQuality.PERCENT_20 &&
+                        return binningX == Binning.ONE &&
+                                binningY == Binning.ONE &&
+                                sq.getImageQuality() != ImageQuality.PERCENT_20 &&
                                 !hasAOComp;
                     }
                     return false;
@@ -599,13 +603,13 @@ public final class GmosRule implements IRule {
 
                     boolean hasAOComp = elems.hasAltair();
 
-                    GmosCommonType.Binning binningX =
-                            (GmosCommonType.Binning) SequenceRule.getInstrumentItem(config, InstGmosCommon.CCD_X_BIN_PROP);
-                    GmosCommonType.Binning binningY =
-                            (GmosCommonType.Binning) SequenceRule.getInstrumentItem(config, InstGmosCommon.CCD_Y_BIN_PROP);
+                    final Binning binningX =
+                            (Binning) SequenceRule.getInstrumentItem(config, InstGmosCommon.CCD_X_BIN_PROP);
+                    final Binning binningY =
+                            (Binning) SequenceRule.getInstrumentItem(config, InstGmosCommon.CCD_Y_BIN_PROP);
 
-                    return (binningX != GmosCommonType.Binning.ONE ||
-                            binningY != GmosCommonType.Binning.ONE) &&
+                    return (binningX != Binning.ONE ||
+                            binningY != Binning.ONE) &&
                             hasAOComp;
                 }
 
@@ -651,8 +655,8 @@ public final class GmosRule implements IRule {
                 private static final String MESSAGE = "The B600_G5303 grating has been superseded by the B600_G5307.";
 
                 public boolean check(Config config, ObservationElements elems) {
-                    GmosCommonType.Disperser disperser = getDisperser(config);
-                    return disperser == GmosNorthType.DisperserNorth.B600_G5303;
+                    final Disperser disperser = getDisperser(config);
+                    return disperser == DisperserNorth.B600_G5303;
                 }
 
                 public String getMessage() {
@@ -674,7 +678,7 @@ public final class GmosRule implements IRule {
                 private static final String MESSAGE = "A slit, mask or IFU is defined, but no grating is selected";
 
                 public boolean check(Config config, ObservationElements elems) {
-                    GmosCommonType.Disperser disperser = getDisperser(config);
+                    final Disperser disperser = getDisperser(config);
                     return disperser != null && isSpecFPUnselected(config, elems) && disperser.isMirror();
                 }
 
@@ -699,12 +703,12 @@ public final class GmosRule implements IRule {
                         "grating and a spectroscopic element in the fpu";
 
                 public boolean check(Config config, ObservationElements elems) {
-                    GmosCommonType.Disperser disperser = getDisperser(config);
+                    final Disperser disperser = getDisperser(config);
                     if (disperser == null) return false; //can't check
-                    InstGmosCommon inst = (InstGmosCommon) elems.getInstrument();
+                    final InstGmosCommon inst = (InstGmosCommon) elems.getInstrument();
                     if (inst == null) return false; //can't check
-                    GmosCommonType.UseNS useNs = inst.getUseNS();
-                    return useNs == GmosCommonType.UseNS.TRUE && disperser.isMirror() && !isSpecFPUnselected(config, elems);
+                    final UseNS useNs = inst.getUseNS();
+                    return useNs == UseNS.TRUE && disperser.isMirror() && !isSpecFPUnselected(config, elems);
                 }
 
                 public String getMessage() {
@@ -755,9 +759,9 @@ public final class GmosRule implements IRule {
                 private static final String MESSAGE = "In IFU one slit mode it is recommended to use the red slit";
 
                 public boolean check(Config config, ObservationElements elems) {
-                    final GmosCommonType.FPUnit fpu = getFPU(config, elems);
-                    return fpu == GmosNorthType.FPUnitNorth.IFU_2 ||
-                            fpu == GmosSouthType.FPUnitSouth.IFU_2;
+                    final FPUnit fpu = getFPU(config, elems);
+                    return fpu == FPUnitNorth.IFU_2 ||
+                            fpu == FPUnitSouth.IFU_2;
                 }
 
                 public String getMessage() {
@@ -781,11 +785,11 @@ public final class GmosRule implements IRule {
 
                 public boolean check(Config config, ObservationElements elems) {
 
-                    GmosCommonType.Filter filter = getFilter(config);
+                    final Filter filter = getFilter(config);
                     if (!filter.isNone()) return false;
-                    final GmosCommonType.FPUnit fpu = getFPU(config, elems);
-                    return fpu == GmosNorthType.FPUnitNorth.IFU_1 ||
-                            fpu == GmosSouthType.FPUnitSouth.IFU_1;
+                    final FPUnit fpu = getFPU(config, elems);
+                    return fpu == FPUnitNorth.IFU_1 ||
+                            fpu == FPUnitSouth.IFU_1;
                 }
 
                 public String getMessage() {
@@ -833,18 +837,17 @@ public final class GmosRule implements IRule {
         private static final String MESSAGE = "For the selected central wavelength and disperser it is recommended to " +
                 "use a blocking filter to avoid second order overlap";
 
-        private static Map<GmosCommonType.Disperser, Double> DISPERSER_LIMITS_MAP =
-                new HashMap<GmosCommonType.Disperser, Double>();
+        private static Map<Disperser, Double> DISPERSER_LIMITS_MAP = new HashMap<>();
 
         static {
             //north dispersers
-            DISPERSER_LIMITS_MAP.put(GmosNorthType.DisperserNorth.R400_G5305, 710.0);
-            DISPERSER_LIMITS_MAP.put(GmosNorthType.DisperserNorth.R831_G5302, 815.0);
-            DISPERSER_LIMITS_MAP.put(GmosNorthType.DisperserNorth.R600_G5304, 775.0);
+            DISPERSER_LIMITS_MAP.put(DisperserNorth.R400_G5305, 710.0);
+            DISPERSER_LIMITS_MAP.put(DisperserNorth.R831_G5302, 815.0);
+            DISPERSER_LIMITS_MAP.put(DisperserNorth.R600_G5304, 775.0);
             //south dispersers
-            DISPERSER_LIMITS_MAP.put(GmosSouthType.DisperserSouth.R400_G5325, 710.0);
-            DISPERSER_LIMITS_MAP.put(GmosSouthType.DisperserSouth.R831_G5322, 815.0);
-            DISPERSER_LIMITS_MAP.put(GmosSouthType.DisperserSouth.R600_G5324, 775.0);
+            DISPERSER_LIMITS_MAP.put(DisperserSouth.R400_G5325, 710.0);
+            DISPERSER_LIMITS_MAP.put(DisperserSouth.R831_G5322, 815.0);
+            DISPERSER_LIMITS_MAP.put(DisperserSouth.R600_G5324, 775.0);
         }
 
         private static DisperserWavelengthChecker _instance = new DisperserWavelengthChecker();
@@ -855,20 +858,18 @@ public final class GmosRule implements IRule {
 
         public boolean check(Config config, ObservationElements elems) {
 
-            GmosCommonType.Filter filter = getFilter(config);
+            final Filter filter = getFilter(config);
             if (!filter.isNone()) return false;
-            GmosCommonType.Disperser disperser = getDisperser(config);
+            final Disperser disperser = getDisperser(config);
             if (disperser == null) return false;
             //the following 2 dispersers generate a warning no matter what wavelength
-            if (disperser == GmosNorthType.DisperserNorth.R150_G5306
-                    || disperser == GmosSouthType.DisperserSouth.R150_G5326)
+            if (disperser == DisperserNorth.R150_G5306 || disperser == DisperserSouth.R150_G5326)
                 return true;
 
-            Double limitWavelength = DISPERSER_LIMITS_MAP.get(disperser);
+            final Double limitWavelength = DISPERSER_LIMITS_MAP.get(disperser);
             if (limitWavelength == null) return false;
 
-            Double centralWavelength =
-                    (Double) SequenceRule.getInstrumentItem(config, InstGmosCommon.DISPERSER_LAMBDA_PROP);
+            final Double centralWavelength = (Double) SequenceRule.getInstrumentItem(config, InstGmosCommon.DISPERSER_LAMBDA_PROP);
 
             return (centralWavelength != null && centralWavelength > limitWavelength);
         }
@@ -1087,14 +1088,14 @@ public final class GmosRule implements IRule {
         // This is a bit poor but it returns null if there is no need to issue
         // a warning. Returns a formatted message otherwise.
         private String getWarningMessage(Config config, ObservationElements elems) {
-            final GmosCommonType.FPUnit fpu = getFPU(config, elems);
+            final FPUnit fpu = getFPU(config, elems);
             final InstGmosCommon inst = (InstGmosCommon) elems.getInstrument();
             int shuffle_distance = inst.getNsDetectorRows();
             if (fpu.isNSslit()) {
-                GmosCommonType.DetectorManufacturer dm = getDetectorManufacturer(config);
+                final DetectorManufacturer dm = getDetectorManufacturer(config);
                 if (dm == null) return null;
                 //int rows = InstGmosCommon.calculateDefaultDetectorRows(dm, 1);
-                int rows = dm.shuffleOffsetPixels();
+                final int rows = dm.shuffleOffsetPixels();
                 if (shuffle_distance != rows) {
                     return String.format(MESSAGE, rows);
                 }
@@ -1103,7 +1104,7 @@ public final class GmosRule implements IRule {
         }
 
         public Problem check(Config config, int step, ObservationElements elems, Object state) {
-            String msg = getWarningMessage(config, elems);
+            final String msg = getWarningMessage(config, elems);
             if (msg != null) {
                 return new Problem(WARNING, PREFIX + "NS_SLIT_SPECTROSCOPY_RULE", msg,
                         SequenceRule.getInstrumentOrSequenceNode(step, elems));
@@ -1124,12 +1125,12 @@ public final class GmosRule implements IRule {
                 private static final String MESSAGE = "The shuffle distance must be a multiple of the CCD Y binning";
 
                 public boolean check(Config config, ObservationElements elems) {
-                    InstGmosCommon inst = (InstGmosCommon) elems.getInstrument();
+                    final InstGmosCommon inst = (InstGmosCommon) elems.getInstrument();
                     if (inst == null) return false;
-                    int shuffle_distance = inst.getNsDetectorRows();
+                    final int shuffle_distance = inst.getNsDetectorRows();
 
-                    GmosCommonType.Binning binningY =
-                            (GmosCommonType.Binning) SequenceRule.getInstrumentItem(config, InstGmosCommon.CCD_Y_BIN_PROP);
+                    final Binning binningY =
+                            (Binning) SequenceRule.getInstrumentItem(config, InstGmosCommon.CCD_Y_BIN_PROP);
                     return binningY != null && (shuffle_distance % binningY.getValue() != 0);
                 }
 
@@ -1166,19 +1167,19 @@ public final class GmosRule implements IRule {
         public Problem check(Config config, int step, ObservationElements elems, Object state) {
             InstGmosCommon inst = (InstGmosCommon) elems.getInstrument();
 
-            GmosCommonType.DetectorManufacturer detectorManufacturer = getDetectorManufacturer(config);
+            final DetectorManufacturer detectorManufacturer = getDetectorManufacturer(config);
 
-            double maxExp;
-            if (detectorManufacturer == GmosCommonType.DetectorManufacturer.E2V) {
+            final double maxExp;
+            if (detectorManufacturer == DetectorManufacturer.E2V) {
                 maxExp = 60.0 * 60;
-            } else if (detectorManufacturer == GmosCommonType.DetectorManufacturer.E2V) {
+            } else if (detectorManufacturer == DetectorManufacturer.E2V) {
                 maxExp = 40.0 * 60;
-            } else if (detectorManufacturer == GmosCommonType.DetectorManufacturer.HAMAMATSU) {
+            } else if (detectorManufacturer == DetectorManufacturer.HAMAMATSU) {
                 maxExp = 20.0 * 60;
             } else {
                 return null;
             }
-            Double expTime = getExposureTime(inst, config);
+            final Double expTime = getExposureTime(inst, config);
             if (expTime != null && expTime > maxExp) {
                 return new Problem(WARNING, PREFIX + "MAX_EXPOSURE_TIME_RULE", msg,
                         SequenceRule.getInstrumentOrSequenceNode(step, elems));
@@ -1240,9 +1241,9 @@ public final class GmosRule implements IRule {
 
         @Override
         public Problem check(Config config, int step, ObservationElements elems, Object state) {
-            SPInstObsComp spInstObsComp = elems.getInstrument();
+            final SPInstObsComp spInstObsComp = elems.getInstrument();
             if (spInstObsComp.getType() == InstGmosNorth.SP_TYPE || spInstObsComp.getType() == InstGmosSouth.SP_TYPE) {
-                Option<Problem> problemOption = MdfConfigRule.checkMaskName(GmosCommonType.FPUnitMode.CUSTOM_MASK, config, step, elems, state);
+                final Option<Problem> problemOption = MdfConfigRule.checkMaskName(FPUnitMode.CUSTOM_MASK, config, step, elems, state);
                 if (problemOption.isDefined() && problemOption.get().getType() == problemType)
                     return problemOption.get();
                 else
@@ -1254,15 +1255,11 @@ public final class GmosRule implements IRule {
     }
 
     private static final class MultiKey {
-        GmosCommonType.DetectorManufacturer dm;
-        GmosCommonType.Filter filter;
-        GmosCommonType.AmpGain gain;
-        SPSiteQuality.SkyBackground sb;
+        final Filter filter;
+        final SkyBackground sb;
 
-        private MultiKey(GmosCommonType.DetectorManufacturer dm, GmosCommonType.Filter filter, GmosCommonType.AmpGain gain, SPSiteQuality.SkyBackground sb) {
-            this.dm = dm;
+        private MultiKey(Filter filter, SkyBackground sb) {
             this.filter = filter;
-            this.gain = gain;
             this.sb = sb;
         }
 
@@ -1271,48 +1268,55 @@ public final class GmosRule implements IRule {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
 
-            MultiKey multiKey = (MultiKey) o;
+            final MultiKey multiKey = (MultiKey) o;
 
-            if (dm != null ? !dm.equals(multiKey.dm) : multiKey.dm != null)
+            if (filter != multiKey.filter)
                 return false;
-            if (filter != null ? !filter.equals(multiKey.filter) : multiKey.filter != null)
-                return false;
-            if (gain != multiKey.gain) return false;
-            if (sb != multiKey.sb) return false;
 
-            return true;
+            return sb == multiKey.sb;
         }
 
         @Override
         public int hashCode() {
-            int result = dm != null ? dm.hashCode() : 0;
-            result = 31 * result + (filter != null ? filter.hashCode() : 0);
-            result = 31 * result + (gain != null ? gain.hashCode() : 0);
+            int result = (filter != null ? filter.hashCode() : 0);
             result = 31 * result + (sb != null ? sb.hashCode() : 0);
             return result;
         }
     }
 
-    private static final Map<MultiKey, Double> EXPOSURE_LIMITS_MAP = new HashMap<MultiKey, Double>();
+    private static final Map<MultiKey, Double> E2V_EXPOSURE_LIMITS = new HashMap<>();
+    private static final Map<MultiKey, Double> HAM_EXPOSURE_LIMITS = new HashMap<>();
 
-    private static Double getLimit(GmosCommonType.DetectorManufacturer dm, GmosCommonType.Filter filter, GmosCommonType.AmpGain gain, SPSiteQuality.SkyBackground sb, GmosCommonType.Binning binning) {
-        MultiKey key = new MultiKey(dm, filter, gain, sb);
-        Double storedLimit = EXPOSURE_LIMITS_MAP.get(key);
+    private static Double getLimit(final DetectorManufacturer dm, final Filter filter, final AmpGain gain, final SkyBackground sb, final Binning binning) {
+        // Currently we only apply these rules for AmpGain.LOW. Note that the amp gain was originally part of
+        // the MultiKey but as long as only one value is relevant it seems overkill to have it there.
+        if (gain != AmpGain.LOW) return Double.MAX_VALUE;
+
+        // check if we have a max value defined
+        final MultiKey key = new MultiKey(filter, sb);
+        final Double storedLimit = getLimits(dm).get(key);
         if (storedLimit == null) return Double.MAX_VALUE;
+
+        // if so return it, taking binning into account
         switch (binning) {
-            case ONE:
-                return EXPOSURE_LIMITS_MAP.get(key);
-            case TWO:
-                return EXPOSURE_LIMITS_MAP.get(key) / 4.0;
-            case FOUR:
-                return EXPOSURE_LIMITS_MAP.get(key) / 16.0;
-            default:
-                throw new IllegalArgumentException("This should never happen, put here just so the compiler doesn't complain about a missing return statement");
+            case ONE:       return storedLimit;
+            case TWO:       return storedLimit / 4.0;
+            case FOUR:      return storedLimit / 16.0;
+            default:        throw new Error();
+        }
+    }
+
+    private static Map<MultiKey, Double> getLimits(final DetectorManufacturer dm) {
+        switch (dm) {
+            case E2V:       return E2V_EXPOSURE_LIMITS;
+            case HAMAMATSU: return HAM_EXPOSURE_LIMITS;
+            default:        throw new Error();
         }
     }
 
     static {
 
+        // ==================
         //HAMAMATSU GMOS-N
 
 // GMOS-N g-band (Hamamatsu Blue CCD) 1x1 binning (unbinned)
@@ -1320,115 +1324,172 @@ public final class GmosRule implements IRule {
 // BG50: 1.83 hours (longer than the maximum exposure time due to cosmic rays)
 // BG80: 32.5 minutes
 // BGAny: 4.5 minutes
-        EXPOSURE_LIMITS_MAP.put(new MultiKey(GmosCommonType.DetectorManufacturer.HAMAMATSU, GmosNorthType.FilterNorth.g_G0301, GmosCommonType.AmpGain.LOW, SPSiteQuality.SkyBackground.PERCENT_20), 4.35 * 60 * 60);
-        EXPOSURE_LIMITS_MAP.put(new MultiKey(GmosCommonType.DetectorManufacturer.HAMAMATSU, GmosNorthType.FilterNorth.g_G0301, GmosCommonType.AmpGain.LOW, SPSiteQuality.SkyBackground.PERCENT_50), 1.83 * 60 * 60);
-        EXPOSURE_LIMITS_MAP.put(new MultiKey(GmosCommonType.DetectorManufacturer.HAMAMATSU, GmosNorthType.FilterNorth.g_G0301, GmosCommonType.AmpGain.LOW, SPSiteQuality.SkyBackground.PERCENT_80), 32.5 * 60);
-        EXPOSURE_LIMITS_MAP.put(new MultiKey(GmosCommonType.DetectorManufacturer.HAMAMATSU, GmosNorthType.FilterNorth.g_G0301, GmosCommonType.AmpGain.LOW, SPSiteQuality.SkyBackground.ANY), 4.5 * 60);
+        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.g_G0301, SkyBackground.PERCENT_20), 4.35 * 60 * 60);
+        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.g_G0301, SkyBackground.PERCENT_50), 1.83 * 60 * 60);
+        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.g_G0301, SkyBackground.PERCENT_80), 32.5 * 60);
+        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.g_G0301, SkyBackground.ANY), 4.5 * 60);
 // GMOS-N r-band (Hamamatsu Red CCD) 1x1 binning (unbinned)
 // BG20: 1.83 hours (longer than the maximum exposure time due to cosmic rays)
 // BG50: 1.02 hours (longer than the maximum exposure time due to cosmic rays)
 // BG80: 25 minutes
 // BGAny: 4.3 minutes
-        EXPOSURE_LIMITS_MAP.put(new MultiKey(GmosCommonType.DetectorManufacturer.HAMAMATSU, GmosNorthType.FilterNorth.r_G0303, GmosCommonType.AmpGain.LOW, SPSiteQuality.SkyBackground.PERCENT_20), 1.83 * 60 * 60);
-        EXPOSURE_LIMITS_MAP.put(new MultiKey(GmosCommonType.DetectorManufacturer.HAMAMATSU, GmosNorthType.FilterNorth.r_G0303, GmosCommonType.AmpGain.LOW, SPSiteQuality.SkyBackground.PERCENT_50), 1.02 * 60 * 60);
-        EXPOSURE_LIMITS_MAP.put(new MultiKey(GmosCommonType.DetectorManufacturer.HAMAMATSU, GmosNorthType.FilterNorth.r_G0303, GmosCommonType.AmpGain.LOW, SPSiteQuality.SkyBackground.PERCENT_80), 25.0 * 60);
-        EXPOSURE_LIMITS_MAP.put(new MultiKey(GmosCommonType.DetectorManufacturer.HAMAMATSU, GmosNorthType.FilterNorth.r_G0303, GmosCommonType.AmpGain.LOW, SPSiteQuality.SkyBackground.ANY), 4.3 * 60);
+        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.r_G0303, SkyBackground.PERCENT_20), 1.83 * 60 * 60);
+        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.r_G0303, SkyBackground.PERCENT_50), 1.02 * 60 * 60);
+        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.r_G0303, SkyBackground.PERCENT_80), 25.0 * 60);
+        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.r_G0303, SkyBackground.ANY), 4.3 * 60);
 // GMOS-N i-band (Hamamatsu Red CCD) 1x1 binning (unbinned)
 // BG20: 1.05 hours (longer than the maximum exposure time due to cosmic rays)
 // BG50: 41 minutes (may end up being longer than the maximum exposure time due to cosmic rays)
 // BG80: 22.3 minutes
 // BGAny: 5.5 minutes
-        EXPOSURE_LIMITS_MAP.put(new MultiKey(GmosCommonType.DetectorManufacturer.HAMAMATSU, GmosNorthType.FilterNorth.i_G0302, GmosCommonType.AmpGain.LOW, SPSiteQuality.SkyBackground.PERCENT_20), 1.05 * 60 * 60);
-        EXPOSURE_LIMITS_MAP.put(new MultiKey(GmosCommonType.DetectorManufacturer.HAMAMATSU, GmosNorthType.FilterNorth.i_G0302, GmosCommonType.AmpGain.LOW, SPSiteQuality.SkyBackground.PERCENT_50), 41.0 * 60);
-        EXPOSURE_LIMITS_MAP.put(new MultiKey(GmosCommonType.DetectorManufacturer.HAMAMATSU, GmosNorthType.FilterNorth.i_G0302, GmosCommonType.AmpGain.LOW, SPSiteQuality.SkyBackground.PERCENT_80), 22.3 * 60);
-        EXPOSURE_LIMITS_MAP.put(new MultiKey(GmosCommonType.DetectorManufacturer.HAMAMATSU, GmosNorthType.FilterNorth.i_G0302, GmosCommonType.AmpGain.LOW, SPSiteQuality.SkyBackground.ANY), 5.5 * 60);
+        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.i_G0302, SkyBackground.PERCENT_20), 1.05 * 60 * 60);
+        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.i_G0302, SkyBackground.PERCENT_50), 41.0 * 60);
+        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.i_G0302, SkyBackground.PERCENT_80), 22.3 * 60);
+        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.i_G0302, SkyBackground.ANY), 5.5 * 60);
 // GMOS-N z-band (Hamamatsu Red CCD) 1x1 binning (unbinned)
 // BG20: 12.3 minutes
 // BG50: 12 minutes
 // BG80: 11.5 minutes
 // BGAny: 8.7 minutes
-        EXPOSURE_LIMITS_MAP.put(new MultiKey(GmosCommonType.DetectorManufacturer.HAMAMATSU, GmosNorthType.FilterNorth.z_G0304, GmosCommonType.AmpGain.LOW, SPSiteQuality.SkyBackground.PERCENT_20), 12.3 * 60);
-        EXPOSURE_LIMITS_MAP.put(new MultiKey(GmosCommonType.DetectorManufacturer.HAMAMATSU, GmosNorthType.FilterNorth.z_G0304, GmosCommonType.AmpGain.LOW, SPSiteQuality.SkyBackground.PERCENT_50), 12.0 * 60);
-        EXPOSURE_LIMITS_MAP.put(new MultiKey(GmosCommonType.DetectorManufacturer.HAMAMATSU, GmosNorthType.FilterNorth.z_G0304, GmosCommonType.AmpGain.LOW, SPSiteQuality.SkyBackground.PERCENT_80), 11.5 * 60);
-        EXPOSURE_LIMITS_MAP.put(new MultiKey(GmosCommonType.DetectorManufacturer.HAMAMATSU, GmosNorthType.FilterNorth.z_G0304, GmosCommonType.AmpGain.LOW, SPSiteQuality.SkyBackground.ANY), 8.7 * 60);
+        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.z_G0304, SkyBackground.PERCENT_20), 12.3 * 60);
+        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.z_G0304, SkyBackground.PERCENT_50), 12.0 * 60);
+        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.z_G0304, SkyBackground.PERCENT_80), 11.5 * 60);
+        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.z_G0304, SkyBackground.ANY), 8.7 * 60);
 // GMOS-N Z-band (Hamamatsu Red CCD) 1x1 binning (unbinned)
 // BG20: 35 minutes (may end up being longer than the maximum exposure time due to cosmic rays)
 // BG50: 31.1 minutes (may end up being longer than the maximum exposure time due to cosmic rays)
 // BG80: 25.8 minutes
 // BGAny: 13.3 minutes
-        EXPOSURE_LIMITS_MAP.put(new MultiKey(GmosCommonType.DetectorManufacturer.HAMAMATSU, GmosNorthType.FilterNorth.Z_G0322, GmosCommonType.AmpGain.LOW, SPSiteQuality.SkyBackground.PERCENT_20), 35.0 * 60);
-        EXPOSURE_LIMITS_MAP.put(new MultiKey(GmosCommonType.DetectorManufacturer.HAMAMATSU, GmosNorthType.FilterNorth.Z_G0322, GmosCommonType.AmpGain.LOW, SPSiteQuality.SkyBackground.PERCENT_50), 31.1 * 60);
-        EXPOSURE_LIMITS_MAP.put(new MultiKey(GmosCommonType.DetectorManufacturer.HAMAMATSU, GmosNorthType.FilterNorth.Z_G0322, GmosCommonType.AmpGain.LOW, SPSiteQuality.SkyBackground.PERCENT_80), 25.8 * 60);
-        EXPOSURE_LIMITS_MAP.put(new MultiKey(GmosCommonType.DetectorManufacturer.HAMAMATSU, GmosNorthType.FilterNorth.Z_G0322, GmosCommonType.AmpGain.LOW, SPSiteQuality.SkyBackground.ANY), 13.3 * 60);
+        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.Z_G0322, SkyBackground.PERCENT_20), 35.0 * 60);
+        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.Z_G0322, SkyBackground.PERCENT_50), 31.1 * 60);
+        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.Z_G0322, SkyBackground.PERCENT_80), 25.8 * 60);
+        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.Z_G0322, SkyBackground.ANY), 13.3 * 60);
 // GMOS-N Y-band (Hamamatsu Red CCD) 1x1 binning (unbinned)
 // BG20: 52.6 minutes (may end up being longer than the maximum exposure time due to cosmic rays)
 // BG50: 52.7 minutes (clearly there is something not quite right with the ITC...)
 // BG80: 52.8 minutes (clearly there is something not quite right with the ITC...)
 // BGAny: 52.8 minutes (I suggest we call all of these 53 minutes, we already know there is an approximation with the ITC because it has no dependence of background counts on sky background in the nearIR)
-        EXPOSURE_LIMITS_MAP.put(new MultiKey(GmosCommonType.DetectorManufacturer.HAMAMATSU, GmosNorthType.FilterNorth.Y_G0323, GmosCommonType.AmpGain.LOW, SPSiteQuality.SkyBackground.PERCENT_20), 52.6 * 60);
-        EXPOSURE_LIMITS_MAP.put(new MultiKey(GmosCommonType.DetectorManufacturer.HAMAMATSU, GmosNorthType.FilterNorth.Y_G0323, GmosCommonType.AmpGain.LOW, SPSiteQuality.SkyBackground.PERCENT_50), 52.7 * 60);
-        EXPOSURE_LIMITS_MAP.put(new MultiKey(GmosCommonType.DetectorManufacturer.HAMAMATSU, GmosNorthType.FilterNorth.Y_G0323, GmosCommonType.AmpGain.LOW, SPSiteQuality.SkyBackground.PERCENT_80), 52.8 * 60);
-        EXPOSURE_LIMITS_MAP.put(new MultiKey(GmosCommonType.DetectorManufacturer.HAMAMATSU, GmosNorthType.FilterNorth.Y_G0323, GmosCommonType.AmpGain.LOW, SPSiteQuality.SkyBackground.ANY), 52.8 * 60);
+        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.Y_G0323, SkyBackground.PERCENT_20), 52.6 * 60);
+        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.Y_G0323, SkyBackground.PERCENT_50), 52.7 * 60);
+        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.Y_G0323, SkyBackground.PERCENT_80), 52.8 * 60);
+        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.Y_G0323, SkyBackground.ANY), 52.8 * 60);
 
+        //HAMAMATSU GMOS-S
 
+// GMOS-S g-band (Hamamatsu Blue CCD) 1x1 binning (unbinned)
+// BG20: 4.35 hours (longer than the maximum exposure time due to cosmic rays)
+// BG50: 1.83 hours (longer than the maximum exposure time due to cosmic rays)
+// BG80: 32.5 minutes
+// BGAny: 4.5 minutes
+        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterSouth.g_G0325, SkyBackground.PERCENT_20), 4.35 * 60 * 60);
+        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterSouth.g_G0325, SkyBackground.PERCENT_50), 1.83 * 60 * 60);
+        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterSouth.g_G0325, SkyBackground.PERCENT_80), 32.5 * 60);
+        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterSouth.g_G0325, SkyBackground.ANY), 4.5 * 60);
+// GMOS-S r-band (Hamamatsu Red CCD) 1x1 binning (unbinned)
+// BG20: 1.83 hours (longer than the maximum exposure time due to cosmic rays)
+// BG50: 1.02 hours (longer than the maximum exposure time due to cosmic rays)
+// BG80: 25 minutes
+// BGAny: 4.3 minutes
+        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterSouth.r_G0326, SkyBackground.PERCENT_20), 1.83 * 60 * 60);
+        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterSouth.r_G0326, SkyBackground.PERCENT_50), 1.02 * 60 * 60);
+        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterSouth.r_G0326, SkyBackground.PERCENT_80), 25.0 * 60);
+        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterSouth.r_G0326, SkyBackground.ANY), 4.3 * 60);
+// GMOS-S i-band (Hamamatsu Red CCD) 1x1 binning (unbinned)
+// BG20: 1.05 hours (longer than the maximum exposure time due to cosmic rays)
+// BG50: 41 minutes (may end up being longer than the maximum exposure time due to cosmic rays)
+// BG80: 22.3 minutes
+// BGAny: 5.5 minutes
+        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterSouth.i_G0327, SkyBackground.PERCENT_20), 1.05 * 60 * 60);
+        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterSouth.i_G0327, SkyBackground.PERCENT_50), 41.0 * 60);
+        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterSouth.i_G0327, SkyBackground.PERCENT_80), 22.3 * 60);
+        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterSouth.i_G0327, SkyBackground.ANY), 5.5 * 60);
+// GMOS-S z-band (Hamamatsu Red CCD) 1x1 binning (unbinned)
+// BG20: 12.3 minutes
+// BG50: 12 minutes
+// BG80: 11.5 minutes
+// BGAny: 8.7 minutes
+        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterSouth.z_G0328, SkyBackground.PERCENT_20), 12.3 * 60);
+        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterSouth.z_G0328, SkyBackground.PERCENT_50), 12.0 * 60);
+        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterSouth.z_G0328, SkyBackground.PERCENT_80), 11.5 * 60);
+        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterSouth.z_G0328, SkyBackground.ANY), 8.7 * 60);
+// GMOS-S Z-band (Hamamatsu Red CCD) 1x1 binning (unbinned)
+// BG20: 35 minutes (may end up being longer than the maximum exposure time due to cosmic rays)
+// BG50: 31.1 minutes (may end up being longer than the maximum exposure time due to cosmic rays)
+// BG80: 25.8 minutes
+// BGAny: 13.3 minutes
+        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterSouth.Z_G0343, SkyBackground.PERCENT_20), 35.0 * 60);
+        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterSouth.Z_G0343, SkyBackground.PERCENT_50), 31.1 * 60);
+        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterSouth.Z_G0343, SkyBackground.PERCENT_80), 25.8 * 60);
+        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterSouth.Z_G0343, SkyBackground.ANY), 13.3 * 60);
+// GMOS-S Y-band (Hamamatsu Red CCD) 1x1 binning (unbinned)
+// BG20: 52.6 minutes (may end up being longer than the maximum exposure time due to cosmic rays)
+// BG50: 52.7 minutes (clearly there is something not quite right with the ITC...)
+// BG80: 52.8 minutes (clearly there is something not quite right with the ITC...)
+// BGAny: 52.8 minutes (I suggest we call all of these 53 minutes, we already know there is an approximation with the ITC because it has no dependence of background counts on sky background in the nearIR)
+        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterSouth.Y_G0344, SkyBackground.PERCENT_20), 52.6 * 60);
+        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterSouth.Y_G0344, SkyBackground.PERCENT_50), 52.7 * 60);
+        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterSouth.Y_G0344, SkyBackground.PERCENT_80), 52.8 * 60);
+        HAM_EXPOSURE_LIMITS.put(new MultiKey(FilterSouth.Y_G0344, SkyBackground.ANY), 52.8 * 60);
+
+        // ==================
         //E2V GMOS-N
 
-        EXPOSURE_LIMITS_MAP.put(new MultiKey(GmosCommonType.DetectorManufacturer.E2V, GmosNorthType.FilterNorth.g_G0301, GmosCommonType.AmpGain.LOW, SPSiteQuality.SkyBackground.PERCENT_20), 4.35 * 60 * 60);
-        EXPOSURE_LIMITS_MAP.put(new MultiKey(GmosCommonType.DetectorManufacturer.E2V, GmosNorthType.FilterNorth.g_G0301, GmosCommonType.AmpGain.LOW, SPSiteQuality.SkyBackground.PERCENT_50), 1.83 * 60 * 60);
-        EXPOSURE_LIMITS_MAP.put(new MultiKey(GmosCommonType.DetectorManufacturer.E2V, GmosNorthType.FilterNorth.g_G0301, GmosCommonType.AmpGain.LOW, SPSiteQuality.SkyBackground.PERCENT_80), 32.5 * 60);
-        EXPOSURE_LIMITS_MAP.put(new MultiKey(GmosCommonType.DetectorManufacturer.E2V, GmosNorthType.FilterNorth.g_G0301, GmosCommonType.AmpGain.LOW, SPSiteQuality.SkyBackground.ANY), 4.5 * 60);
+        E2V_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.g_G0301, SkyBackground.PERCENT_20), 4.35 * 60 * 60);
+        E2V_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.g_G0301, SkyBackground.PERCENT_50), 1.83 * 60 * 60);
+        E2V_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.g_G0301, SkyBackground.PERCENT_80), 32.5 * 60);
+        E2V_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.g_G0301, SkyBackground.ANY), 4.5 * 60);
 
-        EXPOSURE_LIMITS_MAP.put(new MultiKey(GmosCommonType.DetectorManufacturer.E2V, GmosNorthType.FilterNorth.r_G0303, GmosCommonType.AmpGain.LOW, SPSiteQuality.SkyBackground.PERCENT_20), 1.83 * 60 * 60);
-        EXPOSURE_LIMITS_MAP.put(new MultiKey(GmosCommonType.DetectorManufacturer.E2V, GmosNorthType.FilterNorth.r_G0303, GmosCommonType.AmpGain.LOW, SPSiteQuality.SkyBackground.PERCENT_50), 1.02 * 60 * 60);
-        EXPOSURE_LIMITS_MAP.put(new MultiKey(GmosCommonType.DetectorManufacturer.E2V, GmosNorthType.FilterNorth.r_G0303, GmosCommonType.AmpGain.LOW, SPSiteQuality.SkyBackground.PERCENT_80), 25.0 * 60);
-        EXPOSURE_LIMITS_MAP.put(new MultiKey(GmosCommonType.DetectorManufacturer.E2V, GmosNorthType.FilterNorth.r_G0303, GmosCommonType.AmpGain.LOW, SPSiteQuality.SkyBackground.ANY), 4.3 * 60);
+        E2V_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.r_G0303, SkyBackground.PERCENT_20), 1.83 * 60 * 60);
+        E2V_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.r_G0303, SkyBackground.PERCENT_50), 1.02 * 60 * 60);
+        E2V_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.r_G0303, SkyBackground.PERCENT_80), 25.0 * 60);
+        E2V_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.r_G0303, SkyBackground.ANY), 4.3 * 60);
 
-        EXPOSURE_LIMITS_MAP.put(new MultiKey(GmosCommonType.DetectorManufacturer.E2V, GmosNorthType.FilterNorth.i_G0302, GmosCommonType.AmpGain.LOW, SPSiteQuality.SkyBackground.PERCENT_20), 1.05 * 60 * 60);
-        EXPOSURE_LIMITS_MAP.put(new MultiKey(GmosCommonType.DetectorManufacturer.E2V, GmosNorthType.FilterNorth.i_G0302, GmosCommonType.AmpGain.LOW, SPSiteQuality.SkyBackground.PERCENT_50), 41.0 * 60);
-        EXPOSURE_LIMITS_MAP.put(new MultiKey(GmosCommonType.DetectorManufacturer.E2V, GmosNorthType.FilterNorth.i_G0302, GmosCommonType.AmpGain.LOW, SPSiteQuality.SkyBackground.PERCENT_80), 22.3 * 60);
-        EXPOSURE_LIMITS_MAP.put(new MultiKey(GmosCommonType.DetectorManufacturer.E2V, GmosNorthType.FilterNorth.i_G0302, GmosCommonType.AmpGain.LOW, SPSiteQuality.SkyBackground.ANY), 5.5 * 60);
+        E2V_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.i_G0302, SkyBackground.PERCENT_20), 1.05 * 60 * 60);
+        E2V_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.i_G0302, SkyBackground.PERCENT_50), 41.0 * 60);
+        E2V_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.i_G0302, SkyBackground.PERCENT_80), 22.3 * 60);
+        E2V_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.i_G0302, SkyBackground.ANY), 5.5 * 60);
 
-        EXPOSURE_LIMITS_MAP.put(new MultiKey(GmosCommonType.DetectorManufacturer.E2V, GmosNorthType.FilterNorth.z_G0304, GmosCommonType.AmpGain.LOW, SPSiteQuality.SkyBackground.PERCENT_20), 12.3 * 60);
-        EXPOSURE_LIMITS_MAP.put(new MultiKey(GmosCommonType.DetectorManufacturer.E2V, GmosNorthType.FilterNorth.z_G0304, GmosCommonType.AmpGain.LOW, SPSiteQuality.SkyBackground.PERCENT_50), 12.0 * 60);
-        EXPOSURE_LIMITS_MAP.put(new MultiKey(GmosCommonType.DetectorManufacturer.E2V, GmosNorthType.FilterNorth.z_G0304, GmosCommonType.AmpGain.LOW, SPSiteQuality.SkyBackground.PERCENT_80), 11.5 * 60);
-        EXPOSURE_LIMITS_MAP.put(new MultiKey(GmosCommonType.DetectorManufacturer.E2V, GmosNorthType.FilterNorth.z_G0304, GmosCommonType.AmpGain.LOW, SPSiteQuality.SkyBackground.ANY), 8.7 * 60);
+        E2V_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.z_G0304, SkyBackground.PERCENT_20), 12.3 * 60);
+        E2V_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.z_G0304, SkyBackground.PERCENT_50), 12.0 * 60);
+        E2V_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.z_G0304, SkyBackground.PERCENT_80), 11.5 * 60);
+        E2V_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.z_G0304, SkyBackground.ANY), 8.7 * 60);
 
-        EXPOSURE_LIMITS_MAP.put(new MultiKey(GmosCommonType.DetectorManufacturer.E2V, GmosNorthType.FilterNorth.Z_G0322, GmosCommonType.AmpGain.LOW, SPSiteQuality.SkyBackground.PERCENT_20), 35.0 * 60);
-        EXPOSURE_LIMITS_MAP.put(new MultiKey(GmosCommonType.DetectorManufacturer.E2V, GmosNorthType.FilterNorth.Z_G0322, GmosCommonType.AmpGain.LOW, SPSiteQuality.SkyBackground.PERCENT_50), 31.1 * 60);
-        EXPOSURE_LIMITS_MAP.put(new MultiKey(GmosCommonType.DetectorManufacturer.E2V, GmosNorthType.FilterNorth.Z_G0322, GmosCommonType.AmpGain.LOW, SPSiteQuality.SkyBackground.PERCENT_80), 25.8 * 60);
-        EXPOSURE_LIMITS_MAP.put(new MultiKey(GmosCommonType.DetectorManufacturer.E2V, GmosNorthType.FilterNorth.Z_G0322, GmosCommonType.AmpGain.LOW, SPSiteQuality.SkyBackground.ANY), 13.3 * 60);
+        E2V_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.Z_G0322, SkyBackground.PERCENT_20), 35.0 * 60);
+        E2V_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.Z_G0322, SkyBackground.PERCENT_50), 31.1 * 60);
+        E2V_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.Z_G0322, SkyBackground.PERCENT_80), 25.8 * 60);
+        E2V_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.Z_G0322, SkyBackground.ANY), 13.3 * 60);
 
-        EXPOSURE_LIMITS_MAP.put(new MultiKey(GmosCommonType.DetectorManufacturer.E2V, GmosNorthType.FilterNorth.Y_G0323, GmosCommonType.AmpGain.LOW, SPSiteQuality.SkyBackground.PERCENT_20), 52.6 * 60);
-        EXPOSURE_LIMITS_MAP.put(new MultiKey(GmosCommonType.DetectorManufacturer.E2V, GmosNorthType.FilterNorth.Y_G0323, GmosCommonType.AmpGain.LOW, SPSiteQuality.SkyBackground.PERCENT_50), 52.7 * 60);
-        EXPOSURE_LIMITS_MAP.put(new MultiKey(GmosCommonType.DetectorManufacturer.E2V, GmosNorthType.FilterNorth.Y_G0323, GmosCommonType.AmpGain.LOW, SPSiteQuality.SkyBackground.PERCENT_80), 52.8 * 60);
-        EXPOSURE_LIMITS_MAP.put(new MultiKey(GmosCommonType.DetectorManufacturer.E2V, GmosNorthType.FilterNorth.Y_G0323, GmosCommonType.AmpGain.LOW, SPSiteQuality.SkyBackground.ANY), 52.8 * 60);
+        E2V_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.Y_G0323, SkyBackground.PERCENT_20), 52.6 * 60);
+        E2V_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.Y_G0323, SkyBackground.PERCENT_50), 52.7 * 60);
+        E2V_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.Y_G0323, SkyBackground.PERCENT_80), 52.8 * 60);
+        E2V_EXPOSURE_LIMITS.put(new MultiKey(FilterNorth.Y_G0323, SkyBackground.ANY), 52.8 * 60);
 
         //E2V GMOS-S
 
-        EXPOSURE_LIMITS_MAP.put(new MultiKey(GmosCommonType.DetectorManufacturer.E2V, GmosSouthType.FilterSouth.u_G0332, GmosCommonType.AmpGain.LOW, SPSiteQuality.SkyBackground.PERCENT_20), 48.6 * 60 * 60);
-        EXPOSURE_LIMITS_MAP.put(new MultiKey(GmosCommonType.DetectorManufacturer.E2V, GmosSouthType.FilterSouth.u_G0332, GmosCommonType.AmpGain.LOW, SPSiteQuality.SkyBackground.PERCENT_50), 21.1 * 60 * 60);
-        EXPOSURE_LIMITS_MAP.put(new MultiKey(GmosCommonType.DetectorManufacturer.E2V, GmosSouthType.FilterSouth.u_G0332, GmosCommonType.AmpGain.LOW, SPSiteQuality.SkyBackground.PERCENT_80), 5.78 * 60 * 60);
-        EXPOSURE_LIMITS_MAP.put(new MultiKey(GmosCommonType.DetectorManufacturer.E2V, GmosSouthType.FilterSouth.u_G0332, GmosCommonType.AmpGain.LOW, SPSiteQuality.SkyBackground.ANY), 45.0 * 60);
+        E2V_EXPOSURE_LIMITS.put(new MultiKey(FilterSouth.u_G0332, SkyBackground.PERCENT_20), 48.6 * 60 * 60);
+        E2V_EXPOSURE_LIMITS.put(new MultiKey(FilterSouth.u_G0332, SkyBackground.PERCENT_50), 21.1 * 60 * 60);
+        E2V_EXPOSURE_LIMITS.put(new MultiKey(FilterSouth.u_G0332, SkyBackground.PERCENT_80), 5.78 * 60 * 60);
+        E2V_EXPOSURE_LIMITS.put(new MultiKey(FilterSouth.u_G0332, SkyBackground.ANY), 45.0 * 60);
 
-        EXPOSURE_LIMITS_MAP.put(new MultiKey(GmosCommonType.DetectorManufacturer.E2V, GmosSouthType.FilterSouth.g_G0325, GmosCommonType.AmpGain.LOW, SPSiteQuality.SkyBackground.PERCENT_20), 4.35 * 60 * 60);
-        EXPOSURE_LIMITS_MAP.put(new MultiKey(GmosCommonType.DetectorManufacturer.E2V, GmosSouthType.FilterSouth.g_G0325, GmosCommonType.AmpGain.LOW, SPSiteQuality.SkyBackground.PERCENT_50), 1.83 * 60 * 60);
-        EXPOSURE_LIMITS_MAP.put(new MultiKey(GmosCommonType.DetectorManufacturer.E2V, GmosSouthType.FilterSouth.g_G0325, GmosCommonType.AmpGain.LOW, SPSiteQuality.SkyBackground.PERCENT_80), 32.5 * 60);
-        EXPOSURE_LIMITS_MAP.put(new MultiKey(GmosCommonType.DetectorManufacturer.E2V, GmosSouthType.FilterSouth.g_G0325, GmosCommonType.AmpGain.LOW, SPSiteQuality.SkyBackground.ANY), 4.5 * 60);
+        E2V_EXPOSURE_LIMITS.put(new MultiKey(FilterSouth.g_G0325, SkyBackground.PERCENT_20), 4.35 * 60 * 60);
+        E2V_EXPOSURE_LIMITS.put(new MultiKey(FilterSouth.g_G0325, SkyBackground.PERCENT_50), 1.83 * 60 * 60);
+        E2V_EXPOSURE_LIMITS.put(new MultiKey(FilterSouth.g_G0325, SkyBackground.PERCENT_80), 32.5 * 60);
+        E2V_EXPOSURE_LIMITS.put(new MultiKey(FilterSouth.g_G0325, SkyBackground.ANY), 4.5 * 60);
 
-        EXPOSURE_LIMITS_MAP.put(new MultiKey(GmosCommonType.DetectorManufacturer.E2V, GmosSouthType.FilterSouth.r_G0326, GmosCommonType.AmpGain.LOW, SPSiteQuality.SkyBackground.PERCENT_20), 2.56 * 60 * 60);
-        EXPOSURE_LIMITS_MAP.put(new MultiKey(GmosCommonType.DetectorManufacturer.E2V, GmosSouthType.FilterSouth.r_G0326, GmosCommonType.AmpGain.LOW, SPSiteQuality.SkyBackground.PERCENT_50), 1.43 * 60 * 60);
-        EXPOSURE_LIMITS_MAP.put(new MultiKey(GmosCommonType.DetectorManufacturer.E2V, GmosSouthType.FilterSouth.r_G0326, GmosCommonType.AmpGain.LOW, SPSiteQuality.SkyBackground.PERCENT_80), 34.0 * 60);
-        EXPOSURE_LIMITS_MAP.put(new MultiKey(GmosCommonType.DetectorManufacturer.E2V, GmosSouthType.FilterSouth.r_G0326, GmosCommonType.AmpGain.LOW, SPSiteQuality.SkyBackground.ANY), 5.9 * 60);
+        E2V_EXPOSURE_LIMITS.put(new MultiKey(FilterSouth.r_G0326, SkyBackground.PERCENT_20), 2.56 * 60 * 60);
+        E2V_EXPOSURE_LIMITS.put(new MultiKey(FilterSouth.r_G0326, SkyBackground.PERCENT_50), 1.43 * 60 * 60);
+        E2V_EXPOSURE_LIMITS.put(new MultiKey(FilterSouth.r_G0326, SkyBackground.PERCENT_80), 34.0 * 60);
+        E2V_EXPOSURE_LIMITS.put(new MultiKey(FilterSouth.r_G0326, SkyBackground.ANY), 5.9 * 60);
 
-        EXPOSURE_LIMITS_MAP.put(new MultiKey(GmosCommonType.DetectorManufacturer.E2V, GmosSouthType.FilterSouth.i_G0327, GmosCommonType.AmpGain.LOW, SPSiteQuality.SkyBackground.PERCENT_20), 2.13 * 60 * 60);
-        EXPOSURE_LIMITS_MAP.put(new MultiKey(GmosCommonType.DetectorManufacturer.E2V, GmosSouthType.FilterSouth.i_G0327, GmosCommonType.AmpGain.LOW, SPSiteQuality.SkyBackground.PERCENT_50), 1.37 * 60 * 60);
-        EXPOSURE_LIMITS_MAP.put(new MultiKey(GmosCommonType.DetectorManufacturer.E2V, GmosSouthType.FilterSouth.i_G0327, GmosCommonType.AmpGain.LOW, SPSiteQuality.SkyBackground.PERCENT_80), 43.6 * 60);
-        EXPOSURE_LIMITS_MAP.put(new MultiKey(GmosCommonType.DetectorManufacturer.E2V, GmosSouthType.FilterSouth.i_G0327, GmosCommonType.AmpGain.LOW, SPSiteQuality.SkyBackground.ANY), 10.4 * 60);
+        E2V_EXPOSURE_LIMITS.put(new MultiKey(FilterSouth.i_G0327, SkyBackground.PERCENT_20), 2.13 * 60 * 60);
+        E2V_EXPOSURE_LIMITS.put(new MultiKey(FilterSouth.i_G0327, SkyBackground.PERCENT_50), 1.37 * 60 * 60);
+        E2V_EXPOSURE_LIMITS.put(new MultiKey(FilterSouth.i_G0327, SkyBackground.PERCENT_80), 43.6 * 60);
+        E2V_EXPOSURE_LIMITS.put(new MultiKey(FilterSouth.i_G0327, SkyBackground.ANY), 10.4 * 60);
 
-        EXPOSURE_LIMITS_MAP.put(new MultiKey(GmosCommonType.DetectorManufacturer.E2V, GmosSouthType.FilterSouth.z_G0328, GmosCommonType.AmpGain.LOW, SPSiteQuality.SkyBackground.PERCENT_20), 1.06 * 60 * 60);
-        EXPOSURE_LIMITS_MAP.put(new MultiKey(GmosCommonType.DetectorManufacturer.E2V, GmosSouthType.FilterSouth.z_G0328, GmosCommonType.AmpGain.LOW, SPSiteQuality.SkyBackground.PERCENT_50), 1.0 * 60 * 60);
-        EXPOSURE_LIMITS_MAP.put(new MultiKey(GmosCommonType.DetectorManufacturer.E2V, GmosSouthType.FilterSouth.z_G0328, GmosCommonType.AmpGain.LOW, SPSiteQuality.SkyBackground.PERCENT_80), 55.0 * 60);
-        EXPOSURE_LIMITS_MAP.put(new MultiKey(GmosCommonType.DetectorManufacturer.E2V, GmosSouthType.FilterSouth.z_G0328, GmosCommonType.AmpGain.LOW, SPSiteQuality.SkyBackground.ANY), 35.8 * 60);
+        E2V_EXPOSURE_LIMITS.put(new MultiKey(FilterSouth.z_G0328, SkyBackground.PERCENT_20), 1.06 * 60 * 60);
+        E2V_EXPOSURE_LIMITS.put(new MultiKey(FilterSouth.z_G0328, SkyBackground.PERCENT_50), 1.0 * 60 * 60);
+        E2V_EXPOSURE_LIMITS.put(new MultiKey(FilterSouth.z_G0328, SkyBackground.PERCENT_80), 55.0 * 60);
+        E2V_EXPOSURE_LIMITS.put(new MultiKey(FilterSouth.z_G0328, SkyBackground.ANY), 35.8 * 60);
 
     }
 
@@ -1439,19 +1500,22 @@ public final class GmosRule implements IRule {
 
         @Override
         public Problem check(Config config, int step, ObservationElements elems, Object state) {
-            InstGmosCommon inst = (InstGmosCommon) elems.getInstrument();
-            GmosCommonType.DetectorManufacturer dm = getDetectorManufacturer(config);
-            GmosCommonType.Filter filter = getFilter(config);
-            GmosCommonType.Binning xBinning = getXBinning(config);//for imaging, binning is 1x1, 2x2 or 4x4
-            for (SPSiteQuality sq : elems.getSiteQuality()) {
-                SPSiteQuality.SkyBackground sb = sq.getSkyBackground();
-                GmosCommonType.AmpGain gain = getGain(config);
+            final InstGmosCommon inst     = (InstGmosCommon) elems.getInstrument();
+            final DetectorManufacturer dm = getDetectorManufacturer(config);
+            final Filter filter           = getFilter(config);
+            final Binning xBinning        = getXBinning(config);//for imaging, binning is 1x1, 2x2 or 4x4
 
-                Double expTime = getExposureTime(inst, config);
-                if (expTime != null && expTime > getLimit(dm, filter, gain, sb, xBinning)) {
+            for (SPSiteQuality sq : elems.getSiteQuality()) {
+
+                final SkyBackground sb  = sq.getSkyBackground();
+                final AmpGain gain      = getGain(config);
+                final Double expTime    = getExposureTime(inst, config);
+                final Double maxExpTime = getLimit(dm, filter, gain, sb, xBinning);
+
+                if (expTime != null && expTime > maxExpTime) {
                     return new Problem(ERROR, PREFIX + "E_FILTER_MAX_EXPOSURE_TIME_RULE", errMsg,
                             SequenceRule.getInstrumentOrSequenceNode(step, elems));
-                } else if (expTime != null && expTime > getLimit(dm, filter, gain, sb, xBinning) / 2.0) {
+                } else if (expTime != null && expTime > maxExpTime / 2.0) {
                     return new Problem(WARNING, PREFIX + "W_FILTER_MAX_EXPOSURE_TIME_RULE", warnMsg,
                             SequenceRule.getInstrumentOrSequenceNode(step, elems));
                 }
@@ -1472,19 +1536,19 @@ public final class GmosRule implements IRule {
     // Works around a bug (?) in InstGmosCommon.getSysConfig where the FPU
     // parameter isn't added unless using a "builtin" FPU option.  Seems like
     // CUSTOM should be set in this case.
-    private static GmosCommonType.FPUnit getFPU(Config config, ObservationElements elems) {
-        final GmosCommonType.FPUnitMode mode = (GmosCommonType.FPUnitMode) SequenceRule.getItem(config, GmosCommonType.FPUnitMode.class, FPU_MODE_KEY);
+    private static FPUnit getFPU(Config config, ObservationElements elems) {
+        final FPUnitMode mode = (FPUnitMode) SequenceRule.getItem(config, FPUnitMode.class, FPU_MODE_KEY);
 
-        final GmosCommonType.FPUnit fpu;
+        final FPUnit fpu;
         switch (mode) {
             case BUILTIN:
-                fpu = (GmosCommonType.FPUnit) SequenceRule.getItem(config, GmosCommonType.FPUnit.class, FPU_KEY);
+                fpu = (FPUnit) SequenceRule.getItem(config, FPUnit.class, FPU_KEY);
                 break;
             case CUSTOM_MASK:
                 // Okay custom mask "FPU" but *which* one. :-/
                 final SPComponentType type = elems.getInstrumentNode().getType();
-                fpu = InstGmosNorth.SP_TYPE.equals(type) ? GmosNorthType.FPUnitNorth.CUSTOM_MASK
-                                                         : GmosSouthType.FPUnitSouth.CUSTOM_MASK;
+                fpu = InstGmosNorth.SP_TYPE.equals(type) ? FPUnitNorth.CUSTOM_MASK
+                                                         : FPUnitSouth.CUSTOM_MASK;
                 break;
             default:
                 final String msg = String.format("New unaccounted for FPUnitMode type: %s", mode.displayValue());
@@ -1494,37 +1558,36 @@ public final class GmosRule implements IRule {
         return fpu;
     }
 
-    private static GmosCommonType.Disperser getDisperser(Config config) {
-        return (GmosCommonType.Disperser) SequenceRule.getItem(config, GmosCommonType.Disperser.class, DISPERSER_KEY);
+    private static Disperser getDisperser(Config config) {
+        return (Disperser) SequenceRule.getItem(config, Disperser.class, DISPERSER_KEY);
     }
 
-    private static GmosCommonType.Filter getFilter(Config config) {
-        return (GmosCommonType.Filter) SequenceRule.getItem(config, GmosCommonType.Filter.class, FILTER_KEY);
+    private static Filter getFilter(Config config) {
+        return (Filter) SequenceRule.getItem(config, Filter.class, FILTER_KEY);
     }
 
-    public static GmosCommonType.DetectorManufacturer getDetectorManufacturer(Config config) {
-        return (GmosCommonType.DetectorManufacturer) SequenceRule.getItem(config, GmosCommonType.DetectorManufacturer.class, DETECTOR_KEY);
+    public static DetectorManufacturer getDetectorManufacturer(Config config) {
+        return (DetectorManufacturer) SequenceRule.getItem(config, DetectorManufacturer.class, DETECTOR_KEY);
     }
 
-    private static GmosCommonType.AmpGain getGain(Config config) {
-        return (GmosCommonType.AmpGain) SequenceRule.getItem(config, GmosCommonType.AmpGain.class, GAIN_KEY);
+    private static AmpGain getGain(Config config) {
+        return (AmpGain) SequenceRule.getItem(config, AmpGain.class, GAIN_KEY);
     }
 
     private static Binning getXBinning(Config config) {
-        return (Binning) SequenceRule.getItem(config, GmosCommonType.Binning.class, CCD_X_BINNING_KEY);
+        return (Binning) SequenceRule.getItem(config, Binning.class, CCD_X_BINNING_KEY);
     }
 
     private static Binning getYBinning(Config config) {
-        return (Binning) SequenceRule.getItem(config, GmosCommonType.Binning.class, CCD_Y_BINNING_KEY);
+        return (Binning) SequenceRule.getItem(config, Binning.class, CCD_Y_BINNING_KEY);
     }
 
-    private static Double getExposureTime(InstGmosCommon inst, Config config) {
-        // REL-196.  If there are no observes, there will be no observe exposure
-        // time.
-        Double obsExp = SequenceRule.getExposureTime(config);
+    private static Double getExposureTime(InstGmosCommon<?,?,?,?> inst, Config config) {
+        // REL-196.  If there are no observes, there will be no observe exposure time.
+        final Double obsExp = SequenceRule.getExposureTime(config);
         if (obsExp == null) return null;
 
-        if (inst.getUseNS() == GmosCommonType.UseNS.TRUE) {
+        if (inst.getUseNS() == UseNS.TRUE) {
             return obsExp * inst.getNsNumCycles() * inst.getPosList().size() + (inst.isUseElectronicOffsetting() ? 11 : 25) * inst.getNsNumCycles();
         } else {
             return obsExp;
@@ -1532,9 +1595,9 @@ public final class GmosRule implements IRule {
     }
 
     private static boolean isSpecFPUnselected(Config config, ObservationElements elems) {
-        final GmosCommonType.FPUnitMode fpuMode = (GmosCommonType.FPUnitMode) SequenceRule.getInstrumentItem(config, InstGmosCommon.FPU_MODE_PROP);
-        if (fpuMode == GmosCommonType.FPUnitMode.CUSTOM_MASK) return true;
-        if (fpuMode != GmosCommonType.FPUnitMode.BUILTIN) return false;
+        final FPUnitMode fpuMode = (FPUnitMode) SequenceRule.getInstrumentItem(config, InstGmosCommon.FPU_MODE_PROP);
+        if (fpuMode == FPUnitMode.CUSTOM_MASK) return true;
+        if (fpuMode != FPUnitMode.BUILTIN) return false;
         return !getFPU(config, elems).isImaging();
     }
 
@@ -1554,12 +1617,12 @@ public final class GmosRule implements IRule {
         @Override
         public Problem check(final Config config, final int step, final ObservationElements elems, final Object state) {
             final InstGmosCommon inst = (InstGmosCommon) elems.getInstrument();
-            GmosCommonType.DetectorManufacturer dm = getDetectorManufacturer(config);
+            DetectorManufacturer dm = getDetectorManufacturer(config);
             if (dm == null) {
                 dm = inst.getDetectorManufacturer();
             }
 
-            GmosCommonType.CustomROIList customROIList = inst.getCustomROIs();
+            final CustomROIList customROIList = inst.getCustomROIs();
             if (customROIList != null && customROIList.size() > dm.getMaxROIs()) {
                 final String prefix, msg;
                 switch (dm) {
@@ -1593,10 +1656,10 @@ public final class GmosRule implements IRule {
 
         @Override
         public Problem check(Config config, int step, ObservationElements elems, Object state) {
-            InstGmosCommon inst = (InstGmosCommon) elems.getInstrument();
-            GmosCommonType.BuiltinROI roi = (GmosCommonType.BuiltinROI) SequenceRule.getInstrumentItem(config, InstGmosCommon.BUILTIN_ROI_PROP);
+            final InstGmosCommon inst = (InstGmosCommon) elems.getInstrument();
+            BuiltinROI roi = (BuiltinROI) SequenceRule.getInstrumentItem(config, InstGmosCommon.BUILTIN_ROI_PROP);
             if (roi == null) roi = inst.getBuiltinROI();
-            if (roi.equals(GmosCommonType.BuiltinROI.CUSTOM) && inst.getCustomROIs().isEmpty()) {
+            if (roi.equals(BuiltinROI.CUSTOM) && inst.getCustomROIs().isEmpty()) {
                 return new Problem(ERROR, PREFIX + "CUSTOM_ROI_NOT_DECLARED_RULE", errMsg,
                         SequenceRule.getInstrumentOrSequenceNode(step, elems));
             }
@@ -1617,7 +1680,7 @@ public final class GmosRule implements IRule {
         @Override
         public Problem check(final Config config, final int step, final ObservationElements elems, final Object state) {
             final InstGmosCommon inst = (InstGmosCommon) elems.getInstrument();
-            final GmosCommonType.DetectorManufacturer dm = inst.getDetectorManufacturer();
+            final DetectorManufacturer dm = inst.getDetectorManufacturer();
             final boolean overlaps;
             switch (dm) {
                 case E2V:
@@ -1679,13 +1742,13 @@ public final class GmosRule implements IRule {
             }
 
             private boolean isCustomMask(final Config config) {
-                final GmosCommonType.FPUnitMode fpuMode =
-                        (GmosCommonType.FPUnitMode) SequenceRule.getInstrumentItem(config, InstGmosCommon.FPU_MODE_PROP);
-                return fpuMode == GmosCommonType.FPUnitMode.CUSTOM_MASK;
+                final FPUnitMode fpuMode =
+                        (FPUnitMode) SequenceRule.getInstrumentItem(config, InstGmosCommon.FPU_MODE_PROP);
+                return fpuMode == FPUnitMode.CUSTOM_MASK;
             }
 
             private boolean isSlitMask(final Config config, final ObservationElements elems) {
-                final GmosCommonType.FPUnit fpu = getFPU(config, elems);
+                final FPUnit fpu = getFPU(config, elems);
                 return fpu.isSpectroscopic() || fpu.isNSslit();
             }
         }
@@ -1698,10 +1761,10 @@ public final class GmosRule implements IRule {
 
             @Override
             public Problem check(Config config, int step, ObservationElements elems, Object state) {
-                InstGmosCommon inst = (InstGmosCommon) elems.getInstrument();
-                GmosCommonType.BuiltinROI roi = (GmosCommonType.BuiltinROI) SequenceRule.getInstrumentItem(config, InstGmosCommon.BUILTIN_ROI_PROP);
+                final InstGmosCommon inst = (InstGmosCommon) elems.getInstrument();
+                BuiltinROI roi = (BuiltinROI) SequenceRule.getInstrumentItem(config, InstGmosCommon.BUILTIN_ROI_PROP);
                 if (roi == null) roi = inst.getBuiltinROI();
-                if (!roi.equals(GmosCommonType.BuiltinROI.CUSTOM) && !inst.getCustomROIs().isEmpty()) {
+                if (!roi.equals(BuiltinROI.CUSTOM) && !inst.getCustomROIs().isEmpty()) {
                     return new Problem(WARNING, PREFIX + "CUSTOM_ROI_NOT_DECLARED", warnMsg,
                             SequenceRule.getInstrumentOrSequenceNode(step, elems));
                 }
@@ -1771,6 +1834,7 @@ public final class GmosRule implements IRule {
         GMOS_RULES.add(READMODE_SCIENCE_RULE);
         GMOS_RULES.add(GAIN_READMODE_RULE);
         GMOS_RULES.add(BINNING_RULE);
+        GMOS_RULES.add(GMOS_S_DTA_X_RULE);
         GMOS_RULES.add(SPATIAL_DITHER_IMAGING_RULE);
         GMOS_RULES.add(CCD_BIN_AND_IQ_IMAGING_RULE);
         GMOS_RULES.add(CCD_BIN_AND_ALTAIR_IMAGING_RULE);

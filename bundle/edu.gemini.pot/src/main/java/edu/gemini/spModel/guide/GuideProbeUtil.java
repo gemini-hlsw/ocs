@@ -20,7 +20,6 @@ import edu.gemini.spModel.target.SPTarget;
 import edu.gemini.spModel.target.env.GuideProbeTargets;
 
 import java.awt.geom.AffineTransform;
-
 import java.util.*;
 
 /**
@@ -50,7 +49,7 @@ public enum GuideProbeUtil {
      *
      * @param obs the observation whose available guiders are sought
      * @return set of {@link GuideProbe} that are available in the context of
-     *         this observation
+     * this observation
      */
     public Set<GuideProbe> getAvailableGuiders(ISPObservation obs) {
         final List<ISPObsComponent> obsComponents = obs.getObsComponents();
@@ -80,7 +79,7 @@ public enum GuideProbeUtil {
     }
 
     public boolean validate(final SPTarget guideStar, final GuideProbe guideProbe, final ObsContext ctx) {
-        return validate(guideStar.getSkycalcCoordinates(), guideProbe, ctx);
+        return validate(guideStar.getTarget().getSkycalcCoordinates(), guideProbe, ctx);
     }
 
     public boolean validate(final SkyObject guideStar, final GuideProbe guideProbe, final ObsContext ctx) {
@@ -95,7 +94,8 @@ public enum GuideProbeUtil {
         final Coordinates baseCoordinates = ctx.getBaseCoordinates();
 
         return guideProbe.getCorrectedPatrolField(ctx).exists(new PredicateOp<PatrolField>() {
-            @Override public Boolean apply(PatrolField patrolField) {
+            @Override
+            public Boolean apply(PatrolField patrolField) {
                 final BoundaryPosition bp = patrolField.checkBoundaries(coords, baseCoordinates, positionAngle, sciencePositions);
                 return !(bp == BoundaryPosition.outside || bp == BoundaryPosition.outerBoundary);
             }
@@ -117,7 +117,8 @@ public enum GuideProbeUtil {
 
     private boolean inRange(final SPTarget guideStar, final GuideProbe guideProbe, final ObsContext ctx, final Offset offset) {
         return guideProbe.getCorrectedPatrolField(ctx).exists(new PredicateOp<PatrolField>() {
-            @Override public Boolean apply(PatrolField patrolField) {
+            @Override
+            public Boolean apply(PatrolField patrolField) {
                 // offset position -> we must move the corrected patrol field by this offset
                 final double xOffset = -offset.p().toArcsecs().getMagnitude();
                 final double yOffset = -offset.q().toArcsecs().getMagnitude();
@@ -126,7 +127,7 @@ public enum GuideProbeUtil {
                 final PatrolField rotatedPatrolField = offsetPatrolField.getTransformed(AffineTransform.getRotateInstance(-ctx.getPositionAngle().toRadians().getMagnitude()));
                 // find distance of base position to the guide star
                 final Coordinates baseCoordinates = ctx.getBaseCoordinates();
-                final CoordinateDiff diff = new CoordinateDiff(baseCoordinates, guideStar.getSkycalcCoordinates());
+                final CoordinateDiff diff = new CoordinateDiff(baseCoordinates, guideStar.getTarget().getSkycalcCoordinates());
                 final Offset dis = diff.getOffset();
                 final double p = -dis.p().toArcsecs().getMagnitude();
                 final double q = -dis.q().toArcsecs().getMagnitude();

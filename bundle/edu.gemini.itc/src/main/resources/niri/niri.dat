@@ -1,0 +1,18 @@
+#parameters for Niri 
+
+#name
+NIRI
+#Starting wavelength (nm)
+900
+#Ending wavelength (nm)
+6000
+#Sampling
+0.02
+#Background filename
+background.dat
+#Plate Scale
+0.116
+#Read Noise
+47
+#Dark Current per pixel
+.25

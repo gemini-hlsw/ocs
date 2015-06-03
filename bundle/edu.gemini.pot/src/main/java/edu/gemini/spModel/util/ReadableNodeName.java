@@ -5,6 +5,7 @@ import edu.gemini.shared.util.TimeValue;
 import edu.gemini.spModel.core.SPProgramID;
 import edu.gemini.spModel.data.ISPDataObject;
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality;
+import edu.gemini.spModel.obs.SPObservation;
 import edu.gemini.spModel.obscomp.SPNote;
 import edu.gemini.spModel.target.SPTarget;
 import edu.gemini.spModel.target.obsComp.TargetObsComp;
@@ -22,7 +23,7 @@ public final class ReadableNodeName {
 
         private String formatTarget(ISPObsComponent oc) {
             final TargetObsComp toc = (TargetObsComp) oc.getDataObject();
-            return String.format("Target Environment '%s'", toc.getBase().getName());
+            return String.format("Target Environment '%s'", toc.getBase().getTarget().getName());
         }
 
         private String formatInstrument(ISPObsComponent oc) {
@@ -75,6 +76,14 @@ public final class ReadableNodeName {
         }
 
         @Override public void visitObservation(ISPObservation node) {
+            final ISPDataObject o = node.getDataObject();
+            if (o instanceof SPObservation) {
+                final SPObservation spo = (SPObservation) o;
+                if (spo.getLibraryId() != null) {
+                    result = String.format("Observation %d (Library id %s)", node.getObservationNumber(), spo.getLibraryId());
+                    return;
+                }
+            }
             result = String.format("Observation %d", node.getObservationNumber());
         }
 
@@ -107,7 +116,7 @@ public final class ReadableNodeName {
             final SPSiteQuality c = tp.getSiteQuality();
             final TimeValue     v = tp.getTime();
             if ((t != null) && (c != null) && (v != null)) {
-                final String ts = t.getName();
+                final String ts = t.getTarget().getName();
                 final String cs = c.conditions().toString();
                 final String vs = v.toString(2);
                 if (ts != null) {

@@ -3,7 +3,7 @@ package edu.gemini.sp.vcs
 import edu.gemini.sp.vcs.VcsLocking.MergeOp
 import edu.gemini.pot.spdb.IDBDatabaseService
 import edu.gemini.pot.sp.{ISPStaffOnlyFieldProtected, ISPProgram}
-import edu.gemini.sp.vcs.VcsFailure.TryVcs
+import edu.gemini.sp.vcs.OldVcsFailure.TryVcs
 import java.security.Principal
 
 /**

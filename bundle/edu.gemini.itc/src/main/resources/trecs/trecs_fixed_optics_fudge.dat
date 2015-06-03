@@ -1,0 +1,44 @@
+# trecs_opt.dat
+# T-ReCS transmission of reflective optics (no window or filters)
+# Columns are (1) wavelength in nm, (2) transmission.
+# Data are computed assuming 99% reflectivity through 7 surfaces.  
+#
+# Author: Tom Hayward
+# Created: 2001 July 24 
+#
+# Phil Puxley 11 Sept 2001: Original throughput (commented out below) have 
+# been divided by arbitary fudge factor of sqrt(2) :
+# lambda   optB
+
+1000    0.659
+30000   0.659
+
+#original values below
+#1000    0.932
+#2000    0.932
+#3000    0.932
+#4000    0.932
+#5000    0.932
+#6000    0.932
+#7000    0.932
+#8000    0.932
+#9000    0.932
+#10000   0.932
+#11000   0.932
+#12000   0.932
+#13000   0.932
+#14000   0.932
+#15000   0.932
+#16000   0.932
+#17000   0.932
+#18000   0.932
+#19000   0.932
+#20000   0.932
+#21000   0.932
+#22000   0.932
+#23000   0.932
+#24000   0.932
+#25000   0.932
+#26000   0.932
+#27000   0.932
+#28000   0.932

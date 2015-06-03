@@ -1,0 +1,22 @@
+# Author: Inger Jorgensen
+# Created: 15 Feb 2001
+# Changed grating names: Phil Puxley 19-Feb-2001
+# Changed R400 nm/pixel from 0.0852 to 0.0673: BW 26-OCT-2001
+# Changed for REL-477: Upate GMOS ITC with new Hamamatus pixel scales (Note: Should be detector specific)
+#
+# d_lambda is the resolution in nm - constant with wavelength
+# d_lambda and R_at_blaze are for 0.5arcsec slitwidth
+# nm/pixel is dispersion for unbinned pixels
+#
+# Grating  blaze  R_at_blaze  d_lambda  nm/pixel
+#          [nm]               [nm]
+
+# REL-477: FOr the EEV detectors
+B1200_G5301  463    3744        0.1236    0.0232
+R831_G5302   757    4396        0.1722    0.0337
+B600_G5303   461    1688        0.2731    0.0450
+B600_G5307   461    1688        0.2731    0.0450
+R600_G5304   926    3744        0.2473    0.0465
+R400_G5305   764    1918        0.3983    0.0673
+R150_G5306   717     631        1.1363    0.1743
+R150_G5308   717     631        1.1363    0.1743

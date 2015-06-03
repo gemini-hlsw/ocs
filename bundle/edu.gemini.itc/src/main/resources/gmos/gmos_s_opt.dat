@@ -1,0 +1,43 @@
+# GMOS-N transmission of optics, blue coatings
+# Columns are (1) wavelength in nm, (2) transmission.
+# Data are taken from information from Rick Murowinski, Aug 2001
+# Author: Inger Jorgensen
+# Created: 16 Aug 2001
+#
+#  Table gmosopt_new.tab  Thu 01:18:41 16-Aug-2001
+#  Aug 16 2001 Divided the transmission by a sqrt(2) fudge factor to provide a
+#      little margin in the calculations.  Brian Walls 
+#  first are the original un-fudged vals.
+# lambda   optB
+#     350 0.3760
+#     400 0.6670
+#     450 0.7090
+#     500 0.7280
+#     550 0.7480
+#     600 0.7460
+#     650 0.7540
+#     700 0.7720
+#     750 0.7980
+#     800 0.8160
+#     850 0.8340
+#     900 0.8310
+#     950 0.8140
+#    1000 0.8140
+#    1100 0.8140
+
+     350 0.2659
+     400 0.4716
+     450 0.5013
+     500 0.5148
+     550 0.5289
+     600 0.5275
+     650 0.5332
+     700 0.5459
+     750 0.5642
+     800 0.5770
+     850 0.5897
+     900 0.5876
+     950 0.5756
+    1000 0.5756
+    1100 0.5756
+

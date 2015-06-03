@@ -5,7 +5,7 @@ import edu.gemini.spModel.core.{VersionException, SPProgramID}
 import edu.gemini.pot.sp.ISPProgram
 import edu.gemini.pot.sp.version._
 import edu.gemini.sp.vcs._
-import edu.gemini.sp.vcs.VcsFailure._
+import edu.gemini.sp.vcs.OldVcsFailure._
 import scalaz.{-\/, \/-}
 import java.util.logging.Logger
 import edu.gemini.pot.spdb.ProgramSummoner.{IdNotFound, LookupOrFail}
@@ -112,7 +112,7 @@ trait VcsGuiOp {
    */
   def apply(id: SPProgramID, gui: Ui, server: VcsServer): Result
 
-  def explanation: PartialFunction[VcsFailure, String] = { case _ if false => "" }
+  def explanation: PartialFunction[OldVcsFailure, String] = { case _ if false => "" }
 }
 
 
@@ -160,9 +160,9 @@ object VcsSyncOp extends VcsGuiOp {
         // it means the program has received an exec event (or other remote
         // update) since the update succeeded.  If that is the case, just retry
         // until it works or fails for some other reason.
-        case -\/(up: VcsFailure.NeedsUpdate.type) =>
+        case -\/(up: OldVcsFailure.NeedsUpdate.type) =>
           if (count < MaxCommitTry) apply(id, gui, server, count + 1)
-          else Some(-\/(VcsFailure.Unexpected(s"Your version of $id appears to be incompatible.")))
+          else Some(-\/(OldVcsFailure.Unexpected(s"Your version of $id appears to be incompatible.")))
         case otherResult => Some(otherResult)
       }
       case -\/(SummonFailure(IdNotFound(_))) =>
@@ -171,8 +171,8 @@ object VcsSyncOp extends VcsGuiOp {
       case failure => Some(failure)
     }
 
-  override val explanation: PartialFunction[VcsFailure, String] = {
-    case VcsException(ex: VersionException) => ex.getLongMessage // :-\
+  override val explanation: PartialFunction[OldVcsFailure, String] = {
+    case OldVcsException(ex: VersionException) => ex.getLongMessage // :-\
     case HasConflict => "Your program has been updated but you must resolve conflicting edits before storing changes."
   }
 }

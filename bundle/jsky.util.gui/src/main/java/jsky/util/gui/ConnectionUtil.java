@@ -10,6 +10,10 @@ package jsky.util.gui;
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLConnection;
+import edu.gemini.util.ssl.GemSslSocketFactory;
+
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.HttpsURLConnection;
 
 /**
  * A utility class for getting a URL connection in a background thread
@@ -21,7 +25,6 @@ import java.net.URLConnection;
  * @version $Revision: 4414 $
  */
 public class ConnectionUtil {
-
     /**
      * URL to connect to
      */
@@ -58,10 +61,22 @@ public class ConnectionUtil {
     public URLConnection openConnection() throws IOException {
         // run in a separate thread, so the user can monitor progress and cancel it, if needed
         worker = new SwingWorker() {
+            // Create all-trusting host name verifier
+            private HostnameVerifier allHostsValid = (hostname, session) -> true;
 
             public Object construct() {
                 try {
+
                     URLConnection connection = url.openConnection();
+                    // UCAC4 connects to the VoTable proxy on SPDB using https and a self-signed certificate
+                    // In principle this will break connections to other hosts but UCAC4 is the only https on skycat
+                    if ("https".equals(url.getProtocol())) {
+                        HttpsURLConnection httpsConnection = (HttpsURLConnection)connection;
+                        // Support the self signed-certificate
+                        httpsConnection.setSSLSocketFactory(GemSslSocketFactory.get());
+                        // Don't care about name mismatches given the same certificate is used for all SPDB installations
+                        httpsConnection.setHostnameVerifier(allHostsValid);
+                    }
                     connection.getContentLength(); // forces the actual read...
                     return connection;
                 } catch (Exception e) {

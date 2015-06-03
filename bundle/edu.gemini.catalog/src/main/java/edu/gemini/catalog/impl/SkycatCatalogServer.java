@@ -37,8 +37,6 @@ public final class SkycatCatalogServer implements CatalogServer {
         SkycatTable table;
         try {
             table = (SkycatTable) cat.noPopupCatalogQuery(args);
-            // XXX TODO: use version below (allan)
-//            table = (SkycatTable) cat.query(args, false);
         } catch (CatalogException ex) {
             throw new IOException(ex);
         }
@@ -46,12 +44,11 @@ public final class SkycatCatalogServer implements CatalogServer {
         return new CatalogResult(cons, toSkyObjects(table, factory));
     }
 
-
     private static ImList<SkyObject> toSkyObjects(SkycatTable table, SkyObjectFactory factory) {
         CatalogHeader header = getHeader(table);
         int rows = table.getRowCount();
         Vector<Vector<Object>> dataVector = table.getDataVector();
-        final List<SkyObject> res = new ArrayList<SkyObject>();
+        final List<SkyObject> res = new ArrayList<>();
         for (int i=0; i<rows; ++i) {
             CatalogRow row = new DefaultCatalogRow(DefaultImList.create(dataVector.get(i)));
             try {
@@ -65,15 +62,14 @@ public final class SkycatCatalogServer implements CatalogServer {
 
     private static CatalogHeader getHeader(TableQueryResult table) {
         ImList<String> headerList = DefaultImList.create(table.getColumnIdentifiers());
-        ImList<Tuple2<String,Class>> headerPairList = headerList.map(new MapOp<String, Tuple2<String, Class>>() {
+        ImList<Tuple2<String,Class<?>>> headerPairList = headerList.map(new MapOp<String, Tuple2<String, Class<?>>>() {
             @Override
-            public Tuple2<String, Class> apply(String s) {
-                return new Pair<String, Class>(s, String.class);
+            public Tuple2<String, Class<?>> apply(String s) {
+                return new Pair<>(s, String.class);
             }
         });
         return new DefaultCatalogHeader(headerPairList);
     }
-
 
     private QueryArgs mkQueryArgs(QueryConstraint cons) {
         BasicQueryArgs res = new BasicQueryArgs(cat);
@@ -92,7 +88,6 @@ public final class SkycatCatalogServer implements CatalogServer {
         double max = limits.getMaxLimit().toArcmins().getMagnitude();
         return new CoordinateRadius(pos, min, max);
     }
-
 
     private void setMagnitudeQueryArgs(final BasicQueryArgs queryArgs, MagnitudeLimits magLimits) {
         String magColumn = factory.getMagColumn(magLimits.getBand());

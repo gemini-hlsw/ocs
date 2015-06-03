@@ -5,7 +5,7 @@ import org.junit.Assert._
 import edu.gemini.spModel.gemini.obscomp.SPProgram
 import edu.gemini.spModel.obs.ObsQaState
 import edu.gemini.spModel.obscomp.{SPNote, ProgramNote}
-import edu.gemini.sp.vcs.VcsFailure.NeedsUpdate
+import edu.gemini.sp.vcs.OldVcsFailure.NeedsUpdate
 
 class TestStaffOnlyFields {
 
@@ -24,302 +24,302 @@ class TestStaffOnlyFields {
     pc.setDataObjectField[SPProgram](pc.sp.getNodeKey, _.setContactPerson(email))
 
   @Test def testPiCannotUpdateActiveFlag() {
-     withPiTestEnv { env =>
+     piSyncTest { env =>
        import env._
 
        update(user)
 
        // Starts out active
-       assertTrue(isActive(local))
+       assertTrue(isActive(cloned))
 
        // Make it inactive
-       setActive(local, active = false)
-       assertFalse(isActive(local))
+       setActive(cloned, active = false)
+       assertFalse(isActive(cloned))
 
-       local.setTitle("My New Program Title")
+       cloned.setTitle("My New Program Title")
 
        update(user)
 
        // reset to the original value
-       assertTrue(isActive(local))
+       assertTrue(isActive(cloned))
 
        // still has your title though
-       assertEquals("My New Program Title", local.getTitle())
+       assertEquals("My New Program Title", cloned.getTitle())
 
        commit()
 
-       assertEquals("My New Program Title", remote.getTitle())
-       assertTrue(isActive(remote))
+       assertEquals("My New Program Title", central.getTitle())
+       assertTrue(isActive(central))
      }
   }
 
   @Test def testPiCannotCommitActiveFlagUpdate() {
-     withPiTestEnv { env =>
+     piSyncTest { env =>
        import env._
 
        update(user)
 
        // Starts out active
-       assertTrue(isActive(local))
+       assertTrue(isActive(cloned))
 
        // Make it inactive
-       setActive(local, active = false)
-       assertFalse(isActive(local))
+       setActive(cloned, active = false)
+       assertFalse(isActive(cloned))
 
-       local.setTitle("My New Program Title")
+       cloned.setTitle("My New Program Title")
 
        // can't skip the update and just commit this change
        cantCommit(NeedsUpdate)
 
        // reset to the original value so we can commit
-       setActive(local, active = true)
-       assertTrue(isActive(local))
+       setActive(cloned, active = true)
+       assertTrue(isActive(cloned))
 
        // still has your title
-       assertEquals("My New Program Title", local.getTitle())
+       assertEquals("My New Program Title", cloned.getTitle())
 
        // no update, but now it is okay to commit
        commit()
 
-       assertEquals("My New Program Title", remote.getTitle())
-       assertTrue(isActive(remote))
+       assertEquals("My New Program Title", central.getTitle())
+       assertTrue(isActive(central))
      }
   }
 
 
   @Test def testPiCannotUpdateActiveFlagInAConflict() {
-     withPiTestEnv { env =>
+     piSyncTest { env =>
        import env._
 
        update(user)
 
-       setActive(remote, active = false)
+       setActive(central, active = false)
 
-       local.setTitle("My New Program Title")
-       assertTrue(isActive(local))
+       cloned.setTitle("My New Program Title")
+       assertTrue(isActive(cloned))
 
        update(user)
 
-       assertTrue(local.sp.hasConflicts)
+       assertTrue(cloned.sp.hasConflicts)
 
        // By default the remote version is displayed, which will have been
        // set inactive.
-       assertFalse(isActive(local))
+       assertFalse(isActive(cloned))
 
        // Also though the conflict version should be inactive
-       assertFalse(local.sp.getConflicts.dataObjectConflict.getValue.dataObject.asInstanceOf[SPProgram].isActive)
+       assertFalse(cloned.sp.getConflicts.dataObjectConflict.getValue.dataObject.asInstanceOf[SPProgram].isActive)
 
-       local.sp.resolveConflicts()
+       cloned.sp.resolveConflicts()
        commit()
      }
   }
 
   @Test def testStaffCanUpdateActiveFlagInAConflict() {
-     withStaffUserTestEnv("abc@gemini.edu") { env =>
+     staffUserSyncTest("abc@gemini.edu") { env =>
        import env._
 
-       setStaffContact(remote, "abc@gemini.edu")
+       setStaffContact(central, "abc@gemini.edu")
 
        update(user)
 
-       setActive(remote, active = false)
+       setActive(central, active = false)
 
-       local.setTitle("My New Program Title")
-       assertTrue(isActive(local))
+       cloned.setTitle("My New Program Title")
+       assertTrue(isActive(cloned))
 
        update(user)
 
-       assertTrue(local.sp.hasConflicts)
+       assertTrue(cloned.sp.hasConflicts)
 
        // By default the remote version is displayed, which will have been
        // set inactive.
-       assertFalse(isActive(local))
+       assertFalse(isActive(cloned))
 
        // The conflict version now has the original value.
-       assertTrue(local.sp.getConflicts.dataObjectConflict.getValue.dataObject.asInstanceOf[SPProgram].isActive)
+       assertTrue(cloned.sp.getConflicts.dataObjectConflict.getValue.dataObject.asInstanceOf[SPProgram].isActive)
 
-       local.sp.resolveConflicts()
+       cloned.sp.resolveConflicts()
        commit()
      }
   }
 
   @Test def testPiCannotUpdateObsQaState() {
-     withPiTestEnv { env =>
+     piSyncTest { env =>
        import env._
 
-       val key = remote.addObservation().getNodeKey
+       val key = central.addObservation().getNodeKey
 
        update(user)
 
-       local.setObsField(key, _.setOverrideQaState(true))
-       local.setObsField(key, _.setOverriddenObsQaState(ObsQaState.PASS))
-       local.setObsField(key, _.setTitle("okay to change this"))
+       cloned.setObsField(key, _.setOverrideQaState(true))
+       cloned.setObsField(key, _.setOverriddenObsQaState(ObsQaState.PASS))
+       cloned.setObsField(key, _.setTitle("okay to change this"))
 
-       assertEquals(local.getObsField[Boolean](key, _.isOverrideQaState), true)
-       assertEquals(local.getObsField[ObsQaState](key, _.getOverriddenObsQaState), ObsQaState.PASS)
+       assertEquals(cloned.getObsField[Boolean](key, _.isOverrideQaState), true)
+       assertEquals(cloned.getObsField[ObsQaState](key, _.getOverriddenObsQaState), ObsQaState.PASS)
 
        update(user)
        commit()
 
-       assertEquals(local.getObsField[Boolean](key, _.isOverrideQaState), false)
-       assertEquals(local.getObsField[ObsQaState](key, _.getOverriddenObsQaState), ObsQaState.UNDEFINED)
-       assertEquals(local.getObsField[String](key, _.getTitle), "okay to change this")
+       assertEquals(cloned.getObsField[Boolean](key, _.isOverrideQaState), false)
+       assertEquals(cloned.getObsField[ObsQaState](key, _.getOverriddenObsQaState), ObsQaState.UNDEFINED)
+       assertEquals(cloned.getObsField[String](key, _.getTitle), "okay to change this")
      }
   }
 
   @Test def testPiCannotCommitObsQaState() {
-     withPiTestEnv { env =>
+     piSyncTest { env =>
        import env._
 
-       val key = remote.addObservation().getNodeKey
+       val key = central.addObservation().getNodeKey
 
        update(user)
 
-       local.setObsField(key, _.setOverrideQaState(true))
-       local.setObsField(key, _.setOverriddenObsQaState(ObsQaState.PASS))
-       local.setObsField(key, _.setTitle("okay to change this"))
+       cloned.setObsField(key, _.setOverrideQaState(true))
+       cloned.setObsField(key, _.setOverriddenObsQaState(ObsQaState.PASS))
+       cloned.setObsField(key, _.setTitle("okay to change this"))
 
-       assertEquals(local.getObsField[Boolean](key, _.isOverrideQaState), true)
-       assertEquals(local.getObsField[ObsQaState](key, _.getOverriddenObsQaState), ObsQaState.PASS)
+       assertEquals(cloned.getObsField[Boolean](key, _.isOverrideQaState), true)
+       assertEquals(cloned.getObsField[ObsQaState](key, _.getOverriddenObsQaState), ObsQaState.PASS)
 
        cantCommit(NeedsUpdate)
 
        // go back to what it should be
-       local.setObsField(key, _.setOverrideQaState(false))
-       local.setObsField(key, _.setOverriddenObsQaState(ObsQaState.UNDEFINED))
+       cloned.setObsField(key, _.setOverrideQaState(false))
+       cloned.setObsField(key, _.setOverriddenObsQaState(ObsQaState.UNDEFINED))
 
        // Now we can commit our title change without an update
        commit()
 
-       assertEquals(local.getObsField[Boolean](key, _.isOverrideQaState), false)
-       assertEquals(local.getObsField[ObsQaState](key, _.getOverriddenObsQaState), ObsQaState.UNDEFINED)
-       assertEquals(local.getObsField[String](key, _.getTitle), "okay to change this")
+       assertEquals(cloned.getObsField[Boolean](key, _.isOverrideQaState), false)
+       assertEquals(cloned.getObsField[ObsQaState](key, _.getOverriddenObsQaState), ObsQaState.UNDEFINED)
+       assertEquals(cloned.getObsField[String](key, _.getTitle), "okay to change this")
      }
   }
 
   @Test def testStaffCanUpdateObsQaState() {
-    withStaffUserTestEnv("abc@gemini.edu") { env =>
+    staffUserSyncTest("abc@gemini.edu") { env =>
       import env._
 
-      val key = remote.addObservation().getNodeKey
-      setStaffContact(remote, "abc@gemini.edu")
+      val key = central.addObservation().getNodeKey
+      setStaffContact(central, "abc@gemini.edu")
 
       update(user)
 
-      local.setObsField(key, _.setOverrideQaState(true))
-      local.setObsField(key, _.setOverriddenObsQaState(ObsQaState.PASS))
-      local.setObsField(key, _.setTitle("okay to change this"))
+      cloned.setObsField(key, _.setOverrideQaState(true))
+      cloned.setObsField(key, _.setOverriddenObsQaState(ObsQaState.PASS))
+      cloned.setObsField(key, _.setTitle("okay to change this"))
 
-      assertEquals(local.getObsField[Boolean](key, _.isOverrideQaState), true)
-      assertEquals(local.getObsField[ObsQaState](key, _.getOverriddenObsQaState), ObsQaState.PASS)
+      assertEquals(cloned.getObsField[Boolean](key, _.isOverrideQaState), true)
+      assertEquals(cloned.getObsField[ObsQaState](key, _.getOverriddenObsQaState), ObsQaState.PASS)
 
       update(user)
       commit()
 
       // assertEquals(local.getObsField[Boolean](key, _.isOverrideQaState), true)
       // assertEquals(local.getObsField[ObsQaState](key, _.getOverriddenObsQaState), ObsQaState.PASS)
-      assertEquals(local.getObsField[String](key, _.getTitle), "okay to change this")
+      assertEquals(cloned.getObsField[String](key, _.getTitle), "okay to change this")
     }
   }
 
   @Test def testPiCannotCreateANewObservationWithQaState() {
-     withPiTestEnv { env =>
+     piSyncTest { env =>
        import env._
 
-       val key = local.addObservation().getNodeKey
+       val key = cloned.addObservation().getNodeKey
 
-       local.setObsField(key, _.setOverrideQaState(true))
-       local.setObsField(key, _.setOverriddenObsQaState(ObsQaState.PASS))
-       local.setObsField(key, _.setTitle("okay to change this"))
+       cloned.setObsField(key, _.setOverrideQaState(true))
+       cloned.setObsField(key, _.setOverriddenObsQaState(ObsQaState.PASS))
+       cloned.setObsField(key, _.setTitle("okay to change this"))
 
        update(user)
        commit()
 
-       assertEquals(local.getObsField[Boolean](key, _.isOverrideQaState), false)
-       assertEquals(local.getObsField[ObsQaState](key, _.getOverriddenObsQaState), ObsQaState.UNDEFINED)
-       assertEquals(local.getObsField[String](key, _.getTitle), "okay to change this")
+       assertEquals(cloned.getObsField[Boolean](key, _.isOverrideQaState), false)
+       assertEquals(cloned.getObsField[ObsQaState](key, _.getOverriddenObsQaState), ObsQaState.UNDEFINED)
+       assertEquals(cloned.getObsField[String](key, _.getTitle), "okay to change this")
 
      }
   }
 
   @Test def testPiCannotCommitANewObservationWithQaState() {
-     withPiTestEnv { env =>
+     piSyncTest { env =>
        import env._
 
-       val key = local.addObservation().getNodeKey
+       val key = cloned.addObservation().getNodeKey
 
-       local.setObsField(key, _.setOverrideQaState(true))
-       local.setObsField(key, _.setOverriddenObsQaState(ObsQaState.PASS))
-       local.setObsField(key, _.setTitle("okay to change this"))
+       cloned.setObsField(key, _.setOverrideQaState(true))
+       cloned.setObsField(key, _.setOverriddenObsQaState(ObsQaState.PASS))
+       cloned.setObsField(key, _.setTitle("okay to change this"))
 
        cantCommit(NeedsUpdate)
 
        update(user)
        commit()
 
-       assertEquals(local.getObsField[Boolean](key, _.isOverrideQaState), false)
-       assertEquals(local.getObsField[ObsQaState](key, _.getOverriddenObsQaState), ObsQaState.UNDEFINED)
-       assertEquals(local.getObsField[String](key, _.getTitle), "okay to change this")
+       assertEquals(cloned.getObsField[Boolean](key, _.isOverrideQaState), false)
+       assertEquals(cloned.getObsField[ObsQaState](key, _.getOverriddenObsQaState), ObsQaState.UNDEFINED)
+       assertEquals(cloned.getObsField[String](key, _.getTitle), "okay to change this")
 
      }
   }
 
   @Test def testNeedsSuperUserToChangeEmails() {
-     withStaffUserTestEnv("abc@gemini.edu") { env =>
+     staffUserSyncTest("abc@gemini.edu") { env =>
        import env._
 
-       setStaffContact(remote, "abc@gemini.edu")
+       setStaffContact(central, "abc@gemini.edu")
 
        update(user)
 
-       setStaffContact(local, "xyz@gemini.edu")
+       setStaffContact(cloned, "xyz@gemini.edu")
 
        update(user)
 
-       assertEquals(getStaffContact(local), "abc@gemini.edu")
+       assertEquals(getStaffContact(cloned), "abc@gemini.edu")
 
        commit()
      }
   }
 
   @Test def testSuperUserCanChangeEmails() {
-     withStaffTestEnv { env =>
+     staffSyncTest { env =>
        import env._
 
-       setStaffContact(remote, "abc@gemini.edu")
+       setStaffContact(central, "abc@gemini.edu")
 
        update(user)
 
-       setStaffContact(local, "xyz@gemini.edu")
+       setStaffContact(cloned, "xyz@gemini.edu")
 
        update(user)
 
-       assertEquals(getStaffContact(local), "xyz@gemini.edu")
+       assertEquals(getStaffContact(cloned), "xyz@gemini.edu")
 
        commit()
      }
   }
 
   @Test def testPiCannotUpdatePinkNotes() {
-     withPiTestEnv { env =>
+     piSyncTest { env =>
        import env._
 
-       val note = remote.odb.getFactory.createObsComponent(remote.sp, ProgramNote.SP_TYPE, null)
+       val note = central.odb.getFactory.createObsComponent(central.sp, ProgramNote.SP_TYPE, null)
        val obj  = new ProgramNote()
        obj.setTitle("Secret Title")
        obj.setNote("Secret Text")
        note.setDataObject(obj)
 
-       remote.sp.addObsComponent(note)
+       central.sp.addObsComponent(note)
 
        update(user)
 
-       local.setNoteText("hello?", note.getNodeKey)
+       cloned.setNoteText("hello?", note.getNodeKey)
 
        update(user)
 
        // nope, can't do that
-       assertEquals("Secret Text", local.find(note.getNodeKey).getDataObject.asInstanceOf[SPNote].getNote)
+       assertEquals("Secret Text", cloned.find(note.getNodeKey).getDataObject.asInstanceOf[SPNote].getNote)
 
        commit()
      }

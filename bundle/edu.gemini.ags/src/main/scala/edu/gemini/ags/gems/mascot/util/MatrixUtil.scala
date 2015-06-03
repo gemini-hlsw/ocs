@@ -88,20 +88,20 @@ object MatrixUtil {
 
 
     val m = mat.rows
-    val n = mat.cols;
+    val n = mat.cols
     val ldvt = m min n
-    val S = DenseVector.zeros[Double](ldvt);
-    val U = DenseMatrix.zeros[Double](m, ldvt);
-    val Vt = DenseMatrix.zeros[Double](ldvt, n);
+    val S = DenseVector.zeros[Double](ldvt)
+    val U = DenseMatrix.zeros[Double](m, ldvt)
+    val Vt = DenseMatrix.zeros[Double](ldvt, n)
 //    val iwork = new Array[Int](8 * ldvt);
     val workSize = (3
       * ldvt
       * ldvt
       + math.max(math.max(m, n), 4 * ldvt
       * ldvt + 4 * ldvt)
-      );
-    val work = new Array[Double](workSize);
-    val info = new intW(0);
+      )
+    val work = new Array[Double](workSize)
+    val info = new intW(0)
     //    LAPACK.getInstance.dgesdd(
     //      "S", m, n,
     //      mat.copy.data, math.max(1,m),
@@ -115,14 +115,14 @@ object MatrixUtil {
       mat.copy.data, math.max(1, m),
       S.data, U.data, math.max(1, m),
       Vt.data, ldvt,
-      work, work.length, info);
+      work, work.length, info)
 
     if (info.`val` > 0)
       throw new NotConvergedException(NotConvergedException.Iterations)
     else if (info.`val` < 0)
       throw new IllegalArgumentException()
 
-    (U, S, Vt);
+    (U, S, Vt)
   }
 
 
@@ -188,13 +188,13 @@ object MatrixUtil {
     //
     //  return b;
 
-    val n = pb.size;
+    val n = pb.size
     val b = pb :- 0.0 // copy of RHS to be transformed into solution
     val c = pc :- 0.0 // in/out parameters!
     val d = pd :- 0.0
     val e = pe :- 0.0
-    val nrhs = 1;
-    val info = new intW(0);
+    val nrhs = 1
+    val info = new intW(0)
     // Cast to DenseVector so we can access the internal data to pass to the java LAPACK routine
     val bb = b.asInstanceOf[DenseVector[Double]]
     val cc = c.asInstanceOf[DenseVector[Double]]
@@ -204,79 +204,6 @@ object MatrixUtil {
     if (info.`val` != 0) {
       throw new IllegalArgumentException("tridiagonal element became 0.0")
     }
-    b;
+    b
   }
-
-  /*
-   * Returns a Scalala formatted string for the array
-   */
-  def sFormat(a: Array[Array[DenseMatrix[Double]]]): String = {
-    val sb = new StringBuilder;
-    sb.append("Array(\n")
-    for (i <- 0 until a.size) {
-      sb.append(sFormat(a(i)))
-       if (i != a.size - 1) {
-         sb.append(",\n")
-       }
-    }
-    sb.append(")\n")
-    sb.toString;
-  }
-
-  /*
-   * Returns a Scalala formatted string for the array
-   */
-  def sFormat(a: Array[DenseMatrix[Double]]): String = {
-    val sb = new StringBuilder;
-    sb.append("Array(\n")
-    for (i <- 0 until a.size) {
-      sb.append(sFormat(a(i)))
-       if (i != a.size - 1) {
-         sb.append(",\n")
-       }
-    }
-    sb.append(")\n")
-    sb.toString;
-  }
-
-  /*
-   * Returns a Scalala formatted matrix string
-   */
-  def sFormat(m: DenseMatrix[Double]): String = {
-    val sb = new StringBuilder;
-    sb.append("Matrix(\n")
-    for (row <- 0 until m.rows) {
-      sb.append("(")
-      for (col <- 0 until m.cols) {
-        sb.append(m(row, col))
-        if (col != m.cols - 1) {
-          sb.append(",")
-        }
-      }
-      sb.append(")")
-      if (row != m.cols - 1) {
-        sb.append(",\n")
-      }
-    }
-    sb.append(")\n")
-    sb.toString;
-  }
-
-  /*
-   * Returns a Scalala formatted vector string
-   */
-  def sFormat(v: DenseVector[Double]): String = {
-    val sb = new StringBuilder;
-    sb.append("Vector(")
-    for (i <- 0 until v.size) {
-      sb.append(v(i))
-      if (i != v.size - 1) {
-        sb.append(",")
-      }
-    }
-    sb.append(")")
-    sb.toString;
-  }
-
-
 }

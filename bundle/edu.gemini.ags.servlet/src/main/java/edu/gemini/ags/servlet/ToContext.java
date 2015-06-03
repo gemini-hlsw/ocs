@@ -176,21 +176,14 @@ public enum ToContext {
 
         SPTarget t;
         switch (tt) {
-            // Here we just need an SPTarget with a contained NonSiderealTarget
-            // instance, which is insanely complex, stupid, and useless.  In
-            // the end, this is just used to determine whether it is a
-            // non-sidereal target or not in order to pick the right guider.
+            // Here we just need an SPTarget with a contained NonSiderealTarget. In the end, this
+            // is just used to determine whether it is a non-sidereal target or not in order to
+            // pick the right guider.
             case nonsidereal:
-                NonSiderealTarget nst = new NonSiderealTarget(HmsDegTarget.SystemType.J2000) {
-                    @Override public String getPosition() { return ""; }
-                    @Override public String getShortSystemName() { return ""; }
-                    @Override public void dump() { }
-                    @Override public TypeBase[] getSystemOptions() {
-                        return new TypeBase[] { HmsDegTarget.SystemType.J2000 };
-                    }
-                };
-                t = new SPTarget(nst);
-                t.setXY(raDeg, decDeg);
+                t = new SPTarget(new ConicTarget());
+                t.getTarget().getRa().setAs(raDeg, CoordinateParam.Units.DEGREES);
+                t.getTarget().getDec().setAs(decDeg, CoordinateParam.Units.DEGREES);
+                t.notifyOfGenericUpdate();
                 break;
             default:
                 t = new SPTarget(raDeg, decDeg);

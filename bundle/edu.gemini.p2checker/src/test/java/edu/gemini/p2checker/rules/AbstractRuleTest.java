@@ -238,7 +238,8 @@ public class AbstractRuleTest {
     protected void addTargetObsCompAOP1() throws SPUnknownIDException, SPTreeStateException, SPNodeNotLocalException {
         TargetObsComp target = new TargetObsComp();
         SPTarget sptarget = new SPTarget();
-        sptarget.setName("name");
+        sptarget.getTarget().setName("name");
+        sptarget.notifyOfGenericUpdate();
         Set<GuideProbe> guideProbes = new HashSet<GuideProbe>();
         guideProbes.add(AltairAowfsGuider.instance);
         guideProbes.add(PwfsGuideProbe.pwfs1);
@@ -277,7 +278,8 @@ public class AbstractRuleTest {
     protected void addTargetObsCompAO() throws SPUnknownIDException, SPTreeStateException, SPNodeNotLocalException {
         TargetObsComp target = new TargetObsComp();
         SPTarget sptarget = new SPTarget();
-        sptarget.setName("name");
+        sptarget.getTarget().setName("name");
+        sptarget.notifyOfGenericUpdate();
         Set<GuideProbe> guideProbes = new HashSet<GuideProbe>();
         guideProbes.add(AltairAowfsGuider.instance);
 
@@ -320,10 +322,18 @@ public class AbstractRuleTest {
 
     }
 
-    protected ISPSeqComponent addGmosIterator() throws Exception {
-        final ISPSeqComponent sq = fact.createSeqComponent(prog, SPComponentType.ITERATOR_GMOS, null);
+    private ISPSeqComponent addGmosIteratorFor(SPComponentType ct) throws Exception {
+        final ISPSeqComponent sq = fact.createSeqComponent(prog, ct, null);
         obs.getSeqComponent().addSeqComponent(sq);
         return sq;
+    }
+
+    protected ISPSeqComponent addGmosIterator() throws Exception {
+        return addGmosIteratorFor(SPComponentType.ITERATOR_GMOS);
+    }
+
+    protected ISPSeqComponent addGmosSouthIterator() throws Exception {
+        return addGmosIteratorFor(SPComponentType.ITERATOR_GMOSSOUTH);
     }
 
     protected ISPSeqComponent addOffsetIterator() throws Exception {

@@ -11,7 +11,6 @@ trait OcsBundle {
     project.in(file("bundle/edu.gemini.ags.servlet")).dependsOn(
       bundle_edu_gemini_shared_skyobject,
       bundle_edu_gemini_pot,
-      bundle_edu_gemini_catalog,
       bundle_edu_gemini_shared_util,
       bundle_edu_gemini_ags
     )
@@ -56,6 +55,32 @@ trait OcsBundle {
       bundle_edu_gemini_horizons_api,
       bundle_edu_gemini_spModel_core,
       bundle_jsky_coords
+    )
+
+  lazy val bundle_edu_gemini_itc_shared = 
+    project.in(file("bundle/edu.gemini.itc.shared")).dependsOn(
+      bundle_edu_gemini_pot,
+      bundle_edu_gemini_shared_util,
+      bundle_edu_gemini_util_osgi,
+      bundle_edu_gemini_util_security,
+      bundle_edu_gemini_util_trpc
+    )
+
+  lazy val bundle_edu_gemini_itc = 
+    project.in(file("bundle/edu.gemini.itc")).dependsOn(
+      bundle_edu_gemini_itc_shared,
+      bundle_edu_gemini_util_osgi,
+      bundle_edu_gemini_shared_util,
+      bundle_edu_gemini_pot
+    )
+
+  lazy val bundle_edu_gemini_itc_web = 
+    project.in(file("bundle/edu.gemini.itc.web")).dependsOn(
+      bundle_edu_gemini_itc % "test->test;compile->compile",
+      bundle_edu_gemini_itc_shared,
+      bundle_edu_gemini_util_osgi,
+      bundle_edu_gemini_shared_util,
+      bundle_edu_gemini_pot
     )
 
   lazy val bundle_edu_gemini_lchquery_servlet = 
@@ -116,7 +141,6 @@ trait OcsBundle {
       bundle_edu_gemini_ags,
       bundle_edu_gemini_shared_skyobject,
       bundle_edu_gemini_pot,
-      bundle_edu_gemini_catalog,
       bundle_edu_gemini_shared_util,
       bundle_edu_gemini_spModel_core,
       bundle_edu_gemini_spModel_pio,
@@ -137,7 +161,6 @@ trait OcsBundle {
       bundle_edu_gemini_shared_skyobject,
       bundle_edu_gemini_phase2_core,
       bundle_edu_gemini_pot,
-      bundle_edu_gemini_catalog,
       bundle_edu_gemini_shared_util,
       bundle_edu_gemini_spModel_core,
       bundle_edu_gemini_spModel_io,
@@ -149,7 +172,7 @@ trait OcsBundle {
     project.in(file("bundle/edu.gemini.pot")).dependsOn(
       bundle_edu_gemini_shared_skyobject,
       bundle_edu_gemini_shared_util,
-      bundle_edu_gemini_spModel_core,
+      bundle_edu_gemini_spModel_core % "test->test;compile->compile",
       bundle_edu_gemini_spModel_pio,
       bundle_edu_gemini_util_osgi,
       bundle_edu_gemini_util_skycalc,
@@ -166,7 +189,6 @@ trait OcsBundle {
       bundle_edu_gemini_shared_skyobject,
       bundle_edu_gemini_pot,
       bundle_edu_gemini_qpt_shared,
-      bundle_edu_gemini_catalog,
       bundle_edu_gemini_shared_util,
       bundle_edu_gemini_spModel_core,
       bundle_edu_gemini_spModel_pio,
@@ -185,7 +207,6 @@ trait OcsBundle {
       bundle_edu_gemini_ags,
       bundle_edu_gemini_shared_skyobject,
       bundle_edu_gemini_pot,
-      bundle_edu_gemini_catalog,
       bundle_edu_gemini_shared_util,
       bundle_edu_gemini_spModel_core,
       bundle_edu_gemini_spModel_pio,
@@ -201,7 +222,6 @@ trait OcsBundle {
       bundle_edu_gemini_pot,
       bundle_edu_gemini_qpt_shared           % "test->test;compile->compile",
       bundle_edu_gemini_services_client,
-      bundle_edu_gemini_catalog,
       bundle_edu_gemini_shared_util,
       bundle_edu_gemini_shared_gui,
       bundle_edu_gemini_sp_vcs,
@@ -243,10 +263,13 @@ trait OcsBundle {
     project.in(file("bundle/edu.gemini.catalog")).dependsOn(
       bundle_edu_gemini_shared_skyobject,
       bundle_edu_gemini_shared_util,
+      bundle_edu_gemini_pot,
       bundle_edu_gemini_util_skycalc,
+      bundle_edu_gemini_spModel_core         % "test->test;compile->compile",
       bundle_jsky_coords,
       bundle_jsky_util,
-      bundle_jsky_util_gui
+      bundle_jsky_util_gui,
+      bundle_edu_gemini_util_osgi
     )
 
   lazy val bundle_edu_gemini_shared_gui = 
@@ -288,10 +311,11 @@ trait OcsBundle {
 
   lazy val bundle_edu_gemini_sp_vcs = 
     project.in(file("bundle/edu.gemini.sp.vcs")).dependsOn(
-      bundle_edu_gemini_pot,
+      bundle_edu_gemini_pot % "test->test;compile->compile",
       bundle_edu_gemini_shared_util,
       bundle_edu_gemini_sp_vcs_log,
-      bundle_edu_gemini_spModel_core,
+      bundle_edu_gemini_sp_vcs_reg,
+      bundle_edu_gemini_spModel_core % "test->test;compile->compile",
       bundle_edu_gemini_spModel_pio,
       bundle_edu_gemini_util_security,
       bundle_edu_gemini_util_trpc
@@ -331,10 +355,10 @@ trait OcsBundle {
   lazy val bundle_edu_gemini_ags = 
     project.in(file("bundle/edu.gemini.ags")).dependsOn(
       bundle_edu_gemini_shared_skyobject,
-      bundle_edu_gemini_pot,
-      bundle_edu_gemini_catalog,
+      bundle_edu_gemini_pot          % "test->test;compile->compile",
+      bundle_edu_gemini_catalog      % "test->test;compile->compile",
       bundle_edu_gemini_shared_util,
-      bundle_edu_gemini_spModel_core,
+      bundle_edu_gemini_spModel_core % "test->test;compile->compile",
       bundle_edu_gemini_spModel_pio,
       bundle_jsky_coords,
       bundle_jsky_util_gui
@@ -344,7 +368,6 @@ trait OcsBundle {
     project.in(file("bundle/edu.gemini.spModel.io")).dependsOn(
       bundle_edu_gemini_shared_skyobject,
       bundle_edu_gemini_pot,
-      bundle_edu_gemini_catalog,
       bundle_edu_gemini_shared_util,
       bundle_edu_gemini_spModel_core,
       bundle_edu_gemini_spModel_pio,
@@ -368,7 +391,6 @@ trait OcsBundle {
       bundle_edu_gemini_shared_skyobject,
       bundle_edu_gemini_p2checker,
       bundle_edu_gemini_pot,
-      bundle_edu_gemini_catalog,
       bundle_edu_gemini_shared_mail,
       bundle_edu_gemini_shared_util,
       bundle_edu_gemini_sp_vcs,
@@ -500,7 +522,6 @@ trait OcsBundle {
     project.in(file("bundle/edu.gemini.wdba.xmlrpc.server")).dependsOn(
       bundle_edu_gemini_shared_skyobject,
       bundle_edu_gemini_pot,
-      bundle_edu_gemini_catalog,
       bundle_edu_gemini_shared_util,
       bundle_edu_gemini_spModel_core,
       bundle_edu_gemini_spModel_io,
@@ -522,8 +543,8 @@ trait OcsBundle {
       bundle_edu_gemini_auxfile_workflow,
       bundle_edu_gemini_shared_skyobject,
       bundle_edu_gemini_ags,
-      bundle_edu_gemini_catalog,
       bundle_edu_gemini_horizons_api,
+      bundle_edu_gemini_itc_shared,
       bundle_edu_gemini_p2checker,
       bundle_edu_gemini_phase2_core,
       bundle_edu_gemini_pot,
@@ -567,7 +588,6 @@ trait OcsBundle {
 
   lazy val bundle_jsky_app_ot_shared = 
     project.in(file("bundle/jsky.app.ot.shared")).dependsOn(
-      bundle_edu_gemini_catalog,
       bundle_edu_gemini_pot,
       bundle_edu_gemini_shared_util,
       bundle_edu_gemini_spModel_core,
@@ -619,7 +639,8 @@ trait OcsBundle {
 
   lazy val bundle_jsky_util_gui = 
     project.in(file("bundle/jsky.util.gui")).dependsOn(
-      bundle_jsky_util
+      bundle_jsky_util,
+      bundle_edu_gemini_util_ssl
     )
 
   // From OCS2
@@ -694,6 +715,9 @@ trait OcsBundle {
 
   lazy val bundle_edu_gemini_util_pdf = 
     project.in(file("bundle/edu.gemini.util.pdf"))
+
+  lazy val bundle_edu_gemini_epics_acm = 
+    project.in(file("bundle/edu.gemini.epics.acm"))
 
 }
 

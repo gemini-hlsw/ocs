@@ -135,7 +135,7 @@ public class VisitorInstrument extends SPInstObsComp
      */
     @Override
     public double getSetupTime(ISPObservation obs) {
-        return 1200.0;
+        return 600.0;
     }
 
 

@@ -19,6 +19,7 @@ import static edu.gemini.shared.skyobject.Magnitude.Band.*;
 /**
  * A {@link edu.gemini.catalog.skycat.table.SkyObjectFactory} used with the GemsGuideStarSearchDialog class.
  */
+@Deprecated
 public enum GemsSkyObjectFactory implements SkyObjectFactory {
     instance;
 
@@ -27,19 +28,21 @@ public enum GemsSkyObjectFactory implements SkyObjectFactory {
     public static final String RA_COL  = "RA";
     public static final String DEC_COL = "Dec";
 
-    public static final CatalogValueExtractor.MagnitudeDescriptor J_MAG, H_MAG, K_MAG, R_MAG;
+    public static final CatalogValueExtractor.MagnitudeDescriptor UC_MAG, J_MAG, H_MAG, K_MAG, R_MAG, r_MAG;
     static {
+        UC_MAG = new CatalogValueExtractor.MagnitudeDescriptor(UC, "UC");
         J_MAG = new CatalogValueExtractor.MagnitudeDescriptor(J, "J");
         H_MAG = new CatalogValueExtractor.MagnitudeDescriptor(H, "H");
         K_MAG = new CatalogValueExtractor.MagnitudeDescriptor(K, "K");
         R_MAG = new CatalogValueExtractor.MagnitudeDescriptor(R, "R");
+        r_MAG = new CatalogValueExtractor.MagnitudeDescriptor(r, "r'");
     }
 
     private static final FactorySupport sup =
-            new FactorySupport.Builder(ID_COL, RA_COL, DEC_COL).add(J_MAG, H_MAG, K_MAG, R_MAG).build();
+            new FactorySupport.Builder(ID_COL, RA_COL, DEC_COL).add(UC_MAG, J_MAG, H_MAG, K_MAG, R_MAG, r_MAG).build();
 
     public static final Set<Magnitude.Band> BANDS = Collections.unmodifiableSet(
-            new HashSet<Magnitude.Band>(Arrays.asList(J, H, K, R)));
+            new HashSet<>(Arrays.asList(UC, J, H, K, R, r)));
 
     @Override
     public Set<Magnitude.Band> bands() { return BANDS; }

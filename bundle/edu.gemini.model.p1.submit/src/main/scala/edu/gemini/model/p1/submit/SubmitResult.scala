@@ -1,6 +1,6 @@
 package edu.gemini.model.p1.submit
 
-import edu.gemini.model.p1.immutable.Proposal
+import edu.gemini.model.p1.immutable.{ProposalClass, Proposal}
 
 /**
  * ProposalSubmitResult contains a new proposal updated with the submission
@@ -59,7 +59,7 @@ object SubmitResult {
    * A SubmitServiceError identifies errors returned by the remote service.
    * This includes an error code (of questionable value) and a message.
    */
-  case class ServiceError(destination: Option[SubmitDestination], code: Int, message: String) extends Failure
+  case class ServiceError(destination: Option[SubmitDestination], proposalClass: Option[ProposalClass], code: Int, message: String) extends Failure
 
   /**
    * SubmitException is a catch-all for unexpected problems.

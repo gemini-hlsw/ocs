@@ -138,7 +138,9 @@ final class ProgramManager<N extends ISPRootNode> {
             // If some other program has the same id, we cannot add newProg
             if (id != null) {
                 final N tmp1 = _progIdMap.get(id);
-                if ((tmp1 != null) && (tmp1 != oldProg)) throw new DBIDClashException(tmp1.getProgramKey(), id);
+                if ((tmp1 != null) && (tmp1 != oldProg)) {
+                    throw new DBIDClashException(id, tmp1.getProgramKey(), key);
+                }
             }
 
             // Whatever the existing program's id was, we are removing it now

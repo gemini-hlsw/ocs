@@ -29,7 +29,7 @@ public class FieldFormat {
      * @return an object of the given class, or null if it could not be parsed
      */
     public static Object getValue(FieldDesc fieldDesc, String s) {
-        Class c = fieldDesc.getFieldClass();
+        Class<?> c = fieldDesc.getFieldClass();
         s = s.trim();
         if (c == String.class)
             return s;
@@ -93,7 +93,7 @@ public class FieldFormat {
      *         could not be parsed
      */
     public static ValueRange getValueRange(FieldDesc fieldDesc, String s) {
-        Class c = fieldDesc.getFieldClass();
+        Class<?> c = fieldDesc.getFieldClass();
         s = s.trim();
         if (c == String.class)
             return new ValueRange(s);

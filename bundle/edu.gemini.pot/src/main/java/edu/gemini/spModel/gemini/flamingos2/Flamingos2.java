@@ -32,6 +32,8 @@ import edu.gemini.spModel.guide.GuideProbe;
 import edu.gemini.spModel.guide.GuideProbeProvider;
 import edu.gemini.spModel.guide.GuideProbeUtil;
 import edu.gemini.spModel.inst.ElectronicOffsetProvider;
+import edu.gemini.spModel.inst.ScienceAreaGeometry;
+import edu.gemini.spModel.inst.VignettableScienceAreaInstrument;
 import edu.gemini.spModel.obs.plannedtime.CommonStepCalculator;
 import edu.gemini.spModel.obs.plannedtime.ExposureCalculator;
 import edu.gemini.spModel.obs.plannedtime.PlannedTime;
@@ -63,7 +65,7 @@ import static edu.gemini.spModel.seqcomp.SeqConfigNames.INSTRUMENT_KEY;
 
 public final class Flamingos2 extends ParallacticAngleSupportInst
         implements PropertyProvider, GuideProbeProvider, IssPortProvider, ElectronicOffsetProvider,
-        PlannedTime.StepCalculator, PosAngleConstraintAware, CalibrationKeyProvider {
+        PlannedTime.StepCalculator, PosAngleConstraintAware, CalibrationKeyProvider, VignettableScienceAreaInstrument {
 
     // for serialization
     private static final long serialVersionUID = 3L;
@@ -137,6 +139,7 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
         J_LOW("J-low (1.15 um)", "J-low", new Some<Double>(1.15)),
         J("J (1.25 um)", "J", new Some<Double>(1.25)),
         H("H (1.65 um)", "H", new Some<Double>(1.65)),
+        K_LONG("K-long (2.00 um)", "K-long", new Some<Double>(2.00)),
         K_SHORT("K-short (2.15 um)", "K-short", new Some<Double>(2.15)),
         JH("JH (spectroscopic)", "JH", new Some<Double>(1.39)),
         HK("HK (spectroscopic)", "HK", new Some<Double>(1.871)),
@@ -624,12 +627,6 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
     */
     public static final String INSTRUMENT_NAME_PROP = "Flamingos2";
 
-    // The size of the imaging field of view in mm.
-    public static final double IMAGING_FOV_SIZE = 230.12;
-
-    // The width of the MOS field of view in mm
-    public static final double MOS_FOV_WIDTH = 75.16;
-
     // The number of seconds below which fractional exposure times are permitted
     public static final int FRACTIONAL_EXP_TIME_MAX = 65;
 
@@ -671,11 +668,6 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
     }
     // Pre-imaging flag
     public static final boolean DEFAULT_IS_MOS_PREIMAGING = false;
-
-    // The height of the long slit FOV in mm (the width is selected by the user)
-    public static final double LONG_SLIT_FOV_HEIGHT = 164.1; // SCT-297, LongSlit FOV doesn't run the full lenght of the MOS FOV
-    public static final double LONG_SLIT_FOV_SOUTH_POS = 112.0; // South position of slit when PA = 0
-    public static final double LONG_SLIT_FOV_NORTH_POS = 52.1; // North position of slit when PA = 0
 
     private static PropertyDescriptor initProp(String propName, boolean query, boolean iter) {
         PropertyDescriptor pd;
@@ -766,7 +758,6 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
     private boolean eOffsetting = false;
     private double eOffset = 0.0;
 
-
     public Flamingos2() {
         super(SP_TYPE);
         // Override the default exposure time
@@ -795,27 +786,7 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
      * be a rectangular region.
      */
     public double[] getScienceArea() {
-        double plateScale = _lyotWheel.getPlateScale();
-        if (_lyotWheel == LyotWheel.OPEN || _lyotWheel == LyotWheel.HIGH
-                || _lyotWheel == LyotWheel.LOW) {
-            if (_fpu == FPUnit.FPU_NONE) { // imaging
-                double size = IMAGING_FOV_SIZE * plateScale;
-                return new double[]{size, size};
-            } else if (_fpu == FPUnit.CUSTOM_MASK) {
-                double width = MOS_FOV_WIDTH * plateScale;
-                double height = IMAGING_FOV_SIZE * plateScale;
-                return new double[]{width, height};
-            } else if (_fpu.isLongslit()) {
-                double slitWidth = _fpu.getSlitWidth() * _lyotWheel.getPixelScale();
-                double slitHeight = LONG_SLIT_FOV_HEIGHT * plateScale;
-                return new double[]{slitWidth, slitHeight};
-            }
-        }
-
-        // If the Lyot wheel is set to HartmannA or HartmannB, the
-        // FOV should just be a point at the base position (this is not a
-        // scientifically useful option, but is used for focusing)
-        return new double[]{0.0, 0.0};
+        return F2ScienceAreaGeometry.javaScienceAreaDimensions(this);
     }
 
     public double getRecommendedExposureTimeSecs() {
@@ -1437,5 +1408,10 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
             final Flamingos2 oldF2 = (Flamingos2)oldData;
             setFpuCustomMask(oldF2.getFpuCustomMask());
         }
+    }
+
+    @Override
+    public ScienceAreaGeometry getVignettableScienceArea() {
+        return F2ScienceAreaGeometry$.MODULE$;
     }
 }

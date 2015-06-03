@@ -9,7 +9,6 @@ import edu.gemini.pot.spdb.IDBTriggerCondition;
 import edu.gemini.spModel.data.ISPDataObject;
 import edu.gemini.spModel.pio.ParamSet;
 import edu.gemini.spModel.pio.PioFactory;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -35,10 +34,25 @@ public class TriggerCase extends SpdbBaseTestCase {
     private static final SPComponentType TRIGGER_TYPE = SPComponentType.INSTRUMENT_FLAMINGOS2; // SPComponentType.getInstance("trigger", "trigger", "trigger");
 
     public static final class ProgramDataObject implements ISPDataObject {
-        private List _triggerList = new ArrayList();
+        private List<String> _triggerList = new ArrayList<>();
+
+        public Object clone() {
+            try {
+                return super.clone();
+            } catch (CloneNotSupportedException e) {
+                throw new InternalError();
+            }
+        }
+
+        @SuppressWarnings("unchecked")
+        @Override
+        public <A extends ISPDataObject> A clone(A a) {
+            return (A) a.clone();
+        }
+
 
         public String[] getTriggerMessages() {
-            return (String[]) _triggerList.toArray(new String[0]);
+            return _triggerList.toArray(new String[_triggerList.size()]);
         }
 
         public void addTriggerMessage(String message) {
@@ -92,6 +106,19 @@ public class TriggerCase extends SpdbBaseTestCase {
 
     public static final class TriggerDataObject implements ISPDataObject, Serializable {
         private String _triggerMessage;
+
+        public Object clone() {
+            try {
+                return super.clone();
+            } catch (CloneNotSupportedException e) {
+                throw new InternalError();
+            }
+        }
+
+        @Override @SuppressWarnings("unchecked")
+        public <A extends ISPDataObject> A clone(A a) {
+            return (A) a.clone();
+        }
 
         public String getTriggerMessage() {
             return _triggerMessage;
@@ -207,7 +234,6 @@ public class TriggerCase extends SpdbBaseTestCase {
     private ISPProgram _prog;
     private ISPObsComponent _triggerComp;
     private ISPObsComponent _nonTriggerComp;
-    private List _leaseList = new ArrayList();
 
     @Before
     public void setUp() throws Exception {
@@ -218,23 +244,10 @@ public class TriggerCase extends SpdbBaseTestCase {
         _triggerComp    = _createObsComponent(_prog, TRIGGER_TYPE);
         _nonTriggerComp = _createObsComponent(_prog, NON_TRIGGER_TYPE);
 
-        List obsCompList = new ArrayList();
+        List<ISPObsComponent> obsCompList = new ArrayList<>();
         obsCompList.add(_triggerComp);
         obsCompList.add(_nonTriggerComp);
         _prog.setObsComponents(obsCompList);
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        super.tearDown();
-
-//        for (Iterator it=_leaseList.iterator(); it.hasNext(); ) {
-//            Lease lease = (Lease) it.next();
-//            try {
-//                lease.cancel();
-//            } catch (Exception ex) {
-//            }
-//        }
     }
 
     private ISPObsComponent _createObsComponent(ISPProgram prog, SPComponentType type)

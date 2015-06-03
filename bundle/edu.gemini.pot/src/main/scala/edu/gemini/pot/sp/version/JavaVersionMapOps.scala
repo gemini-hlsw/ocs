@@ -11,7 +11,7 @@ object JavaVersionMapOps {
   def emptyVersionMap   = EmptyVersionMap
 
   def getOrNull(m: VersionMap, k: SPNodeKey): NodeVersions  = m.get(k).orNull
-  def getOrEmpty(m: VersionMap, k: SPNodeKey): NodeVersions = m.get(k).getOrElse(EmptyNodeVersions)
+  def getOrEmpty(m: VersionMap, k: SPNodeKey): NodeVersions = m.getOrElse(k, EmptyNodeVersions)
 
   def isNewLocally(k: SPNodeKey, local: VersionMap, remote: VersionMap): Boolean =
     local.get(k).isDefined && remote.get(k).isEmpty

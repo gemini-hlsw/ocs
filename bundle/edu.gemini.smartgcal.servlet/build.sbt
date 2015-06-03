@@ -34,3 +34,7 @@ OsgiKeys.importPackage := Seq(
   "!org.tigris.subversion.*",
   "!org.tmatesoft.svn.core.*",
   "*")
+
+OsgiKeys.privatePackage := Seq(
+  "edu.gemini.smartgcal.servlet.*"
+)

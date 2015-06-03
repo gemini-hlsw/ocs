@@ -1,0 +1,14 @@
+# transparency (cloud cover) model for ITC
+# any conditions; these conditions are very thick cloud
+# columns are (1) wavelength in nm, (2) transparency (0-1)
+# source: assume 3 mag i.e. 5% transmission
+# and unusable beyond 2.5um
+# made up for now!!
+# author: Phil Puxley
+# created 27Aug1999
+
+     300   0.05
+    1000   0.05
+    2500   0.05
+    2600   0.0
+   30000   0.0

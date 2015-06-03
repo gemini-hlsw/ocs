@@ -1,12 +1,10 @@
-//
-// $
-//
-
 package edu.gemini.shared.skyobject;
 
 import edu.gemini.shared.util.immutable.None;
 import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.shared.util.immutable.Some;
+import edu.gemini.spModel.core.Wavelength;
+import edu.gemini.spModel.core.Wavelength$;
 
 import java.io.Serializable;
 import java.util.Comparator;
@@ -16,84 +14,7 @@ import java.util.Comparator;
  * particular wavelengths of light, and optionally are associated with an error
  * in the measurement.
  */
-public final class Magnitude implements Comparable, Serializable {
-
-    /**
-     * Common wavelength bands.
-     */
-    public enum Band {
-        U( 365, "ultraviolet"),
-        B( 445, "blue"),
-        V( 551, "visual"),
-        UC(610, "UCAC"), // unknown FWHM
-        R( 658, "red"),
-        I( 806, "infrared"),
-        Y(1020),
-        J(1220),
-        H(1630),
-        K(2190),
-        L(3450),
-        M(4750),
-        N(10000),
-        Q(16000),
-// REL-549: Remove "AB" and "Jy" Band enum values from the model since they are actually "system" options.
-//        AB(None.INTEGER, None.STRING),
-//        Jy(None.INTEGER, None.STRING),
-        ;
-
-        /**
-         * A Comparator of magnitude bands based upon the name of the
-         * band.  The default ordering is in terms of increasing wavelength.
-         * This comparator can be used to sort passbands based upon an
-         * alphabetical sorting.
-         */
-        public static final Comparator<Band> NAME_COMPARATOR =
-            new Comparator<Band>() {
-                @Override public int compare(Band b1, Band b2) {
-                    return b1.name().compareTo(b2.name());
-                }
-            };
-
-        /**
-         * A Comparator of magnitude bands based upon the associated
-         * wavelength.
-         */
-        public static final Comparator<Band> WAVELENGTH_COMPARATOR =
-            new Comparator<Band>() {
-                @Override public int compare(Band b1, Band b2) {
-                    int b1w = b1.wavelengthMidPoint.getOrElse(Integer.MAX_VALUE);
-                    int b2w = b2.wavelengthMidPoint.getOrElse(Integer.MAX_VALUE);
-                    int res = b1w - b2w;
-                    return res==0 ? b1.ordinal() - b2.ordinal() : res;
-                }
-            };
-
-        private final Option<Integer> wavelengthMidPoint;    // nm
-        private final Option<String> description;
-
-        Band(Option<Integer> mid, Option<String> desc) {
-            this.wavelengthMidPoint = mid;
-            this.description        = desc;
-        }
-
-        Band(int mid) {
-            this(mid, null);
-        }
-
-        Band(int mid, String desc) {
-            this.wavelengthMidPoint = new Some<Integer>(mid);
-            this.description = (desc == null) ? None.STRING : new Some<String>(desc);
-        }
-
-        public Option<Integer> getWavelengthMidPoint() {
-            return wavelengthMidPoint;
-        }
-
-        public Option<String> getDescription() {
-            return description;
-        }
-    }
-
+public final class Magnitude implements Comparable<Magnitude>, Serializable {
     /**
      * REL-549: Magnitude information for targets and guide stars in OT must be stored in value, bandpass, system triples.
      */
@@ -106,6 +27,81 @@ public final class Magnitude implements Comparable, Serializable {
         public static final System DEFAULT = Vega;
     }
 
+    /**
+     * Common wavelength bands.
+     */
+    public enum Band {
+
+        // OCSADV-203
+        u(System.AB, 350, "UV"),
+        g(System.AB, 475, "green"),
+        r(System.AB, 630, "red"),
+        i(System.AB, 780, "far red"),
+        z(System.AB, 925, "near-infrared"),
+
+        U(System.Vega,  365, "ultraviolet"),
+        B(System.Vega,  445, "blue"),
+        V(System.Vega,  551, "visual"),
+        UC(System.Vega, 610, "UCAC"), // unknown FWHM
+        R(System.Vega,  658, "red"),
+        I(System.Vega,  806, "infrared"),
+        Y(System.Vega, 1020),
+        J(System.Vega, 1220),
+        H(System.Vega, 1630),
+        K(System.Vega, 2190),
+        L(System.Vega, 3450),
+        M(System.Vega, 4750),
+        N(System.Vega, 10000),
+        Q(System.Vega, 16000),
+        AP(System.Vega, None.INTEGER, new Some<>("apparent"))
+        ;
+
+        /**
+         * A Comparator of magnitude bands based upon the associated
+         * wavelength.
+         */
+        public static final Comparator<Band> WAVELENGTH_COMPARATOR =
+            new Comparator<Band>() {
+                @Override public int compare(Band b1, Band b2) {
+                    if (b1.wavelengthMidPoint.isDefined() && b2.wavelengthMidPoint.isDefined()) {
+                        double w1 = b1.getWavelengthMidPoint().getValue().toNanometers();
+                        double w2 = b2.getWavelengthMidPoint().getValue().toNanometers();
+                        return (int) (w1 - w2);
+                    } else {
+                        return b1.ordinal() - b2.ordinal();
+                    }
+                }
+            };
+
+        public final System defaultSystem;
+        private final Option<Wavelength> wavelengthMidPoint;
+        private final Option<String> description;
+
+        Band(System sys, Option<Integer> mid, Option<String> desc) {
+            this.defaultSystem      = sys;
+            this.wavelengthMidPoint = mid.map(Wavelength$.MODULE$::fromNanometers);
+            this.description        = desc;
+        }
+
+        Band(System sys, int mid) {
+            this(sys, mid, null);
+        }
+
+        Band(System sys, int mid, String desc) {
+            this.defaultSystem      = sys;
+            this.wavelengthMidPoint = new Some<>(Wavelength$.MODULE$.fromNanometers(mid));
+            this.description = (desc == null) ? None.STRING : new Some<>(desc);
+        }
+
+        public Option<String> getDescription() {
+            return description;
+        }
+
+        public Option<Wavelength> getWavelengthMidPoint() {
+            return wavelengthMidPoint;
+        }
+
+    }
 
     /**
      * Magnitudes with this brightness are undefined.
@@ -126,7 +122,7 @@ public final class Magnitude implements Comparable, Serializable {
      */
     public Magnitude(Band band, double brightness) {
         //noinspection unchecked
-        this(band, brightness, None.INSTANCE, System.DEFAULT);
+        this(band, brightness, None.INSTANCE, band.defaultSystem);
     }
 
     /**
@@ -147,7 +143,7 @@ public final class Magnitude implements Comparable, Serializable {
      * @param error error in measurement
      */
     public Magnitude(Band band, double brightness, double error) {
-        this(band, brightness, new Some<Double>(error), System.DEFAULT);
+        this(band, brightness, new Some<>(error), band.defaultSystem);
     }
 
     /**
@@ -159,7 +155,7 @@ public final class Magnitude implements Comparable, Serializable {
      * @param system mag system
      */
     public Magnitude(Band band, double brightness, double error, System system) {
-        this(band, brightness, new Some<Double>(error), system);
+        this(band, brightness, new Some<>(error), system);
     }
 
     /**
@@ -170,7 +166,7 @@ public final class Magnitude implements Comparable, Serializable {
      * @param error optional error in measurement
      */
     public Magnitude(Band band, double brightness, Option<Double> error) {
-        this(band, brightness, error, System.DEFAULT);
+        this(band, brightness, error, band.defaultSystem);
     }
 
     /**
@@ -202,7 +198,7 @@ public final class Magnitude implements Comparable, Serializable {
      * its brightness adjusted by the given amount.
      */
     public Magnitude add(double brightness) {
-        return new Magnitude(band, this.brightness + brightness, error);
+        return new Magnitude(band, this.brightness + brightness, error, system);
     }
 
 
@@ -235,12 +231,10 @@ public final class Magnitude implements Comparable, Serializable {
      * Compares two magnitude objects by system, band, brightness and error (in that
      * order).
      *
-     * @param o other magnitude object
+     * @param that other magnitude object
      */
     @Override
-    public int compareTo(Object o) {
-        Magnitude that = (Magnitude) o;
-
+    public int compareTo(Magnitude that) {
         int res = system.compareTo(that.system);
         if (res != 0) return res;
 
@@ -252,7 +246,7 @@ public final class Magnitude implements Comparable, Serializable {
 
         if (error.isEmpty()) {
             return that.error.isEmpty() ? 0 : -1;
-        } else if (that.error.isEmpty()){
+        } else if (that.error.isEmpty()) {
             return 1;
         } else {
             return error.getValue().compareTo(that.error.getValue());

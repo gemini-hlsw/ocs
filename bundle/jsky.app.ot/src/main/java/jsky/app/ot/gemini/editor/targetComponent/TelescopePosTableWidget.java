@@ -7,6 +7,7 @@
 package jsky.app.ot.gemini.editor.targetComponent;
 
 import edu.gemini.ags.api.*;
+import edu.gemini.pot.ModelConverters;
 import edu.gemini.pot.sp.ISPObsComponent;
 import edu.gemini.shared.skyobject.Magnitude;
 import edu.gemini.shared.util.immutable.*;
@@ -21,13 +22,12 @@ import edu.gemini.spModel.target.WatchablePos;
 import edu.gemini.spModel.target.env.*;
 import edu.gemini.spModel.target.obsComp.TargetObsComp;
 import edu.gemini.spModel.target.obsComp.TargetSelection;
-import edu.gemini.spModel.target.offset.OffsetPos;
 import edu.gemini.spModel.target.offset.OffsetPosBase;
 import edu.gemini.spModel.target.offset.OffsetPosList;
 import edu.gemini.spModel.target.offset.OffsetUtil;
 import edu.gemini.spModel.target.system.CoordinateParam.Units;
-import edu.gemini.spModel.target.system.HmsDegTarget;
 import edu.gemini.spModel.target.system.ICoordinate;
+import edu.gemini.spModel.target.system.ITarget;
 import jsky.app.ot.OT;
 import jsky.app.ot.OTOptions;
 import jsky.app.ot.util.Resources;
@@ -63,7 +63,7 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
 
 
     // Used to format values as strings.
-    private static NumberFormat nf = NumberFormat.getInstance(Locale.US);
+    private static final NumberFormat nf = NumberFormat.getInstance(Locale.US);
 
     static { nf.setMaximumFractionDigits(2); }
 
@@ -82,7 +82,7 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
                 public Object getValue(Row row) {
                     return row.target().map(new MapOp<SPTarget, String>() {
                         @Override public String apply(SPTarget t) {
-                            return t.getXaxisAsString();
+                            return t.getTarget().getRa().toString();
                         }
                     }).getOrElse("");
                 }
@@ -92,7 +92,7 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
                 public Object getValue(Row row) {
                     return row.target().map(new MapOp<SPTarget, String>() {
                         @Override public String apply(SPTarget t) {
-                            return t.getYaxisAsString();
+                            return t.getTarget().getDec().toString();
                         }
                     }).getOrElse("");
                 }
@@ -123,7 +123,6 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
             Option<Double> distance();
             List<Row> children();
 
-            Option<Magnitude> getMagnitude(Magnitude.Band band);
             String formatMagnitude(Magnitude.Band band);
 
             Icon getIcon();
@@ -133,7 +132,7 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
             final boolean enabled;
             final String tag;
             final String name;
-            Option<SPTarget> target;
+            final Option<SPTarget> target;
 
             AbstractRow(boolean enabled, String tag, String name, Option<SPTarget> target) {
                 this.enabled  = enabled;
@@ -153,7 +152,7 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
             public Option<Magnitude> getMagnitude(final Magnitude.Band band) {
                 return target.flatMap(new MapOp<SPTarget, Option<Magnitude>>() {
                     @Override public Option<Magnitude> apply(SPTarget spTarget) {
-                        return spTarget.getMagnitude(band);
+                        return spTarget.getTarget().getMagnitude(band);
                     }
                 });
             }
@@ -171,7 +170,7 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
 
         static final class BaseTargetRow extends AbstractRow {
             BaseTargetRow(SPTarget target) {
-                super(true, TargetEnvironment.BASE_NAME, target.getName(), new Some<>(target));
+                super(true, TargetEnvironment.BASE_NAME, target.getTarget().getName(), new Some<>(target));
             }
         }
 
@@ -179,7 +178,7 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
             final Option<Double> distance;
 
             NonBaseTargetRow(boolean enabled, String tag, SPTarget target, WorldCoords baseCoords) {
-                super(enabled, tag, target.getName(), new Some<>(target));
+                super(enabled, tag, target.getTarget().getName(), new Some<>(target));
                 final WorldCoords coords = getWorldCoords(target);
                 distance = new Some<>(Math.abs(baseCoords.dist(coords)));
             }
@@ -237,19 +236,15 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
         }
 
         private static Option<AgsGuideQuality> guideQuality(Option<Tuple2<ObsContext, AgsMagnitude.MagnitudeTable>> ags, final GuideProbe guideProbe, final SPTarget guideStar) {
-            return ags.flatMap(new MapOp<Tuple2<ObsContext, AgsMagnitude.MagnitudeTable>, Option<AgsGuideQuality>>() {
-                @Override public Option<AgsGuideQuality> apply(Tuple2<ObsContext, AgsMagnitude.MagnitudeTable> tup) {
-                    if (guideProbe instanceof ValidatableGuideProbe) {
-                        final ValidatableGuideProbe vgp = (ValidatableGuideProbe) guideProbe;
-                        return AgsAnalysis$.MODULE$.analysisForJava(tup._1(), tup._2(), vgp, guideStar).map(new MapOp<AgsAnalysis, AgsGuideQuality>() {
-                            @Override
-                            public AgsGuideQuality apply(AgsAnalysis agsAnalysis) {
-                                return agsAnalysis.quality();
-                            }
-                        });
-                    } else {
-                        return None.instance();
-                    }
+            return ags.flatMap(tup -> {
+                if (guideProbe instanceof ValidatableGuideProbe) {
+                    final ValidatableGuideProbe vgp = (ValidatableGuideProbe) guideProbe;
+                    return AgsRegistrar.instance().currentStrategyForJava(tup._1()).map(strategy -> {
+                        final Option<AgsAnalysis> agsAnalysis = strategy.analyzeForJava(tup._1(), tup._2(), vgp, ModelConverters.toSideralTarget(guideStar));
+                        return agsAnalysis.map(AgsAnalysis::quality);
+                    }).getOrElse(None.<AgsGuideQuality>instance());
+                } else {
+                    return None.instance();
                 }
             });
         }
@@ -275,9 +270,9 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
                 }
             });
 
-            GuideEnvironment ge = env.getGuideEnvironment();
-            ImList<GuideGroup> groups = ge.getOptions();
-            GuideGroup primaryGroup = env.getOrCreatePrimaryGuideGroup();
+            final GuideEnvironment ge = env.getGuideEnvironment();
+            final ImList<GuideGroup> groups = ge.getOptions();
+            final GuideGroup primaryGroup = env.getOrCreatePrimaryGuideGroup();
             if (groups.size() < 2) {
                 for (GuideProbeTargets gt : primaryGroup.getAll()) {
                     final GuideProbe guideProbe = gt.getGuider();
@@ -333,19 +328,8 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
             final Set<Magnitude.Band> bands;
             bands = new TreeSet<>(Magnitude.Band.WAVELENGTH_COMPARATOR);
 
-            // An operation that adds a target's bands to the set.
-            ApplyOp<SPTarget> op = new ApplyOp<SPTarget>() {
-                @Override public void apply(SPTarget spTarget) {
-                    bands.addAll(spTarget.getMagnitudeBands());
-                }
-            };
-
             // Extract all the magnitude bands from the environment.
-            bands.addAll(env.getBase().getMagnitudeBands());
-            for (GuideProbeTargets gt : env.getOrCreatePrimaryGuideGroup()) {
-                gt.getOptions().foreach(op);
-            }
-            env.getUserTargets().foreach(op);
+            env.getTargets().foreach(spTarget -> bands.addAll(spTarget.getTarget().getMagnitudeBands()));
 
             // Create an immutable sorted list containing the results.
             return DefaultImList.create(bands);
@@ -492,17 +476,17 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
 
     // Return the world coordinates for the given target
     private static WorldCoords getWorldCoords(SPTarget tp) {
-        HmsDegTarget target = tp.getTarget().getTargetAsJ2000();
-        ICoordinate c1 = target.getC1();
-        ICoordinate c2 = target.getC2();
-        double x = c1.getAs(Units.DEGREES);
-        double y = c2.getAs(Units.DEGREES);
+        final ITarget target = tp.getTarget();
+        final ICoordinate c1 = target.getRa();
+        final ICoordinate c2 = target.getDec();
+        final double x = c1.getAs(Units.DEGREES);
+        final double y = c2.getAs(Units.DEGREES);
         return new WorldCoords(x, y, 2000.);
     }
 
     private static void styleRendererLabel(JLabel lab, TableData.Row row) {
         final Color c;
-        int style;
+        final int style;
         if (row.enabled()) {
             c     = Color.black;
             style = Font.PLAIN;
@@ -525,15 +509,15 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
                                        boolean leaf,
                                        int row,
                                        boolean hasFocus) {
-            JLabel lab = (JLabel) super.getTreeCellRendererComponent(tree, value, selected, expanded, leaf, row, hasFocus);
+            final JLabel lab = (JLabel) super.getTreeCellRendererComponent(tree, value, selected, expanded, leaf, row, hasFocus);
 
             if (value instanceof TableData.Row) {
-                TableData.Row tableDataRow = (TableData.Row) value;
+                final TableData.Row tableDataRow = (TableData.Row) value;
 
                 // OT-17: display group name in tag field if defined
                 if (!tableDataRow.group().isEmpty()) {
-                    String tag = tableDataRow.tag();
-                    String name = tableDataRow.name();
+                    final String tag = tableDataRow.tag();
+                    final String name = tableDataRow.name();
                     lab.setText(name != null && !name.equals("") ? name : tag);
                 } else {
                     lab.setText(tableDataRow.tag());
@@ -556,16 +540,16 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
 
         void updatePrimaryStar() {
             if (_env == null || !OTOptions.isEditable(_obsComp.getProgram(), _obsComp.getContextObservation())) return;
-            SPTarget target = getSelectedPos();
+            final SPTarget target = getSelectedPos();
             if (target != null) {
                 PrimaryTargetToggle.instance.toggle(_dataObject, target);
             } else {
-                GuideGroup group = getSelectedGroup();
+                final GuideGroup group = getSelectedGroup();
                 if (group != null) {
-                    TargetEnvironment env = _dataObject.getTargetEnvironment();
-                    GuideGroup primary = env.getOrCreatePrimaryGuideGroup();
+                    final TargetEnvironment env = _dataObject.getTargetEnvironment();
+                    final GuideGroup primary = env.getOrCreatePrimaryGuideGroup();
                     if (primary != group && confirmGroupChange(primary, group)) {
-                        GuideEnvironment ge = env.getGuideEnvironment();
+                        final GuideEnvironment ge = env.getGuideEnvironment();
                         _dataObject.setTargetEnvironment(env.setGuideEnvironment(ge.selectPrimary(group)));
                     }
                 }
@@ -590,7 +574,7 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
     // if true, ignore selections
     private boolean _ignoreSelection;
 
-    private PrimaryStarUpdater _primaryStarUpdater;
+    private final PrimaryStarUpdater _primaryStarUpdater;
 
     private final EdCompTargetList owner;
 
@@ -617,6 +601,7 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
      */
     public TelescopePosTableWidget(EdCompTargetList owner) {
         this.owner = owner;
+        setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
         // disable editing by default
         setTreeTableModel(new TableData());
         setCellSelectionEnabled(false);
@@ -628,7 +613,7 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
             @Override
             public void valueChanged(TreeSelectionEvent e) {
                 if (_ignoreSelection) return;
-                Object o = e.getPath().getLastPathComponent();
+                final Object o = e.getPath().getLastPathComponent();
                 if (o instanceof TableData.Row) {
                     _notifySelect((TableData.Row) o);
                 }
@@ -664,24 +649,8 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
     }
 
 
-    /**
-     * The current position location has changed.
-     *
-     * @see TelescopePosWatcher
-     * @param tp
-     */
-    public void telescopePosLocationUpdate(WatchablePos tp) {
-        telescopePosGenericUpdate(tp);
-    }
-
-    /**
-     * The current position has changed in some way.
-     *
-     * @see TelescopePosWatcher
-     * @param tp
-     */
-    public void telescopePosGenericUpdate(WatchablePos tp) {
-        int index = getSelectedRow();
+    public void telescopePosUpdate(WatchablePos tp) {
+        final int index = getSelectedRow();
         _resetTable(_env);
 
         // Restore the selection without firing new selection events.
@@ -723,14 +692,14 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
         startWatchingEnv();
         startWatchingSelection();
 
-        TargetEnvironment env = _dataObject.getTargetEnvironment();
+        final TargetEnvironment env = _dataObject.getTargetEnvironment();
         env.getTargets().foreach(new ApplyOp<SPTarget>() {
             public void apply(SPTarget spTarget) {
                 spTarget.addWatcher(TelescopePosTableWidget.this);
             }
         });
 
-        SPTarget tp = TargetSelection.get(_dataObject.getTargetEnvironment(), _obsComp);
+        final SPTarget tp = TargetSelection.get(_dataObject.getTargetEnvironment(), _obsComp);
         _resetTable(_dataObject.getTargetEnvironment());
 
         int index = -1;
@@ -765,7 +734,7 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
         _dataObject.addPropertyChangeListener(TargetObsComp.TARGET_ENV_PROP, envChangeListener);
     }
 
-    protected void _notifySelect(TableData.Row row) {
+    void _notifySelect(TableData.Row row) {
         final SPTarget target = row.target().getOrNull();
         if (target != null) {
             stopWatchingSelection();
@@ -775,7 +744,7 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
                 startWatchingSelection();
             }
         } else {
-            GuideGroup group = row.group().getOrNull();
+            final GuideGroup group = row.group().getOrNull();
             if (group != null) TargetSelection.setGuideGroup(_env, _obsComp, group);
         }
     }
@@ -786,7 +755,7 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
 
             final SPTarget target = TargetSelection.get(_env, _obsComp);
             if (target != null) {
-                int index = _tableData.indexOf(target);
+                final int index = _tableData.indexOf(target);
                 _setSelectedRow(index);
             }
         }
@@ -794,12 +763,12 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
 
     private final PropertyChangeListener envChangeListener = new PropertyChangeListener() {
         public void propertyChange(PropertyChangeEvent evt) {
-            TargetEnvironment oldEnv = (TargetEnvironment) evt.getOldValue();
-            TargetEnvironment newEnv = (TargetEnvironment) evt.getNewValue();
+            final TargetEnvironment oldEnv = (TargetEnvironment) evt.getOldValue();
+            final TargetEnvironment newEnv = (TargetEnvironment) evt.getNewValue();
 
-            TargetEnvironmentDiff diff = TargetEnvironmentDiff.all(oldEnv, newEnv);
-            Collection<SPTarget> rmTargets  = diff.getRemovedTargets();
-            Collection<SPTarget> addTargets = diff.getAddedTargets();
+            final TargetEnvironmentDiff diff = TargetEnvironmentDiff.all(oldEnv, newEnv);
+            final Collection<SPTarget> rmTargets  = diff.getRemovedTargets();
+            final Collection<SPTarget> addTargets = diff.getAddedTargets();
 
             // First update the target listeners according to what was added
             // and removed.
@@ -812,8 +781,8 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
 
             // Remember what was selected before the reset below.
             int oldSelIndex = getSelectedRow();
-            TreePath tp = getTreeSelectionModel().getSelectionPath();
-            Object o = tp != null? tp.getLastPathComponent() : null;
+            final TreePath tp = getTreeSelectionModel().getSelectionPath();
+            final Object o = tp != null? tp.getLastPathComponent() : null;
             SPTarget oldSelTarget = null;
             if (o instanceof TableData.Row) {
                 oldSelTarget = ((TableData.Row)o).target().getOrNull();
@@ -832,7 +801,7 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
             // If obs comp has a selected target, then honor it.
             final SPTarget newSelectedTarget = TargetSelection.get(_env, _obsComp);
             if (newSelectedTarget != null) {
-                int index = _tableData.indexOf(newSelectedTarget);
+                final int index = _tableData.indexOf(newSelectedTarget);
                 _setSelectedRow(index);
                 return;
             }
@@ -840,7 +809,7 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
             // If a new group was added, select it
             final GuideGroup newSelectedGroup = TargetSelection.getGuideGroup(_env, _obsComp);
             if (newSelectedGroup != null) {
-                int index = _tableData.indexOf(newSelectedGroup);
+                final int index = _tableData.indexOf(newSelectedGroup);
                 if (index != -1) {
                     _setSelectedRow(index);
                     return;
@@ -866,7 +835,7 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
     };
 
     private void _resetTable(final TargetEnvironment env) {
-        boolean firstTime = ((TableData)getTreeTableModel()).env == null;
+        final boolean firstTime = ((TableData)getTreeTableModel()).env == null;
         if (!firstTime) {
             _saveTreeState();
         }
@@ -934,13 +903,13 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
     }
 
     public void expandGroup(GuideGroup group) {
-        int numRows = getRowCount();
+        final int numRows = getRowCount();
         for(int i = 0; i < numRows; i++) {
-            TreePath path = getPathForRow(i);
+            final TreePath path = getPathForRow(i);
             if (!isExpanded(path)) {
-                Object o = path.getLastPathComponent();
+                final Object o = path.getLastPathComponent();
                 if (o instanceof TableData.Row) {
-                    TableData.Row row = (TableData.Row) o;
+                    final TableData.Row row = (TableData.Row) o;
                     if (row.group().getOrNull() == group) {
                         expandPath(path);
                         getSelectionModel().addSelectionInterval(i, i);
@@ -954,14 +923,14 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
     /**
      * Get the position that is currently selected.
      */
-    public SPTarget getSelectedPos() {
+    SPTarget getSelectedPos() {
         return TargetSelection.get(_env, _obsComp);
     }
 
     /**
      * Get the group that is currently selected.
      */
-    public GuideGroup getSelectedGroup() {
+    GuideGroup getSelectedGroup() {
         return TargetSelection.getGuideGroup(_env, _obsComp);
     }
 
@@ -972,7 +941,7 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
     public GuideGroup getSelectedGroupOrParentGroup(TargetEnvironment env) {
         GuideGroup group = getSelectedGroup();
         if (group == null) {
-            SPTarget target = getSelectedPos();
+            final SPTarget target = getSelectedPos();
             if (target != null) {
                 for (GuideGroup g : env.getGroups()) {
                     if (g.containsTarget(target)) {
@@ -997,9 +966,9 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
      * single select is allowed, so the array has length 1).
      */
     public TableData.Row[] getSelectedNodes() {
-        int i = getSelectedRow();
+        final int i = getSelectedRow();
         if (i != -1) {
-            Object o = getPathForRow(i).getLastPathComponent();
+            final Object o = getPathForRow(i).getLastPathComponent();
             if (o instanceof TableData.Row) {
                 return new TableData.Row[]{(TableData.Row)o};
             }
@@ -1014,8 +983,8 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
      */
     public boolean isOkayToAdd(TableData.Row item, TableData.Row parent) {
         if (item == parent) return false;
-        GuideGroup group = parent.group().getOrNull();
-        SPTarget target = item.target().getOrNull();
+        final GuideGroup group = parent.group().getOrNull();
+        final SPTarget target = item.target().getOrNull();
         if (group == null || target == null || group.containsTarget(target)) {
             return false;
         }
@@ -1035,40 +1004,40 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
      */
     public void moveTo(TableData.Row[] items, TableData.Row parent) {
         if (items.length == 0) return;
-        GuideGroup snkGrp = parent.group().getOrNull();
-        SPTarget target = items[0].target().getOrNull();
+        final GuideGroup snkGrp = parent.group().getOrNull();
+        final SPTarget target = items[0].target().getOrNull();
         if (snkGrp.containsTarget(target)) return;
-        GuideGroup srcGrp = getTargetGroup(target);
+        final GuideGroup srcGrp = getTargetGroup(target);
         if (srcGrp == null) return;
 
-        ImList<GuideProbeTargets> targetList = srcGrp.getAllContaining(target);
+        final ImList<GuideProbeTargets> targetList = srcGrp.getAllContaining(target);
         if (targetList.size() == 0) return;
-        GuideProbeTargets src = targetList.get(0);
+        final GuideProbeTargets src = targetList.get(0);
 
-        GuideProbe guideprobe = src.getGuider();
+        final GuideProbe guideprobe = src.getGuider();
         GuideProbeTargets snk = snkGrp.get(guideprobe).getOrElse(null);
         if (snk == null) {
             snk = GuideProbeTargets.create(guideprobe);
         }
 
-        boolean isPrimary = src.getPrimary().getOrElse(null) == target;
-        GuideProbeTargets newSrc = src.removeTarget(target);
-        SPTarget newTarget = SPTarget.CLONE_FUNCTION.apply(target);
+        final boolean isPrimary = src.getPrimary().getOrElse(null) == target;
+        final GuideProbeTargets newSrc = src.removeTarget(target);
+        final SPTarget newTarget = target.clone();
         GuideProbeTargets newSnk = snk.setOptions(snk.getOptions().append(newTarget));
         if (isPrimary) {
             newSnk = newSnk.selectPrimary(newTarget);
         }
 
-        GuideEnvironment guideEnv = _env.getGuideEnvironment();
-        GuideEnvironment newGuideEnv = guideEnv.putGuideProbeTargets(srcGrp, newSrc).putGuideProbeTargets(snkGrp, newSnk);
-        TargetEnvironment newTargetEnv = _env.setGuideEnvironment(newGuideEnv);
+        final GuideEnvironment guideEnv = _env.getGuideEnvironment();
+        final GuideEnvironment newGuideEnv = guideEnv.putGuideProbeTargets(srcGrp, newSrc).putGuideProbeTargets(snkGrp, newSnk);
+        final TargetEnvironment newTargetEnv = _env.setGuideEnvironment(newGuideEnv);
 
         _dataObject.setTargetEnvironment(newTargetEnv);
     }
 
     private GuideGroup getTargetGroup(SPTarget target) {
-        GuideEnvironment ge = _env.getGuideEnvironment();
-        ImList<GuideGroup> groups = ge.getOptions();
+        final GuideEnvironment ge = _env.getGuideEnvironment();
+        final ImList<GuideGroup> groups = ge.getOptions();
         for(GuideGroup group : groups) {
             if (group.containsTarget(target)) {
                 return group;
@@ -1085,11 +1054,11 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
     public void selectRowAt(int index) {
         if (_tableData == null) return;
 
-        SPTarget target = _tableData.targetAt(index).getOrNull();
+        final SPTarget target = _tableData.targetAt(index).getOrNull();
         if (target != null) {
             selectPos(target);
         } else {
-            GuideGroup group = _tableData.groupAt(index).getOrNull();
+            final GuideGroup group = _tableData.groupAt(index).getOrNull();
             if (group != null) {
                 selectGroup(group);
             }
@@ -1099,7 +1068,7 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
     /**
      * Select the base position.
      */
-    public void selectBasePos() {
+    void selectBasePos() {
         selectPos(_env.getBase());
     }
 
@@ -1107,14 +1076,14 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
     /**
      * Select a given position.
      */
-    public void selectPos(SPTarget tp) {
+    void selectPos(SPTarget tp) {
         TargetSelection.set(_env, _obsComp, tp);
     }
 
     /**
      * Select a given guide group.
      */
-    public void selectGroup(GuideGroup group) {
+    void selectGroup(GuideGroup group) {
         TargetSelection.setGuideGroup(_env, _obsComp, group);
     }
 
@@ -1122,9 +1091,9 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
      * Selects the tree node at the given location
      */
     public void setSelectedNode(Point location) {
-        TreePath path = getPathForLocation(location.x, location.y);
+        final TreePath path = getPathForLocation(location.x, location.y);
         if (path != null) {
-            int i = getRowForPath(path);
+            final int i = getRowForPath(path);
             if (i != -1) selectRowAt(i);
         }
     }
@@ -1134,9 +1103,9 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
      */
     public TableData.Row getNode(Point location) {
         if (location != null) {
-            TreePath path = getPathForLocation(location.x, location.y);
+            final TreePath path = getPathForLocation(location.x, location.y);
             if (path != null) {
-                Object o = path.getLastPathComponent();
+                final Object o = path.getLastPathComponent();
                 if (o instanceof TableData.Row) {
                     return (TableData.Row) o;
                 }
@@ -1152,10 +1121,10 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
     /**
      */
     public String toString() {
-        String head = getClass().getName() + "[\n";
+        final String head = getClass().getName() + "[\n";
         String body = "";
-        int numRows = getRowCount();
-        int numCols = getColumnCount();
+        final int numRows = getRowCount();
+        final int numCols = getColumnCount();
         for (int row = 0; row < numRows; ++row) {
             for (int col = 0; col < numCols; ++col) {
                 body += "\t" + _tableData.getValueAt(col, row);
@@ -1177,9 +1146,8 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
             final SortedSet<GuideProbe> oldGuideProbes = oldPrimary.getReferencedGuiders();
             final SortedSet<GuideProbe> newGuideProbes = newPrimary.getReferencedGuiders();
             final Set<String> warnSet = new TreeSet<>();
-            for (OffsetPosList posList : posLists) {
-                for (Object o : posList.getAllPositions()) {
-                    final OffsetPos offsetPos = (OffsetPos) o;
+            for (OffsetPosList<OffsetPosBase> posList : posLists) {
+                for (OffsetPosBase offsetPos : posList.getAllPositions()) {
                     for (GuideProbe guideProbe : oldGuideProbes) {
                         final GuideOption guideOption = offsetPos.getLink(guideProbe);
                         final GuideOptions options = guideProbe.getGuideOptions();
@@ -1200,7 +1168,7 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
 
     // OT-32: Displays a warning/confirmation dialog when the given guide probe configs are impacted
     private boolean confirmGroupChangeDialog(Set<String> warnSet) {
-        StringBuilder msg = new StringBuilder();
+        final StringBuilder msg = new StringBuilder();
         msg.append("<html>Changing the primary group will result in losing the existing "
                          + "offset iterator guiding configuration for:<ul>");
         for(String key : warnSet) {

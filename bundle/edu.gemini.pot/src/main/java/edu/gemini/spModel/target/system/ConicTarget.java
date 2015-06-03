@@ -6,7 +6,6 @@
 //
 package edu.gemini.spModel.target.system;
 
-import edu.gemini.spModel.target.system.CoordinateParam.Units;
 import edu.gemini.spModel.target.system.CoordinateTypes.*;
 
 /**
@@ -18,71 +17,21 @@ import edu.gemini.spModel.target.system.CoordinateTypes.*;
  * @author      Kim Gillies (Modified for SP)
  */
 public final class ConicTarget extends NonSiderealTarget  {
-    /**
-     * Options for the system type.
-     */
-    public static final class SystemType extends TypeBase {
-        public static int _count = 0;
 
-        public static final SystemType ASA_MAJOR_PLANET =
-                new SystemType("AsA major planet");
-        public static final SystemType ASA_MINOR_PLANET =
-                new SystemType("AsA minor planet");
-        public static final SystemType ASA_COMET =
-                new SystemType("AsA comet");
-        public static final SystemType JPL_MAJOR_PLANET =
-                new SystemType("JPL major planet");
-        public static final SystemType JPL_MINOR_BODY =
-                new SystemType("JPL minor body");
-        public static final SystemType MPC_MINOR_PLANET =
-                new SystemType("MPC minor planet");
-        public static final SystemType MPC_COMET =
-                new SystemType("MPC comet");
-
-        public static final SystemType[] TYPES = new SystemType[]{
-            ASA_MAJOR_PLANET,
-            ASA_MINOR_PLANET,
-            ASA_COMET,
-            JPL_MAJOR_PLANET,
-            JPL_MINOR_BODY,
-            MPC_MINOR_PLANET,
-            MPC_COMET
-        };
-
-        private SystemType(String name) {
-            super(_count++, name);
-        }
+    public Tag getTag() {
+        return _tag;
     }
 
-    /**
-     * The base name of this coordinate system.
-     */
-    public static final String SYSTEM_NAME = "Conic";
-    public static final String SHORT_SYSTEM_NAME = "conicTarget";
 
-    /**
-     * Default system type.
-     */
-    public static final SystemType DEFAULT_SYSTEM_TYPE = SystemType.ASA_COMET;
+    private static final Tag DEFAULT_TAG = Tag.JPL_MINOR_BODY;
 
-    public static final String ANODE_PROP = "ANode";
-    public static final String AQ_PROP = "AQ";
-    public static final String E_PROP = "E";
-    public static final String EPOCH_PROP = "Epoch";
-    public static final String INCLINATION_PROP = "Inclination";
-    public static final String LM_PROP = "LM";
-    public static final String N_PROP = "N";
-    public static final String PERIHELION_PROP = "Perihelion";
+    private static final double DEFAULT_E = 0.0;
 
-//    public static final ANode DEFAULT_ANODE = new ANode();
-//    public static final AQ DEFAULT_AQ = new AQ();
-    public static final double DEFAULT_E = 0.0;
-//    public static final Epoch DEFAULT_EPOCH = new Epoch("2000", Units.YEARS);
-//    public static final Epoch DEFAULT_EPOCH_OF_PERI = new Epoch("2000", Units.YEARS);
-//    public static final Inclination DEFAULT_INCLINATION = new Inclination();
-//    public static final LM DEFAULT_LM = new LM();
-//    public static final N DEFAULT_N = new N();
-//    public static final Perihelion DEFAULT_PERIHELION = new Perihelion();
+
+    protected CoordinateTypes.Epoch defaultEpoch() {
+        // inexplicably mutable, so always create a new value
+        return new CoordinateTypes.Epoch("0", CoordinateParam.Units.JD);
+    }
 
 
     private ANode _anode = new ANode();
@@ -92,13 +41,14 @@ public final class ConicTarget extends NonSiderealTarget  {
     private LM _lm = new LM();
     private N _n = new N();
     private Perihelion _perihelion = new Perihelion();
-    private Epoch _epochOfPeri = new Epoch("2000", Units.YEARS);
+    private Epoch _epochOfPeri = defaultEpoch();
+    private final Tag _tag;
 
 
     /**
      * Provides clone support.
      */
-    public Object clone() {
+    public ConicTarget clone() {
         ConicTarget result = (ConicTarget) super.clone();
 
         if (_anode != null) result._anode = (ANode) _anode.clone();
@@ -157,17 +107,15 @@ public final class ConicTarget extends NonSiderealTarget  {
      * Constructs a default ConicTarget instance with default properties.
      */
     public ConicTarget() {
-        // This can't really fail.
-        super(DEFAULT_SYSTEM_TYPE);
+        this(DEFAULT_TAG);
     }
 
     /**
      * Constructs with the specific conic system type and default
      * values.
      */
-    public ConicTarget(SystemType systemOption)
-            throws IllegalArgumentException {
-        super(systemOption);
+    public ConicTarget(Tag tag) {
+        _tag = tag;
     }
 
 
@@ -236,23 +184,8 @@ public final class ConicTarget extends NonSiderealTarget  {
      * Gets the epoch of perihelion of this object.
      */
     public Epoch getEpochOfPeri() {
-        if (_epochOfPeri == null) {
-            _epochOfPeri = _createDefaultEpochOfPeri();
-        }
         return _epochOfPeri;
     }
-
-
-
-    /**
-     * Returns the current epoch of perihelion, creating it if necessary.
-     */
-    private Epoch _createDefaultEpochOfPeri() {
-        return new Epoch("2000", Units.YEARS);
-    }
-
-
-
 
     /**
      * Sets the epoch of perihelion.  The value of the parameter is not
@@ -260,6 +193,7 @@ public final class ConicTarget extends NonSiderealTarget  {
      * stored in this class.
      */
     public void setEpochOfPeri(Epoch newValue) {
+        if (newValue == null) newValue = defaultEpoch();
         _epochOfPeri = newValue;
     }
 
@@ -346,40 +280,5 @@ public final class ConicTarget extends NonSiderealTarget  {
     public void setPerihelion(Perihelion newValue) {
         _perihelion = newValue;
     }
-
-
-    /**
-     * Return the short system name.
-     */
-    public String getShortSystemName() {
-        return SHORT_SYSTEM_NAME;
-    }
-
-    /**
-     * Diagnostic to dump the contents of the target to System.out.
-     */
-    public void dump() {
-        System.out.println(getPosition());
-    }
-
-    /**
-     * Gets a short description of the position.
-     */
-    public String getPosition() {
-        // what should be returned here
-        return "Orbital Elements";
-    }
-
-
-    /**
-     * Gets the available options for this coordinate system.
-     */
-    public TypeBase[] getSystemOptions() {
-//        SystemType[] stA = new SystemType[SystemType.TYPES.length];
-//        System.arraycopy(SystemType.TYPES, 0, stA, 0, SystemType.TYPES.length);
-//        return stA;
-        return SystemType.TYPES;
-    }
-
 
 }

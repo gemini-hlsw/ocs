@@ -521,7 +521,7 @@
             <param name="exposureTime" value="1.49"/>
             <param name="posAngle" value="0"/>
             <param name="coadds" value="1"/>
-            <param name="astrometricFieldEnum" value="YES"/>
+            <param name="astrometricFieldEnum" value="NO"/>
             <param name="adc" value="IN"/>
             <param name="disperser" value="WOLLASTON"/>
             <param name="detectorStartX" value="0"/>
@@ -932,6 +932,7 @@
     <paramset name="node">
       <param name="key" value="77c030a8-2996-4b64-9884-5bae36ce9db5"/>
       <param name="3da82fb4-11cc-4fb4-9a43-86c54d94b131" value="2"/>
+      <param name="214d5e4b-ec02-47fa-8b11-cd776ee2122d" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="ae1e85d6-20db-475e-a4a4-755186bf2fdf"/>

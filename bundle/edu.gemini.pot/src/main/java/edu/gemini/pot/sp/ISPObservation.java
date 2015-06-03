@@ -29,6 +29,12 @@ public interface ISPObservation extends ISPObsComponentContainer, ISPContainerNo
     int getObservationNumber();
 
     /**
+     * Sets the observation number.  It is the caller's responsibility to
+     * ensure that observation numbers are not duplicated.
+     */
+    void setObservationNumber(int num);
+
+    /**
      * Gets the observation id, which is the reference number of the program
      * and a sequential index.  This id is known to, displayed to, and used
      * by humans.

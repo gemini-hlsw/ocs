@@ -1355,24 +1355,7 @@ public abstract class EdCompInstGMOS<T extends InstGmosCommon> extends EdCompIns
 
     // -- Implement the TelescopePosWatcher interface --
 
-    /**
-     * The current position location has changed.
-     *
-     * @param tp
-     * @see edu.gemini.spModel.target.TelescopePosWatcher
-     */
-    public void telescopePosLocationUpdate(WatchablePos tp) {
-        telescopePosGenericUpdate(tp);
-    }
-
-
-    /**
-     * The current position has been changed in some way.
-     *
-     * @param tp
-     * @see TelescopePosWatcher
-     */
-    public void telescopePosGenericUpdate(WatchablePos tp) {
+    public void telescopePosUpdate(WatchablePos tp) {
         if (tp != _curPos) {
             // This shouldn't happen ...
             System.out.println(getClass().getName() + ": received a position " +

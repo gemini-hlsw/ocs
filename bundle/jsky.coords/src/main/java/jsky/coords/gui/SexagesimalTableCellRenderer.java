@@ -83,7 +83,7 @@ public class SexagesimalTableCellRenderer extends DefaultTableCellRenderer {
             if (value instanceof Float)
                 val = ((Float) value).doubleValue();
             else if (value instanceof Double)
-                val = ((Double) value).doubleValue();
+                val = ((Double) value);
         }
         if (!Double.isNaN(val)) {
             HMS hms = new HMS(val / _f);

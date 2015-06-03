@@ -31,19 +31,19 @@ public class JavaExpr extends DVMap {
     private Object[] _context = new Object[1];
 
     // Vector of VarValue: Maps variable names to values
-    private Vector _vars = new Vector();
+    private Vector<VarValue> _vars = new Vector<>();
 
     // Cached number of variables (since it is often only 1)
     private int _numVars = 0;
 
 
     // Export the static methods of java.lang.Math
-    private static final Class[] _stLib = new Class[]{
+    private static final Class<?>[] _stLib = new Class<?>[]{
         Math.class
     };
 
     // Export YYY getXXXProperty() methods for dynamic variable access
-    private Class[] _dynLib = new Class[]{
+    private Class<?>[] _dynLib = new Class<?>[]{
         JavaExpr.class
     };
 
@@ -106,8 +106,7 @@ public class JavaExpr extends DVMap {
 
     /** Called by reflection for the DVMap interface to get the value of the named variable */
     public double getDoubleProperty(String name) {
-        for (int i = 0; i < _numVars; i++) {
-            VarValue v = (VarValue) _vars.get(i);
+        for (VarValue v: _vars) {
             if (v.name.equals(name))
                 return v.value;
         }
@@ -121,8 +120,7 @@ public class JavaExpr extends DVMap {
      * but not ${X}, for example).
      */
     public void setVar(String name, double value) {
-        for (int i = 0; i < _numVars; i++) {
-            VarValue v = (VarValue) _vars.get(i);
+        for (VarValue v: _vars) {
             if (v.name.equals(name)) {
                 v.value = value;
                 return;

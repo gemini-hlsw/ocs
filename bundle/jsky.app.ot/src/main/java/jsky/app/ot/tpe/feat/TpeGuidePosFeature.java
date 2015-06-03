@@ -16,6 +16,8 @@ import edu.gemini.spModel.target.env.OptionsList.UpdateOps;
 import edu.gemini.spModel.target.env.TargetEnvironment;
 import edu.gemini.spModel.target.obsComp.TargetObsComp;
 import edu.gemini.spModel.target.obsComp.TargetSelection;
+import edu.gemini.spModel.target.system.CoordinateParam;
+import edu.gemini.spModel.target.system.HmsDegTarget;
 import jsky.app.ot.gemini.editor.targetComponent.PrimaryTargetToggle;
 import jsky.app.ot.tpe.*;
 import jsky.app.ot.util.BasicPropertyList;
@@ -126,7 +128,7 @@ public class TpeGuidePosFeature extends TpePositionFeature
 
         Option<SkyObject> skyObjectOpt = tme.getSkyObject();
         if (!skyObjectOpt.isEmpty()) {
-            pos = new SPTarget(skyObjectOpt.getValue());
+            pos = new SPTarget(HmsDegTarget.fromSkyObject(skyObjectOpt.getValue()));
         } else {
             // No SkyObject info is present so we use the old way of creating
             // a target from a mouse event.
@@ -134,10 +136,10 @@ public class TpeGuidePosFeature extends TpePositionFeature
             double dec = tme.pos.getDecDeg();
 
             pos = new SPTarget(ra, dec);
-            if (tme.name != null) pos.setName(tme.name);
-
-            Option<String> bString = tme.getBrightness();
-            if (!bString.isEmpty()) pos.setBrightness(bString.getValue());
+            if (tme.name != null) {
+                pos.getTarget().setName(tme.name);
+                pos.notifyOfGenericUpdate();
+            }
         }
 
         return pos;
@@ -509,7 +511,9 @@ public class TpeGuidePosFeature extends TpePositionFeature
             _dragObject.screenPos.y = tme.yWidget;
 
             SPTarget tp = (SPTarget) _dragObject.taggedPos;
-            tp.setTargetWithJ2000(tme.pos.getRaDeg(), tme.pos.getDecDeg());
+            tp.getTarget().getRa().setAs(tme.pos.getRaDeg(), CoordinateParam.Units.DEGREES);
+            tp.getTarget().getDec().setAs(tme.pos.getDecDeg(), CoordinateParam.Units.DEGREES);
+            tp.notifyOfGenericUpdate();
         }
     }
 }

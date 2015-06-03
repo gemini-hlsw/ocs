@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<proposal tacCategory="Galactic" schemaVersion="2015.1.1">
+    <meta band3optionChosen="true">
+        <attachment>/Users/shogo/Documents/Documents/Proposal/proposal/Subaru/15A/SgrAS/Gemini/Phase1/14B_ITC_GemPh1NishiyamaV0927.pdf</attachment>
+    </meta>
+    <semester half="A" year="2015"/>
+    <title>Gas Cloud Accretion onto the SMBH Sgr A* and Formation of Jet 4</title>
+    <abstract>A dense gas cloud was detected to be rapidly approaching the Galactic supermassive black hole (SMBH) SgrA*, and was~1600 Schwarzschild radii from the SMBH at the pericenter of its eccentric orbit in Mar 2014. Ongoing tidal disruption has been observed, and cloud fragments are expected to accrete onto the SMBH on dynamical timescales, suggesting a jet formation in the following years. So we are carrying out daily monitoring observations of SgrA* in near-infrared and radio wavelengths, and we propose quick follow-up observations with Subaru/Gemini. Br-gamma line emission maps obtained with Gemini/NIFS will be used to fine tune our 3D simulation to estimate how much mass accretes, and when the fragments accrete onto the SMBH. Polarimetric and astrometric signals from a jet taken with Subaru/HiCIAO and KaVA will be compared with the finely tuned simulation to understand the timescale of jet formation, and to investigate the correlation between the accreted mass of the cloud fragments and a luminosity of the newly-formed jet. Spectroscopic and imaging observations from 1.6 - 11 um (Subaru/IRCS, COMICS) will also be conducted to understand processes responsible for near- to mid-infrared emission during the accretion event.</abstract>
+    <scheduling></scheduling>
+    <keywords>
+        <keyword>Jets</keyword>
+        <keyword>Black hole physics</keyword>
+        <keyword>Milky way</keyword>
+    </keywords>
+    <investigators>
+        <pi id="investigator-0">
+            <firstName>Shogo</firstName>
+            <lastName>Nishiyama</lastName>
+            <status>PhD</status>
+            <email>shogo.nishiyama@nao.ac.jp</email>
+            <phone>+81-22-214-3422</phone>
+            <address>
+                <institution>Miyagi University of Education</institution>
+                <address>149 Aramaki-Aza-Aoba, Aoba-ku, Sendai, 
+Miyagi 980-0845, Japan</address>
+                <country>Japan</country>
+            </address>
+        </pi>
+        <coi id="investigator-1">
+            <firstName>Tetsuya</firstName>
+            <lastName>Nagata</lastName>
+            <status>PhD</status>
+            <email>nagata@kusastro.kyoto-u.ac.jp</email>
+            <phone></phone>
+            <institution>Kyoto University</institution>
+        </coi>
+        <coi id="investigator-2">
+            <firstName>Motohide</firstName>
+            <lastName>Tamura</lastName>
+            <status>PhD</status>
+            <email>motohide.tamura@nao.ac.jp</email>
+            <phone></phone>
+            <institution>University of Tokyo/NAOJ</institution>
+        </coi>
+        <coi id="investigator-3">
+            <firstName>Tomoyuki</firstName>
+            <lastName>Kudo</lastName>
+            <status>PhD</status>
+            <email>kudotm@subaru.naoj.org</email>
+            <phone></phone>
+            <institution>Subaru Telescope, NAOJ</institution>
+        </coi>
+        <coi id="investigator-4">
+            <firstName>Yosuke</firstName>
+            <lastName>Minowa</lastName>
+            <status>PhD</status>
+            <email>minoways@naoj.org</email>
+            <phone></phone>
+            <institution>Subaru Telescope, NAOJ</institution>
+        </coi>
+        <coi id="investigator-5">
+            <firstName>Masato</firstName>
+            <lastName>Tsuboi</lastName>
+            <status>PhD</status>
+            <email>tsuboi@vsop.isas.jaxa.jp</email>
+            <phone></phone>
+            <institution>JAXA</institution>
+        </coi>
+        <coi id="investigator-6">
+            <firstName>Noriyuki</firstName>
+            <lastName>Matsunaga</lastName>
+            <status>PhD</status>
+            <email>matsunaga@astron.s.u-tokyo.ac.jp</email>
+            <phone></phone>
+            <institution>University of Tokyo</institution>
+        </coi>
+        <coi id="investigator-7">
+            <firstName>Akihiko</firstName>
+            <lastName>Fukui</lastName>
+            <status>PhD</status>
+            <email>afukui@oao.nao.ac.jp</email>
+            <phone></phone>
+            <institution>NAOJ</institution>
+        </coi>
+        <coi id="investigator-8">
+            <firstName>Tae-Soo</firstName>
+            <lastName>Pyo</lastName>
+            <status>PhD</status>
+            <email>pyo@naoj.org</email>
+            <phone></phone>
+            <institution>Subaru Telescope, NAOJ</institution>
+        </coi>
+        <coi id="investigator-9">
+            <firstName>Takuya</firstName>
+            <lastName>Fujiyoshi</lastName>
+            <status>PhD</status>
+            <email>tak@subaru.naoj.org</email>
+            <phone></phone>
+            <institution>Subaru Telescope, NAOJ</institution>
+        </coi>
+        <coi id="investigator-10">
+            <firstName>Takayuki</firstName>
+            <lastName>Saitoh</lastName>
+            <status>PhD</status>
+            <email>saitoh@geo.titech.ac.jp</email>
+            <phone></phone>
+            <institution>Tokyo Institute of Technology</institution>
+        </coi>
+        <coi id="investigator-11">
+            <firstName>Kazunori</firstName>
+            <lastName>Akiyama</lastName>
+            <status>PhD</status>
+            <email>kazunori.akiyama@nao.ac.jp</email>
+            <phone></phone>
+            <institution>University of Tokyo</institution>
+        </coi>
+        <coi id="investigator-12">
+            <firstName>Mareki</firstName>
+            <lastName>Honma</lastName>
+            <status>PhD</status>
+            <email>mareki.honma@nao.ac.jp</email>
+            <phone></phone>
+            <institution>NAOJ</institution>
+        </coi>
+    </investigators>
+    <targets>
+        <sidereal epoch="J2000" id="target-0">
+            <name>Sgr A*</name>
+            <degDeg>
+                <ra>266.41681662</ra>
+                <dec>-29.00782497</dec>
+            </degDeg>
+            <magnitudes>
+                <magnitude system="Vega" band="H">18.700000762939453</magnitude>
+                <magnitude system="Vega" band="K">16.299999237060547</magnitude>
+                <magnitude system="Vega" band="L">12.0</magnitude>
+                <magnitude system="Vega" band="M">11.5</magnitude>
+            </magnitudes>
+        </sidereal>
+    </targets>
+    <conditions>
+        <condition id="condition-0">
+            <name>CC 70%/Cirrus, IQ 20%/Best, SB 50%/Dark, WV Any</name>
+            <cc>70%/Cirrus</cc>
+            <iq>20%/Best</iq>
+            <sb>50%/Dark</sb>
+            <wv>Any</wv>
+        </condition>
+    </conditions>
+    <blueprints>
+        <nifs>
+            <ao id="blueprint-0">
+                <name>NIFS NGS/FL None K (1.99 - 2.40um)</name>
+                <visitor>false</visitor>
+                <disperser>K (1.99 - 2.40um)</disperser>
+                <altair>
+                    <ngs fieldLens="true"/>
+                </altair>
+                <occultingDisk>None</occultingDisk>
+            </ao>
+        </nifs>
+    </blueprints>
+    <observations>
+        <observation blueprint="blueprint-0" condition="condition-0" target="target-0" enabled="true" band="Band 1/2">
+            <time units="hr">8.0</time>
+            <meta ck="">
+                <guiding>
+                    <percentage>100</percentage>
+                    <evaluation>Success</evaluation>
+                </guiding>
+                <visibility>Good</visibility>
+                <gsa>50</gsa>
+            </meta>
+        </observation>
+    </observations>
+    <proposalClass>
+        <queue tooOption="Rapid" key="abd3ea5d-2537-4fe0-b5e6-d7218348ef9e">
+            <exchange partnerLead="investigator-0">
+                <request>
+                    <time units="hr">8.0</time>
+                    <minTime units="hr">4.0</minTime>
+                </request>
+                <partner>subaru</partner>
+            </exchange>
+        </queue>
+    </proposalClass>
+</proposal>

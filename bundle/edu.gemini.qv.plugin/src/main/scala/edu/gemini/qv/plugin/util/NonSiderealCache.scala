@@ -5,7 +5,7 @@ import edu.gemini.qpt.shared.sp.Obs
 import edu.gemini.qv.plugin.QvTool
 import edu.gemini.skycalc.TimeUtils
 import edu.gemini.spModel.core.{Site, Peer}
-import edu.gemini.spModel.target.system.IHorizonsTarget
+import edu.gemini.spModel.target.system.{ NonSiderealTarget => NST }
 import edu.gemini.util.skycalc.calc.Interval
 import edu.gemini.util.skycalc.{Night, Ephemeris, NonSiderealTarget}
 import java.util.logging.{Level, Logger}
@@ -40,14 +40,14 @@ object NonSiderealCache {
   /**
    * Checks if the positions of the base target of this observation can be looked up using Horizon.
    * In order we can do a lookup for a non-sidereal target it needs to be defined (i.e. target environment,
-   * base position and target are not null) and the target implements the IHorizonsTarget interface.
+   * base position and target are not null) and the target is a NonSiderealTarget.
    * @param obs
    * @return
    */
   def isHorizonsTarget(obs: Obs): Boolean =
     // QV only deals with "valid" observations, i.e. target environment, base and target all have to be set
     obs.getTargetEnvironment.getBase.getTarget match {
-      case t: IHorizonsTarget => true
+      case t: NST => true
       case _ => false
     }
 
@@ -83,7 +83,7 @@ object NonSiderealCache {
   def horizonsNameFor(obs: Obs): Option[String] =
     obs.getTargetEnvironment.getBase.getTarget match {
 
-      case t: edu.gemini.spModel.target.system.IHorizonsTarget =>
+      case t: NST =>
         if (t.getName == null || t.getName.isEmpty) None
         else Option(t.getName)
 

@@ -2,13 +2,15 @@ package edu.gemini.ags.impl
 
 import edu.gemini.ags.api.{AgsAnalysis, AgsMagnitude, AgsStrategy}
 import edu.gemini.ags.api.AgsStrategy.{Assignment, Estimate, Selection}
+import edu.gemini.ags.api.defaultProbeBands
 import edu.gemini.ags.gems._
-import edu.gemini.ags.gems.mascot.{Strehl, MascotProgress}
+import edu.gemini.ags.gems.mascot.Strehl
 import edu.gemini.catalog.api._
+import edu.gemini.catalog.votable._
 import edu.gemini.pot.sp.SPComponentType
-import edu.gemini.shared.skyobject.{SkyObject, Magnitude}
-import edu.gemini.shared.skyobject.coords.HmsDegCoordinates
-import edu.gemini.skycalc.{Angle, Offset}
+import edu.gemini.pot.ModelConverters._
+import edu.gemini.spModel.core.Target.SiderealTarget
+
 import edu.gemini.spModel.ags.AgsStrategyKey.GemsKey
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2OiwfsGuideProbe
 import edu.gemini.spModel.gemini.gems.{GemsInstrument, Canopus}
@@ -21,11 +23,16 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.collection.JavaConverters._
 import scala.concurrent._
 import edu.gemini.ags.api.AgsMagnitude.{MagnitudeCalc, MagnitudeTable}
-import edu.gemini.spModel.guide.{GuideProbeGroup, GuideProbe}
-import edu.gemini.spModel.core.Site
+import edu.gemini.spModel.guide.{ValidatableGuideProbe, GuideProbeGroup, GuideProbe}
+import edu.gemini.spModel.core.{Angle, MagnitudeBand}
 
+import scalaz._
+import Scalaz._
 
-object GemsStrategy extends AgsStrategy {
+trait GemsStrategy extends AgsStrategy {
+  // By default use the remote backend but it can be overriden in tests
+  private [impl] def backend:VoTableBackend
+
   override def key = GemsKey
 
   // Since the constraints are run in parallel, we need a way to identify them after
@@ -36,12 +43,12 @@ object GemsStrategy extends AgsStrategy {
   private val OdgwFlexureId    = 1
 
   // Catalog results with search keys to avoid having to recompute search key info on the fly.
-  private case class CatalogResultWithKey(catalogResult: CatalogResult, searchKey: GemsCatalogSearchKey)
+  private case class CatalogResultWithKey(query: CatalogQuery, catalogResult: CatalogQueryResult, searchKey: GemsCatalogSearchKey)
 
 
   // Query the catalog for each constraint and compile a list of results with the necessary
   // information for GeMS.
-  private def catalogResult(ctx: ObsContext, mt: MagnitudeTable): Future[List[CatalogResultWithKey]] = future {
+  private def catalogResult(ctx: ObsContext, mt: MagnitudeTable): Future[List[CatalogResultWithKey]] = {
     // Maps for IDs to types needed by GeMS.
     def GuideStarTypeMap = Map[Int, GemsGuideStarType](
       CanopusTipTiltId -> GemsGuideStarType.tiptilt,
@@ -54,34 +61,40 @@ object GemsStrategy extends AgsStrategy {
       OdgwFlexureId    -> GsaoiOdgw.Group.instance
     )
 
-    val adjustedConstraints = queryConstraints(ctx, mt).map { constraint =>
+    val adjustedConstraints = catalogQueries(ctx, mt).map { constraint =>
       // Adjust the magnitude limits for the conditions.
-      val adjustedMagLimit = constraint.magnitudeLimits.mapMagnitudes(ctx.getConditions.magAdjustOp())
-      constraint.copy(adjustedMagLimit)
+      val adjustedMagConstraints = constraint.magnitudeConstraints.map(c => c.map(m => ctx.getConditions.magAdjustOp().apply(m.toOldModel).toNewModel))
+      constraint.withMagnitudeConstraints(adjustedMagConstraints)
     }
 
-    val server = CatalogServerInstances.STANDARD
-    ParallelCatalogQuery.instance.query(server, adjustedConstraints.asImList).asScala.map { result =>
-      val id = result.constraint.id
-      CatalogResultWithKey(result, new GemsCatalogSearchKey(GuideStarTypeMap(id), GuideProbeGroupMap(id)))
-    }.toList
+    VoTableClient.catalogs(adjustedConstraints, backend).flatMap {
+      case result if result.exists(_.result.containsError) => Future.failed(CatalogException(result.flatMap(_.result.problems)))
+      case result                                          => Future.successful {
+        result.flatMap { r =>
+          val id = r.query.id
+          id.map(x => CatalogResultWithKey(r.query, r.result, GemsCatalogSearchKey(GuideStarTypeMap(x), GuideProbeGroupMap(x))))
+        }
+      }
+    }
   }
 
 
   // Convert from catalog results to GeMS-specific results.
   private def toGemsCatalogSearchResults(ctx: ObsContext, futureAgsCatalogResults: Future[List[CatalogResultWithKey]]): Future[List[GemsCatalogSearchResults]] = {
-    val anglesToTry = (0 until 360 by 45).map(x => new Angle(x, Angle.Unit.DEGREES))
-    val none: Option[Offset] = None
+    val anglesToTry = (0 until 360 by 45).map(Angle.fromDegrees(_))
 
     futureAgsCatalogResults.map { agsCatalogResults =>
       for {
         result <- agsCatalogResults
-        angle <- anglesToTry
+        angle  <- anglesToTry
       } yield {
-        val constraint = result.catalogResult.constraint
-        val catalogSearchCriterion = new CatalogSearchCriterion("ags", constraint.magnitudeLimits, constraint.radiusLimits, none.asGeminiOpt, Some(angle).asGeminiOpt)
+        val constraint = result.query
+        val radiusConstraint = constraint.radiusConstraint
+        val band = constraint.magnitudeConstraints.map(_.band)
+        val mr = constraint.magnitudeConstraints.map(mc => MagnitudeRange(mc.faintnessConstraint, mc.saturationConstraint))
+        val catalogSearchCriterion = CatalogSearchCriterion("ags", band.orNull, mr.orNull, radiusConstraint, None, angle.some)
         val gemsCatalogSearchCriterion = new GemsCatalogSearchCriterion(result.searchKey, catalogSearchCriterion)
-        new GemsCatalogSearchResults(gemsCatalogSearchCriterion, result.catalogResult.candidates.toList)
+        new GemsCatalogSearchResults(gemsCatalogSearchCriterion, result.catalogResult.targets.rows)
       }
     }
   }
@@ -92,18 +105,23 @@ object GemsStrategy extends AgsStrategy {
     cans ++ odgw
   }
 
+  override def analyze(ctx: ObsContext, mt: MagnitudeTable, guideProbe: ValidatableGuideProbe, guideStar: SiderealTarget): Option[AgsAnalysis] =
+    AgsAnalysis.analysis(ctx, mt, guideProbe, guideStar, probeBands(guideProbe))
+
   override def analyze(ctx: ObsContext, mt: MagnitudeTable): List[AgsAnalysis] = {
     import AgsAnalysis._
 
     def mapGroup(grp: GuideProbeGroup): List[AgsAnalysis] = {
       def hasGuideStarForProbe(a: AgsAnalysis): Boolean = a match {
-        case NoGuideStarForProbe(_) => false
-        case _                      => true
+        case NoGuideStarForProbe(_, _) => false
+        case _                         => true
       }
 
-      val probeAnalysis = grp.getMembers.asScala.toList.map{ analysis(ctx, mt, _) }.flatten
+      val probeAnalysis = grp.getMembers.asScala.toList.flatMap { p => analysis(ctx, mt, p, probeBands(p)) }
       probeAnalysis.filter(hasGuideStarForProbe) match {
-        case Nil => List(NoGuideStarForGroup(grp))
+        case Nil =>
+          // Pick the first guide probe as representative, since we are called with either Canopus or GsaoiOdwg
+          ~grp.getMembers.asScala.headOption.map {gp => List(NoGuideStarForGroup(grp, probeBands(gp)))}
         case lst => lst
       }
     }
@@ -111,30 +129,23 @@ object GemsStrategy extends AgsStrategy {
     mapGroup(Canopus.Wfs.Group.instance) ++ mapGroup(GsaoiOdgw.Group.instance)
   }
 
-  override def candidates(ctx: ObsContext, mt: MagnitudeTable): Future[List[(GuideProbe, List[SkyObject])]] = {
+  override def candidates(ctx: ObsContext, mt: MagnitudeTable): Future[List[(GuideProbe, List[SiderealTarget])]] = {
 
     // Extract something we can understand from the GemsCatalogSearchResults.
-    def simplifiedResult(results: List[GemsCatalogSearchResults]): List[(GuideProbe, List[SkyObject])] =
+    def simplifiedResult(results: List[GemsCatalogSearchResults]): List[(GuideProbe, List[SiderealTarget])] =
       results.flatMap { result =>
-        val so = result.getResults.asScala.toList  // extract the sky objects from this thing
+        val so = result.results  // extract the sky objects from this thing
         // For each guide probe associated with these sky objects, add a tuple
         // (guide probe, sky object list) to the results
-        result.getCriterion.getKey.getGroup.getMembers.asScala.toList.map { guideProbe =>
+        result.criterion.key.group.getMembers.asScala.toList.map { guideProbe =>
           (guideProbe, so)
         }
       }
 
     // why do we need multiple position angles?  catalog results are given in
     // a ring (limited by radius limits) around a base position ... confusion
-    val posAngles   = (ctx.getPositionAngle :: (0 until 360 by 90).map(a => new Angle(a, Angle.Unit.DEGREES)).toList).toSet
-    val emptyResult = List.empty[(GuideProbe, List[SkyObject])]
-    future {
-      search(GemsGuideStarSearchOptions.DEFAULT_CATALOG,
-        GemsGuideStarSearchOptions.DEFAULT_CATALOG,
-        GemsTipTiltMode.canopus, ctx, posAngles, None)
-    }.map {
-      _.fold(emptyResult)(simplifiedResult)
-    }
+    val posAngles   = (ctx.getPositionAngle.toNewModel :: (0 until 360 by 90).map(Angle.fromDegrees(_)).toList).toSet
+    search(GemsTipTiltMode.canopus, ctx, posAngles, None).map(simplifiedResult)
   }
 
   override def estimate(ctx: ObsContext, mt: MagnitudeTable): Future[Estimate] = {
@@ -142,110 +153,95 @@ object GemsStrategy extends AgsStrategy {
     val results = toGemsCatalogSearchResults(ctx, catalogResult(ctx, mt))
 
     // Create a set of the angles to try.
-    val anglesToTry = (0 until 360 by 45).map(x => new Angle(x, Angle.Unit.DEGREES)).toSet.asJava
-
+    val anglesToTry = (0 until 360 by 45).map(Angle.fromDegrees(_)).toSet
 
     // A way to terminate the Mascot algorithm immediately in the following cases:
     // 1. A usable 2 or 3-star asterism is found; or
     // 2. If no asterisms were found.
-    // This is unfortunately a hideous way to do anything, which could be avoided if we
-    // rewrote the GemsCatalogResults.analyzeGoodEnough method (which is only used here)
-    // to return something like a Buffer.
-    val progressMeasurer = new MascotProgress {
-      override def progress(s: Strehl, count: Int, total: Int, usable: Boolean): Boolean = {
-        !((usable && s.stars.size >= 2) || (s.stars.size < 2))
-      }
-      override def setProgressTitle(s: String): Unit = {}
+    // Returning false will stop the search
+    def progress(s: Strehl, usable: Boolean): Boolean = {
+      !((usable && s.stars.size >= 2) || (s.stars.size < 2))
     }
 
     // Iterate over 45 degree position angles if no asterism is found at PA = 0.
-    val gemsCatalogResults = results.map(result => new GemsCatalogResults().analyzeGoodEnough(ctx, anglesToTry, result.asJava, progressMeasurer).asScala)
+    val gemsCatalogResults = results.map(result => GemsResultsAnalyzer.analyzeGoodEnough(ctx, anglesToTry, result, progress))
 
     // Filter out the 1-star asterisms. If anything is left, we are good to go; otherwise, no.
     gemsCatalogResults.map { x =>
-      if (x.filter(_.getGuideGroup.getTargets.size() >= 3).isEmpty)
-        AgsStrategy.Estimate.CompleteFailure
-      else
-        AgsStrategy.Estimate.GuaranteedSuccess
+      !x.exists(_.guideGroup.getTargets.size() >= 3) ? AgsStrategy.Estimate.CompleteFailure | AgsStrategy.Estimate.GuaranteedSuccess
     }
   }
 
-
-  private def search(opticalCatalog: String, nirCatalog: String, tipTiltMode: GemsTipTiltMode, ctx: ObsContext, posAngles: Set[Angle], nirBand: Option[Magnitude.Band]): Option[List[GemsCatalogSearchResults]] = {
+  protected [impl] def search(tipTiltMode: GemsTipTiltMode, ctx: ObsContext, posAngles: Set[Angle], nirBand: Option[MagnitudeBand]): Future[List[GemsCatalogSearchResults]] = {
     // Get the instrument: F2 or GSAOI?
-    val gemsInstrument = {
-      if (ctx.getInstrument.getType == SPComponentType.INSTRUMENT_GSAOI)
-        GemsInstrument.gsaoi
-      else
-        GemsInstrument.flamingos2
-    }
-    val gemsOptions = new GemsGuideStarSearchOptions(opticalCatalog, nirCatalog, gemsInstrument, tipTiltMode, posAngles.asJava)
+    val gemsInstrument =
+      (ctx.getInstrument.getType == SPComponentType.INSTRUMENT_GSAOI) ? GemsInstrument.gsaoi | GemsInstrument.flamingos2
+    // Search options
+    val gemsOptions = new GemsGuideStarSearchOptions(gemsInstrument, tipTiltMode, posAngles.asJava)
 
-    // Create the base position.
-    val baseCoords = ctx.getBaseCoordinates
-    val basePos = new HmsDegCoordinates.Builder(baseCoords.getRa, baseCoords.getDec).build
-
-    // Perform the catalog search.
-    val results = new GemsCatalog().search(ctx, basePos, gemsOptions, nirBand.asGeminiOpt, null).asScala.toList
+    // Perform the catalog search, using GemsStrategy's backend
+    val results = GemsVoTableCatalog(backend, ucac4).search(ctx, ctx.getBaseCoordinates.toNewModel, gemsOptions, nirBand, null)
 
     // Now check that the results are valid: there must be a valid tip-tilt and flexure star each.
-    val checker = results.foldRight(Map[String, Boolean]())((result, resultMap) => {
-      val key = result.getCriterion.getKey.getGroup.getKey
-      if (!result.getResults.isEmpty)    resultMap.updated(key, true)
-      else if (!resultMap.contains(key)) resultMap.updated(key, false)
-      else                               resultMap
-    })
-    if (checker.values.exists(!_))
-      None
-    else
-      Some(results)
+    results.map { r =>
+      val AllKeys:List[GemsGuideProbeGroup] = List(Canopus.Wfs.Group.instance, GsaoiOdgw.Group.instance)
+      val containedKeys = r.map(_.criterion.key.group)
+      // Return a list only if both guide probes returned a value
+      ~(containedKeys.forall(AllKeys.contains) option r)
+    }
   }
 
   private def findGuideStars(ctx: ObsContext, posAngles: Set[Angle], results: List[GemsCatalogSearchResults]): Option[GemsGuideStars] = {
     // Passing in null to say we don't want a ProgressMeter.
-    val gemsResults = new GemsCatalogResults().analyze(ctx, posAngles.asJava, results.asJava, null).asScala
-    if (gemsResults.isEmpty)
-      None
-    else
-      Some(gemsResults.head)
+    val gemsResults = GemsResultsAnalyzer.analyze(ctx, posAngles.asJava, results.asJava, None).asScala
+    gemsResults.headOption
   }
 
-  override def select(ctx: ObsContext, mt: MagnitudeTable): Future[Option[Selection]] = future {
-    val posAngles = (ctx.getPositionAngle :: (0 until 360 by 90).map(a => new Angle(a, Angle.Unit.DEGREES)).toList).toSet
-    val results = search(GemsGuideStarSearchOptions.DEFAULT_CATALOG,
-      GemsGuideStarSearchOptions.DEFAULT_CATALOG,
-      GemsTipTiltMode.canopus, ctx, posAngles, None)
-    val gemsGuideStars = results.map(x => findGuideStars(ctx, posAngles, x)).flatten
+  override def select(ctx: ObsContext, mt: MagnitudeTable): Future[Option[Selection]] = {
+    val posAngles = Set(ctx.getPositionAngle.toNewModel, Angle.zero, Angle.fromDegrees(90), Angle.fromDegrees(180), Angle.fromDegrees(270))
+    val results = search(GemsTipTiltMode.canopus, ctx, posAngles, None)
+    results.map { r =>
+      val gemsGuideStars = findGuideStars(ctx, posAngles, r)
 
-    // Now we must convert from an Option[GemsGuideStars] to a Selection.
-    gemsGuideStars.map { x =>
-      val posAngle = x.getPa.toDegrees
-      val assignments = x.getGuideGroup.getAll.asScalaList.map(targets => {
-        val guider = targets.getGuider
-        targets.getTargets.asScalaList.map(target => Assignment(guider, skyObjectFromScienceTarget(target)))
-      }).flatten
-      Selection(posAngle, assignments)
+      // Now we must convert from an Option[GemsGuideStars] to a Selection.
+      gemsGuideStars.map { x =>
+        val assignments = x.guideGroup.getAll.asScalaList.flatMap(targets => {
+          val guider = targets.getGuider
+          targets.getTargets.asScalaList.map(target => Assignment(guider, target.toNewModel))
+        })
+        Selection(x.pa, assignments)
+      }
     }
   }
 
-  def queryConstraints(ctx: ObsContext, mt: MagnitudeTable): List[QueryConstraint] = {
+  def catalogQueries(ctx: ObsContext, mt: MagnitudeTable): List[CatalogQuery] = {
     import AgsMagnitude._
     val cond = ctx.getConditions
     val mags = magnitudes(ctx, mt).toMap
-    def lim(gp: GuideProbe): MagnitudeLimits = autoSearchLimitsCalc(mags(gp), cond)
+    def lim(gp: GuideProbe): Option[MagnitudeRange] = autoSearchLimitsCalc(mags(gp), cond).some
 
-    val odgwMagLimits = (lim(GsaoiOdgw.odgw1)/:GsaoiOdgw.values().drop(1)) { (ml, odgw) =>
-      ml.union(lim(odgw)).getValue
+    val odgwMagLimits = (lim(GsaoiOdgw.odgw1) /: GsaoiOdgw.values().drop(1)) { (ml, odgw) =>
+      (ml |@| lim(odgw))(_ union _)
     }
-    val canMagLimits = (lim(Canopus.Wfs.cwfs1)/:Canopus.Wfs.values().drop(1)) { (ml, can) =>
-      ml.union(lim(can)).getValue
+    val canMagLimits = (lim(Canopus.Wfs.cwfs1) /: Canopus.Wfs.values().drop(1)) { (ml, can) =>
+      (ml |@| lim(can))(_ union _)
     }
 
-    val canopusConstraint = new QueryConstraint(CanopusTipTiltId, ctx.getBaseCoordinates, new RadiusLimits(Canopus.Wfs.Group.instance.getRadiusLimits), canMagLimits)
-    val odgwConstaint     = new QueryConstraint(OdgwFlexureId,    ctx.getBaseCoordinates, new RadiusLimits(GsaoiOdgw.Group.instance.getRadiusLimits),   odgwMagLimits)
-    List(canopusConstraint, odgwConstaint)
+    val canopusConstraint = canMagLimits.map(c => CatalogQuery.catalogQueryForGems(CanopusTipTiltId, ctx.getBaseCoordinates.toNewModel, RadiusConstraint.between(Angle.zero, Canopus.Wfs.Group.instance.getRadiusLimits.toNewModel), c.some))
+    val odgwConstraint     = odgwMagLimits.map(c => CatalogQuery.catalogQueryForGems(OdgwFlexureId,    ctx.getBaseCoordinates.toNewModel, RadiusConstraint.between(Angle.zero, GsaoiOdgw.Group.instance.getRadiusLimits.toNewModel), c.some))
+    List(canopusConstraint, odgwConstraint).flatten
   }
+
+  override val probeBands: List[MagnitudeBand] = defaultProbeBands(MagnitudeBand.R)
+
+  // Return the band used for each probe
+  // TODO Delegate to GemsMagnitudeTable
+  private def probeBands(guideProbe: GuideProbe): List[MagnitudeBand] = if (Canopus.Wfs.Group.instance.getMembers.contains(guideProbe)) defaultProbeBands(MagnitudeBand.R) else List(MagnitudeBand.H)
 
   override val guideProbes: List[GuideProbe] =
     Flamingos2OiwfsGuideProbe.instance :: (GsaoiOdgw.values() ++ Canopus.Wfs.values()).toList
+}
+
+object GemsStrategy extends GemsStrategy {
+  override private [impl] val backend = RemoteBackend
 }

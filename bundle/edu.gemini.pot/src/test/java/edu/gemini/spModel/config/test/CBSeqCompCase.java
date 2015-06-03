@@ -66,6 +66,7 @@ public class CBSeqCompCase extends CBSeqCompTestBase {
 
         TestDataObject dataObj = (TestDataObject) testSeqComp.getDataObject();
         dataObj.setSysConfig(sc);
+        testSeqComp.setDataObject(dataObj);
 
         // Create the one expected configuration.
         IConfig conf = new DefaultConfig();
@@ -92,6 +93,7 @@ public class CBSeqCompCase extends CBSeqCompTestBase {
 
         TestDataObject dataObj = (TestDataObject) testSeqComp.getDataObject();
         dataObj.setSysConfig(sc);
+        testSeqComp.setDataObject(dataObj);
 
 
         // Create the one expected configurations.
@@ -130,7 +132,7 @@ public class CBSeqCompCase extends CBSeqCompTestBase {
 
         TestDataObject dataObj = (TestDataObject) testSeqComp.getDataObject();
         dataObj.setSysConfig(sc);
-
+        testSeqComp.setDataObject(dataObj);
 
         // Create the one expected configurations.
         IConfig conf0 = new DefaultConfig();
@@ -168,6 +170,7 @@ public class CBSeqCompCase extends CBSeqCompTestBase {
 
         TestDataObject dataObj = (TestDataObject) testSeqComp.getDataObject();
         dataObj.setSysConfig(sc);
+        testSeqComp.setDataObject(dataObj);
 
 
         // Create the one expected configurations.

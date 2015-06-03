@@ -12,7 +12,7 @@ public final class Conflict {
      * Note added to {@link Conflicts} to warn the user of a conflict.
      */
     public static abstract class Note implements Serializable {
-        private final SPNodeKey nodeKey;
+        public final SPNodeKey nodeKey;
 
         Note(SPNodeKey nodeKey) {
             if (nodeKey == null) throw new IllegalArgumentException("nodeKey == null");
@@ -25,11 +25,9 @@ public final class Conflict {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
 
-            Note that = (Note) o;
+            final Note that = (Note) o;
+            return nodeKey.equals(that.nodeKey);
 
-            if (!nodeKey.equals(that.nodeKey)) return false;
-
-            return true;
         }
 
         @Override public int hashCode() {
@@ -61,7 +59,7 @@ public final class Conflict {
      * note is added to the parent where the node was in the existing program.
      */
     public static final class Moved extends Note {
-        private final SPNodeKey to;
+        public final SPNodeKey to;
 
         public Moved(SPNodeKey node, SPNodeKey to) {
             super(node);
@@ -78,8 +76,7 @@ public final class Conflict {
             if (!super.equals(o)) return false;
 
             Moved that = (Moved) o;
-            if (!to.equals(that.to)) return false;
-            return true;
+            return to.equals(that.to);
         }
 
         @Override public int hashCode() {

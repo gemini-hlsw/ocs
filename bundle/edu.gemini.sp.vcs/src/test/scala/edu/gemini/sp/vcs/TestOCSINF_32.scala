@@ -29,14 +29,14 @@ class TestOCSINF_32 {
   */
 
   @Test def groupObsStatusMix() {
-    withPiTestEnv { env =>
-      import env.{local => pi, _}
+    piSyncTest { env =>
+      import env.{cloned => pi, _}
 
       useContext("staff") { staff =>
 
         // Make a group containing an observation
-        val grp = remote.addGroup()
-        val obs = remote.addObservation(grp.getNodeKey)
+        val grp = central.addGroup()
+        val obs = central.addObservation(grp.getNodeKey)
 
         //      println("Initial Program")
         //      showTree(remote.sp)

@@ -7,13 +7,9 @@ import jsky.app.ot.editor.type.SpTypeUIUtil;
 import jsky.app.ot.util.Resources;
 
 import javax.swing.*;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.text.DefaultFormatter;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.text.NumberFormat;
@@ -38,58 +34,26 @@ final class SiteQualityPanel extends JPanel {
 
 			add(new JLabel("Sky Background:"), new GBC(0, 0));
 			add(new JComboBox() {{
-				SpTypeUIUtil.initListBox(this, SPSiteQuality.SkyBackground.class, new ActionListener() {
-					public void actionPerformed(ActionEvent ae) {
-						owner.getDataObject().setSkyBackground((SkyBackground)getSelectedItem());
-					}
-				});
-				owner.addPropertyChangeListener(new PropertyChangeListener() {
-					public void propertyChange(PropertyChangeEvent arg0) {
-						getModel().setSelectedItem(owner.getDataObject().getSkyBackground());
-					}
-				});
+				SpTypeUIUtil.initListBox(this, SPSiteQuality.SkyBackground.class, e -> owner.getDataObject().setSkyBackground((SkyBackground)getSelectedItem()));
+				owner.addPropertyChangeListener(e -> getModel().setSelectedItem(owner.getDataObject().getSkyBackground()));
 			}}, new GBC(1, 0));
 
 			add(new JLabel("Cloud Cover:"), new GBC(0, 1));
 			add(new JComboBox() {{
-				SpTypeUIUtil.initListBox(this, SPSiteQuality.CloudCover.class, new ActionListener() {
-					public void actionPerformed(ActionEvent ae) {
-						owner.getDataObject().setCloudCover((CloudCover)getSelectedItem());
-					}
-				});
-				owner.addPropertyChangeListener(new PropertyChangeListener() {
-					public void propertyChange(PropertyChangeEvent arg0) {
-						getModel().setSelectedItem(owner.getDataObject().getCloudCover());
-					}
-				});
+				SpTypeUIUtil.initListBox(this, SPSiteQuality.CloudCover.class, e -> owner.getDataObject().setCloudCover((CloudCover)getSelectedItem()));
+				owner.addPropertyChangeListener(e -> getModel().setSelectedItem(owner.getDataObject().getCloudCover()));
 			}}, new GBC(1, 1));
 
 			add(new JLabel("Image Quality:"), new GBC(0, 2));
 			add(new JComboBox() {{
-				SpTypeUIUtil.initListBox(this, SPSiteQuality.ImageQuality.class, new ActionListener() {
-					public void actionPerformed(ActionEvent ae) {
-						owner.getDataObject().setImageQuality((ImageQuality)getSelectedItem());
-					}
-				});
-				owner.addPropertyChangeListener(new PropertyChangeListener() {
-					public void propertyChange(PropertyChangeEvent arg0) {
-						getModel().setSelectedItem(owner.getDataObject().getImageQuality());
-					}
-				});
+				SpTypeUIUtil.initListBox(this, SPSiteQuality.ImageQuality.class, e -> owner.getDataObject().setImageQuality((ImageQuality)getSelectedItem()));
+				owner.addPropertyChangeListener(e -> getModel().setSelectedItem(owner.getDataObject().getImageQuality()));
 			}}, new GBC(1, 2));
 
 			add(new JLabel("Water Vapor:"), new GBC(0, 3));
 			add(new JComboBox() {{
-				SpTypeUIUtil.initListBox(this, SPSiteQuality.WaterVapor.class, new ActionListener() {
-					public void actionPerformed(ActionEvent ae) {
-						owner.getDataObject().setWaterVapor((WaterVapor)getSelectedItem());
-					}
-				});
-				owner.addPropertyChangeListener(new PropertyChangeListener() {
-					public void propertyChange(PropertyChangeEvent arg0) {
-						getModel().setSelectedItem(owner.getDataObject().getWaterVapor());
-					}
-				});
+				SpTypeUIUtil.initListBox(this, SPSiteQuality.WaterVapor.class, e -> owner.getDataObject().setWaterVapor((WaterVapor)getSelectedItem()));
+				owner.addPropertyChangeListener(e -> getModel().setSelectedItem(owner.getDataObject().getWaterVapor()));
 			}}, new GBC(1, 3));
 
 			// spacer
@@ -110,15 +74,13 @@ final class SiteQualityPanel extends JPanel {
 			elevMin = new JFormattedTextField(nf) {{
                 setColumns(5);
 				setEnabled(false);
-				addPropertyChangeListener("value", new PropertyChangeListener() {
-					public void propertyChange(PropertyChangeEvent evt) {
-						try {
-							Number d = (Number) evt.getNewValue();
-							if (d != null) owner.getDataObject().setElevationConstraintMin(d.doubleValue());
-							warning.setText(getElevationWarning(owner.getDataObject()));
-						} catch (NumberFormatException nfe) {
-                            //do nothing
-                        }
+				addPropertyChangeListener("value", evt -> {
+					try {
+						Number d = (Number) evt.getNewValue();
+						if (d != null) owner.getDataObject().setElevationConstraintMin(d.doubleValue());
+						warning.setText(getElevationWarning(owner.getDataObject()));
+					} catch (NumberFormatException nfe) {
+						//do nothing
 					}
 				});
                 ((DefaultFormatter) getFormatter()).setCommitsOnValidEdit(true);
@@ -127,15 +89,13 @@ final class SiteQualityPanel extends JPanel {
             elevMax = new JFormattedTextField(nf) {{
 				setColumns(5);
 				setEnabled(false);
-				addPropertyChangeListener("value", new PropertyChangeListener() {
-					public void propertyChange(PropertyChangeEvent evt) {
-						try {
-							Number d = (Number) evt.getNewValue();
-							if (d != null) owner.getDataObject().setElevationConstraintMax(d.doubleValue());
-							warning.setText(getElevationWarning(owner.getDataObject()));
-						} catch (NumberFormatException nfe) {
-                            //do nothing
-                        }
+				addPropertyChangeListener("value", evt -> {
+					try {
+						Number d = (Number) evt.getNewValue();
+						if (d != null) owner.getDataObject().setElevationConstraintMax(d.doubleValue());
+						warning.setText(getElevationWarning(owner.getDataObject()));
+					} catch (NumberFormatException nfe) {
+						//do nothing
 					}
 				});
                 ((DefaultFormatter) getFormatter()).setCommitsOnValidEdit(true);
@@ -145,72 +105,64 @@ final class SiteQualityPanel extends JPanel {
 			add(new JComboBox() {
 				boolean pushing = false;
 				{
-				SpTypeUIUtil.initListBox(this, SPSiteQuality.ElevationConstraintType.class, new ActionListener() {
-					public void actionPerformed(ActionEvent ae) {
-						ElevationConstraintType chosenType = (ElevationConstraintType)getSelectedItem();
-						switch (chosenType) {
-						case AIRMASS: units.setText("airmass");
-							elevMin.setEnabled(true); if (!pushing) elevMin.setValue(chosenType.getDefaultMin());
-							elevMax.setEnabled(true); if (!pushing) elevMax.setValue(chosenType.getDefaultMax());
-							break;
-						case HOUR_ANGLE:
-							units.setText("hours");
-							elevMin.setEnabled(true); if (!pushing) elevMin.setValue(chosenType.getDefaultMin());
-							elevMax.setEnabled(true); if (!pushing) elevMax.setValue(chosenType.getDefaultMax());
-							break;
-						case NONE:
-							units.setText("");
-							elevMin.setEnabled(false); elevMin.setValue(null);
-							elevMax.setEnabled(false); elevMax.setValue(null);
-							break;
-						}
-						owner.getDataObject().setElevationConstraintType(chosenType);
-						warning.setText(getElevationWarning(owner.getDataObject()));
+				SpTypeUIUtil.initListBox(this, SPSiteQuality.ElevationConstraintType.class, e -> {
+					ElevationConstraintType chosenType = (ElevationConstraintType)getSelectedItem();
+					switch (chosenType) {
+					case AIRMASS: units.setText("airmass");
+						elevMin.setEnabled(true); if (!pushing) elevMin.setValue(chosenType.getDefaultMin());
+						elevMax.setEnabled(true); if (!pushing) elevMax.setValue(chosenType.getDefaultMax());
+						break;
+					case HOUR_ANGLE:
+						units.setText("hours");
+						elevMin.setEnabled(true); if (!pushing) elevMin.setValue(chosenType.getDefaultMin());
+						elevMax.setEnabled(true); if (!pushing) elevMax.setValue(chosenType.getDefaultMax());
+						break;
+					case NONE:
+						units.setText("");
+						elevMin.setEnabled(false); elevMin.setValue(null);
+						elevMax.setEnabled(false); elevMax.setValue(null);
+						break;
 					}
+					owner.getDataObject().setElevationConstraintType(chosenType);
+					warning.setText(getElevationWarning(owner.getDataObject()));
 				});
-                owner.addPropertyChangeListener(new PropertyChangeListener() {
-					public void propertyChange(PropertyChangeEvent arg0) {
-						ElevationConstraintType ect = owner.getDataObject().getElevationConstraintType();
-						pushing = true;
-						getModel().setSelectedItem(ect);
-						pushing = false;
-						if (ect == ElevationConstraintType.NONE) {
-							elevMin.setEnabled(false);
-							elevMax.setEnabled(false);
-							elevMin.setValue(null);
-							elevMax.setValue(null);
-						} else {
-						    elevMin.setEnabled(true);
-                            elevMax.setEnabled(true);
-							elevMin.setValue(owner.getDataObject().getElevationConstraintMin());
-							elevMax.setValue(owner.getDataObject().getElevationConstraintMax());
-						}
-						warning.setText(getElevationWarning(owner.getDataObject()));
+                owner.addPropertyChangeListener(e -> {
+					ElevationConstraintType ect = owner.getDataObject().getElevationConstraintType();
+					pushing = true;
+					getModel().setSelectedItem(ect);
+					pushing = false;
+					if (ect == ElevationConstraintType.NONE) {
+						elevMin.setEnabled(false);
+						elevMax.setEnabled(false);
+						elevMin.setValue(null);
+						elevMax.setValue(null);
+					} else {
+						elevMin.setEnabled(true);
+						elevMax.setEnabled(true);
+						elevMin.setValue(owner.getDataObject().getElevationConstraintMin());
+						elevMax.setValue(owner.getDataObject().getElevationConstraintMax());
 					}
+					warning.setText(getElevationWarning(owner.getDataObject()));
 				});
 
             }}, new GBC(1, 5));
 			add(elevMin, new GBC(2, 5));
 			add(new JLabel(" - "), new GBC(3, 5));
 			add(elevMax, new GBC(4, 5));
-			add(units, new GBC(5, 5, true));
+			add(units, new GBC(5, 5));
 
 			add(warning, new GBC(1, 6, 5, 1, new Insets(0, 0, 5, 0)));
 
 			final TimingWindowTableModel model = new TimingWindowTableModel();
 			final JTable table = new JTable(model) {{
 				getColumnModel().getColumn(0).setMinWidth(175);
-				owner.addPropertyChangeListener(new PropertyChangeListener() {
-					public void propertyChange(PropertyChangeEvent evt) {
-						model.setSiteQuality(owner.getDataObject());
-					}
-				});
+				owner.addPropertyChangeListener(e -> model.setSiteQuality(owner.getDataObject()));
 			}};
 
 			add(new JLabel("Timing Windows"), new GBC(0, 7));
 			add(new JScrollPane(table) {{
-				setPreferredSize(new Dimension(0, 116));
-			}}, new GBC(0, 8, 5, 1, new Insets(5, 0, 0, 0)) {{
+				setPreferredSize(new Dimension(500, 116));
+			}}, new GBC(0, 8, 6, 1, new Insets(5, 0, 0, 0)) {{
 				weighty = 50;
 			}});
 
@@ -218,79 +170,64 @@ final class SiteQualityPanel extends JPanel {
 				add(new JButton(Resources.getIcon("eclipse/add.gif")) {{
                     setToolTipText("Add new timing window");
                     setFocusable(false);
-                    addActionListener(new ActionListener() {
-						public void actionPerformed(ActionEvent e) {
-							TimingWindow tw = new TimingWindow();
-							TimingWindowDialog twd = new TimingWindowDialog((Frame) SwingUtilities.getWindowAncestor(SiteQualityPanel.this));
-							tw = twd.showEdit(tw);
-							if (tw != null) {
-								owner.getDataObject().addTimingWindow(tw);
-								int index = table.getModel().getRowCount() - 1;
-								table.changeSelection(index, 0, false, false); // magic
-							}
+                    addActionListener(e -> {
+						TimingWindow tw = new TimingWindow();
+						TimingWindowDialog twd = new TimingWindowDialog((Frame) SwingUtilities.getWindowAncestor(SiteQualityPanel.this));
+						tw = twd.showEdit(tw);
+						if (tw != null) {
+							owner.getDataObject().addTimingWindow(tw);
+							int index = table.getModel().getRowCount() - 1;
+							table.changeSelection(index, 0, false, false); // magic
 						}
 					});
                     ButtonFlattener.flatten(this);
 				}});
-//                add(createHorizontalStrut(5));
+
                 add(new JButton(Resources.getIcon("eclipse/remove.gif")) {{
                     setToolTipText("Remove timing window");
                     setEnabled(false);
                     setFocusable(false);
-					table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
-						public void valueChanged(ListSelectionEvent e) {
-							setEnabled(table.getSelectedRowCount() > 0);
-						}
-					});
-					addActionListener(new ActionListener() {
-						public void actionPerformed(ActionEvent e) {
-							int firstRow = table.getSelectedRow();
-							int[] rows = table.getSelectedRows();
-							SPSiteQuality sq = owner.getDataObject();
-							List<TimingWindow> all = sq.getTimingWindows();
-							List<TimingWindow> accum = new ArrayList<TimingWindow>();
-                            for (int row : rows) {
-                                accum.add(all.get(row));
-                            }
-							for (TimingWindow tw: accum)
-								sq.removeTimingWindow(tw);
+					table.getSelectionModel().addListSelectionListener(e -> setEnabled(table.getSelectedRowCount() > 0));
 
-							if (firstRow >= table.getRowCount()) firstRow = table.getRowCount() - 1;
-							if (firstRow >= 0) table.changeSelection(firstRow, 0, false, false);
-
+					addActionListener(e -> {
+						int firstRow = table.getSelectedRow();
+						int[] rows = table.getSelectedRows();
+						SPSiteQuality sq = owner.getDataObject();
+						List<TimingWindow> all = sq.getTimingWindows();
+						List<TimingWindow> accum = new ArrayList<>();
+						for (int row : rows) {
+							accum.add(all.get(row));
 						}
+						for (TimingWindow tw: accum)
+							sq.removeTimingWindow(tw);
+
+						if (firstRow >= table.getRowCount()) firstRow = table.getRowCount() - 1;
+						if (firstRow >= 0) table.changeSelection(firstRow, 0, false, false);
 					});
                     ButtonFlattener.flatten(this);
 				}});
-//                add(createHorizontalStrut(5));
+
                 add(new JButton(Resources.getIcon("eclipse/edit.gif")) {{
                     setToolTipText("Edit timing window");
                     setEnabled(false);
                     setFocusable(false);
-                    table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
-                        public void valueChanged(ListSelectionEvent e) {
-                            setEnabled(table.getSelectedRowCount() == 1);
-                        }
-                    });
-                    addActionListener(new ActionListener() {
-                        public void actionPerformed(ActionEvent e) {
-                            int firstRow = table.getSelectedRow();
-                            SPSiteQuality sq = owner.getDataObject();
-                            List<TimingWindow> all = sq.getTimingWindows();
-                            TimingWindow prev = all.get(firstRow);
-                            TimingWindowDialog twd = new TimingWindowDialog((Frame) SwingUtilities.getWindowAncestor(SiteQualityPanel.this));
-                            TimingWindow next = twd.showEdit(prev);
-                            if (next != null) {
-                                owner.getDataObject().removeTimingWindow(prev);
-                                owner.getDataObject().addTimingWindow(next);
-                                int index = table.getModel().getRowCount() - 1;
-                                table.changeSelection(index, 0, false, false); // magic
-                            }
-                        }
+                    table.getSelectionModel().addListSelectionListener(e -> setEnabled(table.getSelectedRowCount() == 1));
+                    addActionListener(e -> {
+						int firstRow = table.getSelectedRow();
+						SPSiteQuality sq = owner.getDataObject();
+						List<TimingWindow> all = sq.getTimingWindows();
+						TimingWindow prev = all.get(firstRow);
+						TimingWindowDialog twd = new TimingWindowDialog((Frame) SwingUtilities.getWindowAncestor(SiteQualityPanel.this));
+						TimingWindow next = twd.showEdit(prev);
+						if (next != null) {
+							owner.getDataObject().removeTimingWindow(prev);
+							owner.getDataObject().addTimingWindow(next);
+							int index = table.getModel().getRowCount() - 1;
+							table.changeSelection(index, 0, false, false); // magic
+						}
                     });
                     ButtonFlattener.flatten(this);
                 }});
-                add(createHorizontalGlue());
             }}, new GBC(0, 9, 2, 1, new Insets(5 , 0, 0, 0)));
 
 
@@ -388,14 +325,17 @@ class TimingWindowTableModel extends DefaultTableModel implements PropertyChange
 	private static String formatDuration(TimingWindow tw) {
 		long ms = tw.getDuration();
 		if (ms == TimingWindow.WINDOW_REMAINS_OPEN_FOREVER) return "forever";
-		return String.format("%d:%02d", ms / MS_PER_HOUR, (ms % MS_PER_HOUR) / MS_PER_MINUTE);
+		return String.format("%02d:%02d", ms / MS_PER_HOUR, (ms % MS_PER_HOUR) / MS_PER_MINUTE);
 	}
 
-	private static String formatPeriod(TimingWindow tw) {
+	private static String formatPeriod(final TimingWindow tw) {
 		if (tw.getDuration() == TimingWindow.WINDOW_REMAINS_OPEN_FOREVER) return null;
 		if (tw.getRepeat() == TimingWindow.REPEAT_NEVER) return null;
-		long ms = tw.getPeriod();
-		return String.format("%d:%02d", ms / MS_PER_HOUR, (ms % MS_PER_HOUR) / MS_PER_MINUTE);
+		final long ms = tw.getPeriod();
+		final long hh = ms / MS_PER_HOUR;
+		final long mm = (ms % MS_PER_HOUR) / MS_PER_MINUTE;
+		final long ss = (ms % MS_PER_MINUTE) / MS_PER_SECOND;
+		return String.format("%02d:%02d:%02d", hh, mm, ss);
 	}
 
 	private static String formatRepeat(TimingWindow tw) {
@@ -426,26 +366,12 @@ class GBC extends GridBagConstraints {
 		anchor = EAST;
 	}
 	public GBC(int gridx, int gridy) {
-		this(gridx, gridy, false);
-	}
-	public GBC(int gridx, int gridy, boolean grab) {
 		this.gridx = gridx;
 		this.gridy = gridy;
 		insets = new Insets(0, 3, 1, 3);
-		if (grab)
-			this.weightx = 100;
 	}
 	public GBC(int gridx, int gridy, Insets insets) {
 		this(gridx, gridy, 1, 1, insets);
-	}
-	public GBC(int gridx, int gridy, Insets insets, boolean grab) {
-		this(gridx, gridy, 1, 1, insets);
-		if (grab)
-			this.weightx = 100;
-	}
-	public GBC(int gridx, int gridy, int anchor) {
-		this(gridx, gridy);
-		this.anchor = anchor;
 	}
 	public GBC(int gridx, int gridy, int xspan, int yspan, Insets insets) {
 		this(gridx, gridy);

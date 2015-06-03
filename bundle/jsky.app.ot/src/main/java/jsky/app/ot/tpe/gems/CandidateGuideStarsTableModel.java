@@ -1,9 +1,8 @@
 package jsky.app.ot.tpe.gems;
 
-import edu.gemini.shared.skyobject.Magnitude;
-import edu.gemini.shared.skyobject.SkyObject;
-import edu.gemini.shared.util.immutable.Option;
-import edu.gemini.ags.gems.GemsUtil;
+import edu.gemini.ags.gems.GemsUtils4Java;
+import edu.gemini.spModel.core.Target;
+import edu.gemini.catalog.api.ucac4$;
 import jsky.catalog.Catalog;
 import jsky.catalog.FieldDesc;
 import jsky.catalog.FieldDescAdapter;
@@ -12,14 +11,9 @@ import jsky.catalog.skycat.SkycatCatalog;
 import jsky.catalog.skycat.SkycatConfigEntry;
 import jsky.catalog.skycat.SkycatConfigFile;
 import jsky.catalog.skycat.SkycatTable;
-import jsky.coords.DMS;
-import jsky.coords.HMS;
 
 import javax.swing.table.DefaultTableModel;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Properties;
-import java.util.Vector;
+import java.util.*;
 
 /**
  * OT-111: Model for {@link CandidateGuideStarsTable}
@@ -28,12 +22,16 @@ class CandidateGuideStarsTableModel extends DefaultTableModel {
 
     // The NIR band is selected in the UI, the others are listed afterwards (UNUSED_BAND*).
     // Always including them in the table makes the SkyObjectFactory code easier later on.
-    enum Cols {
-        CHECK, ID, R, NIR_BAND, RA, DEC, UNUSED_BAND1, UNUSED_BAND2
+    private enum Cols {
+        CHECK, ID, _r, R, UC, NIR_BAND, RA, DEC, UNUSED_BAND1, UNUSED_BAND2
     }
+
+    private final String RA_TITLE = "RA";
+    private final String DEC_TITLE = "Dec";
 
     // User interface model
     private GemsGuideStarSearchModel _model;
+    private final boolean _isUCAC4;
 
     // The selected NIR band
     private String _nirBand;
@@ -45,24 +43,30 @@ class CandidateGuideStarsTableModel extends DefaultTableModel {
     private Vector<String> _columnNames;
 
     // SkyObjects corresponding to the table rows
-    private List<SkyObject> _skyObjects;
+    private List<Target.SiderealTarget> _siderealTargets;
 
     public CandidateGuideStarsTableModel(GemsGuideStarSearchModel model) {
         _model = model;
         _nirBand = _model.getBand().name();
         _unusedBands = getOtherNirBands(_nirBand);
+        _isUCAC4 = model.getCatalog().catalog() == ucac4$.MODULE$;
         _columnNames = makeColumnNames();
         setDataVector(makeDataVector(), _columnNames);
     }
 
     private Vector<String> makeColumnNames() {
-        Vector<String> columnNames = new Vector();
+        Vector<String> columnNames = new Vector<>();
         columnNames.add(""); // checkbox column
         columnNames.add("Id");
-        columnNames.add("R");
+        if (_isUCAC4) {
+            columnNames.add("r'");
+            columnNames.add("UC");
+        } else {
+            columnNames.add("R");
+        }
         columnNames.add(_nirBand);
-        columnNames.add("RA");
-        columnNames.add("Dec");
+        columnNames.add(RA_TITLE);
+        columnNames.add(DEC_TITLE);
         columnNames.add(_unusedBands[0]);
         columnNames.add(_unusedBands[1]);
         return columnNames;
@@ -84,30 +88,18 @@ class CandidateGuideStarsTableModel extends DefaultTableModel {
     }
 
     private Vector<Vector<Object>> makeDataVector() {
-        _skyObjects = GemsUtil.getUniqueSkyObjects(_model.getGemsCatalogSearchResults());
-        Vector<Vector<Object>> rows = new Vector<Vector<Object>>();
-        for (SkyObject skyObject : _skyObjects) {
-            rows.add(makeRow(skyObject));
+        _siderealTargets = GemsUtils4Java.uniqueTargets(_model.getGemsCatalogSearchResults());
+        Vector<Vector<Object>> rows = new Vector<>();
+        for (Target.SiderealTarget siderealTarget : _siderealTargets) {
+            if (_isUCAC4) {
+                rows.add(CatalogUtils4Java.makeUCAC4Row(siderealTarget, _nirBand, _unusedBands));
+            } else {
+                rows.add(CatalogUtils4Java.makeRow(siderealTarget, _nirBand, _unusedBands));
+            }
         }
         return rows;
     }
 
-    private Vector<Object> makeRow(SkyObject skyObject) {
-        Vector<Object> row = new Vector<Object>(_columnNames.size());
-        row.add(true);
-        row.add(skyObject.getName());
-        row.add(getBrightness(skyObject.getMagnitude(Magnitude.Band.R)));
-        row.add(getBrightness(skyObject.getMagnitude(Magnitude.Band.valueOf(_nirBand))));
-        row.add(new HMS(skyObject.getHmsDegCoordinates().getRa().toHours().getMagnitude()).toString());
-        row.add(new DMS(skyObject.getHmsDegCoordinates().getDec().toDegrees().getMagnitude()).toString());
-        row.add(getBrightness(skyObject.getMagnitude(Magnitude.Band.valueOf(_unusedBands[0]))));
-        row.add(getBrightness(skyObject.getMagnitude(Magnitude.Band.valueOf(_unusedBands[1]))));
-        return row;
-    }
-
-    private Double getBrightness(Option<Magnitude> m) {
-        return m.isEmpty() ? null : m.getValue().getBrightness();
-    }
 
     @Override
     public boolean isCellEditable(int row, int column) {
@@ -120,21 +112,29 @@ class CandidateGuideStarsTableModel extends DefaultTableModel {
             return Boolean.class;
         if (columnIndex == Cols.ID.ordinal())
             return Object.class;
-        if (columnIndex == Cols.R.ordinal() || columnIndex == Cols.NIR_BAND.ordinal()
+        if (columnIndex == Cols.R.ordinal() || columnIndex == Cols._r.ordinal() || columnIndex == Cols.UC.ordinal() || columnIndex == Cols.NIR_BAND.ordinal()
                 || columnIndex == Cols.UNUSED_BAND1.ordinal() || columnIndex == Cols.UNUSED_BAND2.ordinal())
             return Double.class;
         return String.class;
     }
 
     public FieldDesc[] getFields() {
-        FieldDescAdapter[] ar = new FieldDescAdapter[_columnNames.size()];
-        for(int i = 0; i < ar.length; i++) {
-            ar[i] = new FieldDescAdapter(_columnNames.get(i));
+        List<FieldDescAdapter> fields = new ArrayList<>();
+        for(String columnName: _columnNames) {
+            FieldDescAdapter desc = new FieldDescAdapter(columnName);
+            if (columnName.equals(RA_TITLE)) {
+                desc.setIsRA(true);
+            }
+            if (columnName.equals(DEC_TITLE)) {
+                desc.setIsDec(true);
+            }
+            if (columnName.equals("")) {
+                desc.setIsId(true);
+            }
+            fields.add(desc);
         }
-        ar[Cols.ID.ordinal()].setIsId(true);
-        ar[Cols.RA.ordinal()].setIsRA(true);
-        ar[Cols.DEC.ordinal()].setIsDec(true);
-        return ar;
+        FieldDescAdapter[] fd = new FieldDescAdapter[_columnNames.size()];
+        return fields.toArray(fd);
     }
 
     public TableQueryResult getTableQueryResult(Catalog cat) {
@@ -148,8 +148,10 @@ class CandidateGuideStarsTableModel extends DefaultTableModel {
         }
 
         Properties props = (Properties)configEntry.getProperties().clone();
-        props.setProperty(SkycatConfigFile.RA_COL, String.valueOf(Cols.RA.ordinal()));
-        props.setProperty(SkycatConfigFile.DEC_COL, String.valueOf(Cols.DEC.ordinal()));
+        String raPosition = String.valueOf(_columnNames.indexOf(RA_TITLE));
+        String decPosition = String.valueOf(_columnNames.indexOf(DEC_TITLE));
+        props.setProperty(SkycatConfigFile.RA_COL, raPosition);
+        props.setProperty(SkycatConfigFile.DEC_COL, decPosition);
         SkycatConfigEntry entry = new SkycatConfigEntry(props);
         SkycatTable skycatTable = new SkycatTable(entry, getDataVector(), getFields()) {
             @Override
@@ -170,13 +172,13 @@ class CandidateGuideStarsTableModel extends DefaultTableModel {
      * Returns a list of SkyObjects corresponding to the checked (or unchecked) rows in the table
      * @param checked if true, return the checked rows (candidates), otherwise the unchecked (non-candidates)
      */
-    public List<SkyObject> getCandidates(boolean checked) {
-        List<SkyObject> result = new ArrayList<SkyObject>();
+    public List<Target.SiderealTarget> getCandidates(boolean checked) {
+        List<Target.SiderealTarget> result = new ArrayList<>();
         int numRows = getRowCount();
         int col = Cols.CHECK.ordinal();
         for(int row = 0; row < numRows; row++) {
             if ((Boolean)getValueAt(row, col) == checked) {
-                result.add(_skyObjects.get(row));
+                result.add(_siderealTargets.get(row));
             }
         }
         return result;

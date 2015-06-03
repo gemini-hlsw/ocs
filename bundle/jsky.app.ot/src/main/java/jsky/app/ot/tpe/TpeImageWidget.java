@@ -14,7 +14,6 @@ import edu.gemini.spModel.obscomp.SPInstObsComp;
 import edu.gemini.spModel.target.*;
 import edu.gemini.spModel.target.offset.OffsetPosBase;
 import edu.gemini.spModel.target.system.CoordinateParam.Units;
-import edu.gemini.spModel.target.system.HmsDegTarget;
 import edu.gemini.spModel.target.system.ICoordinate;
 import edu.gemini.spModel.target.system.ITarget;
 import edu.gemini.spModel.util.Angle;
@@ -286,10 +285,6 @@ public class TpeImageWidget extends NavigatorImageDisplay implements MouseInputL
         }
     }
 
-    public synchronized void deleteMouseObserver(TpeMouseObserver obs) {
-        _mouseObs.removeElement(obs);
-    }
-
     /**
      * Tell all the mouse observers about the new mouse event.
      */
@@ -373,10 +368,6 @@ public class TpeImageWidget extends NavigatorImageDisplay implements MouseInputL
 
     public synchronized void deleteInfoObserver(TpeImageInfoObserver obs) {
         _infoObs.removeElement(obs);
-    }
-
-    public synchronized void deleteInfoObservers() {
-        _infoObs.removeAllElements();
     }
 
     private void _notifyInfoObs() {
@@ -507,9 +498,9 @@ public class TpeImageWidget extends NavigatorImageDisplay implements MouseInputL
 
         // Get the equinox assumed by the coordinate conversion methods (depends on current image)
         //double equinox = getCoordinateConverter().getEquinox();
-        HmsDegTarget target = ((SPTarget) tp).getTarget().getTargetAsJ2000();
-        ICoordinate c1 = target.getC1();
-        ICoordinate c2 = target.getC2();
+        ITarget target = ((SPTarget) tp).getTarget();
+        ICoordinate c1 = target.getRa();
+        ICoordinate c2 = target.getDec();
         double x = c1.getAs(Units.DEGREES);
         double y = c2.getAs(Units.DEGREES);
         WorldCoords pos = new WorldCoords(x, y, 2000.);
@@ -874,19 +865,7 @@ public class TpeImageWidget extends NavigatorImageDisplay implements MouseInputL
         repaint();
     }
 
-    /**
-     * Implements the TelescopePosWatcher interface
-     * @param tp
-     */
-    public void telescopePosLocationUpdate(WatchablePos tp) {
-        basePosUpdate(((SPTarget) tp).getTarget());
-    }
-
-    /**
-     * Implements the TelescopePosWatcher interface
-     * @param tp
-     */
-    public void telescopePosGenericUpdate(WatchablePos tp) {
+    public void telescopePosUpdate(WatchablePos tp) {
         basePosUpdate(((SPTarget) tp).getTarget());
     }
 
@@ -894,9 +873,8 @@ public class TpeImageWidget extends NavigatorImageDisplay implements MouseInputL
      * The Base position has been updated.
      */
     public void basePosUpdate(ITarget target) {
-        target = target.getTargetAsJ2000();
-        ICoordinate c1 = target.getC1();
-        ICoordinate c2 = target.getC2();
+        ICoordinate c1 = target.getRa();
+        ICoordinate c2 = target.getDec();
         double x = c1.getAs(Units.DEGREES);
         double y = c2.getAs(Units.DEGREES);
         WorldCoords pos = new WorldCoords(x, y, 2000.);
@@ -928,15 +906,9 @@ public class TpeImageWidget extends NavigatorImageDisplay implements MouseInputL
     }
 
     /**
-     // =====
-     */
-
-    /**
      * Gets a minimal context for drawing that does not bother with information that is not needed for drawing
      * like the conditions for example. This method will provide a context useful for drawing when there is no
      * condition node. This solves issue UX-1012.
-     *
-     * @return
      */
     private Option<ObsContext> getMinimalDrawingObsContext() {
         return _ctx.obsContextJavaWithConditions(SPSiteQuality.Conditions.WORST);
@@ -1197,16 +1169,6 @@ public class TpeImageWidget extends NavigatorImageDisplay implements MouseInputL
                         }
                     }
                 }
-
-//                    Set<GuideProbe> strategies = maybeObsContext.getValue().getTargets().getGuideEnvironment().getSelectedGuiders();
-//                    if (strategies.size() == 0) return;
-                // currently only one strategy will be selected; we can take the first one and use it
-//                    GuideProbe guider = strategies.iterator().next();
-//                    if (GuideStarSupport.hasGemsComponent(_ctx) && (guider == CanopusAgsStrategy.instance.getGuider())) {
-//                        gemsGuideStarSearch();
-//                    } else {
-//                        AgsClient.launch(_ctx, this);
-//                    }
             }
         }
     }

@@ -123,10 +123,11 @@ class SingleProbeTest {
     F2Pwfs1,
     F2Pwfs2,
 
-    GmosNorth,
+    // GMOS OI now uses vignetting in AGS, so tests expecting to pick the brightest guide star are no longer relevant.
+    //GmosNorth,
     GmosNorthPwfs1,
     GmosNorthPwfs2,
-    GmosSouth,
+    //GmosSouth,
     GmosSouthPwfs1,
     GmosSouthPwfs2,
 
@@ -198,12 +199,12 @@ class SingleProbeTest {
     All.foreach(f)
 
 
-  @Test def testBase(): Unit                              = testAll(_.testBase())
-  @Test def testBaseOneOffset(): Unit                     = testAll(_.testBaseOneOffset())
-  @Test def testBaseTwoDisjointOffsets(): Unit            = testAll(_.testBaseTwoDisjointOffsets())
-  @Test def testBaseTwoIntersectingOffsets(): Unit        = testAll(_.testBaseTwoIntersectingOffsets())
-  @Test def testBaseRotated(): Unit                       = testAll(_.testBaseRotated())
-  @Test def testBaseRotatedOneOffset(): Unit              = testAll(_.testBaseRotatedOneOffset())
-  @Test def testBaseRotatedTwoIntersectingOffsets(): Unit = testAll(_.testBaseRotatedTwoIntersectingOffsets())
-  @Test def testBaseUnboundedPosAngleConstraint(): Unit = testAll(_.testBaseUnboundedPosAngleConstraint)
+  @Test def testBase()                              = testAll(_.testBase())
+  @Test def testBaseOneOffset()                     = testAll(_.testBaseOneOffset())
+  @Test def testBaseTwoDisjointOffsets()            = testAll(_.testBaseTwoDisjointOffsets())
+  @Test def testBaseTwoIntersectingOffsets()        = testAll(_.testBaseTwoIntersectingOffsets())
+  @Test def testBaseRotated()                       = testAll(_.testBaseRotated())
+  @Test def testBaseRotatedOneOffset()              = testAll(_.testBaseRotatedOneOffset())
+  @Test def testBaseRotatedTwoIntersectingOffsets() = testAll(_.testBaseRotatedTwoIntersectingOffsets())
+  @Test def testBaseUnboundedPosAngleConstraint()   = testAll(_.testBaseUnboundedPosAngleConstraint)
 }

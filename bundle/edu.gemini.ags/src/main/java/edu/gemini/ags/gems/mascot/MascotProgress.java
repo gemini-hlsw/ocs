@@ -12,7 +12,7 @@ public interface MascotProgress {
      * @param usable true if the Strehl object is usable (all of the stars are at valid locations/can be used)
      * @return true to continue, false to cancel
      */
-    public boolean progress(Strehl s, int count, int total, boolean usable);
+    boolean progress(Strehl s, int count, int total, boolean usable);
 
     /**
      * Sets the title for the progress dialog

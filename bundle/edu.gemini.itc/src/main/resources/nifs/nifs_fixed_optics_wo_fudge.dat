@@ -1,0 +1,18 @@
+# Average throughput for the GNIRS static optics
+# Columns are (1) wavelength in nm, (2) throughput
+# Optical elements included: CaF2 window, Pickoff mirror, Entrance fold,
+#  Offner Primary, Secondary and 2nd Primary, Cold Stop, Exit Fold and Collimator
+# Values from J. Elias sensitivity table with zeroes added at 700 and 6000 nm.
+#
+# Author: Bernadette Rodgers
+# Created: 30 July 2003
+
+700  0
+900  0.714
+1100  0.8466
+1270  0.8636
+1640  0.8857
+2230  0.8942
+3710  0.9078
+5150  0.918
+6000  0

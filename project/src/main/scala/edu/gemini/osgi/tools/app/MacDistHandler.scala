@@ -14,11 +14,12 @@ object MacDistHandler {
 
 case class MacDistHandler(jre: Option[String], jreName: String) extends DistHandler {
 
-  def build(outDir: File, jreDir: Option[File], meta: ApplicationMeta, version:String, config: Configuration, d: Configuration.Distribution, solution: Map[BundleSpec, (File, Manifest)], appProjectBaseDir: File) {
+  def build(outDir: File, jreDir: Option[File], meta: ApplicationMeta, version:String, config: Configuration, d: Configuration.Distribution, solution: Map[BundleSpec, (File, Manifest)], log: sbt.Logger, appProjectBaseDir: File) {
 
     // Output dirs
     val name = meta.osxVisibleName(version)
     val appDir = mkdir(outDir,  s"$name.app")
+    val trashDir = mkdir(appDir, ".Trash")  // http://stackoverflow.com/questions/18621467/error-creating-disk-image-using-hdutil
     val contentsDir = mkdir(appDir, "Contents")
     val macosDir = mkdir(contentsDir, "MacOS")
     val resourcesDir = mkdir(contentsDir, "Resources")
@@ -59,11 +60,11 @@ case class MacDistHandler(jre: Option[String], jreName: String) extends DistHand
     val volname = "%s_%s".format(meta.executableName(version), d.toString.toLowerCase)
     val dmgname = volname + ".dmg"
     val dest = new File(outDir, dmgname).getPath
-    val args = Array("hdiutil", "create", "-srcfolder", appDir.getPath, "-volname", volname, dest)
+    val args = Array("hdiutil", "create", "-size", "500m", "-srcfolder", appDir.getPath, "-volname", volname, dest)
     val result = Runtime.getRuntime.exec(args).waitFor()
     if (result != 0) {
-      println("*** " + args.mkString(" "))
-      println("*** HDIUTIL RETURNED " + result)
+      log.error("*** " + args.mkString(" "))
+      log.error("*** HDIUTIL RETURNED " + result)
     }
 
     // And remove the app

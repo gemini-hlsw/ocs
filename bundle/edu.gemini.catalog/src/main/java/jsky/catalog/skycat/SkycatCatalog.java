@@ -145,20 +145,6 @@ public class SkycatCatalog implements PlotableCatalog {
     }
 
     /**
-     * Returns the number of querries made so far
-     */
-    public int getQueryCount() {
-        return _queryCount;
-    }
-
-    /**
-     * Set the object used to manage the configuration info for this catalog
-     */
-    public void setConfigEntry(SkycatConfigEntry entry) {
-        _entry = entry;
-    }
-
-    /**
      * Return the table data (for local catalogs) or null, if not known.
      */
     public SkycatTable getTable() {
@@ -666,8 +652,9 @@ public class SkycatCatalog implements PlotableCatalog {
             //urlStr = _getQueryUrl(urlStr, queryArgs);
             String className = token.nextToken();
             try {
-                Class catalogClass = Class.forName(className);
+                Class<?> catalogClass = Class.forName(className);
                 Catalog catalog = (Catalog) catalogClass.newInstance();
+
                 result = catalog.query(queryArgs);
                 if (result instanceof MemoryCatalog && !(result instanceof SkycatTable)) {
                     MemoryCatalog mcat = (MemoryCatalog) result;
@@ -853,7 +840,7 @@ public class SkycatCatalog implements PlotableCatalog {
                         for (SearchCondition aSc : sc) {
                             if (aSc.getName().equals(SkycatConfigEntry.BAND)) {
                                 String band = aSc.getValueAsString();
-                                if(band.equals("R")){
+                                if (band.equals("R")){
                                     band="f.";
                                 }
                                 buf.append(band);
@@ -1129,13 +1116,6 @@ public class SkycatCatalog implements PlotableCatalog {
             is = filter.filterContent(is);
         }
         return is;
-    }
-
-    /**
-     * Return a the html query result handler
-     */
-    public HTMLQueryResultHandler getHtmlQueryResultHandler() {
-        return _htmlQueryResultHandler;
     }
 
     /**

@@ -2,9 +2,9 @@ import OcsKeys._
 
 name := "ocs"
 
-ocsVersion in ThisBuild := OcsVersion("2015A", false, 1, 1, 2)
+ocsVersion in ThisBuild := OcsVersion("2015B", true, 1, 1, 1)
 
-pitVersion in ThisBuild := OcsVersion("2015A", false, 1, 2, 0)
+pitVersion in ThisBuild := OcsVersion("2015B", false, 2, 1, 0)
 
 // Bundles by default use the ocsVersion; this is overridden in bundles used only by the PIT
 version in ThisBuild := ocsVersion.value.toOsgiVersion
@@ -12,7 +12,20 @@ version in ThisBuild := ocsVersion.value.toOsgiVersion
 scalaVersion in ThisBuild := "2.10.4"
 
 // Note that this is not a standard setting; it's used for building IDEA modules.
-javaVersion in ThisBuild := "1.7" 
+javaVersion in ThisBuild := {
+  val expected = "1.8" 
+  val actual   = sys.props("java.version")
+  if (!actual.startsWith(expected))
+    println(s"""
+      |***
+      |***                   INCORRECT JAVA RUNTIME VERSION 
+      |***
+      |***  The build expects version $expected, but you are running $actual.
+      |***  Change the VM you're using to run sbt to avoid confusion and strange behavior.
+      |***
+    """.stripMargin)
+  expected
+}
 
 scalacOptions in ThisBuild ++= Seq(
   // "-deprecation",
@@ -35,8 +48,8 @@ scalacOptions in ThisBuild ++= Seq(
 )
 
 javacOptions in ThisBuild ++= Seq(
-  "-source", "1.7",
-  "-target", "1.7",
+  "-source", "1.8",
+  "-target", "1.8",
   "-Xlint:all,-serial,-path,-deprecation,-unchecked,-fallthrough" // TOOD: turn all on except maybe -serial and -path
 )
 
@@ -45,7 +58,8 @@ libraryDependencies in ThisBuild ++= Seq(
   "junit"           % "junit"           % "4.11"   % "test",
   "com.novocode"    % "junit-interface" % "0.9"    % "test",
   "org.scalacheck" %% "scalacheck"      % "1.10.1" % "test",
-  "org.specs2"     %% "specs2"          % "1.12.3" % "test"
+  "org.specs2"     %% "specs2"          % "1.12.3" % "test",
+  "org.scalatest"   % "scalatest_2.10"  % "2.0"    % "test"
 )
 
 // Don't build scaladoc (for now)
@@ -57,4 +71,20 @@ publishArtifact in (ThisBuild, packageSrc) := false
 // No poms
 publishMavenStyle in ThisBuild := false
 
-
+// > dash -s List
+commands += {
+  import scala.sys.process._
+  import complete.DefaultParsers._
+  val stuff = Seq(("-6", "java6",  "Java SE6"),
+                  ("-7", "java7",  "Java SE7"),
+		  ("-8", "java8",  "Java SE8"),
+                  ("-s", "scala",  "Scala"),
+                  ("-z", "scalaz", "scalaz"))
+  val option = stuff.map { case (o, d, _) => o ^^^ d } .reduceLeft(_ | _)
+  val parser = token(Space ~> option) ~ token(Space ~> StringBasic)
+  val help = Help.briefDetail(stuff.map { case (o, _, t) => (s"$o <word>", s"Search in $t") })
+  Command("dash", help)(_ => parser) { case (state, (set, topic)) =>
+    s"/usr/bin/open dash://$set:$topic".!
+    state
+  }
+}

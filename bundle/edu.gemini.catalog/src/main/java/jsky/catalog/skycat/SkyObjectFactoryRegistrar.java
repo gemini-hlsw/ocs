@@ -34,35 +34,25 @@ public enum SkyObjectFactoryRegistrar {
      * factory instance.
      */
     private static final SkycatCatalogObjectRegistrar.Instantiator<SkyObjectFactory> INST =
-        new SkycatCatalogObjectRegistrar.Instantiator<SkyObjectFactory>() {
+        className -> {
+            if (className == null) return None.instance();
 
-            // Uses reflection to turn the class name into an object.  This is
-            // a bit grim, but the other options that occurred to me seemed worse:
-            // * search through the classpath looking for instances
-            // * explicitly register them by the short name that appears in the config
-            //   file
-
-            @Override
-            public Option<SkyObjectFactory> instantiate(String className) {
-                if (className == null) return None.instance();
-
-                try {
-                    Class c = Class.forName(className);
-                    Object[] enums = c.getEnumConstants();
-                    if ((enums != null) && (enums.length > 0)) {
-                        //noinspection unchecked
-                        return new Some<SkyObjectFactory>((SkyObjectFactory) enums[0]);
-                    }
-                } catch (Exception ex) {
-                    LOG.log(Level.WARNING, "Problem extracting object from " + className, ex);
+            try {
+                Class<?> c = Class.forName(className);
+                Object[] enums = c.getEnumConstants();
+                if ((enums != null) && (enums.length > 0)) {
+                    //noinspection unchecked
+                    return new Some<>((SkyObjectFactory) enums[0]);
                 }
-                return None.instance();
-
+            } catch (Exception ex) {
+                LOG.log(Level.WARNING, "Problem extracting object from " + className, ex);
             }
+            return None.instance();
+
         };
 
     private static final SkycatCatalogObjectRegistrar<SkyObjectFactory> reg =
-            new SkycatCatalogObjectRegistrar<SkyObjectFactory>(SKYOBJ_FACTORY, INST);
+            new SkycatCatalogObjectRegistrar<>(SKYOBJ_FACTORY, INST);
 
     /**
      * Finds the SkyObjectFactory associated with the given id, if any.

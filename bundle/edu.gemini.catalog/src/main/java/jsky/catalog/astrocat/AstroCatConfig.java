@@ -191,14 +191,12 @@ public class AstroCatConfig extends AbstractCatalogDirectory {
     public CatalogDirectory loadSubDir(URL url) {
         String filename = url.getFile();
         if (filename.endsWith(".xml")) {
-            AstroCatConfig cf = new AstroCatConfig(url, getHTMLQueryResultHandler());
-            return cf;
+            return new AstroCatConfig(url, getHTMLQueryResultHandler());
         }
 
         // for compatibility, also allow Skycat config files here
         if (filename.endsWith(".cfg")) {
-            SkycatConfigFile cf = new SkycatConfigFile(url, getHTMLQueryResultHandler());
-            return cf;
+            return new SkycatConfigFile(url, getHTMLQueryResultHandler());
         }
         throw new RuntimeException("Expected an AstroCat XML file, or a Skycat style .cfg file");
     }
@@ -237,9 +235,9 @@ public class AstroCatConfig extends AbstractCatalogDirectory {
      * Return a list of name servers (Catalogs with serv_type
      * equal to "namesvr") to use to resolve astronomical object names.
      */
-    public List getNameServers() {
-        List l = super.getNameServers();
-        if (l.size() != 0) {
+    public List<Catalog> getNameServers() {
+        List<Catalog> l = super.getNameServers();
+        if (!l.isEmpty()) {
             return l;
         }
         _addDefaultNameServers();

@@ -24,13 +24,13 @@ final class TelescopePosTableDragDropObject implements Transferable {
     private TelescopePosTableWidget _currentOwner;
 
     // The item(s) being dragged.
-    private TelescopePosTableWidget.TableData.Row[] _nodes;
+    private final TelescopePosTableWidget.TableData.Row[] _nodes;
 
     /**
      * This constructor should be used when dragging a newly created object
      * that hasn't been inserted in any tree.
      */
-    TelescopePosTableDragDropObject(TelescopePosTableWidget.TableData.Row node) {
+    private TelescopePosTableDragDropObject(TelescopePosTableWidget.TableData.Row node) {
         _nodes = new TelescopePosTableWidget.TableData.Row[1];
         _nodes[0] = node;
     }
@@ -39,7 +39,7 @@ final class TelescopePosTableDragDropObject implements Transferable {
      * This constructor should be used when dragging an object that currently
      * exists in a tree.
      */
-    TelescopePosTableDragDropObject(TelescopePosTableWidget.TableData.Row node, TelescopePosTableWidget tree) {
+    private TelescopePosTableDragDropObject(TelescopePosTableWidget.TableData.Row node, TelescopePosTableWidget tree) {
         this(node);
         _currentOwner = tree;
     }
@@ -48,7 +48,7 @@ final class TelescopePosTableDragDropObject implements Transferable {
      * This constructor should be used when dragging a newly created set
      * of items that haven't been inserted in any tree.
      */
-    TelescopePosTableDragDropObject(TelescopePosTableWidget.TableData.Row[] nodes) {
+    private TelescopePosTableDragDropObject(TelescopePosTableWidget.TableData.Row[] nodes) {
         _nodes = nodes;
     }
 
@@ -59,11 +59,6 @@ final class TelescopePosTableDragDropObject implements Transferable {
     TelescopePosTableDragDropObject(TelescopePosTableWidget.TableData.Row[] nodes, TelescopePosTableWidget tree) {
         this(nodes);
         _currentOwner = tree;
-    }
-
-    /** Is more than one item being dragged? */
-    boolean isMultiDrag() {
-        return (_nodes.length > 1);
     }
 
     /** Get the first TelescopePosTableWidget.TableData.Row. */

@@ -30,7 +30,7 @@ class SaveAction(shell:RichShell[Model], newFile:Boolean = false) extends ShellA
             "Saving or Submitting will update it and you won't be able to open it with older versions of PIT.\n" +
             "Do you want to update?",
             "Confirm Update", WARNING_MESSAGE, YES_NO_OPTION)
-          if (confirmOverwrite(shell.isRolled )) {
+          if (confirmOverwrite(shell.isRolled)) {
             m.save(f)
             shell.checkpoint()
             true

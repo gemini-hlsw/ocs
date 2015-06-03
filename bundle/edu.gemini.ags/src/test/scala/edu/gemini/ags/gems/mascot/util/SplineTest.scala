@@ -9,7 +9,7 @@ import org.junit.{Ignore, Test}
  * Tests methods in the Spline class.
  */
 
-@Ignore class SplineTest {
+class SplineTest {
 
   /**
    * Tests the spline function.
@@ -71,6 +71,5 @@ import org.junit.{Ignore, Test}
     val tension = 3.0
     assertVectorsEqual(expect, tspline(tension, qe, lambda, lvec), 0.0001)
   }
-
 
 }

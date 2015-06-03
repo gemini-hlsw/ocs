@@ -27,8 +27,6 @@ import java.util.List;
 
 /**
  * Test cases for Gpi setup time calculations.
- *
- * <p>HLPG_PROJECT_BASE property must be set.
  */
 public final class PlannedTimeTest {
     private static final double EXP_TIME = Gpi.DEFAULT_EXPOSURE_TIME;
@@ -97,14 +95,13 @@ public final class PlannedTimeTest {
         String propName = Gpi.EXPOSURE_TIME_PROP.getName();
         List<Double> vals = Arrays.asList(secs);
         return DefaultParameter.getInstance(propName, vals);
-    }
+    }*/
 
     private IParameter getHalfWavePlateAngleParam(Double... angles) {
         String propName = Gpi.HALF_WAVE_PLATE_ANGLE_VALUE_PROP.getName();
         List<Double> vals = Arrays.asList(angles);
         return DefaultParameter.getInstance(propName, vals);
     }
-    */
 
     private IParameter getFilterParam(Gpi.Filter... filters) {
         String propName = Gpi.FILTER_PROP.getName();
@@ -197,6 +194,56 @@ public final class PlannedTimeTest {
         verify(time + over);
     }
 
+    @Test
+    public void testHalfWavePlateChangeOverhead() throws Exception {
+        // Setup the instrument component.
+        gpiDataObject.setExposureTime(EXP_TIME);
+        gpiDataObject.setHalfWavePlateAngle(0);
+        gpiObsComponent.setDataObject(gpiDataObject);
+
+        // Setup the Sequence with 3 steps in which the halfwave plate angle changes
+        ISysConfig sc = new DefaultSysConfig(SeqConfigNames.INSTRUMENT_CONFIG_NAME);
+        sc.putParameter(getHalfWavePlateAngleParam(45.0, 60.0, 90.0));
+        gpiSeqDataObject.setSysConfig(sc);
+        gpiSeqComponent.setDataObject(gpiSeqDataObject);
+
+        // Account for setup, exposure time, and readout time for the 3 steps.
+        double time = Gpi.getImagingSetupSec();
+
+        time += (Gpi.READOUT_PER_EXPOSURE_MS/1000.0 + EXP_TIME) * 3;
+        time += Gpi.READOUT_OVERHEAD_SEC * 3;
+        time += PlannedTime.Category.DHS_OVERHEAD.time/1000.0 * 3;
+
+        double overhead = 2 * Gpi.HALFWAVE_PLATE_CHANGE_OVERHEAD_SECS;
+        verify(time + overhead);
+    }
+
+    @Test
+    public void testHalfWavePlateAndComponentChangeOverhead() throws Exception {
+        // Setup the instrument component.
+        gpiDataObject.setExposureTime(EXP_TIME);
+        gpiDataObject.setHalfWavePlateAngle(0);
+        gpiObsComponent.setDataObject(gpiDataObject);
+
+        // Setup the Sequence with 2 steps in which the halfwave plate angle changes and a filter changes
+        ISysConfig sc = new DefaultSysConfig(SeqConfigNames.INSTRUMENT_CONFIG_NAME);
+        sc.putParameter(getFilterParam(Gpi.Filter.J, Gpi.Filter.K1));
+        sc.putParameter(getHalfWavePlateAngleParam(45.0, 60.0));
+        gpiSeqDataObject.setSysConfig(sc);
+        gpiSeqComponent.setDataObject(gpiSeqDataObject);
+
+        // Account for setup, exposure time, and readout time for both steps
+        double time = Gpi.getImagingSetupSec();
+
+        time += (Gpi.READOUT_PER_EXPOSURE_MS/1000.0 + EXP_TIME) * 2;
+        time += Gpi.READOUT_OVERHEAD_SEC * 2;
+        time += PlannedTime.Category.DHS_OVERHEAD.time/1000.0 * 2;
+
+        // The filter change dominates the half wave plate angle change
+        double overhead = Gpi.SINGLE_CHANGE_OVERHEAD_SECS;
+        verify(time + overhead);
+    }
+
     // Test a sequence in which there is a change followed by another step with
     // no change.
     @Test
@@ -243,7 +290,7 @@ public final class PlannedTimeTest {
         flatDataObject.setCoaddsCount(5);
         flatComp.setDataObject(flatDataObject);
 
-        final List<ISPSeqComponent> children = new ArrayList<ISPSeqComponent>();
+        final List<ISPSeqComponent> children = new ArrayList<>();
         children.add(flatComp);
         gpiSeqComponent.setSeqComponents(children);
 

@@ -13,27 +13,24 @@ import edu.gemini.spModel.core.SPProgramID;
 
 /**
  * <code>DBIDClashException</code> is thrown whenever the database detects that
- * the same node key or ID is being used by two or more distinct programs.
+ * the same ID is being used by two or more distinct programs.
  */
 public final class DBIDClashException extends DBException {
-    public final SPNodeKey key;
     public final SPProgramID id;
+    public final SPNodeKey existingKey;
+    public final SPNodeKey newKey;
 
-    private static String duplicateMessage(SPProgramID programId) {
-        if (programId != null) {
-            return String.format("Program ID '%s' is already in use.", programId);
-        } else {
-            return String.format("Program is already in the database.");
-        }
+    private static String duplicateMessage(final SPProgramID programId, final SPNodeKey existingKey, final SPNodeKey newKey) {
+        return String.format("Program ID '%s' is already in use (existing=%s, new=%s).", programId, existingKey.toString(), newKey.toString());
     }
 
     /**
      * Constructs with no detail message.
      */
-    public DBIDClashException(SPNodeKey key, SPProgramID programId) {
-        super(duplicateMessage(programId));
-        if (programId == null) throw new IllegalArgumentException("Missing id.");
-        this.key = key;
-        this.id = programId;
+    public DBIDClashException(final SPProgramID programId, final SPNodeKey existingKey, final SPNodeKey newKey) {
+        super(duplicateMessage(programId, existingKey, newKey));
+        this.id          = programId;
+        this.existingKey = existingKey;
+        this.newKey      = newKey;
     }
 }

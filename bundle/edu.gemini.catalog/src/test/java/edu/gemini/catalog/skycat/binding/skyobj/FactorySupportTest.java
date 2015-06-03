@@ -45,7 +45,7 @@ public final class FactorySupportTest {
                 new FactorySupport.Builder(ID_COL, RA_COL, DEC_COL).add(J_MAG, K_MAG).build();
 
         public static final Set<Magnitude.Band> BANDS = Collections.unmodifiableSet(
-                new HashSet<Magnitude.Band>(Arrays.asList(J, K)));
+                new HashSet<>(Arrays.asList(J, K)));
 
         @Override
         public Set<Magnitude.Band> bands() { return BANDS; }
@@ -68,12 +68,11 @@ public final class FactorySupportTest {
     private final CatalogHeader header;
 
     public FactorySupportTest() {
-        Tuple2<String, Class> id, ra, dec, j, k;
-        id  = new Pair<String, Class>("ID", String.class);
-        ra  = new Pair<String, Class>("RA", String.class);
-        dec = new Pair<String, Class>("DEC", String.class);
-        j   = new Pair<String, Class>("Jmag", String.class);
-        k   = new Pair<String, Class>("Kmag", String.class);
+        final Tuple2<String, Class<?>> id  = new Pair<String, Class<?>>("ID", String.class);
+        final Tuple2<String, Class<?>> ra  = new Pair<String, Class<?>>("RA", String.class);
+        final Tuple2<String, Class<?>> dec = new Pair<String, Class<?>>("DEC", String.class);
+        final Tuple2<String, Class<?>> j   = new Pair<String, Class<?>>("Jmag", String.class);
+        final Tuple2<String, Class<?>> k   = new Pair<String, Class<?>>("Kmag", String.class);
         header = new DefaultCatalogHeader(DefaultImList.create(id,ra,dec,j,k));
     }
 
@@ -137,7 +136,7 @@ public final class FactorySupportTest {
         assertEquals(8, mag.getBrightness(), 0.000001);
         assertTrue(obj.getMagnitude(K).isEmpty());
 
-        Set set = obj.getMagnitudeBands();
+        Set<Magnitude.Band> set = obj.getMagnitudeBands();
         assertTrue(set.contains(J));
         assertFalse(set.contains(K));
         assertFalse(set.contains(H));
@@ -154,7 +153,7 @@ public final class FactorySupportTest {
         Magnitude kmag = obj.getMagnitude(K).getValue();
         assertEquals(10, kmag.getBrightness(), 0.000001);
 
-        Set set = obj.getMagnitudeBands();
+        Set<Magnitude.Band> set = obj.getMagnitudeBands();
         assertTrue(set.contains(J));
         assertTrue(set.contains(K));
         assertFalse(set.contains(H));

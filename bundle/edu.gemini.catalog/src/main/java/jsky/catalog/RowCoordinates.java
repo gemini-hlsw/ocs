@@ -111,7 +111,7 @@ public class RowCoordinates {
 
 
     /** Return a Coordinates object for the given row vector, or null if not found */
-    public Coordinates getCoordinates(Vector row) {
+    public Coordinates getCoordinates(Vector<Object> row) {
         try {
             if (isWcs) {
                 Object ra = row.get(xCol), dec = row.get(yCol);

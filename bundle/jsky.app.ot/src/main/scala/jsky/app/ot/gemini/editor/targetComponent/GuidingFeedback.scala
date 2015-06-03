@@ -4,11 +4,11 @@ import edu.gemini.ags.api.AgsAnalysis.{NoGuideStarForProbe, NoGuideStarForGroup}
 import edu.gemini.ags.api._
 import edu.gemini.ags.api.AgsGuideQuality._
 import edu.gemini.ags.api.AgsMagnitude.{MagnitudeCalc, MagnitudeTable}
-import edu.gemini.shared.skyobject.Magnitude
+import edu.gemini.pot.ModelConverters._
+import edu.gemini.spModel.core.MagnitudeBand
 import edu.gemini.spModel.guide.{ValidatableGuideProbe, GuideSpeed, GuideProbe}
 import edu.gemini.spModel.guide.GuideSpeed._
 import edu.gemini.spModel.obs.context.ObsContext
-import edu.gemini.spModel.rich.shared.immutable._
 import edu.gemini.spModel.target.SPTarget
 import edu.gemini.spModel.target.env.TargetEnvironment
 import jsky.app.ot.util.OtColor
@@ -24,14 +24,14 @@ object GuidingFeedback {
   import OtColor._
 
   object ProbeLimits {
-    def apply(ctx: ObsContext, mc: MagnitudeCalc): Option[ProbeLimits] = {
+    def apply(probeBands: List[MagnitudeBand], ctx: ObsContext, mc: MagnitudeCalc): Option[ProbeLimits] = {
       val cnds = ctx.getConditions
       val fast = mc.apply(cnds, FAST)
 
-      def faint(gs: GuideSpeed) = mc.apply(cnds, gs).getFaintnessLimit.getBrightness
+      def faint(gs: GuideSpeed) = mc.apply(cnds, gs).faintnessConstraint.brightness
 
-      fast.getSaturationLimit.asScalaOpt.map { sat =>
-        ProbeLimits(fast.getBand, sat.getBrightness, faint(FAST), faint(MEDIUM), faint(SLOW))
+      fast.saturationConstraint.map { sat =>
+        ProbeLimits(probeBands, sat.brightness, faint(FAST), faint(MEDIUM), faint(SLOW))
       }
     }
 
@@ -39,17 +39,17 @@ object GuidingFeedback {
     def lim(d: Double): String = f"$d%.1f"
   }
 
-  case class ProbeLimits(band: Magnitude.Band, sat: Double, fast: Double, medium: Double, slow: Double) {
+  case class ProbeLimits(bands: List[MagnitudeBand], sat: Double, fast: Double, medium: Double, slow: Double) {
     import ProbeLimits.{le, lim}
 
     def searchRange: String =
-      s"${lim(sat)} $le $band $le ${lim(slow)}"
+      s"${lim(sat)} $le ${bands.map(_.name).mkString(", ")} $le ${lim(slow)}"
 
     def detailRange: String =
       s"${lim(sat)} $le FAST $le ${lim(fast)} < MEDIUM $le ${lim(medium)} < SLOW $le ${lim(slow)}"
   }
 
-  class Row(analysis: AgsAnalysis, probeLimits: Option[ProbeLimits], includeProbeName: Boolean) extends GridBagPanel {
+  case class Row(analysis: AgsAnalysis, probeLimits: Option[ProbeLimits], includeProbeName: Boolean) extends GridBagPanel {
     val bg = analysis.quality match {
       case DeliversRequestedIq   => HONEY_DEW
       case PossibleIqDegradation => BANANA
@@ -127,17 +127,17 @@ object GuidingFeedback {
 
   // GuidingFeedback.Rows corresponding to the observation as a whole.
   def obsAnalysis(ctx: ObsContext, mt: MagnitudeTable): List[Row] = {
-    val (calcTable, analysis) = AgsRegistrar.currentStrategy(ctx).fold((Map.empty[GuideProbe, MagnitudeCalc], List.empty[AgsAnalysis])) { strategy =>
-      (strategy.magnitudes(ctx, mt).toMap, strategy.analyze(ctx, mt))
+    val (calcTable, analysis, probeBands) = AgsRegistrar.currentStrategy(ctx).fold((Map.empty[GuideProbe, MagnitudeCalc], List.empty[AgsAnalysis], List.empty[MagnitudeBand])) { strategy =>
+      (strategy.magnitudes(ctx, mt).toMap, strategy.analyze(ctx, mt), strategy.probeBands)
     }
-    val probeLimitsMap = calcTable.mapValues(ProbeLimits(ctx, _))
+    val probeLimitsMap = calcTable.mapValues(ProbeLimits(probeBands, ctx, _))
 
     analysis.map { a =>
       val plo = for {
         gp <- AgsAnalysis.guideProbe(a)
         pl <- probeLimitsMap.get(gp).flatten
       } yield pl
-      new Row(a, plo, includeProbeName = true)
+      Row(a, plo, includeProbeName = true)
     }
   }
 
@@ -165,16 +165,16 @@ object GuidingFeedback {
   def baseAnalysis(ctx: ObsContext, mt: MagnitudeTable): List[Row] =
     AgsRegistrar.currentStrategy(ctx).fold(List.empty[Row]) { s =>
       s.analyze(ctx, mt).filter {
-        case NoGuideStarForGroup(_)   => true
-        case NoGuideStarForProbe(_)   => true
-        case _                        => false
-      }.map { a => new Row(a, None, includeProbeName = true) }
+        case NoGuideStarForGroup(_, _) => true
+        case NoGuideStarForProbe(_, _) => true
+        case _                         => false
+      }.map { a => Row(a, None, includeProbeName = true) }
     }
 
   // GuidingFeedback.Row related to the given guide star itself.
   def guideStarAnalysis(ctx: ObsContext, mt: MagnitudeTable, gp: ValidatableGuideProbe, target: SPTarget): Option[Row] =
-    AgsAnalysis.analysis(ctx, mt, gp).map { a =>
-      val plo = mt(ctx, gp).flatMap(ProbeLimits(ctx, _))
-      new Row(a, plo, includeProbeName = false)
-    }
+    AgsRegistrar.currentStrategy(ctx).flatMap(_.analyze(ctx, mt, gp, target.toNewModel).map { a =>
+      val plo = mt(ctx, gp).flatMap(ProbeLimits(a.probeBands, ctx, _))
+      Row(a, plo, includeProbeName = false)
+    })
 }

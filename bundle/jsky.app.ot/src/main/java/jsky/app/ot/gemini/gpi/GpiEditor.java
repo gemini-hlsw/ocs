@@ -7,7 +7,6 @@ import edu.gemini.shared.gui.bean.EditEvent;
 import edu.gemini.shared.gui.bean.EditListener;
 import edu.gemini.shared.gui.bean.TextFieldPropertyCtrl;
 import edu.gemini.shared.util.immutable.Option;
-import edu.gemini.shared.util.immutable.Some;
 import edu.gemini.spModel.gemini.gpi.Gpi;
 import jsky.app.ot.editor.eng.EngEditor;
 import jsky.app.ot.gemini.editor.ComponentEditor;
@@ -202,21 +201,11 @@ public class GpiEditor extends ComponentEditor<ISPObsComponent, Gpi> implements 
         }
 
         public void valueChanged(final EditEvent<Gpi, Option<Gpi.ObservingMode>> event) {
-            SwingUtilities.invokeLater(new Runnable() {
-                @Override
-                public void run() {
-                    update(event.getNewValue());
-                }
-            });
+            SwingUtilities.invokeLater(() -> update(event.getNewValue()));
         }
 
         public void propertyChange(PropertyChangeEvent evt) {
-            SwingUtilities.invokeLater(new Runnable() {
-                @Override
-                public void run() {
-                    update();
-                }
-            });
+            SwingUtilities.invokeLater(this::update);
         }
 
         void update() {
@@ -254,11 +243,12 @@ public class GpiEditor extends ComponentEditor<ISPObsComponent, Gpi> implements 
         }
 
         // Updates the list of available items in the obs mode combobox
+        @SuppressWarnings("rawtypes")
         private void updateComboBox(Option<Gpi.ObservingMode>[] values, boolean selectLast) {
             final JComboBox cb = ((JComboBox) observingModeCtrl.getComponent());
             if (cb.getModel().getSize() != values.length) {
                 int selected = cb.getSelectedIndex();
-                cb.setModel(new DefaultComboBoxModel(values));
+                cb.setModel(new DefaultComboBoxModel<>(values));
                 if (selectLast) {
                     cb.setSelectedIndex(values.length - 1);
                 } else if (selected < values.length) {
@@ -268,7 +258,7 @@ public class GpiEditor extends ComponentEditor<ISPObsComponent, Gpi> implements 
         }
     }
 
-    // Updates the value of the useCal if it changes
+    // Updates the value of the useCal/useAo/noFpmPinhole/aoOptimize if it changes
     private final class UseLoopListener implements PropertyChangeListener {
         private final CheckboxPropertyCtrl<Gpi> ctrl;
 
@@ -333,6 +323,11 @@ public class GpiEditor extends ComponentEditor<ISPObsComponent, Gpi> implements 
     private final UseLoopListener useCalUpdater;
     private final UseLoopListener useAoUpdater;
 
+    private final CheckboxPropertyCtrl<Gpi> aoOptimizeCtrl;
+    private final CheckboxPropertyCtrl<Gpi> noFpmPinholeCtrl;
+    private final UseLoopListener aoOptimizeUpdater;
+    private final UseLoopListener noFpmPinholeUpdater;
+
     private static final int halfWidth     = 3;
 
     private static final int leftLabelCol  = 0;
@@ -356,7 +351,7 @@ public class GpiEditor extends ComponentEditor<ISPObsComponent, Gpi> implements 
         pan.add(new JPanel(), colGapGbc(gapCol, row));
 
         // Astrometric field
-        astrometricFieldCtrl = new CheckboxPropertyCtrl<Gpi>(Gpi.ASTROMETRIC_FIELD_PROP);
+        astrometricFieldCtrl = new CheckboxPropertyCtrl<>(Gpi.ASTROMETRIC_FIELD_PROP);
         pan.add(astrometricFieldCtrl.getComponent(), propWidgetGbc(leftWidgetCol, row));
 
         ++row;
@@ -365,7 +360,7 @@ public class GpiEditor extends ComponentEditor<ISPObsComponent, Gpi> implements 
         observingModeCtrl = ComboPropertyCtrl.optionEnumInstance(Gpi.OBSERVING_MODE_PROP, Gpi.ObservingMode.class);
         // See OT-102
         ((JComboBox) observingModeCtrl.getComponent()).setModel(
-                new DefaultComboBoxModel(Gpi.ObservingMode.NONENGINEERING_VALUES));
+                new DefaultComboBoxModel<>(Gpi.ObservingMode.NONENGINEERING_VALUES));
 
         addCtrl(pan, leftLabelCol, row, observingModeCtrl);
 
@@ -386,7 +381,7 @@ public class GpiEditor extends ComponentEditor<ISPObsComponent, Gpi> implements 
         // Disperser
         disperserCtrl = ComboPropertyCtrl.enumInstance(Gpi.DISPERSER_PROP);
         // See OT-50: Disperser.OPEN only available in engineering screen
-        ((JComboBox)disperserCtrl.getComponent()).setModel(new DefaultComboBoxModel(Gpi.Disperser.nonEngineeringValues()));
+        ((JComboBox)disperserCtrl.getComponent()).setModel(new DefaultComboBoxModel<>(Gpi.Disperser.nonEngineeringValues()));
         addCtrl(pan, leftLabelCol, row, disperserCtrl);
 
         // ADC
@@ -460,9 +455,9 @@ public class GpiEditor extends ComponentEditor<ISPObsComponent, Gpi> implements 
         lyotCtrl = ComboPropertyCtrl.enumInstance(Gpi.LYOT_PROP);
 
         artificialSourceLabel = new JLabel("                   Artificial Source");
-        irLaserLampCtrl = new CheckboxPropertyCtrl<Gpi>(Gpi.IR_LASER_LAMP_PROP);
-        visibleLaserLampCtrl = new CheckboxPropertyCtrl<Gpi>(Gpi.VISIBLE_LASER_LAMP_PROP);
-        superContinuumLampCtrl = new CheckboxPropertyCtrl<Gpi>(Gpi.SUPER_CONTINUUM_LAMP_PROP);
+        irLaserLampCtrl = new CheckboxPropertyCtrl<>(Gpi.IR_LASER_LAMP_PROP);
+        visibleLaserLampCtrl = new CheckboxPropertyCtrl<>(Gpi.VISIBLE_LASER_LAMP_PROP);
+        superContinuumLampCtrl = new CheckboxPropertyCtrl<>(Gpi.SUPER_CONTINUUM_LAMP_PROP);
 
         attenuationCtrl = TextFieldPropertyCtrl.createDoubleInstance(Gpi.ARTIFICIAL_SOURCE_ATTENUATION_PROP, 1);
         attenuationLabel = new JLabel(attenuationCtrl.getDescriptor().getDisplayName());
@@ -475,13 +470,19 @@ public class GpiEditor extends ComponentEditor<ISPObsComponent, Gpi> implements 
         pupilCameraCtrl = ComboPropertyCtrl.enumInstance(Gpi.PUPUL_CAMERA_PROP);
         fpmCtrl = ComboPropertyCtrl.enumInstance(Gpi.FPM_PROP);
 
-        alwaysRestoreModelCtrl = new CheckboxPropertyCtrl<Gpi>(Gpi.ALWAYS_RESTORE_MODEL_PROP);
+        alwaysRestoreModelCtrl = new CheckboxPropertyCtrl<>(Gpi.ALWAYS_RESTORE_MODEL_PROP);
 
-        useAoCtrl = new CheckboxPropertyCtrl<Gpi>(Gpi.USE_AO_PROP);
+        useAoCtrl = new CheckboxPropertyCtrl<>(Gpi.USE_AO_PROP);
         useAoUpdater = new UseLoopListener(useAoCtrl);
 
-        useCalCtrl = new CheckboxPropertyCtrl<Gpi>(Gpi.USE_CAL_PROP);
+        useCalCtrl = new CheckboxPropertyCtrl<>(Gpi.USE_CAL_PROP);
         useCalUpdater = new UseLoopListener(useCalCtrl);
+
+        aoOptimizeCtrl = new CheckboxPropertyCtrl<>(Gpi.AO_OPTIMIZE_PROP);
+        aoOptimizeUpdater = new UseLoopListener(aoOptimizeCtrl);
+
+        noFpmPinholeCtrl = new CheckboxPropertyCtrl<>(Gpi.ALIGN_FPM_PINHOLE_BIAS_PROP);
+        noFpmPinholeUpdater = new UseLoopListener(noFpmPinholeCtrl);
     }
 
     @Override
@@ -536,6 +537,9 @@ public class GpiEditor extends ComponentEditor<ISPObsComponent, Gpi> implements 
 
         pan.add(useAoCtrl.getComponent(), propWidgetGbc(leftWidgetCol, row++, 3, 1));
         pan.add(useCalCtrl.getComponent(), propWidgetGbc(leftWidgetCol, row++, 3, 1));
+
+        pan.add(aoOptimizeCtrl.getComponent(), propWidgetGbc(leftWidgetCol, row++, 3, 1));
+        pan.add(noFpmPinholeCtrl.getComponent(), propWidgetGbc(leftWidgetCol, row++, 3, 1));
 
         // filler
         final int finalRow = row;
@@ -639,5 +643,10 @@ public class GpiEditor extends ComponentEditor<ISPObsComponent, Gpi> implements 
         inst.addPropertyChangeListener(Gpi.USE_CAL_PROP.getName(), useCalUpdater);
         inst.addPropertyChangeListener(Gpi.USE_AO_PROP.getName(), useAoUpdater);
         useCalCtrl.setBean(inst);
+
+        aoOptimizeCtrl.setBean(inst);
+        noFpmPinholeCtrl.setBean(inst);
+        inst.addPropertyChangeListener(Gpi.AO_OPTIMIZE_PROP.getName(), aoOptimizeUpdater);
+        inst.addPropertyChangeListener(Gpi.ALIGN_FPM_PINHOLE_BIAS_PROP.getName(), noFpmPinholeUpdater);
     }
 }

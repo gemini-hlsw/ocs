@@ -1,15 +1,18 @@
 package edu.gemini.ags.api
 
+import edu.gemini.ags.api.AgsAnalysis.NotReachable
 import edu.gemini.ags.api.AgsMagnitude.{MagnitudeCalc, MagnitudeTable}
-import edu.gemini.catalog.api.QueryConstraint
-import edu.gemini.shared.skyobject.SkyObject
-import edu.gemini.skycalc.Angle
+import edu.gemini.pot.ModelConverters._
 import edu.gemini.spModel.ags.AgsStrategyKey
-import edu.gemini.spModel.guide.GuideProbe
+import edu.gemini.spModel.core.{MagnitudeBand, Angle}
+import edu.gemini.spModel.core.Target.SiderealTarget
+import edu.gemini.spModel.guide.{ValidatableGuideProbe, GuideProbe}
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.rich.shared.immutable._
+import edu.gemini.shared.util.immutable.{Option => JOption, Some => JSome}
 import edu.gemini.spModel.target.SPTarget
 import edu.gemini.spModel.target.env.{OptionsList, GuideProbeTargets, TargetEnvironment}
+import edu.gemini.spModel.target.system.HmsDegTarget
 
 import scala.collection.JavaConverters._
 import scala.concurrent.Future
@@ -21,15 +24,24 @@ trait AgsStrategy {
 
   def analyze(ctx: ObsContext, mt: MagnitudeTable): List[AgsAnalysis]
 
-  def candidates(ctx: ObsContext, mt: MagnitudeTable): Future[List[(GuideProbe, List[SkyObject])]]
+  def analyze(ctx: ObsContext, mt: MagnitudeTable, guideProbe: ValidatableGuideProbe, guideStar: SiderealTarget): Option[AgsAnalysis]
+
+  def analyzeForJava(ctx: ObsContext, mt: MagnitudeTable, guideProbe: ValidatableGuideProbe, guideStar: SiderealTarget): JOption[AgsAnalysis] = {
+    val spTarget = new SPTarget(guideStar.coordinates.ra.toAngle.toDegrees, guideStar.coordinates.dec.toDegrees)
+    if (!guideProbe.validate(spTarget, ctx)) new JSome(NotReachable(guideProbe, guideStar, probeBands))
+    else analyze(ctx, mt, guideProbe, guideStar).asGeminiOpt
+  }
+
+  def candidates(ctx: ObsContext, mt: MagnitudeTable): Future[List[(GuideProbe, List[SiderealTarget])]]
 
   def estimate(ctx: ObsContext, mt: MagnitudeTable): Future[AgsStrategy.Estimate]
 
   def select(ctx: ObsContext, mt: MagnitudeTable): Future[Option[AgsStrategy.Selection]]
 
-  def queryConstraints(ctx: ObsContext, mt: MagnitudeTable): List[QueryConstraint]
-
   def guideProbes: List[GuideProbe]
+
+  // Return the bands used by the strategy in order
+  def probeBands: List[MagnitudeBand]
 }
 
 object AgsStrategy {
@@ -54,7 +66,7 @@ object AgsStrategy {
   /**
    * An assignment of a guide star to a particular guide probe.
    */
-  case class Assignment(guideProbe: GuideProbe, guideStar: SkyObject)
+  case class Assignment(guideProbe: GuideProbe, guideStar: SiderealTarget)
 
   /**
    * Results of running an AGS selection.  The position angle for which the
@@ -68,14 +80,14 @@ object AgsStrategy {
      */
     def applyTo(env: TargetEnvironment): TargetEnvironment = {
       def findMatching(gpt: GuideProbeTargets, target: SPTarget): Option[SPTarget] =
-        Option(target.getName).flatMap { n =>
+        Option(target.getTarget.getName).flatMap { n =>
           gpt.getOptions.toList.asScala.find { t =>
-            Option(t.getName).map(_.trim).exists(_ == n.trim)
+            Option(t.getTarget.getName).map(_.trim).exists(_ == n.trim)
           }
         }
 
-      (env/:assignments) { (curEnv, ass) =>
-        val target = new SPTarget(ass.guideStar)
+      (env /: assignments) { (curEnv, ass) =>
+        val target = new SPTarget(HmsDegTarget.fromSkyObject(ass.guideStar.toOldModel))
         val oldGpt = curEnv.getPrimaryGuideProbeTargets(ass.guideProbe).asScalaOpt
 
         val newGpt = oldGpt.fold(GuideProbeTargets.create(ass.guideProbe, target)) { gpt =>

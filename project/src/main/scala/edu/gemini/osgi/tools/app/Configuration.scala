@@ -7,6 +7,8 @@ object Configuration {
     val Test, MacOS, Windows, Linux32, Linux64, RPM64 /*, Solaris */ = Value
   }
   type Distribution = this.Distribution.Value
+
+  case class HostInfo(hostname: String, username: String, password: String, port: Int = 22, timeout: Int = 15000)
 }
 
 case class Configuration(
@@ -20,6 +22,7 @@ case class Configuration(
   log: Option[String] = None,
   script: Option[File] = None,
   spec: Option[File] = None,
+  remoteBuildInfo: Option[Configuration.HostInfo] = None,
   extending: List[Configuration] = Nil) {
 
   // Default; this can be overridden in instances
@@ -43,6 +46,7 @@ case class Configuration(
     props = c.props ++ props,
     log = log.orElse(c.log),
     spec = spec.orElse(c.spec),
+    remoteBuildInfo = remoteBuildInfo.orElse(c.remoteBuildInfo),
     extending = extending :+ c
   )
 

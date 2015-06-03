@@ -1,0 +1,21 @@
+# Througput of CANOPUS. 
+# 
+# Assumed transmission for MCAO is 88% according
+# to the model and information provided by Peter
+# McGregor and Benoit Neichel
+# Columns are (1) wavelength in nm, (2) throughput
+#
+# Author: Rodrigo Carrasco
+# Created: r026 August 2012
+# Shortest and longest points added to ensure valid data
+# when extrapolating
+#
+# lambda transmission
+#
+    810   0.83
+    925   0.83
+   1250   0.88
+   1650   0.88
+   2200   0.88   
+   2700   0.94
+   3000   0.94

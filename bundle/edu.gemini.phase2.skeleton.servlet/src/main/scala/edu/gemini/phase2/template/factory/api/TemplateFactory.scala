@@ -8,8 +8,11 @@ import edu.gemini.spModel.template.{Phase1Group, SpBlueprint}
 trait TemplateFactory {
 
   /**
-   * Expands the given blueprint and its arguments into a template group and
-   * a group of baseline calibrations.
+   * Expands the given blueprint and its arguments into a template group and a group of baseline
+   * calibrations. If `preserveLibraryIds` is false (the typical case) then library ids will be
+   * erased from the generated program; if true they will be preserved, which can be helpful for
+   * testing.
    */
-  def expand(blueprint: SpBlueprint, pig: Phase1Group): Either[String, BlueprintExpansion]
+  def expand(blueprint: SpBlueprint, pig: Phase1Group, preserveLibraryIds: Boolean): Either[String, BlueprintExpansion]
+
 }

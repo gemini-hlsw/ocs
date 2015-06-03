@@ -7,16 +7,16 @@ import java.util.jar.Manifest
 
 object WinDistHandler extends DistHandler {
 
-  def build(wd: File, jreDir: Option[File], meta: ApplicationMeta, version:String, config: Configuration, d: Configuration.Distribution, solution: Map[BundleSpec, (File, Manifest)], appProjectBaseDir: File) {
+  def build(wd: File, jreDir: Option[File], meta: ApplicationMeta, version:String, config: Configuration, d: Configuration.Distribution, solution: Map[BundleSpec, (File, Manifest)], log: sbt.Logger, appProjectBaseDir: File) {
 
     // Vals in this class attempt to mirror those in proj/ot/appbuild.xml as closely as is reasonable
 
     val winstage = mkdir(wd, "staging")
-    val winjre = jreDir.map(jreDir => new File(new File(jreDir, "windows"), "JRE1.7"))
+    val winjre = jreDir.map(jreDir => new File(new File(jreDir, "windows"), "JRE1.8"))
 
     // Some helpers
     def exec(as: String*) {
-      //println("> " + as.mkString(" "))
+      //log.info("> " + as.mkString(" "))
       val ret = Runtime.getRuntime.exec(as.toArray, null, wd).waitFor()
       if (ret != 0)
         sys.error("Process returned %d: %s".format(ret, as.mkString(" ")))

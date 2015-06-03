@@ -34,8 +34,8 @@ import edu.gemini.spModel.pio.xml.PioXmlFactory;
 import edu.gemini.spModel.target.SPTarget;
 import edu.gemini.spModel.target.obsComp.TargetObsComp;
 import edu.gemini.spModel.target.system.CoordinateParam.Units;
-import edu.gemini.spModel.target.system.HmsDegTarget;
 import edu.gemini.spModel.target.system.ICoordinate;
+import edu.gemini.spModel.target.system.ITarget;
 import edu.gemini.spModel.time.ChargeClass;
 import edu.gemini.spModel.time.ObsTimeCharges;
 import edu.gemini.spModel.time.ObsTimes;
@@ -50,7 +50,6 @@ import jsky.catalog.SearchCondition;
 import jsky.coords.DMS;
 import jsky.coords.HMS;
 
-import javax.security.auth.Subject;
 import java.security.AccessControlException;
 import java.security.Principal;
 import java.util.*;
@@ -450,7 +449,7 @@ public class ObsQueryFunctor extends DBAbstractQueryFunctor {
             final SPTarget target = targetEnv.getBase();
             if (target == null)
                 return null;
-            return target.getName();
+            return target.getTarget().getName();
         } catch (Exception e) {
             e.printStackTrace();
             return null;
@@ -561,9 +560,9 @@ public class ObsQueryFunctor extends DBAbstractQueryFunctor {
             return false;
         final TargetObsComp targetEnv = (TargetObsComp) targetObsComp.getDataObject();
         final SPTarget tp = targetEnv.getBase();
-        final HmsDegTarget target = tp.getTarget().getTargetAsJ2000();
-        final ICoordinate c1 = target.getC1();
-        final ICoordinate c2 = target.getC2();
+        final ITarget target = tp.getTarget();
+        final ICoordinate c1 = target.getRa();
+        final ICoordinate c2 = target.getDec();
         final double ra = c1.getAs(Units.DEGREES) / 15.;
         final double dec = c2.getAs(Units.DEGREES);
 
@@ -661,9 +660,9 @@ public class ObsQueryFunctor extends DBAbstractQueryFunctor {
         if (targetObsComp != null) {
             final TargetObsComp targetEnv = (TargetObsComp) targetObsComp.getDataObject();
             final SPTarget tp = targetEnv.getBase();
-            final HmsDegTarget target = tp.getTarget().getTargetAsJ2000();
-            final ICoordinate c1 = target.getC1();
-            final ICoordinate c2 = target.getC2();
+            final ITarget target = tp.getTarget();
+            final ICoordinate c1 = target.getRa();
+            final ICoordinate c2 = target.getDec();
             ra = c1.getAs(Units.DEGREES);
             dec = c2.getAs(Units.DEGREES);
         }

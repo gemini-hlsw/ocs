@@ -29,6 +29,8 @@ import java.io.Serializable;
 import java.util.*;
 
 import static edu.gemini.shared.skyobject.Magnitude.Band.R;
+import static edu.gemini.shared.skyobject.Magnitude.Band.r;
+import static edu.gemini.shared.skyobject.Magnitude.Band.UC;
 
 /**
  * Site Quality observation component.
@@ -48,125 +50,123 @@ public class SPSiteQuality extends AbstractDataObject implements PropertyProvide
      */
     public static class TimingWindow implements Serializable, Cloneable {
 
-		private static final long serialVersionUID = 1L;
+        private static final long serialVersionUID = 1L;
 
-		public static final int WINDOW_REMAINS_OPEN_FOREVER = -1;
+        public static final int WINDOW_REMAINS_OPEN_FOREVER = -1;
 
 
-		public static final int REPEAT_FOREVER = -1;
-		public static final int REPEAT_NEVER = 0;
+        public static final int REPEAT_FOREVER = -1;
+        public static final int REPEAT_NEVER = 0;
 
-		private static final long MS_PER_SECOND = 1000;
-		private static final long MS_PER_MINUTE = MS_PER_SECOND * 60;
-		private static final long MS_PER_HOUR = MS_PER_MINUTE * 60;
+        private static final long MS_PER_SECOND = 1000;
+        private static final long MS_PER_MINUTE = MS_PER_SECOND * 60;
+        private static final long MS_PER_HOUR = MS_PER_MINUTE * 60;
 
-		public static TimingWindow ALWAYS = new TimingWindow(Long.MIN_VALUE, Long.MAX_VALUE, REPEAT_NEVER, 0);
+        private static final String NAME = "timing-window";
 
-		private static final String NAME = "timing-window";
+        private static final String START_PROP = "start";
+        private static final String DURATION_PROP = "duration";
+        private static final String REPEAT_PROP = "repeat";
+        private static final String PERIOD_PROP = "period";
 
-		private static final String START_PROP = "start";
-		private static final String DURATION_PROP = "duration";
-		private static final String REPEAT_PROP = "repeat";
-		private static final String PERIOD_PROP = "period";
+        // All times and durations in ms
+        private final long start, duration, period;
+        private final int repeat;
 
-		// All times and durations in ms
-		private final long start, duration, period;
-		private final int repeat;
+        public TimingWindow(long start, long duration, int repeat, long period) {
+            this.start = start;
+            this.duration = duration;
+            this.repeat = repeat;
+            this.period = period;
+            assert repeat >= -1;
+        }
 
-		public TimingWindow(long start, long duration, int repeat, long period) {
-			this.start = start;
-			this.duration = duration;
-			this.repeat = repeat;
-			this.period = period;
-			assert repeat >= -1;
-		}
+        public TimingWindow() {
+            this(System.currentTimeMillis(), 24 * MS_PER_HOUR, 0, 0);
+        }
 
-		public TimingWindow() {
-			this(System.currentTimeMillis(), 24 * MS_PER_HOUR, 0, 0);
-		}
+        TimingWindow(ParamSet params) {
+            this(Pio.getLongValue(params, START_PROP, 0),
+                 Pio.getLongValue(params, DURATION_PROP, 0),
+                 Pio.getIntValue(params, REPEAT_PROP, 0),
+                 Pio.getLongValue(params, PERIOD_PROP, 0));
+        }
 
-		TimingWindow(ParamSet params) {
-			this(Pio.getLongValue(params, START_PROP, 0),
-				 Pio.getLongValue(params, DURATION_PROP, 0),
-				 Pio.getIntValue(params, REPEAT_PROP, 0),
-				 Pio.getLongValue(params, PERIOD_PROP, 0));
-		}
+        public long getDuration() {
+            return duration;
+        }
 
-		public long getDuration() {
-			return duration;
-		}
+        public long getPeriod() {
+            return period;
+        }
 
-		public long getPeriod() {
-			return period;
-		}
+        public int getRepeat() {
+            return repeat;
+        }
 
-		public int getRepeat() {
-			return repeat;
-		}
+        public long getStart() {
+            return start;
+        }
 
-		public long getStart() {
-			return start;
-		}
+        ParamSet getParamSet(PioFactory factory) {
+            ParamSet params = factory.createParamSet(NAME);
+            Pio.addLongParam(factory, params, START_PROP, start);
+            Pio.addLongParam(factory, params, DURATION_PROP, duration);
+            Pio.addIntParam(factory, params, REPEAT_PROP, repeat);
+            Pio.addLongParam(factory, params, PERIOD_PROP, period);
+            return params;
+        }
 
-		ParamSet getParamSet(PioFactory factory) {
-			ParamSet params = factory.createParamSet(NAME);
-			Pio.addLongParam(factory, params, START_PROP, start);
-			Pio.addLongParam(factory, params, DURATION_PROP, duration);
-			Pio.addIntParam(factory, params, REPEAT_PROP, repeat);
-			Pio.addLongParam(factory, params, PERIOD_PROP, period);
-			return params;
-		}
+        @Override
+        public String toString() {
+            return String.format("{%d %d %d %d}", start, duration, repeat, period);
+        }
 
-		@Override
-		public String toString() {
-			return String.format("{%d %d %d %d}", start, duration, repeat, period);
-		}
-
-		public TimingWindow clone() {
-			try {
-				return (TimingWindow) super.clone();
-			} catch (CloneNotSupportedException e) {
-				throw new Error("This was supposed to be impossible.");
-			}
-		}
+        public TimingWindow clone() {
+            try {
+                return (TimingWindow) super.clone();
+            } catch (CloneNotSupportedException e) {
+                throw new Error("This was supposed to be impossible.");
+            }
+        }
 
     }
 
     static class TimingWindowList extends LinkedList<TimingWindow> {
 
-		private static final long serialVersionUID = 2L;
-		private static final String NAME = "timing-window-list";
+        private static final long serialVersionUID = 2L;
+        private static final String NAME = "timing-window-list";
 
-		ParamSet getParamSet(PioFactory factory) {
-			ParamSet params = factory.createParamSet(NAME);
-			for (TimingWindow tw: this)
-				params.addParamSet(tw.getParamSet(factory));
-			return params;
-		}
+        ParamSet getParamSet(PioFactory factory) {
+            ParamSet params = factory.createParamSet(NAME);
+            for (TimingWindow tw: this)
+                params.addParamSet(tw.getParamSet(factory));
+            return params;
+        }
 
-		void setParamSet(ParamSet params) {
-			clear();
-			if (params != null) {
-				for (ParamSet ps: params.getParamSets())
-					add(new TimingWindow(ps));
-			}
-		}
+        void setParamSet(ParamSet params) {
+            clear();
+            if (params != null) {
+                for (ParamSet ps: params.getParamSets())
+                    add(new TimingWindow(ps));
+            }
+        }
 
-		@Override
-		public TimingWindowList clone() {
-			TimingWindowList ret = new TimingWindowList();
-			for (TimingWindow tw: this)
-				ret.add(tw.clone());
-			return ret;
-		}
+        @Override
+        public TimingWindowList clone() {
+            TimingWindowList ret = new TimingWindowList();
+            for (TimingWindow tw: this)
+                ret.add(tw.clone());
+            return ret;
+        }
 
     }
 
     @Override
     public SPSiteQuality clone() {
-    	SPSiteQuality ret = (SPSiteQuality) super.clone();
-    	ret._timingWindows = _timingWindows.clone();
-    	return ret;
+        SPSiteQuality ret = (SPSiteQuality) super.clone();
+        ret._timingWindows = _timingWindows.clone();
+        return ret;
     }
 
     public interface PercentageContainer {
@@ -187,20 +187,43 @@ public class SPSiteQuality extends AbstractDataObject implements PropertyProvide
         }
 
         for (T val : values) {
-            if (val.getPercentage() == perc) return new Some<T>(val);
+            if (val.getPercentage() == perc) return new Some<>(val);
         }
         return None.instance();
+    }
+
+    private static Magnitude adjustIf(Magnitude.Band band, Magnitude mag, double amount) {
+        return (mag.getBand() == band) ? mag.add(amount) : mag;
+    }
+
+    /**
+     * Adjust the R magnitude or r` or UC if present
+     * Note that this method is called always with a Magnitude containing a single band
+     */
+    private static Magnitude adjustRLikeMagnitude(Magnitude mag, Double adjustment) {
+        return adjustIf(r, adjustIf(R, adjustIf(UC, mag, adjustment), adjustment), adjustment);
     }
 
     /**
      * Sky Background Options.
      */
-    public static enum SkyBackground implements DisplayableSpType, SequenceableSpType, PercentageContainer {
+    public enum SkyBackground implements DisplayableSpType, SequenceableSpType, PercentageContainer {
 
         PERCENT_20("20%/Darkest", 20, 21.37),
         PERCENT_50("50%/Dark", 50, 20.78),
-        PERCENT_80("80%/Grey", 80, 19.61) { public Magnitude adjust(Magnitude mag) { return adjustIf(R, mag, -0.3); } },
-        ANY("Any/Bright", 100, 0)         { public Magnitude adjust(Magnitude mag) { return adjustIf(R, mag, -0.5); }
+        PERCENT_80("80%/Grey", 80, 19.61) {
+            private double adjustment = -0.3;
+            @Override
+            public Magnitude adjust(Magnitude mag) {
+                return adjustRLikeMagnitude(mag, adjustment);
+            }
+
+        },
+        ANY("Any/Bright", 100, 0)         {
+            private double adjustment = -0.5;
+            public Magnitude adjust(Magnitude mag) {
+                return adjustRLikeMagnitude(mag, adjustment);
+            }
         };
 
         /** The default SkyBackground value **/
@@ -210,15 +233,15 @@ public class SPSiteQuality extends AbstractDataObject implements PropertyProvide
         private final byte _percentage;
         private final double _maxBrightness; // in vMag, smaller is brighter
 
-        private SkyBackground(String displayValue, int percentage, double maxBrightness) {
-        	_percentage = (byte) percentage;
+        SkyBackground(String displayValue, int percentage, double maxBrightness) {
+            _percentage = (byte) percentage;
             _displayValue = displayValue;
             _maxBrightness = maxBrightness;
             assert _percentage >= 0 && _percentage <= 100;
         }
 
         public byte getPercentage() {
-        	return _percentage;
+            return _percentage;
         }
 
         /**
@@ -226,8 +249,8 @@ public class SPSiteQuality extends AbstractDataObject implements PropertyProvide
          * Note that smaller values are brighter. Wacky astronomers, go figure.
          */
         public double getMaxBrightness() {
-			return _maxBrightness;
-		}
+            return _maxBrightness;
+        }
 
         public String displayValue() {
             return _displayValue;
@@ -260,26 +283,9 @@ public class SPSiteQuality extends AbstractDataObject implements PropertyProvide
     }
 
     /**
-     * Get a specific site quality option from its percentage
-     *
-     * @param c The class representing the site quality attribute (CloudCover, ImageQuality, etc...), must implement PercentageContainer
-     * @param percentage The percentage container
-     * @param <T> The type to return, and Enum that implements PercentageContainer
-     * @return An optional enum instance
-     */
-    public static  <T extends Enum<T> & PercentageContainer> Option<T> getEnumFromPercentage(Class<T> c, int percentage){
-        for(T t:c.getEnumConstants()){
-            if(t.getPercentage() == percentage){
-                return new Some(t);
-            }
-        }
-        return None.<T>instance();
-    }
-
-    /**
      * Cloud Cover Options.
      */
-    public static enum CloudCover implements DisplayableSpType, ObsoletableSpType, SequenceableSpType, PercentageContainer {
+    public enum CloudCover implements DisplayableSpType, ObsoletableSpType, SequenceableSpType, PercentageContainer {
         PERCENT_20("20%",        20,  0.0),
         PERCENT_50("50%/Clear",  50,  0.0),
         PERCENT_70("70%/Cirrus", 70, -0.3),
@@ -296,15 +302,15 @@ public class SPSiteQuality extends AbstractDataObject implements PropertyProvide
         private final byte _percentage;
         private final double _magAdjustment;
 
-        private CloudCover(String displayValue, int percentage, double magAdjustment) {
-        	_percentage = (byte) percentage;
+        CloudCover(String displayValue, int percentage, double magAdjustment) {
+            _percentage = (byte) percentage;
             _displayValue = displayValue;
             assert _percentage >= 0 && _percentage <= 100;
             _magAdjustment = magAdjustment;
         }
 
         public byte getPercentage() {
-        	return _percentage;
+            return _percentage;
         }
 
 
@@ -332,7 +338,7 @@ public class SPSiteQuality extends AbstractDataObject implements PropertyProvide
         }
 
         public boolean isObsolete() {
-        	return (this == PERCENT_20) || (this == PERCENT_90);
+            return (this == PERCENT_20) || (this == PERCENT_90);
         }
 
         public String toString() {
@@ -347,11 +353,29 @@ public class SPSiteQuality extends AbstractDataObject implements PropertyProvide
     /**
      * Image Quality Options.
      */
-    public static enum ImageQuality implements DisplayableSpType, SequenceableSpType, PercentageContainer {
-        PERCENT_20("20%/Best", 20) { public Magnitude adjust(Magnitude mag) { return adjustIf(R, mag,  0.5); }},
+    public enum ImageQuality implements DisplayableSpType, SequenceableSpType, PercentageContainer {
+        PERCENT_20("20%/Best", 20) {
+            private double adjustment = 0.5;
+            @Override
+            public Magnitude adjust(Magnitude mag) {
+                return adjustRLikeMagnitude(mag, adjustment);
+            }
+        },
         PERCENT_70("70%/Good", 70),
-        PERCENT_85("85%/Poor", 85) { public Magnitude adjust(Magnitude mag) { return adjustIf(R, mag, -0.5); }},
-        ANY("Any", 100)       { public Magnitude adjust(Magnitude mag) { return adjustIf(R, mag, -1.0); }},
+        PERCENT_85("85%/Poor", 85) {
+            private double adjustment = -0.5;
+            @Override
+            public Magnitude adjust(Magnitude mag) {
+                return adjustRLikeMagnitude(mag, adjustment);
+            }
+        },
+        ANY("Any", 100)       {
+            private double adjustment = -1.0;
+            @Override
+            public Magnitude adjust(Magnitude mag) {
+                return adjustRLikeMagnitude(mag, adjustment);
+            }
+        },
         ;
 
         /** The default ImageQuality value **/
@@ -360,14 +384,14 @@ public class SPSiteQuality extends AbstractDataObject implements PropertyProvide
         private final String _displayValue;
         private final byte _percentage;
 
-        private ImageQuality(String displayValue, int percentage) {
-        	_percentage = (byte) percentage;
+        ImageQuality(String displayValue, int percentage) {
+            _percentage = (byte) percentage;
             _displayValue = displayValue;
             assert _percentage >= 0 && _percentage <= 100;
         }
 
         public byte getPercentage() {
-        	return _percentage;
+            return _percentage;
         }
 
 
@@ -408,7 +432,7 @@ public class SPSiteQuality extends AbstractDataObject implements PropertyProvide
     /**
      * Water Vapor Options.
      */
-    public static enum WaterVapor implements DisplayableSpType, SequenceableSpType, PercentageContainer {
+    public enum WaterVapor implements DisplayableSpType, SequenceableSpType, PercentageContainer {
         PERCENT_20("20%/Low", 20),
         PERCENT_50("50%/Median", 50),
         PERCENT_80("80%/High", 80),
@@ -421,14 +445,14 @@ public class SPSiteQuality extends AbstractDataObject implements PropertyProvide
         private final String _displayValue;
         private final byte _percentage;
 
-        private WaterVapor(String displayValue, int percentage) {
-        	_percentage = (byte) percentage;
+        WaterVapor(String displayValue, int percentage) {
+            _percentage = (byte) percentage;
             _displayValue = displayValue;
             assert _percentage >= 0 && _percentage <= 100;
         }
 
         public byte getPercentage() {
-        	return _percentage;
+            return _percentage;
         }
 
 
@@ -462,11 +486,11 @@ public class SPSiteQuality extends AbstractDataObject implements PropertyProvide
     /**
      * Elevation Constraint Options
      */
-    public static enum ElevationConstraintType implements DisplayableSpType {
+    public enum ElevationConstraintType implements DisplayableSpType {
 
-    	NONE("None", 0, 0, 0, 0),
-    	HOUR_ANGLE("Hour Angle", -5.5, 5.5, -5.0, 5.0),
-    	AIRMASS("Airmass", 1.0, 3.0, 1.0, 2.0),
+        NONE("None", 0, 0, 0, 0),
+        HOUR_ANGLE("Hour Angle", -5.5, 5.5, -5.0, 5.0),
+        AIRMASS("Airmass", 1.0, 3.0, 1.0, 2.0),
 
         ;
 
@@ -476,7 +500,7 @@ public class SPSiteQuality extends AbstractDataObject implements PropertyProvide
         private final double _min, _max;
         private final double _defaultMin, _defaultMax;
 
-        private ElevationConstraintType(String displayValue, double min, double max, double defaultMin, double defaultMax) {
+        ElevationConstraintType(String displayValue, double min, double max, double defaultMin, double defaultMax) {
             _displayValue = displayValue;
             _min = min;
             _max = max;
@@ -489,33 +513,29 @@ public class SPSiteQuality extends AbstractDataObject implements PropertyProvide
         }
 
         public double getDefaultMin() {
-			return _defaultMin;
-		}
-
-        public double getDefaultMax() {
-			return _defaultMax;
-		}
-
-        public double getMax() {
-			return _max;
-		}
-
-        public double getMin() {
-			return _min;
-		}
-
-        public static ElevationConstraintType getElevationConstraintType(String name) {
-        	try {
-        		return valueOf(name);
-        	} catch (IllegalArgumentException iae) {
-        		return DEFAULT;
-        	}
+            return _defaultMin;
         }
 
-    }
+        public double getDefaultMax() {
+            return _defaultMax;
+        }
 
-    private static Magnitude adjustIf(Magnitude.Band band, Magnitude mag, double amount) {
-        return (mag.getBand() == band) ? mag.add(amount) : mag;
+        public double getMax() {
+            return _max;
+        }
+
+        public double getMin() {
+            return _min;
+        }
+
+        public static ElevationConstraintType getElevationConstraintType(String name) {
+            try {
+                return valueOf(name);
+            } catch (IllegalArgumentException iae) {
+                return DEFAULT;
+            }
+        }
+
     }
 
     public static final class Conditions implements Serializable {
@@ -545,11 +565,7 @@ public class SPSiteQuality extends AbstractDataObject implements PropertyProvide
             if (o == null || getClass() != o.getClass()) return false;
 
             Conditions that = (Conditions) o;
-            if (cc != that.cc) return false;
-            if (iq != that.iq) return false;
-            if (sb != that.sb) return false;
-            if (wv != that.wv) return false;
-            return true;
+            return cc == that.cc && iq == that.iq && sb == that.sb && wv == that.wv;
         }
 
         @Override public int hashCode() {
@@ -572,11 +588,7 @@ public class SPSiteQuality extends AbstractDataObject implements PropertyProvide
         }
 
         public MapOp<Magnitude, Magnitude> magAdjustOp() {
-            return new MapOp<Magnitude, Magnitude>() {
-                @Override public Magnitude apply(Magnitude magnitude) {
-                    return adjust(magnitude);
-                }
-            };
+            return this::adjust;
         }
 
         public String toString() {
@@ -596,7 +608,7 @@ public class SPSiteQuality extends AbstractDataObject implements PropertyProvide
     public static final PropertyDescriptor ELEVATION_CONSTRAINT_MAX_PROP;
     public static final PropertyDescriptor TIMING_WINDOWS_PROP;
 
-    private static final Map<String, PropertyDescriptor> PRIVATE_PROP_MAP = new TreeMap<String, PropertyDescriptor>();
+    private static final Map<String, PropertyDescriptor> PRIVATE_PROP_MAP = new TreeMap<>();
     public static final Map<String, PropertyDescriptor> PROPERTY_MAP = Collections.unmodifiableMap(PRIVATE_PROP_MAP);
 
     static {
@@ -706,60 +718,60 @@ public class SPSiteQuality extends AbstractDataObject implements PropertyProvide
     public WaterVapor getWaterVapor() { return conditions.wv; }
 
     public ElevationConstraintType getElevationConstraintType() {
-		return _elevationConstraintType;
-	}
+        return _elevationConstraintType;
+    }
 
-	public void setElevationConstraintType(ElevationConstraintType constraintType) {
-		ElevationConstraintType prev = _elevationConstraintType;
-		_elevationConstraintType = constraintType;
-		firePropertyChange(ELEVATION_CONSTRAINT_TYPE_PROP.getName(), prev, constraintType);
-	}
+    public void setElevationConstraintType(ElevationConstraintType constraintType) {
+        ElevationConstraintType prev = _elevationConstraintType;
+        _elevationConstraintType = constraintType;
+        firePropertyChange(ELEVATION_CONSTRAINT_TYPE_PROP.getName(), prev, constraintType);
+    }
 
-	public double getElevationConstraintMin() {
-		return _elevationConstraintMin;
-	}
+    public double getElevationConstraintMin() {
+        return _elevationConstraintMin;
+    }
 
-	public void setElevationConstraintMin(double min) {
-		double prev = _elevationConstraintMin;
-		_elevationConstraintMin = min;
-		firePropertyChange(ELEVATION_CONSTRAINT_MIN_PROP.getName(), prev, min);
-	}
+    public void setElevationConstraintMin(double min) {
+        double prev = _elevationConstraintMin;
+        _elevationConstraintMin = min;
+        firePropertyChange(ELEVATION_CONSTRAINT_MIN_PROP.getName(), prev, min);
+    }
 
-	public double getElevationConstraintMax() {
-		return _elevationConstraintMax;
-	}
+    public double getElevationConstraintMax() {
+        return _elevationConstraintMax;
+    }
 
-	public void setElevationConstraintMax(double max) {
-		double prev = _elevationConstraintMax;
-		_elevationConstraintMax = max;
-		firePropertyChange(ELEVATION_CONSTRAINT_MAX_PROP.getName(), prev, max);
-	}
+    public void setElevationConstraintMax(double max) {
+        double prev = _elevationConstraintMax;
+        _elevationConstraintMax = max;
+        firePropertyChange(ELEVATION_CONSTRAINT_MAX_PROP.getName(), prev, max);
+    }
 
-	public List<TimingWindow> getTimingWindows() {
-		return Collections.unmodifiableList(_timingWindows);
-	}
+    public List<TimingWindow> getTimingWindows() {
+        return Collections.unmodifiableList(_timingWindows);
+    }
 
-	public void setTimingWindows(List<TimingWindow> windows) {
-		List<TimingWindow> prev = Collections.unmodifiableList(new ArrayList<TimingWindow>(_timingWindows));
-		_timingWindows.clear();
-		_timingWindows.addAll(windows);
-		firePropertyChange(TIMING_WINDOWS_PROP.getName(), prev, getTimingWindows());
-	}
+    public void setTimingWindows(List<TimingWindow> windows) {
+        List<TimingWindow> prev = Collections.unmodifiableList(new ArrayList<>(_timingWindows));
+        _timingWindows.clear();
+        _timingWindows.addAll(windows);
+        firePropertyChange(TIMING_WINDOWS_PROP.getName(), prev, getTimingWindows());
+    }
 
-	public void addTimingWindow(TimingWindow tw) {
-		List<TimingWindow> prev = Collections.unmodifiableList(new ArrayList<TimingWindow>(_timingWindows));
-		_timingWindows.add(tw);
-		firePropertyChange(TIMING_WINDOWS_PROP.getName(), prev, getTimingWindows());
-	}
+    public void addTimingWindow(TimingWindow tw) {
+        List<TimingWindow> prev = Collections.unmodifiableList(new ArrayList<>(_timingWindows));
+        _timingWindows.add(tw);
+        firePropertyChange(TIMING_WINDOWS_PROP.getName(), prev, getTimingWindows());
+    }
 
-	public void removeTimingWindow(TimingWindow tw) {
-		List<TimingWindow> prev = Collections.unmodifiableList(new ArrayList<TimingWindow>(_timingWindows));
-		if (_timingWindows.remove(tw)) {
-			firePropertyChange(TIMING_WINDOWS_PROP.getName(), prev, getTimingWindows());
-		}
-	}
+    public void removeTimingWindow(TimingWindow tw) {
+        List<TimingWindow> prev = Collections.unmodifiableList(new ArrayList<>(_timingWindows));
+        if (_timingWindows.remove(tw)) {
+            firePropertyChange(TIMING_WINDOWS_PROP.getName(), prev, getTimingWindows());
+        }
+    }
 
-	/*
+    /*
      * Return a parameter set describing the current state of this object.
      * @param factory
      */

@@ -11,7 +11,6 @@ import edu.gemini.shared.util.immutable.None;
 import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.shared.util.immutable.Some;
 import edu.gemini.spModel.obscomp.SPInstObsComp;
-import edu.gemini.spModel.util.Angle;
 import jsky.app.ot.tpe.*;
 import jsky.app.ot.util.BasicPropertyList;
 import jsky.app.ot.util.PolygonD;
@@ -48,7 +47,6 @@ public abstract class SciAreaFeatureBase extends TpeImageFeature
     public static final Font POS_ANGLE_FONT = new Font("dialog", Font.PLAIN, 12);
 
     // Used for rotating the science area
-    protected SciAreaDragObject _dragObject;
     protected boolean _dragging = false;
     protected int _dragX;
     protected int _dragY;
@@ -59,11 +57,15 @@ public abstract class SciAreaFeatureBase extends TpeImageFeature
     // The base telescope position
     protected Point2D.Double _baseScreenPos;
 
+    // The corrected position angle.
+    protected double _posAngle;
+
+    // TODO: We can probably get rid of this.
     // Used to rotate figures by the position angle
     protected AffineTransform _posAngleTrans = new AffineTransform();
 
     // List of Figures to draw for the FOV.
-    protected LinkedList<Shape> _figureList = new LinkedList<Shape>();
+    protected LinkedList<Shape> _figureList = new LinkedList<>();
 
 
     /**
@@ -89,9 +91,9 @@ public abstract class SciAreaFeatureBase extends TpeImageFeature
         _baseScreenPos = tii.getBaseScreenPos();
         _sciAreaPD = _sciArea.getPolygonDAt(_baseScreenPos.x, _baseScreenPos.y);
         _pixelsPerArcsec = tii.getPixelsPerArcsec();
-        double posAngle = tii.getCorrectedPosAngleRadians();
+        _posAngle = tii.getCorrectedPosAngleRadians();
         _posAngleTrans.setToIdentity();
-        _posAngleTrans.rotate(-posAngle, _baseScreenPos.x, _baseScreenPos.y);
+        _posAngleTrans.rotate(-_posAngle, _baseScreenPos.x, _baseScreenPos.y);
 
         // Init the _tickMarkPD
         if (_tickMarkPD == null) {
@@ -136,12 +138,11 @@ public abstract class SciAreaFeatureBase extends TpeImageFeature
         _figureList.clear();
     }
 
-
     /**
      * Draw the science area.
      */
     public void draw(Graphics g, TpeImageInfo tii) {
-        Graphics2D g2d = (Graphics2D) g;
+        final Graphics2D g2d = (Graphics2D) g;
 
         if (!_calc(tii)) return;
         _updateFigureList();
@@ -149,9 +150,7 @@ public abstract class SciAreaFeatureBase extends TpeImageFeature
         g2d.setColor(FOV_COLOR);
 
         // draw the FOV
-        for (Shape figure : _figureList) {
-            g2d.draw(figure);
-        }
+        _figureList.forEach(g2d::draw);
 
         // Draw the drag item and science area
         g2d.draw(_sciAreaPD.getPolygon2D());
@@ -196,7 +195,7 @@ public abstract class SciAreaFeatureBase extends TpeImageFeature
             return None.instance();
         }
 
-        _dragObject = null;
+        _dragging = false;
 
         // See if dragging by the corner
         for (int i = 0; i < (_sciAreaPD.npoints - 1); ++i) {
@@ -212,13 +211,12 @@ public abstract class SciAreaFeatureBase extends TpeImageFeature
                 continue;
             }
 
-            Point2D.Double p = tii.getBaseScreenPos();
-            _dragObject = new SciAreaDragObject((int) p.x, (int) p.y, cornerx, cornery);
+            _dragging = true;
         }
 
         // See if dragging by the tick mark (give a couple extra pixels to make it
         // easier to grab)
-        if (_dragObject == null) {
+        if (!_dragging) {
             int x = (int) (_tickMarkPD.xpoints[0] + 0.5);
             int dx = Math.abs(x - tme.xWidget);
             if (dx <= MARKER_SIZE + 2) {
@@ -227,19 +225,17 @@ public abstract class SciAreaFeatureBase extends TpeImageFeature
                 int y = (y0 + y1) / 2;
                 int dy = Math.abs(y - tme.yWidget);
                 if (dy <= MARKER_SIZE + 2) {
-                    Point2D.Double p = tii.getBaseScreenPos();
-                    _dragObject = new SciAreaDragObject((int) p.x, (int) p.y, x, y);
+                    _dragging = true;
                 }
             }
         }
 
-        _dragging = (_dragObject != null);
         if (_dragging) {
             _dragX = tme.xWidget;
             _dragY = tme.yWidget;
         }
 
-        return (_dragging) ? new Some<Object>(_iw.getContext().instrument()) : None.instance();
+        return (_dragging) ? new Some<>(_iw.getContext().instrument()) : None.instance();
     }
 
      /**
@@ -251,24 +247,22 @@ public abstract class SciAreaFeatureBase extends TpeImageFeature
              return;
          }
 
-         if (_dragObject == null) return;
-         _dragX = tme.xWidget;
-         _dragY = tme.yWidget;
+         if (_dragging) {
+             _dragX = tme.xWidget;
+             _dragY = tme.yWidget;
 
-         double radians = _dragObject.getAngle(_dragX, _dragY) * _tii.flipRA() + _tii.getTheta();
-         double degrees = Math.round(Angle.radiansToDegrees(radians));
-        _iw.setPosAngle(degrees);
-        _iw.repaint();
+             _iw.setPosAngle(Math.round(_tii.positionAngle(tme).toDegrees()));
+             _iw.repaint();
+         }
      }
 
     /**
      * Stop dragging.
      */
     public void dragStop(TpeMouseEvent tme) {
-        if (_dragObject != null) {
-            _dragging = false;
+        if (_dragging) {
             drag(tme);
-            _dragObject = null;
+            _dragging = false;
             _iw.getContext().instrument().commit();
         }
     }

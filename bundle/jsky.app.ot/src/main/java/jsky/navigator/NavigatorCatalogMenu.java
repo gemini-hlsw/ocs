@@ -7,9 +7,6 @@
 
 package jsky.navigator;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-
 import javax.swing.*;
 import javax.swing.event.TreeModelEvent;
 import javax.swing.event.TreeModelListener;
@@ -46,9 +43,6 @@ public class NavigatorCatalogMenu extends JMenu implements TreeModelListener {
     /** Catalog submenu */
     private JMenu _catalogMenu;
 
-    /** Archive submenu */
-    private JMenu _archiveMenu;
-
     /** Image server submenu */
     private JMenu _imageServerMenu;
 
@@ -83,7 +77,6 @@ public class NavigatorCatalogMenu extends JMenu implements TreeModelListener {
         addMenuItems();
     }
 
-
     /** Add the catalog menu items. */
     public void addMenuItems() {
         CatalogDirectory dir;
@@ -99,8 +92,6 @@ public class NavigatorCatalogMenu extends JMenu implements TreeModelListener {
         dir.addTreeModelListener(this);
 
         _catalogMenu = _createCatalogSubMenu(this, _catalogMenu, true, dir, Catalog.CATALOG, _I18N.getString("catalogs"));
-
-        _archiveMenu = _createCatalogSubMenu(this, _archiveMenu, true, dir, Catalog.ARCHIVE, _I18N.getString("archives"));
 
         _imageServerMenu = _createCatalogSubMenu(this, _imageServerMenu, true, dir, Catalog.IMAGE_SERVER, _I18N.getString("imageServers"));
 
@@ -118,7 +109,6 @@ public class NavigatorCatalogMenu extends JMenu implements TreeModelListener {
             add(_proxyMenuItem = _createProxySettingsMenuItem());
         }
     }
-
 
     /**
      * Create and return a submenu listing catalogs of the given type.
@@ -168,7 +158,6 @@ public class NavigatorCatalogMenu extends JMenu implements TreeModelListener {
         return menu;
     }
 
-
     /**
      * Create a menu item for accessing a specific catalog.
      */
@@ -182,11 +171,7 @@ public class NavigatorCatalogMenu extends JMenu implements TreeModelListener {
         } else {
             menuItem = new JMenuItem(cat.getName());
         }
-        menuItem.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent ae) {
-                _opener.openCatalogWindow(cat);
-            }
-        });
+        menuItem.addActionListener(ae -> _opener.openCatalogWindow(cat));
         return menuItem;
     }
 
@@ -208,32 +193,21 @@ public class NavigatorCatalogMenu extends JMenu implements TreeModelListener {
         return c;
     }
 
-
-
     /**
      * Create the Catalog => "Local Catalogs" => "Open..." menu item
      */
     private JMenuItem _createCatalogLocalOpenMenuItem() {
         JMenuItem menuItem = new JMenuItem(_I18N.getString("open") + "...");
-        menuItem.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent ae) {
-                _opener.openLocalCatalog();
-            }
-        });
+        menuItem.addActionListener(ae -> _opener.openLocalCatalog());
         return menuItem;
     }
-
 
     /**
      * Create the Catalog => "Browse..." menu item
      */
     private JMenuItem _createCatalogBrowseMenuItem() {
         JMenuItem menuItem = new JMenuItem(_I18N.getString("browse") + "...");
-        menuItem.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent ae) {
-                _opener.openCatalogWindow();
-            }
-        });
+        menuItem.addActionListener(ae -> _opener.openCatalogWindow());
         return menuItem;
     }
 
@@ -242,20 +216,16 @@ public class NavigatorCatalogMenu extends JMenu implements TreeModelListener {
      */
     private JMenuItem _createProxySettingsMenuItem() {
         JMenuItem menuItem = new JMenuItem(_I18N.getString("proxySettings"));
-        menuItem.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent ae) {
-                if (_proxyDialog == null)
-                    _proxyDialog = new ProxyServerDialog();
-                _proxyDialog.setVisible(true);
-            }
+        menuItem.addActionListener(ae -> {
+            if (_proxyDialog == null)
+                _proxyDialog = new ProxyServerDialog();
+            _proxyDialog.setVisible(true);
         });
         return menuItem;
     }
 
-
     // -- implement the TreeModelListener interface
     // (so we can update the menus whenever the catalog tree is changed)
-
 
     public void treeNodesChanged(TreeModelEvent e) {
         addMenuItems();
