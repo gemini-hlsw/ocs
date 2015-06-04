@@ -31,7 +31,7 @@ object AgsClient {
                      "find the best guide star (s) for your observation."
 
   private val NothingFoundMessage =
-    "Sorry, could not find any guide stars for your observation."
+    "Sorry, could not find any guide stars for the current conditions."
 
   private val ExceptionMessage =
     "There was a problem communicating with the remote catalog servers."
@@ -189,7 +189,7 @@ class AgsClient(ctx: TpeContext) extends Dialog {
     }
 
   private def setupManualSearch(msg: String): Unit = {
-    mainPanel.explanatoryText.text = msg + "  Try a manual search?"
+    mainPanel.explanatoryText.text = msg + "  Try changing the conditions, moving the field, or doing a manual search."
     mainPanel.statusIcon.icon      = FailureIcon
     mainPanel.statusMessage.text   = "No guide star was found."
 
