@@ -82,15 +82,15 @@ object Horizons {
    */
   def lookupConicTargetById(
     name:     String,
-    hObjId:   String,
+    hObjId:   String, // unused for now: see REL-2364
     hObjType: ObjectType,
     date:     Date,
     useCache: Boolean
   ): HorizonsIO[(ConicTarget, Ephemeris)] =
     for {
-      _ <- validateName(hObjId)
+      _ <- validateName(name)
       s <- getService
-      r <- lookup(s, hObjId, hObjType, date, useCache)
+      r <- lookup(s, name, hObjType, date, useCache)
       t <- extractConicTarget(r, name)
       e <- extractEphemeris(r)
     } yield (t, e)
@@ -154,9 +154,10 @@ object Horizons {
    */
   def extractConicTarget(r: HorizonsReply, name: String): Horizons.HorizonsIO[ConicTarget] =
     HorizonsIO.either {
+      import OrbitalElements.Name, Name._
 
       // Initialize a conic target from the name and reply in scope
-      def init(ct: ConicTarget): Unit = {
+      def init(aq: Name)(ct: ConicTarget): Unit = {
 
         // Set the identifying information
         ct.setName(name)
@@ -167,11 +168,10 @@ object Horizons {
 
         // Set the orbital elements, if any
         if (r.hasOrbitalElements) {
-          import OrbitalElements.Name._
           val es = r.getOrbitalElements
 
           // hm ok the es.getValue things can be null .. check
-          ct.getAQ         .setOrZero(es.getValue(A))
+          ct.getAQ         .setOrZero(es.getValue(aq))
           ct.getEpoch      .setOrZero(es.getValue(EPOCH))
           ct.getEpochOfPeri.setOrZero(es.getValue(TP))
           ct.getANode      .setOrZero(es.getValue(OM))
@@ -192,8 +192,8 @@ object Horizons {
 
       // Construct and initialize a conic target of the appropriate type
       r.getObjectType match {
-        case ObjectType.COMET      => (new ConicTarget(Tag.JPL_MINOR_BODY)   <| init).right
-        case ObjectType.MINOR_BODY => (new ConicTarget(Tag.MPC_MINOR_PLANET) <| init).right
+        case ObjectType.COMET      => (new ConicTarget(Tag.JPL_MINOR_BODY)   <| init(QR)).right
+        case ObjectType.MINOR_BODY => (new ConicTarget(Tag.MPC_MINOR_PLANET) <| init(A)).right
         case _                     => NoMinorBody.left
       }
 
