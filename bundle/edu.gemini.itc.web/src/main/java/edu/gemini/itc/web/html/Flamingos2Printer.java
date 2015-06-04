@@ -49,41 +49,35 @@ public final class Flamingos2Printer extends PrinterBase {
         // we know this is Flamingos
         final Flamingos2 instrument = (Flamingos2) result.instrument();
 
-        final FormatStringWriter device = new FormatStringWriter();
-        device.setPrecision(2); // Two decimal places
-        device.clear();
         _println("");
 
-        _print(CalculatablePrinter.getTextResult(result.sfCalc(), device));
-        _println(CalculatablePrinter.getTextResult(result.iqCalc(), device));
+        _print(CalculatablePrinter.getTextResult(result.sfCalc()));
+        _println(CalculatablePrinter.getTextResult(result.iqCalc()));
 
         if (!result.parameters().observation().isAutoAperture()) {
-            _println("software aperture extent along slit = " + device.toString(result.parameters().observation().getApertureDiameter()) + " arcsec");
+            _println(String.format("software aperture extent along slit = %.2f arcsec", result.parameters().observation().getApertureDiameter()));
         } else {
             switch (result.parameters().source().getProfileType()) {
                 case UNIFORM:
-                    _println("software aperture extent along slit = "
-                            + device.toString(1 / instrument.getSlitSize() * result.instrument().getPixelSize()) + " arcsec");
+                    _println(String.format("software aperture extent along slit = %.2f arcsec", 1 / instrument.getSlitSize() * result.instrument().getPixelSize()));
                     break;
                 case POINT:
-                    _println("software aperture extent along slit = "
-                            + device.toString(1.4 * result.iqCalc().getImageQuality()) + " arcsec");
+                    _println(String.format("software aperture extent along slit = %.2f arcsec", 1.4 * result.iqCalc().getImageQuality()));
                     break;
             }
         }
 
         if (!result.parameters().source().isUniform()) {
-            _println("fraction of source flux in aperture = " + device.toString(result.st().getSlitThroughput()));
+            _println(String.format("fraction of source flux in aperture = %.2f", result.st().getSlitThroughput()));
         }
 
-        _println("derived image size(FWHM) for a point source = " + device.toString(result.iqCalc().getImageQuality()) + " arcsec");
+        _println(String.format("derived image size(FWHM) for a point source = %.2f arcsec", result.iqCalc().getImageQuality()));
 
         _println("");
-        _println("Requested total integration time = "
-                + device.toString(result.parameters().observation().getExposureTime() * result.parameters().observation().getNumExposures())
-                + " secs, of which "
-                + device.toString(result.parameters().observation().getExposureTime() * result.parameters().observation().getNumExposures()
-                * result.specS2N()[0].getSpecFracWithSource()) + " secs is on source.");
+        final double totExpTime = result.parameters().observation().getExposureTime() * result.parameters().observation().getNumExposures();
+        _println(String.format(
+                "Requested total integration time = %.2f secs, of which %.2f secs is on source.",
+                totExpTime, totExpTime * result.specS2N()[0].getSpecFracWithSource()));
 
         _print("<HR align=left SIZE=3>");
 
@@ -113,34 +107,22 @@ public final class Flamingos2Printer extends PrinterBase {
         // we know this is Flamingos
         final Flamingos2 instrument = (Flamingos2) result.instrument();
 
-        final FormatStringWriter device = new FormatStringWriter();
-        device.setPrecision(2); // Two decimal places
-        device.clear();
         _println("");
 
-        _print(CalculatablePrinter.getTextResult(result.sfCalc(), device));
-        _println(CalculatablePrinter.getTextResult(result.iqCalc(), device));
-        _println(CalculatablePrinter.getTextResult(result.is2nCalc(), result.observation(), device));
-
-        device.setPrecision(0); // NO decimal places
-        device.clear();
+        _print(CalculatablePrinter.getTextResult(result.sfCalc()));
+        _println(CalculatablePrinter.getTextResult(result.iqCalc()));
+        _println(CalculatablePrinter.getTextResult(result.is2nCalc(), result.observation()));
 
         _println("");
-        _println("The peak pixel signal + background is "
-                + device.toString(result.peakPixelCount())
-                + ". This is "
-                + device.toString(result.peakPixelCount()
-                / instrument.getWellDepth() * 100)
-                + "% of the full well depth of "
-                + device.toString(instrument.getWellDepth()) + ".");
+        _println(String.format(
+                "The peak pixel signal + background is %.0f. This is %.0f%% of the full well depth of %.0f.",
+                result.peakPixelCount(), result.peakPixelCount() / instrument.getWellDepth() * 100, instrument.getWellDepth()));
 
         for (final ItcWarning warning : JavaConversions.asJavaList(result.warnings())) {
             _println(warning.msg());
         }
 
         _println("");
-        device.setPrecision(2); // TWO decimal places
-        device.clear();
 
         printConfiguration((Flamingos2) result.instrument(), result.parameters());
     }

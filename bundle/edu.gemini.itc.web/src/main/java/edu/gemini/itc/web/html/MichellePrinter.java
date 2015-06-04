@@ -46,29 +46,24 @@ public final class MichellePrinter extends PrinterBase {
 
         _println("");
 
-        // This object is used to format numerical strings.
-        final FormatStringWriter device = new FormatStringWriter();
-        device.setPrecision(2);  // Two decimal places
-        device.clear();
-
         if (!result.observation().isAutoAperture()) {
-            _println("software aperture extent along slit = " + device.toString(result.observation().getApertureDiameter()) + " arcsec");
+            _println(String.format("software aperture extent along slit = %.2f arcsec", result.observation().getApertureDiameter()));
         } else {
             switch (result.source().getProfileType()) {
                 case UNIFORM:
-                    _println("software aperture extent along slit = " + device.toString(1 / instrument.getFPMask()) + " arcsec");
+                    _println(String.format("software aperture extent along slit = %.2f arcsec", 1 / instrument.getFPMask()));
                     break;
                 case POINT:
-                    _println("software aperture extent along slit = " + device.toString(1.4 * result.iqCalc().getImageQuality()) + " arcsec");
+                    _println(String.format("software aperture extent along slit = %.2f arcsec", 1.4 * result.iqCalc().getImageQuality()));
                     break;
             }
         }
 
         if (!result.source().isUniform()) {
-            _println("fraction of source flux in aperture = " + device.toString(result.st().getSlitThroughput()));
+            _println(String.format("fraction of source flux in aperture = %.2f", result.st().getSlitThroughput()));
         }
 
-        _println("derived image size(FWHM) for a point source = " + device.toString(result.iqCalc().getImageQuality()) + "arcsec\n");
+        _println(String.format("derived image size(FWHM) for a point source = %.2farcsec\n", result.iqCalc().getImageQuality()));
 
         _println("Sky subtraction aperture = " + result.observation().getSkyApertureDiameter() + " times the software aperture.");
 
@@ -81,19 +76,11 @@ public final class MichellePrinter extends PrinterBase {
             //Michelle polarimetry uses 4 waveplate positions so a single observation takes 4 times as long.
             //To the user it should appear as though the time used by the ITC matches thier requested time.
             //hence the x4 factor
-            _println("Requested total integration time = " +
-                    device.toString(exposure_time * 4 * number_exposures) +
-                    " secs, of which " + device.toString(exposure_time * 4 *
-                    number_exposures *
-                    frac_with_source) +
-                    " secs is on source.");
+            _println(String.format("Requested total integration time = %.2f secs, of which %.2f secs is on source.",
+                    exposure_time * 4 * number_exposures, exposure_time * 4 * number_exposures * frac_with_source));
         } else {
-            _println("Requested total integration time = " +
-                    device.toString(exposure_time * number_exposures) +
-                    " secs, of which " + device.toString(exposure_time *
-                    number_exposures *
-                    frac_with_source) +
-                    " secs is on source.");
+            _println(String.format("Requested total integration time = %.2f secs, of which %.2f secs is on source.",
+                    exposure_time * number_exposures, exposure_time * number_exposures * frac_with_source));
         }
 
         _print("<HR align=left SIZE=3>");
@@ -113,8 +100,6 @@ public final class MichellePrinter extends PrinterBase {
         _printFileLink(id,  FinalS2NData.instance());
 
         _println("");
-        device.setPrecision(2);  // TWO decimal places
-        device.clear();
 
         _print("<HR align=left SIZE=3>");
         _println("<b>Input Parameters:</b>");
@@ -134,42 +119,35 @@ public final class MichellePrinter extends PrinterBase {
 
         _println("");
 
-        // This object is used to format numerical strings.
-        final FormatStringWriter device = new FormatStringWriter();
-        device.setPrecision(2);  // Two decimal places
-        device.clear();
-
-        _print(CalculatablePrinter.getTextResult(result.sfCalc(), device));
-        _println(CalculatablePrinter.getTextResult(result.iqCalc(), device));
+        _print(CalculatablePrinter.getTextResult(result.sfCalc()));
+        _println(CalculatablePrinter.getTextResult(result.iqCalc()));
         _println("Sky subtraction aperture = " + result.observation().getSkyApertureDiameter() + " times the software aperture.\n");
 
         if (!instrument.polarimetryIsUsed()) {
-            _println(CalculatablePrinter.getTextResult(result.is2nCalc(), result.observation(), device));
+            _println(CalculatablePrinter.getTextResult(result.is2nCalc(), result.observation()));
         } else {
             _println("Polarimetry mode enabled.\n");
-            final String result2 = CalculatablePrinter.getTextResult(result.is2nCalc(), result.observation(), device);
+            final String result2 = CalculatablePrinter.getTextResult(result.is2nCalc(), result.observation());
             final String delims = "[ ]+";
             final String[] tokens = result2.split(delims);
             for (int i = 0; i < tokens.length; i++) {
                 if (tokens[i].contains("Derived")) {
-                    tokens[i + 5] = device.toString((new Double(tokens[i + 5]) * 4));
-                    tokens[i + 9] = device.toString((new Double(tokens[i + 9]) * 4));
+                    tokens[i + 5] = String.format("%.2f", new Double(tokens[i + 5]) * 4);
+                    tokens[i + 9] = String.format("%.2f", new Double(tokens[i + 9]) * 4);
                 }
                 if (tokens[i].contains("Taking")) {
-                    tokens[i + 1] = device.toString((new Double(tokens[i + 1]) * 4));
+                    tokens[i + 1] = String.format("%.2f", new Double(tokens[i + 1]) * 4);
                 }
                 if (tokens[i].contains("Requested") || tokens[i].contains("Required")) {
-                    tokens[i + 5] = device.toString((new Double(tokens[i + 5]) * 4));
-                    tokens[i + 9] = device.toString((new Double(tokens[i + 9]) * 4));
+                    tokens[i + 5] = String.format("%.2f", new Double(tokens[i + 5]) * 4);
+                    tokens[i + 9] = String.format("%.2f", new Double(tokens[i + 9]) * 4);
                 }
                 _print(tokens[i] + " ");
             }
         }
 
-        device.setPrecision(0);  // NO decimal places
-        device.clear();
         _println("");
-        _println("The peak pixel signal + background is " + device.toString(result.peakPixelCount()) + ". ");
+        _println(String.format("The peak pixel signal + background is %.0f. ", result.peakPixelCount()));
 
         if (result.peakPixelCount() > (instrument.getWellDepth()))
             _println("Warning: peak pixel may be saturating the imaging deep well setting of " +
@@ -177,8 +155,6 @@ public final class MichellePrinter extends PrinterBase {
 
 
         _println("");
-        device.setPrecision(2);  // TWO decimal places
-        device.clear();
 
         _print("<HR align=left SIZE=3>");
         _println("<b>Input Parameters:</b>");
@@ -198,7 +174,7 @@ public final class MichellePrinter extends PrinterBase {
             final String[] tokens = result2.split(delims);
             for (int i = 0; i < tokens.length; i++) {
                 if (tokens[i].contains("<LI>Calculation") && tokens[i + 2].contains("S/N")) {
-                    tokens[i + 5] = device.toString((new Double(tokens[i + 5]) * 4));
+                    tokens[i + 5] = String.format("%.2f", new Double(tokens[i + 5]) * 4);
                 }
                 _print(tokens[i] + " ");
 

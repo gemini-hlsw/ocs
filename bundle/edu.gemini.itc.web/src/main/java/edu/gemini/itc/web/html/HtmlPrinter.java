@@ -19,12 +19,7 @@ public final class HtmlPrinter {
     private HtmlPrinter() {}
 
     public static String printParameterSummary(final SourceDefinition sdp) {
-        StringBuffer sb = new StringBuffer();
-
-        // This object is used to format numerical strings.
-        FormatStringWriter device = new FormatStringWriter();
-        device.setPrecision(4);  // four decimal places
-        device.clear();
+        final StringBuilder sb = new StringBuilder();
 
         sb.append("Source spatial profile, brightness, and spectral distribution: \n");
         sb.append("  The z = ");
@@ -34,12 +29,10 @@ public final class HtmlPrinter {
         sb.append(" is a");
         switch (sdp.getDistributionType()) {
             case ELINE:
-                sb.append("n emission line, at a wavelength of " + device.toString(sdp.getELineWavelength().toMicrons()));
-                device.setPrecision(2);
-                device.clear();
-                sb.append(" microns, and with a width of " + device.toString(sdp.getELineWidth()) + " km/s.\n  It's total flux is " +
-                        device.toString(sdp.getELineFlux().toWatts()) + " watts_flux on a flat continuum of flux density " +
-                        device.toString(sdp.getELineContinuumFlux().toWatts()) + " watts_fd_wavelength.");
+                sb.append(String.format("n emission line, at a wavelength of %.4f microns, ", sdp.getELineWavelength().toMicrons()));
+                sb.append(String.format(
+                        "and with a width of %.2f km/s.\n  It's total flux is %.3e watts_flux on a flat continuum of flux density %.3e watts_fd_wavelength.",
+                        sdp.getELineWidth(), sdp.getELineFlux().toWatts(), sdp.getELineContinuumFlux().toWatts()));
                 break;
             case BBODY:
                 sb.append(" " + sdp.getBBTemp() + "K Blackbody, at " + sdp.getSourceNormalization() +
@@ -67,69 +60,53 @@ public final class HtmlPrinter {
     }
 
     public static String printParameterSummary(final ObservingConditions ocp) {
-        StringBuffer sb = new StringBuffer();
-
-        // This object is used to format numerical strings.
-        FormatStringWriter device = new FormatStringWriter();
-        device.setPrecision(2);  // Two decimal places
-        device.clear();
-
+        final StringBuilder sb = new StringBuilder();
 
         sb.append("Observing Conditions:");
-        sb.append("<LI> Image Quality: " + device.toString(ocp.getImageQualityPercentile() * 100) + "%");
-        sb.append("<LI> Sky Transparency (cloud cover): " + device.toString(ocp.getSkyTransparencyCloudPercentile() * 100) + "%");
-        sb.append("<LI> Sky transparency (water vapour): " + device.toString(ocp.getSkyTransparencyWaterPercentile() * 100) + "%");
-        sb.append("<LI> Sky background: " + device.toString(ocp.getSkyBackgroundPercentile() * 100) + "%");
-        sb.append("<LI> Airmass: " + device.toString(ocp.getAirmass()));
+        sb.append(String.format("<LI> Image Quality: %.2f%%", ocp.getImageQualityPercentile() * 100));
+        sb.append(String.format("<LI> Sky Transparency (cloud cover): %.2f%%", ocp.getSkyTransparencyCloudPercentile() * 100));
+        sb.append(String.format("<LI> Sky transparency (water vapour): %.2f%%", ocp.getSkyTransparencyWaterPercentile() * 100));
+        sb.append(String.format("<LI> Sky background: %.2f%%", ocp.getSkyBackgroundPercentile() * 100));
+        sb.append(String.format("<LI> Airmass: %.2f", ocp.getAirmass()));
         sb.append("<BR>");
 
-        sb.append("Frequency of occurrence of these conditions: " +
-                        device.toString(ocp.getImageQualityPercentile() *
-                                ocp.getSkyTransparencyCloudPercentile() *
-                                ocp.getSkyTransparencyWaterPercentile() *
-                                ocp.getSkyBackgroundPercentile() * 100)
-                        + "%<BR>"
-        );
+        sb.append(String.format("Frequency of occurrence of these conditions: %.2f%%<BR>",
+                ocp.getImageQualityPercentile() *
+                ocp.getSkyTransparencyCloudPercentile() *
+                ocp.getSkyTransparencyWaterPercentile() *
+                ocp.getSkyBackgroundPercentile() * 100));
 
         return sb.toString();
     }
 
     public static String printParameterSummary(final ObservationDetails odp) {
-        StringBuffer sb = new StringBuffer();
-
-        // This object is used to format numerical strings.
-        FormatStringWriter device = new FormatStringWriter();
-        device.setPrecision(2);  // Two decimal places
-        device.clear();
+        final StringBuilder sb = new StringBuilder();
 
         sb.append("Calculation and analysis methods:\n");
-        sb.append("<LI>mode: " + (odp.getMethod().isImaging() ? "imaging" : "spectroscopy") + "\n");
+        sb.append("<LI>mode: ");
+        sb.append((odp.getMethod().isImaging() ? "imaging" : "spectroscopy"));
+        sb.append("\n");
         sb.append("<LI>Calculation of ");
         if (odp.getMethod().isS2N()) {
-            sb.append("S/N ratio with " + odp.getNumExposures() + " exposures of " + device.toString(odp.getExposureTime()) + " secs,");
-            sb.append(" and " + device.toString(odp.getSourceFraction() * 100) + " % of them were on source.\n");
+            sb.append(String.format("S/N ratio with " + odp.getNumExposures() + " exposures of %.2f secs,", odp.getExposureTime()));
+            sb.append(String.format(" and %.2f %% of them were on source.\n", odp.getSourceFraction() * 100));
         } else {
-            sb.append("integration time from a S/N ratio of " + device.toString(odp.getSNRatio()) + " for exposures of");
-            sb.append(" " + device.toString(odp.getExposureTime()) + " with " + device.toString(odp.getSourceFraction() * 100) + " % of them were on source.\n");
+            sb.append(String.format("integration time from a S/N ratio of %.2f for exposures of", odp.getSNRatio()));
+            sb.append(String.format(" %.2f with %.2f %% of them were on source.\n", odp.getExposureTime(), odp.getSourceFraction() * 100));
         }
         sb.append("<LI>Analysis performed for aperture ");
         if (odp.isAutoAperture()) {
             sb.append("that gives 'optimum' S/N ");
         } else {
-            sb.append("of diameter " + device.toString(odp.getApertureDiameter()) + " ");
+            sb.append(String.format("of diameter %.2f ", odp.getApertureDiameter()));
         }
-        sb.append("and a sky aperture that is " + device.toString(odp.getSkyApertureDiameter()) + " times the target aperture.\n");
+        sb.append(String.format("and a sky aperture that is %.2f times the target aperture.\n", odp.getSkyApertureDiameter()));
 
         return sb.toString();
     }
 
     public static String printParameterSummary(final PlottingDetails pdp) {
-        StringBuffer sb = new StringBuffer();
-
-        // This object is used to format numerical strings.
-        FormatStringWriter device = new FormatStringWriter();
-        device.setPrecision(2);  // Two decimal places
-        device.clear();
+        final StringBuilder sb = new StringBuilder();
 
         sb.append("Output:\n<LI>Spectra ");
         switch (pdp.getPlotLimits()) {
@@ -145,39 +122,33 @@ public final class HtmlPrinter {
     }
 
     public static String printParameterSummary(final TelescopeDetails pdp, final String wfs) {
-        StringBuffer sb = new StringBuffer();
-        sb.append("Telescope configuration: \n");
-        sb.append("<LI>" + pdp.getMirrorCoating().displayValue() + " mirror coating.\n");
-        sb.append("<LI>" + portToString(pdp.getInstrumentPort()) + " looking port.\n");
-        sb.append("<LI>wavefront sensor: " + wfs + "\n");
-        return sb.toString();
+        return "Telescope configuration: \n" +
+            "<LI>" + pdp.getMirrorCoating().displayValue() + " mirror coating.\n" +
+            "<LI>" + portToString(pdp.getInstrumentPort()) + " looking port.\n" +
+            "<LI>wavefront sensor: " + wfs + "\n";
     }
 
     public static String printSummary(final Altair altair) {
-        final FormatStringWriter device = new FormatStringWriter();
-        device.setPrecision(3);
-        String s = "r0(" + altair.getWavelength() + "nm) = " + device.toString(altair.getr0()) + " m\n";
-        s += "Strehl = " + device.toString(altair.getStrehl()) + "\n";
-        s += "FWHM of an AO-corrected core = " + device.toString(altair.getAOCorrectedFWHM()) + " arcsec\n";
-        return s;
+        return String.format(
+            "r0(%.0fnm) = %.3f m\n" +
+            "Strehl = %.3f\n"+
+            "FWHM of an AO-corrected core = %.3f arcsec\n",
+            altair.getWavelength(), altair.getr0(), altair.getStrehl(), altair.getAOCorrectedFWHM());
     }
 
     public static String printParameterSummary(final Altair altair) {
-        StringBuffer sb = new StringBuffer();
-
-        // This object is used to format numerical strings.
-        FormatStringWriter device = new FormatStringWriter();
-        device.setPrecision(2);  // Two decimal places
-        device.clear();
-
+        final StringBuilder sb = new StringBuilder();
         sb.append("Altair Guide Star properties:");
+
         if (altair.getWFSMode().equals(AltairParams.GuideStarType.LGS)) {
             sb.append("<LI>Laser Guide Star Mode");
 
         } else {
             sb.append("<LI>Natural Guide Star Mode");
-            sb.append("<LI>Guide Star Seperation " + altair.getGuideStarSeparation());
-            sb.append("<LI>Guide Star Magnitude " + altair.getGuideStarMagnitude());
+            sb.append("<LI>Guide Star Seperation ");
+            sb.append(altair.getGuideStarSeparation());
+            sb.append("<LI>Guide Star Magnitude ");
+            sb.append(altair.getGuideStarMagnitude());
         }
 
         sb.append("<BR>");
@@ -185,13 +156,11 @@ public final class HtmlPrinter {
     }
 
     public static String printSummary(final Gems gems) {
-        final FormatStringWriter device = new FormatStringWriter();
-        device.setPrecision(3);
-        String s = "r0(" + gems.getWavelength() + "nm) = " + device.toString(gems.getr0()) + " m\n";
-        s += "Average Strehl = " + device.toString(gems.getAvgStrehl() * 100) + "%\n";
+        String s = String.format("r0(" + gems.getWavelength() + "nm) = %.3f m\n", gems.getr0());
+        s += String.format("Average Strehl = %.3f%%\n", gems.getAvgStrehl() * 100);
         s += "FWHM of an AO-corrected core = ";
         try {
-            s += device.toString(gems.getAOCorrectedFWHM(true)) + " arcsec\n";
+            s += String.format("%.3f arcsec\n", gems.getAOCorrectedFWHM(true));
         } catch (IllegalArgumentException ex) {
             s += "<span style=\"color:red; font-style:italic;\">Error: " + ex.getMessage() + "</span>\n";
         }
@@ -200,19 +169,9 @@ public final class HtmlPrinter {
     }
 
     public static String printParameterSummary(final Gems gems) {
-        StringBuffer sb = new StringBuffer();
-
-        // This object is used to format numerical strings.
-        FormatStringWriter device = new FormatStringWriter();
-        device.setPrecision(2);  // Two decimal places
-
-        sb.append("Average Strehl:\t" + gems.getAvgStrehl() + "\n");
-        sb.append("Strehl Band:\t" + gems.getStrehlBand() + "\n");
-        sb.append("\n");
-
-        device.clear();
-
-        return sb.toString();
+        return
+            "Average Strehl:\t" + gems.getAvgStrehl() + "\n" +
+            "Strehl Band:\t" + gems.getStrehlBand() + "\n\n";
     }
 
     public static String opticalComponentsToString(final Instrument instrument) {
@@ -223,7 +182,7 @@ public final class HtmlPrinter {
         return s;
     }
 
-    // compatibility for regression testing, can go away after regression tests have passed
+    // TODO: compatibility for regression testing, can go away after regression tests have passed
     private static String portToString(final IssPort port) {
         switch (port) {
             case SIDE_LOOKING:  return "side";
@@ -231,8 +190,5 @@ public final class HtmlPrinter {
             default:            throw new IllegalArgumentException("unknown port");
         }
     }
-
-
-
 
 }

@@ -44,33 +44,26 @@ public final class TRecsPrinter extends PrinterBase {
 
         _println("");
 
-        // This object is used to format numerical strings.
-        final FormatStringWriter device = new FormatStringWriter();
-        device.setPrecision(2); // Two decimal places
-        device.clear();
-
         if (!result.observation().isAutoAperture()) {
-            _println("software aperture extent along slit = " + device.toString(result.observation().getApertureDiameter()) + " arcsec");
+            _println(String.format("software aperture extent along slit = %.2f arcsec", result.observation().getApertureDiameter()));
         } else {
             switch (result.source().getProfileType()) {
                 case UNIFORM:
-                    _println("software aperture extent along slit = " + device.toString(1 / instrument.getFPMask()) + " arcsec");
+                    _println(String.format("software aperture extent along slit = %.2f arcsec", 1 / instrument.getFPMask()));
                     break;
                 case POINT:
-                    _println("software aperture extent along slit = " + device.toString(1.4 * result.iqCalc().getImageQuality()) + " arcsec");
+                    _println(String.format("software aperture extent along slit = %.2f arcsec", 1.4 * result.iqCalc().getImageQuality()));
                     break;
             }
         }
 
         if (!result.source().isUniform()) {
-            _println("fraction of source flux in aperture = " + device.toString(result.st().getSlitThroughput()));
+            _println(String.format("fraction of source flux in aperture = %.2f", result.st().getSlitThroughput()));
         }
 
-        _println("derived image size(FWHM) for a point source = " + device.toString(result.iqCalc().getImageQuality()) + "arcsec\n");
+        _println(String.format("derived image size(FWHM) for a point source = %.2f arcsec\n", result.iqCalc().getImageQuality()));
 
-        _println("Sky subtraction aperture = "
-                + result.observation().getSkyApertureDiameter()
-                + " times the software aperture.");
+        _println("Sky subtraction aperture = " + result.observation().getSkyApertureDiameter() + " times the software aperture.");
 
         _println("");
 
@@ -78,11 +71,7 @@ public final class TRecsPrinter extends PrinterBase {
         final int number_exposures = result.observation().getNumExposures();
         final double frac_with_source = result.observation().getSourceFraction();
 
-        _println("Requested total integration time = "
-                + device.toString(exp_time * number_exposures)
-                + " secs, of which "
-                + device.toString(exp_time * number_exposures
-                * frac_with_source) + " secs is on source.");
+        _println(String.format("Requested total integration time = %.2f secs, of which %.2f secs is on source.", exp_time * number_exposures, exp_time * number_exposures * frac_with_source));
 
         _print("<HR align=left SIZE=3>");
 
@@ -102,8 +91,6 @@ public final class TRecsPrinter extends PrinterBase {
         _printFileLink(id,  FinalS2NData.instance());
 
         _println("");
-        device.setPrecision(2); // TWO decimal places
-        device.clear();
 
         _print("<HR align=left SIZE=3>");
         _println("<b>Input Parameters:</b>");
@@ -123,33 +110,22 @@ public final class TRecsPrinter extends PrinterBase {
 
         _println("");
 
-        // This object is used to format numerical strings.
-        FormatStringWriter device = new FormatStringWriter();
-        device.setPrecision(2); // Two decimal places
-        device.clear();
-
-
-        _print(CalculatablePrinter.getTextResult(result.sfCalc(), device));
-        _println(CalculatablePrinter.getTextResult(result.iqCalc(), device));
+        _print(CalculatablePrinter.getTextResult(result.sfCalc()));
+        _println(CalculatablePrinter.getTextResult(result.iqCalc()));
         _println("Sky subtraction aperture = "
                 + result.observation().getSkyApertureDiameter()
                 + " times the software aperture.\n");
 
-        _println(CalculatablePrinter.getTextResult(result.is2nCalc(), result.observation(), device));
-        device.setPrecision(0); // NO decimal places
-        device.clear();
+        _println(CalculatablePrinter.getTextResult(result.is2nCalc(), result.observation()));
 
         _println("");
-        _println("The peak pixel signal + background is "
-                + device.toString(result.peakPixelCount()) + ". ");
+        _println(String.format("The peak pixel signal + background is %.0f.", result.peakPixelCount()));
 
         if (result.peakPixelCount() > (instrument.getWellDepth()))
             _println("Warning: peak pixel may be saturating the imaging deep well setting of "
                     + instrument.getWellDepth());
 
         _println("");
-        device.setPrecision(2); // TWO decimal places
-        device.clear();
 
         _print("<HR align=left SIZE=3>");
         _println("<b>Input Parameters:</b>");
@@ -174,9 +150,9 @@ public final class TRecsPrinter extends PrinterBase {
         s += "Spatial Binning: 1\n";
         if (p.observation().getMethod().isSpectroscopy())
             s += "Spectral Binning: 1\n";
-        s += "Pixel Size in Spatial Direction: " + instrument.getPixelSize() + "arcsec\n";
+        s += "Pixel Size in Spatial Direction: " + instrument.getPixelSize() + " arcsec\n";
         if (p.observation().getMethod().isSpectroscopy())
-            s += "Pixel Size in Spectral Direction: " + instrument.getGratingDispersion_nmppix() + "nm\n";
+            s += "Pixel Size in Spectral Direction: " + instrument.getGratingDispersion_nmppix() + " nm\n";
         return s;
     }
 

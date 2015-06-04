@@ -35,47 +35,33 @@ public final class GnirsPrinter extends PrinterBase {
 
         final Gnirs instrument = (Gnirs) result.instrument();
 
-        // This object is used to format numerical strings.
-        final FormatStringWriter device = new FormatStringWriter();
-        device.setPrecision(2); // Two decimal places
-        device.clear();
-
         if (!result.observation().isAutoAperture()) {
-            _println("software aperture extent along slit = "
-                    + device.toString(result.observation()
-                    .getApertureDiameter()) + " arcsec");
+            _println(String.format("software aperture extent along slit = %.2f arcsec", result.observation().getApertureDiameter()));
         } else {
             switch (result.source().getProfileType()) {
                 case UNIFORM:
-                    _println("software aperture extent along slit = "
-                            + device.toString(1 / instrument
-                            .getFPMask()) + " arcsec");
+                    _println(String.format("software aperture extent along slit = %.2f arcsec", 1 / instrument.getFPMask()));
                     break;
                 case POINT:
-                    _println("software aperture extent along slit = "
-                            + device.toString(1.4 * result.iqCalc().getImageQuality()) + " arcsec");
+                    _println(String.format("software aperture extent along slit = %.2f arcsec", 1.4 * result.iqCalc().getImageQuality()));
                     break;
             }
         }
 
         if (!result.source().isUniform()) {
-            _println("fraction of source flux in aperture = "
-                    + device.toString(result.st().getSlitThroughput()));
+            _println(String.format("fraction of source flux in aperture = %.2f", result.st().getSlitThroughput()));
         }
 
-        _println("derived image size(FWHM) for a point source = "
-                + device.toString(result.iqCalc().getImageQuality()) + "arcsec\n");
+        _println(String.format("derived image size(FWHM) for a point source = %.2f arcsec\n", result.iqCalc().getImageQuality()));
 
         _println("Sky subtraction aperture = "
                 + result.observation().getSkyApertureDiameter()
                 + " times the software aperture.");
 
         _println("");
-        _println("Requested total integration time = "
-                + device.toString(result.observation().getExposureTime() * result.observation().getNumExposures())
-                + " secs, of which "
-                + device.toString(result.observation().getExposureTime() * result.observation().getNumExposures()
-                * result.observation().getSourceFraction()) + " secs is on source.");
+        _println(String.format("Requested total integration time = %.2f secs, of which %.2f secs is on source.",
+                result.observation().getExposureTime() * result.observation().getNumExposures(),
+                result.observation().getExposureTime() * result.observation().getNumExposures() * result.observation().getSourceFraction()));
 
         _print("<HR align=left SIZE=3>");
 
@@ -108,8 +94,6 @@ public final class GnirsPrinter extends PrinterBase {
         }
 
         _println("");
-        device.setPrecision(2); // TWO decimal places
-        device.clear();
 
         _print("<HR align=left SIZE=3>");
 
@@ -125,11 +109,6 @@ public final class GnirsPrinter extends PrinterBase {
     }
 
     private String gnirsToString(final Gnirs instrument, final Parameters p) {
-        //Used to format the strings
-        final FormatStringWriter device = new FormatStringWriter();
-        device.setPrecision(3);  // Two decimal places
-        device.clear();
-
 
         String s = "Instrument configuration: \n";
         s += HtmlPrinter.opticalComponentsToString(instrument);
@@ -143,17 +122,17 @@ public final class GnirsPrinter extends PrinterBase {
         s += "\n";
 
         s += "<L1> Central Wavelength: " + instrument.getCentralWavelength() + " nm" + " \n";
-        s += "Pixel Size in Spatial Direction: " + instrument.getPixelSize() + "arcsec\n";
+        s += "Pixel Size in Spatial Direction: " + instrument.getPixelSize() + " arcsec\n";
         if (p.observation().getMethod().isSpectroscopy()) {
             if (instrument.XDisp_IsUsed()) {
-                s += "Pixel Size in Spectral Direction(Order 3): " + device.toString(instrument.getGratingDispersion_nmppix() / 3) + "nm\n";
-                s += "Pixel Size in Spectral Direction(Order 4): " + device.toString(instrument.getGratingDispersion_nmppix() / 4) + "nm\n";
-                s += "Pixel Size in Spectral Direction(Order 5): " + device.toString(instrument.getGratingDispersion_nmppix() / 5) + "nm\n";
-                s += "Pixel Size in Spectral Direction(Order 6): " + device.toString(instrument.getGratingDispersion_nmppix() / 6) + "nm\n";
-                s += "Pixel Size in Spectral Direction(Order 7): " + device.toString(instrument.getGratingDispersion_nmppix() / 7) + "nm\n";
-                s += "Pixel Size in Spectral Direction(Order 8): " + device.toString(instrument.getGratingDispersion_nmppix() / 8) + "nm\n";
+                s += "Pixel Size in Spectral Direction(Order 3): " + String.format("%.3f nm\n", instrument.getGratingDispersion_nmppix() / 3);
+                s += "Pixel Size in Spectral Direction(Order 4): " + String.format("%.3f nm\n", instrument.getGratingDispersion_nmppix() / 4);
+                s += "Pixel Size in Spectral Direction(Order 5): " + String.format("%.3f nm\n", instrument.getGratingDispersion_nmppix() / 5);
+                s += "Pixel Size in Spectral Direction(Order 6): " + String.format("%.3f nm\n", instrument.getGratingDispersion_nmppix() / 6);
+                s += "Pixel Size in Spectral Direction(Order 7): " + String.format("%.3f nm\n", instrument.getGratingDispersion_nmppix() / 7);
+                s += "Pixel Size in Spectral Direction(Order 8): " + String.format("%.3f nm\n", instrument.getGratingDispersion_nmppix() / 8);
             } else {
-                s += "Pixel Size in Spectral Direction: " + device.toString(instrument.getGratingDispersion_nmppix()) + "nm\n";
+                s += "Pixel Size in Spectral Direction: " + String.format("%.3f nm\n", instrument.getGratingDispersion_nmppix());
             }
         }
         return s;
