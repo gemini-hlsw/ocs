@@ -17,7 +17,8 @@
 
   <catalog name="PPMXL Catalog at CDS"/>
   <catalog name="2MASS Catalog at CDS"/>
-  <catalog name="UCAC4 Catalog at Gemini"/>
+  <catalog name="UCAC4 Catalog at Gemini North"/>
+  <catalog name="UCAC4 Catalog at Gemini South"/>
   <catalog name="UCAC3 Catalog at CDS"/>
   <catalog name="NOMAD1 catalog at CDS"/>
   <catalog name="GSC-2 at ESO"/>
