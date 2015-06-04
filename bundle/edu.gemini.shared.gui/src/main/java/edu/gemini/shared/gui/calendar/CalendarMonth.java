@@ -1748,6 +1748,16 @@ public class CalendarMonth extends JLabel implements MouseInputListener, KeyList
      * @param c Calendar specifying the date.
      */
     public void setDate(YearMonthDay ymd) {
+        // Some mumbo-jumbo to setup the calendar as if it were clicked by the
+        // user.
+        _from = new MonthYear(ymd.year, ymd.month);
+        _to   = new MonthYear(ymd.year, ymd.month);
+        setMovingModel();
+        displayChanged();
+        fireActionEvent(ACTION_CLICK);
+
+        // Now the dayIndex relative to the (possibly) newly selected month
+        // will be correct so update the selection.
         int index = dayIndex(ymd);
         getSelectionModel().setSelectionInterval(index, index);
         if (getSelectionMode() == ListSelectionModel.SINGLE_SELECTION) {
@@ -1771,12 +1781,7 @@ public class CalendarMonth extends JLabel implements MouseInputListener, KeyList
      * Convenience method to get the selected day if any.
      */
     public YearMonthDay getDate() {
-        int index = getSelectionModel().getAnchorSelectionIndex();
-        if (getSelectionModel().isSelectedIndex(index)) {
-            return dateFromIndex(index);
-        } else {
-            return null;
-        }
+        return _movingModelDate;
     }
 
     public void mouseClicked(MouseEvent event) {
