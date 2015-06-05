@@ -42,50 +42,13 @@ object Hash {
 
   def calc(p: GnirsParameters): Int =
     hash(
-      if (correctedCentralWavelength(p) < 2600) "BC" else "RC",
-      if (p.getPixelScale.equals(GNIRSParams.PixelScale.PS_005)) "L" else "S" ,
-      p.getSlitWidth match {
-        case GNIRSParams.SlitWidth.SW_1   => "slit0.10"
-        case GNIRSParams.SlitWidth.SW_3   => "slit0.20"
-        case GNIRSParams.SlitWidth.SW_6   => "slit0.675"
-        case GNIRSParams.SlitWidth.SW_8   => "slit3.0"
-      },
-      p.getGrating match {
-        case GNIRSParams.Disperser.D_10   => "G10"
-        case GNIRSParams.Disperser.D_32   => "G32"
-        case GNIRSParams.Disperser.D_111  => "G110"
-      },
-      correctedCentralWavelength(p),
-      p.getReadMode match {
-        case GNIRSParams.ReadMode.BRIGHT      => "medNoise"
-        case GNIRSParams.ReadMode.FAINT       => "lowNoise"
-        case GNIRSParams.ReadMode.VERY_FAINT  => "verylowNoise"
-        case GNIRSParams.ReadMode.VERY_BRIGHT => "highNoise"
-      },
-    // TODO: remove entirely!
-      p.getSlitWidth match {
-        case GNIRSParams.SlitWidth.SW_1 => "010"
-        case GNIRSParams.SlitWidth.SW_2 => "015"
-        case GNIRSParams.SlitWidth.SW_3 => "020"
-        case GNIRSParams.SlitWidth.SW_4 => "030"
-        case GNIRSParams.SlitWidth.SW_5 => "045"
-        case GNIRSParams.SlitWidth.SW_6 => "0675"
-        case GNIRSParams.SlitWidth.SW_7 => "100"
-        case GNIRSParams.SlitWidth.SW_8 => "300"
-      },
-      p.getCentralWavelength.toNanometers
+      p.getGrating.name,
+      p.getPixelScale.name,
+      p.getCrossDispersed.name,
+      p.getReadMode.name,
+      p.getCentralWavelength.toNanometers,
+      p.getSlitWidth.name
     )
-
-  // TODO: remove this
-  private def correctedCentralWavelength(p: GnirsParameters): Double = {
-    if (p.getCrossDispersed == CrossDispersed.NO) {
-      p.getCentralWavelength.toNanometers
-    }
-    else {
-      1616.85
-    }
-  }
-  // ==
 
   def calc(p: GsaoiParameters): Int =
     hash(

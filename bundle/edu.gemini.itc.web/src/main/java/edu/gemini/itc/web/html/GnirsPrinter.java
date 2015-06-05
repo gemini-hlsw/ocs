@@ -136,9 +136,9 @@ public final class GnirsPrinter extends PrinterBase {
         String s = "Instrument configuration: \n";
         s += HtmlPrinter.opticalComponentsToString(instrument);
 
-        s += "<LI>Focal Plane Mask: " + fpuName(instrument.getFocalPlaneMask()) + "\n";
+        s += "<LI>Focal Plane Mask: " + instrument.getFocalPlaneMask().displayValue() + "\n";
 
-        s += "<LI>Grating: " + gratingName(instrument.getGrating()) + "\n"; // REL-469
+        s += "<LI>Grating: " + instrument.getGrating().displayValue() + "\n"; // REL-469
 
         s += "<LI>Read Noise: " + instrument.getReadNoise() + "\n";
         s += "<LI>Well Depth: " + instrument.getWellDepth() + "\n";
@@ -159,25 +159,6 @@ public final class GnirsPrinter extends PrinterBase {
             }
         }
         return s;
-    }
-
-    // TODO: Keep regression tests going, remove asap
-    private String gratingName(final GNIRSParams.Disperser grating) {
-        switch (grating) {
-            case D_10:  return "G10";
-            case D_32:  return "G32";
-            case D_111: return "G110";
-            default:    throw new Error();
-        }
-    }
-    private String fpuName(final GNIRSParams.SlitWidth fpu) {
-        switch (fpu) {
-            case SW_1: return "slit0.10";
-            case SW_3: return "slit0.20";
-            case SW_6: return "slit0.675";
-            case SW_8: return "slit3.0";
-            default:   return fpu.displayValue();
-        }
     }
 
 }
