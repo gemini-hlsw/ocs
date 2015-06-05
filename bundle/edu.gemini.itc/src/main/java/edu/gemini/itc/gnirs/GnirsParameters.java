@@ -10,11 +10,6 @@ import edu.gemini.spModel.gemini.gnirs.GNIRSParams.*;
  */
 public final class GnirsParameters implements InstrumentDetails {
 
-    public static final String GNIRS = "gnirs";
-
-    public static final String X_DISP_ON = "yes";
-    public static final String X_DISP_OFF = "no";
-
     public static final String BLUE = "BC";
     public static final String RED = "RC";
 
@@ -72,20 +67,6 @@ public final class GnirsParameters implements InstrumentDetails {
 
     public double getUnXDispCentralWavelength() {
         return instrumentCentralWavelength.toNanometers();
-    }
-
-    public String getStringSlitWidth() {
-        switch (mask) {
-            case SW_1: return "010";
-            case SW_2: return "015";
-            case SW_3: return "020";
-            case SW_4: return "030";
-            case SW_5: return "045";
-            case SW_6: return "0675";
-            case SW_7: return "100";
-            case SW_8: return "300";
-            default:   throw new Error();
-        }
     }
 
     public String getCameraLength() {

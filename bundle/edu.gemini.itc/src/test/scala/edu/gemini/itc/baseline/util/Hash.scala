@@ -61,7 +61,17 @@ object Hash {
         case GNIRSParams.ReadMode.VERY_FAINT  => "verylowNoise"
         case GNIRSParams.ReadMode.VERY_BRIGHT => "highNoise"
       },
-      p.getStringSlitWidth,
+    // TODO: remove entirely!
+      p.getFocalPlaneMask match {
+        case GNIRSParams.SlitWidth.SW_1 => "010"
+        case GNIRSParams.SlitWidth.SW_2 => "015"
+        case GNIRSParams.SlitWidth.SW_3 => "020"
+        case GNIRSParams.SlitWidth.SW_4 => "030"
+        case GNIRSParams.SlitWidth.SW_5 => "045"
+        case GNIRSParams.SlitWidth.SW_6 => "0675"
+        case GNIRSParams.SlitWidth.SW_7 => "100"
+        case GNIRSParams.SlitWidth.SW_8 => "300"
+      },
       p.getUnXDispCentralWavelength
     )
 

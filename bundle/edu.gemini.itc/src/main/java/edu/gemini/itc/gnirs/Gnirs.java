@@ -50,7 +50,6 @@ public final class Gnirs extends Instrument {
     protected Disperser _grating;
     protected ReadMode _readNoise;
     protected SlitWidth _focalPlaneMask;
-    protected String _stringSlitWidth;
     protected CalculationMethod _mode;
     protected double _centralWavelength;
 
@@ -75,7 +74,6 @@ public final class Gnirs extends Instrument {
 
         _readNoise = gp.getReadMode();
         _focalPlaneMask = gp.getFocalPlaneMask();
-        _stringSlitWidth = gp.getStringSlitWidth();
         _grating = gp.getGrating();
         _centralWavelength = gp.getInstrumentCentralWavelength();
         _mode = odp.getMethod();
