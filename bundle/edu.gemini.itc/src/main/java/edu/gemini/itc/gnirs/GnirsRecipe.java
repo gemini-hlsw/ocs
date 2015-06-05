@@ -192,7 +192,7 @@ public final class GnirsRecipe implements SpectroscopyRecipe {
 
             final double trimCenter;
             if (instrument.getGrating().equals(GNIRSParams.Disperser.D_111)) {
-                trimCenter = _gnirsParameters.getCentralWavelength().toNanometers();
+                trimCenter = _gnirsParameters.centralWavelength().toNanometers();
             } else {
                 trimCenter = 2200.0;
             }

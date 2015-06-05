@@ -1,12 +1,10 @@
 package edu.gemini.itc.baseline.util
 
-import edu.gemini.itc.gnirs.GnirsParameters
+import edu.gemini.itc.shared.GnirsParameters
 import edu.gemini.itc.michelle.MichelleParameters
 import edu.gemini.itc.nifs.NifsParameters
 import edu.gemini.itc.shared._
 import edu.gemini.itc.trecs.TRecsParameters
-import edu.gemini.spModel.gemini.gnirs.GNIRSParams
-import edu.gemini.spModel.gemini.gnirs.GNIRSParams.CrossDispersed
 import edu.gemini.spModel.target._
 
 // TEMPORARY helper
@@ -42,12 +40,12 @@ object Hash {
 
   def calc(p: GnirsParameters): Int =
     hash(
-      p.getGrating.name,
-      p.getPixelScale.name,
-      p.getCrossDispersed.name,
-      p.getReadMode.name,
-      p.getCentralWavelength.toNanometers,
-      p.getSlitWidth.name
+      p.grating.name,
+      p.pixelScale.name,
+      p.crossDispersed.name,
+      p.readMode.name,
+      p.centralWavelength.toNanometers,
+      p.slitWidth.name
     )
 
   def calc(p: GsaoiParameters): Int =

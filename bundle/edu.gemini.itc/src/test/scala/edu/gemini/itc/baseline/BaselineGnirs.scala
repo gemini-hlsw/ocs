@@ -1,7 +1,7 @@
 package edu.gemini.itc.baseline
 
 import edu.gemini.itc.baseline.util._
-import edu.gemini.itc.gnirs.GnirsParameters
+import edu.gemini.itc.shared.GnirsParameters
 import edu.gemini.spModel.core.Wavelength
 import edu.gemini.spModel.gemini.gnirs.GNIRSParams._
 

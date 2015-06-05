@@ -3,6 +3,7 @@ package edu.gemini.itc.gnirs;
 import edu.gemini.itc.base.*;
 import edu.gemini.itc.operation.DetectorsTransmissionVisitor;
 import edu.gemini.itc.shared.CalculationMethod;
+import edu.gemini.itc.shared.GnirsParameters;
 import edu.gemini.itc.shared.ObservationDetails;
 import edu.gemini.spModel.gemini.gnirs.GNIRSParams;
 import edu.gemini.spModel.gemini.gnirs.GNIRSParams.Disperser;
@@ -63,7 +64,7 @@ public final class Gnirs extends Instrument {
         _sampling = super.getSampling();
 
         params = gp;
-        _grating = gp.getGrating();
+        _grating = gp.grating();
         _centralWavelength = correctedCentralWavelength(); // correct central wavelength if cross dispersion is used
         _mode = odp.getMethod();
         _XDisp = isXDispUsed();
@@ -106,7 +107,7 @@ public final class Gnirs extends Instrument {
         final FixedOptics _fixedOptics = new FixedOptics(getDirectory() + "/", getPrefix());
         addComponent(_fixedOptics);
 
-        _camera = CameraFactory.camera(params.getPixelScale(), _centralWavelength, getDirectory());
+        _camera = CameraFactory.camera(params.pixelScale(), _centralWavelength, getDirectory());
         addComponent(_camera);
 
         // GNIRS is spectroscopy only
@@ -146,7 +147,7 @@ public final class Gnirs extends Instrument {
     }
 
     public double getFPMask() {
-        return params.getSlitWidth().getValue();
+        return params.slitWidth().getValue();
     }
 
     /**
@@ -169,7 +170,7 @@ public final class Gnirs extends Instrument {
     }
 
     public double getPixelSize() {
-        return params.getPixelScale().getValue();
+        return params.pixelScale().getValue();
     }
 
     public double getSpectralPixelWidth() {
@@ -265,7 +266,7 @@ public final class Gnirs extends Instrument {
     }
 
     public double getReadNoise() {
-        return params.getReadMode().getReadNoise();
+        return params.readMode().getReadNoise();
     }
 
     public double getObservingStart() {
@@ -294,7 +295,7 @@ public final class Gnirs extends Instrument {
     }
 
     public SlitWidth getFocalPlaneMask() {
-        return params.getSlitWidth();
+        return params.slitWidth();
     }
 
     public double getCentralWavelength() {
@@ -307,18 +308,18 @@ public final class Gnirs extends Instrument {
 
     private double correctedCentralWavelength() {
         if (!isXDispUsed()) {
-            return params.getCentralWavelength().toNanometers();
+            return params.centralWavelength().toNanometers();
         } else {
             return XDISP_CENTRAL_WAVELENGTH;
         }
     }
 
     private boolean isLongCamera() {
-        return params.getPixelScale().equals(GNIRSParams.PixelScale.PS_005);
+        return params.pixelScale().equals(GNIRSParams.PixelScale.PS_005);
     }
 
     private boolean isXDispUsed() {
-        return !params.getCrossDispersed().equals(GNIRSParams.CrossDispersed.NO);
+        return !params.crossDispersed().equals(GNIRSParams.CrossDispersed.NO);
     }
 
 
