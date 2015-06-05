@@ -10,12 +10,6 @@ import edu.gemini.spModel.gemini.gnirs.GNIRSParams.*;
  */
 public final class GnirsParameters implements InstrumentDetails {
 
-    public static final String BLUE = "BC";
-    public static final String RED = "RC";
-
-    public static final String LONG = "L";
-    public static final String SHORT = "S";
-
     public static final double LONG_CAMERA_SCALE_FACTOR = 3.0;
 
     private static final double XDISP_CENTRAL_WAVELENGTH = 1616.85;
@@ -69,44 +63,16 @@ public final class GnirsParameters implements InstrumentDetails {
         }
     }
 
+    public boolean isLongCamera() {
+        return pixelScale.equals(PixelScale.PS_005);
+    }
+
     public double getUnXDispCentralWavelength() {
         return instrumentCentralWavelength.toNanometers();
     }
 
-    public String getCameraLength() {
-        switch (pixelScale) {
-            case PS_005: return LONG;
-            case PS_015: return SHORT;
-            default:     throw new Error();
-        }
-    }
-
-    public String getCameraColor() {
-        if (getInstrumentCentralWavelength() < 2600) {
-            return BLUE;
-        } else {
-            return RED;
-        }
-    }
-
     public boolean isXDispUsed() {
         return !xDisp.equals(CrossDispersed.NO);
-    }
-
-    public static String getLongCameraName() {
-        return LONG;
-    }
-
-    public static String getShortCameraName() {
-        return SHORT;
-    }
-
-    public static String getBlueCameraName() {
-        return BLUE;
-    }
-
-    public static String getRedCameraName() {
-        return RED;
     }
 
 }

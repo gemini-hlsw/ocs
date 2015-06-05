@@ -45,7 +45,6 @@ public final class Gnirs extends Instrument {
     protected final DetectorsTransmissionVisitor _dtv;
     protected final TransmissionElement _camera;
     protected final boolean _XDisp;
-    protected final String _cameraLength;
     protected final double _wellDepth;
 
     public Gnirs(GnirsParameters gp, ObservationDetails odp) {
@@ -92,7 +91,7 @@ public final class Gnirs extends Instrument {
         //Select Transmission Element depending on if Cross dispersion is used.
         final TransmissionElement selectableTrans;
         if (_XDisp) {
-            selectableTrans = new XDispersingPrism(getDirectory(), gp.getCameraLength() + "XD");
+            selectableTrans = new XDispersingPrism(getDirectory(), gp.isLongCamera() ? "LXD" : "SXD");
         } else {
             selectableTrans = new GnirsPickoffMirror(getDirectory(), "mirror");
         }
@@ -101,11 +100,8 @@ public final class Gnirs extends Instrument {
         final FixedOptics _fixedOptics = new FixedOptics(getDirectory() + "/", getPrefix());
         addComponent(_fixedOptics);
 
-        final CameraFactory cf = new CameraFactory(gp.getCameraLength(), gp.getCameraColor(), getDirectory());
-        _camera = cf.getCamera();
+        _camera = CameraFactory.camera(params, getDirectory());
         addComponent(_camera);
-
-        _cameraLength = gp.getCameraLength();
 
         // GNIRS is spectroscopy only
         if (_mode.isImaging()) {
@@ -123,7 +119,7 @@ public final class Gnirs extends Instrument {
                 _detector.getDetectorPixels(),
                 1);
 
-        if (_grating.equals(Disperser.D_10) && _cameraLength.equals(GnirsParameters.SHORT))
+        if (_grating.equals(Disperser.D_10) && !params.isLongCamera())
             throw new RuntimeException("The grating " + _grating + " cannot be used with the " +
                     "0.15\" arcsec/pix (Short) camera.\n" +
                     "  Please either change the camera or the grating.");
@@ -155,8 +151,7 @@ public final class Gnirs extends Instrument {
      * @return Effective wavelength in nm
      */
     public int getEffectiveWavelength() {
-        if (_grating.equals("none")) return (int) _Filter.getEffectiveWavelength();
-        else return (int) _gratingOptics.getEffectiveWavelength();
+        return (int) _gratingOptics.getEffectiveWavelength();
 
     }
 
@@ -172,7 +167,7 @@ public final class Gnirs extends Instrument {
     }
 
     public double getSpectralPixelWidth() {
-        if (_cameraLength.equals(GnirsParameters.LONG)) {
+        if (params.isLongCamera()) {
             return _gratingOptics.getPixelWidth() / 3.0;
         } else {
             return _gratingOptics.getPixelWidth();
@@ -207,7 +202,7 @@ public final class Gnirs extends Instrument {
     }
 
     public double getGratingResolution() {
-        if (_cameraLength.equals(GnirsParameters.LONG)) {
+        if (params.isLongCamera()) {
             return _gratingOptics.getGratingResolution() * GnirsParameters.LONG_CAMERA_SCALE_FACTOR;
         } else {
             return _gratingOptics.getGratingResolution();
@@ -225,13 +220,13 @@ public final class Gnirs extends Instrument {
     public double getGratingDispersion_nm() {
         try {
             if (!XDisp_IsUsed()) {
-                if (_cameraLength.equals(GnirsParameters.LONG)) {
+                if (params.isLongCamera()) {
                     return _gratingOptics.getGratingDispersion_nm() / GnirsParameters.LONG_CAMERA_SCALE_FACTOR / GnirsOrderSelector.getOrder(_centralWavelength);
                 } else {
                     return _gratingOptics.getGratingDispersion_nm() / GnirsOrderSelector.getOrder(_centralWavelength);
                 }
             } else {
-                if (_cameraLength.equals(GnirsParameters.LONG)) {
+                if (params.isLongCamera()) {
                     return _gratingOptics.getGratingDispersion_nm() / GnirsParameters.LONG_CAMERA_SCALE_FACTOR;
                 } else {
                     return _gratingOptics.getGratingDispersion_nm();
@@ -245,13 +240,13 @@ public final class Gnirs extends Instrument {
     public double getGratingDispersion_nmppix() {
         try {
             if (!XDisp_IsUsed()) {
-                if (_cameraLength.equals(GnirsParameters.LONG)) {
+                if (params.isLongCamera()) {
                     return _gratingOptics.getGratingDispersion_nmppix() / GnirsParameters.LONG_CAMERA_SCALE_FACTOR / GnirsOrderSelector.getOrder(_centralWavelength);
                 } else {
                     return _gratingOptics.getGratingDispersion_nmppix() / GnirsOrderSelector.getOrder(_centralWavelength);
                 }
             } else {
-                if (_cameraLength.equals(GnirsParameters.LONG)) {
+                if (params.isLongCamera()) {
                     return _gratingOptics.getGratingDispersion_nmppix() / GnirsParameters.LONG_CAMERA_SCALE_FACTOR;
                 } else {
                     return _gratingOptics.getGratingDispersion_nmppix();

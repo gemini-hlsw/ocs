@@ -1,34 +1,46 @@
 package edu.gemini.itc.gnirs;
 
+import edu.gemini.itc.base.Instrument;
 import edu.gemini.itc.base.TransmissionElement;
+import edu.gemini.spModel.gemini.gnirs.GNIRSParams.PixelScale;
 
-/**
- * @author bwalls
- */
-public class CameraFactory {
+public final class CameraFactory {
 
-    private TransmissionElement _camera;
+    private static final String BLUE    = "BC";
+    private static final String RED     = "RC";
 
-    /**
-     * Creates a new instance of CameraFactory
-     */
-    public CameraFactory(String cameraLength, String cameraColor, String directory) {
-        if (cameraLength.equals(GnirsParameters.LONG) && cameraColor.equals(GnirsParameters.BLUE)) {
-            _camera = new LongCameraBlueOptics(directory);
-        }
-        if (cameraLength.equals(GnirsParameters.LONG) && cameraColor.equals(GnirsParameters.RED)) {
-            _camera = new LongCameraRedOptics(directory);
-        }
-        if (cameraLength.equals(GnirsParameters.SHORT) && cameraColor.equals(GnirsParameters.BLUE)) {
-            _camera = new ShortCameraBlueOptics(directory);
-        }
-        if (cameraLength.equals(GnirsParameters.SHORT) && cameraColor.equals(GnirsParameters.RED)) {
-            _camera = new ShortCameraRedOptics(directory);
+    private static final String LONG    = "L";
+    private static final String SHORT   = "S";
+
+
+    public static TransmissionElement camera(final GnirsParameters params, final String directory) {
+
+        final String cameraLength = getCameraLength(params.getPixelScale());
+        final String cameraColor  = getCameraColor(params.getInstrumentCentralWavelength());
+
+        return new TransmissionElement(directory + "/" + Gnirs.getPrefix() + cameraLength + cameraColor + Instrument.getSuffix()) {
+            public String toString() {
+                // prepare a pretty string which is used as the name of this transmission element
+                final String length = cameraLength.equals("L") ? "Long" : "Short";
+                final String color  = cameraColor.equals("BC") ? "Blue" : "Red";
+                return String.format("Camera: %.2farcsec/pix (%s %s)", params.getPixelScale().getValue(), length, color);
+            }
+        };
+    }
+
+    private static String getCameraLength(final PixelScale pixelScale) {
+        switch (pixelScale) {
+            case PS_005: return LONG;
+            case PS_015: return SHORT;
+            default:     throw new Error();
         }
     }
 
-    TransmissionElement getCamera() {
-        return _camera;
+    private static String getCameraColor(final double wavelength) {
+        if (wavelength < 2600) {
+            return BLUE;
+        } else {
+            return RED;
+        }
     }
-
 }

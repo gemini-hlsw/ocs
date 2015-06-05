@@ -41,8 +41,8 @@ object Hash {
 
   def calc(p: GnirsParameters): Int =
     hash(
-      p.getCameraColor,
-      p.getCameraLength,
+      if (p.getInstrumentCentralWavelength < 2600) "BC" else "RC",
+      if (p.isLongCamera) "L" else "S" ,
       p.getSlitWidth match {
         case GNIRSParams.SlitWidth.SW_1   => "slit0.10"
         case GNIRSParams.SlitWidth.SW_3   => "slit0.20"
