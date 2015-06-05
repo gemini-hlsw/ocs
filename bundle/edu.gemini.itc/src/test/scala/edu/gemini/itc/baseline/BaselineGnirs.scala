@@ -17,7 +17,7 @@ object BaselineGnirs {
       PixelScale.PS_005,
       Disperser.D_10,
       ReadMode.FAINT,
-      GnirsParameters.X_DISP_ON,
+      CrossDispersed.LXD,
       Wavelength.fromMicrons(2.4),
       SlitWidth.SW_1),
 
@@ -25,7 +25,7 @@ object BaselineGnirs {
       PixelScale.PS_015,
       Disperser.D_111,
       ReadMode.VERY_BRIGHT,
-      GnirsParameters.X_DISP_OFF,
+      CrossDispersed.NO,
       Wavelength.fromMicrons(2.4),
       SlitWidth.SW_3),
 
@@ -33,7 +33,7 @@ object BaselineGnirs {
       PixelScale.PS_005,
       Disperser.D_32,
       ReadMode.FAINT,
-      GnirsParameters.X_DISP_ON,
+      CrossDispersed.LXD,
       Wavelength.fromMicrons(2.6),
       SlitWidth.SW_6),
 
@@ -41,7 +41,7 @@ object BaselineGnirs {
       PixelScale.PS_015,
       Disperser.D_32,
       ReadMode.VERY_BRIGHT,
-      GnirsParameters.X_DISP_OFF,
+      CrossDispersed.NO,
       Wavelength.fromMicrons(2.6),
       SlitWidth.SW_8)
 

@@ -31,7 +31,7 @@ public final class GnirsParameters implements InstrumentDetails {
     private final ReadMode readMode;
     private final Wavelength instrumentCentralWavelength;
     private final SlitWidth mask;
-    private final String xDisp;
+    private final CrossDispersed xDisp;
 
     /**
      * Constructs a GnirsParameters.
@@ -39,7 +39,7 @@ public final class GnirsParameters implements InstrumentDetails {
     public GnirsParameters(final PixelScale camera,
                            final Disperser grating,
                            final ReadMode readMode,
-                           final String xDisp,
+                           final CrossDispersed xDisp,
                            final Wavelength instrumentCentralWavelength,
                            final SlitWidth mask) {
         this.grating = grating;
@@ -105,7 +105,7 @@ public final class GnirsParameters implements InstrumentDetails {
     }
 
     public boolean isXDispUsed() {
-        return xDisp.equals(X_DISP_ON);
+        return !xDisp.equals(CrossDispersed.NO);
     }
 
     public static String getLongCameraName() {
