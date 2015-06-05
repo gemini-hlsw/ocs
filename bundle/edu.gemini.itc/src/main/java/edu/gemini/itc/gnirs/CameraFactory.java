@@ -13,17 +13,17 @@ public final class CameraFactory {
     private static final String SHORT   = "S";
 
 
-    public static TransmissionElement camera(final GnirsParameters params, final String directory) {
+    public static TransmissionElement camera(final PixelScale pixelScale, final double wavelength, final String directory) {
 
-        final String cameraLength = getCameraLength(params.getPixelScale());
-        final String cameraColor  = getCameraColor(params.getInstrumentCentralWavelength());
+        final String cameraLength = getCameraLength(pixelScale);
+        final String cameraColor  = getCameraColor(wavelength);
 
         return new TransmissionElement(directory + "/" + Gnirs.getPrefix() + cameraLength + cameraColor + Instrument.getSuffix()) {
             public String toString() {
                 // prepare a pretty string which is used as the name of this transmission element
                 final String length = cameraLength.equals("L") ? "Long" : "Short";
                 final String color  = cameraColor.equals("BC") ? "Blue" : "Red";
-                return String.format("Camera: %.2farcsec/pix (%s %s)", params.getPixelScale().getValue(), length, color);
+                return String.format("Camera: %.2farcsec/pix (%s %s)", pixelScale.getValue(), length, color);
             }
         };
     }

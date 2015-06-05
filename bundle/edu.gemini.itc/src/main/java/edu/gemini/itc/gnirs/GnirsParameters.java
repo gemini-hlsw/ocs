@@ -10,10 +10,6 @@ import edu.gemini.spModel.gemini.gnirs.GNIRSParams.*;
  */
 public final class GnirsParameters implements InstrumentDetails {
 
-    public static final double LONG_CAMERA_SCALE_FACTOR = 3.0;
-
-    private static final double XDISP_CENTRAL_WAVELENGTH = 1616.85;
-
     // Data members
     private final Disperser     grating;
     private final PixelScale    pixelScale;
@@ -39,40 +35,29 @@ public final class GnirsParameters implements InstrumentDetails {
         this.slitWidth                      = slitWidth;
     }
 
-    public PixelScale getPixelScale() {
-        return pixelScale;
-    }
-
-    public SlitWidth getSlitWidth() {
-        return slitWidth;
-    }
-
     public Disperser getGrating() {
         return grating;
+    }
+
+    public PixelScale getPixelScale() {
+        return pixelScale;
     }
 
     public ReadMode getReadMode() {
         return readMode;
     }
 
-    public double getInstrumentCentralWavelength() {
-        if (!isXDispUsed()) {
-            return instrumentCentralWavelength.toNanometers();
-        } else {
-            return XDISP_CENTRAL_WAVELENGTH;
-        }
+    public Wavelength getCentralWavelength() {
+        return instrumentCentralWavelength;
     }
 
-    public boolean isLongCamera() {
-        return pixelScale.equals(PixelScale.PS_005);
+    public SlitWidth getSlitWidth() {
+        return slitWidth;
     }
 
-    public double getUnXDispCentralWavelength() {
-        return instrumentCentralWavelength.toNanometers();
+    public CrossDispersed getCrossDispersed() {
+        return xDisp;
     }
 
-    public boolean isXDispUsed() {
-        return !xDisp.equals(CrossDispersed.NO);
-    }
 
 }

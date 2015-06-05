@@ -6,6 +6,7 @@ import edu.gemini.itc.nifs.NifsParameters
 import edu.gemini.itc.shared._
 import edu.gemini.itc.trecs.TRecsParameters
 import edu.gemini.spModel.gemini.gnirs.GNIRSParams
+import edu.gemini.spModel.gemini.gnirs.GNIRSParams.CrossDispersed
 import edu.gemini.spModel.target._
 
 // TEMPORARY helper
@@ -41,8 +42,8 @@ object Hash {
 
   def calc(p: GnirsParameters): Int =
     hash(
-      if (p.getInstrumentCentralWavelength < 2600) "BC" else "RC",
-      if (p.isLongCamera) "L" else "S" ,
+      if (correctedCentralWavelength(p) < 2600) "BC" else "RC",
+      if (p.getPixelScale.equals(GNIRSParams.PixelScale.PS_005)) "L" else "S" ,
       p.getSlitWidth match {
         case GNIRSParams.SlitWidth.SW_1   => "slit0.10"
         case GNIRSParams.SlitWidth.SW_3   => "slit0.20"
@@ -54,7 +55,7 @@ object Hash {
         case GNIRSParams.Disperser.D_32   => "G32"
         case GNIRSParams.Disperser.D_111  => "G110"
       },
-      p.getInstrumentCentralWavelength,
+      correctedCentralWavelength(p),
       p.getReadMode match {
         case GNIRSParams.ReadMode.BRIGHT      => "medNoise"
         case GNIRSParams.ReadMode.FAINT       => "lowNoise"
@@ -72,8 +73,19 @@ object Hash {
         case GNIRSParams.SlitWidth.SW_7 => "100"
         case GNIRSParams.SlitWidth.SW_8 => "300"
       },
-      p.getUnXDispCentralWavelength
+      p.getCentralWavelength.toNanometers
     )
+
+  // TODO: remove this
+  private def correctedCentralWavelength(p: GnirsParameters): Double = {
+    if (p.getCrossDispersed == CrossDispersed.NO) {
+      p.getCentralWavelength.toNanometers
+    }
+    else {
+      1616.85
+    }
+  }
+  // ==
 
   def calc(p: GsaoiParameters): Int =
     hash(
