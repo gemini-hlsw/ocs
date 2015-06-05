@@ -5,6 +5,7 @@ import edu.gemini.itc.operation.DetectorsTransmissionVisitor;
 import edu.gemini.itc.shared.CalculationMethod;
 import edu.gemini.itc.shared.ObservationDetails;
 import edu.gemini.spModel.gemini.gnirs.GNIRSParams.Disperser;
+import edu.gemini.spModel.gemini.gnirs.GNIRSParams.ReadMode;
 
 
 /**
@@ -46,7 +47,7 @@ public final class Gnirs extends Instrument {
     protected double _sampling;
     protected String _filterUsed;
     protected Disperser _grating;
-    protected String _readNoise;
+    protected ReadMode _readNoise;
     protected String _focalPlaneMask;
     protected String _stringSlitWidth;
     protected CalculationMethod _mode;
@@ -71,7 +72,7 @@ public final class Gnirs extends Instrument {
 
         _sampling = super.getSampling();
 
-        _readNoise = gp.getReadNoise();
+        _readNoise = gp.getReadMode();
         _focalPlaneMask = gp.getFocalPlaneMask();
         _stringSlitWidth = gp.getStringSlitWidth();
         _grating = gp.getGrating();
@@ -93,11 +94,11 @@ public final class Gnirs extends Instrument {
         } else {
             _wellDepth = SHALLOW_WELL;
         }
-        if (_readNoise.equals(GnirsParameters.VERY_LOW_READ_NOISE)) {
+        if (_readNoise.equals(ReadMode.VERY_FAINT)) {
             _readNoiseValue = VERY_LOW_BACK_READ_NOISE;  // Added 2/24/2014 by SLP
-        } else if (_readNoise.equals(GnirsParameters.LOW_READ_NOISE)) {
+        } else if (_readNoise.equals(ReadMode.FAINT)) {
             _readNoiseValue = LOW_BACK_READ_NOISE;  // Added 2/24/2014 by SLP
-        } else if (_readNoise.equals(GnirsParameters.MED_READ_NOISE)) {
+        } else if (_readNoise.equals(ReadMode.BRIGHT)) {
             _readNoiseValue = MEDIUM_BACK_READ_NOISE;  // Added 2/24/2014 by SLP
         } else {
             _readNoiseValue = HIGH_BACK_READ_NOISE;  // Added 2/24/2014 by SLP

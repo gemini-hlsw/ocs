@@ -50,7 +50,12 @@ object Hash {
         case GNIRSParams.Disperser.D_111  => "G110"
       },
       p.getInstrumentCentralWavelength,
-      p.getReadNoise,
+      p.getReadMode match {
+        case GNIRSParams.ReadMode.BRIGHT      => "medNoise"
+        case GNIRSParams.ReadMode.FAINT       => "lowNoise"
+        case GNIRSParams.ReadMode.VERY_FAINT  => "verylowNoise"
+        case GNIRSParams.ReadMode.VERY_BRIGHT => "highNoise"
+      },
       p.getStringSlitWidth,
       p.getUnXDispCentralWavelength
     )

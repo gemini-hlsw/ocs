@@ -10,14 +10,6 @@ import edu.gemini.spModel.gemini.gnirs.GNIRSParams.*;
  */
 public final class GnirsParameters implements InstrumentDetails {
 
-    // ITC web form input values.
-    // These constants must be kept in sync with the web page form.
-    // They are used to parse form data.
-
-    public static final String LOW_READ_NOISE = "lowNoise";
-    public static final String VERY_LOW_READ_NOISE = "verylowNoise";
-    public static final String HIGH_READ_NOISE = "highNoise";
-    public static final String MED_READ_NOISE = "medNoise";
     public static final String SLIT0_1 = "slit0.10";
     public static final String SLIT0_15 = "slit0.15";
     public static final String SLIT0_2 = "slit0.20";
@@ -45,7 +37,7 @@ public final class GnirsParameters implements InstrumentDetails {
     // Data members
     private final Disperser grating;
     private final PixelScale camera;
-    private final String readNoise;
+    private final ReadMode readMode;
     private final Wavelength instrumentCentralWavelength;
     private final String mask;
     private final String xDisp;
@@ -55,14 +47,14 @@ public final class GnirsParameters implements InstrumentDetails {
      */
     public GnirsParameters(final PixelScale camera,
                            final Disperser grating,
-                           final String readNoise,
+                           final ReadMode readMode,
                            final String xDisp,
                            final Wavelength instrumentCentralWavelength,
                            final String mask) {
         this.grating = grating;
         this.camera = camera;
         this.xDisp = xDisp;
-        this.readNoise = readNoise;
+        this.readMode = readMode;
         this.instrumentCentralWavelength = instrumentCentralWavelength;
         this.mask = mask;
     }
@@ -71,8 +63,8 @@ public final class GnirsParameters implements InstrumentDetails {
         return grating;
     }
 
-    public String getReadNoise() {
-        return readNoise;
+    public ReadMode getReadMode() {
+        return readMode;
     }
 
     public String getFocalPlaneMask() {
