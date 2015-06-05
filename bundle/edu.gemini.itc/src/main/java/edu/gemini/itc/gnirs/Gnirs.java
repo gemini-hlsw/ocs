@@ -5,7 +5,6 @@ import edu.gemini.itc.operation.DetectorsTransmissionVisitor;
 import edu.gemini.itc.shared.CalculationMethod;
 import edu.gemini.itc.shared.ObservationDetails;
 import edu.gemini.spModel.gemini.gnirs.GNIRSParams.Disperser;
-import edu.gemini.spModel.gemini.gnirs.GNIRSParams.ReadMode;
 import edu.gemini.spModel.gemini.gnirs.GNIRSParams.SlitWidth;
 
 
@@ -32,39 +31,25 @@ public final class Gnirs extends Instrument {
     private static final double LOW_GAIN = 2.18;
     public static final int DETECTOR_PIXELS = 1024;
 
-    public static final double SHORT_CAMERA_PIXEL_SCALE = 0.15;
-    public static final double LONG_CAMERA_PIXEL_SCALE = 0.05;
-
-    private static final double HIGH_BACK_READ_NOISE = 155;    // Old value: 160 (changed 2/27/2014)
-    private static final double MEDIUM_BACK_READ_NOISE = 30;   // Old value: 35 (changed 2/27/2014)
-    private static final double LOW_BACK_READ_NOISE = 10;      // Old value: 11 (changed 2/27/2014)
-    private static final double VERY_LOW_BACK_READ_NOISE = 7;  // Old value: 9 (changed 2/27/2014)
-
-
     // Keep a reference to the color filter to ask for effective wavelength
+    private final GnirsParameters params;
     protected Filter _Filter;
     protected GnirsGratingOptics _gratingOptics;
     protected Detector _detector;
     protected double _sampling;
     protected String _filterUsed;
     protected Disperser _grating;
-    protected ReadMode _readNoise;
-    protected SlitWidth _focalPlaneMask;
     protected CalculationMethod _mode;
     protected double _centralWavelength;
 
     protected final DetectorsTransmissionVisitor _dtv;
-    protected final CameraOptics _camera;
+    protected final TransmissionElement _camera;
     protected final boolean _XDisp;
     protected final String _cameraLength;
     protected final double _wellDepth;
-    protected final double _readNoiseValue;
-
 
     public Gnirs(GnirsParameters gp, ObservationDetails odp) {
         super(INSTR_DIR, FILENAME);
-        _sampling = super.getSampling();
-
         ///
         // The instrument data file gives a start/end wavelength for
         // the instrument.  But with a filter in place, the filter
@@ -72,8 +57,7 @@ public final class Gnirs extends Instrument {
 
         _sampling = super.getSampling();
 
-        _readNoise = gp.getReadMode();
-        _focalPlaneMask = gp.getFocalPlaneMask();
+        params = gp;
         _grating = gp.getGrating();
         _centralWavelength = gp.getInstrumentCentralWavelength();
         _mode = odp.getMethod();
@@ -92,15 +76,6 @@ public final class Gnirs extends Instrument {
             _wellDepth = SHALLOW_WELL;
         } else {
             _wellDepth = SHALLOW_WELL;
-        }
-        if (_readNoise.equals(ReadMode.VERY_FAINT)) {
-            _readNoiseValue = VERY_LOW_BACK_READ_NOISE;  // Added 2/24/2014 by SLP
-        } else if (_readNoise.equals(ReadMode.FAINT)) {
-            _readNoiseValue = LOW_BACK_READ_NOISE;  // Added 2/24/2014 by SLP
-        } else if (_readNoise.equals(ReadMode.BRIGHT)) {
-            _readNoiseValue = MEDIUM_BACK_READ_NOISE;  // Added 2/24/2014 by SLP
-        } else {
-            _readNoiseValue = HIGH_BACK_READ_NOISE;  // Added 2/24/2014 by SLP
         }
 
         //Select filter depending on if Cross dispersion is used.
@@ -128,7 +103,7 @@ public final class Gnirs extends Instrument {
 
         final CameraFactory cf = new CameraFactory(gp.getCameraLength(), gp.getCameraColor(), getDirectory());
         _camera = cf.getCamera();
-        addComponent((edu.gemini.itc.base.TransmissionElement) _camera);
+        addComponent(_camera);
 
         _cameraLength = gp.getCameraLength();
 
@@ -169,7 +144,7 @@ public final class Gnirs extends Instrument {
     }
 
     public double getFPMask() {
-        return _focalPlaneMask.getValue();
+        return params.getSlitWidth().getValue();
     }
 
     /**
@@ -193,7 +168,7 @@ public final class Gnirs extends Instrument {
     }
 
     public double getPixelSize() {
-        return _camera.getPixelScale();
+        return params.getPixelScale().getValue();
     }
 
     public double getSpectralPixelWidth() {
@@ -289,7 +264,7 @@ public final class Gnirs extends Instrument {
     }
 
     public double getReadNoise() {
-        return _readNoiseValue;
+        return params.getReadMode().getReadNoise();
     }
 
     public double getObservingStart() {
@@ -318,7 +293,7 @@ public final class Gnirs extends Instrument {
     }
 
     public SlitWidth getFocalPlaneMask() {
-        return _focalPlaneMask;
+        return params.getSlitWidth();
     }
 
     public double getCentralWavelength() {

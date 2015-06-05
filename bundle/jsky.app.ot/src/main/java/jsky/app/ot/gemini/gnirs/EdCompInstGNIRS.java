@@ -473,7 +473,7 @@ public class EdCompInstGNIRS extends EdCompInstBase<InstGNIRS> implements Action
         }
 
         _w.lowNoiseReads.setText(String.valueOf(readMode.getLowNoiseReads()));
-        _w.readNoise.setText(readMode.getReadNoise());
+        _w.readNoise.setText(String.format("%.0fe-", readMode.getReadNoise()));
         _w.minExpTime.setText(readMode.getMinExpAsString());
     }
 

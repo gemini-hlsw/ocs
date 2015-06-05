@@ -43,7 +43,7 @@ object Hash {
     hash(
       p.getCameraColor,
       p.getCameraLength,
-      p.getFocalPlaneMask match {
+      p.getSlitWidth match {
         case GNIRSParams.SlitWidth.SW_1   => "slit0.10"
         case GNIRSParams.SlitWidth.SW_3   => "slit0.20"
         case GNIRSParams.SlitWidth.SW_6   => "slit0.675"
@@ -62,7 +62,7 @@ object Hash {
         case GNIRSParams.ReadMode.VERY_BRIGHT => "highNoise"
       },
     // TODO: remove entirely!
-      p.getFocalPlaneMask match {
+      p.getSlitWidth match {
         case GNIRSParams.SlitWidth.SW_1 => "010"
         case GNIRSParams.SlitWidth.SW_2 => "015"
         case GNIRSParams.SlitWidth.SW_3 => "020"

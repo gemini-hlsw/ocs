@@ -648,10 +648,10 @@ public class GNIRSParams {
      */
     public static enum ReadMode implements DisplayableSpType, SequenceableSpType, LoggableSpType {
         // Updated for REL-175
-        BRIGHT("Bright Objects", 1, 0.6, "30e-", "bright"),
-        FAINT("Faint Objects", 16, 9., "10e-", "faint"),
-        VERY_FAINT("Very Faint Objects", 32, 18., "7e-", "veryFaint"),
-        VERY_BRIGHT("Very Bright/Acq./High Bckgrd.",  1, 0.2, "155e-", "veryBright"),
+        BRIGHT("Bright Objects", 1, 0.6, 30, "bright"),
+        FAINT("Faint Objects", 16, 9., 10, "faint"),
+        VERY_FAINT("Very Faint Objects", 32, 18., 7, "veryFaint"),
+        VERY_BRIGHT("Very Bright/Acq./High Bckgrd.",  1, 0.2, 155, "veryBright"),
         ;
         /**
          * The default ReadMode value
@@ -662,16 +662,16 @@ public class GNIRSParams {
 
         private int _lowNoiseReads;
         private double _minExp;
-        private String _readNoise;
+        private double _readNoise;
         private String _logValue;
         private String _displayValue;
 
         private ReadMode(String displayValue, int lowNoiseReads,
-                         double minExp, String readNoise, String logValue) {
+                         double minExp, double readNoise, String logValue) {
             _displayValue = displayValue;
             _lowNoiseReads = lowNoiseReads;
             _minExp = minExp;
-            _readNoise = readNoise;
+            _readNoise = readNoise;             // in e-
             _logValue = logValue;
         }
 
@@ -738,7 +738,7 @@ public class GNIRSParams {
             return String.valueOf(_minExp) + " secs";
         }
 
-        public String getReadNoise() {
+        public double getReadNoise() {
             return _readNoise;
         }
     }

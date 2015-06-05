@@ -1,23 +1,13 @@
-// This software is Copyright(c) 2010 Association of Universities for
-// Research in Astronomy, Inc.  This software was prepared by the
-// Association of Universities for Research in Astronomy, Inc. (AURA)
-// acting as operator of the Gemini Observatory under a cooperative
-// agreement with the National Science Foundation. This software may 
-// only be used or copied as described in the license set out in the 
-// file LICENSE.TXT included with the distribution package.
-// * CameraFactory.java
-// *
-// * Created on January 13, 2004, 3:15 PM
-// */
-
 package edu.gemini.itc.gnirs;
+
+import edu.gemini.itc.base.TransmissionElement;
 
 /**
  * @author bwalls
  */
 public class CameraFactory {
 
-    private CameraOptics _camera;
+    private TransmissionElement _camera;
 
     /**
      * Creates a new instance of CameraFactory
@@ -37,7 +27,7 @@ public class CameraFactory {
         }
     }
 
-    CameraOptics getCamera() {
+    TransmissionElement getCamera() {
         return _camera;
     }
 

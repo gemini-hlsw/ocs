@@ -21,28 +21,36 @@ public final class GnirsParameters implements InstrumentDetails {
     private static final double XDISP_CENTRAL_WAVELENGTH = 1616.85;
 
     // Data members
-    private final Disperser grating;
-    private final PixelScale camera;
-    private final ReadMode readMode;
-    private final Wavelength instrumentCentralWavelength;
-    private final SlitWidth mask;
+    private final Disperser     grating;
+    private final PixelScale    pixelScale;
+    private final ReadMode      readMode;
+    private final Wavelength    instrumentCentralWavelength;
+    private final SlitWidth     slitWidth;
     private final CrossDispersed xDisp;
 
     /**
      * Constructs a GnirsParameters.
      */
-    public GnirsParameters(final PixelScale camera,
-                           final Disperser grating,
-                           final ReadMode readMode,
+    public GnirsParameters(final PixelScale     pixelScale,
+                           final Disperser      grating,
+                           final ReadMode       readMode,
                            final CrossDispersed xDisp,
-                           final Wavelength instrumentCentralWavelength,
-                           final SlitWidth mask) {
-        this.grating = grating;
-        this.camera = camera;
-        this.xDisp = xDisp;
-        this.readMode = readMode;
-        this.instrumentCentralWavelength = instrumentCentralWavelength;
-        this.mask = mask;
+                           final Wavelength     instrumentCentralWavelength,
+                           final SlitWidth      slitWidth) {
+        this.grating                        = grating;
+        this.pixelScale                     = pixelScale;
+        this.xDisp                          = xDisp;
+        this.readMode                       = readMode;
+        this.instrumentCentralWavelength    = instrumentCentralWavelength;
+        this.slitWidth                      = slitWidth;
+    }
+
+    public PixelScale getPixelScale() {
+        return pixelScale;
+    }
+
+    public SlitWidth getSlitWidth() {
+        return slitWidth;
     }
 
     public Disperser getGrating() {
@@ -51,10 +59,6 @@ public final class GnirsParameters implements InstrumentDetails {
 
     public ReadMode getReadMode() {
         return readMode;
-    }
-
-    public SlitWidth getFocalPlaneMask() {
-        return mask;
     }
 
     public double getInstrumentCentralWavelength() {
@@ -70,7 +74,7 @@ public final class GnirsParameters implements InstrumentDetails {
     }
 
     public String getCameraLength() {
-        switch (camera) {
+        switch (pixelScale) {
             case PS_005: return LONG;
             case PS_015: return SHORT;
             default:     throw new Error();

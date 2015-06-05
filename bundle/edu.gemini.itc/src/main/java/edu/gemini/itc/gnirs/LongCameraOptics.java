@@ -5,19 +5,15 @@ import edu.gemini.itc.base.TransmissionElement;
 /**
  * This represents the transmission of the optics native to the camera.
  */
-public abstract class LongCameraOptics extends TransmissionElement implements CameraOptics {
+public abstract class LongCameraOptics extends TransmissionElement {
     protected static final String FILENAME = Gnirs.getPrefix() + GnirsParameters.getLongCameraName();
 
     public LongCameraOptics(String cameraTransmissionFile) {
         super(cameraTransmissionFile);
     }
 
-    public double getPixelScale() {
-        return Gnirs.LONG_CAMERA_PIXEL_SCALE;
-    }
-
     public String toString() {
-        return "Camera: " + getPixelScale() + "arcsec/pix (Long ";
+        return "Camera: 0.05arcsec/pix (Long ";
     }
 }
 
