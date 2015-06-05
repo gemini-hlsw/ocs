@@ -2,6 +2,7 @@ package edu.gemini.itc.gnirs;
 
 import edu.gemini.itc.shared.InstrumentDetails;
 import edu.gemini.spModel.core.Wavelength;
+import edu.gemini.spModel.gemini.gnirs.GNIRSParams.*;
 
 /**
  * This class holds the information from the Gnirs section
@@ -22,8 +23,6 @@ public final class GnirsParameters implements InstrumentDetails {
     public static final String VERY_LOW_READ_NOISE = "verylowNoise";
     public static final String HIGH_READ_NOISE = "highNoise";
     public static final String MED_READ_NOISE = "medNoise";
-    public static final String LONG_CAMERA = "0.05";
-    public static final String SHORT_CAMERA = "0.15";
     public static final String SLIT0_1 = "slit0.10";
     public static final String SLIT0_15 = "slit0.15";
     public static final String SLIT0_2 = "slit0.20";
@@ -50,7 +49,7 @@ public final class GnirsParameters implements InstrumentDetails {
 
     // Data members
     private final String grating; // Grating or null
-    private final String camera;
+    private final PixelScale camera;
     private final String readNoise;
     private final Wavelength instrumentCentralWavelength;
     private final String mask;
@@ -59,7 +58,7 @@ public final class GnirsParameters implements InstrumentDetails {
     /**
      * Constructs a GnirsParameters.
      */
-    public GnirsParameters(final String camera,
+    public GnirsParameters(final PixelScale camera,
                            final String grating,
                            final String readNoise,
                            final String xDisp,
@@ -113,9 +112,9 @@ public final class GnirsParameters implements InstrumentDetails {
 
     public String getCameraLength() {
         switch (camera) {
-            case LONG_CAMERA:   return LONG;
-            case SHORT_CAMERA:  return SHORT;
-            default:            throw new Error();
+            case PS_005: return LONG;
+            case PS_015: return SHORT;
+            default:     throw new Error();
         }
     }
 

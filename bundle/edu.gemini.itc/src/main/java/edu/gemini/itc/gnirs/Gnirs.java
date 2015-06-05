@@ -163,7 +163,7 @@ public final class Gnirs extends Instrument {
 
             if (_grating.equals(GnirsParameters.G10) && _cameraLength.equals(GnirsParameters.SHORT))
                 throw new RuntimeException("The grating " + _grating + " cannot be used with the " +
-                        GnirsParameters.SHORT_CAMERA + " arcsec/pix (Short) camera.\n" +
+                        "0.15\" arcsec/pix (Short) camera.\n" +
                         "  Please either change the camera or the grating.");
 
             if (!(_grating.equals("none")) && !(_filterUsed.equals("none")))

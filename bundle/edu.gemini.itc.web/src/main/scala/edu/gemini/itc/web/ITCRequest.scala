@@ -16,6 +16,7 @@ import edu.gemini.spModel.gemini.flamingos2.Flamingos2
 import edu.gemini.spModel.gemini.gmos.GmosCommonType.DetectorManufacturer
 import edu.gemini.spModel.gemini.gmos.GmosNorthType.{DisperserNorth, FPUnitNorth, FilterNorth}
 import edu.gemini.spModel.gemini.gmos.GmosSouthType.{DisperserSouth, FPUnitSouth, FilterSouth}
+import edu.gemini.spModel.gemini.gnirs.GNIRSParams
 import edu.gemini.spModel.gemini.gsaoi.Gsaoi
 import edu.gemini.spModel.gemini.michelle.MichelleParams
 import edu.gemini.spModel.gemini.niri.Niri
@@ -136,7 +137,7 @@ object ITCRequest {
 
   def gnirsParameters(r: ITCRequest): GnirsParameters = {
     val grating     = r.parameter("instrumentDisperser")
-    val camera      = r.parameter("instrumentCamera")
+    val camera      = r.enumParameter(classOf[GNIRSParams.PixelScale])
     val xDisp       = r.parameter("xdisp")
     val readNoise   = r.parameter("readNoise")
     val centralWl   = Wavelength.fromMicrons(r.doubleParameter("instrumentCentralWavelength"))
