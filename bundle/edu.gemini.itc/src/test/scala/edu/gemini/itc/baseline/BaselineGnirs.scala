@@ -19,7 +19,7 @@ object BaselineGnirs {
       ReadMode.FAINT,
       GnirsParameters.X_DISP_ON,
       Wavelength.fromMicrons(2.4),
-      GnirsParameters.SLIT0_1),
+      SlitWidth.SW_1),
 
     new GnirsParameters(
       PixelScale.PS_015,
@@ -27,7 +27,7 @@ object BaselineGnirs {
       ReadMode.VERY_BRIGHT,
       GnirsParameters.X_DISP_OFF,
       Wavelength.fromMicrons(2.4),
-      GnirsParameters.SLIT0_2),
+      SlitWidth.SW_3),
 
     new GnirsParameters(
       PixelScale.PS_005,
@@ -35,7 +35,7 @@ object BaselineGnirs {
       ReadMode.FAINT,
       GnirsParameters.X_DISP_ON,
       Wavelength.fromMicrons(2.6),
-      GnirsParameters.SLIT0_675),
+      SlitWidth.SW_6),
 
     new GnirsParameters(
       PixelScale.PS_015,
@@ -43,7 +43,7 @@ object BaselineGnirs {
       ReadMode.VERY_BRIGHT,
       GnirsParameters.X_DISP_OFF,
       Wavelength.fromMicrons(2.6),
-      GnirsParameters.SLIT3_0)
+      SlitWidth.SW_8)
 
   ))
 

@@ -43,7 +43,12 @@ object Hash {
     hash(
       p.getCameraColor,
       p.getCameraLength,
-      p.getFocalPlaneMask,
+      p.getFocalPlaneMask match {
+        case GNIRSParams.SlitWidth.SW_1   => "slit0.10"
+        case GNIRSParams.SlitWidth.SW_3   => "slit0.20"
+        case GNIRSParams.SlitWidth.SW_6   => "slit0.675"
+        case GNIRSParams.SlitWidth.SW_8   => "slit3.0"
+      },
       p.getGrating match {
         case GNIRSParams.Disperser.D_10   => "G10"
         case GNIRSParams.Disperser.D_32   => "G32"

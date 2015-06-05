@@ -6,6 +6,7 @@ import edu.gemini.itc.shared.CalculationMethod;
 import edu.gemini.itc.shared.ObservationDetails;
 import edu.gemini.spModel.gemini.gnirs.GNIRSParams.Disperser;
 import edu.gemini.spModel.gemini.gnirs.GNIRSParams.ReadMode;
+import edu.gemini.spModel.gemini.gnirs.GNIRSParams.SlitWidth;
 
 
 /**
@@ -48,7 +49,7 @@ public final class Gnirs extends Instrument {
     protected String _filterUsed;
     protected Disperser _grating;
     protected ReadMode _readNoise;
-    protected String _focalPlaneMask;
+    protected SlitWidth _focalPlaneMask;
     protected String _stringSlitWidth;
     protected CalculationMethod _mode;
     protected double _centralWavelength;
@@ -133,50 +134,35 @@ public final class Gnirs extends Instrument {
 
         _cameraLength = gp.getCameraLength();
 
-        //Test to see that all conditions for Spectroscopy are met
-        if (_mode.isSpectroscopy()) {
-            if (_grating.equals("none"))
-                throw new RuntimeException("Spectroscopy calculation method is selected but a grating" +
-                        " is not.\nPlease select a grating and a " +
-                        "focal plane mask in the Instrument " +
-                        "configuration section.");
-            if (_focalPlaneMask.equals(GnirsParameters.NO_SLIT))
-                throw new RuntimeException("Spectroscopy calculation method is selected but a focal" +
-                        " plane mask is not.\nPlease select a " +
-                        "grating and a " +
-                        "focal plane mask in the Instrument " +
-                        "configuration section.");
+        // GNIRS is spectroscopy only
+        if (_mode.isImaging()) {
+            throw new RuntimeException("GNIRS does not support imaging.");
         }
 
 
-        _detector = new Detector(getDirectory() + "/", getPrefix(),
-                "aladdin", "1K x 1K ALADDIN III InSb CCD");
+        _detector = new Detector(getDirectory() + "/", getPrefix(), "aladdin", "1K x 1K ALADDIN III InSb CCD");
         _detector.setDetectorPixels(DETECTOR_PIXELS);
 
-        _dtv = new DetectorsTransmissionVisitor(1,
-                getDirectory() + "/" + getPrefix() + "ccdpix" + Instrument.getSuffix());
+        _dtv = new DetectorsTransmissionVisitor(1, getDirectory() + "/" + getPrefix() + "ccdpix" + Instrument.getSuffix());
 
-        if (!(_grating.equals("none"))) {
+        _gratingOptics = new GnirsGratingOptics(getDirectory() + "/" + getPrefix(), _grating,
+                _centralWavelength,
+                _detector.getDetectorPixels(),
+                1);
 
-            _gratingOptics = new GnirsGratingOptics(getDirectory() + "/" + getPrefix(), _grating,
-                    _centralWavelength,
-                    _detector.getDetectorPixels(),
-                    1);
+        if (_grating.equals(Disperser.D_10) && _cameraLength.equals(GnirsParameters.SHORT))
+            throw new RuntimeException("The grating " + _grating + " cannot be used with the " +
+                    "0.15\" arcsec/pix (Short) camera.\n" +
+                    "  Please either change the camera or the grating.");
 
-            if (_grating.equals(Disperser.D_10) && _cameraLength.equals(GnirsParameters.SHORT))
-                throw new RuntimeException("The grating " + _grating + " cannot be used with the " +
-                        "0.15\" arcsec/pix (Short) camera.\n" +
-                        "  Please either change the camera or the grating.");
-
-            if (!(_grating.equals("none")) && !(_filterUsed.equals("none")))
-                if ((_Filter.getStart() >= _gratingOptics.getEnd()) ||
-                        (_Filter.getEnd() <= _gratingOptics.getStart())) {
-                    throw new RuntimeException("The " + _filterUsed + " filter" +
-                            " and the " + _grating +
-                            " do not overlap with the requested wavelength.\n" +
-                            " Please select a different filter, grating or wavelength.");
-                }
-        }
+        if (!(_filterUsed.equals("none")))
+            if ((_Filter.getStart() >= _gratingOptics.getEnd()) ||
+                    (_Filter.getEnd() <= _gratingOptics.getStart())) {
+                throw new RuntimeException("The " + _filterUsed + " filter" +
+                        " and the " + _grating +
+                        " do not overlap with the requested wavelength.\n" +
+                        " Please select a different filter, grating or wavelength.");
+            }
 
 
         addComponent(_detector);
@@ -185,25 +171,7 @@ public final class Gnirs extends Instrument {
     }
 
     public double getFPMask() {
-        //if (_FP_Mask.equals(NOSLIT)) return null;
-        if (_focalPlaneMask.equals(GnirsParameters.SLIT0_1))
-            return 0.1;
-        else if (_focalPlaneMask.equals(GnirsParameters.SLIT0_15))
-            return 0.15;
-        else if (_focalPlaneMask.equals(GnirsParameters.SLIT0_2))
-            return 0.2;
-        else if (_focalPlaneMask.equals(GnirsParameters.SLIT0_3))
-            return 0.3;
-        else if (_focalPlaneMask.equals(GnirsParameters.SLIT0_45))
-            return 0.45;
-        else if (_focalPlaneMask.equals(GnirsParameters.SLIT0_675))
-            return 0.675;
-        else if (_focalPlaneMask.equals(GnirsParameters.SLIT1_0))
-            return 1.0;
-        else if (_focalPlaneMask.equals(GnirsParameters.SLIT3_0))
-            return 3.0;
-        else
-            return -1.0;
+        return _focalPlaneMask.getValue();
     }
 
     /**
@@ -351,7 +319,7 @@ public final class Gnirs extends Instrument {
         }
     }
 
-    public String getFocalPlaneMask() {
+    public SlitWidth getFocalPlaneMask() {
         return _focalPlaneMask;
     }
 

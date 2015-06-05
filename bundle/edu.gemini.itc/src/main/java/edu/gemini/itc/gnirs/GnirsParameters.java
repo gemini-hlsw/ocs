@@ -10,15 +10,6 @@ import edu.gemini.spModel.gemini.gnirs.GNIRSParams.*;
  */
 public final class GnirsParameters implements InstrumentDetails {
 
-    public static final String SLIT0_1 = "slit0.10";
-    public static final String SLIT0_15 = "slit0.15";
-    public static final String SLIT0_2 = "slit0.20";
-    public static final String SLIT0_3 = "slit0.30";
-    public static final String SLIT0_45 = "slit0.45";
-    public static final String SLIT0_675 = "slit0.675";
-    public static final String SLIT1_0 = "slit1.0";
-    public static final String SLIT3_0 = "slit3.0";
-    public static final String NO_SLIT = "none";
     public static final String GNIRS = "gnirs";
 
     public static final String X_DISP_ON = "yes";
@@ -39,7 +30,7 @@ public final class GnirsParameters implements InstrumentDetails {
     private final PixelScale camera;
     private final ReadMode readMode;
     private final Wavelength instrumentCentralWavelength;
-    private final String mask;
+    private final SlitWidth mask;
     private final String xDisp;
 
     /**
@@ -50,7 +41,7 @@ public final class GnirsParameters implements InstrumentDetails {
                            final ReadMode readMode,
                            final String xDisp,
                            final Wavelength instrumentCentralWavelength,
-                           final String mask) {
+                           final SlitWidth mask) {
         this.grating = grating;
         this.camera = camera;
         this.xDisp = xDisp;
@@ -67,7 +58,7 @@ public final class GnirsParameters implements InstrumentDetails {
         return readMode;
     }
 
-    public String getFocalPlaneMask() {
+    public SlitWidth getFocalPlaneMask() {
         return mask;
     }
 
@@ -85,15 +76,15 @@ public final class GnirsParameters implements InstrumentDetails {
 
     public String getStringSlitWidth() {
         switch (mask) {
-            case SLIT0_1:   return "010";
-            case SLIT0_15:  return "015";
-            case SLIT0_2:   return "020";
-            case SLIT0_3:   return "030";
-            case SLIT0_45:  return "045";
-            case SLIT0_675: return "0675";
-            case SLIT1_0:   return "100";
-            case SLIT3_0:   return "300";
-            default:        return "none";
+            case SW_1: return "010";
+            case SW_2: return "015";
+            case SW_3: return "020";
+            case SW_4: return "030";
+            case SW_5: return "045";
+            case SW_6: return "0675";
+            case SW_7: return "100";
+            case SW_8: return "300";
+            default:   throw new Error();
         }
     }
 
