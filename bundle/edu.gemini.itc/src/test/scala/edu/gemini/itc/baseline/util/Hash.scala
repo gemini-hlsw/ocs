@@ -5,6 +5,7 @@ import edu.gemini.itc.michelle.MichelleParameters
 import edu.gemini.itc.nifs.NifsParameters
 import edu.gemini.itc.shared._
 import edu.gemini.itc.trecs.TRecsParameters
+import edu.gemini.spModel.gemini.gnirs.GNIRSParams
 import edu.gemini.spModel.target._
 
 // TEMPORARY helper
@@ -43,7 +44,11 @@ object Hash {
       p.getCameraColor,
       p.getCameraLength,
       p.getFocalPlaneMask,
-      p.getGrating,
+      p.getGrating match {
+        case GNIRSParams.Disperser.D_10   => "G10"
+        case GNIRSParams.Disperser.D_32   => "G32"
+        case GNIRSParams.Disperser.D_111  => "G110"
+      },
       p.getInstrumentCentralWavelength,
       p.getReadNoise,
       p.getStringSlitWidth,

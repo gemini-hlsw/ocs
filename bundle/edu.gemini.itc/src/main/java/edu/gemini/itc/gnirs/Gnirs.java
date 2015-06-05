@@ -4,6 +4,7 @@ import edu.gemini.itc.base.*;
 import edu.gemini.itc.operation.DetectorsTransmissionVisitor;
 import edu.gemini.itc.shared.CalculationMethod;
 import edu.gemini.itc.shared.ObservationDetails;
+import edu.gemini.spModel.gemini.gnirs.GNIRSParams.Disperser;
 
 
 /**
@@ -44,7 +45,7 @@ public final class Gnirs extends Instrument {
     protected Detector _detector;
     protected double _sampling;
     protected String _filterUsed;
-    protected String _grating;
+    protected Disperser _grating;
     protected String _readNoise;
     protected String _focalPlaneMask;
     protected String _stringSlitWidth;
@@ -161,7 +162,7 @@ public final class Gnirs extends Instrument {
                     _detector.getDetectorPixels(),
                     1);
 
-            if (_grating.equals(GnirsParameters.G10) && _cameraLength.equals(GnirsParameters.SHORT))
+            if (_grating.equals(Disperser.D_10) && _cameraLength.equals(GnirsParameters.SHORT))
                 throw new RuntimeException("The grating " + _grating + " cannot be used with the " +
                         "0.15\" arcsec/pix (Short) camera.\n" +
                         "  Please either change the camera or the grating.");
@@ -271,7 +272,7 @@ public final class Gnirs extends Instrument {
         }
     }
 
-    public String getGrating() {
+    public Disperser getGrating() {
         return _grating;
     }
 

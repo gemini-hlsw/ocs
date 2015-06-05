@@ -1,6 +1,7 @@
 package edu.gemini.itc.gnirs;
 
 import edu.gemini.itc.base.GratingOptics;
+import edu.gemini.spModel.gemini.gnirs.GNIRSParams.*;
 
 /**
  * This represents the transmission and properties of the Grating optics.
@@ -8,12 +9,12 @@ import edu.gemini.itc.base.GratingOptics;
 public final class GnirsGratingOptics extends GratingOptics {
 
     public GnirsGratingOptics(final String directory,
-                              final String gratingName,
+                              final Disperser grating,
                               final double centralWavelength,
                               final int detectorPixels,
                               final int spectralBinning) {
 
-        super(directory, gratingName, "gratings", centralWavelength, detectorPixels, spectralBinning);
+        super(directory, grating.name(), "gratings", centralWavelength, detectorPixels, spectralBinning);
     }
 
 }

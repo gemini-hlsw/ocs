@@ -4,6 +4,7 @@ import edu.gemini.itc.base.*;
 import edu.gemini.itc.operation.*;
 import edu.gemini.itc.shared.*;
 import edu.gemini.spModel.core.Site;
+import edu.gemini.spModel.gemini.gnirs.GNIRSParams;
 import scala.Option;
 import scala.Some;
 import scala.Tuple2;
@@ -190,7 +191,7 @@ public final class GnirsRecipe implements SpectroscopyRecipe {
             }
 
             final double trimCenter;
-            if (instrument.getGrating().equals(GnirsParameters.G110)) {
+            if (instrument.getGrating().equals(GNIRSParams.Disperser.D_111)) {
                 trimCenter = _gnirsParameters.getUnXDispCentralWavelength();
             } else {
                 trimCenter = 2200.0;

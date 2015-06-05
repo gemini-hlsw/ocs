@@ -15,7 +15,7 @@ object BaselineGnirs {
   private lazy val KBandSpectroscopy = Fixture.kBandSpcFixtures(List(
     new GnirsParameters(
       PixelScale.PS_005,
-      GnirsParameters.G10,
+      Disperser.D_10,
       GnirsParameters.LOW_READ_NOISE,
       GnirsParameters.X_DISP_ON,
       Wavelength.fromMicrons(2.4),
@@ -23,7 +23,7 @@ object BaselineGnirs {
 
     new GnirsParameters(
       PixelScale.PS_015,
-      GnirsParameters.G110,
+      Disperser.D_111,
       GnirsParameters.HIGH_READ_NOISE,
       GnirsParameters.X_DISP_OFF,
       Wavelength.fromMicrons(2.4),
@@ -31,7 +31,7 @@ object BaselineGnirs {
 
     new GnirsParameters(
       PixelScale.PS_005,
-      GnirsParameters.G32,
+      Disperser.D_32,
       GnirsParameters.LOW_READ_NOISE,
       GnirsParameters.X_DISP_ON,
       Wavelength.fromMicrons(2.6),
@@ -39,7 +39,7 @@ object BaselineGnirs {
 
     new GnirsParameters(
       PixelScale.PS_015,
-      GnirsParameters.G32,
+      Disperser.D_32,
       GnirsParameters.HIGH_READ_NOISE,
       GnirsParameters.X_DISP_OFF,
       Wavelength.fromMicrons(2.6),

@@ -3,6 +3,7 @@ package edu.gemini.itc.gnirs;
 import edu.gemini.itc.base.DatFile;
 import edu.gemini.itc.base.DefaultArraySpectrum;
 import edu.gemini.itc.base.TransmissionElement;
+import edu.gemini.spModel.gemini.gnirs.GNIRSParams.*;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
@@ -17,11 +18,11 @@ public final class GnirsGratingsTransmission {
 
     private static final int OrdersCnt = 8;
 
-    private static final HashMap<String, TransmissionElement[]> _orderTransmission = new HashMap<>();
+    private static final HashMap<Disperser, TransmissionElement[]> _orderTransmission = new HashMap<>();
 
     private GnirsGratingsTransmission() {}
 
-    public static synchronized TransmissionElement getOrderNTransmission(final String grating, final int order) {
+    public static synchronized TransmissionElement getOrderNTransmission(final Disperser grating, final int order) {
         assert order > 0;
         assert order <= OrdersCnt;
         if (!_orderTransmission.containsKey(grating)) {
@@ -31,7 +32,7 @@ public final class GnirsGratingsTransmission {
     }
 
     @SuppressWarnings("unchecked")
-    private static void loadTransmission(final String grating) {
+    private static void loadTransmission(final Disperser grating) {
         final TransmissionElement[] tes = new TransmissionElement[OrdersCnt];
         final List<Double>[] wavel = (List<Double>[]) Array.newInstance(List.class, OrdersCnt);
         final List<Double>[] order = (List<Double>[]) Array.newInstance(List.class, OrdersCnt);
@@ -40,7 +41,7 @@ public final class GnirsGratingsTransmission {
             order[i] = new ArrayList<>();
         }
 
-        final String file = "/" + Gnirs.INSTR_DIR + "/" + Gnirs.getPrefix() + grating + Gnirs.DATA_SUFFIX;
+        final String file = "/" + Gnirs.INSTR_DIR + "/" + Gnirs.getPrefix() + grating.name() + Gnirs.DATA_SUFFIX;
         try (final Scanner scan = DatFile.scanFile(file)) {
             while (scan.hasNext()) {
                 for (int i = 0; i < OrdersCnt; i++) {

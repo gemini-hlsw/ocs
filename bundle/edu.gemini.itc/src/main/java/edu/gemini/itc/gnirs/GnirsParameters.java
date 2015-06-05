@@ -14,11 +14,6 @@ public final class GnirsParameters implements InstrumentDetails {
     // These constants must be kept in sync with the web page form.
     // They are used to parse form data.
 
-    public static final String NO_DISPERSER = "none";
-    public static final String G10 = "G10";
-    public static final String G32 = "G32";
-    public static final String G110 = "G110";
-
     public static final String LOW_READ_NOISE = "lowNoise";
     public static final String VERY_LOW_READ_NOISE = "verylowNoise";
     public static final String HIGH_READ_NOISE = "highNoise";
@@ -48,7 +43,7 @@ public final class GnirsParameters implements InstrumentDetails {
     private static final double XDISP_CENTRAL_WAVELENGTH = 1616.85;
 
     // Data members
-    private final String grating; // Grating or null
+    private final Disperser grating;
     private final PixelScale camera;
     private final String readNoise;
     private final Wavelength instrumentCentralWavelength;
@@ -59,7 +54,7 @@ public final class GnirsParameters implements InstrumentDetails {
      * Constructs a GnirsParameters.
      */
     public GnirsParameters(final PixelScale camera,
-                           final String grating,
+                           final Disperser grating,
                            final String readNoise,
                            final String xDisp,
                            final Wavelength instrumentCentralWavelength,
@@ -72,7 +67,7 @@ public final class GnirsParameters implements InstrumentDetails {
         this.mask = mask;
     }
 
-    public String getGrating() {
+    public Disperser getGrating() {
         return grating;
     }
 

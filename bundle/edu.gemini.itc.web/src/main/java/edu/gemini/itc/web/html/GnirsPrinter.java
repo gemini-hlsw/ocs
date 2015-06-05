@@ -6,6 +6,7 @@ import edu.gemini.itc.gnirs.Gnirs;
 import edu.gemini.itc.gnirs.GnirsParameters;
 import edu.gemini.itc.gnirs.GnirsRecipe;
 import edu.gemini.itc.shared.*;
+import edu.gemini.spModel.gemini.gnirs.GNIRSParams;
 import scala.Tuple2;
 
 import java.io.PrintWriter;
@@ -138,7 +139,7 @@ public final class GnirsPrinter extends PrinterBase {
         if (!instrument.getFocalPlaneMask().equals(GnirsParameters.NO_SLIT))
             s += "<LI>Focal Plane Mask: " + instrument.getFocalPlaneMask() + "\n";
 
-        s += "<LI>Grating: " + instrument.getGrating() + "\n"; // REL-469
+        s += "<LI>Grating: " + gratingName(instrument.getGrating()) + "\n"; // REL-469
 
         s += "<LI>Read Noise: " + instrument.getReadNoise() + "\n";
         s += "<LI>Well Depth: " + instrument.getWellDepth() + "\n";
@@ -159,6 +160,16 @@ public final class GnirsPrinter extends PrinterBase {
             }
         }
         return s;
+    }
+
+    // TODO: Keep regression tests going, remove asap
+    private String gratingName(final GNIRSParams.Disperser grating) {
+        switch (grating) {
+            case D_10:  return "G10";
+            case D_32:  return "G32";
+            case D_111: return "G110";
+            default:    throw new Error();
+        }
     }
 
 }

@@ -136,7 +136,7 @@ object ITCRequest {
   }
 
   def gnirsParameters(r: ITCRequest): GnirsParameters = {
-    val grating     = r.parameter("instrumentDisperser")
+    val grating     = r.enumParameter(classOf[GNIRSParams.Disperser])
     val camera      = r.enumParameter(classOf[GNIRSParams.PixelScale])
     val xDisp       = r.parameter("xdisp")
     val readNoise   = r.parameter("readNoise")
