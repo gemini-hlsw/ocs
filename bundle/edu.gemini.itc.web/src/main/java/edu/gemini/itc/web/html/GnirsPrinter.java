@@ -125,14 +125,14 @@ public final class GnirsPrinter extends PrinterBase {
         s += "Pixel Size in Spatial Direction: " + instrument.getPixelSize() + " arcsec\n";
         if (p.observation().getMethod().isSpectroscopy()) {
             if (instrument.XDisp_IsUsed()) {
-                s += "Pixel Size in Spectral Direction(Order 3): " + String.format("%.3f nm\n", instrument.getGratingDispersion_nmppix() / 3);
-                s += "Pixel Size in Spectral Direction(Order 4): " + String.format("%.3f nm\n", instrument.getGratingDispersion_nmppix() / 4);
-                s += "Pixel Size in Spectral Direction(Order 5): " + String.format("%.3f nm\n", instrument.getGratingDispersion_nmppix() / 5);
-                s += "Pixel Size in Spectral Direction(Order 6): " + String.format("%.3f nm\n", instrument.getGratingDispersion_nmppix() / 6);
-                s += "Pixel Size in Spectral Direction(Order 7): " + String.format("%.3f nm\n", instrument.getGratingDispersion_nmppix() / 7);
-                s += "Pixel Size in Spectral Direction(Order 8): " + String.format("%.3f nm\n", instrument.getGratingDispersion_nmppix() / 8);
+                s += String.format("Pixel Size in Spectral Direction(Order 3): %.3f nm\n", instrument.getGratingDispersion_nmppix() / 3);
+                s += String.format("Pixel Size in Spectral Direction(Order 4): %.3f nm\n", instrument.getGratingDispersion_nmppix() / 4);
+                s += String.format("Pixel Size in Spectral Direction(Order 5): %.3f nm\n", instrument.getGratingDispersion_nmppix() / 5);
+                s += String.format("Pixel Size in Spectral Direction(Order 6): %.3f nm\n", instrument.getGratingDispersion_nmppix() / 6);
+                s += String.format("Pixel Size in Spectral Direction(Order 7): %.3f nm\n", instrument.getGratingDispersion_nmppix() / 7);
+                s += String.format("Pixel Size in Spectral Direction(Order 8): %.3f nm\n", instrument.getGratingDispersion_nmppix() / 8);
             } else {
-                s += "Pixel Size in Spectral Direction: " + String.format("%.3f nm\n", instrument.getGratingDispersion_nmppix());
+                s += String.format("Pixel Size in Spectral Direction: %.3f nm\n", instrument.getGratingDispersion_nmppix());
             }
         }
         return s;
