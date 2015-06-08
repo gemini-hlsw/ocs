@@ -428,8 +428,6 @@ public class JCalendar extends JPanel implements ActionListener, CalendarDisplay
         c.set(c.YEAR, ymd.year);
         c.set(c.MONTH, ymd.month);
         c.set(c.DAY_OF_MONTH, ymd.day);
-        if (c == null)
-            return null;
         return c.getTime();
     }
 

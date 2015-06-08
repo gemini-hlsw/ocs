@@ -109,10 +109,9 @@ abstract class ValidAtEditor[A <: ITarget](empty: A) extends TelescopePosEditor 
     node = node0
     nonreentrant {
       val nst = spt.getTarget.asInstanceOf[NonSiderealTarget]
-      Option(nst.getDateForPosition).foreach { d =>
-        calendar.setDate(d)
-        timeConfig.setTime(d)
-      }
+      val d   = Option(nst.getDateForPosition) | new java.util.Date
+      calendar.setDate(d)
+      timeConfig.setTime(d)
     }
   }
 
@@ -128,15 +127,16 @@ abstract class ValidAtEditor[A <: ITarget](empty: A) extends TelescopePosEditor 
   ///
 
   /** A program that returns the editor's current date and time. */
-  def dateTime: HorizonsIO[Date] = {
-    val cal = Calendar.getInstance(UTC)
-    cal.setTimeZone(calendar.getTimeZone)
-    cal.setTime(calendar.getDate)
-    cal.set(Calendar.HOUR_OF_DAY, timeConfig.textDoc.getHoursField)
-    cal.set(Calendar.MINUTE,      timeConfig.textDoc.getMinutesField)
-    cal.set(Calendar.SECOND,      timeConfig.textDoc.getSecondsField)
-    HorizonsIO.delay(cal.getTime)
-  }
+  def dateTime: HorizonsIO[Date] =
+    HorizonsIO.delay {
+      val cal = Calendar.getInstance(UTC)
+      cal.setTimeZone(calendar.getTimeZone)
+      cal.setTime(calendar.getDate)
+      cal.set(Calendar.HOUR_OF_DAY, timeConfig.textDoc.getHoursField)
+      cal.set(Calendar.MINUTE, timeConfig.textDoc.getMinutesField)
+      cal.set(Calendar.SECOND, timeConfig.textDoc.getSecondsField)
+      cal.getTime
+    }
 
   /** A program that returns the editor's current target. */
   val target: HorizonsIO[A] =
