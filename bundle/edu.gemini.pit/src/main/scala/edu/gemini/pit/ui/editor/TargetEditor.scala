@@ -28,8 +28,6 @@ import edu.gemini.ui.workspace.util.Factory
 
 import java.beans.PropertyChangeEvent
 import java.beans.PropertyChangeListener
-import java.lang.Integer
-
 
 import java.awt
 import edu.gemini.pit.ui.util.ToolButton
@@ -79,7 +77,7 @@ class TargetEditor private (semester:Semester, target:Target, canEdit:Boolean) e
   // Unlike other editors, let's not have a default button
   dialog.peer.getRootPane.setDefaultButton(null)
 
-  // An enumerated type for our target type option dropdown
+  // An enumerated type for our target type radio buttons
   object TargetType extends Enumeration {
     val SiderealType = Value("Sidereal")
     val NonSiderealType = Value("Non-Sidereal")
@@ -107,7 +105,7 @@ class TargetEditor private (semester:Semester, target:Target, canEdit:Boolean) e
     Tabs.CoordinatesPageContent.Dec,
     Tabs.CoordinatesPageContent.DeltaRA,
     Tabs.CoordinatesPageContent.DeltaDec
-    ) ++ Tabs.magControls.map(_.text).toList) foreach {
+    ) ++ Tabs.magControls.map(_.text)) foreach {
       _.reactions += {
         case ValueChanged(_) => validateEditor()
       }
@@ -207,7 +205,7 @@ class TargetEditor private (semester:Semester, target:Target, canEdit:Boolean) e
         case NonSiderealType => pages += Ephemeris
         case TooType         => () // there is no page for this one
       }
-      visible = !pages.isEmpty
+      visible = pages.nonEmpty
       dialog.pack()
     }
 
@@ -468,7 +466,7 @@ class TargetEditor private (semester:Semester, target:Target, canEdit:Boolean) e
 
         // Our add button, which is always on
         object Add extends ToolButton(SharedIcons.ADD, SharedIcons.ADD_DISABLED, "Add Ephemeris Element") {
-          def apply {
+          override def apply() {
 
             enabled = canEdit
 
@@ -494,7 +492,7 @@ class TargetEditor private (semester:Semester, target:Target, canEdit:Boolean) e
 
         // And delete button, which is enabled only if there's a selection in the viewer
         object Del extends ToolButton(SharedIcons.REMOVE, SharedIcons.REMOVE_DISABLED, "Delete Ephemeris Element") {
-          def apply {
+          override def apply() {
             val m = Viewer.getModel
             for {
               e <- Viewer.selection
@@ -531,7 +529,7 @@ class TargetEditor private (semester:Semester, target:Target, canEdit:Boolean) e
           case false => None
           case true  => Some(ProperMotion(DeltaRA.text.toDouble, DeltaDec.text.toDouble))
         },
-        magnitudes = Tabs.magControls.map(_.magnitude).flatten.toList)
+        magnitudes = Tabs.magControls.flatMap(_.magnitude))
 
     case NonSiderealType =>
 

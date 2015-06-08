@@ -44,7 +44,7 @@ class TargetView(val shellAdvisor:ShellAdvisor) extends BorderPanel with BoundVi
   add(toolbar, BorderPanel.Position.South)
 
   // We need to do this here (rather than in the delete buttons itself) to avoid a stack overlow on init
-  listView.onSelectionChanged {s => toolbar.delete.enabled = canEdit && !s.isEmpty }
+  listView.onSelectionChanged {s => toolbar.delete.enabled = canEdit && s.nonEmpty }
 
   // Public edit method (called from quick-fixes)
   def edit(t:Target) {
@@ -191,9 +191,9 @@ class TargetView(val shellAdvisor:ShellAdvisor) extends BorderPanel with BoundVi
       // A cut action
       object CopyAction extends Action("Copy - Ignored") {
         enabled = false
-        onSelectionChanged(sel => enabled = !sel.isEmpty)
+        onSelectionChanged(sel => enabled = sel.nonEmpty)
         def apply() {
-          transferHandler.exportToClipboard(viewer.getTable, HackClipboard, COPY);
+          transferHandler.exportToClipboard(viewer.getTable, HackClipboard, COPY)
         }
       }
 
@@ -272,7 +272,7 @@ class TargetView(val shellAdvisor:ShellAdvisor) extends BorderPanel with BoundVi
       def apply() {
         for {
           m <- model
-          inUse = m.proposal.observations.map(_.target).flatten.distinct
+          inUse = m.proposal.observations.flatMap(_.target).distinct
           toDelete = listView.selection
           if confirmDelete(toDelete.exists(inUse.contains))
           ts = targetLens.get(m)
