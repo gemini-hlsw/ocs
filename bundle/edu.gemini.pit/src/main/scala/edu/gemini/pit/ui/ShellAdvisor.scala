@@ -39,7 +39,7 @@ import edu.gemini.pit.ui.robot.{ProblemRobot, AgsRobot, GsaRobot, VisibilityRobo
 
 class ShellAdvisor(
     version: String,     // taken from the PIT bundle metadata, shown in the title bar
-    startModel: Model, // Never null
+    startModel: Model,   // Never null
     file: Option[File],  // We may or may not have a file association
     newShellHandler: ((Model, Option[File]) => Unit), // Call this to open a new shell
     locale: Locale)      // This is used as a hint to select a default TAC partner

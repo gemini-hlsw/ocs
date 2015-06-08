@@ -51,7 +51,7 @@ class ProposalSpec extends SpecificationWithJUnit with SemesterProperties {
       val xml = XML.loadString(ProposalIo.writeToString(proposal))
 
       // verify the exported value is set to the current semester
-      xml must \\("semester", "year" -> "2015", "half" -> "B")
+      xml must \\("semester", "year" -> "2016", "half" -> "A")
     }
     "set the schemaVersion to current upon saving a new proposal" in {
       val proposal = Proposal.empty

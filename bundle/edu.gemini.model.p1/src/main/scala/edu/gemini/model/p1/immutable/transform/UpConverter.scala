@@ -1,6 +1,5 @@
 package edu.gemini.model.p1.immutable.transform
 
-import scala.util.matching.Regex
 import xml.{Node => XMLNode, Text}
 
 import scalaz._
@@ -35,6 +34,7 @@ object UpConverter {
   }
 
   // Sequence of conversions for proposals from a given semester
+  val from2015B:List[SemesterConverter] = List(SemesterConverterToCurrent, SemesterConverter2015BTo2016A, SemesterConverter2015ATo2015B, SemesterConverter2014BTo2015A, SemesterConverter2014BTo2014BSV, SemesterConverter2014ATo2014B, LastStepConverter(Semester(2016, SemesterOption.A)))
   val from2015A:List[SemesterConverter] = List(SemesterConverterToCurrent, SemesterConverter2015ATo2015B, SemesterConverter2014BTo2015A, SemesterConverter2014BTo2014BSV, SemesterConverter2014ATo2014B, LastStepConverter(Semester(2015, SemesterOption.B)))
   val from2015AToKR:List[SemesterConverter] = List(SemesterConverterToCurrent, SemesterConverter2015ATo2015B, SemesterConverter2014BTo2015A, SemesterConverter2014BTo2014BSV, SemesterConverter2014ATo2014B, LastStepConverter(Semester(2015, SemesterOption.A)))
   val from2014BSV:List[SemesterConverter] = List(SemesterConverterToCurrent, SemesterConverter2015ATo2015B, SemesterConverter2014BTo2015A, SemesterConverter2014BTo2014BSV, SemesterConverter2014ATo2014B, LastStepConverter(Semester(2014, SemesterOption.B)))
@@ -53,6 +53,8 @@ object UpConverter {
   def convert(node: XMLNode):Result = node match {
     case p @ <proposal>{ns @ _*}</proposal> if (p \ "@schemaVersion").text == Proposal.currentSchemaVersion =>
       StepResult(Nil, node).successNel[String]
+    case p @ <proposal>{ns @ _*}</proposal> if (p \ "@schemaVersion").text == "2015.2.1"                    =>
+      from2015B.concatenate.convert(node)
     case p @ <proposal>{ns @ _*}</proposal> if (p \ "@schemaVersion").text == "2015.1.1"                    =>
       from2015A.concatenate.convert(node)
     case p @ <proposal>{ns @ _*}</proposal> if (p \ "@schemaVersion").text == "2015.1.2"                    =>
@@ -120,6 +122,13 @@ case class LastStepConverter(semester: Semester) extends SemesterConverter {
       StepResult(s"Please use the PIT from semester ${semester.display} to view the unmodified proposal", n).successNel
   }
   override val transformers = List(notifyToUseOlderPIT)
+}
+
+/**
+ * This converter will upgrade to 2016A
+ */
+case object SemesterConverter2015BTo2016A extends SemesterConverter {
+  val transformers = Nil
 }
 
 /**
@@ -211,7 +220,7 @@ case object SemesterConverter2014BTo2014BSV extends SemesterConverter {
       object GmosNNoAltair extends BasicTransformer {
         override def transform(n: xml.Node): xml.NodeSeq = n match {
           case <name>{name}</name>                           => noAltair +: <name>{transformName(name.text)}</name>
-          case elem: xml.Elem                                => elem.copy(child = elem.child.flatMap(transform _))
+          case elem: xml.Elem                                => elem.copy(child = elem.child.flatMap(transform))
           case _                                             => n
         }
       }
@@ -242,7 +251,7 @@ case object SemesterConverter2013BTo2014A extends SemesterConverter {
          override def transform(n: xml.Node): xml.NodeSeq = n match {
            case <name>{name}</name> if name.text.matches(nameRegEx) => <name>{name.text.replace(oldSlit, newSlit)}</name>
            case <fpu>{_}</fpu>                                      => <fpu>{newSlit}</fpu>
-           case elem: xml.Elem                                      => elem.copy(child=elem.child.flatMap(transform _))
+           case elem: xml.Elem                                      => elem.copy(child=elem.child.flatMap(transform))
            case _                                                   => n
          }
        }
@@ -256,7 +265,7 @@ case object SemesterConverter2013BTo2014A extends SemesterConverter {
         override def transform(n: xml.Node): xml.NodeSeq = n match {
           case <name>{name}</name>                           => <name>{name + " < 2.5um"}</name>
           case s @ <spectroscopy>{nodes @ _*}</spectroscopy> => <spectroscopy id={s.attribute("id")}>{transform(nodes) ++ centralWavelengthDefault}</spectroscopy>
-          case elem: xml.Elem                                => elem.copy(child=elem.child.flatMap(transform _))
+          case elem: xml.Elem                                => elem.copy(child=elem.child.flatMap(transform))
           case _                                             => n
         }
       }
@@ -273,7 +282,7 @@ case object SemesterConverter2013BTo2014A extends SemesterConverter {
         override def transform(n: xml.Node): xml.NodeSeq = n match {
           case <name>{name}</name>                                                     => <name>{name.text.replaceAll(narrowBandFilterRegex, replacementFilter)}</name>
           case <filter>{filter}</filter> if filter.text.matches(narrowBandFilterRegex) => defaultFilter
-          case elem: xml.Elem                                                          => elem.copy(child=elem.child.flatMap(transform _))
+          case elem: xml.Elem                                                          => elem.copy(child=elem.child.flatMap(transform))
           case _                                                                       => n
         }
       }
@@ -290,7 +299,7 @@ case object SemesterConverter2013BTo2014A extends SemesterConverter {
         override def transform(n: xml.Node): xml.NodeSeq = n match {
           case <name>{name}</name>                                       => <name>{name.text.replaceAll(yFilter, replacementFilter)}</name>
           case <filter>{filter}</filter> if filter.text.matches(yFilter) => defaultFilter
-          case elem: xml.Elem                                            => elem.copy(child=elem.child.flatMap(transform _))
+          case elem: xml.Elem                                            => elem.copy(child=elem.child.flatMap(transform))
           case _                                                         => n
         }
       }
@@ -302,7 +311,7 @@ case object SemesterConverter2013BTo2014A extends SemesterConverter {
     override def transform(n: xml.Node): xml.NodeSeq = n match {
       case <name>{name}</name>         => <name>{name.text.replaceAll("MOS", s"MOS $slitName")}</name>
       case s @ <mos>{nodes @ _*}</mos> => <mos id={s.attribute("id")}>{transform(nodes) ++ fpuDefault}</mos>
-      case elem: xml.Elem              => elem.copy(child=elem.child.flatMap(transform _))
+      case elem: xml.Elem              => elem.copy(child=elem.child.flatMap(transform))
       case _                           => n
     }
   }
