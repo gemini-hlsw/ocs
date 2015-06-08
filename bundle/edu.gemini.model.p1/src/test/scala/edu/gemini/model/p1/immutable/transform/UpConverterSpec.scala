@@ -38,7 +38,7 @@ class UpConverterSpec extends SpecificationWithJUnit with SemesterProperties {
               i.visitor must beFalse
           }
 
-          proposal.semester must beEqualTo(Semester(2015, SemesterOption.B))
+          proposal.semester must beEqualTo(Semester(2016, SemesterOption.A))
       }
 
       UpConverter.upConvert(xml) must beSuccessful.like {
