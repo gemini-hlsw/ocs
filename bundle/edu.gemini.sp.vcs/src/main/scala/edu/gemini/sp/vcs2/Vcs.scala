@@ -48,11 +48,12 @@ class Vcs(user: VcsAction[Set[Principal]], server: VcsServer, service: Peer => V
 
   /** Adds the given program to the remote peer, copying it into the remote
     * database. */
-  def add(id: SPProgramID, peer: Peer): VcsAction[Unit] =
+  def add(id: SPProgramID, peer: Peer): VcsAction[VersionMap] =
     for {
       p <- server.lookup(id)
+      vm = p.getVersions
       _ <- Client(peer).add(p)
-    } yield ()
+    } yield vm
 
   // pull0 is shared by `pull` and `sync`, since the first half of a sync is
   // to merge in changes from the remote peer.  The local merge is only

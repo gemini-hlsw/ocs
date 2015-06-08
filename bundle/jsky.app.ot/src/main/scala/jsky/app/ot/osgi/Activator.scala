@@ -3,7 +3,8 @@ package jsky.app.ot.osgi
 import edu.gemini.ags.conf.ProbeLimitsTable
 import edu.gemini.pot.spdb.IDBDatabaseService
 import edu.gemini.pot.client.SPDB
-import edu.gemini.sp.vcs.reg.{VcsRegistrationSubscriber, VcsRegistrar}
+import edu.gemini.sp.vcs.reg.VcsRegistrar
+import edu.gemini.sp.vcs2.Vcs
 import edu.gemini.util.osgi.Tracker._
 import edu.gemini.util.osgi.ExternalStorage
 import edu.gemini.util.security.auth.keychain.KeyChain
@@ -14,6 +15,7 @@ import jsky.app.ot.OT
 import jsky.app.ot.gemini.obscat.CatalogQueryHistory
 import jsky.app.ot.plugin.{OtActionPlugin, OtViewerService}
 import jsky.app.ot.vcs.VcsGui
+import jsky.app.ot.vcs2.VcsOtClient
 import jsky.app.ot.viewer.ViewerService
 
 import org.osgi.framework.{ServiceRegistration, BundleContext, BundleActivator}
@@ -30,13 +32,13 @@ class Activator extends BundleActivator {
   private val LOG = Logger.getLogger(getClass.getName)
 
   private var tracker: ServiceTracker[_,_] = null
-  private var vcsSubReg: ServiceRegistration[VcsRegistrationSubscriber] = null
   private var pluginTracker: ServiceTracker[OtActionPlugin, OtActionPlugin] = null
 
   override def start(ctx: BundleContext) {
-    tracker = track[IDBDatabaseService, VcsRegistrar, KeyChain, ServiceRegistration[OtViewerService]](ctx) { (odb, reg, auth) =>
+    tracker = track[IDBDatabaseService, Vcs, VcsRegistrar, KeyChain, ServiceRegistration[OtViewerService]](ctx) { (odb, vcs, reg, auth) =>
       SPDB.init(odb)
       VcsGui.registrar = Some(reg)
+      VcsOtClient.ref  = Some(VcsOtClient(vcs, reg))
 
       val storage = ExternalStorage.getExternalDataRoot(ctx)
 
@@ -69,6 +71,7 @@ class Activator extends BundleActivator {
       viewerReg.unregister()
       SPDB.clear()
       VcsGui.registrar = None
+      VcsOtClient.ref  = None
     }
     tracker.open()
 
@@ -83,8 +86,6 @@ class Activator extends BundleActivator {
       plugin
     } { _.unRegister() }
     pluginTracker.open()
-
-    vcsSubReg = ctx.registerService(classOf[VcsRegistrationSubscriber], VcsGui, new java.util.Hashtable[String, Any])
   }
 
   private def magTableError(msg: String): Nothing = {
@@ -96,7 +97,6 @@ class Activator extends BundleActivator {
   override def stop(ctx: BundleContext) {
     LOG.info("Stop jsky.app.ot")
     CatalogQueryHistory.save(ExternalStorage.getExternalDataRoot(ctx))
-    vcsSubReg = null
     tracker.close()
     tracker = null
   }

@@ -1,6 +1,6 @@
 package edu.gemini.sp.vcs.reg.impl
 
-import edu.gemini.sp.vcs.reg.{VcsRegistrationSubscriber, VcsRegistrationEvent, VcsRegistrar}
+import edu.gemini.sp.vcs.reg.{VcsRegistrationEvent, VcsRegistrar}
 import edu.gemini.spModel.core.Peer
 import edu.gemini.spModel.core.Site
 import edu.gemini.spModel.core.SPProgramID
@@ -106,7 +106,6 @@ class VcsRegistrarImpl(val storage: File) extends VcsRegistrar {
     if (storage.exists()) load(storage).left.map(_ => loadBackup).merge
     else loadBackup
 
-  private var subs: List[VcsRegistrationSubscriber] = Nil
   private implicit val ctx = JavaConversions.asExecutionContext(Executors.newSingleThreadScheduledExecutor())
 
   def allRegistrations = m
@@ -118,7 +117,7 @@ class VcsRegistrarImpl(val storage: File) extends VcsRegistrar {
       if (m.get(pid).forall(_ != loc)) {
         m = m.updated(pid, loc)
         store(storage, bak, m)
-        publish(subs, pid, Some(loc))
+        publish(pid, Some(loc))
       }
     }
 
@@ -127,23 +126,10 @@ class VcsRegistrarImpl(val storage: File) extends VcsRegistrar {
       m.get(pid).foreach { _ =>
         m = m - pid
         store(storage, bak, m)
-        publish(subs, pid, None)
+        publish(pid, None)
       }
     }
 
-  def subscribe(sub: VcsRegistrationSubscriber): Unit =
-    synchronized {
-      subs = if (subs.contains(sub)) subs else sub :: subs
-    }
-
-  def unsubscribe(sub: VcsRegistrationSubscriber): Unit =
-    synchronized {
-      subs = subs.filterNot(_ == sub)
-    }
-
-  private def publish(subs: List[VcsRegistrationSubscriber], pid: SPProgramID, loc: Option[Peer]): Unit =
-    future {
-      val evt = VcsRegistrationEvent(pid, loc)
-      subs.foreach { _.notify(evt, this) }
-    }
+  private def publish(pid: SPProgramID, loc: Option[Peer]): Unit =
+    future { publish(VcsRegistrationEvent(pid, loc)) }
 }
