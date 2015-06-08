@@ -101,22 +101,22 @@ object Commands {
 
     val pull: VcsOp = (id, peer) =>
       runAndFormat(id, peer, vcs.pull(_, _, new AtomicBoolean(false))) {
-        case LocalOnly => "Updated local program."
-        case Neither   => "Already up to date."
+        case (LocalOnly,_) => "Updated local program."
+        case (Neither,_  ) => "Already up to date."
       }
 
     val push: VcsOp = (id, peer) =>
       runAndFormat(id, peer, vcs.push(_, _, new AtomicBoolean(false))) {
-        case RemoteOnly  => "Updated remote program."
-        case Neither     => "Already up to date."
+        case (RemoteOnly,_) => "Updated remote program."
+        case (Neither,_   ) => "Already up to date."
       }
 
     val sync: VcsOp = (id, peer) =>
       runAndFormat(id, peer, vcs.sync(_, _, new AtomicBoolean(false))) {
-        case Neither    => "Already up to date."
-        case LocalOnly  => "Updated local program."
-        case RemoteOnly => "Updated remote program."
-        case Both       => "Synchronized."
+        case (Neither,_   ) => "Already up to date."
+        case (LocalOnly,_ ) => "Updated local program."
+        case (RemoteOnly,_) => "Updated remote program."
+        case (Both,_      ) => "Synchronized."
       }
 
     val vcsOps: Map[String, VcsOp] = Map(

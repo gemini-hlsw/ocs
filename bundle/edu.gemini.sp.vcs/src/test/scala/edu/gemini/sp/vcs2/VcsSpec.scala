@@ -1,6 +1,7 @@
 package edu.gemini.sp.vcs2
 
 
+import edu.gemini.pot.sp.version.VersionMap
 import edu.gemini.sp.vcs2.ProgramLocationSet.{RemoteOnly, LocalOnly, Neither, Both}
 import edu.gemini.sp.vcs2.VcsAction._
 import edu.gemini.sp.vcs2.VcsFailure.NeedsUpdate
@@ -96,7 +97,7 @@ class VcsSpec extends VcsSpecification {
 
     "do nothing if the local version is the same" in withVcs { env =>
       expect(env.local.superStaffVcs.pull(Q1, DummyPeer, notCancelled)) {
-        case \/-(Neither) => ok("")
+        case \/-((Neither,_)) => ok("")
       }
     }
 
@@ -104,7 +105,7 @@ class VcsSpec extends VcsSpecification {
       env.local.progTitle = "The Myth of Sisyphus"
 
       expect(env.local.superStaffVcs.pull(Q1, DummyPeer, notCancelled)) {
-        case \/-(Neither) => ok("")
+        case \/-((Neither,_)) => ok("")
       } and (env.local.progTitle must_== "The Myth of Sisyphus")
     }
 
@@ -112,7 +113,7 @@ class VcsSpec extends VcsSpecification {
       env.remote.progTitle = "The Myth of Sisyphus"
 
       expect(env.local.superStaffVcs.pull(Q1, DummyPeer, notCancelled)) {
-        case \/-(LocalOnly) => ok("")
+        case \/-((LocalOnly,_)) => ok("")
       } and (env.local.progTitle must_== "The Myth of Sisyphus")
     }
 
@@ -148,7 +149,7 @@ class VcsSpec extends VcsSpecification {
 
     "do nothing if the local version is the same" in withVcs { env =>
       expect(env.local.superStaffVcs.push(Q1, DummyPeer, notCancelled)) {
-        case \/-(Neither) => ok("")
+        case \/-((Neither,_)) => ok("")
       }
     }
 
@@ -164,7 +165,7 @@ class VcsSpec extends VcsSpecification {
       env.local.progTitle = "The Myth of Sisyphus"
 
       expect(env.local.superStaffVcs.push(Q1, DummyPeer, notCancelled)) {
-        case \/-(RemoteOnly) => ok("")
+        case \/-((RemoteOnly,_)) => ok("")
       } and (env.remote.progTitle must_== "The Myth of Sisyphus")
     }
 
@@ -179,7 +180,7 @@ class VcsSpec extends VcsSpecification {
     // TODO: pending tests with conflicts, which must be rejected
   }
 
-  def syncFragments(name: String, syncMethod: (Vcs, SPProgramID) => VcsAction[ProgramLocationSet]): Fragments = {
+  def syncFragments(name: String, syncMethod: (Vcs, SPProgramID) => VcsAction[(ProgramLocationSet,VersionMap)]): Fragments = {
     name should {
       "fail if the indicated program doesn't exist locally" in withVcs { env =>
         env.remote.addNewProgram(Q2)
@@ -203,7 +204,7 @@ class VcsSpec extends VcsSpecification {
 
       "do nothing if both versions are the same" in withVcs { env =>
         expect(syncMethod(env.local.superStaffVcs, Q1)) {
-          case \/-(Neither) => ok("")
+          case \/-((Neither,_)) => ok("")
         }
       }
 
@@ -211,7 +212,7 @@ class VcsSpec extends VcsSpecification {
         env.remote.progTitle = "The Myth of Sisyphus"
 
         expect(syncMethod(env.local.superStaffVcs, Q1)) {
-          case \/-(LocalOnly) => ok("")
+          case \/-((LocalOnly,_)) => ok("")
         } and (env.local.progTitle must_== "The Myth of Sisyphus")
       }
 
@@ -219,7 +220,7 @@ class VcsSpec extends VcsSpecification {
         env.local.progTitle = "The Myth of Sisyphus"
 
         expect(syncMethod(env.local.superStaffVcs, Q1)) {
-          case \/-(RemoteOnly) => ok("")
+          case \/-((RemoteOnly,_)) => ok("")
         } and (env.remote.progTitle must_== "The Myth of Sisyphus")
       }
 
@@ -231,7 +232,7 @@ class VcsSpec extends VcsSpecification {
         env.remote.prog.addObsComponent(note)
 
         expect(syncMethod(env.local.superStaffVcs, Q1)) {
-          case \/-(Both) => ok("")
+          case \/-((Both,_)) => ok("")
         } and (env.remote.prog.getGroups.get(0).getNodeKey must_== group.getNodeKey) and
           (env.local.prog.getObsComponents.get(0).getNodeKey must_== note.getNodeKey)
       }

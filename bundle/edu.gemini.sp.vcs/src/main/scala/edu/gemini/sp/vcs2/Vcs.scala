@@ -85,35 +85,41 @@ class Vcs(user: VcsAction[Set[Principal]], server: VcsServer, service: Peer => V
 
   /** Provides an action that will pull changes from the indicated remote peer
     * and merge them with the local program if necessary.  The action returns
-    * `true` if it results in an updated local program; `false` otherwise.
+    * a `PullResult` which indicates whether the local program was updated along
+    * with the resulting `VersionMap`.
     */
-  def pull(id: SPProgramID, peer: Peer, cancelled: AtomicBoolean): VcsAction[PullResult] =
-    pull0(id, Client(peer), cancelled).map(_.localUpdate.fold(LocalOnly, Neither))
+  def pull(id: SPProgramID, peer: Peer, cancelled: AtomicBoolean): VcsAction[(PullResult, VersionMap)] =
+    pull0(id, Client(peer), cancelled).map { e =>
+      (e.localUpdate.fold(LocalOnly, Neither), e.remoteVm)
+    }
 
   /** Provides an action that pushes local changes to the remote peer, merging
     * them with the remote version of the program if necessary.  When performed,
-    * the action returns `true` if it results in an update remote program.
+    * the action returns a `PushResult` indicating whether the remote program
+    * was in fact updated along with the resulting `VersionMap`.
     *
     * Note that the push will only be possible if the local version is strictly
     * newer than the remote version. Otherwise it fails with a `NeedsUpdate`
     * `VcsFailure`. */
-  def push(id: SPProgramID, peer: Peer, cancelled: AtomicBoolean): VcsAction[PushResult] = {
+  def push(id: SPProgramID, peer: Peer, cancelled: AtomicBoolean): VcsAction[(PushResult, VersionMap)] = {
     def validateProgKey(lKey: SPNodeKey, remote: DiffState): VcsAction[Unit] = {
       val rKey = remote.progKey
       if (lKey === rKey) VcsAction.unit else VcsAction.fail(IdClash(id, lKey, rKey))
     }
+
+    case class LocalProg(key: SPNodeKey, diff: ProgramDiff, vm: VersionMap)
 
     val client = Client(peer)
     for {
       diffState <- client.diffState(id)
       _         <- checkCancel(cancelled)
       u         <- user
-      keyDiff   <- server.read(id, u) { p => (p.getProgramKey, ProgramDiff.compare(p, diffState)) }
-      _         <- validateProgKey(keyDiff._1, diffState)
+      lp        <- server.read(id, u) { p => LocalProg(p.getProgramKey, ProgramDiff.compare(p, diffState), p.getVersions) }
+      _         <- validateProgKey(lp.key, diffState)
       _         <- checkCancel(cancelled)
-      res       <- keyDiff._2.plan.compare(diffState.vm) match {
-        case Newer => client.storeDiffs(id, keyDiff._2.plan).map(_.fold(RemoteOnly, Neither))
-        case Same  => VcsAction(Neither)
+      res       <- lp.diff.plan.compare(diffState.vm) match {
+        case Newer => client.storeDiffs(id, lp.diff.plan).map { updated => (updated.fold(RemoteOnly, Neither), lp.vm) }
+        case Same  => VcsAction((Neither, lp.vm))
         case _     => VcsAction.fail(NeedsUpdate)
       }
     } yield res
@@ -124,19 +130,20 @@ class Vcs(user: VcsAction[Set[Principal]], server: VcsServer, service: Peer => V
    * remote peer, merging updates from the remote program with local changes
    * and then sending the resulting merged program to the peer.  When performed,
    * the action returns a `ProgramLocationSet` which describes whether either
-   * or both of the local and remote versions of the program were updated. */
-  def sync(id: SPProgramID, peer: Peer, cancelled: AtomicBoolean): VcsAction[ProgramLocationSet] = {
+   * or both of the local and remote versions of the program were updated. It
+   * also returns the resulting `VersionMap` of the remote program. */
+  def sync(id: SPProgramID, peer: Peer, cancelled: AtomicBoolean): VcsAction[(ProgramLocationSet, VersionMap)] = {
     val client = Client(peer)
     for {
       eval <- pull0(id, client, cancelled)
       s0    = eval.localUpdate.fold(LocalOnly, Neither)
       res  <- eval match {
-        case MergeEval(_,     _, false) =>
-          VcsAction(s0)
+        case MergeEval(_,     _,   rvm, _, false) =>
+          VcsAction((s0, rvm))
 
-        case MergeEval(diffs, _, true)  =>
+        case MergeEval(diffs, lvm, rvm, _, true)  =>
           client.storeDiffs(id, diffs).map { updated =>
-            if (updated) s0 + Remote else s0
+            if (updated) (s0 + Remote, VersionMap.sync(lvm, rvm)) else (s0, rvm)
           }
       }
     } yield res
@@ -146,8 +153,8 @@ class Vcs(user: VcsAction[Set[Principal]], server: VcsServer, service: Peer => V
     * retrying if it fails because the program was updated remotely while
     * performing the merge locally.  Retry up to `retryCount` times if
     * necessary. */
-  def retrySync(id: SPProgramID, peer: Peer, cancelled: AtomicBoolean, retryCount: Int): VcsAction[ProgramLocationSet] = {
-    def retryIfNeedsUpdate(f: VcsFailure): EitherT[Task, ProgramLocationSet, VcsFailure] = f match {
+  def retrySync(id: SPProgramID, peer: Peer, cancelled: AtomicBoolean, retryCount: Int): VcsAction[(ProgramLocationSet, VersionMap)] = {
+    def retryIfNeedsUpdate(f: VcsFailure): EitherT[Task, (ProgramLocationSet, VersionMap), VcsFailure] = f match {
       case NeedsUpdate  => if (retryCount <= 0) EitherT.right(Task.delay(NeedsUpdate))
                            else retrySync(id, peer, cancelled, retryCount - 1).swap
       case otherFailure => EitherT.right(Task.delay(otherFailure))
@@ -187,19 +194,22 @@ object Vcs {
   /** Evaluation of the merge state, which includes whether local and/or remote
     * updates are needed.  We can skip merging locally or remotely if nothing
     * would be changed anyway. */
-  private case class MergeEval(plan: MergePlan, localUpdate: Boolean, remoteUpdate: Boolean)
+  private case class MergeEval(plan: MergePlan, localVm: VersionMap,  remoteVm: VersionMap,
+                                                localUpdate: Boolean, remoteUpdate: Boolean)
 
   private object MergeEval {
     def apply(plan: MergePlan, p: ISPProgram, remoteVm: VersionMap): MergeEval = {
       // ObsPermissionCorrection will reset inappropriately edited observations
       // which can cause Conflicting comparisons.
-      val local = plan.compare(p.getVersions) match {
+      val localVm = p.getVersions
+
+      val local = plan.compare(localVm) match {
         case Newer | Conflicting => true
         case _                   => false
       }
       val remote = plan.compare(remoteVm) === Newer
 
-      MergeEval(plan, local, remote)
+      MergeEval(plan, localVm, remoteVm, local, remote)
     }
   }
 }
