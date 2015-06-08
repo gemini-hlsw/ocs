@@ -16,10 +16,6 @@ public interface SharedIcons {
             super(SharedIcons.class.getResource("icons/" + name));
             this.name = name;
         }
-
-        public URL getURL() {
-            return SharedIcons.class.getResource("icons/" + name);
-        }
     }
 
     @SuppressWarnings("serial")

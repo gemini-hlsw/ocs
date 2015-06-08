@@ -1,5 +1,7 @@
 package edu.gemini.pit.ui.editor
 
+import java.awt.Insets
+
 import com.jgoodies.forms.factories.Borders.DLU4_BORDER
 
 import edu.gemini.model.p1.immutable._
@@ -32,7 +34,7 @@ import java.beans.PropertyChangeListener
 import java.awt
 import edu.gemini.pit.ui.util.ToolButton
 import swing._
-import event.{ValueChanged, SelectionChanged}
+import scala.swing.event.{ButtonClicked, ValueChanged, SelectionChanged}
 import javax.swing.{JLabel, ListSelectionModel}
 import java.util.{TimeZone, Date}
 import java.text.{SimpleDateFormat, DecimalFormat}
@@ -162,6 +164,51 @@ class TargetEditor private (semester:Semester, target:Target, canEdit:Boolean) e
       SynchronousLookup.open(Name.text, dialog).map(Replace.apply).foreach(dialog.close)
     }
     cats.enabled = canEdit
+
+    // Target type picker is a group of radio buttons.
+    // When the user selects a new target type, we ask the
+    // tab pane to switch the set of displayed tabs.
+    object TypePicker extends BoxPanel(Orientation.Horizontal) {
+      val icons = Map[TargetType, SharedIcon](SiderealType    -> SharedIcons.ICON_SIDEREAL,
+                      NonSiderealType -> SharedIcons.ICON_NONSIDEREAL,
+                      TooType         -> SharedIcons.ICON_TOO)
+
+      // Need to keep a var to store the current selection
+      private var selectedType: TargetType = initialType
+      // Gives access to the selected target type
+      def selection = selectedType
+
+      // In Swing, RadioButtons with icons don't look right, use a Label next to the radio button instead
+      val targetTypeRadioButtons:List[(AbstractButton, Label)] = TargetType.all.flatMap { v =>
+        val rb = new RadioButton("") {
+          enabled = canEdit
+          selected = initialType == v
+          reactions += {
+            case ButtonClicked(_) =>
+              selectedType = v
+              Tabs.switchType(v)
+              lookup.enabled = canEdit && (v != TooType)
+          }
+        }
+        icons.get(v).map { i =>
+          val label = new Label(v.toString, i, Alignment.Left)
+          (rb, label)
+        }
+      }
+
+      // But the radio buttons on a group
+      val bg = new ButtonGroup(targetTypeRadioButtons.map(_._1).toSeq :_*) {
+        enabled = canEdit
+      }
+
+      contents ++= targetTypeRadioButtons.map {
+        case (r, l) =>
+          new BorderPanel() {
+            add(r, BorderPanel.Position.West)
+            add(l, BorderPanel.Position.Center)
+          }
+      }
+    }
 
     // Target type picker is a combo box. When the user selects a new target type, we ask the
     // tab pane to switch the set of displayed tabs.
