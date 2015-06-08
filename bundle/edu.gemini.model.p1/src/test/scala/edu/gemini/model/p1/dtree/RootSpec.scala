@@ -12,8 +12,8 @@ class RootSpec extends SpecificationWithJUnit {
       root.choices must contain(Instrument.Gsaoi)
     }
     "include Texes" in {
-      val root = new Root(Semester(2015, A))
-      root.choices must not contain (Instrument.Texes)
+      val root = new Root(Semester(2016, A))
+      root.choices must contain (Instrument.Texes)
     }
     "include Speckles" in {
       val root = new Root(Semester(2015, A))

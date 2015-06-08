@@ -426,17 +426,15 @@ class UpConverterSpec extends SpecificationWithJUnit with SemesterProperties {
           result must \\("gmosN")
       }
     }
-    // Texes and DSSI have been restored, REL-1670
-    "proposal with texes blueprints must be removed, REL-1350, REL-1970" in {
+    "proposal with texes blueprints must be preserved, REL-2308" in {
       val xml = XML.load(new InputStreamReader(getClass.getResourceAsStream("proposal_with_texes.xml")))
 
       val converted = UpConverter.convert(xml)
       converted must beSuccessful.like {
         case StepResult(changes, result) => {
-          changes must have length 5
-          changes must contain("The original proposal contained Texes observations. The instrument is not available and those resources have been removed.")
+          changes must have length 4
           // The texes blueprint must remain
-          result must \\("gmosN")
+          result must \\("Texes")
         }
       }
     }
