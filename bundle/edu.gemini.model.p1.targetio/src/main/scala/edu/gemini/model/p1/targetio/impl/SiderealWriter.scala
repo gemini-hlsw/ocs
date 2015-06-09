@@ -1,11 +1,12 @@
 package edu.gemini.model.p1.targetio.impl
 
-import edu.gemini.model.p1.immutable.SiderealTarget
-import edu.gemini.model.p1.mutable.MagnitudeBand
+import edu.gemini.model.p1.immutable._
 import edu.gemini.model.p1.targetio.api.{TargetWriter, DataSourceError, FileType}
 import edu.gemini.model.p1.targetio.table.{TableWriter, Column}
 
 import java.io.{OutputStream, File}
+
+import edu.gemini.spModel.core.MagnitudeBand
 
 object SiderealWriter extends TargetWriter[SiderealTarget] {
   def write(targets: Iterable[SiderealTarget], file: File, ftype: FileType): Either[DataSourceError, Unit] =
@@ -24,7 +25,7 @@ object SiderealWriter extends TargetWriter[SiderealTarget] {
       Nil
 
   private def bandColumns(targets: Iterable[SiderealTarget]): List[Column[SiderealTarget, _]] =
-    bands(targets).toList.sortBy(_.ordinal) flatMap { band =>
+    bands(targets).toList.sorted.flatMap { band =>
       List(SiderealColumns.magnitude(band), SiderealColumns.magnitudeSystem(band))
     }
 

@@ -1,7 +1,8 @@
 package edu.gemini.model.p1
 
 import java.util.UUID
-import scalaz.Monoid
+import edu.gemini.spModel.core.{MagnitudeSystem, Magnitude, MagnitudeBand}
+import edu.gemini.model.p1.{ mutable => M }
 
 package object immutable {
 
@@ -26,52 +27,52 @@ package object immutable {
 
   // Enumerated types are pulled in directly from the generated code.
   // A macro system sure would be nice here.
-  // grep -h '^public enum' src-gen/edu/gemini/model/p1/mutable/*.java | cut -d' ' -f3 | perl -ne 'chop;print qq|type $_ = mutable.$_\nobject $_ extends EnumObject(mutable.$_.values)\n\n|'
+  // grep -h '^public enum' src-gen/edu/gemini/model/p1/mutable/*.java | cut -d' ' -f3 | perl -ne 'chop;print qq|type $_ = M.$_\nobject $_ extends EnumObject(M.$_.values)\n\n|'
 
-  type Band = mutable.Band
-  object Band extends EnumObject[mutable.Band] {
-    final val BAND_1_2 = mutable.Band.BAND_1_2
-    final val BAND_3 = mutable.Band.BAND_3
+  type Band = M.Band
+  object Band extends EnumObject[M.Band] {
+    final val BAND_1_2 = M.Band.BAND_1_2
+    final val BAND_3 = M.Band.BAND_3
   }
 
-  type CloudCover = mutable.CloudCover
-  object CloudCover extends EnumObject[mutable.CloudCover] {
-    val BEST = mutable.CloudCover.cc50
+  type CloudCover = M.CloudCover
+  object CloudCover extends EnumObject[M.CloudCover] {
+    val BEST = M.CloudCover.cc50
   }
 
-  type CoordinatesEpoch = mutable.CoordinatesEpoch
-  object CoordinatesEpoch extends EnumObject[mutable.CoordinatesEpoch] {
-    val J_2000 = mutable.CoordinatesEpoch.J_2000
+  type CoordinatesEpoch = M.CoordinatesEpoch
+  object CoordinatesEpoch extends EnumObject[M.CoordinatesEpoch] {
+    val J_2000 = M.CoordinatesEpoch.J_2000
   }
 
-  type NgoPartner = mutable.NgoPartner
-  object NgoPartner extends EnumObject[mutable.NgoPartner] {
-    val AR = mutable.NgoPartner.AR
-    val AU = mutable.NgoPartner.AU
-    val BR = mutable.NgoPartner.BR
-    val CA = mutable.NgoPartner.CA
-    val CL = mutable.NgoPartner.CL
-    val KR = mutable.NgoPartner.KR
-    val US = mutable.NgoPartner.US
-    val UH = mutable.NgoPartner.UH
+  type NgoPartner = M.NgoPartner
+  object NgoPartner extends EnumObject[M.NgoPartner] {
+    val AR = M.NgoPartner.AR
+    val AU = M.NgoPartner.AU
+    val BR = M.NgoPartner.BR
+    val CA = M.NgoPartner.CA
+    val CL = M.NgoPartner.CL
+    val KR = M.NgoPartner.KR
+    val US = M.NgoPartner.US
+    val UH = M.NgoPartner.UH
   }
 
-  type ExchangePartner = mutable.ExchangePartner
-  object ExchangePartner extends EnumObject[mutable.ExchangePartner] {
-    final val KECK   = mutable.ExchangePartner.KECK
-    final val SUBARU = mutable.ExchangePartner.SUBARU
-    final val CFHT   = mutable.ExchangePartner.CFHT
+  type ExchangePartner = M.ExchangePartner
+  object ExchangePartner extends EnumObject[M.ExchangePartner] {
+    final val KECK   = M.ExchangePartner.KECK
+    final val SUBARU = M.ExchangePartner.SUBARU
+    final val CFHT   = M.ExchangePartner.CFHT
   }
 
   // Singleton used to represent a Large Program "Partner"
   object LargeProgramPartner
 
-  type SpecialProposalType = mutable.SpecialProposalType
-  object SpecialProposalType extends EnumObject[mutable.SpecialProposalType] {
-    val DEMO_SCIENCE        = mutable.SpecialProposalType.DEMO_SCIENCE
-    val DIRECTORS_TIME      = mutable.SpecialProposalType.DIRECTORS_TIME
-    val POOR_WEATHER        = mutable.SpecialProposalType.POOR_WEATHER
-    val SYSTEM_VERIFICATION = mutable.SpecialProposalType.SYSTEM_VERIFICATION
+  type SpecialProposalType = M.SpecialProposalType
+  object SpecialProposalType extends EnumObject[M.SpecialProposalType] {
+    val DEMO_SCIENCE        = M.SpecialProposalType.DEMO_SCIENCE
+    val DIRECTORS_TIME      = M.SpecialProposalType.DIRECTORS_TIME
+    val POOR_WEATHER        = M.SpecialProposalType.POOR_WEATHER
+    val SYSTEM_VERIFICATION = M.SpecialProposalType.SYSTEM_VERIFICATION
   }
 
   type Flamingos2Filter = mutable.Flamingos2Filter
@@ -86,22 +87,22 @@ package object immutable {
     val HK      = mutable.Flamingos2Filter.HK
   }
 
-  type Flamingos2Disperser = mutable.Flamingos2Disperser
-  object Flamingos2Disperser extends EnumObject[mutable.Flamingos2Disperser] {
-    val R1200JH = mutable.Flamingos2Disperser.R1200JH
-    val R1200HK = mutable.Flamingos2Disperser.R1200HK
-    val R3000   = mutable.Flamingos2Disperser.R3000
+  type Flamingos2Disperser = M.Flamingos2Disperser
+  object Flamingos2Disperser extends EnumObject[M.Flamingos2Disperser] {
+    val R1200JH = M.Flamingos2Disperser.R1200JH
+    val R1200HK = M.Flamingos2Disperser.R1200HK
+    val R3000   = M.Flamingos2Disperser.R3000
   }
 
-  type Flamingos2Fpu = mutable.Flamingos2Fpu
-  object Flamingos2Fpu extends EnumObject[mutable.Flamingos2Fpu]
+  type Flamingos2Fpu = M.Flamingos2Fpu
+  object Flamingos2Fpu extends EnumObject[M.Flamingos2Fpu]
 
-  type GmosNDisperser = mutable.GmosNDisperser
-  object GmosNDisperser extends EnumObject[mutable.GmosNDisperser]
+  type GmosNDisperser = M.GmosNDisperser
+  object GmosNDisperser extends EnumObject[M.GmosNDisperser]
 
-  type GmosNFilter = mutable.GmosNFilter
-  object GmosNFilter extends EnumObject[mutable.GmosNFilter] {
-    import mutable.GmosNFilter._
+  type GmosNFilter = M.GmosNFilter
+  object GmosNFilter extends EnumObject[M.GmosNFilter] {
+    import M.GmosNFilter._
     val None = NONE
     val IMAGING = List(
       g_G0301,
@@ -140,27 +141,27 @@ package object immutable {
     )
   }
 
-  type GmosNFpu = mutable.GmosNFpu
-  object GmosNFpu extends EnumObject[mutable.GmosNFpu]
+  type GmosNFpu = M.GmosNFpu
+  object GmosNFpu extends EnumObject[M.GmosNFpu]
 
-  type GmosNMOSFpu = mutable.GmosNMOSFpu
-  object GmosNMOSFpu extends EnumObject[mutable.GmosNMOSFpu]
+  type GmosNMOSFpu = M.GmosNMOSFpu
+  object GmosNMOSFpu extends EnumObject[M.GmosNMOSFpu]
 
-  type GmosNFpuIfu = mutable.GmosNFpuIfu
-  object GmosNFpuIfu extends EnumObject[mutable.GmosNFpuIfu]
+  type GmosNFpuIfu = M.GmosNFpuIfu
+  object GmosNFpuIfu extends EnumObject[M.GmosNFpuIfu]
 
-  type GmosNFpuNs = mutable.GmosNFpuNs
-  object GmosNFpuNs extends EnumObject[mutable.GmosNFpuNs]
+  type GmosNFpuNs = M.GmosNFpuNs
+  object GmosNFpuNs extends EnumObject[M.GmosNFpuNs]
 
-  type GmosNWavelengthRegime = mutable.GmosNWavelengthRegime
-  object GmosNWavelengthRegime extends EnumObject[mutable.GmosNWavelengthRegime]
+  type GmosNWavelengthRegime = M.GmosNWavelengthRegime
+  object GmosNWavelengthRegime extends EnumObject[M.GmosNWavelengthRegime]
 
-  type GmosSDisperser = mutable.GmosSDisperser
-  object GmosSDisperser extends EnumObject[mutable.GmosSDisperser]
+  type GmosSDisperser = M.GmosSDisperser
+  object GmosSDisperser extends EnumObject[M.GmosSDisperser]
 
-  type GmosSFilter = mutable.GmosSFilter
-  object GmosSFilter extends EnumObject[mutable.GmosSFilter] {
-    import mutable.GmosSFilter._
+  type GmosSFilter = M.GmosSFilter
+  object GmosSFilter extends EnumObject[M.GmosSFilter] {
+    import M.GmosSFilter._
     val None = NONE
     val IMAGING = List(
       u_G0332,
@@ -183,57 +184,57 @@ package object immutable {
     )
   }
 
-  type GmosSFpu = mutable.GmosSFpu
-  object GmosSFpu extends EnumObject[mutable.GmosSFpu]
+  type GmosSFpu = M.GmosSFpu
+  object GmosSFpu extends EnumObject[M.GmosSFpu]
 
-  type GmosSMOSFpu = mutable.GmosSMOSFpu
-  object GmosSMOSFpu extends EnumObject[mutable.GmosSMOSFpu]
+  type GmosSMOSFpu = M.GmosSMOSFpu
+  object GmosSMOSFpu extends EnumObject[M.GmosSMOSFpu]
 
-  type GmosSFpuIfu = mutable.GmosSFpuIfu
-  object GmosSFpuIfu extends EnumObject[mutable.GmosSFpuIfu]
+  type GmosSFpuIfu = M.GmosSFpuIfu
+  object GmosSFpuIfu extends EnumObject[M.GmosSFpuIfu]
 
-  type GmosSFpuIfuNs = mutable.GmosSFpuIfuNs
-  object GmosSFpuIfuNs extends EnumObject[mutable.GmosSFpuIfuNs]
+  type GmosSFpuIfuNs = M.GmosSFpuIfuNs
+  object GmosSFpuIfuNs extends EnumObject[M.GmosSFpuIfuNs]
 
-  type GmosSFpuNs = mutable.GmosSFpuNs
-  object GmosSFpuNs extends EnumObject[mutable.GmosSFpuNs]
+  type GmosSFpuNs = M.GmosSFpuNs
+  object GmosSFpuNs extends EnumObject[M.GmosSFpuNs]
 
-  type GmosSWavelengthRegime = mutable.GmosSWavelengthRegime
-  object GmosSWavelengthRegime extends EnumObject[mutable.GmosSWavelengthRegime]
+  type GmosSWavelengthRegime = M.GmosSWavelengthRegime
+  object GmosSWavelengthRegime extends EnumObject[M.GmosSWavelengthRegime]
 
-  type GnirsCrossDisperser = mutable.GnirsCrossDisperser
-  object GnirsCrossDisperser extends EnumObject[mutable.GnirsCrossDisperser] {
-    val LXD = mutable.GnirsCrossDisperser.LXD
+  type GnirsCrossDisperser = M.GnirsCrossDisperser
+  object GnirsCrossDisperser extends EnumObject[M.GnirsCrossDisperser] {
+    val LXD = M.GnirsCrossDisperser.LXD
   }
 
-  type GnirsDisperser = mutable.GnirsDisperser
-  object GnirsDisperser extends EnumObject[mutable.GnirsDisperser] {
-    val D_10 = mutable.GnirsDisperser.D_10
+  type GnirsDisperser = M.GnirsDisperser
+  object GnirsDisperser extends EnumObject[M.GnirsDisperser] {
+    val D_10 = M.GnirsDisperser.D_10
   }
 
-  type GnirsFilter = mutable.GnirsFilter
-  object GnirsFilter extends EnumObject[mutable.GnirsFilter]
+  type GnirsFilter = M.GnirsFilter
+  object GnirsFilter extends EnumObject[M.GnirsFilter]
 
-  type GnirsFpu = mutable.GnirsFpu
-  object GnirsFpu extends EnumObject[mutable.GnirsFpu]
+  type GnirsFpu = M.GnirsFpu
+  object GnirsFpu extends EnumObject[M.GnirsFpu]
 
-  type GnirsPixelScale = mutable.GnirsPixelScale
-  object GnirsPixelScale extends EnumObject[mutable.GnirsPixelScale] {
-    val PS_005 = mutable.GnirsPixelScale.PS_005
-    val PS_015 = mutable.GnirsPixelScale.PS_015
+  type GnirsPixelScale = M.GnirsPixelScale
+  object GnirsPixelScale extends EnumObject[M.GnirsPixelScale] {
+    val PS_005 = M.GnirsPixelScale.PS_005
+    val PS_015 = M.GnirsPixelScale.PS_015
   }
 
-  type GnirsCentralWavelength = mutable.GnirsCentralWavelength
-  object GnirsCentralWavelength extends EnumObject[mutable.GnirsCentralWavelength]
+  type GnirsCentralWavelength = M.GnirsCentralWavelength
+  object GnirsCentralWavelength extends EnumObject[M.GnirsCentralWavelength]
 
-  type GracesFiberMode = mutable.GracesFiberMode
-  object GracesFiberMode extends EnumObject[mutable.GracesFiberMode]
+  type GracesFiberMode = M.GracesFiberMode
+  object GracesFiberMode extends EnumObject[M.GracesFiberMode]
 
-  type GracesReadMode = mutable.GracesReadMode
-  object GracesReadMode extends EnumObject[mutable.GracesReadMode]
+  type GracesReadMode = M.GracesReadMode
+  object GracesReadMode extends EnumObject[M.GracesReadMode]
 
-  type GpiObservingMode = mutable.GpiObservingMode
-  object GpiObservingMode extends EnumObject[mutable.GpiObservingMode] {
+  type GpiObservingMode = M.GpiObservingMode
+  object GpiObservingMode extends EnumObject[M.GpiObservingMode] {
     def isCoronographMode(mode: GpiObservingMode):Boolean = mode.value.startsWith("Coronograph")
     def isDirectMode(mode: GpiObservingMode):Boolean = mode.value.endsWith("direct")
     def scienceBand(mode: GpiObservingMode):Option[String] = {
@@ -254,72 +255,72 @@ package object immutable {
     }
   }
 
-  type GpiDisperser = mutable.GpiDisperser
-  object GpiDisperser extends EnumObject[mutable.GpiDisperser]
+  type GpiDisperser = M.GpiDisperser
+  object GpiDisperser extends EnumObject[M.GpiDisperser]
 
-  type GuidingEvaluation = mutable.GuidingEvaluation
-  object GuidingEvaluation extends EnumObject[mutable.GuidingEvaluation] {
-    final val SUCCESS = mutable.GuidingEvaluation.SUCCESS
-    final val CAUTION = mutable.GuidingEvaluation.CAUTION
-    final val WARNING = mutable.GuidingEvaluation.WARNING
-    final val FAILURE = mutable.GuidingEvaluation.FAILURE
+  type GuidingEvaluation = M.GuidingEvaluation
+  object GuidingEvaluation extends EnumObject[M.GuidingEvaluation] {
+    final val SUCCESS = M.GuidingEvaluation.SUCCESS
+    final val CAUTION = M.GuidingEvaluation.CAUTION
+    final val WARNING = M.GuidingEvaluation.WARNING
+    final val FAILURE = M.GuidingEvaluation.FAILURE
   }
 
-  type KeckInstrument = mutable.KeckInstrument
-  object KeckInstrument extends EnumObject[mutable.KeckInstrument]
+  type KeckInstrument = M.KeckInstrument
+  object KeckInstrument extends EnumObject[M.KeckInstrument]
 
-  type MichelleFilter = mutable.MichelleFilter
-  object MichelleFilter extends EnumObject[mutable.MichelleFilter]
+  type MichelleFilter = M.MichelleFilter
+  object MichelleFilter extends EnumObject[M.MichelleFilter]
 
-  type MichellePolarimetry = mutable.MichellePolarimetry
-  object MichellePolarimetry extends EnumObject[mutable.MichellePolarimetry] {
-    val YES = mutable.MichellePolarimetry.YES
-    val NO = mutable.MichellePolarimetry.NO
+  type MichellePolarimetry = M.MichellePolarimetry
+  object MichellePolarimetry extends EnumObject[M.MichellePolarimetry] {
+    val YES = M.MichellePolarimetry.YES
+    val NO = M.MichellePolarimetry.NO
   }
 
-  type MichelleFpu = mutable.MichelleFpu
-  object MichelleFpu extends EnumObject[mutable.MichelleFpu]
+  type MichelleFpu = M.MichelleFpu
+  object MichelleFpu extends EnumObject[M.MichelleFpu]
 
-  type MichelleDisperser = mutable.MichelleDisperser
-  object MichelleDisperser extends EnumObject[mutable.MichelleDisperser]
+  type MichelleDisperser = M.MichelleDisperser
+  object MichelleDisperser extends EnumObject[M.MichelleDisperser]
 
-  type NiciDichroic = mutable.NiciDichroic
-  object NiciDichroic extends EnumObject[mutable.NiciDichroic] {
-    val MIRROR = mutable.NiciDichroic.MIRROR
-    val OPEN = mutable.NiciDichroic.OPEN
+  type NiciDichroic = M.NiciDichroic
+  object NiciDichroic extends EnumObject[M.NiciDichroic] {
+    val MIRROR = M.NiciDichroic.MIRROR
+    val OPEN = M.NiciDichroic.OPEN
   }
 
-  type NiciBlueFilter = mutable.NiciBlueFilter
-  object NiciBlueFilter extends EnumObject[mutable.NiciBlueFilter]
+  type NiciBlueFilter = M.NiciBlueFilter
+  object NiciBlueFilter extends EnumObject[M.NiciBlueFilter]
 
-  type NiciFpm = mutable.NiciFpm
-  object NiciFpm extends EnumObject[mutable.NiciFpm]
+  type NiciFpm = M.NiciFpm
+  object NiciFpm extends EnumObject[M.NiciFpm]
 
-  type NiciRedFilter = mutable.NiciRedFilter
-  object NiciRedFilter extends EnumObject[mutable.NiciRedFilter]
+  type NiciRedFilter = M.NiciRedFilter
+  object NiciRedFilter extends EnumObject[M.NiciRedFilter]
 
-  type NifsDisperer = mutable.NifsDisperser
-  object NifsDisperser extends EnumObject[mutable.NifsDisperser] {
-    val Z = mutable.NifsDisperser.Z
+  type NifsDisperer = M.NifsDisperser
+  object NifsDisperser extends EnumObject[M.NifsDisperser] {
+    val Z = M.NifsDisperser.Z
   }
 
-  type NifsOccultingDisk = mutable.NifsOccultingDisk
-  object NifsOccultingDisk extends EnumObject[mutable.NifsOccultingDisk] {
-    val OD_NONE = mutable.NifsOccultingDisk.CLEAR
+  type NifsOccultingDisk = M.NifsOccultingDisk
+  object NifsOccultingDisk extends EnumObject[M.NifsOccultingDisk] {
+    val OD_NONE = M.NifsOccultingDisk.CLEAR
   }
 
-  type NiriCamera = mutable.NiriCamera
-  object NiriCamera extends EnumObject[mutable.NiriCamera] {
-    val F6  = mutable.NiriCamera.F6
-    val F14 = mutable.NiriCamera.F14
-    val F32 = mutable.NiriCamera.F32
+  type NiriCamera = M.NiriCamera
+  object NiriCamera extends EnumObject[M.NiriCamera] {
+    val F6  = M.NiriCamera.F6
+    val F14 = M.NiriCamera.F14
+    val F32 = M.NiriCamera.F32
   }
 
-  type NiriFilter = mutable.NiriFilter
-  object NiriFilter extends EnumObject[mutable.NiriFilter] {
-    val BBF_LPRIME  = mutable.NiriFilter.BBF_LPRIME
-    val BBF_MPRIME  = mutable.NiriFilter.BBF_MPRIME
-    val BBF_BRACONT = mutable.NiriFilter.NBF_BRACONT
+  type NiriFilter = M.NiriFilter
+  object NiriFilter extends EnumObject[M.NiriFilter] {
+    val BBF_LPRIME  = M.NiriFilter.BBF_LPRIME
+    val BBF_MPRIME  = M.NiriFilter.BBF_MPRIME
+    val BBF_BRACONT = M.NiriFilter.NBF_BRACONT
   }
 
   type PhoenixFocalPlaneUnit = mutable.PhoenixFocalPlaneUnit
@@ -331,81 +332,129 @@ package object immutable {
   type GsaoiFilter = mutable.GsaoiFilter
   object GsaoiFilter extends EnumObject[mutable.GsaoiFilter]
 
-  type Guider = mutable.Guider
-  object Guider extends EnumObject[mutable.Guider]
+  type Guider = M.Guider
+  object Guider extends EnumObject[M.Guider]
 
-  type ImageQuality = mutable.ImageQuality
-  object ImageQuality extends EnumObject[mutable.ImageQuality] {
-    val BEST = mutable.ImageQuality.iq20
+  type ImageQuality = M.ImageQuality
+  object ImageQuality extends EnumObject[M.ImageQuality] {
+    val BEST = M.ImageQuality.iq20
   }
 
-  type InvestigatorStatus = mutable.InvestigatorStatus
-  object InvestigatorStatus extends EnumObject[mutable.InvestigatorStatus] {
-    val PH_D  = mutable.InvestigatorStatus.PH_D
-    val OTHER = mutable.InvestigatorStatus.OTHER
+  type InvestigatorStatus = M.InvestigatorStatus
+  object InvestigatorStatus extends EnumObject[M.InvestigatorStatus] {
+    val PH_D  = M.InvestigatorStatus.PH_D
+    val OTHER = M.InvestigatorStatus.OTHER
   }
 
-  type Keyword = mutable.Keyword
-  object Keyword extends EnumObject[mutable.Keyword]
+  type Keyword = M.Keyword
+  object Keyword extends EnumObject[M.Keyword]
 
-  type MagnitudeBand = mutable.MagnitudeBand
-  object MagnitudeBand extends EnumObject[mutable.MagnitudeBand]
-
-  type MagnitudeSystem = mutable.MagnitudeSystem
-  object MagnitudeSystem extends EnumObject[mutable.MagnitudeSystem]
-
-//  type NiriWavelengthRegime = mutable.NiriWavelengthRegime
-//  object NiriWavelengthRegime extends EnumObject[mutable.NiriWavelengthRegime]
-
-  type SemesterOption = mutable.SemesterOption
-  object SemesterOption extends EnumObject[mutable.SemesterOption] {
-    val A = mutable.SemesterOption.A
-    val B = mutable.SemesterOption.B
+  implicit class MagnitudeBandOps(val band: MagnitudeBand) extends AnyVal {
+    def mutable: M.MagnitudeBand = band match {
+      case MagnitudeBand.U  => M.MagnitudeBand.U
+      case MagnitudeBand.B  => M.MagnitudeBand.B
+      case MagnitudeBand.V  => M.MagnitudeBand.V
+      case MagnitudeBand.UC => M.MagnitudeBand.UC
+      case MagnitudeBand.R  => M.MagnitudeBand.R
+      case MagnitudeBand.I  => M.MagnitudeBand.I
+      case MagnitudeBand.Y  => M.MagnitudeBand.Y
+      case MagnitudeBand.J  => M.MagnitudeBand.J
+      case MagnitudeBand.H  => M.MagnitudeBand.H
+      case MagnitudeBand.K  => M.MagnitudeBand.K
+      case MagnitudeBand.L  => M.MagnitudeBand.L
+      case MagnitudeBand.M  => M.MagnitudeBand.M
+      case MagnitudeBand.N  => M.MagnitudeBand.N
+      case MagnitudeBand.Q  => M.MagnitudeBand.Q
+      case _                => sys.error("Should not happen")
+    }
   }
 
-  type SubaruInstrument = mutable.SubaruInstrument
-  object SubaruInstrument extends EnumObject[mutable.SubaruInstrument]
-
-  type SkyBackground = mutable.SkyBackground
-  object SkyBackground extends EnumObject[mutable.SkyBackground] {
-    val BEST = mutable.SkyBackground.sb20
+  implicit class MagnitudeSystemOps(val system: MagnitudeSystem) extends AnyVal {
+    def mutable: M.MagnitudeSystem= system match {
+      case MagnitudeSystem.AB   => M.MagnitudeSystem.AB
+      case MagnitudeSystem.JY   => M.MagnitudeSystem.JY
+      case MagnitudeSystem.VEGA => M.MagnitudeSystem.VEGA
+    }
   }
 
-  type TacCategory = mutable.TacCategory
-  object TacCategory extends EnumObject[mutable.TacCategory] {
-    val GALACTIC = mutable.TacCategory.GALACTIC
+  implicit class MutableMagnitudeBandOps(val band: M.MagnitudeBand) extends AnyVal {
+    def toBand: MagnitudeBand = band match {
+      case M.MagnitudeBand.U  => MagnitudeBand.U
+      case M.MagnitudeBand.B  => MagnitudeBand.B
+      case M.MagnitudeBand.V  => MagnitudeBand.V
+      case M.MagnitudeBand.UC => MagnitudeBand.UC
+      case M.MagnitudeBand.R  => MagnitudeBand.R
+      case M.MagnitudeBand.I  => MagnitudeBand.I
+      case M.MagnitudeBand.Y  => MagnitudeBand.Y
+      case M.MagnitudeBand.J  => MagnitudeBand.J
+      case M.MagnitudeBand.H  => MagnitudeBand.H
+      case M.MagnitudeBand.K  => MagnitudeBand.K
+      case M.MagnitudeBand.L  => MagnitudeBand.L
+      case M.MagnitudeBand.M  => MagnitudeBand.M
+      case M.MagnitudeBand.N  => MagnitudeBand.N
+      case M.MagnitudeBand.Q  => MagnitudeBand.Q
+    }
   }
 
-  type TimeUnit = mutable.TimeUnit
-  object TimeUnit extends EnumObject[mutable.TimeUnit] {
-    val HR = mutable.TimeUnit.HR
-    val NIGHT = mutable.TimeUnit.NIGHT
+  implicit class MagnitudeOps(val magnitude: Magnitude) extends AnyVal {
+    def mutable: M.Magnitude = {
+      val m = Factory.createMagnitude
+          m.setValue(BigDecimal(magnitude.value).bigDecimal)
+          m.setBand(magnitude.band.mutable)
+          m.setSystem(magnitude.system.mutable)
+          m
+    }
+  }
+
+  type SemesterOption = M.SemesterOption
+  object SemesterOption extends EnumObject[M.SemesterOption] {
+    val A = M.SemesterOption.A
+    val B = M.SemesterOption.B
+  }
+
+  type SubaruInstrument = M.SubaruInstrument
+  object SubaruInstrument extends EnumObject[M.SubaruInstrument]
+
+  type SkyBackground = M.SkyBackground
+  object SkyBackground extends EnumObject[M.SkyBackground] {
+    val BEST = M.SkyBackground.sb20
+  }
+
+  type TacCategory = M.TacCategory
+  object TacCategory extends EnumObject[M.TacCategory] {
+    val GALACTIC = M.TacCategory.GALACTIC
+  }
+
+  type TimeUnit = M.TimeUnit
+  object TimeUnit extends EnumObject[M.TimeUnit] {
+    val HR = M.TimeUnit.HR
+    val NIGHT = M.TimeUnit.NIGHT
   }
 
   type ToOChoice = mutable.TooOption
-  object ToOChoice extends EnumObject[mutable.TooOption] {
+  object ToOChoice extends EnumObject[M.TooOption] {
     val None = mutable.TooOption.NONE
   }
 
-  type TexesDisperser = mutable.TexesDisperser
-  object TexesDisperser extends EnumObject[mutable.TexesDisperser]
+  type TexesDisperser = M.TexesDisperser
+  object TexesDisperser extends EnumObject[M.TexesDisperser]
 
-  type TrecsDisperser = mutable.TrecsDisperser
-  object TrecsDisperser extends EnumObject[mutable.TrecsDisperser]
+  type TrecsDisperser = M.TrecsDisperser
+  object TrecsDisperser extends EnumObject[M.TrecsDisperser]
 
-  type TrecsFilter = mutable.TrecsFilter
-  object TrecsFilter extends EnumObject[mutable.TrecsFilter]
+  type TrecsFilter = M.TrecsFilter
+  object TrecsFilter extends EnumObject[M.TrecsFilter]
 
-  type TrecsFpu = mutable.TrecsFpu
-  object TrecsFpu extends EnumObject[mutable.TrecsFpu]
+  type TrecsFpu = M.TrecsFpu
+  object TrecsFpu extends EnumObject[M.TrecsFpu]
 
-  type WaterVapor = mutable.WaterVapor
-  object WaterVapor extends EnumObject[mutable.WaterVapor] {
-    val BEST = mutable.WaterVapor.wv20
+  type WaterVapor = M.WaterVapor
+  object WaterVapor extends EnumObject[M.WaterVapor] {
+    val BEST = M.WaterVapor.wv20
   }
 
-  type WavelengthRegime = mutable.WavelengthRegime
-  object WavelengthRegime extends EnumObject[mutable.WavelengthRegime]
+  type WavelengthRegime = M.WavelengthRegime
+  object WavelengthRegime extends EnumObject[M.WavelengthRegime]
 }
 
 

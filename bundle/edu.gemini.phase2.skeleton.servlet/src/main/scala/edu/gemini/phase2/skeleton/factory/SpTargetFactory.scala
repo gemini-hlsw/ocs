@@ -1,9 +1,9 @@
 package edu.gemini.phase2.skeleton.factory
 
-
 import edu.gemini.model.p1.immutable._
 import edu.gemini.shared.{skyobject => SO}
 import edu.gemini.shared.util.immutable.DefaultImList
+import edu.gemini.spModel.core.{MagnitudeSystem, MagnitudeBand, Magnitude}
 import edu.gemini.spModel.target.system.CoordinateParam.Units
 import edu.gemini.spModel.{target => SP}
 import edu.gemini.spModel.target.system.CoordinateTypes.{PM1 => SPProperMotionRA}
@@ -110,12 +110,12 @@ object SpTargetFactory {
 
   // Find the magnitude band with the same name.
   private def band(b: MagnitudeBand): Either[String, SO.Magnitude.Band] = {
-    val opt = SO.Magnitude.Band.values() find { _.name() == b.name() }
-    opt.toRight("Unexpected magnitude band: %s".format(b.name()))
+    val opt = SO.Magnitude.Band.values().find { _.name() == b.name }
+    opt.toRight(s"Unexpected magnitude band: ${b.name}")
   }
 
   private def system(s: MagnitudeSystem): Either[String, SO.Magnitude.System] = {
-    val opt = SO.Magnitude.System.values() find { _.name().equalsIgnoreCase(s.name()) }
-    opt.toRight("Unexpected magnitude system: %s".format(s.name()))
+    val opt = SO.Magnitude.System.values().find { _.name().equalsIgnoreCase(s.name) }
+    opt.toRight(s"Unexpected magnitude system: ${s.name}")
   }
 }

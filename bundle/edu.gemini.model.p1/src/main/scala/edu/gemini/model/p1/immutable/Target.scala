@@ -1,6 +1,7 @@
 package edu.gemini.model.p1.immutable
 
 import edu.gemini.model.p1.{ mutable => M }
+import edu.gemini.spModel.core.Magnitude
 
 import scala.collection.JavaConverters._
 import scalaz._
@@ -70,7 +71,7 @@ object SiderealTarget extends UuidCache[M.SiderealTarget] {
     Coordinates(Option(m.getDegDeg).getOrElse(m.getHmsDms)),
     m.getEpoch,
     Option(m.getProperMotion).map(ProperMotion(_)),
-    ~Option(m.getMagnitudes).map(_.getMagnitude.asScala.map(Magnitude(_)).toList))
+    ~Option(m.getMagnitudes).map(_.getMagnitude.asScala.map(m => new Magnitude(m.getValue.doubleValue(), m.getBand.toBand)).toList))
 }
 
 case class SiderealTarget (

@@ -4,8 +4,8 @@ import edu.gemini.model.p1.immutable._
 import edu.gemini.model.p1.immutable.CoordinatesEpoch.J_2000
 
 import java.util.Calendar._
+import edu.gemini.spModel.core.{Magnitude, MagnitudeSystem, MagnitudeBand}
 import org.junit.Assert._
-import edu.gemini.model.p1.mutable.MagnitudeSystem._
 import java.util.{UUID, TimeZone, GregorianCalendar}
 
 object TargetUtil {
@@ -24,8 +24,8 @@ object TargetUtil {
   def mkTarget(name: String, elements: List[EphemerisElement]): NonSiderealTarget =
     NonSiderealTarget(UUID.randomUUID(), name, elements, J_2000)
 
-  def mkMag(value: Double, band: MagnitudeBand, system: MagnitudeSystem = VEGA): Magnitude =
-    Magnitude(value, band, system)
+  def mkMag(value: Double, band: MagnitudeBand, system: MagnitudeSystem = MagnitudeSystem.VEGA): Magnitude =
+    new Magnitude(value, band, system)
 
   def mkTarget(name: String, ra: String, dec: String): SiderealTarget =
     SiderealTarget(UUID.randomUUID(), name, HmsDms(ra, dec), J_2000, None, Nil)

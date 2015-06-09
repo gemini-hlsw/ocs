@@ -1,7 +1,7 @@
 package edu.gemini.model.p1.targetio.table
 
-import edu.gemini.model.p1.immutable.{Magnitude, DMS, HMS}
-import edu.gemini.model.p1.mutable.MagnitudeSystem
+import edu.gemini.model.p1.immutable.{DMS, HMS}
+import edu.gemini.spModel.core.{MagnitudeSystem, Magnitude}
 
 object Serializers {
   implicit object StringWriter extends StilSerializer[String] {
@@ -35,7 +35,7 @@ object Serializers {
   }
 
   implicit object OptionalMagnitudeWriter extends StilSerializer[Option[Magnitude]] {
-    private def toDouble(value: Option[Magnitude]): Option[Double] = value.map(_.value.toDouble)
+    private def toDouble(value: Option[Magnitude]): Option[Double] = value.map(_.value)
     def asBinary(value: Option[Magnitude]) = OptionalDoubleWriter.asBinary(toDouble(value))
     def primitiveClass = classOf[java.lang.Double]
     def asText(value: Option[Magnitude]) = OptionalDoubleWriter.asText(toDouble(value))

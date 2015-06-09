@@ -2,10 +2,10 @@ package edu.gemini.phase2.skeleton.factory
 
 import edu.gemini.model.p1.immutable.GracesBlueprint
 import edu.gemini.model.p1.mutable.{GracesFiberMode, GracesReadMode}
-import edu.gemini.model.p1.mutable.MagnitudeBand
 import edu.gemini.pot.sp.{ISPProgram, ISPTemplateGroup}
 import edu.gemini.shared.skyobject.Magnitude.Band
 import edu.gemini.shared.util.immutable.ScalaConverters._
+import edu.gemini.spModel.core.MagnitudeBand
 import edu.gemini.spModel.gemini.graces.blueprint.SpGracesBlueprint
 import edu.gemini.spModel.gemini.graces.blueprint.SpGracesBlueprint._
 import edu.gemini.spModel.pio.xml.PioXmlFactory
@@ -86,7 +86,7 @@ class REL_1842_Test extends TemplateSpec("GRACES_BP.xml") with Specification wit
   // Return the Buckets for the targets in this template group. The returned list should always
   // have size = 1 but we will check that in a test below.
   def groupBuckets(g: ISPTemplateGroup): List[Option[Bucket]] =
-    p2targets(g).map(Bucket.fromTarget(_))
+    p2targets(g).map(Bucket.fromTarget)
 
   // Return the Bucket for the first target in the given group. We establish by testing groupBuckets
   // above that this will return the one and only bucket for this group.

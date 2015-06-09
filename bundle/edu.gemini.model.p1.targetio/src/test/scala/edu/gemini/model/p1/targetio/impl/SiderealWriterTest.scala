@@ -2,9 +2,8 @@ package edu.gemini.model.p1.targetio.impl
 
 import edu.gemini.model.p1.targetio.impl.TargetUtil._
 
-import edu.gemini.model.p1.mutable.MagnitudeBand.{J,H, K}
-import edu.gemini.model.p1.mutable.MagnitudeSystem.{JY}
 import edu.gemini.model.p1.immutable.SiderealTarget
+import edu.gemini.spModel.core.{MagnitudeBand, MagnitudeSystem}
 
 class SiderealWriterTest extends WriterTestBase(SiderealReader, SiderealWriter) {
   val target1 = mkTarget("ngc001", "01:00:00.00", "02:00:00", 1.0, 2.0)
@@ -14,9 +13,9 @@ class SiderealWriterTest extends WriterTestBase(SiderealReader, SiderealWriter) 
   val target5 = mkTarget("ngc004", "00:00:00.00", "00:00:00")
 
   val targets = List(
-    target1.copy(magnitudes = List(mkMag(7.0, J, JY))),
-    target2.copy(magnitudes = List(mkMag(8.0, H))),
-    target3.copy(magnitudes = List(mkMag(1.0, J), mkMag(2.0, H), mkMag(3.0, K, JY))),
+    target1.copy(magnitudes = List(mkMag(7.0, MagnitudeBand.J, MagnitudeSystem.JY))),
+    target2.copy(magnitudes = List(mkMag(8.0, MagnitudeBand.H))),
+    target3.copy(magnitudes = List(mkMag(1.0, MagnitudeBand.J), mkMag(2.0, MagnitudeBand.H), mkMag(3.0, MagnitudeBand.K, MagnitudeSystem.JY))),
     target4,
     target5
   )

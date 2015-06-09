@@ -1,10 +1,11 @@
 package edu.gemini.pit.catalog
 
-import edu.gemini.model.p1.{immutable => I, mutable => M}
+import edu.gemini.model.p1.{immutable => I}
 
 import java.net.URL
 import java.net.URLEncoder.{encode => urlencode}
 
+import edu.gemini.spModel.core.{MagnitudeBand, MagnitudeSystem, Magnitude}
 import votable._
 import java.util.UUID
 
@@ -54,15 +55,15 @@ class Simbad private (val host:String) extends VOTableCatalog {
     // Mags get pulled out into a list
     mags = for {
       (k, Some(v)) <- Map(
-        M.MagnitudeBand.U -> num("phot.mag;em.opt.U"),
-        M.MagnitudeBand.V -> num("phot.mag;em.opt.V"),
-        M.MagnitudeBand.B -> num("phot.mag;em.opt.B"),
-        M.MagnitudeBand.R -> num("phot.mag;em.opt.R"),
-        M.MagnitudeBand.J -> num("phot.mag;em.ir.J"),
-        M.MagnitudeBand.H -> num("phot.mag;em.ir.H"),
-        M.MagnitudeBand.K -> num("phot.mag;em.ir.K"))
+        MagnitudeBand.U -> num("phot.mag;em.opt.U"),
+        MagnitudeBand.V -> num("phot.mag;em.opt.V"),
+        MagnitudeBand.B -> num("phot.mag;em.opt.B"),
+        MagnitudeBand.R -> num("phot.mag;em.opt.R"),
+        MagnitudeBand.J -> num("phot.mag;em.ir.J"),
+        MagnitudeBand.H -> num("phot.mag;em.ir.H"),
+        MagnitudeBand.K -> num("phot.mag;em.ir.K"))
     // TODO: more passbands
-    } yield I.Magnitude(v, k, M.MagnitudeSystem.VEGA) // TODO
+    } yield new Magnitude(v, k, MagnitudeSystem.VEGA) // TODO
 
     // Proper Motion
     pm = for {
