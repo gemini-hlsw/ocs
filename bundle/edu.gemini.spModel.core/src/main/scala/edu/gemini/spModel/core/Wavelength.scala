@@ -36,6 +36,13 @@ sealed trait Wavelength extends Serializable {
   def *(factor: Double): Wavelength =
     Wavelength.fromNanometers(toNanometers * factor)
 
+  /**
+   * Scalar division.
+   * @group Operations
+   */
+  def /(factor: Double): Wavelength =
+    Wavelength.fromNanometers(toNanometers / factor)
+
   /** @group Overrides */
   final override def toString =
     s"Wavelength(${toNanometers}nm)"
