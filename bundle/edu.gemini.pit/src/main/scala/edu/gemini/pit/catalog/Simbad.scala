@@ -10,7 +10,6 @@ import java.util.UUID
 
 object Simbad extends Catalog with App {
 
-
   private lazy val hosts = Array("simbad.u-strasbg.fr", "simbak.cfa.harvard.edu")
   private lazy val simbad = hosts.map(apply).reduceLeft(_ || _)
 
@@ -40,7 +39,7 @@ class Simbad private (val host:String) extends VOTableCatalog {
     kvs = table.fields.zip(row)
 
     // Local find function
-    str = (s:String) => kvs.find(_._1.ucd.map(_.toLowerCase == s.toLowerCase).getOrElse(false)).map(_._2)
+    str = (s:String) => kvs.find(_._1.ucd.exists(_.toLowerCase == s.toLowerCase)).map(_._2)
     num = (s:String) => str(s).flatMap(_.toDoubleOption)
 
     // Switch to Option here to pull out data

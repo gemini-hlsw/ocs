@@ -20,7 +20,7 @@ object SiderealReader extends TargetReader[SiderealTarget] {
   private def targets(e: Either[String, List[TableReader]]): Result =
     e match {
       case Left(msg)  => Left(DataSourceError(msg))
-      case Right(lst) => Right(lst flatMap { targets(_) })
+      case Right(lst) => Right(lst.flatMap(targets))
     }
 
   private def name(table: TableReader, row: TableReader#Row) =

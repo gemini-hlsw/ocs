@@ -268,7 +268,7 @@ class TargetImporter private extends StdModalWizard[State, List[Target]]("Import
 
   }
 
-  def unlift[A, B](xs:List[Either[A, B]]):(List[A], List[B]) = (xs.map(_.left.toOption).flatten, xs.map(_.right.toOption).flatten)
+  def unlift[A, B](xs:List[Either[A, B]]):(List[A], List[B]) = (xs.flatMap(_.left.toOption), xs.flatMap(_.right.toOption))
 
   def read[T <: Target](reader:TargetReader[T], file:File):State = reader.read(file) match {
     case Left(err) =>
