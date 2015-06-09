@@ -106,6 +106,7 @@
             <xsd:enumeration value="Spiral galaxies"/>
             <xsd:enumeration value="Starburst galaxies"/>
             <xsd:enumeration value="Star clusters"/>
+            <xsd:enumeration value="Star formation"/>
             <xsd:enumeration value="Stellar activity"/>
             <xsd:enumeration value="Stellar populations"/>
             <xsd:enumeration value="Stellar interiors"/>
