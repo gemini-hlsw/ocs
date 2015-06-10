@@ -2,6 +2,7 @@ package edu.gemini.sp.vcs2
 
 import edu.gemini.pot.sp.Conflict.{Moved, ResurrectedLocalDelete, ReplacedRemoteDelete}
 import edu.gemini.pot.sp.{Conflict, DataObjectBlob, ISPNode, SPNodeKey}
+import edu.gemini.shared.util.VersionComparison
 import edu.gemini.shared.util.VersionComparison._
 import edu.gemini.sp.vcs2.MergeNode._
 import edu.gemini.spModel.rich.pot.sp._
@@ -101,12 +102,6 @@ object PreliminaryMerge {
 
 
     def toNode(mod: MergeNode, lcs: List[ISPNode], rcs: List[Tree[MergeNode]], f: ChildFilter): Tree[MergeNode] = {
-      // Update the node versions to incorporate local and remote edits.
-      val mod2 = mod match {
-        case m: Modified   => m.copy(nv = mc.syncVersion(m.key))
-        case _: Unmodified => mod
-      }
-
       // Filter the children according to the version information.
       val pc = f(PartitionedChildren.part(lcs, rcs))
 
@@ -133,7 +128,32 @@ object PreliminaryMerge {
 
       // TODO: insert the remote children into sortedLocal according to some
       // TODO: heuristic instead of just appending?
-      Tree.node(mod2, (sortedLocal ++ sortedRemote).toStream)
+      val newChildren = sortedLocal ++ sortedRemote
+
+      // Compute the new version for this node, which is nominally the
+      // combination of the local and remote versions. If the children don't
+      // match what we have locally though (that is, they have been updated by
+      // the merge), then be sure that the local version is updated.
+
+      def sameChildren: Boolean = {
+        val localNode      = mc.local.get(mod.key)
+        val localChildKeys = localNode.map(_.children.map(_.key)) | Nil
+        val newChildKeys   = newChildren.map(_.key)
+        localChildKeys == newChildKeys
+      }
+
+      val k          = mod.key
+      val sv         = mc.syncVersion(k)
+      def svIncr     = sv.incr(mc.local.prog.getLifespanId)
+      val svIsNewer  = sv.compare(mc.local.version(k)) === VersionComparison.Newer
+      val newVersion = if (svIsNewer || sameChildren) sv else svIncr
+
+      val mod2 = mod match {
+        case m: Modified   => m.copy(nv = newVersion)
+        case _: Unmodified => mod
+      }
+
+      Tree.node(mod2, newChildren.toStream)
     }
 
     def go(lr: ISPNode \&/ Tree[MergeNode]): Tree[MergeNode] =

@@ -144,7 +144,7 @@ class Vcs(user: VcsAction[Set[Principal]], server: VcsServer, service: Peer => V
 
         case MergeEval(diffs, lvm, rvm, _, true)  =>
           client.storeDiffs(id, diffs).map { updated =>
-            if (updated) (s0 + Remote, VersionMap.sync(lvm, rvm)) else (s0, rvm)
+            if (updated) (s0 + Remote, eval.plan.vm(rvm)) else (s0, rvm)
           }
       }
     } yield res
