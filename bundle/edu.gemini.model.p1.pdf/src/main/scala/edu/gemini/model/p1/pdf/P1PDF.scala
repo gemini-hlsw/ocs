@@ -33,26 +33,16 @@ object P1PDF {
   }
 
   /** Gets a list with all templates that are currently available. */
-  def templates = {
-    val list = new java.util.ArrayList[Template]
-    list add (DEFAULT)
-    list add (AU)
-    list add (CL)
-    list add (NOAO)
-    list
-  }
+  def templates = List(DEFAULT, AU, CL, NOAO)
 
-  def templatesMap = {
-    val map = new java.util.HashMap[String, Template]()
-    map put ("ar", DEFAULT)
-    map put ("au", AU)
-    map put ("br", DEFAULT)
-    map put ("ca", DEFAULT)
-    map put ("cl", CL)
-    map put ("gs", DEFAULT)
-    map put ("us", NOAO)
-    map
-  }
+  def templatesMap = Map(
+    "ar" -> DEFAULT,
+    "au" -> AU,
+    "br" -> DEFAULT,
+    "ca" -> DEFAULT,
+    "cl" -> CL,
+    "gs" -> DEFAULT,
+    "us" -> NOAO)
 
   /**
    * Creates a pdf from a given xml file and template and writes the resulting pdf file to the output folder.
@@ -63,7 +53,6 @@ object P1PDF {
       createFromNode (XML.loadFile(xmlFile), template, pdfFile, Option(xmlFile.getParentFile))
     } catch {
       case ex:Exception => try {
-        //createFromNode (XML.load(Source.fromFile(xmlFile, "latin1").mkString), template, pdfFile, Option(xmlFile.getParentFile))
         createFromNode (XML.loadString(Source.fromFile(xmlFile, "latin1").mkString), template, pdfFile, Option(xmlFile.getParentFile))
       }
     }
@@ -86,11 +75,11 @@ object P1PDF {
     val xslStream = getClass.getResourceAsStream(template.location)
 
     try {
-      val parentFilePath = if (out.getParentFile == null) "" else out.getParentFile
+      val parentFilePath = Option(out.getParentFile).getOrElse("")
       val xslSource = new StreamSource(xslStream)
       val xmlSource = new StreamSource(new StringReader(xml.toString()))
 
-      val pdf = new PDF(Some(new P1PdfUriResolver))
+      val pdf = new PDF(Some(P1PdfUriResolver))
       if (attachment.isFile) {
         val intermediateOutputFile = new File(parentFilePath + File.separator + "_" + out.getName)
         pdf.transformXslFo(xmlSource, xslSource, intermediateOutputFile, template.parameters)
@@ -110,21 +99,25 @@ object P1PDF {
    * to resolve resources imported with <xsl:import/>. This is necessary since the PDF bundle does not have
    * access to the resources in this bundle.
    */
-  class P1PdfUriResolver extends URIResolver {
+  case object P1PdfUriResolver extends URIResolver {
     override def resolve(href: String,  base: String) = {
-      val r = getClass getResourceAsStream href
-      if (r != null) new StreamSource(r)                                // try to resolve as a normal resource (assuming that caller closes stream?)
-      else if (new File(href).exists) new StreamSource(new File(href))  // try to resolve as a file
-      else new StreamSource(href)                                       // try to resolve as a URL
+      val r = Option(getClass.getResourceAsStream(href))
+      // try to resolve as a normal resource (assuming that caller closes stream?)
+      r.map(new StreamSource(_)).getOrElse {
+        if (new File(href).exists) {
+          new StreamSource(new File(href)) // try to resolve as a file
+        } else {
+          new StreamSource(href)           // try to resolve as a URL
+        }
+      }
     }
   }
 
-
   def main(args:Array[String]) {
     val home = System.getProperty("user.home")
-    val in = new File("%s/pitsource.xml".format(home))
-    val out = new File("%s/pittarget.pdf".format(home))
-    createFromFile(in, DEFAULT, out)
+    val in = new File(s"$home/pitsource.xml")
+    val out = new File(s"$home/pittarget.pdf")
+    createFromFile(in, NOAO, out)
 
     val ok = Runtime.getRuntime.exec(Array("open", out.getAbsolutePath)).waitFor
     println("Exec returned " + ok)

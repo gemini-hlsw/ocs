@@ -3,7 +3,6 @@ package edu.gemini.pit.model
 import edu.gemini.model.p1.pdf.P1PDF
 
 import java.util.prefs.Preferences._
-import scala.collection.JavaConverters._
 import java.util.prefs.{Preferences, PreferenceChangeEvent, PreferenceChangeListener}
 import java.util.logging.{Level, Logger}
 import swing.Swing
@@ -33,7 +32,7 @@ object AppPreferences {
   // PDF pref, getter, setter
   private lazy val pdfPref = getClass.getName + ".pdf"
   private lazy val putPdf = node.put((t:P1PDF.Template) => t.name)(pdfPref) _
-  private def getPdf = node.get((s:String) => P1PDF.templates.asScala.find(_.name == s))(pdfPref)
+  private def getPdf = node.get((s:String) => P1PDF.templates.find(_.name == s))(pdfPref)
 
   // Mode pref, getter, setter
   private lazy val modePref = getClass.getName + ".mode"

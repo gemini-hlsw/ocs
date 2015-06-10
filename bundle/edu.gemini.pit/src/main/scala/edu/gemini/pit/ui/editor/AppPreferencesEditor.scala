@@ -3,7 +3,6 @@ package edu.gemini.pit.ui.editor
 import edu.gemini.pit.model.AppPreferences
 import edu.gemini.model.p1.pdf.P1PDF
 
-import scala.collection.JavaConverters._
 import edu.gemini.pit.ui.util.{ValueRenderer, Rows, StdModalEditor}
 import swing._
 
@@ -18,7 +17,7 @@ class AppPreferencesEditor private (ps:AppPreferences) extends StdModalEditor[Ap
     addRow(new Label("PIT Mode"), PitModeCombo)
   }
 
-  object PdfTemplateCombo extends ComboBox(P1PDF.templates.asScala) with ValueRenderer[P1PDF.Template] {
+  object PdfTemplateCombo extends ComboBox(P1PDF.templates) with ValueRenderer[P1PDF.Template] {
     selection.item = ps.pdf.getOrElse(P1PDF.DEFAULT)
   }
 

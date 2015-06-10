@@ -5,6 +5,8 @@ import org.apache.commons.cli.*;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 
+import scala.collection.JavaConversions;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -16,7 +18,7 @@ public class P1PdfMaker {
     private static final StringBuffer partnerNames;
     static {
         // get templates lookup map
-        templatesMap = P1PDF.templatesMap();
+        templatesMap = JavaConversions.asJavaMap(P1PDF.templatesMap());
 
         // create list of valid partner/country names
         partnerNames = new StringBuffer();
@@ -29,40 +31,44 @@ public class P1PdfMaker {
         }
     }
 
-    private static final Option OPT_RECURSIVE = OptionBuilder.
-        withLongOpt("recursive").
-        withDescription("recurse into subdirectories").
-        hasArg().
-        create("r");
-    private static final Option OPT_STYLESHEET = OptionBuilder.
-        withLongOpt("partner").
-        withDescription("partner or country name, one of: " + partnerNames).
-        hasArg().
-        isRequired().
-        create("c");
-    private static final Option OPT_XML_SOURCE = OptionBuilder.
-        withLongOpt("xmlin").
-        withDescription("input file or a folder").
-        withType(File.class).
-        hasArg().
-        isRequired().
-        create("x");
-    private static final Option OPT_PDF_DEST = OptionBuilder.
-        withLongOpt("pdfout").
-        withDescription("output folder for resulting pdf file(s)").
-        withType(File.class).
-        hasArg().
-        create("p");
-            
+    private static final Option OPT_RECURSIVE;
+    private static final Option OPT_STYLESHEET;
+    private static final Option OPT_XML_SOURCE;
+    private static final Option OPT_PDF_DEST;
+    static {
+        OptionBuilder.withLongOpt("recursive");
+        OptionBuilder.withDescription("recurse into subdirectories");
+        OptionBuilder.hasArg();
+        OPT_RECURSIVE = OptionBuilder.create("r");
 
-    private enum Opt {
+        OptionBuilder.withLongOpt("partner");
+        OptionBuilder.withDescription("partner or country name, one of: " + partnerNames);
+        OptionBuilder.hasArg();
+        OptionBuilder.isRequired();
+        OPT_STYLESHEET = OptionBuilder.create("c");
+
+        OptionBuilder.withLongOpt("xmlin");
+        OptionBuilder.withDescription("input file or a folder");
+        OptionBuilder.withType(File.class);
+        OptionBuilder.hasArg();
+        OptionBuilder.isRequired();
+        OPT_XML_SOURCE = OptionBuilder.create("x");
+
+        OptionBuilder.withLongOpt("pdfout");
+        OptionBuilder.withDescription("output folder for resulting pdf file(s)");
+        OptionBuilder.withType(File.class);
+        OptionBuilder.hasArg();
+        OPT_PDF_DEST = OptionBuilder.create("p");
+    }
+
+     private enum Opt {
         recursive(OPT_RECURSIVE),
         stylesheet(OPT_STYLESHEET),
         xmlsource(OPT_XML_SOURCE),
         pdfdestination(OPT_PDF_DEST);
 
         public final Option option;
-        private Opt(Option option) {
+        Opt(Option option) {
             this.option = option;
         }
 
@@ -84,11 +90,7 @@ public class P1PdfMaker {
             return (File) commandLine.getParsedOptionValue(pdfdestination.option.getOpt());
         }
         private static boolean recursive(CommandLine commandLine) {
-            if (commandLine.hasOption(recursive.option.getOpt())) {
-                return true;    
-            } else {
-                return false;
-            }
+            return commandLine.hasOption(recursive.option.getOpt());
         }
     }
 
@@ -96,12 +98,11 @@ public class P1PdfMaker {
      * A simple main method that can be called by the bundle activator.
      * Assumes that the expected command line args are passed in as properties.
      * Translates the properties to "fake" command line args and passes them on to the "real" main.
-     * @param context
      */
     public static void main(BundleContext context) throws BundleException {
         try {
             // translate properties to command line args
-            List<String> args = new ArrayList<String>();
+            List<String> args = new ArrayList<>();
             for (Opt o : Opt.values()) {
                 String value = context.getProperty(o.option.getOpt());
                 if (value == null) {
@@ -125,7 +126,6 @@ public class P1PdfMaker {
 
     /**
      * Main method.
-     * @param args
      */
     public static void main(String[] args) {
         CommandLineParser parser = new GnuParser();
@@ -172,7 +172,7 @@ public class P1PdfMaker {
     }
     
     private static List<File> filesToProcess(CommandLine line) throws ParseException {
-        List<File> xmls = new ArrayList<File>();
+        List<File> xmls = new ArrayList<>();
         File xml = Opt.xmlsource(line);
         if (!xml.exists()) {
             throw new ParseException("xml source file or folder does not exist");
@@ -188,7 +188,7 @@ public class P1PdfMaker {
     }
     
     private static List<File> getXmlFiles(File xmlsource, boolean recursive) {
-        List<File> files = new ArrayList<File>();
+        List<File> files = new ArrayList<>();
         if (xmlsource.isFile()) {
             // single file
             files.add(xmlsource);
@@ -196,7 +196,7 @@ public class P1PdfMaker {
             // read all files from directory
             for (File f : xmlsource.listFiles()) {
                 if (f.isDirectory() && recursive) {
-                    files.addAll(getXmlFiles(f, recursive));
+                    files.addAll(getXmlFiles(f, true));
                 } else {
                     if (f.getName().endsWith("xml")) {
                         files.add(f);
