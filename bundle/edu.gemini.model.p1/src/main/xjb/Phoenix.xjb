@@ -1,0 +1,86 @@
+<jxb:bindings version="2.0"
+              xmlns:jxb="http://java.sun.com/xml/ns/jaxb"
+              xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+
+    <!-- Custom bindings for Phoenix -->
+    <jxb:bindings schemaLocation="../xsd/Phoenix.xsd" node="/xsd:schema">
+        <!-- PhoenixFocalPlaneUnit => PhoenixParams.Mask-->
+        <jxb:bindings node="./xsd:simpleType[@name='PhoenixFocalPlaneUnit']/xsd:restriction">
+            <jxb:bindings node="./xsd:enumeration[@value='0.17 arcsec slit']">
+                <jxb:typesafeEnumMember name="MASK_1"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='0.25 arcsec slit']">
+                <jxb:typesafeEnumMember name="MASK_2"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='0.34 arcsec slit']">
+                <jxb:typesafeEnumMember name="MASK_3"/>
+            </jxb:bindings>
+        </jxb:bindings>
+
+        <!-- PhoenixFilter => PhoenixParams.Filter-->
+        <jxb:bindings node="./xsd:simpleType[@name='PhoenixFilter']/xsd:restriction">
+            <jxb:bindings node="./xsd:enumeration[@value='M1930']">
+                <jxb:typesafeEnumMember name="M1930"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='M2030']">
+                <jxb:typesafeEnumMember name="M2030"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='M2150']">
+                <jxb:typesafeEnumMember name="M2150"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='L2462']">
+                <jxb:typesafeEnumMember name="L2462"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='L2734']">
+                <jxb:typesafeEnumMember name="L2734"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='L3010']">
+                <jxb:typesafeEnumMember name="L3010"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='L3100']">
+                <jxb:typesafeEnumMember name="L3100"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='L3290']">
+                <jxb:typesafeEnumMember name="L3290"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='K4220']">
+                <jxb:typesafeEnumMember name="K4220"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='K4308']">
+                <jxb:typesafeEnumMember name="K4308"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='K4396']">
+                <jxb:typesafeEnumMember name="K4396"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='K4484']">
+                <jxb:typesafeEnumMember name="K4484"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='K4578']">
+                <jxb:typesafeEnumMember name="K4578"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='K4667']">
+                <jxb:typesafeEnumMember name="K4667"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='K4748']">
+                <jxb:typesafeEnumMember name="K4748"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='H6073']">
+                <jxb:typesafeEnumMember name="H6073"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='H6420']">
+                <jxb:typesafeEnumMember name="H6420"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='J7799']">
+                <jxb:typesafeEnumMember name="J7799"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='J8265']">
+                <jxb:typesafeEnumMember name="J8265"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='J9232']">
+                <jxb:typesafeEnumMember name="J9232"/>
+            </jxb:bindings>
+        </jxb:bindings>
+
+    </jxb:bindings>
+
+</jxb:bindings>
