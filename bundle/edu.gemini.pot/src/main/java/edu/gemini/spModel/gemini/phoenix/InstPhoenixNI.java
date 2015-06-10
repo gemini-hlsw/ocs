@@ -12,7 +12,6 @@ import edu.gemini.spModel.config.IConfigBuilder;
 import edu.gemini.spModel.gemini.inst.DefaultInstNodeInitializer;
 import edu.gemini.spModel.obscomp.SPInstObsComp;
 
-
 /**
  * Initializes <code>{@link ISPObsComponent}</code> nodes of type Phoenix.
  */
