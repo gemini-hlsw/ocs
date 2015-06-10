@@ -227,6 +227,7 @@
             <xsl:when test="$inst = 'nici'">NICI</xsl:when>
             <xsl:when test="$inst = 'nifs'">NIFS</xsl:when>
             <xsl:when test="$inst = 'niri'">NIRI</xsl:when>
+            <xsl:when test="$inst = 'phoenix'">Phoenix</xsl:when>
             <xsl:when test="$inst = 'dssi'">DSSI</xsl:when>
             <xsl:when test="$inst = 'texes'">Texes</xsl:when>
             <xsl:when test="$inst = 'trecs'">TReCS</xsl:when>
@@ -256,6 +257,7 @@
             <xsl:when test="$inst = 'nici'">Gemini South</xsl:when>
             <xsl:when test="$inst = 'nifs'">Gemini North</xsl:when>
             <xsl:when test="$inst = 'niri'">Gemini North</xsl:when>
+            <xsl:when test="$inst = 'phoenix'">Gemini South</xsl:when>
             <xsl:when test="$inst = 'dssi'">Gemini North</xsl:when>
             <xsl:when test="$inst = 'texes'">Gemini North</xsl:when>
             <xsl:when test="$inst = 'trecs'">Gemini South</xsl:when>

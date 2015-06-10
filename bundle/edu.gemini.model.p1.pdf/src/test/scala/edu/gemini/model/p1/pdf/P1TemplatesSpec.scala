@@ -180,6 +180,11 @@ class P1TemplatesSpec extends SpecificationWithJUnit {
       // Check that we use the proper public name of GPI
       XML.loadString(result) must (\\("table-cell") \ ("block") \> "GRACES")
     }
+    "present the correct instrument name when using Phoenix, REL-2356" in {
+      val result = transformProposal("proposal_with_phoenix.xml")
+      // Check that we use the proper public name of Phoenix
+      XML.loadString(result) must (\\("table-cell") \ "block" \> "Phoenix")
+    }
     "Supports Large Programs, REL-1614" in {
       val result = transformProposal("large_program.xml")
       val proposalXml = XML.loadString(result)
@@ -316,6 +321,11 @@ class P1TemplatesSpec extends SpecificationWithJUnit {
       val result = transformProposal("proposal_with_graces.xml", P1PDF.NOAO)
       // Check that GPI is shown in Gemini South
       XML.loadString(result) must (\\("table-cell") \ ("block") \>~ "Gemini North")
+    }
+    "show that Phoenix is in GS, REL-2356" in {
+      val result = transformProposal("proposal_with_phoenix.xml", P1PDF.NOAO)
+      // Check that Phenix is shown in Gemini South
+      XML.loadString(result) must (\\("table-cell") \ ("block") \>~ "Gemini South")
     }
     "show correct Observing Mode for FT, REL-1894" in {
       val result = transformProposal("proposal_fast_turnaround.xml", P1PDF.NOAO)
