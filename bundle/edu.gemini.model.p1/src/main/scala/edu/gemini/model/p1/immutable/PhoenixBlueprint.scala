@@ -14,7 +14,7 @@ case class PhoenixBlueprint(fpu: PhoenixFocalPlaneUnit, filter: PhoenixFilter) e
     m.getFilter
   )
 
-  override def instrument: Instrument = Instrument.Gpi
+  override def instrument: Instrument = Instrument.Phoenix
   override def ao: AoPerspective = AoNone
 
   def mutable(n: Namer) = {
