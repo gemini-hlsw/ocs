@@ -31,12 +31,10 @@ object MagnitudeBand {
 
   case object U  extends MagnitudeBand("U", nm(  360), nm(  75), "ultraviolet")
   case object B  extends MagnitudeBand("B", nm(  440), nm(  90), "blue")
-  case object G  extends MagnitudeBand("G", nm(  477), nm(   1))                  // TODO: G-band width?
   case object V  extends MagnitudeBand("V", nm(  550), nm(  85), "visual")
   case object UC extends MagnitudeBand("UC",nm(  610), nm(  63), "UCAC")
   case object R  extends MagnitudeBand("R", nm(  670), nm( 100), "red")
   case object I  extends MagnitudeBand("I", nm(  870), nm( 100), "infrared")
-  case object Z  extends MagnitudeBand("Z", nm(  913), nm(   1))                  // TODO: Z-band width?
   case object Y  extends MagnitudeBand("Y", nm( 1020), nm( 120))
   case object J  extends MagnitudeBand("J", nm( 1250), nm( 240))
   case object H  extends MagnitudeBand("H", nm( 1650), nm( 300))
@@ -49,8 +47,8 @@ object MagnitudeBand {
   // use V-Band center and width for apparent magnitudes
   case object AP extends MagnitudeBand("AP", V.center, V.width, Some("apparent"), MagnitudeSystem.VEGA)
 
-  val all: List[MagnitudeBand] =
-    List(_u, _g, _r, _i, _z, U, B, G, V, UC, R, I, Z, Y, J, H, K, L, M, N, Q, AP)
+  lazy val all: List[MagnitudeBand] =
+    List(_u, _g, _r, _i, _z, U, B, V, UC, R, I, Y, J, H, K, L, M, N, Q, AP)
 
   // order by central wavelength; make sure that AP always shows up last because it's sort of a special case
   implicit val MagnitudeBandOrder: scalaz.Order[MagnitudeBand] =

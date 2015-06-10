@@ -58,8 +58,14 @@ sealed trait MagnitudesFilter {
   def ignoredMagnitudeField(v: FieldId): Boolean = false
   // Indicates if a magnitude is valid
   def validMagnitude(m: Magnitude): Boolean = !(m.value.isNaN || m.error.exists(_.isNaN))
-  // Find what band the field descriptor should represent
-  def findBand(id: FieldId, band: String): Option[MagnitudeBand] = MagnitudeBand.all.find(_.name == band)
+
+  // Find what band the field descriptor should represent, in general prefer "upper case" bands over "lower case" Sloan bands.
+  // This will prefer U, R and I over u', r' and i' but will map "g" and "z" to the Sloan bands g' and z'.
+  def findBand(id: FieldId, band: String): Option[MagnitudeBand] =
+    MagnitudeBand.all.
+      find(_.name == band.toUpperCase).
+      orElse(MagnitudeBand.all.find(_.name == band))
+
   // filter magnitudes as a whole
   def filterMagnitudeFields(magnitudeFields: List[(FieldId, Magnitude)]): List[Magnitude] = magnitudeFields.collect { case (_, mag) if validMagnitude(mag) => mag }
 }
@@ -72,12 +78,12 @@ case object UCAC4Filter extends MagnitudesFilter {
   override def ignoredMagnitudeField(v: FieldId) = v.id === "amag" || v.id === "e_amag"
   // Magnitudes with value 20 or error over or equal to 0.9 are invalid
   override def validMagnitude(m: Magnitude) = super.validMagnitude(m) && m.value =/= ucac4BadMagnitude && m.error.map(math.abs) <= ucac4BadMagnitudeError
-  // UCAC4 has a few special cases to map magnitudes
+  // UCAC4 has a few special cases to map magnitudes, g, r and i refer to the Sloan bands g', r' and i'
   override def findBand(id: FieldId, band: String): Option[MagnitudeBand] = (id.id, id.ucd) match {
     case ("gmag" | "e_gmag", ucd) if ucd.includes(UcdWord("em.opt.r")) => Some(MagnitudeBand._g)
     case ("rmag" | "e_rmag", ucd) if ucd.includes(UcdWord("em.opt.r")) => Some(MagnitudeBand._r)
     case ("imag" | "e_imag", ucd) if ucd.includes(UcdWord("em.opt.i")) => Some(MagnitudeBand._i)
-    case _                                                             => MagnitudeBand.all.find(_.name == band)
+    case _                                                             => super.findBand(id, band)
   }
 }
 
@@ -102,9 +108,7 @@ case object PPMXLFilter extends MagnitudesFilter {
   }
 }
 
-case object DefaultFilter extends MagnitudesFilter {
-  override def findBand(id: FieldId, band: String): Option[MagnitudeBand] = MagnitudeBand.all.find(_.name == band)
-}
+case object DefaultFilter extends MagnitudesFilter
 
 trait VoTableParser {
 
@@ -152,7 +156,7 @@ trait VoTableParser {
 
     def parseBandToken(token: String):Option[String] = token match {
       case magRegex(_, null) => "UC".some
-      case magRegex(_, b)    => b.replace(".", "").toUpperCase.some
+      case magRegex(_, b)    => b.replace(".", "").some
       case _                 => none
     }
 

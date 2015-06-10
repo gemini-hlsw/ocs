@@ -5,20 +5,20 @@ import Scalaz._
 
 case class Magnitude(value: Double, band: MagnitudeBand, error: Option[Double], system: MagnitudeSystem) {
 
-  /** Secondary constructor defaulting to `MagnitudeSystem.VEGA`. */
+  /** Secondary constructor. */
   def this(value: Double, band: MagnitudeBand, error: Double) =
-    this(value, band, Some(error), MagnitudeSystem.VEGA)
+    this(value, band, Some(error), band.defaultSystem)
 
   def this(value: Double, band: MagnitudeBand, error: Double, system: MagnitudeSystem) =
-    this(value, band, Some(error), MagnitudeSystem.VEGA)
+    this(value, band, Some(error), system)
 
   /** Secondary constructor defaulting to no error. */
   def this(value: Double, band: MagnitudeBand, system: MagnitudeSystem) =
     this(value, band, None, system)
 
-  /** Secondary constructor defaulting to no given error and `MagnitudeSystem.VEGA`. */
+  /** Secondary constructor defaulting to no given error. */
   def this(value: Double, band: MagnitudeBand) =
-    this(value, band, None, MagnitudeSystem.VEGA)
+    this(value, band, None, band.defaultSystem)
 
   def add(v: Double): Magnitude =
     copy(value = value + v)

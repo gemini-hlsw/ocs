@@ -133,12 +133,10 @@ object ModelConverters {
 
       case MagnitudeBand.U  => edu.gemini.shared.skyobject.Magnitude.Band.U
       case MagnitudeBand.B  => edu.gemini.shared.skyobject.Magnitude.Band.B
-      case MagnitudeBand.G  => edu.gemini.shared.skyobject.Magnitude.Band.g
       case MagnitudeBand.V  => edu.gemini.shared.skyobject.Magnitude.Band.V
       case MagnitudeBand.UC => edu.gemini.shared.skyobject.Magnitude.Band.UC
       case MagnitudeBand.R  => edu.gemini.shared.skyobject.Magnitude.Band.R
       case MagnitudeBand.I  => edu.gemini.shared.skyobject.Magnitude.Band.I
-      case MagnitudeBand.Z  => edu.gemini.shared.skyobject.Magnitude.Band.z
       case MagnitudeBand.Y  => edu.gemini.shared.skyobject.Magnitude.Band.Y
       case MagnitudeBand.J  => edu.gemini.shared.skyobject.Magnitude.Band.J
       case MagnitudeBand.H  => edu.gemini.shared.skyobject.Magnitude.Band.H
