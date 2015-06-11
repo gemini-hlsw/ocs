@@ -28,6 +28,9 @@ object PreliminaryMerge {
 
   def tree(mc: MergeContext): TryVcs[Tree[MergeNode]] = {
 
+    def isNewLocal(l: ISPNode)          = !mc.remote.isKnown(l.key)
+    def isNewRemote(r: Tree[MergeNode]) = !mc.local.isKnown(r.key)
+
     def isUpdated(k: SPNodeKey, pc0: ProgContext, pc1: ProgContext): Boolean =
       pc0.version(k).compare(pc1.version(k)) match {
         case Newer | Conflicting => true
@@ -37,69 +40,99 @@ object PreliminaryMerge {
     def isUpdatedLocal(l: ISPNode)          = isUpdated(l.key, mc.local, mc.remote)
     def isUpdatedRemote(r: Tree[MergeNode]) = isUpdated(r.key, mc.remote, mc.local)
 
-    def isUpdatedLocalParent(r: Tree[MergeNode]): Boolean =
-      mc.local.parent(r.key).flatMap(mc.local.get).exists(isUpdatedLocal)
+    // Defines the rules for determining which parent wins in case of ambiguities.
+    def mergeParent(childKey: SPNodeKey): Option[SPNodeKey] = {
+      val lParentKey = mc.local.parent(childKey)
+      val rParentKey = mc.remote.parent(childKey)
 
-    def isUpdatedRemoteParent(l: ISPNode): Boolean =
-      mc.remote.parent(l.key).flatMap(mc.remote.get).exists(isUpdatedRemote)
+      (lParentKey, rParentKey) match {
+        case (None, None)                              => None
+        case (Some(lKey), None)                        => Some(lKey)
+        case (None, Some(rKey))                        => Some(rKey)
+        case (Some(lKey), Some(rKey)) if lKey === rKey => Some(lKey)
+        case (Some(lKey), Some(rKey))                  =>
+          // The only way they can both be defined and yet different is if one
+          // or the other (or both) local and remote sides have an updated
+          // parent and child version.  In this case remote wins when updated.
+          val rParentUp = rParentKey.flatMap(mc.remote.get).exists(isUpdatedRemote)
+          val rChildUp  = mc.remote.get(childKey).exists(isUpdatedRemote)
+          if (rParentUp && rChildUp) Some(rKey) else Some(lKey)
+      }
+    }
 
-    def isDeletedRemoteButUpdatedLocal(l: ISPNode): Boolean =
-      mc.remote.isDeleted(l.key) && (
-        isUpdatedLocal(l) || l.children.exists(isDeletedRemoteButUpdatedLocal)
+    def keep(k: SPNodeKey, pc: ProgContext): Boolean = pc.parent(k) == mergeParent(k)
+    def keepLocalChild(l: ISPNode): Boolean          = keep(l.key, mc.local)
+    def keepRemoteChild(r: Tree[MergeNode]): Boolean = keep(r.key, mc.remote)
+
+    def containsUpdatedLocal(l: ISPNode): Boolean =
+      isUpdatedLocal(l) || l.children.exists(containsUpdatedLocal)
+
+    def containsUpdatedRemote(r: Tree[MergeNode]): Boolean =
+      isUpdatedRemote(r) || r.subForest.exists(containsUpdatedRemote)
+
+    def containsMissingRemoteUpdatedLocal(l: ISPNode): Boolean =
+      !mc.remote.isPresent(l.key) && (
+        isUpdatedLocal(l) || l.children.exists(containsMissingRemoteUpdatedLocal)
       )
 
-    def isDeletedLocalButUpdatedRemote(r: Tree[MergeNode]): Boolean =
-      mc.local.isDeleted(r.key) && (
-        isUpdatedRemote(r) || r.subForest.exists(isDeletedLocalButUpdatedRemote)
+    def containsMissingLocalUpdatedRemote(r: Tree[MergeNode]): Boolean =
+      !mc.local.isPresent(r.key) && (
+        isUpdatedRemote(r) || r.subForest.exists(containsMissingLocalUpdatedRemote)
       )
 
 
     type ChildFilter = PartitionedChildren => PartitionedChildren
 
+    // Filter for local nodes that are newer.
     val newer: ChildFilter = pc => {
       // Keep all local-only children not in a different updated parent remotely.
-      // That is, when the local and remote disagree about where to put a node,
-      // the remote version wins.
-      val local = pc.local.filterNot(isUpdatedRemoteParent)
+      val local = pc.local.filter(keepLocalChild)
 
-      // Keep those remote-only nodes deleted locally (i.e., not elsewhere
-      // locally) and that have a descendant which is modified remotely.
-      // Otherwise we're newer so they are deleted.
-      val remote = pc.remote.filter(isDeletedLocalButUpdatedRemote)
+      // In general we don't want the remote nodes -- we're deleting them.
+      // If deleting something that contains an update we haven't seen though,
+      // we want to keep it anyway.
+      val remote = pc.remote.filter(containsMissingLocalUpdatedRemote)
 
       PartitionedChildren(local, pc.both, remote)
     }
 
-    // Deleted remotely is only used when the local node is not updated
-    // (otherwise `newer` is used). Since the node has not been updated but has
-    // been deleted remotely, we get rid of all children that don't have a
-    // descendant which has been updated locally.
+    // Filter for local nodes that resurrect remotely deleted nodes.  Keep
+    // all children that have been updated locally and which don't belong to
+    // some other node.
     val deletedRemotely: ChildFilter = pc =>
-      pc.copy(local = pc.local.filter(isDeletedRemoteButUpdatedLocal))
-
-    // Keep only those local children that are deleted remotely (i.e., not
-    // elsewhere remotely) and that have a descendant which is modified locally.
-    // All remote children are kept.
-    val older: ChildFilter = pc =>
-      pc.copy(local = pc.local.filter(isDeletedRemoteButUpdatedLocal))
-
-    // Deleted locally is only used when the remote node is not updated
-    // (otherwise `older` is used).  Since the node has not been updated but has
-    // been deleted locally, we git rid of all children that don't have a
-    // descendant which has been updated remotely.
-    val deletedLocally: ChildFilter = pc =>
-      pc.copy(remote = pc.remote.filter(isDeletedLocalButUpdatedRemote))
-
-    // When conflicting, we remove any local-only nodes that are not new,
-    // deleted remotely but updated locally or that are in some other updated
-    // parent in the remote version.
-    val conflicting: ChildFilter = pc =>
-      pc.copy(local = pc.local.filter { lc =>
-        !mc.remote.isKnown(lc.key) ||
-        isDeletedRemoteButUpdatedLocal(lc) ||
-        mc.remote.parent(lc.key).flatMap(mc.remote.get).exists(p => !isUpdatedRemote(p))
+      pc.copy(local = pc.local.filter { child =>
+        keepLocalChild(child) && containsUpdatedLocal(child)
       })
 
+    // Filter for local nodes that are older than their remote counterparts.
+    // This is basically the opposite of "newer".
+    val older: ChildFilter = pc => {
+      val local  = pc.local.filter(containsMissingRemoteUpdatedLocal)
+      val remote = pc.remote.filter(keepRemoteChild)
+      PartitionedChildren(local, pc.both, remote)
+    }
+
+    // Filter for remote nodes that have been deleted locally.  The opposite of
+    // "deletedRemotely".
+    val deletedLocally: ChildFilter = pc =>
+      pc.copy(remote = pc.remote.filter { child =>
+        keepRemoteChild(child) && containsUpdatedRemote(child)
+      })
+
+    // Filter for conflicting edits.  When conflicting, the only local-only
+    // children we keep are those that contain some local update and which
+    // don't belong in some other node (we let any remote deletions through)..
+    val conflicting: ChildFilter = pc => {
+      val local  = pc.local.filter { child =>
+        keepLocalChild(child) && containsUpdatedLocal(child)
+      }
+
+      val remote = pc.remote.filter { child =>
+        keepRemoteChild(child)
+      }
+
+      PartitionedChildren(local, pc.both, remote)
+    }
 
     def toNode(mod: MergeNode, lcs: List[ISPNode], rcs: List[Tree[MergeNode]], f: ChildFilter): Tree[MergeNode] = {
       // Filter the children according to the version information.
@@ -156,13 +189,29 @@ object PreliminaryMerge {
       Tree.node(mod2, newChildren.toStream)
     }
 
-    def go(lr: ISPNode \&/ Tree[MergeNode]): Tree[MergeNode] =
-      lr match {
-        case This(l)    =>
-          toNode(modified(l), l.children, Nil, if (isUpdatedLocal(l)) newer else deletedRemotely)
 
-        case That(r)    =>
-          toNode(r.rootLabel, Nil, r.subForest.toList, if (isUpdatedRemote(r)) older else deletedLocally)
+    def go(lr: ISPNode \&/ Tree[MergeNode]): Tree[MergeNode] = {
+      val incr0: Tree[MergeNode] => Tree[MergeNode] = identity
+
+      def incr1(n: Tree[MergeNode]): Tree[MergeNode] =
+        n.rootLabel match {
+          case m: Modified   =>
+            Tree.node(m.copy(nv = m.nv.incr(mc.local.prog.getLifespanId)), n.subForest)
+          case _             =>
+            n
+        }
+
+      lr match {
+        case This(l) =>
+          val (incr, filt) = if (isNewLocal(l)) (incr0, newer)  // New local node
+                             else (incr1 _, deletedRemotely)    // Resurrected local node
+          incr(toNode(modified(l), l.children, Nil, filt))
+
+        case That(r) =>
+          val (incr, filt) = if (isNewRemote(r)) (incr0, older) // New remote node
+                             else (incr1 _, deletedLocally)     // Resurrected remote node
+          incr(toNode(r.rootLabel, Nil, r.subForest.toList, filt))
+
 
         case Both(l, r) => r.rootLabel match {
           case _: Unmodified => r
@@ -177,6 +226,7 @@ object PreliminaryMerge {
             }
         }
       }
+    }
 
     def addDataObjectConflicts(in: Tree[MergeNode]): TryVcs[Tree[MergeNode]] = {
       val commonKeys = mc.remote.diffMap.keySet & mc.local.nodeMap.keySet

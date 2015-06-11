@@ -31,6 +31,9 @@ final case class Modified(key: SPNodeKey,
                           detail: NodeDetail,
                           conflicts: Conflicts) extends MergeNode {
 
+  def this(n: ISPNode) =
+    this(n.key, n.getVersion, n.getDataObject, NodeDetail(n), n.getConflicts)
+
   def withDataObjectConflict(dob: ISPDataObject): Modified = {
     val doc = new DataObjectConflict(DataObjectConflict.Perspective.LOCAL, dob)
     copy(conflicts = conflicts.withDataObjectConflict(doc))
@@ -69,8 +72,7 @@ object MergeNode {
   def modified(key: SPNodeKey, nv: NodeVersions, dob: ISPDataObject, detail: NodeDetail, conflicts: Conflicts): MergeNode =
     Modified(key, nv, dob, detail, conflicts)
 
-  def modified(n: ISPNode): MergeNode =
-    Modified(n.key, n.getVersion, n.getDataObject, NodeDetail(n), n.getConflicts)
+  def modified(n: ISPNode): MergeNode = new Modified(n)
 
   def modifiedTree(root: ISPNode): Tree[MergeNode] =
     Tree.node(modified(root), root.children.map(modifiedTree).toStream)

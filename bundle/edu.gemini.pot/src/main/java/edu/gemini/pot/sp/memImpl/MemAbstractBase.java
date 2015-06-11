@@ -212,18 +212,8 @@ public abstract class MemAbstractBase implements ISPNode, Serializable {
      */
     protected void attachTo(MemAbstractContainer node) throws SPNodeNotLocalException, SPTreeStateException {
         _setParent(node);
-//        markModified();  moving a child impacts the old and new parents, but not the child
-        if (node != null) node.markModified();
-
-        // Add this node to the map if it wasn't there previously.  This
-        // awful hack was put into place to allow us to create temporary
-        // nodes that never get added to the program and yet not pollute the
-        // version map.  We use this to run the validity checker "can add"
-        // with temporary throw-away nodes.
-        //
-        // See DocumentData.markModified for the corresponding
-        // hack in markModified for nodes without parents. Sorry. :/
-        if (!getDocumentData().containsVersion(getNodeKey())) {
+        if (node != null) {
+            node.markModified();
             markModified();
         }
     }
