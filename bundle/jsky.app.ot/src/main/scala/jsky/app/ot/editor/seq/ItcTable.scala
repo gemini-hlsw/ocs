@@ -270,7 +270,7 @@ class ItcImagingTable(val parameters: ItcParametersProvider) extends ItcTable {
         case INSTRUMENT_GSAOI  =>
           new ItcGsaoiImagingTableModel(keys, uniqueConfigs, inputs, results)
 
-        case INSTRUMENT_GNIRS | INSTRUMENT_NIFS | INSTRUMENT_NIRI =>
+        case INSTRUMENT_NIRI =>
           new ItcGenericImagingTableModel(keys, uniqueConfigs, inputs, results, showCoadds = true)
 
         case _ =>
