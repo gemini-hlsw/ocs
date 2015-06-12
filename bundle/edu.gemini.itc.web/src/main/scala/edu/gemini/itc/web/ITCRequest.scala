@@ -3,11 +3,10 @@ package edu.gemini.itc.web
 import javax.servlet.http.HttpServletRequest
 
 import edu.gemini.itc.base._
-import edu.gemini.itc.gnirs.GnirsParameters
 import edu.gemini.itc.michelle.MichelleParameters
 import edu.gemini.itc.nifs.NifsParameters
-import edu.gemini.itc.shared.SourceDefinition.{Recession, Distribution, Profile}
-import edu.gemini.itc.shared._
+import edu.gemini.itc.shared.SourceDefinition.{Distribution, Profile, Recession}
+import edu.gemini.itc.shared.{GnirsParameters, _}
 import edu.gemini.itc.trecs.TRecsParameters
 import edu.gemini.spModel.core.{Site, Wavelength}
 import edu.gemini.spModel.gemini.acqcam.AcqCamParams
@@ -16,6 +15,7 @@ import edu.gemini.spModel.gemini.flamingos2.Flamingos2
 import edu.gemini.spModel.gemini.gmos.GmosCommonType.DetectorManufacturer
 import edu.gemini.spModel.gemini.gmos.GmosNorthType.{DisperserNorth, FPUnitNorth, FilterNorth}
 import edu.gemini.spModel.gemini.gmos.GmosSouthType.{DisperserSouth, FPUnitSouth, FilterSouth}
+import edu.gemini.spModel.gemini.gnirs.GNIRSParams
 import edu.gemini.spModel.gemini.gsaoi.Gsaoi
 import edu.gemini.spModel.gemini.michelle.MichelleParams
 import edu.gemini.spModel.gemini.niri.Niri
@@ -135,13 +135,13 @@ object ITCRequest {
   }
 
   def gnirsParameters(r: ITCRequest): GnirsParameters = {
-    val grating     = r.parameter("instrumentDisperser")
-    val camera      = r.parameter("instrumentCamera")
-    val xDisp       = r.parameter("xdisp")
-    val readNoise   = r.parameter("readNoise")
+    val grating     = r.enumParameter(classOf[GNIRSParams.Disperser])
+    val camera      = r.enumParameter(classOf[GNIRSParams.PixelScale])
+    val xDisp       = r.enumParameter(classOf[GNIRSParams.CrossDispersed])
+    val readMode    = r.enumParameter(classOf[GNIRSParams.ReadMode])
     val centralWl   = Wavelength.fromMicrons(r.doubleParameter("instrumentCentralWavelength"))
-    val fpMask      = r.parameter("instrumentFPMask")
-    new GnirsParameters(camera, grating, readNoise, xDisp, centralWl, fpMask)
+    val fpMask      = r.enumParameter(classOf[GNIRSParams.SlitWidth])
+    new GnirsParameters(camera, grating, readMode, xDisp, centralWl, fpMask)
   }
 
   def gsaoiParameters(r: ITCRequest): GsaoiParameters = {

@@ -338,43 +338,38 @@
 			<tr>
 
 				<td height="25">Camera: </td>
-				<td height="25"><select name="instrumentCamera" size="1">
-				<option value="0.15" selected="selected">
-				0.15 arcsec/pix</option>
-				<option value="0.05">
-				0.05 arcsec/pix</option>
+				<td height="25"><select name="PixelScale" size="1">
+				<option value="PS_015" selected="selected"> 0.15 arcsec/pix</option>
+				<option value="PS_005"> 0.05 arcsec/pix</option>
 				</select></td>
 
 				<td height="25">Focal plane mask:</td>
-				<td height="25"><select name="instrumentFPMask" size="1">
-				<option value="slit0.10">
+				<td height="25"><select name="SlitWidth" size="1">
+				<option value="SW_1">
 				0.10 arcsec slit</option>
-				<option value="slit0.15">
+				<option value="SW_2">
 				0.15 arcsec slit</option>
-				<option value="slit0.20">
+				<option value="SW_3">
 
 				0.20 arcsec slit</option>
-				<option selected="selected" value="slit0.30">
+				<option selected="selected" value="SW_4">
 				0.30 arcsec slit</option>
-				<option value="slit0.45">
+				<option value="SW_5">
 				0.45 arcsec slit</option>
-				<option value="slit0.675">
+				<option value="SW_6">
 				0.675 arcsec slit</option>
 
-				<option value="slit1.0">
+				<option value="SW_7">
 				1.0 arcsec slit</option>
 				</select></td>
 			</tr>
 			<tr>
 				<td height="25">Grating:</td>
-				<td height="25"><select name="instrumentDisperser" size="1">
+				<td height="25"><select name="Disperser" size="1">
 
-				<option value="G10">
-				10 l/mm</option>
-				<option value="G32" selected="selected">
-				32 l/mm</option>
-				<option value="G110">
-				110 l/mm</option>
+				<option value="D_10"> 10 l/mm</option>
+				<option value="D_32" selected="selected"> 32 l/mm</option>
+				<option value="D_111"> 111 l/mm</option>
 				</select></td>
 
 				<td height="25">Spectrum central wavelength: </td>
@@ -382,11 +377,11 @@
 			</tr>
 			<tr>
 				<td height="25">Cross dispersion:</td>
-				<td colspan= "2" height="25"><select name="xdisp" size="1">
-				<option value="no" selected="selected">
+				<td colspan= "2" height="25"><select name="CrossDispersed" size="1">
+				<option value="NO" selected="selected">
 
 				no</option>
-				<option value="yes">
+				<option value="SXD">
 				yes</option>
 				</select></td>
 			</tr>
@@ -405,24 +400,24 @@
 
 			</tr>
 			<tr>
-				<td align="right" height="21"><input value="medNoise" name="readNoise" type="radio" />  </td>
+				<td align="right" height="21"><input value="BRIGHT" name="ReadMode" type="radio" />  </td>
 				<td height="21">medium background / bright objects  [shallow well; typically
 				for 1-2.5um, standard stars] </td>
 			</tr>
 			<tr>
-				<td align="right" height="21"><input value="lowNoise" name="readNoise" checked="checked" type="radio" />  </td>
+				<td align="right" height="21"><input value="FAINT" name="ReadMode" checked="checked" type="radio" />  </td>
 
 				<td height="21">low background / faint objects [shallow well; typically
 				for 1-2.5um, science targets] </td>
 			</tr>
 			<tr>
-				<td align="right" height="21"><input value="verylowNoise" name="readNoise" type="radio" />  </td>
+				<td align="right" height="21"><input value="VERY_FAINT" name="ReadMode" type="radio" />  </td>
 				<td height="21">very low background / faintest objects [shallow well; typically for
 				1-2.5um v. faint science targets] </td>
 			</tr>
 			<tr>
 
-				<td align="right" height="21"><input value="highNoise" name="readNoise" type="radio" />  </td>
+				<td align="right" height="21"><input value="VERY_BRIGHT" name="ReadMode" type="radio" />  </td>
 				<td height="21">high background (i.e. thermal IR) [deep well; typically for
 				3-5um targets] </td>
 			</tr>

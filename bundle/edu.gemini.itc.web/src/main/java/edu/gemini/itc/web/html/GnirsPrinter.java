@@ -3,7 +3,6 @@ package edu.gemini.itc.web.html;
 import edu.gemini.itc.base.GnirsSpectroscopyResult;
 import edu.gemini.itc.base.SpectroscopyResult;
 import edu.gemini.itc.gnirs.Gnirs;
-import edu.gemini.itc.gnirs.GnirsParameters;
 import edu.gemini.itc.gnirs.GnirsRecipe;
 import edu.gemini.itc.shared.*;
 import scala.Tuple2;
@@ -135,10 +134,9 @@ public final class GnirsPrinter extends PrinterBase {
         String s = "Instrument configuration: \n";
         s += HtmlPrinter.opticalComponentsToString(instrument);
 
-        if (!instrument.getFocalPlaneMask().equals(GnirsParameters.NO_SLIT))
-            s += "<LI>Focal Plane Mask: " + instrument.getFocalPlaneMask() + "\n";
+        s += "<LI>Focal Plane Mask: " + instrument.getFocalPlaneMask().displayValue() + "\n";
 
-        s += "<LI>Grating: " + instrument.getGrating() + "\n"; // REL-469
+        s += "<LI>Grating: " + instrument.getGrating().displayValue() + "\n"; // REL-469
 
         s += "<LI>Read Noise: " + instrument.getReadNoise() + "\n";
         s += "<LI>Well Depth: " + instrument.getWellDepth() + "\n";

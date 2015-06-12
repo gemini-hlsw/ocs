@@ -1,44 +1,46 @@
-// This software is Copyright(c) 2010 Association of Universities for
-// Research in Astronomy, Inc.  This software was prepared by the
-// Association of Universities for Research in Astronomy, Inc. (AURA)
-// acting as operator of the Gemini Observatory under a cooperative
-// agreement with the National Science Foundation. This software may 
-// only be used or copied as described in the license set out in the 
-// file LICENSE.TXT included with the distribution package.
-// * CameraFactory.java
-// *
-// * Created on January 13, 2004, 3:15 PM
-// */
-
 package edu.gemini.itc.gnirs;
 
-/**
- * @author bwalls
- */
-public class CameraFactory {
+import edu.gemini.itc.base.Instrument;
+import edu.gemini.itc.base.TransmissionElement;
+import edu.gemini.spModel.gemini.gnirs.GNIRSParams.PixelScale;
 
-    private CameraOptics _camera;
+public final class CameraFactory {
 
-    /**
-     * Creates a new instance of CameraFactory
-     */
-    public CameraFactory(String cameraLength, String cameraColor, String directory) {
-        if (cameraLength.equals(GnirsParameters.LONG) && cameraColor.equals(GnirsParameters.BLUE)) {
-            _camera = new LongCameraBlueOptics(directory);
-        }
-        if (cameraLength.equals(GnirsParameters.LONG) && cameraColor.equals(GnirsParameters.RED)) {
-            _camera = new LongCameraRedOptics(directory);
-        }
-        if (cameraLength.equals(GnirsParameters.SHORT) && cameraColor.equals(GnirsParameters.BLUE)) {
-            _camera = new ShortCameraBlueOptics(directory);
-        }
-        if (cameraLength.equals(GnirsParameters.SHORT) && cameraColor.equals(GnirsParameters.RED)) {
-            _camera = new ShortCameraRedOptics(directory);
+    private static final String BLUE    = "BC";
+    private static final String RED     = "RC";
+
+    private static final String LONG    = "L";
+    private static final String SHORT   = "S";
+
+
+    public static TransmissionElement camera(final PixelScale pixelScale, final double wavelength, final String directory) {
+
+        final String cameraLength = getCameraLength(pixelScale);
+        final String cameraColor  = getCameraColor(wavelength);
+
+        return new TransmissionElement(directory + "/" + Gnirs.getPrefix() + cameraLength + cameraColor + Instrument.getSuffix()) {
+            public String toString() {
+                // prepare a pretty string which is used as the name of this transmission element
+                final String length = cameraLength.equals("L") ? "Long" : "Short";
+                final String color  = cameraColor.equals("BC") ? "Blue" : "Red";
+                return String.format("Camera: %.2farcsec/pix (%s %s)", pixelScale.getValue(), length, color);
+            }
+        };
+    }
+
+    private static String getCameraLength(final PixelScale pixelScale) {
+        switch (pixelScale) {
+            case PS_005: return LONG;
+            case PS_015: return SHORT;
+            default:     throw new Error();
         }
     }
 
-    CameraOptics getCamera() {
-        return _camera;
+    private static String getCameraColor(final double wavelength) {
+        if (wavelength < 2600) {
+            return BLUE;
+        } else {
+            return RED;
+        }
     }
-
 }

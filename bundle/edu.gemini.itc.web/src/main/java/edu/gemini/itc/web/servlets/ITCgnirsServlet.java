@@ -1,6 +1,6 @@
 package edu.gemini.itc.web.servlets;
 
-import edu.gemini.itc.gnirs.GnirsParameters;
+import edu.gemini.itc.shared.GnirsParameters;
 import edu.gemini.itc.shared.Parameters;
 import edu.gemini.itc.shared.PlottingDetails;
 import edu.gemini.itc.web.ITCRequest;

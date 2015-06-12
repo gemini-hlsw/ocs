@@ -5,6 +5,7 @@ import edu.gemini.spModel.gemini.acqcam.AcqCamParams
 import edu.gemini.spModel.gemini.altair.AltairParams
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2
 import edu.gemini.spModel.gemini.gmos.GmosCommonType
+import edu.gemini.spModel.gemini.gnirs.GNIRSParams
 import edu.gemini.spModel.gemini.gsaoi.Gsaoi
 import edu.gemini.spModel.gemini.niri.Niri
 
@@ -36,6 +37,14 @@ final case class GmosParameters(
                      ifuMethod:         Option[IfuMethod],
                      ccdType:           GmosCommonType.DetectorManufacturer,
                      site:              Site) extends InstrumentDetails
+
+final case class GnirsParameters(
+                     pixelScale:        GNIRSParams.PixelScale,
+                     grating:           GNIRSParams.Disperser,
+                     readMode:          GNIRSParams.ReadMode,
+                     crossDispersed:    GNIRSParams.CrossDispersed,
+                     centralWavelength: Wavelength,
+                     slitWidth:         GNIRSParams.SlitWidth) extends InstrumentDetails
 
 final case class GsaoiParameters(
                       filter:           Gsaoi.Filter,
