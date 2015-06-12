@@ -78,7 +78,7 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
 
     lazy val all = {
       val ps =
-        List(noObs, titleCheck, band3option, abstractCheck, tacCategoryCheck, keywordCheck, attachmentCheck, attachmentValidityCheck, attachmentSizeCheck, missingObsDetailsCheck, duplicateInvestigatorCheck, ftReviewerOrMentor, ftAffiliationMissmatch).flatten ++
+        List(noObs, nonUpdatedInvestigatorName, titleCheck, band3option, abstractCheck, tacCategoryCheck, keywordCheck, attachmentCheck, attachmentValidityCheck, attachmentSizeCheck, missingObsDetailsCheck, duplicateInvestigatorCheck, ftReviewerOrMentor, ftAffiliationMissmatch).flatten ++
           TimeProblems(p, s).all ++
           TimeProblems.partnerZeroTimeRequest(p, s) ++
           TacProblems(p, s).all ++
@@ -438,6 +438,10 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
         v =>
           v.edit(i)
       })
+
+    private lazy val nonUpdatedInvestigatorName =
+      (p.investigators.pi.firstName === "Principal" && p.investigators.pi.lastName === "Investigator") option
+        new Problem(Severity.Error, s"Please provide PI's full name", "Overview", s.inOverview {_.edit(p.investigators.pi)})
 
   }
 

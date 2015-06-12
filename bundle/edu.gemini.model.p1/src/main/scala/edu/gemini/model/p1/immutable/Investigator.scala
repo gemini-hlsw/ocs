@@ -54,7 +54,7 @@ object PrincipalInvestigator extends UuidCache[M.PrincipalInvestigator] {
       m.getStatus,
       InstitutionAddress(m.getAddress))
 
-  def empty = apply(UUID.randomUUID(), "Principal", "Investigator", Nil, "", InvestigatorStatus.PH_D, InstitutionAddress.empty)
+  def empty = apply(UUID.randomUUID(), "", "", Nil, "", InvestigatorStatus.PH_D, InstitutionAddress.empty)
 
 }
 
