@@ -464,11 +464,12 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
 
       object button extends Button with Bound.Self[Proposal] {
         val cpcLens = Proposal.proposalClass
+
         action = Action("") {
           model.foreach { p =>
             p.proposalClass match {
               case c: ClassicalProposalClass =>
-                val vs0 = c.visitors.map(_(p)).flatten
+                val vs0 = c.visitors.flatMap(_(p))
                 val all = p.investigators.all
                 val sel = all.map(vs0.contains)
                 VisitorSelector.open(all.zip(sel), canEdit, view) foreach { vs1 =>
@@ -489,7 +490,7 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
           text = ~m.map { p =>
             p.proposalClass match {
               case c: ClassicalProposalClass =>
-                c.visitors.map(_(p)).flatten match {
+                c.visitors.flatMap(_(p)) match {
                   case Nil => "None selected."
                   case is => is.mkString(", ")
                 }
@@ -601,7 +602,7 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
         }
 
       def updateP1Model(selection: Option[Investigator]) {
-        model.map(p => p.proposalClass match {
+        model.foreach { p => p.proposalClass match {
           case f: FastTurnaroundProgramClass =>
             val validMentors = reviewers(model, phDRequired = true)
             // If the reviewer has a PhD set mentor to None
@@ -610,7 +611,7 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
             val pc = FastTurnaroundProgramClass.reviewerAndMentor.set(f, (reviewer, m))
             model = Some(pcLens.set(p, pc))
           case _ => // ignore
-        })
+        }}
       }
 
       def hasPhD(f: FastTurnaroundProgramClass):Boolean =
@@ -638,12 +639,12 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
         } yield m
 
       def updateP1Model(selection: Option[Investigator]) {
-        model.map(p => p.proposalClass match {
+        model.foreach { p => p.proposalClass match {
           case f:FastTurnaroundProgramClass =>
             val pc = FastTurnaroundProgramClass.mentor.set(f, selection)
             model = Some(pcLens.set(p, pc))
           case _                            => // ignore
-        })
+        }}
       }
 
       override def refresh(m:Option[Proposal]) {
@@ -700,14 +701,14 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
           case _                            => false
         }
 
-        val currentAffiliation = m.map(_.proposalClass).map {
+        val currentAffiliation = m.map(_.proposalClass).flatMap {
             case f:FastTurnaroundProgramClass => f.partnerAffiliation
             case _                            => None
-          }.flatten
-        val previousAffiliation = m.map(_.proposalClass).map {
-            case f:FastTurnaroundProgramClass => f.previousPartnerAffiliation
-            case _                            => None
-          }.flatten
+          }
+        val previousAffiliation = m.map(_.proposalClass).flatMap {
+            case f: FastTurnaroundProgramClass => f.previousPartnerAffiliation
+            case _ => None
+          }
         val pi = currentPi(m)
         val piPartner = Institutions.institution2Ngo(pi.address.institution, pi.address.country)
         pi.address match {
@@ -723,10 +724,10 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
 
       selection.reactions += {
         case SelectionChanged(_) =>
-          val currentAffiliation = model.map(_.proposalClass).map {
+          val currentAffiliation = model.map(_.proposalClass).flatMap {
               case f:FastTurnaroundProgramClass => f.partnerAffiliation
               case _                            => None
-            }.flatten
+            }
           val selected = Partners.toPartner(selection.item)
           if (currentAffiliation != Partners.toPartner(selection.item)) {
             selection.item = Partners.ftPartners.toMap.getOrElse(selected, "None")
@@ -735,12 +736,12 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
       }
 
       def updateP1Model(partner: Option[NgoPartner]) {
-        model.map(p => p.proposalClass match {
+        model.foreach {p => p.proposalClass match {
           case f: FastTurnaroundProgramClass =>
             val pc = FastTurnaroundProgramClass.partnerAffiliation.set(f, partner)
             model = Some(pcLens.set(p, pc))
           case _ => // ignore
-        })
+        }}
       }
     }
 
