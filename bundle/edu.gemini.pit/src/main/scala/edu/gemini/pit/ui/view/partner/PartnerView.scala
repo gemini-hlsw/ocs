@@ -471,7 +471,7 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
                 val vs0 = c.visitors.map(_(p)).flatten
                 val all = p.investigators.all
                 val sel = all.map(vs0.contains)
-                VisitorSelector.open(all.zip(sel), view) foreach { vs1 =>
+                VisitorSelector.open(all.zip(sel), canEdit, view) foreach { vs1 =>
                   model = Some(cpcLens.set(p, c.copy(visitors = vs1.map(_.ref))))
                 }
               case _                         => // nop, should never happen

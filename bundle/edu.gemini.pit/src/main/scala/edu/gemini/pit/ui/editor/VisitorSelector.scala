@@ -8,10 +8,10 @@ import Swing._
 import BorderPanel.Position._
 
 object VisitorSelector {
-  def open(is:List[(Investigator, Boolean)], parent:UIElement) = new VisitorSelector(is).open(parent)
+  def open(is:List[(Investigator, Boolean)], canEdit: Boolean, parent:UIElement) = new VisitorSelector(is, canEdit).open(parent)
 }
 
-class VisitorSelector private (is:List[(Investigator, Boolean)]) extends StdModalEditor[List[Investigator]]("Select Visitors") {
+class VisitorSelector private (is:List[(Investigator, Boolean)], canEdit: Boolean) extends StdModalEditor[List[Investigator]]("Select Visitors") {
 
   override def header = new Label("Select site visitors:") {
     border = BorderFactory.createEmptyBorder(0, 0, 4, 0)
@@ -24,6 +24,8 @@ class VisitorSelector private (is:List[(Investigator, Boolean)]) extends StdModa
     add(footer, South)
 
     object list extends ListView[Investigator](is.map(_._1)) {
+      enabled = canEdit
+
       preferredSize = (200, 200)
       is.zipWithIndex.filter(_._1._2).map(_._2).foreach(selection.indices += _)
     }
