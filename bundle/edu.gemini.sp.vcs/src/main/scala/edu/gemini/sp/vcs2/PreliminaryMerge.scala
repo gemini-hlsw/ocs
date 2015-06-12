@@ -80,63 +80,91 @@ object PreliminaryMerge {
         isUpdatedRemote(r) || r.subForest.exists(containsMissingLocalUpdatedRemote)
       )
 
-
-    type ChildFilter = PartitionedChildren => PartitionedChildren
-
-    // Filter for local nodes that are newer.
-    val newer: ChildFilter = pc => {
-      // Keep all local-only children not in a different updated parent remotely.
-      val local = pc.local.filter(keepLocalChild)
-
-      // In general we don't want the remote nodes -- we're deleting them.
-      // If deleting something that contains an update we haven't seen though,
-      // we want to keep it anyway.
-      val remote = pc.remote.filter(containsMissingLocalUpdatedRemote)
-
-      PartitionedChildren(local, pc.both, remote)
+    sealed trait ChildMergeStrategy {
+      def filter(pc: PartitionedChildren): PartitionedChildren
+      def sort(merged: List[Tree[MergeNode]], lcs: List[ISPNode], rcs: List[Tree[MergeNode]]): List[Tree[MergeNode]]
     }
 
-    // Filter for local nodes that resurrect remotely deleted nodes.  Keep
+    sealed trait LocalMergeStrategy extends ChildMergeStrategy {
+      final def sort(merged: List[Tree[MergeNode]], lcs: List[ISPNode], rcs: List[Tree[MergeNode]]): List[Tree[MergeNode]] =
+        SortHeuristic.sort(merged, lcs.map(_.key), rcs.map(_.key))(_.key)
+    }
+
+    sealed trait RemoteMergeStrategy extends ChildMergeStrategy {
+      final def sort(merged: List[Tree[MergeNode]], lcs: List[ISPNode], rcs: List[Tree[MergeNode]]): List[Tree[MergeNode]] =
+        SortHeuristic.sort(merged, rcs.map(_.key), lcs.map(_.key))(_.key)
+    }
+
+    // Strategy for when there is no edit to either side.
+    val same = new RemoteMergeStrategy {
+      def filter(pc: PartitionedChildren): PartitionedChildren = pc
+    }
+
+    // Strategy for local nodes that are newer.
+    val newer = new LocalMergeStrategy {
+      def filter(pc: PartitionedChildren): PartitionedChildren = {
+        // Keep all local-only children not in a different updated parent remotely.
+        val local = pc.local.filter(keepLocalChild)
+
+        // In general we don't want the remote nodes -- we're deleting them.
+        // If deleting something that contains an update we haven't seen though,
+        // we want to keep it anyway.
+        val remote = pc.remote.filter(containsMissingLocalUpdatedRemote)
+
+        PartitionedChildren(local, pc.both, remote)
+      }
+    }
+
+    // Strategy for local nodes that resurrect remotely deleted nodes.  Keep
     // all children that have been updated locally and which don't belong to
     // some other node.
-    val deletedRemotely: ChildFilter = pc =>
-      pc.copy(local = pc.local.filter { child =>
-        keepLocalChild(child) && containsUpdatedLocal(child)
-      })
-
-    // Filter for local nodes that are older than their remote counterparts.
-    // This is basically the opposite of "newer".
-    val older: ChildFilter = pc => {
-      val local  = pc.local.filter(containsMissingRemoteUpdatedLocal)
-      val remote = pc.remote.filter(keepRemoteChild)
-      PartitionedChildren(local, pc.both, remote)
+    val deletedRemotely = new LocalMergeStrategy {
+      def filter(pc: PartitionedChildren): PartitionedChildren =
+        pc.copy(local = pc.local.filter { child =>
+          keepLocalChild(child) && containsUpdatedLocal(child)
+        })
     }
 
-    // Filter for remote nodes that have been deleted locally.  The opposite of
-    // "deletedRemotely".
-    val deletedLocally: ChildFilter = pc =>
-      pc.copy(remote = pc.remote.filter { child =>
-        keepRemoteChild(child) && containsUpdatedRemote(child)
-      })
+    // Strategy for local nodes that are older than their remote counterparts.
+    // This is basically the opposite of "newer".
+    val older = new RemoteMergeStrategy {
+      def filter(pc: PartitionedChildren): PartitionedChildren = {
+        val local  = pc.local.filter(containsMissingRemoteUpdatedLocal)
+        val remote = pc.remote.filter(keepRemoteChild)
+        PartitionedChildren(local, pc.both, remote)
+      }
+    }
 
-    // Filter for conflicting edits.  When conflicting, the only local-only
+    // Strategy for remote nodes that have been deleted locally.  The opposite
+    // of "deletedRemotely".
+    val deletedLocally = new RemoteMergeStrategy {
+      def filter(pc: PartitionedChildren): PartitionedChildren =
+        pc.copy(remote = pc.remote.filter { child =>
+          keepRemoteChild(child) && containsUpdatedRemote(child)
+        })
+    }
+
+    // Strategy for conflicting edits.  When conflicting, the only local-only
     // children we keep are those that contain some local update and which
     // don't belong in some other node (we let any remote deletions through)..
-    val conflicting: ChildFilter = pc => {
-      val local  = pc.local.filter { child =>
-        keepLocalChild(child) && containsUpdatedLocal(child)
-      }
+    val conflicting = new RemoteMergeStrategy {
+      def filter(pc: PartitionedChildren): PartitionedChildren = {
+        val local = pc.local.filter { child =>
+          keepLocalChild(child) && containsUpdatedLocal(child)
+        }
 
-      val remote = pc.remote.filter { child =>
-        keepRemoteChild(child)
-      }
+        val remote = pc.remote.filter { child =>
+          keepRemoteChild(child)
+        }
 
-      PartitionedChildren(local, pc.both, remote)
+        PartitionedChildren(local, pc.both, remote)
+      }
     }
 
-    def toNode(mod: MergeNode, lcs: List[ISPNode], rcs: List[Tree[MergeNode]], f: ChildFilter): Tree[MergeNode] = {
+
+    def toNode(mod: MergeNode, lcs: List[ISPNode], rcs: List[Tree[MergeNode]], s: ChildMergeStrategy): Tree[MergeNode] = {
       // Filter the children according to the version information.
-      val pc = f(PartitionedChildren.part(lcs, rcs))
+      val pc = s.filter(PartitionedChildren.part(lcs, rcs))
 
       // Merge the local only, both, and remote only children.
       val lMerged = pc.local.map { lc =>
@@ -149,19 +177,8 @@ object PreliminaryMerge {
         mc.local.get(rc.key).fold(go(That(rc))) { lc => go(Both(lc, rc)) }
       }
 
-      // Order the children.
-      def ordering[B](lst: List[B])(fk: B => SPNodeKey): Map[SPNodeKey, Int] =
-        lst.zipWithIndex.map { case (b, i) => fk(b) -> i}.toMap
-
-      val localOrder  = ordering(lcs)(_.key)
-      val remoteOrder = ordering(rcs)(_.key)
-
-      val sortedLocal  = (lMerged ++ bMerged).sortBy(c => localOrder(c.key))
-      val sortedRemote = rMerged.sortBy(c => remoteOrder(c.key))
-
-      // TODO: insert the remote children into sortedLocal according to some
-      // TODO: heuristic instead of just appending?
-      val newChildren = sortedLocal ++ sortedRemote
+      // Combine and order the children.
+      val newChildren = s.sort(lMerged ++ rMerged ++ bMerged, lcs, rcs)
 
       // Compute the new version for this node, which is nominally the
       // combination of the local and remote versions. If the children don't
@@ -219,7 +236,7 @@ object PreliminaryMerge {
             val lc = l.children
             val rc = r.subForest.toList
             l.getVersion.compare(m.nv) match {
-              case Same        => toNode(r.rootLabel, lc, rc, identity)
+              case Same        => toNode(r.rootLabel, lc, rc, same)
               case Newer       => toNode(modified(l), lc, rc, newer)
               case Older       => toNode(r.rootLabel, lc, rc, older)
               case Conflicting => toNode(r.rootLabel, lc, rc, conflicting)
