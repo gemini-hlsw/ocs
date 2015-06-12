@@ -1,10 +1,14 @@
 package edu.gemini.itc.web.html;
 
 import edu.gemini.itc.altair.Altair;
+import edu.gemini.itc.base.ITCConstants;
+import edu.gemini.itc.base.SEDFactory;
+import edu.gemini.itc.base.SpectroscopyResult;
+import edu.gemini.itc.base.VisitableSampledSpectrum;
+import edu.gemini.itc.nifs.IFUComponent;
 import edu.gemini.itc.nifs.Nifs;
 import edu.gemini.itc.nifs.NifsParameters;
 import edu.gemini.itc.nifs.NifsRecipe;
-import edu.gemini.itc.base.*;
 import edu.gemini.itc.shared.*;
 import edu.gemini.spModel.core.Site;
 import scala.Tuple2;
@@ -37,10 +41,6 @@ public final class NifsPrinter extends PrinterBase {
         final Nifs instrument = (Nifs) result.instrument();
 
         _println("");
-        // This object is used to format numerical strings.
-        final FormatStringWriter device = new FormatStringWriter();
-        device.setPrecision(2);  // Two decimal places
-        device.clear();
 
         // TODO : THIS IS PURELY FOR REGRESSION TEST ONLY, REMOVE ASAP
         // Get the summed source and sky
@@ -61,13 +61,8 @@ public final class NifsPrinter extends PrinterBase {
         final double frac_with_source = result.observation().getSourceFraction();
         final double exposure_time = result.observation().getExposureTime();
 
-        _println("derived image halo size (FWHM) for a point source = " + device.toString(result.iqCalc().getImageQuality()) + "arcsec\n");
-        _println("Requested total integration time = " +
-                device.toString(exposure_time * number_exposures) +
-                " secs, of which " + device.toString(exposure_time *
-                number_exposures *
-                frac_with_source) +
-                " secs is on source.");
+        _println(String.format("derived image halo size (FWHM) for a point source = %.2f arcsec\n", result.iqCalc().getImageQuality()));
+        _println(String.format("Requested total integration time = %.2f secs, of which %.2f secs is on source.", exposure_time * number_exposures, exposure_time * number_exposures * frac_with_source));
 
         _print("<HR align=left SIZE=3>");
 
@@ -84,8 +79,6 @@ public final class NifsPrinter extends PrinterBase {
         }
 
         _println("");
-        device.setPrecision(2);  // TWO decimal places
-        device.clear();
 
         _print("<HR align=left SIZE=3>");
 
@@ -104,12 +97,6 @@ public final class NifsPrinter extends PrinterBase {
     }
 
     private String nifsToString(final Nifs instrument) {
-        //Used to format the strings
-        final FormatStringWriter device = new FormatStringWriter();
-        device.setPrecision(3);  // Two decimal places
-        device.clear();
-
-
         String s = "Instrument configuration: \n";
         s += HtmlPrinter.opticalComponentsToString(instrument);
         s += "<LI>Focal Plane Mask: ifu\n";
@@ -118,19 +105,18 @@ public final class NifsPrinter extends PrinterBase {
         s += "\n";
 
         s += "<L1> Central Wavelength: " + instrument.getCentralWavelength() + " nm" + "\n";
-        s += "Pixel Size in Spatial Direction: " + instrument.getPixelSize() + "arcsec\n";
+        s += "Pixel Size in Spatial Direction: " + instrument.getPixelSize() + " arcsec\n";
 
-        s += "Pixel Size in Spectral Direction: " + device.toString(instrument.getGratingDispersion_nmppix()) + "nm\n";
+        s += String.format("Pixel Size in Spectral Direction: %.3f nm\n", instrument.getGratingDispersion_nmppix());
 
         s += "IFU is selected,";
         if (instrument.getIFUMethod().equals(NifsParameters.SINGLE_IFU))
-            s += "with a single IFU element at " + instrument.getIFUOffset() + "arcsecs.";
+            s += "with a single IFU element at " + instrument.getIFUOffset() + " arcsecs.";
         else if (instrument.getIFUMethod().equals(NifsParameters.SUMMED_APERTURE_IFU))
-            s += "with multiple summed IFU elements arranged in a " + instrument.getIFUNumX() + "x" + instrument.getIFUNumY() +
-                    " (" + device.toString(instrument.getIFUNumX() * instrument.getIFU().IFU_LEN_X) + "\"x" +
-                    device.toString(instrument.getIFUNumY() * instrument.getIFU().IFU_LEN_Y) + "\") grid.";
+            s += String.format("with multiple summed IFU elements arranged in a " + instrument.getIFUNumX() + "x" + instrument.getIFUNumY() +
+                    " (%.3f\"x%.3f\") grid.", instrument.getIFUNumX() * IFUComponent.IFU_LEN_X, instrument.getIFUNumY() * IFUComponent.IFU_LEN_Y);
         else
-            s += "with mulitple IFU elements arranged from " + instrument.getIFUMinOffset() + " to " + instrument.getIFUMaxOffset() + "arcsecs.";
+            s += "with mulitple IFU elements arranged from " + instrument.getIFUMinOffset() + " to " + instrument.getIFUMaxOffset() + " arcsecs.";
         s += "\n";
 
         return s;

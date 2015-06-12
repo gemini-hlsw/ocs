@@ -8,6 +8,7 @@ import edu.gemini.itc.base.TransmissionElement;
 import edu.gemini.itc.niri.Niri;
 import edu.gemini.itc.niri.NiriRecipe;
 import edu.gemini.itc.shared.*;
+import edu.gemini.itc.shared.SourceDefinition.Profile;
 import edu.gemini.spModel.gemini.niri.Niri.Mask;
 import scala.Option;
 import scala.Tuple2;
@@ -52,44 +53,32 @@ public final class NiriPrinter extends PrinterBase {
 
         _println("");
 
-        // This object is used to format numerical strings.
-        final FormatStringWriter device = new FormatStringWriter();
-        device.setPrecision(2); // Two decimal places
-        device.clear();
-
         // Altair specific section
         if (result.aoSystem().isDefined()) {
             _println(HtmlPrinter.printSummary((Altair) result.aoSystem().get()));
         }
 
         if (!result.observation().isAutoAperture()) {
-            _println("software aperture extent along slit = "
-                    + device.toString(result.observation().getApertureDiameter()) + " arcsec");
+            _println(String.format("software aperture extent along slit = %.2f arcsec", result.observation().getApertureDiameter()));
         } else {
-            switch (result.source().getProfileType()) {
-                case UNIFORM:
-                    _println("software aperture extent along slit = " + device.toString(1 / instrument.getFPMask()) + " arcsec");
-                    break;
-                case POINT:
-                    _println("software aperture extent along slit = " + device.toString(1.4 * result.specS2N()[0].getImageQuality()) + " arcsec");
-                    break;
+            if (result.source().getProfileType() == Profile.UNIFORM) {
+                _println(String.format("software aperture extent along slit = %.2f arcsec", 1 / instrument.getFPMask()));
+            } else if (result.source().getProfileType() == Profile.POINT) {
+                _println(String.format("software aperture extent along slit = %.2f arcsec", 1.4 * result.specS2N()[0].getImageQuality()));
             }
         }
 
         if (!result.source().isUniform()) {
-            _println("fraction of source flux in aperture = "
-                    + device.toString(result.st().getSlitThroughput()));
+            _println(String.format("fraction of source flux in aperture = %.2f", result.st().getSlitThroughput()));
         }
 
-        _println("derived image size(FWHM) for a point source = "
-                + device.toString(result.specS2N()[0].getImageQuality()) + " arcsec");
+        _println(String.format("derived image size(FWHM) for a point source = %.2f arcsec", result.specS2N()[0].getImageQuality()));
 
         _println("");
-        _println("Requested total integration time = "
-                + device.toString(result.observation().getExposureTime() * result.observation().getNumExposures())
-                + " secs, of which "
-                + device.toString(result.observation().getExposureTime() * result.observation().getNumExposures()
-                * result.observation().getSourceFraction()) + " secs is on source.");
+        _println(String.format(
+                "Requested total integration time = %.2f secs, of which %.2f secs is on source.",
+                result.observation().getExposureTime() * result.observation().getNumExposures(),
+                result.observation().getExposureTime() * result.observation().getNumExposures() * result.observation().getSourceFraction()));
 
         _print("<HR align=left SIZE=3>");
 
@@ -119,35 +108,22 @@ public final class NiriPrinter extends PrinterBase {
 
         _println("");
 
-        // This object is used to format numerical strings.
-        final FormatStringWriter device = new FormatStringWriter();
-        device.setPrecision(2); // Two decimal places
-        device.clear();
-
         // Altair specific section
         if (result.aoSystem().isDefined()) {
             _println(HtmlPrinter.printSummary((Altair) result.aoSystem().get()));
-            _print(CalculatablePrinter.getTextResult(result.sfCalc(), device, false));
-            _println("derived image halo size (FWHM) for a point source = "
-                    + device.toString(result.iqCalc().getImageQuality()) + " arcsec.\n");
+            _print(CalculatablePrinter.getTextResult(result.sfCalc(), false));
+            _println(String.format("derived image halo size (FWHM) for a point source = %.2f arcsec.\n", result.iqCalc().getImageQuality()));
         } else {
-            _print(CalculatablePrinter.getTextResult(result.sfCalc(), device));
-            _println(CalculatablePrinter.getTextResult(result.iqCalc(), device));
+            _print(CalculatablePrinter.getTextResult(result.sfCalc()));
+            _println(CalculatablePrinter.getTextResult(result.iqCalc()));
         }
 
-        _println(CalculatablePrinter.getTextResult(result.is2nCalc(), result.observation(), device));
+        _println(CalculatablePrinter.getTextResult(result.is2nCalc(), result.observation()));
         _println(CalculatablePrinter.getBackgroundLimitResult(result.is2nCalc()));
-        device.setPrecision(0); // NO decimal places
-        device.clear();
 
         _println("");
-        _println("The peak pixel signal + background is "
-                + device.toString(result.peakPixelCount())
-                + ". This is "
-                + device.toString(result.peakPixelCount()
-                / instrument.getWellDepthValue() * 100)
-                + "% of the full well depth of "
-                + device.toString(instrument.getWellDepthValue()) + ".");
+        _println(String.format("The peak pixel signal + background is %.0f. This is %.0f%% of the full well depth of %.0f.",
+                result.peakPixelCount(), result.peakPixelCount() / instrument.getWellDepthValue() * 100, instrument.getWellDepthValue()));
 
         for (final ItcWarning warning : JavaConversions.asJavaList(result.warnings())) {
             _println(warning.msg());

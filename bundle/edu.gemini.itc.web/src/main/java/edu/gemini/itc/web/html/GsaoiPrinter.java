@@ -11,6 +11,7 @@ import edu.gemini.itc.shared.Parameters;
 import scala.collection.JavaConversions;
 
 import java.io.PrintWriter;
+import java.io.StringWriter;
 
 /**
  * Helper class for printing GSAOI calculation results to an output stream.
@@ -38,22 +39,15 @@ public final class GsaoiPrinter extends PrinterBase {
 
         _println("");
 
-        final FormatStringWriter device = new FormatStringWriter();
-        device.setPrecision(2); // Two decimal places
-        device.clear();
-
         _println((HtmlPrinter.printSummary((Gems) result.aoSystem().get())));
 
-        _print(CalculatablePrinter.getTextResult(result.sfCalc(), device, false));
-        _println("derived image halo size (FWHM) for a point source = "
-                + device.toString(result.iqCalc().getImageQuality()) + " arcsec.\n");
-        _println(CalculatablePrinter.getTextResult(result.is2nCalc(), result.observation(), device));
+        _print(CalculatablePrinter.getTextResult(result.sfCalc(), false));
+        _println(String.format("derived image halo size (FWHM) for a point source = %.2f arcsec.\n", result.iqCalc().getImageQuality()));
+        _println(CalculatablePrinter.getTextResult(result.is2nCalc(), result.observation()));
         _println(CalculatablePrinter.getBackgroundLimitResult(result.is2nCalc()));
-        device.setPrecision(0); // NO decimal places
-        device.clear();
 
         _println("");
-        _println("The peak pixel signal + background is " + device.toString(result.peakPixelCount()));
+        _println(String.format("The peak pixel signal + background is %.0f", result.peakPixelCount()));
 
         // REL-1353
         final int peak_pixel_percent = (int) (100 * result.peakPixelCount() / Gsaoi.WELL_DEPTH);
@@ -63,8 +57,6 @@ public final class GsaoiPrinter extends PrinterBase {
         }
 
         _println("");
-        device.setPrecision(2); // TWO decimal places
-        device.clear();
 
         _print("<HR align=left SIZE=3>");
 
@@ -80,9 +72,11 @@ public final class GsaoiPrinter extends PrinterBase {
     }
 
     private String printTeleParametersSummary(final ImagingResult result) {
-        StringBuffer sb = new StringBuffer();
+        final StringWriter sb = new StringWriter();
         sb.append("Telescope configuration: \n");
-        sb.append("<LI>" + result.telescope().getMirrorCoating().displayValue() + " mirror coating.\n");
+        sb.append("<LI>");
+        sb.append(result.telescope().getMirrorCoating().displayValue());
+        sb.append(" mirror coating.\n");
         sb.append("<LI>wavefront sensor: gems\n");
         return sb.toString();
     }

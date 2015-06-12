@@ -2,7 +2,9 @@ package edu.gemini.itc.web.html;
 
 import edu.gemini.itc.acqcam.AcqCamRecipe;
 import edu.gemini.itc.acqcam.AcquisitionCamera;
-import edu.gemini.itc.base.*;
+import edu.gemini.itc.base.ImagingResult;
+import edu.gemini.itc.base.Instrument;
+import edu.gemini.itc.base.TransmissionElement;
 import edu.gemini.itc.shared.AcquisitionCamParameters;
 import edu.gemini.itc.shared.ItcWarning;
 import edu.gemini.itc.shared.Parameters;
@@ -33,31 +35,22 @@ public final class AcqCamPrinter extends PrinterBase {
         // we know this is the acq cam
         final AcquisitionCamera instrument = (AcquisitionCamera) result.instrument();
 
-        // This object is used to format numerical strings.
-        final FormatStringWriter device = new FormatStringWriter();
-        device.setPrecision(2);  // Two decimal places
-        device.clear();
         _println("");
 
-        _print(CalculatablePrinter.getTextResult(result.sfCalc(), device));
-        _println(CalculatablePrinter.getTextResult(result.iqCalc(), device));
-        _println(CalculatablePrinter.getTextResult(result.is2nCalc(), result.observation(), device));
-
-        device.setPrecision(0);  // NO decimal places
-        device.clear();
+        _print(CalculatablePrinter.getTextResult(result.sfCalc()));
+        _println(CalculatablePrinter.getTextResult(result.iqCalc()));
+        _println(CalculatablePrinter.getTextResult(result.is2nCalc(), result.observation()));
 
         _println("");
-        _println("The peak pixel signal + background is " + device.toString(result.peakPixelCount()) + ". This is " +
-                device.toString(result.peakPixelCount() / instrument.getWellDepth() * 100) +
-                "% of the full well depth of " + device.toString(instrument.getWellDepth()) + ".");
+        _println(String.format(
+                "The peak pixel signal + background is %.0f. This is %.0f%% of the full well depth of %.0f.",
+                result.peakPixelCount(), result.peakPixelCount() / instrument.getWellDepth() * 100, instrument.getWellDepth()));
 
         for (final ItcWarning warning : JavaConversions.asJavaList(result.warnings())) {
             _println(warning.msg());
         }
 
         _println("");
-        device.setPrecision(2);  // TWO decimal places
-        device.clear();
 
         printConfiguration(result);
 

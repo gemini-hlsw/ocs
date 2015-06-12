@@ -48,11 +48,6 @@ public final class GmosPrinter extends PrinterBase {
 
         _println("");
 
-        // This object is used to format numerical strings.
-        final FormatStringWriter device = new FormatStringWriter();
-        device.setPrecision(2); // Two decimal places
-        device.clear();
-
         final Gmos[] ccdArray = mainInstrument.getDetectorCcdInstruments();
 
         for (final Gmos instrument : ccdArray) {
@@ -68,26 +63,26 @@ public final class GmosPrinter extends PrinterBase {
                 _println("Read noise: " + instrument.getReadNoise());
                 if (!instrument.isIfuUsed()) {
                     if (!results[0].observation().isAutoAperture()) {
-                        _println("software aperture extent along slit = " + device.toString(results[0].observation().getApertureDiameter()) + " arcsec");
+                        _println(String.format("software aperture extent along slit = %.2f arcsec", results[0].observation().getApertureDiameter()));
                     } else {
                         switch (results[0].source().getProfileType()) {
                             case UNIFORM:
-                                _println("software aperture extent along slit = " + device.toString(1 / instrument.getSlitWidth()) + " arcsec");
+                                _println(String.format("software aperture extent along slit = %.2f arcsec", 1 / instrument.getSlitWidth()));
                                 break;
                             case POINT:
-                                _println("software aperture extent along slit = " + device.toString(1.4 * result.iqCalc().getImageQuality()) + " arcsec");
+                                _println(String.format("software aperture extent along slit = %.2f arcsec", (1.4 * result.iqCalc().getImageQuality())));
                                 break;
                         }
                     }
 
                     if (!results[0].source().isUniform()) {
-                        _println("fraction of source flux in aperture = " + device.toString(result.st().getSlitThroughput()));
+                        _println(String.format("fraction of source flux in aperture = %.2f", result.st().getSlitThroughput()));
                     }
                 }
-                _println("derived image size(FWHM) for a point source = " + device.toString(result.iqCalc().getImageQuality()) + "arcsec\n");
+                _println(String.format("derived image size(FWHM) for a point source = %.2f arcsec\n", result.iqCalc().getImageQuality()));
                 _println("Sky subtraction aperture = " + results[0].observation().getSkyApertureDiameter() + " times the software aperture.");
                 _println("");
-                _println("Requested total integration time = " + device.toString(exposure_time * number_exposures) + " secs, of which " + device.toString(exposure_time * number_exposures * frac_with_source) + " secs is on source.");
+                _println(String.format("Requested total integration time = %.2f secs, of which %.2f secs is on source.", exposure_time * number_exposures, exposure_time * number_exposures * frac_with_source));
                 _print("<HR align=left SIZE=3>");
             }
 
@@ -121,12 +116,6 @@ public final class GmosPrinter extends PrinterBase {
 
         _println("");
 
-        // This object is used to format numerical strings.
-        final FormatStringWriter device = new FormatStringWriter();
-        device.setPrecision(2); // Two decimal places
-        device.clear();
-
-
         final Gmos[] ccdArray = mainInstrument.getDetectorCcdInstruments();
         for (final Gmos instrument : ccdArray) {
             final int ccdIndex = instrument.getDetectorCcdIndex();
@@ -136,8 +125,8 @@ public final class GmosPrinter extends PrinterBase {
             final ImagingResult result = results.list().apply(ccdIndex);
 
             if (ccdIndex == 0) {
-                _print(CalculatablePrinter.getTextResult(result.sfCalc(), device));
-                _println(CalculatablePrinter.getTextResult(result.iqCalc(), device));
+                _print(CalculatablePrinter.getTextResult(result.sfCalc()));
+                _println(CalculatablePrinter.getTextResult(result.iqCalc()));
                 _println("Sky subtraction aperture = "
                         + results.head().observation().getSkyApertureDiameter()
                         + " times the software aperture.\n");
@@ -146,13 +135,10 @@ public final class GmosPrinter extends PrinterBase {
             _println("");
             _println("<b>S/N" + forCcdName + ":</b>");
             _println("");
-            _println(CalculatablePrinter.getTextResult(result.is2nCalc(), result.observation(), device));
-
-            device.setPrecision(0); // NO decimal places
-            device.clear();
+            _println(CalculatablePrinter.getTextResult(result.is2nCalc(), result.observation()));
 
             _println("");
-            _println("The peak pixel signal + background is " + device.toString(result.peakPixelCount()) + ". ");
+            _println(String.format("The peak pixel signal + background is %.0f. ", result.peakPixelCount()));
 
             for (final ItcWarning warning : JavaConversions.asJavaList(result.warnings())) {
                 _println(warning.msg());
@@ -165,10 +151,6 @@ public final class GmosPrinter extends PrinterBase {
 
     private void printConfiguration(final Parameters p, final Gmos mainInstrument) {
         _println("");
-
-        final FormatStringWriter device = new FormatStringWriter();
-        device.setPrecision(2); // TWO decimal places
-        device.clear();
 
         _print("<HR align=left SIZE=3>");
 
