@@ -16,9 +16,9 @@
         </xsd:sequence>
     </xsd:complexType>
 
-	<!--
-		A target is an abstract base class with an id and name.
-	-->
+    <!--
+        A target is an abstract base class with an id and name.
+    -->
     <xsd:complexType name="Target">
         <xsd:sequence>
             <xsd:element name="name" type="xsd:token"/>
@@ -33,19 +33,19 @@
         <xsd:complexContent>
             <xsd:extension base="Target">
                 <xsd:sequence>
-			        <xsd:choice>
-			            <xsd:element name="hmsDms" type="HmsDmsCoordinates"/>
-			            <xsd:element name="degDeg" type="DegDegCoordinates"/>
-			        </xsd:choice>
-		            <xsd:element name="properMotion" type="ProperMotion" minOccurs="0" maxOccurs="1"/>
-		            <xsd:element name="magnitudes" type="Magnitudes" minOccurs="0">
-		                <xsd:unique name="MagnitudeBandUnique">
-		                    <xsd:selector xpath="magnitude"/>
-		                    <xsd:field xpath="@band"/>
-		                </xsd:unique>
-		            </xsd:element>
-				</xsd:sequence>
-		        <xsd:attribute name="epoch" type="CoordinatesEpoch" default="J2000"/>
+                    <xsd:choice>
+                        <xsd:element name="hmsDms" type="HmsDmsCoordinates"/>
+                        <xsd:element name="degDeg" type="DegDegCoordinates"/>
+                    </xsd:choice>
+                    <xsd:element name="properMotion" type="ProperMotion" minOccurs="0" maxOccurs="1"/>
+                    <xsd:element name="magnitudes" type="Magnitudes" minOccurs="0">
+                        <xsd:unique name="MagnitudeBandUnique">
+                            <xsd:selector xpath="magnitude"/>
+                            <xsd:field xpath="@band"/>
+                        </xsd:unique>
+                    </xsd:element>
+                </xsd:sequence>
+                <xsd:attribute name="epoch" type="CoordinatesEpoch" default="J2000"/>
             </xsd:extension>
         </xsd:complexContent>
     </xsd:complexType>
@@ -57,9 +57,9 @@
         <xsd:complexContent>
             <xsd:extension base="Target">
                 <xsd:sequence>
-					<xsd:element name="ephemeris" type="EphemerisElement" minOccurs="2" maxOccurs="unbounded"/>
-				</xsd:sequence>
-		        <xsd:attribute name="epoch" type="CoordinatesEpoch" default="J2000"/>
+                    <xsd:element name="ephemeris" type="EphemerisElement" minOccurs="2" maxOccurs="unbounded"/>
+                </xsd:sequence>
+                <xsd:attribute name="epoch" type="CoordinatesEpoch" default="J2000"/>
             </xsd:extension>
         </xsd:complexContent>
     </xsd:complexType>
@@ -86,18 +86,18 @@
         </xsd:restriction>
     </xsd:simpleType>
 
-	<!--
-		An ephemeris element is coordinates with a date.
-	-->
+    <!--
+        An ephemeris element is coordinates with a date.
+    -->
     <xsd:complexType name="EphemerisElement">
         <xsd:sequence>
-	        <xsd:choice>
-	            <xsd:element name="hmsDms" type="HmsDmsCoordinates"/>
-	            <xsd:element name="degDeg" type="DegDegCoordinates"/>
-	        </xsd:choice>
+            <xsd:choice>
+                <xsd:element name="hmsDms" type="HmsDmsCoordinates"/>
+                <xsd:element name="degDeg" type="DegDegCoordinates"/>
+            </xsd:choice>
         </xsd:sequence>
         <xsd:attribute name="magnitude" type="xsd:decimal"/>
-		<xsd:attribute name="validAt" type="xsd:dateTime"/>
+        <xsd:attribute name="validAt" type="xsd:dateTime"/>
     </xsd:complexType>
 
     <!--
@@ -121,10 +121,10 @@
     <xsd:complexType name="HmsDmsCoordinates">
         <xsd:complexContent>
             <xsd:extension base="Coordinates">
-		        <xsd:sequence>
-		            <xsd:element name="ra"  type="RaHms"/>
-		            <xsd:element name="dec" type="DecDms"/>
-		        </xsd:sequence>
+                <xsd:sequence>
+                    <xsd:element name="ra"  type="RaHms"/>
+                    <xsd:element name="dec" type="DecDms"/>
+                </xsd:sequence>
             </xsd:extension>
         </xsd:complexContent>
     </xsd:complexType>
@@ -155,10 +155,10 @@
     <xsd:complexType name="DegDegCoordinates">
         <xsd:complexContent>
             <xsd:extension base="Coordinates">
-		        <xsd:sequence>
-		            <xsd:element name="ra"  type="RaDeg"/>
-		            <xsd:element name="dec" type="DecDeg"/>
-		        </xsd:sequence>
+                <xsd:sequence>
+                    <xsd:element name="ra"  type="RaDeg"/>
+                    <xsd:element name="dec" type="DecDeg"/>
+                </xsd:sequence>
             </xsd:extension>
         </xsd:complexContent>
     </xsd:complexType>
@@ -188,9 +188,9 @@
       ProperMotion is an RA and Dec delta, in arcseconds per year.
     -->
     <xsd:complexType name="ProperMotion">
-		<xsd:attribute name="deltaRA"  type="xsd:decimal" use="required"/>
-		<xsd:attribute name="deltaDec" type="xsd:decimal" use="required"/>
-	</xsd:complexType>
+        <xsd:attribute name="deltaRA"  type="xsd:decimal" use="required"/>
+        <xsd:attribute name="deltaDec" type="xsd:decimal" use="required"/>
+    </xsd:complexType>
 
     <!--
       A list of one or more magnitude values for a particular target.
@@ -351,61 +351,3 @@
         </xsd:restriction>
     </xsd:simpleType>
 </xsd:schema>
-
-
-<!--
-    <xsd:attribute name="id" type="TargetIdType"/>
-    <xsd:simpleType name="TargetIdType">
-        <xsd:restriction base="xsd:ID">
-            <xsd:pattern value="target-\d+"/>
-        </xsd:restriction>
-    </xsd:simpleType>
--->
-
-        <!--
-        <xsd:complexType name="RaHmsType">
-            <xsd:sequence>
-                <xsd:element name="h" type="CoordinateIntegralHrType"/>
-                <xsd:element name="m" type="CoordinateIntegralMinType"/>
-                <xsd:element name="s" type="CoordinateDecimalSecType"/>
-            </xsd:sequence>
-        </xsd:complexType>
-
-        <xsd:complexType name="DecDmsType">
-            <xsd:sequence>
-                <xsd:element name="d" type="CoordinateIntegralDecDegType"/>
-                <xsd:element name="m" type="CoordinateIntegralMinType"/>
-                <xsd:element name="s" type="CoordinateDecimalSecType"/>
-            </xsd:sequence>
-        </xsd:complexType>
-
-        <xsd:simpleType name="CoordinateIntegralHrType">
-            <xsd:restriction base="xsd:unsignedByte">
-                <xsd:minInclusive value="0"/>
-                <xsd:maxExclusive value="24"/>
-            </xsd:restriction>
-        </xsd:simpleType>
-
-        <xsd:simpleType name="CoordinateIntegralMinType">
-            <xsd:restriction base="xsd:unsignedByte">
-                <xsd:minInclusive value="0"/>
-                <xsd:maxExclusive value="60"/>
-            </xsd:restriction>
-        </xsd:simpleType>
-
-        <xsd:simpleType name="CoordinateDecimalSecType">
-            <xsd:restriction base="xsd:decimal">
-                <xsd:minInclusive value="0"/>
-                <xsd:maxExclusive value="60"/>
-                <xsd:pattern value="\d\d?(\.\d*)?"/>
-            </xsd:restriction>
-        </xsd:simpleType>
-
-        <xsd:simpleType name="CoordinateIntegralDecDegType">
-            <xsd:restriction base="xsd:byte">
-                <xsd:minInclusive value="-90"/>
-                <xsd:maxInclusive value="90"/>
-            </xsd:restriction>
-        </xsd:simpleType>
-        -->
-

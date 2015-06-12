@@ -349,6 +349,23 @@ package object immutable {
   type Keyword = M.Keyword
   object Keyword extends EnumObject[M.Keyword]
 
+  // Bands that are on the phase1 model
+  val allowedBands = List(
+    MagnitudeBand.U,
+    MagnitudeBand.B,
+    MagnitudeBand.V,
+    MagnitudeBand.UC,
+    MagnitudeBand.R,
+    MagnitudeBand.I,
+    MagnitudeBand.Y,
+    MagnitudeBand.J,
+    MagnitudeBand.H,
+    MagnitudeBand.K,
+    MagnitudeBand.L,
+    MagnitudeBand.M,
+    MagnitudeBand.N,
+    MagnitudeBand.Q)
+
   implicit class MagnitudeBandOps(val band: MagnitudeBand) extends AnyVal {
     def mutable: M.MagnitudeBand = band match {
       case MagnitudeBand.U  => M.MagnitudeBand.U

@@ -320,7 +320,7 @@ class TargetEditor private (semester:Semester, target:Target, canEdit:Boolean, i
 
     })
 
-    val magControls = MagnitudeBand.all.map(b => new MagControl(b)).toList
+    val magControls = allowedBands.map(b => new MagControl(b))
 
     // Set of three controls that allow the user to select and edit a Magnitude.
     class MagControl(val band:MagnitudeBand) {
