@@ -57,7 +57,7 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
   import ProblemRobot._
 
   val MaxAttachmentSize = 30 // in megabytes
-  val MaxAttachmentSizeBytes = MaxAttachmentSize*1000*1000 // kbytes as used on the phase1 backends
+  val MaxAttachmentSizeBytes = MaxAttachmentSize * 1000 * 1000 // kbytes as used on the phase1 backends
 
   // Our state
   type State = List[Problem]
@@ -78,7 +78,7 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
 
     lazy val all = {
       val ps =
-        List(noObs, titleCheck, band3option, abstractCheck, tacCategoryCheck, keywordCheck, attachmentCheck, attachmentValidityCheck, attachmentSizeCheck, missingObsDetailsCheck, duplicateInvestigatorCheck, ftReviewerOrMentor, ftAffiliationMissmatch).flatten ++
+        List(noObs, nonUpdatedInvestigatorName, titleCheck, band3option, abstractCheck, tacCategoryCheck, keywordCheck, attachmentCheck, attachmentValidityCheck, attachmentSizeCheck, missingObsDetailsCheck, duplicateInvestigatorCheck, ftReviewerOrMentor, ftAffiliationMismatch).flatten ++
           TimeProblems(p, s).all ++
           TimeProblems.partnerZeroTimeRequest(p, s) ++
           TacProblems(p, s).all ++
@@ -87,7 +87,7 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
       ps.sorted
     }
 
-    private def when[A](b: Boolean)(a: => A) = if (b) Some(a) else None
+    private def when[A](b: Boolean)(a: => A) = b option a
 
     private lazy val titleCheck = when(p.title.isEmpty) {
       new Problem(Severity.Todo, "Please provide a title.", "Overview", s.inOverview(_.title.requestFocus()))
@@ -149,7 +149,7 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
       (t, Some(f)) <- s.catalogHandler.state
       (sev, msg) = f match {
         case Offline      => (Severity.Error, s"Catalog lookup failed for ${t.name} due to network connectivity problems.")
-        case NotFound(t)  => (Severity.Error, s"""Catalog lookup returned no results for target "$t" """)
+        case NotFound(n)  => (Severity.Error, s"""Catalog lookup returned no results for target "$n" """)
         case Error(e)     => (Severity.Error, s"Catalog lookup failed for ${t.name} due to an unexpected error: ")
       }
     } yield new Problem(sev, msg, "Targets", s.inTargetsView(_.edit(t)))
@@ -192,7 +192,7 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
     } yield new Problem(Severity.Warning, msg, "Targets", s.inTargetsView(_.edit(t)))
 
     private lazy val emptyEphemerisCheck = for {
-      t@NonSiderealTarget(_, n, e, _) <- p.targets
+      t @ NonSiderealTarget(_, n, e, _) <- p.targets
       if !t.isEmpty
       if !s.catalogHandler.state.contains(t)
       if e.isEmpty
@@ -280,7 +280,7 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
         p.observations.filter(g.lens.get(_).isEmpty) match {
           case Nil => None
           case h :: Nil => Some(new Problem(Severity.Error, s"One observation has no $s.", "Observations", fix(h.band, g)))
-          case h :: tail => Some(new Problem(Severity.Error, "%d observations have no %s.".format(1 + tail.length, s), "Observations", fix(h.band, g)))
+          case h :: tail => Some(new Problem(Severity.Error, s"${1 + tail.length} observations have no $s.", "Observations", fix(h.band, g)))
         }
 
       List(
@@ -297,11 +297,11 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
       p.observations.filter(_.time.isEmpty) match {
         case Nil => None
         case h :: Nil => Some(new Problem(Severity.Error, "One observation has no observation time.", "Observations", indicateObservation(h)))
-        case h :: tail => Some(new Problem(Severity.Error, "%d observations have no observation times.".format(1 + tail.length), "Observations", indicateObservation(h)))
+        case h :: tail => Some(new Problem(Severity.Error, s"${1 + tail.length} observations have no observation times.", "Observations", indicateObservation(h)))
       }
 
     private def hasBestGuidingConditions(o: Observation): Boolean =
-      o.condition exists {
+      o.condition.exists {
         c =>
           c.cc == CloudCover.BEST && c.iq == ImageQuality.BEST && c.sb == SkyBackground.BEST
       }
@@ -371,7 +371,7 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
     }
 
     private lazy val band3option = (p.meta.band3OptionChosen, p.proposalClass) match {
-      case (false, q: QueueProposalClass) => Some(new Problem(Severity.Todo, "Please select a Band 3 option.", TimeProblems.SCHEDULING_SECTION, s.showPartnersView))
+      case (false, q: QueueProposalClass) => Some(new Problem(Severity.Todo, "Please select a Band 3 option.", TimeProblems.SCHEDULING_SECTION, s.showPartnersView()))
       case _                              => None
     }
 
@@ -379,12 +379,11 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
       o <- p.observations
       if o.band == Band.BAND_3 && (p.proposalClass match {
         case q: QueueProposalClass         if q.band3request.isDefined => false
-        //case f: FastTurnaroundProgramClass if f.band3request.isDefined => false
         case _ => true
       })
     } yield {
       new Problem(Severity.Error,
-      "Allow consideration for Band 3 or delete the Band 3 observation.", "Observations", {
+        "Allow consideration for Band 3 or delete the Band 3 observation.", "Observations", {
         s.showPartnersView()
         s.inObsListView(o.band, v => v.Fixes.indicateObservation(o))
       })
@@ -398,7 +397,7 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
               s.showPartnersView()
             })
 
-    private lazy val ftAffiliationMissmatch = for {
+    private lazy val ftAffiliationMismatch = for {
         pi                                                                      <- Option(p.investigators.pi)
         piNgo                                                                   <- Option(Institutions.institution2Ngo(pi.address.institution, pi.address.country))
         f @ FastTurnaroundProgramClass(_, _, _, _, _, _, _, _, affiliateNgo, _) <- Option(p.proposalClass)
@@ -428,9 +427,9 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
       })
     }
 
-    private lazy val noObs = if (p.observations.isEmpty) {
-      Some(new Problem(Severity.Todo, "Please create observations with conditions, targets, and resources.", "Observations", ()))
-    } else None
+    private lazy val noObs = when (p.observations.isEmpty) {
+      new Problem(Severity.Todo, "Please create observations with conditions, targets, and resources.", "Observations", ())
+    }
 
     private lazy val incompleteInvestigator = for {
       i <- p.investigators.all if !i.isComplete
@@ -438,6 +437,12 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
         v =>
           v.edit(i)
       })
+
+    private val nonUpdatedInvestigatorName = when(p.investigators.pi.firstName === "Principal" && p.investigators.pi.lastName === "Investigator") {
+      new Problem(Severity.Error, s"Please provide PI's full name", "Overview", s.inOverview {
+        _.edit(p.investigators.pi)
+      })
+    }
 
   }
 
@@ -515,7 +520,7 @@ case class TimeProblems(p: Proposal, s: ShellAdvisor) {
     }
   }
 
-  private def when[A](b: Boolean)(a: => A) = if (b) Some(a) else None
+  private def when[A](b: Boolean)(a: => A) = b option a
 
   private def requestedTimeCheck(r: TimeAmount, o: TimeAmount, b: Band) =
     when(r.hours > 0 && !sameTime(r, o)) {
@@ -558,18 +563,18 @@ object TacProblems {
 
 }
 
-case class TacProblems(p: Proposal, s: ShellAdvisor) {
+case class TacProblems(proposal: Proposal, s: ShellAdvisor) {
 
   import TacProblems._
 
-  lazy val responses = TacView.responses(p.proposalClass)
-  lazy val accepts = responses.map {
+  lazy val responses = TacView.responses(proposal.proposalClass)
+  lazy val accepts = responses.flatMap {
     case (p, r) =>
-      r.decision flatMap {
-        case SubmissionDecision(Right(a)) => Some((p, a))
-        case _ => None
-      }
-  }.flatten.toMap
+        r.decision.flatMap {
+          case SubmissionDecision(Right(a)) => Some((p, a))
+          case _ => None
+        }
+    }
 
   def tacProblem(f: => Boolean, sev: Severity, msg: String, partner: Partner): Option[Problem] =
     Option(f).filter(_ == true).map(_ => new Problem(sev, msg, TAC_SECTION, s.showTacView(partner)))
@@ -610,7 +615,7 @@ case class TacProblems(p: Proposal, s: ShellAdvisor) {
   }
 
   def all: List[Problem] = if (tac) (
-    noDecision ++
+      noDecision ++
       noEmail ++
       noRanking ++
       noTimes ++
