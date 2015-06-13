@@ -12,9 +12,6 @@ import edu.gemini.pot.sp.ISPFactory;
 
 import edu.gemini.spModel.config.IConfigBuilder;
 
-
-
-
 /**
  * Initializes <code>{@link ISPSeqComponent}</code> nodes.
  */
@@ -31,8 +28,6 @@ public class SeqConfigPhoenixNI implements ISPNodeInitializer {
      */
     public void initNode(ISPFactory factory, ISPNode node)
              {
-        //System.out.println("Initializing a Phoenix Seq Comp");
-
         ISPSeqComponent castNode = (ISPSeqComponent) node;
         if (!castNode.getType().equals(SeqConfigPhoenix.SP_TYPE)) {
             throw new InternalError();

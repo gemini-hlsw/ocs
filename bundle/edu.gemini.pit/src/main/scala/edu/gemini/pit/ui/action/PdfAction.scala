@@ -7,7 +7,6 @@ import edu.gemini.pit.ui.util.{ValueRenderer, Rows, StdModalEditor, Chooser}
 import edu.gemini.ui.workspace.scala.RichShell
 
 import java.util.prefs.Preferences.userNodeForPackage
-import scala.collection.JavaConverters._
 import scala.swing._
 
 object PdfAction {
@@ -59,7 +58,7 @@ class PdfAction(shell: RichShell[Model]) extends ShellAction(shell, "Export as P
       addRow(DontAskCheck)
     }
 
-    object TemplateCombo extends ComboBox(P1PDF.templates.asScala) with ValueRenderer[P1PDF.Template] {
+    object TemplateCombo extends ComboBox(P1PDF.templates) with ValueRenderer[P1PDF.Template] {
       selection.item = tp.template
     }
 

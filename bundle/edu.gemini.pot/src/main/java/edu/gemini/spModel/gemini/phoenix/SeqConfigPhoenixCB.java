@@ -25,7 +25,6 @@ public final class SeqConfigPhoenixCB extends HelperSeqCompCB {
         super(seqComp);
     }
 
-
     /**
      * This thisApplyNext overrides the HelperSeqCompCB
      * so that the integration time, exposure time and ncoadds can

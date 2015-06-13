@@ -53,6 +53,9 @@ object BlueprintBase {
     // NIFS
     case b: M.NiriBlueprint                 => NiriBlueprint(b)
 
+    // Phoenix
+    case b: M.PhoenixBlueprint              => PhoenixBlueprint(b)
+
     // Speckle
     case b: M.DssiBlueprint                 => DssiBlueprint(b)
 

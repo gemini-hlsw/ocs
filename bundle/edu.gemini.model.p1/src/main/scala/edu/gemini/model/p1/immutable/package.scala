@@ -322,6 +322,12 @@ package object immutable {
     val BBF_BRACONT = mutable.NiriFilter.NBF_BRACONT
   }
 
+  type PhoenixFocalPlaneUnit = mutable.PhoenixFocalPlaneUnit
+  object PhoenixFocalPlaneUnit extends EnumObject[mutable.PhoenixFocalPlaneUnit]
+
+  type PhoenixFilter = mutable.PhoenixFilter
+  object PhoenixFilter extends EnumObject[mutable.PhoenixFilter]
+
   type GsaoiFilter = mutable.GsaoiFilter
   object GsaoiFilter extends EnumObject[mutable.GsaoiFilter]
 

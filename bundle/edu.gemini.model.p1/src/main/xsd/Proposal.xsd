@@ -14,6 +14,7 @@
     <xsd:include schemaLocation="Nici.xsd"/>
     <xsd:include schemaLocation="Niri.xsd"/>
     <xsd:include schemaLocation="Nifs.xsd"/>
+    <xsd:include schemaLocation="Phoenix.xsd"/>
     <xsd:include schemaLocation="Subaru.xsd"/>
     <xsd:include schemaLocation="Dssi.xsd"/>
     <xsd:include schemaLocation="Texes.xsd"/>
@@ -126,6 +127,7 @@
             <xsd:element name="nici"       type="NiciBlueprintChoice"/>
             <xsd:element name="nifs"       type="NifsBlueprintChoice"/>
             <xsd:element name="niri"       type="NiriBlueprintChoice"/>
+            <xsd:element name="phoenix"    type="PhoenixBlueprintChoice"/>
             <xsd:element name="subaru"     type="SubaruBlueprint"/>
             <xsd:element name="dssi"       type="DssiBlueprintChoice"/>
             <xsd:element name="texes"      type="TexesBlueprintChoice"/>

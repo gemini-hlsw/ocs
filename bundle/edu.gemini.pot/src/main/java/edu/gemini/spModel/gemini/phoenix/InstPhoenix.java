@@ -44,7 +44,7 @@ public final class InstPhoenix extends SPInstObsComp implements PropertyProvider
     public static final SPComponentType SP_TYPE =
             SPComponentType.INSTRUMENT_PHOENIX;
 
-    private static final Map<String, PropertyDescriptor> PRIVATE_PROP_MAP = new TreeMap<String, PropertyDescriptor>();
+    private static final Map<String, PropertyDescriptor> PRIVATE_PROP_MAP = new TreeMap<>();
     public static final Map<String, PropertyDescriptor> PROPERTY_MAP = Collections.unmodifiableMap(PRIVATE_PROP_MAP);
 
     //Properties
@@ -319,7 +319,7 @@ public final class InstPhoenix extends SPInstObsComp implements PropertyProvider
      * queryable configuration parameters.
      */
     public static List getInstConfigInfo() {
-        List<InstConfigInfo> configInfo = new LinkedList<InstConfigInfo>();
+        List<InstConfigInfo> configInfo = new LinkedList<>();
         configInfo.add(new InstConfigInfo(MASK_PROP));
         configInfo.add(new InstConfigInfo(FILTER_PROP));
         return configInfo;

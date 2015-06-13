@@ -31,6 +31,10 @@ class RootSpec extends SpecificationWithJUnit {
       val root = new Root(Semester(2016, A))
       root.choices must contain(Instrument.Graces)
     }
+    "includes Phoenix" in {
+      val root = new Root(Semester(2016, A))
+      root.choices must contain(Instrument.Phoenix)
+    }
     "Michelle has been removed in 2016A" in {
       val root = new Root(Semester(2016, A))
       root.choices must not contain Instrument.Michelle

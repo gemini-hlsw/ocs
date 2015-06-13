@@ -22,7 +22,7 @@ object Instrument {
   case object Graces     extends Instrument(GN, "GRACES")
   case object Gsaoi      extends Instrument(GS, "GSAOI")
   case object Nici       extends Instrument(GS, "NICI")
-//  case object Phoenix    extends Instrument(GS, "Phoenix", "Phoenix, "PHOENIX")
+  case object Phoenix    extends Instrument(GS, "Phoenix", "Phoenix", "PHOENIX")
   case object Trecs      extends Instrument(GS, "TReCS", "T-ReCS", "TReCS")
   case object Visitor    extends Instrument(GS, "Visitor")
 

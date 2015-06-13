@@ -21,7 +21,7 @@ public final class PhoenixParams {
     /**
      * Class for Filters.
      */
-    public static enum Filter implements DisplayableSpType, SequenceableSpType, ObsoletableSpType {
+    public enum Filter implements DisplayableSpType, SequenceableSpType, ObsoletableSpType {
 
         M1930("M1930"),
         M2030("M2030"),
@@ -65,7 +65,7 @@ public final class PhoenixParams {
 
         private String _displayValue;
 
-        private Filter(String displayValue) {
+        Filter(String displayValue) {
             _displayValue = displayValue;
 
         }
@@ -102,7 +102,7 @@ public final class PhoenixParams {
     /**
      * Masks
      */
-    public static enum Mask implements DisplayableSpType, SequenceableSpType {
+    public enum Mask implements DisplayableSpType, SequenceableSpType {
 
         MASK_1("0.17 arcsec slit", 0.17),
         MASK_2("0.25 arcsec slit", 0.25),
@@ -118,7 +118,7 @@ public final class PhoenixParams {
         private double _slitWidth;
         private String _displayValue;
 
-        private Mask(String displayValue, double slitWidth) {
+        Mask(String displayValue, double slitWidth) {
             _displayValue = displayValue;
             _slitWidth = slitWidth;
         }

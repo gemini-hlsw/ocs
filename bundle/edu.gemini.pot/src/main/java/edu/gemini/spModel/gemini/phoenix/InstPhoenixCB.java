@@ -18,7 +18,6 @@ import edu.gemini.pot.sp.ISPObsComponent;
 import java.util.Collection;
 import java.util.Map;
 
-
 /**
  * InstPhoenixCB is the configuration builder for the InstPhoenix data
  * object.
