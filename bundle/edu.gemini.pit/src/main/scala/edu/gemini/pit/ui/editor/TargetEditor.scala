@@ -1,7 +1,5 @@
 package edu.gemini.pit.ui.editor
 
-import java.awt.Insets
-
 import com.jgoodies.forms.factories.Borders.DLU4_BORDER
 
 import edu.gemini.model.p1.immutable._
@@ -15,6 +13,7 @@ import edu.gemini.model.p1.immutable.ProperMotion
 import edu.gemini.model.p1.immutable.Semester
 import edu.gemini.model.p1.immutable.SiderealTarget
 import edu.gemini.model.p1.immutable.Target
+import edu.gemini.pit.ui.util.SharedIcons.SharedIcon
 import edu.gemini.pit.ui.util._
 import edu.gemini.pit.ui.util.RATextField
 import edu.gemini.pit.ui.util.ScrollPanes
@@ -35,7 +34,7 @@ import java.awt
 import edu.gemini.pit.ui.util.ToolButton
 import swing._
 import scala.swing.event.{ButtonClicked, ValueChanged, SelectionChanged}
-import javax.swing.{JLabel, ListSelectionModel}
+import javax.swing.{BorderFactory, ListSelectionModel}
 import java.util.{TimeZone, Date}
 import java.text.{SimpleDateFormat, DecimalFormat}
 
@@ -64,7 +63,24 @@ import TargetEditor._
 /**
  * Modal editor for a Target.
  */
-class TargetEditor private (semester:Semester, target:Target, canEdit:Boolean) extends StdModalEditor[Result]("Edit Target") {dialog =>
+class TargetEditor private (semester:Semester, target:Target, canEdit:Boolean) extends StdModalEditor[Result]("Edit Target") { dialog =>
+  // An ADT for our target type radio buttons
+  sealed trait TargetType {
+    val name: String
+  }
+  object TargetType {
+    val all:List[TargetType] = List(SiderealType, NonSiderealType, TooType)
+  }
+  case object SiderealType extends TargetType {
+    val name = "Sidereal"
+  }
+  case object NonSiderealType extends TargetType {
+    val name = "Non-Sidereal"
+  }
+  case object TooType extends TargetType {
+    val name = "Target of Opportunity"
+  }
+
 
   // Construct our header and content
   override def header = Header
@@ -79,18 +95,8 @@ class TargetEditor private (semester:Semester, target:Target, canEdit:Boolean) e
   // Unlike other editors, let's not have a default button
   dialog.peer.getRootPane.setDefaultButton(null)
 
-  // An enumerated type for our target type radio buttons
-  object TargetType extends Enumeration {
-    val SiderealType = Value("Sidereal")
-    val NonSiderealType = Value("Non-Sidereal")
-    val TooType = Value("Target of Opportunity")
-    type TargetType = Value
-  }
-
-  import TargetType._
-
   // When is it valid?
-  override def editorValid = Header.Name.valid && (Header.TypePicker.selection.item match {
+  override def editorValid = Header.Name.valid && (Header.TypePicker.selection match {
     case SiderealType    =>
       Tabs.CoordinatesPageContent.RA.valid &&
         Tabs.CoordinatesPageContent.Dec.valid &&
@@ -113,15 +119,18 @@ class TargetEditor private (semester:Semester, target:Target, canEdit:Boolean) e
       }
     }
 
-  Header.TypePicker.selection.reactions += {
-    case SelectionChanged(_) => validateEditor()
+  Header.TypePicker.bg.buttons.foreach {
+    _.reactions += {
+      case SelectionChanged(_) => validateEditor()
+    }
   }
   (Tabs.CoordinatesPageContent.PMCheck :: Tabs.magControls.map(_.check)) foreach {
       _.reactions += {
       case _ => validateEditor()
     }
   }
-
+  // Show the currently selected dab
+  Tabs.switchType(Header.TypePicker.selection)
 
   // Our editor holds three targets, one of each type.
   lazy val (sidereal, nonSidereal, too, initialType) = {
@@ -191,7 +200,7 @@ class TargetEditor private (semester:Semester, target:Target, canEdit:Boolean) e
           }
         }
         icons.get(v).map { i =>
-          val label = new Label(v.toString, i, Alignment.Left)
+          val label = new Label(v.name, i, Alignment.Left)
           (rb, label)
         }
       }
@@ -204,33 +213,10 @@ class TargetEditor private (semester:Semester, target:Target, canEdit:Boolean) e
       contents ++= targetTypeRadioButtons.map {
         case (r, l) =>
           new BorderPanel() {
+            border = BorderFactory.createEmptyBorder(5, 5, 5, 5)
             add(r, BorderPanel.Position.West)
             add(l, BorderPanel.Position.Center)
           }
-      }
-    }
-
-    // Target type picker is a combo box. When the user selects a new target type, we ask the
-    // tab pane to switch the set of displayed tabs.
-    object TypePicker extends ComboBox(TargetType.values.toSeq) {
-      enabled = canEdit
-      selection.reactions += {
-        case SelectionChanged(_) =>
-          Tabs.switchType(selection.item)
-          lookup.enabled = canEdit && (selection.item != TooType)
-      }
-      selection.item = initialType // initialize
-      renderer = new ListView.Renderer[TargetType] {
-        val delegate = renderer
-        def componentFor(list: ListView[_ <: TargetType], isSelected: Boolean, focused: Boolean, a: TargetType, index: Int) = {
-          val c = delegate.componentFor(list, isSelected, focused, a, index)
-          c.peer.asInstanceOf[JLabel].setIcon(a match {
-            case SiderealType    => SharedIcons.ICON_SIDEREAL
-            case NonSiderealType => SharedIcons.ICON_NONSIDEREAL
-            case TooType         => SharedIcons.ICON_TOO
-          })
-          c
-        }
       }
     }
 
@@ -245,7 +231,7 @@ class TargetEditor private (semester:Semester, target:Target, canEdit:Boolean) e
 
     // A method for switching modes. The way things are engineered we'll never get called unless
     // the mode is actually changing (otherwise we would want to do verify this first).
-    def switchType(t:TargetType) {
+    def switchType(t: TargetType) {
       pages.clear()
       t match {
         case SiderealType    => pages += CoordinatesPage; pages += MagnitudesPage
@@ -377,7 +363,7 @@ class TargetEditor private (semester:Semester, target:Target, canEdit:Boolean) e
 
     }
 
-    // A tab page for an ephmeris for non-sidereal targets
+    // A tab page for an ephemeris for non-sidereal targets
     object Ephemeris extends TabbedPane.Page("Ephemeris", EphemerisContent)
 
     object EphemerisContent extends BorderPanel {
@@ -561,8 +547,7 @@ class TargetEditor private (semester:Semester, target:Target, canEdit:Boolean) e
 
   def value = Done(value0)
 
-  def value0 = Header.TypePicker.selection.item match {
-
+  def value0 = Header.TypePicker.selection match {
     case SiderealType =>
 
       import Header.Name
@@ -596,6 +581,3 @@ class TargetEditor private (semester:Semester, target:Target, canEdit:Boolean) e
   }
 
 }
-
-
-
