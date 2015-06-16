@@ -63,7 +63,7 @@ case class CatalogQueryResult(targets:TargetsTable, problems: List[CatalogProble
 }
 
 object CatalogQueryResult {
-  def apply(r: ParsedVoResource):CatalogQueryResult = CatalogQueryResult(TargetsTable(r.tables.foldMap(identity)), r.tables.map(_.rows.collect {case -\/(p) => p}).flatten)
+  def apply(r: ParsedVoResource):CatalogQueryResult = CatalogQueryResult(TargetsTable(r.tables.foldMap(identity)), r.tables.flatMap(_.rows.collect {case -\/(p) => p}))
 
   val Zero = CatalogQueryResult(TargetsTable.Zero, Nil)
 
@@ -80,6 +80,7 @@ case class GenericError(msg: String) extends CatalogProblem
 case class MissingValues(fields: List[Ucd]) extends CatalogProblem
 case class FieldValueProblem(ucd: Ucd, value: String) extends CatalogProblem
 case class UnmatchedField(ucd: Ucd) extends CatalogProblem
+case object UnknownCatalog extends CatalogProblem
 
 case class CatalogException(problems: List[CatalogProblem]) extends RuntimeException(problems.mkString(", ")) {
   def firstMessage:String = ~problems.headOption.map {
