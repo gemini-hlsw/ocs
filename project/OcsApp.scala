@@ -138,6 +138,7 @@ trait OcsApp { this: OcsBundle =>
     bundle_edu_gemini_wdba_xmlrpc_api,
     bundle_edu_gemini_wdba_xmlrpc_server,
     bundle_edu_gemini_pit,
+    bundle_edu_gemini_pit_launcher,
     bundle_edu_gemini_p1monitor,
     bundle_edu_gemini_tools_p1pdfmaker,
     bundle_jsky_app_ot,

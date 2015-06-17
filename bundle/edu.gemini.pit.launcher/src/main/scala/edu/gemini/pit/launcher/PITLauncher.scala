@@ -1,4 +1,4 @@
-package edu.gemini.pit.util
+package edu.gemini.pit.launcher
 
 import java.io.File
 import java.util.Locale
