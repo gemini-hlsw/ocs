@@ -1,8 +1,8 @@
 package edu.gemini.sp.vcs2
 
 import edu.gemini.pot.sp.Conflict.{Moved, ResurrectedLocalDelete, ReplacedRemoteDelete}
+import edu.gemini.pot.sp.version.NodeVersions
 import edu.gemini.pot.sp.{Conflict, DataObjectBlob, ISPNode, SPNodeKey}
-import edu.gemini.shared.util.VersionComparison
 import edu.gemini.shared.util.VersionComparison._
 import edu.gemini.sp.vcs2.MergeNode._
 import edu.gemini.spModel.rich.pot.sp._
@@ -70,14 +70,14 @@ object PreliminaryMerge {
     def containsUpdatedRemote(r: Tree[MergeNode]): Boolean =
       isUpdatedRemote(r) || r.subForest.exists(containsUpdatedRemote)
 
-    def containsMissingRemoteUpdatedLocal(l: ISPNode): Boolean =
+    def containsMissingRemoteYetUpdatedLocal(l: ISPNode): Boolean =
       !mc.remote.isPresent(l.key) && (
-        isUpdatedLocal(l) || l.children.exists(containsMissingRemoteUpdatedLocal)
+        isUpdatedLocal(l) || l.children.exists(containsMissingRemoteYetUpdatedLocal)
       )
 
-    def containsMissingLocalUpdatedRemote(r: Tree[MergeNode]): Boolean =
+    def containsMissingLocalYetUpdatedRemote(r: Tree[MergeNode]): Boolean =
       !mc.local.isPresent(r.key) && (
-        isUpdatedRemote(r) || r.subForest.exists(containsMissingLocalUpdatedRemote)
+        isUpdatedRemote(r) || r.subForest.exists(containsMissingLocalYetUpdatedRemote)
       )
 
     sealed trait ChildMergeStrategy {
@@ -109,7 +109,7 @@ object PreliminaryMerge {
         // In general we don't want the remote nodes -- we're deleting them.
         // If deleting something that contains an update we haven't seen though,
         // we want to keep it anyway.
-        val remote = pc.remote.filter(containsMissingLocalUpdatedRemote)
+        val remote = pc.remote.filter(containsMissingLocalYetUpdatedRemote)
 
         PartitionedChildren(local, pc.both, remote)
       }
@@ -129,7 +129,7 @@ object PreliminaryMerge {
     // This is basically the opposite of "newer".
     val older = new RemoteMergeStrategy {
       def filter(pc: PartitionedChildren): PartitionedChildren = {
-        val local  = pc.local.filter(containsMissingRemoteUpdatedLocal)
+        val local  = pc.local.filter(containsMissingRemoteYetUpdatedLocal)
         val remote = pc.remote.filter(keepRemoteChild)
         PartitionedChildren(local, pc.both, remote)
       }
@@ -178,29 +178,43 @@ object PreliminaryMerge {
       }
 
       // Combine and order the children.
-      val newChildren = s.sort(lMerged ++ rMerged ++ bMerged, lcs, rcs)
+      val newChildren  = s.sort(lMerged ++ rMerged ++ bMerged, lcs, rcs)
 
       // Compute the new version for this node, which is nominally the
       // combination of the local and remote versions. If the children don't
-      // match what we have locally though (that is, they have been updated by
-      // the merge), then be sure that the local version is updated.
+      // match though (that is, they have been updated by the merge), then be
+      // sure that the local version is updated.
 
-      def sameChildren: Boolean = {
-        val localNode      = mc.local.get(mod.key)
-        val localChildKeys = localNode.map(_.children.map(_.key)) | Nil
-        val newChildKeys   = newChildren.map(_.key)
-        localChildKeys == newChildKeys
-      }
+      val k            = mod.key
+      val syncVersion  = mc.syncVersion(k)
+      def incrVersion  = syncVersion.incr(mc.local.prog.getLifespanId)
+      val newChildKeys = newChildren.map(_.key)
 
-      val k          = mod.key
-      val sv         = mc.syncVersion(k)
-      def svIncr     = sv.incr(mc.local.prog.getLifespanId)
-      val svIsNewer  = sv.compare(mc.local.version(k)) === VersionComparison.Newer
-      val newVersion = if (svIsNewer || sameChildren) sv else svIncr
+      def updatesVersion(nv: NodeVersions): Boolean =
+        syncVersion.compare(nv) match {
+          case Newer | Conflicting => true
+          case Older | Same        => false
+        }
+
+      def updatesLocalVersion: Boolean   = updatesVersion(mc.local.version(k))
+      def updatesRemoteVersion: Boolean  = updatesVersion(mc.remote.version(k))
+      def updatesLocalChildren: Boolean  = newChildKeys =/= (mc.local.get(k).map(_.children.map(_.key)) | Nil)
+      def updatesRemoteChildren: Boolean = newChildKeys =/= (mc.remote.get(k).map(_.subForest.toList.map(_.key)) | Nil)
+
+      val newVersion =
+        if ((!updatesLocalVersion && updatesLocalChildren) || (!updatesRemoteVersion && updatesRemoteChildren))
+          incrVersion
+        else
+          syncVersion
 
       val mod2 = mod match {
         case m: Modified   => m.copy(nv = newVersion)
         case _: Unmodified => mod
+      }
+
+      newVersion.compare(mc.local.version(k)) match {
+        case Newer | Same => // ok
+        case x            => Console.err.println("!!!! " + x + ": " + k)
       }
 
       Tree.node(mod2, newChildren.toStream)
@@ -267,7 +281,8 @@ object PreliminaryMerge {
           t  <- tryTree
           n0 <- t.loc.findNode(k)
           n1 <- n0.addDataObjectConflict(dob)
-        } yield n1.toTree
+          n2 <- n1.incr(mc.local.prog.getLifespanId)
+        } yield n2.toTree
       }
     }
 
@@ -281,8 +296,9 @@ object PreliminaryMerge {
         if (ks.contains(r.key))
           for {
             t0 <- r.mModifyLabel(_.withConflictNote(nf(r.key)))
-            t1 <- visitChildren(t0, goSkip)
-          } yield t1
+            t1 <- t0.incr(mc.local.prog.getLifespanId)
+            t2 <- visitChildren(t1, goSkip)
+          } yield t2
         else
           visitChildren(r, goAdd)
 
@@ -337,7 +353,8 @@ object PreliminaryMerge {
           t  <- tryTree
           n0 <- t.loc.findNode(oldParent)
           n1 <- n0.addConflictNote(new Moved(child, newParent))
-        } yield n1.toTree
+          n2 <- n1.incr(mc.local.prog.getLifespanId)
+        } yield n2.toTree
       }
     }
 

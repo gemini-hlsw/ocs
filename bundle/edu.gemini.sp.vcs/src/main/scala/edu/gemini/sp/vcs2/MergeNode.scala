@@ -156,6 +156,9 @@ object MergeNode {
         case m: Modified => Tree.node(f(m): MergeNode, t.subForest).right
         case _           => TryVcs.fail(s"Expected Modified label for $key")
       }
+
+    def incr(lifespanId: LifespanId): TryVcs[Tree[MergeNode]] =
+      mModifyLabel(m => m.copy(nv = m.nv.incr(lifespanId)))
   }
 
   implicit class MergeZipperOps(z: TreeLoc[MergeNode]) {

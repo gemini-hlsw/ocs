@@ -1,11 +1,15 @@
 package edu.gemini.sp.vcs2
 
+import edu.gemini.spModel.conflict.ConflictFolder
+import edu.gemini.spModel.obs.ObservationStatus
+
 import java.security.Permission
 
 import edu.gemini.pot.sp.Conflict.{Moved, ResurrectedLocalDelete, ReplacedRemoteDelete}
 import edu.gemini.pot.sp.validator.Validator
 import edu.gemini.pot.sp.version.VersionMap
 import edu.gemini.pot.sp.{DataObjectBlob => DOB, _}
+import edu.gemini.shared.util.IntegerIsIntegral
 import edu.gemini.shared.util.VersionComparison
 import edu.gemini.shared.util.VersionComparison.{Conflicting, Same, Newer}
 import edu.gemini.shared.util.immutable.ScalaConverters._
@@ -24,7 +28,7 @@ import org.scalatest.junit.JUnitSuite
 import scala.collection.JavaConverters._
 
 import scalaz._
-import scalaz.syntax.functor._
+import scalaz.syntax.functor._  // idea marks as unused but required for "as"
 
 
 class MergeTest extends JUnitSuite {
@@ -98,14 +102,17 @@ class MergeTest extends JUnitSuite {
 
     val deletedKeys = mergePlan.delete.map(_.key)
 
-    // Find all the merge plan node keys with a particular type of conflict
-    def actualConflictKeys(p: (Conflicts, SPNodeKey) => Boolean ): Set[SPNodeKey] =
+    // Find all the merge plan node keys with a particular type of conflict.
+    // Note, the corrected merge plan may have different/fewer conflicts since
+    // obs permission correction will reset inappropriately edited observations.
+    def mergePlanConflictKeys(p: (Conflicts, SPNodeKey) => Boolean ): Set[SPNodeKey] = {
       mergePlan.update.sFoldRight(Set.empty[SPNodeKey]) { (mn, s) =>
         mn match {
           case Modified(k, _, _, _, con) if p(con, k) => s + k
-          case _                                      => s
+          case _ => s
         }
       }
+    }
 
     val obsEditsTry = ObsEdit.all(lp, diffs)
     val obsEdits    = obsEditsTry match {
@@ -113,10 +120,13 @@ class MergeTest extends JUnitSuite {
       case -\/(f)     => sys.error(s"could not extract edits: ${VcsFailure.explain(f, sp.getProgramID, "", None)}")
     }
 
-    val correctedMergePlan =
+    // WARNING: every time you run this action, you'll get distinct conflict
+    // folder keys.  In particular keep that in mind when comparing with
+    // updatedLocalProgram which when run will run correctedMergePlan
+    val correctedMergePlan: VcsAction[MergePlan] =
       MergeCorrection(mergeContext)(mergePlan, (_: Permission) => VcsAction(true))
 
-    val updatedLocalProgram = {
+    val updatedLocalProgram: VcsAction[ISPProgram] = {
       val localCopy = fact.copyWithSameKeys(lp)
       for {
         mp <- correctedMergePlan
@@ -399,13 +409,12 @@ class MergeTest extends JUnitSuite {
         }
 
         def conflictsMatch(nConflicts: Conflicts, tConflicts: Conflicts): Boolean =
-          (nConflicts.dataObjectConflict.asScalaOpt, tConflicts.dataObjectConflict.asScalaOpt) match {
+          ((nConflicts.dataObjectConflict.asScalaOpt, tConflicts.dataObjectConflict.asScalaOpt) match {
             case (None, None)       => true
             case (Some(n), Some(t)) => (n.perspective == t.perspective) &&
-                                       dataObjectMatches(n.dataObject, t.dataObject) &&
-                                       nConflicts.notes.asScalaList.toSet == tConflicts.notes.asScalaList.toSet
+                                       dataObjectMatches(n.dataObject, t.dataObject)
             case _                  => false
-          }
+          }) && nConflicts.notes.asScalaList.toSet == tConflicts.notes.asScalaList.toSet
 
         def childrenMatch(n: List[ISPNode], t: Stream[Tree[MergeNode]]): Boolean = {
           // The order won't be the same because the Tree[MergeNode] doesn't
@@ -644,6 +653,50 @@ class MergeTest extends JUnitSuite {
       }
     ),
 
+    ("Conflict folders are given strictly Newer version numbers",
+      (start, local, remote, pc) =>
+        pc.updatedLocalProgram.exists { ulp =>
+          val conflicts = ulp.fold(List.empty[ISPNode]) { (lst, n) =>
+            n.getDataObject match {
+              case _: ConflictFolder => n :: lst
+              case _                 => lst
+            }
+          }
+
+          conflicts.forall { c =>
+            VersionComparison.compare(ulp.getVersions(c.key), local.getVersions(c.key)) == Newer
+          }
+        }.run
+    ),
+
+    ("Every merged node with a conflict note has a newer version number",
+      (start, local, remote, pc) => {
+        pc.updatedLocalProgram.exists { ulp =>
+
+          val conflictKeys = ulp.fold(List.empty[SPNodeKey]) { (lst, n) =>
+            if (n.getConflicts.nonEmpty()) n.key :: lst else lst
+          }
+
+          conflictKeys.forall { k =>
+            def stat(p: ISPProgram): Option[ObservationStatus] =
+              p.findDescendant(_.key == k).flatMap(d => Option(d.getContextObservation)).map(o => ObservationStatus.computeFor(o))
+
+            // Obs permission corrections will throw everything off because they
+            // will restore the local observation to duplicate the remote
+            // version. To keep it simple we will just ignore anything that is a
+            // possible status violation.
+            val possibleStatusCorrection = {
+              val us = stat(ulp)
+              val ls = stat(local)
+              (us != ls) || us.exists(_.isGreaterThan(ObservationStatus.READY)) || ls.exists(_.isGreaterThan(ObservationStatus.READY))
+            }
+
+            (VersionComparison.compare(ulp.getVersions(k), local.getVersions(k)) == Newer) || possibleStatusCorrection
+          }
+        }.run
+      }
+    ),
+
     ("When both local and remote data objects are edited, a conflict is added",
       (start, local, remote, pc) => {
         // can't intersect pc.xx.dataObjectEditedNodes because in the actual
@@ -659,7 +712,7 @@ class MergeTest extends JUnitSuite {
         }
 
         // find the merge plan nodes that *do* have a data object conflict
-        val actual = pc.actualConflictKeys((con: Conflicts, _: SPNodeKey) => con.dataObjectConflict.isDefined)
+        val actual = pc.mergePlanConflictKeys((con: Conflicts, _: SPNodeKey) => con.dataObjectConflict.isDefined)
 
         expected == actual
       }
@@ -674,7 +727,7 @@ class MergeTest extends JUnitSuite {
           pc.mergeContext.local.parent(k).exists(allReplaced.contains)
         }
 
-        val actual = pc.actualConflictKeys((con: Conflicts, k: SPNodeKey) =>
+        val actual = pc.mergePlanConflictKeys((con: Conflicts, k: SPNodeKey) =>
           con.notes.contains(new ReplacedRemoteDelete(k))
         )
 
@@ -694,7 +747,7 @@ class MergeTest extends JUnitSuite {
           pc.mergeContext.remote.parent(k).exists(allResurrected.contains)
         }
 
-        val actual = pc.actualConflictKeys((con: Conflicts, k: SPNodeKey) =>
+        val actual = pc.mergePlanConflictKeys((con: Conflicts, k: SPNodeKey) =>
           con.notes.contains(new ResurrectedLocalDelete(k))
         )
 
