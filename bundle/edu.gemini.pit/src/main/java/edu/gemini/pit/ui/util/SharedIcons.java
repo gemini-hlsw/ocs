@@ -56,10 +56,10 @@ public interface SharedIcons {
     Icon ICON_SPINNER = new SharedIcon("spinner.gif");
     Icon ICON_SPINNER_BLUE = new SharedIcon("spinner_blue_gray.gif");
 
-    SharedIcon ICON_SIDEREAL = new SharedIcon("sidereal.png");
+    Icon ICON_SIDEREAL = new SharedIcon("sidereal.png");
     Icon ICON_SIDEREAL_DIS = new SharedIcon("sidereal_dis.png");
-    SharedIcon ICON_NONSIDEREAL = new SharedIcon("nonsidereal.png");
-    SharedIcon ICON_TOO = new SharedIcon("too.png");
+    Icon ICON_NONSIDEREAL = new SharedIcon("nonsidereal.png");
+    Icon ICON_TOO = new SharedIcon("too.png");
 
     Icon ICON_DEVICE = new SharedIcon("device.png");
     Icon ICON_DEVICE_DIS = new SharedIcon("device_dis.png");

@@ -34,7 +34,7 @@ import java.awt
 import edu.gemini.pit.ui.util.ToolButton
 import swing._
 import scala.swing.event.{ButtonClicked, ValueChanged, SelectionChanged}
-import javax.swing.{BorderFactory, ListSelectionModel}
+import javax.swing.{Icon, BorderFactory, ListSelectionModel}
 import java.util.{TimeZone, Date}
 import java.text.{SimpleDateFormat, DecimalFormat}
 
@@ -178,7 +178,8 @@ class TargetEditor private (semester:Semester, target:Target, canEdit:Boolean) e
     // When the user selects a new target type, we ask the
     // tab pane to switch the set of displayed tabs.
     object TypePicker extends BoxPanel(Orientation.Horizontal) {
-      val icons = Map[TargetType, SharedIcon](SiderealType    -> SharedIcons.ICON_SIDEREAL,
+      val icons = Map[TargetType, Icon](
+                      SiderealType    -> SharedIcons.ICON_SIDEREAL,
                       NonSiderealType -> SharedIcons.ICON_NONSIDEREAL,
                       TooType         -> SharedIcons.ICON_TOO)
 
@@ -213,7 +214,7 @@ class TargetEditor private (semester:Semester, target:Target, canEdit:Boolean) e
       contents ++= targetTypeRadioButtons.map {
         case (r, l) =>
           new BorderPanel() {
-            border = BorderFactory.createEmptyBorder(5, 5, 5, 5)
+            border = BorderFactory.createEmptyBorder(1, 10, 0, 5)
             add(r, BorderPanel.Position.West)
             add(l, BorderPanel.Position.Center)
           }
