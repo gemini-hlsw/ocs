@@ -1,5 +1,6 @@
 package edu.gemini.catalog.votable
 
+import edu.gemini.catalog.votable.TableRowItem
 import edu.gemini.spModel.core._
 import edu.gemini.spModel.core.Target.SiderealTarget
 import org.specs2.mutable.SpecificationWithJUnit
@@ -23,6 +24,7 @@ class VoTableParserSpec extends SpecificationWithJUnit with VoTableParser {
         <FIELD ID="gmag_err" datatype="double" name="gmag_err" ucd="stat.error;phot.mag;em.opt.g"/>
         <FIELD ID="rmag_err" datatype="double" name="rmag_err" ucd="stat.error;phot.mag;em.opt.r"/>
         <FIELD ID="flags1" datatype="int" name="flags1" ucd="meta.code"/>
+        <FIELD ID="ppmxl" datatype="int" name="ppmxl" ucd="meta.id;meta.main"/>
       </TABLE>
 
     val tableRow =
@@ -30,6 +32,7 @@ class VoTableParserSpec extends SpecificationWithJUnit with VoTableParser {
         <TD>0.0960165</TD>
         <TD>0.0503736</TD>
         <TD>268435728</TD>
+        <TD>-2140405448</TD>
       </TR>
 
     val dataNode =
@@ -39,11 +42,13 @@ class VoTableParserSpec extends SpecificationWithJUnit with VoTableParser {
             <TD>0.0960165</TD>
             <TD>0.0503736</TD>
             <TD>268435728</TD>
+            <TD>-2140405448</TD>
           </TR>
           <TR>
             <TD>0.51784</TD>
             <TD>0.252201</TD>
             <TD>536871168</TD>
+            <TD>-2140404569</TD>
           </TR>
         </TABLEDATA>
       </DATA>
@@ -61,6 +66,7 @@ class VoTableParserSpec extends SpecificationWithJUnit with VoTableParser {
         <FIELD ID="gmag" datatype="double" name="gmag" ucd="phot.mag;em.opt.g"/>
         <FIELD ID="zmag" datatype="double" name="zmag" ucd="phot.mag;em.opt.z"/>
         <FIELD ID="type" datatype="int" name="type" ucd="meta.code"/>
+        <FIELD ID="ppmxl" datatype="int" name="ppmxl" ucd="meta.id;meta.main"/>
         <DATA>
           <TABLEDATA>
             <TR>
@@ -75,6 +81,7 @@ class VoTableParserSpec extends SpecificationWithJUnit with VoTableParser {
               <TD>22.082</TD>
               <TD>19.8812</TD>
               <TD>3</TD>
+              <TD>-2140405448</TD>
             </TR>
             <TR>
               <TD>536871168</TD>
@@ -88,6 +95,7 @@ class VoTableParserSpec extends SpecificationWithJUnit with VoTableParser {
               <TD>23.0889</TD>
               <TD>20.0088</TD>
               <TD>3</TD>
+              <TD>-2140404569</TD>
             </TR>
           </TABLEDATA>
       </DATA>
@@ -113,6 +121,7 @@ class VoTableParserSpec extends SpecificationWithJUnit with VoTableParser {
         <FIELD ID="type" datatype="int" name="type" ucd="meta.code"/>
         <FIELD ID="jmag" datatype="double" name="jmag" ucd="phot.mag;em.IR.J"/>
         <FIELD ID="e_jmag" datatype="double" name="e_jmag" ucd="stat.error;phot.mag;em.IR.J"/>
+        <FIELD ID="ppmxl" datatype="int" name="ppmxl" ucd="meta.id;meta.main"/>
         <DATA>
           <TABLEDATA>
             <TR>
@@ -134,6 +143,7 @@ class VoTableParserSpec extends SpecificationWithJUnit with VoTableParser {
               <TD>3</TD>
               <TD>13.74</TD>
               <TD>0.029999999999999999</TD>
+              <TD>-2140405448</TD>
             </TR>
             <TR>
               <TD>0.51784</TD>
@@ -154,6 +164,7 @@ class VoTableParserSpec extends SpecificationWithJUnit with VoTableParser {
               <TD>3</TD>
               <TD>12.023</TD>
               <TD>0.02</TD>
+              <TD>-2140404569</TD>
             </TR>
           </TABLEDATA>
       </DATA>
@@ -251,7 +262,8 @@ class VoTableParserSpec extends SpecificationWithJUnit with VoTableParser {
       val result =
         FieldDescriptor(FieldId("gmag_err", Ucd("stat.error;phot.mag;em.opt.g")), "gmag_err") ::
         FieldDescriptor(FieldId("rmag_err", Ucd("stat.error;phot.mag;em.opt.r")), "rmag_err") ::
-        FieldDescriptor(FieldId("flags1", Ucd("meta.code")), "flags1") :: Nil
+        FieldDescriptor(FieldId("flags1", Ucd("meta.code")), "flags1") ::
+        FieldDescriptor(FieldId("ppmxl", Ucd("meta.id;meta.main")), "ppmxl") :: Nil
 
       parseFields(fieldsNode) should beEqualTo(result)
     }
@@ -261,7 +273,8 @@ class VoTableParserSpec extends SpecificationWithJUnit with VoTableParser {
       val result = TableRow(
         TableRowItem(FieldDescriptor(FieldId("gmag_err", Ucd("stat.error;phot.mag;em.opt.g")), "gmag_err"), "0.0960165") ::
         TableRowItem(FieldDescriptor(FieldId("rmag_err", Ucd("stat.error;phot.mag;em.opt.r")), "rmag_err"), "0.0503736") ::
-        TableRowItem(FieldDescriptor(FieldId("flags1", Ucd("meta.code")), "flags1"), "268435728") :: Nil
+        TableRowItem(FieldDescriptor(FieldId("flags1", Ucd("meta.code")), "flags1"), "268435728") ::
+        TableRowItem(FieldDescriptor(FieldId("ppmxl", Ucd("meta.id;meta.main")), "ppmxl"), "-2140405448") :: Nil
       )
       parseTableRow(fields, tableRow) should beEqualTo(result)
     }
@@ -272,75 +285,63 @@ class VoTableParserSpec extends SpecificationWithJUnit with VoTableParser {
         TableRow(
           TableRowItem(FieldDescriptor(FieldId("gmag_err", Ucd("stat.error;phot.mag;em.opt.g")), "gmag_err"), "0.0960165") ::
           TableRowItem(FieldDescriptor(FieldId("rmag_err", Ucd("stat.error;phot.mag;em.opt.r")), "rmag_err"), "0.0503736") ::
-          TableRowItem(FieldDescriptor(FieldId("flags1", Ucd("meta.code")), "flags1"), "268435728") :: Nil
+          TableRowItem(FieldDescriptor(FieldId("flags1", Ucd("meta.code")), "flags1"), "268435728") ::
+          TableRowItem(FieldDescriptor(FieldId("ppmxl", Ucd("meta.id;meta.main")), "ppmxl"), "-2140405448") :: Nil
         ),
         TableRow(
           TableRowItem(FieldDescriptor(FieldId("gmag_err", Ucd("stat.error;phot.mag;em.opt.g")), "gmag_err"), "0.51784") ::
           TableRowItem(FieldDescriptor(FieldId("rmag_err", Ucd("stat.error;phot.mag;em.opt.r")), "rmag_err"), "0.252201") ::
-          TableRowItem(FieldDescriptor(FieldId("flags1", Ucd("meta.code")), "flags1"), "536871168") :: Nil
-        ))
-      parseTableRows(fields, dataNode) should beEqualTo(result)
-    }
-    "be able to parse a list of rows with a list of fields" in {
-      val fields = parseFields(fieldsNode)
-
-      val result = List(
-        TableRow(
-          TableRowItem(FieldDescriptor(FieldId("gmag_err", Ucd("stat.error;phot.mag;em.opt.g")), "gmag_err"), "0.0960165") ::
-          TableRowItem(FieldDescriptor(FieldId("rmag_err", Ucd("stat.error;phot.mag;em.opt.r")), "rmag_err"), "0.0503736") ::
-          TableRowItem(FieldDescriptor(FieldId("flags1", Ucd("meta.code")), "flags1"), "268435728") :: Nil
-        ),
-        TableRow(
-          TableRowItem(FieldDescriptor(FieldId("gmag_err", Ucd("stat.error;phot.mag;em.opt.g")), "gmag_err"), "0.51784") ::
-          TableRowItem(FieldDescriptor(FieldId("rmag_err", Ucd("stat.error;phot.mag;em.opt.r")), "rmag_err"), "0.252201") ::
-          TableRowItem(FieldDescriptor(FieldId("flags1", Ucd("meta.code")), "flags1"), "536871168") :: Nil
+          TableRowItem(FieldDescriptor(FieldId("flags1", Ucd("meta.code")), "flags1"), "536871168") ::
+          TableRowItem(FieldDescriptor(FieldId("ppmxl", Ucd("meta.id;meta.main")), "ppmxl"), "-2140404569") :: Nil
         ))
       parseTableRows(fields, dataNode) should beEqualTo(result)
     }
     "be able to convert a TableRow into a SiderealTarget" in {
+      val fields = parseFields(fieldsNode)
+
       val validRow = TableRow(
                 TableRowItem(FieldDescriptor(FieldId("objid", Ucd("meta.id;meta.main")), "objid"), "123456") ::
                 TableRowItem(FieldDescriptor(FieldId("dej2000", Ucd("pos.eq.dec;meta.main")),"dej2000"), "0.209323681906") ::
                 TableRowItem(FieldDescriptor(FieldId("raj2000", Ucd("pos.eq.ra;meta.main")), "raj2000"), "359.745951955") :: Nil
               )
-      tableRow2Target(Nil)(validRow) should beEqualTo(\/-(SiderealTarget("123456", Coordinates(RightAscension.fromAngle(Angle.parseDegrees("359.745951955").getOrElse(Angle.zero)), Declination.fromAngle(Angle.parseDegrees("0.209323681906").getOrElse(Angle.zero)).getOrElse(Declination.zero)), None, Nil, None)))
+      tableRow2Target(fields)(validRow) should beEqualTo(\/-(SiderealTarget("123456", Coordinates(RightAscension.fromAngle(Angle.parseDegrees("359.745951955").getOrElse(Angle.zero)), Declination.fromAngle(Angle.parseDegrees("0.209323681906").getOrElse(Angle.zero)).getOrElse(Declination.zero)), None, Nil, None)))
 
       val rowWithMissingId = TableRow(
                 TableRowItem(FieldDescriptor(FieldId("dej2000", Ucd("pos.eq.dec;meta.main")), "dej2000"), "0.209323681906") ::
                 TableRowItem(FieldDescriptor(FieldId("raj2000", Ucd("pos.eq.ra;meta.main")), "raj2000"), "359.745951955") :: Nil
               )
-      tableRow2Target(Nil)(rowWithMissingId) should beEqualTo(-\/(MissingValues(List(VoTableParser.UCD_OBJID))))
+      tableRow2Target(fields)(rowWithMissingId) should beEqualTo(-\/(MissingValues(List(VoTableParser.UCD_OBJID))))
 
       val rowWithBadRa = TableRow(
                 TableRowItem(FieldDescriptor(FieldId("objid", Ucd("meta.id;meta.main")), "objid"), "123456") ::
                 TableRowItem(FieldDescriptor(FieldId("dej2000", Ucd("pos.eq.dec;meta.main")), "dej2000"), "0.209323681906") ::
                 TableRowItem(FieldDescriptor(FieldId("raj2000", Ucd("pos.eq.ra;meta.main")), "raj2000"), "ABC") :: Nil
             )
-      tableRow2Target(Nil)(rowWithBadRa) should beEqualTo(-\/(FieldValueProblem(VoTableParser.UCD_RA, "ABC")))
+      tableRow2Target(fields)(rowWithBadRa) should beEqualTo(-\/(FieldValueProblem(VoTableParser.UCD_RA, "ABC")))
     }
-    "be able to parse magnitudes' band" in {
+    "be able to parse magnitude bands in PPMXL" in {
       val iMagField = Ucd("phot.mag;em.opt.i")
       // Optical band
-      parseBands(DefaultFilter)((FieldId("id", iMagField), "20.3051")) should beEqualTo(\/-((FieldId("id", iMagField), MagnitudeBand.I, 20.3051)))
+      parseBands(PPMXLFilter)((FieldId("id", iMagField), "20.3051")) should beEqualTo(\/-((FieldId("id", iMagField), MagnitudeBand.I, 20.3051)))
 
       val jIRMagField = Ucd("phot.mag;em.IR.J")
       // IR band
-      parseBands(DefaultFilter)((FieldId("id", jIRMagField), "13.2349")) should beEqualTo(\/-((FieldId("id", jIRMagField), MagnitudeBand.J, 13.2349)))
+      parseBands(PPMXLFilter)((FieldId("id", jIRMagField), "13.2349")) should beEqualTo(\/-((FieldId("id", jIRMagField), MagnitudeBand.J, 13.2349)))
 
       val jIRErrMagField = Ucd("stat.error;phot.mag;em.IR.J")
       // IR Error
-      parseBands(DefaultFilter)((FieldId("id", jIRErrMagField), "0.02")) should beEqualTo(\/-((FieldId("id", jIRErrMagField), MagnitudeBand.J, 0.02)))
+      parseBands(PPMXLFilter)((FieldId("id", jIRErrMagField), "0.02")) should beEqualTo(\/-((FieldId("id", jIRErrMagField), MagnitudeBand.J, 0.02)))
 
       // No magnitude field
       val badField = Ucd("meta.name")
-      parseBands(DefaultFilter)((FieldId("id", badField), "id")) should beEqualTo(-\/(UnmatchedField(badField)))
+      parseBands(PPMXLFilter)((FieldId("id", badField), "id")) should beEqualTo(-\/(UnmatchedField(badField)))
 
       // Bad value
-      parseBands(DefaultFilter)((FieldId("id", iMagField), "stringValue")) should beEqualTo(-\/(FieldValueProblem(iMagField, "stringValue")))
+      parseBands(PPMXLFilter)((FieldId("id", iMagField), "stringValue")) should beEqualTo(-\/(FieldValueProblem(iMagField, "stringValue")))
 
       // Unknown magnitude
       val noBandField = Ucd("phot.mag;em.opt.p")
-      parseBands(DefaultFilter)((FieldId("id", noBandField), "stringValue")) should beEqualTo(-\/(UnmatchedField(noBandField)))
+      parseBands(PPMXLFilter)((FieldId("id", noBandField), "stringValue")) should beEqualTo(-\/(UnmatchedField(noBandField)))
     }
     "be able to map sloan magnitudes in UCAC4, OCSADV-245" in {
       val gMagField = Ucd("phot.mag;em.opt.R")
@@ -356,8 +357,8 @@ class VoTableParserSpec extends SpecificationWithJUnit with VoTableParser {
       parseBands(UCAC4Filter)((FieldId("imag", iMagField), "20.3051")) should beEqualTo(\/-((FieldId("imag", iMagField), MagnitudeBand._i, 20.3051)))
     }
     "be able to parse an xml into a list of SiderealTargets list of rows with a list of fields" in {
-      val magsTarget1 = List(new Magnitude(23.0888, MagnitudeBand.U), new Magnitude(22.082, MagnitudeBand.G), new Magnitude(20.88, MagnitudeBand.R), new Magnitude(20.3051, MagnitudeBand.I), new Magnitude(19.8812, MagnitudeBand.Z))
-      val magsTarget2 = List(new Magnitude(23.0853, MagnitudeBand.U), new Magnitude(23.0889, MagnitudeBand.G), new Magnitude(21.7686, MagnitudeBand.R), new Magnitude(20.7891, MagnitudeBand.I), new Magnitude(20.0088, MagnitudeBand.Z))
+      val magsTarget1 = List(new Magnitude(23.0888, MagnitudeBand.U), new Magnitude(22.082, MagnitudeBand._g), new Magnitude(20.88, MagnitudeBand.R), new Magnitude(20.3051, MagnitudeBand.I), new Magnitude(19.8812, MagnitudeBand._z))
+      val magsTarget2 = List(new Magnitude(23.0853, MagnitudeBand.U), new Magnitude(23.0889, MagnitudeBand._g), new Magnitude(21.7686, MagnitudeBand.R), new Magnitude(20.7891, MagnitudeBand.I), new Magnitude(20.0088, MagnitudeBand._z))
 
       val result = ParsedTable(List(
         \/-(SiderealTarget("-2140405448", Coordinates(RightAscension.fromDegrees(359.745951955), Declination.fromAngle(Angle.parseDegrees("0.209323681906").getOrElse(Angle.zero)).getOrElse(Declination.zero)), None, magsTarget1, None)),
@@ -368,8 +369,8 @@ class VoTableParserSpec extends SpecificationWithJUnit with VoTableParser {
       parse(voTable).tables.head.containsError should beFalse
     }
     "be able to parse an xml into a list of SiderealTargets including magnitude errors" in {
-      val magsTarget1 = List(new Magnitude(23.0888, MagnitudeBand.U, 0.518214), new Magnitude(22.082, MagnitudeBand.G, 0.0960165), new Magnitude(20.88, MagnitudeBand.R, 0.0503736), new Magnitude(20.3051, MagnitudeBand.I, 0.0456069), new Magnitude(19.8812, MagnitudeBand.Z, 0.138202), new Magnitude(13.74, MagnitudeBand.J, 0.03))
-      val magsTarget2 = List(new Magnitude(23.0853, MagnitudeBand.U, 1.20311), new Magnitude(23.0889, MagnitudeBand.G, 0.51784), new Magnitude(21.7686, MagnitudeBand.R, 0.252201), new Magnitude(20.7891, MagnitudeBand.I, 0.161275), new Magnitude(20.0088, MagnitudeBand.Z, 0.35873), new Magnitude(12.023, MagnitudeBand.J, 0.02))
+      val magsTarget1 = List(new Magnitude(23.0888, MagnitudeBand.U, 0.518214), new Magnitude(22.082, MagnitudeBand._g, 0.0960165), new Magnitude(20.88, MagnitudeBand.R, 0.0503736), new Magnitude(20.3051, MagnitudeBand.I, 0.0456069), new Magnitude(19.8812, MagnitudeBand._z, 0.138202), new Magnitude(13.74, MagnitudeBand.J, 0.03))
+      val magsTarget2 = List(new Magnitude(23.0853, MagnitudeBand.U, 1.20311), new Magnitude(23.0889, MagnitudeBand._g, 0.51784), new Magnitude(21.7686, MagnitudeBand.R, 0.252201), new Magnitude(20.7891, MagnitudeBand.I, 0.161275), new Magnitude(20.0088, MagnitudeBand._z, 0.35873), new Magnitude(12.023, MagnitudeBand.J, 0.02))
 
       val result = ParsedTable(List(
         \/-(SiderealTarget("-2140405448", Coordinates(RightAscension.fromDegrees(359.745951955), Declination.fromAngle(Angle.parseDegrees("0.209323681906").getOrElse(Angle.zero)).getOrElse(Declination.zero)), None, magsTarget1, None)),
@@ -392,10 +393,18 @@ class VoTableParserSpec extends SpecificationWithJUnit with VoTableParser {
     "be able to validate and parse an xml from sds9" in {
       val badXml = "votable-non-validating.xml"
       VoTableParser.parse(badXml, getClass.getResourceAsStream(s"/$badXml")) should beEqualTo(-\/(ValidationError(badXml)))
-
-      val goodXml = "votable.xml"
-      VoTableParser.parse(goodXml, getClass.getResourceAsStream(s"/$goodXml")).map(_.tables.forall(!_.containsError)) must beEqualTo(\/.right(true))
-      VoTableParser.parse(goodXml, getClass.getResourceAsStream(s"/$goodXml")).getOrElse(ParsedVoResource(Nil)).tables should be size 1
+    }
+    "be able to detect unknown catalogs" in {
+      val xmlFile = "votable-unknown.xml"
+      val result  = VoTableParser.parse(xmlFile, getClass.getResourceAsStream(s"/$xmlFile"))
+      result.map { parsed =>
+        parsed.containsError must beEqualTo(true)
+        parsed.tables.map { table =>
+          table.containsError must beEqualTo(true)
+          table.rows.map(_ must beEqualTo(-\/(UnknownCatalog)))
+        }
+      }
+      result.isRight must beEqualTo(true)
     }
     "be able to validate and parse an xml from ucac4" in {
       val xmlFile = "votable-ucac4.xml"

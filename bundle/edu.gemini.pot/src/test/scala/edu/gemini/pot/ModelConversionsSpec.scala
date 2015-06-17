@@ -74,31 +74,27 @@ class ModelConversionsSpec extends Specification with ScalaCheck with Arbitrarie
     }
     "convert SkyObject to SiderealTarget" in {
       forAll { (c: Coordinates, mag: Magnitude, properMotion: Option[ProperMotion]) =>
-        (mag.band != MagnitudeBand.G && mag.band != MagnitudeBand.Z) ==> {
-          val coord = properMotion.map { pm => new skyobject.coords.HmsDegCoordinates.Builder(c.ra.toAngle.toOldModel, c.dec.toAngle.toOldModel).pmDec(skycalc.Angle.milliarcsecs(pm.deltaDec.velocity.masPerYear)).pmRa(skycalc.Angle.milliarcsecs(pm.deltaRA.velocity.masPerYear)).build() }
-            .getOrElse(new skyobject.coords.HmsDegCoordinates.Builder(c.ra.toAngle.toOldModel, c.dec.toAngle.toOldModel).build())
-          val so = new skyobject.SkyObject.Builder("name", coord).magnitudes(mag.toOldModel).build()
-          val t = so.toNewModel
-          t.name shouldEqual "name"
-          t.coordinates ~= c
-          (t.properMotion |@| properMotion)(_ ~= _).getOrElse {properMotion should beNone}
-          t.magnitudeIn(mag.band) should beSome(mag.copy(error = None))
-        }
+        val coord = properMotion.map { pm => new skyobject.coords.HmsDegCoordinates.Builder(c.ra.toAngle.toOldModel, c.dec.toAngle.toOldModel).pmDec(skycalc.Angle.milliarcsecs(pm.deltaDec.velocity.masPerYear)).pmRa(skycalc.Angle.milliarcsecs(pm.deltaRA.velocity.masPerYear)).build() }
+          .getOrElse(new skyobject.coords.HmsDegCoordinates.Builder(c.ra.toAngle.toOldModel, c.dec.toAngle.toOldModel).build())
+        val so = new skyobject.SkyObject.Builder("name", coord).magnitudes(mag.toOldModel).build()
+        val t = so.toNewModel
+        t.name shouldEqual "name"
+        t.coordinates ~= c
+        (t.properMotion |@| properMotion)(_ ~= _).getOrElse {properMotion should beNone}
+        t.magnitudeIn(mag.band) should beSome(mag.copy(error = None))
       }
     }
     "convert SPTarget to SiderealTarget" in {
       forAll { (c: Coordinates, mag: Magnitude, properMotion: Option[ProperMotion]) =>
-        (mag.band != MagnitudeBand.G && mag.band != MagnitudeBand.Z) ==> {
-          val coord = properMotion.map { pm => new skyobject.coords.HmsDegCoordinates.Builder(c.ra.toAngle.toOldModel, c.dec.toAngle.toOldModel).pmDec(skycalc.Angle.milliarcsecs(pm.deltaDec.velocity.masPerYear)).pmRa(skycalc.Angle.milliarcsecs(pm.deltaRA.velocity.masPerYear)).build() }
-            .getOrElse(new skyobject.coords.HmsDegCoordinates.Builder(c.ra.toAngle.toOldModel, c.dec.toAngle.toOldModel).build())
-          val so = new skyobject.SkyObject.Builder("name", coord).magnitudes(mag.toOldModel).build()
-          val target = new SPTarget(HmsDegTarget.fromSkyObject(so))
-          val t = target.toNewModel
-          t.name shouldEqual "name"
-          t.coordinates ~= c
-          (t.properMotion |@| properMotion)(_ ~= _).getOrElse {properMotion should beNone}
-          t.magnitudeIn(mag.band) should beSome(mag.copy(error = None))
-        }
+        val coord = properMotion.map { pm => new skyobject.coords.HmsDegCoordinates.Builder(c.ra.toAngle.toOldModel, c.dec.toAngle.toOldModel).pmDec(skycalc.Angle.milliarcsecs(pm.deltaDec.velocity.masPerYear)).pmRa(skycalc.Angle.milliarcsecs(pm.deltaRA.velocity.masPerYear)).build() }
+          .getOrElse(new skyobject.coords.HmsDegCoordinates.Builder(c.ra.toAngle.toOldModel, c.dec.toAngle.toOldModel).build())
+        val so = new skyobject.SkyObject.Builder("name", coord).magnitudes(mag.toOldModel).build()
+        val target = new SPTarget(HmsDegTarget.fromSkyObject(so))
+        val t = target.toNewModel
+        t.name shouldEqual "name"
+        t.coordinates ~= c
+        (t.properMotion |@| properMotion)(_ ~= _).getOrElse {properMotion should beNone}
+        t.magnitudeIn(mag.band) should beSome(mag.copy(error = None))
       }
     }
   }

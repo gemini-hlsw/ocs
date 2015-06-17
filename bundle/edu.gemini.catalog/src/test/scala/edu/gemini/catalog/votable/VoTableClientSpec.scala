@@ -40,11 +40,11 @@ class VoTableClientSpec extends SpecificationWithJUnit with VoTableClient with N
     }
     "make a query" in {
       // This test loads a file. There is not much to test but it exercises the query backend chain
-      Await.result(VoTableClient.catalog(query, TestVoTableBackend("/votable.xml")), 5.seconds).result.containsError should beFalse
+      Await.result(VoTableClient.catalog(query, TestVoTableBackend("/votable-ucac4.xml")), 5.seconds).result.containsError should beFalse
     }
     "use the cache to skip queries" in {
       val counter = new AtomicInteger(0)
-      val countingBackend = CountingCachedBackend(counter, "/votable.xml")
+      val countingBackend = CountingCachedBackend(counter, "/votable-ucac4.xml")
       // Backend should be hit at most once per url
       val r = for {
           f1 <- VoTableClient.catalog(query, countingBackend)
@@ -56,7 +56,7 @@ class VoTableClientSpec extends SpecificationWithJUnit with VoTableClient with N
     }
     "use the cache to skip queries that occupy a subset" in {
       val counter = new AtomicInteger(0)
-      val countingBackend = CountingCachedBackend(counter, "/votable.xml")
+      val countingBackend = CountingCachedBackend(counter, "/votable-ucac4.xml")
       // query2 has smaller radius
       val query2 = CatalogQuery.catalogQuery(Coordinates.zero, RadiusConstraint.between(Angle.fromDegrees(0), Angle.fromDegrees(0.1)), Some(noMagnitudeConstraint))
       // Backend should be hit at most once per url
