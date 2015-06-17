@@ -28,4 +28,8 @@ public final class DataObjectConflict implements Serializable {
         this.perspective = p;
         this.dataObject  = o;
     }
+
+    @Override public String toString() {
+        return "DataObjectConflict: " + perspective;
+    }
 }
