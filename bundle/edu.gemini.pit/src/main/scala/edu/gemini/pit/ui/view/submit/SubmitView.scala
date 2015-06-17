@@ -120,14 +120,12 @@ class SubmitView(ph: ProblemRobot, newShellHandler: (Model,Option[File]) => Unit
       enabled = false
 
       override def refresh(m:Option[SubmitStatus]) {
-
         enabled = ~m.map {
           case _ if tac => false
           case Ready    => true
           case Partial  => true
           case _        => false
         }
-
       }
 
       reactions += {
@@ -135,18 +133,22 @@ class SubmitView(ph: ProblemRobot, newShellHandler: (Model,Option[File]) => Unit
           for (m <- panel.model) {
             if (saveHandler()) {
               GlassLabel.show(panel.peer.getRootPane, "Submitting Proposal...")
-              submitClient.submit(m.proposal) {psr =>
+              submitClient.submit(m.proposal) { psr =>
                 SwingUtilities.invokeLater(new Runnable {
                   def run() {
-                    dsrs = psr.results.map(a => (a.destination, a.result)).toMap
-                    val m0 = Model.proposal.set(m, psr.proposal)
-                    panel.model = Some(m0)
-                    saveHandler()
                     GlassLabel.hide(panel.peer.getRootPane)
 
+                    val anySuccess = psr.results.exists(_.result.isSuccess)
                     val errors = psr.results.map(_.result).filter(!_.isSuccess)
-                    // Show prompt with error messages
+
+                    if (anySuccess) {
+                      // Save the model
+                      val m0 = Model.proposal.set(m, psr.proposal)
+                      panel.model = Some(m0)
+                      saveHandler()
+                    }
                     if (errors.nonEmpty) {
+                      // Show prompt with error messages
                       SwingUtilities.invokeLater(new Runnable {
                         override def run() {
                           new ProposalSubmissionErrorDialog(SubmitStatus.msg(errors)).open(UIElement.wrap(panel.peer.getRootPane))
