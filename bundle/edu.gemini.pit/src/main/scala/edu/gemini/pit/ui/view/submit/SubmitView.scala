@@ -145,7 +145,8 @@ class SubmitView(ph: ProblemRobot, newShellHandler: (Model,Option[File]) => Unit
                       val m0 = Model.proposal.set(m, psr.proposal)
                       panel.model = Some(m0)
                       saveHandler()
-                    } else if (errors.nonEmpty) {
+                    }
+                    if (errors.nonEmpty) {
                       // Show prompt with error messages
                       SwingUtilities.invokeLater(new Runnable {
                         override def run() {
