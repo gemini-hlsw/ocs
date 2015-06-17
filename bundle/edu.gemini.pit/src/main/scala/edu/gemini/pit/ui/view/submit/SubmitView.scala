@@ -138,10 +138,11 @@ class SubmitView(ph: ProblemRobot, newShellHandler: (Model,Option[File]) => Unit
                   def run() {
                     GlassLabel.hide(panel.peer.getRootPane)
 
-                    dsrs = psr.results.map(a => (a.destination, a.result)).toMap
+                    val anySuccess = psr.results.exists(_.result.isSuccess)
                     val errors = psr.results.map(_.result).filter(!_.isSuccess)
 
-                    if (errors.size != psr.results.size) {
+                    if (anySuccess) {
+                      // Save the model
                       val m0 = Model.proposal.set(m, psr.proposal)
                       panel.model = Some(m0)
                       saveHandler()
