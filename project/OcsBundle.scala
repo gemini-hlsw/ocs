@@ -708,6 +708,12 @@ trait OcsBundle {
       bundle_edu_gemini_spModel_core
     )
 
+  lazy val bundle_edu_gemini_pit_launcher = 
+    project.in(file("bundle/edu.gemini.pit.launcher")).dependsOn(
+      bundle_edu_gemini_pit,
+      bundle_edu_gemini_ags_client_impl
+    )
+
   lazy val bundle_edu_gemini_tools_p1pdfmaker = 
     project.in(file("bundle/edu.gemini.tools.p1pdfmaker")).dependsOn(
       bundle_edu_gemini_model_p1_pdf
