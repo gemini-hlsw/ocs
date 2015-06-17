@@ -227,11 +227,11 @@ trait VoTableParser {
 
     def toSiderealTarget(id: String, ra: String, dec: String, pm: (Option[String], Option[String])): \/[CatalogProblem, SiderealTarget] = {
       for {
+        magFilter      <- magnitudesFilter
         r              <- Angle.parseDegrees(ra).leftMap(_ => FieldValueProblem(VoTableParser.UCD_RA, ra))
         d              <- Angle.parseDegrees(dec).leftMap(_ => FieldValueProblem(VoTableParser.UCD_DEC, dec))
         declination    <- Declination.fromAngle(d) \/> FieldValueProblem(VoTableParser.UCD_DEC, dec)
         properMotion   <- parseProperMotion(pm)
-        magFilter      <- magnitudesFilter
         mags            = entries.filter(magnitudeField(_, magFilter))
         magErrs         = entries.filter(magnitudeErrorField(_, magFilter))
         magnitudes     <- mags.map(parseBands(magFilter)).toList.sequenceU
