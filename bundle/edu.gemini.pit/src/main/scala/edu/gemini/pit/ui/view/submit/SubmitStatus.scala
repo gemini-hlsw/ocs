@@ -12,7 +12,7 @@ import Scalaz._
 object SubmitStatus {
 
   def forProposal(p:ProposalClass, ps:List[Problem]):SubmitStatus = p match {
-    case _ if !ps.map(_.severity).filter(s => s == Severity.Error || s == Severity.Todo).isEmpty  => Incomplete
+    case _ if ps.map(_.severity).exists(s => s == Severity.Error || s == Severity.Todo)  => Incomplete
     case _ if p.key.isEmpty                                             => Ready
     case q:QueueProposalClass                                           => q.subs match {
       case Left(ss) if ss.forall(_.response.isDefined) => Success
@@ -41,7 +41,7 @@ object SubmitStatus {
     case (Ngo(p), _: ExchangeProposalClass)  => s"Exchange proposals to ${destinationName(destination)}"
     case (Exchange(p), _)                    => s"Exchange proposals to ${destinationName(destination)}"
     case (d:SubmitDestination, _)            => s"${destinationName(destination)} proposals"
-    case _                                   => s"proposals to ${destinationName(destination)}" // falback
+    case _                                   => s"proposals to ${destinationName(destination)}" // fallback
   }
 
   def nonCompliantBackend(destination: Option[SubmitDestination], pc: Option[ProposalClass], year: String, semester: String, version: String) = s"PIT version $year$semester$version is required to submit ${~nonCompliantDestination(destination, pc)}"
