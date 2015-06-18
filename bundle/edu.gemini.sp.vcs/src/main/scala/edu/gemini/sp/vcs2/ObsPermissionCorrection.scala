@@ -130,7 +130,7 @@ class ObsPermissionCorrection(
       cf0   <- p2.getOrCreateConflictFolder(lifespanId, nodeMap)
       cf1   <- cf0.incr(lifespanId)
       lobs0 <- restoreLocal(cf1, localObs, remoteDiffs.plan.vm(local), obsNumber)
-      lobs1 <- lobs0.addConflictNote(new UpdatePermissionFail(lobs0.key))
+      lobs1 <- lobs0.addConflictNote(new UpdatePermissionFail(k))
       resurrectedKeys = robs.tree.keySet ++ lobs1.tree.keySet
     } yield MergePlan(lobs1.toTree, mp.delete.filterNot(m => resurrectedKeys.contains(m.key)))
   }
