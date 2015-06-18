@@ -271,25 +271,25 @@ class PositionAnglePanel[I <: SPInstObsComp with PosAngleConstraintAware,
    * angle to be selected in the position angle constraint combo box, and if it is selected but not allowed,
    * resets to FIXED.
    */
-  def updateParallacticControls(): Unit = {
+  def updateParallacticControls(): Unit =
     for {
       p <- ui.parallacticAngleControlsOpt
       e <- editor
-    } yield {
+      o <- Option(e.getContextObservation)
+    } {
       val instrument = e.getDataObject
 
       // Determine if the parallactic angle option can be selected.
       val isParInstAndOk = instrument.isInstanceOf[ParallacticAngleSupport] &&
                            instrument.asInstanceOf[ParallacticAngleSupport].isCompatibleWithMeanParallacticAngleMode
       val canUseAvgPar   = isParInstAndOk &&
-                           !ObsClassService.lookupObsClass(e.getContextObservation).equals(ObsClass.DAY_CAL)
+                           !ObsClassService.lookupObsClass(o).equals(ObsClass.DAY_CAL)
       setOptionEnabled(PosAngleConstraint.PARALLACTIC_ANGLE, canUseAvgPar)
 
       // Now the parallactic angle is in use if it can be used and is selected.
       if (canUseAvgPar && instrument.getPosAngleConstraint.equals(PosAngleConstraint.PARALLACTIC_ANGLE))
         ui.parallacticAngleControlsOpt.foreach(_.ui.relativeTimeMenu.rebuild())
     }
-  }
 
 
   def updateUnboundedControls(): Unit =
