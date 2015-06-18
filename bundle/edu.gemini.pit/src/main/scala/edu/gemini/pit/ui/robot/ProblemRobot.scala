@@ -82,7 +82,7 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
           TimeProblems(p, s).all ++
           TimeProblems.partnerZeroTimeRequest(p, s) ++
           TacProblems(p, s).all ++
-          List(incompleteInvestigator, missingObsElementCheck, cfCheck, emptyTargetCheck, emptyEphemerisCheck, initialEphemerisCheck, finalEphemerisCheck,
+          List(incompleteInvestigator, missingObsElementCheck, cfCheck, emptyTargetCheck, emptyEphemerisCheck, initialEphemerisCheck, finalEphemerisCheck, tooTargetsAndNoActivation,
             badGuiding, badVisibility, iffyVisibility, singlePointEphemerisCheck, minTimeCheck, wrongSite, band3Orphan2, gpiCheck).flatten
       ps.sorted
     }
@@ -159,6 +159,12 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
       if t.isEmpty
       if !s.catalogHandler.state.contains(t)
       msg = s"""Target "${t.name}" appears to be empty."""
+    } yield new Problem(Severity.Error, msg, "Targets", s.inTargetsView(_.edit(t)))
+
+    private lazy val tooTargetsAndNoActivation = for {
+      t @ TooTarget(_, _) <- p.targets
+      if Proposal.toOOption(p.some).exists(_ == TooOption.None)
+      msg = "ToO targets not allowed. Please remove or set the TOO Activation"
     } yield new Problem(Severity.Error, msg, "Targets", s.inTargetsView(_.edit(t)))
 
     lazy val utc = new SimpleDateFormat("dd-MMM-yyyy")
