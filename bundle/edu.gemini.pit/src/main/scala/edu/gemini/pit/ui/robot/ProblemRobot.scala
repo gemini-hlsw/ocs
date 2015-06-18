@@ -186,7 +186,7 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
       if diff > 1.days
       date = new Date(ds.max)
       msg = if (ds.max <= p.semester.firstDay)
-        s"""Ephemeris for target "${t.name}" is undefined between ${utc.format(p.semester.firstDay)}} and ${utc.format(p.semester.lastDay)} UTC."""
+        s"""Ephemeris for target "${t.name}" is undefined between ${utc.format(p.semester.firstDay)} and ${utc.format(p.semester.lastDay)} UTC."""
       else
         s"""Ephemeris for target "${t.name}" is undefined between ${utc.format(date)} and ${utc.format(p.semester.lastDay)} UTC."""
     } yield new Problem(Severity.Warning, msg, "Targets", s.inTargetsView(_.edit(t)))
@@ -196,7 +196,7 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
       if !t.isEmpty
       if !s.catalogHandler.state.contains(t)
       if e.isEmpty
-      msg = "Ephemeris for target \"%s\" is undefined.".format(t.name)
+      msg = s"""Ephemeris for target "${t.name}" is undefined."""
     } yield new Problem(Severity.Warning, msg, "Targets", s.inTargetsView(_.edit(t)))
 
     private val gpiCheck = {

@@ -13,7 +13,6 @@ import edu.gemini.model.p1.immutable.ProperMotion
 import edu.gemini.model.p1.immutable.Semester
 import edu.gemini.model.p1.immutable.SiderealTarget
 import edu.gemini.model.p1.immutable.Target
-import edu.gemini.pit.ui.util.SharedIcons.SharedIcon
 import edu.gemini.pit.ui.util._
 import edu.gemini.pit.ui.util.RATextField
 import edu.gemini.pit.ui.util.ScrollPanes

@@ -18,7 +18,7 @@ object Meta {
 
 case class Meta(attachment:Option[File], band3OptionChosen:Boolean) {
 
-  private def this(m:M.Meta) = this(Option(m.getAttachment).map(new File(_)), Option(m.isBand3OptionChosen).map(_.booleanValue).getOrElse(false))
+  private def this(m:M.Meta) = this(Option(m.getAttachment).map(new File(_)), Option(m.isBand3OptionChosen).exists(_.booleanValue))
 
   def mutable = {
     val m = Factory.createMeta

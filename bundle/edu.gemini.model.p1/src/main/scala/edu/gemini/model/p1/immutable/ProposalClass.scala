@@ -153,7 +153,7 @@ case class ClassicalProposalClass(itac:Option[Itac],
     m.getNgo.addAll(subs.left.map(lst => lst.map(sub => sub.mutable(p, n))).left.getOrElse(Nil).asJava)
 
     // Write out our visitor list, which we get from the proposal
-    m.getVisitor.addAll(visitors.map(_.apply(p)).flatten.map {i =>
+    m.getVisitor.addAll(visitors.flatMap(_.apply(p)).map {i =>
       val v = Factory.createVisitor
       v.setRef(i.mutable(n))
       v

@@ -12,7 +12,6 @@ import javax.swing.TransferHandler._
 import edu.gemini.pit.ui._
 import CommonActions._
 import editor.{TargetExporter, TargetImporter, TargetEditor}
-import edu.gemini.pit.util._
 import javax.swing.{JOptionPane, JComponent, TransferHandler, SwingConstants}
 import edu.gemini.pit.ui.binding._
 import DataFlavors._

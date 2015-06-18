@@ -126,8 +126,8 @@ case class Proposal(meta:Meta,
     Option(m.getProposalClass).map(ProposalClass(_)).getOrElse(ProposalClass.empty),  // TODO: get rid of the empty case
     m.getSchemaVersion)
 
-  def conditions = observations.map(_.condition).flatten.distinct
-  def blueprints = observations.map(_.blueprint).flatten.distinct
+  def conditions = observations.flatMap(_.condition).distinct
+  def blueprints = observations.flatMap(_.blueprint).distinct
 
   def mutable = {
     val n = new Namer
