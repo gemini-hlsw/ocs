@@ -246,6 +246,7 @@ trait VcsSpecification extends Specification {
     else {
       t match {
         case -\/(VcsException(ex)) => ex.printStackTrace()
+        case _                     => // ignore, report the error below
       }
       ko("unexpected result: " + t)
     }

@@ -360,10 +360,8 @@ class MergeTest extends JUnitSuite {
           val remoteMax = remoteOnly.keySet.max
 
           ObsNumberCorrection(pc.mergeContext).apply(pc.mergePlan) match {
-            case -\/(VcsFailure.Unmergeable(msg)) =>
-              // This might start to fail if we update the generator to produce
-              // events or datasets in observation exec logs.
-              Console.err.println(s"Unmergeable: $msg")
+            case -\/(f) =>
+              Console.err.println(VcsFailure.explain(f, start.getProgramID, "", None))
               false
 
             case \/-(mp) =>

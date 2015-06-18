@@ -48,7 +48,7 @@ class VcsServerSpec extends VcsSpecification {
 
   "write" should {
     def dummyWrite(env: TestEnv, pid: SPProgramID, user: Set[Principal]): VcsAction[Boolean] =
-      env.local.server.write[Boolean](pid, user, _ => VcsAction(true), identity, (_,_,_) => VcsAction(true))
+      env.local.server.write[Boolean](pid, user, _ => VcsAction(true), identity, (_,_,_) => VcsAction.unit)
 
     "fail if the program id doesn't exist in the database" in withVcs { env =>
       notFound(dummyWrite(env, Q2, StaffUser), Q2)
@@ -62,7 +62,7 @@ class VcsServerSpec extends VcsSpecification {
       val act = env.local.server.write[Boolean](Q1, StaffUser,
         _ => throw new RuntimeException("handle me"),
         identity,
-        (_,_,_) => VcsAction(true))
+        (_,_,_) => VcsAction.unit)
       exception(act, "handle me")
     }
 
@@ -70,7 +70,7 @@ class VcsServerSpec extends VcsSpecification {
       val act = env.local.server.write[Boolean](Q1, StaffUser,
         _ => VcsAction(true),
         _ => throw new RuntimeException("handle me"),
-        (_,_,_) => VcsAction(true))
+        (_,_,_) => VcsAction.unit)
       exception(act, "handle me")
     }
 

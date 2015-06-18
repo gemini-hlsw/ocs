@@ -3,7 +3,7 @@ package edu.gemini.sp.vcs2
 import edu.gemini.pot.sp.Conflict.ConstraintViolation
 import edu.gemini.pot.sp.SPNodeKey
 import edu.gemini.pot.spdb.DBLocalDatabase
-import edu.gemini.sp.vcs2.VcsFailure.Unmergeable
+import edu.gemini.spModel.core.SPProgramID
 import org.specs2.matcher.MatchResult
 
 import scalaz._
@@ -14,8 +14,8 @@ class ValidityCorrectionSpec extends MergeCorrectionSpec {
 
   private def test(start: Tree[MergeNode], expected: Tree[MergeNode], vc: ValidityCorrection = validityCorrection): MatchResult[Tree[MergeNode]] =
     vc.apply(plan(start)) match {
-      case -\/(Unmergeable(msg)) => failure(msg)
-      case \/-(mp)               => mp.update must correspondTo(expected)
+      case -\/(f)   => failure(VcsFailure.explain(f, SPProgramID.toProgramID("GS-2016A-Q-1"), "", None))
+      case \/-(mp)  => mp.update must correspondTo(expected)
     }
 
   "ValidityCorrection" should {
