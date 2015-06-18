@@ -258,28 +258,28 @@ class MergeTest extends JUnitSuite {
       }
     ),
 
-//    ("a locally deleted node inside a remotely edited parent must be present in the merged program",
-//      (start, local, remote, pc) => {
-//        val localDeletedRemotePresent = pc.local.deletedKeys & pc.remote.nodeMap.keySet
-//        val inEditedRemoteParent = localDeletedRemotePresent.filter { k =>
-//          pc.remote.isParentEdited(pc.remote.nodeMap(k))
-//        }
-//
-//        emptySet(pc, inEditedRemoteParent &~ pc.mergeMap.keySet)
-//      }
-//    ),
+    ("a locally deleted node inside a remotely edited parent must be present in the merged program",
+      (start, local, remote, pc) => {
+        val localDeletedRemotePresent = pc.local.deletedKeys & pc.remote.nodeMap.keySet
+        val inEditedRemoteParent = localDeletedRemotePresent.filter { k =>
+          pc.remote.isParentEdited(pc.remote.nodeMap(k))
+        }
 
-//    ("a locally resurrected node not inside a remotely edited parent must contain a node that is remotely edited",
-//      (start, local, remote, pc) => {
-//        val localDeletedRemotePresent = pc.local.deletedKeys & pc.remote.nodeMap.keySet
-//        val inEditedRemoteParent = localDeletedRemotePresent.filter { k =>
-//          pc.remote.isParentEdited(pc.remote.nodeMap(k))
-//        }
-//
-//        val locallyResurrected = (pc.local.deletedKeys & pc.mergeMap.keySet) &~ inEditedRemoteParent
-//        emptySet(pc, locallyResurrected.map(pc.remote.nodeMap.apply).filterNot(pc.remote.containsRemotelyEditedNode))
-//      }
-//    ),
+        emptySet(pc, inEditedRemoteParent &~ pc.mergeMap.keySet)
+      }
+    ),
+
+    ("a locally resurrected node not inside a remotely edited parent must contain a node that is remotely edited",
+      (start, local, remote, pc) => {
+        val localDeletedRemotePresent = pc.local.deletedKeys & pc.remote.nodeMap.keySet
+        val inEditedRemoteParent = localDeletedRemotePresent.filter { k =>
+          pc.remote.isParentEdited(pc.remote.nodeMap(k))
+        }
+
+        val locallyResurrected = (pc.local.deletedKeys & pc.mergeMap.keySet) &~ inEditedRemoteParent
+        emptySet(pc, locallyResurrected.map(pc.remote.nodeMap.apply).filterNot(pc.remote.containsRemotelyEditedNode))
+      }
+    ),
 
     ("a locally deleted node whose remote version contains no updates must stay deleted",
       (start, local, remote, pc) => {

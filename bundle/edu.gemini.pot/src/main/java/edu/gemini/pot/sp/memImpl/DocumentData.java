@@ -88,7 +88,8 @@ public class DocumentData implements Serializable {
 
             // Avoid counting changes to temporary nodes as modifications.
             // Temporary nodes that never get added to the program shouldn't
-            // be recorded in the version map. Sorry.
+            // be recorded in the version map.  See the corresponding hack in
+            // MemAbstractBase.attachTo().  Sorry.
             if (!vector.isEmpty() || (node.getParent() != null) || (node instanceof ISPRootNode)) {
                 return vector.incr(lifespanId);
             } else {

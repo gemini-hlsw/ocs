@@ -51,12 +51,8 @@ object PreliminaryMerge {
         case (None, Some(rKey))                        => Some(rKey)
         case (Some(lKey), Some(rKey)) if lKey === rKey => Some(lKey)
         case (Some(lKey), Some(rKey))                  =>
-          // The only way they can both be defined and yet different is if one
-          // or the other (or both) local and remote sides have an updated
-          // parent and child version.  In this case remote wins when updated.
-          val rParentUp = rParentKey.flatMap(mc.remote.get).exists(isUpdatedRemote)
-          val rChildUp  = mc.remote.get(childKey).exists(isUpdatedRemote)
-          if (rParentUp && rChildUp) Some(rKey) else Some(lKey)
+          if (rParentKey.flatMap(mc.remote.get).exists(isUpdatedRemote)) Some(rKey)
+          else Some(lKey)
       }
     }
 
@@ -126,12 +122,10 @@ object PreliminaryMerge {
     }
 
     // Strategy for local nodes that are older than their remote counterparts.
-    // This is basically the opposite of "newer".
     val older = new RemoteMergeStrategy {
       def filter(pc: PartitionedChildren): PartitionedChildren = {
         val local  = pc.local.filter(containsMissingRemoteYetUpdatedLocal)
-        val remote = pc.remote.filter(keepRemoteChild)
-        PartitionedChildren(local, pc.both, remote)
+        PartitionedChildren(local, pc.both, pc.remote)
       }
     }
 
@@ -150,14 +144,11 @@ object PreliminaryMerge {
     val conflicting = new RemoteMergeStrategy {
       def filter(pc: PartitionedChildren): PartitionedChildren = {
         val local = pc.local.filter { child =>
-          keepLocalChild(child) && containsUpdatedLocal(child)
+          (keepLocalChild(child) && containsUpdatedLocal(child)) ||
+          mc.remote.parent(child.key).flatMap(mc.remote.get).exists(p => !isUpdatedRemote(p))
         }
 
-        val remote = pc.remote.filter { child =>
-          keepRemoteChild(child)
-        }
-
-        PartitionedChildren(local, pc.both, remote)
+        PartitionedChildren(local, pc.both, pc.remote)
       }
     }
 
@@ -212,11 +203,6 @@ object PreliminaryMerge {
         case _: Unmodified => mod
       }
 
-      newVersion.compare(mc.local.version(k)) match {
-        case Newer | Same => // ok
-        case x            => Console.err.println("!!!! " + x + ": " + k)
-      }
-
       Tree.node(mod2, newChildren.toStream)
     }
 
@@ -234,13 +220,13 @@ object PreliminaryMerge {
 
       lr match {
         case This(l) =>
-          val (incr, filt) = if (isNewLocal(l)) (incr0, newer)  // New local node
-                             else (incr1 _, deletedRemotely)    // Resurrected local node
+          val (incr, filt) = if (isUpdatedLocal(l)) (incr0, newer)  // New or updated local node
+                             else (incr1 _, deletedRemotely)        // Resurrected local node
           incr(toNode(modified(l), l.children, Nil, filt))
 
         case That(r) =>
-          val (incr, filt) = if (isNewRemote(r)) (incr0, older) // New remote node
-                             else (incr1 _, deletedLocally)     // Resurrected remote node
+          val (incr, filt) = if (isUpdatedRemote(r)) (incr0, older) // New or updated remote node
+                             else (incr1 _, deletedLocally)         // Resurrected remote node
           incr(toNode(r.rootLabel, Nil, r.subForest.toList, filt))
 
 
