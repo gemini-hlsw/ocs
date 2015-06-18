@@ -66,10 +66,16 @@ package object vcs2 {
     def fail(vf: => VcsFailure): VcsAction[Nothing] = EitherT(Task.delay(vf.left))
 
     implicit class VcsActionOps[A](a: VcsAction[A]) {
+      private def merge(result: Throwable \/ TryVcs[A]): TryVcs[A] =
+        result.fold(ex => VcsFailure.VcsException(ex).left, identity)
+
       /** Execute this action, performing any side-effects. */
-      def unsafeRun: TryVcs[A] = {
-        a.run.attemptRun.fold(ex => VcsFailure.VcsException(ex).left, identity)
-      }
+      def unsafeRun: TryVcs[A] = merge(a.run.attemptRun)
+
+      /** Executes the action in a separate thread and calls the supplied
+        * handler when finished. */
+      def forkAsync(f: TryVcs[A] => Unit): Unit =
+        Task.fork(a.run).runAsync(result => f(merge(result)))
     }
   }
 

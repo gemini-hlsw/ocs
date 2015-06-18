@@ -3,39 +3,56 @@ package edu.gemini.sp.vcs2
 import scalaz._
 
 sealed trait ProgramLocation {
-  def fold[A](loc: => A, rem: => A): A
-}
-
-sealed trait ProgramLocationSet {
-  def +(loc: ProgramLocation): ProgramLocationSet
+  def fold[A](local: => A, remote: => A): A
 }
 
 object ProgramLocation {
-  case object Local  extends ProgramLocation {
-    def fold[A](loc: => A, rem: => A): A = loc
+  case object Local extends ProgramLocation {
+    def fold[A](local: => A, remote: => A): A = local
   }
 
   case object Remote extends ProgramLocation {
-    def fold[A](loc: => A, rem: => A): A = rem
+    def fold[A](local: => A, remote: => A): A = remote
   }
 
-  implicit def ProgramLocationEqual: Equal[ProgramLocation] = Equal.equalA
+  implicit val EqualProgramLocation: Equal[ProgramLocation] = Equal.equalA
+}
 
-  case object Neither    extends ProgramLocationSet {
+
+sealed trait ProgramLocationSet {
+  def +(loc: ProgramLocation): ProgramLocationSet
+  def toSet: Set[ProgramLocation]
+}
+
+sealed trait PullResult extends ProgramLocationSet
+sealed trait PushResult extends ProgramLocationSet
+
+object ProgramLocationSet {
+  import edu.gemini.sp.vcs2.ProgramLocation.{Local, Remote}
+
+  case object Neither extends PullResult with PushResult {
     def +(loc: ProgramLocation): ProgramLocationSet = loc.fold(LocalOnly, RemoteOnly)
+    def toSet: Set[ProgramLocation] = Set.empty
   }
 
-  case object LocalOnly  extends ProgramLocationSet {
+  case object LocalOnly extends PullResult {
     def +(loc: ProgramLocation): ProgramLocationSet = loc.fold(this, Both)
+    def toSet: Set[ProgramLocation] = Set(Local)
   }
 
-  case object RemoteOnly extends ProgramLocationSet {
+  case object RemoteOnly extends PushResult {
     def +(loc: ProgramLocation): ProgramLocationSet = loc.fold(Both, this)
+    def toSet: Set[ProgramLocation] = Set(Remote)
   }
 
-  case object Both       extends ProgramLocationSet {
+  case object Both extends ProgramLocationSet {
     def +(loc: ProgramLocation): ProgramLocationSet = this
+    def toSet: Set[ProgramLocation] = Set(Local, Remote)
   }
 
-  implicit def ProgramLocationSetEqual: Equal[ProgramLocationSet] = Equal.equalA
+
+  implicit val EqualProgramLocationSet: Equal[ProgramLocationSet] = Equal.equalA
+
+  implicit val EqualPullResult: Equal[PullResult] = Equal.equalA
+  implicit val EqualPushResult: Equal[PushResult] = Equal.equalA
 }

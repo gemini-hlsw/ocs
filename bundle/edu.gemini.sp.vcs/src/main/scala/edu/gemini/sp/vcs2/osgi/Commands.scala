@@ -1,7 +1,7 @@
 package edu.gemini.sp.vcs2.osgi
 
 import edu.gemini.pot.spdb.IDBDatabaseService
-import edu.gemini.sp.vcs2.ProgramLocation.{Both, RemoteOnly, LocalOnly, Neither}
+import edu.gemini.sp.vcs2.ProgramLocationSet.{Both, RemoteOnly, LocalOnly, Neither}
 import edu.gemini.sp.vcs2._
 import edu.gemini.sp.vcs2.VcsAction._
 import edu.gemini.sp.vcs.reg.VcsRegistrar
@@ -9,6 +9,7 @@ import edu.gemini.spModel.core.{Peer, SPProgramID}
 import edu.gemini.util.security.auth.keychain.KeyChain
 
 import java.io.{PrintWriter, StringWriter}
+import java.util.concurrent.atomic.AtomicBoolean
 
 import scalaz._
 import Scalaz._
@@ -96,24 +97,26 @@ object Commands {
       runAndFormat(id, peer, vcs.add) { _ => s"Added $id to $peer" }
 
     val checkout: VcsOp = (id, peer) =>
-      runAndFormat(id, peer, vcs.checkout) { _ => s"Checked out $id from $peer" }
+      runAndFormat(id, peer, vcs.checkout(_, _, new AtomicBoolean(false))) { _ => s"Checked out $id from $peer" }
 
     val pull: VcsOp = (id, peer) =>
-      runAndFormat(id, peer, vcs.pull) { updated =>
-        if (updated) "Updated local program." else "Already up to date."
+      runAndFormat(id, peer, vcs.pull(_, _, new AtomicBoolean(false))) {
+        case (LocalOnly,_) => "Updated local program."
+        case (Neither,_  ) => "Already up to date."
       }
 
     val push: VcsOp = (id, peer) =>
-      runAndFormat(id, peer, vcs.push) { updated =>
-        if (updated) "Updated remote program." else "Already up to date."
+      runAndFormat(id, peer, vcs.push(_, _, new AtomicBoolean(false))) {
+        case (RemoteOnly,_) => "Updated remote program."
+        case (Neither,_   ) => "Already up to date."
       }
 
     val sync: VcsOp = (id, peer) =>
-      runAndFormat(id, peer, vcs.sync) {
-        case Neither    => "Already up to date."
-        case LocalOnly  => "Updated local program."
-        case RemoteOnly => "Updated remote program."
-        case Both       => "Synchronized."
+      runAndFormat(id, peer, vcs.sync(_, _, new AtomicBoolean(false))) {
+        case (Neither,_   ) => "Already up to date."
+        case (LocalOnly,_ ) => "Updated local program."
+        case (RemoteOnly,_) => "Updated remote program."
+        case (Both,_      ) => "Synchronized."
       }
 
     val vcsOps: Map[String, VcsOp] = Map(

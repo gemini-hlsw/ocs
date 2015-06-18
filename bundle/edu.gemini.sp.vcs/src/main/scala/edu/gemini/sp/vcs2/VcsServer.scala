@@ -22,7 +22,7 @@ import Scalaz._
   * actions that read from and write to programs in the database. It also
   * implements the server side of the [[edu.gemini.sp.vcs2.VcsService]]
   * interface. */
-class VcsServer(odb: IDBDatabaseService, vcsLog: VcsLog) { vs =>
+class VcsServer(odb: IDBDatabaseService) { vs =>
 
   import SPNodeKeyLocks.instance.{readLock, readUnlock, writeLock, writeUnlock}
 
@@ -101,7 +101,7 @@ class VcsServer(odb: IDBDatabaseService, vcsLog: VcsLog) { vs =>
   }
 
   /** Server implementation of `VcsService`. */
-  final class SecureVcsService(user: Set[Principal]) extends VcsService {
+  final class SecureVcsService(user: Set[Principal], vcsLog: VcsLog) extends VcsService {
     def geminiPrincipals: Set[GeminiPrincipal] =
       user.collect { case p: GeminiPrincipal => p }
 

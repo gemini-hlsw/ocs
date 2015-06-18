@@ -59,4 +59,16 @@ object VersionMap {
 
   def compare(x: VersionMap, y: VersionMap): VersionComparison =
     VersionComparison(tryCompare(x,y))
+
+  /** Returns a new `VersionMap` with all the keys from both maps and whose
+    * values are the combination of the corresponding `NodeVersions`. In each
+    * case, the combined node versions contains all the keys in either version
+    * vector where the value is the max of the value for that key.
+    *
+    * Intuitively, this method returns the `VersionMap` that results from
+    * synchronizing two program versions with these maps. */
+  def sync(x: VersionMap, y: VersionMap): VersionMap =
+    (x/:y.keySet) { (vm, k) =>
+      vm.updated(k, nodeVersions(x, k).sync(nodeVersions(y, k)))
+    }
 }

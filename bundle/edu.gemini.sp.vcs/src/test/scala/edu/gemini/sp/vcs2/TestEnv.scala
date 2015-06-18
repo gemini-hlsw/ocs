@@ -1,7 +1,5 @@
 package edu.gemini.sp.vcs2
 
-import java.io.File
-
 import edu.gemini.pot.sp.version.{LifespanId, EmptyNodeVersions, NodeVersions}
 import edu.gemini.pot.sp._
 import edu.gemini.pot.spdb.{DBLocalDatabase, IDBDatabaseService}
@@ -18,10 +16,12 @@ import edu.gemini.spModel.obscomp.SPNote
 import edu.gemini.spModel.rich.pot.sp._
 import edu.gemini.util.security.principal.{UserPrincipal, GeminiPrincipal, StaffPrincipal}
 
-import java.security.Principal
-
 import org.specs2.matcher.MatchResult
 import org.specs2.mutable.Specification
+
+import java.io.File
+import java.security.Principal
+import java.util.concurrent.atomic.AtomicBoolean
 
 import scala.reflect.ClassTag
 import scalaz._
@@ -203,11 +203,11 @@ trait VcsSpecification extends Specification {
     val lp = localOdb.getFactory.copyWithNewLifespanId(rp)
     localOdb.put(lp)
 
-    val localServer  = new VcsServer(localOdb,  MockVcsLog)
-    val remoteServer = new VcsServer(remoteOdb, MockVcsLog)
+    val localServer  = new VcsServer(localOdb)
+    val remoteServer = new VcsServer(remoteOdb)
 
-    val local  = TestPeer(localOdb,  localServer,  p => new remoteServer.SecureVcsService(Set(p)))
-    val remote = TestPeer(remoteOdb, remoteServer, p => new localServer.SecureVcsService(Set(p)))
+    val local  = TestPeer(localOdb,  localServer,  p => new remoteServer.SecureVcsService(Set(p), MockVcsLog))
+    val remote = TestPeer(remoteOdb, remoteServer, p => new localServer.SecureVcsService(Set(p), MockVcsLog))
 
     TestEnv(local, remote)
   }
@@ -225,17 +225,17 @@ trait VcsSpecification extends Specification {
   def unsafeSync(env: TestEnv): Unit = {
     import VcsAction._
 
-    env.local.vcs(StaffUserPrincipal).sync(Q1, DummyPeer).unsafeRun match {
+    env.local.vcs(StaffUserPrincipal).sync(Q1, DummyPeer, new AtomicBoolean(false)).unsafeRun match {
       case \/-(_) => ()
       case -\/(f) => sys.error(VcsFailure.explain(f, Q1, "?", Some(DummyPeer)))
     }
   }
 
   def afterPull(env: TestEnv, p: Principal)(mr: => MatchResult[Any]): MatchResult[_] =
-    expect(env.local.vcs(p).pull(Q1, DummyPeer)) { case \/-(_) => mr }
+    expect(env.local.vcs(p).pull(Q1, DummyPeer, new AtomicBoolean(false))) { case \/-(_) => mr }
 
   def afterSync(env: TestEnv, p: Principal)(mr: => MatchResult[Any]): MatchResult[_] =
-    expect(env.local.vcs(p).sync(Q1, DummyPeer)) { case \/-(_) => mr }
+    expect(env.local.vcs(p).sync(Q1, DummyPeer, new AtomicBoolean(false))) { case \/-(_) => mr }
 
   def expect[A](act: VcsAction[A])(pf: PartialFunction[TryVcs[A], MatchResult[_]]): MatchResult[_] = {
     import VcsAction._
