@@ -7,6 +7,9 @@ import scala.collection.JavaConverters._
 import java.util.logging.{Logger, Level}
 import org.xml.sax.SAXException
 
+import scalaz._
+import Scalaz._
+
 object Proposal {
 
   // Lenses
@@ -48,6 +51,14 @@ object Proposal {
       }
     } filterNot (_.isEmpty)
 
+  }
+
+  // find the toOption of the proposal
+  def toOOption(p: Option[Proposal]): Option[TooOption] = p.map(proposalClass.get) match {
+    case Some(q: QueueProposalClass)         => q.tooOption.some
+    case Some(l: LargeProgramClass)          => l.tooOption.some
+    case Some(f: FastTurnaroundProgramClass) => f.tooOption.some
+    case _                                   => none
   }
 
   private val validate = Option(System.getProperty("edu.gemini.model.p1.validate")).isDefined

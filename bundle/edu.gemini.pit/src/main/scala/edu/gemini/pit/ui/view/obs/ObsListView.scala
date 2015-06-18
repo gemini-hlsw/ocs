@@ -149,7 +149,6 @@ class ObsListView(shellAdvisor:ShellAdvisor, band:Band, queueLookup: Target => U
       opaque = true
       foreground = Color.DARK_GRAY
       background = tools.background
-//      icon = SharedIcons.ICON_CLOCK
       border = BorderFactory.createCompoundBorder(
         tools.border,
         BorderFactory.createEmptyBorder(2, 4, 2, 4))
@@ -208,8 +207,9 @@ class ObsListView(shellAdvisor:ShellAdvisor, band:Band, queueLookup: Target => U
     // Add for target must be special-cased
     lazy val addTarget = ToolButton(ICON_SIDEREAL, ICON_SIDEREAL_DIS, "Add Target") {
       for {
-        p <- panel.model
-        t <- TargetEditor.open(p.semester, None, canEdit, panel)
+        p            <- panel.model
+        isTooDefined  = Proposal.toOOption(ObsListView.this.model).exists(_ != TooOption.None)
+        t            <- TargetEditor.open(p.semester, None, canEdit, isTooDefined, panel)
       } {
         val p0 = Proposal.targets.mod(ts => t :: ts, p)
         val p1 = Proposal.observations.mod(os => templateObs.copy(target = Some(t)) :: os, p0)
@@ -349,9 +349,10 @@ class ObsListView(shellAdvisor:ShellAdvisor, band:Band, queueLookup: Target => U
 
         // generic edit doesn't work for targets anymore; we have more work to do now.
         for {
-          m <- panel.model
-          olm <- model
-          newT <- TargetEditor.open(Semester.current, tg.t, canEdit, panel)
+          m            <- panel.model
+          olm          <- model
+          isTooDefined = Proposal.toOOption(ObsListView.this.model).exists(_ != TooOption.None)
+          newT         <- TargetEditor.open(Semester.current, tg.t, canEdit, isTooDefined, panel)
         } {
 
           val included = ~model.map(_.childrenOf(tg))

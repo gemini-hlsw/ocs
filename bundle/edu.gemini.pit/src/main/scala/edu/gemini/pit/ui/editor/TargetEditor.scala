@@ -39,10 +39,10 @@ import java.text.{SimpleDateFormat, DecimalFormat}
 
 object TargetEditor {
 
-  def open(sem:Semester, t0:Option[Target], canEdit:Boolean,  parent:UIElement):Option[Target] = {
+  def open(sem:Semester, t0:Option[Target], canEdit:Boolean, isToO: Boolean, parent:UIElement):Option[Target] = {
     val target = t0.getOrElse(Target.empty)
-    new TargetEditor(sem, target, canEdit).open(parent) match {
-      case Some(Replace(t)) => open(sem, Some(t.withUuid(target.uuid)), canEdit, parent)
+    new TargetEditor(sem, target, canEdit, isToO).open(parent) match {
+      case Some(Replace(t)) => open(sem, Some(t.withUuid(target.uuid)), canEdit, isToO, parent)
       case Some(Done(t))    => Some(t)
       case None             => None
     }
@@ -62,7 +62,7 @@ import TargetEditor._
 /**
  * Modal editor for a Target.
  */
-class TargetEditor private (semester:Semester, target:Target, canEdit:Boolean) extends StdModalEditor[Result]("Edit Target") { dialog =>
+class TargetEditor private (semester:Semester, target:Target, canEdit:Boolean, isToO: Boolean) extends StdModalEditor[Result]("Edit Target") { dialog =>
   // An ADT for our target type radio buttons
   sealed trait TargetType {
     val name: String
@@ -190,7 +190,7 @@ class TargetEditor private (semester:Semester, target:Target, canEdit:Boolean) e
       // In Swing, RadioButtons with icons don't look right, use a Label next to the radio button instead
       val targetTypeRadioButtons:List[(AbstractButton, Label)] = TargetType.all.flatMap { v =>
         val rb = new RadioButton("") {
-          enabled = canEdit
+          enabled = canEdit && (v != TooType || isToO)
           selected = initialType == v
           reactions += {
             case ButtonClicked(_) =>
