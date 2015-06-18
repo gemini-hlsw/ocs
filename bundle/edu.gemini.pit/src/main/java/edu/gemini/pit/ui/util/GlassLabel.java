@@ -10,17 +10,29 @@ import java.util.TimerTask;
 
 public class GlassLabel {
 
-    private static final Timer timer = new Timer();
-
     public static void show(final JRootPane frame, final String message) {
         synchronized (frame) {
             // State gets messed up somewhere if we don't set the glasspane to
             // invisible when we swap. Swing guys did GlassPane wrong.
             frame.getGlassPane().setVisible(false);
-            frame.setGlassPane(new JPanel() {{
+            frame.setGlassPane(new JPanel() {
+                // REL-2255 Starting in Java 1.7, painting doesn't obey the alpha value set on the background color
+                // overriding paintComponent we can achieve the same result
+                @Override
+                protected void paintComponent(Graphics g) {
+                    Graphics2D g2 = (Graphics2D) g;
+                    g2.setColor(getBackground());
+                    g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.7f));
+                    g2.fillRect(0, 0, getWidth(), getHeight());
+                    // Paint children before disposing
+                    super.paintChildren(g);
+                    g2.dispose();
+                }
+
+                {
                 setLayout(new BorderLayout());
-                setOpaque(true);
-                setBackground(new Color(0, 0, 0, 32));
+                setOpaque(false);
+                setBackground(new Color(0, 0, 0, 64));
                 add(new FlashLabel(frame, message), BorderLayout.CENTER);
             }});
             frame.getGlassPane().setVisible(true);
