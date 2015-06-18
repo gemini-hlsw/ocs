@@ -24,7 +24,7 @@ object TargetUtil {
   def mkTarget(name: String, elements: List[EphemerisElement]): NonSiderealTarget =
     NonSiderealTarget(UUID.randomUUID(), name, elements, J_2000)
 
-  def mkMag(value: Double, band: MagnitudeBand, system: MagnitudeSystem = MagnitudeSystem.VEGA): Magnitude =
+  def mkMag(value: Double, band: MagnitudeBand, system: MagnitudeSystem = MagnitudeSystem.default): Magnitude =
     new Magnitude(value, band, system)
 
   def mkTarget(name: String, ra: String, dec: String): SiderealTarget =

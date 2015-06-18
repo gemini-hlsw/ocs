@@ -10,6 +10,8 @@ object MagnitudeSystem {
   case object AB   extends MagnitudeSystem("AB")
   case object JY   extends MagnitudeSystem("Jy")
 
+  val default:MagnitudeSystem = VEGA
+
   val all: List[MagnitudeSystem] =
     List(VEGA, AB, JY)
 

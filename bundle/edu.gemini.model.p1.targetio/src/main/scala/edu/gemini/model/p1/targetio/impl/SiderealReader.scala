@@ -61,5 +61,5 @@ object SiderealReader extends TargetReader[SiderealTarget] {
     }
 
   private def cons(omag: Option[Magnitude], osys: Option[MagnitudeSystem], lst: List[Magnitude]): List[Magnitude] =
-    omag map { _.copy(system = osys.getOrElse(MagnitudeSystem.VEGA)) :: lst } getOrElse lst
+    omag map { _.copy(system = osys.getOrElse(MagnitudeSystem.default)) :: lst } getOrElse lst
 }
