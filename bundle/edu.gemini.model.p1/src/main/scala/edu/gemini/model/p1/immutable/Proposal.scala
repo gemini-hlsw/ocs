@@ -53,8 +53,8 @@ object Proposal {
 
   }
 
-  // find the toOption of the proposal
-  def toOOption(p: Option[Proposal]): Option[TooOption] = p.map(proposalClass.get) match {
+  // find the target of opportunity of the proposal if possible
+  def toO(p: Option[Proposal]): Option[TooOption] = p.map(proposalClass.get) match {
     case Some(q: QueueProposalClass)         => q.tooOption.some
     case Some(l: LargeProgramClass)          => l.tooOption.some
     case Some(f: FastTurnaroundProgramClass) => f.tooOption.some

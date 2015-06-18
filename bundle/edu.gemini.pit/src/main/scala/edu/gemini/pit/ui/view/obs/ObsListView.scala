@@ -208,7 +208,7 @@ class ObsListView(shellAdvisor:ShellAdvisor, band:Band, queueLookup: Target => U
     lazy val addTarget = ToolButton(ICON_SIDEREAL, ICON_SIDEREAL_DIS, "Add Target") {
       for {
         p            <- panel.model
-        isTooDefined  = Proposal.toOOption(ObsListView.this.model).exists(_ != TooOption.None)
+        isTooDefined  = Proposal.toO(ObsListView.this.model).exists(_ != TooOption.None)
         t            <- TargetEditor.open(p.semester, None, canEdit, isTooDefined, panel)
       } {
         val p0 = Proposal.targets.mod(ts => t :: ts, p)
@@ -351,7 +351,7 @@ class ObsListView(shellAdvisor:ShellAdvisor, band:Band, queueLookup: Target => U
         for {
           m            <- panel.model
           olm          <- model
-          isTooDefined = Proposal.toOOption(ObsListView.this.model).exists(_ != TooOption.None)
+          isTooDefined  = Proposal.toO(ObsListView.this.model).exists(_ != TooOption.None)
           newT         <- TargetEditor.open(Semester.current, tg.t, canEdit, isTooDefined, panel)
         } {
 

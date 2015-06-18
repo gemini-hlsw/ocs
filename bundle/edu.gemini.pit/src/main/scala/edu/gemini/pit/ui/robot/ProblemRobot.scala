@@ -163,7 +163,7 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
 
     private lazy val tooTargetsAndNoActivation = for {
       t @ TooTarget(_, _) <- p.targets
-      if Proposal.toOOption(p.some).exists(_ == TooOption.None)
+      if Proposal.toO(p.some).exists(_ == TooOption.None)
       msg = "ToO targets not allowed. Please remove or set the TOO Activation"
     } yield new Problem(Severity.Error, msg, "Targets", s.inTargetsView(_.edit(t)))
 
