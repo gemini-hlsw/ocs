@@ -1,8 +1,7 @@
 package edu.gemini.sp.vcs2
 
-import edu.gemini.pot.sp.Conflict.{Moved, ResurrectedLocalDelete, ReplacedRemoteDelete}
-import edu.gemini.pot.sp.version.NodeVersions
-import edu.gemini.pot.sp.{Conflict, DataObjectBlob, ISPNode, SPNodeKey}
+import edu.gemini.pot.sp.Conflict.Moved
+import edu.gemini.pot.sp.{DataObjectBlob, ISPNode, SPNodeKey}
 import edu.gemini.shared.util.VersionComparison._
 import edu.gemini.sp.vcs2.MergeNode._
 import edu.gemini.spModel.rich.pot.sp._
@@ -28,17 +27,11 @@ object PreliminaryMerge {
 
   def tree(mc: MergeContext): TryVcs[Tree[MergeNode]] = {
 
-    def isNewLocal(l: ISPNode)          = !mc.remote.isKnown(l.key)
-    def isNewRemote(r: Tree[MergeNode]) = !mc.local.isKnown(r.key)
+    def isVersonUpdated(k: SPNodeKey, pc0: ProgContext, pc1: ProgContext): Boolean =
+      pc0.version(k).updates(pc1.version(k))
 
-    def isUpdated(k: SPNodeKey, pc0: ProgContext, pc1: ProgContext): Boolean =
-      pc0.version(k).compare(pc1.version(k)) match {
-        case Newer | Conflicting => true
-        case _                   => false
-      }
-
-    def isUpdatedLocal(l: ISPNode)          = isUpdated(l.key, mc.local, mc.remote)
-    def isUpdatedRemote(r: Tree[MergeNode]) = isUpdated(r.key, mc.remote, mc.local)
+    def isUpdatedLocal(l: ISPNode)          = isVersonUpdated(l.key, mc.local, mc.remote)
+    def isUpdatedRemote(r: Tree[MergeNode]) = isVersonUpdated(r.key, mc.remote, mc.local)
 
     // Defines the rules for determining which parent wins in case of ambiguities.
     def mergeParent(childKey: SPNodeKey): Option[SPNodeKey] = {
@@ -181,14 +174,8 @@ object PreliminaryMerge {
       def incrVersion  = syncVersion.incr(mc.local.prog.getLifespanId)
       val newChildKeys = newChildren.map(_.key)
 
-      def updatesVersion(nv: NodeVersions): Boolean =
-        syncVersion.compare(nv) match {
-          case Newer | Conflicting => true
-          case Older | Same        => false
-        }
-
-      def updatesLocalVersion: Boolean   = updatesVersion(mc.local.version(k))
-      def updatesRemoteVersion: Boolean  = updatesVersion(mc.remote.version(k))
+      def updatesLocalVersion: Boolean   = syncVersion.updates(mc.local.version(k))
+      def updatesRemoteVersion: Boolean  = syncVersion.updates(mc.remote.version(k))
       def updatesLocalChildren: Boolean  = newChildKeys =/= (mc.local.get(k).map(_.children.map(_.key)) | Nil)
       def updatesRemoteChildren: Boolean = newChildKeys =/= (mc.remote.get(k).map(_.subForest.toList.map(_.key)) | Nil)
 
@@ -278,7 +265,7 @@ object PreliminaryMerge {
         (lst/:newParent.subForest) { (lst0, child) =>
           mc.local.parent(child.key).fold(lst0) { oldParentKey =>
             val isMoved = (oldParentKey =/= newParent.key) &&
-                            isUpdated(oldParentKey, mc.local, mc.remote)
+                            isVersonUpdated(oldParentKey, mc.local, mc.remote)
             if (isMoved) (oldParentKey, child.key, newParent.key) :: lst0
             else lst0
           }
