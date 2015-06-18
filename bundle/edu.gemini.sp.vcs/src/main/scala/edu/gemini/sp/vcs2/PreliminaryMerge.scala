@@ -272,55 +272,6 @@ object PreliminaryMerge {
       }
     }
 
-    // Given the root of the tree and the set of keys that have been replaced or
-    // resurrected, find the roots of subtrees with the conflict issue and just
-    // add the note to the roots. For example, if an observation is replaced we
-    // don't want to see conflict notes on every node in the observation, but
-    // rather just on the observation node itself.
-    def addNotes(in: Tree[MergeNode], ks: Set[SPNodeKey], nf: SPNodeKey => Conflict.Note): TryVcs[Tree[MergeNode]] = {
-      def goAdd(r: Tree[MergeNode]): TryVcs[Tree[MergeNode]] =
-        if (ks.contains(r.key))
-          for {
-            t0 <- r.mModifyLabel(_.withConflictNote(nf(r.key)))
-            t1 <- t0.incr(mc.local.prog.getLifespanId)
-            t2 <- visitChildren(t1, goSkip)
-          } yield t2
-        else
-          visitChildren(r, goAdd)
-
-      // If this node is in the set, we skip the note we would otherwise have
-      // added.  If not, from that point down we will go back to adding the note
-      def goSkip(r: Tree[MergeNode]): TryVcs[Tree[MergeNode]] =
-        visitChildren(r, if (ks.contains(r.key)) goSkip else goAdd)
-
-      def visitChildren(t: Tree[MergeNode], fun: Tree[MergeNode] => TryVcs[Tree[MergeNode]]): TryVcs[Tree[MergeNode]] =
-        t.subForest.map(fun).sequenceU.map(children => Tree.node(t.rootLabel, children))
-
-      goAdd(in)
-    }
-
-    def addReplacedRemoteDelete(in: Tree[MergeNode]): TryVcs[Tree[MergeNode]] = {
-      val mergeSurvivors = in.keySet
-      val remoteDeleted  = mc.remote.diff.plan.delete.collect {
-        case Missing(k, _) if mc.remote.isKnown(k) => k
-      }
-      val replaced = mergeSurvivors & remoteDeleted
-
-      // check for empty to avoid an unnecessary traversal.  would work anyway
-      if (replaced.isEmpty) TryVcs(in)
-      else addNotes(in, replaced, new ReplacedRemoteDelete(_))
-    }
-
-    def addResurrectedLocalDelete(in: Tree[MergeNode]): TryVcs[Tree[MergeNode]] = {
-      val mergeSurvivors = in.keySet
-      val localDeleted   = mc.remote.diff.plan.update.keySet.filter(mc.local.isDeleted)
-      val resurrected    = mergeSurvivors & localDeleted
-
-      // check for empty to avoid an unnecessary traversal.  would work anyway
-      if (resurrected.isEmpty) TryVcs(in)
-      else addNotes(in, resurrected, new ResurrectedLocalDelete(_))
-    }
-
     def addMoved(in: Tree[MergeNode]): TryVcs[Tree[MergeNode]] = {
       // moved = List: (old parent, child, new parent)
       val moved = in.foldTree(List.empty[(SPNodeKey, SPNodeKey, SPNodeKey)]) { (newParent, lst) =>
@@ -347,10 +298,8 @@ object PreliminaryMerge {
     def addConflicts(in: Tree[MergeNode]): TryVcs[Tree[MergeNode]] =
       for {
         t0 <- addDataObjectConflicts(in)
-        t1 <- addReplacedRemoteDelete(t0)
-        t2 <- addResurrectedLocalDelete(t1)
-        t3 <- addMoved(t2)
-      } yield t3
+        t1 <- addMoved(t0)
+      } yield t1
 
     addConflicts(go(Both(mc.local.prog, mc.remote.plan.update)))
   }

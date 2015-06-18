@@ -715,49 +715,7 @@ class MergeTest extends JUnitSuite {
         expected == actual
       }
     ),
-
-    ("Conflicts are added when a remotely deleted node is replaced",
-      (start, local, remote, pc) => {
-        // allReplaced is all keys of nodes that were replaced.  we just want
-        // the root of an replaced subtree, so we filter it
-        val allReplaced = pc.mergePlan.update.keySet & pc.remote.deletedKeys
-        val expected    = allReplaced.filterNot { k =>
-          pc.mergeContext.local.parent(k).exists(allReplaced.contains)
-        }
-
-        val actual = pc.mergePlanConflictKeys((con: Conflicts, k: SPNodeKey) =>
-          con.notes.contains(new ReplacedRemoteDelete(k))
-        )
-
-        if (expected != actual) {
-          Console.err.println("expected: " + expected.toList.sorted.mkString(", "))
-          Console.err.println("actual..: " + actual.toList.sorted.mkString(", "))
-        }
-
-        expected == actual
-      }
-    ),
-
-    ("Conflicts are added when a locally deleted node is resurrected",
-      (start, local, remote, pc) => {
-        val allResurrected = pc.mergePlan.update.keySet & pc.local.deletedKeys
-        val expected       = allResurrected.filterNot { k =>
-          pc.mergeContext.remote.parent(k).exists(allResurrected.contains)
-        }
-
-        val actual = pc.mergePlanConflictKeys((con: Conflicts, k: SPNodeKey) =>
-          con.notes.contains(new ResurrectedLocalDelete(k))
-        )
-
-        if (expected != actual) {
-          Console.err.println("expected: " + expected.toList.sorted.mkString(", "))
-          Console.err.println("actual..: " + actual.toList.sorted.mkString(", "))
-        }
-
-        expected == actual
-      }
-    ),
-
+  
     ("Conflicts are added for conflicting moves",
       (start, local, remote, pc) => {
         val mergeParents = pc.mergePlan.update.foldTree(Map.empty[SPNodeKey, SPNodeKey]) { (p,m) =>
