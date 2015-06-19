@@ -74,7 +74,7 @@ object GeminiNormalProposalClass {
 object QueueProposalClass {
 
   // Lenses
-  val tooOption:Lens[QueueProposalClass, TooOption] = Lens.lensu((a, b) => a.copy(tooOption = b), _.tooOption)
+  val tooOption:Lens[QueueProposalClass, ToOChoice] = Lens.lensu((a, b) => a.copy(tooOption = b), _.tooOption)
   val band3request:Lens[QueueProposalClass, Option[SubmissionRequest]] = Lens.lensu((a, b) => a.copy(band3request = b), _.band3request)
 
   def apply(m:M.QueueProposalClass):QueueProposalClass = apply(
@@ -85,7 +85,7 @@ object QueueProposalClass {
     Option(m.getBand3Request).map(SubmissionRequest(_)),
     m.getTooOption)
 
-  val empty = apply(None, None, None, Left(Nil), None, TooOption.None)
+  val empty = apply(None, None, None, Left(Nil), None, ToOChoice.None)
 
 }
 
@@ -94,7 +94,7 @@ case class QueueProposalClass(itac:Option[Itac],
                               key:Option[UUID],
                               subs:Either[List[NgoSubmission], ExchangeSubmission],
                               band3request:Option[SubmissionRequest], // TODO: we probably need a req/res pair
-                              tooOption:TooOption) extends GeminiNormalProposalClass {
+                              tooOption:ToOChoice) extends GeminiNormalProposalClass {
 
   override val isSpecial = false
 
@@ -153,7 +153,7 @@ case class ClassicalProposalClass(itac:Option[Itac],
     m.getNgo.addAll(subs.left.map(lst => lst.map(sub => sub.mutable(p, n))).left.getOrElse(Nil).asJava)
 
     // Write out our visitor list, which we get from the proposal
-    m.getVisitor.addAll(visitors.map(_.apply(p)).flatten.map {i =>
+    m.getVisitor.addAll(visitors.flatMap(_.apply(p)).map {i =>
       val v = Factory.createVisitor
       v.setRef(i.mutable(n))
       v
@@ -255,7 +255,7 @@ case class LargeProgramClass(itac  :Option[Itac],
                             comment:Option[String],
                             key    :Option[UUID],
                             sub    :LargeProgramSubmission,
-                            tooOption:TooOption) extends ProposalClass {
+                            tooOption:ToOChoice) extends ProposalClass {
 
   def mutable:M.LargeProgramClass = {
     val m = Factory.createLargeProgramClass
@@ -282,7 +282,7 @@ case class LargeProgramClass(itac  :Option[Itac],
 object LargeProgramClass {
 
   // Lens
-  val tooOption:Lens[LargeProgramClass, TooOption] = Lens.lensu((a, b) => a.copy(tooOption = b), _.tooOption)
+  val tooOption:Lens[LargeProgramClass, ToOChoice] = Lens.lensu((a, b) => a.copy(tooOption = b), _.tooOption)
   val sub:Lens[LargeProgramClass,LargeProgramSubmission] = Lens.lensu((a, b) => a.copy(sub = b), _.sub)
 
   def apply(m:M.LargeProgramClass):LargeProgramClass = apply(
@@ -292,7 +292,7 @@ object LargeProgramClass {
     LargeProgramSubmission(m.getSubmission),
     m.getTooOption)
 
-  def empty = apply(None, None, None, LargeProgramSubmission.empty, TooOption.None)
+  def empty = apply(None, None, None, LargeProgramSubmission.empty, ToOChoice.None)
 
 }
 
@@ -301,7 +301,7 @@ case class FastTurnaroundProgramClass(itac                       :Option[Itac],
                                       key                        :Option[UUID],
                                       sub                        :FastTurnaroundSubmission,
                                       band3request               :Option[SubmissionRequest],
-                                      tooOption                  :TooOption,
+                                      tooOption                  :ToOChoice,
                                       reviewer                   :Option[Investigator],
                                       mentor                     :Option[Investigator],
                                       partnerAffiliation         :Option[NgoPartner],
@@ -335,7 +335,7 @@ case class FastTurnaroundProgramClass(itac                       :Option[Itac],
 object FastTurnaroundProgramClass {
 
   // Lens
-  val tooOption:Lens[FastTurnaroundProgramClass, TooOption] = Lens.lensu((a, b) => a.copy(tooOption = b), _.tooOption)
+  val tooOption:Lens[FastTurnaroundProgramClass, ToOChoice] = Lens.lensu((a, b) => a.copy(tooOption = b), _.tooOption)
   val sub:Lens[FastTurnaroundProgramClass ,FastTurnaroundSubmission] = Lens.lensu((a, b) => a.copy(sub = b), _.sub)
   val band3request:Lens[FastTurnaroundProgramClass, Option[SubmissionRequest]] = Lens.lensu((a, b) => a.copy(band3request = b), _.band3request)
   val reviewer:Lens[FastTurnaroundProgramClass, Option[Investigator]] = Lens.lensu((a, b) => a.copy(reviewer = b), _.reviewer)
@@ -354,6 +354,6 @@ object FastTurnaroundProgramClass {
     Option(m.getMentor).map(Investigator.apply),
     Option(m.getPartnerAffiliation))
 
-  def empty = apply(None, None, None, FastTurnaroundSubmission.empty, None, TooOption.None, None, None, None)
+  def empty = apply(None, None, None, FastTurnaroundSubmission.empty, None, ToOChoice.None, None, None, None)
 
 }

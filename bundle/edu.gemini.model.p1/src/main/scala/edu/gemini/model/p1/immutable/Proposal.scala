@@ -7,6 +7,9 @@ import scala.collection.JavaConverters._
 import java.util.logging.{Logger, Level}
 import org.xml.sax.SAXException
 
+import scalaz._
+import Scalaz._
+
 object Proposal {
 
   // Lenses
@@ -48,6 +51,14 @@ object Proposal {
       }
     } filterNot (_.isEmpty)
 
+  }
+
+  // find the target of opportunity of the proposal if possible
+  def toOChoice(p: Option[Proposal]): Option[ToOChoice] = p.map(proposalClass.get) match {
+    case Some(q: QueueProposalClass)         => q.tooOption.some
+    case Some(l: LargeProgramClass)          => l.tooOption.some
+    case Some(f: FastTurnaroundProgramClass) => f.tooOption.some
+    case _                                   => none
   }
 
   private val validate = Option(System.getProperty("edu.gemini.model.p1.validate")).isDefined
@@ -126,8 +137,8 @@ case class Proposal(meta:Meta,
     Option(m.getProposalClass).map(ProposalClass(_)).getOrElse(ProposalClass.empty),  // TODO: get rid of the empty case
     m.getSchemaVersion)
 
-  def conditions = observations.map(_.condition).flatten.distinct
-  def blueprints = observations.map(_.blueprint).flatten.distinct
+  def conditions = observations.flatMap(_.condition).distinct
+  def blueprints = observations.flatMap(_.blueprint).distinct
 
   def mutable = {
     val n = new Namer

@@ -26,7 +26,7 @@ object VisibilityRobot extends ObservationMetaRobot[(ProposalClass, BlueprintBas
     }
   }
 
-  // Override caching rules so we update visibility everytime a proposal changes
+  // Override caching rules so we update visibility every time a proposal changes
   override def missing(m: Model): List[((ProposalClass, BlueprintBase, Coordinates), Observation)] =
     obsLens.get(m) collect {
       case o if key(o).isDefined => (key(o).get, o)

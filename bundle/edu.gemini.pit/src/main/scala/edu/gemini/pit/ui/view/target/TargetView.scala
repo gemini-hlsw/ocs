@@ -12,7 +12,6 @@ import javax.swing.TransferHandler._
 import edu.gemini.pit.ui._
 import CommonActions._
 import editor.{TargetExporter, TargetImporter, TargetEditor}
-import edu.gemini.pit.util._
 import javax.swing.{JOptionPane, JComponent, TransferHandler, SwingConstants}
 import edu.gemini.pit.ui.binding._
 import DataFlavors._
@@ -49,8 +48,9 @@ class TargetView(val shellAdvisor:ShellAdvisor) extends BorderPanel with BoundVi
   // Public edit method (called from quick-fixes)
   def edit(t:Target) {
     for {
-      m <- model
-      t0 <- TargetEditor.open(semesterLens.get(m), Some(t), canEdit, panel)
+      m            <- model
+      isTooDefined  = Proposal.toOChoice(model.map(_.proposal)).exists(_ != ToOChoice.None)
+      t0           <- TargetEditor.open(semesterLens.get(m), Some(t), canEdit, isTooDefined, panel)
     } {
       val ts = targetLens.get(m)
       val i = ts.indexOf(t)
@@ -259,9 +259,10 @@ class TargetView(val shellAdvisor:ShellAdvisor) extends BorderPanel with BoundVi
     object add extends ToolButton(SharedIcons.ADD, SharedIcons.ADD_DISABLED, "Add Target") {
       def apply() {
         for {
-          m <- model
-          t <- TargetEditor.open(semester, None, canEdit, panel)
-          ts = targetLens.get(m)
+          m             <- model
+          isTooDefined   = Proposal.toOChoice(model.map(_.proposal)).exists(_ != ToOChoice.None)
+          t             <- TargetEditor.open(semester, None, canEdit, isTooDefined, panel)
+          ts             = targetLens.get(m)
         } model = Some(targetLens.set(m, t :: ts))
       }
     }

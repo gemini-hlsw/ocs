@@ -82,7 +82,7 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
           TimeProblems(p, s).all ++
           TimeProblems.partnerZeroTimeRequest(p, s) ++
           TacProblems(p, s).all ++
-          List(incompleteInvestigator, missingObsElementCheck, cfCheck, emptyTargetCheck, emptyEphemerisCheck, initialEphemerisCheck, finalEphemerisCheck,
+          List(incompleteInvestigator, missingObsElementCheck, cfCheck, emptyTargetCheck, emptyEphemerisCheck, initialEphemerisCheck, finalEphemerisCheck, tooTargetsAndNoActivation,
             badGuiding, badVisibility, iffyVisibility, singlePointEphemerisCheck, minTimeCheck, wrongSite, band3Orphan2, gpiCheck).flatten
       ps.sorted
     }
@@ -161,6 +161,12 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
       msg = s"""Target "${t.name}" appears to be empty."""
     } yield new Problem(Severity.Error, msg, "Targets", s.inTargetsView(_.edit(t)))
 
+    private lazy val tooTargetsAndNoActivation = for {
+      t @ TooTarget(_, _) <- p.targets
+      if Proposal.toOChoice(p.some).exists(_ == ToOChoice.None)
+      msg = "ToO targets not allowed in non-ToO proposals. Please remove them or select a ToO Activation mode"
+    } yield new Problem(Severity.Error, msg, "Targets", s.inTargetsView(_.edit(t)))
+
     lazy val utc = new SimpleDateFormat("dd-MMM-yyyy")
 
     private lazy val initialEphemerisCheck = for {
@@ -186,7 +192,7 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
       if diff > 1.days
       date = new Date(ds.max)
       msg = if (ds.max <= p.semester.firstDay)
-        s"""Ephemeris for target "${t.name}" is undefined between ${utc.format(p.semester.firstDay)}} and ${utc.format(p.semester.lastDay)} UTC."""
+        s"""Ephemeris for target "${t.name}" is undefined between ${utc.format(p.semester.firstDay)} and ${utc.format(p.semester.lastDay)} UTC."""
       else
         s"""Ephemeris for target "${t.name}" is undefined between ${utc.format(date)} and ${utc.format(p.semester.lastDay)} UTC."""
     } yield new Problem(Severity.Warning, msg, "Targets", s.inTargetsView(_.edit(t)))
@@ -196,7 +202,7 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
       if !t.isEmpty
       if !s.catalogHandler.state.contains(t)
       if e.isEmpty
-      msg = "Ephemeris for target \"%s\" is undefined.".format(t.name)
+      msg = s"""Ephemeris for target "${t.name}" is undefined."""
     } yield new Problem(Severity.Warning, msg, "Targets", s.inTargetsView(_.edit(t)))
 
     private val gpiCheck = {

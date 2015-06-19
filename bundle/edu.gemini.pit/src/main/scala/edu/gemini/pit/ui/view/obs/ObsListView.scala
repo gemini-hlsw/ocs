@@ -5,7 +5,6 @@ import edu.gemini.pit.model._
 import edu.gemini.pit.ui.editor._
 import edu.gemini.pit.ui.util.SharedIcons._
 import edu.gemini.pit.ui.util._
-import edu.gemini.pit.util._
 import java.awt.datatransfer._
 import javax.swing.TransferHandler._
 import scala.swing._
@@ -16,7 +15,7 @@ import edu.gemini.gsa.client.api.GsaParams
 import edu.gemini.gsa.client.impl.GsaUrl
 import edu.gemini.pit.ui.CommonActions._
 import java.awt.Color
-import edu.gemini.pit.ui.{HackClipboard, DataFlavors, ShellAdvisor}
+import edu.gemini.pit.ui.{HackClipboard, ShellAdvisor}
 import edu.gemini.pit.ui.binding._
 import edu.gemini.pit.ui.robot.{AgsRobot, GsaRobot}
 import edu.gemini.pit.ui.DataFlavors._
@@ -59,7 +58,7 @@ class ObsListView(shellAdvisor:ShellAdvisor, band:Band, queueLookup: Target => U
         case q:QueueProposalClass         => q.band3request.isDefined
         case f:FastTurnaroundProgramClass => f.band3request.isDefined
         case _                    => false
-      }) || !p.observations.filter(_.band == Band.BAND_3).isEmpty
+      }) || p.observations.exists(_.band == Band.BAND_3)
 
       if (tabEnabled) {
 
@@ -95,10 +94,6 @@ class ObsListView(shellAdvisor:ShellAdvisor, band:Band, queueLookup: Target => U
       "Band 3 time is available only for proposal class \"Queue Observing at Gemini\" and only if the \"Consider for " +
         "Band 3\" option is selected. You may edit these options on the \"Time Requests\" tab in the " +
         "view to the left."
-    /*text =
-      "Band 3 time is available only for proposal class \"Queue Observing at Gemini\" or \"Fast Turnaround Observing at Gemini\" and only if the \"Consider for " +
-        "Band 3\" option is selected. You may edit these options on the \"Time Requests\" tab in the " +
-        "view to the left."*/
   }
 
   // When a new obs is being created, this is the template we use. It is based on whatever is currently
@@ -130,7 +125,7 @@ class ObsListView(shellAdvisor:ShellAdvisor, band:Band, queueLookup: Target => U
     object reorder extends ReorderBar(ObsListGrouping.default.productIterator.toSeq:_*)(Hint) {
       var gs = ObsListGrouping.default
       reactions += {
-        case ReorderBar.Reorder(as) => as.asInstanceOf[Seq[ObsListGrouping[_]]] match {
+        case ReorderBar.Reorder(gr) => gr.asInstanceOf[Seq[ObsListGrouping[_]]] match {
           case Seq(a, b, c) =>
             gs = (a, b, c)
             other.foreach(_.bar.reorder.copyStateFrom(this))
@@ -154,16 +149,15 @@ class ObsListView(shellAdvisor:ShellAdvisor, band:Band, queueLookup: Target => U
       opaque = true
       foreground = Color.DARK_GRAY
       background = tools.background
-//      icon = SharedIcons.ICON_CLOCK
       border = BorderFactory.createCompoundBorder(
         tools.border,
         BorderFactory.createEmptyBorder(2, 4, 2, 4))
       override def refresh(m:Option[List[Observation]]) {
         text = ~panel.model.map {p =>
-          val b1 = p.observations.filter(_.band == Band.BAND_1_2).map(_.time).flatten.map(_.hours).sum
+          val b1 = p.observations.filter(_.band == Band.BAND_1_2).flatMap(_.time).map(_.hours).sum
           p.proposalClass match {
             case q:QueueProposalClass if q.band3request.isDefined =>
-              val b3 = p.observations.filter(_.band == Band.BAND_3).map(_.time).flatten.map(_.hours).sum
+              val b3 = p.observations.filter(_.band == Band.BAND_3).flatMap(_.time).map(_.hours).sum
               "Sum observation times: %3.2f hr | Sum Band 3 times: %3.2f hr".format(b1, b3)
             case _ =>
               "Sum observation times: %3.2f hr".format(b1)
@@ -213,8 +207,9 @@ class ObsListView(shellAdvisor:ShellAdvisor, band:Band, queueLookup: Target => U
     // Add for target must be special-cased
     lazy val addTarget = ToolButton(ICON_SIDEREAL, ICON_SIDEREAL_DIS, "Add Target") {
       for {
-        p <- panel.model
-        t <- TargetEditor.open(p.semester, None, canEdit, panel)
+        p            <- panel.model
+        isTooDefined  = Proposal.toOChoice(ObsListView.this.model).exists(_ != ToOChoice.None)
+        t            <- TargetEditor.open(p.semester, None, canEdit, isTooDefined, panel)
       } {
         val p0 = Proposal.targets.mod(ts => t :: ts, p)
         val p1 = Proposal.observations.mod(os => templateObs.copy(target = Some(t)) :: os, p0)
@@ -239,7 +234,7 @@ class ObsListView(shellAdvisor:ShellAdvisor, band:Band, queueLookup: Target => U
         enabled = canEdit && ~(for (m <- model) yield {
             ~s.map {
               case ObsElem(o)    => o.time.isDefined
-              case g:ObsGroup[_] => !m.childrenOf(g).isEmpty
+              case g:ObsGroup[_] => m.childrenOf(g).nonEmpty
             }
           })
       }
@@ -354,9 +349,10 @@ class ObsListView(shellAdvisor:ShellAdvisor, band:Band, queueLookup: Target => U
 
         // generic edit doesn't work for targets anymore; we have more work to do now.
         for {
-          m <- panel.model
-          olm <- model
-          newT <- TargetEditor.open(Semester.current, tg.t, canEdit, panel)
+          m            <- panel.model
+          olm          <- model
+          isTooDefined  = Proposal.toOChoice(ObsListView.this.model).exists(_ != ToOChoice.None)
+          newT         <- TargetEditor.open(Semester.current, tg.t, canEdit, isTooDefined, panel)
         } {
 
           val included = ~model.map(_.childrenOf(tg))
@@ -408,7 +404,7 @@ class ObsListView(shellAdvisor:ShellAdvisor, band:Band, queueLookup: Target => U
 
     override def foreground(e:ObsListElem) = {
       case Item => e match {
-        case ObsElem(o) if !o.time.isDefined => Color.LIGHT_GRAY
+        case ObsElem(o) if o.time.isEmpty    => Color.LIGHT_GRAY
         case g:ObsGroup[_] if g.isEmpty      => Color.LIGHT_GRAY
         case _                               => Color.BLACK
       }
@@ -630,7 +626,7 @@ class ObsListView(shellAdvisor:ShellAdvisor, band:Band, queueLookup: Target => U
         enabled = false
         onSelectionChanged(sel => enabled = sel.isDefined)
         def apply() {
-          transferHandler.exportToClipboard(myViewer.getTable, HackClipboard, COPY);
+          transferHandler.exportToClipboard(myViewer.getTable, HackClipboard, COPY)
         }
       }
 
@@ -663,12 +659,8 @@ class ObsListView(shellAdvisor:ShellAdvisor, band:Band, queueLookup: Target => U
         def apply() {
             importData(ts)
         }
-
       }
-
-
     }
-
   }
 
   object Fixes extends Bound[Proposal, ObsListModel] {

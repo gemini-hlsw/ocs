@@ -247,14 +247,14 @@ class PartnerView extends BorderPanel with BoundView[Proposal] {view =>
     }
 
     // TOO label and combo box
-    lazy val tooLabel = dvLabel("TOO Activation:") {
+    lazy val tooLabel = dvLabel("ToO Activation:") {
       case _: QueueProposalClass         => true
       case _: LargeProgramClass          => true
       case _: FastTurnaroundProgramClass => true
     }
 
     // TOO option combo box
-    object tooOption extends ComboBox(TooOption.values.toSeq) with ValueRenderer[TooOption] with Bound[Proposal, ProposalClass] {
+    object tooOption extends ComboBox(ToOChoice.values.toSeq) with ValueRenderer[ToOChoice] with Bound[Proposal, ProposalClass] {
 
       val lens = Proposal.proposalClass
 
