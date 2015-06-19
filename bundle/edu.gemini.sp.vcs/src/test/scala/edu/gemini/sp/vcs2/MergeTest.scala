@@ -105,14 +105,13 @@ class MergeTest extends JUnitSuite {
     // Find all the merge plan node keys with a particular type of conflict.
     // Note, the corrected merge plan may have different/fewer conflicts since
     // obs permission correction will reset inappropriately edited observations.
-    def mergePlanConflictKeys(p: (Conflicts, SPNodeKey) => Boolean ): Set[SPNodeKey] = {
+    def mergePlanConflictKeys(p: (Conflicts, SPNodeKey) => Boolean ): Set[SPNodeKey] =
       mergePlan.update.sFoldRight(Set.empty[SPNodeKey]) { (mn, s) =>
         mn match {
           case Modified(k, _, _, _, con) if p(con, k) => s + k
-          case _ => s
+          case _                                      => s
         }
       }
-    }
 
     val obsEditsTry = ObsEdit.all(lp, diffs)
     val obsEdits    = obsEditsTry match {

@@ -8,6 +8,8 @@ import edu.gemini.spModel.rich.pot.sp.SpNodeKeyEqual
 import scalaz._
 import Scalaz._
 
+/** The ObsResurrectionCorrection ensures that resurrected observations are
+  * brought back in their entirety, with all descendants. */
 case class ObsResurrectionCorrection(mc: MergeContext) extends CorrectionFunction {
 
   val lifespanId = mc.local.prog.getLifespanId
@@ -34,10 +36,13 @@ case class ObsResurrectionCorrection(mc: MergeContext) extends CorrectionFunctio
     for {
       obs      <- mp.update.focus(obsKey)
       lobs     <- mc.local.get(obsKey).toTryVcs("Couldn't find resurrected local observation")
-      children = MergeNode.modifiedTree(lobs).subForest
+      children  = MergeNode.modifiedTree(lobs).subForest
       upd      <- complete(mc, mp, obs, children)
     } yield mp.copy(update = upd.toTree)
 
+  // Complete the merge plan observation pointed to by `loc` using the given
+  // children, which are taken from the original local or remote observation.
+  // We have to take care not to introduce duplicate node keys in this process.
   def complete(mc: MergeContext, mp: MergePlan, loc: TreeLoc[MergeNode], children: Stream[Tree[MergeNode]]): TryVcs[TreeLoc[MergeNode]] = {
     val usedKeys = mp.update.keySet
 
