@@ -48,22 +48,29 @@ class ParallacticAngleControls extends GridBagPanel with Publisher {
 
       def rebuild(): Unit = {
         contents.clear()
-        editor.foreach(e => {
-          val obs         = e.getContextObservation
-          val inst        = e.getContextInstrumentDataObject
+
+        // menu items that don't depend on the context
+        val fixedItems = RelativeTime("Now", 0) :: incrementsInMinutes.map(m => RelativeTime(s"Now + $m min", m * 60000))
+
+        // menu items that require an observation and instrument to compute
+        val instItems = for {
+          e    <- editor
+          obs  <- Option(e.getContextObservation)
+          inst <- Option(e.getContextInstrumentDataObject)
+        } yield {
           // For some ridiculous reason, setup and reacq time is provided as
           // floating point seconds by the instrument implementations :/
           val setupTimeMs = math.round(inst.getSetupTime(obs) * 1000)
           val reacqTimeMs = math.round(inst.getReacquisitionTime(obs) * 1000)
-
           def formatMin(ms: Long): String = s"(${math.round(ms/60000.0)} min)"
 
-          contents ++= List(
-            RelativeTime(s"Now + Setup ${formatMin(setupTimeMs)}", setupTimeMs),
-            RelativeTime(s"Now + Reacq. ${formatMin(reacqTimeMs)}", reacqTimeMs),
-            RelativeTime("Now", 0)
-          ) ++ incrementsInMinutes.map(m => RelativeTime(s"Now + $m min", m * 60000))
-        })
+          List(
+            RelativeTime(s"Now + Setup ${formatMin(setupTimeMs)}",  setupTimeMs),
+            RelativeTime(s"Now + Reacq. ${formatMin(reacqTimeMs)}", reacqTimeMs)
+          )
+        }
+
+        contents ++= instItems.getOrElse(Nil) ++ fixedItems
       }
     }
 
@@ -124,9 +131,11 @@ class ParallacticAngleControls extends GridBagPanel with Publisher {
   /**
    * Call this whenever the state of the parallactic controls change
    */
-  private def updateSchedulingBlock(start: Long): Unit = {
-    editor.foreach(e => {
-      val ispObs = e.getContextObservation
+  private def updateSchedulingBlock(start: Long): Unit =
+    for {
+      e      <- editor
+      ispObs <- Option(e.getContextObservation)
+    } {
       val spObs = ispObs.getDataObject.asInstanceOf[SPObservation]
 
       // Calculate the duration.
@@ -144,8 +153,7 @@ class ParallacticAngleControls extends GridBagPanel with Publisher {
 
       // Update the components to reflect the change.
       resetComponents()
-    })
-  }
+    }
 
 
   /**
@@ -156,10 +164,11 @@ class ParallacticAngleControls extends GridBagPanel with Publisher {
     for {
       e <- editor
       s <- site
-    } yield {
+      o <- Option(e.getContextObservation)
+    } {
       val dialog = new ParallacticAngleDialog(
         e.getViewer.getParentFrame,
-        e.getContextObservation,
+        o,
         e.getDataObject.getParallacticAngleDuration,
         s)
       dialog.pack()
@@ -200,12 +209,12 @@ class ParallacticAngleControls extends GridBagPanel with Publisher {
     ui.parallacticAngleFeedback.text = ""
     for {
       e              <- editor
-      ispObservation = e.getContextObservation
+      ispObservation <- Option(e.getContextObservation)
       if ObsTargetCalculatorService.targetCalculation(ispObservation).isDefined
       spObservation  = ispObservation.getDataObject.asInstanceOf[SPObservation]
       sb             <- spObservation.getSchedulingBlock.asScalaOpt
       fmt            <- formatter
-    } yield {
+    } {
       //object dateFormat extends SimpleDateFormat("MM/dd/yy 'at' HH:mm:ss z") {
       object dateFormat extends SimpleDateFormat("MM/dd/yy HH:mm:ss z") {
         setTimeZone(TimeZonePreference.get)
@@ -232,7 +241,11 @@ class ParallacticAngleControls extends GridBagPanel with Publisher {
    * The parallactic angle calculation, if it can be calculated
    */
   def parallacticAngle: Option[Angle] =
-    editor.map(e => e.getDataObject.calculateParallacticAngle(e.getContextObservation).asScalaOpt).flatten
+    for {
+      e <- editor
+      o <- Option(e.getContextObservation)
+      a <- e.getDataObject.calculateParallacticAngle(o).asScalaOpt
+    } yield a
 }
 
 object ParallacticAngleControls {
