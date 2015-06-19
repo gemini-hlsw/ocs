@@ -382,8 +382,8 @@ package object immutable {
     val NIGHT = mutable.TimeUnit.NIGHT
   }
 
-  type TooOption = mutable.TooOption
-  object TooOption extends EnumObject[mutable.TooOption] {
+  type ToOChoice = mutable.TooOption
+  object ToOChoice extends EnumObject[mutable.TooOption] {
     val None = mutable.TooOption.NONE
   }
 

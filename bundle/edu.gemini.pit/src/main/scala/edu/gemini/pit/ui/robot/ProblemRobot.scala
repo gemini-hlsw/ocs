@@ -163,8 +163,8 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
 
     private lazy val tooTargetsAndNoActivation = for {
       t @ TooTarget(_, _) <- p.targets
-      if Proposal.toO(p.some).exists(_ == TooOption.None)
-      msg = "ToO targets not allowed. Please remove or set the TOO Activation"
+      if Proposal.toOChoice(p.some).exists(_ == ToOChoice.None)
+      msg = "ToO targets not allowed in non-ToO proposals. Please remove them or select a ToO Activation mode"
     } yield new Problem(Severity.Error, msg, "Targets", s.inTargetsView(_.edit(t)))
 
     lazy val utc = new SimpleDateFormat("dd-MMM-yyyy")
