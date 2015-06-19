@@ -1,9 +1,7 @@
 package edu.gemini.model.p1.targetio.impl
 
-import edu.gemini.model.p1.immutable.{Magnitude, ProperMotion, HmsDms, SiderealTarget}
+import edu.gemini.model.p1.immutable.{ProperMotion, HmsDms, SiderealTarget}
 import edu.gemini.model.p1.mutable.CoordinatesEpoch.J_2000
-import edu.gemini.model.p1.mutable.{MagnitudeBand, MagnitudeSystem}
-import edu.gemini.model.p1.mutable.MagnitudeSystem.VEGA
 
 import edu.gemini.model.p1.targetio.api._
 import edu.gemini.model.p1.targetio.table._
@@ -11,6 +9,8 @@ import edu.gemini.model.p1.targetio.table._
 import SiderealColumns._
 import java.io.{InputStream, File}
 import java.util.UUID
+
+import edu.gemini.spModel.core.{MagnitudeSystem, MagnitudeBand, Magnitude}
 
 object SiderealReader extends TargetReader[SiderealTarget] {
   def read(file: File): Result      = targets(TableReader(file, REQUIRED))
@@ -20,7 +20,7 @@ object SiderealReader extends TargetReader[SiderealTarget] {
   private def targets(e: Either[String, List[TableReader]]): Result =
     e match {
       case Left(msg)  => Left(DataSourceError(msg))
-      case Right(lst) => Right(lst flatMap { targets(_) })
+      case Right(lst) => Right(lst.flatMap(targets))
     }
 
   private def name(table: TableReader, row: TableReader#Row) =
@@ -50,7 +50,7 @@ object SiderealReader extends TargetReader[SiderealTarget] {
   private val emptyMags: Either[String, List[Magnitude]] = Right(Nil)
 
   private def magList(row: TableReader#Row): Either[String, List[Magnitude]] =
-    (emptyMags/:MagnitudeBand.values().toList) {
+    (emptyMags/:MagnitudeBand.all.toList) {
       (res, band) => {
         for {
           lst <- res.right
@@ -61,5 +61,5 @@ object SiderealReader extends TargetReader[SiderealTarget] {
     }
 
   private def cons(omag: Option[Magnitude], osys: Option[MagnitudeSystem], lst: List[Magnitude]): List[Magnitude] =
-    omag map { _.copy(system = osys.getOrElse(VEGA)) :: lst } getOrElse lst
+    omag map { _.copy(system = osys.getOrElse(MagnitudeSystem.default)) :: lst } getOrElse lst
 }

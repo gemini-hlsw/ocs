@@ -7,6 +7,7 @@ import edu.gemini.pit.ui.editor.Institutions
 import edu.gemini.pit.util.PDF
 import edu.gemini.pit.catalog._
 import java.util.Date
+import edu.gemini.spModel.core.MagnitudeBand
 import view.obs.ObsListGrouping
 import edu.gemini.model.p1.visibility.TargetVisibilityCalc
 import edu.gemini.pit.ui.view.tac.TacView
@@ -208,7 +209,7 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
     private val gpiCheck = {
       def gpiMagnitudesPresent(target: SiderealTarget):List[(Severity, String)] = {
         val requiredMagnitudes = "I" :: "Y" :: "J" :: "H" :: "K" :: Nil
-        val obsMagnitudes = target.magnitudes.map(_.band.value)
+        val obsMagnitudes = target.magnitudes.map(_.band)
         if (!requiredMagnitudes.forall(obsMagnitudes.contains)) {
           List((Severity.Error, "The magnitude information in the GPI target component should include the bandpasses I, Y, J, H, and K"))
         } else {
@@ -217,7 +218,7 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
       }
       def gpiIChecks(target: SiderealTarget):List[(Severity.Value, String)] = for {
           m <- target.magnitudes
-          if m.band.value == "I"
+          if m.band == MagnitudeBand.I
           iMag = m.value
           if iMag < 3.0 || iMag > 8.0
           severity = if (iMag <= 1.0 || iMag > 10.0) Severity.Error else Severity.Warning
@@ -232,7 +233,7 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
       def gpiIfsChecks(obsMode: GpiObservingMode, disperser: GpiDisperser, target: SiderealTarget):List[(Severity.Value, String)] = for {
           m <- target.magnitudes
           scienceBand <- GpiObservingMode.scienceBand(obsMode)
-          if scienceBand.startsWith(m.band.value)
+          if scienceBand.startsWith(m.band.name)
           scienceMag = m.value
           disperserLimit = if (disperser.value.equalsIgnoreCase("Prism")) 0.0 else 2.0
           coronographLimit = 0.0 + disperserLimit
@@ -242,7 +243,7 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
 
       def gpiLowfsChecks(obsMode: GpiObservingMode, target: SiderealTarget):List[(Severity.Value, String)] = for {
         m <- target.magnitudes
-        if m.band.value == "H" && GpiObservingMode.isCoronographMode(obsMode)
+        if m.band == MagnitudeBand.H && GpiObservingMode.isCoronographMode(obsMode)
         hMag = m.value
         if hMag < 2.0 || hMag > 10.0
         message = if (hMag < 2.0) {

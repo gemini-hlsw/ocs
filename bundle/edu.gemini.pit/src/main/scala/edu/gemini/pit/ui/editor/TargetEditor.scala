@@ -5,9 +5,6 @@ import com.jgoodies.forms.factories.Borders.DLU4_BORDER
 import edu.gemini.model.p1.immutable._
 import edu.gemini.model.p1.immutable.DegDeg
 import edu.gemini.model.p1.immutable.EphemerisElement
-import edu.gemini.model.p1.immutable.Magnitude
-import edu.gemini.model.p1.immutable.MagnitudeBand
-import edu.gemini.model.p1.immutable.MagnitudeSystem
 import edu.gemini.model.p1.immutable.NonSiderealTarget
 import edu.gemini.model.p1.immutable.ProperMotion
 import edu.gemini.model.p1.immutable.Semester
@@ -19,6 +16,7 @@ import edu.gemini.pit.ui.util.ScrollPanes
 import edu.gemini.pit.ui.util.SelectOnFocus
 import edu.gemini.pit.ui.util.SharedIcons
 import edu.gemini.pit.ui.util.StdModalEditor
+import edu.gemini.spModel.core.{Magnitude, MagnitudeSystem, MagnitudeBand}
 import edu.gemini.ui.gface.GComparator
 import edu.gemini.ui.gface.GSelection
 import edu.gemini.ui.gface.GSelectionBroker
@@ -322,7 +320,7 @@ class TargetEditor private (semester:Semester, target:Target, canEdit:Boolean, i
 
     })
 
-    val magControls = MagnitudeBand.values.map(b => new MagControl(b)).toList
+    val magControls = allowedBands.map(b => new MagControl(b))
 
     // Set of three controls that allow the user to select and edit a Magnitude.
     class MagControl(val band:MagnitudeBand) {
@@ -345,8 +343,8 @@ class TargetEditor private (semester:Semester, target:Target, canEdit:Boolean, i
       }
 
       // The system combo
-      val combo = new ComboBox(MagnitudeSystem.values.toSeq) {
-        val magDefault = MagnitudeSystem.values.toSeq.head
+      val combo = new ComboBox(MagnitudeSystem.all.toSeq) {
+        val magDefault = MagnitudeSystem.all.toSeq.head
         val magSys = mag.map(_.system).getOrElse(magDefault)
         enabled = mag.isDefined && canEdit
         selection.item = magSys
@@ -358,7 +356,7 @@ class TargetEditor private (semester:Semester, target:Target, canEdit:Boolean, i
       // Get the edited magnitude, if any
       def magnitude = check.selected match {
         case false => None
-        case true  => Some(Magnitude(text.text.toFloat, band, combo.selection.item))
+        case true  => Some(new Magnitude(text.text.toFloat, band, combo.selection.item))
       }
 
     }

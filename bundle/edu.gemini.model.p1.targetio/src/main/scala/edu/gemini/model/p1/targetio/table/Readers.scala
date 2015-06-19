@@ -1,8 +1,8 @@
 package edu.gemini.model.p1.targetio.table
 
-import edu.gemini.model.p1.immutable.{Magnitude, DMS, HMS}
-import edu.gemini.model.p1.mutable.MagnitudeSystem._
-import edu.gemini.model.p1.mutable.{MagnitudeSystem, MagnitudeBand}
+import edu.gemini.model.p1.immutable._
+import edu.gemini.model.p1.{mutable => M}
+import edu.gemini.spModel.core.{MagnitudeSystem, MagnitudeBand, Magnitude}
 
 object Readers {
   def readNone[T]: PartialFunction[Any, Option[T]] = {
@@ -54,12 +54,12 @@ object Readers {
 
 
   def readOptionalMagnitude(band: MagnitudeBand): PartialFunction[Any, Option[Magnitude]] =
-    readOptionalDouble andThen { _.map(dbl => Magnitude(dbl, band, VEGA)) }
+    readOptionalDouble andThen { _.map(new Magnitude(_, band)) }
 
   private def matches(name: String, sys: MagnitudeSystem) = sys.name.equalsIgnoreCase(name)
   val readSystem: PartialFunction[Any, MagnitudeSystem] = {
-     case s: String if MagnitudeSystem.values().exists(matches(s, _)) =>
-       MagnitudeSystem.values().find(matches(s, _)).get
+     case s: String if MagnitudeSystem.all.exists(matches(s, _)) =>
+       MagnitudeSystem.all.find(matches(s, _)).get
   }
 
   def readOptionalSystem(band: MagnitudeBand): PartialFunction[Any, Option[MagnitudeSystem]] =

@@ -2,8 +2,7 @@ package edu.gemini.phase2.skeleton.factory
 
 import java.security.Principal
 
-import edu.gemini.model.p1.immutable.{Target, BlueprintBase, TimeAmount, Condition, Observation, Magnitude, SiderealTarget, Proposal}
-import edu.gemini.model.p1.mutable.{MagnitudeSystem, MagnitudeBand }
+import edu.gemini.model.p1.immutable.{Target, BlueprintBase, TimeAmount, Condition, Observation, SiderealTarget, Proposal}
 import edu.gemini.phase2.core.model.SkeletonShell
 import edu.gemini.phase2.core.odb.SkeletonStoreService
 import edu.gemini.phase2.template.factory.api.TemplateFolderExpansionFactory
@@ -11,7 +10,7 @@ import edu.gemini.phase2.template.factory.impl.{TemplateDb, TemplateFactoryImpl}
 import edu.gemini.pot.sp.{ISPTemplateGroup, ISPProgram}
 import edu.gemini.pot.spdb.DBLocalDatabase
 import edu.gemini.shared.skyobject.Magnitude.Band
-import edu.gemini.spModel.core.SPProgramID
+import edu.gemini.spModel.core.{MagnitudeBand, Magnitude, SPProgramID}
 import edu.gemini.spModel.obscomp.SPNote
 import edu.gemini.spModel.target.SPTarget
 import edu.gemini.spModel.obs.SPObservation
@@ -116,7 +115,7 @@ abstract class TemplateSpec(xmlName: String) { this: Specification =>
 
   /** Construct a phase-1 magnitude in the VEGA system. */
   def p1Mag(n: Double, b: MagnitudeBand): Magnitude =
-    Magnitude(n, b, MagnitudeSystem.VEGA)
+    new Magnitude(n, b)
 
   /** Construct an empty phase-1 sidereal target with the given magnitudes. */
   def p1Target(ms: List[Magnitude]): SiderealTarget =

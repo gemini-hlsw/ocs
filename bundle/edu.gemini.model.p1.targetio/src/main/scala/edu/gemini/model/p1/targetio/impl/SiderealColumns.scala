@@ -1,18 +1,18 @@
 package edu.gemini.model.p1.targetio.impl
 
-import edu.gemini.model.p1.immutable.{Magnitude, SiderealTarget}
-import edu.gemini.model.p1.mutable.MagnitudeBand
+import edu.gemini.model.p1.immutable.SiderealTarget
 
 import edu.gemini.model.p1.targetio.table.Readers._
 import edu.gemini.model.p1.targetio.table.Serializers._
 import edu.gemini.model.p1.targetio.table.{Column, StilSerializer}
+import edu.gemini.spModel.core.{MagnitudeBand, Magnitude}
 
-private[targetio] object SiderealColumns {
+private [targetio] object SiderealColumns {
   val NAME   = col("Name",     readString,         _.name)
   val RA     = col("RAJ2000",  readRa,             _.coords.toHmsDms.ra)
   val DEC    = col("DecJ2000", readDec,            _.coords.toHmsDms.dec)
-  val PM_RA  = col("pmRA",     readOptionalDouble, _.properMotion.map(_.deltaRA.toDouble))
-  val PM_DEC = col("pmDec",    readOptionalDouble, _.properMotion.map(_.deltaDec.toDouble))
+  val PM_RA  = col("pmRA",     readOptionalDouble, _.properMotion.map(_.deltaRA))
+  val PM_DEC = col("pmDec",    readOptionalDouble, _.properMotion.map(_.deltaDec))
 
   val REQUIRED: List[Column[SiderealTarget, _]] = List(NAME, RA, DEC)
 

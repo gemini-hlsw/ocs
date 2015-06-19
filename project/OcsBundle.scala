@@ -663,7 +663,9 @@ trait OcsBundle {
     )
 
   lazy val bundle_edu_gemini_model_p1 = 
-    project.in(file("bundle/edu.gemini.model.p1"))
+    project.in(file("bundle/edu.gemini.model.p1")).dependsOn(
+      bundle_edu_gemini_spModel_core
+    )
 
   lazy val bundle_edu_gemini_model_p1_pdf = 
     project.in(file("bundle/edu.gemini.model.p1.pdf")).dependsOn(

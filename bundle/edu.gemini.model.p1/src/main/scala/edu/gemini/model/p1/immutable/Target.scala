@@ -1,6 +1,7 @@
 package edu.gemini.model.p1.immutable
 
 import edu.gemini.model.p1.{ mutable => M }
+import edu.gemini.spModel.core.Magnitude
 
 import scala.collection.JavaConverters._
 import scalaz._
@@ -61,8 +62,6 @@ case class TooTarget private (uuid:UUID, name: String) extends Target {
 
 object SiderealTarget extends UuidCache[M.SiderealTarget] {
 
-  import Target._
-
   def empty = apply(UUID.randomUUID(), "Untitled", Coordinates.empty, CoordinatesEpoch.J_2000, None, List.empty)
 
   def apply(m: M.SiderealTarget): SiderealTarget =
@@ -72,7 +71,7 @@ object SiderealTarget extends UuidCache[M.SiderealTarget] {
     Coordinates(Option(m.getDegDeg).getOrElse(m.getHmsDms)),
     m.getEpoch,
     Option(m.getProperMotion).map(ProperMotion(_)),
-    ~Option(m.getMagnitudes).map(_.getMagnitude.asScala.map(Magnitude(_)).toList))
+    ~Option(m.getMagnitudes).map(_.getMagnitude.asScala.map(m => new Magnitude(m.getValue.doubleValue(), m.getBand.toBand)).toList))
 }
 
 case class SiderealTarget (
@@ -111,7 +110,6 @@ case class SiderealTarget (
 
 object NonSiderealTarget extends UuidCache[M.NonSiderealTarget] {
 
-  import Target._
   def empty = apply(UUID.randomUUID(), "Untitled", List.empty, CoordinatesEpoch.J_2000)
 
   def apply(m: M.NonSiderealTarget): NonSiderealTarget = new NonSiderealTarget(
@@ -156,7 +154,7 @@ case class NonSiderealTarget(
       val factor = (date.doubleValue - a.validAt) / (b.validAt - a.validAt) // between 0 and 1
       def interp(a: Double, b: Double) = a + (b - a) * factor
       Some((a, b, interp))
-    case _ :: es => find(date, es)
+    case _ :: ep => find(date, ep)
     case _       => None
   }
 
