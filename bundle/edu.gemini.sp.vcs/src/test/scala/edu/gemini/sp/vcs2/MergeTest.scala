@@ -5,7 +5,7 @@ import edu.gemini.spModel.obs.ObservationStatus
 
 import java.security.Permission
 
-import edu.gemini.pot.sp.Conflict.{Moved, ResurrectedLocalDelete, ReplacedRemoteDelete}
+import edu.gemini.pot.sp.Conflict.Moved
 import edu.gemini.pot.sp.validator.Validator
 import edu.gemini.pot.sp.version.VersionMap
 import edu.gemini.pot.sp.{DataObjectBlob => DOB, _}
@@ -255,6 +255,38 @@ class MergeTest extends JUnitSuite {
       (start, local, remote, pc) => {
         val delRemoteModLocal = pc.remote.deletedKeys & pc.local.editedKeys
         emptySet(pc, delRemoteModLocal &~ pc.mergeMap.keySet)
+      }
+    ),
+
+    ("resurrected observations must be brought back to life in full with all their descendants",
+      (start, local, remote, pc) => {
+        val delRemoteModLocal = pc.remote.deletedKeys & pc.local.editedKeys
+        val delLocalModRemote = pc.local.deletedKeys & pc.remote.editedKeys
+
+        def matches(merged: Tree[MergeNode], n: ISPNode): Boolean = {
+          val dobMatches = merged.rootLabel match {
+            case Modified(_,_,dob,_,_) => DOB.same(dob, n.getDataObject)
+            case Unmodified(k)         => k == n.key
+          }
+
+          dobMatches && {
+            val mChildren = merged.subForest
+            val nChildren = n.children
+            mChildren.size == nChildren.size && mChildren.zip(nChildren).forall { case (m, n0) => matches(m, n0) }
+          }
+        }
+
+        def check(resurrectedNodes: Set[SPNodeKey], lookup: SPNodeKey => ISPNode): Boolean =
+          resurrectedNodes.forall { k =>
+            lookup(k) match {
+              case o: ISPObservation =>
+                val cmp = pc.correctedMergePlan.run.run.getOrElse(sys.error("Couldn't run merge plan"))
+                cmp.update.focus(k).exists(loc => matches(loc.tree, o))
+              case _                 => true
+            }
+          }
+
+        check(delRemoteModLocal, pc.local.nodeMap) && check(delLocalModRemote, pc.remote.nodeMap)
       }
     ),
 
@@ -715,7 +747,7 @@ class MergeTest extends JUnitSuite {
         expected == actual
       }
     ),
-  
+
     ("Conflicts are added for conflicting moves",
       (start, local, remote, pc) => {
         val mergeParents = pc.mergePlan.update.foldTree(Map.empty[SPNodeKey, SPNodeKey]) { (p,m) =>
