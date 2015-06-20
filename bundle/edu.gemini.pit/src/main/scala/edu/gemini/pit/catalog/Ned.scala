@@ -30,21 +30,21 @@ class Ned private (val host: String) extends VOTableCatalog {
   def decode(vot: VOTable): Seq[I.Target] = for {
 
     // In the List monad here, eventually iterating rows
-    resource <- vot.resources
+    resource                                <- vot.resources
     table @ Table("NED_MainTable", _, _, _) <- resource.tables
-    row <- table.data.tableData.rows
+    row                                     <- table.data.tableData.rows
     kvs = table.fields.zip(row)
 
     // Local find function
     find = (s: String) => kvs.find(_._1.ucd == Some(s)).map(_._2)
 
     // Switch to Option here to pull out data
-    epoch <- vot.definitions.map(_.cooSys.id) collect {
-      case "J2000" => M.CoordinatesEpoch.J_2000
-    }
-    name <- find("meta.id;meta.main")
-    ra <- find("pos.eq.ra;meta.main").flatMap(_.toDoubleOption)
-    dec <- find("pos.eq.dec;meta.main").flatMap(_.toDoubleOption)
+    epoch                                   <- vot.definitions.map(_.cooSys.id) collect {
+                                                case "J2000" => M.CoordinatesEpoch.J_2000
+                                              }
+    name                                    <- find("meta.id;meta.main")
+    ra                                      <- find("pos.eq.ra;meta.main").flatMap(_.toDoubleOption)
+    dec                                     <- find("pos.eq.dec;meta.main").flatMap(_.toDoubleOption)
 
   } yield I.SiderealTarget(UUID.randomUUID(), name, I.DegDeg(ra, dec), epoch, None, List())
 

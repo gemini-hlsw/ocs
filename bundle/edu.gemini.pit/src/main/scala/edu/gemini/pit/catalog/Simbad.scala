@@ -33,43 +33,43 @@ class Simbad private (val host:String) extends VOTableCatalog {
 
   def decode(vot:VOTable):Seq[I.Target] = for {
 
-  // In the List monad here, eventually iterating rows
-    resource <- vot.resources
-    table@Table("simbad", _, _, _) <- resource.tables
-    row <- table.data.tableData.rows
+    // In the List monad here, eventually iterating rows
+    resource                         <- vot.resources
+    table @ Table("simbad", _, _, _) <- resource.tables
+    row                              <- table.data.tableData.rows
     kvs = table.fields.zip(row)
 
     // Local find function
-    str = (s:String) => kvs.find(_._1.ucd.exists(_.toLowerCase == s.toLowerCase)).map(_._2)
-    num = (s:String) => str(s).flatMap(_.toDoubleOption)
+    str                                = (s:String) => kvs.find(_._1.ucd.exists(_.toLowerCase == s.toLowerCase)).map(_._2)
+    num                                = (s:String) => str(s).flatMap(_.toDoubleOption)
 
     // Switch to Option here to pull out data
-    epoch <- vot.definitions.map(_.cooSys.epoch).map {
-      case "J2000" => I.CoordinatesEpoch.J_2000
-      case s       => I.CoordinatesEpoch.forName(s)
-    }
-    name <- str("meta.id;meta.main")
-    ra <- num("pos.eq.ra;meta.main")
-    dec <- num("pos.eq.dec;meta.main")
+    epoch                             <- vot.definitions.map(_.cooSys.epoch).map {
+                                          case "J2000" => I.CoordinatesEpoch.J_2000
+                                          case s       => I.CoordinatesEpoch.forName(s)
+                                        }
+    name                              <- str("meta.id;meta.main")
+    ra                                <- num("pos.eq.ra;meta.main")
+    dec                               <- num("pos.eq.dec;meta.main")
 
     // Mags get pulled out into a list
-    mags = for {
-      (k, Some(v)) <- Map(
-        MagnitudeBand.U -> num("phot.mag;em.opt.U"),
-        MagnitudeBand.V -> num("phot.mag;em.opt.V"),
-        MagnitudeBand.B -> num("phot.mag;em.opt.B"),
-        MagnitudeBand.R -> num("phot.mag;em.opt.R"),
-        MagnitudeBand.J -> num("phot.mag;em.ir.J"),
-        MagnitudeBand.H -> num("phot.mag;em.ir.H"),
-        MagnitudeBand.K -> num("phot.mag;em.ir.K"))
-    // TODO: more passbands
-    } yield new Magnitude(v, k, MagnitudeSystem.VEGA) // TODO
+    mags                               = for {
+                                            (k, Some(v)) <- Map(
+                                              MagnitudeBand.U -> num("phot.mag;em.opt.U"),
+                                              MagnitudeBand.V -> num("phot.mag;em.opt.V"),
+                                              MagnitudeBand.B -> num("phot.mag;em.opt.B"),
+                                              MagnitudeBand.R -> num("phot.mag;em.opt.R"),
+                                              MagnitudeBand.J -> num("phot.mag;em.ir.J"),
+                                              MagnitudeBand.H -> num("phot.mag;em.ir.H"),
+                                              MagnitudeBand.K -> num("phot.mag;em.ir.K"))
+                                              // TODO: more passbands
+                                          } yield new Magnitude(v, k, MagnitudeSystem.VEGA)
 
     // Proper Motion
-    pm = for {
-      dRa <- num("pos.pm;pos.eq.ra")
-      dDec <- num("pos.pm;pos.eq.dec")
-    } yield I.ProperMotion(dRa, dDec) // TODO: are these correct?
+    pm                                = for {
+                                          dRa  <- num("pos.pm;pos.eq.ra")
+                                          dDec <- num("pos.pm;pos.eq.dec")
+                                        } yield I.ProperMotion(dRa, dDec) // TODO: are these correct?
 
   } yield I.SiderealTarget(UUID.randomUUID(), cleanName(name), I.DegDeg(ra, dec), epoch, pm, mags.toList)
 

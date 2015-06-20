@@ -315,7 +315,7 @@ class TargetEditor private (semester:Semester, target:Target, canEdit:Boolean, i
 
       // Add a set of three controls for each magnitude band.
       magControls.foreach {mc =>
-        addRow(mc.check, mc.text, mc.combo)
+        addRow(mc.check, mc.text, mc.system)
       }
 
     })
@@ -343,7 +343,7 @@ class TargetEditor private (semester:Semester, target:Target, canEdit:Boolean, i
       }
 
       // The system combo
-      val combo = new ComboBox(MagnitudeSystem.all.toSeq) {
+      val system = new ComboBox(MagnitudeSystem.all.toSeq) {
         val magDefault = band.defaultSystem
         val magSys = mag.map(_.system).getOrElse(magDefault)
         enabled = mag.isDefined && canEdit
@@ -356,7 +356,7 @@ class TargetEditor private (semester:Semester, target:Target, canEdit:Boolean, i
       // Get the edited magnitude, if any
       def magnitude = check.selected match {
         case false => None
-        case true  => Some(new Magnitude(text.text.toFloat, band, combo.selection.item))
+        case true  => Some(new Magnitude(text.text.toFloat, band, system.selection.item))
       }
 
     }
