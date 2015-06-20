@@ -328,7 +328,7 @@ class TargetEditor private (semester:Semester, target:Target, canEdit:Boolean, i
       private val mag = sidereal.magnitudes.find(_.band == band)
 
       // The checkbox
-      val check = new CheckBox(band.toString) {
+      val check = new CheckBox(band.name) {
         selected = mag.isDefined
         enabled = canEdit
       }
@@ -344,7 +344,7 @@ class TargetEditor private (semester:Semester, target:Target, canEdit:Boolean, i
 
       // The system combo
       val combo = new ComboBox(MagnitudeSystem.all.toSeq) {
-        val magDefault = MagnitudeSystem.all.toSeq.head
+        val magDefault = band.defaultSystem
         val magSys = mag.map(_.system).getOrElse(magDefault)
         enabled = mag.isDefined && canEdit
         selection.item = magSys

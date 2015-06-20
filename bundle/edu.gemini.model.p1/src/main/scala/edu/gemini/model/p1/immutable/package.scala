@@ -351,6 +351,11 @@ package object immutable {
 
   // Bands that are on the phase1 model
   val allowedBands = List(
+    MagnitudeBand._u,
+    MagnitudeBand._g,
+    MagnitudeBand._r,
+    MagnitudeBand._i,
+    MagnitudeBand._z,
     MagnitudeBand.U,
     MagnitudeBand.B,
     MagnitudeBand.V,
@@ -368,6 +373,11 @@ package object immutable {
 
   implicit class MagnitudeBandOps(val band: MagnitudeBand) extends AnyVal {
     def mutable: M.MagnitudeBand = band match {
+      case MagnitudeBand._u => M.MagnitudeBand._u
+      case MagnitudeBand._g => M.MagnitudeBand._g
+      case MagnitudeBand._r => M.MagnitudeBand._r
+      case MagnitudeBand._i => M.MagnitudeBand._i
+      case MagnitudeBand._z => M.MagnitudeBand._z
       case MagnitudeBand.U  => M.MagnitudeBand.U
       case MagnitudeBand.B  => M.MagnitudeBand.B
       case MagnitudeBand.V  => M.MagnitudeBand.V
@@ -396,6 +406,11 @@ package object immutable {
 
   implicit class MutableMagnitudeBandOps(val band: M.MagnitudeBand) extends AnyVal {
     def toBand: MagnitudeBand = band match {
+      case M.MagnitudeBand._u => MagnitudeBand._u
+      case M.MagnitudeBand._g => MagnitudeBand._g
+      case M.MagnitudeBand._r => MagnitudeBand._r
+      case M.MagnitudeBand._i => MagnitudeBand._i
+      case M.MagnitudeBand._z => MagnitudeBand._z
       case M.MagnitudeBand.U  => MagnitudeBand.U
       case M.MagnitudeBand.B  => MagnitudeBand.B
       case M.MagnitudeBand.V  => MagnitudeBand.V
