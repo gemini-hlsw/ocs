@@ -46,13 +46,13 @@ object VcsSyncDialog {
 
   // Make a multi-line label by doctoring a JTextArea until it works more or
   // less like a text label.
-  private def makeNote(rows: Int, cols: Int, text: String): TextArea =
+  private def makeNote(rows: Int, cols: Int, text0: String): TextArea =
     new TextArea(rows, cols) {
       editable = false
       opaque   = false
       lineWrap = true
       wordWrap = true
-      text     = text
+      text     = text0
       peer.setHighlighter(null)
     }
 
@@ -73,7 +73,7 @@ class VcsSyncDialog(pid: SPProgramID, client: VcsOtClient, comp: Option[Componen
 
   object statusIcon extends Label { icon = Resources.getIcon("spinner16.gif") }
 
-  val statusMsg = makeNote(1, 35, "")
+  val statusMsg = makeNote(1, 35, s"Synchronizing $pid ...")
 
   object resolveButton extends Button("Accept All Remote") {
     visible = false
