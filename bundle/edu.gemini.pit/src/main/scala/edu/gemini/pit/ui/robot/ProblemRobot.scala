@@ -331,18 +331,17 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
       )
 
     private lazy val badVisibility = for {
-      o @ Observation(Some(_), Some(_), Some(_), Some(_), _) <- p.observations
-      v <- if (p.proposalClass.isSpecial) TargetVisibilityCalc.getOnDec(p.semester, o) else TargetVisibilityCalc.get(p.semester, o)
+      o @ Observation(Some(_), Some(_), Some(t), Some(_), _) <- p.observations
+      v                                                      <- if (p.proposalClass.isSpecial) TargetVisibilityCalc.getOnDec(p.semester, o) else TargetVisibilityCalc.get(p.semester, o)
       if v == TargetVisibility.Bad
     } yield new Problem(Severity.Error,
-        visibilityMessage("Target is inaccessible at %s during %s.  Consider an alternative.", p.semester, o),
+        visibilityMessage("Target is inaccessible at %s during %s. Consider an alternative.", p.semester, o),
         "Observations",
         indicateObservation(o))
 
-
     private lazy val iffyVisibility = for {
       o @ Observation(Some(_), Some(_), Some(_), Some(_), _) <- p.observations
-      v <- if (p.proposalClass.isSpecial) TargetVisibilityCalc.getOnDec(p.semester, o) else TargetVisibilityCalc.get(p.semester, o)
+      v                                                      <- if (p.proposalClass.isSpecial) TargetVisibilityCalc.getOnDec(p.semester, o) else TargetVisibilityCalc.get(p.semester, o)
       if v == TargetVisibility.Limited
     } yield new Problem(Severity.Warning,
         visibilityMessage("Target has limited visibility at %s during %s.", p.semester, o),
