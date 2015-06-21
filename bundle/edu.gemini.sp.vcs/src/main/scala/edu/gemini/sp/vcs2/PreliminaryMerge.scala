@@ -17,7 +17,7 @@ object PreliminaryMerge {
 
   def merge(mc: MergeContext): TryVcs[MergePlan] =
     tree(mc).map { t =>
-      val mergedKeys  = t.foldRight(Set.empty[SPNodeKey]) { (mn, s) => s + mn.key }
+      val mergedKeys  = t.sFoldRight(Set.empty[SPNodeKey]) { (mn, s) => s + mn.key }
       val allKeys     = mc.remote.diffMap.keySet ++ mc.remote.plan.delete.map(_.key)
       val deletedKeys = allKeys &~ mergedKeys
       val allMissing  = deletedKeys.map { k => Missing(k, mc.local.version(k).sync(mc.remote.version(k))) }

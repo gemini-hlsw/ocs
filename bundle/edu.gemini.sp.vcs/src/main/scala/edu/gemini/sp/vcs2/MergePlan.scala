@@ -42,7 +42,7 @@ case class MergePlan(update: Tree[MergeNode], delete: Set[Missing]) {
   def vm(vm0: VersionMap): VersionMap = {
     // Extract the updates to the VersionMap from the MergePlan.
     val vmUpdates: VersionMap = {
-      val vm0 = update.foldRight(Map.empty[SPNodeKey, NodeVersions]) { (mn, m) =>
+      val vm0 = update.sFoldRight(Map.empty[SPNodeKey, NodeVersions]) { (mn, m) =>
         mn match {
           case Modified(k, nv, _, _, _) => m.updated(k, nv)
           case _                        => m

@@ -79,8 +79,11 @@ object MergeNode {
 
   implicit class TreeOps[A](t: Tree[A]) {
     /** A `foldRight` with strict evaluation of the `B` value of `f`. */
-    def sFoldRight[B](z: => B)(f: (A, B) => B): B =
-      t.foldRight(z) { (a, b) => f(a,b) }
+    def sFoldRight[B](z: B)(f: (A, B) => B): B =
+      foldTree(z)((t0, b) => f(t0.rootLabel, b))
+
+    // more problems with foldRight.  throws stack overflow for giant programs
+//      t.foldRight(z) { (a, b) => f(a,b) }
 
     // TODO: what's the proper way to do this?
     /** A fold that provides access to the children. */
