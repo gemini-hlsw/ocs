@@ -32,7 +32,7 @@ class SynchronousLookup2 private (targetName:String) extends ModalEditor[Target]
   val m = (Model.proposal andThen Proposal.targets).set(Model.empty, List(t))
 
   // Order here is significant
-  handler.reset
+  handler.reset()
   handler.bind(Some(m), done)
   handler.lookup(t)
 
@@ -68,9 +68,8 @@ class SynchronousLookup2 private (targetName:String) extends ModalEditor[Target]
   }
 
   def listener(state:CatalogRobot#State) {
-    state.headOption.map {
-      case (t, s) => s match {
-
+    state.headOption.foreach {
+      case (_, s) => s match {
         case Some(f) =>
           Contents.msg.text = f match {
             case Offline     => "Server(s) offline."
@@ -79,12 +78,10 @@ class SynchronousLookup2 private (targetName:String) extends ModalEditor[Target]
           }
           Contents.msg.foreground = Color.RED
           Contents.spinner.visible = false
-
         case None =>
           Contents.msg.foreground = Color.BLACK
           Contents.msg.text = "Searching..."
           Contents.spinner.visible = true
-
       }
     }
   }

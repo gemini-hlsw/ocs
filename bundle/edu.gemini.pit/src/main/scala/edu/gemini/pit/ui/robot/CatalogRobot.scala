@@ -3,7 +3,6 @@ package edu.gemini.pit.ui.robot
 import edu.gemini.model.p1.immutable._
 import edu.gemini.pit.ui.util.{BooleanToolPreference, PreferenceManager}
 import edu.gemini.pit.catalog._
-import edu.gemini.pit.catalog._
 import BooleanToolPreference.{SIMBAD, NED, HORIZONS}
 import java.awt.Component
 import javax.swing.JOptionPane
@@ -26,7 +25,7 @@ class CatalogRobot(parent: Component) extends Robot {
   def lookup(t: Target) {
     checkThread()
     if (t.isEmpty && !state.contains(t)) {
-      logger.info("Performing catalog lookup for '%s'".format(t.name))
+      logger.info(s"Performing catalog lookup for '${t.name}'")
       catalog.find(t.name)(callback(t))
     }
   }
@@ -37,7 +36,7 @@ class CatalogRobot(parent: Component) extends Robot {
       // Take the opportunity to remove state for targets that are no longer part of the model.
       // This won't amount to a big leak but we might as well clean it up.
       val ts = targetLens.get(m)
-      state = state -- (state.keys.filterNot(ts.contains))
+      state = state -- state.keys.filterNot(ts.contains)
 
     }
   }
@@ -75,7 +74,6 @@ class CatalogRobot(parent: Component) extends Robot {
           // Several choices. Let the user select one.
           case Success(ts, choices) => disambiguate(semesterLens.get(m), t.name, ts, choices) match {
             case None =>
-
               // User selected cancel. Remove t wherever it occurs. Note that the model might have
               // changed so be sure to fetch it again rather than using the outer 'm'
               model.foreach {
@@ -84,20 +82,16 @@ class CatalogRobot(parent: Component) extends Robot {
                   model = Some(targetLens.set(m, ts.filterNot(_ == t)))
               }
 
-            case Some(Left(t0)) =>
-
+            case Some(Left(t0))     =>
               // User selected one item, so pass it to our handler above
               callback(t)(Success(List(t0), Nil))
 
             case Some(Right(retry)) =>
-
               // User selected a retry option, so evaluate it
               retry(callback(t))
-
           }
 
           case fail: Failure =>
-
             // Record the failure, and we're done
             state = state + (t -> Some(fail))
 
@@ -108,15 +102,15 @@ class CatalogRobot(parent: Component) extends Robot {
 
   // Because copy isn't polymorphic
   private def rename(t: Target, newName: String) = t match {
-    case t: TooTarget => t.copy(name = newName)
-    case t: SiderealTarget => t.copy(name = newName)
+    case t: TooTarget         => t.copy(name = newName)
+    case t: SiderealTarget    => t.copy(name = newName)
     case t: NonSiderealTarget => t.copy(name = newName)
   }
 
   // Because copy isn't polymorphic
   private def withUuid(t: Target, uuid: UUID) = t match {
-    case t: TooTarget => t.copy(uuid = uuid)
-    case t: SiderealTarget => t.copy(uuid = uuid)
+    case t: TooTarget         => t.copy(uuid = uuid)
+    case t: SiderealTarget    => t.copy(uuid = uuid)
     case t: NonSiderealTarget => t.copy(uuid = uuid)
   }
 
@@ -126,9 +120,9 @@ class CatalogRobot(parent: Component) extends Robot {
 
     implicit object Ord extends Ordering[E] {
       def compare(a0: E, b0: E): Int = (a0, b0) match {
-        case (Left(a), Left(b)) => a.name.compareTo(b.name)
-        case (Right(a), Left(b)) => a.name.compareTo(b.name)
-        case (Left(a), Right(b)) => a.name.compareTo(b.name)
+        case (Left(a), Left(b))   => a.name.compareTo(b.name)
+        case (Right(a), Left(b))  => a.name.compareTo(b.name)
+        case (Left(a), Right(b))  => a.name.compareTo(b.name)
         case (Right(a), Right(b)) => a.name.compareTo(b.name)
       }
     }
@@ -138,14 +132,14 @@ class CatalogRobot(parent: Component) extends Robot {
 
         case Left(target: SiderealTarget) =>
           target.coords(sem.midPoint).map(_.toDegDeg) match {
-            case Some(dd) => "%s (%s, %s) %s".format(target.name, dd.ra, dd.dec, target.magnitudes.map(_.band).mkString(" "))
-            case None => "%s (--, --) %s".format(target.name, target.magnitudes.map(_.band).mkString(" "))
+            case Some(dd) => s"${target.name} (${dd.ra}, ${dd.dec}) ${target.magnitudes.map(_.band).mkString(" ")}"
+            case None     => s"${target.name} (--, --) ${target.magnitudes.map(_.band).mkString(" ")}"
           }
 
         case Left(target: NonSiderealTarget) =>
           target.coords(sem.midPoint).map(_.toDegDeg) match {
-            case Some(dd) => "%s (%s, %s)".format(target.name, dd.ra, dd.dec)
-            case None => "%s (--, --)".format(target.name)
+            case Some(dd) => s"${target.name} (${dd.ra}, ${dd.dec})"
+            case None     => s"${target.name} (--, --)"
           }
 
         case Left(target: TooTarget) => "???" // can't happen
@@ -157,16 +151,18 @@ class CatalogRobot(parent: Component) extends Robot {
 
     val all: Seq[E] = ts.map(Left(_): E) ++ cs.map(Right(_): E)
 
-    val pts = all.sorted.map(PickerTarget(_))
+    val pts = all.sorted.map(PickerTarget)
 
     Option(JOptionPane.showInputDialog(
       parent,
-      "Your search for \"%s\" yielded several possible targets.\nPlease select the one you intended:".format(name),
+      s"""Your search for "$name" yielded several possible targets.\nPlease select the one you intended:""",
       "Multiple Targets Found",
       JOptionPane.QUESTION_MESSAGE,
       null,
       pts.toArray,
-      pts(0))).map(_.asInstanceOf[PickerTarget]).map(_.item)
+      pts.head)).collect {
+        case pt: PickerTarget => pt.item
+      }
   }
 
 }

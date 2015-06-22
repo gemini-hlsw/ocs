@@ -220,6 +220,51 @@
     -->
     <xsd:simpleType name="MagnitudeBand">
         <xsd:restriction base="xsd:token">
+            <xsd:enumeration value="u">
+                <xsd:annotation>
+                    <xsd:appinfo>
+                        <desc>UV</desc>
+                        <nm>365</nm>
+                    </xsd:appinfo>
+                </xsd:annotation>
+            </xsd:enumeration>
+
+            <xsd:enumeration value="g">
+                <xsd:annotation>
+                    <xsd:appinfo>
+                        <desc>green</desc>
+                        <nm>483</nm>
+                    </xsd:appinfo>
+                </xsd:annotation>
+            </xsd:enumeration>
+
+            <xsd:enumeration value="r">
+                <xsd:annotation>
+                    <xsd:appinfo>
+                        <desc>red</desc>
+                        <nm>626</nm>
+                    </xsd:appinfo>
+                </xsd:annotation>
+            </xsd:enumeration>
+
+            <xsd:enumeration value="i">
+                <xsd:annotation>
+                    <xsd:appinfo>
+                        <desc>far red</desc>
+                        <nm>767</nm>
+                    </xsd:appinfo>
+                </xsd:annotation>
+            </xsd:enumeration>
+
+            <xsd:enumeration value="z">
+                <xsd:annotation>
+                    <xsd:appinfo>
+                        <desc>near infrared</desc>
+                        <nm>910</nm>
+                    </xsd:appinfo>
+                </xsd:annotation>
+            </xsd:enumeration>
+
             <xsd:enumeration value="U">
                 <xsd:annotation>
                     <xsd:appinfo>

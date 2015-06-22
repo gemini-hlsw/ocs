@@ -26,7 +26,7 @@ trait VOTableCatalog extends Catalog {
         // Parse the URL data into a VOTable
         val vot = VOTable(conn.getInputStream)
         val ts = decode(vot)
-        if (!ts.isEmpty) f(Success(ts.toList, Nil)) else f(NotFound(id))
+        if (ts.nonEmpty) f(Success(ts.toList, Nil)) else f(NotFound(id))
 
       } catch {
         case e:IOException =>

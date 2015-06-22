@@ -1,0 +1,29 @@
+<jxb:bindings version="2.0"
+              xmlns:jxb="http://java.sun.com/xml/ns/jaxb"
+              xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+
+    <!-- Custom bindings for magnitude bands, special cases for SDSS bands-->
+    <jxb:bindings schemaLocation="../xsd/Target.xsd" node="/xsd:schema">
+
+        <!-- SDSS Bands need a special mapping, otherwise they collide with the bands with a capital letter -->
+        <jxb:bindings node="./xsd:simpleType[@name='MagnitudeBand']/xsd:restriction">
+            <jxb:bindings node="./xsd:enumeration[@value='u']">
+                <jxb:typesafeEnumMember name="_u"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='g']">
+                <jxb:typesafeEnumMember name="_g"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='r']">
+                <jxb:typesafeEnumMember name="_r"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='i']">
+                <jxb:typesafeEnumMember name="_i"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='z']">
+                <jxb:typesafeEnumMember name="_z"/>
+            </jxb:bindings>
+        </jxb:bindings>
+
+    </jxb:bindings>
+
+</jxb:bindings>

@@ -16,7 +16,7 @@ object TargetExporter {
   def isExportable(target: Target) = ExportType(target).isDefined
 
   def open(parent: UIElement, targets: List[Target]) {
-    (new TargetExporter(parent, targets)).open()
+    new TargetExporter(parent, targets).open()
   }
 
   sealed trait ExportType {
@@ -42,7 +42,7 @@ object TargetExporter {
     }
 
     def options(ts: List[Target]): Set[ExportType] =
-      (for { Some(et) <- ts.map(apply(_)) } yield et).toSet
+      (for { Some(et) <- ts.map(apply) } yield et).toSet
   }
 
   case class ExportPreferences(exportType: ExportType, fileType: FileType)
