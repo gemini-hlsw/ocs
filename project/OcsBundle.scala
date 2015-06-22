@@ -357,20 +357,6 @@ trait OcsBundle {
       bundle_edu_gemini_util_osgi
     )
 
-  lazy val bundle_edu_gemini_sp_vcs_tui = 
-    project.in(file("bundle/edu.gemini.sp.vcs.tui")).dependsOn(
-      bundle_edu_gemini_pot,
-      bundle_edu_gemini_shared_util,
-      bundle_edu_gemini_sp_vcs,
-      bundle_edu_gemini_sp_vcs_log,
-      bundle_edu_gemini_sp_vcs_reg,
-      bundle_edu_gemini_spModel_core,
-      bundle_edu_gemini_spModel_pio,
-      bundle_edu_gemini_util_osgi,
-      bundle_edu_gemini_util_security,
-      bundle_edu_gemini_util_trpc
-    )
-
   lazy val bundle_edu_gemini_spModel_core = 
     project.in(file("bundle/edu.gemini.spModel.core")).dependsOn(
     )
