@@ -25,7 +25,7 @@ class CatalogRobot(parent: Component) extends Robot {
   def lookup(t: Target) {
     checkThread()
     if (t.isEmpty && !state.contains(t)) {
-      logger.info("Performing catalog lookup for '%s'".format(t.name))
+      logger.info(s"Performing catalog lookup for '${t.name}'")
       catalog.find(t.name)(callback(t))
     }
   }
@@ -89,7 +89,6 @@ class CatalogRobot(parent: Component) extends Robot {
             case Some(Right(retry)) =>
               // User selected a retry option, so evaluate it
               retry(callback(t))
-
           }
 
           case fail: Failure =>
@@ -133,14 +132,14 @@ class CatalogRobot(parent: Component) extends Robot {
 
         case Left(target: SiderealTarget) =>
           target.coords(sem.midPoint).map(_.toDegDeg) match {
-            case Some(dd) => "%s (%s, %s) %s".format(target.name, dd.ra, dd.dec, target.magnitudes.map(_.band).mkString(" "))
-            case None     => "%s (--, --) %s".format(target.name, target.magnitudes.map(_.band).mkString(" "))
+            case Some(dd) => s"${target.name} (${dd.ra}, ${dd.dec}) ${target.magnitudes.map(_.band).mkString(" ")}"
+            case None     => s"${target.name} (--, --) ${target.magnitudes.map(_.band).mkString(" ")}"
           }
 
         case Left(target: NonSiderealTarget) =>
           target.coords(sem.midPoint).map(_.toDegDeg) match {
-            case Some(dd) => "%s (%s, %s)".format(target.name, dd.ra, dd.dec)
-            case None     => "%s (--, --)".format(target.name)
+            case Some(dd) => s"${target.name} (${dd.ra}, ${dd.dec})"
+            case None     => s"${target.name} (--, --)"
           }
 
         case Left(target: TooTarget) => "???" // can't happen
@@ -156,12 +155,14 @@ class CatalogRobot(parent: Component) extends Robot {
 
     Option(JOptionPane.showInputDialog(
       parent,
-      "Your search for \"%s\" yielded several possible targets.\nPlease select the one you intended:".format(name),
+      s"""Your search for "$name" yielded several possible targets.\nPlease select the one you intended:""",
       "Multiple Targets Found",
       JOptionPane.QUESTION_MESSAGE,
       null,
       pts.toArray,
-      pts.head)).map(_.asInstanceOf[PickerTarget]).map(_.item)
+      pts.head)).collect {
+        case pt: PickerTarget => pt.item
+      }
   }
 
 }

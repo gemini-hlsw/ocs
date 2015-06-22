@@ -29,7 +29,7 @@ object Simbad extends Catalog with App {
 
 class Simbad private (val host:String) extends VOTableCatalog {
 
-  def url(id:String) = new URL("http://%s/simbad/sim-id?output.format=VOTABLE&Ident=%s".format(host, urlencode(id, "UTF-8")))
+  def url(id:String) = new URL(s"http://$host/simbad/sim-id?output.format=VOTABLE&Ident=${urlencode(id, "UTF-8")}")
 
   def decode(vot:VOTable):Seq[I.Target] = for {
 
