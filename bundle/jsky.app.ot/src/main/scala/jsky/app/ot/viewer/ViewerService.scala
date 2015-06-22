@@ -1,20 +1,22 @@
 package jsky.app.ot.viewer
 
 import edu.gemini.pot.sp.{ISPProgram, ISPObservation, SPObservationID}
-import edu.gemini.pot.spdb.{ProgramSummoner, IDBDatabaseService}
+import edu.gemini.pot.spdb.IDBDatabaseService
 import edu.gemini.sp.vcs.reg.VcsRegistrar
-import edu.gemini.sp.vcs.{OldVcsFailure, VcsServer, VersionControlSystem}
+import edu.gemini.sp.vcs2.VcsFailure
+import edu.gemini.sp.vcs2.VcsAction._
 import edu.gemini.spModel.core.SPProgramID
-import edu.gemini.util.trpc.client.TrpcClient
 
 import jsky.app.ot.plugin.OtViewerService
 import jsky.app.ot.userprefs.observer.ObservingPeer
+import jsky.app.ot.vcs2.VcsOtClient
+
+import java.util.concurrent.atomic.AtomicBoolean
 
 import scala.collection.JavaConverters._
 
 import scalaz._
 import Scalaz._
-import jsky.app.ot.OT
 
 object ViewerService {
   var instance: Option[ViewerService] = None
@@ -50,20 +52,16 @@ class ViewerService(localOdb: IDBDatabaseService, reg: VcsRegistrar) extends OtV
    * local ODB or from the remote ODB associated with the id.  Performs a
    * checkout of the program into the local ODB if necessary.
    */
-  def load(pid: SPProgramID): \/[OldVcsFailure, ISPProgram] = {
-    def notFound     = OldVcsFailure.SummonFailure(ProgramSummoner.IdNotFound(pid))
+  def load(pid: SPProgramID): \/[VcsFailure, ISPProgram] = {
+    def notFound     = VcsFailure.NotFound(pid)
     def localProgram = Option(localOdb.lookupProgramByID(pid)).\/>(notFound)
     def peer         = (reg.registration(pid) orElse ObservingPeer.get).\/>(notFound)
 
-    // Sorry for the hoop-jumping.  Going from Validation to \/ complicates it
-    def checkoutProgram = peer.flatMap { p =>
-      TrpcClient(p).withKeyChain(OT.getKeyChain) { r =>
-        val res = VersionControlSystem(localOdb, r[VcsServer]).checkout(pid)
-        // perform the side-effect or registering this result in the vcs reg ...
-        res.foreach { _ => reg.register(pid, p) }
-        res
-      }.fold(ex => OldVcsFailure.OldVcsException(ex).left[ISPProgram], identity)
-    }
+    def checkoutProgram = for {
+      p <- peer
+      c <- VcsOtClient.ref.\/>(VcsFailure.Unexpected("Application error, OT not initialized for VCS"))
+      r <- c.checkout(pid, p, new AtomicBoolean(false)).unsafeRun
+    } yield r
 
     localProgram ||| checkoutProgram
   }
@@ -73,7 +71,7 @@ class ViewerService(localOdb: IDBDatabaseService, reg: VcsRegistrar) extends OtV
    * (checking it out if necessary) and then finds the observation inside of
    * that program (if defined).
    */
-  def load(oid: SPObservationID): \/[OldVcsFailure, Option[ISPObservation]] =
+  def load(oid: SPObservationID): \/[VcsFailure, Option[ISPObservation]] =
     load(oid.getProgramID).rightMap { p =>
       p.getAllObservations.asScala.find(_.getObservationID == oid)
     }
@@ -82,7 +80,7 @@ class ViewerService(localOdb: IDBDatabaseService, reg: VcsRegistrar) extends OtV
    * Loads the program associated with the given id, checking it out if
    * necessary, and then shows it in a viewer if successful.
    */
-  def loadAndView(pid: SPProgramID): \/[OldVcsFailure, ISPProgram] = {
+  def loadAndView(pid: SPProgramID): \/[VcsFailure, ISPProgram] = {
     val res = load(pid)
     res.foreach { prog => ViewerManager.open(prog) }
     res
@@ -92,7 +90,7 @@ class ViewerService(localOdb: IDBDatabaseService, reg: VcsRegistrar) extends OtV
    * Loads the program associated with the given observation id, checking it
    * out if necessary, and then shows the given observation in a viewer.
    */
-  def loadAndView(oid: SPObservationID): \/[OldVcsFailure, Option[ISPObservation]] = {
+  def loadAndView(oid: SPObservationID): \/[VcsFailure, Option[ISPObservation]] = {
     val res = load(oid)
     res.foreach { _.foreach { obs => ViewerManager.open(obs) } }
     res
