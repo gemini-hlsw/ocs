@@ -42,6 +42,9 @@ class Simbad private (val host:String) extends VOTableCatalog {
     // Local find function
     str                               = (s:String) => kvs.find(_._1.ucd.exists(_.toLowerCase == s.toLowerCase)).map(_._2)
     num                               = (s:String) => str(s).flatMap(_.toDoubleOption)
+    // Find magnitudes checking ucd and field name
+    magStr                            = (b: String, s:String) => kvs.find(i => i._1.ucd.exists(_.toLowerCase == s.toLowerCase) && i._1.id.endsWith(b)).map(_._2)
+    magNum                            = (b: MagnitudeBand, s:String) => magStr(b.name, s).flatMap(_.toDoubleOption)
 
     // Switch to Option here to pull out data
     epoch                            <- vot.definitions.map(_.cooSys.epoch).map {
@@ -55,14 +58,18 @@ class Simbad private (val host:String) extends VOTableCatalog {
     // Mags get pulled out into a list
     mags                              = for {
                                            (k, Some(v)) <- Map(
-                                             MagnitudeBand.U -> num("phot.mag;em.opt.U"),
-                                             MagnitudeBand.V -> num("phot.mag;em.opt.V"),
-                                             MagnitudeBand.B -> num("phot.mag;em.opt.B"),
-                                             MagnitudeBand.R -> num("phot.mag;em.opt.R"),
-                                             MagnitudeBand.J -> num("phot.mag;em.ir.J"),
-                                             MagnitudeBand.H -> num("phot.mag;em.ir.H"),
-                                             MagnitudeBand.K -> num("phot.mag;em.ir.K"))
-                                            // TODO: more passbands
+                                             MagnitudeBand._u -> magNum(MagnitudeBand._u, "phot.mag;em.opt.U"),
+                                             MagnitudeBand._g -> magNum(MagnitudeBand._g, "phot.mag;em.opt.B"),
+                                             MagnitudeBand._r -> magNum(MagnitudeBand._r, "phot.mag;em.opt.R"),
+                                             MagnitudeBand._i -> magNum(MagnitudeBand._i, "phot.mag;em.opt.I"),
+                                             MagnitudeBand._z -> magNum(MagnitudeBand._z, "phot.mag;em.opt.I"),
+                                             MagnitudeBand.U  -> magNum(MagnitudeBand.U, "phot.mag;em.opt.U"),
+                                             MagnitudeBand.V  -> magNum(MagnitudeBand.V, "phot.mag;em.opt.V"),
+                                             MagnitudeBand.B  -> magNum(MagnitudeBand.B, "phot.mag;em.opt.B"),
+                                             MagnitudeBand.R  -> magNum(MagnitudeBand.R, "phot.mag;em.opt.R"),
+                                             MagnitudeBand.J  -> magNum(MagnitudeBand.J, "phot.mag;em.ir.J"),
+                                             MagnitudeBand.H  -> magNum(MagnitudeBand.H, "phot.mag;em.ir.H"),
+                                             MagnitudeBand.K  -> magNum(MagnitudeBand.K, "phot.mag;em.ir.K"))
                                          } yield new Magnitude(v, k, k.defaultSystem)
 
     // Proper Motion
