@@ -17,7 +17,7 @@ object TargetVisibilityCalc {
       bp     <- obs.blueprint
       target <- obs.target
       coords <- target.coords(sem.midPoint)
-    } yield visibility(Key(sem.half, geminiSite(bp), GuideType(bp)), coords)
+    } yield nonSiderealAdjustment(target, visibility(Key(sem.half, geminiSite(bp), GuideType(bp)), coords))
 
   def getOnDec(sem: Semester, obs: Observation): Option[TargetVisibility] =
     for {
@@ -38,6 +38,14 @@ object TargetVisibilityCalc {
   private def visibility(key: Key, coords: Coordinates): TargetVisibility = {
     val c = coords.toHmsDms
     raVisibility(key, c) & decVisibility(key, c)
+  }
+
+  // REL-2284 For Non sidereal targets, reduce errors into warnings
+  private def nonSiderealAdjustment(target: Target, visibility: TargetVisibility): TargetVisibility = {
+    (target, visibility) match {
+       case (_:NonSiderealTarget, TargetVisibility.Bad) => TargetVisibility.Limited
+       case _                                           => visibility
+     }
   }
 
   private def decVisibility(key: Key, c: HmsDms): TargetVisibility = decMap(key).visibility(c.dec)
