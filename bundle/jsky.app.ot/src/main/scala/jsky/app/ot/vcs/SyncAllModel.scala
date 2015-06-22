@@ -2,8 +2,9 @@ package jsky.app.ot.vcs
 
 import edu.gemini.pot.sp.ISPProgram
 import edu.gemini.pot.sp.version.VersionMap
-import edu.gemini.sp.vcs.{OldVcsFailure, ProgramStatus}
-import edu.gemini.sp.vcs.ProgramStatus._
+import edu.gemini.shared.util.VersionComparison
+import edu.gemini.shared.util.VersionComparison.Same
+import edu.gemini.sp.vcs2.VcsFailure
 import edu.gemini.spModel.core.SPProgramID
 
 object SyncAllModel {
@@ -14,21 +15,21 @@ object SyncAllModel {
 
   object State {
     case object ProgramStatusUpdating extends State {
-      def setProgramStatus(ps: ProgramStatus): State =
-        ps match {
-          case UpToDate => InSync
-          case Unknown  => SyncFailed(None)
-          case _        => PendingSync(ps)
+      def setVersionComparison(vc: Option[VersionComparison]): State =
+        vc match {
+          case Some(Same)  => InSync
+          case None        => SyncFailed(None)
+          case Some(other) => PendingSync(other)
         }
     }
 
-    case class PendingSync(ps: ProgramStatus) extends State {
+    case class PendingSync(vc: VersionComparison) extends State {
       override def isPending: Boolean = true
     }
 
-    case class SyncInProgress(ps: ProgramStatus) extends State
+    case class SyncInProgress(vc: VersionComparison) extends State
 
-    case class SyncFailed(t: Option[OldVcsFailure]) extends State {
+    case class SyncFailed(t: Option[VcsFailure]) extends State {
       override def isTerminal: Boolean = true
     }
 
@@ -85,7 +86,7 @@ case class SyncAllModel(programs: Vector[ProgramSync]) {
     updateState(pid) { ss =>
       ss.state match {
         case State.ProgramStatusUpdating =>
-          State.ProgramStatusUpdating.setProgramStatus(ProgramStatus.apply(ss.program.getVersions, remoteVm))
+          State.ProgramStatusUpdating.setVersionComparison(Some(VersionMap.compare(ss.program.getVersions, remoteVm)))
         case _ => ss.state
       }
     }
@@ -98,7 +99,7 @@ case class SyncAllModel(programs: Vector[ProgramSync]) {
       }
     })
 
-  def markSyncFailed(pid: SPProgramID, t: Option[OldVcsFailure]): SyncAllModel =
+  def markSyncFailed(pid: SPProgramID, t: Option[VcsFailure]): SyncAllModel =
     updateState(pid) { _ => State.SyncFailed(t) }
 
   def markSyncConflict(pid: SPProgramID): SyncAllModel =
