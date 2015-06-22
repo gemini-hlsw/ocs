@@ -1,11 +1,9 @@
 package jsky.app.ot.vcs
 
 import edu.gemini.sp.vcs.{TrpcVcsServer, VcsServer}
-import edu.gemini.sp.vcs.reg.{VcsRegistrationSubscriber, VcsRegistrar}
+import edu.gemini.sp.vcs.reg.VcsRegistrar
 import edu.gemini.spModel.core.{Peer, SPProgramID}
 import edu.gemini.pot.sp.{ISPNode, ISPProgram}
-import scala.swing.{Publisher, Swing}
-import scala.swing.event.Event
 import jsky.app.ot.OT
 
 /**
@@ -13,7 +11,7 @@ import jsky.app.ot.OT
  * particular program ids.  Publishes VcsGui.VcsRegistrationEvent as a Swing
  * Event.
  */
-object VcsGui extends VcsRegistrationSubscriber with Publisher {
+object VcsGui {
   private var reg: Option[VcsRegistrar] = None
 
   def registrar: Option[VcsRegistrar] = reg
@@ -63,9 +61,4 @@ object VcsGui extends VcsRegistrationSubscriber with Publisher {
       } yield ProgramVcsServer(p, srv)
     case _             => Left(VcsServerNotFound("Not a Science Program", NotScience))
   }
-
-  case class VcsRegistrationEvent(pid: SPProgramID, peer: Option[Peer]) extends Event
-
-  def notify(evt: edu.gemini.sp.vcs.reg.VcsRegistrationEvent, pub: VcsRegistrar): Unit =
-    Swing.onEDT { publish(VcsRegistrationEvent(evt.pid, evt.peer)) }
 }

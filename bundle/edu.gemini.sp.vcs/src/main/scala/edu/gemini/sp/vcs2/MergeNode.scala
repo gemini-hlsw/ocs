@@ -8,6 +8,7 @@ import edu.gemini.spModel.conflict.ConflictFolder
 import edu.gemini.spModel.data.ISPDataObject
 import edu.gemini.spModel.rich.pot.sp._
 
+import scala.annotation.tailrec
 import scalaz._
 import Scalaz._
 
@@ -30,6 +31,9 @@ final case class Modified(key: SPNodeKey,
                           dob: ISPDataObject,
                           detail: NodeDetail,
                           conflicts: Conflicts) extends MergeNode {
+
+  def this(n: ISPNode) =
+    this(n.key, n.getVersion, n.getDataObject, NodeDetail(n), n.getConflicts)
 
   def withDataObjectConflict(dob: ISPDataObject): Modified = {
     val doc = new DataObjectConflict(DataObjectConflict.Perspective.LOCAL, dob)
@@ -69,20 +73,23 @@ object MergeNode {
   def modified(key: SPNodeKey, nv: NodeVersions, dob: ISPDataObject, detail: NodeDetail, conflicts: Conflicts): MergeNode =
     Modified(key, nv, dob, detail, conflicts)
 
-  def modified(n: ISPNode): MergeNode =
-    Modified(n.key, n.getVersion, n.getDataObject, NodeDetail(n), n.getConflicts)
+  def modified(n: ISPNode): MergeNode = new Modified(n)
 
   def modifiedTree(root: ISPNode): Tree[MergeNode] =
     Tree.node(modified(root), root.children.map(modifiedTree).toStream)
 
   implicit class TreeOps[A](t: Tree[A]) {
     /** A `foldRight` with strict evaluation of the `B` value of `f`. */
-    def sFoldRight[B](z: => B)(f: (A, B) => B): B =
-      t.foldRight(z) { (a, b) => f(a,b) }
+    def sFoldRight[B](z: B)(f: (A, B) => B): B =
+      foldTree(z)((t0, b) => f(t0.rootLabel, b))
+
+    // more problems with foldRight.  throws stack overflow for giant programs
+//      t.foldRight(z) { (a, b) => f(a,b) }
 
     // TODO: what's the proper way to do this?
     /** A fold that provides access to the children. */
     def foldTree[B](z: B)(f: (Tree[A], B) => B): B = {
+      @tailrec
       def go(rem: List[Tree[A]], res: B): B =
         rem match {
           case Nil        => res
@@ -154,6 +161,9 @@ object MergeNode {
         case m: Modified => Tree.node(f(m): MergeNode, t.subForest).right
         case _           => TryVcs.fail(s"Expected Modified label for $key")
       }
+
+    def incr(lifespanId: LifespanId): TryVcs[Tree[MergeNode]] =
+      mModifyLabel(m => m.copy(nv = m.nv.incr(lifespanId)))
   }
 
   implicit class MergeZipperOps(z: TreeLoc[MergeNode]) {

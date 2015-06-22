@@ -57,6 +57,10 @@ public final class Conflicts implements Serializable {
         return dataObjectConflict.isEmpty() && (notes.size() == 0);
     }
 
+    public boolean nonEmpty() {
+        return !isEmpty();
+    }
+
     public Conflicts merge(Conflicts that) {
         if (that.isEmpty()) return this;
         if (this.isEmpty()) return that;
@@ -71,5 +75,11 @@ public final class Conflicts implements Serializable {
         final ImList<Conflict.Note> mergedNotes = oldNotes.append(that.notes);
 
         return Conflicts.apply(mergedDoc, mergedNotes);
+    }
+
+    @Override public String toString() {
+        final String ds = dataObjectConflict.map(DataObjectConflict::toString).getOrElse("No data object conflict");
+        final String ns = notes.mkString("Notes: {", ",", "}");
+        return "Conflicts: " + ds + ", " + ns;
     }
 }

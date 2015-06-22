@@ -1,6 +1,6 @@
 package edu.gemini.pot.sp
 
-import edu.gemini.shared.util.VersionVector
+import edu.gemini.shared.util.{VersionComparison, VersionVector}
 
 import java.nio.ByteBuffer
 import java.util.UUID
@@ -25,6 +25,14 @@ package object version {
   val EmptyVersionMap: VersionMap = Map.empty
 
   def nodeVersions(vm: VersionMap, k: SPNodeKey): NodeVersions = vm.getOrElse(k, EmptyNodeVersions)
+
+  implicit class NodeVersionsOps(nv: NodeVersions) {
+    def updates(that: NodeVersions): Boolean =
+      nv.compare(that) match {
+        case VersionComparison.Newer | VersionComparison.Conflicting => true
+        case VersionComparison.Older | VersionComparison.Same        => false
+      }
+  }
 
   private def children(n: ISPNode): List[ISPNode] = n match {
     case c: ISPContainerNode => c.getChildren.asScala.toList

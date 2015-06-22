@@ -246,6 +246,7 @@ trait VcsSpecification extends Specification {
     else {
       t match {
         case -\/(VcsException(ex)) => ex.printStackTrace()
+        case _                     => // ignore, report the error below
       }
       ko("unexpected result: " + t)
     }
@@ -265,7 +266,7 @@ trait VcsSpecification extends Specification {
       case -\/(VcsException(rte: RuntimeException)) => rte.getMessage must_== msg
     }
 
-  def localHasNote(n: Conflict.Note, env: TestEnv): MatchResult[_] =
-    env.local.descendant(n.getNodeKey).getConflicts.notes.asScalaList.contains(n) must beTrue
+  def localHasNote(k: SPNodeKey, n: Conflict.Note, env: TestEnv): MatchResult[_] =
+    env.local.descendant(k).getConflicts.notes.asScalaList.contains(n) must beTrue
 
 }

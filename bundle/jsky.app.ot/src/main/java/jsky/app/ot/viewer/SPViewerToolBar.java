@@ -65,12 +65,8 @@ public final class SPViewerToolBar extends JToolBar {
 
         add(viewer._actions.conflictNextAction);
         add(viewer._actions.vcsSyncAction);
+        add(viewer._actions.vcs2SyncAction);
         super.addSeparator();
-
-// RCN: this button is dumb, so I'm not putting it on the toolbar anymore.
-// we'll see if anyone notices.
-//        add(makeEnableEditButton());
-
     }
 
     public boolean isShowPictures() {

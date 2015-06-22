@@ -17,7 +17,8 @@ object MergeCorrection {
   def apply(mc: MergeContext): CorrectionAction =
     (mp: MergePlan, hasPermission: PermissionCheck) =>
       for {
-        prm <- ObsPermissionCorrection(mc)(mp, hasPermission)
+        res <- ObsResurrectionCorrection(mc)(mp).liftVcs
+        prm <- ObsPermissionCorrection(mc)(res, hasPermission)
         on  <- ObsNumberCorrection(mc)(prm).liftVcs
         tn  <- TemplateNumberingCorrection(mc)(on).liftVcs
         v   <- ValidityCorrection(mc)(tn).liftVcs

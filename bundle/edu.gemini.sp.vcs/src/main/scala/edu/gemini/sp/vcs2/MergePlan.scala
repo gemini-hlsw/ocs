@@ -35,10 +35,14 @@ case class MergePlan(update: Tree[MergeNode], delete: Set[Missing]) {
 
   /** Gets the `VersionMap` of the provided program as it will be after the
     * updates in this plan have been applied. */
-  def vm(p: ISPProgram): VersionMap = {
+  def vm(p: ISPProgram): VersionMap = vm(p.getVersions)
+
+  /** Gets the `VersionMap` with any modifications required that will be made
+    * by this merge plan. */
+  def vm(vm0: VersionMap): VersionMap = {
     // Extract the updates to the VersionMap from the MergePlan.
     val vmUpdates: VersionMap = {
-      val vm0 = update.foldRight(Map.empty[SPNodeKey, NodeVersions]) { (mn, m) =>
+      val vm0 = update.sFoldRight(Map.empty[SPNodeKey, NodeVersions]) { (mn, m) =>
         mn match {
           case Modified(k, nv, _, _, _) => m.updated(k, nv)
           case _                        => m
@@ -47,8 +51,9 @@ case class MergePlan(update: Tree[MergeNode], delete: Set[Missing]) {
       (vm0/:delete) { case (vm1, Missing(k, nv)) => vm1.updated(k, nv) }
     }
 
-    p.getVersions ++ vmUpdates
+    vm0 ++ vmUpdates
   }
+
 
   /** Compares the version information in this merge plan with the given
     * version map.  The assumption here is that any unmodified parts of the

@@ -7,7 +7,7 @@ import edu.gemini.spModel.core.Peer
  * A service that provides persistent/mutable mapping between program ids and
  * VCS server locations.
  */
-trait VcsRegistrar {
+trait VcsRegistrar extends scala.collection.mutable.Publisher[VcsRegistrationEvent] {
   def allRegistrations: Map[SPProgramID, Peer]
   def registration(id: SPProgramID): Option[Peer]
   def register(id: SPProgramID, loc: Peer): Unit

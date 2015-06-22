@@ -35,6 +35,10 @@ public final class Conflict {
         }
 
         public abstract void accept(NoteVisitor v);
+
+        @Override public String toString() {
+            return getClass().getSimpleName() + ": " + getNodeKey();
+        }
     }
 
     /**
@@ -86,6 +90,10 @@ public final class Conflict {
         }
 
         public void accept(NoteVisitor v) { v.visitMoved(this); }
+
+        @Override public final String toString() {
+            return super.toString() + " to " + getDestinationKey();
+        }
     }
 
     /**
@@ -95,9 +103,7 @@ public final class Conflict {
      * note.
      */
     public static final class ResurrectedLocalDelete extends Note {
-        public ResurrectedLocalDelete(SPNodeKey node) {
-            super(node);
-        }
+        public ResurrectedLocalDelete(SPNodeKey node) { super(node); }
 
         public void accept(NoteVisitor v) { v.visitResurrectedLocalDelete(this);}
     }

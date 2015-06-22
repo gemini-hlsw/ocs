@@ -1,16 +1,16 @@
 package jsky.app.ot.vcs
 
+import edu.gemini.sp.vcs.reg.VcsRegistrationEvent
 import edu.gemini.spModel.core.{Peer, SPProgramID}
 import edu.gemini.pot.sp.{SPUtil, ISPObsExecLog, ISPNode, ISPProgram}
 import edu.gemini.pot.sp.version._
 import edu.gemini.sp.vcs._
 
-import jsky.app.ot.vcs.VcsGui.VcsRegistrationEvent
 import jsky.app.ot.vcs.vm.{VmStore, VmUpdateEvent}
 
 import java.beans.{PropertyChangeEvent, PropertyChangeListener}
 
-import scala.swing.Publisher
+import scala.swing.{Swing, Publisher}
 import scala.swing.event.Event
 
 case class VcsStateEvent(programId: Option[SPProgramID], peer: Option[Peer], status: ProgramStatus, conflictNodes: List[ISPNode]) extends Event
@@ -41,13 +41,15 @@ final class VcsStateTracker extends Publisher {
   private var vcsState: VcsStateEvent = VcsStateEvent(None, None, ProgramStatus.Unknown, Nil)
   private var updater: Option[ProgramUpdater] = None
 
-  listenTo(VcsGui)
-  reactions += {
-    case VcsRegistrationEvent(pid, _) =>
-      if (progNode.exists(_.getProgramID == pid)) {
-        resetUpdater()
-        updateState(calcConflicts = false)
+  VcsGui.registrar.foreach { reg =>
+    reg.subscribe(new scala.collection.mutable.Subscriber[VcsRegistrationEvent, reg.Pub] {
+      override def notify(pub: reg.Pub, event: VcsRegistrationEvent): Unit = Swing.onEDT {
+        if (progNode.exists(_.getProgramID == event.pid)) {
+          resetUpdater()
+          updateState(calcConflicts = false)
+        }
       }
+    })
   }
 
   def setProgram(n: ISPNode) {

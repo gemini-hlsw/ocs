@@ -17,7 +17,6 @@ import scala.swing.GridBagPanel.Fill._
 import scala.swing.Swing._
 
 import java.awt.Color
-import javax.security.auth.Subject
 import javax.swing.UIManager
 
 

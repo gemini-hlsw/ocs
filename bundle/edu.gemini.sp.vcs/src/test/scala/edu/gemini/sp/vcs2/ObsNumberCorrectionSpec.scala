@@ -4,7 +4,7 @@ import edu.gemini.pot.sp.{SPObservationID, SPNodeKey}
 import edu.gemini.sp.vcs2.NodeDetail.Obs
 import edu.gemini.sp.vcs2.ProgramLocation.{Local, Remote}
 import edu.gemini.sp.vcs2.ProgramLocationSet.{RemoteOnly, LocalOnly, Both}
-import edu.gemini.sp.vcs2.VcsFailure.Unmergeable
+import edu.gemini.spModel.core.SPProgramID
 import edu.gemini.spModel.event.SlewEvent
 import edu.gemini.spModel.gemini.obscomp.SPProgram
 import edu.gemini.spModel.obslog.ObsExecLog
@@ -152,8 +152,8 @@ class ObsNumberCorrectionSpec extends MergeCorrectionSpec {
       val expected  = p.node(renumberedLocal.leaf, oRemote.leaf)
 
       onc(plan) match {
-        case -\/(Unmergeable(msg)) => failure(msg)
-        case \/-(mp)               => mp.update must correspondTo(expected)
+        case -\/(f)   => failure(VcsFailure.explain(f, SPProgramID.toProgramID("GS-2016A-Q-1"), "", None))
+        case \/-(mp)  => mp.update must correspondTo(expected)
       }
     }
   }

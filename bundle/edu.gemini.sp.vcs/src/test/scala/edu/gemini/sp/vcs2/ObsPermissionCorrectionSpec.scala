@@ -31,7 +31,7 @@ class ObsPermissionCorrectionSpec extends VcsSpecification {
       afterPull(env, PiUserPrincipal) {
         localIs(PI_TO_COMPLETE, obsKey, env) and
           (env.local.nodeVersions(obsKey) must_== initialVersion.incr(env.local.lifespanId)) and
-          localHasNote(new CreatePermissionFail(obsKey), env)
+          localHasNote(obsKey, new CreatePermissionFail(obsKey), env)
       }
     }
 
@@ -58,7 +58,7 @@ class ObsPermissionCorrectionSpec extends VcsSpecification {
       afterPull(env, PiUserPrincipal) {
         (env.local.prog.children.exists(_.key == ObsKey) must beTrue) and
           (env.local.prog.getVersion must_== initialVersion.incr(env.local.lifespanId)) and
-          localHasNote(new DeletePermissionFail(ObsKey), env)
+          localHasNote(ObsKey, new DeletePermissionFail(ObsKey), env)
       }
     }
 
@@ -89,7 +89,7 @@ class ObsPermissionCorrectionSpec extends VcsSpecification {
       // sync and see it has been resurrected
       afterPull(env, PiUserPrincipal) {
         (env.local.prog.children.exists(_.key == obsKey) must beTrue) and
-          localHasNote(new DeletePermissionFail(obsKey), env)
+          localHasNote(obsKey, new DeletePermissionFail(obsKey), env)
       }
     }
 
@@ -118,7 +118,7 @@ class ObsPermissionCorrectionSpec extends VcsSpecification {
           (restoredNote.getDataObject.getTitle must_== "abc") and
           (dupNote.key must_!= noteKey) and
           (dupNote.getDataObject.getTitle must_== "123") and
-          localHasNote(new DeletePermissionFail(ObsKey), env)
+          localHasNote(ObsKey, new DeletePermissionFail(ObsKey), env)
       }
     }
 
@@ -152,7 +152,7 @@ class ObsPermissionCorrectionSpec extends VcsSpecification {
       env.local.setObsPhase2Status(ObsKey, PHASE_2_COMPLETE)
       afterPull(env, PiUserPrincipal) {
         localIs(PI_TO_COMPLETE, ObsKey, env) and
-        localHasNote(new UpdatePermissionFail(ObsKey), env)
+        localHasNote(ObsKey, new UpdatePermissionFail(ObsKey), env)
       }
     }
 
@@ -178,7 +178,7 @@ class ObsPermissionCorrectionSpec extends VcsSpecification {
           (localNote.exists(_.key == noteKey) must beTrue) and
           localIs(PHASE_2_COMPLETE, ObsKey, env) and
           localIs(PI_TO_COMPLETE, localObs.key, env) and
-          localHasNote(new UpdatePermissionFail(localObs.key), env)
+          localHasNote(localObs.key, new UpdatePermissionFail(ObsKey), env)
       }
     }
 
@@ -227,7 +227,7 @@ class ObsPermissionCorrectionSpec extends VcsSpecification {
           (newNote.getVersion must_== EmptyNodeVersions.incr(env.local.prog.getLifespanId)) and
           (env.local.descendant(noteKey).getDataObject.getTitle must_== "123") and
           (newNote.getDataObject.getTitle must_== "foo") and
-          localHasNote(new UpdatePermissionFail(localObs.key), env)
+          localHasNote(localObs.key, new UpdatePermissionFail(ObsKey), env)
       }
     }
 
@@ -250,7 +250,7 @@ class ObsPermissionCorrectionSpec extends VcsSpecification {
         (env.local.obs(ObsKey).getObservationNumber must_== 1) and
           (env.local.obs(newObsKey).getObservationNumber must_== 2) and
           (obs3.getObservationNumber must_== 3) and
-          localHasNote(new UpdatePermissionFail(obs3.key), env)
+          localHasNote(obs3.key, new UpdatePermissionFail(ObsKey), env)
       }
     }
 

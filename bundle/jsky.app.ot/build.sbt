@@ -31,6 +31,7 @@ OsgiKeys.privatePackage := Seq(
   "edu.gemini.shared.cat.*",
   "jsky.app.jskycat.*",
   "jsky.app.ot.vcs.*",
+  "jsky.app.ot.vcs2.*",
   "jsky.app.ot",
   "jsky.app.ot.ags",
   "jsky.app.ot.editor.*",
@@ -62,7 +63,7 @@ OsgiKeys.bundleActivator := Some("jsky.app.ot.osgi.Activator")
 
 OsgiKeys.bundleSymbolicName := name.value
 
-OsgiKeys.additionalHeaders += 
+OsgiKeys.additionalHeaders +=
   ("Import-Package" -> "!Acme.JPM.Encoders,!com.sun.*.jpeg,!sun.*,*")
 
 OsgiKeys.dynamicImportPackage := Seq("*") // hmm
@@ -140,4 +141,4 @@ OsgiKeys.exportPackage := Seq(
   "jsky.science.util",
   "jsky.science.util.gui")
 
-        
+

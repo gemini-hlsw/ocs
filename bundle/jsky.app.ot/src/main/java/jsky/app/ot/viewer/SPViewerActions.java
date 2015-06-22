@@ -20,6 +20,7 @@ public final class SPViewerActions {
     public final AbstractViewerAction vcsUpdateAction;
     public final AbstractViewerAction vcsCommitAction;
     public final AbstractViewerAction vcsSyncAction;
+    public final AbstractViewerAction vcs2SyncAction;
     public final AbstractViewerAction syncAllAction;
     public final AbstractViewerAction conflictPrevAction;
     public final AbstractViewerAction conflictNextAction;
@@ -133,8 +134,9 @@ public final class SPViewerActions {
         // VCS Actions
         vcsUpdateAction = new VcsUpdateAction(viewer);
         vcsCommitAction = new VcsCommitAction(viewer);
-        vcsSyncAction = new VcsSyncAction(viewer);
-        syncAllAction = new SyncAllAction(viewer);
+        vcsSyncAction   = new VcsSyncAction(viewer);
+        vcs2SyncAction  = new jsky.app.ot.vcs2.VcsSyncAction(viewer);
+        syncAllAction   = new SyncAllAction(viewer);
 
         // General Edit Actions
         cutAction = new CutAction(viewer);

@@ -2,6 +2,8 @@ package jsky.app.ot.testlauncher
 
 import edu.gemini.ags.conf.ProbeLimitsTable
 import edu.gemini.qv.plugin.{QvTool, ShowQvToolAction}
+import edu.gemini.sp.vcs2.{VcsServer, Vcs}
+import jsky.app.ot.vcs2.VcsOtClient
 import jsky.app.ot.viewer.plugin.PluginRegistry
 
 import scalaz._, Scalaz._
@@ -33,6 +35,10 @@ object TestLauncher extends App {
   SkycatConfigFile.setConfigFile(classOf[SkycatConfigFile].getResource("/jsky/catalog/osgi/skycat.cfg"))
   ViewerService.instance = Some(new ViewerService(odb, reg))
   VcsGui.registrar = Some(reg)
+
+  val vcsServer   = new VcsServer(odb)
+  val vcs         = Vcs(keys, vcsServer)
+  VcsOtClient.ref = Some(VcsOtClient(vcs, reg))
 
   // Register Plugins
   PluginRegistry.add(new ShowVisitLogAction())
