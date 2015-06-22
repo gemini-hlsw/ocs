@@ -264,8 +264,16 @@ class MergeTest extends JUnitSuite {
 
         def matches(merged: Tree[MergeNode], n: ISPNode): Boolean = {
           val dobMatches = merged.rootLabel match {
-            case Modified(_,_,dob,_,_) => DOB.same(dob, n.getDataObject)
-            case Unmodified(k)         => k == n.key
+            case Modified(_,_,dob,_,_) =>
+              // Usually the data objects are the same.  If a child is moved
+              // locally and then the parent is deleted locally and yet edited
+              // remotely though, the edited child is recalled in the
+              // resurrected observation.  We'll just make sure that the same
+              // type of data object is found and not that they are identical.
+              dob.getClass.getName == n.getDataObject.getClass.getName
+              
+            case Unmodified(k)         =>
+              k == n.key
           }
 
           dobMatches && {
