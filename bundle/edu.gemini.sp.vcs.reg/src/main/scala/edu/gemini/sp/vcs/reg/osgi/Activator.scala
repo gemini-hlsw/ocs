@@ -8,17 +8,18 @@ import java.io.File
 import java.util.logging.Logger
 
 class Activator extends BundleActivator {
-  private var reg: ServiceRegistration[VcsRegistrar] = null
-  private var vcsReg: VcsRegistrarImpl = null
+  private var reg: Option[ServiceRegistration[VcsRegistrar]] = None
+  private var vcsReg: Option[VcsRegistrarImpl] = None
 
   override def start(ctx: BundleContext) {
-    vcsReg = new VcsRegistrarImpl(Activator.getStorageFile(ctx))
-    reg = ctx.registerService(classOf[VcsRegistrar], vcsReg, null)
+    vcsReg = Some(new VcsRegistrarImpl(Activator.getStorageFile(ctx)))
+    reg    = vcsReg.map { r => ctx.registerService(classOf[VcsRegistrar], r, null) }
   }
 
   override def stop(ctx: BundleContext) {
-    reg.unregister()
-    reg = null
+    reg.foreach(_.unregister())
+    reg    = None
+    vcsReg = None
   }
 }
 

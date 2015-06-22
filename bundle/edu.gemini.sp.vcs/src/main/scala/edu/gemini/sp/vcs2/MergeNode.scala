@@ -8,6 +8,7 @@ import edu.gemini.spModel.conflict.ConflictFolder
 import edu.gemini.spModel.data.ISPDataObject
 import edu.gemini.spModel.rich.pot.sp._
 
+import scala.annotation.tailrec
 import scalaz._
 import Scalaz._
 
@@ -88,6 +89,7 @@ object MergeNode {
     // TODO: what's the proper way to do this?
     /** A fold that provides access to the children. */
     def foldTree[B](z: B)(f: (Tree[A], B) => B): B = {
+      @tailrec
       def go(rem: List[Tree[A]], res: B): B =
         rem match {
           case Nil        => res
