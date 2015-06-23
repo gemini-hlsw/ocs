@@ -1,7 +1,10 @@
 package jsky.app.ot.vcs2
 
+import edu.gemini.pot.sp.version._
 import edu.gemini.shared.util.VersionComparison
 import edu.gemini.shared.util.VersionComparison.{Newer, Older, Conflicting}
+import edu.gemini.sp.vcs2._
+import edu.gemini.sp.vcs2.OptionOps
 import edu.gemini.spModel.core.{Peer, SPProgramID}
 import edu.gemini.util.security.auth.keychain.Action._
 
@@ -9,22 +12,30 @@ import edu.gemini.util.security.auth.keychain.Action._
 import jsky.app.ot.OT
 import jsky.app.ot.vcs.{VcsPeerSelectionDialog, VcsIcon, VcsStateEvent}
 import jsky.app.ot.viewer.SPViewer
-import jsky.app.ot.viewer.action.{AbstractVcsAction, AbstractViewerAction}
-import jsky.app.ot.viewer.action.AbstractVcsAction.scalaComponent
+import jsky.app.ot.viewer.action.AbstractViewerAction
 
 import java.awt.event.{ActionEvent, KeyEvent}
 import javax.swing.Action._
-import javax.swing.Icon
+import javax.swing.{JComponent, KeyStroke, Icon}
 
 import scala.swing.{Component, Reactor}
 
 import scalaz.\/
 import scalaz.syntax.std.option._
 
+object VcsSyncAction {
+  def scalaComponent(evt: ActionEvent): Option[Component] =
+    evt.getSource match {
+      case j: JComponent            => Some(Component.wrap(j))
+      case s: scala.swing.Component => Some(s)
+      case _                        => None
+    }
+}
+
 final class VcsSyncAction(viewer: SPViewer) extends AbstractViewerAction(viewer, "Sync changes to this program with the database", VcsIcon.UpToDate) with Reactor {
   putValue(AbstractViewerAction.SHORT_NAME, "New Sync")
   putValue(SHORT_DESCRIPTION, "Sync program with any changes from the database.")
-  putValue(ACCELERATOR_KEY, AbstractVcsAction.keystroke(KeyEvent.VK_S))
+  putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_S, AbstractViewerAction.platformEventMask()))
 
   private def pid: Option[SPProgramID] =
     for {
@@ -74,11 +85,14 @@ final class VcsSyncAction(viewer: SPViewer) extends AbstractViewerAction(viewer,
   override def computeEnabledState =
     pid.isDefined && allPeers.size > 0 && viewer.getVcsStateTracker.conflicts.isEmpty
 
-  def actionPerformed(evt: ActionEvent): Unit =
+  def actionPerformed(evt: ActionEvent): Unit = doAction(evt)
+
+  def doAction(evt: ActionEvent): TryVcs[(ProgramLocationSet, VersionMap)] =
     for {
-      pd  <- pid
-      cl  <- VcsOtClient.ref
-      comp = scalaComponent(evt)
-      pr  <- peer orElse promptAndSetPeer(comp)
-    } VcsSyncDialog.open(pd, cl, comp)
+      pd  <- pid \/> VcsFailure.MissingId
+      cl  <- VcsOtClient.ref.toTryVcs("OT not initialized with VcsOtClient")
+      comp = VcsSyncAction.scalaComponent(evt)
+      _   <- (peer orElse promptAndSetPeer(comp)).toTryVcs("Could not determine peer")
+      res <- VcsSyncDialog.open(pd, cl, comp)
+    } yield res
 }

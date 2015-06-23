@@ -4,6 +4,7 @@ import edu.gemini.pot.sp.ISPObservation
 import edu.gemini.spModel.obs.ObservationStatus
 import jsky.app.ot.OTOptions
 import jsky.app.ot.session.SessionQueue
+import jsky.app.ot.vcs2.VcsSyncAction
 import jsky.app.ot.viewer.{SPViewerActions, SPViewer}
 import jsky.util.gui.DialogUtil
 
@@ -29,8 +30,8 @@ final class SyncAndEnqueueAction(viewer: SPViewer) extends AbstractViewerAction(
     try {
       selectedObservations match {
         case Nil => DialogUtil.error("No observation is currently selected")
-        case os  => new VcsSyncAction(viewer).doAction(evt) foreach {
-          _ foreach { _ => os foreach { SessionQueue.INSTANCE.addObservation(_) } }
+        case os  => new VcsSyncAction(viewer).doAction(evt).foreach { _ =>
+          os.foreach(SessionQueue.INSTANCE.addObservation)
         }
       }
     } catch {
