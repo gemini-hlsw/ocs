@@ -1,20 +1,19 @@
 package jsky.app.ot.gemini.editor
 
-import jsky.util.DateUtil
-import javax.swing.table.{TableColumn, DefaultTableModel}
-import edu.gemini.sp.vcs.reg.VcsRegistrar
-import scala.concurrent.ExecutionContext.Implicits.global
-import edu.gemini.util.trpc.client.TrpcClient
-import edu.gemini.sp.vcs.VcsServer
-import java.util.logging.{Level, Logger}
-import edu.gemini.pot.client.SPDB
+import edu.gemini.sp.vcs2.VcsAction._
 import edu.gemini.sp.vcs.log._
-import edu.gemini.sp.vcs.OldVcsFailure.OldVcsException
-import scala.util.Success
-import edu.gemini.sp.vcs.VersionControlSystem
-import scala.util.Failure
+import edu.gemini.sp.vcs.reg.VcsRegistrar
+import edu.gemini.sp.vcs2.VcsFailure
+import edu.gemini.sp.vcs2.VcsFailure.VcsException
+
+import jsky.app.ot.vcs.VcsOtClient
+
+import jsky.util.DateUtil
+import java.util.logging.{Level, Logger}
+import javax.swing.table.{TableColumn, DefaultTableModel}
+
 import scala.swing.Swing
-import jsky.app.ot.OT
+import scalaz.{-\/, \/-}
 
 object EdProgramHelper {
 
@@ -41,7 +40,7 @@ object EdProgramHelper {
     DateUtil.formatUTC(es.timestamps._2),
     //    { val a = es.ops.get(OpFetch).getOrElse(0); a : Integer }, // yes, the tempvar is needed
     {
-      val a = es.ops.get(OpStore).getOrElse(0); a: Integer
+      val a = es.ops.getOrElse(OpStore, 0); a: Integer
     },
     es.principals.map(_.getName).mkString(", "))
   }
@@ -78,33 +77,26 @@ object EdProgramHelper {
     update(Nil)
 
     for {
-      pid <- Option(ed.getProgram).map(_.getProgramID)
-      peer <- vcsReg.registration(pid)
-    } TrpcClient(peer).withKeyChain(OT.getKeyChain) future {
-      r =>
-        val remote = VersionControlSystem(SPDB.get(), r[VcsServer])
-        remote.log(pid, 0, 100).fold({
-          case OldVcsException(e) => throw e
-          case f => throw new RuntimeException(f.toString)
-        }, identity)
-    } onComplete {
-      case Failure(e) =>
-        Log.log(Level.WARNING, s"Failed to fetch VCS history for $pid", e)
-
-      case Success((es, more)) =>
+      pid    <- Option(ed.getProgram).map(_.getProgramID)
+      client <- VcsOtClient.ref
+    } client.log(pid, 0, 100).forkAsync {
+      case \/-((es, more)) =>
         Log.info(s"Got ${es.length} history items for $pid, more == $more")
-
         Swing.onEDT {
           // The program we are viewing could have changed while we were
           // out getting the log.
           for {
-            p <- Option(ed.getProgram)
-            cp <- Option(p.getProgramID)
-            if cp == pid
-          } {
-            update(es)
-          }
+            p  <- Option(ed.getProgram)
+            cp <- Option(p.getProgramID) if cp == pid
+          } update(es)
         }
+
+      case -\/(VcsException(ex)) =>
+        Log.log(Level.WARNING, s"Failed to fetch VCS history for $pid", ex)
+
+      case -\/(f) =>
+        val msg = VcsFailure.explain(f, pid, "log", client.peer(pid))
+        Log.log(Level.WARNING, s"Failed to fetch VCS history for $pid: $msg")
     }
   }
 
