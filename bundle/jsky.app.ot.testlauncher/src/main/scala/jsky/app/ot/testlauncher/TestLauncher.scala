@@ -16,7 +16,6 @@ import edu.gemini.pot.client.SPDB
 import jsky.catalog.skycat.SkycatConfigFile
 import jsky.app.ot.OT
 import jsky.app.ot.viewer.ViewerService
-import jsky.app.ot.vcs.VcsGui
 import jsky.app.ot.visitlog.ShowVisitLogAction
 import edu.gemini.spModel.core._
 import edu.gemini.util.security.auth.ui.{PasswordDialog, AuthDialog}
@@ -34,7 +33,6 @@ object TestLauncher extends App {
   AuthDialog.showDatabaseTab = true
   SkycatConfigFile.setConfigFile(classOf[SkycatConfigFile].getResource("/jsky/catalog/osgi/skycat.cfg"))
   ViewerService.instance = Some(new ViewerService(odb, reg))
-  VcsGui.registrar = Some(reg)
 
   val vcsServer   = new VcsServer(odb)
   val vcs         = Vcs(keys, vcsServer)

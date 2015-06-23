@@ -84,7 +84,11 @@ final class VcsStateTracker extends Publisher {
   def conflicts: List[ISPNode] = vcsState.conflictNodes
 
   private def updateState(calcConflicts: Boolean = true): Unit = {
-    val newPeer = id(progNode).flatMap(VcsGui.peer)
+    val newPeer = for {
+      pd <- id(progNode)
+      cl <- VcsOtClient.ref
+      pr <- cl.peer(pd)
+    } yield pr
 
     val newStatus = for {
       rJvm <- remoteVersions
@@ -116,8 +120,8 @@ final class VcsStateTracker extends Publisher {
 
     updater = for {
       id  <- id(progNode)
-      reg <- VcsGui.registrar
-      loc <- reg.registration(id)
+      c   <- VcsOtClient.ref
+      loc <- c.reg.registration(id)
     } yield ProgramUpdater(id, loc)
 
     updater.foreach { up =>
