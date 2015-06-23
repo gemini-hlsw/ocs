@@ -4,8 +4,8 @@ import edu.gemini.pot.client.SPDB
 import edu.gemini.pot.sp.{ISPProgram, SPNodeKey}
 import edu.gemini.pot.spdb.IDBDatabaseService
 import edu.gemini.shared.gui.SizePreference
+import edu.gemini.shared.util.VersionComparison.{Newer, Conflicting}
 import edu.gemini.shared.util.immutable.ApplyOp
-import edu.gemini.sp.vcs.ProgramStatus.{PendingCheckIn, PendingSync}
 import edu.gemini.sp.vcs.reg.VcsRegistrar
 import edu.gemini.sp.vcs2.VcsAction._
 import edu.gemini.sp.vcs2.VcsFailure
@@ -376,9 +376,8 @@ class OpenDialog private(db: IDBDatabaseService, auth: KeyChain, vcs: VcsRegistr
       def selectedRemote = model.getRemote(table.selectedModelRow)
 
       def isModifiedLocally = model.getStatus(table.selectedModelRow).map {
-        case PendingSync    => true
-        case PendingCheckIn => true
-        case _              => false
+        case Newer | Conflicting => true
+        case _                   => false
       }
 
       // Update methods
