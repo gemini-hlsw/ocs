@@ -2,31 +2,35 @@ package jsky.app.ot.vcs
 
 import edu.gemini.pot.sp.ISPProgram
 import edu.gemini.pot.sp.version.VersionMap
-import edu.gemini.pot.spdb.{ProgramSummoner, IDBDatabaseService}
-import edu.gemini.sp.vcs._
-import edu.gemini.sp.vcs.OldVcsFailure.{TryVcs, OldVcsException}
+import edu.gemini.pot.spdb.IDBDatabaseService
+import edu.gemini.shared.util.VersionComparison
+import edu.gemini.shared.util.VersionComparison.{Same, Older, Newer, Conflicting}
 import edu.gemini.sp.vcs.reg.VcsRegistrar
+import edu.gemini.sp.vcs2.{VcsFailure, ProgramLocationSet, TryVcs}
+import edu.gemini.sp.vcs2.VcsAction._
+import edu.gemini.sp.vcs2.VcsFailure.{HasConflict, VcsException}
 import edu.gemini.spModel.core.{SPProgramID, Peer}
 import edu.gemini.spModel.rich.pot.spdb._
 import edu.gemini.util.security.auth.keychain.Action._
 import edu.gemini.util.security.auth.keychain.KeyChain
 import edu.gemini.util.security.auth.ui.CloseOnEsc
-import edu.gemini.util.trpc.client.TrpcClient
 
+import jsky.app.ot.OT
+import jsky.app.ot.shared.vcs.VersionMapFunctor.VmUpdate
 import jsky.app.ot.userprefs.general.GeneralPreferences
 import jsky.app.ot.util.{OtColor, Resources}
+import jsky.app.ot.vcs.vm.{VmUpdater, VmStore}
 import jsky.app.ot.viewer.ViewerManager
 
 import java.awt.{Font, Color, Component}
 import java.awt.event.{MouseAdapter, MouseEvent}
-import java.util.concurrent.{ThreadFactory, Executors}
-import java.util.concurrent.atomic.AtomicReference
+
+import java.util.concurrent.atomic.AtomicBoolean
 import javax.swing.{ListSelectionModel, JTable, BorderFactory}
 import javax.swing.table.{TableColumn, DefaultTableCellRenderer}
 
 
 import scala.collection.JavaConverters._
-import scala.concurrent.ExecutionContext
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.swing._
 import scala.swing.GridBagPanel.Anchor._
@@ -36,9 +40,6 @@ import scala.swing.event.ActionEvent
 
 import scalaz._
 import Scalaz._
-import jsky.app.ot.vcs.vm.{VmUpdater, VmStore}
-import jsky.app.ot.shared.vcs.VersionMapFunctor.VmUpdate
-import jsky.app.ot.OT
 
 
 object SyncAllDialog {
@@ -54,7 +55,12 @@ object SyncAllDialog {
   def shouldClose(comp: Component, auth: KeyChain, vcs: VcsRegistrar, db: IDBDatabaseService, progs: Vector[ISPProgram]): Boolean = {
     def isModified(p: ISPProgram): Boolean =
       Option(p.getProgramID).exists { pid =>
-        VmStore.get(pid).exists(rvm => ProgramStatus(p.getVersions, rvm).isLocallyModified)
+        VmStore.get(pid).exists { rvm =>
+          VersionMap.compare(p.getVersions, rvm) match {
+            case Newer | Conflicting => true
+            case _                   => false
+          }
+        }
       }
 
     if (!GeneralPreferences.fetch().warnUnsavedChanges()) true
@@ -80,26 +86,14 @@ object SyncAllDialog {
       dialog.peer.setLocationRelativeTo(comp)
       dialog.visible = true
     }
-
-  lazy val lowPriorityFactory = new ThreadFactory {
-    private var seq: Int = 0
-    def newThread(r: Runnable): Thread = {
-      val t = new Thread(r, s"SyncAllPool-Thread-$seq")
-      t.setPriority(Thread.NORM_PRIORITY - 1)
-      seq = seq + 1
-      t
-    }
-  }
-  lazy val executionContext = ExecutionContext.fromExecutorService(Executors.newFixedThreadPool(5, lowPriorityFactory))
 }
 
-import SyncAllDialog.executionContext
 
 class SyncAllDialog private(mode: SyncMode, selectedPeer: Peer, programs: Vector[ISPProgram], db: IDBDatabaseService) extends Dialog with CloseOnEsc { dialog =>
   title = if (mode == SyncMode.ClosePrompt) "Confirm Close" else "Sync Programs"
   modal = true
 
-  val cancelled   = new AtomicReference[java.lang.Boolean](java.lang.Boolean.FALSE)
+  val cancelled   = new AtomicBoolean(java.lang.Boolean.FALSE)
   var closeAnyway = false
 
   var model = SyncAllModel.init(programs)
@@ -118,7 +112,7 @@ class SyncAllDialog private(mode: SyncMode, selectedPeer: Peer, programs: Vector
     val pids = model.programs.filter(_.state == ProgramStatusUpdating).map(_.pid)
 
     def markSyncFailed(ex: Exception): Unit =
-      pids.foreach { pid => updateModel(_.markSyncFailed(pid, some(OldVcsException(ex)))) }
+      pids.foreach { pid => updateModel(_.markSyncFailed(pid, some(VcsException(ex)))) }
 
     def updateRemoteVersions(ups: List[VmUpdate]): Unit = {
       // have to poke the state machine even if there is no actual update to the
@@ -142,51 +136,14 @@ class SyncAllDialog private(mode: SyncMode, selectedPeer: Peer, programs: Vector
     def doSync(p: ISPProgram): Unit = {
       val pid = p.getProgramID
 
-      def currentUser = OT.getKeyChain.subject.getPrincipals.asScala.toSet
-
-      def ifNotCancelled[T](body: => TryVcs[T]): TryVcs[T] =
-        if (!cancelled.get()) body
-        else -\/(OldVcsFailure.Unexpected("Cancelled."))
-
-      def update(r: VcsServer): TryVcs[ISPProgram] =
-        for {
-          prog <- ifNotCancelled(r.fetch(p.getProgramID))
-          upd  <- ifNotCancelled(VcsLocking(db).merge(ProgramSummoner.LookupOrFail, prog, currentUser)(Update))
-        } yield upd
-
-      def store(r: VcsServer): TryVcs[VersionMap] =
-        for {
-          cp <- ifNotCancelled(VcsLocking(db).copy(pid))
-          vm <- ifNotCancelled(r.store(cp))
-        } yield vm
-
-      def sync(r: VcsServer, i: Int): TryVcs[VersionMap] =
-        update(r).flatMap { _ =>
-          store(r) match {
-            // If the commit fails because the client needs an update during
-            // sync, it means the program has received an exec event (or other
-            // remote update) since the update succeeded.  If that is the case,
-            // just retry until it works or fails for some other reason.
-            case -\/(OldVcsFailure.NeedsUpdate) =>
-              if (i < 10) sync(r, i+1)
-              else -\/(OldVcsFailure.Unexpected(s"Your version of $pid appears to be incompatible."))
-            case other                           => other
-          }
-        }
-
-      val fut = TrpcClient(selectedPeer).withKeyChain(OT.getKeyChain).future(r => sync(r[VcsServer], 0))(executionContext)
-
-      fut onFailure {
-        case x: Exception => updateModel(_.markSyncFailed(pid, some(OldVcsException(x))))
-        case t =>            updateModel(_.markSyncFailed(pid, some(OldVcsException(new RuntimeException(t)))))
+      val handleResult: TryVcs[(ProgramLocationSet, VersionMap)] => Unit = {
+        case \/-(a)           => updateModel(_.markSuccess(pid))
+        case -\/(HasConflict) => updateModel(_.markSyncConflict(pid))
+        case -\/(failure)     => updateModel(_.markSyncFailed(pid, some(failure)))
       }
 
-      fut onSuccess {
-        case -\/(OldVcsFailure.HasConflict) => updateModel(_.markSyncConflict(pid))
-        case -\/(f)                      => updateModel(_.markSyncFailed(pid, some(f)))
-        case \/-(vm)                     =>
-          updateModel(_.markSuccess(pid))
-          VmStore.update(pid, vm)
+      VcsOtClient.ref.foreach { c =>
+        c.sync(pid, cancelled).forkAsync(r => Swing.onEDT(handleResult(r)))
       }
     }
 
@@ -318,20 +275,19 @@ class SyncAllDialog private(mode: SyncMode, selectedPeer: Peer, programs: Vector
           }
           r.setIcon(iconName.map(n => Resources.getIcon(n)).orNull)
 
-          def programStatusText(ps: ProgramStatus): String = ps match {
-            case ProgramStatus.PendingSync    => "Incoming, Outgoing"
-            case ProgramStatus.PendingUpdate  => "Incoming"
-            case ProgramStatus.PendingCheckIn => "Outgoing"
-            case ProgramStatus.UpToDate       => "In Sync"
-            case _                            => ""
+          def programStatusText(vc: VersionComparison): String = vc match {
+            case Conflicting => "Incoming, Outgoing"
+            case Older       => "Incoming"
+            case Newer       => "Outgoing"
+            case Same        => "In Sync"
           }
 
           val text = s match {
             case ProgramStatusUpdating => "Pending ..."
-            case PendingSync(ps)       => programStatusText(ps)
-            case SyncInProgress(ps)    => programStatusText(ps)
+            case PendingSync(vc)       => programStatusText(vc)
+            case SyncInProgress(vc)    => programStatusText(vc)
             case SyncFailed(_)         => "Sync Problem"
-            case InSync                => programStatusText(ProgramStatus.UpToDate)
+            case InSync                => programStatusText(Same)
             case Conflicts             => "Conflicts"
           }
           r.setText(text)
@@ -447,7 +403,7 @@ class SyncAllDialog private(mode: SyncMode, selectedPeer: Peer, programs: Vector
           case SyncInProgress(_)     =>
             (OtColor.BANANA, s"$pid is being synchronized with $site.")
           case SyncFailed(f)         =>
-            (OtColor.LIGHT_SALMON, f.fold("Sync failed, check your connection or try again later.")(v => OldVcsFailure.explain(v, ps.pid, "sync", Some(selectedPeer))))
+            (OtColor.LIGHT_SALMON, f.fold("Sync failed, check your connection or try again later.")(v => VcsFailure.explain(v, ps.pid, "sync", Some(selectedPeer))))
           case InSync                =>
             (OtColor.HONEY_DEW, s"$pid is in sync with $site.")
           case Conflicts             =>

@@ -2,24 +2,24 @@ package jsky.app.ot.too
 
 import edu.gemini.pot.client.SPDB
 import edu.gemini.pot.sp.{ISPProgram, ISPObservation}
+import edu.gemini.sp.vcs2.VcsAction._
+import edu.gemini.sp.vcs2.VcsFailure
 import edu.gemini.spModel.core.Peer
 import edu.gemini.spModel.obs.ObsSchedulingReport
-import edu.gemini.sp.vcs.{OldVcsFailure, VersionControlSystem, TrpcVcsServer}
 import edu.gemini.too.event.api.TooEvent
 
 import jsky.app.ot.userprefs.observer.ObserverPreferences
-import jsky.app.ot.vcs.VcsGui
-import jsky.app.ot.viewer.{ViewerService, SPViewer, ViewerManager}
+import jsky.app.ot.vcs.VcsOtClient
+import jsky.app.ot.viewer.ViewerManager
 import jsky.app.ot.viewer.open.OpenDialog
 
+import java.util.concurrent.atomic.AtomicBoolean
 import java.util.logging.Logger
 import javax.swing.{JOptionPane, JComponent}
 import javax.swing.JOptionPane.WARNING_MESSAGE
 
 import scala.collection.JavaConverters._
-import jsky.app.ot.viewer.action.OpenAction
 import scala.swing.Swing
-import jsky.app.ot.OT
 
 
 object TooHandler {
@@ -47,12 +47,12 @@ final class TooHandler(evt: TooEvent, peer: Peer, parent: JComponent) extends Ru
     val oid = report.getObservationId
     val pid = oid.getProgramID
 
-    def currentUser = OT.getKeyChain.subject.getPrincipals.asScala.toSet
-
-    def update(p: ISPProgram): Either[String, ISPProgram] = {
-      val srv = TrpcVcsServer(OT.getKeyChain, peer.host, peer.port)
-      VersionControlSystem.apply(db, srv).update(pid, currentUser).toEither.left.map(failure => OldVcsFailure.explain(failure, pid, "update", Some(peer)))
-    }
+    def update(p: ISPProgram): Either[String, ISPProgram] =
+      for {
+        cl <- VcsOtClient.ref.toRight("OT not initialized properly").right
+        _  <- cl.pull(pid, new AtomicBoolean(false)).unsafeRun.leftMap(VcsFailure.explain(_, pid, "update", Some(peer))).toEither.right
+        p2 <- Option(db.lookupProgramByID(pid)).toRight(s"Could not update $pid").right
+      } yield p2
 
     // Left means the updated failed, Right(None) means we don't have the
     // program locally, Right(Some) means we have successfully updated the
@@ -60,11 +60,11 @@ final class TooHandler(evt: TooEvent, peer: Peer, parent: JComponent) extends Ru
     def lookupAndUpdate: Either[String, Option[ISPProgram]] =
       db.lookupProgramByID(pid) match {
         case null => Right(None)
-        case p => update(p).right.map(Some.apply)
+        case p    => update(p).right.map(Some.apply)
       }
 
     def checkout: Option[ISPProgram] =
-      Option(OpenDialog.checkout(db, pid, peer, parent, VcsGui.registrar.get))
+      Option(OpenDialog.checkout(db, pid, peer, parent, VcsOtClient.unsafeGetRegistrar))
 
     def lookupObs(p: ISPProgram): Option[ISPObservation] =
       Option(p.getAllObservations).map(_.asScala.toList).flatMap(_.find(_.getObservationID == oid))
@@ -77,7 +77,7 @@ final class TooHandler(evt: TooEvent, peer: Peer, parent: JComponent) extends Ru
 
     // If we failed, show the appropriate message.
     obs.left foreach { msg =>
-        JOptionPane.showMessageDialog(parent, msg, "Could not show observation '%s'", WARNING_MESSAGE)
+      JOptionPane.showMessageDialog(parent, msg, "Could not show observation '%s'", WARNING_MESSAGE)
     }
 
     // If we succeeded, open the program and select the observation.  This is

@@ -7,7 +7,6 @@
 
 package jsky.app.ot.viewer;
 
-import edu.gemini.ags.api.AgsMagnitude;
 import edu.gemini.p2checker.api.IP2Problems;
 import edu.gemini.p2checker.api.Problem;
 import edu.gemini.pot.sp.*;
@@ -39,9 +38,9 @@ import jsky.app.ot.util.History;
 import jsky.app.ot.util.PropertyChangeMultiplexer;
 import jsky.app.ot.util.Resources;
 import jsky.app.ot.util.RootEntry;
-import jsky.app.ot.vcs.VcsGui;
 import jsky.app.ot.vcs.VcsStateTracker;
 import jsky.app.ot.vcs.SyncAllDialog;
+import jsky.app.ot.vcs.VcsOtClient;
 import jsky.app.ot.viewer.plugin.PluginConsumer;
 import jsky.app.ot.viewer.plugin.PluginRegistry;
 import jsky.util.gui.BusyWin;
@@ -874,9 +873,9 @@ public final class SPViewer extends SPViewerGUI implements PropertyChangeListene
     }
 
     private boolean shouldClose(List<ISPProgram> progs) {
-        if (VcsGui.registrar().isEmpty()) return true;
+        if (VcsOtClient.ref().isEmpty()) return true;
         else {
-            final VcsRegistrar reg = VcsGui.registrar().get();
+            final VcsRegistrar reg = VcsOtClient.unsafeGetRegistrar();
             return SyncAllDialog.shouldClose(this, OT.getKeyChain(), reg, _db, progs);
         }
     }

@@ -65,7 +65,6 @@ public final class SPViewerToolBar extends JToolBar {
 
         add(viewer._actions.conflictNextAction);
         add(viewer._actions.vcsSyncAction);
-        add(viewer._actions.vcs2SyncAction);
         super.addSeparator();
     }
 

@@ -4,7 +4,7 @@
 package edu.gemini.dbTools.tigratable;
 
 import edu.gemini.pot.sp.*;
-import edu.gemini.sp.vcs.VcsServer;
+import edu.gemini.sp.vcs2.VcsService;
 import edu.gemini.spModel.core.SPProgramID;
 import edu.gemini.spModel.gemini.obscomp.SPProgram;
 import edu.gemini.spModel.obs.ObservationStatus;
@@ -50,7 +50,7 @@ public class TigraTableRow implements Serializable {
      *
      * @return newly created TigraTableRow
      */
-    public static TigraTableRow create(final ISPProgram prog, final VcsServer vcs)  {
+    public static TigraTableRow create(final ISPProgram prog, final VcsService vcs)  {
         final TigraTableRow ttr = new TigraTableRow();
         ttr._setProgramId(prog.getProgramID());
 

@@ -28,7 +28,9 @@ trait OcsApp { this: OcsBundle =>
   )
 
   lazy val app_ot = project.in(file("app/ot")).dependsOn(
-    bundle_edu_gemini_sp_vcs_tui,
+    bundle_edu_gemini_sp_vcs,
+    bundle_edu_gemini_sp_vcs_log,
+    bundle_edu_gemini_sp_vcs_reg,
     bundle_edu_gemini_spdb_shell,
     bundle_edu_gemini_util_log_extras,
     bundle_jsky_app_ot,
@@ -57,7 +59,9 @@ trait OcsApp { this: OcsBundle =>
     bundle_edu_gemini_lchquery_servlet,
     bundle_edu_gemini_qpt_shared,
     bundle_jsky_app_ot_shared,
-    bundle_edu_gemini_sp_vcs_tui,
+    bundle_edu_gemini_sp_vcs,
+    bundle_edu_gemini_sp_vcs_log,
+    bundle_edu_gemini_sp_vcs_reg,
     bundle_edu_gemini_phase2_skeleton_servlet,
     bundle_edu_gemini_spdb_rollover_servlet,
     bundle_edu_gemini_ags_servlet,
@@ -120,7 +124,6 @@ trait OcsApp { this: OcsBundle =>
     bundle_edu_gemini_sp_vcs,
     bundle_edu_gemini_sp_vcs_log,
     bundle_edu_gemini_sp_vcs_reg,
-    bundle_edu_gemini_sp_vcs_tui,
     bundle_edu_gemini_spModel_core,
     bundle_edu_gemini_ags,
     bundle_edu_gemini_spModel_io,

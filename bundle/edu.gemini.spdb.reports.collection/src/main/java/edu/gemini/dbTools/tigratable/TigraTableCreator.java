@@ -6,7 +6,7 @@ package edu.gemini.dbTools.tigratable;
 import edu.gemini.dbTools.html.FtpProps;
 import edu.gemini.dbTools.html.FtpUtil$;
 import edu.gemini.pot.client.SPDB;
-import edu.gemini.sp.vcs.VcsServer;
+import edu.gemini.sp.vcs2.VcsService;
 import edu.gemini.spModel.core.Site;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -82,8 +82,8 @@ public class TigraTableCreator {
 
             // Create the output file.
             log.info("writing temp file to " + out.getAbsolutePath());
-            final ServiceReference<VcsServer> ref = ctx.getServiceReference(VcsServer.class);
-            final VcsServer vcs = (ref == null) ? null : ctx.getService(ref);
+            final ServiceReference<VcsService> ref = ctx.getServiceReference(VcsService.class);
+            final VcsService vcs = (ref == null) ? null : ctx.getService(ref);
             final List<TigraTable> tables = TigraTableFunctor.getTigraTables(SPDB.get(), vcs, user);
             _writeTables(tables, out);
 

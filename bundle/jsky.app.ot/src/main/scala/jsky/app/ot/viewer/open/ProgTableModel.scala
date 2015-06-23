@@ -1,12 +1,14 @@
 package jsky.app.ot.viewer.open
 
+import edu.gemini.pot.sp.version.VersionMap
 import edu.gemini.pot.spdb.{IDBQueryRunner, IDBDatabaseService}
 import edu.gemini.pot.sp.{ISPProgram, SPNodeKey}
+import edu.gemini.shared.util.VersionComparison
+import edu.gemini.shared.util.VersionComparison.{Conflicting, Newer, Older}
 import edu.gemini.shared.util.immutable.MapOp
-import edu.gemini.sp.vcs._
-import edu.gemini.sp.vcs.ProgramStatus.{PendingCheckIn, PendingUpdate, PendingSync}
-import edu.gemini.sp.vcs.OldVcsFailure.OldVcsException
-import edu.gemini.sp.vcs.VersionControlSystem
+import edu.gemini.sp.vcs2.VcsAction._
+import edu.gemini.sp.vcs2.VcsFailure
+import edu.gemini.sp.vcs2.VcsFailure.VcsException
 import edu.gemini.spModel.core.{ProgramId, SPProgramID, Peer, VersionException}
 import edu.gemini.spModel.util.DBProgramInfo
 import edu.gemini.util.security.auth.keychain.KeyChain
@@ -15,7 +17,7 @@ import edu.gemini.util.trpc.client.TrpcClient
 
 import jsky.app.ot.OT
 import jsky.app.ot.shared.spModel.util.DBProgramListFunctor
-import jsky.app.ot.vcs.VcsGui
+import jsky.app.ot.vcs.VcsOtClient
 import jsky.app.ot.viewer.DBProgramChooserFilter
 import jsky.util.gui.DialogUtil
 
@@ -30,7 +32,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.swing._
 import scala.swing.Swing._
 import scala.util.{Success, Failure}
-import scalaz.{Success => _, Failure => _}
+import scalaz.{Success => _, Failure => _, -\/, \/-}
 
 object ProgTableModel {
   lazy val Log = java.util.logging.Logger.getLogger(getClass.getName)
@@ -40,7 +42,7 @@ object ProgTableModel {
 // Our table model
 class ProgTableModel(filter: DBProgramChooserFilter, db: IDBDatabaseService, auth: KeyChain) extends AbstractTableModel {
 
-  val vcs = VcsGui.registrar
+  val vcs = VcsOtClient.ref.map(_.reg)
 
   import ProgTableModel._
 
@@ -51,8 +53,8 @@ class ProgTableModel(filter: DBProgramChooserFilter, db: IDBDatabaseService, aut
   private val locals   = new AtomicReference[Vector[ISPProgram]](Vector.empty)
   private val remotes  = new AtomicReference[Map[Peer, Vector[DBProgramInfo]]](Map())
   private val elems    = new AtomicReference[Vector[Elem]](Vector.empty)
-  private val statuses = new AtomicReference[Map[SPNodeKey, ProgramStatus]](Map())
-  private val failures = new AtomicReference[Map[SPNodeKey, OldVcsFailure]](Map())
+  private val statuses = new AtomicReference[Map[SPNodeKey, VersionComparison]](Map())
+  private val failures = new AtomicReference[Map[SPNodeKey, VcsFailure]](Map())
 
   // Initialization
   filter.addActionListener(ActionListener(_ => fireTableDataChanged()))
@@ -78,7 +80,7 @@ class ProgTableModel(filter: DBProgramChooserFilter, db: IDBDatabaseService, aut
   def getRemote(i: Int): Option[(DBProgramInfo, Peer)] =
     getInfo(i).flatMap(i => remotes.get.find(_._2.contains(i)).map(p => (i, p._1)))
 
-  def getStatus(i: Int): Option[ProgramStatus] =
+  def getStatus(i: Int): Option[VersionComparison] =
     get(i).flatMap(_.left.toOption).flatMap { p => statuses.get().get(p.getNodeKey) }
 
   lazy val getColumnCount: Int =
@@ -97,15 +99,15 @@ class ProgTableModel(filter: DBProgramChooserFilter, db: IDBDatabaseService, aut
     reg <- vcs
     _   <- reg.registration(p.getProgramID)
   } yield statuses.get.get(p.getNodeKey).map {
-      case PendingCheckIn => "Outgoing"
-      case PendingSync    => "Incoming, Outgoing"
-      case PendingUpdate  => "Incoming"
-      case _              => "None"
+      case Newer       => "Outgoing"
+      case Conflicting => "Incoming, Outgoing"
+      case Older       => "Incoming"
+      case _           => "None"
     }.map { s =>
       if (p.hasConflicts) s + ", Conflicts" else s
     }.orElse(failures.get.get(p.getNodeKey).map {
-      case OldVcsException(_: IOException) => "Cannot Connect"
-      case _ => "Error" // for now
+      case VcsException(_: IOException) => "Cannot Connect"
+      case _                            => "Error" // for now
     }).getOrElse("Pending...")
 
 
@@ -185,37 +187,17 @@ class ProgTableModel(filter: DBProgramChooserFilter, db: IDBDatabaseService, aut
       def fireTDC(): Unit = Swing.onEDT { super.fireTableDataChanged() }
 
       for {
-        pid <- Option(p.getProgramID)
-        reg <- vcs
-        loc <- reg.registration(pid)
-      } {
-        // Future[scalaz.Validation[VcsFailure, (ISPProgram, Map[SPNodeKey, NodeStatus])]]
-        val futureStatus = TrpcClient(loc.host, loc.port).withKeyChain(OT.getKeyChain) future { r =>
-          VersionControlSystem(db, r[VcsServer]).programStatus(pid)
-        }
-
-        // Sorry this is a bit confusing. We are dealing with scala.util.Failure
-        // (and Success) from the TrpcClient future and scalaz.Failure (and
-        // Success) from the result of the remote call itself.
-
-        futureStatus onFailure {
-          case e: Exception =>
-            failures.modify(_ + (p.getNodeKey -> OldVcsException(e)))
-            fireTDC()
-          case t =>
-            failures.modify(_ + (p.getNodeKey -> OldVcsException(new RuntimeException(t))))
-            fireTDC()
-        }
-
-        futureStatus onSuccess {
-          case scalaz.-\/(f) =>
-            failures.modify(_ + (p.getNodeKey -> f))
-            fireTDC()
-          case scalaz.\/-(ps) =>
-            statuses.modify(_ + (p.getNodeKey -> ps))
-            fireTDC()
-        }
-
+        pid    <- Option(p.getProgramID)
+        reg    <- vcs
+        loc    <- reg.registration(pid)
+        client <- VcsOtClient.ref
+      } client.version(pid).forkAsync {
+        case \/-(vm) =>
+          statuses.modify(_ + (p.getNodeKey -> VersionMap.compare(p.getVersions, vm)))
+          fireTDC()
+        case -\/(f)  =>
+          failures.modify(_ + (p.getNodeKey -> f))
+          fireTDC()
       }
     }
 

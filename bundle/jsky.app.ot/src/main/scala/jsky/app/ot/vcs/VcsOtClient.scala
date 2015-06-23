@@ -1,4 +1,4 @@
-package jsky.app.ot.vcs2
+package jsky.app.ot.vcs
 
 import edu.gemini.pot.sp.ISPProgram
 import edu.gemini.pot.sp.version.VersionMap
@@ -20,6 +20,9 @@ object VcsOtClient {
   def ref_=(c: Option[VcsOtClient]): Unit = {
     client = c
   }
+
+  def unsafeGetRegistrar: VcsRegistrar =
+    ref.fold(sys.error("OT not initialized for VCS"))(_.reg)
 }
 
 /** Provides a simplified VCS API for the OT that Wraps the raw `Vcs` API to

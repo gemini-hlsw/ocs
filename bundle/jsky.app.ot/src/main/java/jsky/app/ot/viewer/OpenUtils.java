@@ -14,7 +14,7 @@ import edu.gemini.spModel.core.SPProgramID;
 import edu.gemini.spModel.io.SpExportFunctor;
 import edu.gemini.spModel.util.*;
 import jsky.app.ot.OT;
-import jsky.app.ot.vcs.VcsGui$;
+import jsky.app.ot.vcs.VcsOtClient;
 import jsky.app.ot.viewer.open.OpenDialog$;
 import jsky.util.Preferences;
 import jsky.util.gui.DialogUtil;
@@ -266,7 +266,7 @@ public final class OpenUtils {
             return OpenDialog$.MODULE$.open(
                     db,
                     OT.getKeyChain(),
-                    VcsGui$.MODULE$.registrar().get(),
+                    VcsOtClient.unsafeGetRegistrar(),
                     (JComponent) null);
         }
 

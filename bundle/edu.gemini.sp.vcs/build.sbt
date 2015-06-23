@@ -29,5 +29,4 @@ OsgiKeys.privatePackage := Seq(
 )
 
 OsgiKeys.exportPackage := Seq(
-  "edu.gemini.sp.vcs;-noimport:=true",
   "edu.gemini.sp.vcs2")

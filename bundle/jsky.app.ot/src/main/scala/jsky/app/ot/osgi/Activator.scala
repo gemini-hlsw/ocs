@@ -14,8 +14,7 @@ import edu.gemini.util.security.auth.ui.PasswordDialog
 import jsky.app.ot.OT
 import jsky.app.ot.gemini.obscat.CatalogQueryHistory
 import jsky.app.ot.plugin.{OtActionPlugin, OtViewerService}
-import jsky.app.ot.vcs.VcsGui
-import jsky.app.ot.vcs2.VcsOtClient
+import jsky.app.ot.vcs.VcsOtClient
 import jsky.app.ot.viewer.ViewerService
 
 import org.osgi.framework.{ServiceRegistration, BundleContext, BundleActivator}
@@ -37,7 +36,6 @@ class Activator extends BundleActivator {
   override def start(ctx: BundleContext) {
     tracker = track[IDBDatabaseService, Vcs, VcsRegistrar, KeyChain, ServiceRegistration[OtViewerService]](ctx) { (odb, vcs, reg, auth) =>
       SPDB.init(odb)
-      VcsGui.registrar = Some(reg)
       VcsOtClient.ref  = Some(VcsOtClient(vcs, reg))
 
       val storage = ExternalStorage.getExternalDataRoot(ctx)
@@ -70,7 +68,6 @@ class Activator extends BundleActivator {
     } { viewerReg =>
       viewerReg.unregister()
       SPDB.clear()
-      VcsGui.registrar = None
       VcsOtClient.ref  = None
     }
     tracker.open()

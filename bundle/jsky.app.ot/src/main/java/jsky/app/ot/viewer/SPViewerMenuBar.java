@@ -82,7 +82,6 @@ final class SPViewerMenuBar extends JMenuBar {
         menu.add(new ImportAction(_viewer));
         menu.add(new ExportAction(_viewer));
         menu.add(_viewer._actions.vcsSyncAction);
-        menu.add(_viewer._actions.vcs2SyncAction);
         menu.add(_viewer._actions.syncAllAction);
         menu.addSeparator();
         menu.add(new FetchLibrariesAction(_viewer));

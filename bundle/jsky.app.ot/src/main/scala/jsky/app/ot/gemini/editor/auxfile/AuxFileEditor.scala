@@ -5,7 +5,7 @@ import edu.gemini.spModel.core.SPProgramID
 
 import jsky.app.ot.gemini.editor.ProgramForm
 import jsky.app.ot.util.Resources
-import jsky.app.ot.vcs.VcsGui
+import jsky.app.ot.vcs.VcsOtClient
 
 import java.text.SimpleDateFormat
 import java.util.{Collections, Date, TimeZone}
@@ -55,7 +55,7 @@ object AuxFileEditor {
 import AuxFileEditor._
 
 class AuxFileEditor(form: ProgramForm) extends BorderPanel {
-  val model = new AuxFileModel(VcsGui.registrar.get)
+  val model = new AuxFileModel(VcsOtClient.unsafeGetRegistrar)
 
   private val addAction    = new AddAction(this, model)
   private val removeAction = new RemoveAction(this, model)

@@ -49,7 +49,6 @@ ocsAppManifest := {
     BundleSpec((sbt.Keys.name in bundle_edu_gemini_smartgcal_servlet).value, Version.parse((sbt.Keys.version in bundle_edu_gemini_smartgcal_servlet).value)),
     BundleSpec((sbt.Keys.name in bundle_edu_gemini_sp_vcs_log).value, Version.parse((sbt.Keys.version in bundle_edu_gemini_sp_vcs_log).value)),
     BundleSpec((sbt.Keys.name in bundle_edu_gemini_sp_vcs_reg).value, Version.parse((sbt.Keys.version in bundle_edu_gemini_sp_vcs_reg).value)),
-    BundleSpec((sbt.Keys.name in bundle_edu_gemini_sp_vcs_tui).value, Version.parse((sbt.Keys.version in bundle_edu_gemini_sp_vcs_tui).value)),
     BundleSpec((sbt.Keys.name in bundle_edu_gemini_sp_vcs).value, Version.parse((sbt.Keys.version in bundle_edu_gemini_sp_vcs).value)),
     BundleSpec((sbt.Keys.name in bundle_edu_gemini_spModel_core).value, Version.parse((sbt.Keys.version in bundle_edu_gemini_spModel_core).value)),
     BundleSpec((sbt.Keys.name in bundle_edu_gemini_spModel_io).value, Version.parse((sbt.Keys.version in bundle_edu_gemini_spModel_io).value)),

@@ -41,9 +41,10 @@ object VcsPeerSelectionDialog {
   }
 
   def promptAndSet(c: Option[Component], pid: SPProgramID, allPeers: List[Peer]): Unit =
-    for (r <- VcsGui.registrar; p <- prompt(c, pid, allPeers)) {
-      r.register(pid, p)
-    }
+    for {
+      client <- VcsOtClient.ref
+      p      <- prompt(c, pid, allPeers)
+    } client.reg.register(pid, p)
 }
 
 import VcsPeerSelectionDialog._
