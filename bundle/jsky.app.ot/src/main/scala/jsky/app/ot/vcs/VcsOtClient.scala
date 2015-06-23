@@ -21,7 +21,8 @@ object VcsOtClient {
     client = c
   }
 
-  def unsafeGetRegistrar: VcsRegistrar = ref.get.reg
+  def unsafeGetRegistrar: VcsRegistrar =
+    ref.fold(sys.error("OT not initialized for VCS"))(_.reg)
 }
 
 /** Provides a simplified VCS API for the OT that Wraps the raw `Vcs` API to
