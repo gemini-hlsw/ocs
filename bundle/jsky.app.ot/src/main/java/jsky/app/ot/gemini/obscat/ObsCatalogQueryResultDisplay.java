@@ -17,7 +17,7 @@ import jsky.app.ot.session.SessionQueuePanel;
 import jsky.app.ot.shared.gemini.obscat.ObsCatalogInfo;
 import jsky.app.ot.userprefs.observer.ObservingSite;
 import jsky.app.ot.util.Resources;
-import jsky.app.ot.vcs2.VcsOtClient;
+import jsky.app.ot.vcs.VcsOtClient;
 import jsky.app.ot.viewer.OpenUtils;
 import jsky.app.ot.viewer.SPElevationPlotPlugin;
 import jsky.app.ot.viewer.ViewerManager;

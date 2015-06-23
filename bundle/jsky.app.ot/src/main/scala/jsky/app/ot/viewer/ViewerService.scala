@@ -9,7 +9,7 @@ import edu.gemini.spModel.core.SPProgramID
 
 import jsky.app.ot.plugin.OtViewerService
 import jsky.app.ot.userprefs.observer.ObservingPeer
-import jsky.app.ot.vcs2.VcsOtClient
+import jsky.app.ot.vcs.VcsOtClient
 
 import java.util.concurrent.atomic.AtomicBoolean
 

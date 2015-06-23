@@ -8,7 +8,7 @@ import edu.gemini.sp.vcs.{OldVcsFailure, VersionControlSystem, TrpcVcsServer}
 import edu.gemini.too.event.api.TooEvent
 
 import jsky.app.ot.userprefs.observer.ObserverPreferences
-import jsky.app.ot.vcs2.VcsOtClient
+import jsky.app.ot.vcs.VcsOtClient
 import jsky.app.ot.viewer.ViewerManager
 import jsky.app.ot.viewer.open.OpenDialog
 

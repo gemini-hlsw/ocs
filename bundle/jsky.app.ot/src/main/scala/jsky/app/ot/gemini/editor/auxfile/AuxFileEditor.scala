@@ -5,7 +5,7 @@ import edu.gemini.spModel.core.SPProgramID
 
 import jsky.app.ot.gemini.editor.ProgramForm
 import jsky.app.ot.util.Resources
-import jsky.app.ot.vcs2.VcsOtClient
+import jsky.app.ot.vcs.VcsOtClient
 
 import java.text.SimpleDateFormat
 import java.util.{Collections, Date, TimeZone}

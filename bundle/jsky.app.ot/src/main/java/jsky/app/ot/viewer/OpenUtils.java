@@ -14,7 +14,7 @@ import edu.gemini.spModel.core.SPProgramID;
 import edu.gemini.spModel.io.SpExportFunctor;
 import edu.gemini.spModel.util.*;
 import jsky.app.ot.OT;
-import jsky.app.ot.vcs2.VcsOtClient;
+import jsky.app.ot.vcs.VcsOtClient;
 import jsky.app.ot.viewer.open.OpenDialog$;
 import jsky.util.Preferences;
 import jsky.util.gui.DialogUtil;

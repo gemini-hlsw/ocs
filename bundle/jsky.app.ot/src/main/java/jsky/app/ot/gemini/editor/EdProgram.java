@@ -24,7 +24,7 @@ import jsky.app.ot.OTOptions;
 import jsky.app.ot.StaffBean;
 import jsky.app.ot.editor.OtItemEditor;
 import jsky.app.ot.gemini.editor.auxfile.AuxFileEditor;
-import jsky.app.ot.vcs2.VcsOtClient;
+import jsky.app.ot.vcs.VcsOtClient;
 import jsky.coords.HMS;
 import jsky.util.gui.DialogUtil;
 import jsky.util.gui.TextBoxWidget;

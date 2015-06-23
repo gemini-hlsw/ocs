@@ -1,6 +1,6 @@
 package jsky.app.ot.viewer
 
-import jsky.app.ot.vcs2.VcsOtClient
+import jsky.app.ot.vcs.VcsOtClient
 
 import javax.swing.AbstractAction
 import jsky.util.gui.{DialogUtil, BusyWin}

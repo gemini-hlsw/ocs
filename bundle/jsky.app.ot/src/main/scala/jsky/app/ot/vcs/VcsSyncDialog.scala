@@ -1,10 +1,10 @@
-package jsky.app.ot.vcs2
+package jsky.app.ot.vcs
 
 import edu.gemini.pot.client.SPDB
 import edu.gemini.pot.sp.version.VersionMap
-import edu.gemini.sp.vcs2.VcsFailure.{NotFound, HasConflict, Cancelled}
 import edu.gemini.sp.vcs2._
 import edu.gemini.sp.vcs2.VcsAction.VcsActionOps
+import edu.gemini.sp.vcs2.VcsFailure.{Cancelled, HasConflict, NotFound}
 import edu.gemini.spModel.core.SPProgramID
 import jsky.app.ot.util.Resources
 import jsky.app.ot.viewer.action.ResolveConflictsAction
@@ -13,14 +13,13 @@ import java.awt.Color
 import java.util.concurrent.atomic.AtomicBoolean
 import javax.swing.UIManager
 
-import scala.swing._
 import scala.swing.GridBagPanel.Anchor.West
 import scala.swing.GridBagPanel.Fill.Horizontal
 import scala.swing.Swing._
+import scala.swing._
 import scala.swing.event.ActionEvent
-
+import scalaz.Scalaz._
 import scalaz._
-import Scalaz._
 
 
 object VcsSyncDialog {

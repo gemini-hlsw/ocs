@@ -16,7 +16,7 @@ import edu.gemini.util.security.auth.keychain.{Key, KeyChain, Action => KAction}
 import edu.gemini.util.security.auth.ui.{AuthDialog, CloseOnEsc, Instructions}
 import jsky.app.ot.OT
 import jsky.app.ot.util.Resources
-import jsky.app.ot.vcs2.VcsOtClient
+import jsky.app.ot.vcs.VcsOtClient
 import jsky.app.ot.viewer.DBProgramChooserFilter
 
 import java.awt

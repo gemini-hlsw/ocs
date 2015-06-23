@@ -20,7 +20,6 @@ import jsky.app.ot.shared.vcs.VersionMapFunctor.VmUpdate
 import jsky.app.ot.userprefs.general.GeneralPreferences
 import jsky.app.ot.util.{OtColor, Resources}
 import jsky.app.ot.vcs.vm.{VmUpdater, VmStore}
-import jsky.app.ot.vcs2.VcsOtClient
 import jsky.app.ot.viewer.ViewerManager
 
 import java.awt.{Font, Color, Component}

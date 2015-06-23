@@ -7,8 +7,7 @@ import edu.gemini.sp.vcs2.{OptionOps, _}
 import edu.gemini.spModel.core.{Peer, SPProgramID}
 import edu.gemini.util.security.auth.keychain.Action._
 import jsky.app.ot.OT
-import jsky.app.ot.vcs.{VcsIcon, VcsPeerSelectionDialog, VcsStateEvent}
-import jsky.app.ot.vcs2.{VcsOtClient, VcsSyncDialog}
+import jsky.app.ot.vcs.{VcsSyncDialog, VcsOtClient, VcsIcon, VcsPeerSelectionDialog, VcsStateEvent}
 import jsky.app.ot.viewer.SPViewer
 
 import java.awt.event.{ActionEvent, KeyEvent}

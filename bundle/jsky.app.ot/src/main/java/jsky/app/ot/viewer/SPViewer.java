@@ -40,7 +40,7 @@ import jsky.app.ot.util.Resources;
 import jsky.app.ot.util.RootEntry;
 import jsky.app.ot.vcs.VcsStateTracker;
 import jsky.app.ot.vcs.SyncAllDialog;
-import jsky.app.ot.vcs2.VcsOtClient;
+import jsky.app.ot.vcs.VcsOtClient;
 import jsky.app.ot.viewer.plugin.PluginConsumer;
 import jsky.app.ot.viewer.plugin.PluginRegistry;
 import jsky.util.gui.BusyWin;

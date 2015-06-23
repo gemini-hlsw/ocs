@@ -1,4 +1,4 @@
-package jsky.app.ot.vcs2
+package jsky.app.ot.vcs
 
 import edu.gemini.pot.sp.ISPProgram
 import edu.gemini.pot.sp.version.VersionMap

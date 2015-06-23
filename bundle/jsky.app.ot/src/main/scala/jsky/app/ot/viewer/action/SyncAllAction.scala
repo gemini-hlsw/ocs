@@ -3,8 +3,7 @@ package jsky.app.ot.viewer.action
 import edu.gemini.pot.client.SPDB
 
 import jsky.app.ot.OT
-import jsky.app.ot.vcs.{SyncAllDialog, VcsIcon}
-import jsky.app.ot.vcs2.VcsOtClient
+import jsky.app.ot.vcs.{VcsOtClient, SyncAllDialog, VcsIcon}
 import jsky.app.ot.viewer.SPViewer
 
 import java.awt.event.ActionEvent

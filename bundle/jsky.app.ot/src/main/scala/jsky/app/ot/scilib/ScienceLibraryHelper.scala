@@ -1,12 +1,11 @@
 package jsky.app.ot.scilib
 
-import jsky.app.ot.vcs2.VcsOtClient
-
 import edu.gemini.util.security.auth.keychain.Action._
 import edu.gemini.spModel.core._
 import jsky.app.ot.OT
 import edu.gemini.pot.sp.ISPProgram
 import edu.gemini.pot.client.SPDB
+import jsky.app.ot.vcs.VcsOtClient
 import jsky.app.ot.viewer.open.OpenDialog
 import javax.swing.JComponent
 

@@ -3,7 +3,7 @@ package jsky.app.ot.testlauncher
 import edu.gemini.ags.conf.ProbeLimitsTable
 import edu.gemini.qv.plugin.{QvTool, ShowQvToolAction}
 import edu.gemini.sp.vcs2.{VcsServer, Vcs}
-import jsky.app.ot.vcs2.VcsOtClient
+import jsky.app.ot.vcs.VcsOtClient
 import jsky.app.ot.viewer.plugin.PluginRegistry
 
 import scalaz._, Scalaz._

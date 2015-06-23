@@ -7,7 +7,6 @@ import edu.gemini.pot.sp.{SPUtil, ISPObsExecLog, ISPNode, ISPProgram}
 import edu.gemini.pot.sp.version._
 
 import jsky.app.ot.vcs.vm.{VmStore, VmUpdateEvent}
-import jsky.app.ot.vcs2.VcsOtClient
 
 import java.beans.{PropertyChangeEvent, PropertyChangeListener}
 

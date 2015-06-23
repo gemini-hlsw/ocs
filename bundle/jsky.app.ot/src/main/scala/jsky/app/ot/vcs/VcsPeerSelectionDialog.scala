@@ -2,7 +2,6 @@ package jsky.app.ot.vcs
 
 import edu.gemini.spModel.core.{SPProgramID, Peer}
 import jsky.app.ot.userprefs.observer.ObservingPeer
-import jsky.app.ot.vcs2.VcsOtClient
 import jsky.app.ot.viewer.SPViewer
 
 import java.awt.{Point, Toolkit, Color}
