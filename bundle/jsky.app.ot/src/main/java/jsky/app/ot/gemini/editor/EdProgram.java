@@ -24,7 +24,7 @@ import jsky.app.ot.OTOptions;
 import jsky.app.ot.StaffBean;
 import jsky.app.ot.editor.OtItemEditor;
 import jsky.app.ot.gemini.editor.auxfile.AuxFileEditor;
-import jsky.app.ot.vcs.VcsGui$;
+import jsky.app.ot.vcs2.VcsOtClient;
 import jsky.coords.HMS;
 import jsky.util.gui.DialogUtil;
 import jsky.util.gui.TextBoxWidget;
@@ -137,7 +137,7 @@ public final class EdProgram extends OtItemEditor<ISPProgram, SPProgram> impleme
 
         final SPProgramID progId = _showProgId();
         _edAux.update(progId);
-        EdProgramHelper.updateHistoryTable(this, VcsGui$.MODULE$.registrar().get());
+        EdProgramHelper.updateHistoryTable(this, VcsOtClient.unsafeGetRegistrar());
         _showActiveState();
         _showCompletedState();
         _showNotifyPiState();
@@ -147,11 +147,7 @@ public final class EdProgram extends OtItemEditor<ISPProgram, SPProgram> impleme
         // is changed. If the user didn't press Apply before selecting the program
         // node, we may need to give give the events a chance to be handled, to make
         // sure this value is updated before it is displayed.
-        SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
-                _updateTimes();
-            }
-        });
+        SwingUtilities.invokeLater(() -> _updateTimes());
     }
 
     private SPProgramID _showProgId() {

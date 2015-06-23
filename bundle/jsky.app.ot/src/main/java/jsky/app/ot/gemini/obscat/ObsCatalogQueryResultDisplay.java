@@ -17,7 +17,7 @@ import jsky.app.ot.session.SessionQueuePanel;
 import jsky.app.ot.shared.gemini.obscat.ObsCatalogInfo;
 import jsky.app.ot.userprefs.observer.ObservingSite;
 import jsky.app.ot.util.Resources;
-import jsky.app.ot.vcs.VcsGui$;
+import jsky.app.ot.vcs2.VcsOtClient;
 import jsky.app.ot.viewer.OpenUtils;
 import jsky.app.ot.viewer.SPElevationPlotPlugin;
 import jsky.app.ot.viewer.ViewerManager;
@@ -28,7 +28,6 @@ import jsky.catalog.gui.TableDisplay;
 import jsky.catalog.gui.TableDisplayTool;
 import jsky.coords.TargetDesc;
 import jsky.plot.ElevationPlotManager;
-import jsky.plot.ElevationPlotUtil;
 import jsky.util.gui.DialogUtil;
 import jsky.util.gui.SortedJTable;
 import jsky.util.gui.TabbedPanel;
@@ -343,7 +342,7 @@ public final class ObsCatalogQueryResultDisplay extends TableDisplayTool impleme
                 p = remoteProgs.get(pid);
                 if (p == null) {
                     final Remote remote = (Remote) db;
-                    p = OpenDialog.checkout(SPDB.get(), pid, remote.peer(), this, VcsGui$.MODULE$.registrar().get());
+                    p = OpenDialog.checkout(SPDB.get(), pid, remote.peer(), this, VcsOtClient.unsafeGetRegistrar());
                     if (p != null) remoteProgs.put(pid, p);
                 }
             }

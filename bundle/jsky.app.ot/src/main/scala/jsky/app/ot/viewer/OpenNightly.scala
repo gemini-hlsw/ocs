@@ -1,11 +1,12 @@
 package jsky.app.ot.viewer
 
+import jsky.app.ot.vcs2.VcsOtClient
+
 import javax.swing.AbstractAction
 import jsky.util.gui.{DialogUtil, BusyWin}
 import edu.gemini.spModel.core.{SPProgramID, Peer, Site}
 import jsky.app.ot.userprefs.observer.ObservingSite
 import jsky.app.ot.{OTOptions, OT}
-import jsky.app.ot.vcs.VcsGui
 import edu.gemini.pot.client.SPDB
 import jsky.app.ot.shared.spModel.util.CreateOrVerifyFunctor
 import jsky.app.ot.viewer.open.OpenDialog
@@ -37,7 +38,7 @@ abstract class OpenNightly(name: String) extends AbstractAction(name) {
 
   def checkout(pid: SPProgramID, peer: Peer): Option[ISPProgram] = {
     CreateOrVerifyFunctor.execute(OT.getKeyChain, pid, peer)
-    OpenDialog.checkout(SPDB.get, pid, peer, null.asInstanceOf[Component], VcsGui.registrar.get)
+    OpenDialog.checkout(SPDB.get, pid, peer, null.asInstanceOf[Component], VcsOtClient.unsafeGetRegistrar)
   }
 
   // Subclasses need to implement

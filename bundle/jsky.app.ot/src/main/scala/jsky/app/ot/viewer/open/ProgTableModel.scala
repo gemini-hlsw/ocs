@@ -17,7 +17,6 @@ import edu.gemini.util.trpc.client.TrpcClient
 
 import jsky.app.ot.OT
 import jsky.app.ot.shared.spModel.util.DBProgramListFunctor
-import jsky.app.ot.vcs.VcsGui
 import jsky.app.ot.vcs2.VcsOtClient
 import jsky.app.ot.viewer.DBProgramChooserFilter
 import jsky.util.gui.DialogUtil
@@ -43,7 +42,7 @@ object ProgTableModel {
 // Our table model
 class ProgTableModel(filter: DBProgramChooserFilter, db: IDBDatabaseService, auth: KeyChain) extends AbstractTableModel {
 
-  val vcs = VcsGui.registrar
+  val vcs = VcsOtClient.ref.map(_.reg)
 
   import ProgTableModel._
 

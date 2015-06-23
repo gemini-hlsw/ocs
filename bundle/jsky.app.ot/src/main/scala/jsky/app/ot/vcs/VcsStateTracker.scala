@@ -7,6 +7,7 @@ import edu.gemini.pot.sp.{SPUtil, ISPObsExecLog, ISPNode, ISPProgram}
 import edu.gemini.pot.sp.version._
 
 import jsky.app.ot.vcs.vm.{VmStore, VmUpdateEvent}
+import jsky.app.ot.vcs2.VcsOtClient
 
 import java.beans.{PropertyChangeEvent, PropertyChangeListener}
 
@@ -41,9 +42,9 @@ final class VcsStateTracker extends Publisher {
   private var vcsState: VcsStateEvent            = VcsStateEvent(None, None, None, Nil)
   private var updater: Option[ProgramUpdater]    = None
 
-  VcsGui.registrar.foreach { reg =>
-    reg.subscribe(new scala.collection.mutable.Subscriber[VcsRegistrationEvent, reg.Pub] {
-      override def notify(pub: reg.Pub, event: VcsRegistrationEvent): Unit = Swing.onEDT {
+  VcsOtClient.ref.foreach { c =>
+    c.reg.subscribe(new scala.collection.mutable.Subscriber[VcsRegistrationEvent, c.reg.Pub] {
+      override def notify(pub: c.reg.Pub, event: VcsRegistrationEvent): Unit = Swing.onEDT {
         if (progNode.exists(_.getProgramID == event.pid)) {
           resetUpdater()
           updateState(calcConflicts = false)

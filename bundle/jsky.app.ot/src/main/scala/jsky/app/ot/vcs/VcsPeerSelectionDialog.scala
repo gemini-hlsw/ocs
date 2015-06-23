@@ -2,6 +2,7 @@ package jsky.app.ot.vcs
 
 import edu.gemini.spModel.core.{SPProgramID, Peer}
 import jsky.app.ot.userprefs.observer.ObservingPeer
+import jsky.app.ot.vcs2.VcsOtClient
 import jsky.app.ot.viewer.SPViewer
 
 import java.awt.{Point, Toolkit, Color}
@@ -41,8 +42,8 @@ object VcsPeerSelectionDialog {
   }
 
   def promptAndSet(c: Option[Component], pid: SPProgramID, allPeers: List[Peer]): Unit =
-    for (r <- VcsGui.registrar; p <- prompt(c, pid, allPeers)) {
-      r.register(pid, p)
+    for (client <- VcsOtClient.ref; p <- prompt(c, pid, allPeers)) {
+      client.reg.register(pid, p)
     }
 }
 

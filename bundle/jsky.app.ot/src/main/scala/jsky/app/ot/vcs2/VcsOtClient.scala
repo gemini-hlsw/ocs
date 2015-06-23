@@ -20,6 +20,8 @@ object VcsOtClient {
   def ref_=(c: Option[VcsOtClient]): Unit = {
     client = c
   }
+
+  def unsafeGetRegistrar: VcsRegistrar = ref.get.reg
 }
 
 /** Provides a simplified VCS API for the OT that Wraps the raw `Vcs` API to

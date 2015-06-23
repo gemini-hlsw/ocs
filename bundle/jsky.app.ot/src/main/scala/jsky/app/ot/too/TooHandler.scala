@@ -8,8 +8,8 @@ import edu.gemini.sp.vcs.{OldVcsFailure, VersionControlSystem, TrpcVcsServer}
 import edu.gemini.too.event.api.TooEvent
 
 import jsky.app.ot.userprefs.observer.ObserverPreferences
-import jsky.app.ot.vcs.VcsGui
-import jsky.app.ot.viewer.{ViewerService, SPViewer, ViewerManager}
+import jsky.app.ot.vcs2.VcsOtClient
+import jsky.app.ot.viewer.ViewerManager
 import jsky.app.ot.viewer.open.OpenDialog
 
 import java.util.logging.Logger
@@ -17,7 +17,6 @@ import javax.swing.{JOptionPane, JComponent}
 import javax.swing.JOptionPane.WARNING_MESSAGE
 
 import scala.collection.JavaConverters._
-import jsky.app.ot.viewer.action.OpenAction
 import scala.swing.Swing
 import jsky.app.ot.OT
 
@@ -64,7 +63,7 @@ final class TooHandler(evt: TooEvent, peer: Peer, parent: JComponent) extends Ru
       }
 
     def checkout: Option[ISPProgram] =
-      Option(OpenDialog.checkout(db, pid, peer, parent, VcsGui.registrar.get))
+      Option(OpenDialog.checkout(db, pid, peer, parent, VcsOtClient.unsafeGetRegistrar))
 
     def lookupObs(p: ISPProgram): Option[ISPObservation] =
       Option(p.getAllObservations).map(_.asScala.toList).flatMap(_.find(_.getObservationID == oid))
