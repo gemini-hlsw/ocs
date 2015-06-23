@@ -1,10 +1,10 @@
 package jsky.app.ot.vcs
 
+import edu.gemini.shared.util.VersionComparison
 import edu.gemini.sp.vcs.reg.VcsRegistrationEvent
 import edu.gemini.spModel.core.{Peer, SPProgramID}
 import edu.gemini.pot.sp.{SPUtil, ISPObsExecLog, ISPNode, ISPProgram}
 import edu.gemini.pot.sp.version._
-import edu.gemini.sp.vcs._
 
 import jsky.app.ot.vcs.vm.{VmStore, VmUpdateEvent}
 
@@ -13,7 +13,7 @@ import java.beans.{PropertyChangeEvent, PropertyChangeListener}
 import scala.swing.{Swing, Publisher}
 import scala.swing.event.Event
 
-case class VcsStateEvent(programId: Option[SPProgramID], peer: Option[Peer], status: ProgramStatus, conflictNodes: List[ISPNode]) extends Event
+case class VcsStateEvent(programId: Option[SPProgramID], peer: Option[Peer], status: Option[VersionComparison], conflictNodes: List[ISPNode]) extends Event
 
 object VcsStateTracker {
   private def id(po: Option[ISPProgram]): Option[SPProgramID] =
@@ -36,10 +36,10 @@ final class VcsStateTracker extends Publisher {
     }
   }
 
-  private var progNode: Option[ISPProgram] = None
+  private var progNode: Option[ISPProgram]       = None
   private var remoteVersions: Option[VersionMap] = None
-  private var vcsState: VcsStateEvent = VcsStateEvent(None, None, ProgramStatus.Unknown, Nil)
-  private var updater: Option[ProgramUpdater] = None
+  private var vcsState: VcsStateEvent            = VcsStateEvent(None, None, None, Nil)
+  private var updater: Option[ProgramUpdater]    = None
 
   VcsGui.registrar.foreach { reg =>
     reg.subscribe(new scala.collection.mutable.Subscriber[VcsRegistrationEvent, reg.Pub] {
@@ -85,10 +85,10 @@ final class VcsStateTracker extends Publisher {
   private def updateState(calcConflicts: Boolean = true): Unit = {
     val newPeer = id(progNode).flatMap(VcsGui.peer)
 
-    val newStatus = (for {
+    val newStatus = for {
       rJvm <- remoteVersions
       prog <- progNode
-    } yield ProgramStatus(prog.getVersions, rJvm)).getOrElse(ProgramStatus.Unknown)
+    } yield VersionMap.compare(prog.getVersions, rJvm)
 
     val newConflicts = if (calcConflicts) progNode.toList.flatMap(ConflictNavigator.allConflictNodes)
     else vcsState.conflictNodes
@@ -114,7 +114,7 @@ final class VcsStateTracker extends Publisher {
     }
 
     updater = for {
-      id <- id(progNode)
+      id  <- id(progNode)
       reg <- VcsGui.registrar
       loc <- reg.registration(id)
     } yield ProgramUpdater(id, loc)

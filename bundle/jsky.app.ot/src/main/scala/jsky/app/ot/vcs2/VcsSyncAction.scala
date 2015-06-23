@@ -1,7 +1,7 @@
 package jsky.app.ot.vcs2
 
-import edu.gemini.sp.vcs.ProgramStatus
-import edu.gemini.sp.vcs.ProgramStatus.{PendingCheckIn, PendingSync, PendingUpdate, Unknown}
+import edu.gemini.shared.util.VersionComparison
+import edu.gemini.shared.util.VersionComparison.{Newer, Older, Conflicting}
 import edu.gemini.spModel.core.{Peer, SPProgramID}
 import edu.gemini.util.security.auth.keychain.Action._
 
@@ -54,12 +54,12 @@ final class VcsSyncAction(viewer: SPViewer) extends AbstractViewerAction(viewer,
 
   reactions += {
     case VcsStateEvent(pid, peer, status, conflicts) =>
-      def iconFor(s: ProgramStatus): Option[Icon] = s match {
-        case Unknown        => Some(VcsIcon.BrokenLink)
-        case PendingSync    => Some(VcsIcon.PendingSync)
-        case PendingUpdate  => Some(VcsIcon.PendingUpdate)
-        case PendingCheckIn => Some(VcsIcon.PendingCheckIn)
-        case _              => None
+      def iconFor(s: Option[VersionComparison]): Option[Icon] = s match {
+        case None              => Some(VcsIcon.BrokenLink)
+        case Some(Conflicting) => Some(VcsIcon.PendingSync)
+        case Some(Older)       => Some(VcsIcon.PendingUpdate)
+        case Some(Newer)       => Some(VcsIcon.PendingCheckIn)
+        case _                 => None
       }
 
       val newIcon = pid.flatMap { p =>

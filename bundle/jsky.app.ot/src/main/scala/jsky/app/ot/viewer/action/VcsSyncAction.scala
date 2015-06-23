@@ -39,7 +39,7 @@ final class VcsSyncAction(viewer: SPViewer) extends AbstractVcsAction(viewer, "S
       }
 
       val newIcon = pid.flatMap { p =>
-        peer.fold[Option[Icon]](Some(VcsIcon.NoPeer)) { _ => iconFor(status) }
+        peer.fold[Option[Icon]](Some(VcsIcon.NoPeer)) { _ => None } // TODO: delete me
       }.getOrElse(VcsIcon.UpToDate)
 
       if (isShowIcons) putValue(SMALL_ICON, newIcon)
