@@ -1,4 +1,4 @@
-package edu.gemini.sp.vcs
+package edu.gemini.sp.vcs2
 
 import edu.gemini.pot.sp.SPNodeKey
 import edu.gemini.shared.util.VersionVector
