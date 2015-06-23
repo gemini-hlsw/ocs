@@ -36,6 +36,8 @@ ocsAppManifest := {
     BundleSpec((sbt.Keys.name in bundle_edu_gemini_qpt_server).value, Version.parse((sbt.Keys.version in bundle_edu_gemini_qpt_server).value)),
     BundleSpec((sbt.Keys.name in bundle_edu_gemini_qpt_shared).value, Version.parse((sbt.Keys.version in bundle_edu_gemini_qpt_shared).value)),
     BundleSpec((sbt.Keys.name in bundle_edu_gemini_qv_plugin).value, Version.parse((sbt.Keys.version in bundle_edu_gemini_qv_plugin).value)),
+    BundleSpec((sbt.Keys.name in bundle_edu_gemini_seqexec_server).value, Version.parse((sbt.Keys.version in bundle_edu_gemini_seqexec_server).value)),
+    BundleSpec((sbt.Keys.name in bundle_edu_gemini_seqexec_shared).value, Version.parse((sbt.Keys.version in bundle_edu_gemini_seqexec_shared).value)),
     BundleSpec((sbt.Keys.name in bundle_edu_gemini_services_client).value, Version.parse((sbt.Keys.version in bundle_edu_gemini_services_client).value)),
     BundleSpec((sbt.Keys.name in bundle_edu_gemini_services_server).value, Version.parse((sbt.Keys.version in bundle_edu_gemini_services_server).value)),
     BundleSpec((sbt.Keys.name in bundle_edu_gemini_shared_ca).value, Version.parse((sbt.Keys.version in bundle_edu_gemini_shared_ca).value)),
