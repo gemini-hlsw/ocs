@@ -77,8 +77,10 @@ object EdProgramHelper {
     update(Nil)
 
     for {
-      pid    <- Option(ed.getProgram).map(_.getProgramID)
+      prog   <- Option(ed.getProgram)
+      pid    <- Option(prog.getProgramID)
       client <- VcsOtClient.ref
+      _      <- client.peer(pid)
     } client.log(pid, 0, 100).forkAsync {
       case \/-((es, more)) =>
         Log.info(s"Got ${es.length} history items for $pid, more == $more")
