@@ -1,14 +1,13 @@
 package jsky.app.ot.vcs
 
+import edu.gemini.shared.util.VersionComparison.Conflicting
 import edu.gemini.shared.util._
 
 import org.junit.Test
 import org.junit.Assert._
 
 import edu.gemini.pot.sp.SPNodeKey
-import edu.gemini.sp.vcs.ProgramStatus
-import ProgramStatus.PendingSync
-import edu.gemini.pot.sp.version.LifespanId
+import edu.gemini.pot.sp.version.{VersionMap, LifespanId}
 
 
 class VcsStatusTest {
@@ -30,6 +29,6 @@ class VcsStatusTest {
       node_606f -> VersionVector(id_94e -> new java.lang.Integer(2))
     )
 
-    assertEquals(PendingSync, ProgramStatus(m8116, m8115))
+    assertEquals(Conflicting, VersionMap.compare(m8116, m8115))
   }
 }
