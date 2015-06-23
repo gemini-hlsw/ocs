@@ -4,14 +4,11 @@ import edu.gemini.pot.sp.ISPObservation
 import edu.gemini.spModel.obs.ObservationStatus
 import jsky.app.ot.OTOptions
 import jsky.app.ot.session.SessionQueue
-import jsky.app.ot.vcs2.VcsSyncAction
 import jsky.app.ot.viewer.{SPViewerActions, SPViewer}
 import jsky.util.gui.DialogUtil
 
 import java.awt.event.ActionEvent
 import javax.swing.Action
-
-//import scala.collection.JavaConverters._
 
 final class SyncAndEnqueueAction(viewer: SPViewer) extends AbstractViewerAction(viewer, "Add to Session Queue", jsky.util.Resources.getIcon("Add24.gif", classOf[SPViewerActions])) {
   putValue(AbstractViewerAction.SHORT_NAME, "Queue")

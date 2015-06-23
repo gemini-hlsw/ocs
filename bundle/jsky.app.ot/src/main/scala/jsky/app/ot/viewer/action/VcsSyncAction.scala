@@ -1,25 +1,21 @@
-package jsky.app.ot.vcs2
+package jsky.app.ot.viewer.action
 
 import edu.gemini.pot.sp.version._
 import edu.gemini.shared.util.VersionComparison
-import edu.gemini.shared.util.VersionComparison.{Newer, Older, Conflicting}
-import edu.gemini.sp.vcs2._
-import edu.gemini.sp.vcs2.OptionOps
+import edu.gemini.shared.util.VersionComparison.{Conflicting, Newer, Older}
+import edu.gemini.sp.vcs2.{OptionOps, _}
 import edu.gemini.spModel.core.{Peer, SPProgramID}
 import edu.gemini.util.security.auth.keychain.Action._
-
-
 import jsky.app.ot.OT
-import jsky.app.ot.vcs.{VcsPeerSelectionDialog, VcsIcon, VcsStateEvent}
+import jsky.app.ot.vcs.{VcsIcon, VcsPeerSelectionDialog, VcsStateEvent}
+import jsky.app.ot.vcs2.{VcsOtClient, VcsSyncDialog}
 import jsky.app.ot.viewer.SPViewer
-import jsky.app.ot.viewer.action.AbstractViewerAction
 
 import java.awt.event.{ActionEvent, KeyEvent}
 import javax.swing.Action._
-import javax.swing.{JComponent, KeyStroke, Icon}
+import javax.swing.{Icon, JComponent, KeyStroke}
 
 import scala.swing.{Component, Reactor}
-
 import scalaz.\/
 import scalaz.syntax.std.option._
 

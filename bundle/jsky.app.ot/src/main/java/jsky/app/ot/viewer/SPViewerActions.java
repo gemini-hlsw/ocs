@@ -17,7 +17,7 @@ public final class SPViewerActions {
     private final SPViewer viewer;
 
     // Individual actions
-    public final AbstractViewerAction vcs2SyncAction;
+    public final AbstractViewerAction vcsSyncAction;
     public final AbstractViewerAction syncAllAction;
     public final AbstractViewerAction conflictPrevAction;
     public final AbstractViewerAction conflictNextAction;
@@ -129,8 +129,8 @@ public final class SPViewerActions {
         resolveConflictsAction = new ResolveConflictsAction(viewer);
 
         // VCS Actions
-        vcs2SyncAction  = new jsky.app.ot.vcs2.VcsSyncAction(viewer);
-        syncAllAction   = new SyncAllAction(viewer);
+        vcsSyncAction = new VcsSyncAction(viewer);
+        syncAllAction = new SyncAllAction(viewer);
 
         // General Edit Actions
         cutAction = new CutAction(viewer);
