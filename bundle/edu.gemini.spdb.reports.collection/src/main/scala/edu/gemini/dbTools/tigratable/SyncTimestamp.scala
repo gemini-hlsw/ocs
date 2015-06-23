@@ -1,8 +1,8 @@
 package edu.gemini.dbTools.tigratable
 
 import edu.gemini.pot.sp.ISPProgram
-import edu.gemini.sp.vcs.VcsServer
 import edu.gemini.sp.vcs.log.VcsEventSet
+import edu.gemini.sp.vcs2.VcsService
 import edu.gemini.spModel.core.SPProgramID
 import edu.gemini.spModel.gemini.obscomp.SPProgram
 import edu.gemini.util.security.principal.{ProgramPrincipal, UserPrincipal, GeminiPrincipal}
@@ -25,7 +25,7 @@ object SyncTimestamp {
       userPrincipalsForEmails(p.getDataObject.asInstanceOf[SPProgram].getPIInfo.getEmail)
   }
 
-  def lookup(p: ISPProgram, vcs: VcsServer): Option[Long] = {
+  def lookup(p: ISPProgram, vcs: VcsService): Option[Long] = {
     val pis = piPrincipals(p)
 
     def searchLog(pid: SPProgramID): Option[Long] = {
@@ -37,7 +37,7 @@ object SyncTimestamp {
         }
 
       def matches(es: VcsEventSet): Boolean =
-        !es.principals.intersect(pis).isEmpty && es.ops.values.exists(_ > 0)
+        es.principals.intersect(pis).nonEmpty && es.ops.values.exists(_ > 0)
 
       def lookup(s: Stream[EventSetPage]): Option[Long] =
         s.headOption.fold(Option.empty[Long]) {
@@ -54,6 +54,6 @@ object SyncTimestamp {
   }
 
 
-  def lookupDateOrNull(p: ISPProgram, vcs: VcsServer): Date =
+  def lookupDateOrNull(p: ISPProgram, vcs: VcsService): Date =
     lookup(p, vcs).map(l => new Date(l)).orNull
 }

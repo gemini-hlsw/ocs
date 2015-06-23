@@ -8,7 +8,7 @@ import edu.gemini.pot.sp.ISPNode;
 import edu.gemini.pot.spdb.DBAbstractQueryFunctor;
 import edu.gemini.pot.spdb.IDBDatabaseService;
 import edu.gemini.pot.spdb.IDBQueryRunner;
-import edu.gemini.sp.vcs.VcsServer;
+import edu.gemini.sp.vcs2.VcsService;
 import edu.gemini.spModel.core.*;
 
 import java.security.Principal;
@@ -32,10 +32,10 @@ class TigraTableFunctor extends DBAbstractQueryFunctor {
     }
 
     // semester string (e.g., GN_2004A) -> TigraTable
-    private final VcsServer vcs;
+    private final VcsService vcs;
     private final Map<Semester, TigraTable> _tigraTableMap = new TreeMap<Semester, TigraTable>();
 
-    TigraTableFunctor(VcsServer vcs) {
+    TigraTableFunctor(VcsService vcs) {
         this.vcs = vcs;
     }
 
@@ -82,7 +82,7 @@ class TigraTableFunctor extends DBAbstractQueryFunctor {
         }
     }
 
-    public static List<TigraTable> getTigraTables(final IDBDatabaseService db, final VcsServer vcs, final Set<Principal> user) {
+    public static List<TigraTable> getTigraTables(final IDBDatabaseService db, final VcsService vcs, final Set<Principal> user) {
         final TigraTableFunctor funct = new TigraTableFunctor(vcs);
         final IDBQueryRunner qr = db.getQueryRunner(user);
         return qr.queryPrograms(funct).getTigraTables();
