@@ -24,8 +24,8 @@
         <xsd:complexContent>
             <xsd:extension base="BlueprintBase">
                 <xsd:sequence>
-                    <xsd:element name="fpu"    type="PhoenixFocalPlaneUnit" maxOccurs="1" minOccurs="0"/>
-                    <xsd:element name="filter" type="PhoenixFilter"         maxOccurs="1" minOccurs="0"/>
+                    <xsd:element name="fpu"    type="PhoenixFocalPlaneUnit" maxOccurs="1"         minOccurs="0"/>
+                    <xsd:element name="filter" type="PhoenixFilter"         maxOccurs="unbounded" minOccurs="0"/>
                 </xsd:sequence>
             </xsd:extension>
         </xsd:complexContent>

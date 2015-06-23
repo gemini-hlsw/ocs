@@ -23,10 +23,11 @@
     <blueprints>
         <phoenix>
             <Phoenix id="blueprint-0">
-                <name>Phoenix 0.17 arcsec slit H6073</name>
+                <name>Phoenix 0.17 arcsec slit H6073, H6420</name>
                 <visitor>false</visitor>
                 <fpu>0.17 arcsec slit</fpu>
                 <filter>H6073</filter>
+                <filter>H6420</filter>
             </Phoenix>
         </phoenix>
     </blueprints>
