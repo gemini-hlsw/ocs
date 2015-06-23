@@ -198,7 +198,10 @@ class TargetEditor private (semester:Semester, target:Target, canEdit:Boolean, i
           }
         }
         icons.get(v).map { i =>
-          val label = new Label(v.name, i, Alignment.Left)
+          val label = new Label(v.name, i, Alignment.Left) {
+            if (v == TooType && !isToO)
+              tooltip = "Enable ToO targets by requesting ToO Activation in the Time Requests section"
+          }
           (rb, label)
         }
       }
