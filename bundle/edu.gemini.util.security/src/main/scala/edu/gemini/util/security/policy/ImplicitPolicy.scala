@@ -18,7 +18,6 @@ import edu.gemini.spModel.core.SPProgramID
 import edu.gemini.util.security.principal.AffiliatePrincipal
 import edu.gemini.util.security.permission.PiPermission
 import edu.gemini.util.security.permission.NgoPermission
-import edu.gemini.util.security.permission.ObsMergePermission
 import scala.Some
 import edu.gemini.util.security.principal.ProgramPrincipal
 import edu.gemini.util.security.permission.StaffPermission
@@ -54,9 +53,6 @@ class ImplicitPolicy private (db: IDBDatabaseService, ps: Set[Principal]) {
       case PiPermission(Some(id)) =>
         ps.contains(ProgramPrincipal(id)) || // program key
         hasAny(piUserPrincipals(id))         // user principals
-
-      case opm @ ObsMergePermission(o, u) =>
-        opm.pid.forall(pid => MergeValidator(userRolePrivileges(pid), o, u).isValid)
 
       // Read permission can be defined in terms of implied roles
       case ProgramPermission.Read(id) =>
