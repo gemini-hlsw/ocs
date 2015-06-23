@@ -29,7 +29,7 @@ object VcsSyncAction {
 }
 
 final class VcsSyncAction(viewer: SPViewer) extends AbstractViewerAction(viewer, "Sync changes to this program with the database", VcsIcon.UpToDate) with Reactor {
-  putValue(AbstractViewerAction.SHORT_NAME, "New Sync")
+  putValue(AbstractViewerAction.SHORT_NAME, "Sync")
   putValue(SHORT_DESCRIPTION, "Sync program with any changes from the database.")
   putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_S, AbstractViewerAction.platformEventMask()))
 
