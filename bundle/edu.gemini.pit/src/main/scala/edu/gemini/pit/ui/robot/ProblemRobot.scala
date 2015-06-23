@@ -445,7 +445,7 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
       })
 
     private val nonUpdatedInvestigatorName = when(p.investigators.pi.firstName === "Principal" && p.investigators.pi.lastName === "Investigator") {
-      new Problem(Severity.Error, s"Please provide PI's full name", "Overview", s.inOverview {
+      new Problem(Severity.Todo, s"Please provide PI's full name", "Overview", s.inOverview {
         _.edit(p.investigators.pi)
       })
     }
