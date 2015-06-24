@@ -52,6 +52,12 @@
             <jxb:bindings node="./xsd:enumeration[@value='Pa(gamma) (1.094 um)']">
                 <jxb:typesafeEnumMember name="NBF_PAGAMMA"/>
             </jxb:bindings>
+            <!--jxb:bindings node="./xsd:enumeration[@value='J-continuum (1.122 um)']">
+                <jxb:typesafeEnumMember name="J_CONTINUUM_122"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='J-continuum (1.207 um)']">
+                <jxb:typesafeEnumMember name="NBF_H"/>
+            </jxb:bindings-->
             <jxb:bindings node="./xsd:enumeration[@value='Pa(beta) (1.282 um)']">
                 <jxb:typesafeEnumMember name="NBF_PABETA"/>
             </jxb:bindings>
