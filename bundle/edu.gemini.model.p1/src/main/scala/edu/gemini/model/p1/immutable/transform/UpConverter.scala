@@ -133,8 +133,19 @@ case object SemesterConverter2015BTo2016A extends SemesterConverter {
      case p @ <niri>{ns @ _*}</niri> if (p \ "filter").theSeq.exists(removedFilters.contains) =>
        val filtersToRemove = (p \ "filter").theSeq.filter(removedFilters.contains)
        object SlitTransformer extends BasicTransformer {
+         // Regex to match the name, filters are included with a + sign between them
+         val nameRegEx = s"(.*)[${removedFilters.map(i => s"(${i.text}\\+?)").mkString("|")}](.*)"
+         // Individual filter regex, note that ( and ) need to be escaped
+         val filterRegexes = removedFilters.map { f =>
+           s"""${f.text.replace("(", "\\(").replace (")", "\\)")}\\+?""".r
+         }
 
          override def transform(n: xml.Node): xml.NodeSeq = n match {
+           case <name>{name}</name> if name.text.matches(nameRegEx) =>
+             val replacedText = filterRegexes.foldLeft(name.text) { (t, f) =>
+               f.replaceAllIn(t, "")
+             }
+             <name>{replacedText}</name>
            case f @ <filter>{_}</filter> if removedFilters.contains(f)  => xml.NodeSeq.Empty
            case elem: xml.Elem                                      => elem.copy(child = elem.child.flatMap(transform))
            case _                                                   => n

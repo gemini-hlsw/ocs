@@ -24,7 +24,7 @@
     <blueprints>
         <niri>
             <niri id="blueprint-0">
-                <name>NIRI Altair Laser Guidestar f/32 (0.02"/pix, 22" FoV) J-continuum (1.122 um)+J-continuum (1.207 um)</name>
+                <name>NIRI Altair Laser Guidestar f/32 (0.02"/pix, 22" FoV) J-continuum (1.122 um)+J-continuum (1.207 um)+HeI (1.083 um)</name>
                 <visitor>false</visitor>
                 <altair>
                     <lgs pwfs1="false" aowfs="false" oiwfs="false"/>
