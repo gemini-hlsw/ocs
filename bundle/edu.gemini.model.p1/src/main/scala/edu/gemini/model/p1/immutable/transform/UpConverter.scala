@@ -177,7 +177,7 @@ case object SemesterConverter2015ATo2015B extends SemesterConverter {
         override def transform(n: xml.Node): xml.NodeSeq = n match {
           case <fiberMode>{name}</fiberMode> => <fiberMode>{transformFiberMode(name.text)}</fiberMode>
           case <name>{name}</name>           => <name>Graces {transformFiberMode(name.text)}</name>
-          case elem: xml.Elem                => elem.copy(child = elem.child.flatMap(transform _))
+          case elem: xml.Elem                => elem.copy(child = elem.child.flatMap(transform))
           case _                             => n
         }
       }
