@@ -128,7 +128,24 @@ case class LastStepConverter(semester: Semester) extends SemesterConverter {
  * This converter will upgrade to 2016A
  */
 case object SemesterConverter2015BTo2016A extends SemesterConverter {
-  val transformers = Nil
+  val removedFilters = List(<filter>J-continuum (1.122 um)</filter>, <filter>J-continuum (1.207 um)</filter>)
+  val removeUnusedNIRIFilters: TransformFunction = {
+     case p @ <niri>{ns @ _*}</niri> if (p \ "filter").theSeq.exists(removedFilters.contains) =>
+       val filtersToRemove = (p \ "filter").theSeq.filter(removedFilters.contains)
+       object SlitTransformer extends BasicTransformer {
+
+         override def transform(n: xml.Node): xml.NodeSeq = n match {
+           case f @ <filter>{_}</filter> if removedFilters.contains(f)  => xml.NodeSeq.Empty
+           case elem: xml.Elem                                      => elem.copy(child = elem.child.flatMap(transform))
+           case _                                                   => n
+         }
+       }
+       // Remove unavailable filters
+       val removedFiltersText = if (filtersToRemove.length == 1) s"filter ${filtersToRemove.map(_.text).head} has been removed" else s"filters ${filtersToRemove.map(_.text).mkString(",")} have been removed."
+       StepResult(s"The unavailable NIRI $removedFiltersText", <niri id={p.attribute("id")}>{SlitTransformer.transform(ns)}</niri>).successNel
+    }
+  
+  val transformers = List(removeUnusedNIRIFilters)
 }
 
 /**

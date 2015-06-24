@@ -644,6 +644,18 @@ class UpConverterSpec extends SpecificationWithJUnit with SemesterProperties {
           result \\ "graces" must \\("name") \> "Graces 1 fiber (target only, R~67.5k)"
       }
     }
+    "proposal with NIRI blueprints should remove unavailable filters, REL-2390" in {
+      val xml = XML.load(new InputStreamReader(getClass.getResourceAsStream("proposal_niri_removed_filters.xml")))
+
+      val converted = UpConverter.convert(xml)
+      converted must beSuccessful.like {
+        case StepResult(changes, result) =>
+          changes must have length 4
+          result \\ "niri" must \\("filter") \> "HeI (1.083 um)"
+          result \\ "niri" must not(\\("filter") \> "J-continuum (1.122 um)")
+          result \\ "niri" must not(\\("filter") \> "J-continuum (1.207 um)")
+      }
+    }
   }
 
   def testF2R3KYConversion(xml: Elem) = {
