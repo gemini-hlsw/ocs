@@ -65,17 +65,6 @@ public final class CatalogSearchParameters implements Cloneable {
     }
 
     /**
-     * Sets the limit on the number of stars returned.  If the argument is less
-     * than 0, then 0 is used.
-     */
-    public void setResultsLimit(int resultsLimit) {
-        if (resultsLimit < 0) {
-            resultsLimit = 0;
-        }
-        _numStars = resultsLimit;
-    }
-
-    /**
      * Set search radius limits. This is essentially a flat donut.
      *
      * @param radiusLimit search radiu limit

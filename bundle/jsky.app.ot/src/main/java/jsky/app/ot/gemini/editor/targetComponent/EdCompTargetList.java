@@ -22,7 +22,6 @@ import edu.gemini.spModel.target.system.*;
 import jsky.app.ot.OTOptions;
 import jsky.app.ot.ags.*;
 import jsky.app.ot.editor.OtItemEditor;
-import jsky.app.ot.gemini.editor.targetComponent.details.TargetDetailEditor;
 import jsky.app.ot.tpe.AgsClient;
 import jsky.app.ot.tpe.GuideStarSupport;
 import jsky.app.ot.tpe.TelescopePosEditor;
@@ -129,11 +128,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
             // other detail editors are swapped in when the target type changes,
             // update them explicitly so they behave as if they were contained
             // in the panel.
-            for (final TargetDetailEditor ed : _w.detailEditor.allEditorsJava()) {
-                if (_w.detailEditor.curDetailEditorJava().forall(cur -> cur != ed)) {
-                    updateEnabledState(new Component[]{ed}, enabled);
-                }
-            }
+            _w.detailEditor.allEditorsJava().stream().filter(ed -> _w.detailEditor.curDetailEditorJava().forall(cur -> cur != ed)).forEach(ed -> updateEnabledState(new Component[]{ed}, enabled));
         }
 
         final TargetEnvironment env = getDataObject().getTargetEnvironment();
@@ -484,7 +479,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 
             // XXX OT-35 hack to work around recursive call to TargetObsComp.setTargetEnvironment() in
             // SPProgData.ObsContextManager.update()
-            SwingUtilities.invokeLater(() ->  showTargetTag());
+            SwingUtilities.invokeLater(EdCompTargetList.this::showTargetTag);
         }
     }
 
@@ -536,8 +531,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
     }
 
     private static boolean enablePrimary(SPTarget target, TargetEnvironment env) {
-        if (env.getBase() == target) return false;
-        return !env.getUserTargets().contains(target);
+        return env.getBase() != target && !env.getUserTargets().contains(target);
     }
 
     private void refreshAll() {

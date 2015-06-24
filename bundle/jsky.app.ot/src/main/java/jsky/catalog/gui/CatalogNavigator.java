@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Stack;
@@ -133,7 +132,7 @@ public abstract class CatalogNavigator extends JPanel
     private Component _htmlViewerFrame;
 
     // Hash table associating each panel with a tree node
-    private Hashtable<JComponent, Catalog> _panelTreeNodeTable = new Hashtable<JComponent, Catalog>(10);
+    private Hashtable<JComponent, Catalog> _panelTreeNodeTable = new Hashtable<>(10);
 
     // Manages a list of previously viewed catalogs or query results.
     private CatalogHistoryList _historyList;
@@ -142,7 +141,7 @@ public abstract class CatalogNavigator extends JPanel
     private CatalogQueryList _queryList;
 
     // Maps query components to their corresponding result components
-    private Hashtable<JComponent, JComponent> _queryResultComponentMap = new Hashtable<JComponent, JComponent>();
+    private Hashtable<JComponent, JComponent> _queryResultComponentMap = new Hashtable<>();
 
     // The pane dividing the catalog tree and the query panel
     private JSplitPane _querySplitPane;
@@ -341,13 +340,6 @@ public abstract class CatalogNavigator extends JPanel
     }
 
     /**
-     * The pane dividing the query and the results panel
-     */
-    public JSplitPane getResultSplitPane() {
-        return _resultSplitPane;
-    }
-
-    /**
      * Return the JDesktopPane, if using internal frames, otherwise null
      */
     public JDesktopPane getDesktop() {
@@ -466,11 +458,7 @@ public abstract class CatalogNavigator extends JPanel
         _resultComponentChanged();
 
         // try to display the right amount of the query window
-        SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
-                _resultSplitPane.resetToPreferredSizes();
-            }
-        });
+        SwingUtilities.invokeLater(_resultSplitPane::resetToPreferredSizes);
     }
 
     /**
@@ -595,25 +583,11 @@ public abstract class CatalogNavigator extends JPanel
      */
     protected void unplot(Stack stack) {
         // Unplot any catalog symbols before loosing the information
-        int n = stack.size();
-        for (int i = 0; i < n; i++) {
-            CatalogHistoryItem item = (CatalogHistoryItem) (stack.get(i));
+        for (Object aStack : stack) {
+            CatalogHistoryItem item = (CatalogHistoryItem) aStack;
             Object resultComp = _queryResultComponentMap.get(item.getQueryComponent());
             if (resultComp instanceof TableDisplayTool) {
                 ((TableDisplayTool) resultComp).unplot();
-            }
-        }
-    }
-
-    /**
-     * Remove any plot symbols or graphics managed by any of the display components
-     */
-    public void unplot() {
-        Enumeration e = _queryResultComponentMap.elements();
-        while (e.hasMoreElements()) {
-            JComponent comp = (JComponent) e.nextElement();
-            if (comp instanceof TableDisplayTool) {
-                ((TableDisplayTool) comp).unplot();
             }
         }
     }
@@ -626,19 +600,6 @@ public abstract class CatalogNavigator extends JPanel
         _queryPanel.revalidate();
         _resultPanel.revalidate();
         _parent.repaint();
-    }
-
-    /**
-     * Select the node in the catalog directory tree corresponding to the current
-     * display component
-     */
-    protected void updateTreeSelection() {
-        if (_queryComponent instanceof CatalogQueryTool) {
-            _catalogTree.selectNode(((CatalogQueryTool) _queryComponent).getCatalog());
-            _updateTitle(((CatalogQueryTool) _queryComponent).getCatalog());
-        } else if (_queryComponent instanceof TableDisplayTool) {
-            _catalogTree.selectNode(((TableDisplayTool) _queryComponent).getTable());
-        }
     }
 
     public QueryResult getQueryResult() {
@@ -727,12 +688,10 @@ public abstract class CatalogNavigator extends JPanel
     protected void makeProgressPanel() {
         if (_progressPanel == null) {
             _progressPanel = ProgressPanel.makeProgressPanel(_I18N.getString("accessingCatalogServer"));
-            _progressPanel.addActionListener(new ActionListener() {
-                public void actionPerformed(ActionEvent e) {
-                    if (_worker != null) {
-                        _worker.interrupt();
-                        _worker = null;
-                    }
+            _progressPanel.addActionListener(e -> {
+                if (_worker != null) {
+                    _worker.interrupt();
+                    _worker = null;
                 }
             });
         }
@@ -925,7 +884,7 @@ public abstract class CatalogNavigator extends JPanel
 
         // If it is not one of the known content types, call a method that may be
         // redefined in a derived class to handle that type
-        return makeUnknownURLComponent(url, contentType);
+        return makeUnknownURLComponent();
     }
 
 
@@ -1018,7 +977,7 @@ public abstract class CatalogNavigator extends JPanel
      * Returning the current component (_resultComponent) will cause no change.
      * This should be done if the URL is displayed in a separate window.
      */
-    protected JComponent makeUnknownURLComponent(URL url, String contentType) {
+    protected JComponent makeUnknownURLComponent() {
         if (_resultComponent != null)
             return _resultComponent;
         return new EmptyPanel();
@@ -1048,16 +1007,6 @@ public abstract class CatalogNavigator extends JPanel
      */
     protected JFileChooser makeFileChooser() {
         return new JFileChooser(new File("."));
-    }
-
-    /**
-     * Return
-     */
-    public JFileChooser getFileChooser() {
-        if (_fileChooser == null) {
-            _fileChooser = makeFileChooser();
-        }
-        return _fileChooser;
     }
 
     /**
@@ -1266,21 +1215,6 @@ public abstract class CatalogNavigator extends JPanel
     public void saveAs() {
         if (_resultComponent instanceof SaveableWithDialog) {
             ((SaveableWithDialog) _resultComponent).saveAs();
-        } else {
-            DialogUtil.error(_I18N.getString("saveNotSupportedForObjType"));
-        }
-    }
-
-    /**
-     * Save the current query result to the selected file.
-     */
-    public void saveAs(String filename) {
-        if (_resultComponent instanceof Saveable) {
-            try {
-                ((Saveable) _resultComponent).saveAs(filename);
-            } catch (Exception e) {
-                DialogUtil.error(e);
-            }
         } else {
             DialogUtil.error(_I18N.getString("saveNotSupportedForObjType"));
         }

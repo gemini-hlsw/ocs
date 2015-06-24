@@ -15,26 +15,14 @@ import java.util.Comparator;
 public final class AgsContext {
     public static final AgsContext EMPTY = new AgsContext();
 
-    private static final Comparator<AgsStrategy> DISPLAY_NAME_COMPARATOR = new Comparator<AgsStrategy>() {
-        @Override public int compare(AgsStrategy as1, AgsStrategy as2) {
-            return as1.key().displayName().compareTo(as2.key().displayName());
-        }
-    };
+    private static final Comparator<AgsStrategy> DISPLAY_NAME_COMPARATOR = (as1, as2) -> as1.key().displayName().compareTo(as2.key().displayName());
 
     public static AgsContext create(final ISPObservation obs) {
-        return create(ImOption.apply(obs).flatMap(new MapOp<ISPObservation, Option<ObsContext>>() {
-            @Override public Option<ObsContext> apply(ISPObservation o) {
-                return ObsContext.create(o);
-            }
-        }));
+        return create(ImOption.apply(obs).flatMap(ObsContext::create));
     }
 
     public static AgsContext create(final Option<ObsContext> ctxOpt) {
-        return ctxOpt.map(new MapOp<ObsContext, AgsContext>() {
-            @Override public AgsContext apply(ObsContext ctx) {
-                return create(ctx);
-            }
-        }).getOrElse(EMPTY);
+        return ctxOpt.map(AgsContext::create).getOrElse(EMPTY);
     }
 
     public static AgsContext create(final ObsContext ctx) {

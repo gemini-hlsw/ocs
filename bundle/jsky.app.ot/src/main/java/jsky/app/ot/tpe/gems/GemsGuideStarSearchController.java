@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * OT-111: Controller for GemsGuideStarSearchDialog
@@ -113,15 +114,9 @@ class GemsGuideStarSearchController {
         return results;
     }
 
-    // Removes all the objects in the skyObjects list that are also in the excludeCandidates list by comparing names
-    private List<Target.SiderealTarget> removeAll(List<Target.SiderealTarget> skyObjects, List<Target.SiderealTarget> excludeCandidates) {
-        List<Target.SiderealTarget> result = new ArrayList<>();
-        for(Target.SiderealTarget siderealTarget : skyObjects) {
-            if (!contains(excludeCandidates, siderealTarget)) {
-                result.add(siderealTarget);
-            }
-        }
-        return result;
+    // Removes all the objects in the targets list that are also in the excludeCandidates list by comparing names
+    private List<Target.SiderealTarget> removeAll(List<Target.SiderealTarget> targets, List<Target.SiderealTarget> excludeCandidates) {
+        return targets.stream().filter(siderealTarget -> !contains(excludeCandidates, siderealTarget)).collect(Collectors.toList());
     }
 
     // Returns true if a SkyObject with the same name is in the list

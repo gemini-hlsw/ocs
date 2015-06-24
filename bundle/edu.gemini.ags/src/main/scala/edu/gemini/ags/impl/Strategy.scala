@@ -114,23 +114,11 @@ object Strategy {
       case GemsStrategy                      => isAvailable(Canopus.Wfs.cwfs3) // any canopus would serve
       case _                                 => false
     }
-  }
 
-  private def siteAvailability(ctx: ObsContext)(s: AgsStrategy): Boolean =
-    s match {
+  private def siteAvailability(ctx: ObsContext)(s: AgsStrategy): Boolean = s match {
       case Pwfs1North | Pwfs2North => ctx.getSite.asScalaOpt.forall(_ == Site.GN)
       case Pwfs1South | Pwfs2South => ctx.getSite.asScalaOpt.forall(_ == Site.GS)
       case _                       => true
     }
 
-  def validStrategies(ctx: ObsContext): List[AgsStrategy] =
-    InstMap.get(ctx.getInstrument.getType).map(_.apply(ctx)).toList.flatten.filter(guidersAvailable(ctx)).filter(siteAvailability(ctx))
-
-  // Get the site for a given strategy using the context.
-  def site(ctx: ObsContext): Option[Site] =
-    ctx.getSite.asScalaOpt.orElse(AgsRegistrar.currentStrategy(ctx).map {
-      case Pwfs1North | Pwfs2North => Option(Site.GN)
-      case Pwfs1South | Pwfs2South => Option(Site.GS)
-      case _ => None
-    }.flatten)
 }

@@ -9,7 +9,6 @@ package jsky.navigator;
 
 import java.awt.Component;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.geom.AffineTransform;
 import java.util.HashSet;
 
@@ -23,7 +22,6 @@ import jsky.catalog.Catalog;
 import jsky.catalog.CatalogDirectory;
 import jsky.catalog.TableQueryResult;
 import jsky.catalog.QueryResult;
-import jsky.catalog.gui.BasicTablePlotter;
 import jsky.catalog.gui.CatalogNavigatorOpener;
 import jsky.catalog.gui.TablePlotter;
 import jsky.image.fits.codec.FITSImage;
@@ -137,7 +135,7 @@ public class NavigatorImageDisplay extends DivaMainImageDisplay
     public void openCatalogWindow() {
         if (_navigatorFrame == null)
             makeNavigatorFrame();
-        showNavigatorFrame((Catalog) null);
+        showNavigatorFrame(null);
     }
 
     /**
@@ -152,7 +150,7 @@ public class NavigatorImageDisplay extends DivaMainImageDisplay
 
     /** Open a catalog window for the named catalog, if found. */
     public void openCatalogWindow(String name) {
-        CatalogDirectory dir = null;
+        CatalogDirectory dir;
         try {
             dir = CatalogNavigator.getCatalogDirectory();
         } catch (Exception e) {
@@ -327,8 +325,7 @@ public class NavigatorImageDisplay extends DivaMainImageDisplay
             if (plotter != null) {
                 TableQueryResult[] tables = plotter.getTables();
                 if (tables != null) {
-                    for (int i = 0; i < tables.length; i++)
-                        saveFITSTable(tables[i]);
+                    for (TableQueryResult table : tables) saveFITSTable(table);
                 }
             }
         }

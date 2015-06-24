@@ -76,14 +76,14 @@ public class ObsQueryFunctor extends DBAbstractQueryFunctor implements Iterable<
      */
     private static final boolean CalculateAgsAnalysis = Boolean.parseBoolean(System.getProperty("edu.gemini.qpt.shared.sp.ObsQueryFunctor.CalculateAgsAnalysis", "true"));
 
-	private static final long serialVersionUID = 1L;
-	private static final Logger LOGGER = Logger.getLogger(ObsQueryFunctor.class.getName());
+    private static final long serialVersionUID = 1L;
+    private static final Logger LOGGER = Logger.getLogger(ObsQueryFunctor.class.getName());
 
-	private final SortedSet<Prog> programSet = new TreeSet<Prog>();
-	private final SortedSet<String> misconfiguredObservations = new TreeSet<String>();
-	private final SortedSet<String> allSemesters = new TreeSet<String>();
-	private final Map<SPProgramID, ProgramExclusion> programExclusions = new TreeMap<SPProgramID, ProgramExclusion>();
-	private final Map<SPObservationID, ObsExclusion> obsExclusions = new TreeMap<SPObservationID, ObsExclusion>();
+    private final SortedSet<Prog> programSet = new TreeSet<>();
+    private final SortedSet<String> misconfiguredObservations = new TreeSet<>();
+    private final SortedSet<String> allSemesters = new TreeSet<>();
+    private final Map<SPProgramID, ProgramExclusion> programExclusions = new TreeMap<>();
+    private final Map<SPObservationID, ObsExclusion> obsExclusions = new TreeMap<>();
 
     private final Site site;
     private final Calendar date;
@@ -141,7 +141,7 @@ public class ObsQueryFunctor extends DBAbstractQueryFunctor implements Iterable<
      * @param obsClasses
      * @param obsStatuses
      */
-	public ObsQueryFunctor(Site site, Date date, final Set<Semester> extraSemesters, List<ProgramType> progTypes, Set<ObsClass> obsClasses, Set<ObservationStatus> obsStatuses, AgsMagnitude.MagnitudeTable magTable) {
+    public ObsQueryFunctor(Site site, Date date, final Set<Semester> extraSemesters, List<ProgramType> progTypes, Set<ObsClass> obsClasses, Set<ObservationStatus> obsStatuses, AgsMagnitude.MagnitudeTable magTable) {
 
         this.site = site;
         this.date = Calendar.getInstance(site.timezone());
@@ -152,9 +152,9 @@ public class ObsQueryFunctor extends DBAbstractQueryFunctor implements Iterable<
 
         // figure out current semester and add two previous ones for roll overs
         // (this is the default behavior for QPT)
-		final Semester semCurrent = new Semester(site, date);
-		final Semester semRollover1 = semCurrent.prev();
-		final Semester semRollover2 = semRollover1.prev();
+        final Semester semCurrent = new Semester(site, date);
+        final Semester semRollover1 = semCurrent.prev();
+        final Semester semRollover2 = semRollover1.prev();
 
         this.relevantSemesters = new HashSet<Semester>() {{ add(semCurrent); addAll(extraSemesters); }};
         this.rolloverSemesters = new HashSet<Semester>() {{ add(semRollover1); add(semRollover2); }};
@@ -168,27 +168,27 @@ public class ObsQueryFunctor extends DBAbstractQueryFunctor implements Iterable<
         this.magTable = magTable;
     }
 
-	@SuppressWarnings("unchecked")
-	public void execute(IDBDatabaseService db, ISPNode progNode, Set<Principal> principals) {
-		try {
+    @SuppressWarnings("unchecked")
+    public void execute(IDBDatabaseService db, ISPNode progNode, Set<Principal> principals) {
+        try {
 
-			final ISPProgram programShell = (ISPProgram) progNode;
-			final SPProgram program = (SPProgram) programShell.getDataObject();
+            final ISPProgram programShell = (ISPProgram) progNode;
+            final SPProgram program = (SPProgram) programShell.getDataObject();
 
-			// Get program ID and its string value. Punt if it's null.
-			final SPProgramID id = programShell.getProgramID();
-			if (id == null) return;
+            // Get program ID and its string value. Punt if it's null.
+            final SPProgramID id = programShell.getProgramID();
+            if (id == null) return;
 
             if (program == null) {
                 LOGGER.severe("\n*** NULL PROGRAM DATA OBJECT IN " + id + "\n");
                 return;
             }
 
-			// skip programs that are complete (if necessary)
-			if (skipCompletedPrograms && program.isCompleted()) {
-				programExclusions.put(id, ProgramExclusion.MARKED_COMPLETE);
-				return;
-			}
+            // skip programs that are complete (if necessary)
+            if (skipCompletedPrograms && program.isCompleted()) {
+                programExclusions.put(id, ProgramExclusion.MARKED_COMPLETE);
+                return;
+            }
             // skip programs that are inactive (if necessary)
             if (skipInactivePrograms && !program.isActive()) {
                 programExclusions.put(id, ProgramExclusion.INVALID_SEMESTER_OR_TYPE);
@@ -286,7 +286,7 @@ public class ObsQueryFunctor extends DBAbstractQueryFunctor implements Iterable<
             }
 
             // Create our science program.
-			Prog prog = new Prog(
+            Prog prog = new Prog(
                     program, id, program.isActive(), band, isRollover(programShell),
                     plannedTime, usedTime, remainingTime,
                     band3MinimumTime == -1 ? null : band3MinimumTime,
@@ -294,72 +294,72 @@ public class ObsQueryFunctor extends DBAbstractQueryFunctor implements Iterable<
                     program.getPILastName(),
                     program.getNGOContactEmail(),
                     program.getContactPerson());
-			List<Group> groupList = new ArrayList<Group>();
-			List<Note> noteList = new ArrayList<Note>();
+            List<Group> groupList = new ArrayList<>();
+            List<Note> noteList = new ArrayList<>();
 
-			// Now collect its direct obs children.
-			List<Obs> obsList = new ArrayList<Obs>();
-			for (ISPNode rn: programShell.getChildren()) {
+            // Now collect its direct obs children.
+            List<Obs> obsList = new ArrayList<>();
+            for (ISPNode rn: programShell.getChildren()) {
 
-				if (rn instanceof ISPObservation) {
+                if (rn instanceof ISPObservation) {
 
-					Obs obs = getObs(prog, (ISPObservation) rn, null);
-					addObsIfOk(obsList, obs);
+                    Obs obs = getObs(prog, (ISPObservation) rn, null);
+                    addObsIfOk(obsList, obs);
 
-				} else if (rn instanceof ISPGroup) {
+                } else if (rn instanceof ISPGroup) {
 
-					ISPGroup groupShell = (ISPGroup) rn;
-					SPGroup group = (SPGroup) rn.getDataObject();
-					List<Obs> groupObservations = new ArrayList<Obs>();
-					List<Note> groupNotes = new ArrayList<Note>();
+                    ISPGroup groupShell = (ISPGroup) rn;
+                    SPGroup group = (SPGroup) rn.getDataObject();
+                    List<Obs> groupObservations = new ArrayList<>();
+                    List<Note> groupNotes = new ArrayList<>();
 
-					Group miniGroup = new Group(group.getGroup(), group.getGroupType(), groupShell.getNodeKey().toString());
+                    Group miniGroup = new Group(group.getGroup(), group.getGroupType(), groupShell.getNodeKey().toString());
 
-					for (ISPNode rn2: groupShell.getChildren()) {
+                    for (ISPNode rn2: groupShell.getChildren()) {
 
-						if (rn2 instanceof ISPObservation) {
+                        if (rn2 instanceof ISPObservation) {
 
-							Obs obs = getObs(prog, (ISPObservation) rn2, miniGroup);
-							addObsIfOk(groupObservations, obs);
+                            Obs obs = getObs(prog, (ISPObservation) rn2, miniGroup);
+                            addObsIfOk(groupObservations, obs);
 
-						} else {
+                        } else {
 
-							Object o = rn2.getDataObject();
-							if (o instanceof SPNote) {
-								SPNote spnote = (SPNote) o;
-								groupNotes.add(new Note(Scope.Group, spnote.getTitle(), spnote.getNote()));
-							}
+                            Object o = rn2.getDataObject();
+                            if (o instanceof SPNote) {
+                                SPNote spnote = (SPNote) o;
+                                groupNotes.add(new Note(Scope.Group, spnote.getTitle(), spnote.getNote()));
+                            }
 
-						}
+                        }
 
-					}
+                    }
 
-					miniGroup.setChildren(groupObservations, groupNotes);
-					groupList.add(miniGroup);
+                    miniGroup.setChildren(groupObservations, groupNotes);
+                    groupList.add(miniGroup);
 
-				} else {
+                } else {
 
-					Object o = rn.getDataObject();
-					if (o instanceof SPNote) {
-						SPNote spnote = (SPNote) o;
-						noteList.add(new Note(Scope.Group, spnote.getTitle(), spnote.getNote()));
-					}
+                    Object o = rn.getDataObject();
+                    if (o instanceof SPNote) {
+                        SPNote spnote = (SPNote) o;
+                        noteList.add(new Note(Scope.Group, spnote.getTitle(), spnote.getNote()));
+                    }
 
-				}
-			}
+                }
+            }
 
-			// Finish constructing the program.
-			prog.setChildren(obsList, groupList, noteList);
-			programSet.add(prog);
+            // Finish constructing the program.
+            prog.setChildren(obsList, groupList, noteList);
+            programSet.add(prog);
 
-		} catch (Exception e) {
-			LOGGER.log(Level.WARNING, "Trouble in functor.", e);
-		}
-	}
+        } catch (Exception e) {
+            LOGGER.log(Level.WARNING, "Trouble in functor.", e);
+        }
+    }
 
-	public Iterator<Prog> iterator() {
-		return programSet.iterator();
-	}
+    public Iterator<Prog> iterator() {
+        return programSet.iterator();
+    }
 
     /** Checks if an observation is ok and should be added to the result. */
     private void addObsIfOk(List<Obs> list, Obs observation) {
@@ -368,74 +368,74 @@ public class ObsQueryFunctor extends DBAbstractQueryFunctor implements Iterable<
         list.add(observation);
     }
 
-	@SuppressWarnings("unchecked")
-	private SPComponentType[] instrument(ISPObservation obsShell) throws RemoteException {
+    @SuppressWarnings("unchecked")
+    private SPComponentType[] instrument(ISPObservation obsShell) throws RemoteException {
 
-		// For each obs, we can have an inst and an AO
-		SPComponentType inst = null;
-		SPComponentType ao = null;
+        // For each obs, we can have an inst and an AO
+        SPComponentType inst = null;
+        SPComponentType ao = null;
 
-		// Need to look through all the components.
-		for (ISPObsComponent comp: obsShell.getObsComponents()) {
-			SPComponentType type = comp.getType();
+        // Need to look through all the components.
+        for (ISPObsComponent comp: obsShell.getObsComponents()) {
+            SPComponentType type = comp.getType();
 
             if (Gems.SP_TYPE.equals(type))
                 continue; // REL-293
 
-			// There will be zero or one.
-			if (SPComponentBroadType.AO.equals(type.broadType)) {
-				ao = type;
-				if (inst != null)
-					break;
-				continue;
-			}
+            // There will be zero or one.
+            if (SPComponentBroadType.AO.equals(type.broadType)) {
+                ao = type;
+                if (inst != null)
+                    break;
+                continue;
+            }
 
-			// There will be zero or one.
-			if (SPComponentBroadType.INSTRUMENT.equals(type.broadType)) {
-				inst = type;
-				if (ao != null)
-					break;
-			}
+            // There will be zero or one.
+            if (SPComponentBroadType.INSTRUMENT.equals(type.broadType)) {
+                inst = type;
+                if (ao != null)
+                    break;
+            }
 
-		}
+        }
 
-		return (inst == null) ? new SPComponentType[0] :
-			(ao == null) ? new SPComponentType[] { inst } :
-				new SPComponentType[] { inst, ao };
+        return (inst == null) ? new SPComponentType[0] :
+            (ao == null) ? new SPComponentType[] { inst } :
+                new SPComponentType[] { inst, ao };
 
-	}
+    }
 
-	@SuppressWarnings("unchecked")
-	private Double centralWavelength(ISPObservation obsShell) throws RemoteException {
-		for (ISPObsComponent comp: obsShell.getObsComponents()) {
-			SPComponentType type = comp.getType();
+    @SuppressWarnings("unchecked")
+    private Double centralWavelength(ISPObservation obsShell) throws RemoteException {
+        for (ISPObsComponent comp: obsShell.getObsComponents()) {
+            SPComponentType type = comp.getType();
 
-			// This is only relevant for some instruments
-			if (type.equals(InstGNIRS.SP_TYPE)) return ((InstGNIRS) comp.getDataObject()).getCentralWavelength().doubleValue();
-			if (type.equals(InstTReCS.SP_TYPE)) return ((InstTReCS) comp.getDataObject()).getDisperserLambda();
+            // This is only relevant for some instruments
+            if (type.equals(InstGNIRS.SP_TYPE)) return ((InstGNIRS) comp.getDataObject()).getCentralWavelength().doubleValue();
+            if (type.equals(InstTReCS.SP_TYPE)) return ((InstTReCS) comp.getDataObject()).getDisperserLambda();
 
-		}
+        }
 
-		return null;
-	}
+        return null;
+    }
 
-	@SuppressWarnings("unchecked")
-	private Set<Enum> options(ISPObservation obsShell) throws RemoteException {
+    @SuppressWarnings("unchecked")
+    private Set<Enum> options(ISPObservation obsShell) throws RemoteException {
 
-		Set<Enum> ret = new HashSet<Enum>();
+        Set<Enum> ret = new HashSet<>();
 
-		// Need to look through all the components.
-		for (ISPObsComponent comp: obsShell.getObsComponents()) {
-			SPComponentType type = comp.getType();
+        // Need to look through all the components.
+        for (ISPObsComponent comp: obsShell.getObsComponents()) {
+            SPComponentType type = comp.getType();
 
-			// There will be zero or one.
-			if (SPComponentBroadType.INSTRUMENT.equals(type.broadType)) {
+            // There will be zero or one.
+            if (SPComponentBroadType.INSTRUMENT.equals(type.broadType)) {
 
-				// GMOS
-				if (type.equals(InstGmosNorth.SP_TYPE) || type.equals(InstGmosSouth.SP_TYPE)) {
+                // GMOS
+                if (type.equals(InstGmosNorth.SP_TYPE) || type.equals(InstGmosSouth.SP_TYPE)) {
 
-					InstGmosCommon gmos = (InstGmosCommon) comp.getDataObject();
-					ret.add(gmos.getFPUnit());
+                    InstGmosCommon gmos = (InstGmosCommon) comp.getDataObject();
+                    ret.add(gmos.getFPUnit());
                     ret.add(gmos.getDisperser());
                     ret.add(gmos.getFilter());
                     ret.add(gmos.getDetectorManufacturer());
@@ -443,27 +443,27 @@ public class ObsQueryFunctor extends DBAbstractQueryFunctor implements Iterable<
                     ret.add(gmos.getPreImaging());
 
                     addFromIterators(obsShell, ret,
-							InstGmosCommon.FPU_PROP_NAME,
-							InstGmosCommon.DISPERSER_PROP_NAME,
-							InstGmosCommon.FILTER_PROP_NAME);
+                            InstGmosCommon.FPU_PROP_NAME,
+                            InstGmosCommon.DISPERSER_PROP_NAME,
+                            InstGmosCommon.FILTER_PROP_NAME);
 
-				}
+                }
 
-				// Flamingos2
-				if (type.equals(Flamingos2.SP_TYPE)) {
+                // Flamingos2
+                if (type.equals(Flamingos2.SP_TYPE)) {
 
-					Flamingos2 f2 = (Flamingos2) comp.getDataObject();
+                    Flamingos2 f2 = (Flamingos2) comp.getDataObject();
                     ret.add(f2.getFpu());
                     ret.add(f2.getDisperser());
                     ret.add(f2.getFilter());
                     ret.add(f2.getPreImaging());
 
-					addFromIterators(obsShell, ret,
-							Flamingos2.FPU_PROP,
+                    addFromIterators(obsShell, ret,
+                            Flamingos2.FPU_PROP,
                             Flamingos2.DISPERSER_PROP,
                             Flamingos2.FILTER_PROP);
 
-				}
+                }
 
                 // GSAOI
                 if (type.equals(Gsaoi.SP_TYPE)) {
@@ -477,24 +477,24 @@ public class ObsQueryFunctor extends DBAbstractQueryFunctor implements Iterable<
                 }
 
                 // NIRI
-				if (type.equals(InstNIRI.SP_TYPE)) {
+                if (type.equals(InstNIRI.SP_TYPE)) {
 
-					InstNIRI niri = (InstNIRI) comp.getDataObject();
+                    InstNIRI niri = (InstNIRI) comp.getDataObject();
                     ret.add(niri.getFilter());
                     ret.add(niri.getDisperser());
                     ret.add(niri.getMask());
                     ret.add(niri.getCamera());
 
-					addFromIterators(obsShell, ret,
+                    addFromIterators(obsShell, ret,
                             InstNIRI.DISPERSER_PROP,
                             InstNIRI.MASK_PROP,
                             InstNIRI.FILTER_PROP,
                             InstNIRI.CAMERA_PROP);
 
-				}
+                }
 
-				// GNIRS
-				if (type.equals(InstGNIRS.SP_TYPE)) {
+                // GNIRS
+                if (type.equals(InstGNIRS.SP_TYPE)) {
 
                     InstGNIRS gnirs = (InstGNIRS) comp.getDataObject();
                     ret.add(gnirs.getDisperser());
@@ -531,11 +531,11 @@ public class ObsQueryFunctor extends DBAbstractQueryFunctor implements Iterable<
                     ret.add(trecs.getDisperser());
                     ret.add(trecs.getMask());
 
-					addFromIterators(obsShell, ret,
-							InstTReCS.DISPERSER_PROP,
-							InstTReCS.MASK_PROP);
+                    addFromIterators(obsShell, ret,
+                            InstTReCS.DISPERSER_PROP,
+                            InstTReCS.MASK_PROP);
 
-				}
+                }
 
                 // NIFS
                 if (type.equals(InstNIFS.SP_TYPE)) {
@@ -577,18 +577,18 @@ public class ObsQueryFunctor extends DBAbstractQueryFunctor implements Iterable<
                             InstTexes.DISPERSER_PROP);
                 }
 
-			}
+            }
 
-			// There will be zero or one
-			if ( SPComponentBroadType.AO.equals(type.broadType)) {
+            // There will be zero or one
+            if ( SPComponentBroadType.AO.equals(type.broadType)) {
 
-				// If it's altair we need to grab the guide star type
-				if (type.equals(InstAltair.SP_TYPE)) {
-					InstAltair altair = (InstAltair)  comp.getDataObject();
-					ret.add(altair.getGuideStarType());
-				}
+                // If it's altair we need to grab the guide star type
+                if (type.equals(InstAltair.SP_TYPE)) {
+                    InstAltair altair = (InstAltair)  comp.getDataObject();
+                    ret.add(altair.getGuideStarType());
+                }
 
-			}
+            }
 
             // REL-293: check for WFS
             if (TargetObsComp.SP_TYPE.equals(type)) {
@@ -599,11 +599,11 @@ public class ObsQueryFunctor extends DBAbstractQueryFunctor implements Iterable<
                     }
                 }
             }
-		}
+        }
 
-		return ret;
+        return ret;
 
-	}
+    }
 
     /**
      * Look for Altair with LGS or Gems
@@ -669,62 +669,58 @@ public class ObsQueryFunctor extends DBAbstractQueryFunctor implements Iterable<
     }
 
     private void applySysConfigs(ISPObservation obsShell, ApplyOp<ISysConfig> op) {
-   		try {
-   			// Now look at all the instrument iterators in the sequence. This is much faster
-   			// than unrolling the whole sequence. We're doing a breadth-first search for all
-   			// ISPSeqComponents, where the root one is conveniently available on the obsShell.
-   			LinkedList<ISPSeqComponent> queue = new LinkedList<ISPSeqComponent>();
-   			ISPSeqComponent seqShell = obsShell.getSeqComponent();
-   			if (seqShell != null) queue.addLast(seqShell);
-   			while (!queue.isEmpty()) {
-   				seqShell = queue.removeFirst();
-   				queue.addAll(seqShell.getSeqComponents());
-   				Object obj = seqShell.getDataObject();
-   				if (obj instanceof SeqConfigComp) { // this should always be true, I think
-   					SeqConfigComp scc = (SeqConfigComp) obj;
-   					ISysConfig config = scc.getSysConfig();
+        try {
+            // Now look at all the instrument iterators in the sequence. This is much faster
+            // than unrolling the whole sequence. We're doing a breadth-first search for all
+            // ISPSeqComponents, where the root one is conveniently available on the obsShell.
+            LinkedList<ISPSeqComponent> queue = new LinkedList<>();
+            ISPSeqComponent seqShell = obsShell.getSeqComponent();
+            if (seqShell != null) queue.addLast(seqShell);
+            while (!queue.isEmpty()) {
+                seqShell = queue.removeFirst();
+                queue.addAll(seqShell.getSeqComponents());
+                Object obj = seqShell.getDataObject();
+                if (obj instanceof SeqConfigComp) { // this should always be true, I think
+                    SeqConfigComp scc = (SeqConfigComp) obj;
+                    ISysConfig config = scc.getSysConfig();
                     op.apply(config);
-   				}
-   			}
-   		} catch (Exception e) {
-   			// Log and keep going; this will reduce the amount of information available
-   			// to QPT but isn't fatal. Watch for these exceptions as the model changes;
-   			// current code makes some assumptions about the contents of untyped collections.
-   			LOGGER.log(Level.WARNING, "Problem examining instrument iterator.", e);
-   		}
-   	}
+                }
+            }
+        } catch (Exception e) {
+            // Log and keep going; this will reduce the amount of information available
+            // to QPT but isn't fatal. Watch for these exceptions as the model changes;
+            // current code makes some assumptions about the contents of untyped collections.
+            LOGGER.log(Level.WARNING, "Problem examining instrument iterator.", e);
+        }
+    }
 
     @SuppressWarnings("unchecked")
     private void addFromIterators(ISPObservation obsShell, final Set<Enum> ret, final String... params) {
-        applySysConfigs(obsShell, new ApplyOp<ISysConfig>() {
-            @Override public void apply(ISysConfig config) {
-                for (String name: params) {
-                    IParameter param = config.getParameter(name);
-                    if (param != null) {
-                        // magically, this will be a List<Enum>. I think.
-                        for (Enum v: (List<Enum>) param.getValue())
-                            if (v != null) ret.add(v);
-                    }
+        applySysConfigs(obsShell, config -> {
+            for (String name: params) {
+                IParameter param = config.getParameter(name);
+                if (param != null) {
+                    // magically, this will be a List<Enum>. I think.
+                    for (Enum v: (List<Enum>) param.getValue())
+                        if (v != null) ret.add(v);
                 }
             }
         });
     }
 
-	@SuppressWarnings("unchecked")
-	private void addFromIterators(ISPObservation obsShell, Set<Enum> ret, PropertyDescriptor... params) throws RemoteException {
-		String[] names = new String[params.length];
-		for (int i = 0; i < names.length; i++)
-			names[i] = params[i].getName();
-		addFromIterators(obsShell, ret, names);
-	}
+    @SuppressWarnings("unchecked")
+    private void addFromIterators(ISPObservation obsShell, Set<Enum> ret, PropertyDescriptor... params) throws RemoteException {
+        String[] names = new String[params.length];
+        for (int i = 0; i < names.length; i++)
+            names[i] = params[i].getName();
+        addFromIterators(obsShell, ret, names);
+    }
 
     private void addGnirsCameras(ISPObservation obsShell, final Set<Enum> ret, final GNIRSParams.PixelScale pixelScale) {
-        applySysConfigs(obsShell, new ApplyOp<ISysConfig>() {
-            @Override public void apply(ISysConfig config) {
-                // the parameter can be a single wavelength or a DefaultParameter with a collection of wavelengths
-                final IParameter param = config.getParameter(InstGNIRS.CENTRAL_WAVELENGTH_PROP.getName());
-                addGnirsCameras(param, ret, pixelScale);
-            }
+        applySysConfigs(obsShell, config -> {
+            // the parameter can be a single wavelength or a DefaultParameter with a collection of wavelengths
+            final IParameter param = config.getParameter(InstGNIRS.CENTRAL_WAVELENGTH_PROP.getName());
+            addGnirsCameras(param, ret, pixelScale);
         });
     }
 
@@ -743,75 +739,75 @@ public class ObsQueryFunctor extends DBAbstractQueryFunctor implements Iterable<
         // anything else will be ignored.. (including null)
     }
 
-	@SuppressWarnings("unchecked")
-	private String customMask(ISPObservation obsShell) throws RemoteException {
+    @SuppressWarnings("unchecked")
+    private String customMask(ISPObservation obsShell) throws RemoteException {
 
-		// Need to look through all the components.
-		for (ISPObsComponent comp: obsShell.getObsComponents()) {
-			SPComponentType type = comp.getType();
+        // Need to look through all the components.
+        for (ISPObsComponent comp: obsShell.getObsComponents()) {
+            SPComponentType type = comp.getType();
 
-			// There will be zero or one.
-			if (SPComponentBroadType.INSTRUMENT.equals(type.broadType)) {
+            // There will be zero or one.
+            if (SPComponentBroadType.INSTRUMENT.equals(type.broadType)) {
 
-				// GMOS
-				if (type.equals(InstGmosNorth.SP_TYPE) || type.equals(InstGmosSouth.SP_TYPE)) {
-					InstGmosCommon gmos = (InstGmosCommon) comp.getDataObject();
-					return gmos.getFPUnitCustomMask();
-				}
+                // GMOS
+                if (type.equals(InstGmosNorth.SP_TYPE) || type.equals(InstGmosSouth.SP_TYPE)) {
+                    InstGmosCommon gmos = (InstGmosCommon) comp.getDataObject();
+                    return gmos.getFPUnitCustomMask();
+                }
 
-				// Flamingos2 - FPU
-				if (type.equals(Flamingos2.SP_TYPE)) {
-					Flamingos2 flam2 = (Flamingos2) comp.getDataObject();
-					return flam2.getFpuCustomMask();
-				}
+                // Flamingos2 - FPU
+                if (type.equals(Flamingos2.SP_TYPE)) {
+                    Flamingos2 flam2 = (Flamingos2) comp.getDataObject();
+                    return flam2.getFpuCustomMask();
+                }
 
-			}
-		}
+            }
+        }
 
-		return null;
-	}
+        return null;
+    }
 
-	@SuppressWarnings("unchecked")
-	private Obs getObs(Prog info, ISPObservation obsShell, Group group) throws RemoteException {
+    @SuppressWarnings("unchecked")
+    private Obs getObs(Prog info, ISPObservation obsShell, Group group) throws RemoteException {
 
-		// Collect obs info
-		SPObservation obs = (SPObservation) obsShell.getDataObject();
-		SPObservationID id = obsShell.getObservationID(); // will never be null if there's a progid (which there is)
+        // Collect obs info
+        SPObservation obs = (SPObservation) obsShell.getDataObject();
+        SPObservationID id = obsShell.getObservationID(); // will never be null if there's a progid (which there is)
 
         // Only look at those that are of the proper obs class.
-		ObsClass obsClass = ObsClassService.lookupObsClass(obsShell);
-		if (obsClass == null || !relevantObsClasses.contains(obsClass)) {
-			obsExclusions.put(id, ObsExclusion.EXCLUDED_CLASS);
+        ObsClass obsClass = ObsClassService.lookupObsClass(obsShell);
+        if (obsClass == null || !relevantObsClasses.contains(obsClass)) {
+            obsExclusions.put(id, ObsExclusion.EXCLUDED_CLASS);
             return null;
-		}
+        }
 
-		// Only if it's ready or ongoing...
-		ObservationStatus obsStatus = ObservationStatus.computeFor(obsShell);
-		if (obsStatus == null || !relevantObsStatuses.contains(obsStatus)) {
-			obsExclusions.put(id, ObsExclusion.EXCLUDED_STATUS);
-			return null;
-		}
+        // Only if it's ready or ongoing...
+        ObservationStatus obsStatus = ObservationStatus.computeFor(obsShell);
+        if (obsStatus == null || !relevantObsStatuses.contains(obsStatus)) {
+            obsExclusions.put(id, ObsExclusion.EXCLUDED_STATUS);
+            return null;
+        }
 
-		// Get the target environment; NOTE: this may be null!
-		TargetEnvironment targetEnv = null;
-		for (ISPObsComponent obsCompShell: obsShell.getObsComponents()) {
-			SPComponentType type = obsCompShell.getType();
-			if (type.equals(TargetObsComp.SP_TYPE)) {
-				TargetObsComp targetObsComp = (TargetObsComp) obsCompShell.getDataObject();
+        // Get the target environment; NOTE: this may be null!
+        TargetEnvironment targetEnv = null;
+        for (ISPObsComponent obsCompShell: obsShell.getObsComponents()) {
+            SPComponentType type = obsCompShell.getType();
+            if (type.equals(TargetObsComp.SP_TYPE)) {
+                TargetObsComp targetObsComp = (TargetObsComp) obsCompShell.getDataObject();
                 if (targetObsComp != null) targetEnv = targetObsComp.getTargetEnvironment();
-				break;
-			}
-		}
+                break;
+            }
+        }
 
-		// Get the site conditions
-		SPSiteQuality quality = null;
-		for (ISPObsComponent obsCompShell: obsShell.getObsComponents()) {
-			SPComponentType type = obsCompShell.getType();
-			if (type.equals(SPSiteQuality.SP_TYPE)) {
-				quality = (SPSiteQuality) obsCompShell.getDataObject();
-				break;
-			}
-		}
+        // Get the site conditions
+        SPSiteQuality quality = null;
+        for (ISPObsComponent obsCompShell: obsShell.getObsComponents()) {
+            SPComponentType type = obsCompShell.getType();
+            if (type.equals(SPSiteQuality.SP_TYPE)) {
+                quality = (SPSiteQuality) obsCompShell.getDataObject();
+                break;
+            }
+        }
 
         // Get the instrument -- if not present, then ignore.
         // FR-8265: work around for a model bug
@@ -825,17 +821,17 @@ public class ObsQueryFunctor extends DBAbstractQueryFunctor implements Iterable<
         }
         if (inst == null) return null; //  no instrument component
 
-		// And seq steps
-		PlannedStepSummary steps = PlannedTimeSummaryService.getPlannedSteps(obsShell);
-		if (skipNoStepsObservations && (steps.size() == 0 || steps.isStepExecuted(steps.size() - 1))) {
-			LOGGER.warning(id.toString() + " is " + obsStatus + " but has no remaining steps.");
+        // And seq steps
+        PlannedStepSummary steps = PlannedTimeSummaryService.getPlannedSteps(obsShell);
+        if (skipNoStepsObservations && (steps.size() == 0 || steps.isStepExecuted(steps.size() - 1))) {
+            LOGGER.warning(id.toString() + " is " + obsStatus + " but has no remaining steps.");
             // Don't complain for ENG or CAL observations
             if (!info.isEngOrCal()) {
-			    misconfiguredObservations.add(id.toString());
+                misconfiguredObservations.add(id.toString());
             }
-			obsExclusions.put(id, ObsExclusion.NO_REMAINING_STEPS);
+            obsExclusions.put(id, ObsExclusion.NO_REMAINING_STEPS);
             return null;
-		}
+        }
 
         // And times
         PlannedTimeSummary times = PlannedTimeSummaryService.getTotalTime(obsShell);
@@ -856,7 +852,7 @@ public class ObsQueryFunctor extends DBAbstractQueryFunctor implements Iterable<
         // Construct the AgsAnalyses for this observation under the following conditions:
         // 1. IF the system property is not set or is set to true, and
         // 2. IF the observation needs a guide star.
-        List<AgsAnalysis> analysis = new ArrayList<AgsAnalysis>();
+        List<AgsAnalysis> analysis = new ArrayList<>();
 
         if (CalculateAgsAnalysis && SPObservation.needsGuideStar(obsShell)) {
             Option<ObsContext> ctxOpt = ObsContext.create(obsShell);
@@ -875,8 +871,8 @@ public class ObsQueryFunctor extends DBAbstractQueryFunctor implements Iterable<
 
         // create new Obs object based on information collected
         return new Obs(
-			info,
-			group,
+            info,
+            group,
             obsShell.getObservationNumber(),
             Obs.createObsId(info, obsShell.getObservationNumber()),
             obs.getTitle(),
@@ -884,58 +880,58 @@ public class ObsQueryFunctor extends DBAbstractQueryFunctor implements Iterable<
             tooPriority,
             ObservationStatus.computeFor(obsShell),
             obsClass,
-			targetEnv,
-			instrument(obsShell),
-			options(obsShell),
-			customMask(obsShell),
-			centralWavelength(obsShell),
-			steps,
+            targetEnv,
+            instrument(obsShell),
+            options(obsShell),
+            customMask(obsShell),
+            centralWavelength(obsShell),
+            steps,
             times.getPiTime(),
             times.getExecTime(),
             elapsedTime,
-			quality,
+            quality,
             hasLGS(obsShell),
             hasAO(obsShell),
             usesAverageParallacticAngle(obsShell),
             DefaultImList.create(analysis)
         );
 
-	}
+    }
 
-	public static boolean isRollover(ISPProgram programShell) throws RemoteException {
-		try {
+    public static boolean isRollover(ISPProgram programShell) throws RemoteException {
+        try {
             return ((SPProgram) programShell.getDataObject()).getRolloverStatus();
 //            return P1DocumentUtil.getGeminiPart(P1DocumentUtil.lookupProposal(programShell)).getITacExtension().getRolloverFlag();
-		} catch (NullPointerException npe) {
-			// If the required structure isn't there, rollover is false. This
-			// condition would be unusual but is legal. Easier to catch NPE than
-			// check all the null conditions.
-		}
-		return false;
-	}
+        } catch (NullPointerException npe) {
+            // If the required structure isn't there, rollover is false. This
+            // condition would be unusual but is legal. Easier to catch NPE than
+            // check all the null conditions.
+        }
+        return false;
+    }
 
-	public SortedSet<Prog> getProgramSet() {
-		return programSet;
-	}
+    public SortedSet<Prog> getProgramSet() {
+        return programSet;
+    }
 
-	public SortedSet<String> getMisconfiguredObservations() {
-		return misconfiguredObservations;
-	}
+    public SortedSet<String> getMisconfiguredObservations() {
+        return misconfiguredObservations;
+    }
 
-	/**
-	 * Set of all semesters in the database.
-	 */
-	public SortedSet<String> getAllSemesters() {
-		return allSemesters;
-	}
+    /**
+     * Set of all semesters in the database.
+     */
+    public SortedSet<String> getAllSemesters() {
+        return allSemesters;
+    }
 
-	public Map<SPProgramID, ProgramExclusion> getProgramExclusions() {
-		return programExclusions;
-	}
+    public Map<SPProgramID, ProgramExclusion> getProgramExclusions() {
+        return programExclusions;
+    }
 
-	public Map<SPObservationID, ObsExclusion> getObsExclusions() {
-		return obsExclusions;
-	}
+    public Map<SPObservationID, ObsExclusion> getObsExclusions() {
+        return obsExclusions;
+    }
 
 }
 

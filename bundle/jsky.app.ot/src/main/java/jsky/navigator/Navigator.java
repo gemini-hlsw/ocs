@@ -12,7 +12,6 @@ package jsky.navigator;
 
 import jsky.catalog.Catalog;
 import jsky.catalog.FieldDesc;
-import jsky.catalog.QueryArgs;
 import jsky.catalog.TableQueryResult;
 import jsky.catalog.astrocat.AstroCatConfig;
 import jsky.catalog.gui.*;
@@ -20,7 +19,6 @@ import jsky.catalog.skycat.SkycatCatalog;
 import jsky.catalog.skycat.SkycatConfigEntry;
 import jsky.catalog.skycat.SkycatConfigFile;
 import jsky.catalog.skycat.SkycatTable;
-import jsky.coords.CoordinateRadius;
 import jsky.image.gui.MainImageDisplay;
 import jsky.image.gui.PickObjectStatistics;
 import jsky.util.Preferences;
@@ -38,7 +36,6 @@ import java.net.URL;
 import java.util.Properties;
 import java.util.Stack;
 import java.util.Vector;
-
 
 /**
  * Extends CatalogNavigator to include support for displaying images
@@ -134,12 +131,6 @@ public class Navigator extends CatalogNavigator implements CatalogNavigatorOpene
     protected void setImageDisplayControlFrame(Component imageDisplayControlFrame) {
         _imageDisplayControlFrame = imageDisplayControlFrame;
     }
-
-    /** Set the instance of the catalog navigator to use with this image display. */
-    public void setImageDisplayNavigator(Navigator navigator) {
-        _imageDisplay.setNavigator(navigator);
-    }
-
 
     /** Return the action to use to show the image window. */
     public Action getImageDisplayAction() {
@@ -284,9 +275,7 @@ public class Navigator extends CatalogNavigator implements CatalogNavigatorOpene
      * the new image display window.
      */
     protected void notifyNewImageDisplay(Stack stack) {
-        int n = stack.size();
-        for (int i = 0; i < n; i++) {
-            Object comp = stack.get(i);
+        for (Object comp : stack) {
             if (comp instanceof NavigatorQueryTool) {
                 ((NavigatorQueryTool) comp).setImageDisplay(_imageDisplay);
             }
@@ -524,7 +513,7 @@ public class Navigator extends CatalogNavigator implements CatalogNavigatorOpene
         SkycatConfigEntry configEntry = new SkycatConfigEntry(properties);
         FieldDesc[] fields = PickObjectStatistics.getFields();
 
-        Vector dataRows = new Vector();
+        Vector<Vector<Object>> dataRows = new Vector<>();
         dataRows.add(stats.getRow());
         SkycatTable table = new SkycatTable(configEntry, dataRows, fields);
         table.setProperties(properties);
@@ -545,8 +534,8 @@ public class Navigator extends CatalogNavigator implements CatalogNavigatorOpene
         }
 
         int numCols = table.getColumnCount();
-        Vector v = stats.getRow();
-        Vector rowVec = new Vector(numCols);
+        Vector<Object> v = stats.getRow();
+        Vector<Object> rowVec = new Vector<>(numCols);
 
         for (int col = 0; col < numCols; col++) {
             FieldDesc field = table.getColumnDesc(col);
@@ -581,13 +570,5 @@ public class Navigator extends CatalogNavigator implements CatalogNavigatorOpene
         tableDisplayTool.replot();
     }
 
-    public void setCatalogQueryWithResult(Catalog cat, TableQueryResult table, QueryArgs queryArgs) {
-        getCatalogTree().selectNode(cat);
-        setQueryResult(cat, false);
-        setQueryResult(table, false);
-        QueryArgs args = queryArgs.copy();
-        cat.setRegionArgs(args, args.getRegion());
-        ((CatalogQueryTool)getQueryComponent()).getCatalogQueryPanel().setQueryArgs(args);
-    }
 }
 

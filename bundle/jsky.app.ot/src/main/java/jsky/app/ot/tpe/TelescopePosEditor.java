@@ -7,9 +7,7 @@
 
 package jsky.app.ot.tpe;
 
-import edu.gemini.ags.api.AgsStrategy;
 import edu.gemini.pot.sp.*;
-import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.spModel.data.ISPDataObject;
 import edu.gemini.spModel.gemini.nici.SeqRepeatNiciOffset;
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality;
@@ -42,7 +40,6 @@ import jsky.util.gui.DialogUtil;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Point2D;
-import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.IOException;
 
@@ -114,11 +111,7 @@ public class TelescopePosEditor extends JSkyCat implements TpeMouseObserver {
         _tpeToolBar = ((TpeImageDisplayFrame) parent).getTpeToolBar();
         _tpeMenuBar = (TpeImageDisplayMenuBar) ((TpeImageDisplayFrame) parent).getJMenuBar();
 
-        _tpeToolBar.getGuiderSelector().addSelectionListener(new AgsSelectorControl.Listener() {
-            @Override public void agsStrategyUpdated(Option<AgsStrategy> strategy) {
-                AgsStrategyUtil.setSelection(_ctx.obsShellOrNull(), strategy);
-            }
-        });
+        _tpeToolBar.getGuiderSelector().addSelectionListener(strategy -> AgsStrategyUtil.setSelection(_ctx.obsShellOrNull(), strategy));
 
 
         // Don't want the "New Window" menu item here
@@ -149,11 +142,7 @@ public class TelescopePosEditor extends JSkyCat implements TpeMouseObserver {
             @Override public void updateEditableState() { _editorTools.updateAvailableOptions(_allFeatures); }
         });
 
-        _agsPub.subscribe(new AgsContextSubscriber() {
-            @Override public void notify(ISPObservation obs, AgsContext oldOptions, AgsContext newOptions) {
-                _tpeToolBar.getGuiderSelector().setAgsOptions(newOptions);
-            }
-        });
+        _agsPub.subscribe((obs, oldOptions, newOptions) -> _tpeToolBar.getGuiderSelector().setAgsOptions(newOptions));
     }
 
     /**
@@ -329,33 +318,25 @@ public class TelescopePosEditor extends JSkyCat implements TpeMouseObserver {
         ITarget oldBase = oldBasePos.getTarget();
         ITarget newBase = newBasePos.getTarget();
 
-        if (oldBase.getRa().getAs(Units.DEGREES) != newBase.getRa().getAs(Units.DEGREES))
-            return true;
-        return oldBase.getDec().getAs(Units.DEGREES) != newBase.getDec().getAs(Units.DEGREES);
+        return oldBase.getRa().getAs(Units.DEGREES) != newBase.getRa().getAs(Units.DEGREES) || oldBase.getDec().getAs(Units.DEGREES) != newBase.getDec().getAs(Units.DEGREES);
     }
 
-    private final PropertyChangeListener obsListener = new PropertyChangeListener() {
-        @Override
-        public void propertyChange(PropertyChangeEvent evt) {
-            if (!(evt.getSource() instanceof ISPNode)) return;
-            if (!evt.getPropertyName().equals(SPUtil.getDataObjectPropertyName()) &&
-                    !(evt instanceof SPStructureChange)) return;
+    private final PropertyChangeListener obsListener = evt -> {
+        if (!(evt.getSource() instanceof ISPNode)) return;
+        if (!evt.getPropertyName().equals(SPUtil.getDataObjectPropertyName()) &&
+                !(evt instanceof SPStructureChange)) return;
 
-            final ISPNode src = (ISPNode) evt.getSource();
-            final ISPDataObject obj = src.getDataObject();
-            if (isTpeObject(src) || (obj instanceof GuideProbeAvailabilityVolatileDataObject)) {
-                if (_ctx.node().isDefined()) {
-                    reset(_ctx.node().get());
-                }
+        final ISPNode src = (ISPNode) evt.getSource();
+        final ISPDataObject obj = src.getDataObject();
+        if (isTpeObject(src) || (obj instanceof GuideProbeAvailabilityVolatileDataObject)) {
+            if (_ctx.node().isDefined()) {
+                reset(_ctx.node().get());
             }
         }
     };
-    private final PropertyChangeListener selListener = new PropertyChangeListener() {
-        @Override
-        public void propertyChange(PropertyChangeEvent evt) {
-            final ISPNode src = (ISPNode) evt.getSource();
-            reset(src);
-        }
+    private final PropertyChangeListener selListener = evt -> {
+        final ISPNode src = (ISPNode) evt.getSource();
+        reset(src);
     };
 
     /**
