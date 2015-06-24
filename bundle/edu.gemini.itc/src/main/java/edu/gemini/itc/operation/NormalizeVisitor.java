@@ -4,7 +4,7 @@ import edu.gemini.itc.base.SampledSpectrum;
 import edu.gemini.itc.base.SampledSpectrumVisitor;
 import edu.gemini.itc.base.ZeroMagnitudeStar;
 import edu.gemini.itc.shared.BrightnessUnit;
-import edu.gemini.itc.shared.WavebandDefinition;
+import edu.gemini.spModel.core.MagnitudeBand;
 
 /**
  * The NormalizeVisitor class is used to perform Normalization to the SED.
@@ -13,8 +13,8 @@ import edu.gemini.itc.shared.WavebandDefinition;
  * This is where unit conversion happens.
  */
 public class NormalizeVisitor implements SampledSpectrumVisitor {
-    private final WavebandDefinition _band; // String description of waveband (A, B, R, etc.)
-    private final double _user_norm; // Brightness of the object (flux) as an average
+    private final MagnitudeBand _band;    // waveband (A, B, R, etc.)
+    private final double _user_norm;      // Brightness of the object (flux) as an average
     private final BrightnessUnit _units;  // mag, abmag, ...
 
     /**
@@ -24,7 +24,7 @@ public class NormalizeVisitor implements SampledSpectrumVisitor {
      * @param user_norm The average flux in the waveband
      * @param units     The code for the units chosen by user
      */
-    public NormalizeVisitor(final WavebandDefinition waveband, final double user_norm, final BrightnessUnit units) {
+    public NormalizeVisitor(final MagnitudeBand waveband, final double user_norm, final BrightnessUnit units) {
         _band = waveband;
         _user_norm = user_norm;
         _units = units;
@@ -46,45 +46,45 @@ public class NormalizeVisitor implements SampledSpectrumVisitor {
                 norm = zeropoint * (java.lang.Math.pow(10.0, -0.4 * _user_norm));
                 break;
             case JY:
-                norm = _user_norm * 1.509e7 / _band.getCenter();
+                norm = _user_norm * 1.509e7 / _band.center().toNanometers();
                 break;
             case WATTS:
-                norm = _user_norm * _band.getCenter() / 1.988e-13;
+                norm = _user_norm * _band.center().toNanometers() / 1.988e-13;
                 break;
             case ERGS_WAVELENGTH:
-                norm = _user_norm * _band.getCenter() / 1.988e-14;
+                norm = _user_norm * _band.center().toNanometers() / 1.988e-14;
                 break;
             case ERGS_FREQUENCY:
-                norm = _user_norm * 1.509e30 / _band.getCenter();
+                norm = _user_norm * 1.509e30 / _band.center().toNanometers();
                 break;
             case ABMAG:
-                norm = 5.632e10 * java.lang.Math.pow(10, -0.4 * _user_norm) / _band.getCenter();
+                norm = 5.632e10 * java.lang.Math.pow(10, -0.4 * _user_norm) / _band.center().toNanometers();
                 break;
             case MAG_PSA:
                 zeropoint = ZeroMagnitudeStar.getAverageFlux(_band);
                 norm = zeropoint * (java.lang.Math.pow(10.0, -0.4 * _user_norm));
                 break;
             case JY_PSA:
-                norm = _user_norm * 1.509e7 / _band.getCenter();
+                norm = _user_norm * 1.509e7 / _band.center().toNanometers();
                 break;
             case WATTS_PSA:
-                norm = _user_norm * _band.getCenter() / 1.988e-13;
+                norm = _user_norm * _band.center().toNanometers() / 1.988e-13;
                 break;
             case ERGS_WAVELENGTH_PSA:
-                norm = _user_norm * _band.getCenter() / 1.988e-14;
+                norm = _user_norm * _band.center().toNanometers() / 1.988e-14;
                 break;
             case ERGS_FREQUENCY_PSA:
-                norm = _user_norm * 1.509e30 / _band.getCenter();
+                norm = _user_norm * 1.509e30 / _band.center().toNanometers();
                 break;
             case ABMAG_PSA:
-                norm = 5.632e10 * java.lang.Math.pow(10, -0.4 * _user_norm) / _band.getCenter();
+                norm = 5.632e10 * java.lang.Math.pow(10, -0.4 * _user_norm) / _band.center().toNanometers();
                 break;
             default:
                 throw new IllegalArgumentException("Unit code " + _units + " not supported.");
         }
 
         // Calculate avg flux density in chosen normalization band.
-        double average = sed.getAverage(_band.getStart(), _band.getEnd());
+        double average = sed.getAverage(_band.start().toNanometers(), _band.end().toNanometers());
 
         // Calculate multiplier.
         double multiplier = norm / average;

@@ -1,7 +1,7 @@
 package edu.gemini.itc.base;
 
 import edu.gemini.itc.shared.BrightnessUnit;
-import edu.gemini.itc.shared.WavebandDefinition;
+import edu.gemini.spModel.core.MagnitudeBand;
 
 /**
  * This class creates a black body spectrum over the interval defined by the
@@ -17,7 +17,7 @@ public class BlackBodySpectrum implements VisitableSampledSpectrum {
         _spectrum = spectrum;
     }
 
-    public BlackBodySpectrum(double temp, double interval, double flux, BrightnessUnit units, WavebandDefinition band, double z) {
+    public BlackBodySpectrum(double temp, double interval, double flux, BrightnessUnit units, MagnitudeBand band, double z) {
 
         //rescale the start and end depending on the redshift
         final double start = 300 / (1 + z);
@@ -48,7 +48,7 @@ public class BlackBodySpectrum implements VisitableSampledSpectrum {
         //with blackbody convert W m^2 um^-1 to phot....
         final double zeropoint = ZeroMagnitudeStar.getAverageFlux(band);
         final double phot_norm = zeropoint * (java.lang.Math.pow(10.0, -0.4 * _flux));
-        final double average   = _spectrum.getAverage(band.getStart() / (1 + z), band.getEnd() / (1 + z));
+        final double average   = _spectrum.getAverage(band.start().toNanometers() / (1 + z), band.end().toNanometers() / (1 + z));
 
         // Calculate multiplier.
         final double multiplier = phot_norm / average;
@@ -69,27 +69,27 @@ public class BlackBodySpectrum implements VisitableSampledSpectrum {
     }
 
 
-    private double _convertToMag(final double flux, final BrightnessUnit units, final WavebandDefinition band) {
+    private double _convertToMag(final double flux, final BrightnessUnit units, final MagnitudeBand band) {
         //THis method should convert the flux into units of magnitude.
         //same code as in NormalizeVisitor.java.  Eventually should come out
         // into a genral purpose conversion class if needs to be used again.
         final double norm;
         //The firstpart converts the units to our internal units.
         switch (units) {
-            case JY:                norm = flux * 1.509e7 / band.getCenter();       break;
-            case WATTS:             norm = flux * band.getCenter() / 1.988e-13;     break;
-            case ERGS_WAVELENGTH:   norm = flux * band.getCenter() / 1.988e-14;     break;
-            case ERGS_FREQUENCY:    norm = flux * 1.509e30 / band.getCenter();      break;
-            case ABMAG:             norm = 5.632e10 * Math.pow(10, -0.4 * flux) / band.getCenter(); break;
+            case JY:                norm = flux * 1.509e7 / band.center().toNanometers();       break;
+            case WATTS:             norm = flux * band.center().toNanometers() / 1.988e-13;     break;
+            case ERGS_WAVELENGTH:   norm = flux * band.center().toNanometers() / 1.988e-14;     break;
+            case ERGS_FREQUENCY:    norm = flux * 1.509e30 / band.center().toNanometers();      break;
+            case ABMAG:             norm = 5.632e10 * Math.pow(10, -0.4 * flux) / band.center().toNanometers(); break;
             case MAG_PSA:
                 double zeropoint = ZeroMagnitudeStar.getAverageFlux(band);
                 norm = zeropoint * (Math.pow(10.0, -0.4 * flux));
                 break;
-            case JY_PSA:            norm = flux * 1.509e7 / band.getCenter();       break;
-            case WATTS_PSA:         norm = flux * band.getCenter() / 1.988e-13;     break;
-            case ERGS_WAVELENGTH_PSA: norm = flux * band.getCenter() / 1.988e-14;   break;
-            case ERGS_FREQUENCY_PSA:norm = flux * 1.509e30 / band.getCenter();      break;
-            case ABMAG_PSA:         norm = 5.632e10 * Math.pow(10, -0.4 * flux) / band.getCenter(); break;
+            case JY_PSA:            norm = flux * 1.509e7 / band.center().toNanometers();       break;
+            case WATTS_PSA:         norm = flux * band.center().toNanometers() / 1.988e-13;     break;
+            case ERGS_WAVELENGTH_PSA: norm = flux * band.center().toNanometers() / 1.988e-14;   break;
+            case ERGS_FREQUENCY_PSA:norm = flux * 1.509e30 / band.center().toNanometers();      break;
+            case ABMAG_PSA:         norm = 5.632e10 * Math.pow(10, -0.4 * flux) / band.center().toNanometers(); break;
             default:
                 throw new IllegalArgumentException("invalid units " + units);
         }

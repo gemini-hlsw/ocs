@@ -8,7 +8,7 @@ import edu.gemini.itc.nifs.NifsParameters
 import edu.gemini.itc.shared.SourceDefinition.{Distribution, Profile, Recession}
 import edu.gemini.itc.shared.{GnirsParameters, _}
 import edu.gemini.itc.trecs.TRecsParameters
-import edu.gemini.spModel.core.{Site, Wavelength}
+import edu.gemini.spModel.core.{MagnitudeBand, Site, Wavelength}
 import edu.gemini.spModel.gemini.acqcam.AcqCamParams
 import edu.gemini.spModel.gemini.altair.AltairParams
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2
@@ -288,7 +288,9 @@ object ITCRequest {
     }
 
     // Get Normalization info
-    val normBand = r.enumParameter(classOf[WavebandDefinition])
+    val bandName = r.parameter("WavebandDefinition")
+    val normBand = MagnitudeBand.all.find(_.name == bandName)
+    if (normBand.isEmpty) throw new IllegalArgumentException(s"Unsupported wave band $bandName")
 
     // Get Spectrum Resource
     import SourceDefinition.Distribution._
@@ -319,7 +321,7 @@ object ITCRequest {
     }
 
     // WOW, finally we've got everything in place..
-    new SourceDefinition(spatialProfile, sourceDefinition, norm, units, normBand, redshift)
+    new SourceDefinition(spatialProfile, sourceDefinition, norm, units, normBand.get, redshift)
   }
 
   def parameters(r: ITCRequest): Parameters = {

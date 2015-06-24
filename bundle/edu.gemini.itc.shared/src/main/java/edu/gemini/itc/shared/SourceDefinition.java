@@ -1,5 +1,6 @@
 package edu.gemini.itc.shared;
 
+import edu.gemini.spModel.core.MagnitudeBand;
 import edu.gemini.spModel.core.Wavelength;
 import edu.gemini.spModel.target.*;
 
@@ -32,7 +33,7 @@ public final class SourceDefinition implements Serializable {
 
     public final SpatialProfile profile;
     public final SpectralDistribution distribution;
-    public final WavebandDefinition normBand;
+    public final MagnitudeBand normBand;
     public final double norm;
     public final BrightnessUnit units;
     public final double redshift;
@@ -47,7 +48,7 @@ public final class SourceDefinition implements Serializable {
                             final SpectralDistribution distribution,
                             final double norm,
                             final BrightnessUnit units,
-                            final WavebandDefinition normBand,
+                            final MagnitudeBand normBand,
                             final double redshift) {
         this.profile        = profile;
         this.distribution   = distribution;
@@ -100,7 +101,7 @@ public final class SourceDefinition implements Serializable {
         return ((GaussianSource) profile).fwhm();
     }
 
-    public WavebandDefinition getNormBand() {
+    public MagnitudeBand getNormBand() {
         return normBand;
     }
 

@@ -36,22 +36,22 @@ public final class HtmlPrinter {
                 break;
             case BBODY:
                 sb.append(" " + sdp.getBBTemp() + "K Blackbody, at " + sdp.getSourceNormalization() +
-                        " " + sdp.units.displayValue() + " in the " + sdp.getNormBand().name + " band.");
+                        " " + sdp.units.displayValue() + " in the " + sdp.getNormBand().name() + " band.");
                 break;
             case LIBRARY_STAR:
                 sb.append(" " + sdp.getSourceNormalization() + " " + sdp.units.displayValue() + " " + ((Library) sdp.distribution).sedSpectrum() +
-                        " star in the " + sdp.getNormBand().name + " band.");
+                        " star in the " + sdp.getNormBand().name() + " band.");
                 break;
             case LIBRARY_NON_STAR:
                 sb.append(" " + sdp.getSourceNormalization() + " " + sdp.units.displayValue() + " " + ((Library) sdp.distribution).sedSpectrum() +
-                        " in the " + sdp.getNormBand().name + " band.");
+                        " in the " + sdp.getNormBand().name() + " band.");
                 break;
             case USER_DEFINED:
                 sb.append(" a user defined spectrum with the name: " + sdp.getUserDefinedSpectrum());
                 break;
             case PLAW:
                 sb.append(" Power Law Spectrum, with an index of " + sdp.getPowerLawIndex()
-                        + " and " + sdp.getSourceNormalization() + " mag in the " + sdp.getNormBand().name + " band.");
+                        + " and " + sdp.getSourceNormalization() + " mag in the " + sdp.getNormBand().name() + " band.");
                 break;
         }
         sb.append("\n");
