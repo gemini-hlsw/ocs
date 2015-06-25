@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<proposal schemaVersion="2015.2.1">
+    <meta band3optionChosen="false"/>
+    <semester year="2015" half="B"/>
+    <title></title>
+    <abstract></abstract>
+    <scheduling></scheduling>
+    <keywords/>
+    <investigators>
+        <pi id="investigator-0">
+            <firstName>Principal</firstName>
+            <lastName>Investigator</lastName>
+            <status>PhD</status>
+            <email></email>
+            <address>
+                <institution></institution>
+                <address></address>
+                <country></country>
+            </address>
+        </pi>
+    </investigators>
+    <targets/>
+    <conditions/>
+    <blueprints>
+        <niri>
+            <niri id="blueprint-0">
+                <name>NIRI Altair Laser Guidestar f/32 (0.02"/pix, 22" FoV) J-continuum (1.122 um)+J-continuum (1.207 um)+HeI (1.083 um)</name>
+                <visitor>false</visitor>
+                <altair>
+                    <lgs pwfs1="false" aowfs="false" oiwfs="false"/>
+                </altair>
+                <camera>f/32 (0.02"/pix, 22" FoV)</camera>
+                <filter>J-continuum (1.122 um)</filter>
+                <filter>J-continuum (1.207 um)</filter>
+                <filter>HeI (1.083 um)</filter>
+            </niri>
+        </niri>
+    </blueprints>
+    <observations>
+        <observation band="Band 1/2" enabled="true" blueprint="blueprint-0"/>
+    </observations>
+    <proposalClass>
+        <queue tooOption="None"/>
+    </proposalClass>
+</proposal>

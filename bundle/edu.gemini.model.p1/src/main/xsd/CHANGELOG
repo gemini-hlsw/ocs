@@ -7,6 +7,7 @@ Gemini Phase I Schema Changes
 * Added keyword 'Star formation'
 * Offer Phoenix instrument
 * Added SDSS Magnitude Bands u, g, r, i, z
+* Removed NIRI filters J-cont (1.065 um), J-continuum (1.122 um)
 
 # Version 2015.2.1 - 2015B
 ##########################

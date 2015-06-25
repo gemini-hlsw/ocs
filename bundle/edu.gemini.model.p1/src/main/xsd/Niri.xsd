@@ -48,8 +48,8 @@
             <xsd:enumeration value="Jcont (1.065 um)"/>
             <xsd:enumeration value="HeI (1.083 um)"/>
             <xsd:enumeration value="Pa(gamma) (1.094 um)"/>
-            <xsd:enumeration value="J-continuum (1.122 um)"/>
-            <xsd:enumeration value="J-continuum (1.207 um)"/>
+            <!--xsd:enumeration value="J-continuum (1.122 um)"/>
+            <xsd:enumeration value="J-continuum (1.207 um)"/-->
             <xsd:enumeration value="Pa(beta) (1.282 um)"/>
             <xsd:enumeration value="CH4(short) (1.56 um)"/>
             <xsd:enumeration value="H-continuum (1.570 um)"/>

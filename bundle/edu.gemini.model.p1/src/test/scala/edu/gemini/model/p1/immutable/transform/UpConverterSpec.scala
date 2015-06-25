@@ -59,17 +59,17 @@ class UpConverterSpec extends SpecificationWithJUnit with SemesterProperties {
           changes must contain(s"Updated semester to ${Semester.current.display}")
           changes must contain("Please use the PIT from semester 2013A to view the unmodified proposal")
 
-          val proposal = ProposalIo.read(result.toString)
+          val proposal = ProposalIo.read(result.toString())
           proposal.meta.band3OptionChosen must beFalse
           proposal.title must beEqualTo("Observation with GSAOI")
           proposal.abstrakt must beEmpty
           proposal.scheduling must beEmpty
           proposal.keywords must beEmpty
-          proposal.investigators.all must have size (1)
+          proposal.investigators.all must have size 1
           proposal.targets must beEmpty
           proposal.conditions must beEmpty
-          proposal.blueprints must have size (1)
-          proposal.observations must have size (1)
+          proposal.blueprints must have size 1
+          proposal.observations must have size 1
           Option(proposal.proposalClass) must beSome
 
           // Check the instruments
@@ -100,7 +100,7 @@ class UpConverterSpec extends SpecificationWithJUnit with SemesterProperties {
           changes must contain(s"Updated semester to ${Semester.current.display}")
           changes must contain("Please use the PIT from semester 2013A to view the unmodified proposal")
 
-          val proposal = ProposalIo.read(result.toString)
+          val proposal = ProposalIo.read(result.toString())
 
           // Sanity checks
           proposal.meta.band3OptionChosen must beFalse
@@ -108,11 +108,11 @@ class UpConverterSpec extends SpecificationWithJUnit with SemesterProperties {
           proposal.abstrakt must beEmpty
           proposal.scheduling must beEmpty
           proposal.keywords must beEmpty
-          proposal.investigators.all must have size (1)
+          proposal.investigators.all must have size 1
           proposal.targets must beEmpty
           proposal.conditions must beEmpty
-          proposal.blueprints must have size (1)
-          proposal.observations must have size (1)
+          proposal.blueprints must have size 1
+          proposal.observations must have size 1
           Option(proposal.proposalClass) must beSome
 
           proposal.schemaVersion must beEqualTo(Proposal.currentSchemaVersion)
@@ -125,7 +125,7 @@ class UpConverterSpec extends SpecificationWithJUnit with SemesterProperties {
         case StepResult(changes, result) =>
           changes must contain(s"Updated schema version to ${Proposal.currentSchemaVersion}")
 
-          val proposal = ProposalIo.read(result.toString)
+          val proposal = ProposalIo.read(result.toString())
           proposal.tacCategory must beSome(TacCategory.GALACTIC)
       }
     }
@@ -144,7 +144,7 @@ class UpConverterSpec extends SpecificationWithJUnit with SemesterProperties {
             <attachment>file.pdf</attachment>
           </meta>)
 
-          val proposal = ProposalIo.read(result.toString)
+          val proposal = ProposalIo.read(result.toString())
           proposal.meta.band3OptionChosen must beFalse
           proposal.meta.attachment must beSome(new java.io.File("file.pdf"))
       }
@@ -172,7 +172,7 @@ class UpConverterSpec extends SpecificationWithJUnit with SemesterProperties {
             <keyword>Absorption lines</keyword> <keyword>Herbig-Haro objects</keyword> <keyword>High-redshift</keyword>
           </keywords>)
 
-          val proposal = ProposalIo.read(result.toString)
+          val proposal = ProposalIo.read(result.toString())
           proposal.keywords must contain(Keyword.forName("ABSORPTION_LINES"))
           proposal.keywords must contain(Keyword.forName("HERBIG_HARO_OBJECTS"))
           proposal.keywords must contain(Keyword.forName("HIGH_REDSHIFT"))
@@ -187,7 +187,7 @@ class UpConverterSpec extends SpecificationWithJUnit with SemesterProperties {
             <observation band="Band 1/2"/>
           </observations>)
 
-          val proposal = ProposalIo.read(result.toString)
+          val proposal = ProposalIo.read(result.toString())
           proposal.observations.head.enabled must beTrue
       }
     }
@@ -198,7 +198,7 @@ class UpConverterSpec extends SpecificationWithJUnit with SemesterProperties {
         case StepResult(changes, result) =>
           (result \\ "ngoauthority") must beEmpty
 
-          val proposal = ProposalIo.read(result.toString)
+          val proposal = ProposalIo.read(result.toString())
           proposal.proposalClass.itac.map {
             case i: Itac => i.ngoAuthority must beNone
           }
@@ -212,7 +212,7 @@ class UpConverterSpec extends SpecificationWithJUnit with SemesterProperties {
         case StepResult(changes, result) =>
           (result \\ "ngoauthority") must ==/(<ngoauthority>cl</ngoauthority>)
 
-          val proposal = ProposalIo.read(result.toString)
+          val proposal = ProposalIo.read(result.toString())
           proposal.proposalClass.itac.map {
             case i: Itac => i.ngoAuthority must beSome(NgoPartner.CL)
           }
@@ -228,7 +228,7 @@ class UpConverterSpec extends SpecificationWithJUnit with SemesterProperties {
             <observation enabled="false" band="Band 1/2"/>
           </observations>)
 
-          val proposal = ProposalIo.read(result.toString)
+          val proposal = ProposalIo.read(result.toString())
           proposal.observations.head.enabled must beFalse
       }
     }
@@ -245,10 +245,10 @@ class UpConverterSpec extends SpecificationWithJUnit with SemesterProperties {
           changes must contain("NGO acceptance from the United Kingdom has been removed")
 
           // Sanity check
-          ProposalIo.read(result.toString)
+          ProposalIo.read(result.toString())
 
           // ngo is gone
-          result \\ "queue" must not \\ ("ngo")
+          result \\ "queue" must not \\ "ngo"
           // but itac is there
           result \\ "queue" must \\("itac")
           // Check that queue attributes are preserved
@@ -268,7 +268,7 @@ class UpConverterSpec extends SpecificationWithJUnit with SemesterProperties {
           changes must contain("NGO acceptance from the United Kingdom has been removed")
 
           // Sanity check
-          ProposalIo.read(result.toString)
+          ProposalIo.read(result.toString())
 
           // ngo is gone
           result \\ "partner" must have length 1
@@ -293,14 +293,14 @@ class UpConverterSpec extends SpecificationWithJUnit with SemesterProperties {
           changes must contain("The United Kingdom was marked as ITAC NGO authority and has been removed")
 
           // Sanity check
-          ProposalIo.read(result.toString)
+          ProposalIo.read(result.toString())
 
           // ngo is gone
           result \\ "partner" must have length 1
           result \\ "queue" must \\("partner") \> "ar"
           // but itac is there
           result \\ "queue" must \\("itac")
-          result \\ "itac" must not \\ ("ngoauthority")
+          result \\ "itac" must not \\ "ngoauthority"
           // Check that queue attributes are preserved
           result must \\("queue", "key" -> "604c87d8-9bf8-96a8-0642-f70604c87d89", "tooOption" -> "None")
       }
@@ -431,11 +431,10 @@ class UpConverterSpec extends SpecificationWithJUnit with SemesterProperties {
 
       val converted = UpConverter.convert(xml)
       converted must beSuccessful.like {
-        case StepResult(changes, result) => {
+        case StepResult(changes, result) =>
           changes must have length 4
           // The texes blueprint must remain
           result must \\("Texes")
-        }
       }
     }
     /*
@@ -505,7 +504,7 @@ class UpConverterSpec extends SpecificationWithJUnit with SemesterProperties {
 
       val converted = UpConverter.convert(xml)
       converted must beSuccessful.like {
-        case StepResult(changes, result) => {
+        case StepResult(changes, result) =>
           changes must have length 5
           changes must contain("The unavailable Flamingos2 filters F1056 (1.056 um)/F1063 (1.063 um) have been converted to Y (1.020 um).")
           // Check that the centralWavelength node is added
@@ -513,7 +512,6 @@ class UpConverterSpec extends SpecificationWithJUnit with SemesterProperties {
           result \\ "flamingos2" must \\("name") \>~ ".* Y .1.020 um."
           // The texes blueprint must remain
           result must \\("gmosN")
-        }
       }
     }
     "proposal with F2 R3K+Y longslit must use the filter Y, REL-1282" in {
@@ -531,7 +529,7 @@ class UpConverterSpec extends SpecificationWithJUnit with SemesterProperties {
 
       val converted = UpConverter.convert(xml)
       converted must beSuccessful.like {
-        case StepResult(changes, result) => {
+        case StepResult(changes, result) =>
           changes must have length 4
           changes must contain("GMOS-N observations without an Altair setting have had Adaptive Optics set to None.")
           // Check that fpu and name are replaced
@@ -540,7 +538,6 @@ class UpConverterSpec extends SpecificationWithJUnit with SemesterProperties {
           result must \\("altair") \ "none"
           // The texes blueprint must remain
           result must \\("flamingos2")
-        }
       }
     }
     "proposal with GmosN Imaging blueprint and no altair should transform the name to Altair None option, REL-1257" in {
@@ -642,6 +639,19 @@ class UpConverterSpec extends SpecificationWithJUnit with SemesterProperties {
           result \\ "graces" must \\("name") \> "Graces 2 fibers (target+sky, R~40k)"
           result \\ "graces" must \\("fiberMode") \> "1 fiber (target only, R~67.5k)"
           result \\ "graces" must \\("name") \> "Graces 1 fiber (target only, R~67.5k)"
+      }
+    }
+    "proposal with NIRI blueprints should remove unavailable filters, REL-2390" in {
+      val xml = XML.load(new InputStreamReader(getClass.getResourceAsStream("proposal_niri_removed_filters.xml")))
+
+      val converted = UpConverter.convert(xml)
+      converted must beSuccessful.like {
+        case StepResult(changes, result) =>
+          changes must have length 4
+          result \\ "niri" must \\("filter") \> "HeI (1.083 um)"
+          result \\ "niri" must not(\\("filter") \> "J-continuum (1.122 um)")
+          result \\ "niri" must not(\\("filter") \> "J-continuum (1.207 um)")
+          result \\ "niri" must \\("name") \> "NIRI Altair Laser Guidestar f/32 (0.02\"/pix, 22\" FoV) HeI (1.083 um)"
       }
     }
   }
