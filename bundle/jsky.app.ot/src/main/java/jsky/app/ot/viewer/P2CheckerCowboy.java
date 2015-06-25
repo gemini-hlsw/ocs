@@ -23,14 +23,10 @@ import java.util.logging.Logger;
 final class P2CheckerCowboy {
     private static final Logger LOG = Logger.getLogger(P2CheckerCowboy.class.getName());
 
-    static P2CheckerCowboy INSTANCE = new P2CheckerCowboy();
-
-    private P2CheckerCowboy() {
-    }
-
+    private final P2Checker _checker = new P2Checker();
 
     void check(ISPNode node, SPTree tree, AgsMagnitude.MagnitudeTable mt)  {
-        IP2Problems probs = P2Checker.getInstance().check(node, mt);
+        final IP2Problems probs = _checker.check(node, mt);
         if (probs == null) return;
 
         // if an observation or greater, clear everything below this node
