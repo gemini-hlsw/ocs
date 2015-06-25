@@ -43,9 +43,14 @@ class GuidingControls extends GridBagPanel {
   }
 
   val manualGuideStarButton = new Button("Manual GS")
+  // Temporary button to go to the new manual search
+  val newManualGuideStarButton = new Button("New Manual GS")
 
   layout(manualGuideStarButton) = new Constraints {
     gridx  = 3
+  }
+  layout(newManualGuideStarButton) = new Constraints {
+    gridx  = 4
   }
 
   def update(ctxOpt: edu.gemini.shared.util.immutable.Option[ObsContext]): Unit = {

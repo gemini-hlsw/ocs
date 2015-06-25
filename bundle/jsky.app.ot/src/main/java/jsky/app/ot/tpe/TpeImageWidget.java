@@ -1135,6 +1135,10 @@ public class TpeImageWidget extends NavigatorImageDisplay implements MouseInputL
         }
     }
 
+    public void newManualGuideStarSearch() {
+        TpeGuideStarDialog.showDialog(TpeManager.open().getImageWidget());
+    }
+
     // manual guide star selection dialog
     private void manualGuideStarSearch() {
         if (GuideStarSupport.hasGemsComponent(_ctx)) {

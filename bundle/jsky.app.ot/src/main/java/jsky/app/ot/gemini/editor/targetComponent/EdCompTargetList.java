@@ -75,6 +75,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 
         _w.guidingControls.autoGuideStarButton().peer().addActionListener(autoGuideStarListener);
         _w.guidingControls.manualGuideStarButton().peer().addActionListener(manualGuideStarListener);
+        _w.guidingControls.newManualGuideStarButton().peer().addActionListener(newManualGuideStarListener);
         _w.guidingControls.autoGuideStarGuiderSelector().addSelectionListener(strategy ->
             AgsStrategyUtil.setSelection(getContextObservation(), strategy)
         );
@@ -656,6 +657,16 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
             final TelescopePosEditor tpe = TpeManager.open();
             tpe.reset(getNode());
             tpe.getImageWidget().guideStarSearch(true);
+        } catch (Exception e) {
+            DialogUtil.error(e);
+        }
+    };
+
+    private final ActionListener newManualGuideStarListener = evt -> {
+        try {
+            final TelescopePosEditor tpe = TpeManager.open();
+            tpe.reset(getNode());
+            tpe.getImageWidget().newManualGuideStarSearch();
         } catch (Exception e) {
             DialogUtil.error(e);
         }
