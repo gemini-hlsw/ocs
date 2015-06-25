@@ -21,13 +21,13 @@ object Phoenix {
     }
   }
 
-  class FilterNode(fpu: PhoenixFocalPlaneUnit) extends MultiSelectNode[PhoenixFocalPlaneUnit, PhoenixFilter, PhoenixBlueprint](fpu){
+  class FilterNode(fpu: PhoenixFocalPlaneUnit) extends SingleSelectNode[PhoenixFocalPlaneUnit, PhoenixFilter, PhoenixBlueprint](fpu){
     def title = "Filter"
     def description = "Select a filter for your configuration."
 
-    def apply(f: List[PhoenixFilter]) = Right(PhoenixBlueprint(fpu, f))
+    def apply(f: PhoenixFilter) = Right(PhoenixBlueprint(fpu, f))
 
-    override def default = Some(List(PhoenixFilter.forName("K4396")))
+    override def default = Some(PhoenixFilter.forName("K4396"))
 
     def unapply = {
       case b: PhoenixBlueprint => b.filter
