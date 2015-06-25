@@ -1,5 +1,5 @@
 <conf>
-    <smtp>smtp.cl.gemini.edu</smtp>
+    <smtp>sbfsmtprelay-lv1.cl.gemini.edu</smtp>
 
     <bcc>swalker@gemini.edu</bcc>
     <bcc>cquiroz@gemini.edu</bcc>
