@@ -20,7 +20,7 @@ object Partners {
   )
 
   // REL-2248 Contains a list of partners that are not allowed on joint proposals
-  val jointProposalNotAllowed = List[NgoPartner](NgoPartner.KR)
+  val jointProposalNotAllowed = List[NgoPartner](NgoPartner.KR, NgoPartner.AU)
 
   val ftPartners:Seq[(Option[NgoPartner], String)] = {
     (None -> "None") :: NgoPartner.values.toList.map(p => Some(p) -> Partners.name.getOrElse(p, ""))
