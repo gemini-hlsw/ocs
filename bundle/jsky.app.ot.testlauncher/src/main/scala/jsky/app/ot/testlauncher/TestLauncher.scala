@@ -52,5 +52,11 @@ object TestLauncher extends App {
     if (keys.isLocked.unsafeRunAndThrow) System.exit(0)
   }
   OT.open(keys, ProbeLimitsTable.loadOrThrow(), reg, new File(dir, "ot-storage"))
+  // You can pass an argument -program=PROGID to autolaunch the given program
+  // Do simple parsing, errors on argument format or program id will be ignored
+  val programArgRegex = "-program=(.*)".r
+  args.foreach {
+    case programArgRegex(programID) => ViewerService.instance.map(_.loadAndView(SPProgramID.toProgramID(programID)))
+  }
 
 }
