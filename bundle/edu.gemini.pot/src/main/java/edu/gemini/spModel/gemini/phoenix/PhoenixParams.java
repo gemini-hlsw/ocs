@@ -53,6 +53,7 @@ public final class PhoenixParams {
         J7799("J7799"),
         J8265("J8265"),
         J9232("J9232"),
+        J9440("J9440"),
         J9671("J9671") {
             public boolean isObsolete() {
                 return true;
