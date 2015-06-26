@@ -34,6 +34,9 @@
             <jxb:bindings node="./xsd:enumeration[@value='L2734']">
                 <jxb:typesafeEnumMember name="L2734"/>
             </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='L2870']">
+                <jxb:typesafeEnumMember name="L2870"/>
+            </jxb:bindings>
             <jxb:bindings node="./xsd:enumeration[@value='L3010']">
                 <jxb:typesafeEnumMember name="L3010"/>
             </jxb:bindings>
@@ -73,11 +76,11 @@
             <jxb:bindings node="./xsd:enumeration[@value='J7799']">
                 <jxb:typesafeEnumMember name="J7799"/>
             </jxb:bindings>
-            <jxb:bindings node="./xsd:enumeration[@value='J8265']">
-                <jxb:typesafeEnumMember name="J8265"/>
-            </jxb:bindings>
             <jxb:bindings node="./xsd:enumeration[@value='J9232']">
                 <jxb:typesafeEnumMember name="J9232"/>
+            </jxb:bindings>
+            <jxb:bindings node="./xsd:enumeration[@value='J9440']">
+                <jxb:typesafeEnumMember name="J9440"/>
             </jxb:bindings>
         </jxb:bindings>
 

@@ -52,6 +52,7 @@
             <xsd:enumeration value="M2150"/>
             <xsd:enumeration value="L2462"/>
             <xsd:enumeration value="L2734"/>
+            <xsd:enumeration value="L2870"/>
             <xsd:enumeration value="L3010"/>
             <xsd:enumeration value="L3100"/>
             <xsd:enumeration value="L3290"/>
@@ -65,8 +66,8 @@
             <xsd:enumeration value="H6073"/>
             <xsd:enumeration value="H6420"/>
             <xsd:enumeration value="J7799"/>
-            <xsd:enumeration value="J8265"/>
             <xsd:enumeration value="J9232"/>
+            <xsd:enumeration value="J9440"/>
         </xsd:restriction>
     </xsd:simpleType>
 </xsd:schema>

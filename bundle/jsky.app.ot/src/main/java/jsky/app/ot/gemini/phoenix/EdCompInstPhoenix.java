@@ -40,16 +40,14 @@ public final class EdCompInstPhoenix extends EdCompInstBase<InstPhoenix>
         _w.mask.setChoices(_getMasks());
 
         final SpTypeComboBoxModel<PhoenixParams.Filter> model;
-        model = new SpTypeComboBoxModel<PhoenixParams.Filter>(PhoenixParams.Filter.class);
+        model = new SpTypeComboBoxModel<>(PhoenixParams.Filter.class);
         _w.selectedFilter.setModel(model);
         _w.selectedFilter.setRenderer(new SpTypeComboBoxRenderer());
         _w.selectedFilter.setMaximumRowCount(PhoenixParams.Filter.values().length);
-        _w.selectedFilter.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent evt) {
-                final PhoenixParams.Filter filter;
-                filter = (PhoenixParams.Filter) _w.selectedFilter.getSelectedItem();
-                getDataObject().setFilter(filter);
-            }
+        _w.selectedFilter.addActionListener(evt -> {
+            final PhoenixParams.Filter filter;
+            filter = (PhoenixParams.Filter) _w.selectedFilter.getSelectedItem();
+            getDataObject().setFilter(filter);
         });
 
         _w.mask.addWatcher(this);

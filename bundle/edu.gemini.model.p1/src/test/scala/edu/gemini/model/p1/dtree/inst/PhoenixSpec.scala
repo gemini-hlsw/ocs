@@ -16,7 +16,7 @@ class PhoenixSpec extends SpecificationWithJUnit {
       val phoenix = Phoenix()
       val filterNode = phoenix.apply(PhoenixFocalPlaneUnit.MASK_1).a
       filterNode.title must beEqualTo("Filter")
-      filterNode.choices must have size 20
+      filterNode.choices must have size 21
       // Check the default filter
       filterNode.default must beSome(PhoenixFilter.K4396)
     }
