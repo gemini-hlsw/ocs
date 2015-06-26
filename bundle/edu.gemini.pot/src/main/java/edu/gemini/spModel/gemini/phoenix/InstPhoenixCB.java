@@ -44,9 +44,7 @@ public class InstPhoenixCB extends AbstractObsComponentCB {
     }
 
     protected boolean thisHasConfiguration() {
-        if (_sysConfig == null)
-            return false;
-        return (_sysConfig.getParameterCount() > 0);
+        return _sysConfig != null && (_sysConfig.getParameterCount() > 0);
     }
 
     protected void thisApplyNext(IConfig config, IConfig prevFull) {

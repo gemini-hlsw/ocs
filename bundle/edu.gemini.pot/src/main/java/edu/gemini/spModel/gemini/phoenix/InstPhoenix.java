@@ -318,7 +318,7 @@ public final class InstPhoenix extends SPInstObsComp implements PropertyProvider
      * Return a list of InstConfigInfo objects describing the instrument's
      * queryable configuration parameters.
      */
-    public static List getInstConfigInfo() {
+    public static List<InstConfigInfo> getInstConfigInfo() {
         List<InstConfigInfo> configInfo = new LinkedList<>();
         configInfo.add(new InstConfigInfo(MASK_PROP));
         configInfo.add(new InstConfigInfo(FILTER_PROP));
