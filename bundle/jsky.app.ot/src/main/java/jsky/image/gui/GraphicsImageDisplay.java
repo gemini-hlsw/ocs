@@ -1,16 +1,7 @@
-/*
- * Copyright 2000 Association for Universities for Research in Astronomy, Inc.,
- * Observatory Control System, Gemini Telescopes Project.
- *
- * $Id: GraphicsImageDisplay.java 4414 2004-02-03 16:21:36Z brighton $
- */
-
 package jsky.image.gui;
 
-import java.awt.Component;
 import java.awt.Rectangle;
 import java.awt.geom.Point2D;
-import java.net.URL;
 
 import jsky.graphics.CanvasGraphics;
 import jsky.image.fits.codec.FITSImage;
@@ -22,21 +13,21 @@ import jsky.image.fits.codec.FITSImage;
  * @version $Revision: 4414 $
  * @author Allan Brighton
  */
-public abstract interface GraphicsImageDisplay extends BasicImageDisplay {
+public interface GraphicsImageDisplay extends BasicImageDisplay {
 
     /** Return an object to be used for drawing persistent graphics over the image */
-    public CanvasGraphics getCanvasGraphics();
+    CanvasGraphics getCanvasGraphics();
 
     /**
      * Clear the image display, freeing up any resources currently used by the image
      * so that they can be garbage collected.
      */
-    public void clear();
+    void clear();
 
     /**
      * Return true if the image has been cleared.
      */
-    public boolean isClear();
+    boolean isClear();
 
     /**
      * Display a blank image with the given center coordinates.
@@ -44,19 +35,19 @@ public abstract interface GraphicsImageDisplay extends BasicImageDisplay {
      * @param ra  RA center coordinate in deg J2000
      * @param dec Dec center coordinate in deg J2000
      */
-    public void blankImage(double ra, double dec);
+    void blankImage(double ra, double dec);
 
     /**
      * If the current image is in FITS format, return the FITSImage object managing it,
      * otherwise return null. (The FITSImage object is available via the "#fits_image"
      * property from the FITS codec, which implements FITS support for JAI.)
      */
-    public FITSImage getFitsImage();
+    FITSImage getFitsImage();
 
     /**
      * Return the value of the pixel in the given band at the given user coordinates
      */
-    public float getPixelValue(Point2D.Double p, int band);
+    float getPixelValue(Point2D.Double p, int band);
 
     /**
      * Return an array containing the values of the pixels in the given band in the given
@@ -66,5 +57,5 @@ public abstract interface GraphicsImageDisplay extends BasicImageDisplay {
      * @param region describes the region of the image to get in user coordinates
      * @param band the band of the image to get
      */
-    public float[] getPixelValues(Rectangle region, int band);
+    float[] getPixelValues(Rectangle region, int band);
 }
