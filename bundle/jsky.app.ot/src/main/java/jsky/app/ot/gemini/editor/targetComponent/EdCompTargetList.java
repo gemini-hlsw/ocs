@@ -3,9 +3,12 @@
 // See the file COPYRIGHT for complete details.
 package jsky.app.ot.gemini.editor.targetComponent;
 
+import edu.gemini.catalog.ui.QueryResultsWindow;
+import edu.gemini.pot.ModelConverters;
 import edu.gemini.pot.sp.ISPObsComponent;
 import edu.gemini.shared.skyobject.Magnitude;
 import edu.gemini.shared.util.immutable.*;
+import edu.gemini.spModel.core.Coordinates;
 import edu.gemini.spModel.guide.GuideProbe;
 import edu.gemini.spModel.guide.GuideProbeUtil;
 import edu.gemini.spModel.obs.context.ObsContext;
@@ -75,7 +78,11 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 
         _w.guidingControls.autoGuideStarButton().peer().addActionListener(autoGuideStarListener);
         _w.guidingControls.manualGuideStarButton().peer().addActionListener(manualGuideStarListener);
-        _w.guidingControls.newManualGuideStarButton().peer().addActionListener(newManualGuideStarListener);
+
+        _w.guidingControls.newManualGuideStarButton().peer().addActionListener(evt -> {
+            Coordinates coordinates = ModelConverters.toCoordinates(this._curPos.getTarget().getSkycalcCoordinates());
+            QueryResultsWindow.instance().showOn(coordinates);
+        });
         _w.guidingControls.autoGuideStarGuiderSelector().addSelectionListener(strategy ->
             AgsStrategyUtil.setSelection(getContextObservation(), strategy)
         );
@@ -588,7 +595,6 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         _w.detailEditor.edit(getObsContext(env), _curPos, getNode());
     }
 
-
     private void showTargetTag() {
         final TargetEnvironment env = getDataObject().getTargetEnvironment();
         for (int i = 0; i < _w.tag.getItemCount(); ++i) {
@@ -602,7 +608,6 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         }
     }
 
-
     private final TelescopePosWatcher posWatcher = new TelescopePosWatcher() {
         public void telescopePosUpdate(WatchablePos tp) {
             if (tp != _curPos) {
@@ -615,7 +620,6 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
             updateGuiding();
         }
     };
-
 
     @SuppressWarnings("FieldCanBeLocal")
     private final ActionListener removeListener = new ActionListener() {
@@ -650,23 +654,12 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         }
     };
 
-
     @SuppressWarnings("FieldCanBeLocal")
     private final ActionListener manualGuideStarListener = evt -> {
         try {
             final TelescopePosEditor tpe = TpeManager.open();
             tpe.reset(getNode());
             tpe.getImageWidget().guideStarSearch(true);
-        } catch (Exception e) {
-            DialogUtil.error(e);
-        }
-    };
-
-    private final ActionListener newManualGuideStarListener = evt -> {
-        try {
-            final TelescopePosEditor tpe = TpeManager.open();
-            tpe.reset(getNode());
-            tpe.getImageWidget().newManualGuideStarSearch();
         } catch (Exception e) {
             DialogUtil.error(e);
         }
@@ -690,7 +683,6 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
             }
         }
     };
-
 
     @SuppressWarnings("FieldCanBeLocal")
     private final ActionListener duplicateListener = new ActionListener() {
@@ -756,7 +748,6 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         }
     };
 
-
     @SuppressWarnings("FieldCanBeLocal")
     private final ActionListener pasteListener = new ActionListener() {
         private void pasteSelectedPosition(ISPObsComponent obsComponent, TargetObsComp dataObject) {
@@ -774,7 +765,6 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         }
     };
 
-
     @SuppressWarnings("FieldCanBeLocal")
     private final ActionListener primaryListener = new ActionListener() {
         public void actionPerformed(ActionEvent e) {
@@ -783,9 +773,6 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
     };
 
 }
-
-
-
 
 interface PositionType {
     boolean isAvailable();

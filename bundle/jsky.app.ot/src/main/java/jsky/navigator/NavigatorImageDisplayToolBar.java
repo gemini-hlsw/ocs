@@ -16,6 +16,7 @@ public class NavigatorImageDisplayToolBar extends ImageDisplayToolBar {
 
     // toolbar buttons
     protected JButton catalogButton;
+    protected JButton newCatalogButton;
 
     /**
      * Create the toolbar for the given window
@@ -31,6 +32,7 @@ public class NavigatorImageDisplayToolBar extends ImageDisplayToolBar {
         super.addToolBarItems();
         addSeparator();
         add(makeCatalogButton());
+        add(makeNewCatalogButton());
     }
 
     /**
@@ -45,9 +47,26 @@ public class NavigatorImageDisplayToolBar extends ImageDisplayToolBar {
                                        ((NavigatorImageDisplay) imageDisplay).getCatalogBrowseAction());
 
         updateButton(catalogButton,
-                     _I18N.getString("catalogs"),
-                     Resources.getIcon("Catalog24.gif", this.getClass()));
+                _I18N.getString("catalogs"),
+                Resources.getIcon("Catalog24.gif", this.getClass()));
         return catalogButton;
+    }
+
+    /**
+     * Make the new catalog button, if it does not yet exists. Otherwise update the display
+     * using the current options for displaying text or icons.
+     *
+     * @return the catalog button
+     */
+    protected JButton makeNewCatalogButton() {
+        if (newCatalogButton == null)
+            newCatalogButton = makeButton(_I18N.getString("showCatalogWindow"),
+                                       ((NavigatorImageDisplay) imageDisplay).getCatalogBrowseAction());
+
+        updateButton(newCatalogButton,
+                     "New Catalog",
+                     Resources.getIcon("Catalog24.gif", this.getClass()));
+        return newCatalogButton;
     }
 
 
@@ -58,6 +77,7 @@ public class NavigatorImageDisplayToolBar extends ImageDisplayToolBar {
     public void update() {
         super.update();
         makeCatalogButton();
+        makeNewCatalogButton();
     }
 }
 

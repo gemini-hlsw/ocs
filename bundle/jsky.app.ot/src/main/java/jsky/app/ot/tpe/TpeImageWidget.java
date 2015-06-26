@@ -1,6 +1,7 @@
 package jsky.app.ot.tpe;
 
 import edu.gemini.ags.api.AgsStrategy;
+import edu.gemini.catalog.ui.QueryResultsWindow;
 import edu.gemini.shared.cat.CatalogSearchParameters;
 import edu.gemini.shared.cat.ICatalogAlgorithm;
 import edu.gemini.catalog.api.MagnitudeLimits;
@@ -1133,10 +1134,6 @@ public class TpeImageWidget extends NavigatorImageDisplay implements MouseInputL
                 }
             }
         }
-    }
-
-    public void newManualGuideStarSearch() {
-        TpeGuideStarDialog.showDialog(TpeManager.open().getImageWidget());
     }
 
     // manual guide star selection dialog
