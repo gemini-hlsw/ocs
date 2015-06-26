@@ -18,7 +18,7 @@ class PhoenixSpec extends SpecificationWithJUnit {
       filterNode.title must beEqualTo("Filter")
       filterNode.choices must have size 20
       // Check the default filter
-      filterNode.default must beSome(List(PhoenixFilter.K4396))
+      filterNode.default must beSome(PhoenixFilter.K4396)
     }
   }
 
