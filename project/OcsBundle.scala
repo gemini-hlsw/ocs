@@ -737,5 +737,8 @@ trait OcsBundle {
   lazy val bundle_edu_gemini_epics_acm = 
     project.in(file("bundle/edu.gemini.epics.acm"))
 
+  lazy val bundle_edu_gemini_ui_miglayout = 
+    project.in(file("bundle/edu.gemini.ui.miglayout"))
+
 }
 

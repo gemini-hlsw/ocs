@@ -59,6 +59,7 @@ ocsAppManifest := {
     BundleSpec((sbt.Keys.name in bundle_edu_gemini_spdb_shell).value, Version.parse((sbt.Keys.version in bundle_edu_gemini_spdb_shell).value)),
     BundleSpec((sbt.Keys.name in bundle_edu_gemini_too_event).value, Version.parse((sbt.Keys.version in bundle_edu_gemini_too_event).value)),
     BundleSpec((sbt.Keys.name in bundle_edu_gemini_ui_workspace).value, Version.parse((sbt.Keys.version in bundle_edu_gemini_ui_workspace).value)),
+    BundleSpec((sbt.Keys.name in bundle_edu_gemini_ui_miglayout).value, Version.parse((sbt.Keys.version in bundle_edu_gemini_ui_miglayout).value)),
     BundleSpec((sbt.Keys.name in bundle_edu_gemini_util_file_filter).value, Version.parse((sbt.Keys.version in bundle_edu_gemini_util_file_filter).value)),
     BundleSpec((sbt.Keys.name in bundle_edu_gemini_util_fits).value, Version.parse((sbt.Keys.version in bundle_edu_gemini_util_fits).value)),
     BundleSpec((sbt.Keys.name in bundle_edu_gemini_util_javax_mail).value, Version.parse((sbt.Keys.version in bundle_edu_gemini_util_javax_mail).value)),

@@ -134,6 +134,7 @@ trait OcsApp { this: OcsBundle =>
     bundle_edu_gemini_spdb_shell,
     bundle_edu_gemini_too_event,
     bundle_edu_gemini_ui_workspace,
+    bundle_edu_gemini_ui_miglayout,
     bundle_edu_gemini_util_file_filter,
     bundle_edu_gemini_util_fits,
     bundle_edu_gemini_util_javax_mail,
