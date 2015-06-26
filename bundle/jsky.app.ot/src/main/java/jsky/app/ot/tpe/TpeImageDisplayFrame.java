@@ -1,10 +1,3 @@
-/*
- * Copyright 2000 Association for Universities for Research in Astronomy, Inc.,
- * Observatory Control System, Gemini Telescopes Project.
- *
- * $Id: TpeImageDisplayFrame.java 21408 2009-08-05 22:17:07Z swalker $
- */
-
 package jsky.app.ot.tpe;
 
 import jsky.image.gui.DivaMainImageDisplay;
@@ -26,7 +19,6 @@ public class TpeImageDisplayFrame extends NavigatorImageDisplayFrame {
 
     /** Tool bar with Tpe specific commands */
     TpeToolBar tpeToolBar;
-
 
     /**
      * Create a top level window containing an ImageDisplayControl panel.

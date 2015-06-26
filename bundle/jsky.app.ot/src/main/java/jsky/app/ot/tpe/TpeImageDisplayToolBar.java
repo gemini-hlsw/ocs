@@ -1,19 +1,7 @@
-/*
- * Copyright 2001 Association for Universities for Research in Astronomy, Inc.,
- * Observatory Control System, Gemini Telescopes Project.
- *
- * $Id: TpeImageDisplayToolBar.java 39256 2011-11-22 17:42:49Z swalker $
- */
-
 package jsky.app.ot.tpe;
 
 import javax.swing.*;
-
 import jsky.navigator.NavigatorImageDisplayToolBar;
-
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-
 
 /**
  * A tool bar for the image display window.
@@ -51,15 +39,12 @@ public class TpeImageDisplayToolBar extends NavigatorImageDisplayToolBar {
     protected JButton makeAutoGuideStarButton(){
         if (autoGuideStarButton == null) {
             final AbstractAction a = ((TpeImageWidget)imageDisplay).getAutoGuideStarAction();
-            a.addPropertyChangeListener(new PropertyChangeListener() {
-                @Override
-                public void propertyChange(PropertyChangeEvent evt) {
-                    // OT-36: Update text to display "Cancel Search" while in progress...
-                    autoGuideStarButton.setText((String)a.getValue(Action.NAME));
-                    autoGuideStarButton.setVisible(a.isEnabled());
-                }
+            a.addPropertyChangeListener(evt -> {
+                // OT-36: Update text to display "Cancel Search" while in progress...
+                autoGuideStarButton.setText((String)a.getValue(Action.NAME));
+                autoGuideStarButton.setVisible(a.isEnabled());
             });
-            autoGuideStarButton = makeButton((String)a.getValue(Action.SHORT_DESCRIPTION), a, false);
+            autoGuideStarButton = makeButton((String)a.getValue(Action.SHORT_DESCRIPTION), a);
         }
 
         updateButton(autoGuideStarButton,
@@ -77,7 +62,7 @@ public class TpeImageDisplayToolBar extends NavigatorImageDisplayToolBar {
     protected JButton makeManualGuideStarButton() {
         if (manualGuideStarButton == null) {
             final AbstractAction a = ((TpeImageWidget)imageDisplay).getManualGuideStarAction();
-            manualGuideStarButton = makeButton((String)a.getValue(Action.SHORT_DESCRIPTION), a, false);
+            manualGuideStarButton = makeButton((String)a.getValue(Action.SHORT_DESCRIPTION), a);
         }
 
         updateButton(manualGuideStarButton,
@@ -95,7 +80,7 @@ public class TpeImageDisplayToolBar extends NavigatorImageDisplayToolBar {
     protected JButton makeImageButton() {
         if (skyImageButton == null) {
             final AbstractAction a = ((TpeImageWidget)imageDisplay).getSkyImageAction();
-            skyImageButton = makeButton((String)a.getValue(Action.SHORT_DESCRIPTION), a, false);
+            skyImageButton = makeButton((String)a.getValue(Action.SHORT_DESCRIPTION), a);
         }
 
         updateButton(skyImageButton,
@@ -115,12 +100,4 @@ public class TpeImageDisplayToolBar extends NavigatorImageDisplayToolBar {
         makeImageButton();
     }
 
-    public JButton getManualGuideStarButton() {
-        return manualGuideStarButton;
-    }
-
-    public JButton getSkyImageButton() {
-        return skyImageButton;
-    }
 }
-

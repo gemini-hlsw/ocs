@@ -1,10 +1,3 @@
-/*
- * Copyright 2000 Association for Universities for Research in Astronomy, Inc.,
- * Observatory Control System, Gemini Telescopes Project.
- *
- * $Id: SPTreeToolBar.java 46728 2012-07-12 16:39:26Z rnorris $
- */
-
 package jsky.app.ot.viewer;
 
 import jsky.app.ot.OTOptions;
@@ -13,7 +6,6 @@ import jsky.util.gui.GenericToolBar;
 
 import javax.swing.*;
 import java.awt.*;
-
 
 /**
  * A tool bar for the OT tree window.
@@ -28,10 +20,8 @@ public class SPTreeToolBar extends GenericToolBar {
     private JButton _observationGroupButton;
     private JButton _componentMenuButton;
     private JButton _noteMenuButton;
-    //private JButton _libFolderButton;
     private JButton _iterCompMenuButton;
     private JButton _iterObsMenuButton;
-    private JButton _dataProcButton;
 
     /**
      * Create a toolbar with tree related actions for the given OT window.
@@ -238,29 +228,8 @@ public class SPTreeToolBar extends GenericToolBar {
         makeObservationGroupButton();
         makeComponentMenuButton();
         makeNoteMenuButton();
-        //makeLibFolderButton();
         makeIterCompMenuButton();
         makeIterObsMenuButton();
-    }
-
-    JButton getObservationMenuButton() {
-        return _observationMenuButton;
-    }
-
-    JButton getComponentMenuButton() {
-        return _componentMenuButton;
-    }
-
-    JButton getNoteMenuButton() {
-        return _noteMenuButton;
-    }
-
-    JButton getIterCompMenuButton() {
-        return _iterCompMenuButton;
-    }
-
-    JButton getIterObsMenuButton() {
-        return _iterObsMenuButton;
     }
 }
 

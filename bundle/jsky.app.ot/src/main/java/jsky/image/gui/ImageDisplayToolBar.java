@@ -61,7 +61,7 @@ public class ImageDisplayToolBar extends GenericToolBar {
     protected JButton makeCutLevelsButton() {
         if (cutLevelsButton == null)
             cutLevelsButton = makeButton(_I18N.getString("cutLevelsTip"),
-                    imageDisplay.getCutLevelsAction(), false);
+                    imageDisplay.getCutLevelsAction());
 
         updateButton(cutLevelsButton,
                      _I18N.getString("cutLevels"),
@@ -80,4 +80,3 @@ public class ImageDisplayToolBar extends GenericToolBar {
         makeCutLevelsButton();
     }
 }
-
