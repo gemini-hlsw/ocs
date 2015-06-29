@@ -128,7 +128,7 @@ case class LastStepConverter(semester: Semester) extends SemesterConverter {
  * This converter will upgrade to 2016A
  */
 case object SemesterConverter2015BTo2016A extends SemesterConverter {
-  val removedFilters = List(<filter>J-continuum (1.122 um)</filter>, <filter>J-continuum (1.207 um)</filter>)
+  val removedFilters = List(<filter>J-continuum (1.122 um)</filter>, <filter>Jcont (1.065 um)</filter>)
   val removeUnusedNIRIFilters: TransformFunction = {
      case p @ <niri>{ns @ _*}</niri> if (p \ "filter").theSeq.exists(removedFilters.contains) =>
        val filtersToRemove = (p \ "filter").theSeq.filter(removedFilters.contains)

@@ -43,9 +43,9 @@
             <jxb:bindings node="./xsd:enumeration[@value='M(prime) (4.68 um)']">
                 <jxb:typesafeEnumMember name="BBF_MPRIME"/>
             </jxb:bindings>
-            <jxb:bindings node="./xsd:enumeration[@value='Jcont (1.065 um)']">
+            <!--jxb:bindings node="./xsd:enumeration[@value='Jcont (1.065 um)']">
                 <jxb:typesafeEnumMember name="J_CONTINUUM_106"/>
-            </jxb:bindings>
+            </jxb:bindings-->
             <jxb:bindings node="./xsd:enumeration[@value='HeI (1.083 um)']">
                 <jxb:typesafeEnumMember name="NBF_HEI"/>
             </jxb:bindings>
@@ -54,10 +54,10 @@
             </jxb:bindings>
             <!--jxb:bindings node="./xsd:enumeration[@value='J-continuum (1.122 um)']">
                 <jxb:typesafeEnumMember name="J_CONTINUUM_122"/>
-            </jxb:bindings>
+            </jxb:bindings-->
             <jxb:bindings node="./xsd:enumeration[@value='J-continuum (1.207 um)']">
                 <jxb:typesafeEnumMember name="NBF_H"/>
-            </jxb:bindings-->
+            </jxb:bindings>
             <jxb:bindings node="./xsd:enumeration[@value='Pa(beta) (1.282 um)']">
                 <jxb:typesafeEnumMember name="NBF_PABETA"/>
             </jxb:bindings>
