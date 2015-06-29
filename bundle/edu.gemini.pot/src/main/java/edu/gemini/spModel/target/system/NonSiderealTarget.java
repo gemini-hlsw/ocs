@@ -45,14 +45,14 @@ public abstract class NonSiderealTarget extends ITarget {
     /**
      * Get the first Coordinate as an ICoordinate.
      */
-    public ICoordinate getRa() {
+    public HMS getRa() {
         return _ra;
     }
 
     /**
      * Get the second Coordinate as an ICoordinate.
      */
-    public ICoordinate getDec() {
+    public DMS getDec() {
         return _dec;
     }
 

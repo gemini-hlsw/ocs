@@ -16,7 +16,6 @@ import edu.gemini.spModel.obs.plannedtime.PlannedTimeSummaryService;
 import edu.gemini.spModel.target.env.TargetEnvironment;
 import edu.gemini.spModel.target.obsComp.TargetObsComp;
 import edu.gemini.spModel.target.system.CoordinateParam.Units;
-import edu.gemini.spModel.target.system.ICoordinate;
 import edu.gemini.spModel.target.system.ITarget;
 import edu.gemini.spModel.time.TimeAmountFormatter;
 import edu.gemini.spModel.util.SPTreeUtil;
@@ -63,10 +62,8 @@ public class ObsTargetDesc extends TargetDesc {
 
         SPTarget basePos = targetEnv.getBase();
         ITarget target = basePos.getTarget();
-        ICoordinate c1 = target.getRa();
-        ICoordinate c2 = target.getDec();
-        double x = c1.getAs(Units.DEGREES);
-        double y = c2.getAs(Units.DEGREES);
+        double x = target.getRa().getAs(Units.DEGREES);
+        double y = target.getDec().getAs(Units.DEGREES);
         WorldCoords pos = new WorldCoords(x, y, 2000.);
                  String targetName = basePos.getTarget().getName();
 

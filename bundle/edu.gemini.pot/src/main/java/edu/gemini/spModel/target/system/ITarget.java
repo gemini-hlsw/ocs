@@ -71,10 +71,10 @@ public abstract class ITarget implements Cloneable, Serializable {
     public abstract void setName(String name);
 
     /** Get the RA. */
-    public abstract ICoordinate getRa();
+    public abstract HMS getRa();
 
     /** Get the Dec. */
-    public abstract ICoordinate getDec();
+    public abstract DMS getDec();
 
     /** Get the Epoch */
     public abstract Epoch getEpoch();

@@ -8,9 +8,6 @@ package edu.gemini.spModel.target.system.test;
 
 import edu.gemini.spModel.target.system.ITarget;
 import edu.gemini.spModel.target.system.HmsDegTarget;
-import edu.gemini.spModel.target.system.HMS;
-import edu.gemini.spModel.target.system.ICoordinate;
-import edu.gemini.spModel.target.system.DMS;
 import static edu.gemini.spModel.test.TestFile.ser;
 
 import org.junit.Before;

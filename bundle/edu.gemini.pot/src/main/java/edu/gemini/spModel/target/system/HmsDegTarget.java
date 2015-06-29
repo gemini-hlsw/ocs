@@ -140,7 +140,7 @@ public final class HmsDegTarget extends ITarget {
      * This returns a reference to the actual object an {@link HMS HMS}
      * object so take care!
      */
-    public ICoordinate getRa() {
+    public HMS getRa() {
         // Ra exists at instance creation.
         return _ra;
     }
@@ -150,7 +150,7 @@ public final class HmsDegTarget extends ITarget {
      * This returns a reference to the actual object an {@link DMS DMS}
      * object so take care!
      */
-    public ICoordinate getDec() {
+    public DMS getDec() {
         // Dec exists at instance creation.
         return _dec;
     }

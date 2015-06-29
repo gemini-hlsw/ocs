@@ -11,7 +11,6 @@ import edu.gemini.spModel.target.obsComp.TargetObsComp;
 import edu.gemini.spModel.target.obsComp.TargetSelection;
 import edu.gemini.spModel.target.offset.OffsetPosSelection;
 import edu.gemini.spModel.target.system.CoordinateParam.Units;
-import edu.gemini.spModel.target.system.ICoordinate;
 import edu.gemini.spModel.target.system.ITarget;
 import jsky.app.jskycat.JSkyCat;
 import jsky.app.ot.OT;
@@ -280,10 +279,8 @@ public class TelescopePosEditor extends JSkyCat implements TpeMouseObserver {
         if (tp != null) {
             // Get the RA and Dec from the pos list.
             ITarget target = tp.getTarget();
-            ICoordinate c1 = target.getRa();
-            ICoordinate c2 = target.getDec();
-            ra = c1.getAs(Units.DEGREES);
-            dec = c2.getAs(Units.DEGREES);
+            ra = target.getRa().getAs(Units.DEGREES);
+            dec = target.getDec().getAs(Units.DEGREES);
         }
 
         _iw.loadCachedImage(ra, dec);
