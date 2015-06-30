@@ -25,7 +25,7 @@ object constraints {
   }
 
   // Constructs for type-safer units
-  // use Mig Prefix to polute less the use of Units
+  // use Mig Prefix to pollute less the use of Units
   sealed trait MigUnits[T] {
     val value: T
     def toUnits: String
@@ -39,8 +39,18 @@ object constraints {
     override def toUnits = s"${value}px"
   }
 
+  case class PercentUnit[T: Numeric](value: T) extends MigUnits[T] {
+    override def toUnits = s"$value%"
+  }
+
+  // Converts Ints and Doubles to Units
   implicit class Int2Unit(val value: Int) extends AnyVal {
     def px:MigUnits[Int] = PixelsUnit(value)
+    def pct:MigUnits[Int] = PercentUnit(value)
+  }
+
+  implicit class Double2Unit(val value: Double) extends AnyVal {
+    def pct:MigUnits[Double] = PercentUnit(value)
   }
 
   /**
@@ -170,13 +180,15 @@ object MigLayoutDemo extends App {
       }, CC().growX().alignY(TopAlign).wrap())
 
       // Use a Grid on the middle
-      add(new MigPanel(LC().fill()) {
+      add(new MigPanel(LC().fill().debug(0)) {
         add(new Button("Fixed size"), CC().cell(0, 0).width(100.px).height(20.px))
         add(new Button("Fixed max size"), CC().cell(1, 0).growX().maxHeight(15.px))
         add(new Button("C"), CC().cell(0, 1).grow())
         add(new Button("D"), CC().cell(1, 1).grow())
         // Span 2
         add(new Button("D"), CC().cell(0, 2, 2, 2).grow())
+        // One button spanning several columns and a max width
+        add(new Button("Max Height 75%"), CC().cell(2, 0, 2, 3).grow().maxHeight(75.pct))
       }, CC().growX().alignY(TopAlign).wrap())
 
       // Label and exit button
