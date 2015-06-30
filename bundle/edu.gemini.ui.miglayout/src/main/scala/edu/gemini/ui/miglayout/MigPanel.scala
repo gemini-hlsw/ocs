@@ -34,19 +34,19 @@ object constraints {
   // We'll support null, pixel and percentage but MigLayout has a few other units
   sealed trait MigUnits[T] {
     val value: T
-    def toUnits: String
+    def toBoundSize: String
   }
 
   case class NoUnit(value: Int) extends MigUnits[Int] {
-    override def toUnits = value.toString
+    override def toBoundSize = value.toString
   }
 
   case class PixelsUnit(value: Int) extends MigUnits[Int] {
-    override def toUnits = s"${value}px"
+    override def toBoundSize = s"${value}px"
   }
 
   case class PercentUnit[T: Numeric](value: T) extends MigUnits[T] {
-    override def toUnits = s"$value%"
+    override def toBoundSize = s"$value%"
   }
 
   // Converts Ints and Doubles to Units
@@ -78,7 +78,7 @@ object constraints {
      * Create insets all around the same value
      */
     def insets[T](s: MigUnits[T]):MigLC =
-      lc.insets(s.toUnits, s.toUnits, s.toUnits, s.toUnits)
+      lc.insets(s.toBoundSize, s.toBoundSize, s.toBoundSize, s.toBoundSize)
 
     /**
      * Create insets in pixels
@@ -90,13 +90,13 @@ object constraints {
      * Create insets
      */
     def insets[T, U, V, W](top: MigUnits[T], left: MigUnits[U], bottom: MigUnits[V], right: MigUnits[W]):MigLC =
-      lc.insets(top.toUnits, left.toUnits, bottom.toUnits, right.toUnits)
+      lc.insets(top.toBoundSize, left.toBoundSize, bottom.toBoundSize, right.toBoundSize)
 
     /**
      * insetsAll in units
      */
     def insetsAll[T](s: MigUnits[T]):MigLC =
-      lc.insetsAll(s.toUnits)
+      lc.insetsAll(s.toBoundSize)
 
     /**
      * Set alignment on X and Y in one call
@@ -106,17 +106,17 @@ object constraints {
     /**
      * Set grid X gaps in Units
      */
-    def gridGapX[T](g: MigUnits[T]) = lc.gridGapX(g.toUnits)
+    def gridGapX[T](g: MigUnits[T]) = lc.gridGapX(g.toBoundSize)
 
     /**
      * Set grid Y gaps in Units
      */
-    def gridGapY[T](g: MigUnits[T]) = lc.gridGapY(g.toUnits)
+    def gridGapY[T](g: MigUnits[T]) = lc.gridGapY(g.toBoundSize)
 
     /**
      * Set grid gap on X and Y in Units
      */
-    def gridGap[T, U](x: MigUnits[T], y: MigUnits[U]) = lc.gridGap(x.toUnits, y.toUnits)
+    def gridGap[T, U](x: MigUnits[T], y: MigUnits[U]) = lc.gridGap(x.toBoundSize, y.toBoundSize)
   }
 
   /**
@@ -168,22 +168,22 @@ object constraints {
     /**
      * Type safe width
      */
-    def width[U](units: MigUnits[U]): T = a.width(units.toUnits)
+    def width[U](units: MigUnits[U]): T = a.width(units.toBoundSize)
 
     /**
      * Type safe height
      */
-    def height[U](units: MigUnits[U]): T = a.height(units.toUnits)
+    def height[U](units: MigUnits[U]): T = a.height(units.toBoundSize)
 
     /**
      * Type safe maxWidth
      */
-    def maxWidth[U](units: MigUnits[U]): T = a.maxWidth(units.toUnits)
+    def maxWidth[U](units: MigUnits[U]): T = a.maxWidth(units.toBoundSize)
 
     /**
      * Type safe maxHeight
      */
-    def maxHeight[U](units: MigUnits[U]): T = a.maxHeight(units.toUnits)
+    def maxHeight[U](units: MigUnits[U]): T = a.maxHeight(units.toBoundSize)
 
   }
 
@@ -192,51 +192,51 @@ object constraints {
     /**
      * Specify top gap in Units
      */
-    def gapTop[T](u: MigUnits[T]): MigCC = cc.gapTop(u.toUnits)
+    def gapTop[T](u: MigUnits[T]): MigCC = cc.gapTop(u.toBoundSize)
 
     /**
      * Specify bottom gap in Units
      */
-    def gapBottom[T](u: MigUnits[T]): MigCC = cc.gapBottom(u.toUnits)
+    def gapBottom[T](u: MigUnits[T]): MigCC = cc.gapBottom(u.toBoundSize)
 
     /**
      * Specify right gap in Units
      */
-    def gapRight[T](u: MigUnits[T]): MigCC = cc.gapRight(u.toUnits)
+    def gapRight[T](u: MigUnits[T]): MigCC = cc.gapRight(u.toBoundSize)
 
     /**
      * Specify left gap in Units
      */
-    def gapLeft[T](u: MigUnits[T]): MigCC = cc.gapLeft(u.toUnits)
+    def gapLeft[T](u: MigUnits[T]): MigCC = cc.gapLeft(u.toBoundSize)
 
     /**
      * Specify before gap in Units
      */
-    def gapBefore[T](u: MigUnits[T]): MigCC = cc.gapBefore(u.toUnits)
+    def gapBefore[T](u: MigUnits[T]): MigCC = cc.gapBefore(u.toBoundSize)
 
     /**
      * Specify after gap in Units
      */
-    def gapAfter[T](u: MigUnits[T]): MigCC = cc.gapAfter(u.toUnits)
+    def gapAfter[T](u: MigUnits[T]): MigCC = cc.gapAfter(u.toBoundSize)
 
     /**
      * Specify before and after gap on Y in Units
      */
-    def gapY[T, U](before: MigUnits[T], after: MigUnits[U]): MigCC = cc.gapY(before.toUnits, after.toUnits)
+    def gapY[T, U](before: MigUnits[T], after: MigUnits[U]): MigCC = cc.gapY(before.toBoundSize, after.toBoundSize)
 
     /**
      * Specify before and after gap on X in Units
      */
-    def gapX[T, U](before: MigUnits[T], after: MigUnits[U]): MigCC = cc.gapX(before.toUnits, after.toUnits)
+    def gapX[T, U](before: MigUnits[T], after: MigUnits[U]): MigCC = cc.gapX(before.toBoundSize, after.toBoundSize)
 
     /**
      * Specify gaps in Units
      */
     def gap[T, U, V, W](left: MigUnits[T], right: MigUnits[U], top: MigUnits[V], bottom: MigUnits[W]): MigCC = {
-      cc.gapLeft(left.toUnits)
-      cc.gapRight(right.toUnits)
-      cc.gapTop(top.toUnits)
-      cc.gapBottom(bottom.toUnits)
+      cc.gapLeft(left.toBoundSize)
+      cc.gapRight(right.toBoundSize)
+      cc.gapTop(top.toBoundSize)
+      cc.gapBottom(bottom.toBoundSize)
     }
   }
 
