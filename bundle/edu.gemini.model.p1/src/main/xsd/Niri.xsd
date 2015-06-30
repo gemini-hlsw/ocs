@@ -64,7 +64,7 @@
             <xsd:enumeration value="K-continuum (2.27 um)"/>
             <xsd:enumeration value="CH4 ice (2.275 um)"/>
             <xsd:enumeration value="CO 2-0 (bh) (2.294 um)"/>
-            <xsd:enumeration value="CO 3-1 (bh) (2.323 um)"/>
+            <!--xsd:enumeration value="CO 3-1 (bh) (2.323 um)"/-->
             <xsd:enumeration value="H2O ice (3.050 um)"/>
             <xsd:enumeration value="hydrocarbon (3.295 um)"/>
             <xsd:enumeration value="Br(alpha) cont (3.990 um)"/>
