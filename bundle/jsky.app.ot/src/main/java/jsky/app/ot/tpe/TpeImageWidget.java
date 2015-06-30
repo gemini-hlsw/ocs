@@ -488,8 +488,8 @@ public class TpeImageWidget extends NavigatorImageDisplay implements MouseInputL
         // Get the equinox assumed by the coordinate conversion methods (depends on current image)
         //double equinox = getCoordinateConverter().getEquinox();
         ITarget target = ((SPTarget) tp).getTarget();
-        double x = target.getRa().getAs(Units.DEGREES);
-        double y = target.getDec().getAs(Units.DEGREES);
+        double x = target.getRaDegrees();
+        double y = target.getDecDegrees();
         WorldCoords pos = new WorldCoords(x, y, 2000.);
         return worldToScreenCoords(pos);
     }
@@ -837,8 +837,8 @@ public class TpeImageWidget extends NavigatorImageDisplay implements MouseInputL
      * The Base position has been updated.
      */
     public void basePosUpdate(ITarget target) {
-        double x = target.getRa().getAs(Units.DEGREES);
-        double y = target.getDec().getAs(Units.DEGREES);
+        double x = target.getRaDegrees();
+        double y = target.getDecDegrees();
         WorldCoords pos = new WorldCoords(x, y, 2000.);
         setBasePos(pos);
         repaint();

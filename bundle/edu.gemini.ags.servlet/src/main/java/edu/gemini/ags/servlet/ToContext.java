@@ -152,9 +152,7 @@ public enum ToContext {
             // pick the right guider.
             case nonsidereal:
                 t = new SPTarget(new ConicTarget());
-                t.getTarget().getRa().setAs(raDeg, CoordinateParam.Units.DEGREES);
-                t.getTarget().getDec().setAs(decDeg, CoordinateParam.Units.DEGREES);
-                t.notifyOfGenericUpdate();
+                t.setRaDecDegrees(raDeg, decDeg);
                 break;
             default:
                 t = new SPTarget(raDeg, decDeg);

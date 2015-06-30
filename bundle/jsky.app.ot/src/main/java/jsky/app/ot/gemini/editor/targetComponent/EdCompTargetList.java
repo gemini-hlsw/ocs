@@ -224,7 +224,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
             if (spTarget != null) {
                 if (target != null) {
                     spTarget.setTarget(target.clone());
-                    spTarget.getTarget().setMagnitudes(mag);
+                    spTarget.setMagnitudes(mag);
                     spTarget.notifyOfGenericUpdate();
                 }
             } else {

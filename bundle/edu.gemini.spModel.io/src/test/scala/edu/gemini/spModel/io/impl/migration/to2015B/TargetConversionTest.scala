@@ -105,8 +105,8 @@ class TargetConversionTest {
     val toc        = targetComp.getDataObject.asInstanceOf[TargetObsComp]
     val rigel      = toc.getBase.getTarget.asInstanceOf[HmsDegTarget]
 
-    val ra    = rigel.getRa.getAs(CoordinateParam.Units.DEGREES)
-    val dec   = rigel.getDec.getAs(CoordinateParam.Units.DEGREES)
+    val ra    = rigel.getRaDegrees
+    val dec   = rigel.getDecDegrees
     val dra   = rigel.getPropMotionRA
     val ddec  = rigel.getPropMotionDec
     val epoch = rigel.getEpoch.getValue

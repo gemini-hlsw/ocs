@@ -560,8 +560,8 @@ public class ObsQueryFunctor extends DBAbstractQueryFunctor {
         final TargetObsComp targetEnv = (TargetObsComp) targetObsComp.getDataObject();
         final SPTarget tp = targetEnv.getBase();
         final ITarget target = tp.getTarget();
-        final double ra = target.getRa().getAs(Units.DEGREES) / 15.;
-        final double dec = target.getDec().getAs(Units.DEGREES);
+        final double ra = target.getRaDegrees() / 15.;
+        final double dec = target.getDecDegrees();
 
         double ra0 = 0.;
         double ra1 = 24.;
@@ -658,8 +658,8 @@ public class ObsQueryFunctor extends DBAbstractQueryFunctor {
             final TargetObsComp targetEnv = (TargetObsComp) targetObsComp.getDataObject();
             final SPTarget tp = targetEnv.getBase();
             final ITarget target = tp.getTarget();
-            ra = target.getRa().getAs(Units.DEGREES);
-            dec = target.getDec().getAs(Units.DEGREES);
+            ra = target.getRaDegrees();
+            dec = target.getDecDegrees();
         }
 
         // Figure out the planned time for all observations.

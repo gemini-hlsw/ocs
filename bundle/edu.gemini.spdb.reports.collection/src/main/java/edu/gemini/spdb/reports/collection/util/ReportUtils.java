@@ -422,8 +422,8 @@ public class ReportUtils {
         }
 
         // we know it's a ra/dec target, so it's safe to cast here
-        final double r = ((HMS) target.getTarget().getRa()).getValue();
-        final double d = ((DMS) target.getTarget().getDec()).getValue();
+        final double r = target.getTarget().getRaDegrees();
+        final double d = target.getTarget().getDecDegrees();
 
         if (r == 0.0 && d == 0.0) {
             return Option.empty();

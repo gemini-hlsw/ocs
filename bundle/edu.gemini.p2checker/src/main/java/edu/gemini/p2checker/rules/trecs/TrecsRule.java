@@ -15,9 +15,6 @@ import edu.gemini.spModel.target.env.GuideProbeTargets;
 import edu.gemini.spModel.target.env.TargetEnvironment;
 import edu.gemini.spModel.target.obsComp.PwfsGuideProbe;
 import edu.gemini.spModel.target.obsComp.TargetObsComp;
-import edu.gemini.spModel.target.system.CoordinateParam;
-import edu.gemini.spModel.target.system.DMS;
-import edu.gemini.spModel.target.system.HMS;
 import edu.gemini.spModel.target.system.ITarget;
 import jsky.coords.WorldCoords;
 
@@ -36,7 +33,7 @@ public class TrecsRule implements IRule {
      * Class to implement this set of rules
      * % It is preferable to leave the the 'window' option in the OT at 'auto'
      * % some filters are clearly incompatible with the ZnSe window
-     * WARN if window != 'auto', "we recommend that you leave Window Wheel at 'auto'"
+     * WARN if window != 'auto', "we recommend that you leave Window WWheel at 'auto'"
      * ERROR if window = 'ZnSe' && filter == 'Qa' , "Please set Window Wheel to 'auto' or use KRS-5."
      * ERROR if window = 'ZnSe' && filter == 'Qb' , "Please set Window Wheel to 'auto' or use KRS-5."
      * ERROR if window = 'ZnSe' && filter == 'Qbroad', "Please set Window Wheel to AUTO or use KRS-5."
@@ -357,8 +354,8 @@ public class TrecsRule implements IRule {
         // Return the world coordinates for the give target
         private WorldCoords _getWorldCoords(SPTarget tp) {
             ITarget target = tp.getTarget();
-            double x = target.getRa().getAs(CoordinateParam.Units.DEGREES);
-            double y = target.getDec().getAs(CoordinateParam.Units.DEGREES);
+            double x = target.getRaDegrees();
+            double y = target.getDecDegrees();
             return new WorldCoords(x, y, 2000.);
         }
     };

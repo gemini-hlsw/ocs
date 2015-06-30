@@ -109,8 +109,8 @@ final class Fixture {
             // the coordinates and get enough of an idea that they are the
             // same for the purposes of testing GuideProbeTargets.
 
-            assertEquals(t1.getTarget().getRa().getAs(CoordinateParam.Units.DEGREES), t2.getTarget().getRa().getAs(CoordinateParam.Units.DEGREES), 0.000001);
-            assertEquals(t1.getTarget().getDec().getAs(CoordinateParam.Units.DEGREES), t2.getTarget().getDec().getAs(CoordinateParam.Units.DEGREES), 0.000001);
+            assertEquals(t1.getTarget().getRaDegrees(), t2.getTarget().getRaDegrees(), 0.000001);
+            assertEquals(t1.getTarget().getDecDegrees(), t2.getTarget().getDecDegrees(), 0.000001);
         }
     }
 }

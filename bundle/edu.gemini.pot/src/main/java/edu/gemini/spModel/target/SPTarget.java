@@ -10,11 +10,9 @@ package edu.gemini.spModel.target;
 import edu.gemini.spModel.pio.ParamSet;
 import edu.gemini.spModel.pio.PioFactory;
 import edu.gemini.spModel.target.system.*;
-import edu.gemini.spModel.target.system.CoordinateParam.Units;
-import edu.gemini.spModel.target.system.CoordinateTypes.*;
 
 /** A mutable cell containing an ITarget. */
-public final class SPTarget extends WatchablePos {
+public final class SPTarget extends TransitionalSPTarget {
 
     private ITarget _target;
 
@@ -31,8 +29,7 @@ public final class SPTarget extends WatchablePos {
     /** SPTarget with the given RA/Dec in degrees. */
     public SPTarget(final double raDeg, final double degDec) {
         this();
-        _target.getRa().setAs(raDeg, Units.DEGREES);
-        _target.getDec().setAs(degDec, Units.DEGREES);
+        setRaDecDegrees(raDeg, degDec);
     }
 
     /** Return the contained target. */
@@ -73,42 +70,6 @@ public final class SPTarget extends WatchablePos {
     /** Clone this SPTarget. */
     public SPTarget clone() {
         return new SPTarget(_target.clone());
-    }
-
-
-    ///
-    /// END OF PUBLIC API ... EVERYTHING FROM HERE DOWN GOES AWAY
-    ///
-
-    /** Get the PM radial velocity in km/s if the contained target is sidereal, otherwise zero. */
-    public double getTrackingRadialVelocity() {
-        double res = 0.0;
-        if (_target instanceof HmsDegTarget) {
-            final HmsDegTarget t = (HmsDegTarget)_target;
-            res = t.getRV().getValue();
-        }
-        return res;
-    }
-
-    /** Set the PM radial velocity in km/s if the contained target is sidereal, otherwise throw. */
-    public void setTrackingRadialVelocity(final double newValue) {
-        if (_target instanceof HmsDegTarget) {
-            final HmsDegTarget t = (HmsDegTarget)_target;
-            final RV rv = new RV(newValue);
-            t.setRV(rv);
-            _notifyOfUpdate();
-        } else {
-            throw new IllegalArgumentException();
-        }
-    }
-
-    // I'm making this public so I can call it from an editor when I make
-    // a change to the contained target, rather than publishing all the
-    // target members through this idiotic class. All of this crap needs
-    // to be rewritten.
-    /** @deprecated */
-    public void notifyOfGenericUpdate() {
-    	super._notifyOfUpdate();
     }
 
 }

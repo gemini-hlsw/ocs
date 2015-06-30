@@ -33,8 +33,7 @@ final class NamedDetailEditor extends TargetDetailEditor(Tag.NAMED) with Reentra
 
       def textBoxKeyPress(tbwe: TextBoxWidget): Unit =
         nonreentrant {
-          spt.getTarget.setName(tbwe.getValue)
-          spt.notifyOfGenericUpdate()
+          spt.setName(tbwe.getValue)
         }
 
       def textBoxAction(tbwe: TextBoxWidget): Unit = ()

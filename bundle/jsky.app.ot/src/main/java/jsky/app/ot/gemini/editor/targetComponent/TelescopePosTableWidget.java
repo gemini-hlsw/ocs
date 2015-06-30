@@ -78,7 +78,7 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
                 public Object getValue(Row row) {
                     return row.target().map(new MapOp<SPTarget, String>() {
                         @Override public String apply(SPTarget t) {
-                            return t.getTarget().getRa().toString();
+                            return t.getTarget().getRaString();
                         }
                     }).getOrElse("");
                 }
@@ -88,7 +88,7 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
                 public Object getValue(Row row) {
                     return row.target().map(new MapOp<SPTarget, String>() {
                         @Override public String apply(SPTarget t) {
-                            return t.getTarget().getDec().toString();
+                            return t.getTarget().getDecString();
                         }
                     }).getOrElse("");
                 }
@@ -465,8 +465,8 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
     // Return the world coordinates for the given target
     private static WorldCoords getWorldCoords(SPTarget tp) {
         final ITarget target = tp.getTarget();
-        final double x = target.getRa().getAs(Units.DEGREES);
-        final double y = target.getDec().getAs(Units.DEGREES);
+        final double x = target.getRaDegrees();
+        final double y = target.getDecDegrees();
         return new WorldCoords(x, y, 2000.);
     }
 

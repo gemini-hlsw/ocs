@@ -30,11 +30,12 @@ final class ConicNameEditor(date: HorizonsIO[Date]) extends TelescopePosEditor w
       d  <- date
       t0 <- HorizonsIO.delay(ct)
       p  <- Horizons.lookupConicTargetByName(t0.getName, t0.getTag.unsafeToHorizonsObjectType, d)
-      _  <- HorizonsIO.delay(spt.setTarget {
-        p._1 <| (_.setMagnitudes(ct.getMagnitudes)) <|
-                (_.setSpatialProfile(ct.getSpatialProfile)) <|
-                (_.setSpectralDistribution(ct.getSpectralDistribution))
-      })
+      _  <- HorizonsIO.delay {
+        spt.setTarget(p._1)
+        spt.setSpatialProfile(ct.getSpatialProfile)
+        spt.setSpectralDistribution(ct.getSpectralDistribution)
+        spt.setMagnitudes(ct.getMagnitudes)
+      }
     } yield ()
 
   val name = new TextBoxWidget <| { w =>
@@ -43,7 +44,7 @@ final class ConicNameEditor(date: HorizonsIO[Date]) extends TelescopePosEditor w
 
       override def textBoxKeyPress(tbwe: TextBoxWidget): Unit =
         nonreentrant {
-          spt.getTarget.setName(tbwe.getValue)
+          spt.setName(tbwe.getValue)
           // editing the name so invalidate the horizons id.
           ct.setHorizonsObjectId(null) //
           ct.setHorizonsObjectTypeOrdinal(-1)

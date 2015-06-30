@@ -35,8 +35,7 @@ final class SiderealNameEditor extends TelescopePosEditor with ReentrancyHack {
 
       override def textBoxKeyPress(tbwe: TextBoxWidget): Unit =
         nonreentrant {
-          spt.getTarget.setName(tbwe.getValue)
-          spt.notifyOfGenericUpdate()
+          spt.setName(tbwe.getValue)
         }
 
       override def textBoxAction(tbwe: TextBoxWidget): Unit =
@@ -108,14 +107,14 @@ final class SiderealNameEditor extends TelescopePosEditor with ReentrancyHack {
     tqr.getCoordinates(0) match {
       case pos: WorldCoords =>
         try {
-          t.getRa.setValue(pos.getRA.toString)
-          t.getDec.setValue(pos.getDec.toString)
+          t.setRaString(pos.getRA.toString)
+          t.setDecString(pos.getDec.toString)
         } catch {
 
           // N.B. the old target editor handled this case, so we do too. May never happen.
           case _: IllegalArgumentException =>
-            t.getRa.setAs(0, Units.DEGREES)
-            t.getDec.setAs(0, Units.DEGREES)
+            new SPTarget(t).setRaDegrees(0)
+            new SPTarget(t).setDecDegrees(0)
 
         }
       case _ => // ???

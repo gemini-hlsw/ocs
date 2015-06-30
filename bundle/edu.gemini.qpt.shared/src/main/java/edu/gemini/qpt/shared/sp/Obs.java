@@ -572,11 +572,11 @@ public final class Obs implements Serializable, Comparable<Obs> {
 	}
 
 	public double getRa() {
-        return (targetEnvironment != null ? targetEnvironment.getBase().getTarget().getRa().getAs(CoordinateParam.Units.DEGREES) : 0.0);
+        return (targetEnvironment != null ? targetEnvironment.getBase().getTarget().getRaDegrees() : 0.0);
 	}
 
 	public double getDec() {
-        return (targetEnvironment != null ? targetEnvironment.getBase().getTarget().getDec().getAs(CoordinateParam.Units.DEGREES) : 0.0);
+        return (targetEnvironment != null ? targetEnvironment.getBase().getTarget().getDecDegrees() : 0.0);
 	}
 
 	public Conds getConditions() {

@@ -83,8 +83,8 @@ public class SPTargetPio {
             final HmsDegTarget t = (HmsDegTarget) target;
             Pio.addParam(factory, paramSet, _SYSTEM, t.getTag().tccName);
             paramSet.addParam(t.getEpoch().getParam(factory, _EPOCH));
-            Pio.addParam(factory, paramSet, _C1, t.getRa().toString());
-            Pio.addParam(factory, paramSet, _C2, t.getDec().toString());
+            Pio.addParam(factory, paramSet, _C1, t.getRaString());
+            Pio.addParam(factory, paramSet, _C2, t.getDecString());
             paramSet.addParam(t.getPM1().getParam(factory, _PM1));
             paramSet.addParam(t.getPM2().getParam(factory, _PM2));
             paramSet.addParam(t.getParallax().getParam(factory, _PARALLAX));
@@ -100,8 +100,8 @@ public class SPTargetPio {
 
             // OT-495: save and restore RA/Dec for conic targets
             // XXX FIXME: Temporary, until nonsidereal support is implemented
-            Pio.addParam(factory, paramSet, _C1, nst.getRa().toString());
-            Pio.addParam(factory, paramSet, _C2, nst.getDec().toString());
+            Pio.addParam(factory, paramSet, _C1, nst.getRaString());
+            Pio.addParam(factory, paramSet, _C2, nst.getDecString());
             if (nst.getDateForPosition() != null) {
                 Pio.addParam(factory, paramSet, _VALID_DATE, formatDate(nst.getDateForPosition()));
             }
@@ -143,26 +143,26 @@ public class SPTargetPio {
         return paramSet;
     }
 
-    private static void setHMS(HMS c, String s) {
+    private static void setRA(SPTarget t, String s) {
         // We don't know whether we have HH:MM:SS (DD:MM:SS) or a double in
         // degrees.  Try to parse as a Double and use it if that works.
         if (s != null) {
             try {
-                c.setAs(Double.parseDouble(s), CoordinateParam.Units.DEGREES);
+                t.setRaDegrees(Double.parseDouble(s));
             } catch (NumberFormatException ex) {
-                c.setValue(s);
+                t.setRaString(s);
             }
         }
     }
 
-    private static void setDMS(DMS c, String s) {
+    private static void setDec(SPTarget t, String s) {
         // We don't know whether we have HH:MM:SS (DD:MM:SS) or a double in
         // degrees.  Try to parse as a Double and use it if that works.
         if (s != null) {
             try {
-                c.setAs(Double.parseDouble(s), CoordinateParam.Units.DEGREES);
+                t.setDecDegrees(Double.parseDouble(s));
             } catch (NumberFormatException ex) {
-                c.setValue(s);
+                t.setDecString(s);
             }
         }
     }
@@ -184,15 +184,16 @@ public class SPTargetPio {
         if (itarget == null)
             throw new IllegalArgumentException("No target tag with tccName " + system);
 
-        itarget.setName(name);
+        spt.setTarget(itarget);
+        spt.setName(name);
 
         if (itarget instanceof HmsDegTarget) {
             final HmsDegTarget t = (HmsDegTarget)itarget;
 
             final String c1 = Pio.getValue(paramSet, _C1);
             final String c2 = Pio.getValue(paramSet, _C2);
-            setHMS(t.getRa(), c1);
-            setDMS(t.getDec(), c2);
+            setRA(spt, c1);
+            setDec(spt, c2);
 
             final CoordinateTypes.Epoch e = new CoordinateTypes.Epoch();
             e.setParam(paramSet.getParam(_EPOCH));
@@ -226,8 +227,8 @@ public class SPTargetPio {
             // XXX FIXME: Temporary, until nonsidereal support is implemented
             final String c1 = Pio.getValue(paramSet, _C1);
             final String c2 = Pio.getValue(paramSet, _C2);
-            setHMS(nst.getRa(), c1);
-            setDMS(nst.getDec(), c2);
+            setRA(spt, c1);
+            setDec(spt, c2);
 
             final String dateStr = Pio.getValue(paramSet, _VALID_DATE);
             final Date validDate = parseDate(dateStr);
@@ -288,17 +289,16 @@ public class SPTargetPio {
         final ParamSet magCollectionPset = paramSet.getParamSet(MagnitudePio.MAG_LIST);
         if (magCollectionPset != null) {
             try {
-                itarget.setMagnitudes(MagnitudePio.instance.toList(magCollectionPset));
+                spt.setMagnitudes(MagnitudePio.instance.toList(magCollectionPset));
             } catch (final ParseException ex) {
                 LOGGER.log(Level.WARNING, "Could not parse target magnitudes", ex);
             }
         }
 
         // Add spatial profile and spectral distribution
-        itarget.setSpatialProfile(SourcePio.profileFromParamSet(paramSet));
-        itarget.setSpectralDistribution(SourcePio.distributionFromParamSet(paramSet));
+        spt.setSpatialProfile(SourcePio.profileFromParamSet(paramSet));
+        spt.setSpectralDistribution(SourcePio.distributionFromParamSet(paramSet));
 
-        spt.setTarget(itarget);
     }
 
     public static SPTarget fromParamSet(final ParamSet pset) {

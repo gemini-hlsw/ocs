@@ -1,5 +1,6 @@
 package edu.gemini.spModel.target.system.test;
 
+import edu.gemini.spModel.target.SPTarget;
 import edu.gemini.spModel.target.system.*;
 import static edu.gemini.spModel.test.TestFile.ser;
 
@@ -26,11 +27,11 @@ public final class NamedTargetCase {
         assertNotNull(t1);
 
         // Alt/Az
-        t1.getRa().setValue("16:11:12.345");
-        t1.getDec().setValue("-20:30:40.567");
+        new SPTarget(t1).setRaString("16:11:12.345");
+        new SPTarget(t1).setDecString("-20:30:40.567");
 
-        assertEquals("16:11:12.345", t1.getRa().toString());
-        assertEquals("-20:30:40.57", t1.getDec().toString());
+        assertEquals("16:11:12.345", t1.getRaString());
+        assertEquals("-20:30:40.57", t1.getDecString());
 
         //Planet
         t1.setSolarObject(NamedTarget.SolarObject.NEPTUNE);
@@ -39,10 +40,10 @@ public final class NamedTargetCase {
 
     private void _doTestOne(String lIn, String bIn,
                             String lEx, String bEx) {
-        _t1.getRa().setValue(lIn);
-        _t1.getDec().setValue(bIn);
-        String lOut = _t1.getRa().toString();
-        String bOut = _t1.getDec().toString();
+        _t1.setRaString(lIn);
+        _t1.setDecString(bIn);
+        String lOut = _t1.getRaString();
+        String bOut = _t1.getDecString();
 
         assertEquals("Failed comparison,", lEx, lOut);
         assertEquals("Failed comparison,", bEx, bOut);
@@ -58,8 +59,8 @@ public final class NamedTargetCase {
     @Test
     public void testSerialization() throws Exception {
         final NamedTarget outObject = new NamedTarget();
-        outObject.getRa().setValue("210:11:12.4");
-        outObject.getDec().setValue("-11:12:13.4");
+        outObject.setRaString("210:11:12.4");
+        outObject.setDecString("-11:12:13.4");
         outObject.setSolarObject(NamedTarget.SolarObject.URANUS);
         final NamedTarget inObject = ser(outObject);
         assertTrue(outObject.equals(inObject));

@@ -62,8 +62,8 @@ public class ObsTargetDesc extends TargetDesc {
 
         SPTarget basePos = targetEnv.getBase();
         ITarget target = basePos.getTarget();
-        double x = target.getRa().getAs(Units.DEGREES);
-        double y = target.getDec().getAs(Units.DEGREES);
+        double x = target.getRaDegrees();
+        double y = target.getDecDegrees();
         WorldCoords pos = new WorldCoords(x, y, 2000.);
                  String targetName = basePos.getTarget().getName();
 

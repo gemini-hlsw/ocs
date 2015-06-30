@@ -103,8 +103,8 @@ trait UCAC3Regression {
           val equalGroup = expectedGuideGroup.zip(actualGuideGroup).map {
             case (egg, acc) =>
               val sameGuider = egg.getGuider == acc.getGuider
-              val sameRa = egg.getPrimary.getValue.getTarget.getRa.getAs(CoordinateParam.Units.DEGREES) == acc.getPrimary.getValue.getTarget.getRa.getAs(CoordinateParam.Units.DEGREES)
-              val sameDec = egg.getPrimary.getValue.getTarget.getDec.getAs(CoordinateParam.Units.DEGREES) == acc.getPrimary.getValue.getTarget.getDec.getAs(CoordinateParam.Units.DEGREES)
+              val sameRa = egg.getPrimary.getValue.getTarget.getRaDegrees == acc.getPrimary.getValue.getTarget.getRaDegrees
+              val sameDec = egg.getPrimary.getValue.getTarget.getDecDegrees == acc.getPrimary.getValue.getTarget.getDecDegrees
               sameGuider && sameRa && sameDec
           }
           val sameStrehl = math.abs(expected.strehl.avg - actual.strehl.avg) < 0.0001

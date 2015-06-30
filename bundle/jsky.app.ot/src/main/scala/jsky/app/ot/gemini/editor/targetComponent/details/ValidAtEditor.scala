@@ -156,11 +156,10 @@ abstract class ValidAtEditor[A <: ITarget](empty: A) extends TelescopePosEditor 
   def updateSPTarget(t: ITarget): HorizonsIO[Unit] =
     HorizonsIO.delay {
       val old = spt.getTarget
-      spt.setTarget {
-        t <| (_.setMagnitudes(old.getMagnitudes)) <|
-             (_.setSpatialProfile(old.getSpatialProfile)) <|
-             (_.setSpectralDistribution(old.getSpectralDistribution))
-      }
+      spt.setTarget(t)
+      spt.setSpatialProfile(old.getSpatialProfile)
+      spt.setSpectralDistribution(old.getSpectralDistribution)
+      spt.setMagnitudes(old.getMagnitudes)
     }
 
   /**

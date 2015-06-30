@@ -46,8 +46,8 @@ object SpTargetPioSpec extends Specification with ScalaCheck with Arbitraries {
           val paramSet = factory.createParamSet("test")
 
           val spt = new SPTarget(10, 10)
-          spt.getTarget.setSpatialProfile(sp)
-          spt.getTarget.setSpectralDistribution(sd)
+          spt.setSpatialProfile(sp)
+          spt.setSpectralDistribution(sd)
 
           val pset = SPTargetPio.getParamSet(spt, factory)
           val spt2 = SPTargetPio.fromParamSet(pset)
@@ -71,8 +71,8 @@ object SpTargetPioSpec extends Specification with ScalaCheck with Arbitraries {
 
     def expect(ps: ParamSet, era: Double, edec: Double): Unit = {
       val spt = SPTargetPio.fromParamSet(ps)
-      val ra  = spt.getTarget.getRa.getAs(CoordinateParam.Units.DEGREES)
-      val dec = spt.getTarget.getDec.getAs(CoordinateParam.Units.DEGREES)
+      val ra  = spt.getTarget.getRaDegrees
+      val dec = spt.getTarget.getDecDegrees
 
       ra  must beCloseTo(era,  0.000001)
       dec must beCloseTo(edec, 0.000001)

@@ -125,9 +125,7 @@ public abstract class PosMap <K, T extends WatchablePos>
                 // ignore
             }
         } else {
-            ((SPTarget) tp).getTarget().getRa().setAs(tme.pos.getRaDeg(), CoordinateParam.Units.DEGREES);
-            ((SPTarget) tp).getTarget().getDec().setAs(tme.pos.getDecDeg(), CoordinateParam.Units.DEGREES);
-            ((SPTarget) tp).notifyOfGenericUpdate();
+            ((SPTarget) tp).setRaDecDegrees(tme.pos.getRaDeg(), tme.pos.getDecDeg());
         }
 
         tp.addWatcher(this);
