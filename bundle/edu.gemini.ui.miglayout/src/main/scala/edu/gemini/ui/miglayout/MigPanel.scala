@@ -1,5 +1,6 @@
 package edu.gemini.ui.miglayout
 
+import scala.language.reflectiveCalls
 import scala.swing._
 import net.miginfocom.swing._
 import net.miginfocom.layout.{LC => MigLC, AC => MigAC, CC => MigCC}
@@ -74,10 +75,28 @@ object constraints {
       lc.insets(s"${s}px", s"${s}px", s"${s}px", s"${s}px")
 
     /**
+     * Create insets all around the same value
+     */
+    def insets[T](s: MigUnits[T]):MigLC =
+      lc.insets(s.toUnits, s.toUnits, s.toUnits, s.toUnits)
+
+    /**
      * Create insets in pixels
      */
     def insets(top: Int, left: Int, bottom: Int, right: Int):MigLC =
       lc.insets(s"${top}px", s"${left}px", s"${bottom}px", s"${right}px")
+
+    /**
+     * Create insets
+     */
+    def insets[T, U, V, W](top: MigUnits[T], left: MigUnits[U], bottom: MigUnits[V], right: MigUnits[W]):MigLC =
+      lc.insets(top.toUnits, left.toUnits, bottom.toUnits, right.toUnits)
+
+    /**
+     * insetsAll in units
+     */
+    def insetsAll[T](s: MigUnits[T]):MigLC =
+      lc.insetsAll(s.toUnits)
 
     /**
      * Set alignment on X and Y in one call
@@ -198,7 +217,7 @@ object MigLayoutDemo extends App {
     }
 
     // A top level panel that grows and no borders
-    contents = new MigPanel(LC().fill().insets(0).width(100.pct).alignX(LeftAlign)) {
+    contents = new MigPanel(LC().fill().insets(0.px).width(100.pct).alignX(LeftAlign)) {
       // The upper part shows a form that grows on width and aligns to the top
       add(new MigPanel(LC().fill()) {
         // First row
