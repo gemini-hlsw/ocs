@@ -650,7 +650,7 @@ class UpConverterSpec extends SpecificationWithJUnit with SemesterProperties {
           changes must have length 4
           result \\ "niri" must \\("filter") \> "HeI (1.083 um)"
           result \\ "niri" must not(\\("filter") \> "J-continuum (1.122 um)")
-          result \\ "niri" must not(\\("filter") \> "J-continuum (1.207 um)")
+          result \\ "niri" must not(\\("filter") \> "Jcont (1.065 um)")
           result \\ "niri" must \\("name") \> "NIRI Altair Laser Guidestar f/32 (0.02\"/pix, 22\" FoV) HeI (1.083 um)"
       }
     }
