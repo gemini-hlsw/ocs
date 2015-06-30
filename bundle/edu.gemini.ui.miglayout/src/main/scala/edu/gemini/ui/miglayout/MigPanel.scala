@@ -63,20 +63,31 @@ object constraints {
     def apply(): MigCC = new MigCC()
   }
 
-  implicit class CCOp(val cc: MigCC) extends AnyVal {
+  // Structural type
+  private type Alignable[T] = {
+    def alignX(s: String): T
+    def alignY(s: String): T
+  }
+
+  // This implicit class applies to LC/CC using structural types
+  implicit class AlignableOps[T](val a: Alignable[T]) extends AnyVal {
     /**
      * Type safe alignY
      */
-    def alignY(align: MigAlign):MigCC =
-      cc.alignY(align.toAlign)
+    def alignY(align: MigAlign):T =
+      a.alignY(align.toAlign)
 
     /**
      * Type safe alignX
      */
-    def alignX(align: MigAlign):MigCC =
-      cc.alignX(align.toAlign)
+    def alignX(align: MigAlign):T =
+      a.alignX(align.toAlign)
+
   }
 
+  implicit class CCOps(val cc: MigCC) extends AnyVal {
+
+  }
 
 }
 
@@ -123,7 +134,7 @@ object MigLayoutDemo extends App {
     }
 
     // A top level panel that grows and no borders
-    contents = new MigPanel(LC().fill().insets(0)) {
+    contents = new MigPanel(LC().fill().insets(0).alignX(TopAlign)) {
       // The upper part shows a form that grows on width and aligns to the top
       add(new MigPanel(LC().fill()) {
         // First row
