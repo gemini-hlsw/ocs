@@ -102,6 +102,21 @@ object constraints {
      * Set alignment on X and Y in one call
      */
     def align(x: HMigAlign, y: VMigAlign): MigLC = lc.align(x.toAlign, y.toAlign)
+
+    /**
+     * Set grid X gaps in Units
+     */
+    def gridGapX[T](g: MigUnits[T]) = lc.gridGapX(g.toUnits)
+
+    /**
+     * Set grid Y gaps in Units
+     */
+    def gridGapY[T](g: MigUnits[T]) = lc.gridGapY(g.toUnits)
+
+    /**
+     * Set grid gap on X and Y in Units
+     */
+    def gridGap[T, U](x: MigUnits[T], y: MigUnits[U]) = lc.gridGap(x.toUnits, y.toUnits)
   }
 
   /**
@@ -170,6 +185,59 @@ object constraints {
      */
     def maxHeight[U](units: MigUnits[U]): T = a.maxHeight(units.toUnits)
 
+  }
+
+  implicit class CCOps(val cc: MigCC) extends AnyVal {
+
+    /**
+     * Specify top gap in Units
+     */
+    def gapTop[T](u: MigUnits[T]): MigCC = cc.gapTop(u.toUnits)
+
+    /**
+     * Specify bottom gap in Units
+     */
+    def gapBottom[T](u: MigUnits[T]): MigCC = cc.gapBottom(u.toUnits)
+
+    /**
+     * Specify right gap in Units
+     */
+    def gapRight[T](u: MigUnits[T]): MigCC = cc.gapRight(u.toUnits)
+
+    /**
+     * Specify left gap in Units
+     */
+    def gapLeft[T](u: MigUnits[T]): MigCC = cc.gapLeft(u.toUnits)
+
+    /**
+     * Specify before gap in Units
+     */
+    def gapBefore[T](u: MigUnits[T]): MigCC = cc.gapBefore(u.toUnits)
+
+    /**
+     * Specify after gap in Units
+     */
+    def gapAfter[T](u: MigUnits[T]): MigCC = cc.gapAfter(u.toUnits)
+
+    /**
+     * Specify before and after gap on Y in Units
+     */
+    def gapY[T, U](before: MigUnits[T], after: MigUnits[U]): MigCC = cc.gapY(before.toUnits, after.toUnits)
+
+    /**
+     * Specify before and after gap on X in Units
+     */
+    def gapX[T, U](before: MigUnits[T], after: MigUnits[U]): MigCC = cc.gapX(before.toUnits, after.toUnits)
+
+    /**
+     * Specify gaps in Units
+     */
+    def gap[T, U, V, W](left: MigUnits[T], right: MigUnits[U], top: MigUnits[V], bottom: MigUnits[W]): MigCC = {
+      cc.gapLeft(left.toUnits)
+      cc.gapRight(right.toUnits)
+      cc.gapTop(top.toUnits)
+      cc.gapBottom(bottom.toUnits)
+    }
   }
 
 }
