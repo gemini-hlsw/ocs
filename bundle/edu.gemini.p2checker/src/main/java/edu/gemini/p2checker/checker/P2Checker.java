@@ -41,18 +41,18 @@ import edu.gemini.spModel.gemini.trecs.InstTReCS;
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2;
 import edu.gemini.spModel.gemini.visitor.VisitorInstrument;
 import edu.gemini.spModel.obscomp.SPInstObsComp;
+import edu.gemini.spModel.util.NodeValueCache;
+import edu.gemini.spModel.util.NodeValueCache$;
 
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * The main class used to apply rules on a particular program to get potential problems on it.
  */
-public class P2Checker {
-    private static P2Checker _instance;
+public final class P2Checker {
+    private SPNodeKey cacheKey = null;
+    private NodeValueCache<IP2Problems> cache = NodeValueCache$.MODULE$.empty();
 
     private final Map<SPComponentType, IRule> _ruleMap;
 
@@ -89,16 +89,7 @@ public class P2Checker {
         }
     }
 
-
-    public static P2Checker getInstance() {
-        if (_instance == null) {
-            _instance = new P2Checker();
-        }
-        return _instance;
-    }
-
-
-    private P2Checker() {
+    public P2Checker() {
         _ruleMap = new HashMap<>();
         final IRule gmosRule = new GmosRule();
         //add the GMOS Rule to all the instruments that supports it
@@ -126,7 +117,6 @@ public class P2Checker {
         return _ruleMap.get(elements.getInstrumentNode().getType());
     }
 
-
     /**
      * Main entry point for checking a program node.
      *
@@ -135,16 +125,26 @@ public class P2Checker {
      */
     public IP2Problems check(ISPNode node, AgsMagnitude.MagnitudeTable mt) {
         //obs/seq component require us to find the observation first
-        if (node instanceof ISPSeqComponent ||
-                node instanceof ISPObsComponent) {
-            if (node.getParent() instanceof ISPObservation) {
-                return _checkObservation((ISPObservation) node.getParent(), mt);
-            } else {
-                return check(node.getParent(), mt); //recursively attempt to find the Observation
-            }
+        if (node instanceof ISPSeqComponent || node instanceof ISPObsComponent) {
+            return check(node.getContextObservation(), mt);
+
             //observations can be checked immediately
         } else if (node instanceof ISPObservation) {
-            return _checkObservation((ISPObservation) node, mt);
+            final SPNodeKey progKey = node.getProgram().getNodeKey();
+            final NodeValueCache<IP2Problems> nvc = (progKey == cacheKey) ? cache : NodeValueCache$.MODULE$.empty();
+
+            final scala.Tuple2<IP2Problems, NodeValueCache<IP2Problems>> tup;
+            tup = nvc.get(node, new scala.runtime.AbstractFunction1<ISPNode, IP2Problems>() {
+                @Override public IP2Problems apply(ISPNode v1) {
+                    return _checkObservation((ISPObservation) v1, mt);
+                }
+            });
+
+            cache    = tup._2();
+            cacheKey = progKey;
+
+            return tup._1();
+
             //groups contain observations, check them individually
         } else if (node instanceof ISPGroup) {
             final ISPGroup group = (ISPGroup) node;
@@ -153,6 +153,7 @@ public class P2Checker {
                 problems.append(check(obs, mt));
             }
             return problems;
+
             //a program has groups and observations. Check them all.
         } else if (node instanceof ISPProgram) {
             final ISPProgram program = (ISPProgram) node;
