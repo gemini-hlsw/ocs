@@ -25,12 +25,6 @@ OsgiKeys.exportPackage := Seq(
   "edu.gemini.shared.gui",
   "edu.gemini.shared.gui.bean",
   "edu.gemini.shared.gui.calendar",
-  "edu.gemini.shared.gui.dialog",
-  "edu.gemini.shared.gui.dialog.canned",
   "edu.gemini.shared.gui.textComponent",
-  "edu.gemini.shared.gui.goodies",
   "edu.gemini.shared.gui.monthview",
-  "edu.gemini.shared.gui.propertyCtrl",
   "edu.gemini.shared.gui.text")
-
-        

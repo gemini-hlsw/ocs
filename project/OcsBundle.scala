@@ -715,6 +715,7 @@ trait OcsBundle {
       bundle_edu_gemini_model_p1_targetio,
       bundle_edu_gemini_model_p1_visibility,
       bundle_edu_gemini_ui_workspace,
+      bundle_edu_gemini_shared_gui,
       bundle_edu_gemini_util_pdf,
       bundle_edu_gemini_spModel_core
     )
