@@ -82,7 +82,7 @@ class VcsServer(odb: IDBDatabaseService) { vs =>
     * same key or id with an existing program in the database and the user has
     * appropriate keys.
     */
-  def add(p: ISPProgram, user: Set[Principal]): VcsAction[Unit] = {
+  def add(p: ISPProgram): VcsAction[Unit] = {
     def failIfExists(id: SPProgramID, key: SPNodeKey): VcsAction[Unit] = {
       val alreadyExists = Option(odb.lookupProgramByID(id)).as(IdAlreadyExists(id)).orElse {
         Option(odb.lookupProgram(key)).as(KeyAlreadyExists(id, key))
@@ -92,10 +92,8 @@ class VcsServer(odb: IDBDatabaseService) { vs =>
     }
 
     (Option(p.getProgramID) \/> MissingId).liftVcs >>= { id =>
-      accessControlled(id, user) {
-        locked(p.getProgramKey, writeLock, writeUnlock) {
-          failIfExists(id, p.getProgramKey) >> putProg(odb.getFactory.copyWithNewLifespanId(p)).liftVcs
-        }
+      locked(p.getProgramKey, writeLock, writeUnlock) {
+        failIfExists(id, p.getProgramKey) >> putProg(odb.getFactory.copyWithNewLifespanId(p)).liftVcs
       }
     }
   }
@@ -109,7 +107,10 @@ class VcsServer(odb: IDBDatabaseService) { vs =>
       vs.read(id, user)(_.getVersions).unsafeRun
 
     override def add(p: ISPProgram): TryVcs[Unit] =
-      vs.add(p, user).unsafeRun
+      (for {
+        id <- (Option(p.getProgramID) \/> MissingId).liftVcs
+        _  <- accessControlled(id, user) { vs.add(p) }
+      } yield ()).unsafeRun
 
     override def checkout(id: SPProgramID): TryVcs[ISPProgram] =
       vs.read(id, user)(identity).unsafeRun

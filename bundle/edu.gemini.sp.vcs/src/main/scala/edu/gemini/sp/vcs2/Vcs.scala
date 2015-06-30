@@ -42,8 +42,7 @@ class Vcs(user: VcsAction[Set[Principal]], server: VcsServer, service: Peer => V
     for {
       p <- Client(peer).checkout(id)
       _ <- checkCancel(cancelled)
-      u <- user
-      _ <- server.add(p, u)
+      _ <- server.add(p)
     } yield p
 
   /** Adds the given program to the remote peer, copying it into the remote

@@ -116,35 +116,29 @@ class VcsServerSpec extends VcsSpecification {
   }
 
   "add" should {
-    "fail if the user doesn't have access to the program" in withVcs { env =>
-      val user    = Set(ProgramPrincipal(Q3): Principal)
-      val newProg = env.local.newProgram(Q2)
-      forbidden(env.local.server.add(newProg, user))
-    }
-
     "fail if a program with the same key already exists" in withVcs { env =>
       val newProg = env.local.odb.getFactory.createProgram(Key, Q2)
-      val act     = env.local.server.add(newProg, StaffUser)
+      val act     = env.local.server.add(newProg)
       expect(act) { case -\/(KeyAlreadyExists(_, _)) => ok("key exists") }
     }
 
     "fail if a program with the same id already exists" in withVcs { env =>
       val newKey  = new SPNodeKey()
       val newProg = env.local.odb.getFactory.createProgram(newKey, Q1)
-      val act     = env.local.server.add(newProg, StaffUser)
+      val act     = env.local.server.add(newProg)
       expect(act) { case -\/(IdAlreadyExists(_)) => ok("id exists") }
     }
 
     "fail if the new program doesn't have an id" in withVcs { env =>
       val newKey  = new SPNodeKey()
       val newProg = env.local.odb.getFactory.createProgram(newKey, null)
-      val act     = env.local.server.add(newProg, StaffUser)
+      val act     = env.local.server.add(newProg)
       expect(act) { case -\/(MissingId) => ok("missing id") }
     }
 
     "add a new program to the database" in withVcs { env =>
       val newProg = env.local.newProgram(Q2)
-      val act     = env.local.server.add(newProg, StaffUser)
+      val act     = env.local.server.add(newProg)
       act.unsafeRun
 
       env.local.odb.lookupProgram(newProg.getProgramKey) must not beNull
