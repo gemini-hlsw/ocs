@@ -24,6 +24,25 @@ object constraints {
     override def toAlign = "left"
   }
 
+  // Constructs for type-safer units
+  // use Mig Prefix to polute less the use of Units
+  sealed trait MigUnits[T] {
+    val value: T
+    def toUnits: String
+  }
+
+  case class NoUnit(value: Int) extends MigUnits[Int] {
+    override def toUnits = value.toString
+  }
+
+  case class PixelsUnit(value: Int) extends MigUnits[Int] {
+    override def toUnits = s"${value}px"
+  }
+
+  implicit class Int2Unit(val value: Int) extends AnyVal {
+    def px:MigUnits[Int] = PixelsUnit(value)
+  }
+
   /**
    * Decorator for the LC class so we can construct as LC()
    * Note that MigCC is final otherwise we'd rather extend it
@@ -86,7 +105,10 @@ object constraints {
   }
 
   implicit class CCOps(val cc: MigCC) extends AnyVal {
-
+    def width[T](units: MigUnits[T]): MigCC = cc.width(units.toUnits)
+    def height[T](units: MigUnits[T]): MigCC = cc.height(units.toUnits)
+    def maxWidth[T](units: MigUnits[T]): MigCC = cc.maxWidth(units.toUnits)
+    def maxHeight[T](units: MigUnits[T]): MigCC = cc.maxHeight(units.toUnits)
   }
 
 }
@@ -134,7 +156,7 @@ object MigLayoutDemo extends App {
     }
 
     // A top level panel that grows and no borders
-    contents = new MigPanel(LC().fill().insets(0).alignX(TopAlign)) {
+    contents = new MigPanel(LC().fill().insets(0).alignX(LeftAlign)) {
       // The upper part shows a form that grows on width and aligns to the top
       add(new MigPanel(LC().fill()) {
         // First row
@@ -149,8 +171,8 @@ object MigLayoutDemo extends App {
 
       // Use a Grid on the middle
       add(new MigPanel(LC().fill()) {
-        add(new Button("A"), CC().cell(0, 0).grow())
-        add(new Button("B"), CC().cell(1, 0).grow())
+        add(new Button("Fixed size"), CC().cell(0, 0).width(100.px).height(20.px))
+        add(new Button("Fixed max size"), CC().cell(1, 0).growX().maxHeight(15.px))
         add(new Button("C"), CC().cell(0, 1).grow())
         add(new Button("D"), CC().cell(1, 1).grow())
         // Span 2
