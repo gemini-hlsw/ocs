@@ -7,6 +7,11 @@ import net.miginfocom.layout.{LC => MigLC, AC => MigAC, CC => MigCC}
 
 import scala.swing.event.ButtonClicked
 
+/**
+ * Definition of constraints to add elements to a MigLayout
+ * Using these constraints we can avoid the usage of too many String-based definitions
+ * See the example @see MigLayoutDemo
+ */
 object constraints {
   // MigLayout vertical align objects
   sealed trait VMigAlign {
@@ -31,12 +36,12 @@ object constraints {
 
   // Constructs for type-safer units
   // use Mig Prefix to pollute less the use of Units
-  // We'll support null, pixel and percentage but MigLayout has a few other units
   sealed trait MigUnits[T] {
     val value: T
     def toBoundSize: String
   }
 
+    // We'll support null, pixel and percentage but MigLayout has a few other, less used, units
   case class NoUnit(value: Int) extends MigUnits[Int] {
     override def toBoundSize = value.toString
   }
@@ -67,6 +72,7 @@ object constraints {
     def apply(): MigLC = new MigLC()
   }
 
+  // Add operations to LC()
   implicit class LCOps(val lc: MigLC) extends AnyVal {
     /**
      * Create insets all around the same value in pixels
@@ -163,7 +169,7 @@ object constraints {
     def maxHeight(s: String): T
   }
 
-    // This implicit class applies to LC/CC using structural types
+  // This implicit class applies to LC/CC using structural types
   implicit class SizableOps[T](val a: Sizable[T]) extends AnyVal {
     /**
      * Type safe width
@@ -187,6 +193,7 @@ object constraints {
 
   }
 
+  // Add methods to CC()
   implicit class CCOps(val cc: MigCC) extends AnyVal {
 
     /**
@@ -258,20 +265,20 @@ class MigPanel(layoutConstraints: MigLC = constraints.LC(), colConstraints: MigA
     def +=(c: Component, l: Constraints) = add(c, l)
   }
 
-  protected def constraintsFor(comp: Component) =
+  override protected def constraintsFor(comp: Component) =
     layoutManager.getConstraintMap.get(comp.peer) match {
       case c:MigCC => c
       case _       => sys.error("cannot happen")
     }
 
-  protected def areValid(c: Constraints): (Boolean, String) = (true, "")
+  override protected def areValid(c: Constraints): (Boolean, String) = (true, "")
 
-  protected def add(c: Component, l: Constraints = constraints.CC()) = peer.add(c.peer, l)
+  override protected def add(c: Component, l: Constraints = constraints.CC()) = peer.add(c.peer, l)
 
 }
 
 /**
- * Sample application
+ * Sample application with a Frame containing a set of nested MigPanels
  */
 object MigLayoutDemo extends App {
   import constraints._
@@ -289,17 +296,19 @@ object MigLayoutDemo extends App {
       // The upper part shows a form that grows on width and aligns to the top
       add(new MigPanel(LC().fill()) {
         // First row
-        add(new Label("First Name"))
-        add(new TextField(10), CC().growX())
-        add(new Label("Last Name"))
-        add(new TextField(10), CC().wrap().growX())
-        add(new Label("Phone Number"))
+        // Using the += syntax
+        contents += new Label("First Name")
+        contents += (new TextField(10), CC().growX())
+        contents += new Label("Last Name")
+        contents += (new TextField(10), CC().wrap().growX())
+        contents += new Label("Phone Number")
         // Span 3 items
-        add(new TextField(30), CC().wrap().spanX(3).growX())
+        contents += (new TextField(30), CC().wrap().spanX(3).growX())
       }, CC().growX().alignY(TopAlign).wrap())
 
       // Use a Grid on the middle
       add(new MigPanel(LC().fill().debug(0)) {
+        // Using the add syntax
         add(new Button("Fixed size"), CC().cell(0, 0).width(100.px).height(20.px))
         add(new Button("Fixed max size"), CC().cell(1, 0).growX().maxHeight(15.px))
         add(new Button("C"), CC().cell(0, 1).grow())
