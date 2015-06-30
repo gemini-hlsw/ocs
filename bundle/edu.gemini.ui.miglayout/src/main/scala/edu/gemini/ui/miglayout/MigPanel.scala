@@ -79,6 +79,10 @@ object constraints {
     def insets(top: Int, left: Int, bottom: Int, right: Int):MigLC =
       lc.insets(s"${top}px", s"${left}px", s"${bottom}px", s"${right}px")
 
+    /**
+     * Set alignment on X and Y in one call
+     */
+    def align(x: HMigAlign, y: VMigAlign): MigLC = lc.align(x.toAlign, y.toAlign)
   }
 
   /**
@@ -220,7 +224,7 @@ object MigLayoutDemo extends App {
       }, CC().growX().alignY(TopAlign).wrap())
 
       // Label and exit button
-      add(new MigPanel(LC().fill()) {
+      add(new MigPanel(LC().fill().align(LeftAlign, TopAlign)) {
         // Keep on the right
         add(new Label("Demo App"), CC().alignX(LeftAlign))
         // Keep on the left
