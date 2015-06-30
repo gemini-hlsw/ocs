@@ -92,7 +92,7 @@ object constraints {
     def apply(): MigCC = new MigCC()
   }
 
-  // Structural type
+  // Structural type for a class that support alignment
   private type Alignable[T] = {
     def alignX(s: String): T
     def alignY(s: String): T
@@ -103,22 +103,45 @@ object constraints {
     /**
      * Type safe alignY
      */
-    def alignY(align: MigAlign):T =
-      a.alignY(align.toAlign)
+    def alignY(align: MigAlign):T = a.alignY(align.toAlign)
 
     /**
      * Type safe alignX
      */
-    def alignX(align: MigAlign):T =
-      a.alignX(align.toAlign)
+    def alignX(align: MigAlign):T = a.alignX(align.toAlign)
 
   }
 
-  implicit class CCOps(val cc: MigCC) extends AnyVal {
-    def width[T](units: MigUnits[T]): MigCC = cc.width(units.toUnits)
-    def height[T](units: MigUnits[T]): MigCC = cc.height(units.toUnits)
-    def maxWidth[T](units: MigUnits[T]): MigCC = cc.maxWidth(units.toUnits)
-    def maxHeight[T](units: MigUnits[T]): MigCC = cc.maxHeight(units.toUnits)
+  // Structural type for a class that support setting width/height
+  private type Sizable[T] = {
+    def width(s: String): T
+    def height(s: String): T
+    def maxWidth(s: String): T
+    def maxHeight(s: String): T
+  }
+
+    // This implicit class applies to LC/CC using structural types
+  implicit class SizableOps[T](val a: Sizable[T]) extends AnyVal {
+    /**
+     * Type safe width
+     */
+    def width[U](units: MigUnits[U]): T = a.width(units.toUnits)
+
+    /**
+     * Type safe height
+     */
+    def height[U](units: MigUnits[U]): T = a.height(units.toUnits)
+
+    /**
+     * Type safe maxWidth
+     */
+    def maxWidth[U](units: MigUnits[U]): T = a.maxWidth(units.toUnits)
+
+    /**
+     * Type safe maxHeight
+     */
+    def maxHeight[U](units: MigUnits[U]): T = a.maxHeight(units.toUnits)
+
   }
 
 }
@@ -166,7 +189,7 @@ object MigLayoutDemo extends App {
     }
 
     // A top level panel that grows and no borders
-    contents = new MigPanel(LC().fill().insets(0).alignX(LeftAlign)) {
+    contents = new MigPanel(LC().fill().insets(0).width(100.pct).alignX(LeftAlign)) {
       // The upper part shows a form that grows on width and aligns to the top
       add(new MigPanel(LC().fill()) {
         // First row
