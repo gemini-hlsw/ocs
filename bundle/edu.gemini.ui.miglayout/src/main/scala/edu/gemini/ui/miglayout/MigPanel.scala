@@ -7,25 +7,30 @@ import net.miginfocom.layout.{LC => MigLC, AC => MigAC, CC => MigCC}
 import scala.swing.event.ButtonClicked
 
 object constraints {
-  // Typesafe align objects
-  sealed trait MigAlign {
+  // MigLayout vertical align objects
+  sealed trait VMigAlign {
     protected [constraints] def toAlign: String
   }
-  case object TopAlign extends MigAlign {
+  case object TopAlign extends VMigAlign {
     override def toAlign = "top"
   }
-  case object BottomAlign extends MigAlign {
+  case object BottomAlign extends VMigAlign {
     override def toAlign = "bottom"
   }
-  case object RightAlign extends MigAlign {
+  // MigLayout horizontal align objects
+  sealed trait HMigAlign {
+    protected [constraints] def toAlign: String
+  }
+  case object RightAlign extends HMigAlign {
     override def toAlign = "right"
   }
-  case object LeftAlign extends MigAlign {
+  case object LeftAlign extends HMigAlign {
     override def toAlign = "left"
   }
 
   // Constructs for type-safer units
   // use Mig Prefix to pollute less the use of Units
+  // We'll support null, pixel and percentage but MigLayout has a few other units
   sealed trait MigUnits[T] {
     val value: T
     def toUnits: String
@@ -103,12 +108,12 @@ object constraints {
     /**
      * Type safe alignY
      */
-    def alignY(align: MigAlign):T = a.alignY(align.toAlign)
+    def alignY(align: VMigAlign):T = a.alignY(align.toAlign)
 
     /**
      * Type safe alignX
      */
-    def alignX(align: MigAlign):T = a.alignX(align.toAlign)
+    def alignX(align: HMigAlign):T = a.alignX(align.toAlign)
 
   }
 
