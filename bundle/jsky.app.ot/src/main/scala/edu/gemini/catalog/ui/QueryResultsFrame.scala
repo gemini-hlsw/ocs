@@ -1,6 +1,6 @@
 package edu.gemini.catalog.ui
 
-import javax.swing.table.{AbstractTableModel, DefaultTableModel}
+import javax.swing.table.{TableRowSorter, AbstractTableModel, DefaultTableModel}
 
 import edu.gemini.catalog.api.{RadiusConstraint, CatalogQuery}
 import edu.gemini.catalog.votable.VoTableClient
@@ -26,6 +26,9 @@ trait PreferredSizeFrame { this: Window =>
 }
 
 object QueryResultsWindow {
+
+  val instance = this
+  
   sealed trait TableColumn[T] {
     val title: String
     def lens: PLens[Target, T]
@@ -102,11 +105,20 @@ object QueryResultsWindow {
     pack()
   }
 
-  import java.util.{Vector => JVector}
-  val instance = this
-
-  private val table = new Table()
-  table.model = new DefaultTableModel(new JVector(baseColumnNames.map(_.title).asJava), 20)
+  private val table = new Table() {
+    /**
+     * Sorting is not supported in scala.swing.Table (Scala 2.10).
+     */
+    // See: http://stackoverflow.com/questions/9588765/using-tablerowsorter-with-scala-swing-table
+    override def apply(row: Int, column: Int): Any = model.getValueAt(viewToModelRow(row), viewToModelColumn(column))
+    def viewToModelRow(idx: Int) = peer.convertRowIndexToModel(idx)
+    def modelToViewRow(idx: Int) = peer.convertRowIndexToView(idx)
+  }
+  val model = TargetsModel(Nil)
+  table.model = model
+  val sorter = new TableRowSorter[TargetsModel](model)
+  table.peer.setRowSorter(sorter)
+  table.peer.getRowSorter.toggleSortOrder(0)
   private val frame = QueryResultsFrame(table)
 
   def showOn(c: Coordinates):Unit = Swing.onEDT {
@@ -125,7 +137,12 @@ object QueryResultsWindow {
     VoTableClient.catalog(query).onSuccess {
       case x =>
         Swing.onEDT {
-          table.model = TargetsModel(x.result.targets.rows)
+          val model = TargetsModel(x.result.targets.rows)
+          table.model = model
+
+          val sorter = new TableRowSorter[TargetsModel](model)
+          table.peer.setRowSorter(sorter)
+          table.peer.getRowSorter.toggleSortOrder(0)
         }
     }
   }
