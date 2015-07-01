@@ -128,13 +128,13 @@ case class LastStepConverter(semester: Semester) extends SemesterConverter {
  * This converter will upgrade to 2016A
  */
 case object SemesterConverter2015BTo2016A extends SemesterConverter {
-  val removedFilters = List(<filter>J-continuum (1.122 um)</filter>, <filter>Jcont (1.065 um)</filter>)
+  val removedFilters = List(<filter>J-continuum (1.122 um)</filter>, <filter>Jcont (1.065 um)</filter>, <filter>CO 3-1 (bh) (2.323 um)</filter>)
   val removeUnusedNIRIFilters: TransformFunction = {
      case p @ <niri>{ns @ _*}</niri> if (p \ "filter").theSeq.exists(removedFilters.contains) =>
        val filtersToRemove = (p \ "filter").theSeq.filter(removedFilters.contains)
        object SlitTransformer extends BasicTransformer {
          // Regex to match the name, filters are included with a + sign between them
-         val nameRegEx = s"(.*)[${removedFilters.map(i => s"(${i.text}\\+?)").mkString("|")}](.*)"
+         val nameRegEx = s"(.*)[${removedFilters.map(i => s"(${i.text.replace("-", "\\-")}\\+?)").mkString("|")}](.*)"
          // Individual filter regex, note that ( and ) need to be escaped
          val filterRegexes = removedFilters.map { f =>
            s"""${f.text.replace("(", "\\(").replace (")", "\\)")}\\+?""".r

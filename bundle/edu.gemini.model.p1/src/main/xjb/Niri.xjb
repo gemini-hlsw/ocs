@@ -100,9 +100,9 @@
             <jxb:bindings node="./xsd:enumeration[@value='CO 2-0 (bh) (2.294 um)']">
                 <jxb:typesafeEnumMember name="NBF_CO20"/>
             </jxb:bindings>
-            <jxb:bindings node="./xsd:enumeration[@value='CO 3-1 (bh) (2.323 um)']">
+            <!--jxb:bindings node="./xsd:enumeration[@value='CO 3-1 (bh) (2.323 um)']">
                 <jxb:typesafeEnumMember name="NBF_CO31"/>
-            </jxb:bindings>
+            </jxb:bindings-->
             <jxb:bindings node="./xsd:enumeration[@value='H2O ice (3.050 um)']">
                 <jxb:typesafeEnumMember name="NBF_H2O"/>
             </jxb:bindings>
