@@ -52,14 +52,29 @@ object QueryResultsWindow {
     override val lens = Target.pm >=> ProperMotion.deltaDec.partial
     override def displayValue(t: DeclinationAngularVelocity): String = f"${t.velocity.masPerYear}%.2f"
   }
+  case class MagnitudeColumn(band: MagnitudeBand) extends TableColumn[Magnitude] {
+    override val title = band.name
+    // Lens from list of magnitudes to the band's magnitude if present
+    val bLens: List[Magnitude] @?> Magnitude = PLens(ml => ml.find(_.band === band).map(m => Store(b => sys.error("read-only lens"), m)))
+    override val lens = Target.magnitudes >=> bLens
+    override def displayValue(t: Magnitude): String = f"${t.value}%.2f"
+  }
 
   val baseColumnNames:List[TableColumn[_]] = List(IdColumn("Id"), RAColumn("RA"), DECColumn("DE"))
   val pmColumns:List[TableColumn[_]] = List(PMRAColumn("pmRA"), PMDecColumn("pmDEC"))
+  val magColumns = MagnitudeBand.all.map(MagnitudeColumn)
 
   case class TargetsModel(targets: List[SiderealTarget]) extends AbstractTableModel {
-    val columns = targets.foldLeft(baseColumnNames) { (cols, t) =>
-        if (t.properMotion.isDefined) cols ::: pmColumns else cols
-      }.distinct
+
+    // Available colums from the list of targets
+    val columns = {
+      val bandsInTargets = targets.flatMap(_.magnitudes).map(_.band).distinct
+      val hasPM = targets.exists(_.properMotion.isDefined)
+      val pmCols = if (hasPM) pmColumns else Nil
+      val magCols = magColumns.filter(m => bandsInTargets.contains(m.band))
+
+      baseColumnNames ::: pmCols ::: magCols
+    }
 
     override def getRowCount = targets.length
 
