@@ -1,11 +1,11 @@
 package edu.gemini.catalog.ui
 
-import javax.swing.table.{AbstractTableModel, TableModel, DefaultTableModel}
+import javax.swing.table.{AbstractTableModel, DefaultTableModel}
 
 import edu.gemini.catalog.api.{RadiusConstraint, CatalogQuery}
 import edu.gemini.catalog.votable.VoTableClient
 import edu.gemini.spModel.core.Target.SiderealTarget
-import edu.gemini.spModel.core.{Angle, Coordinates}
+import edu.gemini.spModel.core._
 
 import scala.collection.JavaConverters._
 import scala.swing._
@@ -26,24 +26,53 @@ trait PreferredSizeFrame { this: Window =>
 }
 
 object QueryResultsWindow {
-  val baseColumnNames = List("Id", "RA", "DE")
+  sealed trait TableColumn[T] {
+    val title: String
+    def lens: PLens[Target, T]
+    def displayValue(t: T): String = t.toString
+
+    def render(target: Target): String = ~lens.get(target).map(displayValue)
+  }
+  case class IdColumn(title: String) extends TableColumn[String] {
+    override val lens = Target.name
+  }
+  case class RAColumn(title: String) extends TableColumn[RightAscension] {
+    override val lens = Target.coords >=> Coordinates.ra.partial
+    override def displayValue(t: RightAscension) = t.toAngle.formatHMS
+  }
+  case class DECColumn(title: String) extends TableColumn[Declination] {
+    override val lens = Target.coords >=> Coordinates.dec.partial
+    override def displayValue(t: Declination) = t.formatDMS
+  }
+  case class PMRAColumn(title: String) extends TableColumn[RightAscensionAngularVelocity] {
+    override val lens = Target.pm >=> ProperMotion.deltaRA.partial
+    override def displayValue(t: RightAscensionAngularVelocity): String = f"${t.velocity.masPerYear}%.2f"
+  }
+  case class PMDecColumn(title: String) extends TableColumn[DeclinationAngularVelocity] {
+    override val lens = Target.pm >=> ProperMotion.deltaDec.partial
+    override def displayValue(t: DeclinationAngularVelocity): String = f"${t.velocity.masPerYear}%.2f"
+  }
+
+  val baseColumnNames:List[TableColumn[_]] = List(IdColumn("Id"), RAColumn("RA"), DECColumn("DE"))
+  val pmColumns:List[TableColumn[_]] = List(PMRAColumn("pmRA"), PMDecColumn("pmDEC"))
 
   case class TargetsModel(targets: List[SiderealTarget]) extends AbstractTableModel {
+    val columns = targets.foldLeft(baseColumnNames) { (cols, t) =>
+        if (t.properMotion.isDefined) cols ::: pmColumns else cols
+      }.distinct
+
     override def getRowCount = targets.length
 
-    override def getColumnCount = baseColumnNames.size
+    override def getColumnCount = columns.size
 
     override def getColumnName(column: Int): String =
-      baseColumnNames(column)
+      columns(column).title
 
     override def getValueAt(rowIndex: Int, columnIndex: Int) = (targets.isDefinedAt(rowIndex) option {
       val target = targets(rowIndex)
-      val t = baseColumnNames.zipWithIndex.find(_._2 == columnIndex).map {
-        case ("Id", _)  => target.name
-        case ("RA", _)  => target.coordinates.ra.toAngle.formatHMS
-        case ("DE", _) => target.coordinates.dec.formatDMS
+      columns.zipWithIndex.find(_._2 == columnIndex).map { c =>
+        c._1.render(target)
       }
-      t
     }).flatten.orNull
   }
 
@@ -62,7 +91,7 @@ object QueryResultsWindow {
   val instance = this
 
   private val table = new Table()
-  table.model = new DefaultTableModel(new JVector(baseColumnNames.asJava), 20)
+  table.model = new DefaultTableModel(new JVector(baseColumnNames.map(_.title).asJava), 20)
   private val frame = QueryResultsFrame(table)
 
   def showOn(c: Coordinates):Unit = Swing.onEDT {
