@@ -1,6 +1,7 @@
 package edu.gemini.pit.ui.view.submit
 
 import edu.gemini.model.p1.immutable._
+import edu.gemini.shared.gui.GlassLabel
 import scala.swing._
 import event.ButtonClicked
 import Swing._
@@ -11,7 +12,7 @@ import edu.gemini.pit.ui.robot.ProblemRobot.Problem
 import BorderPanel.Position._
 import java.awt.{Font, Color}
 import edu.gemini.pit.ui.view.partner.PartnersFlags
-import edu.gemini.pit.ui.util.{ProposalSubmissionErrorDialog, GlassLabel, SharedIcons, Rows}
+import edu.gemini.pit.ui.util.{ProposalSubmissionErrorDialog, SharedIcons, Rows}
 import edu.gemini.model.p1.submit.{SubmitResult, SubmitDestination, SubmitClient}
 import java.io.File
 import edu.gemini.pit.ui.robot.ProblemRobot

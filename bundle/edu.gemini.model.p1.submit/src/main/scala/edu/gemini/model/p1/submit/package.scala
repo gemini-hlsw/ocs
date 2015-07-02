@@ -19,8 +19,8 @@ package object submit {
     Map(LargeProgram -> url("large_program"), FastTurnaroundProgram -> url("fast_turnaround"))
   }
 
-  val productionSubmissionUrls: Map[SubmitDestination, String] = submissionUrls("http://phase1.cl.gemini.edu/cgi-bin/backend/production")
+  val productionSubmissionUrls: Map[SubmitDestination, String] = submissionUrls("http://hbfphase1-lv1.hi.gemini.edu/cgi-bin/backend/production")
 
-  val testSubmissionUrls: Map[SubmitDestination, String] = submissionUrls("http://phase1.cl.gemini.edu/cgi-bin/backend/test")
+  val testSubmissionUrls: Map[SubmitDestination, String] = submissionUrls("http://hbfphase1-lv1.hi.gemini.edu/cgi-bin/backend/test")
 
 }

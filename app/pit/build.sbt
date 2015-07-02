@@ -30,7 +30,6 @@ def common(pv: Version) = AppConfig(
   vmargs = List(
     "-Xmx512M",
     "-Dedu.gemini.ui.workspace.impl.Workspace.fonts.shrunk=true",
-    "-Dedu.gemini.pit.test=true",
     "-Dfile.encoding=UTF-8"
   ),
   props = Map(

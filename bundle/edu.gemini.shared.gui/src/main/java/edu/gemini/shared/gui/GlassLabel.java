@@ -1,4 +1,4 @@
-package edu.gemini.pit.ui.util;
+package edu.gemini.shared.gui;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
