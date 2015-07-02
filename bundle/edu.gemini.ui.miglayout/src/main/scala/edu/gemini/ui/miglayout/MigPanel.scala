@@ -14,25 +14,13 @@ import scala.swing.event.ButtonClicked
  */
 object constraints {
   // MigLayout vertical align objects
-  sealed trait VMigAlign {
-    protected [constraints] def toAlign: String
-  }
-  case object TopAlign extends VMigAlign {
-    override def toAlign = "top"
-  }
-  case object BottomAlign extends VMigAlign {
-    override def toAlign = "bottom"
-  }
+  sealed abstract class VMigAlign(protected [constraints] val toAlign: String)
+  case object TopAlign extends VMigAlign("top")
+  case object BottomAlign extends VMigAlign("bottom")
   // MigLayout horizontal align objects
-  sealed trait HMigAlign {
-    protected [constraints] def toAlign: String
-  }
-  case object RightAlign extends HMigAlign {
-    override def toAlign = "right"
-  }
-  case object LeftAlign extends HMigAlign {
-    override def toAlign = "left"
-  }
+  sealed abstract class HMigAlign(protected [constraints] val toAlign: String)
+  case object RightAlign extends HMigAlign("right")
+  case object LeftAlign extends HMigAlign("left")
 
   // Constructs for type-safer units
   // use Mig Prefix to pollute less the use of Units
@@ -142,56 +130,77 @@ object constraints {
   }
 
   // Structural type for a class that support alignment
-  private type Alignable[T] = {
-    def alignX(s: String): T
-    def alignY(s: String): T
+  protected trait Alignable[T] {
+    def alignX(a: T, s: String): T
+    def alignY(a: T, s: String): T
   }
 
   // This implicit class applies to LC/CC using structural types
-  implicit class AlignableOps[T](val a: Alignable[T]) extends AnyVal {
+  implicit class AlignableOps[T](val a: T) extends AnyVal {
     /**
      * Type safe alignY
      */
-    def alignY(align: VMigAlign):T = a.alignY(align.toAlign)
+    def alignY(align: VMigAlign)(implicit ev: Alignable[T]):T = ev.alignY(a, align.toAlign)
 
     /**
      * Type safe alignX
      */
-    def alignX(align: HMigAlign):T = a.alignX(align.toAlign)
+    def alignX(align: HMigAlign)(implicit ev: Alignable[T]):T = ev.alignX(a, align.toAlign)
+  }
 
+  implicit val LCAlignable = new Alignable[MigLC] {
+    override def alignX(a: MigLC, s: String) = a.alignX(s)
+    override def alignY(a: MigLC, s: String) = a.alignY(s)
+  }
+  implicit val CCAlignable = new Alignable[MigCC] {
+    override def alignX(a: MigCC, s: String) = a.alignX(s)
+    override def alignY(a: MigCC, s: String) = a.alignY(s)
   }
 
   // Structural type for a class that support setting width/height
-  private type Sizable[T] = {
-    def width(s: String): T
-    def height(s: String): T
-    def maxWidth(s: String): T
-    def maxHeight(s: String): T
+  protected trait Sizable[T] {
+    def width(a: T, s: String): T
+    def height(a: T, s: String): T
+    def maxWidth(a: T, s: String): T
+    def maxHeight(a: T, s: String): T
   }
 
   // This implicit class applies to LC/CC using structural types
-  implicit class SizableOps[T](val a: Sizable[T]) extends AnyVal {
+  implicit class SizableOps[T](val a: T) extends AnyVal {
     /**
      * Type safe width
      */
-    def width[U](units: MigUnits[U]): T = a.width(units.toBoundSize)
+    def width[U](units: MigUnits[U])(implicit ev: Sizable[T]): T = ev.width(a, units.toBoundSize)
 
     /**
      * Type safe height
      */
-    def height[U](units: MigUnits[U]): T = a.height(units.toBoundSize)
+    def height[U](units: MigUnits[U])(implicit ev: Sizable[T]): T = ev.height(a, units.toBoundSize)
 
     /**
      * Type safe maxWidth
      */
-    def maxWidth[U](units: MigUnits[U]): T = a.maxWidth(units.toBoundSize)
+    def maxWidth[U](units: MigUnits[U])(implicit ev: Sizable[T]): T = ev.maxWidth(a, units.toBoundSize)
 
     /**
      * Type safe maxHeight
      */
-    def maxHeight[U](units: MigUnits[U]): T = a.maxHeight(units.toBoundSize)
-
+    def maxHeight[U](units: MigUnits[U])(implicit ev: Sizable[T]): T = ev.maxHeight(a, units.toBoundSize)
   }
+
+  implicit val LCSizable = new Sizable[MigLC] {
+    override def width(a: MigLC, s: String): MigLC = a.width(s)
+    override def height(a: MigLC, s: String): MigLC = a.height(s)
+    override def maxWidth(a: MigLC, s: String): MigLC = a.maxWidth(s)
+    override def maxHeight(a: MigLC, s: String): MigLC = a.maxHeight(s)
+  }
+  implicit val CCSizable = new Sizable[MigCC] {
+    override def width(a: MigCC, s: String): MigCC = a.width(s)
+    override def height(a: MigCC, s: String): MigCC = a.height(s)
+    override def maxWidth(a: MigCC, s: String): MigCC = a.maxWidth(s)
+    override def maxHeight(a: MigCC, s: String): MigCC = a.maxHeight(s)
+  }
+
 
   // Add methods to CC()
   implicit class CCOps(val cc: MigCC) extends AnyVal {
