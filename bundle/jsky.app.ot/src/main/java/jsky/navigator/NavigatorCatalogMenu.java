@@ -1,10 +1,3 @@
-/*
- * Copyright 2000 Association for Universities for Research in Astronomy, Inc.,
- * Observatory Control System, Gemini Telescopes Project.
- *
- * $Id: NavigatorCatalogMenu.java 7122 2006-06-06 16:38:01Z anunez $
- */
-
 package jsky.navigator;
 
 import javax.swing.*;

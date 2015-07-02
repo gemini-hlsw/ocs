@@ -1,10 +1,3 @@
-/*
- * Copyright 2000 Association for Universities for Research in Astronomy, Inc.,
- * Observatory Control System, Gemini Telescopes Project.
- *
- * $Id: NavigatorImageDisplay.java 37930 2011-10-07 23:17:24Z lobrien $
- */
-
 package jsky.navigator;
 
 import java.awt.Component;

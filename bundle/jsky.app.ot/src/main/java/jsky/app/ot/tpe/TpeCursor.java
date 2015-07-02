@@ -1,7 +1,3 @@
-//
-// $
-//
-
 package jsky.app.ot.tpe;
 
 import java.awt.*;
@@ -63,10 +59,6 @@ public enum TpeCursor {
     },
     ;
 
-
-    private static int width = 13;
-    private static int height= 13;
-
     private Cursor cursor;
 
     public abstract Cursor create();
@@ -77,6 +69,8 @@ public enum TpeCursor {
     }
 
     private static BufferedImage createImage() {
+        int width = 13;
+        int height = 13;
         Dimension dim = Toolkit.getDefaultToolkit().getBestCursorSize(width, height);
         GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
         GraphicsDevice gd = ge.getDefaultScreenDevice();

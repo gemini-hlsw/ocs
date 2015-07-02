@@ -1,6 +1,5 @@
 package jsky.app.ot.tpe.gems;
 
-import edu.gemini.ags.gems.GemsUtils4Java;
 import edu.gemini.ags.gems.GemsGuideStarSearchOptions.*;
 import edu.gemini.ags.gems.GemsGuideStars;
 import edu.gemini.pot.ModelConverters;

@@ -1,10 +1,3 @@
-/*
- * Copyright 2000 Association for Universities for Research in Astronomy, Inc.,
- * Observatory Control System, Gemini Telescopes Project.
- *
- * $Id: TelescopePosEditor.java 46768 2012-07-16 18:58:53Z rnorris $
- */
-
 package jsky.app.ot.tpe;
 
 import edu.gemini.pot.sp.*;
@@ -200,7 +193,7 @@ public class TelescopePosEditor extends JSkyCat implements TpeMouseObserver {
      * Return a reference to the first registered TPE image feature
      * corresponding to the given class, or null if not found.
      */
-    public TpeImageFeature getFeature(Class c) {
+    public TpeImageFeature getFeature(Class<?> c) {
         int size = _allFeatures.size();
         for (int i = 0; i < size; i++) {
             TpeImageFeature feat = _allFeatures.elementAt(i);

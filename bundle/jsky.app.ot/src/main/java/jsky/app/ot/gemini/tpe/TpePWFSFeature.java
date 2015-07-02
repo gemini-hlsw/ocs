@@ -1,9 +1,3 @@
-// Copyright 1997 Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-// See the file COPYRIGHT for complete details.
-//
-// $Id: TpePWFSFeature.java 45719 2012-06-01 16:35:09Z swalker $
-//
 package jsky.app.ot.gemini.tpe;
 
 import edu.gemini.catalog.api.RadiusLimits;
@@ -36,7 +30,6 @@ import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
 import java.awt.geom.Point2D;
-import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.Collection;
 import java.util.Collections;
@@ -222,11 +215,7 @@ public class TpePWFSFeature extends WFS_FeatureBase implements PropertyWatcher {
         return null;
     }
 
-    private final PropertyChangeListener selListener = new PropertyChangeListener() {
-        public void propertyChange(PropertyChangeEvent evt) {
-            redraw();
-        }
-    };
+    private final PropertyChangeListener selListener = evt -> redraw();
 
     /**
      * Reinitialize (recalculate the positions and redraw).
@@ -331,7 +320,7 @@ public class TpePWFSFeature extends WFS_FeatureBase implements PropertyWatcher {
             PatrolField patrolField = pwfs.getPatrolField();
             if (!_iw.getMinimalObsContext().isEmpty() && !(_iw.getMinimalObsContext().getValue().getSciencePositions() == null)) {
                 Set<Offset> offsets = _iw.getMinimalObsContext().getValue().getSciencePositions();
-                offsetConstrainedPatrolFieldIsEmpty = offsetConstrainedPatrolFieldIsEmpty || patrolField.outerLimitOffsetIntersection(offsets).isEmpty() ? true : false;
+                offsetConstrainedPatrolFieldIsEmpty = offsetConstrainedPatrolFieldIsEmpty || patrolField.outerLimitOffsetIntersection(offsets).isEmpty();
                 addOffsetConstrainedPatrolField(patrolField, offsets);
             }
         }
@@ -347,7 +336,7 @@ public class TpePWFSFeature extends WFS_FeatureBase implements PropertyWatcher {
 
         Option<SPTarget> primaryPwfs1 = getPrimaryTarget(ctx, PwfsGuideProbe.pwfs1);
         final PosMapOffsetEntry pmoe1 = PosMapOffsetEntry.getPosMapOffsetEntry(pm, selectedOffsetPosList, selectedOffsetPos, PwfsGuideProbe.pwfs1, primaryPwfs1);
-        final PosMapEntry pme1 = pmoe1.getPosMapEntry();
+        final PosMapEntry<SPTarget> pme1 = pmoe1.getPosMapEntry();
         final OffsetPosBase obp1 = pmoe1.getOffsetPos();
         if (pme1 != null) {
             calculateWFSForGuideProbe(pme1.screenPos, obp1, pixelsPerArcsec, baseScreenPos, pfXOffset, pfYOffset, basePosX, basePosY, offsetX, offsetY, isFrozen1, pwfs1, mm2Pixels, PwfsGuideProbe.pwfs1);
@@ -356,7 +345,7 @@ public class TpePWFSFeature extends WFS_FeatureBase implements PropertyWatcher {
 
         Option<SPTarget> primaryPwfs2 = getPrimaryTarget(ctx, PwfsGuideProbe.pwfs2);
         final PosMapOffsetEntry pmoe2 = PosMapOffsetEntry.getPosMapOffsetEntry(pm, selectedOffsetPosList, selectedOffsetPos, PwfsGuideProbe.pwfs2, primaryPwfs2);
-        final PosMapEntry pme2 = pmoe2.getPosMapEntry();
+        final PosMapEntry<SPTarget> pme2 = pmoe2.getPosMapEntry();
         final OffsetPosBase obp2 = pmoe1.getOffsetPos();
         if (pme2 != null) {
             calculateWFSForGuideProbe(pme2.screenPos, obp2, pixelsPerArcsec, baseScreenPos, pfXOffset, pfYOffset, basePosX, basePosY, offsetX, offsetY, isFrozen2, pwfs2, mm2Pixels, PwfsGuideProbe.pwfs2);
@@ -382,7 +371,7 @@ public class TpePWFSFeature extends WFS_FeatureBase implements PropertyWatcher {
         ty += nodChopOffset.y;
 
         // Set up parameters for appropriate wfs
-        final boolean toggle = flipRA == -1 ? false : true; // allan: new default: 27-04-01
+        final boolean toggle = flipRA != -1; // allan: new default: 27-04-01
         final Color pwfsColor = wfs == 1 ? PWFS1_COLOR : PWFS2_COLOR;
         final PwfsGuideProbe probe = wfs == 1 ? PwfsGuideProbe.pwfs1 : PwfsGuideProbe.pwfs2;
 
@@ -823,7 +812,7 @@ public class TpePWFSFeature extends WFS_FeatureBase implements PropertyWatcher {
     @Override
     public Option<Collection<TpeMessage>> getMessages() {
         if (offsetConstrainedPatrolFieldIsEmpty) {
-            return new Some<Collection<TpeMessage>>(Collections.singletonList(WARNING));
+            return new Some<>(Collections.singletonList(WARNING));
         } else {
             return None.instance();
         }

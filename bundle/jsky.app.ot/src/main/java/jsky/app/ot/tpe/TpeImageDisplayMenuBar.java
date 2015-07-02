@@ -1,10 +1,3 @@
-/*
- * Copyright 2000 Association for Universities for Research in Astronomy, Inc.,
- * Observatory Control System, Gemini Telescopes Project.
- *
- * $Id: TpeImageDisplayMenuBar.java 38003 2011-10-13 22:56:01Z abrighton $
- */
-
 package jsky.app.ot.tpe;
 
 import java.awt.event.*;
@@ -14,7 +7,6 @@ import java.util.List;
 import javax.swing.*;
 
 import jsky.app.ot.util.BasicPropertyList;
-import jsky.app.ot.util.PropertyWatcher;
 import jsky.navigator.NavigatorImageDisplayMenuBar;
 import jsky.navigator.NavigatorImageDisplayToolBar;
 
@@ -96,20 +88,14 @@ public class TpeImageDisplayMenuBar extends NavigatorImageDisplayMenuBar {
                                                              final BasicPropertyList pl) {
         final JCheckBoxMenuItem menuItem = new JCheckBoxMenuItem(bp.getName());
         menuItem.setSelected(bp.getValue());
-        menuItem.addItemListener(new ItemListener() {
-            public void itemStateChanged(ItemEvent e) {
-                bp.setValue(menuItem.getState());
-            }
-        });
+        menuItem.addItemListener(e -> bp.setValue(menuItem.getState()));
 
         // keep view and popup menus in sync
-        pl.addWatcher(new PropertyWatcher() {
-            public void propertyChange(String propName) {
-                if (propName.equals(bp.getName())) {
-                    boolean b = bp.getValue();
-                    if (menuItem.isSelected() != b) {
-                        menuItem.setSelected(b);
-                    }
+        pl.addWatcher(propName -> {
+            if (propName.equals(bp.getName())) {
+                boolean b = bp.getValue();
+                if (menuItem.isSelected() != b) {
+                    menuItem.setSelected(b);
                 }
             }
         });
@@ -137,25 +123,20 @@ public class TpeImageDisplayMenuBar extends NavigatorImageDisplayMenuBar {
             menu.add(b);
             group.add(b);
 
-            b.addItemListener(new ItemListener() {
-                @Override
-                public void itemStateChanged(ItemEvent e) {
-                    if (b.isSelected())
-                        cp.setSelection(menuItems.indexOf(b));
-                }
+            b.addItemListener(e -> {
+                if (b.isSelected())
+                    cp.setSelection(menuItems.indexOf(b));
             });
 
         }
 
         // keep view and popup menus in sync
-        pl.addWatcher(new PropertyWatcher() {
-            public void propertyChange(String propName) {
-                if (propName.equals(cp.getName())) {
-                    int index = cp.getSelection();
-                    JRadioButtonMenuItem mi = menuItems.get(index);
-                    if (!mi.isSelected()) {
-                        mi.setSelected(true);
-                    }
+        pl.addWatcher(propName -> {
+            if (propName.equals(cp.getName())) {
+                int index = cp.getSelection();
+                JRadioButtonMenuItem mi = menuItems.get(index);
+                if (!mi.isSelected()) {
+                    mi.setSelected(true);
                 }
             }
         });

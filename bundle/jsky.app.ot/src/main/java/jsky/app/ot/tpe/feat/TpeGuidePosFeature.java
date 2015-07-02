@@ -1,9 +1,3 @@
-// Copyright 1997 Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-// See the file COPYRIGHT for complete details.
-//
-// $Id: TpeGuidePosFeature.java 45751 2012-06-04 15:28:44Z swalker $
-//
 package jsky.app.ot.tpe.feat;
 
 import edu.gemini.shared.skyobject.SkyObject;
@@ -29,7 +23,6 @@ import java.awt.font.TextAttribute;
 import java.awt.geom.Point2D;
 import java.text.AttributedString;
 import java.util.*;
-
 
 public class TpeGuidePosFeature extends TpePositionFeature
         implements TpeCreateableFeature, TpeActionableFeature, PropertyWatcher {
@@ -248,12 +241,12 @@ public class TpeGuidePosFeature extends TpePositionFeature
         Collection<GuideProbe> guiders = GuideProbeMap.instance.values();
 
         // Create the result list.
-        java.util.List<TpeCreateableItem> res = new ArrayList<TpeCreateableItem>();
+        java.util.List<TpeCreateableItem> res = new ArrayList<>();
 
         // Review each guider.  If part of an optimizable group, remember the
         // group in a Set.  Otherwise, add a GuiderCreateableItem to the
         // result list.
-        Set<OptimizableGuideProbeGroup> groups = new HashSet<OptimizableGuideProbeGroup>();
+        Set<OptimizableGuideProbeGroup> groups = new HashSet<>();
         for (GuideProbe guider : guiders) {
             Option<GuideProbeGroup> groupOption = guider.getGroup();
 
@@ -271,11 +264,7 @@ public class TpeGuidePosFeature extends TpePositionFeature
         }
 
         // Sort the list by label.
-        Collections.sort(res, new Comparator<TpeCreateableItem>() {
-            public int compare(TpeCreateableItem item1, TpeCreateableItem item2) {
-                return item1.getLabel().compareTo(item2.getLabel());
-            }
-        });
+        Collections.sort(res, (item1, item2) -> item1.getLabel().compareTo(item2.getLabel()));
 
         return res;
     }
@@ -304,16 +293,16 @@ public class TpeGuidePosFeature extends TpePositionFeature
 
         Iterator<PosMapEntry<SPTarget>> it = pm.getAllPositionMapEntries();
         while (it.hasNext()) {
-            PosMapEntry pme = it.next();
-            SPTarget tp = (SPTarget) pme.taggedPos;
+            PosMapEntry<SPTarget> pme = it.next();
+            SPTarget tp = pme.taggedPos;
 
             TargetEnvironment env = obsComp.getTargetEnvironment();
             for (GuideProbeTargets gt : env.getOrCreatePrimaryGuideGroup()) {
                 if (!gt.getOptions().contains(tp)) continue;
 
                 if (positionIsClose(pme, tme.xWidget, tme.yWidget)) {
-                    Tuple2<GuideProbe, SPTarget> tup = new Pair<GuideProbe, SPTarget>(gt.getGuider(), tp);
-                    return new Some<Tuple2<GuideProbe, SPTarget>>(tup);
+                    Tuple2<GuideProbe, SPTarget> tup = new Pair<>(gt.getGuider(), tp);
+                    return new Some<>(tup);
                 }
 
             }
@@ -394,14 +383,14 @@ public class TpeGuidePosFeature extends TpePositionFeature
 
         // Set up for drawing.
         int size = MARKER_SIZE * 2;
-        Map<TextAttribute, Object> attrMap = new HashMap<TextAttribute, Object>();
+        Map<TextAttribute, Object> attrMap = new HashMap<>();
         attrMap.put(TextAttribute.FONT, FONT);
         Option<ObsContext> obsContextOpt = _iw.getObsContext();
         boolean drawTags = getDrawTags();
         boolean drawPrimary = getIdentifyPrimary();
 
         // Check for overlapping tags
-        Map<Point2D.Double, Integer> overlapMap = new HashMap<Point2D.Double, Integer>();
+        Map<Point2D.Double, Integer> overlapMap = new HashMap<>();
 
         // Draw all the guide targets.
         for (GuideProbeTargets gt : env.getOrCreatePrimaryGuideGroup()) {
@@ -497,7 +486,7 @@ public class TpeGuidePosFeature extends TpePositionFeature
 
             if (positionIsClose(pme, tme.xWidget, tme.yWidget) && env.isGuidePosition(pme.taggedPos)) {
                 _dragObject = pme;
-                return new Some<Object>(pme.taggedPos);
+                return new Some<>(pme.taggedPos);
             }
         }
         return None.instance();
@@ -510,7 +499,7 @@ public class TpeGuidePosFeature extends TpePositionFeature
             _dragObject.screenPos.x = tme.xWidget;
             _dragObject.screenPos.y = tme.yWidget;
 
-            SPTarget tp = (SPTarget) _dragObject.taggedPos;
+            SPTarget tp = _dragObject.taggedPos;
             tp.getTarget().getRa().setAs(tme.pos.getRaDeg(), CoordinateParam.Units.DEGREES);
             tp.getTarget().getDec().setAs(tme.pos.getDecDeg(), CoordinateParam.Units.DEGREES);
             tp.notifyOfGenericUpdate();

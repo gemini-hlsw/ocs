@@ -1,9 +1,3 @@
-// Copyright 1997 Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-// See the file COPYRIGHT for complete details.
-//
-// $Id: TpeBasePosFeature.java 21636 2009-08-24 14:49:45Z swalker $
-//
 package jsky.app.ot.tpe.feat;
 
 import edu.gemini.shared.util.immutable.None;
@@ -18,7 +12,6 @@ import jsky.app.ot.tpe.*;
 
 import java.awt.*;
 import java.awt.geom.Point2D;
-
 
 public class TpeBasePosFeature extends TpePositionFeature {
 
@@ -93,30 +86,6 @@ public class TpeBasePosFeature extends TpePositionFeature {
         g.drawLine((int) (base.x - r), (int) base.y, (int) (base.x + r), (int) base.y);
     }
 
-    /*
-    private void draw(Graphics g, int x, int y) {
-        int r = MARKER_SIZE;
-        int d = 2 * r;
-        g.setColor(Color.yellow);
-        g.drawOval(x - r, y - r, d, d);
-        g.drawLine(x, y - r, x, y + r);
-        g.drawLine(x - r, y, x + r, y);
-    }
-
-    @Override
-    public Option<Icon> getIcon() {
-        return new Some<Icon>(new Icon() {
-            public void paintIcon(Component c, Graphics g, int x, int y) {
-                draw(g, x+9, y+9);
-            }
-
-            public int getIconWidth() { return 18; }
-
-            public int getIconHeight() { return 18; }
-        });
-    }
-    */
-
     /**
      */
     public Option<Object> dragStart(TpeMouseEvent tme, TpeImageInfo tii) {
@@ -124,10 +93,10 @@ public class TpeBasePosFeature extends TpePositionFeature {
         if (env == null) return None.instance();
 
         TpePositionMap pm = TpePositionMap.getMap(_iw);
-        PosMapEntry pme = pm.getPositionMapEntry(env.getBase());
+        PosMapEntry<SPTarget> pme = pm.getPositionMapEntry(env.getBase());
         if (pme != null && positionIsClose(pme, tme.xWidget, tme.yWidget)) {
             _dragObject = pme;
-            return new Some<Object>(pme.taggedPos);
+            return new Some<>(pme.taggedPos);
         }
 
         return None.instance();
@@ -144,7 +113,7 @@ public class TpeBasePosFeature extends TpePositionFeature {
                 _dragObject.screenPos.y = tme.yWidget;
             }
 
-            SPTarget tp = (SPTarget) _dragObject.taggedPos;
+            SPTarget tp = _dragObject.taggedPos;
             tp.getTarget().getRa().setAs(tme.pos.getRaDeg(), CoordinateParam.Units.DEGREES);
             tp.getTarget().getDec().setAs(tme.pos.getDecDeg(), CoordinateParam.Units.DEGREES);
             tp.notifyOfGenericUpdate();

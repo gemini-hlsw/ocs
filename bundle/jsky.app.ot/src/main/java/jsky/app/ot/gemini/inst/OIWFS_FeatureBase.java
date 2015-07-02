@@ -1,8 +1,3 @@
-// Copyright 2001 Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-//
-// $Id: OIWFS_FeatureBase.java 45596 2012-05-29 21:50:05Z swalker $
-//
 package jsky.app.ot.gemini.inst;
 
 import edu.gemini.shared.util.immutable.None;
@@ -25,10 +20,8 @@ import jsky.app.ot.util.PropertyWatcher;
 
 import java.awt.*;
 import java.awt.geom.Point2D;
-import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.Set;
-
 
 /**
  * Base class for the instrument specific OIWFS_Feature classes.
@@ -75,11 +68,7 @@ public abstract class OIWFS_FeatureBase extends WFS_FeatureBase
         super(name, desc);
     }
 
-    private final PropertyChangeListener selectionWatcher = new PropertyChangeListener() {
-        public void propertyChange(PropertyChangeEvent evt) {
-            _redraw();
-        }
-    };
+    private final PropertyChangeListener selectionWatcher = evt -> _redraw();
 
     /**
      * Override reinit to start watching properties.
@@ -137,8 +126,8 @@ public abstract class OIWFS_FeatureBase extends WFS_FeatureBase
         TpeContext ctx = _iw.getContext();
         if (ctx.isEmpty()) return;
 
-        OffsetPosList selectedOffsetPosList = ctx.offsets().selectedPosListOrNull();
-        OffsetPosBase selectedOffsetPos     = ctx.offsets().selectedPosOrNull();
+        OffsetPosList<OffsetPosBase> selectedOffsetPosList = ctx.offsets().selectedPosListOrNull();
+        OffsetPosBase selectedOffsetPos                    = ctx.offsets().selectedPosOrNull();
 
         // If an offset position is selected, use it as the base position
         GuideProbe guider = getOiwfsGuideProbe(ctx);
@@ -168,7 +157,7 @@ public abstract class OIWFS_FeatureBase extends WFS_FeatureBase
         Option<SPTarget> primaryOiwfs = (guider == null) ? none : getPrimaryTarget(ctx, guider);
         PosMapOffsetEntry pmoe = PosMapOffsetEntry.getPosMapOffsetEntry(pm, selectedOffsetPosList,
                                        selectedOffsetPos, guider, primaryOiwfs);
-        PosMapEntry pme = pmoe.getPosMapEntry();
+        PosMapEntry<SPTarget> pme = pmoe.getPosMapEntry();
 
 
         if (pme == null) {
@@ -333,8 +322,7 @@ public abstract class OIWFS_FeatureBase extends WFS_FeatureBase
 
     @Override public boolean isEnabled(TpeContext ctx) {
         if (!super.isEnabled(ctx)) return false;
-        if (!ctx.instrument().isDefined()) return false;
-        return ctx.instrument().get().hasOIWFS();
+        return ctx.instrument().isDefined() && ctx.instrument().get().hasOIWFS();
     }
 
     public TpeImageFeatureCategory getCategory() {

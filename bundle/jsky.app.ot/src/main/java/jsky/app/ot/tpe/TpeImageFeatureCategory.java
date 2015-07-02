@@ -10,7 +10,7 @@ public enum TpeImageFeatureCategory {
 
     private final String display;
 
-    private TpeImageFeatureCategory(String display) {
+    TpeImageFeatureCategory(String display) {
         this.display = display;
     }
 

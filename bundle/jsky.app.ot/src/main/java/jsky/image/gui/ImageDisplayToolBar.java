@@ -1,10 +1,3 @@
-/*
- * Copyright 2001 Association for Universities for Research in Astronomy, Inc.,
- * Observatory Control System, Gemini Telescopes Project.
- *
- * $Id: ImageDisplayToolBar.java 6013 2005-05-02 20:55:16Z brighton $
- */
-
 package jsky.image.gui;
 
 import javax.swing.JButton;
@@ -12,7 +5,6 @@ import javax.swing.JButton;
 import jsky.util.I18N;
 import jsky.util.Resources;
 import jsky.util.gui.GenericToolBar;
-
 
 /**
  * A tool bar for the image display window.

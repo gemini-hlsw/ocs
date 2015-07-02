@@ -1,13 +1,3 @@
-/*
- * ESO Archive
- *
- * $Id: BasicImageReadableProcessor.java 4414 2004-02-03 16:21:36Z brighton $
- *
- * who             when        what
- * --------------  ----------  ----------------------------------------
- * Frank Tanner   2001/12/19  Created
- */
-
 package jsky.image;
 
 import java.awt.geom.Rectangle2D;

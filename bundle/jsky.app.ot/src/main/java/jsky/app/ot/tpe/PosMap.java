@@ -1,9 +1,3 @@
-// Copyright 1997 Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-// See the file COPYRIGHT for complete details.
-//
-// $Id: PosMap.java 20132 2009-06-06 18:08:02Z swalker $
-//
 package jsky.app.ot.tpe;
 
 import edu.gemini.spModel.target.SPTarget;
@@ -15,7 +9,6 @@ import edu.gemini.spModel.telescope.IssPort;
 
 import java.awt.geom.Point2D;
 import java.util.*;
-
 
 /**
  * An auxiliary class used to maintain a mapping between telescope positions
@@ -32,7 +25,7 @@ public abstract class PosMap <K, T extends WatchablePos>
 
 
     /** Maps position tags to PositionMapEntries */
-    protected Map<K, PosMapEntry<T>> _posTable = new Hashtable<K, PosMapEntry<T>>();
+    protected Map<K, PosMapEntry<T>> _posTable = new Hashtable<>();
 
     /** Set to true if the positions in the map are valid */
     protected boolean _valid = false;
@@ -80,12 +73,6 @@ public abstract class PosMap <K, T extends WatchablePos>
         _valid = false;
     }
 
-    protected void handlePostReset() {
-        if (getPosTable() != null) {
-            _iw.repaint();
-        }
-    }
-
     /**
      * Get the position table, initializing if necessary.
      */
@@ -111,7 +98,7 @@ public abstract class PosMap <K, T extends WatchablePos>
     /**
      * Update the given position map entry from the given event,
      */
-    public void updatePosition(PosMapEntry pme, TpeMouseEvent tme) {
+    public void updatePosition(PosMapEntry<T> pme, TpeMouseEvent tme) {
         if (pme.screenPos == null) {
             pme.screenPos = new Point2D.Double(tme.xWidget, tme.yWidget);
         } else {
@@ -149,32 +136,9 @@ public abstract class PosMap <K, T extends WatchablePos>
     }
 
     /**
-     * Is the given x/y location close to the position with the given tag?
-     */
-    public boolean isClose(int x, int y, K key) {
-        PosMapEntry pme = getPositionMapEntry(key);
-        if (pme == null) {
-            return false;
-        }
-
-        Point2D.Double p = pme.screenPos;
-        if (p == null) {
-            return false;
-        }
-
-        double dx = Math.abs(p.x - x);
-        if (dx > MARKER_SIZE) {
-            return false;
-        }
-        double dy = Math.abs(p.y - y);
-        return dy <= MARKER_SIZE;
-
-    }
-
-    /**
      * Find a (visible) position under the given x,y location.
      */
-    public PosMapEntry locate(int x, int y) {
+    public PosMapEntry<T> locate(int x, int y) {
         Map<K, PosMapEntry<T>> posTable = getPosTable();
         if (posTable == null) return null;
 
@@ -227,7 +191,7 @@ public abstract class PosMap <K, T extends WatchablePos>
      * Find a TaggedPos under the given x,y location.
      */
     public WatchablePos locatePos(int x, int y) {
-        PosMapEntry pme = locate(x, y);
+        PosMapEntry<T> pme = locate(x, y);
         if (pme == null) {
             return null;
         }
@@ -271,7 +235,7 @@ public abstract class PosMap <K, T extends WatchablePos>
             } catch (Exception e) {
                 p = null;
             }
-            _posTable.put(getKey(tp), new PosMapEntry<T>(p, tp));
+            _posTable.put(getKey(tp), new PosMapEntry<>(p, tp));
         }
     }
 
@@ -319,7 +283,7 @@ public abstract class PosMap <K, T extends WatchablePos>
             } catch (Exception e) {
                 p = null;
             }
-            PosMapEntry<T> pme = new PosMapEntry<T>(p, tp);
+            PosMapEntry<T> pme = new PosMapEntry<>(p, tp);
             posTable.put(getKey(tp), pme); // Replaces existing one if present
         }
     }
@@ -347,7 +311,7 @@ public abstract class PosMap <K, T extends WatchablePos>
         if (posTable == null) return;
 
         // First remove anything from the table that doesn't exist anymore
-        for (K tag : new HashSet<K>(posTable.keySet())) {
+        for (K tag : new HashSet<>(posTable.keySet())) {
             if (!exists(tag)) {
                 PosMapEntry<T> pme = posTable.remove(tag);
                 if (pme != null) { // And it really shouldn't be ...
@@ -369,7 +333,7 @@ public abstract class PosMap <K, T extends WatchablePos>
                 } catch (Exception ex) {
                     p = null;
                 }
-                pme = new PosMapEntry<T>(p, tp);
+                pme = new PosMapEntry<>(p, tp);
                 posTable.put(getKey(tp), pme); // Replaces existing one if present
             }
         }

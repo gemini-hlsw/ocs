@@ -1,10 +1,3 @@
-/*
- * Copyright 2003 Association for Universities for Research in Astronomy, Inc.,
- * Observatory Control System, Gemini Telescopes Project.
- *
- * $Id: CatalogNavigator.java 39298 2011-11-23 16:00:58Z swalker $
- */
-
 package jsky.catalog.gui;
 
 import java.awt.BorderLayout;

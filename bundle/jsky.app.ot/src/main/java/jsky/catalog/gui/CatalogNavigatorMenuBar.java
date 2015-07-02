@@ -1,13 +1,3 @@
-/*
- * ESO Archive
- *
- * $Id: CatalogNavigatorMenuBar.java 8278 2007-11-23 12:56:52Z anunez $
- *
- * who             when        what
- * --------------  ----------  ----------------------------------------
- * Allan Brighton  1999/05/03  Created
- */
-
 package jsky.catalog.gui;
 
 import java.awt.event.ActionListener;
@@ -29,7 +19,6 @@ import jsky.catalog.TableQueryResult;
 import jsky.util.I18N;
 import jsky.util.Preferences;
 import jsky.util.gui.GenericToolBar;
-
 
 /**
  * Implements a menubar for a CatalogNavigator.

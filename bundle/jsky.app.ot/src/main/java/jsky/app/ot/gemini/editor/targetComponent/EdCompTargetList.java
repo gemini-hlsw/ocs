@@ -1,6 +1,3 @@
-// Copyright 1997 Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-// See the file COPYRIGHT for complete details.
 package jsky.app.ot.gemini.editor.targetComponent;
 
 import edu.gemini.catalog.ui.QueryResultsWindow;

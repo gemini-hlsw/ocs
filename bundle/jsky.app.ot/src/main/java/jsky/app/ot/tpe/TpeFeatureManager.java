@@ -1,9 +1,3 @@
-// Copyright 1997 Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-// See the file COPYRIGHT for complete details.
-//
-// $Id: TpeFeatureManager.java 45662 2012-05-31 02:54:05Z fnussber $
-//
 package jsky.app.ot.tpe;
 
 import edu.gemini.shared.util.immutable.None;
@@ -14,7 +8,6 @@ import jsky.util.Preferences;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.util.*;
 
 /**
@@ -86,16 +79,14 @@ final class TpeFeatureManager {
         // in the image widget by updateAvailableOptions.
         btn.setSelected(Preferences.get(prefName, tif.isEnabledByDefault()));
 
-        btn.addItemListener(new ItemListener() {
-            public void itemStateChanged(ItemEvent e) {
-                final boolean selected = e.getStateChange() == ItemEvent.SELECTED;
-                if (selected) {
-                    _iw.addFeature(tif);
-                } else {
-                    _iw.deleteFeature(tif);
-                }
-                Preferences.set(prefName, selected);
+        btn.addItemListener(e -> {
+            final boolean selected = e.getStateChange() == ItemEvent.SELECTED;
+            if (selected) {
+                _iw.addFeature(tif);
+            } else {
+                _iw.deleteFeature(tif);
             }
+            Preferences.set(prefName, selected);
         });
 
         final Option<Component> keyPanel = tif.getKey().isEmpty() ? None.<Component>instance() :

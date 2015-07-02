@@ -1,13 +1,3 @@
-/*
- * ESO Archive
- *
- * $Id: Navigator.java 38328 2011-11-02 14:08:05Z abrighton $
- *
- * who             when        what
- * --------------  ----------  ----------------------------------------
- * Allan Brighton  1999/06/02  Created
- */
-
 package jsky.navigator;
 
 import jsky.catalog.Catalog;

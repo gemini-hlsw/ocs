@@ -1,9 +1,3 @@
-// Copyright 1997 Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-// See the file COPYRIGHT for complete details.
-//
-// $Id: TpeImageFeature.java 40472 2012-01-06 03:13:23Z fnussber $
-//
 package jsky.app.ot.tpe;
 
 import edu.gemini.skycalc.Angle;
@@ -173,12 +167,10 @@ public abstract class TpeImageFeature implements TelescopePosWatcher {
 
     // -- Utility methods for monitoring telescope positions --
 
-    private final PropertyChangeListener targetEnvListener = new PropertyChangeListener() {
-        public void propertyChange(PropertyChangeEvent evt) {
-            TargetEnvironment oldEnv = (TargetEnvironment) evt.getOldValue();
-            TargetEnvironment newEnv = (TargetEnvironment) evt.getNewValue();
-            handleTargetEnvironmentUpdate(TargetEnvironmentDiff.all(oldEnv, newEnv));
-        }
+    private final PropertyChangeListener targetEnvListener = evt -> {
+        TargetEnvironment oldEnv = (TargetEnvironment) evt.getOldValue();
+        TargetEnvironment newEnv = (TargetEnvironment) evt.getNewValue();
+        handleTargetEnvironmentUpdate(TargetEnvironmentDiff.all(oldEnv, newEnv));
     };
 
     /** Arrange to be notified if the PWFS targets are added, removed, or selected */
@@ -225,8 +217,7 @@ public abstract class TpeImageFeature implements TelescopePosWatcher {
     }
 
     public boolean isEnabled(TpeContext ctx) {
-        if (ctx.isEmpty()) return false;
-        return ctx.targets().isDefined();
+        return !ctx.isEmpty() && ctx.targets().isDefined();
     }
 
     public boolean isEnabledByDefault() {

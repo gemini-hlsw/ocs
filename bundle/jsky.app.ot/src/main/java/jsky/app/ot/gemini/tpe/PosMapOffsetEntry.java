@@ -20,15 +20,15 @@ import jsky.app.ot.tpe.TpePositionMap;
  * OffsetPosBase, along with some usefull utility methods.
  */
 public final class PosMapOffsetEntry {
-    private PosMapEntry _pme;
+    private PosMapEntry<SPTarget> _pme;
     private OffsetPosBase _offsetPos;
 
-    private PosMapOffsetEntry(PosMapEntry pme, OffsetPosBase offsetPos) {
+    private PosMapOffsetEntry(PosMapEntry<SPTarget> pme, OffsetPosBase offsetPos) {
         _pme = pme;
         _offsetPos = offsetPos;
     }
 
-    public PosMapEntry getPosMapEntry() {
+    public PosMapEntry<SPTarget> getPosMapEntry() {
         return _pme;
     }
 
@@ -49,7 +49,7 @@ public final class PosMapOffsetEntry {
      * @param opl offset position list to use (if offset not null)
      * @param op offset position to use if tag is FROZEN
      */
-    public static PosMapOffsetEntry getPosMapOffsetEntry(TpePositionMap pm, OffsetPosList opl, OffsetPosBase op, GuideProbe guider, Option<SPTarget> targetOpt) {
+    public static PosMapOffsetEntry getPosMapOffsetEntry(TpePositionMap pm, OffsetPosList<OffsetPosBase> opl, OffsetPosBase op, GuideProbe guider, Option<SPTarget> targetOpt) {
         SPTarget target = targetOpt.isEmpty() ? null : targetOpt.getValue();
 
         if ((op == null) || (guider == null)) {

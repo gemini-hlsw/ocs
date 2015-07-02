@@ -56,7 +56,7 @@ final class TpeEditorTools {
     private final JToggleButton _dragButton;
     private final JToggleButton _eraseButton;
 
-    private Map<String, JToggleButton> _createButtonMap = new HashMap<String, JToggleButton>();
+    private Map<String, JToggleButton> _createButtonMap = new HashMap<>();
 
     /** Create with the Presentation that contains the tool buttons. */
     TpeEditorTools(TelescopePosEditor tpe) {
@@ -133,12 +133,7 @@ final class TpeEditorTools {
 
     private boolean isEnabled() {
         final TpeContext ctx = _tpe.getImageWidget().getContext();
-        if (ctx.progShell().isDefined() && ctx.obsShell().isDefined()) {
-            return OTOptions.isProgramEditable(ctx.progShell().get()) &&
-                      OTOptions.isObservationEditable(ctx.obsShell().get());
-        } else {
-            return false;
-        }
+        return ctx.progShell().isDefined() && ctx.obsShell().isDefined() && OTOptions.isProgramEditable(ctx.progShell().get()) && OTOptions.isObservationEditable(ctx.obsShell().get());
     }
 
     /**
@@ -165,16 +160,14 @@ final class TpeEditorTools {
             setVisible(false);
             setHorizontalAlignment(LEFT);
         }};
-        btn.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent evt) {
-                _current = btn;
+        btn.addActionListener(evt -> {
+            _current = btn;
 
-                ButtonState bs = ButtonState.get(btn);
-                _tpe.selectFeature(bs.feature);
-                _tpe.getImageWidget().setCursor(TpeCursor.add.get());
+            ButtonState bs = ButtonState.get(btn);
+            _tpe.selectFeature(bs.feature);
+            _tpe.getImageWidget().setCursor(TpeCursor.add.get());
 
-                modeChange(TpeMode.CREATE, new Some<Object>(bs.item));
-            }
+            modeChange(TpeMode.CREATE, new Some<>(bs.item));
         });
 
         new ButtonState(TpeMode.CREATE, tif, item).set(btn);

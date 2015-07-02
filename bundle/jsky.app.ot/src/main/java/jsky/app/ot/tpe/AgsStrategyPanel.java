@@ -2,14 +2,11 @@ package jsky.app.ot.tpe;
 
 import edu.gemini.ags.api.AgsStrategy;
 import edu.gemini.shared.util.immutable.None;
-import edu.gemini.shared.util.immutable.PredicateOp;
 import edu.gemini.shared.util.immutable.Some;
 import jsky.app.ot.ags.AgsContext;
 import jsky.app.ot.ags.AgsSelectorControl;
 
 import javax.swing.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -56,9 +53,7 @@ public final class AgsStrategyPanel extends AgsSelectorControl {
                 final JRadioButton button = mkButton(s, false);
                 buttons.add(button);
                 pan.add(button);
-                button.setSelected(!usingDefault && opts.strategyOverride.exists(new PredicateOp<AgsStrategy>() {
-                    @Override public Boolean apply(AgsStrategy sel) { return sel == s; }
-                }));
+                button.setSelected(!usingDefault && opts.strategyOverride.exists(sel -> sel == s));
             }
         }
 
@@ -70,11 +65,7 @@ public final class AgsStrategyPanel extends AgsSelectorControl {
         final String name = String.format(isDefault ? "Auto (%s)" : "%s", s.key().displayName());
         return new JRadioButton(name) {{
             setToolTipText("Perform AGS search for " + s.key().displayName());
-            addActionListener(new ActionListener() {
-                @Override public void actionPerformed(ActionEvent e) {
-                    fireSelectionUpdate(isDefault ? None.<AgsStrategy>instance() : new Some<>(s));
-                }
-            });
+            addActionListener(e -> fireSelectionUpdate(isDefault ? None.<AgsStrategy>instance() : new Some<>(s)));
         }};
     }
 }
