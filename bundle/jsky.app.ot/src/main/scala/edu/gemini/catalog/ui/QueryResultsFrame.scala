@@ -1,13 +1,12 @@
 package edu.gemini.catalog.ui
 
-import javax.swing.table.{TableRowSorter, AbstractTableModel, DefaultTableModel}
+import javax.swing.table.{TableRowSorter, AbstractTableModel}
 
 import edu.gemini.catalog.api.{RadiusConstraint, CatalogQuery}
 import edu.gemini.catalog.votable.VoTableClient
 import edu.gemini.spModel.core.Target.SiderealTarget
 import edu.gemini.spModel.core._
 
-import scala.collection.JavaConverters._
 import scala.swing._
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -28,7 +27,7 @@ trait PreferredSizeFrame { this: Window =>
 object QueryResultsWindow {
 
   val instance = this
-  
+
   sealed trait TableColumn[T] {
     val title: String
     def lens: PLens[Target, T]

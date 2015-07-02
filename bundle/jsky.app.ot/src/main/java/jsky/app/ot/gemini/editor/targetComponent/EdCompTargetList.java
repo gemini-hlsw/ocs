@@ -355,6 +355,8 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
     private void toggleAgsGuiElements() {
         final boolean supports = GuideStarSupport.supportsAutoGuideStarSelection(getNode());
         _w.guidingControls.supportsAgs_$eq(supports); // hide the ags related buttons
+
+        _w.guidingControls.supportsNewManualGS(!GuideStarSupport.hasGemsComponent(getNode()));
     }
 
     // Guider panel property change listener to modify status and magnitude limits.
