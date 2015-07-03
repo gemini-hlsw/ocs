@@ -2,10 +2,14 @@ package edu.gemini.catalog.ui
 
 import javax.swing.table.{TableRowSorter, AbstractTableModel}
 
-import edu.gemini.catalog.api.{RadiusConstraint, CatalogQuery}
+import edu.gemini.ags.api.AgsRegistrar
+import edu.gemini.catalog.api.CatalogQuery
 import edu.gemini.catalog.votable.VoTableClient
+import edu.gemini.pot.sp.ISPNode
 import edu.gemini.spModel.core.Target.SiderealTarget
 import edu.gemini.spModel.core._
+import jsky.app.ot.OT
+import jsky.app.ot.tpe.TpeContext
 
 import scala.swing._
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -137,10 +141,9 @@ object QueryResultsWindow {
     val frame = QueryResultsFrame(resultsTable)
   }
 
-  private def reloadSearchData(c: Coordinates) {
+  private def reloadSearchData(query: CatalogQuery) {
     import QueryResultsWindow.table._
 
-    val query = CatalogQuery.catalogQuery(c, RadiusConstraint.between(Angle.zero, Angle.fromArcmin(17.9)), None)
     VoTableClient.catalog(query).onSuccess {
       case x =>
         Swing.onEDT {
@@ -157,7 +160,7 @@ object QueryResultsWindow {
   // Public interface
   val instance = this
 
-  def showOn(c: Coordinates):Unit = Swing.onEDT {
+  private def showTable(q: CatalogQuery):Unit = Swing.onEDT {
     import QueryResultsWindow.table._
     if (frame.visible) {
       frame.peer.toFront()
@@ -166,7 +169,20 @@ object QueryResultsWindow {
       frame.visible = true
       frame.peer.toFront()
     }
-    reloadSearchData(c)
+    reloadSearchData(q)
+  }
+
+  def showOn(n: ISPNode) {
+    TpeContext.apply(n).obsContext.foreach { obsCtx =>
+      // TODO The user should be able to select the strategy OCSADV-403
+      AgsRegistrar.currentStrategy(obsCtx).foreach { strategy =>
+        // TODO Use only the first query, GEMS isn't supported yet OCSADV-242, OCSADV-239
+        strategy.catalogQueries(obsCtx, OT.getMagnitudeTable).headOption.foreach { q =>
+          // TODO Filtering should be part of the catalog query OCSADV-402
+          showTable(q)
+        }
+      }
+    }
   }
 
 }
