@@ -6,6 +6,7 @@ import edu.gemini.shared.skyobject.Magnitude;
  * Algorithm for suggesting Altair LGS star.
  *
  */
+@Deprecated
 public final class AltairLGSCatalogAlgorithm extends AOWFSCatalogAlgorithm {
     private static final String NAME = "Altair LGS";
     private static final String DESC = "Selects target for the Altair LGS.";

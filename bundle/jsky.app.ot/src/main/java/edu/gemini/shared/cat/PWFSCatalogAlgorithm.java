@@ -1,17 +1,9 @@
-// Copyright 1997 Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-// See the file COPYRIGHT for complete details.
-//
-// $Id: PWFSCatalogAlgorithm.java 47186 2012-08-02 16:54:23Z swalker $
-//
-
 package edu.gemini.shared.cat;
 
 import edu.gemini.catalog.api.MagnitudeLimits;
 import edu.gemini.catalog.api.RadiusLimits;
 import edu.gemini.skycalc.Angle;
 import edu.gemini.shared.skyobject.Magnitude;
-
 
 /**
  * <em><b>This class is temporary at this location.</b></em>.  Crude first
@@ -21,6 +13,7 @@ import edu.gemini.shared.skyobject.Magnitude;
  * the (proper) R band mag since that's all GSC I has.  Doesn't consider
  * distance for ties in magnitude.
  */
+@Deprecated
 public class PWFSCatalogAlgorithm extends AbstractCatalogAlgorithm {
     private static final String NAME = "Gemini PWFS";
     private static final String DESC = "Selects target for either of the two Gemini PWFS patrol fields.";

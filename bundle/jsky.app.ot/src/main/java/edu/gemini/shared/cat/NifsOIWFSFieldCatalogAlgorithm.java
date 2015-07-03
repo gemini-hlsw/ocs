@@ -6,6 +6,7 @@ import edu.gemini.shared.skyobject.Magnitude;
  * Algorithm for suggesting a NIFS OI WFS star w/field lens.
  * <p>
  */
+@Deprecated
 public class NifsOIWFSFieldCatalogAlgorithm extends OIWFSCatalogAlgorithm {
     private static final String NAME = "NIFS OIWFS w/ field lens";
     private static final String DESC = "Selects target for the NIFS OIWFS w/ field lens.";
@@ -14,14 +15,6 @@ public class NifsOIWFSFieldCatalogAlgorithm extends OIWFSCatalogAlgorithm {
      * Default constructor.
      */
     public NifsOIWFSFieldCatalogAlgorithm() {
-        this(false);
-    }
-
-    /**
-     * Initialize based on the given flag.
-     * @param isAltair true if the observation contains an Altair component
-     */
-    public NifsOIWFSFieldCatalogAlgorithm(boolean isAltair) {
         super(NAME, DESC, 0.22, 0.5, -2.0, 14.5, Magnitude.Band.K);
     }
 

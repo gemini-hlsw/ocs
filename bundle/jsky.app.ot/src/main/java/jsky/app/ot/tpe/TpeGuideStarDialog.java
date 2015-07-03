@@ -1,10 +1,3 @@
-/*
- * Copyright 2003 Association for Universities for Research in Astronomy, Inc.,
- * Observatory Control System, Gemini Telescopes Project.
- *
- * $Id: TpeGuideStarDialog.java 46768 2012-07-16 18:58:53Z rnorris $
- */
-
 package jsky.app.ot.tpe;
 
 import edu.gemini.shared.cat.*;
@@ -45,6 +38,7 @@ import java.awt.event.ActionListener;
  * are to use a guide star catalog to get the best choice based on the
  * current observation, or to select the guide star position manually.
  */
+@Deprecated
 public class TpeGuideStarDialog extends TpeGuideStarDialogForm
         implements ActionListener, TreeModelListener {
 
@@ -232,7 +226,6 @@ public class TpeGuideStarDialog extends TpeGuideStarDialogForm
      * the catalog option chosen by the user. Otherwise, only
      * will warn the users, but won't change what the user has selected
      */
-
     private void _selectDefaultCatalog(boolean changeOption) {
         String instrument = instComboBox.getItemAt(instComboBox.getSelectedIndex());
         String tag = typeComboBox.getItemAt(typeComboBox.getSelectedIndex());

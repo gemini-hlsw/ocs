@@ -2,11 +2,11 @@ package edu.gemini.shared.cat;
 
 import edu.gemini.shared.skyobject.Magnitude;
 
-
 /**
  * Base class for AOWFS catalog algorithms. This class behaves
  * exactly as the OIWFS algorithms, but sets the guide stars as "AOWFS" ones.
  */
+@Deprecated
 public class AOWFSCatalogAlgorithm extends OIWFSCatalogAlgorithm {
 
     /**

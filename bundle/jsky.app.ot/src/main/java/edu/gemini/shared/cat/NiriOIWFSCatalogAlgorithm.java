@@ -1,12 +1,4 @@
-// Copyright 1997 Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-// See the file COPYRIGHT for complete details.
-//
-// $Id: NiriOIWFSCatalogAlgorithm.java 47126 2012-08-01 15:40:43Z swalker $
-//
-
 package edu.gemini.shared.cat;
-
 
 import edu.gemini.shared.skyobject.Magnitude;
 
@@ -14,6 +6,7 @@ import edu.gemini.shared.skyobject.Magnitude;
  * Algorithm for suggesting Niri OI WFS star using the f/14 camera.
  *
  */
+@Deprecated
 public final class NiriOIWFSCatalogAlgorithm extends OIWFSCatalogAlgorithm {
     private static final String NAME = "NIRI OIWFS";
     private static final String DESC = "Selects target for the NIRI OIWFS using the f/14 camera.";

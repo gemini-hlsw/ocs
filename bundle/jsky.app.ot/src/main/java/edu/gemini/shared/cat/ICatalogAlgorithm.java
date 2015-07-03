@@ -1,15 +1,9 @@
-// Copyright 1997 Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-// See the file COPYRIGHT for complete details.
-//
-// $Id: ICatalogAlgorithm.java 7294 2006-08-17 19:04:57Z anunez $
-//
-
 package edu.gemini.shared.cat;
 
 /**
  * Defines the interface that catalog filtering algorithms must implement.
  */
+@Deprecated
 public interface ICatalogAlgorithm {
 
     /**

@@ -1,19 +1,12 @@
 package edu.gemini.shared.cat;
 
-// Copyright 1997 Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-// See the file COPYRIGHT for complete details.
-//
-// $Id: AltairWFSCatalogAlgorithm.java 47126 2012-08-01 15:40:43Z swalker $
-//
-
-
 import edu.gemini.shared.skyobject.Magnitude;
 
 /**
  * Algorithm for suggesting Hokupaa AOWFS star.
  *
  */
+@Deprecated
 public final class AltairWFSCatalogAlgorithm extends AOWFSCatalogAlgorithm {
     private static final String NAME = "Altair NGS";
     private static final String DESC = "Selects target for the Altair NGS.";
