@@ -6,6 +6,7 @@ import edu.gemini.ags.api.AgsRegistrar
 import edu.gemini.catalog.api.CatalogQuery
 import edu.gemini.catalog.votable.VoTableClient
 import edu.gemini.pot.sp.ISPNode
+import edu.gemini.shared.gui.SortableTable
 import edu.gemini.spModel.core.Target.SiderealTarget
 import edu.gemini.spModel.core._
 import jsky.app.ot.OT
@@ -121,17 +122,7 @@ object QueryResultsWindow {
       pack()
     }
 
-    val resultsTable = new Table() {
-      /**
-       * Sorting is not supported in scala.swing.Table (Scala 2.10).
-       */
-      // See: http://stackoverflow.com/questions/9588765/using-tablerowsorter-with-scala-swing-table
-      override def apply(row: Int, column: Int): Any = model.getValueAt(viewToModelRow(row), viewToModelColumn(column))
-
-      def viewToModelRow(idx: Int) = peer.convertRowIndexToModel(idx)
-
-      def modelToViewRow(idx: Int) = peer.convertRowIndexToView(idx)
-    }
+    val resultsTable = new Table() with SortableTable
 
     val model = TargetsModel(Nil)
     resultsTable.model = model

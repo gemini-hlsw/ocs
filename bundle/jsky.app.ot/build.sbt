@@ -29,6 +29,7 @@ OsgiKeys.privatePackage := Seq(
   "edu.gemini.mascot.gui.*",
   "edu.gemini.mask.*",
   "edu.gemini.shared.cat.*",
+  "edu.gemini.catalog.ui.*",
   "jsky.app.jskycat.*",
   "jsky.app.ot.vcs.*",
   "jsky.app.ot",

@@ -13,6 +13,7 @@ import edu.gemini.qv.plugin.table.ObservationTableModel.{Column, DecValue, RaVal
 import edu.gemini.qv.plugin.ui.{QvGui, SideBar, SideBarPanel}
 import edu.gemini.qv.plugin.util.Exporter
 import edu.gemini.qv.plugin.{ConstraintsChanged, QvContext, QvTool, ReferenceDateChanged}
+import edu.gemini.shared.gui.SortableTable
 
 import scala.None
 import scala.collection.mutable
@@ -152,7 +153,7 @@ class ObservationTable(ctx: QvContext) extends GridBagPanel {
    * A table that displays a set of observations and implements some interactions with them, like opening
    * them in the OT and other stuff.
    */
-  abstract class ObservationTableGrid extends SortableTable {
+  abstract class ObservationTableGrid extends Table with SortableTable {
 
     model = dataModel
 
@@ -322,20 +323,6 @@ class ObservationTable(ctx: QvContext) extends GridBagPanel {
     }
 
   }
-
-  /**
-   * Sorting is not supported in scala.swing.Table (Scala 2.10).
-   * This class fixes this by adding some missing methods. Potentially this can be removed with future Scala versions.
-   */
-  abstract class SortableTable extends Table {
-    // === === ===
-    // See: http://stackoverflow.com/questions/9588765/using-tablerowsorter-with-scala-swing-table
-    override def apply(row: Int, column: Int): Any = model.getValueAt(viewToModelRow(row), viewToModelColumn(column))
-    def viewToModelRow(idx: Int) = peer.convertRowIndexToModel(idx)
-    def modelToViewRow(idx: Int) = peer.convertRowIndexToView(idx)
-    // === === ===
-  }
-
 
   class ObservationTableDetails(ctx: QvContext, dataGrid: ObservationTableGrid) extends GridBagPanel {
     private val status = new Label(statusText)
