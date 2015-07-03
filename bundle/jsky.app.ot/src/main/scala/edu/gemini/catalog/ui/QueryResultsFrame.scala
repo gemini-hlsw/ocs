@@ -1,6 +1,7 @@
 package edu.gemini.catalog.ui
 
-import javax.swing.table.{TableRowSorter, AbstractTableModel}
+import javax.swing.SwingConstants
+import javax.swing.table.{DefaultTableCellRenderer, TableRowSorter, AbstractTableModel}
 
 import edu.gemini.ags.api.AgsRegistrar
 import edu.gemini.catalog.api.CatalogQuery
@@ -112,6 +113,7 @@ object QueryResultsWindow {
           c._1.render(target)
         }
       }).flatten.orNull
+
     }
 
     case class QueryResultsFrame(table: Table) extends Frame with PreferredSizeFrame {
@@ -136,13 +138,19 @@ object QueryResultsWindow {
       }
     }
 
-    val resultsTable = new Table() with SortableTable
+    val resultsTable = new Table() with SortableTable {
+      private val m = TargetsModel(Nil)
+      model = model
+      val sorter = new TableRowSorter[TargetsModel](m)
+      peer.setRowSorter(sorter)
+      peer.getRowSorter.toggleSortOrder(0)
 
-    val model = TargetsModel(Nil)
-    resultsTable.model = model
-    val sorter = new TableRowSorter[TargetsModel](model)
-    resultsTable.peer.setRowSorter(sorter)
-    resultsTable.peer.getRowSorter.toggleSortOrder(0)
+      // Align Right
+      peer.setDefaultRenderer(classOf[String], new DefaultTableCellRenderer() {
+        setHorizontalAlignment(SwingConstants.RIGHT)
+      })
+
+    }
     val frame = QueryResultsFrame(resultsTable)
   }
 
