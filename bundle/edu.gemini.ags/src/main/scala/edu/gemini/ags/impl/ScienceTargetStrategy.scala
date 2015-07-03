@@ -42,4 +42,6 @@ case class ScienceTargetStrategy(key: AgsStrategyKey, guideProbe: ValidatableGui
 
   override val guideProbes: List[GuideProbe] = List(guideProbe)
 
+  // No queries are required for this strategy
+  override def catalogQueries(ctx: ObsContext, mt: MagnitudeTable) = Nil
 }

@@ -214,7 +214,7 @@ trait GemsStrategy extends AgsStrategy {
     }
   }
 
-  def catalogQueries(ctx: ObsContext, mt: MagnitudeTable): List[CatalogQuery] = {
+  override def catalogQueries(ctx: ObsContext, mt: MagnitudeTable): List[CatalogQuery] = {
     import AgsMagnitude._
     val cond = ctx.getConditions
     val mags = magnitudes(ctx, mt).toMap
