@@ -6,7 +6,7 @@ import edu.gemini.ags.api.AgsRegistrar
 import edu.gemini.catalog.api.CatalogQuery
 import edu.gemini.catalog.votable.VoTableClient
 import edu.gemini.pot.sp.ISPNode
-import edu.gemini.shared.gui.SortableTable
+import edu.gemini.shared.gui.{SizePreference, SortableTable}
 import edu.gemini.spModel.core.Target.SiderealTarget
 import edu.gemini.spModel.core._
 import jsky.app.ot.OT
@@ -14,18 +14,21 @@ import jsky.app.ot.tpe.TpeContext
 
 import scala.swing._
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.swing.event.{UIElementMoved, UIElementResized}
 
 import scalaz._
 import Scalaz._
 
 trait PreferredSizeFrame { this: Window =>
   def adjustSize() {
-    // Set initial based on the desktop's size, the code below will work with multiple desktops
-    val screenSize = java.awt.GraphicsEnvironment
-                 .getLocalGraphicsEnvironment
-                 .getDefaultScreenDevice
-                 .getDefaultConfiguration.getBounds
-    preferredSize = new Dimension(screenSize.getWidth.intValue() * 3/4, (2f / 3f * screenSize.getHeight).intValue())
+    size = SizePreference.getDimension(this.getClass).getOrElse {
+      // Set initial based on the desktop's size, the code below will work with multiple desktops
+      val screenSize = java.awt.GraphicsEnvironment
+        .getLocalGraphicsEnvironment
+        .getDefaultScreenDevice
+        .getDefaultConfiguration.getBounds
+      new Dimension(screenSize.getWidth.intValue() * 3 / 4, (2f / 3f * screenSize.getHeight).intValue())
+    }
   }
 }
 
@@ -117,9 +120,20 @@ object QueryResultsWindow {
         add(new ScrollPane() {
           contents = table
         }, BorderPanel.Position.Center)
+
       }
       adjustSize()
-      pack()
+      SizePreference.getPosition(this.getClass).foreach { p =>
+        location = p
+      }
+
+      listenTo(this)
+      reactions += {
+        case _: UIElementResized =>
+          SizePreference.setDimension(getClass, Some(this.size))
+        case _: UIElementMoved =>
+          SizePreference.setPosition(getClass, Some(this.location))
+      }
     }
 
     val resultsTable = new Table() with SortableTable
@@ -156,7 +170,6 @@ object QueryResultsWindow {
     if (frame.visible) {
       frame.peer.toFront()
     } else {
-      frame.centerOnScreen()
       frame.visible = true
       frame.peer.toFront()
     }

@@ -143,11 +143,11 @@ class OpenDialog private(db: IDBDatabaseService, auth: KeyChain, vcs: VcsRegistr
   pack()
 
   // Manage the window size preferences.
-  SizePreference.get(getClass).foreach { dim => this.size = dim }
+  SizePreference.getDimension(getClass).foreach { dim => this.size = dim }
   listenTo(this)
   reactions += {
     case e: UIElementResized =>
-        SizePreference.set(getClass, Some(this.size))
+      SizePreference.setDimension(getClass, Some(this.size))
   }
 
   // Our actions
