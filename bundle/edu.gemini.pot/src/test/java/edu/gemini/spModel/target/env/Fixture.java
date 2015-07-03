@@ -43,7 +43,6 @@ final class Fixture {
     }
 
     public static void verifyGuideEnvironmentEquals(GuideEnvironment env1, GuideEnvironment env2) {
-        assertEquals(env1.getActiveGuiders(), env2.getActiveGuiders());
         assertEquals(env1.getReferencedGuiders(), env2.getReferencedGuiders());
         assertEquals(env1.getPrimaryIndex(), env2.getPrimaryIndex());
         verifyGroupListEquals(env1.getOptions(), env2.getOptions());

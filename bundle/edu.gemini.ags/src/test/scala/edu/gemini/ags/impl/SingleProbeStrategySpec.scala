@@ -72,7 +72,7 @@ class SingleProbeStrategySpec extends Specification with NoTimeConversions {
       val ra = Angle.fromHMS(7, 4, 6.531).getOrElse(Angle.zero)
       val dec = Angle.fromDMS(20, 34, 13.070).getOrElse(Angle.zero)
       val target = new SPTarget(ra.toDegrees, dec.toDegrees)
-      val env = TargetEnvironment.create(target) |> {_.addActive(AltairAowfsGuider.instance)}
+      val env = TargetEnvironment.create(target)
       val inst = new InstNIRI <| {_.setPosAngle(0.0)}
 
       val strategy = SingleProbeStrategy(AltairAowfsKey, SingleProbeStrategyParams.AltairAowfsParams, TestVoTableBackend("/ocsadv245.xml"))
@@ -88,7 +88,7 @@ class SingleProbeStrategySpec extends Specification with NoTimeConversions {
       val ra = Angle.fromHMS(21, 46, 38.840).getOrElse(Angle.zero)
       val dec = Declination.fromAngle(Angle.fromDegrees(338.747389)).getOrElse(Declination.zero)
       val target = new SPTarget(ra.toDegrees, dec.toDegrees)
-      val env = TargetEnvironment.create(target) |> {_.addActive(AltairAowfsGuider.instance)}
+      val env = TargetEnvironment.create(target)
       val inst = new InstNIRI <| {_.setPosAngle(0.0)}
 
       val strategy = SingleProbeStrategy(AltairAowfsKey, SingleProbeStrategyParams.AltairAowfsParams, TestVoTableBackend("/ocsadv-245-lgs.xml"))
@@ -105,7 +105,7 @@ class SingleProbeStrategySpec extends Specification with NoTimeConversions {
       val dec = Declination.fromAngle(Angle.zero - Angle.fromDMS(22, 4, 2.34).getOrElse(Angle.zero)).getOrElse(Declination.zero)
       val target = new SPTarget(ra.toDegrees, dec.toDegrees)
       val guiders = Set[GuideProbe](NiriOiwfsGuideProbe.instance, PwfsGuideProbe.pwfs1, PwfsGuideProbe.pwfs2)
-      val env = TargetEnvironment.create(target) |> {_.setActiveGuiders(guiders.asJava)}
+      val env = TargetEnvironment.create(target)
       val inst = new InstNIRI <| {_.setPosAngle(0.0)}
 
       val strategy = SingleProbeStrategy(Pwfs1NorthKey, SingleProbeStrategyParams.PwfsParams(Site.GN, PwfsGuideProbe.pwfs1), TestVoTableBackend("/niri_pwfs1.xml"))
@@ -123,7 +123,7 @@ class SingleProbeStrategySpec extends Specification with NoTimeConversions {
       val dec = Declination.fromAngle(Angle.fromDMS(1, 18, 34.79).getOrElse(Angle.zero)).getOrElse(Declination.zero)
       val target = new SPTarget(ra.toDegrees, dec.toDegrees)
       val guiders = Set[GuideProbe](NiriOiwfsGuideProbe.instance, PwfsGuideProbe.pwfs1, PwfsGuideProbe.pwfs2)
-      val env = TargetEnvironment.create(target) |> {_.setActiveGuiders(guiders.asJava)}
+      val env = TargetEnvironment.create(target)
       val inst = new InstNIRI <| {_.setPosAngle(0.0)}
 
       val strategy = SingleProbeStrategy(Pwfs2NorthKey, SingleProbeStrategyParams.PwfsParams(Site.GN, PwfsGuideProbe.pwfs2), TestVoTableBackend("/niri_pwfs2.xml"))
@@ -141,7 +141,7 @@ class SingleProbeStrategySpec extends Specification with NoTimeConversions {
       val dec = Declination.fromAngle(Angle.zero - Angle.fromDMS(32, 32, 10.34).getOrElse(Angle.zero)).getOrElse(Declination.zero)
       val target = new SPTarget(ra.toDegrees, dec.toDegrees)
       val guiders = Set[GuideProbe](GmosOiwfsGuideProbe.instance, PwfsGuideProbe.pwfs1, PwfsGuideProbe.pwfs2)
-      val env = TargetEnvironment.create(target) |> {_.setActiveGuiders(guiders.asJava)}
+      val env = TargetEnvironment.create(target)
       val inst = new InstGmosNorth <| {_.setPosAngle(0.0)}
 
       val strategy = SingleProbeStrategy(GmosNorthOiwfsKey, SingleProbeStrategyParams.GmosOiwfsParams(Site.GN), TestVoTableBackend("/gmosn_oiwfs.xml"))
@@ -159,7 +159,7 @@ class SingleProbeStrategySpec extends Specification with NoTimeConversions {
 
       val base    = spTarget("21:32:48.000", "-0:06:00.000")
       val guiders = Set[GuideProbe](GmosOiwfsGuideProbe.instance)
-      val env     = TargetEnvironment.create(base) |> {_.setActiveGuiders(guiders.asJava)}
+      val env     = TargetEnvironment.create(base)
 
       val inst    = new InstGmosNorth          <|
         { _.setPosAngle(0.0) }                 <|
@@ -184,7 +184,7 @@ class SingleProbeStrategySpec extends Specification with NoTimeConversions {
     "when there is equal vignetting at a given pos angle, pick the brightest option" in {
       val base    = spTarget("12:00:00", "85:00:00.000")
       val guiders = Set[GuideProbe](GmosOiwfsGuideProbe.instance)
-      val env     = TargetEnvironment.create(base) |> {_.setActiveGuiders(guiders.asJava)}
+      val env     = TargetEnvironment.create(base)
 
       val inst    = new InstGmosNorth          <|
         { _.setPosAngle(45.0) }                <|
@@ -212,7 +212,7 @@ class SingleProbeStrategySpec extends Specification with NoTimeConversions {
     "when there is equal vignetting at a multiple pos angles, pick the brightest option" in {
       val base    = spTarget("12:00:00", "85:00:00.000")
       val guiders = Set[GuideProbe](GmosOiwfsGuideProbe.instance)
-      val env     = TargetEnvironment.create(base) |> {_.setActiveGuiders(guiders.asJava)}
+      val env     = TargetEnvironment.create(base)
 
       val inst    = new InstGmosNorth          <|
         { _.setPosAngle(45.0) }                <|
@@ -247,7 +247,7 @@ class SingleProbeStrategySpec extends Specification with NoTimeConversions {
       val dec = Declination.fromAngle(Angle.fromDMS(22, 0, 52.20).getOrElse(Angle.zero)).getOrElse(Declination.zero)
       val target = new SPTarget(ra.toDegrees, dec.toDegrees)
       val guiders = Set[GuideProbe](GmosOiwfsGuideProbe.instance, PwfsGuideProbe.pwfs1, PwfsGuideProbe.pwfs2)
-      val env = TargetEnvironment.create(target) |> {_.setActiveGuiders(guiders.asJava)}
+      val env = TargetEnvironment.create(target)
       val inst = new InstGmosNorth <| {_.setPosAngle(0.0)}
 
       val strategy = SingleProbeStrategy(Pwfs2NorthKey, SingleProbeStrategyParams.PwfsParams(Site.GN, PwfsGuideProbe.pwfs2), TestVoTableBackend("/gmosn_pwfs2.xml"))
@@ -265,7 +265,7 @@ class SingleProbeStrategySpec extends Specification with NoTimeConversions {
       val dec = Declination.fromAngle(Angle.zero - Angle.fromDMS(69, 6, 3.36).getOrElse(Angle.zero)).getOrElse(Declination.zero)
       val target = new SPTarget(ra.toDegrees, dec.toDegrees)
       val guiders = Set[GuideProbe](Flamingos2OiwfsGuideProbe.instance, PwfsGuideProbe.pwfs1, PwfsGuideProbe.pwfs2)
-      val env = TargetEnvironment.create(target) |> {_.setActiveGuiders(guiders.asJava)}
+      val env = TargetEnvironment.create(target)
       val inst = new Flamingos2 <| {_.setPosAngle(0.0)}
 
       val strategy = SingleProbeStrategy(Flamingos2OiwfsKey, SingleProbeStrategyParams.Flamingos2OiwfsParams, TestVoTableBackend("/f2_oiwfs.xml"))
@@ -283,7 +283,7 @@ class SingleProbeStrategySpec extends Specification with NoTimeConversions {
       val dec = Declination.fromAngle(Angle.zero - Angle.fromDMS(69, 6, 3.36).getOrElse(Angle.zero)).getOrElse(Declination.zero)
       val target = new SPTarget(ra.toDegrees, dec.toDegrees)
       val guiders = Set[GuideProbe](Flamingos2OiwfsGuideProbe.instance, PwfsGuideProbe.pwfs1, PwfsGuideProbe.pwfs2)
-      val env = TargetEnvironment.create(target) |> {_.setActiveGuiders(guiders.asJava)}
+      val env = TargetEnvironment.create(target)
       val inst = new Flamingos2 <| {_.setPosAngle(0.0)}
 
       val strategy = SingleProbeStrategy(Pwfs2SouthKey, SingleProbeStrategyParams.PwfsParams(Site.GS, PwfsGuideProbe.pwfs2), TestVoTableBackend("/f2_pwfs2.xml"))
@@ -301,7 +301,7 @@ class SingleProbeStrategySpec extends Specification with NoTimeConversions {
       val dec = Declination.fromAngle(Angle.zero - Angle.fromDMS(62, 28, 48.90).getOrElse(Angle.zero)).getOrElse(Declination.zero)
       val target = new SPTarget(ra.toDegrees, dec.toDegrees)
       val guiders = Set[GuideProbe](GmosOiwfsGuideProbe.instance, PwfsGuideProbe.pwfs1, PwfsGuideProbe.pwfs2)
-      val env = TargetEnvironment.create(target) |> {_.setActiveGuiders(guiders.asJava)}
+      val env = TargetEnvironment.create(target)
       val inst = new InstGmosSouth <| {_.setPosAngle(0.0)}
 
       val strategy = SingleProbeStrategy(GmosSouthOiwfsKey, SingleProbeStrategyParams.GmosOiwfsParams(Site.GS), TestVoTableBackend("/gmoss_oiwfs.xml"))
@@ -320,7 +320,7 @@ class SingleProbeStrategySpec extends Specification with NoTimeConversions {
       val dec = Declination.fromAngle(Angle.zero - Angle.fromDMS(29, 50, 0).getOrElse(Angle.zero)).getOrElse(Declination.zero)
       val target = new SPTarget(ra.toDegrees, dec.toDegrees)
       val guiders = Set[GuideProbe](GmosOiwfsGuideProbe.instance, PwfsGuideProbe.pwfs1, PwfsGuideProbe.pwfs2)
-      val env = TargetEnvironment.create(target) |> {_.setActiveGuiders(guiders.asJava)}
+      val env = TargetEnvironment.create(target)
       val inst = new InstGmosSouth <| {_.setPosAngle(0.0)}
 
       val strategy = SingleProbeStrategy(Pwfs2SouthKey, SingleProbeStrategyParams.PwfsParams(Site.GS, PwfsGuideProbe.pwfs2), TestVoTableBackend("/gmoss_pwfs2.xml"))
@@ -338,7 +338,7 @@ class SingleProbeStrategySpec extends Specification with NoTimeConversions {
       val dec = Declination.fromAngle(Angle.fromDMS(24, 7, 0).getOrElse(Angle.zero)).getOrElse(Declination.zero)
       val target = new SPTarget(ra.toDegrees, dec.toDegrees)
       val guiders = Set[GuideProbe](GnirsOiwfsGuideProbe.instance, PwfsGuideProbe.pwfs1, PwfsGuideProbe.pwfs2)
-      val env = TargetEnvironment.create(target) |> {_.setActiveGuiders(guiders.asJava)}
+      val env = TargetEnvironment.create(target)
       val inst = new InstGNIRS <| {_.setPosAngle(0.0)}
 
       val strategy = SingleProbeStrategy(Pwfs2NorthKey, SingleProbeStrategyParams.PwfsParams(Site.GN, PwfsGuideProbe.pwfs2), TestVoTableBackend("/gnirs_1.xml"))
@@ -356,7 +356,7 @@ class SingleProbeStrategySpec extends Specification with NoTimeConversions {
       val dec = Declination.fromAngle(Angle.zero - Angle.fromDMS(5, 23, 28).getOrElse(Angle.zero)).getOrElse(Declination.zero)
       val target = new SPTarget(ra.toDegrees, dec.toDegrees)
       val guiders = Set[GuideProbe](GnirsOiwfsGuideProbe.instance, PwfsGuideProbe.pwfs1, PwfsGuideProbe.pwfs2)
-      val env = TargetEnvironment.create(target) |> {_.setActiveGuiders(guiders.asJava)}
+      val env = TargetEnvironment.create(target)
       val inst = new InstGNIRS <| {_.setPosAngle(0.0)}
 
       val strategy = SingleProbeStrategy(Pwfs2NorthKey, SingleProbeStrategyParams.PwfsParams(Site.GN, PwfsGuideProbe.pwfs2), TestVoTableBackend("/gnirs_2.xml"))

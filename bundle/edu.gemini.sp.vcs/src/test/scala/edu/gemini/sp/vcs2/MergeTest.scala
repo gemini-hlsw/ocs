@@ -17,9 +17,7 @@ import edu.gemini.sp.vcs2.NodeDetail.Obs
 import edu.gemini.sp.vcs2.ObsEdit.{ObsUpdate, ObsDelete, ObsCreate}
 import edu.gemini.sp.vcs2.VcsFailure.VcsException
 import edu.gemini.spModel.data.ISPDataObject
-import edu.gemini.spModel.guide.GuideProbe
 import edu.gemini.spModel.rich.pot.sp._
-import edu.gemini.spModel.target.obsComp.TargetObsComp
 import edu.gemini.spModel.template.TemplateGroup
 
 import org.junit.Test
@@ -271,7 +269,7 @@ class MergeTest extends JUnitSuite {
               // resurrected observation.  We'll just make sure that the same
               // type of data object is found and not that they are identical.
               dob.getClass.getName == n.getDataObject.getClass.getName
-              
+
             case Unmodified(k)         =>
               k == n.key
           }
@@ -424,24 +422,10 @@ class MergeTest extends JUnitSuite {
     ("merged program matches merge plan",
       (start, local, remote, pc) => {
         def dataObjectMatches(nDob: ISPDataObject, tDob: ISPDataObject): Boolean = {
-          // Ugh.  There is a ridiculous "active guider" concept in the target
-          // environment which is updated behind the scenes as changes are made
-          // to the observation.  Ignore it.
-          def wipeOutActiveGuiders(toc: TargetObsComp): Unit =
-            toc.setTargetEnvironment(toc.getTargetEnvironment.setActiveGuiders(Set.empty[GuideProbe].asJava))
-
-          val same = DOB.same(nDob, tDob) || ((nDob, tDob) match {
-            case (nTarget: TargetObsComp, tTarget: TargetObsComp) =>
-              wipeOutActiveGuiders(nTarget)
-              wipeOutActiveGuiders(tTarget)
-              DOB.same(nTarget, tTarget)
-            case _ => false
-          })
-
+          val same = DOB.same(nDob, tDob)
           if (!same) {
             Console.err.println("Data objects don't match: " + nDob.getType + ", " + tDob.getType)
           }
-
           same
         }
 

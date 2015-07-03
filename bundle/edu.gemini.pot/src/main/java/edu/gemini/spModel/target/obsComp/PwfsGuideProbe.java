@@ -210,7 +210,7 @@ public enum PwfsGuideProbe implements ValidatableGuideProbe, OffsetValidatingGui
         return MM_FACTOR;
     }
 
-    private PwfsGuideProbe(int index) {
+    PwfsGuideProbe(int index) {
         this.index = index;
 
         radius = PWFS_RADIUS_ARCSEC;
@@ -338,7 +338,7 @@ public enum PwfsGuideProbe implements ValidatableGuideProbe, OffsetValidatingGui
 
     @Override
     public Option<PatrolField> getCorrectedPatrolField(ObsContext ctx) {
-        return ctx.getTargets().isActive(this) ? new Some<>(getCorrectedPatrolField(getPatrolField(), ctx)) : None.<PatrolField>instance();
+        return GuideProbeUtil.instance.isAvailable(ctx, this) ? new Some<>(getCorrectedPatrolField(getPatrolField(), ctx)) : None.<PatrolField>instance();
     }
 
     public PatrolField getCorrectedPatrolField(PatrolField patrolField, ObsContext ctx) {

@@ -14,6 +14,7 @@ import edu.gemini.spModel.gemini.michelle.InstMichelle;
 import edu.gemini.spModel.gemini.michelle.MichelleParams;
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality;
 import edu.gemini.spModel.guide.GuideProbe;
+import edu.gemini.spModel.guide.GuideProbeUtil;
 import edu.gemini.spModel.obs.ObsClassService;
 import edu.gemini.spModel.obsclass.ObsClass;
 import edu.gemini.spModel.target.env.GuideGroup;
@@ -53,7 +54,7 @@ public class MichelleRule implements IRule {
                 Option<GuideProbeTargets> gtOpt = env.getPrimaryGuideProbeTargets(PwfsGuideProbe.pwfs2);
 
                 // TODO: GuideProbeTargets.isEnabled
-                boolean activeP2 = env.isActive(PwfsGuideProbe.pwfs2);
+                boolean activeP2 = elements.getObsContext().exists(c -> GuideProbeUtil.instance.isAvailable(c, PwfsGuideProbe.pwfs2));
                 boolean hasP2 = !gtOpt.isEmpty() && activeP2 && (gtOpt.getValue().getOptions().size() > 0);
 
                 if (!hasP2) {

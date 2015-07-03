@@ -8,8 +8,6 @@ import static edu.gemini.spModel.target.env.OptionsList.UpdateOps.appendAsPrimar
 
 import edu.gemini.shared.util.immutable.*;
 import edu.gemini.spModel.guide.GuideProbe;
-import edu.gemini.spModel.guide.GuideProbeMap;
-import edu.gemini.spModel.pio.Param;
 import edu.gemini.spModel.pio.ParamSet;
 import edu.gemini.spModel.pio.Pio;
 import edu.gemini.spModel.pio.PioFactory;
@@ -43,67 +41,19 @@ public final class GuideEnvironment implements Serializable, TargetContainer, Op
     public static GuideEnvironment EMPTY = create(OptionsListImpl.create(GuideGroup.EMPTY_LIST));
 
     /**
-     * Creates a GuideEnvironment with the given set of GuideGroups and no
-     * available guiders.
+     * Creates a GuideEnvironment with the given set of GuideGroups.
      */
     public static GuideEnvironment create(OptionsList<GuideGroup> guideGroups) {
-        Set<GuideProbe> empty = Collections.emptySet();
-        return new GuideEnvironment(empty, guideGroups);
+        return new GuideEnvironment(guideGroups);
     }
 
-    /**
-     * Creates a GuideEnvironment with the given available guiders and
-     * set of GuideGroups.
-     */
-    public static GuideEnvironment create(Collection<GuideProbe> availableGuiders, OptionsList<GuideGroup> guideGroups) {
-        Set<GuideProbe> copyAct = newGuideProbeSet(availableGuiders);
-        return new GuideEnvironment(copyAct, guideGroups);
-    }
-
-    private static Set<GuideProbe> cpGuideProbes(Collection<GuideProbe> elements) {
-        final Set<GuideProbe> s = new TreeSet<>(GuideProbe.KeyComparator.instance);
-        s.addAll(elements);
-        return Collections.unmodifiableSet(s);
-    }
-
-    private static Set<GuideProbe> newGuideProbeSet(Collection<GuideProbe> elements) {
-        return (elements.size() == 0) ? Collections.<GuideProbe>emptySet() : cpGuideProbes(elements);
-    }
-
-    private final Set<GuideProbe> activeGuiders;
     private final OptionsList<GuideGroup> guideGroups;
 
-    private GuideEnvironment(Set<GuideProbe> activeGuiders, OptionsList<GuideGroup> guideGroups) {
-        if (activeGuiders == null) {
-            throw new IllegalArgumentException("availableGuiders == null");
-        }
+    private GuideEnvironment(OptionsList<GuideGroup> guideGroups) {
         if (guideGroups == null) {
             throw new IllegalArgumentException("guideGroups == null");
         }
-
-        this.activeGuiders = activeGuiders;
         this.guideGroups   = guideGroups;
-    }
-
-    /**
-     * Gets an immutable set of the {@link GuideProbe}s that should be
-     * considered active in this GuideEnvironment.
-     */
-    public Set<GuideProbe> getActiveGuiders() {
-        return activeGuiders;
-    }
-
-    /**
-     * Sets the set of {@link GuideProbe} that should be considered active in
-     * the new GuideEnvironment that is created and returned.
-     *
-     * @return a new GuideEnvironment, identical to this one, but with the
-     *         given activeGuiders
-     */
-    public GuideEnvironment setActiveGuiders(Set<GuideProbe> activeGuiders) {
-        if (activeGuiders.equals(this.activeGuiders)) return this;
-        // reset the selection whenever the set of active guiders changes
-        return new GuideEnvironment(newGuideProbeSet(activeGuiders), guideGroups);
     }
 
     /**
@@ -114,12 +64,7 @@ public final class GuideEnvironment implements Serializable, TargetContainer, Op
      */
     public SortedSet<GuideProbe> getReferencedGuiders() {
         final SortedSet<GuideProbe> res = new TreeSet<>(GuideProbe.KeyComparator.instance);
-        guideGroups.getOptions().foreach(new ApplyOp<GuideGroup>() {
-            @Override
-            public void apply(GuideGroup guideGroup) {
-                res.addAll(guideGroup.getReferencedGuiders());
-            }
-        });
+        guideGroups.getOptions().foreach(guideGroup -> res.addAll(guideGroup.getReferencedGuiders()));
         return res;
     }
 
@@ -132,7 +77,7 @@ public final class GuideEnvironment implements Serializable, TargetContainer, Op
             public SortedSet<GuideProbe> apply(GuideGroup group) {
                 return group.getPrimaryReferencedGuiders();
             }
-        }).getOrElse(new TreeSet<GuideProbe>());
+        }).getOrElse(new TreeSet<>());
     }
 
     @Override
@@ -146,10 +91,9 @@ public final class GuideEnvironment implements Serializable, TargetContainer, Op
     }
 
     private GuideEnvironment updateGuideGroups(UpdateOp<GuideGroup> f) {
-        ImList<GuideGroup> updatedList = guideGroups.getOptions().map(f);
-        Option<Integer> primary = guideGroups.getPrimaryIndex();
-        OptionsListImpl<GuideGroup> updated = OptionsListImpl.create(primary, updatedList);
-        return new GuideEnvironment(activeGuiders, updated);
+        final ImList<GuideGroup> updatedList = guideGroups.getOptions().map(f);
+        final Option<Integer> primary = guideGroups.getPrimaryIndex();
+        return new GuideEnvironment(OptionsListImpl.create(primary, updatedList));
     }
 
     @Override
@@ -178,17 +122,17 @@ public final class GuideEnvironment implements Serializable, TargetContainer, Op
 
     @Override
     public GuideEnvironment selectPrimary(Option<GuideGroup> primary) {
-        return new GuideEnvironment(activeGuiders, guideGroups.selectPrimary(primary));
+        return new GuideEnvironment(guideGroups.selectPrimary(primary));
     }
 
     @Override
     public GuideEnvironment selectPrimary(GuideGroup primary) {
-        return new GuideEnvironment(activeGuiders, guideGroups.selectPrimary(primary));
+        return new GuideEnvironment(guideGroups.selectPrimary(primary));
     }
 
     @Override
     public GuideEnvironment setPrimary(GuideGroup primary) {
-        return new GuideEnvironment(activeGuiders, guideGroups.setPrimary(primary));
+        return new GuideEnvironment(guideGroups.setPrimary(primary));
     }
 
     @Override
@@ -198,12 +142,12 @@ public final class GuideEnvironment implements Serializable, TargetContainer, Op
 
     @Override
     public GuideEnvironment setPrimaryIndex(Option<Integer> primary) {
-        return new GuideEnvironment(activeGuiders, guideGroups.setPrimaryIndex(primary));
+        return new GuideEnvironment(guideGroups.setPrimaryIndex(primary));
     }
 
     @Override
     public GuideEnvironment setPrimaryIndex(int primary) {
-        return new GuideEnvironment(activeGuiders, guideGroups.setPrimaryIndex(primary));
+        return new GuideEnvironment(guideGroups.setPrimaryIndex(primary));
     }
 
     @Override
@@ -213,17 +157,17 @@ public final class GuideEnvironment implements Serializable, TargetContainer, Op
 
     @Override
     public GuideEnvironment setOptions(ImList<GuideGroup> newList) {
-        return new GuideEnvironment(activeGuiders, guideGroups.setOptions(newList));
+        return new GuideEnvironment(guideGroups.setOptions(newList));
     }
 
     @Override
     public GuideEnvironment update(Option<Integer> primaryIndex, ImList<GuideGroup> options) {
-        return new GuideEnvironment(activeGuiders, guideGroups.update(primaryIndex, options));
+        return new GuideEnvironment(guideGroups.update(primaryIndex, options));
     }
 
     @Override
     public GuideEnvironment update(Op<GuideGroup> op) {
-        return new GuideEnvironment(activeGuiders, guideGroups.update(op));
+        return new GuideEnvironment(guideGroups.update(op));
     }
 
     public String mkString(String prefix, String sep, String suffix) {
@@ -258,13 +202,6 @@ public final class GuideEnvironment implements Serializable, TargetContainer, Op
     public ParamSet getParamSet(PioFactory factory) {
         ParamSet paramSet = factory.createParamSet(PARAM_SET_NAME);
 
-        // Active guide probes
-        Param active = factory.createParam("active");
-        for (GuideProbe g : activeGuiders) {
-            active.addValue(g.getKey());
-        }
-        paramSet.addParam(active);
-
         // Guide groups.
         Option<Integer> primary = guideGroups.getPrimaryIndex();
         if (!primary.isEmpty()) {
@@ -278,26 +215,16 @@ public final class GuideEnvironment implements Serializable, TargetContainer, Op
     }
 
     public static GuideEnvironment fromParamSet(ParamSet parent) {
-        // Active guide probes.
-        Set<GuideProbe> active = new TreeSet<>(GuideProbe.KeyComparator.instance);
-        Param activeParam = parent.getParam("active");
-        if (activeParam != null) {
-            for (String guiderKey : activeParam.getValues()) {
-                GuideProbe gp = GuideProbeMap.instance.get(guiderKey);
-                if (gp != null) active.add(gp);
-            }
-        }
-
         // Guide groups.
-        int primary = Pio.getIntValue(parent, "primary", -1);
-        Option<Integer> primaryOpt = (primary < 0) ? None.INTEGER : new Some<>(primary);
+        final int primary = Pio.getIntValue(parent, "primary", -1);
+        final Option<Integer> primaryOpt = (primary < 0) ? None.INTEGER : new Some<>(primary);
 
-        List<GuideGroup> groups = new ArrayList<>();
+        final List<GuideGroup> groups = new ArrayList<>();
         for (ParamSet gps : parent.getParamSets()) {
             groups.add(GuideGroup.fromParamSet(gps));
         }
 
-        return create(active, OptionsListImpl.create(primaryOpt, DefaultImList.create(groups)));
+        return create(OptionsListImpl.create(primaryOpt, DefaultImList.create(groups)));
     }
 
 }

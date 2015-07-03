@@ -5,7 +5,6 @@
 package edu.gemini.spModel.target.env;
 
 import edu.gemini.shared.util.immutable.Option;
-import edu.gemini.spModel.guide.GuideProbe;
 import edu.gemini.spModel.pio.ParamSet;
 import edu.gemini.spModel.pio.PioFactory;
 import edu.gemini.spModel.pio.xml.PioXmlFactory;
@@ -14,12 +13,10 @@ import edu.gemini.spModel.target.SPTarget;
 import edu.gemini.spModel.target.obsComp.PwfsGuideProbe;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
 import java.io.File;
 import java.net.URL;
-import java.util.Set;
 
 /**
  * Tests parsing pre-2010B science programs.
@@ -60,11 +57,6 @@ public class Pre2010BTargetEnvironmentIoTest {
 
                 GuideEnvironment genv = env.getGuideEnvironment();
 
-                // PWFS2 is active.
-                Set<GuideProbe> active = genv.getActiveGuiders();
-                assertEquals(1, active.size());
-                assertEquals(PwfsGuideProbe.pwfs2, active.iterator().next());
-
                 // There is one guide group
                 assertEquals(1, genv.getOptions().size());
 
@@ -90,12 +82,6 @@ public class Pre2010BTargetEnvironmentIoTest {
             public void verify(TargetEnvironment env) throws Exception {
                 GuideEnvironment genv = env.getGuideEnvironment();
 
-                // PWFS1, PWFS2 is active.
-                Set<GuideProbe> active = genv.getActiveGuiders();
-                assertEquals(2, active.size());
-                assertTrue(active.contains(PwfsGuideProbe.pwfs1));
-                assertTrue(active.contains(PwfsGuideProbe.pwfs2));
-
                 GuideGroup grp = genv.getPrimary().getValue();
                 Option<GuideProbeTargets> gpt1Opt = grp.get(PwfsGuideProbe.pwfs1);
                 Option<GuideProbeTargets> gpt2Opt = grp.get(PwfsGuideProbe.pwfs2);
@@ -111,10 +97,6 @@ public class Pre2010BTargetEnvironmentIoTest {
         DISABLED_GUIDE_PROBE_TARGET("IoDisabledGuideProbeTarget") {
             public void verify(TargetEnvironment env) throws Exception {
                 GuideEnvironment genv = env.getGuideEnvironment();
-
-                // nothing active
-                Set<GuideProbe> active = genv.getActiveGuiders();
-                assertEquals(0, active.size());
 
                 GuideGroup grp = genv.getPrimary().getValue();
                 Option<GuideProbeTargets> gptOpt = grp.get(PwfsGuideProbe.pwfs2);

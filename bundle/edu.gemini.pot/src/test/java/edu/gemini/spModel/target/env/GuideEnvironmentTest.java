@@ -23,38 +23,6 @@ import java.util.Set;
  */
 public class GuideEnvironmentTest {
 
-
-    @Test
-    public void testModifyActiveGuiders() {
-        Set<GuideProbe> active = new HashSet<GuideProbe>();
-        active.add(pwfs1);
-
-        GuideEnvironment genv = GuideEnvironment.create(active, OptionsListImpl.create(GuideGroup.EMPTY_LIST));
-        assertEquals(active, genv.getActiveGuiders());
-
-        active.add(pwfs2);
-        assertEquals(1, genv.getActiveGuiders().size());
-        assertEquals(pwfs1, genv.getActiveGuiders().iterator().next());
-    }
-
-    @Test
-    public void testSetActiveGuiders() {
-        GuideEnvironment genv = GuideEnvironment.EMPTY;
-
-        Set<GuideProbe> active = new HashSet<GuideProbe>();
-        active.add(pwfs1);
-        genv = genv.setActiveGuiders(active);
-
-        assertEquals(active, genv.getActiveGuiders());
-        active.add(pwfs2);
-
-        assertEquals(1, genv.getActiveGuiders().size());
-        assertEquals(pwfs1, genv.getActiveGuiders().iterator().next());
-
-        genv = genv.setActiveGuiders(active);
-        assertEquals(active, genv.getActiveGuiders());
-    }
-
     // Create four GuideGroups.
     // 1 - has pwfs1
     // 2 - has pwfs1, pwfs2
@@ -75,10 +43,10 @@ public class GuideEnvironmentTest {
 
     @Test
     public void testGetReferencedGuiders() {
-        Set<GuideProbe> expected = new HashSet<GuideProbe>();
+        final Set<GuideProbe> expected = new HashSet<>();
         assertEquals(expected, GuideEnvironment.EMPTY.getReferencedGuiders());
 
-        Set<GuideProbe> actual = env.getReferencedGuiders();
+        final Set<GuideProbe> actual = env.getReferencedGuiders();
         expected.add(pwfs1);
         expected.add(pwfs2);
         expected.add(GmosOiwfsGuideProbe.instance);
@@ -134,22 +102,19 @@ public class GuideEnvironmentTest {
 
     @Test
     public void testIo() {
-        // With active guide groups
-        GuideEnvironment env2 = env.setActiveGuiders(env.getReferencedGuiders());
-
         // With no primary
-        GuideEnvironment env3 = env.setPrimaryIndex(None.INTEGER);
+        final GuideEnvironment env3 = env.setPrimaryIndex(None.INTEGER);
 
         // With non-default primary
-        GuideEnvironment env4 = env.setPrimaryIndex(new Some<Integer>(1));
+        final GuideEnvironment env4 = env.setPrimaryIndex(new Some<>(1));
 
         // Empty
-        GuideEnvironment env5 = GuideEnvironment.EMPTY;
+        final GuideEnvironment env5 = GuideEnvironment.EMPTY;
 
-        ImList<GuideEnvironment> lst = DefaultImList.create(env, env2, env3, env4, env5);
-        PioFactory fact = new PioXmlFactory();
+        final ImList<GuideEnvironment> lst = DefaultImList.create(env, env3, env4, env5);
+        final PioFactory fact = new PioXmlFactory();
         for (GuideEnvironment expected : lst) {
-            GuideEnvironment actual = GuideEnvironment.fromParamSet(expected.getParamSet(fact));
+            final GuideEnvironment actual = GuideEnvironment.fromParamSet(expected.getParamSet(fact));
             Fixture.verifyGuideEnvironmentEquals(expected, actual);
         }
     }

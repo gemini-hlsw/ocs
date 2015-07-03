@@ -22,7 +22,6 @@ import edu.gemini.spModel.obsrecord.ObsExecStatus;
 import edu.gemini.spModel.seqcomp.InstrumentSequenceSync;
 import edu.gemini.spModel.seqcomp.SeqBase;
 import edu.gemini.spModel.target.obsComp.TargetObsComp;
-import edu.gemini.spModel.target.sync.GuideSync;
 import edu.gemini.spModel.telescope.IssPortSync;
 import edu.gemini.spModel.too.Too;
 import edu.gemini.spModel.too.TooType;
@@ -134,7 +133,6 @@ public class ObservationNI implements ISPNodeInitializer {
         // Set the configuration builder
         ISPObservation obs = (ISPObservation) node;
         node.putClientData(IConfigBuilder.USER_OBJ_KEY, new GemObservationCB(obs));
-        node.putClientData("GuideSync", GuideSync.instance);
         node.putClientData(InstrumentSequenceSync.USER_OBJ_KEY, InstrumentSequenceSync.instance);
 
         // Turn off electronic offset sync for now.  The only usage is

@@ -410,7 +410,7 @@ public class TpeGuidePosFeature extends TpePositionFeature
             // Draw disabled targets in red.  Draw enabled but out of range
             // targets in a slightly transparent color.
             // TODO: GuideProbeTargets.isEnabled
-            Color color = env.isActive(gt.getGuider()) ? Color.green : Color.red;
+            final Color color = obsContextOpt.exists(c -> GuideProbeUtil.instance.isAvailable(c, gt.getGuider())) ? Color.green : Color.red;
             Color invalidColor = OtColor.makeSlightlyTransparent(color);
             g2d.setColor(color);
             attrMap.put(TextAttribute.FOREGROUND, color);

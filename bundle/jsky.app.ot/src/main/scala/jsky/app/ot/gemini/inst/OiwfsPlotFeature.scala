@@ -5,7 +5,7 @@ import edu.gemini.spModel.core._
 import edu.gemini.spModel.gemini.flamingos2.{F2OiwfsProbeArm, Flamingos2OiwfsGuideProbe}
 import edu.gemini.spModel.gemini.gmos.{GmosOiwfsProbeArm, GmosOiwfsGuideProbe}
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality
-import edu.gemini.spModel.guide.{PatrolField, OffsetValidatingGuideProbe}
+import edu.gemini.spModel.guide.{GuideProbeUtil, PatrolField, OffsetValidatingGuideProbe}
 import edu.gemini.spModel.inst.{FeatureGeometry, ProbeArmGeometry}
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.rich.shared.immutable.{asScalaOpt, asGeminiOpt}
@@ -158,7 +158,7 @@ sealed class OiwfsPlotFeature(probe: OffsetValidatingGuideProbe, probeArm: Probe
     _iw.repaint()
 
   override def isEnabled(ctx: TpeContext): Boolean =
-    super.isEnabled(ctx) && ctx.targets.envOrDefault.isActive(probe)
+    super.isEnabled(ctx) && ctx.obsContext.exists(GuideProbeUtil.instance.isAvailable(_, probe))
 
   override def unloaded(): Unit = {
     OIWFS_Feature.getProps.deleteWatcher(this)

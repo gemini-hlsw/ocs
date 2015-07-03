@@ -13,12 +13,13 @@ import edu.gemini.spModel.gemini.nifs.InstNIFS;
 import edu.gemini.spModel.gemini.nifs.NIFSParams;
 import edu.gemini.spModel.gemini.nifs.NifsOiwfsGuideProbe;
 import edu.gemini.spModel.guide.GuideProbe;
+import edu.gemini.spModel.guide.GuideProbeUtil;
+import edu.gemini.spModel.obs.context.ObsContext;
 import edu.gemini.spModel.obsclass.ObsClass;
 import edu.gemini.spModel.obscomp.InstConstants;
 import edu.gemini.spModel.target.SPTarget;
 import edu.gemini.spModel.target.env.GuideProbeTargets;
 import edu.gemini.spModel.target.env.TargetEnvironment;
-import edu.gemini.spModel.target.obsComp.TargetObsComp;
 import edu.gemini.spModel.target.system.CoordinateParam;
 
 
@@ -91,7 +92,7 @@ public final class NifsRule implements IRule {
                         "Minimum exposure for NIFS is 5.3 sec.",
                         SequenceRule.getInstrumentOrSequenceNode(step, elems, config));
             }
-            
+
             return null;
         }
 
@@ -182,11 +183,10 @@ public final class NifsRule implements IRule {
         private static final String MESSAGE = "For on-axis guiding, target cannot be used as OIWFS b/c of vignetting";
 
         public IP2Problems check(ObservationElements elements)  {
-            for (TargetObsComp tenv : elements.getTargetObsComp()) {
-
-                SPTarget baseTarget = getBaseTarget(tenv);
-                Option<SPTarget> oiTarget = getOITarget(tenv);
-                Option<SPTarget> aoTarget = getAOTarget(tenv);
+            for (ObsContext ctx : elements.getObsContext()) {
+                final SPTarget baseTarget       = ctx.getTargets().getBase();
+                final Option<SPTarget> oiTarget = getOITarget(ctx);
+                final Option<SPTarget> aoTarget = getAOTarget(ctx);
 
                 if (baseTarget == null || oiTarget.isEmpty() || aoTarget.isEmpty()) return null;
                 //now, let's compare coordinates. If they are the same, raise an error
@@ -216,27 +216,21 @@ public final class NifsRule implements IRule {
             return null;
         }
 
-        private Option<SPTarget> getAOTarget(TargetObsComp oc) {
+        private Option<SPTarget> getAOTarget(ObsContext oc) {
             return getPrimaryTarget(oc, AltairAowfsGuider.instance);
         }
 
-        private Option<SPTarget> getOITarget(TargetObsComp oc) {
+        private Option<SPTarget> getOITarget(ObsContext oc) {
             return getPrimaryTarget(oc, NifsOiwfsGuideProbe.instance);
         }
 
-        private Option<SPTarget> getPrimaryTarget(TargetObsComp oc, GuideProbe guider) {
-            TargetEnvironment env = oc.getTargetEnvironment();
-            // TODO: GuideProbeTargets.isEnabled
-            if (!env.isActive(guider)) return None.instance(); // doesn't count if not enabled
-
-            Option<GuideProbeTargets> gtOpt = env.getPrimaryGuideProbeTargets(guider);
+        private Option<SPTarget> getPrimaryTarget(ObsContext oc, GuideProbe guider) {
+            final TargetEnvironment env = oc.getTargets();
+            if (!GuideProbeUtil.instance.isAvailable(oc, guider)) return None.instance();
+            final Option<GuideProbeTargets> gtOpt = env.getPrimaryGuideProbeTargets(guider);
             if (gtOpt.isEmpty()) return None.instance();
-            GuideProbeTargets gt = gtOpt.getValue();
+            final GuideProbeTargets gt = gtOpt.getValue();
             return gt.getPrimary();
-        }
-
-        private SPTarget getBaseTarget(TargetObsComp oc) {
-            return oc.getTargetEnvironment().getBase();
         }
     };
 
