@@ -1,6 +1,6 @@
 package edu.gemini.p2checker.rules
 
-import java.util.{Collections, UUID}
+import java.util.UUID
 
 import edu.gemini.p2checker.api.ObservationElements
 import edu.gemini.p2checker.rules.general.GeneralRule
@@ -9,7 +9,7 @@ import edu.gemini.pot.util.POTUtil
 import edu.gemini.spModel.core.SPProgramID
 import edu.gemini.spModel.gemini.gmos.GmosOiwfsGuideProbe
 import edu.gemini.spModel.rich.pot.sp._
-import edu.gemini.spModel.target.env.{GuideProbeTargets, TargetEnvironment}
+import edu.gemini.spModel.target.env.GuideProbeTargets
 import edu.gemini.spModel.target.obsComp.TargetObsComp
 import edu.gemini.shared.util.immutable.ScalaConverters._
 import edu.gemini.spModel.target.system.CoordinateParam.Units
@@ -27,7 +27,7 @@ class WfsRuleSpec extends Specification {
   def expect(errs: String*)(mod: HmsDegTarget => ITarget) = {
 
     // Ok just a bunch of setup. Program with one observation, GMOS, default target env.
-    val f = POTUtil.createFactory(UUID.randomUUID());
+    val f = POTUtil.createFactory(UUID.randomUUID())
     val p = f.createProgram(null, SPProgramID.toProgramID("GS-2014B-Q-1"))
     val o = f.createObservation(p, null) <| p.addObservation
     val i = f.createObsComponent(p, SPComponentType.INSTRUMENT_GMOS, null) <| o.addObsComponent
@@ -42,7 +42,6 @@ class WfsRuleSpec extends Specification {
       val gpt = GuideProbeTargets.create(p, g)
       val gg  = te.getOrCreatePrimaryGuideGroup.setAll(List(gpt).asImList)
       te.setPrimaryGuideGroup(gg)
-        .setActiveGuiders(Collections.singleton(p))
     }
 
     // Update the data object

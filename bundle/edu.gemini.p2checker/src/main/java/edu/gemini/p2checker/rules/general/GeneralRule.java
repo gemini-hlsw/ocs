@@ -25,6 +25,7 @@ import edu.gemini.spModel.gemini.niri.InstNIRI;
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality;
 import edu.gemini.spModel.gemini.seqcomp.SeqRepeatOffsetBase;
 import edu.gemini.spModel.guide.GuideProbe;
+import edu.gemini.spModel.guide.GuideProbeUtil;
 import edu.gemini.spModel.obs.ObsClassService;
 import edu.gemini.spModel.obs.ObservationStatus;
 import edu.gemini.spModel.obsclass.ObsClass;
@@ -194,7 +195,10 @@ public class GeneralRule implements IRule {
             for (GuideProbeTargets guideTargets : env.getOrCreatePrimaryGuideGroup()) {
                 GuideProbe guider = guideTargets.getGuider();
                 // TODO: GuideProbeTargets.isEnabled
-                if ((!env.isActive(guider)) && (guideTargets.getOptions().size() > 0)) {
+
+                final boolean dis = elements.getObsContext().exists(c -> !GuideProbeUtil.instance.isAvailable(c, guider) &&
+                                                                         (guideTargets.getOptions().size() > 0));
+                if (dis) {
                     problems.addError(PREFIX+"DISABLED_GUIDER", String.format(DISABLED_GUIDER, guider.getKey()),
                             elements.getTargetObsComponentNode().getValue());
                     continue;
@@ -276,13 +280,6 @@ public class GeneralRule implements IRule {
                 default:
                     throw new Error("Unpossible target tag: " + t1.getTag());
             }
-        }
-
-        private boolean hasPrimary(TargetEnvironment env, GuideProbe guider) {
-            // TODO: GuideProbeTargets.isEnabled
-            if (!env.isActive(guider)) return false;
-            Option<GuideProbeTargets> gtOpt = env.getPrimaryGuideProbeTargets(guider);
-            return (!gtOpt.isEmpty()) && !gtOpt.getValue().getPrimary().isEmpty();
         }
 
         private boolean hasSameCoordinates(HmsDegTarget base, HmsDegTarget guide) {

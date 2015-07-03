@@ -6,21 +6,16 @@ package edu.gemini.spModel.config;
 
 import edu.gemini.pot.sp.ISPObsComponent;
 import edu.gemini.pot.sp.ISPObservation;
-import edu.gemini.shared.util.immutable.ImOption;
-import edu.gemini.shared.util.immutable.None;
-import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.spModel.config.map.ConfigValMap;
 import edu.gemini.spModel.config.map.ConfigValMapInstances;
 import edu.gemini.spModel.config2.Config;
 import edu.gemini.spModel.config2.ConfigSequence;
 import edu.gemini.spModel.config2.ItemKey;
 import edu.gemini.spModel.data.config.*;
-import edu.gemini.spModel.target.env.TargetEnvironment;
+import edu.gemini.spModel.obs.context.ObsContext;
 import edu.gemini.spModel.target.obsComp.GuideSequence;
-import edu.gemini.spModel.target.obsComp.TargetObsComp;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -49,22 +44,11 @@ public final class ConfigBridge {
         }
     }
 
-    /*
-    */
     public static ConfigSequence extractSequence(ISPObservation obs, Map options, ConfigValMap map) {
         return extractSequence(obs, options, map, false);
     }
 
     public static ConfigSequence extractSequence(ISPObservation obs, Map options, ConfigValMap map, boolean filterMeta) {
-//        if (((options == null) || (options.size() == 0)) && !filterMeta) {
-//            cs = SPObsCache.getConfigSequence(obs);
-//            if (cs == null) {
-//                cs = calculateSequence(obs, null, false);
-//                SPObsCache.setConfigSequence(obs, cs);
-//            }
-//        } else {
-//            cs = calculateSequence(obs, options, filterMeta);
-//        }
        return mapSequence(calculateSequence(obs, options, filterMeta), map);
     }
 
@@ -142,19 +126,6 @@ public final class ConfigBridge {
 
         // Post-process to fix guiding for offset positions as required by the
         // seqexec. :-(
-        return (new GuideSequence(getTargetEnvironment(obs))).postProcessSequence(configSeq);
-    }
-
-    private static final Option<TargetEnvironment> getTargetEnvironment(ISPObservation obs)  {
-        final List<ISPObsComponent> compList = obs.getObsComponents();
-        if (compList == null) return None.instance();
-
-        for (ISPObsComponent obsComp : compList) {
-            if (TargetObsComp.SP_TYPE.equals(obsComp.getType())) {
-                TargetObsComp toc = (TargetObsComp) obsComp.getDataObject();
-                return ImOption.apply(toc.getTargetEnvironment());
-            }
-        }
-        return None.instance();
+        return (new GuideSequence(ObsContext.create(obs))).postProcessSequence(configSeq);
     }
 }

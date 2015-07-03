@@ -25,14 +25,6 @@ public class TccFieldConfig extends ParamSet {
     }
 
     /**
-     * The name to be used in the "value" of the field wavelength param
-     * @return String that is name
-     */
-    String getConfigName() {
-        return _name;
-    }
-
-    /**
      * build will use the <code>(@link TargetEnv}</code> to construct
      * an XML document.
      */
@@ -94,9 +86,7 @@ public class TccFieldConfig extends ParamSet {
         if ( env.getGroups().size() <= 1 ) return "";
         if (!gg.getName().isEmpty()) return gg.getName().getValue();
 
-        Option<Tuple2<GuideGroup, Integer>> res = env.getGroups().zipWithIndex().find(new Function1<Tuple2<GuideGroup,Integer>,Boolean>() {
-            @Override public Boolean apply(Tuple2<GuideGroup, Integer> tup) { return tup._1() == gg; }
-        });
+        final Option<Tuple2<GuideGroup, Integer>> res = env.getGroups().zipWithIndex().find(tup -> tup._1() == gg);
         return res.map(new Function1<Tuple2<GuideGroup,Integer>,String>() {
             @Override public String apply(Tuple2<GuideGroup, Integer> tup) { return "Guide Group " + (tup._2() + 1); }
         }).getOrElse("");
@@ -104,7 +94,7 @@ public class TccFieldConfig extends ParamSet {
 
     private void addTargets(TargetEnvironment env) throws WdbaGlueException {
         addBaseGroup(env);
-        for (GuideProbeTargets gt : env.getOrCreatePrimaryGuideGroup()) addGuideGroup(env, gt);
+        for (GuideProbeTargets gt : env.getOrCreatePrimaryGuideGroup()) addGuideGroup(gt);
     }
 
     private static boolean isEmpty(String name) {
@@ -135,10 +125,9 @@ public class TccFieldConfig extends ParamSet {
         add(TargetGroupConfig.createBaseGroup(env));
     }
 
-    private void addGuideGroup(TargetEnvironment env, GuideProbeTargets gt) throws WdbaGlueException {
+    private void addGuideGroup(GuideProbeTargets gt) throws WdbaGlueException {
         // Ignore disabled guide targets.
-        // TODO: GuideProbeTargets.isEnabled
-        if (!env.isActive(gt.getGuider())) return;
+        if (!_oe.getAvailableGuiders().contains(gt.getGuider())) return;
 
         // Ignore empty guide targets.
         ImList<SPTarget> targets = gt.getOptions();

@@ -3,7 +3,6 @@ package edu.gemini.wdba.tcc;
 import edu.gemini.pot.sp.ISPObservation;
 import edu.gemini.pot.sp.SPComponentType;
 import edu.gemini.pot.sp.SPObservationID;
-import edu.gemini.spModel.core.SPProgramID;
 import edu.gemini.shared.util.immutable.*;
 import edu.gemini.spModel.core.Site;
 import edu.gemini.spModel.data.ISPDataObject;
@@ -13,8 +12,8 @@ import edu.gemini.spModel.gemini.altair.InstAltair;
 import edu.gemini.spModel.gemini.gems.Gems;
 import edu.gemini.spModel.gemini.seqcomp.SeqRepeatOffsetBase;
 import edu.gemini.spModel.guide.GuideProbe;
+import edu.gemini.spModel.guide.GuideProbeUtil;
 import edu.gemini.spModel.obscomp.SPInstObsComp;
-import edu.gemini.spModel.target.SPTarget;
 import edu.gemini.spModel.target.env.GuideGroup;
 import edu.gemini.spModel.target.env.GuideProbeTargets;
 import edu.gemini.spModel.target.env.TargetEnvironment;
@@ -26,6 +25,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.logging.Logger;
 
 /**
@@ -63,7 +63,7 @@ public final class ObservationEnvironment {
         if (aoNode == null) {
             _ao = None.instance();
         } else {
-            _ao = new Some<ISPDataObject>(aoNode.getDataObject());
+            _ao = new Some<>(aoNode.getDataObject());
         }
 
         ITccInstrumentSupport sup = null;
@@ -90,6 +90,17 @@ public final class ObservationEnvironment {
         _is = sup;
     }
 
+    public Set<GuideProbe> getAvailableGuiders() {
+        final List<ISPDataObject> dataObjects = new ArrayList<>(3);
+        if (_targetEnv != null) {
+            dataObjects.add(_obs.getTarget().getDataObject());
+        }
+        if (_inst != null) {
+            dataObjects.add(_obs.getInstrument().getDataObject());
+        }
+        _ao.foreach(dataObjects::add);
+        return GuideProbeUtil.instance.getAvailableGuiders(dataObjects);
+    }
 
     // Create the class instance by calling its create factory method with this OE as an arg
     @SuppressWarnings("unchecked")
@@ -115,11 +126,6 @@ public final class ObservationEnvironment {
         return _obs.getObservationId();
     }
 
-    public SPProgramID getProgramID() {
-        SPObservationID obsId = _obs.getObservationId();
-        return obsId == null ? null : obsId.getProgramID();
-    }
-
     public String getObservationTitle() {
         return _obs.getDataObject().getTitle();
     }
@@ -134,17 +140,6 @@ public final class ObservationEnvironment {
 
     public boolean isSouth() {
         return _site == Site.GS;
-    }
-
-    /**
-     * Allows an instrument support implementation to check to see if the observation's
-     * instrument is the one it wants.
-     * @param type the type for checking
-     * @return true if the types match and there is an instrument else false
-     */
-    public boolean isMyInstrument(SPComponentType type) {
-        if (_inst == null) return false;
-        return _inst.getType().equals(type);
     }
 
     /**
@@ -167,15 +162,6 @@ public final class ObservationEnvironment {
         return (!gtOpt.isEmpty() && (gtOpt.getValue().getOptions().size() > 0));
     }
 
-    public Option<SPTarget> getPrimaryTarget(GuideProbe probe) {
-        Option<GuideProbeTargets> gtOpt = _targetEnv.getPrimaryGuideProbeTargets(probe);
-        Option<SPTarget> none = None.instance();
-
-        // TODO: GuideProbeTargets.isEnabled
-        if (!_targetEnv.isActive(probe)) return none;
-        return gtOpt.isEmpty() ? none : gtOpt.getValue().getPrimary();
-    }
-
     public boolean containsTargets(GuideProbe.Type type) {
         GuideGroup grp = _targetEnv.getOrCreatePrimaryGuideGroup();
         ImList<GuideProbeTargets> gtList = grp.getAllMatching(type);
@@ -184,22 +170,6 @@ public final class ObservationEnvironment {
                 return gt.getOptions().size() > 0;
             }
         });
-    }
-
-    public Option<SPTarget> getPrimaryTarget(GuideProbe.Type type) {
-        GuideGroup grp = _targetEnv.getOrCreatePrimaryGuideGroup();
-        ImList<GuideProbeTargets> gtList = grp.getAllMatching(type);
-
-        Option<GuideProbeTargets> gtOpt = gtList.find(new PredicateOp<GuideProbeTargets>() {
-            @Override public Boolean apply(GuideProbeTargets gt) {
-                if (!_targetEnv.isActive(gt.getGuider())) return false;
-                Option<SPTarget> target = gt.getPrimary();
-                return !target.isEmpty();
-            }
-        });
-
-        Option<SPTarget> none = None.instance();
-        return gtOpt.isEmpty() ? none : gtOpt.getValue().getPrimary();
     }
 
     public enum AoAspect {

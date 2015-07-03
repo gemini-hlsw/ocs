@@ -17,7 +17,6 @@ import edu.gemini.spModel.gemini.michelle.InstMichelle;
 import edu.gemini.spModel.gemini.niri.InstNIRI;
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality;
 import edu.gemini.spModel.gemini.seqcomp.SeqRepeatFlatObs;
-import edu.gemini.spModel.guide.GuideProbe;
 import edu.gemini.spModel.seqcomp.SeqRepeatDarkObs;
 import edu.gemini.spModel.seqcomp.SeqRepeatObserve;
 import edu.gemini.spModel.target.SPTarget;
@@ -29,9 +28,7 @@ import org.junit.Before;
 import org.junit.Ignore;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 /**
  * Class AbstractRuleTest
@@ -65,23 +62,11 @@ public class AbstractRuleTest {
         return createObsComp(prog, dataObj);
     }
 
-    /*
-     private ISPSeqComponent createSeqCompx(AbstractDataObject dataObj) throws SPUnknownIDException {
-        return createSeqCompx(prog, dataObj);
-    } */
     private ISPObsComponent createObsComp(ISPProgram prog, AbstractDataObject dataObj) throws SPUnknownIDException {
         ISPObsComponent obscomp = fact.createObsComponent(prog, dataObj.getType(), null);
         obscomp.setDataObject(dataObj);
         return obscomp;
     }
-
-    /*
-    private ISPSeqComponent createSeqComp(ISPProgram prog, AbstractDataObject dataObj) throws SPUnknownIDException {
-        ISPSeqComponent obscomp = fact.createSeqComponent(prog, dataObj.getType(), null);
-        obscomp.setDataObject(dataObj);
-        return obscomp;
-    }
-    */
 
     protected ISPProgram createBasicProgram() throws SPException, DBIDClashException {
         return createBasicProgram(null);
@@ -240,18 +225,11 @@ public class AbstractRuleTest {
         SPTarget sptarget = new SPTarget();
         sptarget.getTarget().setName("name");
         sptarget.notifyOfGenericUpdate();
-        Set<GuideProbe> guideProbes = new HashSet<GuideProbe>();
-        guideProbes.add(AltairAowfsGuider.instance);
-        guideProbes.add(PwfsGuideProbe.pwfs1);
 
         GuideEnvironment guide = GuideEnvironment.create(
-                guideProbes,
                 OptionsListImpl.create(
                         GuideGroup.create(
                                 "group",
-//                                GuideProbeTargets.create(
-//                                        AltairAowfsGuider.instance,
-//                                        sptarget),
                                 GuideProbeTargets.create(
                                         PwfsGuideProbe.pwfs1,
                                         sptarget)
@@ -280,11 +258,8 @@ public class AbstractRuleTest {
         SPTarget sptarget = new SPTarget();
         sptarget.getTarget().setName("name");
         sptarget.notifyOfGenericUpdate();
-        Set<GuideProbe> guideProbes = new HashSet<GuideProbe>();
-        guideProbes.add(AltairAowfsGuider.instance);
 
         GuideEnvironment guide = GuideEnvironment.create(
-                guideProbes,
                 OptionsListImpl.create(
                         GuideGroup.create(
                                 "group",

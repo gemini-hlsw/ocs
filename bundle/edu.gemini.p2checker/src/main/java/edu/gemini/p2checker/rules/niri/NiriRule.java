@@ -7,6 +7,7 @@ import edu.gemini.p2checker.rules.altair.AltairRule;
 import edu.gemini.p2checker.util.AbstractConfigRule;
 import edu.gemini.p2checker.util.SequenceRule;
 import edu.gemini.pot.sp.ISPObsComponent;
+import edu.gemini.shared.util.immutable.ImOption;
 import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.skycalc.Offset;
 import edu.gemini.spModel.config2.Config;
@@ -18,11 +19,11 @@ import edu.gemini.spModel.gemini.niri.Niri;
 import edu.gemini.spModel.gemini.niri.NiriOiwfsGuideProbe;
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality;
 import edu.gemini.spModel.guide.GuideProbe;
+import edu.gemini.spModel.guide.GuideProbeUtil;
 import edu.gemini.spModel.obs.ObsClassService;
+import edu.gemini.spModel.obs.context.ObsContext;
 import edu.gemini.spModel.obsclass.ObsClass;
 import edu.gemini.spModel.target.env.GuideProbeTargets;
-import edu.gemini.spModel.target.env.TargetEnvironment;
-import edu.gemini.spModel.target.obsComp.TargetObsComp;
 
 import java.beans.PropertyDescriptor;
 
@@ -43,31 +44,20 @@ public final class NiriRule implements IRule {
     /**
      * NIRI Imaging ==> Disperser == "none"
      */
-    private static IConfigMatcher IMAGING_MATCHER = new IConfigMatcher() {
-
-        public boolean matches(Config config, int step, ObservationElements elems) {
-            Niri.Disperser disp = (Niri.Disperser) SequenceRule.getInstrumentItem(config, InstNIRI.DISPERSER_PROP);
-            return disp == Niri.Disperser.NONE;
-        }
+    private static IConfigMatcher IMAGING_MATCHER = (config, step, elems) -> {
+        Niri.Disperser disp = (Niri.Disperser) SequenceRule.getInstrumentItem(config, InstNIRI.DISPERSER_PROP);
+        return disp == Niri.Disperser.NONE;
     };
 
-    private static IConfigMatcher NIRI_SCIENCE_MATCHER = new IConfigMatcher() {
-
-        public boolean matches(Config config, int step, ObservationElements elems) {
-            ObsClass obsClass = SequenceRule.getObsClass(config);
-            return obsClass == ObsClass.SCIENCE;
-        }
+    private static IConfigMatcher NIRI_SCIENCE_MATCHER = (config, step, elems) -> {
+        ObsClass obsClass = SequenceRule.getObsClass(config);
+        return obsClass == ObsClass.SCIENCE;
     };
 
     /**
      * NIRI + Altair
      */
-    private static IConfigMatcher ALTAIR_MATCHER = new IConfigMatcher() {
-
-        public boolean matches(Config config, int step, ObservationElements elems) {
-            return elems.hasAltair();
-        }
-    };
+    private static IConfigMatcher ALTAIR_MATCHER = (config, step, elems) -> elems.hasAltair();
 
     /**
      * Rule for Sky Background and NIRI
@@ -494,48 +484,37 @@ public final class NiriRule implements IRule {
 
         //private static final String ALTAIR_NOAO_MESSAGE = "If using Altair you must define an AOWFS target";
         public P2Problems check(ObservationElements elements)  {
-            for (TargetObsComp obsComp : elements.getTargetObsComp()) {
-
-                TargetEnvironment env = obsComp.getTargetEnvironment();
+            for (ObsContext obsCtx : elements.getObsContext()) {
 
                 P2Problems problems = new P2Problems();
-                boolean hasAOTarget = hasAO(env);
+                boolean hasAOTarget = hasAO(obsCtx);
                 boolean hasAOComp = elements.hasAltair();
 
                 if (hasAOTarget && !hasAOComp) {
                     problems.addError(PREFIX + "AO_NOALTAIR_MSG", AO_NOALTAIR_MSG, elements.getTargetObsComponentNode().getValue());
                 }
-//            else if (!hasAOTarget && hasAOComp) {
-//                problems.addError(ALTAIR_NOAO_MESSAGE, elements.getTargetObsComponentNode());
-//            }
 
-                if (hasOI(env)) {
+                if (hasOI(obsCtx)) {
                     problems.addError(PREFIX + "OI_MESSAGE", OI_MESSAGE, elements.getTargetObsComponentNode().getValue());
                 }
 
-                //Removed for SCI11-301: PWFS1 + LGS phase 2 checks
-//            if (!(hasP2 || hasAOTarget)) {
-//                if (ObsClassService.lookupObsClass(elements.getObservationNode()) != ObsClass.DAY_CAL) {
-//                    problems.addWarning(MESSAGE, elements.getTargetObsComponentNode());
-//                }
-//            }
                 return problems;
             }
             return null;
         }
 
-        private boolean hasOI(TargetEnvironment env) {
-            return hasPrimary(env, NiriOiwfsGuideProbe.instance);
+        private boolean hasOI(ObsContext obsCtx) {
+            return hasPrimary(obsCtx, NiriOiwfsGuideProbe.instance);
         }
 
-        private boolean hasAO(TargetEnvironment env) {
-            return hasPrimary(env, AltairAowfsGuider.instance);
+        private boolean hasAO(ObsContext obsCtx) {
+            return hasPrimary(obsCtx, AltairAowfsGuider.instance);
         }
 
-        private boolean hasPrimary(TargetEnvironment env, GuideProbe guider) {
+        private boolean hasPrimary(ObsContext obsCtx, GuideProbe guider) {
             // TODO: GuideProbeTargets.isEnabled
-            if (!env.isActive(guider)) return false;
-            Option<GuideProbeTargets> gtOpt = env.getPrimaryGuideProbeTargets(guider);
+            if (!GuideProbeUtil.instance.isAvailable(obsCtx, guider)) return false;
+            final Option<GuideProbeTargets> gtOpt = ImOption.apply(obsCtx.getTargets()).flatMap(e -> e.getPrimaryGuideProbeTargets(guider));
             return (!gtOpt.isEmpty()) && !gtOpt.getValue().getPrimary().isEmpty();
         }
     };
@@ -981,7 +960,7 @@ public final class NiriRule implements IRule {
     }
 
 
-    private static enum State {
+    private enum State {
         UNDEFINED,
         PROBLEM,
         NOPROBLEM

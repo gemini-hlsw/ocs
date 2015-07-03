@@ -9,6 +9,7 @@ import edu.gemini.spModel.core.{MagnitudeBand, Site}
 import edu.gemini.spModel.gemini.altair.{AltairParams, InstAltair}
 import edu.gemini.spModel.gemini.gems.Canopus
 import edu.gemini.spModel.gemini.nici.NiciOiwfsGuideProbe
+import edu.gemini.spModel.guide.{GuideProbe, GuideProbeUtil}
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.rich.shared.immutable._
 //import edu.gemini.shared.util.immutable.ScalaConverters._
@@ -106,10 +107,11 @@ object Strategy {
   )
 
   private def guidersAvailable(ctx: ObsContext)(s: AgsStrategy): Boolean = {
+    val isAvailable = GuideProbeUtil.instance.isAvailable(ctx, _: GuideProbe)
     s match {
-      case SingleProbeStrategy(_, params, _) => ctx.getTargets.isActive(params.guideProbe)
-      case ScienceTargetStrategy(_, gp, _)   => ctx.getTargets.isActive(gp)
-      case GemsStrategy                      => ctx.getTargets.isActive(Canopus.Wfs.cwfs3) // any canopus would serve
+      case SingleProbeStrategy(_, params, _) => isAvailable(params.guideProbe)
+      case ScienceTargetStrategy(_, gp, _)   => isAvailable(gp)
+      case GemsStrategy                      => isAvailable(Canopus.Wfs.cwfs3) // any canopus would serve
       case _                                 => false
     }
   }

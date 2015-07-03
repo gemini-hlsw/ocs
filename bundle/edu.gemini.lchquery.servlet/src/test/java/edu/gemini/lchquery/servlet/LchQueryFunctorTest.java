@@ -19,7 +19,6 @@ import edu.gemini.spModel.gemini.gmos.InstGMOSCB;
 import edu.gemini.spModel.gemini.gmos.InstGmosNorth;
 import edu.gemini.spModel.gemini.obscomp.SPProgram;
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality;
-import edu.gemini.spModel.guide.GuideProbe;
 import edu.gemini.spModel.obs.ObsPhase2Status;
 import edu.gemini.spModel.obs.SPObservation;
 import edu.gemini.spModel.target.SPTarget;
@@ -159,12 +158,8 @@ public class LchQueryFunctorTest {
         SPTarget sptarget = new SPTarget();
         sptarget.getTarget().setName("name");
         sptarget.notifyOfGenericUpdate();
-        Set<GuideProbe> guideProbes = new HashSet<GuideProbe>();
-        guideProbes.add(AltairAowfsGuider.instance);
-        guideProbes.add(PwfsGuideProbe.pwfs1);
 
-        GuideEnvironment guide = GuideEnvironment.create(
-                guideProbes,
+        final GuideEnvironment guide = GuideEnvironment.create(
                 OptionsListImpl.<GuideGroup>create(
                         GuideGroup.create(
                                 "group",
@@ -174,7 +169,7 @@ public class LchQueryFunctorTest {
                                 GuideProbeTargets.create(
                                         PwfsGuideProbe.pwfs1,
                                         sptarget))));
-        TargetEnvironment env = TargetEnvironment.create(sptarget, guide, ImCollections.EMPTY_LIST);
+        final TargetEnvironment env = TargetEnvironment.create(sptarget, guide, ImCollections.emptyList());
 
         target.setTargetEnvironment(env);
         ISPObsComponent targetObsComp = createObsComp(prog, target);
@@ -196,18 +191,15 @@ public class LchQueryFunctorTest {
         SPTarget sptarget = new SPTarget();
         sptarget.getTarget().setName("name");
         sptarget.notifyOfGenericUpdate();
-        Set<GuideProbe> guideProbes = new HashSet<GuideProbe>();
-        guideProbes.add(AltairAowfsGuider.instance);
 
-        GuideEnvironment guide = GuideEnvironment.create(
-                guideProbes,
+        final GuideEnvironment guide = GuideEnvironment.create(
                 OptionsListImpl.<GuideGroup>create(
                         GuideGroup.create(
                                 "group",
                                 GuideProbeTargets.create(
                                         AltairAowfsGuider.instance,
                                         sptarget))));
-        TargetEnvironment env = TargetEnvironment.create(sptarget, guide, ImCollections.EMPTY_LIST);
+        final TargetEnvironment env = TargetEnvironment.create(sptarget, guide, ImCollections.emptyList());
 
         target.setTargetEnvironment(env);
         ISPObsComponent targetObsComp = createObsComp(prog, target);

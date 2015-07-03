@@ -16,8 +16,11 @@ import edu.gemini.shared.skyobject.coords.HmsDegCoordinates;
 import edu.gemini.spModel.data.AbstractDataObject;
 import edu.gemini.spModel.data.ISPDataObject;
 import edu.gemini.spModel.obs.context.ObsContext;
+import edu.gemini.spModel.obscomp.SPInstObsComp;
 import edu.gemini.spModel.target.SPTarget;
 import edu.gemini.spModel.target.env.GuideProbeTargets;
+import edu.gemini.spModel.target.env.TargetEnvironment;
+import edu.gemini.spModel.target.obsComp.TargetObsComp;
 
 import java.awt.geom.AffineTransform;
 import java.util.*;
@@ -60,6 +63,23 @@ public enum GuideProbeUtil {
         return getAvailableGuiders(dataObjs);
     }
 
+    public Set<GuideProbe> getAvailableGuiders(ObsContext ctx) {
+        final List<AbstractDataObject> dataObjects = new ArrayList<>(3);
+        final TargetEnvironment env = ctx.getTargets();
+        if (env != null) {
+            final TargetObsComp toc = new TargetObsComp();
+            toc.setTargetEnvironment(env);
+            dataObjects.add(toc);
+        }
+        final SPInstObsComp inst = ctx.getInstrument();
+        if (inst != null) {
+            dataObjects.add(inst);
+        }
+        ctx.getAOComponent().foreach(dataObjects::add);
+
+        return getAvailableGuiders(dataObjects);
+    }
+
     public Set<GuideProbe> getAvailableGuiders(Collection<? extends ISPDataObject> dataObjects) {
         final Set<GuideProbe> res = new HashSet<>();
         final Set<GuideProbe> anti = new HashSet<>();
@@ -76,6 +96,14 @@ public enum GuideProbeUtil {
         res.removeAll(anti);
 
         return res;
+    }
+
+    public boolean isAvailable(ISPObservation obs, GuideProbe guider) {
+       return getAvailableGuiders(obs).contains(guider);
+    }
+
+    public boolean isAvailable(ObsContext ctx, GuideProbe guider) {
+        return getAvailableGuiders(ctx).contains(guider);
     }
 
     public boolean validate(final SPTarget guideStar, final GuideProbe guideProbe, final ObsContext ctx) {

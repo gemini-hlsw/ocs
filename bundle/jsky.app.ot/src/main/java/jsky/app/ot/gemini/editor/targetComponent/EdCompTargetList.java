@@ -297,7 +297,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
             final TargetEnvironment env1 = obsComp.getTargetEnvironment();
 
             if (inst.hasGuideProbes()) {
-                final List<GuideProbe> guiders = new ArrayList<>(env1.getGuideEnvironment().getActiveGuiders());
+                final List<GuideProbe> guiders = new ArrayList<>(GuideProbeUtil.instance.getAvailableGuiders(getContextObservation()));
                 Collections.sort(guiders, GuideProbe.KeyComparator.instance);
 
                 for (final GuideProbe probe : guiders) {

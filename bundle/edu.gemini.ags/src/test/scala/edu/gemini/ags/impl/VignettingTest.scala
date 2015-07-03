@@ -102,7 +102,7 @@ class VignettingTest {
                   offsets: List[Offset] = Nil,
                   conditions: Conditions = BEST): Unit = {
     config.inst.setPosAngleDegrees(posAngle)
-    val targetEnv = TargetEnvironment.create(base).addActive(config.probe)
+    val targetEnv = TargetEnvironment.create(base)
     val offsetSet = offsets.map(_.toOldModel).toSet.asJava
     val ctx       = ObsContext.create(targetEnv, config.inst, Some(config.site).asGeminiOpt, BEST, offsetSet, null)
     val strategy  = AgsRegistrar.currentStrategy(ctx).get.asInstanceOf[SingleProbeStrategy]

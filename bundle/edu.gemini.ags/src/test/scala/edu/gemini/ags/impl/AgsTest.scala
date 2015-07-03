@@ -51,7 +51,7 @@ object AgsTest {
 
   def apply(instType: SPComponentType, guideProbe: GuideProbe, site: Option[Site]): AgsTest = {
     val base       = new SPTarget(0.0, 0.0)
-    val targetEnv  = TargetEnvironment.create(base).addActive(guideProbe)
+    val targetEnv  = TargetEnvironment.create(base)
 
     val inst = InstRegistry.instance.prototype(instType.narrowType).getValue
     inst match {
@@ -117,6 +117,9 @@ case class AgsTest(ctx: ObsContext, guideProbe: GuideProbe, usable: List[(Sidere
     }
     copy(ctx.withSciencePositions(o.toSet.asJava))
   }
+
+  def withStrategyOverride(s: AgsStrategy): AgsTest =
+    copy(ctx.withAgsStrategyOverride(Option(s.key).asGeminiOpt))
 
   def withValidArea(f: (ObsContext, GuideProbe) => Area): AgsTest =
     copy(calculateValidArea = f)

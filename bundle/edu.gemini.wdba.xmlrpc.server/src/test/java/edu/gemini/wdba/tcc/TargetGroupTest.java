@@ -103,7 +103,6 @@ public final class TargetGroupTest extends TestBase {
 
         TargetEnvironment env;
         env = TargetEnvironment.create(base).setAllPrimaryGuideProbeTargets(gtCollection).setUserTargets(userTargets);
-        env = env.addActive(PwfsGuideProbe.pwfs2);
 
         testTargetEnvironment(env);
     }
@@ -140,6 +139,11 @@ public final class TargetGroupTest extends TestBase {
      * Disabled guide targets.
      */
     public void testDisabledGuideTargets() throws Exception {
+
+        // Add a GMOS-S component so that the guider is available.
+        final ISPObsComponent gmosComp = odb.getFactory().createObsComponent(prog, InstGmosSouth.SP_TYPE, null);
+        obs.addObsComponent(gmosComp);
+
         SPTarget guide1 = new SPTarget();
         guide1.getTarget().setName("OIWFS-1");
         SPTarget guide2 = new SPTarget();
@@ -171,7 +175,6 @@ public final class TargetGroupTest extends TestBase {
 
         TargetEnvironment env = TargetEnvironment.create(base);
         env = env.putPrimaryGuideProbeTargets(pwfs1).putPrimaryGuideProbeTargets(pwfs2);
-        env = env.addActive(PwfsGuideProbe.pwfs1).addActive(PwfsGuideProbe.pwfs2);
 
         testTargetEnvironment(env);
     }
@@ -187,7 +190,6 @@ public final class TargetGroupTest extends TestBase {
 
         TargetEnvironment env = TargetEnvironment.create(base);
         env = env.putPrimaryGuideProbeTargets(pwfs1).putPrimaryGuideProbeTargets(pwfs2);
-        env = env.addActive(PwfsGuideProbe.pwfs1).addActive(PwfsGuideProbe.pwfs2);
 
         testTargetEnvironment(env);
     }
@@ -200,7 +202,6 @@ public final class TargetGroupTest extends TestBase {
         GuideProbeTargets gt = GuideProbeTargets.create(GmosOiwfsGuideProbe.instance, targetList);
 
         TargetEnvironment env = TargetEnvironment.create(base).putPrimaryGuideProbeTargets(gt);
-        env = env.addActive(GmosOiwfsGuideProbe.instance);
 
         // Now, we need to add the instrument itself or the guide targets are
         // not enabled and not sent to the TCC.
@@ -223,7 +224,6 @@ public final class TargetGroupTest extends TestBase {
         GuideProbeTargets gt = GuideProbeTargets.create(GsaoiOdgw.odgw1, targetList);
 
         TargetEnvironment env = TargetEnvironment.create(base).putPrimaryGuideProbeTargets(gt);
-        env = env.addActive(GsaoiOdgw.odgw1);
 
         // Now, we need to add the instrument itself or the guide targets are
         // not enabled and not sent to the TCC.
@@ -246,7 +246,6 @@ public final class TargetGroupTest extends TestBase {
         GuideProbeTargets gt = GuideProbeTargets.create(AltairAowfsGuider.instance, targetList);
 
         TargetEnvironment env = TargetEnvironment.create(base).putPrimaryGuideProbeTargets(gt);
-        env = env.addActive(AltairAowfsGuider.instance);
 
         // Now, we need to add Altair or the guide targets are
         // not enabled and not sent to the TCC.
@@ -269,7 +268,6 @@ public final class TargetGroupTest extends TestBase {
         GuideProbeTargets gt = GuideProbeTargets.create(Canopus.Wfs.cwfs1, targetList);
 
         TargetEnvironment env = TargetEnvironment.create(base).putPrimaryGuideProbeTargets(gt);
-        env = env.addActive(Canopus.Wfs.cwfs1);
 
         // Now, we need to add Gems or the guide targets are
         // not enabled and not sent to the TCC.
@@ -352,8 +350,8 @@ public final class TargetGroupTest extends TestBase {
         }
     }
 
-    private static String DEFAULT_PARAM_PATH = "param[@name='" + TccNames.PRIMARY + "']";
-    private static String TARGETS_PATH = "param[@name='" + TccNames.TARGETS + "']";
+    private static final String DEFAULT_PARAM_PATH = "param[@name='" + TccNames.PRIMARY + "']";
+    private static final String TARGETS_PATH = "param[@name='" + TccNames.TARGETS + "']";
 
     private void validateGroup(Element targetGroup, String groupName, String defaultTarget, ImList<SPTarget> targets) {
         // Check the group name.
@@ -420,7 +418,6 @@ public final class TargetGroupTest extends TestBase {
         int targetCount = 1 + env.getUserTargets().size(); // base position + user
         int groupCount = 1; // base group
         for (GuideProbeTargets gt : env.getOrCreatePrimaryGuideGroup()) {
-            if (!env.isActive(gt.getGuider())) continue;
             ++groupCount;
             targetCount += gt.getOptions().size();
         }
@@ -460,7 +457,7 @@ public final class TargetGroupTest extends TestBase {
             String name = nameMap.getGuiderName(guider);
 
             Element guideGroupElement = getGroupElement(name, groupElements);
-            if (!env.isActive(guider) || (gt.getOptions().size() == 0)) {
+            if (gt.getOptions().size() == 0) {
                 assertNull(guideGroupElement);
                 continue;
             }

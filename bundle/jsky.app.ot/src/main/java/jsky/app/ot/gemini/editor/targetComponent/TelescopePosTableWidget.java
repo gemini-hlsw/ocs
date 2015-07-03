@@ -11,10 +11,7 @@ import edu.gemini.pot.ModelConverters;
 import edu.gemini.pot.sp.ISPObsComponent;
 import edu.gemini.shared.skyobject.Magnitude;
 import edu.gemini.shared.util.immutable.*;
-import edu.gemini.spModel.guide.GuideOption;
-import edu.gemini.spModel.guide.GuideOptions;
-import edu.gemini.spModel.guide.GuideProbe;
-import edu.gemini.spModel.guide.ValidatableGuideProbe;
+import edu.gemini.spModel.guide.*;
 import edu.gemini.spModel.obs.context.ObsContext;
 import edu.gemini.spModel.target.SPTarget;
 import edu.gemini.spModel.target.TelescopePosWatcher;
@@ -276,15 +273,13 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
             if (groups.size() < 2) {
                 for (GuideProbeTargets gt : primaryGroup.getAll()) {
                     final GuideProbe guideProbe = gt.getGuider();
-                    final boolean isActive = env.isActive(guideProbe);
+                    final boolean isActive = ctx.exists(c -> GuideProbeUtil.instance.isAvailable(c, guideProbe));
                     final Option<SPTarget> primary = gt.getPrimary();
-                    gt.getOptions().zipWithIndex().foreach(new ApplyOp<Tuple2<SPTarget, Integer>>() {
-                        @Override public void apply(Tuple2<SPTarget, Integer> tup) {
-                            final SPTarget target = tup._1();
-                            final Option<AgsGuideQuality> quality = guideQuality(ags, guideProbe, target);
-                            final boolean isPrimary = !primary.isEmpty() && (primary.getValue() == target);
-                            tmp.add(new GuideTargetRow(isActive, quality, isPrimary, guideProbe, tup._2() + 1, target, baseCoords));
-                        }
+                    gt.getOptions().zipWithIndex().foreach(tup -> {
+                        final SPTarget target = tup._1();
+                        final Option<AgsGuideQuality> quality = guideQuality(ags, guideProbe, target);
+                        final boolean isPrimary = !primary.isEmpty() && (primary.getValue() == target);
+                        tmp.add(new GuideTargetRow(isActive, quality, isPrimary, guideProbe, tup._2() + 1, target, baseCoords));
                     });
                 }
             } else {
@@ -294,15 +289,13 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
                     final List<Row> rowList = new ArrayList<>();
                     for (GuideProbeTargets gt : group.getAll()) {
                         final GuideProbe guideProbe = gt.getGuider();
-                        final boolean isActive = env.isActive(guideProbe);
+                        final boolean isActive = ctx.exists(c -> GuideProbeUtil.instance.isAvailable(c, guideProbe));
                         final Option<SPTarget> primary = gt.getPrimary();
-                        gt.getOptions().zipWithIndex().foreach(new ApplyOp<Tuple2<SPTarget, Integer>>() {
-                            @Override public void apply(Tuple2<SPTarget, Integer> tup) {
-                                final SPTarget target = tup._1();
-                                final Option<AgsGuideQuality> quality = guideQuality(ags, guideProbe, target);
-                                final boolean enabled = isPrimaryGroup && !primary.isEmpty() && (primary.getValue() == tup._1());
-                                rowList.add(new GuideTargetRow(isActive, quality, enabled, guideProbe, tup._2() + 1, tup._1(), baseCoords));
-                            }
+                        gt.getOptions().zipWithIndex().foreach(tup -> {
+                            final SPTarget target = tup._1();
+                            final Option<AgsGuideQuality> quality = guideQuality(ags, guideProbe, target);
+                            final boolean enabled = isPrimaryGroup && !primary.isEmpty() && (primary.getValue() == tup._1());
+                            rowList.add(new GuideTargetRow(isActive, quality, enabled, guideProbe, tup._2() + 1, tup._1(), baseCoords));
                         });
                     }
 
@@ -311,11 +304,7 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
             }
 
             // Add the user positions.
-            env.getUserTargets().zipWithIndex().foreach(new ApplyOp<Tuple2<SPTarget, Integer>>() {
-                @Override public void apply(Tuple2<SPTarget, Integer> tup) {
-                    tmp.add(new UserTargetRow(tup._2(), tup._1(), baseCoords));
-                }
-            });
+            env.getUserTargets().zipWithIndex().foreach(tup -> tmp.add(new UserTargetRow(tup._2(), tup._1(), baseCoords)));
 
             // Finally, initialize the rows
             rows = DefaultImList.create(tmp);

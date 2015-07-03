@@ -55,7 +55,7 @@ class GemsStrategySpec extends Specification with NoTimeConversions {
       val pwfs1 = List(PwfsGuideProbe.pwfs1)
       val guiders:List[GuideProbe] = gsaoi ::: canopus ::: pwfs1
 
-      val ctx = ObsContext.create(env.setActiveGuiders(guiders.toSet.asJava), inst, new JSome(Site.GS), SPSiteQuality.Conditions.BEST, null, new Gems)
+      val ctx = ObsContext.create(env, inst, new JSome(Site.GS), SPSiteQuality.Conditions.BEST, null, new Gems)
 
       val estimate = TestGemsStrategy("/gemsstrategyquery.xml").estimate(ctx, ProbeLimitsTable.loadOrThrow())
       Await.result(estimate, 20.seconds) should beEqualTo(Estimate.GuaranteedSuccess)

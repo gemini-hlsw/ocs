@@ -3,18 +3,14 @@ package edu.gemini.ags.servlet;
 import edu.gemini.skycalc.Angle;
 import edu.gemini.skycalc.DDMMSS;
 import edu.gemini.skycalc.HHMMSS;
-import edu.gemini.skycalc.Offset;
 import edu.gemini.shared.util.immutable.Option;
 
 import edu.gemini.shared.util.immutable.Some;
 import edu.gemini.spModel.core.Site;
-import edu.gemini.spModel.data.ISPDataObject;
 import edu.gemini.spModel.gemini.altair.AltairParams;
 import edu.gemini.spModel.gemini.altair.InstAltair;
-import edu.gemini.spModel.gemini.gems.Gems;
 import edu.gemini.spModel.gemini.gmos.InstGmosNorth;
 import edu.gemini.spModel.gemini.gnirs.InstGNIRS;
-import edu.gemini.spModel.gemini.gsaoi.Gsaoi;
 import edu.gemini.spModel.gemini.inst.InstRegistry;
 import edu.gemini.spModel.gemini.michelle.InstMichelle;
 import edu.gemini.spModel.gemini.michelle.MichelleParams;
@@ -28,7 +24,6 @@ import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.SkyBackground;
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.WaterVapor;
 import edu.gemini.spModel.gemini.trecs.InstTReCS;
 import edu.gemini.spModel.gemini.trecs.TReCSParams;
-import edu.gemini.spModel.guide.GuideProbeUtil;
 import edu.gemini.spModel.obs.context.ObsContext;
 import edu.gemini.spModel.obscomp.SPInstObsComp;
 import edu.gemini.spModel.target.SPTarget;
@@ -40,9 +35,7 @@ import edu.gemini.spModel.telescope.PosAngleConstraintAware;
 
 import javax.servlet.http.HttpServletRequest;
 import java.net.URLDecoder;
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 
 /**
  * Implements a function, more or less: <code>HttpServletRequest => ObsContext</code>..
@@ -67,74 +60,52 @@ public enum ToContext {
         }
     }
 
-    private static interface ParseOp<T> {
+    private interface ParseOp<T> {
         T apply(String s) throws Exception;
     }
 
     public static final String RA  = "ra";
-    private static final ParseOp<Angle> RA_OP = new ParseOp<Angle>() {
-        // depending on the locale the PIT will use dots or commas as decimal separator, replace any commas with dots
-        public Angle apply(String s) throws Exception { return HHMMSS.parse(s.replace(',','.')); }
-    };
+    private static final ParseOp<Angle> RA_OP = s -> HHMMSS.parse(s.replace(',','.'));
 
     public static final String DEC = "dec";
-    private static final ParseOp<Angle> DEC_OP = new ParseOp<Angle>() {
-        // depending on the locale the PIT will use dots or commas as decimal separator, replace any commas with dots
-        public Angle apply(String s) throws Exception { return DDMMSS.parse(s.replace(',','.')); }
-    };
+    private static final ParseOp<Angle> DEC_OP = s -> DDMMSS.parse(s.replace(',','.'));
 
     public static final String TARGET_TYPE = "targetType";
     enum TargetType { sidereal, nonsidereal }
-    private static final ParseOp<TargetType> TARGET_TYPE_OP = new ParseOp<TargetType>() {
-        public TargetType apply(String s) { return TargetType.valueOf(s); }
-    };
+    private static final ParseOp<TargetType> TARGET_TYPE_OP = TargetType::valueOf;
 
     public static final String POS_ANGLE_CONSTRAINT = "pac";
-    private static final ParseOp<PosAngleConstraint> POS_ANGLE_CONSTRAINT_OP = new ParseOp<PosAngleConstraint>() {
-        public PosAngleConstraint apply(String s) {
-            // We previously had value UNKNOWN, but eliminated it since it was superseded by UNBOUNDED.
-            if (s.equals("UNKNOWN"))
-                return PosAngleConstraint.UNBOUNDED;
-            return PosAngleConstraint.valueOf(s);
-        }
+    private static final ParseOp<PosAngleConstraint> POS_ANGLE_CONSTRAINT_OP = s -> {
+        // We previously had value UNKNOWN, but eliminated it since it was superseded by UNBOUNDED.
+        if (s.equals("UNKNOWN"))
+            return PosAngleConstraint.UNBOUNDED;
+        return PosAngleConstraint.valueOf(s);
     };
 
     public static final String CC = "cc";
-    private static final ParseOp<Option<CloudCover>> CC_OP = new ParseOp<Option<CloudCover>>() {
-        public Option<CloudCover> apply(String s) { return CloudCover.read(s); }
-    };
+    private static final ParseOp<Option<CloudCover>> CC_OP = CloudCover::read;
 
     public static final String IQ = "iq";
-    private static final ParseOp<Option<ImageQuality>> IQ_OP = new ParseOp<Option<ImageQuality>>() {
-        public Option<ImageQuality> apply(String s) { return ImageQuality.read(s); }
-    };
+    private static final ParseOp<Option<ImageQuality>> IQ_OP = ImageQuality::read;
 
     public static final String SB = "sb";
-    private static final ParseOp<Option<SkyBackground>> SB_OP = new ParseOp<Option<SkyBackground>>() {
-        public Option<SkyBackground> apply(String s) { return SkyBackground.read(s); }
-    };
+    private static final ParseOp<Option<SkyBackground>> SB_OP = SkyBackground::read;
 
     public static final String INST = "inst";
-    private static final ParseOp<Option<SPInstObsComp>> INST_OP = new ParseOp<Option<SPInstObsComp>>() {
-        public Option<SPInstObsComp> apply(String s) {
-            // There is no Speckle or Visitor in the spModel so we simulate it as Texes
-            if ("Speckle".equalsIgnoreCase(s)) {
-                return InstRegistry.instance.prototype("Texes");
-            } else {
-                return InstRegistry.instance.prototype(s);
-            }
+    private static final ParseOp<Option<SPInstObsComp>> INST_OP = s -> {
+        // There is no Speckle or Visitor in the spModel so we simulate it as Texes
+        if ("Speckle".equalsIgnoreCase(s)) {
+            return InstRegistry.instance.prototype("Texes");
+        } else {
+            return InstRegistry.instance.prototype(s);
         }
     };
 
     public static final String ALTAIR = "altair";
-    private static final ParseOp<AltairParams.Mode> ALTAIR_OP = new ParseOp<AltairParams.Mode>() {
-        public AltairParams.Mode apply(String s) { return modeFromAgsServletParameter(s); }
-    };
+    private static final ParseOp<AltairParams.Mode> ALTAIR_OP = ToContext::modeFromAgsServletParameter;
 
     public static final String NIRI_CAMERA = "niriCamera";
-    private static final ParseOp<Niri.Camera> NIRI_CAMERA_OP = new ParseOp<Niri.Camera>() {
-        public Niri.Camera apply(String s) { return Niri.Camera.valueOf(s); }
-    };
+    private static final ParseOp<Niri.Camera> NIRI_CAMERA_OP = Niri.Camera::valueOf;
 
 
     static String enc(HttpServletRequest req) {
@@ -227,7 +198,7 @@ public enum ToContext {
 
         // --- set chop mode by default for Michelle (impacts selected estimation strategy)
         if (inst instanceof InstMichelle) {
-            ((InstMichelle) inst).setChopMode(new Some<MichelleParams.ChopMode>(MichelleParams.ChopMode.CHOP));
+            ((InstMichelle) inst).setChopMode(new Some<>(MichelleParams.ChopMode.CHOP));
         }
 
         // --- set chop mode by default for TReCS (impacts selected estimation strategy)
@@ -235,20 +206,9 @@ public enum ToContext {
             ((InstTReCS) inst).setObsMode(TReCSParams.ObsMode.CHOP);
         }
 
-        List<ISPDataObject> dataObjects = new ArrayList<ISPDataObject>();
-        TargetObsComp toc = new TargetObsComp();
+        final TargetObsComp toc = new TargetObsComp();
         toc.setTargetEnvironment(env);
-
-        dataObjects.add(toc);
-        dataObjects.add(inst);
-        if (altair != null) dataObjects.add(altair);
-        if (inst instanceof Gsaoi) {
-            dataObjects.add(new Gems());
-        }
-
-        env = env.setActiveGuiders(GuideProbeUtil.instance.getAvailableGuiders(dataObjects));
-
-        return ObsContext.create(env, inst, site, conds, Collections.<Offset>emptySet(), altair);
+        return ObsContext.create(env, inst, site, conds, Collections.emptySet(), altair);
     }
 
     private InstAltair getAltair(HttpServletRequest req) throws RequestException {
@@ -269,20 +229,14 @@ public enum ToContext {
      * @return
      */
     private static AltairParams.Mode modeFromAgsServletParameter(String paramName) {
-        if (paramName.equals("NO")) {
-            return null;
-        } else if (paramName.equals("NGS")) {
-            return AltairParams.Mode.NGS;
-        } else if (paramName.equals("NGS_FL")) {
-            return AltairParams.Mode.NGS_FL;
-        } else if (paramName.equals("LGS")) {
-            return AltairParams.Mode.LGS;
-        } else if (paramName.equals("LGS_P1")) {
-            return AltairParams.Mode.LGS_P1;
-        } else if (paramName.equals("LGS_OI")) {
-            return AltairParams.Mode.LGS_OI;
-        } else {
-            throw new IllegalArgumentException("unknown value " + paramName + " for altair mode");
+        switch (paramName) {
+            case "NO":     return null;
+            case "NGS":    return AltairParams.Mode.NGS;
+            case "NGS_FL": return AltairParams.Mode.NGS_FL;
+            case "LGS":    return AltairParams.Mode.LGS;
+            case "LGS_P1": return AltairParams.Mode.LGS_P1;
+            case "LGS_OI": return AltairParams.Mode.LGS_OI;
+            default:       throw new IllegalArgumentException("unknown value " + paramName + " for altair mode");
         }
     }
 

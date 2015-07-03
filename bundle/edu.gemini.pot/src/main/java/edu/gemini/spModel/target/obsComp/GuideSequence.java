@@ -2,17 +2,18 @@ package edu.gemini.spModel.target.obsComp;
 
 import edu.gemini.shared.util.immutable.*;
 import edu.gemini.spModel.config.ConfigPostProcessor;
-import edu.gemini.spModel.config.map.ConfigValMap;
 import edu.gemini.spModel.config2.Config;
 import edu.gemini.spModel.config2.ConfigSequence;
 import edu.gemini.spModel.config2.ItemKey;
 import edu.gemini.spModel.gemini.gmos.GmosOiwfsGuideProbe;
 import edu.gemini.spModel.guide.*;
+import edu.gemini.spModel.obs.context.ObsContext;
 import edu.gemini.spModel.seqcomp.SeqConfigNames;
 import edu.gemini.spModel.target.env.GuideProbeTargets;
 import edu.gemini.spModel.target.env.TargetEnvironment;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public final class GuideSequence implements ConfigPostProcessor {
     private static final String SYSTEM_NAME       = TargetObsCompConstants.CONFIG_NAME;
@@ -42,12 +43,9 @@ public final class GuideSequence implements ConfigPostProcessor {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
 
-            ExplicitGuideSetting that = (ExplicitGuideSetting) o;
-
+            final ExplicitGuideSetting that = (ExplicitGuideSetting) o;
             if (!option.equals(that.option)) return false;
-            if (!probe.equals(that.probe)) return false;
-
-            return true;
+            return probe.equals(that.probe);
         }
 
         @Override public int hashCode() {
@@ -78,7 +76,7 @@ public final class GuideSequence implements ConfigPostProcessor {
         public final ImList<ExplicitGuideSetting> overrides;
 
         public GuideState(DefaultGuideOptions.Value defaultState) {
-            this(defaultState, ImCollections.EMPTY_LIST);
+            this(defaultState, ImCollections.emptyList());
         }
 
         public GuideState(DefaultGuideOptions.Value defaultState, ImList<ExplicitGuideSetting> overrides) {
@@ -94,8 +92,7 @@ public final class GuideSequence implements ConfigPostProcessor {
             if (o == null || getClass() != o.getClass()) return false;
             final GuideState that = (GuideState) o;
             if (defaultState != that.defaultState) return false;
-            if (!overrides.equals(that.overrides)) return false;
-            return true;
+            return overrides.equals(that.overrides);
         }
 
         @Override public int hashCode() {
@@ -131,28 +128,7 @@ public final class GuideSequence implements ConfigPostProcessor {
                             }
                         });
             }
-        }).getOrElse(ImCollections.EMPTY_LIST);  // toImList.flatten
-    }
-
-    /**
-     * Gets the collection of guide probes that are not used in the observation.
-     * A guide probe is not used if it has no guide star assigned in the
-     * primary guide group, or if has one or more guide stars but none of them
-     * were marked as the "primary" guide star for the guider.
-     */
-    public static ImList<GuideProbe> getUnusedGuiders(Option<TargetEnvironment> env) {
-        return getUnusedGuiders(getRequiredGuiders(env));
-    }
-
-    private static ImList<GuideProbe> getUnusedGuiders(ImList<GuideProbe> req) {
-        final Set<GuideProbe> reqSet = new TreeSet<GuideProbe>(GuideProbe.KeyComparator.instance);
-        for (GuideProbe g : req) reqSet.add(g);
-
-        final Collection<GuideProbe> all    = GuideProbeMap.instance.values();
-        final Collection<GuideProbe> unused = new ArrayList<GuideProbe>(all.size());
-        for (GuideProbe g : all) if (!reqSet.contains(g)) unused.add(g);
-
-        return DefaultImList.create(unused);
+        }).getOrElse(ImCollections.emptyList());
     }
 
     /**
@@ -161,49 +137,41 @@ public final class GuideSequence implements ConfigPostProcessor {
      * context and yet not assigned to any guide star.  This is a hack-around
      * for the brain dead seqexec which should be handling this itself.
      */
-    public static ImList<GuideProbe> getPermanentlyParkedGuiders(Option<TargetEnvironment> envOpt, ImList<GuideProbe> req) {
-        final Set<GuideProbe> required  = new TreeSet<GuideProbe>(GuideProbe.KeyComparator.instance);
+    public static ImList<GuideProbe> getPermanentlyParkedGuiders(Option<ObsContext> ctxOpt, ImList<GuideProbe> req) {
+        final Set<GuideProbe> required  = new TreeSet<>(GuideProbe.KeyComparator.instance);
         for (GuideProbe g : req) required.add(g);
 
         // What's available in this environment?
-        final Set<GuideProbe> available = new TreeSet<GuideProbe>(GuideProbe.KeyComparator.instance);
-        envOpt.foreach(new ApplyOp<TargetEnvironment>() {
-            @Override public void apply(TargetEnvironment env) {
-                available.addAll(env.getGuideEnvironment().getActiveGuiders());
-            }
-        });
+        final Set<GuideProbe> available = new TreeSet<>(GuideProbe.KeyComparator.instance);
+        ctxOpt.foreach(c -> available.addAll(GuideProbeUtil.instance.getAvailableGuiders(c)));
 
         // But we only care about parkable guiders.
-        for (GuideProbe g : available) {
-            if (!(g.getGuideOptions() instanceof StandardGuideOptions)) available.remove(g);
-        }
+        available.stream().filter(g -> !(g.getGuideOptions() instanceof StandardGuideOptions)).forEach(available::remove);
 
         // Always have to park the PWFS? even if not available.
         available.addAll(Arrays.asList(PwfsGuideProbe.values()));
 
         // Finally, if avaliable but unused, park it.
-        final Collection<GuideProbe> parked = new ArrayList<GuideProbe>(available.size());
-        for (GuideProbe g : available) {
-            if (!required.contains(g)) parked.add(g);
-        }
+        final Collection<GuideProbe> parked = new ArrayList<>(available.size());
+        parked.addAll(available.stream().filter(g -> !required.contains(g)).collect(Collectors.toList()));
 
         return DefaultImList.create(parked);
     }
 
 
-    public static Map<ItemKey, GuideOption> getGuideWithParked(Option<TargetEnvironment> env, ImList<GuideProbe> requiredGuiders) {
-        final ImList<GuideProbe> parked = getPermanentlyParkedGuiders(env, requiredGuiders);
+    public static Map<ItemKey, GuideOption> getGuideWithParked(Option<ObsContext> ctx, ImList<GuideProbe> requiredGuiders) {
+        final ImList<GuideProbe> parked = getPermanentlyParkedGuiders(ctx, requiredGuiders);
 
         // Remember any sequence props whose values will be set because they
         // involved required guiders.
-        final Set<ItemKey> handled = new HashSet<ItemKey>();
+        final Set<ItemKey> handled = new HashSet<>();
         for (GuideProbe g : requiredGuiders) {
             handled.add(new ItemKey(PARENT_KEY, g.getSequenceProp()));
         }
 
         // Now for any unused guiders whose sequence property doesn't appear in
         // the handled set, record it as parked / off.
-        final Map<ItemKey, GuideOption> res = new HashMap<ItemKey, GuideOption>();
+        final Map<ItemKey, GuideOption> res = new HashMap<>();
         for (GuideProbe g : parked) {
             final ItemKey key = new ItemKey(PARENT_KEY, g.getSequenceProp());
             if (!handled.contains(key)) {
@@ -222,21 +190,18 @@ public final class GuideSequence implements ConfigPostProcessor {
     private static Map<ItemKey, GuideOption> seqexecHack(Map<ItemKey, GuideOption> parked, Config step) {
         // filter out any existing guideWith* parameters that appear in the
         // config step.
-        Set<ItemKey> rmSet = new HashSet<ItemKey>();
-        for (ItemKey key : parked.keySet()) {
-            if (step.containsItem(key)) rmSet.add(key);
-        }
+        final Set<ItemKey> rmSet = parked.keySet().stream().filter(step::containsItem).collect(Collectors.toSet());
         if (rmSet.size() == 0) {
             return parked;
         } else {
-            Map<ItemKey, GuideOption> updated = new HashMap<ItemKey, GuideOption>(parked);
-            for (ItemKey key : rmSet) updated.remove(key);
+            final Map<ItemKey, GuideOption> updated = new HashMap<>(parked);
+            rmSet.forEach(updated::remove);
             return updated;
         }
     }
 
     public static Map<ItemKey, GuideOption> getGuideWith(GuideState state, ImList<GuideProbe> requiredGuiders) {
-        final Map<ItemKey, GuideOption> res = new HashMap<ItemKey, GuideOption>();
+        final Map<ItemKey, GuideOption> res = new HashMap<>();
 
         // First, set all to the default value.
         for (GuideProbe g : requiredGuiders) {
@@ -255,20 +220,20 @@ public final class GuideSequence implements ConfigPostProcessor {
     }
 
 
-    private final Option<TargetEnvironment> env;
+    private final Option<ObsContext> ctx;
 
-    public GuideSequence(Option<TargetEnvironment> env) {
-        this.env = env;
+    public GuideSequence(Option<ObsContext> ctx) {
+        this.ctx = ctx;
     }
 
 
     @Override public ConfigSequence postProcessSequence(ConfigSequence in) {
-        final ImList<GuideProbe> requiredGuiders = getRequiredGuiders(env);
+        final ImList<GuideProbe> requiredGuiders = getRequiredGuiders(ctx.flatMap(c -> ImOption.apply(c.getTargets())));
         final Config[] steps = in.getAllSteps();
 
         // Handle parking unused probes for the brain-dead seqexec.
         if (steps.length > 0) {
-            Map<ItemKey, GuideOption> parked = seqexecHack(getGuideWithParked(env, requiredGuiders), steps[0]);
+            Map<ItemKey, GuideOption> parked = seqexecHack(getGuideWithParked(ctx, requiredGuiders), steps[0]);
             applyGuideWith(parked, steps[0]);
             gmosNsHack(steps[0], requiredGuiders);
         }

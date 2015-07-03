@@ -7,7 +7,6 @@ package edu.gemini.spModel.target.env;
 import edu.gemini.shared.util.immutable.*;
 import edu.gemini.spModel.guide.GuideProbe;
 import edu.gemini.spModel.pio.ParamSet;
-import edu.gemini.spModel.pio.Pio;
 import edu.gemini.spModel.pio.PioFactory;
 import edu.gemini.spModel.target.SPTarget;
 
@@ -176,62 +175,6 @@ public final class TargetEnvironment implements Serializable, Iterable<SPTarget>
      */
     public TargetEnvironment setAllPrimaryGuideProbeTargets(ImList<GuideProbeTargets> lst) {
         return setPrimaryGuideGroup(getOrCreatePrimaryGuideGroup().setAll(lst));
-    }
-
-    /**
-     * Determines whether the given {@link GuideProbe} is to be considered
-     * active or not in this environment.  This is a convenience method
-     * equivalent to
-     * <code>getGuideEnvironment().getActiveGuiders().contains(guider)</code>.
-     *
-     * @param guider guider to check
-     *
-     * @return <code>true</code> if the given guide probe is considered active;
-     * <code>false</code> otherwise
-     */
-    public boolean isActive(GuideProbe guider) {
-        return guide.getActiveGuiders().contains(guider);
-    }
-
-    /**
-     * Returns an updated target environment using the given set of
-     * {@link GuideProbe} as its active set.  This is a convenience method
-     * equivalent to
-     * <pre>
-     *     TargetEnvironment env = ...
-     *     env.setGuideEnvironment(env.getOrCreatePrimaryGuideGroup().setAll(lst))
-     * </pre>
-     *
-     * @param guiders set of guide probes to use as the active set
-     *
-     * @return a new TargetEnvironment, identical to this one, but using the
-     * given set of active guide probes
-     */
-    public TargetEnvironment setActiveGuiders(Set<GuideProbe> guiders) {
-        return setGuideEnvironment(getGuideEnvironment().setActiveGuiders(guiders));
-    }
-
-    /**
-     * Adds a particular {@link GuideProbe} to the collection of active guide
-     * probes in a new TargetEnvironment.  This is a convenience method that
-     * saves extracting the active set from the contained
-     * {@link GuideEnvironment}, updating it with a new guide probe, and saving
-     * it back.
-     *
-     * @param guider guide probe to add to the active set of guiders
-     *
-     * @return a new TargetEnvironment, identical to this one, but with the
-     * possible addition of the given <code>guider</code> in the collection of
-     * active {@link GuideProbe}s
-     */
-    public TargetEnvironment addActive(GuideProbe guider) {
-        GuideEnvironment genv = getGuideEnvironment();
-        Set<GuideProbe> cur = genv.getActiveGuiders();
-        if (cur.contains(guider)) return this;
-
-        Set<GuideProbe> active = new HashSet<>(cur);
-        active.add(guider);
-        return setGuideEnvironment(genv.setActiveGuiders(active));
     }
 
     /**
@@ -414,20 +357,15 @@ public final class TargetEnvironment implements Serializable, Iterable<SPTarget>
         }
 
         // Parse the old pre-2010B information into a GuideEnvironment
-        Set<GuideProbe> active = new HashSet<>();
         List<GuideProbeTargets> lst = new ArrayList<>();
         for (ParamSet ps : guideProbeTargets) {
             GuideProbeTargets gpt = GuideProbeTargets.fromParamSet(ps);
             if (gpt == null) continue;
-
             lst.add(gpt);
-            if (Pio.getBooleanValue(ps, "enabled", true)) {
-                active.add(gpt.getGuider());
-            }
         }
 
         GuideGroup grp = GuideGroup.create(None.STRING, DefaultImList.create(lst));
-        return GuideEnvironment.create(active, OptionsListImpl.create(grp));
+        return GuideEnvironment.create(OptionsListImpl.create(grp));
     }
 
 
