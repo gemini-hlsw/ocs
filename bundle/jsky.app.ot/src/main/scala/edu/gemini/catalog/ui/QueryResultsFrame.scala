@@ -6,7 +6,7 @@ import edu.gemini.ags.api.AgsRegistrar
 import edu.gemini.catalog.api.CatalogQuery
 import edu.gemini.catalog.votable.VoTableClient
 import edu.gemini.pot.sp.ISPNode
-import edu.gemini.shared.gui.{SizePreference, SortableTable}
+import edu.gemini.shared.gui.{GlassLabel, SizePreference, SortableTable}
 import edu.gemini.spModel.core.Target.SiderealTarget
 import edu.gemini.spModel.core._
 import jsky.app.ot.OT
@@ -149,9 +149,14 @@ object QueryResultsWindow {
   private def reloadSearchData(query: CatalogQuery) {
     import QueryResultsWindow.table._
 
-    VoTableClient.catalog(query).onSuccess {
-      case x =>
+    VoTableClient.catalog(query).onComplete {
+      case _: scala.util.Failure[_] =>
+        GlassLabel.hide(frame.peer.getRootPane) // TODO Display error
+      case scala.util.Success(x) if x.result.containsError =>
+        GlassLabel.hide(frame.peer.getRootPane) // TODO Display error
+      case scala.util.Success(x) =>
         Swing.onEDT {
+          GlassLabel.hide(frame.peer.getRootPane)
           val model = TargetsModel(x.result.targets.rows)
           resultsTable.model = model
 
@@ -173,6 +178,7 @@ object QueryResultsWindow {
       frame.visible = true
       frame.peer.toFront()
     }
+    GlassLabel.show(frame.peer.getRootPane, "Downloading...")
     reloadSearchData(q)
   }
 
