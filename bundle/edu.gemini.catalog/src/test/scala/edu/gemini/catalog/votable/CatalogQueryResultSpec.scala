@@ -1,6 +1,7 @@
 package edu.gemini.catalog.votable
 
 import edu.gemini.catalog.api._
+import edu.gemini.spModel.core.Target.SiderealTarget
 import edu.gemini.spModel.core._
 import org.specs2.mutable.SpecificationWithJUnit
 
@@ -52,6 +53,30 @@ class CatalogQueryResultSpec extends SpecificationWithJUnit {
 
       // Filtering on magnitude leaves only 4 targets
       filtered.targets.rows should be size 4
+    }
+    "be able to filter ignoring the band" in {
+      val m = MagnitudeRange(FaintnessConstraint(15.0), Some(SaturationConstraint(14.0)))
+      val qc  = CatalogQuery.catalogQuery(c, RadiusConstraint.between(Angle.zero, coneSearch), None)
+      val qc2 = CatalogQuery.catalogQueryWithoutBand(c, RadiusConstraint.between(Angle.zero, coneSearch), Some(m))
+      val filtered = unfiltered.filter(qc)
+      val filtered2 = unfiltered.filter(qc2)
+      filtered should beEqualTo(filtered2)
+
+      // Filtering on magnitude leaves 12 targets
+      filtered.targets.rows should be size 12
+    }
+    "be able to filter with a band and range" in {
+      val m = MagnitudeConstraints(MagnitudeBand.J, FaintnessConstraint(15.0), None)
+      val mr = MagnitudeRange(FaintnessConstraint(15.0), None)
+      val qc = CatalogQuery.catalogQuery(c, RadiusConstraint.between(Angle.zero, Angle.fromDegrees(90)), Some(m))
+
+      val qc2 = CatalogQuery.catalogQueryRangeOnBand(c, RadiusConstraint.between(Angle.zero, Angle.fromDegrees(90)), (t: SiderealTarget) => t.magnitudeIn(MagnitudeBand.J), Some(mr))
+      val filtered = unfiltered.filter(qc)
+      val filtered2 = unfiltered.filter(qc2)
+      filtered should beEqualTo(filtered2)
+
+      // Filtering on magnitude leaves 12 targets
+      filtered.targets.rows should be size 9
     }
   }
 
