@@ -39,9 +39,6 @@ sealed trait CatalogQuery {
   //def filter: SiderealTarget => Boolean = (t) => filters.forall(_.filter(t))
   //def filter: SiderealTarget => Boolean = (t) => radiusConstraint.targetsFilter(base)(t) && magnitudeConstraints.map(_.filter(t)).getOrElse(true)
   def filter: SiderealTarget => Boolean = (t) => RadiusFilter(base, radiusConstraint).filter(t) && MagnitudeFilter(magnitudeConstraints).filter(t)
-  def filterOnMagnitude(t: SiderealTarget, m:Option[Magnitude]): Boolean =
-    RadiusFilter(base, radiusConstraint).filter(t) && MagnitudeFilter(magnitudeConstraints).filter(t) &&
-          MagnitudeValueFilter(m, magnitudeRange).filter(t)
   def filterOnMagnitude(t: SiderealTarget, m:Option[Magnitude], rangeAdjustment: (Option[MagnitudeRange], Magnitude) => Option[MagnitudeRange]): Boolean =
     RadiusFilter(base, radiusConstraint).filter(t) && MagnitudeFilter(magnitudeConstraints).filter(t) &&
       AdjustedMagnitudeValueFilter(m, magnitudeRange, rangeAdjustment).filter(t)

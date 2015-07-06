@@ -113,20 +113,20 @@ class Votable2SkyCatalogServlet extends HttpServlet {
             case \/-(mc) => mc
           }
 
-        val query = CatalogQuery.catalogQueryWithoutBand(coordinates, rc, mr >>= (_.toOption))
+        val query = referenceBand.map { b =>
+            CatalogQuery.catalogQueryRangeOnBand(coordinates, rc, magnitudeExtractor(candidateBands(b)), mr >>= (_.toOption))
+          }.getOrElse {
+            CatalogQuery.catalogQuery(coordinates, rc, None)
+          }
 
         // Execute query
         val result = VoTableClient.catalog(query).map { q =>
           if (q.result.containsError) {
             q.result.problems.mkString(", ")
           } else {
-            // Filter rows on the main band
-            val rows = referenceBand.map { b =>
-              q.result.targets.rows.filter(t => q.query.filterOnMagnitude(t, magnitudeExtractor(candidateBands(b))(t)))
-            }.getOrElse(q.result.targets.rows)
-
             // Apply additional magnitude filters
-            val filteredRows = magFilters.foldLeft(rows) { (r, f) =>
+            // TODO OCSADV-404 Support multiple magnitude filters
+            val filteredRows = magFilters.foldLeft(q.result.targets.rows) { (r, f) =>
               r.filter(f.filter)
             }
             // Adjust count of resulting rows
