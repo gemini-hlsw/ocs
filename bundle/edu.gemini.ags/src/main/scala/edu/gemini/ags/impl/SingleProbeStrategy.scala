@@ -44,13 +44,11 @@ case class SingleProbeStrategy(key: AgsStrategyKey, params: SingleProbeStrategyP
 
   override def candidates(ctx: ObsContext, mt: MagnitudeTable): Future[List[(GuideProbe, List[SiderealTarget])]] = {
     val empty = Future.successful(List((params.guideProbe: GuideProbe, List.empty[SiderealTarget])))
-    def filterOnMagnitude(q: CatalogQuery, t: SiderealTarget): Boolean = {
-      params.referenceMagnitude(t).exists(q.filterOnMagnitude(t, _))
-    }
+
     // We cannot let VoTableClient to filter targets as usual, instead we provide an empty magnitude constraint and filter locally
     catalogQueries(ctx, mt).strengthR(backend).headOption.map(Function.tupled(VoTableClient.catalog)).map(_.flatMap {
         case r if r.result.containsError => Future.failed(CatalogException(r.result.problems))
-        case r                           => Future.successful(List((params.guideProbe, r.result.targets.rows.filter(t => filterOnMagnitude(r.query, t)))))
+        case r                           => Future.successful(List((params.guideProbe, r.result.targets.rows)))
     }).getOrElse(empty)
   }
 
