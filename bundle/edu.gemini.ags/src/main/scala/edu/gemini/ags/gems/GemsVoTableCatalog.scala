@@ -95,31 +95,25 @@ case class GemsVoTableCatalog(backend: VoTableBackend = RemoteBackend, catalog: 
     val radiusLimitsList = getRadiusLimits(inst, criterions)
     val magLimitsList = optimizeMagnitudeLimits(criterions)
 
+    val rangeAdjustmentForConditions = (mr: Option[MagnitudeRange], mag: Magnitude) => mr.map { m =>
+                    m.adjust(m => conditions.magAdjustOp().apply(mag.toOldModel).toNewModel.value)
+                  }
     val queries = for {
       radiusLimits <- radiusLimitsList
       magLimits    <- magLimitsList
+      band          = magLimits.band
       mr            = MagnitudeRange(magLimits.faintnessConstraint, magLimits.saturationConstraint)
-      queryArgs     = (CatalogQuery.catalogQueryWithoutBand(basePosition, radiusLimits, mr.some, catalog), magLimits)
+      queryArgs     = (CatalogQuery.catalogQueryWithAdjustedRange(basePosition, radiusLimits, magnitudeExtractor(defaultProbeBands(band)), rangeAdjustmentForConditions, mr.some, catalog), magLimits)
     } yield queryArgs
-
-    val queriesMap = queries.toMap
 
     VoTableClient.catalogs(queries.map(_._1), backend).flatMap {
       case l if l.exists(_.result.containsError) =>
         Future.failed(CatalogException(l.map(_.result.problems).suml))
       case l =>
         Future.successful {
-          val targets = l.map {k =>
-            val referenceBand = queriesMap.get(k.query).map(_.band)
-
-            referenceBand.map { b =>
-              val rangeAdjustmentForConditions = (mr: Option[MagnitudeRange], mag: Magnitude) => mr.map { m =>
-                m.adjust(m => conditions.magAdjustOp().apply(mag.toOldModel).toNewModel.value)
-              }
-
-              k.result.targets.rows.filter(t => k.query.filterOnMagnitude(t, magnitudeExtractor(defaultProbeBands(b))(t), rangeAdjustmentForConditions))
-            }.getOrElse(k.result.targets.rows)
-          }.suml
+          val targets = l.map { k =>
+              k.result.targets.rows
+            }.suml
           assignToCriterion(basePosition, criterions, targets)
         }
     }
