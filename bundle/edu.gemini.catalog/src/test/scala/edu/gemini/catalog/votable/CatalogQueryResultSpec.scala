@@ -3,6 +3,7 @@ package edu.gemini.catalog.votable
 import edu.gemini.catalog.api._
 import edu.gemini.spModel.core.Target.SiderealTarget
 import edu.gemini.spModel.core._
+import edu.gemini.spModel.gemini.obscomp.SPSiteQuality
 import org.specs2.mutable.SpecificationWithJUnit
 
 class CatalogQueryResultSpec extends SpecificationWithJUnit {
@@ -75,8 +76,59 @@ class CatalogQueryResultSpec extends SpecificationWithJUnit {
       val filtered2 = unfiltered.filter(qc2)
       filtered should beEqualTo(filtered2)
 
-      // Filtering on magnitude leaves 12 targets
+      // Filtering only on J-magnitude leaves 9 targets
       filtered.targets.rows should be size 9
+    }
+    "be able to filter with a band range with identity adjustments" in {
+      val mr = MagnitudeRange(FaintnessConstraint(15.0), None)
+      val qc = CatalogQuery.catalogQueryRangeOnBand(c, RadiusConstraint.between(Angle.zero, Angle.fromDegrees(90)), (t: SiderealTarget) => t.magnitudeIn(MagnitudeBand.J), Some(mr))
+
+      def nilAdjustment(mr: Option[MagnitudeRange], mag: Magnitude) = mr
+
+      val qc2 = CatalogQuery.catalogQueryWithAdjustedRange(c, RadiusConstraint.between(Angle.zero, Angle.fromDegrees(90)), (t: SiderealTarget) => t.magnitudeIn(MagnitudeBand.J), nilAdjustment, Some(mr))
+      val filtered = unfiltered.filter(qc)
+      val filtered2 = unfiltered.filter(qc2)
+      filtered should beEqualTo(filtered2)
+
+      // Filtering on magnitude leaves just 9  targets
+      filtered.targets.rows should be size 9
+      filtered2.targets.rows should be size 9
+    }
+    "be able to filter with a band range with nominal conditions" in {
+      import edu.gemini.pot.ModelConverters._
+
+      val mr = MagnitudeRange(FaintnessConstraint(15.0), None)
+      val qc = CatalogQuery.catalogQueryRangeOnBand(c, RadiusConstraint.between(Angle.zero, Angle.fromDegrees(90)), (t: SiderealTarget) => t.magnitudeIn(MagnitudeBand.J), Some(mr))
+
+      // Nominal conditions don't change the MagnitudeRange
+      val conditions = SPSiteQuality.Conditions.NOMINAL
+      def adjustment(mr: Option[MagnitudeRange], mag: Magnitude) =
+        mr.map { m =>
+          m.adjust(k => conditions.magAdjustOp().apply(mag.copy(value = k).toOldModel).toNewModel.value)
+        }
+
+      val qc2 = CatalogQuery.catalogQueryWithAdjustedRange(c, RadiusConstraint.between(Angle.zero, Angle.fromDegrees(90)), (t: SiderealTarget) => t.magnitudeIn(MagnitudeBand.J), adjustment, Some(mr))
+      val filtered = unfiltered.filter(qc)
+      val filtered2 = unfiltered.filter(qc2)
+      filtered should beEqualTo(filtered2)
+
+      // Filtering on magnitude with nominal conditions doesnt change the output
+      filtered.targets.rows should be size 9
+    }
+    "be able to filter with a band range with nominal conditions" in {
+      val mr = MagnitudeRange(FaintnessConstraint(15.0), None)
+
+      // Large adjustment leavig all taregts out
+      def adjustment(mr: Option[MagnitudeRange], mag: Magnitude) =
+        mr.map { m =>
+          m.adjust(k => k - 20)
+        }
+
+      val qc = CatalogQuery.catalogQueryWithAdjustedRange(c, RadiusConstraint.between(Angle.zero, Angle.fromDegrees(90)), (t: SiderealTarget) => t.magnitudeIn(MagnitudeBand.J), adjustment, Some(mr))
+      val filtered = unfiltered.filter(qc)
+
+      // Filtering on magnitude leaves 12 targets
+      filtered.targets.rows should beEmpty
     }
   }
 
