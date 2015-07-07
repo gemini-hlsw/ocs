@@ -24,7 +24,7 @@ public enum GemsInstrument {
     gsaoi() {
         public Option<Offset> getOffset() {
             Angle a = new Angle(4 + GsaoiDetectorArray.DETECTOR_GAP_ARCSEC / 2, Angle.Unit.ARCSECS);
-            return new Some<Offset>(new Offset(a, a));
+            return new Some<>(new Offset(a, a));
         }
 
         public GemsGuideProbeGroup getGuiders() {

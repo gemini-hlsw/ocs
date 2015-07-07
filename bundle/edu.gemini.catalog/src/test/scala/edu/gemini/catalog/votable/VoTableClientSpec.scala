@@ -16,7 +16,7 @@ class VoTableClientSpec extends SpecificationWithJUnit with VoTableClient with N
   val noMagnitudeConstraint = MagnitudeConstraints(MagnitudeBand.J, FaintnessConstraint(100), None)
   "The VoTable client" should {
 
-    val query = CatalogQuery.catalogQuery(Coordinates.zero, RadiusConstraint.between(Angle.fromDegrees(0), Angle.fromDegrees(0.2)), Some(noMagnitudeConstraint))
+    val query = CatalogQuery.catalogQueryOnBand(Coordinates.zero, RadiusConstraint.between(Angle.fromDegrees(0), Angle.fromDegrees(0.2)), noMagnitudeConstraint)
     case class CountingCachedBackend(counter: AtomicInteger, file: String) extends CachedBackend {
       override protected def query(e: SearchKey) = {
         counter.incrementAndGet()
@@ -58,7 +58,7 @@ class VoTableClientSpec extends SpecificationWithJUnit with VoTableClient with N
       val counter = new AtomicInteger(0)
       val countingBackend = CountingCachedBackend(counter, "/votable-ucac4.xml")
       // query2 has smaller radius
-      val query2 = CatalogQuery.catalogQuery(Coordinates.zero, RadiusConstraint.between(Angle.fromDegrees(0), Angle.fromDegrees(0.1)), Some(noMagnitudeConstraint))
+      val query2 = CatalogQuery.catalogQueryOnBand(Coordinates.zero, RadiusConstraint.between(Angle.fromDegrees(0), Angle.fromDegrees(0.1)), noMagnitudeConstraint)
       // Backend should be hit at most once per url
       val r = for {
           f1 <- VoTableClient.catalog(query, countingBackend)

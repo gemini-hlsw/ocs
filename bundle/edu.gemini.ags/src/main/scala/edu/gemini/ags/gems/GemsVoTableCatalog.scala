@@ -2,7 +2,7 @@ package edu.gemini.ags.gems
 
 import edu.gemini.catalog.api._
 import edu.gemini.ags.api.{defaultProbeBands, magnitudeExtractor}
-import edu.gemini.catalog.votable.{RemoteBackend, VoTableBackend, CatalogException, VoTableClient}
+import edu.gemini.catalog.votable._
 import edu.gemini.spModel.core.Target.SiderealTarget
 import edu.gemini.spModel.core.{Angle, Magnitude, MagnitudeBand, Coordinates}
 import edu.gemini.spModel.gemini.gems.GemsInstrument
@@ -71,13 +71,17 @@ case class GemsVoTableCatalog(backend: VoTableBackend = RemoteBackend, catalog: 
   }
 
   private def searchCatalog(basePosition: Coordinates, criterions: List[GemsCatalogSearchCriterion], statusLogger: StatusLogger): Future[List[GemsCatalogSearchResults]] = {
+    // TODO This should be linked to the correct band for flamingos2
+    def extractor(t: SiderealTarget) = t.magnitudeIn(MagnitudeBand.H)
     val queryArgs = for {
       c <- criterions
-      q = CatalogQuery.catalogQueryWithoutBand(basePosition, c.criterion.radiusLimits, c.criterion.magRange.some, catalog)
+      q = CatalogQuery.catalogQueryWithDynamicBand(basePosition, c.criterion.radiusLimits, extractor, c.criterion.magRange, catalog)
     } yield (q, c)
 
     val qm = queryArgs.toMap
-    VoTableClient.catalogs(queryArgs.map(_._1), backend).map(l => l.map(k => GemsCatalogSearchResults(qm.get(k.query).get, k.result.targets.rows)))
+    VoTableClient.catalogs(queryArgs.map(_._1), backend).map(l => l.collect {
+      case QueryResult(q: CatalogQueryWithRange, results:CatalogQueryResult) => GemsCatalogSearchResults(qm.get(q).get, results.targets.rows)
+    })
   }
 
   /**
@@ -95,16 +99,17 @@ case class GemsVoTableCatalog(backend: VoTableBackend = RemoteBackend, catalog: 
     val radiusLimitsList = getRadiusLimits(inst, criterions)
     val magLimitsList = optimizeMagnitudeLimits(criterions)
 
-    def rangeAdjustmentForConditions(mr: Option[MagnitudeRange], mag: Magnitude) =
-      mr.map { m =>
-        m.adjust(m => conditions.magAdjustOp().apply(mag.toOldModel).toNewModel.value)
-      }
+    // Adjust for conditions
+    def rangeAdjustmentForConditions(mr: MagnitudeRange, mag: Magnitude) =
+      // TODO Check possible bug, it should use the param m to process the adjustment
+      mr.adjust(m => conditions.magAdjustOp().apply(mag.toOldModel).toNewModel.value)
+
     val queries = for {
       radiusLimits <- radiusLimitsList
       magLimits    <- magLimitsList
       band          = magLimits.band
       mr            = MagnitudeRange(magLimits.faintnessConstraint, magLimits.saturationConstraint)
-      queryArgs     = (CatalogQuery.catalogQueryWithAdjustedRange(basePosition, radiusLimits, magnitudeExtractor(defaultProbeBands(band)), rangeAdjustmentForConditions, mr.some, catalog), magLimits)
+      queryArgs     = (CatalogQuery.catalogQueryWithAdjustedRange(basePosition, radiusLimits, magnitudeExtractor(defaultProbeBands(band)), mr, rangeAdjustmentForConditions, catalog), magLimits)
     } yield queryArgs
 
     VoTableClient.catalogs(queries.map(_._1), backend).flatMap {

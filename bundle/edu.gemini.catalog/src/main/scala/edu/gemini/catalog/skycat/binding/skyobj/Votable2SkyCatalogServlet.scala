@@ -113,10 +113,10 @@ class Votable2SkyCatalogServlet extends HttpServlet {
             case \/-(mc) => mc
           }
 
-        val query = referenceBand.map { b =>
-            CatalogQuery.catalogQueryRangeOnBand(coordinates, rc, magnitudeExtractor(candidateBands(b)), mr >>= (_.toOption))
+        val query: CatalogQuery = (referenceBand |@| (mr >>= (_.toOption))){ (b, range) =>
+            CatalogQuery.catalogQueryWithDynamicBand(coordinates, rc, magnitudeExtractor(candidateBands(b)), range)
           }.getOrElse {
-            CatalogQuery.catalogQuery(coordinates, rc, None)
+            CatalogQuery.catalogQuery(coordinates, rc)
           }
 
         // Execute query

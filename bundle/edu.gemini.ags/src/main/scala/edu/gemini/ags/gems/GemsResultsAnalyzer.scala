@@ -4,7 +4,7 @@ import java.util.logging.Logger
 
 import edu.gemini.ags.api._
 import edu.gemini.ags.gems.mascot.{MascotCat, MascotProgress, Strehl}
-import edu.gemini.catalog.api.MagnitudeConstraints
+import edu.gemini.catalog.api.{MagnitudeExtractor, MagnitudeConstraints}
 import edu.gemini.spModel.core.{Magnitude, Angle, MagnitudeBand}
 import edu.gemini.spModel.core.Target.SiderealTarget
 import edu.gemini.spModel.gemini.gems.Canopus

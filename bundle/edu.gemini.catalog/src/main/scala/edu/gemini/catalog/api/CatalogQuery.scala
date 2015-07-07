@@ -1,6 +1,6 @@
 package edu.gemini.catalog.api
 
-import edu.gemini.spModel.core.{MagnitudeBand, Magnitude, Coordinates}
+import edu.gemini.spModel.core.Coordinates
 import edu.gemini.spModel.core.Target.SiderealTarget
 
 import scalaz._
@@ -14,16 +14,16 @@ case class RadiusFilter(base: Coordinates, rc: RadiusConstraint) extends QueryRe
   def filter(t: SiderealTarget): Boolean = rc.targetsFilter(base)(t)
 }
 
-case class MagnitudeFilter(mc: Option[MagnitudeConstraints]) extends QueryResultsFilter {
-  def filter(t: SiderealTarget): Boolean = mc.map(_.filter(t)).getOrElse(true)
+case class MagnitudeFilter(mc: MagnitudeConstraints) extends QueryResultsFilter {
+  def filter(t: SiderealTarget): Boolean = mc.filter(t)
 }
 
-case class MagnitudeValueFilter(mag: SiderealTarget => Option[Magnitude], mr: Option[MagnitudeRange]) extends QueryResultsFilter {
-  def filter(t: SiderealTarget): Boolean = mag(t).exists(m => mr.map(_.filter(t, m)).getOrElse(true))
+case class MagnitudeValueFilter(mag: MagnitudeExtractor, mr: MagnitudeRange) extends QueryResultsFilter {
+  def filter(t: SiderealTarget): Boolean = mag(t).exists(m => mr.filter(t, m))
 }
 
-case class AdjustedMagnitudeValueFilter(mag: SiderealTarget => Option[Magnitude], mr: Option[MagnitudeRange], rangeAdjustment: (Option[MagnitudeRange], Magnitude) => Option[MagnitudeRange]) extends QueryResultsFilter {
-  def filter(t: SiderealTarget): Boolean = mag(t).exists(m => rangeAdjustment(mr, m).map(_.filter(t, m)).getOrElse(true))
+case class AdjustedMagnitudeValueFilter(mag: MagnitudeExtractor, mr: MagnitudeRange, rangeAdjustment: MagnitudeRangeAdjustment) extends QueryResultsFilter {
+  def filter(t: SiderealTarget): Boolean = mag(t).exists(m => rangeAdjustment(mr, m).filter(t, m))
 }
 
 sealed trait CatalogQuery {
@@ -31,11 +31,8 @@ sealed trait CatalogQuery {
   val base: Coordinates
   val radiusConstraint: RadiusConstraint
   val catalog: CatalogName
-  // TODO Move these filters out of CatalogQuery
-  val magnitudeConstraints: Option[MagnitudeConstraints]
-  val magnitudeRange: Option[MagnitudeRange]
 
-  val filters: List[QueryResultsFilter] = List(RadiusFilter(base, radiusConstraint), MagnitudeFilter(magnitudeConstraints))
+  val filters: List[QueryResultsFilter]
   def filter(t: SiderealTarget):Boolean = filters.forall(_.filter(t))
 
   def isSuperSetOf(c: CatalogQuery) = {
@@ -52,41 +49,87 @@ sealed trait CatalogQuery {
   }
 }
 
+trait CatalogQueryWithRange extends CatalogQuery { this: CatalogQuery =>
+  val magnitudeRange: MagnitudeRange
+}
+
 object CatalogQuery {
-  private case class BandConstrainedCatalogQuery(base: Coordinates, radiusConstraint: RadiusConstraint, magnitudeConstraints: Option[MagnitudeConstraints], catalog: CatalogName) extends CatalogQuery {
-    override val magnitudeRange: Option[MagnitudeRange] = None
+  private case class BandConstrainedCatalogQuery(base: Coordinates, radiusConstraint: RadiusConstraint, magnitudeConstraints: MagnitudeConstraints, catalog: CatalogName) extends CatalogQuery {
     override val filters: List[QueryResultsFilter] = List(RadiusFilter(base, radiusConstraint), MagnitudeFilter(magnitudeConstraints))
   }
 
-  private case class RangeConstrainedCatalogQuery(base: Coordinates, radiusConstraint: RadiusConstraint, magnitudeRange: Option[MagnitudeRange], catalog: CatalogName) extends CatalogQuery {
-    override val magnitudeConstraints = None
+  private case class RangeConstrainedCatalogQuery(base: Coordinates, radiusConstraint: RadiusConstraint, catalog: CatalogName) extends CatalogQuery {
     override val filters: List[QueryResultsFilter] = List(RadiusFilter(base, radiusConstraint))
   }
 
-  private case class RangeConstrainedCatalogQueryWithBand(base: Coordinates, radiusConstraint: RadiusConstraint, mag: SiderealTarget => Option[Magnitude], magnitudeRange: Option[MagnitudeRange], catalog: CatalogName) extends CatalogQuery {
-    override val magnitudeConstraints = None
+  private case class RangeConstrainedCatalogQueryWithBand(base: Coordinates, radiusConstraint: RadiusConstraint, mag: MagnitudeExtractor, magnitudeRange: MagnitudeRange, catalog: CatalogName) extends CatalogQuery with CatalogQueryWithRange {
     override val filters: List[QueryResultsFilter] = List(RadiusFilter(base, radiusConstraint), MagnitudeValueFilter(mag, magnitudeRange))
   }
 
-  private case class CatalogQueryWithAdjustedBand(override val id: Option[Int], base: Coordinates, radiusConstraint: RadiusConstraint, mag: SiderealTarget => Option[Magnitude], rangeAdjustment: (Option[MagnitudeRange], Magnitude) => Option[MagnitudeRange], magnitudeRange: Option[MagnitudeRange], catalog: CatalogName) extends CatalogQuery {
-    override val magnitudeConstraints = None
+  private case class CatalogQueryWithAdjustedBand(override val id: Option[Int], base: Coordinates, radiusConstraint: RadiusConstraint, mag: MagnitudeExtractor, magnitudeRange: MagnitudeRange, rangeAdjustment: MagnitudeRangeAdjustment, catalog: CatalogName) extends CatalogQuery with CatalogQueryWithRange {
     override val filters: List[QueryResultsFilter] = List(RadiusFilter(base, radiusConstraint), AdjustedMagnitudeValueFilter(mag, magnitudeRange, rangeAdjustment))
   }
-  // TODO Ensure that it makes sense to default to ucac4
-  def catalogQuery(base: Coordinates, radiusConstraint: RadiusConstraint, magnitudeConstraints: Option[MagnitudeConstraints], catalog: CatalogName = ucac4): CatalogQuery
+
+  /**
+   * Builds a catalog query with a radius constraint
+   *
+   * @param base Base Coordinates
+   * @param radiusConstraint Radius to restrict the search
+   * @param catalog Catalog used to search targets
+   */
+  def catalogQuery(base: Coordinates, radiusConstraint: RadiusConstraint, catalog: CatalogName = ucac4): CatalogQuery
+    = RangeConstrainedCatalogQuery(base, radiusConstraint, catalog)
+
+  /**
+   * Builds a catalog query with a radius constraint and constraints on a single band
+   *
+   * @param base Base Coordinates
+   * @param radiusConstraint Radius to restrict the search
+   * @param magnitudeConstraints Constraint on targets on a particular band
+   * @param catalog Catalog used to search targets
+   */
+  def catalogQueryOnBand(base: Coordinates, radiusConstraint: RadiusConstraint, magnitudeConstraints: MagnitudeConstraints, catalog: CatalogName = ucac4): CatalogQuery
     = BandConstrainedCatalogQuery(base, radiusConstraint, magnitudeConstraints, catalog)
 
-  def catalogQueryWithoutBand(base: Coordinates, radiusConstraint: RadiusConstraint, magnitudeRange: Option[MagnitudeRange], catalog: CatalogName = ucac4): CatalogQuery
-    = RangeConstrainedCatalogQuery(base, radiusConstraint, magnitudeRange, catalog)
+  /**
+   * Builds a catalog query with a radius constraint and a range applied to a dynamically extracted band
+   *
+   * @param base Base Coordinates
+   * @param radiusConstraint Radius to restrict the search
+   * @param magnitudeExtractor For a particular target extracts the magnitude used for filtering
+   * @param magnitudeRange Range of values for the magnitude checks
+   * @param catalog Catalog used to search targets
+   */
+  def catalogQueryWithDynamicBand(base: Coordinates, radiusConstraint: RadiusConstraint, magnitudeExtractor: MagnitudeExtractor, magnitudeRange: MagnitudeRange, catalog: CatalogName = ucac4): CatalogQueryWithRange
+    = RangeConstrainedCatalogQueryWithBand(base, radiusConstraint, magnitudeExtractor, magnitudeRange, catalog)
 
-  def catalogQueryRangeOnBand(base: Coordinates, radiusConstraint: RadiusConstraint, mag: SiderealTarget => Option[Magnitude], magnitudeRange: Option[MagnitudeRange], catalog: CatalogName = ucac4): CatalogQuery
-    = RangeConstrainedCatalogQueryWithBand(base, radiusConstraint, mag, magnitudeRange, catalog)
+  /**
+   * Builds a catalog query with a radius constraint, a range applied to a dynamically extracted band and supporting adjustments to the range
+   *
+   * @param base Base Coordinates
+   * @param radiusConstraint Radius to restrict the search
+   * @param magnitudeExtractor For a particular target extracts the magnitude used for filtering
+   * @param magnitudeRange Range of values for the magnitude checks
+   * @param rangeAdjustment Function that can modify the range for a used for a given query, e.g. updates based on conditions
+   * @param catalog Catalog used to search targets
+   */
+  def catalogQueryWithAdjustedRange(base: Coordinates, radiusConstraint: RadiusConstraint, magnitudeExtractor: MagnitudeExtractor, magnitudeRange: MagnitudeRange, rangeAdjustment: MagnitudeRangeAdjustment, catalog: CatalogName = ucac4): CatalogQueryWithRange
+    = CatalogQueryWithAdjustedBand(None, base, radiusConstraint, magnitudeExtractor, magnitudeRange, rangeAdjustment, catalog)
 
-  def catalogQueryWithAdjustedRange(base: Coordinates, radiusConstraint: RadiusConstraint, mag: SiderealTarget => Option[Magnitude], rangeAdjustment: (Option[MagnitudeRange], Magnitude) => Option[MagnitudeRange], magnitudeRange: Option[MagnitudeRange], catalog: CatalogName = ucac4): CatalogQuery
-    = CatalogQueryWithAdjustedBand(None, base, radiusConstraint, mag, rangeAdjustment, magnitudeRange, catalog)
-
-  def catalogQueryForGems(id: Int, base: Coordinates, radiusConstraint: RadiusConstraint, mag: SiderealTarget => Option[Magnitude], rangeAdjustment: (Option[MagnitudeRange], Magnitude) => Option[MagnitudeRange], magnitudeRange: Option[MagnitudeRange], catalog: CatalogName = ucac4): CatalogQuery
-    = CatalogQueryWithAdjustedBand(id.some, base, radiusConstraint, mag, rangeAdjustment, magnitudeRange, catalog)
+  /**
+   * Builds a catalog query with a radius constraint, a range applied to a dynamically extracted band and supporting adjustments to the range
+   * This call is used by GEMS and takes an ID used to index parallel queries
+   *
+   * @param id QueryId
+   * @param base Base Coordinates
+   * @param radiusConstraint Radius to restrict the search
+   * @param magnitudeExtractor For a particular target extracts the magnitude used for filtering
+   * @param magnitudeRange Range of values for the magnitude checks
+   * @param rangeAdjustment Function that can modify the range for a used for a given query, e.g. updates based on conditions
+   * @param catalog Catalog used to search targets
+   */
+  def catalogQueryForGems(id: Int, base: Coordinates, radiusConstraint: RadiusConstraint, magnitudeExtractor: MagnitudeExtractor, magnitudeRange: MagnitudeRange, rangeAdjustment: MagnitudeRangeAdjustment, catalog: CatalogName = ucac4): CatalogQueryWithRange
+    = CatalogQueryWithAdjustedBand(id.some, base, radiusConstraint, magnitudeExtractor, magnitudeRange, rangeAdjustment, catalog)
 }
 
 sealed abstract class CatalogName(val id: String)
