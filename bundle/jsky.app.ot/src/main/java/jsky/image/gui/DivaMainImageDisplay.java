@@ -338,7 +338,6 @@ public class DivaMainImageDisplay extends DivaGraphicsImageDisplay implements Ma
         _canvasDraw = new CanvasDraw(this);
         _fitsGraphics = new FITSGraphics(this);
 
-        // try to restore the history from the previous session
         _historyList = new LinkedList<>();
 
         cleanupImageCache();

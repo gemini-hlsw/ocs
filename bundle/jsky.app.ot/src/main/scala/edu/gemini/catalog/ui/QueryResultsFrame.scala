@@ -180,12 +180,9 @@ object QueryResultsWindow {
 
   private def showTable(q: CatalogQuery):Unit = Swing.onEDT {
     import QueryResultsWindow.table._
-    if (frame.visible) {
-      frame.peer.toFront()
-    } else {
-      frame.visible = true
-      frame.peer.toFront()
-    }
+
+    frame.visible = true
+    frame.peer.toFront()
     GlassLabel.show(frame.peer.getRootPane, "Downloading...")
     reloadSearchData(q)
   }
