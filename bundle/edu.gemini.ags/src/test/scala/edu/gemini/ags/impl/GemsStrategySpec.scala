@@ -141,8 +141,8 @@ class GemsStrategySpec extends Specification with NoTimeConversions {
 
       // Test estimate
       val estimate = gemsStrategy.estimate(ctx, ProbeLimitsTable.loadOrThrow())
-      Await.result(estimate, 20.seconds) should beEqualTo(Estimate.GuaranteedSuccess)
-
+      // Only 2 CWFS stars found, no success
+      Await.result(estimate, 20.seconds) should beEqualTo(Estimate.CompleteFailure)
     }
     "support search/select and analyze on SN-1987A" in {
       val ra = Angle.fromHMS(5, 35, 28.020).getOrElse(Angle.zero)

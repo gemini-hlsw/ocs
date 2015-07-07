@@ -95,9 +95,10 @@ case class GemsVoTableCatalog(backend: VoTableBackend = RemoteBackend, catalog: 
     val radiusLimitsList = getRadiusLimits(inst, criterions)
     val magLimitsList = optimizeMagnitudeLimits(criterions)
 
-    val rangeAdjustmentForConditions = (mr: Option[MagnitudeRange], mag: Magnitude) => mr.map { m =>
-                    m.adjust(m => conditions.magAdjustOp().apply(mag.toOldModel).toNewModel.value)
-                  }
+    def rangeAdjustmentForConditions(mr: Option[MagnitudeRange], mag: Magnitude) =
+      mr.map { m =>
+        m.adjust(m => conditions.magAdjustOp().apply(mag.toOldModel).toNewModel.value)
+      }
     val queries = for {
       radiusLimits <- radiusLimitsList
       magLimits    <- magLimitsList

@@ -118,7 +118,7 @@ class CatalogQueryResultSpec extends SpecificationWithJUnit {
     "be able to filter with a band range with nominal conditions" in {
       val mr = MagnitudeRange(FaintnessConstraint(15.0), None)
 
-      // Large adjustment leavig all taregts out
+      // Large adjustment leaving all targets out
       def adjustment(mr: Option[MagnitudeRange], mag: Magnitude) =
         mr.map { m =>
           m.adjust(k => k - 20)
@@ -127,8 +127,23 @@ class CatalogQueryResultSpec extends SpecificationWithJUnit {
       val qc = CatalogQuery.catalogQueryWithAdjustedRange(c, RadiusConstraint.between(Angle.zero, Angle.fromDegrees(90)), (t: SiderealTarget) => t.magnitudeIn(MagnitudeBand.J), adjustment, Some(mr))
       val filtered = unfiltered.filter(qc)
 
-      // Filtering on magnitude leaves 12 targets
+      // Filtering on magnitude and with the adjustemn takes all the targets out
       filtered.targets.rows should beEmpty
+    }
+    "be able to filter for Gems" in {
+      val mr = MagnitudeRange(FaintnessConstraint(15.0), None)
+
+      // No adjustment
+      def adjustment(mr: Option[MagnitudeRange], mag: Magnitude) =
+        mr.map { m =>
+          m.adjust(k => k )
+        }
+
+      val qc = CatalogQuery.catalogQueryForGems(0, c, RadiusConstraint.between(Angle.zero, Angle.fromDegrees(90)), (t: SiderealTarget) => t.magnitudeIn(MagnitudeBand.J), adjustment, Some(mr))
+      val filtered = unfiltered.filter(qc)
+
+      // Filtering on magnitude leaves 9 targets
+      filtered.targets.rows should be size 9
     }
   }
 
