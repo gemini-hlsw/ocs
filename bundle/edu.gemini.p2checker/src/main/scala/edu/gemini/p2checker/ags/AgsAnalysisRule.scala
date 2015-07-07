@@ -22,8 +22,8 @@ class AgsAnalysisRule(mt: MagnitudeTable) extends IRule {
     // 2. We are not a day calibration observation, and
     // 3. The target is not a target of opportunity.
     if (SPObservation.needsGuideStar(obsShell)) {
-      elements.getObsContext.asScalaOpt.map(ctx => {
-        elements.getTargetObsComponentNode.asScalaOpt.map(targetNode => {
+      elements.getObsContext.asScalaOpt.foreach(ctx => {
+        elements.getTargetObsComponentNode.asScalaOpt.foreach( targetNode => {
           // Perform the analysis.
           val analysis = AgsRegistrar.currentStrategy(ctx).fold(List.empty[AgsAnalysis])(_.analyze(ctx, mt))
 

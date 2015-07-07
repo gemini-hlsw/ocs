@@ -1,29 +1,14 @@
-/*
- * Copyright 2001 Association for Universities for Research in Astronomy, Inc.,
- * Observatory Control System, Gemini Telescopes Project.
- *
- * $Id: PickObjectStatistics.java 4414 2004-02-03 16:21:36Z brighton $
- */
-
 package jsky.image.gui;
 
 import java.awt.Rectangle;
 import java.awt.geom.Point2D;
-import java.io.FileOutputStream;
 import java.util.Vector;
-
-import javax.media.jai.PlanarImage;
 
 import jsky.catalog.FieldDesc;
 import jsky.catalog.FieldDescAdapter;
 import jsky.coords.CoordinateConverter;
 import jsky.coords.WorldCoords;
-import jsky.image.fits.codec.FITSImage;
-import jsky.image.gui.ImageZoom;
 import jsky.science.IQE;
-
-import java.io.DataOutputStream;
-
 
 /**
  * Gathers statistics about a given area of the image using a centroid algorithm.
@@ -155,26 +140,6 @@ public class PickObjectStatistics {
         if (ar == null) {
             //System.out.println("XXX _imageDisplay.getPixelValues() returned null for " + r);
             return;
-        } else {
-            /*XXX
-	    // --------- XXX start test ----------------
-	    // display the image section being used
-	    float[][] imData = new float[h][w];
-	    int n = 0;
-	    for(int j = h-1; j >= 0; j--) {  // FITS order
-		for(int i = 0; i < w; i++) {
-		    imData[j][i] = ar[n++];
-		}
-	    }
-	    try {
-		new FITSImage(imData).getFits().write(new DataOutputStream(new FileOutputStream("x.fits")));
-		ImageDisplayControlFrame f = new ImageDisplayControlFrame("x.fits");
-	    }
-	    catch(Exception e) {
-		e.printStackTrace();
-	    }
-	    // --------- XXX end test ----------------
-	    XXX*/
         }
 
         // examine the image data
@@ -232,11 +197,11 @@ public class PickObjectStatistics {
      * The contents of the vector (column headings, etc.) are described
      * by the result of the getFields() method.
      */
-    public Vector getRow() {
+    public Vector<Object> getRow() {
         if (_centerPos == null || _iqe == null)
             return null;
 
-        Vector row = new Vector(NUM_FIELDS);
+        Vector<Object> row = new Vector<>(NUM_FIELDS);
         for (int i = 0; i < NUM_FIELDS; i++) {
             switch (i) {
                 case ID:
@@ -249,33 +214,33 @@ public class PickObjectStatistics {
                     row.add(_centerPos.getDec().toString());
                     break;
                 case IMAGE_X:
-                    row.add(new Double(_imageX));
+                    row.add(_imageX);
                     break;
                 case IMAGE_Y:
-                    row.add(new Double(_imageY));
+                    row.add(_imageY);
                     break;
                 case FWHM_X:
                     double d1 = _iqe.getFwhmX();
                     if (d1 != 0)
-                        row.add(new Double(d1));
+                        row.add(d1);
                     else
                         row.add(null);
                     break;
                 case FWHM_Y:
                     double d2 = _iqe.getFwhmY();
                     if (d2 != 0)
-                        row.add(new Double(d2));
+                        row.add(d2);
                     else
                         row.add(null);
                     break;
                 case ANGLE:
-                    row.add(new Double(_iqe.getAngle()));
+                    row.add(_iqe.getAngle());
                     break;
                 case PEAK:
-                    row.add(new Double(_iqe.getObjectPeak()));
+                    row.add(_iqe.getObjectPeak());
                     break;
                 case BACKGROUND:
-                    row.add(new Double(_iqe.getMeanBackground()));
+                    row.add(_iqe.getMeanBackground());
                     break;
             }
         }

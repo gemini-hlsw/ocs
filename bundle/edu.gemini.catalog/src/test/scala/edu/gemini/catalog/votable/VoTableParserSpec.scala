@@ -1,6 +1,5 @@
 package edu.gemini.catalog.votable
 
-import edu.gemini.catalog.votable.TableRowItem
 import edu.gemini.spModel.core._
 import edu.gemini.spModel.core.Target.SiderealTarget
 import org.specs2.mutable.SpecificationWithJUnit

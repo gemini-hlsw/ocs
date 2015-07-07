@@ -5,7 +5,6 @@ import edu.gemini.shared.cat.CatalogSearchParameters;
 import edu.gemini.shared.cat.ICatalogAlgorithm;
 import edu.gemini.catalog.api.MagnitudeLimits;
 import edu.gemini.catalog.api.RadiusLimits;
-import edu.gemini.shared.skyobject.Magnitude;
 import edu.gemini.shared.util.immutable.*;
 import edu.gemini.spModel.ags.AgsStrategyKey;
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality;
@@ -428,15 +427,6 @@ public class TpeImageWidget extends NavigatorImageDisplay implements MouseInputL
     }
 
     /**
-     * Convert the given screen coordinates location to world coordinates.
-     */
-    public WorldCoords screenToWorldCoords(int x, int y) {
-        Point2D.Double p = new Point2D.Double(x, y);
-        getCoordinateConverter().screenToWorldCoords(p, false);
-        return new WorldCoords(p.x, p.y, getCoordinateConverter().getEquinox());
-    }
-
-    /**
      * Convert the given world coordinate position to screen coordinates.
      */
     public Point2D.Double worldToScreenCoords(WorldCoords pos) {
@@ -835,29 +825,6 @@ public class TpeImageWidget extends NavigatorImageDisplay implements MouseInputL
     }
 
     /**
-     * Update the mouse cursor, if needed, based on the image feature at the mouse position.
-     */
-    public void updateCursor(TpeMouseEvent tme, Cursor cursor, Cursor defaultCursor) {
-        if (!_imgInfoValid) {
-            return;
-        }
-
-        if (cursor != defaultCursor) {
-            for (final TpeImageFeature tif : _featureList) {
-                if (tif.isMouseOver(tme)) {
-                    if (getCursor() != cursor) {
-                        setCursor(cursor);
-                    }
-                    return;
-                }
-            }
-        }
-        if (getCursor() != defaultCursor) {
-            setCursor(defaultCursor);
-        }
-    }
-
-    /**
      * Implements the PropertyChangeListener interface
      */
     public void propertyChange(PropertyChangeEvent evt) {
@@ -1114,12 +1081,7 @@ public class TpeImageWidget extends NavigatorImageDisplay implements MouseInputL
             SPSiteQuality sq = _ctx.siteQuality().orNull();
             if (sq != null) {
                 final SPSiteQuality.Conditions conditions = sq.conditions();
-                return params.getMagnitudeLimits().mapMagnitudes(new MapOp<Magnitude, Magnitude>() {
-                    @Override
-                    public Magnitude apply(Magnitude magnitude) {
-                        return conditions.adjust(magnitude);
-                    }
-                });
+                return params.getMagnitudeLimits().mapMagnitudes(conditions::adjust);
             }
             return params.getMagnitudeLimits();
         }

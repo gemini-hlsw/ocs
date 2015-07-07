@@ -9,7 +9,7 @@ public class TpeGuideStarDialogForm extends JPanel {
 
     protected final JComboBox<Catalog> catalogComboBox =new JComboBox<>();
     protected final JComboBox<String> typeComboBox = new JComboBox<>();
-    protected final JComboBox<String> instComboBox = new JComboBox<>();;
+    protected final JComboBox<String> instComboBox = new JComboBox<>();
     protected final JLabel catalogWarning = new JLabel();
     protected final JButton okButton = new JButton("    OK    ");
     protected final JButton cancelButton = new JButton("Cancel");

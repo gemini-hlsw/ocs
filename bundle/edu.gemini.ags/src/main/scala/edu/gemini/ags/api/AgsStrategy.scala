@@ -2,6 +2,7 @@ package edu.gemini.ags.api
 
 import edu.gemini.ags.api.AgsAnalysis.NotReachable
 import edu.gemini.ags.api.AgsMagnitude.{MagnitudeCalc, MagnitudeTable}
+import edu.gemini.catalog.api.CatalogQuery
 import edu.gemini.pot.ModelConverters._
 import edu.gemini.spModel.ags.AgsStrategyKey
 import edu.gemini.spModel.core.{MagnitudeBand, Angle}
@@ -33,6 +34,11 @@ trait AgsStrategy {
   }
 
   def candidates(ctx: ObsContext, mt: MagnitudeTable): Future[List[(GuideProbe, List[SiderealTarget])]]
+
+  /**
+   * Returns a list of catalog queries that would be used to search for guide stars with the given context
+   */
+  def catalogQueries(ctx: ObsContext, mt: MagnitudeTable): List[CatalogQuery]
 
   def estimate(ctx: ObsContext, mt: MagnitudeTable): Future[AgsStrategy.Estimate]
 

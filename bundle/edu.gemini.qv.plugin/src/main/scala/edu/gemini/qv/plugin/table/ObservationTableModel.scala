@@ -297,19 +297,19 @@ object ObservationTableModel {
   }
 
   private def asString(o: Any): String = o match {
-    case null => ""
-    case v: Band => v match {
-      case Band.Band1 => "1"
-      case Band.Band2 => "2"
-      case Band.Band3 => "3"
-      case Band.Band4 => "4"
+    case null                 => ""
+    case v: Band              => v match {
+      case Band.Band1     => "1"
+      case Band.Band2     => "2"
+      case Band.Band3     => "3"
+      case Band.Band4     => "4"
       case Band.Undefined => ""
     }
-    case v: Boolean => if (v) "yes" else ""
+    case v: Boolean           => if (v) "yes" else ""
     case v: DisplayableSpType => v.displayValue
-    case v: LoggableSpType => v.logValue
-    case v: Affiliate => v.displayValue
-    case v => v.toString
+    case v: LoggableSpType    => v.logValue
+    case v: Affiliate         => v.displayValue
+    case v                    => v.toString
   }
 
   /** Convert timing windows into human readable string. */
@@ -320,9 +320,9 @@ object ObservationTableModel {
         if (tw.getDuration == TimingWindow.WINDOW_REMAINS_OPEN_FOREVER) " and remains open forever"
         else s" + ${TimeUtils.msToHHMM(tw.getDuration)}" + {
           tw.getRepeat match {
-            case TimingWindow.REPEAT_NEVER => ""
+            case TimingWindow.REPEAT_NEVER   => ""
             case TimingWindow.REPEAT_FOREVER => s" every ${TimeUtils.msToHHMM(tw.getPeriod)} forever"
-            case _ => s" every ${TimeUtils.msToHHMM(tw.getPeriod)} x ${tw.getRepeat}"
+            case _                           => s" every ${TimeUtils.msToHHMM(tw.getPeriod)} x ${tw.getRepeat}"
           }
         }
       }}
@@ -334,13 +334,12 @@ object ObservationTableModel {
   /** Convert elevation constraints into human readable string. */
   private def elevationConstraintsAsString(o: Obs): String = {
     o.getElevationConstraintType match {
-      case ElevationConstraintType.AIRMASS => o.getElevationConstraintMin + " \u2264 airmass \u2264 " + o.getElevationConstraintMax
-      case ElevationConstraintType.HOUR_ANGLE => {
+      case ElevationConstraintType.AIRMASS    => o.getElevationConstraintMin + " \u2264 airmass \u2264 " + o.getElevationConstraintMax
+      case ElevationConstraintType.HOUR_ANGLE =>
         val min = TimeUtils.MS_PER_HOUR * o.getElevationConstraintMin
         val max = TimeUtils.MS_PER_HOUR * o.getElevationConstraintMax
         TimeUtils.msToHHMMSS(min.toLong) + " \u2264 ha \u2264 " + TimeUtils.msToHHMMSS(max.toLong)
-      }
-      case _ => ""
+      case _                                  => ""
     }
   }
 
@@ -357,10 +356,10 @@ object ObservationTableModel {
               else if (s1t != s2t) s1t compare s2t
               else if (s1pId != s2pId) Integer.parseInt(s1pId) compare Integer.parseInt(s2pId)
               else Integer.parseInt(s1oId) compare Integer.parseInt(s2oId)
-            case _ =>
+            case _                                    =>
               s1 compare s2
           }
-        case _ =>
+        case _                                    =>
           s1 compare s2
       }
     }
@@ -379,7 +378,7 @@ object ObservationTableModel {
     val prettyString: String = {
       val dms = new DMS(dec)
       val sig = if (dms.getSign < 0) "-" else ""
-      f"${sig}${dms.getDegrees}:${dms.getMin}%02d:${dms.getSec}%05.2f"
+      f"$sig${dms.getDegrees}:${dms.getMin}%02d:${dms.getSec}%05.2f"
     }
   }
   case class TimeValue(t: Long) extends Comparable[TimeValue] {
@@ -417,9 +416,9 @@ class ObservationTableModel(ctx: QvContext) extends AbstractTableModel {
 
   val rowSorter: TableRowSorter[ObservationTableModel] = {
     val sorter = new TableRowSorter(this)
-    columns.zipWithIndex.foreach({ case (c, ix) => {
+    columns.zipWithIndex.foreach({ case (c, ix) =>
       c.comparator.foreach(sorter.setComparator(ix, _))
-    }})
+    })
     sorter
   }
 
@@ -432,15 +431,15 @@ class ObservationTableModel(ctx: QvContext) extends AbstractTableModel {
 
   def getColumnCount: Int = columns.size
 
-  override def getColumnName(col: Int): String = columns(col) name
+  override def getColumnName(col: Int): String = columns(col).name
 
-  override def getColumnClass(col: Int): Class[_] = columns(col) myClass
+  override def getColumnClass(col: Int): Class[_] = columns(col).myClass
 
   override def isCellEditable(row: Int, col: Int): Boolean = false
 
   def getValueAt(row: Int, col: Int): AnyRef = {
     cachedValues.getOrElseUpdate((row, col), {
-      if (observations.size > 0)
+      if (observations.nonEmpty)
         columns(col).value(observations(row)).asInstanceOf[AnyRef]
       else
         null

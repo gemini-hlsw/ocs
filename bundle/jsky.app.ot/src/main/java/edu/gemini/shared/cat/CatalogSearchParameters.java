@@ -1,10 +1,3 @@
-// Copyright 1997 Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-// See the file COPYRIGHT for complete details.
-//
-// $Id: CatalogSearchParameters.java 47127 2012-08-01 15:42:38Z swalker $
-//
-
 package edu.gemini.shared.cat;
 
 import edu.gemini.catalog.api.MagnitudeLimits;
@@ -62,17 +55,6 @@ public final class CatalogSearchParameters implements Cloneable {
      */
     public int getResultsLimit() {
         return _numStars;
-    }
-
-    /**
-     * Sets the limit on the number of stars returned.  If the argument is less
-     * than 0, then 0 is used.
-     */
-    public void setResultsLimit(int resultsLimit) {
-        if (resultsLimit < 0) {
-            resultsLimit = 0;
-        }
-        _numStars = resultsLimit;
     }
 
     /**

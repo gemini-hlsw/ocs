@@ -1,10 +1,3 @@
-/*
- * Copyright 2001 Association for Universities for Research in Astronomy, Inc.,
- * Observatory Control System, Gemini Telescopes Project.
- *
- * $Id: NavigatorImageDisplayToolBar.java 4414 2004-02-03 16:21:36Z brighton $
- */
-
 package jsky.navigator;
 
 import javax.swing.JButton;
@@ -12,7 +5,6 @@ import javax.swing.JButton;
 import jsky.image.gui.ImageDisplayToolBar;
 import jsky.util.I18N;
 import jsky.util.Resources;
-
 
 /**
  * A tool bar for the image display window.
@@ -24,6 +16,7 @@ public class NavigatorImageDisplayToolBar extends ImageDisplayToolBar {
 
     // toolbar buttons
     protected JButton catalogButton;
+    protected JButton newCatalogButton;
 
     /**
      * Create the toolbar for the given window
@@ -37,10 +30,9 @@ public class NavigatorImageDisplayToolBar extends ImageDisplayToolBar {
      */
     protected void addToolBarItems() {
         super.addToolBarItems();
-
         addSeparator();
-
         add(makeCatalogButton());
+        add(makeNewCatalogButton());
     }
 
     /**
@@ -52,13 +44,29 @@ public class NavigatorImageDisplayToolBar extends ImageDisplayToolBar {
     protected JButton makeCatalogButton() {
         if (catalogButton == null)
             catalogButton = makeButton(_I18N.getString("showCatalogWindow"),
-                                       ((NavigatorImageDisplay) imageDisplay).getCatalogBrowseAction(),
-                                       false);
+                                       ((NavigatorImageDisplay) imageDisplay).getCatalogBrowseAction());
 
         updateButton(catalogButton,
-                     _I18N.getString("catalogs"),
-                     Resources.getIcon("Catalog24.gif", this.getClass()));
+                _I18N.getString("catalogs"),
+                Resources.getIcon("Catalog24.gif", this.getClass()));
         return catalogButton;
+    }
+
+    /**
+     * Make the new catalog button, if it does not yet exists. Otherwise update the display
+     * using the current options for displaying text or icons.
+     *
+     * @return the catalog button
+     */
+    protected JButton makeNewCatalogButton() {
+        if (newCatalogButton == null)
+            newCatalogButton = makeButton(_I18N.getString("showCatalogWindow"),
+                                       ((NavigatorImageDisplay) imageDisplay).getCatalogBrowseAction());
+
+        updateButton(newCatalogButton,
+                     "New Catalog",
+                     Resources.getIcon("Catalog24.gif", this.getClass()));
+        return newCatalogButton;
     }
 
 
@@ -69,6 +77,7 @@ public class NavigatorImageDisplayToolBar extends ImageDisplayToolBar {
     public void update() {
         super.update();
         makeCatalogButton();
+        makeNewCatalogButton();
     }
 }
 

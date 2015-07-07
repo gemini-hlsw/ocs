@@ -1,8 +1,6 @@
-// Copyright 1997 Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-// See the file COPYRIGHT for complete details.
 package jsky.app.ot.gemini.editor.targetComponent;
 
+import edu.gemini.catalog.ui.QueryResultsWindow;
 import edu.gemini.pot.sp.ISPObsComponent;
 import edu.gemini.shared.skyobject.Magnitude;
 import edu.gemini.shared.util.immutable.*;
@@ -22,7 +20,6 @@ import edu.gemini.spModel.target.system.*;
 import jsky.app.ot.OTOptions;
 import jsky.app.ot.ags.*;
 import jsky.app.ot.editor.OtItemEditor;
-import jsky.app.ot.gemini.editor.targetComponent.details.TargetDetailEditor;
 import jsky.app.ot.tpe.AgsClient;
 import jsky.app.ot.tpe.GuideStarSupport;
 import jsky.app.ot.tpe.TelescopePosEditor;
@@ -76,6 +73,10 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 
         _w.guidingControls.autoGuideStarButton().peer().addActionListener(autoGuideStarListener);
         _w.guidingControls.manualGuideStarButton().peer().addActionListener(manualGuideStarListener);
+
+        _w.guidingControls.newManualGuideStarButton().peer().addActionListener(evt -> {
+            QueryResultsWindow.instance().showOn(getNode());
+        });
         _w.guidingControls.autoGuideStarGuiderSelector().addSelectionListener(strategy ->
             AgsStrategyUtil.setSelection(getContextObservation(), strategy)
         );
@@ -129,11 +130,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
             // other detail editors are swapped in when the target type changes,
             // update them explicitly so they behave as if they were contained
             // in the panel.
-            for (final TargetDetailEditor ed : _w.detailEditor.allEditorsJava()) {
-                if (_w.detailEditor.curDetailEditorJava().forall(cur -> cur != ed)) {
-                    updateEnabledState(new Component[]{ed}, enabled);
-                }
-            }
+            _w.detailEditor.allEditorsJava().stream().filter(ed -> _w.detailEditor.curDetailEditorJava().forall(cur -> cur != ed)).forEach(ed -> updateEnabledState(new Component[]{ed}, enabled));
         }
 
         final TargetEnvironment env = getDataObject().getTargetEnvironment();
@@ -352,6 +349,8 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
     private void toggleAgsGuiElements() {
         final boolean supports = GuideStarSupport.supportsAutoGuideStarSelection(getNode());
         _w.guidingControls.supportsAgs_$eq(supports); // hide the ags related buttons
+
+        _w.guidingControls.supportsNewManualGS(!GuideStarSupport.hasGemsComponent(getNode()));
     }
 
     // Guider panel property change listener to modify status and magnitude limits.
@@ -484,7 +483,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 
             // XXX OT-35 hack to work around recursive call to TargetObsComp.setTargetEnvironment() in
             // SPProgData.ObsContextManager.update()
-            SwingUtilities.invokeLater(() ->  showTargetTag());
+            SwingUtilities.invokeLater(EdCompTargetList.this::showTargetTag);
         }
     }
 
@@ -536,8 +535,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
     }
 
     private static boolean enablePrimary(SPTarget target, TargetEnvironment env) {
-        if (env.getBase() == target) return false;
-        return !env.getUserTargets().contains(target);
+        return env.getBase() != target && !env.getUserTargets().contains(target);
     }
 
     private void refreshAll() {
@@ -593,7 +591,6 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         _w.detailEditor.edit(getObsContext(env), _curPos, getNode());
     }
 
-
     private void showTargetTag() {
         final TargetEnvironment env = getDataObject().getTargetEnvironment();
         for (int i = 0; i < _w.tag.getItemCount(); ++i) {
@@ -607,7 +604,6 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         }
     }
 
-
     private final TelescopePosWatcher posWatcher = new TelescopePosWatcher() {
         public void telescopePosUpdate(WatchablePos tp) {
             if (tp != _curPos) {
@@ -620,7 +616,6 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
             updateGuiding();
         }
     };
-
 
     @SuppressWarnings("FieldCanBeLocal")
     private final ActionListener removeListener = new ActionListener() {
@@ -655,7 +650,6 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         }
     };
 
-
     @SuppressWarnings("FieldCanBeLocal")
     private final ActionListener manualGuideStarListener = evt -> {
         try {
@@ -685,7 +679,6 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
             }
         }
     };
-
 
     @SuppressWarnings("FieldCanBeLocal")
     private final ActionListener duplicateListener = new ActionListener() {
@@ -751,7 +744,6 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         }
     };
 
-
     @SuppressWarnings("FieldCanBeLocal")
     private final ActionListener pasteListener = new ActionListener() {
         private void pasteSelectedPosition(ISPObsComponent obsComponent, TargetObsComp dataObject) {
@@ -769,7 +761,6 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         }
     };
 
-
     @SuppressWarnings("FieldCanBeLocal")
     private final ActionListener primaryListener = new ActionListener() {
         public void actionPerformed(ActionEvent e) {
@@ -778,9 +769,6 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
     };
 
 }
-
-
-
 
 interface PositionType {
     boolean isAvailable();

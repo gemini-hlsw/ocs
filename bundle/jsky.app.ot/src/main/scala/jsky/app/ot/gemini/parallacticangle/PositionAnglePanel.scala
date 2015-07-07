@@ -301,8 +301,6 @@ class PositionAnglePanel[I <: SPInstObsComp with PosAngleConstraintAware,
       ui.positionAngleConstraintComboBox.enableItem(option)
     else {
       ui.positionAngleConstraintComboBox.disableItem(option)
-      //if (ui.positionAngleConstraintComboBox.selection.item.equals(option))
-      //  ui.positionAngleConstraintComboBox.selection.item = PosAngleConstraint.FIXED
     }
   }
 

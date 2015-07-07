@@ -1,17 +1,6 @@
-/*
- * ESO Archive
- *
- * $Id: GenericToolBar.java 4414 2004-02-03 16:21:36Z brighton $
- *
- * who             when        what
- * --------------  ----------  ----------------------------------------
- * Allan Brighton  2000/01/31  Created
- */
-
 package jsky.util.gui;
 
 import java.awt.Component;
-import java.awt.Font;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.beans.PropertyChangeEvent;
@@ -23,13 +12,11 @@ import javax.swing.BorderFactory;
 import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JPopupMenu;
-import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
 import javax.swing.SwingConstants;
 
 import jsky.util.I18N;
 import jsky.util.Resources;
-
 
 /**
  * Implements a generic toolbar that can be used for a number
@@ -137,7 +124,7 @@ public class GenericToolBar extends JToolBar {
      */
     protected JButton makeOpenButton() {
         if (openButton == null) {
-            openButton = makeButton(_I18N.getString("fileOpenTip"), target.getOpenAction(), false);
+            openButton = makeButton(_I18N.getString("fileOpenTip"), target.getOpenAction());
         }
 
         updateButton(openButton, _I18N.getString("open"), Resources.getIcon("Open24.gif"));
@@ -154,7 +141,7 @@ public class GenericToolBar extends JToolBar {
      */
     protected JButton makeBackButton() {
         if (backButton == null) {
-            backButton = makeButton(_I18N.getString("fileBackTip"), target.getBackAction(), false);
+            backButton = makeButton(_I18N.getString("fileBackTip"), target.getBackAction());
         }
 
         updateButton(backButton, _I18N.getString("back"), Resources.getIcon("Back24.gif"));
@@ -170,7 +157,7 @@ public class GenericToolBar extends JToolBar {
      */
     protected JButton makeForwardButton() {
         if (forwardButton == null) {
-            forwardButton = makeButton(_I18N.getString("fileForwardTip"), target.getForwAction(), false);
+            forwardButton = makeButton(_I18N.getString("fileForwardTip"), target.getForwAction());
         }
 
         updateButton(forwardButton, _I18N.getString("forward"), Resources.getIcon("Forward24.gif"));
@@ -184,12 +171,9 @@ public class GenericToolBar extends JToolBar {
      *
      * @param toolTip the tool tip text
      * @param action the action for the button
-     * @param isMenuButton true if the button will have a menu
      */
-    protected JButton makeButton(String toolTip, Action action, boolean isMenuButton) {
+    protected JButton makeButton(String toolTip, Action action) {
         JButton button = new JButton();
-        //if (!isMenuButton)
-        //    button.setFont(button.getFont().deriveFont(Font.PLAIN));
         button.setToolTipText(toolTip);
         if (action != null) {
             action.addPropertyChangeListener(new ButtonPropertyChangeListener(button));
@@ -200,27 +184,6 @@ public class GenericToolBar extends JToolBar {
 
         return button;
     }
-
-
-    /**
-     * Make and return a toolbar toggle button.
-     *
-     * @param toolTip the tool tip text
-     * @param action the action for the button
-     */
-    protected JToggleButton makeToggleButton(String toolTip, Action action) {
-        JToggleButton button = new JToggleButton();
-        button.setToolTipText(toolTip);
-        if (action != null) {
-            action.addPropertyChangeListener(new ButtonPropertyChangeListener(button));
-            button.setEnabled(action.isEnabled());
-            button.addActionListener(action);
-        }
-        setupButton(button);
-
-        return button;
-    }
-
 
     /**
      * Make and return a menu button with the given tool tip and menu.
@@ -229,7 +192,7 @@ public class GenericToolBar extends JToolBar {
      * @param menu the menu for the button
      */
     protected JButton makeMenuButton(String toolTip, final JPopupMenu menu) {
-        JButton button = makeButton(toolTip, null, true);
+        JButton button = makeButton(toolTip, null);
         button.addMouseListener(new MouseAdapter() {
 
             public void mousePressed(MouseEvent e) {
@@ -283,18 +246,6 @@ public class GenericToolBar extends JToolBar {
         makeOpenButton();
         makeBackButton();
         makeForwardButton();
-    }
-
-    public JButton getOpenButton() {
-        return openButton;
-    }
-
-    public JButton getBackButton() {
-        return backButton;
-    }
-
-    public JButton getForwardButton() {
-        return forwardButton;
     }
 
     /**

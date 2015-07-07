@@ -1,10 +1,3 @@
-/*
- * Copyright 2000 Association for Universities for Research in Astronomy, Inc.,
- * Observatory Control System, Gemini Telescopes Project.
- *
- * $Id: DivaGraphicsImageDisplay.java 5923 2005-03-30 20:24:42Z brighton $
- */
-
 package jsky.image.gui;
 
 import java.awt.BorderLayout;
@@ -34,8 +27,6 @@ import javax.media.jai.JAI;
 import javax.media.jai.PlanarImage;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import javax.swing.event.EventListenerList;
 
 import jsky.coords.CoordinateConverter;
@@ -274,14 +265,11 @@ public class DivaGraphicsImageDisplay extends JCanvas implements GraphicsImageDi
         _wcs = null;
 
         // register to receive notification when the image changes
-        imageProcessor.addChangeListener(new ChangeListener() {
-
-            public void stateChanged(ChangeEvent ce) {
-                ImageChangeEvent e = (ImageChangeEvent) ce;
-                if (e.isNewAngle())
-                    _updateGraphicsFlag = true;
-                updateImage();
-            }
+        imageProcessor.addChangeListener(ce -> {
+            ImageChangeEvent e = (ImageChangeEvent) ce;
+            if (e.isNewAngle())
+                _updateGraphicsFlag = true;
+            updateImage();
         });
     }
 
@@ -475,7 +463,7 @@ public class DivaGraphicsImageDisplay extends JCanvas implements GraphicsImageDi
      * Return true if the image has been cleared.
      */
     public boolean isClear() {
-        return _displayImage == null || _imageLayer.isVisible() == false;
+        return _displayImage == null || !_imageLayer.isVisible();
     }
 
 
@@ -617,31 +605,31 @@ public class DivaGraphicsImageDisplay extends JCanvas implements GraphicsImageDi
 
 
     /** Return the X tile index for the given X screen coordinate */
-    private final int XtoTileX(int x) {
+    private int XtoTileX(int x) {
         return (int) Math.floor((double) (x - _tileGridXOffset) / _tileWidth);
     }
 
     /** Return the Y tile index for the given Y screen coordinate */
-    private final int YtoTileY(int y) {
+    private int YtoTileY(int y) {
         return (int) Math.floor((double) (y - _tileGridYOffset) / _tileHeight);
     }
 
     /** Return the X screen coordinate for the given X tile index  */
-    private final int TileXtoX(int tx) {
+    private int TileXtoX(int tx) {
         return tx * _tileWidth + _tileGridXOffset;
     }
 
     /** Return the Y screen coordinate for the given Y tile index  */
-    private final int TileYtoY(int ty) {
+    private int TileYtoY(int ty) {
         return ty * _tileHeight + _tileGridYOffset;
     }
 
     // speed up math min and max by inlining
-    private final int maxInt(int a, int b) {
+    private int maxInt(int a, int b) {
         return a > b ? a : b;
     }
 
-    private final int minInt(int a, int b) {
+    private int minInt(int a, int b) {
         return (a <= b) ? a : b;
     }
 

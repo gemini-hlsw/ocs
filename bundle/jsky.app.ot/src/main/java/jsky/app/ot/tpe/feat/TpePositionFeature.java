@@ -1,11 +1,6 @@
-// Copyright 1997 Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-// See the file COPYRIGHT for complete details.
-//
-// $Id: TpePositionFeature.java 21629 2009-08-21 20:27:31Z swalker $
-//
 package jsky.app.ot.tpe.feat;
 
+import edu.gemini.spModel.target.SPTarget;
 import edu.gemini.spModel.target.env.TargetEnvironment;
 import edu.gemini.spModel.target.obsComp.TargetObsComp;
 import jsky.app.ot.tpe.*;
@@ -22,7 +17,7 @@ import java.awt.geom.Point2D;
 public abstract class TpePositionFeature extends TpeImageFeature
         implements TpeDraggableFeature, TpeEraseableFeature, TpeSelectableFeature {
 
-    protected PosMapEntry _dragObject;
+    protected PosMapEntry<SPTarget> _dragObject;
 
     /**
      * Construct the feature with its name and description.
@@ -45,7 +40,7 @@ public abstract class TpePositionFeature extends TpeImageFeature
 
     /**
      */
-    public boolean positionIsClose(PosMapEntry pme, int x, int y) {
+    public boolean positionIsClose(PosMapEntry<SPTarget> pme, int x, int y) {
         Point2D.Double p = pme.screenPos;
         if (p == null) {
             return false;

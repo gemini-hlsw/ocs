@@ -1,9 +1,3 @@
-// Copyright 1997 Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-// See the file COPYRIGHT for complete details.
-//
-// $Id: TpeTargetPosFeature.java 38242 2011-10-26 12:55:06Z abrighton $
-//
 package jsky.app.ot.tpe.feat;
 
 import edu.gemini.shared.util.immutable.ImList;
@@ -30,7 +24,6 @@ public class TpeTargetPosFeature extends TpePositionFeature
     static {
         _props.registerBooleanProperty(PROP_SHOW_TAGS, true);
     }
-
 
     /**
      * Construct the feature with its name and description.
@@ -137,8 +130,8 @@ public class TpeTargetPosFeature extends TpePositionFeature
 
         Iterator<PosMapEntry<SPTarget>> it = pm.getAllPositionMapEntries();
         while (it.hasNext()) {
-            PosMapEntry pme = it.next();
-            SPTarget tp = (SPTarget) pme.taggedPos;
+            PosMapEntry<SPTarget> pme = it.next();
+            SPTarget tp = pme.taggedPos;
 
             TargetEnvironment env = obsComp.getTargetEnvironment();
             if (!env.getUserTargets().contains(tp)) continue;
@@ -218,13 +211,13 @@ public class TpeTargetPosFeature extends TpePositionFeature
 
         Iterator<PosMapEntry<SPTarget>> it = pm.getAllPositionMapEntries();
         while (it.hasNext()) {
-            PosMapEntry pme = it.next();
+            PosMapEntry<SPTarget> pme = it.next();
 
             if (positionIsClose(pme, tme.xWidget, tme.yWidget) &&
-                    env.isUserPosition((SPTarget) pme.taggedPos)) {
+                    env.isUserPosition(pme.taggedPos)) {
 
                 _dragObject = pme;
-                return new Some<Object>(pme.taggedPos);
+                return new Some<>(pme.taggedPos);
             }
         }
         return None.instance();

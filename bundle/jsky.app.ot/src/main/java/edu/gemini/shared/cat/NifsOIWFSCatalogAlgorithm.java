@@ -1,9 +1,3 @@
-// Copyright 2004 Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-//
-// $Id: NifsOIWFSCatalogAlgorithm.java 47186 2012-08-02 16:54:23Z swalker $
-//
-
 package edu.gemini.shared.cat;
 
 import edu.gemini.shared.skyobject.Magnitude;
@@ -18,6 +12,7 @@ import edu.gemini.shared.skyobject.Magnitude;
  * the probe vignetting limitation.  if Altair is not being used then the OIWFS search field should
  * be 1.'5 in radius with the probe vignetting limitation."</i>
  */
+@Deprecated
 public final class NifsOIWFSCatalogAlgorithm extends OIWFSCatalogAlgorithm {
     private static final String NAME = "NIFS OIWFS w/o field lens";
     private static final String DESC = "Selects target for the NIFS OIWFS w/o field lens.";

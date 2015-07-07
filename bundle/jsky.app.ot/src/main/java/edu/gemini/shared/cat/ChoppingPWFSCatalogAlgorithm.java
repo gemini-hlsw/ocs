@@ -1,10 +1,3 @@
-// Copyright 1997 Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-// See the file COPYRIGHT for complete details.
-//
-// $Id: ChoppingPWFSCatalogAlgorithm.java 47126 2012-08-01 15:40:43Z swalker $
-//
-
 package edu.gemini.shared.cat;
 
 import edu.gemini.shared.skyobject.Magnitude;
@@ -17,6 +10,7 @@ import edu.gemini.shared.skyobject.Magnitude;
  * the (proper) R band mag since that's all GSC I has.  Doesn't consider
  * distance for ties in magnitude.
  */
+@Deprecated
 public final class ChoppingPWFSCatalogAlgorithm extends PWFSCatalogAlgorithm {
     private static final String NAME = "Gemini PWFS chopping";
     private static final String DESC = "Selects target for either of the two Gemini PWFS patrol fields when chopping.";

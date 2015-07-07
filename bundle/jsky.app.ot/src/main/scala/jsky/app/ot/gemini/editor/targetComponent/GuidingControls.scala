@@ -9,7 +9,6 @@ import jsky.app.ot.ags.AgsContext
 
 import scala.swing._
 
-
 class GuidingControls extends GridBagPanel {
   opaque = false
 
@@ -43,9 +42,15 @@ class GuidingControls extends GridBagPanel {
   }
 
   val manualGuideStarButton = new Button("Manual GS")
+  // Temporary button to go to the new manual search
+  val newManualGuideStarButton = new Button("New Manual GS")
+  newManualGuideStarButton.visible = false
 
   layout(manualGuideStarButton) = new Constraints {
     gridx  = 3
+  }
+  layout(newManualGuideStarButton) = new Constraints {
+    gridx  = 4
   }
 
   def update(ctxOpt: edu.gemini.shared.util.immutable.Option[ObsContext]): Unit = {
@@ -61,5 +66,9 @@ class GuidingControls extends GridBagPanel {
     guiderLabel.visible = supports
     autoGuideStarGuiderSelector.getUi.setVisible(supports)
     autoGuideStarButton.visible = supports
+  }
+
+  def supportsNewManualGS(supports: Boolean) {
+    newManualGuideStarButton.visible = supports
   }
 }

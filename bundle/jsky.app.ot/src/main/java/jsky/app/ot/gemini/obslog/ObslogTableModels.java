@@ -49,25 +49,23 @@ public interface ObslogTableModels {
 
         protected AbstractDatasetRecordTableModel(ObsLog obsLog, List<DatasetRecord> records) {
             this.obsLog  = obsLog;
-            this.records = new ArrayList<DatasetRecord>(records);
+            this.records = new ArrayList<>(records);
 
-            obsLog.qaLogDataObject.addDatasetQaRecordListener(new ObsQaLog.Listener() {
-                @Override public void datasetQaUpdate(ObsQaLog.Event event) {
-                    final List<DatasetRecord> records = AbstractDatasetRecordTableModel.this.records;
-                    final DatasetLabel l = event.newRec.label;
-                    int row = -1;
-                    int i = 0;
-                    for (DatasetRecord r : records) {
-                        if (r.getLabel().equals(l)) {
-                            row = i;
-                            break;
-                        }
-                        ++i;
+            obsLog.qaLogDataObject.addDatasetQaRecordListener(event -> {
+                final List<DatasetRecord> records1 = AbstractDatasetRecordTableModel.this.records;
+                final DatasetLabel l = event.newRec.label;
+                int row = -1;
+                int i = 0;
+                for (DatasetRecord r : records1) {
+                    if (r.getLabel().equals(l)) {
+                        row = i;
+                        break;
                     }
-                    if (row >= 0) {
-                        records.set(row, records.get(row).withQa(event.newRec));
-                        propertyChange(row, event);
-                    }
+                    ++i;
+                }
+                if (row >= 0) {
+                    records1.set(row, records1.get(row).withQa(event.newRec));
+                    propertyChange(row, event);
                 }
             });
         }

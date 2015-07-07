@@ -1,6 +1,6 @@
 package edu.gemini.ags.impl
 
-import edu.gemini.ags.api.{AgsRegistrar, AgsStrategy}
+import edu.gemini.ags.api.AgsStrategy
 import edu.gemini.catalog.votable.RemoteBackend
 import edu.gemini.pot.sp.SPComponentType
 import edu.gemini.spModel.ags.AgsStrategyKey
@@ -12,7 +12,6 @@ import edu.gemini.spModel.gemini.nici.NiciOiwfsGuideProbe
 import edu.gemini.spModel.guide.{GuideProbe, GuideProbeUtil}
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.rich.shared.immutable._
-//import edu.gemini.shared.util.immutable.ScalaConverters._
 import edu.gemini.spModel.target.obsComp.PwfsGuideProbe
 import edu.gemini.spModel.target.system.NonSiderealTarget
 
@@ -116,8 +115,7 @@ object Strategy {
     }
   }
 
-  private def siteAvailability(ctx: ObsContext)(s: AgsStrategy): Boolean =
-    s match {
+  private def siteAvailability(ctx: ObsContext)(s: AgsStrategy): Boolean = s match {
       case Pwfs1North | Pwfs2North => ctx.getSite.asScalaOpt.forall(_ == Site.GN)
       case Pwfs1South | Pwfs2South => ctx.getSite.asScalaOpt.forall(_ == Site.GS)
       case _                       => true
@@ -126,11 +124,4 @@ object Strategy {
   def validStrategies(ctx: ObsContext): List[AgsStrategy] =
     InstMap.get(ctx.getInstrument.getType).map(_.apply(ctx)).toList.flatten.filter(guidersAvailable(ctx)).filter(siteAvailability(ctx))
 
-  // Get the site for a given strategy using the context.
-  def site(ctx: ObsContext): Option[Site] =
-    ctx.getSite.asScalaOpt.orElse(AgsRegistrar.currentStrategy(ctx).map {
-      case Pwfs1North | Pwfs2North => Option(Site.GN)
-      case Pwfs1South | Pwfs2South => Option(Site.GS)
-      case _ => None
-    }.flatten)
 }

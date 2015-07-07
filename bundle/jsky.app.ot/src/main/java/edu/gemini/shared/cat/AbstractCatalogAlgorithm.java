@@ -1,10 +1,3 @@
-// Copyright 1997 Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-// See the file COPYRIGHT for complete details.
-//
-// $Id: AbstractCatalogAlgorithm.java 7294 2006-08-17 19:04:57Z anunez $
-//
-
 package edu.gemini.shared.cat;
 
 /**
@@ -12,6 +5,7 @@ package edu.gemini.shared.cat;
  * upon which subclasses may be based.  Subclasses must implement the
  * {@link ICatalogAlgorithm#getParameters}.
  */
+@Deprecated
 public abstract class AbstractCatalogAlgorithm implements ICatalogAlgorithm {
 
     public static final String DEFAULT_STAR_TYPE = "Guide Star";

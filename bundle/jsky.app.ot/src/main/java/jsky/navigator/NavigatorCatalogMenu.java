@@ -1,10 +1,3 @@
-/*
- * Copyright 2000 Association for Universities for Research in Astronomy, Inc.,
- * Observatory Control System, Gemini Telescopes Project.
- *
- * $Id: NavigatorCatalogMenu.java 7122 2006-06-06 16:38:01Z anunez $
- */
-
 package jsky.navigator;
 
 import javax.swing.*;
@@ -51,6 +44,9 @@ public class NavigatorCatalogMenu extends JMenu implements TreeModelListener {
 
     /** The "Browse" menu item */
     private JMenuItem _browseMenuItem;
+
+    /** The "New Browse" menu item */
+    private JMenuItem _newBrowseMenuItem;
 
     /** The "Proxy Settings" menu item */
     private JMenuItem _proxyMenuItem;
@@ -102,6 +98,7 @@ public class NavigatorCatalogMenu extends JMenu implements TreeModelListener {
         if (!_isInCatalogWindow && _browseMenuItem == null) {
             addSeparator();
             add(_browseMenuItem = _createCatalogBrowseMenuItem());
+            add(_newBrowseMenuItem = _createCatalogNewBrowseMenuItem());
         }
 
         if (_proxyMenuItem == null) {
@@ -207,6 +204,15 @@ public class NavigatorCatalogMenu extends JMenu implements TreeModelListener {
      */
     private JMenuItem _createCatalogBrowseMenuItem() {
         JMenuItem menuItem = new JMenuItem(_I18N.getString("browse") + "...");
+        menuItem.addActionListener(ae -> _opener.openCatalogWindow());
+        return menuItem;
+    }
+
+    /**
+     * Create the Catalog => "New Browse..." menu item
+     */
+    private JMenuItem _createCatalogNewBrowseMenuItem() {
+        JMenuItem menuItem = new JMenuItem("New Browse ...");
         menuItem.addActionListener(ae -> _opener.openCatalogWindow());
         return menuItem;
     }

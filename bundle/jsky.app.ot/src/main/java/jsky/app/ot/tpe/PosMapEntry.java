@@ -1,15 +1,8 @@
-// Copyright 1997 Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-// See the file COPYRIGHT for complete details.
-//
-// $Id: PosMapEntry.java 18053 2009-02-20 20:16:23Z swalker $
-//
 package jsky.app.ot.tpe;
 
 import edu.gemini.spModel.target.WatchablePos;
 
 import java.awt.geom.Point2D;
-
 
 /**
  * An implementation class that groups an (x,y) screen position and a TaggedPos object.

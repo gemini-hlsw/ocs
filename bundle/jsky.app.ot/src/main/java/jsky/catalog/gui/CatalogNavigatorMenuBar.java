@@ -1,31 +1,16 @@
-/*
- * ESO Archive
- *
- * $Id: CatalogNavigatorMenuBar.java 8278 2007-11-23 12:56:52Z anunez $
- *
- * who             when        what
- * --------------  ----------  ----------------------------------------
- * Allan Brighton  1999/05/03  Created
- */
-
 package jsky.catalog.gui;
 
-import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.util.Hashtable;
 
 import javax.swing.ButtonGroup;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JComponent;
-import javax.swing.JDesktopPane;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JRadioButtonMenuItem;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import javax.swing.event.MenuEvent;
 import javax.swing.event.MenuListener;
 
@@ -34,7 +19,6 @@ import jsky.catalog.TableQueryResult;
 import jsky.util.I18N;
 import jsky.util.Preferences;
 import jsky.util.gui.GenericToolBar;
-
 
 /**
  * Implements a menubar for a CatalogNavigator.
@@ -56,20 +40,8 @@ public class CatalogNavigatorMenuBar extends JMenuBar {
     // The toolbar associated with the image display
     private GenericToolBar _toolBar;
 
-    // Handle for the File menu
-    private JMenu _fileMenu;
-
-    // Handle for the View menu
-    private JMenu _viewMenu;
-
     // Handle for the Go menu
     private JMenu _goMenu;
-
-    // Handle for the catalog menu
-    private JMenu _catalogMenu;
-
-    // Handle for the Table menu
-    private JMenu _tableMenu;
 
     // Handle for the Query menu
     private JMenu _queryMenu;
@@ -85,7 +57,7 @@ public class CatalogNavigatorMenuBar extends JMenuBar {
     private JCheckBoxMenuItem _showCatalogTreeMenuItem;
 
     // Used to show/hide the catalog tree for certain query components
-    private static Hashtable _catalogTreeIsVisibleMap = new Hashtable();
+    private static Hashtable<Class<?>, Boolean> _catalogTreeIsVisibleMap = new Hashtable<>();
 
 
     /**
@@ -95,11 +67,11 @@ public class CatalogNavigatorMenuBar extends JMenuBar {
         super();
         _navigator = navigator;
         _toolBar = toolBar;
-        add(_fileMenu = createFileMenu());
-        add(_viewMenu = createViewMenu());
+        add(createFileMenu());
+        add(createViewMenu());
         add(_goMenu = createGoMenu(null));
-        add(_catalogMenu = createCatalogMenu());
-        add(_tableMenu = createTableMenu());
+        add(createCatalogMenu());
+        add(createTableMenu());
         add(_queryMenu = createQueryMenu(null));
 
         // Arrange to always set the current window for use by the CatalogHistoryItem class,
@@ -117,14 +89,12 @@ public class CatalogNavigatorMenuBar extends JMenuBar {
         });
 
         // Receive notification whenever a new catalog is displayed
-        _navigator.addChangeListener(new ChangeListener() {
-            public void stateChanged(ChangeEvent e) {
-                // keep the Go history menu up to date
-                _updateGoMenu();
+        _navigator.addChangeListener(e -> {
+            // keep the Go history menu up to date
+            _updateGoMenu();
 
-                // Check if the catalog tree should be visible with this catalog
-                updateCatalogTree();
-            }
+            // Check if the catalog tree should be visible with this catalog
+            updateCatalogTree();
         });
 
         // Keep the query menu up to date
@@ -157,7 +127,7 @@ public class CatalogNavigatorMenuBar extends JMenuBar {
         JComponent component = _navigator.getQueryComponent();
         if (component == null)
             return;
-        Boolean showTreeObj = (Boolean) _catalogTreeIsVisibleMap.get(component.getClass());
+        Boolean showTreeObj = _catalogTreeIsVisibleMap.get(component.getClass());
         boolean showTree;
         if (showTreeObj != null) {
             showTree = showTreeObj;
@@ -198,7 +168,7 @@ public class CatalogNavigatorMenuBar extends JMenuBar {
      * This method is included in this class, so that the state of the associated checkbox
      * menu item can be kept up to date.
      */
-    public static void setCatalogTreeIsVisible(Class c, boolean visible) {
+    public static void setCatalogTreeIsVisible(Class<?> c, boolean visible) {
         _catalogTreeIsVisibleMap.put(c, visible);
     }
 
@@ -230,12 +200,7 @@ public class CatalogNavigatorMenuBar extends JMenuBar {
      */
     protected JMenuItem createFileOpenURLMenuItem() {
         JMenuItem menuItem = new JMenuItem(_I18N.getString("openURL") + "...");
-        menuItem.addActionListener(new ActionListener() {
-
-            public void actionPerformed(ActionEvent ae) {
-                _navigator.openURL();
-            }
-        });
+        menuItem.addActionListener(ae -> _navigator.openURL());
         return menuItem;
     }
 
@@ -244,12 +209,7 @@ public class CatalogNavigatorMenuBar extends JMenuBar {
      */
     protected JMenuItem createFileClearMenuItem() {
         JMenuItem menuItem = new JMenuItem(_I18N.getString("clear"));
-        menuItem.addActionListener(new ActionListener() {
-
-            public void actionPerformed(ActionEvent ae) {
-                _navigator.clear();
-            }
-        });
+        menuItem.addActionListener(ae -> _navigator.clear());
         return menuItem;
     }
 
@@ -258,12 +218,7 @@ public class CatalogNavigatorMenuBar extends JMenuBar {
      */
     protected JMenuItem createFileCloseMenuItem() {
         JMenuItem menuItem = new JMenuItem(_I18N.getString("close"));
-        menuItem.addActionListener(new ActionListener() {
-
-            public void actionPerformed(ActionEvent ae) {
-                _navigator.close();
-            }
-        });
+        menuItem.addActionListener(ae -> _navigator.close());
         return menuItem;
     }
 
@@ -286,15 +241,13 @@ public class CatalogNavigatorMenuBar extends JMenuBar {
     protected JCheckBoxMenuItem createViewToolBarMenuItem() {
         JCheckBoxMenuItem menuItem = new JCheckBoxMenuItem(_I18N.getString("toolbar"));
 
-        menuItem.addItemListener(new ItemListener() {
-            public void itemStateChanged(ItemEvent e) {
-                JCheckBoxMenuItem rb = (JCheckBoxMenuItem) e.getSource();
-                _toolBar.setVisible(rb.isSelected());
-                if (rb.isSelected())
-                    Preferences.set(_viewToolBarPrefName, "true");
-                else
-                    Preferences.set(_viewToolBarPrefName, "false");
-            }
+        menuItem.addItemListener(e -> {
+            JCheckBoxMenuItem rb = (JCheckBoxMenuItem) e.getSource();
+            _toolBar.setVisible(rb.isSelected());
+            if (rb.isSelected())
+                Preferences.set(_viewToolBarPrefName, "true");
+            else
+                Preferences.set(_viewToolBarPrefName, "false");
         });
 
         // check for a previous preference setting
@@ -332,23 +285,21 @@ public class CatalogNavigatorMenuBar extends JMenuBar {
         group.add(b2);
         group.add(b3);
 
-        ItemListener itemListener = new ItemListener() {
-            public void itemStateChanged(ItemEvent e) {
-                JRadioButtonMenuItem rb = (JRadioButtonMenuItem) e.getSource();
-                if (rb.isSelected()) {
-                    if (rb.getText().equals(_I18N.getString("picAndText"))) {
-                        _toolBar.setShowPictures(true);
-                        _toolBar.setShowText(true);
-                        Preferences.set(_showToolBarAsPrefName, "1");
-                    } else if (rb.getText().equals(_I18N.getString("picOnly"))) {
-                        _toolBar.setShowPictures(true);
-                        _toolBar.setShowText(false);
-                        Preferences.set(_showToolBarAsPrefName, "2");
-                    } else if (rb.getText().equals(_I18N.getString("textOnly"))) {
-                        _toolBar.setShowPictures(false);
-                        _toolBar.setShowText(true);
-                        Preferences.set(_showToolBarAsPrefName, "3");
-                    }
+        ItemListener itemListener = e -> {
+            JRadioButtonMenuItem rb = (JRadioButtonMenuItem) e.getSource();
+            if (rb.isSelected()) {
+                if (rb.getText().equals(_I18N.getString("picAndText"))) {
+                    _toolBar.setShowPictures(true);
+                    _toolBar.setShowText(true);
+                    Preferences.set(_showToolBarAsPrefName, "1");
+                } else if (rb.getText().equals(_I18N.getString("picOnly"))) {
+                    _toolBar.setShowPictures(true);
+                    _toolBar.setShowText(false);
+                    Preferences.set(_showToolBarAsPrefName, "2");
+                } else if (rb.getText().equals(_I18N.getString("textOnly"))) {
+                    _toolBar.setShowPictures(false);
+                    _toolBar.setShowText(true);
+                    Preferences.set(_showToolBarAsPrefName, "3");
                 }
             }
         };
@@ -374,11 +325,7 @@ public class CatalogNavigatorMenuBar extends JMenuBar {
     protected JCheckBoxMenuItem createViewCatalogTreeMenu() {
         _showCatalogTreeMenuItem = new JCheckBoxMenuItem(_I18N.getString("catalogTree"));
 
-        _showCatalogTreeMenuItem.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                _showCatalogTree(_showCatalogTreeMenuItem.isSelected(), true);
-            }
-        });
+        _showCatalogTreeMenuItem.addActionListener(e -> _showCatalogTree(_showCatalogTreeMenuItem.isSelected(), true));
 
         // check for a previous preference setting
         boolean showTree = Preferences.get(_showCatalogTreePrefName, true);
@@ -430,12 +377,10 @@ public class CatalogNavigatorMenuBar extends JMenuBar {
      */
     protected JMenuItem createGoClearHistoryMenuItem() {
         JMenuItem menuItem = new JMenuItem(_I18N.getString("clearHistory"));
-        menuItem.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent ae) {
-                _navigator.clearHistory();
-                _goMenu.removeAll();
-                createGoMenu(_goMenu);
-            }
+        menuItem.addActionListener(ae -> {
+            _navigator.clearHistory();
+            _goMenu.removeAll();
+            createGoMenu(_goMenu);
         });
         return menuItem;
     }
@@ -458,20 +403,18 @@ public class CatalogNavigatorMenuBar extends JMenuBar {
         menu.add(_tableCellsEditableMenuItem = createTableCellsEditableMenuItem());
 
         // Enable/disable/update the previous checkbutton
-        _navigator.addChangeListener(new ChangeListener() {
-            public void stateChanged(ChangeEvent e) {
-                JComponent c = _navigator.getResultComponent();
-                if (c instanceof TableDisplayTool) {
-                    _tableCellsEditableMenuItem.setEnabled(true);
-                    TableQueryResult queryResult = ((TableDisplayTool) c).getTable();
-                    if (queryResult instanceof MemoryCatalog) {
-                        MemoryCatalog cat = (MemoryCatalog) queryResult;
-                        _tableCellsEditableMenuItem.setSelected(!cat.isReadOnly());
-                    }
-                } else {
-                    _tableCellsEditableMenuItem.setSelected(false);
-                    _tableCellsEditableMenuItem.setEnabled(false);
+        _navigator.addChangeListener(e -> {
+            JComponent c = _navigator.getResultComponent();
+            if (c instanceof TableDisplayTool) {
+                _tableCellsEditableMenuItem.setEnabled(true);
+                TableQueryResult queryResult = ((TableDisplayTool) c).getTable();
+                if (queryResult instanceof MemoryCatalog) {
+                    MemoryCatalog cat = (MemoryCatalog) queryResult;
+                    _tableCellsEditableMenuItem.setSelected(!cat.isReadOnly());
                 }
+            } else {
+                _tableCellsEditableMenuItem.setSelected(false);
+                _tableCellsEditableMenuItem.setEnabled(false);
             }
         });
 
@@ -484,11 +427,9 @@ public class CatalogNavigatorMenuBar extends JMenuBar {
     protected JCheckBoxMenuItem createTableCellsEditableMenuItem() {
         JCheckBoxMenuItem menuItem = new JCheckBoxMenuItem(_I18N.getString("editableTableCells"));
 
-        menuItem.addItemListener(new ItemListener() {
-            public void itemStateChanged(ItemEvent e) {
-                JCheckBoxMenuItem rb = (JCheckBoxMenuItem) e.getSource();
-                _navigator.setTableCellsEditable(rb.isSelected());
-            }
+        menuItem.addItemListener(e -> {
+            JCheckBoxMenuItem rb = (JCheckBoxMenuItem) e.getSource();
+            _navigator.setTableCellsEditable(rb.isSelected());
         });
 
         return menuItem;
@@ -525,12 +466,10 @@ public class CatalogNavigatorMenuBar extends JMenuBar {
         menu.add(_navigator.getStoreNewQueryAction());
         menu.addSeparator();
 
-        ActionListener l = new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                JMenuItem menuItem = (JMenuItem) e.getSource();
-                String name = menuItem.getText();
-                _navigator.storeQuery(name);
-            }
+        ActionListener l = e -> {
+            JMenuItem menuItem = (JMenuItem) e.getSource();
+            String name = menuItem.getText();
+            _navigator.storeQuery(name);
         };
         _navigator.addQueryMenuItems(menu, l);
         return menu;
@@ -543,12 +482,10 @@ public class CatalogNavigatorMenuBar extends JMenuBar {
         JMenu menu = new JMenu(_I18N.getString("deleteQuery"));
         menu.add(_navigator.getDeleteAllQueryAction());
         menu.addSeparator();
-        ActionListener l = new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                JMenuItem menuItem = (JMenuItem) e.getSource();
-                String name = menuItem.getText();
-                _navigator.deleteQuery(name);
-            }
+        ActionListener l = e -> {
+            JMenuItem menuItem = (JMenuItem) e.getSource();
+            String name = menuItem.getText();
+            _navigator.deleteQuery(name);
         };
         _navigator.addQueryMenuItems(menu, l);
         return menu;
@@ -565,28 +502,4 @@ public class CatalogNavigatorMenuBar extends JMenuBar {
         return _toolBar;
     }
 
-    /** Return the handle for the File menu */
-    public JMenu getFileMenu() {
-        return _fileMenu;
-    }
-
-    /** Return the handle for the View menu */
-    public JMenu getViewMenu() {
-        return _viewMenu;
-    }
-
-    /** Return the handle for the Go menu */
-    public JMenu getGoMenu() {
-        return _goMenu;
-    }
-
-    /** Return the handle for the Catalog menu */
-    public JMenu getCatalogMenu() {
-        return _catalogMenu;
-    }
-
-    /** Return the handle for the Table menu */
-    public JMenu getTableMenu() {
-        return _tableMenu;
-    }
 }

@@ -48,6 +48,23 @@ object Target {
       PLens.nil.run
     ))
 
+  val pm: Target @?> ProperMotion =
+    PLens(_.fold(
+      PLens.nil.run,
+      SiderealTarget.pm.run,
+      PLens.nil.run,
+      PLens.nil.run,
+      PLens.nil.run
+    ))
+
+  val magnitudes: Target @?> List[Magnitude] =
+    PLens(_.fold(
+      PLens.nil.run,
+      SiderealTarget.magnitudes.partial.run,
+      PLens.nil.run,
+      PLens.nil.run,
+      PLens.nil.run
+    ))
 
   val raDec: Target @?> (RightAscension, Declination) =
     coords.xmapB(cs => (cs.ra, cs.dec))(Coordinates.tupled)
@@ -134,11 +151,13 @@ object Target {
   
     val empty = SiderealTarget("Untitled", Coordinates.zero, None, Nil, None)
   
-    val name:        SiderealTarget @> String         = Lens(t => Store(s => t.copy(name = s), t.name))
-    val coordinates: SiderealTarget @> Coordinates    = Lens(t => Store(c => t.copy(coordinates = c), t.coordinates))
-    val ra:          SiderealTarget @> RightAscension = coordinates >=> Coordinates.ra
-    val dec:         SiderealTarget @> Declination    = coordinates >=> Coordinates.dec
-  
+    val name:        SiderealTarget @> String          = Lens(t => Store(s => t.copy(name = s), t.name))
+    val coordinates: SiderealTarget @> Coordinates     = Lens(t => Store(c => t.copy(coordinates = c), t.coordinates))
+    val pm:          SiderealTarget @?> ProperMotion   = PLens(t => t.properMotion.map(p => Store(q => t.copy(properMotion = p.some), p)))
+    val ra:          SiderealTarget @> RightAscension  = coordinates >=> Coordinates.ra
+    val dec:         SiderealTarget @> Declination     = coordinates >=> Coordinates.dec
+    val magnitudes:  SiderealTarget @> List[Magnitude] = Lens(t => Store(c => t.copy(magnitudes = c), t.magnitudes))
+
   }
 
   ///

@@ -1,10 +1,3 @@
-// Copyright 1997 Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-// See the file COPYRIGHT for complete details.
-//
-// $Id: OIWFSCatalogAlgorithm.java 47126 2012-08-01 15:40:43Z swalker $
-//
-
 package edu.gemini.shared.cat;
 
 import edu.gemini.catalog.api.MagnitudeLimits;
@@ -12,10 +5,10 @@ import edu.gemini.catalog.api.RadiusLimits;
 import edu.gemini.skycalc.Angle;
 import edu.gemini.shared.skyobject.Magnitude;
 
-
 /**
  * Base class for OIWFS catalog algorithms
  */
+@Deprecated
 public class OIWFSCatalogAlgorithm extends AbstractCatalogAlgorithm {
 
     /**

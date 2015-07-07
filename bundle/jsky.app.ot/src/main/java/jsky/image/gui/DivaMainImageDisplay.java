@@ -1,13 +1,3 @@
-/*
- * ESO Archive
- *
- * $Id: DivaMainImageDisplay.java 47126 2012-08-01 15:40:43Z swalker $
- *
- * who             when        what
- * --------------  ----------  ----------------------------------------
- * Allan Brighton  1999/05/03  Created
- */
-
 package jsky.image.gui;
 
 import com.sun.media.jai.codec.*;
@@ -37,7 +27,6 @@ import javax.swing.*;
 import javax.swing.event.ChangeListener;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.geom.Point2D;
 import java.io.*;
 import java.net.URL;
@@ -54,7 +43,7 @@ import java.util.Stack;
  */
 public class DivaMainImageDisplay extends DivaGraphicsImageDisplay implements MainImageDisplay {
 
-    // Used to access internationalized strings (see i18n/gui*.proprties)
+    // Used to access internationalized strings (see i18n/gui*.properties)
     private static final I18N _I18N = I18N.getInstance(DivaMainImageDisplay.class);
 
     /**
@@ -91,12 +80,6 @@ public class DivaMainImageDisplay extends DivaGraphicsImageDisplay implements Ma
      * Set to true if the image has been modified and needs saving
      */
     private boolean saveNeeded = false;
-
-    /**
-     * True if this is the first instance created by the application
-     */
-    private boolean _firstTime = true;
-
 
     /**
      * The URL for the image, if one was specified (after downloading, if possible)
@@ -181,12 +164,12 @@ public class DivaMainImageDisplay extends DivaGraphicsImageDisplay implements Ma
     /**
      * Stack of ImageHistoryItem, used to go back to a previous image
      */
-    private Stack _backStack = new Stack();
+    private Stack<ImageHistoryItem> _backStack = new Stack<>();
 
     /**
      * Stack of ImageHistoryItem, used to go forward to the next image
      */
-    private Stack _forwStack = new Stack();
+    private Stack<ImageHistoryItem> _forwStack = new Stack<>();
 
     /**
      * Set when the back or forward actions are active to avoid the normal history stack handling
@@ -202,11 +185,6 @@ public class DivaMainImageDisplay extends DivaGraphicsImageDisplay implements Ma
      * Base filename for serialization of the history list
      */
     private static final String HISTORY_LIST_DATA_NAME = "imageHistoryListData";
-
-    /**
-     * Max number of items in the history list
-     */
-    private int _maxHistoryItems = 20;
 
 
     /**
@@ -360,21 +338,9 @@ public class DivaMainImageDisplay extends DivaGraphicsImageDisplay implements Ma
         _canvasDraw = new CanvasDraw(this);
         _fitsGraphics = new FITSGraphics(this);
 
-        // try to restore the history from the previous session
-//        loadHistory();
-        _historyList = new LinkedList<ImageHistoryItem>();
-//        cleanupHistoryList();
-        if (_firstTime) {
-            _firstTime = false;
-            cleanupImageCache();
-        }
+        _historyList = new LinkedList<>();
 
-        // arrange to save the history list for the next session on exit
-//        Runtime.getRuntime().addShutdownHook(new Thread() {
-//            public void run() {
-//                saveHistory(true);
-//            }
-//        });
+        cleanupImageCache();
     }
 
     /**
@@ -459,7 +425,6 @@ public class DivaMainImageDisplay extends DivaGraphicsImageDisplay implements Ma
         if (fitsImage != null) {
             fitsImage.close();
             fitsImage.clearTileCache();
-            fitsImage = null;
         }
 
         // load non FITS images with JAI, but try to load FITS files using the
@@ -571,7 +536,6 @@ public class DivaMainImageDisplay extends DivaGraphicsImageDisplay implements Ma
             downloadImageToTempFile(url);
         } else {
             DialogUtil.error("Unsupported URL syntax: " + s);
-            return;
         }
     }
 
@@ -641,6 +605,7 @@ public class DivaMainImageDisplay extends DivaGraphicsImageDisplay implements Ma
      * Add the given item to the history list, removing duplicates and
      * keeping the list size to a maximum of 20.
      */
+    @SuppressWarnings("unchecked")
     protected void addToHistory(ImageHistoryItem historyItem) {
         ListIterator<ImageHistoryItem> it = ((LinkedList<ImageHistoryItem>) _historyList.clone()).listIterator(0);
         for (int i = 0; it.hasNext(); i++) {
@@ -650,6 +615,10 @@ public class DivaMainImageDisplay extends DivaGraphicsImageDisplay implements Ma
             }
         }
         _historyList.addFirst(historyItem);
+        /*
+          Max number of items in the history list
+        */
+        int _maxHistoryItems = 20;
         if (_historyList.size() > _maxHistoryItems) {
             ImageHistoryItem item = _historyList.removeLast();
             // remove the file, if it is in cache
@@ -696,21 +665,6 @@ public class DivaMainImageDisplay extends DivaGraphicsImageDisplay implements Ma
     }
 
     /**
-     * Return the max number of items in the history list.
-     */
-    public int getMaxHistoryItems() {
-        return _maxHistoryItems;
-    }
-
-    /**
-     * Set the max number of items in the history list.
-     */
-    public void setMaxHistoryItems(int n) {
-        _maxHistoryItems = n;
-    }
-
-
-    /**
      * Merge the historyList with current serialized version (another instance
      * may have written it since we read it last).
      */
@@ -746,7 +700,7 @@ public class DivaMainImageDisplay extends DivaGraphicsImageDisplay implements Ma
             }
         }
 
-        _historyList = new LinkedList<ImageHistoryItem>();
+        _historyList = new LinkedList<>();
         _backAction.setEnabled(false);
         _backStack.clear();
         _forwAction.setEnabled(false);
@@ -775,26 +729,12 @@ public class DivaMainImageDisplay extends DivaGraphicsImageDisplay implements Ma
     /**
      * Try to load the history list from a file, and create an empty list if that fails.
      */
+    @SuppressWarnings("unchecked")
     protected void loadHistory() {
         try {
             _historyList = ImageHistoryItem.apply((LinkedList<ImageHistoryItem.Data>) Preferences.getPreferences().deserialize(HISTORY_LIST_DATA_NAME));
         } catch (Exception e) {
-            _historyList = new LinkedList<ImageHistoryItem>();
-        }
-    }
-
-    /**
-     * Remove any items in the history list for files that no longer exist.
-     */
-    protected void cleanupHistoryList() {
-        // remove dead items from the list
-        ListIterator<ImageHistoryItem> it = ((LinkedList<ImageHistoryItem>) _historyList.clone()).listIterator(0);
-        while (it.hasNext()) {
-            ImageHistoryItem historyItem = it.next();
-            File file = new File(historyItem.data.filename);
-            if (!file.exists()) {
-                _historyList.remove(historyItem);
-            }
+            _historyList = new LinkedList<>();
         }
     }
 
@@ -808,16 +748,11 @@ public class DivaMainImageDisplay extends DivaGraphicsImageDisplay implements Ma
         if (dir.isDirectory()) {
             // Just to be safe, use a filter to only remove files we created
             // (there shouldn't be any other files in the cache dir though)
-            FilenameFilter filter = new FilenameFilter() {
-
-                public boolean accept(File dir, String name) {
-                    return name.startsWith("jsky");
-                }
-            };
+            FilenameFilter filter = (dir1, name) -> name.startsWith("jsky");
             File[] files = dir.listFiles(filter);
-            for (int i = 0; i < files.length; i++) {
-                if (!fileInHistoryList(files[i])) {
-                    files[i].delete();
+            for (File file : files) {
+                if (!fileInHistoryList(file)) {
+                    file.delete();
                 }
 
             }
@@ -834,6 +769,7 @@ public class DivaMainImageDisplay extends DivaGraphicsImageDisplay implements Ma
     /**
      * Return the ImageHistoryItem from the history list, or null if not found.
      */
+    @SuppressWarnings("unchecked")
     protected ImageHistoryItem getImageHistoryItem(File file) {
         ListIterator<ImageHistoryItem> it = ((LinkedList<ImageHistoryItem>) _historyList.clone()).listIterator(0);
         while (it.hasNext()) {
@@ -853,67 +789,21 @@ public class DivaMainImageDisplay extends DivaGraphicsImageDisplay implements Ma
     protected void initProgressPanel() {
         if (_progressPanel == null) {
             _progressPanel = ProgressPanel.makeProgressPanel("Downloading image data ...", _parent);
-            _progressPanel.addActionListener(new ActionListener() {
-
-                public void actionPerformed(ActionEvent e) {
-                    if (_worker != null) {
-                        _worker.interrupt();
-                        _worker = null;
-                    }
+            _progressPanel.addActionListener(e -> {
+                if (_worker != null) {
+                    _worker.interrupt();
+                    _worker = null;
                 }
             });
         }
         _progressPanel.start();
     }
 
-
-    /**
-     * Load an image directly from the given URL in a separate thread, so the user can monitor progress
-     * and cancel it, if needed.
-     */
-    protected void loadImageFromURL(final URL url) {
-        if (!checkSave())
-            return;
-
-        addToHistory();
-        _url = _origURL = url;
-        _filename = null;
-        initProgressPanel();
-
-        _worker = new SwingWorker() {
-
-            public Object construct() {
-                setDownloadState(true);
-                try {
-                    ProgressBarFilterInputStream in = _progressPanel.getLoggedInputStream(url);
-                    InputStream stream = SeekableStream.wrapInputStream(in, true);
-                    setImage(JAI.create("stream", stream));
-                } catch (Exception e) {
-                    return e;
-                }
-                return null;
-            }
-
-            public void finished() {
-                _progressPanel.stop();
-                Object o = getValue();
-                if ((o instanceof Exception) && !(o instanceof ProgressException)) {
-                    DialogUtil.error((Exception) o);
-                }
-                setDownloadState(false);
-                _worker = null;
-            }
-        };
-        _worker.start();
-    }
-
-
     /**
      * Download the given URL to a temporary file in a separate thread and then
      * display the image file when done.
      */
-    protected void downloadImageToTempFile(final URL url) {
-        //System.out.println("XXX downloadImageToTempFile: " + url);
+    protected void downloadImageToTempFile(final URL url) {    //System.out.println("XXX downloadImageToTempFile: " + url);
         initProgressPanel();
         _worker = new SwingWorker() {
 
@@ -924,7 +814,6 @@ public class DivaMainImageDisplay extends DivaGraphicsImageDisplay implements Ma
                 try {
                     String dir = Preferences.getPreferences().getCacheDir().getPath();
                     File file = File.createTempFile("jsky", ".tmp", new File(dir));
-                    //file.deleteOnExit();
                     ProgressBarFilterInputStream in = _progressPanel.getLoggedInputStream(url);
                     FileOutputStream out = new FileOutputStream(file);
                     FileUtil.copy(in, out);
@@ -1001,7 +890,7 @@ public class DivaMainImageDisplay extends DivaGraphicsImageDisplay implements Ma
             _forwAction.setEnabled(true);
         }
 
-        ImageHistoryItem historyItem = (ImageHistoryItem) _backStack.pop();
+        ImageHistoryItem historyItem = _backStack.pop();
         if (_backStack.size() == 0)
             _backAction.setEnabled(false);
 
@@ -1031,7 +920,7 @@ public class DivaMainImageDisplay extends DivaGraphicsImageDisplay implements Ma
             _backAction.setEnabled(true);
         }
 
-        ImageHistoryItem historyItem = (ImageHistoryItem) _forwStack.pop();
+        ImageHistoryItem historyItem = _forwStack.pop();
         if (_forwStack.size() == 0)
             _forwAction.setEnabled(false);
 
@@ -1055,16 +944,17 @@ public class DivaMainImageDisplay extends DivaGraphicsImageDisplay implements Ma
      * @param dec the Dec coordinate for the image (J2000)
      * @return true if an image was loaded
      */
+    @SuppressWarnings("unchecked")
     public boolean loadCachedImage(double ra, double dec) {
-        LinkedList l = ((LinkedList) _historyList.clone());
+        LinkedList<ImageHistoryItem> l = ((LinkedList<ImageHistoryItem>) _historyList.clone());
         if (_filename != null) {
             l.add(0, makeImageHistoryItem()); // check the current image first
         }
         ImageHistoryItem closestHistoryItem = null;
         Double closestDist = null;
-        ListIterator it = l.listIterator(0);
+        ListIterator<ImageHistoryItem> it = l.listIterator(0);
         while (it.hasNext()) {
-            ImageHistoryItem historyItem = (ImageHistoryItem) it.next();
+            ImageHistoryItem historyItem = it.next();
             File file = new File(historyItem.data.filename);
             if (!file.exists()) {
                 // remove dead item
@@ -1232,7 +1122,7 @@ public class DivaMainImageDisplay extends DivaGraphicsImageDisplay implements Ma
      */
     public void checkExtensions(boolean show) {
         FITSImage fitsImage = getFitsImage();
-        int numHDUs = 0;
+        int numHDUs;
         if (fitsImage == null || (numHDUs = fitsImage.getNumHDUs()) <= 1) {
             if (_fitsHDUChooser != null) {
                 _fitsHDUChooser.clear();
@@ -1407,37 +1297,16 @@ public class DivaMainImageDisplay extends DivaGraphicsImageDisplay implements Ma
                 _pickObjectFrame = new PickObjectFrame(this);
                 _pickObjectPanel = ((PickObjectFrame) _pickObjectFrame).getPickObject();
             }
-            _pickObjectPanel.addActionListener(new ActionListener() {
-                public void actionPerformed(ActionEvent e) {
-                    pickedObject();
-                }
-            });
+            _pickObjectPanel.addActionListener(e -> pickedObject());
         }
 
-        SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
-                _pickObjectPanel.pickObject();
-            }
-        });
+        SwingUtilities.invokeLater(_pickObjectPanel::pickObject);
     }
 
     /**
      * Called when an object is selected in the Pick Object window.
      */
     protected void pickedObject() {
-    }
-
-
-    /**
-     * Pop up a dialog window for displaying a table of the FITS extensions
-     */
-    public void viewFitsExtensions() {
-        FITSImage fitsImage = getFitsImage();
-        if (fitsImage != null && fitsImage.getNumHDUs() > 1) {
-            checkExtensions(true);
-        } else {
-            DialogUtil.error("There are no FITS extensions for this image.");
-        }
     }
 
     /**
@@ -1559,7 +1428,7 @@ public class DivaMainImageDisplay extends DivaGraphicsImageDisplay implements Ma
     public void openURL() {
         String urlStr = DialogUtil.input("Enter the World Wide Web location (URL) to display:");
         if (urlStr != null) {
-            URL url = null;
+            URL url;
             try {
                 url = new URL(urlStr);
             } catch (Exception e) {
@@ -1589,7 +1458,6 @@ public class DivaMainImageDisplay extends DivaGraphicsImageDisplay implements Ma
         updateEnabledStates();
     }
 
-
     /**
      * Set to true if the image file has been modified and needs saving.
      */
@@ -1600,14 +1468,6 @@ public class DivaMainImageDisplay extends DivaGraphicsImageDisplay implements Ma
         _imageChangeEvent.setEditStateChanged(true);
         fireChange(_imageChangeEvent);
     }
-
-    /**
-     * Return true if the image file has been modified and needs saving.
-     */
-    public boolean isSaveNeeded() {
-        return saveNeeded;
-    }
-
 
     /**
      * If the current image file has been modified (by adding or deleting a FITS extension,
@@ -1862,13 +1722,6 @@ public class DivaMainImageDisplay extends DivaGraphicsImageDisplay implements Ma
     }
 
     /**
-     * Return the top level windows (or internal frame) for setting cut levels
-     */
-    public Component getImageCutLevelsFrame() {
-        return _imageCutLevelsFrame;
-    }
-
-    /**
      * Return the top level window (or internal frame) for viewing the FITS keywords.
      */
     public Component getFitsKeywordsFrame() {
@@ -1876,52 +1729,10 @@ public class DivaMainImageDisplay extends DivaGraphicsImageDisplay implements Ma
     }
 
     /**
-     * Return the top level window (or internal frame) for viewing image properties
-     */
-    public Component getImagePropertiesFrame() {
-        return _imagePropertiesFrame;
-    }
-
-    /**
-     * Return the top level window (or internal frame) for manipulating image colormaps
-     */
-    public Component getImageColorsFrame() {
-        return _imageColorsFrame;
-    }
-
-    /**
-     * Return the top level window (or internal frame) for selecting image objects (stars, galaxies)
-     */
-    public Component getPickObjectFrame() {
-        return _pickObjectFrame;
-    }
-
-    /**
      * Return the Pick Object panel, if initialized
      */
     public PickObject getPickObjectPanel() {
         return _pickObjectPanel;
-    }
-
-    /**
-     * Return the top level window (or internal frame) for manipulating FITS extensions
-     */
-    public Component getFitsHDUChooserFrame() {
-        return _fitsHDUChooserFrame;
-    }
-
-    /**
-     * Return the panel for manipulating FITS extensions
-     */
-    public FITSHDUChooser getFitsHDUChooser() {
-        return _fitsHDUChooser;
-    }
-
-    /**
-     * Return the object used to save graphics to a FITS table in the image and reload it again later.
-     */
-    public FITSGraphics getFitsGraphics() {
-        return _fitsGraphics;
     }
 
     /**

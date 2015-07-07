@@ -13,6 +13,7 @@ import edu.gemini.qv.plugin.table.ObservationTableModel.{Column, DecValue, RaVal
 import edu.gemini.qv.plugin.ui.{QvGui, SideBar, SideBarPanel}
 import edu.gemini.qv.plugin.util.Exporter
 import edu.gemini.qv.plugin.{ConstraintsChanged, QvContext, QvTool, ReferenceDateChanged}
+import edu.gemini.shared.gui.SortableTable
 
 import scala.None
 import scala.collection.mutable
@@ -152,7 +153,7 @@ class ObservationTable(ctx: QvContext) extends GridBagPanel {
    * A table that displays a set of observations and implements some interactions with them, like opening
    * them in the OT and other stuff.
    */
-  abstract class ObservationTableGrid extends SortableTable {
+  abstract class ObservationTableGrid extends Table with SortableTable {
 
     model = dataModel
 
@@ -167,13 +168,13 @@ class ObservationTable(ctx: QvContext) extends GridBagPanel {
 
     listenTo(ctx.mainFilterProvider, ctx.tableFilterProvider, selection, ctx, mouse.clicks)
     reactions += {
-      case DataChanged =>
+      case DataChanged                                 =>
         updateData()
-      case FilterChanged(_, _, _) =>
+      case FilterChanged(_, _, _)                      =>
         updateData()
-      case ConstraintsChanged =>
+      case ConstraintsChanged                          =>
         updateData()
-      case ReferenceDateChanged =>
+      case ReferenceDateChanged                        =>
         updateData()
 
       case TableRowsSelected(source, range, adjusting) =>
@@ -186,7 +187,7 @@ class ObservationTable(ctx: QvContext) extends GridBagPanel {
           ctx.selectionFilter = Filter.ObservationSet(selObs.toSet)
         }
 
-      case m: MouseClicked if m.clicks == 2 => {
+      case m: MouseClicked if m.clicks == 2            =>
         val viewRow = peer.rowAtPoint(m.point)
         val modelRow = viewToModelRow(viewRow)
         val obs = model.asInstanceOf[ObservationTableModel].observations(modelRow)
@@ -199,7 +200,6 @@ class ObservationTable(ctx: QvContext) extends GridBagPanel {
         } onFailure {
           case t => QvGui.showError("Could Not Open Observation", s"Could not open observation ${obs.getObsId} in OT.", t)
         }
-      }
     }
 
     def updateSearchFilter(text: String) {
@@ -224,7 +224,7 @@ class ObservationTable(ctx: QvContext) extends GridBagPanel {
       dataGrid.revalidate()
 
       // hack: once we got a first load of data resize columns and turn auto resize off for good
-      if (ctx.filtered.size > 0 && dataGrid.autoResizeMode != Table.AutoResizeMode.Off) {
+      if (ctx.filtered.nonEmpty && dataGrid.autoResizeMode != Table.AutoResizeMode.Off) {
         dataGrid.autoResizeMode = Table.AutoResizeMode.Off
         resizeColumns()
       }
@@ -233,13 +233,13 @@ class ObservationTable(ctx: QvContext) extends GridBagPanel {
 
     private def selectObservations(selected: Option[Filter]) = {
       peer.getSelectionModel.setValueIsAdjusting(true)
-      selected.map(f => {
-        dataModel.observations.zipWithIndex.foreach({ case (o, ix) => {
+      selected.foreach (f => {
+        dataModel.observations.zipWithIndex.foreach({ case (o, ix) =>
           if (f.predicate(o)) {
             val j = modelToViewRow(ix)
             peer.getSelectionModel.addSelectionInterval(j, j)
           }
-        }})
+        })
       })
       peer.getSelectionModel.setValueIsAdjusting(false)
     }
@@ -323,20 +323,6 @@ class ObservationTable(ctx: QvContext) extends GridBagPanel {
     }
 
   }
-
-  /**
-   * Sorting is not supported in scala.swing.Table (Scala 2.10).
-   * This class fixes this by adding some missing methods. Potentially this can be removed with future Scala versions.
-   */
-  abstract class SortableTable extends Table {
-    // === === ===
-    // See: http://stackoverflow.com/questions/9588765/using-tablerowsorter-with-scala-swing-table
-    override def apply(row: Int, column: Int): Any = model.getValueAt(viewToModelRow(row), viewToModelColumn(column))
-    def viewToModelRow(idx: Int) = peer.convertRowIndexToModel(idx)
-    def modelToViewRow(idx: Int) = peer.convertRowIndexToView(idx)
-    // === === ===
-  }
-
 
   class ObservationTableDetails(ctx: QvContext, dataGrid: ObservationTableGrid) extends GridBagPanel {
     private val status = new Label(statusText)

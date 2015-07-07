@@ -10,6 +10,7 @@ import edu.gemini.shared.skyobject.Magnitude;
  * the (proper) R band mag since that's all GSC I has.  Doesn't consider
  * distance for ties in magnitude.
  */
+@Deprecated
 public final class ChoppingPWFS2CatalogAlgorithm extends PWFSCatalogAlgorithm {
     private static final String NAME = "Gemini PWFS2 chopping";
     private static final String DESC = "Selects target for the Gemini PWFS2 patrol fields when chopping.";
