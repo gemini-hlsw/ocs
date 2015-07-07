@@ -1,7 +1,7 @@
 package edu.gemini.ags.gems
 
 import edu.gemini.catalog.api._
-import edu.gemini.ags.api.{defaultProbeBands, magnitudeExtractor}
+import edu.gemini.ags.api.magnitudeExtractor
 import edu.gemini.catalog.votable._
 import edu.gemini.spModel.core.Target.SiderealTarget
 import edu.gemini.spModel.core.{Angle, Magnitude, MagnitudeBand, Coordinates}
@@ -97,7 +97,7 @@ case class GemsVoTableCatalog(backend: VoTableBackend = RemoteBackend, catalog: 
    */
   private def searchOptimized(basePosition: Coordinates, conditions: Conditions, criterions: List[GemsCatalogSearchCriterion], inst: GemsInstrument, statusLogger: StatusLogger): Future[List[GemsCatalogSearchResults]] = {
     val radiusLimitsList = getRadiusLimits(inst, criterions)
-    val magLimitsList = optimizeMagnitudeLimits(criterions)
+    val magLimitsList = optimizeMagnitudeRanges(criterions)
 
     // Adjust for conditions
     def rangeAdjustmentForConditions(mr: MagnitudeRange, mag: Magnitude) =
@@ -107,10 +107,10 @@ case class GemsVoTableCatalog(backend: VoTableBackend = RemoteBackend, catalog: 
     val queries = for {
       radiusLimits <- radiusLimitsList
       magLimits    <- magLimitsList
-      band          = magLimits.band
-      mr            = MagnitudeRange(magLimits.faintnessConstraint, magLimits.saturationConstraint)
-      queryArgs     = (CatalogQuery.catalogQueryWithAdjustedRange(basePosition, radiusLimits, magnitudeExtractor(defaultProbeBands(band)), mr, rangeAdjustmentForConditions, catalog), magLimits)
-    } yield queryArgs
+    } yield {
+        val bands          = magLimits._1
+        (CatalogQuery.catalogQueryWithAdjustedRange(basePosition, radiusLimits, magnitudeExtractor(bands), magLimits._2, rangeAdjustmentForConditions, catalog), magLimits)
+      }
 
     VoTableClient.catalogs(queries.map(_._1), backend).flatMap {
       case l if l.exists(_.result.containsError) =>
@@ -172,11 +172,11 @@ case class GemsVoTableCatalog(backend: VoTableBackend = RemoteBackend, catalog: 
   }
 
   // Sets the min/max magnitude limits in the given query arguments
-  protected [gems] def optimizeMagnitudeLimits(criterions: List[GemsCatalogSearchCriterion]): List[MagnitudeConstraints] = {
+  protected [gems] def optimizeMagnitudeRanges(criterions: List[GemsCatalogSearchCriterion]): List[(List[MagnitudeBand], MagnitudeRange)] = {
     val magConstraints = for {
         criteria <- criterions
         mc       =  criteria.criterion.magRange
-      } yield (mc, criteria.criterion.referenceBand)
+      } yield (mc, criteria.criterion.referenceBands)
 
     // Calculate the max faintness per band out of the criteria
     val faintLimitPerBand = for {
@@ -184,7 +184,7 @@ case class GemsVoTableCatalog(backend: VoTableBackend = RemoteBackend, catalog: 
         fl = m.faintnessConstraint
       } yield (b, fl)
 
-    val faintnessMap:Map[MagnitudeBand, FaintnessConstraint] = faintLimitPerBand.groupBy(_._1).map { case (_, v) => v.maxBy(_._2)(FaintnessConstraint.order.toScalaOrdering)}
+    val faintnessMap:Map[List[MagnitudeBand], FaintnessConstraint] = faintLimitPerBand.groupBy(_._1).map { case (_, v) => v.maxBy(_._2)(FaintnessConstraint.order.toScalaOrdering)}
 
     // Calculate the min saturation limit per band out of the criteria
     val saturationLimitPerBand = for {
@@ -196,7 +196,6 @@ case class GemsVoTableCatalog(backend: VoTableBackend = RemoteBackend, catalog: 
 
     (for {
       b <- faintnessMap
-      mc = if (saturationMap.contains(b._1)) MagnitudeConstraints(b._1, b._2, saturationMap.get(b._1)) else new MagnitudeConstraints(new Magnitude(b._2.brightness, b._1))
-    } yield MagnitudeConstraints(b._1, b._2, saturationMap.get(b._1))).toList
+    } yield (b._1, MagnitudeRange(b._2, saturationMap.get(b._1)))).toList
   }
 }
