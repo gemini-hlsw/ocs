@@ -34,17 +34,10 @@ sealed trait CatalogQuery {
   // TODO Move these filters out of CatalogQuery
   val magnitudeConstraints: Option[MagnitudeConstraints]
   val magnitudeRange: Option[MagnitudeRange]
-  //val filters: List[QueryResultsFilter] = List(RadiusFilter(base, radiusConstraint), MagnitudeFilter(magnitudeConstraints))
 
-  //def filter: SiderealTarget => Boolean = (t) => filters.forall(_.filter(t))
-  //def filter: SiderealTarget => Boolean = (t) => radiusConstraint.targetsFilter(base)(t) && magnitudeConstraints.map(_.filter(t)).getOrElse(true)
   def filter: SiderealTarget => Boolean = (t) => RadiusFilter(base, radiusConstraint).filter(t) && MagnitudeFilter(magnitudeConstraints).filter(t)
-  def filterOnMagnitude(t: SiderealTarget, m:Option[Magnitude], rangeAdjustment: (Option[MagnitudeRange], Magnitude) => Option[MagnitudeRange]): Boolean =
-    RadiusFilter(base, radiusConstraint).filter(t) && MagnitudeFilter(magnitudeConstraints).filter(t) &&
-      AdjustedMagnitudeValueFilter(m, magnitudeRange, rangeAdjustment).filter(t)
 
   def withMagnitudeConstraints(magnitudeConstraints: Option[MagnitudeConstraints]): CatalogQuery = this
-  def withMagnitudeRange(magnitudeRange: Option[MagnitudeRange]): CatalogQuery = this
 
   def isSuperSetOf(c: CatalogQuery) = {
     // Angular separation, or distance between the two.
@@ -80,18 +73,12 @@ object CatalogQuery {
     }
   }
 
-  private case class CatalogQueryWithAdjustedBand(base: Coordinates, radiusConstraint: RadiusConstraint, mag: SiderealTarget => Option[Magnitude], rangeAdjustment: (Option[MagnitudeRange], Magnitude) => Option[MagnitudeRange], magnitudeRange: Option[MagnitudeRange], catalog: CatalogName) extends CatalogQuery {
+  private case class CatalogQueryWithAdjustedBand(override val id: Option[Int], base: Coordinates, radiusConstraint: RadiusConstraint, mag: SiderealTarget => Option[Magnitude], rangeAdjustment: (Option[MagnitudeRange], Magnitude) => Option[MagnitudeRange], magnitudeRange: Option[MagnitudeRange], catalog: CatalogName) extends CatalogQuery {
     override val magnitudeConstraints = None
     override def filter: SiderealTarget => Boolean = (t) => {
       RadiusFilter(base, radiusConstraint).filter(t) && mag(t).exists(m => AdjustedMagnitudeValueFilter(m.some, magnitudeRange, rangeAdjustment).filter(t))
     }
   }
-
-  private case class GemsCatalogQuery(override val id: Option[Int], base: Coordinates, radiusConstraint: RadiusConstraint, magnitudeRange: Option[MagnitudeRange], catalog: CatalogName) extends CatalogQuery {
-    override val magnitudeConstraints: Option[MagnitudeConstraints] = None
-    override def withMagnitudeRange(magnitudeRange: Option[MagnitudeRange]): CatalogQuery = copy(magnitudeRange = magnitudeRange)
-  }
-
   // TODO Ensure that it makes sense to default to ucac4
   def catalogQuery(base: Coordinates, radiusConstraint: RadiusConstraint, magnitudeConstraints: Option[MagnitudeConstraints], catalog: CatalogName = ucac4): CatalogQuery
     = BandConstrainedCatalogQuery(base, radiusConstraint, magnitudeConstraints, catalog)
@@ -103,10 +90,10 @@ object CatalogQuery {
     = RangeConstrainedCatalogQueryWithBand(base, radiusConstraint, mag, magnitudeRange, catalog)
 
   def catalogQueryWithAdjustedRange(base: Coordinates, radiusConstraint: RadiusConstraint, mag: SiderealTarget => Option[Magnitude], rangeAdjustment: (Option[MagnitudeRange], Magnitude) => Option[MagnitudeRange], magnitudeRange: Option[MagnitudeRange], catalog: CatalogName = ucac4): CatalogQuery
-    = CatalogQueryWithAdjustedBand(base, radiusConstraint, mag, rangeAdjustment, magnitudeRange, catalog)
+    = CatalogQueryWithAdjustedBand(None, base, radiusConstraint, mag, rangeAdjustment, magnitudeRange, catalog)
 
-  def catalogQueryForGems(id: Int, base: Coordinates, radiusConstraint: RadiusConstraint, magnitudeRange: Option[MagnitudeRange], catalog: CatalogName = ucac4): CatalogQuery
-    = GemsCatalogQuery(Some(id), base, radiusConstraint, magnitudeRange, catalog)
+  def catalogQueryForGems(id: Int, base: Coordinates, radiusConstraint: RadiusConstraint, mag: SiderealTarget => Option[Magnitude], rangeAdjustment: (Option[MagnitudeRange], Magnitude) => Option[MagnitudeRange], magnitudeRange: Option[MagnitudeRange], catalog: CatalogName = ucac4): CatalogQuery
+    = CatalogQueryWithAdjustedBand(id.some, base, radiusConstraint, mag, rangeAdjustment, magnitudeRange, catalog)
 }
 
 sealed abstract class CatalogName(val id: String)
