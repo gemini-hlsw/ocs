@@ -141,7 +141,11 @@ object PreliminaryMerge {
           mc.remote.parent(child.key).flatMap(mc.remote.get).exists(p => !isUpdatedRemote(p))
         }
 
-        PartitionedChildren(local, pc.both, pc.remote)
+        val remote = pc.remote.filterNot { child =>
+          mc.local.isDeleted(child.key) && !containsUpdatedRemote(child)
+        }
+
+        PartitionedChildren(local, pc.both, remote)
       }
     }
 
