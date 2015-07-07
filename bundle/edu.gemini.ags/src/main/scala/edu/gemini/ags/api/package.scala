@@ -1,12 +1,10 @@
 package edu.gemini.ags
 
-import edu.gemini.spModel.core.{MagnitudeBand, Magnitude}
+import edu.gemini.catalog.api.MagnitudeExtractor
+import edu.gemini.spModel.core.MagnitudeBand
 import edu.gemini.spModel.core.Target.SiderealTarget
-import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.Conditions
 
 package object api {
-  // Function that can extract a magnitude out of a target
-  type MagnitudeExtractor = SiderealTarget => Option[Magnitude]
 
   val RLikeBands = List(MagnitudeBand._r, MagnitudeBand.R, MagnitudeBand.UC)
 

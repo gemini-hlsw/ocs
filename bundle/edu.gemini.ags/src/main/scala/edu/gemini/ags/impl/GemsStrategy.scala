@@ -43,8 +43,7 @@ trait GemsStrategy extends AgsStrategy {
   private val OdgwFlexureId    = 1
 
   // Catalog results with search keys to avoid having to recompute search key info on the fly.
-  private case class CatalogResultWithKey(query: CatalogQuery, catalogResult: CatalogQueryResult, searchKey: GemsCatalogSearchKey)
-
+  private case class CatalogResultWithKey(query: CatalogQueryWithRange, band: MagnitudeBand, catalogResult: CatalogQueryResult, searchKey: GemsCatalogSearchKey)
 
   // Query the catalog for each constraint and compile a list of results with the necessary
   // information for GeMS.
@@ -61,13 +60,20 @@ trait GemsStrategy extends AgsStrategy {
       OdgwFlexureId    -> GsaoiOdgw.Group.instance
     )
 
+    // Maps from IDs to guide probe band
+    def GuideProbeBandMap = Map[Int, MagnitudeBand](
+      CanopusTipTiltId -> probeBands(Canopus.Wfs.cwfs1).head,
+      OdgwFlexureId    -> probeBands(GsaoiOdgw.odgw1).head
+    )
+
     VoTableClient.catalogs(catalogQueries(ctx, mt), backend).flatMap {
       case result if result.exists(_.result.containsError) => Future.failed(CatalogException(result.flatMap(_.result.problems)))
       case result                                          => Future.successful {
-        result.flatMap { r =>
-          val id = r.query.id
-          id.map(x => CatalogResultWithKey(r.query, r.result, GemsCatalogSearchKey(GuideStarTypeMap(x), GuideProbeGroupMap(x))))
-        }
+        result.collect {
+          case res @ QueryResult(q: CatalogQueryWithRange, results) =>
+            val id = q.id
+            id.map(x => CatalogResultWithKey(q, GuideProbeBandMap(x), results, GemsCatalogSearchKey(GuideStarTypeMap(x), GuideProbeGroupMap(x))))
+        }.flatten
       }
     }
   }
@@ -78,14 +84,14 @@ trait GemsStrategy extends AgsStrategy {
 
     futureAgsCatalogResults.map { agsCatalogResults =>
       for {
-        result <- agsCatalogResults
-        angle  <- anglesToTry
+        result  <- agsCatalogResults
+        angle   <- anglesToTry
       } yield {
-        val constraint = result.query
-        val radiusConstraint = constraint.radiusConstraint
-        val band = constraint.magnitudeConstraints.map(_.band)
-        val mr = constraint.magnitudeConstraints.map(mc => MagnitudeRange(mc.faintnessConstraint, mc.saturationConstraint))
-        val catalogSearchCriterion = CatalogSearchCriterion("ags", band.orNull, mr.orNull, radiusConstraint, None, angle.some)
+        val query = result.query
+        val radiusConstraint = query.radiusConstraint
+        val band = result.band
+        val mr = query.magnitudeRange
+        val catalogSearchCriterion = CatalogSearchCriterion("ags", band, mr, radiusConstraint, None, angle.some)
         val gemsCatalogSearchCriterion = new GemsCatalogSearchCriterion(result.searchKey, catalogSearchCriterion)
         new GemsCatalogSearchResults(gemsCatalogSearchCriterion, result.catalogResult.targets.rows)
       }
@@ -213,10 +219,8 @@ trait GemsStrategy extends AgsStrategy {
     val mags = magnitudes(ctx, mt).toMap
 
     // Adjust the magnitude limits for the conditions.
-    def rangeAdjustmentForConditions(mr: Option[MagnitudeRange], mag: Magnitude) =
-      mr.map { m =>
-        m.adjust(k => ctx.getConditions.magAdjustOp().apply(mag.copy(value = k).toOldModel).toNewModel.value)
-      }
+    def rangeAdjustmentForConditions(mr: MagnitudeRange, mag: Magnitude) =
+      mr.adjust(k => ctx.getConditions.magAdjustOp().apply(mag.copy(value = k).toOldModel).toNewModel.value)
 
     def lim(gp: GuideProbe): Option[MagnitudeRange] = autoSearchLimitsCalc(mags(gp), cond).some
 
@@ -227,8 +231,8 @@ trait GemsStrategy extends AgsStrategy {
       (ml |@| lim(can))(_ union _)
     }
 
-    val canopusConstraint = canMagLimits.map(c => CatalogQuery.catalogQueryForGems(CanopusTipTiltId, ctx.getBaseCoordinates.toNewModel, RadiusConstraint.between(Angle.zero, Canopus.Wfs.Group.instance.getRadiusLimits.toNewModel), magnitudeExtractor(probeBands(Canopus.Wfs.cwfs1)), rangeAdjustmentForConditions, c.some))
-    val odgwConstraint     = odgwMagLimits.map(c => CatalogQuery.catalogQueryForGems(OdgwFlexureId,    ctx.getBaseCoordinates.toNewModel, RadiusConstraint.between(Angle.zero, GsaoiOdgw.Group.instance.getRadiusLimits.toNewModel), magnitudeExtractor(probeBands(GsaoiOdgw.odgw1)), rangeAdjustmentForConditions, c.some))
+    val canopusConstraint = canMagLimits.map(c => CatalogQuery.catalogQueryForGems(CanopusTipTiltId, ctx.getBaseCoordinates.toNewModel, RadiusConstraint.between(Angle.zero, Canopus.Wfs.Group.instance.getRadiusLimits.toNewModel), magnitudeExtractor(probeBands(Canopus.Wfs.cwfs1)), c, rangeAdjustmentForConditions))
+    val odgwConstraint     = odgwMagLimits.map(c => CatalogQuery.catalogQueryForGems(OdgwFlexureId,    ctx.getBaseCoordinates.toNewModel, RadiusConstraint.between(Angle.zero, GsaoiOdgw.Group.instance.getRadiusLimits.toNewModel), magnitudeExtractor(probeBands(GsaoiOdgw.odgw1)), c, rangeAdjustmentForConditions))
     List(canopusConstraint, odgwConstraint).flatten
   }
 
