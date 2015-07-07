@@ -16,7 +16,7 @@ import Scalaz._
  * Used to query catalogs and filter and categorize query results.
  * See OT-20
  */
-case class CatalogSearchCriterion(name: String, referenceBand: MagnitudeBand, magRange: MagnitudeRange, radiusLimits: RadiusConstraint, offset: Option[Offset] = None, posAngle: Option[Angle] = None) {
+case class CatalogSearchCriterion(name: String, referenceBands: List[MagnitudeBand], magRange: MagnitudeRange, radiusLimits: RadiusConstraint, offset: Option[Offset] = None, posAngle: Option[Angle] = None) {
 
   /**
    * If offset and pos angle are specified, then we want the coordinates of the
