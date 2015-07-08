@@ -38,10 +38,10 @@ class GemsGuideSearchOptionsSpec extends Specification {
 
       criteria should be size 2
       criteria.head.key should beEqualTo(GemsCatalogSearchKey(GemsGuideStarType.tiptilt, GsaoiOdgw.Group.instance))
-      criteria.head.criterion.referenceBands should beEqualTo(List(MagnitudeBand.H))
+      criteria.head.criterion.referenceBand should beEqualTo(MagnitudeBand.H)
       criteria.head.criterion.magRange should beEqualTo(MagnitudeRange(FaintnessConstraint(14.5), Some(SaturationConstraint(7.3))))
       criteria(1).key should beEqualTo(GemsCatalogSearchKey(GemsGuideStarType.flexure, Canopus.Wfs.Group.instance))
-      criteria(1).criterion.referenceBands should beEqualTo(List(MagnitudeBand.R))
+      criteria(1).criterion.referenceBand should beEqualTo(MagnitudeBand.R)
       criteria(1).criterion.magRange should beEqualTo(MagnitudeRange(FaintnessConstraint(16.0), Some(SaturationConstraint(8.5))))
     }
     "provide search options for gsaoi in canopus tip tilt mode" in {
@@ -53,10 +53,10 @@ class GemsGuideSearchOptionsSpec extends Specification {
 
       criteria should be size 2
       criteria.head.key should beEqualTo(GemsCatalogSearchKey(GemsGuideStarType.tiptilt, Canopus.Wfs.Group.instance))
-      criteria.head.criterion.referenceBands should beEqualTo(List(MagnitudeBand.R))
+      criteria.head.criterion.referenceBand should beEqualTo(MagnitudeBand.R)
       criteria.head.criterion.magRange should beEqualTo(MagnitudeRange(FaintnessConstraint(16.0), Some(SaturationConstraint(8.5))))
       criteria(1).key should beEqualTo(GemsCatalogSearchKey(GemsGuideStarType.flexure, GsaoiOdgw.Group.instance))
-      criteria(1).criterion.referenceBands should beEqualTo(List(MagnitudeBand.H))
+      criteria(1).criterion.referenceBand should beEqualTo(MagnitudeBand.H)
       criteria(1).criterion.magRange should beEqualTo(MagnitudeRange(FaintnessConstraint(17.0), Some(SaturationConstraint(8))))
     }
     "provide search options for gsaoi in both tip tilt modes" in {
@@ -69,16 +69,16 @@ class GemsGuideSearchOptionsSpec extends Specification {
 
       criteria should be size 4
       criteria.head.key should beEqualTo(GemsCatalogSearchKey(GemsGuideStarType.tiptilt, Canopus.Wfs.Group.instance))
-      criteria.head.criterion.referenceBands should beEqualTo(List(MagnitudeBand.R))
+      criteria.head.criterion.referenceBand should beEqualTo(MagnitudeBand.R)
       criteria.head.criterion.magRange should beEqualTo(MagnitudeRange(FaintnessConstraint(16.0), Some(SaturationConstraint(8.5))))
       criteria(1).key should beEqualTo(GemsCatalogSearchKey(GemsGuideStarType.flexure, GsaoiOdgw.Group.instance))
-      criteria(1).criterion.referenceBands should beEqualTo(List(MagnitudeBand.H))
+      criteria(1).criterion.referenceBand should beEqualTo(MagnitudeBand.H)
       criteria(1).criterion.magRange should beEqualTo(MagnitudeRange(FaintnessConstraint(17.0), Some(SaturationConstraint(8))))
       criteria(2).key should beEqualTo(GemsCatalogSearchKey(GemsGuideStarType.tiptilt, GsaoiOdgw.Group.instance))
-      criteria(2).criterion.referenceBands should beEqualTo(List(MagnitudeBand.H))
+      criteria(2).criterion.referenceBand should beEqualTo(MagnitudeBand.H)
       criteria(2).criterion.magRange should beEqualTo(MagnitudeRange(FaintnessConstraint(14.5), Some(SaturationConstraint(7.3))))
       criteria(3).key should beEqualTo(GemsCatalogSearchKey(GemsGuideStarType.flexure, Canopus.Wfs.Group.instance))
-      criteria(3).criterion.referenceBands should beEqualTo(List(MagnitudeBand.R))
+      criteria(3).criterion.referenceBand should beEqualTo(MagnitudeBand.R)
       criteria(3).criterion.magRange should beEqualTo(MagnitudeRange(FaintnessConstraint(16.0), Some(SaturationConstraint(8.5))))
     }
   }

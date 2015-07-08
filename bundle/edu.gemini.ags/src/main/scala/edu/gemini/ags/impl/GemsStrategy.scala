@@ -43,7 +43,7 @@ trait GemsStrategy extends AgsStrategy {
   private val OdgwFlexureId    = 1
 
   // Catalog results with search keys to avoid having to recompute search key info on the fly.
-  private case class CatalogResultWithKey(query: CatalogQueryWithRange, bands: List[MagnitudeBand], catalogResult: CatalogQueryResult, searchKey: GemsCatalogSearchKey)
+  private case class CatalogResultWithKey(query: CatalogQueryWithRange, referenceBand: MagnitudeBand, catalogResult: CatalogQueryResult, searchKey: GemsCatalogSearchKey)
 
   // Query the catalog for each constraint and compile a list of results with the necessary
   // information for GeMS.
@@ -61,9 +61,9 @@ trait GemsStrategy extends AgsStrategy {
     )
 
     // Maps from IDs to guide probe band
-    def GuideProbeBandMap = Map[Int, List[MagnitudeBand]](
-      CanopusTipTiltId -> probeBands(Canopus.Wfs.cwfs1),
-      OdgwFlexureId    -> probeBands(GsaoiOdgw.odgw1)
+    def GuideProbeBandMap = Map[Int, MagnitudeBand](
+      CanopusTipTiltId -> MagnitudeBand.R,
+      OdgwFlexureId    -> MagnitudeBand.H
     )
 
     VoTableClient.catalogs(catalogQueries(ctx, mt), backend).flatMap {
@@ -89,7 +89,7 @@ trait GemsStrategy extends AgsStrategy {
       } yield {
         val query = result.query
         val radiusConstraint = query.radiusConstraint
-        val band = result.bands
+        val band = result.referenceBand
         val mr = query.magnitudeRange
         val catalogSearchCriterion = CatalogSearchCriterion("ags", band, mr, radiusConstraint, None, angle.some)
         val gemsCatalogSearchCriterion = new GemsCatalogSearchCriterion(result.searchKey, catalogSearchCriterion)

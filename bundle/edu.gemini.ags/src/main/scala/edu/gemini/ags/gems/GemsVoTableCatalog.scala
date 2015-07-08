@@ -1,7 +1,7 @@
 package edu.gemini.ags.gems
 
 import edu.gemini.catalog.api._
-import edu.gemini.ags.api.magnitudeExtractor
+import edu.gemini.ags.api.{magnitudeExtractor, defaultProbeBands}
 import edu.gemini.catalog.votable._
 import edu.gemini.spModel.core.Target.SiderealTarget
 import edu.gemini.spModel.core.{Angle, Magnitude, MagnitudeBand, Coordinates}
@@ -108,8 +108,8 @@ case class GemsVoTableCatalog(backend: VoTableBackend = RemoteBackend, catalog: 
       radiusLimits <- radiusLimitsList
       magLimits    <- magLimitsList
     } yield {
-        val bands          = magLimits._1
-        (CatalogQuery.catalogQueryWithAdjustedRange(basePosition, radiusLimits, magnitudeExtractor(bands), magLimits._2, rangeAdjustmentForConditions, catalog), magLimits)
+        val band = magLimits._1
+        (CatalogQuery.catalogQueryWithAdjustedRange(basePosition, radiusLimits, magnitudeExtractor(defaultProbeBands(band)), magLimits._2, rangeAdjustmentForConditions, catalog), magLimits)
       }
 
     VoTableClient.catalogs(queries.map(_._1), backend).flatMap {
@@ -172,11 +172,11 @@ case class GemsVoTableCatalog(backend: VoTableBackend = RemoteBackend, catalog: 
   }
 
   // Sets the min/max magnitude limits in the given query arguments
-  protected [gems] def optimizeMagnitudeRanges(criterions: List[GemsCatalogSearchCriterion]): List[(List[MagnitudeBand], MagnitudeRange)] = {
+  protected [gems] def optimizeMagnitudeRanges(criterions: List[GemsCatalogSearchCriterion]): List[(MagnitudeBand, MagnitudeRange)] = {
     val magConstraints = for {
         criteria <- criterions
         mc       =  criteria.criterion.magRange
-      } yield (mc, criteria.criterion.referenceBands)
+      } yield (mc, criteria.criterion.referenceBand)
 
     // Calculate the max faintness per band out of the criteria
     val faintLimitPerBand = for {
@@ -184,7 +184,7 @@ case class GemsVoTableCatalog(backend: VoTableBackend = RemoteBackend, catalog: 
         fl = m.faintnessConstraint
       } yield (b, fl)
 
-    val faintnessMap:Map[List[MagnitudeBand], FaintnessConstraint] = faintLimitPerBand.groupBy(_._1).map { case (_, v) => v.maxBy(_._2)(FaintnessConstraint.order.toScalaOrdering)}
+    val faintnessMap:Map[MagnitudeBand, FaintnessConstraint] = faintLimitPerBand.groupBy(_._1).map { case (_, v) => v.maxBy(_._2)(FaintnessConstraint.order.toScalaOrdering)}
 
     // Calculate the min saturation limit per band out of the criteria
     val saturationLimitPerBand = for {
