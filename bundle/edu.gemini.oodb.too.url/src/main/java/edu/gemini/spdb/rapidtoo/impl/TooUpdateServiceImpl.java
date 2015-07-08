@@ -240,7 +240,6 @@ public final class TooUpdateServiceImpl implements TooUpdateService {
         base.setName(tooTarget.getName());
         base.setRaDecDegrees(tooTarget.getRa(), tooTarget.getDec());
         base.setMagnitudes(tooTarget.getMagnitudes());
-        base.notifyOfGenericUpdate();
 
         // Set the guide star, if present.
         TooGuideTarget gs = update.getGuideStar();

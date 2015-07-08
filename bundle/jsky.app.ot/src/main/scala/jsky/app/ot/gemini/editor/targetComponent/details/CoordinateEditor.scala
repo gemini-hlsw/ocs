@@ -28,7 +28,6 @@ class CoordinateEditor extends TelescopePosEditor with ReentrancyHack {
       } catch {
         case _: IllegalArgumentException => spt.setRaDegrees(0)
       }
-      spt.notifyOfGenericUpdate()
     }
   })
 
@@ -43,7 +42,6 @@ class CoordinateEditor extends TelescopePosEditor with ReentrancyHack {
             case _: IllegalArgumentException =>
               spt.setDecDegrees(0)
           }
-          spt.notifyOfGenericUpdate()
       }
     }
   })

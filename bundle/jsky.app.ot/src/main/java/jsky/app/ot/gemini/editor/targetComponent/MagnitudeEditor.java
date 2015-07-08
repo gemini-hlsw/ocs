@@ -480,13 +480,11 @@ public class MagnitudeEditor implements TelescopePosEditor {
         final Magnitude newMag = new Magnitude(b, Magnitude.UNDEFINED_MAG, 0, b.defaultSystem);
 
         target.setMagnitudes(target.getTarget().getMagnitudes().cons(newMag));
-        target.notifyOfGenericUpdate();
         focusOn(b);
     }
 
     void removeBand(Magnitude.Band b) {
         target.setMagnitudes(target.getTarget().getMagnitudes().filter(new NotBand(b)));
-        target.notifyOfGenericUpdate();
     }
 
     void changeBand(Magnitude.Band from, Magnitude.Band to) {
@@ -498,7 +496,6 @@ public class MagnitudeEditor implements TelescopePosEditor {
         target.setMagnitudes(
                target.getTarget().getMagnitudes().filter(new NotBand(from)).cons(newMag)
         );
-        target.notifyOfGenericUpdate();
         focusOn(to);
     }
 
@@ -512,7 +509,6 @@ public class MagnitudeEditor implements TelescopePosEditor {
         target.setMagnitudes(
                target.getTarget().getMagnitudes().filter(new NotBand(band)).cons(newMag)
         );
-        target.notifyOfGenericUpdate();
         focusOn(band);
     }
 
@@ -527,7 +523,6 @@ public class MagnitudeEditor implements TelescopePosEditor {
             target.setMagnitudes(
                    target.getTarget().getMagnitudes().filter(new NotBand(b)).cons(newMag)
             );
-            target.notifyOfGenericUpdate();
             target.addWatcher(watcher);
         } catch (Exception ex) {
             // do nothing

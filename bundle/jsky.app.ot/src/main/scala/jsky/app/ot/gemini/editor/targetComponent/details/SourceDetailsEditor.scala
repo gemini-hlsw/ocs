@@ -183,19 +183,15 @@ final class SourceDetailsEditor extends GridBagPanel with TelescopePosEditor {
 
     case SelectionChanged(`distributions`) =>
       setDistribution(distributions.selection.item.default)
-      spt.notifyOfGenericUpdate()
 
     case SelectionChanged(`libraryStarDetails`) =>
       setDistribution(libraryStarDetails.selection.item)
-      spt.notifyOfGenericUpdate()
 
     case SelectionChanged(`libraryNonStarDetails`) =>
       setDistribution(libraryNonStarDetails.selection.item)
-      spt.notifyOfGenericUpdate()
 
     case SelectionChanged(`profiles`)  =>
       setProfile(profiles.selection.item.default)
-      spt.notifyOfGenericUpdate()
 
   }
 

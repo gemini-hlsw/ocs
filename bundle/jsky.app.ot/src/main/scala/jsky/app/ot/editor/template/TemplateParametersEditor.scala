@@ -254,7 +254,6 @@ class TemplateParametersEditor(shells: java.util.List[ISPTemplateParameters]) ex
           target.setTarget(coords)
           target.setName(target.getTarget.getName)
           target.setMagnitudes(DefaultImList.create[Magnitude]())
-          target.notifyOfGenericUpdate()
         })}
       )
 
