@@ -568,6 +568,7 @@ trait OcsBundle {
       bundle_edu_gemini_spModel_pio,
       bundle_edu_gemini_spModel_smartgcal,
       bundle_edu_gemini_too_event,
+      bundle_edu_gemini_ui_miglayout,
       bundle_edu_gemini_util_javax_mail,
       bundle_edu_gemini_util_osgi,
       bundle_edu_gemini_util_security,

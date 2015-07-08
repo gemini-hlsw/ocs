@@ -10,12 +10,14 @@ import edu.gemini.pot.sp.ISPNode
 import edu.gemini.shared.gui.{GlassLabel, SizePreference, SortableTable}
 import edu.gemini.spModel.core.Target.SiderealTarget
 import edu.gemini.spModel.core._
+import edu.gemini.ui.miglayout.MigPanel
+import edu.gemini.ui.miglayout.constraints._
 import jsky.app.ot.OT
 import jsky.app.ot.tpe.TpeContext
 
 import scala.swing._
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.swing.event.{UIElementMoved, UIElementResized}
+import scala.swing.event.{ButtonClicked, UIElementMoved, UIElementResized}
 
 import scalaz._
 import Scalaz._
@@ -118,11 +120,24 @@ object QueryResultsWindow {
 
     case class QueryResultsFrame(table: Table) extends Frame with PreferredSizeFrame {
       title = "Query Results"
-      contents = new BorderPanel() {
+
+      def closeFrame(): Unit = {
+        this.visible = false
+      }
+
+      private val closeButton = new Button("Close") {
+        reactions += {
+          case ButtonClicked(_) => closeFrame()
+        }
+      }
+
+      contents = new MigPanel(LC().fill().insets(0)) {
         add(new ScrollPane() {
           contents = table
-        }, BorderPanel.Position.Center)
-
+        }, CC().grow())
+        add(new MigPanel(LC().fillX().insets(10.px)) {
+          add(closeButton, CC().alignX(RightAlign))
+        }, CC().growX().dockSouth())
       }
       adjustSize()
       SizePreference.getPosition(this.getClass).foreach { p =>
