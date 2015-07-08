@@ -24,11 +24,10 @@ class CoordinateEditor extends TelescopePosEditor with ReentrancyHack {
   ra.addWatcher(watcher { s =>
     nonreentrant {
       try {
-        target.getRa.setValue(clean(s))
+        spt.setRaString(clean(s))
       } catch {
-        case _: IllegalArgumentException => target.getRa.setAs(0, Units.DEGREES)
+        case _: IllegalArgumentException => spt.setRaDegrees(0)
       }
-      spt.notifyOfGenericUpdate()
     }
   })
 
@@ -38,12 +37,11 @@ class CoordinateEditor extends TelescopePosEditor with ReentrancyHack {
         case "-" | "+" => // nop
         case s =>
           try {
-            target.getDec.setValue(s)
+            spt.setDecString(s)
           } catch {
             case _: IllegalArgumentException =>
-              target.getDec.setAs(0, Units.DEGREES)
+              spt.setDecDegrees(0)
           }
-          spt.notifyOfGenericUpdate()
       }
     }
   })
@@ -51,8 +49,8 @@ class CoordinateEditor extends TelescopePosEditor with ReentrancyHack {
   def edit(ctx: GOption[ObsContext], target0: SPTarget, node: ISPNode): Unit = {
     spt = target0
     nonreentrant {
-      ra.setText(target.getRa.toString)
-      dec.setText(target.getDec.toString)
+      ra.setText(target.getRaString)
+      dec.setText(target.getDecString)
     }
   }
 

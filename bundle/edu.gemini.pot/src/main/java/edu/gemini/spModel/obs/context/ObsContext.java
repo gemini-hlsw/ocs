@@ -265,8 +265,8 @@ public final class ObsContext {
 
     public Coordinates getBaseCoordinates() {
         SPTarget target = targets.getBase();
-        double raDeg = target.getTarget().getRa().getAs(CoordinateParam.Units.DEGREES);
-        double decDeg = target.getTarget().getDec().getAs(CoordinateParam.Units.DEGREES);
+        double raDeg = target.getTarget().getRaDegrees();
+        double decDeg = target.getTarget().getDecDegrees();
         return new Coordinates(raDeg, decDeg);
     }
 

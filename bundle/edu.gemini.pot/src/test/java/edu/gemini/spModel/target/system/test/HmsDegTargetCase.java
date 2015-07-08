@@ -8,9 +8,6 @@ package edu.gemini.spModel.target.system.test;
 
 import edu.gemini.spModel.target.system.ITarget;
 import edu.gemini.spModel.target.system.HmsDegTarget;
-import edu.gemini.spModel.target.system.HMS;
-import edu.gemini.spModel.target.system.ICoordinate;
-import edu.gemini.spModel.target.system.DMS;
 import static edu.gemini.spModel.test.TestFile.ser;
 
 import org.junit.Before;
@@ -21,8 +18,8 @@ import static org.junit.Assert.*;
  * Class SPTargetTest tests classes related to SPTarget.
  */
 public final class HmsDegTargetCase {
-    ITarget _t1;
-    ITarget _t2;
+    HmsDegTarget _t1;
+    HmsDegTarget _t2;
 
     @Before
     public void setUp() throws Exception {
@@ -36,19 +33,19 @@ public final class HmsDegTargetCase {
         HmsDegTarget t1 = new HmsDegTarget();
         assertNotNull(t1);
 
-        t1.getRa().setValue("10:11:12.345");
-        t1.getDec().setValue("-20:30:40.567");
+        t1.setRaString("10:11:12.345");
+        t1.setDecString("-20:30:40.567");
 
-        assertEquals(t1.getRa().toString(), "10:11:12.345");
-        assertEquals(t1.getDec().toString(), "-20:30:40.57");
+        assertEquals(t1.getRaString(), "10:11:12.345");
+        assertEquals(t1.getDecString(), "-20:30:40.57");
     }
 
     private void _doTestOne(String raIn, String decIn,
                             String raEx, String decEx) {
-        _t1.getRa().setValue(raIn);
-        _t1.getDec().setValue(decIn);
-        String raOut = _t1.getRa().toString();
-        String decOut = _t1.getDec().toString();
+        _t1.setRaString(raIn);
+        _t1.setDecString(decIn);
+        String raOut = _t1.getRaString();
+        String decOut = _t1.getDecString();
 
         assertEquals("Failed comparison,", raEx, raOut);
         assertEquals("Failed comparison,", decEx, decOut);
@@ -64,8 +61,8 @@ public final class HmsDegTargetCase {
     @Test
     public void testSerialization() throws Exception {
         final HmsDegTarget outObject = new HmsDegTarget();
-        outObject.getRa().setValue("10:11:12.34");
-        outObject.getDec().setValue("-11:12:13.4");
+        outObject.setRaString("10:11:12.34");
+        outObject.setDecString("-11:12:13.4");
         final HmsDegTarget inObject = ser(outObject);
         assertTrue(outObject.equals(inObject));
     }

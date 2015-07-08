@@ -23,7 +23,7 @@ object SpTargetFactory {
 
   private def createTooTarget(too: TooTarget): SP.SPTarget = {
     val sp   = new SP.SPTarget(0.0, 0.0)
-    sp.getTarget.setName(too.name)
+    sp.setName(too.name)
     sp
   }
 
@@ -52,20 +52,19 @@ object SpTargetFactory {
     } yield {
       val itarget = new SP.system.ConicTarget()
       val (coords, when) = coordsAt
-      setRaDec(itarget, coords)
       itarget.setDateForPosition(new java.util.Date(when))
 
       val spTarget = new SP.SPTarget(itarget)
-      spTarget.getTarget.setName(nsid.name)
+      spTarget.setName(nsid.name)
+      setRaDec(spTarget, coords)
 
       // Add apparent magnitude, if any.
       nsid.magnitude(time)
         .map(new SO.Magnitude(SO.Magnitude.Band.AP, _, SO.Magnitude.System.AB))
-        .foreach(spTarget.getTarget.putMagnitude)
+        .foreach(spTarget.putMagnitude)
 
       spTarget
     }
-
 
   private def createSiderealTarget(sid: SiderealTarget, time: Long): Either[String, SP.SPTarget] =
     for {
@@ -73,7 +72,6 @@ object SpTargetFactory {
       mags   <- siderealMags(sid).right
     } yield {
       val itarget  = new SP.system.HmsDegTarget()
-      setRaDec(itarget, coords)
       sid.properMotion.foreach { pm =>
         val ra  = pm.deltaRA
         val dec = pm.deltaDec
@@ -82,15 +80,15 @@ object SpTargetFactory {
       }
 
       val spTarget = new SP.SPTarget(itarget)
-      spTarget.getTarget.setName(sid.name)
-      spTarget.getTarget.setMagnitudes(DefaultImList.create(mags.asJava))
+      setRaDec(spTarget, coords)
+      spTarget.setName(sid.name)
+      spTarget.setMagnitudes(DefaultImList.create(mags.asJava))
       spTarget
     }
 
-  private def setRaDec(itarget: SP.system.ITarget, c: Coordinates) {
-    val degDeg   = c.toDegDeg
-    itarget.getRa.setAs(degDeg.ra.toDouble, Units.DEGREES)
-    itarget.getDec.setAs(degDeg.dec.toDouble, Units.DEGREES)
+  private def setRaDec(spt: SP.SPTarget, c: Coordinates) {
+    val degDeg = c.toDegDeg
+    spt.setRaDecDegrees(degDeg.ra.toDouble, degDeg.dec.toDouble)
   }
 
   private def siderealMags(sid: SiderealTarget): Either[String, List[SO.Magnitude]] = {

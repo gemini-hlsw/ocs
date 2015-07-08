@@ -223,8 +223,7 @@ public class AbstractRuleTest {
     protected void addTargetObsCompAOP1() throws SPUnknownIDException, SPTreeStateException, SPNodeNotLocalException {
         TargetObsComp target = new TargetObsComp();
         SPTarget sptarget = new SPTarget();
-        sptarget.getTarget().setName("name");
-        sptarget.notifyOfGenericUpdate();
+        sptarget.setName("name");
 
         GuideEnvironment guide = GuideEnvironment.create(
                 OptionsListImpl.create(
@@ -256,8 +255,7 @@ public class AbstractRuleTest {
     protected void addTargetObsCompAO() throws SPUnknownIDException, SPTreeStateException, SPNodeNotLocalException {
         TargetObsComp target = new TargetObsComp();
         SPTarget sptarget = new SPTarget();
-        sptarget.getTarget().setName("name");
-        sptarget.notifyOfGenericUpdate();
+        sptarget.setName("name");
 
         GuideEnvironment guide = GuideEnvironment.create(
                 OptionsListImpl.create(

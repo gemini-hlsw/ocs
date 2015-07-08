@@ -130,8 +130,7 @@ public class TpeGuidePosFeature extends TpePositionFeature
 
             pos = new SPTarget(ra, dec);
             if (tme.name != null) {
-                pos.getTarget().setName(tme.name);
-                pos.notifyOfGenericUpdate();
+                pos.setName(tme.name);
             }
         }
 
@@ -499,10 +498,8 @@ public class TpeGuidePosFeature extends TpePositionFeature
             _dragObject.screenPos.x = tme.xWidget;
             _dragObject.screenPos.y = tme.yWidget;
 
-            SPTarget tp = _dragObject.taggedPos;
-            tp.getTarget().getRa().setAs(tme.pos.getRaDeg(), CoordinateParam.Units.DEGREES);
-            tp.getTarget().getDec().setAs(tme.pos.getDecDeg(), CoordinateParam.Units.DEGREES);
-            tp.notifyOfGenericUpdate();
+            SPTarget tp = (SPTarget) _dragObject.taggedPos;
+            tp.setRaDecDegrees(tme.pos.getRaDeg(), tme.pos.getDecDeg());
         }
     }
 }

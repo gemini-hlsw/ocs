@@ -240,7 +240,7 @@ class TemplateParametersEditor(shells: java.util.List[ISPTemplateParameters]) ex
         read = identity,
         show = identity,
         get  = _.getTarget.getTarget.getName,
-        set  = setTarget(_.getTarget.setName(_))
+        set  = setTarget(_.setName(_))
       )
 
       val typeCombo = new BoundNullableCombo[TargetType](AllTargetTypes)(
@@ -251,27 +251,26 @@ class TemplateParametersEditor(shells: java.util.List[ISPTemplateParameters]) ex
             case Sidereal    => new HmsDegTarget()
             case NonSidereal => new ConicTarget()
           }
-          coords.setName(target.getTarget.getName)
           target.setTarget(coords)
-          target.getTarget.setMagnitudes(DefaultImList.create[Magnitude]())
-          target.notifyOfGenericUpdate()
+          target.setName(target.getTarget.getName)
+          target.setMagnitudes(DefaultImList.create[Magnitude]())
         })}
       )
 
       val hms = new HMSFormat()
-      val raField = new BoundTextField[HMS](10)(
-        read = s => new HMS(hms.parse(s)),
-        show = _.toString,
-        get  = _.getTarget.getTarget.getRa.asInstanceOf[HMS],
-        set  = setTarget((a, b) => a.getTarget.getRa.setValue(b.toString))
+      val raField = new BoundTextField[Double](10)(
+        read = s => hms.parse(s),
+        show = hms.format,
+        get  = _.getTarget.getTarget.getRaHours,
+        set  = setTarget((a, b) => a.setRaHours(b))
       )
 
       val dms = new DMSFormat()
-      val decField = new BoundTextField[DMS](10)(
-        read = s => new DMS(dms.parse(s)),
-        show = _.toString,
-        get  = _.getTarget.getTarget.getDec.asInstanceOf[DMS],
-        set  = setTarget((a, b) => a.getTarget.getDec.setValue(b.toString))
+      val decField = new BoundTextField[Double](10)(
+        read = s => dms.parse(s),
+        show = dms.format,
+        get  = _.getTarget.getTarget.getDecDegrees,
+        set  = setTarget((a, b) => a.setDecDegrees(b))
       )
 
       def pmField(getPM: HmsDegTarget => Double, setPM: (HmsDegTarget, Double) => Unit): BoundTextField[Double] =
@@ -319,20 +318,17 @@ class TemplateParametersEditor(shells: java.util.List[ISPTemplateParameters]) ex
 
         def setMag[A](f: (Magnitude, A) => Magnitude): (TemplateParameters, A) => TemplateParameters =
           setTarget[A]{ (t, a) =>
-            t.getTarget.putMagnitude(f(t.getTarget.getMagnitude(band).getOrElse(zero), a))
-            t.notifyOfGenericUpdate()
+            t.putMagnitude(f(t.getTarget.getMagnitude(band).getOrElse(zero), a))
           }
 
         val magCheck = new BoundCheckbox(
           get = mag(_).isDefined,
           set = setTarget((target, inc) => {
             if (inc) {
-              target.getTarget.putMagnitude(zero)
-              target.notifyOfGenericUpdate()
+              target.putMagnitude(zero)
             } else {
               val mags = target.getTarget.getMagnitudes.toList.asScala.filterNot(_.getBand == band)
-              target.getTarget.setMagnitudes(DefaultImList.create(mags.asJava))
-              target.notifyOfGenericUpdate()
+              target.setMagnitudes(DefaultImList.create(mags.asJava))
             }}
           )
         )

@@ -34,7 +34,6 @@ import edu.gemini.spModel.pio.xml.PioXmlFactory;
 import edu.gemini.spModel.target.SPTarget;
 import edu.gemini.spModel.target.obsComp.TargetObsComp;
 import edu.gemini.spModel.target.system.CoordinateParam.Units;
-import edu.gemini.spModel.target.system.ICoordinate;
 import edu.gemini.spModel.target.system.ITarget;
 import edu.gemini.spModel.time.ChargeClass;
 import edu.gemini.spModel.time.ObsTimeCharges;
@@ -561,10 +560,8 @@ public class ObsQueryFunctor extends DBAbstractQueryFunctor {
         final TargetObsComp targetEnv = (TargetObsComp) targetObsComp.getDataObject();
         final SPTarget tp = targetEnv.getBase();
         final ITarget target = tp.getTarget();
-        final ICoordinate c1 = target.getRa();
-        final ICoordinate c2 = target.getDec();
-        final double ra = c1.getAs(Units.DEGREES) / 15.;
-        final double dec = c2.getAs(Units.DEGREES);
+        final double ra = target.getRaDegrees() / 15.;
+        final double dec = target.getDecDegrees();
 
         double ra0 = 0.;
         double ra1 = 24.;
@@ -661,10 +658,8 @@ public class ObsQueryFunctor extends DBAbstractQueryFunctor {
             final TargetObsComp targetEnv = (TargetObsComp) targetObsComp.getDataObject();
             final SPTarget tp = targetEnv.getBase();
             final ITarget target = tp.getTarget();
-            final ICoordinate c1 = target.getRa();
-            final ICoordinate c2 = target.getDec();
-            ra = c1.getAs(Units.DEGREES);
-            dec = c2.getAs(Units.DEGREES);
+            ra = target.getRaDegrees();
+            dec = target.getDecDegrees();
         }
 
         // Figure out the planned time for all observations.

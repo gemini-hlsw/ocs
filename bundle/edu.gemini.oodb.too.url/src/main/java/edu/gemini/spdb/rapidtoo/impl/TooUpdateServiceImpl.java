@@ -237,11 +237,9 @@ public final class TooUpdateServiceImpl implements TooUpdateService {
         TargetEnvironment targetEnv = targetObsComp.getTargetEnvironment();
         SPTarget base = targetEnv.getBase();
 
-        base.getTarget().setName(tooTarget.getName());
-        base.getTarget().getRa().setAs(tooTarget.getRa(), CoordinateParam.Units.DEGREES);
-        base.getTarget().getDec().setAs(tooTarget.getDec(), CoordinateParam.Units.DEGREES);
-        base.getTarget().setMagnitudes(tooTarget.getMagnitudes());
-        base.notifyOfGenericUpdate();
+        base.setName(tooTarget.getName());
+        base.setRaDecDegrees(tooTarget.getRa(), tooTarget.getDec());
+        base.setMagnitudes(tooTarget.getMagnitudes());
 
         // Set the guide star, if present.
         TooGuideTarget gs = update.getGuideStar();
@@ -280,15 +278,13 @@ public final class TooUpdateServiceImpl implements TooUpdateService {
                         Option<SPTarget> targetOpt = gt.getPrimary();
                         SPTarget target = targetOpt.isEmpty() ? new SPTarget() : targetOpt.getValue();
 
-                        target.getTarget().getRa().setAs(gs.getRa(), CoordinateParam.Units.DEGREES);
-                        target.getTarget().getDec().setAs(gs.getDec(), CoordinateParam.Units.DEGREES);
+                        target.setRaDecDegrees(gs.getRa(), gs.getDec());
                         String name = gs.getName();
                         if (name != null) {
-                            target.getTarget().setName(name);
+                            target.setName(name);
                         }
-                        target.notifyOfGenericUpdate();
 
-                        target.getTarget().setMagnitudes(gs.getMagnitudes());
+                        target.setMagnitudes(gs.getMagnitudes());
 
                         if (targetOpt.isEmpty()) {
                             ImList<SPTarget> lst = gt.getOptions().cons(target);

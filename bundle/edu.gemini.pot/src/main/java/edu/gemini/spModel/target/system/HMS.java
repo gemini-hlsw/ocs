@@ -28,7 +28,7 @@ package edu.gemini.spModel.target.system;
  * Internally, the <code>CoordinateParam</code> is kept as degrees.
  */
 public class HMS extends CoordinateParam
-        implements ICoordinate, Cloneable {
+        implements Cloneable {
     /* These are the units that HMS can use for conversions, get,
      * and set.  By aggreement, the zero member is the default
      * units.

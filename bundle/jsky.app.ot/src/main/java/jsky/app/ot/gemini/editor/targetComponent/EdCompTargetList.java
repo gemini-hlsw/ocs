@@ -224,8 +224,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
             if (spTarget != null) {
                 if (target != null) {
                     spTarget.setTarget(target.clone());
-                    spTarget.getTarget().setMagnitudes(mag);
-                    spTarget.notifyOfGenericUpdate();
+                    spTarget.setMagnitudes(mag);
                 }
             } else {
                 final GuideGroup group = TargetSelection.getGuideGroup(dataObject.getTargetEnvironment(), obsComponent);
@@ -754,7 +753,6 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         public void actionPerformed(ActionEvent e) {
             if (_curPos != null) {
                 pasteSelectedPosition(getNode(), getDataObject());
-                _curPos.notifyOfGenericUpdate();
             } else if (_curGroup != null) {
                 pasteSelectedPosition(getNode(), getDataObject());
             }

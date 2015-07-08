@@ -113,10 +113,8 @@ public class TpeBasePosFeature extends TpePositionFeature {
                 _dragObject.screenPos.y = tme.yWidget;
             }
 
-            SPTarget tp = _dragObject.taggedPos;
-            tp.getTarget().getRa().setAs(tme.pos.getRaDeg(), CoordinateParam.Units.DEGREES);
-            tp.getTarget().getDec().setAs(tme.pos.getDecDeg(), CoordinateParam.Units.DEGREES);
-            tp.notifyOfGenericUpdate();
+            SPTarget tp = (SPTarget) _dragObject.taggedPos;
+            tp.setRaDecDegrees(tme.pos.getRaDeg(), tme.pos.getDecDeg());
         }
     }
 

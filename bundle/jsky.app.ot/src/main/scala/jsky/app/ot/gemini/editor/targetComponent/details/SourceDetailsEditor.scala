@@ -27,9 +27,9 @@ final class SourceDetailsEditor extends GridBagPanel with TelescopePosEditor {
   private[this] var spt: SPTarget = new SPTarget
 
   private def setDistribution(sd: SpectralDistribution): Unit         = setDistribution(Some(sd))
-  private def setDistribution(sd: Option[SpectralDistribution]): Unit = spt.getTarget.setSpectralDistribution(sd)
+  private def setDistribution(sd: Option[SpectralDistribution]): Unit = spt.setSpectralDistribution(sd)
   private def setProfile     (sp: SpatialProfile): Unit               = setProfile(Some(sp))
-  private def setProfile     (sp: Option[SpatialProfile]): Unit       = spt.getTarget.setSpatialProfile(sp)
+  private def setProfile     (sp: Option[SpatialProfile]): Unit       = spt.setSpatialProfile(sp)
 
   // ==== Spatial Profile Details
 
@@ -183,19 +183,15 @@ final class SourceDetailsEditor extends GridBagPanel with TelescopePosEditor {
 
     case SelectionChanged(`distributions`) =>
       setDistribution(distributions.selection.item.default)
-      spt.notifyOfGenericUpdate()
 
     case SelectionChanged(`libraryStarDetails`) =>
       setDistribution(libraryStarDetails.selection.item)
-      spt.notifyOfGenericUpdate()
 
     case SelectionChanged(`libraryNonStarDetails`) =>
       setDistribution(libraryNonStarDetails.selection.item)
-      spt.notifyOfGenericUpdate()
 
     case SelectionChanged(`profiles`)  =>
       setProfile(profiles.selection.item.default)
-      spt.notifyOfGenericUpdate()
 
   }
 

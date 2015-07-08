@@ -45,14 +45,14 @@ public abstract class NonSiderealTarget extends ITarget {
     /**
      * Get the first Coordinate as an ICoordinate.
      */
-    public ICoordinate getRa() {
+    public final HMS getRa() {
         return _ra;
     }
 
     /**
      * Get the second Coordinate as an ICoordinate.
      */
-    public ICoordinate getDec() {
+    public final DMS getDec() {
         return _dec;
     }
 
@@ -162,4 +162,13 @@ public abstract class NonSiderealTarget extends ITarget {
 		_hObjTypeOrd = ord;
 	}
 
+    @Override
+    public void setRaString(String s) {
+        super.setRaString(s);
+    }
+
+    @Override
+    public void setDecString(String s) {
+        super.setDecString(s);
+    }
 }

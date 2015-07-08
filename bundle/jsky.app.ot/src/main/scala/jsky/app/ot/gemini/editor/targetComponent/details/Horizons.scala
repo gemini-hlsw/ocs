@@ -6,6 +6,7 @@ import java.util.Date
 
 import edu.gemini.horizons.api.HorizonsQuery.ObjectType
 import edu.gemini.horizons.api.{ OrbitalElements, EphemerisEntry, HorizonsReply }
+import edu.gemini.spModel.target.SPTarget
 import edu.gemini.spModel.target.system.CoordinateParam.Units
 import edu.gemini.spModel.target.system.{ NamedTarget, ConicTarget }
 import edu.gemini.spModel.target.system.ITarget.Tag
@@ -135,8 +136,8 @@ object Horizons {
 
         nt.setSolarObject(obj)
         nt.setName(name)
-        nt.getRa .setAs(e.getCoordinates.getRaDeg,  Units.DEGREES)
-        nt.getDec.setAs(e.getCoordinates.getDecDeg, Units.DEGREES)
+        new SPTarget(nt).setRaDegrees(e.getCoordinates.getRaDeg)
+        new SPTarget(nt).setDecDegrees(e.getCoordinates.getDecDeg)
         nt.setDateForPosition(e.getDate)
         nt.right
 
@@ -184,8 +185,8 @@ object Horizons {
         // Set the date/time and coordinates to correspond with the first ephemeris element, if any
         if (r.hasEphemeris) {
           val e = r.getEphemeris.get(0)
-          ct.getRa .setAs(e.getCoordinates.getRaDeg,  Units.DEGREES)
-          ct.getDec.setAs(e.getCoordinates.getDecDeg, Units.DEGREES)
+          new SPTarget(ct).setRaDegrees(e.getCoordinates.getRaDeg)
+          new SPTarget(ct).setDecDegrees(e.getCoordinates.getDecDeg)
           ct.setDateForPosition(e.getDate)
         }
       }

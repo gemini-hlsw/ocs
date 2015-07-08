@@ -26,7 +26,7 @@ package edu.gemini.spModel.target.system;
  * special cases pay for lugging around an extra object.
  */
 public class DMS extends CoordinateParam
-        implements ICoordinate, Cloneable {
+        implements Cloneable {
     /* These are the units that DMS can use for conversions, get,
      * and set.  By aggreement, the zero member is the default
      * units.

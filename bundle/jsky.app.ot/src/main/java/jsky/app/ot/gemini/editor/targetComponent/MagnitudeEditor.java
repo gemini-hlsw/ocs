@@ -479,14 +479,12 @@ public class MagnitudeEditor implements TelescopePosEditor {
 
         final Magnitude newMag = new Magnitude(b, Magnitude.UNDEFINED_MAG, 0, b.defaultSystem);
 
-        target.getTarget().setMagnitudes(target.getTarget().getMagnitudes().cons(newMag));
-        target.notifyOfGenericUpdate();
+        target.setMagnitudes(target.getTarget().getMagnitudes().cons(newMag));
         focusOn(b);
     }
 
     void removeBand(Magnitude.Band b) {
-        target.getTarget().setMagnitudes(target.getTarget().getMagnitudes().filter(new NotBand(b)));
-        target.notifyOfGenericUpdate();
+        target.setMagnitudes(target.getTarget().getMagnitudes().filter(new NotBand(b)));
     }
 
     void changeBand(Magnitude.Band from, Magnitude.Band to) {
@@ -495,10 +493,9 @@ public class MagnitudeEditor implements TelescopePosEditor {
         final Magnitude oldMag = oldMagOpt.getValue();
         final Magnitude newMag = new Magnitude(to, oldMag.getBrightness(), oldMag.getError(), oldMag.getSystem());
 
-        target.getTarget().setMagnitudes(
+        target.setMagnitudes(
                target.getTarget().getMagnitudes().filter(new NotBand(from)).cons(newMag)
         );
-        target.notifyOfGenericUpdate();
         focusOn(to);
     }
 
@@ -509,10 +506,9 @@ public class MagnitudeEditor implements TelescopePosEditor {
         if (system == oldMag.getSystem()) return;
         final Magnitude newMag = new Magnitude(band, oldMag.getBrightness(), oldMag.getError(), system);
 
-        target.getTarget().setMagnitudes(
+        target.setMagnitudes(
                target.getTarget().getMagnitudes().filter(new NotBand(band)).cons(newMag)
         );
-        target.notifyOfGenericUpdate();
         focusOn(band);
     }
 
@@ -524,10 +520,9 @@ public class MagnitudeEditor implements TelescopePosEditor {
         try {
             final Magnitude newMag = new Magnitude(oldMag.getBand(), d, oldMag.getError(), oldMag.getSystem());
             target.deleteWatcher(watcher);
-            target.getTarget().setMagnitudes(
+            target.setMagnitudes(
                    target.getTarget().getMagnitudes().filter(new NotBand(b)).cons(newMag)
             );
-            target.notifyOfGenericUpdate();
             target.addWatcher(watcher);
         } catch (Exception ex) {
             // do nothing

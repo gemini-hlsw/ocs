@@ -67,20 +67,78 @@ public abstract class ITarget implements Cloneable, Serializable {
     /** Get the name. */
     public abstract String getName();
 
-    /** Set the name. */
-    public abstract void setName(String name);
+    ///
+    /// TRANSITIONAL ACCESSORS
+    ///
 
-    /** Get the RA. */
-    public abstract ICoordinate getRa();
+    public double getRaDegrees() {
+        return getRa().getAs(CoordinateParam.Units.DEGREES);
+    }
+
+    public double getRaHours() {
+        return getRa().getAs(CoordinateParam.Units.HMS);
+    }
+
+    public String getRaString() {
+        return getRa().toString();
+    }
+
+    ///
+    /// TRANSITIONAL PACKAGE-PRIVATE
+    ///
+
+    abstract void setName(String name);
+
+    abstract HMS getRa();
+
+    void setRaDegrees(double value) {
+        getRa().setAs(value, CoordinateParam.Units.DEGREES);
+    }
+
+    void setRaHours(double value) {
+        getRa().setAs(value, CoordinateParam.Units.HMS);
+    }
+
+    // TRANSITIONAL
+    void setRaString(String s) {
+        getRa().setValue(s);
+    }
+
+    // TRANSITIONAL
+    void setRaDecDegrees(double ra, double dec) {
+        setRaDegrees(ra);
+        setDecDegrees(dec);
+    }
+
 
     /** Get the Dec. */
-    public abstract ICoordinate getDec();
+    protected abstract DMS getDec();
+
+    // TRANSITIONAL
+    public double getDecDegrees() {
+        return getDec().getAs(CoordinateParam.Units.DEGREES);
+    }
+
+    // TRANSITIONAL
+    void setDecDegrees(double value) {
+        getDec().setAs(value, CoordinateParam.Units.DEGREES);
+    }
+
+    // TRANSITIONAL
+    public String getDecString() {
+        return getDec().toString();
+    }
+
+    // TRANSITIONAL
+    void setDecString(String s) {
+        getDec().setValue(s);
+    }
 
     /** Get the Epoch */
     public abstract Epoch getEpoch();
 
     /** Set the Epoch */
-    public abstract void setEpoch(Epoch e);
+    abstract void setEpoch(Epoch e);
 
 
     // RCN: pushed across from SPTarget
@@ -129,7 +187,7 @@ public abstract class ITarget implements Cloneable, Serializable {
      * @param magnitudes new collection of magnitude information to store with
      * the target
      */
-    public void setMagnitudes(final ImList<Magnitude> magnitudes) {
+    void setMagnitudes(final ImList<Magnitude> magnitudes) {
         this.magnitudes = filterDuplicates(magnitudes);
     }
 
@@ -143,11 +201,7 @@ public abstract class ITarget implements Cloneable, Serializable {
      * wrapped in a {@link edu.gemini.shared.util.immutable.Some} object; {@link edu.gemini.shared.util.immutable.None} if none
      */
     public Option<Magnitude> getMagnitude(final Magnitude.Band band) {
-        return magnitudes.find(new PredicateOp<Magnitude>() {
-            @Override public Boolean apply(final Magnitude magnitude) {
-                return band.equals(magnitude.getBand());
-            }
-        });
+        return magnitudes.find(magnitude -> band.equals(magnitude.getBand()));
     }
 
     /**
@@ -157,11 +211,7 @@ public abstract class ITarget implements Cloneable, Serializable {
      * we have information in this target
      */
     public Set<Magnitude.Band> getMagnitudeBands() {
-        final ImList<Magnitude.Band> bandList = magnitudes.map(new MapOp<Magnitude, Magnitude.Band>() {
-            @Override public Magnitude.Band apply(final Magnitude magnitude) {
-                return magnitude.getBand();
-            }
-        });
+        final ImList<Magnitude.Band> bandList = magnitudes.map(magnitude -> magnitude.getBand());
         return new HashSet<>(bandList.toList());
     }
 
@@ -171,15 +221,11 @@ public abstract class ITarget implements Cloneable, Serializable {
      *
      * @param mag magnitude information to add to the collection of magnitudes
      */
-    public void putMagnitude(final Magnitude mag) {
-        magnitudes = magnitudes.filter(new PredicateOp<Magnitude>() {
-            @Override public Boolean apply(final Magnitude cur) {
-                return cur.getBand() != mag.getBand();
-            }
-        }).cons(mag);
+    void putMagnitude(final Magnitude mag) {
+        magnitudes = magnitudes.filter(cur -> cur.getBand() != mag.getBand()).cons(mag);
     }
 
-    public void setSpectralDistribution(scala.Option<SpectralDistribution> sd) {
+    void setSpectralDistribution(scala.Option<SpectralDistribution> sd) {
         spectralDistribution = sd;
     }
 
@@ -187,7 +233,7 @@ public abstract class ITarget implements Cloneable, Serializable {
         return spectralDistribution;
     }
 
-    public void setSpatialProfile(scala.Option<SpatialProfile> sp) {
+    void setSpatialProfile(scala.Option<SpatialProfile> sp) {
         spatialProfile = sp;
     }
 
@@ -210,7 +256,7 @@ public abstract class ITarget implements Cloneable, Serializable {
 
     /** Gets a Skycalc {@link edu.gemini.skycalc.Coordinates} representation. */
     public synchronized Coordinates getSkycalcCoordinates() {
-        return new Coordinates(getRa().getAs(CoordinateParam.Units.DEGREES), getDec().getAs(CoordinateParam.Units.DEGREES));
+        return new Coordinates(getRaDegrees(), getDecDegrees());
     }
 
     public final String toString() {

@@ -37,6 +37,15 @@ public final class HmsDegTarget extends ITarget {
         return TAG;
     }
 
+    @Override
+    public void setRaString(String s) {
+        super.setRaString(s);
+    }
+
+    @Override
+    public void setDecString(String s) {
+        super.setDecString(s);
+    }
 
     // Various default values.
     // XXX Note: the types derived from CoordinateParam, such as Epoch, are NOT immutable!
@@ -73,8 +82,9 @@ public final class HmsDegTarget extends ITarget {
         target.setName(obj.getName());
         target.setMagnitudes(obj.getMagnitudes());
         target.setEpoch(new Epoch(e.getYear()));
-        target.getRa().setAs(coords.getRa().toDegrees().getMagnitude(), Units.DEGREES);
-        target.getDec().setAs(coords.getDec().toDegrees().getMagnitude(), Units.DEGREES);
+        target.setRaDecDegrees(
+            coords.getRa().toDegrees().getMagnitude(),
+            coords.getDec().toDegrees().getMagnitude());
 
         // Proper Motion
         final Units mas = Units.MILLI_ARCSECS_PER_YEAR;
@@ -140,7 +150,7 @@ public final class HmsDegTarget extends ITarget {
      * This returns a reference to the actual object an {@link HMS HMS}
      * object so take care!
      */
-    public ICoordinate getRa() {
+    public HMS getRa() {
         // Ra exists at instance creation.
         return _ra;
     }
@@ -150,7 +160,7 @@ public final class HmsDegTarget extends ITarget {
      * This returns a reference to the actual object an {@link DMS DMS}
      * object so take care!
      */
-    public ICoordinate getDec() {
+    public DMS getDec() {
         // Dec exists at instance creation.
         return _dec;
     }

@@ -11,7 +11,6 @@ import edu.gemini.spModel.target.obsComp.TargetObsComp;
 import edu.gemini.spModel.target.obsComp.TargetSelection;
 import edu.gemini.spModel.target.offset.OffsetPosSelection;
 import edu.gemini.spModel.target.system.CoordinateParam.Units;
-import edu.gemini.spModel.target.system.ICoordinate;
 import edu.gemini.spModel.target.system.ITarget;
 import jsky.app.jskycat.JSkyCat;
 import jsky.app.ot.OT;
@@ -264,9 +263,7 @@ public class TelescopePosEditor extends JSkyCat implements TpeMouseObserver {
             return;
         }
 
-        tp.getTarget().getRa().setAs(basePos.getRaDeg(), Units.DEGREES);
-        tp.getTarget().getDec().setAs(basePos.getDecDeg(), Units.DEGREES);
-        tp.notifyOfGenericUpdate();
+        tp.setRaDecDegrees(basePos.getRaDeg(), basePos.getDecDeg());
     }
 
     /**
@@ -280,10 +277,8 @@ public class TelescopePosEditor extends JSkyCat implements TpeMouseObserver {
         if (tp != null) {
             // Get the RA and Dec from the pos list.
             ITarget target = tp.getTarget();
-            ICoordinate c1 = target.getRa();
-            ICoordinate c2 = target.getDec();
-            ra = c1.getAs(Units.DEGREES);
-            dec = c2.getAs(Units.DEGREES);
+            ra = target.getRaDegrees();
+            dec = target.getDecDegrees();
         }
 
         _iw.loadCachedImage(ra, dec);
@@ -311,7 +306,7 @@ public class TelescopePosEditor extends JSkyCat implements TpeMouseObserver {
         ITarget oldBase = oldBasePos.getTarget();
         ITarget newBase = newBasePos.getTarget();
 
-        return oldBase.getRa().getAs(Units.DEGREES) != newBase.getRa().getAs(Units.DEGREES) || oldBase.getDec().getAs(Units.DEGREES) != newBase.getDec().getAs(Units.DEGREES);
+        return (oldBase.getRaDegrees() != newBase.getRaDegrees() || oldBase.getDecDegrees() != newBase.getDecDegrees());
     }
 
     private final PropertyChangeListener obsListener = evt -> {
@@ -443,8 +438,8 @@ public class TelescopePosEditor extends JSkyCat implements TpeMouseObserver {
         if (_baseTarget == null) return;
 
         // XXX FIXME: We shouldn't have to use numeric indexes here
-        queryArgs.setParamValue(2, _baseTarget.getTarget().getRa().toString());
-        queryArgs.setParamValue(3, _baseTarget.getTarget().getDec().toString());
+        queryArgs.setParamValue(2, _baseTarget.getTarget().getRaString());
+        queryArgs.setParamValue(3, _baseTarget.getTarget().getDecString());
         queryArgs.setParamValue(4, _baseTarget.getTarget().getTag().tccName);
         if (args.length > 2) {
             //first argument must be a Double, it represent the size on AstroCatalogs

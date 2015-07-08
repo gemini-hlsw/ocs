@@ -13,7 +13,6 @@ import edu.gemini.spModel.obscomp.SPInstObsComp;
 import edu.gemini.spModel.target.*;
 import edu.gemini.spModel.target.offset.OffsetPosBase;
 import edu.gemini.spModel.target.system.CoordinateParam.Units;
-import edu.gemini.spModel.target.system.ICoordinate;
 import edu.gemini.spModel.target.system.ITarget;
 import edu.gemini.spModel.util.Angle;
 import jsky.app.ot.ags.AgsStrategyUtil;
@@ -489,10 +488,8 @@ public class TpeImageWidget extends NavigatorImageDisplay implements MouseInputL
         // Get the equinox assumed by the coordinate conversion methods (depends on current image)
         //double equinox = getCoordinateConverter().getEquinox();
         ITarget target = ((SPTarget) tp).getTarget();
-        ICoordinate c1 = target.getRa();
-        ICoordinate c2 = target.getDec();
-        double x = c1.getAs(Units.DEGREES);
-        double y = c2.getAs(Units.DEGREES);
+        double x = target.getRaDegrees();
+        double y = target.getDecDegrees();
         WorldCoords pos = new WorldCoords(x, y, 2000.);
         return worldToScreenCoords(pos);
     }
@@ -840,10 +837,8 @@ public class TpeImageWidget extends NavigatorImageDisplay implements MouseInputL
      * The Base position has been updated.
      */
     public void basePosUpdate(ITarget target) {
-        ICoordinate c1 = target.getRa();
-        ICoordinate c2 = target.getDec();
-        double x = c1.getAs(Units.DEGREES);
-        double y = c2.getAs(Units.DEGREES);
+        double x = target.getRaDegrees();
+        double y = target.getDecDegrees();
         WorldCoords pos = new WorldCoords(x, y, 2000.);
         setBasePos(pos);
         repaint();

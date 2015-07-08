@@ -23,7 +23,6 @@ import edu.gemini.spModel.target.offset.OffsetPosBase;
 import edu.gemini.spModel.target.offset.OffsetPosList;
 import edu.gemini.spModel.target.offset.OffsetUtil;
 import edu.gemini.spModel.target.system.CoordinateParam.Units;
-import edu.gemini.spModel.target.system.ICoordinate;
 import edu.gemini.spModel.target.system.ITarget;
 import jsky.app.ot.OT;
 import jsky.app.ot.OTOptions;
@@ -79,7 +78,7 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
                 public Object getValue(Row row) {
                     return row.target().map(new MapOp<SPTarget, String>() {
                         @Override public String apply(SPTarget t) {
-                            return t.getTarget().getRa().toString();
+                            return t.getTarget().getRaString();
                         }
                     }).getOrElse("");
                 }
@@ -89,7 +88,7 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
                 public Object getValue(Row row) {
                     return row.target().map(new MapOp<SPTarget, String>() {
                         @Override public String apply(SPTarget t) {
-                            return t.getTarget().getDec().toString();
+                            return t.getTarget().getDecString();
                         }
                     }).getOrElse("");
                 }
@@ -466,10 +465,8 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
     // Return the world coordinates for the given target
     private static WorldCoords getWorldCoords(SPTarget tp) {
         final ITarget target = tp.getTarget();
-        final ICoordinate c1 = target.getRa();
-        final ICoordinate c2 = target.getDec();
-        final double x = c1.getAs(Units.DEGREES);
-        final double y = c2.getAs(Units.DEGREES);
+        final double x = target.getRaDegrees();
+        final double y = target.getDecDegrees();
         return new WorldCoords(x, y, 2000.);
     }
 

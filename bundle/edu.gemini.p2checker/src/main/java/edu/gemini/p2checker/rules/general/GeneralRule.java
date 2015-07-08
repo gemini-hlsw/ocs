@@ -287,11 +287,11 @@ public class GeneralRule implements IRule {
             // Okay, this kind of sucks, but I want to compare the coordinates
             // in the same way they are externalized and displayed.  That is,
             // ignore any extra precision that we end up throwing away.
-            String baseC1 = base.getRa().toString();
-            String baseC2 = base.getDec().toString();
+            String baseC1 = base.getRaString();
+            String baseC2 = base.getDecString();
 
-            String guideC1 = guide.getRa().toString();
-            String guideC2 = guide.getDec().toString();
+            String guideC1 = guide.getRaString();
+            String guideC2 = guide.getDecString();
 
             return baseC1.equals(guideC1) && baseC2.equals(guideC2);
         }
@@ -448,11 +448,11 @@ public class GeneralRule implements IRule {
 
     private static boolean _areTargetsEquals(SPTarget p1Target, SPTarget target, ObservationElements elems) {
 
-        double spRA = target.getTarget().getRa().getAs(CoordinateParam.Units.HMS);
-        double spDec = target.getTarget().getDec().getAs(CoordinateParam.Units.DEGREES);
+        double spRA = target.getTarget().getRaHours();
+        double spDec = target.getTarget().getDecDegrees();
 
-        double p1RA = p1Target.getTarget().getRa().getAs(CoordinateParam.Units.HMS);
-        double p1Dec = p1Target.getTarget().getDec().getAs(CoordinateParam.Units.DEGREES);
+        double p1RA = p1Target.getTarget().getRaHours();
+        double p1Dec = p1Target.getTarget().getDecDegrees();
 
         return _closeEnough(elems, spRA, spDec, p1RA, p1Dec);
     }
@@ -465,8 +465,8 @@ public class GeneralRule implements IRule {
         final ISPObservation obs = elems.getObservationNode();
         if (obs == null || !Too.isToo(obs)) return false;
 
-        double p1RA = p1Target.getTarget().getRa().getAs(CoordinateParam.Units.HMS);
-        double p1Dec = p1Target.getTarget().getDec().getAs(CoordinateParam.Units.DEGREES);
+        double p1RA = p1Target.getTarget().getRaHours();
+        double p1Dec = p1Target.getTarget().getDecDegrees();
         return (p1RA == 0.0) && (p1Dec == 0.0);
     }
 

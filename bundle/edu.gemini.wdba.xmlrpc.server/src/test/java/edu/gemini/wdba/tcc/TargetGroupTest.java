@@ -47,17 +47,17 @@ public final class TargetGroupTest extends TestBase {
         nameMap = new NameMap();
 
         base = new SPTarget();
-        base.getTarget().setName("Base Pos");
+        base.setName("Base Pos");
 
         pwfs1_1 = new SPTarget();
-        pwfs1_1.getTarget().setName("PWFS1-1");
+        pwfs1_1.setName("PWFS1-1");
         pwfs1_2 = new SPTarget();
-        pwfs1_2.getTarget().setName("PWFS1-2");
+        pwfs1_2.setName("PWFS1-2");
 
         pwfs2_1 = new SPTarget();
-        pwfs2_1.getTarget().setName("PWFS2-1");
+        pwfs2_1.setName("PWFS2-1");
         pwfs2_2 = new SPTarget();
-        pwfs2_2.getTarget().setName("PWFS2-2");
+        pwfs2_2.setName("PWFS2-2");
     }
 
     /**
@@ -145,9 +145,9 @@ public final class TargetGroupTest extends TestBase {
         obs.addObsComponent(gmosComp);
 
         SPTarget guide1 = new SPTarget();
-        guide1.getTarget().setName("OIWFS-1");
+        guide1.setName("OIWFS-1");
         SPTarget guide2 = new SPTarget();
-        guide2.getTarget().setName("OIWFS-2");
+        guide2.setName("OIWFS-2");
 
         ImList<SPTarget> targetList;
         targetList = ImCollections.singletonList(guide2).cons(guide1);
@@ -476,8 +476,7 @@ public final class TargetGroupTest extends TestBase {
         ImList<SPTarget> targets = ImCollections.emptyList();
         for (int i=names.length-1; i>=0; --i) {
             SPTarget target = new SPTarget();
-            target.getTarget().setName(names[i]);
-            target.notifyOfGenericUpdate();
+            target.setName(names[i]);
             targets = targets.cons(target);
         }
         return GuideProbeTargets.create(guider, targets).setPrimaryIndex(1);
