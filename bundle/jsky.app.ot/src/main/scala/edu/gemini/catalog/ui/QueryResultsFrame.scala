@@ -126,6 +126,30 @@ object QueryResultsWindow {
       }
     }
 
+    lazy val ra = new TextField() {
+      columns = 20
+
+      def updateRa(ra: RightAscension): Unit = {
+        text = ra.toAngle.formatHMS
+      }
+    }
+
+    lazy val dec = new TextField() {
+      columns = 20
+
+      def updateDec(dec: Declination): Unit = {
+        text = dec.formatDMS
+      }
+    }
+
+    lazy val radiusStart, radiusEnd = new TextField() {
+      columns = 5
+
+      def updateAngle(angle: Angle): Unit = {
+        text = f"${angle.toArcmins}%2.2f"
+      }
+    }
+
     case class QueryResultsFrame(table: Table) extends Frame with PreferredSizeFrame {
       title = "Query Results"
 
@@ -139,13 +163,38 @@ object QueryResultsWindow {
         }
       }
 
-      contents = new MigPanel(LC().fill().insets(0).debug(100)) {
+      private val queryButton = new Button("Query") {
+        reactions += {
+          case ButtonClicked(_) =>
+        }
+      }
+
+      contents = new MigPanel(LC().fill().insets(0).debug(0)) {
+        add(new MigPanel(LC().fill().insets(5.px).debug(200)) {
+          add(new Label("Query Parameters"), CC().dockNorth())
+          add(new Label("RA"), CC().cell(0, 0))
+          add(ra, CC().cell(1, 0).spanX(3))
+          add(new Label("Dec"), CC().cell(0, 1))
+          add(dec, CC().cell(1, 1).spanX(3))
+          add(new Label("J2000") {
+            verticalAlignment = Alignment.Center
+          }, CC().cell(4, 0).spanY(2))
+          add(new Label("Radial Range"), CC().cell(0, 4))
+          add(radiusStart, CC().cell(1, 4))
+          add(new Label("-"), CC().cell(2, 4))
+          add(radiusEnd, CC().cell(3, 4))
+          add(new Label("arcmin"), CC().cell(4, 4))
+          add(queryButton, CC().cell(0, 5).span(5).pushX().alignX(RightAlign))
+        }, CC().spanY(2).alignY(TopAlign))
+
         // Results Table
         add(resultsLabel, CC().growX().wrap())
         // Results Table
         add(new ScrollPane() {
           contents = table
-        }, CC().grow().pushY())
+          // Show horizontal scroll bar
+          horizontalScrollBarPolicy = ScrollPane.BarPolicy.AsNeeded
+        }, CC().grow().pushY().pushX())
         // Command buttons at the bottom
         add(new MigPanel(LC().fillX().insets(10.px)) {
           add(closeButton, CC().alignX(RightAlign))
@@ -171,6 +220,8 @@ object QueryResultsWindow {
       val sorter = new TableRowSorter[TargetsModel](m)
       peer.setRowSorter(sorter)
       peer.getRowSorter.toggleSortOrder(0)
+
+      autoResizeMode = Table.AutoResizeMode.Off
 
       // Align Right
       peer.setDefaultRenderer(classOf[String], new DefaultTableCellRenderer() {
@@ -202,8 +253,16 @@ object QueryResultsWindow {
           resultsTable.peer.setRowSorter(sorter)
           resultsTable.peer.getRowSorter.toggleSortOrder(0)
 
-          // Update the count of tables
+          // Update the count of rows
           resultsLabel.updateCount(x.result.targets.rows.length)
+
+          // Update the RA
+          ra.updateRa(x.query.base.ra)
+          dec.updateDec(x.query.base.dec)
+
+          // Update radius constraint
+          radiusStart.updateAngle(x.query.radiusConstraint.minLimit)
+          radiusEnd.updateAngle(x.query.radiusConstraint.maxLimit)
         }
     }
   }
