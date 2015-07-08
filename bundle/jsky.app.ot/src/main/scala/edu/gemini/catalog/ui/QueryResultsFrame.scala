@@ -118,6 +118,14 @@ object QueryResultsWindow {
 
     }
 
+    lazy val resultsLabel = new Label("Query") {
+      horizontalAlignment = Alignment.Center
+
+      def updateCount(c: Int):Unit = {
+        text = s"Query results: $c"
+      }
+    }
+
     case class QueryResultsFrame(table: Table) extends Frame with PreferredSizeFrame {
       title = "Query Results"
 
@@ -131,10 +139,14 @@ object QueryResultsWindow {
         }
       }
 
-      contents = new MigPanel(LC().fill().insets(0)) {
+      contents = new MigPanel(LC().fill().insets(0).debug(100)) {
+        // Results Table
+        add(resultsLabel, CC().growX().wrap())
+        // Results Table
         add(new ScrollPane() {
           contents = table
-        }, CC().grow())
+        }, CC().grow().pushY())
+        // Command buttons at the bottom
         add(new MigPanel(LC().fillX().insets(10.px)) {
           add(closeButton, CC().alignX(RightAlign))
         }, CC().growX().dockSouth())
@@ -179,13 +191,19 @@ object QueryResultsWindow {
         GlassLabel.hide(frame.peer.getRootPane) // TODO Display error
       case scala.util.Success(x) =>
         Swing.onEDT {
+          // Controller code in MVC-style
           GlassLabel.hide(frame.peer.getRootPane)
+          // Update the table
           val model = TargetsModel(x.result.targets.rows)
           resultsTable.model = model
 
+          // The sorting logic may change if the list of magnitudes changes
           val sorter = new TableRowSorter[TargetsModel](model)
           resultsTable.peer.setRowSorter(sorter)
           resultsTable.peer.getRowSorter.toggleSortOrder(0)
+
+          // Update the count of tables
+          resultsLabel.updateCount(x.result.targets.rows.length)
         }
     }
   }
@@ -208,7 +226,6 @@ object QueryResultsWindow {
       AgsRegistrar.currentStrategy(obsCtx).foreach { strategy =>
         // TODO Use only the first query, GEMS isn't supported yet OCSADV-242, OCSADV-239
         strategy.catalogQueries(obsCtx, OT.getMagnitudeTable).headOption.foreach { q =>
-          // TODO Filtering should be part of the catalog query OCSADV-402
           showTable(q)
         }
       }
