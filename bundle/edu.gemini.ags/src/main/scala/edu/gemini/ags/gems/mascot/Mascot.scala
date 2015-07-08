@@ -2,14 +2,12 @@ package edu.gemini.ags.gems.mascot
 
 import java.util.logging.Logger
 
-import edu.gemini.ags.api.MagnitudeExtractor
 import edu.gemini.ags.gems.mascot.util.AllPairsAndTriples
 import edu.gemini.ags.gems.mascot.util.YUtils._
 
 import MascotUtils._
 import MascotConf._
 import breeze.linalg._
-import edu.gemini.spModel.core.Target.SiderealTarget
 import edu.gemini.spModel.core.MagnitudeBand
 
 import scala.annotation.tailrec

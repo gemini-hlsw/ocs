@@ -1,6 +1,7 @@
 package edu.gemini.catalog.votable
 
 import edu.gemini.catalog.api.CatalogQuery
+import edu.gemini.spModel.core.MagnitudeBand
 import edu.gemini.spModel.core.Target.SiderealTarget
 
 import scala.util.matching.Regex

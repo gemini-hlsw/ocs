@@ -1,8 +1,8 @@
 package edu.gemini.ags.impl
 
-import edu.gemini.ags.api.{MagnitudeExtractor, AgsMagnitude, defaultProbeBands, magnitudeExtractor}
+import edu.gemini.ags.api.{AgsMagnitude, defaultProbeBands, magnitudeExtractor}
 import edu.gemini.ags.api.AgsMagnitude.{MagnitudeCalc, MagnitudeTable}
-import edu.gemini.catalog.api.{CatalogQuery, RadiusConstraint}
+import edu.gemini.catalog.api.{MagnitudeExtractor, CatalogQuery, RadiusConstraint}
 import edu.gemini.pot.ModelConverters._
 import edu.gemini.spModel.core.Target.SiderealTarget
 import edu.gemini.spModel.core.{MagnitudeBand, Angle, Site}
@@ -29,7 +29,7 @@ sealed trait SingleProbeStrategyParams {
       mc <- magnitudeCalc(ctx, mt)
       rc <- radiusConstraint(ctx)
       ml =  AgsMagnitude.manualSearchLimits(mc)
-    } yield CatalogQuery.catalogQueryWithoutBand(ctx.getBaseCoordinates.toNewModel, rc, Some(ml))
+    } yield CatalogQuery.catalogQueryWithDynamicBand(ctx.getBaseCoordinates.toNewModel, rc, referenceMagnitude, ml)
 
   def radiusConstraint(ctx: ObsContext): Option[RadiusConstraint] =
     RadiusLimitCalc.getAgsQueryRadiusLimits(guideProbe, ctx)
