@@ -5,7 +5,6 @@ import breeze.linalg._
 import MascotUtils._
 import MascotConf._
 import Amoeba._
-import edu.gemini.ags.api.MagnitudeExtractor
 import util.Spline._
 import util.YUtils._
 import scala.collection.JavaConverters._

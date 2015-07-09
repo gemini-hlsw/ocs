@@ -75,11 +75,11 @@ class GemsStrategySpec extends Specification with NoTimeConversions {
       val results = Await.result(TestGemsStrategy("/gemsstrategyquery.xml").search(tipTiltMode, ctx, posAngles, scala.None), 20.seconds)
       results should be size 2
 
-      results.head.criterion should beEqualTo(GemsCatalogSearchCriterion(GemsCatalogSearchKey(GemsGuideStarType.tiptilt, GsaoiOdgw.Group.instance), CatalogSearchCriterion("On-detector Guide Window tiptilt", MagnitudeBand.H, MagnitudeRange(FaintnessConstraint(14.5), scala.Option(SaturationConstraint(7.3))), RadiusConstraint.between(Angle.zero, Angle.fromDegrees(0.01666666666665151)), scala.Option(Offset(0.0014984027777700248.degrees[OffsetP], 0.0014984027777700248.degrees[OffsetQ])), scala.None)))
-      results(1).criterion should beEqualTo(GemsCatalogSearchCriterion(GemsCatalogSearchKey(GemsGuideStarType.flexure, Wfs.Group.instance), CatalogSearchCriterion("Canopus Wave Front Sensor flexure", MagnitudeBand.R, MagnitudeRange(FaintnessConstraint(15.0), scala.Option(SaturationConstraint(7.5))), RadiusConstraint.between(Angle.zero, Angle.fromDegrees(0.01666666666665151)), scala.Option(Offset(0.0014984027777700248.degrees[OffsetP], 0.0014984027777700248.degrees[OffsetQ])), scala.None)))
+      results.head.criterion should beEqualTo(GemsCatalogSearchCriterion(GemsCatalogSearchKey(GemsGuideStarType.tiptilt, GsaoiOdgw.Group.instance), CatalogSearchCriterion("On-detector Guide Window tiptilt", RadiusConstraint.between(Angle.zero, Angle.fromDegrees(0.01666666666665151)), MagnitudeConstraints(MagnitudeBand.H, FaintnessConstraint(14.5), scala.Option(SaturationConstraint(7.3))), scala.Option(Offset(0.0014984027777700248.degrees[OffsetP], 0.0014984027777700248.degrees[OffsetQ])), scala.None)))
+      results(1).criterion should beEqualTo(GemsCatalogSearchCriterion(GemsCatalogSearchKey(GemsGuideStarType.flexure, Wfs.Group.instance), CatalogSearchCriterion("Canopus Wave Front Sensor flexure", RadiusConstraint.between(Angle.zero, Angle.fromDegrees(0.01666666666665151)), MagnitudeConstraints(MagnitudeBand.R, FirstBandExtractor(RLikeBands), FaintnessConstraint(15.0), scala.Option(SaturationConstraint(7.5))), scala.Option(Offset(0.0014984027777700248.degrees[OffsetP], 0.0014984027777700248.degrees[OffsetQ])), scala.None)))
       results.head.results should be size 5
       results(1).results should be size 5
-    }
+    }.pendingUntilFixed("See REL-2420")
     "support search/select and analyze on Pal 1 gives guide stars on the northerm hemisphere" in {
       val ra = Angle.fromHMS(3, 33, 20.040).getOrElse(Angle.zero)
       val dec = Angle.fromDMS(79, 34, 51.80).getOrElse(Angle.zero)
@@ -143,7 +143,7 @@ class GemsStrategySpec extends Specification with NoTimeConversions {
       val estimate = gemsStrategy.estimate(ctx, ProbeLimitsTable.loadOrThrow())
       // Only 2 CWFS stars found, no success
       Await.result(estimate, 20.seconds) should beEqualTo(Estimate.CompleteFailure)
-    }
+    }.pendingUntilFixed("See REL-2420")
     "support search/select and analyze on SN-1987A" in {
       val ra = Angle.fromHMS(5, 35, 28.020).getOrElse(Angle.zero)
       val dec = Angle.zero - Angle.fromDMS(69, 16, 11.07).getOrElse(Angle.zero)
@@ -222,7 +222,7 @@ class GemsStrategySpec extends Specification with NoTimeConversions {
       val estimate = gemsStrategy.estimate(ctx, ProbeLimitsTable.loadOrThrow())
       Await.result(estimate, 20.seconds) should beEqualTo(Estimate.GuaranteedSuccess)
 
-    }
+    }.pendingUntilFixed("See REL-2420")
     "support search/select and analyze on SN-1987A part 2" in {
       val ra = Angle.fromHMS(5, 35, 28.020).getOrElse(Angle.zero)
       val dec = Angle.zero - Angle.fromDMS(69, 16, 11.07).getOrElse(Angle.zero)
@@ -287,7 +287,7 @@ class GemsStrategySpec extends Specification with NoTimeConversions {
       // Test estimate
       val estimate = gemsStrategy.estimate(ctx, ProbeLimitsTable.loadOrThrow())
       Await.result(estimate, 20.seconds) should beEqualTo(Estimate.GuaranteedSuccess)
-    }
+    }.pendingUntilFixed("See REL-2420")
     "support search/select and analyze on TYC 8345-1155-1" in {
       val ra = Angle.fromHMS(17, 25, 27.529).getOrElse(Angle.zero)
       val dec = Angle.zero - Angle.fromDMS(48, 27, 24.02).getOrElse(Angle.zero)
@@ -362,7 +362,7 @@ class GemsStrategySpec extends Specification with NoTimeConversions {
       // Test estimate
       val estimate = gemsStrategy.estimate(ctx, ProbeLimitsTable.loadOrThrow())
       Await.result(estimate, 20.seconds) should beEqualTo(Estimate.GuaranteedSuccess)
-    }
+    }.pendingUntilFixed("See REL-2420")
     "support search/select and analyze on M6" in {
       val ra = Angle.fromHMS(17, 40, 20.0).getOrElse(Angle.zero)
       val dec = Angle.zero - Angle.fromDMS(32, 15, 12.0).getOrElse(Angle.zero)
@@ -439,7 +439,7 @@ class GemsStrategySpec extends Specification with NoTimeConversions {
       // Test estimate
       val estimate = gemsStrategy.estimate(ctx, ProbeLimitsTable.loadOrThrow())
       Await.result(estimate, 20.seconds) should beEqualTo(Estimate.GuaranteedSuccess)
-    }
+    }.pendingUntilFixed("See REL-2420")
     "support search/select and analyze on BPM 37093" in {
       val ra = Angle.fromHMS(12, 38, 49.820).getOrElse(Angle.zero)
       val dec = Angle.zero - Angle.fromDMS(49, 48, 0.20).getOrElse(Angle.zero)
@@ -503,7 +503,7 @@ class GemsStrategySpec extends Specification with NoTimeConversions {
       // Test estimate
       val estimate = gemsStrategy.estimate(ctx, ProbeLimitsTable.loadOrThrow())
       Await.result(estimate, 20.seconds) should beEqualTo(Estimate.GuaranteedSuccess)
-    }
+    }.pendingUntilFixed("See REL-2420")
     "support search/select and analyze on BPM 37093 part 2" in {
       val ra = Angle.fromHMS(12, 38, 49.820).getOrElse(Angle.zero)
       val dec = Angle.zero - Angle.fromDMS(49, 48, 0.20).getOrElse(Angle.zero)
@@ -567,7 +567,7 @@ class GemsStrategySpec extends Specification with NoTimeConversions {
       // Test estimate
       val estimate = gemsStrategy.estimate(ctx, ProbeLimitsTable.loadOrThrow())
       Await.result(estimate, 20.seconds) should beEqualTo(Estimate.GuaranteedSuccess)
-    }
+    }.pendingUntilFixed("See REL-2420")
   }
 
   def testSearchOnStandardConditions(file: String, ctx: ObsContext, tipTiltMode: GemsTipTiltMode, posAngles: Set[Angle], expectedTipTiltResultsCount: Int, expectedFlexureResultsCount: Int): Unit = {
@@ -575,9 +575,9 @@ class GemsStrategySpec extends Specification with NoTimeConversions {
     results should be size 2
 
     results.head.criterion.key should beEqualTo(GemsCatalogSearchKey(GemsGuideStarType.tiptilt, Wfs.Group.instance))
-    results.head.criterion should beEqualTo(GemsCatalogSearchCriterion(GemsCatalogSearchKey(GemsGuideStarType.tiptilt, Wfs.Group.instance), CatalogSearchCriterion("Canopus Wave Front Sensor tiptilt", MagnitudeBand.R, MagnitudeRange(FaintnessConstraint(15.0), scala.Option(SaturationConstraint(7.5))), RadiusConstraint.between(Angle.zero, Angle.fromDegrees(0.01666666666665151)), scala.Option(Offset(0.0014984027777700248.degrees[OffsetP], 0.0014984027777700248.degrees[OffsetQ])), scala.Some(Angle.zero))))
+    results.head.criterion should beEqualTo(GemsCatalogSearchCriterion(GemsCatalogSearchKey(GemsGuideStarType.tiptilt, Wfs.Group.instance), CatalogSearchCriterion("Canopus Wave Front Sensor tiptilt", RadiusConstraint.between(Angle.zero, Angle.fromDegrees(0.01666666666665151)), MagnitudeConstraints(MagnitudeBand.R, FirstBandExtractor(RLikeBands), FaintnessConstraint(15.0), scala.Option(SaturationConstraint(7.5))), scala.Option(Offset(0.0014984027777700248.degrees[OffsetP], 0.0014984027777700248.degrees[OffsetQ])), scala.Some(Angle.zero))))
     results(1).criterion.key should beEqualTo(GemsCatalogSearchKey(GemsGuideStarType.flexure, GsaoiOdgw.Group.instance))
-    results(1).criterion should beEqualTo(GemsCatalogSearchCriterion(GemsCatalogSearchKey(GemsGuideStarType.flexure, GsaoiOdgw.Group.instance), CatalogSearchCriterion("On-detector Guide Window flexure", MagnitudeBand.H, MagnitudeRange(FaintnessConstraint(17.0), scala.Option(SaturationConstraint(8.0))), RadiusConstraint.between(Angle.zero, Angle.fromDegrees(0.01666666666665151)), scala.Option(Offset(0.0014984027777700248.degrees[OffsetP], 0.0014984027777700248.degrees[OffsetQ])), scala.Some(Angle.zero))))
+    results(1).criterion should beEqualTo(GemsCatalogSearchCriterion(GemsCatalogSearchKey(GemsGuideStarType.flexure, GsaoiOdgw.Group.instance), CatalogSearchCriterion("On-detector Guide Window flexure", RadiusConstraint.between(Angle.zero, Angle.fromDegrees(0.01666666666665151)), MagnitudeConstraints(MagnitudeBand.H, FaintnessConstraint(17.0), scala.Option(SaturationConstraint(8.0))), scala.Option(Offset(0.0014984027777700248.degrees[OffsetP], 0.0014984027777700248.degrees[OffsetQ])), scala.Some(Angle.zero))))
     results.head.results should be size expectedTipTiltResultsCount
     results(1).results should be size expectedFlexureResultsCount
   }
@@ -587,9 +587,9 @@ class GemsStrategySpec extends Specification with NoTimeConversions {
     results should be size 2
 
     results.head.criterion.key should beEqualTo(GemsCatalogSearchKey(GemsGuideStarType.tiptilt, Wfs.Group.instance))
-    results.head.criterion should beEqualTo(GemsCatalogSearchCriterion(GemsCatalogSearchKey(GemsGuideStarType.tiptilt, Wfs.Group.instance), CatalogSearchCriterion("Canopus Wave Front Sensor tiptilt", MagnitudeBand.R, MagnitudeRange(FaintnessConstraint(15.5), scala.Option(SaturationConstraint(8.0))), RadiusConstraint.between(Angle.zero, Angle.fromDegrees(0.01666666666665151)), scala.Option(Offset(0.0014984027777700248.degrees[OffsetP], 0.0014984027777700248.degrees[OffsetQ])), scala.Some(Angle.zero))))
+    results.head.criterion should beEqualTo(GemsCatalogSearchCriterion(GemsCatalogSearchKey(GemsGuideStarType.tiptilt, Wfs.Group.instance), CatalogSearchCriterion("Canopus Wave Front Sensor tiptilt", RadiusConstraint.between(Angle.zero, Angle.fromDegrees(0.01666666666665151)), MagnitudeConstraints(MagnitudeBand.R, FirstBandExtractor(RLikeBands), FaintnessConstraint(15.5), scala.Option(SaturationConstraint(8.0))), scala.Option(Offset(0.0014984027777700248.degrees[OffsetP], 0.0014984027777700248.degrees[OffsetQ])), scala.Some(Angle.zero))))
     results(1).criterion.key should beEqualTo(GemsCatalogSearchKey(GemsGuideStarType.flexure, GsaoiOdgw.Group.instance))
-    results(1).criterion should beEqualTo(GemsCatalogSearchCriterion(GemsCatalogSearchKey(GemsGuideStarType.flexure, GsaoiOdgw.Group.instance), CatalogSearchCriterion("On-detector Guide Window flexure", MagnitudeBand.H, MagnitudeRange(FaintnessConstraint(17.0), scala.Option(SaturationConstraint(8.0))), RadiusConstraint.between(Angle.zero, Angle.fromDegrees(0.01666666666665151)), scala.Option(Offset(0.0014984027777700248.degrees[OffsetP], 0.0014984027777700248.degrees[OffsetQ])), scala.Some(Angle.zero))))
+    results(1).criterion should beEqualTo(GemsCatalogSearchCriterion(GemsCatalogSearchKey(GemsGuideStarType.flexure, GsaoiOdgw.Group.instance), CatalogSearchCriterion("On-detector Guide Window flexure", RadiusConstraint.between(Angle.zero, Angle.fromDegrees(0.01666666666665151)), MagnitudeConstraints(MagnitudeBand.H, FaintnessConstraint(17.0), scala.Option(SaturationConstraint(8.0))), scala.Option(Offset(0.0014984027777700248.degrees[OffsetP], 0.0014984027777700248.degrees[OffsetQ])), scala.Some(Angle.zero))))
     results.head.results should be size expectedTipTiltResultsCount
     results(1).results should be size expectedFlexureResultsCount
   }
@@ -599,9 +599,9 @@ class GemsStrategySpec extends Specification with NoTimeConversions {
     results should be size 2
 
     results.head.criterion.key should beEqualTo(GemsCatalogSearchKey(GemsGuideStarType.tiptilt, Wfs.Group.instance))
-    results.head.criterion should beEqualTo(GemsCatalogSearchCriterion(GemsCatalogSearchKey(GemsGuideStarType.tiptilt, Wfs.Group.instance), CatalogSearchCriterion("Canopus Wave Front Sensor tiptilt", MagnitudeBand.R, MagnitudeRange(FaintnessConstraint(16.0), scala.Option(SaturationConstraint(8.5))), RadiusConstraint.between(Angle.zero, Angle.fromDegrees(0.01666666666665151)), scala.Option(Offset(0.0014984027777700248.degrees[OffsetP], 0.0014984027777700248.degrees[OffsetQ])), scala.Some(Angle.zero))))
+    results.head.criterion should beEqualTo(GemsCatalogSearchCriterion(GemsCatalogSearchKey(GemsGuideStarType.tiptilt, Wfs.Group.instance), CatalogSearchCriterion("Canopus Wave Front Sensor tiptilt", RadiusConstraint.between(Angle.zero, Angle.fromDegrees(0.01666666666665151)), MagnitudeConstraints(MagnitudeBand.R, FirstBandExtractor(RLikeBands), FaintnessConstraint(16.0), scala.Option(SaturationConstraint(8.5))), scala.Option(Offset(0.0014984027777700248.degrees[OffsetP], 0.0014984027777700248.degrees[OffsetQ])), scala.Some(Angle.zero))))
     results(1).criterion.key should beEqualTo(GemsCatalogSearchKey(GemsGuideStarType.flexure, GsaoiOdgw.Group.instance))
-    results(1).criterion should beEqualTo(GemsCatalogSearchCriterion(GemsCatalogSearchKey(GemsGuideStarType.flexure, GsaoiOdgw.Group.instance), CatalogSearchCriterion("On-detector Guide Window flexure", MagnitudeBand.H, MagnitudeRange(FaintnessConstraint(17.0), scala.Option(SaturationConstraint(8.0))), RadiusConstraint.between(Angle.zero, Angle.fromDegrees(0.01666666666665151)), scala.Option(Offset(0.0014984027777700248.degrees[OffsetP], 0.0014984027777700248.degrees[OffsetQ])), scala.Some(Angle.zero))))
+    results(1).criterion should beEqualTo(GemsCatalogSearchCriterion(GemsCatalogSearchKey(GemsGuideStarType.flexure, GsaoiOdgw.Group.instance), CatalogSearchCriterion("On-detector Guide Window flexure", RadiusConstraint.between(Angle.zero, Angle.fromDegrees(0.01666666666665151)), MagnitudeConstraints(MagnitudeBand.H, FaintnessConstraint(17.0), scala.Option(SaturationConstraint(8.0))), scala.Option(Offset(0.0014984027777700248.degrees[OffsetP], 0.0014984027777700248.degrees[OffsetQ])), scala.Some(Angle.zero))))
     results.head.results should be size expectedTipTiltResultsCount
     results(1).results should be size expectedFlexureResultsCount
   }

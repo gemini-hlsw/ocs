@@ -2,7 +2,7 @@ package edu.gemini.ags.impl
 
 import edu.gemini.ags.api.{AgsAnalysis, AgsMagnitude, AgsStrategy}
 import edu.gemini.ags.api.AgsStrategy.{Assignment, Estimate, Selection}
-import edu.gemini.ags.api.{defaultProbeBands, magnitudeExtractor}
+import edu.gemini.ags.api._
 import edu.gemini.ags.gems._
 import edu.gemini.ags.gems.mascot.Strehl
 import edu.gemini.catalog.api._
@@ -24,7 +24,7 @@ import scala.collection.JavaConverters._
 import scala.concurrent._
 import edu.gemini.ags.api.AgsMagnitude.{MagnitudeCalc, MagnitudeTable}
 import edu.gemini.spModel.guide.{ValidatableGuideProbe, GuideProbeGroup, GuideProbe}
-import edu.gemini.spModel.core.{Magnitude, Angle, MagnitudeBand}
+import edu.gemini.spModel.core.{Angle, MagnitudeBand}
 
 import scalaz._
 import Scalaz._
@@ -90,8 +90,8 @@ trait GemsStrategy extends AgsStrategy {
         val query = result.query
         val radiusConstraint = query.radiusConstraint
         val band = result.referenceBand
-        val mr = query.magnitudeRange
-        val catalogSearchCriterion = CatalogSearchCriterion("ags", band, mr, radiusConstraint, None, angle.some)
+        val mr = query.magnitudeConstraints
+        val catalogSearchCriterion = CatalogSearchCriterion("ags", radiusConstraint, mr, None, angle.some)
         val gemsCatalogSearchCriterion = new GemsCatalogSearchCriterion(result.searchKey, catalogSearchCriterion)
         new GemsCatalogSearchResults(gemsCatalogSearchCriterion, result.catalogResult.targets.rows)
       }
@@ -218,21 +218,17 @@ trait GemsStrategy extends AgsStrategy {
     val cond = ctx.getConditions
     val mags = magnitudes(ctx, mt).toMap
 
-    // Adjust the magnitude limits for the conditions.
-    def rangeAdjustmentForConditions(mr: MagnitudeRange, mag: Magnitude) =
-      mr.adjust(k => ctx.getConditions.magAdjustOp().apply(mag.copy(value = k).toOldModel).toNewModel.value)
-
-    def lim(gp: GuideProbe): Option[MagnitudeRange] = autoSearchLimitsCalc(mags(gp), cond).some
+    def lim(gp: GuideProbe): Option[MagnitudeConstraints] = autoSearchLimitsCalc(mags(gp), cond)
 
     val odgwMagLimits = (lim(GsaoiOdgw.odgw1) /: GsaoiOdgw.values().drop(1)) { (ml, odgw) =>
-      (ml |@| lim(odgw))(_ union _)
+      (ml |@| lim(odgw))(_ union _).flatten
     }
     val canMagLimits = (lim(Canopus.Wfs.cwfs1) /: Canopus.Wfs.values().drop(1)) { (ml, can) =>
-      (ml |@| lim(can))(_ union _)
+      (ml |@| lim(can))(_ union _).flatten
     }
 
-    val canopusConstraint = canMagLimits.map(c => CatalogQuery.catalogQueryForGems(CanopusTipTiltId, ctx.getBaseCoordinates.toNewModel, RadiusConstraint.between(Angle.zero, Canopus.Wfs.Group.instance.getRadiusLimits.toNewModel), magnitudeExtractor(probeBands(Canopus.Wfs.cwfs1)), c, rangeAdjustmentForConditions))
-    val odgwConstraint     = odgwMagLimits.map(c => CatalogQuery.catalogQueryForGems(OdgwFlexureId,    ctx.getBaseCoordinates.toNewModel, RadiusConstraint.between(Angle.zero, GsaoiOdgw.Group.instance.getRadiusLimits.toNewModel), magnitudeExtractor(probeBands(GsaoiOdgw.odgw1)), c, rangeAdjustmentForConditions))
+    val canopusConstraint = canMagLimits.map(c => CatalogQuery.catalogQuery(CanopusTipTiltId, ctx.getBaseCoordinates.toNewModel, RadiusConstraint.between(Angle.zero, Canopus.Wfs.Group.instance.getRadiusLimits.toNewModel), ctx.getConditions.adjust(c), ucac4))
+    val odgwConstraint     = odgwMagLimits.map(c => CatalogQuery.catalogQuery(OdgwFlexureId,    ctx.getBaseCoordinates.toNewModel, RadiusConstraint.between(Angle.zero, GsaoiOdgw.Group.instance.getRadiusLimits.toNewModel), ctx.getConditions.adjust(c), ucac4))
     List(canopusConstraint, odgwConstraint).flatten
   }
 

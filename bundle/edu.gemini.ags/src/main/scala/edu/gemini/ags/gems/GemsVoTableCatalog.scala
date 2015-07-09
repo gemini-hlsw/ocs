@@ -1,14 +1,12 @@
 package edu.gemini.ags.gems
 
 import edu.gemini.catalog.api._
-import edu.gemini.ags.api.{magnitudeExtractor, defaultProbeBands}
 import edu.gemini.catalog.votable._
 import edu.gemini.spModel.core.Target.SiderealTarget
-import edu.gemini.spModel.core.{Angle, Magnitude, MagnitudeBand, Coordinates}
+import edu.gemini.spModel.core.{Angle, MagnitudeBand, Coordinates}
 import edu.gemini.spModel.gemini.gems.GemsInstrument
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.Conditions
 import edu.gemini.spModel.obs.context.ObsContext
-import edu.gemini.pot.ModelConverters._
 
 import scala.concurrent.{Await, Future}
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -71,11 +69,9 @@ case class GemsVoTableCatalog(backend: VoTableBackend = RemoteBackend, catalog: 
   }
 
   private def searchCatalog(basePosition: Coordinates, criterions: List[GemsCatalogSearchCriterion], statusLogger: StatusLogger): Future[List[GemsCatalogSearchResults]] = {
-    // TODO This should be linked to the correct band for flamingos2
-    def extractor(t: SiderealTarget) = t.magnitudeIn(MagnitudeBand.H)
     val queryArgs = for {
       c <- criterions
-      q = CatalogQuery.catalogQueryWithDynamicBand(basePosition, c.criterion.radiusLimits, extractor, c.criterion.magRange, catalog)
+      q = CatalogQuery.catalogQuery(basePosition, c.criterion.radiusLimits, c.criterion.magRange, catalog)
     } yield (q, c)
 
     val qm = queryArgs.toMap
@@ -99,27 +95,17 @@ case class GemsVoTableCatalog(backend: VoTableBackend = RemoteBackend, catalog: 
     val radiusLimitsList = getRadiusLimits(inst, criterions)
     val magLimitsList = optimizeMagnitudeRanges(criterions)
 
-    // Adjust for conditions
-    def rangeAdjustmentForConditions(mr: MagnitudeRange, mag: Magnitude) =
-      // TODO Check possible bug, it should use the param m to process the adjustment
-      mr.adjust(m => conditions.magAdjustOp().apply(mag.toOldModel).toNewModel.value)
-
     val queries = for {
       radiusLimits <- radiusLimitsList
       magLimits    <- magLimitsList
-    } yield {
-        val band = magLimits._1
-        (CatalogQuery.catalogQueryWithAdjustedRange(basePosition, radiusLimits, magnitudeExtractor(defaultProbeBands(band)), magLimits._2, rangeAdjustmentForConditions, catalog), magLimits)
-      }
+    } yield CatalogQuery.catalogQuery(basePosition, radiusLimits, magLimits, catalog)
 
-    VoTableClient.catalogs(queries.map(_._1), backend).flatMap {
+    VoTableClient.catalogs(queries, backend).flatMap {
       case l if l.exists(_.result.containsError) =>
         Future.failed(CatalogException(l.map(_.result.problems).suml))
       case l =>
         Future.successful {
-          val targets = l.map { k =>
-              k.result.targets.rows
-            }.suml
+          val targets = l.foldMap { _.result.targets.rows }
           assignToCriterion(basePosition, criterions, targets)
         }
     }
@@ -172,8 +158,18 @@ case class GemsVoTableCatalog(backend: VoTableBackend = RemoteBackend, catalog: 
   }
 
   // Sets the min/max magnitude limits in the given query arguments
-  protected [gems] def optimizeMagnitudeRanges(criterions: List[GemsCatalogSearchCriterion]): List[(MagnitudeBand, MagnitudeRange)] = {
-    val magConstraints = for {
+  protected [gems] def optimizeMagnitudeRanges(criterions: List[GemsCatalogSearchCriterion]): List[MagnitudeConstraints] = {
+    val constraintsPerBand = criterions.map(_.criterion.magRange).groupBy(_.referenceBand).toList
+    println(criterions.map(_.criterion.magRange))
+    // Get max/min limits per band
+    constraintsPerBand.flatMap {
+      case (_, lims) =>
+        lims.tail.foldLeft(lims.headOption) { (a, b) =>
+          a >>= (_ union b)
+        }
+    }
+
+    /*val magConstraints = for {
         criteria <- criterions
         mc       =  criteria.criterion.magRange
       } yield (mc, criteria.criterion.referenceBand)
@@ -196,6 +192,6 @@ case class GemsVoTableCatalog(backend: VoTableBackend = RemoteBackend, catalog: 
 
     (for {
       b <- faintnessMap
-    } yield (b._1, MagnitudeRange(b._2, saturationMap.get(b._1)))).toList
+    } yield (b._1, MagnitudeRange(b._2, saturationMap.get(b._1)))).toList*/
   }
 }

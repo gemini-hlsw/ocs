@@ -6,7 +6,7 @@ import edu.gemini.spModel.core.Target.SiderealTarget
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.target.SPTarget
 import edu.gemini.ags.api.AgsMagnitude
-import edu.gemini.catalog.api.MagnitudeRange
+import edu.gemini.catalog.api.MagnitudeConstraints
 import edu.gemini.pot.ModelConverters._
 import edu.gemini.spModel.target.system.HmsDegTarget
 
@@ -24,7 +24,7 @@ protected case class CandidateValidator(params: SingleProbeStrategyParams, mt: M
    * established context.
    */
   private def isValid(ctx: ObsContext): (SiderealTarget) => Boolean = {
-    val magLimits:Option[MagnitudeRange] = params.magnitudeCalc(ctx, mt).map(AgsMagnitude.autoSearchLimitsCalc(_, ctx.getConditions))
+    val magLimits:Option[MagnitudeConstraints] = params.magnitudeCalc(ctx, mt).flatMap(AgsMagnitude.autoSearchLimitsCalc(_, ctx.getConditions))
 
     (st: SiderealTarget) => {
       // Do not use any candidates that are too close to science target / base
@@ -37,7 +37,7 @@ protected case class CandidateValidator(params: SingleProbeStrategyParams, mt: M
         }
 
       // Only keep candidates that fall within the magnitude limits.
-      def brightnessOk = (magLimits |@| params.referenceMagnitude(st))(_ contains _.value) | false
+      def brightnessOk = (magLimits |@| params.referenceMagnitude(st))(_ contains _) | false
 
       // Only keep those that are in range of the guide probe.
       def inProbeRange = params.validator(ctx).validate(new SPTarget(HmsDegTarget.fromSkyObject(st.toOldModel)), ctx)

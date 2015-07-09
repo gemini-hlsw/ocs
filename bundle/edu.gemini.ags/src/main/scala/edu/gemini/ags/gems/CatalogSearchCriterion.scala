@@ -1,6 +1,6 @@
 package edu.gemini.ags.gems
 
-import edu.gemini.catalog.api.{MagnitudeRange, RadiusConstraint}
+import edu.gemini.catalog.api.{MagnitudeConstraints, RadiusConstraint}
 import edu.gemini.pot.ModelConverters._
 import edu.gemini.spModel.core.Target.SiderealTarget
 import edu.gemini.spModel.core._
@@ -16,7 +16,7 @@ import Scalaz._
  * Used to query catalogs and filter and categorize query results.
  * See OT-20
  */
-case class CatalogSearchCriterion(name: String, referenceBand: MagnitudeBand, magRange: MagnitudeRange, radiusLimits: RadiusConstraint, offset: Option[Offset] = None, posAngle: Option[Angle] = None) {
+case class CatalogSearchCriterion(name: String, radiusLimits: RadiusConstraint, magRange: MagnitudeConstraints, offset: Option[Offset] = None, posAngle: Option[Angle] = None) {
 
   /**
    * If offset and pos angle are specified, then we want the coordinates of the
@@ -80,7 +80,7 @@ case class CatalogSearchCriterion(name: String, referenceBand: MagnitudeBand, ma
     private def matches(magList: List[Magnitude]): Boolean =
       magList.exists(matches)
 
-    private def matches(mag: Magnitude): Boolean = magRange.contains(mag.value)
+    private def matches(mag: Magnitude): Boolean = magRange.contains(mag)
   }
 
   /**

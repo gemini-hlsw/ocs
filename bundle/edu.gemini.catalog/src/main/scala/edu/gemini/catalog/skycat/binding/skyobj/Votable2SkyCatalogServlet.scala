@@ -49,8 +49,6 @@ class Votable2SkyCatalogServlet extends HttpServlet {
     } yield (b0, v0)
   }
 
-  def magnitudeExtractor(bands: List[MagnitudeBand]) = (st: SiderealTarget) => bands.flatMap(st.magnitudeIn).headOption
-
   def candidateBands(band: MagnitudeBand): List[MagnitudeBand] = band match {
       case MagnitudeBand.R => List(MagnitudeBand._r, MagnitudeBand.R, MagnitudeBand.UC)
       case _               => List(band)
@@ -95,11 +93,11 @@ class Votable2SkyCatalogServlet extends HttpServlet {
         val referenceBand = lowMagLimit.map(x => x.map(_._1)) >>= (_.toOption)
 
         // Build magnitude range
-        val mr = (lowMagLimit |@| highMagLimit){(l, h) =>
+        val mr = (lowMagLimit |@| highMagLimit |@| referenceBand){(l, h, b) =>
           for {
             l0 <- l
             h0 <- h
-          } yield MagnitudeRange(FaintnessConstraint(h0._2), SaturationConstraint(l0._2).some)
+          } yield MagnitudeConstraints(b, FirstBandExtractor(candidateBands(b)), FaintnessConstraint(h0._2), SaturationConstraint(l0._2).some)
         }
 
         // Secondary filters, ignore unparsable parameters
@@ -108,15 +106,15 @@ class Votable2SkyCatalogServlet extends HttpServlet {
                 u0 <- u.parseDouble.disjunction
                 l0 <- l.parseDouble.disjunction
                 b0 <- \/.fromTryCatch(Band.valueOf(b)).map(_.toNewModel)
-              } yield MagnitudeConstraints(b0, FaintnessConstraint(u0), SaturationConstraint(l0).some)
+              } yield MagnitudeConstraints(b0, FirstBandExtractor(candidateBands(b0)), FaintnessConstraint(u0), SaturationConstraint(l0).some)
           }.collect {
             case \/-(mc) => mc
           }
 
-        val query: CatalogQuery = (referenceBand |@| (mr >>= (_.toOption))){ (b, range) =>
-            CatalogQuery.catalogQueryWithDynamicBand(coordinates, rc, magnitudeExtractor(candidateBands(b)), range)
+        val query: CatalogQuery = (mr >>= (_.toOption)).map { const =>
+            CatalogQuery.catalogQuery(coordinates, rc, const, ucac4)
           }.getOrElse {
-            CatalogQuery.catalogQuery(coordinates, rc)
+            CatalogQuery.catalogQuery(coordinates, rc, ucac4)
           }
 
         // Execute query

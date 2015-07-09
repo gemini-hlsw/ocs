@@ -403,7 +403,7 @@ object GemsResultsAnalyzer {
   // Returns true if the target magnitude is within the given limits
   def containsMagnitudeInLimits(target: SiderealTarget, magLimits: MagnitudeConstraints): Boolean =
     // The true default is suspicious but changing it to false breaks backwards compatibility
-    target.magnitudeIn(magLimits.band).map(m => magLimits.contains(m)).getOrElse(true)
+    target.magnitudeIn(magLimits.referenceBand).map(m => magLimits.contains(m)).getOrElse(true)
 
   def toSPTarget(siderealTarget: SiderealTarget):SPTarget = new SPTarget(HmsDegTarget.fromSkyObject(siderealTarget.toOldModel))
 

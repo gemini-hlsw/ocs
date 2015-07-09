@@ -18,6 +18,8 @@ sealed abstract class MagnitudeBand private (val name: String, val center: Wavel
 }
 
 object MagnitudeBand {
+  // Nicer access to R-Band for Java Clients
+  def rBand = R
 
   // OCSADV-203
   // Class files clobber one another on OS X so names can't differ only in case.

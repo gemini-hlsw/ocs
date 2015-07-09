@@ -1,7 +1,9 @@
 package edu.gemini.catalog.api
 
+import edu.gemini.catalog.api.MagnitudeLimits.{SaturationLimit, FaintnessLimit}
 import edu.gemini.spModel.core.Target.SiderealTarget
 import edu.gemini.spModel.core.{MagnitudeBand, Magnitude}
+import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.Conditions
 
 import scalaz._
 import Scalaz._
@@ -45,36 +47,72 @@ object SaturationConstraint {
     Order.orderBy(_.brightness)
 }
 
+sealed trait MagnitudeFilter {
+  def filter(t: SiderealTarget): Boolean
+
+  def referenceBand: MagnitudeBand
+  def faintnessConstraint: FaintnessConstraint
+  def saturationConstraint: Option[SaturationConstraint]
+}
+
+/**
+ * Defines a typeclass of classes that can adjust MagnitudeConstraints, e.g. given certain conditions
+ */
+trait ConstraintsAdjuster[T] {
+  def adjust(t: T, mc: MagnitudeConstraints): MagnitudeConstraints
+}
+
+/**
+ * Defines a class that can extract a magnitude from a target
+ */
+sealed trait MagnitudeExtractor2 {
+  def extract(t: SiderealTarget):Option[Magnitude]
+  def bandSupported(b: MagnitudeBand):Boolean
+}
+
+/**
+ * Search for a specific band on the target
+ */
+case class SingleBandExtractor(band: MagnitudeBand) extends MagnitudeExtractor2 {
+  override def extract(t: SiderealTarget) = t.magnitudeIn(band)
+  override def bandSupported(b: MagnitudeBand) = b === band
+}
+
+/**
+ * Finds the first on a list of bands
+ */
+case class FirstBandExtractor(bands: List[MagnitudeBand]) extends MagnitudeExtractor2 {
+  override def extract(t: SiderealTarget) = bands.map(t.magnitudeIn).find(_.isDefined).flatten
+  override def bandSupported(b: MagnitudeBand) = bands.contains(b)
+}
+
 /**
  * Describes constraints for the magnitude of a target
- * See OT-19.
  */
-case class MagnitudeConstraints(band: MagnitudeBand, faintnessConstraint: FaintnessConstraint, saturationConstraint: Option[SaturationConstraint]) {
-
-  def this(faint:Magnitude) = this(faint.band, FaintnessConstraint(faint.value), None)
+case class MagnitudeConstraints(referenceBand: MagnitudeBand, extractor: MagnitudeExtractor2, faintnessConstraint: FaintnessConstraint, saturationConstraint: Option[SaturationConstraint]) extends MagnitudeFilter {
 
   /**
    * Maps a transformation into a new MagnitudeConstraints
    */
-  def map(f: Magnitude => Magnitude): MagnitudeConstraints = {
-    val mappedFaintness = f(faintnessConstraint.toMagnitude(band)) 
-    val mappedSaturation = saturationConstraint.map(_.toMagnitude(band)).map(f)
+  /*def map(f: Magnitude => Magnitude): MagnitudeConstraints = {
+    v al mappedFaintness = f(faintnessConstraint.toMagnitude(referenceBand))
+    val mappedSaturation = saturationConstraint.map(_.toMagnitude(referenceBand)).map(f)
 
     val fl = FaintnessConstraint(mappedFaintness.value)
     val sl = mappedSaturation.map(s => SaturationConstraint(s.value))
 
-    MagnitudeConstraints(mappedFaintness.band, fl, sl)
-  }
+    MagnitudeConstraints(mappedFaintness.band, extractor, fl, sl)
+  }*/
 
-  def filter: SiderealTarget => Boolean = t => t.magnitudeIn(band).exists(contains)
+  override def filter(t: SiderealTarget): Boolean = extractor.extract(t).exists(contains)
 
   /**
    * Determines whether the magnitude limits include the given magnitude
    * value.
    */
-  def contains(m: Magnitude) = m.band === band && faintnessConstraint.contains(m.value) && saturationConstraint.forall(_.contains(m.value))
+  def contains(m: Magnitude) = extractor.bandSupported(m.band) && faintnessConstraint.contains(m.value) && saturationConstraint.forall(_.contains(m.value))
 
-  def contains(v: Double) = faintnessConstraint.contains(v) && saturationConstraint.forall(_.contains(v))
+  //private def contains(v: Double) = faintnessConstraint.contains(v) && saturationConstraint.forall(_.contains(v))
 
   /**
    * Returns a combination of two MagnitudeConstraints(this and that) such that
@@ -83,28 +121,46 @@ case class MagnitudeConstraints(band: MagnitudeBand, faintnessConstraint: Faintn
    * of magnitude bands.
    */
   def union(that: MagnitudeConstraints): Option[MagnitudeConstraints] =
-    (band == that.band) option {
+    (referenceBand === that.referenceBand && extractor == extractor) option {
       val faintness = faintnessConstraint.max(that.faintnessConstraint)
 
       // Calculate the min saturation limit if both are defined
       val saturation = (saturationConstraint |@| that.saturationConstraint)(_ min _)
 
-      MagnitudeConstraints(band, faintness, saturation)
+      MagnitudeConstraints(referenceBand, extractor, faintness, saturation)
     }
+
+  def adjust(f: Double => Double): MagnitudeConstraints = {
+    val fl = f(faintnessConstraint.brightness)
+    val sl = saturationConstraint.map(_.brightness).map(f)
+    MagnitudeConstraints(referenceBand, extractor, FaintnessConstraint(fl), sl.map(SaturationConstraint.apply))
+  }
 }
 
 object MagnitudeConstraints {
-  def empty(band: MagnitudeBand): MagnitudeConstraints =
-    MagnitudeConstraints(band, FaintnessConstraint(0.0), SaturationConstraint(0.0).some)
+  val instance = this
 
-  def empty(): MagnitudeConstraints =
-    MagnitudeConstraints(MagnitudeBand.R, FaintnessConstraint(0.0), SaturationConstraint(0.0).some)
+  /**
+   * Constructor using a direct reference to the magnitude's band
+   *
+   * @param referenceBand MagnitudeBand to filter on
+   * @param faintnessConstraint Limit on how faint a target can be
+   * @param saturationConstraint Limit on how bright a target can be
+   */
+  def apply(referenceBand: MagnitudeBand, faintnessConstraint: FaintnessConstraint, saturationConstraint: Option[SaturationConstraint]):MagnitudeConstraints = MagnitudeConstraints(referenceBand, SingleBandExtractor(referenceBand), faintnessConstraint, saturationConstraint)
 
+  @Deprecated
+  def conditionsAdjustmentForJava(limits: MagnitudeLimits, conditions: Conditions): MagnitudeLimits = {
+    import edu.gemini.pot.ModelConverters._
+    import edu.gemini.shared.util.immutable.ScalaConverters._
+
+    val mc = conditions.adjust(MagnitudeConstraints(limits.getBand.toNewModel, FaintnessConstraint(limits.getFaintnessLimit.getBrightness), limits.getSaturationLimit.asScalaOpt.map(s => SaturationConstraint(s.getBrightness))))
+    new MagnitudeLimits(limits.getBand, new FaintnessLimit(mc.faintnessConstraint.brightness), mc.saturationConstraint.map(s => new SaturationLimit(s.brightness)).asGeminiOpt)
+  }
 }
+/*case class MagnitudeRange(referenceBand: MagnitudeBand, extractor: MagnitudeExtractor, faintnessConstraint: FaintnessConstraint, saturationConstraint: Option[SaturationConstraint]) extends MagnitudeFilter {
 
-case class MagnitudeRange(faintnessConstraint: FaintnessConstraint, saturationConstraint: Option[SaturationConstraint]) {
-
-  def filter: (SiderealTarget, Magnitude) => Boolean = (t, m) => t.magnitudeIn(m.band).forall(m => contains(m.value))
+  override def filter(t: SiderealTarget): Boolean = extractor(t).forall(m => contains(m.value))
 
   /**
    * Determines whether the magnitude value is in the given range
@@ -123,13 +179,13 @@ case class MagnitudeRange(faintnessConstraint: FaintnessConstraint, saturationCo
     // Calculate the min saturation limit if both are defined
     val saturation = (saturationConstraint |@| that.saturationConstraint)(_ min _)
 
-    MagnitudeRange(faintness, saturation)
+    MagnitudeRange(referenceBand, extractor, faintness, saturation)
   }
 
   def adjust(f: Double => Double): MagnitudeRange = {
     val fl = f(faintnessConstraint.brightness)
     val sl = saturationConstraint.map(_.brightness).map(f)
-    MagnitudeRange(FaintnessConstraint(fl), sl.map(SaturationConstraint.apply))
+    MagnitudeRange(referenceBand, extractor, FaintnessConstraint(fl), sl.map(SaturationConstraint.apply))
   }
 
-}
+}*/

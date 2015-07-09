@@ -448,7 +448,7 @@ case class AgsTest(ctx: ObsContext, guideProbe: GuideProbe, usable: List[(Sidere
                 assertEquals(guideProbe, actProbe)
                 assertEqualTarget(expStar, actStar)
                 strategy.params.referenceMagnitude(actStar).foreach { mag =>
-                  val actSpeed = AgsMagnitude.fastestGuideSpeed(mc, mag.value, ctx.getConditions)
+                  val actSpeed = AgsMagnitude.fastestGuideSpeed(mc, mag, ctx.getConditions)
                   assertTrue(s"Expected: $expSpeed , actual: $actSpeed", actSpeed.exists(_ == expSpeed))
                 }
               case Nil => fail(s"Expected: ($expStar, $expSpeed), but nothing selected")

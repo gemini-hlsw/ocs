@@ -206,7 +206,7 @@ object AgsAnalysis {
       mc  <- mt(ctx, guideProbe)
       mag = usableMagnitude
     } yield {
-      val analysisOpt = mag.map(m => fastestGuideSpeed(mc, m.value, conds).fold(outsideLimits(mc, m.value))(usable))
+      val analysisOpt = mag.map(m => fastestGuideSpeed(mc, m, conds).fold(outsideLimits(mc, m.value))(usable))
       analysisOpt.getOrElse(NoMagnitudeForBand(guideProbe, guideStar, bands))
     }
   }
