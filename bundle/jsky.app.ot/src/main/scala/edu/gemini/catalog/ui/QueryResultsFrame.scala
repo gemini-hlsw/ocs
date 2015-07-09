@@ -86,8 +86,8 @@ object QueryResultsWindow {
       override def displayValue(t: Magnitude): String = f"${t.value}%.2f"
     }
 
-    val baseColumnNames: List[TableColumn[_]] = List(IdColumn("Id"), RAColumn("RA"), DECColumn("DE"))
-    val pmColumns: List[TableColumn[_]] = List(PMRAColumn("pmRA"), PMDecColumn("pmDEC"))
+    val baseColumnNames: List[TableColumn[_]] = List(IdColumn("Id"), RAColumn("RA"), DECColumn("Dec"))
+    val pmColumns: List[TableColumn[_]] = List(PMRAColumn("pmRA"), PMDecColumn("pmDec"))
     val magColumns = MagnitudeBand.all.map(MagnitudeColumn)
 
     case class TargetsModel(targets: List[SiderealTarget]) extends AbstractTableModel {
@@ -170,7 +170,7 @@ object QueryResultsWindow {
       }
 
       contents = new MigPanel(LC().fill().insets(0).debug(0)) {
-        add(new MigPanel(LC().fill().insets(5.px).debug(200)) {
+        add(new MigPanel(LC().fill().insets(5.px).debug(0)) {
           add(new Label("Query Parameters"), CC().dockNorth())
           add(new Label("RA"), CC().cell(0, 0))
           add(ra, CC().cell(1, 0).spanX(3))
@@ -188,12 +188,12 @@ object QueryResultsWindow {
         }, CC().spanY(2).alignY(TopAlign))
 
         // Results Table
-        add(resultsLabel, CC().growX().wrap())
+        add(resultsLabel, CC().wrap())
         // Results Table
         add(new ScrollPane() {
           contents = table
           // Show horizontal scroll bar
-          horizontalScrollBarPolicy = ScrollPane.BarPolicy.AsNeeded
+          horizontalScrollBarPolicy = ScrollPane.BarPolicy.Always
         }, CC().grow().pushY().pushX())
         // Command buttons at the bottom
         add(new MigPanel(LC().fillX().insets(10.px)) {
