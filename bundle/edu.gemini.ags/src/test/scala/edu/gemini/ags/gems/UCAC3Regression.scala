@@ -2,7 +2,7 @@ package edu.gemini.ags.gems
 
 import edu.gemini.ags.gems.mascot.Star
 import edu.gemini.pot.ModelConverters._
-import edu.gemini.shared.util.immutable.{Some => JSome}
+import edu.gemini.shared.util.immutable.{Some => JSome, None => JNone }
 import edu.gemini.spModel.core.AlmostEqual._
 import edu.gemini.spModel.core.Target.SiderealTarget
 import edu.gemini.spModel.core.{Angle, MagnitudeBand, Site}
@@ -39,7 +39,7 @@ trait UCAC3Regression {
     val env = TargetEnvironment.create(baseTarget)
     val offsets = new java.util.HashSet[edu.gemini.skycalc.Offset]
 
-    val obsContext = ObsContext.create(env, new Gsaoi, new JSome(Site.GS), conditions, offsets, new Gems).withPositionAngle(Angle.zero.toOldModel)
+    val obsContext = ObsContext.create(env, new Gsaoi, new JSome(Site.GS), conditions, offsets, new Gems, JNone.instance()).withPositionAngle(Angle.zero.toOldModel)
     val gemsResults = GemsResultsAnalyzer.analyze(obsContext, posAngles.asJava, results.asJava, None)
     areGuideStarListsEqual(expectedGuideStars, gemsResults.asScala.toList)
   }

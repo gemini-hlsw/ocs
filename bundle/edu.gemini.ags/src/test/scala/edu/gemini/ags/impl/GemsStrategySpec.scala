@@ -6,7 +6,7 @@ import edu.gemini.ags.conf.ProbeLimitsTable
 import edu.gemini.ags.gems._
 import edu.gemini.catalog.api._
 import edu.gemini.catalog.votable.TestVoTableBackend
-import edu.gemini.shared.util.immutable.{Some => JSome}
+import edu.gemini.shared.util.immutable.{Some => JSome, None => JNone }
 import edu.gemini.spModel.core._
 import edu.gemini.spModel.core.AngleSyntax._
 import edu.gemini.pot.ModelConverters._
@@ -55,7 +55,7 @@ class GemsStrategySpec extends Specification with NoTimeConversions {
       val pwfs1 = List(PwfsGuideProbe.pwfs1)
       val guiders:List[GuideProbe] = gsaoi ::: canopus ::: pwfs1
 
-      val ctx = ObsContext.create(env, inst, new JSome(Site.GS), SPSiteQuality.Conditions.BEST, null, new Gems)
+      val ctx = ObsContext.create(env, inst, new JSome(Site.GS), SPSiteQuality.Conditions.BEST, null, new Gems, JNone.instance())
 
       val estimate = TestGemsStrategy("/gemsstrategyquery.xml").estimate(ctx, ProbeLimitsTable.loadOrThrow())
       Await.result(estimate, 20.seconds) should beEqualTo(Estimate.GuaranteedSuccess)
@@ -67,7 +67,7 @@ class GemsStrategySpec extends Specification with NoTimeConversions {
       val env = TargetEnvironment.create(target)
       val inst = new Gsaoi <| {_.setPosAngle(0.0)} <| {_.setIssPort(IssPort.UP_LOOKING)}
       val conditions = SPSiteQuality.Conditions.NOMINAL.sb(SPSiteQuality.SkyBackground.ANY)
-      val ctx = ObsContext.create(env, inst, new JSome(Site.GS), conditions , null, new Gems)
+      val ctx = ObsContext.create(env, inst, new JSome(Site.GS), conditions , null, new Gems, JNone.instance())
       val tipTiltMode = GemsTipTiltMode.instrument
 
       val posAngles = Set.empty[Angle]
@@ -87,7 +87,7 @@ class GemsStrategySpec extends Specification with NoTimeConversions {
       val env = TargetEnvironment.create(target)
       val inst = new Gsaoi <| {_.setPosAngle(0.0)} <| {_.setIssPort(IssPort.UP_LOOKING)}
       val conditions = SPSiteQuality.Conditions.NOMINAL
-      val ctx = ObsContext.create(env, inst, new JSome(Site.GS), conditions, null, new Gems)
+      val ctx = ObsContext.create(env, inst, new JSome(Site.GS), conditions, null, new Gems, JNone.instance())
       val tipTiltMode = GemsTipTiltMode.canopus
 
       val posAngles = Set(ctx.getPositionAngle.toNewModel, Angle.zero, Angle.fromDegrees(90), Angle.fromDegrees(180), Angle.fromDegrees(270))
@@ -151,7 +151,7 @@ class GemsStrategySpec extends Specification with NoTimeConversions {
       val env = TargetEnvironment.create(target)
       val inst = new Gsaoi <| {_.setPosAngle(0.0)} <| {_.setIssPort(IssPort.UP_LOOKING)}
       val conditions = SPSiteQuality.Conditions.NOMINAL.sb(SPSiteQuality.SkyBackground.ANY)
-      val ctx = ObsContext.create(env, inst, new JSome(Site.GS), conditions, null, new Gems)
+      val ctx = ObsContext.create(env, inst, new JSome(Site.GS), conditions, null, new Gems, JNone.instance())
       val tipTiltMode = GemsTipTiltMode.canopus
 
       val posAngles = Set(ctx.getPositionAngle.toNewModel, Angle.zero, Angle.fromDegrees(90), Angle.fromDegrees(180), Angle.fromDegrees(270))
@@ -230,7 +230,7 @@ class GemsStrategySpec extends Specification with NoTimeConversions {
       val env = TargetEnvironment.create(target)
       val inst = new Gsaoi <| {_.setPosAngle(0.0)} <| {_.setIssPort(IssPort.UP_LOOKING)}
       val conditions = SPSiteQuality.Conditions.BEST.cc(SPSiteQuality.CloudCover.PERCENT_50)
-      val ctx = ObsContext.create(env, inst, new JSome(Site.GS), conditions, null, new Gems)
+      val ctx = ObsContext.create(env, inst, new JSome(Site.GS), conditions, null, new Gems, JNone.instance())
       val tipTiltMode = GemsTipTiltMode.canopus
 
       val posAngles = Set(ctx.getPositionAngle.toNewModel, Angle.zero, Angle.fromDegrees(90), Angle.fromDegrees(180), Angle.fromDegrees(270))
@@ -295,7 +295,7 @@ class GemsStrategySpec extends Specification with NoTimeConversions {
       val env = TargetEnvironment.create(target)
       val inst = new Gsaoi <| {_.setPosAngle(0.0)} <| {_.setIssPort(IssPort.UP_LOOKING)}
       val conditions = SPSiteQuality.Conditions.NOMINAL.sb(SPSiteQuality.SkyBackground.ANY).wv(SPSiteQuality.WaterVapor.ANY)
-      val ctx = ObsContext.create(env, inst, new JSome(Site.GS), conditions, null, new Gems)
+      val ctx = ObsContext.create(env, inst, new JSome(Site.GS), conditions, null, new Gems, JNone.instance())
       val tipTiltMode = GemsTipTiltMode.canopus
 
       val posAngles = Set(ctx.getPositionAngle.toNewModel, Angle.zero, Angle.fromDegrees(90), Angle.fromDegrees(180), Angle.fromDegrees(270))
@@ -370,7 +370,7 @@ class GemsStrategySpec extends Specification with NoTimeConversions {
       val env = TargetEnvironment.create(target)
       val inst = new Gsaoi <| {_.setPosAngle(0.0)} <| {_.setIssPort(IssPort.UP_LOOKING)}
       val conditions = SPSiteQuality.Conditions.NOMINAL.sb(SPSiteQuality.SkyBackground.ANY).wv(SPSiteQuality.WaterVapor.ANY)
-      val ctx = ObsContext.create(env, inst, new JSome(Site.GS), conditions, null, new Gems)
+      val ctx = ObsContext.create(env, inst, new JSome(Site.GS), conditions, null, new Gems, JNone.instance())
       val tipTiltMode = GemsTipTiltMode.canopus
 
       val posAngles = Set(ctx.getPositionAngle.toNewModel, Angle.zero, Angle.fromDegrees(90), Angle.fromDegrees(180), Angle.fromDegrees(270))
@@ -447,7 +447,7 @@ class GemsStrategySpec extends Specification with NoTimeConversions {
       val env = TargetEnvironment.create(target)
       val inst = new Gsaoi <| {_.setPosAngle(0.0)} <| {_.setIssPort(IssPort.UP_LOOKING)}
       val conditions = SPSiteQuality.Conditions.NOMINAL.sb(SPSiteQuality.SkyBackground.ANY)
-      val ctx = ObsContext.create(env, inst, new JSome(Site.GS), conditions, null, new Gems)
+      val ctx = ObsContext.create(env, inst, new JSome(Site.GS), conditions, null, new Gems, JNone.instance())
       val tipTiltMode = GemsTipTiltMode.canopus
 
       val posAngles = Set(ctx.getPositionAngle.toNewModel, Angle.zero, Angle.fromDegrees(90), Angle.fromDegrees(180), Angle.fromDegrees(270))
@@ -511,7 +511,7 @@ class GemsStrategySpec extends Specification with NoTimeConversions {
       val env = TargetEnvironment.create(target)
       val inst = new Gsaoi <| {_.setPosAngle(0.0)} <| {_.setIssPort(IssPort.UP_LOOKING)}
       val conditions = SPSiteQuality.Conditions.BEST.cc(SPSiteQuality.CloudCover.PERCENT_50)
-      val ctx = ObsContext.create(env, inst, new JSome(Site.GS), conditions, null, new Gems)
+      val ctx = ObsContext.create(env, inst, new JSome(Site.GS), conditions, null, new Gems, JNone.instance())
       val tipTiltMode = GemsTipTiltMode.canopus
 
       val posAngles = Set(ctx.getPositionAngle.toNewModel, Angle.zero, Angle.fromDegrees(90), Angle.fromDegrees(180), Angle.fromDegrees(270))

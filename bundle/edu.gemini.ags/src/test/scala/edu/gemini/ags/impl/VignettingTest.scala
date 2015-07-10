@@ -4,6 +4,7 @@ import edu.gemini.ags.api.AgsRegistrar
 import edu.gemini.ags.conf.ProbeLimitsTable
 import edu.gemini.pot.ModelConverters._
 import edu.gemini.pot.sp.SPComponentType
+import edu.gemini.shared.util.immutable.{ None => JNone }
 import edu.gemini.skycalc.{DDMMSS, HHMMSS}
 import edu.gemini.spModel.core.Target.SiderealTarget
 import edu.gemini.spModel.core._
@@ -104,7 +105,7 @@ class VignettingTest {
     config.inst.setPosAngleDegrees(posAngle)
     val targetEnv = TargetEnvironment.create(base)
     val offsetSet = offsets.map(_.toOldModel).toSet.asJava
-    val ctx       = ObsContext.create(targetEnv, config.inst, Some(config.site).asGeminiOpt, BEST, offsetSet, null)
+    val ctx       = ObsContext.create(targetEnv, config.inst, Some(config.site).asGeminiOpt, BEST, offsetSet, null, JNone.instance())
     val strategy  = AgsRegistrar.currentStrategy(ctx).get.asInstanceOf[SingleProbeStrategy]
 
     def nextCandidate(candidates: List[SiderealTarget], expected: List[SiderealTarget]): Unit = {

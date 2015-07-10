@@ -16,6 +16,7 @@ import edu.gemini.spModel.gemini.altair.InstAltair;
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality;
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.Conditions;
 import edu.gemini.spModel.obs.SPObservation;
+import edu.gemini.spModel.obs.SchedulingBlock;
 import edu.gemini.spModel.obscomp.SPInstObsComp;
 import edu.gemini.spModel.target.SPTarget;
 import edu.gemini.spModel.target.env.TargetEnvironment;
@@ -86,8 +87,9 @@ public final class ObsContext {
                                     SPInstObsComp inst,
                                     Conditions conds,
                                     Set<Offset> sciencePos,
-                                    AbstractDataObject aoComp) {
-        return create(None.<AgsStrategyKey>instance(), targets, inst, getSiteFromInstrument(inst), conds, sciencePos, aoComp);
+                                    AbstractDataObject aoComp,
+                                    Option<SchedulingBlock> schedulingBlock) {
+        return create(None.<AgsStrategyKey>instance(), targets, inst, getSiteFromInstrument(inst), conds, sciencePos, aoComp, schedulingBlock);
     }
 
 
@@ -107,8 +109,9 @@ public final class ObsContext {
                                     Option<Site> site,
                                     Conditions conds,
                                     Set<Offset> sciencePos,
-                                    AbstractDataObject aoComp) {
-        return create(None.<AgsStrategyKey>instance(), targets, inst, site, conds, sciencePos, aoComp);
+                                    AbstractDataObject aoComp,
+                                    Option<SchedulingBlock> schedulingBlock) {
+        return create(None.<AgsStrategyKey>instance(), targets, inst, site, conds, sciencePos, aoComp, schedulingBlock);
     }
 
     public static ObsContext create(Option<AgsStrategyKey> ags,
@@ -117,7 +120,8 @@ public final class ObsContext {
                                     Option<Site> site,
                                     Conditions conds,
                                     Set<Offset> sciencePos,
-                                    AbstractDataObject aoComp) {
+                                    AbstractDataObject aoComp,
+                                    Option<SchedulingBlock> schedulingBlock) {
 
         // If no explicit observing positions are provided, use an offset list
         // with a single "offset" to represent the base position.
@@ -128,9 +132,9 @@ public final class ObsContext {
             offsets = Collections.unmodifiableSet(new LinkedHashSet<>(sciencePos));
         }
         if (aoComp != null) {
-            return new ObsContext(ags, targets, inst, site, conds, offsets, new Some<>(aoComp));
+            return new ObsContext(ags, targets, inst, site, conds, offsets, new Some<>(aoComp), schedulingBlock);
         } else {
-            return new ObsContext(ags, targets, inst, site, conds, offsets, None.<AbstractDataObject>instance());
+            return new ObsContext(ags, targets, inst, site, conds, offsets, None.<AbstractDataObject>instance(), schedulingBlock);
         }
     }
 
@@ -138,13 +142,9 @@ public final class ObsContext {
      * Creates an ObsContext from the given {@link ISPObservation}, assuming
      * it contains at least a target component and an instrument.
      * <p/>
-     * <p><em>This method will require numerous remote method calls to the ODB
-     * if not called from a database functor.</em></p>
      *
      * @return ObsContext representing this observation or {@link None} if
      *         there is no target or no instrument
-     * @ if called from client code and there is a problem
-     *                         communicating with the database
      */
     @SuppressWarnings("rawtypes")
     public static Option<ObsContext> create(ISPObservation obs)  {
@@ -169,7 +169,7 @@ public final class ObsContext {
 
         final SPObservation spObs = (SPObservation) obs.getDataObject();
         return new Some<>(ObsContext.create(spObs.getAgsStrategyOverride(), env, inst, site, conds,
-                offsets, aoCompOpt.getOrNull()));
+                offsets, aoCompOpt.getOrNull(), ((SPObservation) obs.getDataObject()).getSchedulingBlock()));
     }
 
     // Fish out the target, instrument and AO component data objects
@@ -218,9 +218,11 @@ public final class ObsContext {
     private final Set<Offset> sciencePositions;
     private final Option<AbstractDataObject> aoCompOpt;
     private final Option<Site> site;
+    private final Option<SchedulingBlock> schedulingBlock;
 
     private ObsContext(Option<AgsStrategyKey> ags, TargetEnvironment targets, SPInstObsComp inst, Option<Site> site,
-                       Conditions conds, Set<Offset> sciencePositions, Option<AbstractDataObject> aoCompOpt) {
+                       Conditions conds, Set<Offset> sciencePositions, Option<AbstractDataObject> aoCompOpt,
+                       Option<SchedulingBlock> schedulingBlock) {
         this.agsOverride = ags;
         this.targets          = targets;
         this.inst             = (SPInstObsComp) inst.clone();
@@ -228,18 +230,19 @@ public final class ObsContext {
         this.conds            = conds;
         this.sciencePositions = sciencePositions;
         this.aoCompOpt        = aoCompOpt;
+        this.schedulingBlock  = schedulingBlock;
     }
 
     private ObsContext(Option<AgsStrategyKey> ags, TargetEnvironment targets, SPInstObsComp inst, Option<Site> site,
                        Conditions conds, Set<Offset> sciencePositions, Option<AbstractDataObject> aoCompOpt,
-                       Angle posAngle) {
-        this(ags, targets, inst, site, conds, sciencePositions, aoCompOpt);
+                       Angle posAngle, Option<SchedulingBlock> schedulingBlock) {
+        this(ags, targets, inst, site, conds, sciencePositions, aoCompOpt, schedulingBlock);
         this.inst.setPosAngle(posAngle.toDegrees().getMagnitude());
     }
     private ObsContext(Option<AgsStrategyKey> ags, TargetEnvironment targets, SPInstObsComp inst, Option<Site> site,
                        Conditions conds, Set<Offset> sciencePositions, Option<AbstractDataObject> aoCompOpt,
-                       IssPort port) {
-        this(ags, targets, inst, site, conds, sciencePositions, aoCompOpt);
+                       IssPort port, Option<SchedulingBlock> schedulingBlock) {
+        this(ags, targets, inst, site, conds, sciencePositions, aoCompOpt, schedulingBlock);
         if (this.inst instanceof IssPortProvider) {
             ((IssPortProvider) this.inst).setIssPort(port);
         }
@@ -251,7 +254,7 @@ public final class ObsContext {
 
     public ObsContext withAgsStrategyOverride(Option<AgsStrategyKey> s) {
         if (s.equals(agsOverride)) return this;
-        return new ObsContext(s, targets, inst, site, conds, sciencePositions, aoCompOpt);
+        return new ObsContext(s, targets, inst, site, conds, sciencePositions, aoCompOpt, schedulingBlock);
     }
 
     public TargetEnvironment getTargets() {
@@ -260,7 +263,7 @@ public final class ObsContext {
 
     public ObsContext withTargets(TargetEnvironment targets) {
         if (targets.equals(this.targets)) return this;
-        return new ObsContext(agsOverride, targets, inst, site, conds, sciencePositions, aoCompOpt);
+        return new ObsContext(agsOverride, targets, inst, site, conds, sciencePositions, aoCompOpt, schedulingBlock);
     }
 
     public Coordinates getBaseCoordinates() {
@@ -277,7 +280,7 @@ public final class ObsContext {
 
     public ObsContext withPositionAngle(Angle angle) {
         if (angle.equals(getPositionAngle())) return this;
-        return new ObsContext(agsOverride, targets, inst, site, conds, sciencePositions, aoCompOpt, angle);
+        return new ObsContext(agsOverride, targets, inst, site, conds, sciencePositions, aoCompOpt, angle, schedulingBlock);
     }
 
     public PosAngleConstraint getPosAngleConstraint() {
@@ -307,7 +310,7 @@ public final class ObsContext {
 
     public ObsContext withIssPort(IssPort port) {
         if (getIssPort() == port) return this;
-        return new ObsContext(agsOverride, targets, inst, site, conds, sciencePositions, aoCompOpt, port);
+        return new ObsContext(agsOverride, targets, inst, site, conds, sciencePositions, aoCompOpt, port, schedulingBlock);
     }
 
     public SPInstObsComp getInstrument(){
@@ -315,13 +318,13 @@ public final class ObsContext {
     }
 
     public ObsContext withInstrument(SPInstObsComp inst) {
-        return create(agsOverride, targets, inst, site, conds, sciencePositions, aoCompOpt.getOrNull());
+        return create(agsOverride, targets, inst, site, conds, sciencePositions, aoCompOpt.getOrNull(), schedulingBlock);
     }
 
     public Option<Site> getSite() { return site; }
 
     public ObsContext withSite(final Option<Site> site) {
-        return new ObsContext(agsOverride, targets, inst, site, conds, sciencePositions, aoCompOpt);
+        return new ObsContext(agsOverride, targets, inst, site, conds, sciencePositions, aoCompOpt, schedulingBlock);
     }
 
     public Conditions getConditions() {
@@ -330,7 +333,7 @@ public final class ObsContext {
 
     public ObsContext withConditions(Conditions conds) {
         if (getConditions().equals(conds)) return this;
-        return new ObsContext(agsOverride, targets, inst, site, conds, sciencePositions, aoCompOpt);
+        return new ObsContext(agsOverride, targets, inst, site, conds, sciencePositions, aoCompOpt, schedulingBlock);
     }
 
     public Option<AbstractDataObject> getAOComponent(){
@@ -338,7 +341,7 @@ public final class ObsContext {
     }
 
     public ObsContext withAOComponent(AbstractDataObject aoCompOpt){
-        return new ObsContext(agsOverride, targets,  inst, site, conds, sciencePositions, new Some<AbstractDataObject>(aoCompOpt));
+        return new ObsContext(agsOverride, targets,  inst, site, conds, sciencePositions, new Some<AbstractDataObject>(aoCompOpt), schedulingBlock);
     }
 
 
@@ -348,7 +351,11 @@ public final class ObsContext {
 
     public ObsContext withSciencePositions(Set<Offset> sciencePos) {
         if (sciencePos.equals(this.sciencePositions)) return this;
-        return create(agsOverride, targets, inst, site, conds, sciencePos, aoCompOpt.getOrNull());
+        return create(agsOverride, targets, inst, site, conds, sciencePos, aoCompOpt.getOrNull(), schedulingBlock);
+    }
+
+    public Option<SchedulingBlock> getSchedulingBlock() {
+        return schedulingBlock;
     }
 
     public String toString() {

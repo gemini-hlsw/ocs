@@ -349,7 +349,7 @@ class GemsResultsAnalyzerSpec extends MascotProgress with Specification with NoT
     val baseTarget = new SPTarget(coords.getRaDeg, coords.getDecDeg)
     val env = TargetEnvironment.create(baseTarget)
     val offsets = new java.util.HashSet[Offset]
-    val obsContext = ObsContext.create(env, inst, JNone.instance[Site], conditions, offsets, new Gems)
+    val obsContext = ObsContext.create(env, inst, JNone.instance[Site], conditions, offsets, new Gems, JNone.instance())
     val baseRA = Angle.fromDegrees(coords.getRaDeg)
     val baseDec = Angle.fromDegrees(coords.getDecDeg)
     val base = new HmsDegCoordinates.Builder(baseRA.toOldModel, baseDec.toOldModel).build
