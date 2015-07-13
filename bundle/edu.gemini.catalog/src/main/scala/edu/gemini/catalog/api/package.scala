@@ -5,12 +5,6 @@ import edu.gemini.spModel.core.Target.SiderealTarget
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.{Conditions, ImageQuality, CloudCover, SkyBackground}
 
 package object api {
-  // Function that can extract a magnitude out of a target
-  type MagnitudeExtractor = SiderealTarget => Option[Magnitude]
-
-  // Function that can extract a magnitude out of a target
-  def defaultMagnitudeExtractor(band: MagnitudeBand):MagnitudeExtractor = (t: SiderealTarget) => t.magnitudeIn(band)
-
   // Add adjust operation to ConstraintAdjuster typeclass instances
   implicit class ConstraintsAdjusterOps[T](val a: T) extends AnyVal {
     def adjust(mc: MagnitudeConstraints)(implicit ev: ConstraintsAdjuster[T]):MagnitudeConstraints = ev.adjust(a, mc)

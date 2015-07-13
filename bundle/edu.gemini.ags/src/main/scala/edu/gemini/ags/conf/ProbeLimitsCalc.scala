@@ -19,7 +19,7 @@ case class ProbeLimitsCalc(band: MagnitudeBand, saturationAdjustment: Double, fa
     val faint  = faintnessTable(FaintnessKey(c.iq, c.sb, gs))
     val bright = faint - saturationAdjustment
 
-    // Single probe reads adjustments from the table and only adjust for CC
+    // Single probe reads adjustments from the table and only adjusts for CC
     c.cc.adjust(MagnitudeConstraints(band, agsBandExtractor(band), FaintnessConstraint(faint), Some(SaturationConstraint(bright))))
   }
 }

@@ -1,6 +1,6 @@
 package edu.gemini.ags.impl
 
-import edu.gemini.ags.api.{AgsGuideQuality, AgsAnalysis, AgsStrategy, magnitudeExtractor, RLikeBands, defaultProbeBands}
+import edu.gemini.ags.api.{AgsGuideQuality, AgsAnalysis, AgsStrategy, RLikeBands, defaultProbeBands}
 import edu.gemini.ags.api.AgsStrategy.Estimate
 import edu.gemini.ags.conf.ProbeLimitsTable
 import edu.gemini.ags.gems._
@@ -189,9 +189,9 @@ class GemsStrategySpec extends Specification with NoTimeConversions {
       odgw2.map(_.coordinates ~= odgw2x) should beSome(true)
 
       // Check magnitudes are sorted correctly
-      val mag1 = cwfs1.flatMap(magnitudeExtractor(RLikeBands)).map(_.value)
-      val mag2 = cwfs2.flatMap(magnitudeExtractor(RLikeBands)).map(_.value)
-      val mag3 = cwfs3.flatMap(magnitudeExtractor(RLikeBands)).map(_.value)
+      val mag1 = cwfs1.flatMap(FirstBandExtractor(RLikeBands).extract).map(_.value)
+      val mag2 = cwfs2.flatMap(FirstBandExtractor(RLikeBands).extract).map(_.value)
+      val mag3 = cwfs3.flatMap(FirstBandExtractor(RLikeBands).extract).map(_.value)
       (mag3 < mag1 && mag2 < mag1) should beTrue
 
       // Analyze as a whole
@@ -331,9 +331,9 @@ class GemsStrategySpec extends Specification with NoTimeConversions {
       odgw4.map(_.coordinates ~= odgw2x) should beSome(true)
 
       // Check magnitudes are sorted correctly
-      val mag1 = cwfs1.flatMap(magnitudeExtractor(RLikeBands)).map(_.value)
-      val mag2 = cwfs2.flatMap(magnitudeExtractor(RLikeBands)).map(_.value)
-      val mag3 = cwfs3.flatMap(magnitudeExtractor(RLikeBands)).map(_.value)
+      val mag1 = cwfs1.flatMap(FirstBandExtractor(RLikeBands).extract).map(_.value)
+      val mag2 = cwfs2.flatMap(FirstBandExtractor(RLikeBands).extract).map(_.value)
+      val mag3 = cwfs3.flatMap(FirstBandExtractor(RLikeBands).extract).map(_.value)
       (mag3 < mag1 && mag2 < mag1) should beTrue
 
       // Analyze as a whole
@@ -407,9 +407,9 @@ class GemsStrategySpec extends Specification with NoTimeConversions {
       odgw2.map(_.coordinates ~= odgw2x) should beSome(true)
 
       // Check magnitudes are sorted correctly
-      val mag1 = cwfs1.flatMap(magnitudeExtractor(RLikeBands)).map(_.value)
-      val mag2 = cwfs2.flatMap(magnitudeExtractor(RLikeBands)).map(_.value)
-      val mag3 = cwfs3.flatMap(magnitudeExtractor(RLikeBands)).map(_.value)
+      val mag1 = cwfs1.flatMap(FirstBandExtractor(RLikeBands).extract).map(_.value)
+      val mag2 = cwfs2.flatMap(FirstBandExtractor(RLikeBands).extract).map(_.value)
+      val mag3 = cwfs3.flatMap(FirstBandExtractor(RLikeBands).extract).map(_.value)
       (mag3 < mag1 && mag2 < mag1) should beTrue
 
       // Analyze as a whole

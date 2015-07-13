@@ -1,11 +1,11 @@
 package edu.gemini.ags.impl
 
-import edu.gemini.ags.api.{AgsMagnitude, defaultProbeBands, magnitudeExtractor}
+import edu.gemini.ags.api.{AgsMagnitude, defaultProbeBands}
 import edu.gemini.ags.api.AgsMagnitude.{MagnitudeCalc, MagnitudeTable}
-import edu.gemini.catalog.api.{ucac4, MagnitudeExtractor, CatalogQuery, RadiusConstraint}
+import edu.gemini.catalog.api._
 import edu.gemini.pot.ModelConverters._
 import edu.gemini.spModel.core.Target.SiderealTarget
-import edu.gemini.spModel.core.{MagnitudeBand, Angle, Site}
+import edu.gemini.spModel.core.{Magnitude, MagnitudeBand, Angle, Site}
 import edu.gemini.spModel.gemini.altair.AltairAowfsGuider
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2OiwfsGuideProbe
 import edu.gemini.spModel.gemini.gmos.GmosOiwfsGuideProbe
@@ -42,7 +42,7 @@ sealed trait SingleProbeStrategyParams {
   def probeBands = defaultProbeBands(referenceBand)
 
   // For a given target return a magnitude value that can be used to select a target
-  def referenceMagnitude: MagnitudeExtractor = (st: SiderealTarget) => magnitudeExtractor(probeBands)(st)
+  def referenceMagnitude(st: SiderealTarget):Option[Magnitude] = FirstBandExtractor(probeBands).extract(st)
 
   def brightest[A](lst: List[A])(toSiderealTarget: A => SiderealTarget):Option[A] = {
     def magnitude(t: SiderealTarget):Option[Double] = {

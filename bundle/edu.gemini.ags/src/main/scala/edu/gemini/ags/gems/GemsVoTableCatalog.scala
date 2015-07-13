@@ -76,7 +76,7 @@ case class GemsVoTableCatalog(backend: VoTableBackend = RemoteBackend, catalog: 
 
     val qm = queryArgs.toMap
     VoTableClient.catalogs(queryArgs.map(_._1), backend).map(l => l.collect {
-      case QueryResult(q: CatalogQueryWithRange, results:CatalogQueryResult) => GemsCatalogSearchResults(qm.get(q).get, results.targets.rows)
+      case QueryResult(q: CatalogQueryWithMagnitudeFilters, results:CatalogQueryResult) => GemsCatalogSearchResults(qm.get(q).get, results.targets.rows)
     })
   }
 
@@ -160,38 +160,16 @@ case class GemsVoTableCatalog(backend: VoTableBackend = RemoteBackend, catalog: 
   // Sets the min/max magnitude limits in the given query arguments
   protected [gems] def optimizeMagnitudeRanges(criterions: List[GemsCatalogSearchCriterion]): List[MagnitudeConstraints] = {
     val constraintsPerBand = criterions.map(_.criterion.magRange).groupBy(_.referenceBand).toList
-    println(criterions.map(_.criterion.magRange))
     // Get max/min limits per band
     constraintsPerBand.flatMap {
-      case (_, lims) =>
-        lims.tail.foldLeft(lims.headOption) { (a, b) =>
+      case (_, Nil) =>
+        None
+      case (_, h :: Nil) =>
+        Some(h)
+      case (_, h :: tail) =>
+        tail.foldLeft(h.some) { (a, b) =>
           a >>= (_ union b)
         }
     }
-
-    /*val magConstraints = for {
-        criteria <- criterions
-        mc       =  criteria.criterion.magRange
-      } yield (mc, criteria.criterion.referenceBand)
-
-    // Calculate the max faintness per band out of the criteria
-    val faintLimitPerBand = for {
-        (m, b) <- magConstraints
-        fl = m.faintnessConstraint
-      } yield (b, fl)
-
-    val faintnessMap:Map[MagnitudeBand, FaintnessConstraint] = faintLimitPerBand.groupBy(_._1).map { case (_, v) => v.maxBy(_._2)(FaintnessConstraint.order.toScalaOrdering)}
-
-    // Calculate the min saturation limit per band out of the criteria
-    val saturationLimitPerBand = for {
-        (m, b) <- magConstraints
-        sl = m.saturationConstraint.getOrElse(SaturationConstraint(DefaultSaturationMagnitude))
-      } yield (b, sl)
-
-    val saturationMap = saturationLimitPerBand.groupBy(_._1).map { case (_, v) => v.minBy(_._2)(SaturationConstraint.order.toScalaOrdering)}
-
-    (for {
-      b <- faintnessMap
-    } yield (b._1, MagnitudeRange(b._2, saturationMap.get(b._1)))).toList*/
   }
 }

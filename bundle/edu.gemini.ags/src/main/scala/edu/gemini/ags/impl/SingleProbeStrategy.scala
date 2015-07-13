@@ -89,7 +89,7 @@ case class SingleProbeStrategy(key: AgsStrategyKey, params: SingleProbeStrategyP
         val analyzedTargets = for {
           target    <- targets
           analysis  <- AgsAnalysis.analysis(ctx0, mt, vprobe, target, params.probeBands)
-          magnitude <- params.referenceMagnitude.apply(target)
+          magnitude <- params.referenceMagnitude(target)
         } yield (target, magnitude, analysis.quality)
         (ctx0, analyzedTargets)
       }

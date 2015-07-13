@@ -43,7 +43,7 @@ trait GemsStrategy extends AgsStrategy {
   private val OdgwFlexureId    = 1
 
   // Catalog results with search keys to avoid having to recompute search key info on the fly.
-  private case class CatalogResultWithKey(query: CatalogQueryWithRange, referenceBand: MagnitudeBand, catalogResult: CatalogQueryResult, searchKey: GemsCatalogSearchKey)
+  private case class CatalogResultWithKey(query: CatalogQueryWithMagnitudeFilters, referenceBand: MagnitudeBand, catalogResult: CatalogQueryResult, searchKey: GemsCatalogSearchKey)
 
   // Query the catalog for each constraint and compile a list of results with the necessary
   // information for GeMS.
@@ -70,7 +70,7 @@ trait GemsStrategy extends AgsStrategy {
       case result if result.exists(_.result.containsError) => Future.failed(CatalogException(result.flatMap(_.result.problems)))
       case result                                          => Future.successful {
         result.collect {
-          case res @ QueryResult(q: CatalogQueryWithRange, results) =>
+          case res @ QueryResult(q: CatalogQueryWithMagnitudeFilters, results) =>
             val id = q.id
             id.map(x => CatalogResultWithKey(q, GuideProbeBandMap(x), results, GemsCatalogSearchKey(GuideStarTypeMap(x), GuideProbeGroupMap(x))))
         }.flatten
@@ -89,9 +89,8 @@ trait GemsStrategy extends AgsStrategy {
       } yield {
         val query = result.query
         val radiusConstraint = query.radiusConstraint
-        val band = result.referenceBand
         val mr = query.magnitudeConstraints
-        val catalogSearchCriterion = CatalogSearchCriterion("ags", radiusConstraint, mr, None, angle.some)
+        val catalogSearchCriterion = CatalogSearchCriterion("ags", radiusConstraint, mr.head, None, angle.some)
         val gemsCatalogSearchCriterion = new GemsCatalogSearchCriterion(result.searchKey, catalogSearchCriterion)
         new GemsCatalogSearchResults(gemsCatalogSearchCriterion, result.catalogResult.targets.rows)
       }

@@ -4,7 +4,7 @@ import java.util.logging.Logger
 
 import edu.gemini.ags.api._
 import edu.gemini.ags.gems.mascot.{MascotCat, MascotProgress, Strehl}
-import edu.gemini.catalog.api.{MagnitudeExtractor, MagnitudeConstraints}
+import edu.gemini.catalog.api.{FirstBandExtractor, MagnitudeConstraints}
 import edu.gemini.spModel.core.{Magnitude, Angle, MagnitudeBand}
 import edu.gemini.spModel.core.Target.SiderealTarget
 import edu.gemini.spModel.gemini.gems.Canopus
@@ -395,10 +395,8 @@ object GemsResultsAnalyzer {
   /**
    * Sorts the targets list, putting the brightest stars first and returns the sorted array.
    */
-  protected [ags] def sortTargetsByBrightness(targetsList: List[SiderealTarget]): List[SiderealTarget] = {
-    val magnitudeExtractor: MagnitudeExtractor = (st) => RLikeBands.flatMap(st.magnitudeIn).headOption
-    targetsList.sortBy(magnitudeExtractor(_))(MagnitudeOptionOrdering)
-  }
+  protected [ags] def sortTargetsByBrightness(targetsList: List[SiderealTarget]): List[SiderealTarget] =
+    targetsList.sortBy(FirstBandExtractor(RLikeBands).extract)(MagnitudeOptionOrdering)
 
   // Returns true if the target magnitude is within the given limits
   def containsMagnitudeInLimits(target: SiderealTarget, magLimits: MagnitudeConstraints): Boolean =

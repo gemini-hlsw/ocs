@@ -110,7 +110,7 @@ object SingleProbeVignettingTest extends Specification with ScalaCheck with Vign
           c  <- contexts(ctx)
           q = analyze(strategy, c, gs)
           if q < AgsGuideQuality.PossiblyUnusable
-          m  <- strategy.params.referenceMagnitude.apply(gs)
+          m  <- strategy.params.referenceMagnitude(gs)
         } yield (gs, c, q, GmosOiwfsGuideProbe.instance.calculator(c).calc(gs.coordinates), m.value)
 
         analyzedCandidates match {

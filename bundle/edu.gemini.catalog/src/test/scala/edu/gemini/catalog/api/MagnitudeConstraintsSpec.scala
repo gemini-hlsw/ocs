@@ -79,25 +79,5 @@ class MagnitudeConstraintsSpec extends SpecificationWithJUnit {
       val m6 = MagnitudeConstraints(MagnitudeBand.R, FaintnessConstraint(15.0), Some(SaturationConstraint(15.0)))
       m5.union(m6) should beSome(MagnitudeConstraints(MagnitudeBand.R, FaintnessConstraint(15.0), Some(SaturationConstraint(10.0))))
     }
-    /*"supports mapping, e.g. for conditions" in {
-      import edu.gemini.shared.util.immutable.MapOp
-
-      val m = MagnitudeConstraints(MagnitudeBand.R, FaintnessConstraint(15.0), Some(SaturationConstraint(10.0)))
-
-      m.map(identity) should beEqualTo(m)
-      // As used with conditions
-      val brightnessChangeOp = new MapOp[Magnitude, Magnitude] {
-        override def apply(t: Magnitude) = t.copy(value = t.value + 1)
-      }
-
-      m.map(m => brightnessChangeOp.apply(m)).faintnessConstraint should beEqualTo(FaintnessConstraint(16.0))
-      m.map(m => brightnessChangeOp.apply(m)).saturationConstraint should beEqualTo(Some(SaturationConstraint(11.0)))
-
-      val bandChangeOp = new MapOp[Magnitude, Magnitude] {
-        override def apply(t: Magnitude) = t.copy(band = MagnitudeBand.K)
-      }
-
-      m.map(m => bandChangeOp.apply(m)) should beEqualTo(MagnitudeConstraints(MagnitudeBand.K, FaintnessConstraint(15.0), Some(SaturationConstraint(10.0))))
-    }*/
   }
 }

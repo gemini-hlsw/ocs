@@ -65,7 +65,7 @@ trait ConstraintsAdjuster[T] {
 /**
  * Defines a class that can extract a magnitude from a target
  */
-sealed trait MagnitudeExtractor2 {
+sealed trait MagnitudeExtractor {
   def extract(t: SiderealTarget):Option[Magnitude]
   def bandSupported(b: MagnitudeBand):Boolean
 }
@@ -73,7 +73,7 @@ sealed trait MagnitudeExtractor2 {
 /**
  * Search for a specific band on the target
  */
-case class SingleBandExtractor(band: MagnitudeBand) extends MagnitudeExtractor2 {
+case class SingleBandExtractor(band: MagnitudeBand) extends MagnitudeExtractor {
   override def extract(t: SiderealTarget) = t.magnitudeIn(band)
   override def bandSupported(b: MagnitudeBand) = b === band
 }
@@ -81,7 +81,7 @@ case class SingleBandExtractor(band: MagnitudeBand) extends MagnitudeExtractor2 
 /**
  * Finds the first on a list of bands
  */
-case class FirstBandExtractor(bands: List[MagnitudeBand]) extends MagnitudeExtractor2 {
+case class FirstBandExtractor(bands: List[MagnitudeBand]) extends MagnitudeExtractor {
   override def extract(t: SiderealTarget) = bands.map(t.magnitudeIn).find(_.isDefined).flatten
   override def bandSupported(b: MagnitudeBand) = bands.contains(b)
 }
@@ -89,20 +89,7 @@ case class FirstBandExtractor(bands: List[MagnitudeBand]) extends MagnitudeExtra
 /**
  * Describes constraints for the magnitude of a target
  */
-case class MagnitudeConstraints(referenceBand: MagnitudeBand, extractor: MagnitudeExtractor2, faintnessConstraint: FaintnessConstraint, saturationConstraint: Option[SaturationConstraint]) extends MagnitudeFilter {
-
-  /**
-   * Maps a transformation into a new MagnitudeConstraints
-   */
-  /*def map(f: Magnitude => Magnitude): MagnitudeConstraints = {
-    v al mappedFaintness = f(faintnessConstraint.toMagnitude(referenceBand))
-    val mappedSaturation = saturationConstraint.map(_.toMagnitude(referenceBand)).map(f)
-
-    val fl = FaintnessConstraint(mappedFaintness.value)
-    val sl = mappedSaturation.map(s => SaturationConstraint(s.value))
-
-    MagnitudeConstraints(mappedFaintness.band, extractor, fl, sl)
-  }*/
+case class MagnitudeConstraints(referenceBand: MagnitudeBand, extractor: MagnitudeExtractor, faintnessConstraint: FaintnessConstraint, saturationConstraint: Option[SaturationConstraint]) extends MagnitudeFilter {
 
   override def filter(t: SiderealTarget): Boolean = extractor.extract(t).exists(contains)
 
@@ -111,8 +98,6 @@ case class MagnitudeConstraints(referenceBand: MagnitudeBand, extractor: Magnitu
    * value.
    */
   def contains(m: Magnitude) = extractor.bandSupported(m.band) && faintnessConstraint.contains(m.value) && saturationConstraint.forall(_.contains(m.value))
-
-  //private def contains(v: Double) = faintnessConstraint.contains(v) && saturationConstraint.forall(_.contains(v))
 
   /**
    * Returns a combination of two MagnitudeConstraints(this and that) such that
@@ -158,34 +143,3 @@ object MagnitudeConstraints {
     new MagnitudeLimits(limits.getBand, new FaintnessLimit(mc.faintnessConstraint.brightness), mc.saturationConstraint.map(s => new SaturationLimit(s.brightness)).asGeminiOpt)
   }
 }
-/*case class MagnitudeRange(referenceBand: MagnitudeBand, extractor: MagnitudeExtractor, faintnessConstraint: FaintnessConstraint, saturationConstraint: Option[SaturationConstraint]) extends MagnitudeFilter {
-
-  override def filter(t: SiderealTarget): Boolean = extractor(t).forall(m => contains(m.value))
-
-  /**
-   * Determines whether the magnitude value is in the given range
-   */
-  def contains(v: Double) = faintnessConstraint.contains(v) && saturationConstraint.forall(_.contains(v))
-
-  /**
-   * Returns a combination of two MagnitudeRange (this and that) such that
-   * the faintness limit is the faintest of the two and the saturation limit
-   * is the brightest of the two.  In other words, the widest possible range
-   * of magnitude bands.
-   */
-  def union(that: MagnitudeRange): MagnitudeRange = {
-    val faintness = faintnessConstraint.max(that.faintnessConstraint)
-
-    // Calculate the min saturation limit if both are defined
-    val saturation = (saturationConstraint |@| that.saturationConstraint)(_ min _)
-
-    MagnitudeRange(referenceBand, extractor, faintness, saturation)
-  }
-
-  def adjust(f: Double => Double): MagnitudeRange = {
-    val fl = f(faintnessConstraint.brightness)
-    val sl = saturationConstraint.map(_.brightness).map(f)
-    MagnitudeRange(referenceBand, extractor, FaintnessConstraint(fl), sl.map(SaturationConstraint.apply))
-  }
-
-}*/
