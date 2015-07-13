@@ -18,6 +18,7 @@ import edu.gemini.spModel.gemini.gems.Gems;
 import edu.gemini.spModel.gemini.obscomp.SPProgram;
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality;
 import edu.gemini.spModel.obs.SPObservation;
+import edu.gemini.spModel.obs.SchedulingBlock;
 import edu.gemini.spModel.obs.context.ObsContext;
 import edu.gemini.spModel.obscomp.SPInstObsComp;
 import edu.gemini.spModel.seqcomp.SeqRepeatCbOptions;
@@ -165,6 +166,10 @@ public class ObservationElements implements Serializable {
 
     public Option<ISPObsComponent> getAOComponentNode() {
         return _aoComponentNode;
+    }
+
+    public Option<SchedulingBlock> getSchedulingBlock() {
+        return _observation == null ? None.instance() : _observation.getSchedulingBlock();
     }
 
     private void _setInstrumentNode(ISPObsComponent inst) {

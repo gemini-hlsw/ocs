@@ -3,6 +3,7 @@ package jsky.app.ot.tpe
 import edu.gemini.pot.sp._
 
 import edu.gemini.shared.util.immutable.{None => JNone, Option => JOption, Some => JSome}
+import edu.gemini.shared.util.immutable.ScalaConverters._
 import edu.gemini.spModel.core.Site
 import edu.gemini.spModel.data.{ISPDataObject, IOffsetPosListProvider}
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality
@@ -20,7 +21,7 @@ import edu.gemini.spModel.telescope.{IssPortProvider, IssPort}
 import edu.gemini.spModel.util.SPTreeUtil
 
 import scala.collection.JavaConverters._
-import edu.gemini.spModel.obs.SPObservation
+import edu.gemini.spModel.obs.{SchedulingBlock, SPObservation}
 import edu.gemini.skycalc.Offset
 
 object TpeContext {
@@ -198,8 +199,15 @@ case class TpeContext(node: Option[ISPNode]) {
     i <- instrument.dataObject
     ao = (gems.dataObject orElse altair.dataObject).orNull
     obs = s.getDataObject.asInstanceOf[SPObservation]
-  } yield ObsContext.create(obs.getAgsStrategyOverride, t, i, site, c, offsets.scienceOffsetsJava, ao)
+  } yield ObsContext.create(obs.getAgsStrategyOverride, t, i, site, c, offsets.scienceOffsetsJava, ao, obs.getSchedulingBlock)
 
   def obsContextJavaWithConditions(c: Conditions): JOption[ObsContext] =
     toJOption(obsContextWithConditions(c))
+
+  def schedulingBlock: Option[SchedulingBlock] =
+    obsShell.flatMap(_.getDataObject.asInstanceOf[SPObservation].getSchedulingBlock.asScalaOpt)
+
+  def schedulingBlockJava: JOption[SchedulingBlock] =
+    schedulingBlock.asGeminiOpt
+
 }

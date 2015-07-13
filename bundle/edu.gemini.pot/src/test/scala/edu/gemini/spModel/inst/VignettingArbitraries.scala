@@ -3,6 +3,7 @@ package edu.gemini.spModel.inst
 import java.awt.geom.{Point2D, AffineTransform}
 
 import edu.gemini.pot.ModelConverters._
+import edu.gemini.shared.util.immutable.None
 import edu.gemini.skycalc.{Offset => SkyCalcOffset}
 import edu.gemini.spModel.core._
 import edu.gemini.spModel.core.AngleSyntax._
@@ -71,7 +72,7 @@ trait VignettingArbitraries extends Arbitraries {
         env  <- arbitrary[TargetEnvironment]
         gmos <- arbitrary[InstGmosNorth]
         offs <- arbitrary[java.util.Set[SkyCalcOffset]]
-      } yield ObsContext.create(env, gmos, Conditions.NOMINAL, offs, null)
+      } yield ObsContext.create(env, gmos, Conditions.NOMINAL, offs, null, None.instance())
     }
 
   // Generate guide star candidates at all position angles supported by the

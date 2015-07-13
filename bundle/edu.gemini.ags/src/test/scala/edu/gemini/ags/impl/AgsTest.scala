@@ -4,6 +4,7 @@ import edu.gemini.ags.api.{AgsMagnitude, AgsRegistrar, AgsStrategy}
 import edu.gemini.ags.conf.ProbeLimitsTable
 import edu.gemini.pot.sp.SPComponentType
 import edu.gemini.pot.ModelConverters._
+import edu.gemini.shared.util.immutable.{ None => JNone }
 import edu.gemini.skycalc.{Offset, DDMMSS, HHMMSS}
 import edu.gemini.spModel.core._
 import edu.gemini.spModel.core.Target.SiderealTarget
@@ -60,8 +61,8 @@ object AgsTest {
     }
     inst.setPosAngleDegrees(0.0)
 
-    val ctx = if (site.isDefined) ObsContext.create(targetEnv, inst, site.asGeminiOpt, BEST, java.util.Collections.emptySet(), null)
-              else ObsContext.create(targetEnv, inst, BEST, java.util.Collections.emptySet(), null)
+    val ctx = if (site.isDefined) ObsContext.create(targetEnv, inst, site.asGeminiOpt, BEST, java.util.Collections.emptySet(), null, JNone.instance())
+              else ObsContext.create(targetEnv, inst, BEST, java.util.Collections.emptySet(), null, JNone.instance())
     AgsTest(
       ctx,
       guideProbe,

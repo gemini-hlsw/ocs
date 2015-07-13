@@ -39,7 +39,7 @@ class GemsVoTableCatalogSpec extends Specification with NoTimeConversions {
       inst.setPosAngle(0.0)
       inst.setIssPort(IssPort.SIDE_LOOKING)
       val conditions = SPSiteQuality.Conditions.BEST
-      val ctx = ObsContext.create(env, inst, JNone.instance[Site], conditions, null, null)
+      val ctx = ObsContext.create(env, inst, JNone.instance[Site], conditions, null, null, JNone.instance())
       val base = Coordinates(RightAscension.fromAngle(ra), Declination.fromAngle(dec).getOrElse(Declination.zero))
       val instrument = GemsInstrument.gsaoi
       val tipTiltMode = GemsTipTiltMode.instrument
@@ -63,7 +63,7 @@ class GemsVoTableCatalogSpec extends Specification with NoTimeConversions {
       val inst = new Gsaoi
       inst.setPosAngle(0.0)
       inst.setIssPort(IssPort.SIDE_LOOKING)
-      val ctx = ObsContext.create(env, inst, JNone.instance[Site], SPSiteQuality.Conditions.BEST, null, null)
+      val ctx = ObsContext.create(env, inst, JNone.instance[Site], SPSiteQuality.Conditions.BEST, null, null, JNone.instance())
       val instrument = GemsInstrument.gsaoi
       val tipTiltMode = GemsTipTiltMode.instrument
 
@@ -82,7 +82,7 @@ class GemsVoTableCatalogSpec extends Specification with NoTimeConversions {
       val inst = new Gsaoi
       inst.setPosAngle(0.0)
       inst.setIssPort(IssPort.SIDE_LOOKING)
-      val ctx = ObsContext.create(env, inst, JNone.instance[Site], SPSiteQuality.Conditions.BEST, null, null)
+      val ctx = ObsContext.create(env, inst, JNone.instance[Site], SPSiteQuality.Conditions.BEST, null, null, JNone.instance())
       val instrument = GemsInstrument.gsaoi
       val tipTiltMode = GemsTipTiltMode.instrument
 
