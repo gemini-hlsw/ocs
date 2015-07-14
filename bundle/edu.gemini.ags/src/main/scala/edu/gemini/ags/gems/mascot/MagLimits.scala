@@ -18,7 +18,7 @@ case class MagLimits private (bmag: Double,
 
   // preallocate to use in filter
   private lazy val filters = List(new Magnitude(bmag, MagnitudeBand.B), new Magnitude(vmag, MagnitudeBand.V), new Magnitude(jmag, MagnitudeBand.J), new Magnitude(hmag, MagnitudeBand.H), new Magnitude(kmag, MagnitudeBand.K))
-  private lazy val RLikeFilters = RLikeBands.map(new Magnitude(rmag, _))
+  private lazy val RLikeFilters = RLikeBands.map(new Magnitude(rmag, _)).list
 
   /**
    * Returns true if the given star is within the mag limits

@@ -49,9 +49,9 @@ class Votable2SkyCatalogServlet extends HttpServlet {
     } yield (b0, v0)
   }
 
-  def candidateBands(band: MagnitudeBand): List[MagnitudeBand] = band match {
-      case MagnitudeBand.R => List(MagnitudeBand._r, MagnitudeBand.R, MagnitudeBand.UC)
-      case _               => List(band)
+  def candidateBands(band: MagnitudeBand): NonEmptyList[MagnitudeBand] = band match {
+      case MagnitudeBand.R => NonEmptyList(MagnitudeBand._r, MagnitudeBand.R, MagnitudeBand.UC)
+      case _               => NonEmptyList(band)
     }
 
   override protected def doGet(req: HttpServletRequest, resp: HttpServletResponse) {

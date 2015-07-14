@@ -8,7 +8,7 @@ import Scalaz._
 
 package object api {
 
-  val RLikeBands = List(MagnitudeBand._r, MagnitudeBand.R, MagnitudeBand.UC)
+  val RLikeBands = NonEmptyList(MagnitudeBand._r, MagnitudeBand.R, MagnitudeBand.UC)
 
   def agsBandExtractor(band: MagnitudeBand): MagnitudeExtractor = if (band === MagnitudeBand.R) FirstBandExtractor(RLikeBands) else SingleBandExtractor(band)
 
@@ -16,9 +16,9 @@ package object api {
    * Default function to find the valid probe bands from a single band.
    * It essentially expands R into r', R and UC while leaving the other bands untouched
    */
-  def defaultProbeBands(band: MagnitudeBand): List[MagnitudeBand] = band match {
+  def defaultProbeBands(band: MagnitudeBand): NonEmptyList[MagnitudeBand] = band match {
       case MagnitudeBand.R => RLikeBands
-      case _               => List(band)
+      case _               => NonEmptyList(band)
     }
 
 }

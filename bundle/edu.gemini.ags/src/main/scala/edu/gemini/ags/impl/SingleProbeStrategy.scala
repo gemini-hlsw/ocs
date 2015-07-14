@@ -88,7 +88,7 @@ case class SingleProbeStrategy(key: AgsStrategyKey, params: SingleProbeStrategyP
       val analyzed = allValid.map { case (ctx0, targets) =>
         val analyzedTargets = for {
           target    <- targets
-          analysis  <- AgsAnalysis.analysis(ctx0, mt, vprobe, target, params.probeBands)
+          analysis  <- AgsAnalysis.analysis(ctx0, mt, vprobe, target, params.probeBands.list)
           magnitude <- params.referenceMagnitude(target)
         } yield (target, magnitude, analysis.quality)
         (ctx0, analyzedTargets)
@@ -214,10 +214,9 @@ case class SingleProbeStrategy(key: AgsStrategyKey, params: SingleProbeStrategyP
   private def ctx180(c: ObsContext): ObsContext =
     c.withPositionAngle(c.getPositionAngle.add(180.0, skycalc.Angle.Unit.DEGREES))
 
-  override val guideProbes: List[GuideProbe] =
-    List(params.guideProbe)
+  override val guideProbes: List[GuideProbe] = List(params.guideProbe)
 
-  override val probeBands: List[MagnitudeBand] = params.probeBands
+  override val probeBands: List[MagnitudeBand] = params.probeBands.list
 }
 
 object SingleProbeStrategy {

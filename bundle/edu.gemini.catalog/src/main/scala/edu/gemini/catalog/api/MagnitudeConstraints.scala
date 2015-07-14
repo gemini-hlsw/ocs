@@ -81,9 +81,9 @@ case class SingleBandExtractor(band: MagnitudeBand) extends MagnitudeExtractor {
 /**
  * Finds the first on a list of bands
  */
-case class FirstBandExtractor(bands: List[MagnitudeBand]) extends MagnitudeExtractor {
-  override def extract(t: SiderealTarget) = bands.map(t.magnitudeIn).find(_.isDefined).flatten
-  override def bandSupported(b: MagnitudeBand) = bands.contains(b)
+case class FirstBandExtractor(bands: NonEmptyList[MagnitudeBand]) extends MagnitudeExtractor {
+  override def extract(t: SiderealTarget) = bands.map(t.magnitudeIn).list.find(_.isDefined).flatten
+  override def bandSupported(b: MagnitudeBand) = bands.list.contains(b)
 }
 
 /**

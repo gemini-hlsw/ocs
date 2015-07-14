@@ -39,11 +39,11 @@ object GemsResultsAnalyzer {
   // Comparison of RLike bands is done by value alone
   private val MagnitudeOptionOrdering: scala.math.Ordering[Option[Magnitude]] = new scala.math.Ordering[Option[Magnitude]] {
     override def compare(x: Option[Magnitude], y: Option[Magnitude]): Int = (x,y) match {
-      case (Some(m1), Some(m2)) if List(m1.band, m2.band).forall(RLikeBands.contains) => MagnitudeValueOrdering.compare(m1, m2)
-      case (Some(m1), Some(m2))                                                       => Magnitude.MagnitudeOrdering.compare(m1, m2) // Magnitude.MagnitudeOrdering is probably incorrect, you cannot sort on different bands
-      case (None,     None)                                                           => 0
-      case (_,        None)                                                           => -1
-      case (None,     _)                                                              => 1
+      case (Some(m1), Some(m2)) if List(m1.band, m2.band).forall(RLikeBands.list.contains) => MagnitudeValueOrdering.compare(m1, m2)
+      case (Some(m1), Some(m2))                                                            => Magnitude.MagnitudeOrdering.compare(m1, m2) // Magnitude.MagnitudeOrdering is probably incorrect, you cannot sort on different bands
+      case (None,     None)                                                                => 0
+      case (_,        None)                                                                => -1
+      case (None,     _)                                                                   => 1
     }
   }
 

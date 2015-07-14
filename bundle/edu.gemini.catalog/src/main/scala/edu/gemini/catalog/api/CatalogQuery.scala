@@ -14,8 +14,8 @@ case class RadiusFilter(base: Coordinates, rc: RadiusConstraint) extends QueryRe
   def filter(t: SiderealTarget): Boolean = rc.targetsFilter(base)(t)
 }
 
-case class MagnitudeQueryFilter(filters: List[MagnitudeConstraints]) extends QueryResultsFilter {
-  def filter(t: SiderealTarget): Boolean = filters.forall(_.filter(t))
+case class MagnitudeQueryFilter(filters: NonEmptyList[MagnitudeConstraints]) extends QueryResultsFilter {
+  def filter(t: SiderealTarget): Boolean = filters.list.forall(_.filter(t))
 }
 
 sealed trait CatalogQuery {
@@ -42,12 +42,12 @@ sealed trait CatalogQuery {
 }
 
 trait CatalogQueryWithMagnitudeFilters extends CatalogQuery { this: CatalogQuery =>
-  val magnitudeConstraints: List[MagnitudeConstraints]
+  val magnitudeConstraints: NonEmptyList[MagnitudeConstraints]
 }
 
 object CatalogQuery {
   private case class BandConstrainedCatalogQuery(id: Option[Int], base: Coordinates, radiusConstraint: RadiusConstraint, magConstraints: MagnitudeConstraints, catalog: CatalogName) extends CatalogQueryWithMagnitudeFilters {
-    val magnitudeConstraints = List(magConstraints)
+    override val magnitudeConstraints = NonEmptyList(magConstraints)
     override val filters: List[QueryResultsFilter] = List(RadiusFilter(base, radiusConstraint), MagnitudeQueryFilter(magnitudeConstraints))
   }
 

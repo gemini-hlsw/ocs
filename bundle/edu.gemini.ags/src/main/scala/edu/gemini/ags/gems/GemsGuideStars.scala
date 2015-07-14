@@ -1,11 +1,11 @@
 package edu.gemini.ags.gems
 
 import edu.gemini.ags.api._
-import edu.gemini.spModel.core.{Magnitude, Angle}
+import edu.gemini.catalog.api.FirstBandExtractor
+import edu.gemini.spModel.core.Angle
 import edu.gemini.spModel.gemini.gems.Canopus
 import edu.gemini.spModel.gemini.gsaoi.GsaoiOdgw
 import edu.gemini.spModel.gems.GemsGuideProbeGroup
-import edu.gemini.spModel.target.SPTarget
 import edu.gemini.spModel.target.env.GuideGroup
 import edu.gemini.spModel.target.env.GuideProbeTargets
 import edu.gemini.shared.util.immutable.ScalaConverters._
@@ -119,13 +119,10 @@ case class GemsGuideStars(pa: Angle, tiptiltGroup: GemsGuideProbeGroup, strehl: 
    * Find on the guide probe's primary target the value of the R-like magnitude
    */
   private def getRLikeMag(gp: Option[GuideProbeTargets]): Double = {
-    def magnitudeExtractor(t: SPTarget): Option[Magnitude] =
-      RLikeBands.flatMap(b => t.getTarget.getMagnitude(b.toOldModel).asScalaOpt.map(_.toNewModel)).headOption
-
     val r = for {
       g <- gp
       p <- g.getPrimary.asScalaOpt
-      m <- magnitudeExtractor(p)
+      m <- FirstBandExtractor(RLikeBands).extract(p.toNewModel)
     } yield m.value
     r.getOrElse(99.0)
   }
