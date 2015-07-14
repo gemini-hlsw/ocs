@@ -71,6 +71,10 @@ public abstract class ITarget implements Cloneable, Serializable {
     /// TRANSITIONAL ACCESSORS
     ///
 
+    public Option<Double> getRaDegrees(Option<Long> time) {
+        return new Some(getRaDegrees());
+    }
+
     public double getRaDegrees() {
         return getRa().getAs(CoordinateParam.Units.DEGREES);
     }
@@ -113,6 +117,10 @@ public abstract class ITarget implements Cloneable, Serializable {
 
     /** Get the Dec. */
     protected abstract DMS getDec();
+
+    public Option<Double> getDecDegrees(Option<Long> time) {
+        return new Some(getDecDegrees());
+    }
 
     // TRANSITIONAL
     public double getDecDegrees() {
