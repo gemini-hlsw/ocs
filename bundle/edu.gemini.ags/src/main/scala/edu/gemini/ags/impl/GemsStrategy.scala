@@ -87,10 +87,10 @@ trait GemsStrategy extends AgsStrategy {
         result  <- agsCatalogResults
         angle   <- anglesToTry
       } yield {
-        val query = result.query
-        val radiusConstraint = query.radiusConstraint
-        val mr = query.magnitudeConstraints
-        val catalogSearchCriterion = CatalogSearchCriterion("ags", radiusConstraint, mr.head, None, angle.some)
+        val query                      = result.query
+        val radiusConstraint           = query.radiusConstraint
+        val mc                         = query.magnitudeConstraints
+        val catalogSearchCriterion     = CatalogSearchCriterion("ags", radiusConstraint, mc.head, None, angle.some)
         val gemsCatalogSearchCriterion = new GemsCatalogSearchCriterion(result.searchKey, catalogSearchCriterion)
         new GemsCatalogSearchResults(gemsCatalogSearchCriterion, result.catalogResult.targets.rows)
       }
@@ -217,7 +217,7 @@ trait GemsStrategy extends AgsStrategy {
     val cond = ctx.getConditions
     val mags = magnitudes(ctx, mt).toMap
 
-    def lim(gp: GuideProbe): Option[MagnitudeConstraints] = autoSearchLimitsCalc(mags(gp), cond)
+    def lim(gp: GuideProbe): Option[MagnitudeConstraints] = autoSearchConstraints(mags(gp), cond)
 
     val odgwMagLimits = (lim(GsaoiOdgw.odgw1) /: GsaoiOdgw.values().drop(1)) { (ml, odgw) =>
       (ml |@| lim(odgw))(_ union _).flatten

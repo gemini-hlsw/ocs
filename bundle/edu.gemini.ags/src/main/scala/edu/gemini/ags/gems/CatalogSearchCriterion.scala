@@ -16,7 +16,7 @@ import Scalaz._
  * Used to query catalogs and filter and categorize query results.
  * See OT-20
  */
-case class CatalogSearchCriterion(name: String, radiusLimits: RadiusConstraint, magRange: MagnitudeConstraints, offset: Option[Offset] = None, posAngle: Option[Angle] = None) {
+case class CatalogSearchCriterion(name: String, radiusConstraint: RadiusConstraint, magConstraint: MagnitudeConstraints, offset: Option[Offset] = None, posAngle: Option[Angle] = None) {
 
   /**
    * If offset and pos angle are specified, then we want the coordinates of the
@@ -52,9 +52,9 @@ case class CatalogSearchCriterion(name: String, radiusLimits: RadiusConstraint, 
    */
   def adjustedLimits: RadiusConstraint =
     if (offset.isDefined && posAngle.isEmpty) {
-      radiusLimits.adjust(offset.get)
+      radiusConstraint.adjust(offset.get)
     } else {
-      radiusLimits
+      radiusConstraint
     }
 
   /**
@@ -80,7 +80,7 @@ case class CatalogSearchCriterion(name: String, radiusLimits: RadiusConstraint, 
     private def matches(magList: List[Magnitude]): Boolean =
       magList.exists(matches)
 
-    private def matches(mag: Magnitude): Boolean = magRange.contains(mag)
+    private def matches(mag: Magnitude): Boolean = magConstraint.contains(mag)
   }
 
   /**

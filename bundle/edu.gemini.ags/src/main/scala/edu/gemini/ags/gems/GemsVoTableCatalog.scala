@@ -71,7 +71,7 @@ case class GemsVoTableCatalog(backend: VoTableBackend = RemoteBackend, catalog: 
   private def searchCatalog(basePosition: Coordinates, criterions: List[GemsCatalogSearchCriterion], statusLogger: StatusLogger): Future[List[GemsCatalogSearchResults]] = {
     val queryArgs = for {
       c <- criterions
-      q = CatalogQuery.catalogQuery(basePosition, c.criterion.radiusLimits, c.criterion.magRange, catalog)
+      q = CatalogQuery.catalogQuery(basePosition, c.criterion.radiusConstraint, c.criterion.magConstraint, catalog)
     } yield (q, c)
 
     val qm = queryArgs.toMap
@@ -92,12 +92,12 @@ case class GemsVoTableCatalog(backend: VoTableBackend = RemoteBackend, catalog: 
    * @return a list of threads used for background catalog searches
    */
   private def searchOptimized(basePosition: Coordinates, conditions: Conditions, criterions: List[GemsCatalogSearchCriterion], inst: GemsInstrument, statusLogger: StatusLogger): Future[List[GemsCatalogSearchResults]] = {
-    val radiusLimitsList = getRadiusLimits(inst, criterions)
-    val magLimitsList = optimizeMagnitudeRanges(criterions)
+    val radiusConstraints = getRadiusConstraints(inst, criterions)
+    val magConstraints = optimizeMagnitudeConstraints(criterions)
 
     val queries = for {
-      radiusLimits <- radiusLimitsList
-      magLimits    <- magLimitsList
+      radiusLimits <- radiusConstraints
+      magLimits    <- magConstraints
     } yield CatalogQuery.catalogQuery(basePosition, radiusLimits, magLimits, catalog)
 
     VoTableClient.catalogs(queries, backend).flatMap {
@@ -131,7 +131,7 @@ case class GemsVoTableCatalog(backend: VoTableBackend = RemoteBackend, catalog: 
   // areas is too large to get good results.
   // Otherwise, for GSAOI, merge the radius limits into one, since the Canopus and GSAOI radius are both about
   // 1 arcmin.
-  protected [gems] def getRadiusLimits(inst: GemsInstrument, criterions: List[GemsCatalogSearchCriterion]): List[RadiusConstraint] = {
+  protected [gems] def getRadiusConstraints(inst: GemsInstrument, criterions: List[GemsCatalogSearchCriterion]): List[RadiusConstraint] = {
     inst match {
       case GemsInstrument.flamingos2 => criterions.map(_.criterion.adjustedLimits)
       case _                         => optimizeRadiusConstraint(criterions).toList
@@ -158,8 +158,8 @@ case class GemsVoTableCatalog(backend: VoTableBackend = RemoteBackend, catalog: 
   }
 
   // Sets the min/max magnitude limits in the given query arguments
-  protected [gems] def optimizeMagnitudeRanges(criterions: List[GemsCatalogSearchCriterion]): List[MagnitudeConstraints] = {
-    val constraintsPerBand = criterions.map(_.criterion.magRange).groupBy(_.referenceBand).toList
+  protected [gems] def optimizeMagnitudeConstraints(criterions: List[GemsCatalogSearchCriterion]): List[MagnitudeConstraints] = {
+    val constraintsPerBand = criterions.map(_.criterion.magConstraint).groupBy(_.referenceBand).toList
     // Get max/min limits per band
     constraintsPerBand.flatMap {
       case (_, Nil) =>

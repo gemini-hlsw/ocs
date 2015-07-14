@@ -68,6 +68,21 @@ class VoTableClientSpec extends SpecificationWithJUnit with VoTableClient with N
       // Depending on timing it could hit all or less than all parallel urls
       counter.get() should be_<=(VoTableClient.catalogUrls.size)
     }
+    "include query params" in {
+      val counter = new AtomicInteger(0)
+      val countingBackend = CountingCachedBackend(counter, "/votable-ucac4.xml")
+      val mc = MagnitudeConstraints(MagnitudeBand.J, FaintnessConstraint(15.0), None)
+      val query = CatalogQuery.catalogQuery(Coordinates.zero, RadiusConstraint.between(Angle.fromDegrees(0), Angle.fromDegrees(0.1)), mc, ucac4)
+
+      val result = Await.result(VoTableClient.catalog(query, countingBackend), 10.seconds)
+      // Extract the query params from the results
+      result.query.base should beEqualTo(Coordinates.zero)
+      result.query.radiusConstraint should beEqualTo(RadiusConstraint.between(Angle.fromDegrees(0), Angle.fromDegrees(0.1)))
+      result.query match {
+        case q: CatalogQueryWithMagnitudeFilters => q.magnitudeConstraints.head should beEqualTo(mc)
+        case _                                   => failure("Unexpected")
+      }
+    }
 
   }
 }

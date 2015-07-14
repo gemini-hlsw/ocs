@@ -69,7 +69,7 @@ class GemsVoTableCatalogSpec extends Specification with NoTimeConversions {
       val posAngles = new java.util.HashSet[Angle]()
       val options = new GemsGuideStarSearchOptions(instrument, tipTiltMode, posAngles)
 
-      val results = GemsVoTableCatalog(TestVoTableBackend("/gemsvotablecatalogquery.xml")).getRadiusLimits(instrument, options.searchCriteria(ctx, scala.None).asScala.toList)
+      val results = GemsVoTableCatalog(TestVoTableBackend("/gemsvotablecatalogquery.xml")).getRadiusConstraints(instrument, options.searchCriteria(ctx, scala.None).asScala.toList)
       results should be size 1
       results.head should beEqualTo(RadiusConstraint.between(Angle.zero, Angle.fromDegrees(0.01878572819686042)))
     }
@@ -88,7 +88,7 @@ class GemsVoTableCatalogSpec extends Specification with NoTimeConversions {
       val posAngles = new java.util.HashSet[Angle]()
       val options = new GemsGuideStarSearchOptions(instrument, tipTiltMode, posAngles)
 
-      val results = GemsVoTableCatalog(TestVoTableBackend("/gemsvotablecatalogquery.xml")).optimizeMagnitudeRanges(options.searchCriteria(ctx, scala.None).asScala.toList)
+      val results = GemsVoTableCatalog(TestVoTableBackend("/gemsvotablecatalogquery.xml")).optimizeMagnitudeConstraints(options.searchCriteria(ctx, scala.None).asScala.toList)
       results should be size 2
       results.head should beEqualTo(MagnitudeConstraints(MagnitudeBand.R, agsBandExtractor(MagnitudeBand.R), FaintnessConstraint(16), Some(SaturationConstraint(8.5))))
       results(1) should beEqualTo(MagnitudeConstraints(MagnitudeBand.H, FaintnessConstraint(14.5), Some(SaturationConstraint(7.3))))

@@ -24,7 +24,7 @@ object AgsMagnitude {
    * Gets the widest possible range limits incorporating the given conditions
    * and speeds.
    */
-  def rangeLimits(mc: MagnitudeCalc, c1: (Conditions, GuideSpeed), c2: (Conditions, GuideSpeed)): Option[MagnitudeConstraints] =
+  private def rangeConstraints(mc: MagnitudeCalc, c1: (Conditions, GuideSpeed), c2: (Conditions, GuideSpeed)): Option[MagnitudeConstraints] =
     mc(c1._1, c1._2).union(mc(c2._1, c2._2))
 
   /**
@@ -34,8 +34,8 @@ object AgsMagnitude {
    * to a catalog server to find all possible candidates under any conditions
    * or guide speed.
    */
-  def manualSearchLimits(mc: MagnitudeCalc): Option[MagnitudeConstraints] =
-    rangeLimits(mc, (BEST, SLOW), (WORST, FAST))
+  def manualSearchConstraints(mc: MagnitudeCalc): Option[MagnitudeConstraints] =
+    rangeConstraints(mc, (BEST, SLOW), (WORST, FAST))
 
   /**
    * Automatic search limits provide the faintest possible limit for the
@@ -43,8 +43,8 @@ object AgsMagnitude {
    * stars which fall within these limits can be automatically assigned to
    * guiders by the AGS system.
    */
-  def autoSearchLimitsCalc(mc: MagnitudeCalc, c: Conditions): Option[MagnitudeConstraints] =
-    rangeLimits(mc, (c, SLOW), (c, FAST))
+  def autoSearchConstraints(mc: MagnitudeCalc, c: Conditions): Option[MagnitudeConstraints] =
+    rangeConstraints(mc, (c, SLOW), (c, FAST))
 
   /**
    * Determines the fastest possible guide speed (if any) that may be used for

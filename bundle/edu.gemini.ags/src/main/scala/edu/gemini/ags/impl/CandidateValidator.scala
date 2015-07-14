@@ -24,7 +24,7 @@ protected case class CandidateValidator(params: SingleProbeStrategyParams, mt: M
    * established context.
    */
   private def isValid(ctx: ObsContext): (SiderealTarget) => Boolean = {
-    val magLimits:Option[MagnitudeConstraints] = params.magnitudeCalc(ctx, mt).flatMap(AgsMagnitude.autoSearchLimitsCalc(_, ctx.getConditions))
+    val magLimits:Option[MagnitudeConstraints] = params.magnitudeCalc(ctx, mt).flatMap(AgsMagnitude.autoSearchConstraints(_, ctx.getConditions))
 
     (st: SiderealTarget) => {
       // Do not use any candidates that are too close to science target / base

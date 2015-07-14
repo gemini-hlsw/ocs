@@ -46,10 +46,10 @@ object GemsMagnitudeTable extends MagnitudeTable {
     def lookup(site: Site): Option[MagnitudeCalc] =
       ((site, probe) match {
         case (Site.GS, odgw: GsaoiOdgw) =>
-          Some(GsaoiOdgwMagnitudeLimitsCalculator.gemsMagnitudeRange(GemsGuideStarType.flexure, MagnitudeBand.H.some))
+          Some(GsaoiOdgwMagnitudeLimitsCalculator.gemsMagnitudeConstraint(GemsGuideStarType.flexure, MagnitudeBand.H.some))
 
         case (Site.GS, can: Canopus.Wfs) =>
-          Some(CanopusWfsMagnitudeLimitsCalculator.gemsMagnitudeRange(GemsGuideStarType.tiptilt, MagnitudeBand.R.some))
+          Some(CanopusWfsMagnitudeLimitsCalculator.gemsMagnitudeConstraint(GemsGuideStarType.tiptilt, MagnitudeBand.R.some))
 
         case _                                               => None
       }).map(mc)
@@ -61,10 +61,10 @@ object GemsMagnitudeTable extends MagnitudeTable {
    * GSAOI, Canopus, and F2 require special handling for magnitude limits for GeMS.
    */
   trait LimitsCalculator {
-    def gemsMagnitudeRange(starType: GemsGuideStarType, nirBand: Option[MagnitudeBand]): MagnitudeConstraints
+    def gemsMagnitudeConstraint(starType: GemsGuideStarType, nirBand: Option[MagnitudeBand]): MagnitudeConstraints
 
-    def adjustGemsMagnitudeRangeForJava(starType: GemsGuideStarType, nirBand: Option[MagnitudeBand], conditions: Conditions): MagnitudeConstraints =
-      conditions.adjust(gemsMagnitudeRange(starType, nirBand))
+    def adjustGemsMagnitudeConstraintForJava(starType: GemsGuideStarType, nirBand: Option[MagnitudeBand], conditions: Conditions): MagnitudeConstraints =
+      conditions.adjust(gemsMagnitudeConstraint(starType, nirBand))
 
     def searchCriterionBuilder(name: String, radiusLimit: skycalc.Angle, instrument: GemsInstrument, magConstraint: MagnitudeConstraints, posAngles: java.util.Set[Angle]): CatalogSearchCriterion = {
       val radiusConstraint = RadiusConstraint.between(Angle.zero, radiusLimit.toNewModel)
@@ -84,7 +84,7 @@ object GemsMagnitudeTable extends MagnitudeTable {
     GemsInstrument.flamingos2 -> Flamingos2OiwfsMagnitudeLimitsCalculator
   )
 
-  private lazy val GsaoiOdgwMagnitudeLimitsCalculator = new LimitsCalculator {
+  lazy val GsaoiOdgwMagnitudeLimitsCalculator = new LimitsCalculator {
     /**
      * The map formerly in Gsaoi.Filter.
      */
@@ -97,7 +97,7 @@ object GemsMagnitudeTable extends MagnitudeTable {
       (GemsGuideStarType.tiptilt, MagnitudeBand.K) -> magLimits(MagnitudeBand.K, 13.5, 6.5)
     )
 
-    override def gemsMagnitudeRange(starType: GemsGuideStarType, nirBand: Option[MagnitudeBand]): MagnitudeConstraints= {
+    override def gemsMagnitudeConstraint(starType: GemsGuideStarType, nirBand: Option[MagnitudeBand]): MagnitudeConstraints= {
       val filter = nirBand.fold(Gsaoi.Filter.H)(band => Gsaoi.Filter.getFilter(band.toOldModel, Gsaoi.Filter.H))
       MagnitudeLimitsMap((starType, filter.getCatalogBand.getValue.toNewModel))
     }
@@ -112,7 +112,7 @@ object GemsMagnitudeTable extends MagnitudeTable {
   }
 
   lazy val CanopusWfsMagnitudeLimitsCalculator = new CanopusWfsCalculator {
-    override def gemsMagnitudeRange(starType: GemsGuideStarType, nirBand: Option[MagnitudeBand]) =
+    override def gemsMagnitudeConstraint(starType: GemsGuideStarType, nirBand: Option[MagnitudeBand]) =
       magLimits(MagnitudeBand.R, 15.5, 8.0)
 
     override def getNominalMagnitudeConstraints(cwfs: Canopus.Wfs): MagnitudeConstraints =
@@ -120,7 +120,7 @@ object GemsMagnitudeTable extends MagnitudeTable {
   }
 
   private lazy val Flamingos2OiwfsMagnitudeLimitsCalculator = new LimitsCalculator {
-    override def gemsMagnitudeRange(starType: GemsGuideStarType, nirBand: Option[MagnitudeBand]) =
+    override def gemsMagnitudeConstraint(starType: GemsGuideStarType, nirBand: Option[MagnitudeBand]) =
       magLimits(MagnitudeBand.R, 18.0, 9.5)
   }
 }

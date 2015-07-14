@@ -123,7 +123,6 @@ case class MagnitudeConstraints(referenceBand: MagnitudeBand, extractor: Magnitu
 }
 
 object MagnitudeConstraints {
-  val instance = this
 
   /**
    * Constructor using a direct reference to the magnitude's band
@@ -134,6 +133,7 @@ object MagnitudeConstraints {
    */
   def apply(referenceBand: MagnitudeBand, faintnessConstraint: FaintnessConstraint, saturationConstraint: Option[SaturationConstraint]):MagnitudeConstraints = MagnitudeConstraints(referenceBand, SingleBandExtractor(referenceBand), faintnessConstraint, saturationConstraint)
 
+  // Only used when constructing magnitude limits on the TPE. Should not be needed when using the new catalog navigator
   @Deprecated
   def conditionsAdjustmentForJava(limits: MagnitudeLimits, conditions: Conditions): MagnitudeLimits = {
     import edu.gemini.pot.ModelConverters._

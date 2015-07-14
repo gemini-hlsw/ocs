@@ -1077,7 +1077,7 @@ public class TpeImageWidget extends NavigatorImageDisplay implements MouseInputL
             SPSiteQuality sq = _ctx.siteQuality().orNull();
             if (sq != null) {
                 final SPSiteQuality.Conditions conditions = sq.conditions();
-                return MagnitudeConstraints.instance().conditionsAdjustmentForJava(params.getMagnitudeLimits(), conditions);
+                return MagnitudeConstraints.conditionsAdjustmentForJava(params.getMagnitudeLimits(), conditions);
             }
             return params.getMagnitudeLimits();
         }
