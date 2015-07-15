@@ -10,6 +10,7 @@ import edu.gemini.pot.sp.*;
 import edu.gemini.pot.spdb.DBAbstractQueryFunctor;
 import edu.gemini.pot.spdb.IDBDatabaseService;
 import edu.gemini.pot.spdb.IDBQueryRunner;
+import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.spModel.ao.AOConstants;
 import edu.gemini.spModel.ao.AOTreeUtil;
 import edu.gemini.spModel.core.Affiliate;
@@ -658,8 +659,9 @@ public class ObsQueryFunctor extends DBAbstractQueryFunctor {
             final TargetObsComp targetEnv = (TargetObsComp) targetObsComp.getDataObject();
             final SPTarget tp = targetEnv.getBase();
             final ITarget target = tp.getTarget();
-            ra = target.getRaDegrees();
-            dec = target.getDecDegrees();
+            final Option<Long> when = obs.getSchedulingBlock().map(SchedulingBlock::start);
+            ra = target.getRaDegrees(when).getOrNull();
+            dec = target.getDecDegrees(when).getOrNull();
         }
 
         // Figure out the planned time for all observations.
