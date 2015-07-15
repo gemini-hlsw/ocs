@@ -14,6 +14,7 @@ import edu.gemini.spModel.gemini.nifs.NIFSParams;
 import edu.gemini.spModel.gemini.nifs.NifsOiwfsGuideProbe;
 import edu.gemini.spModel.guide.GuideProbe;
 import edu.gemini.spModel.guide.GuideProbeUtil;
+import edu.gemini.spModel.obs.SchedulingBlock;
 import edu.gemini.spModel.obs.context.ObsContext;
 import edu.gemini.spModel.obsclass.ObsClass;
 import edu.gemini.spModel.obscomp.InstConstants;
@@ -182,6 +183,7 @@ public final class NifsRule implements IRule {
     private static IRule OI_AO_SAME_AS_SCIENCE_TARGET_RULE = new IRule() {
         private static final String MESSAGE = "For on-axis guiding, target cannot be used as OIWFS b/c of vignetting";
 
+        P2Problems prob = new P2Problems();
         public IP2Problems check(ObservationElements elements)  {
             for (ObsContext ctx : elements.getObsContext()) {
                 final SPTarget baseTarget       = ctx.getTargets().getBase();
@@ -191,29 +193,31 @@ public final class NifsRule implements IRule {
                 if (baseTarget == null || oiTarget.isEmpty() || aoTarget.isEmpty()) return null;
                 //now, let's compare coordinates. If they are the same, raise an error
 
-                double baseC1 = baseTarget.getTarget().getRaHours();
-                double baseC2 = baseTarget.getTarget().getDecDegrees();
+                final Option<Long> when = elements.getSchedulingBlock().map(SchedulingBlock::start);
 
-                double oiC1 = oiTarget.getValue().getTarget().getRaHours();
-                double oiC2 = oiTarget.getValue().getTarget().getDecDegrees();
+                baseTarget.getTarget().getRaHours(when).foreach(baseC1 ->
+                baseTarget.getTarget().getDecDegrees(when).foreach(baseC2 ->
 
-                double aoC1 = aoTarget.getValue().getTarget().getRaHours();
-                double aoC2 = aoTarget.getValue().getTarget().getDecDegrees();
+                oiTarget.getValue().getTarget().getRaHours(when).foreach(oiC1 ->
+                oiTarget.getValue().getTarget().getDecDegrees(when).foreach(oiC2 ->
 
-
-                if (Double.compare(baseC1, oiC1) == 0
-                        &&
-                        Double.compare(baseC2, oiC2) == 0
-                        &&
-                        Double.compare(oiC1, aoC1) == 0
-                        &&
-                        Double.compare(oiC2, aoC2) == 0) {
-                    P2Problems prob = new P2Problems();
-                    prob.addError(PREFIX + "OI_AO_SAME_AS_SCIENCE_TARGET_RULE", MESSAGE, elements.getTargetObsComponentNode().getValue());
-                    return prob;
+                aoTarget.getValue().getTarget().getRaHours(when).foreach(aoC1 ->
+                aoTarget.getValue().getTarget().getDecDegrees(when).foreach(aoC2 -> {
+                    if (Double.compare(baseC1, oiC1) == 0
+                            &&
+                            Double.compare(baseC2, oiC2) == 0
+                            &&
+                            Double.compare(oiC1, aoC1) == 0
+                            &&
+                            Double.compare(oiC2, aoC2) == 0) {
+                        prob.addError(PREFIX + "OI_AO_SAME_AS_SCIENCE_TARGET_RULE", MESSAGE, elements.getTargetObsComponentNode().getValue());
+                    }
                 }
+
+                ))))));
+
             }
-            return null;
+            return prob;
         }
 
         private Option<SPTarget> getAOTarget(ObsContext oc) {
