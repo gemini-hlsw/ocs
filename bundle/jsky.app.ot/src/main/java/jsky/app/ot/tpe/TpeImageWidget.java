@@ -8,6 +8,7 @@ import edu.gemini.catalog.api.RadiusLimits;
 import edu.gemini.shared.util.immutable.*;
 import edu.gemini.spModel.ags.AgsStrategyKey;
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality;
+import edu.gemini.spModel.obs.SchedulingBlock;
 import edu.gemini.spModel.obs.context.ObsContext;
 import edu.gemini.spModel.obscomp.SPInstObsComp;
 import edu.gemini.spModel.target.*;
@@ -488,8 +489,9 @@ public class TpeImageWidget extends NavigatorImageDisplay implements MouseInputL
         // Get the equinox assumed by the coordinate conversion methods (depends on current image)
         //double equinox = getCoordinateConverter().getEquinox();
         ITarget target = ((SPTarget) tp).getTarget();
-        double x = target.getRaDegrees();
-        double y = target.getDecDegrees();
+        final Option<Long> when = _ctx.schedulingBlockJava().map(SchedulingBlock::start);
+        double x = target.getRaDegrees(when).getOrElse(0.0);
+        double y = target.getDecDegrees(when).getOrElse(0.0);
         WorldCoords pos = new WorldCoords(x, y, 2000.);
         return worldToScreenCoords(pos);
     }
@@ -837,8 +839,9 @@ public class TpeImageWidget extends NavigatorImageDisplay implements MouseInputL
      * The Base position has been updated.
      */
     public void basePosUpdate(ITarget target) {
-        double x = target.getRaDegrees();
-        double y = target.getDecDegrees();
+        final Option<Long> when = _ctx.schedulingBlockJava().map(SchedulingBlock::start);
+        double x = target.getRaDegrees(when).getOrElse(0.0);
+        double y = target.getDecDegrees(when).getOrElse(0.0);
         WorldCoords pos = new WorldCoords(x, y, 2000.);
         setBasePos(pos);
         repaint();
