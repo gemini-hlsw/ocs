@@ -49,11 +49,6 @@ class Votable2SkyCatalogServlet extends HttpServlet {
     } yield (b0, v0)
   }
 
-  def candidateBands(band: MagnitudeBand): NonEmptyList[MagnitudeBand] = band match {
-      case MagnitudeBand.R => NonEmptyList(MagnitudeBand._r, MagnitudeBand.R, MagnitudeBand.UC)
-      case _               => NonEmptyList(band)
-    }
-
   override protected def doGet(req: HttpServletRequest, resp: HttpServletResponse) {
 
     val params:Map[String, String] = req.getParameterMap.asScala.map(t => t._1.toString -> t._2.asInstanceOf[Array[String]](0)).toMap
@@ -97,7 +92,7 @@ class Votable2SkyCatalogServlet extends HttpServlet {
           for {
             l0 <- l
             h0 <- h
-          } yield MagnitudeConstraints(b, FirstBandExtractor(candidateBands(b)), FaintnessConstraint(h0._2), SaturationConstraint(l0._2).some)
+          } yield MagnitudeConstraints(BandsList.bandList(b), FaintnessConstraint(h0._2), SaturationConstraint(l0._2).some)
         }
 
         // Secondary filters, ignore unparsable parameters
@@ -106,7 +101,7 @@ class Votable2SkyCatalogServlet extends HttpServlet {
                 u0 <- u.parseDouble.disjunction
                 l0 <- l.parseDouble.disjunction
                 b0 <- \/.fromTryCatch(Band.valueOf(b)).map(_.toNewModel)
-              } yield MagnitudeConstraints(b0, FirstBandExtractor(candidateBands(b0)), FaintnessConstraint(u0), SaturationConstraint(l0).some)
+              } yield MagnitudeConstraints(BandsList.bandList(b0), FaintnessConstraint(u0), SaturationConstraint(l0).some)
           }.collect {
             case \/-(mc) => mc
           }

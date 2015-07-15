@@ -2,10 +2,10 @@ package edu.gemini.ags.api
 
 import edu.gemini.ags.api.AgsAnalysis.NotReachable
 import edu.gemini.ags.api.AgsMagnitude.{MagnitudeCalc, MagnitudeTable}
-import edu.gemini.catalog.api.CatalogQuery
+import edu.gemini.catalog.api.{BandsList, CatalogQuery}
 import edu.gemini.pot.ModelConverters._
 import edu.gemini.spModel.ags.AgsStrategyKey
-import edu.gemini.spModel.core.{MagnitudeBand, Angle}
+import edu.gemini.spModel.core.Angle
 import edu.gemini.spModel.core.Target.SiderealTarget
 import edu.gemini.spModel.guide.{ValidatableGuideProbe, GuideProbe}
 import edu.gemini.spModel.obs.context.ObsContext
@@ -29,7 +29,7 @@ trait AgsStrategy {
 
   def analyzeForJava(ctx: ObsContext, mt: MagnitudeTable, guideProbe: ValidatableGuideProbe, guideStar: SiderealTarget): JOption[AgsAnalysis] = {
     val spTarget = new SPTarget(guideStar.coordinates.ra.toAngle.toDegrees, guideStar.coordinates.dec.toDegrees)
-    if (!guideProbe.validate(spTarget, ctx)) new JSome(NotReachable(guideProbe, guideStar, probeBands))
+    if (!guideProbe.validate(spTarget, ctx)) new JSome(NotReachable(guideProbe, guideStar, probeBands.bands.list))
     else analyze(ctx, mt, guideProbe, guideStar).asGeminiOpt
   }
 
@@ -46,8 +46,8 @@ trait AgsStrategy {
 
   def guideProbes: List[GuideProbe]
 
-  // Return the bands used by the strategy in order
-  def probeBands: List[MagnitudeBand]
+  // Return the bands searched by the strategy
+  def probeBands: BandsList
 }
 
 object AgsStrategy {

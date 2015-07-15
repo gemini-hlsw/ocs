@@ -1,7 +1,6 @@
 package edu.gemini.ags.gems
 
 import edu.gemini.ags.api.AgsMagnitude.{MagnitudeCalc, MagnitudeTable}
-import edu.gemini.ags.api.agsBandExtractor
 import edu.gemini.pot.ModelConverters._
 import edu.gemini.catalog.api._
 import edu.gemini.spModel.core.{Angle, MagnitudeBand, Site}
@@ -26,10 +25,10 @@ import Scalaz._
 object GemsMagnitudeTable extends MagnitudeTable {
 
   private def faint(band: MagnitudeBand, fl: Double): MagnitudeConstraints=
-    MagnitudeConstraints(band, agsBandExtractor(band), FaintnessConstraint(fl), none)
+    MagnitudeConstraints(BandsList.bandList(band), FaintnessConstraint(fl), none)
 
   private def magLimits(band: MagnitudeBand, fl: Double, sl: Double): MagnitudeConstraints =
-    MagnitudeConstraints(band, agsBandExtractor(band), FaintnessConstraint(fl), SaturationConstraint(sl).some)
+    MagnitudeConstraints(BandsList.bandList(band), FaintnessConstraint(fl), SaturationConstraint(sl).some)
 
   def apply(ctx: ObsContext, probe: GuideProbe): Option[MagnitudeCalc] = {
     def mc(nominalLimits: MagnitudeConstraints): MagnitudeCalc = new MagnitudeCalc() {
@@ -70,7 +69,7 @@ object GemsMagnitudeTable extends MagnitudeTable {
       val radiusConstraint = RadiusConstraint.between(Angle.zero, radiusLimit.toNewModel)
       val searchOffset = instrument.getOffset.asScalaOpt.map(_.toNewModel)
       val searchPA = posAngles.asScala.headOption
-      CatalogSearchCriterion(name, radiusConstraint, MagnitudeConstraints(magConstraint.referenceBand, agsBandExtractor(magConstraint.referenceBand), magConstraint.faintnessConstraint, magConstraint.saturationConstraint), searchOffset, searchPA)
+      CatalogSearchCriterion(name, radiusConstraint, magConstraint, searchOffset, searchPA)
     }
 
   }

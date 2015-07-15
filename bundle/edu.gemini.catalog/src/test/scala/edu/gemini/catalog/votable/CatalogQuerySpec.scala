@@ -20,7 +20,7 @@ class CatalogQuerySpec extends SpecificationWithJUnit {
 
   val faint10 = FaintnessConstraint(10)
   val saturation0= SaturationConstraint(0)
-  val mag10 = MagnitudeConstraints(MagnitudeBand.R, faint10, Some(saturation0))
+  val mag10 = MagnitudeConstraints(RBandsList, faint10, Some(saturation0))
   val base = Coordinates.zero
   val par10_10 = CatalogQuery.catalogQuery(base, rad10, mag10, ucac4)
   val par5_10 = CatalogQuery.catalogQuery(base, rad5, mag10, ucac4)

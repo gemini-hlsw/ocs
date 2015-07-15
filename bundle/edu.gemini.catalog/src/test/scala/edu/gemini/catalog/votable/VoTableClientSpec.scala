@@ -13,7 +13,7 @@ import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class VoTableClientSpec extends SpecificationWithJUnit with VoTableClient with NoTimeConversions {
-  val noMagnitudeConstraint = MagnitudeConstraints(MagnitudeBand.J, FaintnessConstraint(100), None)
+  val noMagnitudeConstraint = MagnitudeConstraints(SingleBand(MagnitudeBand.J), FaintnessConstraint(100), None)
   "The VoTable client" should {
 
     val query = CatalogQuery.catalogQuery(Coordinates.zero, RadiusConstraint.between(Angle.fromDegrees(0), Angle.fromDegrees(0.2)), noMagnitudeConstraint, ucac4)
@@ -71,7 +71,7 @@ class VoTableClientSpec extends SpecificationWithJUnit with VoTableClient with N
     "include query params" in {
       val counter = new AtomicInteger(0)
       val countingBackend = CountingCachedBackend(counter, "/votable-ucac4.xml")
-      val mc = MagnitudeConstraints(MagnitudeBand.J, FaintnessConstraint(15.0), None)
+      val mc = MagnitudeConstraints(SingleBand(MagnitudeBand.J), FaintnessConstraint(15.0), None)
       val query = CatalogQuery.catalogQuery(Coordinates.zero, RadiusConstraint.between(Angle.fromDegrees(0), Angle.fromDegrees(0.1)), mc, ucac4)
 
       val result = Await.result(VoTableClient.catalog(query, countingBackend), 10.seconds)

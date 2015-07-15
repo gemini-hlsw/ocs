@@ -2,7 +2,6 @@ package edu.gemini.ags.impl
 
 import edu.gemini.ags.api.{AgsAnalysis, AgsMagnitude, AgsStrategy}
 import edu.gemini.ags.api.AgsStrategy.{Assignment, Estimate, Selection}
-import edu.gemini.ags.api._
 import edu.gemini.ags.gems._
 import edu.gemini.ags.gems.mascot.Strehl
 import edu.gemini.catalog.api._
@@ -104,7 +103,7 @@ trait GemsStrategy extends AgsStrategy {
   }
 
   override def analyze(ctx: ObsContext, mt: MagnitudeTable, guideProbe: ValidatableGuideProbe, guideStar: SiderealTarget): Option[AgsAnalysis] =
-    AgsAnalysis.analysis(ctx, mt, guideProbe, guideStar, probeBands(guideProbe).list)
+    AgsAnalysis.analysis(ctx, mt, guideProbe, guideStar, probeBands(guideProbe).bands.list)
 
   override def analyze(ctx: ObsContext, mt: MagnitudeTable): List[AgsAnalysis] = {
     import AgsAnalysis._
@@ -115,11 +114,11 @@ trait GemsStrategy extends AgsStrategy {
         case _                         => true
       }
 
-      val probeAnalysis = grp.getMembers.asScala.toList.flatMap { p => analysis(ctx, mt, p, probeBands(p).list) }
+      val probeAnalysis = grp.getMembers.asScala.toList.flatMap { p => analysis(ctx, mt, p, probeBands(p).bands.list) }
       probeAnalysis.filter(hasGuideStarForProbe) match {
         case Nil =>
           // Pick the first guide probe as representative, since we are called with either Canopus or GsaoiOdwg
-          ~grp.getMembers.asScala.headOption.map {gp => List(NoGuideStarForGroup(grp, probeBands(gp).list))}
+          ~grp.getMembers.asScala.headOption.map {gp => List(NoGuideStarForGroup(grp, probeBands(gp).bands.list))}
         case lst => lst
       }
     }
@@ -231,11 +230,11 @@ trait GemsStrategy extends AgsStrategy {
     List(canopusConstraint, odgwConstraint).flatten
   }
 
-  override val probeBands: List[MagnitudeBand] = defaultProbeBands(MagnitudeBand.R).list
+  override val probeBands = RBandsList
 
   // Return the band used for each probe
   // TODO Delegate to GemsMagnitudeTable
-  private def probeBands(guideProbe: GuideProbe): NonEmptyList[MagnitudeBand] = if (Canopus.Wfs.Group.instance.getMembers.contains(guideProbe)) defaultProbeBands(MagnitudeBand.R) else NonEmptyList(MagnitudeBand.H)
+  private def probeBands(guideProbe: GuideProbe): BandsList = if (Canopus.Wfs.Group.instance.getMembers.contains(guideProbe)) RBandsList else SingleBand(MagnitudeBand.H)
 
   override val guideProbes: List[GuideProbe] =
     Flamingos2OiwfsGuideProbe.instance :: (GsaoiOdgw.values() ++ Canopus.Wfs.values()).toList

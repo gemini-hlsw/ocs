@@ -25,7 +25,6 @@ import jsky.util.gui.StatusLogger
  * See OT-26
  */
 case class GemsVoTableCatalog(backend: VoTableBackend = RemoteBackend, catalog: CatalogName = ucac4) {
-  private val DefaultSaturationMagnitude = 0.0
 
   /**
    * Searches for the given base position according to the given options.
@@ -159,7 +158,7 @@ case class GemsVoTableCatalog(backend: VoTableBackend = RemoteBackend, catalog: 
 
   // Sets the min/max magnitude limits in the given query arguments
   protected [gems] def optimizeMagnitudeConstraints(criterions: List[GemsCatalogSearchCriterion]): List[MagnitudeConstraints] = {
-    val constraintsPerBand = criterions.map(_.criterion.magConstraint).groupBy(_.referenceBand).toList
+    val constraintsPerBand = criterions.map(_.criterion.magConstraint).groupBy(_.searchBands).toList
     // Get max/min limits per band
     constraintsPerBand.flatMap {
       case (_, Nil) =>

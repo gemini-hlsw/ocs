@@ -1,8 +1,7 @@
 package edu.gemini.ags.gems.mascot
 
 import MascotConf._
-import edu.gemini.catalog.api.FirstBandExtractor
-import edu.gemini.ags.api.RLikeBands
+import edu.gemini.catalog.api.RBandsList
 
 import edu.gemini.spModel.core._
 import edu.gemini.spModel.core.Target.SiderealTarget
@@ -26,7 +25,7 @@ object Star {
    */
   def makeStar(target: SiderealTarget, centerX: Double, centerY: Double): Star = {
     val (x, y) = calculateXy(target.coordinates.ra.toAngle.toDegrees, target.coordinates.dec.toDegrees, centerX, centerY)
-    val rLikeMagnitude = FirstBandExtractor(RLikeBands).extract(target)
+    val rLikeMagnitude = RBandsList.extract(target)
     val (m, rMag) = calculateM(target.magnitudeIn(MagnitudeBand.B).map(_.value).getOrElse(invalidMag), target.magnitudeIn(MagnitudeBand.V).map(_.value).getOrElse(invalidMag), rLikeMagnitude.map(_.value).getOrElse(invalidMag))
     Star(target, x, y, m, rMag)
 

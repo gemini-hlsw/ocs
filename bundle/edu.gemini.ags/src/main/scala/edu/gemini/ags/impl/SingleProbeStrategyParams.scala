@@ -1,6 +1,6 @@
 package edu.gemini.ags.impl
 
-import edu.gemini.ags.api.{AgsMagnitude, defaultProbeBands}
+import edu.gemini.ags.api.AgsMagnitude
 import edu.gemini.ags.api.AgsMagnitude.{MagnitudeCalc, MagnitudeTable}
 import edu.gemini.catalog.api._
 import edu.gemini.pot.ModelConverters._
@@ -39,10 +39,10 @@ sealed trait SingleProbeStrategyParams {
 
   def validator(ctx: ObsContext): GuideStarValidator = guideProbe
 
-  def probeBands = defaultProbeBands(referenceBand)
+  def probeBands: BandsList = BandsList.bandList(referenceBand)
 
   // For a given target return a magnitude value that can be used to select a target
-  def referenceMagnitude(st: SiderealTarget):Option[Magnitude] = FirstBandExtractor(probeBands).extract(st)
+  def referenceMagnitude(st: SiderealTarget):Option[Magnitude] = probeBands.extract(st)
 
   def brightest[A](lst: List[A])(toSiderealTarget: A => SiderealTarget):Option[A] = {
     def magnitude(t: SiderealTarget):Option[Double] = {

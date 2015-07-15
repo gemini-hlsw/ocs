@@ -13,10 +13,8 @@ package object api {
   // Typeclasses to adjust MagnitudeConstraints for different conditions
   implicit val SkyBackgroundAdjuster = new ConstraintsAdjuster[SkyBackground] {
     // Sky Background only adjust for band R and on 80% and ANY
-    override def adjust(sb: SkyBackground, mc: MagnitudeConstraints) = mc.referenceBand match {
-      case SkyBackground.BAND_TO_ADJUST => mc.adjust(_ + sb.magAdjustment())
-      case _                            => mc
-    }
+    override def adjust(sb: SkyBackground, mc: MagnitudeConstraints) =
+      if (mc.searchBands.bandSupported(SkyBackground.BAND_TO_ADJUST)) mc.adjust(_ + sb.magAdjustment()) else mc
   }
 
   implicit val CloudCoverAdjuster = new ConstraintsAdjuster[CloudCover] {
@@ -28,10 +26,8 @@ package object api {
 
   implicit val ImageQualityAdjuster = new ConstraintsAdjuster[ImageQuality] {
     // ImageQuality adjust for band R
-    override def adjust(iq: ImageQuality, mc: MagnitudeConstraints) = mc.referenceBand match {
-      case ImageQuality.BAND_TO_ADJUST => mc.adjust(_ + iq.magAdjustment())
-      case _                            => mc
-    }
+    override def adjust(iq: ImageQuality, mc: MagnitudeConstraints) =
+      if (mc.searchBands.bandSupported(ImageQuality.BAND_TO_ADJUST)) mc.adjust(_ + iq.magAdjustment()) else mc
   }
 
   implicit val ConditionsAdjuster = new ConstraintsAdjuster[Conditions] {

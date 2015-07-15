@@ -13,13 +13,13 @@ import scalaz._
 import Scalaz._
 
 class CatalogSearchCriterionSpec extends Specification with Arbitraries with ScalaCheck {
-  val mc = MagnitudeConstraints(MagnitudeBand.J, FaintnessConstraint(10.0), Some(SaturationConstraint(2.0)))
+  val mc = MagnitudeConstraints(SingleBand(MagnitudeBand.J), FaintnessConstraint(10.0), Some(SaturationConstraint(2.0)))
 
   "CatalogSearchCriterion" should {
     "not adjust limits if posAngle defined" in {
       forAll { (offset: Offset) =>
         val rc = RadiusConstraint.between(Angle.fromArcmin(1.0), Angle.fromArcmin(2.0))
-        val criterion = CatalogSearchCriterion("name", rc, MagnitudeConstraints(MagnitudeBand.J, FaintnessConstraint(10.0), None), offset.some, Angle.fromDegrees(45).some)
+        val criterion = CatalogSearchCriterion("name", rc, MagnitudeConstraints(SingleBand(MagnitudeBand.J), FaintnessConstraint(10.0), None), offset.some, Angle.fromDegrees(45).some)
         criterion.adjustedLimits should beEqualTo(rc)
       }
     }
@@ -27,7 +27,7 @@ class CatalogSearchCriterionSpec extends Specification with Arbitraries with Sca
       forAll { (offset: Offset) =>
         (offset =/= Offset.zero) ==> {
           val rc = RadiusConstraint.between(Angle.fromArcmin(1.0), Angle.fromArcmin(2.0))
-          val criterion = CatalogSearchCriterion("name", rc, MagnitudeConstraints(MagnitudeBand.J, FaintnessConstraint(10.0), None), offset.some, None)
+          val criterion = CatalogSearchCriterion("name", rc, MagnitudeConstraints(SingleBand(MagnitudeBand.J), FaintnessConstraint(10.0), None), offset.some, None)
           criterion.adjustedLimits should not be equalTo(rc)
           criterion.adjustedLimits.minLimit.toDegrees should beGreaterThanOrEqualTo(0.0)
           criterion.adjustedLimits.maxLimit.toDegrees should beGreaterThanOrEqualTo(0.0)

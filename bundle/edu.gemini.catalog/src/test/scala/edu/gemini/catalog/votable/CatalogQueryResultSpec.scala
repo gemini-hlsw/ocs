@@ -16,7 +16,7 @@ class CatalogQueryResultSpec extends SpecificationWithJUnit {
   val targets = VoTableParser.parse(xmlFile, getClass.getResourceAsStream(s"/$xmlFile"))
   val unfiltered = CatalogQueryResult(targets | ParsedVoResource(Nil))
 
-  val noMagnitudeConstraint = MagnitudeConstraints(MagnitudeBand.J, FaintnessConstraint(100), None)
+  val noMagnitudeConstraint = MagnitudeConstraints(SingleBand(MagnitudeBand.J), FaintnessConstraint(100), None)
 
   "CatalogQueryResultSpec" should {
     "be able to filter targets inside the requested range limit" in {
@@ -39,7 +39,7 @@ class CatalogQueryResultSpec extends SpecificationWithJUnit {
       filtered.targets.rows should be size 7
     }
     "be able to filter by faintness on band j" in {
-      val mc = MagnitudeConstraints(MagnitudeBand.J, FaintnessConstraint(15.0), None)
+      val mc = MagnitudeConstraints(SingleBand(MagnitudeBand.J), FaintnessConstraint(15.0), None)
       val qc = CatalogQuery.catalogQuery(c, RadiusConstraint.between(Angle.zero, coneSearch), mc, ucac4)
       val filtered = unfiltered.filter(qc)
 
@@ -47,7 +47,7 @@ class CatalogQueryResultSpec extends SpecificationWithJUnit {
       filtered.targets.rows should be size 9
     }
     "be able to filter by faintness and saturation on band j" in {
-      val mc = MagnitudeConstraints(MagnitudeBand.J, FaintnessConstraint(15.0), Some(SaturationConstraint(14.0)))
+      val mc = MagnitudeConstraints(SingleBand(MagnitudeBand.J), FaintnessConstraint(15.0), Some(SaturationConstraint(14.0)))
       val qc = CatalogQuery.catalogQuery(c, RadiusConstraint.between(Angle.zero, coneSearch), mc, ucac4)
       val filtered = unfiltered.filter(qc)
 
@@ -55,8 +55,8 @@ class CatalogQueryResultSpec extends SpecificationWithJUnit {
       filtered.targets.rows should be size 4
     }
     "be able to filter with a band and range" in {
-      val mc1 = MagnitudeConstraints(MagnitudeBand.J, FaintnessConstraint(15.0), None)
-      val mc2 = MagnitudeConstraints(MagnitudeBand.J, FaintnessConstraint(15.0), None)
+      val mc1 = MagnitudeConstraints(SingleBand(MagnitudeBand.J), FaintnessConstraint(15.0), None)
+      val mc2 = MagnitudeConstraints(SingleBand(MagnitudeBand.J), FaintnessConstraint(15.0), None)
       val qc1 = CatalogQuery.catalogQuery(c, RadiusConstraint.between(Angle.zero, Angle.fromDegrees(90)), mc1, ucac4)
       val qc2 = CatalogQuery.catalogQuery(c, RadiusConstraint.between(Angle.zero, Angle.fromDegrees(90)), mc2, ucac4)
       val filtered = unfiltered.filter(qc1)
@@ -67,7 +67,7 @@ class CatalogQueryResultSpec extends SpecificationWithJUnit {
       filtered.targets.rows should be size 9
     }
     "be able to filter with a band range with Nil) adjustments" in {
-      val mc = MagnitudeConstraints(MagnitudeBand.J, FaintnessConstraint(15.0), None)
+      val mc = MagnitudeConstraints(SingleBand(MagnitudeBand.J), FaintnessConstraint(15.0), None)
       val qc = CatalogQuery.catalogQuery(c, RadiusConstraint.between(Angle.zero, Angle.fromDegrees(90)), mc, ucac4)
 
       def nilAdjustment(v: Double) = v
@@ -82,7 +82,7 @@ class CatalogQueryResultSpec extends SpecificationWithJUnit {
       filtered2.targets.rows should be size 9
     }
     "be able to filter with a band range with nominal conditions" in {
-      val mc = MagnitudeConstraints(MagnitudeBand.J, FaintnessConstraint(15.0), None)
+      val mc = MagnitudeConstraints(SingleBand(MagnitudeBand.J), FaintnessConstraint(15.0), None)
       val qc = CatalogQuery.catalogQuery(c, RadiusConstraint.between(Angle.zero, Angle.fromDegrees(90)), mc, ucac4)
 
       // Nominal conditions don't change the MagnitudeRange
@@ -97,7 +97,7 @@ class CatalogQueryResultSpec extends SpecificationWithJUnit {
       filtered.targets.rows should be size 9
     }
     "be able to filter with a band range with extreme adjustments" in {
-      val mc = MagnitudeConstraints(MagnitudeBand.J, FaintnessConstraint(15.0), None)
+      val mc = MagnitudeConstraints(SingleBand(MagnitudeBand.J), FaintnessConstraint(15.0), None)
 
       val qc = CatalogQuery.catalogQuery(c, RadiusConstraint.between(Angle.zero, Angle.fromDegrees(90)), mc.adjust(k => k - 20), ucac4)
       val filtered = unfiltered.filter(qc)

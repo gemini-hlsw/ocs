@@ -1,7 +1,6 @@
 package edu.gemini.ags.gems
 
-import edu.gemini.ags.api._
-import edu.gemini.catalog.api.FirstBandExtractor
+import edu.gemini.catalog.api.RBandsList
 import edu.gemini.spModel.core.Angle
 import edu.gemini.spModel.gemini.gems.Canopus
 import edu.gemini.spModel.gemini.gsaoi.GsaoiOdgw
@@ -122,7 +121,7 @@ case class GemsGuideStars(pa: Angle, tiptiltGroup: GemsGuideProbeGroup, strehl: 
     val r = for {
       g <- gp
       p <- g.getPrimary.asScalaOpt
-      m <- FirstBandExtractor(RLikeBands).extract(p.toNewModel)
+      m <- RBandsList.extract(p.toNewModel)
     } yield m.value
     r.getOrElse(99.0)
   }

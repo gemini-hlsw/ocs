@@ -7,11 +7,10 @@ import edu.gemini.catalog.votable.{RemoteBackend, VoTableBackend, CatalogExcepti
 import edu.gemini.pot.ModelConverters._
 import edu.gemini.skycalc
 import edu.gemini.spModel.ags.AgsStrategyKey
-import edu.gemini.spModel.core.{MagnitudeBand, Coordinates, Angle}
+import edu.gemini.spModel.core.{Coordinates, Angle}
 import edu.gemini.spModel.core.Target.SiderealTarget
 import edu.gemini.spModel.guide.{ValidatableGuideProbe, VignettingGuideProbe, GuideProbe}
 import edu.gemini.spModel.obs.context.ObsContext
-import edu.gemini.spModel.target.system.CoordinateParam.Units
 import edu.gemini.spModel.target.system.HmsDegTarget
 import edu.gemini.spModel.telescope.PosAngleConstraint._
 
@@ -34,10 +33,10 @@ case class SingleProbeStrategy(key: AgsStrategyKey, params: SingleProbeStrategyP
     params.magnitudeCalc(ctx, mt).toList.map(params.guideProbe -> _)
 
   override def analyze(ctx: ObsContext, mt: MagnitudeTable): List[AgsAnalysis] =
-    AgsAnalysis.analysis(ctx, mt, params.guideProbe, probeBands).toList
+    AgsAnalysis.analysis(ctx, mt, params.guideProbe, probeBands.bands.list).toList
 
   override def analyze(ctx: ObsContext, mt: MagnitudeTable, guideProbe: ValidatableGuideProbe, guideStar: SiderealTarget): Option[AgsAnalysis] =
-    AgsAnalysis.analysis(ctx, mt, guideProbe, guideStar, probeBands)
+    AgsAnalysis.analysis(ctx, mt, guideProbe, guideStar, probeBands.bands.list)
 
   override def catalogQueries(ctx: ObsContext, mt: MagnitudeTable): List[CatalogQuery] =
     params.catalogQueries(ctx, mt).toList
@@ -88,7 +87,7 @@ case class SingleProbeStrategy(key: AgsStrategyKey, params: SingleProbeStrategyP
       val analyzed = allValid.map { case (ctx0, targets) =>
         val analyzedTargets = for {
           target    <- targets
-          analysis  <- AgsAnalysis.analysis(ctx0, mt, vprobe, target, params.probeBands.list)
+          analysis  <- AgsAnalysis.analysis(ctx0, mt, vprobe, target, params.probeBands.bands.list)
           magnitude <- params.referenceMagnitude(target)
         } yield (target, magnitude, analysis.quality)
         (ctx0, analyzedTargets)
@@ -216,7 +215,7 @@ case class SingleProbeStrategy(key: AgsStrategyKey, params: SingleProbeStrategyP
 
   override val guideProbes: List[GuideProbe] = List(params.guideProbe)
 
-  override val probeBands: List[MagnitudeBand] = params.probeBands.list
+  override val probeBands = params.probeBands
 }
 
 object SingleProbeStrategy {

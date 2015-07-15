@@ -1,7 +1,6 @@
 package edu.gemini.ags.gems
 
 import edu.gemini.catalog.api._
-import edu.gemini.ags.api._
 import edu.gemini.catalog.votable.TestVoTableBackend
 import edu.gemini.spModel.gemini.gems.Canopus.Wfs
 import org.specs2.time.NoTimeConversions
@@ -28,7 +27,7 @@ import scala.concurrent.Await
 import scala.collection.JavaConverters._
 
 class GemsVoTableCatalogSpec extends Specification with NoTimeConversions {
-  val magnitudeRange = MagnitudeConstraints(MagnitudeBand.J, FaintnessConstraint(10.0), SaturationConstraint(2.0).some)
+  val magnitudeRange = MagnitudeConstraints(SingleBand(MagnitudeBand.J), FaintnessConstraint(10.0), SaturationConstraint(2.0).some)
 
   "GemsVoTableCatalog" should {
     "support executing queries" in {
@@ -49,8 +48,8 @@ class GemsVoTableCatalogSpec extends Specification with NoTimeConversions {
       val results = Await.result(GemsVoTableCatalog(TestVoTableBackend("/gemsvotablecatalogquery.xml")).search(ctx, base, options, scala.None, null), 30.seconds)
       results should be size 2
 
-      results.head.criterion should beEqualTo(GemsCatalogSearchCriterion(GemsCatalogSearchKey(GemsGuideStarType.tiptilt, GsaoiOdgw.Group.instance), CatalogSearchCriterion("On-detector Guide Window tiptilt", RadiusConstraint.between(Angle.zero, Angle.fromDegrees(0.01666666666665151)), MagnitudeConstraints(MagnitudeBand.H, FaintnessConstraint(14.5), Some(SaturationConstraint(7.3))), Some(Offset(0.0014984027777700248.degrees[OffsetP], 0.0014984027777700248.degrees[OffsetQ])), scala.None)))
-      results(1).criterion should beEqualTo(GemsCatalogSearchCriterion(GemsCatalogSearchKey(GemsGuideStarType.flexure, Wfs.Group.instance), CatalogSearchCriterion("Canopus Wave Front Sensor flexure", RadiusConstraint.between(Angle.zero, Angle.fromDegrees(0.01666666666665151)), MagnitudeConstraints(MagnitudeBand.R, FirstBandExtractor(RLikeBands), FaintnessConstraint(16.0), Some(SaturationConstraint(8.5))), Some(Offset(0.0014984027777700248.degrees[OffsetP], 0.0014984027777700248.degrees[OffsetQ])), scala.None)))
+      results.head.criterion should beEqualTo(GemsCatalogSearchCriterion(GemsCatalogSearchKey(GemsGuideStarType.tiptilt, GsaoiOdgw.Group.instance), CatalogSearchCriterion("On-detector Guide Window tiptilt", RadiusConstraint.between(Angle.zero, Angle.fromDegrees(0.01666666666665151)), MagnitudeConstraints(SingleBand(MagnitudeBand.H), FaintnessConstraint(14.5), Some(SaturationConstraint(7.3))), Some(Offset(0.0014984027777700248.degrees[OffsetP], 0.0014984027777700248.degrees[OffsetQ])), scala.None)))
+      results(1).criterion should beEqualTo(GemsCatalogSearchCriterion(GemsCatalogSearchKey(GemsGuideStarType.flexure, Wfs.Group.instance), CatalogSearchCriterion("Canopus Wave Front Sensor flexure", RadiusConstraint.between(Angle.zero, Angle.fromDegrees(0.01666666666665151)), MagnitudeConstraints(RBandsList, FaintnessConstraint(16.0), Some(SaturationConstraint(8.5))), Some(Offset(0.0014984027777700248.degrees[OffsetP], 0.0014984027777700248.degrees[OffsetQ])), scala.None)))
       results.head.results should be size 5
       results(1).results should be size 5
     }
@@ -90,8 +89,8 @@ class GemsVoTableCatalogSpec extends Specification with NoTimeConversions {
 
       val results = GemsVoTableCatalog(TestVoTableBackend("/gemsvotablecatalogquery.xml")).optimizeMagnitudeConstraints(options.searchCriteria(ctx, scala.None).asScala.toList)
       results should be size 2
-      results.head should beEqualTo(MagnitudeConstraints(MagnitudeBand.R, agsBandExtractor(MagnitudeBand.R), FaintnessConstraint(16), Some(SaturationConstraint(8.5))))
-      results(1) should beEqualTo(MagnitudeConstraints(MagnitudeBand.H, FaintnessConstraint(14.5), Some(SaturationConstraint(7.3))))
+      results.head should beEqualTo(MagnitudeConstraints(SingleBand(MagnitudeBand.H), FaintnessConstraint(14.5), Some(SaturationConstraint(7.3))))
+      results(1) should beEqualTo(MagnitudeConstraints(RBandsList, FaintnessConstraint(16), Some(SaturationConstraint(8.5))))
     }
     "preserve the radius constraint for a single item without offsets" in {
       val catalog = GemsVoTableCatalog(TestVoTableBackend(""))
