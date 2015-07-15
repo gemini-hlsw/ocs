@@ -107,9 +107,9 @@ class Votable2SkyCatalogServlet extends HttpServlet {
           }
 
         val query: CatalogQuery = (mr >>= (_.toOption)).map { const =>
-            CatalogQuery.catalogQuery(coordinates, rc, const, ucac4)
+            CatalogQuery(coordinates, rc, const, ucac4)
           }.getOrElse {
-            CatalogQuery.catalogQuery(coordinates, rc, ucac4)
+            CatalogQuery(coordinates, rc, Nil, ucac4)
           }
 
         // Execute query

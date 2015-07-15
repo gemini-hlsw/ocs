@@ -159,7 +159,7 @@ case class AgsTest(ctx: ObsContext, guideProbe: GuideProbe, usable: List[(Sidere
         xmult <- List(-1,1)
         ymult <- List(-1,1)
         newPoint = new Point(p.getX + xmult * nudge, p.getY + ymult * nudge)
-        if points.filter(_.distance(newPoint) < minimumDistance).isEmpty && !a.contains(newPoint)
+        if !points.exists(_.distance(newPoint) < minimumDistance) && !a.contains(newPoint)
       } yield newPoint).take(maxOuterPointsPerPoint)).flatten
 
     // Try to find a single working point in the area through a (depth-limited) quaternary BFS search.
@@ -196,12 +196,11 @@ case class AgsTest(ctx: ObsContext, guideProbe: GuideProbe, usable: List[(Sidere
     }
 
     // Get the points that fall outside of the area, limited to maxOuterPoints.
-    val outpoints = pathSegments().map(_._2).map(createOuterPoints(_)).flatten.take(maxOuterPoints)
+    val outpoints = pathSegments().map(_._2).flatMap(createOuterPoints(_)).take(maxOuterPoints)
 
     // Find an inner point to use, and return the candidates.
     (findInnerPoint().toList, outpoints)
   }
-
 
   private def boundingBoxCandidates(a: Area): (List[Point], List[Point]) = {
     val rect = a.getBounds2D
@@ -260,9 +259,8 @@ case class AgsTest(ctx: ObsContext, guideProbe: GuideProbe, usable: List[(Sidere
       bright ++ faintFast ++ faintNorm ++ faintSlow
     }
 
-    def toSkyCoordinates(lst: List[Point]): List[Coordinates] = {
-      lst.map { p => Coordinates(RightAscension.fromAngle(Angle.fromArcsecs(-p.getX)), Declination.fromAngle(Angle.fromArcsecs(-p.getY)).getOrElse(Declination.zero)) }.toSet.toList
-    }
+    def toSkyCoordinates(lst: List[Point]): List[Coordinates] =
+      lst.map { p => Coordinates(RightAscension.fromAngle(Angle.fromArcsecs(-p.getX)), Declination.fromAngle(Angle.fromArcsecs(-p.getY)).getOrElse(Declination.zero)) }.distinct
 
     def candidates(lst: List[Point]): List[(Coordinates, Magnitude, Option[GuideSpeed])] =
       for {
@@ -311,7 +309,7 @@ case class AgsTest(ctx: ObsContext, guideProbe: GuideProbe, usable: List[(Sidere
 
   // Take a test case and produce 36, one with each predefined condition and 30 deg position angle.
   private def allConditionsAndRotations(): List[AgsTest] =
-    allConditions().map(_.allRotations()).flatten
+    allConditions().flatMap(_.allRotations())
 
   // Convenience function to calculate the proper rotation.
   private def rotation: AffineTransform =
@@ -335,7 +333,7 @@ case class AgsTest(ctx: ObsContext, guideProbe: GuideProbe, usable: List[(Sidere
     }
 
   def testBaseTwoIntersectingOffsets(): Unit = {
-    allConditions().map(_.withOffsets((400.0, 400.0), (300.0, 300.0))).map { tc =>
+    allConditions().map(_.withOffsets((400.0, 400.0), (300.0, 300.0))).foreach { tc =>
       // Construct the area consisting of the intersection of the patrol field with respect to both the offsets.
       val originalArea = calculateValidArea(ctx, guideProbe)
       val offsetArea1 = originalArea.createTransformedArea(AffineTransform.getTranslateInstance(-400.0, -400.0))
@@ -363,7 +361,7 @@ case class AgsTest(ctx: ObsContext, guideProbe: GuideProbe, usable: List[(Sidere
   }
 
   def testBaseRotatedTwoIntersectingOffsets(): Unit = {
-    allConditionsAndRotations().map(_.withOffsets((400.0, 400.0), (300.0, 300.0))).map { tc =>
+    allConditionsAndRotations().map(_.withOffsets((400.0, 400.0), (300.0, 300.0))).foreach { tc =>
       // Construct the area consisting of the intersection of the patrol field with respect to both the offsets.
       val originalArea = calculateValidArea(ctx, guideProbe)
 
@@ -386,7 +384,7 @@ case class AgsTest(ctx: ObsContext, guideProbe: GuideProbe, usable: List[(Sidere
 
   def testBaseUnboundedPosAngleConstraint(): Unit = {
     if (ctx.getInstrument.isInstanceOf[PosAngleConstraintAware]) {
-      allConditions().map{ tc =>
+      allConditions().foreach { tc =>
         tc.ctx.getInstrument.asInstanceOf[PosAngleConstraintAware].setPosAngleConstraint(PosAngleConstraint.UNBOUNDED)
 
         // Now we want to create all the candidates for a position angle of 135 and test that these are accessible.
@@ -417,7 +415,7 @@ case class AgsTest(ctx: ObsContext, guideProbe: GuideProbe, usable: List[(Sidere
     def go(winners: List[(SiderealTarget, GuideSpeed)]): Unit = {
       val best:Option[(SiderealTarget, GuideSpeed)] = winners match {
         case Nil => None
-        case lst => strategy.params.brightest(lst)(_._1).headOption
+        case lst => strategy.params.brightest(lst)(_._1)
       }
 
       val all = winners.map(_._1) ++ unusable

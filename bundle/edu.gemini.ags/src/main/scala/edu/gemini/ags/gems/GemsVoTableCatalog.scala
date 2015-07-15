@@ -70,13 +70,11 @@ case class GemsVoTableCatalog(backend: VoTableBackend = RemoteBackend, catalog: 
   private def searchCatalog(basePosition: Coordinates, criterions: List[GemsCatalogSearchCriterion], statusLogger: StatusLogger): Future[List[GemsCatalogSearchResults]] = {
     val queryArgs = for {
       c <- criterions
-      q = CatalogQuery.catalogQuery(basePosition, c.criterion.radiusConstraint, c.criterion.magConstraint, catalog)
+      q = CatalogQuery(basePosition, c.criterion.radiusConstraint, c.criterion.magConstraint, catalog)
     } yield (q, c)
 
     val qm = queryArgs.toMap
-    VoTableClient.catalogs(queryArgs.map(_._1), backend).map(l => l.collect {
-      case QueryResult(q: CatalogQueryWithMagnitudeFilters, results:CatalogQueryResult) => GemsCatalogSearchResults(qm.get(q).get, results.targets.rows)
-    })
+    VoTableClient.catalogs(queryArgs.map(_._1), backend).map(l => l.map { qr => GemsCatalogSearchResults(qm.get(qr.query).get, qr.result.targets.rows)})
   }
 
   /**
@@ -97,7 +95,7 @@ case class GemsVoTableCatalog(backend: VoTableBackend = RemoteBackend, catalog: 
     val queries = for {
       radiusLimits <- radiusConstraints
       magLimits    <- magConstraints
-    } yield CatalogQuery.catalogQuery(basePosition, radiusLimits, magLimits, catalog)
+    } yield CatalogQuery(basePosition, radiusLimits, magLimits, catalog)
 
     VoTableClient.catalogs(queries, backend).flatMap {
       case l if l.exists(_.result.containsError) =>
@@ -163,8 +161,6 @@ case class GemsVoTableCatalog(backend: VoTableBackend = RemoteBackend, catalog: 
     constraintsPerBand.flatMap {
       case (_, Nil) =>
         None
-      case (_, h :: Nil) =>
-        Some(h)
       case (_, h :: tail) =>
         tail.foldLeft(h.some) { (a, b) =>
           a >>= (_ union b)

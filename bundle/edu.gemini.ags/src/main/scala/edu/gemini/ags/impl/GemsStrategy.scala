@@ -42,7 +42,7 @@ trait GemsStrategy extends AgsStrategy {
   private val OdgwFlexureId    = 1
 
   // Catalog results with search keys to avoid having to recompute search key info on the fly.
-  private case class CatalogResultWithKey(query: CatalogQueryWithMagnitudeFilters, referenceBand: MagnitudeBand, catalogResult: CatalogQueryResult, searchKey: GemsCatalogSearchKey)
+  private case class CatalogResultWithKey(query: CatalogQuery, referenceBand: MagnitudeBand, catalogResult: CatalogQueryResult, searchKey: GemsCatalogSearchKey)
 
   // Query the catalog for each constraint and compile a list of results with the necessary
   // information for GeMS.
@@ -68,11 +68,10 @@ trait GemsStrategy extends AgsStrategy {
     VoTableClient.catalogs(catalogQueries(ctx, mt), backend).flatMap {
       case result if result.exists(_.result.containsError) => Future.failed(CatalogException(result.flatMap(_.result.problems)))
       case result                                          => Future.successful {
-        result.collect {
-          case res @ QueryResult(q: CatalogQueryWithMagnitudeFilters, results) =>
-            val id = q.id
-            id.map(x => CatalogResultWithKey(q, GuideProbeBandMap(x), results, GemsCatalogSearchKey(GuideStarTypeMap(x), GuideProbeGroupMap(x))))
-        }.flatten
+        result.flatMap { qr =>
+            val id = qr.query.id
+            id.map(x => CatalogResultWithKey(qr.query, GuideProbeBandMap(x), qr.result, GemsCatalogSearchKey(GuideStarTypeMap(x), GuideProbeGroupMap(x))))
+        }
       }
     }
   }
@@ -225,8 +224,8 @@ trait GemsStrategy extends AgsStrategy {
       (ml |@| lim(can))(_ union _).flatten
     }
 
-    val canopusConstraint = canMagLimits.map(c => CatalogQuery.catalogQuery(CanopusTipTiltId, ctx.getBaseCoordinates.toNewModel, RadiusConstraint.between(Angle.zero, Canopus.Wfs.Group.instance.getRadiusLimits.toNewModel), ctx.getConditions.adjust(c), ucac4))
-    val odgwConstraint     = odgwMagLimits.map(c => CatalogQuery.catalogQuery(OdgwFlexureId,    ctx.getBaseCoordinates.toNewModel, RadiusConstraint.between(Angle.zero, GsaoiOdgw.Group.instance.getRadiusLimits.toNewModel), ctx.getConditions.adjust(c), ucac4))
+    val canopusConstraint = canMagLimits.map(c => CatalogQuery(CanopusTipTiltId.some, ctx.getBaseCoordinates.toNewModel, RadiusConstraint.between(Angle.zero, Canopus.Wfs.Group.instance.getRadiusLimits.toNewModel), List(ctx.getConditions.adjust(c)), ucac4))
+    val odgwConstraint    = odgwMagLimits.map(c => CatalogQuery(OdgwFlexureId.some,    ctx.getBaseCoordinates.toNewModel, RadiusConstraint.between(Angle.zero, GsaoiOdgw.Group.instance.getRadiusLimits.toNewModel), List(ctx.getConditions.adjust(c)), ucac4))
     List(canopusConstraint, odgwConstraint).flatten
   }
 

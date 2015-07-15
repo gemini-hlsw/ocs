@@ -128,7 +128,7 @@ object GuidingFeedback {
   // GuidingFeedback.Rows corresponding to the observation as a whole.
   def obsAnalysis(ctx: ObsContext, mt: MagnitudeTable): List[Row] = {
     val (calcTable, analysis, probeBands) = AgsRegistrar.currentStrategy(ctx).fold((Map.empty[GuideProbe, MagnitudeCalc], List.empty[AgsAnalysis], List.empty[MagnitudeBand])) { strategy =>
-      (strategy.magnitudes(ctx, mt).toMap, strategy.analyze(ctx, mt), strategy.probeBands)
+      (strategy.magnitudes(ctx, mt).toMap, strategy.analyze(ctx, mt), strategy.probeBands.bands.list)
     }
     val probeLimitsMap = calcTable.mapValues(ProbeLimits(probeBands, ctx, _))
 

@@ -36,12 +36,6 @@ object GemsMagnitudeTable extends MagnitudeTable {
         conds.adjust(nominalLimits)
     }
 
-    def ft(band: MagnitudeBand, fl: Double): Option[MagnitudeConstraints] =
-      Some(faint(band, fl))
-
-    def ml(band: MagnitudeBand, fl: Double, sl: Double): Option[MagnitudeConstraints] =
-      Some(magLimits(band, fl, sl))
-
     def lookup(site: Site): Option[MagnitudeCalc] =
       ((site, probe) match {
         case (Site.GS, odgw: GsaoiOdgw) =>
