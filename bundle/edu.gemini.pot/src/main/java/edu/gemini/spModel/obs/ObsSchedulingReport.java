@@ -5,6 +5,7 @@
 package edu.gemini.spModel.obs;
 
 import edu.gemini.pot.sp.*;
+import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.skycalc.TwilightBoundType;
 import edu.gemini.skycalc.TwilightBoundedNight;
 import edu.gemini.skycalc.*;
@@ -84,7 +85,7 @@ public final class ObsSchedulingReport implements Serializable {
             if (SPSiteQuality.SP_TYPE.equals(type)) {
                 sq = (SPSiteQuality) obsComp.getDataObject();
             } else if (TargetObsComp.SP_TYPE.equals(type)) {
-                coords = getCoordinates(obsComp);
+                coords = getCoordinates(obsComp, _dataObj.getSchedulingBlock().map(SchedulingBlock::start));
             }
         }
         _siteQuality = sq;
@@ -126,15 +127,16 @@ public final class ObsSchedulingReport implements Serializable {
         }
     }
 
-    private static WorldCoords getCoordinates(ISPObsComponent obsComp)  {
+    private static WorldCoords getCoordinates(ISPObsComponent obsComp, Option<Long> when)  {
         TargetObsComp env = (TargetObsComp) obsComp.getDataObject();
         SPTarget target = env.getBase();
         if (target == null) return null;
 
-        double ra  = target.getTarget().getRaDegrees();
-        double dec = target.getTarget().getDecDegrees();
-        return new WorldCoords(ra, dec);
-    }
+        return
+            target.getTarget().getRaDegrees(when).flatMap(ra ->
+            target.getTarget().getDecDegrees(when).map(dec ->
+                new WorldCoords(ra, dec))).getOrNull();
+        }
 
     private static ElevationConstraintSolver getElevationConstraintSolver(
             Site site, WorldCoords coords, SPSiteQuality siteQuality) {
