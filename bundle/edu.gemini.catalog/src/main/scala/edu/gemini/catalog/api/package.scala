@@ -12,22 +12,32 @@ package object api {
 
   // Typeclasses to adjust MagnitudeConstraints for different conditions
   implicit val SkyBackgroundAdjuster = new ConstraintsAdjuster[SkyBackground] {
-    // Sky Background only adjust for band R and on 80% and ANY
-    override def adjust(sb: SkyBackground, mc: MagnitudeConstraints) =
-      if (mc.searchBands.bandSupported(SkyBackground.BAND_TO_ADJUST)) mc.adjust(_ + sb.magAdjustment()) else mc
+    // ImageQuality adjust for the R-bands list
+    override def adjust(sb: SkyBackground, mc: MagnitudeConstraints) = (sb, mc.searchBands) match {
+      case (SkyBackground.PERCENT_80, RBandsList) => mc.adjust(_ - 0.3)
+      case (SkyBackground.ANY, RBandsList)        => mc.adjust(_ - 0.5)
+      case _                                      => mc
+    }
   }
 
   implicit val CloudCoverAdjuster = new ConstraintsAdjuster[CloudCover] {
     // CloudCover adjusts in all bands
-    override def adjust(cc: CloudCover, mc: MagnitudeConstraints) = (cc, mc) match {
-      case _  => mc.adjust(_ + cc.magAdjustment())
+    override def adjust(cc: CloudCover, mc: MagnitudeConstraints) = cc match {
+      case CloudCover.PERCENT_70                  => mc.adjust(_ - 0.3)
+      case CloudCover.PERCENT_80                  => mc.adjust(_ - 1.0)
+      case CloudCover.PERCENT_90 | CloudCover.ANY => mc.adjust(_ - 3.0)
+      case _                                      => mc
     }
   }
 
   implicit val ImageQualityAdjuster = new ConstraintsAdjuster[ImageQuality] {
-    // ImageQuality adjust for band R
-    override def adjust(iq: ImageQuality, mc: MagnitudeConstraints) =
-      if (mc.searchBands.bandSupported(ImageQuality.BAND_TO_ADJUST)) mc.adjust(_ + iq.magAdjustment()) else mc
+    // ImageQuality adjust for the R-bands list
+    override def adjust(iq: ImageQuality, mc: MagnitudeConstraints) = (iq, mc.searchBands) match {
+      case (ImageQuality.PERCENT_20, RBandsList) => mc.adjust(_ + 0.5)
+      case (ImageQuality.PERCENT_85, RBandsList) => mc.adjust(_ - 0.5)
+      case (ImageQuality.ANY, RBandsList)        => mc.adjust(_ - 1.0)
+      case _                                     => mc
+    }
   }
 
   implicit val ConditionsAdjuster = new ConstraintsAdjuster[Conditions] {
