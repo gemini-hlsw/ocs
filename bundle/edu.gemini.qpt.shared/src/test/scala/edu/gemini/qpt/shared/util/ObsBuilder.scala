@@ -3,13 +3,13 @@ package edu.gemini.qpt.shared.util
 import edu.gemini.ags.api.AgsAnalysis
 import edu.gemini.pot.sp.SPComponentType
 import edu.gemini.qpt.shared.sp.{Group, Obs, Prog}
-import edu.gemini.shared.util.immutable.DefaultImList
+import edu.gemini.shared.util.immutable.{None => JNone, DefaultImList}
 import edu.gemini.spModel.core.{Declination, RightAscension, Coordinates, SPProgramID}
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality
 import edu.gemini.spModel.obs.plannedtime.PlannedStepSummary
 import edu.gemini.spModel.obsclass.ObsClass
 import edu.gemini.spModel.obs.SPObservation.Priority
-import edu.gemini.spModel.obs.ObservationStatus
+import edu.gemini.spModel.obs.{SchedulingBlock, ObservationStatus}
 import edu.gemini.spModel.obscomp.SPGroup
 import edu.gemini.spModel.target.env.TargetEnvironment
 import edu.gemini.spModel.target.SPTarget
@@ -24,6 +24,7 @@ import scala.collection.JavaConverters._
  * NOTE: Equality on Obs objects is defined based on the program and the obs number. Therefore it is important
  * to have at least unique obs numbers when creating observations for a test. Either assign one explicitely
  * or the observation will get an obs number assigned on creation based on a static counter.
+ * FURTHER NOTE: Instances always have an empty scheduling block.
  */
 case class ObsBuilder(
 // TODO: define useful defaults, use options on the scala side of things where applicable
@@ -79,7 +80,8 @@ case class ObsBuilder(
       lgs,
       ao,
       meanParallacticAngle,
-      DefaultImList.create(analysis.asJavaCollection)
+      DefaultImList.create(analysis.asJavaCollection),
+      JNone.instance[SchedulingBlock]
     )
   }
 

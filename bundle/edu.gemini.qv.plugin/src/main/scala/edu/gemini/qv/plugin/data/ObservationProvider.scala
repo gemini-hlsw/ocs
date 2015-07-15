@@ -114,7 +114,8 @@ object FoldedTargetsProvider {
         headObs.getLGS,
         headObs.getAO,
         headObs.usesMeanParallacticAngle,
-        headObs.getAgsAnalysis
+        headObs.getAgsAnalysis,
+        headObs.getSchedulingBlock
       )
     }
   }
@@ -207,7 +208,8 @@ case class PositionProvider(ctx: QvContext, base: ObservationProvider) extends O
           o.getLGS,
           o.getAO,
           o.usesMeanParallacticAngle,
-          o.getAgsAnalysis
+          o.getAgsAnalysis,
+          o.getSchedulingBlock
         )
       }
       else o
