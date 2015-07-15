@@ -1,11 +1,13 @@
 package jsky.app.ot.tpe;
 
 import edu.gemini.pot.sp.*;
+import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.spModel.data.ISPDataObject;
 import edu.gemini.spModel.gemini.nici.SeqRepeatNiciOffset;
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality;
 import edu.gemini.spModel.gemini.seqcomp.SeqRepeatOffset;
 import edu.gemini.spModel.guide.GuideProbeAvailabilityVolatileDataObject;
+import edu.gemini.spModel.obs.SchedulingBlock;
 import edu.gemini.spModel.target.SPTarget;
 import edu.gemini.spModel.target.obsComp.TargetObsComp;
 import edu.gemini.spModel.target.obsComp.TargetSelection;
@@ -277,8 +279,9 @@ public class TelescopePosEditor extends JSkyCat implements TpeMouseObserver {
         if (tp != null) {
             // Get the RA and Dec from the pos list.
             ITarget target = tp.getTarget();
-            ra = target.getRaDegrees();
-            dec = target.getDecDegrees();
+            final Option<Long> when = _ctx.schedulingBlockJava().map(SchedulingBlock::start);
+            ra = target.getRaDegrees(when).getOrElse(0.0);
+            dec = target.getDecDegrees(when).getOrElse(0.0);
         }
 
         _iw.loadCachedImage(ra, dec);
@@ -306,7 +309,11 @@ public class TelescopePosEditor extends JSkyCat implements TpeMouseObserver {
         ITarget oldBase = oldBasePos.getTarget();
         ITarget newBase = newBasePos.getTarget();
 
-        return (oldBase.getRaDegrees() != newBase.getRaDegrees() || oldBase.getDecDegrees() != newBase.getDecDegrees());
+        Option<Long> oldWhen = oldCtx.schedulingBlockJava().map(SchedulingBlock::start);
+        Option<Long> newWhen = oldCtx.schedulingBlockJava().map(SchedulingBlock::start);
+
+        return (oldBase.getRaDegrees(oldWhen) != newBase.getRaDegrees(newWhen) ||
+                oldBase.getDecDegrees(oldWhen) != newBase.getDecDegrees(newWhen));
     }
 
     private final PropertyChangeListener obsListener = evt -> {
