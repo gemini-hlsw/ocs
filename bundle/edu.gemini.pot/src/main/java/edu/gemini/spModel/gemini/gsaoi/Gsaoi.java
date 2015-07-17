@@ -1,7 +1,3 @@
-//
-// $
-//
-
 package edu.gemini.spModel.gemini.gsaoi;
 
 import edu.gemini.pot.sp.ISPObservation;
@@ -50,7 +46,6 @@ import edu.gemini.spModel.type.SpTypeUtil;
 
 import java.beans.PropertyDescriptor;
 import java.util.*;
-import java.util.logging.Logger;
 
 import static edu.gemini.spModel.seqcomp.SeqConfigNames.INSTRUMENT_KEY;
 
@@ -83,9 +78,7 @@ public final class Gsaoi extends SPInstObsComp implements PropertyProvider, Guid
 //    Exposure Time : > 42.5 sec (recommended) 42.5 sec (min)
 //    Readout overhead: 48 sec
 
-    private static Logger LOG = Logger.getLogger(Gsaoi.class.getName());
-
-    public static enum ReadMode implements DisplayableSpType, SequenceableSpType, LoggableSpType {
+    public enum ReadMode implements DisplayableSpType, SequenceableSpType, LoggableSpType {
         // Updated for REL-439
         BRIGHT("Bright Objects", "Bright", 2, 28, 5.3, 10),
         FAINT("Faint Objects / Broad-band Imaging", "Faint", 8, 13, 21.5, 26),
@@ -101,7 +94,7 @@ public final class Gsaoi extends SPInstObsComp implements PropertyProvider, Guid
         private final double minExposureTime; // seconds
         private final int overhead; // seconds
 
-        private ReadMode(String displayValue, String logValue, int ndr, int readNoise, double minExposureTime,
+        ReadMode(String displayValue, String logValue, int ndr, int readNoise, double minExposureTime,
                          int overhead) {
             this.displayValue = displayValue;
             this.logValue = logValue;
@@ -154,7 +147,7 @@ public final class Gsaoi extends SPInstObsComp implements PropertyProvider, Guid
     }
 
     // REL-445: Updated using the new 50/50 times below
-    public static enum Filter implements DisplayableSpType, SequenceableSpType, LoggableSpType {
+    public enum Filter implements DisplayableSpType, SequenceableSpType, LoggableSpType {
         Z("Z (1.015 um)", "Z",
                 1.015, ReadMode.FAINT, 26.0, 4619, Band.J),
         HEI("HeI (1.083 um)", "HeI",
@@ -217,7 +210,7 @@ public final class Gsaoi extends SPInstObsComp implements PropertyProvider, Guid
         private final double expTimeHalfWell;
         private final Option<Band> catalogBand;
 
-        private Filter(String displayValue, String logValue, double wavelength, ReadMode readMode, double expTime5050,
+        Filter(String displayValue, String logValue, double wavelength, ReadMode readMode, double expTime5050,
                        double expTimeHalfWell, Band catalogBand) {
             this.displayValue = displayValue;
             this.logValue = logValue;
@@ -225,10 +218,10 @@ public final class Gsaoi extends SPInstObsComp implements PropertyProvider, Guid
             this.readMode = readMode;
             this.expTime5050 = expTime5050;
             this.expTimeHalfWell = expTimeHalfWell;
-            this.catalogBand = new Some<Band>(catalogBand);
+            this.catalogBand = new Some<>(catalogBand);
         }
 
-        private Filter(String displayValue, String logValue, double wavelength, ReadMode readMode, double expTime5050,
+        Filter(String displayValue, String logValue, double wavelength, ReadMode readMode, double expTime5050,
                        double expTimeHalfWell) {
             this.displayValue = displayValue;
             this.logValue = logValue;
@@ -301,7 +294,7 @@ public final class Gsaoi extends SPInstObsComp implements PropertyProvider, Guid
         }
     }
 
-    public static enum UtilityWheel implements DisplayableSpType, SequenceableSpType, LoggableSpType {
+    public enum UtilityWheel implements DisplayableSpType, SequenceableSpType, LoggableSpType {
         EXTRAFOCAL_LENS_1("Extra-focal lens 1", "xf 1"),
         EXTRAFOCAL_LENS_2("Extra-focal lens 2", "xf 2"),
         PUPIL_IMAGER("Pupil Imager", "pupil"),
@@ -313,7 +306,7 @@ public final class Gsaoi extends SPInstObsComp implements PropertyProvider, Guid
         private final String displayValue;
         private final String logValue;
 
-        private UtilityWheel(String displayValue, String logValue) {
+        UtilityWheel(String displayValue, String logValue) {
             this.displayValue = displayValue;
             this.logValue = logValue;
         }
@@ -337,16 +330,9 @@ public final class Gsaoi extends SPInstObsComp implements PropertyProvider, Guid
         public static UtilityWheel valueOf(String name, UtilityWheel nvalue) {
             return SpTypeUtil.oldValueOf(UtilityWheel.class, name, nvalue);
         }
-
-//        public static Option<UtilityWheel> valueOf(String name, Option<UtilityWheel> nvalue) {
-//            UtilityWheel def = nvalue.isEmpty() ? null : nvalue.getValue();
-//            UtilityWheel val = SpTypeUtil.oldValueOf(UtilityWheel.class, name, def);
-//            None<UtilityWheel> none = None.instance();
-//            return val == null ? none : new Some<UtilityWheel>(val);
-//        }
     }
 
-    public static enum Roi implements DisplayableSpType, SequenceableSpType, LoggableSpType {
+    public enum Roi implements DisplayableSpType, SequenceableSpType, LoggableSpType {
         FULL_ARRAY("Full Array", "Full Array"),
         ARRAY_64("Array 64", "Array64x64"),
         ARRAY_128("Array 128", "Array128x128"),
@@ -365,7 +351,7 @@ public final class Gsaoi extends SPInstObsComp implements PropertyProvider, Guid
         private final String displayValue;
         private final String logValue;
 
-        private Roi(String displayValue, String logValue) {
+        Roi(String displayValue, String logValue) {
             this.displayValue = displayValue;
             this.logValue = logValue;
         }
@@ -391,7 +377,7 @@ public final class Gsaoi extends SPInstObsComp implements PropertyProvider, Guid
         }
     }
 
-    public static enum OdgwSize implements DisplayableSpType, SequenceableSpType, LoggableSpType {
+    public enum OdgwSize implements DisplayableSpType, SequenceableSpType, LoggableSpType {
         SIZE_4(4),
         SIZE_6(6),
         SIZE_8(8),
@@ -403,7 +389,7 @@ public final class Gsaoi extends SPInstObsComp implements PropertyProvider, Guid
 
         private final int size;
 
-        private OdgwSize(int size) {
+        OdgwSize(int size) {
             this.size = size;
         }
 
@@ -431,12 +417,6 @@ public final class Gsaoi extends SPInstObsComp implements PropertyProvider, Guid
             return SpTypeUtil.oldValueOf(OdgwSize.class, name, nvalue);
         }
 
-//        public static Option<OdgwSize> valueOf(String name, Option<OdgwSize> nvalue) {
-//            OdgwSize def = nvalue.isEmpty() ? null : nvalue.getValue();
-//            OdgwSize val = SpTypeUtil.oldValueOf(OdgwSize.class, name, def);
-//            None<OdgwSize> none = None.instance();
-//            return val == null ? none : new Some<OdgwSize>(val);
-//        }
     }
 
 
@@ -462,7 +442,7 @@ public final class Gsaoi extends SPInstObsComp implements PropertyProvider, Guid
     public static final PropertyDescriptor ROI_PROP;
     public static final PropertyDescriptor ODGW_SIZE_PROP;
 
-    private static final Map<String, PropertyDescriptor> PRIVATE_PROP_MAP = new TreeMap<String, PropertyDescriptor>();
+    private static final Map<String, PropertyDescriptor> PRIVATE_PROP_MAP = new TreeMap<>();
     public static final Map<String, PropertyDescriptor> PROPERTY_MAP = Collections.unmodifiableMap(PRIVATE_PROP_MAP);
 
     private static PropertyDescriptor initProp(String propName, boolean query, boolean iter) {
@@ -511,7 +491,6 @@ public final class Gsaoi extends SPInstObsComp implements PropertyProvider, Guid
     public Gsaoi() {
         super(SP_TYPE);
         readMode = filter.readMode();
-//        setExposureTime(getRecommendedExposureTimeSecs(filter, readMode));
         setExposureTime(60); // REL-445
     }
 
@@ -664,12 +643,8 @@ public final class Gsaoi extends SPInstObsComp implements PropertyProvider, Guid
     }
 
         // Predicate that leaves all CategorizedTime except for the offset overhead.
-    private static final PredicateOp<CategorizedTime> RM_OFFSET_OVERHEAD = new PredicateOp<CategorizedTime>() {
-        @Override public Boolean apply(CategorizedTime ct) {
-            return !((ct.category == Category.CONFIG_CHANGE) &&
-                     (ct.detail == OffsetOverheadCalculator.DETAIL));
-        }
-    };
+    private static final PredicateOp<CategorizedTime> RM_OFFSET_OVERHEAD = ct -> !((ct.category == Category.CONFIG_CHANGE) &&
+             (ct.detail.equals(OffsetOverheadCalculator.DETAIL)));
 
     private static double getOffsetArcsec(Config c, ItemKey k) {
         final String d = (String) c.getItemValue(k); // yes a string :/
@@ -708,16 +683,15 @@ public final class Gsaoi extends SPInstObsComp implements PropertyProvider, Guid
     }
 
     private static boolean isGuided(Option<Config> c) {
-        return c.isEmpty() ? false : isGuided(c.getValue());
+        return !c.isEmpty() && isGuided(c.getValue());
     }
 
     private static boolean isExpensiveOffset(Config cur, Option<Config> prev) {
         if (!isOffset(cur, prev)) return false;
 
         final boolean curGuided = isGuided(cur);
-        if (curGuided) return true;
+        return curGuided || isGuided(prev);
 
-        return curGuided != isGuided(prev);
     }
 
     // REL-1103
@@ -734,7 +708,7 @@ public final class Gsaoi extends SPInstObsComp implements PropertyProvider, Guid
 
     @Override public CategorizedTimeGroup calc(Config cur, Option<Config> prev) {
         // Add wheel move overhead
-        Collection<CategorizedTime> times = new ArrayList<CategorizedTime>();
+        Collection<CategorizedTime> times = new ArrayList<>();
         if (PlannedTime.isUpdated(cur, prev, Filter.KEY, UtilityWheel.KEY)) {
             times.add(getWheelMoveOverhead());
         }
@@ -814,7 +788,7 @@ public final class Gsaoi extends SPInstObsComp implements PropertyProvider, Guid
     }
 
     public static List<InstConfigInfo> getInstConfigInfo() {
-        List<InstConfigInfo> configInfo = new LinkedList<InstConfigInfo>();
+        List<InstConfigInfo> configInfo = new LinkedList<>();
         configInfo.add(new InstConfigInfo(FILTER_PROP));
         configInfo.add(new InstConfigInfo(READ_MODE_PROP));
         return configInfo;
