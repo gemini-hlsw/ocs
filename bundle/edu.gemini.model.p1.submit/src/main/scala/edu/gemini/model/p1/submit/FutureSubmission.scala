@@ -1,5 +1,8 @@
 package edu.gemini.model.p1.submit
 
+import java.security.KeyStore
+import javax.net.ssl.{TrustManagerFactory, SSLContext, HttpsURLConnection}
+
 import edu.gemini.model.p1.immutable.Proposal
 import edu.gemini.model.p1.submit.SubmitResult.{SubmitException, Offline, ServiceError}
 import ResponseParser.parse
@@ -15,6 +18,7 @@ import scalaz._
 import Scalaz._
 
 case class FutureSubmission(dest: SubmitDestination, url: String, proposal: Proposal) {
+
   private val LOG = Logger.getLogger(classOf[FutureSubmission].getName)
 
   private val fut = future { sendSynchronously }
@@ -31,7 +35,9 @@ case class FutureSubmission(dest: SubmitDestination, url: String, proposal: Prop
 
   private def sendSynchronously: SubmitResult =
     try {
-      val http = new URL(url).openConnection().asInstanceOf[HttpURLConnection]
+      val http = new URL(url).openConnection().asInstanceOf[HttpsURLConnection]
+
+      http.setSSLSocketFactory(FutureSubmission.sslFactory)
       http.setReadTimeout(timeout)
       http.setRequestProperty("Accept-Charset", "UTF-8")
 
@@ -63,4 +69,18 @@ case class FutureSubmission(dest: SubmitDestination, url: String, proposal: Prop
     }
   }
 
+}
+
+object FutureSubmission {
+
+  val sslFactory = {
+    // Load keystore from the bundle
+    val in = this.getClass.getResourceAsStream("/phase1.jks")
+    // Password in the clear but the keystore has only public keys
+    val ks = KeyStore.getInstance("JKS") <| {_.load(in, "phase1".toCharArray)}
+
+    val tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm) <| {_.init(ks)}
+    // Socket factory to connect to the phase1 backend and complete the SSL handshake with the public certificates
+    SSLContext.getInstance("TLS") <| {_.init(null, tmf.getTrustManagers, null)} |> {_.getSocketFactory}
+  }
 }
