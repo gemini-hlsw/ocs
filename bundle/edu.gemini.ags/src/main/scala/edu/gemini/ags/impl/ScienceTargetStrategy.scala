@@ -18,10 +18,10 @@ case class ScienceTargetStrategy(key: AgsStrategyKey, guideProbe: ValidatableGui
     Future.successful(AgsStrategy.Estimate.GuaranteedSuccess)
 
   override def analyze(ctx: ObsContext, mt: MagnitudeTable, guideProbe: ValidatableGuideProbe, guideStar: SiderealTarget): Option[AgsAnalysis] =
-    AgsAnalysis.analysis(ctx, mt, guideProbe, guideStar, probeBands.bands.list)
+    AgsAnalysis.analysis(ctx, mt, guideProbe, guideStar, probeBands)
 
   override def analyze(ctx: ObsContext, mt: MagnitudeTable): List[AgsAnalysis] =
-    AgsAnalysis.analysis(ctx, mt, guideProbe, probeBands.bands.list).toList
+    AgsAnalysis.analysis(ctx, mt, guideProbe, probeBands).toList
 
   override def candidates(ctx: ObsContext, mt: MagnitudeTable): Future[List[(GuideProbe, List[SiderealTarget])]] = {
     val so = ctx.getTargets.getBase.toNewModel

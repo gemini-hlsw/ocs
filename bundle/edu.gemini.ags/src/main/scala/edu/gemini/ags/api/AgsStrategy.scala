@@ -29,7 +29,7 @@ trait AgsStrategy {
 
   def analyzeForJava(ctx: ObsContext, mt: MagnitudeTable, guideProbe: ValidatableGuideProbe, guideStar: SiderealTarget): JOption[AgsAnalysis] = {
     val spTarget = new SPTarget(guideStar.coordinates.ra.toAngle.toDegrees, guideStar.coordinates.dec.toDegrees)
-    if (!guideProbe.validate(spTarget, ctx)) new JSome(NotReachable(guideProbe, guideStar, probeBands.bands.list))
+    if (!guideProbe.validate(spTarget, ctx)) new JSome(NotReachable(guideProbe, guideStar, probeBands))
     else analyze(ctx, mt, guideProbe, guideStar).asGeminiOpt
   }
 

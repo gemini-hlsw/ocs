@@ -24,11 +24,8 @@ import Scalaz._
  */
 object GemsMagnitudeTable extends MagnitudeTable {
 
-  private def faint(band: MagnitudeBand, fl: Double): MagnitudeConstraints=
-    MagnitudeConstraints(BandsList.bandList(band), FaintnessConstraint(fl), none)
-
-  private def magLimits(band: MagnitudeBand, fl: Double, sl: Double): MagnitudeConstraints =
-    MagnitudeConstraints(BandsList.bandList(band), FaintnessConstraint(fl), SaturationConstraint(sl).some)
+  private def magLimits(bands: BandsList, fl: Double, sl: Double): MagnitudeConstraints =
+    MagnitudeConstraints(bands, FaintnessConstraint(fl), SaturationConstraint(sl).some)
 
   def apply(ctx: ObsContext, probe: GuideProbe): Option[MagnitudeCalc] = {
     def mc(nominalLimits: MagnitudeConstraints): MagnitudeCalc = new MagnitudeCalc() {
@@ -82,12 +79,12 @@ object GemsMagnitudeTable extends MagnitudeTable {
      * The map formerly in Gsaoi.Filter.
      */
     private val MagnitudeLimitsMap = Map[Pair[GemsGuideStarType, MagnitudeBand], MagnitudeConstraints](
-      (GemsGuideStarType.flexure, MagnitudeBand.J) -> magLimits(MagnitudeBand.J, 17.2, 8.0),
-      (GemsGuideStarType.flexure, MagnitudeBand.H) -> magLimits(MagnitudeBand.H, 17.0, 8.0),
-      (GemsGuideStarType.flexure, MagnitudeBand.K) -> magLimits(MagnitudeBand.K, 18.2, 8.0),
-      (GemsGuideStarType.tiptilt, MagnitudeBand.J) -> magLimits(MagnitudeBand.J, 14.2, 7.1),
-      (GemsGuideStarType.tiptilt, MagnitudeBand.H) -> magLimits(MagnitudeBand.H, 14.5, 7.3),
-      (GemsGuideStarType.tiptilt, MagnitudeBand.K) -> magLimits(MagnitudeBand.K, 13.5, 6.5)
+      (GemsGuideStarType.flexure, MagnitudeBand.J) -> magLimits(SingleBand(MagnitudeBand.J), 17.2, 8.0),
+      (GemsGuideStarType.flexure, MagnitudeBand.H) -> magLimits(SingleBand(MagnitudeBand.H), 17.0, 8.0),
+      (GemsGuideStarType.flexure, MagnitudeBand.K) -> magLimits(SingleBand(MagnitudeBand.K), 18.2, 8.0),
+      (GemsGuideStarType.tiptilt, MagnitudeBand.J) -> magLimits(SingleBand(MagnitudeBand.J), 14.2, 7.1),
+      (GemsGuideStarType.tiptilt, MagnitudeBand.H) -> magLimits(SingleBand(MagnitudeBand.H), 14.5, 7.3),
+      (GemsGuideStarType.tiptilt, MagnitudeBand.K) -> magLimits(SingleBand(MagnitudeBand.K), 13.5, 6.5)
     )
 
     override def gemsMagnitudeConstraint(starType: GemsGuideStarType, nirBand: Option[MagnitudeBand]): MagnitudeConstraints= {
@@ -106,14 +103,14 @@ object GemsMagnitudeTable extends MagnitudeTable {
 
   lazy val CanopusWfsMagnitudeLimitsCalculator = new CanopusWfsCalculator {
     override def gemsMagnitudeConstraint(starType: GemsGuideStarType, nirBand: Option[MagnitudeBand]) =
-      magLimits(MagnitudeBand.R, 15.5, 8.0)
+      magLimits(RBandsList, 15.5, 8.0)
 
     override def getNominalMagnitudeConstraints(cwfs: Canopus.Wfs): MagnitudeConstraints =
-      magLimits(MagnitudeBand.R, 15.5, 8.0)
+      magLimits(RBandsList, 15.5, 8.0)
   }
 
   private lazy val Flamingos2OiwfsMagnitudeLimitsCalculator = new LimitsCalculator {
     override def gemsMagnitudeConstraint(starType: GemsGuideStarType, nirBand: Option[MagnitudeBand]) =
-      magLimits(MagnitudeBand.R, 18.0, 9.5)
+      magLimits(RBandsList, 18.0, 9.5)
   }
 }

@@ -2,9 +2,10 @@ package edu.gemini.ags.api
 
 import edu.gemini.ags.api.AgsGuideQuality.Unusable
 import edu.gemini.ags.api.AgsMagnitude._
+import edu.gemini.catalog.api.BandsList
 import edu.gemini.pot.ModelConverters._
 import edu.gemini.spModel.core.Target.SiderealTarget
-import edu.gemini.spModel.core.{Magnitude, MagnitudeBand}
+import edu.gemini.spModel.core.Magnitude
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.ImageQuality
 import edu.gemini.spModel.guide.{ValidatableGuideProbe, GuideProbe, GuideProbeGroup, GuideSpeed}
 import edu.gemini.spModel.obs.context.ObsContext
@@ -58,57 +59,57 @@ object AgsGuideQuality {
 
 sealed trait AgsAnalysis {
   def quality: AgsGuideQuality = Unusable
-  def probeBands: List[MagnitudeBand]
+  def probeBands: BandsList
   def message(withProbe: Boolean): String
 }
 
 object AgsAnalysis {
-  case class NoGuideStarForProbe(guideProbe: GuideProbe, probeBands: List[MagnitudeBand]) extends AgsAnalysis {
+  case class NoGuideStarForProbe(guideProbe: GuideProbe, probeBands: BandsList) extends AgsAnalysis {
     override def message(withProbe: Boolean): String = {
       val p = if (withProbe) s"${guideProbe.getKey} " else ""
       s"No ${p}guide star selected."
     }
   }
 
-  case class NoGuideStarForGroup(guideGroup: GuideProbeGroup, probeBands: List[MagnitudeBand]) extends AgsAnalysis {
+  case class NoGuideStarForGroup(guideGroup: GuideProbeGroup, probeBands: BandsList) extends AgsAnalysis {
     override def message(withProbe: Boolean): String =
       s"No ${guideGroup.getKey} guide star selected."
   }
 
-  case class MagnitudeTooFaint(guideProbe: GuideProbe, target: SiderealTarget, probeBands: List[MagnitudeBand]) extends AgsAnalysis {
+  case class MagnitudeTooFaint(guideProbe: GuideProbe, target: SiderealTarget, probeBands: BandsList) extends AgsAnalysis {
     override def message(withProbe: Boolean): String = {
       val p = if (withProbe) s"use ${guideProbe.getKey}" else "guide"
       s"Cannot $p with the star in these conditions, even using the slowest guide speed."
     }
   }
 
-  case class MagnitudeTooBright(guideProbe: GuideProbe, target: SiderealTarget, probeBands: List[MagnitudeBand]) extends AgsAnalysis {
+  case class MagnitudeTooBright(guideProbe: GuideProbe, target: SiderealTarget, probeBands: BandsList) extends AgsAnalysis {
     override def message(withProbe: Boolean): String = {
       val p = if (withProbe) s"${guideProbe.getKey} g" else "G"
       s"${p}uide star is too bright to guide."
     }
   }
 
-  case class NotReachable(guideProbe: GuideProbe, target: SiderealTarget, probeBands: List[MagnitudeBand]) extends AgsAnalysis {
+  case class NotReachable(guideProbe: GuideProbe, target: SiderealTarget, probeBands: BandsList) extends AgsAnalysis {
     override def message(withProbe: Boolean): String = {
       val p = if (withProbe) s"with ${guideProbe.getKey} " else ""
       s"The star is not reachable ${p}at all positions."
     }
   }
 
-  case class NoMagnitudeForBand(guideProbe: GuideProbe, target: SiderealTarget, probeBands: List[MagnitudeBand]) extends AgsAnalysis {
+  case class NoMagnitudeForBand(guideProbe: GuideProbe, target: SiderealTarget, probeBands: BandsList) extends AgsAnalysis {
     override def message(withProbe: Boolean): String = {
       val p = if (withProbe) s"${guideProbe.getKey} g" else "G"
-      if (probeBands.length == 1) {
-        s"${p}uide star ${probeBands.head}-band magnitude is missing. Cannot determine guiding performance."
+      if (probeBands.bands.length == 1) {
+        s"${p}uide star ${probeBands.bands.head}-band magnitude is missing. Cannot determine guiding performance."
       } else {
-        s"${p}uide star ${probeBands.map(_.name).mkString(", ")}-band magnitudes are missing. Cannot determine guiding performance."
+        s"${p}uide star ${probeBands.bands.map(_.name).list.mkString(", ")}-band magnitudes are missing. Cannot determine guiding performance."
       }
     }
     override val quality = AgsGuideQuality.PossiblyUnusable
   }
 
-  case class Usable(guideProbe: GuideProbe, target: SiderealTarget, guideSpeed: GuideSpeed, override val quality: AgsGuideQuality, probeBands: List[MagnitudeBand]) extends AgsAnalysis {
+  case class Usable(guideProbe: GuideProbe, target: SiderealTarget, guideSpeed: GuideSpeed, override val quality: AgsGuideQuality, probeBands: BandsList) extends AgsAnalysis {
     override def message(withProbe: Boolean): String = {
       val qualityMessage = quality match {
         case AgsGuideQuality.DeliversRequestedIq => ""
@@ -134,7 +135,7 @@ object AgsAnalysis {
   /**
    * Analysis of the selected guide star (if any) in the given context.
    */
-  protected [ags] def analysis(ctx: ObsContext, mt: MagnitudeTable, guideProbe: ValidatableGuideProbe, bands: List[MagnitudeBand]): Option[AgsAnalysis] = {
+  protected [ags] def analysis(ctx: ObsContext, mt: MagnitudeTable, guideProbe: ValidatableGuideProbe, bands: BandsList): Option[AgsAnalysis] = {
     def selection(ctx: ObsContext, guideProbe: GuideProbe): Option[SPTarget] =
       for {
         gpt   <- ctx.getTargets.getPrimaryGuideProbeTargets(guideProbe).asScalaOpt
@@ -150,13 +151,13 @@ object AgsAnalysis {
    * Analysis of the given guide star in the given context, regardless of which
    * guide star is actually selected in the target environment.
    */
-  protected [ags] def analysis(ctx: ObsContext, mt: MagnitudeTable, guideProbe: ValidatableGuideProbe, guideStar: SiderealTarget, bands: List[MagnitudeBand]): Option[AgsAnalysis] = {
+  protected [ags] def analysis(ctx: ObsContext, mt: MagnitudeTable, guideProbe: ValidatableGuideProbe, guideStar: SiderealTarget, bands: BandsList): Option[AgsAnalysis] = {
     val spTarget = new SPTarget(guideStar.coordinates.ra.toAngle.toDegrees, guideStar.coordinates.dec.toDegrees)
     if (!guideProbe.validate(spTarget, ctx)) Some(NotReachable(guideProbe, guideStar, bands))
     else magnitudeAnalysis(ctx, mt, guideProbe, guideStar, bands)
   }
 
-  private def magnitudeAnalysis(ctx: ObsContext, mt: MagnitudeTable, guideProbe: ValidatableGuideProbe, guideStar: SiderealTarget, bands: List[MagnitudeBand]): Option[AgsAnalysis] = {
+  private def magnitudeAnalysis(ctx: ObsContext, mt: MagnitudeTable, guideProbe: ValidatableGuideProbe, guideStar: SiderealTarget, bands: BandsList): Option[AgsAnalysis] = {
     import GuideSpeed._
     import AgsGuideQuality._
 
@@ -200,7 +201,7 @@ object AgsAnalysis {
     }
 
     // Find the first band in the guide star that is on the list of possible bands
-    def usableMagnitude:Option[Magnitude] = bands.map(guideStar.magnitudeIn).find(_.isDefined).flatten
+    def usableMagnitude:Option[Magnitude] = bands.bands.list.map(guideStar.magnitudeIn).find(_.isDefined).flatten
 
     for {
       mc  <- mt(ctx, guideProbe)

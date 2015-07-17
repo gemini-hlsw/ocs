@@ -21,8 +21,6 @@ sealed trait SingleProbeStrategyParams {
   def guideProbe: ValidatableGuideProbe
   def stepSize: Angle                        = Angle.fromDegrees(10)
   def minDistance: Option[Angle]             = Some(Angle.fromArcsecs(20))
-  // Different instruments have a different reference band to decide what magnitude to use
-  protected def referenceBand: MagnitudeBand = MagnitudeBand.R
 
   final def catalogQueries(ctx: ObsContext, mt: MagnitudeTable): Option[CatalogQuery] =
     for {
@@ -39,7 +37,7 @@ sealed trait SingleProbeStrategyParams {
 
   def validator(ctx: ObsContext): GuideStarValidator = guideProbe
 
-  def probeBands: BandsList = BandsList.bandList(referenceBand)
+  def probeBands: BandsList = RBandsList
 
   // For a given target return a magnitude value that can be used to select a target
   def referenceMagnitude(st: SiderealTarget):Option[Magnitude] = probeBands.extract(st)
@@ -57,39 +55,38 @@ sealed trait SingleProbeStrategyParams {
 
 object SingleProbeStrategyParams {
   case object AltairAowfsParams extends SingleProbeStrategyParams {
-    val guideProbe           = AltairAowfsGuider.instance
-    val site                 = Site.GN
+    override val guideProbe  = AltairAowfsGuider.instance
+    override val site        = Site.GN
     override def stepSize    = Angle.fromDegrees(90)
     override def minDistance = Some(Angle.zero)
   }
 
   case object Flamingos2OiwfsParams extends SingleProbeStrategyParams {
-    val guideProbe        = Flamingos2OiwfsGuideProbe.instance
-    val site              = Site.GS
-    override def stepSize = Angle.fromDegrees(90)
+    override val guideProbe = Flamingos2OiwfsGuideProbe.instance
+    override val site       = Site.GS
+    override def stepSize   = Angle.fromDegrees(90)
   }
 
   case class GmosOiwfsParams(site: Site) extends SingleProbeStrategyParams {
-    val guideProbe = GmosOiwfsGuideProbe.instance
+    override val guideProbe = GmosOiwfsGuideProbe.instance
   }
 
   case object GnirsOiwfsParams extends SingleProbeStrategyParams {
-    val guideProbe             = GnirsOiwfsGuideProbe.instance
-    val site                   = Site.GN
-    override val referenceBand = MagnitudeBand.K
+    override val guideProbe = GnirsOiwfsGuideProbe.instance
+    override val site       = Site.GN
+    override val probeBands = SingleBand(MagnitudeBand.K)
   }
 
   case object NifsOiwfsParams extends SingleProbeStrategyParams {
-    val guideProbe             = NifsOiwfsGuideProbe.instance
-    val site                   = Site.GN
-    override val referenceBand = MagnitudeBand.K
-
+    override val guideProbe = NifsOiwfsGuideProbe.instance
+    override val site       = Site.GN
+    override val probeBands = SingleBand(MagnitudeBand.K)
   }
 
   case object NiriOiwfsParams extends SingleProbeStrategyParams {
-    val guideProbe             = NiriOiwfsGuideProbe.instance
-    val site                   = Site.GN
-    override val referenceBand = MagnitudeBand.K
+    override val guideProbe = NiriOiwfsGuideProbe.instance
+    override val site       = Site.GN
+    override val probeBands = SingleBand(MagnitudeBand.K)
   }
 
 case class PwfsParams(site: Site, guideProbe: PwfsGuideProbe) extends SingleProbeStrategyParams {
