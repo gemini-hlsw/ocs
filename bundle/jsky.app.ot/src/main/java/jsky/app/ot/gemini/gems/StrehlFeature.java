@@ -10,7 +10,7 @@ import edu.gemini.mascot.gui.contour.StrehlContourPlot;
 import edu.gemini.pot.ModelConverters;
 import edu.gemini.shared.skyobject.Magnitude;
 import edu.gemini.shared.util.immutable.*;
-import edu.gemini.spModel.core.MagnitudeBand;
+import edu.gemini.spModel.core.*;
 import edu.gemini.spModel.gemini.gsaoi.Gsaoi;
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality;
 import edu.gemini.spModel.guide.GuideProbe;
@@ -21,7 +21,6 @@ import edu.gemini.spModel.target.WatchablePos;
 import edu.gemini.spModel.target.env.GuideGroup;
 import edu.gemini.spModel.target.env.TargetEnvironment;
 import edu.gemini.spModel.target.env.TargetEnvironmentDiff;
-import edu.gemini.spModel.target.system.CoordinateParam;
 import jsky.app.ot.tpe.*;
 import jsky.app.ot.util.BasicPropertyList;
 import jsky.app.ot.util.PropertyWatcher;
@@ -266,18 +265,18 @@ public class StrehlFeature extends TpeImageFeature implements PropertyWatcher, M
             SPInstObsComp inst = obsContext.getInstrument();
             if (inst instanceof Gsaoi) {
                 Gsaoi gsaoi = (Gsaoi) inst;
-                Option<Magnitude.Band> band = gsaoi.getFilter().getCatalogBand();
+                Option<BandsList> band = gsaoi.getFilter().getCatalogBand();
                 if (!band.isEmpty()) {
-                    String s = band.getValue().name();
+                    BandsList s = band.getValue();
                     SPSiteQuality.Conditions conditions = obsContext.getConditions();
-                    if ("J".equals(s)) {
+                    if (new SingleBand(ModelConverters.toNewBand(Magnitude.Band.J)).equals(s)) {
                         if (conditions != null) {
                             if (conditions.iq == SPSiteQuality.ImageQuality.PERCENT_20) return 0.08;
                             if (conditions.iq == SPSiteQuality.ImageQuality.PERCENT_70) return 0.13;
                             if (conditions.iq == SPSiteQuality.ImageQuality.PERCENT_85) return 0.15;
                         }
                     }
-                    if ("H".equals(s)) {
+                    if (new SingleBand(ModelConverters.toNewBand(Magnitude.Band.H)).equals(s)) {
                         if (conditions != null) {
                             if (conditions.iq == SPSiteQuality.ImageQuality.PERCENT_20) return 0.07;
                             if (conditions.iq == SPSiteQuality.ImageQuality.PERCENT_70) return 0.10;
@@ -285,7 +284,7 @@ public class StrehlFeature extends TpeImageFeature implements PropertyWatcher, M
 
                         }
                     }
-                    if ("K".equals(s)) {
+                    if (new SingleBand(ModelConverters.toNewBand(Magnitude.Band.K)).equals(s)) {
                         if (conditions != null) {
                             if (conditions.iq == SPSiteQuality.ImageQuality.PERCENT_20) return 0.06;
                             if (conditions.iq == SPSiteQuality.ImageQuality.PERCENT_70) return 0.09;
@@ -387,24 +386,24 @@ public class StrehlFeature extends TpeImageFeature implements PropertyWatcher, M
     // see OT-22 for a mapping of GSAOI filters to J, H, and K.
     // If iterating over filters, I think we can assume the filter in
     // the static component as a first pass at least.
-    private MagnitudeBand getBandpass(GuideProbe.Type type) {
+    private BandsList getBandpass(GuideProbe.Type type) {
         if (type != null) {
             switch (type) {
                 case AOWFS:
-                    return Mascot.defaultBandpass();
+                    return RBandsList.instance();
                 case OIWFS:
                     SPInstObsComp inst = _iw.getInstObsComp();
                     if (inst instanceof Gsaoi) {
                         Gsaoi gsaoi = (Gsaoi) inst;
-                        Option<Magnitude.Band> band = gsaoi.getFilter().getCatalogBand();
+                        Option<BandsList> band = gsaoi.getFilter().getCatalogBand();
                         if (!band.isEmpty()) {
-                            return ModelConverters.toNewBand(band.getValue());
+                            return band.getValue();
                         }
                     }
                 default:
             }
         }
-        return Mascot.defaultBandpass();
+        return RBandsList.instance();
     }
 
     // Returns an array of mascot Star objects for the given target list
@@ -502,7 +501,7 @@ public class StrehlFeature extends TpeImageFeature implements PropertyWatcher, M
 
     public Option<Collection<TpeMessage>> getMessages() {
         if (message != null) {
-            return new Some<Collection<TpeMessage>>(Collections.singletonList(message));
+            return new Some<>(Collections.singletonList(message));
         }
         return None.instance();
     }

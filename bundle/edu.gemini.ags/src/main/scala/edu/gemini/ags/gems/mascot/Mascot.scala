@@ -8,7 +8,7 @@ import edu.gemini.ags.gems.mascot.util.YUtils._
 import MascotUtils._
 import MascotConf._
 import breeze.linalg._
-import edu.gemini.spModel.core.MagnitudeBand
+import edu.gemini.spModel.core.{BandsList, MagnitudeBand}
 
 import scala.annotation.tailrec
 import scalaz._
@@ -46,7 +46,7 @@ object Mascot {
   val defaultFactor = 1.0
 
   @Deprecated
-  def computeStrehl4Java(band: MagnitudeBand, factor: Double, n1: Star, n2: Option[Star] = None, n3: Option[Star] = None): Option[Strehl] =
+  def computeStrehl4Java(bandsList: BandsList, factor: Double, n1: Star, n2: Option[Star] = None, n3: Option[Star] = None): Option[Strehl] =
     computeStrehl(factor, StarTriple(n1, n2, n3))
 
   /**

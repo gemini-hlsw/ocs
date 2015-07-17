@@ -78,18 +78,18 @@ object GemsMagnitudeTable extends MagnitudeTable {
     /**
      * The map formerly in Gsaoi.Filter.
      */
-    private val MagnitudeLimitsMap = Map[Pair[GemsGuideStarType, MagnitudeBand], MagnitudeConstraints](
-      (GemsGuideStarType.flexure, MagnitudeBand.J) -> magLimits(SingleBand(MagnitudeBand.J), 17.2, 8.0),
-      (GemsGuideStarType.flexure, MagnitudeBand.H) -> magLimits(SingleBand(MagnitudeBand.H), 17.0, 8.0),
-      (GemsGuideStarType.flexure, MagnitudeBand.K) -> magLimits(SingleBand(MagnitudeBand.K), 18.2, 8.0),
-      (GemsGuideStarType.tiptilt, MagnitudeBand.J) -> magLimits(SingleBand(MagnitudeBand.J), 14.2, 7.1),
-      (GemsGuideStarType.tiptilt, MagnitudeBand.H) -> magLimits(SingleBand(MagnitudeBand.H), 14.5, 7.3),
-      (GemsGuideStarType.tiptilt, MagnitudeBand.K) -> magLimits(SingleBand(MagnitudeBand.K), 13.5, 6.5)
+    private val MagnitudeLimitsMap = Map[Pair[GemsGuideStarType, BandsList], MagnitudeConstraints](
+      (GemsGuideStarType.flexure, SingleBand(MagnitudeBand.J)) -> magLimits(SingleBand(MagnitudeBand.J), 17.2, 8.0),
+      (GemsGuideStarType.flexure, SingleBand(MagnitudeBand.H)) -> magLimits(SingleBand(MagnitudeBand.H), 17.0, 8.0),
+      (GemsGuideStarType.flexure, SingleBand(MagnitudeBand.K)) -> magLimits(SingleBand(MagnitudeBand.K), 18.2, 8.0),
+      (GemsGuideStarType.tiptilt, SingleBand(MagnitudeBand.J)) -> magLimits(SingleBand(MagnitudeBand.J), 14.2, 7.1),
+      (GemsGuideStarType.tiptilt, SingleBand(MagnitudeBand.H)) -> magLimits(SingleBand(MagnitudeBand.H), 14.5, 7.3),
+      (GemsGuideStarType.tiptilt, SingleBand(MagnitudeBand.K)) -> magLimits(SingleBand(MagnitudeBand.K), 13.5, 6.5)
     )
 
     override def gemsMagnitudeConstraint(starType: GemsGuideStarType, nirBand: Option[MagnitudeBand]): MagnitudeConstraints= {
       val filter = nirBand.fold(Gsaoi.Filter.H)(band => Gsaoi.Filter.getFilter(band.toOldModel, Gsaoi.Filter.H))
-      MagnitudeLimitsMap((starType, filter.getCatalogBand.getValue.toNewModel))
+      MagnitudeLimitsMap((starType, filter.getCatalogBand.getValue))
     }
   }
 

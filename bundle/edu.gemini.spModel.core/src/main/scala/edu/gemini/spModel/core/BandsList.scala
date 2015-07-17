@@ -19,6 +19,8 @@ sealed trait BandsList {
  * Extracts the first valid R Band Magnitude if available
  */
 case object RBandsList extends BandsList {
+  val instance = this
+
   val bands = NonEmptyList(MagnitudeBand._r, MagnitudeBand.R, MagnitudeBand.UC)
 }
 

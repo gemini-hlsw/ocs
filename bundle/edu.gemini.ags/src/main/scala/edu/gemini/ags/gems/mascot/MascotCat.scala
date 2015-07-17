@@ -3,7 +3,7 @@ package edu.gemini.ags.gems.mascot
 import java.util.logging.Logger
 
 import edu.gemini.ags.gems.mascot.Mascot.ProgressFunction
-import edu.gemini.spModel.core.MagnitudeBand
+import edu.gemini.spModel.core.{BandsList, MagnitudeBand}
 import edu.gemini.spModel.core.Target.SiderealTarget
 import java.util.concurrent.CancellationException
 
@@ -69,7 +69,7 @@ object MascotCat {
    */
   def findBestAsterismInTargetsList(javaList: List[SiderealTarget],
                                     centerRA: Double, centerDec: Double,
-                                    band: MagnitudeBand, factor: Double,
+                                    band: BandsList, factor: Double,
                                     mascotProgress: Option[MascotProgress]): StrehlResults = {
     val progress:ProgressFunction = (s: Strehl, count: Int, total: Int) => {
       defaultProgress(s, count, total)
@@ -97,7 +97,7 @@ object MascotCat {
    */
   def findBestAsterismInTargetsList(javaList: List[SiderealTarget],
                                     centerRA: Double, centerDec: Double,
-                                    band: MagnitudeBand, factor: Double,
+                                    band: BandsList, factor: Double,
                                     progressCheck: (Strehl, Boolean) => Boolean): StrehlResults = {
     val progress:ProgressFunction = (s: Strehl, count: Int, total: Int) => {
       defaultProgress(s, count, total)
