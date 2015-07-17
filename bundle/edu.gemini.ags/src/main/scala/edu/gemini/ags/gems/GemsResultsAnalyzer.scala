@@ -3,8 +3,8 @@ package edu.gemini.ags.gems
 import java.util.logging.Logger
 
 import edu.gemini.ags.gems.mascot.{MascotCat, MascotProgress, Strehl}
-import edu.gemini.catalog.api.{RBandsList, MagnitudeConstraints}
-import edu.gemini.spModel.core.{Magnitude, Angle, MagnitudeBand}
+import edu.gemini.catalog.api.MagnitudeConstraints
+import edu.gemini.spModel.core.{RBandsList, Magnitude, Angle, MagnitudeBand}
 import edu.gemini.spModel.core.Target.SiderealTarget
 import edu.gemini.spModel.gemini.gems.Canopus
 import edu.gemini.spModel.gemini.gsaoi.{GsaoiOdgw, Gsaoi}

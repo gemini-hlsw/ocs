@@ -1,7 +1,6 @@
 package edu.gemini.ags.gems.mascot
 
 import MascotConf._
-import edu.gemini.catalog.api.RBandsList
 
 import edu.gemini.spModel.core._
 import edu.gemini.spModel.core.Target.SiderealTarget

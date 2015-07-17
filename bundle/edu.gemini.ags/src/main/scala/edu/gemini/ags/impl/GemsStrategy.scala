@@ -23,7 +23,7 @@ import scala.collection.JavaConverters._
 import scala.concurrent._
 import edu.gemini.ags.api.AgsMagnitude.{MagnitudeCalc, MagnitudeTable}
 import edu.gemini.spModel.guide.{ValidatableGuideProbe, GuideProbeGroup, GuideProbe}
-import edu.gemini.spModel.core.{Angle, MagnitudeBand}
+import edu.gemini.spModel.core._
 
 import scalaz._
 import Scalaz._

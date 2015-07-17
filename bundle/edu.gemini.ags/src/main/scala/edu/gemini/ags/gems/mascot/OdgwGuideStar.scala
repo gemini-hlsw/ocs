@@ -1,7 +1,5 @@
 package edu.gemini.ags.gems.mascot
 
-import edu.gemini.catalog.api.SingleBand
-import edu.gemini.spModel.core.MagnitudeBand
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.gemini.gsaoi.GsaoiDetectorArray
 import edu.gemini.skycalc.Coordinates

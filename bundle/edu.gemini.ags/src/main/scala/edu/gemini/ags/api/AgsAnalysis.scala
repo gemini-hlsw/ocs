@@ -2,10 +2,9 @@ package edu.gemini.ags.api
 
 import edu.gemini.ags.api.AgsGuideQuality.Unusable
 import edu.gemini.ags.api.AgsMagnitude._
-import edu.gemini.catalog.api.BandsList
 import edu.gemini.pot.ModelConverters._
 import edu.gemini.spModel.core.Target.SiderealTarget
-import edu.gemini.spModel.core.Magnitude
+import edu.gemini.spModel.core.{BandsList, Magnitude}
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.ImageQuality
 import edu.gemini.spModel.guide.{ValidatableGuideProbe, GuideProbe, GuideProbeGroup, GuideSpeed}
 import edu.gemini.spModel.obs.context.ObsContext

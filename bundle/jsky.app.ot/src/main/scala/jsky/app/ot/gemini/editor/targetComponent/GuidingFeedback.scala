@@ -4,8 +4,8 @@ import edu.gemini.ags.api.AgsAnalysis.{NoGuideStarForProbe, NoGuideStarForGroup}
 import edu.gemini.ags.api._
 import edu.gemini.ags.api.AgsGuideQuality._
 import edu.gemini.ags.api.AgsMagnitude.{MagnitudeCalc, MagnitudeTable}
-import edu.gemini.catalog.api.BandsList
 import edu.gemini.pot.ModelConverters._
+import edu.gemini.spModel.core.BandsList
 import edu.gemini.spModel.guide.{ValidatableGuideProbe, GuideSpeed}
 import edu.gemini.spModel.guide.GuideSpeed._
 import edu.gemini.spModel.obs.context.ObsContext

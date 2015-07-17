@@ -1,7 +1,6 @@
 package edu.gemini.ags.gems.mascot
 
-import edu.gemini.catalog.api.RBandsList
-import edu.gemini.spModel.core.{Magnitude, MagnitudeBand}
+import edu.gemini.spModel.core.{RBandsList, Magnitude, MagnitudeBand}
 
 import scalaz._
 import Scalaz._

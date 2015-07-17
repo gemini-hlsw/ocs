@@ -2,7 +2,7 @@ package edu.gemini.ags.conf
 
 import edu.gemini.ags.api.AgsMagnitude.MagnitudeCalc
 import edu.gemini.catalog.api._
-import edu.gemini.spModel.core.MagnitudeBand
+import edu.gemini.spModel.core.{BandsList, MagnitudeBand}
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.Conditions
 import edu.gemini.spModel.guide.GuideSpeed
 

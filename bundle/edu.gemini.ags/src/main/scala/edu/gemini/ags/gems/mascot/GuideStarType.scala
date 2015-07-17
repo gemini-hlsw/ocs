@@ -1,6 +1,5 @@
 package edu.gemini.ags.gems.mascot
 
-import edu.gemini.catalog.api.BandsList
 import edu.gemini.spModel.obs.context.ObsContext
 
 /**

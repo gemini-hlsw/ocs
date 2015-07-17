@@ -3,7 +3,7 @@ package edu.gemini.catalog.votable
 import java.util.concurrent.atomic.AtomicInteger
 
 import edu.gemini.catalog.api._
-import edu.gemini.spModel.core.{MagnitudeBand, Angle, Coordinates}
+import edu.gemini.spModel.core.{SingleBand, MagnitudeBand, Angle, Coordinates}
 import org.apache.commons.httpclient.NameValuePair
 import org.specs2.mutable.SpecificationWithJUnit
 import org.specs2.time.NoTimeConversions

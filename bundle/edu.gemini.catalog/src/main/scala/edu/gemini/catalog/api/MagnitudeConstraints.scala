@@ -2,7 +2,7 @@ package edu.gemini.catalog.api
 
 import edu.gemini.catalog.api.MagnitudeLimits.{SaturationLimit, FaintnessLimit}
 import edu.gemini.spModel.core.Target.SiderealTarget
-import edu.gemini.spModel.core.{MagnitudeBand, Magnitude}
+import edu.gemini.spModel.core.{SingleBand, BandsList, MagnitudeBand, Magnitude}
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.Conditions
 
 import scalaz._
@@ -60,47 +60,6 @@ sealed trait MagnitudeFilter {
  */
 trait ConstraintsAdjuster[T] {
   def adjust(t: T, mc: MagnitudeConstraints): MagnitudeConstraints
-}
-
-/**
- * Defines a set of bands that can extract a magnitude from a target
- */
-sealed trait BandsList {
-  val bands: NonEmptyList[MagnitudeBand]
-  def extract(t: SiderealTarget) = bands.map(t.magnitudeIn).list.find(_.isDefined).flatten
-  def bandSupported(b: MagnitudeBand) = bands.list.contains(b)
-}
-
-/**
- * Extracts the first valid R Band Magnitude if available
- */
-case object RBandsList extends BandsList {
-  val bands = NonEmptyList(MagnitudeBand._r, MagnitudeBand.R, MagnitudeBand.UC)
-}
-
-/**
- * Extractor for Nici containing 4 bands
- */
-case object NiciBandsList extends BandsList {
-  val bands = NonEmptyList(MagnitudeBand._r, MagnitudeBand.R, MagnitudeBand.UC, MagnitudeBand.K)
-}
-
-/**
- * Extracts a single band from a target if available
- */
-case class SingleBand(band: MagnitudeBand) extends BandsList {
-  val bands = NonEmptyList(band)
-}
-
-object BandsList {
-  implicit val equals = Equal.equal[BandsList]((a, b) => a.bands === b.bands)
-
-  def bandList(band: MagnitudeBand):BandsList = band match {
-    case MagnitudeBand.R  => RBandsList
-    case MagnitudeBand._r => RBandsList
-    case _                => SingleBand(band)
-  }
-
 }
 
 /**

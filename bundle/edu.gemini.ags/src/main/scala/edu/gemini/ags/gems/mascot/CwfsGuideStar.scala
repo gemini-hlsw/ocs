@@ -1,6 +1,5 @@
 package edu.gemini.ags.gems.mascot
 
-import edu.gemini.catalog.api.RBandsList
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.gemini.gems.Canopus
 import edu.gemini.skycalc.Coordinates

@@ -1,6 +1,5 @@
 package edu.gemini.ags.gems
 
-import edu.gemini.catalog.api.{SingleBand, RBandsList}
 import edu.gemini.pot.ModelConverters._
 import edu.gemini.shared.util.immutable.ScalaConverters._
 import edu.gemini.spModel.core._

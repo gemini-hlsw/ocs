@@ -2,7 +2,7 @@ package edu.gemini.ags.gems
 
 import edu.gemini.catalog.api._
 import edu.gemini.shared.util.immutable.{None => JNone}
-import edu.gemini.spModel.core.{MagnitudeBand, Site, Angle}
+import edu.gemini.spModel.core._
 import edu.gemini.spModel.gemini.gems.{Canopus, GemsInstrument}
 import edu.gemini.spModel.gemini.gsaoi.{GsaoiOdgw, Gsaoi}
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality

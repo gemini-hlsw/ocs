@@ -65,7 +65,6 @@ public class StrehlFeature extends TpeImageFeature implements PropertyWatcher, M
 
     private static TpeMessage busyMessage = TpeMessage.infoMessage("Calculating Strehl map...");
 
-
     // Used to format strehl message
     private static NumberFormat nf = NumberFormat.getInstance(Locale.US);
     private static NumberFormat nf2 = NumberFormat.getInstance(Locale.US);

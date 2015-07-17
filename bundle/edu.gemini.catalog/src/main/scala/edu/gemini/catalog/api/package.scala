@@ -1,7 +1,6 @@
 package edu.gemini.catalog
 
-import edu.gemini.spModel.core.{MagnitudeBand, Magnitude}
-import edu.gemini.spModel.core.Target.SiderealTarget
+import edu.gemini.spModel.core.RBandsList
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.{Conditions, ImageQuality, CloudCover, SkyBackground}
 
 package object api {

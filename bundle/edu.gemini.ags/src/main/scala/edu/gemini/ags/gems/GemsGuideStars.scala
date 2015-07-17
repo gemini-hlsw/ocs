@@ -1,7 +1,6 @@
 package edu.gemini.ags.gems
 
-import edu.gemini.catalog.api.RBandsList
-import edu.gemini.spModel.core.Angle
+import edu.gemini.spModel.core.{RBandsList, Angle}
 import edu.gemini.spModel.gemini.gems.Canopus
 import edu.gemini.spModel.gemini.gsaoi.GsaoiOdgw
 import edu.gemini.spModel.gems.GemsGuideProbeGroup

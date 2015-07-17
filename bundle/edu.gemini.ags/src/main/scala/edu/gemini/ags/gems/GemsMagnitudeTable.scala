@@ -3,7 +3,7 @@ package edu.gemini.ags.gems
 import edu.gemini.ags.api.AgsMagnitude.{MagnitudeCalc, MagnitudeTable}
 import edu.gemini.pot.ModelConverters._
 import edu.gemini.catalog.api._
-import edu.gemini.spModel.core.{Angle, MagnitudeBand, Site}
+import edu.gemini.spModel.core._
 import edu.gemini.spModel.gemini.gems.{Canopus, GemsInstrument}
 import edu.gemini.spModel.gemini.gsaoi.{Gsaoi, GsaoiOdgw}
 import edu.gemini.spModel.gems.GemsGuideStarType

@@ -2,7 +2,7 @@ package edu.gemini.ags.api
 
 import edu.gemini.catalog.api.{SaturationConstraint, FaintnessConstraint, MagnitudeConstraints}
 import edu.gemini.catalog.api._
-import edu.gemini.spModel.core.MagnitudeBand
+import edu.gemini.spModel.core.RBandsList
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.{Conditions, SkyBackground, CloudCover, ImageQuality}
 import org.specs2.mutable.Specification
 
