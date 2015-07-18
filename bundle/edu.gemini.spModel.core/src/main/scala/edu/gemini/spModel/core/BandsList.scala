@@ -48,6 +48,7 @@ object BandsList {
   def bandList(band: MagnitudeBand):BandsList = band match {
     case MagnitudeBand.R  => RBandsList
     case MagnitudeBand._r => RBandsList
+    case MagnitudeBand.UC => RBandsList
     case _                => SingleBand(band)
   }
 
