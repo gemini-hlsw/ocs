@@ -5,7 +5,7 @@ import edu.gemini.catalog.votable.RemoteBackend
 import edu.gemini.pot.sp.SPComponentType
 import edu.gemini.spModel.ags.AgsStrategyKey
 import edu.gemini.spModel.ags.AgsStrategyKey._
-import edu.gemini.spModel.core.{MagnitudeBand, Site}
+import edu.gemini.spModel.core.{NiciBandsList, Site}
 import edu.gemini.spModel.gemini.altair.{AltairParams, InstAltair}
 import edu.gemini.spModel.gemini.gems.Canopus
 import edu.gemini.spModel.gemini.nici.NiciOiwfsGuideProbe
@@ -35,7 +35,7 @@ object Strategy {
   val Pwfs2North      = SingleProbeStrategy(Pwfs2NorthKey,      PwfsParams(Site.GN, PwfsGuideProbe.pwfs2))
   val Pwfs1South      = SingleProbeStrategy(Pwfs1SouthKey,      PwfsParams(Site.GS, PwfsGuideProbe.pwfs1))
   val Pwfs2South      = SingleProbeStrategy(Pwfs2SouthKey,      PwfsParams(Site.GS, PwfsGuideProbe.pwfs2))
-  val NiciOiwfs       = ScienceTargetStrategy(NiciOiwfsKey,     NiciOiwfsGuideProbe.instance, List(MagnitudeBand._r, MagnitudeBand.R, MagnitudeBand.UC, MagnitudeBand.K))
+  val NiciOiwfs       = ScienceTargetStrategy(NiciOiwfsKey,     NiciOiwfsGuideProbe.instance, NiciBandsList)
 
   val All = List(
     AltairAowfs,

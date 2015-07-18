@@ -4,14 +4,14 @@ import edu.gemini.ags.api.AgsMagnitude._
 import edu.gemini.pot.ModelConverters._
 import edu.gemini.ags.api.{AgsAnalysis, AgsStrategy}
 import edu.gemini.spModel.ags.AgsStrategyKey
-import edu.gemini.spModel.core.MagnitudeBand
+import edu.gemini.spModel.core.BandsList
 import edu.gemini.spModel.core.Target.SiderealTarget
 import edu.gemini.spModel.guide.{ValidatableGuideProbe, GuideProbe}
 import edu.gemini.spModel.obs.context.ObsContext
 
 import scala.concurrent.Future
 
-case class ScienceTargetStrategy(key: AgsStrategyKey, guideProbe: ValidatableGuideProbe, override val probeBands: List[MagnitudeBand]) extends AgsStrategy {
+case class ScienceTargetStrategy(key: AgsStrategyKey, guideProbe: ValidatableGuideProbe, override val probeBands: BandsList) extends AgsStrategy {
 
   // Since the science target is the used as the guide star, success is always guaranteed.
   override def estimate(ctx: ObsContext, mt: MagnitudeTable): Future[AgsStrategy.Estimate] =

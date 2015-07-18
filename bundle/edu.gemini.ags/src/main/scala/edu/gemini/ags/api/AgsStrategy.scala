@@ -5,7 +5,7 @@ import edu.gemini.ags.api.AgsMagnitude.{MagnitudeCalc, MagnitudeTable}
 import edu.gemini.catalog.api.CatalogQuery
 import edu.gemini.pot.ModelConverters._
 import edu.gemini.spModel.ags.AgsStrategyKey
-import edu.gemini.spModel.core.{MagnitudeBand, Angle}
+import edu.gemini.spModel.core.{BandsList, Angle}
 import edu.gemini.spModel.core.Target.SiderealTarget
 import edu.gemini.spModel.guide.{ValidatableGuideProbe, GuideProbe}
 import edu.gemini.spModel.obs.context.ObsContext
@@ -46,8 +46,10 @@ trait AgsStrategy {
 
   def guideProbes: List[GuideProbe]
 
-  // Return the bands used by the strategy in order
-  def probeBands: List[MagnitudeBand]
+  /**
+   * Indicates the bands that will be used for a given probe
+   */
+  def probeBands: BandsList
 }
 
 object AgsStrategy {

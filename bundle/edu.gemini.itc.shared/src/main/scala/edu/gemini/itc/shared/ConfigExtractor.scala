@@ -145,15 +145,15 @@ object ConfigExtractor {
       filter.getCatalogBand.asScalaOpt.fold(error) { band =>
         val iq = cond.iq
         (band, iq) match {
-          case (Band.J, ImageQuality.PERCENT_20) => GemsParameters(0.10, "J").right
-          case (Band.J, ImageQuality.PERCENT_70) => GemsParameters(0.05, "J").right
-          case (Band.J, ImageQuality.PERCENT_85) => GemsParameters(0.02, "J").right
-          case (Band.H, ImageQuality.PERCENT_20) => GemsParameters(0.15, "H").right
-          case (Band.H, ImageQuality.PERCENT_70) => GemsParameters(0.10, "H").right
-          case (Band.H, ImageQuality.PERCENT_85) => GemsParameters(0.05, "H").right
-          case (Band.K, ImageQuality.PERCENT_20) => GemsParameters(0.30, "K").right
-          case (Band.K, ImageQuality.PERCENT_70) => GemsParameters(0.15, "K").right
-          case (Band.K, ImageQuality.PERCENT_85) => GemsParameters(0.10, "K").right
+          case (SingleBand(MagnitudeBand.J), ImageQuality.PERCENT_20) => GemsParameters(0.10, "J").right
+          case (SingleBand(MagnitudeBand.J), ImageQuality.PERCENT_70) => GemsParameters(0.05, "J").right
+          case (SingleBand(MagnitudeBand.J), ImageQuality.PERCENT_85) => GemsParameters(0.02, "J").right
+          case (SingleBand(MagnitudeBand.H), ImageQuality.PERCENT_20) => GemsParameters(0.15, "H").right
+          case (SingleBand(MagnitudeBand.H), ImageQuality.PERCENT_70) => GemsParameters(0.10, "H").right
+          case (SingleBand(MagnitudeBand.H), ImageQuality.PERCENT_85) => GemsParameters(0.05, "H").right
+          case (SingleBand(MagnitudeBand.K), ImageQuality.PERCENT_20) => GemsParameters(0.30, "K").right
+          case (SingleBand(MagnitudeBand.K), ImageQuality.PERCENT_70) => GemsParameters(0.15, "K").right
+          case (SingleBand(MagnitudeBand.K), ImageQuality.PERCENT_85) => GemsParameters(0.10, "K").right
           case (_, ImageQuality.ANY)             => "GeMS cannot be used in IQ=Any conditions".left
           case _                                 => "ITC GeMS only supports J, H and K band".left
         }

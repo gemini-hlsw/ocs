@@ -1,15 +1,6 @@
-// Copyright 1997-2000
-// Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-// See the file COPYRIGHT for complete details.
-//
-// $Id: SPSiteQuality.java 45640 2012-05-30 17:57:03Z nbarriga $
-//
 package edu.gemini.spModel.gemini.obscomp;
 
 import edu.gemini.pot.sp.SPComponentType;
-import edu.gemini.shared.skyobject.Magnitude;
-import edu.gemini.shared.util.immutable.MapOp;
 import edu.gemini.shared.util.immutable.None;
 import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.shared.util.immutable.Some;
@@ -27,10 +18,6 @@ import edu.gemini.spModel.type.SpTypeUtil;
 import java.beans.PropertyDescriptor;
 import java.io.Serializable;
 import java.util.*;
-
-import static edu.gemini.shared.skyobject.Magnitude.Band.R;
-import static edu.gemini.shared.skyobject.Magnitude.Band.r;
-import static edu.gemini.shared.skyobject.Magnitude.Band.UC;
 
 /**
  * Site Quality observation component.
@@ -192,18 +179,6 @@ public class SPSiteQuality extends AbstractDataObject implements PropertyProvide
         return None.instance();
     }
 
-    private static Magnitude adjustIf(Magnitude.Band band, Magnitude mag, double amount) {
-        return (mag.getBand() == band) ? mag.add(amount) : mag;
-    }
-
-    /**
-     * Adjust the R magnitude or r` or UC if present
-     * Note that this method is called always with a Magnitude containing a single band
-     */
-    private static Magnitude adjustRLikeMagnitude(Magnitude mag, Double adjustment) {
-        return adjustIf(r, adjustIf(R, adjustIf(UC, mag, adjustment), adjustment), adjustment);
-    }
-
     /**
      * Sky Background Options.
      */
@@ -211,20 +186,8 @@ public class SPSiteQuality extends AbstractDataObject implements PropertyProvide
 
         PERCENT_20("20%/Darkest", 20, 21.37),
         PERCENT_50("50%/Dark", 50, 20.78),
-        PERCENT_80("80%/Grey", 80, 19.61) {
-            private double adjustment = -0.3;
-            @Override
-            public Magnitude adjust(Magnitude mag) {
-                return adjustRLikeMagnitude(mag, adjustment);
-            }
-
-        },
-        ANY("Any/Bright", 100, 0)         {
-            private double adjustment = -0.5;
-            public Magnitude adjust(Magnitude mag) {
-                return adjustRLikeMagnitude(mag, adjustment);
-            }
-        };
+        PERCENT_80("80%/Grey", 80, 19.61),
+        ANY(       "Any/Bright", 100, 0);
 
         /** The default SkyBackground value **/
         public static SkyBackground DEFAULT = ANY;
@@ -260,9 +223,6 @@ public class SPSiteQuality extends AbstractDataObject implements PropertyProvide
             return Byte.toString(_percentage);
         }
 
-        public Magnitude adjust(Magnitude mag) { return mag; }
-
-
         /** Return a SkyBackground by name **/
         public static SkyBackground getSkyBackground(String name) {
             return getSkyBackground(name, DEFAULT);
@@ -286,12 +246,12 @@ public class SPSiteQuality extends AbstractDataObject implements PropertyProvide
      * Cloud Cover Options.
      */
     public enum CloudCover implements DisplayableSpType, ObsoletableSpType, SequenceableSpType, PercentageContainer {
-        PERCENT_20("20%",        20,  0.0),
-        PERCENT_50("50%/Clear",  50,  0.0),
-        PERCENT_70("70%/Cirrus", 70, -0.3),
-        PERCENT_80("80%/Cloudy", 80, -1.0),
-        PERCENT_90("90%",        90, -3.0),
-        ANY(       "Any",       100, -3.0),
+        PERCENT_20("20%",        20),
+        PERCENT_50("50%/Clear",  50),
+        PERCENT_70("70%/Cirrus", 70),
+        PERCENT_80("80%/Cloudy", 80),
+        PERCENT_90("90%",        90),
+        ANY(       "Any",       100),
         ;
 
 
@@ -300,19 +260,16 @@ public class SPSiteQuality extends AbstractDataObject implements PropertyProvide
 
         private final String _displayValue;
         private final byte _percentage;
-        private final double _magAdjustment;
 
-        CloudCover(String displayValue, int percentage, double magAdjustment) {
+        CloudCover(String displayValue, int percentage) {
             _percentage = (byte) percentage;
             _displayValue = displayValue;
             assert _percentage >= 0 && _percentage <= 100;
-            _magAdjustment = magAdjustment;
         }
 
         public byte getPercentage() {
             return _percentage;
         }
-
 
         public String displayValue() {
             return _displayValue;
@@ -322,15 +279,10 @@ public class SPSiteQuality extends AbstractDataObject implements PropertyProvide
             return Byte.toString(_percentage);
         }
 
-        public double magAdjustment() { return _magAdjustment; }
-        public Magnitude adjust(Magnitude mag) { return mag.add(_magAdjustment); }
-
         /** Return a CloudCover by name **/
         public static CloudCover getCloudCover(String name) {
             return getCloudCover(name, DEFAULT);
         }
-
-
 
         /** Return a CloudCover by name with a value to return upon error **/
         public static CloudCover getCloudCover(String name, CloudCover nvalue) {
@@ -354,29 +306,10 @@ public class SPSiteQuality extends AbstractDataObject implements PropertyProvide
      * Image Quality Options.
      */
     public enum ImageQuality implements DisplayableSpType, SequenceableSpType, PercentageContainer {
-        PERCENT_20("20%/Best", 20) {
-            private double adjustment = 0.5;
-            @Override
-            public Magnitude adjust(Magnitude mag) {
-                return adjustRLikeMagnitude(mag, adjustment);
-            }
-        },
+        PERCENT_20("20%/Best", 20),
         PERCENT_70("70%/Good", 70),
-        PERCENT_85("85%/Poor", 85) {
-            private double adjustment = -0.5;
-            @Override
-            public Magnitude adjust(Magnitude mag) {
-                return adjustRLikeMagnitude(mag, adjustment);
-            }
-        },
-        ANY("Any", 100)       {
-            private double adjustment = -1.0;
-            @Override
-            public Magnitude adjust(Magnitude mag) {
-                return adjustRLikeMagnitude(mag, adjustment);
-            }
-        },
-        ;
+        PERCENT_85("85%/Poor", 85),
+        ANY(       "Any", 100);
 
         /** The default ImageQuality value **/
         public static ImageQuality DEFAULT = ANY;
@@ -402,8 +335,6 @@ public class SPSiteQuality extends AbstractDataObject implements PropertyProvide
         public String sequenceValue() {
             return Byte.toString(_percentage);
         }
-
-        public Magnitude adjust(Magnitude mag) { return mag; }
 
         /** Return a ImageQuality by name **/
         public static ImageQuality getImageQuality(String name) {
@@ -576,21 +507,6 @@ public class SPSiteQuality extends AbstractDataObject implements PropertyProvide
             return result;
         }
 
-        /**
-         * Adjust the given magnitude limit for the conditions.
-         *
-         * @param mag magnitude at nominal conditions
-         *
-         * @return adjusted magnitudue limit for these conditions
-         */
-        public Magnitude adjust(Magnitude mag) {
-            return cc.adjust(iq.adjust(sb.adjust(mag)));
-        }
-
-        public MapOp<Magnitude, Magnitude> magAdjustOp() {
-            return this::adjust;
-        }
-
         public String toString() {
             StringBuilder buf = new StringBuilder();
             buf.append(cc).append(", ").append(iq).append(", ").append(sb).append(", ").append(wv);
@@ -650,7 +566,6 @@ public class SPSiteQuality extends AbstractDataObject implements PropertyProvide
     }
 
     public Conditions conditions() { return conditions; }
-    public Magnitude adjust(Magnitude mag) { return conditions.adjust(mag); }
 
     /**
      * Set the sky.

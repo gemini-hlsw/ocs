@@ -103,8 +103,8 @@ class SingleProbeStrategySpec extends Specification with NoTimeConversions {
       // HIP 1000 target
       val ra = Angle.fromHMS(0, 12, 30.286).getOrElse(Angle.zero)
       val dec = Declination.fromAngle(Angle.zero - Angle.fromDMS(22, 4, 2.34).getOrElse(Angle.zero)).getOrElse(Declination.zero)
-      val target = new SPTarget(ra.toDegrees, dec.toDegrees)
       val guiders = Set[GuideProbe](NiriOiwfsGuideProbe.instance, PwfsGuideProbe.pwfs1, PwfsGuideProbe.pwfs2)
+      val target = new SPTarget(ra.toDegrees, dec.toDegrees)
       val env = TargetEnvironment.create(target)
       val inst = new InstNIRI <| {_.setPosAngle(0.0)}
 

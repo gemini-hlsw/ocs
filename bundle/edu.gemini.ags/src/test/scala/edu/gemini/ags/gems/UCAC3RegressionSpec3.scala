@@ -1,6 +1,5 @@
 package edu.gemini.ags.gems
 
-import edu.gemini.ags.api._
 import edu.gemini.ags.gems.mascot.{MascotCat, Star}
 import edu.gemini.catalog.api._
 import edu.gemini.shared.util.immutable.ScalaConverters._
@@ -59,7 +58,7 @@ class UCAC3RegressionSpec3 extends Specification with UCAC3Regression {
     }
   }
 
-  val tipTiltCriterion = GemsCatalogSearchCriterion(GemsCatalogSearchKey(GemsGuideStarType.tiptilt, Canopus.Wfs.Group.instance), CatalogSearchCriterion("Canopus Wave Front Sensor", MagnitudeBand.R, MagnitudeRange(FaintnessConstraint(15.0), Some(SaturationConstraint(7.5))), RadiusConstraint.between(Angle.zero, Angle.fromArcmin(1.0)), Some(Offset(5.394250.arcsecs[OffsetP], 5.394250.arcsecs[OffsetQ])), None))
+  val tipTiltCriterion = GemsCatalogSearchCriterion(GemsCatalogSearchKey(GemsGuideStarType.tiptilt, Canopus.Wfs.Group.instance), CatalogSearchCriterion("Canopus Wave Front Sensor", RadiusConstraint.between(Angle.zero, Angle.fromArcmin(1.0)), MagnitudeConstraints(RBandsList, FaintnessConstraint(15.0), Some(SaturationConstraint(7.5))), Some(Offset(5.394250.arcsecs[OffsetP], 5.394250.arcsecs[OffsetQ])), None))
   val tipTiltTargets = List(
     SiderealTarget("042-030622", Coordinates(RightAscension.fromAngle(Angle.parseHMS("5:35:23.888").getOrElse(Angle.zero)), Declination.fromAngle(Angle.parseDMS("-69:16:18.2").getOrElse(Angle.zero)).getOrElse(Declination.zero)), None, List(new Magnitude(15.787, MagnitudeBand.J),new Magnitude(15.156, MagnitudeBand.K),new Magnitude(15.114, MagnitudeBand.H),new Magnitude(14.273, MagnitudeBand.R)), None),
     SiderealTarget("042-030635", Coordinates(RightAscension.fromAngle(Angle.parseHMS("5:35:24.997").getOrElse(Angle.zero)), Declination.fromAngle(Angle.parseDMS("-69:16:04.77").getOrElse(Angle.zero)).getOrElse(Declination.zero)), None, List(new Magnitude(15.71, MagnitudeBand.J),new Magnitude(14.602, MagnitudeBand.K),new Magnitude(14.589, MagnitudeBand.H),new Magnitude(14.721, MagnitudeBand.R)), None),
@@ -68,7 +67,7 @@ class UCAC3RegressionSpec3 extends Specification with UCAC3Regression {
     SiderealTarget("042-030696", Coordinates(RightAscension.fromAngle(Angle.parseHMS("5:35:36.179").getOrElse(Angle.zero)), Declination.fromAngle(Angle.parseDMS("-69:16:09.21").getOrElse(Angle.zero)).getOrElse(Declination.zero)), None, List(new Magnitude(14.673, MagnitudeBand.J),new Magnitude(14.834, MagnitudeBand.K),new Magnitude(14.539, MagnitudeBand.H),new Magnitude(17.103, MagnitudeBand.B),new Magnitude(14.977, MagnitudeBand.R),new Magnitude(14.403, MagnitudeBand.I)), None),
     SiderealTarget("042-030698", Coordinates(RightAscension.fromAngle(Angle.parseHMS("5:35:36.405").getOrElse(Angle.zero)), Declination.fromAngle(Angle.parseDMS("-69:16:24.08").getOrElse(Angle.zero)).getOrElse(Declination.zero)), None, List(new Magnitude(14.428, MagnitudeBand.J),new Magnitude(13.691, MagnitudeBand.K),new Magnitude(14.29, MagnitudeBand.H),new Magnitude(18.086, MagnitudeBand.B),new Magnitude(14.249, MagnitudeBand.R),new Magnitude(14.632, MagnitudeBand.I)), None))
 
-  val flexureCriterion = GemsCatalogSearchCriterion(GemsCatalogSearchKey(GemsGuideStarType.flexure, GsaoiOdgw.Group.instance), CatalogSearchCriterion("On-detector Guide Window", MagnitudeBand.H, MagnitudeRange(FaintnessConstraint(17.0), Some(SaturationConstraint(8.0))), RadiusConstraint.between(Angle.zero, Angle.fromArcmin(1.0)), Some(Offset(OffsetP(Angle.fromDegrees(5.394250)), OffsetQ(Angle.fromDegrees(5.394250)))), None))
+  val flexureCriterion = GemsCatalogSearchCriterion(GemsCatalogSearchKey(GemsGuideStarType.flexure, GsaoiOdgw.Group.instance), CatalogSearchCriterion("On-detector Guide Window", RadiusConstraint.between(Angle.zero, Angle.fromArcmin(1.0)), MagnitudeConstraints(SingleBand(MagnitudeBand.H), FaintnessConstraint(17.0), Some(SaturationConstraint(8.0))), Some(Offset(OffsetP(Angle.fromDegrees(5.394250)), OffsetQ(Angle.fromDegrees(5.394250)))), None))
 
   val flexureTargets = List(
     SiderealTarget("042-030622", Coordinates(RightAscension.fromAngle(Angle.parseHMS("5:35:23.888").getOrElse(Angle.zero)), Declination.fromAngle(Angle.parseDMS("-69:16:18.2").getOrElse(Angle.zero)).getOrElse(Declination.zero)), None, List(new Magnitude(15.787, MagnitudeBand.J),new Magnitude(15.156, MagnitudeBand.K),new Magnitude(15.114, MagnitudeBand.H),new Magnitude(14.273, MagnitudeBand.R)), None),

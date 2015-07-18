@@ -1,6 +1,7 @@
 package jsky.app.ot.tpe;
 
 import edu.gemini.ags.api.AgsStrategy;
+import edu.gemini.catalog.api.MagnitudeConstraints;
 import edu.gemini.shared.cat.CatalogSearchParameters;
 import edu.gemini.shared.cat.ICatalogAlgorithm;
 import edu.gemini.catalog.api.MagnitudeLimits;
@@ -1076,7 +1077,7 @@ public class TpeImageWidget extends NavigatorImageDisplay implements MouseInputL
             SPSiteQuality sq = _ctx.siteQuality().orNull();
             if (sq != null) {
                 final SPSiteQuality.Conditions conditions = sq.conditions();
-                return params.getMagnitudeLimits().mapMagnitudes(conditions::adjust);
+                return MagnitudeConstraints.conditionsAdjustmentForJava(params.getMagnitudeLimits(), conditions);
             }
             return params.getMagnitudeLimits();
         }

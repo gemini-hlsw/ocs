@@ -20,10 +20,10 @@ class CatalogQuerySpec extends SpecificationWithJUnit {
 
   val faint10 = FaintnessConstraint(10)
   val saturation0= SaturationConstraint(0)
-  val mag10 = MagnitudeConstraints(MagnitudeBand.R, faint10, Some(saturation0))
+  val mag10 = MagnitudeConstraints(RBandsList, faint10, Some(saturation0))
   val base = Coordinates.zero
-  val par10_10 = CatalogQuery.catalogQuery(base, rad10, Some(mag10))
-  val par5_10 = CatalogQuery.catalogQuery(base, rad5, Some(mag10))
+  val par10_10 = CatalogQuery(base, rad10, mag10, ucac4)
+  val par5_10 = CatalogQuery(base, rad5, mag10, ucac4)
   val ma2 = Angle.zero - Angle.fromArcsecs(2)
   val ma4_9 = Angle.zero - Angle.fromArcsecs(4.99999)
   val ma7   = Angle.zero - Angle.fromArcsecs(7.0)
@@ -62,25 +62,25 @@ class CatalogQuerySpec extends SpecificationWithJUnit {
           Coordinates(RightAscension.fromAngle(a0),    Declination.fromAngle(ma2).getOrElse(Declination.zero)),
           Coordinates(RightAscension.fromAngle(a0),    Declination.fromAngle(ma4_9).getOrElse(Declination.zero)))
       coordinates.map(c =>
-        par10_10 should beSuperSetOf(CatalogQuery.catalogQuery(c, rad5, Some(mag10)))
+        par10_10 should beSuperSetOf(CatalogQuery(c, rad5, mag10, ucac4))
       )
     }
     "be a superset at the pole" in {
       val pole = Coordinates(RightAscension.zero, Declination.fromAngle(Angle.fromDegrees(90.0)).getOrElse(Declination.zero))
       val close = Coordinates(RightAscension.zero, Declination.fromAngle(Angle.fromDegrees(90.0) - Angle.fromArcsecs(2)).getOrElse(Declination.zero))
       // 10 arcsec radius at the pole
-      val poleP = CatalogQuery.catalogQuery(pole, rad10, Some(mag10))
+      val poleP = CatalogQuery(pole, rad10, mag10, ucac4)
       // 5 arcsec radius close to the pole
-      val closeP = CatalogQuery.catalogQuery(close, rad5, Some(mag10))
+      val closeP = CatalogQuery(close, rad5, mag10, ucac4)
       poleP should beSuperSetOf(closeP)
     }
     "not be a superset far of the pole" in {
       val pole = Coordinates(RightAscension.zero, Declination.fromAngle(Angle.fromDegrees(90.0)).getOrElse(Declination.zero))
       val far = Coordinates(RightAscension.zero, Declination.fromAngle(Angle.fromDegrees(90.0) - Angle.fromArcsecs(7)).getOrElse(Declination.zero))
       // 10 arcsec radius at the pole
-      val poleP = CatalogQuery.catalogQuery(pole, rad10, Some(mag10))
+      val poleP = CatalogQuery(pole, rad10, mag10, ucac4)
       // 5 arcsec radius, but a bit too far from the pole
-      val farP = CatalogQuery.catalogQuery(far, rad5, Some(mag10))
+      val farP = CatalogQuery(far, rad5, mag10, ucac4)
       poleP should beNoSuperSetOf(farP)
     }
     "not be a superset out of the range limits" in {
@@ -103,11 +103,11 @@ class CatalogQuerySpec extends SpecificationWithJUnit {
         Coordinates(RightAscension.fromAngle(a0),    Declination.fromAngle(a20).getOrElse(Declination.zero)),
         Coordinates(RightAscension.fromAngle(a0),    Declination.fromAngle(ma20).getOrElse(Declination.zero)))
       coordinates.map(c =>
-        par10_10 should beNoSuperSetOf(CatalogQuery.catalogQuery(c, rad5, Some(mag10)))
+        par10_10 should beNoSuperSetOf(CatalogQuery(c, rad5, mag10, ucac4))
       )
     }
     "not be a supersef far out of range" in {
-      val far = CatalogQuery.catalogQuery(Coordinates(RightAscension.fromDegrees(180), Declination.zero), rad5, Some(mag10))
+      val far = CatalogQuery(Coordinates(RightAscension.fromDegrees(180), Declination.zero), rad5, mag10, ucac4)
       par10_10 should beNoSuperSetOf(far)
     }
   }

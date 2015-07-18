@@ -2,15 +2,11 @@ package edu.gemini.ags.gems
 
 import edu.gemini.pot.ModelConverters._
 import edu.gemini.shared.util.immutable.ScalaConverters._
-import edu.gemini.ags.api._
-import edu.gemini.spModel.core.Target.SiderealTarget
 import edu.gemini.spModel.core._
 import edu.gemini.spModel.gemini.gems.Canopus
 import edu.gemini.spModel.guide.GuideProbe
-import edu.gemini.spModel.target.SPTarget
 import edu.gemini.shared.skyobject
-import edu.gemini.skycalc
-import edu.gemini.spModel.target.system.{ITarget, HmsDegTarget}
+import edu.gemini.spModel.target.system.ITarget
 import scala.collection.JavaConverters._
 
 import scalaz._
@@ -34,12 +30,13 @@ object GemsUtils4Java {
    */
   def probeMagnitudeInUse(guideProbe: GuideProbe, referenceBand: skyobject.Magnitude.Band, target: ITarget): String = {
     val availableMagnitudes = target.getMagnitudes.asScalaList.map(_.toNewModel)
-    val probeBand = if (Canopus.Wfs.Group.instance.getMembers.contains(guideProbe)) {
-        MagnitudeBand.R
+    // TODO Use GemsMagnitudeTable
+    val bandsList = if (Canopus.Wfs.Group.instance.getMembers.contains(guideProbe)) {
+        RBandsList
       } else {
-        referenceBand.toNewModel
+        SingleBand(referenceBand.toNewModel)
       }
-    val r = defaultProbeBands(probeBand).flatMap {b => availableMagnitudes.find(_.band === b)}.headOption
+    val r = availableMagnitudes.find(m => bandsList.bandSupported(m.band))
     ~r.map(m => s"${m.value} (${m.band.name})")
   }
 

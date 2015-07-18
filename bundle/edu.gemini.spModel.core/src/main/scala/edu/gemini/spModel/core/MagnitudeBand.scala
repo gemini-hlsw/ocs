@@ -18,7 +18,6 @@ sealed abstract class MagnitudeBand private (val name: String, val center: Wavel
 }
 
 object MagnitudeBand {
-
   // OCSADV-203
   // Class files clobber one another on OS X so names can't differ only in case.
   // We may need to revisit and come up with better names.

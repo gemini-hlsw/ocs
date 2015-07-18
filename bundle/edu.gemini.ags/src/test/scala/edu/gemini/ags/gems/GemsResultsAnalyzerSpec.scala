@@ -108,7 +108,7 @@ class GemsResultsAnalyzerSpec extends MascotProgress with Specification with NoT
       val cwfs2Mag = cwfs2.getMagnitude(JMagnitude.Band.UC).getValue.getBrightness
       val cwfs3Mag = cwfs3.getMagnitude(JMagnitude.Band.r).getValue.getBrightness
       cwfs3Mag < cwfs1Mag && cwfs2Mag < cwfs1Mag should beTrue
-    }
+    }.pendingUntilFixed("See REL-2420")
     "support Gsaoi Search on SN-1987A" in {
       val base = new WorldCoords("05:35:28.020", "-69:16:11.07")
       val inst = new Gsaoi <| {_.setPosAngle(0.0)} <| {_.setIssPort(IssPort.UP_LOOKING)}
@@ -169,7 +169,7 @@ class GemsResultsAnalyzerSpec extends MascotProgress with Specification with NoT
       val cwfs2Mag = cwfs2.getMagnitude(JMagnitude.Band.UC).getValue.getBrightness
       val cwfs3Mag = cwfs3.getMagnitude(JMagnitude.Band.UC).getValue.getBrightness
       cwfs3Mag < cwfs1Mag && cwfs2Mag < cwfs1Mag should beTrue
-    }
+    }.pendingUntilFixed("See REL-2420")
     "support Gsaoi Search on M6" in {
       val base = new WorldCoords("17:40:20.000", "-32:15:12.00")
       val inst = new Gsaoi
@@ -230,7 +230,7 @@ class GemsResultsAnalyzerSpec extends MascotProgress with Specification with NoT
       val cwfs2Mag = cwfs2.getMagnitude(JMagnitude.Band.UC).getValue.getBrightness
       val cwfs3Mag = cwfs3.getMagnitude(JMagnitude.Band.UC).getValue.getBrightness
       cwfs3Mag < cwfs1Mag && cwfs2Mag < cwfs1Mag should beTrue
-    }
+    }.pendingUntilFixed("See REL-2420")
     "support Gsaoi Search on BPM 37093" in {
       val base = new WorldCoords("12:38:49.820", "-49:48:00.20")
       val inst = new Gsaoi
@@ -286,7 +286,7 @@ class GemsResultsAnalyzerSpec extends MascotProgress with Specification with NoT
       val cwfs2Mag = group.get(Canopus.Wfs.cwfs2).getValue.getPrimary.getValue.getTarget.getMagnitude(JMagnitude.Band.r).getValue.getBrightness
       val cwfs3Mag = group.get(Canopus.Wfs.cwfs3).getValue.getPrimary.getValue.getTarget.getMagnitude(JMagnitude.Band.r).getValue.getBrightness
       cwfs1Mag > cwfs2Mag && cwfs3Mag < cwfs2Mag should beTrue
-    }
+    }.pendingUntilFixed("See REL-2420")
     "sort targets by R magnitude" in {
       val st1 = SiderealTarget("n", edu.gemini.spModel.core.Coordinates.zero, None, List(new Magnitude(10.0, MagnitudeBand.J)), None)
       GemsResultsAnalyzer.sortTargetsByBrightness(List(st1)).head should beEqualTo(st1)

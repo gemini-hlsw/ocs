@@ -1,7 +1,6 @@
 package edu.gemini.ags.gems.mascot
 
-import edu.gemini.spModel.core.{Magnitude, MagnitudeBand}
-import edu.gemini.ags.api.RLikeBands
+import edu.gemini.spModel.core.{RBandsList, Magnitude, MagnitudeBand}
 
 import scalaz._
 import Scalaz._
@@ -18,14 +17,13 @@ case class MagLimits private (bmag: Double,
 
   // preallocate to use in filter
   private lazy val filters = List(new Magnitude(bmag, MagnitudeBand.B), new Magnitude(vmag, MagnitudeBand.V), new Magnitude(jmag, MagnitudeBand.J), new Magnitude(hmag, MagnitudeBand.H), new Magnitude(kmag, MagnitudeBand.K))
-  private lazy val RLikeFilters = RLikeBands.map(new Magnitude(rmag, _))
 
   /**
    * Returns true if the given star is within the mag limits
    */
   def filter(star: Star): Boolean =
     // requires that B, V, J, H and K are within limits and at least one of r, R, UC are within limits
-    filters.forall { m => star.target.magnitudeIn(m.band).exists(_.value <= m.value) } && RLikeFilters.exists { m => star.target.magnitudeIn(m.band).exists(_.value <= m.value) }
+    filters.forall { m => star.target.magnitudeIn(m.band).exists(_.value <= m.value) } && RBandsList.extract(star.target).isDefined
 }
 
 

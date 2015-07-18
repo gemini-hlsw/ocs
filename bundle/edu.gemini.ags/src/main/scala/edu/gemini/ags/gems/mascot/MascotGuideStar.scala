@@ -2,7 +2,6 @@ package edu.gemini.ags.gems.mascot
 
 import java.util.logging.Logger
 
-import edu.gemini.ags.api.MagnitudeExtractor
 import edu.gemini.ags.gems.mascot.Mascot.ProgressFunction
 import edu.gemini.spModel.core.Coordinates
 import edu.gemini.spModel.core.Target.SiderealTarget

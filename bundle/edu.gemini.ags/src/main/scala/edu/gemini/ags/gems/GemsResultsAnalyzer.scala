@@ -2,10 +2,9 @@ package edu.gemini.ags.gems
 
 import java.util.logging.Logger
 
-import edu.gemini.ags.api._
 import edu.gemini.ags.gems.mascot.{MascotCat, MascotProgress, Strehl}
 import edu.gemini.catalog.api.MagnitudeConstraints
-import edu.gemini.spModel.core.{Magnitude, Angle, MagnitudeBand}
+import edu.gemini.spModel.core._
 import edu.gemini.spModel.core.Target.SiderealTarget
 import edu.gemini.spModel.gemini.gems.Canopus
 import edu.gemini.spModel.gemini.gsaoi.{GsaoiOdgw, Gsaoi}
@@ -39,11 +38,11 @@ object GemsResultsAnalyzer {
   // Comparison of RLike bands is done by value alone
   private val MagnitudeOptionOrdering: scala.math.Ordering[Option[Magnitude]] = new scala.math.Ordering[Option[Magnitude]] {
     override def compare(x: Option[Magnitude], y: Option[Magnitude]): Int = (x,y) match {
-      case (Some(m1), Some(m2)) if List(m1.band, m2.band).forall(RLikeBands.contains) => MagnitudeValueOrdering.compare(m1, m2)
-      case (Some(m1), Some(m2))                                                       => Magnitude.MagnitudeOrdering.compare(m1, m2) // Magnitude.MagnitudeOrdering is probably incorrect, you cannot sort on different bands
-      case (None,     None)                                                           => 0
-      case (_,        None)                                                           => -1
-      case (None,     _)                                                              => 1
+      case (Some(m1), Some(m2)) if List(m1.band, m2.band).forall(RBandsList.bandSupported) => MagnitudeValueOrdering.compare(m1, m2)
+      case (Some(m1), Some(m2))                                                            => Magnitude.MagnitudeOrdering.compare(m1, m2) // Magnitude.MagnitudeOrdering is probably incorrect, you cannot sort on different bands
+      case (None,     None)                                                                => 0
+      case (_,        None)                                                                => -1
+      case (None,     _)                                                                   => 1
     }
   }
 
@@ -347,12 +346,12 @@ object GemsResultsAnalyzer {
   // see OT-22 for a mapping of GSAOI filters to J, H, and K.
   // If iterating over filters, I think we can assume the filter in
   // the static component as a first pass at least.
-  private def bandpass(group: GemsGuideProbeGroup, inst: SPInstObsComp): MagnitudeBand =
+  private def bandpass(group: GemsGuideProbeGroup, inst: SPInstObsComp): BandsList =
     (group, inst) match {
       case (GsaoiOdgw.Group.instance, gsaoi: Gsaoi) =>
-        gsaoi.getFilter.getCatalogBand.asScalaOpt.map(_.toNewModel).getOrElse(MagnitudeBand.R)
+        gsaoi.getFilter.getCatalogBand.asScalaOpt.getOrElse(RBandsList)
       case _ =>
-        MagnitudeBand.R
+        RBandsList
     }
 
   // REL-426: Multiply the average, min, and max Strehl values reported by Mascot by the following scale
@@ -372,21 +371,21 @@ object GemsResultsAnalyzer {
   private def strehlFactor(obsContext: Option[ObsContext]): Double = {
     obsContext.map(o => (o, o.getInstrument)).collect {
       case (ctx, gsaoi: Gsaoi) =>
-        val band = gsaoi.getFilter.getCatalogBand.asScalaOpt.map(_.toNewModel)
+        val band = gsaoi.getFilter.getCatalogBand.asScalaOpt
         val iq = Option(ctx.getConditions).map(_.iq)
         (band, iq) match {
-          case (Some(MagnitudeBand.J), Some(SPSiteQuality.ImageQuality.PERCENT_20)) => 0.12
-          case (Some(MagnitudeBand.J), Some(SPSiteQuality.ImageQuality.PERCENT_70)) => 0.06
-          case (Some(MagnitudeBand.J), Some(SPSiteQuality.ImageQuality.PERCENT_85)) => 0.024
-          case (Some(MagnitudeBand.J), None)                                        => 0.01
-          case (Some(MagnitudeBand.H), Some(SPSiteQuality.ImageQuality.PERCENT_20)) => 0.18
-          case (Some(MagnitudeBand.H), Some(SPSiteQuality.ImageQuality.PERCENT_70)) => 0.14
-          case (Some(MagnitudeBand.H), Some(SPSiteQuality.ImageQuality.PERCENT_85)) => 0.06
-          case (Some(MagnitudeBand.H), None)                                        => 0.01
-          case (Some(MagnitudeBand.K), Some(SPSiteQuality.ImageQuality.PERCENT_20)) => 0.35
-          case (Some(MagnitudeBand.K), Some(SPSiteQuality.ImageQuality.PERCENT_70)) => 0.18
-          case (Some(MagnitudeBand.K), Some(SPSiteQuality.ImageQuality.PERCENT_85)) => 0.12
-          case (Some(MagnitudeBand.K), None)                                        => 0.01
+          case (Some(SingleBand(MagnitudeBand.J)), Some(SPSiteQuality.ImageQuality.PERCENT_20)) => 0.12
+          case (Some(SingleBand(MagnitudeBand.J)), Some(SPSiteQuality.ImageQuality.PERCENT_70)) => 0.06
+          case (Some(SingleBand(MagnitudeBand.J)), Some(SPSiteQuality.ImageQuality.PERCENT_85)) => 0.024
+          case (Some(SingleBand(MagnitudeBand.J)), None)                                        => 0.01
+          case (Some(SingleBand(MagnitudeBand.H)), Some(SPSiteQuality.ImageQuality.PERCENT_20)) => 0.18
+          case (Some(SingleBand(MagnitudeBand.H)), Some(SPSiteQuality.ImageQuality.PERCENT_70)) => 0.14
+          case (Some(SingleBand(MagnitudeBand.H)), Some(SPSiteQuality.ImageQuality.PERCENT_85)) => 0.06
+          case (Some(SingleBand(MagnitudeBand.H)), None)                                        => 0.01
+          case (Some(SingleBand(MagnitudeBand.K)), Some(SPSiteQuality.ImageQuality.PERCENT_20)) => 0.35
+          case (Some(SingleBand(MagnitudeBand.K)), Some(SPSiteQuality.ImageQuality.PERCENT_70)) => 0.18
+          case (Some(SingleBand(MagnitudeBand.K)), Some(SPSiteQuality.ImageQuality.PERCENT_85)) => 0.12
+          case (Some(SingleBand(MagnitudeBand.K)), None)                                        => 0.01
           case _                                                                    => 0.3
         }
     }.getOrElse(0.3)
@@ -395,15 +394,13 @@ object GemsResultsAnalyzer {
   /**
    * Sorts the targets list, putting the brightest stars first and returns the sorted array.
    */
-  protected [ags] def sortTargetsByBrightness(targetsList: List[SiderealTarget]): List[SiderealTarget] = {
-    val magnitudeExtractor: MagnitudeExtractor = (st) => RLikeBands.flatMap(st.magnitudeIn).headOption
-    targetsList.sortBy(magnitudeExtractor(_))(MagnitudeOptionOrdering)
-  }
+  protected [ags] def sortTargetsByBrightness(targetsList: List[SiderealTarget]): List[SiderealTarget] =
+    targetsList.sortBy(RBandsList.extract)(MagnitudeOptionOrdering)
 
   // Returns true if the target magnitude is within the given limits
   def containsMagnitudeInLimits(target: SiderealTarget, magLimits: MagnitudeConstraints): Boolean =
     // The true default is suspicious but changing it to false breaks backwards compatibility
-    target.magnitudeIn(magLimits.band).map(m => magLimits.contains(m)).getOrElse(true)
+    magLimits.searchBands.extract(target).map(m => magLimits.contains(m)).getOrElse(true)
 
   def toSPTarget(siderealTarget: SiderealTarget):SPTarget = new SPTarget(HmsDegTarget.fromSkyObject(siderealTarget.toOldModel))
 

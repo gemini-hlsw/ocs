@@ -27,7 +27,7 @@ import scala.concurrent.Await
 import scala.collection.JavaConverters._
 
 class GemsVoTableCatalogSpec extends Specification with NoTimeConversions {
-  val magnitudeRange = MagnitudeRange(FaintnessConstraint(10.0), SaturationConstraint(2.0).some)
+  val magnitudeRange = MagnitudeConstraints(SingleBand(MagnitudeBand.J), FaintnessConstraint(10.0), SaturationConstraint(2.0).some)
 
   "GemsVoTableCatalog" should {
     "support executing queries" in {
@@ -35,9 +35,7 @@ class GemsVoTableCatalogSpec extends Specification with NoTimeConversions {
       val dec = Angle.fromDMS(41, 30, 42.078).getOrElse(Angle.zero)
       val target = new SPTarget(ra.toDegrees, dec.toDegrees)
       val env = TargetEnvironment.create(target)
-      val inst = new Gsaoi
-      inst.setPosAngle(0.0)
-      inst.setIssPort(IssPort.SIDE_LOOKING)
+      val inst = new Gsaoi <| {_.setPosAngle(0.0)} <| {_.setIssPort(IssPort.SIDE_LOOKING)}
       val conditions = SPSiteQuality.Conditions.BEST
       val ctx = ObsContext.create(env, inst, JNone.instance[Site], conditions, null, null, JNone.instance())
       val base = Coordinates(RightAscension.fromAngle(ra), Declination.fromAngle(dec).getOrElse(Declination.zero))
@@ -50,8 +48,8 @@ class GemsVoTableCatalogSpec extends Specification with NoTimeConversions {
       val results = Await.result(GemsVoTableCatalog(TestVoTableBackend("/gemsvotablecatalogquery.xml")).search(ctx, base, options, scala.None, null), 30.seconds)
       results should be size 2
 
-      results.head.criterion should beEqualTo(GemsCatalogSearchCriterion(GemsCatalogSearchKey(GemsGuideStarType.tiptilt, GsaoiOdgw.Group.instance), CatalogSearchCriterion("On-detector Guide Window tiptilt", MagnitudeBand.H, MagnitudeRange(FaintnessConstraint(14.5), Some(SaturationConstraint(7.3))), RadiusConstraint.between(Angle.zero, Angle.fromDegrees(0.01666666666665151)), Some(Offset(0.0014984027777700248.degrees[OffsetP], 0.0014984027777700248.degrees[OffsetQ])), scala.None)))
-      results(1).criterion should beEqualTo(GemsCatalogSearchCriterion(GemsCatalogSearchKey(GemsGuideStarType.flexure, Wfs.Group.instance), CatalogSearchCriterion("Canopus Wave Front Sensor flexure", MagnitudeBand.R, MagnitudeRange(FaintnessConstraint(16.0), Some(SaturationConstraint(8.5))), RadiusConstraint.between(Angle.zero, Angle.fromDegrees(0.01666666666665151)), Some(Offset(0.0014984027777700248.degrees[OffsetP], 0.0014984027777700248.degrees[OffsetQ])), scala.None)))
+      results.head.criterion should beEqualTo(GemsCatalogSearchCriterion(GemsCatalogSearchKey(GemsGuideStarType.tiptilt, GsaoiOdgw.Group.instance), CatalogSearchCriterion("On-detector Guide Window tiptilt", RadiusConstraint.between(Angle.zero, Angle.fromDegrees(0.01666666666665151)), MagnitudeConstraints(SingleBand(MagnitudeBand.H), FaintnessConstraint(14.5), Some(SaturationConstraint(7.3))), Some(Offset(0.0014984027777700248.degrees[OffsetP], 0.0014984027777700248.degrees[OffsetQ])), scala.None)))
+      results(1).criterion should beEqualTo(GemsCatalogSearchCriterion(GemsCatalogSearchKey(GemsGuideStarType.flexure, Wfs.Group.instance), CatalogSearchCriterion("Canopus Wave Front Sensor flexure", RadiusConstraint.between(Angle.zero, Angle.fromDegrees(0.01666666666665151)), MagnitudeConstraints(RBandsList, FaintnessConstraint(16.0), Some(SaturationConstraint(8.5))), Some(Offset(0.0014984027777700248.degrees[OffsetP], 0.0014984027777700248.degrees[OffsetQ])), scala.None)))
       results.head.results should be size 5
       results(1).results should be size 5
     }
@@ -70,7 +68,7 @@ class GemsVoTableCatalogSpec extends Specification with NoTimeConversions {
       val posAngles = new java.util.HashSet[Angle]()
       val options = new GemsGuideStarSearchOptions(instrument, tipTiltMode, posAngles)
 
-      val results = GemsVoTableCatalog(TestVoTableBackend("/gemsvotablecatalogquery.xml")).getRadiusLimits(instrument, options.searchCriteria(ctx, scala.None).asScala.toList)
+      val results = GemsVoTableCatalog(TestVoTableBackend("/gemsvotablecatalogquery.xml")).getRadiusConstraints(instrument, options.searchCriteria(ctx, scala.None).asScala.toList)
       results should be size 1
       results.head should beEqualTo(RadiusConstraint.between(Angle.zero, Angle.fromDegrees(0.01878572819686042)))
     }
@@ -89,16 +87,16 @@ class GemsVoTableCatalogSpec extends Specification with NoTimeConversions {
       val posAngles = new java.util.HashSet[Angle]()
       val options = new GemsGuideStarSearchOptions(instrument, tipTiltMode, posAngles)
 
-      val results = GemsVoTableCatalog(TestVoTableBackend("/gemsvotablecatalogquery.xml")).optimizeMagnitudeLimits(options.searchCriteria(ctx, scala.None).asScala.toList)
+      val results = GemsVoTableCatalog(TestVoTableBackend("/gemsvotablecatalogquery.xml")).optimizeMagnitudeConstraints(options.searchCriteria(ctx, scala.None).asScala.toList)
       results should be size 2
-      results.head should beEqualTo(MagnitudeConstraints(MagnitudeBand.R, FaintnessConstraint(16), Some(SaturationConstraint(8.5))))
-      results(1) should beEqualTo(MagnitudeConstraints(MagnitudeBand.H, FaintnessConstraint(14.5), Some(SaturationConstraint(7.3))))
+      results.head should beEqualTo(MagnitudeConstraints(SingleBand(MagnitudeBand.H), FaintnessConstraint(14.5), Some(SaturationConstraint(7.3))))
+      results(1) should beEqualTo(MagnitudeConstraints(RBandsList, FaintnessConstraint(16), Some(SaturationConstraint(8.5))))
     }
     "preserve the radius constraint for a single item without offsets" in {
       val catalog = GemsVoTableCatalog(TestVoTableBackend(""))
       val key = GemsCatalogSearchKey(GemsGuideStarType.flexure, GsaoiOdgw.Group.instance)
       val radiusConstraint = RadiusConstraint.between(Angle.fromArcmin(10.0), Angle.fromArcmin(2.0))
-      val criterion = CatalogSearchCriterion("test", MagnitudeBand.J, magnitudeRange, radiusConstraint, None, None)
+      val criterion = CatalogSearchCriterion("test", radiusConstraint, magnitudeRange, None, None)
 
       val s = new GemsCatalogSearchCriterion(key, criterion)
       (~catalog.optimizeRadiusConstraint(List(s)).map(_.maxLimit) ~= radiusConstraint.maxLimit) should beTrue
@@ -110,7 +108,7 @@ class GemsVoTableCatalogSpec extends Specification with NoTimeConversions {
       val radiusConstraint = RadiusConstraint.between(Angle.fromArcmin(10.0), Angle.fromArcmin(2.0))
       val offset = Offset(3.arcmins[OffsetP], 4.arcmins[OffsetQ]).some
       val posAngle = Angle.fromArcmin(3).some
-      val criterion = CatalogSearchCriterion("test", MagnitudeBand.J, magnitudeRange, radiusConstraint, offset, posAngle)
+      val criterion = CatalogSearchCriterion("test", radiusConstraint, magnitudeRange, offset, posAngle)
 
       val s = new GemsCatalogSearchCriterion(key, criterion)
       (~catalog.optimizeRadiusConstraint(List(s)).map(_.maxLimit) ~= radiusConstraint.maxLimit + Angle.fromArcmin(5)) should beTrue
@@ -121,8 +119,8 @@ class GemsVoTableCatalogSpec extends Specification with NoTimeConversions {
       val key = GemsCatalogSearchKey(GemsGuideStarType.flexure, GsaoiOdgw.Group.instance)
       val radiusConstraint1 = RadiusConstraint.between(Angle.fromArcmin(10.0), Angle.fromArcmin(2.0))
       val radiusConstraint2 = RadiusConstraint.between(Angle.fromArcmin(15.0), Angle.fromArcmin(3.0))
-      val criterion1 = CatalogSearchCriterion("test", MagnitudeBand.J, magnitudeRange, radiusConstraint1, None, None)
-      val criterion2 = CatalogSearchCriterion("test", MagnitudeBand.J, magnitudeRange, radiusConstraint2, None, None)
+      val criterion1 = CatalogSearchCriterion("test", radiusConstraint1, magnitudeRange, None, None)
+      val criterion2 = CatalogSearchCriterion("test", radiusConstraint2, magnitudeRange, None, None)
 
       val s1 = new GemsCatalogSearchCriterion(key, criterion1)
       val s2 = new GemsCatalogSearchCriterion(key, criterion2)
@@ -138,8 +136,8 @@ class GemsVoTableCatalogSpec extends Specification with NoTimeConversions {
       val offset1 = Offset(3.arcmins[OffsetP], 4.arcmins[OffsetQ]).some
       val offset2 = Offset(5.arcmins[OffsetP], 12.arcmins[OffsetQ]).some
       val posAngle = Angle.fromArcmin(3).some
-      val criterion1 = CatalogSearchCriterion("test", MagnitudeBand.J, magnitudeRange, radiusConstraint1, offset1, posAngle)
-      val criterion2 = CatalogSearchCriterion("test", MagnitudeBand.J, magnitudeRange, radiusConstraint2, offset2, posAngle)
+      val criterion1 = CatalogSearchCriterion("test", radiusConstraint1, magnitudeRange, offset1, posAngle)
+      val criterion2 = CatalogSearchCriterion("test", radiusConstraint2, magnitudeRange, offset2, posAngle)
 
       val s1 = GemsCatalogSearchCriterion(key, criterion1)
       val s2 = GemsCatalogSearchCriterion(key, criterion2)

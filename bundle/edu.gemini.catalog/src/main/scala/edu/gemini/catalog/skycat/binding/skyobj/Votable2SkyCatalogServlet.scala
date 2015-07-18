@@ -49,13 +49,6 @@ class Votable2SkyCatalogServlet extends HttpServlet {
     } yield (b0, v0)
   }
 
-  def magnitudeExtractor(bands: List[MagnitudeBand]) = (st: SiderealTarget) => bands.flatMap(st.magnitudeIn).headOption
-
-  def candidateBands(band: MagnitudeBand): List[MagnitudeBand] = band match {
-      case MagnitudeBand.R => List(MagnitudeBand._r, MagnitudeBand.R, MagnitudeBand.UC)
-      case _               => List(band)
-    }
-
   override protected def doGet(req: HttpServletRequest, resp: HttpServletResponse) {
 
     val params:Map[String, String] = req.getParameterMap.asScala.map(t => t._1.toString -> t._2.asInstanceOf[Array[String]](0)).toMap
@@ -95,11 +88,11 @@ class Votable2SkyCatalogServlet extends HttpServlet {
         val referenceBand = lowMagLimit.map(x => x.map(_._1)) >>= (_.toOption)
 
         // Build magnitude range
-        val mr = (lowMagLimit |@| highMagLimit){(l, h) =>
+        val mr = (lowMagLimit |@| highMagLimit |@| referenceBand){(l, h, b) =>
           for {
             l0 <- l
             h0 <- h
-          } yield MagnitudeRange(FaintnessConstraint(h0._2), SaturationConstraint(l0._2).some)
+          } yield MagnitudeConstraints(BandsList.bandList(b), FaintnessConstraint(h0._2), SaturationConstraint(l0._2).some)
         }
 
         // Secondary filters, ignore unparsable parameters
@@ -108,25 +101,25 @@ class Votable2SkyCatalogServlet extends HttpServlet {
                 u0 <- u.parseDouble.disjunction
                 l0 <- l.parseDouble.disjunction
                 b0 <- \/.fromTryCatch(Band.valueOf(b)).map(_.toNewModel)
-              } yield MagnitudeConstraints(b0, FaintnessConstraint(u0), SaturationConstraint(l0).some)
+              } yield MagnitudeConstraints(BandsList.bandList(b0), FaintnessConstraint(u0), SaturationConstraint(l0).some)
           }.collect {
             case \/-(mc) => mc
           }
 
-        val query = CatalogQuery.catalogQueryWithoutBand(coordinates, rc, mr >>= (_.toOption))
+        val query: CatalogQuery = (mr >>= (_.toOption)).map { const =>
+            CatalogQuery(coordinates, rc, const, ucac4)
+          }.getOrElse {
+            CatalogQuery(coordinates, rc, Nil, ucac4)
+          }
 
         // Execute query
         val result = VoTableClient.catalog(query).map { q =>
           if (q.result.containsError) {
             q.result.problems.mkString(", ")
           } else {
-            // Filter rows on the main band
-            val rows = referenceBand.map { b =>
-              q.result.targets.rows.filter(t => q.query.filterOnMagnitude(t, magnitudeExtractor(candidateBands(b))(t)))
-            }.getOrElse(q.result.targets.rows)
-
             // Apply additional magnitude filters
-            val filteredRows = magFilters.foldLeft(rows) { (r, f) =>
+            // TODO OCSADV-404 Support multiple magnitude filters
+            val filteredRows = magFilters.foldLeft(q.result.targets.rows) { (r, f) =>
               r.filter(f.filter)
             }
             // Adjust count of resulting rows

@@ -5,8 +5,8 @@ import edu.gemini.ags.api._
 import edu.gemini.ags.api.AgsGuideQuality._
 import edu.gemini.ags.api.AgsMagnitude.{MagnitudeCalc, MagnitudeTable}
 import edu.gemini.pot.ModelConverters._
-import edu.gemini.spModel.core.MagnitudeBand
-import edu.gemini.spModel.guide.{ValidatableGuideProbe, GuideSpeed, GuideProbe}
+import edu.gemini.spModel.core.BandsList
+import edu.gemini.spModel.guide.{ValidatableGuideProbe, GuideSpeed}
 import edu.gemini.spModel.guide.GuideSpeed._
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.target.SPTarget
@@ -24,11 +24,11 @@ object GuidingFeedback {
   import OtColor._
 
   object ProbeLimits {
-    def apply(probeBands: List[MagnitudeBand], ctx: ObsContext, mc: MagnitudeCalc): Option[ProbeLimits] = {
-      val cnds = ctx.getConditions
-      val fast = mc.apply(cnds, FAST)
+    def apply(probeBands: BandsList, ctx: ObsContext, mc: MagnitudeCalc): Option[ProbeLimits] = {
+      val conditions = ctx.getConditions
+      val fast = mc.apply(conditions, FAST)
 
-      def faint(gs: GuideSpeed) = mc.apply(cnds, gs).faintnessConstraint.brightness
+      def faint(gs: GuideSpeed) = mc.apply(conditions, gs).faintnessConstraint.brightness
 
       fast.saturationConstraint.map { sat =>
         ProbeLimits(probeBands, sat.brightness, faint(FAST), faint(MEDIUM), faint(SLOW))
@@ -39,11 +39,11 @@ object GuidingFeedback {
     def lim(d: Double): String = f"$d%.1f"
   }
 
-  case class ProbeLimits(bands: List[MagnitudeBand], sat: Double, fast: Double, medium: Double, slow: Double) {
+  case class ProbeLimits(bands: BandsList, sat: Double, fast: Double, medium: Double, slow: Double) {
     import ProbeLimits.{le, lim}
 
     def searchRange: String =
-      s"${lim(sat)} $le ${bands.map(_.name).mkString(", ")} $le ${lim(slow)}"
+      s"${lim(sat)} $le ${bands.bands.list.map(_.name).mkString(", ")} $le ${lim(slow)}"
 
     def detailRange: String =
       s"${lim(sat)} $le FAST $le ${lim(fast)} < MEDIUM $le ${lim(medium)} < SLOW $le ${lim(slow)}"
@@ -127,18 +127,18 @@ object GuidingFeedback {
 
   // GuidingFeedback.Rows corresponding to the observation as a whole.
   def obsAnalysis(ctx: ObsContext, mt: MagnitudeTable): List[Row] = {
-    val (calcTable, analysis, probeBands) = AgsRegistrar.currentStrategy(ctx).fold((Map.empty[GuideProbe, MagnitudeCalc], List.empty[AgsAnalysis], List.empty[MagnitudeBand])) { strategy =>
-      (strategy.magnitudes(ctx, mt).toMap, strategy.analyze(ctx, mt), strategy.probeBands)
-    }
-    val probeLimitsMap = calcTable.mapValues(ProbeLimits(probeBands, ctx, _))
+    AgsRegistrar.currentStrategy(ctx).map { strategy =>
+      val (calcTable, analysis, probeBands) = (strategy.magnitudes(ctx, mt).toMap, strategy.analyze(ctx, mt), strategy.probeBands)
+      val probeLimitsMap = calcTable.mapValues(ProbeLimits(probeBands, ctx, _))
 
-    analysis.map { a =>
-      val plo = for {
-        gp <- AgsAnalysis.guideProbe(a)
-        pl <- probeLimitsMap.get(gp).flatten
-      } yield pl
-      Row(a, plo, includeProbeName = true)
-    }
+      analysis.map { a =>
+        val plo = for {
+          gp <- AgsAnalysis.guideProbe(a)
+          pl <- probeLimitsMap.get(gp).flatten
+        } yield pl
+        Row(a, plo, includeProbeName = true)
+      }
+    }.getOrElse(Nil)
   }
 
   // Ugh, search through to figure out what the guide probe is, if any.

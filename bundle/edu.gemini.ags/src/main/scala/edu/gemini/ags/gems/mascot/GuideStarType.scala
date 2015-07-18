@@ -1,15 +1,11 @@
 package edu.gemini.ags.gems.mascot
 
-import edu.gemini.spModel.core.MagnitudeBand
 import edu.gemini.spModel.obs.context.ObsContext
 
 /**
  * Common guide star properties
  */
 trait GuideStarType {
-  /**The default bandpass to use for calculations */
-  def defaultBandpass: MagnitudeBand
-
   /**
    * Returns true if the star is a valid guide star.
    * @param ctx the science program observing context

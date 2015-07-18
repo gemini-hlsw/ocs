@@ -50,13 +50,13 @@ class GemsGuideStarSearchController {
         ObsContext obsContext = _worker.getObsContext(basePos.getRaDeg(), basePos.getDecDeg());
         Set<edu.gemini.spModel.core.Angle> posAngles = getPosAngles(obsContext);
 
-        MagnitudeBand band = _model.getBand().getBand();
+        MagnitudeBand nirBand = _model.getBand().getBand();
 
         GemsTipTiltMode tipTiltMode = _model.getAnalyseChoice().getGemsTipTiltMode();
         List<GemsCatalogSearchResults> results;
         try {
             results = _worker.search(_model.getCatalog(), tipTiltMode, obsContext, posAngles,
-                    new scala.Some<>(band));
+                    new scala.Some<>(nirBand));
         } catch(Exception e) {
             DialogUtil.error(_dialog, e);
             results = new ArrayList<>();

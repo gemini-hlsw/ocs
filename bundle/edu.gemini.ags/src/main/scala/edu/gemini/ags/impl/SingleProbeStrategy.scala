@@ -7,11 +7,10 @@ import edu.gemini.catalog.votable.{RemoteBackend, VoTableBackend, CatalogExcepti
 import edu.gemini.pot.ModelConverters._
 import edu.gemini.skycalc
 import edu.gemini.spModel.ags.AgsStrategyKey
-import edu.gemini.spModel.core.{MagnitudeBand, Coordinates, Angle}
+import edu.gemini.spModel.core.{Coordinates, Angle}
 import edu.gemini.spModel.core.Target.SiderealTarget
 import edu.gemini.spModel.guide.{ValidatableGuideProbe, VignettingGuideProbe, GuideProbe}
 import edu.gemini.spModel.obs.context.ObsContext
-import edu.gemini.spModel.target.system.CoordinateParam.Units
 import edu.gemini.spModel.target.system.HmsDegTarget
 import edu.gemini.spModel.telescope.PosAngleConstraint._
 
@@ -44,13 +43,11 @@ case class SingleProbeStrategy(key: AgsStrategyKey, params: SingleProbeStrategyP
 
   override def candidates(ctx: ObsContext, mt: MagnitudeTable): Future[List[(GuideProbe, List[SiderealTarget])]] = {
     val empty = Future.successful(List((params.guideProbe: GuideProbe, List.empty[SiderealTarget])))
-    def filterOnMagnitude(q: CatalogQuery, t: SiderealTarget): Boolean = {
-      params.referenceMagnitude(t).exists(q.filterOnMagnitude(t, _))
-    }
+
     // We cannot let VoTableClient to filter targets as usual, instead we provide an empty magnitude constraint and filter locally
     catalogQueries(ctx, mt).strengthR(backend).headOption.map(Function.tupled(VoTableClient.catalog)).map(_.flatMap {
         case r if r.result.containsError => Future.failed(CatalogException(r.result.problems))
-        case r                           => Future.successful(List((params.guideProbe, r.result.targets.rows.filter(t => filterOnMagnitude(r.query, t)))))
+        case r                           => Future.successful(List((params.guideProbe, r.result.targets.rows)))
     }).getOrElse(empty)
   }
 
@@ -91,7 +88,7 @@ case class SingleProbeStrategy(key: AgsStrategyKey, params: SingleProbeStrategyP
         val analyzedTargets = for {
           target    <- targets
           analysis  <- AgsAnalysis.analysis(ctx0, mt, vprobe, target, params.probeBands)
-          magnitude <- params.referenceMagnitude.apply(target)
+          magnitude <- params.referenceMagnitude(target)
         } yield (target, magnitude, analysis.quality)
         (ctx0, analyzedTargets)
       }
@@ -216,10 +213,9 @@ case class SingleProbeStrategy(key: AgsStrategyKey, params: SingleProbeStrategyP
   private def ctx180(c: ObsContext): ObsContext =
     c.withPositionAngle(c.getPositionAngle.add(180.0, skycalc.Angle.Unit.DEGREES))
 
-  override val guideProbes: List[GuideProbe] =
-    List(params.guideProbe)
+  override val guideProbes: List[GuideProbe] = List(params.guideProbe)
 
-  override val probeBands: List[MagnitudeBand] = params.probeBands
+  override val probeBands = params.probeBands
 }
 
 object SingleProbeStrategy {
