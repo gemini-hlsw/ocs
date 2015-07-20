@@ -163,6 +163,8 @@ object constraints {
     def height(a: T, s: String): T
     def maxWidth(a: T, s: String): T
     def maxHeight(a: T, s: String): T
+    def minWidth(a: T, s: String): T
+    def minHeight(a: T, s: String): T
   }
 
   // This implicit class applies to LC/CC using structural types
@@ -186,6 +188,16 @@ object constraints {
      * Type safe maxHeight
      */
     def maxHeight[U](units: MigUnits[U])(implicit ev: Sizable[T]): T = ev.maxHeight(a, units.toBoundSize)
+
+    /**
+     * Type safe minWidth
+     */
+    def minWidth[U](units: MigUnits[U])(implicit ev: Sizable[T]): T = ev.minWidth(a, units.toBoundSize)
+
+    /**
+     * Type safe minHeight
+     */
+    def minHeight[U](units: MigUnits[U])(implicit ev: Sizable[T]): T = ev.minHeight(a, units.toBoundSize)
   }
 
   implicit val LCSizable = new Sizable[MigLC] {
@@ -193,12 +205,16 @@ object constraints {
     override def height(a: MigLC, s: String): MigLC = a.height(s)
     override def maxWidth(a: MigLC, s: String): MigLC = a.maxWidth(s)
     override def maxHeight(a: MigLC, s: String): MigLC = a.maxHeight(s)
+    override def minWidth(a: MigLC, s: String): MigLC = a.minWidth(s)
+    override def minHeight(a: MigLC, s: String): MigLC = a.minHeight(s)
   }
   implicit val CCSizable = new Sizable[MigCC] {
     override def width(a: MigCC, s: String): MigCC = a.width(s)
     override def height(a: MigCC, s: String): MigCC = a.height(s)
     override def maxWidth(a: MigCC, s: String): MigCC = a.maxWidth(s)
     override def maxHeight(a: MigCC, s: String): MigCC = a.maxHeight(s)
+    override def minWidth(a: MigCC, s: String): MigCC = a.minWidth(s)
+    override def minHeight(a: MigCC, s: String): MigCC = a.minHeight(s)
   }
 
 
