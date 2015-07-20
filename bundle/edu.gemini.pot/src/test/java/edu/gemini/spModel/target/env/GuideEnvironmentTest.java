@@ -40,6 +40,7 @@ public class GuideEnvironmentTest {
     private final GuideGroup grp3 = GuideGroup.create("3", gpt_gmos);
     private final GuideGroup grp4 = GuideGroup.create("4");
     private final GuideEnvironment env = GuideEnvironment.create(OptionsListImpl.create(grp1, grp2, grp3, grp4));
+    private final Option<Long> when = None.instance();
 
     @Test
     public void testGetReferencedGuiders() {
@@ -75,7 +76,7 @@ public class GuideEnvironmentTest {
     @Test
     public void testCloneTargets() {
         GuideEnvironment env2 = env.cloneTargets();
-        Fixture.verifyGuideEnvironmentEquals(env, env2);
+        Fixture.verifyGuideEnvironmentEquals(env, env2, when);
         assertFalse(env2.containsTarget(t_pwfs1_1)); // SPTarget.equals() not defined
     }
 
@@ -115,7 +116,7 @@ public class GuideEnvironmentTest {
         final PioFactory fact = new PioXmlFactory();
         for (GuideEnvironment expected : lst) {
             final GuideEnvironment actual = GuideEnvironment.fromParamSet(expected.getParamSet(fact));
-            Fixture.verifyGuideEnvironmentEquals(expected, actual);
+            Fixture.verifyGuideEnvironmentEquals(expected, actual, when);
         }
     }
 

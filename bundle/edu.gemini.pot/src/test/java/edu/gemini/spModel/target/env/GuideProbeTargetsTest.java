@@ -90,7 +90,7 @@ public final class GuideProbeTargetsTest extends TestCase {
         PioFactory fact = new PioXmlFactory();
         for (GuideProbeTargets expected : DefaultImList.create(fix.gpt_pwfs1, fix.gpt_pwfs2, fix.gpt_gmos)) {
             GuideProbeTargets actual = GuideProbeTargets.fromParamSet(expected.getParamSet(fact));
-            Fixture.verifyGptEquals(expected, actual);
+            Fixture.verifyGptEquals(expected, actual, fix.when);
         }
     }
 
@@ -119,11 +119,11 @@ public final class GuideProbeTargetsTest extends TestCase {
         GuideProbeTargets cgptpwfs2 = fix.gpt_pwfs2.cloneTargets();
         GuideProbeTargets cgptgmos  = fix.gpt_gmos.cloneTargets();
 
-        Fixture.verifyGptEquals(fix.gpt_pwfs1, cgptpwfs1);
+        Fixture.verifyGptEquals(fix.gpt_pwfs1, cgptpwfs1, fix.when);
         assertFalse(fix.gpt_pwfs1.equals(cgptpwfs1));
-        Fixture.verifyGptEquals(fix.gpt_pwfs2, cgptpwfs2);
+        Fixture.verifyGptEquals(fix.gpt_pwfs2, cgptpwfs2, fix.when);
         assertFalse(fix.gpt_pwfs2.equals(cgptpwfs2));
-        Fixture.verifyGptEquals(fix.gpt_gmos,  cgptgmos);
+        Fixture.verifyGptEquals(fix.gpt_gmos,  cgptgmos, fix.when);
         assertEquals(fix.gpt_gmos, cgptgmos); // no targets, so should be same
     }
 
@@ -131,23 +131,23 @@ public final class GuideProbeTargetsTest extends TestCase {
         GuideProbeTargets gpt;
 
         gpt = fix.gpt_pwfs1.removeTarget(fix.t_pwfs1_1);
-        Fixture.verifySpListEquals(DefaultImList.create(fix.t_pwfs1_2), gpt.getOptions());
+        Fixture.verifySpListEquals(DefaultImList.create(fix.t_pwfs1_2), gpt.getOptions(), fix.when);
 
         gpt = fix.gpt_pwfs1.removeTarget(fix.t_pwfs1_2);
-        Fixture.verifySpListEquals(DefaultImList.create(fix.t_pwfs1_1), gpt.getOptions());
+        Fixture.verifySpListEquals(DefaultImList.create(fix.t_pwfs1_1), gpt.getOptions(), fix.when);
 
         // Remove a target that doesn't exist in the GuideProbeTargets instance.
         gpt = fix.gpt_pwfs1.removeTarget(fix.t_pwfs2);
-        Fixture.verifySpListEquals(fix.tl_pwfs1, gpt.getOptions());
+        Fixture.verifySpListEquals(fix.tl_pwfs1, gpt.getOptions(), fix.when);
 
         // Remove the only target in the list
         gpt = fix.gpt_pwfs2.removeTarget(fix.t_pwfs2);
         ImList<SPTarget> empty = ImCollections.emptyList();
-        Fixture.verifySpListEquals(empty, gpt.getOptions());
+        Fixture.verifySpListEquals(empty, gpt.getOptions(), fix.when);
 
         // Remove from an empty list.
         gpt = fix.gpt_gmos.removeTarget(fix.t_pwfs1_1);
-        Fixture.verifySpListEquals(fix.tl_gmos, gpt.getOptions());
+        Fixture.verifySpListEquals(fix.tl_gmos, gpt.getOptions(), fix.when);
     }
 
     public void testTargetMatch() {
