@@ -1,7 +1,7 @@
 package edu.gemini.catalog.ui
 
 import javax.swing.SwingConstants
-import javax.swing.table.{DefaultTableCellRenderer, TableRowSorter, AbstractTableModel}
+import javax.swing.table._
 
 import edu.gemini.ags.api.AgsRegistrar
 import edu.gemini.catalog.api.CatalogQuery
@@ -31,6 +31,73 @@ trait PreferredSizeFrame { this: Window =>
         .getDefaultScreenDevice
         .getDefaultConfiguration.getBounds
       new Dimension(screenSize.getWidth.intValue() * 3 / 4, (2f / 3f * screenSize.getHeight).intValue())
+    }
+  }
+}
+
+/**
+ * Support to calculate the columnt widths and adjust them to the outer width
+ */
+trait TableColumnsAdjuster { this: Table =>
+  autoResizeMode = Table.AutoResizeMode.Off
+
+  val minSpacing: Int = 20
+
+  def adjustColumns(containerWidth: Int): Unit = {
+    import scala.math.max
+
+    def updateTableColumn(column: TableColumn, width: Int):Unit = {
+      if (column.getResizable) {
+        this.peer.getTableHeader.setResizingColumn(column)
+        column.setPreferredWidth(width)
+        column.setWidth(width)
+      }
+    }
+
+    def calculateColumnWidth(column: TableColumn): Int = {
+
+      def calculateColumnHeaderWidth: Int = {
+        val value = column.getHeaderValue
+        val renderer = Option(column.getHeaderRenderer).getOrElse(this.peer.getTableHeader.getDefaultRenderer)
+
+        val c = renderer.getTableCellRendererComponent(this.peer, value, false, false, -1, column.getModelIndex)
+        c.getPreferredSize.width
+      }
+
+      def cellDataWidth(row: Int, column: Int): Int = {
+        val cellRenderer = this.peer.getCellRenderer(row, column)
+        val c = this.peer.prepareRenderer(cellRenderer, row, column)
+        c.getPreferredSize.width + this.peer.getIntercellSpacing.width
+      }
+
+      def calculateColumnDataWidth: Int = {
+        (0 until this.model.getRowCount).foldLeft(0) { (currMax, i) =>
+          max(currMax, cellDataWidth(i, column.getModelIndex))
+        }
+      }
+
+      val columnHeaderWidth = calculateColumnHeaderWidth
+      val columnDataWidth = calculateColumnDataWidth
+
+      max(columnHeaderWidth, columnDataWidth)
+    }
+
+    val tcm = this.peer.getColumnModel
+
+    // Calculate the width
+    val cols = for {
+        i <- 0 until tcm.getColumnCount
+      } yield (tcm.getColumn(i), calculateColumnWidth(tcm.getColumn(i)))
+    val initialWidth = cols.map(_._2).sum
+
+    // Adjust space to fit on the outer width
+    val spacing = max(minSpacing, (containerWidth - initialWidth) / tcm.getColumnCount)
+    // Add the rounding error to the first col
+    val initialOffset = max(0, containerWidth - cols.map(_._2 + spacing).sum)
+    // Set width + spacing
+    cols.zipWithIndex.foreach {
+      case ((c, w), i) if i == 0 => updateTableColumn(c, w + spacing + initialOffset) // Add rounding error to the first col
+      case ((c, w), i)           => updateTableColumn(c, w + spacing)
     }
   }
 }
@@ -169,6 +236,10 @@ object QueryResultsWindow {
         }
       }
 
+      val scrollPane = new ScrollPane() {
+        contents = table
+      }
+
       contents = new MigPanel(LC().fill().insets(0).debug(0)) {
         add(new MigPanel(LC().fill().insets(5.px).debug(0)) {
           add(new Label("Query Parameters"), CC().dockNorth())
@@ -190,11 +261,7 @@ object QueryResultsWindow {
         // Results Table
         add(resultsLabel, CC().wrap())
         // Results Table
-        add(new ScrollPane() {
-          contents = table
-          // Show horizontal scroll bar
-          horizontalScrollBarPolicy = ScrollPane.BarPolicy.Always
-        }, CC().grow().pushY().pushX())
+        add(scrollPane, CC().grow().pushY().pushX())
         // Command buttons at the bottom
         add(new MigPanel(LC().fillX().insets(10.px)) {
           add(closeButton, CC().alignX(RightAlign))
@@ -214,14 +281,12 @@ object QueryResultsWindow {
       }
     }
 
-    val resultsTable = new Table() with SortableTable {
+    val resultsTable = new Table() with SortableTable with TableColumnsAdjuster {
       private val m = TargetsModel(Nil)
       model = model
       val sorter = new TableRowSorter[TargetsModel](m)
       peer.setRowSorter(sorter)
       peer.getRowSorter.toggleSortOrder(0)
-
-      autoResizeMode = Table.AutoResizeMode.Off
 
       // Align Right
       peer.setDefaultRenderer(classOf[String], new DefaultTableCellRenderer() {
@@ -252,6 +317,7 @@ object QueryResultsWindow {
           val sorter = new TableRowSorter[TargetsModel](model)
           resultsTable.peer.setRowSorter(sorter)
           resultsTable.peer.getRowSorter.toggleSortOrder(0)
+          sorter.sort()
 
           // Update the count of rows
           resultsLabel.updateCount(x.result.targets.rows.length)
@@ -263,6 +329,10 @@ object QueryResultsWindow {
           // Update radius constraint
           radiusStart.updateAngle(x.query.radiusConstraint.minLimit)
           radiusEnd.updateAngle(x.query.radiusConstraint.maxLimit)
+
+          // Adjust the width of the columns
+          val insets = frame.scrollPane.border.getBorderInsets(frame.scrollPane.peer)
+          resultsTable.adjustColumns(frame.scrollPane.bounds.width - insets.left - insets.right)
         }
     }
   }
