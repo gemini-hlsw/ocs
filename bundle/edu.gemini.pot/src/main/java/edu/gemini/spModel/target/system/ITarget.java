@@ -72,7 +72,7 @@ public abstract class ITarget implements Cloneable, Serializable {
     ///
 
     public Option<Double> getRaDegrees(Option<Long> time) {
-        return new Some(getRaDegrees());
+        return new Some(getRa().getAs(CoordinateParam.Units.DEGREES));
     }
 
     public double getRaDegrees() {
@@ -80,7 +80,7 @@ public abstract class ITarget implements Cloneable, Serializable {
     }
 
     public Option<Double> getRaHours(Option<Long> time) {
-        return new Some(getRaHours());
+        return new Some(getRa().getAs(CoordinateParam.Units.HMS));
     }
 
     public double getRaHours() {
@@ -268,7 +268,7 @@ public abstract class ITarget implements Cloneable, Serializable {
 
     /** Gets a Skycalc {@link edu.gemini.skycalc.Coordinates} representation. */
     public synchronized Coordinates getSkycalcCoordinates() {
-        return new Coordinates(getRaDegrees(), getDecDegrees());
+        return new Coordinates(getRa().getAs(CoordinateParam.Units.DEGREES), getDec().getAs(CoordinateParam.Units.DEGREES));
     }
 
     public final String toString() {
