@@ -4,9 +4,10 @@ import javax.swing.SwingConstants
 import javax.swing.table._
 
 import edu.gemini.ags.api.AgsRegistrar
-import edu.gemini.catalog.api.CatalogQuery
+import edu.gemini.catalog.api.{MagnitudeConstraints, MagnitudeQueryFilter, CatalogQuery}
 import edu.gemini.catalog.votable.VoTableClient
 import edu.gemini.pot.sp.ISPNode
+import edu.gemini.shared.gui.textComponent.{TextRenderer, NumberField}
 import edu.gemini.shared.gui.{GlassLabel, SizePreference, SortableTable}
 import edu.gemini.spModel.core.Target.SiderealTarget
 import edu.gemini.spModel.core._
@@ -193,30 +194,6 @@ object QueryResultsWindow {
       }
     }
 
-    lazy val ra = new TextField() {
-      columns = 20
-
-      def updateRa(ra: RightAscension): Unit = {
-        text = ra.toAngle.formatHMS
-      }
-    }
-
-    lazy val dec = new TextField() {
-      columns = 20
-
-      def updateDec(dec: Declination): Unit = {
-        text = dec.formatDMS
-      }
-    }
-
-    lazy val radiusStart, radiusEnd = new TextField() {
-      columns = 5
-
-      def updateAngle(angle: Angle): Unit = {
-        text = f"${angle.toArcmins}%2.2f"
-      }
-    }
-
     case class QueryResultsFrame(table: Table) extends Frame with PreferredSizeFrame {
       title = "Query Results"
 
@@ -240,8 +217,48 @@ object QueryResultsWindow {
         contents = table
       }
 
-      contents = new MigPanel(LC().fill().insets(0).debug(0)) {
-        add(new MigPanel(LC().fill().insets(5.px).debug(0)) {
+      case object QueryForm extends MigPanel(LC().fill().insets(5.px).debug(0)) {
+
+        lazy val ra = new TextField() {
+          columns = 20
+
+          def updateRa(ra: RightAscension): Unit = {
+            text = ra.toAngle.formatHMS
+          }
+        }
+
+        lazy val dec = new TextField() {
+          columns = 20
+
+          def updateDec(dec: Declination): Unit = {
+            text = dec.formatDMS
+          }
+        }
+
+        lazy val radiusStart, radiusEnd = new NumberField(None) {
+          def updateAngle(angle: Angle): Unit = {
+            text = f"${angle.toArcmins}%2.2f"
+          }
+        }
+
+        val bands = MagnitudeBand.all.collect {
+          case MagnitudeBand.R  => MagnitudeBand._r
+          case MagnitudeBand.UC => MagnitudeBand._r
+          case b                => b
+        }.distinct
+
+        def bandsComboBox(bandsList: BandsList): ComboBox[MagnitudeBand] = new ComboBox(bands) with TextRenderer[MagnitudeBand] {
+          bandsList match {
+            case RBandsList       => selection.item = MagnitudeBand._r
+            case SingleBand(band) => selection.item = band
+          }
+
+          override def text(a: MagnitudeBand) = a.name
+        }
+
+        def buildLayout(filters: List[MagnitudeQueryFilter]): Unit = {
+          _contents.clear()
+
           add(new Label("Query Parameters"), CC().dockNorth())
           add(new Label("RA"), CC().cell(0, 0))
           add(ra, CC().cell(1, 0).spanX(3))
@@ -251,13 +268,40 @@ object QueryResultsWindow {
             verticalAlignment = Alignment.Center
           }, CC().cell(4, 0).spanY(2))
           add(new Label("Radial Range"), CC().cell(0, 4))
-          add(radiusStart, CC().cell(1, 4))
+          add(radiusStart, CC().cell(1, 4).minWidth(50.px).growX())
           add(new Label("-"), CC().cell(2, 4))
-          add(radiusEnd, CC().cell(3, 4))
+          add(radiusEnd, CC().cell(3, 4).minWidth(50.px).growX())
           add(new Label("arcmin"), CC().cell(4, 4))
-          add(queryButton, CC().cell(0, 5).span(5).pushX().alignX(RightAlign))
-        }, CC().spanY(2).alignY(TopAlign))
 
+          val startIndex = 5
+          filters.map(_.mc).zipWithIndex.map(v => v.copy(_2 = v._2 + startIndex)).foreach {
+            case (MagnitudeConstraints(RBandsList, faint, saturation), i) =>
+              add(new Label("Magnitudes"), CC().cell(0, i))
+              add(new NumberField(faint.brightness.some), CC().cell(1, i).minWidth(50.px).growX())
+              add(new Label("-"), CC().cell(2, i))
+              add(new NumberField(saturation.map(_.brightness)), CC().cell(3, i).minWidth(50.px).growX())
+              add(bandsComboBox(RBandsList), CC().cell(4, i).growX())
+          }
+
+          add(queryButton, CC().cell(0, startIndex + filters.length + 1).span(5).pushX().alignX(RightAlign))
+        }
+
+        def updateQuery(query: CatalogQuery): Unit = {
+          // Update the RA
+          ra.updateRa(query.base.ra)
+          dec.updateDec(query.base.dec)
+
+          // Update radius constraint
+          radiusStart.updateAngle(query.radiusConstraint.minLimit)
+          radiusEnd.updateAngle(query.radiusConstraint.maxLimit)
+
+          buildLayout(query.filters.list.collect {case q: MagnitudeQueryFilter => q})
+        }
+      }
+
+      QueryForm.buildLayout(Nil)
+      contents = new MigPanel(LC().fill().insets(0).debug(0)) {
+        add(QueryForm, CC().spanY(2).alignY(TopAlign).minWidth(250.px))
         // Results Table
         add(resultsLabel, CC().wrap())
         // Results Table
@@ -322,13 +366,8 @@ object QueryResultsWindow {
           // Update the count of rows
           resultsLabel.updateCount(x.result.targets.rows.length)
 
-          // Update the RA
-          ra.updateRa(x.query.base.ra)
-          dec.updateDec(x.query.base.dec)
-
-          // Update radius constraint
-          radiusStart.updateAngle(x.query.radiusConstraint.minLimit)
-          radiusEnd.updateAngle(x.query.radiusConstraint.maxLimit)
+          // Update the magnitude constraints
+          frame.QueryForm.updateQuery(x.query)
 
           // Adjust the width of the columns
           val insets = frame.scrollPane.border.getBorderInsets(frame.scrollPane.peer)
