@@ -1,5 +1,7 @@
 package edu.gemini.pit.ui.view.tac
 
+import edu.gemini.shared.gui.textComponent.{NumberField, SelectOnFocus}
+
 import scalaz._
 import Scalaz._
 import edu.gemini.model.p1.immutable._
