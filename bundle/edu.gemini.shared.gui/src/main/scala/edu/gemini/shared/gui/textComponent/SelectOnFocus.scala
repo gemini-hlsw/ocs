@@ -3,8 +3,6 @@ package edu.gemini.shared.gui.textComponent
 import java.awt.event.{FocusEvent, FocusListener}
 import scala.swing.TextComponent
 
-// From PIT
-
 trait SelectOnFocus { this: TextComponent =>
   peer.addFocusListener(new FocusListener {
     def focusLost(fe: FocusEvent) {

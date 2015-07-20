@@ -13,9 +13,9 @@ import edu.gemini.model.p1.immutable.Target
 import edu.gemini.pit.ui.util._
 import edu.gemini.pit.ui.util.RATextField
 import edu.gemini.pit.ui.util.ScrollPanes
-import edu.gemini.pit.ui.util.SelectOnFocus
 import edu.gemini.pit.ui.util.SharedIcons
 import edu.gemini.pit.ui.util.StdModalEditor
+import edu.gemini.shared.gui.textComponent.{NumberField, SelectOnFocus}
 import edu.gemini.spModel.core.{Magnitude, MagnitudeSystem, MagnitudeBand}
 import edu.gemini.ui.gface.GComparator
 import edu.gemini.ui.gface.GSelection

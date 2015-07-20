@@ -4,6 +4,8 @@ import edu.gemini.pit.ui.util.MultiFormatTextField.Formatter
 
 import java.text.ParseException
 
+import edu.gemini.shared.gui.textComponent.SelectOnFocus
+
 import scala.swing._
 import scala.swing.BorderPanel.Position._
 import scala.swing.Swing.pair2Dimension

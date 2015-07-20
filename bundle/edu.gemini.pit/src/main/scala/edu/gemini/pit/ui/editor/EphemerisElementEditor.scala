@@ -5,6 +5,7 @@ import edu.gemini.model.p1.immutable.DegDeg
 import edu.gemini.model.p1.immutable.EphemerisElement
 
 import edu.gemini.pit.ui.util._
+import edu.gemini.shared.gui.textComponent.NumberField
 
 import scala.swing._
 import scala.swing.event.ValueChanged

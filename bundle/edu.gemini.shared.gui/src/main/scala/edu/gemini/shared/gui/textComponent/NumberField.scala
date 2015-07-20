@@ -50,9 +50,6 @@ class NumberField(d: Option[Double]) extends FormattedTextField(NumberField.df) 
 
   }
 
-
-
   focusLostBehavior = FormattedTextField.FocusLostBehavior.Commit // ?
-
 
 }

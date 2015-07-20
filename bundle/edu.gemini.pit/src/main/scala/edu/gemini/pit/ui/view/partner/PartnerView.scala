@@ -2,6 +2,7 @@ package edu.gemini.pit.ui.view.partner
 
 import edu.gemini.pit.model.Model
 import edu.gemini.pit.ui.util.gface.SimpleListViewer
+import edu.gemini.shared.gui.textComponent.TextRenderer
 import swing.BorderPanel.Position._
 import swing.event.SelectionChanged
 import swing._

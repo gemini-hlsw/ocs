@@ -1,5 +1,7 @@
 package edu.gemini.pit.ui.util
 
+import edu.gemini.shared.gui.textComponent.TextRenderer
+
 import swing.ComboBox
 
 import scala.language.reflectiveCalls
