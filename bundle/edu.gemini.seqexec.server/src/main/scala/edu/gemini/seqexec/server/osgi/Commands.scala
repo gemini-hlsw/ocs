@@ -1,7 +1,7 @@
 package edu.gemini.seqexec.server.osgi
 
 import edu.gemini.pot.sp.SPObservationID
-import edu.gemini.seqexec.server.{SeqexecFailure, Executor, StepResult}
+import edu.gemini.seqexec.server.{ExecutorImpl, SeqexecFailure}
 import edu.gemini.seqexec.shared.{SeqExecService, SeqFailure}
 import edu.gemini.spModel.`type`.{DisplayableSpType, LoggableSpType, SequenceableSpType}
 import edu.gemini.spModel.config2.{ConfigSequence, ItemKey}
@@ -37,6 +37,9 @@ object Commands {
 
   def apply(): Commands = new Commands {
     var loc = new Peer("localhost", 8443, null)
+
+    val exec: ExecutorImpl = 
+      ExecutorImpl.newInstance.run
 
     def host(): String =
       s"Default seq host set to ${loc.host} ${loc.port}"
@@ -124,10 +127,30 @@ object Commands {
           (for {
             oid <- parseId(obsId)
             seq <- fetch(oid, loc)
-          } yield Executor(seq).execute match {
-              case \/-(_)                   => s"Sequence $obsId completed"
-              case -\/(f: SeqexecFailure)   => "Sequence execution failed with error " + SeqexecFailure.explain(f)
+          } yield {
+            exec.start(oid, seq).runAsync(onComplete(oid))
+            s"Sequence $obsId started."
           }).merge
+
+        case List("stop", obsId) =>
+          parseId(obsId).map { oid =>
+            exec.stop(oid).runAsync(onComplete(oid))
+            s"Stop requested for $obsId."
+          } .merge
+
+        case List("continue", obsId) =>
+          parseId(obsId).map { oid =>
+            exec.continue(oid).runAsync(onComplete(oid))
+            s"Resume requested for $obsId."
+          } .merge
+
+        case List("state", obsId) =>
+          parseId(obsId).map { oid => 
+            exec.getState(oid).run match {
+              case -\/(f) => SeqexecFailure.explain(f)
+              case \/-(s) => exec.stateDescription(s)
+            }
+          } .merge
 
         case _ =>
           Usage
@@ -153,4 +176,9 @@ object Commands {
   implicit object KeyOrdering extends scala.Ordering[ItemKey] {
     override def compare(x: ItemKey, y: ItemKey) = x.compareTo(y)
   }
+
+  // TODO: this, better
+  def onComplete[A](id: SPObservationID)(result: Throwable \/ A): Unit =
+    println(id + ": " + result)
+
 }
