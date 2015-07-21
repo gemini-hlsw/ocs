@@ -4,7 +4,7 @@ import javax.swing.SwingConstants
 import javax.swing.table._
 
 import edu.gemini.ags.api.AgsRegistrar
-import edu.gemini.catalog.api.{MagnitudeConstraints, MagnitudeQueryFilter, CatalogQuery}
+import edu.gemini.catalog.api._
 import edu.gemini.catalog.votable.VoTableClient
 import edu.gemini.pot.sp.ISPNode
 import edu.gemini.shared.gui.textComponent.{TextRenderer, NumberField}
@@ -16,9 +16,10 @@ import edu.gemini.ui.miglayout.constraints._
 import jsky.app.ot.OT
 import jsky.app.ot.tpe.TpeContext
 
+import scala.swing.Reactions.Reaction
 import scala.swing._
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.swing.event.{ButtonClicked, UIElementMoved, UIElementResized}
+import scala.swing.event.{ValueChanged, ButtonClicked, UIElementMoved, UIElementResized}
 
 import scalaz._
 import Scalaz._
@@ -218,20 +219,31 @@ object QueryResultsWindow {
       }
 
       case object QueryForm extends MigPanel(LC().fill().insets(5.px).debug(0)) {
+        val queryButtonEnabling:Reaction = {
+          case ValueChanged(a) =>
+            queryButton.enabled = a match {
+              case f: AngleTextField[_] => f.valid
+              case f: NumberField       => f.valid
+              case _                    => true
+            }
+        }
 
         lazy val ra = new RATextField(RightAscension.zero) {
+          reactions += queryButtonEnabling
           def updateRa(ra: RightAscension): Unit = {
-            text = ra.toAngle.formatHMS
+            value = ra
           }
         }
 
         lazy val dec = new DecTextField(Declination.zero) {
+          reactions += queryButtonEnabling
           def updateDec(dec: Declination): Unit = {
-            text = dec.formatDMS
+            value = dec
           }
         }
 
         lazy val radiusStart, radiusEnd = new NumberField(None) {
+          reactions += queryButtonEnabling
           def updateAngle(angle: Angle): Unit = {
             text = f"${angle.toArcmins}%2.2f"
           }
@@ -281,9 +293,13 @@ object QueryResultsWindow {
           filters.map(_.mc).zipWithIndex.map(v => v.copy(_2 = v._2 + startIndex)).foreach {
             case (MagnitudeConstraints(RBandsList, faint, saturation), i) =>
               add(new Label("Magnitudes"), CC().cell(0, i))
-              add(new NumberField(faint.brightness.some), CC().cell(1, i).minWidth(50.px).growX())
+              add(new NumberField(faint.brightness.some) {
+                reactions += queryButtonEnabling
+              }, CC().cell(1, i).minWidth(50.px).growX())
               add(new Label("-"), CC().cell(2, i))
-              add(new NumberField(saturation.map(_.brightness)), CC().cell(3, i).minWidth(50.px).growX())
+              add(new NumberField(saturation.map(_.brightness)) {
+                reactions += queryButtonEnabling
+              }, CC().cell(3, i).minWidth(50.px).growX())
               add(bandsComboBox(RBandsList), CC().cell(4, i).growX())
           }
 
@@ -383,7 +399,7 @@ object QueryResultsWindow {
   // Public interface
   val instance = this
 
-  private def showTable(q: CatalogQuery):Unit = Swing.onEDT {
+  protected [ui] def showTable(q: CatalogQuery):Unit = Swing.onEDT {
     import QueryResultsWindow.table._
 
     frame.visible = true
