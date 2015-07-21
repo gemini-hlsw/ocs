@@ -51,7 +51,8 @@ class AngleTextField[A](initialValue: A, format : Formatter[A]) extends scala.sw
   reactions += {
     case ValueChanged(_) => peer.getFormatter match {
       case f:Formatter[A] =>
-        validate(f)
+        if (!text.isEmpty)
+          validate(f)
     }
   }
 
