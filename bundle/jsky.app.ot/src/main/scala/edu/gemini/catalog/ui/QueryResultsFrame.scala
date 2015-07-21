@@ -421,3 +421,22 @@ object QueryResultsWindow {
   }
 
 }
+
+object CatalogQueryDemo extends SwingApplication {
+  import QueryResultsWindow.instance
+  import jsky.util.gui.Theme
+  import javax.swing.UIManager
+
+  val query = CatalogQuery(None,Coordinates(RightAscension.fromAngle(Angle.fromDegrees(3.1261166666666895)),Declination.fromAngle(Angle.fromDegrees(337.93268333333333)).getOrElse(Declination.zero)),RadiusConstraint.between(Angle.zero,Angle.fromDegrees(0.16459874517619255)),List(MagnitudeConstraints(RBandsList,FaintnessConstraint(16.0),Some(SaturationConstraint(3.1999999999999993)))),ucac4)
+
+  def startup(args: Array[String]) {
+    System.setProperty("apple.awt.antialiasing", "on")
+    System.setProperty("apple.awt.textantialiasing", "on")
+    Theme.install()
+
+    UIManager.put("Button.defaultButtonFollowsFocus", true)
+
+    instance.showTable(query)
+  }
+
+}
