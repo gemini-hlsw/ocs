@@ -219,17 +219,13 @@ object QueryResultsWindow {
 
       case object QueryForm extends MigPanel(LC().fill().insets(5.px).debug(0)) {
 
-        lazy val ra = new TextField() {
-          columns = 20
-
+        lazy val ra = new RATextField(RightAscension.zero) {
           def updateRa(ra: RightAscension): Unit = {
             text = ra.toAngle.formatHMS
           }
         }
 
-        lazy val dec = new TextField() {
-          columns = 20
-
+        lazy val dec = new DecTextField(Declination.zero) {
           def updateDec(dec: Declination): Unit = {
             text = dec.formatDMS
           }
@@ -241,12 +237,14 @@ object QueryResultsWindow {
           }
         }
 
+        // Supported bands, remove R-Like duplicates
         val bands = MagnitudeBand.all.collect {
           case MagnitudeBand.R  => MagnitudeBand._r
           case MagnitudeBand.UC => MagnitudeBand._r
           case b                => b
         }.distinct
 
+        // Make a combo box out of the supported bands
         def bandsComboBox(bandsList: BandsList): ComboBox[MagnitudeBand] = new ComboBox(bands) with TextRenderer[MagnitudeBand] {
           bandsList match {
             case RBandsList       => selection.item = MagnitudeBand._r
@@ -256,14 +254,20 @@ object QueryResultsWindow {
           override def text(a: MagnitudeBand) = a.name
         }
 
+        // Make a query out of the
+        def buildQuery: CatalogQuery = {
+          //CatalogQuery()
+          ???
+        }
+
         def buildLayout(filters: List[MagnitudeQueryFilter]): Unit = {
           _contents.clear()
 
           add(new Label("Query Parameters"), CC().dockNorth())
           add(new Label("RA"), CC().cell(0, 0))
-          add(ra, CC().cell(1, 0).spanX(3))
+          add(ra, CC().cell(1, 0).spanX(3).growX())
           add(new Label("Dec"), CC().cell(0, 1))
-          add(dec, CC().cell(1, 1).spanX(3))
+          add(dec, CC().cell(1, 1).spanX(3).growX())
           add(new Label("J2000") {
             verticalAlignment = Alignment.Center
           }, CC().cell(4, 0).spanY(2))
