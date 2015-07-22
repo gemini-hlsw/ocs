@@ -69,6 +69,7 @@ class ObservationEditor private (obs:Observation, canEdit:Boolean) extends StdMo
   }
 
   object Units extends ComboBox(TimeUnit.values.toList) with ValueRenderer[TimeUnit] {
+    enabled = canEdit
     selection.item = obs.time.getOrElse(TimeAmount.empty).units
   }
 
