@@ -123,7 +123,7 @@ class TargetView(val shellAdvisor:ShellAdvisor) extends BorderPanel with BoundVi
         }
         //        case Epoch      => e.epoch.toString
         case Magnitudes => e match {
-          case t:SiderealTarget    => t.magnitudes.map(_.band.toString).sorted.mkString(" ")
+          case t:SiderealTarget    => t.magnitudes.map(_.band.name).sorted.mkString(" ")
           case t:NonSiderealTarget => t.magnitude(semester.midPoint).map(d => "*").orNull
           case t:TooTarget         => null
         }
