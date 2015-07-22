@@ -100,6 +100,6 @@ case object Partial extends SubmitStatus {
 case object Success extends SubmitStatus {
   val title = "Successfully Received"
   val description =
-    "This proposal has been submitted and is locked (but you can open an editable copy)."
+    "The proposal has been successfully received, no confirmation emails will be sent. The proposal is locked but you can open an editable copy."
 }
 
