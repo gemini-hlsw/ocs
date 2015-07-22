@@ -49,8 +49,10 @@ class VoTableClientSpec extends SpecificationWithJUnit with VoTableClient with N
       val r = for {
           f1 <- VoTableClient.catalog(query, countingBackend)
           f2 <- VoTableClient.catalog(query, countingBackend)
-        } yield f2
-      Await.result(r, 10.seconds)
+        } yield (f1, f2)
+      // Check both have the same results
+      val result = Await.result(r, 10.seconds)
+      result._1 should beEqualTo(result._2)
       // Depending on timing it could hit all or less than all parallel urls
       counter.get() should be_<=(VoTableClient.catalogUrls.size)
     }
@@ -63,10 +65,25 @@ class VoTableClientSpec extends SpecificationWithJUnit with VoTableClient with N
       val r = for {
           f1 <- VoTableClient.catalog(query, countingBackend)
           f2 <- VoTableClient.catalog(query2, countingBackend)
-        } yield f2
+        } yield (f1, f2)
       Await.result(r, 10.seconds)
       // Depending on timing it could hit all or less than all parallel urls
       counter.get() should be_<=(VoTableClient.catalogUrls.size)
+    }
+    "cache hits should preserve the queries" in {
+      val counter = new AtomicInteger(0)
+      val countingBackend = CountingCachedBackend(counter, "/votable-ucac4.xml")
+      // query2 has smaller radius
+      val query2 = CatalogQuery(Coordinates.zero, RadiusConstraint.between(Angle.fromDegrees(0), Angle.fromDegrees(0.1)), noMagnitudeConstraint, ucac4)
+      // Backend should be hit at most once per url
+      val r = for {
+          f1 <- VoTableClient.catalog(query, countingBackend)
+          f2 <- VoTableClient.catalog(query2, countingBackend)
+        } yield (f1, f2)
+      val result = Await.result(r, 10.seconds)
+      // Check that each query is matched
+      result._1.query should beEqualTo(query)
+      result._2.query should beEqualTo(query2)
     }
     "include query params" in {
       val counter = new AtomicInteger(0)

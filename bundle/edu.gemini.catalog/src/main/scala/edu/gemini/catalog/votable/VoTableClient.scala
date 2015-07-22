@@ -127,12 +127,12 @@ trait CachedBackend extends VoTableBackend {
   // Cache the query not the future so that failed queries are executed again
   protected val cachedQuery = cache(query)
 
-  // Do a query to the appropratie backend
+  // Do a query to the appropriate backend
   protected def query(e: SearchKey): QueryResult
 
   // Cache the query not the future so that failed queries are executed again
   protected [votable] def doQuery(query: CatalogQuery, url: String): Future[QueryResult] = future {
-    cachedQuery(SearchKey(query, url))
+    cachedQuery(SearchKey(query, url)).copy(query = query)
   }
 
 }
