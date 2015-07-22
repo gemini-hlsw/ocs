@@ -1,5 +1,7 @@
 package edu.gemini.catalog.ui
 
+import javax.swing.BorderFactory._
+import javax.swing.border.Border
 import javax.swing.SwingConstants
 import javax.swing.table._
 
@@ -213,7 +215,17 @@ object QueryResultsWindow {
         contents = table
       }
 
-      case object QueryForm extends MigPanel(LC().fill().insets(5.px).debug(0)) {
+      case object QueryForm extends MigPanel(LC().fill().insets(0.px).debug(0)) {
+        /** Create a titled border with inner and outer padding. */
+        def titleBorder(title: String): Border =
+          createCompoundBorder(
+            createEmptyBorder(2,2,2,2),
+            createCompoundBorder(
+              createTitledBorder(title),
+              createEmptyBorder(2,2,2,2)))
+
+        border = titleBorder("Query Params")
+
         case class MagnitudeFilterControls(faintess: NumberField, saturation: NumberField, bandCB: ComboBox[MagnitudeBand])
 
         private val queryButton = new Button("Query") {
@@ -292,7 +304,6 @@ object QueryResultsWindow {
         def buildLayout(filters: List[MagnitudeQueryFilter]): Unit = {
           _contents.clear()
 
-          add(new Label("Query Parameters"), CC().dockNorth())
           add(new Label("RA"), CC().cell(0, 0))
           add(ra, CC().cell(1, 0).spanX(3).growX())
           add(new Label("Dec"), CC().cell(0, 1))
@@ -300,11 +311,11 @@ object QueryResultsWindow {
           add(new Label("J2000") {
             verticalAlignment = Alignment.Center
           }, CC().cell(4, 0).spanY(2))
-          add(new Label("Radial Range"), CC().cell(0, 4))
-          add(radiusStart, CC().cell(1, 4).minWidth(50.px).growX())
-          add(new Label("-"), CC().cell(2, 4))
-          add(radiusEnd, CC().cell(3, 4).minWidth(50.px).growX())
-          add(new Label("arcmin"), CC().cell(4, 4))
+          add(new Label("Radial Range"), CC().cell(0, 2))
+          add(radiusStart, CC().cell(1, 2).minWidth(50.px).growX())
+          add(new Label("-"), CC().cell(2, 2))
+          add(radiusEnd, CC().cell(3, 2).minWidth(50.px).growX())
+          add(new Label("arcmin"), CC().cell(4, 2))
 
           // Replace current magnitude filters
           magnitudeControls.clear()
@@ -319,7 +330,7 @@ object QueryResultsWindow {
             MagnitudeFilterControls(faint, sat, cb)
           }
           // Add magnitude filters list
-          val startIndex = 5
+          val startIndex = 3
           magnitudeControls.zipWithIndex.map(v => v.copy(_2 = v._2 + startIndex)).foreach {
             case (MagnitudeFilterControls(faintness, saturation, cb), i) =>
               add(new Label("Magnitudes"), CC().cell(0, i))
@@ -329,7 +340,7 @@ object QueryResultsWindow {
               add(cb, CC().cell(4, i).growX())
           }
 
-          add(queryButton, CC().cell(0, startIndex + filters.length + 1).span(5).pushX().alignX(RightAlign))
+          add(queryButton, CC().cell(0, startIndex + filters.length + 1).span(5).pushX().alignX(RightAlign).gapTop(10.px))
         }
 
         def updateQuery(query: CatalogQuery): Unit = {
@@ -347,9 +358,10 @@ object QueryResultsWindow {
 
       QueryForm.buildLayout(Nil)
       contents = new MigPanel(LC().fill().insets(0).debug(0)) {
+        // Query Form
         add(QueryForm, CC().spanY(2).alignY(TopAlign).minWidth(250.px))
         // Results Table
-        add(resultsLabel, CC().wrap())
+        add(resultsLabel, CC().alignX(CenterAlign).gapTop(5.px).wrap())
         // Results Table
         add(scrollPane, CC().grow().pushY().pushX())
         // Command buttons at the bottom
