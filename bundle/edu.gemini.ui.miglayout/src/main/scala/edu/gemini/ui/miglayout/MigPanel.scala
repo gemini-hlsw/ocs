@@ -21,6 +21,7 @@ object constraints {
   sealed abstract class HMigAlign(protected [constraints] val toAlign: String)
   case object RightAlign extends HMigAlign("right")
   case object LeftAlign extends HMigAlign("left")
+  case object CenterAlign extends HMigAlign("center")
 
   // Constructs for type-safer units
   // use Mig Prefix to pollute less the use of Units
