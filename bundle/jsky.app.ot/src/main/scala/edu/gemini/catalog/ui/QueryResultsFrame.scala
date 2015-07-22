@@ -18,6 +18,7 @@ import jsky.app.ot.tpe.TpeContext
 
 import scala.swing.Reactions.Reaction
 import scala.swing._
+import scala.collection.mutable
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.swing.event.{ValueChanged, ButtonClicked, UIElementMoved, UIElementResized}
 
@@ -208,17 +209,21 @@ object QueryResultsWindow {
         }
       }
 
-      private val queryButton = new Button("Query") {
-        reactions += {
-          case ButtonClicked(_) =>
-        }
-      }
-
       val scrollPane = new ScrollPane() {
         contents = table
       }
 
       case object QueryForm extends MigPanel(LC().fill().insets(5.px).debug(0)) {
+        case class MagnitudeFilterControls(faintess: NumberField, saturation: NumberField, bandCB: ComboBox[MagnitudeBand])
+
+        private val queryButton = new Button("Query") {
+          reactions += {
+            case ButtonClicked(_) =>
+              // Hit the catalog with a new query
+              buildQuery.foreach(reloadSearchData)
+          }
+        }
+
         val queryButtonEnabling:Reaction = {
           case ValueChanged(a) =>
             queryButton.enabled = a match {
@@ -249,6 +254,9 @@ object QueryResultsWindow {
           }
         }
 
+        // Contains the list of controls on the UI to make magnitude filters
+        val magnitudeControls = mutable.ListBuffer.empty[MagnitudeFilterControls]
+
         // Supported bands, remove R-Like duplicates
         val bands = MagnitudeBand.all.collect {
           case MagnitudeBand.R  => MagnitudeBand._r
@@ -266,10 +274,19 @@ object QueryResultsWindow {
           override def text(a: MagnitudeBand) = a.name
         }
 
-        // Make a query out of the
-        def buildQuery: CatalogQuery = {
-          //CatalogQuery()
-          ???
+        // Make a query out of the form parameters
+        def buildQuery: Option[CatalogQuery] = {
+          queryButton.enabled option {
+            // No validation here, the Query button is disabled unless all the controls are valid
+            val coordinates = Coordinates(ra.value, dec.value)
+            val radius = RadiusConstraint.between(Angle.fromArcmin(radiusStart.text.toDouble), Angle.fromArcmin(radiusEnd.text.toDouble))
+
+            val filters = magnitudeControls.map {
+              case MagnitudeFilterControls(faintess, saturation, bandCB) =>
+                MagnitudeConstraints(BandsList.bandList(bandCB.selection.item), FaintnessConstraint(faintess.text.toDouble), SaturationConstraint(saturation.text.toDouble).some)
+            }
+            CatalogQuery(None, coordinates, radius, filters.toList, ucac4)
+          }
         }
 
         def buildLayout(filters: List[MagnitudeQueryFilter]): Unit = {
@@ -289,18 +306,27 @@ object QueryResultsWindow {
           add(radiusEnd, CC().cell(3, 4).minWidth(50.px).growX())
           add(new Label("arcmin"), CC().cell(4, 4))
 
+          // Replace current magnitude filters
+          magnitudeControls.clear()
+          magnitudeControls ++= filters.map { f =>
+            val faint = new NumberField(f.mc.faintnessConstraint.brightness.some) {
+                          reactions += queryButtonEnabling
+                        }
+            val sat = new NumberField(f.mc.saturationConstraint.map(_.brightness)) {
+                            reactions += queryButtonEnabling
+                          }
+            val cb = bandsComboBox(RBandsList)
+            MagnitudeFilterControls(faint, sat, cb)
+          }
+          // Add magnitude filters list
           val startIndex = 5
-          filters.map(_.mc).zipWithIndex.map(v => v.copy(_2 = v._2 + startIndex)).foreach {
-            case (MagnitudeConstraints(RBandsList, faint, saturation), i) =>
+          magnitudeControls.zipWithIndex.map(v => v.copy(_2 = v._2 + startIndex)).foreach {
+            case (MagnitudeFilterControls(faintness, saturation, cb), i) =>
               add(new Label("Magnitudes"), CC().cell(0, i))
-              add(new NumberField(faint.brightness.some) {
-                reactions += queryButtonEnabling
-              }, CC().cell(1, i).minWidth(50.px).growX())
+              add(faintness, CC().cell(1, i).minWidth(50.px).growX())
               add(new Label("-"), CC().cell(2, i))
-              add(new NumberField(saturation.map(_.brightness)) {
-                reactions += queryButtonEnabling
-              }, CC().cell(3, i).minWidth(50.px).growX())
-              add(bandsComboBox(RBandsList), CC().cell(4, i).growX())
+              add(saturation, CC().cell(3, i).minWidth(50.px).growX())
+              add(cb, CC().cell(4, i).growX())
           }
 
           add(queryButton, CC().cell(0, startIndex + filters.length + 1).span(5).pushX().alignX(RightAlign))
@@ -364,6 +390,7 @@ object QueryResultsWindow {
   private def reloadSearchData(query: CatalogQuery) {
     import QueryResultsWindow.table._
 
+    GlassLabel.show(frame.peer.getRootPane, "Downloading...")
     VoTableClient.catalog(query).onComplete {
       case _: scala.util.Failure[_] =>
         GlassLabel.hide(frame.peer.getRootPane) // TODO Display error
@@ -404,7 +431,6 @@ object QueryResultsWindow {
 
     frame.visible = true
     frame.peer.toFront()
-    GlassLabel.show(frame.peer.getRootPane, "Downloading...")
     reloadSearchData(q)
   }
 
