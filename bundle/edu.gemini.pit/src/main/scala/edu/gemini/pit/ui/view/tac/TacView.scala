@@ -131,6 +131,7 @@ class TacView(loc: Locale) extends BorderPanel with BoundView[ProposalClass] { v
 
       override def refresh(m:Option[ProposalClass]) = {
         val newItems = ~m.map(partners)
+        enabled = isTac && m.isDefined
         if (!(~oldItems.map(_ == newItems))) {
           oldItems = Some(newItems)
           this.peer.setModel(ComboBox.newConstantModel(newItems)) // ick
@@ -188,7 +189,7 @@ class TacView(loc: Locale) extends BorderPanel with BoundView[ProposalClass] { v
       override def refresh(m:Option[Option[SubmissionDecision]]) {
         try {
           updating = true
-          selection.item = m.flatten.headOption.map(_.decision.merge).map {
+          selection.item = m.flatten.map(_.decision.merge).map {
             case _:SubmissionReject => Rejected
             case _:SubmissionAccept => Accepted
           }.getOrElse(Undecided)
@@ -214,7 +215,7 @@ class TacView(loc: Locale) extends BorderPanel with BoundView[ProposalClass] { v
       override def refresh(m:Option[Option[A]]) {
         if (!updating) try {
           updating = true
-          val (t, e) = ~m.flatten.headOption.map(sa => (focus.get(sa), true))
+          val (t, e) = ~m.flatten.map(sa => (focus.get(sa), true))
           text = t
           comp.enabled = isTac && e
         } finally {
@@ -277,7 +278,7 @@ class TacView(loc: Locale) extends BorderPanel with BoundView[ProposalClass] { v
 
         // Enabled when it's an accept
         override def refresh(m:Option[Option[SubmissionAccept]]) {
-          enabled = isTac && m.flatten.headOption.isDefined
+          enabled = isTac && m.flatten.isDefined
         }
 
         // Our action, which re-uses the submission request editor
@@ -304,7 +305,7 @@ class TacView(loc: Locale) extends BorderPanel with BoundView[ProposalClass] { v
 
         // Enabled when it's an accept
         override def refresh(m:Option[Option[SubmissionAccept]]) {
-          text = ~m.flatten.headOption.map {a =>
+          text = ~m.flatten.map {a =>
             "%1.2f %s (%1.2f %s minimum)".format(
               a.recommended.value,
               a.recommended.units.value,
@@ -338,7 +339,7 @@ class TacView(loc: Locale) extends BorderPanel with BoundView[ProposalClass] { v
 
       // Enabled when it's an accept
       override def refresh(m:Option[Option[SubmissionAccept]]) {
-        val (b, e) = ~m.flatten.headOption.map(sa => (sa.poorWeather, true))
+        val (b, e) = ~m.flatten.map(sa => (sa.poorWeather, true))
         enabled = isTac && e
         selection.item = if (b) PoorWeatherYes else PoorWeatherNo
       }
