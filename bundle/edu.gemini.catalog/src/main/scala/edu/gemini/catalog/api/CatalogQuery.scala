@@ -36,7 +36,7 @@ case class CatalogQuery(id: Option[Int], base: Coordinates, radiusConstraint: Ra
 
     // See whether the other base position falls out of range of our
     // radius limits.
-    radiusConstraint.maxLimit > max
+    radiusConstraint.maxLimit >= max
   }
 }
 
@@ -47,6 +47,8 @@ object CatalogQuery {
   def apply(base: Coordinates, radiusConstraint: RadiusConstraint, magnitudeConstraints: MagnitudeConstraints, catalog: CatalogName):CatalogQuery = CatalogQuery(None, base, radiusConstraint, List(magnitudeConstraints), catalog)
 
   def apply(base: Coordinates, radiusConstraint: RadiusConstraint, catalog: CatalogName):CatalogQuery = CatalogQuery(None, base, radiusConstraint, Nil, catalog)
+
+  implicit val equals = Equal.equalA[CatalogQuery]
 }
 
 sealed abstract class CatalogName(val id: String)

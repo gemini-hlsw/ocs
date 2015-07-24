@@ -2,6 +2,7 @@ package edu.gemini.pit.ui.editor
 
 import edu.gemini.model.p1.immutable.CoInvestigator
 import edu.gemini.model.p1.immutable.InvestigatorStatus
+import edu.gemini.shared.gui.textComponent.SelectOnFocus
 
 
 import scala.swing.ComboBox

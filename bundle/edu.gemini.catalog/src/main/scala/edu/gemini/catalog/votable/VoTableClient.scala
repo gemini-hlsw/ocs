@@ -102,7 +102,7 @@ trait CachedBackend extends VoTableBackend {
       def go(pos: Int):Option[(Int, QueryResult)] =
         a.lift(pos) match {
           case None    => None
-          case Some(x) => if (x.k.query == k.query || x.k.query.isSuperSetOf(k.query)) Some((pos, x.v)) else go(pos + 1)
+          case Some(x) => if (x.k.query.isSuperSetOf(k.query)) Some((pos, x.v)) else go(pos + 1)
         }
       go(0)
     }
@@ -127,12 +127,14 @@ trait CachedBackend extends VoTableBackend {
   // Cache the query not the future so that failed queries are executed again
   protected val cachedQuery = cache(query)
 
-  // Do a query to the appropratie backend
+  // Do a query to the appropriate backend
   protected def query(e: SearchKey): QueryResult
 
   // Cache the query not the future so that failed queries are executed again
   protected [votable] def doQuery(query: CatalogQuery, url: String): Future[QueryResult] = future {
-    cachedQuery(SearchKey(query, url))
+    val qr = cachedQuery(SearchKey(query, url))
+    // Filter on the cached query results
+    qr.copy(query = query, result = qr.result.filter(query))
   }
 
 }
@@ -163,9 +165,7 @@ case object RemoteBackend extends CachedBackend {
 
     try {
       client.executeMethod(method)
-      VoTableParser.parse(e.url, method.getResponseBodyAsStream).fold(p => QueryResult(e.query, CatalogQueryResult(TargetsTable.Zero, List(p))), y => {
-        QueryResult(e.query, CatalogQueryResult(y).filter(e.query))
-      })
+      VoTableParser.parse(e.url, method.getResponseBodyAsStream).fold(p => QueryResult(e.query, CatalogQueryResult(TargetsTable.Zero, List(p))), y => QueryResult(e.query, CatalogQueryResult(y)))
     } finally {
       method.releaseConnection()
     }
@@ -194,9 +194,8 @@ trait VoTableClient {
     p.future
   }
 
-  protected def doQuery(query: CatalogQuery, url: String, backend: VoTableBackend): Future[QueryResult] = {
+  protected def doQuery(query: CatalogQuery, url: String, backend: VoTableBackend): Future[QueryResult] =
     backend.doQuery(query, url)
-  }
 
 }
 

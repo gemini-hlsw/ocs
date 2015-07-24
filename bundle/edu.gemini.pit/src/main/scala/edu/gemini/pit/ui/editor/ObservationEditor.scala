@@ -9,6 +9,8 @@ import edu.gemini.pit.ui.util._
 import java.awt.Color
 import javax.swing.Icon
 
+import edu.gemini.shared.gui.textComponent.NumberField
+
 import scala.swing._
 import event.ValueChanged
 import scala.swing.Swing._

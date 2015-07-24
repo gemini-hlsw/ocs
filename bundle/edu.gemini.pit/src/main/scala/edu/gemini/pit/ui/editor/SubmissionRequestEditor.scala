@@ -2,10 +2,11 @@ package edu.gemini.pit.ui.editor
 
 import edu.gemini.pit.ui.view.partner.PartnersFlags
 import edu.gemini.model.p1.immutable._
+import edu.gemini.shared.gui.textComponent.NumberField
 import swing._
 import event.ValueChanged
 import Swing._
-import edu.gemini.pit.ui.util.{ValueRenderer, NumberField, Rows, StdModalEditor}
+import edu.gemini.pit.ui.util.{ValueRenderer, Rows, StdModalEditor}
 import scalaz._
 import Scalaz._
 import java.awt.BorderLayout

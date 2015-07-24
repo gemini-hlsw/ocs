@@ -29,7 +29,7 @@ sealed trait SingleProbeStrategyParams {
       ml <- AgsMagnitude.manualSearchConstraints(mc)
     } yield CatalogQuery(ctx.getBaseCoordinates.toNewModel, rc, ml, ucac4)
 
-  def radiusConstraint(ctx: ObsContext): Option[RadiusConstraint] =
+  private def radiusConstraint(ctx: ObsContext): Option[RadiusConstraint] =
     RadiusLimitCalc.getAgsQueryRadiusLimits(guideProbe, ctx)
 
   def magnitudeCalc(ctx: ObsContext, mt: MagnitudeTable): Option[MagnitudeCalc] =
@@ -90,18 +90,18 @@ object SingleProbeStrategyParams {
   }
 
 case class PwfsParams(site: Site, guideProbe: PwfsGuideProbe) extends SingleProbeStrategyParams {
-    override def stepSize = Angle.fromDegrees(360)
+  override def stepSize = Angle.fromDegrees(360)
 
-    private def vignettingProofPatrolField(ctx: ObsContext): PatrolField = {
-      val min = guideProbe.getVignettingClearance(ctx)
-      guideProbe.getCorrectedPatrolField(PatrolField.fromRadiusLimits(min, PwfsGuideProbe.PWFS_RADIUS), ctx)
-    }
+  private def vignettingProofPatrolField(ctx: ObsContext): PatrolField = {
+    val min = guideProbe.getVignettingClearance(ctx)
+    guideProbe.getCorrectedPatrolField(PatrolField.fromRadiusLimits(min, PwfsGuideProbe.PWFS_RADIUS), ctx)
+  }
 
-    override def radiusConstraint(ctx: ObsContext): Option[RadiusConstraint] =
-      RadiusLimitCalc.getAgsQueryRadiusLimits(Some(vignettingProofPatrolField(ctx)), ctx)
+  def radiusConstraint(ctx: ObsContext): Option[RadiusConstraint] =
+    RadiusLimitCalc.getAgsQueryRadiusLimits(Some(vignettingProofPatrolField(ctx)), ctx)
 
-    // We have a special validator for Pwfs.
-    override def validator(ctx: ObsContext): GuideStarValidator =
-      vignettingProofPatrolField(ctx).validator(ctx)
+  // We have a special validator for Pwfs.
+  override def validator(ctx: ObsContext): GuideStarValidator =
+    vignettingProofPatrolField(ctx).validator(ctx)
   }
 }

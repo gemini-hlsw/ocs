@@ -1,8 +1,8 @@
-package edu.gemini.pit.ui.util
+package edu.gemini.shared.gui.textComponent
 
 import javax.swing.JLabel
-import swing.{ComboBox, ListView}
 
+import scala.swing.{ComboBox, ListView}
 
 trait TextRenderer[A] { this:ComboBox[A] =>
   renderer = new ListView.Renderer[A] {
