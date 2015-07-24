@@ -373,7 +373,7 @@ object QueryResultsWindow {
           } else {
             // Replace current magnitude filters
             magnitudeControls.clear()
-            magnitudeControls ++= filters.map(filterControls)
+            magnitudeControls ++= filters.flatMap(filterControls)
 
             // Add magnitude filters list
             magnitudeControls.zipWithIndex.foreach {
@@ -414,13 +414,17 @@ object QueryResultsWindow {
         }
 
         // Makes a combo box out of the supported bands
-        private def bandsComboBox(bandsList: BandsList): ComboBox[MagnitudeBand] = new ComboBox(bands) with TextRenderer[MagnitudeBand] {
-          bandsList match {
-            case RBandsList       => selection.item = MagnitudeBand._r // TODO Should we represent the R-Family as a separate entry on the combo box?
-            case SingleBand(band) => selection.item = band
+        private def bandsBoxes(bandsList: BandsList): List[ComboBox[MagnitudeBand]] = {
+          def bandComboBox(band: MagnitudeBand) =  new ComboBox(bands) with TextRenderer[MagnitudeBand] {
+            selection.item = band
+            override def text(a: MagnitudeBand) = a.name
           }
 
-          override def text(a: MagnitudeBand) = a.name
+          bandsList match {
+            case RBandsList       => List(bandComboBox(MagnitudeBand._r)) // TODO Should we represent the R-Family as a separate entry on the combo box?
+            case NiciBandsList    => List(bandComboBox(MagnitudeBand._r), bandComboBox(MagnitudeBand.V))
+            case SingleBand(band) => List(bandComboBox(band))
+          }
         }
 
         // Read the GUI values and constructs the constrains
@@ -447,11 +451,11 @@ object QueryResultsWindow {
             case ButtonClicked(_) =>
               // Make a copy of the current row
               val mc = magnitudeControls.lift(index).map { mc =>
-                  mc.copy()
+                  List(mc.copy())
                 }.getOrElse {
                   filterControls(MagnitudeConstraints(RBandsList, FaintnessConstraint(99), None))
                 }
-              magnitudeControls.insert(index, mc)
+              magnitudeControls.insertAll(index, mc)
               buildLayout(currentFilters)
               // Important to re-layout the parent
               revalidateFrame()
@@ -472,23 +476,14 @@ object QueryResultsWindow {
         }
 
         // Make GUI controls for a Magnitude Constraint
-        private def filterControls(mc: MagnitudeConstraints): MagnitudeFilterControls = {
+        private def filterControls(mc: MagnitudeConstraints): List[MagnitudeFilterControls] = {
           val faint = new NumberField(mc.faintnessConstraint.brightness.some) {
                         reactions += queryButtonEnabling
                       }
           val sat = new NumberField(mc.saturationConstraint.map(_.brightness)) {
                       reactions += queryButtonEnabling
                     }
-          val cb = bandsComboBox(mc.searchBands)
-          MagnitudeFilterControls(addMagnitudeRowButton(0), faint, new Label("-"), sat, cb, removeMagnitudeRowButton(0))
-        }
-
-        private def addFilterControls(faintness: NumberField, saturation: NumberField, cb: ComboBox[MagnitudeBand]): Unit = {
-          add(new Label("+"), CC().newline())
-          add(faintness, CC().minWidth(50.px).growX())
-          add(new Label("-"), CC())
-          add(saturation, CC().minWidth(50.px).growX())
-          add(cb, CC().growX().wrap())
+          bandsBoxes(mc.searchBands).map(MagnitudeFilterControls(addMagnitudeRowButton(0), faint, new Label("-"), sat, _, removeMagnitudeRowButton(0)))
         }
 
       }
