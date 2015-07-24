@@ -43,15 +43,15 @@ public final class GuideGroupTest extends TestCase {
     public void testNormalize() {
         // Remove duplicates
         GuideGroup grp = GuideGroup.create("x", fix.gpt_pwfs1, fix.gpt_pwfs1);
-        Fixture.verifyGptListEquals(DefaultImList.create(fix.gpt_pwfs1), grp.getAll());
+        Fixture.verifyGptListEquals(DefaultImList.create(fix.gpt_pwfs1), grp.getAll(), fix.when);
 
         // Sort
         grp = GuideGroup.create("x", fix.gpt_pwfs2, fix.gpt_gmos, fix.gpt_pwfs1);
-        Fixture.verifyGptListEquals(fix.grp_all.getAll(), grp.getAll());
+        Fixture.verifyGptListEquals(fix.grp_all.getAll(), grp.getAll(), fix.when);
 
         // Sort and remove duplicates.
         grp = GuideGroup.create("x", fix.gpt_pwfs2, fix.gpt_gmos, fix.gpt_pwfs1, fix.gpt_pwfs2, fix.gpt_gmos);
-        Fixture.verifyGptListEquals(fix.grp_all.getAll(), grp.getAll());
+        Fixture.verifyGptListEquals(fix.grp_all.getAll(), grp.getAll(), fix.when);
     }
 
     public void testSetName() {
@@ -85,8 +85,8 @@ public final class GuideGroupTest extends TestCase {
     }
 
     public void testGet() {
-        Fixture.verifyGptEquals(fix.gpt_pwfs1, fix.grp_all.get(pwfs1).getValue());
-        Fixture.verifyGptEquals(fix.gpt_gmos, fix.grp_gmos.get(GmosOiwfsGuideProbe.instance).getValue());
+        Fixture.verifyGptEquals(fix.gpt_pwfs1, fix.grp_all.get(pwfs1).getValue(), fix.when);
+        Fixture.verifyGptEquals(fix.gpt_gmos, fix.grp_gmos.get(GmosOiwfsGuideProbe.instance).getValue(), fix.when);
         assertTrue(fix.grp_gmos.get(pwfs1).isEmpty());
         assertTrue(GuideGroup.EMPTY.get(pwfs1).isEmpty());
     }
@@ -96,32 +96,32 @@ public final class GuideGroupTest extends TestCase {
         // same as the "all" group.
         GuideGroup grp = fix.grp_gmos.put(fix.gpt_pwfs2).put(fix.gpt_pwfs1);
         assertEquals(grp.getName(), fix.grp_gmos.getName());
-        Fixture.verifyGptListEquals(fix.grp_all.getAll(), grp.getAll());
+        Fixture.verifyGptListEquals(fix.grp_all.getAll(), grp.getAll(), fix.when);
 
         // Add to an empty group
         grp = GuideGroup.EMPTY.put(fix.gpt_gmos);
         assertEquals(grp.getName(), GuideGroup.EMPTY.getName());
-        Fixture.verifyGptListEquals(fix.grp_gmos.getAll(), grp.getAll());
+        Fixture.verifyGptListEquals(fix.grp_gmos.getAll(), grp.getAll(), fix.when);
 
         // Replace an existing GuideProbeTargets.
         GuideProbeTargets gpt = GuideProbeTargets.create(pwfs1, fix.t_pwfs1_2);
         grp = fix.grp_all.put(gpt);  // now the pwfs1 guide probe targets has just one target
         assertEquals(grp.getName(), fix.grp_all.getName());
-        Fixture.verifySpListEquals(DefaultImList.create(fix.t_pwfs1_2), grp.get(pwfs1).getValue().getOptions());
+        Fixture.verifySpListEquals(DefaultImList.create(fix.t_pwfs1_2), grp.get(pwfs1).getValue().getOptions(), fix.when);
     }
 
     public void testRemove() {
         GuideGroup grp = fix.grp_all.remove(pwfs1);
         assertEquals(grp.getName(), fix.grp_all.getName());
-        Fixture.verifyGptListEquals(DefaultImList.create(fix.gpt_gmos, fix.gpt_pwfs2), grp.getAll());
+        Fixture.verifyGptListEquals(DefaultImList.create(fix.gpt_gmos, fix.gpt_pwfs2), grp.getAll(), fix.when);
 
         grp = grp.remove(GmosOiwfsGuideProbe.instance);
         assertEquals(grp.getName(), fix.grp_all.getName());
-        Fixture.verifyGptListEquals(DefaultImList.create(fix.gpt_pwfs2), grp.getAll());
+        Fixture.verifyGptListEquals(DefaultImList.create(fix.gpt_pwfs2), grp.getAll(), fix.when);
 
         grp = grp.remove(pwfs2);
         assertEquals(grp.getName(), fix.grp_all.getName());
-        Fixture.verifyGptListEquals(GuideGroup.EMPTY.getAll(), grp.getAll());
+        Fixture.verifyGptListEquals(GuideGroup.EMPTY.getAll(), grp.getAll(), fix.when);
 
         // Remove from an empty list
         GuideGroup grp2 = grp.remove(pwfs2);
@@ -131,7 +131,7 @@ public final class GuideGroupTest extends TestCase {
     public void testClear() {
         GuideGroup grp = fix.grp_all.clear();
         assertEquals(grp.getName(), fix.grp_all.getName());
-        Fixture.verifyGptListEquals(GuideGroup.EMPTY.getAll(), grp.getAll());
+        Fixture.verifyGptListEquals(GuideGroup.EMPTY.getAll(), grp.getAll(), fix.when);
 
         GuideGroup grp2 = GuideGroup.EMPTY.clear();
         assertSame(GuideGroup.EMPTY, grp2);
@@ -141,54 +141,54 @@ public final class GuideGroupTest extends TestCase {
         // Put all on an empty group.
         GuideGroup grp = GuideGroup.EMPTY.putAll(fix.grp_all.getAll());
         assertEquals(GuideGroup.EMPTY.getName(), grp.getName());
-        Fixture.verifyGptListEquals(fix.grp_all.getAll(), grp.getAll());
+        Fixture.verifyGptListEquals(fix.grp_all.getAll(), grp.getAll(), fix.when);
 
         // Put all, replacing some members.
         grp = fix.grp_gmos.putAll(fix.grp_all.getAll());
         assertEquals(fix.grp_gmos.getName(), grp.getName());
-        Fixture.verifyGptListEquals(fix.grp_all.getAll(), grp.getAll());
+        Fixture.verifyGptListEquals(fix.grp_all.getAll(), grp.getAll(), fix.when);
 
         // Test replace via putAll
         GuideProbeTargets gpt = GuideProbeTargets.create(pwfs1, fix.t_pwfs1_2);
         grp = fix.grp_all.putAll(DefaultImList.create(gpt));  // now the pwfs1 guide probe targets has just one target
         assertEquals(grp.getName(), fix.grp_all.getName());
-        Fixture.verifySpListEquals(DefaultImList.create(fix.t_pwfs1_2), grp.get(pwfs1).getValue().getOptions());
+        Fixture.verifySpListEquals(DefaultImList.create(fix.t_pwfs1_2), grp.get(pwfs1).getValue().getOptions(), fix.when);
 
         // put all empty
         grp = fix.grp_all.putAll(GuideProbeTargets.EMPTY_LIST);
         assertEquals(grp.getName(), fix.grp_all.getName());
-        Fixture.verifyGptListEquals(fix.grp_all.getAll(), grp.getAll());
+        Fixture.verifyGptListEquals(fix.grp_all.getAll(), grp.getAll(), fix.when);
     }
 
     public void testSetAll() {
         // Set all on an empty group.
         GuideGroup grp = GuideGroup.EMPTY.setAll(fix.grp_all.getAll());
         assertEquals(GuideGroup.EMPTY.getName(), grp.getName());
-        Fixture.verifyGptListEquals(fix.grp_all.getAll(), grp.getAll());
+        Fixture.verifyGptListEquals(fix.grp_all.getAll(), grp.getAll(), fix.when);
 
         // Clear via set all
         grp = fix.grp_all.setAll(GuideProbeTargets.EMPTY_LIST);
         assertEquals(fix.grp_all.getName(), grp.getName());
-        Fixture.verifyGptListEquals(GuideProbeTargets.EMPTY_LIST, grp.getAll());
+        Fixture.verifyGptListEquals(GuideProbeTargets.EMPTY_LIST, grp.getAll(), fix.when);
     }
 
     public void testGetAllContaining() {
-        Fixture.verifyGptListEquals(DefaultImList.create(fix.gpt_pwfs1), fix.grp_all.getAllContaining(fix.t_pwfs1_1));
-        Fixture.verifyGptListEquals(GuideProbeTargets.EMPTY_LIST, fix.grp_gmos.getAllContaining(fix.t_pwfs1_1));
+        Fixture.verifyGptListEquals(DefaultImList.create(fix.gpt_pwfs1), fix.grp_all.getAllContaining(fix.t_pwfs1_1), fix.when);
+        Fixture.verifyGptListEquals(GuideProbeTargets.EMPTY_LIST, fix.grp_gmos.getAllContaining(fix.t_pwfs1_1), fix.when);
 
         // Put the same target in more than one GuideProbeTargets object.
         GuideProbeTargets gpt = fix.gpt_gmos.update(OptionsList.UpdateOps.append(fix.t_pwfs1_1));
 
         // t_pwfs1_1 should be in the first two GuideProbeTarets sets here
         GuideGroup grp = GuideGroup.create("x", fix.gpt_pwfs1, gpt, fix.gpt_pwfs2);
-        Fixture.verifyGptListEquals(DefaultImList.create(gpt, fix.gpt_pwfs1), grp.getAllContaining(fix.t_pwfs1_1));
+        Fixture.verifyGptListEquals(DefaultImList.create(gpt, fix.gpt_pwfs1), grp.getAllContaining(fix.t_pwfs1_1), fix.when);
     }
 
     public void testGetAllMatching() {
-        Fixture.verifyGptListEquals(DefaultImList.create(fix.gpt_pwfs1, fix.gpt_pwfs2), fix.grp_all.getAllMatching(GuideProbe.Type.PWFS));
-        Fixture.verifyGptListEquals(DefaultImList.create(fix.gpt_pwfs2), fix.grp_pwfs2_gmos.getAllMatching(GuideProbe.Type.PWFS));
-        Fixture.verifyGptListEquals(GuideProbeTargets.EMPTY_LIST, fix.grp_gmos.getAllMatching(GuideProbe.Type.PWFS));
-        Fixture.verifyGptListEquals(GuideProbeTargets.EMPTY_LIST, GuideGroup.EMPTY.getAllMatching(GuideProbe.Type.PWFS));
+        Fixture.verifyGptListEquals(DefaultImList.create(fix.gpt_pwfs1, fix.gpt_pwfs2), fix.grp_all.getAllMatching(GuideProbe.Type.PWFS), fix.when);
+        Fixture.verifyGptListEquals(DefaultImList.create(fix.gpt_pwfs2), fix.grp_pwfs2_gmos.getAllMatching(GuideProbe.Type.PWFS), fix.when);
+        Fixture.verifyGptListEquals(GuideProbeTargets.EMPTY_LIST, fix.grp_gmos.getAllMatching(GuideProbe.Type.PWFS), fix.when);
+        Fixture.verifyGptListEquals(GuideProbeTargets.EMPTY_LIST, GuideGroup.EMPTY.getAllMatching(GuideProbe.Type.PWFS), fix.when);
     }
 
     public void testGetReferencedGuiders() {
@@ -280,7 +280,7 @@ public final class GuideGroupTest extends TestCase {
     public void testCloneTargets() {
         GuideGroup grp = GuideGroup.CLONE_TARGETS.apply(fix.grp_all);
         assertFalse(fix.grp_all.equals(grp));
-        Fixture.verifyGptListEquals(fix.grp_all.getAll(), grp.getAll());
+        Fixture.verifyGptListEquals(fix.grp_all.getAll(), grp.getAll(), fix.when);
         assertEquals(fix.grp_all.getName(), grp.getName());
 
         grp = GuideGroup.CLONE_TARGETS.apply(fix.grp_gmos);
@@ -313,7 +313,7 @@ public final class GuideGroupTest extends TestCase {
         PioFactory fact = new PioXmlFactory();
         for (GuideGroup expected : DefaultImList.create(fix.grp_all, fix.grp_pwfs2_gmos, fix.grp_gmos)) {
             GuideGroup actual = GuideGroup.fromParamSet(expected.getParamSet(fact));
-            Fixture.verifyGroupEquals(expected, actual);
+            Fixture.verifyGroupEquals(expected, actual, fix.when);
         }
     }
 }

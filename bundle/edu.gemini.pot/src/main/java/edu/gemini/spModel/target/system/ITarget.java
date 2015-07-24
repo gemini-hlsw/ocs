@@ -71,8 +71,16 @@ public abstract class ITarget implements Cloneable, Serializable {
     /// TRANSITIONAL ACCESSORS
     ///
 
+    public Option<Double> getRaDegrees(Option<Long> time) {
+        return new Some(getRa().getAs(CoordinateParam.Units.DEGREES));
+    }
+
     public double getRaDegrees() {
         return getRa().getAs(CoordinateParam.Units.DEGREES);
+    }
+
+    public Option<Double> getRaHours(Option<Long> time) {
+        return new Some(getRa().getAs(CoordinateParam.Units.HMS));
     }
 
     public double getRaHours() {
@@ -113,6 +121,10 @@ public abstract class ITarget implements Cloneable, Serializable {
 
     /** Get the Dec. */
     protected abstract DMS getDec();
+
+    public Option<Double> getDecDegrees(Option<Long> time) {
+        return new Some(getDecDegrees());
+    }
 
     // TRANSITIONAL
     public double getDecDegrees() {
@@ -256,7 +268,7 @@ public abstract class ITarget implements Cloneable, Serializable {
 
     /** Gets a Skycalc {@link edu.gemini.skycalc.Coordinates} representation. */
     public synchronized Coordinates getSkycalcCoordinates() {
-        return new Coordinates(getRaDegrees(), getDecDegrees());
+        return new Coordinates(getRa().getAs(CoordinateParam.Units.DEGREES), getDec().getAs(CoordinateParam.Units.DEGREES));
     }
 
     public final String toString() {

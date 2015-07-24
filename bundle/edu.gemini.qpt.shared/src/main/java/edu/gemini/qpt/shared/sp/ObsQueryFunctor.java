@@ -893,7 +893,8 @@ public class ObsQueryFunctor extends DBAbstractQueryFunctor implements Iterable<
             hasLGS(obsShell),
             hasAO(obsShell),
             usesAverageParallacticAngle(obsShell),
-            DefaultImList.create(analysis)
+            DefaultImList.create(analysis),
+            obs.getSchedulingBlock()
         );
 
     }

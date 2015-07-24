@@ -38,6 +38,7 @@ import edu.gemini.spModel.gemini.trecs.TReCSParams;
 import edu.gemini.spModel.guide.GuideProbe;
 import edu.gemini.spModel.obs.ObservationStatus;
 import edu.gemini.spModel.obs.SPObservation.Priority;
+import edu.gemini.spModel.obs.SchedulingBlock;
 import edu.gemini.spModel.obs.plannedtime.PlannedStepSummary;
 import edu.gemini.spModel.obsclass.ObsClass;
 import edu.gemini.spModel.target.env.TargetEnvironment;
@@ -219,6 +220,7 @@ public final class Obs implements Serializable, Comparable<Obs> {
     private final boolean ao;
     private final boolean meanParallacticAngle;
     private final ImList<AgsAnalysis> agsAnalysis;
+    private final Option<SchedulingBlock> schedulingBlock;
 
 	// Created/computed lazily
 	private transient WorldCoords coords;
@@ -434,7 +436,8 @@ public final class Obs implements Serializable, Comparable<Obs> {
             boolean lgs,
             boolean ao,
             boolean meanParallacticAngle,
-            ImList<AgsAnalysis> agsAnalysis)
+            ImList<AgsAnalysis> agsAnalysis,
+            Option<SchedulingBlock> schedulingBlock)
     {
 
 		this.prog = prog;
@@ -454,6 +457,7 @@ public final class Obs implements Serializable, Comparable<Obs> {
         this.meanParallacticAngle = meanParallacticAngle;
         this.priority = priority;
         this.tooPriority = tooPriority;
+        this.schedulingBlock = schedulingBlock;
 
         // if some steps have been executed the setup time needs to be added, same if there are still steps left
         this.piPlannedTime = piPlannedTime;
@@ -542,6 +546,7 @@ public final class Obs implements Serializable, Comparable<Obs> {
         this.ao = false;
         this.meanParallacticAngle = false;
         this.agsAnalysis = null;
+        this.schedulingBlock = None.instance();
 	}
 
 	public int compareTo(Obs o) {
@@ -572,11 +577,11 @@ public final class Obs implements Serializable, Comparable<Obs> {
 	}
 
 	public double getRa() {
-        return (targetEnvironment != null ? targetEnvironment.getBase().getTarget().getRaDegrees() : 0.0);
+        return (targetEnvironment != null ? targetEnvironment.getBase().getTarget().getRaDegrees(schedulingBlock.map(b -> b.start())).getOrElse(0.0) : 0.0);
 	}
 
 	public double getDec() {
-        return (targetEnvironment != null ? targetEnvironment.getBase().getTarget().getDecDegrees() : 0.0);
+        return (targetEnvironment != null ? targetEnvironment.getBase().getTarget().getDecDegrees(schedulingBlock.map(b -> b.start())).getOrElse(0.0) : 0.0);
 	}
 
 	public Conds getConditions() {
@@ -798,6 +803,9 @@ public final class Obs implements Serializable, Comparable<Obs> {
         return prog.getStructuredProgramId().getShortName() + " [" + obsNumber + "]";
     }
 
+    public Option<SchedulingBlock> getSchedulingBlock() {
+        return schedulingBlock;
+    }
 }
 
 

@@ -3,6 +3,7 @@ package edu.gemini.p2checker.rules.trecs;
 import edu.gemini.p2checker.api.*;
 import edu.gemini.p2checker.util.AbstractConfigRule;
 import edu.gemini.p2checker.util.SequenceRule;
+import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.spModel.config2.Config;
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality;
 import edu.gemini.spModel.gemini.trecs.InstTReCS;
@@ -333,18 +334,27 @@ public class TrecsRule implements IRule {
 
                 for (GuideProbeTargets guideTargets : env.getOrCreatePrimaryGuideGroup()) {
                     for (SPTarget target : guideTargets) {
+
                         // Calculate the distance to the base position in arcmin
-                        WorldCoords basePos = _getWorldCoords(baseTarget);
-                        WorldCoords pos = _getWorldCoords(target);
-                        double dist = Math.abs(basePos.dist(pos));
+                        final Option<Long> when = elements.getSchedulingBlock().map(b -> b.start());
 
-                        if (dist > MAX_DISTANCE) {
-                            problems.addError(PREFIX + "FAR_MESSAGE", String.format(FAR_MESSAGE, ""), elements.getTargetObsComponentNode().getValue());
-                        }
+                        Option<WorldCoords> oBasePos = _getWorldCoords(baseTarget, when);
+                        Option<WorldCoords> oPos = _getWorldCoords(target, when);
 
-                        if (dist < MIN_DISTANCE) {
-                            problems.addWarning(PREFIX + "CLOSE_MESSAGE", String.format(CLOSE_MESSAGE, ""), elements.getTargetObsComponentNode().getValue());
-                        }
+                        oBasePos.foreach(basePos ->
+                            oPos.foreach(pos -> {
+                                double dist = Math.abs(basePos.dist(pos));
+
+                                if (dist > MAX_DISTANCE) {
+                                    problems.addError(PREFIX + "FAR_MESSAGE", String.format(FAR_MESSAGE, ""), elements.getTargetObsComponentNode().getValue());
+                                }
+
+                                if (dist < MIN_DISTANCE) {
+                                    problems.addWarning(PREFIX + "CLOSE_MESSAGE", String.format(CLOSE_MESSAGE, ""), elements.getTargetObsComponentNode().getValue());
+                                }
+                            }
+                        ));
+
                     }
                 }
             }
@@ -352,11 +362,11 @@ public class TrecsRule implements IRule {
         }
 
         // Return the world coordinates for the give target
-        private WorldCoords _getWorldCoords(SPTarget tp) {
+        private Option<WorldCoords> _getWorldCoords(SPTarget tp, Option<Long> time) {
             ITarget target = tp.getTarget();
-            double x = target.getRaDegrees();
-            double y = target.getDecDegrees();
-            return new WorldCoords(x, y, 2000.);
+            return target.getRaDegrees(time).flatMap( ra ->
+                   target.getDecDegrees(time).map(dec ->
+                     new WorldCoords(ra, dec, 2000.)));
         }
     };
 
