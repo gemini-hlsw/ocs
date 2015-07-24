@@ -5,6 +5,7 @@ import java.text.ParseException
 import javax.swing.JFormattedTextField
 import javax.swing.JFormattedTextField.AbstractFormatter
 
+import edu.gemini.shared.gui.textComponent.SelectOnFocus
 import edu.gemini.spModel.core.{Angle, Declination, RightAscension}
 
 import scala.swing.BorderPanel.Position._
@@ -27,9 +28,9 @@ abstract class Formatter[A] extends AbstractFormatter {
   def fromString(s: String): NumberFormatException \/ A
 }
 
-class AngleTextField[A](initialValue: A, format : Formatter[A]) extends scala.swing.TextComponent {
+class AngleTextField[A](initialValue: A, format : Formatter[A]) extends scala.swing.TextComponent with SelectOnFocus {
   override lazy val peer : javax.swing.JFormattedTextField = new JFormattedTextField(format) with SuperMixin
-  var valid = true
+  @volatile var valid = true
   peer.setValue(initialValue)
 
   /** Retrieve the field's value. */

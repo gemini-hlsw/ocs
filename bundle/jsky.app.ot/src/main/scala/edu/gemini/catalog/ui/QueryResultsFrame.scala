@@ -53,8 +53,7 @@ trait TableColumnsAdjuster { this: Table =>
     def updateTableColumn(column: TableColumn, width: Int):Unit = {
       if (column.getResizable) {
         this.peer.getTableHeader.setResizingColumn(column)
-        column.setPreferredWidth(width)
-        column.setWidth(width)
+        column <| {_.setPreferredWidth(width)} <| {_.setWidth(width)}
       }
     }
 
@@ -64,8 +63,7 @@ trait TableColumnsAdjuster { this: Table =>
         val value = column.getHeaderValue
         val renderer = Option(column.getHeaderRenderer).getOrElse(this.peer.getTableHeader.getDefaultRenderer)
 
-        val c = renderer.getTableCellRendererComponent(this.peer, value, false, false, -1, column.getModelIndex)
-        c.getPreferredSize.width
+        renderer.getTableCellRendererComponent(this.peer, value, false, false, -1, column.getModelIndex).getPreferredSize.width
       }
 
       def cellDataWidth(row: Int, column: Int): Int = {
@@ -196,9 +194,7 @@ object QueryResultsWindow {
       private lazy val resultsTable = new Table() with SortableTable with TableColumnsAdjuster {
         private val m = TargetsModel(Nil)
         model = model
-        val sorter = new TableRowSorter[TargetsModel](m)
-        peer.setRowSorter(sorter)
-        peer.getRowSorter.toggleSortOrder(0)
+        new TableRowSorter[TargetsModel](m) <| {_.toggleSortOrder(0)} <| {peer.setRowSorter}
 
         // Align Right
         peer.setDefaultRenderer(classOf[String], new DefaultTableCellRenderer() {
@@ -263,10 +259,7 @@ object QueryResultsWindow {
         resultsTable.model = model
 
         // The sorting logic may change if the list of magnitudes changes
-        val sorter = new TableRowSorter[TargetsModel](model)
-        resultsTable.peer.setRowSorter(sorter)
-        resultsTable.peer.getRowSorter.toggleSortOrder(0)
-        sorter.sort()
+        new TableRowSorter[TargetsModel](model) <| {_.toggleSortOrder(0)} <| {_.sort()} <| {resultsTable.peer.setRowSorter}
 
         // Adjust the width of the columns
         val insets = queryFrame.scrollPane.border.getBorderInsets(queryFrame.scrollPane.peer)
