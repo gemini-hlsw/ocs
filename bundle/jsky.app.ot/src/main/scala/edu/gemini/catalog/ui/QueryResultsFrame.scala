@@ -414,13 +414,17 @@ object QueryResultsWindow {
         }
 
         // Makes a combo box out of the supported bands
-        private def bandsComboBox(bandsList: BandsList): ComboBox[MagnitudeBand] = new ComboBox(bands) with TextRenderer[MagnitudeBand] {
-          bandsList match {
-            case RBandsList       => selection.item = MagnitudeBand._r // TODO Should we represent the R-Family as a separate entry on the combo box?
-            case SingleBand(band) => selection.item = band
+        private def bandsBoxes(bandsList: BandsList): List[ComboBox[MagnitudeBand]] = {
+          def bandComboBox(band: MagnitudeBand) =  new ComboBox(bands) with TextRenderer[MagnitudeBand] {
+            selection.item = band
+            override def text(a: MagnitudeBand) = a.name
           }
 
-          override def text(a: MagnitudeBand) = a.name
+          bandsList match {
+            case RBandsList       => List(bandComboBox(MagnitudeBand._r)) // TODO Should we represent the R-Family as a separate entry on the combo box?
+            case NiciBandsList    => List(bandComboBox(MagnitudeBand._r), bandComboBox(MagnitudeBand.V))
+            case SingleBand(band) => List(bandComboBox(band))
+          }
         }
 
         // Read the GUI values and constructs the constrains
@@ -447,11 +451,11 @@ object QueryResultsWindow {
             case ButtonClicked(_) =>
               // Make a copy of the current row
               val mc = magnitudeControls.lift(index).map { mc =>
-                  mc.copy()
+                  List(mc.copy())
                 }.getOrElse {
                   filterControls(MagnitudeConstraints(RBandsList, FaintnessConstraint(99), SaturationConstraint(-99).some), 0)
                 }
-              magnitudeControls.insert(index, mc)
+              magnitudeControls.insertAll(index, mc)
               buildLayout(currentFilters)
               // Important to re-layout the parent
               revalidateFrame()
