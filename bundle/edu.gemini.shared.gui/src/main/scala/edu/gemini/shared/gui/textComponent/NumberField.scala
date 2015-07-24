@@ -18,7 +18,7 @@ object NumberField {
 }
 
 class NumberField(d: Option[Double]) extends FormattedTextField(NumberField.df) with SelectOnFocus {
-  d.orElse(Some(0))foreach { d =>
+  d.orElse(Some(0)).foreach { d =>
     import NumberField.df
     text = df.format(d)
     commitEdit()
@@ -27,7 +27,7 @@ class NumberField(d: Option[Double]) extends FormattedTextField(NumberField.df) 
   private val pink = new Color(255, 224, 224)
   private val white = background // N.B. this means we can't change the background to anything else
 
-  var valid = true
+  @volatile var valid = true
 
   def valid(d:Double):Boolean = true
 

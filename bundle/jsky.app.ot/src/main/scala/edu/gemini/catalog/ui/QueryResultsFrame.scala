@@ -453,7 +453,7 @@ object QueryResultsWindow {
               val mc = magnitudeControls.lift(index).map { mc =>
                   List(mc.copy())
                 }.getOrElse {
-                  filterControls(MagnitudeConstraints(RBandsList, FaintnessConstraint(99), None))
+                  filterControls(MagnitudeConstraints(RBandsList, FaintnessConstraint(99), SaturationConstraint(-99).some))
                 }
               magnitudeControls.insertAll(index, mc)
               buildLayout(currentFilters)
