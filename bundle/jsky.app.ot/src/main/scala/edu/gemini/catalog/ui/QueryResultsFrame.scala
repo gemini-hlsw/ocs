@@ -7,7 +7,7 @@ import javax.swing.table._
 
 import edu.gemini.ags.api.AgsRegistrar
 import edu.gemini.catalog.api._
-import edu.gemini.catalog.votable.VoTableClient
+import edu.gemini.catalog.votable.{QueryResult, VoTableClient}
 import edu.gemini.pot.sp.ISPNode
 import edu.gemini.shared.gui.textComponent.{TextRenderer, NumberField}
 import edu.gemini.shared.gui.{GlassLabel, SizePreference, SortableTable}
@@ -21,7 +21,6 @@ import jsky.app.ot.tpe.TpeContext
 import scala.swing.Reactions.Reaction
 import scala.swing._
 import scala.collection.mutable
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.swing.event.{ValueChanged, ButtonClicked, UIElementMoved, UIElementResized}
 
 import scalaz._
@@ -41,7 +40,7 @@ trait PreferredSizeFrame { this: Window =>
 }
 
 /**
- * Support to calculate the columnt widths and adjust them to the outer width
+ * Support calculating column widths and can adjust them to the outer width
  */
 trait TableColumnsAdjuster { this: Table =>
   autoResizeMode = Table.AutoResizeMode.Off
@@ -190,32 +189,104 @@ object QueryResultsWindow {
 
     }
 
-    lazy val resultsLabel = new Label("Query") {
-      horizontalAlignment = Alignment.Center
+    /**
+     * Frame to display the Query controls and results
+     */
+    object QueryResultsFrame extends Frame with PreferredSizeFrame {
+      private lazy val resultsTable = new Table() with SortableTable with TableColumnsAdjuster {
+        private val m = TargetsModel(Nil)
+        model = model
+        val sorter = new TableRowSorter[TargetsModel](m)
+        peer.setRowSorter(sorter)
+        peer.getRowSorter.toggleSortOrder(0)
 
-      def updateCount(c: Int):Unit = {
-        text = s"Query results: $c"
+        // Align Right
+        peer.setDefaultRenderer(classOf[String], new DefaultTableCellRenderer() {
+          setHorizontalAlignment(SwingConstants.RIGHT)
+        })
       }
-    }
 
-    case class QueryResultsFrame(table: Table) extends Frame with PreferredSizeFrame {
-      title = "Query Results"
-
-      def closeFrame(): Unit = {
-        this.visible = false
-      }
-
-      private val closeButton = new Button("Close") {
+      private lazy val closeButton = new Button("Close") {
         reactions += {
-          case ButtonClicked(_) => closeFrame()
+          case ButtonClicked(_) => QueryResultsFrame.visible = false
         }
       }
 
-      val scrollPane = new ScrollPane() {
-        contents = table
+      private lazy val scrollPane = new ScrollPane() {
+        contents = resultsTable
       }
 
-      case object QueryForm extends MigPanel(LC().fill().insets(0.px).debug(0)) {
+      private lazy val resultsLabel = new Label("Query") {
+        horizontalAlignment = Alignment.Center
+
+        def updateCount(c: Int):Unit = {
+          text = s"Query results: $c"
+        }
+      }
+
+      title = "Query Results"
+      QueryForm.buildLayout(Nil)
+      contents = new MigPanel(LC().fill().insets(0).debug(0)) {
+        // Query Form
+        add(QueryForm, CC().spanY(2).alignY(TopAlign).minWidth(250.px))
+        // Results Table
+        add(resultsLabel, CC().alignX(CenterAlign).gapTop(5.px).wrap())
+        // Results Table
+        add(scrollPane, CC().grow().pushY().pushX())
+        // Command buttons at the bottom
+        add(new MigPanel(LC().fillX().insets(10.px)) {
+          add(closeButton, CC().alignX(RightAlign))
+        }, CC().growX().dockSouth())
+      }
+
+      // Set initial size
+      adjustSize()
+      // Update location according to the last save position
+      SizePreference.getPosition(this.getClass).foreach { p =>
+        location = p
+      }
+
+      // Save position and dimensions
+      listenTo(this)
+      reactions += {
+        case _: UIElementResized =>
+          SizePreference.setDimension(getClass, Some(this.size))
+        case _: UIElementMoved =>
+          SizePreference.setPosition(getClass, Some(this.location))
+      }
+
+      /**
+       * Called after  a query completes to update the UI according to the results
+       */
+      def updateResults(queryResult: QueryResult): Unit = {
+        val model = TargetsModel(queryResult.result.targets.rows)
+        resultsTable.model = model
+
+        // The sorting logic may change if the list of magnitudes changes
+        val sorter = new TableRowSorter[TargetsModel](model)
+        resultsTable.peer.setRowSorter(sorter)
+        resultsTable.peer.getRowSorter.toggleSortOrder(0)
+        sorter.sort()
+
+        // Adjust the width of the columns
+        val insets = queryFrame.scrollPane.border.getBorderInsets(queryFrame.scrollPane.peer)
+        resultsTable.adjustColumns(queryFrame.scrollPane.bounds.width - insets.left - insets.right)
+
+        // Update the count of rows
+        resultsLabel.updateCount(queryResult.result.targets.rows.length)
+
+        // Update the query form
+        QueryForm.updateQuery(queryResult.query)
+      }
+
+      protected def revalidateFrame(): Unit = {
+        contents.headOption.foreach(_.revalidate())
+      }
+
+      private case object QueryForm extends MigPanel(LC().fill().insets(0.px).debug(0)) {
+        // Represents a magnitude filter containing the controls that make the row
+        case class MagnitudeFilterControls(addButton: Button, faintess: NumberField, separator: Label, saturation: NumberField, bandCB: ComboBox[MagnitudeBand], removeButton: Button)
+
         /** Create a titled border with inner and outer padding. */
         def titleBorder(title: String): Border =
           createCompoundBorder(
@@ -226,9 +297,7 @@ object QueryResultsWindow {
 
         border = titleBorder("Query Params")
 
-        case class MagnitudeFilterControls(faintess: NumberField, saturation: NumberField, bandCB: ComboBox[MagnitudeBand])
-
-        private val queryButton = new Button("Query") {
+        lazy val queryButton = new Button("Query") {
           reactions += {
             case ButtonClicked(_) =>
               // Hit the catalog with a new query
@@ -236,6 +305,7 @@ object QueryResultsWindow {
           }
         }
 
+        // Action to disable the query button if there are invalid fields
         val queryButtonEnabling:Reaction = {
           case ValueChanged(a) =>
             queryButton.enabled = a match {
@@ -247,6 +317,7 @@ object QueryResultsWindow {
 
         lazy val ra = new RATextField(RightAscension.zero) {
           reactions += queryButtonEnabling
+
           def updateRa(ra: RightAscension): Unit = {
             value = ra
           }
@@ -254,6 +325,7 @@ object QueryResultsWindow {
 
         lazy val dec = new DecTextField(Declination.zero) {
           reactions += queryButtonEnabling
+
           def updateDec(dec: Declination): Unit = {
             value = dec
           }
@@ -276,73 +348,59 @@ object QueryResultsWindow {
           case b                => b
         }.distinct
 
-        // Make a combo box out of the supported bands
-        def bandsComboBox(bandsList: BandsList): ComboBox[MagnitudeBand] = new ComboBox(bands) with TextRenderer[MagnitudeBand] {
-          bandsList match {
-            case RBandsList       => selection.item = MagnitudeBand._r
-            case SingleBand(band) => selection.item = band
-          }
-
-          override def text(a: MagnitudeBand) = a.name
-        }
-
-        // Make a query out of the form parameters
-        def buildQuery: Option[CatalogQuery] = {
-          queryButton.enabled option {
-            // No validation here, the Query button is disabled unless all the controls are valid
-            val coordinates = Coordinates(ra.value, dec.value)
-            val radius = RadiusConstraint.between(Angle.fromArcmin(radiusStart.text.toDouble), Angle.fromArcmin(radiusEnd.text.toDouble))
-
-            val filters = magnitudeControls.map {
-              case MagnitudeFilterControls(faintess, saturation, bandCB) =>
-                MagnitudeConstraints(BandsList.bandList(bandCB.selection.item), FaintnessConstraint(faintess.text.toDouble), SaturationConstraint(saturation.text.toDouble).some)
-            }
-            CatalogQuery(None, coordinates, radius, filters.toList, ucac4)
-          }
-        }
-
-        def buildLayout(filters: List[MagnitudeQueryFilter]): Unit = {
+        /**
+         * Reconstructs the layout depending on the magnitude constraints
+         */
+        def buildLayout(filters: List[MagnitudeConstraints]): Unit = {
           _contents.clear()
 
-          add(new Label("RA"), CC().cell(0, 0))
-          add(ra, CC().cell(1, 0).spanX(3).growX())
-          add(new Label("Dec"), CC().cell(0, 1))
-          add(dec, CC().cell(1, 1).spanX(3).growX())
+          add(new Label("RA"), CC().spanX(2))
+          add(ra, CC().spanX(3).growX())
           add(new Label("J2000") {
             verticalAlignment = Alignment.Center
-          }, CC().cell(4, 0).spanY(2))
-          add(new Label("Radial Range"), CC().cell(0, 2))
-          add(radiusStart, CC().cell(1, 2).minWidth(50.px).growX())
-          add(new Label("-"), CC().cell(2, 2))
-          add(radiusEnd, CC().cell(3, 2).minWidth(50.px).growX())
-          add(new Label("arcmin"), CC().cell(4, 2))
+          }, CC().spanY(2).spanX(2))
+          add(new Label("Dec"), CC().spanX(2).newline())
+          add(dec, CC().spanX(3).growX())
+          add(new Label("Radial Range"), CC().spanX(2).newline())
+          add(radiusStart, CC().minWidth(50.px).growX())
+          add(new Label("-"), CC())
+          add(radiusEnd, CC().minWidth(50.px).growX())
+          add(new Label("arcmin"), CC().spanX(3))
 
-          // Replace current magnitude filters
-          magnitudeControls.clear()
-          magnitudeControls ++= filters.map { f =>
-            val faint = new NumberField(f.mc.faintnessConstraint.brightness.some) {
-                          reactions += queryButtonEnabling
-                        }
-            val sat = new NumberField(f.mc.saturationConstraint.map(_.brightness)) {
-                            reactions += queryButtonEnabling
-                          }
-            val cb = bandsComboBox(RBandsList)
-            MagnitudeFilterControls(faint, sat, cb)
-          }
-          // Add magnitude filters list
-          val startIndex = 3
-          magnitudeControls.zipWithIndex.map(v => v.copy(_2 = v._2 + startIndex)).foreach {
-            case (MagnitudeFilterControls(faintness, saturation, cb), i) =>
-              add(new Label("Magnitudes"), CC().cell(0, i))
-              add(faintness, CC().cell(1, i).minWidth(50.px).growX())
-              add(new Label("-"), CC().cell(2, i))
-              add(saturation, CC().cell(3, i).minWidth(50.px).growX())
-              add(cb, CC().cell(4, i).growX())
+          if (filters.isEmpty) {
+            add(new Label("Magnitudes"), CC().newline())
+            add(addMagnitudeRowButton(0), CC())
+          } else {
+            // Replace current magnitude filters
+            magnitudeControls.clear()
+            magnitudeControls ++= filters.zipWithIndex.flatMap(Function.tupled(filterControls))
+
+            // Add magnitude filters list
+            magnitudeControls.zipWithIndex.foreach {
+              case (MagnitudeFilterControls(addButton, faintness, separator, saturation, cb, removeButton), 0) =>
+                add(new Label("Magnitudes"), CC().newline())
+                add(addButton, CC())
+                add(faintness, CC().minWidth(50.px).growX())
+                add(separator, CC())
+                add(saturation, CC().minWidth(50.px).growX())
+                add(cb, CC().grow())
+                add(removeButton, CC())
+              case (MagnitudeFilterControls(addButton, faintness, separator, saturation, cb, removeButton), i) =>
+                add(addButton, CC().spanX(2).newline().alignX(RightAlign))
+                add(faintness, CC().minWidth(50.px).growX())
+                add(separator, CC())
+                add(saturation, CC().minWidth(50.px).growX())
+                add(cb, CC().grow())
+                add(removeButton, CC())
+            }
           }
 
-          add(queryButton, CC().cell(0, startIndex + filters.length + 1).span(5).pushX().alignX(RightAlign).gapTop(10.px))
+          add(queryButton, CC().newline().span(7).pushX().alignX(RightAlign).gapTop(10.px))
         }
 
+        /**
+         * Update query form according to the passed values
+         */
         def updateQuery(query: CatalogQuery): Unit = {
           // Update the RA
           ra.updateRa(query.base.ra)
@@ -352,99 +410,113 @@ object QueryResultsWindow {
           radiusStart.updateAngle(query.radiusConstraint.minLimit)
           radiusEnd.updateAngle(query.radiusConstraint.maxLimit)
 
-          buildLayout(query.filters.list.collect {case q: MagnitudeQueryFilter => q})
+          buildLayout(query.filters.list.collect {case q: MagnitudeQueryFilter => q.mc})
         }
-      }
 
-      QueryForm.buildLayout(Nil)
-      contents = new MigPanel(LC().fill().insets(0).debug(0)) {
-        // Query Form
-        add(QueryForm, CC().spanY(2).alignY(TopAlign).minWidth(250.px))
-        // Results Table
-        add(resultsLabel, CC().alignX(CenterAlign).gapTop(5.px).wrap())
-        // Results Table
-        add(scrollPane, CC().grow().pushY().pushX())
-        // Command buttons at the bottom
-        add(new MigPanel(LC().fillX().insets(10.px)) {
-          add(closeButton, CC().alignX(RightAlign))
-        }, CC().growX().dockSouth())
-      }
-      adjustSize()
-      SizePreference.getPosition(this.getClass).foreach { p =>
-        location = p
-      }
+        // Makes a combo box out of the supported bands
+        private def bandsComboBox(bandsList: BandsList): ComboBox[MagnitudeBand] = new ComboBox(bands) with TextRenderer[MagnitudeBand] {
+          bandsList match {
+            case RBandsList       => selection.item = MagnitudeBand._r // TODO Should we represent the R-Family as a separate entry on the combo box?
+            case SingleBand(band) => selection.item = band
+          }
 
-      listenTo(this)
-      reactions += {
-        case _: UIElementResized =>
-          SizePreference.setDimension(getClass, Some(this.size))
-        case _: UIElementMoved =>
-          SizePreference.setPosition(getClass, Some(this.location))
+          override def text(a: MagnitudeBand) = a.name
+        }
+
+        // Read the GUI values and constructs the constrains
+        private def currentFilters: List[MagnitudeConstraints] =
+          magnitudeControls.map {
+            case MagnitudeFilterControls(_, faintess, _, saturation, bandCB, _) =>
+              MagnitudeConstraints(BandsList.bandList(bandCB.selection.item), FaintnessConstraint(faintess.text.toDouble), SaturationConstraint(saturation.text.toDouble).some)
+          }.toList
+
+        // Make a query out of the form parameters
+        private def buildQuery: Option[CatalogQuery] = {
+          queryButton.enabled option {
+            // No validation here, the Query button is disabled unless all the controls are valid
+            val coordinates = Coordinates(ra.value, dec.value)
+            val radius = RadiusConstraint.between(Angle.fromArcmin(radiusStart.text.toDouble), Angle.fromArcmin(radiusEnd.text.toDouble))
+
+            CatalogQuery(None, coordinates, radius, currentFilters, ucac4)
+          }
+        }
+
+        // Plus button to add a new row of magnitude filter
+        private def addMagnitudeRowButton(index: Int) = new Button("+") {
+          reactions += {
+            case ButtonClicked(_) =>
+              // Make a copy of the current row
+              val mc = magnitudeControls.lift(index).map { mc =>
+                  mc.copy()
+                }.getOrElse {
+                  filterControls(MagnitudeConstraints(RBandsList, FaintnessConstraint(99), SaturationConstraint(-99).some), 0)
+                }
+              magnitudeControls.insert(index, mc)
+              buildLayout(currentFilters)
+              // Important to re-layout the parent
+              revalidateFrame()
+          }
+        }
+
+        // Minus button to remove a row of magnitude filters
+        private def removeMagnitudeRowButton(index: Int) = new Button("-") {
+          reactions += {
+            case ButtonClicked(s) =>
+              magnitudeControls.lift(index).foreach { _ =>
+                magnitudeControls.remove(index)
+                buildLayout(currentFilters)
+                // Important to re-layout the parent
+                revalidateFrame()
+              }
+          }
+        }
+
+        // Make GUI controls for a Magnitude Constraint
+        private def filterControls(mc: MagnitudeConstraints, index: Int): List[MagnitudeFilterControls] = {
+          val faint = new NumberField(mc.faintnessConstraint.brightness.some) {
+                        reactions += queryButtonEnabling
+                      }
+          val sat = new NumberField(mc.saturationConstraint.map(_.brightness)) {
+                      reactions += queryButtonEnabling
+                    }
+          bandsBoxes(mc.searchBands).map(MagnitudeFilterControls(addMagnitudeRowButton(index), faint, new Label("-"), sat, _, removeMagnitudeRowButton(index)))
+        }
+
       }
     }
 
-    val resultsTable = new Table() with SortableTable with TableColumnsAdjuster {
-      private val m = TargetsModel(Nil)
-      model = model
-      val sorter = new TableRowSorter[TargetsModel](m)
-      peer.setRowSorter(sorter)
-      peer.getRowSorter.toggleSortOrder(0)
-
-      // Align Right
-      peer.setDefaultRenderer(classOf[String], new DefaultTableCellRenderer() {
-        setHorizontalAlignment(SwingConstants.RIGHT)
-      })
-
-    }
-    val frame = QueryResultsFrame(resultsTable)
+    val queryFrame = QueryResultsFrame
   }
 
   private def reloadSearchData(query: CatalogQuery) {
     import QueryResultsWindow.table._
+    import scala.concurrent.ExecutionContext.Implicits.global
 
-    GlassLabel.show(frame.peer.getRootPane, "Downloading...")
+    GlassLabel.show(queryFrame.peer.getRootPane, "Downloading...")
     VoTableClient.catalog(query).onComplete {
       case _: scala.util.Failure[_] =>
-        GlassLabel.hide(frame.peer.getRootPane) // TODO Display error
+        GlassLabel.hide(queryFrame.peer.getRootPane) // TODO Display error
       case scala.util.Success(x) if x.result.containsError =>
-        GlassLabel.hide(frame.peer.getRootPane) // TODO Display error
+        GlassLabel.hide(queryFrame.peer.getRootPane) // TODO Display error
       case scala.util.Success(x) =>
         Swing.onEDT {
-          // Controller code in MVC-style
-          GlassLabel.hide(frame.peer.getRootPane)
-          // Update the table
-          val model = TargetsModel(x.result.targets.rows)
-          resultsTable.model = model
-
-          // The sorting logic may change if the list of magnitudes changes
-          val sorter = new TableRowSorter[TargetsModel](model)
-          resultsTable.peer.setRowSorter(sorter)
-          resultsTable.peer.getRowSorter.toggleSortOrder(0)
-          sorter.sort()
-
-          // Update the count of rows
-          resultsLabel.updateCount(x.result.targets.rows.length)
-
-          // Update the magnitude constraints
-          frame.QueryForm.updateQuery(x.query)
-
-          // Adjust the width of the columns
-          val insets = frame.scrollPane.border.getBorderInsets(frame.scrollPane.peer)
-          resultsTable.adjustColumns(frame.scrollPane.bounds.width - insets.left - insets.right)
+          GlassLabel.hide(queryFrame.peer.getRootPane)
+          queryFrame.updateResults(x)
         }
     }
   }
 
-  // Public interface
-  val instance = this
-
-  protected [ui] def showTable(q: CatalogQuery):Unit = Swing.onEDT {
+  // Shows the frame and loads the query
+  protected [ui] def showWithQuery(q: CatalogQuery):Unit = Swing.onEDT {
     import QueryResultsWindow.table._
 
-    frame.visible = true
-    frame.peer.toFront()
+    queryFrame.visible = true
+    queryFrame.peer.toFront()
     reloadSearchData(q)
   }
+
+  // Public interface
+  val instance = this
 
   def showOn(n: ISPNode) {
     TpeContext.apply(n).obsContext.foreach { obsCtx =>
@@ -452,7 +524,7 @@ object QueryResultsWindow {
       AgsRegistrar.currentStrategy(obsCtx).foreach { strategy =>
         // TODO Use only the first query, GEMS isn't supported yet OCSADV-242, OCSADV-239
         strategy.catalogQueries(obsCtx, OT.getMagnitudeTable).headOption.foreach { q =>
-          showTable(q)
+          showWithQuery(q)
         }
       }
     }
@@ -474,7 +546,7 @@ object CatalogQueryDemo extends SwingApplication {
 
     UIManager.put("Button.defaultButtonFollowsFocus", true)
 
-    instance.showTable(query)
+    instance.showWithQuery(query)
   }
 
 }
