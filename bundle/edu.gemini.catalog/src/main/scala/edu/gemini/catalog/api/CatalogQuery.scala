@@ -36,7 +36,7 @@ case class CatalogQuery(id: Option[Int], base: Coordinates, radiusConstraint: Ra
 
     // See whether the other base position falls out of range of our
     // radius limits.
-    radiusConstraint.maxLimit > max
+    radiusConstraint.maxLimit >= max
   }
 }
 

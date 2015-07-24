@@ -289,6 +289,12 @@ class MigPanel(layoutConstraints: MigLC = constraints.LC(), colConstraints: MigA
 
   protected class MigContent extends Content {
     def +=(c: Component, l: Constraints) = add(c, l)
+    def remove(c: Component):Unit = {
+      val index = this.indexWhere(_ == c)
+      if (index >= 0) {
+        this.remove(index)
+      }
+    }
   }
 
   override protected def constraintsFor(comp: Component) =

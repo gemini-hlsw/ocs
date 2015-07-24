@@ -102,7 +102,7 @@ trait CachedBackend extends VoTableBackend {
       def go(pos: Int):Option[(Int, QueryResult)] =
         a.lift(pos) match {
           case None    => None
-          case Some(x) => if (x.k.query === k.query || x.k.query.isSuperSetOf(k.query)) Some((pos, x.v)) else go(pos + 1)
+          case Some(x) => if (x.k.query.isSuperSetOf(k.query)) Some((pos, x.v)) else go(pos + 1)
         }
       go(0)
     }
