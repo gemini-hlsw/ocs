@@ -312,8 +312,8 @@ public class TelescopePosEditor extends JSkyCat implements TpeMouseObserver {
         Option<Long> oldWhen = oldCtx.schedulingBlockJava().map(SchedulingBlock::start);
         Option<Long> newWhen = newCtx.schedulingBlockJava().map(SchedulingBlock::start);
 
-        return (!(oldBase.getRaDegrees(oldWhen).equals(newBase.getRaDegrees(newWhen)) &&
-                  oldBase.getDecDegrees(oldWhen).equals(newBase.getDecDegrees(newWhen)));
+        return !(oldBase.getRaDegrees(oldWhen).equals(newBase.getRaDegrees(newWhen)) &&
+                 oldBase.getDecDegrees(oldWhen).equals(newBase.getDecDegrees(newWhen)));
     }
 
     private final PropertyChangeListener obsListener = evt -> {
