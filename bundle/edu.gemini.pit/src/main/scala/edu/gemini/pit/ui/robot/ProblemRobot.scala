@@ -208,7 +208,7 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
 
     private val gpiCheck = {
       def gpiMagnitudesPresent(target: SiderealTarget):List[(Severity, String)] = {
-        val requiredMagnitudes = "I" :: "Y" :: "J" :: "H" :: "K" :: Nil
+        val requiredMagnitudes = MagnitudeBand.I :: MagnitudeBand.Y :: MagnitudeBand.J :: MagnitudeBand.H :: MagnitudeBand.K :: Nil
         val obsMagnitudes = target.magnitudes.map(_.band)
         if (!requiredMagnitudes.forall(obsMagnitudes.contains)) {
           List((Severity.Error, "The magnitude information in the GPI target component should include the bandpasses I, Y, J, H, and K"))
