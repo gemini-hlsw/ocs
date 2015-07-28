@@ -156,7 +156,7 @@ object QueryResultsWindow {
     }
 
     val baseColumnNames: List[TableColumn[_]] = List(IdColumn("Id"), RAColumn("RA"), DECColumn("Dec"))
-    val pmColumns: List[TableColumn[_]] = List(PMRAColumn("pmRA"), PMDecColumn("pmDec"))
+    val pmColumns: List[TableColumn[_]] = List(PMRAColumn("µ RA"), PMDecColumn("µ Dec"))
     val magColumns = MagnitudeBand.all.map(MagnitudeColumn)
 
     case class TargetsModel(targets: List[SiderealTarget]) extends AbstractTableModel {
@@ -222,15 +222,18 @@ object QueryResultsWindow {
 
       title = "Query Results"
       QueryForm.buildLayout(Nil)
-      contents = new MigPanel(LC().fill().insets(0).debug(0)) {
+      contents = new MigPanel(LC().fill().insets(0).gridGap("0px", "0px").debug(0)) {
         // Query Form
-        add(QueryForm, CC().spanY(2).alignY(TopAlign).minWidth(250.px))
+        add(QueryForm, CC().spanY(2).alignY(TopAlign).minWidth(280.px))
         // Results Table
-        add(resultsLabel, CC().alignX(CenterAlign).gapTop(5.px).wrap())
-        // Results Table
-        add(scrollPane, CC().grow().pushY().pushX())
+        add(new BorderPanel() {
+          border = titleBorder(title)
+          add(scrollPane, BorderPanel.Position.Center)
+        }, CC().grow().pushY().pushX())
         // Command buttons at the bottom
         add(new MigPanel(LC().fillX().insets(10.px)) {
+          // Results label
+          add(resultsLabel, CC().alignX(LeftAlign))
           add(closeButton, CC().alignX(RightAlign))
         }, CC().growX().dockSouth())
       }
@@ -251,6 +254,14 @@ object QueryResultsWindow {
           SizePreference.setPosition(getClass, Some(this.location))
       }
 
+
+      /** Create a titled border with inner and outer padding. */
+      def titleBorder(title: String): Border =
+        createCompoundBorder(
+          createEmptyBorder(2,2,2,2),
+          createCompoundBorder(
+            createTitledBorder(title),
+            createEmptyBorder(2,2,2,2)))
       /**
        * Called after  a query completes to update the UI according to the results
        */
@@ -279,14 +290,6 @@ object QueryResultsWindow {
       private case object QueryForm extends MigPanel(LC().fill().insets(0.px).debug(0)) {
         // Represents a magnitude filter containing the controls that make the row
         case class MagnitudeFilterControls(addButton: Button, faintess: NumberField, separator: Label, saturation: NumberField, bandCB: ComboBox[MagnitudeBand], removeButton: Button)
-
-        /** Create a titled border with inner and outer padding. */
-        def titleBorder(title: String): Border =
-          createCompoundBorder(
-            createEmptyBorder(2,2,2,2),
-            createCompoundBorder(
-              createTitledBorder(title),
-              createEmptyBorder(2,2,2,2)))
 
         border = titleBorder("Query Params")
 
@@ -359,30 +362,24 @@ object QueryResultsWindow {
           add(new Label("-"), CC())
           add(radiusEnd, CC().minWidth(50.px).growX())
           add(new Label("arcmin"), CC().spanX(3))
+          add(new Label("Magnitudes"), CC().spanX(2).newline())
+          add(new Label("Bright."), CC().spanX(2))
+          add(new Label("Faint."), CC())
 
           if (filters.isEmpty) {
-            add(new Label("Magnitudes"), CC().newline())
-            add(addMagnitudeRowButton(0), CC())
+            add(addMagnitudeRowButton(0), CC().spanX(2).alignX(RightAlign).newline())
           } else {
             // Replace current magnitude filters
             magnitudeControls.clear()
             magnitudeControls ++= filters.zipWithIndex.flatMap(Function.tupled(filterControls))
 
             // Add magnitude filters list
-            magnitudeControls.zipWithIndex.foreach {
-              case (MagnitudeFilterControls(addButton, faintness, separator, saturation, cb, removeButton), 0) =>
-                add(new Label("Magnitudes"), CC().newline())
-                add(addButton, CC())
-                add(faintness, CC().minWidth(50.px).growX())
-                add(separator, CC())
-                add(saturation, CC().minWidth(50.px).growX())
-                add(cb, CC().grow())
-                add(removeButton, CC())
-              case (MagnitudeFilterControls(addButton, faintness, separator, saturation, cb, removeButton), i) =>
+            magnitudeControls.foreach {
+              case MagnitudeFilterControls(addButton, faintness, separator, saturation, cb, removeButton) =>
                 add(addButton, CC().spanX(2).newline().alignX(RightAlign))
-                add(faintness, CC().minWidth(50.px).growX())
-                add(separator, CC())
                 add(saturation, CC().minWidth(50.px).growX())
+                add(separator, CC())
+                add(faintness, CC().minWidth(50.px).growX())
                 add(cb, CC().grow())
                 add(removeButton, CC())
             }
