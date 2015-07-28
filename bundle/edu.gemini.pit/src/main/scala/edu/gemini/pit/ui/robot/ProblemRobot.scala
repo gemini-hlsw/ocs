@@ -11,13 +11,14 @@ import edu.gemini.spModel.core.MagnitudeBand
 import view.obs.ObsListGrouping
 import edu.gemini.model.p1.visibility.TargetVisibilityCalc
 import edu.gemini.pit.ui.view.tac.TacView
-import scalaz._
-import Scalaz._
 import java.text.SimpleDateFormat
 import java.io.File
 import edu.gemini.pit.model.{AppPreferences, Model}
 import edu.gemini.pit.catalog.NotFound
 import edu.gemini.pit.catalog.Error
+
+import scalaz._
+import Scalaz._
 
 object ProblemRobot {
 
@@ -208,13 +209,9 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
 
     private val gpiCheck = {
       def gpiMagnitudesPresent(target: SiderealTarget):List[(Severity, String)] = {
-        val requiredMagnitudes = MagnitudeBand.I :: MagnitudeBand.Y :: MagnitudeBand.J :: MagnitudeBand.H :: MagnitudeBand.K :: Nil
-        val obsMagnitudes = target.magnitudes.map(_.band)
-        if (!requiredMagnitudes.forall(obsMagnitudes.contains)) {
-          List((Severity.Error, "The magnitude information in the GPI target component should include the bandpasses I, Y, J, H, and K"))
-        } else {
-          Nil
-        }
+        val requiredBands = Set(MagnitudeBand.I, MagnitudeBand.Y, MagnitudeBand.J, MagnitudeBand.H, MagnitudeBand.K)
+        val observationBands = target.magnitudes.map(_.band).toSet
+        ~(((requiredBands & observationBands) =/= requiredBands) option {List((Severity.Error, "The magnitude information in the GPI target component should include the bandpasses I, Y, J, H, and K"))})
       }
       def gpiIChecks(target: SiderealTarget):List[(Severity.Value, String)] = for {
           m <- target.magnitudes
