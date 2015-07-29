@@ -4,6 +4,7 @@
 
 package edu.gemini.spModel.target;
 
+import edu.gemini.shared.util.immutable.None;
 import edu.gemini.skycalc.Angle;
 import edu.gemini.shared.skyobject.Magnitude;
 import edu.gemini.shared.skyobject.SkyObject;
@@ -64,8 +65,8 @@ public final class SPTargetSkyObjectTest {
             HmsDegTarget hmsDeg = (HmsDegTarget) target.getTarget();
 
             assertEquals("xyz", target.getTarget().getName());
-            assertEquals(15.0, target.getTarget().getRaDegrees(), 0.000001);
-            assertEquals(20.0, target.getTarget().getDecDegrees(), 0.000001);
+            assertEquals(15.0, target.getTarget().getRaDegrees(None.instance()).getValue(), 0.000001);
+            assertEquals(20.0, target.getTarget().getDecDegrees(None.instance()).getValue(), 0.000001);
             assertEquals(1.0, hmsDeg.getPM1().getValue(), 0.000001);
             assertEquals(2.0, hmsDeg.getPM2().getValue(), 0.000001);
 
