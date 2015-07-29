@@ -47,7 +47,7 @@ public class VisitorInstrument extends SPInstObsComp
     public static final PropertyDescriptor EXPOSURE_TIME_PROP;
     public static final PropertyDescriptor POS_ANGLE_PROP;
 
-    private static final Map<String, PropertyDescriptor> PRIVATE_PROP_MAP = new TreeMap<String, PropertyDescriptor>();
+    private static final Map<String, PropertyDescriptor> PRIVATE_PROP_MAP = new TreeMap<>();
     public static final Map<String, PropertyDescriptor> PROPERTY_MAP = Collections.unmodifiableMap(PRIVATE_PROP_MAP);
 
     //Defaults
@@ -61,13 +61,7 @@ public class VisitorInstrument extends SPInstObsComp
         PRIVATE_PROP_MAP.put(pd.getName(), pd);
         return pd;
     }
-
-    private static PropertyDescriptor initProp(String propName, String displayName, boolean query, boolean iter) {
-        PropertyDescriptor pd = PropertySupport.init(propName, displayName, VisitorInstrument.class, query, iter);
-        PRIVATE_PROP_MAP.put(pd.getName(), pd);
-        return pd;
-    }
-
+    
     // Instrument properties
     private String name = "";
     private double _centralWavelength = DEF_WAVELENGTH;
@@ -183,9 +177,7 @@ public class VisitorInstrument extends SPInstObsComp
      * queryable configuration parameters.
      */
     public static List getInstConfigInfo() {
-        List<InstConfigInfo> configInfo = new LinkedList<InstConfigInfo>();
-
-        return configInfo;
+        return new LinkedList<InstConfigInfo>();
     }
 
     /**

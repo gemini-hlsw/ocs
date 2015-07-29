@@ -1,8 +1,3 @@
-// Copyright 1997-2002
-// Association for Universities for Research in Astronomy, Inc.
-//
-// $Id: InstPhoenix.java 38186 2011-10-24 13:21:33Z swalker $
-//
 package edu.gemini.spModel.gemini.phoenix;
 
 import edu.gemini.pot.sp.ISPObservation;
@@ -105,6 +100,7 @@ public final class InstPhoenix extends SPInstObsComp implements PropertyProvider
     private double _gratingWavenumber = DEF_GRATING_WAVENUMBER;
 
     private final String _VERSION =  "2006B-1";
+
     /** Constructor */
     public InstPhoenix() {
         super(SP_TYPE);
@@ -257,7 +253,6 @@ public final class InstPhoenix extends SPInstObsComp implements PropertyProvider
 
     /**
      * Return a parameter set describing the current state of this object.
-     * @param factory
      */
     public ParamSet getParamSet(PioFactory factory) {
         ParamSet paramSet = super.getParamSet(factory);
