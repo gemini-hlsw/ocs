@@ -9,6 +9,7 @@ package edu.gemini.spModel.target;
 
 import edu.gemini.pot.sp.*;
 import edu.gemini.pot.spdb.IDBDatabaseService;
+import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.spModel.gemini.obscomp.SPProgram;
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality;
 import edu.gemini.spModel.obs.SPObservation;
@@ -21,6 +22,8 @@ import edu.gemini.spModel.util.SPTreeUtil;
 import jsky.coords.TargetDesc;
 import jsky.coords.WorldCoords;
 
+import java.util.function.Function;
+
 
 /** Utility class to create a {@link TargetDesc} object describing a given observation target */
 public class ObsTargetDesc extends TargetDesc {
@@ -29,7 +32,7 @@ public class ObsTargetDesc extends TargetDesc {
     private String _targetName;
     private String _timeStr;
 
-    private ObsTargetDesc(String name, WorldCoords coords,
+    private ObsTargetDesc(String name, Function<Option<Long>, Option<WorldCoords>> coords,
                           String priority, String category, String obsId,
                           String targetName, String timeStr,
                           TargetDesc.ElConstraintType elType, double elMin, double elMax) {
@@ -58,9 +61,13 @@ public class ObsTargetDesc extends TargetDesc {
 
         SPTarget basePos = targetEnv.getBase();
         ITarget target = basePos.getTarget();
-        double x = target.getRaDegrees();
-        double y = target.getDecDegrees();
-        WorldCoords pos = new WorldCoords(x, y, 2000.);
+
+        Function<Option<Long>, Option<WorldCoords>> pos = op ->
+            target.getRaDegrees(op).flatMap(x ->
+            target.getDecDegrees(op).map(y ->
+                new WorldCoords(x, y, 2000.)
+            ));
+
                  String targetName = basePos.getTarget().getName();
 
         String obsId = "";

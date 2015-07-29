@@ -8,6 +8,10 @@
 package jsky.coords;
 
 
+import edu.gemini.shared.util.immutable.Option;
+
+import java.util.function.Function;
+
 /**
  * A simple class describing a target object and some related information.
  *
@@ -20,14 +24,14 @@ public abstract class TargetDesc {
     }
 
     private String _name;
-    private WorldCoords _coords;
+    private Function<Option<Long>, Option<WorldCoords>> _coords;
     private String _priority;
     private String _category;
     private ElConstraintType _elType;
     private double _elMin;
     private double _elMax;
 
-    protected TargetDesc(String name, WorldCoords coords, String priority, String category,
+    protected TargetDesc(String name, Function<Option<Long>, Option<WorldCoords>> coords, String priority, String category,
                           ElConstraintType elType, Double elMin, Double elMax) {
         _name = name;
         _coords = coords;
@@ -46,8 +50,8 @@ public abstract class TargetDesc {
         return _name;
     }
 
-    public WorldCoords getCoordinates() {
-        return _coords;
+    public Option<WorldCoords> getCoordinates(Option<Long> when) {
+        return _coords.apply(when);
     }
 
     public String getPriority() {

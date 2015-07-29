@@ -6,10 +6,14 @@
 
 package jsky.plot;
 
+import edu.gemini.shared.util.immutable.None;
+import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.skycalc.ImprovedSkyCalcMethods;
 import edu.gemini.skycalc.SunRiseSet;
 import edu.gemini.spModel.core.Site;
 import jsky.coords.TargetDesc;
+import jsky.coords.WorldCoordinates;
+import jsky.coords.WorldCoords;
 import jsky.plot.util.CalendarUtil;
 import jsky.util.Preferences;
 import jsky.util.StringUtil;
@@ -414,10 +418,13 @@ public class ElevationPlotModel {
                 endAlt   = ImprovedSkyCalcMethods.getAltitude(elMin);
                 break;
             case HOUR_ANGLE:
-                double dec = target.getCoordinates().getDecDeg();
-                double lat = _site.latitude;
-                startAlt = ImprovedSkyCalcMethods.altit(dec, elMin, lat);
-                endAlt   = ImprovedSkyCalcMethods.altit(dec, elMax, lat);
+                final Option<WorldCoords> coords = target.getCoordinates(None.instance());
+                if (coords.isDefined()) {
+                    double dec = coords.getValue().getDecDeg();
+                    double lat = _site.latitude;
+                    startAlt = ImprovedSkyCalcMethods.altit(dec, elMin, lat);
+                    endAlt = ImprovedSkyCalcMethods.altit(dec, elMax, lat);
+                }
                 break;
             case NONE:
                 startAlt = 0.0;
