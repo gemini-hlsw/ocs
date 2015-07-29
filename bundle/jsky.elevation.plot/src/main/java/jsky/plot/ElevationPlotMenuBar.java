@@ -71,7 +71,6 @@ public class ElevationPlotMenuBar extends JMenuBar {
     protected JMenu createViewMenu() {
         JMenu menu = new JMenu(_I18N.getString("view"));
         menu.add(_plotPanel.getDateAction());
-        menu.add(_plotPanel.getTargetsAction());
         menu.add(_showLegendMenuItem = _createViewLegendMenuItem());
         menu.add(createViewSamplePeriodMenu());
         return menu;
