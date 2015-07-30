@@ -12,6 +12,7 @@ import edu.gemini.pot.sp.ISPObsComponent;
 import edu.gemini.shared.skyobject.Magnitude;
 import edu.gemini.shared.util.immutable.*;
 import edu.gemini.spModel.guide.*;
+import edu.gemini.spModel.obs.SchedulingBlock;
 import edu.gemini.spModel.obs.context.ObsContext;
 import edu.gemini.spModel.target.SPTarget;
 import edu.gemini.spModel.target.TelescopePosWatcher;
@@ -173,10 +174,14 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
         static abstract class NonBaseTargetRow extends AbstractRow {
             final Option<Double> distance;
 
-            NonBaseTargetRow(boolean enabled, String tag, SPTarget target, WorldCoords baseCoords) {
+            NonBaseTargetRow(boolean enabled, String tag, SPTarget target, Option<WorldCoords> baseCoords, Option<Long> when) {
                 super(enabled, tag, target.getTarget().getName(), new Some<>(target));
-                final WorldCoords coords = getWorldCoords(target);
-                distance = new Some<>(Math.abs(baseCoords.dist(coords)));
+                final Option<WorldCoords> coords = getWorldCoords(target, when);
+                distance =
+                    baseCoords.flatMap(bc ->
+                    coords.map(c ->
+                        Math.abs(bc.dist(c))
+                    ));
             }
 
             @Override public Option<Double> distance() { return distance; }
@@ -185,8 +190,8 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
         static final class GuideTargetRow extends NonBaseTargetRow {
             final boolean isActiveGuideProbe;
             final Option<AgsGuideQuality> quality;
-            GuideTargetRow(boolean isActiveGuideProbe, Option<AgsGuideQuality> quality, boolean enabled, GuideProbe probe, int index, SPTarget target, WorldCoords baseCoords) {
-                super(enabled, String.format("%s (%d)", probe.getKey(), index), target, baseCoords);
+            GuideTargetRow(boolean isActiveGuideProbe, Option<AgsGuideQuality> quality, boolean enabled, GuideProbe probe, int index, SPTarget target, Option<WorldCoords> baseCoords, Option<Long> when) {
+                super(enabled, String.format("%s (%d)", probe.getKey(), index), target, baseCoords, when);
                 this.isActiveGuideProbe = isActiveGuideProbe;
                 this.quality = quality;
             }
@@ -198,8 +203,8 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
         }
 
         static final class UserTargetRow extends NonBaseTargetRow {
-            UserTargetRow(int index, SPTarget target, WorldCoords baseCoords) {
-                super(true, String.format("%s (%d)", TargetEnvironment.USER_NAME, index+1), target, baseCoords);
+            UserTargetRow(int index, SPTarget target, Option<WorldCoords> baseCoords, Option<Long> when) {
+                super(true, String.format("%s (%d)", TargetEnvironment.USER_NAME, index+1), target, baseCoords, when);
             }
         }
 
@@ -256,7 +261,8 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
 
             // Add the base position first.
             final SPTarget base = env.getBase();
-            final WorldCoords baseCoords = getWorldCoords(base);
+            final Option<Long> when = ctx.flatMap(c -> c.getSchedulingBlock().map(SchedulingBlock::start));
+            final Option<WorldCoords> baseCoords = getWorldCoords(base, when);
             tmp.add(new BaseTargetRow(base));
 
             // Add all the guide groups and targets.
@@ -278,7 +284,7 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
                         final SPTarget target = tup._1();
                         final Option<AgsGuideQuality> quality = guideQuality(ags, guideProbe, target);
                         final boolean isPrimary = !primary.isEmpty() && (primary.getValue() == target);
-                        tmp.add(new GuideTargetRow(isActive, quality, isPrimary, guideProbe, tup._2() + 1, target, baseCoords));
+                        tmp.add(new GuideTargetRow(isActive, quality, isPrimary, guideProbe, tup._2() + 1, target, baseCoords, when));
                     });
                 }
             } else {
@@ -294,7 +300,7 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
                             final SPTarget target = tup._1();
                             final Option<AgsGuideQuality> quality = guideQuality(ags, guideProbe, target);
                             final boolean enabled = isPrimaryGroup && !primary.isEmpty() && (primary.getValue() == tup._1());
-                            rowList.add(new GuideTargetRow(isActive, quality, enabled, guideProbe, tup._2() + 1, tup._1(), baseCoords));
+                            rowList.add(new GuideTargetRow(isActive, quality, enabled, guideProbe, tup._2() + 1, tup._1(), baseCoords, when));
                         });
                     }
 
@@ -303,7 +309,7 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
             }
 
             // Add the user positions.
-            env.getUserTargets().zipWithIndex().foreach(tup -> tmp.add(new UserTargetRow(tup._2(), tup._1(), baseCoords)));
+            env.getUserTargets().zipWithIndex().foreach(tup -> tmp.add(new UserTargetRow(tup._2(), tup._1(), baseCoords, when)));
 
             // Finally, initialize the rows
             rows = DefaultImList.create(tmp);
@@ -463,11 +469,13 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
     }
 
     // Return the world coordinates for the given target
-    private static WorldCoords getWorldCoords(SPTarget tp) {
+    private static Option<WorldCoords> getWorldCoords(SPTarget tp, Option<Long> when) {
         final ITarget target = tp.getTarget();
-        final double x = target.getRaDegrees();
-        final double y = target.getDecDegrees();
-        return new WorldCoords(x, y, 2000.);
+        return
+            target.getRaDegrees(when).flatMap(x ->
+            target.getDecDegrees(when).map(y ->
+                new WorldCoords(x, y, 2000)
+            ));
     }
 
     private static void styleRendererLabel(JLabel lab, TableData.Row row) {
