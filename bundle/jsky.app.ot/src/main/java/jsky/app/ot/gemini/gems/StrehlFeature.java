@@ -14,6 +14,7 @@ import edu.gemini.spModel.core.*;
 import edu.gemini.spModel.gemini.gsaoi.Gsaoi;
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality;
 import edu.gemini.spModel.guide.GuideProbe;
+import edu.gemini.spModel.obs.SchedulingBlock;
 import edu.gemini.spModel.obs.context.ObsContext;
 import edu.gemini.spModel.obscomp.SPInstObsComp;
 import edu.gemini.spModel.target.SPTarget;
@@ -407,30 +408,41 @@ public class StrehlFeature extends TpeImageFeature implements PropertyWatcher, M
     }
 
     // Returns an array of mascot Star objects for the given target list
+    // throws an exception if a star's coordinates are unknown
     private Star[] targetListToStarList(List<SPTarget> targetList) {
         Star[] starList = new Star[3];
         int n = targetList.size();
         for (int i = 0; i < starList.length; i++) {
-            starList[i] = i < n ? targetToStar(targetList.get(i)) : null;
+            if (i < n) {
+                final SPTarget spt = targetList.get(i);
+                final Option<Star> op = targetToStar(spt);
+                if (op.isEmpty()) {
+                    throw new RuntimeException("No coordinates for " + spt.getTarget().getName());
+                }
+                starList[i] = op.getValue();
+            }
         }
         return starList;
     }
 
-    // Returns a mascot Star object for the given target.
-    private Star targetToStar(SPTarget target) {
-        String name = target.getTarget().getName();
-        double ra = target.getTarget().getRaDegrees();
-        double dec = target.getTarget().getDecDegrees();
-        double baseX = _tii.getBasePos().getRaDeg();
-        double baseY = _tii.getBasePos().getDecDeg();
-        Magnitude undef = new Magnitude(Magnitude.Band.J, MascotConf.invalidMag());
-        double bmag = target.getTarget().getMagnitude(Magnitude.Band.B).getOrElse(undef).getBrightness();
-        double vmag = target.getTarget().getMagnitude(Magnitude.Band.V).getOrElse(undef).getBrightness();
-        double rmag = target.getTarget().getMagnitude(Magnitude.Band.R).getOrElse(undef).getBrightness();
-        double jmag = target.getTarget().getMagnitude(Magnitude.Band.J).getOrElse(undef).getBrightness();
-        double hmag = target.getTarget().getMagnitude(Magnitude.Band.H).getOrElse(undef).getBrightness();
-        double kmag = target.getTarget().getMagnitude(Magnitude.Band.K).getOrElse(undef).getBrightness();
-        return Star.makeStar(name, baseX, baseY, bmag, vmag, rmag, jmag, hmag, kmag, ra, dec);
+    // Returns a mascot Star object for the given target, if coordinates are known
+    private Option<Star> targetToStar(SPTarget target) {
+        final Option<Long> when = _iw.getContext().schedulingBlockJava().map(SchedulingBlock::start);
+        return
+            target.getTarget().getRaDegrees(when).flatMap(ra ->
+            target.getTarget().getDecDegrees(when).map(dec -> {
+                String name = target.getTarget().getName();
+                double baseX = _tii.getBasePos().getRaDeg();
+                double baseY = _tii.getBasePos().getDecDeg();
+                Magnitude undef = new Magnitude(Magnitude.Band.J, MascotConf.invalidMag());
+                double bmag = target.getTarget().getMagnitude(Magnitude.Band.B).getOrElse(undef).getBrightness();
+                double vmag = target.getTarget().getMagnitude(Magnitude.Band.V).getOrElse(undef).getBrightness();
+                double rmag = target.getTarget().getMagnitude(Magnitude.Band.R).getOrElse(undef).getBrightness();
+                double jmag = target.getTarget().getMagnitude(Magnitude.Band.J).getOrElse(undef).getBrightness();
+                double hmag = target.getTarget().getMagnitude(Magnitude.Band.H).getOrElse(undef).getBrightness();
+                double kmag = target.getTarget().getMagnitude(Magnitude.Band.K).getOrElse(undef).getBrightness();
+                return Star.makeStar(name, baseX, baseY, bmag, vmag, rmag, jmag, hmag, kmag, ra, dec);
+            }));
     }
 
     // Displays a message with the mean, rms, min and max Strehl values (and FWHM)
