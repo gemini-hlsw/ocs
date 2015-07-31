@@ -225,8 +225,8 @@ public class VisitorInstrument extends SPInstObsComp
         return Double.toString(_centralWavelength);
     }
 
-    private static final Angle PWFS1_VIG = Angle.arcmins(5.7);
-    private static final Angle PWFS2_VIG = Angle.arcmins(5.2);
+    public static final Angle PWFS1_VIG = Angle.arcmins(5.7);
+    public static final Angle PWFS2_VIG = Angle.arcmins(5.2);
 
     @Override public Angle pwfs1VignettingClearance() { return PWFS1_VIG; }
     @Override public Angle pwfs2VignettingClearance() { return PWFS2_VIG; }
