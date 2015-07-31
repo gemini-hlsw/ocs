@@ -38,6 +38,7 @@ case class AgsHttpClient(host: String, port: Int) extends AgsClient {
 
   private def estimateNow(url: URL): AgsResult = {
     try {
+      AgsHttpClient.Log.info(s"AGS Query to $url")
       val conn = url.openConnection().asInstanceOf[HttpsURLConnection]
       conn.setHostnameVerifier(hostnameVerifier)
       conn.setSSLSocketFactory(GemSslSocketFactory.get)
