@@ -3,6 +3,7 @@ package edu.gemini.spModel.gemini.phoenix;
 import edu.gemini.pot.sp.ISPObservation;
 import edu.gemini.pot.sp.SPComponentType;
 import edu.gemini.shared.util.immutable.Option;
+import edu.gemini.skycalc.Angle;
 import edu.gemini.spModel.config2.Config;
 import edu.gemini.spModel.core.Site;
 import edu.gemini.spModel.data.ISPDataObject;
@@ -13,6 +14,7 @@ import edu.gemini.spModel.data.property.PropertyProvider;
 import edu.gemini.spModel.data.property.PropertySupport;
 import edu.gemini.spModel.gemini.phoenix.PhoenixParams.Filter;
 import edu.gemini.spModel.gemini.phoenix.PhoenixParams.Mask;
+import edu.gemini.spModel.gemini.visitor.VisitorInstrument;
 import edu.gemini.spModel.obs.plannedtime.DefaultStepCalculator;
 import edu.gemini.spModel.obs.plannedtime.PlannedTime.*;
 import edu.gemini.spModel.obscomp.InstConfigInfo;
@@ -329,5 +331,8 @@ public final class InstPhoenix extends SPInstObsComp implements PropertyProvider
         return PROPERTY_MAP;
     }
 
+    // REL-2346 Use the same Vignetting clearance as Visitors
+    @Override public Angle pwfs1VignettingClearance() { return VisitorInstrument.PWFS1_VIG; }
+    @Override public Angle pwfs2VignettingClearance() { return VisitorInstrument.PWFS2_VIG; }
 
 }
