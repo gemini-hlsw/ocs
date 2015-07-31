@@ -43,18 +43,20 @@ public class PwfsRule implements IRule {
 
                 SPTarget primary = primaryOpt.getValue();
                 try {
-                    switch (pwfs.checkBoundaries(primary, ctx)) {
-                        case inside:
-                            problems.addWarning(PREFIX + "WARN", "The " + pwfs.getKey() + WARN, targetNode);
-                            break;
-                        case innerBoundary:
-                            // OK, this is where it should be: between inner and outer limits
-                            break;
-                        case outerBoundary:
-                        case outside:
-                            problems.addError(PREFIX + "ERROR", "The " + pwfs.getKey() + ERROR, targetNode);
-                            break;
-                    }
+                    pwfs.checkBoundaries(primary, ctx).foreach(bs -> {
+                        switch (bs) {
+                            case inside:
+                                problems.addWarning(PREFIX + "WARN", "The " + pwfs.getKey() + WARN, targetNode);
+                                break;
+                            case innerBoundary:
+                                // OK, this is where it should be: between inner and outer limits
+                                break;
+                            case outerBoundary:
+                            case outside:
+                                problems.addError(PREFIX + "ERROR", "The " + pwfs.getKey() + ERROR, targetNode);
+                                break;
+                        }
+                    });
                 } catch (InternalError e) {
                     // ignore "radius limits for this instrument are not defined" error here
                 }

@@ -49,17 +49,19 @@ public final class GmosOiwfsStarRule implements IRule {
 
                     SPTarget primary = primaryOpt.getValue();
 
-                    switch (oiwfs.checkBoundaries(primary, ctx)) {
-                        case inside:
-                            break;
-                        case innerBoundary:
-                        case outerBoundary:
-                            problems.addWarning(PREFIX + "WARN", WARN, targetNode);
-                            break;
-                        case outside:
-                            problems.addError(PREFIX + "ERROR", ERROR, targetNode);
-                            break;
-                    }
+                    oiwfs.checkBoundaries(primary, ctx).foreach(bs -> {
+                        switch (bs) {
+                            case inside:
+                                break;
+                            case innerBoundary:
+                            case outerBoundary:
+                                problems.addWarning(PREFIX + "WARN", WARN, targetNode);
+                                break;
+                            case outside:
+                                problems.addError(PREFIX + "ERROR", ERROR, targetNode);
+                                break;
+                        }
+                    });
                 }
             }
         }

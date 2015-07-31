@@ -291,7 +291,7 @@ public enum PwfsGuideProbe implements ValidatableGuideProbe, OffsetValidatingGui
         return GuideProbeUtil.instance.validate(coords, this, ctx);
     }
 
-    public BoundaryPosition checkBoundaries(SPTarget guideStar, ObsContext ctx){
+    public Option<BoundaryPosition> checkBoundaries(SPTarget guideStar, ObsContext ctx){
         return checkBoundaries(guideStar.getTarget().getSkycalcCoordinates(), ctx);
     }
 
@@ -304,29 +304,31 @@ public enum PwfsGuideProbe implements ValidatableGuideProbe, OffsetValidatingGui
      * @param ctx the context
      * @return
      */
-    public BoundaryPosition checkBoundaries(final Coordinates coords, final ObsContext ctx) {
-        final Coordinates baseCoordinates = ctx.getBaseCoordinates();
-        final Angle positionAngle = ctx.getPositionAngle();
-        final Set<Offset> sciencePositions = ctx.getSciencePositions();
+    public Option<BoundaryPosition> checkBoundaries(final Coordinates coords, final ObsContext ctx) {
+        return ctx.getBaseCoordinatesOpt().map(baseCoordinates -> {
+            final Angle positionAngle = ctx.getPositionAngle();
+            final Set<Offset> sciencePositions = ctx.getSciencePositions();
 
-        // check positions against corrected outer patrol field bounds
-        return getCorrectedPatrolField(ctx).map(new MapOp<PatrolField, BoundaryPosition>() {
-            @Override public BoundaryPosition apply(PatrolField patrolField) {
-                final BoundaryPosition bp = patrolField.checkBoundaries(coords, baseCoordinates, positionAngle, sciencePositions);
-                if (bp != BoundaryPosition.inside) {
-                    return BoundaryPosition.outside;
-                }
+            // check positions against corrected outer patrol field bounds
+            return getCorrectedPatrolField(ctx).map(new MapOp<PatrolField, BoundaryPosition>() {
+                @Override
+                public BoundaryPosition apply(PatrolField patrolField) {
+                    final BoundaryPosition bp = patrolField.checkBoundaries(coords, baseCoordinates, positionAngle, sciencePositions);
+                    if (bp != BoundaryPosition.inside) {
+                        return BoundaryPosition.outside;
+                    }
 
-                // Check if any of the guide stars are inside the inner bounds (opposite logic needed, union instead of intersection)
-                final double minLimit = getVignettingClearance(ctx).toArcsecs().getMagnitude();
-                final Ellipse2D e = new Ellipse2D.Double(-minLimit, -minLimit, minLimit * 2.0, minLimit * 2.0);
-                final PatrolField p = getCorrectedPatrolField(new PatrolField(e, e, e), ctx);
-                if (p.anyInside(coords, baseCoordinates, positionAngle, sciencePositions)) {
-                    return BoundaryPosition.inside;
+                    // Check if any of the guide stars are inside the inner bounds (opposite logic needed, union instead of intersection)
+                    final double minLimit = getVignettingClearance(ctx).toArcsecs().getMagnitude();
+                    final Ellipse2D e = new Ellipse2D.Double(-minLimit, -minLimit, minLimit * 2.0, minLimit * 2.0);
+                    final PatrolField p = getCorrectedPatrolField(new PatrolField(e, e, e), ctx);
+                    if (p.anyInside(coords, baseCoordinates, positionAngle, sciencePositions)) {
+                        return BoundaryPosition.inside;
+                    }
+                    return BoundaryPosition.innerBoundary;
                 }
-                return BoundaryPosition.innerBoundary;
-            }
-        }).getOrElse(BoundaryPosition.outside);
+            }).getOrElse(BoundaryPosition.outside);
+        });
     }
 
 

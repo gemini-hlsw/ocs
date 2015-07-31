@@ -213,7 +213,7 @@ public class GmosOiwfsGuideProbeTest extends TestCase {
             for(Integer corner=0;corner<4;corner++){
                 SPTarget guideTarget = new SPTarget(corners[corner].getRaDeg(), corners[corner].getDecDeg());
                 assertEquals("Zone "+zone+", Corner "+corner+" failed.",getExpectedPosition(zone),
-                        GmosOiwfsGuideProbe.instance.checkBoundaries(guideTarget,baseContext));
+                        GmosOiwfsGuideProbe.instance.checkBoundaries(guideTarget,baseContext).getValue());
             }
         }
     }

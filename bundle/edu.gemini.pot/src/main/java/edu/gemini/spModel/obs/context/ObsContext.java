@@ -273,6 +273,16 @@ public final class ObsContext {
         return new Coordinates(raDeg, decDeg);
     }
 
+    public Option<Coordinates> getBaseCoordinatesOpt() {
+        final Option<Long> when = getSchedulingBlock().map(SchedulingBlock::start);
+        SPTarget target = targets.getBase();
+        return
+                target.getTarget().getRaDegrees(when).flatMap(raDeg ->
+                        target.getTarget().getDecDegrees(when).map(decDeg ->
+                                        new Coordinates(raDeg, decDeg)
+                        ));
+    }
+
     public Angle getPositionAngle() {
         double deg = inst.getPosAngle();
         return new Angle(deg, Angle.Unit.DEGREES);
