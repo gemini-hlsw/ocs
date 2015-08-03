@@ -1,8 +1,3 @@
-// Copyright 1997-2002
-// Association for Universities for Research in Astronomy, Inc.
-//
-// $Id: SeqConfigPhoenix.java 7080 2006-05-26 21:10:08Z anunez $
-//
 package edu.gemini.spModel.gemini.phoenix;
 
 import edu.gemini.pot.sp.SPComponentType;

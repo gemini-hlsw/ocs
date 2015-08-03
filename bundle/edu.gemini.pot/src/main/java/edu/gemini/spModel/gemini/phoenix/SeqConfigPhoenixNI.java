@@ -1,8 +1,3 @@
-// Copyright 1997-2002
-// Association for Universities for Research in Astronomy, Inc.
-//
-// $Id: SeqConfigPhoenixNI.java 46768 2012-07-16 18:58:53Z rnorris $
-//
 package edu.gemini.spModel.gemini.phoenix;
 
 import edu.gemini.pot.sp.ISPNodeInitializer;

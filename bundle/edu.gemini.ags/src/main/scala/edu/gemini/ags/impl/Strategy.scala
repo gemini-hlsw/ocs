@@ -100,6 +100,7 @@ object Strategy {
     SPComponentType.INSTRUMENT_NICI       -> const(List(NiciOiwfs, Pwfs2South, Pwfs1South)),
     SPComponentType.INSTRUMENT_NIFS       -> const(List(AltairAowfs, Pwfs2North, Pwfs1North, NifsOiwfs)),
     SPComponentType.INSTRUMENT_NIRI       -> const(List(AltairAowfs, Pwfs2North, Pwfs1North, NiriOiwfs)),
+    SPComponentType.INSTRUMENT_PHOENIX    -> const(List(Pwfs2North, Pwfs2South, Pwfs1North, Pwfs1South)),
     SPComponentType.INSTRUMENT_TEXES      -> const(List(Pwfs2North, Pwfs1North)),
     SPComponentType.INSTRUMENT_TRECS      -> const(List(Pwfs2South, Pwfs1South)),
     SPComponentType.INSTRUMENT_VISITOR    -> const(List(Pwfs2North, Pwfs2South, Pwfs1North, Pwfs1South))

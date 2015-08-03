@@ -68,7 +68,7 @@ class AgsServlet(magTable: MagnitudeTable) extends HttpServlet {
     def estimate(ctx: ObsContext, s: AgsStrategy): Either[Response, AgsStrategy.Estimate] = {
       import scala.concurrent.duration._
       Try {
-        Await.result(s.estimate(ctx, magTable), 1 minute)
+        Await.result(s.estimate(ctx, magTable), 1.minute)
       } match {
         case Success(e)               => Right(e)
         case Failure(io: IOException) => Left(failure(SC_BAD_GATEWAY, io))
