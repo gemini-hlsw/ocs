@@ -30,7 +30,7 @@ abstract class Formatter[A] extends AbstractFormatter {
 
 class AngleTextField[A](initialValue: A, format : Formatter[A]) extends scala.swing.TextComponent with SelectOnFocus {
   override lazy val peer : javax.swing.JFormattedTextField = new JFormattedTextField(format) with SuperMixin
-  @volatile var valid = true
+  var valid = true
   peer.setValue(initialValue)
 
   /** Retrieve the field's value. */

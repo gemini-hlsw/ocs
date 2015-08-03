@@ -27,7 +27,7 @@ class NumberField(d: Option[Double]) extends FormattedTextField(NumberField.df) 
   private val pink = new Color(255, 224, 224)
   private val white = background // N.B. this means we can't change the background to anything else
 
-  @volatile var valid = true
+  var valid = true
 
   def valid(d:Double):Boolean = true
 
