@@ -1,8 +1,3 @@
-// Copyright 1997-2002
-// Association for Universities for Research in Astronomy, Inc.
-//
-// $Id: InstPhoenixCB.java 27568 2010-10-25 18:03:42Z swalker $
-//
 package edu.gemini.spModel.gemini.phoenix;
 
 import edu.gemini.spModel.config.AbstractObsComponentCB;
@@ -36,6 +31,7 @@ public class InstPhoenixCB extends AbstractObsComponentCB {
         return result;
     }
 
+    @SuppressWarnings("rawtypes")
     protected void thisReset(Map options) {
         InstPhoenix dataObj = (InstPhoenix) getDataObject();
         if (dataObj == null)

@@ -1,8 +1,3 @@
-// Copyright 1997-2002
-// Association for Universities for Research in Astronomy, Inc.,
-//
-// $Id: InstPhoenixNI.java 39256 2011-11-22 17:42:49Z swalker $
-//
 package edu.gemini.spModel.gemini.phoenix;
 
 import edu.gemini.pot.sp.ISPObsComponent;

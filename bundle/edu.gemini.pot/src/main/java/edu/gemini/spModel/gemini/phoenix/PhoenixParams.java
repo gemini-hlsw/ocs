@@ -1,8 +1,3 @@
-// Copyright 1997-2002
-// Association for Universities for Research in Astronomy, Inc.
-//
-// $Id: PhoenixParams.java 8434 2008-02-24 19:48:27Z swalker $
-//
 package edu.gemini.spModel.gemini.phoenix;
 
 import edu.gemini.spModel.type.DisplayableSpType;

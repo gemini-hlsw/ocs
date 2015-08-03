@@ -1,13 +1,9 @@
-// Copyright 1997-2002
-// Association for Universities for Research in Astronomy, Inc.
-//
-// $Id: InstPhoenix.java 38186 2011-10-24 13:21:33Z swalker $
-//
 package edu.gemini.spModel.gemini.phoenix;
 
 import edu.gemini.pot.sp.ISPObservation;
 import edu.gemini.pot.sp.SPComponentType;
 import edu.gemini.shared.util.immutable.Option;
+import edu.gemini.skycalc.Angle;
 import edu.gemini.spModel.config2.Config;
 import edu.gemini.spModel.core.Site;
 import edu.gemini.spModel.data.ISPDataObject;
@@ -18,6 +14,7 @@ import edu.gemini.spModel.data.property.PropertyProvider;
 import edu.gemini.spModel.data.property.PropertySupport;
 import edu.gemini.spModel.gemini.phoenix.PhoenixParams.Filter;
 import edu.gemini.spModel.gemini.phoenix.PhoenixParams.Mask;
+import edu.gemini.spModel.gemini.visitor.VisitorInstrument;
 import edu.gemini.spModel.obs.plannedtime.DefaultStepCalculator;
 import edu.gemini.spModel.obs.plannedtime.PlannedTime.*;
 import edu.gemini.spModel.obscomp.InstConfigInfo;
@@ -105,6 +102,7 @@ public final class InstPhoenix extends SPInstObsComp implements PropertyProvider
     private double _gratingWavenumber = DEF_GRATING_WAVENUMBER;
 
     private final String _VERSION =  "2006B-1";
+
     /** Constructor */
     public InstPhoenix() {
         super(SP_TYPE);
@@ -257,7 +255,6 @@ public final class InstPhoenix extends SPInstObsComp implements PropertyProvider
 
     /**
      * Return a parameter set describing the current state of this object.
-     * @param factory
      */
     public ParamSet getParamSet(PioFactory factory) {
         ParamSet paramSet = super.getParamSet(factory);
@@ -334,5 +331,8 @@ public final class InstPhoenix extends SPInstObsComp implements PropertyProvider
         return PROPERTY_MAP;
     }
 
+    // REL-2346 Use the same Vignetting clearance as Visitors
+    @Override public Angle pwfs1VignettingClearance() { return VisitorInstrument.PWFS1_VIG; }
+    @Override public Angle pwfs2VignettingClearance() { return VisitorInstrument.PWFS2_VIG; }
 
 }

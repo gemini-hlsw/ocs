@@ -30,7 +30,7 @@ public final class Activator implements BundleActivator {
 
             try {
                 final AgsMagnitude.MagnitudeTable magTable = ProbeLimitsTable.loadOrThrow();
-                http.registerServlet(APP_CONTEXT, new AgsServlet(magTable), new Hashtable(), null);
+                http.registerServlet(APP_CONTEXT, new AgsServlet(magTable), new Hashtable<>(), null);
             } catch (Exception ex) {
                 LOG.log(Level.SEVERE, "Trouble setting up web application.", ex);
             }
