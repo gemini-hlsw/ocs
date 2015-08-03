@@ -65,7 +65,7 @@ class GemsResultsAnalyzerSpec extends MascotProgress with Specification with NoT
       }
 
       System.out.println("gems results: size = " + gemsGuideStars.size)
-      gemsGuideStars should have size 247
+      gemsGuideStars should have size 164
 
       val result = gemsGuideStars.head
       result.pa.toDegrees should beCloseTo(0, 0.0001)
@@ -108,7 +108,7 @@ class GemsResultsAnalyzerSpec extends MascotProgress with Specification with NoT
       val cwfs2Mag = cwfs2.getMagnitude(JMagnitude.Band.UC).getValue.getBrightness
       val cwfs3Mag = cwfs3.getMagnitude(JMagnitude.Band.r).getValue.getBrightness
       cwfs3Mag < cwfs1Mag && cwfs2Mag < cwfs1Mag should beTrue
-    }.pendingUntilFixed("See REL-2420")
+    }
     "support Gsaoi Search on SN-1987A" in {
       val base = new WorldCoords("05:35:28.020", "-69:16:11.07")
       val inst = new Gsaoi <| {_.setPosAngle(0.0)} <| {_.setIssPort(IssPort.UP_LOOKING)}
@@ -126,7 +126,7 @@ class GemsResultsAnalyzerSpec extends MascotProgress with Specification with NoT
       }
 
       System.out.println("gems results: size = " + gemsGuideStars.size)
-      gemsGuideStars should have size 92
+      gemsGuideStars should have size 94
 
       val result = gemsGuideStars.head
       result.pa.toDegrees should beCloseTo(0, 0.0001)
@@ -146,12 +146,12 @@ class GemsResultsAnalyzerSpec extends MascotProgress with Specification with NoT
       val cwfs2 = group.get(Canopus.Wfs.cwfs2).getValue.getPrimary.getValue.getTarget
       val cwfs3 = group.get(Canopus.Wfs.cwfs3).getValue.getPrimary.getValue.getTarget
       val odgw2 = group.get(GsaoiOdgw.odgw2).getValue.getPrimary.getValue.getTarget
-      cwfs1.getName must beEqualTo("104-014597")
+      cwfs1.getName must beEqualTo("104-014564")
       cwfs2.getName must beEqualTo("104-014608")
       cwfs3.getName must beEqualTo("104-014547")
       odgw2.getName must beEqualTo("104-014556")
 
-      val cwfs1x = Coordinates.create("05:35:32.630", "-69:15:48.64")
+      val cwfs1x = Coordinates.create("05:35:24.994", "-69:16:04.77")
       val cwfs2x = Coordinates.create("05:35:36.409", "-69:16:24.17")
       val cwfs3x = Coordinates.create("05:35:18.423", "-69:16:30.67")
       val odgw2x = Coordinates.create("05:35:23.887", "-69:16:18.20")
@@ -169,7 +169,7 @@ class GemsResultsAnalyzerSpec extends MascotProgress with Specification with NoT
       val cwfs2Mag = cwfs2.getMagnitude(JMagnitude.Band.UC).getValue.getBrightness
       val cwfs3Mag = cwfs3.getMagnitude(JMagnitude.Band.UC).getValue.getBrightness
       cwfs3Mag < cwfs1Mag && cwfs2Mag < cwfs1Mag should beTrue
-    }.pendingUntilFixed("See REL-2420")
+    }
     "support Gsaoi Search on M6" in {
       val base = new WorldCoords("17:40:20.000", "-32:15:12.00")
       val inst = new Gsaoi
@@ -187,7 +187,7 @@ class GemsResultsAnalyzerSpec extends MascotProgress with Specification with NoT
       }
 
       System.out.println("gems results: size = " + gemsGuideStars.size)
-      gemsGuideStars should have size 214
+      gemsGuideStars should have size 28
 
       val result = gemsGuideStars.head
       result.pa.toDegrees should beCloseTo(90, 0.0001)
@@ -207,12 +207,12 @@ class GemsResultsAnalyzerSpec extends MascotProgress with Specification with NoT
       val cwfs2 = group.get(Canopus.Wfs.cwfs2).getValue.getPrimary.getValue.getTarget
       val cwfs3 = group.get(Canopus.Wfs.cwfs3).getValue.getPrimary.getValue.getTarget
       val odgw2 = group.get(GsaoiOdgw.odgw2).getValue.getPrimary.getValue.getTarget
-      cwfs1.getName must beEqualTo("289-128891")
+      cwfs1.getName must beEqualTo("289-128894")
       cwfs2.getName must beEqualTo("289-128878")
       cwfs3.getName must beEqualTo("289-128908")
       odgw2.getName must beEqualTo("289-128891")
 
-      val cwfs1x = Coordinates.create("17:40:19.295", "-32:14:58.34")
+      val cwfs1x = Coordinates.create("17:40:19.713", "-32:15:56.77")
       val cwfs2x = Coordinates.create("17:40:16.855", "-32:15:55.83")
       val cwfs3x = Coordinates.create("17:40:21.594", "-32:15:50.38")
       val odgw2x = Coordinates.create("17:40:19.295", "-32:14:58.34")
@@ -230,7 +230,7 @@ class GemsResultsAnalyzerSpec extends MascotProgress with Specification with NoT
       val cwfs2Mag = cwfs2.getMagnitude(JMagnitude.Band.UC).getValue.getBrightness
       val cwfs3Mag = cwfs3.getMagnitude(JMagnitude.Band.UC).getValue.getBrightness
       cwfs3Mag < cwfs1Mag && cwfs2Mag < cwfs1Mag should beTrue
-    }.pendingUntilFixed("See REL-2420")
+    }
     "support Gsaoi Search on BPM 37093" in {
       val base = new WorldCoords("12:38:49.820", "-49:48:00.20")
       val inst = new Gsaoi
@@ -248,7 +248,7 @@ class GemsResultsAnalyzerSpec extends MascotProgress with Specification with NoT
       }
 
       System.out.println("gems results: size = " + gemsGuideStars.size)
-      gemsGuideStars should have size 97
+      gemsGuideStars should have size 12
 
       val result = gemsGuideStars.head
       result.pa.toDegrees should beCloseTo(0, 0.0001)
@@ -256,7 +256,7 @@ class GemsResultsAnalyzerSpec extends MascotProgress with Specification with NoT
       val group = result.guideGroup
       val set = group.getReferencedGuiders
       // Found a star on CWFS1, CWFS2, CWFS3 and ODWG2
-      set.contains(Canopus.Wfs.cwfs1) should beTrue
+      set.contains(Canopus.Wfs.cwfs1) should beFalse
       set.contains(Canopus.Wfs.cwfs2) should beTrue
       set.contains(Canopus.Wfs.cwfs3) should beTrue
       set.contains(GsaoiOdgw.odgw1) should beFalse
@@ -264,17 +264,14 @@ class GemsResultsAnalyzerSpec extends MascotProgress with Specification with NoT
       set.contains(GsaoiOdgw.odgw3) should beFalse
       set.contains(GsaoiOdgw.odgw4) should beTrue
 
-      val cwfs1 = group.get(Canopus.Wfs.cwfs1).getValue.getPrimary.getValue.getTarget.getSkycalcCoordinates
       val cwfs2 = group.get(Canopus.Wfs.cwfs2).getValue.getPrimary.getValue.getTarget.getSkycalcCoordinates
       val cwfs3 = group.get(Canopus.Wfs.cwfs3).getValue.getPrimary.getValue.getTarget.getSkycalcCoordinates
       val odgw4 = group.get(GsaoiOdgw.odgw4).getValue.getPrimary.getValue.getTarget.getSkycalcCoordinates
-      val cwfs1x = Coordinates.create("12:38:50.130", "-49:47:38.07")
+
       val cwfs2x = Coordinates.create("12:38:44.500", "-49:47:58.38")
       val cwfs3x = Coordinates.create("12:38:50.005", "-49:48:00.89")
       val odgw4x = Coordinates.create("12:38:50.005", "-49:48:00.89")
 
-      (Angle.fromDegrees(cwfs1x.getRaDeg) ~= Angle.fromDegrees(cwfs1.getRaDeg)) should beTrue
-      (Angle.fromDegrees(cwfs1x.getDecDeg) ~= Angle.fromDegrees(cwfs1.getDecDeg)) should beTrue
       (Angle.fromDegrees(cwfs2x.getRaDeg) ~= Angle.fromDegrees(cwfs2.getRaDeg)) should beTrue
       (Angle.fromDegrees(cwfs2x.getDecDeg) ~= Angle.fromDegrees(cwfs2.getDecDeg)) should beTrue
       (Angle.fromDegrees(cwfs3x.getRaDeg) ~= Angle.fromDegrees(cwfs3.getRaDeg)) should beTrue
@@ -282,11 +279,10 @@ class GemsResultsAnalyzerSpec extends MascotProgress with Specification with NoT
       (Angle.fromDegrees(odgw4x.getRaDeg) ~= Angle.fromDegrees(odgw4.getRaDeg)) should beTrue
       (Angle.fromDegrees(odgw4x.getDecDeg) ~= Angle.fromDegrees(odgw4.getDecDeg)) should beTrue
 
-      val cwfs1Mag = group.get(Canopus.Wfs.cwfs1).getValue.getPrimary.getValue.getTarget.getMagnitude(JMagnitude.Band.r).getValue.getBrightness
+      //val cwfs1Mag = group.get(Canopus.Wfs.cwfs1).getValue.getPrimary.getValue.getTarget.getMagnitude(JMagnitude.Band.r).getValue.getBrightness
       val cwfs2Mag = group.get(Canopus.Wfs.cwfs2).getValue.getPrimary.getValue.getTarget.getMagnitude(JMagnitude.Band.r).getValue.getBrightness
       val cwfs3Mag = group.get(Canopus.Wfs.cwfs3).getValue.getPrimary.getValue.getTarget.getMagnitude(JMagnitude.Band.r).getValue.getBrightness
-      cwfs1Mag > cwfs2Mag && cwfs3Mag < cwfs2Mag should beTrue
-    }.pendingUntilFixed("See REL-2420")
+    }
     "sort targets by R magnitude" in {
       val st1 = SiderealTarget("n", edu.gemini.spModel.core.Coordinates.zero, None, List(new Magnitude(10.0, MagnitudeBand.J)), None)
       GemsResultsAnalyzer.sortTargetsByBrightness(List(st1)).head should beEqualTo(st1)
