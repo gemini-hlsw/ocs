@@ -561,26 +561,25 @@ public class ObsQueryFunctor extends DBAbstractQueryFunctor {
         final TargetObsComp targetEnv = (TargetObsComp) targetObsComp.getDataObject();
         final SPTarget tp = targetEnv.getBase();
         final ITarget target = tp.getTarget();
-        final double ra = target.getRaDegrees() / 15.;
-        final double dec = target.getDecDegrees();
 
-        double ra0 = 0.;
-        double ra1 = 24.;
-        double dec0 = -90.;
-        double dec1 = 90.;
+        final Option<Long> when = ((SPObservation) o.getDataObject()).getSchedulingBlock().map(SchedulingBlock::start);
+        final Option<Double> raOp  = target.getRaDegrees(when).map(x -> x / 15.);
+        final Option<Double> decOp = target.getDecDegrees(when);
 
-        if (minRA != null)
-            ra0 = new HMS(minRA, true).getVal();
+        final double ra0  = (minRA != null)  ? new HMS(minRA, true).getVal() :   0.;
+        final double ra1  = (maxRA != null)  ? new HMS(maxRA, true).getVal() :  24.;
+        final double dec0 = (minDec != null) ? new DMS(minDec).getVal()      : -90.;
+        final double dec1 = (maxDec != null) ? new DMS(maxDec).getVal()      :  90.;
 
-        if (maxRA != null)
-            ra1 = new HMS(maxRA, true).getVal();
+        return
+            raOp.flatMap(ra ->
+            decOp.map(dec ->
+            _regionMatchAux(ra, dec, ra0, ra1, dec0, dec1)))
+            .getOrElse(false); // region does not match if there are no coordinates
 
-        if (minDec != null)
-            dec0 = new DMS(minDec).getVal();
+    }
 
-        if (maxDec != null)
-            dec1 = new DMS(maxDec).getVal();
-
+    private boolean _regionMatchAux(double ra, double dec, double ra0, double ra1, double dec0, double dec1) {
         if (dec < dec0 || dec > dec1) {
             return false;
         }

@@ -3,7 +3,10 @@ package edu.gemini.spdb.reports.collection.util;
 import edu.gemini.pot.sp.*;
 import edu.gemini.shared.util.TimeValue;
 import edu.gemini.shared.util.immutable.ApplyOp;
+import edu.gemini.shared.util.immutable.None;
+import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.shared.util.immutable.Pair;
+import edu.gemini.shared.util.immutable.Some;
 import edu.gemini.shared.util.immutable.Tuple2;
 import edu.gemini.spModel.core.SPProgramID;
 import edu.gemini.spModel.core.Site;
@@ -14,6 +17,8 @@ import edu.gemini.spModel.gemini.obscomp.SPProgram;
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality;
 import edu.gemini.spModel.obs.ObsClassService;
 import edu.gemini.spModel.obs.ObsTimesService;
+import edu.gemini.spModel.obs.SPObservation;
+import edu.gemini.spModel.obs.SchedulingBlock;
 import edu.gemini.spModel.obsclass.ObsClass;
 import edu.gemini.spModel.obscomp.ProgramNote;
 import edu.gemini.spModel.target.SPTarget;
@@ -25,8 +30,6 @@ import edu.gemini.spModel.template.TemplateParameters;
 import edu.gemini.spModel.time.ChargeClass;
 import edu.gemini.spModel.too.Too;
 import edu.gemini.spModel.too.TooType;
-import scala.Option;
-import scala.Some;
 
 import java.util.*;
 import java.util.regex.Matcher;
@@ -378,10 +381,9 @@ public class ReportUtils {
             // Figure out the RA of the base position
             final TargetObsComp targetEnv = (TargetObsComp) targetEnvComp.getDataObject();
             final SPTarget target = targetEnv.getBase();
-            final Option<Integer> raHours = getRaHours(target);
-            if (raHours.isDefined()) {
-                hourSet.add(raHours.get());
-            }
+            final Option<Long> when = ((SPObservation) obsShell.getDataObject()).getSchedulingBlock().map(SchedulingBlock::start);
+            final Option<Integer> raHours = getRaHours(target, when);
+            raHours.forEach(h -> hourSet.add(h));
         }
         return hourSet;
 
@@ -393,10 +395,8 @@ public class ReportUtils {
         TemplateParameters.foreach(folder, new ApplyOp<TemplateParameters>() {
             @Override
             public void apply(final TemplateParameters tp) {
-                final Option<Integer> raHours = getRaHours(tp.getTarget());
-                if (raHours.isDefined()) {
-                    hourSet.add(raHours.get());
-                }
+                final Option<Integer> raHours = getRaHours(tp.getTarget(), None.instance());
+                raHours.foreach(h -> hourSet.add(h));
             }
         });
         return hourSet;
@@ -413,23 +413,19 @@ public class ReportUtils {
     }
 
     /** Gets the ra hours value - if the target is not null, has RA/DEC coordinates and is not a "dummy" target. */
-    private static Option<Integer> getRaHours(final SPTarget target) {
+    private static Option<Integer> getRaHours(final SPTarget target, Option<Long> when) {
         if (target == null) {
-            return Option.empty();
+            return None.instance();
         }
         if (!(target.getTarget() instanceof HmsDegTarget)) {
-            return Option.empty();
+            return None.instance();
         }
 
-        // we know it's a ra/dec target, so it's safe to cast here
-        final double r = target.getTarget().getRaDegrees();
-        final double d = target.getTarget().getDecDegrees();
-
-        if (r == 0.0 && d == 0.0) {
-            return Option.empty();
-        } else {
-            return new Some<>(((int) Math.round(r / 15.0)) % 24);
-        }
+        return
+            target.getTarget().getRaDegrees(when).flatMap(r ->
+            target.getTarget().getDecDegrees(when).flatMap(d ->
+                (r == 0.0 && d == 0.0) ?  None.instance() : new Some<>(((int) Math.round(r / 15.0)) % 24)
+            ));
     }
 
     public static Site getSiteDesc(SPProgramID id) {
