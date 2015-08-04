@@ -432,7 +432,7 @@ public class ElevationPlotModel {
     // Altitude in degrees at the target's declination at the given time, the given hour angle, and
     // the observer's latitude, or None if the target's coordinates are unknown.
     private static Option<Double> altit(TargetDesc target, Date when, double ha, double lat) {
-        return target.getCoordinates(new Some(when.getTime())).map(coords ->
+        return target.getCoordinates(new Some<>(when.getTime())).map(coords ->
             ImprovedSkyCalcMethods.altit(coords.getDecDeg(), ha, lat)
         );
     }
