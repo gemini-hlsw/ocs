@@ -6,10 +6,15 @@
 
 package jsky.plot;
 
+import edu.gemini.shared.util.immutable.None;
+import edu.gemini.shared.util.immutable.Option;
+import edu.gemini.shared.util.immutable.Some;
 import edu.gemini.skycalc.ImprovedSkyCalcMethods;
 import edu.gemini.skycalc.SunRiseSet;
 import edu.gemini.spModel.core.Site;
 import jsky.coords.TargetDesc;
+import jsky.coords.WorldCoordinates;
+import jsky.coords.WorldCoords;
 import jsky.plot.util.CalendarUtil;
 import jsky.util.Preferences;
 import jsky.util.StringUtil;
@@ -414,16 +419,22 @@ public class ElevationPlotModel {
                 endAlt   = ImprovedSkyCalcMethods.getAltitude(elMin);
                 break;
             case HOUR_ANGLE:
-                double dec = target.getCoordinates().getDecDeg();
-                double lat = _site.latitude;
-                startAlt = ImprovedSkyCalcMethods.altit(dec, elMin, lat);
-                endAlt   = ImprovedSkyCalcMethods.altit(dec, elMax, lat);
+                startAlt = altit(target, _startDate, elMin, _site.latitude).getOrElse(startAlt);
+                endAlt   = altit(target, _endDate,   elMax, _site.latitude).getOrElse(endAlt);
                 break;
             case NONE:
                 startAlt = 0.0;
                 endAlt = 0.0;
         }
         return new double[]{startAlt, endAlt};
+    }
+
+    // Altitude in degrees at the target's declination at the given time, the given hour angle, and
+    // the observer's latitude, or None if the target's coordinates are unknown.
+    private static Option<Double> altit(TargetDesc target, Date when, double ha, double lat) {
+        return target.getCoordinates(new Some(when.getTime())).map(coords ->
+            ImprovedSkyCalcMethods.altit(coords.getDecDeg(), ha, lat)
+        );
     }
 
     // Returns true if the given elevation value meets the constraints, otherwise false.

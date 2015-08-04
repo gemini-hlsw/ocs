@@ -9,35 +9,34 @@ package edu.gemini.spModel.target;
 
 import edu.gemini.pot.sp.*;
 import edu.gemini.pot.spdb.IDBDatabaseService;
+import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.spModel.gemini.obscomp.SPProgram;
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality;
 import edu.gemini.spModel.obs.SPObservation;
 import edu.gemini.spModel.obs.plannedtime.PlannedTimeSummaryService;
 import edu.gemini.spModel.target.env.TargetEnvironment;
 import edu.gemini.spModel.target.obsComp.TargetObsComp;
-import edu.gemini.spModel.target.system.CoordinateParam.Units;
 import edu.gemini.spModel.target.system.ITarget;
 import edu.gemini.spModel.time.TimeAmountFormatter;
 import edu.gemini.spModel.util.SPTreeUtil;
 import jsky.coords.TargetDesc;
 import jsky.coords.WorldCoords;
 
-import java.util.logging.Logger;
+import java.util.function.Function;
 
 
 /** Utility class to create a {@link TargetDesc} object describing a given observation target */
 public class ObsTargetDesc extends TargetDesc {
 
-    private static final Logger LOGGER = Logger.getLogger(ObsTargetDesc.class.getName());
     private String _obsId;
     private String _targetName;
     private String _timeStr;
 
-    private ObsTargetDesc(String name, WorldCoords coords, String description,
+    private ObsTargetDesc(String name, Function<Option<Long>, Option<WorldCoords>> coords,
                           String priority, String category, String obsId,
                           String targetName, String timeStr,
                           TargetDesc.ElConstraintType elType, double elMin, double elMax) {
-        super(name, coords, description, priority, category,
+        super(name, coords, priority, category,
                 elType, elMin, elMax);
         _obsId = obsId;
         _targetName = targetName;
@@ -62,9 +61,13 @@ public class ObsTargetDesc extends TargetDesc {
 
         SPTarget basePos = targetEnv.getBase();
         ITarget target = basePos.getTarget();
-        double x = target.getRaDegrees();
-        double y = target.getDecDegrees();
-        WorldCoords pos = new WorldCoords(x, y, 2000.);
+
+        Function<Option<Long>, Option<WorldCoords>> pos = op ->
+            target.getRaDegrees(op).flatMap(x ->
+            target.getDecDegrees(op).map(y ->
+                new WorldCoords(x, y, 2000.)
+            ));
+
                  String targetName = basePos.getTarget().getName();
 
         String obsId = "";
@@ -88,8 +91,6 @@ public class ObsTargetDesc extends TargetDesc {
         else
             category = "Band " + category;
 
-        String desc = obsId + "  [" + targetName + "]  " + timeStr;
-
         // Observing conditions
         SPSiteQuality siteQuality = _findSiteQuality(obs);
         TargetDesc.ElConstraintType elType = null;
@@ -102,9 +103,9 @@ public class ObsTargetDesc extends TargetDesc {
         }
 
         if (useTargetName)
-            return new ObsTargetDesc(targetName, pos, desc, prio, category, obsId, targetName, timeStr, elType, min, max);
+            return new ObsTargetDesc(targetName, pos, prio, category, obsId, targetName, timeStr, elType, min, max);
         else
-            return new ObsTargetDesc(obsId, pos, desc, prio, category, obsId, targetName, timeStr, elType, min, max);
+            return new ObsTargetDesc(obsId, pos, prio, category, obsId, targetName, timeStr, elType, min, max);
     }
 
     private static TargetEnvironment _findTargetEnv(ISPObservation obs)  {
@@ -129,21 +130,6 @@ public class ObsTargetDesc extends TargetDesc {
     // Get the total planned time in seconds for the given observation
     private static long _getTotalPlannedTime(ISPObservation obs) {
         return PlannedTimeSummaryService.getTotalTime(obs).getPiTime();
-    }
-
-    /** Return the target's observation id */
-    public String getObservationId() {
-        return _obsId;
-    }
-
-    /** Return the target name */
-    public String getTargetName() {
-        return _targetName;
-    }
-
-    /** Return the total planned time as a string */
-    public String getTimeStr() {
-        return _timeStr;
     }
 
     /** Return an array of one or more Strings describing the target */

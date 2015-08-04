@@ -136,10 +136,6 @@ public class SPElevationPlotPlugin implements ChangeListener, Storeable {
     private void _addMenuItems(ElevationPlotMenuBar menuBar) {
         JMenu menu = menuBar.getViewMenu();
 
-        // need to disable manually adding and deleting targets, since
-        // it conflicts with the target lists in the observations
-        menu.remove(1);
-
         menu.add(_createViewLabelMenu());
         menu.add(_createViewColorCodeMenu());
     }

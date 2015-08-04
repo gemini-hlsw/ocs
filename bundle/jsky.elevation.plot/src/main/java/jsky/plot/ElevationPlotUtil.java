@@ -6,6 +6,8 @@
 
 package jsky.plot;
 
+import edu.gemini.shared.util.immutable.Option;
+import edu.gemini.shared.util.immutable.Some;
 import edu.gemini.skycalc.ImprovedSkyCalcMethods;
 import edu.gemini.spModel.core.Site;
 import edu.gemini.skycalc.ImprovedSkyCalc;
@@ -101,13 +103,15 @@ public class ElevationPlotUtil {
 
         for (int j = 0; j < numSteps; j++) {
             for (int i = 0; i < _targets.length; i++) {
-                WorldCoords pos = _targets[i].getCoordinates();
                 Date utTime = cal.getTime();
-                _skyCalc.calculate(pos, utTime, false);
+                Option<WorldCoords> pos = _targets[i].getCoordinates(new Some(utTime.getTime()));
                 _xData[i][j] = utTime;
-                _yData[i][j] = _skyCalc.getAltitude();
-                _yDataAirmass[i][j] = _skyCalc.getAirmass();
-                _yDataPa[i][j] = _skyCalc.getParallacticAngle();
+                if (pos.isDefined()) {
+                    _skyCalc.calculate(pos.getValue(), utTime, false);
+                    _yData[i][j] = _skyCalc.getAltitude();
+                    _yDataAirmass[i][j] = _skyCalc.getAirmass();
+                    _yDataPa[i][j] = _skyCalc.getParallacticAngle();
+                } // otherwise zero
             }
             cal.add(Calendar.MINUTE, _stepIncrement);
         }

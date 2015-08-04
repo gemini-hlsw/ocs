@@ -93,9 +93,6 @@ public class ElevationPlotPanel extends JPanel implements ChangeListener {
     // The top level parent frame (or internal frame) of the target list dialog.
     private Component _targetListFrame;
 
-    // The target list dialog panel.
-    private TargetListPanel _targetListPanel;
-
     // True if this is the main application window
     private boolean _isMainWindow = false;
 
@@ -142,14 +139,6 @@ public class ElevationPlotPanel extends JPanel implements ChangeListener {
             selectDate();
         }
     };
-
-    // Action for choosing the targets
-    private AbstractAction _targetsAction = new AbstractAction(_I18N.getString("targets")) {
-        public void actionPerformed(ActionEvent evt) {
-            selectTargets();
-        }
-    };
-
 
     /**
      * Create an elevation plot panel.
@@ -498,34 +487,6 @@ public class ElevationPlotPanel extends JPanel implements ChangeListener {
         }
     }
 
-
-    /** Display a dialog for selecting the target objects */
-    public void selectTargets() {
-        if (_targetListFrame != null) {
-            SwingUtil.showFrame(_targetListFrame);
-        } else {
-            JDesktopPane desktop = DialogUtil.getDesktop();
-            if (desktop != null) {
-                _targetListFrame = new TargetListInternalFrame();
-                _targetListPanel = ((TargetListInternalFrame) _targetListFrame).getTargetListPanel();
-                desktop.add(_targetListFrame, JLayeredPane.DEFAULT_LAYER);
-                desktop.moveToFront(_targetListFrame);
-            } else {
-                _targetListFrame = new TargetListFrame();
-                _targetListPanel = ((TargetListFrame) _targetListFrame).getTargetListPanel();
-            }
-
-            _targetListPanel.addChangeListener(new ChangeListener() {
-                public void stateChanged(ChangeEvent e) {
-                    _elevationPanel.setLegendItems(null); // causes update of legend items
-                    _model.setTargets(_targetListPanel.getTargets());
-                }
-            });
-        }
-        _targetListPanel.setTargets(_model.getTargets());
-    }
-
-
     /** Return the Action for printing the graph */
     public AbstractAction getPrintAction() {
         return _printAction;
@@ -544,11 +505,6 @@ public class ElevationPlotPanel extends JPanel implements ChangeListener {
     /** Return the Action for selecting the date */
     public AbstractAction getDateAction() {
         return _dateAction;
-    }
-
-    /** Return the Action for selecting the targets */
-    public AbstractAction getTargetsAction() {
-        return _targetsAction;
     }
 
     // Return the elevation plot
