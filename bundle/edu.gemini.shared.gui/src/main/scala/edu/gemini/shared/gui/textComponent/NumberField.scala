@@ -18,7 +18,7 @@ object NumberField {
 }
 
 class NumberField(d: Option[Double]) extends FormattedTextField(NumberField.df) with SelectOnFocus {
-  d.orElse(Some(0))foreach { d =>
+  d.orElse(Some(0)).foreach { d =>
     import NumberField.df
     text = df.format(d)
     commitEdit()
@@ -50,9 +50,6 @@ class NumberField(d: Option[Double]) extends FormattedTextField(NumberField.df) 
 
   }
 
-
-
   focusLostBehavior = FormattedTextField.FocusLostBehavior.Commit // ?
-
 
 }

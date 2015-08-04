@@ -7,6 +7,8 @@ import edu.gemini.model.p1.immutable.InvestigatorStatus
 
 import edu.gemini.pit.ui.util._
 import java.awt.event.{KeyAdapter, KeyEvent}
+import edu.gemini.shared.gui.textComponent.SelectOnFocus
+
 import swing._
 import event.ValueChanged
 
