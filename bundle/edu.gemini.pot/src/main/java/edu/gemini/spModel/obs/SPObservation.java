@@ -19,6 +19,8 @@ import edu.gemini.spModel.seqcomp.IObserveSeqComponent;
 import edu.gemini.spModel.target.SPTarget;
 import edu.gemini.spModel.target.obsComp.TargetObsComp;
 import edu.gemini.spModel.target.system.CoordinateParam;
+import edu.gemini.spModel.target.system.HmsDegTarget;
+import edu.gemini.spModel.target.system.ITarget;
 import edu.gemini.spModel.time.ChargeClass;
 import edu.gemini.spModel.time.ObsTimeCharges;
 import edu.gemini.spModel.time.ObsTimeCorrection;
@@ -444,8 +446,15 @@ public class SPObservation extends AbstractDataObject implements ISPStaffOnlyFie
             return false;
         } else {
             final TargetObsComp toc = (TargetObsComp) targetComp.getDataObject();
-            final SPTarget target = toc.getBase();
-            return (target.getTarget().getRaDegrees() != 0.0) || (target.getTarget().getDecDegrees() != 0.0);
+            final ITarget target = toc.getBase().getTarget();
+            final boolean too;
+            if (target instanceof HmsDegTarget) {
+                final HmsDegTarget hms = (HmsDegTarget) target;
+                too = hms.getRa().getValue() == 0 && hms.getDec().getValue() == 0;
+            } else {
+                too = false;
+            }
+            return !too;
         }
     }
 
