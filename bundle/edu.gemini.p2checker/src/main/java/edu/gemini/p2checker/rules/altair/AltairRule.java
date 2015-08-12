@@ -130,17 +130,19 @@ public final class AltairRule implements IRule {
 
                     SPTarget primary = primaryOpt.getValue();
 
-                    switch (guider.checkBoundaries(primary, ctx)) {
-                        case inside:
-                            break;
-                        case innerBoundary:
-                        case outerBoundary:
-                            problems.addWarning(PREFIX + "GS_EDGE_WARN", GS_EDGE_WARN, targetNode);
-                            break;
-                        case outside:
-                            problems.addError(PREFIX + "GS_RANGE_ERROR", GS_RANGE_ERROR, targetNode);
-                            break;
-                    }
+                    guider.checkBoundaries(primary, ctx).foreach(bs -> {
+                        switch (bs) {
+                            case inside:
+                                break;
+                            case innerBoundary:
+                            case outerBoundary:
+                                problems.addWarning(PREFIX + "GS_EDGE_WARN", GS_EDGE_WARN, targetNode);
+                                break;
+                            case outside:
+                                problems.addError(PREFIX + "GS_RANGE_ERROR", GS_RANGE_ERROR, targetNode);
+                                break;
+                        }
+                    });
                 }
             }
         }

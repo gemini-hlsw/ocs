@@ -70,21 +70,23 @@ public enum GmosOiwfsGuideProbe implements ValidatableGuideProbe, OffsetValidati
         return None.instance();
     }
 
-    public BoundaryPosition checkBoundaries(final SPTarget guideStar, final ObsContext ctx) {
+    public Option<BoundaryPosition> checkBoundaries(final SPTarget guideStar, final ObsContext ctx) {
         return checkBoundaries(guideStar.getTarget().getSkycalcCoordinates(), ctx);
     }
 
-    public BoundaryPosition checkBoundaries(final Coordinates coords, final ObsContext ctx) {
-        final Coordinates baseCoordinates = ctx.getBaseCoordinates();
-        final Angle positionAngle = ctx.getPositionAngle();
-        final Set<Offset> sciencePositions = ctx.getSciencePositions();
+    public Option<BoundaryPosition> checkBoundaries(final Coordinates coords, final ObsContext ctx) {
+        return ctx.getBaseCoordinatesOpt().map(baseCoordinates -> {
+            final Angle positionAngle = ctx.getPositionAngle();
+            final Set<Offset> sciencePositions = ctx.getSciencePositions();
 
-        // check positions against corrected patrol field
-        return getCorrectedPatrolField(ctx).map(new MapOp<PatrolField, BoundaryPosition>() {
-            @Override public BoundaryPosition apply(PatrolField patrolField) {
-                return patrolField.checkBoundaries(coords, baseCoordinates, positionAngle, sciencePositions);
-            }
-        }).getOrElse(BoundaryPosition.outside);
+            // check positions against corrected patrol field
+            return getCorrectedPatrolField(ctx).map(new MapOp<PatrolField, BoundaryPosition>() {
+                @Override
+                public BoundaryPosition apply(PatrolField patrolField) {
+                    return patrolField.checkBoundaries(coords, baseCoordinates, positionAngle, sciencePositions);
+                }
+            }).getOrElse(BoundaryPosition.outside);
+        });
     }
 
     /**
