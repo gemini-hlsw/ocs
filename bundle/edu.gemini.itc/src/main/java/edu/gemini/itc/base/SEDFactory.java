@@ -8,7 +8,7 @@ import edu.gemini.itc.operation.*;
 import edu.gemini.itc.shared.ObservingConditions;
 import edu.gemini.itc.shared.SourceDefinition;
 import edu.gemini.itc.shared.TelescopeDetails;
-import edu.gemini.itc.shared.WavebandDefinition;
+import edu.gemini.spModel.core.MagnitudeBand;
 import edu.gemini.spModel.core.Site;
 import edu.gemini.spModel.target.Library;
 import scala.Option;
@@ -160,9 +160,9 @@ public final class SEDFactory {
         // both the normalization waveband and the observation waveband
         // (filter region).
 
-        final WavebandDefinition band = sdp.getNormBand();
-        final double start = band.getStart();
-        final double end = band.getEnd();
+        final MagnitudeBand band = sdp.getNormBand();
+        final double start = band.start().toNanometers();
+        final double end = band.end().toNanometers();
 
         // TODO: which instruments need this check, why only some and others not? Do all near-ir instruments need it?
         // TODO: what about Nifs and Gnirs (other near-ir instruments)?

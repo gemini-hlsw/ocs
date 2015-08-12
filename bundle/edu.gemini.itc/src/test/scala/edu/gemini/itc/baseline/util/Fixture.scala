@@ -3,7 +3,7 @@ package edu.gemini.itc.baseline.util
 import edu.gemini.itc.nifs.NifsParameters
 import edu.gemini.itc.shared.TelescopeDetails.Coating
 import edu.gemini.itc.shared._
-import edu.gemini.spModel.core.Wavelength
+import edu.gemini.spModel.core.{MagnitudeBand, Wavelength}
 import edu.gemini.spModel.gemini.altair.AltairParams.{FieldLens, GuideStarType}
 import edu.gemini.spModel.guide.GuideProbe
 import edu.gemini.spModel.target.EmissionLine.{Continuum, Flux}
@@ -106,13 +106,13 @@ object Fixture {
     new SourceDefinition(
       GaussianSource(1.0),
       BlackBody(10000),
-      1.0e-3, BrightnessUnit.MAG, WavebandDefinition.U,
+      1.0e-3, BrightnessUnit.MAG, MagnitudeBand.U,
       0.0
     ),
     new SourceDefinition(
       GaussianSource(1.0),
       PowerLaw(-1.0),
-      1.0e-3, BrightnessUnit.MAG, WavebandDefinition.U,
+      1.0e-3, BrightnessUnit.MAG, MagnitudeBand.U,
       0.5
     )
   )
@@ -122,13 +122,13 @@ object Fixture {
     new SourceDefinition(
       PointSource(),
       LibraryStar.A0V,
-      20.0, BrightnessUnit.MAG, WavebandDefinition.R,
+      20.0, BrightnessUnit.MAG, MagnitudeBand.R,
       0.0
     ),
     new SourceDefinition(
       GaussianSource(1.0),
       BlackBody(8000),
-      1.0e-3, BrightnessUnit.JY, WavebandDefinition.R,
+      1.0e-3, BrightnessUnit.JY, MagnitudeBand.R,
       0.75
     )
   )
@@ -138,13 +138,13 @@ object Fixture {
     new SourceDefinition(
       PointSource(),
       LibraryStar.A0V,
-      20.0, BrightnessUnit.MAG, WavebandDefinition.K,
+      20.0, BrightnessUnit.MAG, MagnitudeBand.K,
       0.0
     ),
     new SourceDefinition(
       UniformSource(),
       EmissionLine(Wavelength.fromMicrons(2.2), 250.0, Flux.fromWatts(5.0e-19), Continuum.fromWatts(1.0e-16)),
-      22.0, BrightnessUnit.MAG_PSA, WavebandDefinition.K,
+      22.0, BrightnessUnit.MAG_PSA, MagnitudeBand.K,
       0.75
     )
   )
@@ -154,13 +154,13 @@ object Fixture {
     new SourceDefinition(
       PointSource(),
       LibraryNonStar.NGC1068,
-      9.0, BrightnessUnit.ABMAG, WavebandDefinition.N,
+      9.0, BrightnessUnit.ABMAG, MagnitudeBand.N,
       0.0
     ),
     new SourceDefinition(
       UniformSource(),
       EmissionLine(Wavelength.fromMicrons(12.8), 500, Flux.fromWatts(5.0e-19), Continuum.fromWatts(1.0e-16)),
-      12.0, BrightnessUnit.MAG_PSA, WavebandDefinition.N,
+      12.0, BrightnessUnit.MAG_PSA, MagnitudeBand.N,
       1.5
     )
   )
@@ -170,13 +170,13 @@ object Fixture {
     new SourceDefinition(
       GaussianSource(1.0),
       BlackBody(10000),
-      1.0e-3, BrightnessUnit.MAG, WavebandDefinition.Q,
+      1.0e-3, BrightnessUnit.MAG, MagnitudeBand.Q,
       0.0
     ),
     new SourceDefinition(
       UniformSource(),
       PowerLaw(-1.0),
-      11.0, BrightnessUnit.MAG_PSA, WavebandDefinition.Q,
+      11.0, BrightnessUnit.MAG_PSA, MagnitudeBand.Q,
       2.0
     )
   )

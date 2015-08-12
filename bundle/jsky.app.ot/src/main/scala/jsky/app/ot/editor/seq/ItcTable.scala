@@ -5,11 +5,12 @@ import javax.swing.{Icon, ListSelectionModel}
 
 import edu.gemini.ags.api.AgsRegistrar
 import edu.gemini.itc.shared._
+import edu.gemini.pot.ModelConverters
 import edu.gemini.pot.sp.SPComponentType._
 import edu.gemini.shared.skyobject.Magnitude
 import edu.gemini.spModel.`type`.DisplayableSpType
 import edu.gemini.spModel.config2.{Config, ConfigSequence, ItemKey}
-import edu.gemini.spModel.core.{Peer, Site, Wavelength}
+import edu.gemini.spModel.core.{MagnitudeBand, Peer, Site, Wavelength}
 import edu.gemini.spModel.guide.GuideProbe
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.obscomp.SPInstObsComp
@@ -191,7 +192,7 @@ trait ItcTable extends Table {
     }
   }
 
-  private def extractSourceMagnitude(target: ITarget, c: Config): String \/ (Double, WavebandDefinition, BrightnessUnit) = {
+  private def extractSourceMagnitude(target: ITarget, c: Config): String \/ (Double, MagnitudeBand, BrightnessUnit) = {
 
     def closestBand(bands: List[Magnitude], wl: Wavelength) =
       // note, at this point we've filtered out all bands without a wavelength
@@ -201,10 +202,8 @@ trait ItcTable extends Table {
       val bands = target.getMagnitudes.toList.asScala.toList.
         filter(_.getBand.getWavelengthMidPoint.isDefined).// ignore bands with unknown wavelengths (currently AP only)
         filterNot(_.getBand == Magnitude.Band.UC).        // ignore UC magnitudes
-        filterNot(_.getBand == Magnitude.Band.AP).        // ignore AP magnitudes
-        filterNot(_.getBand == Magnitude.Band.Y).         // ITC currently does not support Y
-        filterNot(_.getBand == Magnitude.Band.u)          // ITC currently does not support u
-      if (bands.isEmpty) "No standard magnitudes for target defined; ITC does not support UC, AP, Y and u magnitudes.".left[Magnitude]
+        filterNot(_.getBand == Magnitude.Band.AP)         // ignore AP magnitudes
+      if (bands.isEmpty) "No standard magnitudes for target defined; ITC does not support UC and AP magnitudes.".left[Magnitude]
       else closestBand(bands, wl).right[String]
     }
 
@@ -219,32 +218,7 @@ trait ItcTable extends Table {
         case Magnitude.System.AB    => BrightnessUnit.ABMAG
         case Magnitude.System.Jy    => BrightnessUnit.JY
       }
-      val band   = mag.getBand match {
-        case Magnitude.Band.g  => WavebandDefinition.g
-        case Magnitude.Band.r  => WavebandDefinition.r
-        case Magnitude.Band.i  => WavebandDefinition.i
-        case Magnitude.Band.z  => WavebandDefinition.z
-
-        case Magnitude.Band.U  => WavebandDefinition.U
-        case Magnitude.Band.B  => WavebandDefinition.B
-        case Magnitude.Band.V  => WavebandDefinition.V
-        case Magnitude.Band.R  => WavebandDefinition.R
-        case Magnitude.Band.I  => WavebandDefinition.I
-        case Magnitude.Band.J  => WavebandDefinition.J
-        case Magnitude.Band.H  => WavebandDefinition.H
-        case Magnitude.Band.K  => WavebandDefinition.K
-        case Magnitude.Band.L  => WavebandDefinition.L
-        case Magnitude.Band.M  => WavebandDefinition.M
-        case Magnitude.Band.N  => WavebandDefinition.N
-        case Magnitude.Band.Q  => WavebandDefinition.Q
-
-        // UC and AP are not taken into account for ITC calculations; Y and u are currently not supported in ITC
-        case Magnitude.Band.u  => throw new Error()
-        case Magnitude.Band.Y  => throw new Error()
-        case Magnitude.Band.UC => throw new Error()
-        case Magnitude.Band.AP => throw new Error()
-      }
-      (value, band, system)
+      (value, ModelConverters.toNewBand(mag.getBand), system)
     }
   }
 

@@ -8,7 +8,7 @@ import edu.gemini.itc.nifs.NifsParameters
 import edu.gemini.itc.shared.SourceDefinition.{Distribution, Profile, Recession}
 import edu.gemini.itc.shared.{GnirsParameters, _}
 import edu.gemini.itc.trecs.TRecsParameters
-import edu.gemini.spModel.core.{Site, Wavelength}
+import edu.gemini.spModel.core.{MagnitudeBand, Site, Wavelength}
 import edu.gemini.spModel.gemini.acqcam.AcqCamParams
 import edu.gemini.spModel.gemini.altair.AltairParams
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2
@@ -288,18 +288,21 @@ object ITCRequest {
     }
 
     // Get Normalization info
-    val normBand = r.enumParameter(classOf[WavebandDefinition])
+    val bandName = r.parameter("WavebandDefinition")
+    val normBand = MagnitudeBand.all.
+      find(_.name == bandName).
+      getOrElse(sys.error(s"Unsupported wave band $bandName"))
 
     // Get Spectrum Resource
     import SourceDefinition.Distribution._
     val sourceSpec = r.enumParameter(classOf[Distribution])
     val sourceDefinition = sourceSpec match {
-      case BBODY =>             BlackBody(r.doubleParameter("BBTemp"))
-      case PLAW =>              PowerLaw(r.doubleParameter("powerIndex"))
-      case USER_DEFINED =>      UserDefined(r.userSpectrum().get)
-      case LIBRARY_STAR =>      LibraryStar.findByName(r.parameter("stSpectrumType")).get
-      case LIBRARY_NON_STAR =>  LibraryNonStar.findByName(r.parameter("nsSpectrumType")).get
-      case ELINE =>
+      case BBODY            => BlackBody(r.doubleParameter("BBTemp"))
+      case PLAW             => PowerLaw(r.doubleParameter("powerIndex"))
+      case USER_DEFINED     => UserDefined(r.userSpectrum().get)
+      case LIBRARY_STAR     => LibraryStar.findByName(r.parameter("stSpectrumType")).get
+      case LIBRARY_NON_STAR => LibraryNonStar.findByName(r.parameter("nsSpectrumType")).get
+      case ELINE            =>
         val flux = r.doubleParameter("lineFlux")
         val cont = r.doubleParameter("lineContinuum")
         EmissionLine(

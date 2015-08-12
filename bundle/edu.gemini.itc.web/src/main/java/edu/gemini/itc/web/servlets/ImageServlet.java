@@ -92,16 +92,16 @@ public final class ImageServlet extends HttpServlet {
                     throw new Error();
             }
 
-        } catch (IdTimedOutException e) {
-            // if this messages comes up a lot we might need to tweak the cache settings
+        } catch (final IdTimedOutException e) {
+            // if this message comes up a lot we might need to tweak the cache settings
             Log.log(Level.WARNING, "Session has timed out, the requested result is not available anymore");
             response.sendError(HttpServletResponse.SC_REQUEST_TIMEOUT);
 
-        } catch (NumberFormatException e) {
+        } catch (final IllegalArgumentException e) {
             Log.log(Level.WARNING, "The request is malformed " + e.getMessage(), e);
             response.sendError(HttpServletResponse.SC_BAD_REQUEST);
 
-        } catch (Exception e) {
+        } catch (final Exception e) {
             Log.log(Level.WARNING, e.getMessage(), e);
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }

@@ -137,6 +137,7 @@ object Hash {
         case d: PowerLaw        => d.index
         case d: EmissionLine    => (d.wavelength.toMicrons * 1000 + d.continuum.toWatts) * 1000 + d.flux.toWatts
         case d: Library         => d.sedSpectrum
+        case d: UserDefined     => d.spectrum
       },
       src.norm,               // this is the magnitude value
       src.normBand.name,      // this is the magnitude band name
