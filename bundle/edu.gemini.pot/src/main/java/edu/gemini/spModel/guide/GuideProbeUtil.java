@@ -15,6 +15,7 @@ import edu.gemini.shared.skyobject.SkyObject;
 import edu.gemini.shared.skyobject.coords.HmsDegCoordinates;
 import edu.gemini.spModel.data.AbstractDataObject;
 import edu.gemini.spModel.data.ISPDataObject;
+import edu.gemini.spModel.obs.SchedulingBlock;
 import edu.gemini.spModel.obs.context.ObsContext;
 import edu.gemini.spModel.obscomp.SPInstObsComp;
 import edu.gemini.spModel.target.SPTarget;
@@ -106,28 +107,27 @@ public enum GuideProbeUtil {
         return getAvailableGuiders(ctx).contains(guider);
     }
 
-    public boolean validate(final SPTarget guideStar, final GuideProbe guideProbe, final ObsContext ctx) {
-        return validate(guideStar.getTarget().getSkycalcCoordinates(), guideProbe, ctx);
+    public GuideStarValidation validate(final SPTarget guideStar, final GuideProbe guideProbe, final ObsContext ctx) {
+        final Option<Long> when = ctx.getSchedulingBlock().map(SchedulingBlock::start);
+        return guideStar.getTarget().getSkycalcCoordinates(when).map(coords ->
+            validate(coords, guideProbe, ctx)).getOrElse(GuideStarValidation.UNDEFINED);
     }
 
-    public boolean validate(final SkyObject guideStar, final GuideProbe guideProbe, final ObsContext ctx) {
+    public GuideStarValidation validate(final SkyObject guideStar, final GuideProbe guideProbe, final ObsContext ctx) {
         final HmsDegCoordinates coords = guideStar.getCoordinates().toHmsDeg(0);
         final Coordinates c = new Coordinates(coords.getRa(), coords.getDec());
         return validate(c, guideProbe, ctx);
     }
 
-    public boolean validate(final Coordinates coords, final GuideProbe guideProbe, final ObsContext ctx) {
+    public GuideStarValidation validate(final Coordinates coords, final GuideProbe guideProbe, final ObsContext ctx) {
         final Angle positionAngle = ctx.getPositionAngle();
         final Set<Offset> sciencePositions = ctx.getSciencePositions();
-        final Coordinates baseCoordinates = ctx.getBaseCoordinates();
-
-        return guideProbe.getCorrectedPatrolField(ctx).exists(new PredicateOp<PatrolField>() {
-            @Override
-            public Boolean apply(PatrolField patrolField) {
-                final BoundaryPosition bp = patrolField.checkBoundaries(coords, baseCoordinates, positionAngle, sciencePositions);
-                return !(bp == BoundaryPosition.outside || bp == BoundaryPosition.outerBoundary);
-            }
-        });
+        return ctx.getBaseCoordinatesOpt().map(bcs ->
+            guideProbe.getCorrectedPatrolField(ctx).exists(patrolField -> {
+               final BoundaryPosition bp = patrolField.checkBoundaries(coords, bcs, positionAngle, sciencePositions);
+               return !(bp == BoundaryPosition.outside || bp == BoundaryPosition.outerBoundary);
+            }) ? GuideStarValidation.VALID : GuideStarValidation.INVALID
+        ).getOrElse(GuideStarValidation.UNDEFINED);
     }
 
     public boolean inRange(final GuideProbe guideProbe, final ObsContext ctx, final Offset offset) {

@@ -123,7 +123,7 @@ public enum AltairAowfsGuider implements OffsetValidatingGuideProbe, Validatable
         return GuideProbeUtil.instance.inRange(this, ctx, offset);
     }
 
-    @Override public boolean validate(SPTarget guideStar, ObsContext ctx) {
+    @Override public GuideStarValidation validate(SPTarget guideStar, ObsContext ctx) {
         return GuideProbeUtil.instance.validate(guideStar, this, ctx);
     }
 

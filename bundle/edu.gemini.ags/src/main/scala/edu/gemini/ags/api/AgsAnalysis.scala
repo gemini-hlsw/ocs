@@ -6,7 +6,7 @@ import edu.gemini.pot.ModelConverters._
 import edu.gemini.spModel.core.Target.SiderealTarget
 import edu.gemini.spModel.core.{BandsList, Magnitude}
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.ImageQuality
-import edu.gemini.spModel.guide.{ValidatableGuideProbe, GuideProbe, GuideProbeGroup, GuideSpeed}
+import edu.gemini.spModel.guide.{GuideStarValidation, ValidatableGuideProbe, GuideProbe, GuideProbeGroup, GuideSpeed}
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.rich.shared.immutable._
 import edu.gemini.spModel.target.SPTarget
@@ -152,7 +152,7 @@ object AgsAnalysis {
    */
   protected [ags] def analysis(ctx: ObsContext, mt: MagnitudeTable, guideProbe: ValidatableGuideProbe, guideStar: SiderealTarget, bands: BandsList): Option[AgsAnalysis] = {
     val spTarget = new SPTarget(guideStar.coordinates.ra.toAngle.toDegrees, guideStar.coordinates.dec.toDegrees)
-    if (!guideProbe.validate(spTarget, ctx)) Some(NotReachable(guideProbe, guideStar, bands))
+    if (guideProbe.validate(spTarget, ctx) != GuideStarValidation.VALID) Some(NotReachable(guideProbe, guideStar, bands))
     else magnitudeAnalysis(ctx, mt, guideProbe, guideStar, bands)
   }
 

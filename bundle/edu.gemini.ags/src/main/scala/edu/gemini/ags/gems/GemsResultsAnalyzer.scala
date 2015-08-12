@@ -10,7 +10,7 @@ import edu.gemini.spModel.gemini.gems.Canopus
 import edu.gemini.spModel.gemini.gsaoi.{GsaoiOdgw, Gsaoi}
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality
 import edu.gemini.spModel.gems.GemsGuideProbeGroup
-import edu.gemini.spModel.guide.{ValidatableGuideProbe, GuideProbe}
+import edu.gemini.spModel.guide.{GuideStarValidation, ValidatableGuideProbe, GuideProbe}
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.shared.util.immutable.ScalaConverters._
 import edu.gemini.shared.util.immutable.{None => JNone, Option => JOption}
@@ -256,7 +256,7 @@ object GemsResultsAnalyzer {
   private def isTargetValidInGroup(obsContext: ObsContext, target: SiderealTarget, group: GemsGuideProbeGroup, posAngle: Angle): Boolean = {
     val ctx = obsContext.withPositionAngle(posAngle.toOldModel)
     val st = toSPTarget(target)
-    group.getMembers.asScala.exists(_.validate(st, ctx))
+    group.getMembers.asScala.exists(_.validate(st, ctx) == GuideStarValidation.VALID)
   }
 
   // Returns the first valid guide probe for the given target in the given guide probe group at the given
@@ -285,7 +285,7 @@ object GemsResultsAnalyzer {
 
     // Special case:
     // If the tip tilt asterism is assigned to the GSAOI ODGW group, then the flexure star must be assigned to CWFS3.
-    if (isFlexure && ("ODGW" == tiptiltGroup.getKey) && Canopus.Wfs.cwfs3.validate(toSPTarget(target), ctx)) {
+    if (isFlexure && ("ODGW" == tiptiltGroup.getKey) && Canopus.Wfs.cwfs3.validate(toSPTarget(target), ctx) == GuideStarValidation.VALID) {
       Canopus.Wfs.cwfs3.some
     } else {
       val members = if (reverseOrder) group.getMembers.asScala.toList.reverse else group.getMembers.asScala.toList
@@ -299,9 +299,9 @@ object GemsResultsAnalyzer {
       case wfs: Canopus.Wfs          =>
         // Additional check for mag range (for cwfs1 and cwfs2, since different than cwfs3 and group range)
         val canopusWfsCalculator = GemsMagnitudeTable.CanopusWfsMagnitudeLimitsCalculator
-        wfs.validate(toSPTarget(target), ctx) && containsMagnitudeInLimits(target, canopusWfsCalculator.getNominalMagnitudeConstraints(wfs))
+        wfs.validate(toSPTarget(target), ctx) == GuideStarValidation.VALID && containsMagnitudeInLimits(target, canopusWfsCalculator.getNominalMagnitudeConstraints(wfs))
       case vp: ValidatableGuideProbe =>
-        vp.validate(toSPTarget(target), ctx)
+        vp.validate(toSPTarget(target), ctx) == GuideStarValidation.VALID
       case _                         =>
         true
     }

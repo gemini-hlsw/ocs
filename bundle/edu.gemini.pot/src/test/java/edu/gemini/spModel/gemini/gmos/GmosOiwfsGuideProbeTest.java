@@ -4,6 +4,7 @@ import edu.gemini.skycalc.Angle;
 import edu.gemini.skycalc.Coordinates;
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality;
 import edu.gemini.spModel.guide.BoundaryPosition;
+import edu.gemini.spModel.guide.GuideStarValidation;
 import edu.gemini.spModel.obs.context.ObsContext;
 import edu.gemini.spModel.target.SPTarget;
 import edu.gemini.spModel.target.env.TargetEnvironment;
@@ -75,7 +76,7 @@ public class GmosOiwfsGuideProbeTest extends TestCase {
         assertFalse("Mid point of fov, after (-width,-height) movement of base.",
                 GmosOiwfsGuideProbe.instance.validate(
                         new SPTarget(middle.getRaDeg(), middle.getDecDeg()),
-                        ctx));
+                        ctx) == GuideStarValidation.VALID);
 
         //mid point of fov moved
         Coordinates middleMoved = new Coordinates(
@@ -85,7 +86,7 @@ public class GmosOiwfsGuideProbeTest extends TestCase {
         assertTrue("Mid point of fov moved by (-width,-height), after (-width,-height) movement of base.",
                 GmosOiwfsGuideProbe.instance.validate(
                         new SPTarget(middleMoved.getRaDeg(), middleMoved.getDecDeg()),
-                        ctx));
+                        ctx) == GuideStarValidation.VALID);
 
     }
 
@@ -108,19 +109,19 @@ public class GmosOiwfsGuideProbeTest extends TestCase {
         assertTrue("Mid point of fov.",
                 GmosOiwfsGuideProbe.instance.validate(
                         new SPTarget(coords.getRaDeg(), coords.getDecDeg()),
-                        baseContext));
+                        baseContext) == GuideStarValidation.VALID);
 
         ObsContext ctx = baseContext.withPositionAngle(new Angle(90, DEGREES));
         assertFalse("Mid point of fov, after 90 degree rotation of fov.",
                 GmosOiwfsGuideProbe.instance.validate(
                         new SPTarget(coords.getRaDeg(), coords.getDecDeg()),
-                        ctx));
+                        ctx) == GuideStarValidation.VALID);
 
         ctx = baseContext.withPositionAngle(new Angle(45, DEGREES));
         assertTrue("Mid point of fov, after 45 degree rotation of fov.",
                 GmosOiwfsGuideProbe.instance.validate(
                         new SPTarget(coords.getRaDeg(), coords.getDecDeg()),
-                        ctx));
+                        ctx) == GuideStarValidation.VALID);
 
     }
 
@@ -143,7 +144,7 @@ public class GmosOiwfsGuideProbeTest extends TestCase {
         assertTrue("Point in fov.",
                 GmosOiwfsGuideProbe.instance.validate(
                         new SPTarget(coords.getRaDeg(), coords.getDecDeg()),
-                        baseContext));
+                        baseContext) == GuideStarValidation.VALID);
 
         InstGmosNorth ign = (InstGmosNorth) baseContext.getInstrument();
         ign.setFPUnit(GmosNorthType.FPUnitNorth.IFU_2);
@@ -152,7 +153,7 @@ public class GmosOiwfsGuideProbeTest extends TestCase {
         assertFalse("Point outside of fov, after IFU selected.",
                 GmosOiwfsGuideProbe.instance.validate(
                         new SPTarget(coords.getRaDeg(), coords.getDecDeg()),
-                        ctx));
+                        ctx) == GuideStarValidation.VALID);
 
 
     }
@@ -187,7 +188,7 @@ public class GmosOiwfsGuideProbeTest extends TestCase {
         Coordinates[] corners=getCorners(GmosOiwfsGuideProbe.instance.getPatrolField().getArea().getBounds2D(), 0.0001);
         for(Integer i=0;i<4;i++){
             SPTarget guideTarget = new SPTarget(corners[i].getRaDeg(), corners[i].getDecDeg());
-            assertTrue("Corner "+i+" failed.",GmosOiwfsGuideProbe.instance.validate(guideTarget,baseContext));
+            assertTrue("Corner "+i+" failed.",GmosOiwfsGuideProbe.instance.validate(guideTarget,baseContext) == GuideStarValidation.VALID);
         }
     }
 

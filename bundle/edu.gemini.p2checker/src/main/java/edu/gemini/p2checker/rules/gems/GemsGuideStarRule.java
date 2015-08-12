@@ -18,6 +18,7 @@ import edu.gemini.spModel.gemini.gems.Canopus;
 import edu.gemini.spModel.gemini.gsaoi.Gsaoi;
 import edu.gemini.spModel.gemini.gsaoi.GsaoiOdgw;
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality;
+import edu.gemini.spModel.guide.GuideStarValidation;
 import edu.gemini.spModel.guide.ValidatableGuideProbe;
 import edu.gemini.spModel.obs.context.ObsContext;
 import edu.gemini.spModel.obscomp.SPInstObsComp;
@@ -173,7 +174,7 @@ public final class GemsGuideStarRule implements IRule {
         if (primaryOpt.isEmpty()) return true; // okay, no target to check
 
         SPTarget primary = primaryOpt.getValue();
-        return guider.validate(primary, ctx);
+        return guider.validate(primary, ctx) == GuideStarValidation.VALID;
     }
 
     private void addError(P2Problems problems, String id, String tmpl, ObsContext ctx, int index, ISPProgramNode node) {

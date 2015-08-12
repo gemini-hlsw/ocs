@@ -3,6 +3,7 @@ package edu.gemini.ags.impl
 import edu.gemini.ags.api.AgsMagnitude.MagnitudeTable
 import edu.gemini.spModel.core.Coordinates
 import edu.gemini.spModel.core.Target.SiderealTarget
+import edu.gemini.spModel.guide.GuideStarValidation
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.target.SPTarget
 import edu.gemini.ags.api.AgsMagnitude
@@ -40,7 +41,7 @@ protected case class CandidateValidator(params: SingleProbeStrategyParams, mt: M
       def brightnessOk = (magLimits |@| params.referenceMagnitude(st))(_ contains _) | false
 
       // Only keep those that are in range of the guide probe.
-      def inProbeRange = params.validator(ctx).validate(new SPTarget(HmsDegTarget.fromSkyObject(st.toOldModel)), ctx)
+      def inProbeRange = params.validator(ctx).validate(new SPTarget(HmsDegTarget.fromSkyObject(st.toOldModel)), ctx) == GuideStarValidation.VALID
 
       farEnough && brightnessOk && inProbeRange
     }
