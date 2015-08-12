@@ -202,10 +202,8 @@ trait ItcTable extends Table {
       val bands = target.getMagnitudes.toList.asScala.toList.
         filter(_.getBand.getWavelengthMidPoint.isDefined).// ignore bands with unknown wavelengths (currently AP only)
         filterNot(_.getBand == Magnitude.Band.UC).        // ignore UC magnitudes
-        filterNot(_.getBand == Magnitude.Band.AP).        // ignore AP magnitudes
-        filterNot(_.getBand == Magnitude.Band.Y).         // ITC currently does not support Y
-        filterNot(_.getBand == Magnitude.Band.u)          // ITC currently does not support u
-      if (bands.isEmpty) "No standard magnitudes for target defined; ITC does not support UC, AP, Y and u magnitudes.".left[Magnitude]
+        filterNot(_.getBand == Magnitude.Band.AP)         // ignore AP magnitudes
+      if (bands.isEmpty) "No standard magnitudes for target defined; ITC does not support UC and AP magnitudes.".left[Magnitude]
       else closestBand(bands, wl).right[String]
     }
 

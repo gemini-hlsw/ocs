@@ -289,19 +289,20 @@ object ITCRequest {
 
     // Get Normalization info
     val bandName = r.parameter("WavebandDefinition")
-    val normBand = MagnitudeBand.all.find(_.name == bandName)
-    if (normBand.isEmpty) throw new IllegalArgumentException(s"Unsupported wave band $bandName")
+    val normBand = MagnitudeBand.all.
+      find(_.name == bandName).
+      getOrElse(sys.error(s"Unsupported wave band $bandName"))
 
     // Get Spectrum Resource
     import SourceDefinition.Distribution._
     val sourceSpec = r.enumParameter(classOf[Distribution])
     val sourceDefinition = sourceSpec match {
-      case BBODY =>             BlackBody(r.doubleParameter("BBTemp"))
-      case PLAW =>              PowerLaw(r.doubleParameter("powerIndex"))
-      case USER_DEFINED =>      UserDefined(r.userSpectrum().get)
-      case LIBRARY_STAR =>      LibraryStar.findByName(r.parameter("stSpectrumType")).get
-      case LIBRARY_NON_STAR =>  LibraryNonStar.findByName(r.parameter("nsSpectrumType")).get
-      case ELINE =>
+      case BBODY            => BlackBody(r.doubleParameter("BBTemp"))
+      case PLAW             => PowerLaw(r.doubleParameter("powerIndex"))
+      case USER_DEFINED     => UserDefined(r.userSpectrum().get)
+      case LIBRARY_STAR     => LibraryStar.findByName(r.parameter("stSpectrumType")).get
+      case LIBRARY_NON_STAR => LibraryNonStar.findByName(r.parameter("nsSpectrumType")).get
+      case ELINE            =>
         val flux = r.doubleParameter("lineFlux")
         val cont = r.doubleParameter("lineContinuum")
         EmissionLine(
@@ -321,7 +322,7 @@ object ITCRequest {
     }
 
     // WOW, finally we've got everything in place..
-    new SourceDefinition(spatialProfile, sourceDefinition, norm, units, normBand.get, redshift)
+    new SourceDefinition(spatialProfile, sourceDefinition, norm, units, normBand, redshift)
   }
 
   def parameters(r: ITCRequest): Parameters = {
