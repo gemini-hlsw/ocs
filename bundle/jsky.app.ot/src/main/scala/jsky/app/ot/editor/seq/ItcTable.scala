@@ -11,6 +11,7 @@ import edu.gemini.shared.skyobject.Magnitude
 import edu.gemini.spModel.`type`.DisplayableSpType
 import edu.gemini.spModel.config2.{Config, ConfigSequence, ItemKey}
 import edu.gemini.spModel.core.{MagnitudeBand, Peer, Site, Wavelength}
+import edu.gemini.spModel.gemini.gnirs.InstGNIRS
 import edu.gemini.spModel.guide.GuideProbe
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.obscomp.SPInstObsComp
@@ -300,7 +301,15 @@ class ItcSpectroscopyTable(val parameters: ItcParametersProvider) extends ItcTab
       val results       = uniqueConfigs.zip(inputs).map { case (uc, i) => doServiceCall(peer, i) }
 
       instrument.getType match {
-        case INSTRUMENT_GNIRS | INSTRUMENT_GSAOI | INSTRUMENT_NIFS | INSTRUMENT_NIRI =>
+        case INSTRUMENT_GNIRS =>
+          val xDisp = instrument match {
+            case i: InstGNIRS => i.checkCrossDispersed()
+            case _            => false
+          }
+          // ITC results are slightly different depending on cross dispersion mode
+          new ItcGnirsSpectroscopyTableModel(keys, uniqueConfigs, inputs, results, xDisp)
+
+        case INSTRUMENT_GSAOI | INSTRUMENT_NIFS | INSTRUMENT_NIRI =>
           new ItcGenericSpectroscopyTableModel(keys, uniqueConfigs, inputs, results, showCoadds = true)
 
         case _ =>

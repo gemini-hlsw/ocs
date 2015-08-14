@@ -9,15 +9,14 @@ import edu.gemini.spModel.config2.ItemKey
 
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
-
 import scalaz._
-import Scalaz._
 
 /** Columns in the table are defined by their header label and a function on the unique config of the row. */
 case class Column(label: String, value: (ItcUniqueConfig, String\/ItcInputs, Future[ItcService.Result]) => AnyRef, tooltip: String = "")
 
 object ItcTableModel {
-  val PeakPixelTooltip = "Peak pixel value = signal + background"
+  val PeakPixelTooltip    = "Peak pixel value = signal + background"
+  val PeakElectronTooltip = "Peak e- per exposure"
 }
 
 /** ITC tables have three types of columns: a series of header columns, then all the values that change and are
@@ -200,9 +199,26 @@ sealed trait ItcSpectroscopyTableModel extends ItcTableModel
 class ItcGenericSpectroscopyTableModel(val keys: List[ItemKey], val uniqueSteps: List[ItcUniqueConfig], val inputs: List[String\/ItcInputs], val res: List[Future[ItcService.Result]], showCoadds: Boolean = false) extends ItcSpectroscopyTableModel {
   val headers = if (showCoadds) HeadersWithCoadds else Headers
   val results = List(
-    Column("Peak",            (c, i, r) => spcPeakElectrons(r),          tooltip = "Peak e- per exposure"),
+    Column("Peak",            (c, i, r) => spcPeakElectrons(r),          tooltip = ItcTableModel.PeakElectronTooltip),
     Column("S/N Single",      (c, i, r) => spcPeakSNSingle(r)),
     Column("S/N Total",       (c, i, r) => spcPeakSNFinal(r))
   )
 
+}
+
+class ItcGnirsSpectroscopyTableModel(val keys: List[ItemKey], val uniqueSteps: List[ItcUniqueConfig], val inputs: List[String\/ItcInputs], val res: List[Future[ItcService.Result]], xDisp: Boolean) extends ItcSpectroscopyTableModel {
+  val headers = HeadersWithCoadds
+  val results =
+    if (xDisp)
+      // ITC does not provide S/N Single values for cross dispersion
+      List(
+        Column("Peak",            (c, i, r) => spcPeakElectrons(r),          tooltip = ItcTableModel.PeakElectronTooltip),
+        Column("S/N Total",       (c, i, r) => spcPeakSNFinal(r))
+      )
+    else
+      List(
+        Column("Peak",            (c, i, r) => spcPeakElectrons(r),          tooltip = ItcTableModel.PeakElectronTooltip),
+        Column("S/N Single",      (c, i, r) => spcPeakSNSingle(r)),
+        Column("S/N Total",       (c, i, r) => spcPeakSNFinal(r))
+      )
 }
