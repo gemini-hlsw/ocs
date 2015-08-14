@@ -3,6 +3,7 @@ package edu.gemini.itc.baseline
 import edu.gemini.itc.baseline.util._
 import edu.gemini.itc.nifs.NifsParameters
 import edu.gemini.spModel.core.Wavelength
+import edu.gemini.spModel.gemini.nifs.NIFSParams
 
 /**
  * NIFS baseline test fixtures.
@@ -14,7 +15,7 @@ object BaselineNifs {
 
   private lazy val KBandSpectroscopy = Fixture.kBandSpcFixtures(List(
     new NifsParameters(
-      NifsParameters.HK_G0603,
+      NIFSParams.Filter.HK_FILTER,
       NifsParameters.K_G5605,
       NifsParameters.LOW_READ_NOISE,
       Wavelength.fromMicrons(2.1),// central wavelength
@@ -29,7 +30,7 @@ object BaselineNifs {
       Fixture.AltairNgsFL
     ),
     new NifsParameters(
-      NifsParameters.HK_G0603,
+      NIFSParams.Filter.HK_FILTER,
       NifsParameters.K_G5605,
       NifsParameters.LOW_READ_NOISE,
       Wavelength.fromMicrons(2.1),// central wavelength
@@ -44,7 +45,7 @@ object BaselineNifs {
       Fixture.AltairNgs
     ),
     new NifsParameters(
-      NifsParameters.HK_G0603,
+      NIFSParams.Filter.HK_FILTER,
       NifsParameters.K_G5605,
       NifsParameters.LOW_READ_NOISE,
       Wavelength.fromMicrons(2.1),// central wavelength
@@ -61,7 +62,7 @@ object BaselineNifs {
 
 
     new NifsParameters(
-      NifsParameters.HK_G0603,
+      NIFSParams.Filter.HK_FILTER,
       NifsParameters.H_G5604,
       NifsParameters.LOW_READ_NOISE,
       Wavelength.fromMicrons(2.2),// central wavelength
@@ -76,7 +77,7 @@ object BaselineNifs {
       Fixture.AltairNgsFL
     ),
     new NifsParameters(
-      NifsParameters.HK_G0603,
+      NIFSParams.Filter.HK_FILTER,
       NifsParameters.H_G5604,
       NifsParameters.LOW_READ_NOISE,
       Wavelength.fromMicrons(2.2),// central wavelength
@@ -91,7 +92,7 @@ object BaselineNifs {
       Fixture.AltairNgs
     ),
     new NifsParameters(
-      NifsParameters.HK_G0603,
+      NIFSParams.Filter.HK_FILTER,
       NifsParameters.H_G5604,
       NifsParameters.LOW_READ_NOISE,
       Wavelength.fromMicrons(2.2),// central wavelength
@@ -108,7 +109,7 @@ object BaselineNifs {
 
 
     new NifsParameters(
-      NifsParameters.HK_G0603,
+      NIFSParams.Filter.HK_FILTER,
       NifsParameters.H_G5604,
       NifsParameters.LOW_READ_NOISE,
       Wavelength.fromMicrons(2.2),// central wavelength
@@ -123,7 +124,7 @@ object BaselineNifs {
       Fixture.AltairNgsFL
     ),
     new NifsParameters(
-      NifsParameters.HK_G0603,
+      NIFSParams.Filter.HK_FILTER,
       NifsParameters.H_G5604,
       NifsParameters.LOW_READ_NOISE,
       Wavelength.fromMicrons(2.2),// central wavelength
@@ -138,7 +139,7 @@ object BaselineNifs {
       Fixture.AltairNgs
     ),
     new NifsParameters(
-      NifsParameters.HK_G0603,
+      NIFSParams.Filter.HK_FILTER,
       NifsParameters.H_G5604,
       NifsParameters.LOW_READ_NOISE,
       Wavelength.fromMicrons(2.2),// central wavelength

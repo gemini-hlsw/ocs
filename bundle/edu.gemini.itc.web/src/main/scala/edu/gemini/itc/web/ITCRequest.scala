@@ -18,6 +18,7 @@ import edu.gemini.spModel.gemini.gmos.GmosSouthType.{DisperserSouth, FPUnitSouth
 import edu.gemini.spModel.gemini.gnirs.GNIRSParams
 import edu.gemini.spModel.gemini.gsaoi.Gsaoi
 import edu.gemini.spModel.gemini.michelle.MichelleParams
+import edu.gemini.spModel.gemini.nifs.NIFSParams
 import edu.gemini.spModel.gemini.niri.Niri
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality
 import edu.gemini.spModel.guide.GuideProbe
@@ -172,7 +173,7 @@ object ITCRequest {
   }
 
   def nifsParameters(r: ITCRequest): NifsParameters = {
-    val filter      = r.parameter("instrumentFilter")
+    val filter      = r.enumParameter(classOf[NIFSParams.Filter])
     val grating     = r.parameter("instrumentDisperser")
     val readNoise   = r.parameter("readNoise")
     val centralWl   = Wavelength.fromMicrons(r.doubleParameter("instrumentCentralWavelength"))

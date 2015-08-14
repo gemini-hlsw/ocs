@@ -3,6 +3,7 @@ package edu.gemini.itc.nifs;
 import edu.gemini.itc.shared.AltairParameters;
 import edu.gemini.itc.shared.InstrumentDetails;
 import edu.gemini.spModel.core.Wavelength;
+import edu.gemini.spModel.gemini.nifs.NIFSParams;
 import scala.Option;
 
 /**
@@ -28,11 +29,6 @@ public final class NifsParameters implements InstrumentDetails {
     public static final String KS_G5606 = "ks_G5606";
     public static final String KL_G5607 = "kl_G5607";
 
-    //filters
-    public static final String ZJ_G0601 = "ZJ_G0601";
-    public static final String HJ_G0602 = "HJ_G0602";
-    public static final String HK_G0603 = "HK_G0603";
-
     public static final String LOW_READ_NOISE = "lowNoise";
     public static final String VERY_LOW_READ_NOISE = "verylowNoise";
     public static final String HIGH_READ_NOISE = "highNoise";
@@ -41,7 +37,7 @@ public final class NifsParameters implements InstrumentDetails {
     public static final String NIFS = "nifs";
 
     // Data members
-    private final String filter;
+    private final NIFSParams.Filter filter;
     private final String grating;
     private final String readNoise;
     private final Wavelength cenralWavelength;
@@ -58,7 +54,7 @@ public final class NifsParameters implements InstrumentDetails {
     /**
      * Constructs a NifsParameters from a test file.
      */
-    public NifsParameters(final String filter,
+    public NifsParameters(final NIFSParams.Filter filter,
                           final String grating,
                           final String readNoise,
                           final Wavelength centralWavelength,
@@ -87,7 +83,7 @@ public final class NifsParameters implements InstrumentDetails {
         this.cenralWavelength   = centralWavelength;
     }
 
-    public String getFilter() {
+    public NIFSParams.Filter getFilter() {
         return filter;
     }
 

@@ -45,7 +45,6 @@ public final class Nifs extends Instrument {
     protected NifsGratingOptics _gratingOptics;
     protected Detector _detector;
     protected double _sampling;
-    protected String _filterUsed;
     protected String _grating;
     protected String _readNoise;
     protected CalculationMethod _mode;
@@ -81,7 +80,6 @@ public final class Nifs extends Instrument {
         _readNoise = gp.getReadNoise();
         _grating = gp.getGrating();
         _centralWavelength = gp.getInstrumentCentralWavelength();
-        _filterUsed = gp.getFilter();
         _mode = odp.getMethod();
 
         if (_centralWavelength < 1000 || _centralWavelength > 6000) {
@@ -103,14 +101,8 @@ public final class Nifs extends Instrument {
             _wellDepth = SHALLOW_WELL;
         }
 
-        if (!(_filterUsed.equals("none"))) {
-            _Filter = Filter.fromFile(getPrefix(), _filterUsed, getDirectory() + "/");
-            addFilter(_Filter);
-        }
-
-        //Might use this for creating a ITC for imaging mode of NIFS
-        //_selectableTrans = new NifsPickoffMirror(getDirectory(), "mirror");
-        //addComponent(_selectableTrans);
+        _Filter = Filter.fromFile(getPrefix(), gp.getFilter().name(), getDirectory() + "/");
+        addFilter(_Filter);
 
         FixedOptics _fixedOptics = new FixedOptics(getDirectory() + "/", getPrefix());
         addComponent(_fixedOptics);
