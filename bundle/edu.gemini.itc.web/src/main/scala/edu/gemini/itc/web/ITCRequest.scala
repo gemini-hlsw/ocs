@@ -174,7 +174,7 @@ object ITCRequest {
 
   def nifsParameters(r: ITCRequest): NifsParameters = {
     val filter      = r.enumParameter(classOf[NIFSParams.Filter])
-    val grating     = r.parameter("instrumentDisperser")
+    val grating     = r.enumParameter(classOf[NIFSParams.Disperser])
     val readNoise   = r.parameter("readNoise")
     val centralWl   = Wavelength.fromMicrons(r.doubleParameter("instrumentCentralWavelength"))
     val ifuMethod   = r.parameter("ifuMethod")

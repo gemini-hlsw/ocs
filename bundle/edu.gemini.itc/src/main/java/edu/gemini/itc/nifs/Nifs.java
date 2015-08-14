@@ -4,6 +4,7 @@ import edu.gemini.itc.base.*;
 import edu.gemini.itc.operation.DetectorsTransmissionVisitor;
 import edu.gemini.itc.shared.CalculationMethod;
 import edu.gemini.itc.shared.ObservationDetails;
+import edu.gemini.spModel.gemini.nifs.NIFSParams;
 
 /**
  * Nifs specification class
@@ -45,7 +46,6 @@ public final class Nifs extends Instrument {
     protected NifsGratingOptics _gratingOptics;
     protected Detector _detector;
     protected double _sampling;
-    protected String _grating;
     protected String _readNoise;
     protected CalculationMethod _mode;
     protected double _centralWavelength;
@@ -78,7 +78,6 @@ public final class Nifs extends Instrument {
         _sampling = super.getSampling();
 
         _readNoise = gp.getReadNoise();
-        _grating = gp.getGrating();
         _centralWavelength = gp.getInstrumentCentralWavelength();
         _mode = odp.getMethod();
 
@@ -107,21 +106,10 @@ public final class Nifs extends Instrument {
         FixedOptics _fixedOptics = new FixedOptics(getDirectory() + "/", getPrefix());
         addComponent(_fixedOptics);
 
-        //Test to see that all conditions for Spectroscopy are met
-        if (_mode.isSpectroscopy()) {
-            if (_grating.equals("none"))
-                throw new RuntimeException("Spectroscopy calculation method is selected but a grating" +
-                        " is not.\nPlease select a grating and a " +
-                        "focal plane mask in the Instrument " +
-                        "configuration section.");
-        }
-
-        _detector = new Detector(getDirectory() + "/", getPrefix(),
-                "hawaii2_HgCdTe", "2K x 2K HgCdTe HAWAII-2 CCD");
+        _detector = new Detector(getDirectory() + "/", getPrefix(), "hawaii2_HgCdTe", "2K x 2K HgCdTe HAWAII-2 CCD");
         _detector.setDetectorPixels(DETECTOR_PIXELS);
 
-        _dtv = new DetectorsTransmissionVisitor(1,
-                getDirectory() + "/" + getPrefix() + "ccdpix" + Instrument.getSuffix());
+        _dtv = new DetectorsTransmissionVisitor(1, getDirectory() + "/" + getPrefix() + "ccdpix" + Instrument.getSuffix());
 
         _IFUMethod = gp.getIFUMethod();
         if (_IFUMethod.equals(gp.SINGLE_IFU)) {
@@ -147,15 +135,12 @@ public final class Nifs extends Instrument {
         addComponent(_IFU);
 
 
-
-        if (!(_grating.equals("none"))) {
-            _gratingOptics = new NifsGratingOptics(getDirectory() + "/" + getPrefix(), _grating,
-                    _centralWavelength,
-                    _detector.getDetectorPixels(),
-                    1);
-            _sampling = _gratingOptics.getGratingDispersion_nmppix();
-            addGrating(_gratingOptics);
-        }
+        _gratingOptics = new NifsGratingOptics(getDirectory() + "/" + getPrefix(), gp.getGrating().name(),
+                _centralWavelength,
+                _detector.getDetectorPixels(),
+                1);
+        _sampling = _gratingOptics.getGratingDispersion_nmppix();
+        addGrating(_gratingOptics);
 
 
         addComponent(_detector);
@@ -166,15 +151,13 @@ public final class Nifs extends Instrument {
 
     /**
      * Returns the effective observing wavelength.
-     * This is properly calculated as a flux-weighted averate of
+     * This is properly calculated as a flux-weighted average of
      * observed spectrum.  So this may be temporary.
      *
      * @return Effective wavelength in nm
      */
     public int getEffectiveWavelength() {
-        if (_grating.equals("none")) return (int) _Filter.getEffectiveWavelength();
-        else return (int) _gratingOptics.getEffectiveWavelength();
-
+        return (int) _gratingOptics.getEffectiveWavelength();
     }
 
 
@@ -222,10 +205,6 @@ public final class Nifs extends Instrument {
 
     public double getGratingResolution() {
         return _gratingOptics.getGratingResolution();
-    }
-
-    public String getGrating() {
-        return _grating;
     }
 
     public double getGratingBlaze() {

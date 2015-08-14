@@ -16,19 +16,6 @@ public final class NifsParameters implements InstrumentDetails {
     public static final String RADIAL_IFU = "radialIFU";
     public static final String SUMMED_APERTURE_IFU = "summedApertureIFU";
 
-
-    // ITC web form input values.
-    // These constants must be kept in sync with the web page form.
-    // They are used to parse form data.
-
-    public static final String NO_DISPERSER = "none";
-    public static final String Z_G5602 = "z_G5602";
-    public static final String J_G5603 = "j_G5603";
-    public static final String H_G5604 = "h_G5604";
-    public static final String K_G5605 = "k_G5605";
-    public static final String KS_G5606 = "ks_G5606";
-    public static final String KL_G5607 = "kl_G5607";
-
     public static final String LOW_READ_NOISE = "lowNoise";
     public static final String VERY_LOW_READ_NOISE = "verylowNoise";
     public static final String HIGH_READ_NOISE = "highNoise";
@@ -38,7 +25,7 @@ public final class NifsParameters implements InstrumentDetails {
 
     // Data members
     private final NIFSParams.Filter filter;
-    private final String grating;
+    private final NIFSParams.Disperser grating;
     private final String readNoise;
     private final Wavelength cenralWavelength;
     private final String ifuMethod;
@@ -55,7 +42,7 @@ public final class NifsParameters implements InstrumentDetails {
      * Constructs a NifsParameters from a test file.
      */
     public NifsParameters(final NIFSParams.Filter filter,
-                          final String grating,
+                          final NIFSParams.Disperser grating,
                           final String readNoise,
                           final Wavelength centralWavelength,
                           final String ifuMethod,
@@ -87,7 +74,7 @@ public final class NifsParameters implements InstrumentDetails {
         return filter;
     }
 
-    public String getGrating() {
+    public NIFSParams.Disperser getGrating() {
         return grating;
     }
 

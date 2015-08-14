@@ -16,7 +16,7 @@ object BaselineNifs {
   private lazy val KBandSpectroscopy = Fixture.kBandSpcFixtures(List(
     new NifsParameters(
       NIFSParams.Filter.HK_FILTER,
-      NifsParameters.K_G5605,
+      NIFSParams.Disperser.K,
       NifsParameters.LOW_READ_NOISE,
       Wavelength.fromMicrons(2.1),// central wavelength
       NifsParameters.SINGLE_IFU,// IFU method
@@ -31,7 +31,7 @@ object BaselineNifs {
     ),
     new NifsParameters(
       NIFSParams.Filter.HK_FILTER,
-      NifsParameters.K_G5605,
+      NIFSParams.Disperser.K,
       NifsParameters.LOW_READ_NOISE,
       Wavelength.fromMicrons(2.1),// central wavelength
       NifsParameters.SINGLE_IFU,// IFU method
@@ -46,7 +46,7 @@ object BaselineNifs {
     ),
     new NifsParameters(
       NIFSParams.Filter.HK_FILTER,
-      NifsParameters.K_G5605,
+      NIFSParams.Disperser.K,
       NifsParameters.LOW_READ_NOISE,
       Wavelength.fromMicrons(2.1),// central wavelength
       NifsParameters.SINGLE_IFU,// IFU method
@@ -63,7 +63,7 @@ object BaselineNifs {
 
     new NifsParameters(
       NIFSParams.Filter.HK_FILTER,
-      NifsParameters.H_G5604,
+      NIFSParams.Disperser.H,
       NifsParameters.LOW_READ_NOISE,
       Wavelength.fromMicrons(2.2),// central wavelength
       NifsParameters.SUMMED_APERTURE_IFU, // IFU method
@@ -78,7 +78,7 @@ object BaselineNifs {
     ),
     new NifsParameters(
       NIFSParams.Filter.HK_FILTER,
-      NifsParameters.H_G5604,
+      NIFSParams.Disperser.H,
       NifsParameters.LOW_READ_NOISE,
       Wavelength.fromMicrons(2.2),// central wavelength
       NifsParameters.SUMMED_APERTURE_IFU, // IFU method
@@ -93,7 +93,7 @@ object BaselineNifs {
     ),
     new NifsParameters(
       NIFSParams.Filter.HK_FILTER,
-      NifsParameters.H_G5604,
+      NIFSParams.Disperser.H,
       NifsParameters.LOW_READ_NOISE,
       Wavelength.fromMicrons(2.2),// central wavelength
       NifsParameters.SUMMED_APERTURE_IFU, // IFU method
@@ -110,7 +110,7 @@ object BaselineNifs {
 
     new NifsParameters(
       NIFSParams.Filter.HK_FILTER,
-      NifsParameters.H_G5604,
+      NIFSParams.Disperser.H,
       NifsParameters.LOW_READ_NOISE,
       Wavelength.fromMicrons(2.2),// central wavelength
       NifsParameters.RADIAL_IFU,// IFU method
@@ -125,7 +125,7 @@ object BaselineNifs {
     ),
     new NifsParameters(
       NIFSParams.Filter.HK_FILTER,
-      NifsParameters.H_G5604,
+      NIFSParams.Disperser.H,
       NifsParameters.LOW_READ_NOISE,
       Wavelength.fromMicrons(2.2),// central wavelength
       NifsParameters.RADIAL_IFU,// IFU method
@@ -140,7 +140,7 @@ object BaselineNifs {
     ),
     new NifsParameters(
       NIFSParams.Filter.HK_FILTER,
-      NifsParameters.H_G5604,
+      NIFSParams.Disperser.H,
       NifsParameters.LOW_READ_NOISE,
       Wavelength.fromMicrons(2.2),// central wavelength
       NifsParameters.RADIAL_IFU,// IFU method
