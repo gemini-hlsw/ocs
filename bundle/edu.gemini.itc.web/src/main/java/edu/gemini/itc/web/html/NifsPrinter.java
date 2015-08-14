@@ -101,7 +101,7 @@ public final class NifsPrinter extends PrinterBase {
         s += HtmlPrinter.opticalComponentsToString(instrument);
         s += "<LI>Focal Plane Mask: ifu\n";
         s += "<LI>Read Noise: " + instrument.getReadNoise() + "\n";
-        s += "<LI>Well Depth: " + instrument.getWellDepth() + "\n";
+        s += "<LI>Well Depth: 90000.0\n";
         s += "\n";
 
         s += "<L1> Central Wavelength: " + instrument.getCentralWavelength() + " nm" + "\n";

@@ -4,7 +4,6 @@ import edu.gemini.itc.base.*;
 import edu.gemini.itc.operation.DetectorsTransmissionVisitor;
 import edu.gemini.itc.shared.CalculationMethod;
 import edu.gemini.itc.shared.ObservationDetails;
-import edu.gemini.spModel.gemini.nifs.NIFSParams;
 
 /**
  * Nifs specification class
@@ -23,30 +22,13 @@ public final class Nifs extends Instrument {
     // Instrument reads its configuration from here.
     private static final String FILENAME = "nifs" + getSuffix();
 
-    private static final double AD_SATURATION = 56636;
-
-    private static final double HIGH_GAIN = 4.4;
-    private static final double LOW_GAIN = 2.18;
     public static final int DETECTOR_PIXELS = 2048;
-
-    private static final double SHALLOW_WELL = 90000.0;
-    private static final double DEEP_WELL = 180000.0;
-
-    private static final double HIGH_READ_NOISE_VALUE = 145;  //Not used
-
-    // REL-481: Update NIFS read noise estimates
-    private static final double MEDIUM_READ_NOISE_VALUE = 15.4;
-    private static final double LOW_READ_NOISE_VALUE = 8.1;
-    private static final double VERY_LOW_READ_NOISE_VALUE = 4.6;
-
-
 
     // Keep a reference to the color filter to ask for effective wavelength
     protected Filter _Filter;
     protected NifsGratingOptics _gratingOptics;
     protected Detector _detector;
     protected double _sampling;
-    protected String _readNoise;
     protected CalculationMethod _mode;
     protected double _centralWavelength;
 
@@ -63,7 +45,6 @@ public final class Nifs extends Instrument {
     protected boolean _IFU_IsSummed = false;
 
     protected DetectorsTransmissionVisitor _dtv;
-    protected double _wellDepth;
     protected double _readNoiseValue;
 
 
@@ -77,7 +58,6 @@ public final class Nifs extends Instrument {
 
         _sampling = super.getSampling();
 
-        _readNoise = gp.getReadNoise();
         _centralWavelength = gp.getInstrumentCentralWavelength();
         _mode = odp.getMethod();
 
@@ -86,19 +66,7 @@ public final class Nifs extends Instrument {
         }
 
         //Set read noise and Well depth values by obsevation type
-        if (_readNoise.equals(NifsParameters.HIGH_READ_NOISE)) {
-            _readNoiseValue = HIGH_READ_NOISE_VALUE;
-            _wellDepth = DEEP_WELL;
-        } else if (_readNoise.equals(NifsParameters.MED_READ_NOISE)) {
-            _readNoiseValue = MEDIUM_READ_NOISE_VALUE;
-            _wellDepth = SHALLOW_WELL;
-        } else if (_readNoise.equals(NifsParameters.LOW_READ_NOISE)) {
-            _readNoiseValue = LOW_READ_NOISE_VALUE;
-            _wellDepth = SHALLOW_WELL;
-        } else if (_readNoise.equals(NifsParameters.VERY_LOW_READ_NOISE)) {
-            _readNoiseValue = VERY_LOW_READ_NOISE_VALUE;
-            _wellDepth = SHALLOW_WELL;
-        }
+        _readNoiseValue = gp.getReadMode().getReadNoise();
 
         _Filter = Filter.fromFile(getPrefix(), gp.getFilter().name(), getDirectory() + "/");
         addFilter(_Filter);
@@ -180,18 +148,6 @@ public final class Nifs extends Instrument {
         return _sampling;
     }
 
-    public double getADSaturation() {
-        return AD_SATURATION;
-    }
-
-    public double getHighGain() {
-        return HIGH_GAIN;
-    }
-
-    public double getLowGain() {
-        return LOW_GAIN;
-    }
-
     public IFUComponent getIFU() {
         return _IFU;
     }
@@ -207,10 +163,6 @@ public final class Nifs extends Instrument {
         return _gratingOptics.getGratingResolution();
     }
 
-    public double getGratingBlaze() {
-        return _gratingOptics.getGratingBlaze();
-    }
-
     public double getGratingDispersion_nm() {
         return _gratingOptics.getGratingDispersion_nm();
     }
@@ -224,13 +176,11 @@ public final class Nifs extends Instrument {
     }
 
     public double getObservingStart() {
-        double start = _centralWavelength - (getGratingDispersion_nmppix() * _detector.getDetectorPixels() / 2);
-        return start;
+        return _centralWavelength - (getGratingDispersion_nmppix() * _detector.getDetectorPixels() / 2);
     }
 
     public double getObservingEnd() {
-        double end = _centralWavelength + (getGratingDispersion_nmppix() * _detector.getDetectorPixels() / 2);
-        return end;
+        return _centralWavelength + (getGratingDispersion_nmppix() * _detector.getDetectorPixels() / 2);
     }
 
     public double getIFUOffset() {
@@ -260,10 +210,6 @@ public final class Nifs extends Instrument {
 
     public double getCentralWavelength() {
         return _centralWavelength;
-    }
-
-    public double getWellDepth() {
-        return _wellDepth;
     }
 
     public double getReadNoise() {

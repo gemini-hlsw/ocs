@@ -87,23 +87,23 @@ public final class NIFSParams {
     /**
      * Read Mode (REL-481)
      */
-    public static enum ReadMode implements StandardSpType {
+    public enum ReadMode implements StandardSpType {
 
         // Faint object read = Fowler 16-16, readnoise = 6e- (overhead = 85sec per image)
         FAINT_OBJECT_SPEC(
                 "1-2.5 um: Faint Object Spectroscopy",
-                "Weak Source", "4.6 e- @ 77K", 85.0, "> 85 sec", 16, "faint"),
+                "Weak Source", 4.6, 85.0, "> 85 sec", 16, "faint"),
 
         // Added for OT-507
         // Medium read = Fowler 4-4, readnoise=9e- (overhead = 21sec per image)
         MEDIUM_OBJECT_SPEC(
                 "1-2.5 um: Medium Object Spectroscopy",
-                "Medium Source", "8.1 e- @ 77K", 21.0, "> 21 sec", 4, "medium"),
+                "Medium Source", 8.1, 21.0, "> 21 sec", 4, "medium"),
 
         // Bright object read = Fowler 1-1, readnoise = 18 e- (overhead = 5sec per image)
         BRIGHT_OBJECT_SPEC(
                 "1-2.5 um: Bright Object Spectroscopy",
-                "Strong Source", "15.4 e- @ 77K", 5.3, "> 5 sec", 1, "bright"),;
+                "Strong Source", 15.4, 5.3, "> 5 sec", 1, "bright"),;
 
         /**
          * The default ReadMode value
@@ -115,11 +115,11 @@ public final class NIFSParams {
         private String _displayValue;
         private String _description;
         private String _logValue;
-        private String _readNoise;
+        private double _readNoise;
         private String _recommendedExp;
         private int _fowlerSampling;
 
-        private ReadMode(String displayValue, String description, String readNoise,
+        ReadMode(String displayValue, String description, double readNoise,
                          double minExp, String recommendedExp, int fowlerSampling,
                          String logValue) {
             _displayValue = displayValue;
@@ -189,7 +189,7 @@ public final class NIFSParams {
             return _fowlerSampling;
         }
 
-        public String getReadNoise() {
+        public double getReadNoise() {
             return _readNoise;
         }
 

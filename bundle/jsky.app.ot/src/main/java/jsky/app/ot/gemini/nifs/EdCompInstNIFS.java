@@ -167,7 +167,7 @@ public final class EdCompInstNIFS extends EdCompInstBase<InstNIFS>
             _w.readModeFaintLabel.setEnabled(false);
         }
         _w.readModeMinExpTime.setText(readMode.getMinExpAsString());
-        _w.readModeNoise.setText(readMode.getReadNoise());
+        _w.readModeNoise.setText(String.format("%.1f e- @ 77K", readMode.getReadNoise()));
         _w.readModeRecMinExpTime.setText(readMode.getRecommendedMinExp());
     }
 
