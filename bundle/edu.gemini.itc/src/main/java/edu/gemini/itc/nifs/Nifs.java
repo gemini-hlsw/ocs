@@ -2,8 +2,7 @@ package edu.gemini.itc.nifs;
 
 import edu.gemini.itc.base.*;
 import edu.gemini.itc.operation.DetectorsTransmissionVisitor;
-import edu.gemini.itc.shared.CalculationMethod;
-import edu.gemini.itc.shared.ObservationDetails;
+import edu.gemini.itc.shared.*;
 
 /**
  * Nifs specification class
@@ -32,7 +31,7 @@ public final class Nifs extends Instrument {
     protected CalculationMethod _mode;
     protected double _centralWavelength;
 
-    protected String _IFUMethod;
+    protected IfuMethod _IFUMethod;
     protected double _IFUOffset;
     protected double _IFUMinOffset;
     protected double _IFUMaxOffset;
@@ -41,8 +40,6 @@ public final class Nifs extends Instrument {
     protected double _IFUCenterX;
     protected double _IFUCenterY;
     protected IFUComponent _IFU;
-    protected boolean _IFU_IsSingle = false;
-    protected boolean _IFU_IsSummed = false;
 
     protected DetectorsTransmissionVisitor _dtv;
     protected double _readNoiseValue;
@@ -80,25 +77,24 @@ public final class Nifs extends Instrument {
         _dtv = new DetectorsTransmissionVisitor(1, getDirectory() + "/" + getPrefix() + "ccdpix" + Instrument.getSuffix());
 
         _IFUMethod = gp.getIFUMethod();
-        if (_IFUMethod.equals(gp.SINGLE_IFU)) {
-            _IFU_IsSingle = true;
-            _IFUOffset = gp.getIFUOffset();
-            _IFU = new IFUComponent(_IFUOffset, getPixelSize());
+        if (gp.getIFUMethod() instanceof IfuSingle) {
+            _IFUOffset      = ((IfuSingle) gp.getIFUMethod()).offset();
+            _IFU            = new IFUComponent(_IFUOffset, getPixelSize());
         }
-        if (_IFUMethod.equals(gp.RADIAL_IFU)) {
-            _IFUMinOffset = gp.getIFUMinOffset();
-            _IFUMaxOffset = gp.getIFUMaxOffset();
-
-            _IFU = new IFUComponent(_IFUMinOffset, _IFUMaxOffset, getPixelSize());
+        else if (gp.getIFUMethod() instanceof IfuRadial) {
+            _IFUMinOffset   = ((IfuRadial) gp.getIFUMethod()).minOffset();
+            _IFUMaxOffset   = ((IfuRadial) gp.getIFUMethod()).maxOffset();
+            _IFU            = new IFUComponent(_IFUMinOffset, _IFUMaxOffset, getPixelSize());
         }
-        if (_IFUMethod.equals(gp.SUMMED_APERTURE_IFU)) {
-            _IFU_IsSummed = true;
-            _IFUNumX = gp.getIFUNumX();
-            _IFUNumY = gp.getIFUNumY();
-            _IFUCenterX = gp.getIFUCenterX();
-            _IFUCenterY = gp.getIFUCenterY();
-
-            _IFU = new IFUComponent(_IFUNumX, _IFUNumY, _IFUCenterX, _IFUCenterY, getPixelSize());
+        else if (gp.getIFUMethod() instanceof IfuSummed) {
+            _IFUNumX        = ((IfuSummed) gp.getIFUMethod()).numX();
+            _IFUNumY        = ((IfuSummed) gp.getIFUMethod()).numY();
+            _IFUCenterX     = ((IfuSummed) gp.getIFUMethod()).centerX();
+            _IFUCenterY     = ((IfuSummed) gp.getIFUMethod()).centerY();
+            _IFU            = new IFUComponent(_IFUNumX, _IFUNumY, _IFUCenterX, _IFUCenterY, getPixelSize());
+        }
+        else {
+            throw new IllegalArgumentException("ifu method is missing");
         }
         addComponent(_IFU);
 
@@ -203,7 +199,7 @@ public final class Nifs extends Instrument {
         return _IFUNumY;
     }
 
-    public String getIFUMethod() {
+    public IfuMethod getIFUMethod() {
         return _IFUMethod;
     }
 

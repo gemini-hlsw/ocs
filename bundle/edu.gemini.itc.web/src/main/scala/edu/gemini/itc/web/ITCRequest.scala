@@ -123,15 +123,7 @@ object ITCRequest {
     val ccdType     = r.enumParameter(classOf[DetectorManufacturer])
     val centralWl   = Wavelength.fromNanometers(r.doubleParameter("instrumentCentralWavelength"))
     val fpMask      = if (site.equals(Site.GN)) r.enumParameter(classOf[FPUnitNorth],    "instrumentFPMask")   else r.enumParameter(classOf[FPUnitSouth],      "instrumentFPMask")
-    val ifuMethod: Option[IfuMethod]   = if (fpMask.isIFU) {
-      r.parameter("ifuMethod") match {
-        case "singleIFU" => Some(IfuSingle(r.doubleParameter("ifuOffset")))
-        case "radialIFU" => Some(IfuRadial(r.doubleParameter("ifuMinOffset"), r.doubleParameter("ifuMaxOffset")))
-        case _ => throw new IllegalArgumentException()
-      }} else {
-      None
-    }
-
+    val ifuMethod   = if (fpMask.isIFU) Some(ifuMethodParameters(r)) else None
     GmosParameters(filter, grating, centralWl, fpMask, None, spatBinning, specBinning, ifuMethod, ccdType, site)
   }
 
@@ -177,24 +169,9 @@ object ITCRequest {
     val grating     = r.enumParameter(classOf[NIFSParams.Disperser])
     val readNoise   = r.enumParameter(classOf[NIFSParams.ReadMode])
     val centralWl   = Wavelength.fromMicrons(r.doubleParameter("instrumentCentralWavelength"))
-    val ifuMethod   = r.parameter("ifuMethod")
-    val (offset, min, max, numX, numY, centerX, centerY) = ifuMethod match {
-      case "singleIFU"  =>
-        val offset = r.parameter("ifuOffset")
-        (offset, "", "", "", "", "", "")
-      case "radialIFU"  =>
-        val min = r.parameter("ifuMinOffset")
-        val max = r.parameter("ifuMaxOffset")
-        ("", min, max, "", "", "", "")
-      case "summedApertureIFU" =>
-        val numX = r.parameter("ifuNumX")
-        val numY = r.parameter("ifuNumY")
-        val cenX = r.parameter("ifuCenterX")
-        val cenY = r.parameter("ifuCenterY")
-        ("", "", "", numX, numY, cenX, cenY)
-    }
+    val ifuMethod   = ifuMethodParameters(r)
     val altair = altairParameters(r)
-    new NifsParameters(filter, grating, readNoise, centralWl, ifuMethod, offset, min, max, numX, numY, centerX, centerY, altair)
+    new NifsParameters(filter, grating, readNoise, centralWl, ifuMethod, altair)
    }
 
   def trecsParameters(r: ITCRequest): TRecsParameters = {
@@ -324,6 +301,13 @@ object ITCRequest {
 
     // WOW, finally we've got everything in place..
     new SourceDefinition(spatialProfile, sourceDefinition, norm, units, normBand, redshift)
+  }
+
+  def ifuMethodParameters(r: ITCRequest): IfuMethod = r.parameter("ifuMethod") match {
+      case "singleIFU"  => IfuSingle(r.doubleParameter("ifuOffset"))
+      case "radialIFU"  => IfuRadial(r.doubleParameter("ifuMinOffset"), r.doubleParameter("ifuMaxOffset"))
+      case "summedIFU"  => IfuSummed(r.intParameter("ifuNumX"), r.intParameter("ifuNumY"), r.doubleParameter("ifuCenterX"), r.doubleParameter("ifuCenterY"))
+      case _            => throw new IllegalArgumentException()
   }
 
   def parameters(r: ITCRequest): Parameters = {

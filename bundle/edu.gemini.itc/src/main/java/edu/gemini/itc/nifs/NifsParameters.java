@@ -1,6 +1,7 @@
 package edu.gemini.itc.nifs;
 
 import edu.gemini.itc.shared.AltairParameters;
+import edu.gemini.itc.shared.IfuMethod;
 import edu.gemini.itc.shared.InstrumentDetails;
 import edu.gemini.spModel.core.Wavelength;
 import edu.gemini.spModel.gemini.nifs.NIFSParams;
@@ -12,10 +13,6 @@ import scala.Option;
  */
 public final class NifsParameters implements InstrumentDetails {
 
-    public static final String SINGLE_IFU = "singleIFU";
-    public static final String RADIAL_IFU = "radialIFU";
-    public static final String SUMMED_APERTURE_IFU = "summedApertureIFU";
-
     public static final String NIFS = "nifs";
 
     // Data members
@@ -23,14 +20,7 @@ public final class NifsParameters implements InstrumentDetails {
     private final NIFSParams.Disperser grating;
     private final NIFSParams.ReadMode readMode;
     private final Wavelength cenralWavelength;
-    private final String ifuMethod;
-    private final String ifuOffset;
-    private final String ifuMinOffset;
-    private final String ifuMaxOffset;
-    private final String ifuNumX;
-    private final String ifuNumY;
-    private final String ifuCenterX;
-    private final String ifuCenterY;
+    private final IfuMethod ifuMethod;
     private final Option<AltairParameters> altair;
 
     /**
@@ -40,27 +30,13 @@ public final class NifsParameters implements InstrumentDetails {
                           final NIFSParams.Disperser grating,
                           final NIFSParams.ReadMode readMode,
                           final Wavelength centralWavelength,
-                          final String ifuMethod,
-                          final String ifuOffset,
-                          final String ifuMinOffset,
-                          final String ifuMaxOffset,
-                          final String ifuNumX,
-                          final String ifuNumY,
-                          final String ifuCenterX,
-                          final String ifuCenterY,
+                          final IfuMethod ifuMethod,
                           final Option<AltairParameters> altair) {
 
         this.filter             = filter;
         this.grating            = grating;
         this.readMode           = readMode;
         this.ifuMethod          = ifuMethod;
-        this.ifuOffset          = ifuOffset;
-        this.ifuMinOffset       = ifuMinOffset;
-        this.ifuMaxOffset       = ifuMaxOffset;
-        this.ifuNumX            = ifuNumX;
-        this.ifuNumY            = ifuNumY;
-        this.ifuCenterX         = ifuCenterX;
-        this.ifuCenterY         = ifuCenterY;
         this.altair             = altair;
         this.cenralWavelength   = centralWavelength;
     }
@@ -85,38 +61,8 @@ public final class NifsParameters implements InstrumentDetails {
         return cenralWavelength.toNanometers();
     }
 
-
-    public String getIFUMethod() {
+    public IfuMethod getIFUMethod() {
         return ifuMethod;
-    }
-
-    public double getIFUOffset() {
-        return new Double(ifuOffset);
-    }
-
-    public double getIFUMinOffset() {
-        return new Double(ifuMinOffset);
-    }
-
-    public double getIFUMaxOffset() {
-        return new Double(ifuMaxOffset);
-    }
-
-
-    public int getIFUNumX() {
-        return new Integer(ifuNumX);
-    }
-
-    public int getIFUNumY() {
-        return new Integer(ifuNumY);
-    }
-
-    public double getIFUCenterX() {
-        return new Double(ifuCenterX);
-    }
-
-    public double getIFUCenterY() {
-        return new Double(ifuCenterY);
     }
 
     public double getFPMask() {

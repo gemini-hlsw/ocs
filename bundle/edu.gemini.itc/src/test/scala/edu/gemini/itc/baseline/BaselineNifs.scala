@@ -2,6 +2,7 @@ package edu.gemini.itc.baseline
 
 import edu.gemini.itc.baseline.util._
 import edu.gemini.itc.nifs.NifsParameters
+import edu.gemini.itc.shared.{IfuRadial, IfuSummed, IfuSingle}
 import edu.gemini.spModel.core.Wavelength
 import edu.gemini.spModel.gemini.nifs.NIFSParams
 
@@ -18,45 +19,24 @@ object BaselineNifs {
       NIFSParams.Filter.HK_FILTER,
       NIFSParams.Disperser.K,
       NIFSParams.ReadMode.MEDIUM_OBJECT_SPEC,
-      Wavelength.fromMicrons(2.1),// central wavelength
-      NifsParameters.SINGLE_IFU,// IFU method
-      "0",                      // offset
-      "0.0",                    // min offset
-      "0.0",                    // max offset
-      "0",                      // num X
-      "0",                      // num Y
-      "0.0",                    // center x
-      "0.0",                    // center y
+      Wavelength.fromMicrons(2.1),  // central wavelength
+      IfuSingle(0),                 // IFU method
       Fixture.AltairNgsFL
     ),
     new NifsParameters(
       NIFSParams.Filter.HK_FILTER,
       NIFSParams.Disperser.K,
       NIFSParams.ReadMode.MEDIUM_OBJECT_SPEC,
-      Wavelength.fromMicrons(2.1),// central wavelength
-      NifsParameters.SINGLE_IFU,// IFU method
-      "0",                      // offset
-      "0.0",                    // min offset
-      "0.0",                    // max offset
-      "0",                      // num X
-      "0",                      // num Y
-      "0.0",                    // center x
-      "0.0",                    // center y
+      Wavelength.fromMicrons(2.1),  // central wavelength
+      IfuSingle(0),                 // IFU method
       Fixture.AltairNgs
     ),
     new NifsParameters(
       NIFSParams.Filter.HK_FILTER,
       NIFSParams.Disperser.K,
       NIFSParams.ReadMode.MEDIUM_OBJECT_SPEC,
-      Wavelength.fromMicrons(2.1),// central wavelength
-      NifsParameters.SINGLE_IFU,// IFU method
-      "0",                      // offset
-      "0.0",                    // min offset
-      "0.0",                    // max offset
-      "0",                      // num X
-      "0",                      // num Y
-      "0.0",                    // center x
-      "0.0",                     // center y
+      Wavelength.fromMicrons(2.1),  // central wavelength
+      IfuSingle(0),                 // IFU method
       Fixture.AltairLgs
     ),
 
@@ -65,45 +45,24 @@ object BaselineNifs {
       NIFSParams.Filter.HK_FILTER,
       NIFSParams.Disperser.H,
       NIFSParams.ReadMode.MEDIUM_OBJECT_SPEC,
-      Wavelength.fromMicrons(2.2),// central wavelength
-      NifsParameters.SUMMED_APERTURE_IFU, // IFU method
-      "0",                      // offset
-      "0.0",                    // min offset
-      "0.0",                    // max offset
-      "2",                      // num X
-      "5",                      // num Y
-      "0.0",                    // center x
-      "0.0",                    // center y
+      Wavelength.fromMicrons(2.2),  // central wavelength
+      IfuSummed(2, 5, 0, 0),
       Fixture.AltairNgsFL
     ),
     new NifsParameters(
       NIFSParams.Filter.HK_FILTER,
       NIFSParams.Disperser.H,
       NIFSParams.ReadMode.MEDIUM_OBJECT_SPEC,
-      Wavelength.fromMicrons(2.2),// central wavelength
-      NifsParameters.SUMMED_APERTURE_IFU, // IFU method
-      "0",                      // offset
-      "0.0",                    // min offset
-      "0.0",                    // max offset
-      "2",                      // num X
-      "5",                      // num Y
-      "0.0",                    // center x
-      "0.0",                    // center y
+      Wavelength.fromMicrons(2.2),  // central wavelength
+      IfuSummed(2, 5, 0, 0),
       Fixture.AltairNgs
     ),
     new NifsParameters(
       NIFSParams.Filter.HK_FILTER,
       NIFSParams.Disperser.H,
       NIFSParams.ReadMode.MEDIUM_OBJECT_SPEC,
-      Wavelength.fromMicrons(2.2),// central wavelength
-      NifsParameters.SUMMED_APERTURE_IFU, // IFU method
-      "0",                      // offset
-      "0.0",                    // min offset
-      "0.0",                    // max offset
-      "2",                      // num X
-      "5",                      // num Y
-      "0.0",                    // center x
-      "0.0",                    // center y
+      Wavelength.fromMicrons(2.2),  // central wavelength
+      IfuSummed(2, 5, 0, 0),
       Fixture.AltairLgs
     ),
 
@@ -112,45 +71,24 @@ object BaselineNifs {
       NIFSParams.Filter.HK_FILTER,
       NIFSParams.Disperser.H,
       NIFSParams.ReadMode.MEDIUM_OBJECT_SPEC,
-      Wavelength.fromMicrons(2.2),// central wavelength
-      NifsParameters.RADIAL_IFU,// IFU method
-      "0",                      // offset
-      "0.0",                    // min offset
-      "0.0",                    // max offset
-      "0",                      // num X
-      "0",                      // num Y
-      "0.0",                    // center x
-      "1.0",                    // center y
+      Wavelength.fromMicrons(2.2),  // central wavelength
+      IfuRadial(0, 0),
       Fixture.AltairNgsFL
     ),
     new NifsParameters(
       NIFSParams.Filter.HK_FILTER,
       NIFSParams.Disperser.H,
       NIFSParams.ReadMode.MEDIUM_OBJECT_SPEC,
-      Wavelength.fromMicrons(2.2),// central wavelength
-      NifsParameters.RADIAL_IFU,// IFU method
-      "0",                      // offset
-      "0.0",                    // min offset
-      "0.0",                    // max offset
-      "0",                      // num X
-      "0",                      // num Y
-      "0.0",                    // center x
-      "1.0",                    // center y
+      Wavelength.fromMicrons(2.2),  // central wavelength
+      IfuRadial(0, 0),
       Fixture.AltairNgs
     ),
     new NifsParameters(
       NIFSParams.Filter.HK_FILTER,
       NIFSParams.Disperser.H,
       NIFSParams.ReadMode.MEDIUM_OBJECT_SPEC,
-      Wavelength.fromMicrons(2.2),// central wavelength
-      NifsParameters.RADIAL_IFU,// IFU method
-      "0",                      // offset
-      "0.0",                    // min offset
-      "0.0",                    // max offset
-      "0",                      // num X
-      "0",                      // num Y
-      "0.0",                    // center x
-      "1.0",                    // center y
+      Wavelength.fromMicrons(2.2),  // central wavelength
+      IfuRadial(0, 0),
       Fixture.AltairLgs
     )
 

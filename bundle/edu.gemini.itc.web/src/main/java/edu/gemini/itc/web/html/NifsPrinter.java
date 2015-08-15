@@ -110,9 +110,9 @@ public final class NifsPrinter extends PrinterBase {
         s += String.format("Pixel Size in Spectral Direction: %.3f nm\n", instrument.getGratingDispersion_nmppix());
 
         s += "IFU is selected,";
-        if (instrument.getIFUMethod().equals(NifsParameters.SINGLE_IFU))
+        if (instrument.getIFUMethod() instanceof IfuSingle)
             s += "with a single IFU element at " + instrument.getIFUOffset() + " arcsecs.";
-        else if (instrument.getIFUMethod().equals(NifsParameters.SUMMED_APERTURE_IFU))
+        else if (instrument.getIFUMethod() instanceof IfuSummed)
             s += String.format("with multiple summed IFU elements arranged in a " + instrument.getIFUNumX() + "x" + instrument.getIFUNumY() +
                     " (%.3f\"x%.3f\") grid.", instrument.getIFUNumX() * IFUComponent.IFU_LEN_X, instrument.getIFUNumY() * IFUComponent.IFU_LEN_Y);
         else
