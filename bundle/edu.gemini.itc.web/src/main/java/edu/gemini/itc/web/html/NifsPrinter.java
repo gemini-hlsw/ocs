@@ -42,17 +42,6 @@ public final class NifsPrinter extends PrinterBase {
 
         _println("");
 
-        // TODO : THIS IS PURELY FOR REGRESSION TEST ONLY, REMOVE ASAP
-        // Get the summed source and sky
-        final SEDFactory.SourceResult calcSource0 = SEDFactory.calculate(instrument, Site.GN, ITCConstants.NEAR_IR, result.source(), result.conditions(), result.telescope());
-        final VisitableSampledSpectrum sed0 = calcSource0.sed;
-        final VisitableSampledSpectrum sky0 = calcSource0.sky;
-        final double sed_integral0 = sed0.getIntegral();
-        final double sky_integral0 = sky0.getIntegral();
-        // Update this in (or remove from) regression test baseline:
-        _println("SED Int: " + sed_integral0 + " Sky Int: " + sky_integral0);
-        // TODO : THIS IS PURELY FOR REGRESSION TEST ONLY, REMOVE ASAP
-
         if (result.aoSystem().isDefined()) {
             _println(HtmlPrinter.printSummary((Altair) result.aoSystem().get()));
         }

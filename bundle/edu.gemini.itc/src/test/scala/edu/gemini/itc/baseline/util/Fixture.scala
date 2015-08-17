@@ -138,7 +138,7 @@ object Fixture {
     new SourceDefinition(
       PointSource(),
       LibraryStar.A0V,
-      20.0, BrightnessUnit.MAG, MagnitudeBand.K,
+      12.0, BrightnessUnit.MAG, MagnitudeBand.K,
       0.0
     ),
     new SourceDefinition(

@@ -65,15 +65,12 @@ object Hash {
 
   def calc(p: NifsParameters): Int =
     hash(
-      p.getFilter,
+      p.getFilter.name,
       p.getFPMask,
-      p.getGrating,
-      p.getIFUMaxOffset,
-      p.getIFUMethod,
-      p.getIFUMinOffset,
-      p.getIFUOffset,
+      p.getGrating.name,
+      p.getIFUMethod.toString,
       p.getInstrumentCentralWavelength,
-      p.getReadNoise,
+      p.getReadMode.name,
       p.getUnXDispCentralWavelength
     )
 
