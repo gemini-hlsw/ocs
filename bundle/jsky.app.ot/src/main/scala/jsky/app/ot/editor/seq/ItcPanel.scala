@@ -152,7 +152,7 @@ class ItcSpectroscopyPanel(val owner: EdIteratorFolder) extends ItcPanel {
     case SPComponentType.INSTRUMENT_FLAMINGOS2  => true
     case SPComponentType.INSTRUMENT_GMOS        => true
     case SPComponentType.INSTRUMENT_GMOSSOUTH   => true
-    case SPComponentType.INSTRUMENT_GNIRS       => false // will add support at later stage
+    case SPComponentType.INSTRUMENT_GNIRS       => true
     case SPComponentType.INSTRUMENT_MICHELLE    => false // may or may not be supported in OT at some point
     case SPComponentType.INSTRUMENT_NIFS        => false // will add support at later stage
     case SPComponentType.INSTRUMENT_NIRI        => true

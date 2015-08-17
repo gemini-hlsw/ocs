@@ -46,6 +46,9 @@ object ConfigExtractor {
   private val ObsWavelengthKey    = new ItemKey("instrument:observingWavelength")
   private val PortKey             = new ItemKey("instrument:port")
   private val CustomSlitWidthKey  = new ItemKey("instrument:customSlitWidth")
+  private val PixelScaleKey       = new ItemKey("instrument:pixelScale")
+  private val CrossDispersedKey   = new ItemKey("instrument:crossDispersed")
+  private val SlitWidthKey        = new ItemKey("instrument:slitWidth")
 
   private val AoSystemKey         = new ItemKey("adaptive optics:aoSystem")
   private val AoFieldLensKey      = new ItemKey("adaptive optics:fieldLens")
@@ -53,11 +56,12 @@ object ConfigExtractor {
 
   def extractInstrumentDetails(instrument: SPInstObsComp, probe: GuideProbe, targetEnv: TargetEnvironment, c: Config, cond: ObservingConditions): String \/ InstrumentDetails =
     instrument.getType match {
-      case INSTRUMENT_ACQCAM                      => ConfigExtractor.extractAcqCam(c)
-      case INSTRUMENT_FLAMINGOS2                  => ConfigExtractor.extractF2(c)
-      case INSTRUMENT_GMOS | INSTRUMENT_GMOSSOUTH => ConfigExtractor.extractGmos(c)
-      case INSTRUMENT_GSAOI                       => ConfigExtractor.extractGsaoi(c, cond)
-      case INSTRUMENT_NIRI                        => ConfigExtractor.extractNiri(targetEnv, probe, c)
+      case INSTRUMENT_ACQCAM                      => extractAcqCam(c)
+      case INSTRUMENT_FLAMINGOS2                  => extractF2(c)
+      case INSTRUMENT_GNIRS                       => extractGnirs(c)
+      case INSTRUMENT_GMOS | INSTRUMENT_GMOSSOUTH => extractGmos(c)
+      case INSTRUMENT_GSAOI                       => extractGsaoi(c, cond)
+      case INSTRUMENT_NIRI                        => extractNiri(targetEnv, probe, c)
       case _                                      => "Instrument is not supported".left
     }
 
@@ -82,6 +86,18 @@ object ConfigExtractor {
       mask        <- extract[FPUnit]        (c, FpuKey)
       readMode    <- extract[ReadMode]      (c, ReadModeKey)
     } yield Flamingos2Parameters(filter, grism, mask, readMode)
+  }
+
+  private def extractGnirs(c: Config): String \/ GnirsParameters = {
+    import GNIRSParams._
+    for {
+      pixelScale  <- extract[PixelScale]     (c, PixelScaleKey)
+      grating     <- extract[Disperser]      (c, DisperserKey)
+      readMode    <- extract[ReadMode]       (c, ReadModeKey)
+      xDisp       <- extract[CrossDispersed] (c, CrossDispersedKey)
+      slitWidth   <- extract[SlitWidth]      (c, SlitWidthKey)
+      wavelen     <- extractObservingWavelength(c)
+    } yield GnirsParameters(pixelScale, grating, readMode, xDisp, wavelen, slitWidth)
   }
 
   private def extractGmos(c: Config): String \/ GmosParameters = {
