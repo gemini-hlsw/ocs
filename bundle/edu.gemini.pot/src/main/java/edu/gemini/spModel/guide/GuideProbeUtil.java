@@ -154,13 +154,14 @@ public enum GuideProbeUtil {
                 // and we must rotate the patrol field according to position angle
                 final PatrolField rotatedPatrolField = offsetPatrolField.getTransformed(AffineTransform.getRotateInstance(-ctx.getPositionAngle().toRadians().getMagnitude()));
                 // find distance of base position to the guide star
-                final Coordinates baseCoordinates = ctx.getBaseCoordinates();
-                final CoordinateDiff diff = new CoordinateDiff(baseCoordinates, guideStar.getTarget().getSkycalcCoordinates());
-                final Offset dis = diff.getOffset();
-                final double p = -dis.p().toArcsecs().getMagnitude();
-                final double q = -dis.q().toArcsecs().getMagnitude();
-                // and now check if that guide star is inside the correctly transformed/rotated patrol field
-                return rotatedPatrolField.getArea().contains(p, q);
+                return ctx.getBaseCoordinatesOpt().map(baseCoordinates -> {
+                    final CoordinateDiff diff = new CoordinateDiff(baseCoordinates, guideStar.getTarget().getSkycalcCoordinates());
+                    final Offset dis = diff.getOffset();
+                    final double p = -dis.p().toArcsecs().getMagnitude();
+                    final double q = -dis.q().toArcsecs().getMagnitude();
+                    // and now check if that guide star is inside the correctly transformed/rotated patrol field
+                    return rotatedPatrolField.getArea().contains(p, q);
+                }).getOrElse(false);
             }
         });
     }
