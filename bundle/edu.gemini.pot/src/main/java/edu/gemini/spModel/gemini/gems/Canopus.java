@@ -44,7 +44,7 @@ public enum Canopus {
                 return Canopus.instance.probeRange1(ctx);
             }
             @Override
-            public Area probeArm(ObsContext ctx, boolean validate) {
+            public Option<Area> probeArm(ObsContext ctx, boolean validate) {
                 return Canopus.instance.probeArm1(ctx, validate);
             }
             @Override
@@ -66,7 +66,7 @@ public enum Canopus {
                 return Canopus.instance.probeRange2(ctx);
             }
             @Override
-            public Area probeArm(ObsContext ctx, boolean validate) {
+            public Option<Area> probeArm(ObsContext ctx, boolean validate) {
                 return Canopus.instance.probeArm2(ctx, validate);
             }
             @Override
@@ -94,7 +94,7 @@ public enum Canopus {
                 return Canopus.instance.probeRange3(ctx);
             }
             @Override
-            public Area probeArm(ObsContext ctx, boolean validate) {
+            public Option<Area> probeArm(ObsContext ctx, boolean validate) {
                 throw new RuntimeException("cwfs3 probe arm not defined");
             }
             @Override
@@ -219,9 +219,9 @@ public enum Canopus {
          * @param ctx context of the given observation
          * @param validate if true, calls validate() to check that the probe is in range and the arm is not vignetted
          *
-         * @return Shape describing the guide probe arm
+         * @return Shape describing the guide probe arm, if ctx target coordinates are known
          */
-        public abstract Area probeArm(ObsContext ctx, boolean validate);
+        public abstract Option<Area> probeArm(ObsContext ctx, boolean validate);
 
         public GuideStarValidation validate(SPTarget guideStar, ObsContext ctx) {
             final Option<Long> when = ctx.getSchedulingBlock().map(SchedulingBlock::start);
@@ -242,8 +242,8 @@ public enum Canopus {
         // coordinates of the given guide star
         // (i.e.: The guide star is vignetted by the wfs probe arm)
         private static Option<Boolean> isVignetted(Wfs wfs, SPTarget guideStar, ObsContext ctx) {
-            return ctx.getBaseCoordinatesOpt().map(coords -> {
-                Area a = wfs.probeArm(ctx, false);
+            return ctx.getBaseCoordinatesOpt().flatMap(coords ->
+                wfs.probeArm(ctx, false).map(a -> {
                 if (a == null) return false;
 
                 CoordinateDiff diff = new CoordinateDiff(coords, guideStar.getTarget().getSkycalcCoordinates());
@@ -251,7 +251,7 @@ public enum Canopus {
                 double p = -dis.p().toArcsecs().getMagnitude();
                 double q = -dis.q().toArcsecs().getMagnitude();
                 return a.contains(p, q);
-            });
+            }));
         }
 
         /**
@@ -477,11 +477,11 @@ public enum Canopus {
         return res;
     }
 
-    public Area probeArm1(ObsContext ctx, boolean validate) {
+    public Option<Area> probeArm1(ObsContext ctx, boolean validate) {
         return probeArm(ctx, Wfs.cwfs1, validate);
     }
 
-    public Area probeArm2(ObsContext ctx, boolean validate) {
+    public Option<Area> probeArm2(ObsContext ctx, boolean validate) {
         return probeArm(ctx, Wfs.cwfs2, validate);
     }
 
@@ -493,38 +493,40 @@ public enum Canopus {
      * @return the shape in arcsec relative to the base position, or null if the probe is not
      * in range or is vignetted
      */
-    public Area probeArm(ObsContext ctx, Wfs cwfs, boolean validate) {
-        GuideProbeTargets targets = ctx.getTargets().getOrCreatePrimaryGuideGroup().get(cwfs).getOrElse(null);
-        if (targets != null) {
-            SPTarget target = targets.getPrimary().getOrElse(null);
-            if (target != null && (!validate || cwfs.validate(target, ctx) == GuideStarValidation.VALID)) {
-                // Get offset from base position to cwfs in arcsecs
-                CoordinateDiff diff = new CoordinateDiff(ctx.getBaseCoordinates(), target.getTarget().getSkycalcCoordinates());
-                Offset dis = diff.getOffset();
-                double p = -dis.p().toArcsecs().getMagnitude();
-                double q = -dis.q().toArcsecs().getMagnitude();
+    public Option<Area> probeArm(ObsContext ctx, Wfs cwfs, boolean validate) {
+        return ctx.getBaseCoordinatesOpt().map(coords -> {
+            GuideProbeTargets targets = ctx.getTargets().getOrCreatePrimaryGuideGroup().get(cwfs).getOrElse(null);
+            if (targets != null) {
+                SPTarget target = targets.getPrimary().getOrElse(null);
+                if (target != null && (!validate || cwfs.validate(target, ctx) == GuideStarValidation.VALID)) {
+                    // Get offset from base position to cwfs in arcsecs
+                    CoordinateDiff diff = new CoordinateDiff(coords, target.getTarget().getSkycalcCoordinates());
+                    Offset dis = diff.getOffset();
+                    double p = -dis.p().toArcsecs().getMagnitude();
+                    double q = -dis.q().toArcsecs().getMagnitude();
 
-                // Get current transformations
-                double t = ctx.getPositionAngle().toRadians().getMagnitude();
-                t = t + getRotationConfig(ctx.getIssPort()).toRadians().getMagnitude();
-                AffineTransform xform = new AffineTransform();
-                xform.translate(p, q);
-                xform.rotate(cwfs.getArmAngle(ctx)); // probe arm starting angle
-                if (t != 0.0) xform.rotate(-t);
+                    // Get current transformations
+                    double t = ctx.getPositionAngle().toRadians().getMagnitude();
+                    t = t + getRotationConfig(ctx.getIssPort()).toRadians().getMagnitude();
+                    AffineTransform xform = new AffineTransform();
+                    xform.translate(p, q);
+                    xform.rotate(cwfs.getArmAngle(ctx)); // probe arm starting angle
+                    if (t != 0.0) xform.rotate(-t);
 
-                // Get basic probe arm shape and apply transformations
-                Area res = new Area(new Rectangle2D.Double(
-                        -PROBE_ARM_END, -PROBE_ARM_WIDTH / 2,
-                        RADIUS_ARCSEC * 2, PROBE_ARM_WIDTH));
-                res.transform(xform);
+                    // Get basic probe arm shape and apply transformations
+                    Area res = new Area(new Rectangle2D.Double(
+                            -PROBE_ARM_END, -PROBE_ARM_WIDTH / 2,
+                            RADIUS_ARCSEC * 2, PROBE_ARM_WIDTH));
+                    res.transform(xform);
 
-                // Clip to Canopus range, taking offsets into account
-                Area range = probeRange3(ctx);
-                res.intersect(range);
-                return res;
+                    // Clip to Canopus range, taking offsets into account
+                    Area range = probeRange3(ctx);
+                    res.intersect(range);
+                    return res;
+                }
             }
-        }
-        return  null;
+            return null;
+        });
     }
 
     /**
