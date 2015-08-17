@@ -271,17 +271,19 @@ public enum Canopus {
             SPTarget guideStar = guideStarOpt.getValue();
 
             // Calculate the difference between the coordinate and the observation's base position.
-            CoordinateDiff diff = new CoordinateDiff(ctx.getBaseCoordinates(), guideStar.getTarget().getSkycalcCoordinates());
-            // Get offset and switch it to be defined in the same coordinate
-            // system as the shape.
-            Offset dis = diff.getOffset();
-            double p = -dis.p().toArcsecs().getMagnitude();
-            double q = -dis.q().toArcsecs().getMagnitude();
-            Set<Offset> offsets = new TreeSet<Offset>();
-            offsets.add(offset);
+            return ctx.getBaseCoordinatesOpt().map(base -> {
+                CoordinateDiff diff = new CoordinateDiff(base, guideStar.getTarget().getSkycalcCoordinates());
+                // Get offset and switch it to be defined in the same coordinate
+                // system as the shape.
+                Offset dis = diff.getOffset();
+                double p = -dis.p().toArcsecs().getMagnitude();
+                double q = -dis.q().toArcsecs().getMagnitude();
+                Set<Offset> offsets = new TreeSet<Offset>();
+                offsets.add(offset);
 
-            Area a = Canopus.instance.offsetIntersection(ctx, offsets);
-            return a != null && a.contains(p,q);
+                Area a = Canopus.instance.offsetIntersection(ctx, offsets);
+                return a != null && a.contains(p, q);
+            }).getOrElse(false);
         }
     }
 
