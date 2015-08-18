@@ -55,7 +55,7 @@ public final class Nifs extends Instrument {
 
         _sampling = super.getSampling();
 
-        _centralWavelength = gp.getInstrumentCentralWavelength();
+        _centralWavelength = gp.centralWavelength().toNanometers();
         _mode = odp.getMethod();
 
         if (_centralWavelength < 1000 || _centralWavelength > 6000) {
@@ -63,9 +63,9 @@ public final class Nifs extends Instrument {
         }
 
         //Set read noise and Well depth values by obsevation type
-        _readNoiseValue = gp.getReadMode().getReadNoise();
+        _readNoiseValue = gp.readMode().getReadNoise();
 
-        _Filter = Filter.fromFile(getPrefix(), gp.getFilter().name(), getDirectory() + "/");
+        _Filter = Filter.fromFile(getPrefix(), gp.filter().name(), getDirectory() + "/");
         addFilter(_Filter);
 
         FixedOptics _fixedOptics = new FixedOptics(getDirectory() + "/", getPrefix());
@@ -76,21 +76,21 @@ public final class Nifs extends Instrument {
 
         _dtv = new DetectorsTransmissionVisitor(1, getDirectory() + "/" + getPrefix() + "ccdpix" + Instrument.getSuffix());
 
-        _IFUMethod = gp.getIFUMethod();
-        if (gp.getIFUMethod() instanceof IfuSingle) {
-            _IFUOffset      = ((IfuSingle) gp.getIFUMethod()).offset();
+        _IFUMethod = gp.ifuMethod();
+        if (gp.ifuMethod() instanceof IfuSingle) {
+            _IFUOffset      = ((IfuSingle) gp.ifuMethod()).offset();
             _IFU            = new IFUComponent(_IFUOffset, getPixelSize());
         }
-        else if (gp.getIFUMethod() instanceof IfuRadial) {
-            _IFUMinOffset   = ((IfuRadial) gp.getIFUMethod()).minOffset();
-            _IFUMaxOffset   = ((IfuRadial) gp.getIFUMethod()).maxOffset();
+        else if (gp.ifuMethod() instanceof IfuRadial) {
+            _IFUMinOffset   = ((IfuRadial) gp.ifuMethod()).minOffset();
+            _IFUMaxOffset   = ((IfuRadial) gp.ifuMethod()).maxOffset();
             _IFU            = new IFUComponent(_IFUMinOffset, _IFUMaxOffset, getPixelSize());
         }
-        else if (gp.getIFUMethod() instanceof IfuSummed) {
-            _IFUNumX        = ((IfuSummed) gp.getIFUMethod()).numX();
-            _IFUNumY        = ((IfuSummed) gp.getIFUMethod()).numY();
-            _IFUCenterX     = ((IfuSummed) gp.getIFUMethod()).centerX();
-            _IFUCenterY     = ((IfuSummed) gp.getIFUMethod()).centerY();
+        else if (gp.ifuMethod() instanceof IfuSummed) {
+            _IFUNumX        = ((IfuSummed) gp.ifuMethod()).numX();
+            _IFUNumY        = ((IfuSummed) gp.ifuMethod()).numY();
+            _IFUCenterX     = ((IfuSummed) gp.ifuMethod()).centerX();
+            _IFUCenterY     = ((IfuSummed) gp.ifuMethod()).centerY();
             _IFU            = new IFUComponent(_IFUNumX, _IFUNumY, _IFUCenterX, _IFUCenterY, getPixelSize());
         }
         else {
@@ -99,7 +99,7 @@ public final class Nifs extends Instrument {
         addComponent(_IFU);
 
 
-        _gratingOptics = new NifsGratingOptics(getDirectory() + "/" + getPrefix(), gp.getGrating().name(),
+        _gratingOptics = new NifsGratingOptics(getDirectory() + "/" + getPrefix(), gp.grating().name(),
                 _centralWavelength,
                 _detector.getDetectorPixels(),
                 1);

@@ -1,11 +1,8 @@
 package edu.gemini.itc.baseline.util
 
-import edu.gemini.itc.shared.GnirsParameters
 import edu.gemini.itc.michelle.MichelleParameters
-import edu.gemini.itc.nifs.NifsParameters
-import edu.gemini.itc.shared._
+import edu.gemini.itc.shared.{GnirsParameters, _}
 import edu.gemini.itc.trecs.TRecsParameters
-import edu.gemini.spModel.target._
 
 // TEMPORARY helper
 // All input objects will become immutable data only objects (probably Scala case classes).
@@ -66,12 +63,12 @@ object Hash {
 
   def calc(p: NifsParameters): Int =
     hash(
-      p.getFilter.name,
-      p.getGrating.name,
-      p.getReadMode.name,
-      p.getInstrumentCentralWavelength,
-      p.getIFUMethod,
-      calc(p.getAltair)
+      p.filter.name,
+      p.grating.name,
+      p.readMode.name,
+      p.centralWavelength,
+      p.ifuMethod,
+      calc(p.altair)
     )
 
   def calc(p: NiriParameters): Int =

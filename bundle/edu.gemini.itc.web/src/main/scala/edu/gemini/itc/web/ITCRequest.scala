@@ -4,7 +4,6 @@ import javax.servlet.http.HttpServletRequest
 
 import edu.gemini.itc.base._
 import edu.gemini.itc.michelle.MichelleParameters
-import edu.gemini.itc.nifs.NifsParameters
 import edu.gemini.itc.shared.SourceDefinition.{Distribution, Profile, Recession}
 import edu.gemini.itc.shared.{GnirsParameters, _}
 import edu.gemini.itc.trecs.TRecsParameters
@@ -134,14 +133,14 @@ object ITCRequest {
     val readMode    = r.enumParameter(classOf[GNIRSParams.ReadMode])
     val centralWl   = Wavelength.fromMicrons(r.doubleParameter("instrumentCentralWavelength"))
     val fpMask      = r.enumParameter(classOf[GNIRSParams.SlitWidth])
-    new GnirsParameters(camera, grating, readMode, xDisp, centralWl, fpMask)
+    GnirsParameters(camera, grating, readMode, xDisp, centralWl, fpMask)
   }
 
   def gsaoiParameters(r: ITCRequest): GsaoiParameters = {
     val filter      = r.enumParameter(classOf[Gsaoi.Filter])
     val readMode    = r.enumParameter(classOf[Gsaoi.ReadMode])
     val gems        = gemsParameters(r)
-    new GsaoiParameters(filter, readMode, gems)
+    GsaoiParameters(filter, readMode, gems)
   }
 
   def michelleParameters(r: ITCRequest): MichelleParameters = {
@@ -161,7 +160,7 @@ object ITCRequest {
     val wellDepth   = r.enumParameter(classOf[Niri.WellDepth])
     val fpMask      = r.enumParameter(classOf[Niri.Mask])
     val altair      = altairParameters(r)
-    new NiriParameters(filter, grism, camera, readNoise, wellDepth, fpMask, altair)
+    NiriParameters(filter, grism, camera, readNoise, wellDepth, fpMask, altair)
   }
 
   def nifsParameters(r: ITCRequest): NifsParameters = {
@@ -171,7 +170,7 @@ object ITCRequest {
     val centralWl   = Wavelength.fromMicrons(r.doubleParameter("instrumentCentralWavelength"))
     val ifuMethod   = ifuMethodParameters(r)
     val altair = altairParameters(r)
-    new NifsParameters(filter, grating, readNoise, centralWl, ifuMethod, altair)
+    NifsParameters(filter, grating, readNoise, centralWl, ifuMethod, altair)
    }
 
   def trecsParameters(r: ITCRequest): TRecsParameters = {

@@ -1,8 +1,7 @@
 package edu.gemini.itc.baseline
 
 import edu.gemini.itc.baseline.util._
-import edu.gemini.itc.nifs.NifsParameters
-import edu.gemini.itc.shared.{IfuRadial, IfuSummed, IfuSingle}
+import edu.gemini.itc.shared.{NifsParameters, IfuRadial, IfuSingle, IfuSummed}
 import edu.gemini.spModel.core.Wavelength
 import edu.gemini.spModel.gemini.nifs.NIFSParams
 
@@ -15,7 +14,7 @@ object BaselineNifs {
   lazy val Fixtures = KBandSpectroscopy
 
   private lazy val KBandSpectroscopy = Fixture.kBandSpcFixtures(List(
-    new NifsParameters(
+    NifsParameters(
       NIFSParams.Filter.HK_FILTER,
       NIFSParams.Disperser.K,
       NIFSParams.ReadMode.FAINT_OBJECT_SPEC,
@@ -23,7 +22,7 @@ object BaselineNifs {
       IfuSingle(0.0),               // IFU method
       Fixture.AltairNgsFL
     ),
-    new NifsParameters(
+    NifsParameters(
       NIFSParams.Filter.HK_FILTER,
       NIFSParams.Disperser.K_SHORT,
       NIFSParams.ReadMode.MEDIUM_OBJECT_SPEC,
@@ -31,7 +30,7 @@ object BaselineNifs {
       IfuSingle(0.5),               // IFU method
       Fixture.AltairNgs
     ),
-    new NifsParameters(
+    NifsParameters(
       NIFSParams.Filter.HK_FILTER,
       NIFSParams.Disperser.K_LONG,
       NIFSParams.ReadMode.BRIGHT_OBJECT_SPEC,
@@ -41,7 +40,7 @@ object BaselineNifs {
     ),
 
 
-    new NifsParameters(
+    NifsParameters(
       NIFSParams.Filter.JH_FILTER,
       NIFSParams.Disperser.J,
       NIFSParams.ReadMode.MEDIUM_OBJECT_SPEC,
@@ -49,7 +48,7 @@ object BaselineNifs {
       IfuSummed(2, 5, 0.0, 0.0),
       Fixture.AltairNgsFL
     ),
-    new NifsParameters(
+    NifsParameters(
       NIFSParams.Filter.JH_FILTER,
       NIFSParams.Disperser.H,
       NIFSParams.ReadMode.MEDIUM_OBJECT_SPEC,
@@ -57,7 +56,7 @@ object BaselineNifs {
       IfuSummed(2, 5, 0.0, 0.1),
       Fixture.AltairNgs
     ),
-    new NifsParameters(
+    NifsParameters(
       NIFSParams.Filter.JH_FILTER,
       NIFSParams.Disperser.J,
       NIFSParams.ReadMode.MEDIUM_OBJECT_SPEC,
@@ -67,7 +66,7 @@ object BaselineNifs {
     ),
 
 
-    new NifsParameters(
+    NifsParameters(
       NIFSParams.Filter.ZJ_FILTER,
       NIFSParams.Disperser.Z,
       NIFSParams.ReadMode.FAINT_OBJECT_SPEC,
@@ -75,7 +74,7 @@ object BaselineNifs {
       IfuRadial(0.0, 0.0),
       Fixture.AltairNgsFL
     ),
-    new NifsParameters(
+    NifsParameters(
       NIFSParams.Filter.ZJ_FILTER,
       NIFSParams.Disperser.Z,
       NIFSParams.ReadMode.MEDIUM_OBJECT_SPEC,
@@ -83,7 +82,7 @@ object BaselineNifs {
       IfuRadial(0.0, 1.0),
       Fixture.AltairNgs
     ),
-    new NifsParameters(
+    NifsParameters(
       NIFSParams.Filter.ZJ_FILTER,
       NIFSParams.Disperser.Z,
       NIFSParams.ReadMode.BRIGHT_OBJECT_SPEC,
