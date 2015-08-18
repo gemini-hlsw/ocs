@@ -1,6 +1,5 @@
 package edu.gemini.itc.baseline.util
 
-import edu.gemini.itc.nifs.NifsParameters
 import edu.gemini.itc.shared.TelescopeDetails.Coating
 import edu.gemini.itc.shared._
 import edu.gemini.spModel.core.{MagnitudeBand, Wavelength}
@@ -12,7 +11,6 @@ import edu.gemini.spModel.telescope.IssPort
 
 /**
  * Definition of test fixtures which hold all input parameters needed to execute different ITC recipes.
- * TODO: Altair and gems configuration should probably become a part of the instrument configuration(?).
  */
 case class Fixture[T <: InstrumentDetails](
                     ins: T,
@@ -22,26 +20,10 @@ case class Fixture[T <: InstrumentDetails](
                     tep: TelescopeDetails,
                     pdp: PlottingDetails
                        ) {
-  val hash = Hash.calc(ins) + Hash.calc(src) + Hash.calc(ocp) + Hash.calc(odp) + Hash.calc(tep) + Fixture.altairHash(ins) + Fixture.gemsHash(ins) + Hash.calc(pdp)
+  val hash = Hash.calc(ins) + Hash.calc(src) + Hash.calc(ocp) + Hash.calc(odp) + Hash.calc(tep) + Hash.calc(pdp)
 }
 
 object Fixture {
-
-  // ===  TODO: this is temporary only to mimic old behavior
-  def altairHash(ins: InstrumentDetails): Int = ins match {
-    case i: NiriParameters => altairHash(i.altair)
-    case i: NifsParameters => altairHash(i.getAltair)
-    case _                 => 0
-  }
-  def altairHash(altair: Option[AltairParameters]): Int = altair match {
-    case None    => Hash.calc(new AltairParameters(0.0,  0.0, FieldLens.OUT,  GuideStarType.NGS))
-    case Some(a) => Hash.calc(a)
-  }
-  def gemsHash(ins: InstrumentDetails): Int = ins match {
-    case i: GsaoiParameters => Hash.calc(i.gems)
-    case _                 => 0
-  }
-  // ===
 
   // ==== Create fixtures by putting together matching sources, modes and configurations and mixing in conditions and telescope configurations
 

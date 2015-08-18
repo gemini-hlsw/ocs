@@ -57,10 +57,6 @@ public final class NifsParameters implements InstrumentDetails {
         return cenralWavelength.toNanometers();
     }
 
-    public double getUnXDispCentralWavelength() {
-        return cenralWavelength.toNanometers();
-    }
-
     public IfuMethod getIFUMethod() {
         return ifuMethod;
     }

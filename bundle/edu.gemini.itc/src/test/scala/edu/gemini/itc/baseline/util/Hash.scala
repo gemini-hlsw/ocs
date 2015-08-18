@@ -51,7 +51,8 @@ object Hash {
   def calc(p: GsaoiParameters): Int =
     hash(
       p.filter.name,
-      p.readMode.name
+      p.readMode.name,
+      calc(p.gems)
     )
 
   def calc(p: MichelleParameters): Int =
@@ -66,12 +67,11 @@ object Hash {
   def calc(p: NifsParameters): Int =
     hash(
       p.getFilter.name,
-      p.getFPMask,
       p.getGrating.name,
-      p.getIFUMethod.toString,
-      p.getInstrumentCentralWavelength,
       p.getReadMode.name,
-      p.getUnXDispCentralWavelength
+      p.getInstrumentCentralWavelength,
+      p.getIFUMethod,
+      calc(p.getAltair)
     )
 
   def calc(p: NiriParameters): Int =
@@ -81,7 +81,8 @@ object Hash {
       p.mask.name,
       p.grism.name,
       p.readMode.name,
-      p.wellDepth.name
+      p.wellDepth.name,
+      calc(p.altair)
     )
 
   def calc(p: TRecsParameters): Int =
@@ -120,22 +121,12 @@ object Hash {
       odp.getSourceFraction
     )
 
-  // TODO: simplify this again once refactoring of source/source profile/source distribution is done
   def calc(src: SourceDefinition): Int =
     hash(
       src.getProfileType.name,
       src.getDistributionType.name,
-      src.profile match {
-        case s: GaussianSource => s.fwhm
-        case _                 => 0.0
-      },
-      src.distribution match {
-        case d: BlackBody       => d.temperature
-        case d: PowerLaw        => d.index
-        case d: EmissionLine    => (d.wavelength.toMicrons * 1000 + d.continuum.toWatts) * 1000 + d.flux.toWatts
-        case d: Library         => d.sedSpectrum
-        case d: UserDefined     => d.spectrum
-      },
+      src.profile,
+      src.distribution,
       src.norm,               // this is the magnitude value
       src.normBand.name,      // this is the magnitude band name
       src.redshift
@@ -157,12 +148,17 @@ object Hash {
       ocp.getSkyBackground
     )
 
+  def calc(alt: Option[AltairParameters]): Int = alt match {
+    case Some(altair) => calc(altair)
+    case None         => 0
+  }
+
   def calc(alt: AltairParameters): Int =
-    hash(
+    hash (
       alt.guideStarMagnitude,
       alt.guideStarSeparation,
-      alt.fieldLens.displayValue,
-      alt.wfsMode.displayValue
+      alt.fieldLens.name,
+      alt.wfsMode.name
     )
 
   def calc(alt: GemsParameters): Int =

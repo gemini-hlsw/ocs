@@ -154,6 +154,9 @@ object EmissionLine {
       s"Flux(${toWatts}W/m2)"
 
     /** @group Overrides */
+    final override def hashCode = toWatts.hashCode
+
+    /** @group Overrides */
     final override def equals(a: Any) =
       a match {
         case a: Flux       => a.toWatts == this.toWatts
@@ -174,6 +177,9 @@ object EmissionLine {
     /** @group Overrides */
     final override def toString =
       s"Continuum(${toWatts}W/m2/um)"
+
+    /** @group Overrides */
+    final override def hashCode = toWatts.hashCode
 
     /** @group Overrides */
     final override def equals(a: Any) =
