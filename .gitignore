@@ -40,6 +40,7 @@ project/OcsCredentials.scala
 # Reinclude packages named "target" and bundles that end in ".log"
 !/bundle/edu.gemini.pit/src/main/scala/edu/gemini/pit/ui/view/target
 !/bundle/edu.gemini.pot/src/main/java/edu/gemini/spModel/target
+!/bundle/edu.gemini.pot/src/main/scala/edu/gemini/spModel/target
 !/bundle/edu.gemini.pot/src/main/resources/edu/gemini/spModel/target
 !/bundle/edu.gemini.pot/src/test/java/edu/gemini/spModel/target
 !/bundle/edu.gemini.pot/src/test/scala/edu/gemini/spModel/target
