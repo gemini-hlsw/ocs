@@ -81,23 +81,18 @@ object F2OiwfsProbeArm extends ProbeArmGeometry {
   override def armAdjustment(ctx: ObsContext, guideStar: Coordinates, offset: Offset): Option[ArmAdjustment] = {
     import ProbeArmGeometry._
 
-    for {
-      ctx      <- Option(ctx)
-      offset   <- Option(offset)
-    } yield {
-      val gemsFlag = ctx.getAOComponent.asScalaOpt.fold(false){ ao =>
-        val aoNarrowType = ao.getNarrowType
-        aoNarrowType.equals(Gems.SP_TYPE.narrowType)
-      }
-
-      val flamingos2  = ctx.getInstrument.asInstanceOf[Flamingos2]
-      val flip        = flamingos2.getFlipConfig(gemsFlag)
-      val posAngle    = ctx.getPositionAngle.toNewModel
-      val fovRotation = flamingos2.getRotationConfig(gemsFlag).toNewModel
-      val gsOffset    = guideStarOffset(ctx, guideStar)
-      val angle       = armAngle(posAngle, fovRotation, gsOffset, offset, flip, flamingos2.getLyotWheel.getPlateScale)
-      ArmAdjustment(angle, gsOffset)
+    val gemsFlag = ctx.getAOComponent.asScalaOpt.fold(false){ ao =>
+      val aoNarrowType = ao.getNarrowType
+      aoNarrowType.equals(Gems.SP_TYPE.narrowType)
     }
+
+    val flamingos2  = ctx.getInstrument.asInstanceOf[Flamingos2]
+    val flip        = flamingos2.getFlipConfig(gemsFlag)
+    val posAngle    = ctx.getPositionAngle.toNewModel
+    val fovRotation = flamingos2.getRotationConfig(gemsFlag).toNewModel
+    val gsOffset    = guideStarOffset(ctx, guideStar)
+    val angle       = armAngle(posAngle, fovRotation, gsOffset, offset, flip, flamingos2.getLyotWheel.getPlateScale)
+    Some(ArmAdjustment(angle, gsOffset))
   }
 
 
