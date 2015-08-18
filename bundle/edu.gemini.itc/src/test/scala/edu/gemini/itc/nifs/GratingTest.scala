@@ -10,7 +10,7 @@ class GratingTest {
 
   @Test
   def validateNifsGrating(): Unit = {
-    val g = new NifsGratingOptics("/nifs/nifs_", "j_G5603", 1200.0, 1, 1)
+    val g = new NifsGratingOptics("/nifs/nifs_", "J", 1200.0, 1, 1)
     assertEquals(1200.0,    g.getEffectiveWavelength,         0.00001)
     assertEquals(1199.9475, g.getStart,                       0.00001)
     assertEquals(1200.0525, g.getEnd,                         0.00001)
