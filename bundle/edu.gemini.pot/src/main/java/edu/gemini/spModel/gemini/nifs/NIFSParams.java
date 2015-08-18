@@ -1,15 +1,9 @@
-// Copyright 1997-2000
-// Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-// See the file COPYRIGHT for complete details.
-//
-// $Id: NIFSParams.java 38186 2011-10-24 13:21:33Z swalker $
-//
 package edu.gemini.spModel.gemini.nifs;
 
 import edu.gemini.spModel.config2.ItemKey;
 import static edu.gemini.spModel.seqcomp.SeqConfigNames.INSTRUMENT_KEY;
 import edu.gemini.spModel.type.*;
+import scala.Option;
 
 /**
  * This class provides data types for the NIFS components.
@@ -21,16 +15,17 @@ public final class NIFSParams {
 
     /**
      * Dispersers
+     * All dispersers have a default filter they correspond to in case the filter is set to "Same as Disperser".
      */
-    public static enum Disperser implements DisplayableSpType, SequenceableSpType {
+    public enum Disperser implements DisplayableSpType, SequenceableSpType {
 
-        Z("Z Grating", 1.050),
-        J("J Grating", 1.250),
-        H("H Grating", 1.650),
-        K("K Grating", 2.200),
-        K_SHORT("K_short Grating", 2.100),
-        K_LONG("K_long Grating", 2.300),
-        MIRROR("Mirror", 0.), // not applicable
+        Z(      "Z Grating",        1.050,  Filter.ZJ_FILTER),
+        J(      "J Grating",        1.250,  Filter.ZJ_FILTER),
+        H(      "H Grating",        1.650,  Filter.JH_FILTER),
+        K(      "K Grating",        2.200,  Filter.HK_FILTER),
+        K_SHORT("K_short Grating",  2.100,  Filter.HK_FILTER),
+        K_LONG( "K_long Grating",   2.300,  Filter.HK_FILTER),
+        MIRROR( "Mirror",           0.0,    Filter.HK_FILTER),
         ;
 
         /**
@@ -41,10 +36,13 @@ public final class NIFSParams {
         // The default central wavelength in um
         private double _wavelength;
         private String _displayValue;
+        // The default filter for this grating if filter is "Same as Disperser"
+        private Filter _defaultFilter;
 
-        private Disperser(String displayValue, double wavelength) {
-            _displayValue = displayValue;
-            _wavelength = wavelength;
+        Disperser(String displayValue, double wavelength, Filter defaultFilter) {
+            _displayValue   = displayValue;
+            _wavelength     = wavelength;
+            _defaultFilter  = defaultFilter;
         }
 
         /**
@@ -60,6 +58,10 @@ public final class NIFSParams {
 
         public String sequenceValue() {
             return _displayValue;
+        }
+
+        public Filter defaultFilter() {
+            return _defaultFilter;
         }
 
         /**
@@ -87,23 +89,23 @@ public final class NIFSParams {
     /**
      * Read Mode (REL-481)
      */
-    public static enum ReadMode implements StandardSpType {
+    public enum ReadMode implements StandardSpType {
 
         // Faint object read = Fowler 16-16, readnoise = 6e- (overhead = 85sec per image)
         FAINT_OBJECT_SPEC(
                 "1-2.5 um: Faint Object Spectroscopy",
-                "Weak Source", "4.6 e- @ 77K", 85.0, "> 85 sec", 16, "faint"),
+                "Weak Source", 4.6, 85.0, "> 85 sec", 16, "faint"),
 
         // Added for OT-507
         // Medium read = Fowler 4-4, readnoise=9e- (overhead = 21sec per image)
         MEDIUM_OBJECT_SPEC(
                 "1-2.5 um: Medium Object Spectroscopy",
-                "Medium Source", "8.1 e- @ 77K", 21.0, "> 21 sec", 4, "medium"),
+                "Medium Source", 8.1, 21.0, "> 21 sec", 4, "medium"),
 
         // Bright object read = Fowler 1-1, readnoise = 18 e- (overhead = 5sec per image)
         BRIGHT_OBJECT_SPEC(
                 "1-2.5 um: Bright Object Spectroscopy",
-                "Strong Source", "15.4 e- @ 77K", 5.3, "> 5 sec", 1, "bright"),;
+                "Strong Source", 15.4, 5.3, "> 5 sec", 1, "bright"),;
 
         /**
          * The default ReadMode value
@@ -115,11 +117,11 @@ public final class NIFSParams {
         private String _displayValue;
         private String _description;
         private String _logValue;
-        private String _readNoise;
+        private double _readNoise;
         private String _recommendedExp;
         private int _fowlerSampling;
 
-        private ReadMode(String displayValue, String description, String readNoise,
+        ReadMode(String displayValue, String description, double readNoise,
                          double minExp, String recommendedExp, int fowlerSampling,
                          String logValue) {
             _displayValue = displayValue;
@@ -189,7 +191,7 @@ public final class NIFSParams {
             return _fowlerSampling;
         }
 
-        public String getReadNoise() {
+        public double getReadNoise() {
             return _readNoise;
         }
 
@@ -205,7 +207,7 @@ public final class NIFSParams {
     /**
      * Engineering Read Mode
      */
-    public static enum EngReadMode implements DisplayableSpType, LoggableSpType, SequenceableSpType {
+    public enum EngReadMode implements DisplayableSpType, LoggableSpType, SequenceableSpType {
 
         FOWLER_SAMPLING_READOUT("Fowler Sampling Readout", "fowler"),
         LINEAR_READ("Linear Read", "linear"),
@@ -219,7 +221,7 @@ public final class NIFSParams {
         private String _displayValue;
         private String _logValue;
 
-        private EngReadMode(String displayValue, String logValue) {
+        EngReadMode(String displayValue, String logValue) {
             _displayValue = displayValue;
             _logValue = logValue;
         }
@@ -261,7 +263,7 @@ public final class NIFSParams {
     /**
      * Masks
      */
-    public static enum Mask implements DisplayableSpType, SequenceableSpType, LoggableSpType {
+    public enum Mask implements DisplayableSpType, SequenceableSpType, LoggableSpType {
 
         CLEAR("Clear", "clear", false),
         PINHOLE("0.1 arcsec Pinhole", "pinhole", false),
@@ -298,7 +300,7 @@ public final class NIFSParams {
          * @param logValue  the name for logging
          * @param isOccultingDisk true if the mask is an occulting disk
          */
-        private Mask(String displayValue, String logValue, boolean isOccultingDisk) {
+        Mask(String displayValue, String logValue, boolean isOccultingDisk) {
             _displayValue = displayValue;
             _isOccultingDisk = isOccultingDisk;
             _logValue = logValue;
@@ -362,7 +364,7 @@ public final class NIFSParams {
     /**
      * Filters
      */
-    public static enum Filter implements DisplayableSpType, SequenceableSpType {
+    public enum Filter implements DisplayableSpType, SequenceableSpType {
 
         // OT-500:
         // IF (grating = "Mirror" or Imaging Mirror = "In") and filter =
@@ -385,11 +387,11 @@ public final class NIFSParams {
         private String _wavelength;  // in µm
         private String _displayValue;
 
-        private Filter(String displayValue) {
+        Filter(String displayValue) {
             _displayValue = displayValue;
         }
 
-        private Filter(String displayValue, String wavelength) {
+        Filter(String displayValue, String wavelength) {
             this(displayValue);
             _wavelength = wavelength;
         }
@@ -434,7 +436,7 @@ public final class NIFSParams {
     /**
      * ImagingMirror values (out/in).
      */
-    public static enum ImagingMirror implements DisplayableSpType, SequenceableSpType {
+    public enum ImagingMirror implements DisplayableSpType, SequenceableSpType {
 
         OUT("Out"),
         IN("In"),
@@ -447,7 +449,7 @@ public final class NIFSParams {
 
         private String _displayValue;
 
-        private ImagingMirror(String displayValue) {
+        ImagingMirror(String displayValue) {
             _displayValue = displayValue;
         }
 

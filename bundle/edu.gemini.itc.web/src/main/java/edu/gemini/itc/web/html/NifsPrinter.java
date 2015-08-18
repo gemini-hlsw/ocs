@@ -1,16 +1,11 @@
 package edu.gemini.itc.web.html;
 
 import edu.gemini.itc.altair.Altair;
-import edu.gemini.itc.base.ITCConstants;
-import edu.gemini.itc.base.SEDFactory;
 import edu.gemini.itc.base.SpectroscopyResult;
-import edu.gemini.itc.base.VisitableSampledSpectrum;
 import edu.gemini.itc.nifs.IFUComponent;
 import edu.gemini.itc.nifs.Nifs;
-import edu.gemini.itc.nifs.NifsParameters;
 import edu.gemini.itc.nifs.NifsRecipe;
 import edu.gemini.itc.shared.*;
-import edu.gemini.spModel.core.Site;
 import scala.Tuple2;
 
 import java.io.PrintWriter;
@@ -41,17 +36,6 @@ public final class NifsPrinter extends PrinterBase {
         final Nifs instrument = (Nifs) result.instrument();
 
         _println("");
-
-        // TODO : THIS IS PURELY FOR REGRESSION TEST ONLY, REMOVE ASAP
-        // Get the summed source and sky
-        final SEDFactory.SourceResult calcSource0 = SEDFactory.calculate(instrument, Site.GN, ITCConstants.NEAR_IR, result.source(), result.conditions(), result.telescope());
-        final VisitableSampledSpectrum sed0 = calcSource0.sed;
-        final VisitableSampledSpectrum sky0 = calcSource0.sky;
-        final double sed_integral0 = sed0.getIntegral();
-        final double sky_integral0 = sky0.getIntegral();
-        // Update this in (or remove from) regression test baseline:
-        _println("SED Int: " + sed_integral0 + " Sky Int: " + sky_integral0);
-        // TODO : THIS IS PURELY FOR REGRESSION TEST ONLY, REMOVE ASAP
 
         if (result.aoSystem().isDefined()) {
             _println(HtmlPrinter.printSummary((Altair) result.aoSystem().get()));
@@ -101,7 +85,7 @@ public final class NifsPrinter extends PrinterBase {
         s += HtmlPrinter.opticalComponentsToString(instrument);
         s += "<LI>Focal Plane Mask: ifu\n";
         s += "<LI>Read Noise: " + instrument.getReadNoise() + "\n";
-        s += "<LI>Well Depth: " + instrument.getWellDepth() + "\n";
+        s += "<LI>Well Depth: 90000.0\n";
         s += "\n";
 
         s += "<L1> Central Wavelength: " + instrument.getCentralWavelength() + " nm" + "\n";
@@ -110,9 +94,9 @@ public final class NifsPrinter extends PrinterBase {
         s += String.format("Pixel Size in Spectral Direction: %.3f nm\n", instrument.getGratingDispersion_nmppix());
 
         s += "IFU is selected,";
-        if (instrument.getIFUMethod().equals(NifsParameters.SINGLE_IFU))
+        if (instrument.getIFUMethod() instanceof IfuSingle)
             s += "with a single IFU element at " + instrument.getIFUOffset() + " arcsecs.";
-        else if (instrument.getIFUMethod().equals(NifsParameters.SUMMED_APERTURE_IFU))
+        else if (instrument.getIFUMethod() instanceof IfuSummed)
             s += String.format("with multiple summed IFU elements arranged in a " + instrument.getIFUNumX() + "x" + instrument.getIFUNumY() +
                     " (%.3f\"x%.3f\") grid.", instrument.getIFUNumX() * IFUComponent.IFU_LEN_X, instrument.getIFUNumY() * IFUComponent.IFU_LEN_Y);
         else

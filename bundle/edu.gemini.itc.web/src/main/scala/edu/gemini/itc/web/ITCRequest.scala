@@ -4,7 +4,6 @@ import javax.servlet.http.HttpServletRequest
 
 import edu.gemini.itc.base._
 import edu.gemini.itc.michelle.MichelleParameters
-import edu.gemini.itc.nifs.NifsParameters
 import edu.gemini.itc.shared.SourceDefinition.{Distribution, Profile, Recession}
 import edu.gemini.itc.shared.{GnirsParameters, _}
 import edu.gemini.itc.trecs.TRecsParameters
@@ -18,6 +17,7 @@ import edu.gemini.spModel.gemini.gmos.GmosSouthType.{DisperserSouth, FPUnitSouth
 import edu.gemini.spModel.gemini.gnirs.GNIRSParams
 import edu.gemini.spModel.gemini.gsaoi.Gsaoi
 import edu.gemini.spModel.gemini.michelle.MichelleParams
+import edu.gemini.spModel.gemini.nifs.NIFSParams
 import edu.gemini.spModel.gemini.niri.Niri
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality
 import edu.gemini.spModel.guide.GuideProbe
@@ -122,15 +122,7 @@ object ITCRequest {
     val ccdType     = r.enumParameter(classOf[DetectorManufacturer])
     val centralWl   = Wavelength.fromNanometers(r.doubleParameter("instrumentCentralWavelength"))
     val fpMask      = if (site.equals(Site.GN)) r.enumParameter(classOf[FPUnitNorth],    "instrumentFPMask")   else r.enumParameter(classOf[FPUnitSouth],      "instrumentFPMask")
-    val ifuMethod: Option[IfuMethod]   = if (fpMask.isIFU) {
-      r.parameter("ifuMethod") match {
-        case "singleIFU" => Some(IfuSingle(r.doubleParameter("ifuOffset")))
-        case "radialIFU" => Some(IfuRadial(r.doubleParameter("ifuMinOffset"), r.doubleParameter("ifuMaxOffset")))
-        case _ => throw new IllegalArgumentException()
-      }} else {
-      None
-    }
-
+    val ifuMethod   = if (fpMask.isIFU) Some(ifuMethodParameters(r)) else None
     GmosParameters(filter, grating, centralWl, fpMask, None, spatBinning, specBinning, ifuMethod, ccdType, site)
   }
 
@@ -141,14 +133,14 @@ object ITCRequest {
     val readMode    = r.enumParameter(classOf[GNIRSParams.ReadMode])
     val centralWl   = Wavelength.fromMicrons(r.doubleParameter("instrumentCentralWavelength"))
     val fpMask      = r.enumParameter(classOf[GNIRSParams.SlitWidth])
-    new GnirsParameters(camera, grating, readMode, xDisp, centralWl, fpMask)
+    GnirsParameters(camera, grating, readMode, xDisp, centralWl, fpMask)
   }
 
   def gsaoiParameters(r: ITCRequest): GsaoiParameters = {
     val filter      = r.enumParameter(classOf[Gsaoi.Filter])
     val readMode    = r.enumParameter(classOf[Gsaoi.ReadMode])
     val gems        = gemsParameters(r)
-    new GsaoiParameters(filter, readMode, gems)
+    GsaoiParameters(filter, readMode, gems)
   }
 
   def michelleParameters(r: ITCRequest): MichelleParameters = {
@@ -168,32 +160,17 @@ object ITCRequest {
     val wellDepth   = r.enumParameter(classOf[Niri.WellDepth])
     val fpMask      = r.enumParameter(classOf[Niri.Mask])
     val altair      = altairParameters(r)
-    new NiriParameters(filter, grism, camera, readNoise, wellDepth, fpMask, altair)
+    NiriParameters(filter, grism, camera, readNoise, wellDepth, fpMask, altair)
   }
 
   def nifsParameters(r: ITCRequest): NifsParameters = {
-    val filter      = r.parameter("instrumentFilter")
-    val grating     = r.parameter("instrumentDisperser")
-    val readNoise   = r.parameter("readNoise")
+    val filter      = r.enumParameter(classOf[NIFSParams.Filter])
+    val grating     = r.enumParameter(classOf[NIFSParams.Disperser])
+    val readNoise   = r.enumParameter(classOf[NIFSParams.ReadMode])
     val centralWl   = Wavelength.fromMicrons(r.doubleParameter("instrumentCentralWavelength"))
-    val ifuMethod   = r.parameter("ifuMethod")
-    val (offset, min, max, numX, numY, centerX, centerY) = ifuMethod match {
-      case "singleIFU"  =>
-        val offset = r.parameter("ifuOffset")
-        (offset, "", "", "", "", "", "")
-      case "radialIFU"  =>
-        val min = r.parameter("ifuMinOffset")
-        val max = r.parameter("ifuMaxOffset")
-        ("", min, max, "", "", "", "")
-      case "summedApertureIFU" =>
-        val numX = r.parameter("ifuNumX")
-        val numY = r.parameter("ifuNumY")
-        val cenX = r.parameter("ifuCenterX")
-        val cenY = r.parameter("ifuCenterY")
-        ("", "", "", numX, numY, cenX, cenY)
-    }
+    val ifuMethod   = ifuMethodParameters(r)
     val altair = altairParameters(r)
-    new NifsParameters(filter, grating, readNoise, centralWl, ifuMethod, offset, min, max, numX, numY, centerX, centerY, altair)
+    NifsParameters(filter, grating, readNoise, centralWl, ifuMethod, altair)
    }
 
   def trecsParameters(r: ITCRequest): TRecsParameters = {
@@ -323,6 +300,13 @@ object ITCRequest {
 
     // WOW, finally we've got everything in place..
     new SourceDefinition(spatialProfile, sourceDefinition, norm, units, normBand, redshift)
+  }
+
+  def ifuMethodParameters(r: ITCRequest): IfuMethod = r.parameter("ifuMethod") match {
+      case "singleIFU"  => IfuSingle(r.doubleParameter("ifuOffset"))
+      case "radialIFU"  => IfuRadial(r.doubleParameter("ifuMinOffset"), r.doubleParameter("ifuMaxOffset"))
+      case "summedIFU"  => IfuSummed(r.intParameter("ifuNumX"), r.intParameter("ifuNumY"), r.doubleParameter("ifuCenterX"), r.doubleParameter("ifuCenterY"))
+      case _            => throw new IllegalArgumentException()
   }
 
   def parameters(r: ITCRequest): Parameters = {

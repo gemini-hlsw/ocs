@@ -7,6 +7,7 @@ import edu.gemini.spModel.gemini.flamingos2.Flamingos2
 import edu.gemini.spModel.gemini.gmos.GmosCommonType
 import edu.gemini.spModel.gemini.gnirs.GNIRSParams
 import edu.gemini.spModel.gemini.gsaoi.Gsaoi
+import edu.gemini.spModel.gemini.nifs.NIFSParams
 import edu.gemini.spModel.gemini.niri.Niri
 
 /*
@@ -47,9 +48,17 @@ final case class GnirsParameters(
                      slitWidth:         GNIRSParams.SlitWidth) extends InstrumentDetails
 
 final case class GsaoiParameters(
-                      filter:           Gsaoi.Filter,
-                      readMode:         Gsaoi.ReadMode,
-                      gems:             GemsParameters) extends InstrumentDetails
+                     filter:            Gsaoi.Filter,
+                     readMode:          Gsaoi.ReadMode,
+                     gems:              GemsParameters) extends InstrumentDetails
+
+final case class NifsParameters(
+                     filter:            NIFSParams.Filter,
+                     grating:           NIFSParams.Disperser,
+                     readMode:          NIFSParams.ReadMode,
+                     centralWavelength: Wavelength,
+                     ifuMethod:         IfuMethod,
+                     altair:            Option[AltairParameters]) extends InstrumentDetails
 
 final case class NiriParameters(
                      filter:            Niri.Filter,

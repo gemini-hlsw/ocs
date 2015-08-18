@@ -87,8 +87,8 @@ public final class NifsRecipe implements SpectroscopyRecipe {
         IQcalc.calculate();
 
         final Option<AOSystem> altair;
-        if (_nifsParameters.getAltair().isDefined()) {
-            final Altair ao = new Altair(instrument.getEffectiveWavelength(), _telescope.getTelescopeDiameter(), IQcalc.getImageQuality(), _nifsParameters.getAltair().get(), 0.0);
+        if (_nifsParameters.altair().isDefined()) {
+            final Altair ao = new Altair(instrument.getEffectiveWavelength(), _telescope.getTelescopeDiameter(), IQcalc.getImageQuality(), _nifsParameters.altair().get(), 0.0);
             altair = Option.apply((AOSystem) ao);
         } else {
             altair = Option.empty();
@@ -155,12 +155,12 @@ public final class NifsRecipe implements SpectroscopyRecipe {
         final Iterator<Double> halo_src_frac_it = halo_sf_list.iterator();
 
         int i = 0;
-        final SpecS2N[] specS2Narr = new SpecS2N[_nifsParameters.getIFUMethod().equals(NifsParameters.SUMMED_APERTURE_IFU) ? 1 : sf_list.size()];
+        final SpecS2N[] specS2Narr = new SpecS2N[_nifsParameters.ifuMethod() instanceof IfuSummed ? 1 : sf_list.size()];
 
         while (src_frac_it.hasNext()) {
             double ap_diam = 1;
 
-            if (_nifsParameters.getIFUMethod().equals(NifsParameters.SUMMED_APERTURE_IFU)) {
+            if (_nifsParameters.ifuMethod()  instanceof IfuSummed) {
                 while (src_frac_it.hasNext()) {
                     spec_source_frac = spec_source_frac + src_frac_it.next();
                     halo_spec_source_frac = halo_spec_source_frac + halo_src_frac_it.next();
@@ -173,7 +173,10 @@ public final class NifsRecipe implements SpectroscopyRecipe {
             }
 
 
-            final SpecS2NLargeSlitVisitor specS2N = new SpecS2NLargeSlitVisitor(_nifsParameters.getFPMask(), pixel_size,
+            // fp mask is fixed as 0.15
+            final double fpMask = 0.15;
+
+            final SpecS2NLargeSlitVisitor specS2N = new SpecS2NLargeSlitVisitor(fpMask, pixel_size,
                     instrument.getSpectralPixelWidth(),
                     instrument.getObservingStart(),
                     instrument.getObservingEnd(),
@@ -192,7 +195,7 @@ public final class NifsRecipe implements SpectroscopyRecipe {
             specS2N.setBackgroundSpectrum(calcSource.sky);
             specS2N.setHaloSpectrum(altair.isDefined() ? calcSource.halo.get() : (VisitableSampledSpectrum) calcSource.sed.clone());
             specS2N.setHaloImageQuality(IQcalc.getImageQuality());
-            if (_nifsParameters.getAltair().isDefined())
+            if (_nifsParameters.altair().isDefined())
                 specS2N.setSpecHaloSourceFraction(halo_spec_source_frac);
             else
                 specS2N.setSpecHaloSourceFraction(0.0);
@@ -212,7 +215,7 @@ public final class NifsRecipe implements SpectroscopyRecipe {
     private static SpcChartData createNifsSignalChart(final SpectroscopyResult result, final int index) {
         final Nifs instrument = (Nifs) result.instrument();
         final List<Double> ap_offset_list = instrument.getIFU().getApertureOffsetList();
-        final String title = instrument.getIFUMethod().equals(NifsParameters.SUMMED_APERTURE_IFU) ?
+        final String title = instrument.getIFUMethod() instanceof IfuSummed ?
                 "Signal and Background (IFU summed apertures: " +
                         instrument.getIFUNumX() + "x" + instrument.getIFUNumY() +
                         ", " + String.format("%.3f", instrument.getIFUNumX() * IFUComponent.IFU_LEN_X) + "\"x" +
@@ -224,7 +227,7 @@ public final class NifsRecipe implements SpectroscopyRecipe {
     private static SpcChartData createNifsS2NChart(final SpectroscopyResult result, final int index) {
         final Nifs instrument = (Nifs) result.instrument();
         final List<Double> ap_offset_list = instrument.getIFU().getApertureOffsetList();
-        final String title = instrument.getIFUMethod().equals(NifsParameters.SUMMED_APERTURE_IFU) ?
+        final String title = instrument.getIFUMethod() instanceof IfuSummed ?
                 "Intermediate Single Exp and Final S/N \n(IFU apertures:" +
                         instrument.getIFUNumX() + "x" + instrument.getIFUNumY() +
                         ", " + String.format("%.3f", instrument.getIFUNumX() * IFUComponent.IFU_LEN_X) + "\"x" +

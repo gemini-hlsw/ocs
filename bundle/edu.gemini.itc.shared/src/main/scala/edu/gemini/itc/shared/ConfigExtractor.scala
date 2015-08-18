@@ -11,6 +11,7 @@ import edu.gemini.spModel.gemini.flamingos2.Flamingos2
 import edu.gemini.spModel.gemini.gmos.{GmosCommonType, GmosNorthType, GmosSouthType, InstGmosNorth}
 import edu.gemini.spModel.gemini.gnirs.GNIRSParams
 import edu.gemini.spModel.gemini.gsaoi.Gsaoi
+import edu.gemini.spModel.gemini.nifs.NIFSParams
 import edu.gemini.spModel.gemini.niri.Niri
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality
 import edu.gemini.spModel.guide.GuideProbe
@@ -61,6 +62,7 @@ object ConfigExtractor {
       case INSTRUMENT_GNIRS                       => extractGnirs(c)
       case INSTRUMENT_GMOS | INSTRUMENT_GMOSSOUTH => extractGmos(c)
       case INSTRUMENT_GSAOI                       => extractGsaoi(c, cond)
+      case INSTRUMENT_NIFS                        => extractNifs(targetEnv, probe, c)
       case INSTRUMENT_NIRI                        => extractNiri(targetEnv, probe, c)
       case _                                      => "Instrument is not supported".left
     }
@@ -181,6 +183,24 @@ object ConfigExtractor {
       gems        <- extractGems            (filter)
     } yield {
       GsaoiParameters(filter, readMode, gems)
+    }
+  }
+
+  private def extractNifs(targetEnv: TargetEnvironment, probe: GuideProbe, c: Config): String \/ NifsParameters = {
+
+    import NIFSParams._
+
+    for {
+      filter      <- extract[Filter]        (c, FilterKey)
+      grating     <- extract[Disperser]     (c, DisperserKey)
+      readMode    <- extract[ReadMode]      (c, ReadModeKey)
+      altair      <- extractAltair          (targetEnv, probe, c)
+      wavelen     <- extractObservingWavelength(c)
+    } yield {
+      // Note: In the future we will support more options, for now only single on-axis is supported.
+      val ifu = IfuSingle(0.0)
+
+      NifsParameters(filter, grating, readMode, wavelen, ifu, altair)
     }
   }
 

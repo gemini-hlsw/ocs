@@ -167,7 +167,7 @@ public final class EdCompInstNIFS extends EdCompInstBase<InstNIFS>
             _w.readModeFaintLabel.setEnabled(false);
         }
         _w.readModeMinExpTime.setText(readMode.getMinExpAsString());
-        _w.readModeNoise.setText(readMode.getReadNoise());
+        _w.readModeNoise.setText(String.format("%.1f e- @ 77K", readMode.getReadNoise()));
         _w.readModeRecMinExpTime.setText(readMode.getRecommendedMinExp());
     }
 
@@ -231,7 +231,7 @@ public final class EdCompInstNIFS extends EdCompInstBase<InstNIFS>
             if (disperser == Disperser.MIRROR) {
                 // OT-314: If the mirror is configured  then the Filter should automatically
                 // default to the K-band filter.
-                _w.filter.setSelectedIndex(Filter.HK_FILTER.ordinal());
+                _w.filter.setSelectedIndex(Disperser.MIRROR.defaultFilter().ordinal());
                 // OT-318: set default read mode to bright object
                 getDataObject().setReadMode(ReadMode.BRIGHT_OBJECT_SPEC);
                 _updateReadMode();
@@ -245,7 +245,7 @@ public final class EdCompInstNIFS extends EdCompInstBase<InstNIFS>
             if (filter == Filter.SAME_AS_DISPERSER && disperser == Disperser.MIRROR) {
                 // OT-314: If the mirror is configured  then the Filter should automatically
                 // default to the K-band filter.
-                filter = Filter.HK_FILTER;
+                filter = Disperser.MIRROR.defaultFilter();
             }
             getDataObject().setFilter(filter);
         }
