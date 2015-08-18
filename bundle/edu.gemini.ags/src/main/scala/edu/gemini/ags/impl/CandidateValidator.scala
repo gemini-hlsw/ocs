@@ -26,7 +26,7 @@ protected case class CandidateValidator(params: SingleProbeStrategyParams, mt: M
    * established context. Returns constant `false` if base coordinates are unknown.
    */
   private def isValid(ctx: ObsContext): (SiderealTarget) => Boolean =
-    ctx.getBaseCoordinatesOpt.asScalaOpt.fold((_: SiderealTarget) => false) { base =>
+    ctx.getBaseCoordinates.asScalaOpt.fold((_: SiderealTarget) => false) { base =>
     val magLimits:Option[MagnitudeConstraints] = params.magnitudeCalc(ctx, mt).flatMap(AgsMagnitude.autoSearchConstraints(_, ctx.getConditions))
 
     (st: SiderealTarget) => {

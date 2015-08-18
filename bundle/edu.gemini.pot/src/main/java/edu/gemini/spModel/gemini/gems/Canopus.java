@@ -242,7 +242,7 @@ public enum Canopus {
         // coordinates of the given guide star
         // (i.e.: The guide star is vignetted by the wfs probe arm)
         private static Option<Boolean> isVignetted(Wfs wfs, SPTarget guideStar, ObsContext ctx) {
-            return ctx.getBaseCoordinatesOpt().flatMap(coords ->
+            return ctx.getBaseCoordinates().flatMap(coords ->
                 wfs.probeArm(ctx, false).map(a -> {
                 if (a == null) return false;
 
@@ -271,7 +271,7 @@ public enum Canopus {
             SPTarget guideStar = guideStarOpt.getValue();
 
             // Calculate the difference between the coordinate and the observation's base position.
-            return ctx.getBaseCoordinatesOpt().map(base -> {
+            return ctx.getBaseCoordinates().map(base -> {
                 CoordinateDiff diff = new CoordinateDiff(base, guideStar.getTarget().getSkycalcCoordinates());
                 // Get offset and switch it to be defined in the same coordinate
                 // system as the shape.
@@ -496,7 +496,7 @@ public enum Canopus {
      * in range or is vignetted
      */
     public Option<Area> probeArm(ObsContext ctx, Wfs cwfs, boolean validate) {
-        return ctx.getBaseCoordinatesOpt().map(coords -> {
+        return ctx.getBaseCoordinates().map(coords -> {
             GuideProbeTargets targets = ctx.getTargets().getOrCreatePrimaryGuideGroup().get(cwfs).getOrElse(null);
             if (targets != null) {
                 SPTarget target = targets.getPrimary().getOrElse(null);
@@ -538,7 +538,7 @@ public enum Canopus {
     public Set<Wfs> getProbesInRange(Coordinates coords, ObsContext ctx) {
         Set<Wfs> res = new HashSet<Wfs>();
 
-        ctx.getBaseCoordinatesOpt().foreach(bcs -> {
+        ctx.getBaseCoordinates().foreach(bcs -> {
             // Calculate the difference between the coordinate and the observation's
             // base position.
             CoordinateDiff diff;

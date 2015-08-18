@@ -190,7 +190,7 @@ case class SingleProbeStrategy(key: AgsStrategyKey, params: SingleProbeStrategyP
 
   private def filterUnbounded(ctx: ObsContext, mt: MagnitudeTable, candidates: List[SiderealTarget]): List[(ObsContext, List[SiderealTarget])] = {
     for {
-      base <- ctx.getBaseCoordinatesOpt.asScalaOpt.toList
+      base <- ctx.getBaseCoordinates.asScalaOpt.toList
       so <- candidates
       pa = SingleProbeStrategy.calculatePositionAngle(base.toNewModel, so)
       ctxSo = ctx.withPositionAngle(pa.toOldModel)
@@ -211,7 +211,7 @@ case class SingleProbeStrategy(key: AgsStrategyKey, params: SingleProbeStrategyP
 
     val pairs: List[(Angle, SiderealTarget)] =
       for {
-        base <- ctx.getBaseCoordinatesOpt.asScalaOpt.toList
+        base <- ctx.getBaseCoordinates.asScalaOpt.toList
         so   <- candidates
       } yield (SingleProbeStrategy.calculatePositionAngle(base.toNewModel, so), so)
 

@@ -122,7 +122,7 @@ public enum GuideProbeUtil {
     public GuideStarValidation validate(final Coordinates coords, final GuideProbe guideProbe, final ObsContext ctx) {
         final Angle positionAngle = ctx.getPositionAngle();
         final Set<Offset> sciencePositions = ctx.getSciencePositions();
-        return ctx.getBaseCoordinatesOpt().map(bcs ->
+        return ctx.getBaseCoordinates().map(bcs ->
             guideProbe.getCorrectedPatrolField(ctx).exists(patrolField -> {
                final BoundaryPosition bp = patrolField.checkBoundaries(coords, bcs, positionAngle, sciencePositions);
                return !(bp == BoundaryPosition.outside || bp == BoundaryPosition.outerBoundary);
@@ -154,7 +154,7 @@ public enum GuideProbeUtil {
                 // and we must rotate the patrol field according to position angle
                 final PatrolField rotatedPatrolField = offsetPatrolField.getTransformed(AffineTransform.getRotateInstance(-ctx.getPositionAngle().toRadians().getMagnitude()));
                 // find distance of base position to the guide star
-                return ctx.getBaseCoordinatesOpt().map(baseCoordinates -> {
+                return ctx.getBaseCoordinates().map(baseCoordinates -> {
                     final CoordinateDiff diff = new CoordinateDiff(baseCoordinates, guideStar.getTarget().getSkycalcCoordinates());
                     final Offset dis = diff.getOffset();
                     final double p = -dis.p().toArcsecs().getMagnitude();

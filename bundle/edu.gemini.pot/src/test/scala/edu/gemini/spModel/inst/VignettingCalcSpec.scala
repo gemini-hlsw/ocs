@@ -29,7 +29,7 @@ object VignettingCalcSpec extends Specification with ScalaCheck with VignettingA
       val gmosN = ctx.getInstrument.asInstanceOf[InstGmosNorth]
 
       s"""---- Test Env ----
-         |  Base        = ${ctx.getBaseCoordinatesOpt.asScalaOpt.map(_.toNewModel.shows)}
+         |  Base        = ${ctx.getBaseCoordinates.asScalaOpt.map(_.toNewModel.shows)}
          |  Instrument:
          |    Pos Angle = ${ctx.getPositionAngle}
          |    ISS Port  = ${ctx.getIssPort}
@@ -72,7 +72,7 @@ object VignettingCalcSpec extends Specification with ScalaCheck with VignettingA
         // Figure out the offset from the base of each candidate that does not
         // vignette the science area.
         val zeroVigCandidates = env.candidates.filter(env.vc.calc(_) == 0)
-        val base              = env.ctx.getBaseCoordinatesOpt.getValue.toNewModel
+        val base              = env.ctx.getBaseCoordinates.getValue.toNewModel
         val candidateOffsets  = zeroVigCandidates.map(Coordinates.difference(base, _).offset)
 
         // Check that at each offset, the candidate isn't on the science area.

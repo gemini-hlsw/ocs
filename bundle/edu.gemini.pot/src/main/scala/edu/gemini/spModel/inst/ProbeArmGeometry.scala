@@ -65,7 +65,7 @@ object ProbeArmGeometry {
   case class ArmAdjustment(angle: Angle, guideStar: Offset)
 
   def guideStarOffset(ctx: ObsContext, guideStarCoords: Coordinates): Option[Offset] =
-    ctx.getBaseCoordinatesOpt.asScalaOpt.map { baseCoords =>
+    ctx.getBaseCoordinates.asScalaOpt.map { baseCoords =>
       Coordinates.difference(baseCoords.toNewModel, guideStarCoords).offset
     }
 

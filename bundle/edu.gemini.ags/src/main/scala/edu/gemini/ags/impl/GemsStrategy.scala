@@ -163,7 +163,7 @@ trait GemsStrategy extends AgsStrategy {
   }
 
   protected [impl] def search(tipTiltMode: GemsTipTiltMode, ctx: ObsContext, posAngles: Set[Angle], nirBand: Option[MagnitudeBand]): Future[List[GemsCatalogSearchResults]] =
-    ctx.getBaseCoordinatesOpt.asScalaOpt.fold(Future.successful(List.empty[GemsCatalogSearchResults])) { base =>
+    ctx.getBaseCoordinates.asScalaOpt.fold(Future.successful(List.empty[GemsCatalogSearchResults])) { base =>
     // Get the instrument: F2 or GSAOI?
     val gemsInstrument =
       (ctx.getInstrument.getType == SPComponentType.INSTRUMENT_GSAOI) ? GemsInstrument.gsaoi | GemsInstrument.flamingos2
@@ -206,7 +206,7 @@ trait GemsStrategy extends AgsStrategy {
   }
 
   override def catalogQueries(ctx: ObsContext, mt: MagnitudeTable): List[CatalogQuery] =
-    ctx.getBaseCoordinatesOpt.asScalaOpt.fold(List.empty[CatalogQuery]) { base =>
+    ctx.getBaseCoordinates.asScalaOpt.fold(List.empty[CatalogQuery]) { base =>
       import AgsMagnitude._
       val cond = ctx.getConditions
       val mags = magnitudes(ctx, mt).toMap

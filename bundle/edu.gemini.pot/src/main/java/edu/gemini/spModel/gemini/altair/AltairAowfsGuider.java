@@ -105,7 +105,7 @@ public enum AltairAowfsGuider implements OffsetValidatingGuideProbe, Validatable
     }
 
     public Option<BoundaryPosition> checkBoundaries(final Coordinates coords, final ObsContext ctx) {
-        return ctx.getBaseCoordinatesOpt().map(baseCoordinates -> {
+        return ctx.getBaseCoordinates().map(baseCoordinates -> {
             final Angle positionAngle = ctx.getPositionAngle();
             final Set<Offset> sciencePositions = ctx.getSciencePositions();
 

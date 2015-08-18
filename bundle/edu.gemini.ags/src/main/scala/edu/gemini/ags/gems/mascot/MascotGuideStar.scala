@@ -56,7 +56,7 @@ object MascotGuideStar {
                                     magLimits: MagLimits = defaultMagLimits,
                                     progress: ProgressFunction = Mascot.defaultProgress)
   : List[(List[Strehl], Double, Double, Double)] =
-    ctx.getBaseCoordinatesOpt.asScalaOpt.foldMap { base =>
+    ctx.getBaseCoordinates.asScalaOpt.foldMap { base =>
     val center = base.toNewModel
     val simple = posAngleTolerance == 0.0 && basePosTolerance == 0.0
     val guideStarFilter = guideStarType.filter(ctx, magLimits, _: Star)

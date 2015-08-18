@@ -60,7 +60,7 @@ object SingleProbeVignettingTest extends Specification with ScalaCheck with Vign
   def genGuidStars(ctx: ObsContext): Gen[List[SiderealTarget]] = {
     def farEnough(c: Coordinates): Boolean = {
       val minDistance = SingleProbeStrategyParams.GmosOiwfsParams.apply(Site.GN).minDistance.map(_.toDegrees) | 0
-      val diff        = Coordinates.difference(ctx.getBaseCoordinatesOpt.getValue.toNewModel, c).distance.toDegrees
+      val diff        = Coordinates.difference(ctx.getBaseCoordinates.getValue.toNewModel, c).distance.toDegrees
       diff > minDistance
     }
 
@@ -147,7 +147,7 @@ object SingleProbeVignettingTest extends Specification with ScalaCheck with Vign
               val gmosN = ctx.getInstrument.asInstanceOf[InstGmosNorth]
               println(
               s"""--- Test Env ---
-                 |  Base        = ${ctx.getBaseCoordinatesOpt.getValue.toNewModel.shows}
+                 |  Base        = ${ctx.getBaseCoordinates.getValue.toNewModel.shows}
                  |  Instrument:
                  |    Pos Angle = ${ctx.getPositionAngle}
                  |    PA Mode   = ${gmosN.getPosAngleConstraint}

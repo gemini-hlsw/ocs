@@ -283,7 +283,7 @@ public enum GsaoiDetectorArray {
      * off the array or base coordinates are unknown
      */
     public Option<Id> getId(Coordinates coords, ObsContext ctx) {
-        return ctx.getBaseCoordinatesOpt().flatMap(base -> {
+        return ctx.getBaseCoordinates().flatMap(base -> {
             // Calculate the difference between the coordinate and the observation's
             // base position.
             CoordinateDiff diff;

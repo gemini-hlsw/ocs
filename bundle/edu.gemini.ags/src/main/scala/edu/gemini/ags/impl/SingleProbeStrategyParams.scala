@@ -25,7 +25,7 @@ sealed trait SingleProbeStrategyParams {
 
   final def catalogQueries(ctx: ObsContext, mt: MagnitudeTable): Option[CatalogQuery] =
     for {
-      base <- ctx.getBaseCoordinatesOpt.asScalaOpt
+      base <- ctx.getBaseCoordinates.asScalaOpt
       mc   <- magnitudeCalc(ctx, mt)
       rc   <- radiusConstraint(ctx)
       ml   <- AgsMagnitude.manualSearchConstraints(mc)
