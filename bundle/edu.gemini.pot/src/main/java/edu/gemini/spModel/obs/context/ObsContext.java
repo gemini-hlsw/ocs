@@ -266,13 +266,6 @@ public final class ObsContext {
         return new ObsContext(agsOverride, targets, inst, site, conds, sciencePositions, aoCompOpt, schedulingBlock);
     }
 
-    public Coordinates getBaseCoordinates() {
-        SPTarget target = targets.getBase();
-        double raDeg = target.getTarget().getRaDegrees();
-        double decDeg = target.getTarget().getDecDegrees();
-        return new Coordinates(raDeg, decDeg);
-    }
-
     public Option<Coordinates> getBaseCoordinatesOpt() {
         final Option<Long> when = getSchedulingBlock().map(SchedulingBlock::start);
         SPTarget target = targets.getBase();

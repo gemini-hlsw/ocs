@@ -117,7 +117,7 @@ trait VignettingArbitraries extends Arbitraries {
         //    p = delta RA * cos(dec)
         // so
         //    deltaRA = p / cos(dec)
-        val base     = ctx.getBaseCoordinates.toNewModel
+        val base     = ctx.getBaseCoordinatesOpt.getValue.toNewModel
         val cos      = math.cos(math.toRadians(base.dec.toDegrees))
         val deltaRa  = if (cos == 0) 0.0 else pd/cos
         val deltaDec = qd

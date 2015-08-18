@@ -162,7 +162,8 @@ trait GemsStrategy extends AgsStrategy {
     }
   }
 
-  protected [impl] def search(tipTiltMode: GemsTipTiltMode, ctx: ObsContext, posAngles: Set[Angle], nirBand: Option[MagnitudeBand]): Future[List[GemsCatalogSearchResults]] = {
+  protected [impl] def search(tipTiltMode: GemsTipTiltMode, ctx: ObsContext, posAngles: Set[Angle], nirBand: Option[MagnitudeBand]): Future[List[GemsCatalogSearchResults]] =
+    ctx.getBaseCoordinatesOpt.asScalaOpt.fold(Future.successful(List.empty[GemsCatalogSearchResults])) { base =>
     // Get the instrument: F2 or GSAOI?
     val gemsInstrument =
       (ctx.getInstrument.getType == SPComponentType.INSTRUMENT_GSAOI) ? GemsInstrument.gsaoi | GemsInstrument.flamingos2
@@ -170,7 +171,7 @@ trait GemsStrategy extends AgsStrategy {
     val gemsOptions = new GemsGuideStarSearchOptions(gemsInstrument, tipTiltMode, posAngles.asJava)
 
     // Perform the catalog search, using GemsStrategy's backend
-    val results = GemsVoTableCatalog(backend, ucac4).search(ctx, ctx.getBaseCoordinates.toNewModel, gemsOptions, nirBand, null)
+    val results = GemsVoTableCatalog(backend, ucac4).search(ctx, base.toNewModel, gemsOptions, nirBand, null)
 
     // Now check that the results are valid: there must be a valid tip-tilt and flexure star each.
     results.map { r =>
@@ -204,24 +205,25 @@ trait GemsStrategy extends AgsStrategy {
     }
   }
 
-  override def catalogQueries(ctx: ObsContext, mt: MagnitudeTable): List[CatalogQuery] = {
-    import AgsMagnitude._
-    val cond = ctx.getConditions
-    val mags = magnitudes(ctx, mt).toMap
+  override def catalogQueries(ctx: ObsContext, mt: MagnitudeTable): List[CatalogQuery] =
+    ctx.getBaseCoordinatesOpt.asScalaOpt.fold(List.empty[CatalogQuery]) { base =>
+      import AgsMagnitude._
+      val cond = ctx.getConditions
+      val mags = magnitudes(ctx, mt).toMap
 
-    def lim(gp: GuideProbe): Option[MagnitudeConstraints] = autoSearchConstraints(mags(gp), cond)
+      def lim(gp: GuideProbe): Option[MagnitudeConstraints] = autoSearchConstraints(mags(gp), cond)
 
-    val odgwMagLimits = (lim(GsaoiOdgw.odgw1) /: GsaoiOdgw.values().drop(1)) { (ml, odgw) =>
-      (ml |@| lim(odgw))(_ union _).flatten
+      val odgwMagLimits = (lim(GsaoiOdgw.odgw1) /: GsaoiOdgw.values().drop(1)) { (ml, odgw) =>
+        (ml |@| lim(odgw))(_ union _).flatten
+      }
+      val canMagLimits = (lim(Canopus.Wfs.cwfs1) /: Canopus.Wfs.values().drop(1)) { (ml, can) =>
+        (ml |@| lim(can))(_ union _).flatten
+      }
+
+      val canopusConstraint = canMagLimits.map(c => CatalogQuery(CanopusTipTiltId.some, base.toNewModel, RadiusConstraint.between(Angle.zero, Canopus.Wfs.Group.instance.getRadiusLimits.toNewModel), List(ctx.getConditions.adjust(c)), ucac4))
+      val odgwConstraint    = odgwMagLimits.map(c => CatalogQuery(OdgwFlexureId.some,   base.toNewModel, RadiusConstraint.between(Angle.zero, GsaoiOdgw.Group.instance.getRadiusLimits.toNewModel), List(ctx.getConditions.adjust(c)), ucac4))
+      List(canopusConstraint, odgwConstraint).flatten
     }
-    val canMagLimits = (lim(Canopus.Wfs.cwfs1) /: Canopus.Wfs.values().drop(1)) { (ml, can) =>
-      (ml |@| lim(can))(_ union _).flatten
-    }
-
-    val canopusConstraint = canMagLimits.map(c => CatalogQuery(CanopusTipTiltId.some, ctx.getBaseCoordinates.toNewModel, RadiusConstraint.between(Angle.zero, Canopus.Wfs.Group.instance.getRadiusLimits.toNewModel), List(ctx.getConditions.adjust(c)), ucac4))
-    val odgwConstraint    = odgwMagLimits.map(c => CatalogQuery(OdgwFlexureId.some,    ctx.getBaseCoordinates.toNewModel, RadiusConstraint.between(Angle.zero, GsaoiOdgw.Group.instance.getRadiusLimits.toNewModel), List(ctx.getConditions.adjust(c)), ucac4))
-    List(canopusConstraint, odgwConstraint).flatten
-  }
 
   override val probeBands = RBandsList
 

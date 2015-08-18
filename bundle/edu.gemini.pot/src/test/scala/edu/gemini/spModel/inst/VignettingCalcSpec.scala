@@ -18,6 +18,8 @@ import scala.collection.JavaConverters._
 import scalaz._
 import Scalaz._
 
+import edu.gemini.shared.util.immutable.ScalaConverters._
+
 object VignettingCalcSpec extends Specification with ScalaCheck with VignettingArbitraries with Helpers {
 
   case class TestEnv(ctx: ObsContext, candidates: List[Coordinates]) {
@@ -27,7 +29,7 @@ object VignettingCalcSpec extends Specification with ScalaCheck with VignettingA
       val gmosN = ctx.getInstrument.asInstanceOf[InstGmosNorth]
 
       s"""---- Test Env ----
-         |  Base        = ${ctx.getBaseCoordinates.toNewModel.shows}
+         |  Base        = ${ctx.getBaseCoordinatesOpt.asScalaOpt.map(_.toNewModel.shows)}
          |  Instrument:
          |    Pos Angle = ${ctx.getPositionAngle}
          |    ISS Port  = ${ctx.getIssPort}
@@ -70,7 +72,7 @@ object VignettingCalcSpec extends Specification with ScalaCheck with VignettingA
         // Figure out the offset from the base of each candidate that does not
         // vignette the science area.
         val zeroVigCandidates = env.candidates.filter(env.vc.calc(_) == 0)
-        val base              = env.ctx.getBaseCoordinates.toNewModel
+        val base              = env.ctx.getBaseCoordinatesOpt.getValue.toNewModel
         val candidateOffsets  = zeroVigCandidates.map(Coordinates.difference(base, _).offset)
 
         // Check that at each offset, the candidate isn't on the science area.

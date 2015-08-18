@@ -74,14 +74,17 @@ object GmosOiwfsProbeArm extends ProbeArmGeometry {
       case _                    => None
     }
 
-    ifuOpt.map { ifu =>
+    for {
+      gsOffset <- guideStarOffset(ctx, guideStar)
+      ifu      <- ifuOpt
+    } yield {
       val ifuOffset = Offset(ifu.arcsecs[OffsetP], OffsetQ.Zero)
-      val flip      = ctx.getIssPort == IssPort.SIDE_LOOKING
-      val posAngle  = ctx.getPositionAngle.toNewModel
-      val gsOffset  = guideStarOffset(ctx, guideStar)
-      val angle     = armAngle(posAngle, gsOffset,  offset, ifuOffset, flip)
+      val flip = ctx.getIssPort == IssPort.SIDE_LOOKING
+      val posAngle = ctx.getPositionAngle.toNewModel
+      val angle = armAngle(posAngle, gsOffset, offset, ifuOffset, flip)
       ArmAdjustment(angle, gsOffset)
     }
+
   }
 
   /** Calculates the probe arm angle at the position angle for the given guide

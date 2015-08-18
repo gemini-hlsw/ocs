@@ -6,6 +6,7 @@ import edu.gemini.spModel.guide.GuideProbe
 import edu.gemini.spModel.inst.FeatureGeometry._
 import edu.gemini.spModel.inst.ProbeArmGeometry.ArmAdjustment
 import edu.gemini.spModel.obs.context.ObsContext
+import edu.gemini.shared.util.immutable.ScalaConverters._
 
 import java.awt.Shape
 import java.awt.geom.AffineTransform
@@ -63,8 +64,9 @@ object ProbeArmGeometry {
    */
   case class ArmAdjustment(angle: Angle, guideStar: Offset)
 
-  def guideStarOffset(ctx: ObsContext, guideStarCoords: Coordinates): Offset = {
-    val baseCoords = ctx.getBaseCoordinates.toNewModel
-    Coordinates.difference(baseCoords, guideStarCoords).offset
-  }
+  def guideStarOffset(ctx: ObsContext, guideStarCoords: Coordinates): Option[Offset] =
+    ctx.getBaseCoordinatesOpt.asScalaOpt.map { baseCoords =>
+      Coordinates.difference(baseCoords.toNewModel, guideStarCoords).offset
+    }
+
 }

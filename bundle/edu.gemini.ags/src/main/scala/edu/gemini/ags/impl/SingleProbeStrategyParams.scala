@@ -15,6 +15,7 @@ import edu.gemini.spModel.gemini.niri.NiriOiwfsGuideProbe
 import edu.gemini.spModel.guide.{GuideStarValidator, PatrolField, ValidatableGuideProbe}
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.target.obsComp.PwfsGuideProbe
+import edu.gemini.shared.util.immutable.ScalaConverters._
 
 sealed trait SingleProbeStrategyParams {
   def site: Site
@@ -24,10 +25,11 @@ sealed trait SingleProbeStrategyParams {
 
   final def catalogQueries(ctx: ObsContext, mt: MagnitudeTable): Option[CatalogQuery] =
     for {
-      mc <- magnitudeCalc(ctx, mt)
-      rc <- radiusConstraint(ctx)
-      ml <- AgsMagnitude.manualSearchConstraints(mc)
-    } yield CatalogQuery(ctx.getBaseCoordinates.toNewModel, rc, ml, ucac4)
+      base <- ctx.getBaseCoordinatesOpt.asScalaOpt
+      mc   <- magnitudeCalc(ctx, mt)
+      rc   <- radiusConstraint(ctx)
+      ml   <- AgsMagnitude.manualSearchConstraints(mc)
+    } yield CatalogQuery(base.toNewModel, rc, ml, ucac4)
 
   def radiusConstraint(ctx: ObsContext): Option[RadiusConstraint] =
     RadiusLimitCalc.getAgsQueryRadiusLimits(guideProbe, ctx)
