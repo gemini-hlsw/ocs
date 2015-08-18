@@ -3,6 +3,7 @@ package edu.gemini.itc.nifs;
 import edu.gemini.itc.base.*;
 import edu.gemini.itc.operation.DetectorsTransmissionVisitor;
 import edu.gemini.itc.shared.*;
+import edu.gemini.spModel.gemini.nifs.NIFSParams;
 
 /**
  * Nifs specification class
@@ -65,7 +66,22 @@ public final class Nifs extends Instrument {
         //Set read noise and Well depth values by obsevation type
         _readNoiseValue = gp.readMode().getReadNoise();
 
-        _Filter = Filter.fromFile(getPrefix(), gp.filter().name(), getDirectory() + "/");
+        // decide which filter we are going to use in case "Same as Disperser" is selected
+        final NIFSParams.Filter filter;
+        switch (gp.filter()) {
+            case SAME_AS_DISPERSER:
+                if (gp.grating().filter().isDefined()) {
+                    filter = gp.grating().filter().get();
+                } else {
+                    throw new RuntimeException("No filter defined that corresponds to " + gp.grating().name());
+                }
+                break;
+            default:
+                filter = gp.filter();
+                break;
+        }
+
+        _Filter = Filter.fromFile(getPrefix(), filter.name(), getDirectory() + "/");
         addFilter(_Filter);
 
         FixedOptics _fixedOptics = new FixedOptics(getDirectory() + "/", getPrefix());
