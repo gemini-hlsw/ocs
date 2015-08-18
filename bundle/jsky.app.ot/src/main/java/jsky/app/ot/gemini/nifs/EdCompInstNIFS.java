@@ -245,7 +245,7 @@ public final class EdCompInstNIFS extends EdCompInstBase<InstNIFS>
             if (filter == Filter.SAME_AS_DISPERSER && disperser == Disperser.MIRROR) {
                 // OT-314: If the mirror is configured  then the Filter should automatically
                 // default to the K-band filter.
-                filter = Filter.HK_FILTER;
+                filter = Disperser.MIRROR.defaultFilter();
             }
             getDataObject().setFilter(filter);
         }

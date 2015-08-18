@@ -19,13 +19,13 @@ public final class NIFSParams {
      */
     public enum Disperser implements DisplayableSpType, SequenceableSpType {
 
-        Z(      "Z Grating",        1.050,  Option.apply(Filter.ZJ_FILTER)),
-        J(      "J Grating",        1.250,  Option.apply(Filter.ZJ_FILTER)),
-        H(      "H Grating",        1.650,  Option.apply(Filter.JH_FILTER)),
-        K(      "K Grating",        2.200,  Option.apply(Filter.HK_FILTER)),
-        K_SHORT("K_short Grating",  2.100,  Option.apply(Filter.HK_FILTER)),
-        K_LONG( "K_long Grating",   2.300,  Option.apply(Filter.HK_FILTER)),
-        MIRROR( "Mirror",           0.0,    Option.apply((Filter) null)),
+        Z(      "Z Grating",        1.050,  Filter.ZJ_FILTER),
+        J(      "J Grating",        1.250,  Filter.ZJ_FILTER),
+        H(      "H Grating",        1.650,  Filter.JH_FILTER),
+        K(      "K Grating",        2.200,  Filter.HK_FILTER),
+        K_SHORT("K_short Grating",  2.100,  Filter.HK_FILTER),
+        K_LONG( "K_long Grating",   2.300,  Filter.HK_FILTER),
+        MIRROR( "Mirror",           0.0,    Filter.HK_FILTER),
         ;
 
         /**
@@ -36,13 +36,13 @@ public final class NIFSParams {
         // The default central wavelength in um
         private double _wavelength;
         private String _displayValue;
-        // The value for the filter, if filter is "Same as Disperser", not defined for mirror
-        private Option<Filter> _filter;
+        // The default filter for this grating if filter is "Same as Disperser"
+        private Filter _defaultFilter;
 
-        Disperser(String displayValue, double wavelength, Option<Filter> filter) {
+        Disperser(String displayValue, double wavelength, Filter defaultFilter) {
             _displayValue   = displayValue;
             _wavelength     = wavelength;
-            _filter         = filter;
+            _defaultFilter  = defaultFilter;
         }
 
         /**
@@ -60,8 +60,8 @@ public final class NIFSParams {
             return _displayValue;
         }
 
-        public Option<Filter> filter() {
-            return _filter;
+        public Filter defaultFilter() {
+            return _defaultFilter;
         }
 
         /**

@@ -69,16 +69,8 @@ public final class Nifs extends Instrument {
         // decide which filter we are going to use in case "Same as Disperser" is selected
         final NIFSParams.Filter filter;
         switch (gp.filter()) {
-            case SAME_AS_DISPERSER:
-                if (gp.grating().filter().isDefined()) {
-                    filter = gp.grating().filter().get();
-                } else {
-                    throw new RuntimeException("No filter defined that corresponds to " + gp.grating().name());
-                }
-                break;
-            default:
-                filter = gp.filter();
-                break;
+            case SAME_AS_DISPERSER: filter = gp.grating().defaultFilter(); break;
+            default:                filter = gp.filter(); break;
         }
 
         _Filter = Filter.fromFile(getPrefix(), filter.name(), getDirectory() + "/");
