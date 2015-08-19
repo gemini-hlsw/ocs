@@ -6,6 +6,7 @@
  */
 package edu.gemini.spModel.target.system.test;
 
+import edu.gemini.shared.util.immutable.None;
 import edu.gemini.spModel.target.system.ITarget;
 import edu.gemini.spModel.target.system.HmsDegTarget;
 import static edu.gemini.spModel.test.TestFile.ser;
@@ -36,16 +37,16 @@ public final class HmsDegTargetCase {
         t1.setRaString("10:11:12.345");
         t1.setDecString("-20:30:40.567");
 
-        assertEquals(t1.getRaString(), "10:11:12.345");
-        assertEquals(t1.getDecString(), "-20:30:40.57");
+        assertEquals(t1.getRaString(None.instance()).getOrNull(), "10:11:12.345");
+        assertEquals(t1.getDecString(None.instance()).getOrNull(), "-20:30:40.57");
     }
 
     private void _doTestOne(String raIn, String decIn,
                             String raEx, String decEx) {
         _t1.setRaString(raIn);
         _t1.setDecString(decIn);
-        String raOut = _t1.getRaString();
-        String decOut = _t1.getDecString();
+        String raOut = _t1.getRaString(None.instance()).getOrNull();
+        String decOut = _t1.getDecString(None.instance()).getOrNull();
 
         assertEquals("Failed comparison,", raEx, raOut);
         assertEquals("Failed comparison,", decEx, decOut);

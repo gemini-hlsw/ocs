@@ -87,8 +87,8 @@ public abstract class ITarget implements Cloneable, Serializable {
         return getRa().getAs(CoordinateParam.Units.HMS);
     }
 
-    public String getRaString() {
-        return getRa().toString();
+    public Option<String> getRaString(Option<Long> time) {
+        return new Some(getRa().toString());
     }
 
     ///
@@ -137,8 +137,8 @@ public abstract class ITarget implements Cloneable, Serializable {
     }
 
     // TRANSITIONAL
-    public String getDecString() {
-        return getDec().toString();
+    public Option<String> getDecString(Option<Long> time) {
+        return new Some(getDec().toString());
     }
 
     // TRANSITIONAL

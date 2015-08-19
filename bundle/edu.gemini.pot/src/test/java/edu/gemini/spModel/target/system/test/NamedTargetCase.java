@@ -1,5 +1,6 @@
 package edu.gemini.spModel.target.system.test;
 
+import edu.gemini.shared.util.immutable.None;
 import edu.gemini.spModel.target.SPTarget;
 import edu.gemini.spModel.target.system.*;
 import static edu.gemini.spModel.test.TestFile.ser;
@@ -30,8 +31,8 @@ public final class NamedTargetCase {
         new SPTarget(t1).setRaString("16:11:12.345");
         new SPTarget(t1).setDecString("-20:30:40.567");
 
-        assertEquals("16:11:12.345", t1.getRaString());
-        assertEquals("-20:30:40.57", t1.getDecString());
+        assertEquals("16:11:12.345", t1.getRaString(None.instance()).getOrNull());
+        assertEquals("-20:30:40.57", t1.getDecString(None.instance()).getOrNull());
 
         //Planet
         t1.setSolarObject(NamedTarget.SolarObject.NEPTUNE);
@@ -42,8 +43,8 @@ public final class NamedTargetCase {
                             String lEx, String bEx) {
         _t1.setRaString(lIn);
         _t1.setDecString(bIn);
-        String lOut = _t1.getRaString();
-        String bOut = _t1.getDecString();
+        String lOut = _t1.getRaString(None.instance()).getOrNull();
+        String bOut = _t1.getDecString(None.instance()).getOrNull();
 
         assertEquals("Failed comparison,", lEx, lOut);
         assertEquals("Failed comparison,", bEx, bOut);

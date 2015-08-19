@@ -6,6 +6,7 @@ import edu.gemini.shared.util.immutable.DefaultImList;
 import edu.gemini.shared.util.immutable.ImList;
 import edu.gemini.ags.gems.GemsGuideStars;
 import edu.gemini.ags.gems.GemsStrehl;
+import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.spModel.guide.GuideProbe;
 import edu.gemini.spModel.target.SPTarget;
 import edu.gemini.spModel.target.env.GuideProbeTargets;
@@ -95,9 +96,11 @@ class CandidateAsterismsTreeTableModel extends AbstractTreeTableModel {
         // (XXX There might be another way to get the parent node)
         private Row _parent;
 
+        private final Option<Long> _when;
+
         // A row corresponding to a GemsGuideStars object
         // (top level node, displays the Strehl info and checkbox)
-        Row(GemsGuideStars gemsGuideStars, List<Row> children) {
+        Row(GemsGuideStars gemsGuideStars, List<Row> children, Option<Long> when) {
             _gemsGuideStars = gemsGuideStars;
             _guideProbeTargets = null;
             _band = null;
@@ -108,15 +111,17 @@ class CandidateAsterismsTreeTableModel extends AbstractTreeTableModel {
             for(Row row : _children) {
                 row._parent = this;
             }
+            _when = when;
         }
 
         // A row corresponding to a GuideProbeTargets object (child node)
-        Row(GemsGuideStars gemsGuideStars, GuideProbeTargets guideProbeTargets, Magnitude.Band band) {
+        Row(GemsGuideStars gemsGuideStars, GuideProbeTargets guideProbeTargets, Magnitude.Band band, Option<Long> when) {
             _gemsGuideStars = gemsGuideStars;
             _guideProbeTargets = guideProbeTargets;
             _band = band;
             _isTopLevel = false;
             _children = null;
+            _when = when;
         }
 
         GemsGuideStars getGemsGuideStars() {
@@ -198,7 +203,7 @@ class CandidateAsterismsTreeTableModel extends AbstractTreeTableModel {
 
         String getRA() {
             if (_guideProbeTargets != null) {
-                return getTarget().getTarget().getRaString();
+                return getTarget().getTarget().getRaString(_when).getOrNull();
             } else if (_gemsGuideStars != null) { // top level displays Strehl values
                 GemsStrehl strehl = _gemsGuideStars.strehl();
                 if (strehl != null) {
@@ -210,7 +215,7 @@ class CandidateAsterismsTreeTableModel extends AbstractTreeTableModel {
 
         Object getDec() {
             if (_guideProbeTargets != null) {
-                return getTarget().getTarget().getDecString();
+                return getTarget().getTarget().getDecString(_when).getOrNull();
             }
             return null;
         }
@@ -234,11 +239,7 @@ class CandidateAsterismsTreeTableModel extends AbstractTreeTableModel {
 
     private final ImList<String> _columnHeaders;
 
-    CandidateAsterismsTreeTableModel() {
-        _columnHeaders = computeColumnHeaders();
-    }
-
-    CandidateAsterismsTreeTableModel(List<GemsGuideStars> gemsGuideStarsList, Magnitude.Band band) {
+    CandidateAsterismsTreeTableModel(List<GemsGuideStars> gemsGuideStarsList, Magnitude.Band band, Option<Long> when) {
         super(new ArrayList<Row>());
         _columnHeaders = computeColumnHeaders();
 
@@ -247,9 +248,9 @@ class CandidateAsterismsTreeTableModel extends AbstractTreeTableModel {
         for(GemsGuideStars gemsGuideStars : gemsGuideStarsList) {
             final List<Row> rowList = new ArrayList<>();
             for (GuideProbeTargets guideProbeTargets : gemsGuideStars.guideGroup().getAll()) {
-                rowList.add(new Row(gemsGuideStars, guideProbeTargets, band));
+                rowList.add(new Row(gemsGuideStars, guideProbeTargets, band, when));
             }
-            tmp.add(new Row(gemsGuideStars, rowList));
+            tmp.add(new Row(gemsGuideStars, rowList, when));
         }
 
         if (tmp.size() > 0) {

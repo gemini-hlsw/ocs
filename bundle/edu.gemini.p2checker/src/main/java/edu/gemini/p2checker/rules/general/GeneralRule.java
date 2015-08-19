@@ -288,11 +288,11 @@ public class GeneralRule implements IRule {
             // Okay, this kind of sucks, but I want to compare the coordinates
             // in the same way they are externalized and displayed.  That is,
             // ignore any extra precision that we end up throwing away.
-            String baseC1 = base.getRaString();
-            String baseC2 = base.getDecString();
+            String baseC1 = base.getRa().toString();
+            String baseC2 = base.getDec().toString();
 
-            String guideC1 = guide.getRaString();
-            String guideC2 = guide.getDecString();
+            String guideC1 = guide.getRa().toString();
+            String guideC2 = guide.getDec().toString();
 
             return baseC1.equals(guideC1) && baseC2.equals(guideC2);
         }

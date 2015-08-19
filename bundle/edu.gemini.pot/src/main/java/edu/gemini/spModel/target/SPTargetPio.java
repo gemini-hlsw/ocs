@@ -2,6 +2,9 @@ package edu.gemini.spModel.target;
 
 import edu.gemini.shared.skyobject.Magnitude;
 import edu.gemini.shared.util.immutable.ImList;
+import edu.gemini.shared.util.immutable.None;
+import edu.gemini.shared.util.immutable.Option;
+import edu.gemini.shared.util.immutable.Some;
 import edu.gemini.spModel.pio.ParamSet;
 import edu.gemini.spModel.pio.Pio;
 import edu.gemini.spModel.pio.PioFactory;
@@ -83,8 +86,8 @@ public class SPTargetPio {
             final HmsDegTarget t = (HmsDegTarget) target;
             Pio.addParam(factory, paramSet, _SYSTEM, t.getTag().tccName);
             paramSet.addParam(t.getEpoch().getParam(factory, _EPOCH));
-            Pio.addParam(factory, paramSet, _C1, t.getRaString());
-            Pio.addParam(factory, paramSet, _C2, t.getDecString());
+            Pio.addParam(factory, paramSet, _C1, t.getRa().toString());
+            Pio.addParam(factory, paramSet, _C2, t.getDec().toString());
             paramSet.addParam(t.getPM1().getParam(factory, _PM1));
             paramSet.addParam(t.getPM2().getParam(factory, _PM2));
             paramSet.addParam(t.getParallax().getParam(factory, _PARALLAX));
@@ -100,11 +103,11 @@ public class SPTargetPio {
 
             // OT-495: save and restore RA/Dec for conic targets
             // XXX FIXME: Temporary, until nonsidereal support is implemented
-            Pio.addParam(factory, paramSet, _C1, nst.getRaString());
-            Pio.addParam(factory, paramSet, _C2, nst.getDecString());
-            if (nst.getDateForPosition() != null) {
-                Pio.addParam(factory, paramSet, _VALID_DATE, formatDate(nst.getDateForPosition()));
-            }
+            final Option<Date> date = new Some(nst.getDateForPosition()).filter(d -> d != null);
+            final Option<Long> when = date.map(d -> d.getTime());
+            nst.getRaString(when).foreach(s -> Pio.addParam(factory, paramSet, _C1, s));
+            nst.getDecString(when).foreach(s -> Pio.addParam(factory, paramSet, _C2, s));
+            date.foreach(d -> Pio.addParam(factory, paramSet, _VALID_DATE, formatDate(d)));
 
             if (target instanceof ConicTarget) {
                 final ConicTarget t = (ConicTarget) target;

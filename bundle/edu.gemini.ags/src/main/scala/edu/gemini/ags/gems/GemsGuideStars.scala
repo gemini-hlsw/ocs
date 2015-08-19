@@ -7,6 +7,7 @@ import edu.gemini.spModel.gems.GemsGuideProbeGroup
 import edu.gemini.spModel.target.env.GuideGroup
 import edu.gemini.spModel.target.env.GuideProbeTargets
 import edu.gemini.shared.util.immutable.ScalaConverters._
+import edu.gemini.shared.util.immutable.{ None => JNone }
 import edu.gemini.pot.ModelConverters._
 
 import scala.annotation.tailrec
@@ -128,9 +129,11 @@ case class GemsGuideStars(pa: Angle, tiptiltGroup: GemsGuideProbeGroup, strehl: 
   override def toString: String = {
     import scala.collection.JavaConverters._
 
+    val NoTime = JNone.instance[java.lang.Long]
+
     val guiders = guideGroup.getReferencedGuiders.asScala.map { gp =>
       val target = guideGroup.get(gp).getValue.getPrimary.getValue
-      s"$gp[${target.getTarget.getRaString},${target.getTarget.getRaString}]"
+      s"$gp[${target.getTarget.getRaString(NoTime)},${target.getTarget.getRaString(NoTime)}]"
     }
     s"GemsGuideStars{pa=$pa, tiptilt=${tiptiltGroup.getKey}, avg Strehl=${strehl.avg * 100}, guiders=${guiders.mkString(" ")}}"
   }

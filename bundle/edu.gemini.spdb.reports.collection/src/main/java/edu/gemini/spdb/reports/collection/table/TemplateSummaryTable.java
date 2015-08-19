@@ -2,6 +2,7 @@ package edu.gemini.spdb.reports.collection.table;
 
 import edu.gemini.pot.sp.*;
 import edu.gemini.shared.util.TimeValue;
+import edu.gemini.shared.util.immutable.None;
 import edu.gemini.spModel.core.SPProgramID;
 import edu.gemini.spModel.gemini.obscomp.SPProgram;
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality;
@@ -134,8 +135,8 @@ public class TemplateSummaryTable extends AbstractTable {
         row.put(Columns.PROG_TOO_STATUS, tooType.getDisplayValue());
         row.put(Columns.TEMPLATE_ID, templateId);
         row.put(Columns.TARGET_NAME, target.getTarget().getName());
-        row.put(Columns.RA, target.getTarget().getRaString());
-        row.put(Columns.DEC, target.getTarget().getDecString());
+        row.put(Columns.RA, target.getTarget().getRaString(None.instance()).getOrElse(""));
+        row.put(Columns.DEC, target.getTarget().getDecString(None.instance()).getOrElse(""));
         row.put(Columns.COND_CONSTRAINTS, conditions.toString().replaceAll(",", ""));
         row.put(Columns.INST_CONFIG, instConfig);
         row.put(Columns.PHASE1_TIME, String.format("%.2f hrs", time.getTimeAmount()));

@@ -3,6 +3,7 @@ package jsky.app.ot.tpe.gems;
 import edu.gemini.ags.gems.GemsGuideStarSearchOptions.*;
 import edu.gemini.ags.gems.GemsGuideStars;
 import edu.gemini.pot.ModelConverters;
+import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.spModel.core.Target;
 import edu.gemini.spModel.target.env.TargetEnvironment;
 import edu.gemini.spModel.target.obsComp.TargetObsComp;
@@ -591,8 +592,9 @@ public class GemsGuideStarSearchDialog extends JFrame {
     }
 
     private void analyzeDone() {
+        final Option<Long> when = _tpe.getObsContext().flatMap(c -> c.getSchedulingBlock()).map(b -> b.start());
         CandidateAsterismsTreeTableModel treeTableModel = new CandidateAsterismsTreeTableModel(
-                _model.getGemsGuideStars(), ModelConverters.toOldBand(_model.getBand().getBand()));
+                _model.getGemsGuideStars(), ModelConverters.toOldBand(_model.getBand().getBand()), when);
         _candidateAsterismsTreeTable.setTreeTableModel(treeTableModel);
         _candidateAsterismsTreeTable.expandAll();
         _candidateAsterismsTreeTable.packAll();

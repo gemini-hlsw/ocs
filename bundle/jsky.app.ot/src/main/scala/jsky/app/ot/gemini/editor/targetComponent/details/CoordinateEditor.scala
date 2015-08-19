@@ -2,6 +2,7 @@ package jsky.app.ot.gemini.editor.targetComponent.details
 
 import edu.gemini.pot.sp.ISPNode
 import edu.gemini.shared.util.immutable.{ Option => GOption }
+import edu.gemini.shared.util.immutable.ScalaConverters._
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.target.SPTarget
 import edu.gemini.spModel.target.system.CoordinateParam.Units
@@ -49,8 +50,9 @@ class CoordinateEditor extends TelescopePosEditor with ReentrancyHack {
   def edit(ctx: GOption[ObsContext], target0: SPTarget, node: ISPNode): Unit = {
     spt = target0
     nonreentrant {
-      ra.setText(target.getRaString)
-      dec.setText(target.getDecString)
+      val when = ctx.asScalaOpt.flatMap(_.getSchedulingBlock.asScalaOpt).map(_.start).map(java.lang.Long.valueOf).asGeminiOpt
+      target.getRaString(when).asScalaOpt.foreach(ra.setText)
+      target.getDecString(when).asScalaOpt.foreach(dec.setText)
     }
   }
 
