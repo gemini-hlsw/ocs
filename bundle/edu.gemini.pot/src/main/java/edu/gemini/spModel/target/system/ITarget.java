@@ -75,7 +75,7 @@ public abstract class ITarget implements Cloneable, Serializable {
         return new Some(getRa().getAs(CoordinateParam.Units.DEGREES));
     }
 
-    public double getRaDegrees() {
+    public double getRaDegreesx() {
         return getRa().getAs(CoordinateParam.Units.DEGREES);
     }
 

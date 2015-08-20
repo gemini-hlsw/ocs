@@ -2,10 +2,12 @@ package edu.gemini.rollover.servlet
 
 import edu.gemini.spModel.gemini.obscomp.{SPProgram, SPSiteQuality}
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality._
+import edu.gemini.spModel.obs.SPObservation
 import edu.gemini.spModel.obs.plannedtime.PlannedTimeCalculator
 import edu.gemini.spModel.target.obsComp.TargetObsComp
 import edu.gemini.pot.sp._
 import edu.gemini.spModel.target.system.CoordinateParam.Units
+import edu.gemini.shared.util.immutable.ScalaConverters._
 
 import scala.annotation.tailrec
 import scala.collection.JavaConverters._
@@ -48,9 +50,25 @@ object RolloverObservation {
       targetEnv  <- Option(dataObj.getTargetEnvironment)
       science    <- Option(targetEnv.getBase)
       name       <- Option(science.getTarget.getName)
-      ra         <- Option(science.getTarget.getRaDegrees)
-      dec        <- Option(science.getTarget.getDecDegrees)
-    } yield RolloverTarget(name, new Angle(ra, Angle.Unit.DEGREES), new Angle(dec, Angle.Unit.DEGREES))
+    } yield {
+
+      // Amazingly this is easier in Java
+      val when = o.getDataObject
+        .asInstanceOf[SPObservation]
+        .getSchedulingBlock
+        .asScalaOpt
+        .map(b => java.lang.Long.valueOf(b.start))
+        .asGeminiOpt
+
+      // Coordinates may or may not be known
+      val coords = for {
+        ra  <- science.getTarget.getRaDegrees(when).asScalaOpt
+        dec <- science.getTarget.getDecDegrees(when).asScalaOpt
+      } yield Coords(new Angle(ra, Angle.Unit.DEGREES), new Angle(dec, Angle.Unit.DEGREES))
+
+      RolloverTarget(name, coords)
+
+    }
 
   private def conditions(o: ISPObservation): Option[RolloverConditions] =
     for {
@@ -73,6 +91,7 @@ object RolloverObservation {
     }
 }
 
-case class RolloverTarget(name: String, ra: Angle, dec: Angle)
+case class Coords(ra: Angle, dec: Angle)
+case class RolloverTarget(name: String, coords: Option[Coords])
 case class RolloverConditions(cc: CloudCover, iq: ImageQuality, sb: SkyBackground, wv: WaterVapor)
 case class RolloverObservation(id: SPObservationID, partner: String, target: RolloverTarget, conds: RolloverConditions, remainingTime: Long)

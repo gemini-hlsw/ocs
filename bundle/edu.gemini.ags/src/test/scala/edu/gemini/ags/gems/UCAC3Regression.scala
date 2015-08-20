@@ -14,7 +14,10 @@ import edu.gemini.spModel.guide.GuideProbe
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.target.SPTarget
 import edu.gemini.spModel.target.env.{GuideProbeTargets, TargetEnvironment}
-import edu.gemini.spModel.target.system.CoordinateParam
+import edu.gemini.spModel.target.system.{ITarget, CoordinateParam}
+import edu.gemini.shared.util.immutable.{ None => JNone, Option => JOption }
+import edu.gemini.shared.util.immutable.ScalaConverters._
+
 import jsky.coords.WorldCoords
 
 import scala.collection.JavaConverters._
@@ -103,9 +106,7 @@ trait UCAC3Regression {
           val equalGroup = expectedGuideGroup.zip(actualGuideGroup).map {
             case (egg, acc) =>
               val sameGuider = egg.getGuider == acc.getGuider
-              val sameRa = egg.getPrimary.getValue.getTarget.getRaDegrees == acc.getPrimary.getValue.getTarget.getRaDegrees
-              val sameDec = egg.getPrimary.getValue.getTarget.getDecDegrees == acc.getPrimary.getValue.getTarget.getDecDegrees
-              sameGuider && sameRa && sameDec
+              sameGuider && sameCoordinates(egg.getPrimary.getValue.getTarget, acc.getPrimary.getValue.getTarget)
           }
           val sameStrehl = math.abs(expected.strehl.avg - actual.strehl.avg) < 0.0001
           sameStrehl && equalGroup.forall(_ == true)
@@ -118,6 +119,18 @@ trait UCAC3Regression {
       equalSize
     }
   }
+
+
+  // Compare if two targets have the same RA/Dec ... they are assumed to be sidereal
+  def sameCoordinates(a: ITarget, b: ITarget): Boolean = {
+    val when = JNone.instance[java.lang.Long]
+    same(a.getRaDegrees(when),  b.getRaDegrees(when)) &&
+    same(a.getDecDegrees(when), b.getDecDegrees(when))
+  }
+
+  // True if both are defined and values are ==
+  def same[A](a: JOption[A], b: JOption[A]): Boolean =
+    a.asScalaOpt.flatMap(a0 => b.asScalaOpt.map(b0 => a0 == b0)).getOrElse(false)
 
   // Compare two lists of guide stars, equal comparison doesn't work directly
   def areAsterismStarsTheSame(actualStars: List[Star], expectedStars: List[Star]):Boolean = {

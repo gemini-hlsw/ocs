@@ -56,8 +56,8 @@ final class RolloverServlet(site: Site, odb: IDBDatabaseService, user: java.util
       <id>{ ro.id.toString }</id>
       <partner>{ ro.partner }</partner>
       <target>
-        <ra>{ ro.target.ra.toDegrees.getMagnitude }</ra>
-        <dec>{ ro.target.dec.toDegrees.getMagnitude }</dec>
+        <ra>{ ro.target.coords.map(_.ra).getOrElse(0.0) }</ra>
+        <dec>{ ro.target.coords.map(_.dec).getOrElse(0.0) }</dec>
       </target>
       <conditions>
         <cc>{ ro.conds.cc.getPercentage }</cc>
