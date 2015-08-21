@@ -3,10 +3,9 @@ package edu.gemini.spModel.gemini.flamingos2
 import java.awt.Shape
 import java.awt.geom.{Area, Point2D, Rectangle2D}
 
+import edu.gemini.pot.ModelConverters._
 import edu.gemini.shared.util.immutable.ImPolygon
-import edu.gemini.skycalc.Offset
-import edu.gemini.spModel.core
-import edu.gemini.spModel.core.{Angle, Coordinates}
+import edu.gemini.spModel.core._
 import edu.gemini.spModel.gemini.gems.Gems
 import edu.gemini.spModel.inst.ProbeArmGeometry
 import edu.gemini.spModel.inst.ProbeArmGeometry.ArmAdjustment
@@ -21,6 +20,8 @@ import Scalaz._
 object F2OiwfsProbeArm extends ProbeArmGeometry {
   // Simplified Java access.
   val instance = this
+
+  import edu.gemini.spModel.inst.FeatureGeometry._
 
   override protected val guideProbeInstance = Flamingos2OiwfsGuideProbe.instance
 
@@ -58,61 +59,6 @@ object F2OiwfsProbeArm extends ProbeArmGeometry {
     new Area(probeArm) <| (_.add(new Area(pickoffMirror)))
   }
 
-
-  /*  COMMENT OUT FOR NOW, NEEDS UPDATE AND VERIFICATION
-  override def armAdjustment(ctx0: ObsContext,
-                             guideStarCoords: Coordinates,
-                             offset0: Offset,
-                             T: Point2D): Option[ArmAdjustment] = {
-    import ProbeArmGeometry._
-
-    for {
-      ctx      <- Option(ctx0)
-      offset   <- Option(offset0)
-    } yield {
-      val gemsFlag = ctx.getAOComponent.asScalaOpt.fold(false){ ao =>
-        val aoNarrowType = ao.getNarrowType
-        aoNarrowType.equals(Gems.SP_TYPE.narrowType)
-      }
-
-      val flamingos2  = ctx.getInstrument.asInstanceOf[Flamingos2]
-      val flip        = if (flamingos2.getFlipConfig(gemsFlag)) -1 else 1
-      val posAngle    = ctx.getPositionAngle.toRadians.getMagnitude
-      val fovRotation = flamingos2.getRotationConfig(gemsFlag).toRadians.getMagnitude
-      val guideStarPt = guideStarPoint(ctx, guideStarCoords)
-      val angle       = armAngle(posAngle, fovRotation, guideStarPt, T, flip, flamingos2.getLyotWheel.getPlateScale)
-      ArmAdjustment(angle, guideStarPt)
-    }
-  }
-
-  private def armAngle(posAngle:    Double,
-                       fovRotation: Double,
-                       guideStar:   Point2D,
-                       T:           Point2D,
-                       flip:        Int,
-                       plateScale:  Double): Angle = {
-    val P = {
-      val scaledPAO = ProbeArmOffset * plateScale
-      val angle     = -posAngle - fovRotation
-      new Point2D.Double(scaledPAO * flip * math.cos(angle), scaledPAO * flip * math.sin(angle))
-    }
-    val D = new Point2D.Double(guideStar.getX + T.getX - P.getX, guideStar.getY + T.getY - P.getY)
-
-    val Q = {
-      val scaledPBAL = ProbeBaseArmLength * plateScale
-      val scaledPPAL = ProbePickoffArmLength * plateScale
-      val distance   = math.min(math.sqrt(D.getX * D.getX + D.getY * D.getY), scaledPBAL + scaledPPAL)
-
-      val a = (scaledPBAL * scaledPBAL - scaledPPAL * scaledPPAL + distance * distance) / (2 * distance)
-      val h = flip * math.sqrt(scaledPBAL * scaledPBAL - a * a)
-
-      new Point2D.Double(-guideStar.getX - T.getX + P.getX + (a * D.getX + h * D.getY) / distance,
-                         -guideStar.getY - T.getY + P.getY + (a * D.getY - h * D.getX) / distance)
-    }
-
-    Angle.fromRadians(math.atan2(Q.getY, Q.getX))
-  }
-*/
   // Size of probe arm components in mm.
   val PickoffMirrorSize          = 19.8
   val ProbePickoffArmTotalLength = 203.40
@@ -132,5 +78,51 @@ object F2OiwfsProbeArm extends ProbeArmGeometry {
    * @param offset    offset for which to calculate the adjustment
    * @return          probe arm adjustments for this data
    */
-  override def armAdjustment(ctx: ObsContext, guideStar: Coordinates, offset: core.Offset): Option[ArmAdjustment] = None
+  override def armAdjustment(ctx: ObsContext, guideStar: Coordinates, offset: Offset): Option[ArmAdjustment] = {
+    import ProbeArmGeometry._
+
+    val gemsFlag = ctx.getAOComponent.asScalaOpt.fold(false){ ao =>
+      val aoNarrowType = ao.getNarrowType
+      aoNarrowType.equals(Gems.SP_TYPE.narrowType)
+    }
+
+    val flamingos2  = ctx.getInstrument.asInstanceOf[Flamingos2]
+    val flip        = flamingos2.getFlipConfig(gemsFlag)
+    val posAngle    = ctx.getPositionAngle.toNewModel
+    val fovRotation = flamingos2.getRotationConfig(gemsFlag).toNewModel
+    val gsOffset    = guideStarOffset(ctx, guideStar)
+    val angle       = armAngle(posAngle, fovRotation, gsOffset, offset, flip, flamingos2.getLyotWheel.getPlateScale)
+    Some(ArmAdjustment(angle, gsOffset))
+  }
+
+
+  private def armAngle(posAngle:    Angle,
+                       fovRotation: Angle,
+                       gsOffset:    Offset,
+                       offset:      Offset,
+                       flip:        Boolean,
+                       plateScale:  Double): Angle = {
+    val Q = {
+      val P = {
+        val scaledFlippedPAO = {
+          val scaledPAO = ProbeArmOffset * plateScale
+          if (flip) -scaledPAO else scaledPAO
+        }
+        val angle = (posAngle + fovRotation) * -1
+        new Point2D.Double(scaledFlippedPAO * math.cos(angle.toRadians), scaledFlippedPAO * math.sin(angle.toRadians))
+      }
+
+      val guideStar = (gsOffset - offset.rotate(posAngle)).toPoint
+      val D = new Point2D.Double(guideStar.getX - P.getX, guideStar.getY - P.getY)
+
+      val scaledPBAL = ProbeBaseArmLength * plateScale
+      val scaledPPAL = ProbePickoffArmLength * plateScale
+      val distance   = math.min(math.sqrt(D.getX * D.getX + D.getY * D.getY), scaledPBAL + scaledPPAL)
+      val a = (scaledPBAL * scaledPBAL - scaledPPAL * scaledPPAL + distance * distance) / (2 * distance)
+      val h = (if (flip) -1 else 1) * math.sqrt(scaledPBAL * scaledPBAL - a * a)
+      new Point2D.Double(-guideStar.getX + P.getX + (a * D.getX + h * D.getY) / distance,
+                         -guideStar.getY + P.getY + (a * D.getY - h * D.getX) / distance)
+    }
+    Angle.fromRadians(math.atan2(Q.getY, Q.getX))
+  }
 }

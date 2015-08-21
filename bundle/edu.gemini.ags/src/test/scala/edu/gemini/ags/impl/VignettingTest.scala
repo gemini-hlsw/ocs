@@ -9,6 +9,7 @@ import edu.gemini.skycalc.{DDMMSS, HHMMSS}
 import edu.gemini.spModel.core.Target.SiderealTarget
 import edu.gemini.spModel.core._
 import edu.gemini.spModel.core.AngleSyntax._
+import edu.gemini.spModel.gemini.flamingos2.{Flamingos2OiwfsGuideProbe, Flamingos2}
 import edu.gemini.spModel.gemini.gmos.{GmosOiwfsGuideProbe, InstGmosSouth}
 import edu.gemini.spModel.gemini.inst.InstRegistry
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality._
@@ -43,8 +44,11 @@ class VignettingTest {
     inst.asInstanceOf[IssPortProvider].setIssPort(port)
   }
 
-  val GMOSSouthSideLookingWithOI = VignettingConfigurationWithISSPort(InstGmosSouth.SP_TYPE, GmosOiwfsGuideProbe.instance, Site.GS, IssPort.SIDE_LOOKING)
-  val GMOSSouthUpLookingWithOI   = VignettingConfigurationWithISSPort(InstGmosSouth.SP_TYPE, GmosOiwfsGuideProbe.instance, Site.GS, IssPort.UP_LOOKING)
+  val GMOSSouthSideLookingWithOI = VignettingConfigurationWithISSPort(InstGmosSouth.SP_TYPE, GmosOiwfsGuideProbe.instance,       Site.GS, IssPort.SIDE_LOOKING)
+  val GMOSSouthUpLookingWithOI   = VignettingConfigurationWithISSPort(InstGmosSouth.SP_TYPE, GmosOiwfsGuideProbe.instance,       Site.GS, IssPort.UP_LOOKING)
+  val F2SideLookingWithOI        = VignettingConfigurationWithISSPort(Flamingos2.SP_TYPE,    Flamingos2OiwfsGuideProbe.instance, Site.GS, IssPort.SIDE_LOOKING)
+  val F2UpLookingWithOI          = VignettingConfigurationWithISSPort(Flamingos2.SP_TYPE,    Flamingos2OiwfsGuideProbe.instance, Site.GS, IssPort.UP_LOOKING)
+  val AllConfigs = List(GMOSSouthSideLookingWithOI, GMOSSouthUpLookingWithOI, F2SideLookingWithOI, F2UpLookingWithOI)
 
   val GS1  = siderealTarget("GS1",  "23:59:58.187 -00:00:10.20", 10.0)
   val GS2  = siderealTarget("GS2",  "23:59:55.693  00:00:49.30", 15.0)
@@ -58,7 +62,7 @@ class VignettingTest {
   val GS10 = siderealTarget("GS10", "00:00:10.200 -00:01:35.20", 15.5)
   val All = List(GS1, GS2, GS3, GS4, GS5, GS6, GS7, GS8, GS9, GS10)
 
-  // Specifically non-vignetting guide stars for base position (0,0) to test that brightness is correctly chosen.
+  // Specifically GMOS side looking non-vignetting guide stars for base position (0,0) to test that brightness is correctly chosen.
   val NVGS1 = siderealTarget("NGS1", "23:59:57.620  00:03:10.40", 11.0)
   val NVGS2 = siderealTarget("NGS2", "23:59:48.213  00:02:50.00",  9.0)
   val NVGS3 = siderealTarget("NGS3", "23:59:47.420  00:01:26.70", 10.0)
@@ -69,17 +73,26 @@ class VignettingTest {
   val NVGS8 = siderealTarget("NGS8", "23:59:59.320  00:03:15.50", 16.5)
   val AllNV = List(NVGS1, NVGS2, NVGS3, NVGS4, NVGS5, NVGS6, NVGS7, NVGS8)
 
-  // Load the magnitude table and create the base position.
-  val mt   = ProbeLimitsTable.loadOrThrow()
-  val base = new SPTarget(0.0, 0.0)
+  // Load the magnitude table and create base positions.
+  val mt          = ProbeLimitsTable.loadOrThrow()
+  val zeroBase    = basePosition("00:00:00.000 00:00:00.00")
+  val shiftedBase = basePosition("23:59:52.747 00:01:11.40")
 
   // Convert a string and magnitude to a SiderealTarget.
-  def siderealTarget(name: String, raDecStr: String, rMag: Double): SiderealTarget = {
+  def siderealTarget(name: String, raDecStr: String, rMag: Double): SiderealTarget =
+    SiderealTarget(name, parseCoordinates(raDecStr), None, List(new Magnitude(rMag, MagnitudeBand.R)), None)
+
+  // Convert a string to a base.
+  def basePosition(raDecStr: String): SPTarget = {
+    val c = parseCoordinates(raDecStr)
+    new SPTarget(c.ra.toAngle.toDegrees, c.dec.toDegrees)
+  }
+
+  def parseCoordinates(raDecStr: String): Coordinates = {
     val (raStr, decStr) = raDecStr.span(_ != ' ')
     val ra  = Angle.fromDegrees(HHMMSS.parse(raStr).toDegrees.getMagnitude)
     val dec = Angle.fromDegrees(DDMMSS.parse(decStr.trim).toDegrees.getMagnitude)
-    val sc  = Coordinates(RightAscension.fromAngle(ra), Declination.fromAngle(dec).getOrElse(Declination.zero))
-    SiderealTarget(name, sc, None, List(new Magnitude(rMag, MagnitudeBand.R)), None)
+    Coordinates(RightAscension.fromAngle(ra), Declination.fromAngle(dec).getOrElse(Declination.zero))
   }
 
   /**
@@ -92,6 +105,7 @@ class VignettingTest {
    * @param expected   the order in which the candidates should be selected
    * @param candidates the list of candidates to pass to AGS
    * @param config     the instrument and guide probe to test
+   * @param base       the base position
    * @param posAngle   the position angle to use in degrees
    * @param offsets    the offsets to use
    * @param conditions the conditions required
@@ -99,6 +113,7 @@ class VignettingTest {
   def executeTest(expected: List[SiderealTarget],
                   candidates: List[SiderealTarget] = All,
                   config: VignettingConfiguration = GMOSSouthSideLookingWithOI,
+                  base: SPTarget = zeroBase,
                   posAngle: Double = 0.0,
                   offsets: List[Offset] = Nil,
                   conditions: Conditions = BEST): Unit = {
@@ -130,55 +145,128 @@ class VignettingTest {
     nextCandidate(Random.shuffle(candidates), expected)
   }
 
-  @Ignore @Test def testSideLookingBasePosAngle0() = {
-    val expected   = List(GS3, GS2, GS1, GS4)
-    executeTest(expected)
+  @Test def testPosAngle0() = {
+    AllConfigs.foreach{ c =>
+      val expected = c match {
+        case GMOSSouthSideLookingWithOI => List(GS3, GS2, GS1, GS4)
+        case GMOSSouthUpLookingWithOI   => List(GS1)
+        case F2SideLookingWithOI        => List(GS3, GS2, GS1)
+        case F2UpLookingWithOI          => List(GS10, GS8, GS1)
+      }
+      executeTest(expected, config = c)
+    }
   }
 
-  @Ignore @Test def testSideLookingBasePosAngle90() = {
-    val expected = List(GS7, GS6, GS1)
-    executeTest(expected, posAngle = 90.0)
+  @Test def testPosAngle90() = {
+    AllConfigs.foreach{ c =>
+      val expected = c match {
+        case GMOSSouthSideLookingWithOI => List(GS7, GS6, GS1)
+        case GMOSSouthUpLookingWithOI   => List(GS3, GS2, GS1, GS4)
+        case F2SideLookingWithOI        => List(GS3, GS2, GS1)
+        case F2UpLookingWithOI          => List(GS10, GS8, GS1)
+      }
+      executeTest(expected, config = c, posAngle = 90.0)
+    }
   }
 
-  @Ignore @Test def testSideLookingBasePosAngle180() = {
-    val expected = List(GS8, GS10, GS9)
-    executeTest(expected, posAngle = 180.0)
+  @Test def testPosAngle180() = {
+    AllConfigs.foreach{ c =>
+      val expected = c match {
+        case GMOSSouthSideLookingWithOI => List(GS8, GS10, GS9)
+        case GMOSSouthUpLookingWithOI   => List(GS7, GS6)
+        case F2SideLookingWithOI        => List(GS10, GS8, GS1)
+        case F2UpLookingWithOI          => List(GS3, GS2, GS1)
+      }
+      executeTest(expected, config = c, posAngle = 180.0)
+    }
   }
 
-  @Ignore @Test def testUpLookingBasePosAngle0() = {
-    val expected = List(GS1)
-    executeTest(expected, config = GMOSSouthUpLookingWithOI)
+  @Test def testOneOffsetPosAngle0() = {
+    val offsets = List(Offset(50.arcsecs[OffsetP], 50.arcsecs[OffsetQ]))
+    AllConfigs.foreach { c =>
+      val expected = c match {
+        case GMOSSouthSideLookingWithOI => List(GS2, GS6)
+        case GMOSSouthUpLookingWithOI   => List(GS2, GS1, GS6)
+        case F2SideLookingWithOI        => List(GS2, GS1, GS8)
+        case F2UpLookingWithOI          => List(GS10, GS7, GS8)
+      }
+      executeTest(expected, config = c, offsets = offsets)
+    }
   }
 
-  @Ignore @Test def testUpLookingBasePosAngle90() = {
-    val expected = List(GS3, GS2, GS1, GS4)
-    executeTest(expected, config = GMOSSouthUpLookingWithOI, posAngle = 90.0)
+  @Test def testOneNegOffsetPosAngle0() = {
+    val offsets = List(Offset(-50.arcsecs[OffsetP], -50.arcsecs[OffsetQ]))
+    AllConfigs.foreach { c =>
+      val expected = c match {
+        case GMOSSouthSideLookingWithOI => List(GS5, GS3, GS2)
+        case GMOSSouthUpLookingWithOI   => List(GS5)
+        case F2SideLookingWithOI        => List(GS3, GS2, GS1)
+        case F2UpLookingWithOI          => List(GS8, GS1)
+      }
+      executeTest(expected, config = c, offsets = offsets)
+    }
   }
 
-  @Ignore @Test def testUpLookingBasePosAngle180() = {
-    val expected = List(GS7, GS6)
-    executeTest(expected, config = GMOSSouthUpLookingWithOI, posAngle = 180.0)
+  @Test def testOneBigOffsetPosAngle0() = {
+    val offsets = List(Offset(200.arcsecs[OffsetP], 50.arcsecs[OffsetQ]))
+    AllConfigs.foreach { c =>
+      val expected = c match {
+        case GMOSSouthSideLookingWithOI => List(GS6, GS7)
+        case GMOSSouthUpLookingWithOI   => List(GS6, GS8, GS10)
+        case F2SideLookingWithOI        => List(GS8, GS10, GS7)
+        case F2UpLookingWithOI          => Nil
+      }
+      executeTest(expected, config = c, offsets = offsets)
+    }
   }
 
-  @Ignore @Test def testSideLookingOneOffsetPosAngle0() = {
-    val expected = List(GS2, GS6)
-    executeTest(expected, offsets = List(Offset(50.arcsecs[OffsetP], 50.arcsecs[OffsetQ])))
+  @Test def testOneBigNegOffsetPosAngle0() = {
+    val offsets = List(Offset(-200.arcsecs[OffsetP], -50.arcsecs[OffsetQ]))
+    AllConfigs.foreach { c =>
+      val expected = c match {
+        case GMOSSouthSideLookingWithOI => List(GS5)
+        case GMOSSouthUpLookingWithOI   => List(GS5)
+        case F2SideLookingWithOI        => Nil
+        case F2UpLookingWithOI          => List(GS1, GS2, GS3)
+      }
+      executeTest(expected, config = c, offsets = offsets)
+    }
   }
 
-  @Ignore @Test def testSideLookingOneOffset2PosAngle0() = {
-    // The vignetting exclusively on the offset would result in GS6 and then GS7, but the vignetting averaged across
-    // the base position and the offset would result in GS7 and then GS6.
-    val expected = List(GS7, GS6)
-    executeTest(expected, offsets = List(Offset(200.arcsecs[OffsetP], 50.arcsecs[OffsetQ])))
+  @Test def testOneOffsetPosAngle90() = {
+    val offsets = List(Offset(50.arcsecs[OffsetP], 50.arcsecs[OffsetQ]))
+    AllConfigs.foreach { c =>
+      val expected = c match {
+        case GMOSSouthSideLookingWithOI => List(GS6, GS8)
+        case GMOSSouthUpLookingWithOI   => List(GS3, GS6, GS2, GS1, GS8)
+        case F2SideLookingWithOI        => List(GS2, GS1, GS8)
+        case F2UpLookingWithOI          => List(GS8, GS10, GS9) // 9 vignettes least, but med quality
+      }
+      executeTest(expected, config = c, offsets = offsets, posAngle = 90.0)
+    }
   }
 
-  @Ignore @Test def testSideLookingOneNegOffset2PosAngle0() = {
-    val expected = List(GS5, GS3, GS2)
-    executeTest(expected, offsets = List(Offset(-50.arcsecs[OffsetP], -50.arcsecs[OffsetQ])))
+  @Test def testAllNoVignetting() = {
+    AllConfigs.foreach { c =>
+      val expected = c match {
+        case GMOSSouthSideLookingWithOI => List(NVGS2, NVGS3, NVGS1, NVGS4, NVGS6, NVGS5, NVGS7)
+        case GMOSSouthUpLookingWithOI   => List(NVGS4, NVGS5)
+        case F2SideLookingWithOI        => List(NVGS6)
+        case F2UpLookingWithOI          => Nil
+      }
+      executeTest(expected, config = c, candidates = AllNV)
+    }
   }
 
-  @Ignore @Test def testAllNoVignetting() = {
-    val expected = List(NVGS2, NVGS3, NVGS1, NVGS4, NVGS6, NVGS5, NVGS7)
-    executeTest(expected, candidates = AllNV)
+  @Test def testShiftedBase() = {
+    AllConfigs.foreach { c =>
+      val expected = c match {
+        case GMOSSouthSideLookingWithOI => List(GS3, GS4)
+        case GMOSSouthUpLookingWithOI   => List(GS5, GS3)
+        case F2SideLookingWithOI        => List(GS3, GS4)
+        case F2UpLookingWithOI          => List(GS8, GS1, GS2)
+      }
+      executeTest(expected, config = c, base = shiftedBase)
+    }
   }
 }

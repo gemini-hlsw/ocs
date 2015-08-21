@@ -11,6 +11,7 @@ import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.spModel.core.Offset;
 import edu.gemini.spModel.gemini.acqcam.InstAcqCam;
 import edu.gemini.spModel.gemini.bhros.InstBHROS;
+import edu.gemini.spModel.gemini.flamingos2.F2ScienceAreaGeometry$;
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2;
 import edu.gemini.spModel.gemini.gmos.InstGmosCommon;
 import edu.gemini.spModel.gemini.gnirs.InstGNIRS;
@@ -26,7 +27,6 @@ import edu.gemini.spModel.gemini.trecs.InstTReCS;
 import edu.gemini.spModel.obscomp.SPInstObsComp;
 import jsky.app.ot.gemini.acqcam.AcqCam_SciAreaFeature;
 import jsky.app.ot.gemini.bhros.BHROS_SciAreaFeature;
-import jsky.app.ot.gemini.flamingos2.Flamingos2_SciAreaFeature;
 import jsky.app.ot.gemini.gnirs.GNIRS_SciAreaFeature;
 import jsky.app.ot.gemini.gpi.Gpi_SciAreaFeature;
 import jsky.app.ot.gemini.gsaoi.GsaoiDetectorArrayFeature;
@@ -68,7 +68,7 @@ public class SciAreaFeature extends TpeImageFeature
     private TReCS_SciAreaFeature _trecsFeat;
     private Michelle_SciAreaFeature _michelleFeat;
     private GNIRS_SciAreaFeature _gnirsFeat;
-    private Flamingos2_SciAreaFeature _flamingos2Feat;
+    private SciAreaPlotFeature _flamingos2Feat;
     private NICI_SciAreaFeature _niciFeat;
     private Texes_SciAreaFeature _texesFeat;
     private Gpi_SciAreaFeature _gpiFeat;
@@ -249,7 +249,7 @@ public class SciAreaFeature extends TpeImageFeature
             _feat = _gnirsFeat;
         } else if (inst instanceof Flamingos2) {
             if (_flamingos2Feat == null) {
-                _flamingos2Feat = new Flamingos2_SciAreaFeature();
+                _flamingos2Feat = new SciAreaPlotFeature(F2ScienceAreaGeometry$.MODULE$);
             }
             _feat = _flamingos2Feat;
         } else if (inst instanceof InstNICI) {

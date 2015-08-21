@@ -17,7 +17,7 @@ import java.util.Collection;
 /**
  * The Flamingos II OIWFS guider.
  */
-public enum Flamingos2OiwfsGuideProbe implements GuideProbe, ValidatableGuideProbe, OffsetValidatingGuideProbe /*, VignettingGuideProbe */ {
+public enum Flamingos2OiwfsGuideProbe implements GuideProbe, ValidatableGuideProbe, OffsetValidatingGuideProbe, VignettingGuideProbe {
     instance;
 
     private static final PatrolField patrolField;
@@ -169,12 +169,10 @@ public enum Flamingos2OiwfsGuideProbe implements GuideProbe, ValidatableGuidePro
         }
     }
 
-    /* Coming soon....
     @Override
-    public double calculateVignetting(final ObsContext ctx,
-                                      final edu.gemini.spModel.core.Coordinates guideStarCoordinates) {
-        return VignettingCalculator.calculateVignetting(ctx, guideStarCoordinates, F2OiwfsProbeArm.instance());
-        return 0.0;
+    public VignettingCalculator calculator(ObsContext ctx) {
+        return VignettingCalculator$.MODULE$.apply(ctx,
+                F2OiwfsProbeArm$.MODULE$,
+                F2ScienceAreaGeometry$.MODULE$);
     }
-    */
 }
