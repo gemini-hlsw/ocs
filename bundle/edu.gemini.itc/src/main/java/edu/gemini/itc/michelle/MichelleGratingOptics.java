@@ -1,6 +1,7 @@
 package edu.gemini.itc.michelle;
 
 import edu.gemini.itc.base.GratingOptics;
+import edu.gemini.itc.shared.MichelleParameters;
 
 /**
  * This represents the transmission and properties of the Grating optics.

@@ -55,11 +55,11 @@ public class MultipartTestServlet extends HttpServlet {
             try {
                 final ITCMultiPartParser parser = new ITCMultiPartParser(request, MAX_CONTENT_LENGTH);
                 final ITCRequest r = ITCRequest.from(parser);
-                ObservationDetails odp = ITCRequest.observationParameters(r);
-                ObservingConditions ocp = ITCRequest.obsConditionParameters(r);
-                SourceDefinition sdp = ITCRequest.sourceDefinitionParameters(r);
-                TelescopeDetails tp = ITCRequest.teleParameters(r);
-                AcquisitionCamParameters acp = ITCRequest.acqCamParameters(r);
+                final AcquisitionCamParameters acp = ITCRequest.acqCamParameters(r);
+                final ObservationDetails odp = ITCRequest.observationParameters(r, acp);
+                final ObservingConditions ocp = ITCRequest.obsConditionParameters(r);
+                final SourceDefinition sdp = ITCRequest.sourceDefinitionParameters(r);
+                final TelescopeDetails tp = ITCRequest.teleParameters(r);
 
                 out.println(odp.toString());
                 out.println("<br>");
@@ -72,9 +72,9 @@ public class MultipartTestServlet extends HttpServlet {
                 out.println(acp.toString());
 
                 String txtFileName = "";
-                final Iterator it = parser.getFileNames();
+                final Iterator<String> it = parser.getFileNames();
                 while (it.hasNext()) {
-                    txtFileName = (String) it.next();
+                    txtFileName = it.next();
                     System.out.println(parser.getTextFile(txtFileName) + "<br>");
                 }
                 //Use this Code in Sed Factory to create a Textfile Reader for the String.

@@ -1,7 +1,9 @@
 package edu.gemini.itc.web.servlets;
 
+import edu.gemini.itc.shared.*;
 import edu.gemini.itc.web.ITCMultiPartParser;
 import edu.gemini.itc.web.ITCRequest;
+import edu.gemini.itc.web.html.*;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -19,16 +21,9 @@ import java.util.Calendar;
  */
 public abstract class ITCServlet extends HttpServlet {
 
-    public static int MAX_CONTENT_LENGTH = 1000000;  // Max file size 1MB
+    private static final String TITLE = "Gemini Integration Time Calculator";
 
-    public ITCServlet() {
-        super();
-    }
-
-    /**
-     * Returns a title
-     */
-    public abstract String getTitle();
+    private static final int MAX_CONTENT_LENGTH = 1000000;  // Max file size 1MB
 
     /**
      * Returns version of the servlet.
@@ -43,7 +38,24 @@ public abstract class ITCServlet extends HttpServlet {
     /**
      * Subclasses supply the body content for the html document.
      */
-    public abstract void writeOutput(ITCRequest mpp, PrintWriter out);
+    public void writeOutput(final ITCRequest r, final PrintWriter out) {
+        final InstrumentDetails ip  = ITCRequest.instrumentParameters(r);
+        final Parameters p          = ITCRequest.parameters(r, ip);
+        final PrinterBase printer;
+        if      (ip instanceof AcquisitionCamParameters)    printer = new AcqCamPrinter(p, (AcquisitionCamParameters) ip, out);
+        else if (ip instanceof Flamingos2Parameters)        printer = new Flamingos2Printer(p, (Flamingos2Parameters) ip, ITCRequest.plotParameters(r), out);
+        else if (ip instanceof GmosParameters)              printer = new GmosPrinter(p, (GmosParameters) ip, ITCRequest.plotParameters(r), out);
+        else if (ip instanceof GnirsParameters)             printer = new GnirsPrinter(p, (GnirsParameters) ip, ITCRequest.plotParameters(r), out);
+        else if (ip instanceof GsaoiParameters)             printer = new GsaoiPrinter(p, (GsaoiParameters) ip, out);
+        else if (ip instanceof MichelleParameters)          printer = new MichellePrinter(p, (MichelleParameters) ip, ITCRequest.plotParameters(r), out);
+        else if (ip instanceof NifsParameters)              printer = new NifsPrinter(p, (NifsParameters) ip, ITCRequest.plotParameters(r), out);
+        else if (ip instanceof NiriParameters)              printer = new NiriPrinter(p, (NiriParameters) ip, ITCRequest.plotParameters(r), out);
+        else if (ip instanceof TRecsParameters)             printer = new TRecsPrinter(p, (TRecsParameters) ip, ITCRequest.plotParameters(r), out);
+        else    throw new IllegalArgumentException("");
+
+        out.println("<a href = \"http://www.gemini.edu/sciops/instruments/integration-time-calculators/itc-help\"> Click here for help with the results page.</a>");
+        printer.writeOutput();
+    }
 
     /**
      * Called by server when form is submitted.
@@ -106,10 +118,10 @@ public abstract class ITCServlet extends HttpServlet {
      */
     protected void openDocument(PrintWriter out) {
         out.println("<HTML><HEAD><TITLE>");
-        out.println(getTitle() + " " + getVersion());
+        out.println(ITCServlet.TITLE);
         out.println("</TITLE></HEAD>");
         out.println("<BODY text='#000000' bgcolor='#ffffff'>");
-        out.println("<H2>" + getTitle() + "<br>" + getInst() + " version " + getVersion() + "</H2>");
+        out.println("<H2>" + ITCServlet.TITLE + "<br>" + getInst() + " version " + getVersion() + "</H2>");
     }
 
     /**

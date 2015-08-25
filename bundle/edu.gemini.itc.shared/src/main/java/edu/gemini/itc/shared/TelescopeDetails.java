@@ -25,33 +25,33 @@ public final class TelescopeDetails implements Serializable {
     }
 
     // The telescope size
-    private static final double _telescopeDiameter = 3.95 + 3.95;
+    private static final double telescopeDiameter = 3.95 + 3.95;
 
     // Data members
-    private final Coating           _mirrorCoating;  // aluminum or silver
-    private final IssPort               _instrumentPort; // up or side
-    private final GuideProbe.Type   _wfs;
+    private final Coating           mirrorCoating;  // aluminum or silver
+    private final IssPort           instrumentPort; // up or side
+    private final GuideProbe.Type   wfs;
 
     public TelescopeDetails(final Coating mirrorCoating, final IssPort instrumentPort, final GuideProbe.Type wfs) {
-        _mirrorCoating  = mirrorCoating;
-        _instrumentPort = instrumentPort;
-        _wfs            = wfs;
+        this.mirrorCoating  = mirrorCoating;
+        this.instrumentPort = instrumentPort;
+        this.wfs            = wfs;
     }
 
     public Coating getMirrorCoating() {
-        return _mirrorCoating;
+        return mirrorCoating;
     }
 
     public IssPort getInstrumentPort() {
-        return _instrumentPort;
+        return instrumentPort;
     }
 
     public GuideProbe.Type getWFS() {
-        return _wfs;
+        return wfs;
     }
 
     public double getTelescopeDiameter() {
-        return _telescopeDiameter;
+        return telescopeDiameter;
     }
 
 

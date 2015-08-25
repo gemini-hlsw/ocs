@@ -4,7 +4,7 @@ import edu.gemini.spModel.core.{Wavelength, Site}
 import edu.gemini.spModel.gemini.acqcam.AcqCamParams
 import edu.gemini.spModel.gemini.altair.AltairParams
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2
-import edu.gemini.spModel.gemini.gmos.GmosCommonType
+import edu.gemini.spModel.gemini.gmos.{GmosSouthType, GmosNorthType, GmosCommonType}
 import edu.gemini.spModel.gemini.gnirs.GNIRSParams
 import edu.gemini.spModel.gemini.gsaoi.Gsaoi
 import edu.gemini.spModel.gemini.nifs.NIFSParams
@@ -82,3 +82,28 @@ final case class GemsParameters(
                      avgStrehl:           Double,
                      strehlBand:          String)
 
+
+object InstrumentDetails {
+
+  // NOTE: This is similar to the code in ItcUniqueConfig which decides on imaging or spectroscopy setup
+  // on Config elements. There should be a way to share this?
+
+  // figure out if the instrument is configured for imaging by checking if a disperser element is present
+  def isImaging(i: InstrumentDetails): Boolean = i match {
+    case i: AcquisitionCamParameters  => true                                       // Acq cam is imaging only
+    case i: Flamingos2Parameters      => i.grism.equals(Flamingos2.Disperser.NONE)
+    case i: GnirsParameters           => false                                      // GNIRS is spectroscopy only
+    case i: GsaoiParameters           => true                                       // Gsaoi is imaging only
+    case i: MichelleParameters        => i.getGrating.equals(MichelleParameters.NO_DISPERSER)
+    case i: NifsParameters            => false                                      // NIFS is spectroscopy only
+    case i: NiriParameters            => i.grism.equals(Niri.Disperser.NONE)
+    case i: TRecsParameters           => i.getGrating.equals(TRecsParameters.NO_DISPERSER)
+    case i: GmosParameters            =>
+      i.grating.equals(GmosNorthType.DisperserNorth.MIRROR) ||
+        i.grating.equals(GmosSouthType.DisperserSouth.MIRROR)
+  }
+
+  // figure out if the instrument is configured for spectroscopy (ie. not imaging)
+  def isSpectroscopy(i: InstrumentDetails): Boolean = !isImaging(i)
+
+}

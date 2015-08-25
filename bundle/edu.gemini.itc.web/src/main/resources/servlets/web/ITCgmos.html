@@ -11,6 +11,10 @@
 <div class="content">
 
 <form method="post" enctype="multipart/form-data" action="/itc/servlet/gmos" target="resultsWindow">
+
+	<!-- instrument definition -->
+	<input name="Instrument" value="GMOS" type="hidden">
+
 	<!-- Spatial profile and brightness definitions follow-->
 	<p>
 	<span style="color: #ff0000"><b>Astronomical source definition</b></span> 
@@ -560,61 +564,47 @@
 	<table background="http://www.gemini.edu/sciops/instruments/itc/mez-green-bckgrnd.gif" border="0" cellpadding="6" cellspacing="0" height="70" width="100%">
 		<tbody>
 			<tr>
-				<td colspan="3" height="50" valign="bottom"><b>Calculation method:</b><i><span>(<a href="#" onclick="window.open('http://www.gemini.edu/?q=node/10256','mywindow','width=1000,height=700,toolbar=no,location=no,directories=no,sta tus=no,menubar=no,scrollbars=yes,copyhistory=no,resizable=no');return false">more info</a>)</span></i><br />
+				<td colspan="2" height="50" valign="bottom"><b>Calculation method:</b><i><span>(<a href="#" onclick="window.open('http://www.gemini.edu/?q=node/10256','mywindow','width=1000,height=700,toolbar=no,location=no,directories=no,sta tus=no,menubar=no,scrollbars=yes,copyhistory=no,resizable=no');return false">more info</a>)</span></i><br />
 
-				<i>Select imaging or spectroscopy and the calculation method (note: second method is not
-				available for spectroscopy)</i></td>
+				<i>Select calculation method (note: second method is not available for spectroscopy)</i></td>
 			</tr>
 			<tr>
-				<td colspan="3"><input value="imaging" name="calcMode" checked="checked" type="radio" /> Imaging or <input value="spectroscopy" name="calcMode" type="radio" /> spectroscopy ... </td>
-			</tr>
-			<tr>
-
-				<td> </td>
-				<!-- calc method A-->
 				<td><input value="s2n" name="calcMethod" checked="checked" type="radio" /></td>
 				<td>Total S/N ratio resulting from <input name="numExpA" size="5" value="1" type="text" />
 				exposures each having an exposure time of <input name="expTimeA" size="5" value="900" type="text" /> secs and with a fraction <input name="fracOnSourceA" size="4" value="1.0" type="text" /> of exposures that observe the source </td>
 
 			</tr>
-			<!-- ADD calc method B-->
-			<!-- calc method C-->
 			<tr>
-				<td> </td>
 				<td><input value="intTime" name="calcMethod" type="radio" /></td>
 				<td>Total integration time to achieve a S/N ratio of <input name="sigmaC" size="3" value="5" type="text" /> using an exposure time for each exposure of <input name="expTimeC" size="5" value="900" type="text" /> secs and with a fraction <input name="fracOnSourceC" size="4" value="1.0" type="text" /> of exposures that observe the source </td>
 
 			</tr>
 			<!-- analysis methods-->
 			<tr>
-				<td colspan="3" height="50" valign="bottom"><b>Analysis method:</b> <i><span>(</span><a href="#" onclick="window.open('http://www.gemini.edu/?q=node/10256#analysis','mywindow','width=1000,height=700,toolbar=no,location=no,directories=no,sta tus=no,menubar=no,scrollbars=yes,copyhistory=no,resizable=no');return false"><span>more info</span></a><span>)</span></i></td>
+				<td colspan="2" height="50" valign="bottom"><b>Analysis method:</b> <i><span>(</span><a href="#" onclick="window.open('http://www.gemini.edu/?q=node/10256#analysis','mywindow','width=1000,height=700,toolbar=no,location=no,directories=no,sta tus=no,menubar=no,scrollbars=yes,copyhistory=no,resizable=no');return false"><span>more info</span></a><span>)</span></i></td>
 			</tr>
 			<tr>
-
-				<td colspan="3"><input value="autoAper" name="aperType" checked="checked" type="radio" /> Software
-				aperture that gives 'optimum' S/N ratio and with a sky aperture <input name="autoSkyAper" size="4" value="5" type="text" /> times the target aperture</td>
+				<td><input value="autoAper" name="aperType" checked="checked" type="radio" /></td>
+				<td>Software aperture that gives 'optimum' S/N ratio and with a sky aperture <input name="autoSkyAper" size="4" value="5" type="text" /> times the target aperture</td>
 			</tr>
 			<tr>
-				<td colspan="3"><input value="userAper" name="aperType" type="radio" /> Software aperture of
-				diameter (or slit length) <input name="userAperDiam" size="4" value="2" type="text" />
-				arcsec and with a sky aperture <input name="userSkyAper" size="4" value="5" type="text" /> times the target aperture</td>
+				<td><input value="userAper" name="aperType" type="radio" /></td>
+				<td>Software aperture of diameter (or slit length) <input name="userAperDiam" size="4" value="2" type="text" /> arcsec and with a sky aperture <input name="userSkyAper" size="4" value="5" type="text" /> times the target aperture</td>
 
 			</tr>
 			<tr>
-				<td colspan="3" height="50" valign="bottom">For Integral Field Unit (IFU) spectroscopy
-				only ...</td>
+				<td colspan="2" height="50" valign="bottom">For Integral Field Unit (IFU) spectroscopy only ...</td>
 			</tr>
 			<tr>
-				<td colspan="3"><i>Normally set sky aperture above to be 500x target aperture when
-				using the smaller IFU field for sky measurement.</i></td>
+				<i>Normally set sky aperture above to be 500x target aperture when using the smaller IFU field for sky measurement.</i>
 			</tr>
 			<tr>
 
-				<td colspan="2"><input value="singleIFU" name="ifuMethod" checked="checked" type="radio" /></td>
+				<td><input value="singleIFU" name="ifuMethod" checked="checked" type="radio" /></td>
 				<td>Select an individual IFU element offset by <input name="ifuOffset" size="5" value="0.0" type="text" /> arcsec from the center</td>
 			</tr>
 			<tr>
-				<td colspan="2"><input value="radialIFU" name="ifuMethod" type="radio" /></td>
+				<td><input value="radialIFU" name="ifuMethod" type="radio" /></td>
 				<td>Select multiple IFU elements along a radius with offsets of <input name="ifuMinOffset" size="5" value="0.0" type="text" />  to
 				<input name="ifuMaxOffset" size="5" value="3.0" type="text" /> arcsec </td>
 

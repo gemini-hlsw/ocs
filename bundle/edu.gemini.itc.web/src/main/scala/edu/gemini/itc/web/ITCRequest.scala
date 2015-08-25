@@ -3,10 +3,9 @@ package edu.gemini.itc.web
 import javax.servlet.http.HttpServletRequest
 
 import edu.gemini.itc.base._
-import edu.gemini.itc.michelle.MichelleParameters
 import edu.gemini.itc.shared.SourceDefinition.{Distribution, Profile, Recession}
-import edu.gemini.itc.shared.{GnirsParameters, _}
-import edu.gemini.itc.trecs.TRecsParameters
+import edu.gemini.itc.shared._
+import edu.gemini.pot.sp.SPComponentType
 import edu.gemini.spModel.core.{MagnitudeBand, Site, Wavelength}
 import edu.gemini.spModel.gemini.acqcam.AcqCamParams
 import edu.gemini.spModel.gemini.altair.AltairParams
@@ -96,6 +95,22 @@ object ITCRequest {
     val sb      = r.enumParameter(classOf[SPSiteQuality.SkyBackground])
     val airmass = r.doubleParameter("Airmass")
     new ObservingConditions(iq, cc, wv, sb, airmass)
+  }
+
+  def instrumentParameters(r: ITCRequest): InstrumentDetails = {
+    import SPComponentType._
+    val i = r.parameter("Instrument")
+    if      (i == INSTRUMENT_ACQCAM.narrowType)     acqCamParameters(r)
+    else if (i == INSTRUMENT_FLAMINGOS2.narrowType) flamingos2Parameters(r)
+    else if (i == INSTRUMENT_GMOS.narrowType)       gmosParameters(r)
+    else if (i == INSTRUMENT_GMOSSOUTH.narrowType)  gmosParameters(r)
+    else if (i == INSTRUMENT_GNIRS.narrowType)      gnirsParameters(r)
+    else if (i == INSTRUMENT_GSAOI.narrowType)      gsaoiParameters(r)
+    else if (i == INSTRUMENT_MICHELLE.narrowType)   michelleParameters(r)
+    else if (i == INSTRUMENT_NIFS.narrowType)       nifsParameters(r)
+    else if (i == INSTRUMENT_NIRI.narrowType)       niriParameters(r)
+    else if (i == INSTRUMENT_TRECS.narrowType)      trecsParameters(r)
+    else    sys.error(s"invalid instrument $i")
   }
 
   def acqCamParameters(r: ITCRequest): AcquisitionCamParameters = {
@@ -211,23 +226,22 @@ object ITCRequest {
     new GemsParameters(avgStrehl, strehlBand)
   }
 
-  def observationParameters(r: ITCRequest): ObservationDetails = {
-    val calcMode   = r.parameter("calcMode")
+  def observationParameters(r: ITCRequest, i: InstrumentDetails): ObservationDetails = {
     val calcMethod = r.parameter("calcMethod")
-    val calculationMethod = (calcMode, calcMethod) match {
-      case ("imaging", "intTime")     =>
+    val calculationMethod = calcMethod match {
+      case "intTime"  if InstrumentDetails.isImaging(i)     =>
         ImagingInt(
           r.doubleParameter("sigmaC"),
           r.doubleParameter("expTimeC"),
           r.doubleParameter("fracOnSourceC")
         )
-      case ("imaging", "s2n")         =>
+      case "s2n"      if InstrumentDetails.isImaging(i)     =>
         ImagingSN(
           r.intParameter("numExpA"),
           r.doubleParameter("expTimeA"),
           r.doubleParameter("fracOnSourceA")
         )
-      case ("spectroscopy", "s2n")    =>
+      case "s2n"      if InstrumentDetails.isSpectroscopy(i) =>
         SpectroscopySN(
           r.intParameter("numExpA"),
           r.doubleParameter("expTimeA"),
@@ -309,9 +323,9 @@ object ITCRequest {
       case _            => throw new IllegalArgumentException()
   }
 
-  def parameters(r: ITCRequest): Parameters = {
+  def parameters(r: ITCRequest, i: InstrumentDetails): Parameters = {
     val source        = ITCRequest.sourceDefinitionParameters(r)
-    val observation   = ITCRequest.observationParameters(r)
+    val observation   = ITCRequest.observationParameters(r, i)
     val conditions    = ITCRequest.obsConditionParameters(r)
     val telescope     = ITCRequest.teleParameters(r)
     Parameters(source, observation, conditions, telescope)

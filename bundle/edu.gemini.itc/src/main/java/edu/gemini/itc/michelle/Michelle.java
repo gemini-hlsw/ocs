@@ -3,6 +3,7 @@ package edu.gemini.itc.michelle;
 import edu.gemini.itc.base.*;
 import edu.gemini.itc.operation.DetectorsTransmissionVisitor;
 import edu.gemini.itc.shared.CalculationMethod;
+import edu.gemini.itc.shared.MichelleParameters;
 import edu.gemini.itc.shared.ObservationDetails;
 import edu.gemini.spModel.gemini.michelle.MichelleParams;
 

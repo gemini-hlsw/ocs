@@ -11,6 +11,10 @@
 <div class="content">
 
 <form method="post" enctype="multipart/form-data" action="/itc/servlet/nifs" target="resultsWindow">
+
+	<!-- instrument definition -->
+	<input name="Instrument" value="NIFS" type="hidden">
+
 	<!---->
 	<p>
 	<span style="color: #ff0000"><b>Astronomical source definition</b></span> 
@@ -504,9 +508,6 @@
 			<tr>
 				<td colspan="2" height="40" valign="bottom"><b>Calculation method:</b><i><span>(<a href="#" onclick="window.open('http://www.gemini.edu/?q=node/10256','mywindow','width=1000,height=700,toolbar=no,location=no,directories=no,sta tus=no,menubar=no,scrollbars=yes,copyhistory=no,resizable=no'); return false">more info</a>)</span></i></td>
 			</tr>
-			<!---->
-			<input value="spectroscopy" name="calcMode" type="hidden" />
-			<!---->
 			<tr>
 
 				<td colspan="2"><input value="s2n" name="calcMethod" type="hidden" />Total S/N ratio resulting from <input name="numExpA" size="5" value="30" type="text" />
@@ -515,16 +516,7 @@
 			<!----><!---->
 			<input value="1" name="autoSkyAper" type="hidden" />
 			<input value="1" name="userSkyAper" type="hidden" />
-
-			<tr>
-				<td colspan="2" height="50" valign="bottom"><b>Analysis method:</b> <i><span>(</span><a href="#" onclick="window.open('http://www.gemini.edu/?q=node/10256#analysis','mywindow','width=1000,height=700,toolbar=no,location=no,directories=no,sta tus=no,menubar=no,scrollbars=yes,copyhistory=no,resizable=no'); return false"><span>more info</span></a><span>)</span></i></td>
-			</tr>
-			<tr>
-				<td colspan="2"><input value="autoAper" name="aperType" type="hidden" /> 
-				<br />
-				</td>
-
-			</tr>
+			<input value="autoAper" name="aperType" type="hidden" />
 			<tr>
 				<td colspan="2"><input value="userAper" name="aperType" type="hidden" />  <input name="userAperDiam" size="4" value="2" type="hidden" /> </td>
 			</tr>

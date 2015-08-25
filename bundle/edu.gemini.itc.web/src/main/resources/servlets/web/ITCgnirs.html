@@ -11,6 +11,10 @@
 <div class="content">
 
 <form method="POST" enctype="multipart/form-data" action="/itc/servlet/gnirs" target="resultsWindow">
+
+	<!-- instrument definition -->
+	<input name="Instrument" value="GNIRS" type="hidden">
+
 	<!-- Spatial profile and brightness definitions follow-->
 	<p>
 
@@ -534,9 +538,6 @@
 				<td colspan="2" height="40" valign="bottom"><b>Calculation method:</b><i><span>(<a href="#" onclick="window.open('http://www.gemini.edu/?q=node/10256','mywindow','width=1000,height=700,toolbar=no,location=no,directories=no,sta tus=no,menubar=no,scrollbars=yes,copyhistory=no,resizable=no'); return false">more info</a>)</span></i></td>
 
 			</tr>
-			<!-- by definition, calc mode can only be spectroscopy....-->
-			<input value="spectroscopy" name="calcMode" type="hidden" />
-			<!-- ...and must be calc method A-->
 			<tr>
 				<td colspan="2"><input value="s2n" name="calcMethod" type="hidden" />Total S/N ratio resulting 
 				from <input name="numExpA" size="5" value="30" type="text" />

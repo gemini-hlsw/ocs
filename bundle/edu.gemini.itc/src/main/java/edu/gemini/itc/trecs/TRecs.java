@@ -4,6 +4,7 @@ import edu.gemini.itc.base.*;
 import edu.gemini.itc.operation.DetectorsTransmissionVisitor;
 import edu.gemini.itc.shared.CalculationMethod;
 import edu.gemini.itc.shared.ObservationDetails;
+import edu.gemini.itc.shared.TRecsParameters;
 import scala.Option;
 
 import java.util.Scanner;

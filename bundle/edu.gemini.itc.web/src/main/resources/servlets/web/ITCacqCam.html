@@ -11,7 +11,11 @@
 <div class="content">
 
 <form method="POST" enctype="multipart/form-data" action="/itc/servlet/acqcam" target="resultsWindow">
-<!-- Spatial profile and brightness definitions follow-->
+
+  <!-- instrument definition -->
+  <input name="Instrument" value="AcqCam" type="hidden">
+
+  <!-- Spatial profile and brightness definitions follow-->
   <p><font color="#FF0000"><b>Astronomical source definition</b></font> </p>
 
   <table border="0" width="100%" height="101" background="http://www.gemini.edu/sciops/instruments/itc/mez-green-bckgrnd.gif"
@@ -381,7 +385,6 @@
     <tr>
 
       <td height="50" valign="bottom" colspan="3"><b>Calculation method:</b><i><font size="-1">(<a href="#" onclick="window.open('http://www.gemini.edu/?q=node/10256','mywindow','width=1000,height=700,toolbar=no,location=no,directories=no,sta tus=no,menubar=no,scrollbars=yes,copyhistory=no,resizable=no'); return false">more info</a>)</font></i><br>
-      <i>Select the calculation method </i> <input value="imaging" name="calcMode" type="hidden"></td>
 
     </tr>
     <tr>

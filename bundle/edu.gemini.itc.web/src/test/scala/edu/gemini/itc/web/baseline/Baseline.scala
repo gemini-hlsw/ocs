@@ -3,9 +3,7 @@ package edu.gemini.itc.web.baseline
 import java.io.{ByteArrayOutputStream, PrintWriter}
 
 import edu.gemini.itc.baseline.util.Fixture
-import edu.gemini.itc.michelle.MichelleParameters
-import edu.gemini.itc.shared.{GnirsParameters, _}
-import edu.gemini.itc.trecs.TRecsParameters
+import edu.gemini.itc.shared._
 import edu.gemini.itc.web.html._
 import edu.gemini.itc.web.servlets.ImageServlet
 

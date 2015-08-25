@@ -1,4 +1,4 @@
-package edu.gemini.itc.trecs;
+package edu.gemini.itc.shared;
 
 import edu.gemini.itc.shared.InstrumentDetails;
 import edu.gemini.spModel.core.Wavelength;

@@ -4,7 +4,7 @@ import edu.gemini.itc.base.ImagingResult;
 import edu.gemini.itc.base.SpectroscopyResult;
 import edu.gemini.itc.shared.*;
 import edu.gemini.itc.trecs.TRecs;
-import edu.gemini.itc.trecs.TRecsParameters;
+import edu.gemini.itc.shared.TRecsParameters;
 import edu.gemini.itc.trecs.TRecsRecipe;
 import scala.Tuple2;
 

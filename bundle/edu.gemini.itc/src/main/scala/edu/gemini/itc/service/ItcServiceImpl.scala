@@ -6,12 +6,10 @@ import edu.gemini.itc.flamingos2.Flamingos2Recipe
 import edu.gemini.itc.gmos.GmosRecipe
 import edu.gemini.itc.gnirs.GnirsRecipe
 import edu.gemini.itc.gsaoi.GsaoiRecipe
-import edu.gemini.itc.michelle.MichelleParameters
 import edu.gemini.itc.nifs.NifsRecipe
 import edu.gemini.itc.niri.NiriRecipe
 import edu.gemini.itc.operation.ImagingS2NMethodACalculation
 import edu.gemini.itc.shared._
-import edu.gemini.itc.trecs.TRecsParameters
 
 import scalaz._
 import Scalaz._

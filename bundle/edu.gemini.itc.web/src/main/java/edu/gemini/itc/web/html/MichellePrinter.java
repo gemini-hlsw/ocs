@@ -3,7 +3,7 @@ package edu.gemini.itc.web.html;
 import edu.gemini.itc.base.ImagingResult;
 import edu.gemini.itc.base.SpectroscopyResult;
 import edu.gemini.itc.michelle.Michelle;
-import edu.gemini.itc.michelle.MichelleParameters;
+import edu.gemini.itc.shared.MichelleParameters;
 import edu.gemini.itc.michelle.MichelleRecipe;
 import edu.gemini.itc.shared.*;
 import edu.gemini.spModel.gemini.michelle.MichelleParams;
