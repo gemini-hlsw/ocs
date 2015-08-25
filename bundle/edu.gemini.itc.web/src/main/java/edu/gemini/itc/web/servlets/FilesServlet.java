@@ -16,7 +16,7 @@ import java.util.logging.Logger;
  * This servlet provides data files and charts for spectroscopy results that have previously
  * been calculated and are cached by this servlet.
  */
-public final class ImageServlet extends HttpServlet {
+public final class FilesServlet extends HttpServlet {
 
     public static final String ParamType        = "type";
     public static final String ParamId          = "id";
@@ -28,7 +28,7 @@ public final class ImageServlet extends HttpServlet {
     public static final String TypeImg          = "img";
     public static final String TypeTxt          = "txt";
 
-    private static final Logger Log = Logger.getLogger(ImageServlet.class.getName());
+    private static final Logger Log = Logger.getLogger(FilesServlet.class.getName());
 
     // === Caching
     // We need to keep the results of ITC calculations in memory for a while in order to be able to serve

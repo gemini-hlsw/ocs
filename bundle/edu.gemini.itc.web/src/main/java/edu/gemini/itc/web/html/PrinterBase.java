@@ -2,7 +2,7 @@ package edu.gemini.itc.web.html;
 
 import edu.gemini.itc.base.*;
 import edu.gemini.itc.shared.*;
-import edu.gemini.itc.web.servlets.ImageServlet;
+import edu.gemini.itc.web.servlets.FilesServlet;
 import edu.gemini.itc.web.servlets.ServerInfo;
 
 import java.io.PrintWriter;
@@ -16,10 +16,12 @@ public abstract class PrinterBase {
         _out = pr;
     }
 
+    public abstract String getInstrumentName();
+
     public abstract void writeOutput();
 
     protected UUID cache(final ItcSpectroscopyResult result) {
-        return ImageServlet.cache(result);
+        return FilesServlet.cache(result);
     }
 
     /* TODO: this needs to be validated for spectroscopy for all instruments, find a better place to do this */
@@ -64,10 +66,10 @@ public abstract class PrinterBase {
         _println("<a href =" +
                 "\"" + ServerInfo.getServerURL() +
                 "itc/servlet/images" +
-                "?" + ImageServlet.ParamType  + "=" + ImageServlet.TypeTxt +
-                "&" + ImageServlet.ParamName  + "=" + type.toString() +
-                "&" + ImageServlet.ParamIndex + "=" + index +
-                "&" + ImageServlet.ParamId    + "=" + id +
+                "?" + FilesServlet.ParamType  + "=" + FilesServlet.TypeTxt +
+                "&" + FilesServlet.ParamName  + "=" + type.toString() +
+                "&" + FilesServlet.ParamIndex + "=" + index +
+                "&" + FilesServlet.ParamId    + "=" + id +
                 "\"> Click here for " + toFileLabel(type) + ". </a>");
     }
 
@@ -79,10 +81,10 @@ public abstract class PrinterBase {
     protected void _printImageLink(final UUID id, final SpcChartType type, final int index, final PlottingDetails pd) {
         _print("<img alt=\"" + toImgAlt(type) + "\" src=\"" + ServerInfo.getServerURL() +
                 "itc/servlet/images" +
-                "?" + ImageServlet.ParamType  + "=" + ImageServlet.TypeImg +
-                "&" + ImageServlet.ParamName  + "=" + type.toString() +
-                "&" + ImageServlet.ParamIndex + "=" + index +
-                "&" + ImageServlet.ParamId    + "=" + id +
+                "?" + FilesServlet.ParamType  + "=" + FilesServlet.TypeImg +
+                "&" + FilesServlet.ParamName  + "=" + type.toString() +
+                "&" + FilesServlet.ParamIndex + "=" + index +
+                "&" + FilesServlet.ParamId    + "=" + id +
                 toPlotLimits(pd) + "\"/>");
     }
 
@@ -90,8 +92,8 @@ public abstract class PrinterBase {
         if (pd.getPlotLimits() == PlottingDetails.PlotLimits.AUTO) {
             return "";
         } else {
-            return "&" + ImageServlet.ParamLoLimit + "=" + pd.getPlotWaveL() +
-                   "&" + ImageServlet.ParamHiLimit + "=" + pd.getPlotWaveU();
+            return "&" + FilesServlet.ParamLoLimit + "=" + pd.getPlotWaveL() +
+                   "&" + FilesServlet.ParamHiLimit + "=" + pd.getPlotWaveU();
         }
     }
 

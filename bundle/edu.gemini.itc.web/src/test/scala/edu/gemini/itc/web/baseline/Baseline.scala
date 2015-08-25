@@ -5,7 +5,7 @@ import java.io.{ByteArrayOutputStream, PrintWriter}
 import edu.gemini.itc.baseline.util.Fixture
 import edu.gemini.itc.shared._
 import edu.gemini.itc.web.html._
-import edu.gemini.itc.web.servlets.ImageServlet
+import edu.gemini.itc.web.servlets.FilesServlet
 
 import scala.io.Source
 
@@ -31,7 +31,7 @@ case class Output(string: String) {
       foldLeft(17L)((acc, s) => 37L*acc + s.hashCode)
 
   def hashDatFile(id: String, index: String, filename: String): Int = {
-    val file = ImageServlet.toFile(id, filename, index.toInt)
+    val file = FilesServlet.toFile(id, filename, index.toInt)
     file.split('\n').drop(1).foldLeft(17)((acc, s) => 37*acc + s.hashCode)
   }
 

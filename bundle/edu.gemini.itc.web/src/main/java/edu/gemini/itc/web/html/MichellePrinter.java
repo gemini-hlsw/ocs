@@ -6,6 +6,7 @@ import edu.gemini.itc.michelle.Michelle;
 import edu.gemini.itc.shared.MichelleParameters;
 import edu.gemini.itc.michelle.MichelleRecipe;
 import edu.gemini.itc.shared.*;
+import edu.gemini.pot.sp.SPComponentType;
 import edu.gemini.spModel.gemini.michelle.MichelleParams;
 import scala.Tuple2;
 
@@ -28,6 +29,13 @@ public final class MichellePrinter extends PrinterBase {
         this.isImaging = p.observation().getMethod().isImaging();
     }
 
+    /**
+     * Then name of the instrument this recipe belongs to.
+     * @return
+     */
+    public String getInstrumentName() {
+        return SPComponentType.INSTRUMENT_MICHELLE.readableStr;
+    }
 
     public void writeOutput() {
         if (isImaging) {
