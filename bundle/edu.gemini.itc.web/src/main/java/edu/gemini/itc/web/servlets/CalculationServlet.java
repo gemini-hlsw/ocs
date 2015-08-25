@@ -21,7 +21,8 @@ import java.util.Calendar;
  */
 public final class CalculationServlet extends HttpServlet {
 
-    private static final String TITLE = "Gemini Integration Time Calculator";
+    private static final String HELP_URL        = "http://www.gemini.edu/sciops/instruments/integration-time-calculators/itc-help";
+    private static final String TITLE           = "Gemini Integration Time Calculator";
 
     private static final int MAX_CONTENT_LENGTH = 1000000;  // Max file size 1MB
 
@@ -86,7 +87,7 @@ public final class CalculationServlet extends HttpServlet {
      */
     private void openDocument(final PrintWriter out) {
         out.println("<HTML><HEAD><TITLE>");
-        out.println(CalculationServlet.TITLE);
+        out.println(TITLE);
         out.println("</TITLE></HEAD>");
         out.println("<BODY text='#000000' bgcolor='#ffffff'>");
     }
@@ -98,19 +99,19 @@ public final class CalculationServlet extends HttpServlet {
         final InstrumentDetails ip  = ITCRequest.instrumentParameters(r);
         final Parameters p          = ITCRequest.parameters(r, ip);
         final PrinterBase printer;
-        if      (ip instanceof AcquisitionCamParameters)    printer = new AcqCamPrinter(p, (AcquisitionCamParameters) ip, out);
-        else if (ip instanceof Flamingos2Parameters)        printer = new Flamingos2Printer(p, (Flamingos2Parameters) ip, ITCRequest.plotParameters(r), out);
-        else if (ip instanceof GmosParameters)              printer = new GmosPrinter(p, (GmosParameters) ip, ITCRequest.plotParameters(r), out);
-        else if (ip instanceof GnirsParameters)             printer = new GnirsPrinter(p, (GnirsParameters) ip, ITCRequest.plotParameters(r), out);
-        else if (ip instanceof GsaoiParameters)             printer = new GsaoiPrinter(p, (GsaoiParameters) ip, out);
-        else if (ip instanceof MichelleParameters)          printer = new MichellePrinter(p, (MichelleParameters) ip, ITCRequest.plotParameters(r), out);
-        else if (ip instanceof NifsParameters)              printer = new NifsPrinter(p, (NifsParameters) ip, ITCRequest.plotParameters(r), out);
-        else if (ip instanceof NiriParameters)              printer = new NiriPrinter(p, (NiriParameters) ip, ITCRequest.plotParameters(r), out);
-        else if (ip instanceof TRecsParameters)             printer = new TRecsPrinter(p, (TRecsParameters) ip, ITCRequest.plotParameters(r), out);
-        else    throw new IllegalArgumentException("");
+        if      (ip instanceof AcquisitionCamParameters) printer = new AcqCamPrinter(p, (AcquisitionCamParameters) ip, out);
+        else if (ip instanceof Flamingos2Parameters)     printer = new Flamingos2Printer(p, (Flamingos2Parameters) ip, ITCRequest.plotParameters(r), out);
+        else if (ip instanceof GmosParameters)           printer = new GmosPrinter(p, (GmosParameters) ip, ITCRequest.plotParameters(r), out);
+        else if (ip instanceof GnirsParameters)          printer = new GnirsPrinter(p, (GnirsParameters) ip, ITCRequest.plotParameters(r), out);
+        else if (ip instanceof GsaoiParameters)          printer = new GsaoiPrinter(p, (GsaoiParameters) ip, out);
+        else if (ip instanceof MichelleParameters)       printer = new MichellePrinter(p, (MichelleParameters) ip, ITCRequest.plotParameters(r), out);
+        else if (ip instanceof NifsParameters)           printer = new NifsPrinter(p, (NifsParameters) ip, ITCRequest.plotParameters(r), out);
+        else if (ip instanceof NiriParameters)           printer = new NiriPrinter(p, (NiriParameters) ip, ITCRequest.plotParameters(r), out);
+        else if (ip instanceof TRecsParameters)          printer = new TRecsPrinter(p, (TRecsParameters) ip, ITCRequest.plotParameters(r), out);
+        else    throw new RuntimeException("Instrument not implemented.");
 
-        out.println("<H2>" + CalculationServlet.TITLE + "<br>" + printer.getInstrumentName() + "</H2>");
-        out.println("<a href = \"http://www.gemini.edu/sciops/instruments/integration-time-calculators/itc-help\"> Click here for help with the results page.</a>");
+        out.println("<H2>" + TITLE + "<br>" + printer.getInstrumentName() + "</H2>");
+        out.println("<a href = \"" + HELP_URL + "\"> Click here for help with the results page.</a>");
 
         printer.writeOutput();
     }
