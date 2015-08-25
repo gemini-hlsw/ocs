@@ -4,8 +4,9 @@ import edu.gemini.itc.base.ImagingResult;
 import edu.gemini.itc.base.SpectroscopyResult;
 import edu.gemini.itc.shared.*;
 import edu.gemini.itc.trecs.TRecs;
-import edu.gemini.itc.trecs.TRecsParameters;
+import edu.gemini.itc.shared.TRecsParameters;
 import edu.gemini.itc.trecs.TRecsRecipe;
+import edu.gemini.pot.sp.SPComponentType;
 import scala.Tuple2;
 
 import java.io.PrintWriter;
@@ -25,6 +26,14 @@ public final class TRecsPrinter extends PrinterBase {
         this.recipe    = new TRecsRecipe(p.source(), p.observation(), p.conditions(), ip, p.telescope());
         this.pdp       = pdp;
         this.isImaging = p.observation().getMethod().isImaging();
+    }
+
+    /**
+     * Then name of the instrument this recipe belongs to.
+     * @return
+     */
+    public String getInstrumentName() {
+        return SPComponentType.INSTRUMENT_TRECS.readableStr;
     }
 
     public void writeOutput() {

@@ -4,6 +4,8 @@ import edu.gemini.itc.gmos.Gmos;
 import edu.gemini.itc.gmos.GmosRecipe;
 import edu.gemini.itc.base.*;
 import edu.gemini.itc.shared.*;
+import edu.gemini.pot.sp.SPComponentType;
+import edu.gemini.spModel.core.Site;
 import edu.gemini.spModel.gemini.gmos.GmosNorthType;
 import edu.gemini.spModel.gemini.gmos.GmosSouthType;
 import scala.Tuple2;
@@ -17,15 +19,25 @@ import java.util.UUID;
  */
 public final class GmosPrinter extends PrinterBase {
 
+    private final String instrumentName;
     private final GmosRecipe recipe;
     private final PlottingDetails pdp;
     private final boolean isImaging;
 
     public GmosPrinter(final Parameters p, final GmosParameters ip, final PlottingDetails pdp, final PrintWriter out) {
         super(out);
-        this.recipe = new GmosRecipe(p.source(), p.observation(), p.conditions(), ip, p.telescope());
-        this.pdp = pdp;
-        this.isImaging = p.observation().getMethod().isImaging();
+        this.instrumentName = ip.site().equals(Site.GN) ? SPComponentType.INSTRUMENT_GMOS.readableStr : SPComponentType.INSTRUMENT_GMOSSOUTH.readableStr;
+        this.recipe         = new GmosRecipe(p.source(), p.observation(), p.conditions(), ip, p.telescope());
+        this.pdp            = pdp;
+        this.isImaging      = p.observation().getMethod().isImaging();
+    }
+
+    /**
+     * Then name of the instrument this recipe belongs to.
+     * @return
+     */
+    public String getInstrumentName() {
+        return instrumentName;
     }
 
     /**

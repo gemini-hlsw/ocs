@@ -5,7 +5,6 @@ import edu.gemini.itc.operation.*;
 import edu.gemini.itc.shared.*;
 import edu.gemini.spModel.core.Site;
 import scala.Tuple2;
-import scala.collection.JavaConversions;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -10,7 +10,12 @@
 
 <div class="content">
 
-<form method="post" enctype="multipart/form-data" action="/itc/servlet/trecs" target="resultsWindow">
+<form method="post" enctype="multipart/form-data" action="/itc/servlet/calc" target="resultsWindow">
+
+	<!-- instrument definition -->
+	<input name="Instrument" value="TReCS" type="hidden">
+
+
 	<!-- Spatial profile and brightness definitions follow-->
 	<p>
 
@@ -52,7 +57,7 @@
 			</tr>
 			<tr>
 				<td> </td>
-				<td><img src="/spacer.gif" height="1" width="40" /><input name="Profile" value="GAUSSIAN" type="radio" /></td>
+				<td><img src="/spacer.gif" height="1" width="40" style="opacity:0.0"/><input name="Profile" value="GAUSSIAN" type="radio" /></td>
 				<td>Gaussian profile with full width half maximum (including seeing) of <input name="gaussFwhm" size="5" value="1.0" type="text" /> arcsec and spatially integrated brightness of <input name="gaussSourceNorm" size="8" value="0.005" type="text" /> <select name="gaussSourceUnits" size="1">
 
 				<option value="MAG">
@@ -73,7 +78,7 @@
 			</tr>
 			<tr>
 				<td> </td>
-				<td><img src="/spacer.gif" height="1" width="40" /><input name="Profile" value="UNIFORM" type="radio" /></td>
+				<td><img src="/spacer.gif" height="1" width="40" style="opacity:0.0"/><input name="Profile" value="UNIFORM" type="radio" /></td>
 				<td>Uniform surface brightness <input name="usbSourceNorm" size="8" value="12.0" type="text" /> <select name="usbSourceUnits" size="1">
 				<option selected="selected" value="MAG_PSA">
 				mag / sq arcsec</option>
@@ -92,7 +97,7 @@
 				</select> (e.g. 21.6 mag / sq arcsec) </td>
 			</tr>
 			<tr>
-				<td colspan="3"><img src="/spacer.gif" height="40" width="1" />with the above <b>brightness normalisation</b> applied in filter <select name="WavebandDefinition" size="1">
+				<td colspan="3"><img src="/spacer.gif" height="40" width="1" style="opacity:0.0"/>with the above <b>brightness normalisation</b> applied in filter <select name="WavebandDefinition" size="1">
 
                     <option value="U">U (0.36um)</option>
                     <option value="B">B (0.44um)</option>
@@ -469,56 +474,44 @@
 		<tbody>
 
 			<tr>
-				<td colspan="3" height="50" valign="bottom"><b>Calculation method:</b><i><span>(<a href="#" onclick="window.open('http://www.gemini.edu/?q=node/10256','mywindow','width=1000,height=700,toolbar=no,location=no,directories=no,sta tus=no,menubar=no,scrollbars=yes,copyhistory=no,resizable=no'); return false">more info</a>)</span></i><br />
-				<i>Select imaging or spectroscopy and the calculation method (note: second method is not
-				available for spectroscopy)</i></td>
+				<td colspan="2" height="50" valign="bottom"><b>Calculation method:</b><i><span>(<a href="#" onclick="window.open('http://www.gemini.edu/?q=node/10256','mywindow','width=1000,height=700,toolbar=no,location=no,directories=no,sta tus=no,menubar=no,scrollbars=yes,copyhistory=no,resizable=no'); return false">more info</a>)</span></i><br />
+				<i>Select the calculation method (note: second method is not available for spectroscopy)</i></td>
 			</tr>
 			<tr>
-				<td colspan="3"><input value="imaging" name="calcMode" checked="checked" type="radio" /> Imaging or 
-				<input value="spectroscopy" name="calcMode" type="radio" /> spectroscopy ... </td>
-
-			</tr>
-			<tr>
-				<td> </td>
-				<!-- calc method A-->
 				<td><input value="s2n" name="calcMethod" checked="checked" type="radio" /><input name="numExpA" value="0" type="hidden" /></td>
 				<td>Total S/N ratio resulting from a total time of <input name="expTimeA" size="5" value="1800" type="text" /> secs and with a fraction <input name="fracOnSourceA" size="4" value="0.5" type="text" /> of exposures that observe the source (number of individual
 				exposures will be calculated from assumed frame time) </td>
 
 			</tr>
-			<!-- ADD calc method B-->
-			<!-- calc method C-->
 			<tr>
-				<td> </td>
 				<td><input value="intTime" name="calcMethod" type="radio" /><input name="expTimeC" value="0" type="hidden" /></td>
 				<td>Total integration time to achieve a S/N ratio of <input name="sigmaC" size="3" value="5" type="text" />  and with a fraction <input name="fracOnSourceC" size="4" value="0.5" type="text" /> of exposures that observe the source </td>
 
 			</tr>
 			<!-- analysis methods-->
 			<tr>
-				<td colspan="3" height="50" valign="bottom"><b>Analysis method:</b> <i><span>(</span><a href="#" onclick="window.open('http://www.gemini.edu/?q=node/10256#analysis','mywindow','width=1000,height=700,toolbar=no,location=no,directories=no,sta tus=no,menubar=no,scrollbars=yes,copyhistory=no,resizable=no'); return false"><span>more info</span></a><span>)</span></i></td>
+				<td colspan="2" height="50" valign="bottom"><b>Analysis method:</b> <i><span>(</span><a href="#" onclick="window.open('http://www.gemini.edu/?q=node/10256#analysis','mywindow','width=1000,height=700,toolbar=no,location=no,directories=no,sta tus=no,menubar=no,scrollbars=yes,copyhistory=no,resizable=no'); return false"><span>more info</span></a><span>)</span></i></td>
 			</tr>
 			<tr>
 
-				<td colspan="3"><input value="autoAper" name="aperType" checked="checked" type="radio" /> Software
-				aperture that gives 'optimum' S/N ratio and with a sky aperture <input name="autoSkyAper" size="4" value="5" type="text" /> times the target aperture</td>
+				<td><input value="autoAper" name="aperType" checked="checked" type="radio" /></td>
+				<td>Software aperture that gives 'optimum' S/N ratio and with a sky aperture <input name="autoSkyAper" size="4" value="5" type="text" /> times the target aperture</td>
 			</tr>
 			<tr>
-				<td colspan="3"><input value="userAper" name="aperType" type="radio" /> Software aperture of
-				diameter (or slit length) <input name="userAperDiam" size="4" value="2" type="text" />
-				arcsec and with a sky aperture <input name="userSkyAper" size="4" value="5" type="text" /> times the target aperture</td>
+				<td><input value="userAper" name="aperType" type="radio" /></td>
+				<td>Software aperture of diameter (or slit length) <input name="userAperDiam" size="4" value="2" type="text" /> arcsec and with a sky aperture <input name="userSkyAper" size="4" value="5" type="text" /> times the target aperture</td>
 
 			</tr>
 			<tr>
-				<td colspan="3" height="50" valign="bottom"><b>Output:</b> </td>
+				<td colspan="2" height="50" valign="bottom"><b>Output:</b> </td>
 			</tr>
 			<tr>
-				<td colspan="3">For spectroscopy, <input value="AUTO" name="PlotLimits" checked="checked" type="radio" /> autoscale or <input value="USER" name="PlotLimits" type="radio" /> specify
+				<td colspan="2">For spectroscopy, <input value="AUTO" name="PlotLimits" checked="checked" type="radio" /> autoscale or <input value="USER" name="PlotLimits" type="radio" /> specify
 				limits for plotted spectra (lower wavelength <input name="plotWavelengthL" size="6" value="8.0" type="text" /> um and upper wavelength <input name="plotWavelengthU" size="6" value="13.000" type="text" /> um) </td>
 
 			</tr>
 			<tr>
-				<td colspan="3">
+				<td colspan="2">
 				<p align="right">
 				<input value="reset" type="reset" />  <input src="http://www.gemini.edu/sciops/instruments/itc/calcButton.gif" align="absbottom" border="0" height="24" type="image" width="78" />
 				</p>
@@ -530,7 +523,7 @@
 	<div align="center">
 	<center>
 	<p>
-	<input value="calculate" type="submit" /> <img src="/spacer.gif" height="1" width="40" /><input value="reset to defaults" type="reset" /> 
+	<input value="calculate" type="submit" /> <img src="/spacer.gif" height="1" width="40" style="opacity:0.0"/><input value="reset to defaults" type="reset" />
 	</p>
 	</center>
 	</div>

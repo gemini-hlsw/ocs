@@ -1,8 +1,6 @@
 package edu.gemini.itc.baseline.util
 
-import edu.gemini.itc.michelle.MichelleParameters
-import edu.gemini.itc.shared.{GnirsParameters, _}
-import edu.gemini.itc.trecs.TRecsParameters
+import edu.gemini.itc.shared._
 
 // TEMPORARY helper
 // All input objects will become immutable data only objects (probably Scala case classes).

@@ -5,6 +5,7 @@ import edu.gemini.itc.base.SpectroscopyResult;
 import edu.gemini.itc.gnirs.Gnirs;
 import edu.gemini.itc.gnirs.GnirsRecipe;
 import edu.gemini.itc.shared.*;
+import edu.gemini.pot.sp.SPComponentType;
 import scala.Tuple2;
 
 import java.io.PrintWriter;
@@ -22,6 +23,14 @@ public final class GnirsPrinter extends PrinterBase {
         super(out);
         this.pdp        = pdp;
         this.recipe     = new GnirsRecipe(p.source(), p.observation(), p.conditions(), ip, p.telescope());
+    }
+
+    /**
+     * Then name of the instrument this recipe belongs to.
+     * @return
+     */
+    public String getInstrumentName() {
+        return SPComponentType.INSTRUMENT_GNIRS.readableStr;
     }
 
     public void writeOutput() {

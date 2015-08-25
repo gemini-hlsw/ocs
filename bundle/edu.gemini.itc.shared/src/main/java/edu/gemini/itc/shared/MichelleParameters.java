@@ -1,4 +1,4 @@
-package edu.gemini.itc.michelle;
+package edu.gemini.itc.shared;
 
 import edu.gemini.itc.shared.InstrumentDetails;
 import edu.gemini.spModel.core.Wavelength;
@@ -24,6 +24,8 @@ public final class MichelleParameters implements InstrumentDetails {
 
     public static final String ENABLED = "enabled";
     public static final String DISABLED = "disabled";
+
+    public static final String NO_DISPERSER = "none";
 
     private final Mask mask;
     private final String filter;

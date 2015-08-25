@@ -6,6 +6,7 @@ import edu.gemini.itc.nifs.IFUComponent;
 import edu.gemini.itc.nifs.Nifs;
 import edu.gemini.itc.nifs.NifsRecipe;
 import edu.gemini.itc.shared.*;
+import edu.gemini.pot.sp.SPComponentType;
 import scala.Tuple2;
 
 import java.io.PrintWriter;
@@ -23,6 +24,14 @@ public final class NifsPrinter extends PrinterBase {
         super(out);
         this.recipe = new NifsRecipe(p.source(), p.observation(), p.conditions(), ip, p.telescope());
         this.pdp    = pdp;
+    }
+
+    /**
+     * Then name of the instrument this recipe belongs to.
+     * @return
+     */
+    public String getInstrumentName() {
+        return SPComponentType.INSTRUMENT_NIFS.readableStr;
     }
 
     public void writeOutput() {

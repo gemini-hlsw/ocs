@@ -112,7 +112,7 @@ public class ITCMultiPartParser {
      *
      * @return Returns and Iterator of all the file names.
      */
-    public Iterator getFileNames() {
+    public Iterator<String> getFileNames() {
         return fileNames.iterator();
     }
 
