@@ -3,10 +3,8 @@ package edu.gemini.itc.web.html;
 import edu.gemini.itc.base.ImagingResult;
 import edu.gemini.itc.base.SpectroscopyResult;
 import edu.gemini.itc.michelle.Michelle;
-import edu.gemini.itc.shared.MichelleParameters;
 import edu.gemini.itc.michelle.MichelleRecipe;
 import edu.gemini.itc.shared.*;
-import edu.gemini.pot.sp.SPComponentType;
 import edu.gemini.spModel.gemini.michelle.MichelleParams;
 import scala.Tuple2;
 
@@ -27,14 +25,6 @@ public final class MichellePrinter extends PrinterBase {
         this.recipe    = new MichelleRecipe(p.source(), p.observation(), p.conditions(), ip, p.telescope());
         this.pdp       = pdp;
         this.isImaging = p.observation().getMethod().isImaging();
-    }
-
-    /**
-     * Then name of the instrument this recipe belongs to.
-     * @return
-     */
-    public String getInstrumentName() {
-        return SPComponentType.INSTRUMENT_MICHELLE.readableStr;
     }
 
     public void writeOutput() {

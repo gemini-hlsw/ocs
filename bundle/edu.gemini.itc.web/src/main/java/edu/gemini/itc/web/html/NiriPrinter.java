@@ -9,7 +9,6 @@ import edu.gemini.itc.niri.Niri;
 import edu.gemini.itc.niri.NiriRecipe;
 import edu.gemini.itc.shared.*;
 import edu.gemini.itc.shared.SourceDefinition.Profile;
-import edu.gemini.pot.sp.SPComponentType;
 import edu.gemini.spModel.gemini.niri.Niri.Mask;
 import scala.Option;
 import scala.Tuple2;
@@ -35,14 +34,6 @@ public final class NiriPrinter extends PrinterBase {
         this.recipe    = new NiriRecipe(p.source(), p.observation(), p.conditions(), ip, p.telescope());
         this.isImaging = p.observation().getMethod().isImaging();
         this.pdp       = pdp;
-    }
-
-    /**
-     * Then name of the instrument this recipe belongs to.
-     * @return
-     */
-    public String getInstrumentName() {
-        return SPComponentType.INSTRUMENT_NIRI.readableStr;
     }
 
     public void writeOutput() {
