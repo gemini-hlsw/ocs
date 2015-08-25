@@ -52,11 +52,11 @@ object Hash {
 
   def calc(p: MichelleParameters): Int =
     hash(
-      p.getFilter,
-      p.getFocalPlaneMask.name,
-      p.getGrating,
-      p.getInstrumentCentralWavelength,
-      p.polarimetryIsUsed()
+      p.filter.name,
+      p.mask.name,
+      p.grating.name,
+      p.centralWavelength.toNanometers,
+      p.polarimetry.name
     )
 
   def calc(p: NifsParameters): Int =

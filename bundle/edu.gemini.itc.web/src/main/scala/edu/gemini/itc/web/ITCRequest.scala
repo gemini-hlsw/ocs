@@ -7,6 +7,7 @@ import edu.gemini.itc.shared.SourceDefinition.{Distribution, Profile, Recession}
 import edu.gemini.itc.shared._
 import edu.gemini.pot.sp.SPComponentType
 import edu.gemini.spModel.core.{MagnitudeBand, Site, Wavelength}
+import edu.gemini.spModel.data.YesNoType
 import edu.gemini.spModel.gemini.acqcam.AcqCamParams
 import edu.gemini.spModel.gemini.altair.AltairParams
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2
@@ -97,19 +98,22 @@ object ITCRequest {
     new ObservingConditions(iq, cc, wv, sb, airmass)
   }
 
+  def instrumentName(r: ITCRequest): String =
+    r.parameter("Instrument")
+
   def instrumentParameters(r: ITCRequest): InstrumentDetails = {
     import SPComponentType._
-    val i = r.parameter("Instrument")
-    if      (i == INSTRUMENT_ACQCAM.narrowType)     acqCamParameters(r)
-    else if (i == INSTRUMENT_FLAMINGOS2.narrowType) flamingos2Parameters(r)
-    else if (i == INSTRUMENT_GMOS.narrowType)       gmosParameters(r)
-    else if (i == INSTRUMENT_GMOSSOUTH.narrowType)  gmosParameters(r)
-    else if (i == INSTRUMENT_GNIRS.narrowType)      gnirsParameters(r)
-    else if (i == INSTRUMENT_GSAOI.narrowType)      gsaoiParameters(r)
-    else if (i == INSTRUMENT_MICHELLE.narrowType)   michelleParameters(r)
-    else if (i == INSTRUMENT_NIFS.narrowType)       nifsParameters(r)
-    else if (i == INSTRUMENT_NIRI.narrowType)       niriParameters(r)
-    else if (i == INSTRUMENT_TRECS.narrowType)      trecsParameters(r)
+    val i = instrumentName(r)
+    if      (i == INSTRUMENT_ACQCAM.readableStr)     acqCamParameters(r)
+    else if (i == INSTRUMENT_FLAMINGOS2.readableStr) flamingos2Parameters(r)
+    else if (i == INSTRUMENT_GMOS.readableStr)       gmosParameters(r)
+    else if (i == INSTRUMENT_GMOSSOUTH.readableStr)  gmosParameters(r)
+    else if (i == INSTRUMENT_GNIRS.readableStr)      gnirsParameters(r)
+    else if (i == INSTRUMENT_GSAOI.readableStr)      gsaoiParameters(r)
+    else if (i == INSTRUMENT_MICHELLE.readableStr)   michelleParameters(r)
+    else if (i == INSTRUMENT_NIFS.readableStr)       nifsParameters(r)
+    else if (i == INSTRUMENT_NIRI.readableStr)       niriParameters(r)
+    else if (i == INSTRUMENT_TRECS.readableStr)      trecsParameters(r)
     else    sys.error(s"invalid instrument $i")
   }
 
@@ -159,11 +163,11 @@ object ITCRequest {
   }
 
   def michelleParameters(r: ITCRequest): MichelleParameters = {
-    val filter      = r.parameter("instrumentFilter")
-    val grating     = r.parameter("instrumentDisperser")
+    val filter      = r.enumParameter(classOf[MichelleParams.Filter])
+    val grating     = r.enumParameter(classOf[MichelleParams.Disperser])
     val centralWl   = Wavelength.fromMicrons(r.doubleParameter("instrumentCentralWavelength"))
     val fpMask      = r.enumParameter(classOf[MichelleParams.Mask])
-    val polarimetry = r.parameter("polarimetry")
+    val polarimetry = r.enumParameter(classOf[YesNoType], "polarimetry")
     new MichelleParameters(filter, grating, centralWl, fpMask, polarimetry)
   }
 

@@ -189,7 +189,7 @@ class DatFileTest {
 
   @Test
   def parseFile4(): Unit = {
-    val filter = DatFile.filters("/michelle/michelle_Si-1.dat")
+    val filter = DatFile.filters("/michelle/michelle_SI_1.dat")
     assert(filter.wavelength == 7734)
     assert(filter.data.size == 2)
     assert(filter.data(0).size == 13)

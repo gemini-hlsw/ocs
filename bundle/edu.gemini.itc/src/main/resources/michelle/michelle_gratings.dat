@@ -17,11 +17,11 @@
 #
 #Grating	 Ref WL	 	R_at_ref	d_lambda	nm/pixel
 #
-lowN		10500		200		48		24
-lowQ		20500		110             186		31
-medN1		 9500		1000		9.5		4.75		
-medN2		 9600		3000		3.2		1.6
-EchelleN	 9600		30000		0.32		0.16
-EchelleQ	19200		20000		0.96		0.32		
+LOW_RES_10	10500		200		    48		    24
+LOW_RES_20	20500		110         186	    	31
+MED_RES		9500		1000		9.5		    4.75
+HIGH_RES	9600		3000		3.2		    1.6
+ECHELLE_N   9600		30000		0.32		0.16
+ECHELLE_Q   19200		20000		0.96		0.32
 
 

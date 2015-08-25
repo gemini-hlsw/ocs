@@ -1,12 +1,14 @@
 package edu.gemini.itc.shared
 
 import edu.gemini.spModel.core.{Wavelength, Site}
+import edu.gemini.spModel.data.YesNoType
 import edu.gemini.spModel.gemini.acqcam.AcqCamParams
 import edu.gemini.spModel.gemini.altair.AltairParams
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2
 import edu.gemini.spModel.gemini.gmos.{GmosSouthType, GmosNorthType, GmosCommonType}
 import edu.gemini.spModel.gemini.gnirs.GNIRSParams
 import edu.gemini.spModel.gemini.gsaoi.Gsaoi
+import edu.gemini.spModel.gemini.michelle.MichelleParams
 import edu.gemini.spModel.gemini.nifs.NIFSParams
 import edu.gemini.spModel.gemini.niri.Niri
 
@@ -52,6 +54,13 @@ final case class GsaoiParameters(
                      readMode:          Gsaoi.ReadMode,
                      gems:              GemsParameters) extends InstrumentDetails
 
+final case class MichelleParameters(
+                     filter:            MichelleParams.Filter,
+                     grating:           MichelleParams.Disperser,
+                     centralWavelength: Wavelength,
+                     mask:              MichelleParams.Mask,
+                     polarimetry:       YesNoType) extends InstrumentDetails
+
 final case class NifsParameters(
                      filter:            NIFSParams.Filter,
                      grating:           NIFSParams.Disperser,
@@ -94,7 +103,7 @@ object InstrumentDetails {
     case i: Flamingos2Parameters      => i.grism.equals(Flamingos2.Disperser.NONE)
     case i: GnirsParameters           => false                                      // GNIRS is spectroscopy only
     case i: GsaoiParameters           => true                                       // Gsaoi is imaging only
-    case i: MichelleParameters        => i.getGrating.equals(MichelleParameters.NO_DISPERSER)
+    case i: MichelleParameters        => i.grating.equals(MichelleParams.Disperser.MIRROR)
     case i: NifsParameters            => false                                      // NIFS is spectroscopy only
     case i: NiriParameters            => i.grism.equals(Niri.Disperser.NONE)
     case i: TRecsParameters           => i.getGrating.equals(TRecsParameters.NO_DISPERSER)
