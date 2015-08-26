@@ -55,7 +55,7 @@ public final class TRecs extends Instrument {
         _mode = odp.getMethod();
 
         final TReCSParams.WindowWheel instrumentWindow = tp.instrumentWindow();
-        final String file = getDirectory() + "/" + getPrefix() + instrumentWindow + Instrument.getSuffix();
+        final String file = getDirectory() + "/" + getPrefix() + instrumentWindow.name() + Instrument.getSuffix();
         final InstrumentWindow trecsInstrumentWindow = new InstrumentWindow(file, instrumentWindow.name());
         addComponent(trecsInstrumentWindow);
 
