@@ -6,7 +6,6 @@ import edu.gemini.itc.base.TransmissionElement;
 import edu.gemini.itc.flamingos2.Flamingos2;
 import edu.gemini.itc.flamingos2.Flamingos2Recipe;
 import edu.gemini.itc.shared.*;
-import edu.gemini.pot.sp.SPComponentType;
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2.FPUnit;
 import scala.Tuple2;
 import scala.collection.JavaConversions;
@@ -28,14 +27,6 @@ public final class Flamingos2Printer extends PrinterBase {
         this.pdp       = pdp;
         this.recipe    = new Flamingos2Recipe(p.source(), p.observation(), p.conditions(), ip, p.telescope());
         this.isImaging = p.observation().getMethod().isImaging();
-    }
-
-    /**
-     * Then name of the instrument this recipe belongs to.
-     * @return
-     */
-    public String getInstrumentName() {
-        return SPComponentType.INSTRUMENT_FLAMINGOS2.readableStr;
     }
 
     /**

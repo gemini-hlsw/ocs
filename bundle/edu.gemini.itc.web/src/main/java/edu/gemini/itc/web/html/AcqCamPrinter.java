@@ -8,7 +8,6 @@ import edu.gemini.itc.base.TransmissionElement;
 import edu.gemini.itc.shared.AcquisitionCamParameters;
 import edu.gemini.itc.shared.ItcWarning;
 import edu.gemini.itc.shared.Parameters;
-import edu.gemini.pot.sp.SPComponentType;
 import scala.collection.JavaConversions;
 
 import java.io.PrintWriter;
@@ -23,14 +22,6 @@ public final class AcqCamPrinter extends PrinterBase {
     public AcqCamPrinter(final Parameters p, final AcquisitionCamParameters ip, final PrintWriter out) {
         super(out);
         recipe = new AcqCamRecipe(p.source(), p.observation(), p.conditions(), p.telescope(), ip);
-    }
-
-    /**
-     * Then name of the instrument this recipe belongs to.
-     * @return
-     */
-    public String getInstrumentName() {
-        return SPComponentType.INSTRUMENT_ACQCAM.readableStr;
     }
 
     public void writeOutput() {

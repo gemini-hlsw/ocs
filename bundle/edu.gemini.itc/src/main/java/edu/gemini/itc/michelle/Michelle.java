@@ -5,12 +5,17 @@ import edu.gemini.itc.operation.DetectorsTransmissionVisitor;
 import edu.gemini.itc.shared.CalculationMethod;
 import edu.gemini.itc.shared.MichelleParameters;
 import edu.gemini.itc.shared.ObservationDetails;
+import edu.gemini.spModel.data.YesNoType;
 import edu.gemini.spModel.gemini.michelle.MichelleParams;
 
 /**
  * Michelle specification class
  */
 public final class Michelle extends Instrument {
+
+    public static final String WIRE_GRID = "wire_grid";
+    public static final String KBR = "KBr";
+
     /**
      * Related files will be in this subdir of lib
      */
@@ -48,24 +53,24 @@ public final class Michelle extends Instrument {
 
         this.params = mp;
         _sampling = super.getSampling();
-        _centralWavelength = mp.getInstrumentCentralWavelength();
+        _centralWavelength = mp.centralWavelength().toNanometers();
 
         _mode = odp.getMethod();
 
         final InstrumentWindow michelleInstrumentWindow =
                 new InstrumentWindow(getDirectory() + "/" + getPrefix() +
-                        mp.KBR + Instrument.getSuffix(), mp.KBR);
+                        KBR + Instrument.getSuffix(), KBR);
         addComponent(michelleInstrumentWindow);
 
-        if (mp.polarimetryIsUsed()) {
+        if (mp.polarimetry().equals(YesNoType.YES)) {
             final WireGrid michelleWireGrid =
                     new WireGrid(getDirectory() + "/" + getPrefix() +
-                            mp.WIRE_GRID + Instrument.getSuffix());
+                            WIRE_GRID + Instrument.getSuffix());
             addComponent(michelleWireGrid);
         }
 
-        if (!(mp.getFilter().equals("none"))) {
-            _Filter = Filter.fromWLFile(getPrefix(), mp.getFilter(), getDirectory() + "/");
+        if (!(mp.filter().equals(MichelleParams.Filter.NONE))) {
+            _Filter = Filter.fromWLFile(getPrefix(), mp.filter().name(), getDirectory() + "/");
             addFilter(_Filter);
         }
 
@@ -76,18 +81,18 @@ public final class Michelle extends Instrument {
 
         //Test to see that all conditions for Spectroscopy are met
         if (_mode.isSpectroscopy()) {
-            if (params.getGrating().equals("none"))
+            if (params.grating().equals(MichelleParams.Disperser.MIRROR))
                 throw new RuntimeException("Spectroscopy mode is selected but a grating" +
                         " is not.\nPlease select a grating and a " +
                         "focal plane mask in the Instrument " +
                         "configuration section.");
-            if (params.getFocalPlaneMask() == MichelleParams.Mask.MASK_IMAGING)
+            if (params.mask() == MichelleParams.Mask.MASK_IMAGING)
                 throw new RuntimeException("Spectroscopy mode is selected but a focal" +
                         " plane mask is not.\nPlease select a " +
                         "grating and a " +
                         "focal plane mask in the Instrument " +
                         "configuration section.");
-            if (params.polarimetryIsUsed()) {
+            if (params.polarimetry().equals(YesNoType.YES)) {
                 throw new RuntimeException("Spectroscopy mode cannot be used with the " +
                         "Polarimeter in.\n Please either deselect the " +
                         "Polarimeter, or change the mode to Imaging.");
@@ -95,15 +100,15 @@ public final class Michelle extends Instrument {
         }
 
         if (_mode.isImaging()) {
-            if (params.getFilter().equals("none"))
+            if (params.filter().equals(MichelleParams.Filter.NONE))
                 throw new RuntimeException("Imaging mode is selected but a filter" +
                         " is not.\n  Please select a filter and resubmit the " +
                         "form to continue.");
-            if (!params.getGrating().equals("none"))
+            if (!params.grating().equals(MichelleParams.Disperser.MIRROR))
                 throw new RuntimeException("Imaging mode is selected but a grating" +
                         " is also selected.\nPlease deselect the " +
                         "grating or change the mode to spectroscopy.");
-            if (params.getFocalPlaneMask() != MichelleParams.Mask.MASK_IMAGING)
+            if (params.mask() != MichelleParams.Mask.MASK_IMAGING)
                 throw new RuntimeException("Imaging mode is selected but a Focal" +
                         " Plane Mask is also selected.\nPlease " +
                         "deselect the Focal Plane Mask" +
@@ -116,8 +121,8 @@ public final class Michelle extends Instrument {
 
         _dtv = new DetectorsTransmissionVisitor(1, getDirectory() + "/" + getPrefix() + "ccdpix" + Instrument.getSuffix());
 
-        if (!(params.getGrating().equals("none"))) {
-            _gratingOptics = new MichelleGratingOptics(getDirectory() + "/" + getPrefix(), params.getGrating(),
+        if (!(params.grating().equals(MichelleParams.Disperser.MIRROR))) {
+            _gratingOptics = new MichelleGratingOptics(getDirectory() + "/" + getPrefix(), params.grating(),
                     _centralWavelength,
                     detector.getDetectorPixels());
             addGrating(_gratingOptics);
@@ -137,7 +142,7 @@ public final class Michelle extends Instrument {
      * @return Effective wavelength in nm
      */
     public int getEffectiveWavelength() {
-        if (params.getGrating().equals("none"))
+        if (params.grating().equals(MichelleParams.Disperser.MIRROR))
             return (int) _Filter.getEffectiveWavelength();
         else
             return (int) _gratingOptics.getEffectiveWavelength();
@@ -145,10 +150,6 @@ public final class Michelle extends Instrument {
 
     public double getGratingResolution() {
         return _gratingOptics.getGratingResolution();
-    }
-
-    public String getGrating() {
-        return params.getGrating();
     }
 
     public double getGratingDispersion_nm() {
@@ -196,7 +197,7 @@ public final class Michelle extends Instrument {
 
     public double getFPMask() {
         // Can we use the slit width from the Mask objects here?
-        switch (params.getFocalPlaneMask()) {
+        switch (params.mask()) {
             case MASK_1:    return 0.19;
             case MASK_2:    return 0.38;
             case MASK_3:    return 0.57;
@@ -208,7 +209,7 @@ public final class Michelle extends Instrument {
     }
 
     public boolean polarimetryIsUsed() {
-        return params.polarimetryIsUsed();
+        return params.polarimetry().equals(YesNoType.YES);
     }
 
 
@@ -224,7 +225,7 @@ public final class Michelle extends Instrument {
     }
 
     public MichelleParams.Mask getFocalPlaneMask() {
-        return params.getFocalPlaneMask();
+        return params.mask();
     }
 
     public double getCentralWavelength() {

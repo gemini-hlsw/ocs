@@ -1,7 +1,7 @@
 package edu.gemini.itc.michelle;
 
 import edu.gemini.itc.base.GratingOptics;
-import edu.gemini.itc.shared.MichelleParameters;
+import edu.gemini.spModel.gemini.michelle.MichelleParams;
 
 /**
  * This represents the transmission and properties of the Grating optics.
@@ -14,28 +14,40 @@ public final class MichelleGratingOptics extends GratingOptics {
     private static final double SPECTROSCOPY_MED_N2_FRAME_TIME = 3.0; //Seconds
     private static final double SPECTROSCOPY_ECHELLE_FRAME_TIME = 30; //Seconds
 
+    private final MichelleParams.Disperser grating;
+
     public MichelleGratingOptics(final String directory,
-                                 final String gratingName,
+                                 final MichelleParams.Disperser grating,
                                  final double centralWavelength,
                                  final int detectorPixels) {
 
-        super(directory, gratingName, "gratings", centralWavelength, detectorPixels, 1);
+        super(directory, getGratingName(grating, centralWavelength), "gratings", centralWavelength, detectorPixels, 1);
+        this.grating = grating;
+    }
+
+    private static String getGratingName(final MichelleParams.Disperser grating, final double centralWavelength) {
+        switch (grating) {
+            case ECHELLE:
+                // ECHELLE_N covers 7-14 microns, ECHELLE_Q covers 16-26 microns
+                if (centralWavelength <= 15) return "ECHELLE_N"; else return "ECHELLE_Q";
+            default:
+                return grating.name();
+        }
     }
 
     public double getFrameTime() {
         final double frameTime;
-        switch (gratingName) {
-            case MichelleParameters.LOW_N:
+        switch (grating) {
+            case LOW_RES_10:
                 frameTime = SPECTROSCOPY_LOWRES_N_FRAME_TIME;
                 break;
-            case MichelleParameters.MED_N1:
+            case MED_RES:
                 frameTime = SPECTROSCOPY_MED_N1_FRAME_TIME;
                 break;
-            case MichelleParameters.MED_N2:
+            case HIGH_RES:
                 frameTime = SPECTROSCOPY_MED_N2_FRAME_TIME;
                 break;
-            case MichelleParameters.ECHELLE_N:
-            case MichelleParameters.ECHELLE_Q:
+            case ECHELLE:
                 frameTime = SPECTROSCOPY_ECHELLE_FRAME_TIME;
                 break;
             default:

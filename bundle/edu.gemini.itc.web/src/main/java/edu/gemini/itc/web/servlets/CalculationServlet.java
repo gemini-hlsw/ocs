@@ -65,6 +65,11 @@ public final class CalculationServlet extends HttpServlet {
                 c = ITCRequest.from(request);
             }
 
+            final String instrument = ITCRequest.instrumentName(c);
+            out.println("<H2>" + TITLE + "<br>" + instrument + "</H2>");
+            out.println("<a href = \"" + HELP_URL + "\"> Click here for help with the results page.</a>");
+
+
             writeOutput(c, out);
             closeDocument(out); // Write close of html document
 
@@ -109,9 +114,6 @@ public final class CalculationServlet extends HttpServlet {
         else if (ip instanceof NiriParameters)           printer = new NiriPrinter(p, (NiriParameters) ip, ITCRequest.plotParameters(r), out);
         else if (ip instanceof TRecsParameters)          printer = new TRecsPrinter(p, (TRecsParameters) ip, ITCRequest.plotParameters(r), out);
         else    throw new RuntimeException("Instrument not implemented.");
-
-        out.println("<H2>" + TITLE + "<br>" + printer.getInstrumentName() + "</H2>");
-        out.println("<a href = \"" + HELP_URL + "\"> Click here for help with the results page.</a>");
 
         printer.writeOutput();
     }

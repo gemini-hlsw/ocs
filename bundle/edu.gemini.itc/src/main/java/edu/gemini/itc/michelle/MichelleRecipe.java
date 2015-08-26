@@ -4,6 +4,7 @@ import edu.gemini.itc.base.*;
 import edu.gemini.itc.operation.*;
 import edu.gemini.itc.shared.*;
 import edu.gemini.spModel.core.Site;
+import edu.gemini.spModel.data.YesNoType;
 import scala.Tuple2;
 
 import java.util.ArrayList;
@@ -58,7 +59,7 @@ public final class MichelleRecipe implements ImagingRecipe, SpectroscopyRecipe {
         // NOTE : odp.getExposureTime() carries the TOTAL exposure time (as opposed to exp time for a single frame)
         final Michelle instrument = new Michelle(mp, odp); // TODO: Avoid creating an instrument instance twice.
         final double correctedTotalObservationTime;
-        if (mp.polarimetryIsUsed()) {
+        if (mp.polarimetry().equals(YesNoType.YES)) {
             //If polarimetry is used divide exposure time by 4 because of the 4 waveplate positions
             correctedTotalObservationTime = odp.getExposureTime() / 4;
         } else {

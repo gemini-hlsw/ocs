@@ -16,8 +16,6 @@ public abstract class PrinterBase {
         _out = pr;
     }
 
-    public abstract String getInstrumentName();
-
     public abstract void writeOutput();
 
     protected UUID cache(final ItcSpectroscopyResult result) {

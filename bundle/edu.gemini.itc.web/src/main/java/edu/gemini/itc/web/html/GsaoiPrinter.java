@@ -8,7 +8,6 @@ import edu.gemini.itc.gsaoi.GsaoiRecipe;
 import edu.gemini.itc.shared.GsaoiParameters;
 import edu.gemini.itc.shared.ItcWarning;
 import edu.gemini.itc.shared.Parameters;
-import edu.gemini.pot.sp.SPComponentType;
 import scala.collection.JavaConversions;
 
 import java.io.PrintWriter;
@@ -24,14 +23,6 @@ public final class GsaoiPrinter extends PrinterBase {
     public GsaoiPrinter(final Parameters p, final GsaoiParameters ip, final PrintWriter out) {
         super(out);
         recipe = new GsaoiRecipe(p.source(), p.observation(), p.conditions(), ip, p.telescope());
-    }
-
-    /**
-     * Then name of the instrument this recipe belongs to.
-     * @return
-     */
-    public String getInstrumentName() {
-        return SPComponentType.INSTRUMENT_GSAOI.readableStr;
     }
 
     /**
