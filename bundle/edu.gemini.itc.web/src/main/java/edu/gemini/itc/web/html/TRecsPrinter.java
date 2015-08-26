@@ -5,6 +5,7 @@ import edu.gemini.itc.base.SpectroscopyResult;
 import edu.gemini.itc.shared.*;
 import edu.gemini.itc.trecs.TRecs;
 import edu.gemini.itc.trecs.TRecsRecipe;
+import edu.gemini.spModel.gemini.trecs.TReCSParams;
 import scala.Tuple2;
 
 import java.io.PrintWriter;
@@ -141,8 +142,9 @@ public final class TRecsPrinter extends PrinterBase {
         String s = "Instrument configuration: \n";
         s += HtmlPrinter.opticalComponentsToString(instrument);
 
-        if (!instrument.getFocalPlaneMask().equals(TRecsParameters.NO_SLIT))
-            s += "<LI> Focal Plane Mask: " + instrument.getFocalPlaneMask() + "\n";
+        final TReCSParams.Mask mask = instrument.getFocalPlaneMask();
+        if (!mask.equals(TReCSParams.Mask.MASK_IMAGING) && !mask.equals(TReCSParams.Mask.MASK_IMAGING_W))
+            s += "<LI> Focal Plane Mask: " + instrument.getFocalPlaneMask().displayValue() + "\n";
         s += "\n";
         if (p.observation().getMethod().isSpectroscopy())
             s += "<L1> Central Wavelength: " + instrument.getCentralWavelength() + " nm" + "\n";

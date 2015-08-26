@@ -39,7 +39,7 @@ object Hash {
       p.pixelScale.name,
       p.crossDispersed.name,
       p.readMode.name,
-      p.centralWavelength.toNanometers,
+      p.centralWavelength,
       p.slitWidth.name
     )
 
@@ -55,7 +55,7 @@ object Hash {
       p.filter.name,
       p.mask.name,
       p.grating.name,
-      p.centralWavelength.toNanometers,
+      p.centralWavelength,
       p.polarimetry.name
     )
 
@@ -82,11 +82,11 @@ object Hash {
 
   def calc(p: TRecsParameters): Int =
     hash(
-      p.getFilter,
-      p.getFocalPlaneMask,
-      p.getGrating,
-      p.getInstrumentCentralWavelength,
-      p.getInstrumentWindow
+      p.filter.name,
+      p.mask.name,
+      p.grating.name,
+      p.centralWavelength,
+      p.instrumentWindow.name
     )
 
   def calc(p: AcquisitionCamParameters): Int =
@@ -129,9 +129,9 @@ object Hash {
 
   def calc(tp: TelescopeDetails): Int =
     hash(
-      tp.getInstrumentPort.displayValue,
-      tp.getMirrorCoating.displayValue,
-      tp.getWFS.name.toLowerCase
+      tp.getInstrumentPort.name,
+      tp.getMirrorCoating.name,
+      tp.getWFS.name
     )
 
   def calc(ocp: ObservingConditions): Int =

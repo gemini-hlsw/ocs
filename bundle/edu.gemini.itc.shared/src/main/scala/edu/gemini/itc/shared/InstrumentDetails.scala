@@ -11,6 +11,7 @@ import edu.gemini.spModel.gemini.gsaoi.Gsaoi
 import edu.gemini.spModel.gemini.michelle.MichelleParams
 import edu.gemini.spModel.gemini.nifs.NIFSParams
 import edu.gemini.spModel.gemini.niri.Niri
+import edu.gemini.spModel.gemini.trecs.TReCSParams
 
 /*
  * A collection of objects that define subsets of instrument configuration parameters
@@ -78,6 +79,13 @@ final case class NiriParameters(
                      mask:              Niri.Mask,
                      altair:            Option[AltairParameters]) extends InstrumentDetails
 
+final case class TRecsParameters(
+                     filter:            TReCSParams.Filter,
+                     instrumentWindow:  TReCSParams.WindowWheel,
+                     grating:           TReCSParams.Disperser,
+                     centralWavelength: Wavelength,
+                     mask:              TReCSParams.Mask) extends InstrumentDetails
+
 
 // == AO
 
@@ -106,10 +114,10 @@ object InstrumentDetails {
     case i: MichelleParameters        => i.grating.equals(MichelleParams.Disperser.MIRROR)
     case i: NifsParameters            => false                                      // NIFS is spectroscopy only
     case i: NiriParameters            => i.grism.equals(Niri.Disperser.NONE)
-    case i: TRecsParameters           => i.getGrating.equals(TRecsParameters.NO_DISPERSER)
+    case i: TRecsParameters           => i.grating.equals(TReCSParams.Disperser.MIRROR)
     case i: GmosParameters            =>
       i.grating.equals(GmosNorthType.DisperserNorth.MIRROR) ||
-        i.grating.equals(GmosSouthType.DisperserSouth.MIRROR)
+      i.grating.equals(GmosSouthType.DisperserSouth.MIRROR)
   }
 
   // figure out if the instrument is configured for spectroscopy (ie. not imaging)
