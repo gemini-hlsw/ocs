@@ -4,6 +4,7 @@ import edu.gemini.itc.shared.*;
 import edu.gemini.itc.web.ITCMultiPartParser;
 import edu.gemini.itc.web.ITCRequest;
 import edu.gemini.itc.web.html.*;
+import edu.gemini.spModel.core.Version;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -66,7 +67,7 @@ public final class CalculationServlet extends HttpServlet {
             }
 
             final String instrument = ITCRequest.instrumentName(c);
-            out.println("<H2>" + TITLE + "<br>" + instrument + "</H2>");
+            out.println("<H2>" + TITLE + "<br>" + instrument + " - " + Version.current + "</H2>");
             out.println("<a href = \"" + HELP_URL + "\"> Click here for help with the results page.</a>");
 
 
