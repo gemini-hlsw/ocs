@@ -3,6 +3,10 @@ package edu.gemini.itc.baseline
 import edu.gemini.itc.baseline.util._
 import edu.gemini.itc.shared.TRecsParameters
 import edu.gemini.spModel.core.Wavelength
+import edu.gemini.spModel.gemini.trecs.TReCSParams.Disperser
+import edu.gemini.spModel.gemini.trecs.TReCSParams.Filter
+import edu.gemini.spModel.gemini.trecs.TReCSParams.Mask
+import edu.gemini.spModel.gemini.trecs.TReCSParams.WindowWheel
 
 /**
  * TRecs baseline test fixtures.
@@ -17,11 +21,11 @@ object BaselineTRecs {
 
   private lazy val NBandSpectroscopy = Fixture.nBandSpcFixtures(List(
     new TRecsParameters(
-      "N",                                //String Filter,
-      "KBr",                              //String cryostat window
-      "HiRes-10",                         //String grating, ("none") for imaging
-      Wavelength.fromMicrons(12),         //instrumentCentralWavelength
-      TRecsParameters.SLIT0_21            //String FP_Mask,
+      Filter.N,                           // Filter,
+      WindowWheel.KBR,                    // Cryostat window
+      Disperser.HIGH_RES,                 // Grating
+      Wavelength.fromMicrons(12),         // instrumentCentralWavelength
+      Mask.MASK_1                         // FPU,
     )
   ), TRecsObservingConditions)
 

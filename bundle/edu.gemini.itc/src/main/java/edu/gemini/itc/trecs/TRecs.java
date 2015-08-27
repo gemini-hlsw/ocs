@@ -5,6 +5,10 @@ import edu.gemini.itc.operation.DetectorsTransmissionVisitor;
 import edu.gemini.itc.shared.CalculationMethod;
 import edu.gemini.itc.shared.ObservationDetails;
 import edu.gemini.itc.shared.TRecsParameters;
+import edu.gemini.spModel.gemini.trecs.TReCSParams;
+import edu.gemini.spModel.gemini.trecs.TReCSParams.Disperser;
+import edu.gemini.spModel.gemini.trecs.TReCSParams.Mask;
+import edu.gemini.spModel.gemini.trecs.TReCSParams.WindowWheel;
 import scala.Option;
 
 import java.util.Scanner;
@@ -36,8 +40,8 @@ public final class TRecs extends Instrument {
     private final Option<Filter> _filter;
     private final Option<TrecsGratingOptics> _gratingOptics;
     private final double _sampling;
-    private final String _grating;
-    private final String _focalPlaneMask;
+    private final Disperser _grating;
+    private final Mask _focalPlaneMask;
     private final CalculationMethod _mode;
     private final double _centralWavelength;
     private final DetectorsTransmissionVisitor _dtv;
@@ -45,19 +49,19 @@ public final class TRecs extends Instrument {
     public TRecs(final TRecsParameters tp, final ObservationDetails odp) {
         super(INSTR_DIR, FILENAME);
 
-        _focalPlaneMask = tp.getFocalPlaneMask();
-        _grating = tp.getGrating();
-        _centralWavelength = tp.getInstrumentCentralWavelength();
+        _focalPlaneMask = tp.mask();
+        _grating = tp.grating();
+        _centralWavelength = tp.centralWavelength().toNanometers();
         _mode = odp.getMethod();
 
-        final String instrumentWindow = tp.getInstrumentWindow();
-        final String file = getDirectory() + "/" + getPrefix() + instrumentWindow + Instrument.getSuffix();
-        final InstrumentWindow trecsInstrumentWindow = new InstrumentWindow(file, instrumentWindow);
+        final TReCSParams.WindowWheel instrumentWindow = tp.instrumentWindow();
+        final String file = getDirectory() + "/" + getPrefix() + instrumentWindow.name() + Instrument.getSuffix();
+        final InstrumentWindow trecsInstrumentWindow = new InstrumentWindow(file, instrumentWindow.name());
         addComponent(trecsInstrumentWindow);
 
 
-        if (!(tp.getFilter().equals("none"))) {
-            final Filter filter = Filter.fromWLFile(getPrefix(), tp.getFilter(), getDirectory() + "/");
+        if (!(tp.filter().equals(TReCSParams.Filter.NONE))) {
+            final Filter filter = Filter.fromWLFile(getPrefix(), tp.filter().name(), getDirectory() + "/");
             addFilter(filter);
             _filter = Option.apply(filter);
         } else {
@@ -71,12 +75,12 @@ public final class TRecs extends Instrument {
 
         //Test to see that all conditions for Spectroscopy are met
         if (_mode.isSpectroscopy()) {
-            if (_grating.equals("none"))
+            if (_grating.equals(Disperser.MIRROR))
                 throw new RuntimeException("Spectroscopy calculation method is selected but a grating" +
                         " is not.\nPlease select a grating and a " +
                         "focal plane mask in the Instrument " +
                         "configuration section.");
-            if (_focalPlaneMask.equals(TRecsParameters.NO_SLIT))
+            if (_focalPlaneMask.equals(Mask.MASK_IMAGING) || _focalPlaneMask.equals(Mask.MASK_IMAGING_W))
                 throw new RuntimeException("Spectroscopy calculation method is selected but a focal" +
                         " plane mask is not.\nPlease select a " +
                         "grating and a " +
@@ -85,15 +89,15 @@ public final class TRecs extends Instrument {
         }
 
         if (_mode.isImaging()) {
-            if (tp.getFilter().equals("none"))
+            if (tp.filter().equals(TReCSParams.Filter.NONE))
                 throw new RuntimeException("Imaging calculation method is selected but a filter" +
                         " is not.\n  Please select a filter and resubmit the " +
                         "form to continue.");
-            if (!_grating.equals("none"))
+            if (!_grating.equals(Disperser.MIRROR))
                 throw new RuntimeException("Imaging calculation method is selected but a grating" +
                         " is also selected.\nPlease deselect the " +
                         "grating or change the method to spectroscopy.");
-            if (!_focalPlaneMask.equals("none"))
+            if (!_focalPlaneMask.equals(Mask.MASK_IMAGING) && !_focalPlaneMask.equals(Mask.MASK_IMAGING_W))
                 throw new RuntimeException("Imaging calculation method is selected but a Focal" +
                         " Plane Mask is also selected.\nPlease " +
                         "deselect the Focal Plane Mask" +
@@ -106,16 +110,16 @@ public final class TRecs extends Instrument {
 
         _dtv = new DetectorsTransmissionVisitor(1, getDirectory() + "/" + getPrefix() + "ccdpix" + Instrument.getSuffix());
 
-        if (!(_grating.equals("none"))) {
+        if (!(_grating.equals(Disperser.MIRROR))) {
 
-            final TrecsGratingOptics gratingOptics = new TrecsGratingOptics(getDirectory() + "/" + TRecs.getPrefix(), _grating,
+            final TrecsGratingOptics gratingOptics = new TrecsGratingOptics(getDirectory() + "/" + TRecs.getPrefix(), _grating.name(),
                     _centralWavelength,
                     detector.getDetectorPixels());
             _sampling = gratingOptics.getGratingDispersion_nmppix();
 
-            if (getGrating().equals(TRecsParameters.LORES20_G5402) && !(instrumentWindow.equals(TRecsParameters.KRS5))) {
-                throw new RuntimeException("The " + getGrating() + " grating must be " +
-                        "used with the " + TRecsParameters.KRS5 + " window. \n" +
+            if (getGrating().equals(Disperser.LOW_RES_20) && !(instrumentWindow.equals(WindowWheel.KRS_5))) {
+                throw new RuntimeException("The " + getGrating().displayValue() + " grating must be " +
+                        "used with the " + WindowWheel.KRS_5.displayValue() + " window. \n" +
                         "Please change the grating or the window cover.");
             }
             addGrating(gratingOptics);
@@ -139,7 +143,7 @@ public final class TRecs extends Instrument {
      * @return Effective wavelength in nm
      */
     public int getEffectiveWavelength() {
-        if (_grating.equals("none")) return (int) _filter.get().getEffectiveWavelength();
+        if (_grating.equals(Disperser.MIRROR)) return (int) _filter.get().getEffectiveWavelength();
         else return (int) _gratingOptics.get().getEffectiveWavelength();
 
     }
@@ -149,7 +153,7 @@ public final class TRecs extends Instrument {
     }
 
 
-    public String getGrating() {
+    public Disperser getGrating() {
         return _grating;
     }
 
@@ -187,7 +191,7 @@ public final class TRecs extends Instrument {
 
     public double getFrameTime() {
         if (_mode.isSpectroscopy()) {
-            if (getGrating().equals(TRecsParameters.HIRES10_G5403)) {
+            if (getGrating().equals(Disperser.HIGH_RES)) {
                 return SPECTROSCOPY_HI_RES_FRAME_TIME;
             } else {
                 return SPECTROSCOPY_LOW_RES_FRAME_TIME;
@@ -205,18 +209,19 @@ public final class TRecs extends Instrument {
     }
 
     public double getFPMask() {
-        //if (_FP_Mask.equals(NOSLIT)) return null;
-        if (_focalPlaneMask.equals(TRecsParameters.SLIT0_21)) return 0.21;
-        else if (_focalPlaneMask.equals(TRecsParameters.SLIT0_26)) return 0.26;
-        else if (_focalPlaneMask.equals(TRecsParameters.SLIT0_31)) return 0.31;
-        else if (_focalPlaneMask.equals(TRecsParameters.SLIT0_36)) return 0.36;
-        else if (_focalPlaneMask.equals(TRecsParameters.SLIT0_66)) return 0.66;
-        else if (_focalPlaneMask.equals(TRecsParameters.SLIT0_72)) return 0.72;
-        else if (_focalPlaneMask.equals(TRecsParameters.SLIT1_32)) return 1.32;
-        else return -1.0;
+        switch (_focalPlaneMask) {
+            case MASK_1: return 0.21;
+            case MASK_2: return 0.26;
+            case MASK_3: return 0.31;
+            case MASK_4: return 0.36;
+            case MASK_5: return 0.66;
+            case MASK_6: return 0.72;
+            case MASK_7: return 1.32;
+            default:     return -1.0;
+        }
     }
 
-    public String getFocalPlaneMask() {
+    public Mask getFocalPlaneMask() {
         return _focalPlaneMask;
     }
 

@@ -20,6 +20,7 @@ import edu.gemini.spModel.gemini.michelle.MichelleParams
 import edu.gemini.spModel.gemini.nifs.NIFSParams
 import edu.gemini.spModel.gemini.niri.Niri
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality
+import edu.gemini.spModel.gemini.trecs.TReCSParams
 import edu.gemini.spModel.guide.GuideProbe
 import edu.gemini.spModel.target.EmissionLine.{Continuum, Flux}
 import edu.gemini.spModel.target._
@@ -120,8 +121,7 @@ object ITCRequest {
   def acqCamParameters(r: ITCRequest): AcquisitionCamParameters = {
     val colorFilter = r.enumParameter(classOf[AcqCamParams.ColorFilter])
     val ndFilter    = r.enumParameter(classOf[AcqCamParams.NDFilter])
-
-    new AcquisitionCamParameters(colorFilter, ndFilter)
+    AcquisitionCamParameters(colorFilter, ndFilter)
   }
 
   def flamingos2Parameters(r: ITCRequest): Flamingos2Parameters = {
@@ -129,7 +129,7 @@ object ITCRequest {
     val grism       = r.enumParameter(classOf[Flamingos2.Disperser])
     val readMode    = r.enumParameter(classOf[Flamingos2.ReadMode])
     val fpMask      = r.enumParameter(classOf[Flamingos2.FPUnit])
-    new Flamingos2Parameters(filter, grism, fpMask, readMode)
+    Flamingos2Parameters(filter, grism, fpMask, readMode)
   }
 
   def gmosParameters(r: ITCRequest): GmosParameters = {
@@ -168,7 +168,7 @@ object ITCRequest {
     val centralWl   = Wavelength.fromMicrons(r.doubleParameter("instrumentCentralWavelength"))
     val fpMask      = r.enumParameter(classOf[MichelleParams.Mask])
     val polarimetry = r.enumParameter(classOf[YesNoType], "polarimetry")
-    new MichelleParameters(filter, grating, centralWl, fpMask, polarimetry)
+    MichelleParameters(filter, grating, centralWl, fpMask, polarimetry)
   }
 
   def niriParameters(r: ITCRequest): NiriParameters = {
@@ -193,12 +193,12 @@ object ITCRequest {
    }
 
   def trecsParameters(r: ITCRequest): TRecsParameters = {
-    val filter      = r.parameter("instrumentFilter")
-    val window      = r.parameter("instrumentWindow")
-    val grating     = r.parameter("instrumentDisperser")
+    val filter      = r.enumParameter(classOf[TReCSParams.Filter])
+    val window      = r.enumParameter(classOf[TReCSParams.WindowWheel])
+    val grating     = r.enumParameter(classOf[TReCSParams.Disperser])
     val centralWl   = Wavelength.fromMicrons(r.doubleParameter("instrumentCentralWavelength"))
-    val fpMask      = r.parameter("instrumentFPMask")
-    new TRecsParameters(filter, window, grating, centralWl, fpMask)
+    val fpMask      = r.enumParameter(classOf[TReCSParams.Mask])
+    TRecsParameters(filter, window, grating, centralWl, fpMask)
   }
 
   def plotParameters(r: ITCRequest): PlottingDetails = {

@@ -256,13 +256,10 @@
 			<tr>
 				<td>Cryostat window:</td>
 
-				<td><select name="instrumentWindow" size="1">
-				<option selected="selected" value="KBr">
-				KBr</option>
-				<option value="KRS5">
-				KRS5</option>
-				<option value="ZnSe">
-				ZnSe</option>
+				<td><select name="WindowWheel" size="1">
+				<option selected="selected" value="KBR">KBr</option>
+				<option value="KRS_5">KRS5</option>
+				<option value="ZNSE">ZnSe</option>
 
 				</select></td>
 				<td> </td>
@@ -270,90 +267,50 @@
 			</tr>
 			<tr>
 				<td>Filter:</td>
-				<td><select name="instrumentFilter" size="1">
+				<td><select name="Filter" size="1">
 
-				<option selected="selected" value="N">
-				N (broad 10um)</option>
-				<option value="Si-1">
-				Si-1 (7.7um)</option>
-				<option value="Si-2">
-				Si-2 (8.7um)</option>
-				<option value="Si-3">
-
-				Si-3 (9.7um)</option>
-				<option value="Si-4">
-				Si-4 (10.4um)</option>
-				<option value="Si-5">
-				Si-5 (11.7um)</option>
-				<option value="Si-6">
-				Si-6 (12.3um)</option>
-
-				<option value="ArIII">
-				[Ar III]</option>
-				<option value="SIV">
-				[S IV]</option>
-				<option value="NeII">
-				[Ne II]</option>
-				<option value="NeIIcont">
-
-				[Ne II] cont</option>
-				<option value="PAH8.6">
-				PAH 8.6um</option>
-				<option value="PAH11.3">
-				PAH 11.3um</option>
-				<option value="Qshort">
-				Q short</option>
-
-				<option value="Qa">
-				Qa</option>
-				<option value="Qb">
-				Qb</option>
-				<option value="Q">
-				Q (broad 20.8um)</option>
-				<option value="K">
-
-				K</option>
-				<option value="L">
-				L</option>
-				<option value="M">
-				M</option>
+				<option selected="selected" value="N">N (broad 10um)</option>
+				<option value="SI_1">Si-1 (7.7um)</option>
+				<option value="SI_2">Si-2 (8.7um)</option>
+				<option value="SI_3">Si-3 (9.7um)</option>
+				<option value="SI_4">Si-4 (10.4um)</option>
+				<option value="SI_5">Si-5 (11.7um)</option>
+				<option value="SI_6">Si-6 (12.3um)</option>
+				<option value="AR_III">[Ar III]</option>
+				<option value="S_IV">[S IV]</option>
+				<option value="NE_II">[Ne II]</option>
+				<option value="NE_II_CONT">[Ne II] cont</option>
+				<option value="PAH_8_6">PAH 8.6um</option>
+				<option value="PAH_11_3">PAH 11.3um</option>
+				<option value="Q_SHORT">Q short</option>
+				<option value="QA">Qa</option>
+				<option value="QB">Qb</option>
+				<option value="Q">Q (broad 20.8um)</option>
+				<option value="K">K</option>
+				<option value="L">L</option>
+				<option value="M">M</option>
 				</select></td>
 				<td>Focal plane mask: </td>
 
-				<td><select name="instrumentFPMask" size="1">
-				<option selected="selected" value="none">
-				none</option>
-				<option value="slit0.21">
-				0.21 arcsec slit</option>
-				<option value="slit0.26">
-				0.26 arcsec slit</option>
-
-				<option value="slit0.31">
-				0.31 arcsec slit</option>
-				<option value="slit0.36">
-				0.36 arcsec slit</option>
-				<option value="slit0.66">
-				0.66 arcsec slit</option>
-				<option value="slit0.72">
-
-				0.72 arcsec slit</option>
-				<option value="slit1.32">
-				1.32 arcsec slit</option>
+				<td><select name="Mask" size="1">
+				<option selected="selected" value="MASK_IMAGING">none</option>
+				<option value="MASK_1">0.21 arcsec slit</option>
+				<option value="MASK_2">0.26 arcsec slit</option>
+				<option value="MASK_3">0.31 arcsec slit</option>
+				<option value="MASK_4">0.36 arcsec slit</option>
+				<option value="MASK_5">0.66 arcsec slit</option>
+				<option value="MASK_6">0.72 arcsec slit</option>
+				<option value="MASK_7">1.32 arcsec slit</option>
 				</select></td>
 			</tr>
 			<tr>
 				<td>Grating:</td>
 
-				<td><select name="instrumentDisperser" size="1">
-				<option selected="selected" value="none">
-				none (imaging)</option>
-				<option value="LoRes-10">
-				LoRes-10 grating</option>
-				<option value="HiRes-10">
-				HiRes-10 grating</option>
-
-				<option value="LoRes-20">
-				LoRes-20 grating</option>
+				<td><select name="Disperser" size="1">
+				<option selected="selected" value="MIRROR">none (imaging)</option>
+				<option value="LOW_RES_10">LoRes-10 grating</option>
+				<option value="HIGH_RES">HiRes-10 grating</option>
+				<option value="LOW_RES_20">LoRes-20 grating</option>
 				</select></td>
 				<td>Spectrum central wavelength: </td>
 				<td><input name="instrumentCentralWavelength" size="8" value=" " type="text" /> um</td>
