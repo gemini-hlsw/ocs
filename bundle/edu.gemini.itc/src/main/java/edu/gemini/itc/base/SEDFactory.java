@@ -222,7 +222,7 @@ public final class SEDFactory {
         sed.accept(water);
 
         // Background spectrum is introduced here.
-        final VisitableSampledSpectrum sky = SEDFactory.getSED(getSky(instrument, bandStr, site, odp), instrument.getSampling());
+        final VisitableSampledSpectrum sky = SEDFactory.getSED(getSky(bandStr, site, odp), instrument.getSampling());
         Option<VisitableSampledSpectrum> halo = Option.empty();
 
         // Apply telescope transmission to both sed and sky
@@ -300,17 +300,7 @@ public final class SEDFactory {
         }
     }
 
-    private static String getSky(final Instrument instrument, final String band, final Site site, final ObservingConditions ocp) {
-        // TODO: F2 uses a peculiar path (?), fix this and update regression test baseline!
-        if (instrument instanceof Flamingos2) {
-            return ITCConstants.SKY_BACKGROUND_LIB + "/"
-                        + ITCConstants.NEAR_IR_SKY_BACKGROUND_FILENAME_BASE
-                        + "_"
-                        + ocp.getSkyTransparencyWaterCategory() // REL-557
-                        + "_" + ocp.getAirmassCategory()
-                        + ITCConstants.DATA_SUFFIX;
-        }
-        // TODO: this is how all instruments should work:
+    private static String getSky(final String band, final Site site, final ObservingConditions ocp) {
         switch (band) {
             case ITCConstants.VISIBLE:
                 return ITCConstants.SKY_BACKGROUND_LIB + "/"
