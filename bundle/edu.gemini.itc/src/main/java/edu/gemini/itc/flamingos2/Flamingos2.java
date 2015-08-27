@@ -17,7 +17,7 @@ public final class Flamingos2 extends Instrument {
     public static final String INSTR_DIR = "flamingos2";
     public static final String INSTR_PREFIX = "";
     public static final String INSTR_PREFIX_2 = "flamingos2_";
-    private static final double WELL_DEPTH = 200000.0;
+    private static final double WELL_DEPTH = 155400;
     public static String getPrefix() {
         return INSTR_PREFIX;
     }
@@ -135,11 +135,7 @@ public final class Flamingos2 extends Instrument {
 
     @Override
     public double getReadNoise() {
-        switch (params.readMode()) {
-            // TODO: this is for regression tests only, actual readmode is defined as 12.1
-            case BRIGHT_OBJECT_SPEC:    return 12.0;
-            default:                    return params.readMode().readNoise();
-        }
+        return params.readMode().readNoise();
     }
 
     public double getSpectralPixelWidth() {

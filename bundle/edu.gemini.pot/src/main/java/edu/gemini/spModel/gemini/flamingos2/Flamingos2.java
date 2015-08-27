@@ -397,7 +397,7 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
             public double recomendedExpTimeSec() { return  5.0; }
             public double readoutTimeSec()       { return  8.0; }
             public int readCount()               { return  1;   }
-            public double readNoise()            { return 12.1; }
+            public double readNoise()            { return 11.7; }
         },
 
         MEDIUM_OBJECT_SPEC() {
