@@ -265,19 +265,21 @@ public class PatrolField {
             this.validArea = validArea;
         }
 
-        @Override public boolean validate(SPTarget guideStar, ObsContext ctx) {
-            final Coordinates baseCoordinates  = ctx.getBaseCoordinates();
-            final Coordinates guideCoordinates = guideStar.getTarget().getSkycalcCoordinates();
-            // Calculate the difference between the coordinate and the observation's
-            // base position.
-            CoordinateDiff diff;
-            diff = new CoordinateDiff(baseCoordinates, guideCoordinates);
-            // Get offset and switch it to be defined in the same coordinate
-            // system as the shape.
-            Offset dis = diff.getOffset();
-            double p = -dis.p().toArcsecs().getMagnitude();
-            double q = -dis.q().toArcsecs().getMagnitude();
-            return validArea.contains(p, q);
+        @Override
+        public GuideStarValidation validate(SPTarget guideStar, ObsContext ctx) {
+            return ctx.getBaseCoordinatesOpt().map(baseCoordinates -> {
+                final Coordinates guideCoordinates = guideStar.getTarget().getSkycalcCoordinates();
+                // Calculate the difference between the coordinate and the observation's
+                // base position.
+                CoordinateDiff diff;
+                diff = new CoordinateDiff(baseCoordinates, guideCoordinates);
+                // Get offset and switch it to be defined in the same coordinate
+                // system as the shape.
+                Offset dis = diff.getOffset();
+                double p = -dis.p().toArcsecs().getMagnitude();
+                double q = -dis.q().toArcsecs().getMagnitude();
+                return validArea.contains(p, q) ? GuideStarValidation.VALID : GuideStarValidation.INVALID;
+            }).getOrElse(GuideStarValidation.UNDEFINED);
         }
     }
 

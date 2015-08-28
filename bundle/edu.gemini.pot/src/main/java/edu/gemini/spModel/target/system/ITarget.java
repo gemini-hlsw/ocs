@@ -271,6 +271,15 @@ public abstract class ITarget implements Cloneable, Serializable {
         return new Coordinates(getRa().getAs(CoordinateParam.Units.DEGREES), getDec().getAs(CoordinateParam.Units.DEGREES));
     }
 
+    /** Gets a Skycalc {@link edu.gemini.skycalc.Coordinates} representation. */
+    public synchronized Option<Coordinates> getSkycalcCoordinates(Option<Long> when) {
+        return
+            getRaDegrees(when).flatMap(ra ->
+            getDecDegrees(when).map(dec ->
+                new Coordinates(ra, dec)
+            ));
+    }
+
     public final String toString() {
         return String.format("ITarget(%s, %s)", getTag(), getName());
     }

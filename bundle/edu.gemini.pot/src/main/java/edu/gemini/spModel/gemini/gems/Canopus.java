@@ -12,6 +12,7 @@ import edu.gemini.skycalc.Offset;
 import edu.gemini.spModel.data.AbstractDataObject;
 import edu.gemini.spModel.gems.GemsGuideProbeGroup;
 import edu.gemini.spModel.guide.*;
+import edu.gemini.spModel.obs.SchedulingBlock;
 import edu.gemini.spModel.obs.context.ObsContext;
 import edu.gemini.spModel.target.SPTarget;
 import edu.gemini.spModel.target.env.GuideProbeTargets;
@@ -69,9 +70,9 @@ public enum Canopus {
                 return Canopus.instance.probeArm2(ctx, validate);
             }
             @Override
-            public boolean validate(SPTarget guideStar, ObsContext ctx) {
+            public GuideStarValidation validate(SPTarget guideStar, ObsContext ctx) {
                 return super.validate(guideStar, ctx)
-                        && !isVignetted(cwfs1, guideStar, ctx);
+                        .and(validateVignetting(cwfs1, guideStar, ctx));
             }
             @Override
             protected double getArmAngle(ObsContext ctx) {
@@ -101,10 +102,10 @@ public enum Canopus {
                 throw new RuntimeException("cwfs3 probe arm not defined");
             }
             @Override
-            public boolean validate(SPTarget guideStar, ObsContext ctx) {
+            public GuideStarValidation validate(SPTarget guideStar, ObsContext ctx) {
                 return super.validate(guideStar, ctx)
-                        && !isVignetted(cwfs1, guideStar, ctx)
-                        && !isVignetted(cwfs2, guideStar, ctx);
+                       .and(validateVignetting(cwfs1, guideStar, ctx))
+                       .and(validateVignetting(cwfs2, guideStar, ctx));
             }
             // not implemented yet, return an empty area
             @Override
@@ -222,23 +223,35 @@ public enum Canopus {
          */
         public abstract Area probeArm(ObsContext ctx, boolean validate);
 
-        public boolean validate(SPTarget guideStar, ObsContext ctx) {
-            Coordinates coords = guideStar.getTarget().getSkycalcCoordinates();
-            return Canopus.instance.getProbesInRange(coords, ctx).contains(this);
+        public GuideStarValidation validate(SPTarget guideStar, ObsContext ctx) {
+            final Option<Long> when = ctx.getSchedulingBlock().map(SchedulingBlock::start);
+            final Wfs self = this;
+            return guideStar.getTarget().getSkycalcCoordinates(when).map(coords ->
+                Canopus.instance.getProbesInRange(coords, ctx).contains(self) ?
+                        GuideStarValidation.VALID : GuideStarValidation.INVALID
+            ).getOrElse(GuideStarValidation.UNDEFINED);
         }
 
-        // Returns true if the area of the probe arm for the given wfs contains the
+        private static GuideStarValidation validateVignetting(Wfs wfs, SPTarget guideStar, ObsContext ctx) {
+            return isVignetted(wfs, guideStar, ctx).map(b ->
+                b ? GuideStarValidation.INVALID : GuideStarValidation.VALID
+            ).getOrElse(GuideStarValidation.UNDEFINED);
+        }
+
+            // Returns true if the area of the probe arm for the given wfs contains the
         // coordinates of the given guide star
         // (i.e.: The guide star is vignetted by the wfs probe arm)
-        private static boolean isVignetted(Wfs wfs, SPTarget guideStar, ObsContext ctx) {
-            Area a = wfs.probeArm(ctx, false);
-            if (a == null) return false;
+        private static Option<Boolean> isVignetted(Wfs wfs, SPTarget guideStar, ObsContext ctx) {
+            return ctx.getBaseCoordinatesOpt().map(coords -> {
+                Area a = wfs.probeArm(ctx, false);
+                if (a == null) return false;
 
-            CoordinateDiff diff = new CoordinateDiff(ctx.getBaseCoordinates(), guideStar.getTarget().getSkycalcCoordinates());
-            Offset dis = diff.getOffset();
-            double p = -dis.p().toArcsecs().getMagnitude();
-            double q = -dis.q().toArcsecs().getMagnitude();
-            return a.contains(p, q);
+                CoordinateDiff diff = new CoordinateDiff(coords, guideStar.getTarget().getSkycalcCoordinates());
+                Offset dis = diff.getOffset();
+                double p = -dis.p().toArcsecs().getMagnitude();
+                double q = -dis.q().toArcsecs().getMagnitude();
+                return a.contains(p, q);
+            });
         }
 
         /**
@@ -484,7 +497,7 @@ public enum Canopus {
         GuideProbeTargets targets = ctx.getTargets().getOrCreatePrimaryGuideGroup().get(cwfs).getOrElse(null);
         if (targets != null) {
             SPTarget target = targets.getPrimary().getOrElse(null);
-            if (target != null && (!validate || cwfs.validate(target, ctx))) {
+            if (target != null && (!validate || cwfs.validate(target, ctx) == GuideStarValidation.VALID)) {
                 // Get offset from base position to cwfs in arcsecs
                 CoordinateDiff diff = new CoordinateDiff(ctx.getBaseCoordinates(), target.getTarget().getSkycalcCoordinates());
                 Offset dis = diff.getOffset();
@@ -521,20 +534,22 @@ public enum Canopus {
     public Set<Wfs> getProbesInRange(Coordinates coords, ObsContext ctx) {
         Set<Wfs> res = new HashSet<Wfs>();
 
-        // Calculate the difference between the coordinate and the observation's
-        // base position.
-        CoordinateDiff diff;
-        diff = new CoordinateDiff(ctx.getBaseCoordinates(), coords);
+        ctx.getBaseCoordinatesOpt().foreach(bcs -> {
+            // Calculate the difference between the coordinate and the observation's
+            // base position.
+            CoordinateDiff diff;
+            diff = new CoordinateDiff(bcs, coords);
 
-        // Get offset and switch it to be defined in the same coordinate
-        // system as the shape.
-        Offset dis = diff.getOffset();
-        double p = -dis.p().toArcsecs().getMagnitude();
-        double q = -dis.q().toArcsecs().getMagnitude();
+            // Get offset and switch it to be defined in the same coordinate
+            // system as the shape.
+            Offset dis = diff.getOffset();
+            double p = -dis.p().toArcsecs().getMagnitude();
+            double q = -dis.q().toArcsecs().getMagnitude();
 
-        if (probeRange1(ctx).contains(p, q)) res.add(Wfs.cwfs1);
-        if (probeRange2(ctx).contains(p, q)) res.add(Wfs.cwfs2);
-        if (probeRange3(ctx).contains(p, q)) res.add(Wfs.cwfs3);
+            if (probeRange1(ctx).contains(p, q)) res.add(Wfs.cwfs1);
+            if (probeRange2(ctx).contains(p, q)) res.add(Wfs.cwfs2);
+            if (probeRange3(ctx).contains(p, q)) res.add(Wfs.cwfs3);
+        });
 
         return res;
     }

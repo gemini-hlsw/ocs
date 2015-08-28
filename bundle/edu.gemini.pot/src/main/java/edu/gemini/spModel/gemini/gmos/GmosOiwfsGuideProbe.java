@@ -101,15 +101,15 @@ public enum GmosOiwfsGuideProbe implements ValidatableGuideProbe, OffsetValidati
     }
 
     @Override
-    public boolean validate(final SPTarget guideStar, final ObsContext ctx) {
+    public GuideStarValidation validate(final SPTarget guideStar, final ObsContext ctx) {
         return GuideProbeUtil.instance.validate(guideStar.getTarget().getSkycalcCoordinates(), this, ctx);
     }
 
-    public boolean validate(final SkyObject guideStar, final ObsContext ctx) {
+    public GuideStarValidation validate(final SkyObject guideStar, final ObsContext ctx) {
         return GuideProbeUtil.instance.validate(guideStar, this, ctx);
     }
 
-    public boolean validate(final Coordinates guideStar, final ObsContext ctx) {
+    public GuideStarValidation validate(final Coordinates guideStar, final ObsContext ctx) {
         return GuideProbeUtil.instance.validate(guideStar, this, ctx);
     }
 

@@ -16,8 +16,7 @@ public interface GuideStarValidator {
      *
      * @param ctx context in which the guide star is validated
      *
-     * @return <code>true</code> if the guide star is considered valid in the
-     * given {@link edu.gemini.spModel.obs.context.ObsContext}; <code>false</code> otherwise
+     * @return a {@link edu.gemini.spModel.guide.GuideStarValidation}
      */
-    boolean validate(SPTarget guideStar, ObsContext ctx);
+    GuideStarValidation validate(SPTarget guideStar, ObsContext ctx);
 }

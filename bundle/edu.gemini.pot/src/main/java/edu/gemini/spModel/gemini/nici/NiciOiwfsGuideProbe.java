@@ -61,7 +61,7 @@ public enum NiciOiwfsGuideProbe implements ValidatableGuideProbe {
         return (ctx.getInstrument() instanceof InstNICI) ? new Some<>(getPatrolField()) : None.<PatrolField>instance();
     }
     @Override
-    public boolean validate(SPTarget guideStar, ObsContext ctx) {
+    public GuideStarValidation validate(SPTarget guideStar, ObsContext ctx) {
         return GuideProbeUtil.instance.validate(guideStar.getTarget().getSkycalcCoordinates(), this, ctx);
     }
 }

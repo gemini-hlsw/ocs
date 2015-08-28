@@ -429,7 +429,7 @@ public class TpeGuidePosFeature extends TpePositionFeature
                 boolean valid = true;
                 AttributedString txt = new AttributedString(tag, attrMap);
                 if (!obsContextOpt.isEmpty() && (validator != null) &&
-                        !validator.validate(target, obsContextOpt.getValue())) {
+                        validator.validate(target, obsContextOpt.getValue()) != GuideStarValidation.VALID) {
                     txt.addAttribute(TextAttribute.STRIKETHROUGH, true);
                     txt.addAttribute(TextAttribute.FOREGROUND, invalidColor);
                     g2d.setColor(invalidColor);

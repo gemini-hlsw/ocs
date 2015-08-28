@@ -15,6 +15,7 @@ import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.spModel.gemini.gmos.GmosCommonType;
 import edu.gemini.spModel.gemini.gmos.InstGmosCommon;
 import edu.gemini.spModel.guide.*;
+import edu.gemini.spModel.obs.SchedulingBlock;
 import edu.gemini.spModel.obs.context.ObsContext;
 import edu.gemini.spModel.obscomp.SPInstObsComp;
 import edu.gemini.spModel.target.SPTarget;
@@ -279,15 +280,18 @@ public enum PwfsGuideProbe implements ValidatableGuideProbe, OffsetValidatingGui
 
     /* ValidatableGuideProbe */
 
-    public boolean validate(SPTarget guideStar, ObsContext ctx) {
-        return validate(guideStar.getTarget().getSkycalcCoordinates(), ctx);
+    public GuideStarValidation validate(SPTarget guideStar, ObsContext ctx) {
+        final Option<Long> when = ctx.getSchedulingBlock().map(SchedulingBlock::start);
+        return guideStar.getTarget().getSkycalcCoordinates(when).map(coords ->
+            validate(coords, ctx)
+        ).getOrElse(GuideStarValidation.UNDEFINED);
     }
 
-    public boolean validate(SkyObject guideStar, ObsContext ctx) {
+    public GuideStarValidation validate(SkyObject guideStar, ObsContext ctx) {
         return GuideProbeUtil.instance.validate(guideStar, this, ctx);
     }
 
-    public boolean validate(Coordinates coords, ObsContext ctx) {
+    public GuideStarValidation validate(Coordinates coords, ObsContext ctx) {
         return GuideProbeUtil.instance.validate(coords, this, ctx);
     }
 

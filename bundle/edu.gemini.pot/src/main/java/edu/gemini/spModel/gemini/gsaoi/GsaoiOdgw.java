@@ -5,6 +5,7 @@ import edu.gemini.skycalc.Coordinates;
 import edu.gemini.shared.util.immutable.*;
 import edu.gemini.spModel.gems.GemsGuideProbeGroup;
 import edu.gemini.spModel.guide.*;
+import edu.gemini.spModel.obs.SchedulingBlock;
 import edu.gemini.spModel.obs.context.ObsContext;
 import edu.gemini.spModel.target.SPTarget;
 import edu.gemini.spModel.target.env.GuideGroup;
@@ -332,13 +333,15 @@ public enum GsaoiOdgw implements ValidatableGuideProbe {
         return values()[id.index() - 1];
     }
 
-    public boolean validate(SPTarget guideStar, ObsContext ctx) {
-        Coordinates coords = guideStar.getTarget().getSkycalcCoordinates();
-        // Get the id of the detector in which the guide star lands, if any
+    public GuideStarValidation validate(SPTarget guideStar, ObsContext ctx) {
+        final Option<Long> when = ctx.getSchedulingBlock().map(SchedulingBlock::start);
+        return guideStar.getTarget().getSkycalcCoordinates(when).map(coords -> {
+            // Get the id of the detector in which the guide star lands, if any
 
-        Option<GsaoiDetectorArray.Id> idOpt = GsaoiDetectorArray.instance.getId(coords, ctx);
-        if (idOpt.isEmpty()) return false;
-        return idOpt.getValue() == id;
+            Option<GsaoiDetectorArray.Id> idOpt = GsaoiDetectorArray.instance.getId(coords, ctx);
+            if (idOpt.isEmpty()) return GuideStarValidation.INVALID;
+            return idOpt.getValue() == id ? GuideStarValidation.VALID : GuideStarValidation.INVALID;
+        }).getOrElse(GuideStarValidation.UNDEFINED);
     }
 
     // not implemented yet, return empty area
