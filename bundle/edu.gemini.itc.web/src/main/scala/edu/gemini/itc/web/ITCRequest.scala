@@ -22,9 +22,12 @@ import edu.gemini.spModel.gemini.niri.Niri
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality
 import edu.gemini.spModel.gemini.trecs.TReCSParams
 import edu.gemini.spModel.guide.GuideProbe
-import edu.gemini.spModel.target.EmissionLine.{Continuum, Flux}
+import edu.gemini.spModel.target.EmissionLine.Continuum
 import edu.gemini.spModel.target._
 import edu.gemini.spModel.telescope.IssPort
+import squants.motion.MetersPerSecond
+import squants.radio.WattsPerSquareMeter
+import squants.space.Microns
 
 /**
  * ITC requests define a generic mechanism to look up values by their parameter names.
@@ -301,9 +304,9 @@ object ITCRequest {
         val flux = r.doubleParameter("lineFlux")
         val cont = r.doubleParameter("lineContinuum")
         EmissionLine(
-          Wavelength.fromMicrons(r.doubleParameter("lineWavelength")),
-          r.doubleParameter("lineWidth"),
-          if (r.parameter("lineFluxUnits") == "watts_flux") Flux.fromWatts(flux) else Flux.fromErgs(flux),
+          Microns(r.doubleParameter("lineWavelength")),
+          MetersPerSecond(r.doubleParameter("lineWidth")*1000),
+          if (r.parameter("lineFluxUnits") == "watts_flux") WattsPerSquareMeter(flux) else WattsPerSquareMeter(flux/1000),
           if (r.parameter("lineContinuumUnits") == "watts_fd_wavelength") Continuum.fromWatts(cont) else Continuum.fromErgs(cont)
         )
     }

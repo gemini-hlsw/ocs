@@ -42,7 +42,7 @@ public final class GsaoiRecipe implements ImagingRecipe {
 
     private void validateInputParameters() {
         if (_sdParameters.getDistributionType().equals(SourceDefinition.Distribution.ELINE))
-            if (_sdParameters.getELineWidth() < (3E5 / (_sdParameters
+            if (_sdParameters.getELineWidth().toMetersPerSecond()/1000 < (3E5 / (_sdParameters
                     .getELineWavelength().toNanometers() * 25))) { // *25 b/c of increased resolution of transmission files
                 throw new RuntimeException(
                         "Please use a model line width > 0.04 nm (or "

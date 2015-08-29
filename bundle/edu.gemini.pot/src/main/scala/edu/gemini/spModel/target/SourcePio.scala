@@ -4,10 +4,13 @@ import java.util.logging.{Level, Logger}
 
 import edu.gemini.spModel.core.Wavelength
 import edu.gemini.spModel.pio.{ParamSet, Pio, PioFactory}
-import edu.gemini.spModel.target.EmissionLine.{Continuum, Flux}
+import edu.gemini.spModel.target.EmissionLine.Continuum
+import squants.motion.MetersPerSecond
+import squants.radio.WattsPerSquareMeter
+import squants.space.Nanometers
 
+import scalaz.Scalaz._
 import scalaz._
-import Scalaz._
 
 object SourcePio {
   private val LOGGER: Logger = Logger.getLogger(SourcePio.getClass.getName)
@@ -53,9 +56,9 @@ object SourcePio {
 
       case sd: EmissionLine     =>
         factory.createParamSet(EmissionLineName)  <|
-          (Pio.addDoubleParam(factory, _, ElineWavelength, sd.wavelength.toNanometers))<|
-          (Pio.addDoubleParam(factory, _, ElineWidth,      sd.width))                  <|
-          (Pio.addDoubleParam(factory, _, ElineFlux,       sd.flux.toWatts))           <|
+          (Pio.addDoubleParam(factory, _, ElineWavelength, sd.wavelength.toNanometers))   <|
+          (Pio.addDoubleParam(factory, _, ElineWidth,      sd.width.toMetersPerSecond))   <|
+          (Pio.addDoubleParam(factory, _, ElineFlux,       sd.flux.toWattsPerSquareMeter))<|
           (Pio.addDoubleParam(factory, _, ElineContinuum,  sd.continuum.toWatts))
 
       case sd: UserDefined      =>
@@ -86,9 +89,9 @@ object SourcePio {
       }
       val eline = Option(pset.getParamSet(EmissionLineName)).map { p =>
         EmissionLine(
-          Wavelength.fromNanometers(Pio.getDoubleValue(p, ElineWavelength, 0)),
-          Pio.getDoubleValue(p, ElineWidth, 0),
-          Flux.fromWatts(Pio.getDoubleValue(p, ElineFlux, 0)),
+          Nanometers(Pio.getDoubleValue(p, ElineWavelength, 0)),
+          MetersPerSecond(Pio.getDoubleValue(p, ElineWidth, 0)),
+          WattsPerSquareMeter(Pio.getDoubleValue(p, ElineFlux, 0)),
           Continuum.fromWatts(Pio.getDoubleValue(p, ElineContinuum, 0))
         )
       }
