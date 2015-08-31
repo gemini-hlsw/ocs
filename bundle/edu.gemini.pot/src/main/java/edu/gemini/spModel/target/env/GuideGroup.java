@@ -155,7 +155,7 @@ public final class GuideGroup implements Serializable, Iterable<GuideProbeTarget
      * instance; <code>false</code> otherwise
      */
     public boolean contains(GuideProbe guider) {
-        return guideTargets.exists(GuideProbeTargets.match(guider));
+        return guideTargets.exists(gpt -> gpt.getGuider() == guider);
     }
 
     /**
@@ -169,7 +169,7 @@ public final class GuideGroup implements Serializable, Iterable<GuideProbeTarget
      * {@link edu.gemini.shared.util.immutable.None} if none
      */
     public Option<GuideProbeTargets> get(GuideProbe guider) {
-        return guideTargets.find(GuideProbeTargets.match(guider));
+        return guideTargets.find(gpt -> gpt.getGuider() == guider);
     }
 
     /**
@@ -186,7 +186,8 @@ public final class GuideGroup implements Serializable, Iterable<GuideProbeTarget
      * given guide probe target options
      */
     public GuideGroup put(GuideProbeTargets targets) {
-        return new GuideGroup(name, sortByGuider(guideTargets.remove(GuideProbeTargets.match(targets.getGuider())).cons(targets)));
+        final GuideProbe guideProbe = targets.getGuider();
+        return new GuideGroup(name, sortByGuider(guideTargets.remove(gpt -> gpt.getGuider() == guideProbe).cons(targets)));
     }
 
     /**
@@ -201,7 +202,7 @@ public final class GuideGroup implements Serializable, Iterable<GuideProbeTarget
      * {@link GuideProbeTargets} entry associated with {@link GuideProbe}
      */
     public GuideGroup remove(GuideProbe guider) {
-        final ImList<GuideProbeTargets> lst = guideTargets.remove(GuideProbeTargets.match(guider));
+        final ImList<GuideProbeTargets> lst = guideTargets.remove(gpt -> gpt.getGuider() == guider);
         if (lst.size() == guideTargets.size()) return this;
         return new GuideGroup(name, lst);
     }
@@ -287,7 +288,7 @@ public final class GuideGroup implements Serializable, Iterable<GuideProbeTarget
      * with the given <code>type</code>, or an empty collection if none
      */
     public ImList<GuideProbeTargets> getAllMatching(GuideProbe.Type type) {
-        return guideTargets.filter(GuideProbeTargets.match(type));
+        return guideTargets.filter(gpt -> gpt.getGuider().getType() == type);
     }
 
 
@@ -300,7 +301,7 @@ public final class GuideGroup implements Serializable, Iterable<GuideProbeTarget
      * list if there are none
      */
     private ImList<GuideProbe> getReferencedGuiderList() {
-        return guideTargets.filter(GuideProbeTargets.MATCH_NON_EMPTY).map(GuideProbeTargets.EXTRACT_PROBE);
+        return guideTargets.filter(GuideProbeTargets::containsTargets).map(GuideProbeTargets::getGuider);
     }
 
     /**

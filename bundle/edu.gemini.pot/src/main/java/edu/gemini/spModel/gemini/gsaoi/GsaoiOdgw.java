@@ -10,10 +10,7 @@ import edu.gemini.spModel.obs.context.ObsContext;
 import edu.gemini.spModel.target.SPTarget;
 import edu.gemini.spModel.target.env.GuideGroup;
 import edu.gemini.spModel.target.env.GuideProbeTargets;
-import edu.gemini.spModel.target.env.OptionsList.UpdateOps;
-import edu.gemini.spModel.target.env.OptionsListImpl;
 import edu.gemini.spModel.target.env.TargetEnvironment;
-import scalaz.Alpha;
 
 import java.awt.geom.Area;
 import java.util.*;
@@ -73,14 +70,14 @@ public enum GsaoiOdgw implements ValidatableGuideProbe {
 
         public Option<GuideProbe> select(Coordinates guideStar, ObsContext ctx) {
             // Get the id of the detector in which the guide star lands, if any
-            Option<GsaoiDetectorArray.Id> idOpt = GsaoiDetectorArray.instance.getId(guideStar, ctx);
+            final Option<GsaoiDetectorArray.Id> idOpt = GsaoiDetectorArray.instance.getId(guideStar, ctx);
             if (idOpt.isEmpty()) return None.instance();
 
             // Return a new Some with this instance in it.
-            return new Some<GuideProbe>(lookup(idOpt.getValue()));
+            return new Some<>(lookup(idOpt.getValue()));
         }
 
-        public TargetEnvironment add(final SPTarget guideStar, final boolean isBAGS, final ObsContext ctx) {
+        public TargetEnvironment add(final SPTarget guideStar, final boolean isBags, final ObsContext ctx) {
             // Select the appropriate guider, if any.
             final TargetEnvironment env = ctx.getTargets();
             final Option<GuideProbe> probeOpt = select(guideStar.getTarget().getSkycalcCoordinates(), ctx);
@@ -91,28 +88,26 @@ public enum GsaoiOdgw implements ValidatableGuideProbe {
             // Return an updated target environment that incorporates this
             // guide star.
             final GuideGroup grp = env.getOrCreatePrimaryGuideGroup();
-
             final Option<GuideProbeTargets> gptOpt = grp.get(probe);
 
-            // If the target is already defined, ignore it, even if it is a BAGS target. We do not want any
-            // overlap between manual and BAGS, and manual overrides BAGS.
             if (gptOpt.exists(gpt -> gpt.containsTarget(guideStar)))
                 return env;
 
-            final GuideProbeTargets gptNew = isBAGS
-                    ? gptOpt.map(gpt -> gpt.setBAGSTarget(guideStar).setPrimaryToBAGSTarget()).
-                        getOrElse(GuideProbeTargets.create(probe, guideStar).selectPrimary(guideStar))
-                    : gptOpt.getOrElse(GuideProbeTargets.create(probe, guideStar)).selectPrimary(guideStar);
+            final GuideProbeTargets gptNew = gptOpt.map(gpt -> isBags
+                    ? gpt.setBagsTarget(guideStar)
+                    : gpt.addManualTarget(guideStar)).
+                    getOrElse(GuideProbeTargets.create(probe, guideStar)).
+                    selectPrimary(guideStar);
             final GuideGroup grpNew = grp.put(gptNew);
             return env.setPrimaryGuideGroup(grpNew);
         }
 
-        // Sort the targets in the current context into a map keyed by
+        // Partition the targets in the current context into a map keyed by
         // GsaoiOdgw.  Targets in the obs context that land on the detector will
         // appear in the list associated with appropriate guide window.
         // Targets that don't land on the array are kept with whatever
         // guide window they were previously associated with.
-        private Map<GsaoiOdgw, List<SPTarget>> sortTargets(final ObsContext ctx) {
+        private Map<GsaoiOdgw, List<SPTarget>> partitionTargets(final ObsContext ctx) {
 
             // Initialize the map with empty lists.
             final Map<GsaoiOdgw, List<SPTarget>> map = new HashMap<>();
@@ -129,15 +124,15 @@ public enum GsaoiOdgw implements ValidatableGuideProbe {
                 if (gtOpt.isEmpty()) continue;
 
                 for (final SPTarget target : gtOpt.getValue().getTargets()) {
-                    final Option<GuideProbe> opt = select(target.getTarget().getSkycalcCoordinates(), ctx);
-                    if (opt.isEmpty()) {
+                    final Option<GuideProbe> gpOpt = select(target.getTarget().getSkycalcCoordinates(), ctx);
+                    if (gpOpt.isEmpty()) {
                         // Doesn't fall on the detector, so keep it with
                         // whichever ODGW it was associated with.
                         map.get(odgw).add(target);
                     } else {
                         // Does fall on the detector, so put it with that
                         // detector be-it the same as before or a new one.
-                        final GsaoiOdgw newOdgw = (GsaoiOdgw) opt.getValue();
+                        final GsaoiOdgw newOdgw = (GsaoiOdgw) gpOpt.getValue();
                         map.get(newOdgw).add(target);
                     }
                 }
@@ -151,7 +146,7 @@ public enum GsaoiOdgw implements ValidatableGuideProbe {
         private Map<GsaoiOdgw, SPTarget> getOldPrimaryMap(ObsContext ctx) {
             final TargetEnvironment env = ctx.getTargets();
 
-            final Map<GsaoiOdgw, SPTarget> res = new HashMap<GsaoiOdgw, SPTarget>();
+            final Map<GsaoiOdgw, SPTarget> res = new HashMap<>();
             for (final GsaoiOdgw odgw : GsaoiOdgw.values()) {
                 final Option<GuideProbeTargets> gtOpt = env.getPrimaryGuideProbeTargets(odgw);
                 gtOpt.foreach(gt -> gt.getPrimary().foreach(p -> res.put(odgw, p)));
@@ -194,12 +189,11 @@ public enum GsaoiOdgw implements ValidatableGuideProbe {
         }
 
         public Option<TargetEnvironment> optimize(ObsContext ctx) {
-            // Sort the targets in the current context.
-            final Map<GsaoiOdgw, List<SPTarget>> sortedMap = sortTargets(ctx);
+            // Partition the targets in the current context.
+            final Map<GsaoiOdgw, List<SPTarget>> partition = partitionTargets(ctx);
 
-            // Now figure out what the primary guide star should be in the
-            // new context.
-            final Map<GsaoiOdgw, SPTarget> primaryMap = getNewPrimaryMap(ctx, sortedMap);
+            // Now figure out what the primary guide star should be in the new context.
+            final Map<GsaoiOdgw, SPTarget> primaryMap = getNewPrimaryMap(ctx, partition);
 
             // Map all the old GuideTargets in the old target environment, keyed
             // by their guider.  This will include all guiders in use, not just
@@ -222,7 +216,7 @@ public enum GsaoiOdgw implements ValidatableGuideProbe {
             // Create the optimized target environment.
             boolean updated = false;
             for (final GsaoiOdgw odgw : GsaoiOdgw.values()) {
-                final List<SPTarget> lst = sortedMap.get(odgw);
+                final List<SPTarget> lst = partition.get(odgw);
                 if (lst.size() == 0) {
                     // No guide stars for this guide window, so remove it from
                     // the map if it is there.
@@ -236,21 +230,18 @@ public enum GsaoiOdgw implements ValidatableGuideProbe {
                     // primaryMap.
                     final ImList<SPTarget> imLst = DefaultImList.create(lst);
                     final SPTarget primary = primaryMap.get(odgw);
-                    final int primaryIndex = imLst.indexOf(primary);
-
-                    final Option<Integer> primaryOpt = (primaryIndex == -1) ? None.INTEGER : new Some<>(primaryIndex);
+                    //final int primaryIndex = imLst.indexOf(primary);
+                    //final Option<Integer> primaryOpt = (primaryIndex == -1) ? None.INTEGER : new Some<>(primaryIndex);
 
                     // TODO: PROBLEM HERE: is primary BAGS or not?
                     final GuideProbeTargets gptOld = gtMap.get(odgw);
-                    if (gptOld != null) {
-                        final boolean primaryIsBags = gptOld.getBAGSTarget().exists(primary::equals);
-                        final Option<SPTarget> bagsTarget = primaryIsBags ? new Some<>(primary) : GuideProbeTargets.NO_TARGET;
-                        final GuideProbeTargets gptNew = GuideProbeTargets.create(odgw, bagsTarget, new Some<>(primary), imLst);
-                        gtMap.put(odgw, gptNew);
+                    final boolean primaryIsBags = gptOld != null && gptOld.getBagsTarget().exists(primary::equals);
+                    final Option<SPTarget> bagsTarget = primaryIsBags ? new Some<>(primary) : GuideProbeTargets.NO_TARGET;
+                    final GuideProbeTargets gptNew = GuideProbeTargets.create(odgw, bagsTarget, new Some<>(primary), imLst);
+                    gtMap.put(odgw, gptNew);
 
-                        if (!updated && (targetsUpdated(imLst, gptOld.getManualTargets()) || !gptOld.getBAGSTarget().equals(bagsTarget))) {
-                            updated = true;
-                        }
+                    if (!updated && (gptOld == null || targetsUpdated(imLst, gptOld.getTargets()) || !gptOld.getBagsTarget().equals(bagsTarget))) {
+                        updated = true;
                     }
                 }
             }

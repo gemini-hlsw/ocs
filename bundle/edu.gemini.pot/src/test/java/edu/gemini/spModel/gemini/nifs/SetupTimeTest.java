@@ -139,7 +139,7 @@ public final class SetupTimeTest {
 
                 // Remove the OIWFS if it exists.
                 GuideGroup grp = env.getOrCreatePrimaryGuideGroup();
-                ImList<GuideProbeTargets> gtList = grp.getAll().remove(GuideProbeTargets.match(NifsOiwfsGuideProbe.instance));
+                final ImList<GuideProbeTargets> gtList = grp.getAll().remove(gpt -> gpt.getGuider() == NifsOiwfsGuideProbe.instance);
                 env = env.setPrimaryGuideGroup(grp.setAll(gtList));
 
                 dataObj.setTargetEnvironment(env);

@@ -30,7 +30,7 @@ public final class TargetGroupConfig extends ParamSet {
         final GuideProbe guider = gt.getGuider();
         final ImList<SPTarget> manualTargets = gt.getManualTargets();
         final Option<SPTarget> primaryOpt = gt.getPrimary();
-        final Option<SPTarget> bagsTargetOpt = gt.getBAGSTarget();
+        final Option<SPTarget> bagsTargetOpt = gt.getBagsTarget();
 
         // SW: no longer always setting a primary target.
 //        if ((primary == null) && (targets.size() > 0)) primary = targets.head();
