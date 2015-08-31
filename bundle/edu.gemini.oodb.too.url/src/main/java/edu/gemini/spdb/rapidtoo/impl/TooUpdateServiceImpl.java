@@ -234,7 +234,7 @@ public final class TooUpdateServiceImpl implements TooUpdateService {
         // Get the target component and update the base position.
         ISPObsComponent targetComp = _findComponent(obs, TargetObsComp.SP_TYPE);
         TargetObsComp targetObsComp = (TargetObsComp) targetComp.getDataObject();
-        TargetEnvironment targetEnv = targetObsComp.getTargetEnvironment();
+        final TargetEnvironment targetEnv = targetObsComp.getTargetEnvironment();
         SPTarget base = targetEnv.getBase();
 
         base.setName(tooTarget.getName());
@@ -272,14 +272,14 @@ public final class TooUpdateServiceImpl implements TooUpdateService {
                     }
 
                     if (probe != null) {
-                        Option<GuideProbeTargets> gtOpt = targetEnv.getPrimaryGuideProbeTargets(probe);
-                        GuideProbeTargets gt = gtOpt.isEmpty() ? GuideProbeTargets.create(probe) : gtOpt.getValue();
+                        final Option<GuideProbeTargets> gtOpt = targetEnv.getPrimaryGuideProbeTargets(probe);
+                        final GuideProbeTargets gt = gtOpt.isEmpty() ? GuideProbeTargets.create(probe) : gtOpt.getValue();
 
-                        Option<SPTarget> targetOpt = gt.getPrimary();
-                        SPTarget target = targetOpt.isEmpty() ? new SPTarget() : targetOpt.getValue();
+                        final Option<SPTarget> targetOpt = gt.getPrimary();
+                        final SPTarget target = targetOpt.isEmpty() ? new SPTarget() : targetOpt.getValue();
 
                         target.setRaDecDegrees(gs.getRa(), gs.getDec());
-                        String name = gs.getName();
+                        final String name = gs.getName();
                         if (name != null) {
                             target.setName(name);
                         }
@@ -287,10 +287,9 @@ public final class TooUpdateServiceImpl implements TooUpdateService {
                         target.setMagnitudes(gs.getMagnitudes());
 
                         if (targetOpt.isEmpty()) {
-                            ImList<SPTarget> lst = gt.getOptions().cons(target);
-                            gt = GuideProbeTargets.create(probe, lst);
-                            targetEnv = targetEnv.putPrimaryGuideProbeTargets(gt);
-                            targetObsComp.setTargetEnvironment(targetEnv);
+                            final GuideProbeTargets gtNew = gt.setManualTargets(gt.getManualTargets().cons(target)).selectPrimary(target);
+                            final TargetEnvironment targetEnvNew = targetEnv.putPrimaryGuideProbeTargets(gtNew);
+                            targetObsComp.setTargetEnvironment(targetEnvNew);
                         }
                     }
                 }

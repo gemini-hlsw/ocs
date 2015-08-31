@@ -112,23 +112,9 @@ public final class GuideSequence implements ConfigPostProcessor {
      * "primary" assigned to it in the primary guide group.
      */
     public static ImList<GuideProbe> getRequiredGuiders(Option<TargetEnvironment> envOpt) {
-        return envOpt.map(new MapOp<TargetEnvironment, ImList<GuideProbe>>() {
-            @Override public ImList<GuideProbe> apply(TargetEnvironment env) {
-                return env.getOrCreatePrimaryGuideGroup().getAll().
-                        filter(new PredicateOp<GuideProbeTargets>() {
-                            @Override
-                            public Boolean apply(GuideProbeTargets gpt) {
-                                return !gpt.getPrimary().isEmpty();
-                            }
-                        }).
-                        map(new MapOp<GuideProbeTargets, GuideProbe>() {
-                            @Override
-                            public GuideProbe apply(GuideProbeTargets gpt) {
-                                return gpt.getGuider();
-                            }
-                        });
-            }
-        }).getOrElse(ImCollections.emptyList());
+        return envOpt.map(env -> env.getOrCreatePrimaryGuideGroup().getAll().
+                        filter(gpt -> gpt.getPrimary().isDefined()).
+                        map(GuideProbeTargets::getGuider)).getOrElse(ImCollections.emptyList());
     }
 
     /**

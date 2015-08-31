@@ -37,8 +37,6 @@ import java.beans.PropertyChangeListener;
 import java.util.*;
 import java.util.List;
 
-import static edu.gemini.spModel.target.env.OptionsList.UpdateOps.append;
-
 /**
  * This is the editor for the target list component. It is terrible.
  */
@@ -473,9 +471,9 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
             final GuideProbeTargets targets;
             final SPTarget target = new SPTarget();
             if (opt.isEmpty()) {
-                targets = GuideProbeTargets.create(probe, target);
+                targets = GuideProbeTargets.create(probe, target).selectPrimary(target);
             } else {
-                targets = opt.getValue().update(OptionsList.UpdateOps.appendAsPrimary(target));
+                targets = opt.getValue().addManualTarget(target).selectPrimary(target);
             }
             obsComp.setTargetEnvironment(env.setGuideEnvironment(
                     env.getGuideEnvironment().putGuideProbeTargets(guideGroup, targets)));
@@ -557,7 +555,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         GuideProbe illegal = null;
         for (GuideProbe guider : illegalSet) {
             final Option<GuideProbeTargets> gtOpt = env.getPrimaryGuideProbeTargets(guider);
-            if (gtOpt.getValue().getOptions().contains(_curPos)) {
+            if (gtOpt.getValue().getTargets().contains(_curPos)) {
                 illegal = guider;
                 guiders.add(guider);
             }
@@ -701,8 +699,8 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                 final List<GuideGroup> groups = new ArrayList<>();
                 for (GuideGroup group : env.getGroups()) {
                     for (GuideProbeTargets gt : group) {
-                        if (gt.getOptions().contains(target)) {
-                            group = group.put(gt.update(append(newTarget)));
+                        if (gt.getTargets().contains(target)) {
+                            group = group.put(gt.addManualTarget(newTarget));
                             duplicated = true;
                             break;
                         }
@@ -822,26 +820,17 @@ class GuidePositionType implements PositionType {
         if (isMember(env, target)) return;
         env = env.removeTarget(target);
 
-        GuideProbeTargets gt;
+
         final Option<GuideProbeTargets> gtOpt = env.getPrimaryGuideProbeTargets(guider);
-        if (gtOpt.isEmpty()) {
-            gt = GuideProbeTargets.create(guider, ImCollections.singletonList(target));
-        } else {
-            gt = gtOpt.getValue();
-            gt = gt.update(OptionsList.UpdateOps.appendAsPrimary(target));
-        }
+        final GuideProbeTargets gt = gtOpt.map(gpt -> gpt.addManualTarget(target)).
+                getOrElse(GuideProbeTargets.create(guider, target)).selectPrimary(target);
+
         env = env.putPrimaryGuideProbeTargets(gt);
         obsComp.setTargetEnvironment(env);
     }
 
     public boolean isMember(TargetEnvironment env, SPTarget target) {
-        for (GuideGroup group : env.getGroups()) {
-            final Option<GuideProbeTargets> gtOpt = group.get(guider);
-            if (!gtOpt.isEmpty() && gtOpt.getValue().getOptions().contains(target)) {
-                return true;
-            }
-        }
-        return false;
+        return env.getGroups().exists(group -> group.get(guider).exists(gt -> gt.getTargets().contains(target)));
     }
 
     public String toString() {

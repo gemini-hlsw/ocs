@@ -41,10 +41,10 @@ public class GsaoiOdgwGroupTest extends TestCase {
         // (OT-8) Account for ODGW hotspot (and convert arcsec value to deg)
         final double d = GsaoiDetectorArray.ODGW_HOTSPOT_OFFSET/3600.;
 
-        SPTarget base         = new SPTarget(d, d);
-        TargetEnvironment env = TargetEnvironment.create(base);
+        final SPTarget base         = new SPTarget(d, d);
+        final TargetEnvironment env = TargetEnvironment.create(base);
 
-        Gsaoi inst = new Gsaoi();
+        final Gsaoi inst = new Gsaoi();
         inst.setPosAngle(0);
         inst.setIssPort(IssPort.SIDE_LOOKING);
 
@@ -59,7 +59,7 @@ public class GsaoiOdgwGroupTest extends TestCase {
     @Test
     public void testEmptySelect() {
         // In the gap between detectors for the baseContext.
-        Coordinates coords = new Coordinates(
+        final Coordinates coords = new Coordinates(
             new Angle(0, ARCSECS), new Angle(midDetector, ARCSECS)
         );
         assertTrue(group.select(coords, baseContext).isEmpty());
@@ -67,15 +67,15 @@ public class GsaoiOdgwGroupTest extends TestCase {
 
     @Test
     public void testSelect() {
-        Coordinates[] coordsArray = new Coordinates[] {
+        final Coordinates[] coordsArray = new Coordinates[] {
                 new Coordinates(new Angle( midDetector, ARCSECS), new Angle(-midDetector, ARCSECS)), // 1
                 new Coordinates(new Angle(-midDetector, ARCSECS), new Angle(-midDetector, ARCSECS)), // 2
                 new Coordinates(new Angle(-midDetector, ARCSECS), new Angle( midDetector, ARCSECS)), // 3
                 new Coordinates(new Angle( midDetector, ARCSECS), new Angle( midDetector, ARCSECS)), // 4
         };
         for (int i=0; i<4; ++i) {
-            Coordinates coords = coordsArray[i];
-            GsaoiOdgw expected = GsaoiOdgw.values()[i];
+            final Coordinates coords = coordsArray[i];
+            final GsaoiOdgw expected = GsaoiOdgw.values()[i];
             assertEquals(expected, group.select(coords, baseContext).getValue());
         }
     }
@@ -83,56 +83,55 @@ public class GsaoiOdgwGroupTest extends TestCase {
     @Test
     public void testEmptyAdd() {
         // In the gap between detectors for the baseContext.
-        Coordinates coords = new Coordinates(
+        final Coordinates coords = new Coordinates(
             new Angle(0, ARCSECS), new Angle(midDetector, ARCSECS)
         );
 
-        SPTarget guideTarget = new SPTarget(coords.getRaDeg(), coords.getDecDeg());
-        TargetEnvironment env = group.add(guideTarget, baseContext);
+        final SPTarget guideTarget = new SPTarget(coords.getRaDeg(), coords.getDecDeg());
+        final TargetEnvironment env = group.add(guideTarget, false, baseContext);
 
         // Adds an ODGW1 target by default.
-        ImList<GuideProbeTargets> col = env.getOrCreatePrimaryGuideGroup().getAll();
+        final ImList<GuideProbeTargets> col = env.getOrCreatePrimaryGuideGroup().getAll();
         assertEquals(1, col.size());
 
-        Option<GuideProbeTargets> gtOpt = env.getPrimaryGuideProbeTargets(GsaoiOdgw.odgw1);
+        final Option<GuideProbeTargets> gtOpt = env.getPrimaryGuideProbeTargets(GsaoiOdgw.odgw1);
         assertFalse(gtOpt.isEmpty());
 
-        GuideProbeTargets gt = gtOpt.getValue();
-        assertEquals(1, gt.getOptions().size());
-        assertEquals(guideTarget, gt.getOptions().head());
+        final GuideProbeTargets gt = gtOpt.getValue();
+        assertEquals(1, gt.getTargets().size());
+        assertEquals(guideTarget, gt.getTargets().head());
     }
 
     @Test
     public void testAdd() {
-        Coordinates[] coordsArray = new Coordinates[] {
+        final Coordinates[] coordsArray = new Coordinates[] {
                 new Coordinates(new Angle( midDetector, ARCSECS), new Angle(-midDetector, ARCSECS)), // 1
                 new Coordinates(new Angle(-midDetector, ARCSECS), new Angle(-midDetector, ARCSECS)), // 2
                 new Coordinates(new Angle(-midDetector, ARCSECS), new Angle( midDetector, ARCSECS)), // 3
                 new Coordinates(new Angle( midDetector, ARCSECS), new Angle( midDetector, ARCSECS)), // 4
         };
         for (int i=0; i<4; ++i) {
-            Coordinates coords   = coordsArray[i];
-            SPTarget guideTarget;
-            guideTarget = new SPTarget(coords.getRaDeg(), coords.getDecDeg());
-            GsaoiOdgw odgw = GsaoiOdgw.values()[i];
+            final Coordinates coords   = coordsArray[i];
+            final SPTarget guideTarget = new SPTarget(coords.getRaDeg(), coords.getDecDeg());
+            final GsaoiOdgw odgw = GsaoiOdgw.values()[i];
 
-            TargetEnvironment env = group.add(guideTarget, baseContext);
+            final TargetEnvironment env = group.add(guideTarget, false, baseContext);
 
             // Should have just one set of GuideTargets for the new guide star.
             assertEquals(1, env.getOrCreatePrimaryGuideGroup().getAll().size());
 
             // Should be guide targets for the expected guide window.
-            Option<GuideProbeTargets> gtOpt = env.getPrimaryGuideProbeTargets(odgw);
-            assertEquals(1, gtOpt.getValue().getOptions().size());
+            final Option<GuideProbeTargets> gtOpt = env.getPrimaryGuideProbeTargets(odgw);
+            assertEquals(1, gtOpt.getValue().getTargets().size());
 
             // Should be the new target that was added.
-            assertEquals(guideTarget, gtOpt.getValue().getOptions().head());
+            assertEquals(guideTarget, gtOpt.getValue().getTargets().head());
         }
     }
 
     private GuideProbeTargets create(GsaoiOdgw odgw, Coordinates coords) {
-        SPTarget target = new SPTarget(coords.getRaDeg(), coords.getDecDeg());
-        return GuideProbeTargets.create(odgw, target);
+        final SPTarget target = new SPTarget(coords.getRaDeg(), coords.getDecDeg());
+        return GuideProbeTargets.create(odgw, target).selectPrimary(target);
     }
 
     // Simple test case where an ODGW star ends up in another detector due to
@@ -140,27 +139,26 @@ public class GsaoiOdgwGroupTest extends TestCase {
     @Test
     public void testOptimizeOne() {
         // Setup a target in the detector with id 1.
-        Coordinates coords = new Coordinates(new Angle(midDetector, ARCSECS), new Angle(-midDetector, ARCSECS)); // 1
-        GuideProbeTargets gt = create(GsaoiOdgw.odgw1, coords);
-        SPTarget target = gt.getOptions().head();
+        final Coordinates coords = new Coordinates(new Angle(midDetector, ARCSECS), new Angle(-midDetector, ARCSECS)); // 1
+        final GuideProbeTargets gt = create(GsaoiOdgw.odgw1, coords);
+        SPTarget target = gt.getTargets().head();
 
-        TargetEnvironment env = baseContext.getTargets().putPrimaryGuideProbeTargets(gt);
-        ObsContext ctx = baseContext.withTargets(env);
+        final TargetEnvironment env = baseContext.getTargets().putPrimaryGuideProbeTargets(gt);
 
-        // Now, optimize this context when rotated 90 degrees
-        ctx = ctx.withPositionAngle(new Angle(90, DEGREES));
-        Option<TargetEnvironment> optEnv = group.optimize(ctx);
+        // Optimize this context when rotated 90 degrees
+        final ObsContext ctx = baseContext.withTargets(env).withPositionAngle(new Angle(90, DEGREES));
+        final Option<TargetEnvironment> optEnv = group.optimize(ctx);
 
         // Should have moved to Id 4.
-        TargetEnvironment newEnv = optEnv.getValue();
-        Set<GuideProbe> guiders = newEnv.getOrCreatePrimaryGuideGroup().getReferencedGuiders();
+        final TargetEnvironment newEnv = optEnv.getValue();
+        final Set<GuideProbe> guiders = newEnv.getOrCreatePrimaryGuideGroup().getReferencedGuiders();
         assertEquals(1, guiders.size());
         assertEquals(GsaoiOdgw.odgw4, guiders.iterator().next());
 
-        Option<GuideProbeTargets> gtOpt = newEnv.getPrimaryGuideProbeTargets(GsaoiOdgw.odgw4);
-        gt = gtOpt.getValue();
-        assertEquals(1, gt.getOptions().size());
-        assertSame(target, gt.getOptions().get(0));
+        final Option<GuideProbeTargets> gtOpt = newEnv.getPrimaryGuideProbeTargets(GsaoiOdgw.odgw4);
+        final GuideProbeTargets gtNew = gtOpt.getValue();
+        assertEquals(1, gtNew.getTargets().size());
+        assertSame(target, gtNew.getTargets().get(0));
     }
 
     // Tests that an existing primary guide star is kept when new targets are
@@ -168,31 +166,29 @@ public class GsaoiOdgwGroupTest extends TestCase {
     @Test
     public void testKeepPrimary() {
         // Create a target in detector 2, just on the border with 3.
-        Coordinates coords2 = new Coordinates(new Angle(-midDetector, ARCSECS), new Angle(-DETECTOR_GAP_ARCSEC, ARCSECS));
-        GuideProbeTargets gt2 = create(GsaoiOdgw.odgw2, coords2);
+        final Coordinates coords2 = new Coordinates(new Angle(-midDetector, ARCSECS), new Angle(-DETECTOR_GAP_ARCSEC, ARCSECS));
+        final GuideProbeTargets gt2 = create(GsaoiOdgw.odgw2, coords2);
 
         // Create a target in detector 3, just on the border with 2.
-        Coordinates coords3 = new Coordinates(new Angle(-midDetector, ARCSECS), new Angle( DETECTOR_GAP_ARCSEC, ARCSECS));
-        GuideProbeTargets gt3 = create(GsaoiOdgw.odgw3, coords3);
+        final Coordinates coords3 = new Coordinates(new Angle(-midDetector, ARCSECS), new Angle( DETECTOR_GAP_ARCSEC, ARCSECS));
+        final GuideProbeTargets gt3 = create(GsaoiOdgw.odgw3, coords3);
 
-        // Set up an obs context with tese targets.
-        TargetEnvironment env = baseContext.getTargets().putPrimaryGuideProbeTargets(gt2).putPrimaryGuideProbeTargets(gt3);
-        ObsContext ctx = baseContext.withTargets(env);
+        // Set up an obs context with these targets, and optimize when rotated 45 degrees.
+        final TargetEnvironment env = baseContext.getTargets().putPrimaryGuideProbeTargets(gt2).putPrimaryGuideProbeTargets(gt3);
+        final ObsContext ctx = baseContext.withTargets(env).withPositionAngle(new Angle(45, DEGREES));
 
-        // Optimize this context when rotated 45 degrees.  This will bring the
-        // target in detector 4 into detector 1.
-        ctx = ctx.withPositionAngle(new Angle(45, DEGREES));
-        Option<TargetEnvironment> optEnv = group.optimize(ctx);
+        // This will bring the target in detector 4 into detector 1.
+        final Option<TargetEnvironment> optEnv = group.optimize(ctx);
 
         // Should have two targets in detector 2.
-        TargetEnvironment newEnv = optEnv.getValue();
-        Set<GuideProbe> guiders = newEnv.getOrCreatePrimaryGuideGroup().getReferencedGuiders();
+        final TargetEnvironment newEnv = optEnv.getValue();
+        final Set<GuideProbe> guiders = newEnv.getOrCreatePrimaryGuideGroup().getReferencedGuiders();
         assertEquals(1, guiders.size());
         assertEquals(GsaoiOdgw.odgw2, guiders.iterator().next());
 
-        Option<GuideProbeTargets> gtOpt = newEnv.getPrimaryGuideProbeTargets(GsaoiOdgw.odgw2);
-        GuideProbeTargets gt = gtOpt.getValue();
-        assertEquals(2, gt.getOptions().size());
+        final Option<GuideProbeTargets> gtOpt = newEnv.getPrimaryGuideProbeTargets(GsaoiOdgw.odgw2);
+        final GuideProbeTargets gt = gtOpt.getValue();
+        assertEquals(2, gt.getTargets().size());
 
         // Make sure that the primary star is the primary star from gt2.
         // In other words, it shouldn't change just because a new star was
@@ -205,38 +201,33 @@ public class GsaoiOdgwGroupTest extends TestCase {
     @Test
     public void testKeepTransferPrimary() {
         // Put two guide stars in the same detector (detector 2).
-        Coordinates coords2a = new Coordinates(new Angle(midDetector, ARCSECS), new Angle(-DETECTOR_GAP_ARCSEC, ARCSECS));
-        Coordinates coords2b = new Coordinates(new Angle(DETECTOR_GAP_ARCSEC, ARCSECS), new Angle(-midDetector, ARCSECS));
-        SPTarget target2a = new SPTarget(coords2a.getRaDeg(), coords2a.getDecDeg());
-        SPTarget target2b = new SPTarget(coords2b.getRaDeg(), coords2b.getDecDeg());
+        final Coordinates coords2a = new Coordinates(new Angle(midDetector, ARCSECS), new Angle(-DETECTOR_GAP_ARCSEC, ARCSECS));
+        final Coordinates coords2b = new Coordinates(new Angle(DETECTOR_GAP_ARCSEC, ARCSECS), new Angle(-midDetector, ARCSECS));
+        final SPTarget target2a = new SPTarget(coords2a.getRaDeg(), coords2a.getDecDeg());
+        final SPTarget target2b = new SPTarget(coords2b.getRaDeg(), coords2b.getDecDeg());
 
-        GuideProbeTargets gt = GuideProbeTargets.create(GsaoiOdgw.odgw2, target2a, target2b);
+        final GuideProbeTargets gt = GuideProbeTargets.create(GsaoiOdgw.odgw2, target2a, target2b).selectPrimary(target2b);
 
-        // Make the second one primary.
-        gt = gt.selectPrimary(target2b);
+        // Setup the obs context, rotated 90 degrees.
+        final TargetEnvironment env = baseContext.getTargets().putPrimaryGuideProbeTargets(gt);
+        final ObsContext ctx = baseContext.withTargets(env).withPositionAngle(new Angle(90, DEGREES));
 
-        // Setup the obs context.
-        TargetEnvironment env = baseContext.getTargets().putPrimaryGuideProbeTargets(gt);
-        ObsContext ctx = baseContext.withTargets(env);
-
-        // Optimize this context when rotated 90 degrees.  This will put both
-        // targets in detector 1.
-        ctx = ctx.withPositionAngle(new Angle(90, DEGREES));
-        Option<TargetEnvironment> optEnv = group.optimize(ctx);
+        // This will put both targets in detector 1.
+        final Option<TargetEnvironment> optEnv = group.optimize(ctx);
 
         // Should have two targets in detector 4.
-        TargetEnvironment newEnv = optEnv.getValue();
-        Set<GuideProbe> guiders = newEnv.getOrCreatePrimaryGuideGroup().getReferencedGuiders();
+        final TargetEnvironment newEnv = optEnv.getValue();
+        final Set<GuideProbe> guiders = newEnv.getOrCreatePrimaryGuideGroup().getReferencedGuiders();
         assertEquals(1, guiders.size());
         assertEquals(GsaoiOdgw.odgw4, guiders.iterator().next());
 
-        Option<GuideProbeTargets> gtOpt1 = newEnv.getPrimaryGuideProbeTargets(GsaoiOdgw.odgw4);
-        GuideProbeTargets gt1 = gtOpt1.getValue();
-        assertEquals(2, gt1.getOptions().size());
+        final Option<GuideProbeTargets> gtOpt1 = newEnv.getPrimaryGuideProbeTargets(GsaoiOdgw.odgw4);
+        final GuideProbeTargets gt1 = gtOpt1.getValue();
+        assertEquals(2, gt1.getTargets().size());
 
         // Make sure that the second star is still primary in the new
         // environment.
-        Option<SPTarget> actual = gt1.getPrimary();
+        final Option<SPTarget> actual = gt1.getPrimary();
         assertFalse(actual.isEmpty());
         assertEquals(target2b, actual.getValue());
     }
