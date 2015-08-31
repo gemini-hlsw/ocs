@@ -1,7 +1,3 @@
-/**
- * $Id: Flamingos2.java 45751 2012-06-04 15:28:44Z swalker $
- */
-
 package edu.gemini.spModel.gemini.flamingos2;
 
 import edu.gemini.pot.sp.ISPObsComponent;
@@ -74,12 +70,12 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
     /**
       * Flamingos2 Dispersers.
       */
-    public static enum Disperser implements DisplayableSpType, SequenceableSpType, LoggableSpType {
+    public enum Disperser implements DisplayableSpType, SequenceableSpType, LoggableSpType {
 
         NONE("None", "none", None.DOUBLE),
-        R1200JH("R=1200 (J + H) grism", "R1200JH", new Some<Double>(1.39)),
-        R1200HK("R=1200 (H + K) grism", "R1200HK", new Some<Double>(1.871)),
-        R3000("R=3000 (J or H or K) grism", "R3000", new Some<Double>(1.65)),
+        R1200JH("R=1200 (J + H) grism", "R1200JH", new Some<>(1.39)),
+        R1200HK("R=1200 (H + K) grism", "R1200HK", new Some<>(1.871)),
+        R3000("R=3000 (J or H or K) grism", "R3000", new Some<>(1.65)),
         ;
 
         /** The default Disperser value **/
@@ -90,7 +86,7 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
         private final String _logValue;
         private final Option<Double> _wavelength;  // in um
 
-        private Disperser(String name, String logValue, Option<Double> wavelength) {
+        Disperser(String name, String logValue, Option<Double> wavelength) {
             _displayName = name;
             _logValue    = logValue;
             _wavelength  = wavelength;
@@ -120,7 +116,7 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
         public static Option<Disperser> byName(String name) {
             for (Disperser m: values()) {
                 if (m.displayValue().equals(name)) {
-                    return new Some(m);
+                    return new Some<>(m);
                 }
             }
             return None.instance();
@@ -130,19 +126,19 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
     /**
      * Filters
      */
-    public static enum Filter implements DisplayableSpType, SequenceableSpType, LoggableSpType {
+    public enum Filter implements DisplayableSpType, SequenceableSpType, LoggableSpType {
 
-        OPEN("Open", "Open", new Some<Double>(1.6)),
-        Y("Y (1.02 um)", "Y", new Some<Double>(1.02)),
-        F1056("F1056 (1.056 um)", "F1056", new Some<Double>(1.056)),
-        F1063("F1063 (1.063 um)", "F1063", new Some<Double>(1.063)),
-        J_LOW("J-low (1.15 um)", "J-low", new Some<Double>(1.15)),
-        J("J (1.25 um)", "J", new Some<Double>(1.25)),
-        H("H (1.65 um)", "H", new Some<Double>(1.65)),
-        K_LONG("K-long (2.00 um)", "K-long", new Some<Double>(2.00)),
-        K_SHORT("K-short (2.15 um)", "K-short", new Some<Double>(2.15)),
-        JH("JH (spectroscopic)", "JH", new Some<Double>(1.39)),
-        HK("HK (spectroscopic)", "HK", new Some<Double>(1.871)),
+        OPEN("Open", "Open", new Some<>(1.6)),
+        Y("Y (1.02 um)", "Y", new Some<>(1.02)),
+        F1056("F1056 (1.056 um)", "F1056", new Some<>(1.056)),
+        F1063("F1063 (1.063 um)", "F1063", new Some<>(1.063)),
+        J_LOW("J-low (1.15 um)", "J-low", new Some<>(1.15)),
+        J("J (1.25 um)", "J", new Some<>(1.25)),
+        H("H (1.65 um)", "H", new Some<>(1.65)),
+        K_LONG("K-long (2.00 um)", "K-long", new Some<>(2.00)),
+        K_SHORT("K-short (2.15 um)", "K-short", new Some<>(2.15)),
+        JH("JH (spectroscopic)", "JH", new Some<>(1.39)),
+        HK("HK (spectroscopic)", "HK", new Some<>(1.871)),
         DARK("Dark", "Dark", None.DOUBLE);
 
         /** The default Filter value **/
@@ -153,7 +149,7 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
         private final String _logValue;
         private final Option<Double> _wavelength;  // in um
 
-        private Filter(String name, String logValue, Option<Double> wavelength) {
+        Filter(String name, String logValue, Option<Double> wavelength) {
             _displayName = name;
             _logValue    = logValue;
             _wavelength  = wavelength;
@@ -184,7 +180,7 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
         public static Option<Filter> byName(String name) {
             for (Filter m: values()) {
                 if (m.displayValue().equals(name)) {
-                    return new Some<Filter>(m);
+                    return new Some<>(m);
                 }
             }
             return None.instance();
@@ -194,7 +190,7 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
     /**
      * Lyot Wheel Values
      */
-    public static enum LyotWheel implements DisplayableSpType, SequenceableSpType, LoggableSpType, ObsoletableSpType  {
+    public enum LyotWheel implements DisplayableSpType, SequenceableSpType, LoggableSpType, ObsoletableSpType  {
 
 
         // f/16:  plate scale = 1.61 arcsec/mm;  pixel scale=0.18 arcsec/pixel
@@ -225,11 +221,11 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
         private final String _logValue;
         private final boolean _obsolete;
 
-        private LyotWheel(String name, String logValue, double plateScale, double pixelScale) {
+        LyotWheel(String name, String logValue, double plateScale, double pixelScale) {
             this(name, logValue, plateScale, pixelScale, false);
         }
 
-        private LyotWheel(String name, String logValue, double plateScale, double pixelScale, boolean obsolete) {
+        LyotWheel(String name, String logValue, double plateScale, double pixelScale, boolean obsolete) {
             _displayName = name;
             _logValue    = logValue;
             _plateScale  = plateScale;
@@ -237,7 +233,7 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
             _obsolete    = obsolete;
         }
 
-        private LyotWheel(String name) {
+        LyotWheel(String name) {
             this(name, name, 0., 0.);
         }
 
@@ -280,7 +276,7 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
         public static Option<LyotWheel> byName(String name) {
             for (LyotWheel m: values()) {
                 if (m.displayValue().equals(name)) {
-                    return new Some<LyotWheel>(m);
+                    return new Some<>(m);
                 }
             }
             return None.instance();
@@ -290,7 +286,7 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
     /**
      * Focal Plan Unit support.
      */
-    public static enum FPUnit implements DisplayableSpType, SequenceableSpType, LoggableSpType {
+    public enum FPUnit implements DisplayableSpType, SequenceableSpType, LoggableSpType {
 
         FPU_NONE("Imaging (none)", "none",                     0, Decker.IMAGING),
         LONGSLIT_1("1-pix longslit", "longslit_1",             1, Decker.LONG_SLIT),
@@ -377,7 +373,7 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
         public static Option<FPUnit> byName(String name) {
             for (FPUnit m: values()) {
                 if (m.displayValue().equals(name)) {
-                    return new Some<FPUnit>(m);
+                    return new Some<>(m);
                 }
             }
             return None.instance();
@@ -387,7 +383,7 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
     /**
      * Read Mode
      */
-    public static enum ReadMode implements StandardSpType {
+    public enum ReadMode implements StandardSpType {
         BRIGHT_OBJECT_SPEC() {
             public String displayValue() { return "Bright Object";}
             public String description()  { return "Strong Source";}
@@ -397,7 +393,7 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
             public double recomendedExpTimeSec() { return  5.0; }
             public double readoutTimeSec()       { return  8.0; }
             public int readCount()               { return  1;   }
-            public double readNoise()            { return 12.1; }
+            public double readNoise()            { return 11.7; }
         },
 
         MEDIUM_OBJECT_SPEC() {
@@ -463,21 +459,21 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
         public static Option<ReadMode> byName(String name) {
             for (ReadMode m: values()) {
                 if (m.displayValue().equals(name)) {
-                    return new Some<ReadMode>(m);
+                    return new Some<>(m);
                 }
             }
             return None.instance();
         }
     }
 
-    public static enum WindowCover implements StandardSpType {
+    public enum WindowCover implements StandardSpType {
         OPEN("Open"),
         CLOSE("Close"),
         ;
 
         private final String displayValue;
 
-        private WindowCover(String displayValue) { this.displayValue = displayValue; }
+        WindowCover(String displayValue) { this.displayValue = displayValue; }
         public String description() { return displayValue; }
         public String displayValue() { return displayValue; }
         public String logValue() { return displayValue; }
@@ -492,11 +488,11 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
             WindowCover def = nvalue.isEmpty() ? null : nvalue.getValue();
             WindowCover val = SpTypeUtil.oldValueOf(WindowCover.class, name, def);
             None<WindowCover> none = None.instance();
-            return val == null ? none : new Some<WindowCover>(val);
+            return val == null ? none : new Some<>(val);
         }
     }
 
-    public static enum Decker implements StandardSpType {
+    public enum Decker implements StandardSpType {
         IMAGING("Imaging"),
         LONG_SLIT("Long Slit"),
         MOS("MOS"),
@@ -519,11 +515,11 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
             Decker def = nvalue.isEmpty() ? null : nvalue.getValue();
             Decker val = SpTypeUtil.oldValueOf(Decker.class, name, def);
             None<Decker> none = None.instance();
-            return val == null ? none : new Some<Decker>(val);
+            return val == null ? none : new Some<>(val);
         }
     }
 
-    public static enum ReadoutMode implements StandardSpType {
+    public enum ReadoutMode implements StandardSpType {
         SCIENCE("Science"),
         ENGINEERING("Engineering"),
         ;
@@ -545,11 +541,11 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
             ReadoutMode def = nvalue.isEmpty() ? null : nvalue.getValue();
             ReadoutMode val = SpTypeUtil.oldValueOf(ReadoutMode.class, name, def);
             None<ReadoutMode> none = None.instance();
-            return val == null ? none : new Some<ReadoutMode>(val);
+            return val == null ? none : new Some<>(val);
         }
     }
 
-    public static enum Reads implements StandardSpType {
+    public enum Reads implements StandardSpType {
         READS_1( 1),
         READS_3( 3),
         READS_4( 4),
@@ -569,7 +565,7 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
 
         private final int reads;
 
-        private Reads(int reads) { this.reads = reads; }
+        Reads(int reads) { this.reads = reads; }
         public String description() { return displayValue(); }
         public String displayValue() { return String.valueOf(reads); }
         public String logValue() { return displayValue(); }
@@ -585,7 +581,7 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
             Reads def = nvalue.isEmpty() ? null : nvalue.getValue();
             Reads val = SpTypeUtil.oldValueOf(Reads.class, name, def);
             None<Reads> none = None.instance();
-            return val == null ? none : new Some<Reads>(val);
+            return val == null ? none : new Some<>(val);
         }
     }
 
@@ -678,10 +674,10 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
 
 
     static {
-        FOV_ROTATION=new HashMap<IssPort, Angle[]>();
+        FOV_ROTATION=new HashMap<>();
         FOV_ROTATION.put(IssPort.SIDE_LOOKING,new Angle[]{Angle.ANGLE_0DEGREES,Angle.ANGLE_0DEGREES});
         FOV_ROTATION.put(IssPort.UP_LOOKING,new Angle[]{Angle.ANGLE_0DEGREES,Angle.ANGLE_0DEGREES});
-        FLIP=new HashMap<IssPort,boolean[]>();
+        FLIP=new HashMap<>();
         FLIP.put(IssPort.SIDE_LOOKING,new boolean[]{false,true});
         FLIP.put(IssPort.UP_LOOKING,new boolean[]{true,false});
 
@@ -845,11 +841,7 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
 
         final GuideGroup gg = tenv.getOrCreatePrimaryGuideGroup();
         final Option<GuideProbeTargets> gpt = gg.get(Flamingos2OiwfsGuideProbe.instance);
-        return gpt.exists(new PredicateOp<GuideProbeTargets>() {
-            @Override public Boolean apply(GuideProbeTargets spTargets) {
-                return !spTargets.getPrimary().isEmpty();
-            }
-        });
+        return gpt.exists(spTargets -> !spTargets.getPrimary().isEmpty());
     }
 
     public static double getSpectroscopySetupSec() {
@@ -942,9 +934,7 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
             @Override public PropertyDescriptor descriptor1() { return DISPERSER_PROP; }
             @Override public PropertyDescriptor descriptor2() { return FILTER_PROP; }
             @Override public String calcWavelength(Disperser d, Filter f) {
-                return getObservingWavelength(d, f).map(new MapOp<Double, String>() {
-                    public String apply(Double d) { return String.valueOf(d); }
-                }).getOrNull();
+                return getObservingWavelength(d, f).map(String::valueOf).getOrNull();
             }
         }
     );
@@ -1340,7 +1330,7 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
      * queryable configuration parameters.
      */
     public static List getInstConfigInfo() {
-        List<InstConfigInfo> configInfo = new LinkedList<InstConfigInfo>();
+        List<InstConfigInfo> configInfo = new LinkedList<>();
 
         configInfo.add(new InstConfigInfo(DISPERSER_PROP));
         configInfo.add(new InstConfigInfo(FILTER_PROP));

@@ -217,50 +217,40 @@ public final class SEDFactory {
                 odp.getSkyTransparencyWater(),
                 odp.getAirmass(),
                 getWater(bandStr),
-                instrument instanceof Flamingos2 ? Site.GN : site, // TODO: GN is **wrong** for F2, fix this and update regression test baseline!
+                site,
                 bandStr);
         sed.accept(water);
 
         // Background spectrum is introduced here.
-        final VisitableSampledSpectrum sky = SEDFactory.getSED(getSky(instrument, bandStr, site, odp), instrument.getSampling());
+        final VisitableSampledSpectrum sky = SEDFactory.getSED(getSky(bandStr, site, odp), instrument.getSampling());
         Option<VisitableSampledSpectrum> halo = Option.empty();
-        if (instrument instanceof Flamingos2) {
-            // TODO: F2 differs slightly from GMOS, GNIRS, Michelle, TRecs and Nifs in this (order of operations)
-            // TODO: check with science if we can change this and adapt baseline for regression tests accordingly
-            final SampledSpectrumVisitor tb = new TelescopeBackgroundVisitor(tp, Site.GS, ITCConstants.NEAR_IR);
-            sky.accept(tb);
-            final SampledSpectrumVisitor t = TelescopeTransmissionVisitor.create(tp);
-            sed.accept(t);
-            sky.accept(t);
-            sky.accept(tel);
-            halo = Option.empty();
-        } else {
-            // Apply telescope transmission to both sed and sky
-            final SampledSpectrumVisitor t = TelescopeTransmissionVisitor.create(tp);
-            sed.accept(t);
-            sky.accept(t);
-            // Create and Add background for the telescope.
-            final SampledSpectrumVisitor tb = new TelescopeBackgroundVisitor(tp, site, bandStr);
-            sky.accept(tb);
 
-            // FOR GSAOI and NIRI ADD AO STUFF HERE
-            if (instrument instanceof Gsaoi || instrument instanceof Niri) {
-                // Moved section where sky/sed is convolved with instrument below Altair/Gems
-                // section
-                // Module 5b
-                // The instrument with its detectors modifies the source and
-                // background spectra.
-                // input: instrument, source and background SED
-                // output: total flux of source and background.
-                // TODO: for GSAOI and NIRI convolve here, why??
-                instrument.convolveComponents(sed);
-                if (ao.isDefined()) {
-                    halo = Option.apply(SEDFactory.applyAoSystem(ao.get(), sky, sed));
-                }
+        // Apply telescope transmission to both sed and sky
+        final SampledSpectrumVisitor t = TelescopeTransmissionVisitor.create(tp);
+        sed.accept(t);
+        sky.accept(t);
+
+        // Create and Add background for the telescope.
+        final SampledSpectrumVisitor tb = new TelescopeBackgroundVisitor(tp, site, bandStr);
+        sky.accept(tb);
+
+        // FOR GSAOI and NIRI ADD AO STUFF HERE
+        if (instrument instanceof Gsaoi || instrument instanceof Niri) {
+            // Moved section where sky/sed is convolved with instrument below Altair/Gems
+            // section
+            // Module 5b
+            // The instrument with its detectors modifies the source and
+            // background spectra.
+            // input: instrument, source and background SED
+            // output: total flux of source and background.
+            // TODO: for GSAOI and NIRI convolve here, why??
+            instrument.convolveComponents(sed);
+            if (ao.isDefined()) {
+                halo = Option.apply(SEDFactory.applyAoSystem(ao.get(), sky, sed));
             }
-
-            sky.accept(tel);
         }
+
+        sky.accept(tel);
 
         // Add instrument background to sky background for a total background.
         // At this point "sky" is not the right name.
@@ -310,17 +300,7 @@ public final class SEDFactory {
         }
     }
 
-    private static String getSky(final Instrument instrument, final String band, final Site site, final ObservingConditions ocp) {
-        // TODO: F2 uses a peculiar path (?), fix this and update regression test baseline!
-        if (instrument instanceof Flamingos2) {
-            return ITCConstants.SKY_BACKGROUND_LIB + "/"
-                        + ITCConstants.NEAR_IR_SKY_BACKGROUND_FILENAME_BASE
-                        + "_"
-                        + ocp.getSkyTransparencyWaterCategory() // REL-557
-                        + "_" + ocp.getAirmassCategory()
-                        + ITCConstants.DATA_SUFFIX;
-        }
-        // TODO: this is how all instruments should work:
+    private static String getSky(final String band, final Site site, final ObservingConditions ocp) {
         switch (band) {
             case ITCConstants.VISIBLE:
                 return ITCConstants.SKY_BACKGROUND_LIB + "/"
