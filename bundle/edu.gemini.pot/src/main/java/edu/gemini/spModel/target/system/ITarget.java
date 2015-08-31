@@ -75,10 +75,6 @@ public abstract class ITarget implements Cloneable, Serializable {
         return new Some(getRa().getAs(CoordinateParam.Units.DEGREES));
     }
 
-    public double getRaDegreesx() {
-        return getRa().getAs(CoordinateParam.Units.DEGREES);
-    }
-
     public Option<Double> getRaHours(Option<Long> time) {
         return new Some(getRa().getAs(CoordinateParam.Units.HMS));
     }
