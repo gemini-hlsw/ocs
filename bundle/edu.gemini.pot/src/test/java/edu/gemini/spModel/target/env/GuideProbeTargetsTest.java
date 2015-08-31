@@ -26,7 +26,7 @@ public final class GuideProbeTargetsTest extends TestCase {
 
     @Test
     public void testMatchGuider() {
-        final PredicateOp<GuideProbeTargets> op = GuideProbeTargets.match(pwfs1);
+        final PredicateOp<GuideProbeTargets> op = gpt -> gpt.getGuider() == pwfs1;
         assertTrue(op.apply(fix.gpt_pwfs1));
         assertFalse(op.apply(fix.gpt_pwfs2));
         assertFalse(op.apply(fix.gpt_gmos));
@@ -34,7 +34,7 @@ public final class GuideProbeTargetsTest extends TestCase {
 
     @Test
     public void testMatchType() {
-        final PredicateOp<GuideProbeTargets> op = GuideProbeTargets.match(GuideProbe.Type.OIWFS);
+        final PredicateOp<GuideProbeTargets> op = gpt -> gpt.getGuider().getType() == GuideProbe.Type.OIWFS;
         assertFalse(op.apply(fix.gpt_pwfs1));
         assertFalse(op.apply(fix.gpt_pwfs2));
         assertTrue(op.apply(fix.gpt_gmos));
@@ -70,7 +70,7 @@ public final class GuideProbeTargetsTest extends TestCase {
 
     @Test
     public void testExtractProbe() {
-        Function1<GuideProbeTargets, GuideProbe> f = GuideProbeTargets.EXTRACT_PROBE;
+        Function1<GuideProbeTargets, GuideProbe> f = GuideProbeTargets::getGuider;
         assertEquals(pwfs1, f.apply(fix.gpt_pwfs1));
         assertEquals(pwfs2, f.apply(fix.gpt_pwfs2));
         assertEquals(GmosOiwfsGuideProbe.instance, f.apply(fix.gpt_gmos));
@@ -78,7 +78,7 @@ public final class GuideProbeTargetsTest extends TestCase {
 
     @Test
     public void testMatchNonEmpty() {
-        PredicateOp<GuideProbeTargets> f = GuideProbeTargets.MATCH_NON_EMPTY;
+        PredicateOp<GuideProbeTargets> f = GuideProbeTargets::containsTargets;
         assertTrue(f.apply(fix.gpt_pwfs1));
         assertTrue(f.apply(fix.gpt_pwfs2));
         assertFalse(f.apply(fix.gpt_gmos));

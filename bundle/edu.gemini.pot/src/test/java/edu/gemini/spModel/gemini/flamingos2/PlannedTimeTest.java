@@ -117,7 +117,7 @@ public final class PlannedTimeTest {
         obs.addObsComponent(targetComp);
 
         final SPTarget pwfs2Target = new SPTarget();
-        final GuideProbeTargets pwfs2 = GuideProbeTargets.create(PwfsGuideProbe.pwfs2, new SPTarget()).selectPrimary(pwfs2Target);
+        final GuideProbeTargets pwfs2 = GuideProbeTargets.create(PwfsGuideProbe.pwfs2, pwfs2Target).selectPrimary(pwfs2Target);
         targetDo.setTargetEnvironment(tenv.putPrimaryGuideProbeTargets(pwfs2));
         targetComp.setDataObject(targetDo);
 
