@@ -23,7 +23,6 @@ import edu.gemini.spModel.target.obsComp.TargetSelection;
 import edu.gemini.spModel.target.offset.OffsetPosBase;
 import edu.gemini.spModel.target.offset.OffsetPosList;
 import edu.gemini.spModel.target.offset.OffsetUtil;
-import edu.gemini.spModel.target.system.CoordinateParam.Units;
 import edu.gemini.spModel.target.system.ITarget;
 import jsky.app.ot.OT;
 import jsky.app.ot.OTOptions;
@@ -272,11 +271,11 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
             final ImList<GuideGroup> groups = ge.getOptions();
             final GuideGroup primaryGroup = env.getOrCreatePrimaryGuideGroup();
             if (groups.size() < 2) {
-                for (GuideProbeTargets gt : primaryGroup.getAll()) {
+                for (final GuideProbeTargets gt : primaryGroup.getAll()) {
                     final GuideProbe guideProbe = gt.getGuider();
                     final boolean isActive = ctx.exists(c -> GuideProbeUtil.instance.isAvailable(c, guideProbe));
                     final Option<SPTarget> primary = gt.getPrimary();
-                    gt.getOptions().zipWithIndex().foreach(tup -> {
+                    gt.getTargets().zipWithIndex().foreach(tup -> {
                         final SPTarget target = tup._1();
                         final Option<AgsGuideQuality> quality = guideQuality(ags, guideProbe, target);
                         final boolean isPrimary = !primary.isEmpty() && (primary.getValue() == target);
@@ -292,7 +291,7 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
                         final GuideProbe guideProbe = gt.getGuider();
                         final boolean isActive = ctx.exists(c -> GuideProbeUtil.instance.isAvailable(c, guideProbe));
                         final Option<SPTarget> primary = gt.getPrimary();
-                        gt.getOptions().zipWithIndex().foreach(tup -> {
+                        gt.getTargets().zipWithIndex().foreach(tup -> {
                             final SPTarget target = tup._1();
                             final Option<AgsGuideQuality> quality = guideQuality(ags, guideProbe, target);
                             final boolean enabled = isPrimaryGroup && !primary.isEmpty() && (primary.getValue() == tup._1());
@@ -1013,10 +1012,8 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
         final boolean isPrimary = src.getPrimary().getOrElse(null) == target;
         final GuideProbeTargets newSrc = src.removeTarget(target);
         final SPTarget newTarget = target.clone();
-        GuideProbeTargets newSnk = snk.setOptions(snk.getOptions().append(newTarget));
-        if (isPrimary) {
-            newSnk = newSnk.selectPrimary(newTarget);
-        }
+
+        final GuideProbeTargets newSnk = isPrimary ? snk.addManualTarget(newTarget).selectPrimary(newTarget) : snk.addManualTarget(newTarget);
 
         final GuideEnvironment guideEnv = _env.getGuideEnvironment();
         final GuideEnvironment newGuideEnv = guideEnv.putGuideProbeTargets(srcGrp, newSrc).putGuideProbeTargets(snkGrp, newSnk);

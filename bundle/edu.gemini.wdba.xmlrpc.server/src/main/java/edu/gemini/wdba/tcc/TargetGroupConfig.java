@@ -20,29 +20,28 @@ import java.util.List;
 public final class TargetGroupConfig extends ParamSet {
     public static final String TYPE_VALUE="targetgroup";
 
-    public static TargetGroupConfig createBaseGroup(TargetEnvironment env) {
-        ImList<SPTarget> targets = env.getUserTargets();
-        targets = targets.cons(env.getBase());
-        return new TargetGroupConfig(TccNames.BASE, targets, env.getBase().getTarget().getName());
+    public static TargetGroupConfig createBaseGroup(final TargetEnvironment env) {
+        final ImList<SPTarget> targets = env.getUserTargets().cons(env.getBase());
+        return new TargetGroupConfig(TccNames.BASE, targets, GuideProbeTargets.NO_TARGET,
+                env.getBase().getTarget().getName());
     }
 
-    public static TargetGroupConfig createGuideGroup(GuideProbeTargets gt) {
-        GuideProbe guider = gt.getGuider();
-
-        ImList<SPTarget> targets = gt.getOptions();
-        Option<SPTarget> primaryOpt = gt.getPrimary();
+    public static TargetGroupConfig createGuideGroup(final GuideProbeTargets gt) {
+        final GuideProbe guider = gt.getGuider();
+        final ImList<SPTarget> manualTargets = gt.getManualTargets();
+        final Option<SPTarget> primaryOpt = gt.getPrimary();
+        final Option<SPTarget> bagsTargetOpt = gt.getBAGSTarget();
 
         // SW: no longer always setting a primary target.
 //        if ((primary == null) && (targets.size() > 0)) primary = targets.head();
 
-        String primaryTargetName = null;
-        if (!primaryOpt.isEmpty()) primaryTargetName = primaryOpt.getValue().getTarget().getName();
-
-        String tag = TargetConfig.getTag(guider);
-        return new TargetGroupConfig(tag, targets, primaryTargetName);
+        final String primaryTargetName = primaryOpt.map(p -> p.getTarget().getName()).getOrNull();
+        final String tag = TargetConfig.getTag(guider);
+        return new TargetGroupConfig(tag, manualTargets, bagsTargetOpt, primaryTargetName);
     }
 
-    private TargetGroupConfig(String name, ImList<SPTarget> targets, String primaryTargetName) {
+    private TargetGroupConfig(final String name, final ImList<SPTarget> targets,
+                              final Option<SPTarget> bagsTarget, final String primaryTargetName) {
         super(name);
 
         addAttribute(TYPE, TYPE_VALUE);
@@ -51,11 +50,10 @@ public final class TargetGroupConfig extends ParamSet {
             putParameter(TccNames.PRIMARY, primaryTargetName);
         }
 
-        List<String> targetNames = new ArrayList<String>(targets.size());
-        for (SPTarget target : targets) {
-            targetNames.add(target.getTarget().getName());
-        }
-
+        final List<String> targetNames = new ArrayList<String>(targets.size());
+        targets.foreach(t -> targetNames.add(t.getTarget().getName()));
         putParameter(TccNames.TARGETS, targetNames);
+
+        bagsTarget.foreach(t -> putParameter(TccNames.BAGSTARGET, t.getTarget().getName()));
     }
 }
