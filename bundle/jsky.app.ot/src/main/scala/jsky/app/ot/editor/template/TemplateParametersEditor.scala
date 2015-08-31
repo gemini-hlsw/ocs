@@ -3,7 +3,7 @@ package jsky.app.ot.editor.template
 import edu.gemini.pot.sp.ISPTemplateParameters
 import edu.gemini.shared.skyobject.Magnitude
 import edu.gemini.shared.util.TimeValue
-import edu.gemini.shared.util.immutable.DefaultImList
+import edu.gemini.shared.util.immutable.{ DefaultImList, None => JNone, Option => JOption }
 import edu.gemini.spModel.`type`.ObsoletableSpType
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.{PercentageContainer, ImageQuality, CloudCover, SkyBackground, WaterVapor}
@@ -257,11 +257,13 @@ class TemplateParametersEditor(shells: java.util.List[ISPTemplateParameters]) ex
         })}
       )
 
+      val JNoneLong: JOption[java.lang.Long] = JNone.instance[java.lang.Long]
+
       val hms = new HMSFormat()
       val raField = new BoundTextField[Double](10)(
         read = s => hms.parse(s),
         show = hms.format,
-        get  = _.getTarget.getTarget.getRaHours,
+        get  = _.getTarget.getTarget.getRaHours(JNoneLong).getOrElse(0.0),
         set  = setTarget((a, b) => a.setRaHours(b))
       )
 
@@ -269,7 +271,7 @@ class TemplateParametersEditor(shells: java.util.List[ISPTemplateParameters]) ex
       val decField = new BoundTextField[Double](10)(
         read = s => dms.parse(s),
         show = dms.format,
-        get  = _.getTarget.getTarget.getDecDegrees,
+        get  = _.getTarget.getTarget.getDecDegrees(JNoneLong).getOrElse(0.0),
         set  = setTarget((a, b) => a.setDecDegrees(b))
       )
 
