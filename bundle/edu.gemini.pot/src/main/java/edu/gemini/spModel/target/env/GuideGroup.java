@@ -339,11 +339,7 @@ public final class GuideGroup implements Serializable, Iterable<GuideProbeTarget
      * selected target.
      */
     public SortedSet<GuideProbe> getPrimaryReferencedGuiders() {
-        return toSet(guideTargets.filter(new PredicateOp<GuideProbeTargets>() {
-            @Override public Boolean apply(GuideProbeTargets gpt) {
-                return gpt.getPrimary().isDefined();
-            }
-        }).map(GuideProbeTargets.EXTRACT_PROBE));
+        return toSet(guideTargets.filter(gpt -> gpt.getPrimary().isDefined()).map(GuideProbeTargets::getGuider));
     }
 
     /**
@@ -380,11 +376,7 @@ public final class GuideGroup implements Serializable, Iterable<GuideProbeTarget
 
     @Override
     public GuideGroup removeTarget(final SPTarget target) {
-        ImList<GuideProbeTargets> updated = guideTargets.map(new Function1<GuideProbeTargets, GuideProbeTargets>() {
-            @Override public GuideProbeTargets apply(GuideProbeTargets t) {
-                return t.update(UpdateOps.remove(target));
-            }
-        });
+        final ImList<GuideProbeTargets> updated = guideTargets.map(gpt -> gpt.removeTargetSelectPrimary(target));
         return new GuideGroup(name, updated);
     }
 
@@ -396,11 +388,7 @@ public final class GuideGroup implements Serializable, Iterable<GuideProbeTarget
 
     @Override
     public GuideGroup cloneTargets() {
-        ImList<GuideProbeTargets> cloned = guideTargets.map(new Function1<GuideProbeTargets, GuideProbeTargets>() {
-            @Override public GuideProbeTargets apply(GuideProbeTargets t) {
-                return t.cloneTargets();
-            }
-        });
+        final ImList<GuideProbeTargets> cloned = guideTargets.map(GuideProbeTargets::cloneTargets);
         return new GuideGroup(name, cloned);
     }
 

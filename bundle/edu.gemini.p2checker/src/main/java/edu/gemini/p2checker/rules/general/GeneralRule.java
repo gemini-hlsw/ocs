@@ -154,16 +154,16 @@ public class GeneralRule implements IRule {
         public IP2Problems check(ObservationElements elements)  {
             if (elements.getTargetObsComp().isEmpty()) return null; //can't check
 
-            TargetEnvironment env = elements.getTargetObsComp().getValue().getTargetEnvironment();
+            final TargetEnvironment env = elements.getTargetObsComp().getValue().getTargetEnvironment();
 
-            P2Problems problems = new P2Problems();
-            SPTarget baseTarget = env.getBase();
+            final P2Problems problems = new P2Problems();
+            final SPTarget baseTarget = env.getBase();
 
             final boolean hasAltairComp = elements.hasAltair();
             boolean isLgs = false;
 
             // Don't do Altair checks if Altair is not supported
-            boolean altairSupported = isAltairSupported(elements);
+            final boolean altairSupported = isAltairSupported(elements);
 
             if (hasAltairComp && altairSupported) {
                 final ISPObsComponent targetComp = elements.getTargetObsComponentNode().getValue();
@@ -193,12 +193,12 @@ public class GeneralRule implements IRule {
                 }
             }
 
-            for (GuideProbeTargets guideTargets : env.getOrCreatePrimaryGuideGroup()) {
-                GuideProbe guider = guideTargets.getGuider();
+            for (final GuideProbeTargets guideTargets : env.getOrCreatePrimaryGuideGroup()) {
+                final GuideProbe guider = guideTargets.getGuider();
                 // TODO: GuideProbeTargets.isEnabled
 
                 final boolean dis = elements.getObsContext().exists(c -> !GuideProbeUtil.instance.isAvailable(c, guider) &&
-                                                                         (guideTargets.getOptions().size() > 0));
+                                                                         (guideTargets.getTargets().size() > 0));
                 if (dis) {
                     problems.addError(PREFIX+"DISABLED_GUIDER", String.format(DISABLED_GUIDER, guider.getKey()),
                             elements.getTargetObsComponentNode().getValue());
@@ -206,8 +206,8 @@ public class GeneralRule implements IRule {
                 }
 
                 if (guider == PwfsGuideProbe.pwfs1) {
-                    if (guideTargets.getOptions().size() > 0) {
-                        SPInstObsComp instrument = elements.getInstrument();
+                    if (guideTargets.getTargets().size() > 0) {
+                        final SPInstObsComp instrument = elements.getInstrument();
                         if(instrument!=null && instrument.getSite().contains(Site.GN) && !isLgs){
                             problems.addWarning(PREFIX+"P2_PREFERRED", P2_PREFERRED,elements.getTargetObsComponentNode().getValue());
                         }
@@ -215,8 +215,8 @@ public class GeneralRule implements IRule {
                     continue;
                 }
 
-                Set<String> errorSet = new TreeSet<String>();
-                for (SPTarget target : guideTargets) {
+                final Set<String> errorSet = new TreeSet<>();
+                for (final SPTarget target : guideTargets) {
                     //Check for empty name
                     if ("".equals(target.getTarget().getName().trim())) {
                         errorSet.add(String.format(WFS_EMPTY_NAME_TEMPLATE, guider.getKey()));
@@ -247,9 +247,9 @@ public class GeneralRule implements IRule {
                     }
 
                 }
-                for (String error : errorSet) {
-                    String id = error.equals(WFS_EMPTY_NAME_TEMPLATE) ? "WFS_EMPTY_NAME_TEMPLATE" :
-                            (error.equals(NAME_CLASH_MESSAGE) ? "NAME_CLASH_MESSAGE" : "COORD_CLASH_MESSAGE");
+                for (final String error : errorSet) {
+                    final String id = error.equals(WFS_EMPTY_NAME_TEMPLATE) ? "WFS_EMPTY_NAME_TEMPLATE" :
+                              (error.equals(NAME_CLASH_MESSAGE) ? "NAME_CLASH_MESSAGE" : "COORD_CLASH_MESSAGE");
                     problems.addError(PREFIX+id, error, elements.getTargetObsComponentNode().getValue());
                 }
             }

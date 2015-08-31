@@ -128,11 +128,11 @@ public class TccFieldConfig extends ParamSet {
         if (!_oe.getAvailableGuiders().contains(gt.getGuider())) return;
 
         // Ignore empty guide targets.
-        ImList<SPTarget> targets = gt.getOptions();
+        final ImList<SPTarget> targets = gt.getTargets();
         if (targets.size() == 0) return;
 
         // Add each target, setting any missing names along the way.
-        String tag = TargetConfig.getTag(gt.getGuider());
+        final String tag = TargetConfig.getTag(gt.getGuider());
 
         int pos = 1;
         for (SPTarget target : targets) {

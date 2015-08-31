@@ -116,7 +116,8 @@ public final class PlannedTimeTest {
         final TargetEnvironment tenv = targetDo.getTargetEnvironment();
         obs.addObsComponent(targetComp);
 
-        final GuideProbeTargets pwfs2 = GuideProbeTargets.create(PwfsGuideProbe.pwfs2, new SPTarget());
+        final SPTarget pwfs2Target = new SPTarget();
+        final GuideProbeTargets pwfs2 = GuideProbeTargets.create(PwfsGuideProbe.pwfs2, new SPTarget()).selectPrimary(pwfs2Target);
         targetDo.setTargetEnvironment(tenv.putPrimaryGuideProbeTargets(pwfs2));
         targetComp.setDataObject(targetDo);
 
@@ -124,7 +125,8 @@ public final class PlannedTimeTest {
         verify(Flamingos2.getImagingSetupSec(obs) + readout);
 
         // With OIWFS
-        final GuideProbeTargets oiwfs = GuideProbeTargets.create(Flamingos2OiwfsGuideProbe.instance, new SPTarget());
+        final SPTarget oiwfsTarget = new SPTarget();
+        final GuideProbeTargets oiwfs = GuideProbeTargets.create(Flamingos2OiwfsGuideProbe.instance, oiwfsTarget).selectPrimary(oiwfsTarget);
         targetDo.setTargetEnvironment(tenv.putPrimaryGuideProbeTargets(oiwfs));
         targetComp.setDataObject(targetDo);
 

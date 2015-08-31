@@ -342,8 +342,8 @@ public final class CanopusFeature extends TpeImageFeature implements PropertyWat
     }
 
     private static boolean containsTarget(TargetEnvironment env, GuideProbe guider, SPTarget target) {
-        Option<GuideProbeTargets> gtOpt = env.getPrimaryGuideProbeTargets(guider);
-        return (!gtOpt.isEmpty()) && gtOpt.getValue().getOptions().contains(target);
+        final Option<GuideProbeTargets> gtOpt = env.getPrimaryGuideProbeTargets(guider);
+        return gtOpt.exists(gt -> gt.containsTarget(target));
     }
 
     public void handleDragStarted(Object dragObject, ObsContext context) {

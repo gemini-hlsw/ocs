@@ -23,6 +23,7 @@ public final class TccNames {
     public static final String AZEL = "AzEl";
     public static final String BASE = "Base";
 //    public static final String BASE = "sciencetarget";
+    public static final String BAGSTARGET = "bagsTarget";
     public static final String BASICCHOP = "BasicChop";
     public static final String BRIGHTNESS = "brightness";
     //public static final String FIELD = "targetEnv";

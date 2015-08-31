@@ -882,11 +882,7 @@ public abstract class EdCompInstGMOS<T extends InstGmosCommon> extends EdCompIns
     private boolean primaryOiwfsStarExists() {
         final TargetEnvironment env = getContextTargetEnv();
         if (env == null) return false;
-
-        for (GuideProbeTargets targets : env.getPrimaryGuideProbeTargets(GmosOiwfsGuideProbe.instance)) {
-            return !targets.getPrimary().isEmpty();
-        }
-        return false;
+        return env.getPrimaryGuideProbeTargets(GmosOiwfsGuideProbe.instance).exists(gt -> gt.getPrimary().isDefined());
     }
 
     /**

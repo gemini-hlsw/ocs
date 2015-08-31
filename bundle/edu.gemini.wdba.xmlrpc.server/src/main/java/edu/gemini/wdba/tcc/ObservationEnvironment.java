@@ -158,18 +158,14 @@ public final class ObservationEnvironment {
     }
 
     public boolean containsTargets(GuideProbe probe) {
-        Option<GuideProbeTargets> gtOpt = _targetEnv.getPrimaryGuideProbeTargets(probe);
-        return (!gtOpt.isEmpty() && (gtOpt.getValue().getOptions().size() > 0));
+        final Option<GuideProbeTargets> gtOpt = _targetEnv.getPrimaryGuideProbeTargets(probe);
+        return gtOpt.exists(GuideProbeTargets::containsTargets);
     }
 
     public boolean containsTargets(GuideProbe.Type type) {
-        GuideGroup grp = _targetEnv.getOrCreatePrimaryGuideGroup();
-        ImList<GuideProbeTargets> gtList = grp.getAllMatching(type);
-        return gtList.exists(new PredicateOp<GuideProbeTargets>() {
-            @Override public Boolean apply(GuideProbeTargets gt) {
-                return gt.getOptions().size() > 0;
-            }
-        });
+        final GuideGroup grp = _targetEnv.getOrCreatePrimaryGuideGroup();
+        final ImList<GuideProbeTargets> gtList = grp.getAllMatching(type);
+        return gtList.exists(GuideProbeTargets::containsTargets);
     }
 
     public enum AoAspect {
