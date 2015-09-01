@@ -314,7 +314,7 @@ public final class GuideProbeTargets implements Serializable, TargetContainer, I
         if (targetOption.equals(bagsTarget))
             return this;
 
-        final Option<SPTarget> primaryTargetNew = primaryIsBagsTarget() ? targetOption : primaryTarget;
+        final Option<SPTarget> primaryTargetNew = primaryIsBagsTarget() || primaryTarget.isEmpty() ? targetOption : primaryTarget;
         return new GuideProbeTargets(guider, targetOption, primaryTargetNew, manualTargets);
     }
 
