@@ -280,34 +280,36 @@ public enum GsaoiDetectorArray {
      *
      * @return {@link Some}<{@link Id}> associated with the detector array
      * quadrant in which the <code>coords</code> fall, or {@link None} if
-     * off the array
+     * off the array or base coordinates are unknown
      */
     public Option<Id> getId(Coordinates coords, ObsContext ctx) {
-        // Calculate the difference between the coordinate and the observation's
-        // base position.
-        CoordinateDiff diff;
-        diff = new CoordinateDiff(ctx.getBaseCoordinates(), coords);
+        return ctx.getBaseCoordinatesOpt().flatMap(base -> {
+            // Calculate the difference between the coordinate and the observation's
+            // base position.
+            CoordinateDiff diff;
+            diff = new CoordinateDiff(base, coords);
 
-        // Get offset and switch it to be defined in the same coordinate
-        // system as the shape.
-        Offset offset = diff.getOffset();
-        double p = -offset.p().toArcsecs().getMagnitude();
-        double q = -offset.q().toArcsecs().getMagnitude();
+            // Get offset and switch it to be defined in the same coordinate
+            // system as the shape.
+            Offset offset = diff.getOffset();
+            double p = -offset.p().toArcsecs().getMagnitude();
+            double q = -offset.q().toArcsecs().getMagnitude();
 
-        // Get a rotation to transform the shape to the position angle.
-        AffineTransform xform = new AffineTransform();
-        xform.rotate(-ctx.getPositionAngle().toRadians().getMagnitude());
+            // Get a rotation to transform the shape to the position angle.
+            AffineTransform xform = new AffineTransform();
+            xform.rotate(-ctx.getPositionAngle().toRadians().getMagnitude());
 
-        // Check each quadrant to see if it contains the point, returning
-        // a new Some if so.
-        Set<Offset> offsets = ctx.getSciencePositions();
-        for (Tuple2<Quadrant, Shape> t : quadrantIntersection(offsets)) {
-            Area a = new Area(t._2());
-            a.transform(xform);
-            if (a.contains(p, q)) return new Some<Id>(t._1().id(ctx.getIssPort()));
-        }
+            // Check each quadrant to see if it contains the point, returning
+            // a new Some if so.
+            Set<Offset> offsets = ctx.getSciencePositions();
+            for (Tuple2<Quadrant, Shape> t : quadrantIntersection(offsets)) {
+                Area a = new Area(t._2());
+                a.transform(xform);
+                if (a.contains(p, q)) return new Some<Id>(t._1().id(ctx.getIssPort()));
+            }
 
-        // Not on the detector for all offset positions.
-        return None.instance();
+            // Not on the detector for all offset positions.
+            return None.instance();
+        });
     }
 }
