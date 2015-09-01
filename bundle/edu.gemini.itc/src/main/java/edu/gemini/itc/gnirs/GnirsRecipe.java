@@ -57,7 +57,7 @@ public final class GnirsRecipe implements SpectroscopyRecipe {
     private void validateInputParameters() {
         if (_sdParameters.getDistributionType().equals(SourceDefinition.Distribution.ELINE))
             // *25 b/c of increased resolutuion of transmission files
-            if (_sdParameters.getELineWidth() < (3E5 / (_sdParameters.getELineWavelength().toNanometers() * 25))) {
+            if (_sdParameters.getELineWidth().toMetersPerSecond()/1000 < (3E5 / (_sdParameters.getELineWavelength().toNanometers() * 25))) {
                 throw new RuntimeException(
                         "Please use a model line width > 0.04 nm (or "
                                 + (3E5 / (_sdParameters.getELineWavelength().toNanometers() * 25))

@@ -3,6 +3,9 @@ package edu.gemini.itc.shared;
 import edu.gemini.spModel.core.MagnitudeBand;
 import edu.gemini.spModel.core.Wavelength;
 import edu.gemini.spModel.target.*;
+import squants.motion.Velocity;
+import squants.radio.Irradiance;
+import squants.space.Length;
 
 import java.io.Serializable;
 
@@ -117,15 +120,15 @@ public final class SourceDefinition implements Serializable {
         return ((BlackBody) distribution).temperature();
     }
 
-    public Wavelength getELineWavelength() {
+    public Length getELineWavelength() {
         return ((EmissionLine) distribution).wavelength();
     }
 
-    public double getELineWidth() {
+    public Velocity getELineWidth() {
         return ((EmissionLine) distribution).width();
     }
 
-    public EmissionLine.Flux getELineFlux() {
+    public Irradiance getELineFlux() {
         return ((EmissionLine) distribution).flux();
     }
 

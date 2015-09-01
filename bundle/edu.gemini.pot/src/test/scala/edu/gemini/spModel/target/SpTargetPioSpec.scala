@@ -1,13 +1,16 @@
 package edu.gemini.spModel.target
 
-import edu.gemini.spModel.core.{Wavelength, Arbitraries}
+import edu.gemini.spModel.core.{Arbitraries, Wavelength}
 import edu.gemini.spModel.pio.ParamSet
 import edu.gemini.spModel.pio.xml.PioXmlFactory
-import edu.gemini.spModel.target.EmissionLine.{Continuum, Flux}
-import edu.gemini.spModel.target.system.{ConicTarget, HmsDegTarget, ITarget, CoordinateParam}
+import edu.gemini.spModel.target.EmissionLine.Continuum
+import edu.gemini.spModel.target.system.{ConicTarget, HmsDegTarget, ITarget}
 import org.scalacheck.{Arbitrary, Gen}
 import org.specs2.ScalaCheck
 import org.specs2.mutable.Specification
+import squants.motion.MetersPerSecond
+import squants.radio.WattsPerSquareMeter
+import squants.space.Nanometers
 
 /** Tests Pio input/output operations for SpTargets.
   * Currently this only tests that the source profile and distribution are stored and retrieved.
@@ -22,8 +25,8 @@ object SpTargetPioSpec extends Specification with ScalaCheck with Arbitraries {
         BlackBody(10000),
         PowerLaw(0),
         PowerLaw(1),
-        EmissionLine(Wavelength.fromNanometers(450), 150, Flux.fromWatts(13), Continuum.fromWatts(22)),
-        EmissionLine(Wavelength.fromNanometers(550), 400, Flux.fromWatts(23), Continuum.fromWatts(42)),
+        EmissionLine(Nanometers(450), MetersPerSecond(150000), WattsPerSquareMeter(13), Continuum.fromWatts(22)),
+        EmissionLine(Nanometers(550), MetersPerSecond(400000), WattsPerSquareMeter(23), Continuum.fromWatts(42)),
         LibraryStar.A0V,
         LibraryStar.A5III,
         LibraryNonStar.NGC2023,

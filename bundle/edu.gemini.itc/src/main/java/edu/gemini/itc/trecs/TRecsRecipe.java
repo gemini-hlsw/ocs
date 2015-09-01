@@ -40,7 +40,7 @@ public final class TRecsRecipe implements ImagingRecipe, SpectroscopyRecipe {
 
     private void validateInputParameters() {
         if (_sdParameters.getDistributionType().equals(SourceDefinition.Distribution.ELINE))
-            if (_sdParameters.getELineWidth() < (3E5 / (_sdParameters.getELineWavelength().toNanometers() / 4))) { // /4 b/c of increased resolution of transmission files
+            if (_sdParameters.getELineWidth().toMetersPerSecond()/1000 < (3E5 / (_sdParameters.getELineWavelength().toNanometers() / 4))) { // /4 b/c of increased resolution of transmission files
                 throw new RuntimeException(
                         "Please use a model line width > 4 nm (or "
                                 + (3E5 / (_sdParameters.getELineWavelength().toNanometers() / 4))
