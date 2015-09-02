@@ -10,7 +10,7 @@ import edu.gemini.spModel.target.EmissionLine.{Continuum, Flux}
 import edu.gemini.spModel.target._
 import jsky.app.ot.gemini.editor.targetComponent.TelescopePosEditor
 import jsky.app.ot.gemini.editor.targetComponent.details.NumericPropertySheet.Prop
-import squants.space.LengthConversions._
+import edu.gemini.spModel.core.WavelengthConversions._
 
 import scala.swing.GridBagPanel.{Anchor, Fill}
 import scala.swing.ListView.Renderer
