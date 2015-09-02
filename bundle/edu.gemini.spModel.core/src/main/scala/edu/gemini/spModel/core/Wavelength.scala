@@ -48,16 +48,16 @@ final case class Wavelength(length: Length) extends AnyVal with Serializable {
 object Wavelength {
 
   /**
-   * Creates a `Wavelength` from nanometers.
+   * Creates a `Wavelength` from numeric value representing nanometers.
    * @group Constructors
    */
-  def fromNanometers(d: Double) = Wavelength(Nanometers(d))
+  def fromNanometers[A](value: A)(implicit num : Numeric[A]) = Wavelength(Nanometers(value))
 
   /**
-   * Creates a `Wavelength` from microns.
+   * Creates a `Wavelength` from numeric value representing microns.
    * @group Constructors
    */
-  def fromMicrons(d: Double) = Wavelength(Microns(d))
+  def fromMicrons[A](value: A)(implicit num : Numeric[A]) = Wavelength(Microns(value))
 
   /**
    * The zero `Wavelength`.
@@ -87,15 +87,8 @@ object Wavelength {
 
 object WavelengthConversions {
 
-  // implicit conversion from double to `Wavelength`
-  implicit class wavelengthFromDouble(value: Double) {
-    def nm         = Wavelength.fromNanometers(value)
-    def nanometers = Wavelength.fromNanometers(value)
-    def microns    = Wavelength.fromMicrons(value)
-  }
-
-  // implicit conversion from int to `Wavelength`
-  implicit class wavelengthFromInteger(value: Int) {
+  // implicit conversion from numeric values to `Wavelength`
+  implicit class wavelengthFromDouble[A](value: A)(implicit num : Numeric[A]) {
     def nm         = Wavelength.fromNanometers(value)
     def nanometers = Wavelength.fromNanometers(value)
     def microns    = Wavelength.fromMicrons(value)
