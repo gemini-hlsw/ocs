@@ -24,7 +24,7 @@ object MagnitudeBand {
   // Class files clobber one another on OS X so names can't differ only in case.
   // We may need to revisit and come up with better names.
   // Values for Sloan filters (u', g', r', i', z') taken from Fukugita et al. (1996)
-  case object _u extends MagnitudeBand("u",    10.nm,   46.nm, "UV",             MagnitudeSystem.AB)
+  case object _u extends MagnitudeBand("u",   356.nm,   46.nm, "UV",             MagnitudeSystem.AB)
   case object _g extends MagnitudeBand("g",   483.nm,   99.nm, "green",          MagnitudeSystem.AB)
   case object _r extends MagnitudeBand("r",   626.nm,   96.nm, "red",            MagnitudeSystem.AB)
   case object _i extends MagnitudeBand("i",   767.nm,  106.nm, "far red",        MagnitudeSystem.AB)
