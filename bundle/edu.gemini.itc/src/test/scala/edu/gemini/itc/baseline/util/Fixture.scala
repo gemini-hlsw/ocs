@@ -8,8 +8,7 @@ import edu.gemini.spModel.guide.GuideProbe
 import edu.gemini.spModel.target.EmissionLine.{Continuum, Flux}
 import edu.gemini.spModel.target._
 import edu.gemini.spModel.telescope.IssPort
-import squants.space.LengthConversions._
-import edu.gemini.spModel.core.Wavelength._
+import edu.gemini.spModel.core.WavelengthConversions._
 
 /**
  * Definition of test fixtures which hold all input parameters needed to execute different ITC recipes.

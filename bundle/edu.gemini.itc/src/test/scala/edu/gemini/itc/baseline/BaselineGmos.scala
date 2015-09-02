@@ -6,7 +6,7 @@ import edu.gemini.spModel.core.Site
 import edu.gemini.spModel.gemini.gmos.GmosCommonType.DetectorManufacturer
 import edu.gemini.spModel.gemini.gmos.GmosNorthType.{DisperserNorth, FPUnitNorth, FilterNorth}
 import edu.gemini.spModel.gemini.gmos.GmosSouthType.{DisperserSouth, FPUnitSouth, FilterSouth}
-import squants.space.LengthConversions._
+import edu.gemini.spModel.core.WavelengthConversions._
 
 /**
  * GMOS baseline test fixtures.

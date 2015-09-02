@@ -21,7 +21,7 @@ import edu.gemini.spModel.target.SPTarget
 import edu.gemini.spModel.target.env.{GuideProbeTargets, TargetEnvironment}
 import edu.gemini.spModel.target.system.ITarget
 import edu.gemini.spModel.telescope.IssPort
-import squants.space.LengthConversions._
+import edu.gemini.spModel.core.WavelengthConversions._
 
 import scala.reflect.ClassTag
 import scalaz.Scalaz._

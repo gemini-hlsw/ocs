@@ -4,7 +4,7 @@ import edu.gemini.itc.baseline.util._
 import edu.gemini.itc.shared.MichelleParameters
 import edu.gemini.spModel.data.YesNoType
 import edu.gemini.spModel.gemini.michelle.MichelleParams.{Disperser, Filter, Mask}
-import squants.space.LengthConversions._
+import edu.gemini.spModel.core.WavelengthConversions._
 
 /**
  * Michelle baseline test fixtures.

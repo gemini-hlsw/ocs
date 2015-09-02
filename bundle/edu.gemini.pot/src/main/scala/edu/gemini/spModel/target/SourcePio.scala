@@ -4,7 +4,7 @@ import java.util.logging.{Level, Logger}
 
 import edu.gemini.spModel.pio.{ParamSet, Pio, PioFactory}
 import edu.gemini.spModel.target.EmissionLine.{Continuum, Flux}
-import squants.space.LengthConversions._
+import edu.gemini.spModel.core.WavelengthConversions._
 
 import scalaz.Scalaz._
 import scalaz._

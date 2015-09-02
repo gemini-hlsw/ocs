@@ -1,6 +1,6 @@
 package edu.gemini.spModel.core
 
-import squants.space.LengthConversions._
+import edu.gemini.spModel.core.WavelengthConversions._
 
 sealed abstract class MagnitudeBand private (val name: String, val center: Wavelength, val width: Wavelength, val description: Option[String], val defaultSystem: MagnitudeSystem) extends Product with Serializable {
 
@@ -54,7 +54,7 @@ object MagnitudeBand {
   // order by central wavelength; make sure that AP always shows up last because it's sort of a special case
   implicit val MagnitudeBandOrder: scalaz.Order[MagnitudeBand] =
     scalaz.Order.orderBy {
-      case AP   => Wavelength(Double.MaxValue.nm)
+      case AP   => Double.MaxValue.nm
       case band => band.center
     }
 

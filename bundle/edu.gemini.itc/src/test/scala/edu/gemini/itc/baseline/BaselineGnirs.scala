@@ -3,7 +3,7 @@ package edu.gemini.itc.baseline
 import edu.gemini.itc.baseline.util._
 import edu.gemini.itc.shared.GnirsParameters
 import edu.gemini.spModel.gemini.gnirs.GNIRSParams._
-import squants.space.LengthConversions._
+import edu.gemini.spModel.core.WavelengthConversions._
 
 /**
  * GNIRS baseline test fixtures.
