@@ -25,7 +25,7 @@ import edu.gemini.spModel.guide.GuideProbe
 import edu.gemini.spModel.target.EmissionLine.{Continuum, Flux}
 import edu.gemini.spModel.target._
 import edu.gemini.spModel.telescope.IssPort
-import squants.space.LengthConversions._
+import edu.gemini.spModel.core.WavelengthConversions._
 
 /**
  * ITC requests define a generic mechanism to look up values by their parameter names.
@@ -65,12 +65,10 @@ sealed abstract class ITCRequest {
   }
 
   /** Gets the central wavelength in microns. */
-  def centralWavelengthInMicrons(): Wavelength =
-    Wavelength(doubleParameter("instrumentCentralWavelength").microns)
+  def centralWavelengthInMicrons():    Wavelength = doubleParameter("instrumentCentralWavelength").microns
 
   /** Gets the central wavelength in nanometers. */
-  def centralWavelengthInNanometers(): Wavelength =
-    Wavelength(doubleParameter("instrumentCentralWavelength").nanometers)
+  def centralWavelengthInNanometers(): Wavelength = doubleParameter("instrumentCentralWavelength").nanometers
 
   /** Gets the user SED text file from the request.
     * Only multipart HTTP requests will support this. */
@@ -310,7 +308,7 @@ object ITCRequest {
         val flux = r.doubleParameter("lineFlux")
         val cont = r.doubleParameter("lineContinuum")
         EmissionLine(
-          Wavelength(r.doubleParameter("lineWavelength").microns),
+          r.doubleParameter("lineWavelength").microns,
           r.doubleParameter("lineWidth"),
           if (r.parameter("lineFluxUnits") == "watts_flux") Flux.fromWatts(flux) else Flux.fromErgs(flux),
           if (r.parameter("lineContinuumUnits") == "watts_fd_wavelength") Continuum.fromWatts(cont) else Continuum.fromErgs(cont)
