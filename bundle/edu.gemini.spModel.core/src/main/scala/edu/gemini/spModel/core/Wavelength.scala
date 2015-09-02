@@ -1,89 +1,56 @@
 package edu.gemini.spModel.core
 
-import scalaz.{Order, Monoid}
+import squants.Length
+import squants.space.Nanometers
+
+import scalaz.{Monoid, Order}
 
 /** Representation of wavelengths. */
-sealed trait Wavelength extends Serializable {
+final case class Wavelength(length: Length) extends AnyVal with Serializable {
 
   /** The wavelength as nanometers.
     * @group Conversions
     */
-  def toNanometers: Double
+  def toNanometers: Double = length.toNanometers
 
   /** The wavelength as microns or micrometers.
     * @group Conversions
     */
-  def toMicrons: Double = toNanometers / 1000
+  def toMicrons: Double = length.toMicrons
 
   /**
    * Addition.
    * @group Operations
    */
-  def +(a: Wavelength): Wavelength =
-    Wavelength.fromNanometers(toNanometers + a.toNanometers)
+  def +(a: Wavelength): Wavelength = Wavelength(length + a.length)
 
   /**
    * Subtraction.
    * @group Operations
    */
-  def -(a: Wavelength): Wavelength =
-    Wavelength.fromNanometers(toNanometers - a.toNanometers)
+  def -(a: Wavelength): Wavelength = Wavelength(length - a.length)
 
   /**
    * Scalar multiplication.
    * @group Operations
    */
-  def *(factor: Double): Wavelength =
-    Wavelength.fromNanometers(toNanometers * factor)
+  def *(factor: Double): Wavelength = Wavelength(length * factor)
 
   /**
    * Scalar division.
    * @group Operations
    */
-  def /(factor: Double): Wavelength =
-    Wavelength.fromNanometers(toNanometers / factor)
+  def /(factor: Double): Wavelength = Wavelength(length / factor)
 
-  /** @group Overrides */
-  final override def toString =
-    s"Wavelength(${toNanometers}nm)"
-
-  /** @group Overrides */
-  final override def equals(a: Any) =
-    a match {
-      case a: Wavelength => a.toNanometers == this.toNanometers
-      case _             => false
-    }
-
-  /** @group Overrides */
-  final override def hashCode =
-    toNanometers.hashCode
 }
 
 object Wavelength {
 
   /**
-   * Constructs a `Wavelength` from the given value in nanometers.
-   * @group Constructors
-   */
-  def fromNanometers(l: Double) = new Wavelength {
-    require(l >= 0)
-    override val toNanometers = l
-  }
-
-  /**
-   * Constructs a `Wavelength` from the given value in microns (aka. micrometers).
-   * @group Constructors
-   */
-  def fromMicrons(l: Double) = new Wavelength {
-    require(l >= 0)
-    override val toNanometers = l * 1000
-  }
-
-  /**
    * The zero `Wavelength`.
    * @group Constructors
    */
-  lazy val zero = fromNanometers(0.0)
+  lazy val zero = Wavelength(Nanometers(0))
 
   /**
    * Additive monoid for `Wavelength`.
@@ -103,6 +70,10 @@ object Wavelength {
   implicit val WavelengthOrdering: scala.Ordering[Wavelength] =
     scala.Ordering.by(_.toNanometers)
 
-
+  /** @group Implicit Conversions */
+  implicit def fromLength(l: Length): Wavelength = {
+    require(l.value >= 0, "wavelength must be >= 0")
+    Wavelength(l)
+  }
 }
 

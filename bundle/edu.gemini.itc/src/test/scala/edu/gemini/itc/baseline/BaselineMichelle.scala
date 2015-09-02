@@ -2,11 +2,9 @@ package edu.gemini.itc.baseline
 
 import edu.gemini.itc.baseline.util._
 import edu.gemini.itc.shared.MichelleParameters
-import edu.gemini.spModel.core.Wavelength
 import edu.gemini.spModel.data.YesNoType
-import edu.gemini.spModel.gemini.michelle.MichelleParams.Mask
-import edu.gemini.spModel.gemini.michelle.MichelleParams.Filter
-import edu.gemini.spModel.gemini.michelle.MichelleParams.Disperser
+import edu.gemini.spModel.gemini.michelle.MichelleParams.{Disperser, Filter, Mask}
+import squants.space.LengthConversions._
 
 /**
  * Michelle baseline test fixtures.
@@ -20,7 +18,7 @@ object BaselineMichelle {
     new MichelleParameters(
       Filter.N_PRIME,               // Filter,
       Disperser.MIRROR,             // Grating,
-      Wavelength.fromMicrons(12),   // instrumentCentralWavelength,
+      12.microns,                   // central wavelength,
       Mask.MASK_IMAGING,            // FP_Mask,
       YesNoType.YES                 // polarimetry (enabled only allowed if imaging)
     )
@@ -30,7 +28,7 @@ object BaselineMichelle {
     new MichelleParameters(
       Filter.N_PRIME,               // Filter,
       Disperser.HIGH_RES,           // Grating,
-      Wavelength.fromMicrons(11),   // instrumentCentralWavelength,
+      11.microns,                   // central wavelength,
       Mask.MASK_2,                  // FP_Mask,
       YesNoType.NO                  // polarimetry (enabled only allowed if imaging)
     )
@@ -40,7 +38,7 @@ object BaselineMichelle {
     new MichelleParameters(
       Filter.QA,                    // Filter,
       Disperser.LOW_RES_20,         // Grating,
-      Wavelength.fromMicrons(18.2), // instrumentCentralWavelength,
+      18.2.microns,                 // central wavelength,
       Mask.MASK_4,                  // FP_Mask,
       YesNoType.NO                  // polarimetry (enabled only allowed if imaging)
     )

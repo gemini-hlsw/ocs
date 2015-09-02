@@ -2,8 +2,8 @@ package edu.gemini.itc.baseline
 
 import edu.gemini.itc.baseline.util._
 import edu.gemini.itc.shared.GnirsParameters
-import edu.gemini.spModel.core.Wavelength
 import edu.gemini.spModel.gemini.gnirs.GNIRSParams._
+import squants.space.LengthConversions._
 
 /**
  * GNIRS baseline test fixtures.
@@ -18,7 +18,7 @@ object BaselineGnirs {
       Disperser.D_10,
       ReadMode.FAINT,
       CrossDispersed.LXD,
-      Wavelength.fromMicrons(2.4),
+      2.4.microns,
       SlitWidth.SW_1),
 
     new GnirsParameters(
@@ -26,7 +26,7 @@ object BaselineGnirs {
       Disperser.D_111,
       ReadMode.VERY_BRIGHT,
       CrossDispersed.NO,
-      Wavelength.fromMicrons(2.4),
+      2.4.microns,
       SlitWidth.SW_3),
 
     new GnirsParameters(
@@ -34,7 +34,7 @@ object BaselineGnirs {
       Disperser.D_32,
       ReadMode.FAINT,
       CrossDispersed.LXD,
-      Wavelength.fromMicrons(2.6),
+      2.6.microns,
       SlitWidth.SW_6),
 
     new GnirsParameters(
@@ -42,7 +42,7 @@ object BaselineGnirs {
       Disperser.D_32,
       ReadMode.VERY_BRIGHT,
       CrossDispersed.NO,
-      Wavelength.fromMicrons(2.6),
+      2.6.microns,
       SlitWidth.SW_8)
 
   ))

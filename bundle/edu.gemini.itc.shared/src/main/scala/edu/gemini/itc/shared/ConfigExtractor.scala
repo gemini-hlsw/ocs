@@ -21,6 +21,7 @@ import edu.gemini.spModel.target.SPTarget
 import edu.gemini.spModel.target.env.{GuideProbeTargets, TargetEnvironment}
 import edu.gemini.spModel.target.system.ITarget
 import edu.gemini.spModel.telescope.IssPort
+import squants.space.LengthConversions._
 
 import scala.reflect.ClassTag
 import scalaz.Scalaz._
@@ -271,7 +272,7 @@ object ConfigExtractor {
         if (c.containsItem(ObsWavelengthKey)) extractDoubleFromString(c, ObsWavelengthKey)
         else "Observing wavelength is not defined (missing filter?)".left
 
-    }).map(Wavelength.fromMicrons)
+    }).map(_.microns)
   }
 
   // Extract an optional integer, values in the configuration are Java objects
