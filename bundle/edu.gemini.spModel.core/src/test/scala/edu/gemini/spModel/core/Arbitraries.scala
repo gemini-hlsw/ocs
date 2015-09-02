@@ -1,5 +1,6 @@
 package edu.gemini.spModel.core
 
+import edu.gemini.spModel.core.WavelengthConversions._
 import org.scalacheck._
 import org.scalacheck.Gen._
 import org.scalacheck.Arbitrary._
@@ -122,8 +123,6 @@ trait Arbitraries {
       oneOf(Moon, Mercury, Venus, Mars, Jupiter, Saturn, Uranus, Neptune, Pluto)
     }
 
-  // TODO: conic targets
-
   implicit val arbTarget: Arbitrary[Target] =
     Arbitrary(oneOf(
       arbitrary[Target.TooTarget],
@@ -132,7 +131,7 @@ trait Arbitraries {
       arbitrary[Target.NamedTarget]))
 
   implicit val arbWavelength: Arbitrary[Wavelength] =
-    Arbitrary(arbitrary[Short].map(n => Math.abs(n) / 1000.0).map(Wavelength.fromMicrons))
+    Arbitrary(arbitrary[Short].map(n => Math.abs(n).nm))
 
 }
 
