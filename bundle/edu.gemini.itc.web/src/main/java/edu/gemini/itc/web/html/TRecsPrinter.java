@@ -147,7 +147,7 @@ public final class TRecsPrinter extends PrinterBase {
             s += "<LI> Focal Plane Mask: " + instrument.getFocalPlaneMask().displayValue() + "\n";
         s += "\n";
         if (p.observation().getMethod().isSpectroscopy())
-            s += "<L1> Central Wavelength: " + instrument.getCentralWavelength() + " nm" + "\n";
+            s += String.format("<L1> Central Wavelength: %.1f nm\n", instrument.getCentralWavelength());
         s += "Spatial Binning: 1\n";
         if (p.observation().getMethod().isSpectroscopy())
             s += "Spectral Binning: 1\n";

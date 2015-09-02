@@ -88,7 +88,7 @@ public final class NifsPrinter extends PrinterBase {
         s += "<LI>Well Depth: 90000.0\n";
         s += "\n";
 
-        s += "<L1> Central Wavelength: " + instrument.getCentralWavelength() + " nm" + "\n";
+        s += String.format("<L1> Central Wavelength: %.1f nm\n", instrument.getCentralWavelength());
         s += "Pixel Size in Spatial Direction: " + instrument.getPixelSize() + " arcsec\n";
 
         s += String.format("Pixel Size in Spectral Direction: %.3f nm\n", instrument.getGratingDispersion_nmppix());
