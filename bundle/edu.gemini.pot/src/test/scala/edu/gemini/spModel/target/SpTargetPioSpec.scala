@@ -1,10 +1,12 @@
 package edu.gemini.spModel.target
 
-import edu.gemini.spModel.core.{Wavelength, Arbitraries}
+import edu.gemini.spModel.core.Arbitraries
 import edu.gemini.spModel.pio.ParamSet
 import edu.gemini.spModel.pio.xml.PioXmlFactory
 import edu.gemini.spModel.target.EmissionLine.{Continuum, Flux}
-import edu.gemini.spModel.target.system.{ConicTarget, HmsDegTarget, ITarget, CoordinateParam}
+import edu.gemini.spModel.target.system.{ConicTarget, HmsDegTarget, ITarget}
+import edu.gemini.spModel.core.WavelengthConversions._
+
 import org.scalacheck.{Arbitrary, Gen}
 import org.specs2.ScalaCheck
 import org.specs2.mutable.Specification
@@ -22,8 +24,8 @@ object SpTargetPioSpec extends Specification with ScalaCheck with Arbitraries {
         BlackBody(10000),
         PowerLaw(0),
         PowerLaw(1),
-        EmissionLine(Wavelength.fromNanometers(450), 150, Flux.fromWatts(13), Continuum.fromWatts(22)),
-        EmissionLine(Wavelength.fromNanometers(550), 400, Flux.fromWatts(23), Continuum.fromWatts(42)),
+        EmissionLine(450.nm, 150, Flux.fromWatts(13), Continuum.fromWatts(22)),
+        EmissionLine(550.nm, 400, Flux.fromWatts(23), Continuum.fromWatts(42)),
         LibraryStar.A0V,
         LibraryStar.A5III,
         LibraryNonStar.NGC2023,

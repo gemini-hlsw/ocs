@@ -118,7 +118,9 @@ public final class SourceDefinition implements Serializable {
     }
 
     public Wavelength getELineWavelength() {
-        return ((EmissionLine) distribution).wavelength();
+        // Wavelength is a value class, on the Java side wavelength() therefore returns just a Length
+        // and not a Wavelength object, so we need to repackage it to make it a wavelength. Blech.
+        return new Wavelength(((EmissionLine) distribution).wavelength());
     }
 
     public double getELineWidth() {

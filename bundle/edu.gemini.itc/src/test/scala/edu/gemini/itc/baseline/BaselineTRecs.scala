@@ -2,11 +2,8 @@ package edu.gemini.itc.baseline
 
 import edu.gemini.itc.baseline.util._
 import edu.gemini.itc.shared.TRecsParameters
-import edu.gemini.spModel.core.Wavelength
-import edu.gemini.spModel.gemini.trecs.TReCSParams.Disperser
-import edu.gemini.spModel.gemini.trecs.TReCSParams.Filter
-import edu.gemini.spModel.gemini.trecs.TReCSParams.Mask
-import edu.gemini.spModel.gemini.trecs.TReCSParams.WindowWheel
+import edu.gemini.spModel.gemini.trecs.TReCSParams.{Disperser, Filter, Mask, WindowWheel}
+import edu.gemini.spModel.core.WavelengthConversions._
 
 /**
  * TRecs baseline test fixtures.
@@ -24,7 +21,7 @@ object BaselineTRecs {
       Filter.N,                           // Filter,
       WindowWheel.KBR,                    // Cryostat window
       Disperser.HIGH_RES,                 // Grating
-      Wavelength.fromMicrons(12),         // instrumentCentralWavelength
+      12.microns,                         // central wavelength
       Mask.MASK_1                         // FPU,
     )
   ), TRecsObservingConditions)
