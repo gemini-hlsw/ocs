@@ -7,7 +7,7 @@ import scalaz.{Monoid, Order}
 
 /** Representation of wavelengths.
   * Wavelength is internally represented by `squants` values of type `Length`. */
-final case class Wavelength(length: Length) extends AnyVal with Serializable {
+final case class Wavelength private(length: Length) extends AnyVal with Serializable {
 
   /** The wavelength as nanometers.
     * @group Conversions
