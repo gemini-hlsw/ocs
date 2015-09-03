@@ -1,6 +1,7 @@
 package edu.gemini.itc.baseline.util
 
 import edu.gemini.itc.shared._
+import edu.gemini.spModel.target._
 
 // TEMPORARY helper
 // All input objects will become immutable data only objects (probably Scala case classes).
@@ -27,7 +28,7 @@ object Hash {
       p.fpMask.name,
       p.grating.name,
       p.ifuMethod.toString,
-      p.centralWavelength,
+      s"${p.centralWavelength.toNanometers}.0f",
       p.site.name,
       p.spatialBinning,
       p.spectralBinning
@@ -39,7 +40,7 @@ object Hash {
       p.pixelScale.name,
       p.crossDispersed.name,
       p.readMode.name,
-      p.centralWavelength,
+      s"${p.centralWavelength.toNanometers}.0f",
       p.slitWidth.name
     )
 
@@ -55,7 +56,7 @@ object Hash {
       p.filter.name,
       p.mask.name,
       p.grating.name,
-      p.centralWavelength,
+      s"${p.centralWavelength.toNanometers}.0f",
       p.polarimetry.name
     )
 
@@ -64,7 +65,7 @@ object Hash {
       p.filter.name,
       p.grating.name,
       p.readMode.name,
-      p.centralWavelength,
+      s"${p.centralWavelength.toNanometers}.0f",
       p.ifuMethod,
       calc(p.altair)
     )
@@ -85,7 +86,7 @@ object Hash {
       p.filter.name,
       p.mask.name,
       p.grating.name,
-      p.centralWavelength,
+      s"${p.centralWavelength.toNanometers}.0f",
       p.instrumentWindow.name
     )
 
@@ -108,12 +109,12 @@ object Hash {
       odp.isAutoAperture,
       odp.getMethod.isS2N,
       odp.getMethod.isImaging,
-      odp.getExposureTime,
+      s"${odp.getExposureTime}.2f",
       odp.getNumExposures,
-      odp.getApertureDiameter,
-      odp.getSkyApertureDiameter,
-      odp.getSNRatio,
-      odp.getSourceFraction
+      s"${odp.getApertureDiameter}.2f",
+      s"${odp.getSkyApertureDiameter}.2f",
+      s"${odp.getSNRatio}.2f",
+      s"${odp.getSourceFraction}.2f"
     )
 
   def calc(src: SourceDefinition): Int =
@@ -121,7 +122,13 @@ object Hash {
       src.getProfileType.name,
       src.getDistributionType.name,
       src.profile,
-      src.distribution,
+      src.distribution match {
+        case BlackBody(t)             => s"$t%.2f"
+        case PowerLaw(i)              => s"$i%.2f"
+        case EmissionLine(w, s, f, c) => s"${w.toNanometers}%.0f $s%.2f ${f.toWatts}%.4e ${c.toWatts}%.4e"
+        case UserDefined(s)           => s
+        case l: Library               => l.sedSpectrum
+      },
       src.norm,               // this is the magnitude value
       src.normBand.name,      // this is the magnitude band name
       src.redshift
@@ -150,20 +157,23 @@ object Hash {
 
   def calc(alt: AltairParameters): Int =
     hash (
-      alt.guideStarMagnitude,
-      alt.guideStarSeparation,
+      s"${alt.guideStarMagnitude}.2f",
+      s"${alt.guideStarSeparation}.2f",
       alt.fieldLens.name,
       alt.wfsMode.name
     )
 
   def calc(alt: GemsParameters): Int =
     hash(
-      alt.avgStrehl,
+      s"${alt.avgStrehl}.2f",
       alt.strehlBand
     )
 
   def calc(pdp: PlottingDetails): Int =
-    hash(pdp.getPlotWaveL, pdp.getPlotWaveU)
+    hash(
+      s"${pdp.getPlotWaveL}.2f",
+      s"${pdp.getPlotWaveU}.2f"
+    )
 
   private def hash(values: Any*) =
     values.
