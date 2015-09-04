@@ -143,10 +143,6 @@ public final class Michelle extends Instrument {
             return (int) _gratingOptics.getEffectiveWavelength();
     }
 
-    public double getGratingResolution() {
-        return _gratingOptics.getGratingResolution();
-    }
-
     public double getGratingDispersion_nm() {
         return _gratingOptics.getGratingDispersion_nm();
     }

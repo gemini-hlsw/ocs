@@ -159,10 +159,6 @@ public final class Nifs extends Instrument {
         return INSTR_PREFIX;
     }
 
-    public double getGratingResolution() {
-        return _gratingOptics.getGratingResolution();
-    }
-
     public double getGratingDispersion_nm() {
         return _gratingOptics.getGratingDispersion_nm();
     }

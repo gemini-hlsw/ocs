@@ -188,20 +188,8 @@ public final class Gnirs extends Instrument {
         return INSTR_PREFIX;
     }
 
-    public double getGratingResolution() {
-        if (isLongCamera()) {
-            return _gratingOptics.getGratingResolution() * LONG_CAMERA_SCALE_FACTOR;
-        } else {
-            return _gratingOptics.getGratingResolution();
-        }
-    }
-
     public Disperser getGrating() {
         return _grating;
-    }
-
-    public double getGratingBlaze() {
-        return _gratingOptics.getGratingBlaze();
     }
 
     public double getGratingDispersion_nm() {

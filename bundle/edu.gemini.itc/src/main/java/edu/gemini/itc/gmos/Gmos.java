@@ -190,10 +190,6 @@ public abstract class Gmos extends Instrument implements BinningProvider {
 
     }
 
-    public double getGratingResolution() {
-        return _gratingOptics.getGratingResolution();
-    }
-
     public GmosCommonType.Disperser getGrating() {
         return gp.grating();
     }

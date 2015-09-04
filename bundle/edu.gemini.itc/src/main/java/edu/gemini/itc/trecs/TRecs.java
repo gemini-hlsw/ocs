@@ -144,11 +144,6 @@ public final class TRecs extends Instrument {
 
     }
 
-    public double getGratingResolution() {
-        return _gratingOptics.get().getGratingResolution();
-    }
-
-
     public Disperser getGrating() {
         return _grating;
     }
