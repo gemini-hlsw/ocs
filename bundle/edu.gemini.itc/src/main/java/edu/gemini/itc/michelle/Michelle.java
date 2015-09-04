@@ -1,7 +1,6 @@
 package edu.gemini.itc.michelle;
 
 import edu.gemini.itc.base.*;
-import edu.gemini.itc.operation.DetectorsTransmissionVisitor;
 import edu.gemini.itc.shared.CalculationMethod;
 import edu.gemini.itc.shared.MichelleParameters;
 import edu.gemini.itc.shared.ObservationDetails;
@@ -36,8 +35,6 @@ public final class Michelle extends Instrument {
     private static final double SPECTROSCOPY_PIXEL_SIZE = 0.2;
 
     private static final int DETECTOR_PIXELS = 320;
-
-    private DetectorsTransmissionVisitor _dtv;
 
     // Keep a reference to the color filter to ask for effective wavelength
     private Filter _Filter;
@@ -118,8 +115,6 @@ public final class Michelle extends Instrument {
 
         final Detector detector = new Detector(getDirectory() + "/", getPrefix(), "det", "320x240 pixel Si:As IBC array");
         detector.setDetectorPixels(DETECTOR_PIXELS);
-
-        _dtv = new DetectorsTransmissionVisitor(1, getDirectory() + "/" + getPrefix() + "ccdpix" + Instrument.getSuffix());
 
         if (!(params.grating().equals(MichelleParams.Disperser.MIRROR))) {
             _gratingOptics = new MichelleGratingOptics(getDirectory() + "/" + getPrefix(), params.grating(),
@@ -218,10 +213,6 @@ public final class Michelle extends Instrument {
      */
     public static String getPrefix() {
         return INSTR_PREFIX;
-    }
-
-    public DetectorsTransmissionVisitor getDetectorTransmision() {
-        return _dtv;
     }
 
     public MichelleParams.Mask getFocalPlaneMask() {

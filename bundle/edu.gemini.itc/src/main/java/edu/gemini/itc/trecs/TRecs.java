@@ -1,7 +1,6 @@
 package edu.gemini.itc.trecs;
 
 import edu.gemini.itc.base.*;
-import edu.gemini.itc.operation.DetectorsTransmissionVisitor;
 import edu.gemini.itc.shared.CalculationMethod;
 import edu.gemini.itc.shared.ObservationDetails;
 import edu.gemini.itc.shared.TRecsParameters;
@@ -44,7 +43,6 @@ public final class TRecs extends Instrument {
     private final Mask _focalPlaneMask;
     private final CalculationMethod _mode;
     private final double _centralWavelength;
-    private final DetectorsTransmissionVisitor _dtv;
 
     public TRecs(final TRecsParameters tp, final ObservationDetails odp) {
         super(INSTR_DIR, FILENAME);
@@ -107,8 +105,6 @@ public final class TRecs extends Instrument {
 
         final Detector detector = new Detector(getDirectory() + "/", getPrefix(), "det", "320x240 pixel Si:As IBC array");
         detector.setDetectorPixels(DETECTOR_PIXELS);
-
-        _dtv = new DetectorsTransmissionVisitor(1, getDirectory() + "/" + getPrefix() + "ccdpix" + Instrument.getSuffix());
 
         if (!(_grating.equals(Disperser.MIRROR))) {
 
@@ -234,10 +230,6 @@ public final class TRecs extends Instrument {
      */
     public static String getPrefix() {
         return INSTR_PREFIX;
-    }
-
-    public DetectorsTransmissionVisitor getDetectorTransmision() {
-        return _dtv;
     }
 
 }

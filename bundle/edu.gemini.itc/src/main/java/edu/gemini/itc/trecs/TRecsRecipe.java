@@ -176,13 +176,13 @@ public final class TRecsRecipe implements ImagingRecipe, SpectroscopyRecipe {
                 instrument.getObservingEnd(),
                 instrument.getGratingDispersion_nm(),
                 instrument.getGratingDispersion_nmppix(),
-                instrument.getGratingResolution(), spec_source_frac,
+                spec_source_frac,
                 im_qual, ap_diam, number_exposures, frac_with_source,
                 exp_time,
                 instrument.getDarkCurrent(),
                 instrument.getReadNoise(),
                 _obsDetailParameters.getSkyApertureDiameter());
-        specS2N.setDetectorTransmission(instrument.getDetectorTransmision());
+
         specS2N.setSourceSpectrum(sed);
         specS2N.setBackgroundSpectrum(sky);
         sed.accept(specS2N);

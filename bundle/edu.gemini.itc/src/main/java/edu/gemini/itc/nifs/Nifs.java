@@ -1,7 +1,6 @@
 package edu.gemini.itc.nifs;
 
 import edu.gemini.itc.base.*;
-import edu.gemini.itc.operation.DetectorsTransmissionVisitor;
 import edu.gemini.itc.shared.*;
 import edu.gemini.spModel.gemini.nifs.NIFSParams;
 
@@ -42,7 +41,6 @@ public final class Nifs extends Instrument {
     protected double _IFUCenterY;
     protected IFUComponent _IFU;
 
-    protected DetectorsTransmissionVisitor _dtv;
     protected double _readNoiseValue;
 
 
@@ -81,8 +79,6 @@ public final class Nifs extends Instrument {
 
         _detector = new Detector(getDirectory() + "/", getPrefix(), "hawaii2_HgCdTe", "2K x 2K HgCdTe HAWAII-2 CCD");
         _detector.setDetectorPixels(DETECTOR_PIXELS);
-
-        _dtv = new DetectorsTransmissionVisitor(1, getDirectory() + "/" + getPrefix() + "ccdpix" + Instrument.getSuffix());
 
         _IFUMethod = gp.ifuMethod();
         if (gp.ifuMethod() instanceof IfuSingle) {
@@ -173,10 +169,6 @@ public final class Nifs extends Instrument {
 
     public double getGratingDispersion_nmppix() {
         return _gratingOptics.getGratingDispersion_nmppix();
-    }
-
-    public DetectorsTransmissionVisitor getDetectorTransmision() {
-        return _dtv;
     }
 
     public double getObservingStart() {

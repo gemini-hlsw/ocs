@@ -167,7 +167,6 @@ public final class GnirsRecipe implements SpectroscopyRecipe {
                 instrument.getObservingEnd(),
                 instrument.getGratingDispersion_nm(),
                 instrument.getGratingDispersion_nmppix(),
-                instrument.getGratingResolution(),
                 spec_source_frac,
                 im_qual, ap_diam,
                 _obsDetailParameters.getNumExposures(),
@@ -176,8 +175,6 @@ public final class GnirsRecipe implements SpectroscopyRecipe {
                 instrument.getDarkCurrent(),
                 instrument.getReadNoise(),
                 _obsDetailParameters.getSkyApertureDiameter());
-
-        specS2N.setDetectorTransmission(instrument.getDetectorTransmision());
 
         if (instrument.XDisp_IsUsed()) {
             final VisitableSampledSpectrum[] sedOrder = new VisitableSampledSpectrum[6];

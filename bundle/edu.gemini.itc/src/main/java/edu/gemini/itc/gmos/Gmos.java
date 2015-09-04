@@ -107,7 +107,7 @@ public abstract class Gmos extends Instrument implements BinningProvider {
 
         if (detectorCcdIndex == 0) {
             _dtv = new DetectorsTransmissionVisitor(gp.spectralBinning(),
-                    getDirectory() + "/" + getPrefix() + "ccdpix_red" + Instrument.getSuffix());
+                    getDirectory() + "/" + getPrefix() + "ccdpix" + Instrument.getSuffix());
         }
 
         if (isIfuUsed()) {
