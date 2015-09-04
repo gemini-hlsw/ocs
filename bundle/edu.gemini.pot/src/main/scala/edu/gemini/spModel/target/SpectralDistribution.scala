@@ -1,7 +1,8 @@
 package edu.gemini.spModel.target
 
 import edu.gemini.spModel.core.Wavelength
-import edu.gemini.spModel.target.EmissionLine.{Continuum, Flux}
+import edu.gemini.spModel.target.EmissionLine.Continuum
+import squants.radio.Irradiance
 
 /** Definitions for the spectral distribution of a source.
   * A source can be anything from a star, galaxy, quasar or planet to a comet or asteroid. */
@@ -14,7 +15,7 @@ final case class BlackBody(temperature: Double) extends SpectralDistribution
 final case class PowerLaw(index: Double) extends SpectralDistribution
 
 /** A single emission line. */
-final case class EmissionLine(wavelength: Wavelength, width: Double, flux: Flux, continuum: Continuum) extends SpectralDistribution
+final case class EmissionLine(wavelength: Wavelength, width: Double, flux: Irradiance, continuum: Continuum) extends SpectralDistribution
 
 /** A user defined spectrum. */
 final case class UserDefined(spectrum: String) extends SpectralDistribution
@@ -143,31 +144,6 @@ object LibraryNonStar {
 /** Definition of flux and continuum units and their conversions for emission lines.
   * The units defined here are the ones supported in the ITC web application. */
 object EmissionLine {
-
-  /** Flux of an emission line. Units are per area. */
-  sealed trait Flux extends Serializable {
-    def toWatts: Double                   // units are W/m2
-    def toErgs: Double = toWatts * 1000   // units are ergs/s/cm2
-
-    /** @group Overrides */
-    final override def toString =
-      s"Flux(${toWatts}W/m2)"
-
-    /** @group Overrides */
-    final override def hashCode = toWatts.hashCode
-
-    /** @group Overrides */
-    final override def equals(a: Any) =
-      a match {
-        case a: Flux       => a.toWatts == this.toWatts
-        case _             => false
-      }
-
-  }
-  object Flux {
-    def fromWatts(value: Double) = new Flux { override val toWatts = value }
-    def fromErgs(value: Double)  = new Flux { override val toWatts = value / 1000 }
-  }
 
   /** Flux continuum of an emission line. Units are per length. */
   sealed trait Continuum extends Serializable {

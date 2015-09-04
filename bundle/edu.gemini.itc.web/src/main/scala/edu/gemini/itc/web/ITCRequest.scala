@@ -6,7 +6,8 @@ import edu.gemini.itc.base._
 import edu.gemini.itc.shared.SourceDefinition.{Distribution, Profile, Recession}
 import edu.gemini.itc.shared._
 import edu.gemini.pot.sp.SPComponentType
-import edu.gemini.spModel.core.{Wavelength, MagnitudeBand, Site}
+import edu.gemini.spModel.core.WavelengthConversions._
+import edu.gemini.spModel.core.{MagnitudeBand, Site, Wavelength}
 import edu.gemini.spModel.data.YesNoType
 import edu.gemini.spModel.gemini.acqcam.AcqCamParams
 import edu.gemini.spModel.gemini.altair.AltairParams
@@ -22,10 +23,10 @@ import edu.gemini.spModel.gemini.niri.Niri
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality
 import edu.gemini.spModel.gemini.trecs.TReCSParams
 import edu.gemini.spModel.guide.GuideProbe
-import edu.gemini.spModel.target.EmissionLine.{Continuum, Flux}
+import edu.gemini.spModel.target.EmissionLine.Continuum
 import edu.gemini.spModel.target._
 import edu.gemini.spModel.telescope.IssPort
-import edu.gemini.spModel.core.WavelengthConversions._
+import squants.radio.IrradianceConversions._
 
 /**
  * ITC requests define a generic mechanism to look up values by their parameter names.
@@ -310,7 +311,7 @@ object ITCRequest {
         EmissionLine(
           r.doubleParameter("lineWavelength").microns,
           r.doubleParameter("lineWidth"),
-          if (r.parameter("lineFluxUnits") == "watts_flux") Flux.fromWatts(flux) else Flux.fromErgs(flux),
+          if (r.parameter("lineFluxUnits") == "watts_flux") flux.wattsPerSquareMeter else (flux/1000.0).wattsPerSquareMeter,
           if (r.parameter("lineContinuumUnits") == "watts_fd_wavelength") Continuum.fromWatts(cont) else Continuum.fromErgs(cont)
         )
     }

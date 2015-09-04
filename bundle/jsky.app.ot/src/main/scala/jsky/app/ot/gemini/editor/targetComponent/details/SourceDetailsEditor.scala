@@ -6,11 +6,13 @@ import javax.swing.JPanel
 import edu.gemini.pot.sp.ISPNode
 import edu.gemini.shared.util.immutable.{Option => GOption}
 import edu.gemini.spModel.obs.context.ObsContext
-import edu.gemini.spModel.target.EmissionLine.{Continuum, Flux}
+import edu.gemini.spModel.target.EmissionLine.Continuum
 import edu.gemini.spModel.target._
 import jsky.app.ot.gemini.editor.targetComponent.TelescopePosEditor
 import jsky.app.ot.gemini.editor.targetComponent.details.NumericPropertySheet.Prop
+
 import edu.gemini.spModel.core.WavelengthConversions._
+import squants.radio.IrradianceConversions._
 
 import scala.swing.GridBagPanel.{Anchor, Fill}
 import scala.swing.ListView.Renderer
@@ -59,7 +61,7 @@ final class SourceDetailsEditor extends GridBagPanel with TelescopePosEditor {
   // === Spectral Distribution Details
 
   private val defaultBlackBody    = BlackBody(10000)
-  private val defaultEmissionLine = EmissionLine(2.2.microns, 500, Flux.fromWatts(5.0e-19), Continuum.fromWatts(1.0e-16))
+  private val defaultEmissionLine = EmissionLine(2.2.microns, 500, 5.0e-19.wattsPerSquareMeter, Continuum.fromWatts(1.0e-16))
   private val defaultPowerLaw     = PowerLaw(1)
 
   private def blackBodyOrDefault   (t: SPTarget): BlackBody     = t.getTarget.getSpectralDistribution.fold(defaultBlackBody)(_.asInstanceOf[BlackBody])
@@ -73,16 +75,16 @@ final class SourceDetailsEditor extends GridBagPanel with TelescopePosEditor {
     renderer = Renderer(_.label)
   }
   private val blackBodyDetails = NumericPropertySheet[BlackBody](None, blackBodyOrDefault,
-    Prop("Temperature", "Kelvin",   _.temperature,          (a, v) => setDistribution(BlackBody(v)))
+    Prop("Temperature", "Kelvin",   _.temperature,                (a, v) => setDistribution(BlackBody(v)))
   )
   private val emissionLineDetails = NumericPropertySheet[EmissionLine](None, emissionLineOrDefault,
-    Prop("Wavelength",  "µm",       _.wavelength.toMicrons, (a, v) => setDistribution(EmissionLine(v.microns,                  a.width,  a.flux,             a.continuum))),
-    Prop("Width",       "km/sec",   _.width,                (a, v) => setDistribution(EmissionLine(a.wavelength,               v,        a.flux,             a.continuum))),
-    Prop("Flux",        "W/m²",     _.flux.toWatts,         (a, v) => setDistribution(EmissionLine(a.wavelength,               a.width,  Flux.fromWatts(v),  a.continuum))),
-    Prop("Continuum",   "W/m²/µm",  _.continuum.toWatts,    (a, v) => setDistribution(EmissionLine(a.wavelength,               a.width,  a.flux,             Continuum.fromWatts(v))))
+    Prop("Wavelength",  "µm",       _.wavelength.toMicrons,       (a, v) => setDistribution(EmissionLine(v.microns,    a.width, a.flux,                a.continuum))),
+    Prop("Width",       "km/sec",   _.width,                      (a, v) => setDistribution(EmissionLine(a.wavelength, v,       a.flux,                a.continuum))),
+    Prop("Flux",        "W/m²",     _.flux.toWattsPerSquareMeter, (a, v) => setDistribution(EmissionLine(a.wavelength, a.width, v.wattsPerSquareMeter, a.continuum))),
+    Prop("Continuum",   "W/m²/µm",  _.continuum.toWatts,          (a, v) => setDistribution(EmissionLine(a.wavelength, a.width, a.flux,                Continuum.fromWatts(v))))
   )
   private val powerLawDetails = NumericPropertySheet[PowerLaw](None, powerLawOrDefault,
-    Prop("Index",       "",         _.index,                (a, v) => setDistribution(PowerLaw(v)))
+    Prop("Index",       "",         _.index,                      (a, v) => setDistribution(PowerLaw(v)))
   )
 
   private case class DistributionPanel(label: String, panel: Component, default: Option[SpectralDistribution])

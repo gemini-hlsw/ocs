@@ -125,7 +125,7 @@ object Hash {
       src.distribution match {
         case BlackBody(t)             => f"$t%.2f"
         case PowerLaw(i)              => f"$i%.2f"
-        case EmissionLine(w, s, f, c) => f"${w.toNanometers}%.0f $s%.2f ${f.toWatts}%.4e ${c.toWatts}%.4e"
+        case EmissionLine(w, s, f, c) => f"${w.toNanometers}%.0f $s%.2f ${f.toWattsPerSquareMeter}%.4e ${c.toWatts}%.4e"
         case UserDefined(s)           => s
         case l: Library               => l.sedSpectrum
       },

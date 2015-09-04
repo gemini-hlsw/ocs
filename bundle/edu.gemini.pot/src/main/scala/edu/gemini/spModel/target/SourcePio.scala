@@ -2,12 +2,12 @@ package edu.gemini.spModel.target
 
 import java.util.logging.{Level, Logger}
 
+import edu.gemini.spModel.core.Wavelength
 import edu.gemini.spModel.pio.{ParamSet, Pio, PioFactory}
-import edu.gemini.spModel.target.EmissionLine.{Continuum, Flux}
-import edu.gemini.spModel.core.WavelengthConversions._
+import edu.gemini.spModel.target.EmissionLine.Continuum
+import squants.radio.Irradiance
 
 import scalaz.Scalaz._
-import scalaz._
 
 object SourcePio {
   private val LOGGER: Logger = Logger.getLogger(SourcePio.getClass.getName)
@@ -53,9 +53,9 @@ object SourcePio {
 
       case sd: EmissionLine     =>
         factory.createParamSet(EmissionLineName)  <|
-          (Pio.addDoubleParam(factory, _, ElineWavelength, sd.wavelength.toNanometers))<|
-          (Pio.addDoubleParam(factory, _, ElineWidth,      sd.width))                  <|
-          (Pio.addDoubleParam(factory, _, ElineFlux,       sd.flux.toWatts))           <|
+          (Pio.addParam      (factory, _, ElineWavelength, sd.wavelength.toString()))<|
+          (Pio.addDoubleParam(factory, _, ElineWidth,      sd.width))                <|
+          (Pio.addParam      (factory, _, ElineFlux,       sd.flux.toString()))      <|
           (Pio.addDoubleParam(factory, _, ElineContinuum,  sd.continuum.toWatts))
 
       case sd: UserDefined      =>
@@ -84,14 +84,18 @@ object SourcePio {
       val plaw = Option(pset.getParamSet(PowerLawName)).map { p =>
         PowerLaw(Pio.getDoubleValue(p, PowerLawIndex, 0))
       }
-      val eline = Option(pset.getParamSet(EmissionLineName)).map { p =>
-        EmissionLine(
-          Pio.getDoubleValue(p, ElineWavelength, 0).nm,
-          Pio.getDoubleValue(p, ElineWidth, 0),
-          Flux.fromWatts(Pio.getDoubleValue(p, ElineFlux, 0)),
-          Continuum.fromWatts(Pio.getDoubleValue(p, ElineContinuum, 0))
-        )
-      }
+      val eline = Option(pset.getParamSet(EmissionLineName)).map { p => {
+        for {
+          wavelength  <- Wavelength(Pio.getValue(p, ElineWavelength))
+          flux        <- Irradiance(Pio.getValue(p, ElineFlux))
+        } yield
+          EmissionLine(
+            wavelength,
+            Pio.getDoubleValue(p, ElineWidth, 0),
+            flux,
+            Continuum.fromWatts(Pio.getDoubleValue(p, ElineContinuum, 0))
+          )
+      }.get}
       val star = Option(pset.getParamSet(LibraryStarName)).flatMap { p =>
         LibraryStar.findByName(Pio.getValue(p, LibrarySpectrum))
       }
