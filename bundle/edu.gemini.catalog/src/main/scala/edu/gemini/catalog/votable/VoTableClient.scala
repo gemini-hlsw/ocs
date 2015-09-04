@@ -4,7 +4,7 @@ import java.net.{URL, UnknownHostException}
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.logging.Logger
 
-import edu.gemini.catalog.api.{NameCatalogQuery, ConeSearchCatalogQuery, CatalogQuery}
+import edu.gemini.catalog.api.{RadiusConstraint, NameCatalogQuery, ConeSearchCatalogQuery, CatalogQuery}
 import edu.gemini.spModel.core.Angle
 import edu.gemini.spModel.core.SiderealTarget
 import org.apache.commons.httpclient.{NameValuePair, HttpClient}
@@ -14,6 +14,7 @@ import scala.annotation.tailrec
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{Promise, Future, future}
 import scala.util.{Failure, Success}
+import scala.math.min
 
 import scalaz._
 import Scalaz._
@@ -65,9 +66,10 @@ trait CachedBackend extends VoTableBackend {
           r.foreach {
             case (pos, x) =>
               // Remove it from its current position
+              val ce = m(pos)
               m = m.patch(pos, Nil, 1)
               // Move it to the front
-              m = CacheEntry(k, x) +: m
+              m = ce +: m
           }
           r.map(_._2)
         }
@@ -102,8 +104,9 @@ trait CachedBackend extends VoTableBackend {
       @tailrec
       def go(pos: Int):Option[(Int, QueryResult)] =
         a.lift(pos) match {
-          case None                                                            => None
-          case Some(CacheEntry(SearchKey(query:ConeSearchCatalogQuery, r), v)) => if (query.isSuperSetOf(k.query)) Some((pos, v)) else go(pos + 1)
+          case Some(CacheEntry(SearchKey(query:ConeSearchCatalogQuery, _), v)) =>
+            // Note we need to compare against the widened query
+            if (widen(query).isSuperSetOf(k.query)) Some((pos, v)) else go(pos + 1)
           case _                                                               => None // Not caching named queries so far
         }
       go(0)
@@ -112,17 +115,12 @@ trait CachedBackend extends VoTableBackend {
     QueryCache.buildCache(contains)
   }
 
-  // First success or last failure
-  protected def selectOne[A](fs: List[Future[A]]): Future[A] = {
-    val p = Promise[A]()
-    val n = new AtomicInteger(fs.length)
-    fs.foreach { f =>
-      f.onComplete {
-        case Success(a) => p.trySuccess(a)
-        case Failure(e) => if (n.decrementAndGet == 0) p.tryFailure(e)
-      }
-    }
-    p.future
+  // Make the query wider increasing cache efficiency
+  protected def widen(q: CatalogQuery): CatalogQuery = q match {
+    case c: ConeSearchCatalogQuery =>
+      val widerLimit = min(c.radiusConstraint.maxLimit.toArcmins + 10, c.radiusConstraint.maxLimit.toArcmins * 1.5)
+      c.copy(radiusConstraint = RadiusConstraint.between(c.radiusConstraint.minLimit, Angle.fromArcmin(widerLimit)))
+    case x => x
   }
 
   // Cache the query not the future so that failed queries are executed again
@@ -153,9 +151,11 @@ trait RemoteCallBackend {this: CachedBackend =>
   // Indicates if the backend should validate the queries
   protected def validate: Boolean
 
+
   override protected def query(e: SearchKey): QueryResult = {
     val method = new GetMethod(queryUrl(e))
-    val qs = queryParams(e.query)
+    val widerQuery = widen(e.query)
+    val qs = queryParams(widerQuery)
     method.setQueryString(qs)
     Log.info(s"Catalog query to ${method.getURI}")
 
@@ -165,8 +165,8 @@ trait RemoteCallBackend {this: CachedBackend =>
     try {
       client.executeMethod(method)
       VoTableParser.parse(e.query.catalog, method.getResponseBodyAsStream, validate) match {
-        case -\/(p) => QueryResult(e.query, CatalogQueryResult(TargetsTable.Zero, List(p)))
-        case \/-(y) => QueryResult(e.query, CatalogQueryResult(y))
+        case -\/(p) => QueryResult(widerQuery, CatalogQueryResult(TargetsTable.Zero, List(p)))
+        case \/-(y) => QueryResult(widerQuery, CatalogQueryResult(y))
       }
     } finally {
       method.releaseConnection()
