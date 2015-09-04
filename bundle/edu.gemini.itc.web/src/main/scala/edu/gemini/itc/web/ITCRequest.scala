@@ -6,7 +6,7 @@ import edu.gemini.itc.base._
 import edu.gemini.itc.shared.SourceDefinition.{Distribution, Profile, Recession}
 import edu.gemini.itc.shared._
 import edu.gemini.pot.sp.SPComponentType
-import edu.gemini.spModel.core.{MagnitudeBand, Site, Wavelength}
+import edu.gemini.spModel.core.{Wavelength, MagnitudeBand, Site}
 import edu.gemini.spModel.data.YesNoType
 import edu.gemini.spModel.gemini.acqcam.AcqCamParams
 import edu.gemini.spModel.gemini.altair.AltairParams
@@ -25,6 +25,7 @@ import edu.gemini.spModel.guide.GuideProbe
 import edu.gemini.spModel.target.EmissionLine.{Continuum, Flux}
 import edu.gemini.spModel.target._
 import edu.gemini.spModel.telescope.IssPort
+import edu.gemini.spModel.core.WavelengthConversions._
 
 /**
  * ITC requests define a generic mechanism to look up values by their parameter names.
@@ -62,6 +63,12 @@ sealed abstract class ITCRequest {
         case e: NumberFormatException => throw new IllegalArgumentException(s"$d is not a valid double number value for parameter $name")
       }
   }
+
+  /** Gets the central wavelength in microns. */
+  def centralWavelengthInMicrons():    Wavelength = doubleParameter("instrumentCentralWavelength").microns
+
+  /** Gets the central wavelength in nanometers. */
+  def centralWavelengthInNanometers(): Wavelength = doubleParameter("instrumentCentralWavelength").nanometers
 
   /** Gets the user SED text file from the request.
     * Only multipart HTTP requests will support this. */
@@ -139,7 +146,7 @@ object ITCRequest {
     val spatBinning = r.intParameter("spatBinning")
     val specBinning = r.intParameter("specBinning")
     val ccdType     = r.enumParameter(classOf[DetectorManufacturer])
-    val centralWl   = Wavelength.fromNanometers(r.doubleParameter("instrumentCentralWavelength"))
+    val centralWl   = r.centralWavelengthInNanometers()
     val fpMask      = if (site.equals(Site.GN)) r.enumParameter(classOf[FPUnitNorth],    "instrumentFPMask")   else r.enumParameter(classOf[FPUnitSouth],      "instrumentFPMask")
     val ifuMethod   = if (fpMask.isIFU) Some(ifuMethodParameters(r)) else None
     GmosParameters(filter, grating, centralWl, fpMask, None, spatBinning, specBinning, ifuMethod, ccdType, site)
@@ -150,7 +157,7 @@ object ITCRequest {
     val camera      = r.enumParameter(classOf[GNIRSParams.PixelScale])
     val xDisp       = r.enumParameter(classOf[GNIRSParams.CrossDispersed])
     val readMode    = r.enumParameter(classOf[GNIRSParams.ReadMode])
-    val centralWl   = Wavelength.fromMicrons(r.doubleParameter("instrumentCentralWavelength"))
+    val centralWl   = r.centralWavelengthInMicrons()
     val fpMask      = r.enumParameter(classOf[GNIRSParams.SlitWidth])
     GnirsParameters(camera, grating, readMode, xDisp, centralWl, fpMask)
   }
@@ -165,7 +172,7 @@ object ITCRequest {
   def michelleParameters(r: ITCRequest): MichelleParameters = {
     val filter      = r.enumParameter(classOf[MichelleParams.Filter])
     val grating     = r.enumParameter(classOf[MichelleParams.Disperser])
-    val centralWl   = Wavelength.fromMicrons(r.doubleParameter("instrumentCentralWavelength"))
+    val centralWl   = r.centralWavelengthInMicrons()
     val fpMask      = r.enumParameter(classOf[MichelleParams.Mask])
     val polarimetry = r.enumParameter(classOf[YesNoType], "polarimetry")
     MichelleParameters(filter, grating, centralWl, fpMask, polarimetry)
@@ -186,7 +193,7 @@ object ITCRequest {
     val filter      = r.enumParameter(classOf[NIFSParams.Filter])
     val grating     = r.enumParameter(classOf[NIFSParams.Disperser])
     val readNoise   = r.enumParameter(classOf[NIFSParams.ReadMode])
-    val centralWl   = Wavelength.fromMicrons(r.doubleParameter("instrumentCentralWavelength"))
+    val centralWl   = r.centralWavelengthInMicrons()
     val ifuMethod   = ifuMethodParameters(r)
     val altair = altairParameters(r)
     NifsParameters(filter, grating, readNoise, centralWl, ifuMethod, altair)
@@ -196,7 +203,7 @@ object ITCRequest {
     val filter      = r.enumParameter(classOf[TReCSParams.Filter])
     val window      = r.enumParameter(classOf[TReCSParams.WindowWheel])
     val grating     = r.enumParameter(classOf[TReCSParams.Disperser])
-    val centralWl   = Wavelength.fromMicrons(r.doubleParameter("instrumentCentralWavelength"))
+    val centralWl   = r.centralWavelengthInMicrons()
     val fpMask      = r.enumParameter(classOf[TReCSParams.Mask])
     TRecsParameters(filter, window, grating, centralWl, fpMask)
   }
@@ -301,7 +308,7 @@ object ITCRequest {
         val flux = r.doubleParameter("lineFlux")
         val cont = r.doubleParameter("lineContinuum")
         EmissionLine(
-          Wavelength.fromMicrons(r.doubleParameter("lineWavelength")),
+          r.doubleParameter("lineWavelength").microns,
           r.doubleParameter("lineWidth"),
           if (r.parameter("lineFluxUnits") == "watts_flux") Flux.fromWatts(flux) else Flux.fromErgs(flux),
           if (r.parameter("lineContinuumUnits") == "watts_fd_wavelength") Continuum.fromWatts(cont) else Continuum.fromErgs(cont)

@@ -1,89 +1,69 @@
 package edu.gemini.spModel.core
 
-import scalaz.{Order, Monoid}
+import squants.Length
+import squants.space.{Microns, Nanometers}
 
-/** Representation of wavelengths. */
-sealed trait Wavelength extends Serializable {
+import scalaz.{Monoid, Order}
+
+/** Representation of wavelengths.
+  * Wavelength is internally represented by `squants` values of type `Length`. */
+final case class Wavelength private(length: Length) extends AnyVal with Serializable {
 
   /** The wavelength as nanometers.
     * @group Conversions
     */
-  def toNanometers: Double
+  def toNanometers: Double = length.toNanometers
 
   /** The wavelength as microns or micrometers.
     * @group Conversions
     */
-  def toMicrons: Double = toNanometers / 1000
+  def toMicrons: Double = length.toMicrons
 
   /**
    * Addition.
    * @group Operations
    */
-  def +(a: Wavelength): Wavelength =
-    Wavelength.fromNanometers(toNanometers + a.toNanometers)
+  def +(a: Wavelength): Wavelength = Wavelength(length + a.length)
 
   /**
    * Subtraction.
    * @group Operations
    */
-  def -(a: Wavelength): Wavelength =
-    Wavelength.fromNanometers(toNanometers - a.toNanometers)
+  def -(a: Wavelength): Wavelength = Wavelength(length - a.length)
 
   /**
    * Scalar multiplication.
    * @group Operations
    */
-  def *(factor: Double): Wavelength =
-    Wavelength.fromNanometers(toNanometers * factor)
+  def *(factor: Double): Wavelength = Wavelength(length * factor)
 
   /**
    * Scalar division.
    * @group Operations
    */
-  def /(factor: Double): Wavelength =
-    Wavelength.fromNanometers(toNanometers / factor)
+  def /(factor: Double): Wavelength = Wavelength(length / factor)
 
-  /** @group Overrides */
-  final override def toString =
-    s"Wavelength(${toNanometers}nm)"
-
-  /** @group Overrides */
-  final override def equals(a: Any) =
-    a match {
-      case a: Wavelength => a.toNanometers == this.toNanometers
-      case _             => false
-    }
-
-  /** @group Overrides */
-  final override def hashCode =
-    toNanometers.hashCode
 }
 
 object Wavelength {
 
   /**
-   * Constructs a `Wavelength` from the given value in nanometers.
+   * Creates a `Wavelength` from numeric value representing nanometers.
    * @group Constructors
    */
-  def fromNanometers(l: Double) = new Wavelength {
-    require(l >= 0)
-    override val toNanometers = l
-  }
+  def fromNanometers[A](value: A)(implicit num : Numeric[A]) = Wavelength(Nanometers(value))
 
   /**
-   * Constructs a `Wavelength` from the given value in microns (aka. micrometers).
+   * Creates a `Wavelength` from numeric value representing microns.
    * @group Constructors
    */
-  def fromMicrons(l: Double) = new Wavelength {
-    require(l >= 0)
-    override val toNanometers = l * 1000
-  }
+  def fromMicrons[A](value: A)(implicit num : Numeric[A]) = Wavelength(Microns(value))
 
   /**
    * The zero `Wavelength`.
    * @group Constructors
    */
-  lazy val zero = fromNanometers(0.0)
+  lazy val zero = Wavelength(Nanometers(0))
 
   /**
    * Additive monoid for `Wavelength`.
@@ -103,6 +83,17 @@ object Wavelength {
   implicit val WavelengthOrdering: scala.Ordering[Wavelength] =
     scala.Ordering.by(_.toNanometers)
 
+}
+
+object WavelengthConversions {
+
+  // implicit conversion from numeric values to `Wavelength`
+  implicit class wavelengthFromDouble[A](value: A)(implicit num : Numeric[A]) {
+    def nm         = Wavelength.fromNanometers(value)
+    def nanometers = Wavelength.fromNanometers(value)
+    def microns    = Wavelength.fromMicrons(value)
+  }
 
 }
+
 

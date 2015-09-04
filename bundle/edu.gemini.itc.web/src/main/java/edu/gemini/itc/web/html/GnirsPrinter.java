@@ -121,7 +121,7 @@ public final class GnirsPrinter extends PrinterBase {
         s += "<LI>Well Depth: " + instrument.getWellDepth() + "\n";
         s += "\n";
 
-        s += "<L1> Central Wavelength: " + instrument.getCentralWavelength() + " nm" + " \n";
+        s += String.format("<L1> Central Wavelength: %.1f nm\n", instrument.getCentralWavelength());
         s += "Pixel Size in Spatial Direction: " + instrument.getPixelSize() + " arcsec\n";
         if (p.observation().getMethod().isSpectroscopy()) {
             if (instrument.XDisp_IsUsed()) {

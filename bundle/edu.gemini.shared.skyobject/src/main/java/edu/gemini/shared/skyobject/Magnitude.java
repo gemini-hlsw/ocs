@@ -4,7 +4,7 @@ import edu.gemini.shared.util.immutable.None;
 import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.shared.util.immutable.Some;
 import edu.gemini.spModel.core.Wavelength;
-import edu.gemini.spModel.core.Wavelength$;
+import squants.space.LengthConversions;
 
 import java.io.Serializable;
 import java.util.Comparator;
@@ -79,7 +79,7 @@ public final class Magnitude implements Comparable<Magnitude>, Serializable {
 
         Band(System sys, Option<Integer> mid, Option<String> desc) {
             this.defaultSystem      = sys;
-            this.wavelengthMidPoint = mid.map(Wavelength$.MODULE$::fromNanometers);
+            this.wavelengthMidPoint = mid.map(w -> new Wavelength(LengthConversions.nanometer().$times(w)));
             this.description        = desc;
         }
 
@@ -89,7 +89,7 @@ public final class Magnitude implements Comparable<Magnitude>, Serializable {
 
         Band(System sys, int mid, String desc) {
             this.defaultSystem      = sys;
-            this.wavelengthMidPoint = new Some<>(Wavelength$.MODULE$.fromNanometers(mid));
+            this.wavelengthMidPoint = new Some<>(new Wavelength(LengthConversions.nanometer().$times(mid)));
             this.description = (desc == null) ? None.STRING : new Some<>(desc);
         }
 
