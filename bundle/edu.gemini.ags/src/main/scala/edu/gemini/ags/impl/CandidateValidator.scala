@@ -10,6 +10,7 @@ import edu.gemini.ags.api.AgsMagnitude
 import edu.gemini.catalog.api.MagnitudeConstraints
 import edu.gemini.pot.ModelConverters._
 import edu.gemini.spModel.target.system.HmsDegTarget
+import edu.gemini.shared.util.immutable.ScalaConverters._
 
 import scalaz._
 import Scalaz._
@@ -22,9 +23,10 @@ import Scalaz._
 protected case class CandidateValidator(params: SingleProbeStrategyParams, mt: MagnitudeTable, candidates: List[SiderealTarget]) {
   /**
    * Produces a predicate for testing whether a candidate is valid in an
-   * established context.
+   * established context. Returns constant `false` if base coordinates are unknown.
    */
-  private def isValid(ctx: ObsContext): (SiderealTarget) => Boolean = {
+  private def isValid(ctx: ObsContext): (SiderealTarget) => Boolean =
+    ctx.getBaseCoordinatesOpt.asScalaOpt.fold((_: SiderealTarget) => false) { base =>
     val magLimits:Option[MagnitudeConstraints] = params.magnitudeCalc(ctx, mt).flatMap(AgsMagnitude.autoSearchConstraints(_, ctx.getConditions))
 
     (st: SiderealTarget) => {
@@ -33,7 +35,7 @@ protected case class CandidateValidator(params: SingleProbeStrategyParams, mt: M
       def farEnough =
         params.minDistance.forall { min =>
           val soCoords = st.coordinates
-          val diff = Coordinates.difference(ctx.getBaseCoordinates.toNewModel, soCoords)
+          val diff = Coordinates.difference(base.toNewModel, soCoords)
           diff.distance >= min
         }
 

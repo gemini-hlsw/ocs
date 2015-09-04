@@ -7,6 +7,9 @@ import edu.gemini.spModel.core.Coordinates
 import edu.gemini.spModel.core.Target.SiderealTarget
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.pot.ModelConverters._
+import edu.gemini.shared.util.immutable.ScalaConverters._
+
+import scalaz._, Scalaz._
 
 /**
  * Provides methods to find the best ODGW or CWFS guide stars using the Mascot Strehl algorithm
@@ -52,15 +55,16 @@ object MascotGuideStar {
                                     factor: Double = Mascot.defaultFactor,
                                     magLimits: MagLimits = defaultMagLimits,
                                     progress: ProgressFunction = Mascot.defaultProgress)
-  : List[(List[Strehl], Double, Double, Double)] = {
-    val center = ctx.getBaseCoordinates.toNewModel
+  : List[(List[Strehl], Double, Double, Double)] =
+    ctx.getBaseCoordinatesOpt.asScalaOpt.foldMap { base =>
+    val center = base.toNewModel
     val simple = posAngleTolerance == 0.0 && basePosTolerance == 0.0
     val guideStarFilter = guideStarType.filter(ctx, magLimits, _: Star)
     // If no tolerances were given, we can do more filtering up front
     val filter = if (simple) guideStarFilter else magLimits.filter _
     val (_, strehlList) = MascotCat.findBestAsterism(queryResult, center.ra.toAngle.toDegrees, center.dec.toAngle.toDegrees, factor, progress, filter)
     if (simple) {
-      val basePos = ctx.getBaseCoordinates
+      val basePos = base
       List((strehlList, ctx.getInstrument.getPosAngleDegrees, basePos.getRaDeg, basePos.getDecDeg))
     } else {
       asterismFilter(ctx.getInstrument.getPosAngleDegrees, center, guideStarFilter, posAngleTolerance, basePosTolerance, strehlList)

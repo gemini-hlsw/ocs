@@ -13,6 +13,7 @@ import edu.gemini.spModel.guide.{ValidatableGuideProbe, VignettingGuideProbe, Gu
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.target.system.HmsDegTarget
 import edu.gemini.spModel.telescope.PosAngleConstraint._
+import edu.gemini.shared.util.immutable.ScalaConverters._
 
 import scala.collection.JavaConverters._
 import scala.concurrent._
@@ -189,8 +190,9 @@ case class SingleProbeStrategy(key: AgsStrategyKey, params: SingleProbeStrategyP
 
   private def filterUnbounded(ctx: ObsContext, mt: MagnitudeTable, candidates: List[SiderealTarget]): List[(ObsContext, List[SiderealTarget])] = {
     for {
+      base <- ctx.getBaseCoordinatesOpt.asScalaOpt.toList
       so <- candidates
-      pa = SingleProbeStrategy.calculatePositionAngle(ctx.getBaseCoordinates.toNewModel, so)
+      pa = SingleProbeStrategy.calculatePositionAngle(base.toNewModel, so)
       ctxSo = ctx.withPositionAngle(pa.toOldModel)
       if CandidateValidator(params, mt, List(so)).exists(ctxSo)
     } yield (ctxSo, List(so))
@@ -205,10 +207,19 @@ case class SingleProbeStrategy(key: AgsStrategyKey, params: SingleProbeStrategyP
   }
 
   // List of candidates and their angles for the case where the pos angle constraint is unbounded.
-  private def selectUnbounded(ctx: ObsContext, mt: MagnitudeTable, candidates: List[SiderealTarget]): List[(Angle, SiderealTarget)] =
-    candidates.map(so => (SingleProbeStrategy.calculatePositionAngle(ctx.getBaseCoordinates.toNewModel, so), so)).filter {
+  private def selectUnbounded(ctx: ObsContext, mt: MagnitudeTable, candidates: List[SiderealTarget]): List[(Angle, SiderealTarget)] = {
+
+    val pairs: List[(Angle, SiderealTarget)] =
+      for {
+        base <- ctx.getBaseCoordinatesOpt.asScalaOpt.toList
+        so   <- candidates
+      } yield (SingleProbeStrategy.calculatePositionAngle(base.toNewModel, so), so)
+
+    pairs.filter {
       case (angle, st) => CandidateValidator(params, mt, List(st)).exists(ctx.withPositionAngle(angle.toOldModel))
     }
+
+  }
 
   private def ctx180(c: ObsContext): ObsContext =
     c.withPositionAngle(c.getPositionAngle.add(180.0, skycalc.Angle.Unit.DEGREES))
