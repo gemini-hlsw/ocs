@@ -134,7 +134,7 @@ public final class Flamingos2Recipe implements ImagingRecipe, SpectroscopyRecipe
                 instrument.getObservingEnd(),
                 gratDispersion_nm,
                 gratDispersion_nmppix,
-                instrument.getGrismResolution(), spec_source_frac, im_qual,
+                spec_source_frac, im_qual,
                 ap_diam,
                 _obsDetailParameters.getNumExposures(),
                 _obsDetailParameters.getSourceFraction(),
@@ -143,7 +143,6 @@ public final class Flamingos2Recipe implements ImagingRecipe, SpectroscopyRecipe
                 instrument.getReadNoise(),
                 _obsDetailParameters.getSkyApertureDiameter());
 
-        specS2N.setDetectorTransmission(instrument.getDetectorTransmision());
         specS2N.setSourceSpectrum(src.sed);
         specS2N.setBackgroundSpectrum(src.sky);
         specS2N.setSpecHaloSourceFraction(0.0);

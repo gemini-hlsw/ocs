@@ -1,7 +1,6 @@
 package edu.gemini.itc.gnirs;
 
 import edu.gemini.itc.base.*;
-import edu.gemini.itc.operation.DetectorsTransmissionVisitor;
 import edu.gemini.itc.shared.CalculationMethod;
 import edu.gemini.itc.shared.GnirsParameters;
 import edu.gemini.itc.shared.ObservationDetails;
@@ -32,10 +31,6 @@ public final class Gnirs extends Instrument {
     private static final double SHALLOW_WELL = 90000.0;
     private static final double DEEP_WELL = 180000.0;
 
-    private static final double AD_SATURATION = 56636;
-
-    private static final double HIGH_GAIN = 4.4;
-    private static final double LOW_GAIN = 2.18;
     public static final int DETECTOR_PIXELS = 1024;
 
     // Keep a reference to the color filter to ask for effective wavelength
@@ -49,7 +44,6 @@ public final class Gnirs extends Instrument {
     protected CalculationMethod _mode;
     protected double _centralWavelength;
 
-    protected final DetectorsTransmissionVisitor _dtv;
     protected final TransmissionElement _camera;
     protected final boolean _XDisp;
     protected final double _wellDepth;
@@ -119,8 +113,6 @@ public final class Gnirs extends Instrument {
         _detector = new Detector(getDirectory() + "/", getPrefix(), "aladdin", "1K x 1K ALADDIN III InSb CCD");
         _detector.setDetectorPixels(DETECTOR_PIXELS);
 
-        _dtv = new DetectorsTransmissionVisitor(1, getDirectory() + "/" + getPrefix() + "ccdpix" + Instrument.getSuffix());
-
         _gratingOptics = new GnirsGratingOptics(getDirectory() + "/" + getPrefix(), _grating,
                 _centralWavelength,
                 _detector.getDetectorPixels(),
@@ -189,18 +181,6 @@ public final class Gnirs extends Instrument {
         return _sampling;
     }
 
-    public double getADSaturation() {
-        return AD_SATURATION;
-    }
-
-    public double getHighGain() {
-        return HIGH_GAIN;
-    }
-
-    public double getLowGain() {
-        return LOW_GAIN;
-    }
-
     /**
      * The prefix on data file names for this instrument.
      */
@@ -208,20 +188,8 @@ public final class Gnirs extends Instrument {
         return INSTR_PREFIX;
     }
 
-    public double getGratingResolution() {
-        if (isLongCamera()) {
-            return _gratingOptics.getGratingResolution() * LONG_CAMERA_SCALE_FACTOR;
-        } else {
-            return _gratingOptics.getGratingResolution();
-        }
-    }
-
     public Disperser getGrating() {
         return _grating;
-    }
-
-    public double getGratingBlaze() {
-        return _gratingOptics.getGratingBlaze();
     }
 
     public double getGratingDispersion_nm() {
@@ -275,10 +243,6 @@ public final class Gnirs extends Instrument {
 
     public double getObservingEnd() {
         return _centralWavelength + (getGratingDispersion_nmppix() * _detector.getDetectorPixels() / 2);
-    }
-
-    public DetectorsTransmissionVisitor getDetectorTransmision() {
-        return _dtv;
     }
 
     public boolean XDisp_IsUsed() {

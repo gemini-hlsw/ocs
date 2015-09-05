@@ -1,7 +1,6 @@
 package edu.gemini.itc.flamingos2;
 
 import edu.gemini.itc.base.*;
-import edu.gemini.itc.operation.DetectorsTransmissionVisitor;
 import edu.gemini.itc.shared.Flamingos2Parameters;
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2.FPUnit;
 import scala.Option;
@@ -16,17 +15,11 @@ public final class Flamingos2 extends Instrument {
     private static final String FILENAME = "flamingos2" + getSuffix();
     public static final String INSTR_DIR = "flamingos2";
     public static final String INSTR_PREFIX = "";
-    public static final String INSTR_PREFIX_2 = "flamingos2_";
     private static final double WELL_DEPTH = 155400;
     public static String getPrefix() {
         return INSTR_PREFIX;
     }
-    public static String getPrefix2() {
-        return INSTR_PREFIX_2;
-    }
 
-
-    private final DetectorsTransmissionVisitor _dtv;
     private final Option<Filter> _colorFilter;
     private final Option<GrismOptics> _grismOptics;
     private final Flamingos2Parameters params;
@@ -41,7 +34,6 @@ public final class Flamingos2 extends Instrument {
         params = fp;
         _slitSize = getSlitSize() * getPixelSize();
         _colorFilter = addColorFilter(fp);
-        _dtv = new DetectorsTransmissionVisitor(1, getDirectory() + "/" + getPrefix2() + "ccdpix" + Instrument.getSuffix());
 
         addComponent(new FixedOptics(getDirectory() + File.separator, getPrefix()));
         addComponent(new Detector(getDirectory() + File.separator, getPrefix(), "detector", "2048x2048 Hawaii-II (HgCdTe)"));
@@ -127,10 +119,6 @@ public final class Flamingos2 extends Instrument {
         } else {
             return getStart();
         }
-    }
-
-    public DetectorsTransmissionVisitor getDetectorTransmision() {
-        return _dtv;
     }
 
     @Override

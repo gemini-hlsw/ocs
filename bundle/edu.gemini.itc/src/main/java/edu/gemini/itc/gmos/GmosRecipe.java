@@ -244,7 +244,6 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
                         instrument.getObservingEnd(),
                         instrument.getGratingDispersion_nm(),
                         instrument.getGratingDispersion_nmppix(),
-                        instrument.getGratingResolution(),
                         spsf,
                         im_qual,
                         ap_diam,
@@ -255,11 +254,16 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
                         read_noise,
                         _obsDetailParameters.getSkyApertureDiameter());
 
-                specS2N[i].setDetectorTransmission(mainInstrument.getDetectorTransmision());
                 specS2N[i].setCcdPixelRange(firstCcdIndex, lastCcdIndex);
                 specS2N[i].setSourceSpectrum(src.sed);
                 specS2N[i].setBackgroundSpectrum(src.sky);
+
                 src.sed.accept(specS2N[i]);
+
+                specS2N[i].getSignalSpectrum().accept(mainInstrument.getDetectorTransmision());
+                specS2N[i].getBackgroundSpectrum().accept(mainInstrument.getDetectorTransmision());
+                specS2N[i].getExpS2NSpectrum().accept(mainInstrument.getDetectorTransmision());
+                specS2N[i].getFinalS2NSpectrum().accept(mainInstrument.getDetectorTransmision());
 
             }
         } else {
@@ -272,7 +276,6 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
                     instrument.getObservingEnd(),
                     instrument.getGratingDispersion_nm(),
                     instrument.getGratingDispersion_nmppix(),
-                    instrument.getGratingResolution(),
                     spec_source_frac,
                     im_qual,
                     ap_diam,
@@ -283,11 +286,17 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
                     read_noise,
                     _obsDetailParameters.getSkyApertureDiameter());
 
-            specS2N[0].setDetectorTransmission(mainInstrument.getDetectorTransmision());
+
             specS2N[0].setCcdPixelRange(firstCcdIndex, lastCcdIndex);
             specS2N[0].setSourceSpectrum(src.sed);
             specS2N[0].setBackgroundSpectrum(src.sky);
+
             src.sed.accept(specS2N[0]);
+
+            specS2N[0].getSignalSpectrum().accept(mainInstrument.getDetectorTransmision());
+            specS2N[0].getBackgroundSpectrum().accept(mainInstrument.getDetectorTransmision());
+            specS2N[0].getExpS2NSpectrum().accept(mainInstrument.getDetectorTransmision());
+            specS2N[0].getFinalS2NSpectrum().accept(mainInstrument.getDetectorTransmision());
 
         }
 

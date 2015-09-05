@@ -107,7 +107,7 @@ public abstract class Gmos extends Instrument implements BinningProvider {
 
         if (detectorCcdIndex == 0) {
             _dtv = new DetectorsTransmissionVisitor(gp.spectralBinning(),
-                    getDirectory() + "/" + getPrefix() + "ccdpix_red" + Instrument.getSuffix());
+                    getDirectory() + "/" + getPrefix() + "ccdpix" + Instrument.getSuffix());
         }
 
         if (isIfuUsed()) {
@@ -188,10 +188,6 @@ public abstract class Gmos extends Instrument implements BinningProvider {
         if (grating.isEmpty()) return (int) _Filter.getEffectiveWavelength();
         else return (int) _gratingOptics.getEffectiveWavelength();
 
-    }
-
-    public double getGratingResolution() {
-        return _gratingOptics.getGratingResolution();
     }
 
     public GmosCommonType.Disperser getGrating() {

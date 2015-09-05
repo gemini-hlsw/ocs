@@ -182,7 +182,6 @@ public final class NifsRecipe implements SpectroscopyRecipe {
                     instrument.getObservingEnd(),
                     instrument.getGratingDispersion_nm(),
                     instrument.getGratingDispersion_nmppix(),
-                    instrument.getGratingResolution(),
                     spec_source_frac, im_qual,
                     ap_diam, number_exposures,
                     frac_with_source, exposure_time,
@@ -190,7 +189,6 @@ public final class NifsRecipe implements SpectroscopyRecipe {
                     instrument.getReadNoise(),
                     _obsDetailParameters.getSkyApertureDiameter());
 
-            specS2N.setDetectorTransmission(instrument.getDetectorTransmision());
             specS2N.setSourceSpectrum(calcSource.sed);
             specS2N.setBackgroundSpectrum(calcSource.sky);
             specS2N.setHaloSpectrum(altair.isDefined() ? calcSource.halo.get() : (VisitableSampledSpectrum) calcSource.sed.clone());

@@ -4,41 +4,68 @@ import edu.gemini.itc.base.SampledSpectrum;
 import edu.gemini.itc.base.SampledSpectrumVisitor;
 import edu.gemini.itc.base.VisitableSampledSpectrum;
 
+import java.util.Optional;
+
 /**
  * The SpecS2NLargeSlitVisitor is used to calculate the s2n of an observation using
  * a larger slit set.
  */
 public class SpecS2NLargeSlitVisitor implements SampledSpectrumVisitor, SpecS2N {
 
-    final private double spec_Npix;
-    final private double spec_frac_with_source;
+    private VisitableSampledSpectrum source_flux;
+    private VisitableSampledSpectrum halo_flux;
+    private VisitableSampledSpectrum background_flux;
+    private VisitableSampledSpectrum spec_signal;
+    private VisitableSampledSpectrum sqrt_spec_var_background;
+    private VisitableSampledSpectrum spec_exp_s2n;
+    private VisitableSampledSpectrum spec_final_s2n;
 
-    private VisitableSampledSpectrum source_flux, halo_flux, background_flux, spec_noise,
-            spec_sourceless_noise, spec_signal, spec_var_source, spec_var_background,
-            sqrt_spec_var_background, spec_exp_s2n, spec_final_s2n;
-    private double slit_width, pixel_size, spec_source_fraction, spec_halo_source_fraction, pix_width, spec_exp_time, im_qual, uncorrected_im_qual, dark_current, read_noise, obs_wave_low, obs_wave_high,
-            gratingDispersion_nm, gratingDispersion_nmppix, skyAper;
-    private int spec_number_exposures;
+    private final double spec_Npix;
+    private final double spec_frac_with_source;
+    private final double slit_width;
+    private final double pixel_size;
+    private final double spec_source_fraction;
+    private final double spec_exp_time;
+    private final double im_qual;
+    private final double dark_current;
+    private final double read_noise;
+    private final double skyAper;
+    private final int spec_number_exposures;
+
+    private double pix_width;
+    private double obs_wave_low;
+    private double obs_wave_high;
+    private double gratingDispersion_nm;
+    private double gratingDispersion_nmppix;
+    private double spec_halo_source_fraction;
+    private double uncorrected_im_qual;
+
+    private int _firstCcdPixel = 0;
+    private int _lastCcdPixel = -1;
     private boolean haloIsUsed = false;
 
-    private edu.gemini.itc.operation.DetectorsTransmissionVisitor _dtv;
-
-    private int _firstCcdPixel = 0, _lastCcdPixel = -1;
 
     /**
      * Constructs SpecS2NVisitor with specified slit_width,
      * pixel_size, Smoothing Element, SlitThroughput, spec_Npix(sw aperture
      * size), ExpNum, frac_with_source, ExpTime .
      */
-    public SpecS2NLargeSlitVisitor(double slit_width, double pixel_size,
-                                   double pix_width, double obs_wave_low,
-                                   double obs_wave_high, double gratingDispersion_nm,
-                                   double gratingDispersion_nmppix, double grating_res,
-                                   double spec_source_fraction, double im_qual,
-                                   double spec_Npix, int spec_number_exposures,
-                                   double spec_frac_with_source, double spec_exp_time,
-                                   double dark_current, double read_noise,
-                                   double skyAper) {
+    public SpecS2NLargeSlitVisitor(final double slit_width,
+                                   final double pixel_size,
+                                   final double pix_width,
+                                   final double obs_wave_low,
+                                   final double obs_wave_high,
+                                   final double gratingDispersion_nm,
+                                   final double gratingDispersion_nmppix,
+                                   final double spec_source_fraction,
+                                   final double im_qual,
+                                   final double spec_Npix,
+                                   final int spec_number_exposures,
+                                   final double spec_frac_with_source,
+                                   final double spec_exp_time,
+                                   final double dark_current,
+                                   final double read_noise,
+                                   final double skyAper) {
         this.slit_width = slit_width;
         this.pixel_size = pixel_size;
         this.pix_width = pix_width;
@@ -59,7 +86,7 @@ public class SpecS2NLargeSlitVisitor implements SampledSpectrumVisitor, SpecS2N 
     }
 
     // Return index of last CCD pixel, if defined and in range
-    private int lastCcdPixel(int n) {
+    private int lastCcdPixel(final int n) {
         if (_lastCcdPixel == -1 || _lastCcdPixel >= n) return n - 1;
         return _lastCcdPixel;
     }
@@ -79,7 +106,7 @@ public class SpecS2NLargeSlitVisitor implements SampledSpectrumVisitor, SpecS2N 
     /**
      * Implements the SampledSpectrumVisitor interface
      */
-    public void visit(SampledSpectrum sed) {
+    public void visit(final SampledSpectrum sed) {
         //this.obs_wave = (obs_wave_low+obs_wave_high)/2;
 
 
@@ -146,7 +173,6 @@ public class SpecS2NLargeSlitVisitor implements SampledSpectrumVisitor, SpecS2N 
                     //source_flux.getStart(), source_flux.getEnd(),
                     pix_width, 0);
             halo_flux.accept(halo_resample);
-            halo_flux.accept(_dtv);
         }
 
 
@@ -164,14 +190,11 @@ public class SpecS2NLargeSlitVisitor implements SampledSpectrumVisitor, SpecS2N 
         source_flux.accept(source_resample);
         background_flux.accept(background_resample);
 
-        source_flux.accept(_dtv);
-        background_flux.accept(_dtv);
-
         // the number of exposures measuring the source flux is
         double spec_number_source_exposures = spec_number_exposures * spec_frac_with_source;
 
-        spec_var_source = (VisitableSampledSpectrum) source_flux.clone();
-        spec_var_background = (VisitableSampledSpectrum) background_flux.clone();
+        final VisitableSampledSpectrum spec_var_source = (VisitableSampledSpectrum) source_flux.clone();
+        final VisitableSampledSpectrum spec_var_background = (VisitableSampledSpectrum) background_flux.clone();
 
         //Shot noise on the source flux in aperture
         int source_flux_last = lastCcdPixel(source_flux.getLength());
@@ -196,10 +219,10 @@ public class SpecS2NLargeSlitVisitor implements SampledSpectrumVisitor, SpecS2N 
 
         //Readout noise in aperture
         double spec_var_readout = read_noise * read_noise * spec_Npix;
-        //Create a container for the total and sourceless noise in the
-        //aperture
-        spec_noise = (VisitableSampledSpectrum) source_flux.clone();
-        spec_sourceless_noise = (VisitableSampledSpectrum) source_flux.clone();
+
+        //Create a container for the total and sourceless noise in the aperture
+        final VisitableSampledSpectrum spec_noise = (VisitableSampledSpectrum) source_flux.clone();
+        final VisitableSampledSpectrum spec_sourceless_noise = (VisitableSampledSpectrum) source_flux.clone();
 
         spec_signal = (VisitableSampledSpectrum) source_flux.clone();
         spec_exp_s2n = (VisitableSampledSpectrum) source_flux.clone();
@@ -249,53 +272,49 @@ public class SpecS2NLargeSlitVisitor implements SampledSpectrumVisitor, SpecS2N 
             sqrt_spec_var_background.setY(i, Math.sqrt(spec_var_background.getY(i)));
     }
 
-    public void setSourceSpectrum(VisitableSampledSpectrum sed) {
+    public void setSourceSpectrum(final VisitableSampledSpectrum sed) {
         source_flux = sed;
     }
 
-    public void setHaloSpectrum(VisitableSampledSpectrum sed) {
+    public void setHaloSpectrum(final VisitableSampledSpectrum sed) {
         halo_flux = sed;
         haloIsUsed = true;
     }
 
-    public void setSpecHaloSourceFraction(double spec_halo_source_fraction) {
+    public void setSpecHaloSourceFraction(final double spec_halo_source_fraction) {
         this.spec_halo_source_fraction = spec_halo_source_fraction;
     }
 
-    public void setHaloImageQuality(double uncorrected_im_qual) {
+    public void setHaloImageQuality(final double uncorrected_im_qual) {
         this.uncorrected_im_qual = uncorrected_im_qual;
     }
 
-    public void setBackgroundSpectrum(VisitableSampledSpectrum sed) {
+    public void setBackgroundSpectrum(final VisitableSampledSpectrum sed) {
         background_flux = sed;
     }
 
-    public void setDetectorTransmission(edu.gemini.itc.operation.DetectorsTransmissionVisitor dtv) {
-        _dtv = dtv;
-    }
-
-    public void setCcdPixelRange(int first, int last) {
+    public void setCcdPixelRange(final int first, final int last) {
         _firstCcdPixel = first;
         _lastCcdPixel = last;
     }
 
-    public void setGratingDispersion_nmppix(double gratingDispersion_nmppix) {
+    public void setGratingDispersion_nmppix(final double gratingDispersion_nmppix) {
         this.gratingDispersion_nmppix = gratingDispersion_nmppix;
     }
 
-    public void setGratingDispersion_nm(double gratingDispersion_nm) {
+    public void setGratingDispersion_nm(final double gratingDispersion_nm) {
         this.gratingDispersion_nm = gratingDispersion_nm;
     }
 
-    public void setSpectralPixelWidth(double pix_width) {
+    public void setSpectralPixelWidth(final double pix_width) {
         this.pix_width = pix_width;
     }
 
-    public void setStartWavelength(double obs_wave_low) {
+    public void setStartWavelength(final double obs_wave_low) {
         this.obs_wave_low = obs_wave_low;
     }
 
-    public void setEndWavelength(double obs_wave_high) {
+    public void setEndWavelength(final double obs_wave_high) {
         this.obs_wave_high = obs_wave_high;
     }
 
