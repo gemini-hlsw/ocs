@@ -40,7 +40,6 @@ public class SpecS2NLargeSlitVisitor implements SampledSpectrumVisitor, SpecS2N 
     private double spec_halo_source_fraction;
     private double uncorrected_im_qual;
 
-    private Optional<DetectorsTransmissionVisitor> _dtv = Optional.empty();
     private int _firstCcdPixel = 0;
     private int _lastCcdPixel = -1;
     private boolean haloIsUsed = false;
@@ -174,7 +173,6 @@ public class SpecS2NLargeSlitVisitor implements SampledSpectrumVisitor, SpecS2N 
                     //source_flux.getStart(), source_flux.getEnd(),
                     pix_width, 0);
             halo_flux.accept(halo_resample);
-            _dtv.ifPresent(halo_flux::accept);
         }
 
 
@@ -191,9 +189,6 @@ public class SpecS2NLargeSlitVisitor implements SampledSpectrumVisitor, SpecS2N 
 
         source_flux.accept(source_resample);
         background_flux.accept(background_resample);
-
-        _dtv.ifPresent(source_flux::accept);
-        _dtv.ifPresent(background_flux::accept);
 
         // the number of exposures measuring the source flux is
         double spec_number_source_exposures = spec_number_exposures * spec_frac_with_source;
@@ -296,10 +291,6 @@ public class SpecS2NLargeSlitVisitor implements SampledSpectrumVisitor, SpecS2N 
 
     public void setBackgroundSpectrum(final VisitableSampledSpectrum sed) {
         background_flux = sed;
-    }
-
-    public void setDetectorTransmission(final DetectorsTransmissionVisitor dtv) {
-        _dtv = Optional.of(dtv);
     }
 
     public void setCcdPixelRange(final int first, final int last) {
