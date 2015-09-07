@@ -1,7 +1,7 @@
 
 **NOTE**: This doc is written in Markdown format. You can view it locally using https://github.com/joeyespo/grip or paste it into a Gist or just read the source.
 
-## OCS 2.1
+## OCS
 
 [![Join the chat at https://gitter.im/gemini-hlsw/ocs](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/gemini-hlsw/ocs?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
@@ -24,15 +24,15 @@ For the impatient, here is how to get up and running:
 
 - You need [**sbt**](http://www.scala-sbt.org/), which is most easily installed via [`homebrew`](http://brew.sh/).
 - Add the following (or similar) to your shell profile:
-  ```export SBT_OPTS='-XX:ReservedCodeCacheSize=256M -XX:MaxPermSize=256M -Xmx3500M -Xss2M -Dfile.encoding=UTF-8'``` 
+  ```export SBT_OPTS='-XX:ReservedCodeCacheSize=512M -Xmx3500M -Xss2M -Dfile.encoding=UTF-8 -XX:+CMSClassUnloadingEnabled'``` 
 
 Now, From the root of the project, run `sbt`. It will download the internet the first time you do this, and will eventually drop you at a `>` prompt. From here you can do many things. Here are some basic commands:
 
 | sbt cmmand          | explanation 
 |------------------|-------------
-| `projects`       | List all projects in the build. All projects other than the root `ocs2-1` will be prefixed with `app_` or `bundle_`.
+| `projects`       | List all projects in the build. All projects other than the root `ocs` will be prefixed with `app_` or `bundle_`.
 | `project <name>` | Change to the given project. *Note that tab completion works here (and everywhere).* If you're working on a specific bundle, switch to that bundle; if you're working on several bundles in the same application, switch to the application project. This will limit the extent of compilation. If you're doing a very large refactoring job or just want to be sure the whole world builds, you can do this from the top. To see where you are just type `project`.
-| `project /`      | Go to the "top"; same as `project ocs2-1`.
+| `project /`      | Go to the "top"; same as `project ocs`.
 | `compile`        | Compile the main source for the current project and its dependencies, as needed. This is always an incremental compilation; if you wish to do a full compile, `clean` first (see below).
 | `test:compile`   | Compile the test sources in the current project, which implies normal `compile` as well.
 | `test`           | Compile (if needed) and run tests. There is no need to define suites or anything; sbt will find and run any JUnit, Specs2, or ScalaCheck tests found under `/src/test/`. You can use `testOnly <classname>` to run a single test, or `testQuick` to re-run test that failed the previous run and/or depend directly or indirectly on code that has changed.
