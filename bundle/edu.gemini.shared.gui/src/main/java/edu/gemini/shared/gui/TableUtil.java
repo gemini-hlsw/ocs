@@ -1,6 +1,6 @@
 // Copyright 1997 Association for Universities for Research in Astronomy, Inc.,
 // Observatory Control System, Gemini Telescopes Project.
-// See the file COPYRIGHT for complete details.
+// See the file LICENSE for complete details.
 //
 // $Id: TableUtil.java 6545 2005-08-16 13:17:04Z shane $
 //

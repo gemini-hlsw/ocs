@@ -1,7 +1,7 @@
 // Copyright 1997-2000
 // Association for Universities for Research in Astronomy, Inc.,
 // Observatory Control System, Gemini Telescopes Project.
-// See the file COPYRIGHT for complete details.
+// See the file LICENSE for complete details.
 //
 // $Id: SeqConfigComp.java 18743 2009-03-12 22:15:39Z swalker $
 //

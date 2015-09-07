@@ -1,7 +1,7 @@
 // Copyright 1997-2000
 // Association for Universities for Research in Astronomy, Inc.,
 // Observatory Control System, Gemini Telescopes Project.
-// See the file COPYRIGHT for complete details.
+// See the file LICENSE for complete details.
 //
 // $Id: OffsetPos.java 8574 2008-05-18 20:47:17Z swalker $
 //

@@ -1,6 +1,6 @@
 // Copyright 2000 Association for Universities for Research in Astronomy, Inc.,
 // Observatory Control System, Gemini Telescopes Project.
-// See the file COPYRIGHT for complete details.
+// See the file LICENSE for complete details.
 //
 // $Id: IDBProgramLister.java 7397 2006-10-17 13:55:11Z shane $
 //

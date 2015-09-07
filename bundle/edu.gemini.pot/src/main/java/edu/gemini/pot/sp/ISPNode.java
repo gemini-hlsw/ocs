@@ -1,6 +1,6 @@
 // Copyright 1999 Association for Universities for Research in Astronomy, Inc.,
 // Observatory Control System, Gemini Telescopes Project.
-// See the file COPYRIGHT for complete details.
+// See the file LICENSE for complete details.
 //
 // $Id: ISPNode.java 46997 2012-07-26 15:51:35Z swalker $
 //

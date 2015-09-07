@@ -1,7 +1,7 @@
 // Copyright 1997-2001
 // Association for Universities for Research in Astronomy, Inc.,
 // Observatory Control System, Gemini Telescopes Project.
-// See the file COPYRIGHT for complete details.
+// See the file LICENSE for complete details.
 //
 // $Id: AOConstants.java 7096 2006-05-31 16:18:59Z anunez $
 //

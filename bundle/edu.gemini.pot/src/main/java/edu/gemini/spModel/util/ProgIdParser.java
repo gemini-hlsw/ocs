@@ -1,6 +1,6 @@
 // Copyright 2000 Association for Universities for Research in Astronomy, Inc.,
 // Observatory Control System, Gemini Telescopes Project.
-// See the file COPYRIGHT for complete details.
+// See the file LICENSE for complete details.
 //
 // $Id: ProgIdParser.java 6686 2005-10-19 19:51:16Z shane $
 //

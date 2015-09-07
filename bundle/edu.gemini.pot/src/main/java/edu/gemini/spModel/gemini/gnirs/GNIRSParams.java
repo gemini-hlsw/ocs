@@ -1,7 +1,7 @@
 // Copyright 1997-2000
 // Association for Universities for Research in Astronomy, Inc.,
 // Observatory Control System, Gemini Telescopes Project.
-// See the file COPYRIGHT for complete details.
+// See the file LICENSE for complete details.
 //
 // $Id: GNIRSParams.java 45360 2012-05-18 19:57:50Z nbarriga $
 //
