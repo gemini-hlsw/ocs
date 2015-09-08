@@ -267,7 +267,7 @@ public class PatrolField {
 
         @Override
         public GuideStarValidation validate(SPTarget guideStar, ObsContext ctx) {
-            return ctx.getBaseCoordinatesOpt().map(baseCoordinates -> {
+            return ctx.getBaseCoordinates().map(baseCoordinates -> {
                 final Coordinates guideCoordinates = guideStar.getTarget().getSkycalcCoordinates();
                 // Calculate the difference between the coordinate and the observation's
                 // base position.

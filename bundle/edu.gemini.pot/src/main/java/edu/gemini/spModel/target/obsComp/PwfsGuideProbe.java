@@ -309,7 +309,7 @@ public enum PwfsGuideProbe implements ValidatableGuideProbe, OffsetValidatingGui
      * @return
      */
     public Option<BoundaryPosition> checkBoundaries(final Coordinates coords, final ObsContext ctx) {
-        return ctx.getBaseCoordinatesOpt().map(baseCoordinates -> {
+        return ctx.getBaseCoordinates().map(baseCoordinates -> {
             final Angle positionAngle = ctx.getPositionAngle();
             final Set<Offset> sciencePositions = ctx.getSciencePositions();
 

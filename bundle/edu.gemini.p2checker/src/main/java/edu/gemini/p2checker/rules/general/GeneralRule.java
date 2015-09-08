@@ -28,6 +28,7 @@ import edu.gemini.spModel.guide.GuideProbe;
 import edu.gemini.spModel.guide.GuideProbeUtil;
 import edu.gemini.spModel.obs.ObsClassService;
 import edu.gemini.spModel.obs.ObservationStatus;
+import edu.gemini.spModel.obs.SchedulingBlock;
 import edu.gemini.spModel.obsclass.ObsClass;
 import edu.gemini.spModel.obscomp.InstConstants;
 import edu.gemini.spModel.obscomp.SPInstObsComp;
@@ -446,15 +447,22 @@ public class GeneralRule implements IRule {
         }
     };
 
+    // targets are equal only if positions are defined and within _getMinDistance
     private static boolean _areTargetsEquals(SPTarget p1Target, SPTarget target, ObservationElements elems) {
 
-        double spRA = target.getTarget().getRaHours();
-        double spDec = target.getTarget().getDecDegrees();
+        final Option<Long> when = elems.getSchedulingBlock().map(SchedulingBlock::start);
 
-        double p1RA = p1Target.getTarget().getRaHours();
-        double p1Dec = p1Target.getTarget().getDecDegrees();
+        Option<Double> spRA = target.getTarget().getRaHours(when);
+        Option<Double> spDec = target.getTarget().getDecDegrees(when);
 
-        return _closeEnough(elems, spRA, spDec, p1RA, p1Dec);
+        Option<Double> p1RA = p1Target.getTarget().getRaHours(when);
+        Option<Double> p1Dec = p1Target.getTarget().getDecDegrees(when);
+
+        double minDistance = _getMinDistance(elems);
+
+        return _close(spRA,  p1RA,  minDistance) &&
+               _close(spDec, p1Dec, minDistance);
+
     }
 
     // Consider it a match if the real observation is a ToO observation and the
@@ -465,17 +473,19 @@ public class GeneralRule implements IRule {
         final ISPObservation obs = elems.getObservationNode();
         if (obs == null || !Too.isToo(obs)) return false;
 
-        double p1RA = p1Target.getTarget().getRaHours();
-        double p1Dec = p1Target.getTarget().getDecDegrees();
-        return (p1RA == 0.0) && (p1Dec == 0.0);
+        final ITarget t = p1Target.getTarget();
+        if (t instanceof HmsDegTarget) {
+            final HmsDegTarget hmsDeg = (HmsDegTarget) t;
+            return hmsDeg.getRa().getValue()  == 0.0 &&
+                   hmsDeg.getDec().getValue() == 0.0; ///
+        }
+
+        return false;
     }
 
-    private static boolean _closeEnough(ObservationElements elems, double spRA, double spDec, double p1RA, double p1Dec) {
-        double minDistance = _getMinDistance(elems);
-
-        return Math.abs(spRA - p1RA) <= minDistance
-                &&
-                Math.abs(spDec - p1Dec) <= minDistance;
+    // true if both defined and diff <= tolerance
+    private static boolean _close(Option<Double> a, Option<Double> b, Double tolerance) {
+        return a.flatMap(a0 -> b.map(b0 -> Math.abs(a0 - b0) <= tolerance)).getOrElse(false);
     }
 
 

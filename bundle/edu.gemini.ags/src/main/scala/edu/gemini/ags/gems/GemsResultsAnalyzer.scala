@@ -59,7 +59,7 @@ object GemsResultsAnalyzer {
    * @return a sorted List of GemsGuideStars
    */
   def analyze(obsContext: ObsContext, posAngles: java.util.Set[Angle], catalogSearch: java.util.List[GemsCatalogSearchResults], mascotProgress: Option[MascotProgress]): java.util.List[GemsGuideStars] = {
-    obsContext.getBaseCoordinatesOpt.asScalaOpt.map(_.toNewModel).map { base =>
+    obsContext.getBaseCoordinates.asScalaOpt.map(_.toNewModel).map { base =>
       // gemsGuideStars needs to be mutable to support updates from inside mascot
       val gemsGuideStars = TiptiltFlexurePair.pairs(catalogSearch.asScala.toList).foldLeft(List.empty[GemsGuideStars]) { (gemsGuideStars, pair) =>
         val tiptiltGroup = pair.tiptiltResults.criterion.key.group
@@ -99,7 +99,7 @@ object GemsResultsAnalyzer {
    * @return a sorted List of GemsGuideStars
    */
   def analyzeGoodEnough(obsContext: ObsContext, posAngles: Set[Angle], catalogSearch: List[GemsCatalogSearchResults], progressGoodEnough: (Strehl, Boolean) => Boolean): List[GemsGuideStars] = {
-    obsContext.getBaseCoordinatesOpt.asScalaOpt.map(_.toNewModel).foldMap { base =>
+    obsContext.getBaseCoordinates.asScalaOpt.map(_.toNewModel).foldMap { base =>
 
       @tailrec
       def go(stars: List[GemsGuideStars], pairs: List[TiptiltFlexurePair]): List[GemsGuideStars] = {
