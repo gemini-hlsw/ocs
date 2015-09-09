@@ -2,6 +2,7 @@ package jsky.app.ot.gemini.niri;
 
 import jsky.util.gui.DropDownListBoxWidget;
 import jsky.util.gui.NumberBoxWidget;
+import jsky.util.gui.SingleSelectComboBox;
 
 import javax.swing.*;
 import java.awt.*;
@@ -42,7 +43,7 @@ public class NiriForm extends JPanel {
         beamSplitterLabel = new JLabel();
         beamSplitter = new DropDownListBoxWidget();
         filterLabel = new JLabel();
-        selectedFilter = new DropDownListBoxWidget();
+        selectedFilter = new SingleSelectComboBox();
         fastModeExposuresLabel = new JLabel();
         fastModeExposures = new NumberBoxWidget();
         fastModeReadsUnits = new JLabel();
@@ -457,7 +458,7 @@ public class NiriForm extends JPanel {
     private JLabel beamSplitterLabel;
     DropDownListBoxWidget beamSplitter;
     private JLabel filterLabel;
-    DropDownListBoxWidget selectedFilter;
+    SingleSelectComboBox selectedFilter;
     private JLabel fastModeExposuresLabel;
     NumberBoxWidget fastModeExposures;
     private JLabel fastModeReadsUnits;

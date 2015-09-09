@@ -620,7 +620,7 @@ public final class Niri {
     /**
      * Class for Filters.
      */
-    public static enum Filter implements StandardSpType {
+    public static enum Filter implements StandardSpType, ObsoletableSpType {
 
         // broadband
         BBF_Y("Y", "Y (1.02 um)", "Y", 1.02, Type.broadband),
@@ -638,10 +638,10 @@ public final class Niri {
         BBF_M_ORDER_SORT("Order sorting M", "Order sorting M (5.00 um)", "M/OS", 5.00, Type.broadband),
 
         // narrowband
-        J_CONTINUUM_106("J-continuum (1.065 um)", "J-continuum (1.065 um)", "J-cont(1.065)", 1.065, Type.narrowband),
+        J_CONTINUUM_106("J-continuum (1.065 um)", "J-continuum (1.065 um)", "J-cont(1.065)", 1.065, Type.narrowband, true), //REL-2399 - this filter is now obsolete
         NBF_HEI("HeI", "HeI (1.083 um)", "HeI", 1.083, Type.narrowband),
         NBF_PAGAMMA("Pa(gamma)", "Pa(gamma) (1.094 um)", "Pa-gam", 1.094, Type.narrowband),
-        J_CONTINUUM_122("J-continuum (1.122 um)", "J-continuum (1.122 um)", "J-cont(1.122)", 1.122, Type.narrowband),
+        J_CONTINUUM_122("J-continuum (1.122 um)", "J-continuum (1.122 um)", "J-cont(1.122)", 1.122, Type.narrowband, true), //REL-2399 - this filter is now obsolete
         NBF_H("J-continuum(1.207)", "J-continuum (1.207 um)", "J-cont", 1.207, Type.narrowband),
         NBF_PABETA("Pa(beta)", "Pa(beta) (1.282 um)", "Pa-beta", 1.282, Type.narrowband),
         NBF_HCONT("H-continuum(1.57)", "H-continuum (1.570 um)", "H-cont", 1.570, Type.narrowband),
@@ -677,6 +677,7 @@ public final class Niri {
         private String _displayValue;
         private String _description;
         private String _logValue;
+        private boolean _isObsolete;
         private double _wavelength;
         private Type _type;
 
@@ -687,6 +688,16 @@ public final class Niri {
             _logValue = logValue;
             _wavelength = wavelength;
             _type = type;
+        }
+
+        Filter(String displayValue, String desc, String logValue,
+                       double wavelength, Type type, boolean isObsolete) {
+            _displayValue = displayValue;
+            _description = desc;
+            _logValue = logValue;
+            _wavelength = wavelength;
+            _type = type;
+            _isObsolete = isObsolete;
         }
 
         public String displayValue() {
@@ -704,6 +715,9 @@ public final class Niri {
         public String logValue() {
             return _logValue;
         }
+
+        @Override
+        public boolean isObsolete() { return _isObsolete; }
 
         public Type type() {
             return _type;

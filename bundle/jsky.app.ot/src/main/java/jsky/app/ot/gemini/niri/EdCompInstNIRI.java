@@ -13,6 +13,8 @@ import edu.gemini.spModel.gemini.niri.Niri.*;
 import edu.gemini.spModel.type.SpTypeUtil;
 import jsky.app.ot.OT;
 import jsky.app.ot.OTOptions;
+import jsky.app.ot.editor.type.SpTypeComboBoxModel;
+import jsky.app.ot.editor.type.SpTypeComboBoxRenderer;
 import jsky.app.ot.gemini.editor.EdCompInstBase;
 import jsky.util.gui.DropDownListBoxWidget;
 import jsky.util.gui.DropDownListBoxWidgetWatcher;
@@ -59,9 +61,15 @@ public final class EdCompInstNIRI extends EdCompInstBase<InstNIRI>
 
         _w.camera.setChoices(_getCameras());
 
-        final String[] filters = _getFilters();
-        _w.selectedFilter.setChoices(filters);
-        _w.selectedFilter.setMaximumRowCount(Math.min(filters.length, 20));
+//        final String[] filters = _getFilters();
+//        _w.selectedFilter.setChoices(filters);
+//        _w.selectedFilter.setMaximumRowCount(Math.min(filters.length, 20));
+
+        final SpTypeComboBoxModel<Filter> filterModel = new SpTypeComboBoxModel<>(Filter.class);
+        _w.selectedFilter.setModel(filterModel);
+        _w.selectedFilter.setRenderer(new SpTypeComboBoxRenderer());
+        _w.selectedFilter.setMaximumRowCount(Filter.values().length);
+        _w.selectedFilter.addActionListener(this);
 
         final String[] dispersers = _getDispersers();
         _w.disperser.setChoices(dispersers);
@@ -79,7 +87,7 @@ public final class EdCompInstNIRI extends EdCompInstBase<InstNIRI>
         _w.mask.addWatcher(this);
         _w.beamSplitter.addWatcher(this);
         _w.disperser.addWatcher(this);
-        _w.selectedFilter.addWatcher(this);
+//        _w.selectedFilter.addWatcher(this);
         _w.fastModeExposures.addWatcher(this);
 
         // Arrange to be notified when the OT editable state changes.
@@ -194,7 +202,7 @@ public final class EdCompInstNIRI extends EdCompInstBase<InstNIRI>
         // First fill in the text box.
         final Filter filter = getDataObject().getFilter();
         if (filter != null) {
-            _w.selectedFilter.setValue(filter.description());
+            _w.selectedFilter.getModel().setSelectedItem(filter);
         }
 
         /*
@@ -354,6 +362,8 @@ public final class EdCompInstNIRI extends EdCompInstBase<InstNIRI>
             getDataObject().setBuiltinROI(BuiltinROI.SPEC_1024_512);
             _updateReadMode();
             _updateScienceFOV();
+        } else if (w == _w.selectedFilter) {
+            getDataObject().setFilter((Filter) _w.selectedFilter.getSelectedItem());
         }
     }
 
@@ -373,9 +383,6 @@ public final class EdCompInstNIRI extends EdCompInstBase<InstNIRI>
             _updateScienceFOV();
         } else if (ddlbw == _w.disperser) {
             getDataObject().setDisperser(Disperser.getDisperserByIndex(index));
-        } else if (ddlbw == _w.selectedFilter) {
-            getDataObject().setFilter(_getFilterFromDesc(val));
-            _updateFilterWidgets();
         }
     }
 
