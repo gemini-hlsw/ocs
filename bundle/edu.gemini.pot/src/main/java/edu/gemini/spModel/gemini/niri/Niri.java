@@ -27,7 +27,7 @@ public final class Niri {
     /**
      * Cameras
      */
-    public static enum Camera implements StandardSpType {
+    public enum Camera implements StandardSpType {
 
         F6("f/6", "(0.12 arcsec/pix)", "f6", Size.F6),
         F14("f/14", "(0.05 arcsec/pix)", "f14", Size.F14),
@@ -58,14 +58,14 @@ public final class Niri {
          */
         public static final Camera DEFAULT = F6;
 
-        private String _displayValue;
-        private String _description;
-        private String _logValue;
+        private final String _displayValue;
+        private final String _description;
+        private final String _logValue;
 
         // The default science area size for the camera.  Values is "height".
-        private double _height;
+        private final double _height;
 
-        private Camera(String displayVal, String desc, String logValue, double height) {
+        Camera(final String displayVal, final String desc, final String logValue, final double height) {
             _displayValue = displayVal;
             _description = desc;
             _logValue = logValue;
@@ -130,7 +130,7 @@ public final class Niri {
     /**
      * Beam Splitter
      */
-    public static enum BeamSplitter implements DisplayableSpType, SequenceableSpType {
+    public enum BeamSplitter implements DisplayableSpType, SequenceableSpType {
 
         same_as_camera("same as camera", 0.),
         f6("f/6", Camera.Size.F6),
@@ -139,10 +139,10 @@ public final class Niri {
 
         public static final BeamSplitter DEFAULT = same_as_camera;
 
-        private String _displayValue;
-        private double _height;
+        private final String _displayValue;
+        private final double _height;
 
-        private BeamSplitter(String displayVal, double height) {
+        BeamSplitter(final String displayVal, final double height) {
             _displayValue = displayVal;
             _height = height;
         }
@@ -161,14 +161,6 @@ public final class Niri {
         public static BeamSplitter getBeamSplitterByIndex(int index) {
             return SpTypeUtil.valueOf(BeamSplitter.class, index, DEFAULT);
         }
-
-        /**
-         * Return a BeamSplitter by name
-         */
-        public static BeamSplitter getBeamSplitter(String name) {
-            return getBeamSplitter(name, DEFAULT);
-        }
-
 
         /**
          * Return a BeamSplitter by name giving a value to return upon error
@@ -209,7 +201,7 @@ public final class Niri {
     /**
      * Dispersers
      */
-    public static enum Disperser implements DisplayableSpType, SequenceableSpType, LoggableSpType {
+    public enum Disperser implements DisplayableSpType, SequenceableSpType, LoggableSpType {
 
         NONE("none", 0.0, "none"),
         J("J-grism f/6", 1.20, "Jgrism"),
@@ -222,7 +214,7 @@ public final class Niri {
         H_F32("H-grism f/32", H.getCentralWavelength(), "Hgrism"),
         K_F32("K-grism f/32", K.getCentralWavelength(), "Kgrism"),;
 
-        private static final Map<String, Disperser> CONVERTER = new HashMap<String, Disperser>();
+        private static final Map<String, Disperser> CONVERTER = new HashMap<>();
 
         static {
             CONVERTER.put("H-grism", H);
@@ -238,13 +230,13 @@ public final class Niri {
         public static final Disperser DEFAULT = NONE;
 
         // String value for central wavelength, used by TCC
-        private double _wavelength;
+        private final double _wavelength;
 
         // The log value for this disperser
-        private String _displayValue;
-        private String _logValue;
+        private final String _displayValue;
+        private final String _logValue;
 
-        private Disperser(String displayValue, double wavelength, String logValue) {
+        Disperser(final String displayValue, final double wavelength, final String logValue) {
             _displayValue = displayValue;
             _wavelength = wavelength;
             _logValue = logValue;
@@ -316,7 +308,7 @@ public final class Niri {
     /**
      * Read Mode
      */
-    public static enum ReadMode implements StandardSpType {
+    public enum ReadMode implements StandardSpType {
 
 //In NIRI sequence component change readmode choices to be the same as in the NIRI
 // component (with some abbreviation). They should be
@@ -363,12 +355,12 @@ public final class Niri {
         public static final ReadMode DEFAULT = IMAG_1TO25;
         public static final ItemKey KEY = new ItemKey(INSTRUMENT_KEY, "readMode");
 
-        private String _displayValue;
-        private String _description;
-        private String _readNoise;
-        private double[] _minExp;
-        private String _recommendedExp;
-        private String _logValue;
+        private final String _displayValue;
+        private final String _description;
+        private final String _readNoise;
+        private final double[] _minExp;
+        private final String _recommendedExp;
+        private final String _logValue;
 
         // Create a ReadMode with the given name and description.
         // The array of min exposure times (minExp) corresponds to the ROI array
@@ -376,8 +368,8 @@ public final class Niri {
         // each of these at indexes 0,1,2,3.
         // The recommened exposure time is just for display (XXX should it be
         // an array also?)
-        private ReadMode(String displayValue, String description, String readNoise,
-                         double[] minExp, String recommendedExp, String logValue) {
+        ReadMode(final String displayValue, final String description, final String readNoise,
+                         final double[] minExp, final String recommendedExp, final String logValue) {
             _displayValue = displayValue;
             _description = description;
             _readNoise = readNoise;
@@ -403,13 +395,6 @@ public final class Niri {
         }
 
         /**
-         * Return a ReadMode by index *
-         */
-        static public ReadMode getReadModeByIndex(int index) {
-            return SpTypeUtil.valueOf(ReadMode.class, index, DEFAULT);
-        }
-
-        /**
          * Return a ReadMode by name *
          */
         static public ReadMode getReadMode(String name) {
@@ -422,12 +407,13 @@ public final class Niri {
         static public ReadMode getReadMode(String name, ReadMode nvalue) {
 
             // XXX for backward compatibility
-            if (name.equals("narrow-band imaging/spectroscopy")) {
-                return IMAG_SPEC_NB;
-            } else if (name.equals("1-2.5 um imaging")) {
-                return IMAG_1TO25;
-            } else if (name.equals("3-5um imaging/spectroscopy")) {
-                return IMAG_SPEC_3TO5;
+            switch (name) {
+                case "narrow-band imaging/spectroscopy":
+                    return IMAG_SPEC_NB;
+                case "1-2.5 um imaging":
+                    return IMAG_1TO25;
+                case "3-5um imaging/spectroscopy":
+                    return IMAG_SPEC_3TO5;
             }
 
             return SpTypeUtil.oldValueOf(ReadMode.class, name, nvalue);
@@ -464,7 +450,7 @@ public final class Niri {
     /**
      * Masks
      */
-    public static enum Mask implements StandardSpType {
+    public enum Mask implements StandardSpType {
 
         // Note the f/6 value is given for the MASK_NONE, which is sometimes wrong.
         MASK_IMAGING("imaging",
@@ -529,7 +515,7 @@ public final class Niri {
             double MASK_11_HEIGHT = Camera.Size.F32;
         }
 
-        private static final Map<String, Mask> CONVERTER = new HashMap<String, Mask>();
+        private static final Map<String, Mask> CONVERTER = new HashMap<>();
 
         static {
             CONVERTER.put("f/32 6-pix slit center", MASK_9);
@@ -550,12 +536,12 @@ public final class Niri {
         public static final Mask DEFAULT = MASK_IMAGING;
 
         // The internal values of height and width for this instance of Mask
-        private double _width = Size.IMAGING_SIZE;
-        private double _height = Size.IMAGING_SIZE;
-        private String _displayValue;
-        private String _logValue;
+        private final double _width;
+        private final double _height;
+        private final String _displayValue;
+        private final String _logValue;
 
-        private Mask(String displayValue, double width, double height, String logValue) {
+        Mask(final String displayValue, final double width, final double height, final String logValue) {
             _displayValue = displayValue;
             _width = width;
             _height = height;
@@ -620,7 +606,7 @@ public final class Niri {
     /**
      * Class for Filters.
      */
-    public static enum Filter implements StandardSpType, ObsoletableSpType {
+    public enum Filter implements StandardSpType, ObsoletableSpType {
 
         // broadband
         BBF_Y("Y", "Y (1.02 um)", "Y", 1.02, Type.broadband),
@@ -674,20 +660,16 @@ public final class Niri {
             narrowband,;
         }
 
-        private String _displayValue;
-        private String _description;
-        private String _logValue;
-        private boolean _isObsolete;
-        private double _wavelength;
-        private Type _type;
+        private final String _displayValue;
+        private final String _description;
+        private final String _logValue;
+        private final boolean _isObsolete;
+        private final double _wavelength;
+        private final Type _type;
 
-        private Filter(String displayValue, String desc, String logValue,
+        Filter(String displayValue, String desc, String logValue,
                        double wavelength, Type type) {
-            _displayValue = displayValue;
-            _description = desc;
-            _logValue = logValue;
-            _wavelength = wavelength;
-            _type = type;
+            this(displayValue, desc, logValue, wavelength, type, false);
         }
 
         Filter(String displayValue, String desc, String logValue,
@@ -811,20 +793,6 @@ public final class Niri {
         }
 
         /**
-         * Return the x start pixel.
-         */
-        public int getXStart() {
-            return _xStart;
-        }
-
-        /**
-         * Return the y start pixel.
-         */
-        public int getYStart() {
-            return _yStart;
-        }
-
-        /**
          * Return the x size in unbinned pixels.
          */
         public int getXSize() {
@@ -844,7 +812,7 @@ public final class Niri {
      * selected Regions of Interest.  Currently, NIRI supports only
      * the full detector.
      */
-    public static enum BuiltinROI implements DisplayableSpType, LoggableSpType, SequenceableSpType {
+    public enum BuiltinROI implements DisplayableSpType, LoggableSpType, SequenceableSpType {
 
         FULL_FRAME("full frame readout", DefaultRoi.DESCRIPTION, "full"),
         CENTRAL_768("central 768x768", new ROIDescription(128, 128, 768, 768), "c768"),
@@ -861,11 +829,11 @@ public final class Niri {
         public static final BuiltinROI DEFAULT = FULL_FRAME;
         public static final ItemKey KEY = new ItemKey(INSTRUMENT_KEY, "builtinROI");
 
-        private ROIDescription _roid;
-        private String _displayValue;
-        private String _logValue;
+        private final ROIDescription _roid;
+        private final String _displayValue;
+        private final String _logValue;
 
-        private BuiltinROI(String displayValue, ROIDescription roid, String logValue) {
+        BuiltinROI(final String displayValue, final ROIDescription roid, final String logValue) {
             _displayValue = displayValue;
             _roid = roid;
             _logValue = logValue;
@@ -908,7 +876,7 @@ public final class Niri {
     /**
      * Well Depth
      */
-    public static enum WellDepth implements DisplayableSpType, DescribableSpType, SequenceableSpType {
+    public enum WellDepth implements DisplayableSpType, DescribableSpType, SequenceableSpType {
 
         SHALLOW("shallow well", "1-2.5 um only"),
         DEEP("deep well", "3-5 um"),;
@@ -918,10 +886,10 @@ public final class Niri {
          */
         public static final WellDepth DEFAULT = SHALLOW;
 
-        private String _displayValue;
-        private String _description;
+        private final String _displayValue;
+        private final String _description;
 
-        private WellDepth(String displayValue, String description) {
+        WellDepth(final String displayValue, final String description) {
             _displayValue = displayValue;
             _description = description;
         }
@@ -936,13 +904,6 @@ public final class Niri {
 
         public String sequenceValue() {
             return _displayValue;
-        }
-
-        /**
-         * Return a WellDepth by index *
-         */
-        static public WellDepth getWellDepthByIndex(int index) {
-            return SpTypeUtil.valueOf(WellDepth.class, index, DEFAULT);
         }
 
         /**
@@ -964,7 +925,7 @@ public final class Niri {
     /**
      * Focus
      */
-    public static enum FocusSuggestion implements DisplayableSpType, SequenceableSpType {
+    public enum FocusSuggestion implements DisplayableSpType, SequenceableSpType {
 
         BEST_FOCUS("best focus"),;
 
@@ -973,9 +934,9 @@ public final class Niri {
          */
         public static final FocusSuggestion DEFAULT = BEST_FOCUS;
 
-        private String _displayValue;
+        private final String _displayValue;
 
-        private FocusSuggestion(String displayValue) {
+        FocusSuggestion(String displayValue) {
             _displayValue = displayValue;
         }
 
@@ -991,26 +952,6 @@ public final class Niri {
             return _displayValue;
         }
 
-        /**
-         * Return a Focus by index
-         */
-        static public FocusSuggestion getFocusByIndex(int index) {
-            return SpTypeUtil.valueOf(FocusSuggestion.class, index, DEFAULT);
-        }
-
-        /**
-         * Return a Focus by name
-         */
-        static public FocusSuggestion getFocus(String name) {
-            return getFocusSuggestion(name, DEFAULT);
-        }
-
-        /**
-         * Return a Focus by name giving a value to return upon error
-         */
-        static public FocusSuggestion getFocusSuggestion(String name, FocusSuggestion nvalue) {
-            return SpTypeUtil.oldValueOf(FocusSuggestion.class, name, nvalue);
-        }
     }
 
     public static class Focus extends SuggestibleString {
