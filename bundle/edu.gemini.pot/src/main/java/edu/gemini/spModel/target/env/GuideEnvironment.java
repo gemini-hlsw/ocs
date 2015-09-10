@@ -72,22 +72,17 @@ public final class GuideEnvironment implements Serializable, TargetContainer, Op
      * Gets the subset of referenced guiders that are actually selected, if any.
      */
     public SortedSet<GuideProbe> getPrimaryReferencedGuiders() {
-        return guideGroups.getPrimary().map(new MapOp<GuideGroup, SortedSet<GuideProbe>>() {
-            @Override
-            public SortedSet<GuideProbe> apply(GuideGroup group) {
-                return group.getPrimaryReferencedGuiders();
-            }
-        }).getOrElse(new TreeSet<>());
+        return guideGroups.getPrimary().map(GuideGroup::getPrimaryReferencedGuiders).getOrElse(new TreeSet<>());
     }
 
     @Override
     public ImList<SPTarget> getTargets() {
-        return guideGroups.getOptions().flatMap(TargetContainer.EXTRACT_TARGET);
+        return guideGroups.getOptions().flatMap(TargetContainer::getTargets);
     }
 
     @Override
     public boolean containsTarget(SPTarget target) {
-        return guideGroups.getOptions().exists(new TargetMatch(target));
+        return guideGroups.getOptions().exists(gg -> gg.containsTarget(target));
     }
 
     private GuideEnvironment updateGuideGroups(UpdateOp<GuideGroup> f) {
@@ -98,12 +93,12 @@ public final class GuideEnvironment implements Serializable, TargetContainer, Op
 
     @Override
     public GuideEnvironment cloneTargets() {
-        return updateGuideGroups(GuideGroup.CLONE_TARGETS);
+        return updateGuideGroups(GuideGroup::cloneTargets);
     }
 
     @Override
     public GuideEnvironment removeTarget(SPTarget target) {
-        return updateGuideGroups(GuideGroup.removeTargetUpdate(target));
+        return updateGuideGroups(g -> g.removeTarget(target));
     }
 
     public GuideEnvironment removeGroup(GuideGroup group) {

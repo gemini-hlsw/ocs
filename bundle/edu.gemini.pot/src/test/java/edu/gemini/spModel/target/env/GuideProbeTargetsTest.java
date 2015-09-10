@@ -150,14 +150,14 @@ public final class GuideProbeTargetsTest extends TestCase {
     }
 
     public void testTargetMatch() {
-        PredicateOp<TargetContainer> f = new TargetContainer.TargetMatch(fix.t_pwfs2);
+        PredicateOp<TargetContainer> f = t -> t.containsTarget(fix.t_pwfs2);
         assertFalse(f.apply(fix.gpt_pwfs1));
         assertTrue(f.apply(fix.gpt_pwfs2));
         assertFalse(f.apply(fix.gpt_gmos));
     }
 
     public void testExtractTarget() {
-        Function1<TargetContainer, ImList<SPTarget>> f = TargetContainer.EXTRACT_TARGET;
+        final Function1<TargetContainer, ImList<SPTarget>> f = TargetContainer::getTargets;
         assertEquals(fix.tl_pwfs1, f.apply(fix.gpt_pwfs1));
         assertEquals(fix.tl_pwfs2, f.apply(fix.gpt_pwfs2));
         assertEquals(fix.tl_gmos,  f.apply(fix.gpt_gmos));
