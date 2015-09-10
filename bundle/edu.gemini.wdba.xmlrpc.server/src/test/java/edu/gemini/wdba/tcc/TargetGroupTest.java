@@ -4,7 +4,6 @@
 
 package edu.gemini.wdba.tcc;
 
-import edu.gemini.model.p1.immutable.Target;
 import edu.gemini.pot.sp.ISPObsComponent;
 import edu.gemini.shared.util.immutable.*;
 import edu.gemini.spModel.ext.ObservationNode;

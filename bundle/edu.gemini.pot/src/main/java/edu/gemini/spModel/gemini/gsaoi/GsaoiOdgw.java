@@ -230,10 +230,7 @@ public enum GsaoiOdgw implements ValidatableGuideProbe {
                     // primaryMap.
                     final ImList<SPTarget> imLst = DefaultImList.create(lst);
                     final SPTarget primary = primaryMap.get(odgw);
-                    //final int primaryIndex = imLst.indexOf(primary);
-                    //final Option<Integer> primaryOpt = (primaryIndex == -1) ? None.INTEGER : new Some<>(primaryIndex);
 
-                    // TODO: PROBLEM HERE: is primary BAGS or not?
                     final GuideProbeTargets gptOld = gtMap.get(odgw);
                     final boolean primaryIsBags = gptOld != null && gptOld.getBagsTarget().exists(primary::equals);
                     final Option<SPTarget> bagsTarget = primaryIsBags ? new Some<>(primary) : GuideProbeTargets.NO_TARGET;

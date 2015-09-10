@@ -92,7 +92,7 @@ public class NifsSetupTimeService {
         if (ctx.target != null) {
             final TargetEnvironment env = ctx.target.getTargetEnvironment();
             final Option<GuideProbeTargets> gtOpt = env.getPrimaryGuideProbeTargets(NifsOiwfsGuideProbe.instance);
-            if (gtOpt.isDefined() && gtOpt.getValue().containsTargets()) {
+            if (gtOpt.exists(GuideProbeTargets::containsTargets)) {
                 setupSeconds += OIWFS_SETUP_SEC;
             }
         }

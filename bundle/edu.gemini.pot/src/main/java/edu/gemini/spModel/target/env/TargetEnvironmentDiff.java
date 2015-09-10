@@ -46,8 +46,8 @@ public final class TargetEnvironmentDiff implements Serializable {
      */
     public static TargetEnvironmentDiff guideProbe(TargetEnvironment oldEnv, TargetEnvironment newEnv, final GuideProbe guider) {
         final ImList<SPTarget> empty = ImCollections.emptyList();
-        final Function1<GuideGroup, ImList<SPTarget>> f2 = (g -> g.get(guider).map(GuideProbeTargets::getTargets).getOrElse(empty));
-        return primaryGuideGroupExtraction(oldEnv, newEnv, f2);
+        return primaryGuideGroupExtraction(oldEnv, newEnv,
+                g -> g.get(guider).map(GuideProbeTargets::getTargets).getOrElse(empty));
     }
 
     private static TargetEnvironmentDiff primaryGuideGroupExtraction(TargetEnvironment oldEnv, TargetEnvironment newEnv, Function1<GuideGroup, ImList<SPTarget>> f) {
