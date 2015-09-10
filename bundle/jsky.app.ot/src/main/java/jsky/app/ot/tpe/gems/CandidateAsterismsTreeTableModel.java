@@ -154,15 +154,12 @@ class CandidateAsterismsTreeTableModel extends AbstractTreeTableModel {
         }
 
         String getGuideProbe() {
-            if (_guideProbeTargets != null) {
-                return _guideProbeTargets.getGuider().getKey();
-            }
-            return null;
+            return _guideProbeTargets == null ? null : _guideProbeTargets.getGuider().getKey();
         }
 
         String getId() {
             if (_guideProbeTargets != null) {
-                if (!_guideProbeTargets.getPrimary().isEmpty()) {
+                if (_guideProbeTargets.getPrimary().isDefined()) {
                     return _guideProbeTargets.getPrimary().getValue().getTarget().getName();
                 }
             } else if (_gemsGuideStars != null) { // top level displays Strehl values

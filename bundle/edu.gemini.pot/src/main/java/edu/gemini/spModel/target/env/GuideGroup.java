@@ -155,7 +155,7 @@ public final class GuideGroup implements Serializable, Iterable<GuideProbeTarget
      * instance; <code>false</code> otherwise
      */
     public boolean contains(GuideProbe guider) {
-        return guideTargets.exists(GuideProbeTargets.match(guider));
+        return guideTargets.exists(gpt -> gpt.getGuider() == guider);
     }
 
     /**
@@ -169,7 +169,7 @@ public final class GuideGroup implements Serializable, Iterable<GuideProbeTarget
      * {@link edu.gemini.shared.util.immutable.None} if none
      */
     public Option<GuideProbeTargets> get(GuideProbe guider) {
-        return guideTargets.find(GuideProbeTargets.match(guider));
+        return guideTargets.find(gpt -> gpt.getGuider() == guider);
     }
 
     /**
@@ -186,7 +186,8 @@ public final class GuideGroup implements Serializable, Iterable<GuideProbeTarget
      * given guide probe target options
      */
     public GuideGroup put(GuideProbeTargets targets) {
-        return new GuideGroup(name, sortByGuider(guideTargets.remove(GuideProbeTargets.match(targets.getGuider())).cons(targets)));
+        final GuideProbe guideProbe = targets.getGuider();
+        return new GuideGroup(name, sortByGuider(guideTargets.remove(gpt -> gpt.getGuider() == guideProbe).cons(targets)));
     }
 
     /**
@@ -201,7 +202,7 @@ public final class GuideGroup implements Serializable, Iterable<GuideProbeTarget
      * {@link GuideProbeTargets} entry associated with {@link GuideProbe}
      */
     public GuideGroup remove(GuideProbe guider) {
-        final ImList<GuideProbeTargets> lst = guideTargets.remove(GuideProbeTargets.match(guider));
+        final ImList<GuideProbeTargets> lst = guideTargets.remove(gpt -> gpt.getGuider() == guider);
         if (lst.size() == guideTargets.size()) return this;
         return new GuideGroup(name, lst);
     }
@@ -274,7 +275,7 @@ public final class GuideGroup implements Serializable, Iterable<GuideProbeTarget
      * <code>{@link edu.gemini.shared.util.immutable.None}</code> otherwise
      */
     public ImList<GuideProbeTargets> getAllContaining(SPTarget target) {
-        return guideTargets.filter(new TargetMatch(target));
+        return guideTargets.filter(gt -> gt.containsTarget(target));
     }
 
     /**
@@ -287,7 +288,7 @@ public final class GuideGroup implements Serializable, Iterable<GuideProbeTarget
      * with the given <code>type</code>, or an empty collection if none
      */
     public ImList<GuideProbeTargets> getAllMatching(GuideProbe.Type type) {
-        return guideTargets.filter(GuideProbeTargets.match(type));
+        return guideTargets.filter(gpt -> gpt.getGuider().getType() == type);
     }
 
 
@@ -300,7 +301,7 @@ public final class GuideGroup implements Serializable, Iterable<GuideProbeTarget
      * list if there are none
      */
     private ImList<GuideProbe> getReferencedGuiderList() {
-        return guideTargets.filter(GuideProbeTargets.MATCH_NON_EMPTY).map(GuideProbeTargets.EXTRACT_PROBE);
+        return guideTargets.filter(GuideProbeTargets::containsTargets).map(GuideProbeTargets::getGuider);
     }
 
     /**
@@ -339,11 +340,7 @@ public final class GuideGroup implements Serializable, Iterable<GuideProbeTarget
      * selected target.
      */
     public SortedSet<GuideProbe> getPrimaryReferencedGuiders() {
-        return toSet(guideTargets.filter(new PredicateOp<GuideProbeTargets>() {
-            @Override public Boolean apply(GuideProbeTargets gpt) {
-                return gpt.getPrimary().isDefined();
-            }
-        }).map(GuideProbeTargets.EXTRACT_PROBE));
+        return toSet(guideTargets.filter(gpt -> gpt.getPrimary().isDefined()).map(GuideProbeTargets::getGuider));
     }
 
     /**
@@ -362,45 +359,23 @@ public final class GuideGroup implements Serializable, Iterable<GuideProbeTarget
 
     @Override
     public ImList<SPTarget> getTargets() {
-        return guideTargets.flatMap(TargetContainer.EXTRACT_TARGET);
+        return guideTargets.flatMap(TargetContainer::getTargets);
     }
 
     @Override
     public boolean containsTarget(SPTarget target) {
-        return guideTargets.exists(new TargetMatch(target));
-    }
-
-    public static UpdateOp<GuideGroup> removeTargetUpdate(final SPTarget target) {
-        return new UpdateOp<GuideGroup>() {
-            @Override public GuideGroup apply(GuideGroup group) {
-                return group.removeTarget(target);
-            }
-        };
+        return guideTargets.exists(gt -> gt.containsTarget(target));
     }
 
     @Override
     public GuideGroup removeTarget(final SPTarget target) {
-        ImList<GuideProbeTargets> updated = guideTargets.map(new Function1<GuideProbeTargets, GuideProbeTargets>() {
-            @Override public GuideProbeTargets apply(GuideProbeTargets t) {
-                return t.update(UpdateOps.remove(target));
-            }
-        });
+        final ImList<GuideProbeTargets> updated = guideTargets.map(gpt -> gpt.removeTargetSelectPrimary(target));
         return new GuideGroup(name, updated);
     }
 
-    public static final UpdateOp<GuideGroup> CLONE_TARGETS = new UpdateOp<GuideGroup>() {
-        @Override public GuideGroup apply(GuideGroup guideGroup) {
-            return guideGroup.cloneTargets();
-        }
-    };
-
     @Override
     public GuideGroup cloneTargets() {
-        ImList<GuideProbeTargets> cloned = guideTargets.map(new Function1<GuideProbeTargets, GuideProbeTargets>() {
-            @Override public GuideProbeTargets apply(GuideProbeTargets t) {
-                return t.cloneTargets();
-            }
-        });
+        final ImList<GuideProbeTargets> cloned = guideTargets.map(GuideProbeTargets::cloneTargets);
         return new GuideGroup(name, cloned);
     }
 

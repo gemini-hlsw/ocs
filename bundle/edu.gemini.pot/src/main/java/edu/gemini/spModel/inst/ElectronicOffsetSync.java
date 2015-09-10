@@ -134,19 +134,16 @@ public enum ElectronicOffsetSync implements ISPEventMonitor {
             if (None.instance().equals(target)) return false;
 
             // Figure out the guider to use.
-            ElectronicOffsetProvider prov;
-            prov = (ElectronicOffsetProvider) inst.getDataObject();
-            GuideProbe guider = prov.getElectronicOffsetGuider();
+            final ElectronicOffsetProvider prov = (ElectronicOffsetProvider) inst.getDataObject();
+            final GuideProbe guider = prov.getElectronicOffsetGuider();
 
             // Get the target environment.
-            TargetObsComp targetComp;
-            targetComp = (TargetObsComp) target.getValue().getDataObject();
-            TargetEnvironment env = targetComp.getTargetEnvironment();
+            final TargetObsComp targetComp = (TargetObsComp) target.getValue().getDataObject();
+            final TargetEnvironment env = targetComp.getTargetEnvironment();
 
             // Figure out whether it supports the indicated guide star.
-            Option<GuideProbeTargets> gtOpt = env.getPrimaryGuideProbeTargets(guider);
-            if (gtOpt.isEmpty()) return false;
-            return (gtOpt.getValue().getOptions().size() > 0);
+            final Option<GuideProbeTargets> gtOpt = env.getPrimaryGuideProbeTargets(guider);
+            return gtOpt.exists(GuideProbeTargets::containsTargets);
         }
 
         /**

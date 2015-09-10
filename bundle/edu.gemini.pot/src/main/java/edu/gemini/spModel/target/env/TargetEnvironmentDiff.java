@@ -36,12 +36,7 @@ public final class TargetEnvironmentDiff implements Serializable {
      * guide stars in the primary guide group of each environment.
      */
     public static TargetEnvironmentDiff primaryGuideGroup(TargetEnvironment oldEnv, TargetEnvironment newEnv) {
-        Function1<GuideGroup, ImList<SPTarget>> f = new Function1<GuideGroup, ImList<SPTarget>>() {
-            @Override public ImList<SPTarget> apply(GuideGroup guideGroup) {
-                return guideGroup.getTargets();
-            }
-        };
-        return primaryGuideGroupExtraction(oldEnv, newEnv, f);
+        return primaryGuideGroupExtraction(oldEnv, newEnv, GuideGroup::getTargets);
     }
 
     /**
@@ -50,26 +45,15 @@ public final class TargetEnvironmentDiff implements Serializable {
      * of each environment.
      */
     public static TargetEnvironmentDiff guideProbe(TargetEnvironment oldEnv, TargetEnvironment newEnv, final GuideProbe guider) {
-        final Function1<OptionsList<SPTarget>, ImList<SPTarget>> f1 = new Function1<OptionsList<SPTarget>, ImList<SPTarget>>() {
-            @Override public ImList<SPTarget> apply(OptionsList<SPTarget> optList) {
-                return optList.getOptions();
-            }
-        };
-        Function1<GuideGroup, ImList<SPTarget>> f2 = new Function1<GuideGroup, ImList<SPTarget>>() {
-            @Override public ImList<SPTarget> apply(GuideGroup guideGroup) {
-                ImList<SPTarget> empty = ImCollections.emptyList();
-                return guideGroup.get(guider).map(f1).getOrElse(empty);
-            }
-        };
-
+        final ImList<SPTarget> empty = ImCollections.emptyList();
+        final Function1<GuideGroup, ImList<SPTarget>> f2 = (g -> g.get(guider).map(GuideProbeTargets::getTargets).getOrElse(empty));
         return primaryGuideGroupExtraction(oldEnv, newEnv, f2);
     }
 
     private static TargetEnvironmentDiff primaryGuideGroupExtraction(TargetEnvironment oldEnv, TargetEnvironment newEnv, Function1<GuideGroup, ImList<SPTarget>> f) {
         final ImList<SPTarget> empty = ImCollections.emptyList();
-        ImList<SPTarget> oldList, newList;
-        oldList = oldEnv.getGuideEnvironment().getPrimary().map(f).getOrElse(empty);
-        newList = newEnv.getGuideEnvironment().getPrimary().map(f).getOrElse(empty);
+        final ImList<SPTarget> oldList = oldEnv.getGuideEnvironment().getPrimary().map(f).getOrElse(empty);
+        final ImList<SPTarget> newList = newEnv.getGuideEnvironment().getPrimary().map(f).getOrElse(empty);
         return new TargetEnvironmentDiff(oldEnv, newEnv, oldList, newList);
     }
 
@@ -84,10 +68,10 @@ public final class TargetEnvironmentDiff implements Serializable {
         this.oldEnv = oldEnv;
         this.newEnv = newEnv;
 
-        Set<SPTarget> oldSet = Collections.newSetFromMap(new IdentityHashMap<SPTarget, Boolean>());
+        Set<SPTarget> oldSet = Collections.newSetFromMap(new IdentityHashMap<>());
         if (oldEnv != null) oldSet.addAll(oldTargets.toList());
 
-        Set<SPTarget> newSet = Collections.newSetFromMap(new IdentityHashMap<SPTarget, Boolean>());
+        Set<SPTarget> newSet = Collections.newSetFromMap(new IdentityHashMap<>());
         if (newEnv != null) newSet.addAll(newTargets.toList());
 
         if (oldEnv != null) newSet.removeAll(oldTargets.toList());

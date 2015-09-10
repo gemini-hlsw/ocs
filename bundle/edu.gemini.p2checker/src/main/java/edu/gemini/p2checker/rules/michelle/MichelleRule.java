@@ -46,16 +46,16 @@ public class MichelleRule implements IRule {
         private static final String OI_PRESENT_MESSAGE = "MICHELLE has no OIWFS";
 
         public IP2Problems check(ObservationElements elements)  {
-            P2Problems prob = new P2Problems();
-            for (TargetObsComp obsCommp : elements.getTargetObsComp()) {
+            final P2Problems prob = new P2Problems();
+            for (final TargetObsComp obsCommp : elements.getTargetObsComp()) {
 
-                TargetEnvironment env = obsCommp.getTargetEnvironment();
+                final TargetEnvironment env = obsCommp.getTargetEnvironment();
 
-                Option<GuideProbeTargets> gtOpt = env.getPrimaryGuideProbeTargets(PwfsGuideProbe.pwfs2);
+                final Option<GuideProbeTargets> gtOpt = env.getPrimaryGuideProbeTargets(PwfsGuideProbe.pwfs2);
 
                 // TODO: GuideProbeTargets.isEnabled
-                boolean activeP2 = elements.getObsContext().exists(c -> GuideProbeUtil.instance.isAvailable(c, PwfsGuideProbe.pwfs2));
-                boolean hasP2 = !gtOpt.isEmpty() && activeP2 && (gtOpt.getValue().getOptions().size() > 0);
+                final boolean activeP2 = elements.getObsContext().exists(c -> GuideProbeUtil.instance.isAvailable(c, PwfsGuideProbe.pwfs2));
+                final boolean hasP2 = activeP2 && gtOpt.exists(GuideProbeTargets::containsTargets);
 
                 if (!hasP2) {
                     prob.addWarning(PREFIX + "NO_P2_MESSAGE", NO_P2_MESSAGE, elements.getTargetObsComponentNode().getValue());
@@ -67,16 +67,12 @@ public class MichelleRule implements IRule {
             return prob;
         }
 
-        private boolean hasOI(TargetEnvironment env) {
-            GuideGroup grp = env.getOrCreatePrimaryGuideGroup();
+        private boolean hasOI(final TargetEnvironment env) {
+            final GuideGroup grp = env.getOrCreatePrimaryGuideGroup();
 
-            ImList<GuideProbeTargets> col = grp.getAllMatching(GuideProbe.Type.OIWFS);
+            final ImList<GuideProbeTargets> col = grp.getAllMatching(GuideProbe.Type.OIWFS);
             if ((col == null) || (col.size() == 0)) return false;
-
-            for (GuideProbeTargets gt : col) {
-                if (gt.getOptions().size() > 0) return true;
-            }
-            return false;
+            return col.exists(gpt -> gpt.getTargets().nonEmpty());
         }
     };
 

@@ -46,8 +46,8 @@ public class GuideConfigTest extends TestBase {
     }
 
     private static GuideProbeTargets createGuideTargets(GuideProbe probe) {
-        ImList<SPTarget> targetList = ImCollections.singletonList(new SPTarget());
-        return GuideProbeTargets.create(probe, targetList);
+        final SPTarget target = new SPTarget();
+        return GuideProbeTargets.create(probe, target).selectPrimary(target);
     }
 
     private static ImList<GuideProbeTargets> createGuideTargetsList(GuideProbe... probes) {

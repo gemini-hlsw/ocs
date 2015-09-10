@@ -90,9 +90,9 @@ public class NifsSetupTimeService {
 
         // Add 5 minutes if using the OIWFS
         if (ctx.target != null) {
-            TargetEnvironment env = ctx.target.getTargetEnvironment();
-            Option<GuideProbeTargets> gtOpt = env.getPrimaryGuideProbeTargets(NifsOiwfsGuideProbe.instance);
-            if (!gtOpt.isEmpty() && (gtOpt.getValue().getOptions().size() > 0)) {
+            final TargetEnvironment env = ctx.target.getTargetEnvironment();
+            final Option<GuideProbeTargets> gtOpt = env.getPrimaryGuideProbeTargets(NifsOiwfsGuideProbe.instance);
+            if (gtOpt.isDefined() && gtOpt.getValue().containsTargets()) {
                 setupSeconds += OIWFS_SETUP_SEC;
             }
         }
