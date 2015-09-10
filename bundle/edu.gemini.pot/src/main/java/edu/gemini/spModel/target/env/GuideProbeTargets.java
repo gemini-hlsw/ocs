@@ -47,7 +47,7 @@ public final class GuideProbeTargets implements Serializable, TargetContainer, I
      * A Comparator that sorts GuideProbeTargets based upon the
      * {@link GuideProbe} that they contain.
      */
-    public static enum GuiderComparator implements Serializable, Comparator<GuideProbeTargets> {
+    public enum GuiderComparator implements Serializable, Comparator<GuideProbeTargets> {
         instance;
 
         @Override public int compare(final GuideProbeTargets gt1, final GuideProbeTargets gt2) {
@@ -155,7 +155,6 @@ public final class GuideProbeTargets implements Serializable, TargetContainer, I
         if (manualTargets == null)
             throw new IllegalArgumentException("missing target options");
 
-        // TODO: Is there a way to force this without exception handling and checking?
         final boolean primaryIsBags = compareTargets(bagsTarget, primaryTarget);
         if (!primaryIsBags && !primaryTarget.forall(manualTargets::contains))
             throw new IllegalArgumentException("primary target must be either BAGS target or in manual targets");
@@ -332,9 +331,7 @@ public final class GuideProbeTargets implements Serializable, TargetContainer, I
      * @return a new GuideProbeTargets with the primary target and BAGS target as described
      */
     public GuideProbeTargets setBagsTarget(final SPTarget target) {
-        // TODO: one line
-        final Option<SPTarget> targetOption = ImOption.apply(target);
-        return setBagsTarget(targetOption);
+        return setBagsTarget(ImOption.apply(target));
     }
 
     /**
@@ -412,7 +409,6 @@ public final class GuideProbeTargets implements Serializable, TargetContainer, I
      */
     public GuideProbeTargets setPrimaryIndex(final Option<Integer> indexOption) {
         // If the current primary is already as set, nothing to do.
-        // TODO: CHECK
         final Option<Integer> oldPrimaryIndex = getPrimaryIndex();
         if (indexOption.exists(i -> oldPrimaryIndex.exists(i::equals))
                 || (indexOption.isEmpty() && oldPrimaryIndex.isEmpty()))
@@ -508,7 +504,7 @@ public final class GuideProbeTargets implements Serializable, TargetContainer, I
     public static final String GUIDER_PARAM_SET_NAME = "guider";
     public static final String BAGSTARGET_PARAM_SET_NAME = "bagsTarget";
 
-    // TODO: modified, must be tested.
+
     public ParamSet getParamSet(final PioFactory factory) {
         final ParamSet paramSet = factory.createParamSet(GUIDER_PARAM_SET_NAME);
 

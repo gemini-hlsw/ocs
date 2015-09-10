@@ -215,10 +215,6 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
                 return new ImageIcon(img);
             }
 
-            @Override public boolean editable() {
-                return false;
-            }
-
             @Override public Icon getIcon() {
                 final Icon qualityIcon = isActiveGuideProbe ?
                         GuidingIcon.apply(quality.getOrElse(AgsGuideQuality.Unusable$.MODULE$), enabled) :
@@ -320,10 +316,10 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
                 }
             } else {
                 int groupIndex = 1;
-                for (GuideGroup group : groups) {
+                for (final GuideGroup group : groups) {
                     final boolean isPrimaryGroup = group == primaryGroup;
                     final List<Row> rowList = new ArrayList<>();
-                    for (GuideProbeTargets gt : group.getAll()) {
+                    for (final GuideProbeTargets gt : group.getAll()) {
                         final GuideProbe guideProbe = gt.getGuider();
                         final boolean isActive = ctx.exists(c -> GuideProbeUtil.instance.isAvailable(c, guideProbe));
                         final Option<SPTarget> primary = gt.getPrimary();
