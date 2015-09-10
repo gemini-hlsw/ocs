@@ -275,7 +275,7 @@ public final class GuideGroup implements Serializable, Iterable<GuideProbeTarget
      * <code>{@link edu.gemini.shared.util.immutable.None}</code> otherwise
      */
     public ImList<GuideProbeTargets> getAllContaining(SPTarget target) {
-        return guideTargets.filter(new TargetMatch(target));
+        return guideTargets.filter(gt -> gt.containsTarget(target));
     }
 
     /**
@@ -359,20 +359,12 @@ public final class GuideGroup implements Serializable, Iterable<GuideProbeTarget
 
     @Override
     public ImList<SPTarget> getTargets() {
-        return guideTargets.flatMap(TargetContainer.EXTRACT_TARGET);
+        return guideTargets.flatMap(TargetContainer::getTargets);
     }
 
     @Override
     public boolean containsTarget(SPTarget target) {
-        return guideTargets.exists(new TargetMatch(target));
-    }
-
-    public static UpdateOp<GuideGroup> removeTargetUpdate(final SPTarget target) {
-        return new UpdateOp<GuideGroup>() {
-            @Override public GuideGroup apply(GuideGroup group) {
-                return group.removeTarget(target);
-            }
-        };
+        return guideTargets.exists(gt -> gt.containsTarget(target));
     }
 
     @Override
@@ -380,12 +372,6 @@ public final class GuideGroup implements Serializable, Iterable<GuideProbeTarget
         final ImList<GuideProbeTargets> updated = guideTargets.map(gpt -> gpt.removeTargetSelectPrimary(target));
         return new GuideGroup(name, updated);
     }
-
-    public static final UpdateOp<GuideGroup> CLONE_TARGETS = new UpdateOp<GuideGroup>() {
-        @Override public GuideGroup apply(GuideGroup guideGroup) {
-            return guideGroup.cloneTargets();
-        }
-    };
 
     @Override
     public GuideGroup cloneTargets() {

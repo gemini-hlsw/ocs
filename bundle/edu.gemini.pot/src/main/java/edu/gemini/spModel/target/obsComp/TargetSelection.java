@@ -65,32 +65,26 @@ public final class TargetSelection {
 
         final List<Selection> res = new ArrayList<>();
         res.add(new Selection(null, env.getBase()));
-        for (GuideGroup g : env.getGroups()) {
+        for (final GuideGroup g : env.getGroups()) {
             res.add(new Selection(g, null));
-            for (SPTarget t : g.getTargets()) res.add(new Selection(g, t));
+            g.getTargets().foreach(t -> res.add(new Selection(g, t)));
         }
-        for (SPTarget t : env.getUserTargets()) res.add(new Selection(null, t));
+        env.getUserTargets().foreach(t -> res.add(new Selection(null, t)));
         return DefaultImList.create(res);
     }
 
-    private static final MapOp<Tuple2<Selection, Integer>, Integer> INDEX_OF = new MapOp<Tuple2<Selection, Integer>, Integer>() {
-        @Override public Integer apply(Tuple2<Selection, Integer> tup) { return tup._2(); }
-    };
+    private static final MapOp<Tuple2<Selection, Integer>, Integer> INDEX_OF = Tuple2::_2;
 
     public static int indexOf(TargetEnvironment env, final SPTarget target) {
-        return toSelections(env).zipWithIndex().find(new PredicateOp<Tuple2<Selection, Integer>>() {
-            @Override public Boolean apply(Tuple2<Selection, Integer> tup) {
-                return tup._1().target == target;
-            }
-        }).map(INDEX_OF).getOrElse(NO_SELECTION.value);
+        return toSelections(env).zipWithIndex().
+                find(tup -> target.equals(tup._1().target)).
+                map(INDEX_OF).getOrElse(NO_SELECTION.value);
     }
 
     public static int indexOf(TargetEnvironment env, final GuideGroup grp) {
-        return toSelections(env).zipWithIndex().find(new PredicateOp<Tuple2<Selection, Integer>>() {
-            @Override public Boolean apply(Tuple2<Selection, Integer> tup) {
-                return tup._1().guideGroup == grp;
-            }
-        }).map(INDEX_OF).getOrElse(NO_SELECTION.value);
+        return toSelections(env).zipWithIndex().
+                find(tup -> grp.equals(tup._1().guideGroup)).
+                map(INDEX_OF).getOrElse(NO_SELECTION.value);
     }
 
     private static Selection selectionAt(TargetEnvironment env, int index) {

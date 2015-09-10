@@ -247,7 +247,7 @@ public final class GuideGroupTest extends TestCase {
     }
 
     public void testRemoveTargetUpdate() {
-        UpdateOp<GuideGroup> f = GuideGroup.removeTargetUpdate(fix.t_pwfs1_2);
+        UpdateOp<GuideGroup> f = g -> g.removeTarget(fix.t_pwfs1_2);
 
         GuideGroup grp = f.apply(fix.grp_all);
         ImList<SPTarget> expected = DefaultImList.create(
@@ -279,13 +279,12 @@ public final class GuideGroupTest extends TestCase {
     }
 
     public void testCloneTargets() {
-        GuideGroup grp = GuideGroup.CLONE_TARGETS.apply(fix.grp_all);
+        final GuideGroup grp = fix.grp_all.cloneTargets();
         assertFalse(fix.grp_all.equals(grp));
         Fixture.verifyGptListEquals(fix.grp_all.getAll(), grp.getAll(), fix.when);
         assertEquals(fix.grp_all.getName(), grp.getName());
 
-        grp = GuideGroup.CLONE_TARGETS.apply(fix.grp_gmos);
-
+        //grp = GuideGroup.CLONE_TARGETS.apply(fix.grp_gmos);
         // XXX allan: removed GuideGroup.equals def to avoid having new, empty groups being equal
 //        assertTrue(fix.grp_gmos.equals(grp)); // no SPTargets so these are .equals too
     }

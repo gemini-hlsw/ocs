@@ -75,9 +75,16 @@ public final class GuideProbeTargets implements Serializable, TargetContainer, I
      * appropriately.
      */
     static private final Function2<Option<SPTarget>, SPTarget, Option<SPTarget>> possiblyRemoveTarget = ((o,t) ->
-            o.exists(t::equals) ? NO_TARGET : o
+            o.exists(ot -> ot.getTarget().equals(t.getTarget())) ? NO_TARGET : o
     );
 
+
+    /**
+     * Compare targets by their ITarget component so as to ignore watchers.
+     */
+    static private boolean compareTargets(final Option<SPTarget> t1, final Option<SPTarget> t2) {
+        return (t1.isEmpty() && t2.isEmpty()) || t1.forall(spt1 -> t2.exists(spt2 -> spt1.getTarget().equals(spt2.getTarget())));
+    }
 
     /**
      * Creates a GuideTargets instance associated with the given
@@ -149,7 +156,8 @@ public final class GuideProbeTargets implements Serializable, TargetContainer, I
             throw new IllegalArgumentException("missing target options");
 
         // TODO: Is there a way to force this without exception handling and checking?
-        if (!bagsTarget.equals(primaryTarget) && !primaryTarget.forall(manualTargets::contains))
+        final boolean primaryIsBags = compareTargets(bagsTarget, primaryTarget);
+        if (!primaryIsBags && !primaryTarget.forall(manualTargets::contains))
             throw new IllegalArgumentException("primary target must be either BAGS target or in manual targets");
 
         this.guider = guider;
@@ -182,7 +190,7 @@ public final class GuideProbeTargets implements Serializable, TargetContainer, I
      */
     @Override
     public boolean containsTarget(final SPTarget target) {
-        return bagsTarget.exists(target::equals) || manualTargets.contains(target);
+        return target != null && (bagsTarget.exists(target::equals) || manualTargets.contains(target));
     }
 
     /**
@@ -219,10 +227,9 @@ public final class GuideProbeTargets implements Serializable, TargetContainer, I
         // 1. Primary is None
         // 2. Primary is BAGS
         // 3. Primary is in manual list
-        final Option<SPTarget> primaryTargetClone = primaryTarget.map(t ->
-                bagsTarget.exists(t::equals) ? bagsTarget.getValue() :
-                manualTargetsClone.get(manualTargets.indexOf(t))
-        );
+        final Option<SPTarget> primaryTargetClone = primaryTarget.equals(bagsTarget) ?
+                bagsTargetClone :
+                primaryTarget.map(t -> manualTargetsClone.get(manualTargets.indexOf(t)));
 
         return new GuideProbeTargets(guider, bagsTargetClone, primaryTargetClone, manualTargetsClone);
     }
@@ -445,7 +452,8 @@ public final class GuideProbeTargets implements Serializable, TargetContainer, I
     public GuideProbeTargets togglePrimary(final SPTarget target) {
         if (!getTargets().contains(target))
             throw new IllegalArgumentException("not a member of the list");
-        return new GuideProbeTargets(guider, bagsTarget, new Some<>(target), manualTargets);
+        final Option<SPTarget> newPrimary = primaryTarget.exists(target::equals) ? None.instance() : new Some<>(target);
+        return new GuideProbeTargets(guider, bagsTarget, newPrimary, manualTargets);
     }
 
     /**

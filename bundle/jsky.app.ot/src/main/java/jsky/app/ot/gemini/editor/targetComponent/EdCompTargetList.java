@@ -16,7 +16,7 @@ import edu.gemini.spModel.target.WatchablePos;
 import edu.gemini.spModel.target.env.*;
 import edu.gemini.spModel.target.obsComp.TargetObsComp;
 import edu.gemini.spModel.target.obsComp.TargetSelection;
-import edu.gemini.spModel.target.system.*;
+import edu.gemini.spModel.target.system.ITarget;
 import jsky.app.ot.OTOptions;
 import jsky.app.ot.ags.*;
 import jsky.app.ot.editor.OtItemEditor;
@@ -72,11 +72,10 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         _w.guidingControls.autoGuideStarButton().peer().addActionListener(autoGuideStarListener);
         _w.guidingControls.manualGuideStarButton().peer().addActionListener(manualGuideStarListener);
 
-        _w.guidingControls.newManualGuideStarButton().peer().addActionListener(evt -> {
-            QueryResultsWindow.instance().showOn(getNode());
-        });
+        _w.guidingControls.newManualGuideStarButton().peer().addActionListener(evt ->
+                QueryResultsWindow.instance().showOn(getNode()));
         _w.guidingControls.autoGuideStarGuiderSelector().addSelectionListener(strategy ->
-            AgsStrategyUtil.setSelection(getContextObservation(), strategy)
+                AgsStrategyUtil.setSelection(getContextObservation(), strategy)
         );
 
         _w.guideGroupName.addWatcher(new TextBoxWidgetWatcher() {
@@ -92,6 +91,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                         list.add(g == _curGroup ? newGroup : g);
                     }
                     _curGroup = newGroup;
+
                     getDataObject().setTargetEnvironment(env.setGuideEnvironment(ge.setOptions(DefaultImList.create(list))));
                     _w.guideGroupName.requestFocus(); // otherwise focus is lost during event handling
                 });
@@ -101,7 +101,8 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         });
 
         _w.positionTable.addKeyListener(new KeyAdapter() {
-            @Override public void keyPressed(KeyEvent event) {
+            @Override
+            public void keyPressed(KeyEvent event) {
                 switch (event.getKeyCode()) {
                     // Make the delete and backspace buttons delete selected positions.
                     case KeyEvent.VK_DELETE:
@@ -138,6 +139,17 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         _w.newMenu.setEnabled(enabled && inst != null);
     }
 
+    /**
+     * Private method to update the remove and primary buttons, as this code is used multiple times.
+     */
+    private void updateRemovePrimaryButtons(final TargetEnvironment env) {
+        final boolean editable   = OTOptions.areRootAndCurrentObsIfAnyEditable(getProgram(), getContextObservation());
+        final boolean curNotBags = !env.getGroups().exists(gg -> gg.getAllContaining(_curPos).exists(gpt -> gpt.getBagsTarget().exists(_curPos::equals)));
+        final boolean curNotBase = _curPos != env.getBase();
+        _w.removeButton.setEnabled(curNotBase && curNotBags && editable);
+        _w.primaryButton.setEnabled(enablePrimary(_curPos, env) && editable);
+    }
+
     private final ActionListener _tagListener = new ActionListener() {
         public void actionPerformed(ActionEvent e) {
             final PositionType pt = (PositionType) _w.tag.getSelectedItem();
@@ -155,11 +167,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                     if (_curPos != null) {
                         _curPos.addWatcher(posWatcher);
                         refreshAll();
-
-                        // can't remove base position, so disable button
-                        final boolean editable = OTOptions.areRootAndCurrentObsIfAnyEditable(getProgram(), getContextObservation());
-                        _w.removeButton.setEnabled(_curPos != env.getBase() && editable);
-                        _w.primaryButton.setEnabled(enablePrimary(_curPos, env) && editable);
+                        updateRemovePrimaryButtons(env);
                     }
                 }
             }
@@ -271,11 +279,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                 if (_curPos != null) {
                     _curPos.addWatcher(posWatcher);
                     refreshAll();
-
-                    // can't remove base position, so disable button
-                    final boolean editable = OTOptions.areRootAndCurrentObsIfAnyEditable(getProgram(), getContextObservation());
-                    _w.removeButton.setEnabled(_curPos != env2.getBase() && editable);
-                    _w.primaryButton.setEnabled(enablePrimary(selTarget, env2) && editable);
+                    updateRemovePrimaryButtons(env2);
                 }
             }
         }
@@ -287,9 +291,6 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
             _w.newMenu.setEnabled(false);
         } else {
             _w.newMenu.setEnabled(true);
-
-            final TargetEnvironment env1 = obsComp.getTargetEnvironment();
-
             if (inst.hasGuideProbes()) {
                 final List<GuideProbe> guiders = new ArrayList<>(GuideProbeUtil.instance.getAvailableGuiders(getContextObservation()));
                 Collections.sort(guiders, GuideProbe.KeyComparator.instance);
@@ -388,12 +389,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                         _curPos = target;
                         _curPos.addWatcher(posWatcher);
                         refreshAll();
-
-                        // can't remove base position, so disable button
-                        final boolean editable = OTOptions.areRootAndCurrentObsIfAnyEditable(getProgram(), getContextObservation());
-                        _w.removeButton.setEnabled(_curPos != env1.getBase() && editable);
-                        _w.primaryButton.setEnabled(enablePrimary(target, env1) && editable);
-
+                        updateRemovePrimaryButtons(env1);
                     }
                 }
             } else {
@@ -519,6 +515,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
             final ImList<GuideGroup> options = ge.getOptions();
             final GuideGroup group = GuideGroup.create(null);
             final ImList<GuideGroup> groups = options.append(group);
+
             // OT-34: make new group primary and select it
             if (!positionTable.confirmGroupChange(primaryGroup, group)) return;
             obsComp.setTargetEnvironment(env.setGuideEnvironment(ge.setOptions(groups).selectPrimary(group)));
@@ -586,6 +583,10 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 
         // Update target details
         _w.detailEditor.edit(getObsContext(env), _curPos, getNode());
+
+        // TODO: Why is this doing nothing???
+        // final boolean isBags = _curPos != null && env.getGroups().exists(gg -> gg.getAllContaining(_curPos).exists(gpt -> gpt.getBagsTarget().exists(_curPos::equals)));
+        // _w.detailEditor.allEditorsJava().stream().filter(ed -> _w.detailEditor.curDetailEditorJava().forall(cur -> cur != ed)).forEach(ed -> updateEnabledState(new Component[]{ed}, !isBags));
     }
 
     private void showTargetTag() {
@@ -639,9 +640,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                 if (_curPos != null) {
                     _curPos.addWatcher(posWatcher);
                     refreshAll();
-                    final boolean editable = OTOptions.areRootAndCurrentObsIfAnyEditable(getProgram(), getContextObservation());
-                    _w.removeButton.setEnabled(_curPos != env.getBase() && editable);
-                    _w.primaryButton.setEnabled(enablePrimary(selTarget, env) && editable);
+                    updateRemovePrimaryButtons(env);
                 }
             }
         }
