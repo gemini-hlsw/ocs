@@ -1,8 +1,8 @@
 package edu.gemini.spModel.core
 
-import squants.Length
-import squants.space.{Microns, Nanometers}
+import squants.space.{Length, Microns, Nanometers}
 
+import scala.util.Try
 import scalaz.{Monoid, Order}
 
 /** Representation of wavelengths.
@@ -43,9 +43,20 @@ final case class Wavelength private(length: Length) extends AnyVal with Serializ
    */
   def /(factor: Double): Wavelength = Wavelength(length / factor)
 
+  /**
+   * toString()
+   */
+  override def toString: String = length.toString()
+
 }
 
 object Wavelength {
+
+  /**
+   * Creates a `Wavelength` from a string, e.g. "2.2 µm".
+   * @group Constructors
+   */
+  def apply(s: String): Try[Wavelength] = for {length <- Length(s)} yield Wavelength(length)
 
   /**
    * Creates a `Wavelength` from numeric value representing nanometers.
