@@ -7,21 +7,28 @@
 package jsky.app.ot.gemini.niri;
 
 import edu.gemini.pot.sp.ISPNode;
+import edu.gemini.shared.util.immutable.ImOption;
+import edu.gemini.shared.util.immutable.None;
+import edu.gemini.shared.util.immutable.Option;
+import edu.gemini.shared.util.immutable.Some;
 import edu.gemini.spModel.gemini.niri.InstNIRI;
+import edu.gemini.spModel.gemini.niri.Niri;
 import edu.gemini.spModel.gemini.niri.Niri.*;
 import edu.gemini.spModel.type.SpTypeUtil;
 import jsky.app.ot.OT;
 import jsky.app.ot.OTOptions;
-import jsky.app.ot.editor.type.SpTypeComboBoxModel;
-import jsky.app.ot.editor.type.SpTypeComboBoxRenderer;
 import jsky.app.ot.gemini.editor.EdCompInstBase;
 import jsky.util.gui.DropDownListBoxWidget;
 import jsky.util.gui.DropDownListBoxWidgetWatcher;
 import jsky.util.gui.TextBoxWidget;
 
-import javax.swing.JPanel;
+import javax.swing.*;
+import javax.swing.plaf.basic.BasicComboBoxRenderer;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.*;
+import java.util.List;
 
 
 /**
@@ -34,6 +41,8 @@ public final class EdCompInstNIRI extends EdCompInstBase<InstNIRI>
      * The GUI layout panel
      */
     private final NiriForm _w = new NiriForm();
+
+    private final static Component SEPARATOR = new JSeparator(JSeparator.HORIZONTAL);
 
 
     /**
@@ -56,9 +65,8 @@ public final class EdCompInstNIRI extends EdCompInstBase<InstNIRI>
 
         _w.camera.setChoices(_getCameras());
 
-        final SpTypeComboBoxModel<Filter> filterModel = new SpTypeComboBoxModel<>(Filter.class);
-        _w.selectedFilter.setModel(filterModel);
-        _w.selectedFilter.setRenderer(new SpTypeComboBoxRenderer());
+        _w.selectedFilter.setModel(new NiriFilterComboBoxModel());
+        _w.selectedFilter.setRenderer(new ΝiriFilterComboBoxRenderer());
         _w.selectedFilter.setMaximumRowCount(Math.min(Filter.values().length, 20));
         _w.selectedFilter.addActionListener(this);
 
@@ -151,7 +159,7 @@ public final class EdCompInstNIRI extends EdCompInstBase<InstNIRI>
         // First fill in the text box.
         final Filter filter = getDataObject().getFilter();
         if (filter != null) {
-            _w.selectedFilter.getModel().setSelectedItem(filter);
+            _w.selectedFilter.getModel().setSelectedItem(ImOption.apply(filter));
         }
     }
 
@@ -289,7 +297,9 @@ public final class EdCompInstNIRI extends EdCompInstBase<InstNIRI>
             _updateReadMode();
             _updateScienceFOV();
         } else if (w == _w.selectedFilter) {
-            getDataObject().setFilter((Filter) _w.selectedFilter.getSelectedItem());
+            @SuppressWarnings("unchecked")
+            Option<Filter> filter = (Option<Filter>)_w.selectedFilter.getSelectedItem();
+            getDataObject().setFilter(filter.getOrElse(Filter.DEFAULT));
         }
     }
 
@@ -330,4 +340,77 @@ public final class EdCompInstNIRI extends EdCompInstBase<InstNIRI>
             getDataObject().setFastModeExposures(value);
         }
     }
+
+
+    /**
+     * An auxiliary method that returns a Vector with all the original NIRI Filters wrapped as Option elements,
+     * separated by Type. We use a None element to separate them in the final result. This is used for display
+     * purposes in the ComboBox
+     * @return a Vector of optional filters.
+     */
+    private static Vector<Option<Filter>> buildElements() {
+        final java.util.List<Filter> v = new ArrayList<>(SpTypeUtil.getSelectableItems(Niri.Filter.class));
+
+        final List<Option<Filter>> bbFilters = new ArrayList<>();
+        final List<Option<Niri.Filter>> nbFilters = new ArrayList<>();
+
+        for (Niri.Filter filter: v) {
+            switch (filter.type()) {
+                case broadband:
+                    bbFilters.add(new Some<>(filter));
+                    break;
+                case narrowband:
+                    nbFilters.add(new Some<>(filter));
+                    break;
+            }
+        }
+
+        final Vector<Option<Niri.Filter>> nv = new Vector<>();
+        nv.addAll(bbFilters);
+        nv.add(None.instance());
+        nv.addAll(nbFilters);
+        return nv;
+    }
+
+    /**
+     * A ComboBox model for NIRI Filters, such as we can group narrowband and broadband filters together
+     * We disable the possibility of selecting the elements in the combo that are used as separators,
+     * which are stored as None objects.
+     */
+    private final class NiriFilterComboBoxModel extends DefaultComboBoxModel {
+
+        @SuppressWarnings("unchecked")
+        public NiriFilterComboBoxModel() {
+            super(buildElements());
+        }
+
+        @Override
+        public void setSelectedItem(Object anObject) {
+
+            @SuppressWarnings("unchecked")
+            Option<Niri.Filter> filter = (Option<Niri.Filter>) anObject;
+            if (filter.isDefined()) super.setSelectedItem(anObject);
+        }
+    }
+
+    /**
+     * A Renderer for the Niri Filter combobox. It uses the description for the display (contrary to
+     * what other SpTypes use which is the displayable field, add a mark to obsolete filters, and return
+     * a JComponent.Separator if the filter is a None.
+     */
+    private final class ΝiriFilterComboBoxRenderer extends BasicComboBoxRenderer {
+
+        public Component getListCellRendererComponent(JList jList, Object value, int index, boolean isSelected, boolean hasFocus) {
+
+            @SuppressWarnings("unchecked")
+            final Option<Niri.Filter> opFilter = (Option<Niri.Filter>) value;
+
+            return opFilter.map(f ->
+                            super.getListCellRendererComponent(jList, f.description() + (f.isObsolete() ? "*" : ""), index, isSelected, hasFocus)
+            ).getOrElse(SEPARATOR);
+
+        }
+    }
+
+
 }
