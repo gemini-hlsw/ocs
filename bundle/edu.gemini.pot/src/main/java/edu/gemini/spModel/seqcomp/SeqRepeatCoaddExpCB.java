@@ -15,6 +15,7 @@ import edu.gemini.spModel.data.config.IConfig;
 import edu.gemini.spModel.data.config.StringParameter;
 import edu.gemini.spModel.data.config.DefaultParameter;
 import edu.gemini.spModel.config.AbstractSeqComponentCB;
+import edu.gemini.spModel.dataflow.GsaSequenceEditor;
 import edu.gemini.spModel.obscomp.InstConstants;
 
 import java.util.Map;
@@ -85,6 +86,8 @@ public class SeqRepeatCoaddExpCB extends AbstractSeqComponentCB {
         config.putParameter(SYSTEM_NAME,
                             StringParameter.getInstance(InstConstants.OBS_CLASS_PROP,
                                                         c.getObsClass().sequenceValue()));
+
+        GsaSequenceEditor.instance.addProprietaryPeriod(config, getSeqComponent().getProgram(), c.getObsClass());
 
         if (!SeqRepeatCbOptions.getAddObsCount(_options)) return;
         config.putParameter(SYSTEM_NAME,

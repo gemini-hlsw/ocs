@@ -1,5 +1,6 @@
 package edu.gemini.spModel.dataflow;
 
+import edu.gemini.pot.sp.ISPProgram;
 import edu.gemini.spModel.data.config.*;
 import edu.gemini.spModel.obsclass.ObsClass;
 import edu.gemini.spModel.seqcomp.SeqConfigNames;
@@ -11,8 +12,8 @@ import edu.gemini.spModel.seqcomp.SeqConfigNames;
 public enum GsaSequenceEditor {
     instance;
 
-    public static final String PROPRIETARY_MD     = "propMd";
-    public static final String PROPRIETARY_MONTHS = "propMonths";
+    public static final String PROPRIETARY_MD     = "proprietaryMd";
+    public static final String PROPRIETARY_MONTHS = "proprietaryMonths";
 
     public void addProprietaryMetadata(IConfig c, GsaAspect gsa) {
         c.putParameter(
@@ -27,5 +28,9 @@ public enum GsaSequenceEditor {
             SeqConfigNames.OBSERVE_CONFIG_NAME,
             DefaultParameter.getInstance(PROPRIETARY_MONTHS, m)
         );
+    }
+
+    public void addProprietaryPeriod(IConfig c, ISPProgram prog, ObsClass obsClass) {
+        addProprietaryPeriod(c, GsaAspect.lookup(prog), obsClass);
     }
 }
