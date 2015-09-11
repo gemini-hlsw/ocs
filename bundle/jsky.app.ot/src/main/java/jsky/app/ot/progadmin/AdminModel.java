@@ -43,17 +43,9 @@ final class AdminModel implements Serializable {
      * functor so that multiple trips to the ODB are avoided.
      */
     public AdminModel(ISPProgram prog)  {
-        programModel = new ProgramAttrModel(prog);
-
+        programModel  = new ProgramAttrModel(prog);
         timeAcctModel = new TimeAcctModel(prog);
-
-        SPProgram dataObj = (SPProgram) prog.getDataObject();
-        gsaAspect = dataObj.getGsaAspect();
-        if (gsaAspect == null) {
-            SPProgramID progId = programModel.getProgramId();
-            Option<ProgramType> programType = ProgramTypeModel.getProgramType(progId);
-            gsaAspect = GsaAspect.getDefaultAspect(programType);
-        }
+        gsaAspect     = GsaAspect.lookup(prog);
     }
 
     public ISPProgram apply(IDBDatabaseService db, ISPProgram prog) throws DBIDClashException {

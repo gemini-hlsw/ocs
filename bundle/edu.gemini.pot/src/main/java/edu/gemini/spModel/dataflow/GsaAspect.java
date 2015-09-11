@@ -4,7 +4,11 @@
 
 package edu.gemini.spModel.dataflow;
 
+import edu.gemini.pot.sp.ISPProgram;
+import edu.gemini.shared.util.immutable.ImOption;
 import edu.gemini.shared.util.immutable.Option;
+import edu.gemini.spModel.core.ProgramType$;
+import edu.gemini.spModel.gemini.obscomp.SPProgram;
 import edu.gemini.spModel.pio.ParamSet;
 import edu.gemini.spModel.pio.Pio;
 import edu.gemini.spModel.pio.PioFactory;
@@ -24,7 +28,7 @@ public class GsaAspect implements Serializable {
 
     public static final GsaAspect DEFAULT = new GsaAspect(false, 0);
 
-    private static final Map<ProgramType, GsaAspect> TYPE_MAP = new HashMap<ProgramType, GsaAspect>();
+    private static final Map<ProgramType, GsaAspect> TYPE_MAP = new HashMap<>();
 
     static {
         TYPE_MAP.put(ProgramType.Calibration$.MODULE$,        new GsaAspect(true,  0));
@@ -44,6 +48,20 @@ public class GsaAspect implements Serializable {
         if (type == null) return DEFAULT;
         GsaAspect res = TYPE_MAP.get(type);
         return (res == null) ? DEFAULT : res;
+    }
+
+    /**
+     * Looks up the GsaAspect that should be associated with the  program.  This
+     * may be explicitly assigned to the program. If not, and if the program
+     * type can be derived from the program id (which may or may not be set),
+     * use the default for the program type.  If all else fails, then return
+     * a default 0 proprietary month instance.
+     */
+    public static GsaAspect lookup(ISPProgram prog) {
+        final GsaAspect gsa = ((SPProgram) prog.getDataObject()).getGsaAspect();
+        return gsa != null ? gsa :  GsaAspect.getDefaultAspect(
+            ImOption.apply(prog.getProgramID()).flatMap(pid -> ImOption.apply(ProgramType$.MODULE$.readOrNull(pid)))
+        );
     }
 
     private boolean _sendToGsa;

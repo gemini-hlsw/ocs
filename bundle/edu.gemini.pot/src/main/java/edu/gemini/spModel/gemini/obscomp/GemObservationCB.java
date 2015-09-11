@@ -16,6 +16,8 @@ import edu.gemini.spModel.config2.Config;
 import edu.gemini.spModel.config2.ConfigSequence;
 import edu.gemini.spModel.core.SPProgramID;
 import edu.gemini.spModel.data.config.*;
+import edu.gemini.spModel.dataflow.GsaAspect;
+import edu.gemini.spModel.dataflow.GsaSequenceEditor;
 import edu.gemini.spModel.dataset.DatasetLabel;
 import edu.gemini.spModel.gemini.calunit.calibration.CalConfigBuilderUtil;
 import edu.gemini.spModel.gemini.calunit.calibration.CalConfigFactory;
@@ -424,6 +426,10 @@ public class GemObservationCB extends ObservationCB {
         dc.putParameter(param);
         param = StringParameter.getInstance(InstConstants.OBSERVATIONID_PROP, obsIdStr);
         dc.putParameter(param);
+
+        // Add proprietary metadata flag
+        final GsaAspect gsa = GsaAspect.lookup(obs.getProgram());
+        GsaSequenceEditor.instance.addProprietaryMetadata(config, gsa);
     }
 
     @Override
