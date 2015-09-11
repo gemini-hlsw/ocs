@@ -1,6 +1,6 @@
 /* Copyright 2000 Association for Universities for Research in Astronomy, Inc.,
  * Observatory Control System, Gemini Telescopes Project.
- * See the file COPYRIGHT for complete details.
+ * See the file LICENSE for complete details.
  *
  * $Id: OffsetPosCase.java 19597 2009-05-04 15:36:57Z swalker $
  */

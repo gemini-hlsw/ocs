@@ -1,6 +1,6 @@
 /* Copyright 2000 Association for Universities for Research in Astronomy, Inc.,
  * Observatory Control System, Gemini Telescopes Project.
- * See the file COPYRIGHT for complete details.
+ * See the file LICENSE for complete details.
  *
  * $Id: HMSFormatCase.java 21620 2009-08-20 19:41:32Z swalker $
  */

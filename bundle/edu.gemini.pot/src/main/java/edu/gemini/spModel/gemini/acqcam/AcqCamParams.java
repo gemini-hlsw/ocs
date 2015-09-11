@@ -1,7 +1,7 @@
 // Copyright 1997-2000
 // Association for Universities for Research in Astronomy, Inc.,
 // Observatory Control System, Gemini Telescopes Project.
-// See the file COPYRIGHT for complete details.
+// See the file LICENSE for complete details.
 //
 // $Id: AcqCamParams.java 7038 2006-05-17 14:24:43Z gillies $
 //

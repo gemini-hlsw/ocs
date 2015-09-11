@@ -1,6 +1,6 @@
 // Copyright 1999 Association for Universities for Research in Astronomy, Inc.,
 // Observatory Control System, Gemini Telescopes Project.
-// See the file COPYRIGHT for complete details.
+// See the file LICENSE for complete details.
 //
 // $Id: JCalendarPopup.java 38330 2011-11-02 15:16:29Z nbarriga $
 //

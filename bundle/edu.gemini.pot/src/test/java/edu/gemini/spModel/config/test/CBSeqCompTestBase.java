@@ -1,7 +1,7 @@
 // Copyright 2000
 // Association for Universities for Research in Astronomy, Inc.
 // Observatory Control System, Gemini Telescopes Project.
-// See the file COPYRIGHT for complete details.
+// See the file LICENSE for complete details.
 //
 // $Id: CBSeqCompTestBase.java 6017 2005-05-02 22:49:39Z shane $
 //

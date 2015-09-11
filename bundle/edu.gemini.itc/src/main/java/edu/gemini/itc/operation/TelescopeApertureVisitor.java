@@ -4,7 +4,7 @@
 // acting as operator of the Gemini Observatory under a cooperative
 // agreement with the National Science Foundation. This software may 
 // only be used or copied as described in the license set out in the 
-// file LICENSE.TXT included with the distribution package.
+// file LICENSE included with the distribution package.
 //
 // $Id: TelescopeApertureVisitor.java,v 1.2 2003/11/21 14:31:02 shane Exp $
 //

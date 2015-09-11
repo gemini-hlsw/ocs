@@ -2,7 +2,7 @@
  * $Id: NavigatorPane.java 4414 2004-02-03 16:21:36Z brighton $
  *
  * Copyright (c) 1998-2000 The Regents of the University of California.
- * All rights reserved. See the file COPYRIGHT for details.
+ * All rights reserved. See the file LICENSE for details.
  */
 
 package jsky.navigator;

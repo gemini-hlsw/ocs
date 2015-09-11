@@ -4,7 +4,7 @@
 // acting as operator of the Gemini Observatory under a cooperative
 // agreement with the National Science Foundation. This software may 
 // only be used or copied as described in the license set out in the 
-// file LICENSE.TXT included with the distribution package.
+// file LICENSE included with the distribution package.
 //
 // $Id: SampledSpectrum.java,v 1.4 2004/02/13 13:00:59 bwalls Exp $
 //

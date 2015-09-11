@@ -1,6 +1,6 @@
 // Copyright 1999 Association for Universities for Research in Astronomy, Inc.,
 // Observatory Control System, Gemini Telescopes Project.
-// See the file COPYRIGHT for complete details.
+// See the file LICENSE for complete details.
 //
 // $Id: TimeValue.java 15389 2008-11-03 20:02:08Z swalker $
 //

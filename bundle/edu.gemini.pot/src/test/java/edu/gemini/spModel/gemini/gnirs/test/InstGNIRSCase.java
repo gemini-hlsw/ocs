@@ -1,6 +1,6 @@
 /* Copyright 2000 Association for Universities for Research in Astronomy, Inc.,
  * Observatory Control System, Gemini Telescopes Project.
- * See the file COPYRIGHT for complete details.
+ * See the file LICENSE for complete details.
  *
  * $Id: InstGNIRSCase.java 7049 2006-05-18 21:22:33Z gillies $
  */

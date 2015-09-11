@@ -1,6 +1,6 @@
 // Copyright 2000 Association for Universities for Research in Astronomy, Inc.,
 // Observatory Control System, Gemini Telescopes Project.
-// See the file COPYRIGHT for complete details.
+// See the file LICENSE for complete details.
 //
 // $Id: OT.java 47190 2012-08-02 18:40:21Z swalker $
 //

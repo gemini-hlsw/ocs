@@ -1,7 +1,7 @@
 // Copyright 2002
 // Association for Universities for Research in Astronomy, Inc.
 // Observatory Control System, Gemini Telescopes Project.
-// See the file COPYRIGHT for complete details.
+// See the file LICENSE for complete details.
 //
 // $Id: IConfigParameter.java 38078 2011-10-18 15:15:29Z swalker $
 //

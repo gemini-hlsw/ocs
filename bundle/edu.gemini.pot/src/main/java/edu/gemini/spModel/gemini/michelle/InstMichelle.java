@@ -1,7 +1,7 @@
 // Copyright 2002
 // Association for Universities for Research in Astronomy, Inc.,
 // Observatory Control System, Gemini Telescopes Project.
-// See the file COPYRIGHT for complete details.
+// See the file LICENSE for complete details.
 //
 // $Id: InstMichelle.java 45662 2012-05-31 02:54:05Z fnussber $
 //
