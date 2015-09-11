@@ -7,10 +7,6 @@
 package jsky.app.ot.gemini.niri;
 
 import edu.gemini.pot.sp.ISPNode;
-import edu.gemini.shared.util.immutable.ImOption;
-import edu.gemini.shared.util.immutable.None;
-import edu.gemini.shared.util.immutable.Option;
-import edu.gemini.shared.util.immutable.Some;
 import edu.gemini.spModel.gemini.niri.InstNIRI;
 import edu.gemini.spModel.gemini.niri.Niri;
 import edu.gemini.spModel.gemini.niri.Niri.*;
@@ -159,7 +155,7 @@ public final class EdCompInstNIRI extends EdCompInstBase<InstNIRI>
         // First fill in the text box.
         final Filter filter = getDataObject().getFilter();
         if (filter != null) {
-            _w.selectedFilter.getModel().setSelectedItem(ImOption.apply(filter));
+            _w.selectedFilter.getModel().setSelectedItem(Optional.of(filter));
         }
     }
 
@@ -298,8 +294,8 @@ public final class EdCompInstNIRI extends EdCompInstBase<InstNIRI>
             _updateScienceFOV();
         } else if (w == _w.selectedFilter) {
             @SuppressWarnings("unchecked")
-            Option<Filter> filter = (Option<Filter>)_w.selectedFilter.getSelectedItem();
-            getDataObject().setFilter(filter.getOrElse(Filter.DEFAULT));
+            Optional<Filter> filter = (Optional<Filter>)_w.selectedFilter.getSelectedItem();
+            getDataObject().setFilter(filter.orElse(Filter.DEFAULT));
         }
     }
 
@@ -348,26 +344,26 @@ public final class EdCompInstNIRI extends EdCompInstBase<InstNIRI>
      * purposes in the ComboBox
      * @return a Vector of optional filters.
      */
-    private static Vector<Option<Filter>> buildElements() {
+    private static Vector<Optional<Filter>> buildElements() {
         final java.util.List<Filter> v = new ArrayList<>(SpTypeUtil.getSelectableItems(Niri.Filter.class));
 
-        final List<Option<Filter>> bbFilters = new ArrayList<>();
-        final List<Option<Niri.Filter>> nbFilters = new ArrayList<>();
+        final List<Optional<Filter>> bbFilters = new ArrayList<>();
+        final List<Optional<Niri.Filter>> nbFilters = new ArrayList<>();
 
         for (Niri.Filter filter: v) {
             switch (filter.type()) {
                 case broadband:
-                    bbFilters.add(new Some<>(filter));
+                    bbFilters.add(Optional.of(filter));
                     break;
                 case narrowband:
-                    nbFilters.add(new Some<>(filter));
+                    nbFilters.add(Optional.of(filter));
                     break;
             }
         }
 
-        final Vector<Option<Niri.Filter>> nv = new Vector<>();
+        final Vector<Optional<Niri.Filter>> nv = new Vector<>();
         nv.addAll(bbFilters);
-        nv.add(None.instance());
+        nv.add(Optional.empty());
         nv.addAll(nbFilters);
         return nv;
     }
@@ -388,8 +384,8 @@ public final class EdCompInstNIRI extends EdCompInstBase<InstNIRI>
         public void setSelectedItem(Object anObject) {
 
             @SuppressWarnings("unchecked")
-            Option<Niri.Filter> filter = (Option<Niri.Filter>) anObject;
-            if (filter.isDefined()) super.setSelectedItem(anObject);
+            Optional<Niri.Filter> filter = (Optional<Niri.Filter>) anObject;
+            if (filter.isPresent()) super.setSelectedItem(anObject);
         }
     }
 
@@ -403,11 +399,11 @@ public final class EdCompInstNIRI extends EdCompInstBase<InstNIRI>
         public Component getListCellRendererComponent(JList jList, Object value, int index, boolean isSelected, boolean hasFocus) {
 
             @SuppressWarnings("unchecked")
-            final Option<Niri.Filter> opFilter = (Option<Niri.Filter>) value;
+            final Optional<Niri.Filter> opFilter = (Optional<Niri.Filter>) value;
 
             return opFilter.map(f ->
                             super.getListCellRendererComponent(jList, f.description() + (f.isObsolete() ? "*" : ""), index, isSelected, hasFocus)
-            ).getOrElse(SEPARATOR);
+            ).orElse(SEPARATOR);
 
         }
     }
