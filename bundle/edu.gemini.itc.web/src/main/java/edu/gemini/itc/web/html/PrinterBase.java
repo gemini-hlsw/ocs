@@ -6,6 +6,7 @@ import edu.gemini.itc.web.servlets.FilesServlet;
 import edu.gemini.itc.web.servlets.ServerInfo;
 
 import java.io.PrintWriter;
+import java.util.Optional;
 import java.util.UUID;
 
 public abstract class PrinterBase {
@@ -51,27 +52,52 @@ public abstract class PrinterBase {
             _out.println();
     }
 
-    // Display an error text
-    protected void _error(final String s) {
-        _println("<span style=\"color:red; font-style:italic;\">" + s + "</span>");
+    /** Adds a file link with a concatenation of all series of the given data type of chart 0. */
+    protected void _printFileLinkAllSeries(final UUID id, final SpcDataType type) {
+        _printFileLink(id, type, 0, Optional.empty(), Optional.empty());
     }
 
+    /** Adds a file link with series 0 of the given data type of chart 0. */
     protected void _printFileLink(final UUID id, final SpcDataType type) {
-        _printFileLink(id, type, 0);
+        _printFileLink(id, type, 0, Optional.of(0), Optional.empty());
     }
 
-    protected void _printFileLink(final UUID id, final SpcDataType type, final int index) {
+    /** Adds a file link with the series 0 of the given type and chart. */
+    protected void _printFileLink(final UUID id, final SpcDataType type, final int chartIndex) {
+        _printFileLink(id, type, chartIndex, Optional.of(0), Optional.empty());
+    }
+
+    /** Adds a file link with the series with the given index for the given type and chart and with an additional text in the label. */
+    protected void _printFileLink(final UUID id, final SpcDataType type, final int chartIndex, final int seriesIndex, final String txt) {
+        _printFileLink(id, type, chartIndex, Optional.of(seriesIndex), Optional.of(txt));
+    }
+
+    /** Adds a link to a file representing one (or all) series of data (x,y value pairs) of a chart.
+     *  The file will be created on-demand by the FilesServlet. If no series index is given, all series of the given
+     *  type are stitched together and represented in a single file. This is used for displaying the values covering
+     *  several CCDs which are represented by different colors in the charts and therefore by different data series;
+     *  currently this is only used for GMOS' HAMAMATSU CCDs but might be interesting for GHOST in the future.
+     * @param id            the UUID representing the cached calculation results
+     * @param type          the type of data (e.g. signal, background etc)
+     * @param chartIndex    the index of the chart (e.g. signal or s2n)
+     * @param seriesIndex   the index of the chart series
+     * @param txt           an optional text that will be added to the HTML link description if present
+     */
+    protected void _printFileLink(final UUID id, final SpcDataType type, final int chartIndex, final Optional<Integer> seriesIndex, final Optional<String> txt) {
         _println("<a href =" +
                 "\"" + ServerInfo.getServerURL() +
                 "itc/servlet/images" +
-                "?" + FilesServlet.ParamType  + "=" + FilesServlet.TypeTxt +
-                "&" + FilesServlet.ParamName  + "=" + type.toString() +
-                "&" + FilesServlet.ParamIndex + "=" + index +
-                "&" + FilesServlet.ParamId    + "=" + id +
-                "\"> Click here for " + toFileLabel(type) + ". </a>");
+                "?" + FilesServlet.ParamType        + "=" + FilesServlet.TypeTxt +
+                "&" + FilesServlet.ParamName        + "=" + type.toString() +
+                "&" + FilesServlet.ParamChartIndex  + "=" + chartIndex +
+                seriesIndex.map(i -> "&" + FilesServlet.ParamSeriesIndex + "=" + i).orElse("") +
+                "&" + FilesServlet.ParamId          + "=" + id +
+                "\"> Click here for " + toFileLabel(type) +
+                txt.orElse("") +
+                ".</a>");
     }
 
-    // Adds an HTML image link
+    // Adds a link to an image
     protected void _printImageLink(final UUID id, final SpcChartType type, final PlottingDetails pd) {
         _printImageLink(id, type, 0, pd);
     }
@@ -79,10 +105,10 @@ public abstract class PrinterBase {
     protected void _printImageLink(final UUID id, final SpcChartType type, final int index, final PlottingDetails pd) {
         _print("<img alt=\"" + toImgAlt(type) + "\" src=\"" + ServerInfo.getServerURL() +
                 "itc/servlet/images" +
-                "?" + FilesServlet.ParamType  + "=" + FilesServlet.TypeImg +
-                "&" + FilesServlet.ParamName  + "=" + type.toString() +
-                "&" + FilesServlet.ParamIndex + "=" + index +
-                "&" + FilesServlet.ParamId    + "=" + id +
+                "?" + FilesServlet.ParamType        + "=" + FilesServlet.TypeImg +
+                "&" + FilesServlet.ParamName        + "=" + type.toString() +
+                "&" + FilesServlet.ParamChartIndex  + "=" + index +
+                "&" + FilesServlet.ParamId          + "=" + id +
                 toPlotLimits(pd) + "\"/>");
     }
 

@@ -79,21 +79,15 @@ class ItcServiceImpl extends ItcService {
 
   private def spectroscopyResult(recipe: SpectroscopyRecipe): Result = {
     val r = recipe.calculateSpectroscopy()
-    resultWithoutFiles(r._1, r._2.warnings)
+    ItcResult.forResult(ItcSpectroscopyResult(r._1.charts, r._2.warnings))
   }
 
   private def spectroscopyResult(recipe: SpectroscopyArrayRecipe): Result = {
     val r = recipe.calculateSpectroscopy()
-    resultWithoutFiles(r._1, combineWarnings(r._2.toList))
+    val c = r._1.charts
+    val w = combineWarnings(r._2.toList)
+    ItcResult.forResult(ItcSpectroscopyResult(c, w))
   }
-
-  // Currently the OT does not use the text files that can be downloaded from the web page. Andy S. says it is
-  // unlikely that we want to display those files in the OT, so for now, we don't send them in order to save
-  // a bit of bandwidth. If the need arises to have the files accessible in the clients just change this to
-  // send the original result.
-  private def resultWithoutFiles(result: ItcSpectroscopyResult, warnings: List[ItcWarning]): Result =
-    ItcResult.forResult(ItcSpectroscopyResult(result.charts, List(), warnings))
-
 
   // combine all warnings for the different CCDs and prepend a "CCD x:" in front of them
   private def combineWarnings[A <: edu.gemini.itc.base.Result](rs: List[A]): List[ItcWarning] =

@@ -72,25 +72,33 @@ public final class GnirsPrinter extends PrinterBase {
             _printImageLink(id, SignalChart.instance(), pdp);
             _println("");
 
-            _printFileLink(id,  SignalData.instance());
-            _printFileLink(id,  BackgroundData.instance());
+            for (int i = 0; i < result.signalOrder().length; i++) {
+                _printFileLink(id, SignalData.instance(), 0, i, "Order " + (i+3));
+            }
+            for (int i = 0; i < result.backGroundOrder().length; i++) {
+                _printFileLink(id, BackgroundData.instance(), 0, i, "Order " + (i+3));
+            }
+
             _printImageLink(id, S2NChart.instance(), pdp);
             _println("");
 
-            _printFileLink(id,  FinalS2NData.instance());
+
+            for (int i = 0; i < result.finalS2NOrder().length; i++) {
+                _printFileLink(id, FinalS2NData.instance(), 0, i, "Order " + (i+3));
+            }
 
         } else {
 
             _printImageLink(id, SignalChart.instance(), pdp);
             _println("");
 
-            _printFileLink(id,  SignalData.instance());
-            _printFileLink(id,  BackgroundData.instance());
+            _printFileLink(id, SignalData.instance());
+            _printFileLink(id, BackgroundData.instance());
             _printImageLink(id, S2NChart.instance(), pdp);
             _println("");
 
-            _printFileLink(id,  SingleS2NData.instance());
-            _printFileLink(id,  FinalS2NData.instance());
+            _printFileLink(id, SingleS2NData.instance());
+            _printFileLink(id, FinalS2NData.instance());
         }
 
         _println("");

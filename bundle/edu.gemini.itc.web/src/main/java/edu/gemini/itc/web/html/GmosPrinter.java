@@ -92,10 +92,10 @@ public final class GmosPrinter extends PrinterBase {
 
                 if (ccdIndex == 0) {
                     _println("<p style=\"page-break-inside: never\">");
-                    _printFileLink(id, SignalData.instance());
-                    _printFileLink(id, BackgroundData.instance());
-                    _printFileLink(id, SingleS2NData.instance());
-                    _printFileLink(id, FinalS2NData.instance());
+                    _printFileLinkAllSeries(id, SignalData.instance());
+                    _printFileLinkAllSeries(id, BackgroundData.instance());
+                    _printFileLinkAllSeries(id, SingleS2NData.instance());
+                    _printFileLinkAllSeries(id, FinalS2NData.instance());
                 }
                 _println("");
             }

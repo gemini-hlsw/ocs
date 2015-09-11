@@ -65,48 +65,8 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
             add(createGmosChart(r, 0));
             add(createGmosChart(r, 1));
         }};
-        final List<SpcDataFile> dataFiles = new ArrayList<SpcDataFile>() {{
-            add(new SpcDataFile(SignalData.instance(),     toFile(r, "Sig")));
-            add(new SpcDataFile(BackgroundData.instance(), toFile(r, "Bac")));
-            add(new SpcDataFile(SingleS2NData.instance(),  toFile(r, "Sin")));
-            add(new SpcDataFile(FinalS2NData.instance(),   toFile(r, "Fin")));
-        }};
-        return new Tuple2<>(ItcSpectroscopyResult.apply(dataSets, dataFiles, new ArrayList<>()), r);
+        return new Tuple2<>(ItcSpectroscopyResult.apply(dataSets, new ArrayList<>()), r);
     }
-
-    protected static String toFile(final SpectroscopyResult[] results, final String filename) {
-        final Gmos mainInstrument = (Gmos) results[0].instrument();
-        final DetectorsTransmissionVisitor tv = mainInstrument.getDetectorTransmision();
-        final Gmos[] ccdArray = mainInstrument.getDetectorCcdInstruments();
-
-        final StringBuilder sb = new StringBuilder();
-
-        for (final Gmos instrument : ccdArray) {
-
-            final int ccdIndex = instrument.getDetectorCcdIndex();
-            final int first = tv.getDetectorCcdStartIndex(ccdIndex);
-            final int last = tv.getDetectorCcdEndIndex(ccdIndex, ccdArray.length);
-            // REL-478: include the gaps in the text data output
-            final int lastWithGap = (ccdIndex < 2 && ccdArray.length > 1)
-                    ? tv.getDetectorCcdStartIndex(ccdIndex + 1)
-                    : last;
-
-            final SpectroscopyResult result = results[ccdIndex];
-            final VisitableSampledSpectrum sed;
-            switch (filename) {
-                // TODO: why are we using the last specS2N element only? this seems fishy..?
-                case "Sig": sed = result.specS2N()[result.specS2N().length - 1].getSignalSpectrum(); break;
-                case "Bac": sed = result.specS2N()[result.specS2N().length - 1].getBackgroundSpectrum(); break;
-                case "Sin": sed = result.specS2N()[result.specS2N().length - 1].getExpS2NSpectrum(); break;
-                case "Fin": sed = result.specS2N()[result.specS2N().length - 1].getFinalS2NSpectrum(); break;
-                default:
-                    throw new Error();
-            }
-            sb.append(sed.printSpecAsString(first, lastWithGap));
-        }
-        return sb.toString();
-    }
-
 
     public NonEmptyList<ImagingResult> calculateImaging() {
         return calculateImaging(createGmos());
@@ -406,6 +366,10 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
             final String ccdName = instrument.getDetectorCcdName();
             final int first = tv.getDetectorCcdStartIndex(ccdIndex);
             final int last = tv.getDetectorCcdEndIndex(ccdIndex, ccdArray.length);
+            // REL-478: include the gaps in the text data output
+            final int lastWithGap = (ccdIndex < 2 && ccdArray.length > 1)
+                    ? tv.getDetectorCcdStartIndex(ccdIndex + 1)
+                    : last;
 
             // assign colors; CCD0 is blue, CCD1 is green, CCD2 is red
             final Color lightColor;
@@ -422,13 +386,13 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
             for (int i = 0; i < result.specS2N().length; i++) {
                 switch (index) {
                     case 0:
-                        data.add(new SpcSeriesData(SignalData.instance(),     "Signal "           + ccdName, result.specS2N()[i].getSignalSpectrum().getData(first, last),     new Some<>(lightColor)));
-                        data.add(new SpcSeriesData(BackgroundData.instance(), "SQRT(Background) " + ccdName, result.specS2N()[i].getBackgroundSpectrum().getData(first, last), new Some<>(darkColor)));
+                        data.add(new SpcSeriesData(SignalData.instance(),     "Signal "           + ccdName, result.specS2N()[i].getSignalSpectrum().getData(first, lastWithGap),     new Some<>(lightColor)));
+                        data.add(new SpcSeriesData(BackgroundData.instance(), "SQRT(Background) " + ccdName, result.specS2N()[i].getBackgroundSpectrum().getData(first, lastWithGap), new Some<>(darkColor)));
                         break;
 
                     case 1:
-                        data.add(new SpcSeriesData(SingleS2NData.instance(),  "Single Exp S/N "   + ccdName, result.specS2N()[i].getExpS2NSpectrum().getData(first, last),     new Some<>(lightColor)));
-                        data.add(new SpcSeriesData(FinalS2NData.instance(),   "Final S/N "        + ccdName, result.specS2N()[i].getFinalS2NSpectrum().getData(first, last),   new Some<>(darkColor)));
+                        data.add(new SpcSeriesData(SingleS2NData.instance(),  "Single Exp S/N "   + ccdName, result.specS2N()[i].getExpS2NSpectrum().getData(first, lastWithGap),     new Some<>(lightColor)));
+                        data.add(new SpcSeriesData(FinalS2NData.instance(),   "Final S/N "        + ccdName, result.specS2N()[i].getFinalS2NSpectrum().getData(first, lastWithGap),   new Some<>(darkColor)));
                         break;
 
                     default:

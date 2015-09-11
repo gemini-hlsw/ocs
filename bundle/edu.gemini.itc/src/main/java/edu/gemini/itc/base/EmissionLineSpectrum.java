@@ -282,16 +282,4 @@ public final class EmissionLineSpectrum implements VisitableSampledSpectrum {
         return _spectrum.getData(minXIndex, maxXIndex);
     }
 
-    public String toString() {
-        return _spectrum.toString();
-    }
-
-    public String printSpecAsString() {
-        return _spectrum.printSpecAsString();
-    }
-
-    public String printSpecAsString(final int firstIndex, final int lastIndex) {
-        return _spectrum.printSpecAsString(firstIndex, lastIndex);
-    }
-
 }

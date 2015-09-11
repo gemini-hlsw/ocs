@@ -437,23 +437,6 @@ public class DefaultSampledSpectrum implements VisitableSampledSpectrum {
                 (getX(indexEnd) - getX(indexStart));
     }
 
-    private int getFirstNonZeroPosition() {
-        for (int i = 0; i < getLength(); ++i) {
-            if (_y[i] != 0)
-                return i;
-        }
-        return 0;
-    }
-
-    private int getLastNonZeroPosition() {
-        for (int i = getLength() - 1; i >= 0; --i) {
-            if (_y[i] != 0)
-                return i;
-        }
-        return getLength();
-    }
-
-
     /**
      * This returns a 2d array of the data used to chart the SampledSpectrum
      * using JClass Chart.  The array has the following dimensions
@@ -497,54 +480,6 @@ public class DefaultSampledSpectrum implements VisitableSampledSpectrum {
             data[1][i - minXIndex] = _y[i];
         }
         return data;
-    }
-
-    public String toString() {
-        String s = "Spectrum - start: " + getStart() + " end: " + getEnd()
-                + " sampling: " + getSampling() + " length: " + getLength();
-        return s;
-    }
-
-    public String printSpecAsString() {
-
-        StringBuffer result = new StringBuffer();
-        NumberFormat nf = DecimalFormat.getInstance();
-        nf.setGroupingUsed(false);
-        nf.setMaximumFractionDigits(3);
-        nf.setMinimumFractionDigits(3);
-        int n = getLastNonZeroPosition();
-        for (int i = getFirstNonZeroPosition(); i < n; ++i) {
-            double x = getX(i);
-            double y = _y[i];
-            // By default DecimalFormat returns unicode characters for NaN and Infinity. This
-            // causes encoding problems when reading the text file back. For now,
-            // just replace NaNs with a string.
-            // TODO: This is a workaround, writing spectra files needs an overhaul.
-            // TODO: Also: Change GNIRS test data in a way that no NaN values are created(?).
-            String xStr = Double.isNaN(x) ? "NaN" : nf.format(x);
-            String yStr = Double.isNaN(y) ? "NaN" : nf.format(y);
-            result.append(xStr);
-            result.append("\t");
-            result.append(yStr);
-            result.append("\n");
-        }
-        return result.toString();
-    }
-
-    public String printSpecAsString(int firstIndex, int lastIndex) {
-
-        if (firstIndex >= _y.length) firstIndex = _y.length - 1;
-        if (lastIndex >= _y.length) lastIndex = _y.length - 1;
-        StringBuffer result = new StringBuffer();
-        NumberFormat nf = DecimalFormat.getInstance();
-        nf.setGroupingUsed(false);
-        nf.setMaximumFractionDigits(3);
-        nf.setMinimumFractionDigits(3);
-
-        for (int i = firstIndex; i <= lastIndex; ++i) {
-            result.append(nf.format(getX(i)) + "\t" + nf.format(_y[i]) + "\n");
-        }
-        return result.toString();
     }
 
 }

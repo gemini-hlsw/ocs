@@ -14,11 +14,6 @@ import Scalaz._
 /** The data structures here are an attempt to unify the results produced by the different instrument recipes.
   * Results are either a few simple numbers in case of imaging or a set of charts made up by data series with (x,y)
   * value pairs for spectroscopy.
-  *
-  * For spectroscopy the data series are also used to produce some text data files which can be downloaded from
-  * the result pages of the web application. In theory the text files can be produced from the data series, but
-  * unfortunately there is some special handling involved for some of the instruments and therefore those files
-  * are created by the recipes and then added to the result data as strings. Maybe this can be unified.
   */
 sealed trait ItcResult extends Serializable {
   def warnings:   List[ItcWarning]
@@ -46,9 +41,6 @@ case object BackgroundData extends SpcDataType { val instance = this }  // backg
 case object SingleS2NData  extends SpcDataType { val instance = this }  // single S2N over wavelength [nm]
 case object FinalS2NData   extends SpcDataType { val instance = this }  // final S2N over wavelength [nm]
 
-/** Text data files representing a spectroscopy data set (e.g. signal or background) */
-final case class SpcDataFile(dataType: SpcDataType, file: String)
-
 /** Series of (x,y) data points used to create charts and text data files. */
 final case class SpcSeriesData(dataType: SpcDataType, title: String, data: Array[Array[Double]], color: Option[Color] = None) {
   def x(i: Int): Double      = xValues(i)
@@ -63,19 +55,17 @@ final case class SpcChartData(chartType: SpcChartType, title: String, xAxisLabel
   require(series.map(_.title).distinct.size == series.size, "titles of series are not unique")
 
   /** Gets all data series for the given type. */
-  def allSeries(t: SpcDataType): List[SpcSeriesData]        = series.filter(_.dataType == t)
+  def allSeries(t: SpcDataType): List[SpcSeriesData] = series.filter(_.dataType == t)
+
+  /** Gets all data series for the given type as Java lists. */
+  def allSeriesAsJava(t: SpcDataType): java.util.List[SpcSeriesData] = series.filter(_.dataType == t)
 }
 
 /** The result of a spectroscpy ITC calculation is a set of charts and text files.
   * Individual charts and data series can be referenced by their types and an index. For most instruments there
   * is only one chart and data series of each type, however for NIFS for example there will be several charts
   * of each type in case of multiple IFU elements. */
-final case class ItcSpectroscopyResult(charts: List[SpcChartData], files: List[SpcDataFile], warnings: List[ItcWarning]) extends ItcResult {
-
-  /** Gets a text file for a data series by type and index.
-    * This method will fail if the result (data) you're looking for does not exist.
-    */
-  def file(t: SpcDataType, i: Int = 0): SpcDataFile         = files.filter(_.dataType == t)(i)
+final case class ItcSpectroscopyResult(charts: List[SpcChartData], warnings: List[ItcWarning]) extends ItcResult {
 
   /** Gets chart data by type and index.
     * This method will fail if the result you're looking for does not exist.
@@ -91,8 +81,8 @@ final case class ItcSpectroscopyResult(charts: List[SpcChartData], files: List[S
 object ItcSpectroscopyResult {
 
   // java compatibility
-  def apply(charts: java.util.List[SpcChartData], files: java.util.List[SpcDataFile], warnings: java.util.List[ItcWarning]) =
-    new ItcSpectroscopyResult(charts.toList, files.toList, warnings.toList)
+  def apply(charts: java.util.List[SpcChartData], warnings: java.util.List[ItcWarning]) =
+    new ItcSpectroscopyResult(charts.toList, warnings.toList)
 
 }
 
