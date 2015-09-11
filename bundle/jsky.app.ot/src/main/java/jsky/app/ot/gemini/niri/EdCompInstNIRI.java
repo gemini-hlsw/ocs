@@ -1,9 +1,3 @@
-// Copyright 1997 Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-// See the file LICENSE for complete details.
-//
-// $Id: EdCompInstNIRI.java 8275 2007-11-22 20:15:41Z gillies $
-//
 package jsky.app.ot.gemini.niri;
 
 import edu.gemini.pot.sp.ISPNode;
@@ -24,7 +18,6 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.*;
-import java.util.List;
 
 
 /**
@@ -339,32 +332,19 @@ public final class EdCompInstNIRI extends EdCompInstBase<InstNIRI>
 
 
     /**
-     * An auxiliary method that returns a Vector with all the original NIRI Filters wrapped as Option elements,
-     * separated by Type. We use a None element to separate them in the final result. This is used for display
-     * purposes in the ComboBox
+     * An auxiliary method that returns a Vector with all the original NIRI Filters wrapped as <code>Optional</code>
+     * elements, separated by Type. We use an <code>Optional.empty()</code> element to separate them in the final
+     * result.
+     * This is used for display purposes in the ComboBox.
      * @return a Vector of optional filters.
      */
-    private static Vector<Optional<Filter>> buildElements() {
+    private static Vector<Optional<Filter>> getFilterOptions() {
         final java.util.List<Filter> v = new ArrayList<>(SpTypeUtil.getSelectableItems(Niri.Filter.class));
 
-        final List<Optional<Filter>> bbFilters = new ArrayList<>();
-        final List<Optional<Niri.Filter>> nbFilters = new ArrayList<>();
-
-        for (Niri.Filter filter: v) {
-            switch (filter.type()) {
-                case broadband:
-                    bbFilters.add(Optional.of(filter));
-                    break;
-                case narrowband:
-                    nbFilters.add(Optional.of(filter));
-                    break;
-            }
-        }
-
         final Vector<Optional<Niri.Filter>> nv = new Vector<>();
-        nv.addAll(bbFilters);
+        v.stream().filter(f -> f.type() == Filter.Type.broadband).forEach(f -> nv.add(Optional.of(f)));
         nv.add(Optional.empty());
-        nv.addAll(nbFilters);
+        v.stream().filter(f -> f.type() == Filter.Type.narrowband).forEach(f -> nv.add(Optional.of(f)));
         return nv;
     }
 
@@ -377,7 +357,7 @@ public final class EdCompInstNIRI extends EdCompInstBase<InstNIRI>
 
         @SuppressWarnings("unchecked")
         public NiriFilterComboBoxModel() {
-            super(buildElements());
+            super(getFilterOptions());
         }
 
         @Override
@@ -392,7 +372,7 @@ public final class EdCompInstNIRI extends EdCompInstBase<InstNIRI>
     /**
      * A Renderer for the Niri Filter combobox. It uses the description for the display (contrary to
      * what other SpTypes use which is the displayable field, add a mark to obsolete filters, and return
-     * a JComponent.Separator if the filter is a None.
+     * a <code>JComponent.Separator</code> if the filter is an <code>Optional.empty()</code>.
      */
     private final class ΝiriFilterComboBoxRenderer extends BasicComboBoxRenderer {
 
