@@ -1,6 +1,7 @@
 package edu.gemini.itc.web.baseline
 
 import java.io.{ByteArrayOutputStream, PrintWriter}
+import java.util.Optional
 
 import edu.gemini.itc.baseline.util.Fixture
 import edu.gemini.itc.shared._
@@ -10,28 +11,35 @@ import edu.gemini.itc.web.servlets.FilesServlet
 import scala.io.Source
 
 /**
- * Representation of ITC recipe output values.
+ * Representation of ITC recipe output values (HTML output and dat files).
  * @param string
  */
 case class Output(string: String) {
   // dig out all links to data files (file type, index and session id)
-  private val DatFiles = """type=txt&filename=([a-zA-Z0-9]*)&index=([0-9]*)&id=([a-z0-9\-]*)""".r
+  private val DatFilesWithoutSeries = """type=txt&filename=([a-zA-Z0-9]*)&chartIndex=([0-9]*)&id=([a-z0-9\-]*)""".r
+  private val DatFilesWithSeries    = """type=txt&filename=([a-zA-Z0-9]*)&chartIndex=([0-9]*)&seriesIndex=([0-9]*)&id=([a-z0-9\-]*)""".r
 
-  val hash: Long = 37L*fixString(string).hashCode() + hashAllDatFiles(string)
+  val hash: Long = 37L*fixString(string).hashCode() + hashAllDatFilesWithoutSeries(string) + hashAllDatFiles(string)
 
   // replace URLs which change every time beause of UUIDs that are used as sesssion IDs
   private def fixString(s: String) = s.
     replaceAll("""type=txt&filename=[^"]*""", "").
     replaceAll("""type=img&filename=[^"]*""", "")
 
-  def hashAllDatFiles(s: String): Long =
-    DatFiles.
+  def hashAllDatFilesWithoutSeries(s: String): Long =
+    DatFilesWithoutSeries.
       findAllMatchIn(s).
-      map(m => hashDatFile(m.group(3), m.group(2), m.group(1))).
+      map(m => hashDatFile(m.group(3), Optional.empty(), m.group(2).toInt, m.group(1))).
       foldLeft(17L)((acc, s) => 37L*acc + s.hashCode)
 
-  def hashDatFile(id: String, index: String, filename: String): Int = {
-    val file = FilesServlet.toFile(id, filename, index.toInt)
+  def hashAllDatFiles(s: String): Long =
+    DatFilesWithSeries.
+      findAllMatchIn(s).
+      map(m => hashDatFile(m.group(4), Optional.of(m.group(3).toInt), m.group(2).toInt, m.group(1))).
+      foldLeft(17L)((acc, s) => 37L*acc + s.hashCode)
+
+  def hashDatFile(id: String, seriesIndex: java.util.Optional[Integer], chartIndex: Int, filename: String): Int = {
+    val file = FilesServlet.toFile(id, filename, chartIndex, seriesIndex)
     file.split('\n').drop(1).foldLeft(17)((acc, s) => 37*acc + s.hashCode)
   }
 
