@@ -54,7 +54,7 @@ public final class Flamingos2Recipe implements ImagingRecipe, SpectroscopyRecipe
         }
 
         // some general validations
-        Validation.validate(_obsDetailParameters, _sdParameters);
+        Validation.validate(_obsDetailParameters, _sdParameters, 25.0);
     }
 
     public Tuple2<ItcSpectroscopyResult, SpectroscopyResult> calculateSpectroscopy() {

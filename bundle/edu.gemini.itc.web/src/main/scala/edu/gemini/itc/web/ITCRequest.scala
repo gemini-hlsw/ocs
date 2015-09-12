@@ -27,6 +27,7 @@ import edu.gemini.spModel.target.EmissionLine.Continuum
 import edu.gemini.spModel.target._
 import edu.gemini.spModel.telescope.IssPort
 import squants.radio.IrradianceConversions._
+import squants.motion.VelocityConversions._
 
 /**
  * ITC requests define a generic mechanism to look up values by their parameter names.
@@ -310,7 +311,7 @@ object ITCRequest {
         val cont = r.doubleParameter("lineContinuum")
         EmissionLine(
           r.doubleParameter("lineWavelength").microns,
-          r.doubleParameter("lineWidth"),
+          r.doubleParameter("lineWidth").kps,
           if (r.parameter("lineFluxUnits") == "watts_flux") flux.wattsPerSquareMeter else (flux/1000.0).wattsPerSquareMeter,
           if (r.parameter("lineContinuumUnits") == "watts_fd_wavelength") Continuum.fromWatts(cont) else Continuum.fromErgs(cont)
         )

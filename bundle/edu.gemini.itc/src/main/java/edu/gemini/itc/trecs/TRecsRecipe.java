@@ -39,14 +39,6 @@ public final class TRecsRecipe implements ImagingRecipe, SpectroscopyRecipe {
     }
 
     private void validateInputParameters() {
-        if (_sdParameters.getDistributionType().equals(SourceDefinition.Distribution.ELINE))
-            if (_sdParameters.getELineWidth() < (3E5 / (_sdParameters.getELineWavelength().toNanometers() / 4))) { // /4 b/c of increased resolution of transmission files
-                throw new RuntimeException(
-                        "Please use a model line width > 4 nm (or "
-                                + (3E5 / (_sdParameters.getELineWavelength().toNanometers() / 4))
-                                + " km/s) to avoid undersampling of the line profile when convolved with the transmission response");
-            }
-
         // For mid-IR observation the watervapor percentile and sky background
         // percentile must be the same
         if (!_obsConditionParameters.getSkyTransparencyWaterCategory().equals(_obsConditionParameters.getSkyBackgroundCategory())) {
@@ -56,7 +48,7 @@ public final class TRecsRecipe implements ImagingRecipe, SpectroscopyRecipe {
         }
 
         // some general validations
-        Validation.validate(_obsDetailParameters, _sdParameters);
+        Validation.validate(_obsDetailParameters, _sdParameters, 0.25);
     }
 
     private ObservationDetails correctedObsDetails(final TRecsParameters tp, final ObservationDetails odp) {

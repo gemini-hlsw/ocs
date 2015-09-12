@@ -2,6 +2,7 @@ package edu.gemini.itc.base;
 
 import edu.gemini.spModel.core.Wavelength;
 import edu.gemini.spModel.target.EmissionLine;
+import squants.motion.Velocity;
 import squants.radio.Irradiance;
 
 /**
@@ -19,7 +20,7 @@ public final class EmissionLineSpectrum implements VisitableSampledSpectrum {
         _spectrum = spectrum;
     }
 
-    public EmissionLineSpectrum(final Wavelength wavelength, final double width, final Irradiance flux,
+    public EmissionLineSpectrum(final Wavelength wavelength, final Velocity width, final Irradiance flux,
                                 final EmissionLine.Continuum continuum, final double z, final double interval) {
 
         //shift start and end depending on redshift
@@ -35,7 +36,7 @@ public final class EmissionLineSpectrum implements VisitableSampledSpectrum {
         final double _continuumFlux = continuum.toWatts() * _wavelength / 1.988e-13;
 
         // calculate sigma
-        final double sigma = width * _wavelength / 7.05e5;
+        final double sigma = width.toKilometersPerSecond() * _wavelength / 7.05e5;
         int i = 0;
         for (double lam = start; lam <= end; lam += interval) {
             fluxArray[i] = _elineFlux(lam, sigma, _flux, _continuumFlux, _wavelength);

@@ -13,6 +13,7 @@ import jsky.app.ot.gemini.editor.targetComponent.details.NumericPropertySheet.Pr
 
 import edu.gemini.spModel.core.WavelengthConversions._
 import squants.radio.IrradianceConversions._
+import squants.motion.VelocityConversions._
 
 import scala.swing.GridBagPanel.{Anchor, Fill}
 import scala.swing.ListView.Renderer
@@ -61,7 +62,7 @@ final class SourceDetailsEditor extends GridBagPanel with TelescopePosEditor {
   // === Spectral Distribution Details
 
   private val defaultBlackBody    = BlackBody(10000)
-  private val defaultEmissionLine = EmissionLine(2.2.microns, 500, 5.0e-19.wattsPerSquareMeter, Continuum.fromWatts(1.0e-16))
+  private val defaultEmissionLine = EmissionLine(2.2.microns, 500.kps, 5.0e-19.wattsPerSquareMeter, Continuum.fromWatts(1.0e-16))
   private val defaultPowerLaw     = PowerLaw(1)
 
   private def blackBodyOrDefault   (t: SPTarget): BlackBody     = t.getTarget.getSpectralDistribution.fold(defaultBlackBody)(_.asInstanceOf[BlackBody])
@@ -79,7 +80,7 @@ final class SourceDetailsEditor extends GridBagPanel with TelescopePosEditor {
   )
   private val emissionLineDetails = NumericPropertySheet[EmissionLine](None, emissionLineOrDefault,
     Prop("Wavelength",  "µm",       _.wavelength.toMicrons,       (a, v) => setDistribution(EmissionLine(v.microns,    a.width, a.flux,                a.continuum))),
-    Prop("Width",       "km/sec",   _.width,                      (a, v) => setDistribution(EmissionLine(a.wavelength, v,       a.flux,                a.continuum))),
+    Prop("Width",       "km/sec",   _.width.toKilometersPerSecond,(a, v) => setDistribution(EmissionLine(a.wavelength, v.kps,   a.flux,                a.continuum))),
     Prop("Flux",        "W/m²",     _.flux.toWattsPerSquareMeter, (a, v) => setDistribution(EmissionLine(a.wavelength, a.width, v.wattsPerSquareMeter, a.continuum))),
     Prop("Continuum",   "W/m²/µm",  _.continuum.toWatts,          (a, v) => setDistribution(EmissionLine(a.wavelength, a.width, a.flux,                Continuum.fromWatts(v))))
   )
