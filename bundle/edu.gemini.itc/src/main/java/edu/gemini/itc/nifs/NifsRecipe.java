@@ -69,15 +69,7 @@ public final class NifsRecipe implements SpectroscopyRecipe {
             dataSets.add(createNifsSignalChart(r, i));
             dataSets.add(createNifsS2NChart(r, i));
         }
-        final List<SpcDataFile> dataFiles = new ArrayList<SpcDataFile>() {{
-            for (int i = 0; i < r.specS2N().length; i++) {
-                add(new SpcDataFile(SignalData.instance(),     r.specS2N()[i].getSignalSpectrum().printSpecAsString()));
-                add(new SpcDataFile(BackgroundData.instance(), r.specS2N()[i].getBackgroundSpectrum().printSpecAsString()));
-                add(new SpcDataFile(SingleS2NData.instance(),  r.specS2N()[i].getExpS2NSpectrum().printSpecAsString()));
-                add(new SpcDataFile(FinalS2NData.instance(),   r.specS2N()[i].getFinalS2NSpectrum().printSpecAsString()));
-            }
-        }};
-        return new Tuple2<>(ItcSpectroscopyResult.apply(dataSets, dataFiles, new ArrayList<>()), r);
+        return new Tuple2<>(ItcSpectroscopyResult.apply(dataSets, new ArrayList<>()), r);
     }
 
     private SpectroscopyResult calculateSpectroscopy(final Nifs instrument) {

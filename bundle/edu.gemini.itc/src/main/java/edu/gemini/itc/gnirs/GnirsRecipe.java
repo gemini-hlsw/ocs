@@ -80,29 +80,8 @@ public final class GnirsRecipe implements SpectroscopyRecipe {
                 add(Recipe$.MODULE$.createS2NChart(r));
             }
         }};
-        final List<SpcDataFile> dataFiles = new ArrayList<SpcDataFile>() {{
-            if (instrument.XDisp_IsUsed()) {
-                add(new SpcDataFile(SignalData.instance(),     toFile(r.signalOrder())));
-                add(new SpcDataFile(BackgroundData.instance(), toFile(r.backGroundOrder())));
-                add(new SpcDataFile(FinalS2NData.instance(),   toFile(r.finalS2NOrder())));
-            } else {
-                add(new SpcDataFile(SignalData.instance(),     r.specS2N()[0].getSignalSpectrum().printSpecAsString()));
-                add(new SpcDataFile(BackgroundData.instance(), r.specS2N()[0].getBackgroundSpectrum().printSpecAsString()));
-                add(new SpcDataFile(SingleS2NData.instance(),  r.specS2N()[0].getExpS2NSpectrum().printSpecAsString()));
-                add(new SpcDataFile(FinalS2NData.instance(),   r.specS2N()[0].getFinalS2NSpectrum().printSpecAsString()));
-            }
-        }};
-        return new Tuple2<>(ItcSpectroscopyResult.apply(dataSets, dataFiles, new ArrayList<>()), r);
+        return new Tuple2<>(ItcSpectroscopyResult.apply(dataSets, new ArrayList<>()), r);
     }
-
-    protected static String toFile(final VisitableSampledSpectrum[] sedArr) {
-        final StringBuilder sb = new StringBuilder();
-        for (final VisitableSampledSpectrum sed : sedArr){
-            sb.append(sed.printSpecAsString());
-        }
-        return sb.toString();
-    }
-
 
     private GnirsSpectroscopyResult calculateSpectroscopy(final Gnirs instrument) {
         // Module 1b

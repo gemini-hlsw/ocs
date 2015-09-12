@@ -26,31 +26,21 @@ public interface SampledSpectrum extends ArraySpectrum {
     /**
      * @return array of spectrum y values
      */
-    public double[] getValues();
+    double[] getValues();
 
     /**
      * @return x sample size (bin size)
      */
-    public double getSampling();
+    double getSampling();
 
     /**
      * Sets all these SampledSpectrum parameters.
      * I don't like methods that set several things at once, but I
      * inherited this code, so I won't change it yet.
      */
-    public abstract void reset(double[] flux, double wavelengthStart,
+    void reset(double[] flux, double wavelengthStart,
                                double wavelengthInterval);
 
-    public abstract void trim(double wavelengthStart, double wavelengthEnd);
+    void trim(double wavelengthStart, double wavelengthEnd);
 
-
-    /**
-     * @return String of all the Values
-     */
-    public String printSpecAsString();
-
-    /**
-     * @return String of all the Values between the given indexes
-     */
-    public String printSpecAsString(int firstIndex, int lastIndex);
 }

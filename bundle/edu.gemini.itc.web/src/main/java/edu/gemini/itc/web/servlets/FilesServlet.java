@@ -21,7 +21,8 @@ public final class FilesServlet extends HttpServlet {
     public static final String ParamType        = "type";
     public static final String ParamId          = "id";
     public static final String ParamName        = "filename";
-    public static final String ParamIndex       = "index";
+    public static final String ParamChartIndex  = "chartIndex";
+    public static final String ParamSeriesIndex = "seriesIndex";
     public static final String ParamLoLimit     = "loLimit";
     public static final String ParamHiLimit     = "hiLimit";
 
@@ -73,19 +74,20 @@ public final class FilesServlet extends HttpServlet {
             final String filename = request.getParameter(ParamName);
             final String type     = request.getParameter(ParamType);
             final String id       = request.getParameter(ParamId);
-            final int index       = Integer.parseInt(request.getParameter(ParamIndex));
+            final int chartIndex  = Integer.parseInt(request.getParameter(ParamChartIndex));
+            final Optional<Integer> seriesIndex = Optional.ofNullable(request.getParameter(ParamSeriesIndex)).map(Integer::parseInt);
 
             switch (type) {
 
                 case TypeTxt:
                     response.setContentType("text/plain");
-                    response.getOutputStream().write(toFile(id, filename, index).getBytes());
+                    response.getOutputStream().write(toFile(id, filename, chartIndex, seriesIndex).getBytes());
                     break;
 
                 case TypeImg:
                     response.setContentType("image/png");
                     final PlottingDetails pd = toPlottingDetails(request);
-                    ChartUtilities.writeBufferedImageAsPNG(response.getOutputStream(), toImage(id, filename, index, pd));
+                    ChartUtilities.writeBufferedImageAsPNG(response.getOutputStream(), toImage(id, filename, chartIndex, pd));
                     break;
 
                 default:
@@ -131,17 +133,40 @@ public final class FilesServlet extends HttpServlet {
     }
 
     // this is public because we use it for testing
-    public static String toFile(final String id, final String filename, final int index) {
+    public static String toFile(final String id, final String filename, final int chartIndex, final Optional<Integer> seriesIndex) {
         final ItcSpectroscopyResult result = result(id);
         final String file;
         switch (filename) {
-            case "SignalData":     file = result.file(SignalData.instance(), index).file(); break;
-            case "BackgroundData": file = result.file(BackgroundData.instance(), index).file(); break;
-            case "SingleS2NData":  file = result.file(SingleS2NData.instance(), index).file(); break;
-            case "FinalS2NData":   file = result.file(FinalS2NData.instance(), index).file(); break;
+            case "SignalData":     file = toFile(result.chart(SignalChart.instance(), chartIndex).allSeriesAsJava(SignalData.instance()),     seriesIndex); break;
+            case "BackgroundData": file = toFile(result.chart(SignalChart.instance(), chartIndex).allSeriesAsJava(BackgroundData.instance()), seriesIndex); break;
+            case "SingleS2NData":  file = toFile(result.chart(S2NChart.instance(),    chartIndex).allSeriesAsJava(SingleS2NData.instance()),  seriesIndex); break;
+            case "FinalS2NData":   file = toFile(result.chart(S2NChart.instance(),    chartIndex).allSeriesAsJava(FinalS2NData.instance()),   seriesIndex); break;
             default:               throw new Error();
         }
         return "# ITC Data: " + Calendar.getInstance().getTime() + "\n \n" + file;
+    }
+
+    private static String toFile(final List<SpcSeriesData> dataSeries, final Optional<Integer> seriesIndex) {
+        return seriesIndex.
+                map(dataSeries::get).
+                map(FilesServlet::toFile).
+                orElse(toFiles(dataSeries));
+    }
+
+    private static String toFiles(final List<SpcSeriesData> dataSeries) {
+        final StringBuilder sb = new StringBuilder();
+        dataSeries.stream().
+                map(FilesServlet::toFile).
+                forEach(sb::append);
+        return sb.toString();
+    }
+
+    private static String toFile(final SpcSeriesData data) {
+        final StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < data.data()[0].length; i++) {
+            sb.append(String.format("%.3f\t%.3f\n", data.data()[0][i], data.data()[1][i]));
+        }
+        return sb.toString();
     }
 
 }
