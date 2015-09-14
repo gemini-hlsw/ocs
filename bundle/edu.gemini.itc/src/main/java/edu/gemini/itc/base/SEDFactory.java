@@ -137,13 +137,11 @@ public final class SEDFactory {
         return prefix + "/" + ((Library) sdp.distribution).sedSpectrum() + SED_FILE_EXTENSION;
     }
 
-
-    // TODO: site and band could be moved to instrument(?)
-    public static SourceResult calculate(final Instrument instrument, final Site site, final String bandStr, final SourceDefinition sdp, final ObservingConditions odp, final TelescopeDetails tp) {
-        return calculate(instrument, site, bandStr, sdp, odp, tp, Option.apply((AOSystem) null));
+    public static SourceResult calculate(final Instrument instrument, final SourceDefinition sdp, final ObservingConditions odp, final TelescopeDetails tp) {
+        return calculate(instrument, sdp, odp, tp, Option.apply((AOSystem) null));
     }
 
-    public static SourceResult calculate(final Instrument instrument, final Site site, final String bandStr, final SourceDefinition sdp, final ObservingConditions odp, final TelescopeDetails tp, final Option<AOSystem> ao) {
+    public static SourceResult calculate(final Instrument instrument, final SourceDefinition sdp, final ObservingConditions odp, final TelescopeDetails tp, final Option<AOSystem> ao) {
         // Module 1b
         // Define the source energy (as function of wavelength).
         //
@@ -214,15 +212,14 @@ public final class SEDFactory {
         sed.accept(clouds);
 
         final SampledSpectrumVisitor water = WaterTransmissionVisitor.create(
+                instrument,
                 odp.getSkyTransparencyWater(),
                 odp.getAirmass(),
-                getWater(bandStr),
-                site,
-                bandStr);
+                getWater(instrument));
         sed.accept(water);
 
         // Background spectrum is introduced here.
-        final VisitableSampledSpectrum sky = SEDFactory.getSED(getSky(bandStr, site, odp), instrument.getSampling());
+        final VisitableSampledSpectrum sky = SEDFactory.getSED(getSky(instrument, odp), instrument.getSampling());
         Option<VisitableSampledSpectrum> halo = Option.empty();
 
         // Apply telescope transmission to both sed and sky
@@ -231,7 +228,7 @@ public final class SEDFactory {
         sky.accept(t);
 
         // Create and Add background for the telescope.
-        final SampledSpectrumVisitor tb = new TelescopeBackgroundVisitor(tp, site, bandStr);
+        final SampledSpectrumVisitor tb = new TelescopeBackgroundVisitor(instrument, tp);
         sky.accept(tb);
 
         // FOR GSAOI and NIRI ADD AO STUFF HERE
@@ -291,36 +288,36 @@ public final class SEDFactory {
         return halo;
     }
 
-    private static String getWater(final String band) {
-        switch (band) {
-            case ITCConstants.VISIBLE:  return "skytrans_";
-            case ITCConstants.NEAR_IR:  return "nearIR_trans_";
-            case ITCConstants.MID_IR:   return "midIR_trans_";
-            default:                    throw new Error("invalid band");
+    private static String getWater(final Instrument instrument) {
+        switch (instrument.getBands()) {
+            case VISIBLE:  return "skytrans_";
+            case NEAR_IR:  return "nearIR_trans_";
+            case MID_IR:   return "midIR_trans_";
+            default:       throw new Error("invalid band");
         }
     }
 
-    private static String getSky(final String band, final Site site, final ObservingConditions ocp) {
-        switch (band) {
-            case ITCConstants.VISIBLE:
+    private static String getSky(final Instrument instrument, final ObservingConditions ocp) {
+        switch (instrument.getBands()) {
+            case VISIBLE:
                 return ITCConstants.SKY_BACKGROUND_LIB + "/"
                         + ITCConstants.OPTICAL_SKY_BACKGROUND_FILENAME_BASE
                         + "_"
                         + ocp.getSkyBackgroundCategory()
                         + "_" + ocp.getAirmassCategory()
                         + ITCConstants.DATA_SUFFIX;
-            case ITCConstants.NEAR_IR:
+            case NEAR_IR:
                 return "/"
-                        + ITCConstants.HI_RES + (site.equals(Site.GN) ? "/mk" : "/cp")
-                        + ITCConstants.NEAR_IR + ITCConstants.SKY_BACKGROUND_LIB + "/"
+                        + ITCConstants.HI_RES + (instrument.getSite().equals(Site.GN) ? "/mk" : "/cp")
+                        + instrument.getBands().getDirectory() + ITCConstants.SKY_BACKGROUND_LIB + "/"
                         + ITCConstants.NEAR_IR_SKY_BACKGROUND_FILENAME_BASE + "_"
                         + ocp.getSkyTransparencyWaterCategory() + "_"
                         + ocp.getAirmassCategory()
                         + ITCConstants.DATA_SUFFIX;
-            case ITCConstants.MID_IR:
+            case MID_IR:
                 return "/"
-                        + ITCConstants.HI_RES + (site.equals(Site.GN) ? "/mk" : "/cp")
-                        + ITCConstants.MID_IR +ITCConstants.SKY_BACKGROUND_LIB + "/"
+                        + ITCConstants.HI_RES + (instrument.getSite().equals(Site.GN) ? "/mk" : "/cp")
+                        + instrument.getBands().getDirectory() + ITCConstants.SKY_BACKGROUND_LIB + "/"
                         + ITCConstants.MID_IR_SKY_BACKGROUND_FILENAME_BASE + "_"
                         + ocp.getSkyTransparencyWaterCategory() + "_"
                         + ocp.getAirmassCategory()

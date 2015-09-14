@@ -4,6 +4,7 @@ import edu.gemini.itc.base.*;
 import edu.gemini.itc.shared.CalculationMethod;
 import edu.gemini.itc.shared.MichelleParameters;
 import edu.gemini.itc.shared.ObservationDetails;
+import edu.gemini.spModel.core.Site;
 import edu.gemini.spModel.data.YesNoType;
 import edu.gemini.spModel.gemini.michelle.MichelleParams;
 
@@ -46,7 +47,7 @@ public final class Michelle extends Instrument {
     private final MichelleParameters params;
 
     public Michelle(final MichelleParameters mp, final ObservationDetails odp) {
-        super(INSTR_DIR, FILENAME);
+        super(Site.GN, Bands.MID_IR, INSTR_DIR, FILENAME);
 
         this.params = mp;
         _sampling = super.getSampling();

@@ -101,7 +101,7 @@ public final class MichelleRecipe implements ImagingRecipe, SpectroscopyRecipe {
     private SpectroscopyResult calculateSpectroscopy(final Michelle instrument) {
 
         // Get the summed source and sky
-        final SEDFactory.SourceResult calcSource = SEDFactory.calculate(instrument, Site.GN, ITCConstants.MID_IR, _sdParameters, _obsConditionParameters, _telescope);
+        final SEDFactory.SourceResult calcSource = SEDFactory.calculate(instrument, _sdParameters, _obsConditionParameters, _telescope);
         final VisitableSampledSpectrum sed = calcSource.sed;
         final VisitableSampledSpectrum sky = calcSource.sky;
 
@@ -192,7 +192,7 @@ public final class MichelleRecipe implements ImagingRecipe, SpectroscopyRecipe {
     private ImagingResult calculateImaging(final Michelle instrument) {
 
         // Get the summed source and sky
-        final SEDFactory.SourceResult calcSource = SEDFactory.calculate(instrument, Site.GN, ITCConstants.MID_IR, _sdParameters, _obsConditionParameters, _telescope);
+        final SEDFactory.SourceResult calcSource = SEDFactory.calculate(instrument, _sdParameters, _obsConditionParameters, _telescope);
         final VisitableSampledSpectrum sed = calcSource.sed;
         final VisitableSampledSpectrum sky = calcSource.sky;
         final double sed_integral = sed.getIntegral();

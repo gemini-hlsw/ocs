@@ -4,7 +4,6 @@ import edu.gemini.itc.base.*;
 import edu.gemini.itc.gems.Gems;
 import edu.gemini.itc.operation.*;
 import edu.gemini.itc.shared.*;
-import edu.gemini.spModel.core.Site;
 import scala.Some;
 
 import java.util.ArrayList;
@@ -69,7 +68,7 @@ public final class GsaoiRecipe implements ImagingRecipe {
                 _obsConditionParameters.getImageQualityPercentile(),
                 _sdParameters);
 
-        final SEDFactory.SourceResult calcSource = SEDFactory.calculate(instrument, Site.GS, ITCConstants.NEAR_IR, _sdParameters, _obsConditionParameters, _telescope, new Some<AOSystem>(gems));
+        final SEDFactory.SourceResult calcSource = SEDFactory.calculate(instrument, _sdParameters, _obsConditionParameters, _telescope, new Some<>(gems));
 
 
         // End of the Spectral energy distribution portion of the ITC.

@@ -2,6 +2,7 @@ package edu.gemini.itc.acqcam;
 
 import edu.gemini.itc.base.*;
 import edu.gemini.itc.shared.AcquisitionCamParameters;
+import edu.gemini.spModel.core.Site;
 
 /**
  * Aquisition Camera specification class
@@ -31,7 +32,7 @@ public class AcquisitionCamera extends Instrument {
      * construct an AcquisitionCamera with specified color filter and ND filter.
      */
     public AcquisitionCamera(final AcquisitionCamParameters params) {
-        super(INSTR_DIR, FILENAME);
+        super(Site.GN, Bands.VISIBLE, INSTR_DIR, FILENAME);
         _colorFilter = Filter.fromFile(getPrefix(), "colfilt_" + params.colorFilter().name(), getDirectory() + "/");
         addFilter(_colorFilter);
         addComponent(new NDFilterWheel(params.ndFilter(), getDirectory() + "/"));

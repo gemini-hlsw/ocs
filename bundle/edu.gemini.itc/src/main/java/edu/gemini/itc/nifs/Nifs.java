@@ -2,6 +2,7 @@ package edu.gemini.itc.nifs;
 
 import edu.gemini.itc.base.*;
 import edu.gemini.itc.shared.*;
+import edu.gemini.spModel.core.Site;
 import edu.gemini.spModel.gemini.nifs.NIFSParams;
 
 /**
@@ -46,7 +47,7 @@ public final class Nifs extends Instrument {
 
 
     public Nifs(final NifsParameters gp, final ObservationDetails odp) {
-        super(INSTR_DIR, FILENAME);
+        super(Site.GN, Bands.NEAR_IR, INSTR_DIR, FILENAME);
 
         // The instrument data file gives a start/end wavelength for
         // the instrument.  But with a filter in place, the filter

@@ -4,6 +4,7 @@ import edu.gemini.itc.base.*;
 import edu.gemini.itc.shared.CalculationMethod;
 import edu.gemini.itc.shared.ObservationDetails;
 import edu.gemini.itc.shared.TRecsParameters;
+import edu.gemini.spModel.core.Site;
 import edu.gemini.spModel.gemini.trecs.TReCSParams;
 import edu.gemini.spModel.gemini.trecs.TReCSParams.Disperser;
 import edu.gemini.spModel.gemini.trecs.TReCSParams.Mask;
@@ -45,7 +46,7 @@ public final class TRecs extends Instrument {
     private final double _centralWavelength;
 
     public TRecs(final TRecsParameters tp, final ObservationDetails odp) {
-        super(INSTR_DIR, FILENAME);
+        super(Site.GS, Bands.MID_IR, INSTR_DIR, FILENAME);
 
         _focalPlaneMask = tp.mask();
         _grating = tp.grating();

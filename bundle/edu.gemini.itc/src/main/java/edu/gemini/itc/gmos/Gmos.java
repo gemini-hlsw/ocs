@@ -51,7 +51,7 @@ public abstract class Gmos extends Instrument implements BinningProvider {
     private int _detectorCcdIndex = 0; // 0, 1, or 2 when there are multiple CCDs in the detector
 
     public Gmos(final GmosParameters gp, final ObservationDetails odp, final String FILENAME, final int detectorCcdIndex) {
-        super(INSTR_DIR, FILENAME);
+        super(gp.site(), Bands.VISIBLE, INSTR_DIR, FILENAME);
 
         this.odp    = odp;
         this.gp     = gp;

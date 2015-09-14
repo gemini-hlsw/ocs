@@ -89,12 +89,6 @@ public interface ITCConstants {
      */
     String SLIT_THROUGHPUT_FILENAME = "/slit_throughput";
 
-    String VISIBLE = "03-08";
-
-    String NEAR_IR = "1-5";
-
-    String MID_IR = "7-26";
-
     String HI_RES = "HI-Res";
 
 

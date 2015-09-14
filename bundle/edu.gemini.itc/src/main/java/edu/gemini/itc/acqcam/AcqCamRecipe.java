@@ -3,7 +3,6 @@ package edu.gemini.itc.acqcam;
 import edu.gemini.itc.base.*;
 import edu.gemini.itc.operation.*;
 import edu.gemini.itc.shared.*;
-import edu.gemini.spModel.core.Site;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -55,7 +54,7 @@ public final class AcqCamRecipe implements ImagingRecipe {
     private ImagingResult calculateImaging(final AcquisitionCamera instrument) {
 
         // Get the summed source and sky
-        final SEDFactory.SourceResult calcSource = SEDFactory.calculate(instrument, Site.GN, ITCConstants.VISIBLE, _sdParameters, _obsConditionParameters, _telescope);
+        final SEDFactory.SourceResult calcSource = SEDFactory.calculate(instrument, _sdParameters, _obsConditionParameters, _telescope);
         final VisitableSampledSpectrum sed = calcSource.sed;
         final VisitableSampledSpectrum sky = calcSource.sky;
         final double sed_integral = sed.getIntegral();

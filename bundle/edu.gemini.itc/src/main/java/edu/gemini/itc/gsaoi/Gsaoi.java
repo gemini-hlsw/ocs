@@ -3,6 +3,7 @@ package edu.gemini.itc.gsaoi;
 import edu.gemini.itc.base.*;
 import edu.gemini.itc.shared.GsaoiParameters;
 import edu.gemini.itc.shared.ObservationDetails;
+import edu.gemini.spModel.core.Site;
 
 /**
  * Gsaoi specification class
@@ -41,7 +42,7 @@ public final class Gsaoi extends Instrument {
      * and camera type.
      */
     public Gsaoi(final GsaoiParameters np, final ObservationDetails odp) {
-        super(INSTR_DIR, FILENAME);
+        super(Site.GS, Bands.NEAR_IR, INSTR_DIR, FILENAME);
 
         this.params = np;
         _filter = Filter.fromFile(getPrefix(), np.filter().name(), getDirectory() + "/");

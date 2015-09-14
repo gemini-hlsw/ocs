@@ -98,7 +98,7 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
         final SpecS2NLargeSlitVisitor[] specS2N;
         final SlitThroughput st;
 
-        final SEDFactory.SourceResult src = SEDFactory.calculate(instrument, _gmosParameters.site(), ITCConstants.VISIBLE, _sdParameters, _obsConditionParameters, _telescope);
+        final SEDFactory.SourceResult src = SEDFactory.calculate(instrument, _sdParameters, _obsConditionParameters, _telescope);
         final int ccdIndex = instrument.getDetectorCcdIndex();
         final DetectorsTransmissionVisitor tv = mainInstrument.getDetectorTransmision();
         final int firstCcdIndex = tv.getDetectorCcdStartIndex(ccdIndex);
@@ -279,7 +279,7 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
         //
         // inputs: source morphology specification
 
-        final SEDFactory.SourceResult src = SEDFactory.calculate(instrument, _gmosParameters.site(), ITCConstants.VISIBLE, _sdParameters, _obsConditionParameters, _telescope);
+        final SEDFactory.SourceResult src = SEDFactory.calculate(instrument, _sdParameters, _obsConditionParameters, _telescope);
         final double sed_integral = src.sed.getIntegral();
         final double sky_integral = src.sky.getIntegral();
 

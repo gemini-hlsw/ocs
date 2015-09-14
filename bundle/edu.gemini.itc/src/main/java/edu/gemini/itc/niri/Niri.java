@@ -4,6 +4,7 @@ import edu.gemini.itc.base.*;
 import edu.gemini.itc.shared.CalculationMethod;
 import edu.gemini.itc.shared.NiriParameters;
 import edu.gemini.itc.shared.ObservationDetails;
+import edu.gemini.spModel.core.Site;
 import edu.gemini.spModel.gemini.niri.Niri.Disperser;
 import edu.gemini.spModel.gemini.niri.Niri.Mask;
 import edu.gemini.spModel.gemini.niri.Niri.ReadMode;
@@ -45,7 +46,7 @@ public class Niri extends Instrument {
      * grism, and camera type.
      */
     public Niri(final NiriParameters np, final ObservationDetails odp) {
-        super(INSTR_DIR, FILENAME);
+        super(Site.GN, Bands.NEAR_IR, INSTR_DIR, FILENAME);
 
         this.params = np;
 

@@ -1,10 +1,9 @@
 package edu.gemini.itc.niri;
 
 import edu.gemini.itc.altair.Altair;
-import edu.gemini.itc.operation.*;
 import edu.gemini.itc.base.*;
+import edu.gemini.itc.operation.*;
 import edu.gemini.itc.shared.*;
-import edu.gemini.spModel.core.Site;
 import scala.Option;
 import scala.Tuple2;
 import scala.collection.JavaConversions;
@@ -91,7 +90,7 @@ public final class NiriRecipe implements ImagingRecipe, SpectroscopyRecipe {
             altair = Option.empty();
         }
 
-        final SEDFactory.SourceResult calcSource = SEDFactory.calculate(instrument, Site.GN, ITCConstants.NEAR_IR, _sdParameters, _obsConditionParameters, _telescope, altair);
+        final SEDFactory.SourceResult calcSource = SEDFactory.calculate(instrument, _sdParameters, _obsConditionParameters, _telescope, altair);
 
         // End of the Spectral energy distribution portion of the ITC.
 
@@ -208,7 +207,7 @@ public final class NiriRecipe implements ImagingRecipe, SpectroscopyRecipe {
             altair = Option.empty();
         }
 
-        final SEDFactory.SourceResult calcSource = SEDFactory.calculate(instrument, Site.GN, ITCConstants.NEAR_IR, _sdParameters, _obsConditionParameters, _telescope, altair);
+        final SEDFactory.SourceResult calcSource = SEDFactory.calculate(instrument, _sdParameters, _obsConditionParameters, _telescope, altair);
 
         // End of the Spectral energy distribution portion of the ITC.
 
