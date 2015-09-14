@@ -10,6 +10,7 @@ import edu.gemini.spModel.config.MetaDataConfig;
 import edu.gemini.spModel.config2.Config;
 import edu.gemini.spModel.config2.ConfigSequence;
 import edu.gemini.spModel.config2.ItemKey;
+import edu.gemini.spModel.dataflow.GsaSequenceEditor;
 import edu.gemini.spModel.gemini.calunit.calibration.CalDictionary;
 import edu.gemini.spModel.gemini.seqcomp.smartgcal.SmartgcalSysConfig;
 import edu.gemini.spModel.obsclass.ObsClass;
@@ -95,6 +96,10 @@ public class DynamicSequenceTableModel extends AbstractTableModel {
         // keys.  Why do we put those in there?
         res.remove(INST_EXP_TIME_KEY);
         res.remove(INST_COADDS_KEY);
+
+        // Take out the proprietary months, which isn't important for sequence
+        // planning.
+        res.remove(GsaSequenceEditor.PROPRIETARY_MONTHS_KEY);
 
         // Now, if telescope:p or telescope:q is present, then make sure the
         // other is present as well. Otherwise, the table seems incomplete.
