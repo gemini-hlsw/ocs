@@ -15,8 +15,8 @@ import edu.gemini.spModel.target.SpatialProfile;
  */
 public final class Validation {
 
-    public static void validate(final ObservationDetails obs, final SourceDefinition source, final double elineFudge) {
-        checkElineWidth(source, elineFudge);
+    public static void validate(final Instrument instrument, final ObservationDetails obs, final SourceDefinition source) {
+        checkElineWidth(instrument, source);
         checkSourceFraction(obs.getNumExposures(), obs.getSourceFraction());
         checkGaussianFwhm(source.profile);
         checkSkyAperture(obs.getAnalysis());
@@ -51,24 +51,33 @@ public final class Validation {
     }
 
     /**
-     * Checks the relation between the emission line width and the emission line wavelength.
-     * It is not clear to me what the purpose/origin of the seemingly instrument dependent "fudge" factor is,
-     * I am just centralising and reproducing the original functionality here. The original code contained the
-     * comments "fudge x b/c of increased resolution of transmission files" next to those numbers.
-     * @param source
-     * @param fudge
+     * Checks the relation between the emission line width and the resolution (sampling rate) of the data
+     * files describing the atmospheric properties.
      */
-    private static void checkElineWidth(final SourceDefinition source, final double fudge) {
+    private static void checkElineWidth(final Instrument instrument, final SourceDefinition source) {
+
         if (source.getDistributionType().equals(SourceDefinition.Distribution.ELINE)) {
 
-            final double maxWidth = 3E5 / (source.getELineWavelength().toNanometers() * fudge);
+            // These values reflect the resolution of the data files we are currently using to describe the
+            // atmospheric properties for the given wavelength ranges. In case the resolution of those files change,
+            // these values should change, too. Ideally there was a way to know the resolution from the files,
+            // but right now there is no such mechanism in place.
+            final double resolution;
+            switch (instrument.getBands()) {
+                case VISIBLE: resolution = 0.50 * 2; break; // visible is sampled with 0.5 nm resolution
+                case NEAR_IR: resolution = 0.02 * 2; break; // near ir is sampled with 0.02 nm resolution
+                case MID_IR:  resolution = 2.00 * 2; break; // mid ir is sampled with 2 nm resolution
+                default:      throw new Error();
+            }
+
+            final double maxWidth = ITCConstants.C / (source.getELineWavelength().toNanometers() / resolution);
 
             if (source.getELineWidth().toKilometersPerSecond() < maxWidth) {
                 throw new IllegalArgumentException(
                     String.format(
                             "Please use a model line width > %.2f nm (or %.2f km/s) " +
                             "to avoid undersampling of the line profile when convolved " +
-                            "with the transmission response", 1.0/fudge, maxWidth));
+                            "with the transmission response", 1.0*resolution, maxWidth));
             }
         }
     }

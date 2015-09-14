@@ -21,6 +21,7 @@ import java.util.List;
  */
 public final class NifsRecipe implements SpectroscopyRecipe {
 
+    private final Nifs instrument;
     private final SourceDefinition _sdParameters;
     private final ObservationDetails _obsDetailParameters;
     private final ObservingConditions _obsConditionParameters;
@@ -38,26 +39,22 @@ public final class NifsRecipe implements SpectroscopyRecipe {
                       final TelescopeDetails telescope)
 
     {
+        instrument = new Nifs(nifsParameters, obsDetailParameters);
         _sdParameters = sdParameters;
         _obsDetailParameters = obsDetailParameters;
         _obsConditionParameters = obsConditionParameters;
         _nifsParameters = nifsParameters;
         _telescope = telescope;
 
-        validateInputParameters();
-    }
-
-    private void validateInputParameters() {
         // some general validations
-        Validation.validate(_obsDetailParameters, _sdParameters, 25.0);
+        Validation.validate(instrument, _obsDetailParameters, _sdParameters);
     }
 
     /**
      * Performs recipe calculation.
      */
     public Tuple2<ItcSpectroscopyResult, SpectroscopyResult> calculateSpectroscopy() {
-        final Nifs instrument = new Nifs(_nifsParameters, _obsDetailParameters);
-        final SpectroscopyResult r = calculateSpectroscopy(instrument);
+        final SpectroscopyResult r = doCalculateSpectroscopy();
         final List<SpcChartData> dataSets = new ArrayList<>();
         for (int i = 0; i < r.specS2N().length; i++) {
             dataSets.add(createNifsSignalChart(r, i));
@@ -66,7 +63,7 @@ public final class NifsRecipe implements SpectroscopyRecipe {
         return new Tuple2<>(ItcSpectroscopyResult.apply(dataSets, new ArrayList<>()), r);
     }
 
-    private SpectroscopyResult calculateSpectroscopy(final Nifs instrument) {
+    private SpectroscopyResult doCalculateSpectroscopy() {
 
         // Calculate image quality
         final ImageQualityCalculatable IQcalc = ImageQualityCalculationFactory.getCalculationInstance(_sdParameters, _obsConditionParameters, _telescope, instrument);

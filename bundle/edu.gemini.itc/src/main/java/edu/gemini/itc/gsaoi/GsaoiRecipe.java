@@ -14,6 +14,7 @@ import java.util.List;
  */
 public final class GsaoiRecipe implements ImagingRecipe {
 
+    private final Gsaoi instrument;
     private final GsaoiParameters _gsaoiParameters;
     private final ObservingConditions _obsConditionParameters;
     private final ObservationDetails _obsDetailParameters;
@@ -30,26 +31,18 @@ public final class GsaoiRecipe implements ImagingRecipe {
                        final TelescopeDetails telescope)
 
     {
+        instrument = new Gsaoi(gsaoiParameters, obsDetailParameters);
         _sdParameters = sdParameters;
         _obsDetailParameters = obsDetailParameters;
         _obsConditionParameters = obsConditionParameters;
         _gsaoiParameters = gsaoiParameters;
         _telescope = telescope;
 
-        validateInputParameters();
-    }
-
-    private void validateInputParameters() {
         // some general validations
-        Validation.validate(_obsDetailParameters, _sdParameters, 25.0);
+        Validation.validate(instrument, _obsDetailParameters, _sdParameters);
     }
 
     public ImagingResult calculateImaging() {
-        final Gsaoi instrument = new Gsaoi(_gsaoiParameters, _obsDetailParameters);
-        return calculateImaging(instrument);
-    }
-
-    private ImagingResult calculateImaging(final Gsaoi instrument) {
         // Module 1b
         // Define the source energy (as function of wavelength).
         //

@@ -14,10 +14,10 @@ import java.util.List;
  */
 public final class TRecsRecipe implements ImagingRecipe, SpectroscopyRecipe {
 
+    private final TRecs instrument;
     private final SourceDefinition _sdParameters;
     private final ObservationDetails _obsDetailParameters;
     private final ObservingConditions _obsConditionParameters;
-    private final TRecsParameters _trecsParameters;
     private final TelescopeDetails _telescope;
 
     /**
@@ -29,10 +29,10 @@ public final class TRecsRecipe implements ImagingRecipe, SpectroscopyRecipe {
                        final TRecsParameters trecsParameters,
                        final TelescopeDetails telescope) {
 
+        instrument = new TRecs(trecsParameters, obsDetailParameters);
         _sdParameters = sdParameters;
         _obsDetailParameters = correctedObsDetails(trecsParameters, obsDetailParameters);
         _obsConditionParameters = obsConditionParameters;
-        _trecsParameters = trecsParameters;
         _telescope = telescope;
 
         validateInputParameters();
@@ -48,7 +48,7 @@ public final class TRecsRecipe implements ImagingRecipe, SpectroscopyRecipe {
         }
 
         // some general validations
-        Validation.validate(_obsDetailParameters, _sdParameters, 0.25);
+        Validation.validate(instrument, _obsDetailParameters, _sdParameters);
     }
 
     private ObservationDetails correctedObsDetails(final TRecsParameters tp, final ObservationDetails odp) {
@@ -81,8 +81,7 @@ public final class TRecsRecipe implements ImagingRecipe, SpectroscopyRecipe {
     }
 
     public Tuple2 <ItcSpectroscopyResult, SpectroscopyResult> calculateSpectroscopy() {
-        final TRecs instrument = new TRecs(_trecsParameters, _obsDetailParameters);
-        final SpectroscopyResult r = calculateSpectroscopy(instrument);
+        final SpectroscopyResult r = doCalculateSpectroscopy();
         final List<SpcChartData> dataSets = new ArrayList<SpcChartData>() {{
             add(Recipe$.MODULE$.createSignalChart(r, 0));
             add(Recipe$.MODULE$.createS2NChart(r, 0));
@@ -90,12 +89,7 @@ public final class TRecsRecipe implements ImagingRecipe, SpectroscopyRecipe {
         return new Tuple2<>(ItcSpectroscopyResult.apply(dataSets, new ArrayList<>()), r);
     }
 
-    public ImagingResult calculateImaging() {
-        final TRecs instrument = new TRecs(_trecsParameters, _obsDetailParameters);
-        return calculateImaging(instrument);
-    }
-
-    private SpectroscopyResult calculateSpectroscopy(final TRecs instrument) {
+    private SpectroscopyResult doCalculateSpectroscopy() {
 
         // Get the summed source and sky
         final SEDFactory.SourceResult calcSource = SEDFactory.calculate(instrument, _sdParameters, _obsConditionParameters, _telescope);
@@ -179,7 +173,7 @@ public final class TRecsRecipe implements ImagingRecipe, SpectroscopyRecipe {
         return SpectroscopyResult$.MODULE$.apply(p, instrument, null, IQcalc, specS2Narr, st); // TODO SFCalc not needed!
     }
 
-    private ImagingResult calculateImaging(final TRecs instrument) {
+    public ImagingResult calculateImaging() {
         // Module 1b
         // Define the source energy (as function of wavelength).
         //

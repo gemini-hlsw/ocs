@@ -12,11 +12,11 @@ import java.util.List;
  */
 public final class AcqCamRecipe implements ImagingRecipe {
 
+    private final AcquisitionCamera instrument;
     private final SourceDefinition _sdParameters;
     private final ObservationDetails _obsDetailParameters;
     private final ObservingConditions _obsConditionParameters;
     private final TelescopeDetails _telescope;
-    private final AcquisitionCamera instrument;
 
     /**
      * Constructs an AcqCamRecipe given the parameters.
@@ -28,30 +28,20 @@ public final class AcqCamRecipe implements ImagingRecipe {
                         final TelescopeDetails telescope,
                         final AcquisitionCamParameters acqCamParameters) {
 
+        instrument = new AcquisitionCamera(acqCamParameters);
         _sdParameters = sdParameters;
         _obsDetailParameters = obsDetailParameters;
         _obsConditionParameters = obsConditionParameters;
         _telescope = telescope;
 
-        // create instrument
-        instrument = new AcquisitionCamera(acqCamParameters);
-
-        validateInputParameters();
-    }
-
-    private void validateInputParameters() {
         // some general validations
-        Validation.validate(_obsDetailParameters, _sdParameters, 1.0);
-    }
-
-    public ImagingResult calculateImaging() {
-        return calculateImaging(instrument);
+        Validation.validate(instrument, _obsDetailParameters, _sdParameters);
     }
 
     /**
      * Performs recipe calculation.
      */
-    private ImagingResult calculateImaging(final AcquisitionCamera instrument) {
+    public ImagingResult calculateImaging() {
 
         // Get the summed source and sky
         final SEDFactory.SourceResult calcSource = SEDFactory.calculate(instrument, _sdParameters, _obsConditionParameters, _telescope);

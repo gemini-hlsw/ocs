@@ -17,10 +17,10 @@ import java.util.List;
 public final class MichelleRecipe implements ImagingRecipe, SpectroscopyRecipe {
 
     // Parameters from the web page.
+    private final Michelle instrument;
     private final SourceDefinition _sdParameters;
     private final ObservationDetails _obsDetailParameters;
     private final ObservingConditions _obsConditionParameters;
-    private final MichelleParameters _michelleParameters;
     private final TelescopeDetails _telescope;
 
     /**
@@ -32,18 +32,14 @@ public final class MichelleRecipe implements ImagingRecipe, SpectroscopyRecipe {
                           final ObservingConditions obsConditionParameters,
                           final MichelleParameters michelleParameters,
                           final TelescopeDetails telescope) {
+        instrument = new Michelle(michelleParameters, obsDetailParameters);
         _sdParameters = sdParameters;
         _obsDetailParameters = correctedObsDetails(michelleParameters, obsDetailParameters);
         _obsConditionParameters = obsConditionParameters;
-        _michelleParameters = michelleParameters;
         _telescope = telescope;
 
-        validateInputParameters();
-    }
-
-    private void validateInputParameters() {
         // some general validations
-        Validation.validate(_obsDetailParameters, _sdParameters, 0.25);
+        Validation.validate(instrument, _obsDetailParameters, _sdParameters);
     }
 
     private ObservationDetails correctedObsDetails(final MichelleParameters mp, final ObservationDetails odp) {
@@ -52,7 +48,6 @@ public final class MichelleRecipe implements ImagingRecipe, SpectroscopyRecipe {
         // TODO : some missing parameters and/or turns the total exposure time into a single exposure time.
         // TODO : This is a temporary hack. There needs to be a better solution for this.
         // NOTE : odp.getExposureTime() carries the TOTAL exposure time (as opposed to exp time for a single frame)
-        final Michelle instrument = new Michelle(mp, odp); // TODO: Avoid creating an instrument instance twice.
         final double correctedTotalObservationTime;
         if (mp.polarimetry().equals(YesNoType.YES)) {
             //If polarimetry is used divide exposure time by 4 because of the 4 waveplate positions
@@ -84,8 +79,7 @@ public final class MichelleRecipe implements ImagingRecipe, SpectroscopyRecipe {
     }
 
     public Tuple2<ItcSpectroscopyResult, SpectroscopyResult> calculateSpectroscopy() {
-        final Michelle instrument = new Michelle(_michelleParameters, _obsDetailParameters);
-        final SpectroscopyResult r = calculateSpectroscopy(instrument);
+        final SpectroscopyResult r = doCalculateSpectroscopy();
         final List<SpcChartData> dataSets = new ArrayList<SpcChartData>() {{
             add(Recipe$.MODULE$.createSignalChart(r, 0));
             add(Recipe$.MODULE$.createS2NChart(r, 0));
@@ -93,12 +87,7 @@ public final class MichelleRecipe implements ImagingRecipe, SpectroscopyRecipe {
         return new Tuple2<>(ItcSpectroscopyResult.apply(dataSets, new ArrayList<>()), r);
     }
 
-    public ImagingResult calculateImaging() {
-        final Michelle instrument = new Michelle(_michelleParameters, _obsDetailParameters);
-        return calculateImaging(instrument);
-    }
-
-    private SpectroscopyResult calculateSpectroscopy(final Michelle instrument) {
+    private SpectroscopyResult doCalculateSpectroscopy() {
 
         // Get the summed source and sky
         final SEDFactory.SourceResult calcSource = SEDFactory.calculate(instrument, _sdParameters, _obsConditionParameters, _telescope);
@@ -189,7 +178,7 @@ public final class MichelleRecipe implements ImagingRecipe, SpectroscopyRecipe {
 
     }
 
-    private ImagingResult calculateImaging(final Michelle instrument) {
+    public ImagingResult calculateImaging() {
 
         // Get the summed source and sky
         final SEDFactory.SourceResult calcSource = SEDFactory.calculate(instrument, _sdParameters, _obsConditionParameters, _telescope);

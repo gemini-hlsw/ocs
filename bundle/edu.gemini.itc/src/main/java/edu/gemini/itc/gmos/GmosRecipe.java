@@ -20,10 +20,10 @@ import java.util.List;
  */
 public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRecipe {
 
+    private final Gmos mainInstrument;
     private final SourceDefinition _sdParameters;
     private final ObservationDetails _obsDetailParameters;
     private final ObservingConditions _obsConditionParameters;
-    private final GmosParameters _gmosParameters;
     private final TelescopeDetails _telescope;
 
     /**
@@ -36,22 +36,18 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
                       final TelescopeDetails telescope)
 
     {
+        mainInstrument = createGmos(gmosParameters, obsDetailParameters);
         _sdParameters = sdParameters;
         _obsDetailParameters = obsDetailParameters;
         _obsConditionParameters = obsConditionParameters;
-        _gmosParameters = gmosParameters;
         _telescope = telescope;
 
-        validateInputParamters();
-    }
-
-    private void validateInputParamters() {
         // some general validations
-        Validation.validate(_obsDetailParameters, _sdParameters, 1.0);
+        Validation.validate(mainInstrument, _obsDetailParameters, _sdParameters);
     }
 
     public Tuple2<ItcSpectroscopyResult, SpectroscopyResult[]> calculateSpectroscopy() {
-        final SpectroscopyResult[] r = calculateSpectroscopy(createGmos());
+        final SpectroscopyResult[] r = doCalculateSpectroscopy();
         final List<SpcChartData> dataSets = new ArrayList<SpcChartData>() {{
             add(createGmosChart(r, 0));
             add(createGmosChart(r, 1));
@@ -59,11 +55,7 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
         return new Tuple2<>(ItcSpectroscopyResult.apply(dataSets, new ArrayList<>()), r);
     }
 
-    public NonEmptyList<ImagingResult> calculateImaging() {
-        return calculateImaging(createGmos());
-    }
-
-    private SpectroscopyResult[] calculateSpectroscopy(final Gmos mainInstrument) {
+    private SpectroscopyResult[] doCalculateSpectroscopy() {
         final Gmos[] ccdArray = mainInstrument.getDetectorCcdInstruments();
         final SpectroscopyResult[] results = new SpectroscopyResult[ccdArray.length];
         for (int i = 0; i < ccdArray.length; i++) {
@@ -73,7 +65,7 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
         return results;
     }
 
-    private NonEmptyList<ImagingResult> calculateImaging(final Gmos mainInstrument) {
+    public NonEmptyList<ImagingResult> calculateImaging() {
         final Gmos[] ccdArray = mainInstrument.getDetectorCcdInstruments();
         final List<ImagingResult> results = new ArrayList<>();
         for (final Gmos instrument : ccdArray) {
@@ -84,10 +76,10 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
         return NonEmptyList$.MODULE$.apply(sResults.head(), sResults.tail().toSeq());
     }
 
-    private Gmos createGmos() {
-        switch (_gmosParameters.site()) {
-            case GN: return new GmosNorth(_gmosParameters, _obsDetailParameters, 0);
-            case GS: return new GmosSouth(_gmosParameters, _obsDetailParameters, 0);
+    private Gmos createGmos(final GmosParameters parameters, final ObservationDetails observationDetails) {
+        switch (parameters.site()) {
+            case GN: return new GmosNorth(parameters, observationDetails, 0);
+            case GS: return new GmosSouth(parameters, observationDetails, 0);
             default: throw new Error("invalid site");
         }
     }

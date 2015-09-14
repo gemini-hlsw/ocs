@@ -19,7 +19,7 @@ public final class GnirsRecipe implements SpectroscopyRecipe {
 
     public static final int ORDERS = 6;
 
-    // Parameters from the web page.
+    private final Gnirs instrument;
     private final SourceDefinition _sdParameters;
     private final ObservationDetails _obsDetailParameters;
     private final ObservingConditions _obsConditionParameters;
@@ -40,6 +40,7 @@ public final class GnirsRecipe implements SpectroscopyRecipe {
                        final TelescopeDetails telescope)
 
     {
+        instrument = new Gnirs(gnirsParameters, obsDetailParameters);
         _sdParameters = sdParameters;
         _obsDetailParameters = obsDetailParameters;
         _obsConditionParameters = obsConditionParameters;
@@ -50,17 +51,12 @@ public final class GnirsRecipe implements SpectroscopyRecipe {
         backGroundOrder = new VisitableSampledSpectrum[ORDERS];
         finalS2NOrder = new VisitableSampledSpectrum[ORDERS];
 
-        validateInputParameters();
-    }
-
-    private void validateInputParameters() {
         // some general validations
-        Validation.validate(_obsDetailParameters, _sdParameters, 25.0);
+        Validation.validate(instrument, _obsDetailParameters, _sdParameters);
     }
 
     public Tuple2<ItcSpectroscopyResult, SpectroscopyResult> calculateSpectroscopy() {
-        final Gnirs instrument = new Gnirs(_gnirsParameters, _obsDetailParameters);
-        final GnirsSpectroscopyResult r = calculateSpectroscopy(instrument);
+        final GnirsSpectroscopyResult r = doCalculateSpectroscopy();
         final List<SpcChartData> dataSets = new ArrayList<SpcChartData>() {{
             if (instrument.XDisp_IsUsed()) {
                 add(createGnirsSignalChart(r));
@@ -73,7 +69,7 @@ public final class GnirsRecipe implements SpectroscopyRecipe {
         return new Tuple2<>(ItcSpectroscopyResult.apply(dataSets, new ArrayList<>()), r);
     }
 
-    private GnirsSpectroscopyResult calculateSpectroscopy(final Gnirs instrument) {
+    private GnirsSpectroscopyResult doCalculateSpectroscopy() {
         // Module 1b
         // Define the source energy (as function of wavelength).
         //
