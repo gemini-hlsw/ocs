@@ -21,7 +21,7 @@ import java.io.Serializable;
 /**
  * Contains Gemini Science Archive related attributes.
  */
-public class GsaAspect implements Serializable {
+public final class GsaAspect implements Serializable {
     private static final String SEND_TO_GSA         = "sendToGsa";
     private static final String PROPRIETARY_MONTHS  = "proprietaryMonths";
     private static final String KEEP_HEADER_PRIVATE = "headerPrivate";
@@ -64,9 +64,9 @@ public class GsaAspect implements Serializable {
         );
     }
 
-    private boolean _sendToGsa;
-    private int _proprietaryMonths = -1;
-    private boolean _keepHeaderPrivate;
+    private final boolean _sendToGsa;
+    private final int _proprietaryMonths;
+    private final boolean _keepHeaderPrivate;
 
     public GsaAspect(boolean sendToGsa, int months) {
         this(sendToGsa, months, false);
@@ -82,10 +82,15 @@ public class GsaAspect implements Serializable {
      * Set the state of this object from the given parameter set.
      */
     public GsaAspect(ParamSet paramSet) {
-        if (paramSet == null) return;
-        _sendToGsa         = Pio.getBooleanValue(paramSet, SEND_TO_GSA, false);
-        _proprietaryMonths = Pio.getIntValue(paramSet, PROPRIETARY_MONTHS, -1);
-        _keepHeaderPrivate = Pio.getBooleanValue(paramSet, KEEP_HEADER_PRIVATE, false);
+        if (paramSet == null) {
+            _sendToGsa         = false;
+            _proprietaryMonths = -1;
+            _keepHeaderPrivate = false;
+        } else {
+            _sendToGsa         = Pio.getBooleanValue(paramSet, SEND_TO_GSA, false);
+            _proprietaryMonths = Pio.getIntValue(paramSet, PROPRIETARY_MONTHS, -1);
+            _keepHeaderPrivate = Pio.getBooleanValue(paramSet, KEEP_HEADER_PRIVATE, false);
+        }
     }
 
     public boolean isSendToGsa() {
