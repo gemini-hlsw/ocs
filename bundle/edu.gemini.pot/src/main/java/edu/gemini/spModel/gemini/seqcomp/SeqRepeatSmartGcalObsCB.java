@@ -17,6 +17,7 @@ import edu.gemini.spModel.data.config.DefaultSysConfig;
 import edu.gemini.spModel.data.config.IConfig;
 import edu.gemini.spModel.data.config.ISysConfig;
 import edu.gemini.spModel.data.config.StringParameter;
+import edu.gemini.spModel.dataflow.GsaSequenceEditor;
 import edu.gemini.spModel.gemini.calunit.calibration.*;
 import edu.gemini.spModel.gemini.calunit.smartgcal.Calibration;
 import edu.gemini.spModel.gemini.calunit.smartgcal.CalibrationKey;
@@ -229,14 +230,16 @@ public abstract class SeqRepeatSmartGcalObsCB implements IConfigBuilder, Cloneab
 
     private void setObsClass(IConfig current, Config step)  {
         SeqRepeatSmartGcalObs c = (SeqRepeatSmartGcalObs) seqComponent.getDataObject();
+        final ObsClass obsClass;
         if (c.getObsClass() == null) {
             // auto mode -> calculate observe class for calibration (depends on node type and baseline calibration type (night/day))
-            ObsClass autoObsClass = calculateAutoObsClass(step);
-            getObserveConfig(current).putParameter(StringParameter.getInstance(InstConstants.OBS_CLASS_PROP, autoObsClass.sequenceValue()));
+            obsClass = calculateAutoObsClass(step);
         } else {
             // manual mode -> we use the value that is set in the GUI component
-            getObserveConfig(current).putParameter(StringParameter.getInstance(InstConstants.OBS_CLASS_PROP, c.getObsClass().sequenceValue()));
+            obsClass = c.getObsClass();
         }
+        getObserveConfig(current).putParameter(StringParameter.getInstance(InstConstants.OBS_CLASS_PROP, obsClass.sequenceValue()));
+        GsaSequenceEditor.instance.addProprietaryPeriod(current, seqComponent.getProgram(), obsClass);
     }
 
     private ObsClass calculateAutoObsClass(Config step) {

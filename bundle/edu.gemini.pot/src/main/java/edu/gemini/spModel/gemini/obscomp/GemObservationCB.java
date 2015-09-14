@@ -16,19 +16,19 @@ import edu.gemini.spModel.config2.Config;
 import edu.gemini.spModel.config2.ConfigSequence;
 import edu.gemini.spModel.core.SPProgramID;
 import edu.gemini.spModel.data.config.*;
+import edu.gemini.spModel.dataflow.GsaAspect;
+import edu.gemini.spModel.dataflow.GsaSequenceEditor;
 import edu.gemini.spModel.dataset.DatasetLabel;
 import edu.gemini.spModel.gemini.calunit.calibration.CalConfigBuilderUtil;
 import edu.gemini.spModel.gemini.calunit.calibration.CalConfigFactory;
 import edu.gemini.spModel.gemini.calunit.smartgcal.CalibrationKeyProvider;
 import edu.gemini.spModel.gemini.seqcomp.smartgcal.SmartgcalSysConfig;
-import edu.gemini.spModel.guide.*;
 import edu.gemini.spModel.obscomp.InstConstants;
 import edu.gemini.spModel.obscomp.SPInstObsComp;
 import edu.gemini.spModel.obslog.ObsExecLog;
 import edu.gemini.spModel.obsrecord.ObsExecRecord;
 import edu.gemini.spModel.seqcomp.SeqConfigNames;
 import edu.gemini.spModel.target.env.TargetEnvironment;
-import edu.gemini.spModel.target.obsComp.TargetObsComp;
 import edu.gemini.spModel.target.obsComp.TargetObsCompConstants;
 
 import java.text.DecimalFormat;
@@ -87,7 +87,7 @@ public class GemObservationCB extends ObservationCB {
             return ImOption.apply(p.getQueueBand()).flatMap(new MapOp<String, Option<Integer>>() {
                 @Override public Option<Integer> apply(String s) {
                     try {
-                        return new Some<Integer>(Integer.parseInt(s));
+                        return new Some<>(Integer.parseInt(s));
                     } catch (NumberFormatException ex) {
                         return None.INTEGER;
                     }
@@ -99,8 +99,6 @@ public class GemObservationCB extends ObservationCB {
         private final Option<Integer> _scienceBand;
         private final SPInstObsComp _inst;
         private final ObsExecRecord _obsExecRecord;
-        private final Set<GuideProbe> _availableGuiders;
-        private final Set<GuideProbe> _unavailableGuiders;
         private final ConfigSequence _completedSteps;
 
         ObsContext(ISPObservation obs)  {
@@ -112,47 +110,20 @@ public class GemObservationCB extends ObservationCB {
 
             // Loop through the obs components extracting the required info.
             SPInstObsComp inst  = null;
-
-            Set<GuideProbe> referenced = null;
-            Set<GuideProbe> anti = new HashSet<GuideProbe>();
-            Set<GuideProbe> guiders = new HashSet<GuideProbe>();
-
             for (ISPObsComponent obsComp : obs.getObsComponents()) {
                 Object dataObj = obsComp.getDataObject();
-                if (dataObj instanceof GuideProbeProvider) {
-                    guiders.addAll(((GuideProbeProvider) dataObj).getGuideProbes());
-                }
-                if (dataObj instanceof GuideProbeConsumer) {
-                    anti.addAll(((GuideProbeConsumer) dataObj).getConsumedGuideProbes());
-                }
-
-                if (dataObj instanceof TargetObsComp) {
-                    referenced = ((TargetObsComp) dataObj).getTargetEnvironment().getGuideEnvironment().getReferencedGuiders();
-                } else if (dataObj instanceof SPInstObsComp) {
+                if (dataObj instanceof SPInstObsComp) {
                     inst = (SPInstObsComp) dataObj;
                 }
             }
 
-            final ISPObsExecLog lc  = obs.getObsExecLog();
-            final ObsExecLog log = (lc == null) ? null : (ObsExecLog) lc.getDataObject();
+            final ISPObsExecLog lc            = obs.getObsExecLog();
+            final ObsExecLog log              = (lc == null) ? null : (ObsExecLog) lc.getDataObject();
             final ObsExecRecord obsExecRecord = (log == null) ? null : log.getRecord();
-            final ConfigSequence seq  = (log == null) ? null : log.getCompletedSteps();
+            final ConfigSequence seq          = (log == null) ? null : log.getCompletedSteps();
 
-            guiders.removeAll(anti);
-
-            _inst             = inst;
-            _obsExecRecord = obsExecRecord;
-            _availableGuiders = Collections.unmodifiableSet(guiders);
-
-            // Figure out the set of guiders that are referenced in the target
-            // env, but not available in the observation.
-            if (referenced == null) {
-                _unavailableGuiders = Collections.emptySet();
-            } else {
-                referenced.removeAll(guiders);
-                _unavailableGuiders = Collections.unmodifiableSet(referenced);
-            }
-
+            _inst           = inst;
+            _obsExecRecord  = obsExecRecord;
             _completedSteps = (seq != null) ? seq : new ConfigSequence();
         }
 
@@ -170,14 +141,6 @@ public class GemObservationCB extends ObservationCB {
 
         ObsExecRecord getObsRecord() {
             return _obsExecRecord;
-        }
-
-        Set<GuideProbe> getAvailableGuiders() {
-            return _availableGuiders;
-        }
-
-        Set<GuideProbe> getUnavailableGuiders() {
-            return _unavailableGuiders;
         }
 
         Config[] getCompletedSteps() {
@@ -304,16 +267,6 @@ public class GemObservationCB extends ObservationCB {
                         }
                     }
                 }
-
-                // Another hack -- if there are guide probes referenced in the
-                // target environment and/or offset iterators that aren't
-                // available in the current context, then remove references to
-                // them from the sequence.  We don't want to send
-                // "guideWithAOWFS", for example, if there is no Altair
-                // component.
-//                for (GuideProbe unavail : ctx.getUnavailableGuiders()) {
-//                    sc.removeParameter(unavail.getSequenceProp());
-//                }
             }
 
             // Now check for observe and update if needed
@@ -338,11 +291,9 @@ public class GemObservationCB extends ObservationCB {
             }
 
             final ISysConfig obsConfig = sc;
-            ctx.getScienceBand().foreach(new ApplyOp<Integer>() {
-                @Override public void apply(Integer band) {
-                    final IParameter p = DefaultParameter.getInstance(InstConstants.SCI_BAND, band);
-                    obsConfig.putParameter(p);
-                }
+            ctx.getScienceBand().foreach(band -> {
+                final IParameter p = DefaultParameter.getInstance(InstConstants.SCI_BAND, band);
+                obsConfig.putParameter(p);
             });
 
             if (observeType != null && observeType.equals(InstConstants.SCIENCE_OBSERVE_TYPE)) {
@@ -436,14 +387,6 @@ public class GemObservationCB extends ObservationCB {
 
         ISPObservation obs = _getObsNode();
 
-// RCN: this detection method doesn't work if stubs aren't unwrapped explicitly ... skip the check for now
-//
-//        // We can only do config building in a functor.
-//        if (!StubRegistry.isLocal(obs)) {
-//            LOG.log(Level.WARNING, "Config building in client.", new RuntimeException());
-//            throw new RuntimeException("Config building in client");
-//        }
-
         _obsContext = new ObsContext(obs);
         getObsState().reset();
     }
@@ -483,39 +426,11 @@ public class GemObservationCB extends ObservationCB {
         dc.putParameter(param);
         param = StringParameter.getInstance(InstConstants.OBSERVATIONID_PROP, obsIdStr);
         dc.putParameter(param);
+
+        // Add proprietary metadata flag
+        final GsaAspect gsa = GsaAspect.lookup(obs.getProgram());
+        GsaSequenceEditor.instance.addHeaderVisibility(config, gsa);
     }
-
-    /*
-    private void parkUnusedProbe(ISysConfig sc, GuideProbe probe) {
-        // Only park probes that actually can park ... those that use standard
-        // guide options.
-        GuideOptions opts = probe.getGuideOptions();
-        if (!(opts instanceof StandardGuideOptions)) return;
-
-        // See if there is already a value there for this probe.
-        Object val = sc.getParameterValue(probe.getSequenceProp());
-        if (val != null) return;
-
-        // Okay, add the configuration needed to park this probe.
-        String param = probe.getSequenceProp();
-        String park  = StandardGuideOptions.Value.park.name();
-        sc.putParameter(StringParameter.getInstance(param, park));
-    }
-    */
-
-    /*
-    private void parkUnusedProbes(IConfig config, ObsContext ctx)  {
-        ISysConfig sc = config.getSysConfig(SeqConfigNames.TELESCOPE_CONFIG_NAME);
-        if (sc == null) return;
-        Set<GuideProbe> probes = new HashSet<GuideProbe>(ctx.getAvailableGuiders());
-
-        // Always make sure to park PWFS probes that aren't used.
-        probes.addAll(Arrays.asList(PwfsGuideProbe.values()));
-
-        // Park all available, but unused probes.
-        for (GuideProbe probe : probes) parkUnusedProbe(sc, probe);
-    }
-    */
 
     @Override
     public void applyNext(IConfig config, IConfig prevFull)  {
@@ -533,8 +448,5 @@ public class GemObservationCB extends ObservationCB {
         // Update the configuration if needed
         os.updateConfig(config, _obsContext);
         os.advanceDataLabelCounter();
-
-        // Park unused guide probes.
-//        if (isFirstTime) parkUnusedProbes(config, _obsContext);
     }
 }

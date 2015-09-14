@@ -12,6 +12,7 @@ import edu.gemini.spModel.data.config.DefaultParameter;
 import edu.gemini.spModel.data.config.IConfig;
 import edu.gemini.spModel.config.AbstractSeqComponentCB;
 import edu.gemini.spModel.data.config.StringParameter;
+import edu.gemini.spModel.dataflow.GsaSequenceEditor;
 import edu.gemini.spModel.obscomp.InstConstants;
 
 import edu.gemini.pot.sp.ISPSeqComponent;
@@ -72,6 +73,8 @@ public class SeqRepeatBiasObsCB extends AbstractSeqComponentCB {
                 c.getObsClass().sequenceValue()));
         config.putParameter(SYSTEM_NAME, StringParameter.getInstance(InstConstants.OBJECT_PROP,
                 "Bias"));
+
+        GsaSequenceEditor.instance.addProprietaryPeriod(config, getSeqComponent().getProgram(), c.getObsClass());
 
         // See OT-73
         // Was moved from TextSequenceFunctor

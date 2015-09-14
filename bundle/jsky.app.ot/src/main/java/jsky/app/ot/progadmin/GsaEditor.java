@@ -7,6 +7,7 @@ package jsky.app.ot.progadmin;
 import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.spModel.core.ProgramType;
 import edu.gemini.spModel.dataflow.GsaAspect;
+import static edu.gemini.spModel.dataflow.GsaAspect.Visibility.*;
 
 import javax.swing.*;
 
@@ -41,7 +42,7 @@ public final class GsaEditor implements ProgramTypeListener {
 
         boolean sendToGsa = false;
         if (model != null) sendToGsa = model.isSendToGsa();
-        return new GsaAspect(sendToGsa, months, isPrivate);
+        return new GsaAspect(sendToGsa, months, isPrivate ? PRIVATE : PUBLIC);
     }
 
     public void setModel(GsaAspect model) {
