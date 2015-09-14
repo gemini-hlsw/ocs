@@ -429,7 +429,7 @@ public class GemObservationCB extends ObservationCB {
 
         // Add proprietary metadata flag
         final GsaAspect gsa = GsaAspect.lookup(obs.getProgram());
-        GsaSequenceEditor.instance.addProprietaryMetadata(config, gsa);
+        GsaSequenceEditor.instance.addHeaderVisibility(config, gsa);
     }
 
     @Override

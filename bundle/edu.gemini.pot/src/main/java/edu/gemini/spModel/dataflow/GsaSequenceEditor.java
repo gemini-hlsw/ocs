@@ -14,14 +14,14 @@ import static edu.gemini.spModel.seqcomp.SeqConfigNames.OBSERVE_KEY;
 public enum GsaSequenceEditor {
     instance;
 
-    public static final String  PROPRIETARY_MD         = "proprietaryMd";
-    public static final ItemKey PROPRIETARY_MD_KEY     = new ItemKey(OBSERVE_KEY, PROPRIETARY_MD);
+    public static final String  HEADER_VISIBILITY      = "headerVisibility";
+    public static final ItemKey HEADER_VISIBILITY_KEY  = new ItemKey(OBSERVE_KEY, HEADER_VISIBILITY);
 
     public static final String  PROPRIETARY_MONTHS     = "proprietaryMonths";
     public static final ItemKey PROPRIETARY_MONTHS_KEY = new ItemKey(OBSERVE_KEY, PROPRIETARY_MONTHS);
 
-    public void addProprietaryMetadata(IConfig c, GsaAspect gsa) {
-        c.putParameter(OBSERVE_CONFIG_NAME, DefaultParameter.getInstance(PROPRIETARY_MD, gsa.isHeaderPrivate()));
+    public void addHeaderVisibility(IConfig c, GsaAspect gsa) {
+        c.putParameter(OBSERVE_CONFIG_NAME, DefaultParameter.getInstance(HEADER_VISIBILITY, gsa.getHeaderVisibility()));
     }
 
     public void addProprietaryPeriod(IConfig c, GsaAspect gsa, ObsClass obsClass) {

@@ -17,14 +17,31 @@ import edu.gemini.spModel.core.ProgramType;
 import java.util.Map;
 import java.util.HashMap;
 import java.io.Serializable;
+import java.util.Optional;
 
 /**
  * Contains Gemini Science Archive related attributes.
  */
 public final class GsaAspect implements Serializable {
+    public enum Visibility {
+        PRIVATE,
+        PUBLIC,
+        ;
+
+        public static Optional<Visibility> parse(String vs) {
+            return Optional.ofNullable(vs).flatMap(s -> {
+                try {
+                    return Optional.of(Visibility.valueOf(s));
+                } catch (Exception ex) {
+                    return Optional.empty();
+                }
+            });
+        }
+    }
+
     private static final String SEND_TO_GSA         = "sendToGsa";
     private static final String PROPRIETARY_MONTHS  = "proprietaryMonths";
-    private static final String KEEP_HEADER_PRIVATE = "headerPrivate";
+    private static final String HEADER_VISIBILITY   = "headerVisibility";
 
     public static final GsaAspect DEFAULT = new GsaAspect(false, 0);
 
@@ -66,16 +83,16 @@ public final class GsaAspect implements Serializable {
 
     private final boolean _sendToGsa;
     private final int _proprietaryMonths;
-    private final boolean _keepHeaderPrivate;
+    private final Visibility _headerVisibility;
 
     public GsaAspect(boolean sendToGsa, int months) {
-        this(sendToGsa, months, false);
+        this(sendToGsa, months, Visibility.PUBLIC);
     }
 
-    public GsaAspect(boolean sendToGsa, int months, boolean headerPrivate) {
+    public GsaAspect(boolean sendToGsa, int months, Visibility visibility) {
         _sendToGsa         = sendToGsa;
         _proprietaryMonths = months;
-        _keepHeaderPrivate = headerPrivate;
+        _headerVisibility  = visibility;
     }
 
     /**
@@ -85,11 +102,14 @@ public final class GsaAspect implements Serializable {
         if (paramSet == null) {
             _sendToGsa         = false;
             _proprietaryMonths = -1;
-            _keepHeaderPrivate = false;
+            _headerVisibility  = Visibility.PUBLIC;
         } else {
             _sendToGsa         = Pio.getBooleanValue(paramSet, SEND_TO_GSA, false);
             _proprietaryMonths = Pio.getIntValue(paramSet, PROPRIETARY_MONTHS, -1);
-            _keepHeaderPrivate = Pio.getBooleanValue(paramSet, KEEP_HEADER_PRIVATE, false);
+
+            // Handle migration from the old boolean flag to Visibility.
+            final Optional<Visibility> vs = Visibility.parse(Pio.getValue(paramSet, HEADER_VISIBILITY));
+            _headerVisibility  = vs.orElseGet(() -> Pio.getBooleanValue(paramSet, "headerPrivate", false) ? Visibility.PRIVATE : Visibility.PUBLIC);
         }
     }
 
@@ -101,8 +121,12 @@ public final class GsaAspect implements Serializable {
         return _proprietaryMonths;
     }
 
+    public Visibility getHeaderVisibility() {
+        return _headerVisibility;
+    }
+
     public boolean isHeaderPrivate() {
-        return _keepHeaderPrivate;
+        return _headerVisibility == Visibility.PRIVATE;
     }
 
     public boolean equals(Object o) {
@@ -112,13 +136,13 @@ public final class GsaAspect implements Serializable {
         GsaAspect that = (GsaAspect) o;
 
         if (_sendToGsa != that._sendToGsa) return false;
-        if (_keepHeaderPrivate != that._keepHeaderPrivate) return false;
+        if (_headerVisibility != that._headerVisibility) return false;
         return (_proprietaryMonths == that._proprietaryMonths);
     }
 
     public int hashCode() {
         int result = _proprietaryMonths;
-        result = 31 * result + (_keepHeaderPrivate ? 1 : 0);
+        result = 31 * result + _headerVisibility.hashCode();
         result = 31 * result + (_sendToGsa ? 1 : 0);
         return result;
     }
@@ -130,7 +154,7 @@ public final class GsaAspect implements Serializable {
         ParamSet paramSet = factory.createParamSet(name);
         Pio.addBooleanParam(factory, paramSet, SEND_TO_GSA, _sendToGsa);
         Pio.addIntParam(factory, paramSet, PROPRIETARY_MONTHS, _proprietaryMonths);
-        Pio.addBooleanParam(factory, paramSet, KEEP_HEADER_PRIVATE, _keepHeaderPrivate);
+        Pio.addParam(factory, paramSet, HEADER_VISIBILITY, _headerVisibility.name());
         return paramSet;
     }
 }
