@@ -1,9 +1,3 @@
-// Copyright 1997 Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-// See the file LICENSE for complete details.
-//
-// $Id: EdCompInstNIRI.java 8275 2007-11-22 20:15:41Z gillies $
-//
 package jsky.app.ot.gemini.niri;
 
 import edu.gemini.pot.sp.ISPNode;
@@ -18,11 +12,12 @@ import jsky.util.gui.DropDownListBoxWidget;
 import jsky.util.gui.DropDownListBoxWidgetWatcher;
 import jsky.util.gui.TextBoxWidget;
 
-import javax.swing.JPanel;
+import javax.swing.*;
+import javax.swing.plaf.basic.BasicComboBoxRenderer;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 
 /**
@@ -34,15 +29,15 @@ public final class EdCompInstNIRI extends EdCompInstBase<InstNIRI>
     /**
      * The GUI layout panel
      */
-    private final NiriForm _w;
+    private final NiriForm _w = new NiriForm();
+
+    private final static Component SEPARATOR = new JSeparator(JSeparator.HORIZONTAL);
 
 
-    /**
     /**
      * The constructor initializes the user interface.
      */
     public EdCompInstNIRI() {
-        _w = new NiriForm();
 
         _w.readModeNarrowBandButton.addActionListener(this);
         _w.readMode1To25Button.addActionListener(this);
@@ -59,9 +54,10 @@ public final class EdCompInstNIRI extends EdCompInstBase<InstNIRI>
 
         _w.camera.setChoices(_getCameras());
 
-        final String[] filters = _getFilters();
-        _w.selectedFilter.setChoices(filters);
-        _w.selectedFilter.setMaximumRowCount(Math.min(filters.length, 20));
+        _w.selectedFilter.setModel(new NiriFilterComboBoxModel());
+        _w.selectedFilter.setRenderer(new ΝiriFilterComboBoxRenderer());
+        _w.selectedFilter.setMaximumRowCount(Math.min(Filter.values().length, 20));
+        _w.selectedFilter.addActionListener(this);
 
         final String[] dispersers = _getDispersers();
         _w.disperser.setChoices(dispersers);
@@ -79,7 +75,6 @@ public final class EdCompInstNIRI extends EdCompInstBase<InstNIRI>
         _w.mask.addWatcher(this);
         _w.beamSplitter.addWatcher(this);
         _w.disperser.addWatcher(this);
-        _w.selectedFilter.addWatcher(this);
         _w.fastModeExposures.addWatcher(this);
 
         // Arrange to be notified when the OT editable state changes.
@@ -122,40 +117,6 @@ public final class EdCompInstNIRI extends EdCompInstBase<InstNIRI>
     }
 
     /**
-     * Return an array of filter names (combined broad band and narrow
-     * band, separated by an empty item).
-     */
-    private String[] _getFilters() {
-        // SW: this is all gross.  We should be storing actual Filter objects
-        // in the combo boxes, not strings.
-        final Niri.Filter[] filters = Niri.Filter.values();
-        final List<String> descriptions = new ArrayList<String>(filters.length + 1);
-
-        Niri.Filter.Type type = Niri.Filter.Type.broadband;
-        for (Filter f : filters) {
-            if (f.type() != type) {
-                type = f.type();
-                descriptions.add("--------------");
-            }
-            descriptions.add(f.description());
-        }
-        return descriptions.toArray(new String[descriptions.size()]);
-    }
-
-
-    /**
-     * Return the Filter object, given the description String
-     */
-    private Filter _getFilterFromDesc(String desc) {
-        final Niri.Filter[] filters = Niri.Filter.values();
-        for (Filter f : filters) {
-            if (desc.equals(f.description())) return f;
-        }
-        return Niri.Filter.DEFAULT;
-    }
-
-
-    /**
      * Return the window containing the editor
      */
     public JPanel getWindow() {
@@ -179,13 +140,6 @@ public final class EdCompInstNIRI extends EdCompInstBase<InstNIRI>
         _updateROI();
     }
 
-    /**
-     * Get the index of the filter in the given array, or -1 if the filter
-     * isn't in the array.
-     */
-//    private int _getFilterIndex(Filter filter, SPTypeBaseList blist) {
-//        return blist.getIndexByType(filter);
-//    }
 
     /**
      * Update the filter choice related widgets.
@@ -194,25 +148,8 @@ public final class EdCompInstNIRI extends EdCompInstBase<InstNIRI>
         // First fill in the text box.
         final Filter filter = getDataObject().getFilter();
         if (filter != null) {
-            _w.selectedFilter.setValue(filter.description());
+            _w.selectedFilter.getModel().setSelectedItem(Optional.of(filter));
         }
-
-        /*
-        // See which type of filter the selected filter is, if any.
-        if (filter != null) {
-            int index = _getFilterIndex(filter, BroadBandFilter.TYPES);
-            if (index != -1) {
-                _w.selectedFilter.setValue(index);
-            } else {
-                index = _getFilterIndex(filter, NarrowBandFilter.TYPES);
-                if (index != -1) {
-                    // leave room for space between broad and narrow band listings
-                    _w.selectedFilter.setValue(NIRIParams.BROADBANDFILTERS.length + 1 + index);
-                }
-            }
-            // XXX _w.filterWavelength.setText(filter.getDescription());
-        }
-        */
     }
 
 
@@ -287,12 +224,6 @@ public final class EdCompInstNIRI extends EdCompInstBase<InstNIRI>
     }
 
     /**
-     * Must watch table widget actions as part of the TableWidgetWatcher
-     * interface, but don't care about them.
-     */
-    //public void	tableAction(TableWidget twe, int colIndex, int rowIndex) {}
-
-    /**
      * Return the position angle text box
      */
     public TextBoxWidget getPosAngleTextBox() {
@@ -354,6 +285,10 @@ public final class EdCompInstNIRI extends EdCompInstBase<InstNIRI>
             getDataObject().setBuiltinROI(BuiltinROI.SPEC_1024_512);
             _updateReadMode();
             _updateScienceFOV();
+        } else if (w == _w.selectedFilter) {
+            @SuppressWarnings("unchecked")
+            Optional<Filter> filter = (Optional<Filter>)_w.selectedFilter.getSelectedItem();
+            getDataObject().setFilter(filter.orElse(Filter.DEFAULT));
         }
     }
 
@@ -373,9 +308,6 @@ public final class EdCompInstNIRI extends EdCompInstBase<InstNIRI>
             _updateScienceFOV();
         } else if (ddlbw == _w.disperser) {
             getDataObject().setDisperser(Disperser.getDisperserByIndex(index));
-        } else if (ddlbw == _w.selectedFilter) {
-            getDataObject().setFilter(_getFilterFromDesc(val));
-            _updateFilterWidgets();
         }
     }
 
@@ -397,4 +329,64 @@ public final class EdCompInstNIRI extends EdCompInstBase<InstNIRI>
             getDataObject().setFastModeExposures(value);
         }
     }
+
+
+    /**
+     * An auxiliary method that returns a Vector with all the original NIRI Filters wrapped as <code>Optional</code>
+     * elements, separated by Type. We use an <code>Optional.empty()</code> element to separate them in the final
+     * result.
+     * This is used for display purposes in the ComboBox.
+     * @return a Vector of optional filters.
+     */
+    private static Vector<Optional<Filter>> getFilterOptions() {
+        final java.util.List<Filter> v = new ArrayList<>(SpTypeUtil.getSelectableItems(Niri.Filter.class));
+
+        final Vector<Optional<Niri.Filter>> nv = new Vector<>();
+        v.stream().filter(f -> f.type() == Filter.Type.broadband).forEach(f -> nv.add(Optional.of(f)));
+        nv.add(Optional.empty());
+        v.stream().filter(f -> f.type() == Filter.Type.narrowband).forEach(f -> nv.add(Optional.of(f)));
+        return nv;
+    }
+
+    /**
+     * A ComboBox model for NIRI Filters, such as we can group narrowband and broadband filters together
+     * We disable the possibility of selecting the elements in the combo that are used as separators,
+     * which are stored as None objects.
+     */
+    private final class NiriFilterComboBoxModel extends DefaultComboBoxModel {
+
+        @SuppressWarnings("unchecked")
+        public NiriFilterComboBoxModel() {
+            super(getFilterOptions());
+        }
+
+        @Override
+        public void setSelectedItem(Object anObject) {
+
+            @SuppressWarnings("unchecked")
+            Optional<Niri.Filter> filter = (Optional<Niri.Filter>) anObject;
+            if (filter.isPresent()) super.setSelectedItem(anObject);
+        }
+    }
+
+    /**
+     * A Renderer for the Niri Filter combobox. It uses the description for the display (contrary to
+     * what other SpTypes use which is the displayable field, add a mark to obsolete filters, and return
+     * a <code>JComponent.Separator</code> if the filter is an <code>Optional.empty()</code>.
+     */
+    private final class ΝiriFilterComboBoxRenderer extends BasicComboBoxRenderer {
+
+        public Component getListCellRendererComponent(JList jList, Object value, int index, boolean isSelected, boolean hasFocus) {
+
+            @SuppressWarnings("unchecked")
+            final Optional<Niri.Filter> opFilter = (Optional<Niri.Filter>) value;
+
+            return opFilter.map(f ->
+                            super.getListCellRendererComponent(jList, f.description() + (f.isObsolete() ? "*" : ""), index, isSelected, hasFocus)
+            ).orElse(SEPARATOR);
+
+        }
+    }
+
+
 }

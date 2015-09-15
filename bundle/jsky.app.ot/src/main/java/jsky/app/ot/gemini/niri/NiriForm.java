@@ -2,53 +2,51 @@ package jsky.app.ot.gemini.niri;
 
 import jsky.util.gui.DropDownListBoxWidget;
 import jsky.util.gui.NumberBoxWidget;
+import jsky.util.gui.SingleSelectComboBox;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 /*
  * Created by JFormDesigner on Wed Nov 02 15:19:48 CET 2005
  */
 
 
-/**
- * @author User #1
- */
 public class NiriForm extends JPanel {
     public NiriForm() {
         initComponents();
     }
 
     private void initComponents() {
-        // JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
-        // Generated using JFormDesigner non-commercial license
-        cameraLabel = new JLabel();
-        expTimeLabel = new JLabel();
+        JLabel cameraLabel = new JLabel();
+        JLabel expTimeLabel = new JLabel();
+        JLabel disperserLabel = new JLabel();
+        JLabel maskLabel = new JLabel();
+        JLabel coaddsLabel = new JLabel();
+        JLabel posAngleLabel = new JLabel();
+        JLabel scienceFOVLabel = new JLabel();
+        JLabel expTimeUnits = new JLabel();
+        JLabel coaddsUnits = new JLabel();
+        JLabel posAngleUnits = new JLabel();
+        JLabel beamSplitterLabel = new JLabel();
+        JLabel filterLabel = new JLabel();
+        JLabel fastModeExposuresLabel = new JLabel();
+        JLabel fastModeReadsUnits = new JLabel();
+        JTabbedPane jTabbedPane1 = new JTabbedPane();
+        JPanel readModePanel = new JPanel();
+        JLabel component1 = new JLabel();
+        JLabel component2 = new JLabel();
+        JPanel roiPanel = new JPanel();
+
         camera = new DropDownListBoxWidget();
         exposureTime = new NumberBoxWidget();
-        disperserLabel = new JLabel();
         disperser = new DropDownListBoxWidget();
-        maskLabel = new JLabel();
         mask = new DropDownListBoxWidget();
-        coaddsLabel = new JLabel();
-        posAngleLabel = new JLabel();
         coadds = new NumberBoxWidget();
         posAngle = new NumberBoxWidget();
-        scienceFOVLabel = new JLabel();
-        expTimeUnits = new JLabel();
-        coaddsUnits = new JLabel();
-        posAngleUnits = new JLabel();
-        beamSplitterLabel = new JLabel();
         beamSplitter = new DropDownListBoxWidget();
-        filterLabel = new JLabel();
-        selectedFilter = new DropDownListBoxWidget();
-        fastModeExposuresLabel = new JLabel();
+        selectedFilter = new SingleSelectComboBox();
         fastModeExposures = new NumberBoxWidget();
-        fastModeReadsUnits = new JLabel();
         scienceFOV = new JLabel();
-        jTabbedPane1 = new JTabbedPane();
-        readModePanel = new JPanel();
         readMode1To25Button = new JRadioButton();
         readModeNarrowBandButton = new JRadioButton();
         readMode3To5Button = new JRadioButton();
@@ -58,19 +56,16 @@ public class NiriForm extends JPanel {
         readModeMinExpTime = new JLabel();
         readModeNoise = new JLabel();
         readModeNoiseLabel = new JLabel();
-        component1 = new JLabel();
         readModeRecMinExpTimeLabel = new JLabel();
         readModeRecMinExpTime = new JLabel();
         minExpTimeLabel = new JLabel();
         shallowWellDepthButton = new JRadioButton();
         deepWellDepthButton = new JRadioButton();
-        roiPanel = new JPanel();
         roiFullFrameButton = new JRadioButton();
         roiCentral768Button = new JRadioButton();
         roiCentral256Button = new JRadioButton();
         roiCentral512Button = new JRadioButton();
         roiSpec1024x512Button = new JRadioButton();
-        component2 = new JLabel();
 
         //======== this ========
         setMinimumSize(new Dimension(350, 378));
@@ -254,11 +249,6 @@ public class NiriForm extends JPanel {
 
                 //---- readModeNarrowBandButton ----
                 readModeNarrowBandButton.setText("1-2.5um: Faint Object Narrow-band Imaging/Spectroscopy");
-                readModeNarrowBandButton.addActionListener(new ActionListener() {
-                    public void actionPerformed(ActionEvent e) {
-                        readModeNarrowBandButton_actionPerformed(e);
-                    }
-                });
                 readModePanel.add(readModeNarrowBandButton, new GridBagConstraints(0, 0, 4, 1, 0.0, 1.0,
                         GridBagConstraints.WEST, GridBagConstraints.NONE,
                         new Insets(5, 11, 0, 0), 0, 0));
@@ -332,11 +322,6 @@ public class NiriForm extends JPanel {
 
                 //---- shallowWellDepthButton ----
                 shallowWellDepthButton.setText("Shallow well (1-2.5 um)");
-                shallowWellDepthButton.addActionListener(new ActionListener() {
-                    public void actionPerformed(ActionEvent e) {
-                        shallowWellDepthButton_actionPerformed(e);
-                    }
-                });
                 readModePanel.add(shallowWellDepthButton, new GridBagConstraints(0, 6, 2, 1, 0.0, 1.0,
                         GridBagConstraints.WEST, GridBagConstraints.NONE,
                         new Insets(17, 11, 11, 0), 0, 0));
@@ -378,11 +363,6 @@ public class NiriForm extends JPanel {
                 //---- roiCentral512Button ----
                 roiCentral512Button.setToolTipText("Set the Region of Interest to the central 128x128 pixels");
                 roiCentral512Button.setText("Central 512x512");
-                roiCentral512Button.addActionListener(new ActionListener() {
-                    public void actionPerformed(ActionEvent e) {
-                        roiCentral512Button_actionPerformed(e);
-                    }
-                });
                 roiPanel.add(roiCentral512Button, new GridBagConstraints(0, 2, 1, 1, 1.0, 1.0,
                         GridBagConstraints.WEST, GridBagConstraints.NONE,
                         new Insets(6, 11, 0, 0), 0, 0));
@@ -424,46 +404,16 @@ public class NiriForm extends JPanel {
         // JFormDesigner - End of component initialization  //GEN-END:initComponents
     }
 
-    private void readModeNarrowBandButton_actionPerformed(ActionEvent e) {
-        // TODO add your code here
-    }
-
-    private void shallowWellDepthButton_actionPerformed(ActionEvent e) {
-        // TODO add your code here
-    }
-
-    private void roiCentral512Button_actionPerformed(ActionEvent e) {
-        // TODO add your code here
-    }
-
-    // JFormDesigner - Variables declaration - DO NOT MODIFY  //GEN-BEGIN:variables
-    // Generated using JFormDesigner non-commercial license
-    private JLabel cameraLabel;
-    private JLabel expTimeLabel;
     DropDownListBoxWidget camera;
     NumberBoxWidget exposureTime;
-    private JLabel disperserLabel;
     DropDownListBoxWidget disperser;
-    private JLabel maskLabel;
     DropDownListBoxWidget mask;
-    private JLabel coaddsLabel;
-    private JLabel posAngleLabel;
     NumberBoxWidget coadds;
     NumberBoxWidget posAngle;
-    private JLabel scienceFOVLabel;
-    private JLabel expTimeUnits;
-    private JLabel coaddsUnits;
-    private JLabel posAngleUnits;
-    private JLabel beamSplitterLabel;
     DropDownListBoxWidget beamSplitter;
-    private JLabel filterLabel;
-    DropDownListBoxWidget selectedFilter;
-    private JLabel fastModeExposuresLabel;
+    SingleSelectComboBox selectedFilter;
     NumberBoxWidget fastModeExposures;
-    private JLabel fastModeReadsUnits;
     JLabel scienceFOV;
-    private JTabbedPane jTabbedPane1;
-    private JPanel readModePanel;
     JRadioButton readMode1To25Button;
     JRadioButton readModeNarrowBandButton;
     JRadioButton readMode3To5Button;
@@ -473,18 +423,15 @@ public class NiriForm extends JPanel {
     JLabel readModeMinExpTime;
     JLabel readModeNoise;
     JLabel readModeNoiseLabel;
-    private JLabel component1;
     JLabel readModeRecMinExpTimeLabel;
     JLabel readModeRecMinExpTime;
     JLabel minExpTimeLabel;
     JRadioButton shallowWellDepthButton;
     JRadioButton deepWellDepthButton;
-    private JPanel roiPanel;
     JRadioButton roiFullFrameButton;
     JRadioButton roiCentral768Button;
     JRadioButton roiCentral256Button;
     JRadioButton roiCentral512Button;
     JRadioButton roiSpec1024x512Button;
-    JLabel component2;
     // JFormDesigner - End of variables declaration  //GEN-END:variables
 }
