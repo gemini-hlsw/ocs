@@ -27,13 +27,13 @@ public class CalibrationMapFactory {
     private static final Logger LOG = Logger.getLogger(CalibrationMapFactory.class.getName());
 
     public static CalibrationMap createFromData(String instrument, CalibrationFile file) {
-        CalibrationMap map = createEmpty(instrument, file.getVersion());
-        CalibrationMapReader reader = new CalibrationMapReader(map);
+        final CalibrationMap map = createEmpty(instrument, file.getVersion());
+        final CalibrationMapReader reader = new CalibrationMapReader(map);
         reader.read(file.getData().getBytes());
         // the data we receive here must not contain errors, it has to be checked previously
         // in case the data can not be successfully parsed we throw an exception
         if (reader.hasErrors()) {
-            LOG.log(Level.INFO, "could not read calibration data");
+            LOG.log(Level.INFO, "could not read calibration data " + reader.getErrors());
             throw new RuntimeException("could not read calibration data");
         }
         return map;
