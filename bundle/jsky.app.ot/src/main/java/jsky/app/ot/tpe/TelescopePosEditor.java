@@ -445,21 +445,29 @@ public class TelescopePosEditor extends JSkyCat implements TpeMouseObserver {
         if (_baseTarget == null) return;
 
         // XXX FIXME: We shouldn't have to use numeric indexes here
-        queryArgs.setParamValue(2, _baseTarget.getTarget().getRaString());
-        queryArgs.setParamValue(3, _baseTarget.getTarget().getDecString());
-        queryArgs.setParamValue(4, _baseTarget.getTarget().getTag().tccName);
-        if (args.length > 2) {
-            //first argument must be a Double, it represent the size on AstroCatalogs
-            queryArgs.setParamValue(5, Double.valueOf(args[1]));
-            queryArgs.setParamValue(6, args[2]);
-        } else { //use default parameters
-            queryArgs.setParamValue(5, 15.0);
-            // REL-269: don't set the mag band here
-            if (c instanceof SkycatCatalog) {
-                queryArgs.setParamValue(6, 15.0);
-            }
+        final Option<Long> when = _ctx.schedulingBlockJava().map(SchedulingBlock::start);
+        boolean go = // true if coords are known
+            _baseTarget.getTarget().getRaString(when).flatMap(ra ->
+            _baseTarget.getTarget().getDecString(when).map(dec -> {
+                queryArgs.setParamValue(2, ra);
+                queryArgs.setParamValue(3, dec);
+                queryArgs.setParamValue(4, _baseTarget.getTarget().getTag().tccName);
+                if (args.length > 2) {
+                    //first argument must be a Double, it represent the size on AstroCatalogs
+                    queryArgs.setParamValue(5, Double.valueOf(args[1]));
+                    queryArgs.setParamValue(6, args[2]);
+                } else { //use default parameters
+                    queryArgs.setParamValue(5, 15.0);
+                    // REL-269: don't set the mag band here
+                    if (c instanceof SkycatCatalog) {
+                        queryArgs.setParamValue(6, 15.0);
+                    }
+                }
+                return true;
+            })).getOrElse(false);
+        if (go) {
+            cqt.setQueryResult(c.query(queryArgs)); // throws; can't go in block above
         }
-        cqt.setQueryResult(c.query(queryArgs));
     }
 
 

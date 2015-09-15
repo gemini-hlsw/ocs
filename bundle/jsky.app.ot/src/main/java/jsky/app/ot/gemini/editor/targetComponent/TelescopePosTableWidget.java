@@ -77,21 +77,13 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
 
             RA("RA") {
                 public Object getValue(Row row) {
-                    return row.target().map(new MapOp<SPTarget, String>() {
-                        @Override public String apply(SPTarget t) {
-                            return t.getTarget().getRaString();
-                        }
-                    }).getOrElse("");
+                    return row.target().flatMap(t -> t.getTarget().getRaString(row.when())).getOrElse("");
                 }
             },
 
             DEC("Dec") {
                 public Object getValue(Row row) {
-                    return row.target().map(new MapOp<SPTarget, String>() {
-                        @Override public String apply(SPTarget t) {
-                            return t.getTarget().getDecString();
-                        }
-                    }).getOrElse("");
+                    return row.target().flatMap(t -> t.getTarget().getDecString(row.when())).getOrElse("");
                 }
             },
 
@@ -123,6 +115,7 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
             String formatMagnitude(Magnitude.Band band);
 
             Icon getIcon();
+            Option<Long> when();
         }
 
         static abstract class AbstractRow implements Row {
@@ -130,12 +123,14 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
             final String tag;
             final String name;
             final Option<SPTarget> target;
+            final Option<Long> when;
 
-            AbstractRow(boolean enabled, String tag, String name, Option<SPTarget> target) {
+            AbstractRow(boolean enabled, String tag, String name, Option<SPTarget> target, Option<Long> when) {
                 this.enabled  = enabled;
                 this.tag      = tag;
                 this.name     = name;
                 this.target   = target;
+                this.when     = when;
             }
 
             public boolean enabled()          { return enabled;  }
@@ -145,6 +140,7 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
             public Option<GuideGroup> group() { return None.instance(); }
             public Option<Double> distance()  { return None.instance(); }
             public List<Row> children()       { return Collections.emptyList(); }
+            public Option<Long> when()        { return when; }
 
             public Option<Magnitude> getMagnitude(final Magnitude.Band band) {
                 return target.flatMap(new MapOp<SPTarget, Option<Magnitude>>() {
@@ -166,8 +162,8 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
         }
 
         static final class BaseTargetRow extends AbstractRow {
-            BaseTargetRow(SPTarget target) {
-                super(true, TargetEnvironment.BASE_NAME, target.getTarget().getName(), new Some<>(target));
+            BaseTargetRow(SPTarget target, Option<Long> when) {
+                super(true, TargetEnvironment.BASE_NAME, target.getTarget().getName(), new Some<>(target), when);
             }
         }
 
@@ -175,7 +171,7 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
             final Option<Double> distance;
 
             NonBaseTargetRow(boolean enabled, String tag, SPTarget target, Option<WorldCoords> baseCoords, Option<Long> when) {
-                super(enabled, tag, target.getTarget().getName(), new Some<>(target));
+                super(enabled, tag, target.getTarget().getName(), new Some<>(target), when);
                 final Option<WorldCoords> coords = getWorldCoords(target, when);
                 distance =
                     baseCoords.flatMap(bc ->
@@ -213,7 +209,7 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
             private final List<Row> children;
 
             GroupRow(boolean enabled, int index, GuideGroup group, List<Row> children) {
-                super(enabled, group.getName().getOrElse("Guide Group " + index), "", None.<SPTarget>instance());
+                super(enabled, group.getName().getOrElse("Guide Group " + index), "", None.<SPTarget>instance(), None.<Long>instance());
                 this.group    = new Some<>(group);
                 this.children = Collections.unmodifiableList(children);
             }
@@ -263,7 +259,7 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
             final SPTarget base = env.getBase();
             final Option<Long> when = ctx.flatMap(c -> c.getSchedulingBlock().map(SchedulingBlock::start));
             final Option<WorldCoords> baseCoords = getWorldCoords(base, when);
-            tmp.add(new BaseTargetRow(base));
+            tmp.add(new BaseTargetRow(base, when));
 
             // Add all the guide groups and targets.
             final Option<Tuple2<ObsContext, AgsMagnitude.MagnitudeTable>> ags = ctx.map(new MapOp<ObsContext, Tuple2<ObsContext, AgsMagnitude.MagnitudeTable>>() {
