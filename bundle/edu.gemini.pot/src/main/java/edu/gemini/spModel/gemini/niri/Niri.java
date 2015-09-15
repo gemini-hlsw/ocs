@@ -768,18 +768,14 @@ public final class Niri {
      */
     public static final class ROIDescription implements Serializable {
 
-        private int _xStart;
-        private int _yStart;
-        private int _xSize;
-        private int _ySize;
+        private final int _xSize;
+        private final int _ySize;
 
         /**
-         * Constructor for an ROIDescription takes an x and y start along with
+         * Constructor for an ROIDescription takes
          * an x and y size in unbinned pixels.
          */
-        public ROIDescription(int xStart, int yStart, int xSize, int ySize) {
-            _xStart = xStart;
-            _yStart = yStart;
+        public ROIDescription(final int xSize, final int ySize) {
             _xSize = xSize;
             _ySize = ySize;
         }
@@ -788,8 +784,8 @@ public final class Niri {
          * A copy constructor for creating copies of an already
          * existing ROIDescription.
          */
-        public ROIDescription(ROIDescription roid) {
-            this(roid._xStart, roid._yStart, roid._xSize, roid._ySize);
+        public ROIDescription(final ROIDescription roid) {
+            this(roid._xSize, roid._ySize);
         }
 
         /**
@@ -815,15 +811,15 @@ public final class Niri {
     public enum BuiltinROI implements DisplayableSpType, LoggableSpType, SequenceableSpType {
 
         FULL_FRAME("full frame readout", DefaultRoi.DESCRIPTION, "full"),
-        CENTRAL_768("central 768x768", new ROIDescription(128, 128, 768, 768), "c768"),
-        CENTRAL_512("central 512x512", new ROIDescription(256, 256, 512, 512), "c512"),
-        CENTRAL_256("central 256x256", new ROIDescription(384, 384, 256, 256), "c256"),
-        SPEC_1024_512("spectroscopy 1024x512", new ROIDescription(0, 256, 1024, 512), "spec"),;
+        CENTRAL_768("central 768x768", new ROIDescription(768, 768), "c768"),
+        CENTRAL_512("central 512x512", new ROIDescription(512, 512), "c512"),
+        CENTRAL_256("central 256x256", new ROIDescription(256, 256), "c256"),
+        SPEC_1024_512("spectroscopy 1024x512", new ROIDescription(1024, 512), "spec"),;
 
         // The default ROI size (width, height)
         interface DefaultRoi {
             int SIZE = 1024;
-            ROIDescription DESCRIPTION = new ROIDescription(1, 1, SIZE, SIZE);
+            ROIDescription DESCRIPTION = new ROIDescription(SIZE, SIZE);
         }
 
         public static final BuiltinROI DEFAULT = FULL_FRAME;
