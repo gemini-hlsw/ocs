@@ -1,9 +1,9 @@
 package edu.gemini.itc.base;
 
 import edu.gemini.spModel.core.Wavelength;
-import edu.gemini.spModel.target.EmissionLine;
 import squants.motion.Velocity;
 import squants.radio.Irradiance;
+import squants.radio.SpectralIrradiance;
 
 /**
  * This class creates a EmissionLine spectrum over the interval defined by the
@@ -21,7 +21,7 @@ public final class EmissionLineSpectrum implements VisitableSampledSpectrum {
     }
 
     public EmissionLineSpectrum(final Wavelength wavelength, final Velocity width, final Irradiance flux,
-                                final EmissionLine.Continuum continuum, final double z, final double interval) {
+                                final SpectralIrradiance continuum, final double z, final double interval) {
 
         //shift start and end depending on redshift
         final double start = 300 / (1 + z); //ancient, potentially obsolete comment for start value: 0.2*_wavelength;//.8
@@ -33,7 +33,7 @@ public final class EmissionLineSpectrum implements VisitableSampledSpectrum {
         // convert values to internal units
         final double _wavelength    = wavelength.toNanometers();
         final double _flux          = flux.toWattsPerSquareMeter() * _wavelength / 1.988e-16;
-        final double _continuumFlux = continuum.toWatts() * _wavelength / 1.988e-13;
+        final double _continuumFlux = continuum.toWattsPerSquareMeterPerMicron() * _wavelength / 1.988e-13;
 
         // calculate sigma
         final double sigma = width.toKilometersPerSecond() * _wavelength / 7.05e5;

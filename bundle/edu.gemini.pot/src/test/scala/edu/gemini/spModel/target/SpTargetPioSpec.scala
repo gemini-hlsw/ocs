@@ -4,15 +4,13 @@ import edu.gemini.spModel.core.Arbitraries
 import edu.gemini.spModel.core.WavelengthConversions._
 import edu.gemini.spModel.pio.ParamSet
 import edu.gemini.spModel.pio.xml.PioXmlFactory
-import edu.gemini.spModel.target.EmissionLine.Continuum
 import edu.gemini.spModel.target.system.{ConicTarget, HmsDegTarget, ITarget}
-
-import squants.radio.IrradianceConversions._
-import squants.motion.VelocityConversions._
-
 import org.scalacheck.{Arbitrary, Gen}
 import org.specs2.ScalaCheck
 import org.specs2.mutable.Specification
+import squants.motion.VelocityConversions._
+import squants.radio.IrradianceConversions._
+import squants.radio.SpectralIrradianceConversions._
 
 /** Tests Pio input/output operations for SpTargets.
   * Currently this only tests that the source profile and distribution are stored and retrieved.
@@ -27,8 +25,8 @@ object SpTargetPioSpec extends Specification with ScalaCheck with Arbitraries {
         BlackBody(10000),
         PowerLaw(0),
         PowerLaw(1),
-        EmissionLine(450.nm, 150.kps, 13.wattsPerSquareMeter, Continuum.fromWatts(22)),
-        EmissionLine(550.nm, 400.kps, 23.wattsPerSquareMeter, Continuum.fromWatts(42)),
+        EmissionLine(450.nm, 150.kps, 13.wattsPerSquareMeter, 22.wattsPerSquareMeterPerMicron),
+        EmissionLine(550.nm, 400.kps, 23.wattsPerSquareMeter, 42.wattsPerSquareMeterPerMicron),
         LibraryStar.A0V,
         LibraryStar.A5III,
         LibraryNonStar.NGC2023,
