@@ -134,6 +134,14 @@ object QueryResultsWindow {
       override def displayValue(t: Declination) = t.formatDMS
     }
 
+    case class DistanceColumn(base: Coordinates, title: String) extends TableColumn[Angle] {
+      val distance: Coordinates @> Angle = Lens(c => Store(r => c, Coordinates.difference(base, c).distance))
+
+      override val lens = Target.coords >=> distance.partial
+
+      override def displayValue(t: Angle) = f"${t.toArcmins}%.2f"
+    }
+
     case class PMRAColumn(title: String) extends TableColumn[RightAscensionAngularVelocity] {
       override val lens = Target.pm >=> ProperMotion.deltaRA.partial
 
@@ -155,11 +163,11 @@ object QueryResultsWindow {
       override def displayValue(t: Magnitude): String = f"${t.value}%.2f"
     }
 
-    val baseColumnNames: List[TableColumn[_]] = List(IdColumn("Id"), RAColumn("RA"), DECColumn("Dec"))
+    def baseColumnNames(base: Coordinates): List[TableColumn[_]] = List(IdColumn("Id"), RAColumn("RA"), DECColumn("Dec"), DistanceColumn(base, "Dist. [arcmin]"))
     val pmColumns: List[TableColumn[_]] = List(PMRAColumn("µ RA"), PMDecColumn("µ Dec"))
     val magColumns = MagnitudeBand.all.map(MagnitudeColumn)
 
-    case class TargetsModel(targets: List[SiderealTarget]) extends AbstractTableModel {
+    case class TargetsModel(base: Coordinates, targets: List[SiderealTarget]) extends AbstractTableModel {
 
       // Available columns from the list of targets
       val columns = {
@@ -168,7 +176,7 @@ object QueryResultsWindow {
         val pmCols = if (hasPM) pmColumns else Nil
         val magCols = magColumns.filter(m => bandsInTargets.contains(m.band))
 
-        baseColumnNames ::: pmCols ::: magCols
+        baseColumnNames(base) ::: pmCols ::: magCols
       }
 
       override def getRowCount = targets.length
@@ -192,7 +200,7 @@ object QueryResultsWindow {
      */
     object QueryResultsFrame extends Frame with PreferredSizeFrame {
       private lazy val resultsTable = new Table() with SortableTable with TableColumnsAdjuster {
-        private val m = TargetsModel(Nil)
+        private val m = TargetsModel(Coordinates.zero, Nil)
         model = model
         new TableRowSorter[TargetsModel](m) <| {_.toggleSortOrder(0)} <| {peer.setRowSorter}
 
@@ -266,7 +274,7 @@ object QueryResultsWindow {
        * Called after  a query completes to update the UI according to the results
        */
       def updateResults(queryResult: QueryResult): Unit = {
-        val model = TargetsModel(queryResult.result.targets.rows)
+        val model = TargetsModel(queryResult.query.base, queryResult.result.targets.rows)
         resultsTable.model = model
 
         // The sorting logic may change if the list of magnitudes changes
