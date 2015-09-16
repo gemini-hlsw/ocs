@@ -6,16 +6,17 @@ import javax.swing.SwingConstants
 import javax.swing.table._
 
 import edu.gemini.ags.api.AgsRegistrar
+import edu.gemini.ags.conf.ProbeLimitsTable
 import edu.gemini.catalog.api._
 import edu.gemini.catalog.votable.{QueryResult, VoTableClient}
 import edu.gemini.pot.sp.ISPNode
 import edu.gemini.shared.gui.textComponent.{TextRenderer, NumberField}
 import edu.gemini.shared.gui.{GlassLabel, SizePreference, SortableTable}
 import edu.gemini.spModel.core.Target.SiderealTarget
+import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.core._
 import edu.gemini.ui.miglayout.MigPanel
 import edu.gemini.ui.miglayout.constraints._
-import jsky.app.ot.OT
 import jsky.app.ot.tpe.TpeContext
 
 import scala.swing.Reactions.Reaction
@@ -490,6 +491,10 @@ object QueryResultsWindow {
     val queryFrame = QueryResultsFrame
   }
 
+  private def reloadObservationInfo(ctx: ObsContext): Unit = {
+    // Update the instrument, WFS and conditions
+  }
+
   private def reloadSearchData(query: CatalogQuery) {
     import QueryResultsWindow.table._
     import scala.concurrent.ExecutionContext.Implicits.global
@@ -509,11 +514,12 @@ object QueryResultsWindow {
   }
 
   // Shows the frame and loads the query
-  protected [ui] def showWithQuery(q: CatalogQuery):Unit = Swing.onEDT {
+  protected [ui] def showWithQuery(ctx: ObsContext, q: CatalogQuery):Unit = Swing.onEDT {
     import QueryResultsWindow.table._
 
     queryFrame.visible = true
     queryFrame.peer.toFront()
+    reloadObservationInfo(ctx)
     reloadSearchData(q)
   }
 
@@ -521,13 +527,15 @@ object QueryResultsWindow {
   val instance = this
 
   def showOn(n: ISPNode) {
-    TpeContext.apply(n).obsContext.foreach { obsCtx =>
-      // TODO The user should be able to select the strategy OCSADV-403
-      AgsRegistrar.currentStrategy(obsCtx).foreach { strategy =>
-        // TODO Use only the first query, GEMS isn't supported yet OCSADV-242, OCSADV-239
-        strategy.catalogQueries(obsCtx, OT.getMagnitudeTable).headOption.foreach { q =>
-          showWithQuery(q)
-        }
+    TpeContext.apply(n).obsContext.foreach(showOn)
+  }
+
+  def showOn(obsCtx: ObsContext) {
+    // TODO The user should be able to select the strategy OCSADV-403
+    AgsRegistrar.currentStrategy(obsCtx).foreach { strategy =>
+      // TODO Use only the first query, GEMS isn't supported yet OCSADV-242, OCSADV-239
+      strategy.catalogQueries(obsCtx, ProbeLimitsTable.loadOrThrow()).headOption.foreach { q =>
+        showWithQuery(obsCtx, q)
       }
     }
   }
@@ -538,6 +546,14 @@ object CatalogQueryDemo extends SwingApplication {
   import QueryResultsWindow.instance
   import jsky.util.gui.Theme
   import javax.swing.UIManager
+  import edu.gemini.shared.util.immutable.{None => JNone, Some => JSome}
+  import edu.gemini.spModel.gemini.niri.InstNIRI
+  import edu.gemini.spModel.gemini.niri.NiriOiwfsGuideProbe
+  import edu.gemini.spModel.guide.GuideProbe
+  import edu.gemini.spModel.target.obsComp.PwfsGuideProbe
+  import edu.gemini.spModel.gemini.obscomp.SPSiteQuality
+  import edu.gemini.spModel.target.SPTarget
+  import edu.gemini.spModel.target.env.TargetEnvironment
 
   val query = CatalogQuery(None,Coordinates(RightAscension.fromAngle(Angle.fromDegrees(3.1261166666666895)),Declination.fromAngle(Angle.fromDegrees(337.93268333333333)).getOrElse(Declination.zero)),RadiusConstraint.between(Angle.zero,Angle.fromDegrees(0.16459874517619255)),List(MagnitudeConstraints(RBandsList,FaintnessConstraint(16.0),Some(SaturationConstraint(3.1999999999999993)))),ucac4)
 
@@ -548,7 +564,17 @@ object CatalogQueryDemo extends SwingApplication {
 
     UIManager.put("Button.defaultButtonFollowsFocus", true)
 
-    instance.showWithQuery(query)
+    val ra = Angle.fromHMS(0, 12, 30.286).getOrElse(Angle.zero)
+    val dec = Declination.fromAngle(Angle.zero - Angle.fromDMS(22, 4, 2.34).getOrElse(Angle.zero)).getOrElse(Declination.zero)
+    val guiders = Set[GuideProbe](NiriOiwfsGuideProbe.instance, PwfsGuideProbe.pwfs1, PwfsGuideProbe.pwfs2)
+    val target = new SPTarget(ra.toDegrees, dec.toDegrees) <| {_.setName("HIP 100")}
+    val env = TargetEnvironment.create(target)
+    val inst = new InstNIRI <| {_.setPosAngle(0.0)}
+
+    val conditions = SPSiteQuality.Conditions.NOMINAL.sb(SPSiteQuality.SkyBackground.ANY).cc(SPSiteQuality.CloudCover.PERCENT_80).iq(SPSiteQuality.ImageQuality.PERCENT_85)
+    val ctx = ObsContext.create(env, inst, new JSome(Site.GN), conditions, null, null, JNone.instance())
+
+    instance.showOn(ctx)
   }
 
 }
