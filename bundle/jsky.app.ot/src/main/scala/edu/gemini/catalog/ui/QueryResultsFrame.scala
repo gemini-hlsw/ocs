@@ -43,10 +43,10 @@ trait PreferredSizeFrame { this: Window =>
 /**
  * Describes the observation used to do a Guide Star Search
  */
-case class ObservationInfo(objectName: Option[String])
+case class ObservationInfo(objectName: Option[String], instrumentName: Option[String])
 
 object ObservationInfo {
-  def apply(ctx: ObsContext):ObservationInfo = ObservationInfo(Option(ctx.getTargets.getBase).map(_.getTarget.getName))
+  def apply(ctx: ObsContext):ObservationInfo = ObservationInfo(Option(ctx.getTargets.getBase).map(_.getTarget.getName), Option(ctx.getInstrument).map(_.getTitle))
 }
 
 /**
@@ -330,6 +330,7 @@ object QueryResultsWindow {
         }
 
         lazy val objectName = new TextField("")
+        lazy val instrumentName = new Label("")
 
         lazy val ra = new RATextField(RightAscension.zero) {
           reactions += queryButtonEnabling
@@ -379,6 +380,10 @@ object QueryResultsWindow {
           }, CC().spanY(2).spanX(2))
           add(new Label("Dec"), CC().spanX(2).newline())
           add(dec, CC().spanX(3).growX())
+          add(new Separator(Orientation.Horizontal), CC().spanX(7).growX().newline())
+          add(new Label("Instrument"), CC().spanX(2).newline())
+          add(instrumentName, CC().spanX(3))
+          add(new Separator(Orientation.Horizontal), CC().spanX(7).growX().newline())
           add(new Label("Radial Range"), CC().spanX(2).newline())
           add(radiusStart, CC().minWidth(50.px).growX())
           add(new Label("-"), CC())
@@ -416,6 +421,7 @@ object QueryResultsWindow {
         def updateQuery(info: Option[ObservationInfo], query: CatalogQuery): Unit = {
           info.foreach { i =>
             objectName.text = ~i.objectName
+            instrumentName.text = ~i.instrumentName
           }
           // Update the RA
           ra.updateRa(query.base.ra)
@@ -456,7 +462,7 @@ object QueryResultsWindow {
             val coordinates = Coordinates(ra.value, dec.value)
             val radius = RadiusConstraint.between(Angle.fromArcmin(radiusStart.text.toDouble), Angle.fromArcmin(radiusEnd.text.toDouble))
 
-            (ObservationInfo(objectName.text.some).some, CatalogQuery(None, coordinates, radius, currentFilters, ucac4))
+            (ObservationInfo(objectName.text.some, instrumentName.text.some).some, CatalogQuery(None, coordinates, radius, currentFilters, ucac4))
           }
         }
 
