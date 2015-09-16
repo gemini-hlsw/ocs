@@ -41,6 +41,15 @@ trait PreferredSizeFrame { this: Window =>
 }
 
 /**
+ * Describes the observation used to do a Guide Star Search
+ */
+case class ObservationInfo(objectName: Option[String])
+
+object ObservationInfo {
+  def apply(ctx: ObsContext):ObservationInfo = ObservationInfo(Option(ctx.getTargets.getBase).map(_.getTarget.getName))
+}
+
+/**
  * Support calculating column widths and can adjust them to the outer width
  */
 trait TableColumnsAdjuster { this: Table =>
@@ -274,8 +283,8 @@ object QueryResultsWindow {
       /**
        * Called after  a query completes to update the UI according to the results
        */
-      def updateResults(queryResult: QueryResult): Unit = {
-        val model = TargetsModel(queryResult.query.base, queryResult.result.targets.rows)
+      def updateResults(info: Option[ObservationInfo], queryResult: QueryResult): Unit = {
+        val model = TargetsModel(queryResult.result.targets.rows)
         resultsTable.model = model
 
         // The sorting logic may change if the list of magnitudes changes
@@ -289,7 +298,7 @@ object QueryResultsWindow {
         resultsLabel.updateCount(queryResult.result.targets.rows.length)
 
         // Update the query form
-        QueryForm.updateQuery(queryResult.query)
+        QueryForm.updateQuery(info, queryResult.query)
       }
 
       protected def revalidateFrame(): Unit = {
@@ -306,7 +315,7 @@ object QueryResultsWindow {
           reactions += {
             case ButtonClicked(_) =>
               // Hit the catalog with a new query
-              buildQuery.foreach(reloadSearchData)
+              buildQuery.foreach(Function.tupled(reloadSearchData))
           }
         }
 
@@ -319,6 +328,8 @@ object QueryResultsWindow {
               case _                    => true
             }
         }
+
+        lazy val objectName = new TextField("")
 
         lazy val ra = new RATextField(RightAscension.zero) {
           reactions += queryButtonEnabling
@@ -359,7 +370,9 @@ object QueryResultsWindow {
         def buildLayout(filters: List[MagnitudeConstraints]): Unit = {
           _contents.clear()
 
-          add(new Label("RA"), CC().spanX(2))
+          add(new Label("Object"), CC().spanX(2))
+          add(objectName, CC().spanX(3).growX())
+          add(new Label("RA"), CC().spanX(2).newline())
           add(ra, CC().spanX(3).growX())
           add(new Label("J2000") {
             verticalAlignment = Alignment.Center
@@ -400,7 +413,10 @@ object QueryResultsWindow {
         /**
          * Update query form according to the passed values
          */
-        def updateQuery(query: CatalogQuery): Unit = {
+        def updateQuery(info: Option[ObservationInfo], query: CatalogQuery): Unit = {
+          info.foreach { i =>
+            objectName.text = ~i.objectName
+          }
           // Update the RA
           ra.updateRa(query.base.ra)
           dec.updateDec(query.base.dec)
@@ -434,13 +450,13 @@ object QueryResultsWindow {
           }.toList
 
         // Make a query out of the form parameters
-        private def buildQuery: Option[CatalogQuery] = {
+        private def buildQuery: Option[(Option[ObservationInfo], CatalogQuery)] = {
           queryButton.enabled option {
             // No validation here, the Query button is disabled unless all the controls are valid
             val coordinates = Coordinates(ra.value, dec.value)
             val radius = RadiusConstraint.between(Angle.fromArcmin(radiusStart.text.toDouble), Angle.fromArcmin(radiusEnd.text.toDouble))
 
-            CatalogQuery(None, coordinates, radius, currentFilters, ucac4)
+            (ObservationInfo(objectName.text.some).some, CatalogQuery(None, coordinates, radius, currentFilters, ucac4))
           }
         }
 
@@ -491,11 +507,7 @@ object QueryResultsWindow {
     val queryFrame = QueryResultsFrame
   }
 
-  private def reloadObservationInfo(ctx: ObsContext): Unit = {
-    // Update the instrument, WFS and conditions
-  }
-
-  private def reloadSearchData(query: CatalogQuery) {
+  private def reloadSearchData(obsInfo: Option[ObservationInfo], query: CatalogQuery) {
     import QueryResultsWindow.table._
     import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -508,7 +520,7 @@ object QueryResultsWindow {
       case scala.util.Success(x) =>
         Swing.onEDT {
           GlassLabel.hide(queryFrame.peer.getRootPane)
-          queryFrame.updateResults(x)
+          queryFrame.updateResults(obsInfo, x)
         }
     }
   }
@@ -519,8 +531,7 @@ object QueryResultsWindow {
 
     queryFrame.visible = true
     queryFrame.peer.toFront()
-    reloadObservationInfo(ctx)
-    reloadSearchData(q)
+    reloadSearchData(ObservationInfo(ctx).some, q)
   }
 
   // Public interface
