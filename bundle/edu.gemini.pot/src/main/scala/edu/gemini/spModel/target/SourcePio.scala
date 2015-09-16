@@ -7,6 +7,7 @@ import edu.gemini.spModel.target.EmissionLine.Continuum
 
 import edu.gemini.spModel.core.WavelengthConversions._
 import squants.radio.IrradianceConversions._
+import squants.motion.VelocityConversions._
 
 import scalaz.Scalaz._
 
@@ -55,7 +56,7 @@ object SourcePio {
       case sd: EmissionLine     =>
         factory.createParamSet(EmissionLineName)  <|
           (Pio.addDoubleParam(factory, _, ElineWavelength, sd.wavelength.toNanometers))    <|
-          (Pio.addDoubleParam(factory, _, ElineWidth,      sd.width))                      <|
+          (Pio.addDoubleParam(factory, _, ElineWidth,      sd.width.toKilometersPerSecond))<|
           (Pio.addDoubleParam(factory, _, ElineFlux,       sd.flux.toWattsPerSquareMeter)) <|
           (Pio.addDoubleParam(factory, _, ElineContinuum,  sd.continuum.toWatts))
 
@@ -88,7 +89,7 @@ object SourcePio {
       val eline = Option(pset.getParamSet(EmissionLineName)).map { p =>
         EmissionLine(
           Pio.getDoubleValue(p, ElineWavelength, 0).nm,
-          Pio.getDoubleValue(p, ElineWidth, 0),
+          Pio.getDoubleValue(p, ElineWidth, 0).kps,
           Pio.getDoubleValue(p, ElineFlux, 0).wattsPerSquareMeter,
           Continuum.fromWatts(Pio.getDoubleValue(p, ElineContinuum, 0))
         )

@@ -3,7 +3,6 @@ package edu.gemini.itc.gnirs;
 import edu.gemini.itc.base.*;
 import edu.gemini.itc.operation.*;
 import edu.gemini.itc.shared.*;
-import edu.gemini.spModel.core.Site;
 import edu.gemini.spModel.gemini.gnirs.GNIRSParams;
 import scala.Option;
 import scala.Some;
@@ -20,7 +19,7 @@ public final class GnirsRecipe implements SpectroscopyRecipe {
 
     public static final int ORDERS = 6;
 
-    // Parameters from the web page.
+    private final Gnirs instrument;
     private final SourceDefinition _sdParameters;
     private final ObservationDetails _obsDetailParameters;
     private final ObservingConditions _obsConditionParameters;
@@ -41,6 +40,7 @@ public final class GnirsRecipe implements SpectroscopyRecipe {
                        final TelescopeDetails telescope)
 
     {
+        instrument = new Gnirs(gnirsParameters, obsDetailParameters);
         _sdParameters = sdParameters;
         _obsDetailParameters = obsDetailParameters;
         _obsConditionParameters = obsConditionParameters;
@@ -51,26 +51,12 @@ public final class GnirsRecipe implements SpectroscopyRecipe {
         backGroundOrder = new VisitableSampledSpectrum[ORDERS];
         finalS2NOrder = new VisitableSampledSpectrum[ORDERS];
 
-        validateInputParameters();
-    }
-
-    private void validateInputParameters() {
-        if (_sdParameters.getDistributionType().equals(SourceDefinition.Distribution.ELINE))
-            // *25 b/c of increased resolutuion of transmission files
-            if (_sdParameters.getELineWidth() < (3E5 / (_sdParameters.getELineWavelength().toNanometers() * 25))) {
-                throw new RuntimeException(
-                        "Please use a model line width > 0.04 nm (or "
-                                + (3E5 / (_sdParameters.getELineWavelength().toNanometers() * 25))
-                                + " km/s) to avoid undersampling of the line profile when convolved with the transmission response");
-            }
-
         // some general validations
-        Validation.validate(_obsDetailParameters, _sdParameters);
+        Validation.validate(instrument, _obsDetailParameters, _sdParameters);
     }
 
     public Tuple2<ItcSpectroscopyResult, SpectroscopyResult> calculateSpectroscopy() {
-        final Gnirs instrument = new Gnirs(_gnirsParameters, _obsDetailParameters);
-        final GnirsSpectroscopyResult r = calculateSpectroscopy(instrument);
+        final GnirsSpectroscopyResult r = doCalculateSpectroscopy();
         final List<SpcChartData> dataSets = new ArrayList<SpcChartData>() {{
             if (instrument.XDisp_IsUsed()) {
                 add(createGnirsSignalChart(r));
@@ -83,7 +69,7 @@ public final class GnirsRecipe implements SpectroscopyRecipe {
         return new Tuple2<>(ItcSpectroscopyResult.apply(dataSets, new ArrayList<>()), r);
     }
 
-    private GnirsSpectroscopyResult calculateSpectroscopy(final Gnirs instrument) {
+    private GnirsSpectroscopyResult doCalculateSpectroscopy() {
         // Module 1b
         // Define the source energy (as function of wavelength).
         //
@@ -100,7 +86,7 @@ public final class GnirsRecipe implements SpectroscopyRecipe {
 
 
         // Get the summed source and sky
-        final SEDFactory.SourceResult calcSource = SEDFactory.calculate(instrument, Site.GN, ITCConstants.NEAR_IR, _sdParameters, _obsConditionParameters, _telescope);
+        final SEDFactory.SourceResult calcSource = SEDFactory.calculate(instrument, _sdParameters, _obsConditionParameters, _telescope);
         final VisitableSampledSpectrum sed = calcSource.sed;
         final VisitableSampledSpectrum sky = calcSource.sky;
 

@@ -1,6 +1,7 @@
 package edu.gemini.itc.base;
 
 import edu.gemini.itc.niri.GrismOptics;
+import edu.gemini.spModel.core.Site;
 import scala.Option;
 import scala.Some;
 
@@ -17,8 +18,28 @@ import java.util.List;
  */
 public abstract class Instrument {
 
+    public enum Bands {
+        VISIBLE("03-08"),
+        NEAR_IR("1-5"),
+        MID_IR("7-26");
+
+        private final String directory;
+
+        Bands(final String directory) {
+            this.directory = directory;
+        }
+
+        public String getDirectory() {
+            return directory;
+        }
+    }
+
     public static final String DATA_SUFFIX = ITCConstants.DATA_SUFFIX;
 
+    // The site of the instrument
+    private final Site site;
+    // Type of instrument: visible, near IR or mid IR
+    private final Bands bands;
     // Instrument parameters from dat file
     private final DatFile.Instrument params;
     // List of Components
@@ -42,14 +63,16 @@ public abstract class Instrument {
      * @param filename The filename of the instrument data file
      */
     // Automatically loads the background data.
-    protected Instrument(String subdir, String filename) {
+    protected Instrument(final Site site, final Bands bands, final String subdir, final String filename) {
         final String dir = ITCConstants.LIB + "/" + subdir + "/";
-        params      = DatFile.instruments().apply(dir + filename);
-        components  = new LinkedList<>();
-        background  = new DefaultArraySpectrum(dir + params.backgroundFile());
-        filter      = Option.empty();
-        grating     = Option.empty();
-        grism       = Option.empty();  // TODO: difference grism vs grating??
+        this.site        = site;
+        this.bands       = bands;
+        this.params      = DatFile.instruments().apply(dir + filename);
+        this.components  = new LinkedList<>();
+        this.background  = new DefaultArraySpectrum(dir + params.backgroundFile());
+        this.filter      = Option.empty();
+        this.grating     = Option.empty();
+        this.grism       = Option.empty();  // TODO: difference grism vs grating??
     }
 
     /**
@@ -144,6 +167,14 @@ public abstract class Instrument {
     }
 
     // Accessor methods
+    public Site getSite() {
+        return site;
+    }
+
+    public Bands getBands() {
+        return bands;
+    }
+
     public String getName() {
         return params.name();
     }

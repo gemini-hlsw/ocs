@@ -3,7 +3,6 @@ package edu.gemini.itc.flamingos2;
 import edu.gemini.itc.base.*;
 import edu.gemini.itc.operation.*;
 import edu.gemini.itc.shared.*;
-import edu.gemini.spModel.core.Site;
 import scala.Tuple2;
 
 import java.util.ArrayList;
@@ -14,6 +13,7 @@ import java.util.List;
  */
 public final class Flamingos2Recipe implements ImagingRecipe, SpectroscopyRecipe {
 
+    private final Flamingos2 instrument;
     private final Flamingos2Parameters _flamingos2Parameters;
     private final ObservingConditions _obsConditionParameters;
     private final ObservationDetails _obsDetailParameters;
@@ -29,6 +29,7 @@ public final class Flamingos2Recipe implements ImagingRecipe, SpectroscopyRecipe
                             final ObservingConditions obsConditionParameters,
                             final Flamingos2Parameters flamingos2Parameters,
                             final TelescopeDetails telescope) {
+        instrument = new Flamingos2(flamingos2Parameters);
         _sdParameters = sdParameters;
         _obsDetailParameters = obsDetailParameters;
         _obsConditionParameters = obsConditionParameters;
@@ -54,12 +55,11 @@ public final class Flamingos2Recipe implements ImagingRecipe, SpectroscopyRecipe
         }
 
         // some general validations
-        Validation.validate(_obsDetailParameters, _sdParameters);
+        Validation.validate(instrument, _obsDetailParameters, _sdParameters);
     }
 
     public Tuple2<ItcSpectroscopyResult, SpectroscopyResult> calculateSpectroscopy() {
-        final Flamingos2 instrument = new Flamingos2(_flamingos2Parameters);
-        final SpectroscopyResult r = calculateSpectroscopy(instrument);
+        final SpectroscopyResult r = doCalculateSpectroscopy();
         final List<SpcChartData> dataSets = new ArrayList<SpcChartData>() {{
             add(Recipe$.MODULE$.createSignalChart(r));
             add(Recipe$.MODULE$.createS2NChart(r));
@@ -67,12 +67,7 @@ public final class Flamingos2Recipe implements ImagingRecipe, SpectroscopyRecipe
         return new Tuple2<>(ItcSpectroscopyResult.apply(dataSets, new ArrayList<>()), r);
     }
 
-    public ImagingResult calculateImaging() {
-        final Flamingos2 instrument = new Flamingos2(_flamingos2Parameters);
-        return calculateImaging(instrument);
-    }
-
-    private SpectroscopyResult calculateSpectroscopy(final Flamingos2 instrument) {
+    private SpectroscopyResult doCalculateSpectroscopy() {
         // Start of morphology section of ITC
 
         // Module 1a
@@ -83,7 +78,7 @@ public final class Flamingos2Recipe implements ImagingRecipe, SpectroscopyRecipe
         // Define the source morphology
         //
         // inputs: source morphology specification
-        final SEDFactory.SourceResult src = SEDFactory.calculate(instrument, Site.GS, ITCConstants.NEAR_IR, _sdParameters, _obsConditionParameters, _telescope);
+        final SEDFactory.SourceResult src = SEDFactory.calculate(instrument, _sdParameters, _obsConditionParameters, _telescope);
 
         // Calculate image quality
         final ImageQualityCalculatable IQcalc = ImageQualityCalculationFactory.getCalculationInstance(_sdParameters, _obsConditionParameters, _telescope, instrument);
@@ -149,7 +144,7 @@ public final class Flamingos2Recipe implements ImagingRecipe, SpectroscopyRecipe
         return SpectroscopyResult$.MODULE$.apply(p, instrument, SFcalc, IQcalc, specS2Narr, st);
     }
 
-    private ImagingResult calculateImaging(final Flamingos2 instrument) {
+    public ImagingResult calculateImaging() {
 
         // Start of morphology section of ITC
 
@@ -161,7 +156,7 @@ public final class Flamingos2Recipe implements ImagingRecipe, SpectroscopyRecipe
         // Define the source morphology
         //
         // inputs: source morphology specification
-        final SEDFactory.SourceResult src = SEDFactory.calculate(instrument, Site.GS, ITCConstants.NEAR_IR, _sdParameters, _obsConditionParameters, _telescope);
+        final SEDFactory.SourceResult src = SEDFactory.calculate(instrument, _sdParameters, _obsConditionParameters, _telescope);
 
         // Calculate image quality
         final ImageQualityCalculatable IQcalc = ImageQualityCalculationFactory.getCalculationInstance(_sdParameters, _obsConditionParameters, _telescope, instrument);

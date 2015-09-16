@@ -2,6 +2,7 @@ package edu.gemini.itc.flamingos2;
 
 import edu.gemini.itc.base.*;
 import edu.gemini.itc.shared.Flamingos2Parameters;
+import edu.gemini.spModel.core.Site;
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2.FPUnit;
 import scala.Option;
 
@@ -29,7 +30,7 @@ public final class Flamingos2 extends Instrument {
      * construct a Flamingos2 object with specified color filter and ND filter.
      */
     public Flamingos2(final Flamingos2Parameters fp) {
-        super(INSTR_DIR, FILENAME);
+        super(Site.GS, Bands.NEAR_IR, INSTR_DIR, FILENAME);
 
         params = fp;
         _slitSize = getSlitSize() * getPixelSize();

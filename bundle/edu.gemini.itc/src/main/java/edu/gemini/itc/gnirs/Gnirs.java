@@ -4,6 +4,7 @@ import edu.gemini.itc.base.*;
 import edu.gemini.itc.shared.CalculationMethod;
 import edu.gemini.itc.shared.GnirsParameters;
 import edu.gemini.itc.shared.ObservationDetails;
+import edu.gemini.spModel.core.Site;
 import edu.gemini.spModel.gemini.gnirs.GNIRSParams;
 import edu.gemini.spModel.gemini.gnirs.GNIRSParams.Disperser;
 import edu.gemini.spModel.gemini.gnirs.GNIRSParams.SlitWidth;
@@ -49,7 +50,7 @@ public final class Gnirs extends Instrument {
     protected final double _wellDepth;
 
     public Gnirs(GnirsParameters gp, ObservationDetails odp) {
-        super(INSTR_DIR, FILENAME);
+        super(Site.GN, Bands.NEAR_IR, INSTR_DIR, FILENAME);
         ///
         // The instrument data file gives a start/end wavelength for
         // the instrument.  But with a filter in place, the filter

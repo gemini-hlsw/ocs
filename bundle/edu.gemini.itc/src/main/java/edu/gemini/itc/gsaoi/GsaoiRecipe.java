@@ -4,7 +4,6 @@ import edu.gemini.itc.base.*;
 import edu.gemini.itc.gems.Gems;
 import edu.gemini.itc.operation.*;
 import edu.gemini.itc.shared.*;
-import edu.gemini.spModel.core.Site;
 import scala.Some;
 
 import java.util.ArrayList;
@@ -15,6 +14,7 @@ import java.util.List;
  */
 public final class GsaoiRecipe implements ImagingRecipe {
 
+    private final Gsaoi instrument;
     private final GsaoiParameters _gsaoiParameters;
     private final ObservingConditions _obsConditionParameters;
     private final ObservationDetails _obsDetailParameters;
@@ -31,35 +31,18 @@ public final class GsaoiRecipe implements ImagingRecipe {
                        final TelescopeDetails telescope)
 
     {
+        instrument = new Gsaoi(gsaoiParameters, obsDetailParameters);
         _sdParameters = sdParameters;
         _obsDetailParameters = obsDetailParameters;
         _obsConditionParameters = obsConditionParameters;
         _gsaoiParameters = gsaoiParameters;
         _telescope = telescope;
 
-        validateInputParameters();
-    }
-
-    private void validateInputParameters() {
-        if (_sdParameters.getDistributionType().equals(SourceDefinition.Distribution.ELINE))
-            if (_sdParameters.getELineWidth() < (3E5 / (_sdParameters
-                    .getELineWavelength().toNanometers() * 25))) { // *25 b/c of increased resolution of transmission files
-                throw new RuntimeException(
-                        "Please use a model line width > 0.04 nm (or "
-                                + (3E5 / (_sdParameters.getELineWavelength().toNanometers() * 25))
-                                + " km/s) to avoid undersampling of the line profile when convolved with the transmission response");
-            }
-
         // some general validations
-        Validation.validate(_obsDetailParameters, _sdParameters);
+        Validation.validate(instrument, _obsDetailParameters, _sdParameters);
     }
 
     public ImagingResult calculateImaging() {
-        final Gsaoi instrument = new Gsaoi(_gsaoiParameters, _obsDetailParameters);
-        return calculateImaging(instrument);
-    }
-
-    private ImagingResult calculateImaging(final Gsaoi instrument) {
         // Module 1b
         // Define the source energy (as function of wavelength).
         //
@@ -78,7 +61,7 @@ public final class GsaoiRecipe implements ImagingRecipe {
                 _obsConditionParameters.getImageQualityPercentile(),
                 _sdParameters);
 
-        final SEDFactory.SourceResult calcSource = SEDFactory.calculate(instrument, Site.GS, ITCConstants.NEAR_IR, _sdParameters, _obsConditionParameters, _telescope, new Some<AOSystem>(gems));
+        final SEDFactory.SourceResult calcSource = SEDFactory.calculate(instrument, _sdParameters, _obsConditionParameters, _telescope, new Some<>(gems));
 
 
         // End of the Spectral energy distribution portion of the ITC.

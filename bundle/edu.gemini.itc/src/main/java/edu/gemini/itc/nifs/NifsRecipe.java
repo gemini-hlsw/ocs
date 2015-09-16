@@ -21,6 +21,7 @@ import java.util.List;
  */
 public final class NifsRecipe implements SpectroscopyRecipe {
 
+    private final Nifs instrument;
     private final SourceDefinition _sdParameters;
     private final ObservationDetails _obsDetailParameters;
     private final ObservingConditions _obsConditionParameters;
@@ -38,32 +39,22 @@ public final class NifsRecipe implements SpectroscopyRecipe {
                       final TelescopeDetails telescope)
 
     {
+        instrument = new Nifs(nifsParameters, obsDetailParameters);
         _sdParameters = sdParameters;
         _obsDetailParameters = obsDetailParameters;
         _obsConditionParameters = obsConditionParameters;
         _nifsParameters = nifsParameters;
         _telescope = telescope;
 
-        validateInputParameters();
-    }
-
-    private void validateInputParameters() {
-        if (_sdParameters.getDistributionType().equals(SourceDefinition.Distribution.ELINE)) {
-            if (_sdParameters.getELineWidth() < (3E5 / (_sdParameters.getELineWavelength().toNanometers() * 25))) {  // *25 b/c of increased resolutuion of transmission files
-                throw new RuntimeException("Please use a model line width > 0.04 nm (or " + (3E5 / (_sdParameters.getELineWavelength().toNanometers() * 25)) + " km/s) to avoid undersampling of the line profile when convolved with the transmission response");
-            }
-        }
-
         // some general validations
-        Validation.validate(_obsDetailParameters, _sdParameters);
+        Validation.validate(instrument, _obsDetailParameters, _sdParameters);
     }
 
     /**
      * Performs recipe calculation.
      */
     public Tuple2<ItcSpectroscopyResult, SpectroscopyResult> calculateSpectroscopy() {
-        final Nifs instrument = new Nifs(_nifsParameters, _obsDetailParameters);
-        final SpectroscopyResult r = calculateSpectroscopy(instrument);
+        final SpectroscopyResult r = doCalculateSpectroscopy();
         final List<SpcChartData> dataSets = new ArrayList<>();
         for (int i = 0; i < r.specS2N().length; i++) {
             dataSets.add(createNifsSignalChart(r, i));
@@ -72,7 +63,7 @@ public final class NifsRecipe implements SpectroscopyRecipe {
         return new Tuple2<>(ItcSpectroscopyResult.apply(dataSets, new ArrayList<>()), r);
     }
 
-    private SpectroscopyResult calculateSpectroscopy(final Nifs instrument) {
+    private SpectroscopyResult doCalculateSpectroscopy() {
 
         // Calculate image quality
         final ImageQualityCalculatable IQcalc = ImageQualityCalculationFactory.getCalculationInstance(_sdParameters, _obsConditionParameters, _telescope, instrument);
@@ -86,7 +77,7 @@ public final class NifsRecipe implements SpectroscopyRecipe {
             altair = Option.empty();
         }
 
-        final SEDFactory.SourceResult calcSource = SEDFactory.calculate(instrument, Site.GN, ITCConstants.NEAR_IR, _sdParameters, _obsConditionParameters, _telescope, altair);
+        final SEDFactory.SourceResult calcSource = SEDFactory.calculate(instrument, _sdParameters, _obsConditionParameters, _telescope, altair);
 
         // End of the Spectral energy distribution portion of the ITC.
 

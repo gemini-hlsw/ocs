@@ -3,7 +3,6 @@ package edu.gemini.itc.acqcam;
 import edu.gemini.itc.base.*;
 import edu.gemini.itc.operation.*;
 import edu.gemini.itc.shared.*;
-import edu.gemini.spModel.core.Site;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,11 +12,11 @@ import java.util.List;
  */
 public final class AcqCamRecipe implements ImagingRecipe {
 
+    private final AcquisitionCamera instrument;
     private final SourceDefinition _sdParameters;
     private final ObservationDetails _obsDetailParameters;
     private final ObservingConditions _obsConditionParameters;
     private final TelescopeDetails _telescope;
-    private final AcquisitionCamera instrument;
 
     /**
      * Constructs an AcqCamRecipe given the parameters.
@@ -29,39 +28,23 @@ public final class AcqCamRecipe implements ImagingRecipe {
                         final TelescopeDetails telescope,
                         final AcquisitionCamParameters acqCamParameters) {
 
+        instrument = new AcquisitionCamera(acqCamParameters);
         _sdParameters = sdParameters;
         _obsDetailParameters = obsDetailParameters;
         _obsConditionParameters = obsConditionParameters;
         _telescope = telescope;
 
-        // create instrument
-        instrument = new AcquisitionCamera(acqCamParameters);
-
-        validateInputParameters();
-    }
-
-    private void validateInputParameters() {
-        if (_sdParameters.getDistributionType().equals(SourceDefinition.Distribution.ELINE)) {
-            if (_sdParameters.getELineWidth() < (3E5 / (_sdParameters.getELineWavelength().toNanometers()))) {
-                throw new IllegalArgumentException("Please use a model line width > 1 nm (or " + (3E5 / (_sdParameters.getELineWavelength().toNanometers())) + " km/s) to avoid undersampling of the line profile when convolved with the transmission response");
-            }
-        }
-
         // some general validations
-        Validation.validate(_obsDetailParameters, _sdParameters);
-    }
-
-    public ImagingResult calculateImaging() {
-        return calculateImaging(instrument);
+        Validation.validate(instrument, _obsDetailParameters, _sdParameters);
     }
 
     /**
      * Performs recipe calculation.
      */
-    private ImagingResult calculateImaging(final AcquisitionCamera instrument) {
+    public ImagingResult calculateImaging() {
 
         // Get the summed source and sky
-        final SEDFactory.SourceResult calcSource = SEDFactory.calculate(instrument, Site.GN, ITCConstants.VISIBLE, _sdParameters, _obsConditionParameters, _telescope);
+        final SEDFactory.SourceResult calcSource = SEDFactory.calculate(instrument, _sdParameters, _obsConditionParameters, _telescope);
         final VisitableSampledSpectrum sed = calcSource.sed;
         final VisitableSampledSpectrum sky = calcSource.sky;
         final double sed_integral = sed.getIntegral();

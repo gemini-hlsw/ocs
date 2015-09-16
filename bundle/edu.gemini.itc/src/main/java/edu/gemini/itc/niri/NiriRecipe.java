@@ -1,10 +1,9 @@
 package edu.gemini.itc.niri;
 
 import edu.gemini.itc.altair.Altair;
-import edu.gemini.itc.operation.*;
 import edu.gemini.itc.base.*;
+import edu.gemini.itc.operation.*;
 import edu.gemini.itc.shared.*;
-import edu.gemini.spModel.core.Site;
 import scala.Option;
 import scala.Tuple2;
 import scala.collection.JavaConversions;
@@ -17,6 +16,7 @@ import java.util.List;
  */
 public final class NiriRecipe implements ImagingRecipe, SpectroscopyRecipe {
 
+    private final Niri instrument;
     private final NiriParameters _niriParameters;
     private final ObservingConditions _obsConditionParameters;
     private final ObservationDetails _obsDetailParameters;
@@ -33,6 +33,7 @@ public final class NiriRecipe implements ImagingRecipe, SpectroscopyRecipe {
                       final TelescopeDetails telescope)
 
     {
+        instrument = new Niri(niriParameters, obsDetailParameters);
         _sdParameters = sdParameters;
         _obsDetailParameters = obsDetailParameters;
         _obsConditionParameters = obsConditionParameters;
@@ -50,27 +51,13 @@ public final class NiriRecipe implements ImagingRecipe, SpectroscopyRecipe {
             }
         }
 
-        if (_sdParameters.getDistributionType().equals(SourceDefinition.Distribution.ELINE))
-            if (_sdParameters.getELineWidth() < (3E5 / (_sdParameters.getELineWavelength().toNanometers() * 25))) { // *25 b/c of increased resolution of transmission files
-                throw new RuntimeException(
-                        "Please use a model line width > 0.04 nm (or "
-                                + (3E5 / (_sdParameters.getELineWavelength().toNanometers() * 25))
-                                + " km/s) to avoid undersampling of the line profile when convolved with the transmission response");
-            }
-
         // some general validations
-        Validation.validate(_obsDetailParameters, _sdParameters);
+        Validation.validate(instrument, _obsDetailParameters, _sdParameters);
 
-    }
-
-    public ImagingResult calculateImaging() {
-        final Niri instrument = new Niri(_niriParameters, _obsDetailParameters);
-        return calculateImaging(instrument);
     }
 
     public Tuple2<ItcSpectroscopyResult, SpectroscopyResult> calculateSpectroscopy() {
-        final Niri instrument = new Niri(_niriParameters, _obsDetailParameters);
-        final SpectroscopyResult r = calculateSpectroscopy(instrument);
+        final SpectroscopyResult r = doCalculateSpectroscopy();
         final List<SpcChartData> dataSets = new ArrayList<SpcChartData>() {{
             add(Recipe$.MODULE$.createSignalChart(r, 0));
             add(Recipe$.MODULE$.createS2NChart(r, 0));
@@ -78,7 +65,7 @@ public final class NiriRecipe implements ImagingRecipe, SpectroscopyRecipe {
         return new Tuple2<>(ItcSpectroscopyResult.apply(dataSets, new ArrayList<>()), r);
     }
 
-    private SpectroscopyResult calculateSpectroscopy(final Niri instrument) {
+    private SpectroscopyResult doCalculateSpectroscopy() {
         // Module 1b
         // Define the source energy (as function of wavelength).
         //
@@ -99,7 +86,7 @@ public final class NiriRecipe implements ImagingRecipe, SpectroscopyRecipe {
             altair = Option.empty();
         }
 
-        final SEDFactory.SourceResult calcSource = SEDFactory.calculate(instrument, Site.GN, ITCConstants.NEAR_IR, _sdParameters, _obsConditionParameters, _telescope, altair);
+        final SEDFactory.SourceResult calcSource = SEDFactory.calculate(instrument, _sdParameters, _obsConditionParameters, _telescope, altair);
 
         // End of the Spectral energy distribution portion of the ITC.
 
@@ -195,7 +182,7 @@ public final class NiriRecipe implements ImagingRecipe, SpectroscopyRecipe {
         return new GenericSpectroscopyResult(p, instrument, SFcalc, IQcalc, specS2Narr, st, altair, ImagingResult.NoWarnings());
     }
 
-    private ImagingResult calculateImaging(final Niri instrument) {
+    public ImagingResult calculateImaging() {
         // Module 1b
         // Define the source energy (as function of wavelength).
         //
@@ -216,7 +203,7 @@ public final class NiriRecipe implements ImagingRecipe, SpectroscopyRecipe {
             altair = Option.empty();
         }
 
-        final SEDFactory.SourceResult calcSource = SEDFactory.calculate(instrument, Site.GN, ITCConstants.NEAR_IR, _sdParameters, _obsConditionParameters, _telescope, altair);
+        final SEDFactory.SourceResult calcSource = SEDFactory.calculate(instrument, _sdParameters, _obsConditionParameters, _telescope, altair);
 
         // End of the Spectral energy distribution portion of the ITC.
 

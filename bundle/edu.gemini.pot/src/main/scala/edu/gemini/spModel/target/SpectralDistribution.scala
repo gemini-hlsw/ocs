@@ -2,6 +2,7 @@ package edu.gemini.spModel.target
 
 import edu.gemini.spModel.core.Wavelength
 import edu.gemini.spModel.target.EmissionLine.Continuum
+import squants.motion.Velocity
 import squants.radio.Irradiance
 
 /** Definitions for the spectral distribution of a source.
@@ -15,7 +16,7 @@ final case class BlackBody(temperature: Double) extends SpectralDistribution
 final case class PowerLaw(index: Double) extends SpectralDistribution
 
 /** A single emission line. */
-final case class EmissionLine(wavelength: Wavelength, width: Double, flux: Irradiance, continuum: Continuum) extends SpectralDistribution
+final case class EmissionLine(wavelength: Wavelength, width: Velocity, flux: Irradiance, continuum: Continuum) extends SpectralDistribution
 
 /** A user defined spectrum. */
 final case class UserDefined(spectrum: String) extends SpectralDistribution

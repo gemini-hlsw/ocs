@@ -18,24 +18,23 @@ public class TelescopeBackgroundVisitor implements SampledSpectrumVisitor {
      * We will use a different background file for different
      * ports and coatings.
      */
-    public TelescopeBackgroundVisitor(final TelescopeDetails tp, final Site site, final String wavelenRange) {
+    public TelescopeBackgroundVisitor(final Instrument instrument, final TelescopeDetails tp) {
 
         final String _fullBackgroundResource;
-        if (!wavelenRange.equals(ITCConstants.VISIBLE)) {
-
-            final String filenameBase = "/HI-Res/" + abbrForSite(site) + wavelenRange + ITCConstants.TELESCOPE_BACKGROUND_LIB + "/" + ITCConstants.GS_TELESCOPE_BACKGROUND_FILENAME_BASE;
-            setup = getFileName(tp);
-            _fullBackgroundResource = filenameBase + setup + ITCConstants.DATA_SUFFIX;
-
-        } else {
-
-            final String filenameBase = ITCConstants.TELESCOPE_BACKGROUND_FILENAME_BASE;
-            setup = getFileName(tp) + "_ph";
-            _fullBackgroundResource = ITCConstants.TELESCOPE_BACKGROUND_LIB + "/" + filenameBase + setup + ITCConstants.DATA_SUFFIX;
+        final String filenameBase;
+        switch (instrument.getBands()) {
+            case VISIBLE:
+                filenameBase = ITCConstants.TELESCOPE_BACKGROUND_FILENAME_BASE;
+                setup = getFileName(tp) + "_ph";
+                _fullBackgroundResource = ITCConstants.TELESCOPE_BACKGROUND_LIB + "/" + filenameBase + setup + ITCConstants.DATA_SUFFIX;
+                break;
+            default:
+                filenameBase = "/HI-Res/" + abbrForSite(instrument.getSite()) + instrument.getBands().getDirectory() + ITCConstants.TELESCOPE_BACKGROUND_LIB + "/" + ITCConstants.GS_TELESCOPE_BACKGROUND_FILENAME_BASE;
+                setup = getFileName(tp);
+                _fullBackgroundResource = filenameBase + setup + ITCConstants.DATA_SUFFIX;
         }
 
         telescopeBack = new DefaultArraySpectrum(_fullBackgroundResource);
-
 
     }
 
