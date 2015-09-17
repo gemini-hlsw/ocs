@@ -9,7 +9,7 @@ import edu.gemini.spModel.core.WavelengthConversions._
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.target._
 import jsky.app.ot.gemini.editor.targetComponent.TelescopePosEditor
-import jsky.app.ot.gemini.editor.targetComponent.details.NumericPropertySheet.{SingleProp, SquantsProp, Prop}
+import jsky.app.ot.gemini.editor.targetComponent.details.NumericPropertySheet.Prop
 import squants.motion.{KilometersPerSecond, Velocity}
 import squants.motion.VelocityConversions._
 import squants.radio.IrradianceConversions._
@@ -80,10 +80,10 @@ final class SourceDetailsEditor extends GridBagPanel with TelescopePosEditor {
     Prop("Temperature", "Kelvin",   _.temperature,                (a, v) => setDistribution(BlackBody(v)))
   )
   private val emissionLineDetails = NumericPropertySheet[EmissionLine](None, emissionLineOrDefault,
-    Prop       ("Wavelength",  "um",                                                                            _.wavelength.toMicrons, (a, v)                     => setDistribution(EmissionLine(v.microns,    a.width, a.flux, a.continuum))),
-    SingleProp ("Width",       KilometersPerSecond,                                                              _.width,               (a, v: Velocity)           => setDistribution(EmissionLine(a.wavelength, v,       a.flux, a.continuum))),
-    SquantsProp("Flux",        Seq(WattsPerSquareMeter, ErgsPerSecondPerSquareCentimeter),                       _.flux,                (a, v: Irradiance)         => setDistribution(EmissionLine(a.wavelength, a.width, v,      a.continuum))),
-    SquantsProp("Continuum",   Seq(WattsPerSquareMeterPerMicron, ErgsPerSecondPerSquareCentimeterPerAngstrom),   _.continuum,           (a, v: SpectralIrradiance) => setDistribution(EmissionLine(a.wavelength, a.width, a.flux, v)))
+    Prop("Wavelength",  "μm", _.wavelength.toMicrons, (a, v)                     => setDistribution(a.copy(wavelength = v.microns))),
+    Prop("Width",             _.width,                (a, v: Velocity)           => setDistribution(a.copy(width      = v        )), KilometersPerSecond),
+    Prop("Flux",              _.flux,                 (a, v: Irradiance)         => setDistribution(a.copy(flux       = v        )), WattsPerSquareMeter, ErgsPerSecondPerSquareCentimeter),
+    Prop("Continuum",         _.continuum,            (a, v: SpectralIrradiance) => setDistribution(a.copy(continuum  = v        )), WattsPerSquareMeterPerMicron, ErgsPerSecondPerSquareCentimeterPerAngstrom)
   )
   private val powerLawDetails = NumericPropertySheet[PowerLaw](None, powerLawOrDefault,
     Prop("Index",       "",         _.index,                      (a, v) => setDistribution(PowerLaw(v)))

@@ -50,9 +50,9 @@ case class NumericPropertySheet[A](title: scala.Option[String], f: SPTarget => A
       c.fill = GridBagConstraints.HORIZONTAL
       c.insets = ins
     })
-  }
 
-  pairs.foreach { case (p, w) =>
+    // if the right component is a unit selector we need to
+    // update the value every time the unit is changed
     p.rightComponent match {
       case c: ComboBox[_] =>
         listenTo(c.selection)
@@ -61,7 +61,9 @@ case class NumericPropertySheet[A](title: scala.Option[String], f: SPTarget => A
         }
       case _ =>
     }
+
   }
+
 
   def edit(ctx: Option[ObsContext], target: SPTarget, node: ISPNode): Unit =
     nonreentrant {
@@ -95,39 +97,36 @@ object NumericPropertySheet {
   sealed trait Prop[A, B] {
     def leftComponent: Component
     def rightComponent: Component
-    def edit: (A, Double) => Unit
+    def edit: (A, Double)          => Unit
     def init: (NumberBoxWidget, A) => Unit
   }
 
   case class DoubleProp[A](leftCaption: String, rightCaption: String, get: A => Double, edit: (A, Double) => Unit) extends Prop[A, Double] {
     val leftComponent  = new Label(leftCaption)
     val rightComponent = new Label(rightCaption)
-    def init: (NumberBoxWidget, A) => Unit = (w,a) => {
+    def init: (NumberBoxWidget, A) => Unit  =  (w,a) => {
       w.setValue(get(a))
     }
   }
 
-  case class SingleProp[A, B <: Quantity[B]](leftCaption: String, unit: UnitOfMeasure[B], get: A => B, edit0: (A, B) => Unit) extends Prop[A, B] {
+  case class SingleUnitQuantity[A, B <: Quantity[B]](leftCaption: String, unit: UnitOfMeasure[B], get: A => B, set: (A, B) => Unit) extends Prop[A, B] {
     val leftComponent  = new Label(leftCaption)
     val rightComponent = new Label(unit.symbol)
-    def edit: (A, Double) => Unit   = (v, d)  => edit0(v, unit(d))
-    def init: (NumberBoxWidget, A) => Unit = (w,a) => {
+    def edit: (A, Double)          => Unit  =  (a, d) => set(a, unit(d))
+    def init: (NumberBoxWidget, A) => Unit  =  (w, a) => {
       w.setValue(get(a).value)
     }
   }
 
-  case class SquantsProp[A, B <: Quantity[B]](leftCaption: String, units: Seq[UnitOfMeasure[B]], get: A => B, edit0: (A, B) => Unit) extends Prop[A, B] {
+  case class MultiUnitQuantity[A, B <: Quantity[B]](leftCaption: String, units: Seq[UnitOfMeasure[B]], get: A => B, set: (A, B) => Unit) extends Prop[A, B] {
     val leftComponent  = new Label(leftCaption)
-    val rightComponent = new ComboBox[UnitOfMeasure[B]](units) {
-      renderer = Renderer(_.symbol)
-    }
+    val rightComponent = new ComboBox[UnitOfMeasure[B]](units) {renderer = Renderer(_.symbol)}
     def unit           = rightComponent.selection.item
-    def edit: (A, Double) => Unit   = (v, d)  => edit0(v, unit(d))
-    def init: (NumberBoxWidget, A) => Unit = (w,a) => {
+    def edit: (A, Double)          => Unit  =  (a, d) => set(a, unit(d))
+    def init: (NumberBoxWidget, A) => Unit  =  (w, a) => {
       w.setValue(get(a).value)
       rightComponent.selection.item = get(a).unit
     }
-
   }
 
   object Prop {
@@ -138,8 +137,13 @@ object NumericPropertySheet {
     def apply[A](leftCaption: String, rightCaption: String, f: A => CoordinateParam): Prop[A, Double] =
       DoubleProp(leftCaption, rightCaption, a => f(a).getValue, (a, b) => f(a).setValue(b))
 
-//    def apply[A, B <: Quantity[B]](leftCaption: String, unit: UnitOfMeasure[B], f0: A => B, g0: (A, B) => Unit) =
-//      SingleProp(leftCaption, unit, f0, g0)
+    def apply[A, B <: Quantity[B]](leftCaption: String, get: A => B, set: (A, B) => Unit, units: UnitOfMeasure[B]*): Prop[A, B] =
+      units.length match {
+        case 0      => sys.error("quantity property needs at least one unit")
+        case 1      => SingleUnitQuantity(leftCaption, units.head, get, set)
+        case _      => MultiUnitQuantity(leftCaption,  units,      get, set)
+      }
+
   }
 
 }
