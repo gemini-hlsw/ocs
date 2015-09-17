@@ -2,6 +2,8 @@ package edu.gemini.itc.operation;
 
 import edu.gemini.itc.base.ITCConstants;
 import edu.gemini.itc.base.TransmissionElement;
+import edu.gemini.spModel.gemini.obscomp.SPSiteQuality;
+
 
 /**
  * The CloudTransmissionVisitor is designed to adjust the SED for
@@ -16,8 +18,8 @@ public final class CloudTransmissionVisitor {
     /**
      * Constructs transmission visitor for clouds.
      */
-    public static TransmissionElement create(int skyTransparencyCloud) {
+    public static TransmissionElement create(final SPSiteQuality.CloudCover cc) {
         return new TransmissionElement(ITCConstants.TRANSMISSION_LIB + "/" + FILENAME +
-                skyTransparencyCloud + ITCConstants.DATA_SUFFIX);
+                "_" + cc.sequenceValue() + ITCConstants.DATA_SUFFIX);
     }
 }

@@ -1,6 +1,7 @@
 package edu.gemini.itc.baseline.util
 
 import edu.gemini.itc.shared._
+import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.CloudCover
 import edu.gemini.spModel.target._
 
 // TEMPORARY helper
@@ -145,7 +146,10 @@ object Hash {
     hash(
       ocp.getAirmass,
       ocp.iq.ordinal() + 1,
-      ocp.getSkyTransparencyCloud,
+      ocp.cc match {
+        case CloudCover.ANY => ocp.cc.ordinal
+        case _              => ocp.cc.ordinal + 1
+      },
       ocp.wv.ordinal() + 1,
       ocp.sb.ordinal() + 1
     )

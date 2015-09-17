@@ -40,20 +40,6 @@ public final class ObservingConditions implements Serializable {
     public SkyBackground sb() { return sb; }
 
 
-    // == CC
-
-    // TODO: currently ITC does not support 90% for CC and a total of 4 values (1..4) for CC
-    // TODO: in order to deal with this we translate 90% to ANY
-    // TODO: Note: values is used for file lookup like cloud_trans<nr>.dat
-
-    public int getSkyTransparencyCloud() {
-        switch (cc) {
-            case ANY:           return cc.ordinal();
-            default:            return cc.ordinal() + 1;
-        }
-    }
-
-
     // == Airmass
     public double getAirmass() {
         return airmass;

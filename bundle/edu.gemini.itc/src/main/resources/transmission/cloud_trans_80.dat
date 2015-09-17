@@ -1,5 +1,5 @@
 # transparency (cloud cover) model for ITC
-# 90%-ile conditions; these conditions are thick cloud
+# 80%-ile conditions; these conditions are thick cloud
 # columns are (1) wavelength in nm, (2) transparency (0-1)
 # source: assume 1mag (factor 2.5) attenuation
 # and unusable beyond 2.5um
