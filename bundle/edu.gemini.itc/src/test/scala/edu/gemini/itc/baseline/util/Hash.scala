@@ -144,10 +144,10 @@ object Hash {
   def calc(ocp: ObservingConditions): Int =
     hash(
       ocp.getAirmass,
-      ocp.getImageQuality,
+      ocp.iq.ordinal() + 1,
       ocp.getSkyTransparencyCloud,
-      ocp.getSkyTransparencyWater,
-      ocp.getSkyBackground
+      ocp.wv.ordinal() + 1,
+      ocp.sb.ordinal() + 1
     )
 
   def calc(alt: Option[AltairParameters]): Int = alt match {

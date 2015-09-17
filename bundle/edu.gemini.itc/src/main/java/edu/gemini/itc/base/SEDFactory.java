@@ -213,7 +213,7 @@ public final class SEDFactory {
 
         final SampledSpectrumVisitor water = WaterTransmissionVisitor.create(
                 instrument,
-                odp.getSkyTransparencyWater(),
+                odp.wv(),
                 odp.getAirmass(),
                 getWater(instrument));
         sed.accept(water);
@@ -303,7 +303,7 @@ public final class SEDFactory {
                 return ITCConstants.SKY_BACKGROUND_LIB + "/"
                         + ITCConstants.OPTICAL_SKY_BACKGROUND_FILENAME_BASE
                         + "_"
-                        + ocp.getSkyBackgroundCategory()
+                        + ocp.sb().sequenceValue()
                         + "_" + ocp.getAirmassCategory()
                         + ITCConstants.DATA_SUFFIX;
             case NEAR_IR:
@@ -311,7 +311,7 @@ public final class SEDFactory {
                         + ITCConstants.HI_RES + (instrument.getSite().equals(Site.GN) ? "/mk" : "/cp")
                         + instrument.getBands().getDirectory() + ITCConstants.SKY_BACKGROUND_LIB + "/"
                         + ITCConstants.NEAR_IR_SKY_BACKGROUND_FILENAME_BASE + "_"
-                        + ocp.getSkyTransparencyWaterCategory() + "_"
+                        + ocp.wv().sequenceValue() + "_"
                         + ocp.getAirmassCategory()
                         + ITCConstants.DATA_SUFFIX;
             case MID_IR:
@@ -319,7 +319,7 @@ public final class SEDFactory {
                         + ITCConstants.HI_RES + (instrument.getSite().equals(Site.GN) ? "/mk" : "/cp")
                         + instrument.getBands().getDirectory() + ITCConstants.SKY_BACKGROUND_LIB + "/"
                         + ITCConstants.MID_IR_SKY_BACKGROUND_FILENAME_BASE + "_"
-                        + ocp.getSkyTransparencyWaterCategory() + "_"
+                        + ocp.wv().sequenceValue() + "_"
                         + ocp.getAirmassCategory()
                         + ITCConstants.DATA_SUFFIX;
             default:

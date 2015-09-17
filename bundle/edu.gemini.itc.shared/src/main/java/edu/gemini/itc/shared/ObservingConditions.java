@@ -20,9 +20,6 @@ public final class ObservingConditions implements Serializable {
 
     /**
      * Constructs a ObservingConditionParameters from a servlet request
-     *
-     * @param r Servlet request containing the form data.
-     * @throws Exception if input data is not parsable.
      */
     public ObservingConditions(
             final ImageQuality iq,
@@ -30,7 +27,6 @@ public final class ObservingConditions implements Serializable {
             final WaterVapor wv,
             final SkyBackground sb,
             final double airmass) {
-
         this.iq      = iq;
         this.cc      = cc;
         this.wv      = wv;
@@ -38,18 +34,11 @@ public final class ObservingConditions implements Serializable {
         this.airmass = airmass;
     }
 
-    // == IQ
-    public int getImageQuality() {
-        return iq.ordinal() + 1;
-    }
+    public ImageQuality  iq() { return iq; }
+    public WaterVapor    wv() { return wv; }
+    public CloudCover    cc() { return cc; }
+    public SkyBackground sb() { return sb; }
 
-    public ImageQuality iq() {
-        return iq;
-    }
-
-    public double getImageQualityPercentile() {
-        return iq.getPercentage() / 100.0;
-    }
 
     // == CC
 
@@ -64,38 +53,6 @@ public final class ObservingConditions implements Serializable {
         }
     }
 
-    public double getSkyTransparencyCloudPercentile() {
-        switch (cc) {
-            case PERCENT_90:    return 1.0;
-            default:            return cc.getPercentage() / 100.0;
-        }
-    }
-
-    // == WV
-    public int getSkyTransparencyWater() {
-        return wv.ordinal() + 1;
-    }
-
-    public double getSkyTransparencyWaterPercentile() {
-        return wv.getPercentage() / 100.0;
-    }
-
-    public String getSkyTransparencyWaterCategory() {
-        return wv.sequenceValue();
-    }
-
-    // == SB
-    public int getSkyBackground() {
-        return sb.ordinal() + 1;
-    }
-
-    public double getSkyBackgroundPercentile() {
-        return sb.getPercentage() / 100.0;
-    }
-
-    public String getSkyBackgroundCategory() {
-        return sb.sequenceValue();
-    }
 
     // == Airmass
     public double getAirmass() {
@@ -109,21 +66,6 @@ public final class ObservingConditions implements Serializable {
             return "15";
         else
             return "20";
-    }
-
-
-    /**
-     * Return a human-readable string for debugging
-     */
-    public String toString() {
-        StringBuffer sb = new StringBuffer();
-        sb.append("Image Quality:\t" + getImageQuality() + "\n");
-        sb.append("Cloud Trans:\t" + getSkyTransparencyCloud() + "\n");
-        sb.append("Water Trans:\t" + getSkyTransparencyWater() + "\n");
-        sb.append("Sky Background:\t" + getSkyBackground() + "\n");
-        sb.append("Airmass:\t" + getAirmass() + "\n");
-        sb.append("\n");
-        return sb.toString();
     }
 
 }

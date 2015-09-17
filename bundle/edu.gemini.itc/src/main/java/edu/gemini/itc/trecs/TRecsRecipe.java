@@ -41,7 +41,7 @@ public final class TRecsRecipe implements ImagingRecipe, SpectroscopyRecipe {
     private void validateInputParameters() {
         // For mid-IR observation the watervapor percentile and sky background
         // percentile must be the same
-        if (!_obsConditionParameters.getSkyTransparencyWaterCategory().equals(_obsConditionParameters.getSkyBackgroundCategory())) {
+        if (!(_obsConditionParameters.wv().getPercentage() == _obsConditionParameters.sb().getPercentage())) {
             throw new RuntimeException("Sky background percentile must be equal to sky transparency(water vapor): \n "
                     + "    Please modify the Observing condition constraints section of the HTML form \n"
                     + "    and recalculate.");

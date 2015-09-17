@@ -3,6 +3,7 @@ package edu.gemini.itc.operation;
 import edu.gemini.itc.base.ArraySpectrum;
 import edu.gemini.itc.base.DefaultArraySpectrum;
 import edu.gemini.itc.base.ITCConstants;
+import edu.gemini.spModel.gemini.obscomp.SPSiteQuality;
 import edu.gemini.spModel.guide.GuideProbe;
 
 public class ImageQualityCalculation implements ImageQualityCalculatable {
@@ -11,11 +12,11 @@ public class ImageQualityCalculation implements ImageQualityCalculatable {
     private double airmass, effectiveWavelength, im_qual;
 
     public ImageQualityCalculation(final GuideProbe.Type wfs,
-                                   final int imageQuality,
+                                   final SPSiteQuality.ImageQuality iq,
                                    final double airmass,
                                    final int effectiveWavelength) {
 
-        im_qual_model_file = ITCConstants.IM_QUAL_LIB + "/" + ITCConstants.IM_QUAL_BASE + wfs.name().toLowerCase() + imageQuality + ITCConstants.DATA_SUFFIX;
+        im_qual_model_file = ITCConstants.IM_QUAL_LIB + "/" + ITCConstants.IM_QUAL_BASE + wfs.name().toLowerCase() + (iq.ordinal()+1) + ITCConstants.DATA_SUFFIX;
 
         this.airmass = airmass;
         this.effectiveWavelength = effectiveWavelength;

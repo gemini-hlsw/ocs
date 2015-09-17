@@ -34,7 +34,7 @@ public final class ImageQualityCalculationFactory {
                 // This case creates an ImageQuality Calculation
                 return new ImageQualityCalculation(
                         wfs,
-                        observingConditions.getImageQuality(),
+                        observingConditions.iq(),
                         observingConditions.getAirmass(),
                         instrument.getEffectiveWavelength());
         }

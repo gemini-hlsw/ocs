@@ -14,7 +14,7 @@ object BaselineTRecs {
   lazy val Fixtures = NBandSpectroscopy
 
   // NOTE: For TRecs sky background value must be equal to water vapor value.
-  private lazy val TRecsObservingConditions = Fixture.ObservingConditions.filter(o => o.getSkyBackground == o.getSkyTransparencyWater)
+  private lazy val TRecsObservingConditions = Fixture.ObservingConditions.filter(o => o.sb.getPercentage == o.wv.getPercentage)
 
   private lazy val NBandSpectroscopy = Fixture.nBandSpcFixtures(List(
     new TRecsParameters(
