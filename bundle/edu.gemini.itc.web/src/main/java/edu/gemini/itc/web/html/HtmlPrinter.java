@@ -67,7 +67,7 @@ public final class HtmlPrinter {
         sb.append(String.format("<LI> Sky Transparency (cloud cover): %d.00%%", ocp.cc().getPercentage()));
         sb.append(String.format("<LI> Sky transparency (water vapour): %d.00%%", ocp.wv().getPercentage()));
         sb.append(String.format("<LI> Sky background: %d.00%%", ocp.sb().getPercentage()));
-        sb.append(String.format("<LI> Airmass: %.2f", ocp.getAirmass()));
+        sb.append(String.format("<LI> Airmass: %.2f", ocp.airmass()));
         sb.append("<BR>");
 
         sb.append(String.format("Frequency of occurrence of these conditions: %.2f%%<BR>",

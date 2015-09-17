@@ -144,7 +144,7 @@ object Hash {
 
   def calc(ocp: ObservingConditions): Int =
     hash(
-      ocp.getAirmass,
+      ocp.airmass,
       ocp.iq.ordinal() + 1,
       ocp.cc match {
         case CloudCover.ANY => ocp.cc.ordinal

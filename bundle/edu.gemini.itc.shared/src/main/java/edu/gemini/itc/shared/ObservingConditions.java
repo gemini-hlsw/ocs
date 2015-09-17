@@ -34,24 +34,10 @@ public final class ObservingConditions implements Serializable {
         this.airmass = airmass;
     }
 
-    public ImageQuality  iq() { return iq; }
-    public WaterVapor    wv() { return wv; }
-    public CloudCover    cc() { return cc; }
-    public SkyBackground sb() { return sb; }
-
-
-    // == Airmass
-    public double getAirmass() {
-        return airmass;
-    }
-
-    public String getAirmassCategory() {
-        if (airmass <= 1.25)
-            return "10";
-        else if (airmass > 1.25 && airmass <= 1.75)
-            return "15";
-        else
-            return "20";
-    }
+    public ImageQuality  iq()      { return iq; }
+    public WaterVapor    wv()      { return wv; }
+    public CloudCover    cc()      { return cc; }
+    public SkyBackground sb()      { return sb; }
+    public double        airmass() { return airmass; }
 
 }

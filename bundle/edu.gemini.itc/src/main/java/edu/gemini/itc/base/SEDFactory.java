@@ -214,7 +214,7 @@ public final class SEDFactory {
         final SampledSpectrumVisitor water = WaterTransmissionVisitor.create(
                 instrument,
                 odp.wv(),
-                odp.getAirmass(),
+                odp.airmass(),
                 getWater(instrument));
         sed.accept(water);
 
@@ -304,7 +304,7 @@ public final class SEDFactory {
                         + ITCConstants.OPTICAL_SKY_BACKGROUND_FILENAME_BASE
                         + "_"
                         + ocp.sb().sequenceValue()
-                        + "_" + ocp.getAirmassCategory()
+                        + "_" + airmassCategory(ocp.airmass())
                         + ITCConstants.DATA_SUFFIX;
             case NEAR_IR:
                 return "/"
@@ -312,7 +312,7 @@ public final class SEDFactory {
                         + instrument.getBands().getDirectory() + ITCConstants.SKY_BACKGROUND_LIB + "/"
                         + ITCConstants.NEAR_IR_SKY_BACKGROUND_FILENAME_BASE + "_"
                         + ocp.wv().sequenceValue() + "_"
-                        + ocp.getAirmassCategory()
+                        + airmassCategory(ocp.airmass())
                         + ITCConstants.DATA_SUFFIX;
             case MID_IR:
                 return "/"
@@ -320,7 +320,7 @@ public final class SEDFactory {
                         + instrument.getBands().getDirectory() + ITCConstants.SKY_BACKGROUND_LIB + "/"
                         + ITCConstants.MID_IR_SKY_BACKGROUND_FILENAME_BASE + "_"
                         + ocp.wv().sequenceValue() + "_"
-                        + ocp.getAirmassCategory()
+                        + airmassCategory(ocp.airmass())
                         + ITCConstants.DATA_SUFFIX;
             default:
                 throw new Error("invalid band");
@@ -338,5 +338,13 @@ public final class SEDFactory {
         }
     }
 
+    private static String airmassCategory(final double airmass) {
+        if (airmass <= 1.25)
+            return "10";
+        else if (airmass > 1.25 && airmass <= 1.75)
+            return "15";
+        else
+            return "20";
+    }
 
 }
