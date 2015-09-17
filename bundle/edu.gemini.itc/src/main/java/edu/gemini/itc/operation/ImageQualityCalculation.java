@@ -16,7 +16,7 @@ public class ImageQualityCalculation implements ImageQualityCalculatable {
                                    final double airmass,
                                    final int effectiveWavelength) {
 
-        im_qual_model_file = ITCConstants.IM_QUAL_LIB + "/" + ITCConstants.IM_QUAL_BASE + wfs.name().toLowerCase() + (iq.ordinal()+1) + ITCConstants.DATA_SUFFIX;
+        im_qual_model_file = ITCConstants.IM_QUAL_LIB + "/" + ITCConstants.IM_QUAL_BASE + wfs.name().toLowerCase() + "_" + iq.sequenceValue() + ITCConstants.DATA_SUFFIX;
 
         this.airmass = airmass;
         this.effectiveWavelength = effectiveWavelength;
