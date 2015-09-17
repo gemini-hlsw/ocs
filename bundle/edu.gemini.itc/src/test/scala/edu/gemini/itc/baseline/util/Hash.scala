@@ -145,13 +145,10 @@ object Hash {
   def calc(ocp: ObservingConditions): Int =
     hash(
       ocp.airmass,
-      ocp.iq.ordinal() + 1,
-      ocp.cc match {
-        case CloudCover.ANY => ocp.cc.ordinal
-        case _              => ocp.cc.ordinal + 1
-      },
-      ocp.wv.ordinal() + 1,
-      ocp.sb.ordinal() + 1
+      ocp.iq.name,
+      ocp.cc.name,
+      ocp.wv.name,
+      ocp.sb.name
     )
 
   def calc(alt: Option[AltairParameters]): Int = alt match {
