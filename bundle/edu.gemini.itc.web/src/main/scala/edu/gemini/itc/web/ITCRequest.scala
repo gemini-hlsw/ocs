@@ -105,7 +105,7 @@ object ITCRequest {
     val wv      = r.enumParameter(classOf[SPSiteQuality.WaterVapor])
     val sb      = r.enumParameter(classOf[SPSiteQuality.SkyBackground])
     val airmass = r.doubleParameter("Airmass")
-    new ObservingConditions(iq, cc, wv, sb, airmass)
+    ObservingConditions(iq, cc, wv, sb, airmass)
   }
 
   def instrumentName(r: ITCRequest): String =

@@ -1,5 +1,15 @@
 package edu.gemini.itc.shared
 
+import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.{WaterVapor, CloudCover, SkyBackground, ImageQuality}
+
+// ==== Observing conditions
+
+final case class ObservingConditions(
+                      iq: ImageQuality,
+                      cc: CloudCover,
+                      wv: WaterVapor,
+                      sb: SkyBackground,
+                      airmass: Double)
 
 // ==== Calculation method
 
