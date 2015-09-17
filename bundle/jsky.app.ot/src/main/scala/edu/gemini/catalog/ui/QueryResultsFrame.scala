@@ -13,6 +13,8 @@ import edu.gemini.pot.sp.ISPNode
 import edu.gemini.shared.gui.textComponent.{TextRenderer, NumberField}
 import edu.gemini.shared.gui.{GlassLabel, SizePreference, SortableTable}
 import edu.gemini.spModel.core.Target.SiderealTarget
+import edu.gemini.spModel.gemini.obscomp.SPSiteQuality
+import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.Conditions
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.core._
 import edu.gemini.ui.miglayout.MigPanel
@@ -44,14 +46,15 @@ trait PreferredSizeFrame { this: Window =>
 /**
  * Describes the observation used to do a Guide Star Search
  */
-case class ObservationInfo(objectName: Option[String], instrumentName: Option[String], strategy: Option[AgsStrategy], validStrategies: List[AgsStrategy])
+case class ObservationInfo(objectName: Option[String], instrumentName: Option[String], strategy: Option[AgsStrategy], validStrategies: List[AgsStrategy], conditions: Option[Conditions])
 
 object ObservationInfo {
   def apply(ctx: ObsContext):ObservationInfo = ObservationInfo(
     Option(ctx.getTargets.getBase).map(_.getTarget.getName),
     Option(ctx.getInstrument).map(_.getTitle),
     AgsRegistrar.currentStrategy(ctx),
-    AgsRegistrar.validStrategies(ctx))
+    AgsRegistrar.validStrategies(ctx),
+    ctx.getConditions.some)
 }
 
 /**
@@ -339,6 +342,15 @@ object QueryResultsWindow {
         lazy val guider = new ComboBox(List.empty[AgsStrategy]) with TextRenderer[AgsStrategy] {
           override def text(a: AgsStrategy) = ~Option(a).map(_.key.displayName)
         }
+        lazy val sbBox = new ComboBox(List(SPSiteQuality.SkyBackground.values(): _*)) with TextRenderer[SPSiteQuality.SkyBackground] {
+          override def text(a: SPSiteQuality.SkyBackground) = a.displayValue()
+        }
+        lazy val ccBox = new ComboBox(List(SPSiteQuality.CloudCover.values(): _*)) with TextRenderer[SPSiteQuality.CloudCover] {
+          override def text(a: SPSiteQuality.CloudCover) = a.displayValue()
+        }
+        lazy val iqBox = new ComboBox(List(SPSiteQuality.ImageQuality.values(): _*)) with TextRenderer[SPSiteQuality.ImageQuality] {
+          override def text(a: SPSiteQuality.ImageQuality) = a.displayValue()
+        }
 
         lazy val ra = new RATextField(RightAscension.zero) {
           reactions += queryButtonEnabling
@@ -393,6 +405,12 @@ object QueryResultsWindow {
           add(instrumentName, CC().spanX(3))
           add(new Label("Guider"), CC().spanX(2).newline())
           add(guider, CC().spanX(3).growX())
+          add(new Label("Sky Background"), CC().spanX(2).newline())
+          add(sbBox, CC().spanX(3).growX())
+          add(new Label("Cloud Cover"), CC().spanX(2).newline())
+          add(ccBox, CC().spanX(3).growX())
+          add(new Label("Image Quality"), CC().spanX(2).newline())
+          add(iqBox, CC().spanX(3).growX())
           add(new Separator(Orientation.Horizontal), CC().spanX(7).growX().newline())
           add(new Label("Radial Range"), CC().spanX(2).newline())
           add(radiusStart, CC().minWidth(50.px).growX())
@@ -437,6 +455,12 @@ object QueryResultsWindow {
             val selected = info >>= {_.strategy}
             selected.foreach(guiderModel.setSelectedItem)
             guider.peer.setModel(guiderModel)
+            // Update conditions
+            i.conditions.foreach { c =>
+              sbBox.selection.item = c.sb
+              ccBox.selection.item = c.cc
+              iqBox.selection.item = c.iq
+            }
           }
           // Update the RA
           ra.updateRa(query.base.ra)
@@ -481,8 +505,10 @@ object QueryResultsWindow {
               i <- 0 until guider.peer.getModel.getSize
             } yield guider.peer.getModel.getElementAt(i)
 
-            // TODO Use the selected guider to do a different strategy OCSADV-406
-            val info = ObservationInfo(objectName.text.some, instrumentName.text.some, Option(guider.selection.item), guiders.toList).some
+            // TODO Use the selected guider to do a different strategy OCSADV-403
+            val conditions = Conditions.NOMINAL.sb(sbBox.selection.item).cc(ccBox.selection.item).iq(iqBox.selection.item)
+            // TODO Change the search query for different conditions OCSADV-416
+            val info = ObservationInfo(objectName.text.some, instrumentName.text.some, Option(guider.selection.item), guiders.toList, conditions.some).some
             (info, CatalogQuery(None, coordinates, radius, currentFilters, ucac4))
           }
         }
