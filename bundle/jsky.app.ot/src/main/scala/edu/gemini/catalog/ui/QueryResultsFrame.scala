@@ -2,10 +2,10 @@ package edu.gemini.catalog.ui
 
 import javax.swing.BorderFactory._
 import javax.swing.border.Border
-import javax.swing.SwingConstants
+import javax.swing.{DefaultComboBoxModel, SwingConstants}
 import javax.swing.table._
 
-import edu.gemini.ags.api.AgsRegistrar
+import edu.gemini.ags.api.{AgsStrategy, AgsRegistrar}
 import edu.gemini.ags.conf.ProbeLimitsTable
 import edu.gemini.catalog.api._
 import edu.gemini.catalog.votable.{QueryResult, VoTableClient}
@@ -22,6 +22,7 @@ import jsky.app.ot.tpe.TpeContext
 import scala.swing.Reactions.Reaction
 import scala.swing._
 import scala.collection.mutable
+import scala.collection.JavaConverters._
 import scala.swing.event.{ValueChanged, ButtonClicked, UIElementMoved, UIElementResized}
 
 import scalaz._
@@ -43,10 +44,14 @@ trait PreferredSizeFrame { this: Window =>
 /**
  * Describes the observation used to do a Guide Star Search
  */
-case class ObservationInfo(objectName: Option[String], instrumentName: Option[String])
+case class ObservationInfo(objectName: Option[String], instrumentName: Option[String], strategy: Option[AgsStrategy], validStrategies: List[AgsStrategy])
 
 object ObservationInfo {
-  def apply(ctx: ObsContext):ObservationInfo = ObservationInfo(Option(ctx.getTargets.getBase).map(_.getTarget.getName), Option(ctx.getInstrument).map(_.getTitle))
+  def apply(ctx: ObsContext):ObservationInfo = ObservationInfo(
+    Option(ctx.getTargets.getBase).map(_.getTarget.getName),
+    Option(ctx.getInstrument).map(_.getTitle),
+    AgsRegistrar.currentStrategy(ctx),
+    AgsRegistrar.validStrategies(ctx))
 }
 
 /**
@@ -284,7 +289,7 @@ object QueryResultsWindow {
        * Called after  a query completes to update the UI according to the results
        */
       def updateResults(info: Option[ObservationInfo], queryResult: QueryResult): Unit = {
-        val model = TargetsModel(queryResult.result.targets.rows)
+        val model = TargetsModel(queryResult.query.base, queryResult.result.targets.rows)
         resultsTable.model = model
 
         // The sorting logic may change if the list of magnitudes changes
@@ -331,6 +336,9 @@ object QueryResultsWindow {
 
         lazy val objectName = new TextField("")
         lazy val instrumentName = new Label("")
+        lazy val guider = new ComboBox(List.empty[AgsStrategy]) with TextRenderer[AgsStrategy] {
+          override def text(a: AgsStrategy) = ~Option(a).map(_.key.displayName)
+        }
 
         lazy val ra = new RATextField(RightAscension.zero) {
           reactions += queryButtonEnabling
@@ -383,6 +391,8 @@ object QueryResultsWindow {
           add(new Separator(Orientation.Horizontal), CC().spanX(7).growX().newline())
           add(new Label("Instrument"), CC().spanX(2).newline())
           add(instrumentName, CC().spanX(3))
+          add(new Label("Guider"), CC().spanX(2).newline())
+          add(guider, CC().spanX(3).growX())
           add(new Separator(Orientation.Horizontal), CC().spanX(7).growX().newline())
           add(new Label("Radial Range"), CC().spanX(2).newline())
           add(radiusStart, CC().minWidth(50.px).growX())
@@ -422,6 +432,11 @@ object QueryResultsWindow {
           info.foreach { i =>
             objectName.text = ~i.objectName
             instrumentName.text = ~i.instrumentName
+            // Update guiders box model
+            val guiderModel = new DefaultComboBoxModel[AgsStrategy](new java.util.Vector((~info.map(_.validStrategies)).asJava))
+            val selected = info >>= {_.strategy}
+            selected.foreach(guiderModel.setSelectedItem)
+            guider.peer.setModel(guiderModel)
           }
           // Update the RA
           ra.updateRa(query.base.ra)
@@ -436,7 +451,7 @@ object QueryResultsWindow {
 
         // Makes a combo box out of the supported bands
         private def bandsBoxes(bandsList: BandsList): List[ComboBox[MagnitudeBand]] = {
-          def bandComboBox(band: MagnitudeBand) =  new ComboBox(bands) with TextRenderer[MagnitudeBand] {
+          def bandComboBox(band: MagnitudeBand) = new ComboBox(bands) with TextRenderer[MagnitudeBand] {
             selection.item = band
             override def text(a: MagnitudeBand) = a.name
           }
@@ -462,7 +477,13 @@ object QueryResultsWindow {
             val coordinates = Coordinates(ra.value, dec.value)
             val radius = RadiusConstraint.between(Angle.fromArcmin(radiusStart.text.toDouble), Angle.fromArcmin(radiusEnd.text.toDouble))
 
-            (ObservationInfo(objectName.text.some, instrumentName.text.some).some, CatalogQuery(None, coordinates, radius, currentFilters, ucac4))
+            val guiders = for {
+              i <- 0 until guider.peer.getModel.getSize
+            } yield guider.peer.getModel.getElementAt(i)
+
+            // TODO Use the selected guider to do a different strategy OCSADV-406
+            val info = ObservationInfo(objectName.text.some, instrumentName.text.some, Option(guider.selection.item), guiders.toList).some
+            (info, CatalogQuery(None, coordinates, radius, currentFilters, ucac4))
           }
         }
 
