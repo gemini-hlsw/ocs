@@ -65,8 +65,9 @@ object Interpolate {
     LongAngleInterpolation.xmap(RightAscension.fromAngle, _.toAngle)
 
   implicit val LongDeclinationInterpolation: Interpolate[Long, Declination] =
-    LongAngleInterpolation.xmap(
-      Declination.fromAngle(_).getOrElse(sys.error("Declination out of range.")), _.toAngle) // sigh
+    LongDoubleInterpolation.xmap(
+      d => Declination.fromAngle(Angle.fromDegrees(d)).getOrElse(sys.error("Declination out of range.")),
+      _.toDegrees) // sigh
 
   implicit val InterpolateCoordinates: Interpolate[Long, Coordinates] =
     (LongRightAscensionInterpolation zip LongDeclinationInterpolation).xmap(
