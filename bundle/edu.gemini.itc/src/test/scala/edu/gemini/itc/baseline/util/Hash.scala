@@ -1,6 +1,7 @@
 package edu.gemini.itc.baseline.util
 
 import edu.gemini.itc.shared._
+import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.CloudCover
 import edu.gemini.spModel.target._
 
 // TEMPORARY helper
@@ -143,11 +144,11 @@ object Hash {
 
   def calc(ocp: ObservingConditions): Int =
     hash(
-      ocp.getAirmass,
-      ocp.getImageQuality,
-      ocp.getSkyTransparencyCloud,
-      ocp.getSkyTransparencyWater,
-      ocp.getSkyBackground
+      ocp.airmass,
+      ocp.iq.name,
+      ocp.cc.name,
+      ocp.wv.name,
+      ocp.sb.name
     )
 
   def calc(alt: Option[AltairParameters]): Int = alt match {

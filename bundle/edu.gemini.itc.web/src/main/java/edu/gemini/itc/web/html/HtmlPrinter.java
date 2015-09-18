@@ -63,18 +63,18 @@ public final class HtmlPrinter {
         final StringBuilder sb = new StringBuilder();
 
         sb.append("Observing Conditions:");
-        sb.append(String.format("<LI> Image Quality: %.2f%%", ocp.getImageQualityPercentile() * 100));
-        sb.append(String.format("<LI> Sky Transparency (cloud cover): %.2f%%", ocp.getSkyTransparencyCloudPercentile() * 100));
-        sb.append(String.format("<LI> Sky transparency (water vapour): %.2f%%", ocp.getSkyTransparencyWaterPercentile() * 100));
-        sb.append(String.format("<LI> Sky background: %.2f%%", ocp.getSkyBackgroundPercentile() * 100));
-        sb.append(String.format("<LI> Airmass: %.2f", ocp.getAirmass()));
+        sb.append(String.format("<LI> Image Quality: %d.00%%", ocp.iq().getPercentage()));
+        sb.append(String.format("<LI> Sky Transparency (cloud cover): %d.00%%", ocp.cc().getPercentage()));
+        sb.append(String.format("<LI> Sky transparency (water vapour): %d.00%%", ocp.wv().getPercentage()));
+        sb.append(String.format("<LI> Sky background: %d.00%%", ocp.sb().getPercentage()));
+        sb.append(String.format("<LI> Airmass: %.2f", ocp.airmass()));
         sb.append("<BR>");
 
         sb.append(String.format("Frequency of occurrence of these conditions: %.2f%%<BR>",
-                ocp.getImageQualityPercentile() *
-                ocp.getSkyTransparencyCloudPercentile() *
-                ocp.getSkyTransparencyWaterPercentile() *
-                ocp.getSkyBackgroundPercentile() * 100));
+                (ocp.iq().getPercentage()/100.0) *
+                (ocp.cc().getPercentage()/100.0) *
+                (ocp.wv().getPercentage()/100.0) *
+                (ocp.sb().getPercentage()/100.0) * 100));
 
         return sb.toString();
     }

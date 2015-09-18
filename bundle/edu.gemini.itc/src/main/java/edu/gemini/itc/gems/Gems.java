@@ -3,6 +3,7 @@ package edu.gemini.itc.gems;
 import edu.gemini.itc.base.AOSystem;
 import edu.gemini.itc.base.SampledSpectrumVisitor;
 import edu.gemini.itc.shared.SourceDefinition;
+import edu.gemini.spModel.gemini.obscomp.SPSiteQuality;
 
 /**
  * Gems AO class
@@ -28,7 +29,7 @@ public class Gems implements AOSystem {
      */
     public static final String GEMS_TRANSMISSION_FILENAME = "transmission";
 
-    private double wavelength, wavelengthMeters, telescopeDiameter, uncorrectedSeeing;
+    private double wavelength, telescopeDiameter, uncorrectedSeeing;
     private static final double geometricFactor = 1.0;
 
     private GemsBackgroundVisitor gemsBackground;
@@ -40,24 +41,23 @@ public class Gems implements AOSystem {
     // Strehl band value entered in the web page next to average strehl
     private String strehlBand;
 
-    // Selected IQ setting (in percent) from web page
-    private double imageQualityPercentile;
+    // Selected IQ setting
+    private SPSiteQuality.ImageQuality iq;
 
     // Point source or extended source
     private final SourceDefinition source;
 
     //Constructor
     public Gems(double wavelength, double telescopeDiameter, double uncorrectedSeeing, double avgStrehl,
-                String strehlBand, double imageQualityPercentile, SourceDefinition source) {
+                String strehlBand, SPSiteQuality.ImageQuality iq, SourceDefinition source) {
         gemsBackground = new GemsBackgroundVisitor();
         gemsTransmission = new GemsTransmissionVisitor();
         this.wavelength = wavelength;
-        this.wavelengthMeters = wavelength * 10E9;
         this.telescopeDiameter = telescopeDiameter;
         this.uncorrectedSeeing = uncorrectedSeeing;
         this.avgStrehl = avgStrehl;
         this.strehlBand = strehlBand;
-        this.imageQualityPercentile = imageQualityPercentile;
+        this.iq = iq;
         this.source = source;
     }
 
@@ -132,38 +132,26 @@ public class Gems implements AOSystem {
         switch (source.getProfileType()) {
             case POINT:
                 // point source
-                final int IQ20 = 20, IQ70 = 70, IQ85 = 85;
-                final int iq = (int) (imageQualityPercentile * 100);
                 switch (strehlBand.charAt(0)) {
                     case 'J':
                         switch (iq) {
-                            case IQ20:
-                                return 0.08;
-                            case IQ70:
-                                return 0.13;
-                            case IQ85:
-                                return 0.15;
+                            case PERCENT_20: return 0.08;
+                            case PERCENT_70: return 0.13;
+                            case PERCENT_85: return 0.15;
                         }
                         break;
                     case 'H':
                         switch (iq) {
-                            case IQ20:
-                                return 0.07;
-                            case IQ70:
-                                return 0.10;
-                            case IQ85:
-                                return 0.13;
+                            case PERCENT_20: return 0.07;
+                            case PERCENT_70: return 0.10;
+                            case PERCENT_85: return 0.13;
                         }
                         break;
                     case 'K':
                         switch (iq) {
-
-                            case IQ20:
-                                return 0.06;
-                            case IQ70:
-                                return 0.09;
-                            case IQ85:
-                                return 0.12;
+                            case PERCENT_20: return 0.06;
+                            case PERCENT_70: return 0.09;
+                            case PERCENT_85: return 0.12;
                         }
                         break;
 
@@ -186,29 +174,6 @@ public class Gems implements AOSystem {
         } else {
             return getAOCorrectedFWHM_oldVersion();
         }
-    }
-
-
-    //Used for debugging
-    public String toString() {
-
-        String s = "GeMS Debug Information:";
-
-        s += "\n";
-
-        s += "r0: " + getr0() + "\n";
-        s += "Average Strehl: " + getAvgStrehl() * 100 + "\n";
-        s += "FluxAttenuation: " + getFluxAttenuation() + "\n";
-        try {
-            s += "AO Corrected FWHM: " + getAOCorrectedFWHM() + "\n";
-        } catch (IllegalArgumentException ex) {
-            s += ex.getMessage() + "\n";
-        }
-        s += "Wavelength: " + wavelength + "\n";
-        s += "Uncorrected Seeing " + uncorrectedSeeing + "\n";
-        s += "Telescope Diameter " + telescopeDiameter + "\n";
-
-        return s;
     }
 
 }

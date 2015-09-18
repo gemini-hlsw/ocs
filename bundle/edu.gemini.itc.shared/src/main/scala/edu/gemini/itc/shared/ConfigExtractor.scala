@@ -162,8 +162,7 @@ object ConfigExtractor {
     // TODO: here we should use the avg Strehl values calculated by the Mascot / AGS algorithms for better results
     def extractGems(filter: Filter): String \/ GemsParameters =
       filter.getCatalogBand.asScalaOpt.fold(error) { band =>
-        val iq = cond.iq
-        (band, iq) match {
+        (band, cond.iq) match {
           case (SingleBand(MagnitudeBand.J), ImageQuality.PERCENT_20) => GemsParameters(0.10, "J").right
           case (SingleBand(MagnitudeBand.J), ImageQuality.PERCENT_70) => GemsParameters(0.05, "J").right
           case (SingleBand(MagnitudeBand.J), ImageQuality.PERCENT_85) => GemsParameters(0.02, "J").right

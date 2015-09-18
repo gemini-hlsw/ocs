@@ -208,13 +208,13 @@ public final class SEDFactory {
         // inputs: SED, AIRMASS, sky emmision file, mirror configuration,
         // output: SED and sky background as they arrive at instruments
 
-        final SampledSpectrumVisitor clouds = CloudTransmissionVisitor.create(odp.getSkyTransparencyCloud());
+        final SampledSpectrumVisitor clouds = CloudTransmissionVisitor.create(odp.cc());
         sed.accept(clouds);
 
         final SampledSpectrumVisitor water = WaterTransmissionVisitor.create(
                 instrument,
-                odp.getSkyTransparencyWater(),
-                odp.getAirmass(),
+                odp.wv(),
+                odp.airmass(),
                 getWater(instrument));
         sed.accept(water);
 
@@ -303,24 +303,24 @@ public final class SEDFactory {
                 return ITCConstants.SKY_BACKGROUND_LIB + "/"
                         + ITCConstants.OPTICAL_SKY_BACKGROUND_FILENAME_BASE
                         + "_"
-                        + ocp.getSkyBackgroundCategory()
-                        + "_" + ocp.getAirmassCategory()
+                        + ocp.sb().sequenceValue()
+                        + "_" + airmassCategory(ocp.airmass())
                         + ITCConstants.DATA_SUFFIX;
             case NEAR_IR:
                 return "/"
                         + ITCConstants.HI_RES + (instrument.getSite().equals(Site.GN) ? "/mk" : "/cp")
                         + instrument.getBands().getDirectory() + ITCConstants.SKY_BACKGROUND_LIB + "/"
                         + ITCConstants.NEAR_IR_SKY_BACKGROUND_FILENAME_BASE + "_"
-                        + ocp.getSkyTransparencyWaterCategory() + "_"
-                        + ocp.getAirmassCategory()
+                        + ocp.wv().sequenceValue() + "_"
+                        + airmassCategory(ocp.airmass())
                         + ITCConstants.DATA_SUFFIX;
             case MID_IR:
                 return "/"
                         + ITCConstants.HI_RES + (instrument.getSite().equals(Site.GN) ? "/mk" : "/cp")
                         + instrument.getBands().getDirectory() + ITCConstants.SKY_BACKGROUND_LIB + "/"
                         + ITCConstants.MID_IR_SKY_BACKGROUND_FILENAME_BASE + "_"
-                        + ocp.getSkyTransparencyWaterCategory() + "_"
-                        + ocp.getAirmassCategory()
+                        + ocp.wv().sequenceValue() + "_"
+                        + airmassCategory(ocp.airmass())
                         + ITCConstants.DATA_SUFFIX;
             default:
                 throw new Error("invalid band");
@@ -338,5 +338,13 @@ public final class SEDFactory {
         }
     }
 
+    private static String airmassCategory(final double airmass) {
+        if (airmass <= 1.25)
+            return "10";
+        else if (airmass > 1.25 && airmass <= 1.75)
+            return "15";
+        else
+            return "20";
+    }
 
 }

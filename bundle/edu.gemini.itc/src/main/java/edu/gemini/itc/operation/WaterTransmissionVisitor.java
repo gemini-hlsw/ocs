@@ -5,6 +5,7 @@ import edu.gemini.itc.base.Instrument;
 import edu.gemini.itc.base.SampledSpectrumVisitor;
 import edu.gemini.itc.base.TransmissionElement;
 import edu.gemini.spModel.core.Site;
+import edu.gemini.spModel.gemini.obscomp.SPSiteQuality;
 
 /**
  * The WaterTransmissionVisitor is designed to adjust the SED for
@@ -15,14 +16,14 @@ public final class WaterTransmissionVisitor {
     private WaterTransmissionVisitor() {
     }
 
-    public static SampledSpectrumVisitor create(final Instrument instrument, final int skyTransparencyWater, final double airMass, final String file_name) {
+    public static SampledSpectrumVisitor create(final Instrument instrument, final SPSiteQuality.WaterVapor wv, final double airMass, final String file_name) {
 
         final String name;
 
         switch (instrument.getBands()) {
             case VISIBLE:
-                switch (skyTransparencyWater) {
-                    case 1:
+                switch (wv) {
+                    case PERCENT_20:
                         if (airMass <= 1.25) {
                             name = ITCConstants.TRANSMISSION_LIB + "/" +
                                     file_name + "20_" + "10" +
@@ -37,7 +38,7 @@ public final class WaterTransmissionVisitor {
                                     ITCConstants.DATA_SUFFIX;
                         }
                         break;
-                    case 2:
+                    case PERCENT_50:
                         if (airMass <= 1.25) {
                             name = ITCConstants.TRANSMISSION_LIB + "/" +
                                     file_name + "50_" + "10" +
@@ -52,7 +53,7 @@ public final class WaterTransmissionVisitor {
                                     ITCConstants.DATA_SUFFIX;
                         }
                         break;
-                    case 3:
+                    case PERCENT_80:
                         if (airMass <= 1.25) {
                             name = ITCConstants.TRANSMISSION_LIB + "/" +
                                     file_name + "80_" + "10" +
@@ -67,7 +68,7 @@ public final class WaterTransmissionVisitor {
                                     ITCConstants.DATA_SUFFIX;
                         }
                         break;
-                    case 4:
+                    case ANY:
                         if (airMass <= 1.25) {
                             name = ITCConstants.TRANSMISSION_LIB + "/" +
                                     file_name + "100_" + "10" +
@@ -100,19 +101,11 @@ public final class WaterTransmissionVisitor {
                 else
                     _airmassCategory = "20";
 
-                switch (skyTransparencyWater) {
-                    case 1:
-                        _transmissionCategory = "20_";
-                        break;
-                    case 2:
-                        _transmissionCategory = "50_";
-                        break;
-                    case 3:
-                        _transmissionCategory = "80_";
-                        break;
-                    case 4:
-                        _transmissionCategory = "100_";
-                        break;
+                switch (wv) {
+                    case PERCENT_20: _transmissionCategory = "20_"; break;
+                    case PERCENT_50: _transmissionCategory = "50_"; break;
+                    case PERCENT_80: _transmissionCategory = "80_"; break;
+                    case ANY: _transmissionCategory = "100_"; break;
                     default:
                         throw new IllegalArgumentException("unknown WV value");
                 }
