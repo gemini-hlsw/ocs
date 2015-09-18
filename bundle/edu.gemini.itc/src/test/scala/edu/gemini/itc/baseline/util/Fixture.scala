@@ -6,11 +6,11 @@ import edu.gemini.spModel.core.MagnitudeBand
 import edu.gemini.spModel.core.WavelengthConversions._
 import edu.gemini.spModel.gemini.altair.AltairParams.{FieldLens, GuideStarType}
 import edu.gemini.spModel.guide.GuideProbe
-import edu.gemini.spModel.target.EmissionLine.Continuum
 import edu.gemini.spModel.target._
 import edu.gemini.spModel.telescope.IssPort
-import squants.radio.IrradianceConversions._
 import squants.motion.VelocityConversions._
+import squants.radio.IrradianceConversions._
+import squants.radio.SpectralIrradianceConversions._
 
 /**
  * Definition of test fixtures which hold all input parameters needed to execute different ITC recipes.
@@ -128,7 +128,7 @@ object Fixture {
     ),
     new SourceDefinition(
       UniformSource(),
-      EmissionLine(2.2.microns, 250.0.kps, 5.0e-19.wattsPerSquareMeter, Continuum.fromWatts(1.0e-16)),
+      EmissionLine(2.2.microns, 250.0.kps, 5.0e-19.wattsPerSquareMeter, 1.0e-16.wattsPerSquareMeterPerMicron),
       22.0, BrightnessUnit.MAG_PSA, MagnitudeBand.K,
       0.75
     )
@@ -144,7 +144,7 @@ object Fixture {
     ),
     new SourceDefinition(
       UniformSource(),
-      EmissionLine(12.8.microns, 500.kps, 5.0e-19.wattsPerSquareMeter, Continuum.fromWatts(1.0e-16)),
+      EmissionLine(12.8.microns, 500.kps, 5.0e-19.wattsPerSquareMeter, 1.0e-16.wattsPerSquareMeterPerMicron),
       12.0, BrightnessUnit.MAG_PSA, MagnitudeBand.N,
       1.5
     )

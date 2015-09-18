@@ -3,11 +3,11 @@ package edu.gemini.spModel.target
 import java.util.logging.{Level, Logger}
 
 import edu.gemini.spModel.pio.{ParamSet, Pio, PioFactory}
-import edu.gemini.spModel.target.EmissionLine.Continuum
 
 import edu.gemini.spModel.core.WavelengthConversions._
 import squants.radio.IrradianceConversions._
 import squants.motion.VelocityConversions._
+import squants.radio.SpectralIrradianceConversions._
 
 import scalaz.Scalaz._
 
@@ -58,7 +58,7 @@ object SourcePio {
           (Pio.addDoubleParam(factory, _, ElineWavelength, sd.wavelength.toNanometers))    <|
           (Pio.addDoubleParam(factory, _, ElineWidth,      sd.width.toKilometersPerSecond))<|
           (Pio.addDoubleParam(factory, _, ElineFlux,       sd.flux.toWattsPerSquareMeter)) <|
-          (Pio.addDoubleParam(factory, _, ElineContinuum,  sd.continuum.toWatts))
+          (Pio.addDoubleParam(factory, _, ElineContinuum,  sd.continuum.toWattsPerSquareMeterPerMicron))
 
       case sd: UserDefined      =>
         // User defined distributions are for now only supported on the web app end.
@@ -91,7 +91,7 @@ object SourcePio {
           Pio.getDoubleValue(p, ElineWavelength, 0).nm,
           Pio.getDoubleValue(p, ElineWidth, 0).kps,
           Pio.getDoubleValue(p, ElineFlux, 0).wattsPerSquareMeter,
-          Continuum.fromWatts(Pio.getDoubleValue(p, ElineContinuum, 0))
+          Pio.getDoubleValue(p, ElineContinuum, 0).wattsPerSquareMeterPerMicron
         )
       }
       val star = Option(pset.getParamSet(LibraryStarName)).flatMap { p =>

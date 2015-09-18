@@ -32,7 +32,7 @@ public final class HtmlPrinter {
                 sb.append(String.format("n emission line, at a wavelength of %.4f microns, ", sdp.getELineWavelength().toMicrons()));
                 sb.append(String.format(
                         "and with a width of %.2f km/s.\n  It's total flux is %.3e watts_flux on a flat continuum of flux density %.3e watts_fd_wavelength.",
-                        sdp.getELineWidth().toKilometersPerSecond(), sdp.getELineFlux().toWattsPerSquareMeter(), sdp.getELineContinuumFlux().toWatts()));
+                        sdp.getELineWidth().toKilometersPerSecond(), sdp.getELineFlux().toWattsPerSquareMeter(), sdp.getELineContinuumFlux().toWattsPerSquareMeterPerMicron()));
                 break;
             case BBODY:
                 sb.append(" " + sdp.getBBTemp() + "K Blackbody, at " + sdp.getSourceNormalization() +

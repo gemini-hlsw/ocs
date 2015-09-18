@@ -5,6 +5,7 @@ import edu.gemini.spModel.core.Wavelength;
 import edu.gemini.spModel.target.*;
 import squants.motion.Velocity;
 import squants.radio.Irradiance;
+import squants.radio.SpectralIrradiance;
 
 import java.io.Serializable;
 
@@ -133,7 +134,7 @@ public final class SourceDefinition implements Serializable {
         return ((EmissionLine) distribution).flux();
     }
 
-    public EmissionLine.Continuum getELineContinuumFlux() {
+    public SpectralIrradiance getELineContinuumFlux() {
         return ((EmissionLine) distribution).continuum();
     }
 
