@@ -56,6 +56,13 @@ object Target {
       PLens.nil.run
     ))
 
+  val ephemeris: Target @?> (Long ==>> Coordinates) =
+    PLens(_.fold(
+      PLens.nil.run,
+      PLens.nil.run,
+      NonSiderealTarget.ephemeris.partial.run
+    ))
+
   val raDec: Target @?> (RightAscension, Declination) =
     coords.xmapB(cs => (cs.ra, cs.dec))(Coordinates.tupled)
 
@@ -167,7 +174,8 @@ object Target {
   }
 
   object NonSiderealTarget {
-    val name: NonSiderealTarget @> String = Lens(t => Store(s => t.copy(name = s), t.name))
+    val ephemeris: NonSiderealTarget @> (Long ==>> Coordinates) = Lens(t => Store(s => t.copy(ephemeris = s), t.ephemeris))
+    val name:      NonSiderealTarget @> String = Lens(t => Store(s => t.copy(name = s), t.name))
   }
   
 }
