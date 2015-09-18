@@ -60,6 +60,13 @@ object Target {
       NonSiderealTarget.ephemeris.partial.run
     ))
 
+  val horizonsDesignation: Target @?> HorizonsDesignation =
+    PLens(_.fold(
+      PLens.nil.run,
+      PLens.nil.run,
+      NonSiderealTarget.horizonsDesignation.run
+    ))
+
   val raDec: Target @?> (RightAscension, Declination) =
     coords.xmapB(cs => (cs.ra, cs.dec))(Coordinates.tupled)
 
@@ -136,7 +143,7 @@ object Target {
   case class NonSiderealTarget(
     name: String,
     ephemeris: Ephemeris,
-    horizonsInfo: Option[HorizonsDesignation]) extends Target {
+    horizonsDesignation: Option[HorizonsDesignation]) extends Target {
 
     def fold[A](too: Target.TooTarget => A,
                 sid: Target.SiderealTarget => A,
@@ -149,8 +156,9 @@ object Target {
   }
 
   object NonSiderealTarget {
-    val ephemeris: NonSiderealTarget @> Ephemeris = Lens(t => Store(s => t.copy(ephemeris = s), t.ephemeris))
-    val name:      NonSiderealTarget @> String    = Lens(t => Store(s => t.copy(name = s), t.name))
+    val ephemeris:           NonSiderealTarget @> Ephemeris            = Lens(t => Store(s => t.copy(ephemeris = s), t.ephemeris))
+    val name:                NonSiderealTarget @> String               = Lens(t => Store(s => t.copy(name = s), t.name))
+    val horizonsDesignation: NonSiderealTarget @?> HorizonsDesignation = PLens(t => t.horizonsDesignation.map(p => Store(q => t.copy(horizonsDesignation = p.some), p)))
   }
   
 }
