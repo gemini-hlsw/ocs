@@ -90,12 +90,11 @@ trait Arbitraries {
   implicit val arbTooTarget: Arbitrary[Target.TooTarget] =
     Arbitrary(arbitrary[String].map(Target.TooTarget))
 
-  implicit val arbHorizonsInfo: Arbitrary[Target.HorizonsInfo] =
+  implicit val arbHorizonsDesignation: Arbitrary[HorizonsDesignation] =
     Arbitrary {
       for {
-        objectTypeOrdinal <- arbitrary[Int]
-        objectId          <- arbitrary[Long]
-      } yield Target.HorizonsInfo(objectTypeOrdinal, objectId)
+        objectName <- arbitrary[Int]
+      } yield HorizonsDesignation.Asteroid(objectName.toString)
     }
 
   implicit val arbSiderealTarget: Arbitrary[Target.SiderealTarget] =
@@ -105,8 +104,7 @@ trait Arbitraries {
           coordinates  <- arbitrary[Coordinates]
           properMotion <- arbitrary[Option[ProperMotion]]
           magnitudes   <- arbitrary[List[Magnitude]]
-          horizonsInfo <- arbitrary[Option[Target.HorizonsInfo]]
-      } yield Target.SiderealTarget(name, coordinates, properMotion, magnitudes, horizonsInfo)
+      } yield Target.SiderealTarget(name, coordinates, properMotion, magnitudes)
     }
 
   implicit val arbNonSiderealTarget: Arbitrary[Target.NonSiderealTarget] =
@@ -114,8 +112,8 @@ trait Arbitraries {
       for {
          name         <- arbitrary[String]
          ephemeris    <- arbitrary[List[(Long, Coordinates)]]
-         horizonsInfo <- arbitrary[Option[Target.HorizonsInfo]]
-      } yield Target.NonSiderealTarget(name, ==>>.fromList(ephemeris), horizonsInfo)
+         horizonsDesignation <- arbitrary[Option[HorizonsDesignation]]
+      } yield Target.NonSiderealTarget(name, ==>>.fromList(ephemeris), horizonsDesignation)
     }
 
   implicit val arbTarget: Arbitrary[Target] =
