@@ -11,6 +11,8 @@ package object core {
   type Dec = Declination
   val  Dec = Declination
 
+  type Ephemeris = Long ==>> Coordinates
+
   /** Operations for maps of types that we can interpolate.  We use these for Ephemerides. */ 
   implicit class MoreMapOps[K, V](m: K ==>> V)(implicit O: Order[K], I: Interpolate[K,V]) {
 

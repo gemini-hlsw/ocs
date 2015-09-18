@@ -56,7 +56,7 @@ object Target {
       PLens.nil.run
     ))
 
-  val ephemeris: Target @?> (Long ==>> Coordinates) =
+  val ephemeris: Target @?> Ephemeris =
     PLens(_.fold(
       PLens.nil.run,
       PLens.nil.run,
@@ -160,7 +160,7 @@ object Target {
   /** Nonsidereal target with an ephemeris. */
   case class NonSiderealTarget(
     name: String,
-    ephemeris: Long ==>> Coordinates,
+    ephemeris: Ephemeris,
     horizonsInfo: Option[Target.HorizonsInfo]) extends Target {
 
     def fold[A](too: Target.TooTarget => A,
@@ -174,8 +174,8 @@ object Target {
   }
 
   object NonSiderealTarget {
-    val ephemeris: NonSiderealTarget @> (Long ==>> Coordinates) = Lens(t => Store(s => t.copy(ephemeris = s), t.ephemeris))
-    val name:      NonSiderealTarget @> String = Lens(t => Store(s => t.copy(name = s), t.name))
+    val ephemeris: NonSiderealTarget @> Ephemeris = Lens(t => Store(s => t.copy(ephemeris = s), t.ephemeris))
+    val name:      NonSiderealTarget @> String    = Lens(t => Store(s => t.copy(name = s), t.name))
   }
   
 }
