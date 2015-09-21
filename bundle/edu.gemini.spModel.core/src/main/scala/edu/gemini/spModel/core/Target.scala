@@ -17,8 +17,7 @@ sealed trait Target {
   /** Alternative to pattern-matching. */
   def fold[A](too: Target.TooTarget         => A,
               sid: Target.SiderealTarget    => A,
-              non: Target.NonSiderealTarget => A,
-              nam: Target.NamedTarget       => A): A
+              non: Target.NonSiderealTarget => A): A
 
 }
 
@@ -33,15 +32,13 @@ object Target {
     PLens(_.fold(
       TooTarget.name.partial.run,
       SiderealTarget.name.partial.run,
-      NonSiderealTarget.name.partial.run,
-      PLens.nil.run
+      NonSiderealTarget.name.partial.run
     ))
 
   val coords: Target @?> Coordinates =
     PLens(_.fold(
       PLens.nil.run,
       SiderealTarget.coordinates.partial.run,
-      PLens.nil.run,
       PLens.nil.run
     ))
 
@@ -49,7 +46,6 @@ object Target {
     PLens(_.fold(
       PLens.nil.run,
       SiderealTarget.pm.run,
-      PLens.nil.run,
       PLens.nil.run
     ))
 
@@ -57,7 +53,6 @@ object Target {
     PLens(_.fold(
       PLens.nil.run,
       SiderealTarget.magnitudes.partial.run,
-      PLens.nil.run,
       PLens.nil.run
     ))
 
@@ -105,8 +100,7 @@ object Target {
     
     def fold[A](too: Target.TooTarget => A,
                 sid: Target.SiderealTarget => A,
-                non: Target.NonSiderealTarget => A,
-                nam: Target.NamedTarget => A): A = 
+                non: Target.NonSiderealTarget => A): A = 
       too(this)
   
   }
@@ -132,8 +126,7 @@ object Target {
   
     def fold[A](too: Target.TooTarget => A,
                 sid: Target.SiderealTarget => A,
-                non: Target.NonSiderealTarget => A,
-                nam: Target.NamedTarget => A): A = 
+                non: Target.NonSiderealTarget => A): A = 
       sid(this)
 
     def magnitudeIn(band: MagnitudeBand): Option[Magnitude] = magnitudes.find(_.band === band)
@@ -165,8 +158,7 @@ object Target {
 
     def fold[A](too: Target.TooTarget => A,
                 sid: Target.SiderealTarget => A,
-                non: Target.NonSiderealTarget => A,
-                nam: Target.NamedTarget => A): A = 
+                non: Target.NonSiderealTarget => A): A = 
       non(this)
 
     def coords(date: Long): Option[Coordinates] = 
@@ -200,46 +192,6 @@ object Target {
 
   object NonSiderealTarget {
     val name: NonSiderealTarget @> String = Lens(t => Store(s => t.copy(name = s), t.name))
-  }
-
-  ///
-  /// NAMED TARGET (SOLAR OBJECT, KNOWN TO TCS)
-  ///
-
-  /** Enumerated type of named targets recognized by the TCC. */
-  sealed abstract class NamedTarget(val name: String, val horizonsId: String) extends Target with Product with Serializable {
-
-    def coords(time: Long) =
-      None
-
-    val horizonsInfo =
-      None // TODO
-
-    def fold[A](too: Target.TooTarget => A,
-                sid: Target.SiderealTarget => A,
-                non: Target.NonSiderealTarget => A,
-                nam: Target.NamedTarget => A): A = nam(this)
-
-  }
-
-  object NamedTarget {
-
-    case object Moon    extends NamedTarget("Moon",    "301")
-    case object Mercury extends NamedTarget("Mercury", "199")
-    case object Venus   extends NamedTarget("Venus",   "299")
-    case object Mars    extends NamedTarget("Mars",    "499")
-    case object Jupiter extends NamedTarget("Jupiter", "599")
-    case object Saturn  extends NamedTarget("Saturn",  "699")
-    case object Uranus  extends NamedTarget("Uranus",  "799")
-    case object Neptune extends NamedTarget("Neptune", "899")
-    case object Pluto   extends NamedTarget("Pluto",   "999")
-
-    val values: List[NamedTarget] =
-      List(Moon, Mercury, Venus, Mars, Jupiter, Saturn, Uranus, Neptune, Pluto)
-
-    def fromString(name: String): Option[NamedTarget] =
-      values.find(_.name == name)
-
   }
   
 }

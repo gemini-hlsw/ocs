@@ -117,18 +117,11 @@ trait Arbitraries {
       } yield Target.NonSiderealTarget(name, ephemeris, horizonsInfo)
     }
 
-  implicit val arbNamedTarget: Arbitrary[Target.NamedTarget] =
-    Arbitrary {
-      import Target.NamedTarget._
-      oneOf(Moon, Mercury, Venus, Mars, Jupiter, Saturn, Uranus, Neptune, Pluto)
-    }
-
   implicit val arbTarget: Arbitrary[Target] =
     Arbitrary(oneOf(
       arbitrary[Target.TooTarget],
       arbitrary[Target.SiderealTarget],
-      arbitrary[Target.NonSiderealTarget],
-      arbitrary[Target.NamedTarget]))
+      arbitrary[Target.NonSiderealTarget]))
 
   implicit val arbWavelength: Arbitrary[Wavelength] =
     Arbitrary(arbitrary[Short].map(n => Math.abs(n).nm))
