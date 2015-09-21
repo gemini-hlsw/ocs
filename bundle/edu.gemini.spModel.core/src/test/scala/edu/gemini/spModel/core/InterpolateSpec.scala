@@ -78,27 +78,23 @@ object InterpolateSpec extends Specification with ScalaCheck with Arbitraries wi
 
   "Coordinate interpolation" should {
 
-    "be invariant at min" ! forAll { (a: Coordinates) => 
-      val b = a.offset(Angle.fromDegrees(20), Angle.fromDegrees(-20))
+    "be invariant at min" ! forAll { (a: Coordinates, b: Coordinates) => 
       val c = Interpolate[Long, Coordinates].interpolate((10L, a), (20L, b), 10L)
       c ~= a
     }
 
-    "be invariant at max" ! forAll { (a: Coordinates) => 
-      val b = a.offset(Angle.fromDegrees(20), Angle.fromDegrees(20))
+    "be invariant at max" ! forAll { (a: Coordinates, b: Coordinates) => 
       val c = Interpolate[Long, Coordinates].interpolate((10L, a), (20L, b), 20L)
       c ~= b
     }
 
-    "work backwards" ! forAll { (a: Coordinates) => 
-      val b = a.offset(Angle.fromDegrees(20), Angle.fromDegrees(20))
+    "work backwards" ! forAll { (a: Coordinates, b: Coordinates) => 
       val c = Interpolate[Long, Coordinates].interpolate((10L, b), (20L, a), 12L)
       val d = Interpolate[Long, Coordinates].interpolate((10L, a), (20L, b), 18L)
       c ~= d
     }
 
-    "interpolate Declination correctly" ! forAll { (a: Coordinates, xa: Angle, xy: Angle) => 
-      val b = a.offset(xa, xy)
+    "interpolate Declination correctly" ! forAll { (a: Coordinates, b: Coordinates) => 
       val decs = (10L to 20L).map { n => 
         Interpolate[Long, Coordinates].interpolate((10L, b), (20L, a), n).dec.toDegrees
       }
@@ -106,8 +102,7 @@ object InterpolateSpec extends Specification with ScalaCheck with Arbitraries wi
       (deltas, deltas.tail).zipped.map(_ ~= _).forall(identity)
     }
 
-    "interpolate RA correctly" ! forAll { (a: Coordinates, xa: Angle, xy: Angle) => 
-      val b = a.offset(xa, xy)
+    "interpolate RA correctly" ! forAll { (a: Coordinates, b: Coordinates) => 
       val ras = (10L to 20L).map { n => 
         Interpolate[Long, Coordinates].interpolate((10L, b), (20L, a), n).ra.toAngle.toDegrees
       }
