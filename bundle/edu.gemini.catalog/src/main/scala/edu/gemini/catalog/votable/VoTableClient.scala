@@ -4,7 +4,7 @@ import java.net.UnknownHostException
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.logging.Logger
 
-import edu.gemini.catalog.api.CatalogQuery
+import edu.gemini.catalog.api.{ConeSearchCatalogQuery, CatalogQuery}
 import edu.gemini.spModel.core.Angle
 import edu.gemini.spModel.core.Target.SiderealTarget
 import org.apache.commons.httpclient.{NameValuePair, HttpClient}
@@ -101,8 +101,9 @@ trait CachedBackend extends VoTableBackend {
       @tailrec
       def go(pos: Int):Option[(Int, QueryResult)] =
         a.lift(pos) match {
-          case None    => None
-          case Some(x) => if (x.k.query.isSuperSetOf(k.query)) Some((pos, x.v)) else go(pos + 1)
+          case None                                                            => None
+          case Some(CacheEntry(SearchKey(query:ConeSearchCatalogQuery, r), v)) => if (query.isSuperSetOf(k.query)) Some((pos, v)) else go(pos + 1)
+          case Some(_)                                                         => None // Not caching named queries so far
         }
       go(0)
     }
@@ -148,11 +149,14 @@ case object RemoteBackend extends CachedBackend {
 
   private def format(a: Angle)= f"${a.toDegrees}%4.03f"
 
-  def queryParams(qs: CatalogQuery): Array[NameValuePair] = Array(
-    new NameValuePair("CATALOG", qs.catalog.id),
-    new NameValuePair("RA", format(qs.base.ra.toAngle)),
-    new NameValuePair("DEC", f"${qs.base.dec.toDegrees}%4.03f"),
-    new NameValuePair("SR", format(qs.radiusConstraint.maxLimit)))
+  protected [votable] def queryParams(q: CatalogQuery): Array[NameValuePair] = q match {
+    case qs: ConeSearchCatalogQuery => Array(
+      new NameValuePair("CATALOG", qs.catalog.id),
+      new NameValuePair("RA", format(qs.base.ra.toAngle)),
+      new NameValuePair("DEC", f"${qs.base.dec.toDegrees}%4.03f"),
+      new NameValuePair("SR", format(qs.radiusConstraint.maxLimit)))
+    case _ => Array.empty
+  }
 
   override protected def query(e: SearchKey): QueryResult = {
     val method = new GetMethod(s"${e.url}/cgi-bin/conesearch.py")

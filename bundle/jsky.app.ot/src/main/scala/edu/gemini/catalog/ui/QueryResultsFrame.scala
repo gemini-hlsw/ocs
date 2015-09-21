@@ -291,19 +291,21 @@ object QueryResultsWindow {
       /**
        * Called after  a query completes to update the UI according to the results
        */
-      def updateResults(info: Option[ObservationInfo], queryResult: QueryResult): Unit = {
-        val model = TargetsModel(queryResult.query.base, queryResult.result.targets.rows)
-        resultsTable.model = model
+      def updateResults(queryResult: QueryResult): Unit = {
+        queryResult.query match {
+          case q: ConeSearchCatalogQuery =>
+            val model = TargetsModel(q.base, queryResult.result.targets.rows)
+            resultsTable.model = model
 
-        // The sorting logic may change if the list of magnitudes changes
-        new TableRowSorter[TargetsModel](model) <| {_.toggleSortOrder(0)} <| {_.sort()} <| {resultsTable.peer.setRowSorter}
+            // The sorting logic may change if the list of magnitudes changes
+            new TableRowSorter[TargetsModel](model) <| {_.toggleSortOrder(0)} <| {_.sort()} <| {resultsTable.peer.setRowSorter}
 
-        // Adjust the width of the columns
-        val insets = queryFrame.scrollPane.border.getBorderInsets(queryFrame.scrollPane.peer)
-        resultsTable.adjustColumns(queryFrame.scrollPane.bounds.width - insets.left - insets.right)
+            // Adjust the width of the columns
+            val insets = queryFrame.scrollPane.border.getBorderInsets(queryFrame.scrollPane.peer)
+            resultsTable.adjustColumns(queryFrame.scrollPane.bounds.width - insets.left - insets.right)
 
-        // Update the count of rows
-        resultsLabel.updateCount(queryResult.result.targets.rows.length)
+            // Update the count of rows
+            resultsLabel.updateCount(queryResult.result.targets.rows.length)
 
         // Update the query form
         QueryForm.updateQuery(info, queryResult.query)
@@ -619,7 +621,7 @@ object CatalogQueryDemo extends SwingApplication {
   import edu.gemini.spModel.target.SPTarget
   import edu.gemini.spModel.target.env.TargetEnvironment
 
-  val query = CatalogQuery(None,Coordinates(RightAscension.fromAngle(Angle.fromDegrees(3.1261166666666895)),Declination.fromAngle(Angle.fromDegrees(337.93268333333333)).getOrElse(Declination.zero)),RadiusConstraint.between(Angle.zero,Angle.fromDegrees(0.16459874517619255)),List(MagnitudeConstraints(RBandsList,FaintnessConstraint(16.0),Some(SaturationConstraint(3.1999999999999993)))),ucac4)
+  val query = CatalogQuery(Coordinates(RightAscension.fromAngle(Angle.fromDegrees(3.1261166666666895)),Declination.fromAngle(Angle.fromDegrees(337.93268333333333)).getOrElse(Declination.zero)),RadiusConstraint.between(Angle.zero,Angle.fromDegrees(0.16459874517619255)),List(MagnitudeConstraints(RBandsList,FaintnessConstraint(16.0),Some(SaturationConstraint(3.1999999999999993)))),ucac4)
 
   def startup(args: Array[String]) {
     System.setProperty("apple.awt.antialiasing", "on")

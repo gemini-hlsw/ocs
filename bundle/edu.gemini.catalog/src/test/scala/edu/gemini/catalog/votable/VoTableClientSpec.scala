@@ -112,9 +112,7 @@ class VoTableClientSpec extends SpecificationWithJUnit with VoTableClient with N
 
       val result = Await.result(VoTableClient.catalog(query, countingBackend), 10.seconds)
       // Extract the query params from the results
-      result.query.base should beEqualTo(coordinates)
-      result.query.radiusConstraint should beEqualTo(RadiusConstraint.between(Angle.fromDegrees(0), Angle.fromDegrees(0.1)))
-      result.query.magnitudeConstraints.head should beEqualTo(mc)
+      result.query should beEqualTo(query)
     }
 
   }
