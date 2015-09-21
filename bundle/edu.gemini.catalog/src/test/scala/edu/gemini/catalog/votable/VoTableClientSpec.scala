@@ -1,5 +1,6 @@
 package edu.gemini.catalog.votable
 
+import java.net.{UnknownHostException, URL}
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicInteger
 
@@ -13,6 +14,8 @@ import scala.concurrent._
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
 
+import scalaz.NonEmptyList
+
 class VoTableClientSpec extends SpecificationWithJUnit with VoTableClient with NoTimeConversions {
   val noMagnitudeConstraint = MagnitudeConstraints(SingleBand(MagnitudeBand.J), FaintnessConstraint(100), None)
   "The VoTable client" should {
@@ -23,6 +26,7 @@ class VoTableClientSpec extends SpecificationWithJUnit with VoTableClient with N
 
     val query = CatalogQuery(coordinates, RadiusConstraint.between(Angle.fromDegrees(0), Angle.fromDegrees(0.1)), noMagnitudeConstraint, ucac4)
     case class CountingCachedBackend(counter: AtomicInteger, file: String) extends CachedBackend {
+      override val catalogUrls = NonEmptyList(new URL(s"file://$file"))
       override protected def query(e: SearchKey) = {
         counter.incrementAndGet()
         VoTableParser.parse(e.url, this.getClass.getResourceAsStream(file)).fold(p => QueryResult(e.query, CatalogQueryResult(TargetsTable.Zero, List(p))), y => QueryResult(e.query, CatalogQueryResult(y)))
@@ -33,17 +37,18 @@ class VoTableClientSpec extends SpecificationWithJUnit with VoTableClient with N
       RemoteBackend.queryParams(query) should beEqualTo(Array(new NameValuePair("CATALOG", "ucac4"), new NameValuePair("RA", "10.000"), new NameValuePair("DEC", "20.000"), new NameValuePair("SR", "0.100")))
     }
     "make a query to a bad site" in {
-      Await.result(doQuery(query, "unknown site", RemoteBackend), 1.seconds) should throwA[IllegalArgumentException]
+      Await.result(doQuery(query, new URL("http://unknown site"), RemoteBackend), 1.seconds) should throwA[UnknownHostException]
     }
     "be able to select the first successful of several futures" in {
       def f1 = Future { Thread.sleep(1000); throw new RuntimeException("oops") }
       def f2 = Future { Thread.sleep(2000); 42 } // this one should complete first
       def f3 = Future { Thread.sleep(3000); 99 }
 
-      Await.result(selectOne(List(f1, f2, f3)), 3.seconds) should beEqualTo(42)
+      Await.result(selectOne(NonEmptyList(f1, f2, f3)), 3.seconds) should beEqualTo(42)
     }
     "make a query" in {
       // This test loads a file. There is not much to test but it exercises the query backend chain
+      println(Await.result(VoTableClient.catalog(query, TestVoTableBackend("/votable-ucac4.xml")), 5.seconds).result.problems)
       Await.result(VoTableClient.catalog(query, TestVoTableBackend("/votable-ucac4.xml")), 5.seconds).result.containsError should beFalse
     }
     "use the cache to skip queries" in {
@@ -58,7 +63,7 @@ class VoTableClientSpec extends SpecificationWithJUnit with VoTableClient with N
       val result = Await.result(r, 10.seconds)
       result._1 should beEqualTo(result._2)
       // Depending on timing it could hit all or less than all parallel urls
-      counter.get() should be_<=(VoTableClient.catalogUrls.size)
+      counter.get() should be_<=(countingBackend.catalogUrls.size)
     }
     "use the cache to skip queries that occupy a subset" in {
       val counter = new AtomicInteger(0)
@@ -72,7 +77,7 @@ class VoTableClientSpec extends SpecificationWithJUnit with VoTableClient with N
         } yield (f1, f2)
       Await.result(r, 10.seconds)
       // Depending on timing it could hit all or less than all parallel urls
-      counter.get() should be_<=(VoTableClient.catalogUrls.size)
+      counter.get() should be_<=(countingBackend.catalogUrls.size)
     }
     "cache hits should preserve the queries" in {
       val counter = new AtomicInteger(0)

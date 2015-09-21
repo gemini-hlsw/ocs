@@ -1,5 +1,7 @@
 package edu.gemini.catalog.votable
 
+import java.net.URL
+
 import edu.gemini.catalog.api.CatalogQuery
 import edu.gemini.spModel.core.MagnitudeBand
 import edu.gemini.spModel.core.Target.SiderealTarget
@@ -76,7 +78,7 @@ case class QueryResult(query: CatalogQuery, result: CatalogQueryResult)
 /** Indicates an issue parsing the targets, e.g. missing values, bad format, etc. */
 sealed trait CatalogProblem
 
-case class ValidationError(url: String) extends CatalogProblem
+case class ValidationError(url: URL) extends CatalogProblem
 case class GenericError(msg: String) extends CatalogProblem
 case class MissingValues(fields: List[Ucd]) extends CatalogProblem
 case class FieldValueProblem(ucd: Ucd, value: String) extends CatalogProblem

@@ -1,6 +1,7 @@
 package edu.gemini.catalog.votable
 
 import java.io.{ByteArrayInputStream, InputStream}
+import java.net.URL
 
 import edu.gemini.spModel.core._
 import edu.gemini.spModel.core.Target.SiderealTarget
@@ -48,7 +49,7 @@ object VoTableParser extends VoTableParser {
   /**
    * parse takes an input stream and attempts to read the xml content and convert it to a VoTable resource
    */
-  def parse(url: String, is: InputStream): CatalogResult =
+  def parse(url: URL, is: InputStream): CatalogResult =
     validate(is).fold(k => \/.left(ValidationError(url)), r => \/.right(parse(XML.loadString(r))))
 }
 
