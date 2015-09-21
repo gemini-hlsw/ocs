@@ -58,19 +58,16 @@ object Interpolate {
       }
     }
 
-  implicit val LongAngleInterpolation: Interpolate[Long, Angle] =
-    LongDoubleInterpolation.xmap(Angle.fromDegrees, _.toDegrees)
-
-  implicit val LongRightAscensionInterpolation: Interpolate[Long, RightAscension] =
-    LongAngleInterpolation.xmap(RightAscension.fromAngle, _.toAngle)
-
-  implicit val LongDeclinationInterpolation: Interpolate[Long, Declination] =
-    LongDoubleInterpolation.xmap(
-      d => Declination.fromAngle(Angle.fromDegrees(d)).getOrElse(sys.error("Declination out of range.")),
-      _.toDegrees) // sigh
-
   implicit val InterpolateCoordinates: Interpolate[Long, Coordinates] =
-    (LongRightAscensionInterpolation zip LongDeclinationInterpolation).xmap(
-      Coordinates.tupled, c => (c.ra, c.dec))
+    new Interpolate[Long, Coordinates] {
+      def interpolate(a: (Long, Coordinates), b: (Long, Coordinates), c: Long): Coordinates = {
+        val ((n1, c1), (n2, c2)) = (a, b)
+        val f =  ((c.toDouble - n1.toDouble) / (n2.toDouble - n1.toDouble))
+        val (da, db) = c1 diff c2
+        val da0 = Angle.signedDegrees(da.toDegrees) * f
+        val db0 = Angle.signedDegrees(db.toDegrees) * f
+        c1.offset(Angle.fromDegrees(da0), Angle.fromDegrees(db0))
+      }
+    }
 
 }

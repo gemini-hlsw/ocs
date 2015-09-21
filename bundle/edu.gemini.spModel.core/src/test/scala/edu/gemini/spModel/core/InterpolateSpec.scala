@@ -58,21 +58,61 @@ object InterpolateSpec extends Specification with ScalaCheck with Arbitraries wi
       val y = Interpolate[Long, Double].interpolate((10L, b.toDouble), (20L, a.toDouble), 18L)
       x ~= y
     }
-    
+
+    "be invariant at min" ! forAll { (a: Int, b: Int) =>
+      val x = Interpolate[Long, Double].interpolate((10L, a.toDouble), (20L, b.toDouble), 10L)
+      x ~= a.toDouble
+    }
+
+    "be invariant at max" ! forAll { (a: Int, b: Int) =>
+      val x = Interpolate[Long, Double].interpolate((10L, a.toDouble), (20L, b.toDouble), 20L)
+      x ~= b.toDouble
+    }
+
+    "work off the end" ! forAll { (a: Int, b: Int) =>
+      val x = Interpolate[Long, Double].interpolate((10L, a.toDouble), (20L, b.toDouble), 30L)
+      x ~= b.toDouble + (b.toDouble - a.toDouble)
+    }
+
   }
 
   "Coordinate interpolation" should {
 
-    "be accurate in ra" ! forAll { (a: Coordinates, b: Coordinates) =>
-      val x = Interpolate[Long, Coordinates].interpolate((10L, a), (20L, b), 12L)
-      val y = Interpolate[Long, Double].interpolate((10L, a.ra.toAngle.toDegrees), (20L, b.ra.toAngle.toDegrees), 12L)
-      x.ra.toAngle.toDegrees ~= y
+    "be invariant at min" ! forAll { (a: Coordinates) => 
+      val b = a.offset(Angle.fromDegrees(20), Angle.fromDegrees(-20))
+      val c = Interpolate[Long, Coordinates].interpolate((10L, a), (20L, b), 10L)
+      c ~= a
     }
 
-    "be accurate in dec" ! forAll { (a: Coordinates, b: Coordinates) =>
-      val x = Interpolate[Long, Coordinates].interpolate((10L, a), (20L, b), 12L)
-      val y = Interpolate[Long, Double].interpolate((10L, a.dec.toDegrees), (20L, b.dec.toDegrees), 12L)
-      x.dec.toDegrees ~= y
+    "be invariant at max" ! forAll { (a: Coordinates) => 
+      val b = a.offset(Angle.fromDegrees(20), Angle.fromDegrees(20))
+      val c = Interpolate[Long, Coordinates].interpolate((10L, a), (20L, b), 20L)
+      c ~= b
+    }
+
+    "work backwards" ! forAll { (a: Coordinates) => 
+      val b = a.offset(Angle.fromDegrees(20), Angle.fromDegrees(20))
+      val c = Interpolate[Long, Coordinates].interpolate((10L, b), (20L, a), 12L)
+      val d = Interpolate[Long, Coordinates].interpolate((10L, a), (20L, b), 18L)
+      c ~= d
+    }
+
+    "interpolate Declination correctly" ! forAll { (a: Coordinates, xa: Angle, xy: Angle) => 
+      val b = a.offset(xa, xy)
+      val decs = (10L to 20L).map { n => 
+        Interpolate[Long, Coordinates].interpolate((10L, b), (20L, a), n).dec.toDegrees
+      }
+      val deltas = (decs, decs.tail).zipped.map(_ - _)
+      (deltas, deltas.tail).zipped.map(_ ~= _).forall(identity)
+    }
+
+    "interpolate RA correctly" ! forAll { (a: Coordinates, xa: Angle, xy: Angle) => 
+      val b = a.offset(xa, xy)
+      val ras = (10L to 20L).map { n => 
+        Interpolate[Long, Coordinates].interpolate((10L, b), (20L, a), n).ra.toAngle.toDegrees
+      }
+      val deltas = (ras, ras.tail).zipped.map((a, b) => a - b) 
+      (deltas, deltas.tail).zipped.map(_ ~= _).distinct.length <= 2 // can cross 0 one time
     }
 
   }
