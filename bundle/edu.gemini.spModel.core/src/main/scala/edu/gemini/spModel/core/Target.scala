@@ -18,8 +18,7 @@ sealed trait Target {
   def fold[A](too: Target.TooTarget         => A,
               sid: Target.SiderealTarget    => A,
               non: Target.NonSiderealTarget => A,
-              nam: Target.NamedTarget       => A,
-              con: Target.ConicTarget       => A): A
+              nam: Target.NamedTarget       => A): A
 
 }
 
@@ -35,15 +34,13 @@ object Target {
       TooTarget.name.partial.run,
       SiderealTarget.name.partial.run,
       NonSiderealTarget.name.partial.run,
-      PLens.nil.run,
-      ConicTarget.name.partial.run
+      PLens.nil.run
     ))
 
   val coords: Target @?> Coordinates =
     PLens(_.fold(
       PLens.nil.run,
       SiderealTarget.coordinates.partial.run,
-      PLens.nil.run,
       PLens.nil.run,
       PLens.nil.run
     ))
@@ -53,7 +50,6 @@ object Target {
       PLens.nil.run,
       SiderealTarget.pm.run,
       PLens.nil.run,
-      PLens.nil.run,
       PLens.nil.run
     ))
 
@@ -61,7 +57,6 @@ object Target {
     PLens(_.fold(
       PLens.nil.run,
       SiderealTarget.magnitudes.partial.run,
-      PLens.nil.run,
       PLens.nil.run,
       PLens.nil.run
     ))
@@ -111,8 +106,7 @@ object Target {
     def fold[A](too: Target.TooTarget => A,
                 sid: Target.SiderealTarget => A,
                 non: Target.NonSiderealTarget => A,
-                nam: Target.NamedTarget => A,
-                con: Target.ConicTarget => A): A = 
+                nam: Target.NamedTarget => A): A = 
       too(this)
   
   }
@@ -139,8 +133,7 @@ object Target {
     def fold[A](too: Target.TooTarget => A,
                 sid: Target.SiderealTarget => A,
                 non: Target.NonSiderealTarget => A,
-                nam: Target.NamedTarget => A,
-                con: Target.ConicTarget => A): A = 
+                nam: Target.NamedTarget => A): A = 
       sid(this)
 
     def magnitudeIn(band: MagnitudeBand): Option[Magnitude] = magnitudes.find(_.band === band)
@@ -173,8 +166,7 @@ object Target {
     def fold[A](too: Target.TooTarget => A,
                 sid: Target.SiderealTarget => A,
                 non: Target.NonSiderealTarget => A,
-                nam: Target.NamedTarget => A,
-                con: Target.ConicTarget => A): A = 
+                nam: Target.NamedTarget => A): A = 
       non(this)
 
     def coords(date: Long): Option[Coordinates] = 
@@ -226,8 +218,7 @@ object Target {
     def fold[A](too: Target.TooTarget => A,
                 sid: Target.SiderealTarget => A,
                 non: Target.NonSiderealTarget => A,
-                nam: Target.NamedTarget => A,
-                con: Target.ConicTarget => A): A = nam(this)
+                nam: Target.NamedTarget => A): A = nam(this)
 
   }
 
@@ -250,114 +241,7 @@ object Target {
       values.find(_.name == name)
 
   }
-
-  ///
-  /// CONIC TARGET (UNDERSTOOD BY TCS)
-  ///
-
-  /** The type of targets defined by orbital elements. */
-  sealed trait ConicTarget extends Target {
-    import ConicParameter._
-
-    def name: String
-    def epochOfElevation: EpochOfElevation
-    def inclination: Inclination
-    def longitudeOfAscendingNode: LongitudeOfAscendingNode
-    def eccentricity: Double
-    def perihelion: Perihelion
-    def coords(time: Long) = None
-    val horizonsInfo = None // TODO
-
-    def fold[A](too: Target.TooTarget => A,
-                sid: Target.SiderealTarget => A,
-                non: Target.NonSiderealTarget => A,
-                nam: Target.NamedTarget => A,
-                con: Target.ConicTarget => A): A = 
-      con(this)
-
-    def foldConic[A](com: ConicTarget.JplComet => A,
-                     min: ConicTarget.JplMinorPlanet => A): A
-
-  }
-
-  object ConicTarget {
-    import ConicParameter._
-
-    /// CONIC TARGET LENSES
-
-    val name:                     ConicTarget @> String                   = Lens(_.foldConic(JplComet.name.run, JplMinorPlanet.name.run))
-    val epochOfElevation:         ConicTarget @> EpochOfElevation         = Lens(_.foldConic(JplComet.epochOfElevation.run, JplMinorPlanet.epochOfElevation.run))
-    val inclination:              ConicTarget @> Inclination              = Lens(_.foldConic(JplComet.inclination.run, JplMinorPlanet.inclination.run))
-    val longitudeOfAscendingNode: ConicTarget @> LongitudeOfAscendingNode = Lens(_.foldConic(JplComet.longitudeOfAscendingNode.run, JplMinorPlanet.longitudeOfAscendingNode.run))
-    val eccentricity:             ConicTarget @> Double                   = Lens(_.foldConic(JplComet.eccentricity.run, JplMinorPlanet.eccentricity.run))
-    val perihelion:               ConicTarget @> Perihelion               = Lens(_.foldConic(JplComet.perihelion.run, JplMinorPlanet.perihelion.run))
-
-    val periDistance:      ConicTarget @?> PerihelionDistance = PLens(_.foldConic(JplComet.periDistance.partial.run, PLens.nil.run))
-    val epochOfPerihelion: ConicTarget @?> EpochOfPerihelion  = PLens(_.foldConic(JplComet.epochOfPerihelion.partial.run, PLens.nil.run))
-    val meanDist:          ConicTarget @?> MeanDistance       = PLens(_.foldConic(PLens.nil.run, JplMinorPlanet.meanDist.partial.run))
-    val meanAnomaly:       ConicTarget @?> MeanAnomaly        = PLens(_.foldConic(PLens.nil.run, JplMinorPlanet.meanAnomaly.partial.run))
-
-    /// JPL COMET
-
-    final case class JplComet(
-      name: String,
-      epochOfElevation: EpochOfElevation,
-      inclination: Inclination,
-      longitudeOfAscendingNode: LongitudeOfAscendingNode,
-      eccentricity: Double,
-      perihelion: Perihelion,
-      periDistance: PerihelionDistance,
-      epochOfPerihelion: EpochOfPerihelion) extends ConicTarget {
-
-      def foldConic[A](com: JplComet => A, min: JplMinorPlanet => A): A =
-        com(this)
-
-    }
-
-    object JplComet {
-      val name:                     JplComet @> String                   = Lens(c => Store(s => c.copy(name = s), c.name))
-      val epochOfElevation:         JplComet @> EpochOfElevation         = Lens(c => Store(s => c.copy(epochOfElevation = s), c.epochOfElevation))
-      val inclination:              JplComet @> Inclination              = Lens(c => Store(s => c.copy(inclination = s), c.inclination))
-      val longitudeOfAscendingNode: JplComet @> LongitudeOfAscendingNode = Lens(c => Store(s => c.copy(longitudeOfAscendingNode = s), c.longitudeOfAscendingNode))
-      val eccentricity:             JplComet @> Double                   = Lens(c => Store(s => c.copy(eccentricity = s), c.eccentricity))
-      val perihelion:               JplComet @> Perihelion               = Lens(c => Store(s => c.copy(perihelion = s), c.perihelion))
-      val periDistance:             JplComet @> PerihelionDistance       = Lens(c => Store(s => c.copy(periDistance = s), c.periDistance))
-      val epochOfPerihelion:        JplComet @> EpochOfPerihelion        = Lens(c => Store(s => c.copy(epochOfPerihelion = s), c.epochOfPerihelion))      
-    }
-
-    /// JPL MINOR PLANET
-
-    final case class JplMinorPlanet(
-      name: String,
-      epochOfElevation: EpochOfElevation,
-      inclination: Inclination,
-      longitudeOfAscendingNode: LongitudeOfAscendingNode,
-      eccentricity: Double,
-      perihelion: Perihelion,
-      meanDist: MeanDistance,
-      meanAnomaly: MeanAnomaly) extends ConicTarget {
-
-      def foldConic[A](com: JplComet => A, min: JplMinorPlanet => A): A =
-        min(this)
-
-    }
-
-    object JplMinorPlanet {
-      val name:                     JplMinorPlanet @> String                   = Lens(c => Store(s => c.copy(name = s), c.name))
-      val epochOfElevation:         JplMinorPlanet @> EpochOfElevation         = Lens(c => Store(s => c.copy(epochOfElevation = s), c.epochOfElevation))
-      val inclination:              JplMinorPlanet @> Inclination              = Lens(c => Store(s => c.copy(inclination = s), c.inclination))
-      val longitudeOfAscendingNode: JplMinorPlanet @> LongitudeOfAscendingNode = Lens(c => Store(s => c.copy(longitudeOfAscendingNode = s), c.longitudeOfAscendingNode))
-      val eccentricity:             JplMinorPlanet @> Double                   = Lens(c => Store(s => c.copy(eccentricity = s), c.eccentricity))
-      val perihelion:               JplMinorPlanet @> Perihelion               = Lens(c => Store(s => c.copy(perihelion = s), c.perihelion))
-      val meanDist:                 JplMinorPlanet @> MeanDistance             = Lens(c => Store(s => c.copy(meanDist = s), c.meanDist))
-      val meanAnomaly:              JplMinorPlanet @> MeanAnomaly              = Lens(c => Store(s => c.copy(meanAnomaly = s), c.meanAnomaly))
-    }
-
-
-  }
-
-
-
+  
 }
 
 
