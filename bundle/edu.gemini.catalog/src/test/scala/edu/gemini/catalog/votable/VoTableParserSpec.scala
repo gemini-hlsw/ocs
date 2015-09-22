@@ -390,7 +390,7 @@ class VoTableParserSpec extends SpecificationWithJUnit with VoTableParser {
         \/-(SiderealTarget("550-001324", Coordinates(RightAscension.fromDegrees(9.91958055555557), Declination.fromAngle(Angle.parseDegrees("19.997709722222226").getOrElse(Angle.zero)).getOrElse(Declination.zero)), pm2, magsTarget2, None))
       ))
       parse(voTableWithProperMotion).tables.head should beEqualTo(result)
-    }.pendingUntilFixed("pm")
+    }
     "be able to validate and parse an xml from sds9" in {
       val badXml = "votable-non-validating.xml"
       VoTableParser.parse(new URL(s"file:////$badXml"), getClass.getResourceAsStream(s"/$badXml")) should beEqualTo(-\/(ValidationError(new URL(s"file:////$badXml"))))
@@ -479,9 +479,13 @@ class VoTableParserSpec extends SpecificationWithJUnit with VoTableParser {
       // The sample has only one row
       val result = VoTableParser.parse(new URL(s"file:////$xmlFile"), getClass.getResourceAsStream(s"/$xmlFile")).getOrElse(ParsedVoResource(Nil)).tables.headOption.flatMap(_.rows.headOption).get
 
+      // id and coordinates
       result.map(_.name) should beEqualTo(\/.right("* alf Lyr"))
       result.map(_.coordinates.ra) should beEqualTo(\/.right(RightAscension.fromAngle(Angle.fromDegrees(279.23473479))))
       result.map(_.coordinates.dec) should beEqualTo(\/.right(Declination.fromAngle(Angle.fromDegrees(38.78368896)).getOrElse(Declination.zero)))
+      // proper motions
+      result.map(_.properMotion.map(_.deltaRA)) should beEqualTo(\/.right(Some(RightAscensionAngularVelocity(AngularVelocity(200.94)))))
+      result.map(_.properMotion.map(_.deltaDec)) should beEqualTo(\/.right(Some(DeclinationAngularVelocity(AngularVelocity(286.23)))))
     }
   }
 }

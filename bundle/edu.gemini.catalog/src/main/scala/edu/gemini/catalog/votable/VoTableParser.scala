@@ -53,12 +53,14 @@ object VoTableParser extends VoTableParser {
     validate(is).fold(k => \/.left(ValidationError(url)), r => \/.right(parse(XML.loadString(r))))
 }
 
-// A CatalogAdapter improves parsing handling catalog-specific options
+// A CatalogAdapter improves parsing handling catalog-specific options like parsing magnitudes and selecting key fields
 sealed trait CatalogAdapter {
   // Required fields
   val idField: FieldId
   val raField: FieldId
   val decField: FieldId
+  val pmRaField = FieldId("pmra", VoTableParser.UCD_PMRA)
+  val pmDecField = FieldId("pmde", VoTableParser.UCD_PMDEC)
 
   // Indicates if a field should be ignored
   def ignoredMagnitudeField(v: FieldId): Boolean = false
@@ -80,6 +82,7 @@ case object UCAC4Adapter extends CatalogAdapter {
   val idField = FieldId("ucac4", VoTableParser.UCD_OBJID)
   val raField = FieldId("raj2000", VoTableParser.UCD_RA)
   val decField = FieldId("dej2000", VoTableParser.UCD_DEC)
+
   val ucac4BadMagnitude = 20.0
   val ucac4BadMagnitudeError = 0.9.some
 
@@ -100,6 +103,7 @@ case object PPMXLAdapter extends CatalogAdapter {
   val idField = FieldId("ppmxl", VoTableParser.UCD_OBJID)
   val raField = FieldId("raj2000", VoTableParser.UCD_RA)
   val decField = FieldId("decj2000", VoTableParser.UCD_DEC)
+
   // PPMXL may contain two representations for bands R and B, represented with ids r1mag/r2mag or b1mag/b2mac
   // The ids r1mag/r2mag are preferred but if they are absent we should use the alternative values
   val primaryMagnitudesIds = List("r1mag", "b1mag")
@@ -124,6 +128,8 @@ case object SimbadAdapter extends CatalogAdapter {
   val idField = FieldId("MAIN_ID", VoTableParser.UCD_OBJID)
   val raField = FieldId("RA_d", VoTableParser.UCD_RA)
   val decField = FieldId("DEC_d", VoTableParser.UCD_DEC)
+  override val pmRaField = FieldId("PMRA", VoTableParser.UCD_PMRA)
+  override val pmDecField = FieldId("PMDEC", VoTableParser.UCD_PMDEC)
 
   override def ignoredMagnitudeField(v: FieldId) = !v.id.toLowerCase.startsWith("flux")
 }
@@ -268,7 +274,7 @@ trait VoTableParser {
       id      <- entries.get(adapter.idField) \/> MissingValue(adapter.idField)
       ra      <- entries.get(adapter.raField) \/> MissingValue(adapter.raField)
       dec     <- entries.get(adapter.decField) \/> MissingValue(adapter.decField)
-      (pmRa, pmDec)   = (entries.get(FieldId("", VoTableParser.UCD_PMRA)), entries.get(FieldId("", VoTableParser.UCD_PMDEC)))
+      (pmRa, pmDec)   = (entries.get(adapter.pmRaField), entries.get(adapter.pmDecField))
     } yield toSiderealTarget(id, ra, dec, (pmRa, pmDec))
 
     result.flatMap(identity)
