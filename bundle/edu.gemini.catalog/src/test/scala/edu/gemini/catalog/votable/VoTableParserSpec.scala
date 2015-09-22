@@ -486,6 +486,15 @@ class VoTableParserSpec extends SpecificationWithJUnit with VoTableParser {
       // proper motions
       result.map(_.properMotion.map(_.deltaRA)) should beEqualTo(\/.right(Some(RightAscensionAngularVelocity(AngularVelocity(200.94)))))
       result.map(_.properMotion.map(_.deltaDec)) should beEqualTo(\/.right(Some(DeclinationAngularVelocity(AngularVelocity(286.23)))))
+      // magnitudes
+      result.map(_.magnitudeIn(MagnitudeBand.U)) should beEqualTo(\/.right(Some(new Magnitude(0.03, MagnitudeBand.U))))
+      result.map(_.magnitudeIn(MagnitudeBand.B)) should beEqualTo(\/.right(Some(new Magnitude(0.03, MagnitudeBand.B))))
+      result.map(_.magnitudeIn(MagnitudeBand.V)) should beEqualTo(\/.right(Some(new Magnitude(0.03, MagnitudeBand.V))))
+      result.map(_.magnitudeIn(MagnitudeBand.R)) should beEqualTo(\/.right(Some(new Magnitude(0.07, MagnitudeBand.R))))
+      result.map(_.magnitudeIn(MagnitudeBand.I)) should beEqualTo(\/.right(Some(new Magnitude(0.10, MagnitudeBand.I))))
+      result.map(_.magnitudeIn(MagnitudeBand.J)) should beEqualTo(\/.right(Some(new Magnitude(-0.18, MagnitudeBand.J))))
+      result.map(_.magnitudeIn(MagnitudeBand.H)) should beEqualTo(\/.right(Some(new Magnitude(-0.03, MagnitudeBand.H))))
+      result.map(_.magnitudeIn(MagnitudeBand.K)) should beEqualTo(\/.right(Some(new Magnitude(0.13, MagnitudeBand.K))))
     }
   }
 }
