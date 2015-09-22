@@ -48,7 +48,6 @@ class VoTableClientSpec extends SpecificationWithJUnit with VoTableClient with N
     }
     "make a query" in {
       // This test loads a file. There is not much to test but it exercises the query backend chain
-      println(Await.result(VoTableClient.catalog(query, TestVoTableBackend("/votable-ucac4.xml")), 5.seconds).result.problems)
       Await.result(VoTableClient.catalog(query, TestVoTableBackend("/votable-ucac4.xml")), 5.seconds).result.containsError should beFalse
     }
     "use the cache to skip queries" in {

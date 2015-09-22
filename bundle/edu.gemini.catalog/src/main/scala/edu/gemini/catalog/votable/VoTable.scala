@@ -80,7 +80,7 @@ sealed trait CatalogProblem
 
 case class ValidationError(url: URL) extends CatalogProblem
 case class GenericError(msg: String) extends CatalogProblem
-case class MissingValues(fields: List[Ucd]) extends CatalogProblem
+case class MissingValue(field: FieldId) extends CatalogProblem
 case class FieldValueProblem(ucd: Ucd, value: String) extends CatalogProblem
 case class UnmatchedField(ucd: Ucd) extends CatalogProblem
 case object UnknownCatalog extends CatalogProblem

@@ -53,8 +53,13 @@ object VoTableParser extends VoTableParser {
     validate(is).fold(k => \/.left(ValidationError(url)), r => \/.right(parse(XML.loadString(r))))
 }
 
-// A MagnitudesFilter can ignore fields for certain catalogues and transform others
-sealed trait MagnitudesFilter {
+// A CatalogAdapter improves parsing handling catalog-specific options
+sealed trait CatalogAdapter {
+  // Required fields
+  val idField: FieldId
+  val raField: FieldId
+  val decField: FieldId
+
   // Indicates if a field should be ignored
   def ignoredMagnitudeField(v: FieldId): Boolean = false
   // Indicates if a magnitude is valid
@@ -71,7 +76,10 @@ sealed trait MagnitudesFilter {
   def filterMagnitudeFields(magnitudeFields: List[(FieldId, Magnitude)]): List[Magnitude] = magnitudeFields.collect { case (_, mag) if validMagnitude(mag) => mag }
 }
 
-case object UCAC4Filter extends MagnitudesFilter {
+case object UCAC4Adapter extends CatalogAdapter {
+  val idField = FieldId("ucac4", VoTableParser.UCD_OBJID)
+  val raField = FieldId("raj2000", VoTableParser.UCD_RA)
+  val decField = FieldId("dej2000", VoTableParser.UCD_DEC)
   val ucac4BadMagnitude = 20.0
   val ucac4BadMagnitudeError = 0.9.some
 
@@ -88,7 +96,10 @@ case object UCAC4Filter extends MagnitudesFilter {
   }
 }
 
-case object PPMXLFilter extends MagnitudesFilter {
+case object PPMXLAdapter extends CatalogAdapter {
+  val idField = FieldId("ppmxl", VoTableParser.UCD_OBJID)
+  val raField = FieldId("raj2000", VoTableParser.UCD_RA)
+  val decField = FieldId("decj2000", VoTableParser.UCD_DEC)
   // PPMXL may contain two representations for bands R and B, represented with ids r1mag/r2mag or b1mag/b2mac
   // The ids r1mag/r2mag are preferred but if they are absent we should use the alternative values
   val primaryMagnitudesIds = List("r1mag", "b1mag")
@@ -109,21 +120,28 @@ case object PPMXLFilter extends MagnitudesFilter {
   }
 }
 
+case object SimbadAdapter extends CatalogAdapter {
+  val idField = FieldId("MAIN_ID", VoTableParser.UCD_OBJID)
+  val raField = FieldId("RA_d", VoTableParser.UCD_RA)
+  val decField = FieldId("DEC_d", VoTableParser.UCD_DEC)
+
+  override def ignoredMagnitudeField(v: FieldId) = !v.id.toLowerCase.startsWith("flux")
+}
+
 trait VoTableParser {
 
   import scala.xml.Node
 
   private val magRegex = """(?i)em.(opt|IR)(\.\w)?""".r
-  private val REQUIRED = List(VoTableParser.UCD_OBJID, VoTableParser.UCD_RA, VoTableParser.UCD_DEC)
 
   protected def parseFieldDescriptor(xml: Node): Option[FieldDescriptor] = xml match {
-    case f @ <FIELD/> =>
+    case f @ <FIELD>{_*}</FIELD> =>
       (for {
         id   <- f \ "@ID"
         name <- f \ "@name"
         ucd  <- f \ "@ucd"
       } yield FieldDescriptor(FieldId(id.text, Ucd(ucd.text)), name.text)).headOption
-    case _            => None
+    case _                       => None
   }
 
   protected def parseFields(xml: Node): List[FieldDescriptor] = (for {
@@ -149,8 +167,8 @@ trait VoTableParser {
 
   def parseDoubleValue(ucd: Ucd, s: String): CatalogProblem \/ Double =
     \/.fromTryCatch(s.toDouble).leftMap(_ => FieldValueProblem(ucd, s))
-  
-  protected def parseBands[T <: MagnitudesFilter](filter: T)(p: (FieldId, String)): CatalogProblem \/ (FieldId, MagnitudeBand, Double) = {
+
+  protected def parseBands[T <: CatalogAdapter](filter: T)(p: (FieldId, String)): CatalogProblem \/ (FieldId, MagnitudeBand, Double) = {
     val (fieldId: FieldId, value: String) = p
 
     def parseBandToken(token: String):Option[String] = token match {
@@ -176,30 +194,31 @@ trait VoTableParser {
   protected def parse(xml: Node): ParsedVoResource = {
     val tables = for {
       table <- xml \\ "TABLE"
-      fields = parseFields(table)
+      tableId = table \ "@ID"
+      fields  = parseFields(table)
       tr = parseTableRows(fields, table)
-    } yield ParsedTable(tr.map(tableRow2Target(fields)).toList)
+    } yield ParsedTable(tr.map(tableRow2Target(tableId.headOption.map(_.text), fields)).toList)
     ParsedVoResource(tables.toList)
   }
 
   /**
    * Convert a table row to a sidereal target or CatalogProblem
    */
-  protected def tableRow2Target(fields: List[FieldDescriptor])(row: TableRow): CatalogProblem \/ SiderealTarget = {
+  protected def tableRow2Target(tableId: Option[String], fields: List[FieldDescriptor])(row: TableRow): CatalogProblem \/ SiderealTarget = {
     val entries = row.itemsMap
-    val entriesByUcd = entries.map(x => x._1.ucd -> x._2)
 
-   val magnitudesFilter: CatalogProblem \/ MagnitudesFilter = {
+    val catalogAdapter: CatalogProblem \/ CatalogAdapter = {
       val isUCAC4 = fields.exists(_.name === "ucac4")
       val isPPMXL = fields.exists(_.name === "ppmxl")
-      if (isUCAC4) UCAC4Filter.right else if (isPPMXL) PPMXLFilter.right else UnknownCatalog.left
+      val isSimbad = tableId.exists(_.equalsIgnoreCase("simbad"))
+      if (isUCAC4) UCAC4Adapter.right else if (isPPMXL) PPMXLAdapter.right else if (isSimbad) SimbadAdapter.right else UnknownCatalog.left
     }
 
-    def missing = REQUIRED.filterNot(entriesByUcd.contains)
-
-    def containsMagnitude(v: FieldId, magFilter: MagnitudesFilter) = v.ucd.includes(VoTableParser.UCD_MAG) && v.ucd.matches(magRegex) && !magFilter.ignoredMagnitudeField(v)
-    def magnitudeField(v: (FieldId, String), magFilter: MagnitudesFilter) = containsMagnitude(v._1, magFilter) && !v._1.ucd.includes(VoTableParser.STAT_ERR)
-    def magnitudeErrorField(v: (FieldId, String), magFilter: MagnitudesFilter) = containsMagnitude(v._1, magFilter) && v._1.ucd.includes(VoTableParser.STAT_ERR)
+    def containsMagnitude(v: FieldId, magFilter: CatalogAdapter) = v.ucd.includes(VoTableParser.UCD_MAG) && v.ucd.matches(magRegex) && !magFilter.ignoredMagnitudeField(v)
+    def magnitudeField(v: (FieldId, String), magFilter: CatalogAdapter) = {
+      containsMagnitude(v._1, magFilter) && !v._1.ucd.includes(VoTableParser.STAT_ERR) && v._2.nonEmpty
+    }
+    def magnitudeErrorField(v: (FieldId, String), magFilter: CatalogAdapter) = containsMagnitude(v._1, magFilter) && v._1.ucd.includes(VoTableParser.STAT_ERR)
 
     def parseProperMotion(pm: (Option[String], Option[String])): CatalogProblem \/ Option[ProperMotion] = {
       val k = for {
@@ -213,7 +232,7 @@ trait VoTableParser {
       k.sequenceU
     }
 
-    def combineWithErrorsAndFilter(m: List[(FieldId, MagnitudeBand, Double)], e: List[(FieldId, MagnitudeBand, Double)], magFilter: MagnitudesFilter): List[Magnitude] = {
+    def combineWithErrorsAndFilter(m: List[(FieldId, MagnitudeBand, Double)], e: List[(FieldId, MagnitudeBand, Double)], magFilter: CatalogAdapter): List[Magnitude] = {
       val mags = m.map {
           case (f, b, d) => f -> new Magnitude(d, b, b.defaultSystem)
         }
@@ -228,7 +247,7 @@ trait VoTableParser {
 
     def toSiderealTarget(id: String, ra: String, dec: String, pm: (Option[String], Option[String])): \/[CatalogProblem, SiderealTarget] = {
       for {
-        magFilter      <- magnitudesFilter
+        magFilter      <- catalogAdapter
         r              <- Angle.parseDegrees(ra).leftMap(_ => FieldValueProblem(VoTableParser.UCD_RA, ra))
         d              <- Angle.parseDegrees(dec).leftMap(_ => FieldValueProblem(VoTableParser.UCD_DEC, dec))
         declination    <- Declination.fromAngle(d) \/> FieldValueProblem(VoTableParser.UCD_DEC, dec)
@@ -245,12 +264,13 @@ trait VoTableParser {
     }
 
     val result = for {
-        id             <- entriesByUcd.get(VoTableParser.UCD_OBJID)
-        ra             <- entriesByUcd.get(VoTableParser.UCD_RA)
-        dec            <- entriesByUcd.get(VoTableParser.UCD_DEC)
-        (pmRa, pmDec)   = (entriesByUcd.get(VoTableParser.UCD_PMRA), entriesByUcd.get(VoTableParser.UCD_PMDEC))
-      } yield toSiderealTarget(id, ra, dec, (pmRa, pmDec))
+      adapter <- catalogAdapter
+      id      <- entries.get(adapter.idField) \/> MissingValue(adapter.idField)
+      ra      <- entries.get(adapter.raField) \/> MissingValue(adapter.raField)
+      dec     <- entries.get(adapter.decField) \/> MissingValue(adapter.decField)
+      (pmRa, pmDec)   = (entries.get(FieldId("", VoTableParser.UCD_PMRA)), entries.get(FieldId("", VoTableParser.UCD_PMDEC)))
+    } yield toSiderealTarget(id, ra, dec, (pmRa, pmDec))
 
-    result.getOrElse(\/.left(MissingValues(missing)))
+    result.flatMap(identity)
   }
 }

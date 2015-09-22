@@ -4,7 +4,7 @@ import java.net.{URL, UnknownHostException}
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.logging.Logger
 
-import edu.gemini.catalog.api.{ConeSearchCatalogQuery, CatalogQuery}
+import edu.gemini.catalog.api.{NameCatalogQuery, ConeSearchCatalogQuery, CatalogQuery}
 import edu.gemini.spModel.core.Angle
 import edu.gemini.spModel.core.Target.SiderealTarget
 import org.apache.commons.httpclient.{NameValuePair, HttpClient}
