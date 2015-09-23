@@ -37,7 +37,7 @@ class VoTableClientSpec extends SpecificationWithJUnit with VoTableClient with N
       RemoteBackend.queryParams(query) should beEqualTo(Array(new NameValuePair("CATALOG", "ucac4"), new NameValuePair("RA", "10.000"), new NameValuePair("DEC", "20.000"), new NameValuePair("SR", "0.100")))
     }
     "make a query to a bad site" in {
-      Await.result(doQuery(query, new URL("http://unknown site"), RemoteBackend), 1.seconds) should throwA[UnknownHostException]
+      Await.result(doQuery(query, new URL("http://unknown site"), RemoteBackend), 2.seconds) should throwA[UnknownHostException]
     }
     "be able to select the first successful of several futures" in {
       def f1 = Future { Thread.sleep(1000); throw new RuntimeException("oops") }

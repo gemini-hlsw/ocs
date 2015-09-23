@@ -323,39 +323,82 @@ class VoTableParserSpec extends SpecificationWithJUnit with VoTableParser {
     "be able to parse magnitude bands in PPMXL" in {
       val iMagField = Ucd("phot.mag;em.opt.i")
       // Optical band
-      parseBands(PPMXLAdapter)((FieldId("id", iMagField), "20.3051")) should beEqualTo(\/-((FieldId("id", iMagField), MagnitudeBand.I, 20.3051)))
+      PPMXLAdapter.parseMagnitude((FieldId("id", iMagField), "20.3051")) should beEqualTo(\/-((FieldId("id", iMagField), MagnitudeBand.I, 20.3051)))
 
       val jIRMagField = Ucd("phot.mag;em.IR.J")
       // IR band
-      parseBands(PPMXLAdapter)((FieldId("id", jIRMagField), "13.2349")) should beEqualTo(\/-((FieldId("id", jIRMagField), MagnitudeBand.J, 13.2349)))
+      PPMXLAdapter.parseMagnitude((FieldId("id", jIRMagField), "13.2349")) should beEqualTo(\/-((FieldId("id", jIRMagField), MagnitudeBand.J, 13.2349)))
 
       val jIRErrMagField = Ucd("stat.error;phot.mag;em.IR.J")
       // IR Error
-      parseBands(PPMXLAdapter)((FieldId("id", jIRErrMagField), "0.02")) should beEqualTo(\/-((FieldId("id", jIRErrMagField), MagnitudeBand.J, 0.02)))
+      PPMXLAdapter.parseMagnitude((FieldId("id", jIRErrMagField), "0.02")) should beEqualTo(\/-((FieldId("id", jIRErrMagField), MagnitudeBand.J, 0.02)))
 
       // No magnitude field
       val badField = Ucd("meta.name")
-      parseBands(PPMXLAdapter)((FieldId("id", badField), "id")) should beEqualTo(-\/(UnmatchedField(badField)))
+      PPMXLAdapter.parseMagnitude((FieldId("id", badField), "id")) should beEqualTo(-\/(UnmatchedField(badField)))
 
       // Bad value
-      parseBands(PPMXLAdapter)((FieldId("id", iMagField), "stringValue")) should beEqualTo(-\/(FieldValueProblem(iMagField, "stringValue")))
+      PPMXLAdapter.parseMagnitude((FieldId("id", iMagField), "stringValue")) should beEqualTo(-\/(FieldValueProblem(iMagField, "stringValue")))
 
       // Unknown magnitude
       val noBandField = Ucd("phot.mag;em.opt.p")
-      parseBands(PPMXLAdapter)((FieldId("id", noBandField), "stringValue")) should beEqualTo(-\/(UnmatchedField(noBandField)))
+      PPMXLAdapter.parseMagnitude((FieldId("id", noBandField), "stringValue")) should beEqualTo(-\/(UnmatchedField(noBandField)))
     }
     "be able to map sloan magnitudes in UCAC4, OCSADV-245" in {
       val gMagField = Ucd("phot.mag;em.opt.R")
       // gmag maps to g'
-      parseBands(UCAC4Adapter)((FieldId("gmag", gMagField), "20.3051")) should beEqualTo(\/-((FieldId("gmag", gMagField), MagnitudeBand._g, 20.3051)))
+      UCAC4Adapter.parseMagnitude((FieldId("gmag", gMagField), "20.3051")) should beEqualTo(\/-((FieldId("gmag", gMagField), MagnitudeBand._g, 20.3051)))
 
       val rMagField = Ucd("phot.mag;em.opt.R")
       // rmag maps to r'
-      parseBands(UCAC4Adapter)((FieldId("rmag", rMagField), "20.3051")) should beEqualTo(\/-((FieldId("rmag", rMagField), MagnitudeBand._r, 20.3051)))
+      UCAC4Adapter.parseMagnitude((FieldId("rmag", rMagField), "20.3051")) should beEqualTo(\/-((FieldId("rmag", rMagField), MagnitudeBand._r, 20.3051)))
 
       val iMagField = Ucd("phot.mag;em.opt.I")
       // imag maps to r'
-      parseBands(UCAC4Adapter)((FieldId("imag", iMagField), "20.3051")) should beEqualTo(\/-((FieldId("imag", iMagField), MagnitudeBand._i, 20.3051)))
+      UCAC4Adapter.parseMagnitude((FieldId("imag", iMagField), "20.3051")) should beEqualTo(\/-((FieldId("imag", iMagField), MagnitudeBand._i, 20.3051)))
+    }
+    "be able to map sloan magnitudes in Simbad" in {
+      val zMagField = Ucd("phot.mag;em.opt.I")
+      // FLUX_z maps to z'
+      SimbadAdapter.parseMagnitude((FieldId("FLUX_z", zMagField), "20.3051")) should beEqualTo(\/-((FieldId("FLUX_z", zMagField), MagnitudeBand._z, 20.3051)))
+
+      val rMagField = Ucd("phot.mag;em.opt.R")
+      // FLUX_r maps to r'
+      SimbadAdapter.parseMagnitude((FieldId("FLUX_r", rMagField), "20.3051")) should beEqualTo(\/-((FieldId("FLUX_r", rMagField), MagnitudeBand._r, 20.3051)))
+
+      val uMagField = Ucd("phot.mag;em.opt.u")
+      // FLUX_u maps to u'
+      SimbadAdapter.parseMagnitude((FieldId("FLUX_u", uMagField), "20.3051")) should beEqualTo(\/-((FieldId("FLUX_u", uMagField), MagnitudeBand._u, 20.3051)))
+
+      val gMagField = Ucd("phot.mag;em.opt.b")
+      // FLUX_g maps to g'
+      SimbadAdapter.parseMagnitude((FieldId("FLUX_g", gMagField), "20.3051")) should beEqualTo(\/-((FieldId("FLUX_g", gMagField), MagnitudeBand._g, 20.3051)))
+
+      val iMagField = Ucd("phot.mag;em.opt.i")
+      // FLUX_u maps to u'
+      SimbadAdapter.parseMagnitude((FieldId("FLUX_i", iMagField), "20.3051")) should beEqualTo(\/-((FieldId("FLUX_i", iMagField), MagnitudeBand._i, 20.3051)))
+    }
+    "be able to map non-sloan magnitudes in Simbad" in {
+      val rMagField = Ucd("phot.mag;em.opt.R")
+      // FLUX_R maps to R
+      SimbadAdapter.parseMagnitude((FieldId("FLUX_R", rMagField), "20.3051")) should beEqualTo(\/-((FieldId("FLUX_R", rMagField), MagnitudeBand.R, 20.3051)))
+
+      val uMagField = Ucd("phot.mag;em.opt.U")
+      // FLUX_U maps to U
+      SimbadAdapter.parseMagnitude((FieldId("FLUX_U", uMagField), "20.3051")) should beEqualTo(\/-((FieldId("FLUX_U", uMagField), MagnitudeBand.U, 20.3051)))
+
+      val iMagField = Ucd("phot.mag;em.opt.I")
+      // FLUX_I maps to I
+      SimbadAdapter.parseMagnitude((FieldId("FLUX_I", iMagField), "20.3051")) should beEqualTo(\/-((FieldId("FLUX_I", iMagField), MagnitudeBand.I, 20.3051)))
+    }
+    "be able to map magnitude errors in Simbad" in {
+      // Magnitude errors in simbad don't include the band in the UCD, we must get it from the ID :(
+      val magErrorUcd = Ucd("stat.error;phot.mag")
+      // FLUX_r maps to r'
+      SimbadAdapter.parseMagnitude((FieldId("FLUX_ERROR_r", magErrorUcd), "20.3051")) should beEqualTo(\/-((FieldId("FLUX_ERROR_r", magErrorUcd), MagnitudeBand._r, 20.3051)))
+
+      // FLUX_R maps to R
+      SimbadAdapter.parseMagnitude((FieldId("FLUX_ERROR_R", magErrorUcd), "20.3051")) should beEqualTo(\/-((FieldId("FLUX_ERROR_R", magErrorUcd), MagnitudeBand.R, 20.3051)))
     }
     "be able to parse an xml into a list of SiderealTargets list of rows with a list of fields" in {
       val magsTarget1 = List(new Magnitude(23.0888, MagnitudeBand.U), new Magnitude(22.082, MagnitudeBand._g), new Magnitude(20.88, MagnitudeBand.R), new Magnitude(20.3051, MagnitudeBand.I), new Magnitude(19.8812, MagnitudeBand._z))
@@ -495,6 +538,24 @@ class VoTableParserSpec extends SpecificationWithJUnit with VoTableParser {
       result.map(_.magnitudeIn(MagnitudeBand.J)) should beEqualTo(\/.right(Some(new Magnitude(-0.18, MagnitudeBand.J))))
       result.map(_.magnitudeIn(MagnitudeBand.H)) should beEqualTo(\/.right(Some(new Magnitude(-0.03, MagnitudeBand.H))))
       result.map(_.magnitudeIn(MagnitudeBand.K)) should beEqualTo(\/.right(Some(new Magnitude(0.13, MagnitudeBand.K))))
+    }
+    "parse simbad named queries with sloan magnitudes" in {
+      val xmlFile = "simbad-2MFGC6625.xml"
+      // The sample has only one row
+      val result = VoTableParser.parse(new URL(s"file:////$xmlFile"), getClass.getResourceAsStream(s"/$xmlFile")).getOrElse(ParsedVoResource(Nil)).tables.headOption.flatMap(_.rows.headOption).get
+
+      // id and coordinates
+      result.map(_.name) should beEqualTo(\/.right("2MFGC 6625"))
+      result.map(_.coordinates.ra) should beEqualTo(\/.right(RightAscension.fromAngle(Angle.fromHMS(8, 23, 54.966).getOrElse(Angle.zero))))
+      result.map(_.coordinates.dec) should beEqualTo(\/.right(Declination.fromAngle(Angle.fromDMS(28, 6, 21.6792).getOrElse(Angle.zero)).getOrElse(Declination.zero)))
+      // proper motions
+      result.map(_.properMotion) should beEqualTo(\/.right(None))
+      // magnitudes
+      result.map(_.magnitudeIn(MagnitudeBand._u)) should beEqualTo(\/.right(Some(new Magnitude(17.353, MagnitudeBand._u, 0.009))))
+      result.map(_.magnitudeIn(MagnitudeBand._g)) should beEqualTo(\/.right(Some(new Magnitude(16.826, MagnitudeBand._g, 0.004))))
+      result.map(_.magnitudeIn(MagnitudeBand._r)) should beEqualTo(\/.right(Some(new Magnitude(17.286, MagnitudeBand._r, 0.005))))
+      result.map(_.magnitudeIn(MagnitudeBand._i)) should beEqualTo(\/.right(Some(new Magnitude(16.902, MagnitudeBand._i, 0.005))))
+      result.map(_.magnitudeIn(MagnitudeBand._z)) should beEqualTo(\/.right(Some(new Magnitude(17.015, MagnitudeBand._z, 0.011))))
     }
   }
 }
