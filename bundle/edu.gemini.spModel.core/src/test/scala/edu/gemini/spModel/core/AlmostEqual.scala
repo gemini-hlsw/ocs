@@ -1,5 +1,7 @@
 package edu.gemini.spModel.core
 
+import scalaz._, Scalaz._
+
 trait AlmostEqual[A] {
   def almostEqual(a: A, b: A): Boolean
 }
@@ -9,6 +11,12 @@ object AlmostEqual {
   implicit class AlmostEqualOps[A](a: A)(implicit A: AlmostEqual[A]) {
     def ~=(b: A): Boolean = A.almostEqual(a, b)
   }
+
+  implicit def AlmostEqualOption[A: AlmostEqual]: AlmostEqual[Option[A]] =
+    new AlmostEqual[Option[A]] {
+      def almostEqual(a: Option[A], b: Option[A]) =
+        (a |@| b)(_ ~= _).getOrElse(false)
+    }
 
   implicit val DoubleAlmostEqual =
     new AlmostEqual[Double] {

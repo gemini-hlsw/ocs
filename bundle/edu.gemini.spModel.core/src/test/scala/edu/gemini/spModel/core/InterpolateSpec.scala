@@ -61,17 +61,30 @@ object InterpolateSpec extends Specification with ScalaCheck with Arbitraries wi
 
     "be invariant at min" ! forAll { (a: Int, b: Int) =>
       val x = Interpolate[Long, Double].interpolate((10L, a.toDouble), (20L, b.toDouble), 10L)
-      x ~= a.toDouble
+      x ~= Some(a.toDouble)
     }
 
     "be invariant at max" ! forAll { (a: Int, b: Int) =>
       val x = Interpolate[Long, Double].interpolate((10L, a.toDouble), (20L, b.toDouble), 20L)
-      x ~= b.toDouble
+      x ~= Some(b.toDouble)
     }
 
     "work off the end" ! forAll { (a: Int, b: Int) =>
       val x = Interpolate[Long, Double].interpolate((10L, a.toDouble), (20L, b.toDouble), 30L)
-      x ~= b.toDouble + (b.toDouble - a.toDouble)
+      x ~= Some(b.toDouble + (b.toDouble - a.toDouble))
+    }
+
+    "interoplate a constant value for constaint domain" ! forAll { (a: Int) =>
+      (0 to 30).map { n => 
+        Interpolate[Long, Double].interpolate((10L, a.toDouble), (20L, a.toDouble), n)
+      }.forall(_ == Some(a))
+    }
+
+    "yield None in the degenerate case" ! forAll { (a: Int, b: Int) =>
+      (a != b) ==> {
+        val x = Interpolate[Long, Double].interpolate((10L, a.toDouble), (10L, b.toDouble), 10L)
+        x == None
+      }
     }
 
   }
@@ -80,12 +93,12 @@ object InterpolateSpec extends Specification with ScalaCheck with Arbitraries wi
 
     "be invariant at min" ! forAll { (a: Coordinates, b: Coordinates) => 
       val c = Interpolate[Long, Coordinates].interpolate((10L, a), (20L, b), 10L)
-      c ~= a
+      c ~= Some(a)
     }
 
     "be invariant at max" ! forAll { (a: Coordinates, b: Coordinates) => 
       val c = Interpolate[Long, Coordinates].interpolate((10L, a), (20L, b), 20L)
-      c ~= b
+      c ~= Some(b)
     }
 
     "work backwards" ! forAll { (a: Coordinates, b: Coordinates) => 
@@ -96,18 +109,25 @@ object InterpolateSpec extends Specification with ScalaCheck with Arbitraries wi
 
     "interpolate Declination correctly" ! forAll { (a: Coordinates, b: Coordinates) => 
       val decs = (10L to 20L).map { n => 
-        Interpolate[Long, Coordinates].interpolate((10L, b), (20L, a), n).dec.toDegrees
+        Interpolate[Long, Coordinates].interpolate((10L, b), (20L, a), n).map(_.dec.toDegrees)
       }
-      val deltas = (decs, decs.tail).zipped.map(_ - _)
+      val deltas = (decs, decs.tail).zipped.map((a, b) => (a |@| b)(_ - _))
       (deltas, deltas.tail).zipped.map(_ ~= _).forall(identity)
     }
 
     "interpolate RA correctly" ! forAll { (a: Coordinates, b: Coordinates) => 
       val ras = (10L to 20L).map { n => 
-        Interpolate[Long, Coordinates].interpolate((10L, b), (20L, a), n).ra.toAngle.toDegrees
+        Interpolate[Long, Coordinates].interpolate((10L, b), (20L, a), n).map(_.ra.toAngle.toDegrees)
       }
-      val deltas = (ras, ras.tail).zipped.map((a, b) => a - b) 
+      val deltas = (ras, ras.tail).zipped.map((a, b) => (a |@| b)(_ - _))
       (deltas, deltas.tail).zipped.map(_ ~= _).distinct.length <= 2 // can cross 0 one time
+    }
+
+    "yield None in the degenerate case" ! forAll { (a: Coordinates, b: Coordinates) => 
+      (a != b) ==> {
+        val c = Interpolate[Long, Coordinates].interpolate((20L, a), (20L, b), 20L)
+        c == None
+      }
     }
 
   }

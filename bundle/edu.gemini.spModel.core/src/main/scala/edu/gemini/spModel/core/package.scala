@@ -22,7 +22,11 @@ package object core {
         case Some(v) => Some(v)
         case None    => 
           val (lt, gt) = m.split(k)
-          ^(lt.findMax, gt.findMin)(I.interpolate(_, _, k))
+          for {
+            a <- lt.findMax
+            b <- gt.findMin
+            c <- I.interpolate(a, b, k)
+          } yield c
       }
 
     /** Construct an exact or interpolated slice. */
@@ -38,3 +42,4 @@ package object core {
   }
 
 }
+
