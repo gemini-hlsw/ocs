@@ -99,7 +99,7 @@ object CatalogAdapter {
 
 }
 
-// Common methods for UCAC4 and Simbad
+// Common methods for UCAC4 and PPMXL
 trait StandardAdapter {
   // Find what band the field descriptor should represent, in general prefer "upper case" bands over "lower case" Sloan bands.
   // This will prefer U, R and I over u', r' and i' but will map "g" and "z" to the Sloan bands g' and z'.

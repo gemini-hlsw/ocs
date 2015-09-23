@@ -157,11 +157,47 @@ case object RemoteBackend extends CachedBackend {
       new NameValuePair("RA", format(qs.base.ra.toAngle)),
       new NameValuePair("DEC", f"${qs.base.dec.toDegrees}%4.03f"),
       new NameValuePair("SR", format(qs.radiusConstraint.maxLimit)))
-    case _ => Array.empty
+    case _                          => Array.empty
   }
 
   override protected def query(e: SearchKey): QueryResult = {
     val method = new GetMethod(s"${e.url}/cgi-bin/conesearch.py")
+    val qs = queryParams(e.query)
+    method.setQueryString(qs)
+    Log.info(s"Catalog query to ${method.getURI}")
+
+    val client = new HttpClient
+    client.setConnectionTimeout(timeout)
+
+    try {
+      client.executeMethod(method)
+      VoTableParser.parse(e.url, method.getResponseBodyAsStream).fold(p => QueryResult(e.query, CatalogQueryResult(TargetsTable.Zero, List(p))), y => QueryResult(e.query, CatalogQueryResult(y)))
+    } finally {
+      method.releaseConnection()
+    }
+  }
+
+}
+
+case object SimbadNameBackend extends CachedBackend {
+  val instance = this
+  override val catalogUrls = NonEmptyList(new URL("http://simbad.cfa.harvard.edu/simbad/"), new URL("http://simbad.u-strasbg.fr/simbad"))
+
+  val Log = Logger.getLogger(getClass.getName)
+
+  private val timeout = 30 * 1000 // Max time to wait
+
+  private def format(a: Angle)= f"${a.toDegrees}%4.03f"
+
+  protected [votable] def queryParams(q: CatalogQuery): Array[NameValuePair] = q match {
+    case qs: NameCatalogQuery => Array(
+      new NameValuePair("output.format", "VOTable"),
+      new NameValuePair("Ident", qs.search))
+    case _                    => Array.empty
+  }
+
+  override protected def query(e: SearchKey): QueryResult = {
+    val method = new GetMethod(s"${e.url}/sim-id")
     val qs = queryParams(e.query)
     method.setQueryString(qs)
     Log.info(s"Catalog query to ${method.getURI}")
