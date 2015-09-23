@@ -2,25 +2,29 @@ package edu.gemini.catalog.ui
 
 import javax.swing.BorderFactory._
 import javax.swing.border.Border
-import javax.swing.SwingConstants
+import javax.swing.{DefaultComboBoxModel, SwingConstants}
 import javax.swing.table._
 
-import edu.gemini.ags.api.AgsRegistrar
+import edu.gemini.ags.api.{AgsStrategy, AgsRegistrar}
+import edu.gemini.ags.conf.ProbeLimitsTable
 import edu.gemini.catalog.api._
 import edu.gemini.catalog.votable.{QueryResult, VoTableClient}
 import edu.gemini.pot.sp.ISPNode
 import edu.gemini.shared.gui.textComponent.{TextRenderer, NumberField}
 import edu.gemini.shared.gui.{GlassLabel, SizePreference, SortableTable}
 import edu.gemini.spModel.core.Target.SiderealTarget
+import edu.gemini.spModel.gemini.obscomp.SPSiteQuality
+import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.Conditions
+import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.core._
 import edu.gemini.ui.miglayout.MigPanel
 import edu.gemini.ui.miglayout.constraints._
-import jsky.app.ot.OT
 import jsky.app.ot.tpe.TpeContext
 
 import scala.swing.Reactions.Reaction
 import scala.swing._
 import scala.collection.mutable
+import scala.collection.JavaConverters._
 import scala.swing.event.{ValueChanged, ButtonClicked, UIElementMoved, UIElementResized}
 
 import scalaz._
@@ -37,6 +41,20 @@ trait PreferredSizeFrame { this: Window =>
       new Dimension(screenSize.getWidth.intValue() * 3 / 4, (2f / 3f * screenSize.getHeight).intValue())
     }
   }
+}
+
+/**
+ * Describes the observation used to do a Guide Star Search
+ */
+case class ObservationInfo(objectName: Option[String], instrumentName: Option[String], strategy: Option[AgsStrategy], validStrategies: List[AgsStrategy], conditions: Option[Conditions])
+
+object ObservationInfo {
+  def apply(ctx: ObsContext):ObservationInfo = ObservationInfo(
+    Option(ctx.getTargets.getBase).map(_.getTarget.getName),
+    Option(ctx.getInstrument).map(_.getTitle),
+    AgsRegistrar.currentStrategy(ctx),
+    AgsRegistrar.validStrategies(ctx),
+    ctx.getConditions.some)
 }
 
 /**
@@ -273,7 +291,7 @@ object QueryResultsWindow {
       /**
        * Called after  a query completes to update the UI according to the results
        */
-      def updateResults(queryResult: QueryResult): Unit = {
+      def updateResults(info: Option[ObservationInfo], queryResult: QueryResult): Unit = {
         val model = TargetsModel(queryResult.query.base, queryResult.result.targets.rows)
         resultsTable.model = model
 
@@ -288,7 +306,7 @@ object QueryResultsWindow {
         resultsLabel.updateCount(queryResult.result.targets.rows.length)
 
         // Update the query form
-        QueryForm.updateQuery(queryResult.query)
+        QueryForm.updateQuery(info, queryResult.query)
       }
 
       protected def revalidateFrame(): Unit = {
@@ -305,7 +323,7 @@ object QueryResultsWindow {
           reactions += {
             case ButtonClicked(_) =>
               // Hit the catalog with a new query
-              buildQuery.foreach(reloadSearchData)
+              buildQuery.foreach(Function.tupled(reloadSearchData))
           }
         }
 
@@ -317,6 +335,21 @@ object QueryResultsWindow {
               case f: NumberField       => f.valid
               case _                    => true
             }
+        }
+
+        lazy val objectName = new TextField("")
+        lazy val instrumentName = new Label("")
+        lazy val guider = new ComboBox(List.empty[AgsStrategy]) with TextRenderer[AgsStrategy] {
+          override def text(a: AgsStrategy) = ~Option(a).map(_.key.displayName)
+        }
+        lazy val sbBox = new ComboBox(List(SPSiteQuality.SkyBackground.values(): _*)) with TextRenderer[SPSiteQuality.SkyBackground] {
+          override def text(a: SPSiteQuality.SkyBackground) = a.displayValue()
+        }
+        lazy val ccBox = new ComboBox(List(SPSiteQuality.CloudCover.values(): _*)) with TextRenderer[SPSiteQuality.CloudCover] {
+          override def text(a: SPSiteQuality.CloudCover) = a.displayValue()
+        }
+        lazy val iqBox = new ComboBox(List(SPSiteQuality.ImageQuality.values(): _*)) with TextRenderer[SPSiteQuality.ImageQuality] {
+          override def text(a: SPSiteQuality.ImageQuality) = a.displayValue()
         }
 
         lazy val ra = new RATextField(RightAscension.zero) {
@@ -358,13 +391,27 @@ object QueryResultsWindow {
         def buildLayout(filters: List[MagnitudeConstraints]): Unit = {
           _contents.clear()
 
-          add(new Label("RA"), CC().spanX(2))
+          add(new Label("Object"), CC().spanX(2))
+          add(objectName, CC().spanX(3).growX())
+          add(new Label("RA"), CC().spanX(2).newline())
           add(ra, CC().spanX(3).growX())
           add(new Label("J2000") {
             verticalAlignment = Alignment.Center
           }, CC().spanY(2).spanX(2))
           add(new Label("Dec"), CC().spanX(2).newline())
           add(dec, CC().spanX(3).growX())
+          add(new Separator(Orientation.Horizontal), CC().spanX(7).growX().newline())
+          add(new Label("Instrument"), CC().spanX(2).newline())
+          add(instrumentName, CC().spanX(3))
+          add(new Label("Guider"), CC().spanX(2).newline())
+          add(guider, CC().spanX(3).growX())
+          add(new Label("Sky Background"), CC().spanX(2).newline())
+          add(sbBox, CC().spanX(3).growX())
+          add(new Label("Cloud Cover"), CC().spanX(2).newline())
+          add(ccBox, CC().spanX(3).growX())
+          add(new Label("Image Quality"), CC().spanX(2).newline())
+          add(iqBox, CC().spanX(3).growX())
+          add(new Separator(Orientation.Horizontal), CC().spanX(7).growX().newline())
           add(new Label("Radial Range"), CC().spanX(2).newline())
           add(radiusStart, CC().minWidth(50.px).growX())
           add(new Label("-"), CC())
@@ -399,7 +446,22 @@ object QueryResultsWindow {
         /**
          * Update query form according to the passed values
          */
-        def updateQuery(query: CatalogQuery): Unit = {
+        def updateQuery(info: Option[ObservationInfo], query: CatalogQuery): Unit = {
+          info.foreach { i =>
+            objectName.text = ~i.objectName
+            instrumentName.text = ~i.instrumentName
+            // Update guiders box model
+            val guiderModel = new DefaultComboBoxModel[AgsStrategy](new java.util.Vector((~info.map(_.validStrategies)).asJava))
+            val selected = info >>= {_.strategy}
+            selected.foreach(guiderModel.setSelectedItem)
+            guider.peer.setModel(guiderModel)
+            // Update conditions
+            i.conditions.foreach { c =>
+              sbBox.selection.item = c.sb
+              ccBox.selection.item = c.cc
+              iqBox.selection.item = c.iq
+            }
+          }
           // Update the RA
           ra.updateRa(query.base.ra)
           dec.updateDec(query.base.dec)
@@ -413,7 +475,7 @@ object QueryResultsWindow {
 
         // Makes a combo box out of the supported bands
         private def bandsBoxes(bandsList: BandsList): List[ComboBox[MagnitudeBand]] = {
-          def bandComboBox(band: MagnitudeBand) =  new ComboBox(bands) with TextRenderer[MagnitudeBand] {
+          def bandComboBox(band: MagnitudeBand) = new ComboBox(bands) with TextRenderer[MagnitudeBand] {
             selection.item = band
             override def text(a: MagnitudeBand) = a.name
           }
@@ -433,13 +495,21 @@ object QueryResultsWindow {
           }.toList
 
         // Make a query out of the form parameters
-        private def buildQuery: Option[CatalogQuery] = {
+        private def buildQuery: Option[(Option[ObservationInfo], CatalogQuery)] = {
           queryButton.enabled option {
             // No validation here, the Query button is disabled unless all the controls are valid
             val coordinates = Coordinates(ra.value, dec.value)
             val radius = RadiusConstraint.between(Angle.fromArcmin(radiusStart.text.toDouble), Angle.fromArcmin(radiusEnd.text.toDouble))
 
-            CatalogQuery(None, coordinates, radius, currentFilters, ucac4)
+            val guiders = for {
+              i <- 0 until guider.peer.getModel.getSize
+            } yield guider.peer.getModel.getElementAt(i)
+
+            // TODO Use the selected guider to do a different strategy OCSADV-403
+            val conditions = Conditions.NOMINAL.sb(sbBox.selection.item).cc(ccBox.selection.item).iq(iqBox.selection.item)
+            // TODO Change the search query for different conditions OCSADV-416
+            val info = ObservationInfo(objectName.text.some, instrumentName.text.some, Option(guider.selection.item), guiders.toList, conditions.some).some
+            (info, CatalogQuery(None, coordinates, radius, currentFilters, ucac4))
           }
         }
 
@@ -490,7 +560,7 @@ object QueryResultsWindow {
     val queryFrame = QueryResultsFrame
   }
 
-  private def reloadSearchData(query: CatalogQuery) {
+  private def reloadSearchData(obsInfo: Option[ObservationInfo], query: CatalogQuery) {
     import QueryResultsWindow.table._
     import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -503,31 +573,33 @@ object QueryResultsWindow {
       case scala.util.Success(x) =>
         Swing.onEDT {
           GlassLabel.hide(queryFrame.peer.getRootPane)
-          queryFrame.updateResults(x)
+          queryFrame.updateResults(obsInfo, x)
         }
     }
   }
 
   // Shows the frame and loads the query
-  protected [ui] def showWithQuery(q: CatalogQuery):Unit = Swing.onEDT {
+  protected [ui] def showWithQuery(ctx: ObsContext, q: CatalogQuery):Unit = Swing.onEDT {
     import QueryResultsWindow.table._
 
     queryFrame.visible = true
     queryFrame.peer.toFront()
-    reloadSearchData(q)
+    reloadSearchData(ObservationInfo(ctx).some, q)
   }
 
   // Public interface
   val instance = this
 
   def showOn(n: ISPNode) {
-    TpeContext.apply(n).obsContext.foreach { obsCtx =>
-      // TODO The user should be able to select the strategy OCSADV-403
-      AgsRegistrar.currentStrategy(obsCtx).foreach { strategy =>
-        // TODO Use only the first query, GEMS isn't supported yet OCSADV-242, OCSADV-239
-        strategy.catalogQueries(obsCtx, OT.getMagnitudeTable).headOption.foreach { q =>
-          showWithQuery(q)
-        }
+    TpeContext.apply(n).obsContext.foreach(showOn)
+  }
+
+  def showOn(obsCtx: ObsContext) {
+    // TODO The user should be able to select the strategy OCSADV-403
+    AgsRegistrar.currentStrategy(obsCtx).foreach { strategy =>
+      // TODO Use only the first query, GEMS isn't supported yet OCSADV-242, OCSADV-239
+      strategy.catalogQueries(obsCtx, ProbeLimitsTable.loadOrThrow()).headOption.foreach { q =>
+        showWithQuery(obsCtx, q)
       }
     }
   }
@@ -538,6 +610,14 @@ object CatalogQueryDemo extends SwingApplication {
   import QueryResultsWindow.instance
   import jsky.util.gui.Theme
   import javax.swing.UIManager
+  import edu.gemini.shared.util.immutable.{None => JNone, Some => JSome}
+  import edu.gemini.spModel.gemini.niri.InstNIRI
+  import edu.gemini.spModel.gemini.niri.NiriOiwfsGuideProbe
+  import edu.gemini.spModel.guide.GuideProbe
+  import edu.gemini.spModel.target.obsComp.PwfsGuideProbe
+  import edu.gemini.spModel.gemini.obscomp.SPSiteQuality
+  import edu.gemini.spModel.target.SPTarget
+  import edu.gemini.spModel.target.env.TargetEnvironment
 
   val query = CatalogQuery(None,Coordinates(RightAscension.fromAngle(Angle.fromDegrees(3.1261166666666895)),Declination.fromAngle(Angle.fromDegrees(337.93268333333333)).getOrElse(Declination.zero)),RadiusConstraint.between(Angle.zero,Angle.fromDegrees(0.16459874517619255)),List(MagnitudeConstraints(RBandsList,FaintnessConstraint(16.0),Some(SaturationConstraint(3.1999999999999993)))),ucac4)
 
@@ -548,7 +628,17 @@ object CatalogQueryDemo extends SwingApplication {
 
     UIManager.put("Button.defaultButtonFollowsFocus", true)
 
-    instance.showWithQuery(query)
+    val ra = Angle.fromHMS(0, 12, 30.286).getOrElse(Angle.zero)
+    val dec = Declination.fromAngle(Angle.zero - Angle.fromDMS(22, 4, 2.34).getOrElse(Angle.zero)).getOrElse(Declination.zero)
+    val guiders = Set[GuideProbe](NiriOiwfsGuideProbe.instance, PwfsGuideProbe.pwfs1, PwfsGuideProbe.pwfs2)
+    val target = new SPTarget(ra.toDegrees, dec.toDegrees) <| {_.setName("HIP 100")}
+    val env = TargetEnvironment.create(target)
+    val inst = new InstNIRI <| {_.setPosAngle(0.0)}
+
+    val conditions = SPSiteQuality.Conditions.NOMINAL.sb(SPSiteQuality.SkyBackground.ANY).cc(SPSiteQuality.CloudCover.PERCENT_80).iq(SPSiteQuality.ImageQuality.PERCENT_85)
+    val ctx = ObsContext.create(env, inst, new JSome(Site.GN), conditions, null, null, JNone.instance())
+
+    instance.showOn(ctx)
   }
 
 }

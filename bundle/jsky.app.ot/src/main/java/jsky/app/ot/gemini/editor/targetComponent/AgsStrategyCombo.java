@@ -29,8 +29,7 @@ public final class AgsStrategyCombo extends AgsSelectorControl implements Action
             if (o == null || getClass() != o.getClass()) return false;
 
             final ComboEntry that = (ComboEntry) o;
-            if (!name.equals(that.name)) return false;
-            return strategy.equals(that.strategy);
+            return name.equals(that.name) && strategy.equals(that.strategy);
         }
 
         @Override
@@ -59,35 +58,20 @@ public final class AgsStrategyCombo extends AgsSelectorControl implements Action
         combo.removeActionListener(this);
         combo.removeAllItems();
 
-        final ImList<ComboEntry> validEntries = opts.validStrategies.map(new MapOp<AgsStrategy, ComboEntry>() {
-            @Override public ComboEntry apply(AgsStrategy agsStrategy) {
-                return new ComboEntry(agsStrategy.key().displayName(), new Some<>(agsStrategy));
-            }
+        final ImList<ComboEntry> validEntries = opts.validStrategies.map(agsStrategy -> new ComboEntry(agsStrategy.key().displayName(), new Some<>(agsStrategy)));
+
+        final Option<ComboEntry> defaultEntry = opts.defaultStrategy.map(agsStrategy -> {
+            final String name = String.format("Auto (%s)", agsStrategy.key().displayName());
+            return new ComboEntry(name, None.<AgsStrategy>instance());
         });
 
-        final Option<ComboEntry> defaultEntry = opts.defaultStrategy.map(new MapOp<AgsStrategy, ComboEntry>() {
-            @Override public ComboEntry apply(AgsStrategy agsStrategy) {
-                final String name = String.format("Auto (%s)", agsStrategy.key().displayName());
-                return new ComboEntry(name, None.<AgsStrategy>instance());
-            }
-        });
-
-        // val allEntries = defaultEntry.fold(validEntries) { _ :: validEntries }
         final ImList<ComboEntry> allEntries = defaultEntry.isEmpty() ? validEntries : validEntries.cons(defaultEntry.getValue());
         final ComboBoxModel<ComboEntry> model = new DefaultComboBoxModel<>(new Vector<>(allEntries.toList()));
 
         final Option<ComboEntry> sel = opts.usingDefault() ? defaultEntry :
-            allEntries.find(new PredicateOp<ComboEntry>() {
-                @Override public Boolean apply(ComboEntry comboEntry) {
-                    return comboEntry.strategy.equals(opts.strategyOverride);
-                }
-            });
+            allEntries.find(comboEntry -> comboEntry.strategy.equals(opts.strategyOverride));
 
-        sel.foreach(new ApplyOp<ComboEntry>() {
-            @Override public void apply(ComboEntry comboEntry) {
-                model.setSelectedItem(comboEntry);
-            }
-        });
+        sel.foreach(model::setSelectedItem);
 
         combo.setModel(model);
         combo.addActionListener(this);
