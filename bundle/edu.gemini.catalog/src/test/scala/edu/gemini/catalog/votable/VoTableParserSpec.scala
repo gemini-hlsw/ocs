@@ -557,5 +557,28 @@ class VoTableParserSpec extends SpecificationWithJUnit with VoTableParser {
       result.map(_.magnitudeIn(MagnitudeBand._i)) should beEqualTo(\/.right(Some(new Magnitude(16.902, MagnitudeBand._i, 0.005))))
       result.map(_.magnitudeIn(MagnitudeBand._z)) should beEqualTo(\/.right(Some(new Magnitude(17.015, MagnitudeBand._z, 0.011))))
     }
+    "parse simbad named queries with mixed magnitudes" in {
+      val xmlFile = "simbad-J000008.13.xml"
+      // The sample has only one row
+      val result = VoTableParser.parse(new URL(s"file:////$xmlFile"), getClass.getResourceAsStream(s"/$xmlFile")).getOrElse(ParsedVoResource(Nil)).tables.headOption.flatMap(_.rows.headOption).get
+
+      // id and coordinates
+      result.map(_.name) should beEqualTo(\/.right("2SLAQ J000008.13+001634.6"))
+      result.map(_.coordinates.ra) should beEqualTo(\/.right(RightAscension.fromAngle(Angle.fromHMS(0, 0, 8.136).getOrElse(Angle.zero))))
+      result.map(_.coordinates.dec) should beEqualTo(\/.right(Declination.fromAngle(Angle.fromDMS(0, 16, 34.6908).getOrElse(Angle.zero)).getOrElse(Declination.zero)))
+      // proper motions
+      result.map(_.properMotion) should beEqualTo(\/.right(None))
+      // magnitudes
+      result.map(_.magnitudeIn(MagnitudeBand.B)) should beEqualTo(\/.right(Some(new Magnitude(20.35, MagnitudeBand.B))))
+      result.map(_.magnitudeIn(MagnitudeBand.V)) should beEqualTo(\/.right(Some(new Magnitude(20.03, MagnitudeBand.V))))
+      result.map(_.magnitudeIn(MagnitudeBand.J)) should beEqualTo(\/.right(Some(new Magnitude(19.399, MagnitudeBand.J, 0.073))))
+      result.map(_.magnitudeIn(MagnitudeBand.H)) should beEqualTo(\/.right(Some(new Magnitude(19.416, MagnitudeBand.H, 0.137))))
+      result.map(_.magnitudeIn(MagnitudeBand.K)) should beEqualTo(\/.right(Some(new Magnitude(19.176, MagnitudeBand.K, 0.115))))
+      result.map(_.magnitudeIn(MagnitudeBand._u)) should beEqualTo(\/.right(Some(new Magnitude(20.233, MagnitudeBand._u, 0.054))))
+      result.map(_.magnitudeIn(MagnitudeBand._g)) should beEqualTo(\/.right(Some(new Magnitude(20.201, MagnitudeBand._g, 0.021))))
+      result.map(_.magnitudeIn(MagnitudeBand._r)) should beEqualTo(\/.right(Some(new Magnitude(19.929, MagnitudeBand._r, 0.021))))
+      result.map(_.magnitudeIn(MagnitudeBand._i)) should beEqualTo(\/.right(Some(new Magnitude(19.472, MagnitudeBand._i, 0.023))))
+      result.map(_.magnitudeIn(MagnitudeBand._z)) should beEqualTo(\/.right(Some(new Magnitude(19.191, MagnitudeBand._z, 0.068))))
+    }
   }
 }
