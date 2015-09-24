@@ -619,7 +619,8 @@ object QueryResultsWindow {
       val mt = ProbeLimitsTable.loadOrThrow()
       // TODO Use only the first query, GEMS isn't supported yet OCSADV-242, OCSADV-239
       strategy.catalogQueries(obsCtx, mt).headOption.foreach { q =>
-        showWithQuery(obsCtx, mt, q)
+        // OCSADV-415 Display all the rows by removing the magnitude constraints
+        showWithQuery(obsCtx, mt, q.copy(magnitudeConstraints = Nil))
       }
     }
   }
