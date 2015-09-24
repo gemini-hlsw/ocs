@@ -27,7 +27,7 @@ import scala.swing.Reactions.Reaction
 import scala.swing._
 import scala.collection.mutable
 import scala.collection.JavaConverters._
-import scala.swing.event.{ValueChanged, ButtonClicked, UIElementMoved, UIElementResized}
+import scala.swing.event._
 
 import scalaz._
 import Scalaz._
@@ -48,20 +48,19 @@ trait PreferredSizeFrame { this: Window =>
 /**
  * Describes the observation used to do a Guide Star Search
  */
-case class ObservationInfo(objectName: Option[String], instrumentName: Option[String], strategy: Option[AgsStrategy], validStrategies: List[AgsStrategy], conditions: Option[Conditions], limits: Option[ProbeLimits])
+case class ObservationInfo(objectName: Option[String], instrumentName: Option[String], strategy: Option[AgsStrategy], validStrategiesAndLimits: List[(AgsStrategy, Option[ProbeLimits])], conditions: Option[Conditions])
 
 object ObservationInfo {
 
-  def probeLimits(obsCtx: ObsContext, strategy: Option[AgsStrategy], mt: MagnitudeTable):Option[ProbeLimits] =
-    strategy >>= {s => s.magnitudes(obsCtx, mt).map(k => ProbeLimits(s.probeBands, obsCtx, k._2)).headOption.flatten}
+  def probeLimits(obsCtx: ObsContext, strategy: AgsStrategy, mt: MagnitudeTable):Option[(AgsStrategy, Option[ProbeLimits])] =
+    strategy.magnitudes(obsCtx, mt).map(k => strategy -> ProbeLimits(strategy.probeBands, obsCtx, k._2)).headOption
 
   def apply(ctx: ObsContext, mt: MagnitudeTable):ObservationInfo = ObservationInfo(
     Option(ctx.getTargets.getBase).map(_.getTarget.getName),
     Option(ctx.getInstrument).map(_.getTitle),
     AgsRegistrar.currentStrategy(ctx),
-    AgsRegistrar.validStrategies(ctx),
-    ctx.getConditions.some,
-    probeLimits(ctx, AgsRegistrar.currentStrategy(ctx), mt))
+    AgsRegistrar.validStrategies(ctx).flatMap(probeLimits(ctx, _, mt)),
+    ctx.getConditions.some)
 }
 
 /**
@@ -350,8 +349,13 @@ object QueryResultsWindow {
 
         lazy val objectName = new TextField("")
         lazy val instrumentName = new Label("")
-        lazy val guider = new ComboBox(List.empty[AgsStrategy]) with TextRenderer[AgsStrategy] {
-          override def text(a: AgsStrategy) = ~Option(a).map(_.key.displayName)
+        lazy val guider = new ComboBox(List.empty[(AgsStrategy, Option[ProbeLimits])]) with TextRenderer[(AgsStrategy, Option[ProbeLimits])] {
+          override def text(a: (AgsStrategy, Option[ProbeLimits])) = ~Option(a).map(_._1.key.displayName)
+          listenTo(selection)
+          reactions += {
+            case SelectionChanged(_) =>
+              updateGuideSpeedText()
+          }
         }
         lazy val sbBox = new ComboBox(List(SPSiteQuality.SkyBackground.values(): _*)) with TextRenderer[SPSiteQuality.SkyBackground] {
           override def text(a: SPSiteQuality.SkyBackground) = a.displayValue()
@@ -458,6 +462,14 @@ object QueryResultsWindow {
           add(queryButton, CC().newline().span(7).pushX().alignX(RightAlign).gapTop(10.px))
         }
 
+        def updateGuideSpeedText():Unit = {
+          // GuideSpeed text
+          for {
+            sel        <- guider.selection.item.some
+            probeLimit <- sel._2
+          } limitsLabel.text = probeLimit.detailRange
+        }
+
         /**
          * Update query form according to the passed values
          */
@@ -466,8 +478,12 @@ object QueryResultsWindow {
             objectName.text = ~i.objectName
             instrumentName.text = ~i.instrumentName
             // Update guiders box model
-            val guiderModel = new DefaultComboBoxModel[AgsStrategy](new java.util.Vector((~info.map(_.validStrategies)).asJava))
-            val selected = info >>= {_.strategy}
+            val guiderModel = new DefaultComboBoxModel[(AgsStrategy, Option[ProbeLimits])](new java.util.Vector((~info.map(_.validStrategiesAndLimits)).asJava))
+            val selected = for {
+                in <- info
+                s  <- in.strategy
+                it <- in.validStrategiesAndLimits.find(_._1 == s)
+              } yield it
             selected.foreach(guiderModel.setSelectedItem)
             guider.peer.setModel(guiderModel)
             // Update conditions
@@ -476,10 +492,7 @@ object QueryResultsWindow {
               ccBox.selection.item = c.cc
               iqBox.selection.item = c.iq
             }
-            // GuideSpeed text
-            i.limits.foreach { pb =>
-              limitsLabel.text = pb.detailRange
-            }
+            updateGuideSpeedText()
           }
           // Update the RA
           ra.updateRa(query.base.ra)
