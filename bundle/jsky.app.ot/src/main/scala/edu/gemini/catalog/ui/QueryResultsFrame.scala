@@ -5,6 +5,7 @@ import javax.swing.border.Border
 import javax.swing.{DefaultComboBoxModel, SwingConstants}
 import javax.swing.table._
 
+import edu.gemini.ags.api.AgsMagnitude.MagnitudeTable
 import edu.gemini.ags.api.{AgsStrategy, AgsRegistrar}
 import edu.gemini.ags.conf.ProbeLimitsTable
 import edu.gemini.catalog.api._
@@ -19,6 +20,7 @@ import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.core._
 import edu.gemini.ui.miglayout.MigPanel
 import edu.gemini.ui.miglayout.constraints._
+import jsky.app.ot.gemini.editor.targetComponent.GuidingFeedback.ProbeLimits
 import jsky.app.ot.tpe.TpeContext
 
 import scala.swing.Reactions.Reaction
@@ -46,15 +48,20 @@ trait PreferredSizeFrame { this: Window =>
 /**
  * Describes the observation used to do a Guide Star Search
  */
-case class ObservationInfo(objectName: Option[String], instrumentName: Option[String], strategy: Option[AgsStrategy], validStrategies: List[AgsStrategy], conditions: Option[Conditions])
+case class ObservationInfo(objectName: Option[String], instrumentName: Option[String], strategy: Option[AgsStrategy], validStrategies: List[AgsStrategy], conditions: Option[Conditions], limits: Option[ProbeLimits])
 
 object ObservationInfo {
-  def apply(ctx: ObsContext):ObservationInfo = ObservationInfo(
+
+  def probeLimits(obsCtx: ObsContext, strategy: Option[AgsStrategy], mt: MagnitudeTable):Option[ProbeLimits] =
+    strategy >>= {s => s.magnitudes(obsCtx, mt).map(k => ProbeLimits(s.probeBands, obsCtx, k._2)).headOption.flatten}
+
+  def apply(ctx: ObsContext, mt: MagnitudeTable):ObservationInfo = ObservationInfo(
     Option(ctx.getTargets.getBase).map(_.getTarget.getName),
     Option(ctx.getInstrument).map(_.getTitle),
     AgsRegistrar.currentStrategy(ctx),
     AgsRegistrar.validStrategies(ctx),
-    ctx.getConditions.some)
+    ctx.getConditions.some,
+    probeLimits(ctx, AgsRegistrar.currentStrategy(ctx), mt))
 }
 
 /**
@@ -355,6 +362,9 @@ object QueryResultsWindow {
         lazy val iqBox = new ComboBox(List(SPSiteQuality.ImageQuality.values(): _*)) with TextRenderer[SPSiteQuality.ImageQuality] {
           override def text(a: SPSiteQuality.ImageQuality) = a.displayValue()
         }
+        lazy val limitsLabel = new Label() {
+          font = font.deriveFont(font.getSize2D * 0.8f)
+        }
 
         lazy val ra = new RATextField(RightAscension.zero) {
           reactions += queryButtonEnabling
@@ -415,6 +425,7 @@ object QueryResultsWindow {
           add(ccBox, CC().spanX(3).growX())
           add(new Label("Image Quality"), CC().spanX(2).newline())
           add(iqBox, CC().spanX(3).growX())
+          add(limitsLabel, CC().spanX(7).growX().newline())
           add(new Separator(Orientation.Horizontal), CC().spanX(7).growX().newline())
           add(new Label("Radial Range"), CC().spanX(2).newline())
           add(radiusStart, CC().minWidth(50.px).growX())
@@ -464,6 +475,10 @@ object QueryResultsWindow {
               sbBox.selection.item = c.sb
               ccBox.selection.item = c.cc
               iqBox.selection.item = c.iq
+            }
+            // GuideSpeed text
+            i.limits.foreach { pb =>
+              limitsLabel.text = pb.detailRange
             }
           }
           // Update the RA
@@ -583,12 +598,12 @@ object QueryResultsWindow {
   }
 
   // Shows the frame and loads the query
-  protected [ui] def showWithQuery(ctx: ObsContext, q: CatalogQuery):Unit = Swing.onEDT {
+  protected [ui] def showWithQuery(ctx: ObsContext, mt: MagnitudeTable, q: CatalogQuery):Unit = Swing.onEDT {
     import QueryResultsWindow.table._
 
     queryFrame.visible = true
     queryFrame.peer.toFront()
-    reloadSearchData(ObservationInfo(ctx).some, q)
+    reloadSearchData(ObservationInfo(ctx, mt).some, q)
   }
 
   // Public interface
@@ -601,9 +616,10 @@ object QueryResultsWindow {
   def showOn(obsCtx: ObsContext) {
     // TODO The user should be able to select the strategy OCSADV-403
     AgsRegistrar.currentStrategy(obsCtx).foreach { strategy =>
+      val mt = ProbeLimitsTable.loadOrThrow()
       // TODO Use only the first query, GEMS isn't supported yet OCSADV-242, OCSADV-239
-      strategy.catalogQueries(obsCtx, ProbeLimitsTable.loadOrThrow()).headOption.foreach { q =>
-        showWithQuery(obsCtx, q)
+      strategy.catalogQueries(obsCtx, mt).headOption.foreach { q =>
+        showWithQuery(obsCtx, mt, q)
       }
     }
   }
