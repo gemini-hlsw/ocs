@@ -46,17 +46,17 @@ public class CalibrationMapTest {
         Assert.assertEquals(6, keys.size());
 
         // wildcard that matches all available values
-        // this also tests that obsoleted values are not taken into account (13 are defined, 2 of them are obsolete)
+        // Note that obsolete values are allowed!
         properties.setProperty(ConfigKeyGnirs.Values.SLIT_WIDTH.toString(), "*");
         keys = map.createConfig(properties);
-        Assert.assertEquals(11, keys.size());
+        Assert.assertEquals(13, keys.size());
 
-        // combination of wildcards: 11 slit widths, 2 pixel scales, 2 well depths = 44 keys...
+        // combination of wildcards: 13 slit widths (2 obsolete), 2 pixel scales, 2 well depths = 52 keys...
         properties.setProperty(ConfigKeyGnirs.Values.SLIT_WIDTH.toString(), "*");
         properties.setProperty(ConfigKeyGnirs.Values.PIXEL_SCALE.toString(), "*");
         properties.setProperty(ConfigKeyGnirs.Values.WELL_DEPTH.toString(), "*");
         keys = map.createConfig(properties);
-        Assert.assertEquals(44, keys.size());
+        Assert.assertEquals(52, keys.size());
     }
 
     @Test
