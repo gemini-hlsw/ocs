@@ -24,7 +24,6 @@ import edu.gemini.spModel.target.obsComp.TargetObsComp;
 import edu.gemini.spModel.target.offset.OffsetPosBase;
 import edu.gemini.spModel.target.offset.OffsetPosList;
 import edu.gemini.spModel.target.offset.OffsetUtil;
-import edu.gemini.spModel.target.system.CoordinateParam;
 import edu.gemini.spModel.telescope.IssPort;
 import edu.gemini.spModel.telescope.IssPortProvider;
 import edu.gemini.spModel.telescope.PosAngleConstraint;
@@ -56,7 +55,7 @@ public final class ObsContext {
 
         // Otherwise, we try to get the site from the program ID.
         final SPObservationID obsId = observation.getObservationID();
-        return (obsId == null) ? None.<Site>instance() : ImOption.apply(obsId.getProgramID().site());
+        return (obsId == null) ? None.instance() : ImOption.apply(obsId.getProgramID().site());
     }
 
     /**
@@ -89,7 +88,7 @@ public final class ObsContext {
                                     Set<Offset> sciencePos,
                                     AbstractDataObject aoComp,
                                     Option<SchedulingBlock> schedulingBlock) {
-        return create(None.<AgsStrategyKey>instance(), targets, inst, getSiteFromInstrument(inst), conds, sciencePos, aoComp, schedulingBlock);
+        return create(None.instance(), targets, inst, getSiteFromInstrument(inst), conds, sciencePos, aoComp, schedulingBlock);
     }
 
 
@@ -111,7 +110,7 @@ public final class ObsContext {
                                     Set<Offset> sciencePos,
                                     AbstractDataObject aoComp,
                                     Option<SchedulingBlock> schedulingBlock) {
-        return create(None.<AgsStrategyKey>instance(), targets, inst, site, conds, sciencePos, aoComp, schedulingBlock);
+        return create(None.instance(), targets, inst, site, conds, sciencePos, aoComp, schedulingBlock);
     }
 
     public static ObsContext create(Option<AgsStrategyKey> ags,
@@ -134,7 +133,7 @@ public final class ObsContext {
         if (aoComp != null) {
             return new ObsContext(ags, targets, inst, site, conds, offsets, new Some<>(aoComp), schedulingBlock);
         } else {
-            return new ObsContext(ags, targets, inst, site, conds, offsets, None.<AbstractDataObject>instance(), schedulingBlock);
+            return new ObsContext(ags, targets, inst, site, conds, offsets, None.instance(), schedulingBlock);
         }
     }
 
@@ -165,11 +164,12 @@ public final class ObsContext {
 
         OffsetPosList<OffsetPosBase>[] posListA = (OffsetPosList<OffsetPosBase>[])new OffsetPosList[posLists.size()];
         posListA = posLists.toArray(posListA);
+
         final Set<Offset> offsets = OffsetUtil.getSciencePositions(posListA);
 
         final SPObservation spObs = (SPObservation) obs.getDataObject();
         return new Some<>(ObsContext.create(spObs.getAgsStrategyOverride(), env, inst, site, conds,
-                offsets, aoCompOpt.getOrNull(), ((SPObservation) obs.getDataObject()).getSchedulingBlock()));
+                offsets, aoCompOpt.getOrNull(), spObs.getSchedulingBlock()));
     }
 
     // Fish out the target, instrument and AO component data objects
@@ -206,7 +206,7 @@ public final class ObsContext {
             }
 
             if ((target == null) || (inst == null) || (conds == null)) return None.instance();
-            Option<AbstractDataObject> aoOpt = (aoComp == null) ? None.<AbstractDataObject>instance() : new Some<>(aoComp);
+            Option<AbstractDataObject> aoOpt = (aoComp == null) ? None.instance() : new Some<>(aoComp);
             return new Some<>(new ObsData(target, inst, conds, aoOpt));
         }
     }
@@ -344,7 +344,7 @@ public final class ObsContext {
     }
 
     public ObsContext withAOComponent(AbstractDataObject aoCompOpt){
-        return new ObsContext(agsOverride, targets,  inst, site, conds, sciencePositions, new Some<AbstractDataObject>(aoCompOpt), schedulingBlock);
+        return new ObsContext(agsOverride, targets,  inst, site, conds, sciencePositions, new Some<>(aoCompOpt), schedulingBlock);
     }
 
 

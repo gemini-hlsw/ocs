@@ -125,28 +125,13 @@ public class TpeImageWidget extends NavigatorImageDisplay implements MouseInputL
 
         public void actionPerformed(ActionEvent evt) {
             try {
-                guideStarSearch(true);
+                manualGuideStarSearch();
             } catch (Exception e) {
                 DialogUtil.error(e);
             }
         }
     };
 
-    private final AbstractAction _autoGuideStarAction = new AbstractAction(
-            "Auto GS",
-            Resources.getIcon("gsauto.png")) {
-        {
-            putValue(Action.SHORT_DESCRIPTION, "Have the OT automatically select the best guide star for your observation");
-        }
-
-        public void actionPerformed(ActionEvent actionEvent) {
-            try {
-                guideStarSearch(false);
-            } catch (Exception e) {
-                DialogUtil.error(e);
-            }
-        }
-    };
     private boolean _viewingOffsets;
 
     /**
@@ -680,8 +665,6 @@ public class TpeImageWidget extends NavigatorImageDisplay implements MouseInputL
             basePosUpdate(base.getTarget());
         }
 
-        _autoGuideStarAction.setEnabled(GuideStarSupport.supportsAutoGuideStarSelection(_ctx));
-
         repaint();
     }
 
@@ -1095,47 +1078,47 @@ public class TpeImageWidget extends NavigatorImageDisplay implements MouseInputL
     }
 
 
-    /**
-     * Do a manual guide star search if manual is true, otherwise, if supported, do an automatic search.
-     *
-     * @param manual true for manual search
-     */
-    public void guideStarSearch(boolean manual) {
-        if (manual) {
-            manualGuideStarSearch();
-        } else {
-            Option<ObsContext> maybeObsContext = _ctx.obsContextJava();
-            if (maybeObsContext.isEmpty()) {
-                // UX-1012: there's no obsContext which means some vital information is missing
-                // in this case do not allow an automated guide star search to be launched
-                final String missingComponent;
-                if (_ctx.targets().isEmpty()) {
-                    missingComponent = "Target";
-                } else if (_ctx.instrument().isEmpty()) {
-                    missingComponent = "Instrument";
-                } else if (_ctx.siteQuality().isEmpty()) {
-                    missingComponent = "Site Quality";
-                } else {
-                    missingComponent = "Some";
-                }
-                DialogUtil.error(String.format("%s component is missing. It is not possible to select a guide star.", missingComponent));
-            } else {
-                if (GuideStarSupport.supportsAutoGuideStarSelection(_ctx)) {
-                    final Option<AgsStrategy> ass = AgsStrategyUtil.currentStrategy(maybeObsContext);
-                    if (!ass.isEmpty()) {
-                        if (ass.getValue().key() == AgsStrategyKey.GemsKey$.MODULE$ && GuideStarSupport.hasGemsComponent(_ctx)) {
-                            gemsGuideStarSearch();
-                        } else {
-                            AgsClient.launch(_ctx, this);
-                        }
-                    }
-                }
-            }
-        }
-    }
+//    /**
+//     * Do a manual guide star search if manual is true, otherwise, if supported, do an automatic search.
+//     *
+//     * @param manual true for manual search
+//     */
+//    private void guideStarSearch(boolean manual) {
+//        if (manual) {
+//            manualGuideStarSearch();
+//        } else {
+//            Option<ObsContext> maybeObsContext = _ctx.obsContextJava();
+//            if (maybeObsContext.isEmpty()) {
+//                // UX-1012: there's no obsContext which means some vital information is missing
+//                // in this case do not allow an automated guide star search to be launched
+//                final String missingComponent;
+//                if (_ctx.targets().isEmpty()) {
+//                    missingComponent = "Target";
+//                } else if (_ctx.instrument().isEmpty()) {
+//                    missingComponent = "Instrument";
+//                } else if (_ctx.siteQuality().isEmpty()) {
+//                    missingComponent = "Site Quality";
+//                } else {
+//                    missingComponent = "Some";
+//                }
+//                DialogUtil.error(String.format("%s component is missing. It is not possible to select a guide star.", missingComponent));
+//            } else {
+//                if (GuideStarSupport.supportsAutoGuideStarSelection(_ctx)) {
+//                    final Option<AgsStrategy> ass = AgsStrategyUtil.currentStrategy(maybeObsContext);
+//                    if (!ass.isEmpty()) {
+//                        if (ass.getValue().key() == AgsStrategyKey.GemsKey$.MODULE$ && GuideStarSupport.hasGemsComponent(_ctx)) {
+//                            gemsGuideStarSearch();
+//                        } else {
+//                            AgsClient.launch(_ctx, this);
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//    }
 
     // manual guide star selection dialog
-    private void manualGuideStarSearch() {
+    public void manualGuideStarSearch() {
         if (GuideStarSupport.hasGemsComponent(_ctx)) {
             showGemsGuideStarSearchDialog();
         } else {
@@ -1147,8 +1130,6 @@ public class TpeImageWidget extends NavigatorImageDisplay implements MouseInputL
     private void gemsGuideStarSearch() {
         if (_gemsGuideStarWorker == null) {
             _gemsGuideStarWorker = new GemsGuideStarWorker();
-            // Change button/menu label while searching
-            _autoGuideStarAction.putValue(Action.NAME, "Cancel Search");
             _gemsGuideStarWorker.start();
         } else {
             // button changes to Cancel during processing. If pressed, interrupt the background thread.
@@ -1172,13 +1153,8 @@ public class TpeImageWidget extends NavigatorImageDisplay implements MouseInputL
         return _manualGuideStarAction;
     }
 
-    public AbstractAction getAutoGuideStarAction() {
-        return _autoGuideStarAction;
-    }
-
     // Called from GemsGuideStarWorker when finished
     void setGemsGuideStarWorkerFinished() {
-        _autoGuideStarAction.putValue(Action.NAME, "Auto GS");
         _gemsGuideStarWorker = null;
     }
 
