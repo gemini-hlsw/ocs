@@ -88,9 +88,6 @@ public class TpeImageWidget extends NavigatorImageDisplay implements MouseInputL
     // The default algorithm to use for catalog searches
     private ICatalogAlgorithm _algorithm;
 
-    // Background task to automatically select GEMS guide stars
-    private GemsGuideStarWorker _gemsGuideStarWorker;
-
     // Dialog for GeMS manual guide star selection
     private GemsGuideStarSearchDialog _gemsGuideStarSearchDialog;
 
@@ -1126,17 +1123,6 @@ public class TpeImageWidget extends NavigatorImageDisplay implements MouseInputL
         }
     }
 
-    // OT-36: Gems guide star auto selection
-    private void gemsGuideStarSearch() {
-        if (_gemsGuideStarWorker == null) {
-            _gemsGuideStarWorker = new GemsGuideStarWorker();
-            _gemsGuideStarWorker.start();
-        } else {
-            // button changes to Cancel during processing. If pressed, interrupt the background thread.
-            _gemsGuideStarWorker.interrupt();
-        }
-    }
-
     private void showGemsGuideStarSearchDialog() {
         if (_gemsGuideStarSearchDialog == null) {
             _gemsGuideStarSearchDialog = new GemsGuideStarSearchDialog();
@@ -1151,11 +1137,6 @@ public class TpeImageWidget extends NavigatorImageDisplay implements MouseInputL
      */
     public AbstractAction getManualGuideStarAction() {
         return _manualGuideStarAction;
-    }
-
-    // Called from GemsGuideStarWorker when finished
-    void setGemsGuideStarWorkerFinished() {
-        _gemsGuideStarWorker = null;
     }
 
     public AbstractAction getSkyImageAction() {

@@ -15,7 +15,7 @@ import jsky.app.ot.OT
 import jsky.app.ot.gemini.altair.Altair_WFS_Feature
 import jsky.app.ot.gemini.inst.OIWFS_Feature
 import jsky.app.ot.gemini.tpe.TpePWFSFeature
-import jsky.app.ot.tpe.{GuideStarSupport, TpeContext, TpeManager}
+import jsky.app.ot.tpe.{GemsGuideStarWorker, GuideStarSupport, TpeContext, TpeManager}
 import scala.collection.JavaConverters._
 import scala.collection.immutable.HashMap
 import scala.swing.Swing
@@ -104,22 +104,24 @@ object BagsManager {
       curCtx.foreach { obsCtx =>
         AgsRegistrar.currentStrategy(obsCtx).foreach { strategy =>
           if (strategy.key == GemsStrategy.key && GuideStarSupport.hasGemsComponent(observation)) {
-            //GemsGuideStarWorker?
-          }
-
-          val fut = strategy.select(obsCtx, OT.getMagnitudeTable)
-          fut.onComplete {
-            case Success(selOpt) =>
-              LOG.info(s"BAGS lookup for observation=${obsKey} successful.")
-              Swing.onEDT {
-                applySelection(selOpt)
-                showTpeFeatures(selOpt)
-              }
-              taskComplete(this, success=true)
-            case Failure(ex)  =>
-              LOG.warning(s"BAGS lookup for observation=${obsKey} failed.")
-              Thread.sleep(RequeueDelay)
-              taskComplete(this, success=false)
+            muteObservation(observation)
+            new GemsGuideStarWorker().start()
+            unmuteObservation(observation)
+          } else {
+            val fut = strategy.select(obsCtx, OT.getMagnitudeTable)
+            fut.onComplete {
+              case Success(selOpt) =>
+                LOG.info(s"BAGS lookup for observation=${obsKey} successful.")
+                Swing.onEDT {
+                  applySelection(selOpt)
+                  showTpeFeatures(selOpt)
+                }
+                taskComplete(this, success = true)
+              case Failure(ex) =>
+                LOG.warning(s"BAGS lookup for observation=${obsKey} failed.")
+                Thread.sleep(RequeueDelay)
+                taskComplete(this, success = false)
+            }
           }
         }
       }
