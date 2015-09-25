@@ -12,10 +12,9 @@ import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.rich.shared.immutable._
 import edu.gemini.shared.util.immutable.{Option => JOption, Some => JSome}
 import edu.gemini.spModel.target.SPTarget
-import edu.gemini.spModel.target.env.{OptionsList, GuideProbeTargets, TargetEnvironment}
+import edu.gemini.spModel.target.env.{GuideProbeTargets, TargetEnvironment}
 import edu.gemini.spModel.target.system.HmsDegTarget
 
-import scala.collection.JavaConverters._
 import scala.concurrent.Future
 
 trait AgsStrategy {
@@ -86,22 +85,12 @@ object AgsStrategy {
      * Creates a new TargetEnvironment with guide stars for each assignment in
      * the Selection.
      */
-    def applyTo(env: TargetEnvironment): TargetEnvironment = {
-      // Only interested in the manual targets here as we either have no AGS target or will be replacing it.
-      def findMatching(gpt: GuideProbeTargets, target: SPTarget): Option[SPTarget] =
-        Option(target.getTarget.getName).flatMap { n =>
-          gpt.getManualTargets.toList.asScala.find { t =>
-            Option(t.getTarget.getName).map(_.trim).exists(_ == n.trim)
-          }
-        }
-
+    def applyTo(env: TargetEnvironment): TargetEnvironment =
       (env /: assignments) { (curEnv, ass) =>
         val target = new SPTarget(HmsDegTarget.fromSkyObject(ass.guideStar.toOldModel))
         val oldGpt = curEnv.getPrimaryGuideProbeTargets(ass.guideProbe).asScalaOpt
-
         val newGpt = oldGpt.getOrElse(GuideProbeTargets.create(ass.guideProbe)).setBagsTarget(target)
         curEnv.putPrimaryGuideProbeTargets(newGpt)
       }
-    }
   }
 }

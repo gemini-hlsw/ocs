@@ -20,7 +20,6 @@ import edu.gemini.spModel.target.system.ITarget;
 import jsky.app.ot.OTOptions;
 import jsky.app.ot.ags.*;
 import jsky.app.ot.editor.OtItemEditor;
-import jsky.app.ot.tpe.AgsClient;
 import jsky.app.ot.tpe.GuideStarSupport;
 import jsky.app.ot.tpe.TelescopePosEditor;
 import jsky.app.ot.tpe.TpeManager;
@@ -69,9 +68,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         _w.duplicateButton.addActionListener(duplicateListener);
         _w.primaryButton  .addActionListener(primaryListener);
 
-        _w.guidingControls.autoGuideStarButton().peer().addActionListener(autoGuideStarListener);
         _w.guidingControls.manualGuideStarButton().peer().addActionListener(manualGuideStarListener);
-
         _w.guidingControls.newManualGuideStarButton().peer().addActionListener(evt ->
                 QueryResultsWindow.instance().showOn(getNode()));
         _w.guidingControls.autoGuideStarGuiderSelector().addSelectionListener(strategy ->
@@ -651,28 +648,9 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         try {
             final TelescopePosEditor tpe = TpeManager.open();
             tpe.reset(getNode());
-            tpe.getImageWidget().guideStarSearch(true);
+            tpe.getImageWidget().manualGuideStarSearch();
         } catch (Exception e) {
             DialogUtil.error(e);
-        }
-    };
-
-    @SuppressWarnings("FieldCanBeLocal")
-    private final ActionListener autoGuideStarListener = new ActionListener() {
-        public void actionPerformed(ActionEvent evt) {
-            try {
-                if (GuideStarSupport.hasGemsComponent(getNode())) {
-                    final TelescopePosEditor tpe = TpeManager.open();
-                    tpe.reset(getNode());
-                    tpe.getImageWidget().guideStarSearch(false);
-                } else {
-                    // In general, we don't want to pop open the TPE just to
-                    // pick a guide star.
-                    AgsClient.launch(getNode(), _w);
-                }
-            } catch (Exception e) {
-                DialogUtil.error(e);
-            }
         }
     };
 
