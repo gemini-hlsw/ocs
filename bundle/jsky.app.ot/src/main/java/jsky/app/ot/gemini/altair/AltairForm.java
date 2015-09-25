@@ -5,9 +5,6 @@ import jsky.util.gui.OptionWidget;
 
 import javax.swing.*;
 import java.awt.*;
-/**
- * @author User #1
- */
 public class AltairForm extends JPanel {
 	public AltairForm() {
 		initComponents();
@@ -63,19 +60,16 @@ public class AltairForm extends JPanel {
                 new Insets(11, 11, 0, 0), 0, 0));
 
         //---- eight50Button ----
-		eight50Button.setText("850 nm");
+		eight50Button.setText("850 nm - 2.5 μm science");
 		add(eight50Button, new GridBagConstraints(1, 1, 1, 1, 0.0, 0.0,
 			GridBagConstraints.WEST, GridBagConstraints.NONE,
 			new Insets(11, 11, 0, 0), 0, 0));
 
         //---- oneButton ----
-		oneButton.setText("1 um");
+		oneButton.setText("750 nm - 5 μm science");
 		add(oneButton, new GridBagConstraints(1, 2, 1, 1, 0.0, 0.0,
 			GridBagConstraints.WEST, GridBagConstraints.NONE,
 			new Insets(0, 11, 0, 0), 0, 0));
-
-        // This setting is no longer supported.
-        oneButton.setEnabled(false);
 
 		//---- cassRotatorLabel ----
 		cassRotatorLabel.setToolTipText("");
