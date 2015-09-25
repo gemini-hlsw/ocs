@@ -1074,46 +1074,6 @@ public class TpeImageWidget extends NavigatorImageDisplay implements MouseInputL
         _algorithm = algorithm;
     }
 
-
-//    /**
-//     * Do a manual guide star search if manual is true, otherwise, if supported, do an automatic search.
-//     *
-//     * @param manual true for manual search
-//     */
-//    private void guideStarSearch(boolean manual) {
-//        if (manual) {
-//            manualGuideStarSearch();
-//        } else {
-//            Option<ObsContext> maybeObsContext = _ctx.obsContextJava();
-//            if (maybeObsContext.isEmpty()) {
-//                // UX-1012: there's no obsContext which means some vital information is missing
-//                // in this case do not allow an automated guide star search to be launched
-//                final String missingComponent;
-//                if (_ctx.targets().isEmpty()) {
-//                    missingComponent = "Target";
-//                } else if (_ctx.instrument().isEmpty()) {
-//                    missingComponent = "Instrument";
-//                } else if (_ctx.siteQuality().isEmpty()) {
-//                    missingComponent = "Site Quality";
-//                } else {
-//                    missingComponent = "Some";
-//                }
-//                DialogUtil.error(String.format("%s component is missing. It is not possible to select a guide star.", missingComponent));
-//            } else {
-//                if (GuideStarSupport.supportsAutoGuideStarSelection(_ctx)) {
-//                    final Option<AgsStrategy> ass = AgsStrategyUtil.currentStrategy(maybeObsContext);
-//                    if (!ass.isEmpty()) {
-//                        if (ass.getValue().key() == AgsStrategyKey.GemsKey$.MODULE$ && GuideStarSupport.hasGemsComponent(_ctx)) {
-//                            gemsGuideStarSearch();
-//                        } else {
-//                            AgsClient.launch(_ctx, this);
-//                        }
-//                    }
-//                }
-//            }
-//        }
-//    }
-
     // manual guide star selection dialog
     public void manualGuideStarSearch() {
         if (GuideStarSupport.hasGemsComponent(_ctx)) {
