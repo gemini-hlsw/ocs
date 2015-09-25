@@ -558,7 +558,7 @@ object QueryResultsWindow {
             val conditions = Conditions.NOMINAL.sb(sbBox.selection.item).cc(ccBox.selection.item).iq(iqBox.selection.item)
 
             val info = ObservationInfo(objectName.text.some, instrumentName.text.some, Option(guider.selection.item.strategy), guiders.toList, conditions.some)
-            val defaultQuery = CatalogQuery(None, coordinates, radius, currentFilters, ucac4)
+            val defaultQuery = CatalogQuery(coordinates, radius, currentFilters, ucac4)
             (info.some, guider.selection.item.query.headOption.getOrElse(defaultQuery))
           }
         }
@@ -649,9 +649,12 @@ object QueryResultsWindow {
     AgsRegistrar.currentStrategy(obsCtx).foreach { strategy =>
       val mt = ProbeLimitsTable.loadOrThrow()
       // TODO Use only the first query, GEMS isn't supported yet OCSADV-242, OCSADV-239
-      strategy.catalogQueries(obsCtx, mt).headOption.foreach { q =>
-        // OCSADV-403 Display all the rows, removing the magnitude constraints
-        showWithQuery(obsCtx, mt, q.copy(magnitudeConstraints = Nil))
+      strategy.catalogQueries(obsCtx, mt).headOption.foreach {
+        case q: ConeSearchCatalogQuery =>
+          // OCSADV-403 Display all the rows, removing the magnitude constraints
+          showWithQuery(obsCtx, mt, q.copy(magnitudeConstraints = Nil))
+        case _                         =>
+          // Ignore named queries
       }
     }
   }
