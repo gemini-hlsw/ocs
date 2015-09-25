@@ -78,8 +78,8 @@ trait GemsStrategy extends AgsStrategy {
         for {
           result                                                    <- agsCatalogResults
           angle                                                     <- anglesToTry
-          q @ ConeSearchCatalogQuery(_, _, radiusConstraint, mc, _) = result.query
         } yield {
+          val ConeSearchCatalogQuery(_, _, radiusConstraint, mc, _) = result.query
           val catalogSearchCriterion     = CatalogSearchCriterion("ags", radiusConstraint, mc.head, None, angle.some)
           val gemsCatalogSearchCriterion = new GemsCatalogSearchCriterion(result.searchKey, catalogSearchCriterion)
           new GemsCatalogSearchResults(gemsCatalogSearchCriterion, result.catalogResult.targets.rows)

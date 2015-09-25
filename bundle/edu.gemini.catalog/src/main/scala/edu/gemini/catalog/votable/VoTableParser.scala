@@ -317,6 +317,6 @@ trait VoTableParser {
       (pmRa, pmDec)   = (entries.get(adapter.pmRaField), entries.get(adapter.pmDecField))
     } yield toSiderealTarget(id, ra, dec, (pmRa, pmDec))
 
-    result.flatMap(identity)
+    result.join
   }
 }

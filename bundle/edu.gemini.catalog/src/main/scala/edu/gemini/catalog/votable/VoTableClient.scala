@@ -204,7 +204,10 @@ case object SimbadNameBackend extends CachedBackend {
 
     try {
       client.executeMethod(method)
-      VoTableParser.parse(e.url, method.getResponseBodyAsStream).fold(p => QueryResult(e.query, CatalogQueryResult(TargetsTable.Zero, List(p))), y => QueryResult(e.query, CatalogQueryResult(y)))
+      VoTableParser.parse(e.url, method.getResponseBodyAsStream) match {
+        case -\/(p) => QueryResult(e.query, CatalogQueryResult(TargetsTable.Zero, List(p)))
+        case \/-(y) => QueryResult(e.query, CatalogQueryResult(y))
+      }
     } finally {
       method.releaseConnection()
     }
