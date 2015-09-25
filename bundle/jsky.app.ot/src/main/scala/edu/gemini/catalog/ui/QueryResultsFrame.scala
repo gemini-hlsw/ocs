@@ -291,7 +291,7 @@ object QueryResultsWindow {
       /**
        * Called after  a query completes to update the UI according to the results
        */
-      def updateResults(queryResult: QueryResult): Unit = {
+      def updateResults(info: Option[ObservationInfo], queryResult: QueryResult): Unit = {
         queryResult.query match {
           case q: ConeSearchCatalogQuery =>
             val model = TargetsModel(q.base, queryResult.result.targets.rows)
@@ -307,8 +307,10 @@ object QueryResultsWindow {
             // Update the count of rows
             resultsLabel.updateCount(queryResult.result.targets.rows.length)
 
-        // Update the query form
-        QueryForm.updateQuery(info, queryResult.query)
+            // Update the query form
+            QueryForm.updateQuery(info, q)
+          case _ =>
+        }
       }
 
       protected def revalidateFrame(): Unit = {
@@ -448,7 +450,7 @@ object QueryResultsWindow {
         /**
          * Update query form according to the passed values
          */
-        def updateQuery(info: Option[ObservationInfo], query: CatalogQuery): Unit = {
+        def updateQuery(info: Option[ObservationInfo], query: ConeSearchCatalogQuery): Unit = {
           info.foreach { i =>
             objectName.text = ~i.objectName
             instrumentName.text = ~i.instrumentName
@@ -511,7 +513,7 @@ object QueryResultsWindow {
             val conditions = Conditions.NOMINAL.sb(sbBox.selection.item).cc(ccBox.selection.item).iq(iqBox.selection.item)
             // TODO Change the search query for different conditions OCSADV-416
             val info = ObservationInfo(objectName.text.some, instrumentName.text.some, Option(guider.selection.item), guiders.toList, conditions.some).some
-            (info, CatalogQuery(None, coordinates, radius, currentFilters, ucac4))
+            (info, CatalogQuery(coordinates, radius, currentFilters, ucac4))
           }
         }
 

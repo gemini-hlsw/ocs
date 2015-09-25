@@ -125,7 +125,6 @@ trait CachedBackend extends VoTableBackend {
     p.future
   }
 
-
   // Cache the query not the future so that failed queries are executed again
   protected val cachedQuery = cache(query)
 
@@ -186,8 +185,6 @@ case object SimbadNameBackend extends CachedBackend {
   val Log = Logger.getLogger(getClass.getName)
 
   private val timeout = 30 * 1000 // Max time to wait
-
-  private def format(a: Angle)= f"${a.toDegrees}%4.03f"
 
   protected [votable] def queryParams(q: CatalogQuery): Array[NameValuePair] = q match {
     case qs: NameCatalogQuery => Array(
