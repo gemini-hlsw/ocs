@@ -5,6 +5,7 @@ import javax.swing.border.Border
 import javax.swing.{DefaultComboBoxModel, SwingConstants}
 import javax.swing.table._
 
+import edu.gemini.ags.api.AgsMagnitude.MagnitudeTable
 import edu.gemini.ags.api.{AgsStrategy, AgsRegistrar}
 import edu.gemini.ags.conf.ProbeLimitsTable
 import edu.gemini.catalog.api._
@@ -19,13 +20,14 @@ import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.core._
 import edu.gemini.ui.miglayout.MigPanel
 import edu.gemini.ui.miglayout.constraints._
+import jsky.app.ot.gemini.editor.targetComponent.GuidingFeedback.ProbeLimits
 import jsky.app.ot.tpe.TpeContext
 
 import scala.swing.Reactions.Reaction
 import scala.swing._
 import scala.collection.mutable
 import scala.collection.JavaConverters._
-import scala.swing.event.{ValueChanged, ButtonClicked, UIElementMoved, UIElementResized}
+import scala.swing.event._
 
 import scalaz._
 import Scalaz._
@@ -44,17 +46,37 @@ trait PreferredSizeFrame { this: Window =>
 }
 
 /**
+ * Locally describe an ags strategy including its limits and the query that would trigger
+ */
+case class SupportedStrategy(strategy: AgsStrategy, limits: Option[ProbeLimits], query: List[CatalogQuery])
+
+/**
  * Describes the observation used to do a Guide Star Search
  */
-case class ObservationInfo(objectName: Option[String], instrumentName: Option[String], strategy: Option[AgsStrategy], validStrategies: List[AgsStrategy], conditions: Option[Conditions])
+case class ObservationInfo(objectName: Option[String], instrumentName: Option[String], strategy: Option[AgsStrategy], validStrategies: List[SupportedStrategy], conditions: Option[Conditions]) {
+  def catalogQuery:List[CatalogQuery] = validStrategies.collect {
+      case SupportedStrategy(s, _, query) if s == strategy => query
+    }.flatten
+}
 
 object ObservationInfo {
-  def apply(ctx: ObsContext):ObservationInfo = ObservationInfo(
+
+  /**
+   * Converts an AgsStrategy to a simpler description to be stored in the UI model
+   */
+  private def toSupportedStrategy(obsCtx: ObsContext, strategy: AgsStrategy, mt: MagnitudeTable):SupportedStrategy = {
+    val pb = strategy.magnitudes(obsCtx, mt).map(k => ProbeLimits(strategy.probeBands, obsCtx, k._2)).headOption
+    val queries = strategy.catalogQueries(obsCtx, mt)
+    SupportedStrategy(strategy, pb.flatten, queries)
+  }
+
+  def apply(ctx: ObsContext, mt: MagnitudeTable):ObservationInfo = ObservationInfo(
     Option(ctx.getTargets.getBase).map(_.getTarget.getName),
     Option(ctx.getInstrument).map(_.getTitle),
     AgsRegistrar.currentStrategy(ctx),
-    AgsRegistrar.validStrategies(ctx),
+    AgsRegistrar.validStrategies(ctx).map(toSupportedStrategy(ctx, _, mt)),
     ctx.getConditions.some)
+
 }
 
 /**
@@ -343,8 +365,13 @@ object QueryResultsWindow {
 
         lazy val objectName = new TextField("")
         lazy val instrumentName = new Label("")
-        lazy val guider = new ComboBox(List.empty[AgsStrategy]) with TextRenderer[AgsStrategy] {
-          override def text(a: AgsStrategy) = ~Option(a).map(_.key.displayName)
+        lazy val guider = new ComboBox(List.empty[SupportedStrategy]) with TextRenderer[SupportedStrategy] {
+          override def text(a: SupportedStrategy) = ~Option(a).map(_.strategy.key.displayName)
+          listenTo(selection)
+          reactions += {
+            case SelectionChanged(_) =>
+              updateGuideSpeedText()
+          }
         }
         lazy val sbBox = new ComboBox(List(SPSiteQuality.SkyBackground.values(): _*)) with TextRenderer[SPSiteQuality.SkyBackground] {
           override def text(a: SPSiteQuality.SkyBackground) = a.displayValue()
@@ -354,6 +381,9 @@ object QueryResultsWindow {
         }
         lazy val iqBox = new ComboBox(List(SPSiteQuality.ImageQuality.values(): _*)) with TextRenderer[SPSiteQuality.ImageQuality] {
           override def text(a: SPSiteQuality.ImageQuality) = a.displayValue()
+        }
+        lazy val limitsLabel = new Label() {
+          font = font.deriveFont(font.getSize2D * 0.8f)
         }
 
         lazy val ra = new RATextField(RightAscension.zero) {
@@ -415,6 +445,7 @@ object QueryResultsWindow {
           add(ccBox, CC().spanX(3).growX())
           add(new Label("Image Quality"), CC().spanX(2).newline())
           add(iqBox, CC().spanX(3).growX())
+          add(limitsLabel, CC().spanX(7).growX().newline())
           add(new Separator(Orientation.Horizontal), CC().spanX(7).growX().newline())
           add(new Label("Radial Range"), CC().spanX(2).newline())
           add(radiusStart, CC().minWidth(50.px).growX())
@@ -448,6 +479,15 @@ object QueryResultsWindow {
         }
 
         /**
+         * Updates the text containing the limits for the currently selected guider
+         */
+        def updateGuideSpeedText():Unit =
+          for {
+            sel        <- guider.selection.item.some
+            probeLimit <- sel.limits
+          } limitsLabel.text = probeLimit.detailRange
+
+        /**
          * Update query form according to the passed values
          */
         def updateQuery(info: Option[ObservationInfo], query: ConeSearchCatalogQuery): Unit = {
@@ -455,8 +495,12 @@ object QueryResultsWindow {
             objectName.text = ~i.objectName
             instrumentName.text = ~i.instrumentName
             // Update guiders box model
-            val guiderModel = new DefaultComboBoxModel[AgsStrategy](new java.util.Vector((~info.map(_.validStrategies)).asJava))
-            val selected = info >>= {_.strategy}
+            val guiderModel = new DefaultComboBoxModel[SupportedStrategy](new java.util.Vector((~info.map(_.validStrategies)).asJava))
+            val selected = for {
+                in <- info
+                s  <- in.strategy
+                it <- in.validStrategies.find(_.strategy == s)
+              } yield it
             selected.foreach(guiderModel.setSelectedItem)
             guider.peer.setModel(guiderModel)
             // Update conditions
@@ -465,6 +509,7 @@ object QueryResultsWindow {
               ccBox.selection.item = c.cc
               iqBox.selection.item = c.iq
             }
+            updateGuideSpeedText()
           }
           // Update the RA
           ra.updateRa(query.base.ra)
@@ -509,11 +554,12 @@ object QueryResultsWindow {
               i <- 0 until guider.peer.getModel.getSize
             } yield guider.peer.getModel.getElementAt(i)
 
-            // TODO Use the selected guider to do a different strategy OCSADV-403
-            val conditions = Conditions.NOMINAL.sb(sbBox.selection.item).cc(ccBox.selection.item).iq(iqBox.selection.item)
             // TODO Change the search query for different conditions OCSADV-416
-            val info = ObservationInfo(objectName.text.some, instrumentName.text.some, Option(guider.selection.item), guiders.toList, conditions.some).some
-            (info, CatalogQuery(coordinates, radius, currentFilters, ucac4))
+            val conditions = Conditions.NOMINAL.sb(sbBox.selection.item).cc(ccBox.selection.item).iq(iqBox.selection.item)
+
+            val info = ObservationInfo(objectName.text.some, instrumentName.text.some, Option(guider.selection.item.strategy), guiders.toList, conditions.some)
+            val defaultQuery = CatalogQuery(coordinates, radius, currentFilters, ucac4)
+            (info.some, guider.selection.item.query.headOption.getOrElse(defaultQuery))
           }
         }
 
@@ -583,12 +629,12 @@ object QueryResultsWindow {
   }
 
   // Shows the frame and loads the query
-  protected [ui] def showWithQuery(ctx: ObsContext, q: CatalogQuery):Unit = Swing.onEDT {
+  protected [ui] def showWithQuery(ctx: ObsContext, mt: MagnitudeTable, q: CatalogQuery):Unit = Swing.onEDT {
     import QueryResultsWindow.table._
 
     queryFrame.visible = true
     queryFrame.peer.toFront()
-    reloadSearchData(ObservationInfo(ctx).some, q)
+    reloadSearchData(ObservationInfo(ctx, mt).some, q)
   }
 
   // Public interface
@@ -601,9 +647,14 @@ object QueryResultsWindow {
   def showOn(obsCtx: ObsContext) {
     // TODO The user should be able to select the strategy OCSADV-403
     AgsRegistrar.currentStrategy(obsCtx).foreach { strategy =>
+      val mt = ProbeLimitsTable.loadOrThrow()
       // TODO Use only the first query, GEMS isn't supported yet OCSADV-242, OCSADV-239
-      strategy.catalogQueries(obsCtx, ProbeLimitsTable.loadOrThrow()).headOption.foreach { q =>
-        showWithQuery(obsCtx, q)
+      strategy.catalogQueries(obsCtx, mt).headOption.foreach {
+        case q: ConeSearchCatalogQuery =>
+          // OCSADV-403 Display all the rows, removing the magnitude constraints
+          showWithQuery(obsCtx, mt, q.copy(magnitudeConstraints = Nil))
+        case _                         =>
+          // Ignore named queries
       }
     }
   }
