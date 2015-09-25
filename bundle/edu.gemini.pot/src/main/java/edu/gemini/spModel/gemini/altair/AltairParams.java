@@ -25,17 +25,17 @@ public final class AltairParams {
     /**
      * Wavelength
      */
-    public static enum Wavelength implements DisplayableSpType, SequenceableSpType {
+    public enum Wavelength implements DisplayableSpType, SequenceableSpType {
 
         WAVELENGTH_850NM("850 nm"),
         WAVELENGTH_1UM("1 um"),;
 
         /* The default Wavelength index value */
         public static final Wavelength DEFAULT = WAVELENGTH_850NM;
-        private String _displayValue;
+        private final String _displayValue;
 
         // Constructor
-        private Wavelength(String displayValue) {
+        Wavelength(String displayValue) {
             _displayValue = displayValue;
         }
 
@@ -48,13 +48,6 @@ public final class AltairParams {
         }
 
         /**
-         * Return a Wavelength by index *
-         */
-        static public Wavelength getWavelengthByIndex(int index) {
-            return SpTypeUtil.valueOf(Wavelength.class, index, DEFAULT);
-        }
-
-        /**
          * Return a Wavelength by name giving a value to return upon error *
          */
         static public Wavelength getWavelength(String name, Wavelength value) {
@@ -62,7 +55,7 @@ public final class AltairParams {
         }
     }
 
-    public static enum ADC implements DisplayableSpType, SequenceableSpType {
+    public enum ADC implements DisplayableSpType, SequenceableSpType {
 
         ON("ON"),
         OFF("OFF"),;
@@ -71,9 +64,9 @@ public final class AltairParams {
          * The default ADC value *
          */
         public static final ADC DEFAULT = OFF;
-        private String _displayValue;
+        private final String _displayValue;
 
-        private ADC(String displayValue) {
+        ADC(String displayValue) {
             _displayValue = displayValue;
         }
 
@@ -100,7 +93,7 @@ public final class AltairParams {
         }
     }
 
-    public static enum CassRotator implements DisplayableSpType, SequenceableSpType {
+    public enum CassRotator implements DisplayableSpType, SequenceableSpType {
 
         FOLLOWING("Following"),
         FIXED("Fixed"),
@@ -110,9 +103,9 @@ public final class AltairParams {
          * The default CassRotator value *
          */
         public static final CassRotator DEFAULT = FOLLOWING;
-        private String _displayValue;
+        private final String _displayValue;
 
-        private CassRotator(String displayValue) {
+        CassRotator(String displayValue) {
             _displayValue = displayValue;
         }
 
@@ -140,7 +133,7 @@ public final class AltairParams {
     }
 
 
-    public static enum FieldLens implements DisplayableSpType, SequenceableSpType {
+    public enum FieldLens implements DisplayableSpType, SequenceableSpType {
 
         IN("IN"),
         OUT("OUT"),
@@ -150,9 +143,9 @@ public final class AltairParams {
          * The default FieldLens value *
          */
         public static final FieldLens DEFAULT = OUT;
-        private String _displayValue;
+        private final String _displayValue;
 
-        private FieldLens(String displayValue) {
+        FieldLens(String displayValue) {
             _displayValue = displayValue;
         }
 
@@ -162,13 +155,6 @@ public final class AltairParams {
 
         public String sequenceValue() {
             return _displayValue;
-        }
-
-        /**
-         * Return an FieldLens by name *
-         */
-        static public FieldLens getFieldLens(String name) {
-            return getFieldLens(name, DEFAULT);
         }
 
         /**
@@ -179,7 +165,7 @@ public final class AltairParams {
         }
     }
 
-    public static enum NdFilter implements DisplayableSpType, SequenceableSpType {
+    public enum NdFilter implements DisplayableSpType, SequenceableSpType {
 
         IN("IN"),
         OUT("OUT"),
@@ -189,9 +175,9 @@ public final class AltairParams {
          * The default NdFilter value *
          */
         public static final NdFilter DEFAULT = OUT;
-        private String _displayValue;
+        private final String _displayValue;
 
-        private NdFilter(String displayValue) {
+        NdFilter(String displayValue) {
             _displayValue = displayValue;
         }
 
@@ -202,13 +188,6 @@ public final class AltairParams {
 
         public String sequenceValue() {
             return _displayValue;
-        }
-
-        /**
-         * Return an NdFilter by name *
-         */
-        static public NdFilter getNdFilter(String name) {
-            return getNdFilter(name, DEFAULT);
         }
 
         /**
@@ -222,7 +201,7 @@ public final class AltairParams {
     /**
      * Choices for Laser Guide Star or Natural Guide Star  - OT-544
      */
-    public static enum GuideStarType implements DisplayableSpType, SequenceableSpType {
+    public enum GuideStarType implements DisplayableSpType, SequenceableSpType {
 
         NGS("NGS"),
         LGS("LGS"),
@@ -232,9 +211,9 @@ public final class AltairParams {
          * The default GuideStarType value *
          */
         public static final GuideStarType DEFAULT = NGS;
-        private String _displayValue;
+        private final String _displayValue;
 
-        private GuideStarType(String displayValue) {
+        GuideStarType(String displayValue) {
             _displayValue = displayValue;
         }
 
@@ -259,7 +238,7 @@ public final class AltairParams {
      * The mode knows which guide star type, field lens position and guider belong to it.
      * Only the mode is made persistent.
      */
-    public static enum Mode implements DisplayableSpType, SequenceableSpType {
+    public enum Mode implements DisplayableSpType, SequenceableSpType {
 
         NGS     ("NGS",     GuideStarType.NGS, FieldLens.OUT, AltairAowfsGuider.instance),
         NGS_FL  ("NGS+FL",  GuideStarType.NGS, FieldLens.IN,  AltairAowfsGuider.instance),
@@ -274,7 +253,7 @@ public final class AltairParams {
         private final FieldLens _fieldLens;
         private final GuideProbe _guider;
 
-        private Mode(String displayValue, GuideStarType guideStarType, FieldLens fieldLens, GuideProbe guider) {
+        Mode(String displayValue, GuideStarType guideStarType, FieldLens fieldLens, GuideProbe guider) {
             _displayValue = displayValue;
             _guideStarType = guideStarType;
             _fieldLens = fieldLens;
