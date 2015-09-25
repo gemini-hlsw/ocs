@@ -7,23 +7,22 @@ import edu.gemini.catalog.votable.CatalogException;
 import edu.gemini.catalog.votable.ConeSearchBackend;
 import edu.gemini.pot.ModelConverters;
 import edu.gemini.pot.sp.ISPNode;
-import edu.gemini.shared.util.immutable.None;
-import edu.gemini.shared.util.immutable.Some;
+import edu.gemini.shared.util.immutable.*;
 import edu.gemini.skycalc.Angle;
 import edu.gemini.shared.skyobject.coords.HmsDegCoordinates;
 import edu.gemini.shared.skyobject.coords.SkyCoordinates;
-import edu.gemini.shared.util.immutable.DefaultImList;
-import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.skycalc.Coordinates;
 import edu.gemini.sp.vcs2.NodeDetail;
 import edu.gemini.spModel.core.MagnitudeBand;
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2;
 import edu.gemini.spModel.gemini.gems.GemsInstrument;
 import edu.gemini.spModel.gems.GemsTipTiltMode;
+import edu.gemini.spModel.guide.GuideProbe;
 import edu.gemini.spModel.obs.context.ObsContext;
 import edu.gemini.spModel.obscomp.SPInstObsComp;
 import edu.gemini.spModel.target.SPTarget;
 import edu.gemini.spModel.target.env.GuideGroup;
+import edu.gemini.spModel.target.env.GuideProbeTargets;
 import edu.gemini.spModel.target.env.TargetEnvironment;
 import edu.gemini.spModel.target.obsComp.TargetObsComp;
 import jsky.coords.WorldCoords;
@@ -34,6 +33,8 @@ import jsky.util.gui.StatusLogger;
 
 import java.util.*;
 import java.util.concurrent.CancellationException;
+import java.util.function.BiFunction;
+import java.util.function.BinaryOperator;
 
 /**
  * OT-36: Automate Gems guide star selection in background thread.
@@ -142,16 +143,46 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
     }
 
     public static void applyResults(final TpeContext ctx, final GemsGuideStars gemsGuideStars) {
-        final SPInstObsComp inst = ctx.instrument().orNull();
-        if (inst != null) {
-            inst.setPosAngleDegrees(gemsGuideStars.pa().toDegrees());
-            ctx.instrument().commit();
-        }
+        applyResults(ctx, new Some<>(gemsGuideStars), false);
+    }
+
+    public static void applyResults(final TpeContext ctx, final Option<GemsGuideStars> gemsGuideStarsOpt, boolean isBags) {
+        gemsGuideStarsOpt.foreach(gemsGuideStars -> {
+            final SPInstObsComp inst = ctx.instrument().orNull();
+            if (inst != null) {
+                inst.setPosAngleDegrees(gemsGuideStars.pa().toDegrees());
+                ctx.instrument().commit();
+            }
+        });
 
         final TargetObsComp targetObsComp = ctx.targets().orNull();
         if (targetObsComp != null) {
-            final TargetEnvironment env = targetObsComp.getTargetEnvironment();
-            targetObsComp.setTargetEnvironment(env.setPrimaryGuideGroup(gemsGuideStars.guideGroup()));
+            // Clear out all the old targets.
+            final TargetEnvironment oldEnv     = targetObsComp.getTargetEnvironment();
+            final Set<GuideProbe> oldProbes    = oldEnv.getGuideEnvironment().getReferencedGuiders();
+            final TargetEnvironment clearedEnv = oldProbes.stream().reduce(oldEnv, (TargetEnvironment curEnv, GuideProbe gp) -> {
+                final Option<GuideProbeTargets> oldGptOpt = curEnv.getPrimaryGuideProbeTargets(gp);
+                final GuideProbeTargets newGpt = oldGptOpt.getOrElse(GuideProbeTargets.create(gp)).setBagsTarget(GuideProbeTargets.NO_TARGET);
+                return curEnv.putPrimaryGuideProbeTargets(newGpt);
+            }, (te1, te2) -> te2);
+
+            // If this is BAGS running, denote the primary selected targets as the BAGS targets.
+            // This is a horrible way to do things, but we don't want to mess with the actual GeMS lookup code so we
+            // transform the guide group as necessary for BAGS.
+            final TargetEnvironment finalEnv = gemsGuideStarsOpt.map(gemsGuideStars -> {
+                final GuideGroup gg;
+                if (isBags) {
+                    final ImList<GuideProbeTargets> gptList = gemsGuideStars.guideGroup().getAll().map(gpt ->
+                        gpt.getPrimary().map(primary -> gpt.removeTarget(primary).setBagsTarget(primary)).getOrElse(gpt)
+                    );
+                    gg = gemsGuideStars.guideGroup().putAll(gptList);
+                } else {
+                    gg = gemsGuideStars.guideGroup();
+                }
+                return clearedEnv.setPrimaryGuideGroup(gg);
+            }).getOrElse(clearedEnv);
+
+            targetObsComp.setTargetEnvironment(finalEnv);
             ctx.targets().commit();
         }
     }
@@ -299,15 +330,14 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
         }
     }
 
-    // TODO: Mine
-    public static Option<GemsGuideStars> findGuideStars(final ObsContext obsContext) {
+    public static Option<GemsGuideStars> findGuideStars(final ObsContext obsContext) throws Exception {
         try {
             final Set<edu.gemini.spModel.core.Angle> posAngles = getPosAngles(obsContext);
             final List<GemsCatalogSearchResults> results = unloggedSearch(GemsGuideStarSearchOptions.DEFAULT, GemsTipTiltMode.canopus, obsContext, posAngles,
                     scala.Option.empty());
             final List<GemsGuideStars> gemsResults = GemsResultsAnalyzer.instance().analyze(obsContext, posAngles, results, scala.Option.empty());
             return gemsResults.size() > 0 ? new Some<>(gemsResults.get(0)) : None.instance();
-        } catch (final Exception e) {
+        } catch (NoStarsException e) {
             return None.instance();
         }
     }
@@ -329,12 +359,6 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
             stopProgress();
             interrupted = false;
         }
-    }
-
-    // TODO: Mine
-    public static List<GemsGuideStars> findAllGuideStarsNoGui(final ObsContext obsContext, final Set<edu.gemini.spModel.core.Angle> posAngles,
-                                                  final List<GemsCatalogSearchResults> results) throws Exception {
-        return filterByPosAngle(GemsResultsAnalyzer.instance().analyze(obsContext, posAngles, results, scala.Option.empty()));
     }
 
     // OT-111: The candidate asterisms table should present only the options with the same position

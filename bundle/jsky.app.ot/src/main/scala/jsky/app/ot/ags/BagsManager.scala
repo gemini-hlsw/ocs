@@ -5,7 +5,6 @@ import java.util.concurrent.{LinkedBlockingQueue, Executors}
 import java.util.logging.Logger
 
 import edu.gemini.ags.api.{AgsRegistrar, AgsStrategy}
-import edu.gemini.ags.gems.GemsGuideStars
 import edu.gemini.ags.impl.GemsStrategy
 import edu.gemini.pot.sp._
 import edu.gemini.spModel.guide.GuideProbe
@@ -20,7 +19,7 @@ import jsky.app.ot.tpe.{GemsGuideStarWorker, GuideStarSupport, TpeContext, TpeMa
 import scala.collection.JavaConverters._
 import scala.collection.immutable.HashMap
 import scala.swing.Swing
-import scala.util.{Failure, Success}
+import scala.util.{Try, Failure, Success}
 import scala.concurrent.ExecutionContext.Implicits.global
 
 
@@ -44,89 +43,104 @@ object BagsManager {
     def performLookup(): Unit = {
       LOG.info(s"Performing BAGS lookup for observation=$obsKey")
 
-      def showTpeFeatures(selOpt: Option[AgsStrategy.Selection]): Unit =
-        selOpt.foreach { sel =>
-          Option(TpeManager.get()).filter(_.isVisible).foreach { tpe =>
-            sel.assignments.foreach { ass =>
-              val clazz = ass.guideProbe.getType match {
-                case GuideProbe.Type.AOWFS => classOf[Altair_WFS_Feature]
-                case GuideProbe.Type.OIWFS => classOf[OIWFS_Feature]
-                case GuideProbe.Type.PWFS => classOf[TpePWFSFeature]
-              }
-              Option(tpe.getFeature(clazz)).foreach {
-                tpe.selectFeature
-              }
-            }
+
+      def gemsLookup(obsCtx: ObsContext): Unit = {
+        LOG.info(s"BAGS GeMS lookup for observation=$obsKey starting")
+        val ggsTry = Try { GemsGuideStarWorker.findGuideStars(obsCtx) }
+        LOG.info(s"BAGS GeMS lookup for observation=$obsKey ${ggsTry.map(_ => "successful").getOrElse("failed")}")
+        if (ggsTry.isFailure)
+          println(s"EXCEPTION=${ggsTry.failed.get}")
+        ggsTry.foreach { ggs =>
+          Swing.onEDT {
+            muteObservation(observation)
+            GemsGuideStarWorker.applyResults(TpeContext(observation), ggs, true)
+            unmuteObservation(observation)
           }
         }
+        taskComplete(this, success = ggsTry.isSuccess)
+      }
 
-      def applySelection(selOpt: Option[AgsStrategy.Selection]): Unit = {
-        // Make a new TargetEnvironment with the guide probe assignments.
-        val ctx = TpeContext(observation)
 
-        // Find out which guide probes previously had assignments, but no longer do.
-        val oldEnv           = ctx.targets.envOrDefault
-        val allProbes        = oldEnv.getGuideEnvironment.getReferencedGuiders.asScala.toSet
-        val assignedProbes   = selOpt.map(_.assignments.map(_.guideProbe)).toList.flatten
-        val unassignedProbes = allProbes -- assignedProbes
-
-        // Clear out the guide probes that no longer have a valid assignment.
-        val clearedEnv       = (oldEnv /: unassignedProbes) { (curEnv, gp) =>
-          val oldGpt = curEnv.getPrimaryGuideProbeTargets(gp).asScalaOpt
-          val newGpt = oldGpt.getOrElse(GuideProbeTargets.create(gp)).setBagsTarget(GuideProbeTargets.NO_TARGET)
-          curEnv.putPrimaryGuideProbeTargets(newGpt)
-        }
-
-        // Apply the new selection.
-        val newEnv = selOpt.fold(clearedEnv)(_.applyTo(clearedEnv))
-
-        // Update the TargetEnvironment.
-        muteObservation(observation)
-        ctx.targets.dataObject.foreach { targetComp =>
-          targetComp.setTargetEnvironment(newEnv)
-          ctx.targets.commit()
-
-          // Update the position angle, if necessary.
+      def otherLookup(obsCtx: ObsContext, strategy: AgsStrategy): Unit = {
+        def showTpeFeatures(selOpt: Option[AgsStrategy.Selection]): Unit =
           selOpt.foreach { sel =>
-            ctx.instrument.dataObject.foreach { inst =>
-              val deg = sel.posAngle.toDegrees
-              val old = inst.getPosAngleDegrees
-              if (deg != old) {
-                inst.setPosAngleDegrees(deg)
-                ctx.instrument.commit()
+            Option(TpeManager.get()).filter(_.isVisible).foreach { tpe =>
+              sel.assignments.foreach { ass =>
+                val clazz = ass.guideProbe.getType match {
+                  case GuideProbe.Type.AOWFS => classOf[Altair_WFS_Feature]
+                  case GuideProbe.Type.OIWFS => classOf[OIWFS_Feature]
+                  case GuideProbe.Type.PWFS => classOf[TpePWFSFeature]
+                }
+                Option(tpe.getFeature(clazz)).foreach {
+                  tpe.selectFeature
+                }
               }
             }
           }
+
+        def applySelection(selOpt: Option[AgsStrategy.Selection]): Unit = {
+          // Make a new TargetEnvironment with the guide probe assignments.
+          val ctx = TpeContext(observation)
+
+          // Find out which guide probes previously had assignments, but no longer do.
+          val oldEnv           = ctx.targets.envOrDefault
+          val allProbes        = oldEnv.getGuideEnvironment.getReferencedGuiders.asScala.toSet
+          val assignedProbes   = selOpt.map(_.assignments.map(_.guideProbe)).toList.flatten
+          val unassignedProbes = allProbes -- assignedProbes
+
+          // Clear out the guide probes that no longer have a valid assignment.
+          val clearedEnv       = (oldEnv /: unassignedProbes) { (curEnv, gp) =>
+            val oldGpt = curEnv.getPrimaryGuideProbeTargets(gp).asScalaOpt
+            val newGpt = oldGpt.getOrElse(GuideProbeTargets.create(gp)).setBagsTarget(GuideProbeTargets.NO_TARGET)
+            curEnv.putPrimaryGuideProbeTargets(newGpt)
+          }
+
+          // Apply the new selection.
+          val newEnv = selOpt.fold(clearedEnv)(_.applyTo(clearedEnv))
+
+          // Update the TargetEnvironment.
+          muteObservation(observation)
+          ctx.targets.dataObject.foreach { targetComp =>
+            targetComp.setTargetEnvironment(newEnv)
+            ctx.targets.commit()
+
+            // Update the position angle, if necessary.
+            selOpt.foreach { sel =>
+              ctx.instrument.dataObject.foreach { inst =>
+                val deg = sel.posAngle.toDegrees
+                val old = inst.getPosAngleDegrees
+                if (deg != old) {
+                  inst.setPosAngleDegrees(deg)
+                  ctx.instrument.commit()
+                }
+              }
+            }
+          }
+          unmuteObservation(observation)
         }
-        unmuteObservation(observation)
+
+        val fut = strategy.select(obsCtx, OT.getMagnitudeTable)
+        fut.onComplete {
+          case Success(selOpt) =>
+            LOG.info(s"BAGS lookup for observation=$obsKey successful.")
+            Swing.onEDT {
+              applySelection(selOpt)
+              showTpeFeatures(selOpt)
+            }
+            taskComplete(this, success = true)
+          case Failure(ex) =>
+            LOG.warning(s"BAGS lookup for observation=$obsKey failed.")
+            taskComplete(this, success = false)
+        }
       }
 
 
       curCtx.foreach { obsCtx =>
         AgsRegistrar.currentStrategy(obsCtx).foreach { strategy =>
           if (strategy.key == GemsStrategy.key && GuideStarSupport.hasGemsComponent(observation)) {
-            LOG.info(s"BAGS GeMS lookup for observation=$obsKey starting")
-            GemsGuideStarWorker.findGuideStars(obsCtx).asScalaOpt.foreach { ggs =>
-              muteObservation(observation)
-              GemsGuideStarWorker.applyResults(TpeContext(observation), ggs)
-              unmuteObservation(observation)
-            }
-            LOG.info(s"BAGS GeMS lookup for observation=$obsKey done")
+            gemsLookup(obsCtx)
           } else {
-            val fut = strategy.select(obsCtx, OT.getMagnitudeTable)
-            fut.onComplete {
-              case Success(selOpt) =>
-                LOG.info(s"BAGS lookup for observation=${obsKey} successful.")
-                Swing.onEDT {
-                  applySelection(selOpt)
-                  showTpeFeatures(selOpt)
-                }
-                taskComplete(this, success = true)
-              case Failure(ex) =>
-                LOG.warning(s"BAGS lookup for observation=${obsKey} failed.")
-                Thread.sleep(RequeueDelay)
-                taskComplete(this, success = false)
-            }
+            otherLookup(obsCtx, strategy)
           }
         }
       }
@@ -209,6 +223,8 @@ object BagsManager {
         }
     }
     else {
+      Thread.sleep(RequeueDelay)
+
       // We only need to do something if the task is not already in the queue.
       taskQueue.synchronized {
         if (!taskQueue.contains(obsKey)) {
@@ -254,23 +270,6 @@ object BagsManager {
 
   private val propertyChangeListener = new PropertyChangeListener {
     override def propertyChange(evt: PropertyChangeEvent): Unit = evt.getSource match {
-//      case obsComp: ISPObsComponent if evt.getOldValue.isInstanceOf[TargetObsComp] && evt.getNewValue.isInstanceOf[TargetObsComp] =>
-//        println(s"\nISPObsComponent: $evt")
-//        // We want to avoid kicking off a BAGS lookup if the property change that triggered this is a BAGS lookup.
-//        val oldEnv = evt.getOldValue.asInstanceOf[TargetObsComp].getTargetEnvironment
-//        val newEnv = evt.getNewValue.asInstanceOf[TargetObsComp].getTargetEnvironment
-//
-//        // Check to see if all the BAGS guide stars are not the same.
-//        val sameBaseAndBags = newEnv.getBase.getTarget.equals(oldEnv.getBase.getTarget) && newEnv.getGroups.asScala.forall {
-//          _.getAll.asScala.forall { gptNew =>
-//            // We must compare ITargets and not SPTargets because the watcher list will not be the same.
-//            val newBagsTarget = gptNew.getBagsTarget.asScalaOpt.map(_.getTarget)
-//            oldEnv.getGroups.asScala.exists {
-//              _.get(gptNew.getGuider).asScala.exists(_.getBagsTarget.asScalaOpt.map(_.getTarget).equals(newBagsTarget))
-//            }
-//          }
-//        }
-//        if (!sameBaseAndBags) updateObservation(obsComp.getContextObservation)
       case prog: ISPProgram => prog.getObservations.asScala.foreach(updateObservation)
       case node: ISPNode    => updateObservation(node.getContextObservation)
       case _                => // Ignore
