@@ -169,7 +169,7 @@ trait GemsStrategy extends AgsStrategy {
     val gemsOptions = new GemsGuideStarSearchOptions(gemsInstrument, tipTiltMode, posAngles.asJava)
 
     // Perform the catalog search, using GemsStrategy's backend
-    val results = GemsVoTableCatalog(backend, UCAC4).search(ctx, base.toNewModel, gemsOptions, nirBand, null)
+    val results = GemsVoTableCatalog(backend, UCAC4).search(ctx, base.toNewModel, gemsOptions, nirBand)
 
     // Now check that the results are valid: there must be a valid tip-tilt and flexure star each.
     results.map { r =>
