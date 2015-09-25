@@ -292,21 +292,25 @@ object QueryResultsWindow {
        * Called after  a query completes to update the UI according to the results
        */
       def updateResults(info: Option[ObservationInfo], queryResult: QueryResult): Unit = {
-        val model = TargetsModel(queryResult.query.base, queryResult.result.targets.rows)
-        resultsTable.model = model
+        queryResult.query match {
+          case q: ConeSearchCatalogQuery =>
+            val model = TargetsModel(q.base, queryResult.result.targets.rows)
+            resultsTable.model = model
 
-        // The sorting logic may change if the list of magnitudes changes
-        new TableRowSorter[TargetsModel](model) <| {_.toggleSortOrder(0)} <| {_.sort()} <| {resultsTable.peer.setRowSorter}
+            // The sorting logic may change if the list of magnitudes changes
+            new TableRowSorter[TargetsModel](model) <| {_.toggleSortOrder(0)} <| {_.sort()} <| {resultsTable.peer.setRowSorter}
 
-        // Adjust the width of the columns
-        val insets = queryFrame.scrollPane.border.getBorderInsets(queryFrame.scrollPane.peer)
-        resultsTable.adjustColumns(queryFrame.scrollPane.bounds.width - insets.left - insets.right)
+            // Adjust the width of the columns
+            val insets = queryFrame.scrollPane.border.getBorderInsets(queryFrame.scrollPane.peer)
+            resultsTable.adjustColumns(queryFrame.scrollPane.bounds.width - insets.left - insets.right)
 
-        // Update the count of rows
-        resultsLabel.updateCount(queryResult.result.targets.rows.length)
+            // Update the count of rows
+            resultsLabel.updateCount(queryResult.result.targets.rows.length)
 
-        // Update the query form
-        QueryForm.updateQuery(info, queryResult.query)
+            // Update the query form
+            QueryForm.updateQuery(info, q)
+          case _ =>
+        }
       }
 
       protected def revalidateFrame(): Unit = {
@@ -446,7 +450,7 @@ object QueryResultsWindow {
         /**
          * Update query form according to the passed values
          */
-        def updateQuery(info: Option[ObservationInfo], query: CatalogQuery): Unit = {
+        def updateQuery(info: Option[ObservationInfo], query: ConeSearchCatalogQuery): Unit = {
           info.foreach { i =>
             objectName.text = ~i.objectName
             instrumentName.text = ~i.instrumentName
@@ -509,7 +513,7 @@ object QueryResultsWindow {
             val conditions = Conditions.NOMINAL.sb(sbBox.selection.item).cc(ccBox.selection.item).iq(iqBox.selection.item)
             // TODO Change the search query for different conditions OCSADV-416
             val info = ObservationInfo(objectName.text.some, instrumentName.text.some, Option(guider.selection.item), guiders.toList, conditions.some).some
-            (info, CatalogQuery(None, coordinates, radius, currentFilters, ucac4))
+            (info, CatalogQuery(coordinates, radius, currentFilters, ucac4))
           }
         }
 
@@ -619,7 +623,7 @@ object CatalogQueryDemo extends SwingApplication {
   import edu.gemini.spModel.target.SPTarget
   import edu.gemini.spModel.target.env.TargetEnvironment
 
-  val query = CatalogQuery(None,Coordinates(RightAscension.fromAngle(Angle.fromDegrees(3.1261166666666895)),Declination.fromAngle(Angle.fromDegrees(337.93268333333333)).getOrElse(Declination.zero)),RadiusConstraint.between(Angle.zero,Angle.fromDegrees(0.16459874517619255)),List(MagnitudeConstraints(RBandsList,FaintnessConstraint(16.0),Some(SaturationConstraint(3.1999999999999993)))),ucac4)
+  val query = CatalogQuery(Coordinates(RightAscension.fromAngle(Angle.fromDegrees(3.1261166666666895)),Declination.fromAngle(Angle.fromDegrees(337.93268333333333)).getOrElse(Declination.zero)),RadiusConstraint.between(Angle.zero,Angle.fromDegrees(0.16459874517619255)),List(MagnitudeConstraints(RBandsList,FaintnessConstraint(16.0),Some(SaturationConstraint(3.1999999999999993)))),ucac4)
 
   def startup(args: Array[String]) {
     System.setProperty("apple.awt.antialiasing", "on")

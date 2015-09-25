@@ -1,10 +1,10 @@
 package edu.gemini.catalog.votable
 
-import java.net.UnknownHostException
+import java.net.{URL, UnknownHostException}
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.logging.Logger
 
-import edu.gemini.catalog.api.CatalogQuery
+import edu.gemini.catalog.api.{NameCatalogQuery, ConeSearchCatalogQuery, CatalogQuery}
 import edu.gemini.spModel.core.Angle
 import edu.gemini.spModel.core.Target.SiderealTarget
 import org.apache.commons.httpclient.{NameValuePair, HttpClient}
@@ -19,11 +19,12 @@ import scalaz._
 import Scalaz._
 
 trait VoTableBackend {
-  protected [votable] def doQuery(query: CatalogQuery, url: String): Future[QueryResult]
+  val catalogUrls: NonEmptyList[URL]
+  protected [votable] def doQuery(query: CatalogQuery, url: URL): Future[QueryResult]
 }
 
 trait CachedBackend extends VoTableBackend {
-  case class SearchKey(query: CatalogQuery, url: String)
+  case class SearchKey(query: CatalogQuery, url: URL)
 
   case class CacheEntry[K, V](k: K, v: V)
 
@@ -101,8 +102,9 @@ trait CachedBackend extends VoTableBackend {
       @tailrec
       def go(pos: Int):Option[(Int, QueryResult)] =
         a.lift(pos) match {
-          case None    => None
-          case Some(x) => if (x.k.query.isSuperSetOf(k.query)) Some((pos, x.v)) else go(pos + 1)
+          case None                                                            => None
+          case Some(CacheEntry(SearchKey(query:ConeSearchCatalogQuery, r), v)) => if (query.isSuperSetOf(k.query)) Some((pos, v)) else go(pos + 1)
+          case _                                                               => None // Not caching named queries so far
         }
       go(0)
     }
@@ -123,7 +125,6 @@ trait CachedBackend extends VoTableBackend {
     p.future
   }
 
-
   // Cache the query not the future so that failed queries are executed again
   protected val cachedQuery = cache(query)
 
@@ -131,7 +132,7 @@ trait CachedBackend extends VoTableBackend {
   protected def query(e: SearchKey): QueryResult
 
   // Cache the query not the future so that failed queries are executed again
-  protected [votable] def doQuery(query: CatalogQuery, url: String): Future[QueryResult] = future {
+  protected [votable] def doQuery(query: CatalogQuery, url: URL): Future[QueryResult] = future {
     val qr = cachedQuery(SearchKey(query, url))
     // Filter on the cached query results
     qr.copy(query = query, result = qr.result.filter(query))
@@ -141,6 +142,7 @@ trait CachedBackend extends VoTableBackend {
 
 case object RemoteBackend extends CachedBackend {
   val instance = this
+  override val catalogUrls = NonEmptyList(new URL("http://gscatalog.gemini.edu"), new URL("http://gncatalog.gemini.edu"))
 
   val Log = Logger.getLogger(getClass.getName)
 
@@ -148,11 +150,14 @@ case object RemoteBackend extends CachedBackend {
 
   private def format(a: Angle)= f"${a.toDegrees}%4.03f"
 
-  def queryParams(qs: CatalogQuery): Array[NameValuePair] = Array(
-    new NameValuePair("CATALOG", qs.catalog.id),
-    new NameValuePair("RA", format(qs.base.ra.toAngle)),
-    new NameValuePair("DEC", f"${qs.base.dec.toDegrees}%4.03f"),
-    new NameValuePair("SR", format(qs.radiusConstraint.maxLimit)))
+  protected [votable] def queryParams(q: CatalogQuery): Array[NameValuePair] = q match {
+    case qs: ConeSearchCatalogQuery => Array(
+      new NameValuePair("CATALOG", qs.catalog.id),
+      new NameValuePair("RA", format(qs.base.ra.toAngle)),
+      new NameValuePair("DEC", f"${qs.base.dec.toDegrees}%4.03f"),
+      new NameValuePair("SR", format(qs.radiusConstraint.maxLimit)))
+    case _                          => Array.empty
+  }
 
   override protected def query(e: SearchKey): QueryResult = {
     val method = new GetMethod(s"${e.url}/cgi-bin/conesearch.py")
@@ -173,8 +178,47 @@ case object RemoteBackend extends CachedBackend {
 
 }
 
+case object SimbadNameBackend extends CachedBackend {
+  val instance = this
+  override val catalogUrls = NonEmptyList(new URL("http://simbad.cfa.harvard.edu/simbad/"), new URL("http://simbad.u-strasbg.fr/simbad"))
+
+  val Log = Logger.getLogger(getClass.getName)
+
+  private val timeout = 30 * 1000 // Max time to wait
+
+  protected [votable] def queryParams(q: CatalogQuery): Array[NameValuePair] = q match {
+    case qs: NameCatalogQuery => Array(
+      new NameValuePair("output.format", "VOTable"),
+      new NameValuePair("Ident", qs.search))
+    case _                    => Array.empty
+  }
+
+  override protected def query(e: SearchKey): QueryResult = {
+    val method = new GetMethod(s"${e.url}/sim-id")
+    val qs = queryParams(e.query)
+    method.setQueryString(qs)
+    Log.info(s"Catalog query to ${method.getURI}")
+
+    val client = new HttpClient
+    client.setConnectionTimeout(timeout)
+
+    try {
+      client.executeMethod(method)
+      VoTableParser.parse(e.url, method.getResponseBodyAsStream) match {
+        case -\/(p) => QueryResult(e.query, CatalogQueryResult(TargetsTable.Zero, List(p)))
+        case \/-(y) => QueryResult(e.query, CatalogQueryResult(y))
+      }
+    } finally {
+      method.releaseConnection()
+    }
+  }
+
+}
+
 case class CannedBackend(results: List[SiderealTarget]) extends VoTableBackend {
-  override protected[votable] def doQuery(query: CatalogQuery, url: String): Future[QueryResult] =
+  // Needs some fake list of urls to hit
+  override val catalogUrls = NonEmptyList(new URL("file:////"))
+  override protected[votable] def doQuery(query: CatalogQuery, url: URL): Future[QueryResult] =
     Future.successful {
       QueryResult(query, CatalogQueryResult(TargetsTable(results), Nil))
     }
@@ -182,7 +226,7 @@ case class CannedBackend(results: List[SiderealTarget]) extends VoTableBackend {
 
 trait VoTableClient {
   // First success or last failure
-  protected def selectOne[A](fs: List[Future[A]]): Future[A] = {
+  protected def selectOne[A](fs: NonEmptyList[Future[A]]): Future[A] = {
     val p = Promise[A]()
     val n = new AtomicInteger(fs.length)
     fs.foreach { f =>
@@ -194,20 +238,18 @@ trait VoTableClient {
     p.future
   }
 
-  protected def doQuery(query: CatalogQuery, url: String, backend: VoTableBackend): Future[QueryResult] =
+  protected def doQuery(query: CatalogQuery, url: URL, backend: VoTableBackend): Future[QueryResult] =
     backend.doQuery(query, url)
 
 }
 
 object VoTableClient extends VoTableClient {
-  val catalogUrls = List("http://gscatalog.gemini.edu", "http://gncatalog.gemini.edu")
-
   /**
    * Do a query for targets, it returns a list of targets and possible problems found
    */
   def catalog(query: CatalogQuery, backend: VoTableBackend = RemoteBackend): Future[QueryResult] = {
     val f = for {
-      url <- catalogUrls
+      url <- backend.catalogUrls
     } yield doQuery(query, url, backend)
     selectOne(f).recover {
        case t:UnknownHostException => QueryResult(query, CatalogQueryResult(TargetsTable.Zero, List(GenericError(s"Unreachable host ${t.getMessage}"))))

@@ -1,5 +1,7 @@
 package edu.gemini.catalog.votable
 
+import java.net.URL
+
 import edu.gemini.catalog.api._
 import edu.gemini.spModel.core._
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality
@@ -13,7 +15,7 @@ class CatalogQueryResultSpec extends SpecificationWithJUnit {
   val coneSearch = Angle.fromDegrees(0.1)
 
   val xmlFile = "votable-ucac4.xml"
-  val targets = VoTableParser.parse(xmlFile, getClass.getResourceAsStream(s"/$xmlFile"))
+  val targets = VoTableParser.parse(new URL(s"file:////$xmlFile"), getClass.getResourceAsStream(s"/$xmlFile"))
   val unfiltered = CatalogQueryResult(targets | ParsedVoResource(Nil))
 
   val noMagnitudeConstraint = MagnitudeConstraints(SingleBand(MagnitudeBand.J), FaintnessConstraint(100), None)
