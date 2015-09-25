@@ -68,6 +68,8 @@ sealed trait CatalogAdapter {
   def isMagnitudeErrorField(v: (FieldId, String)): Boolean = containsMagnitude(v._1) && v._1.ucd.includes(VoTableParser.STAT_ERR) && v._2.nonEmpty
   // filter magnitudes as a whole, removing invalid values and duplicates
   def filterAndDeduplicateMagnitudes(magnitudeFields: List[(FieldId, Magnitude)]): List[Magnitude] = magnitudeFields.collect { case (_, mag) if validMagnitude(mag) => mag }
+  // Indicates if a parsed magnitude is valid
+  def validMagnitude(m: Magnitude): Boolean = !(m.value.isNaN || m.error.exists(_.isNaN))
   // Attempts to extract a band and value for a magnitude from a pair of field and value
   def parseMagnitude(p: (FieldId, String)): CatalogProblem \/ (FieldId, MagnitudeBand, Double) = {
     val (fieldId: FieldId, value: String) = p
@@ -85,8 +87,6 @@ sealed trait CatalogAdapter {
 
   // Indicates if a field contianing a magnitude should be ignored, by default all fields are considered
   protected def ignoreMagnitudeField(v: FieldId): Boolean = false
-  // Indicates if a parsed magnitude is valid
-  protected def validMagnitude(m: Magnitude): Boolean = !(m.value.isNaN || m.error.exists(_.isNaN))
   // Indicates if the field has a magnitude field
   protected def containsMagnitude(v: FieldId): Boolean = v.ucd.includes(VoTableParser.UCD_MAG) && v.ucd.matches(CatalogAdapter.magRegex) && !ignoreMagnitudeField(v)
 }
@@ -288,7 +288,7 @@ trait VoTableParser {
       // Filter magnitudes as a whole
       val magnitudes = adapter.filterAndDeduplicateMagnitudes(mags)
       // Link magnitudes with their errors
-      magnitudes.map(i => i.copy(error = magErrors.get(i.band)))
+      magnitudes.map(i => i.copy(error = magErrors.get(i.band))).filter(adapter.validMagnitude)
     }
 
     def toSiderealTarget(id: String, ra: String, dec: String, pm: (Option[String], Option[String])): \/[CatalogProblem, SiderealTarget] = {
