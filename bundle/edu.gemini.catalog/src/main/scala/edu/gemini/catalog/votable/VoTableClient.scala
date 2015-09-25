@@ -104,7 +104,7 @@ trait CachedBackend extends VoTableBackend {
         a.lift(pos) match {
           case None                                                            => None
           case Some(CacheEntry(SearchKey(query:ConeSearchCatalogQuery, r), v)) => if (query.isSuperSetOf(k.query)) Some((pos, v)) else go(pos + 1)
-          case Some(_)                                                         => None // Not caching named queries so far
+          case _                                                               => None // Not caching named queries so far
         }
       go(0)
     }
