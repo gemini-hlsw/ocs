@@ -5,6 +5,7 @@ import java.util.concurrent.{LinkedBlockingQueue, Executors}
 import java.util.logging.Logger
 
 import edu.gemini.ags.api.{AgsRegistrar, AgsStrategy}
+import edu.gemini.ags.gems.GemsGuideStars
 import edu.gemini.ags.impl.GemsStrategy
 import edu.gemini.pot.sp._
 import edu.gemini.spModel.guide.GuideProbe
@@ -61,7 +62,7 @@ object BagsManager {
 
       def applySelection(selOpt: Option[AgsStrategy.Selection]): Unit = {
         // Make a new TargetEnvironment with the guide probe assignments.
-        val ctx = TpeContext.apply(observation)
+        val ctx = TpeContext(observation)
 
         // Find out which guide probes previously had assignments, but no longer do.
         val oldEnv           = ctx.targets.envOrDefault
@@ -104,9 +105,13 @@ object BagsManager {
       curCtx.foreach { obsCtx =>
         AgsRegistrar.currentStrategy(obsCtx).foreach { strategy =>
           if (strategy.key == GemsStrategy.key && GuideStarSupport.hasGemsComponent(observation)) {
-            muteObservation(observation)
-            new GemsGuideStarWorker().start()
-            unmuteObservation(observation)
+            LOG.info(s"BAGS GeMS lookup for observation=$obsKey starting")
+            GemsGuideStarWorker.findGuideStars(obsCtx).asScalaOpt.foreach { ggs =>
+              muteObservation(observation)
+              GemsGuideStarWorker.applyResults(TpeContext(observation), ggs)
+              unmuteObservation(observation)
+            }
+            LOG.info(s"BAGS GeMS lookup for observation=$obsKey done")
           } else {
             val fut = strategy.select(obsCtx, OT.getMagnitudeTable)
             fut.onComplete {
