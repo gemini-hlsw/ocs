@@ -7,30 +7,26 @@ import javax.swing.*;
 import java.awt.*;
 public class AltairForm extends JPanel {
 	public AltairForm() {
-		initComponents();
-	}
-
-	private void initComponents() {
-		adcLabel = new JLabel();
-		beamSplitterLabel = new JLabel();
+		JLabel adcLabel = new JLabel();
+		JLabel beamSplitterLabel = new JLabel();
 		adcCheck = new CheckBoxWidget();
 		eight50Button = new OptionWidget();
 		oneButton = new OptionWidget();
-		cassRotatorLabel = new JLabel();
+		JLabel cassRotatorLabel = new JLabel();
 		cassRotatorFollowingButton = new JRadioButton();
 		cassRotatorFixedButton = new JRadioButton();
-		ndFilterLabel = new JLabel();
+		JLabel ndFilterLabel = new JLabel();
 		ndFilterInButton = new JRadioButton();
 		ndFilterOutButton = new JRadioButton();
-		guideStarType = new JLabel();
+		JLabel guideStarType = new JLabel();
 		ngsRadioButton = new JRadioButton();
         ngsWithFieldLensRadioButton = new JRadioButton();
         lgsRadioButton = new JRadioButton();
         lgsP1RadioButton = new JRadioButton();
         lgsOiRadioButton = new JRadioButton();
-        withFlLabel1 = new JLabel();
-        withFlLabel2 = new JLabel();
-        withFlLabel3 = new JLabel();
+		JLabel withFlLabel1 = new JLabel();
+		JLabel withFlLabel2 = new JLabel();
+		JLabel withFlLabel3 = new JLabel();
 
         //======== this ========
 		setMinimumSize(new Dimension(400, 453));
@@ -68,8 +64,8 @@ public class AltairForm extends JPanel {
         //---- oneButton ----
 		oneButton.setText("750 nm - 5 μm science");
 		add(oneButton, new GridBagConstraints(1, 2, 1, 1, 0.0, 0.0,
-			GridBagConstraints.WEST, GridBagConstraints.NONE,
-			new Insets(0, 11, 0, 0), 0, 0));
+				GridBagConstraints.WEST, GridBagConstraints.NONE,
+				new Insets(0, 11, 0, 0), 0, 0));
 
 		//---- cassRotatorLabel ----
 		cassRotatorLabel.setToolTipText("");
@@ -184,25 +180,16 @@ public class AltairForm extends JPanel {
 
 	}
 
-	private JLabel adcLabel;
-	private JLabel beamSplitterLabel;
-	CheckBoxWidget adcCheck;
-	OptionWidget eight50Button;
-	OptionWidget oneButton;
-	private JLabel cassRotatorLabel;
-	JRadioButton cassRotatorFollowingButton;
-	JRadioButton cassRotatorFixedButton;
-	private JLabel ndFilterLabel;
-	JRadioButton ndFilterInButton;
-	JRadioButton ndFilterOutButton;
-	private JLabel guideStarType;
-	JRadioButton ngsRadioButton;
-    JRadioButton ngsWithFieldLensRadioButton;
-    JRadioButton lgsRadioButton;
-    JRadioButton lgsP1RadioButton;
-    JRadioButton lgsOiRadioButton;
-	private JLabel horizontalFiller;
-    private JLabel withFlLabel1;
-    private JLabel withFlLabel2;
-    private JLabel withFlLabel3;
+	final CheckBoxWidget adcCheck;
+	final OptionWidget eight50Button;
+	final OptionWidget oneButton;
+	final JRadioButton cassRotatorFollowingButton;
+	final JRadioButton cassRotatorFixedButton;
+	final JRadioButton ndFilterInButton;
+	final JRadioButton ndFilterOutButton;
+	final JRadioButton ngsRadioButton;
+    final JRadioButton ngsWithFieldLensRadioButton;
+    final JRadioButton lgsRadioButton;
+    final JRadioButton lgsP1RadioButton;
+    final JRadioButton lgsOiRadioButton;
 }
