@@ -27,8 +27,8 @@ public final class AltairParams {
      */
     public enum Wavelength implements DisplayableSpType, SequenceableSpType {
 
-        WAVELENGTH_A("850 nm - 2.5 μm"),
-        WAVELENGTH_B("750 nm - 5 μm"),;
+        WAVELENGTH_A("850 nm - 2.5 μm science"),
+        WAVELENGTH_B("750 nm - 5 μm science"),;
 
         /* The default Wavelength index value */
         public static final Wavelength DEFAULT = WAVELENGTH_A;
