@@ -53,7 +53,7 @@ public final class InstAltair extends AbstractDataObject implements PropertyProv
     public static final PropertyDescriptor MODE_PROP;
 
 
-    private static final Map<String, PropertyDescriptor> PRIVATE_PROP_MAP = new TreeMap<String, PropertyDescriptor>();
+    private static final Map<String, PropertyDescriptor> PRIVATE_PROP_MAP = new TreeMap<>();
     public static final Map<String, PropertyDescriptor> PROPERTY_MAP = Collections.unmodifiableMap(PRIVATE_PROP_MAP);
 
     private static PropertyDescriptor initProp(String propName, boolean query, boolean iter) {
@@ -64,8 +64,8 @@ public final class InstAltair extends AbstractDataObject implements PropertyProv
     }
 
     static {
-        boolean query_yes = true;
-        boolean iter_no   = false;
+        final boolean query_yes = true;
+        final boolean iter_no   = false;
 
         WAVELENGTH_PROP = initProp("wavelength", query_yes, iter_no);
         ADC_PROP = initProp("adc", query_yes, iter_no);
@@ -220,14 +220,6 @@ public final class InstAltair extends AbstractDataObject implements PropertyProv
         return _mode.fieldLens();
     }
 
-    /**
-     * Gets the guider which is an attribute of the selected mode.
-     * @return
-     */
-    public boolean usesPwfs1() {
-        return _mode.guider().equals(PwfsGuideProbe.pwfs1);
-    }
-
     public void setMode(Mode newValue) {
         Mode oldValue = getMode();
         if (oldValue != newValue) {
@@ -295,11 +287,8 @@ public final class InstAltair extends AbstractDataObject implements PropertyProv
     public void setParamSet(ParamSet paramSet) {
         super.setParamSet(paramSet);
 
-        // We no longer support 1 nm, so check for this and change it to 850um if it is 1 nm.
         String v = Pio.getValue(paramSet, AltairConstants.WAVELENGTH_PROP);
-        if ("WAVELENGTH_1UM".equals(v)) {
-            setWavelength(Wavelength.WAVELENGTH_850NM);
-        } else if (v != null) {
+        if (v != null) {
             _setWavelength(v);
         }
 
@@ -357,22 +346,6 @@ public final class InstAltair extends AbstractDataObject implements PropertyProv
         return sc;
     }
 
-    /**
-     * Return a list of InstConfigInfo objects describing the instrument's
-     * queryable configuration parameters.
-     */
-//    public static List getInstConfigInfo() {
-//        List<InstConfigInfo> configInfo = new LinkedList<InstConfigInfo>();
-//
-//        configInfo.add(new InstConfigInfo<ADC>("ADC", AltairConstants.ADC_PROP, ADC.class));
-//        configInfo.add(new InstConfigInfo<CassRotator>("Cass Rotator", AltairConstants.CASS_ROTATOR_PROP, CassRotator.class));
-//        configInfo.add(new InstConfigInfo<NdFilter>("ND Filter", AltairConstants.ND_FILTER_PROP, NdFilter.class));
-//        configInfo.add(new InstConfigInfo<FieldLens>("Field Lens", AltairConstants.FIELD_LENSE_PROP, FieldLens.class));
-//        configInfo.add(new InstConfigInfo<GuideStarType>("Guide Star Type", AltairConstants.GUIDESTAR_TYPE_PROP, GuideStarType.class));
-//
-//        return configInfo;
-//    }
-
     private static Collection<GuideProbe> GUIDE_PROBES    =
             GuideProbeUtil.instance.createCollection(AltairAowfsGuider.instance);
     private static Collection<GuideProbe> NO_GUIDE_PROBES =
@@ -390,7 +363,7 @@ public final class InstAltair extends AbstractDataObject implements PropertyProv
             GuideProbeUtil.instance.createCollection(PwfsGuideProbe.pwfs1, PwfsGuideProbe.pwfs2);
 
     private static Set<GuideProbe> allMinus(GuideProbe guideProbe) {
-        final Set<GuideProbe> guiders = new TreeSet<GuideProbe>(GuideProbe.KeyComparator.instance);
+        final Set<GuideProbe> guiders = new TreeSet<>(GuideProbe.KeyComparator.instance);
         guiders.addAll(GuideProbeMap.instance.values());
         guiders.remove(guideProbe);
         return guiders;
