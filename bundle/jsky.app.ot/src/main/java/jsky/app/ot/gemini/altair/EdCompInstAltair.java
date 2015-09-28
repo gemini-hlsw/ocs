@@ -62,7 +62,7 @@ public final class EdCompInstAltair extends OtItemEditor<ISPObsComponent, InstAl
         _w.adcCheck.setSelected(inst.getAdc() == ADC.ON);
 
         final Wavelength wl = inst.getWavelength();
-        if (wl == Wavelength.WAVELENGTH_850NM) {
+        if (wl == Wavelength.WAVELENGTH_A) {
             _w.eight50Button.setSelected(true);
         } else {
             // This setting has been deprecated and should no longer be possible.
@@ -112,9 +112,9 @@ public final class EdCompInstAltair extends OtItemEditor<ISPObsComponent, InstAl
         if (w == _w.adcCheck) {
             getDataObject().setAdc(_w.adcCheck.isSelected() ? ADC.ON : ADC.OFF);
         } else if (w == _w.oneButton) {
-            getDataObject().setWavelength(Wavelength.WAVELENGTH_1UM);
+            getDataObject().setWavelength(Wavelength.WAVELENGTH_B);
         } else if (w == _w.eight50Button) {
-            getDataObject().setWavelength(Wavelength.WAVELENGTH_850NM);
+            getDataObject().setWavelength(Wavelength.WAVELENGTH_A);
         } else if (w == _w.cassRotatorFollowingButton) {
             getDataObject().setCassRotator(CassRotator.FOLLOWING);
         } else if (w == _w.cassRotatorFixedButton) {

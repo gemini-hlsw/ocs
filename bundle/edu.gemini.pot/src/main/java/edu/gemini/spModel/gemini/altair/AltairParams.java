@@ -27,11 +27,11 @@ public final class AltairParams {
      */
     public enum Wavelength implements DisplayableSpType, SequenceableSpType {
 
-        WAVELENGTH_850NM("850 nm"),
-        WAVELENGTH_1UM("1 um"),;
+        WAVELENGTH_A("850 nm - 2.5 μm"),
+        WAVELENGTH_B("750 nm - 5 μm"),;
 
         /* The default Wavelength index value */
-        public static final Wavelength DEFAULT = WAVELENGTH_850NM;
+        public static final Wavelength DEFAULT = WAVELENGTH_A;
         private final String _displayValue;
 
         // Constructor
@@ -44,7 +44,7 @@ public final class AltairParams {
         }
 
         public String sequenceValue() {
-            return _displayValue;
+            return name();
         }
 
         /**
