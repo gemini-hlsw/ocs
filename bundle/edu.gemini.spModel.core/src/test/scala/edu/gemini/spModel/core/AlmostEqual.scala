@@ -12,10 +12,11 @@ object AlmostEqual {
     def ~=(b: A): Boolean = A.almostEqual(a, b)
   }
 
+  // almost equal if both None, or both Some and values are almost equal
   implicit def AlmostEqualOption[A: AlmostEqual]: AlmostEqual[Option[A]] =
     new AlmostEqual[Option[A]] {
       def almostEqual(a: Option[A], b: Option[A]) =
-        (a |@| b)(_ ~= _).getOrElse(false)
+        (a |@| b)(_ ~= _).getOrElse(true)
     }
 
   implicit val DoubleAlmostEqual =

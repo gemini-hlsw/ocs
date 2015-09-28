@@ -95,7 +95,7 @@ object InterpolateSpec extends Specification with ScalaCheck with Arbitraries wi
       val f =  ((c.toDouble - n1.toDouble) / (n2.toDouble - n1.toDouble))
       val c1 = Interpolate[Long, Coordinates].interpolate((n1.toLong, a), (n2.toLong, b), c.toLong)
       val c2 = Some(f).filterNot(f => f.isInfinity || f.isNaN).map(a.interpolate(b, _))
-      (c1 |@| c2)(_ ~= _).getOrElse(true)
+      c1 ~= c2
     }
 
   }
