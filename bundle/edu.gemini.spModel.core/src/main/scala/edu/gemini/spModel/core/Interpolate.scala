@@ -67,12 +67,8 @@ object Interpolate {
     new Interpolate[Long, Coordinates] {
       def interpolate(a: (Long, Coordinates), b: (Long, Coordinates), c: Long): Option[Coordinates] = {
         val ((n1, c1), (n2, c2)) = (a, b)
-        val f =  ((c.toDouble - n1.toDouble) / (n2.toDouble - n1.toDouble))
-        val (da, db) = c1 diff c2
-        val da0 = Angle.signedDegrees(da.toDegrees) * f
-        val db0 = Angle.signedDegrees(db.toDegrees) * f
-        if (da0.isNaN || db0.isNaN) None
-        else Some(c1.offset(Angle.fromDegrees(da0), Angle.fromDegrees(db0)))
+        val f = ((c.toDouble - n1.toDouble) / (n2.toDouble - n1.toDouble))
+        Option(f).filterNot(f => f.isNaN || f.isInfinity).map(c1.interpolate(c2, _))
       }
     }
 

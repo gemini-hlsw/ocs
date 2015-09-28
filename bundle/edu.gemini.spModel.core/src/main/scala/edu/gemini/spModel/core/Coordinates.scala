@@ -25,12 +25,57 @@ final case class Coordinates(ra: RightAscension, dec: Declination) {
   def diff(c: Coordinates): (Angle, Angle) =
     (c.ra.toAngle - ra.toAngle, c.dec.toAngle - dec.toAngle)
 
+  /**
+   * Angular distance from `this` to `that`, always a positive angle in [0, 180].
+   * Source: http://www.movable-type.co.uk/scripts/latlong.html
+   */
+  def angularDistance(that: Coordinates): Angle = {
+    val φ1 = this.dec.toAngle.toRadians
+    val φ2 = that.dec.toAngle.toRadians
+    val Δφ = (that.dec.toAngle - this.dec.toAngle).toRadians
+    val Δλ = (that.ra.toAngle  - this.ra.toAngle) .toRadians
+    val a  = sin(Δφ / 2) * sin(Δφ / 2) +
+             cos(φ1)     * cos(φ2)     *
+             sin(Δλ / 2) * sin(Δλ / 2)
+    Angle.fromRadians(2 * atan2(sqrt(a), sqrt(1 - a)))
+  }
+
+
+  /**
+   * Interpolate between `this` and `that` at a position specified by `f`, where `0.0` is `this`,
+   * `1.0` is `other`, and `0.5` is halfway along the great circle connecting them. Note that this
+   * computation is undefined where `f` is `NaN` or `Infinity`.
+   * Source: http://www.movable-type.co.uk/scripts/latlong.html
+   */
+  def interpolate(that: Coordinates, f: Double): Coordinates = {
+    val δ = angularDistance(that).toRadians
+    if (δ == 0) this
+    else {
+      val φ1 = this.dec.toAngle.toRadians
+      val φ2 = that.dec.toAngle.toRadians
+      val λ1 = this.ra.toAngle.toRadians
+      val λ2 = that.ra.toAngle.toRadians
+      val a = sin((1 - f) * δ) / sin(δ) // n.b. this line is wrong on the web page
+      val b = sin(f * δ) / sin(δ)
+      val x = a * cos(φ1) * cos(λ1) + b * cos(φ2) * cos(λ2)
+      val y = a * cos(φ1) * sin(λ1) + b * cos(φ2) * sin(λ2)
+      val z = a * sin(φ1) + b * sin(φ2)
+      val φi = atan2(z, sqrt(x * x + y * y))
+      val λi = atan2(y, x)
+      Coordinates(RA.fromAngle(Angle.fromRadians(λi)), Dec.fromAngle(Angle.fromRadians(φi)).get)
+    }
+  }
+
 }
 
 object Coordinates extends ((RightAscension, Declination) => Coordinates) {
 
   val ra:  Coordinates @> RightAscension = Lens(c => Store(r => c.copy(ra = r), c.ra))
   val dec: Coordinates @> Declination    = Lens(c => Store(d => c.copy(dec = d), c.dec))
+
+  /** Construct a `Coordinates` from values in degrees, where `dec` is in [-90, 90). */
+  def fromDegrees(ra: Double, dec: Double): Option[Coordinates] =
+    Dec.fromAngle(Angle.fromDegrees(dec)).map(Coordinates(RA.fromDegrees(ra), _))
 
   /**
    * The origin, at RA = Dec = 0.
@@ -104,6 +149,7 @@ object Coordinates extends ((RightAscension, Declination) => Coordinates) {
       }
     Difference(Angle.fromDegrees(phi * radian), Angle.fromDegrees(dist * radian))
   }
+
 }
 
 

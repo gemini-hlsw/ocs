@@ -89,45 +89,13 @@ object InterpolateSpec extends Specification with ScalaCheck with Arbitraries wi
 
   }
 
-  "Coordinate interpolation" should {
+  "Interpolate[Coordinates]" should {
 
-    "be invariant at min" ! forAll { (a: Coordinates, b: Coordinates) => 
-      val c = Interpolate[Long, Coordinates].interpolate((10L, a), (20L, b), 10L)
-      c ~= Some(a)
-    }
-
-    "be invariant at max" ! forAll { (a: Coordinates, b: Coordinates) => 
-      val c = Interpolate[Long, Coordinates].interpolate((10L, a), (20L, b), 20L)
-      c ~= Some(b)
-    }
-
-    "work backwards" ! forAll { (a: Coordinates, b: Coordinates) => 
-      val c = Interpolate[Long, Coordinates].interpolate((10L, b), (20L, a), 12L)
-      val d = Interpolate[Long, Coordinates].interpolate((10L, a), (20L, b), 18L)
-      c ~= d
-    }
-
-    "interpolate Declination correctly" ! forAll { (a: Coordinates, b: Coordinates) => 
-      val decs = (10L to 20L).map { n => 
-        Interpolate[Long, Coordinates].interpolate((10L, b), (20L, a), n).map(_.dec.toDegrees)
-      }
-      val deltas = (decs, decs.tail).zipped.map((a, b) => (a |@| b)(_ - _))
-      (deltas, deltas.tail).zipped.map(_ ~= _).forall(identity)
-    }
-
-    "interpolate RA correctly" ! forAll { (a: Coordinates, b: Coordinates) => 
-      val ras = (10L to 20L).map { n => 
-        Interpolate[Long, Coordinates].interpolate((10L, b), (20L, a), n).map(_.ra.toAngle.toDegrees)
-      }
-      val deltas = (ras, ras.tail).zipped.map((a, b) => (a |@| b)(_ - _))
-      (deltas, deltas.tail).zipped.map(_ ~= _).distinct.length <= 2 // can cross 0 one time
-    }
-
-    "yield None in the degenerate case" ! forAll { (a: Coordinates, b: Coordinates) => 
-      (a != b) ==> {
-        val c = Interpolate[Long, Coordinates].interpolate((20L, a), (20L, b), 20L)
-        c == None
-      }
+    "be consistent with Coordinates.interpolate" ! forAll { (a: Coordinates, b: Coordinates, n1: Short, n2: Short, c: Short) => 
+      val f =  ((c.toDouble - n1.toDouble) / (n2.toDouble - n1.toDouble))
+      val c1 = Interpolate[Long, Coordinates].interpolate((n1.toLong, a), (n2.toLong, b), c.toLong)
+      val c2 = Some(f).filterNot(f => f.isInfinity || f.isNaN).map(a.interpolate(b, _))
+      (c1 |@| c2)(_ ~= _).getOrElse(true)
     }
 
   }
