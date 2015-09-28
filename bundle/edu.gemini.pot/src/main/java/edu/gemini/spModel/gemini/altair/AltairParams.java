@@ -27,16 +27,18 @@ public final class AltairParams {
      */
     public enum Wavelength implements DisplayableSpType, SequenceableSpType {
 
-        WAVELENGTH_A("750 nm - 5 μm science"),
-        WAVELENGTH_B("850 nm - 2.5 μm science");
+        WAVELENGTH_A("750 nm - 5 μm science", "WAVELENGTH_A"),
+        WAVELENGTH_B("850 nm - 2.5 μm science", "WAVELENGTH_B");
 
         /* The default Wavelength index value */
         public static final Wavelength DEFAULT = WAVELENGTH_B;
         private final String _displayValue;
+        private final String _sequenceValue;
 
         // Constructor
-        Wavelength(String displayValue) {
+        Wavelength(String displayValue, String sequenceValue) {
             _displayValue = displayValue;
+            _sequenceValue = sequenceValue;
         }
 
         public String displayValue() {
@@ -44,7 +46,7 @@ public final class AltairParams {
         }
 
         public String sequenceValue() {
-            return name();
+            return _sequenceValue;
         }
 
         /**
