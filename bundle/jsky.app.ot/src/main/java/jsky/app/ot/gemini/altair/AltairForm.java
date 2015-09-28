@@ -58,13 +58,13 @@ public class AltairForm extends JPanel {
                 new Insets(11, 11, 0, 0), 0, 0));
 
         //---- eight50Button ----
-        eight50Button.setText(AltairParams.Wavelength.WAVELENGTH_A.displayValue());
+        eight50Button.setText(AltairParams.Wavelength.WAVELENGTH_B.displayValue());
         add(eight50Button, new GridBagConstraints(1, 1, 1, 1, 0.0, 0.0,
                 GridBagConstraints.WEST, GridBagConstraints.NONE,
                 new Insets(11, 11, 0, 0), 0, 0));
 
         //---- oneButton ----
-        oneButton.setText(AltairParams.Wavelength.WAVELENGTH_B.displayValue());
+        oneButton.setText(AltairParams.Wavelength.WAVELENGTH_A.displayValue());
         add(oneButton, new GridBagConstraints(1, 2, 1, 1, 0.0, 0.0,
                 GridBagConstraints.WEST, GridBagConstraints.NONE,
                 new Insets(0, 11, 0, 0), 0, 0));
