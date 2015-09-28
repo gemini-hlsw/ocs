@@ -11,6 +11,7 @@ import edu.gemini.spModel.core.{Coordinates, Angle}
 import edu.gemini.spModel.core.Target.SiderealTarget
 import edu.gemini.spModel.guide.{ValidatableGuideProbe, VignettingGuideProbe, GuideProbe}
 import edu.gemini.spModel.obs.context.ObsContext
+import edu.gemini.spModel.target.system.CoordinateParam.Units
 import edu.gemini.spModel.target.system.HmsDegTarget
 import edu.gemini.spModel.telescope.PosAngleConstraint._
 import edu.gemini.shared.util.immutable.ScalaConverters._
@@ -250,8 +251,8 @@ object SingleProbeStrategy {
     val ra1    = st.coordinates.ra.toAngle.toRadians
     val dec1   = st.coordinates.dec.toAngle.toRadians
     val target = HmsDegTarget.fromSkyObject(st.toOldModel)
-    val ra2    = Angle.fromDegrees(target.getRaDegrees).toRadians
-    val dec2   = Angle.fromDegrees(target.getDecDegrees).toRadians
+    val ra2    = Angle.fromDegrees(target.getRa.getAs(Units.DEGREES)).toRadians
+    val dec2   = Angle.fromDegrees(target.getDec.getAs(Units.DEGREES)).toRadians
     val raDiff = ra2 - ra1
     val angle  = atan2(sin(raDiff), cos(dec1) * tan(dec2) - sin(dec1) * cos(raDiff))
     Angle.fromRadians(angle)

@@ -8,9 +8,13 @@ import edu.gemini.spModel.target.system.{ConicTarget, HmsDegTarget, ITarget}
 import org.scalacheck.{Arbitrary, Gen}
 import org.specs2.ScalaCheck
 import org.specs2.mutable.Specification
+
 import squants.motion.VelocityConversions._
 import squants.radio.IrradianceConversions._
 import squants.radio.SpectralIrradianceConversions._
+
+import edu.gemini.shared.util.immutable.{ None => JNone }
+import edu.gemini.shared.util.immutable.ScalaConverters._
 
 /** Tests Pio input/output operations for SpTargets.
   * Currently this only tests that the source profile and distribution are stored and retrieved.
@@ -74,8 +78,8 @@ object SpTargetPioSpec extends Specification with ScalaCheck with Arbitraries {
 
     def expect(ps: ParamSet, era: Double, edec: Double): Unit = {
       val spt = SPTargetPio.fromParamSet(ps)
-      val ra  = spt.getTarget.getRaDegrees
-      val dec = spt.getTarget.getDecDegrees
+      val ra  = spt.getTarget.getRaDegrees(JNone.instance[java.lang.Long]).asScalaOpt.map(_.doubleValue).get
+      val dec = spt.getTarget.getDecDegrees(JNone.instance[java.lang.Long]).asScalaOpt.map(_.doubleValue).get
 
       ra  must beCloseTo(era,  0.000001)
       dec must beCloseTo(edec, 0.000001)

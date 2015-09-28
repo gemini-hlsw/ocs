@@ -10,6 +10,7 @@ import edu.gemini.pot.sp.{SPComponentType, ISPObservation, ISPTemplateFolder, IS
 import edu.gemini.pot.spdb.{IDBDatabaseService, DBLocalDatabase}
 import edu.gemini.spModel.io.impl.{PioSpXmlWriter, PioSpXmlParser}
 import edu.gemini.spModel.template.{TemplateParameters, TemplateGroup}
+import edu.gemini.shared.util.immutable.{ None => JNone }
 
 import org.junit.Test
 import org.junit.Assert._
@@ -105,8 +106,10 @@ class TargetConversionTest {
     val toc        = targetComp.getDataObject.asInstanceOf[TargetObsComp]
     val rigel      = toc.getBase.getTarget.asInstanceOf[HmsDegTarget]
 
-    val ra    = rigel.getRaDegrees
-    val dec   = rigel.getDecDegrees
+    val when  = JNone.instance[java.lang.Long]
+
+    val ra    = rigel.getRaDegrees(when).getValue
+    val dec   = rigel.getDecDegrees(when).getValue
     val dra   = rigel.getPropMotionRA
     val ddec  = rigel.getPropMotionDec
     val epoch = rigel.getEpoch.getValue
