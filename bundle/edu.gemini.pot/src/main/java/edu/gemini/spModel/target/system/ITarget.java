@@ -79,10 +79,6 @@ public abstract class ITarget implements Cloneable, Serializable {
         return new Some(getRa().getAs(CoordinateParam.Units.HMS));
     }
 
-    public double getRaHours() {
-        return getRa().getAs(CoordinateParam.Units.HMS);
-    }
-
     public Option<String> getRaString(Option<Long> time) {
         return new Some(getRa().toString());
     }
@@ -119,12 +115,7 @@ public abstract class ITarget implements Cloneable, Serializable {
     protected abstract DMS getDec();
 
     public Option<Double> getDecDegrees(Option<Long> time) {
-        return new Some(getDecDegrees());
-    }
-
-    // TRANSITIONAL
-    public double getDecDegrees() {
-        return getDec().getAs(CoordinateParam.Units.DEGREES);
+        return new Some(getDec().getAs(CoordinateParam.Units.DEGREES));
     }
 
     // TRANSITIONAL

@@ -8,6 +8,9 @@ import edu.gemini.spModel.target.system.{ConicTarget, HmsDegTarget, ITarget}
 import org.scalacheck.{Arbitrary, Gen}
 import org.specs2.ScalaCheck
 import org.specs2.mutable.Specification
+import edu.gemini.shared.util.immutable.{ None => JNone }
+import edu.gemini.shared.util.immutable.ScalaConverters._
+
 
 import squants.motion.VelocityConversions._
 import squants.radio.IrradianceConversions._
