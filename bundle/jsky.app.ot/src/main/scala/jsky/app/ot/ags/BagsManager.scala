@@ -160,7 +160,7 @@ object BagsManager {
     }
   }
 
-  private val NumThreads = 1
+  private val NumThreads = 5
   private val RequeueDelay = 3000
   private val executor = Executors.newFixedThreadPool(NumThreads)
   private var taskMap = new HashMap[SPNodeKey, BagsTask]
