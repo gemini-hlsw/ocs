@@ -10,7 +10,7 @@ import edu.gemini.pot.sp._
 import edu.gemini.spModel.guide.GuideProbe
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.rich.shared.immutable._
-import edu.gemini.spModel.target.env.GuideProbeTargets
+import edu.gemini.spModel.target.env.{TargetEnvironment, GuideProbeTargets}
 import edu.gemini.spModel.target.obsComp.TargetObsComp
 import jsky.app.ot.OT
 import jsky.app.ot.gemini.altair.Altair_WFS_Feature
@@ -84,13 +84,13 @@ object BagsManager {
           val ctx = TpeContext(observation)
 
           // Find out which guide probes previously had assignments, but no longer do.
-          val oldEnv           = ctx.targets.envOrDefault
-          val allProbes        = oldEnv.getGuideEnvironment.getReferencedGuiders.asScala.toSet
-          val assignedProbes   = selOpt.map(_.assignments.map(_.guideProbe)).toList.flatten
+          val oldEnv = ctx.targets.envOrDefault
+          val allProbes = oldEnv.getGuideEnvironment.getReferencedGuiders.asScala.toSet
+          val assignedProbes = selOpt.map(_.assignments.map(_.guideProbe)).toList.flatten
           val unassignedProbes = allProbes -- assignedProbes
 
           // Clear out the guide probes that no longer have a valid assignment.
-          val clearedEnv       = (oldEnv /: unassignedProbes) { (curEnv, gp) =>
+          val clearedEnv = (oldEnv /: unassignedProbes) { (curEnv, gp) =>
             val oldGpt = curEnv.getPrimaryGuideProbeTargets(gp).asScalaOpt
             val newGpt = oldGpt.getOrElse(GuideProbeTargets.create(gp)).setBagsTarget(GuideProbeTargets.NO_TARGET)
             curEnv.putPrimaryGuideProbeTargets(newGpt)
@@ -99,25 +99,27 @@ object BagsManager {
           // Apply the new selection.
           val newEnv = selOpt.fold(clearedEnv)(_.applyTo(clearedEnv))
 
-          // Update the TargetEnvironment.
-          muteObservation(observation)
-          ctx.targets.dataObject.foreach { targetComp =>
-            targetComp.setTargetEnvironment(newEnv)
-            ctx.targets.commit()
+          // Update the TargetEnvironment if it is different.
+          if (!bagsTargetsMatch(oldEnv, newEnv)) {
+            muteObservation(observation)
+            ctx.targets.dataObject.foreach { targetComp =>
+              targetComp.setTargetEnvironment(newEnv)
+              ctx.targets.commit()
 
-            // Update the position angle, if necessary.
-            selOpt.foreach { sel =>
-              ctx.instrument.dataObject.foreach { inst =>
-                val deg = sel.posAngle.toDegrees
-                val old = inst.getPosAngleDegrees
-                if (deg != old) {
-                  inst.setPosAngleDegrees(deg)
-                  ctx.instrument.commit()
+              // Update the position angle, if necessary.
+              selOpt.foreach { sel =>
+                ctx.instrument.dataObject.foreach { inst =>
+                  val deg = sel.posAngle.toDegrees
+                  val old = inst.getPosAngleDegrees
+                  if (deg != old) {
+                    inst.setPosAngleDegrees(deg)
+                    ctx.instrument.commit()
+                  }
                 }
               }
             }
+            unmuteObservation(observation)
           }
-          unmuteObservation(observation)
         }
 
         val fut = strategy.select(obsCtx, OT.getMagnitudeTable)
@@ -269,6 +271,18 @@ object BagsManager {
     }
   }
 
+  // Check two target environments to see if the BAGS targets match exactly between them.
+  def bagsTargetsMatch(oldEnv: TargetEnvironment, newEnv: TargetEnvironment): Boolean = {
+    oldEnv.getGuideEnvironment.getPrimaryReferencedGuiders.equals(newEnv.getGuideEnvironment.getPrimaryReferencedGuiders) &&
+      oldEnv.getGuideEnvironment.getPrimaryReferencedGuiders.asScala.forall { gp =>
+        oldEnv.getPrimaryGuideProbeTargets(gp).asScalaOpt.forall { oldGpt =>
+          val oldBags = oldGpt.getBagsTarget.asScalaOpt
+          val newBags = newEnv.getPrimaryGuideProbeTargets(gp).asScalaOpt.flatMap(_.getBagsTarget.asScalaOpt)
+          oldBags.forall(oldTarget => newBags.exists(_.getTarget.equals(oldTarget.getTarget)))
+        }
+      }
+  }
+
   private val propertyChangeListener = new PropertyChangeListener {
     override def propertyChange(evt: PropertyChangeEvent): Unit = evt.getSource match {
       case obsComp: ISPObsComponent =>
@@ -278,19 +292,11 @@ object BagsManager {
           val newEnv = evt.getNewValue.asInstanceOf[TargetObsComp].getTargetEnvironment
 
           // Same base, same primary guiders, same BAGS targets.
-          oldEnv.getBase.getTarget.equals(newEnv.getBase.getTarget) &&
-            oldEnv.getGuideEnvironment.getPrimaryReferencedGuiders.equals(newEnv.getGuideEnvironment.getPrimaryReferencedGuiders) &&
-            oldEnv.getGuideEnvironment.getPrimaryReferencedGuiders.asScala.forall { gp =>
-              oldEnv.getPrimaryGuideProbeTargets(gp).asScalaOpt.forall { oldGpt =>
-                val oldBags = oldGpt.getBagsTarget.asScalaOpt
-                val newBags = newEnv.getPrimaryGuideProbeTargets(gp).asScalaOpt.flatMap(_.getBagsTarget.asScalaOpt)
-                oldBags.forall(oldTarget => newBags.exists(_.getTarget.equals(oldTarget.getTarget)))
-              }
-            }
+          oldEnv.getBase.getTarget.equals(newEnv.getBase.getTarget) && bagsTargetsMatch(oldEnv, newEnv)
         }
-        println(s"*** sameEnv=$sameEnv")
         if (!sameEnv)
           updateObservation(obsComp.getContextObservation)
+
       case prog: ISPProgram => prog.getObservations.asScala.foreach(updateObservation)
       case node: ISPNode    => updateObservation(node.getContextObservation)
       case _                => // Ignore
