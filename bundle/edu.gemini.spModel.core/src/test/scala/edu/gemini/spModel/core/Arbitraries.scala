@@ -45,14 +45,6 @@ trait Arbitraries {
       } yield Coordinates(ra, dec)
     }
 
-  // implicit val arbEphemerisElement: Arbitrary[(Long, Coordinates)] =
-  //   Arbitrary {
-  //     for {
-  //       coords <- arbitrary[Coordinates]
-  //       valid  <- arbitrary[Long]
-  //     } yield (coords, valid)
-  //   }
-
   implicit val arbMagnitudeBand: Arbitrary[MagnitudeBand] =
     Arbitrary(oneOf(MagnitudeBand.all))
 
@@ -93,8 +85,13 @@ trait Arbitraries {
   implicit val arbHorizonsDesignation: Arbitrary[HorizonsDesignation] =
     Arbitrary {
       for {
-        objectName <- arbitrary[Int]
-      } yield HorizonsDesignation.Asteroid(objectName.toString)
+        obj <- arbitrary[Int].map(_.toString)
+        des <- oneOf(
+          HorizonsDesignation.Asteroid(obj),
+          HorizonsDesignation.Comet(obj),
+          HorizonsDesignation.MajorBody(obj)
+        )
+      } yield des
     }
 
   implicit val arbSiderealTarget: Arbitrary[Target.SiderealTarget] =
