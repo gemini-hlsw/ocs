@@ -1,6 +1,6 @@
 package edu.gemini.spModel.target
 
 sealed trait SpatialProfile extends Serializable
-final case class PointSource() extends SpatialProfile
+case object PointSource extends SpatialProfile
+case object UniformSource extends SpatialProfile
 final case class GaussianSource(fwhm: Double) extends SpatialProfile
-final case class UniformSource() extends SpatialProfile

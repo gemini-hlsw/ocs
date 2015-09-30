@@ -385,6 +385,7 @@ trait OcsBundle {
 
   lazy val bundle_edu_gemini_spModel_pio = 
     project.in(file("bundle/edu.gemini.spModel.pio")).dependsOn(
+      bundle_edu_gemini_spModel_core,
       bundle_edu_gemini_shared_util
     )
 

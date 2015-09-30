@@ -36,8 +36,6 @@ final class SourceDetailsEditor extends GridBagPanel with TelescopePosEditor {
 
   // ==== Spatial Profile Details
 
-  private val defaultPointSource    = PointSource()
-  private val defaultUniformSource  = UniformSource()
   private val defaultGaussianSource = GaussianSource(0.5)
 
   private def gaussianOrDefault(t: SPTarget): GaussianSource = t.getTarget.getSpatialProfile.fold(defaultGaussianSource)(_.asInstanceOf[GaussianSource])
@@ -51,9 +49,9 @@ final class SourceDetailsEditor extends GridBagPanel with TelescopePosEditor {
   private case class ProfilePanel(label: String, panel: Component, default: Option[SpatialProfile])
   private val profilePanels = List(
     ProfilePanel("«undefined»",              new JPanel(),          None),
-    ProfilePanel("Point Source",             pointSourceDetails,    Some(defaultPointSource)),
+    ProfilePanel("Point Source",             pointSourceDetails,    Some(PointSource)),
     ProfilePanel("Extended Gaussian Source", gaussianSourceDetails, Some(defaultGaussianSource)),
-    ProfilePanel("Extended Uniform Source",  uniformSourceDetails,  Some(defaultUniformSource))
+    ProfilePanel("Extended Uniform Source",  uniformSourceDetails,  Some(UniformSource))
   )
 
   private val profiles = new ComboBox[ProfilePanel](profilePanels) {
@@ -210,20 +208,20 @@ final class SourceDetailsEditor extends GridBagPanel with TelescopePosEditor {
       deafTo(editElements:_*)
 
       spt.getTarget.getSpatialProfile match {
-        case None                     => profiles.selection.item = profilePanels.head
-        case Some(s: PointSource)     => profiles.selection.item = profilePanels(1)
-        case Some(s: GaussianSource)  => profiles.selection.item = profilePanels(2); profilePanels(2).panel.asInstanceOf[NumericPropertySheet[GaussianSource]].edit(obsContext, spTarget, node)
-        case Some(s: UniformSource)   => profiles.selection.item = profilePanels(3)
+        case None                        => profiles.selection.item = profilePanels.head
+        case Some(PointSource)           => profiles.selection.item = profilePanels(1)
+        case Some(GaussianSource(_))     => profiles.selection.item = profilePanels(2); profilePanels(2).panel.asInstanceOf[NumericPropertySheet[GaussianSource]].edit(obsContext, spTarget, node)
+        case Some(UniformSource)         => profiles.selection.item = profilePanels(3)
       }
 
       spt.getTarget.getSpectralDistribution match {
-        case None                     => distributions.selection.item = distributionPanels.head
-        case Some(s: LibraryStar)     => distributions.selection.item = distributionPanels(1); libraryStarDetails.selection.item = s
-        case Some(s: LibraryNonStar)  => distributions.selection.item = distributionPanels(2); libraryNonStarDetails.selection.item = s
-        case Some(s: BlackBody)       => distributions.selection.item = distributionPanels(3); distributionPanels(3).panel.asInstanceOf[NumericPropertySheet[BlackBody]].edit(obsContext, spTarget, node)
-        case Some(s: EmissionLine)    => distributions.selection.item = distributionPanels(4); distributionPanels(4).panel.asInstanceOf[NumericPropertySheet[EmissionLine]].edit(obsContext, spTarget, node)
-        case Some(s: PowerLaw)        => distributions.selection.item = distributionPanels(5); distributionPanels(5).panel.asInstanceOf[NumericPropertySheet[PowerLaw]].edit(obsContext, spTarget, node)
-        case Some(s: UserDefined)     => throw new Error("not yet supported") // at a later stage we will add support for aux file user spectras
+        case None                        => distributions.selection.item = distributionPanels.head
+        case Some(s: LibraryStar)        => distributions.selection.item = distributionPanels(1); libraryStarDetails.selection.item = s
+        case Some(s: LibraryNonStar)     => distributions.selection.item = distributionPanels(2); libraryNonStarDetails.selection.item = s
+        case Some(BlackBody(_))          => distributions.selection.item = distributionPanels(3); distributionPanels(3).panel.asInstanceOf[NumericPropertySheet[BlackBody]].edit(obsContext, spTarget, node)
+        case Some(EmissionLine(_,_,_,_)) => distributions.selection.item = distributionPanels(4); distributionPanels(4).panel.asInstanceOf[NumericPropertySheet[EmissionLine]].edit(obsContext, spTarget, node)
+        case Some(PowerLaw(_))           => distributions.selection.item = distributionPanels(5); distributionPanels(5).panel.asInstanceOf[NumericPropertySheet[PowerLaw]].edit(obsContext, spTarget, node)
+        case Some(UserDefined(_))        => sys.error("not yet supported") // at a later stage we will add support for aux file user spectras
       }
 
       updateUI()

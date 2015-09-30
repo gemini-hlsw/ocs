@@ -105,7 +105,7 @@ object Fixture {
   // ------- R - BAND
   lazy val RBandSources = List(
     new SourceDefinition(
-      PointSource(),
+      PointSource,
       LibraryStar.A0V,
       20.0, BrightnessUnit.MAG, MagnitudeBand.R,
       0.0
@@ -121,13 +121,13 @@ object Fixture {
   // ------- K - BAND
   lazy val KBandSources = List(
     new SourceDefinition(
-      PointSource(),
+      PointSource,
       LibraryStar.A0V,
       12.0, BrightnessUnit.MAG, MagnitudeBand.K,
       0.0
     ),
     new SourceDefinition(
-      UniformSource(),
+      UniformSource,
       EmissionLine(2.2.microns, 250.0.kps, 5.0e-19.wattsPerSquareMeter, 1.0e-16.wattsPerSquareMeterPerMicron),
       22.0, BrightnessUnit.MAG_PSA, MagnitudeBand.K,
       0.75
@@ -137,13 +137,13 @@ object Fixture {
   // ------- N - BAND
   lazy val NBandSources = List(
     new SourceDefinition(
-      PointSource(),
+      PointSource,
       LibraryNonStar.NGC1068,
       9.0, BrightnessUnit.ABMAG, MagnitudeBand.N,
       0.0
     ),
     new SourceDefinition(
-      UniformSource(),
+      UniformSource,
       EmissionLine(12.8.microns, 500.kps, 5.0e-19.wattsPerSquareMeter, 1.0e-16.wattsPerSquareMeterPerMicron),
       12.0, BrightnessUnit.MAG_PSA, MagnitudeBand.N,
       1.5
@@ -159,7 +159,7 @@ object Fixture {
       0.0
     ),
     new SourceDefinition(
-      UniformSource(),
+      UniformSource,
       PowerLaw(-1.0),
       11.0, BrightnessUnit.MAG_PSA, MagnitudeBand.Q,
       2.0

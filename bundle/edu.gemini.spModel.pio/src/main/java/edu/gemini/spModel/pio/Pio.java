@@ -3,10 +3,14 @@
 //
 package edu.gemini.spModel.pio;
 
+import scala.Tuple2;
+import squants.Dimension;
+import squants.Quantity;
+
+import java.beans.PropertyDescriptor;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.beans.PropertyDescriptor;
 
 // This class represents a design tradeoff.  Though it might be easier for
 // the client of PIO to use if all these convenience methods were placed
@@ -463,20 +467,6 @@ public final class Pio {
         return param;
     }
 
-    public static Param addFloatParam(PioFactory factory, ParamSet parent, String name, float value) {
-        Param param = factory.createParam(name);
-        param.setValue(String.valueOf(value));
-        parent.addParam(param);
-        return param;
-    }
-
-    public static Param addShortParam(PioFactory factory, ParamSet parent, String name, short value) {
-        Param param = factory.createParam(name);
-        param.setValue(String.valueOf(value));
-        parent.addParam(param);
-        return param;
-    }
-
     public static byte getByteValue(PioNodeParent context, String path, byte def) {
         String strValue = getValue(context, path);
         if (strValue == null) return def;
@@ -487,25 +477,45 @@ public final class Pio {
         }
     }
 
-    public static short getShortValue(PioNodeParent context, String path, short def) {
-        String strValue = getValue(context, path);
-        if (strValue == null) return def;
-        try {
-            return Short.parseShort(strValue);
-        } catch (NumberFormatException ex) {
-            return def;
-        }
+    /**
+     * Adds a squants quantity with name <code>name</code>.
+     * @param factory PioFactory that should be used to create the parameter
+     * @param parent node to which the new {@link Param} should be added
+     * @param name name of the new {@link Param}
+     * @param quantity the quantity to be stored (value and units)
+     * @param <Q> a squants quantity
+     * @return newly created {@link Param} that was added to {@link ParamSet}
+     */
+    public static  <Q extends Quantity<Q>> Param addQuantity(final PioFactory factory, final ParamSet parent, final String name, final Q quantity) {
+        final Tuple2<Object, String> t = quantity.toTuple();
+        final String value = t._1().toString();
+        final String units = t._2();
+        return addParam(factory, parent, name, value, units);
     }
 
-    public static float getFloatValue(PioNodeParent context, String path, float def) {
-        String strValue = getValue(context, path);
-        if (strValue == null) return def;
+    /**
+     * Gets a squants quantity with the given name from the given context.
+     * Returns 0 of primary unit of the given squants dimension in case the element does not exist or could not be parsed.
+     * @param context the node context
+     * @param path the node path
+     * @param dimension a squants dimension
+     * @param <Q> a squants quantity
+     * @return quantity parsed from XML structure
+     */
+    public static <Q extends Quantity<Q>> Q getQuantity(final PioNodeParent context, final String path, final Dimension<Q> dimension) {
         try {
-            return Float.parseFloat(strValue);
-        } catch (NumberFormatException ex) {
-            return def;
+            // Get the Param corresponding to the path.
+            final PioPath pp = new PioPath(path);
+            final PioNode node = context.lookupNode(pp);
+            // Return the value.
+            final String value = ((Param) node).getValue();
+            final String units = ((Param) node).getUnits();
+            return dimension.parse(value + " " + units).get();
+
+        } catch (final Exception e) {
+            // doing this is lame but in sync with existing Pio methods: swallow error and return a default value
+            return dimension.parse("0 " + dimension.primaryUnit().symbol()).get();
         }
     }
-
 
 }

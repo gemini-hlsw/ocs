@@ -8,9 +8,6 @@ import edu.gemini.spModel.target.system.{ConicTarget, HmsDegTarget, ITarget}
 import org.scalacheck.{Arbitrary, Gen}
 import org.specs2.ScalaCheck
 import org.specs2.mutable.Specification
-import edu.gemini.shared.util.immutable.{ None => JNone }
-import edu.gemini.shared.util.immutable.ScalaConverters._
-
 
 import squants.motion.VelocityConversions._
 import squants.radio.IrradianceConversions._
@@ -32,8 +29,8 @@ object SpTargetPioSpec extends Specification with ScalaCheck with Arbitraries {
         BlackBody(10000),
         PowerLaw(0),
         PowerLaw(1),
-        EmissionLine(450.nm, 150.kps, 13.wattsPerSquareMeter, 22.wattsPerSquareMeterPerMicron),
-        EmissionLine(550.nm, 400.kps, 23.wattsPerSquareMeter, 42.wattsPerSquareMeterPerMicron),
+        EmissionLine(450.nm, 150.kps, 13.ergsPerSecondPerSquareCentimeter, 22.wattsPerSquareMeterPerMicron),
+        EmissionLine(550.nm, 400.kps, 23.wattsPerSquareMeter, 42.ergsPerSecondPerSquareCentimeterPerAngstrom),
         LibraryStar.A0V,
         LibraryStar.A5III,
         LibraryNonStar.NGC2023,
@@ -42,10 +39,11 @@ object SpTargetPioSpec extends Specification with ScalaCheck with Arbitraries {
     }
     implicit val arbProfile = Arbitrary[SpatialProfile] {
       Gen.oneOf(
-        PointSource(),
+        PointSource,
+        UniformSource,
         GaussianSource(0.5),
-        GaussianSource(0.75),
-        UniformSource())
+        GaussianSource(0.75)
+      )
     }
 
     "SPTargetPio" should {
@@ -62,8 +60,8 @@ object SpTargetPioSpec extends Specification with ScalaCheck with Arbitraries {
           val pset = SPTargetPio.getParamSet(spt, factory)
           val spt2 = SPTargetPio.fromParamSet(pset)
 
-          assert(spt.getTarget.getSpatialProfile == spt2.getTarget.getSpatialProfile)
-          assert(spt.getTarget.getSpectralDistribution == spt2.getTarget.getSpectralDistribution)
+          assert(spt.getTarget.getSpatialProfile === spt2.getTarget.getSpatialProfile)
+          assert(spt.getTarget.getSpectralDistribution === spt2.getTarget.getSpectralDistribution)
         }
     }
 

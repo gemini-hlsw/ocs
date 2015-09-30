@@ -61,9 +61,9 @@ public final class SourceDefinition implements Serializable {
         this.redshift       = redshift;
 
         // provide an enum for the spatial profile types (helps with the Java implementation -> switch)
-        if      (profile instanceof PointSource)          profileType = Profile.POINT;
-        else if (profile instanceof GaussianSource)       profileType = Profile.GAUSSIAN;
-        else if (profile instanceof UniformSource)        profileType = Profile.UNIFORM;
+        if      (profile instanceof PointSource$)        profileType = Profile.POINT;
+        else if (profile instanceof GaussianSource)      profileType = Profile.GAUSSIAN;
+        else if (profile instanceof UniformSource$)      profileType = Profile.UNIFORM;
         else    throw new IllegalArgumentException();
 
         // provide an enum for the spectral distribution types (helps with the Java implementation -> switch)

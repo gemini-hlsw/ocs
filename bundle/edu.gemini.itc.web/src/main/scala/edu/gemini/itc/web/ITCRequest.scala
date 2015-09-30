@@ -279,7 +279,7 @@ object ITCRequest {
       case POINT    =>
         val norm  = r.doubleParameter("psSourceNorm")
         val units = r.enumParameter(classOf[BrightnessUnit], "psSourceUnits")
-        (PointSource(), norm, units)
+        (PointSource, norm, units)
       case GAUSSIAN =>
         val norm  = r.doubleParameter("gaussSourceNorm")
         val units = r.enumParameter(classOf[BrightnessUnit], "gaussSourceUnits")
@@ -288,7 +288,7 @@ object ITCRequest {
       case UNIFORM  =>
         val norm  = r.doubleParameter("usbSourceNorm")
         val units = r.enumParameter(classOf[BrightnessUnit], "usbSourceUnits")
-        (UniformSource(), norm, units)
+        (UniformSource, norm, units)
     }
 
     // Get Normalization info
