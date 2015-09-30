@@ -25,6 +25,7 @@ import edu.gemini.spModel.target.env.GuideGroup;
 import edu.gemini.spModel.target.env.GuideProbeTargets;
 import edu.gemini.spModel.target.env.TargetEnvironment;
 import edu.gemini.spModel.target.obsComp.TargetObsComp;
+import jsky.app.ot.ags.BagsManager;
 import jsky.coords.WorldCoords;
 import jsky.util.gui.SwingWorker;
 import jsky.util.gui.DialogUtil;
@@ -182,8 +183,11 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
                 return clearedEnv.setPrimaryGuideGroup(gg);
             }).getOrElse(clearedEnv);
 
-            targetObsComp.setTargetEnvironment(finalEnv);
-            ctx.targets().commit();
+            // If BAGS is running, only change if the target environments differ.
+            if (!isBags || !BagsManager.bagsTargetsMatch(oldEnv, finalEnv)) {
+                targetObsComp.setTargetEnvironment(finalEnv);
+                ctx.targets().commit();
+            }
         }
     }
 
