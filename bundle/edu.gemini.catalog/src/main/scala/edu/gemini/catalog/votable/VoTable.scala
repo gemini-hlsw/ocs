@@ -15,7 +15,7 @@ case class UcdWord(token: String)
 case class Ucd(tokens: List[UcdWord]) {
   def includes(ucd: UcdWord): Boolean = tokens.contains(ucd)
   def matches(r: Regex): Boolean = tokens.exists(t => r.findFirstIn(t.token).isDefined)
-  override def toString = tokens.mkString(", ")
+  override def toString = tokens.map(_.token).mkString(", ")
 }
 
 object Ucd {
