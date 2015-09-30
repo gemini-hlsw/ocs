@@ -11,6 +11,7 @@ import edu.gemini.spModel.guide.GuideProbe
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.rich.shared.immutable._
 import edu.gemini.spModel.target.env.GuideProbeTargets
+import edu.gemini.spModel.target.obsComp.TargetObsComp
 import jsky.app.ot.OT
 import jsky.app.ot.gemini.altair.Altair_WFS_Feature
 import jsky.app.ot.gemini.inst.OIWFS_Feature
@@ -270,6 +271,26 @@ object BagsManager {
 
   private val propertyChangeListener = new PropertyChangeListener {
     override def propertyChange(evt: PropertyChangeEvent): Unit = evt.getSource match {
+      case obsComp: ISPObsComponent =>
+        // Check to see if anything has changed.
+        val sameEnv = evt.getOldValue.isInstanceOf[TargetObsComp] && evt.getNewValue.isInstanceOf[TargetObsComp] && {
+          val oldEnv = evt.getOldValue.asInstanceOf[TargetObsComp].getTargetEnvironment
+          val newEnv = evt.getNewValue.asInstanceOf[TargetObsComp].getTargetEnvironment
+
+          // Same base, same primary guiders, same BAGS targets.
+          oldEnv.getBase.getTarget.equals(newEnv.getBase.getTarget) &&
+            oldEnv.getGuideEnvironment.getPrimaryReferencedGuiders.equals(newEnv.getGuideEnvironment.getPrimaryReferencedGuiders) &&
+            oldEnv.getGuideEnvironment.getPrimaryReferencedGuiders.asScala.forall { gp =>
+              oldEnv.getPrimaryGuideProbeTargets(gp).asScalaOpt.forall { oldGpt =>
+                val oldBags = oldGpt.getBagsTarget.asScalaOpt
+                val newBags = newEnv.getPrimaryGuideProbeTargets(gp).asScalaOpt.flatMap(_.getBagsTarget.asScalaOpt)
+                oldBags.forall(oldTarget => newBags.exists(_.getTarget.equals(oldTarget.getTarget)))
+              }
+            }
+        }
+        println(s"*** sameEnv=$sameEnv")
+        if (!sameEnv)
+          updateObservation(obsComp.getContextObservation)
       case prog: ISPProgram => prog.getObservations.asScala.foreach(updateObservation)
       case node: ISPNode    => updateObservation(node.getContextObservation)
       case _                => // Ignore
