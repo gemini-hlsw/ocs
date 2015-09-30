@@ -44,13 +44,13 @@ class CatalogSearchCriterionSpec extends Specification with Arbitraries with Sca
       val matcher = criterion.matcher(base)
 
       // base pos is not in radius limit
-      matcher.matches(SiderealTarget("testObj", base, None, List(new Magnitude(3.0, MagnitudeBand.J)), None)) should beFalse
+      matcher.matches(SiderealTarget("testObj", base, None, List(new Magnitude(3.0, MagnitudeBand.J)))) should beFalse
       val pos = Coordinates(RightAscension.fromAngle(baseRA), Declination.fromAngle(baseDec + Angle.fromArcmin(3.0)).getOrElse(Declination.zero))
 
       // Should be in mag and radius limit
-      matcher.matches(SiderealTarget("testObj", pos, None, List(new Magnitude(3.0, MagnitudeBand.J)), None)) should beTrue
+      matcher.matches(SiderealTarget("testObj", pos, None, List(new Magnitude(3.0, MagnitudeBand.J)))) should beTrue
       // mag out of range
-      matcher.matches(SiderealTarget("testObj", pos, None, List(new Magnitude(11.0, MagnitudeBand.J)), None)) should beFalse
+      matcher.matches(SiderealTarget("testObj", pos, None, List(new Magnitude(11.0, MagnitudeBand.J)))) should beFalse
     }
     "support search with offset" in {
       val radiusLimits = RadiusConstraint.between(Angle.fromArcmin(1.0), Angle.fromArcmin(10.0))
@@ -62,15 +62,15 @@ class CatalogSearchCriterionSpec extends Specification with Arbitraries with Sca
       val matcher = criterion.matcher(base)
 
       // base pos is in radius limit with offset
-      matcher.matches(SiderealTarget("testObj", base, None, List(new Magnitude(3.0, MagnitudeBand.J)), None)) should beTrue
+      matcher.matches(SiderealTarget("testObj", base, None, List(new Magnitude(3.0, MagnitudeBand.J)))) should beTrue
 
       // Should be in mag and radius limit
       val pos = Coordinates(RightAscension.fromAngle(baseRA), Declination.fromAngle(baseDec + Angle.fromArcmin(11.0)).getOrElse(Declination.zero))
-      matcher.matches(SiderealTarget("testObj", pos, None, List(new Magnitude(3.0, MagnitudeBand.J)), None)) should beTrue
+      matcher.matches(SiderealTarget("testObj", pos, None, List(new Magnitude(3.0, MagnitudeBand.J)))) should beTrue
 
       // Should be in mag and radius limit
       val pos2 = Coordinates(RightAscension.fromAngle(baseRA + Angle.fromArcmin(11.0)), Declination.fromAngle(baseDec).getOrElse(Declination.zero))
-      matcher.matches(SiderealTarget("testObj", pos2, None, List(new Magnitude(3.0, MagnitudeBand.J)), None)) should beTrue
+      matcher.matches(SiderealTarget("testObj", pos2, None, List(new Magnitude(3.0, MagnitudeBand.J)))) should beTrue
     }
     "support search with offset and pos angle" in {
       val radiusLimits = RadiusConstraint.between(Angle.fromArcmin(10.0), Angle.fromArcmin(2.0))
@@ -83,15 +83,15 @@ class CatalogSearchCriterionSpec extends Specification with Arbitraries with Sca
       val matcher = criterion.matcher(base)
 
       // base pos is not in radius limit
-      matcher.matches(SiderealTarget("testObj", base, None, List(new Magnitude(3.0, MagnitudeBand.J)), None)) should beFalse
+      matcher.matches(SiderealTarget("testObj", base, None, List(new Magnitude(3.0, MagnitudeBand.J)))) should beFalse
 
       // Should not be in radius limit
       val pos = Coordinates(RightAscension.fromAngle(baseRA), Declination.fromAngle(baseDec + Angle.fromArcmin(11.0)).getOrElse(Declination.zero))
-      matcher.matches(SiderealTarget("testObj", pos, None, List(new Magnitude(3.0, MagnitudeBand.J)), None)) should beFalse
+      matcher.matches(SiderealTarget("testObj", pos, None, List(new Magnitude(3.0, MagnitudeBand.J)))) should beFalse
 
       // Should be in mag and radius limit
       val pos2 = Coordinates(RightAscension.fromAngle(baseRA + Angle.fromArcmin(11.0)), Declination.fromAngle(baseDec).getOrElse(Declination.zero))
-      matcher.matches(SiderealTarget("testObj", pos2, None, List(new Magnitude(3.0, MagnitudeBand.J)), None)) should beTrue
+      matcher.matches(SiderealTarget("testObj", pos2, None, List(new Magnitude(3.0, MagnitudeBand.J)))) should beTrue
 
     }
   }
