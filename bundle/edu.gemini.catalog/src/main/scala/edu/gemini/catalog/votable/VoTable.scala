@@ -15,6 +15,7 @@ case class UcdWord(token: String)
 case class Ucd(tokens: List[UcdWord]) {
   def includes(ucd: UcdWord): Boolean = tokens.contains(ucd)
   def matches(r: Regex): Boolean = tokens.exists(t => r.findFirstIn(t.token).isDefined)
+  override def toString = tokens.mkString(", ")
 }
 
 object Ucd {
@@ -76,14 +77,28 @@ object CatalogQueryResult {
 case class QueryResult(query: CatalogQuery, result: CatalogQueryResult)
 
 /** Indicates an issue parsing the targets, e.g. missing values, bad format, etc. */
-sealed trait CatalogProblem
+sealed trait CatalogProblem {
+  def displayValue: String
+}
 
-case class ValidationError(url: URL) extends CatalogProblem
-case class GenericError(msg: String) extends CatalogProblem
-case class MissingValue(field: FieldId) extends CatalogProblem
-case class FieldValueProblem(ucd: Ucd, value: String) extends CatalogProblem
-case class UnmatchedField(ucd: Ucd) extends CatalogProblem
-case object UnknownCatalog extends CatalogProblem
+case class ValidationError(url: URL) extends CatalogProblem {
+  val displayValue = s"Invalid url $url"
+}
+case class GenericError(msg: String) extends CatalogProblem {
+  val displayValue = msg
+}
+case class MissingValue(field: FieldId) extends CatalogProblem {
+  val displayValue = s"Missing required field ${field.id}"
+}
+case class FieldValueProblem(ucd: Ucd, value: String) extends CatalogProblem {
+  val displayValue = s"Error parsing field $ucd with value $value"
+}
+case class UnmatchedField(ucd: Ucd) extends CatalogProblem {
+  val displayValue = s"Unmatched field $ucd"
+}
+case object UnknownCatalog extends CatalogProblem {
+  val displayValue = s"Requested an unknown catalog"
+}
 
 case class CatalogException(problems: List[CatalogProblem]) extends RuntimeException(problems.mkString(", ")) {
   def firstMessage:String = ~problems.headOption.map {

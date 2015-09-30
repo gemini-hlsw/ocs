@@ -192,9 +192,7 @@ case object ConeSearchBackend extends CachedBackend with RemoteCallBackend {
 }
 
 case object SimbadNameBackend extends CachedBackend with RemoteCallBackend {
-  override val catalogUrls = NonEmptyList(new URL("http://simbad.cfa.harvard.edu/simbad/"), new URL("http://simbad.u-strasbg.fr/simbad"))
-
-  private val timeout = 30 * 1000 // Max time to wait
+  override val catalogUrls = NonEmptyList(new URL("http://simbad.cfa.harvard.edu/simbad"), new URL("http://simbad.u-strasbg.fr/simbad"))
 
   protected [votable] def queryParams(q: CatalogQuery): Array[NameValuePair] = q match {
     case qs: NameCatalogQuery => Array(

@@ -319,6 +319,13 @@ object QueryResultsWindow {
             createEmptyBorder(2,2,2,2)))
 
       /**
+       * Show error message at the bottom line
+       */
+      def displayError(error: String): Unit = {
+        errorLabel.text = error
+      }
+
+      /**
        * Called after a name search completes
        */
       def updateName(search: String, targets: List[SiderealTarget]): Unit = {
@@ -670,6 +677,12 @@ object QueryResultsWindow {
     GlassLabel.show(queryFrame.peer.getRootPane, "Searching...")
     val query = CatalogQuery(search)
     VoTableClient.catalog(query, SimbadNameBackend).onComplete {
+      case scala.util.Failure(f) =>
+        GlassLabel.hide(queryFrame.peer.getRootPane)
+        queryFrame.displayError(s"Exception: ${f.getMessage}")
+      case scala.util.Success(x) if x.result.containsError =>
+        GlassLabel.hide(queryFrame.peer.getRootPane)
+        queryFrame.displayError(s"Error: ${x.result.problems.head.displayValue}")
       case scala.util.Success(x) =>
         Swing.onEDT {
           GlassLabel.hide(queryFrame.peer.getRootPane)
@@ -684,10 +697,12 @@ object QueryResultsWindow {
 
     GlassLabel.show(queryFrame.peer.getRootPane, "Downloading...")
     VoTableClient.catalog(query).onComplete {
-      case _: scala.util.Failure[_] =>
-        GlassLabel.hide(queryFrame.peer.getRootPane) // TODO Display error
+      case scala.util.Failure(f) =>
+        GlassLabel.hide(queryFrame.peer.getRootPane)
+        queryFrame.displayError(s"Exception: ${f.getMessage}")
       case scala.util.Success(x) if x.result.containsError =>
-        GlassLabel.hide(queryFrame.peer.getRootPane) // TODO Display error
+        GlassLabel.hide(queryFrame.peer.getRootPane)
+        queryFrame.displayError(s"Error: ${x.result.problems.head.displayValue}")
       case scala.util.Success(x) =>
         Swing.onEDT {
           GlassLabel.hide(queryFrame.peer.getRootPane)
