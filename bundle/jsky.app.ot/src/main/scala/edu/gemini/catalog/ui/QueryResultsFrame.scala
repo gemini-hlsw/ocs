@@ -9,10 +9,10 @@ import edu.gemini.ags.api.AgsMagnitude.MagnitudeTable
 import edu.gemini.ags.api.{AgsStrategy, AgsRegistrar}
 import edu.gemini.ags.conf.ProbeLimitsTable
 import edu.gemini.catalog.api._
-import edu.gemini.catalog.votable.{QueryResult, VoTableClient}
+import edu.gemini.catalog.votable.{SimbadNameBackend, QueryResult, VoTableClient}
 import edu.gemini.pot.sp.ISPNode
 import edu.gemini.shared.gui.textComponent.{TextRenderer, NumberField}
-import edu.gemini.shared.gui.{GlassLabel, SizePreference, SortableTable}
+import edu.gemini.shared.gui.{ButtonFlattener, GlassLabel, SizePreference, SortableTable}
 import edu.gemini.spModel.core.Target.SiderealTarget
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.Conditions
@@ -22,6 +22,7 @@ import edu.gemini.ui.miglayout.MigPanel
 import edu.gemini.ui.miglayout.constraints._
 import jsky.app.ot.gemini.editor.targetComponent.GuidingFeedback.ProbeLimits
 import jsky.app.ot.tpe.TpeContext
+import jsky.app.ot.util.Resources
 
 import scala.swing.Reactions.Reaction
 import scala.swing._
@@ -310,6 +311,13 @@ object QueryResultsWindow {
           createCompoundBorder(
             createTitledBorder(title),
             createEmptyBorder(2,2,2,2)))
+
+      /**
+       * Called after a name search completes
+       */
+      def updateName(targets: List[SiderealTarget]): Unit =
+        targets.headOption.foreach(QueryForm.updateName)
+
       /**
        * Called after  a query completes to update the UI according to the results
        */
@@ -339,7 +347,11 @@ object QueryResultsWindow {
         contents.headOption.foreach(_.revalidate())
       }
 
+      /**
+       * Contains the data used to create the right-hand side form to do queries
+       */
       private case object QueryForm extends MigPanel(LC().fill().insets(0.px).debug(0)) {
+
         // Represents a magnitude filter containing the controls that make the row
         case class MagnitudeFilterControls(addButton: Button, faintess: NumberField, separator: Label, saturation: NumberField, bandCB: ComboBox[MagnitudeBand], removeButton: Button)
 
@@ -364,6 +376,14 @@ object QueryResultsWindow {
         }
 
         lazy val objectName = new TextField("")
+        lazy val searchByName =   new Button("") {
+          icon = Resources.getIcon("eclipse/search.gif")
+          ButtonFlattener.flatten(peer)
+          reactions += {
+            case ButtonClicked(_) if objectName.text.nonEmpty =>
+              doNameSearch(objectName.text)
+          }
+        }
         lazy val instrumentName = new Label("")
         lazy val guider = new ComboBox(List.empty[SupportedStrategy]) with TextRenderer[SupportedStrategy] {
           override def text(a: SupportedStrategy) = ~Option(a).map(_.strategy.key.displayName)
@@ -427,6 +447,7 @@ object QueryResultsWindow {
 
           add(new Label("Object"), CC().spanX(2))
           add(objectName, CC().spanX(3).growX())
+          add(searchByName, CC().spanX(4))
           add(new Label("RA"), CC().spanX(2).newline())
           add(ra, CC().spanX(3).growX())
           add(new Label("J2000") {
@@ -522,6 +543,12 @@ object QueryResultsWindow {
           buildLayout(query.filters.list.collect {case q: MagnitudeQueryFilter => q.mc})
         }
 
+        def updateName(t: SiderealTarget): Unit = {
+          // Don't update the name, Simbad often has many names for the same target
+          ra.updateRa(t.coordinates.ra)
+          dec.updateDec(t.coordinates.dec)
+        }
+
         // Makes a combo box out of the supported bands
         private def bandsBoxes(bandsList: BandsList): List[ComboBox[MagnitudeBand]] = {
           def bandComboBox(band: MagnitudeBand) = new ComboBox(bands) with TextRenderer[MagnitudeBand] {
@@ -610,6 +637,21 @@ object QueryResultsWindow {
     val queryFrame = QueryResultsFrame
   }
 
+  private def doNameSearch(search: String): Unit = {
+    import scala.concurrent.ExecutionContext.Implicits.global
+    import QueryResultsWindow.table._
+
+    GlassLabel.show(queryFrame.peer.getRootPane, "Searching...")
+    val query = CatalogQuery(search)
+    VoTableClient.catalog(query, SimbadNameBackend).onComplete {
+      case scala.util.Success(x) =>
+        Swing.onEDT {
+          GlassLabel.hide(queryFrame.peer.getRootPane)
+          queryFrame.updateName(x.result.targets.rows)
+        }
+    }
+  }
+
   private def reloadSearchData(obsInfo: Option[ObservationInfo], query: CatalogQuery) {
     import QueryResultsWindow.table._
     import scala.concurrent.ExecutionContext.Implicits.global
@@ -686,7 +728,7 @@ object CatalogQueryDemo extends SwingApplication {
     val ra = Angle.fromHMS(0, 12, 30.286).getOrElse(Angle.zero)
     val dec = Declination.fromAngle(Angle.zero - Angle.fromDMS(22, 4, 2.34).getOrElse(Angle.zero)).getOrElse(Declination.zero)
     val guiders = Set[GuideProbe](NiriOiwfsGuideProbe.instance, PwfsGuideProbe.pwfs1, PwfsGuideProbe.pwfs2)
-    val target = new SPTarget(ra.toDegrees, dec.toDegrees) <| {_.setName("HIP 100")}
+    val target = new SPTarget(ra.toDegrees, dec.toDegrees) <| {_.setName("HIP 1000")}
     val env = TargetEnvironment.create(target)
     val inst = new InstNIRI <| {_.setPosAngle(0.0)}
 
