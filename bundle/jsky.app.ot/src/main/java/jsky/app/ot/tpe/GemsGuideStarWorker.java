@@ -4,7 +4,7 @@ import edu.gemini.ags.gems.*;
 import edu.gemini.ags.gems.mascot.Strehl;
 import edu.gemini.ags.gems.mascot.MascotProgress;
 import edu.gemini.catalog.votable.CatalogException;
-import edu.gemini.catalog.votable.RemoteBackend;
+import edu.gemini.catalog.votable.ConeSearchBackend;
 import edu.gemini.pot.ModelConverters;
 import edu.gemini.skycalc.Angle;
 import edu.gemini.shared.skyobject.coords.HmsDegCoordinates;
@@ -224,7 +224,7 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
             GemsInstrument instrument = inst instanceof Flamingos2 ? GemsInstrument.flamingos2 : GemsInstrument.gsaoi;
             GemsGuideStarSearchOptions options = new GemsGuideStarSearchOptions(instrument, tipTiltMode, posAngles);
 
-            List<GemsCatalogSearchResults> results = new GemsVoTableCatalog(RemoteBackend.instance(), catalog.catalog()).search4Java(obsContext, ModelConverters.toCoordinates(base), options, nirBand, statusLogger, 30);
+            List<GemsCatalogSearchResults> results = new GemsVoTableCatalog(ConeSearchBackend.instance(), catalog.catalog()).search4Java(obsContext, ModelConverters.toCoordinates(base), options, nirBand, statusLogger, 30);
             if (interrupted) {
                 throw new CancellationException("Canceled");
             }

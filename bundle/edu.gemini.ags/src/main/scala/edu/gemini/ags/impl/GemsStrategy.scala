@@ -234,5 +234,5 @@ trait GemsStrategy extends AgsStrategy {
 }
 
 object GemsStrategy extends GemsStrategy {
-  override private [impl] val backend = RemoteBackend
+  override private [impl] val backend = ConeSearchBackend
 }

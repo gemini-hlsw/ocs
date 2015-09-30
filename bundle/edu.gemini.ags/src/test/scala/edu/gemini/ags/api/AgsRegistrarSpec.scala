@@ -2,7 +2,7 @@ package edu.gemini.ags.api
 
 import edu.gemini.ags.impl.SingleProbeStrategy
 import edu.gemini.ags.impl.SingleProbeStrategyParams.PwfsParams
-import edu.gemini.catalog.votable.RemoteBackend
+import edu.gemini.catalog.votable.ConeSearchBackend
 import edu.gemini.shared.util.immutable.{None => JNone, Some => JSome}
 import edu.gemini.spModel.ags.AgsStrategyKey.Pwfs2SouthKey
 import edu.gemini.spModel.core.{Site, Declination, Angle}
@@ -27,7 +27,7 @@ class AgsRegistrarSpec extends Specification {
 
       val ctx = ObsContext.create(env, inst, new JSome(Site.GS), null, null, null, JNone.instance())
 
-      AgsRegistrar.defaultStrategy(ctx) should beSome(SingleProbeStrategy(Pwfs2SouthKey,PwfsParams(Site.GS, PwfsGuideProbe.pwfs2),RemoteBackend))
+      AgsRegistrar.defaultStrategy(ctx) should beSome(SingleProbeStrategy(Pwfs2SouthKey,PwfsParams(Site.GS, PwfsGuideProbe.pwfs2),ConeSearchBackend))
     }
   }
 

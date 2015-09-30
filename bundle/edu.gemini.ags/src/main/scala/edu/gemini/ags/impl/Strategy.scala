@@ -1,7 +1,7 @@
 package edu.gemini.ags.impl
 
 import edu.gemini.ags.api.AgsStrategy
-import edu.gemini.catalog.votable.RemoteBackend
+import edu.gemini.catalog.votable.ConeSearchBackend
 import edu.gemini.pot.sp.SPComponentType
 import edu.gemini.spModel.ags.AgsStrategyKey
 import edu.gemini.spModel.ags.AgsStrategyKey._
@@ -22,7 +22,7 @@ object Strategy {
   import SingleProbeStrategyParams._
 
   // Backend for searching on catalogs
-  val backend = RemoteBackend
+  val backend = ConeSearchBackend
 
   val AltairAowfs     = SingleProbeStrategy(AltairAowfsKey,     AltairAowfsParams)
   val Flamingos2Oiwfs = SingleProbeStrategy(Flamingos2OiwfsKey, Flamingos2OiwfsParams)

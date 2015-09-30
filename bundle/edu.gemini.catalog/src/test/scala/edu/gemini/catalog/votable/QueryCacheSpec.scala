@@ -3,7 +3,7 @@ package edu.gemini.catalog.votable
 import java.util.concurrent.atomic.AtomicInteger
 
 import org.specs2.mutable.Specification
-import RemoteBackend.QueryCache
+import ConeSearchBackend.QueryCache
 
 import scala.annotation.tailrec
 
