@@ -10,7 +10,7 @@ import edu.gemini.ags.api.AgsMagnitude.MagnitudeTable
 import edu.gemini.ags.api.{AgsStrategy, AgsRegistrar}
 import edu.gemini.ags.conf.ProbeLimitsTable
 import edu.gemini.catalog.api._
-import edu.gemini.catalog.votable.{SimbadNameBackend, QueryResult, VoTableClient}
+import edu.gemini.catalog.votable._
 import edu.gemini.pot.sp.ISPNode
 import edu.gemini.shared.gui.textComponent.{SelectOnFocus, TextRenderer, NumberField}
 import edu.gemini.shared.gui.{ButtonFlattener, GlassLabel, SizePreference, SortableTable}
@@ -670,45 +670,39 @@ object QueryResultsWindow {
     val queryFrame = QueryResultsFrame
   }
 
-  private def doNameSearch(search: String): Unit = {
-    import scala.concurrent.ExecutionContext.Implicits.global
-    import QueryResultsWindow.table._
 
-    GlassLabel.show(queryFrame.peer.getRootPane, "Searching...")
-    val query = CatalogQuery(search)
-    VoTableClient.catalog(query, SimbadNameBackend).onComplete {
-      case scala.util.Failure(f) =>
-        GlassLabel.hide(queryFrame.peer.getRootPane)
-        queryFrame.displayError(s"Exception: ${f.getMessage}")
-      case scala.util.Success(x) if x.result.containsError =>
-        GlassLabel.hide(queryFrame.peer.getRootPane)
-        queryFrame.displayError(s"Error: ${x.result.problems.head.displayValue}")
-      case scala.util.Success(x) =>
-        Swing.onEDT {
+  private def catalogSearch(query: CatalogQuery, backend: VoTableBackend, message: String, onSuccess: (QueryResult) => Unit) : Unit = {
+      import scala.concurrent.ExecutionContext.Implicits.global
+      import QueryResultsWindow.table._
+
+      GlassLabel.show(queryFrame.peer.getRootPane, message)
+      VoTableClient.catalog(query, backend).onComplete {
+        case scala.util.Failure(f) =>
           GlassLabel.hide(queryFrame.peer.getRootPane)
-          queryFrame.updateName(search, x.result.targets.rows)
-        }
+          queryFrame.displayError(s"Exception: ${f.getMessage}")
+        case scala.util.Success(x) if x.result.containsError =>
+          GlassLabel.hide(queryFrame.peer.getRootPane)
+          queryFrame.displayError(s"Error: ${x.result.problems.head.displayValue}")
+        case scala.util.Success(x) =>
+          Swing.onEDT {
+            GlassLabel.hide(queryFrame.peer.getRootPane)
+            onSuccess(x)
+          }
+      }
     }
+
+  private def doNameSearch(search: String): Unit = {
+    import QueryResultsWindow.table._
+    catalogSearch(CatalogQuery(search), SimbadNameBackend, "Searching...", { x =>
+      queryFrame.updateName(search, x.result.targets.rows)
+    })
   }
 
   private def reloadSearchData(obsInfo: Option[ObservationInfo], query: CatalogQuery) {
     import QueryResultsWindow.table._
-    import scala.concurrent.ExecutionContext.Implicits.global
-
-    GlassLabel.show(queryFrame.peer.getRootPane, "Downloading...")
-    VoTableClient.catalog(query).onComplete {
-      case scala.util.Failure(f) =>
-        GlassLabel.hide(queryFrame.peer.getRootPane)
-        queryFrame.displayError(s"Exception: ${f.getMessage}")
-      case scala.util.Success(x) if x.result.containsError =>
-        GlassLabel.hide(queryFrame.peer.getRootPane)
-        queryFrame.displayError(s"Error: ${x.result.problems.head.displayValue}")
-      case scala.util.Success(x) =>
-        Swing.onEDT {
-          GlassLabel.hide(queryFrame.peer.getRootPane)
-          queryFrame.updateResults(obsInfo, x)
-        }
-    }
+    catalogSearch(query, ConeSearchBackend, "Searching...", { x =>
+      queryFrame.updateResults(obsInfo, x)
+    })
   }
 
   // Shows the frame and loads the query
