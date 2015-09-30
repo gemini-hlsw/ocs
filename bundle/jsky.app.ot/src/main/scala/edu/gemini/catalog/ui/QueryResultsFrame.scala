@@ -1,8 +1,9 @@
 package edu.gemini.catalog.ui
 
+import java.awt.Color
 import javax.swing.BorderFactory._
 import javax.swing.border.Border
-import javax.swing.{DefaultComboBoxModel, SwingConstants}
+import javax.swing.{UIManager, DefaultComboBoxModel, SwingConstants}
 import javax.swing.table._
 
 import edu.gemini.ags.api.AgsMagnitude.MagnitudeTable
@@ -269,22 +270,27 @@ object QueryResultsWindow {
         }
       }
 
+      private lazy val errorLabel = new Label("") {
+        horizontalAlignment = Alignment.Left
+        foreground = Color.red
+
+        def reset(): Unit = text = ""
+      }
+
       title = "Query Results"
       QueryForm.buildLayout(Nil)
       contents = new MigPanel(LC().fill().insets(0).gridGap("0px", "0px").debug(0)) {
         // Query Form
-        add(QueryForm, CC().spanY(2).alignY(TopAlign).minWidth(280.px))
+        add(QueryForm, CC().alignY(TopAlign).minWidth(280.px))
         // Results Table
         add(new BorderPanel() {
           border = titleBorder(title)
           add(scrollPane, BorderPanel.Position.Center)
-        }, CC().grow().pushY().pushX())
-        // Command buttons at the bottom
-        add(new MigPanel(LC().fillX().insets(10.px)) {
-          // Results label
-          add(resultsLabel, CC().alignX(LeftAlign))
-          add(closeButton, CC().alignX(RightAlign))
-        }, CC().growX().dockSouth())
+        }, CC().grow().spanX(2).pushY().pushX())
+        // Labels and command buttons at the bottom
+        add(resultsLabel, CC().alignX(LeftAlign).alignY(BaselineAlign).newline().gap(10.px, 10.px, 10.px, 10.px))
+        add(errorLabel, CC().alignX(LeftAlign).alignY(BaselineAlign).gap(10.px, 10.px, 10.px, 10.px))
+        add(closeButton, CC().alignX(RightAlign).alignY(BaselineAlign).gap(10.px, 10.px, 10.px, 10.px))
       }
 
       // Set initial size
@@ -315,8 +321,12 @@ object QueryResultsWindow {
       /**
        * Called after a name search completes
        */
-      def updateName(targets: List[SiderealTarget]): Unit =
-        targets.headOption.foreach(QueryForm.updateName)
+      def updateName(search: String, targets: List[SiderealTarget]): Unit = {
+        QueryForm.updateName(targets.headOption)
+        targets.headOption.ifNone {
+          errorLabel.text = s"Target '$search' not found..."
+        }
+      }
 
       /**
        * Called after  a query completes to update the UI according to the results
@@ -375,7 +385,15 @@ object QueryResultsWindow {
             }
         }
 
-        lazy val objectName = new TextField("")
+        lazy val objectName = new TextField("") {
+          val foregroundColor = UIManager.getColor("TextField.foreground")
+          listenTo(keys)
+          reactions += {
+            case KeyTyped(_, _, _, _) =>
+              errorLabel.reset()
+              foreground = foregroundColor
+          }
+        }
         lazy val searchByName =   new Button("") {
           icon = Resources.getIcon("eclipse/search.gif")
           ButtonFlattener.flatten(peer)
@@ -543,10 +561,16 @@ object QueryResultsWindow {
           buildLayout(query.filters.list.collect {case q: MagnitudeQueryFilter => q.mc})
         }
 
-        def updateName(t: SiderealTarget): Unit = {
-          // Don't update the name, Simbad often has many names for the same target
-          ra.updateRa(t.coordinates.ra)
-          dec.updateDec(t.coordinates.dec)
+        def updateName(t: Option[SiderealTarget]): Unit = {
+          t.foreach { i =>
+            // Don't update the name, Simbad often has many names for the same target
+            ra.updateRa(i.coordinates.ra)
+            dec.updateDec(i.coordinates.dec)
+          }
+          t.ifNone {
+            objectName.foreground = Color.red
+          }
+
         }
 
         // Makes a combo box out of the supported bands
@@ -647,7 +671,7 @@ object QueryResultsWindow {
       case scala.util.Success(x) =>
         Swing.onEDT {
           GlassLabel.hide(queryFrame.peer.getRootPane)
-          queryFrame.updateName(x.result.targets.rows)
+          queryFrame.updateName(search, x.result.targets.rows)
         }
     }
   }
@@ -706,7 +730,6 @@ object QueryResultsWindow {
 object CatalogQueryDemo extends SwingApplication {
   import QueryResultsWindow.instance
   import jsky.util.gui.Theme
-  import javax.swing.UIManager
   import edu.gemini.shared.util.immutable.{None => JNone, Some => JSome}
   import edu.gemini.spModel.gemini.niri.InstNIRI
   import edu.gemini.spModel.gemini.niri.NiriOiwfsGuideProbe
