@@ -608,7 +608,7 @@ object QueryResultsWindow {
           queryButton.enabled option {
             // No validation here, the Query button is disabled unless all the controls are valid
             val coordinates = Coordinates(ra.value, dec.value)
-            val radius = RadiusConstraint.between(Angle.fromArcmin(radiusStart.text.toDouble), Angle.fromArcmin(radiusEnd.text.toDouble))
+            val radiusConstraint = RadiusConstraint.between(Angle.fromArcmin(radiusStart.text.toDouble), Angle.fromArcmin(radiusEnd.text.toDouble))
 
             val guiders = for {
               i <- 0 until guider.peer.getModel.getSize
@@ -618,8 +618,13 @@ object QueryResultsWindow {
             val conditions = Conditions.NOMINAL.sb(sbBox.selection.item).cc(ccBox.selection.item).iq(iqBox.selection.item)
 
             val info = ObservationInfo(objectName.text.some, instrumentName.text.some, Option(guider.selection.item.strategy), guiders.toList, conditions.some)
-            val defaultQuery = CatalogQuery(coordinates, radius, currentFilters, ucac4)
-            (info.some, guider.selection.item.query.headOption.getOrElse(defaultQuery))
+            val defaultQuery = CatalogQuery(coordinates, radiusConstraint, currentFilters, ucac4)
+            // Start with the guider's query and update it with the values on the UI
+            val calculatedQuery = guider.selection.item.query.headOption.collect {
+              case c: ConeSearchCatalogQuery if currentFilters.nonEmpty => c.copy(base = coordinates, radiusConstraint = radiusConstraint, magnitudeConstraints = currentFilters)
+              case c: ConeSearchCatalogQuery                            => c.copy(base = coordinates, radiusConstraint = radiusConstraint) // Use the magnitude constraints from the guider
+            }
+            (info.some, calculatedQuery.getOrElse(defaultQuery))
           }
         }
 
