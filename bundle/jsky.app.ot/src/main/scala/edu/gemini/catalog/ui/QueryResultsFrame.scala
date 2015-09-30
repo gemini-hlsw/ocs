@@ -12,7 +12,7 @@ import edu.gemini.ags.conf.ProbeLimitsTable
 import edu.gemini.catalog.api._
 import edu.gemini.catalog.votable.{SimbadNameBackend, QueryResult, VoTableClient}
 import edu.gemini.pot.sp.ISPNode
-import edu.gemini.shared.gui.textComponent.{TextRenderer, NumberField}
+import edu.gemini.shared.gui.textComponent.{SelectOnFocus, TextRenderer, NumberField}
 import edu.gemini.shared.gui.{ButtonFlattener, GlassLabel, SizePreference, SortableTable}
 import edu.gemini.spModel.core.Target.SiderealTarget
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality
@@ -385,16 +385,18 @@ object QueryResultsWindow {
             }
         }
 
-        lazy val objectName = new TextField("") {
+        lazy val objectName = new TextField("") with SelectOnFocus {
           val foregroundColor = UIManager.getColor("TextField.foreground")
           listenTo(keys)
           reactions += {
+            case KeyPressed(_, Key.Enter, _, _) if text.nonEmpty =>
+              doNameSearch(text)
             case KeyTyped(_, _, _, _) =>
               errorLabel.reset()
               foreground = foregroundColor
           }
         }
-        lazy val searchByName =   new Button("") {
+        lazy val searchByName = new Button("") {
           icon = Resources.getIcon("eclipse/search.gif")
           ButtonFlattener.flatten(peer)
           reactions += {
