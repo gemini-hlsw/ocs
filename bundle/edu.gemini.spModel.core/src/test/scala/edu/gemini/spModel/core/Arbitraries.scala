@@ -5,6 +5,8 @@ import org.scalacheck._
 import org.scalacheck.Gen._
 import org.scalacheck.Arbitrary._
 
+import scalaz.==>>
+
 trait Arbitraries {
 
   implicit val arbAngle: Arbitrary[Angle] =
@@ -43,14 +45,13 @@ trait Arbitraries {
       } yield Coordinates(ra, dec)
     }
 
-  implicit val arbEphemerisElement: Arbitrary[EphemerisElement] =
-    Arbitrary {
-      for {
-        coords <- arbitrary[Coordinates]
-        mag    <- arbitrary[Option[Double]]
-        valid  <- arbitrary[Long]
-      } yield EphemerisElement(coords, mag, valid)
-    }
+  // implicit val arbEphemerisElement: Arbitrary[(Long, Coordinates)] =
+  //   Arbitrary {
+  //     for {
+  //       coords <- arbitrary[Coordinates]
+  //       valid  <- arbitrary[Long]
+  //     } yield (coords, valid)
+  //   }
 
   implicit val arbMagnitudeBand: Arbitrary[MagnitudeBand] =
     Arbitrary(oneOf(MagnitudeBand.all))
@@ -112,9 +113,9 @@ trait Arbitraries {
     Arbitrary {
       for {
          name         <- arbitrary[String]
-         ephemeris    <- arbitrary[List[EphemerisElement]]
+         ephemeris    <- arbitrary[List[(Long, Coordinates)]]
          horizonsInfo <- arbitrary[Option[Target.HorizonsInfo]]
-      } yield Target.NonSiderealTarget(name, ephemeris, horizonsInfo)
+      } yield Target.NonSiderealTarget(name, ==>>.fromList(ephemeris), horizonsInfo)
     }
 
   implicit val arbTarget: Arbitrary[Target] =

@@ -56,6 +56,13 @@ object Target {
       PLens.nil.run
     ))
 
+  val ephemeris: Target @?> Ephemeris =
+    PLens(_.fold(
+      PLens.nil.run,
+      PLens.nil.run,
+      NonSiderealTarget.ephemeris.partial.run
+    ))
+
   val raDec: Target @?> (RightAscension, Declination) =
     coords.xmapB(cs => (cs.ra, cs.dec))(Coordinates.tupled)
 
@@ -153,7 +160,7 @@ object Target {
   /** Nonsidereal target with an ephemeris. */
   case class NonSiderealTarget(
     name: String,
-    ephemeris: List[EphemerisElement],
+    ephemeris: Ephemeris,
     horizonsInfo: Option[Target.HorizonsInfo]) extends Target {
 
     def fold[A](too: Target.TooTarget => A,
@@ -161,37 +168,14 @@ object Target {
                 non: Target.NonSiderealTarget => A): A = 
       non(this)
 
-    def coords(date: Long): Option[Coordinates] = 
-      for {
-        (a, b, f) <- find(date, ephemeris)
-        (cA, cB)   = (a.coords, b.coords)
-        ra         = RightAscension fromAngle Angle.fromDegrees(f(cA.ra. toAngle.toDegrees, cB.ra. toAngle.toDegrees))
-        dec       <- Declination    fromAngle Angle.fromDegrees(f(cA.dec.toAngle.toDegrees, cB.dec.toAngle.toDegrees))
-      } yield Coordinates(ra, dec)
-
-    /** Magnitude for this target at the specified time, if known. */
-    def magnitude(date: Long): Option[Double] = 
-      for {
-        (a, b, f) <- find(date, ephemeris)
-        mA        <- a.magnitude
-        mB        <- b.magnitude
-      } yield f(mA, mB)
-
-    private def find(date: Long, es: List[EphemerisElement]): Option[(EphemerisElement, EphemerisElement, (Double, Double) => Double)] = 
-      es match {
-        case Nil       => None
-        case _ :: tail => 
-          es.zip(tail).collectFirst { case (a, b) if a.validAt <= date && date <= b.validAt =>
-            val factor = (date.doubleValue - a.validAt) / (b.validAt - a.validAt) // between 0 and 1
-            def interp(a: Double, b: Double) = a + (b - a) * factor
-            (a, b, interp)
-          }
-      }
+    def coords(date: Long): Option[Coordinates] =
+      ephemeris.iLookup(date)
 
   }
 
   object NonSiderealTarget {
-    val name: NonSiderealTarget @> String = Lens(t => Store(s => t.copy(name = s), t.name))
+    val ephemeris: NonSiderealTarget @> Ephemeris = Lens(t => Store(s => t.copy(ephemeris = s), t.ephemeris))
+    val name:      NonSiderealTarget @> String    = Lens(t => Store(s => t.copy(name = s), t.name))
   }
   
 }

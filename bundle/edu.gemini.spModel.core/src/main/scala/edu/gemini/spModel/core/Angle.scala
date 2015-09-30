@@ -11,6 +11,12 @@ sealed trait Angle extends java.io.Serializable {
    */
   def toDegrees: Double
 
+  /**
+   * This `Angle` in signed degrees [-180 , 180]
+   * @group Conversions
+   */
+  def toSignedDegrees: Double =
+    Angle.signedDegrees(toDegrees)
 
   /**
    * This `Angle` in radians [0, 2π)

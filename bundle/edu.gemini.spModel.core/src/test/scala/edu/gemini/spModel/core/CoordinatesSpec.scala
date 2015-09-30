@@ -54,6 +54,45 @@ object CoordinatesSpec extends Specification with ScalaCheck with Arbitraries wi
       }
 
   }
+
+  "Coordinates Angular Separation" should {
+
+    "be in [0, 180]" !
+      forAll { (a: Coordinates, b: Coordinates) =>
+        val deg = a.angularDistance(b).toDegrees
+        deg >= 0 && deg <= 180
+      }
+
+    "be consistent with RA offsetting at the equator" ! 
+      forAll { (ra: RA, da: Angle) =>
+        val a = Coordinates(ra, Dec.zero)
+        val b = a.offset(da, Angle.zero)
+        val d = a.angularDistance(b) 
+        d.toDegrees ~= da.toSignedDegrees.abs
+      }
+
+    "be consistent with Dec offsetting (includes polar discontinuity)" ! 
+      forAll { (a: Coordinates, da: Angle) =>
+        val b = a.offset(Angle.zero, da)
+        val d = a.angularDistance(b) 
+        d.toDegrees ~= da.toSignedDegrees.abs
+      }
+
+  }
+
+  "Coordinates Interpolation" should {
+
+    "be consistent with fractional angular separation" ! 
+      forAll { (c1: Coordinates, c2: Coordinates) =>
+        val sep = c1.angularDistance(c2)
+        (-1.0 to 2.0 by 0.1).forall { f =>
+          val stepSep = c1.interpolate(c2, f).angularDistance(c1)
+          stepSep.toDegrees ~= (sep * f).toSignedDegrees.abs
+        }
+      }
+
+  }
+
 }
 
 
