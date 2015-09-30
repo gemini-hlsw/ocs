@@ -1,7 +1,7 @@
-package edu.gemini.spModel.io.impl.migration.to2015B
+package edu.gemini.spModel.io.impl.migration
 
 import edu.gemini.pot.sp.SPComponentType
-import edu.gemini.spModel.pio.{ ParamSet, Container, ContainerParent}
+import edu.gemini.spModel.pio.{Container, ContainerParent, ParamSet}
 
 import scala.collection.JavaConverters._
 import scala.util.Try
