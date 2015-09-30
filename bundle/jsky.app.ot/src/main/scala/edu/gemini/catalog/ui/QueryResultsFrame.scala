@@ -55,7 +55,7 @@ case class SupportedStrategy(strategy: AgsStrategy, limits: Option[ProbeLimits],
 /**
  * Describes the observation used to do a Guide Star Search
  */
-case class ObservationInfo(objectName: Option[String], instrumentName: Option[String], strategy: Option[AgsStrategy], validStrategies: List[SupportedStrategy], conditions: Option[Conditions]) {
+case class ObservationInfo(objectName: Option[String], instrumentName: Option[String], strategy: Option[AgsStrategy], validStrategies: List[SupportedStrategy], conditions: Option[Conditions], catalog: CatalogName) {
   def catalogQuery:List[CatalogQuery] = validStrategies.collect {
       case SupportedStrategy(s, _, query) if s == strategy => query
     }.flatten
@@ -77,7 +77,8 @@ object ObservationInfo {
     Option(ctx.getInstrument).map(_.getTitle),
     AgsRegistrar.currentStrategy(ctx),
     AgsRegistrar.validStrategies(ctx).map(toSupportedStrategy(ctx, _, mt)),
-    ctx.getConditions.some)
+    ctx.getConditions.some,
+    ucac4)
 
 }
 
@@ -412,6 +413,9 @@ object QueryResultsWindow {
           }
         }
         lazy val instrumentName = new Label("")
+        lazy val catalogBox = new ComboBox(List[CatalogName](ucac4, ppmxl)) with TextRenderer[CatalogName] {
+          override def text(a: CatalogName) = ~Option(a).map(_.displayName)
+        }
         lazy val guider = new ComboBox(List.empty[SupportedStrategy]) with TextRenderer[SupportedStrategy] {
           override def text(a: SupportedStrategy) = ~Option(a).map(_.strategy.key.displayName)
           listenTo(selection)
@@ -472,7 +476,9 @@ object QueryResultsWindow {
         def buildLayout(filters: List[MagnitudeConstraints]): Unit = {
           _contents.clear()
 
-          add(new Label("Object"), CC().spanX(2))
+          add(catalogBox, CC().spanX(7).alignX(CenterAlign))
+          add(new Separator(Orientation.Horizontal), CC().spanX(7).growX().newline())
+          add(new Label("Object"), CC().spanX(2).newline())
           add(objectName, CC().spanX(3).growX())
           add(searchByName, CC().spanX(4))
           add(new Label("RA"), CC().spanX(2).newline())
@@ -624,7 +630,7 @@ object QueryResultsWindow {
               case c: ConeSearchCatalogQuery if currentFilters.nonEmpty => c.copy(base = coordinates, radiusConstraint = radiusConstraint, magnitudeConstraints = currentFilters)
               case c: ConeSearchCatalogQuery                            => c.copy(base = coordinates, radiusConstraint = radiusConstraint) // Use the magnitude constraints from the guider
             }
-            (info.some, calculatedQuery.getOrElse(defaultQuery))
+            (info.some, guiderQuery.getOrElse(defaultQuery))
           }
         }
 

@@ -18,6 +18,21 @@ case class MagnitudeQueryFilter(mc: MagnitudeConstraints) extends QueryResultsFi
   def filter(t: SiderealTarget): Boolean = mc.filter(t)
 }
 
+sealed abstract class CatalogName(val id: String, val displayName: String)
+
+case object sdss extends CatalogName("sdss9", "SDSS9 @ Gemini")
+case object gsc234 extends CatalogName("gsc234", "GSC234 @ Gemini")
+case object ppmxl extends CatalogName("ppmxl", "PPMXL @ Gemini")
+case object ucac4 extends CatalogName("ucac4", "UCAC4 @ Gemini")
+case object twomass_psc extends CatalogName("twomass_psc", "TwoMass PSC @ Gemini")
+case object twomass_xsc extends CatalogName("twomass_xsc", "TwoMass XSC @ Gemini")
+case object simbad extends CatalogName("simbad", "Simbad")
+
+object CatalogName {
+  implicit val equals = Equal.equal[CatalogName]((a, b) => a.id === b.id)
+
+}
+
 /**
  * Represents a query on a catalog
  */
@@ -39,6 +54,7 @@ case class ConeSearchCatalogQuery(id: Option[Int], base: Coordinates, radiusCons
 
   override def isSuperSetOf(q: CatalogQuery) = q match {
     case c: ConeSearchCatalogQuery =>
+
       // Angular separation, or distance between the two.
       val distance = Coordinates.difference(base, c.base).distance
 
@@ -48,7 +64,7 @@ case class ConeSearchCatalogQuery(id: Option[Int], base: Coordinates, radiusCons
 
       // See whether the other base position falls out of range of our
       // radius limits.
-      radiusConstraint.maxLimit >= max
+      radiusConstraint.maxLimit >= max && q.catalog === catalog
     case _ => false
   }
 }
@@ -80,13 +96,3 @@ object CatalogQuery {
 
   implicit val equals = Equal.equalA[CatalogQuery]
 }
-
-sealed abstract class CatalogName(val id: String)
-
-case object sdss extends CatalogName("sdss9")
-case object gsc234 extends CatalogName("gsc234")
-case object ppmxl extends CatalogName("ppmxl")
-case object ucac4 extends CatalogName("ucac4")
-case object twomass_psc extends CatalogName("twomass_psc")
-case object twomass_xsc extends CatalogName("twomass_xsc")
-case object simbad extends CatalogName("simbad")
