@@ -85,10 +85,11 @@ trait Arbitraries {
   implicit val arbHorizonsDesignation: Arbitrary[HorizonsDesignation] =
     Arbitrary {
       for {
-        obj <- arbitrary[Int].map(_.toString)
+        obj <- arbitrary[Int]
         des <- oneOf(
-          HorizonsDesignation.Asteroid(obj),
-          HorizonsDesignation.Comet(obj),
+          HorizonsDesignation.Asteroid(obj.toString),
+          HorizonsDesignation.AsteroidOldStyle(obj),
+          HorizonsDesignation.Comet(obj.toString),
           HorizonsDesignation.MajorBody(obj)
         )
       } yield des
