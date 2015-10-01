@@ -11,9 +11,6 @@ sealed trait Target {
   /** Coordinates (if known) for this target at the specified UNIX time. */
   def coords(time: Long): Option[Coordinates]
 
-  /** Horizons information for this target, if known. */
-  def horizonsInfo: Option[Target.HorizonsInfo]
-
   /** Alternative to pattern-matching. */
   def fold[A](too: Target.TooTarget         => A,
               sid: Target.SiderealTarget    => A,
@@ -63,6 +60,13 @@ object Target {
       NonSiderealTarget.ephemeris.partial.run
     ))
 
+  val horizonsDesignation: Target @?> HorizonsDesignation =
+    PLens(_.fold(
+      PLens.nil.run,
+      PLens.nil.run,
+      NonSiderealTarget.horizonsDesignation.run
+    ))
+
   val raDec: Target @?> (RightAscension, Declination) =
     coords.xmapB(cs => (cs.ra, cs.dec))(Coordinates.tupled)
 
@@ -75,24 +79,6 @@ object Target {
     raDecAngles.xmapB(_.bimap(_.toDegrees, _.toDegrees))(_.bimap(Angle.fromDegrees, Angle.fromDegrees))
 
   ///
-  /// HORIZONS INFO
-  ///
-
-  final case class HorizonsInfo(objectTypeOrdinal: Int, objectId: Long)
-
-  object HorizonsInfo {
-
-    val objectTypeOrdinal: HorizonsInfo @> Int  = Lens(i => Store(s => i.copy(objectTypeOrdinal = s), i.objectTypeOrdinal))
-    val objectId:          HorizonsInfo @> Long = Lens(i => Store(s => i.copy(objectId = s), i.objectId))
-
-    object PioKey {
-      val ObjectId = "horizons-object-id"
-      val ObjectTypeOrdinal = "horizons-object-type"
-    }
-
-  }
-
-  ///
   /// TARGET OF OPPORTUNITY
   ///
 
@@ -100,9 +86,6 @@ object Target {
   case class TooTarget(name: String) extends Target {
 
     def coords(time: Long) = 
-      None
-    
-    def horizonsInfo = 
       None
     
     def fold[A](too: Target.TooTarget => A,
@@ -125,8 +108,7 @@ object Target {
     name: String,
     coordinates: Coordinates,
     properMotion: Option[ProperMotion],
-    magnitudes: List[Magnitude],
-    horizonsInfo: Option[Target.HorizonsInfo]) extends Target {
+    magnitudes: List[Magnitude]) extends Target {
 
     def coords(date: Long) = 
       Some(coordinates)
@@ -142,7 +124,7 @@ object Target {
 
   object SiderealTarget {
   
-    val empty = SiderealTarget("Untitled", Coordinates.zero, None, Nil, None)
+    val empty = SiderealTarget("Untitled", Coordinates.zero, None, Nil)
   
     val name:        SiderealTarget @> String          = Lens(t => Store(s => t.copy(name = s), t.name))
     val coordinates: SiderealTarget @> Coordinates     = Lens(t => Store(c => t.copy(coordinates = c), t.coordinates))
@@ -161,7 +143,7 @@ object Target {
   case class NonSiderealTarget(
     name: String,
     ephemeris: Ephemeris,
-    horizonsInfo: Option[Target.HorizonsInfo]) extends Target {
+    horizonsDesignation: Option[HorizonsDesignation]) extends Target {
 
     def fold[A](too: Target.TooTarget => A,
                 sid: Target.SiderealTarget => A,
@@ -174,8 +156,9 @@ object Target {
   }
 
   object NonSiderealTarget {
-    val ephemeris: NonSiderealTarget @> Ephemeris = Lens(t => Store(s => t.copy(ephemeris = s), t.ephemeris))
-    val name:      NonSiderealTarget @> String    = Lens(t => Store(s => t.copy(name = s), t.name))
+    val ephemeris:           NonSiderealTarget @> Ephemeris            = Lens(t => Store(s => t.copy(ephemeris = s), t.ephemeris))
+    val name:                NonSiderealTarget @> String               = Lens(t => Store(s => t.copy(name = s), t.name))
+    val horizonsDesignation: NonSiderealTarget @?> HorizonsDesignation = PLens(t => t.horizonsDesignation.map(p => Store(q => t.copy(horizonsDesignation = p.some), p)))
   }
   
 }
