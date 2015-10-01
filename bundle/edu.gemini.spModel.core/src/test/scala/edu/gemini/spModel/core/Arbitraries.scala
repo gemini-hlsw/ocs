@@ -111,7 +111,8 @@ trait Arbitraries {
          name         <- arbitrary[String]
          ephemeris    <- arbitrary[List[(Long, Coordinates)]]
          horizonsDesignation <- arbitrary[Option[HorizonsDesignation]]
-      } yield Target.NonSiderealTarget(name, ==>>.fromList(ephemeris), horizonsDesignation)
+         magnitudes   <- arbitrary[List[Magnitude]]
+      } yield Target.NonSiderealTarget(name, ==>>.fromList(ephemeris), horizonsDesignation, magnitudes)
     }
 
   implicit val arbTarget: Arbitrary[Target] =

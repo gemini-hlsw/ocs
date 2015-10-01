@@ -50,7 +50,7 @@ object Target {
     PLens(_.fold(
       PLens.nil.run,
       SiderealTarget.magnitudes.partial.run,
-      PLens.nil.run
+      NonSiderealTarget.magnitudes.partial.run
     ))
 
   val ephemeris: Target @?> Ephemeris =
@@ -143,7 +143,8 @@ object Target {
   case class NonSiderealTarget(
     name: String,
     ephemeris: Ephemeris,
-    horizonsDesignation: Option[HorizonsDesignation]) extends Target {
+    horizonsDesignation: Option[HorizonsDesignation],
+    magnitudes: List[Magnitude]) extends Target {
 
     def fold[A](too: Target.TooTarget => A,
                 sid: Target.SiderealTarget => A,
@@ -159,6 +160,7 @@ object Target {
     val ephemeris:           NonSiderealTarget @> Ephemeris            = Lens(t => Store(s => t.copy(ephemeris = s), t.ephemeris))
     val name:                NonSiderealTarget @> String               = Lens(t => Store(s => t.copy(name = s), t.name))
     val horizonsDesignation: NonSiderealTarget @?> HorizonsDesignation = PLens(t => t.horizonsDesignation.map(p => Store(q => t.copy(horizonsDesignation = p.some), p)))
+    val magnitudes:          NonSiderealTarget @> List[Magnitude] = Lens(t => Store(c => t.copy(magnitudes = c), t.magnitudes))
   }
   
 }
