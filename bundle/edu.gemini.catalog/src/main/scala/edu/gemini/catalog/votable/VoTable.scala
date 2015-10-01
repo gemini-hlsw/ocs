@@ -1,9 +1,6 @@
 package edu.gemini.catalog.votable
 
-import java.net.URL
-
-import edu.gemini.catalog.api.CatalogQuery
-import edu.gemini.spModel.core.MagnitudeBand
+import edu.gemini.catalog.api.{CatalogName, CatalogQuery}
 import edu.gemini.spModel.core.Target.SiderealTarget
 
 import scala.util.matching.Regex
@@ -81,8 +78,8 @@ sealed trait CatalogProblem {
   def displayValue: String
 }
 
-case class ValidationError(url: URL) extends CatalogProblem {
-  val displayValue = s"Invalid url $url"
+case class ValidationError(catalog: CatalogName) extends CatalogProblem {
+  val displayValue = s"Invalid response from ${catalog.displayName}"
 }
 case class GenericError(msg: String) extends CatalogProblem {
   val displayValue = msg

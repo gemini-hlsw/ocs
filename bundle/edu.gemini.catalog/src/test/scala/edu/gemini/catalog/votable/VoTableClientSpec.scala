@@ -29,7 +29,7 @@ class VoTableClientSpec extends SpecificationWithJUnit with VoTableClient with N
       override val catalogUrls = NonEmptyList(new URL(s"file://$file"))
       override protected def query(e: SearchKey) = {
         counter.incrementAndGet()
-        VoTableParser.parse(e.url, this.getClass.getResourceAsStream(file)).fold(p => QueryResult(e.query, CatalogQueryResult(TargetsTable.Zero, List(p))), y => QueryResult(e.query, CatalogQueryResult(y)))
+        VoTableParser.parse(ucac4, this.getClass.getResourceAsStream(file)).fold(p => QueryResult(e.query, CatalogQueryResult(TargetsTable.Zero, List(p))), y => QueryResult(e.query, CatalogQueryResult(y)))
       }
     }
 

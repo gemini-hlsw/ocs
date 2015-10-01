@@ -3,6 +3,7 @@ package edu.gemini.catalog.votable
 import java.io.{ByteArrayInputStream, InputStream}
 import java.net.URL
 
+import edu.gemini.catalog.api.CatalogName
 import edu.gemini.spModel.core._
 import edu.gemini.spModel.core.Target.SiderealTarget
 
@@ -46,12 +47,12 @@ object VoTableParser extends VoTableParser {
   /**
    * parse takes an input stream and attempts to read the xml content and convert it to a VoTable resource
    */
-  def parse(url: URL, is: InputStream, checkValidity: Boolean = true): CatalogResult = {
+  def parse(catalog: CatalogName, is: InputStream, checkValidity: Boolean = true): CatalogResult = {
     // Load in memory (Could be a problem for large responses)
     val xmlText = Source.fromInputStream(is, "UTF-8").getLines().mkString
 
     (checkValidity, validate(xmlText)) match {
-      case (true, -\/(e))  => \/.left(ValidationError(url))
+      case (true, -\/(e))  => \/.left(ValidationError(catalog))
       case (false, -\/(e)) => \/.right(parse(XML.loadString(xmlText)))
       case (_, \/-(r))     => \/.right(parse(XML.loadString(r)))
     }

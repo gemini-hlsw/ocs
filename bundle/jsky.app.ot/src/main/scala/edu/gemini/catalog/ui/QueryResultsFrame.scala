@@ -623,14 +623,15 @@ object QueryResultsWindow {
             // TODO Change the search query for different conditions OCSADV-416
             val conditions = Conditions.NOMINAL.sb(sbBox.selection.item).cc(ccBox.selection.item).iq(iqBox.selection.item)
 
-            val info = ObservationInfo(objectName.text.some, instrumentName.text.some, Option(guider.selection.item.strategy), guiders.toList, conditions.some)
-            val defaultQuery = CatalogQuery(coordinates, radiusConstraint, currentFilters, ucac4)
+            val selectedCatalog = catalogBox.selection.item
+            val info = ObservationInfo(objectName.text.some, instrumentName.text.some, Option(guider.selection.item.strategy), guiders.toList, conditions.some, selectedCatalog)
+            val defaultQuery = CatalogQuery(coordinates, radiusConstraint, currentFilters, selectedCatalog)
             // Start with the guider's query and update it with the values on the UI
             val calculatedQuery = guider.selection.item.query.headOption.collect {
-              case c: ConeSearchCatalogQuery if currentFilters.nonEmpty => c.copy(base = coordinates, radiusConstraint = radiusConstraint, magnitudeConstraints = currentFilters)
-              case c: ConeSearchCatalogQuery                            => c.copy(base = coordinates, radiusConstraint = radiusConstraint) // Use the magnitude constraints from the guider
+              case c: ConeSearchCatalogQuery if currentFilters.nonEmpty => c.copy(base = coordinates, radiusConstraint = radiusConstraint, magnitudeConstraints = currentFilters, catalog = selectedCatalog)
+              case c: ConeSearchCatalogQuery                            => c.copy(base = coordinates, radiusConstraint = radiusConstraint, catalog = selectedCatalog) // Use the magnitude constraints from the guider
             }
-            (info.some, guiderQuery.getOrElse(defaultQuery))
+            (info.some, calculatedQuery.getOrElse(defaultQuery))
           }
         }
 
