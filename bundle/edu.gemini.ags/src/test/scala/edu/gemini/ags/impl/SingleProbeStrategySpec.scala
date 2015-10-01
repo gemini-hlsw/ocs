@@ -64,7 +64,7 @@ class SingleProbeStrategySpec extends Specification with NoTimeConversions {
     val dec    = Declination.fromAngle(Angle.parseDMS(decStr).getOrElse(sys.error("couldn't parse Dec"))).getOrElse(sys.error("invalid dec"))
     val coords = Coordinates(ra, dec)
     val ms     = mags.map { case (value, band) => Magnitude(value, band, None, VEGA) }.toList
-    SiderealTarget(name, coords, None, ms)
+    SiderealTarget(name, coords, None, None, ms)
   }
 
   "SingleProbeStrategy" should {

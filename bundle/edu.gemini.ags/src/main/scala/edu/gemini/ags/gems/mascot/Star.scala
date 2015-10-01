@@ -42,7 +42,8 @@ object Star {
                  ra: Double, dec: Double): Star = {
     val coordinates = Coordinates(RightAscension.fromAngle(Angle.fromDegrees(ra)), Declination.fromAngle(Angle.fromDegrees(dec)).getOrElse(Declination.zero))
     val magnitudes = List(new Magnitude(bmag, MagnitudeBand.B), new Magnitude(vmag, MagnitudeBand.V), new Magnitude(rmag, MagnitudeBand.R), new Magnitude(jmag, MagnitudeBand.J), new Magnitude(hmag, MagnitudeBand.H), new Magnitude(kmag, MagnitudeBand.K))
-    val target = SiderealTarget(name, coordinates, None, magnitudes)
+    // Note the synthetic target has no proper motion
+    val target = SiderealTarget(name, coordinates, None, None, magnitudes)
     makeStar(target, centerX, centerY)
   }
   /**

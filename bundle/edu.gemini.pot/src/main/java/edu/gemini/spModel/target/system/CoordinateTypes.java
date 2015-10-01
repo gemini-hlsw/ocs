@@ -99,6 +99,7 @@ public final class CoordinateTypes {
     /**
      * The RV (radial velocity) parameter type.
      */
+    @Deprecated
     public static final class RV extends CoordinateParam {
         public static final Units[] UNITS = {Units.KM_PER_SEC};
 

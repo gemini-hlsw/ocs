@@ -9,6 +9,7 @@ import edu.gemini.spModel.rich.shared.immutable._
 import edu.gemini.spModel.target.SPTarget
 import edu.gemini.spModel.target.offset.OffsetPosBase
 import edu.gemini.spModel.target.system.HmsDegTarget
+import squants.motion.KilometersPerSecond
 
 import scalaz._
 import Scalaz._
@@ -186,7 +187,7 @@ object ModelConverters {
       val pmRa        = RightAscensionAngularVelocity(AngularVelocity(so.getHmsDegCoordinates.getPmRa.toMilliarcsecs.getMagnitude))
       val pmDec       = DeclinationAngularVelocity(AngularVelocity(so.getHmsDegCoordinates.getPmDec.toMilliarcsecs.getMagnitude))
       val pm          = ProperMotion(pmRa, pmDec)
-      SiderealTarget(so.getName, coordinates, Some(pm), mags.toList)
+      SiderealTarget(so.getName, coordinates, Some(pm), None, mags.toList)
     }
   }
 
@@ -204,7 +205,12 @@ object ModelConverters {
         case t:HmsDegTarget => Some(ProperMotion(RightAscensionAngularVelocity(AngularVelocity(t.getPropMotionRA)), DeclinationAngularVelocity(AngularVelocity(t.getPropMotionDec))))
         case _              => None
       }
-      SiderealTarget(name, coordinates, pm, mags)
+      // Only HmsDegTargets have a radial velocity
+      val rv          = sp.getTarget match {
+        case t:HmsDegTarget => Some(RadialVelocity(KilometersPerSecond(t.getRV.getValue)))
+        case _              => None
+      }
+      SiderealTarget(name, coordinates, pm, rv, mags)
     }
   }
 }
