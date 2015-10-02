@@ -2,7 +2,7 @@ import OcsKeys._
 
 name := "ocs"
 
-ocsVersion in ThisBuild := OcsVersion("2015B", true, 1, 1, 1)
+ocsVersion in ThisBuild := OcsVersion("2015B", true, 2, 2, 1)
 
 pitVersion in ThisBuild := OcsVersion("2016A", false, 1, 1, 0)
 

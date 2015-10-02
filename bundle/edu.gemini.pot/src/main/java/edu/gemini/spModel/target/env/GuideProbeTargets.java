@@ -83,7 +83,7 @@ public final class GuideProbeTargets implements Serializable, TargetContainer, I
      * Compare targets by their ITarget component so as to ignore watchers.
      */
     static private boolean compareTargets(final Option<SPTarget> t1, final Option<SPTarget> t2) {
-        return (t1.isEmpty() && t2.isEmpty()) || t1.forall(spt1 -> t2.exists(spt2 -> spt1.getTarget().equals(spt2.getTarget())));
+        return (t1.isEmpty() && t2.isEmpty()) || t1.exists(spt1 -> t2.exists(spt2 -> spt1.getTarget().equals(spt2.getTarget())));
     }
 
     /**

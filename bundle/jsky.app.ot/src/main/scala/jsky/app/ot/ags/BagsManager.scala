@@ -5,7 +5,6 @@ import java.util.concurrent.{LinkedBlockingQueue, Executors}
 import java.util.logging.Logger
 
 import edu.gemini.ags.api.{AgsRegistrar, AgsStrategy}
-import edu.gemini.ags.impl.GemsStrategy
 import edu.gemini.pot.sp._
 import edu.gemini.spModel.guide.GuideProbe
 import edu.gemini.spModel.obs.context.ObsContext
@@ -42,15 +41,20 @@ object BagsManager {
       BagsTask(observation, curCtx, ctxOpt)
 
     def performLookup(): Unit = {
-      LOG.info(s"Performing BAGS lookup for observation=$obsKey")
+      LOG.info(s"Performing BAGS lookup for observation=${observation.getObservationID}")
 
 
+      def resultString[A](r: Option[A]): String =
+        s"Results=${r.fold("No")(_ => "Yes")}."
+
+      // We must handle GeMS separately from other strategies, and delegate the work to the GemsGuideStarWorker.
       def gemsLookup(obsCtx: ObsContext): Unit = {
-        LOG.info(s"BAGS GeMS lookup for observation=$obsKey starting")
+        LOG.info(s"BAGS GeMS lookup for observation=${observation.getObservationID} starting...")
         val ggsTry = Try { GemsGuideStarWorker.findGuideStars(obsCtx) }
-        LOG.info(s"BAGS GeMS lookup for observation=$obsKey ${ggsTry.map(_ => "successful").getOrElse("failed")}")
+        LOG.info(s"BAGS GeMS lookup for observation=${observation.getObservationID} ${ggsTry.map(ggs => s"successful. " +
+          resultString(ggs.asScalaOpt)).getOrElse("failed.")}")
         if (ggsTry.isFailure)
-          println(s"EXCEPTION=${ggsTry.failed.get}")
+          LOG.warning(s"EXCEPTION=${ggsTry.failed.get}")
         ggsTry.foreach { ggs =>
           Swing.onEDT {
             muteObservation(observation)
@@ -61,7 +65,7 @@ object BagsManager {
         taskComplete(this, success = ggsTry.isSuccess)
       }
 
-
+      // The mechanism to perform lookups for all other guide probes.
       def otherLookup(obsCtx: ObsContext, strategy: AgsStrategy): Unit = {
         def showTpeFeatures(selOpt: Option[AgsStrategy.Selection]): Unit =
           selOpt.foreach { sel =>
@@ -125,14 +129,14 @@ object BagsManager {
         val fut = strategy.select(obsCtx, OT.getMagnitudeTable)
         fut.onComplete {
           case Success(selOpt) =>
-            LOG.info(s"BAGS lookup for observation=$obsKey successful.")
+            LOG.info(s"BAGS lookup for observation=${observation.getObservationID} successful. ${resultString(selOpt)}")
             Swing.onEDT {
               applySelection(selOpt)
               showTpeFeatures(selOpt)
             }
             taskComplete(this, success = true)
           case Failure(ex) =>
-            LOG.warning(s"BAGS lookup for observation=$obsKey failed.")
+            LOG.warning(s"BAGS lookup for observation=${observation.getObservationID} failed.")
             taskComplete(this, success = false)
         }
       }
@@ -140,7 +144,7 @@ object BagsManager {
 
       curCtx.foreach { obsCtx =>
         AgsRegistrar.currentStrategy(obsCtx).foreach { strategy =>
-          if (strategy.key == GemsStrategy.key && GuideStarSupport.hasGemsComponent(observation)) {
+          if (GuideStarSupport.hasGemsComponent(observation)) {
             gemsLookup(obsCtx)
           } else {
             otherLookup(obsCtx, strategy)
@@ -175,7 +179,18 @@ object BagsManager {
   def registerProgram(prog: ISPProgram) = {
     Option(prog).foreach { p =>
       p.addCompositeChangeListener(propertyChangeListener)
-      p.getObservations.asScala.foreach(updateObservation)
+
+      // Only queue up observations that do not have an auto guide star.
+      p.getObservations.asScala.foreach { obs =>
+        val obsCtx = ObsContext.create(obs)
+        obsCtx.asScalaOpt.foreach { ctx =>
+          if (ctx.getTargets.getGuideEnvironment.getPrimaryReferencedGuiders.isEmpty ||
+            ctx.getTargets.getGuideEnvironment.getPrimaryReferencedGuiders.asScala.exists(gp => {
+            ctx.getTargets.getPrimaryGuideProbeTargets(gp).asScalaOpt.forall(_.getBagsTarget.isEmpty)})) {
+            updateObservation(obs)
+          }
+        }
+      }
     }
   }
 
@@ -272,34 +287,35 @@ object BagsManager {
   }
 
   // Check two target environments to see if the BAGS targets match exactly between them.
-  def bagsTargetsMatch(oldEnv: TargetEnvironment, newEnv: TargetEnvironment): Boolean = {
+  def bagsTargetsMatch(oldEnv: TargetEnvironment, newEnv: TargetEnvironment): Boolean =
     oldEnv.getGuideEnvironment.getPrimaryReferencedGuiders.equals(newEnv.getGuideEnvironment.getPrimaryReferencedGuiders) &&
       oldEnv.getGuideEnvironment.getPrimaryReferencedGuiders.asScala.forall { gp =>
         oldEnv.getPrimaryGuideProbeTargets(gp).asScalaOpt.forall { oldGpt =>
           val oldBags = oldGpt.getBagsTarget.asScalaOpt
           val newBags = newEnv.getPrimaryGuideProbeTargets(gp).asScalaOpt.flatMap(_.getBagsTarget.asScalaOpt)
-          oldBags.forall(oldTarget => newBags.exists(_.getTarget.equals(oldTarget.getTarget)))
+          (oldBags.isEmpty && newBags.isEmpty) || oldBags.exists(oldTarget => newBags.exists(_.getTarget.equals(oldTarget.getTarget)))
         }
       }
-  }
 
   private val propertyChangeListener = new PropertyChangeListener {
-    override def propertyChange(evt: PropertyChangeEvent): Unit = evt.getSource match {
-      case obsComp: ISPObsComponent =>
-        // Check to see if anything has changed.
-        val sameEnv = evt.getOldValue.isInstanceOf[TargetObsComp] && evt.getNewValue.isInstanceOf[TargetObsComp] && {
-          val oldEnv = evt.getOldValue.asInstanceOf[TargetObsComp].getTargetEnvironment
-          val newEnv = evt.getNewValue.asInstanceOf[TargetObsComp].getTargetEnvironment
+    override def propertyChange(evt: PropertyChangeEvent): Unit = {
+      evt.getSource match {
+        case obsComp: ISPObsComponent =>
+          // Check to see if anything has changed.
+          val sameEnv = evt.getOldValue.isInstanceOf[TargetObsComp] && evt.getNewValue.isInstanceOf[TargetObsComp] && {
+            val oldEnv = evt.getOldValue.asInstanceOf[TargetObsComp].getTargetEnvironment
+            val newEnv = evt.getNewValue.asInstanceOf[TargetObsComp].getTargetEnvironment
 
-          // Same base, same primary guiders, same BAGS targets.
-          oldEnv.getBase.getTarget.equals(newEnv.getBase.getTarget) && bagsTargetsMatch(oldEnv, newEnv)
-        }
-        if (!sameEnv)
-          updateObservation(obsComp.getContextObservation)
+            // Same base, same primary guiders, same BAGS targets.
+            oldEnv.getBase.getTarget.equals(newEnv.getBase.getTarget) && bagsTargetsMatch(oldEnv, newEnv)
+          }
+          if (!sameEnv)
+            updateObservation(obsComp.getContextObservation)
 
-      case prog: ISPProgram => prog.getObservations.asScala.foreach(updateObservation)
-      case node: ISPNode    => updateObservation(node.getContextObservation)
-      case _                => // Ignore
+        case prog: ISPProgram => prog.getObservations.asScala.foreach(updateObservation)
+        case node: ISPNode    => updateObservation(node.getContextObservation)
+        case _                => // Ignore
+      }
     }
   }
 }
