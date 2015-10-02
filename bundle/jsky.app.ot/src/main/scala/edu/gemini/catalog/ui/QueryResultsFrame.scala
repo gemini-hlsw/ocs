@@ -78,7 +78,7 @@ object ObservationInfo {
     AgsRegistrar.currentStrategy(ctx),
     AgsRegistrar.validStrategies(ctx).map(toSupportedStrategy(ctx, _, mt)),
     ctx.getConditions.some,
-    ucac4)
+    UCAC4)
 
 }
 
@@ -413,7 +413,7 @@ object QueryResultsWindow {
           }
         }
         lazy val instrumentName = new Label("")
-        lazy val catalogBox = new ComboBox(List[CatalogName](ucac4, ppmxl)) with TextRenderer[CatalogName] {
+        lazy val catalogBox = new ComboBox(List[CatalogName](UCAC4, PPMXL)) with TextRenderer[CatalogName] {
           override def text(a: CatalogName) = ~Option(a).map(_.displayName)
         }
         lazy val guider = new ComboBox(List.empty[SupportedStrategy]) with TextRenderer[SupportedStrategy] {
@@ -762,7 +762,7 @@ object CatalogQueryDemo extends SwingApplication {
   import edu.gemini.spModel.target.SPTarget
   import edu.gemini.spModel.target.env.TargetEnvironment
 
-  val query = CatalogQuery(Coordinates(RightAscension.fromAngle(Angle.fromDegrees(3.1261166666666895)),Declination.fromAngle(Angle.fromDegrees(337.93268333333333)).getOrElse(Declination.zero)),RadiusConstraint.between(Angle.zero,Angle.fromDegrees(0.16459874517619255)),List(MagnitudeConstraints(RBandsList,FaintnessConstraint(16.0),Some(SaturationConstraint(3.1999999999999993)))),ucac4)
+  val query = CatalogQuery(Coordinates(RightAscension.fromAngle(Angle.fromDegrees(3.1261166666666895)),Declination.fromAngle(Angle.fromDegrees(337.93268333333333)).getOrElse(Declination.zero)),RadiusConstraint.between(Angle.zero,Angle.fromDegrees(0.16459874517619255)),List(MagnitudeConstraints(RBandsList,FaintnessConstraint(16.0),Some(SaturationConstraint(3.1999999999999993)))),UCAC4)
 
   def startup(args: Array[String]) {
     System.setProperty("apple.awt.antialiasing", "on")

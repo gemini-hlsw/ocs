@@ -1,8 +1,8 @@
 package edu.gemini.ags.gems;
 
 import edu.gemini.catalog.api.CatalogName;
-import edu.gemini.catalog.api.ppmxl$;
-import edu.gemini.catalog.api.ucac4$;
+import edu.gemini.catalog.api.PPMXL$;
+import edu.gemini.catalog.api.UCAC4$;
 import edu.gemini.catalog.api.MagnitudeConstraints;
 import edu.gemini.pot.ModelConverters;
 import edu.gemini.spModel.core.Angle;
@@ -48,9 +48,9 @@ public class GemsGuideStarSearchOptions {
 
         public CatalogName catalog() {
             if (this == PPMXL_GEMINI) {
-                return ppmxl$.MODULE$;
+                return PPMXL$.MODULE$;
             } else {
-                return ucac4$.MODULE$;
+                return UCAC4$.MODULE$;
             }
         }
 

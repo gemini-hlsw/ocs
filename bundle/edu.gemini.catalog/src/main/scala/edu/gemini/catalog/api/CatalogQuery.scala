@@ -20,13 +20,13 @@ case class MagnitudeQueryFilter(mc: MagnitudeConstraints) extends QueryResultsFi
 
 sealed abstract class CatalogName(val id: String, val displayName: String)
 
-case object sdss extends CatalogName("sdss9", "SDSS9 @ Gemini")
-case object gsc234 extends CatalogName("gsc234", "GSC234 @ Gemini")
-case object ppmxl extends CatalogName("ppmxl", "PPMXL @ Gemini")
-case object ucac4 extends CatalogName("ucac4", "UCAC4 @ Gemini")
-case object twomass_psc extends CatalogName("twomass_psc", "TwoMass PSC @ Gemini")
-case object twomass_xsc extends CatalogName("twomass_xsc", "TwoMass XSC @ Gemini")
-case object simbad extends CatalogName("simbad", "Simbad")
+case object SDSS extends CatalogName("sdss9", "SDSS9 @ Gemini")
+case object GSC234 extends CatalogName("gsc234", "GSC234 @ Gemini")
+case object PPMXL extends CatalogName("ppmxl", "PPMXL @ Gemini")
+case object UCAC4 extends CatalogName("ucac4", "UCAC4 @ Gemini")
+case object TWOMASS_PSC extends CatalogName("twomass_psc", "TwoMass PSC @ Gemini")
+case object TWOMASS_XSC extends CatalogName("twomass_xsc", "TwoMass XSC @ Gemini")
+case object SIMBAD extends CatalogName("simbad", "Simbad")
 
 object CatalogName {
   implicit val equals = Equal.equal[CatalogName]((a, b) => a.id === b.id)
@@ -92,7 +92,7 @@ object CatalogQuery {
 
   def apply(base: Coordinates, radiusConstraint: RadiusConstraint, catalog: CatalogName):CatalogQuery = ConeSearchCatalogQuery(None, base, radiusConstraint, Nil, catalog)
 
-  def apply(search: String):CatalogQuery = NameCatalogQuery(search, simbad)
+  def apply(search: String):CatalogQuery = NameCatalogQuery(search, SIMBAD)
 
   implicit val equals = Equal.equalA[CatalogQuery]
 }

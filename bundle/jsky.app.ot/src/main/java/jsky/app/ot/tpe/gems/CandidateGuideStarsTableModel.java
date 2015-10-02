@@ -2,7 +2,7 @@ package jsky.app.ot.tpe.gems;
 
 import edu.gemini.ags.gems.GemsUtils4Java;
 import edu.gemini.spModel.core.Target;
-import edu.gemini.catalog.api.ucac4$;
+import edu.gemini.catalog.api.UCAC4$;
 import jsky.catalog.Catalog;
 import jsky.catalog.FieldDesc;
 import jsky.catalog.FieldDescAdapter;
@@ -49,7 +49,7 @@ class CandidateGuideStarsTableModel extends DefaultTableModel {
         _model = model;
         _nirBand = _model.getBand().name();
         _unusedBands = getOtherNirBands(_nirBand);
-        _isUCAC4 = model.getCatalog().catalog() == ucac4$.MODULE$;
+        _isUCAC4 = model.getCatalog().catalog() == UCAC4$.MODULE$;
         _columnNames = makeColumnNames();
         setDataVector(makeDataVector(), _columnNames);
     }
