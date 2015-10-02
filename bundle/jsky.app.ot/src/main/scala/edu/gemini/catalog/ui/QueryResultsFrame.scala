@@ -1,18 +1,19 @@
 package edu.gemini.catalog.ui
 
+import java.awt.Color
 import javax.swing.BorderFactory._
 import javax.swing.border.Border
-import javax.swing.{DefaultComboBoxModel, SwingConstants}
+import javax.swing.{UIManager, DefaultComboBoxModel, SwingConstants}
 import javax.swing.table._
 
 import edu.gemini.ags.api.AgsMagnitude.MagnitudeTable
 import edu.gemini.ags.api.{AgsStrategy, AgsRegistrar}
 import edu.gemini.ags.conf.ProbeLimitsTable
 import edu.gemini.catalog.api._
-import edu.gemini.catalog.votable.{QueryResult, VoTableClient}
+import edu.gemini.catalog.votable._
 import edu.gemini.pot.sp.ISPNode
-import edu.gemini.shared.gui.textComponent.{TextRenderer, NumberField}
-import edu.gemini.shared.gui.{GlassLabel, SizePreference, SortableTable}
+import edu.gemini.shared.gui.textComponent.{SelectOnFocus, TextRenderer, NumberField}
+import edu.gemini.shared.gui.{ButtonFlattener, GlassLabel, SizePreference, SortableTable}
 import edu.gemini.spModel.core.Target.SiderealTarget
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.Conditions
@@ -22,6 +23,7 @@ import edu.gemini.ui.miglayout.MigPanel
 import edu.gemini.ui.miglayout.constraints._
 import jsky.app.ot.gemini.editor.targetComponent.GuidingFeedback.ProbeLimits
 import jsky.app.ot.tpe.TpeContext
+import jsky.app.ot.util.Resources
 
 import scala.swing.Reactions.Reaction
 import scala.swing._
@@ -268,22 +270,27 @@ object QueryResultsWindow {
         }
       }
 
+      private lazy val errorLabel = new Label("") {
+        horizontalAlignment = Alignment.Left
+        foreground = Color.red
+
+        def reset(): Unit = text = ""
+      }
+
       title = "Query Results"
       QueryForm.buildLayout(Nil)
       contents = new MigPanel(LC().fill().insets(0).gridGap("0px", "0px").debug(0)) {
         // Query Form
-        add(QueryForm, CC().spanY(2).alignY(TopAlign).minWidth(280.px))
+        add(QueryForm, CC().alignY(TopAlign).minWidth(280.px))
         // Results Table
         add(new BorderPanel() {
           border = titleBorder(title)
           add(scrollPane, BorderPanel.Position.Center)
-        }, CC().grow().pushY().pushX())
-        // Command buttons at the bottom
-        add(new MigPanel(LC().fillX().insets(10.px)) {
-          // Results label
-          add(resultsLabel, CC().alignX(LeftAlign))
-          add(closeButton, CC().alignX(RightAlign))
-        }, CC().growX().dockSouth())
+        }, CC().grow().spanX(2).pushY().pushX())
+        // Labels and command buttons at the bottom
+        add(resultsLabel, CC().alignX(LeftAlign).alignY(BaselineAlign).newline().gap(10.px, 10.px, 10.px, 10.px))
+        add(errorLabel, CC().alignX(LeftAlign).alignY(BaselineAlign).gap(10.px, 10.px, 10.px, 10.px))
+        add(closeButton, CC().alignX(RightAlign).alignY(BaselineAlign).gap(10.px, 10.px, 10.px, 10.px))
       }
 
       // Set initial size
@@ -310,6 +317,24 @@ object QueryResultsWindow {
           createCompoundBorder(
             createTitledBorder(title),
             createEmptyBorder(2,2,2,2)))
+
+      /**
+       * Show error message at the bottom line
+       */
+      def displayError(error: String): Unit = {
+        errorLabel.text = error
+      }
+
+      /**
+       * Called after a name search completes
+       */
+      def updateName(search: String, targets: List[SiderealTarget]): Unit = {
+        QueryForm.updateName(targets.headOption)
+        targets.headOption.ifNone {
+          errorLabel.text = s"Target '$search' not found..."
+        }
+      }
+
       /**
        * Called after  a query completes to update the UI according to the results
        */
@@ -339,7 +364,11 @@ object QueryResultsWindow {
         contents.headOption.foreach(_.revalidate())
       }
 
+      /**
+       * Contains the data used to create the right-hand side form to do queries
+       */
       private case object QueryForm extends MigPanel(LC().fill().insets(0.px).debug(0)) {
+
         // Represents a magnitude filter containing the controls that make the row
         case class MagnitudeFilterControls(addButton: Button, faintess: NumberField, separator: Label, saturation: NumberField, bandCB: ComboBox[MagnitudeBand], removeButton: Button)
 
@@ -363,7 +392,25 @@ object QueryResultsWindow {
             }
         }
 
-        lazy val objectName = new TextField("")
+        lazy val objectName = new TextField("") with SelectOnFocus {
+          val foregroundColor = UIManager.getColor("TextField.foreground")
+          listenTo(keys)
+          reactions += {
+            case KeyPressed(_, Key.Enter, _, _) if text.nonEmpty =>
+              doNameSearch(text)
+            case KeyTyped(_, _, _, _) =>
+              errorLabel.reset()
+              foreground = foregroundColor
+          }
+        }
+        lazy val searchByName = new Button("") {
+          icon = Resources.getIcon("eclipse/search.gif")
+          ButtonFlattener.flatten(peer)
+          reactions += {
+            case ButtonClicked(_) if objectName.text.nonEmpty =>
+              doNameSearch(objectName.text)
+          }
+        }
         lazy val instrumentName = new Label("")
         lazy val guider = new ComboBox(List.empty[SupportedStrategy]) with TextRenderer[SupportedStrategy] {
           override def text(a: SupportedStrategy) = ~Option(a).map(_.strategy.key.displayName)
@@ -427,6 +474,7 @@ object QueryResultsWindow {
 
           add(new Label("Object"), CC().spanX(2))
           add(objectName, CC().spanX(3).growX())
+          add(searchByName, CC().spanX(4))
           add(new Label("RA"), CC().spanX(2).newline())
           add(ra, CC().spanX(3).growX())
           add(new Label("J2000") {
@@ -522,6 +570,18 @@ object QueryResultsWindow {
           buildLayout(query.filters.list.collect {case q: MagnitudeQueryFilter => q.mc})
         }
 
+        def updateName(t: Option[SiderealTarget]): Unit = {
+          t.foreach { i =>
+            // Don't update the name, Simbad often has many names for the same target
+            ra.updateRa(i.coordinates.ra)
+            dec.updateDec(i.coordinates.dec)
+          }
+          t.ifNone {
+            objectName.foreground = Color.red
+          }
+
+        }
+
         // Makes a combo box out of the supported bands
         private def bandsBoxes(bandsList: BandsList): List[ComboBox[MagnitudeBand]] = {
           def bandComboBox(band: MagnitudeBand) = new ComboBox(bands) with TextRenderer[MagnitudeBand] {
@@ -548,7 +608,7 @@ object QueryResultsWindow {
           queryButton.enabled option {
             // No validation here, the Query button is disabled unless all the controls are valid
             val coordinates = Coordinates(ra.value, dec.value)
-            val radius = RadiusConstraint.between(Angle.fromArcmin(radiusStart.text.toDouble), Angle.fromArcmin(radiusEnd.text.toDouble))
+            val radiusConstraint = RadiusConstraint.between(Angle.fromArcmin(radiusStart.text.toDouble), Angle.fromArcmin(radiusEnd.text.toDouble))
 
             val guiders = for {
               i <- 0 until guider.peer.getModel.getSize
@@ -558,8 +618,13 @@ object QueryResultsWindow {
             val conditions = Conditions.NOMINAL.sb(sbBox.selection.item).cc(ccBox.selection.item).iq(iqBox.selection.item)
 
             val info = ObservationInfo(objectName.text.some, instrumentName.text.some, Option(guider.selection.item.strategy), guiders.toList, conditions.some)
-            val defaultQuery = CatalogQuery(coordinates, radius, currentFilters, ucac4)
-            (info.some, guider.selection.item.query.headOption.getOrElse(defaultQuery))
+            val defaultQuery = CatalogQuery(coordinates, radiusConstraint, currentFilters, ucac4)
+            // Start with the guider's query and update it with the values on the UI
+            val calculatedQuery = guider.selection.item.query.headOption.collect {
+              case c: ConeSearchCatalogQuery if currentFilters.nonEmpty => c.copy(base = coordinates, radiusConstraint = radiusConstraint, magnitudeConstraints = currentFilters)
+              case c: ConeSearchCatalogQuery                            => c.copy(base = coordinates, radiusConstraint = radiusConstraint) // Use the magnitude constraints from the guider
+            }
+            (info.some, calculatedQuery.getOrElse(defaultQuery))
           }
         }
 
@@ -610,22 +675,39 @@ object QueryResultsWindow {
     val queryFrame = QueryResultsFrame
   }
 
+
+  private def catalogSearch(query: CatalogQuery, backend: VoTableBackend, message: String, onSuccess: (QueryResult) => Unit) : Unit = {
+      import scala.concurrent.ExecutionContext.Implicits.global
+      import QueryResultsWindow.table._
+
+      GlassLabel.show(queryFrame.peer.getRootPane, message)
+      VoTableClient.catalog(query, backend).onComplete {
+        case scala.util.Failure(f) =>
+          GlassLabel.hide(queryFrame.peer.getRootPane)
+          queryFrame.displayError(s"Exception: ${f.getMessage}")
+        case scala.util.Success(x) if x.result.containsError =>
+          GlassLabel.hide(queryFrame.peer.getRootPane)
+          queryFrame.displayError(s"Error: ${x.result.problems.head.displayValue}")
+        case scala.util.Success(x) =>
+          Swing.onEDT {
+            GlassLabel.hide(queryFrame.peer.getRootPane)
+            onSuccess(x)
+          }
+      }
+    }
+
+  private def doNameSearch(search: String): Unit = {
+    import QueryResultsWindow.table._
+    catalogSearch(CatalogQuery(search), SimbadNameBackend, "Searching...", { x =>
+      queryFrame.updateName(search, x.result.targets.rows)
+    })
+  }
+
   private def reloadSearchData(obsInfo: Option[ObservationInfo], query: CatalogQuery) {
     import QueryResultsWindow.table._
-    import scala.concurrent.ExecutionContext.Implicits.global
-
-    GlassLabel.show(queryFrame.peer.getRootPane, "Downloading...")
-    VoTableClient.catalog(query).onComplete {
-      case _: scala.util.Failure[_] =>
-        GlassLabel.hide(queryFrame.peer.getRootPane) // TODO Display error
-      case scala.util.Success(x) if x.result.containsError =>
-        GlassLabel.hide(queryFrame.peer.getRootPane) // TODO Display error
-      case scala.util.Success(x) =>
-        Swing.onEDT {
-          GlassLabel.hide(queryFrame.peer.getRootPane)
-          queryFrame.updateResults(obsInfo, x)
-        }
-    }
+    catalogSearch(query, ConeSearchBackend, "Searching...", { x =>
+      queryFrame.updateResults(obsInfo, x)
+    })
   }
 
   // Shows the frame and loads the query
@@ -664,7 +746,6 @@ object QueryResultsWindow {
 object CatalogQueryDemo extends SwingApplication {
   import QueryResultsWindow.instance
   import jsky.util.gui.Theme
-  import javax.swing.UIManager
   import edu.gemini.shared.util.immutable.{None => JNone, Some => JSome}
   import edu.gemini.spModel.gemini.niri.InstNIRI
   import edu.gemini.spModel.gemini.niri.NiriOiwfsGuideProbe
@@ -686,7 +767,7 @@ object CatalogQueryDemo extends SwingApplication {
     val ra = Angle.fromHMS(0, 12, 30.286).getOrElse(Angle.zero)
     val dec = Declination.fromAngle(Angle.zero - Angle.fromDMS(22, 4, 2.34).getOrElse(Angle.zero)).getOrElse(Declination.zero)
     val guiders = Set[GuideProbe](NiriOiwfsGuideProbe.instance, PwfsGuideProbe.pwfs1, PwfsGuideProbe.pwfs2)
-    val target = new SPTarget(ra.toDegrees, dec.toDegrees) <| {_.setName("HIP 100")}
+    val target = new SPTarget(ra.toDegrees, dec.toDegrees) <| {_.setName("HIP 1000")}
     val env = TargetEnvironment.create(target)
     val inst = new InstNIRI <| {_.setPosAngle(0.0)}
 

@@ -17,6 +17,7 @@ object constraints {
   sealed abstract class VMigAlign(protected [constraints] val toAlign: String)
   case object TopAlign extends VMigAlign("top")
   case object BottomAlign extends VMigAlign("bottom")
+  case object BaselineAlign extends VMigAlign("baseline")
   // MigLayout horizontal align objects
   sealed abstract class HMigAlign(protected [constraints] val toAlign: String)
   case object RightAlign extends HMigAlign("right")

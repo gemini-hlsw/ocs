@@ -3,7 +3,7 @@ package edu.gemini.ags.impl
 import edu.gemini.ags.api._
 import edu.gemini.ags.api.AgsMagnitude._
 import edu.gemini.catalog.api.CatalogQuery
-import edu.gemini.catalog.votable.{RemoteBackend, VoTableBackend, CatalogException, VoTableClient}
+import edu.gemini.catalog.votable.{ConeSearchBackend, VoTableBackend, CatalogException, VoTableClient}
 import edu.gemini.pot.ModelConverters._
 import edu.gemini.skycalc
 import edu.gemini.spModel.ags.AgsStrategyKey
@@ -28,7 +28,7 @@ import Scalaz._
  * The same logic is applied to various single-star guiding scenarios (i.e.,
  * everything except for GeMS).
  */
-case class SingleProbeStrategy(key: AgsStrategyKey, params: SingleProbeStrategyParams, backend: VoTableBackend = RemoteBackend) extends AgsStrategy {
+case class SingleProbeStrategy(key: AgsStrategyKey, params: SingleProbeStrategyParams, backend: VoTableBackend = ConeSearchBackend) extends AgsStrategy {
   import SingleProbeStrategy._
 
   override def magnitudes(ctx: ObsContext, mt: MagnitudeTable): List[(GuideProbe, AgsMagnitude.MagnitudeCalc)] =

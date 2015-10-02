@@ -580,5 +580,11 @@ class VoTableParserSpec extends SpecificationWithJUnit with VoTableParser {
       result.map(_.magnitudeIn(MagnitudeBand._i)) should beEqualTo(\/.right(Some(new Magnitude(19.472, MagnitudeBand._i, 0.023))))
       result.map(_.magnitudeIn(MagnitudeBand._z)) should beEqualTo(\/.right(Some(new Magnitude(19.191, MagnitudeBand._z, 0.068))))
     }
+    "parse simbad with a not-found name" in {
+      val xmlFile = "simbad-not-found.xml"
+      // Simbad returns non-valid xml when an element is not found, we need to skip validation :S
+      val result = VoTableParser.parse(new URL(s"file:////$xmlFile"), getClass.getResourceAsStream(s"/$xmlFile"), false)
+      result must beEqualTo(\/.right(ParsedVoResource(List())))
+    }
   }
 }

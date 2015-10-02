@@ -30,7 +30,7 @@ object VoTableParser extends VoTableParser {
 
   val xsd = "/votable-1.2.xsd"
   
-  private def validate(xmlFile: InputStream): Throwable \/ String = \/.fromTryCatch {
+  private def validate(xmlText: String): Throwable \/ String = \/.fromTryCatch {
     import javax.xml.transform.stream.StreamSource
     import javax.xml.validation.SchemaFactory
 
@@ -39,9 +39,6 @@ object VoTableParser extends VoTableParser {
     val schema = factory.newSchema(new StreamSource(getClass.getResourceAsStream(xsd)))
     val validator = schema.newValidator()
 
-    // Load in memory (Could be a problem for large responses)
-    val xmlText = Source.fromInputStream(xmlFile, "UTF-8").getLines().mkString
-
     validator.validate(new StreamSource(new ByteArrayInputStream(xmlText.getBytes(java.nio.charset.Charset.forName("UTF-8")))))
     xmlText
   }
@@ -49,8 +46,16 @@ object VoTableParser extends VoTableParser {
   /**
    * parse takes an input stream and attempts to read the xml content and convert it to a VoTable resource
    */
-  def parse(url: URL, is: InputStream): CatalogResult =
-    validate(is).fold(k => \/.left(ValidationError(url)), r => \/.right(parse(XML.loadString(r))))
+  def parse(url: URL, is: InputStream, checkValidity: Boolean = true): CatalogResult = {
+    // Load in memory (Could be a problem for large responses)
+    val xmlText = Source.fromInputStream(is, "UTF-8").getLines().mkString
+
+    (checkValidity, validate(xmlText)) match {
+      case (true, -\/(e))  => \/.left(ValidationError(url))
+      case (false, -\/(e)) => \/.right(parse(XML.loadString(xmlText)))
+      case (_, \/-(r))     => \/.right(parse(XML.loadString(r)))
+    }
+  }
 }
 
 // A CatalogAdapter improves parsing handling catalog-specific options like parsing magnitudes and selecting key fields

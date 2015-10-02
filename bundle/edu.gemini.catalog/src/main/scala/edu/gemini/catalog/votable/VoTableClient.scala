@@ -5,6 +5,7 @@ import java.util.concurrent.atomic.AtomicInteger
 import java.util.logging.Logger
 
 import edu.gemini.catalog.api.{NameCatalogQuery, ConeSearchCatalogQuery, CatalogQuery}
+import edu.gemini.catalog.votable.ConeSearchBackend._
 import edu.gemini.spModel.core.Angle
 import edu.gemini.spModel.core.Target.SiderealTarget
 import org.apache.commons.httpclient.{NameValuePair, HttpClient}
@@ -140,13 +141,44 @@ trait CachedBackend extends VoTableBackend {
 
 }
 
-case object RemoteBackend extends CachedBackend {
-  val instance = this
-  override val catalogUrls = NonEmptyList(new URL("http://gscatalog.gemini.edu"), new URL("http://gncatalog.gemini.edu"))
-
-  val Log = Logger.getLogger(getClass.getName)
+/**
+ * Common methods to do query calls to remote servers
+ */
+trait RemoteCallBackend {this: CachedBackend =>
+  val Log = Logger.getLogger(this.getClass.getName)
 
   private val timeout = 30 * 1000 // Max time to wait
+
+  protected [votable] def queryParams(q: CatalogQuery): Array[NameValuePair]
+  protected [votable] def queryUrl(e: SearchKey): String
+  // Indicates if the backend should validate the queries
+  protected def validate: Boolean
+
+  override protected def query(e: SearchKey): QueryResult = {
+    val method = new GetMethod(queryUrl(e))
+    val qs = queryParams(e.query)
+    method.setQueryString(qs)
+    Log.info(s"Catalog query to ${method.getURI}")
+
+    val client = new HttpClient
+    client.setConnectionTimeout(timeout)
+
+    try {
+      client.executeMethod(method)
+      VoTableParser.parse(e.url, method.getResponseBodyAsStream, validate) match {
+        case -\/(p) => QueryResult(e.query, CatalogQueryResult(TargetsTable.Zero, List(p)))
+        case \/-(y) => QueryResult(e.query, CatalogQueryResult(y))
+      }
+    } finally {
+      method.releaseConnection()
+    }
+  }
+}
+
+case object ConeSearchBackend extends CachedBackend with RemoteCallBackend {
+  val instance = this
+  override val catalogUrls = NonEmptyList(new URL("http://gscatalog.gemini.edu"), new URL("http://gncatalog.gemini.edu"))
+  override val validate = true
 
   private def format(a: Angle)= f"${a.toDegrees}%4.03f"
 
@@ -159,32 +191,12 @@ case object RemoteBackend extends CachedBackend {
     case _                          => Array.empty
   }
 
-  override protected def query(e: SearchKey): QueryResult = {
-    val method = new GetMethod(s"${e.url}/cgi-bin/conesearch.py")
-    val qs = queryParams(e.query)
-    method.setQueryString(qs)
-    Log.info(s"Catalog query to ${method.getURI}")
-
-    val client = new HttpClient
-    client.setConnectionTimeout(timeout)
-
-    try {
-      client.executeMethod(method)
-      VoTableParser.parse(e.url, method.getResponseBodyAsStream).fold(p => QueryResult(e.query, CatalogQueryResult(TargetsTable.Zero, List(p))), y => QueryResult(e.query, CatalogQueryResult(y)))
-    } finally {
-      method.releaseConnection()
-    }
-  }
-
+  override def queryUrl(e: SearchKey): String = s"${e.url}/cgi-bin/conesearch.py"
 }
 
-case object SimbadNameBackend extends CachedBackend {
-  val instance = this
-  override val catalogUrls = NonEmptyList(new URL("http://simbad.cfa.harvard.edu/simbad/"), new URL("http://simbad.u-strasbg.fr/simbad"))
-
-  val Log = Logger.getLogger(getClass.getName)
-
-  private val timeout = 30 * 1000 // Max time to wait
+case object SimbadNameBackend extends CachedBackend with RemoteCallBackend {
+  override val catalogUrls = NonEmptyList(new URL("http://simbad.cfa.harvard.edu/simbad"), new URL("http://simbad.u-strasbg.fr/simbad"))
+  override val validate = false // Simbad sometimes returns non-valid XML, in particular in errors
 
   protected [votable] def queryParams(q: CatalogQuery): Array[NameValuePair] = q match {
     case qs: NameCatalogQuery => Array(
@@ -193,25 +205,7 @@ case object SimbadNameBackend extends CachedBackend {
     case _                    => Array.empty
   }
 
-  override protected def query(e: SearchKey): QueryResult = {
-    val method = new GetMethod(s"${e.url}/sim-id")
-    val qs = queryParams(e.query)
-    method.setQueryString(qs)
-    Log.info(s"Catalog query to ${method.getURI}")
-
-    val client = new HttpClient
-    client.setConnectionTimeout(timeout)
-
-    try {
-      client.executeMethod(method)
-      VoTableParser.parse(e.url, method.getResponseBodyAsStream) match {
-        case -\/(p) => QueryResult(e.query, CatalogQueryResult(TargetsTable.Zero, List(p)))
-        case \/-(y) => QueryResult(e.query, CatalogQueryResult(y))
-      }
-    } finally {
-      method.releaseConnection()
-    }
-  }
+  override def queryUrl(e: SearchKey): String = s"${e.url}/sim-id"
 
 }
 
@@ -247,7 +241,7 @@ object VoTableClient extends VoTableClient {
   /**
    * Do a query for targets, it returns a list of targets and possible problems found
    */
-  def catalog(query: CatalogQuery, backend: VoTableBackend = RemoteBackend): Future[QueryResult] = {
+  def catalog(query: CatalogQuery, backend: VoTableBackend = ConeSearchBackend): Future[QueryResult] = {
     val f = for {
       url <- backend.catalogUrls
     } yield doQuery(query, url, backend)
@@ -260,7 +254,7 @@ object VoTableClient extends VoTableClient {
   /**
    * Do multiple parallel queries, it returns a consolidated list of targets and possible problems found
    */
-  def catalogs(queries: List[CatalogQuery], backend: VoTableBackend = RemoteBackend): Future[List[QueryResult]] = {
+  def catalogs(queries: List[CatalogQuery], backend: VoTableBackend = ConeSearchBackend): Future[List[QueryResult]] = {
     val r = queries.strengthR(backend).map(Function.tupled(catalog))
     Future.sequence(r)
   }
