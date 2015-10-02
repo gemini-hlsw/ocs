@@ -15,7 +15,7 @@ import java.util.ArrayList;
  * Band definitions for nod&shuffle modes.
  */
 public class BandDef {
-    // Shuffel mode values
+    // Shuffle mode values
     public static final int NO_SHUFFLE = 0;
     public static final int MICRO_SHUFFLE = 1;
     public static final int BAND_SHUFFLE = 2;

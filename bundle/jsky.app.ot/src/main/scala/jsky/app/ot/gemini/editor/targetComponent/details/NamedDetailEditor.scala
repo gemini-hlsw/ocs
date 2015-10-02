@@ -15,7 +15,6 @@ import jsky.util.gui.{DropDownListBoxWidget, DropDownListBoxWidgetWatcher, TextB
 import scalaz._, Scalaz._
 
 final class NamedDetailEditor extends TargetDetailEditor(Tag.NAMED) with ReentrancyHack {
-
   private[this] var spt = new SPTarget // never null
 
   private def nt: NamedTarget = spt.getTarget.asInstanceOf[NamedTarget]
@@ -30,14 +29,10 @@ final class NamedDetailEditor extends TargetDetailEditor(Tag.NAMED) with Reentra
     w.setColumns(10)
     w.setMinimumSize(w.getPreferredSize)
     w.addWatcher(new TextBoxWidgetWatcher {
-
       def textBoxKeyPress(tbwe: TextBoxWidget): Unit =
         nonreentrant {
           spt.setName(tbwe.getValue)
         }
-
-      def textBoxAction(tbwe: TextBoxWidget): Unit = ()
-
     })
   }
 
