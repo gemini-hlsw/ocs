@@ -104,7 +104,7 @@ public final class GuideGroupTest extends TestCase {
         Fixture.verifyGptListEquals(fix.grp_gmos.getAll(), grp.getAll(), fix.when);
 
         // Replace an existing GuideProbeTargets.
-        GuideProbeTargets gpt = GuideProbeTargets.create(pwfs1, fix.t_pwfs1_2).selectPrimary(fix.t_pwfs1_2);
+        GuideProbeTargets gpt = GuideProbeTargets.create(pwfs1, fix.t_pwfs1_2).withExistingPrimary(fix.t_pwfs1_2);
         grp = fix.grp_all.put(gpt);  // now the pwfs1 guide probe targets has just one target
         assertEquals(grp.getName(), fix.grp_all.getName());
         Fixture.verifySpListEquals(DefaultImList.create(fix.t_pwfs1_2), grp.get(pwfs1).getValue().getTargets(), fix.when);
@@ -149,7 +149,7 @@ public final class GuideGroupTest extends TestCase {
         Fixture.verifyGptListEquals(fix.grp_all.getAll(), grp.getAll(), fix.when);
 
         // Test replace via putAll
-        GuideProbeTargets gpt = GuideProbeTargets.create(pwfs1, fix.t_pwfs1_2).selectPrimary(fix.t_pwfs1_2);
+        GuideProbeTargets gpt = GuideProbeTargets.create(pwfs1, fix.t_pwfs1_2).withExistingPrimary(fix.t_pwfs1_2);
         grp = fix.grp_all.putAll(DefaultImList.create(gpt));  // now the pwfs1 guide probe targets has just one target
         assertEquals(grp.getName(), fix.grp_all.getName());
         Fixture.verifySpListEquals(DefaultImList.create(fix.t_pwfs1_2), grp.get(pwfs1).getValue().getTargets(), fix.when);
@@ -212,7 +212,7 @@ public final class GuideGroupTest extends TestCase {
         // Make a GMOS GuideProbeTargets instance with a guide star so that
         // it is not eliminated from the results because it is empty.
         final SPTarget target = new SPTarget();
-        final GuideProbeTargets gpt = GuideProbeTargets.create(GmosOiwfsGuideProbe.instance, target).selectPrimary(target);
+        final GuideProbeTargets gpt = GuideProbeTargets.create(GmosOiwfsGuideProbe.instance, target).withExistingPrimary(target);
         final GuideGroup all = fix.grp_all.put(gpt);
 
         final Set<GuideProbe> pwfs = new HashSet<>();

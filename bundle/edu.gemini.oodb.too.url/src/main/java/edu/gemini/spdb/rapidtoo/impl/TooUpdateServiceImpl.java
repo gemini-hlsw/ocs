@@ -3,7 +3,6 @@ package edu.gemini.spdb.rapidtoo.impl;
 import edu.gemini.pot.sp.*;
 import static edu.gemini.pot.sp.SPComponentBroadType.INSTRUMENT;
 import edu.gemini.pot.spdb.IDBDatabaseService;
-import edu.gemini.shared.util.immutable.ImList;
 import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.spModel.core.SPBadIDException;
 import edu.gemini.spModel.core.SPProgramID;
@@ -22,7 +21,6 @@ import edu.gemini.spModel.target.env.GuideProbeTargets;
 import edu.gemini.spModel.target.env.TargetEnvironment;
 import edu.gemini.spModel.target.obsComp.PwfsGuideProbe;
 import edu.gemini.spModel.target.obsComp.TargetObsComp;
-import edu.gemini.spModel.target.system.CoordinateParam;
 import edu.gemini.spModel.too.TooConstraintService;
 import edu.gemini.spdb.rapidtoo.*;
 import edu.gemini.util.security.auth.keychain.KeyService;
@@ -288,7 +286,7 @@ public final class TooUpdateServiceImpl implements TooUpdateService {
                         target.setMagnitudes(gs.getMagnitudes());
 
                     if (targetOpt.isEmpty()) {
-                        final GuideProbeTargets gtNew = gt.setManualTargets(gt.getManualTargets().cons(target)).selectPrimary(target);
+                        final GuideProbeTargets gtNew = gt.withManualTargets(gt.getManualTargets().cons(target)).withExistingPrimary(target);
                         final TargetEnvironment targetEnvNew = targetEnv.putPrimaryGuideProbeTargets(gtNew);
                         targetObsComp.setTargetEnvironment(targetEnvNew);
                     }

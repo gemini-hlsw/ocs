@@ -112,7 +112,7 @@ public final class TargetEnvironment implements Serializable, Iterable<SPTarget>
      * might have.  This is a convenience method that is equivalent to
      * <pre>
      *     TargetEnvironment env = ...
-     *     env.setGuideEnvironment(env.getGuideEnvironment().setPrimary(grp))
+     *     env.setGuideEnvironment(env.getGuideEnvironment().withManualPrimary(grp))
      * </pre>
      *
      * @param grp new primary guide group

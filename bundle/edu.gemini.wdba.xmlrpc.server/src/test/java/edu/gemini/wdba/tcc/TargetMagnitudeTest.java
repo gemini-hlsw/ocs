@@ -39,7 +39,7 @@ public final class TargetMagnitudeTest extends TestBase {
         pwfs1_1 = new SPTarget();
         pwfs1_1.setName("PWFS1-1");
 
-        final GuideProbeTargets gpt = GuideProbeTargets.create(PwfsGuideProbe.pwfs1, pwfs1_1).selectPrimary(pwfs1_1);
+        final GuideProbeTargets gpt = GuideProbeTargets.create(PwfsGuideProbe.pwfs1, pwfs1_1).withExistingPrimary(pwfs1_1);
         final GuideGroup grp = GuideGroup.create("Default Guide Group", gpt);
         env = TargetEnvironment.create(base).setPrimaryGuideGroup(grp);
     }

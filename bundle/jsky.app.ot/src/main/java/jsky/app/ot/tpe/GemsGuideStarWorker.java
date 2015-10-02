@@ -6,13 +6,11 @@ import edu.gemini.ags.gems.mascot.MascotProgress;
 import edu.gemini.catalog.votable.CatalogException;
 import edu.gemini.catalog.votable.ConeSearchBackend;
 import edu.gemini.pot.ModelConverters;
-import edu.gemini.pot.sp.ISPNode;
 import edu.gemini.shared.util.immutable.*;
 import edu.gemini.skycalc.Angle;
 import edu.gemini.shared.skyobject.coords.HmsDegCoordinates;
 import edu.gemini.shared.skyobject.coords.SkyCoordinates;
 import edu.gemini.skycalc.Coordinates;
-import edu.gemini.sp.vcs2.NodeDetail;
 import edu.gemini.spModel.core.MagnitudeBand;
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2;
 import edu.gemini.spModel.gemini.gems.GemsInstrument;
@@ -34,8 +32,6 @@ import jsky.util.gui.StatusLogger;
 
 import java.util.*;
 import java.util.concurrent.CancellationException;
-import java.util.function.BiFunction;
-import java.util.function.BinaryOperator;
 
 /**
  * OT-36: Automate Gems guide star selection in background thread.
@@ -163,7 +159,7 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
             final Set<GuideProbe> oldProbes    = oldEnv.getGuideEnvironment().getReferencedGuiders();
             final TargetEnvironment clearedEnv = oldProbes.stream().reduce(oldEnv, (TargetEnvironment curEnv, GuideProbe gp) -> {
                 final Option<GuideProbeTargets> oldGptOpt = curEnv.getPrimaryGuideProbeTargets(gp);
-                final GuideProbeTargets newGpt = oldGptOpt.getOrElse(GuideProbeTargets.create(gp)).setBagsTarget(GuideProbeTargets.NO_TARGET);
+                final GuideProbeTargets newGpt = oldGptOpt.getOrElse(GuideProbeTargets.create(gp)).withBagsTarget(GuideProbeTargets.NO_TARGET);
                 return curEnv.putPrimaryGuideProbeTargets(newGpt);
             }, (te1, te2) -> te2);
 
@@ -174,7 +170,7 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
                 final GuideGroup gg;
                 if (isBags) {
                     final ImList<GuideProbeTargets> gptList = gemsGuideStars.guideGroup().getAll().map(gpt ->
-                        gpt.getPrimary().map(primary -> gpt.removeTarget(primary).setBagsTarget(primary)).getOrElse(gpt)
+                        gpt.getPrimary().map(primary -> gpt.removeTarget(primary).withBagsTarget(primary)).getOrElse(gpt)
                     );
                     gg = gemsGuideStars.guideGroup().putAll(gptList);
                 } else {

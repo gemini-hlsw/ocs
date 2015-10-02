@@ -96,7 +96,7 @@ object BagsManager {
           // Clear out the guide probes that no longer have a valid assignment.
           val clearedEnv = (oldEnv /: unassignedProbes) { (curEnv, gp) =>
             val oldGpt = curEnv.getPrimaryGuideProbeTargets(gp).asScalaOpt
-            val newGpt = oldGpt.getOrElse(GuideProbeTargets.create(gp)).setBagsTarget(GuideProbeTargets.NO_TARGET)
+            val newGpt = oldGpt.getOrElse(GuideProbeTargets.create(gp)).withBagsTarget(GuideProbeTargets.NO_TARGET)
             curEnv.putPrimaryGuideProbeTargets(newGpt)
           }
 

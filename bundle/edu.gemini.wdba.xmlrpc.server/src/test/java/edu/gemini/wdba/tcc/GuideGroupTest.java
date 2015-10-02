@@ -41,7 +41,7 @@ public final class GuideGroupTest extends TestBase {
 
     private static GuideProbeTargets createGuideTargets(GuideProbe probe) {
         final SPTarget target = new SPTarget();
-        return GuideProbeTargets.create(probe, target).selectPrimary(target);
+        return GuideProbeTargets.create(probe, target).withExistingPrimary(target);
     }
 
     private static ImList<GuideProbeTargets> createGuideTargetsList(GuideProbe... probes) {

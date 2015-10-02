@@ -131,7 +131,7 @@ public class GsaoiOdgwGroupTest extends TestCase {
 
     private GuideProbeTargets create(GsaoiOdgw odgw, Coordinates coords) {
         final SPTarget target = new SPTarget(coords.getRaDeg(), coords.getDecDeg());
-        return GuideProbeTargets.create(odgw, target).selectPrimary(target);
+        return GuideProbeTargets.create(odgw, target).withExistingPrimary(target);
     }
 
     // Simple test case where an ODGW star ends up in another detector due to
@@ -206,7 +206,7 @@ public class GsaoiOdgwGroupTest extends TestCase {
         final SPTarget target2a = new SPTarget(coords2a.getRaDeg(), coords2a.getDecDeg());
         final SPTarget target2b = new SPTarget(coords2b.getRaDeg(), coords2b.getDecDeg());
 
-        final GuideProbeTargets gt = GuideProbeTargets.create(GsaoiOdgw.odgw2, target2a, target2b).selectPrimary(target2b);
+        final GuideProbeTargets gt = GuideProbeTargets.create(GsaoiOdgw.odgw2, target2a, target2b).withExistingPrimary(target2b);
 
         // Setup the obs context, rotated 90 degrees.
         final TargetEnvironment env = baseContext.getTargets().putPrimaryGuideProbeTargets(gt);

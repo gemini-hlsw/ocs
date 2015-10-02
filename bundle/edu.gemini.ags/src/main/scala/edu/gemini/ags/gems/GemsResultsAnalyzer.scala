@@ -240,7 +240,7 @@ object GemsResultsAnalyzer {
         probe
     }
     val spTarget = toSPTarget(target)
-    gp.map(GuideProbeTargets.create(_, spTarget).selectPrimary(spTarget))
+    gp.map(GuideProbeTargets.create(_, spTarget).withExistingPrimary(spTarget))
   }
 
   // Returns the given targets list with any objects removed that are not valid in at least one of the

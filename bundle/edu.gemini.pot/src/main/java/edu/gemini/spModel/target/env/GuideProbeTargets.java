@@ -316,7 +316,7 @@ public final class GuideProbeTargets implements Serializable, TargetContainer, I
      * @param targetOption the new BAGS target
      * @return a new GuideProbeTargets with the primary target and BAGS target as described
      */
-    public GuideProbeTargets setBagsTarget(final Option<SPTarget> targetOption) {
+    public GuideProbeTargets withBagsTarget(final Option<SPTarget> targetOption) {
         if (targetOption.equals(bagsTarget))
             return this;
 
@@ -330,8 +330,8 @@ public final class GuideProbeTargets implements Serializable, TargetContainer, I
      * @param target the new BAGS target
      * @return a new GuideProbeTargets with the primary target and BAGS target as described
      */
-    public GuideProbeTargets setBagsTarget(final SPTarget target) {
-        return setBagsTarget(ImOption.apply(target));
+    public GuideProbeTargets withBagsTarget(final SPTarget target) {
+        return withBagsTarget(ImOption.apply(target));
     }
 
     /**
@@ -339,7 +339,7 @@ public final class GuideProbeTargets implements Serializable, TargetContainer, I
      * If there is no BAGS guide star, then primary is unset.
      * @return a new GuideProbeTargets with the primary target set as described
      */
-    public GuideProbeTargets setPrimaryToBagsTarget() {
+    public GuideProbeTargets withPrimaryToBagsTarget() {
         if (primaryIsBagsTarget())
             return this;
         return new GuideProbeTargets(guider, bagsTarget, bagsTarget, manualTargets);
@@ -351,7 +351,7 @@ public final class GuideProbeTargets implements Serializable, TargetContainer, I
      * @param targetOption the primary target to select, or None
      * @return a new GuideProbeTargets with the primary target as indicated
      */
-    public GuideProbeTargets selectPrimary(final Option<SPTarget> targetOption) {
+    public GuideProbeTargets withExistingPrimary(final Option<SPTarget> targetOption) {
         if (targetOption.equals(primaryTarget))
             return this;
         return new GuideProbeTargets(guider, bagsTarget, targetOption, manualTargets);
@@ -363,9 +363,9 @@ public final class GuideProbeTargets implements Serializable, TargetContainer, I
      * @param target the primary target to select
      * @return a new GuideProbeTargets with the primary target as indicated
      */
-    public GuideProbeTargets selectPrimary(final SPTarget target) {
+    public GuideProbeTargets withExistingPrimary(final SPTarget target) {
         final Option<SPTarget> targetOption = target == null ? NO_TARGET : new Some<>(target);
-        return selectPrimary(targetOption);
+        return withExistingPrimary(targetOption);
     }
 
     /**
@@ -373,7 +373,7 @@ public final class GuideProbeTargets implements Serializable, TargetContainer, I
      * @param target the primary guide star.
      * @return the new GuideProbeTargets with the primary target as indicated.
      */
-    public GuideProbeTargets setPrimary(final SPTarget target) {
+    public GuideProbeTargets withManualPrimary(final SPTarget target) {
         if (target == null)
             return new GuideProbeTargets(guider, bagsTarget, NO_TARGET, manualTargets);
 
@@ -407,7 +407,7 @@ public final class GuideProbeTargets implements Serializable, TargetContainer, I
      * @param indexOption the optional index to use as the primary
      * @return the new GuideProbeTargets with the new primary as described above
      */
-    public GuideProbeTargets setPrimaryIndex(final Option<Integer> indexOption) {
+    public GuideProbeTargets withPrimaryByIndex(final Option<Integer> indexOption) {
         // If the current primary is already as set, nothing to do.
         final Option<Integer> oldPrimaryIndex = getPrimaryIndex();
         if (indexOption.exists(i -> oldPrimaryIndex.exists(i::equals))
@@ -417,7 +417,7 @@ public final class GuideProbeTargets implements Serializable, TargetContainer, I
         if (indexOption.isEmpty())
             return new GuideProbeTargets(guider, bagsTarget, NO_TARGET, manualTargets);
 
-        return setPrimaryIndex(indexOption.getValue());
+        return withPrimaryByIndex(indexOption.getValue());
     }
 
     /**
@@ -428,7 +428,7 @@ public final class GuideProbeTargets implements Serializable, TargetContainer, I
      * @throws java.lang.IndexOutOfBoundsException if the index does not indicate a valid guide star
      * @return the new GuideProbeTargets with the new primary as described above
      */
-    public GuideProbeTargets setPrimaryIndex(final int index) {
+    public GuideProbeTargets withPrimaryByIndex(final int index) {
         if (index == 0 && bagsTarget.isDefined())
             return new GuideProbeTargets(guider, bagsTarget, bagsTarget, manualTargets);
 
@@ -469,7 +469,7 @@ public final class GuideProbeTargets implements Serializable, TargetContainer, I
      * @param manualTargetsNew the new list of manual targets to use
      * @return a new GuideProbeTargets as described above.
      */
-    public GuideProbeTargets setManualTargets(final ImList<SPTarget> manualTargetsNew) {
+    public GuideProbeTargets withManualTargets(final ImList<SPTarget> manualTargetsNew) {
         // If the primary target is None, or the primary is the BAGS, then just return with the new list.
         if (primaryTarget.forall(t -> bagsTarget.forall(t::equals)))
             return new GuideProbeTargets(guider, bagsTarget, primaryTarget, manualTargetsNew);
@@ -548,7 +548,7 @@ public final class GuideProbeTargets implements Serializable, TargetContainer, I
         final ImList<SPTarget> manualTargets = DefaultImList.create(lst);
 
         final GuideProbeTargets gpt = new GuideProbeTargets(probe, bagsTarget, NO_TARGET, manualTargets);
-        return gpt.setPrimaryIndex(primary);
+        return gpt.withPrimaryByIndex(primary);
     }
 
     public String mkString(final String prefix, final String sep, final String suffix) {
