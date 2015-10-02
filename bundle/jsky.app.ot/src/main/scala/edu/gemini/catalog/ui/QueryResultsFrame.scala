@@ -55,7 +55,7 @@ case class SupportedStrategy(strategy: AgsStrategy, limits: Option[ProbeLimits],
 /**
  * Describes the observation used to do a Guide Star Search
  */
-case class ObservationInfo(objectName: Option[String], instrumentName: Option[String], strategy: Option[AgsStrategy], validStrategies: List[SupportedStrategy], conditions: Option[Conditions]) {
+case class ObservationInfo(objectName: Option[String], instrumentName: Option[String], strategy: Option[AgsStrategy], validStrategies: List[SupportedStrategy], conditions: Option[Conditions], catalog: CatalogName) {
   def catalogQuery:List[CatalogQuery] = validStrategies.collect {
       case SupportedStrategy(s, _, query) if s == strategy => query
     }.flatten
@@ -77,7 +77,8 @@ object ObservationInfo {
     Option(ctx.getInstrument).map(_.getTitle),
     AgsRegistrar.currentStrategy(ctx),
     AgsRegistrar.validStrategies(ctx).map(toSupportedStrategy(ctx, _, mt)),
-    ctx.getConditions.some)
+    ctx.getConditions.some,
+    UCAC4)
 
 }
 
@@ -412,6 +413,9 @@ object QueryResultsWindow {
           }
         }
         lazy val instrumentName = new Label("")
+        lazy val catalogBox = new ComboBox(List[CatalogName](UCAC4, PPMXL)) with TextRenderer[CatalogName] {
+          override def text(a: CatalogName) = ~Option(a).map(_.displayName)
+        }
         lazy val guider = new ComboBox(List.empty[SupportedStrategy]) with TextRenderer[SupportedStrategy] {
           override def text(a: SupportedStrategy) = ~Option(a).map(_.strategy.key.displayName)
           listenTo(selection)
@@ -472,7 +476,9 @@ object QueryResultsWindow {
         def buildLayout(filters: List[MagnitudeConstraints]): Unit = {
           _contents.clear()
 
-          add(new Label("Object"), CC().spanX(2))
+          add(catalogBox, CC().spanX(7).alignX(CenterAlign))
+          add(new Separator(Orientation.Horizontal), CC().spanX(7).growX().newline())
+          add(new Label("Object"), CC().spanX(2).newline())
           add(objectName, CC().spanX(3).growX())
           add(searchByName, CC().spanX(4))
           add(new Label("RA"), CC().spanX(2).newline())
@@ -617,12 +623,13 @@ object QueryResultsWindow {
             // TODO Change the search query for different conditions OCSADV-416
             val conditions = Conditions.NOMINAL.sb(sbBox.selection.item).cc(ccBox.selection.item).iq(iqBox.selection.item)
 
-            val info = ObservationInfo(objectName.text.some, instrumentName.text.some, Option(guider.selection.item.strategy), guiders.toList, conditions.some)
-            val defaultQuery = CatalogQuery(coordinates, radiusConstraint, currentFilters, ucac4)
+            val selectedCatalog = catalogBox.selection.item
+            val info = ObservationInfo(objectName.text.some, instrumentName.text.some, Option(guider.selection.item.strategy), guiders.toList, conditions.some, selectedCatalog)
+            val defaultQuery = CatalogQuery(coordinates, radiusConstraint, currentFilters, selectedCatalog)
             // Start with the guider's query and update it with the values on the UI
             val calculatedQuery = guider.selection.item.query.headOption.collect {
-              case c: ConeSearchCatalogQuery if currentFilters.nonEmpty => c.copy(base = coordinates, radiusConstraint = radiusConstraint, magnitudeConstraints = currentFilters)
-              case c: ConeSearchCatalogQuery                            => c.copy(base = coordinates, radiusConstraint = radiusConstraint) // Use the magnitude constraints from the guider
+              case c: ConeSearchCatalogQuery if currentFilters.nonEmpty => c.copy(base = coordinates, radiusConstraint = radiusConstraint, magnitudeConstraints = currentFilters, catalog = selectedCatalog)
+              case c: ConeSearchCatalogQuery                            => c.copy(base = coordinates, radiusConstraint = radiusConstraint, catalog = selectedCatalog) // Use the magnitude constraints from the guider
             }
             (info.some, calculatedQuery.getOrElse(defaultQuery))
           }
@@ -755,7 +762,7 @@ object CatalogQueryDemo extends SwingApplication {
   import edu.gemini.spModel.target.SPTarget
   import edu.gemini.spModel.target.env.TargetEnvironment
 
-  val query = CatalogQuery(Coordinates(RightAscension.fromAngle(Angle.fromDegrees(3.1261166666666895)),Declination.fromAngle(Angle.fromDegrees(337.93268333333333)).getOrElse(Declination.zero)),RadiusConstraint.between(Angle.zero,Angle.fromDegrees(0.16459874517619255)),List(MagnitudeConstraints(RBandsList,FaintnessConstraint(16.0),Some(SaturationConstraint(3.1999999999999993)))),ucac4)
+  val query = CatalogQuery(Coordinates(RightAscension.fromAngle(Angle.fromDegrees(3.1261166666666895)),Declination.fromAngle(Angle.fromDegrees(337.93268333333333)).getOrElse(Declination.zero)),RadiusConstraint.between(Angle.zero,Angle.fromDegrees(0.16459874517619255)),List(MagnitudeConstraints(RBandsList,FaintnessConstraint(16.0),Some(SaturationConstraint(3.1999999999999993)))),UCAC4)
 
   def startup(args: Array[String]) {
     System.setProperty("apple.awt.antialiasing", "on")

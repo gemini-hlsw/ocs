@@ -2,6 +2,7 @@ package edu.gemini.catalog.votable
 
 import java.net.URL
 
+import edu.gemini.catalog.api.{SIMBAD, PPMXL, UCAC4}
 import edu.gemini.spModel.core._
 import edu.gemini.spModel.core.Target.SiderealTarget
 import org.specs2.mutable.SpecificationWithJUnit
@@ -436,11 +437,11 @@ class VoTableParserSpec extends SpecificationWithJUnit with VoTableParser {
     }
     "be able to validate and parse an xml from sds9" in {
       val badXml = "votable-non-validating.xml"
-      VoTableParser.parse(new URL(s"file:////$badXml"), getClass.getResourceAsStream(s"/$badXml")) should beEqualTo(-\/(ValidationError(new URL(s"file:////$badXml"))))
+      VoTableParser.parse(UCAC4, getClass.getResourceAsStream(s"/$badXml")) should beEqualTo(-\/(ValidationError(UCAC4)))
     }
     "be able to detect unknown catalogs" in {
       val xmlFile = "votable-unknown.xml"
-      val result  = VoTableParser.parse(new URL(s"file:////$xmlFile"), getClass.getResourceAsStream(s"/$xmlFile"))
+      val result  = VoTableParser.parse(UCAC4, getClass.getResourceAsStream(s"/$xmlFile"))
       result.map { parsed =>
         parsed.containsError must beEqualTo(true)
         parsed.tables.map { table =>
@@ -452,17 +453,17 @@ class VoTableParserSpec extends SpecificationWithJUnit with VoTableParser {
     }
     "be able to validate and parse an xml from ucac4" in {
       val xmlFile = "votable-ucac4.xml"
-      VoTableParser.parse(new URL(s"file:////$xmlFile"), getClass.getResourceAsStream(s"/$xmlFile")).map(_.tables.forall(!_.containsError)) must beEqualTo(\/.right(true))
-      VoTableParser.parse(new URL(s"file:////$xmlFile"), getClass.getResourceAsStream(s"/$xmlFile")).getOrElse(ParsedVoResource(Nil)).tables should be size 1
+      VoTableParser.parse(UCAC4, getClass.getResourceAsStream(s"/$xmlFile")).map(_.tables.forall(!_.containsError)) must beEqualTo(\/.right(true))
+      VoTableParser.parse(UCAC4, getClass.getResourceAsStream(s"/$xmlFile")).getOrElse(ParsedVoResource(Nil)).tables should be size 1
     }
     "be able to validate and parse an xml from ppmxl" in {
       val xmlFile = "votable-ppmxl.xml"
-      VoTableParser.parse(new URL(s"file:////$xmlFile"), getClass.getResourceAsStream(s"/$xmlFile")).map(_.tables.forall(!_.containsError)) must beEqualTo(\/.right(true))
-      VoTableParser.parse(new URL(s"file:////$xmlFile"), getClass.getResourceAsStream(s"/$xmlFile")).getOrElse(ParsedVoResource(Nil)).tables should be size 1
+      VoTableParser.parse(PPMXL, getClass.getResourceAsStream(s"/$xmlFile")).map(_.tables.forall(!_.containsError)) must beEqualTo(\/.right(true))
+      VoTableParser.parse(PPMXL, getClass.getResourceAsStream(s"/$xmlFile")).getOrElse(ParsedVoResource(Nil)).tables should be size 1
     }
     "be able to select r1mag over r2mag and b2mag when b1mag is absent in ppmxl" in {
       val xmlFile = "votable-ppmxl.xml"
-      val result = VoTableParser.parse(new URL(s"file:////$xmlFile"), getClass.getResourceAsStream(s"/$xmlFile")).getOrElse(ParsedVoResource(Nil)).tables.map(TargetsTable.apply).map(_.rows).flatMap(_.find(_.name == "-1471224894")).headOption
+      val result = VoTableParser.parse(PPMXL, getClass.getResourceAsStream(s"/$xmlFile")).getOrElse(ParsedVoResource(Nil)).tables.map(TargetsTable.apply).map(_.rows).flatMap(_.find(_.name == "-1471224894")).headOption
 
       val magR = result >>= {_.magnitudeIn(MagnitudeBand.R)}
       magR.map(_.value) should beSome(18.149999999999999)
@@ -472,7 +473,7 @@ class VoTableParserSpec extends SpecificationWithJUnit with VoTableParser {
     "be able to ignore bogus magnitudes on ppmxl" in {
       val xmlFile = "votable-ppmxl.xml"
       // Check a well-known target containing invalid magnitude values an bands H, I, K and J
-      val result = VoTableParser.parse(new URL(s"file:////$xmlFile"), getClass.getResourceAsStream(s"/$xmlFile")).getOrElse(ParsedVoResource(Nil)).tables.map(TargetsTable.apply).map(_.rows).flatMap(_.find(_.name == "-1471224894")).headOption
+      val result = VoTableParser.parse(PPMXL, getClass.getResourceAsStream(s"/$xmlFile")).getOrElse(ParsedVoResource(Nil)).tables.map(TargetsTable.apply).map(_.rows).flatMap(_.find(_.name == "-1471224894")).headOption
       val magH = result >>= {_.magnitudeIn(MagnitudeBand.H)}
       val magI = result >>= {_.magnitudeIn(MagnitudeBand.I)}
       val magK = result >>= {_.magnitudeIn(MagnitudeBand.K)}
@@ -484,9 +485,9 @@ class VoTableParserSpec extends SpecificationWithJUnit with VoTableParser {
     }
     "be able to filter out bad magnitudes" in {
       val xmlFile = "fmag.xml"
-      VoTableParser.parse(new URL(s"file:////$xmlFile"), getClass.getResourceAsStream(s"/$xmlFile")).map(_.tables.forall(!_.containsError)) must beEqualTo(\/.right(true))
+      VoTableParser.parse(UCAC4, getClass.getResourceAsStream(s"/$xmlFile")).map(_.tables.forall(!_.containsError)) must beEqualTo(\/.right(true))
       // The sample has only one row
-      val result = VoTableParser.parse(new URL(s"file:////$xmlFile"), getClass.getResourceAsStream(s"/$xmlFile")).getOrElse(ParsedVoResource(Nil)).tables.headOption.flatMap(_.rows.headOption).get
+      val result = VoTableParser.parse(UCAC4, getClass.getResourceAsStream(s"/$xmlFile")).getOrElse(ParsedVoResource(Nil)).tables.headOption.flatMap(_.rows.headOption).get
 
       val mags = result.map(_.magnitudeIn(MagnitudeBand.R))
       // Does not contain R as it is filtered out being magnitude 20 and error 99
@@ -494,9 +495,9 @@ class VoTableParserSpec extends SpecificationWithJUnit with VoTableParser {
     }
     "convert fmag to UC" in {
       val xmlFile = "fmag.xml"
-      VoTableParser.parse(new URL(s"file:////$xmlFile"), getClass.getResourceAsStream(s"/$xmlFile")).map(_.tables.forall(!_.containsError)) must beEqualTo(\/.right(true))
+      VoTableParser.parse(UCAC4, getClass.getResourceAsStream(s"/$xmlFile")).map(_.tables.forall(!_.containsError)) must beEqualTo(\/.right(true))
       // The sample has only one row
-      val result = VoTableParser.parse(new URL(s"file:////$xmlFile"), getClass.getResourceAsStream(s"/$xmlFile")).getOrElse(ParsedVoResource(Nil)).tables.headOption.flatMap(_.rows.headOption).get
+      val result = VoTableParser.parse(UCAC4, getClass.getResourceAsStream(s"/$xmlFile")).getOrElse(ParsedVoResource(Nil)).tables.headOption.flatMap(_.rows.headOption).get
 
       val mags = result.map(_.magnitudeIn(MagnitudeBand.UC))
       // Fmag gets converted to UC
@@ -505,7 +506,7 @@ class VoTableParserSpec extends SpecificationWithJUnit with VoTableParser {
     "extract Sloan's band" in {
       val xmlFile = "sloan.xml"
       // The sample has only one row
-      val result = VoTableParser.parse(new URL(s"file:////$xmlFile"), getClass.getResourceAsStream(s"/$xmlFile")).getOrElse(ParsedVoResource(Nil)).tables.headOption.flatMap(_.rows.headOption).get
+      val result = VoTableParser.parse(UCAC4, getClass.getResourceAsStream(s"/$xmlFile")).getOrElse(ParsedVoResource(Nil)).tables.headOption.flatMap(_.rows.headOption).get
 
       val gmag = result.map(_.magnitudeIn(MagnitudeBand._g))
       // gmag gets converted to g'
@@ -520,7 +521,7 @@ class VoTableParserSpec extends SpecificationWithJUnit with VoTableParser {
     "parse simbad named queries" in {
       val xmlFile = "simbad-vega.xml"
       // The sample has only one row
-      val result = VoTableParser.parse(new URL(s"file:////$xmlFile"), getClass.getResourceAsStream(s"/$xmlFile")).getOrElse(ParsedVoResource(Nil)).tables.headOption.flatMap(_.rows.headOption).get
+      val result = VoTableParser.parse(SIMBAD, getClass.getResourceAsStream(s"/$xmlFile")).getOrElse(ParsedVoResource(Nil)).tables.headOption.flatMap(_.rows.headOption).get
 
       // id and coordinates
       result.map(_.name) should beEqualTo(\/.right("* alf Lyr"))
@@ -542,7 +543,7 @@ class VoTableParserSpec extends SpecificationWithJUnit with VoTableParser {
     "parse simbad named queries with sloan magnitudes" in {
       val xmlFile = "simbad-2MFGC6625.xml"
       // The sample has only one row
-      val result = VoTableParser.parse(new URL(s"file:////$xmlFile"), getClass.getResourceAsStream(s"/$xmlFile")).getOrElse(ParsedVoResource(Nil)).tables.headOption.flatMap(_.rows.headOption).get
+      val result = VoTableParser.parse(SIMBAD, getClass.getResourceAsStream(s"/$xmlFile")).getOrElse(ParsedVoResource(Nil)).tables.headOption.flatMap(_.rows.headOption).get
 
       // id and coordinates
       result.map(_.name) should beEqualTo(\/.right("2MFGC 6625"))
@@ -560,7 +561,7 @@ class VoTableParserSpec extends SpecificationWithJUnit with VoTableParser {
     "parse simbad named queries with mixed magnitudes" in {
       val xmlFile = "simbad-J000008.13.xml"
       // The sample has only one row
-      val result = VoTableParser.parse(new URL(s"file:////$xmlFile"), getClass.getResourceAsStream(s"/$xmlFile")).getOrElse(ParsedVoResource(Nil)).tables.headOption.flatMap(_.rows.headOption).get
+      val result = VoTableParser.parse(SIMBAD, getClass.getResourceAsStream(s"/$xmlFile")).getOrElse(ParsedVoResource(Nil)).tables.headOption.flatMap(_.rows.headOption).get
 
       // id and coordinates
       result.map(_.name) should beEqualTo(\/.right("2SLAQ J000008.13+001634.6"))
@@ -583,7 +584,7 @@ class VoTableParserSpec extends SpecificationWithJUnit with VoTableParser {
     "parse simbad with a not-found name" in {
       val xmlFile = "simbad-not-found.xml"
       // Simbad returns non-valid xml when an element is not found, we need to skip validation :S
-      val result = VoTableParser.parse(new URL(s"file:////$xmlFile"), getClass.getResourceAsStream(s"/$xmlFile"), false)
+      val result = VoTableParser.parse(SIMBAD, getClass.getResourceAsStream(s"/$xmlFile"), checkValidity = false)
       result must beEqualTo(\/.right(ParsedVoResource(List())))
     }
   }

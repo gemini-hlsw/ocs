@@ -5,7 +5,6 @@ import java.util.concurrent.atomic.AtomicInteger
 import java.util.logging.Logger
 
 import edu.gemini.catalog.api.{NameCatalogQuery, ConeSearchCatalogQuery, CatalogQuery}
-import edu.gemini.catalog.votable.ConeSearchBackend._
 import edu.gemini.spModel.core.Angle
 import edu.gemini.spModel.core.Target.SiderealTarget
 import org.apache.commons.httpclient.{NameValuePair, HttpClient}
@@ -165,7 +164,7 @@ trait RemoteCallBackend {this: CachedBackend =>
 
     try {
       client.executeMethod(method)
-      VoTableParser.parse(e.url, method.getResponseBodyAsStream, validate) match {
+      VoTableParser.parse(e.query.catalog, method.getResponseBodyAsStream, validate) match {
         case -\/(p) => QueryResult(e.query, CatalogQueryResult(TargetsTable.Zero, List(p)))
         case \/-(y) => QueryResult(e.query, CatalogQueryResult(y))
       }

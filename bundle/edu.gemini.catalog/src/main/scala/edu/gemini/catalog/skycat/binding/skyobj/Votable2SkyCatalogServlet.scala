@@ -18,8 +18,11 @@ import Scalaz._
 
 @Deprecated
 class Votable2SkyCatalogServlet extends HttpServlet {
+  // UCAC bands
+  val magnitudeBands = List(MagnitudeBand.UC, MagnitudeBand.B, MagnitudeBand.V, MagnitudeBand._g, MagnitudeBand._r, MagnitudeBand._i, MagnitudeBand.J, MagnitudeBand.H, MagnitudeBand.K)
+
   private def magnitudes(t: SiderealTarget):String = {
-    UCAC4.magnitudeBands.map {b =>
+    magnitudeBands.map {b =>
       t.magnitudeIn(b).map(m => f"${m.value}%3.3f").getOrElse(" ")
     }.mkString("\t")
   }
@@ -29,7 +32,7 @@ class Votable2SkyCatalogServlet extends HttpServlet {
     s"$raV\t$decV"
   }
   private def toRow(t: SiderealTarget):String = f"${t.name}%-10s\t${t.coordinates.ra.toAngle.toDegrees}%+03.07f\t${t.coordinates.dec.toDegrees}%+03.07f\t${properMotion(t)}\t${magnitudes(t)}"
-  private def headers:String = s"4UC\tRA\tDEC\tpmRA\tpmDEC\t${UCAC4.magnitudeBands.map(_.name).mkString("\t")}\n-"
+  private def headers:String = s"4UC\tRA\tDEC\tpmRA\tpmDEC\t${magnitudeBands.map(_.name).mkString("\t")}\n-"
 
   private val lowLimitMagRegex = """(.*)magLL""".r
   private val highLimitMagRegex = """(.*)magHL""".r
@@ -107,9 +110,9 @@ class Votable2SkyCatalogServlet extends HttpServlet {
           }
 
         val query: CatalogQuery = (mr >>= (_.toOption)).map { const =>
-            CatalogQuery(coordinates, rc, const, ucac4)
+            CatalogQuery(coordinates, rc, const, UCAC4)
           }.getOrElse {
-            CatalogQuery(coordinates, rc, Nil, ucac4)
+            CatalogQuery(coordinates, rc, Nil, UCAC4)
           }
 
         // Execute query
