@@ -251,7 +251,6 @@ public final class TooUpdateServiceImpl implements TooUpdateService {
             if (tooProbe == null) {
                 LOG.warning("Guide star probe not specified.");
             } else {
-                // damn
                 final GuideProbe probe;
                 switch (tooProbe) {
                     case AOWFS:

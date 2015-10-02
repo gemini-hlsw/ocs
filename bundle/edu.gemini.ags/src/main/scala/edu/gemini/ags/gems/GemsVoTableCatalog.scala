@@ -52,27 +52,25 @@ case class GemsVoTableCatalog(backend: VoTableBackend = ConeSearchBackend, catal
    * @return  Future with a list of search results
    */
   def search(obsContext: ObsContext, basePosition: Coordinates, options: GemsGuideStarSearchOptions, nirBand: Option[MagnitudeBand]): Future[List[GemsCatalogSearchResults]] = {
-    val criterions = options.searchCriteria(obsContext, nirBand).asScala.toList
+    val criteria = options.searchCriteria(obsContext, nirBand).asScala.toList
     val inst = options.getInstrument
 
     val resultSequence = inst match {
-      case GemsInstrument.flamingos2 => searchCatalog(basePosition, criterions)
-      case i                         => searchOptimized(basePosition, obsContext.getConditions, criterions, i)
+      case GemsInstrument.flamingos2 => searchCatalog(basePosition, criteria)
+      case i                         => searchOptimized(basePosition, obsContext.getConditions, criteria, i)
     }
 
     // sort on criteria order
     resultSequence.map(_.sortWith({
       case (x, y) =>
-        criterions.indexOf(x.criterion) < criterions.indexOf(y.criterion)
+        criteria.indexOf(x.criterion) < criteria.indexOf(y.criterion)
     }))
   }
 
-  private def searchCatalog(basePosition: Coordinates, criterions: List[GemsCatalogSearchCriterion]): Future[List[GemsCatalogSearchResults]] = {
-    val queryArgs = for {
-      c <- criterions
-      q = CatalogQuery(basePosition, c.criterion.radiusConstraint, c.criterion.magConstraint, catalog)
-    } yield (q, c)
-
+  private def searchCatalog(basePosition: Coordinates, criteria: List[GemsCatalogSearchCriterion]): Future[List[GemsCatalogSearchResults]] = {
+    val queryArgs = criteria.map { c =>
+      (CatalogQuery(basePosition, c.criterion.radiusConstraint, c.criterion.magConstraint, catalog), c)
+    }
     val qm = queryArgs.toMap
     VoTableClient.catalogs(queryArgs.map(_._1), backend).map(l => l.map { qr => GemsCatalogSearchResults(qm.get(qr.query).get, qr.result.targets.rows)})
   }
@@ -109,7 +107,7 @@ case class GemsVoTableCatalog(backend: VoTableBackend = ConeSearchBackend, catal
   }
 
   /**
-   * Assign targets to matching criterions
+   * Assign targets to matching criteria
    */
   private def assignToCriterion(basePosition: Coordinates, criterions: List[GemsCatalogSearchCriterion], targets: List[SiderealTarget]): List[GemsCatalogSearchResults] = {
 
