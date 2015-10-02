@@ -117,7 +117,7 @@ public final class PlannedTimeTest {
         obs.addObsComponent(targetComp);
 
         final SPTarget pwfs2Target = new SPTarget();
-        final GuideProbeTargets pwfs2 = GuideProbeTargets.create(PwfsGuideProbe.pwfs2, pwfs2Target).selectPrimary(pwfs2Target);
+        final GuideProbeTargets pwfs2 = GuideProbeTargets.create(PwfsGuideProbe.pwfs2, pwfs2Target).withExistingPrimary(pwfs2Target);
         targetDo.setTargetEnvironment(tenv.putPrimaryGuideProbeTargets(pwfs2));
         targetComp.setDataObject(targetDo);
 
@@ -126,7 +126,7 @@ public final class PlannedTimeTest {
 
         // With OIWFS
         final SPTarget oiwfsTarget = new SPTarget();
-        final GuideProbeTargets oiwfs = GuideProbeTargets.create(Flamingos2OiwfsGuideProbe.instance, oiwfsTarget).selectPrimary(oiwfsTarget);
+        final GuideProbeTargets oiwfs = GuideProbeTargets.create(Flamingos2OiwfsGuideProbe.instance, oiwfsTarget).withExistingPrimary(oiwfsTarget);
         targetDo.setTargetEnvironment(tenv.putPrimaryGuideProbeTargets(oiwfs));
         targetComp.setDataObject(targetDo);
 

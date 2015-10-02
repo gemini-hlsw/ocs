@@ -464,9 +464,9 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
             final GuideProbeTargets targets;
             final SPTarget target = new SPTarget();
             if (opt.isEmpty()) {
-                targets = GuideProbeTargets.create(probe, target).selectPrimary(target);
+                targets = GuideProbeTargets.create(probe, target).withExistingPrimary(target);
             } else {
-                targets = opt.getValue().addManualTarget(target).selectPrimary(target);
+                targets = opt.getValue().addManualTarget(target).withExistingPrimary(target);
             }
             obsComp.setTargetEnvironment(env.setGuideEnvironment(
                     env.getGuideEnvironment().putGuideProbeTargets(guideGroup, targets)));
@@ -800,7 +800,7 @@ class GuidePositionType implements PositionType {
 
         final Option<GuideProbeTargets> gtOpt = env.getPrimaryGuideProbeTargets(guider);
         final GuideProbeTargets gt = gtOpt.map(gpt -> gpt.addManualTarget(target)).
-                getOrElse(GuideProbeTargets.create(guider, target)).selectPrimary(target);
+                getOrElse(GuideProbeTargets.create(guider, target)).withExistingPrimary(target);
 
         env = env.putPrimaryGuideProbeTargets(gt);
         obsComp.setTargetEnvironment(env);

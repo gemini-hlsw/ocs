@@ -1026,7 +1026,7 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
         final GuideProbeTargets newSrc = src.removeTarget(target);
         final SPTarget newTarget = target.clone();
 
-        final GuideProbeTargets newSnk = isPrimary ? snk.addManualTarget(newTarget).selectPrimary(newTarget) : snk.addManualTarget(newTarget);
+        final GuideProbeTargets newSnk = isPrimary ? snk.addManualTarget(newTarget).withExistingPrimary(newTarget) : snk.addManualTarget(newTarget);
 
         final GuideEnvironment guideEnv = _env.getGuideEnvironment();
         final GuideEnvironment newGuideEnv = guideEnv.putGuideProbeTargets(srcGrp, newSrc).putGuideProbeTargets(snkGrp, newSnk);

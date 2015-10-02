@@ -154,7 +154,7 @@ public final class TargetGroupTest extends TestBase {
         targetList = ImCollections.singletonList(guide2).cons(guide1);
 
         GuideProbeTargets gt = GuideProbeTargets.create(GmosOiwfsGuideProbe.instance, GuideProbeTargets.NO_TARGET,
-                GuideProbeTargets.NO_TARGET, targetList).setPrimaryIndex(1);
+                GuideProbeTargets.NO_TARGET, targetList).withPrimaryByIndex(1);
         nameMap.putGuiderName(GmosOiwfsGuideProbe.instance, "OIWFS");
 
         ImList<GuideProbeTargets> gtCollection = DefaultImList.create(gt);
@@ -192,7 +192,7 @@ public final class TargetGroupTest extends TestBase {
 
         final ImList<SPTarget> targetList2 = ImCollections.singletonList(pwfs2_2).cons(pwfs2_1);
         GuideProbeTargets pwfs2 = GuideProbeTargets.create(PwfsGuideProbe.pwfs2, GuideProbeTargets.NO_TARGET,
-                new Some<>(pwfs2_1), targetList2).setPrimaryIndex(None.INTEGER);
+                new Some<>(pwfs2_1), targetList2).withPrimaryByIndex(None.INTEGER);
 
         final TargetEnvironment env = TargetEnvironment.create(base).
                 putPrimaryGuideProbeTargets(pwfs1).putPrimaryGuideProbeTargets(pwfs2);
@@ -487,6 +487,6 @@ public final class TargetGroupTest extends TestBase {
             target.setName(names[i]);
             targets = targets.cons(target);
         }
-        return GuideProbeTargets.create(guider, GuideProbeTargets.NO_TARGET, GuideProbeTargets.NO_TARGET, targets).setPrimaryIndex(1);
+        return GuideProbeTargets.create(guider, GuideProbeTargets.NO_TARGET, GuideProbeTargets.NO_TARGET, targets).withPrimaryByIndex(1);
     }
 }

@@ -94,10 +94,10 @@ public enum GsaoiOdgw implements ValidatableGuideProbe {
                 return env;
 
             final GuideProbeTargets gptNew = gptOpt.map(gpt -> isBags
-                    ? gpt.setBagsTarget(guideStar)
+                    ? gpt.withBagsTarget(guideStar)
                     : gpt.addManualTarget(guideStar)).
                     getOrElse(GuideProbeTargets.create(probe, guideStar)).
-                    selectPrimary(guideStar);
+                    withExistingPrimary(guideStar);
             final GuideGroup grpNew = grp.put(gptNew);
             return env.setPrimaryGuideGroup(grpNew);
         }

@@ -162,7 +162,7 @@ public final class SetupTimeTest {
 
                 // Add the OIWFS if it doesn't exist.
                 final SPTarget target = new SPTarget();
-                GuideProbeTargets gt = GuideProbeTargets.create(NifsOiwfsGuideProbe.instance, target).selectPrimary(target);
+                GuideProbeTargets gt = GuideProbeTargets.create(NifsOiwfsGuideProbe.instance, target).withExistingPrimary(target);
                 env = env.putPrimaryGuideProbeTargets(gt);
                 dataObj.setTargetEnvironment(env);
                 ctx.targetComponent.setDataObject(dataObj);

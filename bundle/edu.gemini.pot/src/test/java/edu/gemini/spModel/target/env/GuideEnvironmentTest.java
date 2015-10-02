@@ -134,7 +134,7 @@ public class GuideEnvironmentTest {
         assertNotNull(gpt);
 
         // Update them with a new target (the 3rd in the list of options)
-        final GuideProbeTargets gpt2 = gpt.setManualTargets(gpt.getManualTargets().append(new SPTarget()));
+        final GuideProbeTargets gpt2 = gpt.withManualTargets(gpt.getManualTargets().append(new SPTarget()));
         final GuideEnvironment  env3 = env2.putGuideProbeTargets(newGrp4, gpt2);
 
         // Check that they now contain the new target.

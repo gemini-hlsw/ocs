@@ -6,11 +6,9 @@ import edu.gemini.spModel.guide.*;
 import edu.gemini.spModel.obs.context.ObsContext;
 import edu.gemini.spModel.target.SPTarget;
 import edu.gemini.spModel.target.env.GuideProbeTargets;
-import edu.gemini.spModel.target.env.OptionsList.UpdateOps;
 import edu.gemini.spModel.target.env.TargetEnvironment;
 import edu.gemini.spModel.target.obsComp.TargetObsComp;
 import edu.gemini.spModel.target.obsComp.TargetSelection;
-import edu.gemini.spModel.target.system.CoordinateParam;
 import edu.gemini.spModel.target.system.HmsDegTarget;
 import jsky.app.ot.gemini.editor.targetComponent.PrimaryTargetToggle;
 import jsky.app.ot.tpe.*;
@@ -178,7 +176,7 @@ public class TpeGuidePosFeature extends TpePositionFeature
 
             final TargetEnvironment env = obsComp.getTargetEnvironment();
             final Option<GuideProbeTargets> gptOpt = env.getPrimaryGuideProbeTargets(guider);
-            final GuideProbeTargets gpt = gptOpt.getOrElse(GuideProbeTargets.create(guider)).setPrimary(pos);
+            final GuideProbeTargets gpt = gptOpt.getOrElse(GuideProbeTargets.create(guider)).withManualPrimary(pos);
 
             obsComp.setTargetEnvironment(env.putPrimaryGuideProbeTargets(gpt));
             _iw.getContext().targets().commit();

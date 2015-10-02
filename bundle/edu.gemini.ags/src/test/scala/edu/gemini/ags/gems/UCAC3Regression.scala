@@ -50,7 +50,7 @@ trait UCAC3Regression {
   // Build a GuideProbeTargets class out of a list of targets
   def guideProbeTargetsGenerator(targets: Map[String, SPTarget]):GuideProbeTargetsFinder = (guider: GuideProbe, name: String) => {
     val target = targets.getOrElse(name, defaultTarget)
-    GuideProbeTargets.create(guider, target).selectPrimary(target)
+    GuideProbeTargets.create(guider, target).withExistingPrimary(target)
   }
 
   // Converts targets with R magnitude to r', R or UC discarding duplicates
