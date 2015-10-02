@@ -71,7 +71,7 @@ public class Pre2010BTargetEnvironmentIoTest {
                 GuideProbeTargets gpt = gptOpt.getValue();
 
                 // Which contains a single target
-                assertEquals(1, gpt.getOptions().size());
+                assertEquals(1, gpt.getTargets().size());
 
                 SPTarget primary = gpt.getPrimary().getValue();
                 verifyTarget("GSC001", primary);

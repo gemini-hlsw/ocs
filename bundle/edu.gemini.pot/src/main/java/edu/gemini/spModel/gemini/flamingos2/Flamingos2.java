@@ -840,8 +840,9 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
         final TargetEnvironment tenv  = dataObj.getTargetEnvironment();
 
         final GuideGroup gg = tenv.getOrCreatePrimaryGuideGroup();
-        final Option<GuideProbeTargets> gpt = gg.get(Flamingos2OiwfsGuideProbe.instance);
-        return gpt.exists(spTargets -> !spTargets.getPrimary().isEmpty());
+
+        final Option<GuideProbeTargets> gptOpt = gg.get(Flamingos2OiwfsGuideProbe.instance);
+        return gptOpt.exists(gpt -> gpt.getPrimary().isDefined());
     }
 
     public static double getSpectroscopySetupSec() {

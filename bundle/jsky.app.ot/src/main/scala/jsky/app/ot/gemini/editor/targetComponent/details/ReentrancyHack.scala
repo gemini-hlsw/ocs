@@ -6,7 +6,7 @@ trait ReentrancyHack {
   @volatile private[this] var updating = false
 
   /**
-   * Perform the givan action, ignoring re-entrant calls. This isn't even close to being
+   * Perform the given action, ignoring re-entrant calls. This isn't even close to being
    * threadsafe. Use on UI thread and hope for the best.
    */
   protected[this] def nonreentrant(f: => Unit): Unit =

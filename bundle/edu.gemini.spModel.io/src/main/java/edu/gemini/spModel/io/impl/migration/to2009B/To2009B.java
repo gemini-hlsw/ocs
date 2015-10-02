@@ -78,7 +78,7 @@ public enum To2009B {
             SPTarget target = tagMap.get(targetTag);
             if (target != null) {
                 Option<GuideProbeTargets> gtOpt = env.getPrimaryGuideProbeTargets(guider);
-                GuideProbeTargets gt = gtOpt.getValue().selectPrimary(target);
+                GuideProbeTargets gt = gtOpt.getValue().withExistingPrimary(target);
                 env = env.putPrimaryGuideProbeTargets(gt);
             }
         }

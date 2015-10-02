@@ -30,27 +30,16 @@ class GuidingControls extends GridBagPanel {
     insets = new Insets(0, 5, 0, 10)
   }
 
-  val autoGuideStarButton = new Button("Auto GS") {
-    def update(analysis: List[AgsAnalysis]): Unit = {
-      enabled = analysis.nonEmpty // if empty, no strategy so no search
-    }
-  }
-
-  layout(autoGuideStarButton) = new Constraints {
-    gridx  = 2
-    insets = new Insets(0, 0, 0, 5)
-  }
-
   val manualGuideStarButton = new Button("Manual GS")
   // Temporary button to go to the new manual search
   val newManualGuideStarButton = new Button("New Manual GS")
   newManualGuideStarButton.visible = false
 
   layout(manualGuideStarButton) = new Constraints {
-    gridx  = 3
+    gridx  = 2
   }
   layout(newManualGuideStarButton) = new Constraints {
-    gridx  = 4
+    gridx  = 3
   }
 
   def update(ctxOpt: edu.gemini.shared.util.immutable.Option[ObsContext]): Unit = {
@@ -58,14 +47,12 @@ class GuidingControls extends GridBagPanel {
       ctx <- ctxOpt.asScalaOpt
       str <- AgsRegistrar.currentStrategy(ctx)
     } yield str.analyze(ctx, OT.getMagnitudeTable)).getOrElse(List.empty)
-    autoGuideStarButton.update(analysis)
     autoGuideStarGuiderSelector.setAgsOptions(AgsContext.create(ctxOpt))
   }
 
   def supportsAgs_=(supports: Boolean): Unit = {
     guiderLabel.visible = supports
     autoGuideStarGuiderSelector.getUi.setVisible(supports)
-    autoGuideStarButton.visible = supports
   }
 
   def supportsNewManualGS(supports: Boolean) {

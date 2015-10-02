@@ -27,7 +27,7 @@ enum SPTargetPosListParser {
     private static final Logger LOG = Logger.getLogger(SPTargetPosListParser.class.getName());
 
     // A small helper that is basically a mutable target enviornment.  It is
-    // built up target by target parsed fromt the XML, then converted into a
+    // built up target by target parsed from the XML, then converted into a
     // real TargetEnvironment.
     private final static class Targets {
         SPTarget base;
@@ -76,9 +76,10 @@ enum SPTargetPosListParser {
         public void addTarget(SPTarget target, Targets targets) {
             GuideProbeTargets gt = targets.guideMap.get(guider);
             if (gt == null) {
-                gt = GuideProbeTargets.create(guider, ImCollections.singletonList(target));
+                gt = GuideProbeTargets.create(guider, GuideProbeTargets.NO_TARGET,
+                        GuideProbeTargets.NO_TARGET, ImCollections.singletonList(target));
             } else {
-                gt = gt.setOptions(gt.getOptions().append(target));
+                gt = gt.addManualTarget(target);
             }
             targets.guideMap.put(guider, gt);
         }

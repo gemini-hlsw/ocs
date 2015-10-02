@@ -112,7 +112,7 @@ public final class TargetEnvironment implements Serializable, Iterable<SPTarget>
      * might have.  This is a convenience method that is equivalent to
      * <pre>
      *     TargetEnvironment env = ...
-     *     env.setGuideEnvironment(env.getGuideEnvironment().setPrimary(grp))
+     *     env.setGuideEnvironment(env.getGuideEnvironment().withManualPrimary(grp))
      * </pre>
      *
      * @param grp new primary guide group
@@ -266,13 +266,9 @@ public final class TargetEnvironment implements Serializable, Iterable<SPTarget>
      */
     @Override
     public TargetEnvironment cloneTargets() {
-        SPTarget clonedBase = base.clone();
-        GuideEnvironment clonedGuide = guide.cloneTargets();
-        ImList<SPTarget> clonedUser  = user.map(new Function1<SPTarget, SPTarget>() {
-            public SPTarget apply(final SPTarget target) {
-                return target.clone();
-            }
-        });
+        final SPTarget clonedBase = base.clone();
+        final GuideEnvironment clonedGuide = guide.cloneTargets();
+        final ImList<SPTarget> clonedUser = user.map(SPTarget::clone);
         return new TargetEnvironment(clonedBase, clonedGuide, clonedUser);
     }
 

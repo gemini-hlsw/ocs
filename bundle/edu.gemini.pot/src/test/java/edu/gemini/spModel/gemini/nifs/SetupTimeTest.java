@@ -139,7 +139,7 @@ public final class SetupTimeTest {
 
                 // Remove the OIWFS if it exists.
                 GuideGroup grp = env.getOrCreatePrimaryGuideGroup();
-                ImList<GuideProbeTargets> gtList = grp.getAll().remove(GuideProbeTargets.match(NifsOiwfsGuideProbe.instance));
+                final ImList<GuideProbeTargets> gtList = grp.getAll().remove(gpt -> gpt.getGuider() == NifsOiwfsGuideProbe.instance);
                 env = env.setPrimaryGuideGroup(grp.setAll(gtList));
 
                 dataObj.setTargetEnvironment(env);
@@ -161,7 +161,8 @@ public final class SetupTimeTest {
                 TargetEnvironment env = dataObj.getTargetEnvironment();
 
                 // Add the OIWFS if it doesn't exist.
-                GuideProbeTargets gt = GuideProbeTargets.create(NifsOiwfsGuideProbe.instance, new SPTarget());
+                final SPTarget target = new SPTarget();
+                GuideProbeTargets gt = GuideProbeTargets.create(NifsOiwfsGuideProbe.instance, target).withExistingPrimary(target);
                 env = env.putPrimaryGuideProbeTargets(gt);
                 dataObj.setTargetEnvironment(env);
                 ctx.targetComponent.setDataObject(dataObj);

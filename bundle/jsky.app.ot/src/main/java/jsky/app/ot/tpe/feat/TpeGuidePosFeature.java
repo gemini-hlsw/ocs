@@ -6,11 +6,9 @@ import edu.gemini.spModel.guide.*;
 import edu.gemini.spModel.obs.context.ObsContext;
 import edu.gemini.spModel.target.SPTarget;
 import edu.gemini.spModel.target.env.GuideProbeTargets;
-import edu.gemini.spModel.target.env.OptionsList.UpdateOps;
 import edu.gemini.spModel.target.env.TargetEnvironment;
 import edu.gemini.spModel.target.obsComp.TargetObsComp;
 import edu.gemini.spModel.target.obsComp.TargetSelection;
-import edu.gemini.spModel.target.system.CoordinateParam;
 import edu.gemini.spModel.target.system.HmsDegTarget;
 import jsky.app.ot.gemini.editor.targetComponent.PrimaryTargetToggle;
 import jsky.app.ot.tpe.*;
@@ -171,15 +169,14 @@ public class TpeGuidePosFeature extends TpePositionFeature
 
         /** This is called, e.g., to create a new guide star in reaction to a mouse down **/
         public void create(TpeMouseEvent tme, TpeImageInfo tii) {
-            TargetObsComp obsComp = getTargetObsComp();
+            final TargetObsComp obsComp = getTargetObsComp();
             if (obsComp == null) return;
 
-            SPTarget pos = createNewTarget(tme);
+            final SPTarget pos = createNewTarget(tme);
 
-            TargetEnvironment env = obsComp.getTargetEnvironment();
-            Option<GuideProbeTargets> gptOpt = env.getPrimaryGuideProbeTargets(guider);
-            GuideProbeTargets gpt = gptOpt.getOrElse(GuideProbeTargets.create(guider));
-            gpt = gpt.update(UpdateOps.appendAsPrimary(pos));
+            final TargetEnvironment env = obsComp.getTargetEnvironment();
+            final Option<GuideProbeTargets> gptOpt = env.getPrimaryGuideProbeTargets(guider);
+            final GuideProbeTargets gpt = gptOpt.getOrElse(GuideProbeTargets.create(guider)).withManualPrimary(pos);
 
             obsComp.setTargetEnvironment(env.putPrimaryGuideProbeTargets(gpt));
             _iw.getContext().targets().commit();
@@ -228,7 +225,7 @@ public class TpeGuidePosFeature extends TpePositionFeature
             Option<ObsContext> ctx = tme.source.getObsContext();
             if (ctx.isEmpty()) return;
 
-            obsComp.setTargetEnvironment(group.add(pos,ctx.getValue()));
+            obsComp.setTargetEnvironment(group.add(pos, false, ctx.getValue()));
             _iw.getContext().targets().commit();
         }
     }
@@ -297,7 +294,7 @@ public class TpeGuidePosFeature extends TpePositionFeature
 
             TargetEnvironment env = obsComp.getTargetEnvironment();
             for (GuideProbeTargets gt : env.getOrCreatePrimaryGuideGroup()) {
-                if (!gt.getOptions().contains(tp)) continue;
+                if (!gt.getTargets().contains(tp)) continue;
 
                 if (positionIsClose(pme, tme.xWidget, tme.yWidget)) {
                     Tuple2<GuideProbe, SPTarget> tup = new Pair<>(gt.getGuider(), tp);
@@ -328,16 +325,15 @@ public class TpeGuidePosFeature extends TpePositionFeature
     /**
      */
     public boolean erase(TpeMouseEvent tme) {
-        Option<Tuple2<GuideProbe, SPTarget>> res = locatePosition(tme);
+        final Option<Tuple2<GuideProbe, SPTarget>> res = locatePosition(tme);
         if (res.isEmpty()) return false;
 
-        TargetObsComp     toc = getTargetObsComp();
-        TargetEnvironment env = getTargetEnvironment();
-        Option<GuideProbeTargets> gtOpt = env.getPrimaryGuideProbeTargets(res.getValue()._1());
+        final TargetObsComp     toc = getTargetObsComp();
+        final TargetEnvironment env = getTargetEnvironment();
+        final Option<GuideProbeTargets> gtOpt = env.getPrimaryGuideProbeTargets(res.getValue()._1());
         if (gtOpt.isEmpty()) return false;
 
-        GuideProbeTargets gt = gtOpt.getValue();
-        gt = gt.update(UpdateOps.remove(res.getValue()._2()));
+        final GuideProbeTargets gt = gtOpt.getValue().removeTargetSelectPrimary(res.getValue()._2());
         toc.setTargetEnvironment(env.putPrimaryGuideProbeTargets(gt));
         _iw.getContext().targets().commit();
         return true;
@@ -346,17 +342,17 @@ public class TpeGuidePosFeature extends TpePositionFeature
     /**
      * @see jsky.app.ot.tpe.TpeSelectableFeature
      */
-    public Object select(TpeMouseEvent tme) {
-        TargetObsComp obsComp = getTargetObsComp();
+    public Object select(final TpeMouseEvent tme) {
+        final TargetObsComp obsComp = getTargetObsComp();
         if (obsComp == null) return false;
 
-        TpePositionMap pm = TpePositionMap.getMap(_iw);
-        SPTarget tp = (SPTarget) pm.locatePos(tme.xWidget, tme.yWidget);
+        final TpePositionMap pm = TpePositionMap.getMap(_iw);
+        final SPTarget tp = (SPTarget) pm.locatePos(tme.xWidget, tme.yWidget);
         if (tp == null) return null;
 
-        TargetEnvironment env = obsComp.getTargetEnvironment();
-        for (GuideProbeTargets gt : env.getOrCreatePrimaryGuideGroup()) {
-            if (gt.getOptions().contains(tp)) {
+        final TargetEnvironment env = obsComp.getTargetEnvironment();
+        for (final GuideProbeTargets gt : env.getOrCreatePrimaryGuideGroup()) {
+            if (gt.getTargets().contains(tp)) {
                 TargetSelection.set(env, getContext().targets().shell().get(), tp);
                 return tp;
             }
@@ -411,7 +407,7 @@ public class TpeGuidePosFeature extends TpePositionFeature
 
             // Draw each star of this type.
             int index = 1;
-            ImList<SPTarget> targetList = gt.getOptions();
+            final ImList<SPTarget> targetList = gt.getTargets();
             for (SPTarget target : targetList) {
                 // If there is exactly one of this type, then no need to show
                 // the index.

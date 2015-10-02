@@ -33,16 +33,15 @@ public final class TargetMagnitudeTest extends TestBase {
     protected void setUp() throws Exception {
         super.setUp();
 
-        SPTarget base = new SPTarget();
+        final SPTarget base = new SPTarget();
         base.setName("Base Pos");
 
         pwfs1_1 = new SPTarget();
         pwfs1_1.setName("PWFS1-1");
 
-        env = TargetEnvironment.create(base);
-        GuideProbeTargets gpt = GuideProbeTargets.create(PwfsGuideProbe.pwfs1, pwfs1_1);
-        GuideGroup grp = GuideGroup.create("Default Guide Group", gpt);
-        env = env.setPrimaryGuideGroup(grp);
+        final GuideProbeTargets gpt = GuideProbeTargets.create(PwfsGuideProbe.pwfs1, pwfs1_1).withExistingPrimary(pwfs1_1);
+        final GuideGroup grp = GuideGroup.create("Default Guide Group", gpt);
+        env = TargetEnvironment.create(base).setPrimaryGuideGroup(grp);
     }
 
     public void testNoMagnitudeInfo() throws Exception {
