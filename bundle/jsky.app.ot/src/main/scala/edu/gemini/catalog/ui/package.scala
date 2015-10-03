@@ -58,14 +58,18 @@ package object ui {
    * Represents a table column description
    * @tparam T The type of the column
    */
-  sealed trait CatalogNavigatorColumn[T] {
-    val title: String
+  abstract class CatalogNavigatorColumn[T >: Null] {
+    def title: String
 
     def lens: PLens[Target, T]
 
     def displayValue(t: T): String = t.toString
 
-    def render(target: Target): String = ~lens.get(target).map(displayValue)
+    // Extract the data from the target via the lens
+    def render(target: Target): Option[T] = lens.get(target)
+
+    // Indicates the class of the column
+    def clazz:Class[_] = manifest.runtimeClass
   }
 
   case class IdColumn(title: String) extends CatalogNavigatorColumn[String] {
@@ -113,17 +117,19 @@ package object ui {
     override def displayValue(t: Magnitude): String = f"${t.value}%.2f"
   }
 
-  def baseColumnNames(base: Coordinates): List[CatalogNavigatorColumn[_]] = List(IdColumn("Id"), RAColumn("RA"), DECColumn("Dec"), DistanceColumn(base, "Dist. [arcmin]"))
-  val pmColumns: List[CatalogNavigatorColumn[_]] = List(PMRAColumn("µ RA"), PMDecColumn("µ Dec"))
+  // Required to give limits to the existential type list
+  type ColumnsList = List[CatalogNavigatorColumn[A] forSome { type A >: Null <: AnyRef}]
+
+  def baseColumnNames(base: Coordinates): ColumnsList = List(IdColumn("Id"), RAColumn("RA"), DECColumn("Dec"), DistanceColumn(base, "Dist. [arcmin]"))
+  val pmColumns: ColumnsList  = List(PMRAColumn("µ RA"), PMDecColumn("µ Dec"))
   val magColumns = MagnitudeBand.all.map(MagnitudeColumn)
 
   /**
    * Data model for the main table of the catalog navigator
    */
   case class TargetsModel(base: Coordinates, targets: List[SiderealTarget]) extends AbstractTableModel {
-
     // Available columns from the list of targets
-    val columns = {
+    val columns:ColumnsList = {
       val bandsInTargets = targets.flatMap(_.magnitudes).map(_.band).distinct
       val hasPM = targets.exists(_.properMotion.isDefined)
       val pmCols = if (hasPM) pmColumns else Nil
@@ -139,9 +145,11 @@ package object ui {
     override def getColumnName(column: Int): String =
       columns(column).title
 
-    override def getValueAt(rowIndex: Int, columnIndex: Int) = targets.lift(rowIndex).flatMap { t =>
-      columns.zipWithIndex.find(_._2 == columnIndex).map(_._1.render(t))
-    }.orNull
+    override def getValueAt(rowIndex: Int, columnIndex: Int):AnyRef =
+      targets.lift(rowIndex).flatMap { t =>
+        columns.lift(columnIndex) >>= {_.render(t)}
+      }.orNull
 
+    override def getColumnClass(columnIndex: Int): Class[_] = columns(columnIndex).clazz
   }
 }
