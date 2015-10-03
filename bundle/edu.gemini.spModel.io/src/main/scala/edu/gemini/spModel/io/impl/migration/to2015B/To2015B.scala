@@ -1,5 +1,6 @@
 package edu.gemini.spModel.io.impl.migration.to2015B
 
+import edu.gemini.spModel.io.impl.migration.{Migration, PioSyntax}
 import edu.gemini.spModel.target.system.CoordinateParam
 
 import java.util.UUID
@@ -19,7 +20,7 @@ import scala.annotation.tailrec
 import scalaz._, Scalaz._
 
 /** Convert to new target model. This is side-effecty, sorry. */
-object To2015B {
+object To2015B extends Migration {
   import PioSyntax._
   import BrightnessParser._
 
@@ -54,11 +55,8 @@ object To2015B {
   val CONTAINER_OBSERVATION    = "observation"
 
   val PARAMSET_NOTE                = "Note"
-  val PARAMSET_BASE                = "base"
-  val PARAMSET_TARGET              = "spTarget"
   val PARAMSET_MAGNITUDES          = "magnitudeList"
   val PARAMSET_TEMPLATE_GROUP      = "Template Group"
-  val PARAMSET_TEMPLATE_PARAMETERS = "Template Parameters"
 
   val VALUE_NAME_UNTITLED = "(untitled)"
 
@@ -120,26 +118,6 @@ object To2015B {
   implicit class MoreDisjunctionOps[A, B](ab: A \/ B) {
     def unsafeExtract(implicit ev: A <:< Throwable): B =
       ab.fold(throw _, identity)
-  }
-
-  // Extract all the target paramsets, be they part of an observation or
-  // template parameters.
-  private def allTargets(d: Document): List[ParamSet] = {
-    val names = Set(PARAMSET_BASE, PARAMSET_TARGET)
-
-    val templateTargets = for {
-      cs  <- d.findContainers(SPComponentType.TEMPLATE_PARAMETERS)
-      tps <- cs.allParamSets if tps.getName == PARAMSET_TEMPLATE_PARAMETERS
-      ps  <- tps.allParamSets if names(ps.getName)
-    } yield ps
-
-    val obsTargets = for {
-      obs <- d.findContainers(SPComponentType.OBSERVATION_BASIC)
-      env <- obs.findContainers(SPComponentType.TELESCOPE_TARGETENV)
-      ps  <- env.allParamSets if names(ps.getName)
-    } yield ps
-
-    templateTargets ++ obsTargets
   }
 
   // Convert B1950 coordinates to J2000

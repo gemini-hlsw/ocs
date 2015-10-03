@@ -1,51 +1,33 @@
 package edu.gemini.spModel.io.impl.migration.to2015B
 
+import java.io.{StringReader, StringWriter}
+
+import edu.gemini.pot.sp.{ISPObservation, ISPProgram, ISPTemplateFolder, ISPTemplateGroup, SPComponentType}
+import edu.gemini.shared.util.immutable.{None => JNone}
+import edu.gemini.spModel.io.impl.migration.MigrationTest
+import edu.gemini.spModel.io.impl.{PioSpXmlParser, PioSpXmlWriter}
 import edu.gemini.spModel.obscomp.SPNote
 import edu.gemini.spModel.target.obsComp.TargetObsComp
-import edu.gemini.spModel.target.system.{DMSFormat, HMSFormat, CoordinateParam, NonSiderealTarget, HmsDegTarget}
-
-import java.io.{StringReader, StringWriter, InputStreamReader}
-
-import edu.gemini.pot.sp.{SPComponentType, ISPObservation, ISPTemplateFolder, ISPTemplateGroup, ISPProgram}
-import edu.gemini.pot.spdb.{IDBDatabaseService, DBLocalDatabase}
-import edu.gemini.spModel.io.impl.{PioSpXmlWriter, PioSpXmlParser}
-import edu.gemini.spModel.template.{TemplateParameters, TemplateGroup}
-import edu.gemini.shared.util.immutable.{ None => JNone }
-
-import org.junit.Test
+import edu.gemini.spModel.target.system.{DMSFormat, HMSFormat, HmsDegTarget, NonSiderealTarget}
+import edu.gemini.spModel.template.{TemplateGroup, TemplateParameters}
 import org.junit.Assert._
+import org.junit.Test
 
 import scala.collection.JavaConverters._
 
 // a rudimentary test to make sure it doesn't blow up
 
-class TargetConversionTest {
-  private def withTestOdb(block: IDBDatabaseService => Unit): Unit = {
-    val odb = DBLocalDatabase.createTransient()
-    try {
-      block(odb)
-    } finally {
-      odb.getDBAdmin.shutdown()
-    }
-  }
-
-  private def withTestProgram(block: (IDBDatabaseService, ISPProgram) => Unit): Unit = withTestOdb { odb =>
-    val parser = new PioSpXmlParser(odb.getFactory)
-    parser.parseDocument(new InputStreamReader(getClass.getResourceAsStream("GS-2015B-T-1.xml"))) match {
-      case p: ISPProgram => block(odb, p)
-      case _             => fail("Expecting a science program")
-    }
-  }
+class TargetConversionTest extends MigrationTest {
 
   // Simple conversion from 2015A model.
   @Test
   def testTemplateConversion(): Unit =
-    withTestProgram { (_,p) => validateProgram(p) }
+    withTestProgram("GS-2015B-T-1.xml", { (_,p) => validateProgram(p) })
 
   // Read 2015A model, write 2015B model, read back 2015B model, validate.
   @Test
   def roundTrip(): Unit =
-    withTestProgram { (odb, p0) =>
+    withTestProgram("GS-2015B-T-1.xml", { (odb, p0) =>
       val sw = new StringWriter()
       new PioSpXmlWriter(sw).printDocument(p0)
 
@@ -54,7 +36,7 @@ class TargetConversionTest {
         case p1: ISPProgram => validateProgram(p1)
         case _              => fail("expecting a science program")
       }
-    }
+    })
 
   private def validateProgram(p: ISPProgram): Unit = {
     validateTemplateFolder(p.getTemplateFolder)

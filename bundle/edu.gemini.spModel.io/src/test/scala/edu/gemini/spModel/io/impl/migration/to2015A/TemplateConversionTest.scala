@@ -1,49 +1,31 @@
 package edu.gemini.spModel.io.impl.migration.to2015A
 
-import java.io.{StringReader, StringWriter, InputStreamReader}
+import java.io.{StringReader, StringWriter}
 
-import edu.gemini.pot.sp.{ISPTemplateFolder, ISPTemplateGroup, ISPProgram}
-import edu.gemini.pot.spdb.{IDBDatabaseService, DBLocalDatabase}
+import edu.gemini.pot.sp.{ISPProgram, ISPTemplateFolder, ISPTemplateGroup}
 import edu.gemini.spModel.gemini.gmos.InstGmosSouth
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality
-import edu.gemini.spModel.io.impl.{PioSpXmlWriter, PioSpXmlParser}
-import edu.gemini.spModel.template.{TemplateParameters, TemplateGroup, TemplateFolder}
-
-import org.junit.Test
+import edu.gemini.spModel.io.impl.migration.MigrationTest
+import edu.gemini.spModel.io.impl.{PioSpXmlParser, PioSpXmlWriter}
+import edu.gemini.spModel.template.{TemplateFolder, TemplateGroup, TemplateParameters}
 import org.junit.Assert._
+import org.junit.Test
 
 import scala.collection.JavaConverters._
 
 // At least rudimentary evidence that the conversion works.
 
-class TemplateConversionTest {
-
-  private def withTestOdb(block: IDBDatabaseService => Unit): Unit = {
-    val odb = DBLocalDatabase.createTransient()
-    try {
-      block(odb)
-    } finally {
-      odb.getDBAdmin.shutdown()
-    }
-  }
-
-  private def withTestProgram(block: (IDBDatabaseService, ISPProgram) => Unit): Unit = withTestOdb { odb =>
-    val parser = new PioSpXmlParser(odb.getFactory)
-    parser.parseDocument(new InputStreamReader(getClass.getResourceAsStream("GS-2014A-Q-999.xml"))) match {
-      case p: ISPProgram => block(odb, p)
-      case _             => fail("Expecting a science program")
-    }
-  }
+class TemplateConversionTest extends MigrationTest {
 
   // Simple conversion from 2014B model.
   @Test
   def testTemplateConversion(): Unit =
-    withTestProgram { (_,p) => validateProgram(p) }
+    withTestProgram("GS-2014A-Q-999.xml", { (_,p) => validateProgram(p) })
 
   // Read 2014B model, write 2015A model, read back 2015A model, validate.
   @Test
   def roundTrip(): Unit =
-    withTestProgram { (odb, p0) =>
+    withTestProgram("GS-2014A-Q-999.xml", { (odb, p0) =>
       val sw = new StringWriter()
       new PioSpXmlWriter(sw).printDocument(p0)
 
@@ -52,7 +34,7 @@ class TemplateConversionTest {
         case p1: ISPProgram => validateProgram(p1)
         case _              => fail("expecting a science program")
       }
-    }
+    })
 
   private def validateProgram(p: ISPProgram): Unit = {
     def validateGroup(g: ISPTemplateGroup): Unit = {

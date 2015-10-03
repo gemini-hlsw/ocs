@@ -17,6 +17,7 @@ import edu.gemini.spModel.io.impl.migration.to2014A.AddMissingStaticInstrumentPa
 import edu.gemini.spModel.io.impl.migration.to2014A.To2014A;
 import edu.gemini.spModel.io.impl.migration.to2015A.To2015A;
 import edu.gemini.spModel.io.impl.migration.to2015B.To2015B;
+import edu.gemini.spModel.io.impl.migration.to2016A.To2016A;
 import edu.gemini.spModel.io.impl.migration.toPalote.Grillo2Palote;
 import edu.gemini.spModel.obs.SPObservation;
 import edu.gemini.spModel.obscomp.SPGroup;
@@ -214,6 +215,9 @@ public final class PioSpXmlParser {
 
         // Update pre-2015B target model
         To2015B.updateProgram(doc);
+
+        // Update pre-2016A programs
+        To2016A.updateProgram(doc);
 
         // We will special case the Phase 1 container.
         Container p1Container = null;
