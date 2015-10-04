@@ -533,6 +533,8 @@ class VoTableParserSpec extends SpecificationWithJUnit with VoTableParser {
       result.map(_.properMotion.map(_.deltaDec)) should beEqualTo(\/.right(Some(DeclinationAngularVelocity(AngularVelocity(286.23)))))
       // radial velocity
       result.map(_.radialVelocity) should beEqualTo(\/.right(RadialVelocity(KilometersPerSecond(-20.6)).some))
+      // redshift
+      result.map(_.redshift) should beEqualTo(\/.right(Redshift(-0.000069).some))
       // magnitudes
       result.map(_.magnitudeIn(MagnitudeBand.U)) should beEqualTo(\/.right(Some(new Magnitude(0.03, MagnitudeBand.U))))
       result.map(_.magnitudeIn(MagnitudeBand.B)) should beEqualTo(\/.right(Some(new Magnitude(0.03, MagnitudeBand.B))))
@@ -556,6 +558,8 @@ class VoTableParserSpec extends SpecificationWithJUnit with VoTableParser {
       result.map(_.properMotion) should beEqualTo(\/.right(None))
       // radial velocity
       result.map(_.radialVelocity) should beEqualTo(\/.right(RadialVelocity(KilometersPerSecond(13828)).some))
+      // redshift
+      result.map(_.redshift) should beEqualTo(\/.right(Redshift(0.04724).some))
       // magnitudes
       result.map(_.magnitudeIn(MagnitudeBand._u)) should beEqualTo(\/.right(Some(new Magnitude(17.353, MagnitudeBand._u, 0.009))))
       result.map(_.magnitudeIn(MagnitudeBand._g)) should beEqualTo(\/.right(Some(new Magnitude(16.826, MagnitudeBand._g, 0.004))))
@@ -576,6 +580,8 @@ class VoTableParserSpec extends SpecificationWithJUnit with VoTableParser {
       result.map(_.properMotion) should beEqualTo(\/.right(None))
       // radial velocity
       result.map(_.radialVelocity) should beEqualTo(\/.right(RadialVelocity(KilometersPerSecond(233509)).some))
+      // redshift
+      result.map(_.redshift) should beEqualTo(\/.right(Redshift(1.8365).some))
       // magnitudes
       result.map(_.magnitudeIn(MagnitudeBand.B)) should beEqualTo(\/.right(Some(new Magnitude(20.35, MagnitudeBand.B))))
       result.map(_.magnitudeIn(MagnitudeBand.V)) should beEqualTo(\/.right(Some(new Magnitude(20.03, MagnitudeBand.V))))
