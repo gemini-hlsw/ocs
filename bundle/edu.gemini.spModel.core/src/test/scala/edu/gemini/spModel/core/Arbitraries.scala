@@ -72,6 +72,9 @@ trait Arbitraries {
   implicit val arbRadialVelocity: Arbitrary[RadialVelocity] =
     Arbitrary(arbitrary[Double].map(v => RadialVelocity(KilometersPerSecond(v))))
 
+  implicit val arbRedshift: Arbitrary[Redshift] =
+    Arbitrary(arbitrary[Double].map(v => Redshift(v)))
+
   implicit val arbMagnitude: Arbitrary[Magnitude] =
     Arbitrary {
       for {
@@ -105,8 +108,9 @@ trait Arbitraries {
           coordinates    <- arbitrary[Coordinates]
           properMotion   <- arbitrary[Option[ProperMotion]]
           radialVelocity <- arbitrary[Option[RadialVelocity]]
+          redshift       <- arbitrary[Option[Redshift]]
           magnitudes     <- arbitrary[List[Magnitude]]
-      } yield Target.SiderealTarget(name, coordinates, properMotion, radialVelocity, magnitudes)
+      } yield Target.SiderealTarget(name, coordinates, properMotion, radialVelocity, redshift, magnitudes)
     }
 
   implicit val arbNonSiderealTarget: Arbitrary[Target.NonSiderealTarget] =

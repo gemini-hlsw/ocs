@@ -324,7 +324,7 @@ trait VoTableParser {
       } yield {
         val coordinates = Coordinates(RightAscension.fromAngle(r), declination)
         val combMags    = combineWithErrorsAndFilter(magnitudes, magnitudeErrs, adapter).sorted(VoTableParser.MagnitudeOrdering)
-        SiderealTarget(id, coordinates, properMotion, rv, combMags)
+        SiderealTarget(id, coordinates, properMotion, rv, None, combMags)
       }
     }
 

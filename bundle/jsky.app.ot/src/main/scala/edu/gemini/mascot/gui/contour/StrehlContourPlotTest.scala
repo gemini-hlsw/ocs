@@ -19,7 +19,7 @@ object StrehlContourPlotTest {
                  ra: Double, dec: Double): Star = {
     val coords = Coordinates(RightAscension.fromDegrees(ra), Declination.fromAngle(Angle.fromDegrees(dec)).getOrElse(Declination.zero))
     val magnitudes = List(new Magnitude(bmag, MagnitudeBand.B), new Magnitude(vmag, MagnitudeBand.V), new Magnitude(rmag, MagnitudeBand.R), new Magnitude(jmag, MagnitudeBand.J), new Magnitude(hmag, MagnitudeBand.H), new Magnitude(kmag, MagnitudeBand.K))
-    val target = SiderealTarget("name", coords, None, None, magnitudes)
+    val target = SiderealTarget("name", coords, None, None, None, magnitudes)
     Star.makeStar(target, centerX, centerY).copy(x = centerX, y = centerY)
   }
 
@@ -62,7 +62,7 @@ object StrehlContourPlotTest {
   }
 
   def main(args: Array[String]) {
-    val (starList, strehlList) = Mascot.findBestAsterism(allStarList)
+    val (_, strehlList) = Mascot.findBestAsterism(allStarList)
 
     var i = 0
     val n = strehlList.size

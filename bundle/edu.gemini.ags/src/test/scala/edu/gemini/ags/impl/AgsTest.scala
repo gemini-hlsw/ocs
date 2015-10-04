@@ -75,7 +75,7 @@ object AgsTest {
     val ra  = Angle.fromDegrees(HHMMSS.parse(raStr).toDegrees.getMagnitude)
     val dec = Angle.fromDegrees(DDMMSS.parse(decStr.trim).toDegrees.getMagnitude)
     val sc  = Coordinates(RightAscension.fromAngle(ra), Declination.fromAngle(dec).getOrElse(Declination.zero))
-    SiderealTarget(raDecStr, sc, None, None, List(new Magnitude(rMag, MagnitudeBand.R)))
+    SiderealTarget(raDecStr, sc, None, None, None, List(new Magnitude(rMag, MagnitudeBand.R)))
   }
 
   def siderealTargets(so: (String, Double)*): List[SiderealTarget] = {
@@ -273,11 +273,11 @@ case class AgsTest(ctx: ObsContext, guideProbe: GuideProbe, usable: List[(Sidere
       s"$base${ctx.getInstrument.getType.narrowType}($i)"
 
     val usableCandidates:List[(SiderealTarget, GuideSpeed)] = candidates(in).zipWithIndex.collect { case ((sc, mag, Some(gs)), i) =>
-      (SiderealTarget(name("in", i), sc, None, None, List(mag)), gs)
+      (SiderealTarget(name("in", i), sc, None, None, None, List(mag)), gs)
     }
 
     val unusableCandidates = candidates(out).zipWithIndex.map { case ((sc, mag, _), i) =>
-      SiderealTarget(name("out", i), sc, None, None, List(mag))
+      SiderealTarget(name("out", i), sc, None, None, None, List(mag))
     }
 
     copy(usable = usableCandidates, unusable = unusableCandidates)

@@ -307,7 +307,7 @@ class VoTableParserSpec extends SpecificationWithJUnit with VoTableParser {
                 TableRowItem(FieldDescriptor(FieldId("decj2000", Ucd("pos.eq.dec;meta.main")),"dej2000"), "0.209323681906") ::
                 TableRowItem(FieldDescriptor(FieldId("raj2000", Ucd("pos.eq.ra;meta.main")), "raj2000"), "359.745951955") :: Nil
               )
-      tableRow2Target(None, fields)(validRow) should beEqualTo(\/-(SiderealTarget("123456", Coordinates(RightAscension.fromAngle(Angle.parseDegrees("359.745951955").getOrElse(Angle.zero)), Declination.fromAngle(Angle.parseDegrees("0.209323681906").getOrElse(Angle.zero)).getOrElse(Declination.zero)), None, None, Nil)))
+      tableRow2Target(None, fields)(validRow) should beEqualTo(\/-(SiderealTarget("123456", Coordinates(RightAscension.fromAngle(Angle.parseDegrees("359.745951955").getOrElse(Angle.zero)), Declination.fromAngle(Angle.parseDegrees("0.209323681906").getOrElse(Angle.zero)).getOrElse(Declination.zero)), None, None, None, Nil)))
 
       val rowWithMissingId = TableRow(
                 TableRowItem(FieldDescriptor(FieldId("decj2000", Ucd("pos.eq.dec;meta.main")), "dej2000"), "0.209323681906") ::
@@ -407,8 +407,8 @@ class VoTableParserSpec extends SpecificationWithJUnit with VoTableParser {
       val magsTarget2 = List(new Magnitude(23.0853, MagnitudeBand.U), new Magnitude(23.0889, MagnitudeBand._g), new Magnitude(21.7686, MagnitudeBand.R), new Magnitude(20.7891, MagnitudeBand.I), new Magnitude(20.0088, MagnitudeBand._z))
 
       val result = ParsedTable(List(
-        \/-(SiderealTarget("-2140405448", Coordinates(RightAscension.fromDegrees(359.745951955), Declination.fromAngle(Angle.parseDegrees("0.209323681906").getOrElse(Angle.zero)).getOrElse(Declination.zero)), None, None, magsTarget1)),
-        \/-(SiderealTarget("-2140404569", Coordinates(RightAscension.fromDegrees(359.749274134), Declination.fromAngle(Angle.parseDegrees("0.210251239819").getOrElse(Angle.zero)).getOrElse(Declination.zero)), None, None, magsTarget2))
+        \/-(SiderealTarget("-2140405448", Coordinates(RightAscension.fromDegrees(359.745951955), Declination.fromAngle(Angle.parseDegrees("0.209323681906").getOrElse(Angle.zero)).getOrElse(Declination.zero)), None, None, None, magsTarget1)),
+        \/-(SiderealTarget("-2140404569", Coordinates(RightAscension.fromDegrees(359.749274134), Declination.fromAngle(Angle.parseDegrees("0.210251239819").getOrElse(Angle.zero)).getOrElse(Declination.zero)), None, None, None, magsTarget2))
       ))
       // There is only one table
       parse(voTable).tables.head should beEqualTo(result)
@@ -419,8 +419,8 @@ class VoTableParserSpec extends SpecificationWithJUnit with VoTableParser {
       val magsTarget2 = List(new Magnitude(23.0853, MagnitudeBand.U, 1.20311), new Magnitude(23.0889, MagnitudeBand._g, 0.51784), new Magnitude(21.7686, MagnitudeBand.R, 0.252201), new Magnitude(20.7891, MagnitudeBand.I, 0.161275), new Magnitude(20.0088, MagnitudeBand._z, 0.35873), new Magnitude(12.023, MagnitudeBand.J, 0.02))
 
       val result = ParsedTable(List(
-        \/-(SiderealTarget("-2140405448", Coordinates(RightAscension.fromDegrees(359.745951955), Declination.fromAngle(Angle.parseDegrees("0.209323681906").getOrElse(Angle.zero)).getOrElse(Declination.zero)), None, None, magsTarget1)),
-        \/-(SiderealTarget("-2140404569", Coordinates(RightAscension.fromDegrees(359.749274134), Declination.fromAngle(Angle.parseDegrees("0.210251239819").getOrElse(Angle.zero)).getOrElse(Declination.zero)), None, None, magsTarget2))
+        \/-(SiderealTarget("-2140405448", Coordinates(RightAscension.fromDegrees(359.745951955), Declination.fromAngle(Angle.parseDegrees("0.209323681906").getOrElse(Angle.zero)).getOrElse(Declination.zero)), None, None, None, magsTarget1)),
+        \/-(SiderealTarget("-2140404569", Coordinates(RightAscension.fromDegrees(359.749274134), Declination.fromAngle(Angle.parseDegrees("0.210251239819").getOrElse(Angle.zero)).getOrElse(Declination.zero)), None, None, None, magsTarget2))
       ))
       parse(voTableWithErrors).tables.head should beEqualTo(result)
     }
@@ -431,8 +431,8 @@ class VoTableParserSpec extends SpecificationWithJUnit with VoTableParser {
       val pm2 = ProperMotion(RightAscensionAngularVelocity(AngularVelocity(-7)), DeclinationAngularVelocity(AngularVelocity(-13.9))).some
 
       val result = ParsedTable(List(
-        \/-(SiderealTarget("550-001323", Coordinates(RightAscension.fromDegrees(9.897141944444456), Declination.fromAngle(Angle.parseDegrees("19.98878944444442").getOrElse(Angle.zero)).getOrElse(Declination.zero)), pm1, None, magsTarget1)),
-        \/-(SiderealTarget("550-001324", Coordinates(RightAscension.fromDegrees(9.91958055555557), Declination.fromAngle(Angle.parseDegrees("19.997709722222226").getOrElse(Angle.zero)).getOrElse(Declination.zero)), pm2, None, magsTarget2))
+        \/-(SiderealTarget("550-001323", Coordinates(RightAscension.fromDegrees(9.897141944444456), Declination.fromAngle(Angle.parseDegrees("19.98878944444442").getOrElse(Angle.zero)).getOrElse(Declination.zero)), pm1, None, None, magsTarget1)),
+        \/-(SiderealTarget("550-001324", Coordinates(RightAscension.fromDegrees(9.91958055555557), Declination.fromAngle(Angle.parseDegrees("19.997709722222226").getOrElse(Angle.zero)).getOrElse(Declination.zero)), pm2, None, None, magsTarget2))
       ))
       parse(voTableWithProperMotion).tables.head should beEqualTo(result)
     }
