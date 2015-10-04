@@ -104,7 +104,14 @@ object Target {
   ///
 
   /** Sidereal target with optional proper motion. */
-  case class SiderealTarget(name: String, coordinates: Coordinates, properMotion: Option[ProperMotion], radialVelocity: Option[RadialVelocity], redshift: Option[Redshift], parallax: Option[Parallax], magnitudes: List[Magnitude]) extends Target {
+  case class SiderealTarget(
+    name: String,
+    coordinates: Coordinates,
+    properMotion: Option[ProperMotion],
+    radialVelocity: Option[RadialVelocity],
+    redshift: Option[Redshift],
+    parallax: Option[Parallax],
+    magnitudes: List[Magnitude]) extends Target {
 
     def coords(date: Long) = 
       Some(coordinates)

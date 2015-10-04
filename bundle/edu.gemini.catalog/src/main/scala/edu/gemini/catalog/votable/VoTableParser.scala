@@ -27,6 +27,7 @@ object VoTableParser extends VoTableParser {
   val UCD_PMRA = Ucd("pos.pm;pos.eq.ra")
   val UCD_RV = Ucd("spect.dopplerVeloc.opt")
   val UCD_Z = Ucd("src.redshift")
+  val UCD_PLX = Ucd("pos.parallax.trig")
 
   val UCD_MAG = UcdWord("phot.mag")
   val STAT_ERR = UcdWord("stat.error")
@@ -71,6 +72,7 @@ sealed trait CatalogAdapter {
   val pmDecField = FieldId("pmde", VoTableParser.UCD_PMDEC)
   val rvField    = FieldId("RV_VALUE", VoTableParser.UCD_RV)
   val zField     = FieldId("Z_VALUE", VoTableParser.UCD_Z)
+  val plxField   = FieldId("PLX_VALUE", VoTableParser.UCD_PLX)
 
   // Indicates if the field is a magnitude
   def isMagnitudeField(v: (FieldId, String)): Boolean = containsMagnitude(v._1) && !v._1.ucd.includes(VoTableParser.STAT_ERR) && v._2.nonEmpty
@@ -288,23 +290,20 @@ trait VoTableParser {
       k.sequenceU
     }
 
-    def parseRv(rv: Option[String]): CatalogProblem \/ Option[RadialVelocity] = {
-      val k = for {
+    def parseRv(rv: Option[String]): CatalogProblem \/ Option[RadialVelocity] =
+      (for {
         r <- rv.filter(_.nonEmpty)
-      } yield for {
-          rav <- CatalogAdapter.parseDoubleValue(VoTableParser.UCD_RV, r)
-        } yield RadialVelocity(KilometersPerSecond(rav))
-      k.sequenceU
-    }
+      } yield CatalogAdapter.parseDoubleValue(VoTableParser.UCD_RV, r).map(p => RadialVelocity(KilometersPerSecond(p)))).sequenceU
 
-    def parseZ(z: Option[String]): CatalogProblem \/ Option[Redshift] = {
-      val k = for {
+    def parseZ(z: Option[String]): CatalogProblem \/ Option[Redshift] =
+      (for {
         r <- z.filter(_.nonEmpty)
-      } yield for {
-          zv <- CatalogAdapter.parseDoubleValue(VoTableParser.UCD_RV, r)
-        } yield Redshift(zv)
-      k.sequenceU
-    }
+      } yield CatalogAdapter.parseDoubleValue(VoTableParser.UCD_RV, r).map(Redshift.apply)).sequenceU
+
+    def parsePlx(plx: Option[String]): CatalogProblem \/ Option[Parallax] =
+      (for {
+        p <- plx.filter(_.nonEmpty)
+      } yield CatalogAdapter.parseDoubleValue(VoTableParser.UCD_RV, p).map(p => Parallax(Angle.fromArcsecs(p / 1000)))).sequenceU
 
     def combineWithErrorsAndFilter(m: List[(FieldId, MagnitudeBand, Double)], e: List[(FieldId, MagnitudeBand, Double)], adapter: CatalogAdapter): List[Magnitude] = {
       val mags = m.map {
@@ -319,7 +318,7 @@ trait VoTableParser {
       magnitudes.map(i => i.copy(error = magErrors.get(i.band))).filter(adapter.validMagnitude)
     }
 
-    def toSiderealTarget(id: String, ra: String, dec: String, pm: (Option[String], Option[String]), rv: Option[String], z: Option[String]): \/[CatalogProblem, SiderealTarget] = {
+    def toSiderealTarget(id: String, ra: String, dec: String, pm: (Option[String], Option[String]), rv: Option[String], z: Option[String], plx: Option[String]): \/[CatalogProblem, SiderealTarget] = {
       for {
         adapter        <- catalogAdapter
         r              <- Angle.parseDegrees(ra).leftMap(_ => FieldValueProblem(VoTableParser.UCD_RA, ra))
@@ -328,6 +327,7 @@ trait VoTableParser {
         properMotion   <- parseProperMotion(pm)
         radialVelocity <- parseRv(rv)
         redshift       <- parseZ(z)
+        parallax       <- parsePlx(plx)
         mags            = entries.filter(adapter.isMagnitudeField)
         magErrs         = entries.filter(adapter.isMagnitudeErrorField)
         magnitudes     <- mags.map(adapter.parseMagnitude).toList.sequenceU
@@ -335,7 +335,7 @@ trait VoTableParser {
       } yield {
         val coordinates = Coordinates(RightAscension.fromAngle(r), declination)
         val combMags    = combineWithErrorsAndFilter(magnitudes, magnitudeErrs, adapter).sorted(VoTableParser.MagnitudeOrdering)
-        SiderealTarget(id, coordinates, properMotion, radialVelocity, redshift, None, combMags)
+        SiderealTarget(id, coordinates, properMotion, radialVelocity, redshift, parallax, combMags)
       }
     }
 
@@ -347,7 +347,8 @@ trait VoTableParser {
       (pmRa, pmDec)    = (entries.get(adapter.pmRaField), entries.get(adapter.pmDecField))
       rv               = entries.get(adapter.rvField)
       z                = entries.get(adapter.zField)
-    } yield toSiderealTarget(id, ra, dec, (pmRa, pmDec), rv, z)
+      plx              = entries.get(adapter.plxField)
+    } yield toSiderealTarget(id, ra, dec, (pmRa, pmDec), rv, z, plx)
 
     result.join
   }
