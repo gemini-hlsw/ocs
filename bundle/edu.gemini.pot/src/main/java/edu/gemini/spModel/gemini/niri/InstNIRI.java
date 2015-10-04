@@ -1,10 +1,3 @@
-// Copyright 1997-2000
-// Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-// See the file LICENSE for complete details.
-//
-// $Id: InstNIRI.java 46768 2012-07-16 18:58:53Z rnorris $
-//
 package edu.gemini.spModel.gemini.niri;
 
 import edu.gemini.pot.sp.ISPObservation;
@@ -95,7 +88,7 @@ public final class InstNIRI extends SPInstObsComp implements PropertyProvider, G
     public static final PropertyDescriptor FAST_MODE_PROP;
     public static final ItemKey FAST_MODE_KEY = new ItemKey(INSTRUMENT_KEY, "fastModeExposures");
 
-    private static final Map<String, PropertyDescriptor> PRIVATE_PROP_MAP = new TreeMap<String, PropertyDescriptor>();
+    private static final Map<String, PropertyDescriptor> PRIVATE_PROP_MAP = new TreeMap<>();
     public static final Map<String, PropertyDescriptor> PROPERTY_MAP = Collections.unmodifiableMap(PRIVATE_PROP_MAP);
 
     private static PropertyDescriptor initProp(String propName, boolean query, boolean iter) {
@@ -200,8 +193,7 @@ public final class InstNIRI extends SPInstObsComp implements PropertyProvider, G
         public boolean equals(Object other) {
             if (!(other instanceof SetupTimeKey)) return false;
             SetupTimeKey that = (SetupTimeKey) other;
-            if (_mode != that._mode) return false;
-            return (_altairMode == that._altairMode);
+            return _mode == that._mode && (_altairMode == that._altairMode);
         }
 
         public int hashCode() {
@@ -217,7 +209,7 @@ public final class InstNIRI extends SPInstObsComp implements PropertyProvider, G
         return 30.0;
     }
 
-    private static final Map<SetupTimeKey, Double> SETUP_TIME = new HashMap<SetupTimeKey, Double>();
+    private static final Map<SetupTimeKey, Double> SETUP_TIME = new HashMap<>();
 
     static {
         SETUP_TIME.put(new SetupTimeKey(Mode.imaging), 6 * 60.);
@@ -266,8 +258,8 @@ public final class InstNIRI extends SPInstObsComp implements PropertyProvider, G
     }
 
     @Override
-    public CategorizedTimeGroup calc(Config cur, Option<Config> prev) {
-        final Collection<CategorizedTime> times = new ArrayList<CategorizedTime>();
+    public CategorizedTimeGroup calc(final Config cur, final Option<Config> prev) {
+        final Collection<CategorizedTime> times = new ArrayList<>();
 
         // Add filter change overhead if necessary.
         if (PlannedTime.isUpdated(cur, prev, Filter.KEY)) {
@@ -276,22 +268,19 @@ public final class InstNIRI extends SPInstObsComp implements PropertyProvider, G
 
         // Add readout time.
         final int coadds = ExposureCalculator.instance.coadds(cur);
-        ReadMode readMode = (ReadMode) cur.getItemValue(ReadMode.KEY);
-        BuiltinROI roi = (BuiltinROI) cur.getItemValue(BuiltinROI.KEY);
+        final ReadMode readMode = (ReadMode) cur.getItemValue(ReadMode.KEY);
+        final BuiltinROI roi = (BuiltinROI) cur.getItemValue(BuiltinROI.KEY);
 
-        Option<NiriReadoutTime> nrt = NiriReadoutTime.lookup(roi, readMode);
-        nrt.foreach(new ApplyOp<NiriReadoutTime>() {
-            @Override
-            public void apply(NiriReadoutTime niriReadoutTime) {
-                times.add(CategorizedTime.fromSeconds(Category.DHS_WRITE, niriReadoutTime.dhsWrite));
-                times.add(CategorizedTime.fromSeconds(Category.READOUT, niriReadoutTime.getReadout(coadds)));
-            }
+        final Option<NiriReadoutTime> nrt = NiriReadoutTime.lookup(roi, readMode);
+        nrt.foreach(niriReadoutTime -> {
+            times.add(CategorizedTime.fromSeconds(Category.DHS_WRITE, niriReadoutTime.dhsWrite));
+            times.add(CategorizedTime.fromSeconds(Category.READOUT, niriReadoutTime.getReadout(coadds)));
         });
 
         // Add exposure time
-        double exp = ExposureCalculator.instance.exposureTimeSec(cur);
-        int fast = (Integer) cur.getItemValue(FAST_MODE_KEY);
-        double secs = fast * exp * coadds;
+        final double exp = ExposureCalculator.instance.exposureTimeSec(cur);
+        final int fast = (Integer) cur.getItemValue(FAST_MODE_KEY);
+        final double secs = fast * exp * coadds;
         times.add(CategorizedTime.fromSeconds(Category.EXPOSURE, secs));
 
         return CommonStepCalculator.instance.calc(cur, prev).addAll(times);
@@ -307,10 +296,10 @@ public final class InstNIRI extends SPInstObsComp implements PropertyProvider, G
         // The size depends upon the selected camera.
         // Index 0 is width, 1 is length/height
 
-        ROIDescription roi = _builtinROI.getROIDescription();
-        Mask m = getMask();
-        double height = _getCorrectHeight(m, roi);
-        double width = height;
+        final ROIDescription roi = _builtinROI.getROIDescription();
+        final Mask m = getMask();
+        final double height = _getCorrectHeight(m, roi);
+        double width = 0;
         if (m != Mask.MASK_IMAGING && m != Mask.PINHOLE_MASK) {
             // must be a slit
             width = m.getWidth();
@@ -572,9 +561,8 @@ public final class InstNIRI extends SPInstObsComp implements PropertyProvider, G
     }
 
     public void setFocus(Focus focus) {
-        // ignore for now
+        // Required for reflection
     }
-
 
     /**
      * Returns the number of fast mode exposures.
@@ -708,7 +696,7 @@ public final class InstNIRI extends SPInstObsComp implements PropertyProvider, G
      * queryable configuration parameters.
      */
     public static List<InstConfigInfo> getInstConfigInfo() {
-        List<InstConfigInfo> configInfo = new LinkedList<InstConfigInfo>();
+        List<InstConfigInfo> configInfo = new LinkedList<>();
         configInfo.add(new InstConfigInfo(CAMERA_PROP));
         configInfo.add(new InstConfigInfo(DISPERSER_PROP));
         configInfo.add(new InstConfigInfo(MASK_PROP));

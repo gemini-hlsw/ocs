@@ -12,7 +12,7 @@ import java.io.Serializable;
  */
 @Deprecated
 public final class MagnitudeLimits implements Serializable {
-    public static interface Limit extends Serializable {
+    public interface Limit extends Serializable {
         double getBrightness();
         boolean contains(Magnitude mag);
     }
@@ -90,11 +90,11 @@ public final class MagnitudeLimits implements Serializable {
     }
 
     public MagnitudeLimits(Magnitude.Band band, FaintnessLimit faintnessLimit, SaturationLimit saturationLimit) {
-        this(band, faintnessLimit, new Some<SaturationLimit>(saturationLimit));
+        this(band, faintnessLimit, new Some<>(saturationLimit));
     }
 
     public MagnitudeLimits(Magnitude faint) {
-        this(faint.getBand(), new FaintnessLimit(faint.getBrightness()), None.<SaturationLimit>instance());
+        this(faint.getBand(), new FaintnessLimit(faint.getBrightness()), None.instance());
     }
 
     public MagnitudeLimits copy(Magnitude.Band b) {
@@ -129,42 +129,12 @@ public final class MagnitudeLimits implements Serializable {
         return faintnessLimit.toMagnitude(band);
     }
 
-    public Option<Magnitude> saturation() {
-        return saturationLimit.map(new MapOp<SaturationLimit, Magnitude>() {
-            @Override public Magnitude apply(SaturationLimit l) {
-                return l.toMagnitude(band);
-            }
-        });
-    }
-
-    public MagnitudeLimits mapMagnitudes(MapOp<Magnitude, Magnitude> op) {
-        Magnitude newFaint = op.apply(faint());
-        Option<Magnitude> newSatOpt = saturation().map(op);
-
-        FaintnessLimit fl = new FaintnessLimit(newFaint.getBrightness());
-        Option<SaturationLimit> sl = newSatOpt.map(new MapOp<Magnitude, SaturationLimit>() {
-            @Override public SaturationLimit apply(Magnitude m) {
-                return new SaturationLimit(m.getBrightness());
-            }
-        });
-
-        return new MagnitudeLimits(newFaint.getBand(), fl, sl);
-    }
-
     /**
      * Returns a predicate that accepts SkyObjects with a magnitude contained
      * by this MagnitudesLimits object.
      */
     public PredicateOp<SkyObject> skyObjectFilter() {
-        return new PredicateOp<SkyObject>() {
-            @Override public Boolean apply(SkyObject candidate) {
-                return candidate.getMagnitude(getBand()).map(new MapOp<Magnitude, Boolean>() {
-                    @Override public Boolean apply(Magnitude mag) {
-                        return contains(mag);
-                    }
-                }).getOrElse(false);
-            }
-        };
+        return candidate -> candidate.getMagnitude(getBand()).map(this::contains).getOrElse(false);
     }
 
     /**
@@ -179,12 +149,7 @@ public final class MagnitudeLimits implements Serializable {
         if (!faintnessLimit.contains(mag)) return false;
 
         // nor too bright
-        return saturationLimit.forall(new PredicateOp<SaturationLimit>() {
-            @Override
-            public Boolean apply(SaturationLimit sl) {
-                return sl.contains(mag);
-            }
-        });
+        return saturationLimit.forall(sl -> sl.contains(mag));
     }
 
     @Override

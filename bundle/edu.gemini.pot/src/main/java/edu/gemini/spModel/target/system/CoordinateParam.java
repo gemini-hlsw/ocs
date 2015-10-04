@@ -1,9 +1,3 @@
-// Copyright 2000 Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-// See the file LICENSE for complete details.
-//
-// $Id: CoordinateParam.java 18053 2009-02-20 20:16:23Z swalker $
-//
 package edu.gemini.spModel.target.system;
 
 import edu.gemini.spModel.pio.Param;
@@ -261,14 +255,14 @@ public abstract class CoordinateParam implements Cloneable, Serializable {
      * <p>
      * This method is protected for use by concrete subclasses.
      */
-    protected void checkUnits(Units units)
+    protected void checkUnits(final Units units)
             throws IllegalArgumentException {
         // Check whether the given units are supported.  If not,
         // throw an exception.
         boolean ok = false;
         Units[] uA = getUnitOptions();
-        for (int i = 0; i < uA.length; ++i) {
-            if (uA[i] == units) {
+        for (Units anUA : uA) {
+            if (anUA == units) {
                 ok = true;
                 break;
             }
@@ -291,7 +285,7 @@ public abstract class CoordinateParam implements Cloneable, Serializable {
      * Override equals() to return true if both parameters have the same value
      * and units.
      */
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
         if (obj == null) {
             return false;
         }
@@ -301,16 +295,8 @@ public abstract class CoordinateParam implements Cloneable, Serializable {
         }
 
         CoordinateParam cp = (CoordinateParam) obj;
-        if (Double.doubleToLongBits(getValue()) !=
-                Double.doubleToLongBits(cp.getValue())) {
-            return false;
-        }
+        return Double.doubleToLongBits(getValue()) == Double.doubleToLongBits(cp.getValue()) && getUnits() == cp.getUnits();
 
-        if (getUnits() != cp.getUnits()) {
-            return false;
-        }
-
-        return true;
     }
 
     /**

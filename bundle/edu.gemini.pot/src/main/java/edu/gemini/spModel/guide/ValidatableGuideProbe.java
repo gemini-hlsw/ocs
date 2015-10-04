@@ -1,9 +1,4 @@
-//
-// $
-//
-
 package edu.gemini.spModel.guide;
-
 
 /**
  * An interface that represents a guider which can validate guide star

@@ -54,7 +54,6 @@ import java.beans.VetoableChangeListener;
 import java.beans.VetoableChangeSupport;
 import java.text.DecimalFormat;
 
-
 /**
  *
  * An interface for a single node on the time line.
@@ -62,13 +61,12 @@ import java.text.DecimalFormat;
  * <P>This code was developed by NASA, Goddard Space Flight Center, Code 588
  * for the Scientist's Expert Assistant (SEA) project.
  *
- * @version		04/27/99
- * @author		M. Fishman
+ * @version     04/27/99
+ * @author      M. Fishman
  **/
 public class DefaultTimeLineNode implements TimeLineNode {
 
-
-    protected float fThumbHeight = 8;
+    protected final float fThumbHeight = 8;
     protected float fHandleHeight = 12;
     protected float fHandleWidth = 6;
 
@@ -83,60 +81,34 @@ public class DefaultTimeLineNode implements TimeLineNode {
     protected float fThumbBegin = 0.0f;
     protected float fThumbEnd = 0.0f;
 
-    protected BasicStroke fDefaultStroke = new BasicStroke();
-    protected BasicStroke fShadowStroke = new BasicStroke(1);
+    protected final BasicStroke fDefaultStroke = new BasicStroke();
+    protected final BasicStroke fShadowStroke = new BasicStroke(1);
 
-    protected Line2D.Float fThumbShadowLine = new Line2D.Float();
-    protected Line2D.Float fThumbTopShadowLine = new Line2D.Float();
-    protected Line2D.Float fLHandleTopShadowLine = new Line2D.Float();
-    protected Line2D.Float fLHandleBottomShadowLine = new Line2D.Float();
-    protected Line2D.Float fLHandleRightShadowLine = new Line2D.Float();
-    protected Line2D.Float fLHandleLeftShadowLine = new Line2D.Float();
-    protected Line2D.Float fRHandleTopShadowLine = new Line2D.Float();
-    protected Line2D.Float fRHandleBottomShadowLine = new Line2D.Float();
-    protected Line2D.Float fRHandleRightShadowLine = new Line2D.Float();
-    protected Line2D.Float fRHandleLeftShadowLine = new Line2D.Float();
+    protected final Line2D.Float fThumbShadowLine = new Line2D.Float();
+    protected final Line2D.Float fThumbTopShadowLine = new Line2D.Float();
+    protected final Line2D.Float fLHandleTopShadowLine = new Line2D.Float();
+    protected final Line2D.Float fLHandleBottomShadowLine = new Line2D.Float();
+    protected final Line2D.Float fLHandleRightShadowLine = new Line2D.Float();
+    protected final Line2D.Float fLHandleLeftShadowLine = new Line2D.Float();
+    protected final Line2D.Float fRHandleTopShadowLine = new Line2D.Float();
+    protected final Line2D.Float fRHandleBottomShadowLine = new Line2D.Float();
+    protected final Line2D.Float fRHandleRightShadowLine = new Line2D.Float();
+    protected final Line2D.Float fRHandleLeftShadowLine = new Line2D.Float();
 
-    protected Rectangle2D.Float fThumb = new Rectangle2D.Float();
-    protected Rectangle2D.Float fLeftHandle = new Rectangle2D.Float();
-    protected Rectangle2D.Float fRightHandle = new Rectangle2D.Float();
+    protected final Rectangle2D.Float fThumb = new Rectangle2D.Float();
+    protected final Rectangle2D.Float fLeftHandle = new Rectangle2D.Float();
+    protected final Rectangle2D.Float fRightHandle = new Rectangle2D.Float();
 
     protected TimeLine fTimeLine = null;
 
     protected boolean fForceRecalculation = false;
 
-    protected VetoableChangeListener fMyVetoListener = new VetoableChangeListener() {
+    protected final VetoableChangeListener fMyVetoListener = evt -> fChangeSupport.fireVetoableChange(evt.getPropertyName(),
+                                      evt.getOldValue(),
+                                      evt.getNewValue());
 
-        public void vetoableChange(PropertyChangeEvent evt)
-                throws PropertyVetoException {
-            fChangeSupport.fireVetoableChange(evt.getPropertyName(),
-                                              evt.getOldValue(),
-                                              evt.getNewValue());
-        }
-    };
-
-
-    /**
-     *
-     * constructor
-     *
-     **/
-    public DefaultTimeLineNode() {
-        // super
-    }
-
-    public DefaultTimeLineNode(Time start, Time end) {
-        this(start, end, "unknown");
-    }
-
-
-    public DefaultTimeLineNode(Time startTime, Time endTime, String name) {
+    public DefaultTimeLineNode(final Time startTime, final Time endTime, final String name) {
         fModel = new DefaultVetoableTimeLineNodeModel(startTime, endTime, name);
-        init();
-    }
-
-    public DefaultTimeLineNode(VetoableTimeLineNodeModel model) {
-        fModel = model;
         init();
     }
 
@@ -155,14 +127,14 @@ public class DefaultTimeLineNode implements TimeLineNode {
      * set the selection mode of the time linenode
      *
      **/
-    public void setSelectionMode(int mode) {
+    public void setSelectionMode(final int mode) {
         if (fMode != mode) {
-            int oldMode = fMode;
+            final int oldMode = fMode;
             try {
                 fChangeSupport.fireVetoableChange(TimeLineNode.MODE, oldMode, mode);
                 fMode = mode;
-            } catch (DetailedPropertyVetoException ex) {
-
+            } catch (DetailedPropertyVetoException ignored) {
+                // ignored
             } catch (PropertyVetoException ex) {
                 ex.printStackTrace();
             }
@@ -183,9 +155,9 @@ public class DefaultTimeLineNode implements TimeLineNode {
      * set the unselected color for the time line node
      *
      **/
-    public void setUnselectedColor(Color color) {
+    public void setUnselectedColor(final Color color) {
         if (color != fUnselectedColor) {
-            Color oldColor = fUnselectedColor;
+            final Color oldColor = fUnselectedColor;
             try {
                 fUnselectedColor = color;
                 fChangeSupport.fireVetoableChange(TimeLineNode.UNSELECTED_COLOR,
@@ -213,9 +185,9 @@ public class DefaultTimeLineNode implements TimeLineNode {
      * set the selected color for the time line node
      *
      **/
-    public void setSelectedColor(Color color) {
+    public void setSelectedColor(final Color color) {
         if (color != fSelectedColor) {
-            Color oldColor = fSelectedColor;
+            final Color oldColor = fSelectedColor;
             try {
                 fSelectedColor = color;
                 fChangeSupport.fireVetoableChange(TimeLineNode.UNSELECTED_COLOR,
@@ -252,20 +224,17 @@ public class DefaultTimeLineNode implements TimeLineNode {
      * set the time that this node starts
      *
      **/
-    public void setStartTime(Time time) throws DetailedPropertyVetoException {
+    public void setStartTime(final Time time) throws DetailedPropertyVetoException {
         if (time.getValue(Time.SECOND) != fModel.getStartTime().getValue(Time.SECOND)) {
-            Time oldTime = fModel.getStartTime();
+            final Time oldTime = fModel.getStartTime();
             try {
                 fModel.setValidStartTime(time);
-
                 Time displayEdge = fTimeLine.getDisplayStart();
                 if ((getStartTime().getValue() < displayEdge.getValue() &&
                         oldTime.getValue() >= displayEdge.getValue())) {
                     fChangeSupport.fireVetoableChange(TimeLineNode.HIT_LEFT_EDGE, oldTime, time);
                     fForceRecalculation = true;
                 }
-
-
             } catch (DetailedPropertyVetoException ex) {
                 fForceRecalculation = true;
                 throw ex;
@@ -280,10 +249,10 @@ public class DefaultTimeLineNode implements TimeLineNode {
      * move node by specified amount
      *
      **/
-    public synchronized void moveTimeLineNodeBy(Time time) throws DetailedPropertyVetoException {
+    public synchronized void moveTimeLineNodeBy(final Time time) throws DetailedPropertyVetoException {
         if (time.getValue() != 0.0) {
-            Time oldStartTime = fModel.getStartTime();
-            Time oldEndTime = fModel.getEndTime();
+            final Time oldStartTime = fModel.getStartTime();
+            final Time oldEndTime = fModel.getEndTime();
             try {
                 fModel.moveTimeLineNodeByValid(time);
                 if (fTimeLine != null) {
@@ -294,10 +263,7 @@ public class DefaultTimeLineNode implements TimeLineNode {
                             fChangeSupport.fireVetoableChange(TimeLineNode.HIT_LEFT_EDGE,
                                                               oldStartTime, getStartTime());
                             fForceRecalculation = true;
-
                         }
-
-
                     } else {
                         Time displayEdge = fTimeLine.getDisplayEnd();
                         if ((getEndTime().getValue() > displayEdge.getValue() &&
@@ -305,7 +271,6 @@ public class DefaultTimeLineNode implements TimeLineNode {
                             fChangeSupport.fireVetoableChange(TimeLineNode.HIT_RIGHT_EDGE, oldEndTime, time);
                             fForceRecalculation = true;
                         }
-
                     }
                 }
 
@@ -333,13 +298,13 @@ public class DefaultTimeLineNode implements TimeLineNode {
      * set the time on the time line that this node ends
      *
      **/
-    public void setEndTime(Time time) throws DetailedPropertyVetoException {
+    public void setEndTime(final Time time) throws DetailedPropertyVetoException {
         if (time.getValue(Time.SECOND) != fModel.getEndTime().getValue(Time.SECOND)) {
-            Time oldTime = fModel.getEndTime();
+            final Time oldTime = fModel.getEndTime();
             try {
                 if (time.getValue(Time.SECOND) > getStartTime().getValue(Time.SECOND)) {
                     fModel.setValidEndTime(time);
-                    Time displayEdge = fTimeLine.getDisplayEnd();
+                    final Time displayEdge = fTimeLine.getDisplayEnd();
                     if ((fModel.getEndTime().getValue() > displayEdge.getValue() &&
                             oldTime.getValue() <= displayEdge.getValue())) {
                         fChangeSupport.fireVetoableChange(TimeLineNode.HIT_RIGHT_EDGE, oldTime, time);
@@ -349,7 +314,6 @@ public class DefaultTimeLineNode implements TimeLineNode {
                     throw new DetailedPropertyVetoException(this, TimeLineNode.NODE_MIN_SIZE_EXCEEDED,
                                                             "invalid end time", null);
                 }
-
             } catch (DetailedPropertyVetoException ex) {
                 fModel.revertToPrevious();
                 fForceRecalculation = true;
@@ -360,7 +324,6 @@ public class DefaultTimeLineNode implements TimeLineNode {
         }
     }
 
-
     /**
      *
      * get the duration of the time line node
@@ -370,26 +333,22 @@ public class DefaultTimeLineNode implements TimeLineNode {
         return fModel.getDuration();
     }
 
-
     /**
      *
      * set the duration of the time line node
-     *
      **/
-    public void setDuration(Time durationLength) throws DetailedPropertyVetoException {
+    public void setDuration(final Time durationLength) throws DetailedPropertyVetoException {
         if (fTimeLine != null) {
             setEndTime(new Time(fModel.getStartTime().getValue(Time.SECOND) +
                                 durationLength.getValue(Time.SECOND), Time.SECOND));
         }
     }
 
-
     /**
      *
      * add a property change listener to the node
-     *
      **/
-    public void addVetoableChangeListener(VetoableChangeListener listener) {
+    public void addVetoableChangeListener(final VetoableChangeListener listener) {
         fChangeSupport.addVetoableChangeListener(listener);
 
     }
@@ -397,9 +356,8 @@ public class DefaultTimeLineNode implements TimeLineNode {
     /**
      *
      * remove a propertyChangeListener to the node
-     *
      **/
-    public void removeVetoableChangeListener(VetoableChangeListener listener) {
+    public void removeVetoableChangeListener(final VetoableChangeListener listener) {
         fChangeSupport.removeVetoableChangeListener(listener);
     }
 
@@ -408,23 +366,23 @@ public class DefaultTimeLineNode implements TimeLineNode {
      *
      * @param graphics the graphics component to paint
      **/
-    public void paintTimeLineNode(Graphics2D graphics) {
-        Font origFont = graphics.getFont();
+    public void paintTimeLineNode(final Graphics2D graphics) {
+        final Font origFont = graphics.getFont();
         graphics.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
         graphics.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 
-        Time startTime = fModel.getStartTime();
-        Time endTime = fModel.getEndTime();
+        final Time startTime = fModel.getStartTime();
+        final Time endTime = fModel.getEndTime();
 
         boolean addHandles = true;
         if (!((startTime.getValue(Time.SECOND) > fTimeLine.getDisplayEnd().getValue(Time.SECOND)) ||
                 (endTime.getValue(Time.SECOND) < fTimeLine.getDisplayStart().getValue(Time.SECOND)))) {
-            if ((fDragMode == TimeLineNode.UNSELECTED) || (fForceRecalculation == true)) {
+            if ((fDragMode == TimeLineNode.UNSELECTED) || fForceRecalculation) {
                 calculateNodeDimensions();
                 fForceRecalculation = false;
             } else {
-                float thumbMin = fTimeLine.getPointForTime(fTimeLine.getDisplayStart());
-                float thumbMax = fTimeLine.getPointForTime(fTimeLine.getDisplayEnd());
+                final float thumbMin = fTimeLine.getPointForTime(fTimeLine.getDisplayStart());
+                final float thumbMax = fTimeLine.getPointForTime(fTimeLine.getDisplayEnd());
 
                 if (fThumbBegin < thumbMin) {
                     fThumbBegin = thumbMin;
@@ -434,8 +392,8 @@ public class DefaultTimeLineNode implements TimeLineNode {
                     fThumbEnd = thumbMax;
                 }
             }
-            float thumbLengthMin = 2f * fHandleWidth;
-            float thumbWidth = (fThumbEnd - fThumbBegin);
+            final float thumbLengthMin = 2f * fHandleWidth;
+            final float thumbWidth = (fThumbEnd - fThumbBegin);
             float thumbHeight = fThumbHeight;
             if (thumbWidth < thumbLengthMin) {
                 thumbHeight = fHandleHeight;
@@ -457,7 +415,6 @@ public class DefaultTimeLineNode implements TimeLineNode {
             graphics.draw(fThumb);
             graphics.fill(fThumb);
 
-
             // this is the bottom shadow line of the thumb
             fThumbShadowLine.x1 = fThumb.x;
             fThumbShadowLine.y1 = fThumb.y + thumbHeight;
@@ -478,11 +435,9 @@ public class DefaultTimeLineNode implements TimeLineNode {
             graphics.setColor(Color.white);
             graphics.draw(fThumbTopShadowLine);
 
+            final double length = endTime.getValue(Time.MINUTE) - startTime.getValue(Time.MINUTE);
 
-            double length = endTime.getValue(Time.MINUTE) - startTime.getValue(Time.MINUTE);
-
-            if ((startTime.getValue(Time.SECOND) >= fTimeLine.getDisplayStart().getValue(Time.SECOND)) &&
-                    (addHandles == true)) {
+            if ((startTime.getValue(Time.SECOND) >= fTimeLine.getDisplayStart().getValue(Time.SECOND)) && addHandles) {
                 // draw left handle
                 fLeftHandle.height = fHandleHeight;
                 fLeftHandle.width = fHandleWidth;
@@ -518,7 +473,6 @@ public class DefaultTimeLineNode implements TimeLineNode {
                 graphics.setColor(Color.black);
                 graphics.draw(fLHandleBottomShadowLine);
 
-
                 graphics.draw(fLHandleRightShadowLine);
 
                 fLHandleTopShadowLine.x1 = fLeftHandle.x;
@@ -531,8 +485,7 @@ public class DefaultTimeLineNode implements TimeLineNode {
                 graphics.draw(fLHandleLeftShadowLine);
             }
 
-            if ((endTime.getValue(Time.SECOND) <= fTimeLine.getDisplayEnd().getValue(Time.SECOND)) &&
-                    (addHandles == true)) {
+            if ((endTime.getValue(Time.SECOND) <= fTimeLine.getDisplayEnd().getValue(Time.SECOND)) && addHandles) {
                 // draw Right handle
                 fRightHandle.height = fHandleHeight;
                 fRightHandle.width = fHandleWidth;
@@ -580,10 +533,9 @@ public class DefaultTimeLineNode implements TimeLineNode {
             }
 
             // draw name label
-
             graphics.setFont(TimeLineNode.DEFAULT_FONT);
-            NodeLabelData nlp = calc(getTimeLineNodeName(), graphics, addHandles);
-            AffineTransform oldTransform = graphics.getTransform();
+            final NodeLabelData nlp = calc(getTimeLineNodeName(), graphics, addHandles);
+            final AffineTransform oldTransform = graphics.getTransform();
             if (nlp.rotate) {
                 graphics.rotate(TimeLineNode.LABEL_ROTATION, nlp.textX, nlp.textY);
             }
@@ -596,10 +548,10 @@ public class DefaultTimeLineNode implements TimeLineNode {
 
             // draw duration
             graphics.setFont(TimeLineNode.DEFAULT_FONT);
-            DecimalFormat lengthForm = new DecimalFormat();
+            final DecimalFormat lengthForm = new DecimalFormat();
             lengthForm.setMaximumFractionDigits(2);
-            String lengthStr = lengthForm.format(length);
-            Rectangle2D lengthBounds = graphics.getFontMetrics().getStringBounds(lengthStr,
+            final String lengthStr = lengthForm.format(length);
+            final Rectangle2D lengthBounds = graphics.getFontMetrics().getStringBounds(lengthStr,
                                                                                  graphics);
             graphics.setColor(Color.black);
             float lengthX = fThumb.x + thumbWidth / 2f - (float) (lengthBounds.getWidth() / 2.0);
@@ -612,7 +564,6 @@ public class DefaultTimeLineNode implements TimeLineNode {
             if (lengthBounds.getWidth() > thumbWidth) {
                 lengthX = fThumb.x + thumbWidth / 2f;
                 graphics.rotate(TimeLineNode.LABEL_REVERSE_ROTATION, lengthX, lengthY);
-
             }
             if (thumbWidth > 14.) // allan: quick fix to avoid overlapping strings
             {
@@ -629,7 +580,7 @@ public class DefaultTimeLineNode implements TimeLineNode {
         final float textY;
         final boolean rotate;
 
-        NodeLabelData(String label, float x, float y, boolean rotate) {
+        NodeLabelData(final String label, final float x, final float y, final boolean rotate) {
             this.label  = label;
             this.textX  = x;
             this.textY  = y;
@@ -639,9 +590,9 @@ public class DefaultTimeLineNode implements TimeLineNode {
 
     private static final int LABEL_PADDING = 8;
 
-    private NodeLabelData calc(String startLabel, Graphics2D graphics, boolean addHandles) {
-        Rectangle2D nameBounds = graphics.getFontMetrics().getStringBounds(startLabel, graphics);
-        float thumbWidth = (fThumbEnd - fThumbBegin);
+    private NodeLabelData calc(final String startLabel, final Graphics2D graphics, final boolean addHandles) {
+        final Rectangle2D nameBounds = graphics.getFontMetrics().getStringBounds(startLabel, graphics);
+        final float thumbWidth = (fThumbEnd - fThumbBegin);
 
         float textY;
         if (!addHandles) {
@@ -652,22 +603,21 @@ public class DefaultTimeLineNode implements TimeLineNode {
 
         if ((nameBounds.getWidth() + LABEL_PADDING) <= thumbWidth) {
             // Already fits, so just return the information.
-            float textX = fThumb.x + thumbWidth / 2f - (float) (nameBounds.getWidth() / 2.0);
+            final float textX = fThumb.x + thumbWidth / 2f - (float) (nameBounds.getWidth() / 2.0);
             return new NodeLabelData(startLabel, textX, textY, false);
         }
 
         // Too big to fit, so try a shorter label if available.
-        String shorterLabel = shortenTimeLineNodeName(startLabel);
+        final String shorterLabel = shortenTimeLineNodeName(startLabel);
         if ((shorterLabel == null) || (shorterLabel.length() >= startLabel.length())) {
             // There isn't a shorter label, so rotate it.
-            float textX = fThumb.x + thumbWidth / 2f;
+            final float textX = fThumb.x + thumbWidth / 2f;
             return new NodeLabelData(startLabel, textX, textY, true);
         } else {
             // We got back a shorter alternative, so use it.
             return calc(shorterLabel, graphics, addHandles);
         }
     }
-
 
     /**
      *
@@ -677,8 +627,8 @@ public class DefaultTimeLineNode implements TimeLineNode {
     private float fTempMouseOffset = 0;
     private float fTempThumbWidth = 0;
 
-    public synchronized void handleMouseEvent(MouseEvent evt) {
-        Point pt = evt.getPoint();
+    public synchronized void handleMouseEvent(final MouseEvent evt) {
+        final Point pt = evt.getPoint();
         if (!evt.isPopupTrigger()) {
             if ((evt.getID() == MouseEvent.MOUSE_CLICKED) && (evt.getClickCount() == 1)) {
                 if (fLeftHandle.contains(pt.x, pt.y)) {
@@ -716,13 +666,13 @@ public class DefaultTimeLineNode implements TimeLineNode {
                 }
 
             } else if (evt.getID() == MouseEvent.MOUSE_RELEASED) {
-                int oldMode = fDragMode;
+                final int oldMode = fDragMode;
                 fDragMode = TimeLineNode.UNSELECTED;
                 try {
                     setDuration(getDuration());
                     fChangeSupport.fireVetoableChange(TimeLineNode.MODE, oldMode, fDragMode);
                 } catch (Exception ex) {
-
+                    // ignored
                 }
             }
         }
@@ -733,9 +683,9 @@ public class DefaultTimeLineNode implements TimeLineNode {
      * handle mouse events
      *
      **/
-    public synchronized void handleMouseDragEvent(MouseEvent evt) {
+    public synchronized void handleMouseDragEvent(final MouseEvent evt) {
         if (fDragMode != TimeLineNode.UNSELECTED) {
-            Point pt = evt.getPoint();
+            final Point pt = evt.getPoint();
 
             if (fDragMode == TimeLineNode.LEFT_HANDLE_SELECTED) {
                 fThumbBegin = pt.x;
@@ -746,33 +696,26 @@ public class DefaultTimeLineNode implements TimeLineNode {
                 fThumbEnd = fThumbBegin + fTempThumbWidth;
             }
 
-            Time newStartTime = fTimeLine.getTimeForPoint(fThumbBegin);
-            Time newEndTime = fTimeLine.getTimeForPoint(fThumbEnd);
-            Time oldStartTime = getStartTime();
+            final Time newStartTime = fTimeLine.getTimeForPoint(fThumbBegin);
+            final Time newEndTime = fTimeLine.getTimeForPoint(fThumbEnd);
+            final Time oldStartTime = getStartTime();
 
             try {
                 if (fDragMode == TimeLineNode.NODE_SELECTED) {
                     if (newStartTime.getValue(Time.SECOND) != oldStartTime.getValue(Time.SECOND)) {
-                        double moveByVal = newStartTime.getValue(Time.SECOND)
+                        final double moveByVal = newStartTime.getValue(Time.SECOND)
                                 - oldStartTime.getValue(Time.SECOND);
                         moveTimeLineNodeBy(new Time(moveByVal, Time.SECOND));
-
                     }
                 } else if (fDragMode == TimeLineNode.LEFT_HANDLE_SELECTED) {
-
                     setStartTime(newStartTime);
                 } else if (fDragMode == TimeLineNode.RIGHT_HANDLE_SELECTED) {
                     setEndTime(newEndTime);
                 }
 
             } catch (DetailedPropertyVetoException ex) {
-
                 fForceRecalculation = true;
-            } catch (PropertyVetoException ex) {
-                ex.printStackTrace();
             }
-
-
         }
     }
 
@@ -782,18 +725,14 @@ public class DefaultTimeLineNode implements TimeLineNode {
      * handle mouse events
      *
      **/
-    public void handleMouseMoveEvent(MouseEvent evt) {
-        // tbd
-
-    }
+    public void handleMouseMoveEvent(final MouseEvent evt) { }
 
     /**
      *
      * handle key event
      *
      **/
-    //private static final int MAX_STEPS=600;
-    public void handleKeyEvent(KeyEvent evt) throws DetailedPropertyVetoException {
+    public void handleKeyEvent(final KeyEvent evt) throws DetailedPropertyVetoException {
         if (evt.getID() == KeyEvent.KEY_PRESSED) {
             int interval = 10;
 
@@ -802,52 +741,36 @@ public class DefaultTimeLineNode implements TimeLineNode {
             } else if (evt.isShiftDown()) {
                 interval = 60;
             }
-            /*
-            if (totalIntervals > MAX_STEPS)
-            {
-                interval=totalIntervals/MAX_STEPS;
-            }
-            */
             if (evt.getKeyCode() == KeyEvent.VK_LEFT) {
                 interval = -1 * interval;
-            } else if (evt.getKeyCode() == KeyEvent.VK_RIGHT) {
-                interval = 1 * interval;
-            } else {
+            } else if (evt.getKeyCode() != KeyEvent.VK_RIGHT) {
                 interval = 0;
             }
 
             if (interval != 0) {
-                Time anInterval = fTimeLine.getIntervalTime();
-                Time intervalTime = new Time(anInterval.getValue(Time.SECOND) * interval, Time.SECOND);
-                try {
-                    if (getSelectionMode() == TimeLineNode.LEFT_HANDLE_SELECTED) {
-                        setStartTime(new Time(getStartTime().getValue(Time.SECOND)
-                                              + intervalTime.getValue(Time.SECOND),
-                                              Time.SECOND));
-                    } else if (getSelectionMode() == TimeLineNode.RIGHT_HANDLE_SELECTED) {
-                        setEndTime(new Time(getEndTime().getValue(Time.SECOND)
-                                            + intervalTime.getValue(Time.SECOND),
-                                            Time.SECOND));
-                    } else if (getSelectionMode() == TimeLineNode.NODE_SELECTED) {
-                        moveTimeLineNodeBy(intervalTime);
-                    }
-                } catch (DetailedPropertyVetoException ex) {
-                    throw ex;
-                } catch (PropertyVetoException ex) {
-                    ex.printStackTrace();
+                final Time anInterval = fTimeLine.getIntervalTime();
+                final Time intervalTime = new Time(anInterval.getValue(Time.SECOND) * interval, Time.SECOND);
+                if (getSelectionMode() == TimeLineNode.LEFT_HANDLE_SELECTED) {
+                    setStartTime(new Time(getStartTime().getValue(Time.SECOND)
+                                          + intervalTime.getValue(Time.SECOND),
+                                          Time.SECOND));
+                } else if (getSelectionMode() == TimeLineNode.RIGHT_HANDLE_SELECTED) {
+                    setEndTime(new Time(getEndTime().getValue(Time.SECOND)
+                                        + intervalTime.getValue(Time.SECOND),
+                                        Time.SECOND));
+                } else if (getSelectionMode() == TimeLineNode.NODE_SELECTED) {
+                    moveTimeLineNodeBy(intervalTime);
                 }
             }
-
         }
     }
-
 
     /**
      *
      * give the time line node a name
      *
      **/
-    public void setTimeLineNodeName(String name) {
+    public void setTimeLineNodeName(final String name) {
         fModel.setTimeLineNodeName(name);
     }
 
@@ -860,15 +783,14 @@ public class DefaultTimeLineNode implements TimeLineNode {
         return fModel.getTimeLineNodeName();
     }
 
-    public String shortenTimeLineNodeName(String name) { return null; }
-
+    public String shortenTimeLineNodeName(final String name) { return null; }
 
     /**
      *
      * set the parent time line
      *
      **/
-    public void setParent(TimeLine timeLine) {
+    public void setParent(final TimeLine timeLine) {
         fTimeLine = timeLine;
         TimeLineModel model = null;
         if (timeLine != null) {
@@ -900,18 +822,13 @@ public class DefaultTimeLineNode implements TimeLineNode {
         fThumbEnd = fTimeLine.getPointForTime(fModel.getEndTime());
     }
 
-
     /**
      *
      * returns whether the node is currently being dragged
      *
      **/
     public boolean isDragging() {
-        if (fDragMode == TimeLineNode.UNSELECTED) {
-            return false;
-        } else {
-            return true;
-        }
+        return fDragMode != TimeLineNode.UNSELECTED;
     }
 
     /**
@@ -924,7 +841,6 @@ public class DefaultTimeLineNode implements TimeLineNode {
         return (fMode == TimeLineNode.NODE_SELECTED);
     }
 
-
     /**
      *
      * revert the time line node to its previous position
@@ -934,16 +850,15 @@ public class DefaultTimeLineNode implements TimeLineNode {
         fModel.revertToPrevious();
     }
 
-    public void vetoableChange(PropertyChangeEvent evt) throws DetailedPropertyVetoException {
+    public void vetoableChange(final PropertyChangeEvent evt) throws DetailedPropertyVetoException {
 
-        if ((evt.getPropertyName() != TimeLine.NODE_REMOVED) && (evt.getSource() instanceof TimeLineNode)) {
-            TimeLineNode node = (TimeLineNode) evt.getSource();
+        if (!TimeLine.NODE_REMOVED.equals(evt.getPropertyName()) && (evt.getSource() instanceof TimeLineNode)) {
+            final TimeLineNode node = (TimeLineNode) evt.getSource();
 
             if ((node != this) && (intersects(node) || node.intersects(this))) {
                 throw new DetailedPropertyVetoException(this, TimeLineNode.NODE_OVERLAP,
                                                         "node " + getTimeLineNodeName() + " overlaps "
                                                         + node.getTimeLineNodeName(), evt);
-
             }
         }
     }
@@ -953,7 +868,7 @@ public class DefaultTimeLineNode implements TimeLineNode {
      * returns what area of a time line node a point exists in
      *
      **/
-    public int getAreaForPoint(Point pt) {
+    public int getAreaForPoint(final Point pt) {
         int result = TimeLineNode.UNSELECTED;
         if (fLeftHandle.contains(pt.x, pt.y)) {
             result = TimeLineNode.LEFT_HANDLE_SELECTED;
@@ -970,7 +885,7 @@ public class DefaultTimeLineNode implements TimeLineNode {
      * returns whether the node intersects the passed in node
      *
      **/
-    public boolean intersects(TimeLineNode node) {
+    public boolean intersects(final TimeLineNode node) {
         return fModel.intersects(node.getModel());
     }
 
@@ -980,21 +895,20 @@ public class DefaultTimeLineNode implements TimeLineNode {
      *
      **/
     public Point getCenterPoint() {
-        double value = fModel.getStartTime().getValue() +
+        final double value = fModel.getStartTime().getValue() +
                 (fModel.getEndTime().getValue() - fModel.getStartTime().getValue()) / 2.0;
-        Time centerTime = new Time(value);
-        float x = fTimeLine.getPointForTime(centerTime);
-        float y = fTimeLine.getHeight() / 2f;
-        Point pt = new Point(Math.round(x), Math.round(y));
-        return pt;
+        final Time centerTime = new Time(value);
+        final float x = fTimeLine.getPointForTime(centerTime);
+        final float y = fTimeLine.getHeight() / 2f;
+        return new Point(Math.round(x), Math.round(y));
     }
 
     public Rectangle getBounds() {
-        double startTime = fModel.getStartTime().getValue();
-        double endTime   = fModel.getEndTime().getValue();
-        float  x         = fTimeLine.getPointForTime(new Time(startTime));
-        float  w         = fTimeLine.getPointForTime(new Time(endTime)) - x;
-        float  h         = fTimeLine.getHeight();
+        final double startTime = fModel.getStartTime().getValue();
+        final double endTime   = fModel.getEndTime().getValue();
+        final float  x         = fTimeLine.getPointForTime(new Time(startTime));
+        final float  w         = fTimeLine.getPointForTime(new Time(endTime)) - x;
+        final float  h         = fTimeLine.getHeight();
         return new Rectangle(Math.round(x), 0, Math.round(w), Math.round(h));
     }
 
@@ -1003,25 +917,20 @@ public class DefaultTimeLineNode implements TimeLineNode {
      * move node to a specified location
      *
      **/
-    public synchronized void setTimeLineNode(Time start, Time end) throws DetailedPropertyVetoException {
-
-        Time oldStartTime = getStartTime();
-        Time oldEndTime = getEndTime();
+    public synchronized void setTimeLineNode(final Time start, final Time end) throws DetailedPropertyVetoException {
+        final Time oldStartTime = getStartTime();
+        final Time oldEndTime = getEndTime();
         try {
-
             fModel.setValidTimeLineNode(start, end);
 
             if (fTimeLine != null) {
-
                 Time displayEdge = fTimeLine.getDisplayStart();
                 if ((fModel.getStartTime().getValue() < displayEdge.getValue() &&
                         oldStartTime.getValue() >= displayEdge.getValue())) {
                     fChangeSupport.fireVetoableChange(TimeLineNode.HIT_LEFT_EDGE,
                                                       oldStartTime, fModel.getStartTime());
                     fForceRecalculation = true;
-
                 }
-
 
                 displayEdge = fTimeLine.getDisplayEnd();
                 if ((fModel.getEndTime().getValue() > displayEdge.getValue() &&
@@ -1029,13 +938,9 @@ public class DefaultTimeLineNode implements TimeLineNode {
                     fChangeSupport.fireVetoableChange(TimeLineNode.HIT_RIGHT_EDGE, oldEndTime, fModel.getEndTime());
                     fForceRecalculation = true;
                 }
-
-
             }
 
-
         } catch (DetailedPropertyVetoException ex) {
-
             fForceRecalculation = true;
             throw ex;
         } catch (PropertyVetoException ex) {
@@ -1048,9 +953,9 @@ public class DefaultTimeLineNode implements TimeLineNode {
      * returns whether the specified point is in the node
      *
      **/
-    public boolean containsPoint(Point pt) {
+    public boolean containsPoint(final Point pt) {
         boolean result = false;
-        Time time = fTimeLine.getTimeForPoint(pt.x);
+        final Time time = fTimeLine.getTimeForPoint(pt.x);
         if ((time.getValue() >= fModel.getStartTime().getValue()) &&
                 (time.getValue() <= fModel.getEndTime().getValue())) {
             result = true;
@@ -1064,28 +969,25 @@ public class DefaultTimeLineNode implements TimeLineNode {
      * returns a description for the area at the specified point
      *
      **/
-    public String getDescription(Point pt) {
-        String units = fTimeLine.getUnitsType();
-        if (units == fTimeLine.DATE_VIEW || units == fTimeLine.TIME_VIEW)
+    public String getDescription(final Point pt) {
+        final String units = fTimeLine.getUnitsType();
+        if (TimeLine.DATE_VIEW.equals(units) || TimeLine.TIME_VIEW.equals(units))
             return getTimeLineNodeName();
 
         String result = null;
         if (fLeftHandle.contains(pt.x, pt.y)) {
-            DecimalFormat form = new DecimalFormat();
+            final DecimalFormat form = new DecimalFormat();
             form.setMaximumFractionDigits(2);
-            String str = form.format(getStartTime().getValue(units));
+            final String str = form.format(getStartTime().getValue(units));
             result = str + " " + Time.getUnitsAbbrev(units);
-
         } else if (fRightHandle.contains(pt.x, pt.y)) {
-            DecimalFormat form = new DecimalFormat();
+            final DecimalFormat form = new DecimalFormat();
             form.setMaximumFractionDigits(2);
-            String str = form.format(getEndTime().getValue(units));
+            final String str = form.format(getEndTime().getValue(units));
             result = str + " " + Time.getUnitsAbbrev(units);
-
         } else if (fThumb.contains(pt.x, pt.y)) {
             result = getTimeLineNodeName();
         }
-
 
         return result;
     }
@@ -1104,7 +1006,7 @@ public class DefaultTimeLineNode implements TimeLineNode {
      * set the time line node's underlying model
      *
      **/
-    public void setModel(TimeLineNodeModel model) {
+    public void setModel(final TimeLineNodeModel model) {
         if (model != fModel) {
             if (fModel != null) {
                 fModel.removeVetoableChangeListener(fMyVetoListener);
@@ -1119,17 +1021,16 @@ public class DefaultTimeLineNode implements TimeLineNode {
      * get the cursor for the specified point
      *
      */
-    public Cursor getCursor(MouseEvent evt) {
+    public Cursor getCursor(final MouseEvent evt) {
         Cursor result = TimeLine.DEFAULT_CURSOR;
-        Point pt = evt.getPoint();
+        final Point pt = evt.getPoint();
         if (fLeftHandle.contains(pt.x, pt.y) ||
                 fRightHandle.contains(pt.x, pt.y) ||
                 fThumb.contains(pt.x, pt.y)) {
-            if (getParent().getMode() == TimeLine.SELECTION_MODE) {
+            if (TimeLine.SELECTION_MODE.equals(getParent().getMode())) {
                 result = MOVE_CURSOR;
             }
         }
-
 
         return result;
     }
