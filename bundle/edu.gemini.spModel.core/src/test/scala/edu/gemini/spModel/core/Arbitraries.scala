@@ -65,8 +65,7 @@ trait Arbitraries {
         deltaRA  <- arbitrary[RightAscensionAngularVelocity]
         deltaDec <- arbitrary[DeclinationAngularVelocity]
         epoch    <- arbitrary[Epoch]
-        parallax <- arbitrary[Option[Angle]]
-      } yield ProperMotion(deltaRA, deltaDec, epoch, parallax)
+      } yield ProperMotion(deltaRA, deltaDec, epoch)
     }
 
   implicit val arbRadialVelocity: Arbitrary[RadialVelocity] =
@@ -74,6 +73,9 @@ trait Arbitraries {
 
   implicit val arbRedshift: Arbitrary[Redshift] =
     Arbitrary(arbitrary[Double].map(v => Redshift(v)))
+
+  implicit val arbParallax: Arbitrary[Parallax] =
+    Arbitrary(arbitrary[Angle].map(Parallax.apply))
 
   implicit val arbMagnitude: Arbitrary[Magnitude] =
     Arbitrary {
@@ -109,8 +111,9 @@ trait Arbitraries {
           properMotion   <- arbitrary[Option[ProperMotion]]
           radialVelocity <- arbitrary[Option[RadialVelocity]]
           redshift       <- arbitrary[Option[Redshift]]
+          parallax       <- arbitrary[Option[Parallax]]
           magnitudes     <- arbitrary[List[Magnitude]]
-      } yield Target.SiderealTarget(name, coordinates, properMotion, radialVelocity, redshift, magnitudes)
+      } yield Target.SiderealTarget(name, coordinates, properMotion, radialVelocity, redshift, parallax, magnitudes)
     }
 
   implicit val arbNonSiderealTarget: Arbitrary[Target.NonSiderealTarget] =

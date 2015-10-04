@@ -1,7 +1,6 @@
 package edu.gemini.catalog.votable
 
 import java.io.{ByteArrayInputStream, InputStream}
-import java.net.URL
 
 import edu.gemini.catalog.api.CatalogName
 import edu.gemini.spModel.core._
@@ -336,7 +335,7 @@ trait VoTableParser {
       } yield {
         val coordinates = Coordinates(RightAscension.fromAngle(r), declination)
         val combMags    = combineWithErrorsAndFilter(magnitudes, magnitudeErrs, adapter).sorted(VoTableParser.MagnitudeOrdering)
-        SiderealTarget(id, coordinates, properMotion, radialVelocity, redshift, combMags)
+        SiderealTarget(id, coordinates, properMotion, radialVelocity, redshift, None, combMags)
       }
     }
 
