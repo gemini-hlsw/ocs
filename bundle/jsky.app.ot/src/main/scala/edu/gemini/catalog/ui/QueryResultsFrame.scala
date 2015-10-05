@@ -136,7 +136,7 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
   def updateResults(info: Option[ObservationInfo], queryResult: QueryResult): Unit = {
     queryResult.query match {
       case q: ConeSearchCatalogQuery =>
-        val model = TargetsModel(q.base, queryResult.result.targets.rows)
+        val model = TargetsModel(info, q.base, queryResult.result.targets.rows)
         resultsTable.model = model
 
         // The sorting logic may change if the list of magnitudes changes
@@ -421,7 +421,8 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
         val conditions = Conditions.NOMINAL.sb(sbBox.selection.item).cc(ccBox.selection.item).iq(iqBox.selection.item)
 
         val selectedCatalog = catalogBox.selection.item
-        val info = ObservationInfo(objectName.text.some, instrumentName.text.some, Option(guider.selection.item.strategy), guiders.toList, conditions.some, selectedCatalog)
+        // TODO Create a synthetic ObsContext out of the parameters
+        val info = ObservationInfo(None, objectName.text.some, instrumentName.text.some, Option(guider.selection.item.strategy), guiders.toList, conditions.some, selectedCatalog, ProbeLimitsTable.loadOrThrow())
         val defaultQuery = CatalogQuery(coordinates, radiusConstraint, currentFilters, selectedCatalog)
         // Start with the guider's query and update it with the values on the UI
         val calculatedQuery = guider.selection.item.query.headOption.collect {

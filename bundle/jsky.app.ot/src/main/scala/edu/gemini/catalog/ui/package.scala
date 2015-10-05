@@ -3,11 +3,12 @@ package edu.gemini.catalog.ui
 import javax.swing.table._
 
 import edu.gemini.ags.api.AgsMagnitude.MagnitudeTable
-import edu.gemini.ags.api.{AgsRegistrar, AgsStrategy}
+import edu.gemini.ags.api.{AgsAnalysis, AgsGuideQuality, AgsRegistrar, AgsStrategy}
 import edu.gemini.catalog.api.{UCAC4, CatalogName, CatalogQuery}
 import edu.gemini.spModel.core.Target.SiderealTarget
 import edu.gemini.spModel.core._
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.Conditions
+import edu.gemini.spModel.guide.ValidatableGuideProbe
 import edu.gemini.spModel.obs.context.ObsContext
 import jsky.app.ot.gemini.editor.targetComponent.GuidingFeedback.ProbeLimits
 
@@ -24,7 +25,7 @@ case class SupportedStrategy(strategy: AgsStrategy, limits: Option[ProbeLimits],
 /**
  * Describes the observation used to do a Guide Star Search
  */
-case class ObservationInfo(objectName: Option[String], instrumentName: Option[String], strategy: Option[AgsStrategy], validStrategies: List[SupportedStrategy], conditions: Option[Conditions], catalog: CatalogName) {
+case class ObservationInfo(ctx: Option[ObsContext], objectName: Option[String], instrumentName: Option[String], strategy: Option[AgsStrategy], validStrategies: List[SupportedStrategy], conditions: Option[Conditions], catalog: CatalogName, mt: MagnitudeTable) {
   def catalogQuery:List[CatalogQuery] = validStrategies.collect {
       case SupportedStrategy(s, _, query) if s == strategy => query
     }.flatten
@@ -42,12 +43,14 @@ object ObservationInfo {
   }
 
   def apply(ctx: ObsContext, mt: MagnitudeTable):ObservationInfo = ObservationInfo(
+    ctx.some,
     Option(ctx.getTargets.getBase).map(_.getTarget.getName),
     Option(ctx.getInstrument).map(_.getTitle),
     AgsRegistrar.currentStrategy(ctx),
     AgsRegistrar.validStrategies(ctx).map(toSupportedStrategy(ctx, _, mt)),
     ctx.getConditions.some,
-    UCAC4)
+    UCAC4,
+    mt)
 
 }
 
@@ -77,6 +80,31 @@ case class IdColumn(title: String) extends CatalogNavigatorColumn[String] {
   override val lens = Target.name
 
   def ordering = implicitly[scala.math.Ordering[String]]
+}
+
+case class GuidingQuality(info: Option[ObservationInfo], title: String) extends CatalogNavigatorColumn[AgsGuideQuality] {
+  // Calculate the guiding quality of the target
+  def target2Analysis(t: Target):Option[AgsAnalysis] = {
+    (for {
+      o                               <- info
+      s                               <- o.strategy
+      gp                              <- s.guideProbes.headOption.collect {
+                                        case v: ValidatableGuideProbe => v
+                                      }
+      ctx <- o.ctx
+      st @ SiderealTarget(_, _, _, _) = t
+    } yield s.analyze(ctx, o.mt, gp, st)).flatten
+  }
+
+  val gf: SiderealTarget @?> AgsGuideQuality = PLens(t => target2Analysis(t).map(p => Store(q => sys.error("Not in use"), p.quality)))
+
+  override val lens: Target @?> AgsGuideQuality = PLens(_.fold(
+    PLens.nil.run,
+    gf.run,
+    PLens.nil.run
+  ))
+
+  def ordering = implicitly[scala.math.Ordering[AgsGuideQuality]]
 }
 
 case class RAColumn(title: String) extends CatalogNavigatorColumn[RightAscension] {
@@ -147,11 +175,11 @@ case class MagnitudeColumn(band: MagnitudeBand) extends CatalogNavigatorColumn[M
 /**
  * Data model for the main table of the catalog navigator
  */
-case class TargetsModel(base: Coordinates, targets: List[SiderealTarget]) extends AbstractTableModel {
+case class TargetsModel(info: Option[ObservationInfo], base: Coordinates, targets: List[SiderealTarget]) extends AbstractTableModel {
   // Required to give limits to the existential type list
   type ColumnsList = List[CatalogNavigatorColumn[A] forSome { type A >: Null <: AnyRef}]
 
-  def baseColumnNames(base: Coordinates): ColumnsList = List(IdColumn("Id"), RAColumn("RA"), DECColumn("Dec"), DistanceColumn(base, "Dist. [arcmin]"))
+  def baseColumnNames(base: Coordinates): ColumnsList = List(GuidingQuality(info, ""), IdColumn("Id"), RAColumn("RA"), DECColumn("Dec"), DistanceColumn(base, "Dist. [arcmin]"))
   val pmColumns: ColumnsList  = List(PMRAColumn("µ RA"), PMDecColumn("µ Dec"))
   val magColumns = MagnitudeBand.all.map(MagnitudeColumn)
 
