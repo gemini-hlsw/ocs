@@ -1,4 +1,4 @@
-package edu.gemini.catalog
+package edu.gemini.catalog.ui
 
 import javax.swing.table._
 
@@ -17,138 +17,137 @@ import scalaz._
 import Scalaz._
 
 /**
- * contains the Catalog Navigator UI model classes
+ * Locally describe an ags strategy including its limits and the query that would trigger
  */
-package object ui {
+case class SupportedStrategy(strategy: AgsStrategy, limits: Option[ProbeLimits], query: List[CatalogQuery])
+
+/**
+ * Describes the observation used to do a Guide Star Search
+ */
+case class ObservationInfo(objectName: Option[String], instrumentName: Option[String], strategy: Option[AgsStrategy], validStrategies: List[SupportedStrategy], conditions: Option[Conditions], catalog: CatalogName) {
+  def catalogQuery:List[CatalogQuery] = validStrategies.collect {
+      case SupportedStrategy(s, _, query) if s == strategy => query
+    }.flatten
+}
+
+object ObservationInfo {
 
   /**
-   * Locally describe an ags strategy including its limits and the query that would trigger
+   * Converts an AgsStrategy to a simpler description to be stored in the UI model
    */
-  case class SupportedStrategy(strategy: AgsStrategy, limits: Option[ProbeLimits], query: List[CatalogQuery])
-
-  /**
-   * Describes the observation used to do a Guide Star Search
-   */
-  case class ObservationInfo(objectName: Option[String], instrumentName: Option[String], strategy: Option[AgsStrategy], validStrategies: List[SupportedStrategy], conditions: Option[Conditions], catalog: CatalogName) {
-    def catalogQuery:List[CatalogQuery] = validStrategies.collect {
-        case SupportedStrategy(s, _, query) if s == strategy => query
-      }.flatten
+  private def toSupportedStrategy(obsCtx: ObsContext, strategy: AgsStrategy, mt: MagnitudeTable):SupportedStrategy = {
+    val pb = strategy.magnitudes(obsCtx, mt).map(k => ProbeLimits(strategy.probeBands, obsCtx, k._2)).headOption
+    val queries = strategy.catalogQueries(obsCtx, mt)
+    SupportedStrategy(strategy, pb.flatten, queries)
   }
 
-  object ObservationInfo {
+  def apply(ctx: ObsContext, mt: MagnitudeTable):ObservationInfo = ObservationInfo(
+    Option(ctx.getTargets.getBase).map(_.getTarget.getName),
+    Option(ctx.getInstrument).map(_.getTitle),
+    AgsRegistrar.currentStrategy(ctx),
+    AgsRegistrar.validStrategies(ctx).map(toSupportedStrategy(ctx, _, mt)),
+    ctx.getConditions.some,
+    UCAC4)
 
-    /**
-     * Converts an AgsStrategy to a simpler description to be stored in the UI model
-     */
-    private def toSupportedStrategy(obsCtx: ObsContext, strategy: AgsStrategy, mt: MagnitudeTable):SupportedStrategy = {
-      val pb = strategy.magnitudes(obsCtx, mt).map(k => ProbeLimits(strategy.probeBands, obsCtx, k._2)).headOption
-      val queries = strategy.catalogQueries(obsCtx, mt)
-      SupportedStrategy(strategy, pb.flatten, queries)
-    }
+}
 
-    def apply(ctx: ObsContext, mt: MagnitudeTable):ObservationInfo = ObservationInfo(
-      Option(ctx.getTargets.getBase).map(_.getTarget.getName),
-      Option(ctx.getInstrument).map(_.getTitle),
-      AgsRegistrar.currentStrategy(ctx),
-      AgsRegistrar.validStrategies(ctx).map(toSupportedStrategy(ctx, _, mt)),
-      ctx.getConditions.some,
-      UCAC4)
+/**
+ * Represents a table column description
+ * @tparam T The type of the column
+ */
+abstract class CatalogNavigatorColumn[T >: Null: Manifest] {
+  def title: String
 
+  def lens: PLens[Target, T]
+
+  // Display the value in the table as String. values are Any in the table model
+  def displayValue(t: Any): Option[String] = Option(t).map(_.toString)
+
+  // Extract the data from the target via the lens
+  def render(target: Target): Option[T] = lens.get(target)
+
+  // Indicates the class of the column
+  def clazz:Class[_] = manifest.runtimeClass
+
+  // Returns the ordering for the column
+  def ordering: scala.math.Ordering[T] // TODO Could we make this generic? implicitly[Ordering[T]] does not work :S
+}
+
+case class IdColumn(title: String) extends CatalogNavigatorColumn[String] {
+  override val lens = Target.name
+
+  def ordering = implicitly[scala.math.Ordering[String]]
+}
+
+case class RAColumn(title: String) extends CatalogNavigatorColumn[RightAscension] {
+  override val lens = Target.coords >=> Coordinates.ra.partial
+
+  override def displayValue(t: Any) = Option(t).collect {
+    case r: RightAscension => r.toAngle.formatHMS
   }
 
-  /**
-   * Represents a table column description
-   * @tparam T The type of the column
-   */
-  abstract class CatalogNavigatorColumn[T >: Null: Manifest] {
-    def title: String
+  def ordering = implicitly[scala.math.Ordering[RightAscension]]
+}
 
-    def lens: PLens[Target, T]
+case class DECColumn(title: String) extends CatalogNavigatorColumn[Declination] {
+  override val lens = Target.coords >=> Coordinates.dec.partial
 
-    // Display the value in the table as String. values are Any in the table model
-    def displayValue(t: Any): Option[String] = Option(t).map(_.toString)
-
-    // Extract the data from the target via the lens
-    def render(target: Target): Option[T] = lens.get(target)
-
-    // Indicates the class of the column
-    def clazz:Class[_] = manifest.runtimeClass
-
-    // Returns the ordering for the column
-    def ordering: scala.math.Ordering[T] // TODO Could we make this generic? implicitly[Ordering[T]] does not work :S
+  override def displayValue(t: Any) = Option(t).collect {
+    case d: Declination => d.formatDMS
   }
 
-  case class IdColumn(title: String) extends CatalogNavigatorColumn[String] {
-    override val lens = Target.name
+  def ordering = implicitly[scala.math.Ordering[Declination]]
+}
 
-    def ordering = implicitly[scala.math.Ordering[String]]
+case class DistanceColumn(base: Coordinates, title: String) extends CatalogNavigatorColumn[Angle] {
+  val distance: Coordinates @> Angle = Lens(c => Store(r => c, Coordinates.difference(base, c).distance))
+
+  override val lens = Target.coords >=> distance.partial
+
+  override def displayValue(t: Any) = Option(t).collect {
+    case a: Angle => f"${a.toArcmins}%.2f"
   }
 
-  case class RAColumn(title: String) extends CatalogNavigatorColumn[RightAscension] {
-    override val lens = Target.coords >=> Coordinates.ra.partial
+  def ordering = implicitly[scala.math.Ordering[Angle]]
+}
 
-    override def displayValue(t: Any) = Option(t).collect {
-      case r: RightAscension => r.toAngle.formatHMS
-    }
+case class PMRAColumn(title: String) extends CatalogNavigatorColumn[RightAscensionAngularVelocity] {
+  override val lens = Target.pm >=> ProperMotion.deltaRA.partial
 
-    def ordering = implicitly[scala.math.Ordering[RightAscension]]
+  override def displayValue(t: Any) = Option(t).collect {
+    case r: RightAscensionAngularVelocity => f"${r.velocity.masPerYear}%.2f"
   }
 
-  case class DECColumn(title: String) extends CatalogNavigatorColumn[Declination] {
-    override val lens = Target.coords >=> Coordinates.dec.partial
+  def ordering = implicitly[scala.math.Ordering[RightAscensionAngularVelocity]]
+}
 
-    override def displayValue(t: Any) = Option(t).collect {
-      case d: Declination => d.formatDMS
-    }
+case class PMDecColumn(title: String) extends CatalogNavigatorColumn[DeclinationAngularVelocity] {
+  override val lens = Target.pm >=> ProperMotion.deltaDec.partial
 
-    def ordering = implicitly[scala.math.Ordering[Declination]]
+  override def displayValue(t: Any) = Option(t).collect {
+    case d: DeclinationAngularVelocity => f"${d.velocity.masPerYear}%.2f"
   }
 
-  case class DistanceColumn(base: Coordinates, title: String) extends CatalogNavigatorColumn[Angle] {
-    val distance: Coordinates @> Angle = Lens(c => Store(r => c, Coordinates.difference(base, c).distance))
+  def ordering = implicitly[scala.math.Ordering[DeclinationAngularVelocity]]
+}
 
-    override val lens = Target.coords >=> distance.partial
+case class MagnitudeColumn(band: MagnitudeBand) extends CatalogNavigatorColumn[Magnitude] {
+  override val title = band.name
+  // Lens from list of magnitudes to the band's magnitude if present
+  val bLens: List[Magnitude] @?> Magnitude = PLens(ml => ml.find(_.band === band).map(m => Store(b => sys.error("read-only lens"), m)))
+  override val lens = Target.magnitudes >=> bLens
 
-    override def displayValue(t: Any) = Option(t).collect {
-      case a: Angle => f"${a.toArcmins}%.2f"
-    }
-
-    def ordering = implicitly[scala.math.Ordering[Angle]]
+  override def displayValue(t: Any) = Option(t).collect {
+    case m: Magnitude => f"${m.value}%.2f"
   }
 
-  case class PMRAColumn(title: String) extends CatalogNavigatorColumn[RightAscensionAngularVelocity] {
-    override val lens = Target.pm >=> ProperMotion.deltaRA.partial
+  def ordering = implicitly[scala.math.Ordering[Magnitude]]
+}
 
-    override def displayValue(t: Any) = Option(t).collect {
-      case r: RightAscensionAngularVelocity => f"${r.velocity.masPerYear}%.2f"
-    }
-
-    def ordering = implicitly[scala.math.Ordering[RightAscensionAngularVelocity]]
-  }
-
-  case class PMDecColumn(title: String) extends CatalogNavigatorColumn[DeclinationAngularVelocity] {
-    override val lens = Target.pm >=> ProperMotion.deltaDec.partial
-
-    override def displayValue(t: Any) = Option(t).collect {
-      case d: DeclinationAngularVelocity => f"${d.velocity.masPerYear}%.2f"
-    }
-
-    def ordering = implicitly[scala.math.Ordering[DeclinationAngularVelocity]]
-  }
-
-  case class MagnitudeColumn(band: MagnitudeBand) extends CatalogNavigatorColumn[Magnitude] {
-    override val title = band.name
-    // Lens from list of magnitudes to the band's magnitude if present
-    val bLens: List[Magnitude] @?> Magnitude = PLens(ml => ml.find(_.band === band).map(m => Store(b => sys.error("read-only lens"), m)))
-    override val lens = Target.magnitudes >=> bLens
-
-    override def displayValue(t: Any) = Option(t).collect {
-      case m: Magnitude => f"${m.value}%.2f"
-    }
-
-    def ordering = implicitly[scala.math.Ordering[Magnitude]]
-  }
-
+/**
+ * Data model for the main table of the catalog navigator
+ */
+case class TargetsModel(base: Coordinates, targets: List[SiderealTarget]) extends AbstractTableModel {
   // Required to give limits to the existential type list
   type ColumnsList = List[CatalogNavigatorColumn[A] forSome { type A >: Null <: AnyRef}]
 
@@ -156,48 +155,44 @@ package object ui {
   val pmColumns: ColumnsList  = List(PMRAColumn("µ RA"), PMDecColumn("µ Dec"))
   val magColumns = MagnitudeBand.all.map(MagnitudeColumn)
 
-  /**
-   * Data model for the main table of the catalog navigator
-   */
-  case class TargetsModel(base: Coordinates, targets: List[SiderealTarget]) extends AbstractTableModel {
-    // Available columns from the list of targets
-    val columns:ColumnsList = {
-      val bandsInTargets = targets.flatMap(_.magnitudes).map(_.band).distinct
-      val hasPM = targets.exists(_.properMotion.isDefined)
-      val pmCols = if (hasPM) pmColumns else Nil
-      val magCols = magColumns.filter(m => bandsInTargets.contains(m.band))
+  // Available columns from the list of targets
+  val columns:ColumnsList = {
+    val bandsInTargets = targets.flatMap(_.magnitudes).map(_.band).distinct
+    val hasPM = targets.exists(_.properMotion.isDefined)
+    val pmCols = if (hasPM) pmColumns else Nil
+    val magCols = magColumns.filter(m => bandsInTargets.contains(m.band))
 
-      baseColumnNames(base) ::: pmCols ::: magCols
-    }
-
-    override def getRowCount = targets.length
-
-    override def getColumnCount = columns.size
-
-    override def getColumnName(column: Int): String =
-      columns(column).title
-
-    override def getValueAt(rowIndex: Int, columnIndex: Int):AnyRef =
-      targets.lift(rowIndex).flatMap { t =>
-        columns.lift(columnIndex) >>= {_.render(t)}
-      }.orNull
-
-    override def getColumnClass(columnIndex: Int): Class[_] = columns(columnIndex).clazz
-
-    def rendererComponent(value: Any, isSelected: Boolean, hasFocus: Boolean, row: Int, column: Int): Option[Component]= {
-      columns.lift(column).flatMap { c =>
-        c.displayValue(value).map(new Label(_) {
-          horizontalAlignment = Alignment.Right
-        })
-      }
-    }
-
-    // Returns a Table Sorter depending on the available columns
-    def sorter =
-      new TableRowSorter[TargetsModel](this) <| { _.toggleSortOrder(0) } <| { sorter =>
-        columns.zipWithIndex.foreach {
-          case (column, i)        => sorter.setComparator(i, column.ordering)
-        }
-      } <| { _.sort() }
+    baseColumnNames(base) ::: pmCols ::: magCols
   }
+
+  override def getRowCount = targets.length
+
+  override def getColumnCount = columns.size
+
+  override def getColumnName(column: Int): String =
+    columns(column).title
+
+  override def getValueAt(rowIndex: Int, columnIndex: Int):AnyRef =
+    targets.lift(rowIndex).flatMap { t =>
+      columns.lift(columnIndex) >>= {_.render(t)}
+    }.orNull
+
+  override def getColumnClass(columnIndex: Int): Class[_] = columns(columnIndex).clazz
+
+  def rendererComponent(value: Any, isSelected: Boolean, hasFocus: Boolean, row: Int, column: Int): Option[Component]= {
+    columns.lift(column).flatMap { c =>
+      c.displayValue(value).map(new Label(_) {
+        horizontalAlignment = Alignment.Right
+      })
+    }
+  }
+
+  // Returns a Table Sorter depending on the available columns
+  def sorter =
+    new TableRowSorter[TargetsModel](this) <| { _.toggleSortOrder(0) } <| { sorter =>
+      columns.zipWithIndex.foreach {
+        case (column, i)        => sorter.setComparator(i, column.ordering)
+      }
+    } <| { _.sort() }
 }
+
