@@ -15,7 +15,6 @@ import edu.gemini.spModel.obscomp.SPInstObsComp
 import edu.gemini.spModel.rich.shared.immutable._
 import edu.gemini.spModel.telescope.{PosAngleConstraint, PosAngleConstraintAware}
 import jsky.app.ot.editor.OtItemEditor
-import jsky.app.ot.tpe.AgsClient
 import jsky.app.ot.util.OtColor
 
 import scala.swing.GridBagPanel.{Anchor, Fill}
@@ -259,9 +258,6 @@ class PositionAnglePanel[I <: SPInstObsComp with PosAngleConstraintAware,
       val angleAsDouble = angle.toDegrees.toPositive.getMagnitude
       ui.positionAngleTextField.text = numberFormatter.format(angleAsDouble)
       e.getDataObject.setPosAngle(angleAsDouble)
-
-      // This requires an AGS lookup.
-      launchAGS()
     }
   }
 
@@ -303,12 +299,6 @@ class PositionAnglePanel[I <: SPInstObsComp with PosAngleConstraintAware,
       ui.positionAngleConstraintComboBox.disableItem(option)
     }
   }
-
-  /**
-   * Launch the AGS lookup.
-   */
-  private def launchAGS(): Unit =
-    editor.foreach(e => AgsClient.launch(e.getNode, e.getWindow))
 }
 
 

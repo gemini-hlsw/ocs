@@ -8,8 +8,6 @@ import jsky.image.gui.MainImageDisplay;
 import jsky.util.gui.*;
 
 import javax.swing.*;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableModel;
 import java.awt.event.ActionEvent;
@@ -72,7 +70,7 @@ public class MaskDialog implements PropertyChangeListener {
         _w.wavelength.setValue(_maskParams.getWavelength());
         _w.filter.setSelectedItem(_maskParams.getFilter());
         _w.disperser.setSelectedItem(_maskParams.getDisperser());
-        _w.numMasks.setValue(new Integer(_maskParams.getNumMasks()));
+        _w.numMasks.setValue(_maskParams.getNumMasks());
 
         _w.slitLength.setValue(bandDef.getSlitLength());
         _w.microShuffleAmountArcsec.setValue(bandDef.getMicroShuffleAmount());
@@ -86,119 +84,84 @@ public class MaskDialog implements PropertyChangeListener {
         _maskParams.addPropertyChangeListener(this);
         _maskParams.getBandDef().addPropertyChangeListener(this);
 
-        _w.numMasks.addChangeListener(new ChangeListener() {
-            public void stateChanged(ChangeEvent e) {
-                _maskParams.setNumMasks(((Integer)_w.numMasks.getModel().getValue()).intValue());
-            }
-        });
+        _w.numMasks.addChangeListener(e -> _maskParams.setNumMasks((Integer) _w.numMasks.getModel().getValue()));
 
-        _w.wavelength.addWatcher(new TextBoxWidgetAdapter() {
-            public void textBoxKeyPress(TextBoxWidget tbw) {
+        _w.wavelength.addWatcher(new TextBoxWidgetWatcher() {
+            @Override public void textBoxKeyPress(TextBoxWidget tbw) {
                 _maskParams.setWavelength(tbw.getDoubleValue(_maskParams.getWavelength()));
             }
         });
 
-        _w.instrument.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                _maskParams.setInstrument((String)_w.instrument.getSelectedItem());
+        _w.instrument.addActionListener(e -> _maskParams.setInstrument((String) _w.instrument.getSelectedItem()));
+
+        _w.disperser.addWatcher((ddlbw, index, val) -> {
+            try {
+                _maskParams.setDisperser((GmosCommonType.Disperser) ddlbw.getSelectedItem());
+            } catch (IllegalArgumentException e) {
+                DialogUtil.error(e.getMessage());
+                _w.disperser.setSelectedItem(_maskParams.getDisperser());
             }
         });
 
-        _w.disperser.addWatcher(new DropDownListBoxWidgetWatcher() {
-            public void dropDownListBoxAction(DropDownListBoxWidget ddlbw, int index, String val) {
-                try {
-                    _maskParams.setDisperser((GmosCommonType.Disperser)ddlbw.getSelectedItem());
-                } catch(IllegalArgumentException e) {
-                    DialogUtil.error(e.getMessage());
-                    _w.disperser.setSelectedItem(_maskParams.getDisperser());
-                }
-            }
-        });
-
-        _w.filter.addWatcher(new DropDownListBoxWidgetWatcher() {
-            public void dropDownListBoxAction(DropDownListBoxWidget ddlbw, int index, String val) {
+        _w.filter.addWatcher((ddlbw, index, val) -> {
                 try {
                     _maskParams.setFilter((GmosCommonType.Filter)ddlbw.getSelectedItem());
                 } catch(IllegalArgumentException e) {
                     DialogUtil.error(e.getMessage());
                     _w.filter.setSelectedItem(_maskParams.getFilter());
                 }
-            }
-        });
+            });
 
-        _w.shuffleMode.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                bandDef.setShuffleMode(_w.shuffleMode.getSelectedIndex());
-            }
-        });
+        _w.shuffleMode.addActionListener(e -> bandDef.setShuffleMode(_w.shuffleMode.getSelectedIndex()));
 
-        _w.slitLength.addWatcher(new jsky.util.gui.TextBoxWidgetAdapter() {
-            public void textBoxKeyPress(TextBoxWidget tbw) {
+        _w.slitLength.addWatcher(new TextBoxWidgetWatcher() {
+            @Override public void textBoxKeyPress(TextBoxWidget tbw) {
                 bandDef.setSlitLength(tbw.getIntegerValue(bandDef.getSlitLength()));
             }
         });
 
-        _w.microShuffleAmountArcsec.addWatcher(new jsky.util.gui.TextBoxWidgetAdapter() {
-            public void textBoxKeyPress(TextBoxWidget tbw) {
+        _w.microShuffleAmountArcsec.addWatcher(new TextBoxWidgetWatcher() {
+            @Override public void textBoxKeyPress(TextBoxWidget tbw) {
                 bandDef.setMicroShuffleAmount(tbw.getDoubleValue(bandDef.getMicroShuffleAmount()));
             }
         });
 
-        _w.microShuffleAmountPixels.addWatcher(new TextBoxWidgetAdapter() {
-            public void textBoxKeyPress(TextBoxWidget tbw) {
+        _w.microShuffleAmountPixels.addWatcher(new TextBoxWidgetWatcher() {
+            @Override public void textBoxKeyPress(TextBoxWidget tbw) {
                 bandDef.setMicroShufflePix(tbw.getDoubleValue(bandDef.getMicroShufflePix()));
             }
         });
 
-        _w.bandSize.addWatcher(new TextBoxWidgetAdapter() {
-            public void textBoxKeyPress(TextBoxWidget tbw) {
+        _w.bandSize.addWatcher(new TextBoxWidgetWatcher() {
+            @Override public void textBoxKeyPress(TextBoxWidget tbw) {
                 bandDef.setBandSize(tbw.getIntegerValue(bandDef.getBandSize()));
             }
         });
 
-        _w.bandShuffleAmountArcsec.addWatcher(new TextBoxWidgetAdapter() {
-            public void textBoxKeyPress(TextBoxWidget tbw) {
+        _w.bandShuffleAmountArcsec.addWatcher(new TextBoxWidgetWatcher() {
+            @Override public void textBoxKeyPress(TextBoxWidget tbw) {
                 bandDef.setBandShuffleAmount(tbw.getDoubleValue(bandDef.getBandShuffleAmount()));
             }
         });
 
-        _w.bandShuffleAmountPixels.addWatcher(new TextBoxWidgetAdapter() {
-            public void textBoxKeyPress(TextBoxWidget tbw) {
+        _w.bandShuffleAmountPixels.addWatcher(new TextBoxWidgetWatcher() {
+            @Override public void textBoxKeyPress(TextBoxWidget tbw) {
                 bandDef.setBandShufflePix(tbw.getDoubleValue(bandDef.getBandShufflePix()));
             }
         });
 
-        _w.bandsYOffset.addWatcher(new TextBoxWidgetAdapter() {
-            public void textBoxKeyPress(TextBoxWidget tbw) {
+        _w.bandsYOffset.addWatcher(new TextBoxWidgetWatcher() {
+            @Override public void textBoxKeyPress(TextBoxWidget tbw) {
                 bandDef.setBandsYOffset(tbw.getIntegerValue(bandDef.getBandsYOffset()));
             }
         });
 
         // --
 
-        _w.bandResetButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                bandDef.resetToDefault(BandDef.BAND_SHUFFLE);
-            }
-        });
-
-        _w.microResetButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                bandDef.resetToDefault(BandDef.MICRO_SHUFFLE);
-            }
-        });
-
-        _w.makeMaskFilesButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                _makeMaskFiles();
-            }
-        });
-
-        _w.cancelButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                _w.setVisible(false);
-            }
-        });
+        _w.bandResetButton.addActionListener(e -> bandDef.resetToDefault(BandDef.BAND_SHUFFLE));
+        _w.microResetButton.addActionListener(e -> bandDef.resetToDefault(BandDef.MICRO_SHUFFLE));
+        _w.makeMaskFilesButton.addActionListener(e -> _makeMaskFiles());
+        _w.cancelButton.addActionListener(e -> _w.setVisible(false));
 
         _w.pack();
     }

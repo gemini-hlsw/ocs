@@ -12,10 +12,9 @@ import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.rich.shared.immutable._
 import edu.gemini.shared.util.immutable.{Option => JOption, Some => JSome}
 import edu.gemini.spModel.target.SPTarget
-import edu.gemini.spModel.target.env.{OptionsList, GuideProbeTargets, TargetEnvironment}
+import edu.gemini.spModel.target.env.{GuideProbeTargets, TargetEnvironment}
 import edu.gemini.spModel.target.system.HmsDegTarget
 
-import scala.collection.JavaConverters._
 import scala.concurrent.Future
 
 trait AgsStrategy {
@@ -86,30 +85,12 @@ object AgsStrategy {
      * Creates a new TargetEnvironment with guide stars for each assignment in
      * the Selection.
      */
-    def applyTo(env: TargetEnvironment): TargetEnvironment = {
-      def findMatching(gpt: GuideProbeTargets, target: SPTarget): Option[SPTarget] =
-        Option(target.getTarget.getName).flatMap { n =>
-          gpt.getOptions.toList.asScala.find { t =>
-            Option(t.getTarget.getName).map(_.trim).exists(_ == n.trim)
-          }
-        }
-
+    def applyTo(env: TargetEnvironment): TargetEnvironment =
       (env /: assignments) { (curEnv, ass) =>
         val target = new SPTarget(HmsDegTarget.fromSkyObject(ass.guideStar.toOldModel))
         val oldGpt = curEnv.getPrimaryGuideProbeTargets(ass.guideProbe).asScalaOpt
-
-        val newGpt = oldGpt.fold(GuideProbeTargets.create(ass.guideProbe, target)) { gpt =>
-          // We already have guide probe targets for guide probe.
-          // Does one with the same target name already exist? If so, mark it as
-          // primary and replace it with the target we just made.  If not, add the
-          // target and mark it as primary.
-          findMatching(gpt, target).fold(gpt.update(OptionsList.UpdateOps.appendAsPrimary(target))) { existing =>
-            gpt.selectPrimary(existing).setPrimary(target)
-          }
-        }
-
+        val newGpt = oldGpt.getOrElse(GuideProbeTargets.create(ass.guideProbe)).withBagsTarget(target)
         curEnv.putPrimaryGuideProbeTargets(newGpt)
       }
-    }
   }
 }

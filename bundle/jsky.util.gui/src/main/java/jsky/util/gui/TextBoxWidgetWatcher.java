@@ -7,9 +7,8 @@
 package jsky.util.gui;
 
 public interface TextBoxWidgetWatcher {
-
-    public void textBoxKeyPress(TextBoxWidget tbwe);
-    public void textBoxAction(TextBoxWidget tbwe);
-
+    default void textBoxKeyPress(TextBoxWidget tbwe) {}
+    default void textBoxAction(TextBoxWidget tbwe) {}
+    default void textBoxDoneEditing(TextBoxWidget tbwe) {}
 }
 

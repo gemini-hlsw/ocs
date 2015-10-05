@@ -11,7 +11,6 @@ public class TpeImageDisplayToolBar extends NavigatorImageDisplayToolBar {
     // toolbar buttons
     private JButton skyImageButton;
     private JButton manualGuideStarButton;
-    private JButton autoGuideStarButton;
 
     /**
      * Create the toolbar for the given window
@@ -33,24 +32,6 @@ public class TpeImageDisplayToolBar extends NavigatorImageDisplayToolBar {
         addSeparator();
 
         add(makeManualGuideStarButton());
-        add(makeAutoGuideStarButton());
-    }
-
-    protected JButton makeAutoGuideStarButton(){
-        if (autoGuideStarButton == null) {
-            final AbstractAction a = ((TpeImageWidget)imageDisplay).getAutoGuideStarAction();
-            a.addPropertyChangeListener(evt -> {
-                // OT-36: Update text to display "Cancel Search" while in progress...
-                autoGuideStarButton.setText((String)a.getValue(Action.NAME));
-                autoGuideStarButton.setVisible(a.isEnabled());
-            });
-            autoGuideStarButton = makeButton((String)a.getValue(Action.SHORT_DESCRIPTION), a);
-        }
-
-        updateButton(autoGuideStarButton,
-                     "Auto GS",
-                     jsky.util.Resources.getIcon("gsauto.png", this.getClass()));
-        return autoGuideStarButton;
     }
 
     /**
@@ -96,7 +77,6 @@ public class TpeImageDisplayToolBar extends NavigatorImageDisplayToolBar {
     public void update() {
         super.update();
         makeManualGuideStarButton();
-        makeAutoGuideStarButton();
         makeImageButton();
     }
 

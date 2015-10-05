@@ -23,6 +23,7 @@ import edu.gemini.spModel.obslog.ObsQaLog;
 import edu.gemini.spModel.util.SPTreeUtil;
 import jsky.app.ot.OT;
 import jsky.app.ot.OTOptions;
+import jsky.app.ot.ags.BagsManager;
 import jsky.app.ot.editor.EdObsGroup;
 import jsky.app.ot.editor.OtItemEditor;
 import jsky.app.ot.editor.eng.EngEditor;
@@ -37,7 +38,6 @@ import jsky.app.ot.ui.util.UIConstants;
 import jsky.app.ot.util.History;
 import jsky.app.ot.util.PropertyChangeMultiplexer;
 import jsky.app.ot.util.Resources;
-import jsky.app.ot.util.RootEntry;
 import jsky.app.ot.vcs.VcsStateTracker;
 import jsky.app.ot.vcs.SyncAllDialog;
 import jsky.app.ot.vcs.VcsOtClient;
@@ -87,11 +87,8 @@ public final class SPViewer extends SPViewerGUI implements PropertyChangeListene
 
     // Used to show the problems (if any) found on the program nodes
     private final SPProblemsViewer _problemViewer = new SPProblemsViewer(this);
-    private final SPConflictToolWindow _conflictPanel = new SPConflictToolWindow(new SPConflictToolWindow.Dismiss() {
-        public void apply() {
-            updateConflictToolWindow();
-        }
-    }, this, getTree());
+    private final SPConflictToolWindow _conflictPanel = new SPConflictToolWindow(this::updateConflictToolWindow, this, getTree());
+
 
     private final EngToolWindow _engToolWindow = new EngToolWindow();
 
@@ -105,11 +102,9 @@ public final class SPViewer extends SPViewerGUI implements PropertyChangeListene
     // Listener that rebuilds the menu, toolbars, and editor in response to changes to stuff that can cause the
     // authorization situation to change. Right now this means any manipulation of the keychain and any change to
     // the ISPProgram's data object.
-    public final PropertyChangeListener authListener = new PropertyChangeListener() {
-        public void propertyChange(final PropertyChangeEvent evt) {
-            rebuildMenusAndToolbars();
-            _updateFrameTitle();
-        }
+    public final PropertyChangeListener authListener = evt -> {
+        rebuildMenusAndToolbars();
+        _updateFrameTitle();
     };
 
     private final Map<SPNodeKey, SPTree.StateSnapshot> treeSnapshots = new HashMap<>();
@@ -142,13 +137,11 @@ public final class SPViewer extends SPViewerGUI implements PropertyChangeListene
         getTree().setViewer(this);
 
         // handle tree selections
-        getTree().addSPTreeListener(new SPTreeListener() {
-            public void nodeSelected(final SPTreeEvent event) {
-                if (getRoot() != null) {
-                    // show some selection feedback right away
-                    getTree().paintImmediately(getTree().getTree().getBounds());
-                    _treeNodeSelected(event.getViewable());
-                }
+        getTree().addSPTreeListener(event -> {
+            if (getRoot() != null) {
+                // show some selection feedback right away
+                getTree().paintImmediately(getTree().getTree().getBounds());
+                _treeNodeSelected(event.getViewable());
             }
         });
 
@@ -188,15 +181,13 @@ public final class SPViewer extends SPViewerGUI implements PropertyChangeListene
     }
 
     private void rebuildMenusAndToolbars() {
-        SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
-                try {
-                    getParentFrame().rebuildMainContent();
-                    _showEditor();
-                    _updateListeners();
-                } catch (Exception ex) {
-                    DialogUtil.error(ex);
-                }
+        SwingUtilities.invokeLater(() -> {
+            try {
+                getParentFrame().rebuildMainContent();
+                _showEditor();
+                _updateListeners();
+            } catch (Exception ex) {
+                DialogUtil.error(ex);
             }
         });
     }
@@ -566,15 +557,13 @@ public final class SPViewer extends SPViewerGUI implements PropertyChangeListene
                     // Note: need to do this later to avoid problems with data object being
                     // null when the node is selected.
                     if (expandAndSelect) {
-                        SwingUtilities.invokeLater(new Runnable() {
-                            public void run() {
-                                try {
-                                    getTree().setSelectedNode(node);
-                                    getTree().expandNode(node);
-                                } catch (Exception e) {
-                                    e.printStackTrace(); // RCN: worth a shot...
-                                    //do nothing
-                                }
+                        SwingUtilities.invokeLater(() -> {
+                            try {
+                                getTree().setSelectedNode(node);
+                                getTree().expandNode(node);
+                            } catch (Exception e) {
+                                e.printStackTrace(); // RCN: worth a shot...
+                                //do nothing
                             }
                         });
                     }
@@ -685,6 +674,7 @@ public final class SPViewer extends SPViewerGUI implements PropertyChangeListene
 
             // If there was an old root, clean up
             if (getRoot() != null) {
+                BagsManager.unregisterProgram(getRoot());
                 getDatabase().checkpoint();
                 getRoot().removePropertyChangeListener(ISPProgram.DATA_OBJECT_KEY, authListener);
                 updateEngToolWindow(null);
@@ -728,6 +718,8 @@ public final class SPViewer extends SPViewerGUI implements PropertyChangeListene
                 if (getRoot() != null && OTOptions.isCheckingEngineEnabled()) {
                     _checker.check(getRoot(), getTree(), OT.getMagnitudeTable());
                 }
+
+                BagsManager.registerProgram(root);
             }
 
             // Finally, update title and actions
@@ -748,25 +740,23 @@ public final class SPViewer extends SPViewerGUI implements PropertyChangeListene
     }
 
     private void updateEngToolWindow(final Component comp) {
-        SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
-                final SPViewerFrame f = getParentFrame();
-                final ToolWindowManager twm = f.getToolWindowManager();
-                final ToolWindow win = twm.getToolWindow(EngToolWindow.ENG_TOOL_WINDOW_KEY);
-                if (win == null) return;
+        SwingUtilities.invokeLater(() -> {
+            final SPViewerFrame f = getParentFrame();
+            final ToolWindowManager twm = f.getToolWindowManager();
+            final ToolWindow win = twm.getToolWindow(EngToolWindow.ENG_TOOL_WINDOW_KEY);
+            if (win == null) return;
 
-                boolean engVisible = false;
-                if (win.isAvailable()) engVisible = win.isVisible();
-                win.setAvailable(comp != null);
+            boolean engVisible = false;
+            if (win.isAvailable()) engVisible = win.isVisible();
+            win.setAvailable(comp != null);
 
-                if (comp != null) {
-                    _engToolWindow.setComponent(comp);
+            if (comp != null) {
+                _engToolWindow.setComponent(comp);
 
-                    final DockedTypeDescriptor dtd;
-                    dtd = (DockedTypeDescriptor) win.getTypeDescriptor(ToolWindowType.DOCKED);
-                    dtd.setDockLength(comp.getPreferredSize().width + 30);
-                    win.setVisible(engVisible);
-                }
+                final DockedTypeDescriptor dtd;
+                dtd = (DockedTypeDescriptor) win.getTypeDescriptor(ToolWindowType.DOCKED);
+                dtd.setDockLength(comp.getPreferredSize().width + 30);
+                win.setVisible(engVisible);
             }
         });
     }
@@ -775,37 +765,35 @@ public final class SPViewer extends SPViewerGUI implements PropertyChangeListene
 
     //Update the ToolWindow that contains the problems details, if possible
     public void updateProblemToolWindow(final IP2Problems problems) {
-        SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
-                final SPViewerFrame f = getParentFrame();
-                final ToolWindowManager toolWindowManager = f.getToolWindowManager();
-                final ToolWindow problemToolWindow =
-                        toolWindowManager.getToolWindow(SPViewerFrame.PROBLEM_TOOLWINDOW_KEY);
+        SwingUtilities.invokeLater(() -> {
+            final SPViewerFrame f = getParentFrame();
+            final ToolWindowManager toolWindowManager = f.getToolWindowManager();
+            final ToolWindow problemToolWindow =
+                    toolWindowManager.getToolWindow(SPViewerFrame.PROBLEM_TOOLWINDOW_KEY);
 
-                if (problemToolWindow != null) {
-                    if (problemToolWindow.isAvailable()) {
-                        visible = problemToolWindow.isVisible();
-                    }
-
-                    boolean available = false;
-                    Icon icon = null;
-                    if (problems != null) {
-                        final Problem.Type type = problems.getSeverity();
-                        switch (type) {
-                            case ERROR:
-                                available = true;
-                                icon = UIConstants.ERROR_ICON;
-                                break;
-                            case WARNING:
-                                available = true;
-                                icon = UIConstants.WARNING_ICON;
-                                break;
-                        }
-                    }
-                    problemToolWindow.setIcon(icon);
-                    problemToolWindow.setAvailable(available);
-                    if (available) problemToolWindow.setVisible(visible);
+            if (problemToolWindow != null) {
+                if (problemToolWindow.isAvailable()) {
+                    visible = problemToolWindow.isVisible();
                 }
+
+                boolean available = false;
+                Icon icon = null;
+                if (problems != null) {
+                    final Problem.Type type = problems.getSeverity();
+                    switch (type) {
+                        case ERROR:
+                            available = true;
+                            icon = UIConstants.ERROR_ICON;
+                            break;
+                        case WARNING:
+                            available = true;
+                            icon = UIConstants.WARNING_ICON;
+                            break;
+                    }
+                }
+                problemToolWindow.setIcon(icon);
+                problemToolWindow.setAvailable(available);
+                if (available) problemToolWindow.setVisible(visible);
             }
         });
     }
@@ -895,19 +883,27 @@ public final class SPViewer extends SPViewerGUI implements PropertyChangeListene
         if ((p != null) && !shouldClose(p)) {
             return;
         }
-        if (p != null){
+        if (p != null) {
+            BagsManager.unregisterProgram(p);
             treeSnapshots.remove(p.getNodeKey());
         }
         tryNavigate(_history.delete());
     }
 
     public void closeProgram(ISPProgram node) {
-        if (node != null) treeSnapshots.remove(node.getNodeKey());
+        if (node != null) {
+            BagsManager.unregisterProgram(node);
+            treeSnapshots.remove(node.getNodeKey());
+        }
         tryNavigate(_history.delete(node));
     }
 
     /** Close the current viewer window, but don't exit the application, even if it is the last window. */
     private void closeViewer() {
+        // TODO: Do not know if we need to do this?
+        if (getRoot() != null)
+            BagsManager.unregisterProgram(getRoot());
+
         tryNavigate(_history.empty());
         treeSnapshots.clear();
         try {
@@ -935,26 +931,21 @@ public final class SPViewer extends SPViewerGUI implements PropertyChangeListene
         if (!shouldClose(allPrograms())) {
             return;
         }
-        for (final SPViewer viewer : new ArrayList<>(_orderedInstances)) {
-            viewer.closeViewer();
-        }
+        _orderedInstances.forEach(SPViewer::closeViewer);
+
         // TODO: Potentially there are still plugins an other parts of the application open.
         System.exit(0);
     }
 
     private List<ISPProgram> programs() {
         final List<ISPProgram> progs = new ArrayList<>();
-        for (RootEntry re : _history.rootEntriesAsJava()) {
-            progs.add(re.root());
-        }
+        _history.rootEntriesAsJava().forEach(re -> progs.add(re.root()));
         return progs;
     }
 
     private static List<ISPProgram> allPrograms() {
         final List<ISPProgram> programs = new ArrayList<>();
-        for (final SPViewer viewer : new ArrayList<>(_orderedInstances)) {
-            programs.addAll(viewer.programs());
-        }
+        _orderedInstances.forEach(v -> programs.addAll(v.programs()));
         return programs;
     }
 

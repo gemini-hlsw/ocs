@@ -18,8 +18,7 @@ import org.junit.Test;
 import java.util.Comparator;
 
 /**
- * Test cases for {@link GuideProbeTargets}.  The bulk of it is delegated
- * to an OptionsListImpl which is tested in OptionsListTest.
+ * Test cases for {@link GuideProbeTargets}.
  */
 public final class GuideProbeTargetsTest extends TestCase {
 
@@ -27,15 +26,15 @@ public final class GuideProbeTargetsTest extends TestCase {
 
     @Test
     public void testMatchGuider() {
-        PredicateOp<GuideProbeTargets> op = GuideProbeTargets.match(pwfs1);
+        final PredicateOp<GuideProbeTargets> op = gpt -> gpt.getGuider() == pwfs1;
         assertTrue(op.apply(fix.gpt_pwfs1));
         assertFalse(op.apply(fix.gpt_pwfs2));
         assertFalse(op.apply(fix.gpt_gmos));
     }
 
     @Test
-    public void tesetMatchType() {
-        PredicateOp<GuideProbeTargets> op = GuideProbeTargets.match(GuideProbe.Type.OIWFS);
+    public void testMatchType() {
+        final PredicateOp<GuideProbeTargets> op = gpt -> gpt.getGuider().getType() == GuideProbe.Type.OIWFS;
         assertFalse(op.apply(fix.gpt_pwfs1));
         assertFalse(op.apply(fix.gpt_pwfs2));
         assertTrue(op.apply(fix.gpt_gmos));
@@ -71,7 +70,7 @@ public final class GuideProbeTargetsTest extends TestCase {
 
     @Test
     public void testExtractProbe() {
-        Function1<GuideProbeTargets, GuideProbe> f = GuideProbeTargets.EXTRACT_PROBE;
+        Function1<GuideProbeTargets, GuideProbe> f = GuideProbeTargets::getGuider;
         assertEquals(pwfs1, f.apply(fix.gpt_pwfs1));
         assertEquals(pwfs2, f.apply(fix.gpt_pwfs2));
         assertEquals(GmosOiwfsGuideProbe.instance, f.apply(fix.gpt_gmos));
@@ -79,7 +78,7 @@ public final class GuideProbeTargetsTest extends TestCase {
 
     @Test
     public void testMatchNonEmpty() {
-        PredicateOp<GuideProbeTargets> f = GuideProbeTargets.MATCH_NON_EMPTY;
+        PredicateOp<GuideProbeTargets> f = GuideProbeTargets::containsTargets;
         assertTrue(f.apply(fix.gpt_pwfs1));
         assertTrue(f.apply(fix.gpt_pwfs2));
         assertFalse(f.apply(fix.gpt_gmos));
@@ -131,34 +130,34 @@ public final class GuideProbeTargetsTest extends TestCase {
         GuideProbeTargets gpt;
 
         gpt = fix.gpt_pwfs1.removeTarget(fix.t_pwfs1_1);
-        Fixture.verifySpListEquals(DefaultImList.create(fix.t_pwfs1_2), gpt.getOptions(), fix.when);
+        Fixture.verifySpListEquals(DefaultImList.create(fix.t_pwfs1_2), gpt.getTargets(), fix.when);
 
         gpt = fix.gpt_pwfs1.removeTarget(fix.t_pwfs1_2);
-        Fixture.verifySpListEquals(DefaultImList.create(fix.t_pwfs1_1), gpt.getOptions(), fix.when);
+        Fixture.verifySpListEquals(DefaultImList.create(fix.t_pwfs1_1), gpt.getTargets(), fix.when);
 
         // Remove a target that doesn't exist in the GuideProbeTargets instance.
         gpt = fix.gpt_pwfs1.removeTarget(fix.t_pwfs2);
-        Fixture.verifySpListEquals(fix.tl_pwfs1, gpt.getOptions(), fix.when);
+        Fixture.verifySpListEquals(fix.tl_pwfs1, gpt.getTargets(), fix.when);
 
         // Remove the only target in the list
         gpt = fix.gpt_pwfs2.removeTarget(fix.t_pwfs2);
         ImList<SPTarget> empty = ImCollections.emptyList();
-        Fixture.verifySpListEquals(empty, gpt.getOptions(), fix.when);
+        Fixture.verifySpListEquals(empty, gpt.getTargets(), fix.when);
 
         // Remove from an empty list.
         gpt = fix.gpt_gmos.removeTarget(fix.t_pwfs1_1);
-        Fixture.verifySpListEquals(fix.tl_gmos, gpt.getOptions(), fix.when);
+        Fixture.verifySpListEquals(fix.tl_gmos, gpt.getTargets(), fix.when);
     }
 
     public void testTargetMatch() {
-        PredicateOp<TargetContainer> f = new TargetContainer.TargetMatch(fix.t_pwfs2);
+        PredicateOp<TargetContainer> f = t -> t.containsTarget(fix.t_pwfs2);
         assertFalse(f.apply(fix.gpt_pwfs1));
         assertTrue(f.apply(fix.gpt_pwfs2));
         assertFalse(f.apply(fix.gpt_gmos));
     }
 
     public void testExtractTarget() {
-        Function1<TargetContainer, ImList<SPTarget>> f = TargetContainer.EXTRACT_TARGET;
+        final Function1<TargetContainer, ImList<SPTarget>> f = TargetContainer::getTargets;
         assertEquals(fix.tl_pwfs1, f.apply(fix.gpt_pwfs1));
         assertEquals(fix.tl_pwfs2, f.apply(fix.gpt_pwfs2));
         assertEquals(fix.tl_gmos,  f.apply(fix.gpt_gmos));

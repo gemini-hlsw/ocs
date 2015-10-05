@@ -3,7 +3,6 @@ package edu.gemini.spdb.rapidtoo.impl;
 import edu.gemini.pot.sp.*;
 import static edu.gemini.pot.sp.SPComponentBroadType.INSTRUMENT;
 import edu.gemini.pot.spdb.IDBDatabaseService;
-import edu.gemini.shared.util.immutable.ImList;
 import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.spModel.core.SPBadIDException;
 import edu.gemini.spModel.core.SPProgramID;
@@ -22,7 +21,6 @@ import edu.gemini.spModel.target.env.GuideProbeTargets;
 import edu.gemini.spModel.target.env.TargetEnvironment;
 import edu.gemini.spModel.target.obsComp.PwfsGuideProbe;
 import edu.gemini.spModel.target.obsComp.TargetObsComp;
-import edu.gemini.spModel.target.system.CoordinateParam;
 import edu.gemini.spModel.too.TooConstraintService;
 import edu.gemini.spdb.rapidtoo.*;
 import edu.gemini.util.security.auth.keychain.KeyService;
@@ -220,78 +218,76 @@ public final class TooUpdateServiceImpl implements TooUpdateService {
         return null;
     }
 
-    private void _setTarget(ISPObservation obs, TooUpdate update)  {
-        TooTarget tooTarget = update.getBasePosition();
+    private void _setTarget(final ISPObservation obs, final TooUpdate update)  {
+        final TooTarget tooTarget = update.getBasePosition();
         if (tooTarget == null) {
             LOG.warning("Too update missing target information.");
             return;
         }
 
         // Set the title of the observation.
-        SPObservation obsDobj = (SPObservation) obs.getDataObject();
+        final SPObservation obsDobj = (SPObservation) obs.getDataObject();
         obsDobj.setTitle(tooTarget.getName());
 
         // Get the target component and update the base position.
-        ISPObsComponent targetComp = _findComponent(obs, TargetObsComp.SP_TYPE);
-        TargetObsComp targetObsComp = (TargetObsComp) targetComp.getDataObject();
-        TargetEnvironment targetEnv = targetObsComp.getTargetEnvironment();
-        SPTarget base = targetEnv.getBase();
+        final ISPObsComponent targetComp = _findComponent(obs, TargetObsComp.SP_TYPE);
+        if (targetComp == null) {
+            LOG.warning("Too update has no target component.");
+            return;
+        }
 
+        final TargetObsComp targetObsComp = (TargetObsComp) targetComp.getDataObject();
+        final TargetEnvironment targetEnv = targetObsComp.getTargetEnvironment();
+
+        final SPTarget base = targetEnv.getBase();
         base.setName(tooTarget.getName());
         base.setRaDecDegrees(tooTarget.getRa(), tooTarget.getDec());
         base.setMagnitudes(tooTarget.getMagnitudes());
 
         // Set the guide star, if present.
-        TooGuideTarget gs = update.getGuideStar();
+        final TooGuideTarget gs = update.getGuideStar();
         if (gs != null) {
-            TooGuideTarget.GuideProbe tooProbe = gs.getGuideProbe();
+            final TooGuideTarget.GuideProbe tooProbe = gs.getGuideProbe();
             if (tooProbe == null) {
                 LOG.warning("Guide star probe not specified.");
             } else {
-                Double ra  = gs.getRa();
-                Double dec = gs.getDec();
+                final GuideProbe probe;
+                switch (tooProbe) {
+                    case AOWFS:
+                        probe = AltairAowfsGuider.instance;
+                        break;
+                    case OIWFS:
+                        probe = getOiwfs(obs);
+                        break;
+                    case PWFS1:
+                        probe = PwfsGuideProbe.pwfs1;
+                        break;
+                    case PWFS2:
+                        probe = PwfsGuideProbe.pwfs2;
+                        break;
+                    default:
+                        probe = null;
+                }
 
-                if ((ra == null) || (dec == null)) {
-                    LOG.warning("Guide star ra or dec missing.");
-                } else {
-                    // damn
-                    GuideProbe probe = null;
-                    switch (tooProbe) {
-                        case AOWFS:
-                            probe = AltairAowfsGuider.instance;
-                            break;
-                        case OIWFS:
-                            probe = getOiwfs(obs);
-                            break;
-                        case PWFS1:
-                            probe = PwfsGuideProbe.pwfs1;
-                            break;
-                        case PWFS2:
-                            probe = PwfsGuideProbe.pwfs2;
-                            break;
+                if (probe != null) {
+                    final Option<GuideProbeTargets> gtOpt = targetEnv.getPrimaryGuideProbeTargets(probe);
+                    final GuideProbeTargets gt = gtOpt.isEmpty() ? GuideProbeTargets.create(probe) : gtOpt.getValue();
+
+                    final Option<SPTarget> targetOpt = gt.getPrimary();
+                    final SPTarget target = targetOpt.isEmpty() ? new SPTarget() : targetOpt.getValue();
+
+                    target.setRaDecDegrees(gs.getRa(), gs.getDec());
+                    final String name = gs.getName();
+                    if (name != null) {
+                        target.setName(name);
                     }
-
-                    if (probe != null) {
-                        Option<GuideProbeTargets> gtOpt = targetEnv.getPrimaryGuideProbeTargets(probe);
-                        GuideProbeTargets gt = gtOpt.isEmpty() ? GuideProbeTargets.create(probe) : gtOpt.getValue();
-
-                        Option<SPTarget> targetOpt = gt.getPrimary();
-                        SPTarget target = targetOpt.isEmpty() ? new SPTarget() : targetOpt.getValue();
-
-                        target.setRaDecDegrees(gs.getRa(), gs.getDec());
-                        String name = gs.getName();
-                        if (name != null) {
-                            target.setName(name);
-                        }
 
                         target.setMagnitudes(gs.getMagnitudes());
 
-                        if (targetOpt.isEmpty()) {
-                            ImList<SPTarget> lst = gt.getOptions().cons(target);
-                            gt = GuideProbeTargets.create(probe, lst);
-                            targetEnv = targetEnv.putPrimaryGuideProbeTargets(gt);
-                            targetObsComp.setTargetEnvironment(targetEnv);
-                        }
+                    if (targetOpt.isEmpty()) {
+                        final GuideProbeTargets gtNew = gt.withManualTargets(gt.getManualTargets().cons(target)).withExistingPrimary(target);
+                        final TargetEnvironment targetEnvNew = targetEnv.putPrimaryGuideProbeTargets(gtNew);
+                        targetObsComp.setTargetEnvironment(targetEnvNew);
                     }
                 }
             }
