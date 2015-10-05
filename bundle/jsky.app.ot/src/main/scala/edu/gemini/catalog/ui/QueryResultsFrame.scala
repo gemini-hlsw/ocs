@@ -42,6 +42,8 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
     override def configure(t: Table, sel: Boolean, foc: Boolean, value: AgsGuideQuality, row: Int, col: Int): Unit = {
       component.icon = GuidingIcon(value, enabled = true)
       component.text = ""
+      component.preferredSize = new Dimension(GuidingIcon.sideLength + 2, GuidingIcon.sideLength + 2)
+      component.maximumSize = new Dimension(GuidingIcon.sideLength  + 2, GuidingIcon.sideLength + 2)
     }
   }
 
@@ -155,6 +157,7 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
 
         // Adjust the width of the columns
         val insets = scrollPane.border.getBorderInsets(scrollPane.peer)
+        resultsTable.peer.getColumnModel.getColumn(0).setResizable(false)
         resultsTable.adjustColumns(scrollPane.bounds.width - insets.left - insets.right)
 
         // Update the count of rows

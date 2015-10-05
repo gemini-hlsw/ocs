@@ -18,10 +18,8 @@ trait TableColumnsAdjuster { this: Table =>
     import scala.math.max
 
     def updateTableColumn(column: TableColumn, width: Int):Unit = {
-      if (column.getResizable) {
-        this.peer.getTableHeader.setResizingColumn(column)
-        column <| {_.setPreferredWidth(width)} <| {_.setWidth(width)}
-      }
+      this.peer.getTableHeader.setResizingColumn(column)
+      column <| {_.setPreferredWidth(width)} <| {_.setWidth(width)}
     }
 
     def calculateColumnWidth(column: TableColumn): Int = {
@@ -33,9 +31,10 @@ trait TableColumnsAdjuster { this: Table =>
         renderer.getTableCellRendererComponent(this.peer, value, false, false, -1, column.getModelIndex).getPreferredSize.width
       }
 
-      def cellDataWidth(row: Int, column: Int): Int = {
-        val cellRenderer = this.peer.getCellRenderer(row, column)
-        val c = this.peer.prepareRenderer(cellRenderer, row, column)
+      def cellDataWidth(row: Int, col: Int): Int = {
+        val cellRenderer = this.peer.getCellRenderer(row, col)
+        val c = this.peer.prepareRenderer(cellRenderer, row, col)
+
         c.getPreferredSize.width + this.peer.getIntercellSpacing.width
       }
 
@@ -56,17 +55,30 @@ trait TableColumnsAdjuster { this: Table =>
     // Calculate the width
     val cols = for {
         i <- 0 until tcm.getColumnCount
+        if tcm.getColumn(i).getResizable
       } yield (tcm.getColumn(i), calculateColumnWidth(tcm.getColumn(i)))
     val initialWidth = cols.map(_._2).sum
 
+    val nonResizableCols = for {
+        i <- 0 until tcm.getColumnCount
+        if !tcm.getColumn(i).getResizable
+      } yield (tcm.getColumn(i), calculateColumnWidth(tcm.getColumn(i)))
+    val nonResizableWidth = nonResizableCols.map(_._2).sum
+
+    val resizableColumnsLength = cols.length
+
     // Adjust space to fit on the outer width
-    val spacing = max(minSpacing, (containerWidth - initialWidth) / tcm.getColumnCount)
+    val spacing = max(minSpacing, (containerWidth - initialWidth - nonResizableWidth) / resizableColumnsLength)
     // Add the rounding error to the first col
-    val initialOffset = max(0, containerWidth - cols.map(_._2 + spacing).sum)
+    val initialOffset = containerWidth - cols.map(_._2 + spacing).sum - nonResizableWidth
     // Set width + spacing
     cols.zipWithIndex.foreach {
       case ((c, w), i) if i == 0 => updateTableColumn(c, w + spacing + initialOffset) // Add rounding error to the first col
-      case ((c, w), i)           => updateTableColumn(c, w + spacing)
+      case ((c, w), _)           => updateTableColumn(c, w + spacing)
+    }
+
+    nonResizableCols.foreach {
+      case (c, w) => updateTableColumn(c, w)
     }
   }
 }

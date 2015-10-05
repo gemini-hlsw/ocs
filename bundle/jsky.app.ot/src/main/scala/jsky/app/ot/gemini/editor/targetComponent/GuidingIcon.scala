@@ -16,6 +16,7 @@ import javax.swing.ImageIcon
  * enabled and disabled variations.
  */
 object GuidingIcon {
+  val sideLength = 16
 
   private val darkGreen = new Color(0, 153, 0)
 
@@ -31,7 +32,7 @@ object GuidingIcon {
   // See: http://en.wikipedia.org/wiki/Harvey_Balls
   private def makeIcon(q: AgsGuideQuality, enabled: Boolean): ImageIcon = {
     new ImageIcon({
-      val img = new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB)
+      val img = new BufferedImage(sideLength, sideLength, BufferedImage.TYPE_INT_ARGB)
       val g2  = img.createGraphics()
 
       Rendering.withQuality(g2) {
