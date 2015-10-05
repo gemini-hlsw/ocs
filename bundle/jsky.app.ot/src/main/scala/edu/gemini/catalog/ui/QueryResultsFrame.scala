@@ -38,18 +38,12 @@ import Scalaz._
  */
 object QueryResultsFrame extends Frame with PreferredSizeFrame {
   private lazy val resultsTable = new Table() with SortableTable with TableColumnsAdjuster {
-    private val m = TargetsModel(Coordinates.zero, Nil)
-    model = model
-    new TableRowSorter[TargetsModel](m) <| {
-      _.toggleSortOrder(0)
-    } <| {
-      peer.setRowSorter
-    }
-
-    // Align Right
-    peer.setDefaultRenderer(classOf[String], new DefaultTableCellRenderer() {
-      setHorizontalAlignment(SwingConstants.RIGHT)
-    })
+    override def rendererComponent(isSelected: Boolean, focused: Boolean, row: Int, column: Int) =
+      (model, model.getValueAt(row, column)) match {
+        case (m: TargetsModel, value) =>
+          // Delegate rendering to the model
+          m.rendererComponent(value ,isSelected, focused, row, column).getOrElse(super.rendererComponent(isSelected, focused, row, column))
+      }
   }
 
   private lazy val closeButton = new Button("Close") {

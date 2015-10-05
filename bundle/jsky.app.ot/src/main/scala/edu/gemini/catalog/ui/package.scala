@@ -1,6 +1,6 @@
 package edu.gemini.catalog
 
-import javax.swing.table.AbstractTableModel
+import javax.swing.table._
 
 import edu.gemini.ags.api.AgsMagnitude.MagnitudeTable
 import edu.gemini.ags.api.{AgsRegistrar, AgsStrategy}
@@ -11,6 +11,8 @@ import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.Conditions
 import edu.gemini.spModel.obs.context.ObsContext
 import jsky.app.ot.gemini.editor.targetComponent.GuidingFeedback.ProbeLimits
 
+import scala.language.existentials
+import scala.swing.{Alignment, Label, Component}
 import scalaz._
 import Scalaz._
 
@@ -63,7 +65,8 @@ package object ui {
 
     def lens: PLens[Target, T]
 
-    def displayValue(t: T): String = t.toString
+    // Display the value in the table as String. values are Any in the table model
+    def displayValue(t: Any): Option[String] = t.toString.some
 
     // Extract the data from the target via the lens
     def render(target: Target): Option[T] = lens.get(target)
@@ -79,13 +82,17 @@ package object ui {
   case class RAColumn(title: String) extends CatalogNavigatorColumn[RightAscension] {
     override val lens = Target.coords >=> Coordinates.ra.partial
 
-    override def displayValue(t: RightAscension) = t.toAngle.formatHMS
+    override def displayValue(t: Any) = Option(t).collect {
+      case r: RightAscension => r.toAngle.formatHMS
+    }
   }
 
   case class DECColumn(title: String) extends CatalogNavigatorColumn[Declination] {
     override val lens = Target.coords >=> Coordinates.dec.partial
 
-    override def displayValue(t: Declination) = t.formatDMS
+    override def displayValue(t: Any) = Option(t).collect {
+      case d: Declination => d.formatDMS
+    }
   }
 
   case class DistanceColumn(base: Coordinates, title: String) extends CatalogNavigatorColumn[Angle] {
@@ -93,19 +100,25 @@ package object ui {
 
     override val lens = Target.coords >=> distance.partial
 
-    override def displayValue(t: Angle) = f"${t.toArcmins}%.2f"
+    override def displayValue(t: Any) = Option(t).collect {
+      case a: Angle => f"${a.toArcmins}%.2f"
+    }
   }
 
   case class PMRAColumn(title: String) extends CatalogNavigatorColumn[RightAscensionAngularVelocity] {
     override val lens = Target.pm >=> ProperMotion.deltaRA.partial
 
-    override def displayValue(t: RightAscensionAngularVelocity): String = f"${t.velocity.masPerYear}%.2f"
+    override def displayValue(t: Any) = Option(t).collect {
+      case r: RightAscensionAngularVelocity => f"${r.velocity.masPerYear}%.2f"
+    }
   }
 
   case class PMDecColumn(title: String) extends CatalogNavigatorColumn[DeclinationAngularVelocity] {
     override val lens = Target.pm >=> ProperMotion.deltaDec.partial
 
-    override def displayValue(t: DeclinationAngularVelocity): String = f"${t.velocity.masPerYear}%.2f"
+    override def displayValue(t: Any) = Option(t).collect {
+      case d: DeclinationAngularVelocity => f"${d.velocity.masPerYear}%.2f"
+    }
   }
 
   case class MagnitudeColumn(band: MagnitudeBand) extends CatalogNavigatorColumn[Magnitude] {
@@ -114,7 +127,9 @@ package object ui {
     val bLens: List[Magnitude] @?> Magnitude = PLens(ml => ml.find(_.band === band).map(m => Store(b => sys.error("read-only lens"), m)))
     override val lens = Target.magnitudes >=> bLens
 
-    override def displayValue(t: Magnitude): String = f"${t.value}%.2f"
+    override def displayValue(t: Any) = Option(t).collect {
+      case m: Magnitude => f"${m.value}%.2f"
+    }
   }
 
   // Required to give limits to the existential type list
@@ -151,5 +166,13 @@ package object ui {
       }.orNull
 
     override def getColumnClass(columnIndex: Int): Class[_] = columns(columnIndex).clazz
+
+    def rendererComponent(value: Any, isSelected: Boolean, hasFocus: Boolean, row: Int, column: Int): Option[Component]= {
+      columns.lift(column).flatMap { c =>
+        c.displayValue(value).map(new Label(_) {
+          horizontalAlignment = Alignment.Right
+        })
+      }
+    }
   }
 }
