@@ -3,8 +3,7 @@ package edu.gemini.catalog.ui
 import java.awt.Color
 import javax.swing.BorderFactory._
 import javax.swing.border.Border
-import javax.swing.{UIManager, DefaultComboBoxModel, SwingConstants}
-import javax.swing.table._
+import javax.swing.{UIManager, DefaultComboBoxModel}
 
 import edu.gemini.ags.api.AgsMagnitude.MagnitudeTable
 import edu.gemini.ags.api.AgsRegistrar
@@ -38,8 +37,10 @@ import Scalaz._
  */
 object QueryResultsFrame extends Frame with PreferredSizeFrame {
   private lazy val resultsTable = new Table() with SortableTable with TableColumnsAdjuster {
+
     override def rendererComponent(isSelected: Boolean, focused: Boolean, row: Int, column: Int) =
-      (model, model.getValueAt(row, column)) match {
+      // Note that we need to use the same conversions as indicated on SortableTable to get the value
+      (model, model.getValueAt(viewToModelRow(row), viewToModelColumn(column))) match {
         case (m: TargetsModel, value) =>
           // Delegate rendering to the model
           m.rendererComponent(value ,isSelected, focused, row, column).getOrElse(super.rendererComponent(isSelected, focused, row, column))
@@ -139,13 +140,7 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
         resultsTable.model = model
 
         // The sorting logic may change if the list of magnitudes changes
-        new TableRowSorter[TargetsModel](model) <| {
-          _.toggleSortOrder(0)
-        } <| {
-          _.sort()
-        } <| {
-          resultsTable.peer.setRowSorter
-        }
+        resultsTable.peer.setRowSorter(model.sorter)
 
         // Adjust the width of the columns
         val insets = scrollPane.border.getBorderInsets(scrollPane.peer)

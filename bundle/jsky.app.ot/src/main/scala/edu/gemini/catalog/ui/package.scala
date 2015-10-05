@@ -60,23 +60,28 @@ package object ui {
    * Represents a table column description
    * @tparam T The type of the column
    */
-  abstract class CatalogNavigatorColumn[T >: Null] {
+  abstract class CatalogNavigatorColumn[T >: Null: Manifest] {
     def title: String
 
     def lens: PLens[Target, T]
 
     // Display the value in the table as String. values are Any in the table model
-    def displayValue(t: Any): Option[String] = t.toString.some
+    def displayValue(t: Any): Option[String] = Option(t).map(_.toString)
 
     // Extract the data from the target via the lens
     def render(target: Target): Option[T] = lens.get(target)
 
     // Indicates the class of the column
     def clazz:Class[_] = manifest.runtimeClass
+
+    // Returns the ordering for the column
+    def ordering: scala.math.Ordering[T] // TODO Could we make this generic? implicitly[Ordering[T]] does not work :S
   }
 
   case class IdColumn(title: String) extends CatalogNavigatorColumn[String] {
     override val lens = Target.name
+
+    def ordering = implicitly[scala.math.Ordering[String]]
   }
 
   case class RAColumn(title: String) extends CatalogNavigatorColumn[RightAscension] {
@@ -85,6 +90,8 @@ package object ui {
     override def displayValue(t: Any) = Option(t).collect {
       case r: RightAscension => r.toAngle.formatHMS
     }
+
+    def ordering = implicitly[scala.math.Ordering[RightAscension]]
   }
 
   case class DECColumn(title: String) extends CatalogNavigatorColumn[Declination] {
@@ -93,6 +100,8 @@ package object ui {
     override def displayValue(t: Any) = Option(t).collect {
       case d: Declination => d.formatDMS
     }
+
+    def ordering = implicitly[scala.math.Ordering[Declination]]
   }
 
   case class DistanceColumn(base: Coordinates, title: String) extends CatalogNavigatorColumn[Angle] {
@@ -103,6 +112,8 @@ package object ui {
     override def displayValue(t: Any) = Option(t).collect {
       case a: Angle => f"${a.toArcmins}%.2f"
     }
+
+    def ordering = implicitly[scala.math.Ordering[Angle]]
   }
 
   case class PMRAColumn(title: String) extends CatalogNavigatorColumn[RightAscensionAngularVelocity] {
@@ -111,6 +122,8 @@ package object ui {
     override def displayValue(t: Any) = Option(t).collect {
       case r: RightAscensionAngularVelocity => f"${r.velocity.masPerYear}%.2f"
     }
+
+    def ordering = implicitly[scala.math.Ordering[RightAscensionAngularVelocity]]
   }
 
   case class PMDecColumn(title: String) extends CatalogNavigatorColumn[DeclinationAngularVelocity] {
@@ -119,6 +132,8 @@ package object ui {
     override def displayValue(t: Any) = Option(t).collect {
       case d: DeclinationAngularVelocity => f"${d.velocity.masPerYear}%.2f"
     }
+
+    def ordering = implicitly[scala.math.Ordering[DeclinationAngularVelocity]]
   }
 
   case class MagnitudeColumn(band: MagnitudeBand) extends CatalogNavigatorColumn[Magnitude] {
@@ -130,6 +145,8 @@ package object ui {
     override def displayValue(t: Any) = Option(t).collect {
       case m: Magnitude => f"${m.value}%.2f"
     }
+
+    def ordering = implicitly[scala.math.Ordering[Magnitude]]
   }
 
   // Required to give limits to the existential type list
@@ -174,5 +191,13 @@ package object ui {
         })
       }
     }
+
+    // Returns a Table Sorter depending on the available columns
+    def sorter =
+      new TableRowSorter[TargetsModel](this) <| { _.toggleSortOrder(0) } <| { sorter =>
+        columns.zipWithIndex.foreach {
+          case (column, i)        => sorter.setComparator(i, column.ordering)
+        }
+      } <| { _.sort() }
   }
 }
