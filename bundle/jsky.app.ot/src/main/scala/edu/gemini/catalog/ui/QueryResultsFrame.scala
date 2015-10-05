@@ -6,7 +6,7 @@ import javax.swing.border.Border
 import javax.swing.{UIManager, DefaultComboBoxModel}
 
 import edu.gemini.ags.api.AgsMagnitude.MagnitudeTable
-import edu.gemini.ags.api.AgsRegistrar
+import edu.gemini.ags.api.{AgsGuideQuality, AgsRegistrar}
 import edu.gemini.ags.conf.ProbeLimitsTable
 import edu.gemini.catalog.api._
 import edu.gemini.catalog.votable._
@@ -20,6 +20,7 @@ import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.core._
 import edu.gemini.ui.miglayout.MigPanel
 import edu.gemini.ui.miglayout.constraints._
+import jsky.app.ot.gemini.editor.targetComponent.GuidingIcon
 import jsky.app.ot.tpe.TpeContext
 import jsky.app.ot.util.Resources
 
@@ -36,11 +37,21 @@ import Scalaz._
  * Frame to display the Query controls and results
  */
 object QueryResultsFrame extends Frame with PreferredSizeFrame {
+
+  private class GuidingFeedbackRenderer extends Table.AbstractRenderer[AgsGuideQuality, Label](new Label) {
+    override def configure(t: Table, sel: Boolean, foc: Boolean, value: AgsGuideQuality, row: Int, col: Int): Unit = {
+      component.icon = GuidingIcon(value, enabled = true)
+      component.text = ""
+    }
+  }
+
   private lazy val resultsTable = new Table() with SortableTable with TableColumnsAdjuster {
 
     override def rendererComponent(isSelected: Boolean, focused: Boolean, row: Int, column: Int) =
       // Note that we need to use the same conversions as indicated on SortableTable to get the value
       (model, model.getValueAt(viewToModelRow(row), viewToModelColumn(column))) match {
+        case (m: TargetsModel, q:AgsGuideQuality) =>
+          new GuidingFeedbackRenderer().componentFor(this, isSelected, focused, q, row, column)
         case (m: TargetsModel, value) =>
           // Delegate rendering to the model
           m.rendererComponent(value ,isSelected, focused, row, column).getOrElse(super.rendererComponent(isSelected, focused, row, column))
