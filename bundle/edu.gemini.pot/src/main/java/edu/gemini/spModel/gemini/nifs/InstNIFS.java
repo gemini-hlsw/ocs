@@ -1,10 +1,3 @@
-// Copyright 1997-2000
-// Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-// See the file LICENSE for complete details.
-//
-// $Id: InstNIFS.java 46996 2012-07-26 14:21:12Z swalker $
-//
 package edu.gemini.spModel.gemini.nifs;
 
 import edu.gemini.pot.sp.ISPObservation;
@@ -68,7 +61,7 @@ public final class InstNIFS extends SPInstObsComp implements PropertyProvider, G
     public static final SPComponentType SP_TYPE =
             SPComponentType.INSTRUMENT_NIFS;
 
-    private static final Map<String, PropertyDescriptor> PRIVATE_PROP_MAP = new TreeMap<String, PropertyDescriptor>();
+    private static final Map<String, PropertyDescriptor> PRIVATE_PROP_MAP = new TreeMap<>();
     public static final Map<String, PropertyDescriptor> PROPERTY_MAP = Collections.unmodifiableMap(PRIVATE_PROP_MAP);
 
     //Properties
@@ -475,8 +468,8 @@ public final class InstNIFS extends SPInstObsComp implements PropertyProvider, G
      * Return a list of InstConfigInfo objects describing the instrument's
      * queryable configuration parameters.
      */
-    public static List getInstConfigInfo() {
-        List<InstConfigInfo> configInfo = new LinkedList<InstConfigInfo>();
+    public static List<InstConfigInfo> getInstConfigInfo() {
+        final List<InstConfigInfo> configInfo = new LinkedList<>();
         configInfo.add(new InstConfigInfo(IMAGING_MIRROR_PROP));
         configInfo.add(new InstConfigInfo(DISPERSER_PROP));
         configInfo.add(new InstConfigInfo(MASK_PROP));
@@ -495,7 +488,7 @@ public final class InstNIFS extends SPInstObsComp implements PropertyProvider, G
         return GUIDE_PROBES;
     }
 
-    public static final ConfigInjector WAVELENGTH_INJECTOR = ConfigInjector.create(
+    public static final ConfigInjector<String> WAVELENGTH_INJECTOR = ConfigInjector.create(
         new ObsWavelengthCalc3<Disperser, Filter, Double>() {
             public PropertyDescriptor descriptor1() { return DISPERSER_PROP; }
             public PropertyDescriptor descriptor2() { return FILTER_PROP; }

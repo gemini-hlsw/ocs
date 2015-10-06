@@ -436,7 +436,6 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
 
         val selectedCatalog = catalogBox.selection.item
 
-
         val inst = ObservationInfo.toInstrument(instrumentName.text)
         val info = ObservationInfo(None, objectName.text.some, coordinates.some, inst, Option(guider.selection.item.strategy), guiders.toList, conditions.some, selectedCatalog, ProbeLimitsTable.loadOrThrow())
         val defaultQuery = CatalogQuery(coordinates, radiusConstraint, currentFilters, selectedCatalog)

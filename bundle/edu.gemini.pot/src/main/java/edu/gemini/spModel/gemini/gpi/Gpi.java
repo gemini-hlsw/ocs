@@ -1133,7 +1133,7 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
     public static final Map<String, PropertyDescriptor> PROPERTY_MAP = Collections.unmodifiableMap(PRIVATE_PROP_MAP);
 
     /**
-     * The name of the Flamingos2 instrument configuration
+     * The name of the GPI instrument configuration
      */
     public static final String INSTRUMENT_NAME_PROP = "GPI";
 

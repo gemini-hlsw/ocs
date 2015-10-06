@@ -489,12 +489,12 @@ public class TpeGuidePosFeature extends TpePositionFeature
 
     /**
      */
-    public void drag(TpeMouseEvent tme) {
+    public void drag(final TpeMouseEvent tme) {
         if (_dragObject != null && _dragObject.screenPos != null) {
             _dragObject.screenPos.x = tme.xWidget;
             _dragObject.screenPos.y = tme.yWidget;
 
-            SPTarget tp = (SPTarget) _dragObject.taggedPos;
+            final SPTarget tp = _dragObject.taggedPos;
             tp.setRaDecDegrees(tme.pos.getRaDeg(), tme.pos.getDecDeg());
         }
     }

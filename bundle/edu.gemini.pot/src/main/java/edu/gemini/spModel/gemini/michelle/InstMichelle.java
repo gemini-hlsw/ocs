@@ -1,11 +1,3 @@
-// Copyright 2002
-// Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-// See the file LICENSE for complete details.
-//
-// $Id: InstMichelle.java 45662 2012-05-31 02:54:05Z fnussber $
-//
-
 package edu.gemini.spModel.gemini.michelle;
 
 import edu.gemini.pot.sp.ISPObservation;
@@ -140,7 +132,7 @@ public final class InstMichelle extends SPInstObsComp implements PropertyProvide
     public static final PropertyDescriptor NEXP_PROP;
 
 
-    private static final Map<String, PropertyDescriptor> PRIVATE_PROP_MAP = new TreeMap<String, PropertyDescriptor>();
+    private static final Map<String, PropertyDescriptor> PRIVATE_PROP_MAP = new TreeMap<>();
     public static final Map<String, PropertyDescriptor> PROPERTY_MAP = Collections.unmodifiableMap(PRIVATE_PROP_MAP);
 
     static {
@@ -269,11 +261,7 @@ public final class InstMichelle extends SPInstObsComp implements PropertyProvide
             }
         }
 
-        if (maybeChopMode.getValue().equals(ChopMode.CHOP)) {
-            return true;
-        }
-
-        return false;
+        return maybeChopMode.getValue().equals(ChopMode.CHOP);
     }
 
     /**
@@ -899,7 +887,7 @@ public final class InstMichelle extends SPInstObsComp implements PropertyProvide
         v = Pio.getValue(paramSet, FIELD_ROTATOR_ANGLE_PROP.getName());
         if (v != null) {
             try {
-                setFieldRotatorAngle(new Some<Double>(Double.parseDouble(v)));
+                setFieldRotatorAngle(new Some<>(Double.parseDouble(v)));
             } catch (Exception ex) {
                 LOG.warning("Could not parse field rotator angle " + v);
             }
@@ -907,7 +895,7 @@ public final class InstMichelle extends SPInstObsComp implements PropertyProvide
         v = Pio.getValue(paramSet, SLIT_ANGLE_PROP.getName());
         if (v != null) {
             try {
-                setSlitAngle(new Some<Double>(Double.parseDouble(v)));
+                setSlitAngle(new Some<>(Double.parseDouble(v)));
             } catch (Exception ex) {
                 LOG.warning("Could not parse slit angle " + v);
             }
@@ -929,17 +917,17 @@ public final class InstMichelle extends SPInstObsComp implements PropertyProvide
      * Return the configuration for this component.
      */
     public ISysConfig getSysConfig() {
-        ISysConfig sc = new DefaultSysConfig(SeqConfigNames.INSTRUMENT_CONFIG_NAME);
+        final ISysConfig sc = new DefaultSysConfig(SeqConfigNames.INSTRUMENT_CONFIG_NAME);
 
         // Fill in the current values.
         sc.putParameter(StringParameter.getInstance(ISPDataObject.VERSION_PROP, getVersion()));
 
-        Option<DisperserOrder> dorder = getDisperserOrder();
+        final Option<DisperserOrder> dorder = getDisperserOrder();
         if (!dorder.isEmpty()) {
             sc.putParameter(DefaultParameter.getInstance(DISPERSER_ORDER_PROP.getName(), dorder.getValue()));
         }
 
-        Disperser d = getDisperser();
+        final Disperser d = getDisperser();
         sc.putParameter(DefaultParameter.getInstance(DISPERSER_PROP.getName(), d));
         if (d != Disperser.MIRROR) {
             sc.putParameter(DefaultParameter.getInstance(DISPERSER_LAMBDA_PROP.getName(), getDisperserLambda()));
@@ -960,11 +948,11 @@ public final class InstMichelle extends SPInstObsComp implements PropertyProvide
         sc.putParameter(DefaultParameter.getInstance(POLARIMETRY_PROP.getName(), getPolarimetry()));
         sc.putParameter(DefaultParameter.getInstance(POS_ANGLE_PROP.getName(), getPosAngleDegrees()));
 
-        Option<FilterWheelA> filtA = getFilterWheelA();
+        final Option<FilterWheelA> filtA = getFilterWheelA();
         if (!filtA.isEmpty()) {
             sc.putParameter(DefaultParameter.getInstance(FILTER_A_PROP.getName(), filtA.getValue()));
         }
-        Option<FilterWheelB> filtB = getFilterWheelB();
+        final Option<FilterWheelB> filtB = getFilterWheelB();
         if (!filtB.isEmpty()) {
             sc.putParameter(DefaultParameter.getInstance(FILTER_B_PROP.getName(), filtB.getValue()));
         }
@@ -977,24 +965,24 @@ public final class InstMichelle extends SPInstObsComp implements PropertyProvide
         if (!pos.isEmpty()) {
             sc.putParameter(DefaultParameter.getInstance(EXTRACTOR_POSITION_PROP.getName(), pos.getValue()));
         }
-        Option<Double> rotAngle = getFieldRotatorAngle();
+        final Option<Double> rotAngle = getFieldRotatorAngle();
         if (!rotAngle.isEmpty()) {
             sc.putParameter(DefaultParameter.getInstance(FIELD_ROTATOR_ANGLE_PROP.getName(), rotAngle.getValue()));
         }
-        Option<Double> slitAngle = getSlitAngle();
+        final Option<Double> slitAngle = getSlitAngle();
         if (!slitAngle.isEmpty()) {
             sc.putParameter(DefaultParameter.getInstance(SLIT_ANGLE_PROP.getName(), getSlitAngle().getValue()));
         }
-        Option<EngMask> engMask = getEngineeringMask();
+        final Option<EngMask> engMask = getEngineeringMask();
         if (!engMask.isEmpty()) {
             sc.putParameter(DefaultParameter.getInstance(ENG_MASK_PROP.getName(), engMask.getValue()));
         }
-        Option<ChopMode> chopMode = getChopMode();
+        final Option<ChopMode> chopMode = getChopMode();
         if (!chopMode.isEmpty()) {
             sc.putParameter(DefaultParameter.getInstance(CHOP_MODE_PROP.getName(), chopMode.getValue()));
             sc.putParameter(DefaultParameter.getInstance(NEXP_PROP.getName(), getNexp()));
         }
-        Option<ChopWaveform> chopWaveform = getChopWaveform();
+        final Option<ChopWaveform> chopWaveform = getChopWaveform();
         if (!chopWaveform.isEmpty()) {
             sc.putParameter(DefaultParameter.getInstance(CHOP_WAVEFORM_PROP.getName(), chopWaveform.getValue()));
         }
@@ -1006,8 +994,8 @@ public final class InstMichelle extends SPInstObsComp implements PropertyProvide
      * Return a list of InstConfigInfo objects describing the instrument's
      * queryable configuration parameters.
      */
-    public static List getInstConfigInfo() {
-        List<InstConfigInfo> configInfo = new LinkedList<InstConfigInfo>();
+    public static List<InstConfigInfo> getInstConfigInfo() {
+        final List<InstConfigInfo> configInfo = new LinkedList<>();
 
         configInfo.add(new InstConfigInfo(DISPERSER_PROP));
         configInfo.add(new InstConfigInfo(MASK_PROP));
@@ -1025,7 +1013,7 @@ public final class InstMichelle extends SPInstObsComp implements PropertyProvide
         return false;
     }
 
-    public static final ConfigInjector WAVELENGTH_INJECTOR = ConfigInjector.create(
+    public static final ConfigInjector<String> WAVELENGTH_INJECTOR = ConfigInjector.create(
         new ObsWavelengthCalc3<Disperser, Filter, Double>() {
             public PropertyDescriptor descriptor1() { return DISPERSER_PROP; }
             public PropertyDescriptor descriptor2() { return FILTER_PROP; }

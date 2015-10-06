@@ -1,7 +1,3 @@
-//
-// $Id: InstNICI.java 45259 2012-05-14 23:58:29Z fnussber $
-//
-
 package edu.gemini.spModel.gemini.nici;
 
 import edu.gemini.pot.sp.ISPObservation;
@@ -70,9 +66,6 @@ import static edu.gemini.spModel.gemini.nici.NICIParams.*;
 // value associated with the not active CR mode.  When the CR mode is switched,
 // we also swap the not-active angle and the base class "pos angle".  Grim.
 //
-
-
-
 public final class InstNICI extends SPInstObsComp implements PropertyProvider, GuideProbeProvider, IssPortProvider, StepCalculator {
     private static final Logger LOG = Logger.getLogger(InstNICI.class.getName());
 
@@ -80,7 +73,7 @@ public final class InstNICI extends SPInstObsComp implements PropertyProvider, G
 
     public static final SPComponentType SP_TYPE = SPComponentType.INSTRUMENT_NICI;
 
-    private static final Map<String, PropertyDescriptor> PRIVATE_PROP_MAP = new TreeMap<String, PropertyDescriptor>();
+    private static final Map<String, PropertyDescriptor> PRIVATE_PROP_MAP = new TreeMap<>();
     public static final Map<String, PropertyDescriptor> PROPERTY_MAP = Collections.unmodifiableMap(PRIVATE_PROP_MAP);
 
     //Properties
@@ -253,12 +246,8 @@ public final class InstNICI extends SPInstObsComp implements PropertyProvider, G
     }
 
     // Predicate that leaves all CategorizedTime except for the offset overhead.
-    private static final PredicateOp<CategorizedTime> RM_OFFSET_OVERHEAD = new PredicateOp<CategorizedTime>() {
-        @Override public Boolean apply(CategorizedTime ct) {
-            return !((ct.category == Category.CONFIG_CHANGE) &&
-                     (ct.detail == OffsetOverheadCalculator.DETAIL));
-        }
-    };
+    private static final PredicateOp<CategorizedTime> RM_OFFSET_OVERHEAD = ct -> !((ct.category == Category.CONFIG_CHANGE) &&
+             OffsetOverheadCalculator.DETAIL.equals(ct.detail));
 
     // Get correct offset overhead in the common group.  If a small offset,
     // we remove the offset overhead put there by the common step calculator
@@ -271,7 +260,7 @@ public final class InstNICI extends SPInstObsComp implements PropertyProvider, G
     }
 
     @Override public CategorizedTimeGroup calc(Config cur, Option<Config> prev) {
-        Collection<CategorizedTime> times = new ArrayList<CategorizedTime>();
+        Collection<CategorizedTime> times = new ArrayList<>();
 
         // Add time for any configuration change.
         if (PlannedTime.isUpdated(cur, prev,
@@ -496,8 +485,8 @@ public final class InstNICI extends SPInstObsComp implements PropertyProvider, G
     /**
      * This method is called by the OT Browser to determine how to query the instrument
      */
-    public static List getInstConfigInfo() {
-        List<InstConfigInfo> configInfo = new LinkedList<InstConfigInfo>();
+    public static List<InstConfigInfo> getInstConfigInfo() {
+        final List<InstConfigInfo> configInfo = new LinkedList<>();
         configInfo.add(new InstConfigInfo(FOCAL_PLANE_MASK_PROP));
         configInfo.add(new InstConfigInfo(PUPIL_MASK_PROP));
         configInfo.add(new InstConfigInfo(CASS_ROTATOR_PROP));
@@ -561,7 +550,7 @@ public final class InstNICI extends SPInstObsComp implements PropertyProvider, G
         return res;
     }
 
-    public static ConfigInjector WAVELENGTH_INJECTOR = ConfigInjector.create(
+    public static ConfigInjector<String> WAVELENGTH_INJECTOR = ConfigInjector.create(
         new ObsWavelengthCalc3<ImagingMode, Channel1FW, Channel2FW>() {
 
             public PropertyDescriptor descriptor1() { return IMAGING_MODE_PROP; }

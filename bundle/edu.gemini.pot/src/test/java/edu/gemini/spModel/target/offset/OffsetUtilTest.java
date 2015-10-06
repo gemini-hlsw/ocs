@@ -1,7 +1,3 @@
-//
-// $
-//
-
 package edu.gemini.spModel.target.offset;
 
 import edu.gemini.skycalc.Angle;
@@ -40,9 +36,9 @@ public class OffsetUtilTest extends TestCase {
     }
 
     protected void setUp() {
-        emptyPosList  = new OffsetPosList<OffsetPos>(OffsetPos.FACTORY);
-        singlePosList = new OffsetPosList<OffsetPos>(OffsetPos.FACTORY);
-        twoPosList    = new OffsetPosList<OffsetPos>(OffsetPos.FACTORY);
+        emptyPosList  = new OffsetPosList<>(OffsetPos.FACTORY);
+        singlePosList = new OffsetPosList<>(OffsetPos.FACTORY);
+        twoPosList    = new OffsetPosList<>(OffsetPos.FACTORY);
 
         addPosition(singlePosList, 0);
         addPosition(twoPosList, 0);
@@ -53,68 +49,68 @@ public class OffsetUtilTest extends TestCase {
     }
 
     public void testGetOffsets() throws Exception {
-        Set<Offset> res = OffsetUtil.getOffsets((OffsetPosList[])null);
+        Set<Offset> res = OffsetUtil.getOffsets((OffsetPosList<?>[])null);
         assertEquals(0, res.size());
 
-        res = OffsetUtil.getOffsets(new OffsetPosList[] {});
+        res = OffsetUtil.getOffsets(new OffsetPosList<?>[] {});
         assertEquals(0, res.size());
 
-        res = OffsetUtil.getOffsets(new OffsetPosList[] {emptyPosList});
+        res = OffsetUtil.getOffsets(new OffsetPosList<?>[] {emptyPosList});
         assertEquals(0, res.size());
 
-        res = OffsetUtil.getOffsets(new OffsetPosList[] {emptyPosList, singlePosList});
+        res = OffsetUtil.getOffsets(new OffsetPosList<?>[] {emptyPosList, singlePosList});
         assertEquals(1, res.size());
         assertEquals(offset0, res.iterator().next());
 
-        res = OffsetUtil.getOffsets(new OffsetPosList[] {singlePosList, twoPosList});
+        res = OffsetUtil.getOffsets(new OffsetPosList<?>[] {singlePosList, twoPosList});
         assertEquals(2, res.size());
         assertTrue(res.contains(offset0));
         assertTrue(res.contains(offset1));
     }
 
     public void testOptionGetOffsets() throws Exception {
-        Option<OffsetPosList[]> none = None.instance();
+        Option<OffsetPosList<?>[]> none = None.instance();
         Set<Offset> res = OffsetUtil.getOffsets(none);
         assertEquals(0, res.size());
 
-        res = OffsetUtil.getOffsets(new Some<OffsetPosList[]>(new OffsetPosList[] {}));
+        res = OffsetUtil.getOffsets(new Some<>(new OffsetPosList<?>[] {}));
         assertEquals(0, res.size());
 
-        res = OffsetUtil.getOffsets(new Some<OffsetPosList[]>(new OffsetPosList[] {emptyPosList}));
+        res = OffsetUtil.getOffsets(new Some<>(new OffsetPosList<?>[] {emptyPosList}));
         assertEquals(0, res.size());
 
-        res = OffsetUtil.getOffsets(new Some<OffsetPosList[]>(new OffsetPosList[] {emptyPosList, singlePosList}));
+        res = OffsetUtil.getOffsets(new Some<>(new OffsetPosList<?>[] {emptyPosList, singlePosList}));
         assertEquals(1, res.size());
         assertEquals(offset0, res.iterator().next());
 
-        res = OffsetUtil.getOffsets(new Some<OffsetPosList[]>(new OffsetPosList[] {singlePosList, twoPosList}));
+        res = OffsetUtil.getOffsets(new Some<>(new OffsetPosList<?>[] {singlePosList, twoPosList}));
         assertEquals(2, res.size());
         assertTrue(res.contains(offset0));
         assertTrue(res.contains(offset1));
     }
 
     public void testGetScienceOffsets() throws Exception {
-        Set<Offset> res = OffsetUtil.getSciencePositions((OffsetPosList[])null);
+        Set<Offset> res = OffsetUtil.getSciencePositions((OffsetPosList<?>[])null);
         assertEquals(1, res.size());
         assertTrue(res.contains(offset0));
 
-        res = OffsetUtil.getSciencePositions(new OffsetPosList[] {});
+        res = OffsetUtil.getSciencePositions(new OffsetPosList<?>[] {});
         assertEquals(1, res.size());
         assertTrue(res.contains(offset0));
 
-        res = OffsetUtil.getSciencePositions(new OffsetPosList[] {emptyPosList});
+        res = OffsetUtil.getSciencePositions(new OffsetPosList<?>[] {emptyPosList});
         assertEquals(1, res.size());
         assertTrue(res.contains(offset0));
 
-        OffsetPosList<OffsetPos> pl = new OffsetPosList<OffsetPos>(OffsetPos.FACTORY);
+        OffsetPosList<OffsetPos> pl = new OffsetPosList<>(OffsetPos.FACTORY);
         addPosition(pl, 1);
-        res = OffsetUtil.getSciencePositions(new OffsetPosList[] {pl});
+        res = OffsetUtil.getSciencePositions(new OffsetPosList<?>[] {pl});
         assertEquals(1, res.size());
         assertTrue(res.contains(offset1));
     }
 
     public void testFilterSkyPositions() throws Exception {
-        OffsetPosList<OffsetPos> pl = new OffsetPosList<OffsetPos>(OffsetPos.FACTORY);
+        OffsetPosList<OffsetPos> pl = new OffsetPosList<>(OffsetPos.FACTORY);
         final OffsetPos pos0 = addPosition(pl, 0);
         final OffsetPos pos1 = addPosition(pl, 1);
         final OffsetPos pos2 = addPosition(pl, 2);
@@ -126,7 +122,7 @@ public class OffsetUtilTest extends TestCase {
         pos2.setLink(GUIDER1, inactive);
         pos2.setLink(GUIDER2, inactive);
 
-        Set<Offset> res = OffsetUtil.getSciencePositions(new OffsetPosList[] {pl});
+        Set<Offset> res = OffsetUtil.getSciencePositions(new OffsetPosList<?>[] {pl});
         assertEquals(2, res.size());
         assertTrue(res.contains(offset0));
         assertTrue(res.contains(offset1));
@@ -134,7 +130,7 @@ public class OffsetUtilTest extends TestCase {
 
     public void testFilterAllPositions() throws Exception {
 
-        OffsetPosList<OffsetPos> pl = new OffsetPosList<OffsetPos>(OffsetPos.FACTORY);
+        OffsetPosList<OffsetPos> pl = new OffsetPosList<>(OffsetPos.FACTORY);
         final OffsetPos pos1 = addPosition(pl, 1);
         final OffsetPos pos2 = addPosition(pl, 2);
 
@@ -146,7 +142,7 @@ public class OffsetUtilTest extends TestCase {
         pos2.setLink(GUIDER1, inactive);
         pos2.setLink(GUIDER2, inactive);
 
-        Set<Offset> res = OffsetUtil.getSciencePositions(new OffsetPosList[] {pl});
+        Set<Offset> res = OffsetUtil.getSciencePositions(new OffsetPosList<?>[] {pl});
         assertEquals(1, res.size());
         assertTrue(res.contains(offset0));
     }
