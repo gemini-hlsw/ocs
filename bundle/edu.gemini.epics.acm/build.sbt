@@ -42,5 +42,5 @@ OsgiKeys.bundleSymbolicName := name.value
 OsgiKeys.dynamicImportPackage := Seq("")
 
 OsgiKeys.exportPackage := Seq(
-  "edu.geminu.epics.acm"
+  "edu.gemini.epics.acm"
 )
