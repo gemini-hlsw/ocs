@@ -1,7 +1,3 @@
-//
-// $Id$
-//
-
 package jsky.app.ot.editor.seq;
 
 import edu.gemini.pot.sp.SPNodeKey;
@@ -25,7 +21,7 @@ import static jsky.app.ot.editor.seq.Keys.*;
  * Table model that holds the values in the configuration that change over its
  * course.
  */
-public class DynamicSequenceTableModel extends AbstractTableModel {
+public final class DynamicSequenceTableModel extends AbstractTableModel {
     public static final ItemKey[] SORT_ORDER = new ItemKey[] {
             DATALABEL_KEY,
             OBS_CLASS_KEY,
@@ -40,22 +36,22 @@ public class DynamicSequenceTableModel extends AbstractTableModel {
 
     private SPNodeKey _nodeKey;
 
-    public void setSequence(ConfigSequence sequence, SPNodeKey key, List<ItemKey> alwaysShow) {
+    public void setSequence(final ConfigSequence sequence, final SPNodeKey key, final List<ItemKey> alwaysShow) {
         _sequence     = sequence;
         _nodeKey      = key;
 
         final ItemKey[] newIteratedKeys = sort(getIteratedKeys(sequence, alwaysShow));
-        if (newIteratedKeys.equals(_iteratedKeys)) {
+        if (Arrays.equals(newIteratedKeys, _iteratedKeys)) {
             fireTableDataChanged();
         } else {
-            _iteratedKeys = sort(getIteratedKeys(sequence, alwaysShow));
+            _iteratedKeys = newIteratedKeys;
             fireTableStructureChanged();
         }
     }
 
-    private Set<ItemKey> getIteratedKeys(ConfigSequence seq, List<ItemKey> alwaysShow) {
-        Set<ItemKey> res = new HashSet<ItemKey>();
-        ItemKey[]   keys = seq.getIteratedKeys();
+    private Set<ItemKey> getIteratedKeys(final ConfigSequence seq, final List<ItemKey> alwaysShow) {
+        final Set<ItemKey> res = new HashSet<>();
+        final ItemKey[]   keys = seq.getIteratedKeys();
         for (ItemKey key : keys) {
             // Strip out all the smart gcal metadata.
             if (MetaDataConfig.MATCHER.matches(key) || SmartgcalSysConfig.MATCHER.matches(key)) continue;
@@ -111,8 +107,8 @@ public class DynamicSequenceTableModel extends AbstractTableModel {
         return res;
     }
 
-    private ItemKey[] sort(Set<ItemKey> keys) {
-        List<ItemKey> res = new ArrayList<ItemKey>(keys.size());
+    private ItemKey[] sort(final Set<ItemKey> keys) {
+        final List<ItemKey> res = new ArrayList<>(keys.size());
 
         // First put in the keys from the sort order that are present in the
         // iterated keys set.
@@ -123,13 +119,13 @@ public class DynamicSequenceTableModel extends AbstractTableModel {
         }
 
         // Now sort everything that's left by name.
-        List<ItemKey> sortedKeys = new ArrayList<ItemKey>(keys);
+        final List<ItemKey> sortedKeys = new ArrayList<>(keys);
         Collections.sort(sortedKeys);
 
         // Now we're left with the everything whose order isn't fixed.  Split
         // them up by path prefix.  In other words, group the instrument items,
         // telescope items, etc.
-        Map<String, List<ItemKey>> groupedItems = new HashMap<String, List<ItemKey>>();
+        final Map<String, List<ItemKey>> groupedItems = new HashMap<>();
         for (ItemKey key : sortedKeys) {
 
             // Get the broad category for the item -- the root parent
@@ -143,7 +139,7 @@ public class DynamicSequenceTableModel extends AbstractTableModel {
             // Add it to the list for that parent.
             List<ItemKey> lst = groupedItems.get(parent.getName());
             if (lst == null) {
-                lst = new ArrayList<ItemKey>();
+                lst = new ArrayList<>();
                 groupedItems.put(parent.getName(), lst);
             }
             lst.add(key);
@@ -166,7 +162,7 @@ public class DynamicSequenceTableModel extends AbstractTableModel {
             res.addAll(groupedItems.get(category));
         }
 
-        return res.toArray(new ItemKey[0]);
+        return res.toArray(new ItemKey[res.size()]);
     }
 
     public int getRowCount() {
@@ -179,18 +175,18 @@ public class DynamicSequenceTableModel extends AbstractTableModel {
         return _iteratedKeys.length;
     }
 
-    private boolean isGcal(Config config) {
-        String type = (String) config.getItemValue(OBS_TYPE_KEY);
+    private boolean isGcal(final Config config) {
+        final String type = (String) config.getItemValue(OBS_TYPE_KEY);
         return InstConstants.FLAT_OBSERVE_TYPE.equals(type) ||
                InstConstants.ARC_OBSERVE_TYPE.equals(type);
     }
 
-    public Object getValueAt(int rowIndex, int columnIndex) {
+    public Object getValueAt(final int rowIndex, final int columnIndex) {
         if (_sequence == null) return null;
         if (_sequence.size() == 0) return null;
 
-        Config config = _sequence.getStep(rowIndex);
-        ItemKey   key = _iteratedKeys[columnIndex];
+        final Config config = _sequence.getStep(rowIndex);
+        final ItemKey   key = _iteratedKeys[columnIndex];
         if (!isGcal(config) && "calibration".equals(key.getParent().toString())) return "";
         Object    val = config.getItemValue(key);
 
@@ -203,12 +199,12 @@ public class DynamicSequenceTableModel extends AbstractTableModel {
         return val;
     }
 
-    public ItemKey getItemKeyAt(int columnIndex) {
+    public ItemKey getItemKeyAt(final int columnIndex) {
         if ((_iteratedKeys == null) || (_iteratedKeys.length == 0)) return null;
         return _iteratedKeys[columnIndex];
     }
 
-    public Class getColumnClass(int columnIndex) {
+    public Class<?> getColumnClass(final int columnIndex) {
         return Object.class; // sorry, the columns are dynamically generated
     }
 
@@ -223,22 +219,22 @@ public class DynamicSequenceTableModel extends AbstractTableModel {
         return "<html>" + res.replaceFirst(" ", "<br/>") + "</html>";
     }
 
-    public boolean isComplete(int step) {
+    public boolean isComplete(final int step) {
         if (_sequence == null) return false;
-        Object val = _sequence.getItemValue(step, OBS_STATUS_KEY);
+        final Object val = _sequence.getItemValue(step, OBS_STATUS_KEY);
         return "complete".equals(val);
     }
 
-    public boolean isError(int step) {
+    public boolean isError(final int step) {
         if (_sequence == null) return false;
-        Object val = _sequence.getItemValue(step, SmartgcalSysConfig.MAPPING_ERROR_KEY);
+        final Object val = _sequence.getItemValue(step, SmartgcalSysConfig.MAPPING_ERROR_KEY);
         return Boolean.TRUE.equals(val);
     }
 
-    public boolean matchesNodeId(int step) {
+    public boolean matchesNodeId(final int step) {
         if (_nodeKey == null) return true;
-        Object val = _sequence.getItemValue(step, SP_NODE_KEY);
-        List<SPNodeKey> keys = (List<SPNodeKey>) val;
+        final Object val = _sequence.getItemValue(step, SP_NODE_KEY);
+        final List<SPNodeKey> keys = (List<SPNodeKey>) val;
         return (keys == null) || keys.contains(_nodeKey);
     }
 }
