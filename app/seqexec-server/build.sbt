@@ -45,11 +45,13 @@ def common(version: Version) = AppConfig(
     BundleSpec("edu.gemini.shared.gui",        version),
     BundleSpec("edu.gemini.spModel.io",        version),
     BundleSpec("edu.gemini.spModel.smartgcal", version),
+    BundleSpec("edu.gemini.epics.acm",         version),
     BundleSpec("org.scala-lang.scala-reflect", Version(2, 10, 1)),
     BundleSpec("org.scala-lang.scala-swing",   Version(2, 0, 0)),
     BundleSpec("slf4j.api",                    Version(1, 6, 4)),
     BundleSpec("slf4j.jdk14",                  Version(1, 6, 4)),
-    BundleSpec("org.apache.commons.logging",   Version(1, 1, 0))
+    BundleSpec("org.apache.commons.logging",   Version(1, 1, 0)),
+    BundleSpec("squants",                      Version(0, 5, 3))
   )
 )
 
