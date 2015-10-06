@@ -59,7 +59,7 @@ public final class InstTReCS extends SPInstObsComp implements PropertyProvider, 
     public static final SPComponentType SP_TYPE =
             SPComponentType.INSTRUMENT_TRECS;
 
-    private static final Map<String, PropertyDescriptor> PRIVATE_PROP_MAP = new TreeMap<String, PropertyDescriptor>();
+    private static final Map<String, PropertyDescriptor> PRIVATE_PROP_MAP = new TreeMap<>();
     public static final Map<String, PropertyDescriptor> PROPERTY_MAP = Collections.unmodifiableMap(PRIVATE_PROP_MAP);
 
     public static final PropertyDescriptor DISPERSER_PROP;
@@ -859,8 +859,8 @@ public final class InstTReCS extends SPInstObsComp implements PropertyProvider, 
     /**
      * Return a list of InstConfigInfo objects describing the instrument's queryable configuration parameters.
      */
-    public static List getInstConfigInfo() {
-        List<InstConfigInfo> configInfo = new LinkedList<InstConfigInfo>();
+    public static List<InstConfigInfo> getInstConfigInfo() {
+        final List<InstConfigInfo> configInfo = new LinkedList<>();
         configInfo.add(new InstConfigInfo(DISPERSER_PROP));
         configInfo.add(new InstConfigInfo(MASK_PROP));
         configInfo.add(new InstConfigInfo(FILTER_PROP));
@@ -876,7 +876,7 @@ public final class InstTReCS extends SPInstObsComp implements PropertyProvider, 
         return PROPERTY_MAP;
     }
 
-    public static final ConfigInjector WAVELENGTH_INJECTOR = ConfigInjector.create(
+    public static final ConfigInjector<String> WAVELENGTH_INJECTOR = ConfigInjector.create(
         new ObsWavelengthCalc3<Disperser, Filter, Double>() {
             public PropertyDescriptor descriptor1() { return DISPERSER_PROP; }
             public PropertyDescriptor descriptor2() { return FILTER_PROP; }

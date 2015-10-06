@@ -150,8 +150,7 @@ public class InstNICITest extends TestCase {
      * Test to see that simple set/get works, as well as serialization of the property,
      * persistence to/from a ParamSet.
      */
-    private void testProperty(InstNICI target, String propName, Class type, Collection values) throws Exception {
-
+    private void testProperty(InstNICI target, String propName, Class<?> type, Collection<?> values) throws Exception {
         String propertyName = Character.toUpperCase(propName.charAt(0)) + "";
         if (propName.length() > 1) {
             propertyName += propName.substring(1);
@@ -182,15 +181,15 @@ public class InstNICITest extends TestCase {
     }
 
     private void testProperty(InstNICI target, String propName, double[] values) throws Exception {
-        Collection<Double> vals = new ArrayList<Double>(values.length);
+        Collection<Double> vals = new ArrayList<>(values.length);
         for (double value : values) vals.add(value);
         testProperty(target, propName, Double.TYPE, vals);
     }
 
      private void testProperty(InstNICI target, String propName, Object[] values) throws Exception {
-        Collection<Object> vals = new ArrayList<Object>(values.length);
+        Collection<Object> vals = new ArrayList<>(values.length);
         if (values.length <= 0) throw new Exception("Collection has zero elements!");
-        Class type = values[0].getClass();
+        Class<?> type = values[0].getClass();
         vals.addAll(Arrays.asList(values));
 
          if (type.getSuperclass().isEnum()) {
@@ -201,7 +200,7 @@ public class InstNICITest extends TestCase {
     }
 
     private void testProperty(InstNICI target, String propName, int[] values) throws Exception {
-        Collection<Integer> vals = new ArrayList<Integer>(values.length);
+        Collection<Integer> vals = new ArrayList<>(values.length);
         for (int value : values) vals.add(value);
         testProperty(target, propName, Integer.TYPE, vals);
     }

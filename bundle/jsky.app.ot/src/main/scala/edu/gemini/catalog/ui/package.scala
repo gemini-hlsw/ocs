@@ -1,0 +1,310 @@
+package edu.gemini.catalog.ui
+
+import javax.swing.table._
+
+import edu.gemini.ags.api.AgsMagnitude.MagnitudeTable
+import edu.gemini.ags.api.{AgsAnalysis, AgsGuideQuality, AgsRegistrar, AgsStrategy}
+import edu.gemini.catalog.api.{UCAC4, CatalogName, CatalogQuery}
+import edu.gemini.pot.sp.SPComponentType
+import edu.gemini.shared.util.immutable.{None => JNone, Some => JSome}
+import edu.gemini.spModel.core.Target.SiderealTarget
+import edu.gemini.spModel.core._
+import edu.gemini.spModel.gemini.flamingos2.Flamingos2
+import edu.gemini.spModel.gemini.gmos.{InstGmosSouth, InstGmosNorth}
+import edu.gemini.spModel.gemini.gnirs.{GNIRSConstants, InstGNIRS}
+import edu.gemini.spModel.gemini.gsaoi.Gsaoi
+import edu.gemini.spModel.gemini.michelle.InstMichelle
+import edu.gemini.spModel.gemini.nici.InstNICI
+import edu.gemini.spModel.gemini.nifs.InstNIFS
+import edu.gemini.spModel.gemini.niri.InstNIRI
+import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.Conditions
+import edu.gemini.spModel.gemini.phoenix.InstPhoenix
+import edu.gemini.spModel.gemini.texes.InstTexes
+import edu.gemini.spModel.gemini.trecs.InstTReCS
+import edu.gemini.spModel.gemini.visitor.VisitorInstrument
+import edu.gemini.spModel.guide.ValidatableGuideProbe
+import edu.gemini.spModel.obs.context.ObsContext
+import edu.gemini.spModel.target.SPTarget
+import edu.gemini.spModel.target.env.TargetEnvironment
+import jsky.app.ot.gemini.editor.targetComponent.GuidingFeedback.ProbeLimits
+import edu.gemini.pot.ModelConverters._
+
+import scala.language.existentials
+import scala.swing.{Alignment, Label, Component}
+import scala.collection.JavaConverters._
+import scalaz._
+import Scalaz._
+
+
+/**
+ * Locally describe an ags strategy including its limits and the query that would trigger
+ */
+case class SupportedStrategy(strategy: AgsStrategy, limits: Option[ProbeLimits], query: List[CatalogQuery])
+
+/**
+ * Describes the observation used to do a Guide Star Search
+ */
+case class ObservationInfo(ctx: Option[ObsContext], objectName: Option[String], baseCoordinates: Option[Coordinates], instrument: Option[SPComponentType], strategy: Option[AgsStrategy], validStrategies: List[SupportedStrategy], conditions: Option[Conditions], catalog: CatalogName, mt: MagnitudeTable) {
+  def catalogQuery:List[CatalogQuery] = validStrategies.collect {
+      case SupportedStrategy(s, _, query) if s == strategy => query
+    }.flatten
+
+  /**
+   * Attempts to find the guide probe for the selected strategy
+   */
+  def guideProbe: Option[ValidatableGuideProbe] =
+    strategy.flatMap(_.guideProbes.headOption.collect {
+                      case v: ValidatableGuideProbe => v
+                    })
+
+  /**
+   * Attempts to find the instrument name from the instrument field
+   */
+  def instrumentName:Option[String] = instrument.flatMap{i => ObservationInfo.InstMap.find(_._2 == i)}.map(_._1)
+
+  /**
+   * An obscontext is required for guide quality calculation. The method below will attempt to create a context out of the information on the query form
+   * TODO: Review if this is the best way to proceed
+   */
+  def toContext: Option[ObsContext] = ctx.orElse {
+    val inst = instrument.collect {
+      case SPComponentType.INSTRUMENT_FLAMINGOS2 => new Flamingos2()
+      case SPComponentType.INSTRUMENT_GMOS       => new InstGmosNorth()
+      case SPComponentType.INSTRUMENT_GMOSSOUTH  => new InstGmosSouth()
+      case SPComponentType.INSTRUMENT_GNIRS      => new InstGNIRS()
+      case SPComponentType.INSTRUMENT_GSAOI      => new Gsaoi()
+      case SPComponentType.INSTRUMENT_MICHELLE   => new InstMichelle()
+      case SPComponentType.INSTRUMENT_NICI       => new InstNICI()
+      case SPComponentType.INSTRUMENT_NIFS       => new InstNIFS()
+      case SPComponentType.INSTRUMENT_NIRI       => new InstNIRI()
+      case SPComponentType.INSTRUMENT_PHOENIX    => new InstPhoenix()
+      case SPComponentType.INSTRUMENT_TEXES      => new InstTexes()
+      case SPComponentType.INSTRUMENT_TRECS      => new InstTReCS()
+      case SPComponentType.INSTRUMENT_VISITOR    => new VisitorInstrument()
+    }
+    val site = inst.flatMap(_.getSite.asScala.headOption)
+    (baseCoordinates |@| inst |@| site){ (c, i, s) =>
+      val target = new SPTarget(c.ra.toAngle.toDegrees, c.dec.toDegrees) <| {_.setName(~objectName)}
+      val env = TargetEnvironment.create(target)
+      // To calculate analysis of guide quality, it is required the site, insturment and conditions
+      // TODO Verify if we need offsets, AO info and scheduling block
+      ObsContext.create(env, i, new JSome(s), conditions.get, null, null, JNone.instance())
+    }
+  }
+}
+
+object ObservationInfo {
+
+  private val InstMap = Map[String, SPComponentType](
+    Flamingos2.INSTRUMENT_NAME_PROP        -> SPComponentType.INSTRUMENT_FLAMINGOS2,
+    InstGmosNorth.INSTRUMENT_NAME_PROP     -> SPComponentType.INSTRUMENT_GMOS,
+    InstGmosSouth.INSTRUMENT_NAME_PROP     -> SPComponentType.INSTRUMENT_GMOSSOUTH,
+    GNIRSConstants.INSTRUMENT_NAME_PROP    -> SPComponentType.INSTRUMENT_GNIRS,
+    InstMichelle.INSTRUMENT_NAME_PROP      -> SPComponentType.INSTRUMENT_MICHELLE,
+    InstNICI.INSTRUMENT_NAME_PROP          -> SPComponentType.INSTRUMENT_NICI,
+    InstNIFS.INSTRUMENT_NAME_PROP          -> SPComponentType.INSTRUMENT_NIFS,
+    InstNIRI.INSTRUMENT_NAME_PROP          -> SPComponentType.INSTRUMENT_NIRI,
+    InstPhoenix.INSTRUMENT_NAME_PROP       -> SPComponentType.INSTRUMENT_PHOENIX,
+    InstTexes.INSTRUMENT_NAME_PROP         -> SPComponentType.INSTRUMENT_TEXES,
+    InstTReCS.INSTRUMENT_NAME_PROP         -> SPComponentType.INSTRUMENT_TRECS,
+    VisitorInstrument.INSTRUMENT_NAME_PROP -> SPComponentType.INSTRUMENT_VISITOR
+  )
+
+  /**
+   * find the instrument for a given name
+   * TODO: verify if there is a better way to find out the instrument names
+   * TODO: Should we support al the instruments on the map?
+   * TODO: Move the instrument selection into a combo box
+   */
+  def toInstrument(name: String):Option[SPComponentType] = InstMap.get(name)
+
+  /**
+   * Converts an AgsStrategy to a simpler description to be stored in the UI model
+   */
+  private def toSupportedStrategy(obsCtx: ObsContext, strategy: AgsStrategy, mt: MagnitudeTable):SupportedStrategy = {
+    val pb = strategy.magnitudes(obsCtx, mt).map(k => ProbeLimits(strategy.probeBands, obsCtx, k._2)).headOption
+    val queries = strategy.catalogQueries(obsCtx, mt)
+    SupportedStrategy(strategy, pb.flatten, queries)
+  }
+
+  def apply(ctx: ObsContext, mt: MagnitudeTable):ObservationInfo = ObservationInfo(
+    ctx.some,
+    Option(ctx.getTargets.getBase).map(_.getTarget.getName),
+    Option(ctx.getTargets.getBase).map(_.getTarget.getSkycalcCoordinates.toNewModel),
+    Option(ctx.getInstrument.getType),
+    AgsRegistrar.currentStrategy(ctx),
+    AgsRegistrar.validStrategies(ctx).map(toSupportedStrategy(ctx, _, mt)),
+    ctx.getConditions.some,
+    UCAC4,
+    mt)
+
+}
+
+/**
+ * Represents a table column description
+ * @tparam T The type of the column
+ */
+abstract class CatalogNavigatorColumn[T >: Null: Manifest] {
+  def title: String
+
+  def lens: PLens[Target, T]
+
+  // Display the value in the table as String. values are Any in the table model
+  def displayValue(t: Any): Option[String] = Option(t).map(_.toString)
+
+  // Extract the data from the target via the lens
+  def render(target: Target): Option[T] = lens.get(target)
+
+  // Indicates the class of the column
+  def clazz:Class[_] = manifest.runtimeClass
+
+  // Returns the ordering for the column
+  def ordering: scala.math.Ordering[T] // TODO Could we make this generic? implicitly[Ordering[T]] does not work :S
+}
+
+case class IdColumn(title: String) extends CatalogNavigatorColumn[String] {
+  override val lens = Target.name
+
+  def ordering = implicitly[scala.math.Ordering[String]]
+}
+
+case class GuidingQuality(info: Option[ObservationInfo], title: String) extends CatalogNavigatorColumn[AgsGuideQuality] {
+  // Calculate the guiding quality of the target
+  def target2Analysis(t: Target):Option[AgsAnalysis] = {
+    (for {
+      o                               <- info
+      s                               <- o.strategy
+      gp                              <- o.guideProbe
+      st @ SiderealTarget(_, _, _, _) = t
+      ctx                             <- o.toContext
+    } yield s.analyze(ctx, o.mt, gp, st)).flatten
+  }
+
+  val gf: SiderealTarget @?> AgsGuideQuality = PLens(t => target2Analysis(t).map(p => Store(q => sys.error("Not in use"), p.quality)))
+
+  override val lens: Target @?> AgsGuideQuality = PLens(_.fold(
+    PLens.nil.run,
+    gf.run,
+    PLens.nil.run
+  ))
+
+  def ordering = implicitly[scala.math.Ordering[AgsGuideQuality]]
+}
+
+case class RAColumn(title: String) extends CatalogNavigatorColumn[RightAscension] {
+  override val lens = Target.coords >=> Coordinates.ra.partial
+
+  override def displayValue(t: Any) = Option(t).collect {
+    case r: RightAscension => r.toAngle.formatHMS
+  }
+
+  def ordering = implicitly[scala.math.Ordering[RightAscension]]
+}
+
+case class DECColumn(title: String) extends CatalogNavigatorColumn[Declination] {
+  override val lens = Target.coords >=> Coordinates.dec.partial
+
+  override def displayValue(t: Any) = Option(t).collect {
+    case d: Declination => d.formatDMS
+  }
+
+  def ordering = implicitly[scala.math.Ordering[Declination]]
+}
+
+case class DistanceColumn(base: Coordinates, title: String) extends CatalogNavigatorColumn[Angle] {
+  val distance: Coordinates @> Angle = Lens(c => Store(r => c, Coordinates.difference(base, c).distance))
+
+  override val lens = Target.coords >=> distance.partial
+
+  override def displayValue(t: Any) = Option(t).collect {
+    case a: Angle => f"${a.toArcmins}%.2f"
+  }
+
+  def ordering = implicitly[scala.math.Ordering[Angle]]
+}
+
+case class PMRAColumn(title: String) extends CatalogNavigatorColumn[RightAscensionAngularVelocity] {
+  override val lens = Target.pm >=> ProperMotion.deltaRA.partial
+
+  override def displayValue(t: Any) = Option(t).collect {
+    case r: RightAscensionAngularVelocity => f"${r.velocity.masPerYear}%.2f"
+  }
+
+  def ordering = implicitly[scala.math.Ordering[RightAscensionAngularVelocity]]
+}
+
+case class PMDecColumn(title: String) extends CatalogNavigatorColumn[DeclinationAngularVelocity] {
+  override val lens = Target.pm >=> ProperMotion.deltaDec.partial
+
+  override def displayValue(t: Any) = Option(t).collect {
+    case d: DeclinationAngularVelocity => f"${d.velocity.masPerYear}%.2f"
+  }
+
+  def ordering = implicitly[scala.math.Ordering[DeclinationAngularVelocity]]
+}
+
+case class MagnitudeColumn(band: MagnitudeBand) extends CatalogNavigatorColumn[Magnitude] {
+  override val title = band.name
+  // Lens from list of magnitudes to the band's magnitude if present
+  val bLens: List[Magnitude] @?> Magnitude = PLens(ml => ml.find(_.band === band).map(m => Store(b => sys.error("read-only lens"), m)))
+  override val lens = Target.magnitudes >=> bLens
+
+  override def displayValue(t: Any) = Option(t).collect {
+    case m: Magnitude => f"${m.value}%.2f"
+  }
+
+  def ordering = implicitly[scala.math.Ordering[Magnitude]]
+}
+
+/**
+ * Data model for the main table of the catalog navigator
+ */
+case class TargetsModel(info: Option[ObservationInfo], base: Coordinates, targets: List[SiderealTarget]) extends AbstractTableModel {
+  // Required to give limits to the existential type list
+  type ColumnsList = List[CatalogNavigatorColumn[A] forSome { type A >: Null <: AnyRef}]
+
+  def baseColumnNames(base: Coordinates): ColumnsList = List(GuidingQuality(info, ""), IdColumn("Id"), RAColumn("RA"), DECColumn("Dec"), DistanceColumn(base, "Dist. [arcmin]"))
+  val pmColumns: ColumnsList  = List(PMRAColumn("µ RA"), PMDecColumn("µ Dec"))
+  val magColumns = MagnitudeBand.all.map(MagnitudeColumn)
+
+  // Available columns from the list of targets
+  val columns:ColumnsList = {
+    val bandsInTargets = targets.flatMap(_.magnitudes).map(_.band).distinct
+    val hasPM = targets.exists(_.properMotion.isDefined)
+    val pmCols = if (hasPM) pmColumns else Nil
+    val magCols = magColumns.filter(m => bandsInTargets.contains(m.band))
+
+    baseColumnNames(base) ::: pmCols ::: magCols
+  }
+
+  override def getRowCount = targets.length
+
+  override def getColumnCount = columns.size
+
+  override def getColumnName(column: Int): String =
+    columns(column).title
+
+  override def getValueAt(rowIndex: Int, columnIndex: Int):AnyRef =
+    targets.lift(rowIndex).flatMap { t =>
+      columns.lift(columnIndex) >>= {_.render(t)}
+    }.orNull
+
+  override def getColumnClass(columnIndex: Int): Class[_] = columns(columnIndex).clazz
+
+  def rendererComponent(value: Any, isSelected: Boolean, hasFocus: Boolean, row: Int, column: Int): Option[Component]= {
+    columns.lift(column).flatMap { c =>
+      c.displayValue(value).map(new Label(_) {
+        horizontalAlignment = Alignment.Right
+      })
+    }
+  }
+
+  // Returns a Table Sorter depending on the available columns
+  def sorter =
+    new TableRowSorter[TargetsModel](this) <| { _.toggleSortOrder(0) } <| { sorter =>
+      columns.zipWithIndex.foreach {
+        case (column, i)        => sorter.setComparator(i, column.ordering)
+      }
+    } <| { _.sort() }
+}
+

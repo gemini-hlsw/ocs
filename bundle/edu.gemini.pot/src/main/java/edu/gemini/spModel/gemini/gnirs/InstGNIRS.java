@@ -1,10 +1,3 @@
-// Copyright 2003
-// Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-//
-// $Id: InstGNIRS.java 47108 2012-08-01 01:30:06Z swalker $
-//
-
 package edu.gemini.spModel.gemini.gnirs;
 
 import edu.gemini.pot.sp.ISPObservation;
@@ -86,11 +79,9 @@ public class InstGNIRS extends ParallacticAngleSupportInst implements PropertyPr
     public static final PropertyDescriptor ACQUISITION_MIRROR_PROP;
     public static final PropertyDescriptor POS_ANGLE_CONSTRAINT_PROP;
 
-
     public static final PropertyDescriptor PORT_PROP;
 
-
-    private static final Map<String, PropertyDescriptor> PRIVATE_PROP_MAP = new TreeMap<String, PropertyDescriptor>();
+    private static final Map<String, PropertyDescriptor> PRIVATE_PROP_MAP = new TreeMap<>();
     public static final Map<String, PropertyDescriptor> PROPERTY_MAP = Collections.unmodifiableMap(PRIVATE_PROP_MAP);
 
     private static PropertyDescriptor initProp(String propName, boolean query, boolean iter) {
@@ -681,11 +672,9 @@ public class InstGNIRS extends ParallacticAngleSupportInst implements PropertyPr
 
     /**
      * Return a parameter set describing the current state of this object.
-     *
-     * @param factory
      */
-    public ParamSet getParamSet(PioFactory factory) {
-        ParamSet paramSet = super.getParamSet(factory);
+    public ParamSet getParamSet(final PioFactory factory) {
+        final ParamSet paramSet = super.getParamSet(factory);
 
         Pio.addParam(factory, paramSet, GNIRSConstants.PIXEL_SCALE_PROP, getPixelScale().name());
         Pio.addParam(factory, paramSet, GNIRSConstants.DISPERSER_PROP, getDisperser().name());
@@ -812,7 +801,7 @@ public class InstGNIRS extends ParallacticAngleSupportInst implements PropertyPr
      * queryable configuration parameters.
      */
     public static List<InstConfigInfo> getInstConfigInfo() {
-        List<InstConfigInfo> configInfo = new LinkedList<InstConfigInfo>();
+        final List<InstConfigInfo> configInfo = new LinkedList<>();
 
         configInfo.add(new InstConfigInfo(PIXEL_SCALE_PROP));
         configInfo.add(new InstConfigInfo(DISPERSER_PROP));

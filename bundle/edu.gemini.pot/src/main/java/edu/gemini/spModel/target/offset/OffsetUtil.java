@@ -1,7 +1,3 @@
-//
-// $
-//
-
 package edu.gemini.spModel.target.offset;
 
 import edu.gemini.pot.sp.*;
@@ -14,6 +10,7 @@ import edu.gemini.spModel.guide.GuideOption;
 import edu.gemini.spModel.guide.GuideProbe;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * A utility for converting between the old {@link OffsetPosList} and
@@ -27,7 +24,7 @@ public final class OffsetUtil {
     public static final Set<Offset> NO_OFFSETS = Collections.emptySet();
 
     /**
-     * A single {@ilnk Offset} at the base position.
+     * A single {@link Offset} at the base position.
      */
     public static final Set<Offset> BASE_POS_OFFSET =
             Collections.singleton(new Offset(new Angle(0, ARCSECS), new Angle(0, ARCSECS)));
@@ -38,19 +35,17 @@ public final class OffsetUtil {
      * given array of offset pos lists.  If there are none, then
      * {@link #NO_OFFSETS} are returned.
      */
-    public static Set<Offset> getOffsets(Option<OffsetPosList[]> posListAOpt) {
+    public static Set<Offset> getOffsets(Option<OffsetPosList<? extends OffsetPosBase>[]> posListAOpt) {
         if (posListAOpt.isEmpty()) return NO_OFFSETS;
         return getOffsets(posListAOpt.getValue());
     }
 
     // Get a set of all the offset positions in the given array of position
     // lists.
-    private static Collection<OffsetPosBase> extractOffsets(OffsetPosList[] posListA) {
-        Collection<OffsetPosBase> res = new ArrayList<OffsetPosBase>();
-        for (OffsetPosList opl : posListA) {
-            for (Object obj : opl.getAllPositions()) {
-                res.add((OffsetPosBase) obj);
-            }
+    private static Collection<OffsetPosBase> extractOffsets(OffsetPosList<? extends OffsetPosBase>[] posListA) {
+        Collection<OffsetPosBase> res = new ArrayList<>();
+        for (OffsetPosList<? extends OffsetPosBase> opl : posListA) {
+            res.addAll(opl.getAllPositions().stream().map(obj -> (OffsetPosBase) obj).collect(Collectors.toList()));
         }
         return res;
     }
@@ -59,7 +54,7 @@ public final class OffsetUtil {
     private static Set<Offset> convertOffsets(Collection<OffsetPosBase> col) {
         if (col.size() == 0) return NO_OFFSETS;
 
-        Set<Offset> res = new LinkedHashSet<Offset>();
+        Set<Offset> res = new LinkedHashSet<>();
         for (OffsetPosBase pos : col) {
             double x = pos.getXaxis();
             double y = pos.getYaxis();
@@ -105,7 +100,7 @@ public final class OffsetUtil {
      * Gets an unmodifiable Set of {@link Offset}s for all the positions in the
      * given array of offset pos lists.
      */
-    public static Set<Offset> getOffsets(OffsetPosList[] posListA) {
+    public static Set<Offset> getOffsets(OffsetPosList<? extends OffsetPosBase>[] posListA) {
         if ((posListA == null) || (posListA.length == 0)) return NO_OFFSETS;
         return convertOffsets(extractOffsets(posListA));
     }
@@ -115,7 +110,7 @@ public final class OffsetUtil {
      * If there are no explicit offset positions, then a single {@link Offset}
      * at the base position is returned.  See {@link #BASE_POS_OFFSET}.
      */
-    public static Set<Offset> getSciencePositions(Option<OffsetPosList[]> posListAOpt) {
+    public static Set<Offset> getSciencePositions(Option<OffsetPosList<? extends OffsetPosBase>[]> posListAOpt) {
         if (posListAOpt.isEmpty()) return BASE_POS_OFFSET;
         return getSciencePositions(posListAOpt.getValue());
     }
@@ -125,7 +120,7 @@ public final class OffsetUtil {
      * If there are no explicit offset positions, then a single {@link Offset}
      * at the base position is returned.  See {@link #BASE_POS_OFFSET}.
      */
-    public static Set<Offset> getSciencePositions(OffsetPosList[] posListA) {
+    public static Set<Offset> getSciencePositions(OffsetPosList<? extends OffsetPosBase>[] posListA) {
         if ((posListA == null) || (posListA.length == 0)) return BASE_POS_OFFSET;
 
         Set<Offset> res = convertOffsets(filterNonGuidedPositions(extractOffsets(posListA)));
@@ -139,7 +134,7 @@ public final class OffsetUtil {
 
     public static List<OffsetPosList<OffsetPosBase>> allOffsetPosLists(ISPNode node) {
         if (node == null) return Collections.emptyList();
-        final List<OffsetPosList<OffsetPosBase>> res = new ArrayList<OffsetPosList<OffsetPosBase>>();
+        final List<OffsetPosList<OffsetPosBase>> res = new ArrayList<>();
         addOffsetPosLists(node, res);
         return res;
     }

@@ -75,15 +75,6 @@ public abstract class EdCompInstGMOS<T extends InstGmosCommon> extends EdCompIns
     final PropertyChangeListener updateParallacticAnglePCL;
     final PropertyChangeListener updateUnboundedAnglePCL;
 
-//    /**
-//     * Value assigned to WFS tags to indicate that the WFS is parked (inactive).
-//     */
-//    public static final String PARKED = "park";
-//
-//    /**
-//     * Value assigned to WFS tags to indicate that the WFS is frozen (not moving).
-//     */
-//    public static final String FROZEN = "freeze";
 
     @Override
     public void focusGained(FocusEvent focusEvent) {
@@ -206,7 +197,7 @@ public abstract class EdCompInstGMOS<T extends InstGmosCommon> extends EdCompIns
      * The constructor initializes the user interface.
      */
     public EdCompInstGMOS() {
-        _w = new GmosForm<T>();
+        _w = new GmosForm<>();
         _offsetTable = _w.offsetTable;
         _customROITable = _w.customROITable;
 
@@ -268,36 +259,30 @@ public abstract class EdCompInstGMOS<T extends InstGmosCommon> extends EdCompIns
         _w.removeButton.addActionListener(this);
 
         // initialize the combo boxes
-        initListBox(_w.disperserComboBox, getDisperserClass(), new ActionListener() {
-            public void actionPerformed(ActionEvent evt) {
-                getDataObject().setDisperser((Enum) _w.disperserComboBox.getSelectedItem());
-                _updateDisperser();
-                _checkDisperserValue();
-            }
+        initListBox(_w.disperserComboBox, getDisperserClass(), evt -> {
+            getDataObject().setDisperser((Enum) _w.disperserComboBox.getSelectedItem());
+            _updateDisperser();
+            _checkDisperserValue();
         });
 
 
-        initListBox(_w.filterComboBox, getFilterClass(), new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                getDataObject().setFilter((Enum) _w.filterComboBox.getSelectedItem());
-                _checkDisperserValue();
+        initListBox(_w.filterComboBox, getFilterClass(), e -> {
+            getDataObject().setFilter((Enum) _w.filterComboBox.getSelectedItem());
+            _checkDisperserValue();
 
-            }
         });
 
-        initListBox(_w.detectorManufacturerComboBox, getDetectorManufacturerClass(), new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                final DetectorManufacturer selectedDetectorManufacturer =
-                        (DetectorManufacturer) _w.detectorManufacturerComboBox.getSelectedItem();
-                if (selectedDetectorManufacturer != getDataObject().getDetectorManufacturer()) {
-                    getDataObject().setDetectorManufacturer((DetectorManufacturer) _w.detectorManufacturerComboBox.getSelectedItem());
+        initListBox(_w.detectorManufacturerComboBox, getDetectorManufacturerClass(), e -> {
+            final DetectorManufacturer selectedDetectorManufacturer =
+                    (DetectorManufacturer) _w.detectorManufacturerComboBox.getSelectedItem();
+            if (selectedDetectorManufacturer != getDataObject().getDetectorManufacturer()) {
+                getDataObject().setDetectorManufacturer((DetectorManufacturer) _w.detectorManufacturerComboBox.getSelectedItem());
 //                    _instGMOS.initializeDetectorManufacturerValues();
 
-                    _updateControlVisibility();
-                    _updateReadoutCharacteristics();
-                    _updateNodAndShuffle();
-                    _updateCCD();
-                }
+                _updateControlVisibility();
+                _updateReadoutCharacteristics();
+                _updateNodAndShuffle();
+                _updateCCD();
             }
         });
 
@@ -355,28 +340,15 @@ public abstract class EdCompInstGMOS<T extends InstGmosCommon> extends EdCompIns
         _clearWarning(_w.warningCustomROI);
 
         _w.detectorManufacturerComboBox.setEnabled(OTOptions.isStaffGlobally()); // REL-1194
-        StaffBean$.MODULE$.addPropertyChangeListener(new PropertyChangeListener() {
-            @Override
-            public void propertyChange(PropertyChangeEvent evt) {
-                _w.detectorManufacturerComboBox.setEnabled(isEnabled() && OTOptions.isStaffGlobally()); // REL-1194
-            }
+        StaffBean$.MODULE$.addPropertyChangeListener(evt -> {
+            _w.detectorManufacturerComboBox.setEnabled(isEnabled() && OTOptions.isStaffGlobally()); // REL-1194
         });
 
         addCustomRoiPasteKeyBinding();
 
         // Create the property change listeners for the parallactic angle panel.
-        updateParallacticAnglePCL = new PropertyChangeListener() {
-            @Override
-            public void propertyChange(PropertyChangeEvent evt) {
-                _w.posAnglePanel.updateParallacticControls();
-            }
-        };
-        updateUnboundedAnglePCL   = new PropertyChangeListener() {
-            @Override
-            public void propertyChange(PropertyChangeEvent evt) {
-                _w.posAnglePanel.updateUnboundedControls();
-            }
-        };
+        updateParallacticAnglePCL = evt -> _w.posAnglePanel.updateParallacticControls();
+        updateUnboundedAnglePCL   = evt -> _w.posAnglePanel.updateUnboundedControls();
     }
 
     private Site getSite() {
@@ -399,8 +371,8 @@ public abstract class EdCompInstGMOS<T extends InstGmosCommon> extends EdCompIns
     //This method will initialize the DropDownListBox with the elements
     //indicated in Enum class, and will configure the widget to show all the
     //available options.
-    private <E extends Enum<E>> void initListBox(JComboBox widget, Class<E> c, ActionListener l) {
-        final SpTypeComboBoxModel<E> model = new SpTypeComboBoxModel<E>(c);
+    private <E extends Enum<E>> void initListBox(JComboBox<E> widget, Class<E> c, ActionListener l) {
+        final SpTypeComboBoxModel<E> model = new SpTypeComboBoxModel<>(c);
         widget.setModel(model);
         widget.setRenderer(new SpTypeComboBoxRenderer());
         widget.setMaximumRowCount(c.getEnumConstants().length);

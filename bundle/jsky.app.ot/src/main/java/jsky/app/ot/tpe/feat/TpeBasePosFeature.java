@@ -104,7 +104,7 @@ public class TpeBasePosFeature extends TpePositionFeature {
 
     /**
      */
-    public void drag(TpeMouseEvent tme) {
+    public void drag(final TpeMouseEvent tme) {
         if (_dragObject != null) {
             if (_dragObject.screenPos == null) {
                 _dragObject.screenPos = new Point2D.Double(tme.xWidget, tme.yWidget);
@@ -113,7 +113,7 @@ public class TpeBasePosFeature extends TpePositionFeature {
                 _dragObject.screenPos.y = tme.yWidget;
             }
 
-            SPTarget tp = (SPTarget) _dragObject.taggedPos;
+            final SPTarget tp = _dragObject.taggedPos;
             tp.setRaDecDegrees(tme.pos.getRaDeg(), tme.pos.getDecDeg());
         }
     }

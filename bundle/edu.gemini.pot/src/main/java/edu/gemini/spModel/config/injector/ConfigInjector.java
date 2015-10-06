@@ -42,7 +42,7 @@ public final class ConfigInjector<R> implements Serializable {
         Adapter1(ConfigInjectorCalc1<A, R> calc) {
             this.calc = calc;
 
-            List<PropertyDescriptor> tmp = new ArrayList<PropertyDescriptor>();
+            List<PropertyDescriptor> tmp = new ArrayList<>();
             tmp.add(calc.descriptor1());
             props = Collections.unmodifiableList(tmp);
             result = calc.resultPropertyName();
@@ -71,7 +71,7 @@ public final class ConfigInjector<R> implements Serializable {
         Adapter2(ConfigInjectorCalc2<A, B, R> calc) {
             this.calc = calc;
 
-            List<PropertyDescriptor> tmp = new ArrayList<PropertyDescriptor>();
+            List<PropertyDescriptor> tmp = new ArrayList<>();
             tmp.add(calc.descriptor1());
             tmp.add(calc.descriptor2());
             props = Collections.unmodifiableList(tmp);
@@ -103,7 +103,7 @@ public final class ConfigInjector<R> implements Serializable {
         Adapter3(ConfigInjectorCalc3<A, B, C, R> calc) {
             this.calc = calc;
 
-            List<PropertyDescriptor> tmp = new ArrayList<PropertyDescriptor>();
+            List<PropertyDescriptor> tmp = new ArrayList<>();
             tmp.add(calc.descriptor1());
             tmp.add(calc.descriptor2());
             tmp.add(calc.descriptor3());
@@ -133,8 +133,8 @@ public final class ConfigInjector<R> implements Serializable {
      *
      * @param calc calculator for observing wavelengths.
      */
-    public static <A, R> ConfigInjector create(ConfigInjectorCalc1<A, R> calc) {
-        return new ConfigInjector<R>(new Adapter1<A, R>(calc));
+    public static <A, R> ConfigInjector<R> create(ConfigInjectorCalc1<A, R> calc) {
+        return new ConfigInjector<>(new Adapter1<>(calc));
     }
 
     /**
@@ -143,8 +143,8 @@ public final class ConfigInjector<R> implements Serializable {
      *
      * @param calc calculator for observing wavelengths.
      */
-    public static <A, B, R> ConfigInjector create(ConfigInjectorCalc2<A, B, R> calc) {
-        return new ConfigInjector<R>(new Adapter2<A, B, R>(calc));
+    public static <A, B, R> ConfigInjector<R> create(ConfigInjectorCalc2<A, B, R> calc) {
+        return new ConfigInjector<>(new Adapter2<>(calc));
     }
 
     /**
@@ -153,8 +153,8 @@ public final class ConfigInjector<R> implements Serializable {
      *
      * @param calc calculator for observing wavelengths.
      */
-    public static <A, B, C, R> ConfigInjector create(ConfigInjectorCalc3<A, B, C, R> calc) {
-        return new ConfigInjector<R>(new Adapter3<A, B, C, R>(calc));
+    public static <A, B, C, R> ConfigInjector<R> create(ConfigInjectorCalc3<A, B, C, R> calc) {
+        return new ConfigInjector<>(new Adapter3<>(calc));
     }
 
     private final CalcAdapter<R> adapter;

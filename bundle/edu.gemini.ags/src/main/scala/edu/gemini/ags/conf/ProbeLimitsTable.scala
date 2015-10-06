@@ -55,7 +55,7 @@ case class ProbeLimitsTable(tab: CalcMap) extends MagnitudeTable {
       case _: Canopus.Wfs => GemsMagnitudeTable(ctx, probe)
       case _              =>
         for {
-          s <- ctx.getSite.asScalaOpt
+          s  <- ctx.getSite.asScalaOpt
           id <- lookup(s, ctx, probe)
           ct <- tab.get(id)
         } yield ct
