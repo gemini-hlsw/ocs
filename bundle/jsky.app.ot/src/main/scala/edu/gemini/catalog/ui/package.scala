@@ -5,17 +5,36 @@ import javax.swing.table._
 import edu.gemini.ags.api.AgsMagnitude.MagnitudeTable
 import edu.gemini.ags.api.{AgsAnalysis, AgsGuideQuality, AgsRegistrar, AgsStrategy}
 import edu.gemini.catalog.api.{UCAC4, CatalogName, CatalogQuery}
+import edu.gemini.pot.sp.SPComponentType
+import edu.gemini.shared.util.immutable.{None => JNone, Some => JSome}
 import edu.gemini.spModel.core.Target.SiderealTarget
 import edu.gemini.spModel.core._
+import edu.gemini.spModel.gemini.flamingos2.Flamingos2
+import edu.gemini.spModel.gemini.gmos.{InstGmosSouth, InstGmosNorth}
+import edu.gemini.spModel.gemini.gnirs.{GNIRSConstants, InstGNIRS}
+import edu.gemini.spModel.gemini.gsaoi.Gsaoi
+import edu.gemini.spModel.gemini.michelle.InstMichelle
+import edu.gemini.spModel.gemini.nici.InstNICI
+import edu.gemini.spModel.gemini.nifs.InstNIFS
+import edu.gemini.spModel.gemini.niri.InstNIRI
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.Conditions
+import edu.gemini.spModel.gemini.phoenix.InstPhoenix
+import edu.gemini.spModel.gemini.texes.InstTexes
+import edu.gemini.spModel.gemini.trecs.InstTReCS
+import edu.gemini.spModel.gemini.visitor.VisitorInstrument
 import edu.gemini.spModel.guide.ValidatableGuideProbe
 import edu.gemini.spModel.obs.context.ObsContext
+import edu.gemini.spModel.target.SPTarget
+import edu.gemini.spModel.target.env.TargetEnvironment
 import jsky.app.ot.gemini.editor.targetComponent.GuidingFeedback.ProbeLimits
+import edu.gemini.pot.ModelConverters._
 
 import scala.language.existentials
 import scala.swing.{Alignment, Label, Component}
+import scala.collection.JavaConverters._
 import scalaz._
 import Scalaz._
+
 
 /**
  * Locally describe an ags strategy including its limits and the query that would trigger
@@ -25,13 +44,79 @@ case class SupportedStrategy(strategy: AgsStrategy, limits: Option[ProbeLimits],
 /**
  * Describes the observation used to do a Guide Star Search
  */
-case class ObservationInfo(ctx: Option[ObsContext], objectName: Option[String], instrumentName: Option[String], strategy: Option[AgsStrategy], validStrategies: List[SupportedStrategy], conditions: Option[Conditions], catalog: CatalogName, mt: MagnitudeTable) {
+case class ObservationInfo(ctx: Option[ObsContext], objectName: Option[String], baseCoordinates: Option[Coordinates], instrument: Option[SPComponentType], strategy: Option[AgsStrategy], validStrategies: List[SupportedStrategy], conditions: Option[Conditions], catalog: CatalogName, mt: MagnitudeTable) {
   def catalogQuery:List[CatalogQuery] = validStrategies.collect {
       case SupportedStrategy(s, _, query) if s == strategy => query
     }.flatten
+
+  /**
+   * Attempts to find the guide probe for the selected strategy
+   */
+  def guideProbe: Option[ValidatableGuideProbe] =
+    strategy.flatMap(_.guideProbes.headOption.collect {
+                      case v: ValidatableGuideProbe => v
+                    })
+
+  /**
+   * Attempts to find the instrument name from the instrument field
+   */
+  def instrumentName:Option[String] = instrument.flatMap{i => ObservationInfo.InstMap.find(_._2 == i)}.map(_._1)
+
+  /**
+   * An obscontext is required for guide quality calculation. The method below will attempt to create a context out of the information on the query form
+   * TODO: Review if this is the best way to proceed
+   */
+  def toContext: Option[ObsContext] = ctx.orElse {
+    val inst = instrument.collect {
+      case SPComponentType.INSTRUMENT_FLAMINGOS2 => new Flamingos2()
+      case SPComponentType.INSTRUMENT_GMOS       => new InstGmosNorth()
+      case SPComponentType.INSTRUMENT_GMOSSOUTH  => new InstGmosSouth()
+      case SPComponentType.INSTRUMENT_GNIRS      => new InstGNIRS()
+      case SPComponentType.INSTRUMENT_GSAOI      => new Gsaoi()
+      case SPComponentType.INSTRUMENT_MICHELLE   => new InstMichelle()
+      case SPComponentType.INSTRUMENT_NICI       => new InstNICI()
+      case SPComponentType.INSTRUMENT_NIFS       => new InstNIFS()
+      case SPComponentType.INSTRUMENT_NIRI       => new InstNIRI()
+      case SPComponentType.INSTRUMENT_PHOENIX    => new InstPhoenix()
+      case SPComponentType.INSTRUMENT_TEXES      => new InstTexes()
+      case SPComponentType.INSTRUMENT_TRECS      => new InstTReCS()
+      case SPComponentType.INSTRUMENT_VISITOR    => new VisitorInstrument()
+    }
+    val site = inst.flatMap(_.getSite.asScala.headOption)
+    (baseCoordinates |@| inst |@| site){ (c, i, s) =>
+      val target = new SPTarget(c.ra.toAngle.toDegrees, c.dec.toDegrees) <| {_.setName(~objectName)}
+      val env = TargetEnvironment.create(target)
+      // To calculate analysis of guide quality, it is required the site, insturment and conditions
+      // TODO Verify if we need offsets, AO info and scheduling block
+      ObsContext.create(env, i, new JSome(s), conditions.get, null, null, JNone.instance())
+    }
+  }
 }
 
 object ObservationInfo {
+
+  private val InstMap = Map[String, SPComponentType](
+    Flamingos2.INSTRUMENT_NAME_PROP        -> SPComponentType.INSTRUMENT_FLAMINGOS2,
+    InstGmosNorth.INSTRUMENT_NAME_PROP     -> SPComponentType.INSTRUMENT_GMOS,
+    InstGmosSouth.INSTRUMENT_NAME_PROP     -> SPComponentType.INSTRUMENT_GMOSSOUTH,
+    GNIRSConstants.INSTRUMENT_NAME_PROP    -> SPComponentType.INSTRUMENT_GNIRS,
+    InstMichelle.INSTRUMENT_NAME_PROP      -> SPComponentType.INSTRUMENT_MICHELLE,
+    InstNICI.INSTRUMENT_NAME_PROP          -> SPComponentType.INSTRUMENT_NICI,
+    InstNIFS.INSTRUMENT_NAME_PROP          -> SPComponentType.INSTRUMENT_NIFS,
+    InstNIRI.INSTRUMENT_NAME_PROP          -> SPComponentType.INSTRUMENT_NIRI,
+    InstPhoenix.INSTRUMENT_NAME_PROP       -> SPComponentType.INSTRUMENT_PHOENIX,
+    InstTexes.INSTRUMENT_NAME_PROP         -> SPComponentType.INSTRUMENT_TEXES,
+    InstTReCS.INSTRUMENT_NAME_PROP         -> SPComponentType.INSTRUMENT_TRECS,
+    VisitorInstrument.INSTRUMENT_NAME_PROP -> SPComponentType.INSTRUMENT_VISITOR
+  )
+
+  /**
+   * find the instrument for a given name
+   * TODO: verify if there is a better way to find out the instrument names
+   * TODO: Should we support al the instruments on the map?
+   * TODO: Move the instrument selection into a combo box
+   */
+  def toInstrument(name: String):Option[SPComponentType] = InstMap.get(name)
 
   /**
    * Converts an AgsStrategy to a simpler description to be stored in the UI model
@@ -45,7 +130,8 @@ object ObservationInfo {
   def apply(ctx: ObsContext, mt: MagnitudeTable):ObservationInfo = ObservationInfo(
     ctx.some,
     Option(ctx.getTargets.getBase).map(_.getTarget.getName),
-    Option(ctx.getInstrument).map(_.getTitle),
+    Option(ctx.getTargets.getBase).map(_.getTarget.getSkycalcCoordinates.toNewModel),
+    Option(ctx.getInstrument.getType),
     AgsRegistrar.currentStrategy(ctx),
     AgsRegistrar.validStrategies(ctx).map(toSupportedStrategy(ctx, _, mt)),
     ctx.getConditions.some,
@@ -88,11 +174,9 @@ case class GuidingQuality(info: Option[ObservationInfo], title: String) extends 
     (for {
       o                               <- info
       s                               <- o.strategy
-      gp                              <- s.guideProbes.headOption.collect {
-                                        case v: ValidatableGuideProbe => v
-                                      }
-      ctx <- o.ctx
+      gp                              <- o.guideProbe
       st @ SiderealTarget(_, _, _, _) = t
+      ctx                             <- o.toContext
     } yield s.analyze(ctx, o.mt, gp, st)).flatten
   }
 
