@@ -12,27 +12,41 @@ import scala.util.{Failure, Success}
 import scalaz._
 
 /** Columns in the table are defined by their header label and a function on the unique config of the row. */
-case class Column(label: String, value: (ItcUniqueConfig, String\/ItcInputs, Future[ItcService.Result]) => AnyRef, tooltip: String = "")
+class Column private (val label: String, val value: (ItcUniqueConfig, String\/ItcInputs, Future[ItcService.Result]) => AnyRef, val tooltip: String = "")
+
+object Column {
+  /** Creates a Column transforming a label with newlines into a corresponding html snippet for multiline rendering in table headers. */
+  def apply(label: String, value: (ItcUniqueConfig, String\/ItcInputs, Future[ItcService.Result]) => AnyRef, tooltip: String = ""): Column = {
+    new Column(multiLineHeader(label), value, tooltip)
+  }
+  /** Transforms a string with newlines into a html snippet for multiline rendering. */
+  private def multiLineHeader(label: String): String = {
+    if (label.contains('\n'))
+      "<html>" + label.replaceAll("\n", "<br/>") + "</html>"
+    else
+      label
+  }
+}
 
 object ItcTableModel {
   val PeakPixelTooltip    = "Peak pixel value = signal + background"
   val PeakElectronTooltip = "Peak e- per exposure"
 }
 
-/** ITC tables have three types of columns: a series of header columns, then all the values that change and are
+/** ITC tables have three types of columns: a series of header columns, then all the dynamic values that change and are
   * relevant for the different unique configs (denoted by their {{{ItemKey}}} values) and finally the ITC calculation
   * results. The static columns (headers and results) are represented by a {{{Column}}} object.
   */
 sealed trait ItcTableModel extends AbstractTableModel {
 
   /// Define some generic columns. Values are rendered as strings in order to have them left aligned, similar to other sequence tables.
-  val LabelsColumn  = Column("Data Labels",     (c, i, r) => (resultIcon(r).orNull, c.labels))
-  val ImagesColumn  = Column("Images",          (c, i, r) => s"${c.count}",                      tooltip = "Number of exposures used in S/N calculation")
-  val CoaddsColumn  = Column("Coadds",          (c, i, r) => s"${c.coadds.getOrElse(1.0)}",      tooltip = "Number of coadds")
-  val ExpTimeColumn = Column("Exposure Time",   (c, i, r) => f"${c.singleExposureTime}%.1f",     tooltip = "Exposure time of each image [s]")
-  val TotTimeColumn = Column("Total Exp. Time", (c, i, r) => f"${c.totalExposureTime}%.1f",      tooltip = "Total exposure time [s]")
-  val SrcMagColumn  = Column("Source Mag",      (c, i, r) => i.map(sourceMag).toOption,          tooltip = "Source magnitude [mag]")
-  val SrcFracColumn = Column("Source Fraction", (c, i, r) => i.map(sourceFraction).toOption,     tooltip = "Fraction of images on source")
+  val LabelsColumn  = Column("Data\nLabels",     (c, i, r) => (resultIcon(r).orNull, c.labels))
+  val ImagesColumn  = Column("Images",           (c, i, r) => s"${c.count}",                      tooltip = "Number of exposures used in S/N calculation")
+  val CoaddsColumn  = Column("Coadds",           (c, i, r) => s"${c.coadds.getOrElse(1.0)}",      tooltip = "Number of coadds")
+  val ExpTimeColumn = Column("Exposure\nTime",   (c, i, r) => f"${c.singleExposureTime}%.1f",     tooltip = "Exposure time of each image [s]")
+  val TotTimeColumn = Column("Total\nExp. Time", (c, i, r) => f"${c.totalExposureTime}%.1f",      tooltip = "Total exposure time [s]")
+  val SrcMagColumn  = Column("Source\nMag",      (c, i, r) => i.map(sourceMag).toOption,          tooltip = "Source magnitude [mag]")
+  val SrcFracColumn = Column("Source\nFraction", (c, i, r) => i.map(sourceFraction).toOption,     tooltip = "Fraction of images on source")
 
 
   // Define different sets of columns as headers
@@ -179,15 +193,15 @@ class ItcGenericImagingTableModel(val keys: List[ItemKey], val uniqueSteps: List
 class ItcGmosImagingTableModel(val keys: List[ItemKey], val uniqueSteps: List[ItcUniqueConfig], val inputs: List[String\/ItcInputs], val res: List[Future[ItcService.Result]]) extends ItcImagingTableModel {
   val headers = Headers
   val results = List(
-    Column("CCD1 Peak",       (c, i, r) => imgPeakPixelFlux(r, ccd=0),   tooltip = ItcTableModel.PeakPixelTooltip + " for CCD 1"),
-    Column("CCD1 S/N Single", (c, i, r) => imgSingleSNRatio(r, ccd=0)),
-    Column("CCD1 S/N Total",  (c, i, r) => imgTotalSNRatio (r, ccd=0)),
-    Column("CCD2 Peak",       (c, i, r) => imgPeakPixelFlux(r, ccd=1),   tooltip = ItcTableModel.PeakPixelTooltip + " for CCD 2"),
-    Column("CCD2 S/N Single", (c, i, r) => imgSingleSNRatio(r, ccd=1)),
-    Column("CCD2 S/N Total",  (c, i, r) => imgTotalSNRatio (r, ccd=1)),
-    Column("CCD3 Peak",       (c, i, r) => imgPeakPixelFlux(r, ccd=2),   tooltip = ItcTableModel.PeakPixelTooltip + " for CCD 3"),
-    Column("CCD3 S/N Single", (c, i, r) => imgSingleSNRatio(r, ccd=2)),
-    Column("CCD3 S/N Total",  (c, i, r) => imgTotalSNRatio (r, ccd=2))
+    Column("CCD1\nPeak",       (c, i, r) => imgPeakPixelFlux(r, ccd=0),   tooltip = ItcTableModel.PeakPixelTooltip + " for CCD 1"),
+    Column("CCD1\nS/N Single", (c, i, r) => imgSingleSNRatio(r, ccd=0)),
+    Column("CCD1\nS/N Total",  (c, i, r) => imgTotalSNRatio (r, ccd=0)),
+    Column("CCD2\nPeak",       (c, i, r) => imgPeakPixelFlux(r, ccd=1),   tooltip = ItcTableModel.PeakPixelTooltip + " for CCD 2"),
+    Column("CCD2\nS/N Single", (c, i, r) => imgSingleSNRatio(r, ccd=1)),
+    Column("CCD2\nS/N Total",  (c, i, r) => imgTotalSNRatio (r, ccd=1)),
+    Column("CCD3\nPeak",       (c, i, r) => imgPeakPixelFlux(r, ccd=2),   tooltip = ItcTableModel.PeakPixelTooltip + " for CCD 3"),
+    Column("CCD3\nS/N Single", (c, i, r) => imgSingleSNRatio(r, ccd=2)),
+    Column("CCD3\nS/N Total",  (c, i, r) => imgTotalSNRatio (r, ccd=2))
   )
 }
 
