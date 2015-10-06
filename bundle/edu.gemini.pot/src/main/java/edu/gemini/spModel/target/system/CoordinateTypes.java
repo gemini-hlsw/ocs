@@ -1,9 +1,3 @@
-// Copyright 2000 Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-// See the file LICENSE for complete details.
-//
-// $Id: CoordinateTypes.java 44322 2012-04-09 15:29:58Z swalker $
-//
 package edu.gemini.spModel.target.system;
 
 /**
@@ -16,8 +10,7 @@ package edu.gemini.spModel.target.system;
 public final class CoordinateTypes {
     // Don't allow instances of this class to be created.  It's really just
     // a scope for the specific coordinate params.
-    private CoordinateTypes() {
-    }
+    private CoordinateTypes() { }
 
     /**
      * The PM1 (proper motion of c1) parameter type.
@@ -30,7 +23,7 @@ public final class CoordinateTypes {
         };
 
         public Object clone() {
-            return (PM1) super.clone();
+            return super.clone();
         }
 
         public PM1() {
@@ -68,7 +61,7 @@ public final class CoordinateTypes {
         };
 
         public Object clone() {
-            return (PM2) super.clone();
+            return super.clone();
         }
 
         public PM2() {
@@ -99,11 +92,12 @@ public final class CoordinateTypes {
     /**
      * The RV (radial velocity) parameter type.
      */
+    @Deprecated
     public static final class RV extends CoordinateParam {
         public static final Units[] UNITS = {Units.KM_PER_SEC};
 
         public Object clone() {
-            return (RV) super.clone();
+            return super.clone();
         }
 
         public RV() {
@@ -134,6 +128,7 @@ public final class CoordinateTypes {
     /**
      * The Parallax parameter type.
      */
+    @Deprecated
     public static final class Parallax extends CoordinateParam {
         public static final Units[] UNITS = {Units.MILLI_ARCSECS, Units.ARCSECS};
 
@@ -181,27 +176,11 @@ public final class CoordinateTypes {
         public static final Units[] UNITS = {Units.DEGREES, };
 
         public Object clone() {
-            return (ANode) super.clone();
+            return super.clone();
         }
 
         public ANode() {
             super(0.0, UNITS[0]);
-        }
-
-        public ANode(String value) {
-            super(value, UNITS[0]);
-        }
-
-        public ANode(String value, Units units) {
-            super(value, units);
-        }
-
-        public ANode(double value) {
-            super(value, UNITS[0]);
-        }
-
-        public ANode(double value, Units units) {
-            super(value, units);
         }
 
         public Units[] getUnitOptions() {
@@ -216,7 +195,7 @@ public final class CoordinateTypes {
         public static final Units[] UNITS = {Units.AU, };
 
         public Object clone() {
-            return (AQ) super.clone();
+            return super.clone();
         }
 
         public AQ() {
@@ -286,7 +265,7 @@ public final class CoordinateTypes {
         public static final Units[] UNITS = {Units.DEGREES, };
 
         public Object clone() {
-            return (Inclination) super.clone();
+            return super.clone();
         }
 
         public Inclination() {
@@ -321,27 +300,11 @@ public final class CoordinateTypes {
         public static final Units[] UNITS = {Units.DEGREES, };
 
         public Object clone() {
-            return (LM) super.clone();
+            return super.clone();
         }
 
         public LM() {
             super(0.0, UNITS[0]);
-        }
-
-        public LM(String value) {
-            super(value, UNITS[0]);
-        }
-
-        public LM(String value, Units units) {
-            super(value, units);
-        }
-
-        public LM(double value) {
-            super(value, UNITS[0]);
-        }
-
-        public LM(double value, Units units) {
-            super(value, units);
         }
 
         public Units[] getUnitOptions() {
@@ -356,7 +319,7 @@ public final class CoordinateTypes {
         public static final Units[] UNITS = {Units.DEGREES_PER_DAY, };
 
         public Object clone() {
-            return (N) super.clone();
+            return super.clone();
         }
 
         public N() {
@@ -391,7 +354,7 @@ public final class CoordinateTypes {
         public static final Units[] UNITS = {Units.DEGREES, };
 
         public Object clone() {
-            return (Perihelion) super.clone();
+            return super.clone();
         }
 
         public Perihelion() {

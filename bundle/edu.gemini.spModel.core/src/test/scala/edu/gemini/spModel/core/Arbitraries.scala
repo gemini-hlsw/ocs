@@ -4,6 +4,7 @@ import edu.gemini.spModel.core.WavelengthConversions._
 import org.scalacheck._
 import org.scalacheck.Gen._
 import org.scalacheck.Arbitrary._
+import squants.motion.KilometersPerSecond
 
 import scalaz.==>>
 
@@ -64,10 +65,17 @@ trait Arbitraries {
         deltaRA  <- arbitrary[RightAscensionAngularVelocity]
         deltaDec <- arbitrary[DeclinationAngularVelocity]
         epoch    <- arbitrary[Epoch]
-        parallax <- arbitrary[Option[Angle]]
-        rv       <- arbitrary[Option[Double]]
-      } yield ProperMotion(deltaRA, deltaDec, epoch, parallax, rv)
+      } yield ProperMotion(deltaRA, deltaDec, epoch)
     }
+
+  implicit val arbRadialVelocity: Arbitrary[RadialVelocity] =
+    Arbitrary(arbitrary[Double].map(v => RadialVelocity(KilometersPerSecond(v))))
+
+  implicit val arbRedshift: Arbitrary[Redshift] =
+    Arbitrary(arbitrary[Double].map(v => Redshift(v)))
+
+  implicit val arbParallax: Arbitrary[Parallax] =
+    Arbitrary(arbitrary[Angle].map(Parallax.apply))
 
   implicit val arbMagnitude: Arbitrary[Magnitude] =
     Arbitrary {
@@ -98,11 +106,14 @@ trait Arbitraries {
   implicit val arbSiderealTarget: Arbitrary[Target.SiderealTarget] =
     Arbitrary {
       for {
-          name         <- arbitrary[String]
-          coordinates  <- arbitrary[Coordinates]
-          properMotion <- arbitrary[Option[ProperMotion]]
-          magnitudes   <- arbitrary[List[Magnitude]]
-      } yield Target.SiderealTarget(name, coordinates, properMotion, magnitudes)
+          name           <- arbitrary[String]
+          coordinates    <- arbitrary[Coordinates]
+          properMotion   <- arbitrary[Option[ProperMotion]]
+          radialVelocity <- arbitrary[Option[RadialVelocity]]
+          redshift       <- arbitrary[Option[Redshift]]
+          parallax       <- arbitrary[Option[Parallax]]
+          magnitudes     <- arbitrary[List[Magnitude]]
+      } yield Target.SiderealTarget(name, coordinates, properMotion, radialVelocity, redshift, parallax, magnitudes)
     }
 
   implicit val arbNonSiderealTarget: Arbitrary[Target.NonSiderealTarget] =

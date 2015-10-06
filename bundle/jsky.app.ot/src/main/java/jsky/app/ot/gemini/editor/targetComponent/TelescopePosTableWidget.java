@@ -1,9 +1,3 @@
-// Copyright 1997 Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-// See the file LICENSE for complete details.
-//
-// $Id: TelescopePosTableWidget.java 8534 2008-05-11 05:21:26Z swalker $
-//
 package jsky.app.ot.gemini.editor.targetComponent;
 
 import edu.gemini.ags.api.*;
@@ -48,7 +42,6 @@ import java.text.NumberFormat;
 import java.util.*;
 import java.util.List;
 
-
 /**
  * An extension of the TableWidget to support telescope target lists.
  */
@@ -67,21 +60,21 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
 
         enum Col {
             TAG("Type Tag") {
-                public Object getValue(Row row) { return row.tag(); }
+                public Object getValue(final Row row) { return row.tag(); }
             },
 
             NAME("Name") {
-                public Object getValue(Row row) { return row.name(); }
+                public Object getValue(final Row row) { return row.name(); }
             },
 
             RA("RA") {
-                public Object getValue(Row row) {
+                public Object getValue(final Row row) {
                     return row.target().flatMap(t -> t.getTarget().getRaString(row.when())).getOrElse("");
                 }
             },
 
             DEC("Dec") {
-                public Object getValue(Row row) {
+                public Object getValue(final Row row) {
                     return row.target().flatMap(t -> t.getTarget().getDecString(row.when())).getOrElse("");
                 }
             },
@@ -407,7 +400,7 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
             return rowAt(index).flatMap(Row::group);
         }
 
-        public Option<Row> rowAt(int index) {
+        public Option<Row> rowAt(final int index) {
             int i = 0;
             for (Row row : rows) {
                 if (i == index)
@@ -619,7 +612,7 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
     /**
      * Default constructor.
      */
-    public TelescopePosTableWidget(EdCompTargetList owner) {
+    public TelescopePosTableWidget(final EdCompTargetList owner) {
         this.owner = owner;
         setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
         // disable editing by default
@@ -686,7 +679,7 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
     /**
      * Reinitialize the table.
      */
-    public void reinit(TargetObsComp dataObject) {
+    public void reinit(final TargetObsComp dataObject) {
         dragSource.setEditable(false);
         dropTarget.setEditable(false);
 
@@ -899,7 +892,7 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
         expandList.forEach(this::expandPath);
     }
 
-    public void expandGroup(GuideGroup group) {
+    public void expandGroup(final GuideGroup group) {
         final int numRows = getRowCount();
         for (int i = 0; i < numRows; i++) {
             final TreePath path = getPathForRow(i);
@@ -978,7 +971,7 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
      * Returns true if it is ok to add the given item row to the given parent row
      * (parent must be a guide group row and item a suitable guide star object).
      */
-    public boolean isOkayToAdd(TableData.Row item, TableData.Row parent) {
+    public boolean isOkayToAdd(final TableData.Row item, final TableData.Row parent) {
         if (item == parent) return false;
         final GuideGroup group = parent.group().getOrNull();
         final SPTarget target = item.target().getOrNull();

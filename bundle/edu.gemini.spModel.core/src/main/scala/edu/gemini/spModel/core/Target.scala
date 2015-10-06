@@ -104,10 +104,13 @@ object Target {
   ///
 
   /** Sidereal target with optional proper motion. */
-  case class SiderealTarget (
+  case class SiderealTarget(
     name: String,
     coordinates: Coordinates,
     properMotion: Option[ProperMotion],
+    radialVelocity: Option[RadialVelocity],
+    redshift: Option[Redshift],
+    parallax: Option[Parallax],
     magnitudes: List[Magnitude]) extends Target {
 
     def coords(date: Long) = 
@@ -124,11 +127,14 @@ object Target {
 
   object SiderealTarget {
   
-    val empty = SiderealTarget("Untitled", Coordinates.zero, None, Nil)
+    val empty = SiderealTarget("Untitled", Coordinates.zero, None, None, None, None, Nil)
   
     val name:        SiderealTarget @> String          = Lens(t => Store(s => t.copy(name = s), t.name))
     val coordinates: SiderealTarget @> Coordinates     = Lens(t => Store(c => t.copy(coordinates = c), t.coordinates))
     val pm:          SiderealTarget @?> ProperMotion   = PLens(t => t.properMotion.map(p => Store(q => t.copy(properMotion = p.some), p)))
+    val rv:          SiderealTarget @?> RadialVelocity = PLens(t => t.radialVelocity.map(p => Store(q => t.copy(radialVelocity = p.some), p)))
+    val z:           SiderealTarget @?> Redshift       = PLens(t => t.redshift.map(p => Store(q => t.copy(redshift = p.some), p)))
+    val px:          SiderealTarget @?> Parallax       = PLens(t => t.parallax.map(p => Store(q => t.copy(parallax = p.some), p)))
     val ra:          SiderealTarget @> RightAscension  = coordinates >=> Coordinates.ra
     val dec:         SiderealTarget @> Declination     = coordinates >=> Coordinates.dec
     val magnitudes:  SiderealTarget @> List[Magnitude] = Lens(t => Store(c => t.copy(magnitudes = c), t.magnitudes))
@@ -160,10 +166,7 @@ object Target {
     val ephemeris:           NonSiderealTarget @> Ephemeris            = Lens(t => Store(s => t.copy(ephemeris = s), t.ephemeris))
     val name:                NonSiderealTarget @> String               = Lens(t => Store(s => t.copy(name = s), t.name))
     val horizonsDesignation: NonSiderealTarget @?> HorizonsDesignation = PLens(t => t.horizonsDesignation.map(p => Store(q => t.copy(horizonsDesignation = p.some), p)))
-    val magnitudes:          NonSiderealTarget @> List[Magnitude] = Lens(t => Store(c => t.copy(magnitudes = c), t.magnitudes))
+    val magnitudes:          NonSiderealTarget @> List[Magnitude]      = Lens(t => Store(c => t.copy(magnitudes = c), t.magnitudes))
   }
   
 }
-
-
-

@@ -1,13 +1,8 @@
-//
-// $
-//
-
 package edu.gemini.shared.skyobject;
 
 import edu.gemini.shared.skyobject.coords.HmsDegCoordinates;
 import edu.gemini.shared.skyobject.coords.SkyCoordinates;
 import edu.gemini.shared.util.immutable.*;
-import edu.gemini.skycalc.Coordinates;
 
 import java.io.Serializable;
 import java.util.*;
@@ -97,9 +92,9 @@ public final class SkyObject implements Serializable {
          *
          * @return <code>this</code> Builder
          */
-        public Builder attributes(Map<Object, Object> attrs) {
+        public Builder attributes(final Map<Object, Object> attrs) {
             // Make an immutable copy of the argument and store it.
-            TreeMap<Object, Object> copy = new TreeMap<Object, Object>(attrs);
+            TreeMap<Object, Object> copy = new TreeMap<>(attrs);
             return internalAttributes(Collections.unmodifiableMap(copy));
         }
 
@@ -254,10 +249,9 @@ public final class SkyObject implements Serializable {
      * @return {@link None} if there is no attribute associated with the given
      * key; {@link Some}<Object> if there is one
      */
-    public Option<Object> getAttribute(Object key) {
-        Option<Object> none = None.instance();
+    public Option<Object> getAttribute(final Object key) {
         Object res = attrMap.get(key);
-        return (res == null) ? none : new Some<Object>(res);
+        return (res == null) ? None.instance() : new Some<>(res);
     }
 
     /**
@@ -280,8 +274,8 @@ public final class SkyObject implements Serializable {
      * @return new SkyObject, identical to <code>this</code> SkyObject, but
      * with the given attribute
      */
-    public SkyObject addAttribute(Object key, Object value) {
-        Map<Object, Object> copy = new TreeMap<Object, Object>(attrMap);
+    public SkyObject addAttribute(final Object key, final Object value) {
+        final Map<Object, Object> copy = new TreeMap<>(attrMap);
         copy.put(key,value);
         return builder().attributes(copy).build();
     }
@@ -320,20 +314,12 @@ public final class SkyObject implements Serializable {
      * this wavelength band; {@link Some}<Magnitude> otherwise
      */
     public Option<Magnitude> getMagnitude(final Magnitude.Band band) {
-        return magList.find(new PredicateOp<Magnitude>() {
-            @Override public Boolean apply(Magnitude magnitude) {
-                return band.equals(magnitude.getBand());
-            }
-        });
+        return magList.find(magnitude -> band.equals(magnitude.getBand()));
     }
 
     // A map operation from Magnitude to Magnitude.Band.
     private static final MapOp<Magnitude, Magnitude.Band> BAND_MAP_OP =
-            new MapOp<Magnitude, Magnitude.Band>() {
-                @Override public Magnitude.Band apply(Magnitude magnitude) {
-                    return magnitude.getBand();
-                }
-            };
+            Magnitude::getBand;
 
     /**
      * Gets all the magnitudes associated with this SkyObject, if any.
@@ -342,7 +328,7 @@ public final class SkyObject implements Serializable {
      * is an associated {@link Magnitude}
      */
     public Set<Magnitude.Band> getMagnitudeBands() {
-        return new HashSet<Magnitude.Band>(magList.map(BAND_MAP_OP).toList());
+        return new HashSet<>(magList.map(BAND_MAP_OP).toList());
     }
 
     /**
@@ -355,11 +341,7 @@ public final class SkyObject implements Serializable {
      * with the addition of, or update to, the provide {@link Magnitude}
      */
     public SkyObject addMagnitude(final Magnitude mag) {
-        return withMagnitudes(magList.filter(new PredicateOp<Magnitude>() {
-            @Override public Boolean apply(Magnitude magnitude) {
-                return mag.getBand() != magnitude.getBand();
-            }
-        }).cons(mag));
+        return withMagnitudes(magList.filter(magnitude -> mag.getBand() != magnitude.getBand()).cons(mag));
     }
 
     /**
