@@ -30,7 +30,7 @@ public final class PhoenixParams {
         L3290("L3290"),
 
         K4132("K4132") {
-            public boolean isObsolete() {
+            @Override public boolean isObsolete() {
                 return true;
             }
         },
@@ -46,22 +46,26 @@ public final class PhoenixParams {
         H6420("H6420"),
 
         J7799("J7799"),
-        J8265("J8265"),
+        J8265("J8265") {
+            @Override public boolean isObsolete() {
+                return true;
+            }
+        },
         J9232("J9232"),
         J9440("J9440"),
         J9671("J9671") {
-            public boolean isObsolete() {
+            @Override public boolean isObsolete() {
                 return true;
             }
         },
         ;
 
         /** The default Filter value **/
-        public static Filter DEFAULT = Filter.K4396;
+        public final static Filter DEFAULT = Filter.K4396;
 
-        private String _displayValue;
+        private final String _displayValue;
 
-        Filter(String displayValue) {
+        Filter(final String displayValue) {
             _displayValue = displayValue;
 
         }
@@ -79,17 +83,17 @@ public final class PhoenixParams {
         }
 
         /** Return the Filter by searching through the known types. **/
-        public static Filter getFilter(String name) {
+        public static Filter getFilter(final String name) {
             return getFilter(name, DEFAULT);
         }
 
         /** Return a Filter by name giving a value to return upon error **/
-        static public Filter getFilter(String name, Filter nvalue) {
+        static public Filter getFilter(final String name, final Filter nvalue) {
             return SpTypeUtil.oldValueOf(Filter.class, name, nvalue);
         }
 
         /** Return a Filter by index **/
-        static public Filter getFilterByIndex(int index) {
+        static public Filter getFilterByIndex(final int index) {
             return SpTypeUtil.valueOf(Filter.class, index, DEFAULT);
         }
     }
@@ -111,10 +115,10 @@ public final class PhoenixParams {
         /* The default Mask value */
         public static final Mask DEFAULT = MASK_3;
 
-        private double _slitWidth;
-        private String _displayValue;
+        private final double _slitWidth;
+        private final String _displayValue;
 
-        Mask(String displayValue, double slitWidth) {
+        Mask(final String displayValue, final double slitWidth) {
             _displayValue = displayValue;
             _slitWidth = slitWidth;
         }
@@ -128,12 +132,12 @@ public final class PhoenixParams {
         }
 
         /** Return a Mask by index **/
-        static public Mask getMaskByIndex(int index) {
+        static public Mask getMaskByIndex(final int index) {
             return SpTypeUtil.valueOf(Mask.class, index, DEFAULT);
         }
 
         /** Return a Mask by name giving a value to return upon error **/
-        static public Mask getMask(String name, Mask nvalue) {
+        static public Mask getMask(final String name, final Mask nvalue) {
             return SpTypeUtil.oldValueOf(Mask.class, name, nvalue);
         }
 
