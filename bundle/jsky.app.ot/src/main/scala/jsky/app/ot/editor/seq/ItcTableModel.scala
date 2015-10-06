@@ -129,13 +129,9 @@ sealed trait ItcTableModel extends AbstractTableModel {
   }
 
   override def getColumnName(col: Int): String = {
-    def multiLineHeader(label: String, separator: String): String = {
-      if (label.contains(separator))
-        // returning an html snippet allows for column headers with multiple lines
-        "<html>" + label.replaceFirst(separator, "<br/>") + "</html>"
-      else
-        label
-    }
+    def multiLineHeader(label: String, separator: String): String =
+      // returning an html snippet allows for column headers with multiple lines
+      "<html>" + label.replaceFirst(separator, "<br/>") + "</html>"
 
     column(col) match {
       case Some(c) => multiLineHeader(c.label, "\n")
