@@ -126,7 +126,7 @@ public final class DynamicSequenceTableModel extends AbstractTableModel {
         // them up by path prefix.  In other words, group the instrument items,
         // telescope items, etc.
         final Map<String, List<ItemKey>> groupedItems = new HashMap<>();
-        for (ItemKey key : sortedKeys) {
+        for (final ItemKey key : sortedKeys) {
 
             // Get the broad category for the item -- the root parent
             ItemKey parent = key;
@@ -158,7 +158,7 @@ public final class DynamicSequenceTableModel extends AbstractTableModel {
         if (lst != null) res.addAll(lst);
 
         // Now what ever is remaining.
-        for (String category : groupedItems.keySet()) {
+        for (final String category : groupedItems.keySet()) {
             res.addAll(groupedItems.get(category));
         }
 
@@ -187,6 +187,7 @@ public final class DynamicSequenceTableModel extends AbstractTableModel {
 
         final Config config = _sequence.getStep(rowIndex);
         final ItemKey   key = _iteratedKeys[columnIndex];
+        if (key.getParent() == null) return null;
         if (!isGcal(config) && "calibration".equals(key.getParent().toString())) return "";
         Object    val = config.getItemValue(key);
 
@@ -234,7 +235,7 @@ public final class DynamicSequenceTableModel extends AbstractTableModel {
     public boolean matchesNodeId(final int step) {
         if (_nodeKey == null) return true;
         final Object val = _sequence.getItemValue(step, SP_NODE_KEY);
-        final List<SPNodeKey> keys = (List<SPNodeKey>) val;
+        final List<?> keys = (List<?>) val;
         return (keys == null) || keys.contains(_nodeKey);
     }
 }

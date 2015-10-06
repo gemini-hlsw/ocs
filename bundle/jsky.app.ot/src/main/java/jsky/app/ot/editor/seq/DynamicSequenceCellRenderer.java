@@ -18,7 +18,7 @@ final class DynamicSequenceCellRenderer extends SequenceCellRenderer {
         Collections.addAll(this, DynamicSequenceTableModel.SORT_ORDER);
     }};
 
-    private DynamicSequenceTableModel _model;
+    private final DynamicSequenceTableModel _model;
 
     DynamicSequenceCellRenderer(final DynamicSequenceTableModel model) {
         _model  = model;
