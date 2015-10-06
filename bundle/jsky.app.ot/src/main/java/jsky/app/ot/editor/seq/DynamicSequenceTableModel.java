@@ -212,14 +212,15 @@ public class DynamicSequenceTableModel extends AbstractTableModel {
         return Object.class; // sorry, the columns are dynamically generated
     }
 
-    public String getColumnName(int columnIndex) {
+    public String getColumnName(final int columnIndex) {
         if (_iteratedKeys == null) return null;
-        ItemKey key = _iteratedKeys[columnIndex];
-        String path = key.getPath();
+        final ItemKey key = _iteratedKeys[columnIndex];
+        final String path = key.getPath();
 
-        String res = StringUtil.toDisplayName(key.getName());
-        if (path.startsWith("calibration")) res = "Cal " + res;
-        return res;
+        final String name  = StringUtil.toDisplayName(key.getName());
+        final String res   = path.startsWith("calibration") ? "Cal " + name : name;
+        // returning an html snippet allows for column headers with multiple lines
+        return "<html>" + res.replaceFirst(" ", "<br/>") + "</html>";
     }
 
     public boolean isComplete(int step) {

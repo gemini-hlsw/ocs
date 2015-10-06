@@ -12,21 +12,7 @@ import scala.util.{Failure, Success}
 import scalaz._
 
 /** Columns in the table are defined by their header label and a function on the unique config of the row. */
-class Column private (val label: String, val value: (ItcUniqueConfig, String\/ItcInputs, Future[ItcService.Result]) => AnyRef, val tooltip: String = "")
-
-object Column {
-  /** Creates a Column transforming a label with newlines into a corresponding html snippet for multiline rendering in table headers. */
-  def apply(label: String, value: (ItcUniqueConfig, String\/ItcInputs, Future[ItcService.Result]) => AnyRef, tooltip: String = ""): Column = {
-    new Column(multiLineHeader(label), value, tooltip)
-  }
-  /** Transforms a string with newlines into a html snippet for multiline rendering. */
-  private def multiLineHeader(label: String): String = {
-    if (label.contains('\n'))
-      "<html>" + label.replaceAll("\n", "<br/>") + "</html>"
-    else
-      label
-  }
-}
+case class Column(label: String, value: (ItcUniqueConfig, String\/ItcInputs, Future[ItcService.Result]) => AnyRef, tooltip: String = "")
 
 object ItcTableModel {
   val PeakPixelTooltip    = "Peak pixel value = signal + background"
@@ -142,9 +128,19 @@ sealed trait ItcTableModel extends AbstractTableModel {
     case None    => uniqueSteps(row).config.getItemValue(toKey(col))
   }
 
-  override def getColumnName(col: Int): String = column(col) match {
-    case Some(c) => c.label
-    case None    => StringUtil.toDisplayName(toKey(col).getName) // create column name for key columns
+  override def getColumnName(col: Int): String = {
+    def multiLineHeader(label: String, separator: String): String = {
+      if (label.contains(separator))
+        // returning an html snippet allows for column headers with multiple lines
+        "<html>" + label.replaceFirst(separator, "<br/>") + "</html>"
+      else
+        label
+    }
+
+    column(col) match {
+      case Some(c) => multiLineHeader(c.label, "\n")
+      case None    => multiLineHeader(StringUtil.toDisplayName(toKey(col).getName), " ") // create column name for key columns
+    }
   }
 
   def tooltip(col: Int): String = column(col) match {
