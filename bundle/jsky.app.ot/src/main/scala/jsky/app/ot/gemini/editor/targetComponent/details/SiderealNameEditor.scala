@@ -1,31 +1,44 @@
 package jsky.app.ot.gemini.editor.targetComponent.details
 
+import edu.gemini.catalog.api.CatalogQuery
+import edu.gemini.catalog.votable.{SimbadNameBackend, VoTableClient}
 import edu.gemini.pot.sp.ISPNode
 import edu.gemini.shared.util.immutable.{ Option => GOption }
-import edu.gemini.catalog.skycat.CatalogException
+import edu.gemini.spModel.core.Target.SiderealTarget
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.target.SPTarget
-import edu.gemini.spModel.target.system.CoordinateParam.Units
+import edu.gemini.spModel.target.system.CoordinateTypes.{RV, Parallax}
 import edu.gemini.spModel.target.system.HmsDegTarget
 import jsky.app.ot.gemini.editor.targetComponent.TelescopePosEditor
 import jsky.catalog.skycat.{SkycatConfigFile, FullMimeSimbadCatalogFilter, SkycatCatalog}
-import jsky.catalog.{BasicQueryArgs, TableQueryResult, Catalog}
 import jsky.coords.WorldCoords
 import jsky.util.gui.{DialogUtil, DropDownListBoxWidget, TextBoxWidgetWatcher, TextBoxWidget}
+import edu.gemini.pot.ModelConverters._
+
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.swing.Swing
 
 import scalaz.syntax.id._
 import scalaz.{ \/-, -\/ }
 
 // Name editor, with catalog lookup for sidereal targets
 final class SiderealNameEditor extends TelescopePosEditor with ReentrancyHack {
+  // Why are we still using SPTarget here?
   private[this] var spt = new SPTarget // never null
 
   def forkSearch(): Unit = {
-    val cat = cats.getSelectedItem.asInstanceOf[Catalog]
-    forkSwingWorker(lookupTarget(cat, name.getValue)) {
+    val qf = VoTableClient.catalog(CatalogQuery(name.getValue), SimbadNameBackend)
+    qf.onFailure {
+      case f => DialogUtil.error(f.getMessage)
+    }
+    qf.onSuccess {
+      case s if s.result.containsError => DialogUtil.error(s.result.problems.map(_.displayValue).mkString(", "))
+      case s                           => processResult(s.result.targets.rows.headOption)
+    }
+    /*forkSwingWorker(lookupTarget(cat, name.getValue)) {
       case \/-(r) => processResult(r)
       case -\/(e) => DialogUtil.error(e.getMessage)
-    }
+    }*/
   }
 
   val name = new TextBoxWidget <| { w =>
@@ -45,11 +58,6 @@ final class SiderealNameEditor extends TelescopePosEditor with ReentrancyHack {
 
   val search = searchButton(forkSearch())
 
-  val cats = new DropDownListBoxWidget <| { m =>
-    m.setChoices(SkycatConfigFile.getConfigFile.getNameServers)
-    m.setVisible(false) // just hide this for now
-  }
-
   def edit(ctx: GOption[ObsContext], target: SPTarget, node: ISPNode): Unit = {
     this.spt = target
     nonreentrant {
@@ -57,72 +65,27 @@ final class SiderealNameEditor extends TelescopePosEditor with ReentrancyHack {
     }
   }
 
-  def lookupTarget(catalog: Catalog, name: String): TableQueryResult = {
+  def processResult(target: Option[SiderealTarget]): Unit = Swing.onEDT {
+    val t = spt.getTarget.asInstanceOf[HmsDegTarget]
 
-    // If it's a SkycatCatalog lookup on simbad, add a filter. No idea why.
-    catalog match {
-      case skycat: SkycatCatalog if skycat.getShortName.contains("simbad") =>
-        skycat.addCatalogFilter(FullMimeSimbadCatalogFilter.getFilter)
-      case _ => // do nothing special
-    }
+    target.foreach { i =>
+      i.properMotion.foreach { pm =>
+        t.setPropMotionRA(pm.deltaRA.velocity.masPerYear)
+        t.setPropMotionDec(pm.deltaDec.velocity.masPerYear)
+      }
+      // TODO: Should we pass the time?
+      t.setRaString(i.coordinates.ra.toAngle.formatHMS)
+      t.setDecString(i.coordinates.dec.formatDMS)
 
-    // Prepare the query
-    val queryArgs = new BasicQueryArgs(catalog) <| { as =>
-      as.setId(name)
-      as.setMaxRows(1)
-    }
-
-    // Go .. this is a blocking call
-    catalog.query(queryArgs) match {
-      case tqr: TableQueryResult => tqr
-      case e: Exception => throw e
-      case a => throw new CatalogException("Unexpected result: " + a)
-    }
-
-  }
-
-
-  def processResult(tqr: TableQueryResult): Unit = {
-    val t = spt.getTarget.asInstanceOf[HmsDegTarget] // always works, heh-heh
-
-    // Get a value from the first row, which is the only one we look at
-    def getValue(n: Int) = tqr.getValueAt(0, n)
-
-    // Set the PM, if any
-    tqr.getColumnIndex("pm1") <| { pm =>
-      if (pm >= 0) {
-        (getValue(pm), getValue(pm + 1)) match {
-          case (ra: java.lang.Double, dec: java.lang.Double) =>
-            t.setPropMotionRA(ra)
-            t.setPropMotionDec(dec)
-          case _ => // ???
-        }
-      } else {
-        t.setPropMotionRA(0.0)
-        t.setPropMotionDec(0.0)
+      /*i.parallax.foreach { p =>
+        t.setParallax(new Parallax(scala.math.ulp()p.angle.toArcsecs * 1000))
+      }*/
+      i.radialVelocity.foreach {v =>
+        t.setRV(new RV(v.velocity.toKilometersPerSecond))
       }
     }
 
-    // Set the coordinates, if any
-    tqr.getCoordinates(0) match {
-      case pos: WorldCoords =>
-        try {
-          t.setRaString(pos.getRA.toString)
-          t.setDecString(pos.getDec.toString)
-        } catch {
-
-          // N.B. the old target editor handled this case, so we do too. May never happen.
-          case _: IllegalArgumentException =>
-            new SPTarget(t).setRaDegrees(0)
-            new SPTarget(t).setDecDegrees(0)
-
-        }
-      case _ => // ???
-    }
-
-    // Notify the world
     spt.notifyOfGenericUpdate()
-
   }
 
 }
