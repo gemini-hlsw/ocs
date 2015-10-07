@@ -194,7 +194,7 @@ object ModelConverters {
       }
       // Only HmsDegTargets may have parallax
       val px          = sp.getTarget match {
-        case t:HmsDegTarget => Some(Parallax(Angle.fromArcsecs(t.getParallax.arcsecs())))
+        case t:HmsDegTarget => Some(Parallax(t.getParallax.mas()))
         case _              => None
       }
       SiderealTarget(name, coordinates, pm, rv, None, px, mags)

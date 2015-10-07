@@ -303,7 +303,7 @@ trait VoTableParser {
     def parsePlx(plx: Option[String]): CatalogProblem \/ Option[Parallax] =
       (for {
         p <- plx.filter(_.nonEmpty)
-      } yield CatalogAdapter.parseDoubleValue(VoTableParser.UCD_RV, p).map(p => Parallax(Angle.fromArcsecs(p / 1000)))).sequenceU
+      } yield CatalogAdapter.parseDoubleValue(VoTableParser.UCD_RV, p).map(p => Parallax(p))).sequenceU
 
     def combineWithErrorsAndFilter(m: List[(FieldId, MagnitudeBand, Double)], e: List[(FieldId, MagnitudeBand, Double)], adapter: CatalogAdapter): List[Magnitude] = {
       val mags = m.map {

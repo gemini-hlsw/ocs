@@ -536,7 +536,7 @@ class VoTableParserSpec extends SpecificationWithJUnit with VoTableParser {
       // redshift
       result.map(_.redshift) should beEqualTo(\/.right(Redshift(-0.000069).some))
       // parallax
-      result.map(_.parallax) should beEqualTo(\/.right(Parallax(Angle.fromArcsecs(130.23/1000)).some))
+      result.map(_.parallax) should beEqualTo(\/.right(Parallax(130.23).some))
       // magnitudes
       result.map(_.magnitudeIn(MagnitudeBand.U)) should beEqualTo(\/.right(Some(new Magnitude(0.03, MagnitudeBand.U))))
       result.map(_.magnitudeIn(MagnitudeBand.B)) should beEqualTo(\/.right(Some(new Magnitude(0.03, MagnitudeBand.B))))

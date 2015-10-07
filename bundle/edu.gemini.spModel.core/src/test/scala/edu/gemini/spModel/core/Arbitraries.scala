@@ -75,7 +75,7 @@ trait Arbitraries {
     Arbitrary(arbitrary[Double].map(v => Redshift(v)))
 
   implicit val arbParallax: Arbitrary[Parallax] =
-    Arbitrary(arbitrary[Angle].map(Parallax.apply))
+    Arbitrary(arbitrary[Double].map(Parallax.apply))
 
   implicit val arbMagnitude: Arbitrary[Magnitude] =
     Arbitrary {

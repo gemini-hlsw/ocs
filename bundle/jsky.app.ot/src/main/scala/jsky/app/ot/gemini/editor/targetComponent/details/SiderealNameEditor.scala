@@ -10,9 +10,7 @@ import edu.gemini.spModel.target.SPTarget
 import edu.gemini.spModel.target.system.CoordinateTypes.{RV, Parallax}
 import edu.gemini.spModel.target.system.HmsDegTarget
 import jsky.app.ot.gemini.editor.targetComponent.TelescopePosEditor
-import jsky.catalog.skycat.{SkycatConfigFile, FullMimeSimbadCatalogFilter, SkycatCatalog}
-import jsky.coords.WorldCoords
-import jsky.util.gui.{DialogUtil, DropDownListBoxWidget, TextBoxWidgetWatcher, TextBoxWidget}
+import jsky.util.gui.{DialogUtil, TextBoxWidgetWatcher, TextBoxWidget}
 import edu.gemini.pot.ModelConverters._
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -35,10 +33,6 @@ final class SiderealNameEditor extends TelescopePosEditor with ReentrancyHack {
       case s if s.result.containsError => DialogUtil.error(s.result.problems.map(_.displayValue).mkString(", "))
       case s                           => processResult(s.result.targets.rows.headOption)
     }
-    /*forkSwingWorker(lookupTarget(cat, name.getValue)) {
-      case \/-(r) => processResult(r)
-      case -\/(e) => DialogUtil.error(e.getMessage)
-    }*/
   }
 
   val name = new TextBoxWidget <| { w =>
@@ -77,9 +71,9 @@ final class SiderealNameEditor extends TelescopePosEditor with ReentrancyHack {
       t.setRaString(i.coordinates.ra.toAngle.formatHMS)
       t.setDecString(i.coordinates.dec.formatDMS)
 
-      /*i.parallax.foreach { p =>
-        t.setParallax(new Parallax(scala.math.ulp()p.angle.toArcsecs * 1000))
-      }*/
+      i.parallax.foreach { p =>
+        t.setParallax(new Parallax(p.mas))
+      }
       i.radialVelocity.foreach {v =>
         t.setRV(new RV(v.velocity.toKilometersPerSecond))
       }
