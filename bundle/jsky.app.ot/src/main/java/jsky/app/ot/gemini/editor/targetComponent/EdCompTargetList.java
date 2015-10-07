@@ -1,6 +1,5 @@
 package jsky.app.ot.gemini.editor.targetComponent;
 
-import edu.gemini.catalog.ui.QueryResultsFrame;
 import edu.gemini.pot.sp.ISPObsComponent;
 import edu.gemini.shared.skyobject.Magnitude;
 import edu.gemini.shared.util.immutable.*;
@@ -70,9 +69,6 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 
         _w.guidingControls.manualGuideStarButton().peer().addActionListener(manualGuideStarListener);
 
-        _w.guidingControls.newManualGuideStarButton().peer().addActionListener(evt -> {
-            QueryResultsFrame.instance().showOn(getNode());
-        });
         _w.guidingControls.autoGuideStarGuiderSelector().addSelectionListener(strategy ->
                 AgsStrategyUtil.setSelection(getContextObservation(), strategy)
         );

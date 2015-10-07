@@ -70,7 +70,7 @@ trait TableColumnsAdjuster { this: Table =>
     // Adjust space to fit on the outer width
     val spacing = max(minSpacing, (containerWidth - initialWidth - nonResizableWidth) / resizableColumnsLength)
     // Add the rounding error to the first col
-    val initialOffset = containerWidth - cols.map(_._2 + spacing).sum - nonResizableWidth
+    val initialOffset = max(0, containerWidth - cols.map(_._2 + spacing).sum - nonResizableWidth)
     // Set width + spacing
     cols.zipWithIndex.foreach {
       case ((c, w), i) if i == 0 => updateTableColumn(c, w + spacing + initialOffset) // Add rounding error to the first col

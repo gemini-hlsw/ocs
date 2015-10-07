@@ -536,6 +536,11 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
     TpeContext.apply(n).obsContext.foreach(showOn)
   }
 
+  def showOn(obsCtx: Option[ObsContext]): Unit = {
+    // TODO Support launching without a context
+    obsCtx.foreach(showOn)
+  }
+
   def showOn(obsCtx: ObsContext) {
     // TODO The user should be able to select the strategy OCSADV-403
     AgsRegistrar.currentStrategy(obsCtx).foreach { strategy =>
