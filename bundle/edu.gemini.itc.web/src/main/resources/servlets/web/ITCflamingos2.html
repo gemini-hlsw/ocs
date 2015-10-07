@@ -1,9 +1,10 @@
 <html>
 
 <head>
-<title>Flamingos-2 ITC</title>
-<base target="content_frame">
-<link rel="stylesheet" type="text/css" href="itc_test.css" />
+    <meta charset="UTF-8"/>
+    <title>Flamingos-2 ITC</title>
+    <base target="content_frame">
+    <link rel="stylesheet" type="text/css" href="itc_test.css" />
 </head>
 
 <body link="#0000FF" vlink="#8B0000" text="#000000" bgcolor="#ffffff">
@@ -30,23 +31,16 @@
 			<tr>
 				<td><input name="Profile" value="POINT" checked="checked" type="radio" /></td>
 				<td colspan="2"><b>Point source</b> (<a href="#" onclick="window.open('http://www.gemini.edu/?q=node/10257#spatial','mywindow','width=1000,height=700,toolbar=no,location=no,directories=no,sta tus=no,menubar=no,scrollbars=yes,copyhistory=no,resizable=no');return false">nominal
-				PSF</a>) with spatially integrated brightness <input name="psSourceNorm" size="8" value="20.0" type="text" /> <select name="psSourceUnits" size="1">
-
-				<option value="MAG">
-				mag</option>
-				<option value="ABMAG">
-				AB mag</option>
-				<option value="JY">
-				Jy</option>
-				<option value="WATTS">
-
-				W/m^2/um</option>
-				<option value="ERGS_WAVELENGTH">
-				ergs/s/cm^2/A</option>
-				<option value="ERGS_FREQUENCY">
-				ergs/s/cm^2/Hz</option>
-				</select> (e.g. 19.3 mag or 2e-17 W/m^2/um) </td>
-
+				PSF</a>) with spatially integrated brightness <input name="psSourceNorm" size="8" value="20.0" type="text" />
+                    <select name="psSourceUnits" size="1">
+                        <option value="MAG">mag</option>
+                        <option value="ABMAG">AB mag</option>
+                        <option value="JY">Jy</option>
+                        <option value="WATTS">W/m²/µm</option>
+                        <option value="ERGS_WAVELENGTH">erg/s/cm²/Å</option>
+                        <option value="ERGS_FREQUENCY">erg/s/cm²/Hz</option>
+                    </select> (e.g. 19.3 mag or 2e-17 W/m²/µm)
+                </td>
 			</tr>
 			<tr>
 				<td valign="top"></td>
@@ -57,42 +51,30 @@
 				<td> </td>
 
 				<td><img src="/spacer.gif" height="1" width="40"  style="opacity:0.0"/><input name="Profile" value="GAUSSIAN" type="radio" /></td>
-				<td>Gaussian profile with full width half maximum (including seeing) of <input name="gaussFwhm" size="5" value="1.0" type="text" /> arcsec and spatially integrated brightness of <input name="gaussSourceNorm" size="8" value="1.0e-3" type="text" /> <select name="gaussSourceUnits" size="1">
-				<option value="MAG">
-				mag</option>
-				<option value="ABMAG">
-				AB mag</option>
-
-				<option value="JY">
-				Jy</option>
-				<option value="WATTS">
-				W/m^2/um</option>
-				<option value="ERGS_WAVELENGTH">
-				ergs/s/cm^2/A</option>
-				<option value="ERGS_FREQUENCY">
-
-				ergs/s/cm^2/Hz</option>
-				</select> (e.g. 19.3 mag or 2e-17 W/m^2/um) </td>
+				<td>Gaussian profile with full width half maximum (including seeing) of <input name="gaussFwhm" size="5" value="1.0" type="text" /> arcsec and spatially integrated brightness of <input name="gaussSourceNorm" size="8" value="1.0e-3" type="text" />
+                    <select name="gaussSourceUnits" size="1">
+                        <option value="MAG">mag</option>
+                        <option value="ABMAG">AB mag</option>
+                        <option value="JY">Jy</option>
+                        <option value="WATTS">W/m²/µm</option>
+                        <option value="ERGS_WAVELENGTH">erg/s/cm²/Å</option>
+                        <option value="ERGS_FREQUENCY">erg/s/cm²/Hz</option>
+                    </select> (e.g. 19.3 mag or 2e-17 W/m²/µm)
+                </td>
 			</tr>
 			<tr>
 				<td> </td>
 				<td><img src="/spacer.gif" height="1" width="40" style="opacity:0.0"/><input name="Profile" value="UNIFORM" type="radio" /></td>
-				<td>Uniform surface brightness <input name="usbSourceNorm" size="8" value="22.0" type="text" /> <select name="usbSourceUnits" size="1">
-
-				<option value="MAG_PSA">
-				mag / sq arcsec</option>
-				<option value="ABMAG_PSA">
-				AB mag / sq arcsec</option>
-				<option value="JY_PSA">
-				Jy / sq arcsec</option>
-				<option value="WATTS_PSA">
-
-				W/m^2/um / sq arcsec</option>
-				<option value="ERGS_WAVELENGTH_PSA">
-				ergs/s/cm^2/A / sq arcsec</option>
-				<option value="ERGS_FREQUENCY_PSA">
-				ergs/s/cm^2/Hz / sq arcsec</option>
-				</select> (e.g. 21.6 mag / sq arcsec) </td>
+				<td>Uniform surface brightness <input name="usbSourceNorm" size="8" value="22.0" type="text" />
+                    <select name="usbSourceUnits" size="1">
+                        <option value="MAG_PSA">mag/arcsec²</option>
+                        <option value="ABMAG_PSA">AB mag/arcsec²</option>
+                        <option value="JY_PSA">Jy/arcsec²</option>
+                        <option value="WATTS_PSA">W/m²/µm/arcsec²</option>
+                        <option value="ERGS_WAVELENGTH_PSA">erg/s/cm²/Å/arcsec²</option>
+                        <option value="ERGS_FREQUENCY_PSA">erg/s/cm²/Hz/arcsec²</option>
+                    </select> (e.g. 21.6 mag/arcsec²)
+                </td>
 
 			</tr>		
 		
@@ -101,22 +83,22 @@
 				with the above <b>brightness normalisation</b> applied in filter
 				<select name="WavebandDefinition" size="1">
 
-                    <option value="U">U (0.36um)</option>
-                    <option value="B">B (0.44um)</option>
-                    <option value="g">g' (0.48um) </option>
-                    <option value="V">V (0.55um)</option>
-                    <option value="r">r' (0.62um) </option>
-                    <option value="R">R (0.67um)</option>
-                    <option value="i">i' (0.77um) </option>
-                    <option value="I">I (0.87um)</option>
-                    <option value="z">z' (0.92um) </option>
-                    <option value="J">J (1.25um)</option>
-                    <option value="H">H (1.65um)</option>
-                    <option value="K" selected>K (2.2um)</option>
-                    <option value="L">L' (3.76um)</option>
-                    <option value="M">M' (4.77um)</option>
-                    <option value="N">N (10.5um)</option>
-                    <option value="Q">Q (20.1um)</option>
+                    <option value="U">U (0.36µm)</option>
+                    <option value="B">B (0.44µm)</option>
+                    <option value="g">g' (0.48µm) </option>
+                    <option value="V">V (0.55µm)</option>
+                    <option value="r">r' (0.62µm) </option>
+                    <option value="R">R (0.67µm)</option>
+                    <option value="i">i' (0.77µm) </option>
+                    <option value="I">I (0.87µm)</option>
+                    <option value="z">z' (0.92µm) </option>
+                    <option value="J">J (1.25µm)</option>
+                    <option value="H">H (1.65µm)</option>
+                    <option value="K" selected>K (2.2µm)</option>
+                    <option value="L">L' (3.76µm)</option>
+                    <option value="M">M' (4.77µm)</option>
+                    <option value="N">N (10.5µm)</option>
+                    <option value="Q">Q (20.1µm)</option>
 
                 </select> band</td>
 
@@ -158,138 +140,69 @@
 			<tr>
 				<td><input value="LIBRARY_STAR" name="Distribution" checked="checked" type="radio" /></td>
 				<td colspan="2">Library spectrum of a star with spectral type <select name="stSpectrumType" size="1">
-				<option value="O5V">
-				O5V</option>
-				<option value="O8III">
-				O8III</option>
-
-				<option value="B0V">
-				B0V</option>
-				<option value="B5-7V">
-				B5-7V</option>
-				<option value="B5III">
-				B5III</option>
-				<option value="B5I">
-
-				B5I</option>
-				<option value="A0V" selected="selected">
-				A0V</option>
-				<option value="A0III">
-				A0III</option>
-				<option value="A0I">
-				A0I</option>
-
-				<option value="A5V">
-				A5V</option>
-				<option value="A5III">
-				A5III</option>
-				<option value="F0V">
-				F0V</option>
-				<option value="F0III">
-
-				F0III</option>
-				<option value="F0I">
-				F0I</option>
-				<option value="F5V">
-				F5V</option>
-				<option value="F5V-w">
-				F5V-w</option>
-
-				<option value="F6V-r">
-				F6V-r</option>
-				<option value="F5III">
-				F5III</option>
-				<option value="F5I">
-				F5I</option>
-				<option value="G0V">
-
-				G0V</option>
-				<option value="G0V-w">
-				G0V-w</option>
-				<option value="G0V-r">
-				G0V-r</option>
-				<option value="G0III">
-				G0III</option>
-
-				<option value="G0I">
-				G0I</option>
-				<option value="G2V">
-				G2V</option>
-				<option value="G5V">
-				G5V</option>
-				<option value="G5V-w">
-
-				G5V-w</option>
-				<option value="G5V-r">
-				G5V-r</option>
-				<option value="G5III">
-				G5III</option>
-				<option value="G5III-w">
-				G5III-w</option>
-
-				<option value="G5III-r">
-				G5III-r</option>
-				<option value="G5I">
-				G5I</option>
-				<option value="K0V">
-				K0V</option>
-				<option value="K0V-r">
-
-				K0V-r</option>
-				<option value="K0III">
-				K0III</option>
-				<option value="K0III-w">
-				K0III-w</option>
-				<option value="K0III-r">
-				K0III-r</option>
-
-				<option value="K0-1II">
-				K0-1II</option>
-				<option value="K4V">
-				K4V</option>
-				<option value="K4III">
-				K4III</option>
-				<option value="K4III-w">
-
-				K4III-w</option>
-				<option value="K4III-r">
-				K4III-r</option>
-				<option value="K4I">
-				K4I</option>
-				<option value="M0V">
-				M0V</option>
-
-				<option value="M0III">
-				M0III</option>
-				<option value="M3V">
-				M3V</option>
-				<option value="M3III">
-				M3III</option>
-				<option value="M6V">
-
-				M6V</option>
-				<option value="M6III">
-				M6III</option>
-				<option value="M9III">
-				M9III</option>
+				<option value="O5V">O5V</option>
+				<option value="O8III">O8III</option>
+				<option value="O8III">O8III</option>
+				<option value="B0V">B0V</option>
+				<option value="B5-7V">B5-7V</option>
+				<option value="B5III">B5III</option>
+				<option value="B5I">B5I</option>
+				<option value="A0V" selected="selected">A0V</option>
+				<option value="A0III">A0III</option>
+				<option value="A0I"> A0I</option>
+				<option value="A5V">A5V</option>
+				<option value="A5III">A5III</option>
+				<option value="F0V">F0V</option>
+				<option value="F0III">F0III</option>
+				<option value="F0I">F0I</option>
+				<option value="F5V">F5V</option>
+				<option value="F5V-w">F5V-w</option>
+				<option value="F6V-r">F6V-r</option>
+				<option value="F5III">F5III</option>
+				<option value="F5I">F5I</option>
+				<option value="G0V">G0V</option>
+				<option value="G0V-w">G0V-w</option>
+				<option value="G0V-r">G0V-r</option>
+				<option value="G0III">G0III</option>
+				<option value="G0I">G0I</option>
+				<option value="G2V">G2V</option>
+				<option value="G5V">G5V</option>
+				<option value="G5V-w">G5V-w</option>
+				<option value="G5V-r">G5V-r</option>
+				<option value="G5III">G5III</option>
+				<option value="G5III-w">G5III-w</option>
+				<option value="G5III-r">G5III-r</option>
+				<option value="G5I">G5I</option>
+				<option value="K0V">K0V</option>
+				<option value="K0V-r">K0V-r</option>
+				<option value="K0III">K0III</option>
+				<option value="K0III-w">K0III-w</option>
+				<option value="K0III-r">K0III-r</option>
+				<option value="K0-1II">K0-1II</option>
+				<option value="K4V">K4V</option>
+				<option value="K4III">K4III</option>
+				<option value="K4III-w">K4III-w</option>
+				<option value="K4III-r">K4III-r</option>
+				<option value="K4I">K4I</option>
+				<option value="M0V">M0V</option>
+				<option value="M0III">M0III</option>
+				<option value="M3V">M3V</option>
+				<option value="M3III">M3III</option>
+				<option value="M6V">M6V</option>
+				<option value="M6III">M6III</option>
+				<option value="M9III">M9III</option>
 				</select></td>
 			</tr>
 
 			<tr>
 				<td><input value="ELINE" name="Distribution" type="radio" /></td>
 				<td colspan="2">Single emission line at wavelength <input name="lineWavelength" size="5" value="2.2" type="text" /> micron with line flux <input name="lineFlux" size="8" value="5.0e-19" type="text" /> <select name="lineFluxUnits" size="1">
-				<option value="watts_flux">
-				W/m^2</option>
-				<option value="ergs_flux">
-
-				ergs/s/cm^2</option>
+				<option value="watts_flux">W/m²</option>
+				<option value="ergs_flux">erg/s/cm²</option>
 				</select> and line width <input name="lineWidth" size="7" value="100.0" type="text" /> km/s
 				on a flat (in wavelength) continuum of flux density <input name="lineContinuum" size="8" value="1.0e-16" type="text" /> <select name="lineContinuumUnits" size="1">
-				<option value="watts_fd_wavelength">
-				W/m^2/um</option>
-				<option value="ergs_fd_wavelength">
-
-				ergs/s/cm^2/A</option>
+				<option value="watts_fd_wavelength">W/m²/µm</option>
+				<option value="ergs_fd_wavelength">erg/s/cm²/Å</option>
 				</select></td>
 			</tr>
 			<tr>
@@ -350,11 +263,11 @@
 				<td>
 				<select name="Filter" size="1">
 					<option value="OPEN">Open</option>
-					<option value="Y">Y (1.02 um)</option>
-					<option value="J_LOW">J-low (1.15 um)</option>
-					<option value="J">J (1.25 um)</option>
-					<option value="H">H (1.65 um)</option>
-					<option value="K_SHORT" selected> Ks (2.15 um)</option>
+					<option value="Y">Y (1.02 µm)</option>
+					<option value="J_LOW">J-low (1.15 µm)</option>
+					<option value="J">J (1.25 µm)</option>
+					<option value="H">H (1.65 µm)</option>
+					<option value="K_SHORT" selected> Ks (2.15 µm)</option>
 					<option value="JH">JH</option>
 					<option value="HK">HK</option>
 				</select>
@@ -386,13 +299,13 @@
 			<tr>
 				<td colspan="4" style="padding-left:30">
 				<input value="BRIGHT_OBJECT_SPEC" name="ReadMode" type="radio"/>
-				Bright object: CDS and readnoise = 12 e-
+				Bright object: CDS and readnoise = 11.7 e-
 				<br>
 				<input value="MEDIUM_OBJECT_SPEC" name="ReadMode" checked="checked" type="radio"/>
-				Medium object: 4 reads and readnoise = 6 e-
+				Medium object: 4 reads and readnoise = 6.0 e-
 				<br>
 				<input value="FAINT_OBJECT_SPEC" name="ReadMode" type="radio"/>
-				Faint object: 8 reads and readnoise < 5 e-				
+				Faint object: 8 reads and readnoise < 5.0 e-
 
 			</tr>
 			<tr>
