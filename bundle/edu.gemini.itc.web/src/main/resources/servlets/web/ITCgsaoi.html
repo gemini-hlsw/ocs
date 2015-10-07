@@ -1,9 +1,10 @@
 <html>
 
 <head>
-<title>GSAOI ITC</title>
-<base target="content_frame">
-<link rel="stylesheet" type="text/css" href="itc_test.css" />
+	<meta charset="UTF-8"/>
+	<title>GSAOI ITC</title>
+	<base target="content_frame">
+	<link rel="stylesheet" type="text/css" href="itc_test.css" />
 </head>
 
 <body link="#0000FF" vlink="#8B0000" text="#000000" bgcolor="#ffffff">
@@ -30,22 +31,16 @@
 			<tr>
 				<td><input name="Profile" value="POINT" checked="checked" type="radio" /></td>
 				<td colspan="2"><b>Point source</b> (<a href="#" onclick="window.open('http://www.gemini.edu/?q=node/10257#spatial','mywindow','width=1000,height=700,toolbar=no,location=no,directories=no,sta tus=no,menubar=no,scrollbars=yes,copyhistory=no,resizable=no'); return false">nominal
-				PSF</a>) with spatially integrated brightness <input name="psSourceNorm" size="8" value="20.0" type="text" /> <select name="psSourceUnits" size="1">
-
-				<option value="MAG">
-				mag</option>
-				<option value="ABMAG">
-				AB mag</option>
-				<option value="JY">
-				Jy</option>
-				<option value="WATTS">
-
-				W/m^2/um</option>
-				<option value="ERGS_WAVELENGTH">
-				ergs/s/cm^2/A</option>
-				<option value="ERGS_FREQUENCY">
-				ergs/s/cm^2/Hz</option>
-				</select> (e.g. 19.3 mag or 2e-17 W/m^2/um) </td>
+				PSF</a>) with spatially integrated brightness <input name="psSourceNorm" size="8" value="20.0" type="text" />
+                    <select name="psSourceUnits" size="1">
+                        <option value="MAG">mag</option>
+                        <option value="ABMAG">AB mag</option>
+                        <option value="JY">Jy</option>
+                        <option value="WATTS">W/m²/µm</option>
+                        <option value="ERGS_WAVELENGTH">erg/s/cm²/Å</option>
+                        <option value="ERGS_FREQUENCY">erg/s/cm²/Hz</option>
+                    </select> (e.g. 19.3 mag or 2e-17 W/m²/µm)
+                </td>
 
 			</tr>
 			<tr>
@@ -57,63 +52,51 @@
 				<td> </td>
 
 				<td><img src="/spacer.gif" height="1" width="40" border="0" style="opacity:0.0"/><input name="Profile" value="GAUSSIAN" type="radio" /></td>
-				<td>Gaussian profile with full width half maximum (including seeing) of <input name="gaussFwhm" size="5" value="1.0" type="text" /> arcsec and spatially integrated brightness of <input name="gaussSourceNorm" size="8" value="1.0e-3" type="text" /> <select name="gaussSourceUnits" size="1">
-				<option value="MAG">
-				mag</option>
-				<option value="ABMAG">
-				AB mag</option>
-
-				<option value="JY">
-				Jy</option>
-				<option value="WATTS">
-				W/m^2/um</option>
-				<option value="ERGS_WAVELENGTH">
-				ergs/s/cm^2/A</option>
-				<option value="ERGS_FREQUENCY">
-
-				ergs/s/cm^2/Hz</option>
-				</select> (e.g. 19.3 mag or 2e-17 W/m^2/um) </td>
+				<td>Gaussian profile with full width half maximum (including seeing) of <input name="gaussFwhm" size="5" value="1.0" type="text" /> arcsec and spatially integrated brightness of <input name="gaussSourceNorm" size="8" value="1.0e-3" type="text" />
+                    <select name="gaussSourceUnits" size="1">
+                        <option value="MAG">mag</option>
+                        <option value="ABMAG">AB mag</option>
+                        <option value="JY">Jy</option>
+                        <option value="WATTS">W/m²/µm</option>
+                        <option value="ERGS_WAVELENGTH">erg/s/cm²/Å</option>
+                        <option value="ERGS_FREQUENCY">erg/s/cm²/Hz</option>
+                    </select> (e.g. 19.3 mag or 2e-17 W/m²/µm)
+                </td>
 			</tr>
 			<tr>
 				<td> </td>
 				<td><img src="/spacer.gif" height="1" width="40" border="0" style="opacity:0.0"/><input name="Profile" value="UNIFORM" type="radio" /></td>
-				<td>Uniform surface brightness <input name="usbSourceNorm" size="8" value="22.0" type="text" /> <select name="usbSourceUnits" size="1">
-
-				<option value="MAG_PSA">
-				mag / sq arcsec</option>
-				<option value="ABMAG_PSA">
-				AB mag / sq arcsec</option>
-				<option value="JY_PSA">
-				Jy / sq arcsec</option>
-				<option value="WATTS_PSA">
-
-				W/m^2/um / sq arcsec</option>
-				<option value="ERGS_WAVELENGTH_PSA">
-				ergs/s/cm^2/A / sq arcsec</option>
-				<option value="ERGS_FREQUENCY_PSA">
-				ergs/s/cm^2/Hz / sq arcsec</option>
-				</select> (e.g. 21.6 mag / sq arcsec) </td>
+				<td>Uniform surface brightness <input name="usbSourceNorm" size="8" value="22.0" type="text" />
+                    <select name="usbSourceUnits" size="1">
+                        <option value="MAG_PSA">mag/arcsec²</option>
+                        <option value="ABMAG_PSA">AB mag/arcsec²</option>
+                        <option value="JY_PSA">Jy/arcsec²</option>
+                        <option value="WATTS_PSA">W/m²/µm/arcsec²</option>
+                        <option value="ERGS_WAVELENGTH_PSA">erg/s/cm²/Å/arcsec²</option>
+                        <option value="ERGS_FREQUENCY_PSA">erg/s/cm²/Hz/arcsec²</option>
+                    </select> (e.g. 21.6 mag/arcsec²)
+                </td>
 
 			</tr>
 			<tr>
 				<td colspan="3"><img src="/spacer.gif" height="40" width="1" border="0" style="opacity:0.0"/>with the above <b>brightness normalisation</b> applied in filter <select name="WavebandDefinition" size="1">
 
-                    <option value="U">U (0.36um)</option>
-                    <option value="B">B (0.44um)</option>
-                    <option value="g">g' (0.48um) </option>
-                    <option value="V">V (0.55um)</option>
-                    <option value="r">r' (0.62um) </option>
-                    <option value="R">R (0.67um)</option>
-                    <option value="i">i' (0.77um) </option>
-                    <option value="I">I (0.87um)</option>
-                    <option value="z">z' (0.92um) </option>
-                    <option value="J">J (1.25um)</option>
-                    <option value="H">H (1.65um)</option>
-                    <option value="K" selected>K (2.2um)</option>
-                    <option value="L">L' (3.76um)</option>
-                    <option value="M">M' (4.77um)</option>
-                    <option value="N">N (10.5um)</option>
-                    <option value="Q">Q (20.1um)</option>
+                    <option value="U">U (0.36µm)</option>
+                    <option value="B">B (0.44µm)</option>
+                    <option value="g">g' (0.48µm) </option>
+                    <option value="V">V (0.55µm)</option>
+                    <option value="r">r' (0.62µm) </option>
+                    <option value="R">R (0.67µm)</option>
+                    <option value="i">i' (0.77µm) </option>
+                    <option value="I">I (0.87µm)</option>
+                    <option value="z">z' (0.92µm) </option>
+                    <option value="J">J (1.25µm)</option>
+                    <option value="H">H (1.65µm)</option>
+                    <option value="K" selected>K (2.2µm)</option>
+                    <option value="L">L' (3.76µm)</option>
+                    <option value="M">M' (4.77µm)</option>
+                    <option value="N">N (10.5µm)</option>
+                    <option value="Q">Q (20.1µm)</option>
 
 				</select> band</td>
 
@@ -276,17 +259,17 @@
 				<td><input value="ELINE" name="Distribution" type="radio" /></td>
 				<td colspan="2">Single emission line at wavelength <input name="lineWavelength" size="5" value="2.2" type="text" /> micron with line flux <input name="lineFlux" size="8" value="5.0e-19" type="text" /> <select name="lineFluxUnits" size="1">
 				<option value="watts_flux">
-				W/m^2</option>
+				W/m²</option>
 				<option value="ergs_flux">
 
-				ergs/s/cm^2</option>
+				erg/s/cm²</option>
 				</select> and line width <input name="lineWidth" size="7" value="100.0" type="text" /> km/s
 				on a flat (in wavelength) continuum of flux density <input name="lineContinuum" size="8" value="1.0e-16" type="text" /> <select name="lineContinuumUnits" size="1">
 				<option value="watts_fd_wavelength">
-				W/m^2/um</option>
+				W/m²/µm</option>
 				<option value="ergs_fd_wavelength">
 
-				ergs/s/cm^2/A</option>
+				erg/s/cm²/Å</option>
 				</select></td>
 			</tr>
 			<tr>
@@ -341,28 +324,28 @@
                     <tr>
                         <td>Filter:</td>
                             <td colspan="3"><select name="Filter" size="1">
-                                <option value="Z">Z (1.015 um)</option>
-                                <option value="J">J (1.250 um)</option>
-                                <option value="H">H (1.650 um)</option>
-                                <option value="K_PRIME">K(prime) (2.120 um)</option>
-                                <option value="K_SHORT">K(short) (2.150 um)</option>
-                                <option value="K">K (2.200 um)</option>
-                                <option value="J_CONTINUUM">J-continuum(1.207 um)</option>
-                                <option value="H_CONTINUUM">H-continuum(1.570 um)</option>
-                                <option value="CH4_SHORT">CH4(short) (1.580 um)</option>
-                                <option value="CH4_LONG">CH4(long) (1.690 um)</option>
-                                <option value="K_CONTINUUM1">Ks-continuum (2.093 um)</option>
-                                <option value="K_CONTINUUM2">Kl-continuum (2.270 um)</option>
-                                <option value="HEI">HeI(1.083 um)</option>
-                                <option value="PA_GAMMA">Pa(gamma)(1.094 um)</option>
-                                <option value="PA_BETA">Pa(beta)(1.282 um)</option>
-                                <option value="FE_II">[FeII] (1.644 um)</option>
-                                <option value="H20_ICE">H2O ice (2.000 um)</option>
-                                <option value="HEI_2P2S">HeI (2p2s) (2.058 um)</option>
-                                <option value="H2_1_0_S_1">H2 1-0 S(1) (2.122 um)</option>
-                                <option value="BR_GAMMA">Br(gamma) (2.166 um)</option>
-                                <option value="H2_2_1_S_1">H2 2-1 S(1) (2.248 um)</option>
-                                <option value="CO">CO (2.360 um)</OPTION>
+                                <option value="Z">Z (1.015 µm)</option>
+                                <option value="J">J (1.250 µm)</option>
+                                <option value="H">H (1.650 µm)</option>
+                                <option value="K_PRIME">K(prime) (2.120 µm)</option>
+                                <option value="K_SHORT">K(short) (2.150 µm)</option>
+                                <option value="K">K (2.200 µm)</option>
+                                <option value="J_CONTINUUM">J-continuum(1.207 µm)</option>
+                                <option value="H_CONTINUUM">H-continuum(1.570 µm)</option>
+                                <option value="CH4_SHORT">CH4(short) (1.580 µm)</option>
+                                <option value="CH4_LONG">CH4(long) (1.690 µm)</option>
+                                <option value="K_CONTINUUM1">Ks-continuum (2.093 µm)</option>
+                                <option value="K_CONTINUUM2">Kl-continuum (2.270 µm)</option>
+                                <option value="HEI">HeI(1.083 µm)</option>
+                                <option value="PA_GAMMA">Pa(gamma)(1.094 µm)</option>
+                                <option value="PA_BETA">Pa(beta)(1.282 µm)</option>
+                                <option value="FE_II">[FeII] (1.644 µm)</option>
+                                <option value="H20_ICE">H2O ice (2.000 µm)</option>
+                                <option value="HEI_2P2S">HeI (2p2s) (2.058 µm)</option>
+                                <option value="H2_1_0_S_1">H2 1-0 S(1) (2.122 µm)</option>
+                                <option value="BR_GAMMA">Br(gamma) (2.166 µm)</option>
+                                <option value="H2_2_1_S_1">H2 2-1 S(1) (2.248 µm)</option>
+                                <option value="CO">CO (2.360 µm)</OPTION>
                         </select></td>
                     </tr>
                     </tbody>
