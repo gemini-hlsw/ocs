@@ -1,7 +1,3 @@
-//
-// $
-//
-
 package edu.gemini.spModel.target.env;
 
 import edu.gemini.shared.util.immutable.Option;

@@ -1,7 +1,3 @@
-//
-// $
-//
-
 package jsky.app.ot.gemini.editor.targetComponent;
 
 import edu.gemini.pot.sp.ISPNode;

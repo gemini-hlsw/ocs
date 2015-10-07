@@ -29,6 +29,7 @@ import java.util.Vector;
  * @author Allan Brighton
  * @version $Revision: 47126 $
  */
+@Deprecated
 public class SkycatCatalog implements PlotableCatalog {
 
     private static Logger LOG = Logger.getLogger(SkycatCatalog.class.getName());

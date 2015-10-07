@@ -1,10 +1,3 @@
-// Copyright 1997-2000
-// Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-// See the file LICENSE for complete details.
-//
-// $Id: SPTarget.java 45443 2012-05-23 20:26:52Z abrighton $
-//
 package edu.gemini.spModel.target;
 
 import edu.gemini.spModel.pio.ParamSet;

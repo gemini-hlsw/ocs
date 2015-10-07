@@ -103,8 +103,8 @@ public class SPTargetPio {
 
             // OT-495: save and restore RA/Dec for conic targets
             // XXX FIXME: Temporary, until nonsidereal support is implemented
-            final Option<Date> date = new Some(nst.getDateForPosition()).filter(d -> d != null);
-            final Option<Long> when = date.map(d -> d.getTime());
+            final Option<Date> date = new Some<>(nst.getDateForPosition()).filter(d -> d != null);
+            final Option<Long> when = date.map(Date::getTime);
             nst.getRaString(when).foreach(s -> Pio.addParam(factory, paramSet, _C1, s));
             nst.getDecString(when).foreach(s -> Pio.addParam(factory, paramSet, _C2, s));
             date.foreach(d -> Pio.addParam(factory, paramSet, _VALID_DATE, formatDate(d)));

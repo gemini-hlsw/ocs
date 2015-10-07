@@ -1,10 +1,3 @@
-// Copyright 1999 Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-// See the file LICENSE for complete details.
-//
-// $Id: ISPFactory.java 46866 2012-07-20 19:35:51Z swalker $
-//
-
 package edu.gemini.pot.sp;
 
 import edu.gemini.spModel.core.SPProgramID;
@@ -492,14 +485,15 @@ public interface ISPFactory {
      * In order to discover the types that can be
      * created by the factory, a client can use this method.
      */
-    List getCreatableObsComponents();
+    List<SPComponentType> getCreatableObsComponents();
+
     /**
      * Returns a List of <code>{@link SPComponentType}</code> objects, one
      * for each type of seq component that can be created by this factory.
      * In order to discover the types that can be
      * created by the factory, a client can use this method.
      */
-    List getCreatableSeqComponents();
+    List<SPComponentType> getCreatableSeqComponents();
 
     /**
      * Sets the default initializer to use when creating a new group.
@@ -520,7 +514,7 @@ public interface ISPFactory {
      * @throws SPUnknownIDException if the given <code>progKey</code> refers
      * to a program that is not known by this factory
      */
-    public ISPGroup createGroup(ISPProgram prog, SPNodeKey key)
+    ISPGroup createGroup(ISPProgram prog, SPNodeKey key)
             throws SPUnknownIDException;
 
     /**
@@ -539,7 +533,7 @@ public interface ISPFactory {
      * @throws SPUnknownIDException if the given <code>progKey</code> refers
      * to a program that is not known by this factory
      */
-    public ISPGroup createGroup(ISPProgram prog,
+    ISPGroup createGroup(ISPProgram prog,
                                 ISPNodeInitializer init,
                                 SPNodeKey key)
             throws SPUnknownIDException;
@@ -547,7 +541,7 @@ public interface ISPFactory {
     /**
      * Creates a deep copy of the given <code>group</code>
      */
-    public ISPGroup createGroupCopy(ISPProgram prog,
+    ISPGroup createGroupCopy(ISPProgram prog,
                                     ISPGroup ispGroup,
                                     boolean preserveKeys)
             throws SPUnknownIDException;

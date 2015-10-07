@@ -1,21 +1,10 @@
-// Copyright 1997 Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-// See the file LICENSE for complete details.
-//
-// $Id: DropDownListBoxWidget.java 8331 2007-12-05 19:16:40Z anunez $
-//
 package jsky.util.gui;
 
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import java.awt.BorderLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.List;
 import java.util.Vector;
-
-
-
 
 /**
  * A non-editable combo box with watchers.
@@ -23,10 +12,10 @@ import java.util.Vector;
  *
  * @author	Shane Walker, Allan Brighton (Swing port)
  */
-public class DropDownListBoxWidget extends JComboBox  {
+public class DropDownListBoxWidget<T> extends JComboBox<T>  {
 
     // Observers
-    private Vector _watchers = new Vector();
+    private Vector<DropDownListBoxWidgetWatcher> _watchers = new Vector<>();
 
     /** If true, don't fire any action events */
     protected boolean actionsEnabled = true;
@@ -34,11 +23,7 @@ public class DropDownListBoxWidget extends JComboBox  {
 
     /** Default Constructor */
     public DropDownListBoxWidget() {
-        addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                _notifyAction(getIntegerValue());
-            }
-        });
+        addActionListener(e -> _notifyAction(getIntegerValue()));
     }
 
 
@@ -69,8 +54,9 @@ public class DropDownListBoxWidget extends JComboBox  {
     //
     // Get a copy of the _watchers Vector.
     //
-    private synchronized final Vector _getWatchers() {
-        return (Vector) _watchers.clone();
+    @SuppressWarnings("unchecked")
+    private synchronized Vector<DropDownListBoxWidgetWatcher> _getWatchers() {
+        return (Vector<DropDownListBoxWidgetWatcher>) _watchers.clone();
     }
 
     //
@@ -125,35 +111,23 @@ public class DropDownListBoxWidget extends JComboBox  {
     }
 
     /** Add the given object to the list of choices */
-    public void addChoice(Object o) {
+    public void addChoice(T o) {
         addItem(o);
     }
 
     /** Set the choices by specifying a Vector containing the strings that represent the choices. */
-    public void setChoices(List choices) {
+    public void setChoices(List<T> choices) {
         actionsEnabled = false;
         removeAllItems();
-        int n = choices.size();
-        for (int i = 0; i < n; i++)
-            addItem(choices.get(i));
+        for (T choice : choices) addItem(choice);
         actionsEnabled = true;
     }
 
-//    /** Set the choices by specifying the strings that appear on screen. */
-//    public void setChoices(String[] choices) {
-//        actionsEnabled = false;
-//        removeAllItems();
-//        for (int i = 0; i < choices.length; i++)
-//            addItem(choices[i]);
-//        actionsEnabled = true;
-//    }
-
     /** Set the choices by specifying the objects that appear on screen. */
-    public void setChoices(Object[] choices) {
+    public void setChoices(T[] choices) {
         actionsEnabled = false;
         removeAllItems();
-        for (int i = 0; i < choices.length; i++)
-            addItem(choices[i]);
+        for (T choice : choices) addItem(choice);
         actionsEnabled = true;
     }
 
@@ -170,7 +144,7 @@ public class DropDownListBoxWidget extends JComboBox  {
     public static void main(String[] args) {
         JFrame frame = new JFrame("DropDownListBoxWidget");
 
-        DropDownListBoxWidget ddlbwe = new DropDownListBoxWidget();
+        DropDownListBoxWidget<String> ddlbwe = new DropDownListBoxWidget<>();
         ddlbwe.setChoices(new String[]{
             "One", "Two", "Three", "Four", "Five", "Six"
         });
@@ -178,11 +152,7 @@ public class DropDownListBoxWidget extends JComboBox  {
             "XOne", "XTwo", "XThree", "XFour", "XFive", "XSix"
         });
 
-        ddlbwe.addWatcher(new DropDownListBoxWidgetWatcher() {
-            public void dropDownListBoxAction(DropDownListBoxWidget ddlbwe, int index, String val) {
-                System.out.println("dropDownListBoxAction: " + ddlbwe.getValue());
-            }
-        });
+        ddlbwe.addWatcher((ddlbwe1, index, val) -> System.out.println("dropDownListBoxAction: " + ddlbwe1.getValue()));
 
         frame.getContentPane().add(ddlbwe, BorderLayout.CENTER);
         frame.pack();

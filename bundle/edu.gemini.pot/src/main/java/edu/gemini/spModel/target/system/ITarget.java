@@ -1,9 +1,3 @@
-// Copyright 2000 Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-// See the file LICENSE for complete details.
-//
-// $Id: ITarget.java 18053 2009-02-20 20:16:23Z swalker $
-//
 package edu.gemini.spModel.target.system;
 
 import edu.gemini.shared.skyobject.Magnitude;
@@ -72,15 +66,15 @@ public abstract class ITarget implements Cloneable, Serializable {
     ///
 
     public Option<Double> getRaDegrees(Option<Long> time) {
-        return new Some(getRa().getAs(CoordinateParam.Units.DEGREES));
+        return new Some<>(getRa().getAs(CoordinateParam.Units.DEGREES));
     }
 
     public Option<Double> getRaHours(Option<Long> time) {
-        return new Some(getRa().getAs(CoordinateParam.Units.HMS));
+        return new Some<>(getRa().getAs(CoordinateParam.Units.HMS));
     }
 
     public Option<String> getRaString(Option<Long> time) {
-        return new Some(getRa().toString());
+        return new Some<>(getRa().toString());
     }
 
     ///
@@ -115,7 +109,7 @@ public abstract class ITarget implements Cloneable, Serializable {
     protected abstract DMS getDec();
 
     public Option<Double> getDecDegrees(Option<Long> time) {
-        return new Some(getDec().getAs(CoordinateParam.Units.DEGREES));
+        return new Some<>(getDec().getAs(CoordinateParam.Units.DEGREES));
     }
 
     // TRANSITIONAL
@@ -125,7 +119,7 @@ public abstract class ITarget implements Cloneable, Serializable {
 
     // TRANSITIONAL
     public Option<String> getDecString(Option<Long> time) {
-        return new Some(getDec().toString());
+        return new Some<>(getDec().toString());
     }
 
     // TRANSITIONAL
@@ -210,7 +204,7 @@ public abstract class ITarget implements Cloneable, Serializable {
      * we have information in this target
      */
     public Set<Magnitude.Band> getMagnitudeBands() {
-        final ImList<Magnitude.Band> bandList = magnitudes.map(magnitude -> magnitude.getBand());
+        final ImList<Magnitude.Band> bandList = magnitudes.map(Magnitude::getBand);
         return new HashSet<>(bandList.toList());
     }
 

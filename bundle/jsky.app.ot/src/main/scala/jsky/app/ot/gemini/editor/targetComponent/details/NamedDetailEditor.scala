@@ -36,10 +36,10 @@ final class NamedDetailEditor extends TargetDetailEditor(Tag.NAMED) with Reentra
     })
   }
 
-  val solarObject = new DropDownListBoxWidget {
+  val solarObject = new DropDownListBoxWidget[AnyRef] {
     setChoices(NamedTarget.SolarObject.values.asInstanceOf[Array[AnyRef]])
-    addWatcher(new DropDownListBoxWidgetWatcher {
-      def dropDownListBoxAction(w: DropDownListBoxWidget, index: Int, value: String) {
+    addWatcher(new DropDownListBoxWidgetWatcher[AnyRef] {
+      def dropDownListBoxAction(w: DropDownListBoxWidget[AnyRef], index: Int, value: String) {
         nonreentrant {
           val o = w.getValue.asInstanceOf[NamedTarget.SolarObject]
           nt.setSolarObject(o)

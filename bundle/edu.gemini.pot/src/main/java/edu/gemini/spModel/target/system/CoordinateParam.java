@@ -8,13 +8,12 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 
-
 /**
  * The base class for target coordinate parameters and their associated
  * types.
  * <p>
  * Coordinate systems are defined by many parameters.  This class serves as the
- * base class for a single paramter.  A parameter is a combination of
+ * base class for a single parameter.  A parameter is a combination of
  * a value and its units.  Since many parameters share the same types of
  * units, they are collected in the {@link TypeBase TypeBase}
  * subclass {@link CoordinateParam.Units Units}.  The

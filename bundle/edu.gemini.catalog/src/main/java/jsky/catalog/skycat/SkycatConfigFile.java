@@ -1,11 +1,3 @@
-/*
- * Copyright 2000 Association for Universities for Research in Astronomy, Inc.,
- * Observatory Control System, Gemini Telescopes Project.
- *
- * $Id: SkycatConfigFile.java 24804 2010-03-28 03:15:24Z swalker $
- */
-
-
 package jsky.catalog.skycat;
 
 import jsky.catalog.*;
@@ -22,7 +14,6 @@ import java.util.List;
 import java.util.Properties;
 import java.util.Vector;
 
-
 /**
  * Reads a Skycat style catalog config file and stores
  * information about the catalogs defined there. Since catalog
@@ -35,6 +26,7 @@ import java.util.Vector;
  * @version $Revision: 24804 $ $Date: 2010-03-27 20:15:24 -0700 (Sat, 27 Mar 2010) $
  * @author Allan Brighton
  */
+@Deprecated
 public class SkycatConfigFile extends AbstractCatalogDirectory {
 
     /** Top level config file */
