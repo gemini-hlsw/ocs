@@ -1,15 +1,4 @@
-/*
- * ESO Archive
- *
- * $Id: RowCoordinates.java 4414 2004-02-03 16:21:36Z brighton $
- *
- * who             when        what
- * --------------  ----------  ----------------------------------------
- * Allan Brighton  1999/05/10  Created
- */
-
 package jsky.catalog;
-
 
 import java.util.*;
 
@@ -123,7 +112,7 @@ public class RowCoordinates {
                     } else if (ra instanceof Double && dec instanceof Double) {
                         return new WorldCoords((Double) ra, (Double) dec, equinox);
                     } else if (ra instanceof Float && dec instanceof Float) {
-                        return new WorldCoords(((Float) ra).floatValue(), ((Float) dec).floatValue(), equinox);
+                        return new WorldCoords((Float) ra, (Float) dec, equinox);
                     }
                 }
             } else if (isPix) {
@@ -132,7 +121,7 @@ public class RowCoordinates {
                     if (x instanceof Double && y instanceof Double)
                         return new ImageCoords((Double) x, (Double) y);
                     else if (x instanceof Float && y instanceof Float)
-                        return new ImageCoords(((Float) x).floatValue(), ((Float) y).floatValue());
+                        return new ImageCoords((Float) x, (Float) y);
                 }
             }
         } catch (NumberFormatException e) {

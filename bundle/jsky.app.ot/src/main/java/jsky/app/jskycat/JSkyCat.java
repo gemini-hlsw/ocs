@@ -1,13 +1,3 @@
-/*
- * ESO Archive
- *
- * $Id: JSkyCat.java 7729 2007-04-27 21:09:07Z gillies $
- *
- * who             when        what
- * --------------  ----------  ----------------------------------------
- * Allan Brighton  1999/05/03  Created
- */
-
 package jsky.app.jskycat;
 
 import jsky.image.gui.MainImageDisplay;
@@ -142,7 +132,7 @@ public class JSkyCat extends JFrame {
             setContentPane(desktop);
         }
 
-        NavigatorInternalFrame navigatorFrame = null;
+        NavigatorInternalFrame navigatorFrame;
         NavigatorImageDisplayInternalFrame imageFrame = null;
         if (imageFileOrUrl != null || !showNavigator) {
             imageFrame = makeNavigatorImageDisplayInternalFrame(desktop, imageFileOrUrl);
@@ -190,7 +180,7 @@ public class JSkyCat extends JFrame {
      * @param imageFileOrUrl an image file or URL to display
      */
     protected void makeFrameLayout(boolean showNavigator, String imageFileOrUrl) {
-        NavigatorFrame navigatorFrame = null;
+        NavigatorFrame navigatorFrame;
         NavigatorImageDisplayFrame imageFrame = null;
 
         if (imageFileOrUrl != null || !showNavigator) {
@@ -405,28 +395,35 @@ public class JSkyCat extends JFrame {
         boolean ok = true;
         int tilecache = 64;
 
+        label:
         for (int i = 0; i < args.length; i++) {
             if (args[i].charAt(0) == '-') {
                 String opt = args[i];
-                if (opt.equals("-internalframes")) {
-                    internalFrames = true;
-                } else if (opt.equals("-nointernalframes")) {
-                    internalFrames = false;
-                } else if (opt.equals("-shownavigator")) {
-                    showNavigator = true;
-                } else if (opt.equals("-port")) {
-                    String arg = args[++i];
-                    portNum = Integer.parseInt(arg);
-                } else if (opt.equals("-tilecache")) {
-                    try {
-                        tilecache = Integer.parseInt(args[++i]);
-                    } catch (NumberFormatException e) {
-                        System.out.println("Warning: bad value for -tilecache option: " + args[i]);
-                    }
-                } else {
-                    System.out.println(_I18N.getString("unknownOption") + ": " + opt);
-                    ok = false;
-                    break;
+                switch (opt) {
+                    case "-internalframes":
+                        internalFrames = true;
+                        break;
+                    case "-nointernalframes":
+                        internalFrames = false;
+                        break;
+                    case "-shownavigator":
+                        showNavigator = true;
+                        break;
+                    case "-port":
+                        String arg = args[++i];
+                        portNum = Integer.parseInt(arg);
+                        break;
+                    case "-tilecache":
+                        try {
+                            tilecache = Integer.parseInt(args[++i]);
+                        } catch (NumberFormatException e) {
+                            System.out.println("Warning: bad value for -tilecache option: " + args[i]);
+                        }
+                        break;
+                    default:
+                        System.out.println(_I18N.getString("unknownOption") + ": " + opt);
+                        ok = false;
+                        break label;
                 }
             } else {
                 if (imageFileOrUrl != null) {

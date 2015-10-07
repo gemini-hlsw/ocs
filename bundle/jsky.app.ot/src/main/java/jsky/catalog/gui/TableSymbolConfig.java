@@ -1,10 +1,3 @@
-/*
- * Copyright 2002 Association for Universities for Research in Astronomy, Inc.,
- * Observatory Control System, Gemini Telescopes Project.
- *
- * $Id: TableSymbolConfig.java 8331 2007-12-05 19:16:40Z anunez $
- */
-
 package jsky.catalog.gui;
 
 import java.awt.event.ActionEvent;
@@ -104,19 +97,17 @@ public class TableSymbolConfig extends TableSymbolConfigGUI implements IApplyCan
         _plotter = plotter;
 
         symbolTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        symbolTable.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
-            public void valueChanged(ListSelectionEvent e) {
-                if (e.getValueIsAdjusting())
-                    return;
-                int first = e.getFirstIndex();
-                int last = e.getLastIndex();
-                ListSelectionModel model = symbolTable.getSelectionModel();
-                for (int i = first; i <= last; i++) {
-                    if (model.isSelectedIndex(i) && i >= 0 && i < _symbols.length) {
-                        _selectedSymbolRow = i;
-                        editSymbol(_symbols[i]);
-                        break;
-                    }
+        symbolTable.getSelectionModel().addListSelectionListener(e -> {
+            if (e.getValueIsAdjusting())
+                return;
+            int first = e.getFirstIndex();
+            int last = e.getLastIndex();
+            ListSelectionModel model = symbolTable.getSelectionModel();
+            for (int i = first; i <= last; i++) {
+                if (model.isSelectedIndex(i) && i >= 0 && i < _symbols.length) {
+                    _selectedSymbolRow = i;
+                    editSymbol(_symbols[i]);
+                    break;
                 }
             }
         });
@@ -247,8 +238,7 @@ public class TableSymbolConfig extends TableSymbolConfigGUI implements IApplyCan
         DefaultListModel model = (DefaultListModel) list.getModel();
         model.removeAllElements();
         if (ar != null) {
-            for (int i = 0; i < ar.length; i++)
-                model.addElement(ar[i]);
+            for (String anAr : ar) model.addElement(anAr);
         }
     }
 
@@ -258,8 +248,7 @@ public class TableSymbolConfig extends TableSymbolConfigGUI implements IApplyCan
         model.removeAllElements();
         if (v != null) {
             int n = v.size();
-            for (int i = 0; i < n; i++)
-                model.addElement(v.get(i));
+            for (Object aV : v) model.addElement(aV);
         }
     }
 
@@ -271,16 +260,15 @@ public class TableSymbolConfig extends TableSymbolConfigGUI implements IApplyCan
         setListData(useList, used);
 
         // List of column variables not used
-        Vector v = _table.getColumnIdentifiers();
+        Vector<String> v = _table.getColumnIdentifiers();
         int size = v.size();
-        Vector ignore = new Vector(size);
-        for (int i = 0; i < size; i++) {
-            String s = (String) v.get(i);
+        Vector<String> ignore = new Vector<>(size);
+        for (String s : v) {
             if (used == null) {
                 ignore.add(s);
             } else {
-                for (int j = 0; j < used.length; j++) {
-                    if (s.equals(used[j]))
+                for (String anUsed : used) {
+                    if (s.equals(anUsed))
                         continue;
                     ignore.add(s);
                 }
@@ -301,9 +289,9 @@ public class TableSymbolConfig extends TableSymbolConfigGUI implements IApplyCan
         // Select the correct color
         String colorName = symb.getColorName(symb.getFg());
         ar = TablePlotSymbol.COLOR_NAMES;
-        for (int i = 0; i < ar.length; i++) {
-            if (colorName.equals(ar[i])) {
-                colorComboBox.getModel().setSelectedItem(ar[i]);
+        for (String anAr : ar) {
+            if (colorName.equals(anAr)) {
+                colorComboBox.getModel().setSelectedItem(anAr);
                 break;
             }
         }

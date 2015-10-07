@@ -164,7 +164,7 @@ public abstract class OffsetPosBase extends WatchablePos {
 
         // Update the current value
 
-        Map<GuideProbe, GuideOption> m = new TreeMap<GuideProbe, GuideOption>(GuideProbe.KeyComparator.instance);
+        Map<GuideProbe, GuideOption> m = new TreeMap<>(GuideProbe.KeyComparator.instance);
         m.putAll(_linkMap);
         m.put(guider, option);
         _linkMap = Collections.unmodifiableMap(m);
@@ -207,11 +207,11 @@ public abstract class OffsetPosBase extends WatchablePos {
     }
 
     public Set<GuideProbe> getGuideProbes() {
-        return new HashSet<GuideProbe>(_linkMap.keySet());
+        return new HashSet<>(_linkMap.keySet());
     }
 
     public Set<GuideProbe> getGuideProbes(GuideProbe.Type type) {
-        Set<GuideProbe> res = new HashSet<GuideProbe>();
+        Set<GuideProbe> res = new HashSet<>();
         for (GuideProbe probe : _linkMap.keySet()) {
             if (probe.getType() == type) res.add(probe);
         }
@@ -240,7 +240,7 @@ public abstract class OffsetPosBase extends WatchablePos {
         if (_linkMap.size() == 1) {
             _linkMap = Collections.emptyMap();
         } else {
-            Map<GuideProbe, GuideOption> newLinks = new TreeMap<GuideProbe, GuideOption>(GuideProbe.KeyComparator.instance);
+            Map<GuideProbe, GuideOption> newLinks = new TreeMap<>(GuideProbe.KeyComparator.instance);
             newLinks.putAll(_linkMap);
             newLinks.remove(probe);
             _linkMap = Collections.unmodifiableMap(newLinks);
@@ -402,7 +402,7 @@ public abstract class OffsetPosBase extends WatchablePos {
 
         defaultGuideOption = Pio.getEnumValue(paramSet, DEFAULT_GUIDE_OPTION_PARAM, DefaultGuideOptions.Value.on);
 
-        Map<GuideProbe, GuideOption> links = new TreeMap<GuideProbe, GuideOption>(GuideProbe.KeyComparator.instance);
+        Map<GuideProbe, GuideOption> links = new TreeMap<>(GuideProbe.KeyComparator.instance);
         setLinkParameters(links, LINK_PREFIX, paramSet);
         if (links.size() == 0) {
             _linkMap = Collections.emptyMap();
@@ -463,7 +463,7 @@ public abstract class OffsetPosBase extends WatchablePos {
             return None.instance();
         }
 
-        return new Some<Offset>(new Offset(new Angle(p, ARCSECS), new Angle(q, ARCSECS)));
+        return new Some<>(new Offset(new Angle(p, ARCSECS), new Angle(q, ARCSECS)));
     }
 
     public static final ItemKey TEL_P_KEY       = new ItemKey("telescope:p");
@@ -482,7 +482,7 @@ public abstract class OffsetPosBase extends WatchablePos {
         Object q = config.getItemValue(TEL_Q_KEY);
         if ((p == null) || (q == null)) return None.instance();
 
-        Double pd, qd = null;
+        Double pd, qd;
         try {
             pd = parsePqVal(p);
             qd = parsePqVal(q);
@@ -492,7 +492,7 @@ public abstract class OffsetPosBase extends WatchablePos {
             return None.instance();
         }
 
-        return new Some<Offset>(new Offset(new Angle(pd, ARCSECS), new Angle(qd, ARCSECS)));
+        return new Some<>(new Offset(new Angle(pd, ARCSECS), new Angle(qd, ARCSECS)));
     }
 
     /**

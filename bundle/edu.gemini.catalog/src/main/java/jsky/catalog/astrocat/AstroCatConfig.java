@@ -1,11 +1,3 @@
-/*
- * Copyright 2002 Association for Universities for Research in Astronomy, Inc.,
- * Observatory Control System, Gemini Telescopes Project.
- *
- * $Id: AstroCatConfig.java 23553 2010-01-22 19:24:12Z swalker $
- */
-
-
 package jsky.catalog.astrocat;
 
 import jsky.catalog.*;
@@ -283,6 +275,7 @@ public class AstroCatConfig extends AbstractCatalogDirectory {
     /**
      * Save the catalog list in the default location (~/.jsky/AstroCat.xml)
      */
+    @Deprecated
     public void save() {
         String home = System.getProperty("user.home");
         String sep = System.getProperty("file.separator");

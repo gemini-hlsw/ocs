@@ -16,7 +16,6 @@ import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
 import java.awt.geom.Point2D;
-import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.Collection;
 import java.util.LinkedList;
@@ -54,10 +53,10 @@ public abstract class TpeImageFeature implements TelescopePosWatcher {
     protected boolean _isVisible;
 
     /** The feature's name. */
-    protected String _name;
+    protected final String _name;
 
     /** The feature's description. */
-    protected String _description;
+    protected final String _description;
 
     /**
      * Instantiate a TpeImageFeature from a fully qualified class name.
@@ -265,9 +264,6 @@ public abstract class TpeImageFeature implements TelescopePosWatcher {
      * move the area to the current screen position that represents (0,0) of the instrument's coordinate system.
      * Note: This method implicitly includes the correction needed for images in the TPE with coordinate systems
      * that are flipped along the x-Axis (flipRA).
-     * @param rotation
-     * @param scaleFactor
-     * @param translation
      */
     protected void setTransformationToScreen(Angle rotation, double scaleFactor, Point2D.Double translation) {
         double radians = rotation.convertTo(Angle.Unit.RADIANS).getMagnitude();
@@ -280,7 +276,6 @@ public abstract class TpeImageFeature implements TelescopePosWatcher {
 
     /**
      * Gets the current transformation for mapping a geometry to the screen.
-     * @return
      */
     protected AffineTransform getTransformationToScreen() {
         return toScreenTransform;
@@ -289,8 +284,6 @@ public abstract class TpeImageFeature implements TelescopePosWatcher {
     /**
      * Transforms a geometry to screen coordinates according to the parameter set with
      * {@see setTransformationFlipXY} and {@see setTransformationToScreen}.
-     * @param area
-     * @return
      */
     protected Area transformToScreen(Area area) {
         area.transform(toScreenTransform);
@@ -333,7 +326,7 @@ public abstract class TpeImageFeature implements TelescopePosWatcher {
         }
     }
     // List of Figures to draw.
-    protected LinkedList<Figure> _figureList = new LinkedList<>();
+    protected final LinkedList<Figure> _figureList = new LinkedList<>();
     protected void clearFigures() {
         _figureList.clear();
     }

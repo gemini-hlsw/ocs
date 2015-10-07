@@ -1,14 +1,6 @@
-// Copyright 1997-2000
-// Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-// See the file LICENSE for complete details.
-//
-// $Id: TargetObsComp.java 45277 2012-05-15 22:53:11Z swalker $
-//
 package edu.gemini.spModel.target.obsComp;
 
 import edu.gemini.pot.sp.SPComponentType;
-import edu.gemini.shared.util.immutable.ApplyOp;
 import edu.gemini.spModel.data.AbstractDataObject;
 import edu.gemini.spModel.guide.GuideProbe;
 import edu.gemini.spModel.guide.GuideProbeProvider;
@@ -24,7 +16,6 @@ import edu.gemini.spModel.target.system.ITarget;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.util.Collection;
-
 
 /**
  * A class for telescope observation component items.  Maintains a
@@ -74,9 +65,7 @@ public final class TargetObsComp extends AbstractDataObject implements GuideProb
         final TargetObsComp toc = (TargetObsComp) super.clone();
         toc.targetEnv = targetEnv.cloneTargets();
         toc.prop      = toc.new PcePropagator();
-        toc.targetEnv.getTargets().foreach(new ApplyOp<SPTarget>() {
-            @Override public void apply(SPTarget target) { target.addWatcher(toc.prop); }
-        });
+        toc.targetEnv.getTargets().foreach(target -> target.addWatcher(toc.prop));
         return toc;
     }
 
@@ -132,12 +121,9 @@ public final class TargetObsComp extends AbstractDataObject implements GuideProb
     }
 
     private void watchTargets() {
-        targetEnv.getTargets().foreach(new ApplyOp<SPTarget>() {
-            @Override
-            public void apply(SPTarget target) {
-                target.deleteWatcher(prop);
-                target.addWatcher(prop);
-            }
+        targetEnv.getTargets().foreach(target -> {
+            target.deleteWatcher(prop);
+            target.addWatcher(prop);
         });
     }
 

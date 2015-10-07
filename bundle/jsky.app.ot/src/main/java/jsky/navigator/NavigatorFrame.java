@@ -1,13 +1,3 @@
-/*
- * ESO Archive
- *
- * $Id: NavigatorFrame.java 39360 2011-11-25 13:02:23Z swalker $
- *
- * who             when        what
- * --------------  ----------  ----------------------------------------
- * Allan Brighton  1999/06/02  Created
- */
-
 package jsky.navigator;
 
 import jsky.catalog.CatalogDirectory;
@@ -17,13 +7,9 @@ import jsky.catalog.gui.CatalogTree;
 import jsky.catalog.gui.TablePlotter;
 import jsky.image.gui.MainImageDisplay;
 import jsky.util.Preferences;
-import jsky.util.gui.DialogUtil;
 
 import javax.swing.*;
-import javax.swing.event.TreeSelectionEvent;
-import javax.swing.event.TreeSelectionListener;
 import java.awt.*;
-
 
 /**
  * Provides a top level window and menubar for the Navigator class.
@@ -57,11 +43,7 @@ public class NavigatorFrame extends JFrame {
 
         // Selecting a catalog from the menu turns autoQuery on, but selecting one from the tree should
         // turn it off again
-        catalogTree.getTree().addTreeSelectionListener(new TreeSelectionListener() {
-            public void valueChanged(TreeSelectionEvent e) {
-                navigator.setAutoQuery(false);
-            }
-        });
+        catalogTree.getTree().addTreeSelectionListener(e -> navigator.setAutoQuery(false));
 
 
         NavigatorToolBar toolbar = new NavigatorToolBar(navigator);

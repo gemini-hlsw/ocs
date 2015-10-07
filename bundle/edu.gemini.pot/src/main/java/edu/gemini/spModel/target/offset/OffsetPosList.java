@@ -34,7 +34,7 @@ public final class OffsetPosList<P extends OffsetPosBase> implements Cloneable, 
     private transient List<OffsetPosListWatcher<P>> _watchers;
 
     /** The implementation of the list. */
-    private List<P> _posList = new ArrayList<P>();
+    private List<P> _posList = new ArrayList<>();
 
     private final OffsetPosBase.Factory<P> _factory;
 
@@ -63,7 +63,7 @@ public final class OffsetPosList<P extends OffsetPosBase> implements Cloneable, 
             //noinspection unchecked
             ol = (OffsetPosList<P>) super.clone();
             ol._watchers    = null;
-            ol._posList     = new ArrayList<P>();
+            ol._posList     = new ArrayList<>();
         } catch (CloneNotSupportedException ex) {
             // Should not happen
             throw new UnsupportedOperationException();
@@ -98,7 +98,7 @@ public final class OffsetPosList<P extends OffsetPosBase> implements Cloneable, 
      */
     public synchronized List<P> getAllPositions() {
         if (_posList == null) return Collections.emptyList();
-        return new ArrayList<P>(_posList);
+        return new ArrayList<>(_posList);
     }
 
     /**
@@ -265,7 +265,7 @@ public final class OffsetPosList<P extends OffsetPosBase> implements Cloneable, 
         // list.
         Set<GuideProbe> rmProbes = op.getGuideProbes();
         rmProbes.removeAll(advancedGuiding);
-        for (GuideProbe gp : rmProbes) op.removeLink(gp);
+        rmProbes.forEach(op::removeLink);
 
         // Add any that are missing.
         for (GuideProbe gp : advancedGuiding) {
@@ -292,7 +292,7 @@ public final class OffsetPosList<P extends OffsetPosBase> implements Cloneable, 
 
     public void addAdvancedGuiding(GuideProbe gp) {
         if (advancedGuiding.contains(gp)) return;
-        final Set<GuideProbe> a = new TreeSet<GuideProbe>(GuideProbe.KeyComparator.instance);
+        final Set<GuideProbe> a = new TreeSet<>(GuideProbe.KeyComparator.instance);
         a.addAll(advancedGuiding);
         a.add(gp);
         updateAdvancedGuiding(Collections.unmodifiableSet(a));
@@ -305,7 +305,7 @@ public final class OffsetPosList<P extends OffsetPosBase> implements Cloneable, 
         if (advancedGuiding.size() == 1) {
             newValue = Collections.emptySet();
         } else {
-            Set<GuideProbe> a = new TreeSet<GuideProbe>(GuideProbe.KeyComparator.instance);
+            Set<GuideProbe> a = new TreeSet<>(GuideProbe.KeyComparator.instance);
             a.addAll(advancedGuiding);
             a.remove(gp);
             newValue = Collections.unmodifiableSet(a);
@@ -325,7 +325,7 @@ public final class OffsetPosList<P extends OffsetPosBase> implements Cloneable, 
         if (guiders.isEmpty()) {
             newValue = Collections.emptySet();
         } else {
-            Set<GuideProbe> a = new TreeSet<GuideProbe>(GuideProbe.KeyComparator.instance);
+            Set<GuideProbe> a = new TreeSet<>(GuideProbe.KeyComparator.instance);
             a.addAll(guiders);
             newValue = Collections.unmodifiableSet(a);
         }
@@ -490,7 +490,7 @@ public final class OffsetPosList<P extends OffsetPosBase> implements Cloneable, 
         ParamSet paramSet = factory.createParamSet(name);
 
         if (advancedGuiding.size() > 0) {
-            List<String> keys = new ArrayList<String>(advancedGuiding.size());
+            List<String> keys = new ArrayList<>(advancedGuiding.size());
             for (GuideProbe gp : advancedGuiding) keys.add(gp.getKey());
             Pio.addListParam(factory, paramSet, ADVANCED_GUIDING_PROP, keys);
         }
@@ -513,7 +513,7 @@ public final class OffsetPosList<P extends OffsetPosBase> implements Cloneable, 
         if (paramSet == null) return;
 
         boolean migrate = false;
-        final List<P> positions = new ArrayList<P>(paramSet.getParamSetCount());
+        final List<P> positions = new ArrayList<>(paramSet.getParamSetCount());
         for (ParamSet ps : paramSet.getParamSets()) {
             final P op = _factory.create(ps.getName());
             op.setParamSet(ps);
@@ -525,7 +525,7 @@ public final class OffsetPosList<P extends OffsetPosBase> implements Cloneable, 
             }
         }
 
-        final Set<GuideProbe> advanced = new TreeSet<GuideProbe>(GuideProbe.KeyComparator.instance);
+        final Set<GuideProbe> advanced = new TreeSet<>(GuideProbe.KeyComparator.instance);
         if (migrate) {
             OffsetPosMigration.apply(positions);
             if (positions.size() > 0) {
@@ -575,7 +575,7 @@ public final class OffsetPosList<P extends OffsetPosBase> implements Cloneable, 
      */
     public synchronized void addWatcher(OffsetPosListWatcher<P> w) {
         if (_watchers == null) {
-            _watchers = new ArrayList<OffsetPosListWatcher<P>>();
+            _watchers = new ArrayList<>();
         } else if (_watchers.contains(w)) {
             return;
         }
@@ -595,7 +595,7 @@ public final class OffsetPosList<P extends OffsetPosBase> implements Cloneable, 
      */
     protected final synchronized List<OffsetPosListWatcher<P>> _getWatchers() {
         if (_watchers == null) return null;
-        return new ArrayList<OffsetPosListWatcher<P>>(_watchers);
+        return new ArrayList<>(_watchers);
     }
 
     /**
@@ -626,7 +626,7 @@ public final class OffsetPosList<P extends OffsetPosBase> implements Cloneable, 
         int n = v.size();
         for (int i = 0; i < n; i++) {
             OffsetPosListWatcher<P> w = v.get(i);
-            w.posListAddedPosition(this, new ArrayList<P>(tp));
+            w.posListAddedPosition(this, new ArrayList<>(tp));
         }
     }
 
@@ -643,7 +643,7 @@ public final class OffsetPosList<P extends OffsetPosBase> implements Cloneable, 
         int n = v.size();
         for (int i = 0; i < n; i++) {
             OffsetPosListWatcher<P> w = v.get(i);
-            w.posListRemovedPosition(this, new ArrayList<P>(tp));
+            w.posListRemovedPosition(this, new ArrayList<>(tp));
         }
     }
 

@@ -1,6 +1,7 @@
 package jsky.app.ot.tpe;
 
 import edu.gemini.pot.sp.*;
+import edu.gemini.shared.util.immutable.None;
 import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.spModel.data.ISPDataObject;
 import edu.gemini.spModel.gemini.nici.SeqRepeatNiciOffset;
@@ -12,7 +13,6 @@ import edu.gemini.spModel.target.SPTarget;
 import edu.gemini.spModel.target.obsComp.TargetObsComp;
 import edu.gemini.spModel.target.obsComp.TargetSelection;
 import edu.gemini.spModel.target.offset.OffsetPosSelection;
-import edu.gemini.spModel.target.system.CoordinateParam.Units;
 import edu.gemini.spModel.target.system.ITarget;
 import jsky.app.jskycat.JSkyCat;
 import jsky.app.ot.OT;
@@ -60,7 +60,7 @@ public class TelescopePosEditor extends JSkyCat implements TpeMouseObserver {
     /**
      * List of all features
      */
-    private Vector<TpeImageFeature> _allFeatures = new Vector<>();
+    private final Vector<TpeImageFeature> _allFeatures;
 
     private TpeContext _ctx = TpeContext.empty();
 
@@ -72,22 +72,22 @@ public class TelescopePosEditor extends JSkyCat implements TpeMouseObserver {
     /**
      * Tool button helper
      */
-    private TpeEditorTools _editorTools;
+    private final TpeEditorTools _editorTools;
 
     /**
      * Object managing the image features
      */
-    private TpeFeatureManager _featureMan;
+    private final TpeFeatureManager _featureMan;
 
     /**
      * Toolbar (on the side with toggle buttons)
      */
-    private TpeToolBar _tpeToolBar;
+    private final TpeToolBar _tpeToolBar;
 
     /**
      * Menu bar
      */
-    private TpeImageDisplayMenuBar _tpeMenuBar;
+    private final TpeImageDisplayMenuBar _tpeMenuBar;
 
     private final AgsContextPublisher _agsPub = new AgsContextPublisher();
 

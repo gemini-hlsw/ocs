@@ -431,6 +431,7 @@ public class SkycatConfigFile extends AbstractCatalogDirectory {
      * (~/.jsky/skycat.cfg) to make it permanent. The information is saved in the
      * same format used by the skycat application.
      */
+    @Deprecated
     public void save() {
         String home = System.getProperty("user.home");
         String sep = System.getProperty("file.separator");

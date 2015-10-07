@@ -1,7 +1,3 @@
-//
-// $
-//
-
 package edu.gemini.spModel.obs.context;
 
 import edu.gemini.pot.sp.*;

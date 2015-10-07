@@ -1,6 +1,5 @@
 package jsky.app.ot.tpe;
 
-import edu.gemini.ags.api.AgsStrategy;
 import edu.gemini.catalog.api.MagnitudeConstraints;
 import edu.gemini.catalog.ui.QueryResultsFrame;
 import edu.gemini.shared.cat.CatalogSearchParameters;
@@ -8,17 +7,14 @@ import edu.gemini.shared.cat.ICatalogAlgorithm;
 import edu.gemini.catalog.api.MagnitudeLimits;
 import edu.gemini.catalog.api.RadiusLimits;
 import edu.gemini.shared.util.immutable.*;
-import edu.gemini.spModel.ags.AgsStrategyKey;
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality;
 import edu.gemini.spModel.obs.SchedulingBlock;
 import edu.gemini.spModel.obs.context.ObsContext;
 import edu.gemini.spModel.obscomp.SPInstObsComp;
 import edu.gemini.spModel.target.*;
 import edu.gemini.spModel.target.offset.OffsetPosBase;
-import edu.gemini.spModel.target.system.CoordinateParam.Units;
 import edu.gemini.spModel.target.system.ITarget;
 import edu.gemini.spModel.util.Angle;
-import jsky.app.ot.ags.AgsStrategyUtil;
 import jsky.app.ot.tpe.gems.GemsGuideStarSearchDialog;
 import jsky.app.ot.util.OtColor;
 import jsky.app.ot.util.PolygonD;

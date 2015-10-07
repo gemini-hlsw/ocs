@@ -2,7 +2,7 @@ package jsky.app.ot.tpe
 
 import edu.gemini.pot.sp._
 
-import edu.gemini.shared.util.immutable.{None => JNone, Option => JOption, Some => JSome}
+import edu.gemini.shared.util.immutable.{None => JNone, Option => JOption}
 import edu.gemini.shared.util.immutable.ScalaConverters._
 import edu.gemini.spModel.core.Site
 import edu.gemini.spModel.data.{ISPDataObject, IOffsetPosListProvider}
@@ -35,8 +35,6 @@ object TpeContext {
     c <- Option(f(o))
   } yield c
 
-  private[tpe] def toJOption[T](o: Option[T]): JOption[T] =
-    o.map(t => new JSome[T](t)).getOrElse(JNone.instance())
 }
 
 import TpeContext._
@@ -191,7 +189,7 @@ case class TpeContext(node: Option[ISPNode]) {
 
   def obsContext: Option[ObsContext] = siteQuality.dataObject.flatMap(sq => obsContextWithConditions(sq.conditions))
 
-  def obsContextJava: JOption[ObsContext] = toJOption(obsContext)
+  def obsContextJava: JOption[ObsContext] = obsContext.asGeminiOpt
 
   def obsContextWithConditions(c: Conditions): Option[ObsContext] = for {
     s <- obsShell
@@ -202,7 +200,7 @@ case class TpeContext(node: Option[ISPNode]) {
   } yield ObsContext.create(obs.getAgsStrategyOverride, t, i, site, c, offsets.scienceOffsetsJava, ao, obs.getSchedulingBlock)
 
   def obsContextJavaWithConditions(c: Conditions): JOption[ObsContext] =
-    toJOption(obsContextWithConditions(c))
+    obsContextWithConditions(c).asGeminiOpt
 
   def schedulingBlock: Option[SchedulingBlock] =
     obsShell.flatMap(_.getDataObject.asInstanceOf[SPObservation].getSchedulingBlock.asScalaOpt)

@@ -1,34 +1,18 @@
-/*
- * ESO Archive
- *
- * $Id: TableDisplayTool.java 37930 2011-10-07 23:17:24Z lobrien $
- *
- * who             when        what
- * --------------  ----------  ----------------------------------------
- * Allan Brighton  1999/06/02  Created
- */
-
 package jsky.catalog.gui;
 
 import java.awt.Component;
 import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.Insets;
-import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.print.PrinterException;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.OptionalDataException;
-import java.lang.ClassNotFoundException;
 import java.util.Vector;
 import java.util.logging.Logger;
 
 import javax.swing.JButton;
 import javax.swing.JDesktopPane;
 import javax.swing.JFileChooser;
-import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JLayeredPane;
 import javax.swing.JOptionPane;
@@ -38,7 +22,6 @@ import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-import javax.swing.table.DefaultTableModel;
 
 import jsky.catalog.MemoryCatalog;
 import jsky.catalog.QueryResult;
@@ -57,7 +40,6 @@ import jsky.util.gui.SwingUtil;
 import jsky.util.gui.TabbedPanel;
 import jsky.util.gui.TabbedPanelFrame;
 import jsky.util.gui.TabbedPanelInternalFrame;
-
 
 /**
  * Combines a TableDisplay component for displaying query results in
@@ -175,12 +157,7 @@ public class TableDisplayTool extends JPanel
         makeLayout(queryResultDisplay);
 
         // try to plot the table after it is displayed (make sure its the event thread)
-        SwingUtilities.invokeLater(new Runnable() {
-
-            public void run() {
-                plot();
-            }
-        });
+        SwingUtilities.invokeLater(TableDisplayTool.this::plot);
     }
 
 
@@ -233,39 +210,25 @@ public class TableDisplayTool extends JPanel
         _plotButton = new JButton(_I18N.getString("plot"));
         _plotButton.setToolTipText(_I18N.getString("plotTip"));
         panel.add(_plotButton);
-        _plotButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent ev) {
-                unplot();
-                plot();
-            }
+        _plotButton.addActionListener(ev -> {
+            unplot();
+            plot();
         });
 
         _unplotButton = new JButton(_I18N.getString("unplot"));
         _unplotButton.setToolTipText(_I18N.getString("unplotTip"));
         panel.add(_unplotButton);
-        _unplotButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent ev) {
-                unplot();
-            }
-        });
+        _unplotButton.addActionListener(ev -> unplot());
 
         _unplotAllButton = new JButton(_I18N.getString("unplotAll"));
         _unplotAllButton.setToolTipText(_I18N.getString("unplotTip"));
         panel.add(_unplotAllButton);
-        _unplotAllButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent ev) {
-                unplotAll();
-            }
-        });
+        _unplotAllButton.addActionListener(ev -> unplotAll());
 
         _configButton = new JButton(_I18N.getString("configure"));
         _configButton.setToolTipText(_I18N.getString("configureTip"));
         panel.add(_configButton);
-        _configButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent ev) {
-                configure();
-            }
-        });
+        _configButton.addActionListener(ev -> configure());
 
         return panel;
     }
@@ -393,16 +356,8 @@ public class TableDisplayTool extends JPanel
         final IApplyCancel symbolConfig = (IApplyCancel) getPlotter().getConfigPanel(getTable());
         tabbedPane.add((JPanel) symbolConfig, _I18N.getString("plotSymbols"));
 
-        ActionListener applyListener = new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                symbolConfig.apply();
-            }
-        };
-        ActionListener cancelListener = new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                symbolConfig.cancel();
-            }
-        };
+        ActionListener applyListener = e -> symbolConfig.apply();
+        ActionListener cancelListener = e -> symbolConfig.cancel();
         _configPanel.getApplyButton().addActionListener(applyListener);
         _configPanel.getOKButton().addActionListener(applyListener);
         _configPanel.getCancelButton().addActionListener(cancelListener);
@@ -415,16 +370,8 @@ public class TableDisplayTool extends JPanel
         _tableConfig = new TableColumnConfigPanel(_tableDisplay);
         tabbedPane.add(_tableConfig, _I18N.getString("showTableCols"));
 
-        ActionListener applyListener = new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                _tableConfig.apply();
-            }
-        };
-        ActionListener cancelListener = new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                _tableConfig.cancel();
-            }
-        };
+        ActionListener applyListener = e -> _tableConfig.apply();
+        ActionListener cancelListener = e -> _tableConfig.cancel();
         _configPanel.getApplyButton().addActionListener(applyListener);
         _configPanel.getOKButton().addActionListener(applyListener);
         _configPanel.getCancelButton().addActionListener(cancelListener);
@@ -494,8 +441,7 @@ public class TableDisplayTool extends JPanel
      * to open.
      */
     protected JFileChooser makeFileChooser() {
-        JFileChooser _fileChooser = new JFileChooser(new File("."));
-        return _fileChooser;
+        return new JFileChooser(new File("."));
     }
 
 
@@ -590,7 +536,7 @@ public class TableDisplayTool extends JPanel
     /**
      * Add a row to the table.
      */
-    public void addRow(Vector v) {
+    public void addRow(Vector<Object> v) {
         _tableDisplay.getTable().addRow(v);
         _tableDisplay.update();
         updateTitle();
@@ -601,20 +547,12 @@ public class TableDisplayTool extends JPanel
      * An exception will be thrown if the row index is
      * out of range or the vector has the wrong size.
      */
-    public void updateRow(int rowIndex, Vector v) {
+    public void updateRow(int rowIndex, Vector<Object> v) {
         TableQueryResult table = _tableDisplay.getTableQueryResult();
         for (int colIndex = 0; colIndex < v.size(); colIndex++) {
             table.setValueAt(v.get(colIndex), rowIndex, colIndex);
         }
         _tableDisplay.update();
-    }
-
-    /**
-     * Return the vector for the given row.
-     */
-    public Vector getRow(int rowIndex) {
-        DefaultTableModel model = (DefaultTableModel) _tableDisplay.getTableQueryResult();
-        return (Vector) model.getDataVector().get(rowIndex);
     }
 
 

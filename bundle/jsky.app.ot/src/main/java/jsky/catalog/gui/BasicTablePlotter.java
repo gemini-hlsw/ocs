@@ -1,10 +1,3 @@
-/*
- * Copyright 2002 Association for Universities for Research in Astronomy, Inc.,
- * Observatory Control System, Gemini Telescopes Project.
- *
- * $Id: BasicTablePlotter.java 38445 2011-11-08 05:25:34Z abrighton $
- */
-
 package jsky.catalog.gui;
 
 import diva.canvas.CanvasLayer;
@@ -168,8 +161,7 @@ public class BasicTablePlotter
 
         // The symbol objects need a reference to the table being plotted
         // to evaluate expressions based on column values
-        for (int i = 0; i < symbols.length; i++)
-            symbols[i].setTable(table);
+        for (TablePlotSymbol symbol : symbols) symbol.setTable(table);
 
         // holds the plot symbols for this table
         _symbolAr = new SymbolListItem[symbols.length];
@@ -986,9 +978,9 @@ public class BasicTablePlotter
     private static Tuple2<CatalogHeader, CatalogRow> wrap(Collection<String> header, Collection<Object> row) {
         ImList<Tuple2<String,Class<?>>> colLst = DefaultImList.create();
         for (String col : header) {
-            colLst = colLst.append(new Pair<String,Class<?>>(col, String.class));
+            colLst = colLst.append(new Pair<>(col, String.class));
         }
-        return new Pair<CatalogHeader,  CatalogRow>(
+        return new Pair<>(
                 new DefaultCatalogHeader(colLst),
                 new DefaultCatalogRow(DefaultImList.create(row)));
     }

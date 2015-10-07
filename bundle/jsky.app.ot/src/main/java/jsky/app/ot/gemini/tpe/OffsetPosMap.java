@@ -37,7 +37,7 @@ public final class OffsetPosMap extends PosMap<String, OffsetPosBase> implements
     }
 
     public boolean exists(String key) {
-        return (iterator.posList() == null) ? false : iterator.posList().exists(key);
+        return iterator.posList() != null && iterator.posList().exists(key);
     }
 
     protected boolean posListAvailable() {
