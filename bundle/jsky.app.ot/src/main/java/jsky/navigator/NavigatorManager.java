@@ -1,8 +1,3 @@
-// Copyright 2003 Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-//
-// $Id: NavigatorManager.java 4726 2004-05-14 16:50:12Z brighton $
-//
 package jsky.navigator;
 
 import javax.swing.JDesktopPane;
@@ -49,7 +44,7 @@ public final class NavigatorManager {
      */
     public static Navigator create() {
         if (_navigator == null) {
-            CatalogDirectory dir = null;
+            CatalogDirectory dir;
             try {
                 dir = CatalogNavigator.getCatalogDirectory();
             } catch (Exception e) {

@@ -2,6 +2,7 @@ package jsky.app.ot.tpe;
 
 import edu.gemini.ags.api.AgsStrategy;
 import edu.gemini.catalog.api.MagnitudeConstraints;
+import edu.gemini.catalog.ui.QueryResultsFrame;
 import edu.gemini.shared.cat.CatalogSearchParameters;
 import edu.gemini.shared.cat.ICatalogAlgorithm;
 import edu.gemini.catalog.api.MagnitudeLimits;
@@ -1079,7 +1080,7 @@ public class TpeImageWidget extends NavigatorImageDisplay implements MouseInputL
         if (GuideStarSupport.hasGemsComponent(_ctx)) {
             showGemsGuideStarSearchDialog();
         } else {
-            TpeGuideStarDialog.showDialog(TpeManager.open().getImageWidget());
+            QueryResultsFrame.instance().showOn(_ctx.obsContext());
         }
     }
 
