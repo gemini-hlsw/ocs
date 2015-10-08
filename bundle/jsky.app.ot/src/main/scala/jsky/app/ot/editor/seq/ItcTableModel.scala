@@ -88,7 +88,23 @@ sealed trait ItcTableModel extends AbstractTableModel {
   protected def sourceFraction  (i: ItcInputs) = f"${i.obs.getSourceFraction}%.2f"
 
 
-  protected def spcPeakElectrons(result: Future[ItcService.Result]) = spectroscopyResult(result).map(_.allSeries(SignalChart, SignalData).map(_.yValues.max).max.toInt)
+  protected def spcPeakElectrons(result: Future[ItcService.Result]) = {
+    // zip signal and background values, sum them and return max value (i.e. max(signal + background))
+    def maxSum(s: SpcSeriesData, b: SpcSeriesData) =
+      s.yValues.zip(b.yValues).map(p => p._1 + p._2).max.round
+
+    // zip signal and background value arrays and return max of all maximums
+    // e.g. GNIRS with cross dispersion will have several arrays for signal and background, one for each order
+    def maxAllSum(s: List[SpcSeriesData], b: List[SpcSeriesData]) =
+      s.zip(b).map(p => maxSum(p._1, p._2)).max
+
+    val r = spectroscopyResult(result)
+    for {
+      signal     <- r.map(_.allSeries(SignalChart, SignalData))
+      background <- r.map(_.allSeries(SignalChart, BackgroundData))
+
+    } yield maxAllSum(signal, background)
+  }
 
   protected def spcPeakSNSingle (result: Future[ItcService.Result]) = spectroscopyResult(result).map(_.allSeries(S2NChart, SingleS2NData).map(_.yValues.max).max)
 
