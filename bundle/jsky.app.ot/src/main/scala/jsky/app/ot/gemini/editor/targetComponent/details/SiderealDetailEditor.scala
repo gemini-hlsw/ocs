@@ -22,12 +22,12 @@ final class SiderealDetailEditor extends TargetDetailEditor(ITarget.Tag.SIDEREAL
   // Editor Components
 
   val kind   = new TargetTypeEditor
-  val name   = new SiderealNameEditor
   val coords = new CoordinateEditor
 
   val mags   = new MagnitudeEditor <| { e =>
     e.getComponent.asInstanceOf[JComponent].setBorder(titleBorder("Magnitudes"))
   }
+  val name   = new SiderealNameEditor(mags)
 
   val props = NumericPropertySheet[HmsDegTarget](Some("Motion"), _.getTarget.asInstanceOf[HmsDegTarget],
     Prop("µ RA",     "mas/year", _.getPM1),

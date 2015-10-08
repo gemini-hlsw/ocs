@@ -3,13 +3,15 @@ package jsky.app.ot.gemini.editor.targetComponent.details
 import edu.gemini.catalog.api.CatalogQuery
 import edu.gemini.catalog.votable.{SimbadNameBackend, VoTableClient}
 import edu.gemini.pot.sp.ISPNode
+import edu.gemini.pot.ModelConverters._
+import edu.gemini.shared.util.immutable.ScalaConverters._
 import edu.gemini.shared.util.immutable.{ Option => GOption }
 import edu.gemini.spModel.core.Target.SiderealTarget
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.target.SPTarget
 import edu.gemini.spModel.target.system.CoordinateTypes.{RV, Parallax}
 import edu.gemini.spModel.target.system.HmsDegTarget
-import jsky.app.ot.gemini.editor.targetComponent.TelescopePosEditor
+import jsky.app.ot.gemini.editor.targetComponent.{MagnitudeEditor, TelescopePosEditor}
 import jsky.util.gui.{DialogUtil, TextBoxWidgetWatcher, TextBoxWidget}
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -18,7 +20,7 @@ import scala.swing.Swing
 import scalaz.syntax.id._
 
 // Name editor, with catalog lookup for sidereal targets
-final class SiderealNameEditor extends TelescopePosEditor with ReentrancyHack {
+final class SiderealNameEditor(mags: MagnitudeEditor) extends TelescopePosEditor with ReentrancyHack {
   private[this] var spt = new SPTarget // never null
 
   def forkSearch(): Unit = {
@@ -76,6 +78,9 @@ final class SiderealNameEditor extends TelescopePosEditor with ReentrancyHack {
       }
       i.redshift.foreach {v =>
         t.setRedshift(v)
+      }
+      if (i.magnitudes.nonEmpty) {
+        mags.replaceMagnitudes(i.magnitudes.map(_.toOldModel).asImList)
       }
     }
 
