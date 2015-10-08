@@ -100,6 +100,7 @@ trait ItcTable extends Table {
       case (ico: Icon, str: String)  => new Label(str,              ico,  Alignment.Left)
       case d: DisplayableSpType      => new Label(d.displayValue(), null, Alignment.Left)
       case Some(i: Int)              => new Label(i.toString,       null, Alignment.Right)
+      case Some(l: Long)             => new Label(l.toString,       null, Alignment.Right)
       case Some(d: Double)           => new Label(f"$d%.2f",        null, Alignment.Right)
       case Some(s: String)           => new Label(s,                null, Alignment.Left)
       case None | null               => new Label("")
