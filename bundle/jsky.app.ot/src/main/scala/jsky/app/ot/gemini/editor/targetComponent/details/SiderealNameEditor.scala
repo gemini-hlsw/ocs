@@ -1,9 +1,12 @@
 package jsky.app.ot.gemini.editor.targetComponent.details
 
+import javax.swing.SwingUtilities
+
 import edu.gemini.catalog.api.CatalogQuery
 import edu.gemini.catalog.votable.{SimbadNameBackend, VoTableClient}
 import edu.gemini.pot.sp.ISPNode
 import edu.gemini.pot.ModelConverters._
+import edu.gemini.shared.gui.GlassLabel
 import edu.gemini.shared.util.immutable.ScalaConverters._
 import edu.gemini.shared.util.immutable.{ Option => GOption }
 import edu.gemini.spModel.core.Target.SiderealTarget
@@ -24,13 +27,34 @@ final class SiderealNameEditor(mags: MagnitudeEditor) extends TelescopePosEditor
   private[this] var spt = new SPTarget // never null
 
   def forkSearch(): Unit = {
-    val qf = VoTableClient.catalog(CatalogQuery(name.getValue), SimbadNameBackend)
+    val searchItem = name.getValue
+    // We are on the EDT
+    GlassLabel.show(SwingUtilities.getRootPane(name), "Searching...")
+
+    val qf = VoTableClient.catalog(CatalogQuery(searchItem), SimbadNameBackend)
     qf.onFailure {
-      case f => DialogUtil.error(f.getMessage)
+      case f =>
+        Swing.onEDT {
+          GlassLabel.hide(SwingUtilities.getRootPane(name))
+          DialogUtil.error(f.getMessage)
+        }
     }
     qf.onSuccess {
-      case s if s.result.containsError => DialogUtil.error(s.result.problems.map(_.displayValue).mkString(", "))
-      case s                           => processResult(s.result.targets.rows.headOption)
+      case s if s.result.containsError        =>
+        Swing.onEDT {
+          GlassLabel.hide(SwingUtilities.getRootPane(name))
+          DialogUtil.error(s.result.problems.map(_.displayValue).mkString(", "))
+        }
+      case s if s.result.targets.rows.isEmpty =>
+        Swing.onEDT {
+          GlassLabel.hide(SwingUtilities.getRootPane(name))
+          DialogUtil.error(s"Target '$searchItem' not found ")
+        }
+      case s                                  =>
+        Swing.onEDT {
+          GlassLabel.hide(SwingUtilities.getRootPane(name))
+          processResult(s.result.targets.rows.headOption)
+        }
     }
   }
 
