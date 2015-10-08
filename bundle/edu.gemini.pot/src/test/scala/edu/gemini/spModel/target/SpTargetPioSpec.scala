@@ -1,6 +1,6 @@
 package edu.gemini.spModel.target
 
-import edu.gemini.spModel.core.Arbitraries
+import edu.gemini.spModel.core.{Redshift, Arbitraries}
 import edu.gemini.spModel.core.WavelengthConversions._
 import edu.gemini.spModel.pio.ParamSet
 import edu.gemini.spModel.pio.xml.PioXmlFactory
@@ -62,6 +62,23 @@ object SpTargetPioSpec extends Specification with ScalaCheck with Arbitraries {
 
           assert(spt.getTarget.getSpatialProfile === spt2.getTarget.getSpatialProfile)
           assert(spt.getTarget.getSpectralDistribution === spt2.getTarget.getSpectralDistribution)
+        }
+      "store redshift" !
+        prop { z: Redshift =>
+
+          val factory = new PioXmlFactory()
+          val t = new HmsDegTarget
+
+          t.setRedshift(z)
+          val spt = new SPTarget(t)
+
+          val pset = SPTargetPio.getParamSet(spt, factory)
+          val spt2 = SPTargetPio.fromParamSet(pset)
+
+          (spt.getTarget, spt2.getTarget) match {
+            case (t1: HmsDegTarget, t2: HmsDegTarget) => assert(t1.getRedshift === t2.getRedshift)
+            case _                                    => failure("Cannot happen")
+          }
         }
     }
 

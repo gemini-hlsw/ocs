@@ -2,9 +2,9 @@ package edu.gemini.spModel.target;
 
 import edu.gemini.shared.skyobject.Magnitude;
 import edu.gemini.shared.util.immutable.ImList;
-import edu.gemini.shared.util.immutable.None;
 import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.shared.util.immutable.Some;
+import edu.gemini.spModel.core.Redshift;
 import edu.gemini.spModel.pio.ParamSet;
 import edu.gemini.spModel.pio.Pio;
 import edu.gemini.spModel.pio.PioFactory;
@@ -34,6 +34,7 @@ public class SPTargetPio {
     private static final String _PM2 = "pm2";
     private static final String _PARALLAX = "parallax";
     private static final String _RV = "rv";
+    private static final String _Z = "z";
     private static final String _ANODE = "anode";
     private static final String _AQ = "aq";
     private static final String _E = "e";
@@ -92,6 +93,7 @@ public class SPTargetPio {
             paramSet.addParam(t.getPM2().getParam(factory, _PM2));
             paramSet.addParam(t.getParallax().getParam(factory, _PARALLAX));
             paramSet.addParam(t.getRV().getParam(factory, _RV));
+            Pio.addParam(factory, paramSet, _Z, Double.toString(t.getRedshift().redshift()));
         } else if (target instanceof NonSiderealTarget) {
             final NonSiderealTarget nst = (NonSiderealTarget) target;
 
@@ -218,6 +220,17 @@ public class SPTargetPio {
             rv.setParam(paramSet.getParam(_RV));
             t.setRV(rv);
 
+            final String z = Pio.getValue(paramSet, _Z);
+            if (z != null) {
+                try {
+                    Double redshift = Double.parseDouble(z);
+                    t.setRedshift(new Redshift(redshift));
+                } catch (final IllegalArgumentException ex) {
+                    //this shouldn't happen, unless corrupted data
+                    LOGGER.log(Level.WARNING, "Invalid redshift value: " + z);
+                }
+            }
+
         } else if (itarget instanceof NonSiderealTarget) {
 
             final NonSiderealTarget nst = (NonSiderealTarget)itarget;
@@ -240,7 +253,6 @@ public class SPTargetPio {
 
             if (itarget instanceof ConicTarget) {
                 final ConicTarget t = (ConicTarget) itarget;
-
 
                 final CoordinateTypes.Epoch e = new CoordinateTypes.Epoch();
                 e.setParam(paramSet.getParam(_EPOCH));

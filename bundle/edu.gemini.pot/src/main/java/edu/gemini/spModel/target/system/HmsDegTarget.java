@@ -1,13 +1,8 @@
-// Copyright 2000 Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-// See the file LICENSE for complete details.
-//
-// $Id: HmsDegTarget.java 27482 2010-10-15 18:42:07Z nbarriga $
-//
 package edu.gemini.spModel.target.system;
 
 import edu.gemini.shared.skyobject.SkyObject;
 import edu.gemini.shared.skyobject.coords.HmsDegCoordinates;
+import edu.gemini.spModel.core.Redshift;
 import edu.gemini.spModel.target.system.CoordinateParam.Units;
 import edu.gemini.spModel.target.system.CoordinateTypes.*;
 
@@ -54,6 +49,7 @@ public final class HmsDegTarget extends ITarget {
     private static final PM2 DEFAULT_PM2 = new PM2();
     private static final RV DEFAULT_RV = new RV();
     private static final Parallax DEFAULT_PARALLAX = new Parallax();
+    private static final Redshift DEFAULT_Z = Redshift.instance().zero();
     private static final Date DEFAULT_TAIZ = null;
     private static final String DEFAULT_NAME = "";
 
@@ -65,6 +61,7 @@ public final class HmsDegTarget extends ITarget {
     // and a software system may be able to use them.
     private RV _rv = DEFAULT_RV;
     private Parallax _parallax = DEFAULT_PARALLAX;
+    private Redshift _z = DEFAULT_Z;
     private Date _taiz = DEFAULT_TAIZ;
     private HMS _ra = new HMS();
     private DMS _dec = new DMS();
@@ -111,6 +108,7 @@ public final class HmsDegTarget extends ITarget {
         if (_pm1 != null) result._pm1 = (PM1) _pm1.clone();
         if (_pm2 != null) result._pm2 = (PM2) _pm2.clone();
         if (_rv != null) result._rv = (RV) _rv.clone();
+        if (_z != null) result._z = _z; // Redshift is immutable it can be freely copied
         if (_parallax != null) result._parallax = (Parallax) _parallax.clone();
         if (_taiz != null) result._taiz = (Date) _taiz.clone();
 
@@ -124,6 +122,7 @@ public final class HmsDegTarget extends ITarget {
     /**
      * Override equals to return true if both instances are the same.
      */
+    @Override
     public boolean equals(Object obj) {
         if (obj == null) return false;
         if (obj == this) return true;
@@ -140,6 +139,7 @@ public final class HmsDegTarget extends ITarget {
         if (!(_pm1.equals(sys._pm1))) return false;
         if (!(_pm2.equals(sys._pm2))) return false;
         if (!(_rv.equals(sys._rv))) return false;
+        if (!(_z.equals(sys._z))) return false;
         if (!(_parallax.equals(sys._parallax))) return false;
 
         return true;
@@ -254,7 +254,6 @@ public final class HmsDegTarget extends ITarget {
         return _rv;
     }
 
-
     /**
      * Sets the radial velocity.  The value of the
      * parameter is not copied so future modification will have an effect
@@ -264,6 +263,22 @@ public final class HmsDegTarget extends ITarget {
         _rv = newValue;
     }
 
+    /**
+     * Gets the Redshift object.
+     */
+    public Redshift getRedshift() {
+        if (_z == null) {
+            _z = DEFAULT_Z;
+        }
+        return _z;
+    }
+
+    /**
+     * Sets the redshift.
+     */
+    public void setRedshift(Redshift newValue) {
+        _z = newValue;
+    }
 
     /**
      * Gets the parallax object.

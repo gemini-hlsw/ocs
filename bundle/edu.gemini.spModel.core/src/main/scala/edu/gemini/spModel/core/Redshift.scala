@@ -4,11 +4,14 @@ import scalaz.{Monoid, Order}
 
 /**
  * Specification of Radial velocity
+ * TODO Cannot be a value class as it breaks java compatibilty, convert to value class when the legacy target model disappears
  * @param redshift dimensionless measurement of redshift
  */
-case class Redshift(redshift: Double)
+case class Redshift(redshift: Double) extends Serializable
 
 object Redshift {
+  def instance = this
+
   /**
    * The `No redshift`
    * @group Constructors

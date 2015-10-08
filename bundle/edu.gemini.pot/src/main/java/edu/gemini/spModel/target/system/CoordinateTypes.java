@@ -92,7 +92,6 @@ public final class CoordinateTypes {
     /**
      * The RV (radial velocity) parameter type.
      */
-    @Deprecated
     public static final class RV extends CoordinateParam {
         public static final Units[] UNITS = {Units.KM_PER_SEC};
 
@@ -128,7 +127,6 @@ public final class CoordinateTypes {
     /**
      * The Parallax parameter type.
      */
-    @Deprecated
     public static final class Parallax extends CoordinateParam {
         public static final Units[] UNITS = {Units.MILLI_ARCSECS, Units.ARCSECS};
 
