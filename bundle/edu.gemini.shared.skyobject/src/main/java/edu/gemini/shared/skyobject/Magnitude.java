@@ -3,6 +3,7 @@ package edu.gemini.shared.skyobject;
 import edu.gemini.shared.util.immutable.None;
 import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.shared.util.immutable.Some;
+import edu.gemini.spModel.core.MagnitudeSystem;
 import edu.gemini.spModel.core.Wavelength;
 import squants.space.LengthConversions;
 
@@ -15,17 +16,9 @@ import java.util.Comparator;
  * in the measurement.
  */
 public final class Magnitude implements Comparable<Magnitude>, Serializable {
-    /**
-     * REL-549: Magnitude information for targets and guide stars in OT must be stored in value, bandpass, system triples.
-     */
-    public enum System {
-        Vega,
-        AB,
-        Jy,
-        ;
 
-        public static final System DEFAULT = Vega;
-    }
+    private static final MagnitudeSystem AB   = MagnitudeSystem.AB$.MODULE$;
+    private static final MagnitudeSystem Vega = MagnitudeSystem.VEGA$.MODULE$;
 
     /**
      * Common wavelength bands.
@@ -33,27 +26,27 @@ public final class Magnitude implements Comparable<Magnitude>, Serializable {
     public enum Band {
 
         // OCSADV-203
-        u(System.AB, 350, "UV"),
-        g(System.AB, 475, "green"),
-        r(System.AB, 630, "red"),
-        i(System.AB, 780, "far red"),
-        z(System.AB, 925, "near-infrared"),
+        u(AB, 350, "UV"),
+        g(AB, 475, "green"),
+        r(AB, 630, "red"),
+        i(AB, 780, "far red"),
+        z(AB, 925, "near-infrared"),
 
-        U(System.Vega,  365, "ultraviolet"),
-        B(System.Vega,  445, "blue"),
-        V(System.Vega,  551, "visual"),
-        UC(System.Vega, 610, "UCAC"), // unknown FWHM
-        R(System.Vega,  658, "red"),
-        I(System.Vega,  806, "infrared"),
-        Y(System.Vega, 1020),
-        J(System.Vega, 1220),
-        H(System.Vega, 1630),
-        K(System.Vega, 2190),
-        L(System.Vega, 3450),
-        M(System.Vega, 4750),
-        N(System.Vega, 10000),
-        Q(System.Vega, 16000),
-        AP(System.Vega, None.INTEGER, new Some<>("apparent"))
+        U(Vega,  365, "ultraviolet"),
+        B(Vega,  445, "blue"),
+        V(Vega,  551, "visual"),
+        UC(Vega, 610, "UCAC"), // unknown FWHM
+        R(Vega,  658, "red"),
+        I(Vega,  806, "infrared"),
+        Y(Vega, 1020),
+        J(Vega, 1220),
+        H(Vega, 1630),
+        K(Vega, 2190),
+        L(Vega, 3450),
+        M(Vega, 4750),
+        N(Vega, 10000),
+        Q(Vega, 16000),
+        AP(Vega, None.INTEGER, new Some<>("apparent"))
         ;
 
         /**
@@ -73,21 +66,21 @@ public final class Magnitude implements Comparable<Magnitude>, Serializable {
                 }
             };
 
-        public final System defaultSystem;
+        public final MagnitudeSystem defaultSystem;
         private final Option<Wavelength> wavelengthMidPoint;
         private final Option<String> description;
 
-        Band(System sys, Option<Integer> mid, Option<String> desc) {
+        Band(MagnitudeSystem sys, Option<Integer> mid, Option<String> desc) {
             this.defaultSystem      = sys;
             this.wavelengthMidPoint = mid.map(w -> new Wavelength(LengthConversions.nanometer().$times(w)));
             this.description        = desc;
         }
 
-        Band(System sys, int mid) {
+        Band(MagnitudeSystem sys, int mid) {
             this(sys, mid, null);
         }
 
-        Band(System sys, int mid, String desc) {
+        Band(MagnitudeSystem sys, int mid, String desc) {
             this.defaultSystem      = sys;
             this.wavelengthMidPoint = new Some<>(new Wavelength(LengthConversions.nanometer().$times(mid)));
             this.description = (desc == null) ? None.STRING : new Some<>(desc);
@@ -111,7 +104,7 @@ public final class Magnitude implements Comparable<Magnitude>, Serializable {
     private final Band band;
     private final double brightness;
     private final Option<Double> error;
-    private final System system;
+    private final MagnitudeSystem system;
 
     /**
      * Creates with the magnitude band and brightness, leaving the error
@@ -131,7 +124,7 @@ public final class Magnitude implements Comparable<Magnitude>, Serializable {
      * @param band bandpass associated with the brightness
      * @param brightness absolute brightness
      */
-    public Magnitude(Band band, double brightness, System system) {
+    public Magnitude(Band band, double brightness, MagnitudeSystem system) {
         this(band, brightness, None.<Double>instance(), system);
     }
 
@@ -154,7 +147,7 @@ public final class Magnitude implements Comparable<Magnitude>, Serializable {
      * @param error error in measurement
      * @param system mag system
      */
-    public Magnitude(Band band, double brightness, double error, System system) {
+    public Magnitude(Band band, double brightness, double error, MagnitudeSystem system) {
         this(band, brightness, new Some<>(error), system);
     }
 
@@ -177,7 +170,7 @@ public final class Magnitude implements Comparable<Magnitude>, Serializable {
      * @param error optional error in measurement
      * @param system mag system
      */
-    public Magnitude(Band band, double brightness, Option<Double> error, System system) {
+    public Magnitude(Band band, double brightness, Option<Double> error, MagnitudeSystem system) {
         if (band == null) throw new IllegalArgumentException("band is null");
         if (error == null) throw new IllegalArgumentException("error is null");
         if (system == null) throw new IllegalArgumentException("system is null");
@@ -188,10 +181,10 @@ public final class Magnitude implements Comparable<Magnitude>, Serializable {
         this.system     = system;
     }
 
-    public Band getBand()            { return band; }
-    public double getBrightness()    { return brightness; }
-    public System getSystem()        { return system; }
-    public Option<Double> getError() { return error; }
+    public Band getBand()               { return band; }
+    public double getBrightness()       { return brightness; }
+    public MagnitudeSystem getSystem()  { return system; }
+    public Option<Double> getError()    { return error; }
 
     /**
      * Gets a new Magnitude object that is identical to this one, but with
