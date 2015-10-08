@@ -1,5 +1,6 @@
 package jsky.app.ot.gemini.editor.targetComponent.details
 
+import edu.gemini.spModel.core.Redshift
 import edu.gemini.spModel.target.system.CoordinateParam.Units
 import edu.gemini.spModel.target.system.CoordinateTypes.{Epoch, Parallax}
 
@@ -31,9 +32,10 @@ final class SiderealDetailEditor extends TargetDetailEditor(ITarget.Tag.SIDEREAL
   val props = NumericPropertySheet[HmsDegTarget](Some("Motion"), _.getTarget.asInstanceOf[HmsDegTarget],
     Prop("µ RA",     "mas/year", _.getPM1),
     Prop("µ Dec",    "mas/year", _.getPM2),
-    Prop("Epoch",    "years",    _.getEpoch.getValue, (t, d) => t.setEpoch(new Epoch(d, Units.YEARS))),
-    Prop("Parallax", "mas",      _.getParallax.mas,   (t, d) => t.setParallax(new Parallax(d, Units.MILLI_ARCSECS))),
-    Prop("RV",       "km/sec",   _.getRV)
+    Prop("Epoch",    "years",    _.getEpoch.getValue,    (t, d) => t.setEpoch(new Epoch(d, Units.YEARS))),
+    Prop("Parallax", "mas",      _.getParallax.mas,      (t, d) => t.setParallax(new Parallax(d, Units.MILLI_ARCSECS))),
+    Prop("RV",       "km/sec",   _.getRV),
+    Prop("Redshift", "",         _.getRedshift.redshift, (t, d) => t.setRedshift(Redshift(d)))
   )
 
   // Layout

@@ -11,17 +11,14 @@ import edu.gemini.spModel.target.system.CoordinateTypes.{RV, Parallax}
 import edu.gemini.spModel.target.system.HmsDegTarget
 import jsky.app.ot.gemini.editor.targetComponent.TelescopePosEditor
 import jsky.util.gui.{DialogUtil, TextBoxWidgetWatcher, TextBoxWidget}
-import edu.gemini.pot.ModelConverters._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.swing.Swing
 
 import scalaz.syntax.id._
-import scalaz.{ \/-, -\/ }
 
 // Name editor, with catalog lookup for sidereal targets
 final class SiderealNameEditor extends TelescopePosEditor with ReentrancyHack {
-  // Why are we still using SPTarget here?
   private[this] var spt = new SPTarget // never null
 
   def forkSearch(): Unit = {
@@ -76,6 +73,9 @@ final class SiderealNameEditor extends TelescopePosEditor with ReentrancyHack {
       }
       i.radialVelocity.foreach {v =>
         t.setRV(new RV(v.velocity.toKilometersPerSecond))
+      }
+      i.redshift.foreach {v =>
+        t.setRedshift(v)
       }
     }
 
