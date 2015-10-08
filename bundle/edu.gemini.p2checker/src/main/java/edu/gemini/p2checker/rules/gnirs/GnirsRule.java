@@ -1,4 +1,3 @@
-//$Id$
 package edu.gemini.p2checker.rules.gnirs;
 
 import edu.gemini.p2checker.api.*;
@@ -13,13 +12,11 @@ import edu.gemini.spModel.gemini.gnirs.InstGNIRS;
 import scala.runtime.AbstractFunction2;
 
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Stream;
 
 public class GnirsRule implements IRule {
-    private static final Collection<IConfigRule> GNIRS_RULES = new ArrayList<IConfigRule>();
+    private static final Collection<IConfigRule> GNIRS_RULES = new ArrayList<>();
     private static final String PREFIX = "GnirsRule_";
 
     // ERROR if Camera ?= *red (or equivalent of pixel scale+wavelength) && Cross-dispersed != No, "The red cameras cannot be used in cross-dispersed mode."
@@ -27,8 +24,8 @@ public class GnirsRule implements IRule {
         private static final String MESSAGE = "The red cameras cannot be used in cross-dispersed mode.";
 
         @Override
-        public Problem check(Config config, int step, ObservationElements elems, Object state) {
-            Camera camera = (Camera) SequenceRule.getInstrumentItem(config, InstGNIRS.CAMERA_PROP);
+        public Problem check(final Config config, final int step, final ObservationElements elems, final Object state) {
+            final Camera camera = (Camera) SequenceRule.getInstrumentItem(config, InstGNIRS.CAMERA_PROP);
             if (camera == null) return null;
             switch (camera) {
                 case SHORT_BLUE:
@@ -36,7 +33,7 @@ public class GnirsRule implements IRule {
                     return null;
             }
 
-            CrossDispersed xd = (CrossDispersed) SequenceRule.getInstrumentItem(config, InstGNIRS.CROSS_DISPERSED_PROP);
+            final CrossDispersed xd = (CrossDispersed) SequenceRule.getInstrumentItem(config, InstGNIRS.CROSS_DISPERSED_PROP);
             if ((xd == null) || (xd == CrossDispersed.NO)) return null;
 
             return new Problem(ERROR, PREFIX+"RED_CAMERA_XD_RULE", MESSAGE, elems.getSeqComponentNode());
@@ -53,11 +50,11 @@ public class GnirsRule implements IRule {
         private static final String MESSAGE = "Cross-dispersed mode is not available in the L or M bands.";
 
         @Override
-        public Problem check(Config config, int step, ObservationElements elems, Object state) {
-            CrossDispersed xd = (CrossDispersed) SequenceRule.getInstrumentItem(config, InstGNIRS.CROSS_DISPERSED_PROP);
+        public Problem check(final Config config, final int step, final ObservationElements elems, final Object state) {
+            final CrossDispersed xd = (CrossDispersed) SequenceRule.getInstrumentItem(config, InstGNIRS.CROSS_DISPERSED_PROP);
             if ((xd == null) || (xd == CrossDispersed.NO)) return null;
 
-            Wavelength l = (Wavelength) SequenceRule.getInstrumentItem(config, InstGNIRS.CENTRAL_WAVELENGTH_PROP);
+            final Wavelength l = (Wavelength) SequenceRule.getInstrumentItem(config, InstGNIRS.CENTRAL_WAVELENGTH_PROP);
             if (l.doubleValue() <= 2.5) return null;
 
             return new Problem(ERROR, PREFIX+"WAVELENGTH_XD_RULE", MESSAGE, SequenceRule.getInstrumentOrSequenceNode(step, elems, config));
@@ -75,17 +72,17 @@ public class GnirsRule implements IRule {
         private static final String SCALE_MESSAGE = "The 0.15\"/pix scale cannot be used with the LXD prism";
 
         @Override
-        public Problem check(Config config, int step, ObservationElements elems, Object state) {
+        public Problem check(final Config config, final int step, final ObservationElements elems, final Object state) {
             // Only apply this rule if using LXD.
-            CrossDispersed xd = (CrossDispersed) SequenceRule.getInstrumentItem(config, InstGNIRS.CROSS_DISPERSED_PROP);
+            final CrossDispersed xd = (CrossDispersed) SequenceRule.getInstrumentItem(config, InstGNIRS.CROSS_DISPERSED_PROP);
             if (xd != CrossDispersed.LXD) return null;
 
-            PixelScale scale = (PixelScale) SequenceRule.getInstrumentItem(config, InstGNIRS.PIXEL_SCALE_PROP);
+            final PixelScale scale = (PixelScale) SequenceRule.getInstrumentItem(config, InstGNIRS.PIXEL_SCALE_PROP);
             if (scale == PixelScale.PS_015) {
                 return new Problem(ERROR, PREFIX+"SCALE_MESSAGE", SCALE_MESSAGE, SequenceRule.getInstrumentOrSequenceNode(step, elems, config));
             }
 
-            Camera camera = (Camera) SequenceRule.getInstrumentItem(config, InstGNIRS.CAMERA_PROP);
+            final Camera camera = (Camera) SequenceRule.getInstrumentItem(config, InstGNIRS.CAMERA_PROP);
             if (camera == Camera.SHORT_BLUE) {
                 return new Problem(ERROR, PREFIX+"BLUE_MESSAGE", BLUE_MESSAGE, elems.getSeqComponentNode());
             }
@@ -118,19 +115,15 @@ public class GnirsRule implements IRule {
   ERROR if inst=GNIRS && Read Mode == Very Faint Objects && exptime < 18, 'Exposure times for Very Faint Object mode
       must be greater than 18 sec.'
     */
-
-    /**
-     *
-     */
     private enum ExpTimeComparison {
         tooShort {
             @Override
-            public boolean check(double expTime, double limit) {
+            public boolean check(final double expTime, final double limit) {
                 return expTime < limit;
             }
 
             @Override
-            public Problem.Type getProblemType(ReadMode rm, double expTime) {
+            public Problem.Type getProblemType(final ReadMode rm, final double expTime) {
                 if (check(expTime, limits.get(rm)[0])) {
                     return ERROR;
                 }
@@ -139,20 +132,19 @@ public class GnirsRule implements IRule {
         },
         tooLong {
             @Override
-            public boolean check(double expTime, double limit) {
+            public boolean check(final double expTime, final double limit) {
                 return expTime > limit;
             }
 
             @Override
-            public Problem.Type getProblemType(ReadMode rm, double expTime) {
+            public Problem.Type getProblemType(final ReadMode rm, final double expTime) {
                 if (check(expTime, limits.get(rm)[1])) {
                     return WARNING;
                 }
                 return Problem.Type.NONE;
             }
         };
-        private static final Map<ReadMode, Double[]> limits = new HashMap<ReadMode, Double[]>();
-
+        private static final Map<ReadMode, Double[]> limits = new HashMap<>();
         static {
             limits.put(ReadMode.VERY_BRIGHT, new Double[]{0.2, 1.0});
             limits.put(ReadMode.BRIGHT, new Double[]{0.6, 20.0});
@@ -167,7 +159,7 @@ public class GnirsRule implements IRule {
          * @param limit   against which to check
          * @return true if we are "outside" the limit (i.e. if there is a problem)
          */
-        public abstract boolean check(double expTime, double limit);
+        public abstract boolean check(final double expTime, final double limit);
 
         /**
          * Get a warning, error or none for the given exposure time and ReadMode
@@ -176,7 +168,7 @@ public class GnirsRule implements IRule {
          * @param expTime the exposure time to check
          * @return Problem.Type.WARNING, Problem.Type.ERROR or Problem.Type.NONE
          */
-        public abstract Problem.Type getProblemType(ReadMode rm, double expTime);
+        public abstract Problem.Type getProblemType(final ReadMode rm, final double expTime);
 
         /**
          * The entry point for using this class. Checks if there is a problem.
@@ -188,12 +180,12 @@ public class GnirsRule implements IRule {
          *               observation
          * @return a Problem if there is one, otherwise null
          */
-        public Problem getProblem(Config config, int step, ObservationElements elems) {
-            ReadMode rm = (ReadMode) SequenceRule.getInstrumentItem(config, InstGNIRS.READ_MODE_PROP);
-            Double expTime = SequenceRule.getExposureTime(config); // getInstrumentItem(config,InstGNIRS.EXPOSURE_TIME_PROP);
+        public Problem getProblem(final Config config, final int step, final ObservationElements elems) {
+            final ReadMode rm = (ReadMode) SequenceRule.getInstrumentItem(config, InstGNIRS.READ_MODE_PROP);
+            final Double expTime = SequenceRule.getExposureTime(config); // getInstrumentItem(config,InstGNIRS.EXPOSURE_TIME_PROP);
             if (expTime == null) return null;
 
-            Problem.Type type = getProblemType(rm, expTime);
+            final Problem.Type type = getProblemType(rm, expTime);
             switch (type) {
                 case ERROR:
                     return new Problem(type, PREFIX+"ExpTimeComparisonError_"+rm.name(),
@@ -276,17 +268,17 @@ public class GnirsRule implements IRule {
     private static IConfigRule ACQUISITION_FILTER_RULE = new IConfigRule() {
 
         @Override
-        public Problem check(Config config, int step, ObservationElements elems, Object state) {
-            AcquisitionMirror mirror = (AcquisitionMirror) SequenceRule.getInstrumentItem(config, InstGNIRS.ACQUISITION_MIRROR_PROP);
+        public Problem check(final Config config, final int step, final ObservationElements elems, final Object state) {
+            final AcquisitionMirror mirror = (AcquisitionMirror) SequenceRule.getInstrumentItem(config, InstGNIRS.ACQUISITION_MIRROR_PROP);
             if (mirror == AcquisitionMirror.IN) {
-                Wavelength l = (Wavelength) SequenceRule.getInstrumentItem(config, InstGNIRS.CENTRAL_WAVELENGTH_PROP);
-                Filter f = (Filter) SequenceRule.getInstrumentItem(config, InstGNIRS.FILTER_PROP);
+                final Wavelength l = (Wavelength) SequenceRule.getInstrumentItem(config, InstGNIRS.CENTRAL_WAVELENGTH_PROP);
+                final Filter f = (Filter) SequenceRule.getInstrumentItem(config, InstGNIRS.FILTER_PROP);
                 if (f == null) return null;
                 if (f == Filter.X_DISPERSED) {
                     return new Problem(ERROR, PREFIX+"ACQUISITION_FILTER_RULE_1", "The XD blocking filter cannot be used for acquisitions",
                             SequenceRule.getInstrumentOrSequenceNode(step, elems, config));
                 }
-                double wl;
+                final double wl;
                 try {
                     wl = l.doubleValue();
                 } catch (NumberFormatException ex) {
@@ -330,17 +322,6 @@ public class GnirsRule implements IRule {
         }
     };
 
-
-    /**
-     * NIRI + Altair
-     */
-    private static IConfigMatcher ALTAIR_MATCHER = new IConfigMatcher() {
-
-        public boolean matches(Config config, int step, ObservationElements elems) {
-            return elems.hasAltair();
-        }
-    };
-
     
     /**
      * Rules for GNIRS + Altair.
@@ -351,13 +332,13 @@ public class GnirsRule implements IRule {
         private static final String STREHLS = "Altair typically provides Strehls of 5% or less for wavelengths shorter than 1.3 microns";
         private static final String M_BAND = "The throughput and thermal emission from Altair prevent its use in the M-band";
 
-        public Problem check(Config config, int step, ObservationElements elems, Object state) {
-            Filter filter = (Filter) SequenceRule.getInstrumentItem(config, InstGNIRS.FILTER_PROP);
-            Wavelength wavelength = (Wavelength) SequenceRule.getInstrumentItem(config,
+        public Problem check(final Config config, final int step, final ObservationElements elems, final Object state) {
+            final Filter filter = (Filter) SequenceRule.getInstrumentItem(config, InstGNIRS.FILTER_PROP);
+            final Wavelength wavelength = (Wavelength) SequenceRule.getInstrumentItem(config,
                     InstGNIRS.CENTRAL_WAVELENGTH_PROP);
-            AcquisitionMirror acqMirror = (AcquisitionMirror) SequenceRule.getInstrumentItem(config,
+            final AcquisitionMirror acqMirror = (AcquisitionMirror) SequenceRule.getInstrumentItem(config,
                     InstGNIRS.ACQUISITION_MIRROR_PROP);
-            CrossDispersed xd = (CrossDispersed) SequenceRule.getInstrumentItem(config, InstGNIRS.CROSS_DISPERSED_PROP);
+            final CrossDispersed xd = (CrossDispersed) SequenceRule.getInstrumentItem(config, InstGNIRS.CROSS_DISPERSED_PROP);
 
             // Altair use for GNIRS (X,J)
             // From JIRA:
@@ -384,7 +365,7 @@ public class GnirsRule implements IRule {
         }
 
         public IConfigMatcher getMatcher() {
-            return ALTAIR_MATCHER;
+            return (config, step, elems) -> elems.hasAltair();
         }
     };
 
@@ -395,7 +376,7 @@ public class GnirsRule implements IRule {
     private static IConfigRule NO_P_OFFSETS_WITH_SLIT_SPECTROSCOPY_RULE = new NoPOffsetWithSlitRule(
         PREFIX,
         new AbstractFunction2<Config, ObservationElements, Boolean>() {
-            public Boolean apply(Config config, ObservationElements elems){
+            public Boolean apply(final Config config, final ObservationElements elems){
                 return
                     ((GNIRSParams.SlitWidth) SequenceRule.getInstrumentItem(config, InstGNIRS.SLIT_WIDTH_PROP)).
                     isSlitSpectroscopy();
@@ -403,27 +384,51 @@ public class GnirsRule implements IRule {
         }
     );
 
+    /**
+     * REL-2167: Warn if acq mirror is out and decker is acq.
+     */
+    private static IConfigRule DECKER_ACQ_MIRROR_OUT = new IConfigRule() {
+        private final static String NAME = "M_DECKER_ACQ_OUT";
+        private final static String M_DECKER_ACQ_OUT = "The Decker is set to acquisition but the Acquisition Mirror is out.";
+
+        @Override
+        public Problem check(Config config, int step, ObservationElements elems, Object state) {
+            final InstGNIRS inst = (InstGNIRS) elems.getInstrument();
+            if (inst.getAcquisitionMirror() == AcquisitionMirror.OUT && inst.getDecker() == Decker.ACQUISITION)
+                return new Problem(WARNING, PREFIX + NAME, M_DECKER_ACQ_OUT, SequenceRule.getInstrumentOrSequenceNode(step, elems));
+            return null;
+        }
+
+        @Override
+        public IConfigMatcher getMatcher() {
+            return IConfigMatcher.ALWAYS;
+        }
+    };
+
 
     static {
         GNIRS_RULES.add(RED_CAMERA_XD_RULE);
         GNIRS_RULES.add(WAVELENGTH_XD_RULE);
         GNIRS_RULES.add(SHORT_BLUE_XD_RULE);
-        for (ReadMode rm : ReadMode.values()) {
+
+        for (final ReadMode rm : ReadMode.values()) {
             if (rm == ReadMode.VERY_FAINT) {
                 GNIRS_RULES.add(new ReadModeRule(rm, ExpTimeComparison.tooShort));
             } else {
-                for (ExpTimeComparison comp : ExpTimeComparison.values()) {
+                for (final ExpTimeComparison comp : ExpTimeComparison.values()) {
                     GNIRS_RULES.add(new ReadModeRule(rm, comp));
                 }
             }
         }
+
         GNIRS_RULES.add(ACQUISITION_FILTER_RULE);
         GNIRS_RULES.add(ALTAIR_RULE);
         GNIRS_RULES.add(NO_P_OFFSETS_WITH_SLIT_SPECTROSCOPY_RULE);
+        GNIRS_RULES.add(DECKER_ACQ_MIRROR_OUT);
     }
 
-    public IP2Problems check(ObservationElements elements)  {
-        IP2Problems prob = new SequenceRule(GNIRS_RULES, null).check(elements);
+    public IP2Problems check(final ObservationElements elements)  {
+        final IP2Problems prob = new SequenceRule(GNIRS_RULES, null).check(elements);
 
         // Altair checks (See REL-386)
         prob.append(AltairRule.INSTANCE.check(elements));
