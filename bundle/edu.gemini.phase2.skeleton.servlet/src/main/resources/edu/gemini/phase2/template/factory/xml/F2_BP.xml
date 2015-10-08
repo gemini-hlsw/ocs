@@ -2,7 +2,7 @@
 <!DOCTYPE document PUBLIC "-//Gemini Observatory//DTD for Storage of P1 and P2 Documents//EN" "http://ftp.gemini.edu/Support/xml/dtds/SpXML2.dtd">
 
 <document>
-  <container kind="program" type="Program" version="2014A-1" subtype="basic" key="13774c9a-7ad6-4850-addf-81eaaac2a2aa" name="GS-FLAMINGOS2-BP">
+  <container kind="program" type="Program" version="2015B-1" subtype="basic" key="8be6cf9b-6442-4546-b603-f20d88d6a6a7" name="F2-BP">
     <paramset name="Science Program" kind="dataObj">
       <param name="title" value="FLAMINGOS-2 PHASE I/II MAPPING BPS"/>
       <param name="programMode" value="QUEUE"/>
@@ -23,34 +23,33 @@
       <param name="completed" value="false"/>
       <param name="notifyPi" value="YES"/>
     </paramset>
-    <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="92e3b86c-0635-45fa-a056-15533e13a442" name="Note">
+    <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="07b7a40a-d0f7-4f7c-aa71-e2e9f62231ab" name="Note">
       <paramset name="Note" kind="dataObj">
         <param name="title" value="Next libID = 28"/>
         <param name="NoteText" value=""/>
       </paramset>
     </container>
-    <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="dd86bcec-58f0-4796-86c8-ea5e7343740c" name="Note">
+    <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="d413afe8-ae86-4c35-9c2c-350b087f3466" name="Note">
       <paramset name="Note" kind="dataObj">
         <param name="title" value="History"/>
         <param name="NoteText">
           <value>
-2010-Apr-23: Create program (BM)
-2013-Jun-28: Add templates and some examples (AWS)
+2010-Apr-23: Create program (bmiller)
+2013-Jun-28: Add templates and some examples (astephens)
 2013-Nov-25: Added a F2 iterator to setup GCALs as bright read mode.
-
-
+2015-Oct-07: Add arcs to Telluric standards (rdiaz)
 
 </value>
         </param>
       </paramset>
     </container>
-    <container kind="group" type="Group" version="2009A-1" subtype="group" key="af64f12b-4692-4945-8e31-87145968036e" name="Group">
+    <container kind="group" type="Group" version="2009A-1" subtype="group" key="c1ba0c27-b0cc-4c7b-a9e4-a15eea16a8d0" name="Group">
       <paramset name="Group" kind="dataObj">
         <param name="title" value="IMAGING BLUEPRINTS"/>
         <param name="GroupType" value="TYPE_FOLDER"/>
         <param name="libraryId" value=""/>
       </paramset>
-      <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="46d4bb81-21ec-4541-aadf-7ea271fa3d00" name="Note">
+      <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="2453779f-9b75-4610-a243-d32d4d83667b" name="Note">
         <paramset name="Note" kind="dataObj">
           <param name="title" value="F2 Imaging Notes"/>
           <param name="NoteText">
@@ -70,14 +69,14 @@
 
 7. If the automatic guide star selection failed for any observation please include a note and talk with your contact scientist to validate any manually-selected guide stars.
 
-8. Don't forget to include daytime flats and darks.
+8. Don't forget to include daytime flats. There is no need to include the darks, these are taken on a weekly basis.
 
-9. Feel free to include a note with any any special advice for the observer.
+9. Feel free to include a note with any special advice for the observer.
 </value>
           </param>
         </paramset>
       </container>
-      <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="bc7aa720-2246-4c99-b9d4-9af76bbe21dd" name="GS-FLAMINGOS2-BP-1">
+      <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="43d4a42b-4b32-42d7-8295-c4a78fc662d4" name="F2-BP-1">
         <paramset name="Observation" kind="dataObj">
           <param name="title" value="Sparse Field Imaging"/>
           <param name="libraryId" value="1"/>
@@ -87,11 +86,15 @@
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
         </paramset>
-        <container kind="obsComp" type="Instrument" version="2009A-1" subtype="Flamingos2" key="0c600cb9-be1b-405c-9f7d-b46a63b84ced" name="Flamingos2">
+        <container kind="obsComp" type="Instrument" version="2009A-1" subtype="Flamingos2" key="77a0fb26-23f1-4aa8-8d69-4dfc70900255" name="Flamingos2">
           <paramset name="Flamingos2" kind="dataObj">
             <param name="exposureTime" value="60.0"/>
             <param name="posAngle" value="0"/>
             <param name="coadds" value="1"/>
+            <paramset name="parallacticAngleDuration">
+              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
+              <param name="explicitDuration" value="0"/>
+            </paramset>
             <param name="disperser" value="NONE"/>
             <param name="filter" value="Y"/>
             <param name="readMode" value="BRIGHT_OBJECT_SPEC"/>
@@ -104,14 +107,28 @@
             <param name="decker" value="IMAGING"/>
           </paramset>
         </container>
-        <container kind="seqComp" type="Iterator" version="2012A-1" subtype="base" key="69da14e5-a0c3-4a4b-bade-13a33307c9bc" name="Sequence">
+        <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="d353436b-926b-4ec1-a89e-9619c6718305" name="Observing Log">
+          <paramset name="Observing Log" kind="dataObj">
+            <paramset name="obsQaRecord"/>
+          </paramset>
+        </container>
+        <container kind="obsExecLog" type="ObsLog" version="2009A-1" subtype="exec" key="843da153-31b4-4eac-b48f-7d03fcaf9dd0" name="Observation Exec Log">
+          <paramset name="Observation Exec Log" kind="dataObj">
+            <paramset name="obsExecRecord">
+              <paramset name="datasets"/>
+              <paramset name="events"/>
+              <paramset name="configMap"/>
+            </paramset>
+          </paramset>
+        </container>
+        <container kind="seqComp" type="Iterator" version="2012A-1" subtype="base" key="923a67d4-293b-4726-9ddd-df98f8570879" name="Sequence">
           <paramset name="Sequence" kind="dataObj"/>
-          <container kind="seqComp" type="Iterator" version="2009A-1" subtype="Flamingos2" key="157e624b-2275-4a0f-9d57-7aeee3417ff9" name="Flamingos2 Sequence">
+          <container kind="seqComp" type="Iterator" version="2009A-1" subtype="Flamingos2" key="55d000c9-cb7d-4761-819b-f3bca56415f8" name="Flamingos2 Sequence">
             <paramset name="Flamingos2 Sequence" kind="dataObj">
               <param name="exposureTime" value="60.0"/>
               <param name="filter" value="Y"/>
             </paramset>
-            <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="228ce8ab-d1a1-481f-8280-5e7488fa20c9" name="Offset">
+            <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="ab2f04f7-2088-4a27-ac9f-f8475a409408" name="Offset">
               <paramset name="Offset" kind="dataObj">
                 <param name="title" value="15&quot; Offsets"/>
                 <paramset name="offsets">
@@ -162,7 +179,7 @@
                   </paramset>
                 </paramset>
               </paramset>
-              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="36779996-0d75-4779-a3c1-8b3b0d476111" name="Observe">
+              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="94b99ed6-9201-4dd9-b832-22ae3f2d1701" name="Observe">
                 <paramset name="Observe" kind="dataObj">
                   <param name="repeatCount" value="1"/>
                   <param name="class" value="SCIENCE"/>
@@ -172,7 +189,7 @@
           </container>
         </container>
       </container>
-      <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="aaeb7432-fa09-4f53-b102-45015dd0e82f" name="GS-FLAMINGOS2-BP-9">
+      <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="c701d0ce-2dbb-4e06-a1fb-2e4681e10bbe" name="F2-BP-2">
         <paramset name="Observation" kind="dataObj">
           <param name="title" value="Crowded Field / Extended Object Imaging"/>
           <param name="libraryId" value="2"/>
@@ -182,13 +199,17 @@
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
         </paramset>
-        <container kind="obsComp" type="Instrument" version="2009A-1" subtype="Flamingos2" key="3870d00d-3789-4442-a6fa-b9b4ec1e2114" name="Flamingos2">
+        <container kind="obsComp" type="Instrument" version="2009A-1" subtype="Flamingos2" key="cc4a60d4-f0ca-4f5b-bbcd-3825a93b6e9b" name="Flamingos2">
           <paramset name="Flamingos2" kind="dataObj">
             <param name="exposureTime" value="60.0"/>
             <param name="posAngle" value="0"/>
             <param name="coadds" value="1"/>
+            <paramset name="parallacticAngleDuration">
+              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
+              <param name="explicitDuration" value="0"/>
+            </paramset>
             <param name="disperser" value="NONE"/>
-            <param name="filter" value="Y"/>
+            <param name="filter" value="J"/>
             <param name="readMode" value="BRIGHT_OBJECT_SPEC"/>
             <param name="lyotWheel" value="OPEN"/>
             <param name="issPort" value="SIDE_LOOKING"/>
@@ -199,14 +220,28 @@
             <param name="decker" value="IMAGING"/>
           </paramset>
         </container>
-        <container kind="seqComp" type="Iterator" version="2012A-1" subtype="base" key="bbc6d53c-5418-4de7-a37b-5996aa5e5de4" name="Sequence">
+        <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="4d4494a2-1498-4fa2-873e-529e38195789" name="Observing Log">
+          <paramset name="Observing Log" kind="dataObj">
+            <paramset name="obsQaRecord"/>
+          </paramset>
+        </container>
+        <container kind="obsExecLog" type="ObsLog" version="2009A-1" subtype="exec" key="c13afc11-ce65-4e99-ac7e-a017fb8a7a5a" name="Observation Exec Log">
+          <paramset name="Observation Exec Log" kind="dataObj">
+            <paramset name="obsExecRecord">
+              <paramset name="datasets"/>
+              <paramset name="events"/>
+              <paramset name="configMap"/>
+            </paramset>
+          </paramset>
+        </container>
+        <container kind="seqComp" type="Iterator" version="2012A-1" subtype="base" key="04a4e50b-712d-4a8a-997d-e9f6f63a13bf" name="Sequence">
           <paramset name="Sequence" kind="dataObj"/>
-          <container kind="seqComp" type="Iterator" version="2009A-1" subtype="Flamingos2" key="0edbc870-ed50-4954-b233-b1bb1d014cdd" name="Flamingos2 Sequence">
+          <container kind="seqComp" type="Iterator" version="2009A-1" subtype="Flamingos2" key="07a56d85-b3bd-4852-b500-760ab0205279" name="Flamingos2 Sequence">
             <paramset name="Flamingos2 Sequence" kind="dataObj">
               <param name="exposureTime" value="60.0"/>
-              <param name="filter" value="Y"/>
+              <param name="filter" value="J"/>
             </paramset>
-            <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="341bcef8-5445-44a0-82c0-3b0f9f07ce6f" name="Offset">
+            <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="d650035a-03d7-4bf0-a2e1-f061f3f02f21" name="Offset">
               <paramset name="Offset" kind="dataObj">
                 <param name="title" value="Src 10&quot; Offsets"/>
                 <paramset name="offsets">
@@ -237,14 +272,14 @@
                   </paramset>
                 </paramset>
               </paramset>
-              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="454a324a-019a-4cd2-96e0-ae1b8e5387e5" name="Observe">
+              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="a2cff03a-83bd-409f-912a-ddb1705f3982" name="Observe">
                 <paramset name="Observe" kind="dataObj">
                   <param name="repeatCount" value="1"/>
                   <param name="class" value="SCIENCE"/>
                 </paramset>
               </container>
             </container>
-            <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="95bda42a-0941-4234-8efe-190c1e98369e" name="Offset">
+            <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="a7260717-9ada-4029-9b82-5ceb638ec424" name="Offset">
               <paramset name="Offset" kind="dataObj">
                 <param name="title" value="Sky 30&quot; Offsets"/>
                 <paramset name="offsets">
@@ -275,7 +310,7 @@
                   </paramset>
                 </paramset>
               </paramset>
-              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="85eee383-ce67-47ff-95a9-6bac2fb388a8" name="Observe">
+              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="c70d765e-998f-4d5f-b0d1-79f2cdb8e57c" name="Observe">
                 <paramset name="Observe" kind="dataObj">
                   <param name="repeatCount" value="1"/>
                   <param name="class" value="SCIENCE"/>
@@ -285,9 +320,9 @@
           </container>
         </container>
       </container>
-      <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="e47f45c3-dd61-465d-8823-8291597d8d1a" name="GS-FLAMINGOS2-BP-10">
+      <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="4f1d9971-4870-4547-80c6-96277bd13151" name="F2-BP-3">
         <paramset name="Observation" kind="dataObj">
-          <param name="title" value="Flats &amp; Darks"/>
+          <param name="title" value="Flats"/>
           <param name="libraryId" value="3"/>
           <param name="priority" value="LOW"/>
           <param name="tooOverrideRapid" value="false"/>
@@ -295,7 +330,7 @@
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
         </paramset>
-        <container kind="obsComp" type="Scheduling" version="2009A-1" subtype="conditions" key="79264ec1-d33e-4f62-aa83-f975f530b25e" name="Observing Conditions">
+        <container kind="obsComp" type="Scheduling" version="2009A-1" subtype="conditions" key="0db0a984-23ab-4bcf-bc88-435d2e3a3320" name="Observing Conditions">
           <paramset name="Observing Conditions" kind="dataObj">
             <param name="CloudCover" value="ANY"/>
             <param name="ImageQuality" value="ANY"/>
@@ -307,21 +342,19 @@
             <paramset name="timing-window-list"/>
           </paramset>
         </container>
-        <container kind="obsComp" type="Telescope" version="2009B-1" subtype="targetEnv" key="13c95d31-0f68-4725-bab5-8445656867fd" name="Targets">
+        <container kind="obsComp" type="Telescope" version="2009B-1" subtype="targetEnv" key="c6451861-8ada-432c-98fb-83be9100484d" name="Targets">
           <paramset name="Targets" kind="dataObj">
             <paramset name="targetEnv">
               <paramset name="base">
                 <param name="name" value="GCAL"/>
                 <param name="system" value="J2000"/>
                 <param name="epoch" value="2000.0" units="years"/>
-                <param name="brightness" value=""/>
                 <param name="c1" value="00:00:00.000"/>
                 <param name="c2" value="00:00:00.00"/>
                 <param name="pm1" value="0.0" units="milli-arcsecs/year"/>
                 <param name="pm2" value="0.0" units="milli-arcsecs/year"/>
                 <param name="parallax" value="0.0" units="arcsecs"/>
                 <param name="rv" value="0.0" units="km/sec"/>
-                <param name="wavelength" value="-1.0" units="angstroms"/>
               </paramset>
               <paramset name="guideEnv">
                 <param name="active">
@@ -329,16 +362,19 @@
                   <value sequence="1">PWFS1</value>
                   <value sequence="2">PWFS2</value>
                 </param>
-                <param name="selected"/>
               </paramset>
             </paramset>
           </paramset>
         </container>
-        <container kind="obsComp" type="Instrument" version="2009A-1" subtype="Flamingos2" key="88cd5203-1ed1-4563-bd00-50a92d968e98" name="Flamingos2">
+        <container kind="obsComp" type="Instrument" version="2009A-1" subtype="Flamingos2" key="377520de-9c85-4f9f-9f41-dce000f2e69d" name="Flamingos2">
           <paramset name="Flamingos2" kind="dataObj">
             <param name="exposureTime" value="85.0"/>
             <param name="posAngle" value="0"/>
             <param name="coadds" value="1"/>
+            <paramset name="parallacticAngleDuration">
+              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
+              <param name="explicitDuration" value="0"/>
+            </paramset>
             <param name="disperser" value="NONE"/>
             <param name="filter" value="Y"/>
             <param name="readMode" value="BRIGHT_OBJECT_SPEC"/>
@@ -351,14 +387,28 @@
             <param name="decker" value="IMAGING"/>
           </paramset>
         </container>
-        <container kind="seqComp" type="Iterator" version="2012A-1" subtype="base" key="9557c175-c6d2-4458-8981-ea44de9fb648" name="Sequence">
+        <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="223c4720-276d-4558-afc9-bfe64493de94" name="Observing Log">
+          <paramset name="Observing Log" kind="dataObj">
+            <paramset name="obsQaRecord"/>
+          </paramset>
+        </container>
+        <container kind="obsExecLog" type="ObsLog" version="2009A-1" subtype="exec" key="1a4ad737-057d-4e8d-b630-677771b02c69" name="Observation Exec Log">
+          <paramset name="Observation Exec Log" kind="dataObj">
+            <paramset name="obsExecRecord">
+              <paramset name="datasets"/>
+              <paramset name="events"/>
+              <paramset name="configMap"/>
+            </paramset>
+          </paramset>
+        </container>
+        <container kind="seqComp" type="Iterator" version="2012A-1" subtype="base" key="ce604274-30fc-4f7a-95da-c8b0434dfa4d" name="Sequence">
           <paramset name="Sequence" kind="dataObj"/>
-          <container kind="seqComp" type="Iterator" version="2009A-1" subtype="Flamingos2" key="984315fb-5af4-4215-83cf-732f37e2652f" name="Flamingos2 Sequence">
+          <container kind="seqComp" type="Iterator" version="2009A-1" subtype="Flamingos2" key="4079ec1e-ad37-4e15-a54f-f2350d1e9d98" name="Flamingos2 Sequence">
             <paramset name="Flamingos2 Sequence" kind="dataObj">
               <param name="title" value="Flamingos2: Flats"/>
               <param name="filter" value="Y"/>
             </paramset>
-            <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartFlat" key="4209e5d9-01c5-48ff-8768-73b71718bffd" name="Flat">
+            <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartFlat" key="6e455a36-880b-413c-98e5-438baead7ba8" name="Flat">
               <paramset name="Flat" kind="dataObj">
                 <param name="repeatCount" value="1"/>
                 <param name="class" value="DAY_CAL"/>
@@ -370,13 +420,13 @@
         </container>
       </container>
     </container>
-    <container kind="group" type="Group" version="2009A-1" subtype="group" key="ede19817-46a1-4f20-87f5-7b87127e3621" name="Group">
+    <container kind="group" type="Group" version="2009A-1" subtype="group" key="ec86544b-9bbd-4a5e-ab25-25091929f6f5" name="Group">
       <paramset name="Group" kind="dataObj">
         <param name="title" value="LONGSLIT BLUEPRINTS"/>
         <param name="GroupType" value="TYPE_FOLDER"/>
         <param name="libraryId" value=""/>
       </paramset>
-      <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="560d15f4-38b8-4ea6-ad17-6ceaf5864cd6" name="Note">
+      <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="c4309d32-7b0d-4944-b9a9-41f11de6c20a" name="Note">
         <paramset name="Note" kind="dataObj">
           <param name="title" value="F2 Long-Slit Notes"/>
           <param name="NoteText">
@@ -396,14 +446,16 @@
 
 7. Include TWO Telluric standard observations; one which is (observation time / 2) in RA before and another which is (observation time / 2) after the science target with similar Declination.
 
-8. Please attach fintder charts via the OT "File Attachment" tab.
+8. Please attach finder charts via the OT "File Attachment" tab.
 
-9. Feel free to include a note with any any special advice for the observer.
+9. There is no need to include the darks, these are taken on a weekly basis.
+
+10. Feel free to include a note with any any special advice for the observer.
 </value>
           </param>
         </paramset>
       </container>
-      <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="8076a854-ae5c-447e-ab5e-be8b32852541" name="GS-FLAMINGOS2-BP-13">
+      <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="b47f0a75-cb0e-4c76-b362-06ebef396371" name="F2-BP-4">
         <paramset name="Observation" kind="dataObj">
           <param name="title" value="Telluric Acquisition"/>
           <param name="libraryId" value="11"/>
@@ -413,49 +465,55 @@
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
         </paramset>
-        <container kind="obsComp" type="Instrument" version="2009A-1" subtype="Flamingos2" key="a3c9c116-54e0-46ac-b69e-698d53ea3a8e" name="Flamingos2">
+        <container kind="obsComp" type="Instrument" version="2009A-1" subtype="Flamingos2" key="5324e9a3-5c98-4505-bf33-5bc3c5fb666b" name="Flamingos2">
           <paramset name="Flamingos2" kind="dataObj">
             <param name="exposureTime" value="2.0"/>
             <param name="posAngle" value="0"/>
             <param name="coadds" value="1"/>
+            <paramset name="parallacticAngleDuration">
+              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
+              <param name="explicitDuration" value="0"/>
+            </paramset>
             <param name="disperser" value="NONE"/>
             <param name="filter" value="H"/>
             <param name="readMode" value="BRIGHT_OBJECT_SPEC"/>
             <param name="lyotWheel" value="OPEN"/>
             <param name="issPort" value="SIDE_LOOKING"/>
             <param name="posAngleConstraint" value="FIXED"/>
-            <param name="fpu" value="LONGSLIT_3"/>
+            <param name="fpu" value="LONGSLIT_2"/>
             <param name="mosPreimaging" value="NO"/>
             <param name="useElectronicOffsetting" value="false"/>
             <param name="decker" value="LONG_SLIT"/>
           </paramset>
         </container>
-        <container kind="obsComp" type="Scheduling" version="2009A-1" subtype="conditions" key="9d996f4c-addf-46fd-b0dc-09bfe7e27357" name="Observing Conditions">
-          <paramset name="Observing Conditions" kind="dataObj">
-            <param name="CloudCover" value="ANY"/>
-            <param name="ImageQuality" value="ANY"/>
-            <param name="SkyBackground" value="ANY"/>
-            <param name="WaterVapor" value="ANY"/>
-            <param name="ElevationConstraintType" value="NONE"/>
-            <param name="ElevationConstraintMin" value="0.0"/>
-            <param name="ElevationConstraintMax" value="0.0"/>
-            <paramset name="timing-window-list"/>
+        <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="abf81f26-01b2-41bb-be23-fdb4d174e82a" name="Observing Log">
+          <paramset name="Observing Log" kind="dataObj">
+            <paramset name="obsQaRecord"/>
           </paramset>
         </container>
-        <container kind="seqComp" type="Iterator" version="2012A-1" subtype="base" key="252b958a-e610-456e-892a-afb6938b3990" name="Sequence">
+        <container kind="obsExecLog" type="ObsLog" version="2009A-1" subtype="exec" key="3442bdd8-b196-4de1-883a-ac2a2471fb52" name="Observation Exec Log">
+          <paramset name="Observation Exec Log" kind="dataObj">
+            <paramset name="obsExecRecord">
+              <paramset name="datasets"/>
+              <paramset name="events"/>
+              <paramset name="configMap"/>
+            </paramset>
+          </paramset>
+        </container>
+        <container kind="seqComp" type="Iterator" version="2012A-1" subtype="base" key="b99861bd-a1bc-4e60-b27c-fcadb2d7eb42" name="Sequence">
           <paramset name="Sequence" kind="dataObj"/>
-          <container kind="seqComp" type="Iterator" version="2009A-1" subtype="Flamingos2" key="8d9e0ccc-f520-4516-98c8-2d05a981974d" name="Flamingos2 Sequence">
+          <container kind="seqComp" type="Iterator" version="2009A-1" subtype="Flamingos2" key="c42a4394-2aae-4f1c-9710-9a2448bc71f0" name="Flamingos2 Sequence">
             <paramset name="Flamingos2 Sequence" kind="dataObj">
               <param name="title" value="Flamingos2: Define Slit"/>
-              <param name="fpu" value="LONGSLIT_3"/>
+              <param name="fpu" value="LONGSLIT_2"/>
             </paramset>
-            <container kind="seqComp" type="Iterator" version="2009A-1" subtype="Flamingos2" key="de707dc8-989a-4824-8a41-004b64488584" name="Flamingos2 Sequence">
+            <container kind="seqComp" type="Iterator" version="2009A-1" subtype="Flamingos2" key="c5e81be7-13ab-485a-8f97-61a401ed5257" name="Flamingos2 Sequence">
               <paramset name="Flamingos2 Sequence" kind="dataObj">
                 <param name="title" value="Flamingos2: Field Image"/>
                 <param name="decker" value="IMAGING"/>
                 <param name="fpu" value="FPU_NONE"/>
               </paramset>
-              <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="cdb1ac82-fd0f-48aa-9634-f9c0946f35a0" name="Offset">
+              <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="bea9e198-f0d4-4ebb-a3bc-ce33945c5580" name="Offset">
                 <paramset name="Offset" kind="dataObj">
                   <paramset name="offsets">
                     <paramset name="Offset0" sequence="0">
@@ -465,7 +523,7 @@
                     </paramset>
                   </paramset>
                 </paramset>
-                <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="5e360a16-2627-49a5-9288-a0839cde6d31" name="Observe">
+                <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="4c74ef65-d89d-40d1-b71d-44b54870a30a" name="Observe">
                   <paramset name="Observe" kind="dataObj">
                     <param name="repeatCount" value="1"/>
                     <param name="class" value="ACQ_CAL"/>
@@ -474,13 +532,13 @@
               </container>
             </container>
           </container>
-          <container kind="seqComp" type="Iterator" version="2009A-1" subtype="Flamingos2" key="1c72c9a4-46b2-4523-84e2-7d78033db1ef" name="Flamingos2 Sequence">
+          <container kind="seqComp" type="Iterator" version="2009A-1" subtype="Flamingos2" key="8a5038f7-fb31-489c-9a03-f13b1120dc4c" name="Flamingos2 Sequence">
             <paramset name="Flamingos2 Sequence" kind="dataObj">
               <param name="title" value="Flamingos2: Slit Image"/>
               <param name="decker" value="LONG_SLIT"/>
               <param name="exposureTime" value="10.0"/>
             </paramset>
-            <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="264459f5-e530-4e9d-95c3-c4aff0349ff9" name="Offset">
+            <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="719d5f1a-7403-4d21-bdb1-48603b08a147" name="Offset">
               <paramset name="Offset" kind="dataObj">
                 <paramset name="offsets">
                   <paramset name="Offset0" sequence="0">
@@ -490,7 +548,7 @@
                   </paramset>
                 </paramset>
               </paramset>
-              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="9991598b-5dc2-47bd-bcff-8077c372bd38" name="Observe">
+              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="c12a06d1-a02d-4d62-97e4-a32cb2ac72f6" name="Observe">
                 <paramset name="Observe" kind="dataObj">
                   <param name="repeatCount" value="1"/>
                   <param name="class" value="ACQ_CAL"/>
@@ -498,12 +556,12 @@
               </container>
             </container>
           </container>
-          <container kind="seqComp" type="Iterator" version="2009A-1" subtype="Flamingos2" key="33bfcbf5-a403-4255-a1f3-d561ea755f73" name="Flamingos2 Sequence">
+          <container kind="seqComp" type="Iterator" version="2009A-1" subtype="Flamingos2" key="fe5ba4e1-1a66-49b7-a5b8-f36bc2d10664" name="Flamingos2 Sequence">
             <paramset name="Flamingos2 Sequence" kind="dataObj">
               <param name="title" value="Flamingos2: Through-Slit Image"/>
               <param name="decker" value="LONG_SLIT"/>
             </paramset>
-            <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="6d695bc6-94f3-43d4-b385-88e813ebf5b8" name="Offset">
+            <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="246e7f39-bc39-4230-84d2-7cad66fda92b" name="Offset">
               <paramset name="Offset" kind="dataObj">
                 <paramset name="offsets">
                   <paramset name="Offset0" sequence="0">
@@ -523,7 +581,7 @@
                   </paramset>
                 </paramset>
               </paramset>
-              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="6d33c586-1eeb-431c-8b2b-1ba752583334" name="Observe">
+              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="524c1b2f-3bb9-4e95-9d35-43cc5056eff6" name="Observe">
                 <paramset name="Observe" kind="dataObj">
                   <param name="repeatCount" value="1"/>
                   <param name="class" value="ACQ_CAL"/>
@@ -533,7 +591,7 @@
           </container>
         </container>
       </container>
-      <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="a2cd333f-8d7d-4e96-a69b-5dc0a0f397e7" name="GS-FLAMINGOS2-BP-14">
+      <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="5ba9c8f7-ec29-40c1-925a-92d8cb9663e7" name="F2-BP-5">
         <paramset name="Observation" kind="dataObj">
           <param name="title" value="Telluric Observation"/>
           <param name="libraryId" value="12"/>
@@ -543,13 +601,17 @@
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
         </paramset>
-        <container kind="obsComp" type="Instrument" version="2009A-1" subtype="Flamingos2" key="f0ade14c-8490-4fd8-958c-013f64ff4c88" name="Flamingos2">
+        <container kind="obsComp" type="Instrument" version="2009A-1" subtype="Flamingos2" key="898d1921-e169-4e65-895d-4ad885a09232" name="Flamingos2">
           <paramset name="Flamingos2" kind="dataObj">
             <param name="exposureTime" value="30.0"/>
             <param name="posAngle" value="0"/>
             <param name="coadds" value="1"/>
-            <param name="disperser" value="R1200HK"/>
-            <param name="filter" value="J"/>
+            <paramset name="parallacticAngleDuration">
+              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
+              <param name="explicitDuration" value="0"/>
+            </paramset>
+            <param name="disperser" value="R3000"/>
+            <param name="filter" value="H"/>
             <param name="readMode" value="BRIGHT_OBJECT_SPEC"/>
             <param name="lyotWheel" value="OPEN"/>
             <param name="issPort" value="SIDE_LOOKING"/>
@@ -560,26 +622,28 @@
             <param name="decker" value="LONG_SLIT"/>
           </paramset>
         </container>
-        <container kind="obsComp" type="Scheduling" version="2009A-1" subtype="conditions" key="d174d7be-1fdb-4d23-a38f-ff59b31cfd1c" name="Observing Conditions">
-          <paramset name="Observing Conditions" kind="dataObj">
-            <param name="CloudCover" value="ANY"/>
-            <param name="ImageQuality" value="ANY"/>
-            <param name="SkyBackground" value="ANY"/>
-            <param name="WaterVapor" value="ANY"/>
-            <param name="ElevationConstraintType" value="NONE"/>
-            <param name="ElevationConstraintMin" value="0.0"/>
-            <param name="ElevationConstraintMax" value="0.0"/>
-            <paramset name="timing-window-list"/>
+        <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="b75cfbaa-f303-4b8d-b928-0fad0573cdf1" name="Observing Log">
+          <paramset name="Observing Log" kind="dataObj">
+            <paramset name="obsQaRecord"/>
           </paramset>
         </container>
-        <container kind="seqComp" type="Iterator" version="2012A-1" subtype="base" key="51db511a-a51a-4fd5-9524-fdd18e80ff73" name="Sequence">
+        <container kind="obsExecLog" type="ObsLog" version="2009A-1" subtype="exec" key="110eefce-c70c-40e7-806d-129cafffb09f" name="Observation Exec Log">
+          <paramset name="Observation Exec Log" kind="dataObj">
+            <paramset name="obsExecRecord">
+              <paramset name="datasets"/>
+              <paramset name="events"/>
+              <paramset name="configMap"/>
+            </paramset>
+          </paramset>
+        </container>
+        <container kind="seqComp" type="Iterator" version="2012A-1" subtype="base" key="753a5fab-4f58-41e5-ac99-7529eefbcae3" name="Sequence">
           <paramset name="Sequence" kind="dataObj"/>
-          <container kind="seqComp" type="Iterator" version="2009A-1" subtype="Flamingos2" key="d9c1195c-2d4f-4795-b941-9bf87f1c47a5" name="Flamingos2 Sequence">
+          <container kind="seqComp" type="Iterator" version="2009A-1" subtype="Flamingos2" key="e415422d-054c-46af-8ff2-f95563eb2c7a" name="Flamingos2 Sequence">
             <paramset name="Flamingos2 Sequence" kind="dataObj">
               <param name="exposureTime" value="30.0"/>
-              <param name="filter" value="J"/>
+              <param name="filter" value="H"/>
             </paramset>
-            <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="726b4691-031a-4d53-8cee-1964e0e50f56" name="Offset">
+            <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="c309735b-eeb6-4fda-bd88-1ae3ce30cf56" name="Offset">
               <paramset name="Offset" kind="dataObj">
                 <param name="title" value="ABBA 15&quot; Offsets"/>
                 <paramset name="offsets">
@@ -605,17 +669,24 @@
                   </paramset>
                 </paramset>
               </paramset>
-              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="8f9cce41-f80f-4cd4-97db-94cfc7b18aa5" name="Observe">
+              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="bd249857-eace-453f-a787-8292638e1c33" name="Observe">
                 <paramset name="Observe" kind="dataObj">
                   <param name="repeatCount" value="1"/>
                   <param name="class" value="PARTNER_CAL"/>
                 </paramset>
               </container>
             </container>
+            <container kind="seqComp" type="Observer" version="2009A-1" subtype="BaselineNight" key="c4d0222e-78a8-4232-8afe-b093f3055b20" name="Night Baseline GCAL">
+              <paramset name="Night Baseline GCAL" kind="dataObj">
+                <param name="repeatCount" value="1"/>
+                <param name="coadds" value="1"/>
+                <param name="exposureTime" value="10.0"/>
+              </paramset>
+            </container>
           </container>
         </container>
       </container>
-      <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="35e0dd08-09b6-41bd-9f43-cf8285fec9cf" name="GS-FLAMINGOS2-BP-2">
+      <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="37f28b2a-0367-432e-810b-4084aa4fe295" name="F2-BP-6">
         <paramset name="Observation" kind="dataObj">
           <param name="title" value="Acquisition (H&lt;12 w/o sky sub)"/>
           <param name="libraryId" value="13"/>
@@ -625,37 +696,55 @@
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
         </paramset>
-        <container kind="obsComp" type="Instrument" version="2009A-1" subtype="Flamingos2" key="5618b5a4-788d-4c28-b204-f71a218266f7" name="Flamingos2">
+        <container kind="obsComp" type="Instrument" version="2009A-1" subtype="Flamingos2" key="363a1e2d-f8a6-4f46-b888-48c20d0b2565" name="Flamingos2">
           <paramset name="Flamingos2" kind="dataObj">
             <param name="exposureTime" value="5.0"/>
             <param name="posAngle" value="0"/>
             <param name="coadds" value="1"/>
+            <paramset name="parallacticAngleDuration">
+              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
+              <param name="explicitDuration" value="0"/>
+            </paramset>
             <param name="disperser" value="NONE"/>
             <param name="filter" value="H"/>
             <param name="readMode" value="BRIGHT_OBJECT_SPEC"/>
             <param name="lyotWheel" value="OPEN"/>
             <param name="issPort" value="SIDE_LOOKING"/>
             <param name="posAngleConstraint" value="FIXED"/>
-            <param name="fpu" value="LONGSLIT_3"/>
+            <param name="fpu" value="LONGSLIT_2"/>
             <param name="mosPreimaging" value="NO"/>
             <param name="useElectronicOffsetting" value="false"/>
             <param name="decker" value="LONG_SLIT"/>
           </paramset>
         </container>
-        <container kind="seqComp" type="Iterator" version="2012A-1" subtype="base" key="69270624-dd57-4c73-b5c2-0db620f5286b" name="Sequence">
+        <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="57652511-9973-435c-8d39-10803b051f14" name="Observing Log">
+          <paramset name="Observing Log" kind="dataObj">
+            <paramset name="obsQaRecord"/>
+          </paramset>
+        </container>
+        <container kind="obsExecLog" type="ObsLog" version="2009A-1" subtype="exec" key="2b5b778e-8b06-47de-8ed1-75eb115dc104" name="Observation Exec Log">
+          <paramset name="Observation Exec Log" kind="dataObj">
+            <paramset name="obsExecRecord">
+              <paramset name="datasets"/>
+              <paramset name="events"/>
+              <paramset name="configMap"/>
+            </paramset>
+          </paramset>
+        </container>
+        <container kind="seqComp" type="Iterator" version="2012A-1" subtype="base" key="6d11888f-45dd-40de-89ae-aae20292dc28" name="Sequence">
           <paramset name="Sequence" kind="dataObj"/>
-          <container kind="seqComp" type="Iterator" version="2009A-1" subtype="Flamingos2" key="791480f7-b93f-4c86-a64b-03c94a00fe82" name="Flamingos2 Sequence">
+          <container kind="seqComp" type="Iterator" version="2009A-1" subtype="Flamingos2" key="a3bd6c05-ca14-4795-8bd8-e444efa91d7c" name="Flamingos2 Sequence">
             <paramset name="Flamingos2 Sequence" kind="dataObj">
               <param name="title" value="Flamingos2: Define Slit"/>
-              <param name="fpu" value="LONGSLIT_3"/>
+              <param name="fpu" value="LONGSLIT_2"/>
             </paramset>
-            <container kind="seqComp" type="Iterator" version="2009A-1" subtype="Flamingos2" key="33d4d829-3b46-4d57-bb49-cbf5d0ad3118" name="Flamingos2 Sequence">
+            <container kind="seqComp" type="Iterator" version="2009A-1" subtype="Flamingos2" key="e69190f7-4397-49e0-9697-477c9cfb3844" name="Flamingos2 Sequence">
               <paramset name="Flamingos2 Sequence" kind="dataObj">
                 <param name="title" value="Flamingos2: Field Image"/>
                 <param name="decker" value="IMAGING"/>
                 <param name="fpu" value="FPU_NONE"/>
               </paramset>
-              <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="279d471e-fee8-4948-a9e5-9098e59edaf7" name="Offset">
+              <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="dcf2172d-38b1-477f-943e-88258c12e1d1" name="Offset">
                 <paramset name="Offset" kind="dataObj">
                   <paramset name="offsets">
                     <paramset name="Offset0" sequence="0">
@@ -665,7 +754,7 @@
                     </paramset>
                   </paramset>
                 </paramset>
-                <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="031183a7-faad-421e-a4d2-ca02dfc5fbb2" name="Observe">
+                <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="18d32852-2ce5-4270-b94a-d06fa76306f2" name="Observe">
                   <paramset name="Observe" kind="dataObj">
                     <param name="repeatCount" value="1"/>
                     <param name="class" value="ACQ"/>
@@ -674,13 +763,13 @@
               </container>
             </container>
           </container>
-          <container kind="seqComp" type="Iterator" version="2009A-1" subtype="Flamingos2" key="93aa59ed-17bf-4256-9898-9c837e63d13b" name="Flamingos2 Sequence">
+          <container kind="seqComp" type="Iterator" version="2009A-1" subtype="Flamingos2" key="1899872a-fff6-44d4-a8a1-8dc6b5acdc73" name="Flamingos2 Sequence">
             <paramset name="Flamingos2 Sequence" kind="dataObj">
               <param name="title" value="Flamingos2: Slit Image"/>
               <param name="decker" value="LONG_SLIT"/>
               <param name="exposureTime" value="10.0"/>
             </paramset>
-            <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="8b01e76c-35e2-44f4-b97b-fb2f5e2f07f5" name="Offset">
+            <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="6ea9844d-1ce9-41f5-87c2-2b0eb75eb9fa" name="Offset">
               <paramset name="Offset" kind="dataObj">
                 <paramset name="offsets">
                   <paramset name="Offset0" sequence="0">
@@ -690,7 +779,7 @@
                   </paramset>
                 </paramset>
               </paramset>
-              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="0491515a-20ab-4a88-9f99-ead51b0b72db" name="Observe">
+              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="22670ea9-9771-45f3-b9cd-0708c3f09bf0" name="Observe">
                 <paramset name="Observe" kind="dataObj">
                   <param name="repeatCount" value="1"/>
                   <param name="class" value="ACQ"/>
@@ -698,12 +787,12 @@
               </container>
             </container>
           </container>
-          <container kind="seqComp" type="Iterator" version="2009A-1" subtype="Flamingos2" key="7d6959df-b63d-4744-a0f4-f89336d057e8" name="Flamingos2 Sequence">
+          <container kind="seqComp" type="Iterator" version="2009A-1" subtype="Flamingos2" key="49747aba-2c26-4fe7-ae05-d64a7450d815" name="Flamingos2 Sequence">
             <paramset name="Flamingos2 Sequence" kind="dataObj">
               <param name="title" value="Flamingos2: Through-Slit Image"/>
               <param name="decker" value="LONG_SLIT"/>
             </paramset>
-            <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="e20574db-6d80-4da6-9706-f486f954ab82" name="Offset">
+            <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="7f178adb-1efb-4293-adfe-bf8d38a6a792" name="Offset">
               <paramset name="Offset" kind="dataObj">
                 <paramset name="offsets">
                   <paramset name="Offset0" sequence="0">
@@ -723,7 +812,7 @@
                   </paramset>
                 </paramset>
               </paramset>
-              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="b98522f4-fd84-464e-886c-8a7f17b95294" name="Observe">
+              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="38cdeaa4-d58d-40db-89e3-0f3b5c357981" name="Observe">
                 <paramset name="Observe" kind="dataObj">
                   <param name="repeatCount" value="1"/>
                   <param name="class" value="ACQ"/>
@@ -733,7 +822,7 @@
           </container>
         </container>
       </container>
-      <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="0a4b0822-6d24-41c5-a97b-72b1a38e1efc" name="GS-FLAMINGOS2-BP-3">
+      <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="2a5f2966-c67b-4aab-b970-65bb38b4c360" name="F2-BP-7">
         <paramset name="Observation" kind="dataObj">
           <param name="title" value="Acquisition (H&gt;12 w/ sky sub)"/>
           <param name="libraryId" value="14"/>
@@ -743,37 +832,55 @@
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
         </paramset>
-        <container kind="obsComp" type="Instrument" version="2009A-1" subtype="Flamingos2" key="88fa6c96-2f34-4dcc-9132-ba8d9837da30" name="Flamingos2">
+        <container kind="obsComp" type="Instrument" version="2009A-1" subtype="Flamingos2" key="821e476a-aa4e-411d-a9e3-5d9423153881" name="Flamingos2">
           <paramset name="Flamingos2" kind="dataObj">
             <param name="exposureTime" value="10.0"/>
             <param name="posAngle" value="0"/>
             <param name="coadds" value="1"/>
+            <paramset name="parallacticAngleDuration">
+              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
+              <param name="explicitDuration" value="0"/>
+            </paramset>
             <param name="disperser" value="NONE"/>
             <param name="filter" value="H"/>
             <param name="readMode" value="BRIGHT_OBJECT_SPEC"/>
             <param name="lyotWheel" value="OPEN"/>
             <param name="issPort" value="SIDE_LOOKING"/>
             <param name="posAngleConstraint" value="FIXED"/>
-            <param name="fpu" value="LONGSLIT_8"/>
+            <param name="fpu" value="LONGSLIT_2"/>
             <param name="mosPreimaging" value="NO"/>
             <param name="useElectronicOffsetting" value="false"/>
             <param name="decker" value="LONG_SLIT"/>
           </paramset>
         </container>
-        <container kind="seqComp" type="Iterator" version="2012A-1" subtype="base" key="162b7e72-b25c-4404-8e94-d8560fc1a7a7" name="Sequence">
+        <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="4fbb59ee-f36c-40e8-94c2-a3b642a4e170" name="Observing Log">
+          <paramset name="Observing Log" kind="dataObj">
+            <paramset name="obsQaRecord"/>
+          </paramset>
+        </container>
+        <container kind="obsExecLog" type="ObsLog" version="2009A-1" subtype="exec" key="447b2f34-a70d-41be-8a41-918594a914e6" name="Observation Exec Log">
+          <paramset name="Observation Exec Log" kind="dataObj">
+            <paramset name="obsExecRecord">
+              <paramset name="datasets"/>
+              <paramset name="events"/>
+              <paramset name="configMap"/>
+            </paramset>
+          </paramset>
+        </container>
+        <container kind="seqComp" type="Iterator" version="2012A-1" subtype="base" key="aa1224d6-11e7-4111-a362-95ddd4784953" name="Sequence">
           <paramset name="Sequence" kind="dataObj"/>
-          <container kind="seqComp" type="Iterator" version="2009A-1" subtype="Flamingos2" key="94bc0e35-f080-46a2-818b-741eb1a62157" name="Flamingos2 Sequence">
+          <container kind="seqComp" type="Iterator" version="2009A-1" subtype="Flamingos2" key="11f76d4c-4578-4d45-b86e-40d7cf06c742" name="Flamingos2 Sequence">
             <paramset name="Flamingos2 Sequence" kind="dataObj">
               <param name="title" value="Flamingos2: Define Slit"/>
-              <param name="fpu" value="LONGSLIT_8"/>
+              <param name="fpu" value="LONGSLIT_2"/>
             </paramset>
-            <container kind="seqComp" type="Iterator" version="2009A-1" subtype="Flamingos2" key="b6730225-fc52-4cd0-ba4b-9d17d670b7e2" name="Flamingos2 Sequence">
+            <container kind="seqComp" type="Iterator" version="2009A-1" subtype="Flamingos2" key="c668799a-0c10-484d-ac0f-ba04690c6e32" name="Flamingos2 Sequence">
               <paramset name="Flamingos2 Sequence" kind="dataObj">
                 <param name="title" value="Flamingos2: Field Image"/>
                 <param name="decker" value="IMAGING"/>
                 <param name="fpu" value="FPU_NONE"/>
               </paramset>
-              <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="2d2c92c2-71e4-488a-ae36-f9051423ba18" name="Offset">
+              <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="c3d1e47c-1625-4191-8a60-02954d676af2" name="Offset">
                 <paramset name="Offset" kind="dataObj">
                   <paramset name="offsets">
                     <paramset name="Offset1" sequence="0">
@@ -788,7 +895,7 @@
                     </paramset>
                   </paramset>
                 </paramset>
-                <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="66a1512a-ebb7-4c36-b9b7-7886bc2b33da" name="Observe">
+                <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="aff775e9-fc55-4b9a-8b47-6888848b7572" name="Observe">
                   <paramset name="Observe" kind="dataObj">
                     <param name="repeatCount" value="1"/>
                     <param name="class" value="ACQ"/>
@@ -797,13 +904,13 @@
               </container>
             </container>
           </container>
-          <container kind="seqComp" type="Iterator" version="2009A-1" subtype="Flamingos2" key="1e808781-a2ed-4637-baa2-8bf8277dd4b2" name="Flamingos2 Sequence">
+          <container kind="seqComp" type="Iterator" version="2009A-1" subtype="Flamingos2" key="1f1f5024-7925-4003-b838-ee22db460354" name="Flamingos2 Sequence">
             <paramset name="Flamingos2 Sequence" kind="dataObj">
               <param name="title" value="Flamingos2: Slit Image"/>
               <param name="decker" value="LONG_SLIT"/>
               <param name="exposureTime" value="10.0"/>
             </paramset>
-            <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="8106fde4-b19d-4b33-9666-ab7fa9596677" name="Offset">
+            <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="672cd430-9e2b-444c-9456-84258a483138" name="Offset">
               <paramset name="Offset" kind="dataObj">
                 <paramset name="offsets">
                   <paramset name="Offset0" sequence="0">
@@ -813,7 +920,7 @@
                   </paramset>
                 </paramset>
               </paramset>
-              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="46911aea-ca09-488d-a4d0-f29f09fbb086" name="Observe">
+              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="d8fcdb4a-9554-41d6-bcc3-19730456bc10" name="Observe">
                 <paramset name="Observe" kind="dataObj">
                   <param name="repeatCount" value="1"/>
                   <param name="class" value="ACQ"/>
@@ -821,12 +928,12 @@
               </container>
             </container>
           </container>
-          <container kind="seqComp" type="Iterator" version="2009A-1" subtype="Flamingos2" key="37dff1f2-3ff0-4db2-b395-4e149911859b" name="Flamingos2 Sequence">
+          <container kind="seqComp" type="Iterator" version="2009A-1" subtype="Flamingos2" key="00b86d4e-e21e-4100-87ac-d2f802d946b0" name="Flamingos2 Sequence">
             <paramset name="Flamingos2 Sequence" kind="dataObj">
               <param name="title" value="Flamingos2: Through-Slit Image"/>
               <param name="decker" value="LONG_SLIT"/>
             </paramset>
-            <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="b27ff1c3-6d2d-41a7-a9d8-0b01ab6d81dc" name="Offset">
+            <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="50a05d0e-dcd9-42f9-8f4d-626114234c5c" name="Offset">
               <paramset name="Offset" kind="dataObj">
                 <paramset name="offsets">
                   <paramset name="Offset1" sequence="0">
@@ -851,7 +958,7 @@
                   </paramset>
                 </paramset>
               </paramset>
-              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="6ca6058c-3697-4049-81dd-757dcecea3dc" name="Observe">
+              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="b5f188bd-fb0a-4348-b70e-15e22028a45e" name="Observe">
                 <paramset name="Observe" kind="dataObj">
                   <param name="repeatCount" value="1"/>
                   <param name="class" value="ACQ"/>
@@ -861,7 +968,7 @@
           </container>
         </container>
       </container>
-      <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="fce74e7d-67b0-4458-80d9-2526a5fd11d6" name="GS-FLAMINGOS2-BP-4">
+      <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="a60cc9f3-ecf1-4d87-b23b-4cb11a92a16e" name="F2-BP-8">
         <paramset name="Observation" kind="dataObj">
           <param name="title" value="Sparse Field Spectroscopy"/>
           <param name="libraryId" value="15"/>
@@ -871,13 +978,17 @@
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
         </paramset>
-        <container kind="obsComp" type="Instrument" version="2009A-1" subtype="Flamingos2" key="69a44e75-e6b7-4e5f-8b5d-e625fe59ef54" name="Flamingos2">
+        <container kind="obsComp" type="Instrument" version="2009A-1" subtype="Flamingos2" key="f4d5a6b8-b8aa-4ed4-81c5-c5378a86d2ea" name="Flamingos2">
           <paramset name="Flamingos2" kind="dataObj">
             <param name="exposureTime" value="300.0"/>
             <param name="posAngle" value="0"/>
             <param name="coadds" value="1"/>
-            <param name="disperser" value="R1200HK"/>
-            <param name="filter" value="J"/>
+            <paramset name="parallacticAngleDuration">
+              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
+              <param name="explicitDuration" value="0"/>
+            </paramset>
+            <param name="disperser" value="R3000"/>
+            <param name="filter" value="H"/>
             <param name="readMode" value="FAINT_OBJECT_SPEC"/>
             <param name="lyotWheel" value="OPEN"/>
             <param name="issPort" value="SIDE_LOOKING"/>
@@ -888,14 +999,28 @@
             <param name="decker" value="LONG_SLIT"/>
           </paramset>
         </container>
-        <container kind="seqComp" type="Iterator" version="2012A-1" subtype="base" key="25bf9bfe-b7cf-4d01-a9c2-90cb55fa9a14" name="Sequence">
+        <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="5e382394-e313-415a-974a-1ed02dd6b604" name="Observing Log">
+          <paramset name="Observing Log" kind="dataObj">
+            <paramset name="obsQaRecord"/>
+          </paramset>
+        </container>
+        <container kind="obsExecLog" type="ObsLog" version="2009A-1" subtype="exec" key="d7d74ee6-f0dd-476a-ac9b-4321cdbc37db" name="Observation Exec Log">
+          <paramset name="Observation Exec Log" kind="dataObj">
+            <paramset name="obsExecRecord">
+              <paramset name="datasets"/>
+              <paramset name="events"/>
+              <paramset name="configMap"/>
+            </paramset>
+          </paramset>
+        </container>
+        <container kind="seqComp" type="Iterator" version="2012A-1" subtype="base" key="d5bbd4c2-8479-4cd9-91f3-a6a620c10977" name="Sequence">
           <paramset name="Sequence" kind="dataObj"/>
-          <container kind="seqComp" type="Iterator" version="2009A-1" subtype="Flamingos2" key="69f769e3-aa68-42c4-9d59-d4a8f74049d8" name="Flamingos2 Sequence">
+          <container kind="seqComp" type="Iterator" version="2009A-1" subtype="Flamingos2" key="4a4dd0ef-d7d0-4d0a-a710-df17d0f61bed" name="Flamingos2 Sequence">
             <paramset name="Flamingos2 Sequence" kind="dataObj">
               <param name="exposureTime" value="300.0"/>
-              <param name="filter" value="J"/>
+              <param name="filter" value="H"/>
             </paramset>
-            <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="e28d6248-1dc7-48d0-9e79-24ee7771268e" name="Offset">
+            <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="41e436db-5b18-45f9-92f9-ba63c93417ae" name="Offset">
               <paramset name="Offset" kind="dataObj">
                 <param name="title" value="ABBA 10&quot; Offsets"/>
                 <paramset name="offsets">
@@ -921,19 +1046,19 @@
                   </paramset>
                 </paramset>
               </paramset>
-              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="df2e530d-7aae-4e98-952d-d8f9c9616d31" name="Observe">
+              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="189881a8-073f-4048-b839-ee5a4a600770" name="Observe">
                 <paramset name="Observe" kind="dataObj">
                   <param name="repeatCount" value="1"/>
                   <param name="class" value="SCIENCE"/>
                 </paramset>
               </container>
             </container>
-            <container kind="seqComp" type="Iterator" version="2009A-1" subtype="Flamingos2" key="bd17d176-16a0-4641-918f-be6b51ca1ce8" name="Flamingos2 Sequence">
+            <container kind="seqComp" type="Iterator" version="2009A-1" subtype="Flamingos2" key="c48be3b2-e9cd-4ac7-8642-7216f74da2b2" name="Flamingos2 Sequence">
               <paramset name="Flamingos2 Sequence" kind="dataObj">
                 <param name="title" value="Flamingos2: GCAL sequence"/>
                 <param name="readMode" value="BRIGHT_OBJECT_SPEC"/>
               </paramset>
-              <container kind="seqComp" type="Observer" version="2009A-1" subtype="BaselineNight" key="685049d7-d667-4583-8f68-b9117648cd56" name="Night Baseline GCAL">
+              <container kind="seqComp" type="Observer" version="2009A-1" subtype="BaselineNight" key="f54aac7b-426a-41ea-9de3-3d3975cca05e" name="Night Baseline GCAL">
                 <paramset name="Night Baseline GCAL" kind="dataObj">
                   <param name="repeatCount" value="1"/>
                   <param name="coadds" value="1"/>
@@ -944,7 +1069,7 @@
           </container>
         </container>
       </container>
-      <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="4a7f1f5d-a533-4793-8432-a388756709e2" name="GS-FLAMINGOS2-BP-19">
+      <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="927c529e-5e78-489e-8c14-4c0344ce61c9" name="F2-BP-9">
         <paramset name="Observation" kind="dataObj">
           <param name="title" value="Extended Object Spectroscopy"/>
           <param name="libraryId" value="16"/>
@@ -954,13 +1079,17 @@
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
         </paramset>
-        <container kind="obsComp" type="Instrument" version="2009A-1" subtype="Flamingos2" key="112a097b-2df7-4219-8cec-35edaaa469af" name="Flamingos2">
+        <container kind="obsComp" type="Instrument" version="2009A-1" subtype="Flamingos2" key="e656ed11-ded3-4226-be26-d041008b6ed9" name="Flamingos2">
           <paramset name="Flamingos2" kind="dataObj">
             <param name="exposureTime" value="300.0"/>
             <param name="posAngle" value="0"/>
             <param name="coadds" value="1"/>
-            <param name="disperser" value="R1200HK"/>
-            <param name="filter" value="J"/>
+            <paramset name="parallacticAngleDuration">
+              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
+              <param name="explicitDuration" value="0"/>
+            </paramset>
+            <param name="disperser" value="R3000"/>
+            <param name="filter" value="H"/>
             <param name="readMode" value="FAINT_OBJECT_SPEC"/>
             <param name="lyotWheel" value="OPEN"/>
             <param name="issPort" value="SIDE_LOOKING"/>
@@ -971,14 +1100,28 @@
             <param name="decker" value="LONG_SLIT"/>
           </paramset>
         </container>
-        <container kind="seqComp" type="Iterator" version="2012A-1" subtype="base" key="5d811008-5a46-46e8-addc-be2eaf727636" name="Sequence">
+        <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="8e9759e3-2a27-4e02-83a1-3e9344246dc3" name="Observing Log">
+          <paramset name="Observing Log" kind="dataObj">
+            <paramset name="obsQaRecord"/>
+          </paramset>
+        </container>
+        <container kind="obsExecLog" type="ObsLog" version="2009A-1" subtype="exec" key="2ccbc80c-4760-488a-a444-e7a34ad7fb78" name="Observation Exec Log">
+          <paramset name="Observation Exec Log" kind="dataObj">
+            <paramset name="obsExecRecord">
+              <paramset name="datasets"/>
+              <paramset name="events"/>
+              <paramset name="configMap"/>
+            </paramset>
+          </paramset>
+        </container>
+        <container kind="seqComp" type="Iterator" version="2012A-1" subtype="base" key="c181f180-dacf-48cd-b8c6-48e394b4e998" name="Sequence">
           <paramset name="Sequence" kind="dataObj"/>
-          <container kind="seqComp" type="Iterator" version="2009A-1" subtype="Flamingos2" key="b2233f08-730d-4cbd-ab57-81e286977bd6" name="Flamingos2 Sequence">
+          <container kind="seqComp" type="Iterator" version="2009A-1" subtype="Flamingos2" key="80597ba1-8a6a-4367-a5e8-f3d59d7bb349" name="Flamingos2 Sequence">
             <paramset name="Flamingos2 Sequence" kind="dataObj">
               <param name="exposureTime" value="300.0"/>
-              <param name="filter" value="J"/>
+              <param name="filter" value="H"/>
             </paramset>
-            <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="ce03bc40-1e9e-4579-a397-d1fadfe755fb" name="Offset">
+            <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="25277d64-66fd-4efb-b40a-71c199372380" name="Offset">
               <paramset name="Offset" kind="dataObj">
                 <param name="title" value="Offsets"/>
                 <paramset name="offsets">
@@ -1024,19 +1167,19 @@
                   </paramset>
                 </paramset>
               </paramset>
-              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="90fe1979-1c40-4b31-bbb1-dfe0b22bc5ee" name="Observe">
+              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="9ff20ce6-5215-41e8-a4e5-c84a6fb52214" name="Observe">
                 <paramset name="Observe" kind="dataObj">
                   <param name="repeatCount" value="1"/>
                   <param name="class" value="SCIENCE"/>
                 </paramset>
               </container>
             </container>
-            <container kind="seqComp" type="Iterator" version="2009A-1" subtype="Flamingos2" key="869b4bb5-0285-407f-b9ca-bcd8507bc5a2" name="Flamingos2 Sequence">
+            <container kind="seqComp" type="Iterator" version="2009A-1" subtype="Flamingos2" key="6fac89cb-3936-48ff-af0c-306b942cde9e" name="Flamingos2 Sequence">
               <paramset name="Flamingos2 Sequence" kind="dataObj">
                 <param name="title" value="Flamingos2: GCAL sequence"/>
                 <param name="readMode" value="BRIGHT_OBJECT_SPEC"/>
               </paramset>
-              <container kind="seqComp" type="Observer" version="2009A-1" subtype="BaselineNight" key="91a3fa32-40e5-484d-a892-05e8f6b9d928" name="Night Baseline GCAL">
+              <container kind="seqComp" type="Observer" version="2009A-1" subtype="BaselineNight" key="88396487-e988-4065-8694-12eda0134f19" name="Night Baseline GCAL">
                 <paramset name="Night Baseline GCAL" kind="dataObj">
                   <param name="repeatCount" value="1"/>
                   <param name="coadds" value="1"/>
@@ -1047,7 +1190,7 @@
           </container>
         </container>
       </container>
-      <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="b746bcd4-efef-45ff-a20f-12d84c3be1d1" name="GS-FLAMINGOS2-BP-11">
+      <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="d7cb3389-08b3-4c7c-902e-4aabc4085db9" name="F2-BP-10">
         <paramset name="Observation" kind="dataObj">
           <param name="title" value="Telluric Acquisition"/>
           <param name="libraryId" value="17"/>
@@ -1057,49 +1200,55 @@
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
         </paramset>
-        <container kind="obsComp" type="Instrument" version="2009A-1" subtype="Flamingos2" key="282aef62-88aa-49fb-9413-cdd0828d6414" name="Flamingos2">
+        <container kind="obsComp" type="Instrument" version="2009A-1" subtype="Flamingos2" key="dce09d6d-70db-4cff-bcca-df8e988461ef" name="Flamingos2">
           <paramset name="Flamingos2" kind="dataObj">
             <param name="exposureTime" value="2.0"/>
             <param name="posAngle" value="0"/>
             <param name="coadds" value="1"/>
+            <paramset name="parallacticAngleDuration">
+              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
+              <param name="explicitDuration" value="0"/>
+            </paramset>
             <param name="disperser" value="NONE"/>
             <param name="filter" value="H"/>
             <param name="readMode" value="BRIGHT_OBJECT_SPEC"/>
             <param name="lyotWheel" value="OPEN"/>
             <param name="issPort" value="SIDE_LOOKING"/>
             <param name="posAngleConstraint" value="FIXED"/>
-            <param name="fpu" value="LONGSLIT_3"/>
+            <param name="fpu" value="LONGSLIT_2"/>
             <param name="mosPreimaging" value="NO"/>
             <param name="useElectronicOffsetting" value="false"/>
             <param name="decker" value="LONG_SLIT"/>
           </paramset>
         </container>
-        <container kind="obsComp" type="Scheduling" version="2009A-1" subtype="conditions" key="0d0f4353-361a-4d76-8f37-0f8463898fa1" name="Observing Conditions">
-          <paramset name="Observing Conditions" kind="dataObj">
-            <param name="CloudCover" value="ANY"/>
-            <param name="ImageQuality" value="ANY"/>
-            <param name="SkyBackground" value="ANY"/>
-            <param name="WaterVapor" value="ANY"/>
-            <param name="ElevationConstraintType" value="NONE"/>
-            <param name="ElevationConstraintMin" value="0.0"/>
-            <param name="ElevationConstraintMax" value="0.0"/>
-            <paramset name="timing-window-list"/>
+        <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="a811afb0-b999-49d7-a304-dfe750bf9655" name="Observing Log">
+          <paramset name="Observing Log" kind="dataObj">
+            <paramset name="obsQaRecord"/>
           </paramset>
         </container>
-        <container kind="seqComp" type="Iterator" version="2012A-1" subtype="base" key="377870b4-fbaf-4816-b2fb-eb3aed7de042" name="Sequence">
+        <container kind="obsExecLog" type="ObsLog" version="2009A-1" subtype="exec" key="eb66ae9e-b326-47c2-9b13-d06cc9fafd8f" name="Observation Exec Log">
+          <paramset name="Observation Exec Log" kind="dataObj">
+            <paramset name="obsExecRecord">
+              <paramset name="datasets"/>
+              <paramset name="events"/>
+              <paramset name="configMap"/>
+            </paramset>
+          </paramset>
+        </container>
+        <container kind="seqComp" type="Iterator" version="2012A-1" subtype="base" key="0b9a5dbd-7cb5-42e5-bac6-fc997ebb5b45" name="Sequence">
           <paramset name="Sequence" kind="dataObj"/>
-          <container kind="seqComp" type="Iterator" version="2009A-1" subtype="Flamingos2" key="0d7962ee-1e55-415e-9cab-e066ad0958a3" name="Flamingos2 Sequence">
+          <container kind="seqComp" type="Iterator" version="2009A-1" subtype="Flamingos2" key="9914481c-4756-43a0-a4cc-d07004ddb256" name="Flamingos2 Sequence">
             <paramset name="Flamingos2 Sequence" kind="dataObj">
               <param name="title" value="Flamingos2: Define Slit"/>
-              <param name="fpu" value="LONGSLIT_3"/>
+              <param name="fpu" value="LONGSLIT_2"/>
             </paramset>
-            <container kind="seqComp" type="Iterator" version="2009A-1" subtype="Flamingos2" key="517b12b7-bd91-4a9f-aa38-d0c79200bf7f" name="Flamingos2 Sequence">
+            <container kind="seqComp" type="Iterator" version="2009A-1" subtype="Flamingos2" key="b8b01f6a-6894-4548-947d-f9fdada03630" name="Flamingos2 Sequence">
               <paramset name="Flamingos2 Sequence" kind="dataObj">
                 <param name="title" value="Flamingos2: Field Image"/>
                 <param name="decker" value="IMAGING"/>
                 <param name="fpu" value="FPU_NONE"/>
               </paramset>
-              <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="f897e57b-24b6-4018-b5df-61f2021e6df1" name="Offset">
+              <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="fe8ad9e9-eef7-4e2d-8156-947f9fbdf6c7" name="Offset">
                 <paramset name="Offset" kind="dataObj">
                   <paramset name="offsets">
                     <paramset name="Offset0" sequence="0">
@@ -1109,7 +1258,7 @@
                     </paramset>
                   </paramset>
                 </paramset>
-                <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="dedec326-e730-4bc2-8feb-35fdb3b58d4d" name="Observe">
+                <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="103c31bc-f181-4b5c-a131-42e58c1fd5f4" name="Observe">
                   <paramset name="Observe" kind="dataObj">
                     <param name="repeatCount" value="1"/>
                     <param name="class" value="ACQ_CAL"/>
@@ -1118,13 +1267,13 @@
               </container>
             </container>
           </container>
-          <container kind="seqComp" type="Iterator" version="2009A-1" subtype="Flamingos2" key="d8b0ce1b-06e6-4a2a-9295-b14964d7b232" name="Flamingos2 Sequence">
+          <container kind="seqComp" type="Iterator" version="2009A-1" subtype="Flamingos2" key="c550d6f8-0555-486a-a27b-2549e86023cf" name="Flamingos2 Sequence">
             <paramset name="Flamingos2 Sequence" kind="dataObj">
               <param name="title" value="Flamingos2: Slit Image"/>
               <param name="decker" value="LONG_SLIT"/>
               <param name="exposureTime" value="10.0"/>
             </paramset>
-            <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="36206909-45b5-4831-abcd-d1cef497ed59" name="Offset">
+            <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="ed5ae7a6-6d72-4fa7-aa82-ed64a1d4648f" name="Offset">
               <paramset name="Offset" kind="dataObj">
                 <paramset name="offsets">
                   <paramset name="Offset0" sequence="0">
@@ -1134,7 +1283,7 @@
                   </paramset>
                 </paramset>
               </paramset>
-              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="1f37041b-6b1a-4a74-b196-f04a45c6db53" name="Observe">
+              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="4868e20a-2789-467b-9b8f-2a78ceecbf36" name="Observe">
                 <paramset name="Observe" kind="dataObj">
                   <param name="repeatCount" value="1"/>
                   <param name="class" value="ACQ_CAL"/>
@@ -1142,12 +1291,12 @@
               </container>
             </container>
           </container>
-          <container kind="seqComp" type="Iterator" version="2009A-1" subtype="Flamingos2" key="a2a4f311-d867-4958-9bf8-c52252d4473d" name="Flamingos2 Sequence">
+          <container kind="seqComp" type="Iterator" version="2009A-1" subtype="Flamingos2" key="31d3cc62-7f62-4ee4-811e-1aa3036765b9" name="Flamingos2 Sequence">
             <paramset name="Flamingos2 Sequence" kind="dataObj">
               <param name="title" value="Flamingos2: Through-Slit Image"/>
               <param name="decker" value="LONG_SLIT"/>
             </paramset>
-            <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="744a206a-b49b-4b32-90b7-7a3a30156901" name="Offset">
+            <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="0b44ee5d-ac48-483b-8cfb-6a3456986597" name="Offset">
               <paramset name="Offset" kind="dataObj">
                 <paramset name="offsets">
                   <paramset name="Offset0" sequence="0">
@@ -1167,7 +1316,7 @@
                   </paramset>
                 </paramset>
               </paramset>
-              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="8fb12491-87f1-40fb-8547-98eda52522c3" name="Observe">
+              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="5a8e48cb-a24c-42c1-b55e-45645e6757c4" name="Observe">
                 <paramset name="Observe" kind="dataObj">
                   <param name="repeatCount" value="1"/>
                   <param name="class" value="ACQ_CAL"/>
@@ -1177,7 +1326,7 @@
           </container>
         </container>
       </container>
-      <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="9043b463-2390-4456-ac3f-1ca64038e898" name="GS-FLAMINGOS2-BP-12">
+      <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="26de3cf6-3ec3-4c92-adc1-c7dcf63b068a" name="F2-BP-11">
         <paramset name="Observation" kind="dataObj">
           <param name="title" value="Telluric Observation"/>
           <param name="libraryId" value="18"/>
@@ -1187,13 +1336,17 @@
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
         </paramset>
-        <container kind="obsComp" type="Instrument" version="2009A-1" subtype="Flamingos2" key="ca7fc455-1c77-4b81-80f4-8bbfe45b3b5e" name="Flamingos2">
+        <container kind="obsComp" type="Instrument" version="2009A-1" subtype="Flamingos2" key="a7dea324-c874-414d-b9c0-1510ce4e5d7d" name="Flamingos2">
           <paramset name="Flamingos2" kind="dataObj">
             <param name="exposureTime" value="30.0"/>
             <param name="posAngle" value="0"/>
             <param name="coadds" value="1"/>
-            <param name="disperser" value="R1200HK"/>
-            <param name="filter" value="J"/>
+            <paramset name="parallacticAngleDuration">
+              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
+              <param name="explicitDuration" value="0"/>
+            </paramset>
+            <param name="disperser" value="R3000"/>
+            <param name="filter" value="H"/>
             <param name="readMode" value="BRIGHT_OBJECT_SPEC"/>
             <param name="lyotWheel" value="OPEN"/>
             <param name="issPort" value="SIDE_LOOKING"/>
@@ -1204,26 +1357,28 @@
             <param name="decker" value="LONG_SLIT"/>
           </paramset>
         </container>
-        <container kind="obsComp" type="Scheduling" version="2009A-1" subtype="conditions" key="f7542c28-aeeb-4437-a3d6-0315f452811d" name="Observing Conditions">
-          <paramset name="Observing Conditions" kind="dataObj">
-            <param name="CloudCover" value="ANY"/>
-            <param name="ImageQuality" value="ANY"/>
-            <param name="SkyBackground" value="ANY"/>
-            <param name="WaterVapor" value="ANY"/>
-            <param name="ElevationConstraintType" value="NONE"/>
-            <param name="ElevationConstraintMin" value="0.0"/>
-            <param name="ElevationConstraintMax" value="0.0"/>
-            <paramset name="timing-window-list"/>
+        <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="b4f1d74e-c61e-43a5-b858-ae281761fd15" name="Observing Log">
+          <paramset name="Observing Log" kind="dataObj">
+            <paramset name="obsQaRecord"/>
           </paramset>
         </container>
-        <container kind="seqComp" type="Iterator" version="2012A-1" subtype="base" key="4d36ae87-e08b-4fef-894d-b963ff44365f" name="Sequence">
+        <container kind="obsExecLog" type="ObsLog" version="2009A-1" subtype="exec" key="4ffeb15e-b233-4fea-8817-f6fa7d1467fd" name="Observation Exec Log">
+          <paramset name="Observation Exec Log" kind="dataObj">
+            <paramset name="obsExecRecord">
+              <paramset name="datasets"/>
+              <paramset name="events"/>
+              <paramset name="configMap"/>
+            </paramset>
+          </paramset>
+        </container>
+        <container kind="seqComp" type="Iterator" version="2012A-1" subtype="base" key="f71dd4bc-594c-440d-b834-889f1ce8b113" name="Sequence">
           <paramset name="Sequence" kind="dataObj"/>
-          <container kind="seqComp" type="Iterator" version="2009A-1" subtype="Flamingos2" key="e3871251-999c-4bf7-bc98-79234b57758e" name="Flamingos2 Sequence">
+          <container kind="seqComp" type="Iterator" version="2009A-1" subtype="Flamingos2" key="5e03016a-a9f4-45a0-99a4-a0fca9816915" name="Flamingos2 Sequence">
             <paramset name="Flamingos2 Sequence" kind="dataObj">
               <param name="exposureTime" value="30.0"/>
-              <param name="filter" value="J"/>
+              <param name="filter" value="H"/>
             </paramset>
-            <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="25c43f08-5d60-41b9-addb-78a3aa28613a" name="Offset">
+            <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="a4e0b02e-9bcb-4d4f-a334-c317942d59d6" name="Offset">
               <paramset name="Offset" kind="dataObj">
                 <param name="title" value="ABBA 15&quot; Offsets"/>
                 <paramset name="offsets">
@@ -1249,24 +1404,31 @@
                   </paramset>
                 </paramset>
               </paramset>
-              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="11ce44e5-a87b-42d8-99c7-db0405717f0a" name="Observe">
+              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="4441ff78-52bd-4df0-9b48-03530ad93af3" name="Observe">
                 <paramset name="Observe" kind="dataObj">
                   <param name="repeatCount" value="1"/>
                   <param name="class" value="PARTNER_CAL"/>
                 </paramset>
               </container>
             </container>
+            <container kind="seqComp" type="Observer" version="2009A-1" subtype="BaselineNight" key="3b0cf7cc-05e9-4ab0-ac35-2d6eb3074493" name="Night Baseline GCAL">
+              <paramset name="Night Baseline GCAL" kind="dataObj">
+                <param name="repeatCount" value="1"/>
+                <param name="coadds" value="1"/>
+                <param name="exposureTime" value="10.0"/>
+              </paramset>
+            </container>
           </container>
         </container>
       </container>
     </container>
-    <container kind="group" type="Group" version="2009A-1" subtype="group" key="ee3242a0-73a9-4a26-972b-1ac19c4d77b7" name="Group">
+    <container kind="group" type="Group" version="2009A-1" subtype="group" key="29edaec7-c1f0-4137-9e7a-535ca29ea0da" name="Group">
       <paramset name="Group" kind="dataObj">
         <param name="title" value="MOS BLUEPRINTS"/>
         <param name="GroupType" value="TYPE_FOLDER"/>
         <param name="libraryId" value=""/>
       </paramset>
-      <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="310bc8b4-2cbf-41da-a56c-d785af4896b9" name="Note">
+      <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="3d39acef-6b8d-4296-8ee6-e434589428dc" name="Note">
         <paramset name="Note" kind="dataObj">
           <param name="title" value="F2 MOS Notes"/>
           <param name="NoteText">
@@ -1280,11 +1442,13 @@
 
 4. Include TWO Telluric standard observations; one which is (observation time / 2) in RA before and another which is (observation time / 2) after the science target with similar Declination.
 
+5. There is no need to include the darks, these are taken on a weekly basis.
+
 </value>
           </param>
         </paramset>
       </container>
-      <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="ac44c51a-cbb5-479f-abdc-11bceaf03342" name="GS-FLAMINGOS2-BP-5">
+      <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="f13aeead-a221-403a-a647-80bf6fd682d7" name="F2-BP-12">
         <paramset name="Observation" kind="dataObj">
           <param name="title" value="MOS Pre-imaging"/>
           <param name="libraryId" value="21"/>
@@ -1294,11 +1458,15 @@
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
         </paramset>
-        <container kind="obsComp" type="Instrument" version="2009A-1" subtype="Flamingos2" key="873a8d8a-b7af-48f5-8e31-00075dfbb35b" name="Flamingos2">
+        <container kind="obsComp" type="Instrument" version="2009A-1" subtype="Flamingos2" key="54166e26-fdb9-45b9-a125-732b51a6a0b4" name="Flamingos2">
           <paramset name="Flamingos2" kind="dataObj">
             <param name="exposureTime" value="30.0"/>
             <param name="posAngle" value="0"/>
             <param name="coadds" value="1"/>
+            <paramset name="parallacticAngleDuration">
+              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
+              <param name="explicitDuration" value="0"/>
+            </paramset>
             <param name="disperser" value="NONE"/>
             <param name="filter" value="H"/>
             <param name="readMode" value="BRIGHT_OBJECT_SPEC"/>
@@ -1311,14 +1479,28 @@
             <param name="decker" value="IMAGING"/>
           </paramset>
         </container>
-        <container kind="seqComp" type="Iterator" version="2012A-1" subtype="base" key="166b5166-18c0-4b46-8aac-8910b19ddb24" name="Sequence">
+        <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="0e21edf3-21ad-404a-811f-da6e713b16b4" name="Observing Log">
+          <paramset name="Observing Log" kind="dataObj">
+            <paramset name="obsQaRecord"/>
+          </paramset>
+        </container>
+        <container kind="obsExecLog" type="ObsLog" version="2009A-1" subtype="exec" key="8bface0c-ed93-4e45-932c-5be7ec8c6911" name="Observation Exec Log">
+          <paramset name="Observation Exec Log" kind="dataObj">
+            <paramset name="obsExecRecord">
+              <paramset name="datasets"/>
+              <paramset name="events"/>
+              <paramset name="configMap"/>
+            </paramset>
+          </paramset>
+        </container>
+        <container kind="seqComp" type="Iterator" version="2012A-1" subtype="base" key="5e2235a8-c672-4d32-b528-4ebb86170f43" name="Sequence">
           <paramset name="Sequence" kind="dataObj"/>
-          <container kind="seqComp" type="Iterator" version="2009A-1" subtype="Flamingos2" key="0c61bf2d-02f3-451b-84ca-37c55acb90bd" name="Flamingos2 Sequence">
+          <container kind="seqComp" type="Iterator" version="2009A-1" subtype="Flamingos2" key="b8b4b023-f685-42aa-a92d-f27c5851f350" name="Flamingos2 Sequence">
             <paramset name="Flamingos2 Sequence" kind="dataObj">
               <param name="exposureTime" value="30.0"/>
               <param name="filter" value="H"/>
             </paramset>
-            <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="b947ff27-cd66-43bc-81a5-6a2d8eda1b3b" name="Offset">
+            <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="68444a25-2030-4827-a232-3f42585a4970" name="Offset">
               <paramset name="Offset" kind="dataObj">
                 <param name="title" value="15&quot; Offsets"/>
                 <paramset name="offsets">
@@ -1369,7 +1551,7 @@
                   </paramset>
                 </paramset>
               </paramset>
-              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="438e6281-c65a-4cc3-9ea2-34464da12242" name="Observe">
+              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="c59293b5-3354-43a1-9268-aba836f7e8e8" name="Observe">
                 <paramset name="Observe" kind="dataObj">
                   <param name="repeatCount" value="1"/>
                   <param name="class" value="SCIENCE"/>
@@ -1379,7 +1561,7 @@
           </container>
         </container>
       </container>
-      <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="a1ce80cb-cb56-4c48-8d5c-ff4e5faaa2ea" name="GS-FLAMINGOS2-BP-17">
+      <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="1f64ac77-2107-4384-9ae4-512a3977d11d" name="F2-BP-13">
         <paramset name="Observation" kind="dataObj">
           <param name="title" value="Telluric Acquisition"/>
           <param name="libraryId" value="22"/>
@@ -1389,11 +1571,15 @@
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
         </paramset>
-        <container kind="obsComp" type="Instrument" version="2009A-1" subtype="Flamingos2" key="b58d1922-f119-47bc-9253-a2fd3e22694c" name="Flamingos2">
+        <container kind="obsComp" type="Instrument" version="2009A-1" subtype="Flamingos2" key="5c8c3ca8-9e7b-4d9e-a15e-ca7a6625da11" name="Flamingos2">
           <paramset name="Flamingos2" kind="dataObj">
             <param name="exposureTime" value="2.0"/>
             <param name="posAngle" value="0"/>
             <param name="coadds" value="1"/>
+            <paramset name="parallacticAngleDuration">
+              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
+              <param name="explicitDuration" value="0"/>
+            </paramset>
             <param name="disperser" value="NONE"/>
             <param name="filter" value="H"/>
             <param name="readMode" value="BRIGHT_OBJECT_SPEC"/>
@@ -1406,32 +1592,34 @@
             <param name="decker" value="LONG_SLIT"/>
           </paramset>
         </container>
-        <container kind="obsComp" type="Scheduling" version="2009A-1" subtype="conditions" key="ced6a89e-6e40-46fd-8485-ada6b69f7a1d" name="Observing Conditions">
-          <paramset name="Observing Conditions" kind="dataObj">
-            <param name="CloudCover" value="ANY"/>
-            <param name="ImageQuality" value="ANY"/>
-            <param name="SkyBackground" value="ANY"/>
-            <param name="WaterVapor" value="ANY"/>
-            <param name="ElevationConstraintType" value="NONE"/>
-            <param name="ElevationConstraintMin" value="0.0"/>
-            <param name="ElevationConstraintMax" value="0.0"/>
-            <paramset name="timing-window-list"/>
+        <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="afa16615-314b-46de-89e6-ad94e25059aa" name="Observing Log">
+          <paramset name="Observing Log" kind="dataObj">
+            <paramset name="obsQaRecord"/>
           </paramset>
         </container>
-        <container kind="seqComp" type="Iterator" version="2012A-1" subtype="base" key="5c7d370b-f230-4fc2-adb8-dd363bf189f2" name="Sequence">
+        <container kind="obsExecLog" type="ObsLog" version="2009A-1" subtype="exec" key="0509f947-8956-4c1a-94c5-ade840ac35b6" name="Observation Exec Log">
+          <paramset name="Observation Exec Log" kind="dataObj">
+            <paramset name="obsExecRecord">
+              <paramset name="datasets"/>
+              <paramset name="events"/>
+              <paramset name="configMap"/>
+            </paramset>
+          </paramset>
+        </container>
+        <container kind="seqComp" type="Iterator" version="2012A-1" subtype="base" key="3f6a512d-06df-44b8-bdab-946a1c212c0c" name="Sequence">
           <paramset name="Sequence" kind="dataObj"/>
-          <container kind="seqComp" type="Iterator" version="2009A-1" subtype="Flamingos2" key="eb75051e-7d11-435c-a98f-54cb54f90401" name="Flamingos2 Sequence">
+          <container kind="seqComp" type="Iterator" version="2009A-1" subtype="Flamingos2" key="a2e76452-56c8-4d03-b34a-d163db209e73" name="Flamingos2 Sequence">
             <paramset name="Flamingos2 Sequence" kind="dataObj">
               <param name="title" value="Flamingos2: Define Slit"/>
               <param name="fpu" value="LONGSLIT_2"/>
             </paramset>
-            <container kind="seqComp" type="Iterator" version="2009A-1" subtype="Flamingos2" key="9d92fd4e-69cc-4387-a904-c6692c9dac70" name="Flamingos2 Sequence">
+            <container kind="seqComp" type="Iterator" version="2009A-1" subtype="Flamingos2" key="380fbfeb-cb84-46ea-9153-8be189e2e219" name="Flamingos2 Sequence">
               <paramset name="Flamingos2 Sequence" kind="dataObj">
                 <param name="title" value="Flamingos2: Field Image"/>
                 <param name="decker" value="IMAGING"/>
                 <param name="fpu" value="FPU_NONE"/>
               </paramset>
-              <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="bc469127-6527-4beb-b60f-e9ce11d7e447" name="Offset">
+              <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="2857e9a1-d2bb-4abe-9221-8dab61c81d18" name="Offset">
                 <paramset name="Offset" kind="dataObj">
                   <paramset name="offsets">
                     <paramset name="Offset0" sequence="0">
@@ -1441,7 +1629,7 @@
                     </paramset>
                   </paramset>
                 </paramset>
-                <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="efbcdc8c-600e-4c02-9748-e58c70c69572" name="Observe">
+                <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="a19ec5c7-1352-4a22-823e-33af4f11f269" name="Observe">
                   <paramset name="Observe" kind="dataObj">
                     <param name="repeatCount" value="1"/>
                     <param name="class" value="ACQ_CAL"/>
@@ -1450,13 +1638,13 @@
               </container>
             </container>
           </container>
-          <container kind="seqComp" type="Iterator" version="2009A-1" subtype="Flamingos2" key="9ca8b7b7-e911-43c8-8b43-9117f98cc9af" name="Flamingos2 Sequence">
+          <container kind="seqComp" type="Iterator" version="2009A-1" subtype="Flamingos2" key="8b03fee3-4eca-4895-b783-be7872c4ce98" name="Flamingos2 Sequence">
             <paramset name="Flamingos2 Sequence" kind="dataObj">
               <param name="title" value="Flamingos2: Slit Image"/>
               <param name="decker" value="LONG_SLIT"/>
               <param name="exposureTime" value="10.0"/>
             </paramset>
-            <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="f14c6c99-d754-4cbd-b5a5-e3741dfa488e" name="Offset">
+            <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="fa59b36e-1e29-43f1-9096-c12dc339dd45" name="Offset">
               <paramset name="Offset" kind="dataObj">
                 <paramset name="offsets">
                   <paramset name="Offset0" sequence="0">
@@ -1466,7 +1654,7 @@
                   </paramset>
                 </paramset>
               </paramset>
-              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="3e069671-e002-4236-99a6-e4ca72974632" name="Observe">
+              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="d7a29dc0-9686-4396-a7ea-4d2c947d3c08" name="Observe">
                 <paramset name="Observe" kind="dataObj">
                   <param name="repeatCount" value="1"/>
                   <param name="class" value="ACQ_CAL"/>
@@ -1474,12 +1662,12 @@
               </container>
             </container>
           </container>
-          <container kind="seqComp" type="Iterator" version="2009A-1" subtype="Flamingos2" key="8f7e9292-b23c-4d71-ba40-212c2e3cdcd7" name="Flamingos2 Sequence">
+          <container kind="seqComp" type="Iterator" version="2009A-1" subtype="Flamingos2" key="b58f4d72-4b97-4211-9f23-8672d676d723" name="Flamingos2 Sequence">
             <paramset name="Flamingos2 Sequence" kind="dataObj">
               <param name="title" value="Flamingos2: Through-Slit Image"/>
               <param name="decker" value="LONG_SLIT"/>
             </paramset>
-            <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="df7f7f61-d315-4def-b91d-d94d1fc5bcb8" name="Offset">
+            <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="2e6e619e-4321-4994-9d67-423a948ec3e0" name="Offset">
               <paramset name="Offset" kind="dataObj">
                 <paramset name="offsets">
                   <paramset name="Offset1" sequence="0">
@@ -1499,7 +1687,7 @@
                   </paramset>
                 </paramset>
               </paramset>
-              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="70b20867-e5fd-4f6d-872c-4512caffa46f" name="Observe">
+              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="a2ff2299-ce19-4738-aa85-611f740bb708" name="Observe">
                 <paramset name="Observe" kind="dataObj">
                   <param name="repeatCount" value="1"/>
                   <param name="class" value="ACQ_CAL"/>
@@ -1509,7 +1697,7 @@
           </container>
         </container>
       </container>
-      <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="7d27715e-31b7-4b78-b07d-2add90b31b80" name="GS-FLAMINGOS2-BP-18">
+      <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="dafdf2e4-594a-42a8-b1f8-d964352634d3" name="F2-BP-14">
         <paramset name="Observation" kind="dataObj">
           <param name="title" value="Telluric Observation"/>
           <param name="libraryId" value="23"/>
@@ -1519,13 +1707,17 @@
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
         </paramset>
-        <container kind="obsComp" type="Instrument" version="2009A-1" subtype="Flamingos2" key="e7867ca8-a58b-4bcf-9676-db50615c1149" name="Flamingos2">
+        <container kind="obsComp" type="Instrument" version="2009A-1" subtype="Flamingos2" key="be49195f-5438-4dff-8ba5-24b4ec574dac" name="Flamingos2">
           <paramset name="Flamingos2" kind="dataObj">
             <param name="exposureTime" value="30.0"/>
             <param name="posAngle" value="0"/>
             <param name="coadds" value="1"/>
-            <param name="disperser" value="R1200HK"/>
-            <param name="filter" value="J"/>
+            <paramset name="parallacticAngleDuration">
+              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
+              <param name="explicitDuration" value="0"/>
+            </paramset>
+            <param name="disperser" value="R3000"/>
+            <param name="filter" value="H"/>
             <param name="readMode" value="BRIGHT_OBJECT_SPEC"/>
             <param name="lyotWheel" value="OPEN"/>
             <param name="issPort" value="SIDE_LOOKING"/>
@@ -1536,26 +1728,28 @@
             <param name="decker" value="LONG_SLIT"/>
           </paramset>
         </container>
-        <container kind="obsComp" type="Scheduling" version="2009A-1" subtype="conditions" key="342f020d-7797-4199-928f-837b78c1d098" name="Observing Conditions">
-          <paramset name="Observing Conditions" kind="dataObj">
-            <param name="CloudCover" value="ANY"/>
-            <param name="ImageQuality" value="ANY"/>
-            <param name="SkyBackground" value="ANY"/>
-            <param name="WaterVapor" value="ANY"/>
-            <param name="ElevationConstraintType" value="NONE"/>
-            <param name="ElevationConstraintMin" value="0.0"/>
-            <param name="ElevationConstraintMax" value="0.0"/>
-            <paramset name="timing-window-list"/>
+        <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="c9c6d465-5e84-469e-aede-6495cd707f9f" name="Observing Log">
+          <paramset name="Observing Log" kind="dataObj">
+            <paramset name="obsQaRecord"/>
           </paramset>
         </container>
-        <container kind="seqComp" type="Iterator" version="2012A-1" subtype="base" key="cf8e979c-7411-46c1-ae91-26273c55e1c6" name="Sequence">
+        <container kind="obsExecLog" type="ObsLog" version="2009A-1" subtype="exec" key="78767795-adc8-4c5e-bb1d-4ece6436f0b6" name="Observation Exec Log">
+          <paramset name="Observation Exec Log" kind="dataObj">
+            <paramset name="obsExecRecord">
+              <paramset name="datasets"/>
+              <paramset name="events"/>
+              <paramset name="configMap"/>
+            </paramset>
+          </paramset>
+        </container>
+        <container kind="seqComp" type="Iterator" version="2012A-1" subtype="base" key="e055903f-4862-411e-bc04-8030cfe06a31" name="Sequence">
           <paramset name="Sequence" kind="dataObj"/>
-          <container kind="seqComp" type="Iterator" version="2009A-1" subtype="Flamingos2" key="f77eb2d9-48d1-4618-96bc-9ecd33d42279" name="Flamingos2 Sequence">
+          <container kind="seqComp" type="Iterator" version="2009A-1" subtype="Flamingos2" key="4a8fd70b-50e0-4dc4-97af-3a58b4e1171a" name="Flamingos2 Sequence">
             <paramset name="Flamingos2 Sequence" kind="dataObj">
               <param name="exposureTime" value="30.0"/>
-              <param name="filter" value="J"/>
+              <param name="filter" value="H"/>
             </paramset>
-            <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="2d6c57e9-8617-4452-8657-5a5a61635357" name="Offset">
+            <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="2154f1f4-f9b1-41a2-98ff-5f72fa2f51e8" name="Offset">
               <paramset name="Offset" kind="dataObj">
                 <param name="title" value="MOS Telluric Offsets"/>
                 <paramset name="offsets">
@@ -1591,7 +1785,7 @@
                   </paramset>
                 </paramset>
               </paramset>
-              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="b8d652c5-a454-432c-a469-439ff4d484c0" name="Observe">
+              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="b183a572-574a-458c-a062-4236791b62e5" name="Observe">
                 <paramset name="Observe" kind="dataObj">
                   <param name="repeatCount" value="1"/>
                   <param name="class" value="PARTNER_CAL"/>
@@ -1601,7 +1795,7 @@
           </container>
         </container>
       </container>
-      <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="cfc88bfb-f103-43a2-be6e-91ca054da136" name="GS-FLAMINGOS2-BP-6">
+      <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="12710afd-3fd6-4446-8fa7-ce2fa06c46b8" name="F2-BP-15">
         <paramset name="Observation" kind="dataObj">
           <param name="title" value="MOS Acquisition"/>
           <param name="libraryId" value="24"/>
@@ -1611,11 +1805,15 @@
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
         </paramset>
-        <container kind="obsComp" type="Instrument" version="2009A-1" subtype="Flamingos2" key="acd21bc4-9bac-4404-9779-de09070cb3f2" name="Flamingos2">
+        <container kind="obsComp" type="Instrument" version="2009A-1" subtype="Flamingos2" key="4b68dd37-7d5e-41eb-af47-2b9d4e922757" name="Flamingos2">
           <paramset name="Flamingos2" kind="dataObj">
             <param name="exposureTime" value="10.0"/>
             <param name="posAngle" value="0"/>
             <param name="coadds" value="1"/>
+            <paramset name="parallacticAngleDuration">
+              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
+              <param name="explicitDuration" value="0"/>
+            </paramset>
             <param name="disperser" value="NONE"/>
             <param name="filter" value="H"/>
             <param name="readMode" value="BRIGHT_OBJECT_SPEC"/>
@@ -1629,20 +1827,34 @@
             <param name="decker" value="MOS"/>
           </paramset>
         </container>
-        <container kind="seqComp" type="Iterator" version="2012A-1" subtype="base" key="13e9a6d7-e25b-46f6-9585-d942685817df" name="Sequence">
+        <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="4b99d37e-4aac-4b30-bea1-e99a56b7caba" name="Observing Log">
+          <paramset name="Observing Log" kind="dataObj">
+            <paramset name="obsQaRecord"/>
+          </paramset>
+        </container>
+        <container kind="obsExecLog" type="ObsLog" version="2009A-1" subtype="exec" key="0b68d78a-e6e0-43e9-8a7b-00ceabece460" name="Observation Exec Log">
+          <paramset name="Observation Exec Log" kind="dataObj">
+            <paramset name="obsExecRecord">
+              <paramset name="datasets"/>
+              <paramset name="events"/>
+              <paramset name="configMap"/>
+            </paramset>
+          </paramset>
+        </container>
+        <container kind="seqComp" type="Iterator" version="2012A-1" subtype="base" key="aa782dcd-6250-40a3-9f69-8688689072b3" name="Sequence">
           <paramset name="Sequence" kind="dataObj"/>
-          <container kind="seqComp" type="Iterator" version="2009A-1" subtype="Flamingos2" key="238674f9-0034-4913-8880-313adcc673fd" name="Flamingos2 Sequence">
+          <container kind="seqComp" type="Iterator" version="2009A-1" subtype="Flamingos2" key="8d45441d-552e-4566-aea6-2483671226c8" name="Flamingos2 Sequence">
             <paramset name="Flamingos2 Sequence" kind="dataObj">
               <param name="title" value="Flamingos2: Define Mask"/>
               <param name="fpuCustomMask" value="GSYYYYSQXXX-NN"/>
             </paramset>
-            <container kind="seqComp" type="Iterator" version="2009A-1" subtype="Flamingos2" key="7495bab8-cf0e-46a2-a9b8-bb33d441a932" name="Flamingos2 Sequence">
+            <container kind="seqComp" type="Iterator" version="2009A-1" subtype="Flamingos2" key="ce8669af-6720-4604-ae43-d295b367cfdd" name="Flamingos2 Sequence">
               <paramset name="Flamingos2 Sequence" kind="dataObj">
                 <param name="title" value="Flamingos2: Field Image"/>
                 <param name="decker" value="IMAGING"/>
                 <param name="fpu" value="FPU_NONE"/>
               </paramset>
-              <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="7b2dce22-6b41-4c84-8c96-37bf96b7aa0d" name="Offset">
+              <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="69b3d343-4d36-4f9c-b003-550444041897" name="Offset">
                 <paramset name="Offset" kind="dataObj">
                   <paramset name="offsets">
                     <paramset name="Offset1" sequence="0">
@@ -1657,7 +1869,7 @@
                     </paramset>
                   </paramset>
                 </paramset>
-                <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="7f78ad4b-a94d-4239-8652-2b2a94da9a33" name="Observe">
+                <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="413b42e1-0d99-4fbf-acf8-f9ec32fd3050" name="Observe">
                   <paramset name="Observe" kind="dataObj">
                     <param name="repeatCount" value="1"/>
                     <param name="class" value="ACQ"/>
@@ -1665,13 +1877,13 @@
                 </container>
               </container>
             </container>
-            <container kind="seqComp" type="Iterator" version="2009A-1" subtype="Flamingos2" key="a7f2a519-a728-4d72-84de-1686b8a2b8ff" name="Flamingos2 Sequence">
+            <container kind="seqComp" type="Iterator" version="2009A-1" subtype="Flamingos2" key="8caa9707-be93-48c1-9596-5df9ca631d2b" name="Flamingos2 Sequence">
               <paramset name="Flamingos2 Sequence" kind="dataObj">
                 <param name="title" value="Flamingos2: Through-Mask Images"/>
                 <param name="decker" value="MOS"/>
                 <param name="fpu" value="CUSTOM_MASK"/>
               </paramset>
-              <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="e9274f70-b320-4fdc-ae3d-e775b00dda48" name="Offset">
+              <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="93484db0-5220-49c9-84ae-7814fdbd9970" name="Offset">
                 <paramset name="Offset" kind="dataObj">
                   <paramset name="offsets">
                     <paramset name="Offset1" sequence="0">
@@ -1696,7 +1908,7 @@
                     </paramset>
                   </paramset>
                 </paramset>
-                <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="47cec009-bd88-410c-a927-f21085f42c90" name="Observe">
+                <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="71a1605e-8958-4d5d-9484-9ad2300d949e" name="Observe">
                   <paramset name="Observe" kind="dataObj">
                     <param name="repeatCount" value="1"/>
                     <param name="class" value="ACQ"/>
@@ -1707,7 +1919,7 @@
           </container>
         </container>
       </container>
-      <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="4d2b4326-12bd-4c0f-9bed-e09b74a8f00d" name="GS-FLAMINGOS2-BP-8">
+      <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="d2130cd3-86fd-4f36-95da-54ea23da6028" name="F2-BP-16">
         <paramset name="Observation" kind="dataObj">
           <param name="title" value="MOS Science"/>
           <param name="libraryId" value="25"/>
@@ -1717,13 +1929,17 @@
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
         </paramset>
-        <container kind="obsComp" type="Instrument" version="2009A-1" subtype="Flamingos2" key="70b3c8d9-529e-4e48-ba01-b0d1b82b1eec" name="Flamingos2">
+        <container kind="obsComp" type="Instrument" version="2009A-1" subtype="Flamingos2" key="d8102367-afe4-41de-b730-18b7ae2d02cd" name="Flamingos2">
           <paramset name="Flamingos2" kind="dataObj">
             <param name="exposureTime" value="300.0"/>
             <param name="posAngle" value="0"/>
             <param name="coadds" value="1"/>
-            <param name="disperser" value="R1200HK"/>
-            <param name="filter" value="J"/>
+            <paramset name="parallacticAngleDuration">
+              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
+              <param name="explicitDuration" value="0"/>
+            </paramset>
+            <param name="disperser" value="R3000"/>
+            <param name="filter" value="H"/>
             <param name="readMode" value="FAINT_OBJECT_SPEC"/>
             <param name="lyotWheel" value="OPEN"/>
             <param name="issPort" value="SIDE_LOOKING"/>
@@ -1735,14 +1951,28 @@
             <param name="decker" value="MOS"/>
           </paramset>
         </container>
-        <container kind="seqComp" type="Iterator" version="2012A-1" subtype="base" key="bd654e07-153f-4c39-8a07-d4eb9c0b0f9c" name="Sequence">
+        <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="6d1c37e6-ffc9-4850-822b-adfae89e9a2e" name="Observing Log">
+          <paramset name="Observing Log" kind="dataObj">
+            <paramset name="obsQaRecord"/>
+          </paramset>
+        </container>
+        <container kind="obsExecLog" type="ObsLog" version="2009A-1" subtype="exec" key="0a21c756-ebad-4fba-94dc-cc12a1efddf4" name="Observation Exec Log">
+          <paramset name="Observation Exec Log" kind="dataObj">
+            <paramset name="obsExecRecord">
+              <paramset name="datasets"/>
+              <paramset name="events"/>
+              <paramset name="configMap"/>
+            </paramset>
+          </paramset>
+        </container>
+        <container kind="seqComp" type="Iterator" version="2012A-1" subtype="base" key="a4747803-730e-4314-8739-9bb06480fdf8" name="Sequence">
           <paramset name="Sequence" kind="dataObj"/>
-          <container kind="seqComp" type="Iterator" version="2009A-1" subtype="Flamingos2" key="ae8037c8-d268-437e-968d-9c74004fe308" name="Flamingos2 Sequence">
+          <container kind="seqComp" type="Iterator" version="2009A-1" subtype="Flamingos2" key="5d69db48-77d8-43fe-915a-904474c4d09d" name="Flamingos2 Sequence">
             <paramset name="Flamingos2 Sequence" kind="dataObj">
               <param name="exposureTime" value="300.0"/>
-              <param name="filter" value="J"/>
+              <param name="filter" value="H"/>
             </paramset>
-            <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="5e971b09-02a0-49c1-bff7-294a0e831e83" name="Offset">
+            <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="8160f83b-3266-43e8-9b21-324cabb91a43" name="Offset">
               <paramset name="Offset" kind="dataObj">
                 <param name="title" value="ABBA 5&quot; Offsets"/>
                 <paramset name="offsets">
@@ -1768,29 +1998,46 @@
                   </paramset>
                 </paramset>
               </paramset>
-              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="1138e641-f373-4399-95c3-c89cbd9b3441" name="Observe">
+              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="70def726-cd29-4532-88ae-499be3513b5b" name="Observe">
                 <paramset name="Observe" kind="dataObj">
                   <param name="repeatCount" value="1"/>
                   <param name="class" value="SCIENCE"/>
                 </paramset>
               </container>
             </container>
-            <container kind="seqComp" type="Iterator" version="2009A-1" subtype="Flamingos2" key="d0ff80f4-a212-43b1-8138-00680d9aa299" name="Flamingos2 Sequence">
+            <container kind="seqComp" type="Iterator" version="2009A-1" subtype="Flamingos2" key="24869041-3da7-4bc6-a663-4eb5535cae37" name="Flamingos2 Sequence">
               <paramset name="Flamingos2 Sequence" kind="dataObj">
                 <param name="readMode" value="BRIGHT_OBJECT_SPEC"/>
               </paramset>
-              <container kind="seqComp" type="Observer" version="2009A-1" subtype="BaselineNight" key="57a85b7a-a591-4043-a7f6-be0f90846552" name="Night Baseline GCAL">
-                <paramset name="Night Baseline GCAL" kind="dataObj">
+              <container kind="seqComp" type="Observer" version="2009A-1" subtype="GemFlat" key="b2c5a2d1-455a-410d-8cf6-a6266bfa3d35" name="Manual Flat/Arc">
+                <paramset name="Manual Flat/Arc" kind="dataObj">
                   <param name="repeatCount" value="1"/>
+                  <param name="class" value="PARTNER_CAL"/>
                   <param name="coadds" value="1"/>
-                  <param name="exposureTime" value="10.0"/>
+                  <param name="exposureTime" value="180.0"/>
+                  <param name="lamp" value="IR_GREY_BODY_HIGH"/>
+                  <param name="shutter" value="OPEN"/>
+                  <param name="filter" value="NIR"/>
+                  <param name="diffuser" value="IR"/>
+                </paramset>
+              </container>
+              <container kind="seqComp" type="Observer" version="2009A-1" subtype="GemFlat" key="47577442-24a0-47a1-a303-ed0e38d957e3" name="Manual Flat/Arc">
+                <paramset name="Manual Flat/Arc" kind="dataObj">
+                  <param name="repeatCount" value="1"/>
+                  <param name="class" value="PARTNER_CAL"/>
+                  <param name="coadds" value="1"/>
+                  <param name="exposureTime" value="50.0"/>
+                  <param name="lamp" value="IR_GREY_BODY_HIGH"/>
+                  <param name="shutter" value="OPEN"/>
+                  <param name="filter" value="ND_20"/>
+                  <param name="diffuser" value="IR"/>
                 </paramset>
               </container>
             </container>
           </container>
         </container>
       </container>
-      <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="62574a92-5904-4f74-b2a1-5dd46bfb1f87" name="GS-FLAMINGOS2-BP-15">
+      <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="c0f0d646-79a3-46e3-873b-685b98f63ed5" name="F2-BP-17">
         <paramset name="Observation" kind="dataObj">
           <param name="title" value="Telluric Acquisition"/>
           <param name="libraryId" value="26"/>
@@ -1800,11 +2047,15 @@
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
         </paramset>
-        <container kind="obsComp" type="Instrument" version="2009A-1" subtype="Flamingos2" key="960d37c8-db3a-439a-9afd-90b6140afac6" name="Flamingos2">
+        <container kind="obsComp" type="Instrument" version="2009A-1" subtype="Flamingos2" key="1e3c9038-f9e6-4236-b4d9-19c9935dca8f" name="Flamingos2">
           <paramset name="Flamingos2" kind="dataObj">
             <param name="exposureTime" value="2.0"/>
             <param name="posAngle" value="0"/>
             <param name="coadds" value="1"/>
+            <paramset name="parallacticAngleDuration">
+              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
+              <param name="explicitDuration" value="0"/>
+            </paramset>
             <param name="disperser" value="NONE"/>
             <param name="filter" value="H"/>
             <param name="readMode" value="BRIGHT_OBJECT_SPEC"/>
@@ -1817,32 +2068,34 @@
             <param name="decker" value="LONG_SLIT"/>
           </paramset>
         </container>
-        <container kind="obsComp" type="Scheduling" version="2009A-1" subtype="conditions" key="52527770-94aa-4646-a25e-e8e0c32c84bf" name="Observing Conditions">
-          <paramset name="Observing Conditions" kind="dataObj">
-            <param name="CloudCover" value="ANY"/>
-            <param name="ImageQuality" value="ANY"/>
-            <param name="SkyBackground" value="ANY"/>
-            <param name="WaterVapor" value="ANY"/>
-            <param name="ElevationConstraintType" value="NONE"/>
-            <param name="ElevationConstraintMin" value="0.0"/>
-            <param name="ElevationConstraintMax" value="0.0"/>
-            <paramset name="timing-window-list"/>
+        <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="0273f687-73e1-465c-a3ee-e5962d15c482" name="Observing Log">
+          <paramset name="Observing Log" kind="dataObj">
+            <paramset name="obsQaRecord"/>
           </paramset>
         </container>
-        <container kind="seqComp" type="Iterator" version="2012A-1" subtype="base" key="060fc823-98f3-4024-a25e-19e297fe7b14" name="Sequence">
+        <container kind="obsExecLog" type="ObsLog" version="2009A-1" subtype="exec" key="4052c36b-4e08-4eea-acc4-3746236cd3fe" name="Observation Exec Log">
+          <paramset name="Observation Exec Log" kind="dataObj">
+            <paramset name="obsExecRecord">
+              <paramset name="datasets"/>
+              <paramset name="events"/>
+              <paramset name="configMap"/>
+            </paramset>
+          </paramset>
+        </container>
+        <container kind="seqComp" type="Iterator" version="2012A-1" subtype="base" key="eaa16bf0-b066-442c-8c61-effd1513b080" name="Sequence">
           <paramset name="Sequence" kind="dataObj"/>
-          <container kind="seqComp" type="Iterator" version="2009A-1" subtype="Flamingos2" key="22112f98-cd79-46df-ac81-b435caf3a870" name="Flamingos2 Sequence">
+          <container kind="seqComp" type="Iterator" version="2009A-1" subtype="Flamingos2" key="1de1092d-42b1-4963-9fb3-868ea97e7807" name="Flamingos2 Sequence">
             <paramset name="Flamingos2 Sequence" kind="dataObj">
               <param name="title" value="Flamingos2: Define Slit"/>
               <param name="fpu" value="LONGSLIT_2"/>
             </paramset>
-            <container kind="seqComp" type="Iterator" version="2009A-1" subtype="Flamingos2" key="d426a85b-dcbf-47a4-92fd-b2d4e434fdb1" name="Flamingos2 Sequence">
+            <container kind="seqComp" type="Iterator" version="2009A-1" subtype="Flamingos2" key="49ddd0fa-3d36-46f0-bffc-51aae2cd8e5c" name="Flamingos2 Sequence">
               <paramset name="Flamingos2 Sequence" kind="dataObj">
                 <param name="title" value="Flamingos2: Field Image"/>
                 <param name="decker" value="IMAGING"/>
                 <param name="fpu" value="FPU_NONE"/>
               </paramset>
-              <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="facb533c-e754-4f2b-82e2-cb110b03da33" name="Offset">
+              <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="e7896f2d-f864-4d8a-9260-3609bc0bc0f3" name="Offset">
                 <paramset name="Offset" kind="dataObj">
                   <paramset name="offsets">
                     <paramset name="Offset0" sequence="0">
@@ -1852,7 +2105,7 @@
                     </paramset>
                   </paramset>
                 </paramset>
-                <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="6454230d-c094-4ec8-b2db-85c7cceefe1a" name="Observe">
+                <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="735e3aa3-973b-44b3-acc7-915154cc3cf2" name="Observe">
                   <paramset name="Observe" kind="dataObj">
                     <param name="repeatCount" value="1"/>
                     <param name="class" value="ACQ_CAL"/>
@@ -1861,13 +2114,13 @@
               </container>
             </container>
           </container>
-          <container kind="seqComp" type="Iterator" version="2009A-1" subtype="Flamingos2" key="45327139-f94c-4162-a01c-039e5e9b7139" name="Flamingos2 Sequence">
+          <container kind="seqComp" type="Iterator" version="2009A-1" subtype="Flamingos2" key="6414d5e4-fdca-439d-9e78-48efa9d65cdf" name="Flamingos2 Sequence">
             <paramset name="Flamingos2 Sequence" kind="dataObj">
               <param name="title" value="Flamingos2: Slit Image"/>
               <param name="decker" value="LONG_SLIT"/>
               <param name="exposureTime" value="10.0"/>
             </paramset>
-            <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="4823a8df-db26-45b0-a118-2689c8fbd662" name="Offset">
+            <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="8e90b5f0-ab65-4bf7-8f69-f8fd1fd7507d" name="Offset">
               <paramset name="Offset" kind="dataObj">
                 <paramset name="offsets">
                   <paramset name="Offset0" sequence="0">
@@ -1877,7 +2130,7 @@
                   </paramset>
                 </paramset>
               </paramset>
-              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="76792d02-a157-4bfe-b8d9-c4e3e4de767e" name="Observe">
+              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="132fb47e-f684-457e-9706-13e3517f9d7f" name="Observe">
                 <paramset name="Observe" kind="dataObj">
                   <param name="repeatCount" value="1"/>
                   <param name="class" value="ACQ_CAL"/>
@@ -1885,12 +2138,12 @@
               </container>
             </container>
           </container>
-          <container kind="seqComp" type="Iterator" version="2009A-1" subtype="Flamingos2" key="4ad587c3-6a0e-40fd-ad82-da7817faf1e2" name="Flamingos2 Sequence">
+          <container kind="seqComp" type="Iterator" version="2009A-1" subtype="Flamingos2" key="6dfd0d29-5fe6-4c6c-ad28-786609551d61" name="Flamingos2 Sequence">
             <paramset name="Flamingos2 Sequence" kind="dataObj">
               <param name="title" value="Flamingos2: Through-Slit Image"/>
               <param name="decker" value="LONG_SLIT"/>
             </paramset>
-            <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="da89e428-8c63-42eb-9c29-0758d32da04c" name="Offset">
+            <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="4d9177d6-1dae-4934-bd82-fb6ad748b95a" name="Offset">
               <paramset name="Offset" kind="dataObj">
                 <paramset name="offsets">
                   <paramset name="Offset0" sequence="0">
@@ -1910,7 +2163,7 @@
                   </paramset>
                 </paramset>
               </paramset>
-              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="a757af01-c668-45c5-b403-e70e62afb42b" name="Observe">
+              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="5e47c591-6f5e-4ae9-b3b5-d3ac526bca14" name="Observe">
                 <paramset name="Observe" kind="dataObj">
                   <param name="repeatCount" value="1"/>
                   <param name="class" value="ACQ_CAL"/>
@@ -1920,7 +2173,7 @@
           </container>
         </container>
       </container>
-      <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="aeb1717d-37a7-4744-87c8-ec46a3f02c15" name="GS-FLAMINGOS2-BP-16">
+      <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="c0958715-133c-4b98-a579-e3a14bcea42a" name="F2-BP-18">
         <paramset name="Observation" kind="dataObj">
           <param name="title" value="Telluric Observation"/>
           <param name="libraryId" value="27"/>
@@ -1930,13 +2183,17 @@
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
         </paramset>
-        <container kind="obsComp" type="Instrument" version="2009A-1" subtype="Flamingos2" key="c9cd1a28-2727-4d45-b5ce-4ff7ad495b45" name="Flamingos2">
+        <container kind="obsComp" type="Instrument" version="2009A-1" subtype="Flamingos2" key="96f2952a-c48a-4b25-b506-a3886d417aa2" name="Flamingos2">
           <paramset name="Flamingos2" kind="dataObj">
             <param name="exposureTime" value="30.0"/>
             <param name="posAngle" value="0"/>
             <param name="coadds" value="1"/>
-            <param name="disperser" value="R1200HK"/>
-            <param name="filter" value="J"/>
+            <paramset name="parallacticAngleDuration">
+              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
+              <param name="explicitDuration" value="0"/>
+            </paramset>
+            <param name="disperser" value="R3000"/>
+            <param name="filter" value="H"/>
             <param name="readMode" value="BRIGHT_OBJECT_SPEC"/>
             <param name="lyotWheel" value="OPEN"/>
             <param name="issPort" value="SIDE_LOOKING"/>
@@ -1947,26 +2204,28 @@
             <param name="decker" value="LONG_SLIT"/>
           </paramset>
         </container>
-        <container kind="obsComp" type="Scheduling" version="2009A-1" subtype="conditions" key="6f31f2d0-988f-4ab4-ba2e-a16a0bff113e" name="Observing Conditions">
-          <paramset name="Observing Conditions" kind="dataObj">
-            <param name="CloudCover" value="ANY"/>
-            <param name="ImageQuality" value="ANY"/>
-            <param name="SkyBackground" value="ANY"/>
-            <param name="WaterVapor" value="ANY"/>
-            <param name="ElevationConstraintType" value="NONE"/>
-            <param name="ElevationConstraintMin" value="0.0"/>
-            <param name="ElevationConstraintMax" value="0.0"/>
-            <paramset name="timing-window-list"/>
+        <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="3fee9094-e646-4a3b-8b22-f264dd74b150" name="Observing Log">
+          <paramset name="Observing Log" kind="dataObj">
+            <paramset name="obsQaRecord"/>
           </paramset>
         </container>
-        <container kind="seqComp" type="Iterator" version="2012A-1" subtype="base" key="0b35a51e-0e58-42e8-8d38-58b49903819e" name="Sequence">
+        <container kind="obsExecLog" type="ObsLog" version="2009A-1" subtype="exec" key="03abac63-d909-4935-ad0e-2d6423cdbe2c" name="Observation Exec Log">
+          <paramset name="Observation Exec Log" kind="dataObj">
+            <paramset name="obsExecRecord">
+              <paramset name="datasets"/>
+              <paramset name="events"/>
+              <paramset name="configMap"/>
+            </paramset>
+          </paramset>
+        </container>
+        <container kind="seqComp" type="Iterator" version="2012A-1" subtype="base" key="64f6ee0d-5dea-4a2e-947a-80a6cca89953" name="Sequence">
           <paramset name="Sequence" kind="dataObj"/>
-          <container kind="seqComp" type="Iterator" version="2009A-1" subtype="Flamingos2" key="e029af62-4a5a-4c1c-8fb1-2312ae2444b3" name="Flamingos2 Sequence">
+          <container kind="seqComp" type="Iterator" version="2009A-1" subtype="Flamingos2" key="b1a6a17b-4359-4a93-93dd-c66942e243c1" name="Flamingos2 Sequence">
             <paramset name="Flamingos2 Sequence" kind="dataObj">
               <param name="exposureTime" value="30.0"/>
-              <param name="filter" value="J"/>
+              <param name="filter" value="H"/>
             </paramset>
-            <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="9711e37a-d9a9-4ab3-8e72-236c2aea15c9" name="Offset">
+            <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="96efc2fe-25a9-4dc9-ab43-1a3cfd6c59fb" name="Offset">
               <paramset name="Offset" kind="dataObj">
                 <param name="title" value="MOS Telluric Offsets"/>
                 <paramset name="offsets">
@@ -2002,12 +2261,19 @@
                   </paramset>
                 </paramset>
               </paramset>
-              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="241abc2d-14e2-4f8c-a58f-75a053db3fa6" name="Observe">
+              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="794d1fd6-5f08-45a1-83f6-1c7878329211" name="Observe">
                 <paramset name="Observe" kind="dataObj">
                   <param name="repeatCount" value="1"/>
                   <param name="class" value="PARTNER_CAL"/>
                 </paramset>
               </container>
+            </container>
+            <container kind="seqComp" type="Observer" version="2009A-1" subtype="BaselineNight" key="e2350246-903f-4506-a3e4-0d0941376849" name="Night Baseline GCAL">
+              <paramset name="Night Baseline GCAL" kind="dataObj">
+                <param name="repeatCount" value="1"/>
+                <param name="coadds" value="1"/>
+                <param name="exposureTime" value="10.0"/>
+              </paramset>
             </container>
           </container>
         </container>
@@ -2016,736 +2282,852 @@
   </container>
   <container kind="versions" type="versions" version="1.0">
     <paramset name="node">
-      <param name="key" value="ca7fc455-1c77-4b81-80f4-8bbfe45b3b5e"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="d353436b-926b-4ec1-a89e-9619c6718305"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="76792d02-a157-4bfe-b8d9-c4e3e4de767e"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="eb66ae9e-b326-47c2-9b13-d06cc9fafd8f"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="9711e37a-d9a9-4ab3-8e72-236c2aea15c9"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="5e47c591-6f5e-4ae9-b3b5-d3ac526bca14"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="7d27715e-31b7-4b78-b07d-2add90b31b80"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="b1a6a17b-4359-4a93-93dd-c66942e243c1"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="bc7aa720-2246-4c99-b9d4-9af76bbe21dd"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="26de3cf6-3ec3-4c92-adc1-c7dcf63b068a"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="dedec326-e730-4bc2-8feb-35fdb3b58d4d"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="ed5ae7a6-6d72-4fa7-aa82-ed64a1d4648f"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="7f78ad4b-a94d-4239-8652-2b2a94da9a33"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="12710afd-3fd6-4446-8fa7-ce2fa06c46b8"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="8076a854-ae5c-447e-ab5e-be8b32852541"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="1899872a-fff6-44d4-a8a1-8dc6b5acdc73"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="facb533c-e754-4f2b-82e2-cb110b03da33"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="9914481c-4756-43a0-a4cc-d07004ddb256"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="e47f45c3-dd61-465d-8823-8291597d8d1a"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="77a0fb26-23f1-4aa8-8d69-4dfc70900255"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="b947ff27-cd66-43bc-81a5-6a2d8eda1b3b"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="f54aac7b-426a-41ea-9de3-3d3975cca05e"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="cf8e979c-7411-46c1-ae91-26273c55e1c6"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="447b2f34-a70d-41be-8a41-918594a914e6"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="b98522f4-fd84-464e-886c-8a7f17b95294"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="54166e26-fdb9-45b9-a125-732b51a6a0b4"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="69f769e3-aa68-42c4-9d59-d4a8f74049d8"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="3"/>
+      <param name="key" value="8a5038f7-fb31-489c-9a03-f13b1120dc4c"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="7b2dce22-6b41-4c84-8c96-37bf96b7aa0d"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="c70d765e-998f-4d5f-b0d1-79f2cdb8e57c"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="6f31f2d0-988f-4ab4-ba2e-a16a0bff113e"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="363a1e2d-f8a6-4f46-b888-48c20d0b2565"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="46911aea-ca09-488d-a4d0-f29f09fbb086"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="c309735b-eeb6-4fda-bd88-1ae3ce30cf56"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="5c7d370b-f230-4fc2-adb8-dd363bf189f2"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="4079ec1e-ad37-4e15-a54f-f2350d1e9d98"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="4d2b4326-12bd-4c0f-9bed-e09b74a8f00d"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="aa782dcd-6250-40a3-9f69-8688689072b3"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="a2a4f311-d867-4958-9bf8-c52252d4473d"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="c3d1e47c-1625-4191-8a60-02954d676af2"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="79264ec1-d33e-4f62-aa83-f975f530b25e"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="4b99d37e-4aac-4b30-bea1-e99a56b7caba"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="2d6c57e9-8617-4452-8657-5a5a61635357"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="07b7a40a-d0f7-4f7c-aa71-e2e9f62231ab"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="bbc6d53c-5418-4de7-a37b-5996aa5e5de4"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="672cd430-9e2b-444c-9456-84258a483138"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="8f9cce41-f80f-4cd4-97db-94cfc7b18aa5"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="f71dd4bc-594c-440d-b834-889f1ce8b113"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="91a3fa32-40e5-484d-a892-05e8f6b9d928"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="07a56d85-b3bd-4852-b500-760ab0205279"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="1c72c9a4-46b2-4523-84e2-7d78033db1ef"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="78767795-adc8-4c5e-bb1d-4ece6436f0b6"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="70b3c8d9-529e-4e48-ba01-b0d1b82b1eec"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="38cdeaa4-d58d-40db-89e3-0f3b5c357981"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="060fc823-98f3-4024-a25e-19e297fe7b14"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="110eefce-c70c-40e7-806d-129cafffb09f"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="df7f7f61-d315-4def-b91d-d94d1fc5bcb8"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="3b0cf7cc-05e9-4ab0-ac35-2d6eb3074493"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="4ad587c3-6a0e-40fd-ad82-da7817faf1e2"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="b8b4b023-f685-42aa-a92d-f27c5851f350"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="66a1512a-ebb7-4c36-b9b7-7886bc2b33da"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="d413afe8-ae86-4c35-9c2c-350b087f3466"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="98"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="252b958a-e610-456e-892a-afb6938b3990"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="94b99ed6-9201-4dd9-b832-22ae3f2d1701"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="6ca6058c-3697-4049-81dd-757dcecea3dc"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="6dfd0d29-5fe6-4c6c-ad28-786609551d61"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="a757af01-c668-45c5-b403-e70e62afb42b"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="1de1092d-42b1-4963-9fb3-868ea97e7807"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="35e0dd08-09b6-41bd-9f43-cf8285fec9cf"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="dcf2172d-38b1-477f-943e-88258c12e1d1"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="46d4bb81-21ec-4541-aadf-7ea271fa3d00"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="c9c6d465-5e84-469e-aede-6495cd707f9f"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="a1ce80cb-cb56-4c48-8d5c-ff4e5faaa2ea"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="24869041-3da7-4bc6-a663-4eb5535cae37"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="aeb1717d-37a7-4744-87c8-ec46a3f02c15"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="5324e9a3-5c98-4505-bf33-5bc3c5fb666b"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="bc469127-6527-4beb-b60f-e9ce11d7e447"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="03abac63-d909-4935-ad0e-2d6423cdbe2c"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="cfc88bfb-f103-43a2-be6e-91ca054da136"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="49747aba-2c26-4fe7-ae05-d64a7450d815"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="69da14e5-a0c3-4a4b-bade-13a33307c9bc"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="4441ff78-52bd-4df0-9b48-03530ad93af3"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="7d6959df-b63d-4744-a0f4-f89336d057e8"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="b75cfbaa-f303-4b8d-b928-0fad0573cdf1"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="9043b463-2390-4456-ac3f-1ca64038e898"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="4868e20a-2789-467b-9b8f-2a78ceecbf36"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="9d92fd4e-69cc-4387-a904-c6692c9dac70"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="5ba9c8f7-ec29-40c1-925a-92d8cb9663e7"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="69270624-dd57-4c73-b5c2-0db620f5286b"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="0b9a5dbd-7cb5-42e5-bac6-fc997ebb5b45"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="e7867ca8-a58b-4bcf-9676-db50615c1149"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="4d9177d6-1dae-4934-bd82-fb6ad748b95a"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="0edbc870-ed50-4954-b233-b1bb1d014cdd"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="6ea9844d-1ce9-41f5-87c2-2b0eb75eb9fa"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="b8d652c5-a454-432c-a469-439ff4d484c0"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="ce604274-30fc-4f7a-95da-c8b0434dfa4d"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="1f37041b-6b1a-4a74-b196-f04a45c6db53"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="cc4a60d4-f0ca-4f5b-bbcd-3825a93b6e9b"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="282aef62-88aa-49fb-9413-cdd0828d6414"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="898d1921-e169-4e65-895d-4ad885a09232"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="33bfcbf5-a403-4255-a1f3-d561ea755f73"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="04a4e50b-712d-4a8a-997d-e9f6f63a13bf"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="031183a7-faad-421e-a4d2-ca02dfc5fbb2"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="524c1b2f-3bb9-4e95-9d35-43cc5056eff6"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="984315fb-5af4-4215-83cf-732f37e2652f"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="927c529e-5e78-489e-8c14-4c0344ce61c9"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="47cec009-bd88-410c-a927-f21085f42c90"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="d7d74ee6-f0dd-476a-ac9b-4321cdbc37db"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="aaeb7432-fa09-4f53-b102-45015dd0e82f"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="b2c5a2d1-455a-410d-8cf6-a6266bfa3d35"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="869b4bb5-0285-407f-b9ca-bcd8507bc5a2"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="e055903f-4862-411e-bc04-8030cfe06a31"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="af64f12b-4692-4945-8e31-87145968036e"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="f4d5a6b8-b8aa-4ed4-81c5-c5378a86d2ea"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="241abc2d-14e2-4f8c-a58f-75a053db3fa6"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="3d39acef-6b8d-4296-8ee6-e434589428dc"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="6d695bc6-94f3-43d4-b385-88e813ebf5b8"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="b99861bd-a1bc-4e60-b27c-fcadb2d7eb42"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="f7542c28-aeeb-4437-a3d6-0315f452811d"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="31d3cc62-7f62-4ee4-811e-1aa3036765b9"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="52527770-94aa-4646-a25e-e8e0c32c84bf"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="80597ba1-8a6a-4367-a5e8-f3d59d7bb349"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="5e360a16-2627-49a5-9288-a0839cde6d31"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="96efc2fe-25a9-4dc9-ab43-1a3cfd6c59fb"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="e9274f70-b320-4fdc-ae3d-e775b00dda48"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="0b68d78a-e6e0-43e9-8a7b-00ceabece460"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="ee3242a0-73a9-4a26-972b-1ac19c4d77b7"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="3fee9094-e646-4a3b-8b22-f264dd74b150"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="8f7e9292-b23c-4d71-ba40-212c2e3cdcd7"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="6d1c37e6-ffc9-4850-822b-adfae89e9a2e"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="454a324a-019a-4cd2-96e0-ae1b8e5387e5"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="fe5ba4e1-1a66-49b7-a5b8-f36bc2d10664"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="685049d7-d667-4583-8f68-b9117648cd56"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="93484db0-5220-49c9-84ae-7814fdbd9970"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="ae8037c8-d268-437e-968d-9c74004fe308"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="3"/>
+      <param name="key" value="fe8ad9e9-eef7-4e2d-8156-947f9fbdf6c7"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="9ca8b7b7-e911-43c8-8b43-9117f98cc9af"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="47577442-24a0-47a1-a303-ed0e38d957e3"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="85eee383-ce67-47ff-95a9-6bac2fb388a8"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="64f6ee0d-5dea-4a2e-947a-80a6cca89953"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="0491515a-20ab-4a88-9f99-ead51b0b72db"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="f13aeead-a221-403a-a647-80bf6fd682d7"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="6454230d-c094-4ec8-b2db-85c7cceefe1a"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="c1ba0c27-b0cc-4c7b-a9e4-a15eea16a8d0"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="9b8609e3-7445-4ba4-aacb-685c5e36dbb1"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="2154f1f4-f9b1-41a2-98ff-5f72fa2f51e8"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="a7f2a519-a728-4d72-84de-1686b8a2b8ff"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="41e436db-5b18-45f9-92f9-ba63c93417ae"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="4a7f1f5d-a533-4793-8432-a388756709e2"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="0b44ee5d-ac48-483b-8cfb-6a3456986597"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="8106fde4-b19d-4b33-9666-ab7fa9596677"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="37f28b2a-0367-432e-810b-4084aa4fe295"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="1138e641-f373-4399-95c3-c89cbd9b3441"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="d8fcdb4a-9554-41d6-bcc3-19730456bc10"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="342f020d-7797-4199-928f-837b78c1d098"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="5c8c3ca8-9e7b-4d9e-a15e-ca7a6625da11"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="bd17d176-16a0-4641-918f-be6b51ca1ce8"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="2b5b778e-8b06-47de-8ed1-75eb115dc104"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="94bc0e35-f080-46a2-818b-741eb1a62157"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="a19ec5c7-1352-4a22-823e-33af4f11f269"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="960d37c8-db3a-439a-9afd-90b6140afac6"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="55d000c9-cb7d-4761-819b-f3bca56415f8"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="37dff1f2-3ff0-4db2-b395-4e149911859b"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="0a21c756-ebad-4fba-94dc-cc12a1efddf4"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="33d4d829-3b46-4d57-bb49-cbf5d0ad3118"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="e69190f7-4397-49e0-9697-477c9cfb3844"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="1e808781-a2ed-4637-baa2-8bf8277dd4b2"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="a2cff03a-83bd-409f-912a-ddb1705f3982"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="f77eb2d9-48d1-4618-96bc-9ecd33d42279"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="8bface0c-ed93-4e45-932c-5be7ec8c6911"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="3e069671-e002-4236-99a6-e4ca72974632"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="1f1f5024-7925-4003-b838-ee22db460354"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="c9cd1a28-2727-4d45-b5ce-4ff7ad495b45"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="8e9759e3-2a27-4e02-83a1-3e9344246dc3"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="36779996-0d75-4779-a3c1-8b3b0d476111"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="4ffeb15e-b233-4fea-8817-f6fa7d1467fd"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="d426a85b-dcbf-47a4-92fd-b2d4e434fdb1"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="a2ff2299-ce19-4738-aa85-611f740bb708"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="f0ade14c-8490-4fd8-958c-013f64ff4c88"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="68444a25-2030-4827-a232-3f42585a4970"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="93aa59ed-17bf-4256-9898-9c837e63d13b"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="c13afc11-ce65-4e99-ac7e-a017fb8a7a5a"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="726b4691-031a-4d53-8cee-1964e0e50f56"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="b5f188bd-fb0a-4348-b70e-15e22028a45e"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="8fb12491-87f1-40fb-8547-98eda52522c3"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="22670ea9-9771-45f3-b9cd-0708c3f09bf0"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="0a4b0822-6d24-41c5-a97b-72b1a38e1efc"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="4c74ef65-d89d-40d1-b71d-44b54870a30a"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="ede19817-46a1-4f20-87f5-7b87127e3621"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="d7a29dc0-9686-4396-a7ea-4d2c947d3c08"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="744a206a-b49b-4b32-90b7-7a3a30156901"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="377520de-9c85-4f9f-9f41-dce000f2e69d"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="e20574db-6d80-4da6-9706-f486f954ab82"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="223c4720-276d-4558-afc9-bfe64493de94"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="3870d00d-3789-4442-a6fa-b9b4ec1e2114"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="ab2f04f7-2088-4a27-ac9f-f8475a409408"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="70b20867-e5fd-4f6d-872c-4512caffa46f"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="6e455a36-880b-413c-98e5-438baead7ba8"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="d174d7be-1fdb-4d23-a38f-ff59b31cfd1c"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="a4e0b02e-9bcb-4d4f-a334-c317942d59d6"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="22112f98-cd79-46df-ac81-b435caf3a870"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="c6451861-8ada-432c-98fb-83be9100484d"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="6d33c586-1eeb-431c-8b2b-1ba752583334"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="6d11888f-45dd-40de-89ae-aae20292dc28"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="90fe1979-1c40-4b31-bbb1-dfe0b22bc5ee"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="0db0a984-23ab-4bcf-bc88-435d2e3a3320"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="791480f7-b93f-4c86-a64b-03c94a00fe82"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="0509f947-8956-4c1a-94c5-ade840ac35b6"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="dd86bcec-58f0-4796-86c8-ea5e7343740c"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="b58f4d72-4b97-4211-9f23-8672d676d723"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="310bc8b4-2cbf-41da-a56c-d785af4896b9"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="8d45441d-552e-4566-aea6-2483671226c8"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="560d15f4-38b8-4ea6-ad17-6ceaf5864cd6"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="c48be3b2-e9cd-4ac7-8642-7216f74da2b2"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="bd654e07-153f-4c39-8a07-d4eb9c0b0f9c"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="a811afb0-b999-49d7-a304-dfe750bf9655"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="166b5166-18c0-4b46-8aac-8910b19ddb24"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="2ccbc80c-4760-488a-a444-e7a34ad7fb78"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="b6730225-fc52-4cd0-ba4b-9d17d670b7e2"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="70def726-cd29-4532-88ae-499be3513b5b"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="13e9a6d7-e25b-46f6-9585-d942685817df"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="1e3c9038-f9e6-4236-b4d9-19c9935dca8f"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="cdb1ac82-fd0f-48aa-9634-f9c0946f35a0"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="fa59b36e-1e29-43f1-9096-c12dc339dd45"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="0d0f4353-361a-4d76-8f37-0f8463898fa1"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="1f64ac77-2107-4384-9ae4-512a3977d11d"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="228ce8ab-d1a1-481f-8280-5e7488fa20c9"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="be49195f-5438-4dff-8ba5-24b4ec574dac"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="0d7962ee-1e55-415e-9cab-e066ad0958a3"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="c668799a-0c10-484d-ac0f-ba04690c6e32"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="279d471e-fee8-4948-a9e5-9098e59edaf7"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="18d32852-2ce5-4270-b94a-d06fa76306f2"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="11ce44e5-a87b-42d8-99c7-db0405717f0a"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="d650035a-03d7-4bf0-a2e1-f061f3f02f21"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="945b309d-a3e9-4f4c-8d4d-e1d78a01d765"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="c4309d32-7b0d-4944-b9a9-41f11de6c20a"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="2"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="0c600cb9-be1b-405c-9f7d-b46a63b84ced"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="43d4a42b-4b32-42d7-8295-c4a78fc662d4"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="de707dc8-989a-4824-8a41-004b64488584"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="a7260717-9ada-4029-9b82-5ceb638ec424"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="9991598b-5dc2-47bd-bcff-8077c372bd38"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="2857e9a1-d2bb-4abe-9221-8dab61c81d18"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="da89e428-8c63-42eb-9c29-0758d32da04c"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="aa1224d6-11e7-4111-a362-95ddd4784953"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="95bda42a-0941-4234-8efe-190c1e98369e"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="2a5f2966-c67b-4aab-b970-65bb38b4c360"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="341bcef8-5445-44a0-82c0-3b0f9f07ce6f"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="d5bbd4c2-8479-4cd9-91f3-a6a620c10977"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="b58d1922-f119-47bc-9253-a2fd3e22694c"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="132fb47e-f684-457e-9706-13e3517f9d7f"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="438e6281-c65a-4cc3-9ea2-34464da12242"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="e415422d-054c-46af-8ff2-f95563eb2c7a"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="ce03bc40-1e9e-4579-a397-d1fadfe755fb"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="69b3d343-4d36-4f9c-b003-550444041897"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="0b35a51e-0e58-42e8-8d38-58b49903819e"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="2e6e619e-4321-4994-9d67-423a948ec3e0"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="13774c9a-7ad6-4850-addf-81eaaac2a2aa"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="2"/>
+      <param name="key" value="bea9e198-f0d4-4ebb-a3bc-ce33945c5580"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="a3c9c116-54e0-46ac-b69e-698d53ea3a8e"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="c12a06d1-a02d-4d62-97e4-a32cb2ac72f6"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="f897e57b-24b6-4018-b5df-61f2021e6df1"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="5d69db48-77d8-43fe-915a-904474c4d09d"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="7495bab8-cf0e-46a2-a9b8-bb33d441a932"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="c5e81be7-13ab-485a-8f97-61a401ed5257"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="5618b5a4-788d-4c28-b204-f71a218266f7"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="5a8e48cb-a24c-42c1-b55e-45645e6757c4"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="2d2c92c2-71e4-488a-ae36-f9051423ba18"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="e656ed11-ded3-4226-be26-d041008b6ed9"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="238674f9-0034-4913-8880-313adcc673fd"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="0273f687-73e1-465c-a3ee-e5962d15c482"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="4823a8df-db26-45b0-a118-2689c8fbd662"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="c550d6f8-0555-486a-a27b-2549e86023cf"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="57a85b7a-a591-4043-a7f6-be0f90846552"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="c0f0d646-79a3-46e3-873b-685b98f63ed5"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="25bf9bfe-b7cf-4d01-a9c2-90cb55fa9a14"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="189881a8-073f-4048-b839-ee5a4a600770"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="36206909-45b5-4831-abcd-d1cef497ed59"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="bd249857-eace-453f-a787-8292638e1c33"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="9d996f4c-addf-46fd-b0dc-09bfe7e27357"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="923a67d4-293b-4726-9ddd-df98f8570879"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="f14c6c99-d754-4cbd-b5a5-e3741dfa488e"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="2453779f-9b75-4610-a243-d32d4d83667b"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="157e624b-2275-4a0f-9d57-7aeee3417ff9"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="ec86544b-9bbd-4a5e-ab25-25091929f6f5"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="eb75051e-7d11-435c-a98f-54cb54f90401"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="49ddd0fa-3d36-46f0-bffc-51aae2cd8e5c"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="45327139-f94c-4162-a01c-039e5e9b7139"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="d8102367-afe4-41de-b730-18b7ae2d02cd"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="df2e530d-7aae-4e98-952d-d8f9c9616d31"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="794d1fd6-5f08-45a1-83f6-1c7878329211"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="ac44c51a-cbb5-479f-abdc-11bceaf03342"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="b8b01f6a-6894-4548-947d-f9fdada03630"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="acd21bc4-9bac-4404-9779-de09070cb3f2"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="3f6a512d-06df-44b8-bdab-946a1c212c0c"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="ced6a89e-6e40-46fd-8485-ada6b69f7a1d"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="d2130cd3-86fd-4f36-95da-54ea23da6028"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="25c43f08-5d60-41b9-addb-78a3aa28613a"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="380fbfeb-cb84-46ea-9153-8be189e2e219"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="62574a92-5904-4f74-b2a1-5dd46bfb1f87"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="8caa9707-be93-48c1-9596-5df9ca631d2b"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="e28d6248-1dc7-48d0-9e79-24ee7771268e"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="abf81f26-01b2-41bb-be23-fdb4d174e82a"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="4d36ae87-e08b-4fef-894d-b963ff44365f"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="3442bdd8-b196-4de1-883a-ac2a2471fb52"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="88fa6c96-2f34-4dcc-9132-ba8d9837da30"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="8e90b5f0-ab65-4bf7-8f69-f8fd1fd7507d"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="e3871251-999c-4bf7-bc98-79234b57758e"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="0e21edf3-21ad-404a-811f-da6e713b16b4"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="e029af62-4a5a-4c1c-8fb1-2312ae2444b3"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="c0958715-133c-4b98-a579-e3a14bcea42a"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="88cd5203-1ed1-4563-bd00-50a92d968e98"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="b4f1d74e-c61e-43a5-b858-ae281761fd15"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="efbcdc8c-600e-4c02-9748-e58c70c69572"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="8160f83b-3266-43e8-9b21-324cabb91a43"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="112a097b-2df7-4219-8cec-35edaaa469af"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="5e03016a-a9f4-45a0-99a4-a0fca9816915"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="5d811008-5a46-46e8-addc-be2eaf727636"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="b47f0a75-cb0e-4c76-b362-06ebef396371"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="8d9e0ccc-f520-4516-98c8-2d05a981974d"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="29edaec7-c1f0-4137-9e7a-535ca29ea0da"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="264459f5-e530-4e9d-95c3-c4aff0349ff9"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="9ff20ce6-5215-41e8-a4e5-c84a6fb52214"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="a2cd333f-8d7d-4e96-a69b-5dc0a0f397e7"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="8be6cf9b-6442-4546-b603-f20d88d6a6a7"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="7"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="0c61bf2d-02f3-451b-84ca-37c55acb90bd"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="4a8fd70b-50e0-4dc4-97af-3a58b4e1171a"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="b27ff1c3-6d2d-41a7-a9d8-0b01ab6d81dc"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="dce09d6d-70db-4cff-bcca-df8e988461ef"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="92e3b86c-0635-45fa-a056-15533e13a442"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="4fbb59ee-f36c-40e8-94c2-a3b642a4e170"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="d0ff80f4-a212-43b1-8138-00680d9aa299"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="00b86d4e-e21e-4100-87ac-d2f802d946b0"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="51db511a-a51a-4fd5-9524-fdd18e80ff73"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="a60cc9f3-ecf1-4d87-b23b-4cb11a92a16e"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="8b01e76c-35e2-44f4-b97b-fb2f5e2f07f5"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="57652511-9973-435c-8d39-10803b051f14"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="38a84d83-cb27-477a-869f-f914f747d747"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="a7dea324-c874-414d-b9c0-1510ce4e5d7d"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="fce74e7d-67b0-4458-80d9-2526a5fd11d6"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="4052c36b-4e08-4eea-acc4-3746236cd3fe"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="13c95d31-0f68-4725-bab5-8445656867fd"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="103c31bc-f181-4b5c-a131-42e58c1fd5f4"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="377870b4-fbaf-4816-b2fb-eb3aed7de042"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="a4747803-730e-4314-8739-9bb06480fdf8"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="9557c175-c6d2-4458-8981-ea44de9fb648"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="246e7f39-bc39-4230-84d2-7cad66fda92b"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="69a44e75-e6b7-4e5f-8b5d-e625fe59ef54"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="eaa16bf0-b066-442c-8c61-effd1513b080"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="d9c1195c-2d4f-4795-b941-9bf87f1c47a5"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="753a5fab-4f58-41e5-ac99-7529eefbcae3"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="517b12b7-bd91-4a9f-aa38-d0c79200bf7f"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="c4d0222e-78a8-4232-8afe-b093f3055b20"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="162b7e72-b25c-4404-8e94-d8560fc1a7a7"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="5e2235a8-c672-4d32-b528-4ebb86170f43"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="873a8d8a-b7af-48f5-8e31-00075dfbb35b"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="843da153-31b4-4eac-b48f-7d03fcaf9dd0"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="d8b0ce1b-06e6-4a2a-9295-b14964d7b232"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="c701d0ce-2dbb-4e06-a1fb-2e4681e10bbe"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="b2233f08-730d-4cbd-ab57-81e286977bd6"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="3"/>
+      <param name="key" value="413b42e1-0d99-4fbf-acf8-f9ec32fd3050"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="4209e5d9-01c5-48ff-8768-73b71718bffd"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="50a05d0e-dcd9-42f9-8f4d-626114234c5c"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="5e971b09-02a0-49c1-bff7-294a0e831e83"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="8b03fee3-4eca-4895-b783-be7872c4ce98"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
     <paramset name="node">
-      <param name="key" value="b746bcd4-efef-45ff-a20f-12d84c3be1d1"/>
-      <param name="fc704408-1afe-4d15-b2ad-65d40a7e89e7" value="1"/>
+      <param name="key" value="c59293b5-3354-43a1-9268-aba836f7e8e8"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="aff775e9-fc55-4b9a-8b47-6888848b7572"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="dafdf2e4-594a-42a8-b1f8-d964352634d3"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="afa16615-314b-46de-89e6-ad94e25059aa"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="821e476a-aa4e-411d-a9e3-5d9423153881"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="96f2952a-c48a-4b25-b506-a3886d417aa2"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="88396487-e988-4065-8694-12eda0134f19"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="25277d64-66fd-4efb-b40a-71c199372380"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="e7896f2d-f864-4d8a-9260-3609bc0bc0f3"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="11f76d4c-4578-4d45-b86e-40d7cf06c742"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="a2e76452-56c8-4d03-b34a-d163db209e73"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="71a1605e-8958-4d5d-9484-9ad2300d949e"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="7f178adb-1efb-4293-adfe-bf8d38a6a792"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="6fac89cb-3936-48ff-af0c-306b942cde9e"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="4d4494a2-1498-4fa2-873e-529e38195789"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="4f1d9971-4870-4547-80c6-96277bd13151"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="1a4ad737-057d-4e8d-b630-677771b02c69"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="b183a572-574a-458c-a062-4236791b62e5"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="6414d5e4-fdca-439d-9e78-48efa9d65cdf"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="e2350246-903f-4506-a3e4-0d0941376849"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="4b68dd37-7d5e-41eb-af47-2b9d4e922757"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="c42a4394-2aae-4f1c-9710-9a2448bc71f0"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="ce8669af-6720-4604-ae43-d295b367cfdd"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="5e382394-e313-415a-974a-1ed02dd6b604"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="a3bd6c05-ca14-4795-8bd8-e444efa91d7c"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="d7cb3389-08b3-4c7c-902e-4aabc4085db9"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="719d5f1a-7403-4d21-bdb1-48603b08a147"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="4a4dd0ef-d7d0-4d0a-a710-df17d0f61bed"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="735e3aa3-973b-44b3-acc7-915154cc3cf2"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="c181f180-dacf-48cd-b8c6-48e394b4e998"/>
+      <param name="5c583ebc-1872-42b9-953a-9db98361f620" value="1"/>
     </paramset>
   </container>
 </document>
