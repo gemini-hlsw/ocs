@@ -11,9 +11,7 @@ import edu.gemini.spModel.gemini.gnirs.GNIRSParams.*;
 import edu.gemini.spModel.gemini.gnirs.InstGNIRS;
 import scala.runtime.AbstractFunction2;
 
-
 import java.util.*;
-import java.util.stream.Stream;
 
 public class GnirsRule implements IRule {
     private static final Collection<IConfigRule> GNIRS_RULES = new ArrayList<>();
