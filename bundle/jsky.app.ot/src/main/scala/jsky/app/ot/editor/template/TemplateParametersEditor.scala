@@ -5,6 +5,7 @@ import edu.gemini.shared.skyobject.Magnitude
 import edu.gemini.shared.util.TimeValue
 import edu.gemini.shared.util.immutable.{ DefaultImList, None => JNone, Option => JOption }
 import edu.gemini.spModel.`type`.ObsoletableSpType
+import edu.gemini.spModel.core.MagnitudeSystem
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.{PercentageContainer, ImageQuality, CloudCover, SkyBackground, WaterVapor}
 import edu.gemini.spModel.rich.shared.immutable.asScalaOpt
@@ -346,8 +347,8 @@ class TemplateParametersEditor(shells: java.util.List[ISPTemplateParameters]) ex
           override def updateEnabledState(): Unit = enabled = includeBand
         }
 
-        val magSys = new BoundNullableCombo[Magnitude.System](Magnitude.System.values())(
-          show = _.name(),
+        val magSys = new BoundNullableCombo[MagnitudeSystem](MagnitudeSystem.all)(
+          show = _.name,
           get  = magOrZero(_).getSystem,
           set  = setMag((m, s) => new Magnitude(band, m.getBrightness, s))
         ) {

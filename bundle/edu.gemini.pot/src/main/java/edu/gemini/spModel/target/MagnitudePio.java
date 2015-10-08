@@ -2,6 +2,7 @@ package edu.gemini.spModel.target;
 
 import edu.gemini.shared.skyobject.Magnitude;
 import edu.gemini.shared.util.immutable.*;
+import edu.gemini.spModel.core.MagnitudeSystem;
 import edu.gemini.spModel.pio.ParamSet;
 import edu.gemini.spModel.pio.Pio;
 import edu.gemini.spModel.pio.PioFactory;
@@ -93,7 +94,7 @@ public enum MagnitudePio {
         Magnitude.Band band = mag.getBand();
         double magVal = mag.getBrightness();
         Option<Double> error = mag.getError();
-        Magnitude.System system = mag.getSystem();
+        MagnitudeSystem system = mag.getSystem();
 
         Pio.addParam(factory, magPset, MAG_BAND, band.name());
         Pio.addDoubleParam(factory, magPset, MAG_VAL, magVal);
@@ -194,10 +195,10 @@ public enum MagnitudePio {
 
         // Get the system and assume Vega if not specified.
         String systemName = Pio.getValue(pset, MAG_SYSTEM);
-        if (systemName == null) systemName = Magnitude.System.Vega.name();
-        Magnitude.System system;
+        if (systemName == null) systemName = MagnitudeSystem.VEGA$.MODULE$.name();
+        MagnitudeSystem system;
         try {
-            system = Magnitude.System.valueOf(systemName);
+            system = MagnitudeSystem.valueOf(systemName);
         } catch (Exception ex) {
             String msg = String.format("Invalid magnitude system '%s'", systemName);
             throw new ParseException(msg, 0);

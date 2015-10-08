@@ -7,6 +7,8 @@ package jsky.app.ot.gemini.editor.targetComponent;
 import edu.gemini.pot.sp.ISPNode;
 import edu.gemini.shared.skyobject.Magnitude;
 import edu.gemini.shared.util.immutable.*;
+import edu.gemini.spModel.core.MagnitudeSystem;
+import edu.gemini.spModel.core.MagnitudeSystem$;
 import edu.gemini.spModel.obs.context.ObsContext;
 import edu.gemini.spModel.target.SPTarget;
 import edu.gemini.spModel.target.TelescopePosWatcher;
@@ -59,7 +61,7 @@ public class MagnitudeEditor implements TelescopePosEditor {
         JButton getButton();
         Option<Magnitude.Band> getMagnitudeBand();
         Option<JComboBox<Magnitude.Band>> getBandCombo();
-        Option<JComboBox<Magnitude.System>> getSystemCombo();
+        Option<JComboBox<MagnitudeSystem>> getSystemCombo();
         Option<JTextField> getTextField();
         void setTarget(SPTarget target, Mode mode);
     }
@@ -81,7 +83,7 @@ public class MagnitudeEditor implements TelescopePosEditor {
         private final Magnitude.Band band;
         private final JButton rmButton;
         private final JComboBox<Magnitude.Band> cb;
-        private final JComboBox<Magnitude.System> systemCb;
+        private final JComboBox<MagnitudeSystem> systemCb;
         private final JFormattedTextField tf;
 
         // Action invoked when the remove button is pressed.  Removes the
@@ -116,7 +118,7 @@ public class MagnitudeEditor implements TelescopePosEditor {
             @Override public void actionPerformed(ActionEvent e) {
                 final Magnitude.Band band = (Magnitude.Band) cb.getSelectedItem();
                 if (band == null) return;
-                final Magnitude.System system = (Magnitude.System) systemCb.getSelectedItem();
+                final MagnitudeSystem system = (MagnitudeSystem) systemCb.getSelectedItem();
                 if (system == null) return;
                 changeSystem(band, system);
             }
@@ -147,7 +149,8 @@ public class MagnitudeEditor implements TelescopePosEditor {
             cb = new JComboBox<Magnitude.Band>() {{
                 setToolTipText("Set magnitude band");
             }};
-            systemCb = new JComboBox<Magnitude.System>(Magnitude.System.values()) {{
+            systemCb = new JComboBox<MagnitudeSystem>(MagnitudeSystem$.MODULE$.allAsJava()) {{
+                setRenderer((list, value,  index,  isSelected,  cellHasFocus)  -> new JLabel(value.name()));
                 setToolTipText("Set magnitude system");
             }};
 
@@ -208,7 +211,7 @@ public class MagnitudeEditor implements TelescopePosEditor {
         }
 
         @Override public Option<JComboBox<Magnitude.Band>> getBandCombo() { return new Some<>(cb); }
-        @Override public Option<JComboBox<Magnitude.System>> getSystemCombo() { return new Some<>(systemCb); }
+        @Override public Option<JComboBox<MagnitudeSystem>> getSystemCombo() { return new Some<>(systemCb); }
         @Override public Option<JTextField> getTextField() { return new Some<>(tf); }
     }
 
@@ -287,7 +290,7 @@ public class MagnitudeEditor implements TelescopePosEditor {
         }
 
         @Override public Option<JComboBox<Magnitude.Band>> getBandCombo() { return new Some<>(cb); }
-        @Override public Option<JComboBox<Magnitude.System>> getSystemCombo() { return None.instance(); }
+        @Override public Option<JComboBox<MagnitudeSystem>> getSystemCombo() { return None.instance(); }
         @Override public Option<JTextField> getTextField() { return new Some<>(tf); }
     }
 
@@ -310,7 +313,7 @@ public class MagnitudeEditor implements TelescopePosEditor {
 
         @Override public JButton getButton() { return addButton; }
         @Override public Option<JComboBox<Magnitude.Band>> getBandCombo() { return None.instance(); }
-        @Override public Option<JComboBox<Magnitude.System>> getSystemCombo() { return None.instance(); }
+        @Override public Option<JComboBox<MagnitudeSystem>> getSystemCombo() { return None.instance(); }
         @Override public Option<JTextField> getTextField() { return None.instance(); }
 
         @Override public Option<Magnitude.Band> getMagnitudeBand() {
@@ -365,7 +368,7 @@ public class MagnitudeEditor implements TelescopePosEditor {
                 }});
             }
 
-            final Option<JComboBox<Magnitude.System>> system = row.getSystemCombo();
+            final Option<JComboBox<MagnitudeSystem>> system = row.getSystemCombo();
             if (!system.isEmpty()) {
                 content.add(system.getValue(), new GridBagConstraints() {{
                     gridx=3; gridy=y; insets=new Insets(0, 0, 5, 0); fill=HORIZONTAL;
@@ -499,7 +502,7 @@ public class MagnitudeEditor implements TelescopePosEditor {
         focusOn(to);
     }
 
-    void changeSystem(Magnitude.Band band, Magnitude.System system) {
+    void changeSystem(Magnitude.Band band, MagnitudeSystem system) {
         final Option<Magnitude> oldMagOpt = target.getTarget().getMagnitude(band);
         if (oldMagOpt.isEmpty()) return; // shouldn't happen ...
         final Magnitude oldMag = oldMagOpt.getValue();
