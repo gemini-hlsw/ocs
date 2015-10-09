@@ -16,6 +16,7 @@ import java.awt.*;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -95,15 +96,15 @@ final class SequenceTabUtil {
         return fc;
     }
 
-    static void resizeTableColumns(JTable table, TableModel model) {
+    static void resizeTableColumns(final JTable table, final TableModel model) {
         final TableColumnModel colModel = table.getColumnModel();
         final FontMetrics fm = table.getFontMetrics(table.getFont());
         final int rows = model.getRowCount();
 
         for (int col=0; col<model.getColumnCount(); ++col) {
-            final String title = model.getColumnName(col);
 
             // Start with the width of the column header
+            final String title = getLongestHeaderLine(model, col).trim();
             int size = fm.stringWidth(title);
 
             // Check the width of each item in the column to get the maximum width
@@ -119,6 +120,22 @@ final class SequenceTabUtil {
             // Resize the column
             final TableColumn tc = colModel.getColumn(col);
             _setColumnWidth(tc, size, size, size);
+        }
+    }
+
+    /**
+     * Gets the (longest) column header line.
+     * In case of html headers which may contain several lines separated by <br> tags we need to ignore
+     * all html tags and return the longest of the given lines.
+     */
+    private static String getLongestHeaderLine(final TableModel model, final int col) {
+        final String title = model.getColumnName(col);
+        if (title.startsWith("<html>")) {
+            return Arrays.stream(title.split("<br/?>")).                    // split around html breaks
+                    map(s -> s.replaceAll("<.*?>", "")).                    // get rid of html tags
+                    reduce("", (a, s) -> a.length() > s.length() ? a : s);  // find longest line
+        } else {
+            return title;
         }
     }
 
