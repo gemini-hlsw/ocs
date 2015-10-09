@@ -3,14 +3,7 @@ package edu.gemini.spModel.core
 import scala.collection.JavaConversions._
 import scalaz.Equal
 
-sealed abstract class MagnitudeSystem(val name: String) extends Product with Comparable[MagnitudeSystem] with Serializable {
-
-  // ===== LEGACY JAVA SUPPORT =====
-  import MagnitudeSystem._
-
-  def compareTo(other: MagnitudeSystem) = all.indexOf(other) - all.indexOf(this)
-
-}
+sealed abstract class MagnitudeSystem(val name: String) extends Product with Serializable
 
 object MagnitudeSystem {
 
@@ -21,7 +14,7 @@ object MagnitudeSystem {
 //  case object ERGSA  extends MagnitudeSystem("erg/s/cm²/Å")
 //  case object ERGSHZ extends MagnitudeSystem("erg/s/cm²/Hz")
 
-  val default:MagnitudeSystem = VEGA
+  val default: MagnitudeSystem = VEGA
 
   val all: List[MagnitudeSystem] =
     List(VEGA, AB, JY)
@@ -33,7 +26,5 @@ object MagnitudeSystem {
   // ===== LEGACY JAVA SUPPORT =====
   val allAsJava = new java.util.Vector[MagnitudeSystem](all)
   val DEFAULT = default
-
-  def valueOf(s: String) = all.find(_.name == s).get
 
 }
