@@ -9,6 +9,7 @@ import edu.gemini.spModel.pio.PioFactory;
 
 import java.text.ParseException;
 import java.util.List;
+import java.util.Optional;
 import java.util.logging.Logger;
 
 /**
@@ -194,11 +195,14 @@ public enum MagnitudePio {
         }
 
         // Get the system and assume Vega if not specified.
-        String systemName = Pio.getValue(pset, MAG_SYSTEM);
-        if (systemName == null) systemName = MagnitudeSystem.VEGA$.MODULE$.name();
-        MagnitudeSystem system;
+        final String defaultSys = MagnitudeSystem.VEGA$.MODULE$.name();
+        final String systemName = Optional.ofNullable(Pio.getValue(pset, MAG_SYSTEM)).orElse(defaultSys);
+        final MagnitudeSystem system;
         try {
-            system = MagnitudeSystem.valueOf(systemName);
+            system = MagnitudeSystem.allAsJava().stream().
+                        filter(m -> m.name().equals(systemName)).
+                        findFirst().
+                        get();
         } catch (Exception ex) {
             String msg = String.format("Invalid magnitude system '%s'", systemName);
             throw new ParseException(msg, 0);
