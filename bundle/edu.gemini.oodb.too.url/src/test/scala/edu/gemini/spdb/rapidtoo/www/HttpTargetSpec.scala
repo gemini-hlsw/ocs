@@ -83,7 +83,7 @@ object HttpTargetSpec extends Specification with ScalaCheck with Arbitraries {
       mustFail(req without "dec")
     }
     "Mags: Parse Magnitudes" ! forAll { (ms: List[Magnitude]) =>
-      val s = ms.map(m => s"${m.getBrightness}/${m.getBand}/${m.getSystem}").mkString(",")
+      val s = ms.map(m => s"${m.getBrightness}/${m.getBand}/${m.getSystem.name}").mkString(",")
       val t = new HttpTooTarget(req.modifiedWith("mags" -> s))
       t.getMagnitudes must_== ms.asImList
     }
@@ -160,7 +160,7 @@ object HttpTargetSpec extends Specification with ScalaCheck with Arbitraries {
       mustFail(req without "gsprobe")
     }
     "Mags: Parse Magnitudes" ! forAll { (ms: List[Magnitude]) =>
-      val s = ms.map(m => s"${m.getBrightness}/${m.getBand}/${m.getSystem}").mkString(",")
+      val s = ms.map(m => s"${m.getBrightness}/${m.getBand}/${m.getSystem.name}").mkString(",")
       val t = new HttpTooGuideTarget(req.modifiedWith("gsmags" -> s))
       t.getMagnitudes must_== ms.asImList
     }
