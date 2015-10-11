@@ -1,0 +1,107 @@
+package edu.gemini.dataman.gsa.query
+
+import edu.gemini.dataman.gsa.query.JsonCodecs._
+import edu.gemini.spModel.dataset.DatasetLabel
+import edu.gemini.spModel.dataset.DatasetQaState._
+
+import argonaut._
+import Argonaut._
+
+import org.specs2.mutable.Specification
+
+import java.time.Instant
+
+import scalaz._
+
+
+object GsaFileCodecSpec extends Specification {
+  val json0 =
+    """
+      |{
+      |  "qa_state": "Pass",
+      |  "data_label": "GN-2015A-Q-4-95-019",
+      |  "entrytime": "2015-09-12 03:06:39.961433+00:00",
+      |  "filename": "N20150912S0124.fits"
+      |}
+    """.stripMargin
+
+  val json1 =
+  """
+    |{
+    |  "qa_state": "Usable",
+    |  "data_label": "GN-2015A-Q-4-92-004",
+    |  "entrytime": "2015-09-12 03:06:41.803116+00:00",
+    |  "filename": "N20150912S0125.fits"
+    |}
+  """.stripMargin
+
+  val file0 =
+    GsaFile(new DatasetLabel("GN-2015A-Q-4-95-019"), PASS, Instant.parse("2015-09-12T03:06:39.00Z").plusNanos(961433000), "N20150912S0124.fits")
+
+  val file1 =
+    GsaFile(new DatasetLabel("GN-2015A-Q-4-92-004"), USABLE, Instant.parse("2015-09-12T03:06:41.00Z").plusNanos(803116000), "N20150912S0125.fits")
+
+  def jsonList(js: String*): String = js.mkString("[\n", ",\n", "\n]")
+
+  def roundTrip(entries: List[GsaFile]): List[GsaFile] =
+    Parse.decodeOption[List[GsaFile]](entries.asJson.spaces2).get
+
+  "GsaFile codec" should {
+    "decode empty list" in {
+      Parse.decodeOption[List[GsaFile]]("[]").get must_== Nil
+    }
+
+    "decode singleton list" in {
+      Parse.decodeOption[List[GsaFile]](jsonList(json0)).get must_== List(file0)
+    }
+
+    "decode list" in {
+      Parse.decodeOption[List[GsaFile]](jsonList(json0, json1)).get must_== List(file0, file1)
+    }
+
+    "roundtrip empty list" in {
+      roundTrip(Nil) must_== Nil
+    }
+
+    "roundtrip singleton list" in {
+      roundTrip(List(file0)) must_== List(file0)
+    }
+
+    "roundtrip list" in {
+      roundTrip(List(file0, file1)) must_== List(file0, file1)
+    }
+
+    "fail missing key" in {
+      val json =
+        """
+          |{
+          |  "qa_state": "Pass",
+          |  "data_label": "GN-2015A-Q-4-95-019",
+          |  "entrytime": "2015-09-12 03:06:39.961433+00:00"
+          |}
+        """.stripMargin
+
+      Parse.decodeEither[GsaFile](json) match {
+        case -\/(_) => success
+        case _      => failure("Expecting missing filename warning")
+      }
+    }
+
+    "fail invalid value" in {
+      val json =
+        """
+          |{
+          |  "qa_state": "PASS",
+          |  "data_label": "GN-2015A-Q-4-95-019",
+          |  "entrytime": "2015-09-12 03:06:39.961433+00:00",
+          |  "filename": "N20150912S0124.fits"
+          |}
+        """.stripMargin
+
+      Parse.decodeEither[GsaFile](json) match {
+        case -\/(_) => success
+        case _      => failure("Expecting unparseable QA state warning")
+      }
+    }
+  }
+}
