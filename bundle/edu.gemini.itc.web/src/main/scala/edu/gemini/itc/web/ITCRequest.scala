@@ -6,7 +6,7 @@ import edu.gemini.itc.base._
 import edu.gemini.itc.shared._
 import edu.gemini.pot.sp.SPComponentType
 import edu.gemini.spModel.core.WavelengthConversions._
-import edu.gemini.spModel.core.{MagnitudeBand, Site, Wavelength}
+import edu.gemini.spModel.core._
 import edu.gemini.spModel.data.YesNoType
 import edu.gemini.spModel.gemini.acqcam.AcqCamParams
 import edu.gemini.spModel.gemini.altair.AltairParams
@@ -274,21 +274,39 @@ object ITCRequest {
   }
 
   def sourceDefinitionParameters(r: ITCRequest): SourceDefinition = {
+
+    def magnitudeSystemFor(s: String) = s match {
+      case "MAG"                  => MagnitudeSystem.Vega
+      case "ABMAG"                => MagnitudeSystem.AB
+      case "JY"                   => MagnitudeSystem.Jy
+      case "WATTS"                => MagnitudeSystem.Watts
+      case "ERGS_WAVELENGTH"      => MagnitudeSystem.ErgsWavelength
+      case "ERGS_FREQUENCY"       => MagnitudeSystem.ErgsFrequency
+    }
+    def surfaceBrightnessFor(s: String) = s match {
+      case "MAG_PSA"              => SurfaceBrightness.Vega
+      case "ABMAG_PSA"            => SurfaceBrightness.AB
+      case "JY_PSA"               => SurfaceBrightness.Jy
+      case "WATTS_PSA"            => SurfaceBrightness.Watts
+      case "ERGS_WAVELENGTH_PSA"  => SurfaceBrightness.ErgsWavelength
+      case "ERGS_FREQUENCY_PSA"   => SurfaceBrightness.ErgsFrequency
+    }
+
     // Get the source geometry and type
     val profileName = r.parameter("Profile")
     val (spatialProfile, norm, units) = profileName match {
       case "POINT"    =>
         val norm  = r.doubleParameter("psSourceNorm")
-        val units = r.enumParameter(classOf[BrightnessUnit], "psSourceUnits")
+        val units = magnitudeSystemFor(r.parameter("psSourceUnits"))
         (PointSource, norm, units)
       case "GAUSSIAN" =>
         val norm  = r.doubleParameter("gaussSourceNorm")
-        val units = r.enumParameter(classOf[BrightnessUnit], "gaussSourceUnits")
+        val units = magnitudeSystemFor(r.parameter("gaussSourceUnits"))
         val fwhm  = r.doubleParameter("gaussFwhm")
         (GaussianSource(fwhm), norm, units)
       case "UNIFORM"  =>
         val norm  = r.doubleParameter("usbSourceNorm")
-        val units = r.enumParameter(classOf[BrightnessUnit], "usbSourceUnits")
+        val units = surfaceBrightnessFor(r.parameter("usbSourceUnits"))
         (UniformSource, norm, units)
       case _          =>
         throw new NoSuchElementException(s"Unknown SpatialProfile $profileName")

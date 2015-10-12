@@ -1,7 +1,9 @@
 package edu.gemini.itc.base;
 
-import edu.gemini.itc.shared.BrightnessUnit;
+import edu.gemini.spModel.core.BrightnessUnit;
 import edu.gemini.spModel.core.MagnitudeBand;
+import edu.gemini.spModel.core.MagnitudeSystem;
+import edu.gemini.spModel.core.SurfaceBrightness;
 
 /**
  * This class creates a black body spectrum over the interval defined by the
@@ -28,13 +30,10 @@ public class BlackBodySpectrum implements VisitableSampledSpectrum {
 
         //if units need to be converted do it.
         final double _flux;
-        switch (units) {
-            case MAG:
-            case MAG_PSA:
-                _flux = flux;
-                break;
-            default:
-                _flux = _convertToMag(flux, units, band);
+        if (units.equals(MagnitudeSystem.Vega$.MODULE$) || units.equals(SurfaceBrightness.Vega$.MODULE$)) {
+            _flux = flux;
+        } else {
+            _flux = _convertToMag(flux, units, band);
         }
 
         int i = 0;
@@ -75,23 +74,18 @@ public class BlackBodySpectrum implements VisitableSampledSpectrum {
         // into a genral purpose conversion class if needs to be used again.
         final double norm;
         //The firstpart converts the units to our internal units.
-        switch (units) {
-            case JY:                norm = flux * 1.509e7 / band.center().toNanometers();       break;
-            case WATTS:             norm = flux * band.center().toNanometers() / 1.988e-13;     break;
-            case ERGS_WAVELENGTH:   norm = flux * band.center().toNanometers() / 1.988e-14;     break;
-            case ERGS_FREQUENCY:    norm = flux * 1.509e30 / band.center().toNanometers();      break;
-            case ABMAG:             norm = 5.632e10 * Math.pow(10, -0.4 * flux) / band.center().toNanometers(); break;
-            case MAG_PSA:
-                double zeropoint = ZeroMagnitudeStar.getAverageFlux(band);
-                norm = zeropoint * (Math.pow(10.0, -0.4 * flux));
-                break;
-            case JY_PSA:            norm = flux * 1.509e7 / band.center().toNanometers();       break;
-            case WATTS_PSA:         norm = flux * band.center().toNanometers() / 1.988e-13;     break;
-            case ERGS_WAVELENGTH_PSA: norm = flux * band.center().toNanometers() / 1.988e-14;   break;
-            case ERGS_FREQUENCY_PSA:norm = flux * 1.509e30 / band.center().toNanometers();      break;
-            case ABMAG_PSA:         norm = 5.632e10 * Math.pow(10, -0.4 * flux) / band.center().toNanometers(); break;
-            default:
-                throw new IllegalArgumentException("invalid units " + units);
+        if (units.equals(MagnitudeSystem.AB$.MODULE$) || units.equals(SurfaceBrightness.AB$.MODULE$)) {
+            norm = 5.632e10 * Math.pow(10, -0.4 * flux) / band.center().toNanometers();
+        } else if (units.equals(MagnitudeSystem.Jy$.MODULE$) || units.equals(SurfaceBrightness.Jy$.MODULE$)) {
+            norm = flux * 1.509e7 / band.center().toNanometers();
+        } else if (units.equals(MagnitudeSystem.Watts$.MODULE$) || units.equals(SurfaceBrightness.Watts$.MODULE$)) {
+            norm = flux * band.center().toNanometers() / 1.988e-13;
+        } else if (units.equals(MagnitudeSystem.ErgsWavelength$.MODULE$) || units.equals(SurfaceBrightness.ErgsWavelength$.MODULE$)) {
+            norm = flux * band.center().toNanometers() / 1.988e-14;
+        } else if (units.equals(MagnitudeSystem.ErgsFrequency$.MODULE$) || units.equals(SurfaceBrightness.ErgsFrequency$.MODULE$)) {
+            norm = flux * 1.509e30 / band.center().toNanometers();
+        } else {
+            throw new IllegalArgumentException("invalid units " + units);
         }
 
 
