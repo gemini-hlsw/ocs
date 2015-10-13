@@ -42,7 +42,7 @@ object BagsManager {
       LOG.info(s"Performing BAGS lookup for observation=${observation.getObservationID}")
 
       def resultString[A](r: Option[A]): String =
-        s"Results=${r ? "No" | "Yes"}."
+        s"Results=${r ? "Yes" | "No"}."
 
       // We must handle GeMS separately from other strategies, and delegate the work to the GemsGuideStarWorker.
       def gemsLookup(obsCtx: ObsContext): Unit = {
