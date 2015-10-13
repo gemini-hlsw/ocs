@@ -4,6 +4,7 @@ import javax.swing.table._
 
 import edu.gemini.ags.api.AgsMagnitude.MagnitudeTable
 import edu.gemini.ags.api.{AgsAnalysis, AgsGuideQuality, AgsRegistrar, AgsStrategy}
+import edu.gemini.ags.conf.ProbeLimitsTable
 import edu.gemini.catalog.api.{UCAC4, CatalogName, CatalogQuery}
 import edu.gemini.pot.sp.SPComponentType
 import edu.gemini.shared.util.immutable.{None => JNone, Some => JSome}
@@ -17,6 +18,7 @@ import edu.gemini.spModel.gemini.michelle.InstMichelle
 import edu.gemini.spModel.gemini.nici.InstNICI
 import edu.gemini.spModel.gemini.nifs.InstNIFS
 import edu.gemini.spModel.gemini.niri.InstNIRI
+import edu.gemini.spModel.gemini.obscomp.SPSiteQuality
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.Conditions
 import edu.gemini.spModel.gemini.phoenix.InstPhoenix
 import edu.gemini.spModel.gemini.texes.InstTexes
@@ -83,17 +85,20 @@ case class ObservationInfo(ctx: Option[ObsContext], objectName: Option[String], 
       case SPComponentType.INSTRUMENT_VISITOR    => new VisitorInstrument()
     }
     val site = inst.flatMap(_.getSite.asScala.headOption)
-    (baseCoordinates |@| inst |@| site){ (c, i, s) =>
+    (baseCoordinates |@| inst |@| site |@| conditions){ (c, i, s, cond) =>
       val target = new SPTarget(c.ra.toAngle.toDegrees, c.dec.toDegrees) <| {_.setName(~objectName)}
       val env = TargetEnvironment.create(target)
       // To calculate analysis of guide quality, it is required the site, insturment and conditions
       // TODO Verify if we need offsets, AO info and scheduling block
-      ObsContext.create(env, i, new JSome(s), conditions.get, null, null, JNone.instance())
+      ObsContext.create(env, i, new JSome(s), cond, null, null, JNone.instance())
     }
   }
 }
 
 object ObservationInfo {
+  // Observation context loaded initially with default parameters
+  // TODO don't hardcode to Gmos South
+  val zero = new ObservationInfo(None, "".some, Coordinates.zero.some, SPComponentType.INSTRUMENT_GMOSSOUTH.some, None, Nil, SPSiteQuality.Conditions.BEST.some, UCAC4, ProbeLimitsTable.loadOrThrow())
 
   private val InstMap = Map[String, SPComponentType](
     Flamingos2.INSTRUMENT_NAME_PROP        -> SPComponentType.INSTRUMENT_FLAMINGOS2,

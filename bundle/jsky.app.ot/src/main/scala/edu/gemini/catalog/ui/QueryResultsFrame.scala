@@ -420,25 +420,32 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
           MagnitudeConstraints(BandsList.bandList(bandCB.selection.item), FaintnessConstraint(faintess.text.toDouble), SaturationConstraint(saturation.text.toDouble).some)
       }.toList
 
+    def observationInfoFromForm: ObservationInfo = {
+      val selectedCatalog = catalogBox.selection.item
+
+      val guiders = for {
+        i <- 0 until guider.peer.getModel.getSize
+      } yield guider.peer.getModel.getElementAt(i)
+
+      // TODO Change the search query for different conditions OCSADV-416
+      val conditions = Conditions.NOMINAL.sb(sbBox.selection.item).cc(ccBox.selection.item).iq(iqBox.selection.item)
+
+      val inst = ObservationInfo.toInstrument(instrumentName.text)
+      val coordinates = Coordinates(ra.value, dec.value)
+      ObservationInfo(None, objectName.text.some, coordinates.some, inst, Option(guider.selection.item.strategy), guiders.toList, conditions.some, selectedCatalog, ProbeLimitsTable.loadOrThrow())
+    }
+
     // Make a query out of the form parameters
     private def buildQuery: Option[(Option[ObservationInfo], CatalogQuery)] = {
       queryButton.enabled option {
         // No validation here, the Query button is disabled unless all the controls are valid
-        val coordinates = Coordinates(ra.value, dec.value)
         val radiusConstraint = RadiusConstraint.between(Angle.fromArcmin(radiusStart.text.toDouble), Angle.fromArcmin(radiusEnd.text.toDouble))
-
-        val guiders = for {
-          i <- 0 until guider.peer.getModel.getSize
-        } yield guider.peer.getModel.getElementAt(i)
-
-        // TODO Change the search query for different conditions OCSADV-416
-        val conditions = Conditions.NOMINAL.sb(sbBox.selection.item).cc(ccBox.selection.item).iq(iqBox.selection.item)
-
         val selectedCatalog = catalogBox.selection.item
 
-        val inst = ObservationInfo.toInstrument(instrumentName.text)
-        val info = ObservationInfo(None, objectName.text.some, coordinates.some, inst, Option(guider.selection.item.strategy), guiders.toList, conditions.some, selectedCatalog, ProbeLimitsTable.loadOrThrow())
+        val coordinates = Coordinates(ra.value, dec.value)
+        val info = observationInfoFromForm
         val defaultQuery = CatalogQuery(coordinates, radiusConstraint, currentFilters, selectedCatalog)
+
         // Start with the guider's query and update it with the values on the UI
         val calculatedQuery = guider.selection.item.query.headOption.collect {
           case c: ConeSearchCatalogQuery if currentFilters.nonEmpty => c.copy(base = coordinates, radiusConstraint = radiusConstraint, magnitudeConstraints = currentFilters, catalog = selectedCatalog)
@@ -537,8 +544,7 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
   }
 
   def showOn(obsCtx: Option[ObsContext]): Unit = {
-    // TODO Support launching without a context
-    obsCtx.foreach(showOn)
+    obsCtx.orElse(ObservationInfo.zero.toContext).foreach(showOn)
   }
 
   def showOn(obsCtx: ObsContext) {
