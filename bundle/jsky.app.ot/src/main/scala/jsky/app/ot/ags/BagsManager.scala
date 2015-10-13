@@ -93,7 +93,9 @@ object BagsManager {
     }
   }
 
-  private class BagsThread(id: Int) extends Runnable {
+  private class BagsThread(id: Int) extends Thread {
+    setPriority(Thread.NORM_PRIORITY - 1)
+
     override def run() {
       // Get the next task to run. This blocks on the queue.
       val task = nextTask()
@@ -106,7 +108,7 @@ object BagsManager {
     }
   }
 
-  private val NumThreads = math.min(1, Runtime.getRuntime.availableProcessors())
+  private val NumThreads = math.max(1, Runtime.getRuntime.availableProcessors()-1)
   private val RequeueDelay = 3000
   private val executor = Executors.newFixedThreadPool(NumThreads)
   private var taskMap = new HashMap[SPNodeKey, BagsTask]
