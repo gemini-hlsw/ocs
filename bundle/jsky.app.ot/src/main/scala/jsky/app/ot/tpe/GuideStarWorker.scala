@@ -56,17 +56,17 @@ object GuideStarWorker {
       ctx.targets.dataObject.foreach { targetComp =>
         targetComp.setTargetEnvironment(newEnv)
         ctx.targets.commit()
+      }
+    }
 
-        // Update the position angle, if necessary.
-        selOpt.foreach { sel =>
-          ctx.instrument.dataObject.foreach { inst =>
-            val deg = sel.posAngle.toDegrees
-            val old = inst.getPosAngleDegrees
-            if (deg != old) {
-              inst.setPosAngleDegrees(deg)
-              ctx.instrument.commit()
-            }
-          }
+    // Update the position angle, if necessary.
+    selOpt.foreach { sel =>
+      ctx.instrument.dataObject.foreach { inst =>
+        val deg = sel.posAngle.toDegrees
+        val old = inst.getPosAngleDegrees
+        if (deg != old) {
+          inst.setPosAngleDegrees(deg)
+          ctx.instrument.commit()
         }
       }
     }
