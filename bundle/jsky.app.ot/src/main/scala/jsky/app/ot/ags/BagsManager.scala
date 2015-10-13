@@ -120,7 +120,7 @@ object BagsManager {
       p.addCompositeChangeListener(propertyChangeListener)
 
       // Only queue up observations that do not have an auto guide star.
-      p.getObservations.asScala.foreach { obs =>
+      p.getAllObservations.asScala.foreach { obs =>
         val obsCtx = ObsContext.create(obs)
         obsCtx.asScalaOpt.foreach { ctx =>
           if (ctx.getTargets.getGuideEnvironment.getPrimaryReferencedGuiders.isEmpty ||
@@ -251,9 +251,14 @@ object BagsManager {
           if (!sameEnv)
             updateObservation(obsComp.getContextObservation)
 
-        case prog: ISPProgram => prog.getObservations.asScala.foreach(updateObservation)
-        case node: ISPNode    => updateObservation(node.getContextObservation)
-        case _                => // Ignore
+        case prog: ISPProgram =>
+          prog.getAllObservations.asScala.foreach(updateObservation)
+        case group: ISPGroup =>
+          group.getObservations.asScala.foreach(updateObservation)
+        case node: ISPNode    =>
+          updateObservation(node.getContextObservation)
+        case _                =>
+          // Ignore
       }
     }
   }
