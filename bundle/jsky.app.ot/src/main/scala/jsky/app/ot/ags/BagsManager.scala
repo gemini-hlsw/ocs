@@ -93,9 +93,7 @@ object BagsManager {
     }
   }
 
-  private class BagsThread(id: Int) extends Thread {
-    setPriority(Thread.NORM_PRIORITY - 1)
-
+  private class BagsThread(id: Int) extends Runnable {
     override def run() {
       // Get the next task to run. This blocks on the queue.
       val task = nextTask()
@@ -108,18 +106,25 @@ object BagsManager {
     }
   }
 
-  private val NumThreads = math.max(1, Runtime.getRuntime.availableProcessors()-1)
+  private val NumThreads = math.min(1, Runtime.getRuntime.availableProcessors())
   private val RequeueDelay = 3000
   private val executor = Executors.newFixedThreadPool(NumThreads)
   private var taskMap = new HashMap[SPNodeKey, BagsTask]
   private val taskQueue = new LinkedBlockingQueue[SPNodeKey]
+
+  // The programs we are actively managing. This is to prevent threads who fail from adding their observations
+  // back into the queue when the program is no longer active.
+  private var activePrograms = Set[SPNodeKey]()
+
   List.tabulate(NumThreads)(i => new BagsThread(i)).foreach(executor.submit)
 
 
   // Initial registration of program.
   def registerProgram(prog: ISPProgram) = {
     Option(prog).foreach { p =>
-      p.addCompositeChangeListener(propertyChangeListener)
+      activePrograms.synchronized(activePrograms += p.getNodeKey)
+      p.addStructureChangeListener(structurePropertyChangeListener)
+      p.addCompositeChangeListener(compositePropertyChangeListener)
 
       // Only queue up observations that do not have an auto guide star.
       p.getAllObservations.asScala.foreach { obs =>
@@ -127,7 +132,7 @@ object BagsManager {
         obsCtx.asScalaOpt.foreach { ctx =>
           if (ctx.getTargets.getGuideEnvironment.getPrimaryReferencedGuiders.isEmpty ||
             ctx.getTargets.getGuideEnvironment.getPrimaryReferencedGuiders.asScala.exists(gp => {
-            ctx.getTargets.getPrimaryGuideProbeTargets(gp).asScalaOpt.forall(_.getBagsTarget.isEmpty)})) {
+              ctx.getTargets.getPrimaryGuideProbeTargets(gp).asScalaOpt.forall(_.getBagsTarget.isEmpty)})) {
             updateObservation(obs)
           }
         }
@@ -138,18 +143,24 @@ object BagsManager {
   // Unregister a program.
   def unregisterProgram(prog: ISPProgram) = {
     Option(prog).foreach { p =>
-      p.getObservations.asScala.foreach(removeObservation)
-      p.removeCompositeChangeListener(propertyChangeListener)
+      p.getAllObservations.asScala.foreach(removeObservation)
+      p.removeCompositeChangeListener(compositePropertyChangeListener)
+      p.removeStructureChangeListener(structurePropertyChangeListener)
+      activePrograms.synchronized(activePrograms -= p.getNodeKey)
     }
   }
 
   // Mute an observation from firing PropertyChangeEvents to BAGS while updating BAGS guide stars.
-  private def muteObservation(obs: ISPObservation) =
-    obs.getProgram.removeCompositeChangeListener(propertyChangeListener)
+  private def muteObservation(obs: ISPObservation) = {
+    obs.getProgram.removeCompositeChangeListener(compositePropertyChangeListener)
+    obs.getProgram.removeStructureChangeListener(structurePropertyChangeListener)
+  }
 
   // Unmute an observation from firing PropertyChangeEvents to BAGS while updating BAGS guide stars.
-  private def unmuteObservation(obs: ISPObservation) =
-    obs.getProgram.addCompositeChangeListener(propertyChangeListener)
+  private def unmuteObservation(obs: ISPObservation) = {
+    obs.getProgram.addStructureChangeListener(structurePropertyChangeListener)
+    obs.getProgram.addCompositeChangeListener(compositePropertyChangeListener)
+  }
 
   // Retrieve the next task to perform and set it up, moving it into the processing phase by assigning
   // curCtx to nextCtx.
@@ -175,24 +186,33 @@ object BagsManager {
           done
         }
       }
-      if (!doneWithTask)
-        taskQueue.synchronized {
-          if (!taskQueue.contains(obsKey))
-            taskQueue.add(obsKey)
+
+      // If a task is not complete and the program is still active, we add it back.
+      if (!doneWithTask) {
+        val isActiveProgram = activePrograms.synchronized(activePrograms.contains(task.observation.getProgramKey))
+        if (isActiveProgram) {
+          taskQueue.synchronized {
+            if (!taskQueue.contains(obsKey))
+              taskQueue.add(obsKey)
+          }
         }
+      }
     }
     else {
-      Thread.sleep(RequeueDelay)
+      val isActiveProgram = activePrograms.synchronized(activePrograms.contains(task.observation.getProgramKey))
+      if (isActiveProgram) {
+        Thread.sleep(RequeueDelay)
 
-      // We only need to do something if the task is not already in the queue.
-      taskQueue.synchronized {
-        if (!taskQueue.contains(obsKey)) {
-          val newTask = task match {
-            case BagsTask(obs, Some(ctx), None) => BagsTask(obs, None, Some(ctx))
-            case t => t
+        // We only need to do something if the task is not already in the queue.
+        taskQueue.synchronized {
+          if (!taskQueue.contains(obsKey)) {
+            val newTask = task match {
+              case BagsTask(obs, Some(ctx), None) => BagsTask(obs, None, Some(ctx))
+              case t => t
+            }
+            taskMap.synchronized(taskMap += ((obsKey, newTask)))
+            taskQueue.add(obsKey)
           }
-          taskMap.synchronized(taskMap += ((obsKey, newTask)))
-          taskQueue.add(obsKey)
         }
       }
     }
@@ -238,30 +258,17 @@ object BagsManager {
         }
       }
 
-  private val propertyChangeListener = new PropertyChangeListener {
-    override def propertyChange(evt: PropertyChangeEvent): Unit = {
-      evt.getSource match {
-        case obsComp: ISPObsComponent =>
-          // Check to see if anything has changed.
-          val sameEnv = evt.getOldValue.isInstanceOf[TargetObsComp] && evt.getNewValue.isInstanceOf[TargetObsComp] && {
-            val oldEnv = evt.getOldValue.asInstanceOf[TargetObsComp].getTargetEnvironment
-            val newEnv = evt.getNewValue.asInstanceOf[TargetObsComp].getTargetEnvironment
+  private val compositePropertyChangeListener = new PropertyChangeListener {
+    override def propertyChange(evt: PropertyChangeEvent): Unit = evt.getSource match {
+      case node: ISPNode => updateObservation(node.getContextObservation)
+      case _             => // Ignore
+    }
+  }
 
-            // Same base, same primary guiders, same BAGS targets.
-            oldEnv.getBase.getTarget.equals(newEnv.getBase.getTarget) && bagsTargetsMatch(oldEnv, newEnv)
-          }
-          if (!sameEnv)
-            updateObservation(obsComp.getContextObservation)
-
-        case prog: ISPProgram =>
-          prog.getAllObservations.asScala.foreach(updateObservation)
-        case group: ISPGroup =>
-          group.getObservations.asScala.foreach(updateObservation)
-        case node: ISPNode    =>
-          updateObservation(node.getContextObservation)
-        case _                =>
-          // Ignore
-      }
+  private val structurePropertyChangeListener = new PropertyChangeListener {
+    override def propertyChange(evt: PropertyChangeEvent): Unit = evt.getSource match {
+      case cont: ISPObservationContainer => cont.getAllObservations.asScala.foreach(updateObservation)
+      case _                             => // Ignore
     }
   }
 }
