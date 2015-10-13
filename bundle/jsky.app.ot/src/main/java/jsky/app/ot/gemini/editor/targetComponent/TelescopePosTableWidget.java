@@ -188,7 +188,7 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
             BagsTargetRow(final boolean isActiveGuideProbe, final Option<AgsGuideQuality> quality, final boolean enabled,
                           final GuideProbe probe, final SPTarget target, final Option<WorldCoords> baseCoords,
                           final Option<Long> when) {
-                super(enabled, String.format("%s (BAGS)", probe.getKey()), target, baseCoords, when);
+                super(enabled, probe.getKey(), target, baseCoords, when);
                 this.isActiveGuideProbe = isActiveGuideProbe;
                 this.quality = quality;
             }
