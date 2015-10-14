@@ -22,7 +22,7 @@ public class MagnitudeTest {
         assertEquals(Band.J, m.getBand());
         assertEquals(1.0, m.getBrightness(), DELTA);
         assertEquals(None.INSTANCE, m.getError());
-        assertEquals(MagnitudeSystem.DEFAULT(), m.getSystem());
+        assertEquals(MagnitudeSystem.Default(), m.getSystem());
 
         try {
             new Magnitude(null, 1.0);
@@ -42,11 +42,11 @@ public class MagnitudeTest {
 
     @Test
     public void testConstructionWithSystem() {
-        Magnitude m = new Magnitude(Band.J, 1.0, 0.1, MagnitudeSystem.JY$.MODULE$);
+        Magnitude m = new Magnitude(Band.J, 1.0, 0.1, MagnitudeSystem.Jy$.MODULE$);
         assertEquals(Band.J, m.getBand());
         assertEquals(1.0, m.getBrightness(), DELTA);
         assertEquals(0.1, m.getError().getValue(), DELTA);
-        assertEquals(MagnitudeSystem.JY$.MODULE$, m.getSystem());
+        assertEquals(MagnitudeSystem.Jy$.MODULE$, m.getSystem());
     }
 
     @Test

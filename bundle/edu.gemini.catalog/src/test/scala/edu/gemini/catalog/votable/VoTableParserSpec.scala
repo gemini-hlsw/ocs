@@ -502,7 +502,7 @@ class VoTableParserSpec extends SpecificationWithJUnit with VoTableParser {
 
       val mags = result.map(_.magnitudeIn(MagnitudeBand.UC))
       // Fmag gets converted to UC
-      mags should beEqualTo(\/.right(Some(Magnitude(5.9, MagnitudeBand.UC, None, MagnitudeSystem.VEGA))))
+      mags should beEqualTo(\/.right(Some(Magnitude(5.9, MagnitudeBand.UC, None, MagnitudeSystem.Vega))))
     }
     "extract Sloan's band" in {
       val xmlFile = "sloan.xml"

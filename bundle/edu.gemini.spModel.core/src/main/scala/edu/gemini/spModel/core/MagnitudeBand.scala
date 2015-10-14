@@ -5,10 +5,10 @@ import edu.gemini.spModel.core.WavelengthConversions._
 sealed abstract class MagnitudeBand private (val name: String, val center: Wavelength, val width: Wavelength, val description: Option[String], val defaultSystem: MagnitudeSystem) extends Product with Serializable {
 
   private def this(name: String, center: Wavelength, width: Wavelength) =
-    this(name, center, width, None, MagnitudeSystem.VEGA)
+    this(name, center, width, None, MagnitudeSystem.Vega)
 
   private def this(name: String, center: Wavelength, width: Wavelength, description: String) =
-    this(name, center, width, Some(description), MagnitudeSystem.VEGA)
+    this(name, center, width, Some(description), MagnitudeSystem.Vega)
 
   private def this(name: String, center: Wavelength, width: Wavelength, description: String, defaultMagnitudeSystem: MagnitudeSystem) =
     this(name, center, width, Some(description), defaultMagnitudeSystem)
@@ -46,7 +46,7 @@ object MagnitudeBand {
   case object Q  extends MagnitudeBand("Q", 20130.nm, 1650.nm)
 
   // use V-Band center and width for apparent magnitudes
-  case object AP extends MagnitudeBand("AP", V.center, V.width, Some("apparent"), MagnitudeSystem.VEGA)
+  case object AP extends MagnitudeBand("AP", V.center, V.width, Some("apparent"), MagnitudeSystem.Vega)
 
   lazy val all: List[MagnitudeBand] =
     List(_u, _g, _r, _i, _z, U, B, V, UC, R, I, Y, J, H, K, L, M, N, Q, AP)

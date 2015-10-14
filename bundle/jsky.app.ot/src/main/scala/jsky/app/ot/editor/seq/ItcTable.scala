@@ -216,9 +216,9 @@ trait ItcTable extends Table {
       val value  = mag.getBrightness
       // TODO: unify band definitions from spModel core and itc shared so that we don't need this translation anymore
       val system = mag.getSystem match {
-        case MagnitudeSystem.VEGA  => BrightnessUnit.MAG
+        case MagnitudeSystem.Vega  => BrightnessUnit.MAG
         case MagnitudeSystem.AB    => BrightnessUnit.ABMAG
-        case MagnitudeSystem.JY    => BrightnessUnit.JY
+        case MagnitudeSystem.Jy    => BrightnessUnit.JY
       }
       (value, ModelConverters.toNewBand(mag.getBand), system)
     }

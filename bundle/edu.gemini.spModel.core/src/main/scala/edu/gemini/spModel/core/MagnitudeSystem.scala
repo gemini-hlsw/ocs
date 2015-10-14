@@ -7,17 +7,14 @@ sealed abstract class MagnitudeSystem(val name: String) extends Product with Ser
 
 object MagnitudeSystem {
 
-  case object VEGA   extends MagnitudeSystem("Vega")
+  case object Vega   extends MagnitudeSystem("Vega")
   case object AB     extends MagnitudeSystem("AB")
-  case object JY     extends MagnitudeSystem("Jy")
-//  case object WATTS  extends MagnitudeSystem("W/m²/µm")
-//  case object ERGSA  extends MagnitudeSystem("erg/s/cm²/Å")
-//  case object ERGSHZ extends MagnitudeSystem("erg/s/cm²/Hz")
+  case object Jy     extends MagnitudeSystem("Jy")
 
-  val default: MagnitudeSystem = VEGA
+  val default: MagnitudeSystem = Vega
 
   val all: List[MagnitudeSystem] =
-    List(VEGA, AB, JY)
+    List(Vega, AB, Jy)
 
   implicit val MagnitudeSystemEqual: Equal[MagnitudeSystem] =
     Equal.equalA
@@ -25,6 +22,6 @@ object MagnitudeSystem {
 
   // ===== LEGACY JAVA SUPPORT =====
   val allAsJava = new java.util.Vector[MagnitudeSystem](all)
-  val DEFAULT = default
+  val Default = default // default is a reserved key word in Java!
 
 }
