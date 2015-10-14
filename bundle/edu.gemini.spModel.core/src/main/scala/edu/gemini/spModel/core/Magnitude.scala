@@ -27,6 +27,12 @@ case class Magnitude(value: Double, band: MagnitudeBand, error: Option[Double], 
 
 object Magnitude {
 
+  // Lenses
+  val value: Magnitude  @> Double          = Lens.lensu((a, b) => a.copy(value = b), _.value)
+  val band:  Magnitude  @> MagnitudeBand   = Lens.lensu((a, b) => a.copy(band = b), _.band)
+  val error: Magnitude  @> Option[Double]  = Lens.lensu((a, b) => a.copy(error = b), _.error)
+  val system: Magnitude @> MagnitudeSystem = Lens.lensu((a, b) => a.copy(system = b), _.system)
+
   // by system name, band name, value and error (in that order)
   implicit val MagnitudeOrdering: scala.math.Ordering[Magnitude] =
     scala.math.Ordering.by(m => (m.system.name, m.band.name, m.value, m.error))

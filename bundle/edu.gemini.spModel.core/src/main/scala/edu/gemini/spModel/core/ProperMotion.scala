@@ -18,4 +18,6 @@ object ProperMotion {
 
   val deltaRA : ProperMotion @> RightAscensionAngularVelocity = Lens(t => Store(s => t.copy(deltaRA = s), t.deltaRA))
   val deltaDec: ProperMotion @> DeclinationAngularVelocity    = Lens(t => Store(s => t.copy(deltaDec = s), t.deltaDec))
+  val epoch:    ProperMotion @> Epoch                         = Lens(t => Store(s => t.copy(epoch = s), t.epoch))
+
 }

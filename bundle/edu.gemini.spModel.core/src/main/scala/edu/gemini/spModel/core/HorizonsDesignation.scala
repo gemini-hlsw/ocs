@@ -17,23 +17,35 @@ object HorizonsDesignation {
    * the query string `DES=C/1973 E1;CAP`.
    */
   final case class Comet(des: String) extends HorizonsDesignation(s"DES=$des;CAP")
+  object Comet {
+    val des: Comet @> String = Lens.lensu((a, b) => a.copy(des = b), _.des)
+  }
 
   /**
    * Designation for an asteroid under modern naming conventions. Example: `1971 UC1` for
    * 1896 Beer, yielding a query string `DES=1971 UC1`.
    */
   final case class Asteroid(des: String) extends HorizonsDesignation(s"DES=$des")
+  object Asteroid {
+    val des: Asteroid @> String = Lens.lensu((a, b) => a.copy(des = b), _.des)
+  }
 
   /**
    * Designation for an asteroid under "old" naming conventions. These are small numbers. Example:
    * `4` for Vesta, yielding a query string `4;`
    */
   final case class AsteroidOldStyle(num: Int) extends HorizonsDesignation(s"$num;")
+  object AsteroidOldStyle {
+    val num: AsteroidOldStyle @> Int = Lens.lensu((a, b) => a.copy(num = b), _.num)
+  }
 
   /**
    * Designation for a major body (planet or satellite thereof). These have small numbers. Example:
    * `606` for Titan, yielding a query string `606`.
    */
   final case class MajorBody(num: Int) extends HorizonsDesignation(s"$num")
+  object MajorBody {
+    val num: MajorBody @> Int = Lens.lensu((a, b) => a.copy(num = b), _.num)
+  }
 
 }
