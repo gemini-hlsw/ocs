@@ -18,7 +18,7 @@ import java.util.Comparator;
 public final class Magnitude implements Comparable<Magnitude>, Serializable {
 
     private static final MagnitudeSystem AB   = MagnitudeSystem.AB$.MODULE$;
-    private static final MagnitudeSystem Vega = MagnitudeSystem.VEGA$.MODULE$;
+    private static final MagnitudeSystem Vega = MagnitudeSystem.Vega$.MODULE$;
 
     /**
      * Common wavelength bands.

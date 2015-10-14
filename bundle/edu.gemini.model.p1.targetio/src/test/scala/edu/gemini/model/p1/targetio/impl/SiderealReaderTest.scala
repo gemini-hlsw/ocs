@@ -81,13 +81,13 @@ ngc007,01:00:00.00,02:00:00,1.0,2.0,6.6,7.7
   }
 
   @Test def testMagWithSystem() {
-    good(target1.copy(magnitudes = List(mkMag(6.6, MagnitudeBand.R, MagnitudeSystem.JY), mkMag(7.7, MagnitudeBand.J))), csvHeader + """,R,J,R_sys
+    good(target1.copy(magnitudes = List(mkMag(6.6, MagnitudeBand.R, MagnitudeSystem.Jy), mkMag(7.7, MagnitudeBand.J))), csvHeader + """,R,J,R_sys
 ngc007,01:00:00.00,02:00:00,1.0,2.0,6.6,7.7,JY
 """)
-    good(target1.copy(magnitudes = List(mkMag(6.6, MagnitudeBand.R, MagnitudeSystem.JY), mkMag(7.7, MagnitudeBand.J))), csvHeader + """,R,J,R_sys,J_sys
+    good(target1.copy(magnitudes = List(mkMag(6.6, MagnitudeBand.R, MagnitudeSystem.Jy), mkMag(7.7, MagnitudeBand.J))), csvHeader + """,R,J,R_sys,J_sys
 ngc007,01:00:00.00,02:00:00,1.0,2.0,6.6,7.7,JY,INDEF
 """)
-    good(target1.copy(magnitudes = List(mkMag(6.6, MagnitudeBand.R, MagnitudeSystem.JY))), csvHeader + """,R,J,R_sys,J_sys
+    good(target1.copy(magnitudes = List(mkMag(6.6, MagnitudeBand.R, MagnitudeSystem.Jy))), csvHeader + """,R,J,R_sys,J_sys
 ngc007,01:00:00.00,02:00:00,1.0,2.0,6.6,INDEF,JY,INDEF
 """)
   }

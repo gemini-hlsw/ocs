@@ -195,7 +195,7 @@ public enum MagnitudePio {
         }
 
         // Get the system and assume Vega if not specified.
-        final String defaultSys = MagnitudeSystem.VEGA$.MODULE$.name();
+        final String defaultSys = MagnitudeSystem.Vega$.MODULE$.name();
         final String systemName = Optional.ofNullable(Pio.getValue(pset, MAG_SYSTEM)).orElse(defaultSys);
         final MagnitudeSystem system;
         try {

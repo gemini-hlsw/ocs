@@ -14,7 +14,7 @@ object MagParserSpec extends Specification with ScalaCheck with Arbitraries {
   "MagParser" should {
 
     "Parse Valid Mags" ! forAll { (ms: List[Magnitude]) =>
-      val s = ms.map(m => s"${m.getBrightness}/${m.getBand}/${m.getSystem.name}").mkString(",")
+      val s = ms.map(m => s"${m.getBrightness}/${m.getBand}/${m.getSystem}").mkString(",")
       new MagParser().unsafeParse(s) must_== ms.asImList
     }
 

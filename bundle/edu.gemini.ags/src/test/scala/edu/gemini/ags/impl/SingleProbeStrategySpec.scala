@@ -10,7 +10,7 @@ import edu.gemini.skycalc.{Angle => SkycalcAngle, Offset => SkycalcOffset}
 import edu.gemini.spModel.ags.AgsStrategyKey._
 import edu.gemini.spModel.core.Target.SiderealTarget
 import edu.gemini.spModel.core.MagnitudeBand.{_r, R, UC}
-import edu.gemini.spModel.core.MagnitudeSystem.VEGA
+import edu.gemini.spModel.core.MagnitudeSystem.Vega
 import edu.gemini.spModel.core._
 import edu.gemini.shared.util.immutable.{None => JNone, Some}
 import edu.gemini.spModel.gemini.altair.{AltairAowfsGuider, AltairParams, InstAltair}
@@ -63,7 +63,7 @@ class SingleProbeStrategySpec extends Specification with NoTimeConversions {
     val ra     = RightAscension.fromAngle(Angle.parseHMS(raStr).getOrElse(sys.error("couldn't parse RA")))
     val dec    = Declination.fromAngle(Angle.parseDMS(decStr).getOrElse(sys.error("couldn't parse Dec"))).getOrElse(sys.error("invalid dec"))
     val coords = Coordinates(ra, dec)
-    val ms     = mags.map { case (value, band) => Magnitude(value, band, None, VEGA) }.toList
+    val ms     = mags.map { case (value, band) => Magnitude(value, band, None, Vega) }.toList
     SiderealTarget(name, coords, None, None, None, None, ms)
   }
 

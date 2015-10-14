@@ -77,7 +77,7 @@ public final class ManitudePioTest {
     @Test
     public void testListWithSystem() throws Exception {
         Magnitude magJ1 = new Magnitude(Magnitude.Band.J, 1, (Option<Double>) None.INSTANCE, MagnitudeSystem.AB$.MODULE$);
-        Magnitude magK2 = new Magnitude(Magnitude.Band.K, 2, (Option<Double>) None.INSTANCE, MagnitudeSystem.JY$.MODULE$);
+        Magnitude magK2 = new Magnitude(Magnitude.Band.K, 2, (Option<Double>) None.INSTANCE, MagnitudeSystem.Jy$.MODULE$);
 
         ImList<Magnitude> lst1 = DefaultImList.create(magJ1, magK2);
         ParamSet pset = MagnitudePio.instance.toParamSet(fact, lst1);
@@ -90,7 +90,7 @@ public final class ManitudePioTest {
             magnitude -> magnitude.getBand() == Magnitude.Band.J && magnitude.getSystem() == MagnitudeSystem.AB$.MODULE$
         ));
         assertEquals(new Some<>(magK2), lst2.find(
-            magnitude -> magnitude.getBand() == Magnitude.Band.K && magnitude.getSystem() == MagnitudeSystem.JY$.MODULE$
+            magnitude -> magnitude.getBand() == Magnitude.Band.K && magnitude.getSystem() == MagnitudeSystem.Jy$.MODULE$
         ));
     }
 }
