@@ -10,7 +10,7 @@ import edu.gemini.ags.api.{AgsGuideQuality, AgsRegistrar}
 import edu.gemini.ags.conf.ProbeLimitsTable
 import edu.gemini.catalog.api._
 import edu.gemini.catalog.votable._
-import edu.gemini.pot.sp.ISPNode
+import edu.gemini.pot.sp.{SPComponentType, ISPNode}
 import edu.gemini.shared.gui.textComponent.{SelectOnFocus, TextRenderer, NumberField}
 import edu.gemini.shared.gui.{ButtonFlattener, GlassLabel, SizePreference, SortableTable}
 import edu.gemini.spModel.core.Target.SiderealTarget
@@ -220,7 +220,9 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
           doNameSearch(objectName.text)
       }
     }
-    lazy val instrumentName = new Label("")
+    lazy val instrumentBox = new ComboBox[SPComponentType](ObservationInfo.InstList.map(_._2)) with TextRenderer[SPComponentType] {
+      override def text(a: SPComponentType) = ~Option(a).flatMap(t => ObservationInfo.InstMap.get(t))
+    }
     lazy val catalogBox = new ComboBox(List[CatalogName](UCAC4, PPMXL)) with TextRenderer[CatalogName] {
       override def text(a: CatalogName) = ~Option(a).map(_.displayName)
     }
@@ -300,7 +302,7 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
       add(dec, CC().spanX(3).growX())
       add(new Separator(Orientation.Horizontal), CC().spanX(7).growX().newline())
       add(new Label("Instrument"), CC().spanX(2).newline())
-      add(instrumentName, CC().spanX(3))
+      add(instrumentBox, CC().spanX(3).growX())
       add(new Label("Guider"), CC().spanX(2).newline())
       add(guider, CC().spanX(3).growX())
       add(new Label("Sky Background"), CC().spanX(2).newline())
@@ -357,7 +359,7 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
     def updateQuery(info: Option[ObservationInfo], query: ConeSearchCatalogQuery): Unit = {
       info.foreach { i =>
         objectName.text = ~i.objectName
-        instrumentName.text = ~i.instrumentName
+        instrumentBox.selection.item = i.instrument.getOrElse(ObservationInfo.DefaultInstrument)
         // Update guiders box model
         val guiderModel = new DefaultComboBoxModel[SupportedStrategy](new java.util.Vector((~info.map(_.validStrategies)).asJava))
         val selected = for {
@@ -430,9 +432,8 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
       // TODO Change the search query for different conditions OCSADV-416
       val conditions = Conditions.NOMINAL.sb(sbBox.selection.item).cc(ccBox.selection.item).iq(iqBox.selection.item)
 
-      val inst = ObservationInfo.toInstrument(instrumentName.text)
       val coordinates = Coordinates(ra.value, dec.value)
-      ObservationInfo(None, objectName.text.some, coordinates.some, inst, Option(guider.selection.item.strategy), guiders.toList, conditions.some, selectedCatalog, ProbeLimitsTable.loadOrThrow())
+      ObservationInfo(None, objectName.text.some, coordinates.some, instrumentBox.selection.item.some, Option(guider.selection.item.strategy), guiders.toList, conditions.some, selectedCatalog, ProbeLimitsTable.loadOrThrow())
     }
 
     // Make a query out of the form parameters

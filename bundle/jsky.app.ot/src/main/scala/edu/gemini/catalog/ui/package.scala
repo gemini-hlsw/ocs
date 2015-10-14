@@ -13,6 +13,7 @@ import edu.gemini.spModel.core._
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2
 import edu.gemini.spModel.gemini.gmos.{InstGmosSouth, InstGmosNorth}
 import edu.gemini.spModel.gemini.gnirs.{GNIRSConstants, InstGNIRS}
+import edu.gemini.spModel.gemini.gpi.Gpi
 import edu.gemini.spModel.gemini.gsaoi.Gsaoi
 import edu.gemini.spModel.gemini.michelle.InstMichelle
 import edu.gemini.spModel.gemini.nici.InstNICI
@@ -60,11 +61,6 @@ case class ObservationInfo(ctx: Option[ObsContext], objectName: Option[String], 
                     })
 
   /**
-   * Attempts to find the instrument name from the instrument field
-   */
-  def instrumentName:Option[String] = instrument.flatMap{i => ObservationInfo.InstMap.find(_._2 == i)}.map(_._1)
-
-  /**
    * An obscontext is required for guide quality calculation. The method below will attempt to create a context out of the information on the query form
    * TODO: Review if this is the best way to proceed
    */
@@ -74,6 +70,7 @@ case class ObservationInfo(ctx: Option[ObsContext], objectName: Option[String], 
       case SPComponentType.INSTRUMENT_GMOS       => new InstGmosNorth()
       case SPComponentType.INSTRUMENT_GMOSSOUTH  => new InstGmosSouth()
       case SPComponentType.INSTRUMENT_GNIRS      => new InstGNIRS()
+      case SPComponentType.INSTRUMENT_GPI        => new Gpi()
       case SPComponentType.INSTRUMENT_GSAOI      => new Gsaoi()
       case SPComponentType.INSTRUMENT_MICHELLE   => new InstMichelle()
       case SPComponentType.INSTRUMENT_NICI       => new InstNICI()
@@ -96,15 +93,17 @@ case class ObservationInfo(ctx: Option[ObsContext], objectName: Option[String], 
 }
 
 object ObservationInfo {
-  // Observation context loaded initially with default parameters
-  // TODO don't hardcode to Gmos South
-  val zero = new ObservationInfo(None, "".some, Coordinates.zero.some, SPComponentType.INSTRUMENT_GMOSSOUTH.some, None, Nil, SPSiteQuality.Conditions.BEST.some, UCAC4, ProbeLimitsTable.loadOrThrow())
+  val DefaultInstrument = SPComponentType.INSTRUMENT_GMOSSOUTH
 
-  private val InstMap = Map[String, SPComponentType](
+  // Observation context loaded initially with default parameters
+  val zero = new ObservationInfo(None, "".some, Coordinates.zero.some, DefaultInstrument.some, None, Nil, SPSiteQuality.Conditions.BEST.some, UCAC4, ProbeLimitsTable.loadOrThrow())
+
+  val InstList = List(
     Flamingos2.INSTRUMENT_NAME_PROP        -> SPComponentType.INSTRUMENT_FLAMINGOS2,
     InstGmosNorth.INSTRUMENT_NAME_PROP     -> SPComponentType.INSTRUMENT_GMOS,
     InstGmosSouth.INSTRUMENT_NAME_PROP     -> SPComponentType.INSTRUMENT_GMOSSOUTH,
     GNIRSConstants.INSTRUMENT_NAME_PROP    -> SPComponentType.INSTRUMENT_GNIRS,
+    Gpi.INSTRUMENT_NAME_PROP               -> SPComponentType.INSTRUMENT_GPI ,
     InstMichelle.INSTRUMENT_NAME_PROP      -> SPComponentType.INSTRUMENT_MICHELLE,
     InstNICI.INSTRUMENT_NAME_PROP          -> SPComponentType.INSTRUMENT_NICI,
     InstNIFS.INSTRUMENT_NAME_PROP          -> SPComponentType.INSTRUMENT_NIFS,
@@ -112,16 +111,10 @@ object ObservationInfo {
     InstPhoenix.INSTRUMENT_NAME_PROP       -> SPComponentType.INSTRUMENT_PHOENIX,
     InstTexes.INSTRUMENT_NAME_PROP         -> SPComponentType.INSTRUMENT_TEXES,
     InstTReCS.INSTRUMENT_NAME_PROP         -> SPComponentType.INSTRUMENT_TRECS,
-    VisitorInstrument.INSTRUMENT_NAME_PROP -> SPComponentType.INSTRUMENT_VISITOR
+    "Visitor"                              -> SPComponentType.INSTRUMENT_VISITOR
   )
 
-  /**
-   * find the instrument for a given name
-   * TODO: verify if there is a better way to find out the instrument names
-   * TODO: Should we support al the instruments on the map?
-   * TODO: Move the instrument selection into a combo box
-   */
-  def toInstrument(name: String):Option[SPComponentType] = InstMap.get(name)
+  val InstMap = InstList.map(i => (i._2, i._1)).toMap
 
   /**
    * Converts an AgsStrategy to a simpler description to be stored in the UI model
