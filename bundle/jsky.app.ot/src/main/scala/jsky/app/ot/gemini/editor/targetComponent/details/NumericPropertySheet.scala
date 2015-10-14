@@ -4,7 +4,7 @@ import java.awt.{GridBagConstraints, GridBagLayout, Insets}
 import javax.swing.JPanel
 
 import edu.gemini.pot.sp.ISPNode
-import edu.gemini.shared.util.immutable.Option
+import edu.gemini.shared.util.immutable.{Option => JOption}
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.target.SPTarget
 import edu.gemini.spModel.target.system.CoordinateParam
@@ -15,13 +15,13 @@ import squants.{Quantity, UnitOfMeasure}
 
 import scala.swing.ListView.Renderer
 import scala.swing.event.SelectionChanged
-import scala.swing.{Publisher, ComboBox, Component, Label}
+import scala.swing._
 import scalaz.std.list._
 import scalaz.syntax.functor._
 import scalaz.syntax.id._
 
 // An editor for a list of doubles, with a titled border
-case class NumericPropertySheet[A](title: scala.Option[String], f: SPTarget => A, props: NumericPropertySheet.Prop[A, _]*)
+case class NumericPropertySheet[A](title: Option[String], f: SPTarget => A, props: NumericPropertySheet.Prop[A, _]*)
   extends JPanel with TelescopePosEditor with Publisher with ReentrancyHack {
 
   private[this] var spt: SPTarget = new SPTarget // never null
@@ -53,11 +53,24 @@ case class NumericPropertySheet[A](title: scala.Option[String], f: SPTarget => A
 
     // if the right component is a unit selector we need to
     // update the value every time the unit is changed
-    p.rightComponent match {
+    Option(p.rightComponent).foreach {
       case c: ComboBox[_] =>
         listenTo(c.selection)
         reactions += {
-          case SelectionChanged(`c`) => updateField(p, w)
+          case SelectionChanged(`c`) =>
+            updateField(p, w)
+        }
+      case _ =>
+    }
+    // if the left side component is a selector we need to support
+    // transforming the value on the text without writing it back to the
+    // model until the user edits it
+    Option(p.leftComponent).foreach {
+      case c: ComboBox[_] =>
+        listenTo(c.selection)
+        reactions += {
+          case SelectionChanged(`c`) =>
+            transformField(p, w)
         }
       case _ =>
     }
@@ -65,7 +78,7 @@ case class NumericPropertySheet[A](title: scala.Option[String], f: SPTarget => A
   }
 
 
-  def edit(ctx: Option[ObsContext], target: SPTarget, node: ISPNode): Unit =
+  def edit(ctx: JOption[ObsContext], target: SPTarget, node: ISPNode): Unit =
     nonreentrant {
       spt = target
       pairs.foreach { case (p, w) => p.init(w, f(target)) }
@@ -90,6 +103,13 @@ case class NumericPropertySheet[A](title: scala.Option[String], f: SPTarget => A
       }
     catch { case _: NumberFormatException => }
 
+  private def transformField(p: Prop[A, _], tbwe: TextBoxWidget) =
+    try {
+      pairs.find(_._1 == p).foreach { w =>
+        p.transform(w._2, f(spt), tbwe.getValue.toDouble)
+      }
+    } catch { case _: NumberFormatException => }
+
 }
 
 object NumericPropertySheet {
@@ -97,8 +117,9 @@ object NumericPropertySheet {
   sealed trait Prop[A, B] {
     def leftComponent: Component
     def rightComponent: Component
-    def edit: (A, Double)          => Unit
-    def init: (NumberBoxWidget, A) => Unit
+    def edit: (A, Double)                       => Unit
+    def transform: (NumberBoxWidget, A, Double) => Unit = (_, _, _) => {}
+    def init: (NumberBoxWidget, A)              => Unit
   }
 
   case class DoubleProp[A](leftCaption: String, rightCaption: String, get: A => Double, edit: (A, Double) => Unit) extends Prop[A, Double] {
@@ -106,6 +127,29 @@ object NumericPropertySheet {
     val rightComponent = new Label(rightCaption)
     def init: (NumberBoxWidget, A) => Unit  =  (w,a) => {
       w.setValue(get(a))
+    }
+  }
+
+  case class TransformableProp[A, B](leftOptions: List[B], rightCaptions: Map[B, String], initial: B, render: B => String, get: (A, B) => Double, set: (A, B, Double) => Unit) extends Prop[A, Double] {
+    val rightComponent = new Label(rightCaptions.getOrElse(initial, ""))
+    val leftComponent  = new ComboBox[B](leftOptions) {
+      selection.item = initial
+      renderer = Renderer(render)
+      listenTo(selection)
+      reactions += {
+        case SelectionChanged(_) =>
+          rightComponent.text = rightCaptions.getOrElse(selection.item, "")
+      }
+    }
+
+    def edit: (A, Double)          => Unit  =  (a, d) => {
+      set(a, leftComponent.selection.item, d)
+    }
+    override def transform: (NumberBoxWidget,  A, Double)          => Unit  =  (w, a, d) => {
+      w.setValue(get(a, leftComponent.selection.item))
+    }
+    def init: (NumberBoxWidget, A) => Unit  =  (w, a) => {
+      w.setValue(get(a, leftComponent.selection.item))
     }
   }
 
@@ -136,6 +180,9 @@ object NumericPropertySheet {
 
     def apply[A](leftCaption: String, rightCaption: String, f: A => CoordinateParam): Prop[A, Double] =
       DoubleProp(leftCaption, rightCaption, a => f(a).getValue, (a, b) => f(a).setValue(b))
+
+    def apply[A, B](leftOptions: List[B], rightCaptions: Map[B, String], initial: B, render: B => String, f: (A, B) => Double, g: (A, B, Double) => Unit): Prop[A, Double] =
+      TransformableProp(leftOptions, rightCaptions, initial, render, f, g)
 
     def apply[A, B <: Quantity[B]](leftCaption: String, get: A => B, set: (A, B) => Unit, units: UnitOfMeasure[B]*): Prop[A, B] =
       units.length match {

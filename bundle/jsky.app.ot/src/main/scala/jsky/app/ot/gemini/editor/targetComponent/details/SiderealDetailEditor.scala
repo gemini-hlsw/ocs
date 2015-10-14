@@ -13,6 +13,7 @@ import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.target.SPTarget
 import edu.gemini.spModel.target.system.{HmsDegTarget, ITarget}
 import jsky.app.ot.gemini.editor.targetComponent.MagnitudeEditor
+import squants.motion.KilometersPerSecond
 
 import scalaz.syntax.id._
 
@@ -29,13 +30,45 @@ final class SiderealDetailEditor extends TargetDetailEditor(ITarget.Tag.SIDEREAL
   }
   val name   = new SiderealNameEditor(mags)
 
+  sealed trait RedshiftRepresentations
+  case object RadialVelocity extends RedshiftRepresentations
+  case object RedshiftZ extends RedshiftRepresentations
+  case object ApparentRadialVelocity extends RedshiftRepresentations
+
+  object RedshiftRepresentations {
+    val all: List[RedshiftRepresentations] = List(RadialVelocity, RedshiftZ, ApparentRadialVelocity)
+    val repr: Map[RedshiftRepresentations, String] = Map(RadialVelocity -> "km/sec", RedshiftZ -> "", ApparentRadialVelocity -> "km/s")
+
+    val renderLabel: RedshiftRepresentations => String = {
+      case RadialVelocity         => "RV"
+      case RedshiftZ              => "z"
+      case ApparentRadialVelocity => "cz"
+    }
+
+    val renderValue: (HmsDegTarget, RedshiftRepresentations) => Double = (t, v) => v match {
+      case RadialVelocity         =>
+        t.getRedshift.toRadialVelocity.toKilometersPerSecond
+      case RedshiftZ              =>
+        t.getRedshift.redshift
+      case ApparentRadialVelocity =>
+        t.getRedshift.toApparentRadialVelocity.toKilometersPerSecond
+    }
+    val editValue: (HmsDegTarget, RedshiftRepresentations, Double) => Unit = (t, v, d) => v match {
+      case RadialVelocity         =>
+        t.setRedshift(Redshift.fromRadialVelocity(KilometersPerSecond(d)))
+      case RedshiftZ              =>
+        t.setRedshift(Redshift(d))
+      case ApparentRadialVelocity =>
+        t.setRedshift(Redshift.fromApparentRadialVelocity(KilometersPerSecond(d)))
+    }
+  }
+
   val props = NumericPropertySheet[HmsDegTarget](Some("Motion"), _.getTarget.asInstanceOf[HmsDegTarget],
     Prop("µ RA",     "mas/year", _.getPM1),
     Prop("µ Dec",    "mas/year", _.getPM2),
     Prop("Epoch",    "years",    _.getEpoch.getValue,    (t, d) => t.setEpoch(new Epoch(d, Units.YEARS))),
     Prop("Parallax", "mas",      _.getParallax.mas,      (t, d) => t.setParallax(new Parallax(d, Units.MILLI_ARCSECS))),
-    Prop("RV",       "km/sec",   _.getRV),
-    Prop("Redshift", "",         _.getRedshift.redshift, (t, d) => t.setRedshift(Redshift(d)))
+    Prop(RedshiftRepresentations.all, RedshiftRepresentations.repr, RedshiftZ, RedshiftRepresentations.renderLabel, RedshiftRepresentations.renderValue, RedshiftRepresentations.editValue)
   )
 
   // Layout
