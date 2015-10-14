@@ -2,7 +2,7 @@ package edu.gemini.spModel.io.impl.migration.to2015B
 
 import edu.gemini.shared.skyobject.Magnitude
 import edu.gemini.shared.skyobject.Magnitude.Band
-import edu.gemini.shared.skyobject.Magnitude.System
+import edu.gemini.spModel.core.MagnitudeSystem
 
 import scala.util.parsing.combinator.RegexParsers
 import scalaz._, Scalaz._
@@ -33,14 +33,14 @@ object BrightnessParser extends RegexParsers {
     Band.values.map(bandParser).foldRight[Parser[Band]](failure("expected band"))(_ ||| _)
   }
 
-  private case class Sys(s: System, scale: BigDecimal = BigDecimal(1, 0)) {
+  private case class Sys(s: MagnitudeSystem, scale: BigDecimal = BigDecimal(1, 0)) {
     def toMag(b: Band, m: BigDecimal): Magnitude = new Magnitude(b, (m * scale).doubleValue(), s)
   }
 
-  private val Jy     = Sys(System.Jy)
-  private val mJy    = Sys(System.Jy, BigDecimal(1, 3))  // 1 mJy = 0.001 Jy
-  private val AB     = Sys(System.AB)
-  private val Vega   = Sys(System.Vega)
+  private val Jy     = Sys(MagnitudeSystem.Jy)
+  private val mJy    = Sys(MagnitudeSystem.Jy, BigDecimal(1, 3))  // 1 mJy = 0.001 Jy
+  private val AB     = Sys(MagnitudeSystem.AB)
+  private val Vega   = Sys(MagnitudeSystem.Vega)
 
   private val AllSys = List(Jy, mJy, AB, Vega)
 

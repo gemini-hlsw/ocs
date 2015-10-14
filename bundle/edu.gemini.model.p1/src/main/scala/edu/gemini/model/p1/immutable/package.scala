@@ -399,8 +399,8 @@ package object immutable {
   implicit class MagnitudeSystemOps(val system: MagnitudeSystem) extends AnyVal {
     def mutable: M.MagnitudeSystem = system match {
       case MagnitudeSystem.AB   => M.MagnitudeSystem.AB
-      case MagnitudeSystem.JY   => M.MagnitudeSystem.JY
-      case MagnitudeSystem.VEGA => M.MagnitudeSystem.VEGA
+      case MagnitudeSystem.Jy   => M.MagnitudeSystem.JY
+      case MagnitudeSystem.Vega => M.MagnitudeSystem.VEGA
     }
   }
 

@@ -1,11 +1,8 @@
-//
-// $
-//
-
 package edu.gemini.spModel.target;
 
 import edu.gemini.shared.skyobject.Magnitude;
 import edu.gemini.shared.util.immutable.*;
+import edu.gemini.spModel.core.MagnitudeSystem;
 import edu.gemini.spModel.pio.ParamSet;
 import edu.gemini.spModel.pio.PioFactory;
 import edu.gemini.spModel.pio.xml.PioXmlFactory;
@@ -79,8 +76,8 @@ public final class ManitudePioTest {
 
     @Test
     public void testListWithSystem() throws Exception {
-        Magnitude magJ1 = new Magnitude(Magnitude.Band.J, 1, (Option<Double>) None.INSTANCE, Magnitude.System.AB);
-        Magnitude magK2 = new Magnitude(Magnitude.Band.K, 2, (Option<Double>) None.INSTANCE, Magnitude.System.Jy);
+        Magnitude magJ1 = new Magnitude(Magnitude.Band.J, 1, (Option<Double>) None.INSTANCE, MagnitudeSystem.AB$.MODULE$);
+        Magnitude magK2 = new Magnitude(Magnitude.Band.K, 2, (Option<Double>) None.INSTANCE, MagnitudeSystem.Jy$.MODULE$);
 
         ImList<Magnitude> lst1 = DefaultImList.create(magJ1, magK2);
         ParamSet pset = MagnitudePio.instance.toParamSet(fact, lst1);
@@ -89,15 +86,11 @@ public final class ManitudePioTest {
         assertEquals(2, lst2.size());
 
         // Order isn't necessarily preserved.
-        assertEquals(new Some<Magnitude>(magJ1), lst2.find(new PredicateOp<Magnitude>() {
-            @Override public Boolean apply(Magnitude magnitude) {
-                return magnitude.getBand() == Magnitude.Band.J && magnitude.getSystem() == Magnitude.System.AB;
-            }
-        }));
-        assertEquals(new Some<Magnitude>(magK2), lst2.find(new PredicateOp<Magnitude>() {
-            @Override public Boolean apply(Magnitude magnitude) {
-                return magnitude.getBand() == Magnitude.Band.K && magnitude.getSystem() == Magnitude.System.Jy;
-            }
-        }));
+        assertEquals(new Some<>(magJ1), lst2.find(
+            magnitude -> magnitude.getBand() == Magnitude.Band.J && magnitude.getSystem() == MagnitudeSystem.AB$.MODULE$
+        ));
+        assertEquals(new Some<>(magK2), lst2.find(
+            magnitude -> magnitude.getBand() == Magnitude.Band.K && magnitude.getSystem() == MagnitudeSystem.Jy$.MODULE$
+        ));
     }
 }
