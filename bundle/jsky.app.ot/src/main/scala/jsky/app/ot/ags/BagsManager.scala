@@ -6,6 +6,7 @@ import java.util.logging.Logger
 
 import edu.gemini.ags.api.{AgsRegistrar, AgsStrategy}
 import edu.gemini.pot.sp._
+import edu.gemini.spModel.obs.ObservationStatus
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.rich.shared.immutable._
 import edu.gemini.spModel.target.env.TargetEnvironment
@@ -49,10 +50,12 @@ object BagsManager {
         Try { GemsGuideStarWorker.findGuideStars(obsCtx) } match {
           case Success(ggs) =>
             LOG.info(s"BAGS GeMS lookup for observation=${observation.getObservationID} successful. ${resultString(ggs.asScalaOpt)}")
-            Swing.onEDT {
-              muteObservation(observation)
-              GemsGuideStarWorker.applyResults(TpeContext(observation), ggs, true)
-              unmuteObservation(observation)
+            if (ObservationStatus.computeFor(observation) != ObservationStatus.OBSERVED) {
+              Swing.onEDT {
+                muteObservation(observation)
+                GemsGuideStarWorker.applyResults(TpeContext(observation), ggs, true)
+                unmuteObservation(observation)
+              }
             }
             taskComplete(this, success = true)
           case Failure(ex) =>
@@ -67,10 +70,12 @@ object BagsManager {
         fut.onComplete {
           case Success(selOpt) =>
             LOG.info(s"BAGS lookup for observation=${observation.getObservationID} successful. ${resultString(selOpt)}")
-            Swing.onEDT {
-              muteObservation(observation)
-              GuideStarWorker.applyResults(TpeContext(observation), selOpt)
-              unmuteObservation(observation)
+            if (ObservationStatus.computeFor(observation) != ObservationStatus.OBSERVED) {
+              Swing.onEDT {
+                muteObservation(observation)
+                GuideStarWorker.applyResults(TpeContext(observation), selOpt)
+                unmuteObservation(observation)
+              }
             }
             taskComplete(this, success = true)
           case Failure(ex) =>
