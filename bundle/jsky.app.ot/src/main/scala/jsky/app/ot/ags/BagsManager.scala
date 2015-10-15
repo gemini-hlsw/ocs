@@ -1,7 +1,7 @@
 package jsky.app.ot.ags
 
 import java.beans.{PropertyChangeEvent, PropertyChangeListener}
-import java.util.concurrent.{LinkedBlockingQueue, Executors}
+import java.util.concurrent.{TimeoutException, LinkedBlockingQueue, Executors}
 import java.util.logging.{Level, Logger}
 
 import edu.gemini.ags.api.{AgsRegistrar, AgsStrategy}
@@ -17,8 +17,10 @@ import jsky.app.ot.OT
 import jsky.app.ot.tpe._
 import scala.collection.JavaConverters._
 import scala.collection.immutable.HashMap
+import scala.concurrent.Await
 import scala.swing.Swing
 import scala.util.{Try, Failure, Success}
+import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
 
 import scalaz._, Scalaz._
@@ -41,11 +43,13 @@ object BagsManager {
     def newContext(ctxOpt: Option[ObsContext]): BagsTask =
       BagsTask(observation, curCtx, ctxOpt)
 
-    def performLookup(): Unit = {
+    def performLookup(bagsThread: BagsThread): Unit = {
+      val bagsIdMsg = s"BAGS lookup on thread=${bagsThread.id} for observation=${observation.getObservationID}"
+
       def lookup[S,T](optExtract: S => Option[T])(worker: (TpeContext, S) => Unit)(results: Try[S]): Unit = {
         results match {
           case Success(selOpt) =>
-            LOG.info(s"BAGS lookup for observation=${observation.getObservationID} successful. Results=${optExtract(selOpt) ? "Yes" | "No"}.")
+            LOG.info(s"$bagsIdMsg successful. Results=${optExtract(selOpt) ? "Yes" | "No"}.")
             if (ObservationStatus.computeFor(observation) != ObservationStatus.OBSERVED) {
               Swing.onEDT {
                 muteObservation(observation)
@@ -53,61 +57,79 @@ object BagsManager {
                 unmuteObservation(observation)
               }
             }
-            taskComplete(this, success = true)
+            taskSuccess(this)
 
           // We don't want to print the stack trace if the host is simply unreachable.
           // This is reported only as a GenericError in a CatalogException, unfortunately.
           case Failure(CatalogException((e: GenericError) :: _)) =>
-            LOG.warning(s"BAGS lookup for observation=${observation.getObservationID} failed: ${e.msg}")
-            taskComplete(this, success = false)
+            LOG.warning(s"$bagsIdMsg failed: ${e.msg}")
+            taskFail(this)
+
+          // If we timed out, we don't want to delay.
+          case Failure(ex: TimeoutException) =>
+            LOG.warning(s"$bagsIdMsg failed: ${ex.getMessage}")
+            taskFail(this, timedOut = true)
 
           // For all other exceptions, print the full stack trace.
           case Failure(ex) =>
-            LOG.log(Level.WARNING, s"BAGS lookup for observation=${observation.getObservationID} failed.", ex)
-            taskComplete(this, success = false)
+            LOG.log(Level.WARNING, s"$bagsIdMsg} failed.", ex)
+            taskFail(this)
         }
       }
 
 
-      LOG.info(s"Performing BAGS lookup for observation=${observation.getObservationID}")
+      LOG.info(s"Performing $bagsIdMsg.")
       curCtx.foreach { obsCtx =>
         AgsRegistrar.currentStrategy(obsCtx).foreach { strategy =>
           if (GuideStarSupport.hasGemsComponent(observation)) {
             lookup((x: GOption[GemsGuideStars]) => x.asScalaOpt)(GemsGuideStarWorker.applyResults(_, _, true))(Try(GemsGuideStarWorker.findGuideStars(obsCtx)))
           } else {
+            // This future always completes, either with results or timeout of 30s, so we wait for it with a long timeout
+            // to let it do its thing.
             val fut = strategy.select(obsCtx, OT.getMagnitudeTable)
-            fut.onComplete(lookup(identity[Option[AgsStrategy.Selection]])(GuideStarWorker.applyResults))
+            val futDone = Await.ready(fut, LookupTimeout)
+            futDone.onComplete(lookup(identity[Option[AgsStrategy.Selection]])(GuideStarWorker.applyResults))
           }
         }
       }
     }
   }
 
-  private class BagsThread(id: Int) extends Thread {
+  private case class BagsThread(id: Int) extends Thread {
     setPriority(Thread.NORM_PRIORITY - 1)
 
     override def run() {
       // Get the next task to run. This blocks on the queue.
       val task = nextTask()
 
-      // Execute the task.
-      task.foreach(_.performLookup())
+      task.foreach(_.performLookup(this))
 
       // Resubmit self for execution.
       executor.submit(this)
     }
   }
 
+  // A timeout for catalog searches that guarantees they will complete.
+  private val LookupTimeout = 1.hour
+
+  // If a task fails due to timeout, a thread takes a brief sleep before requeueing to allow sanity to restore. In ms.
+  private val RequeueDelay = 5000
+
+  // We use an executor to allow for a certain number of threads to run, which are created and fixed as per below.
   private val NumThreads = math.max(1, Runtime.getRuntime.availableProcessors()-1)
-  private val RequeueDelay = 3000
   private val executor = Executors.newFixedThreadPool(NumThreads)
-  private var taskMap = new HashMap[SPNodeKey, BagsTask]
+
+  // Tasks to lookup are managed in two forms: a blocking FIFO queue contains a list of observations by node key
+  // waiting for threads to perform lookups for them, and these node keys are mapped to acutal tasks to perform
+  // via the map.
   private val taskQueue = new LinkedBlockingQueue[SPNodeKey]
+  private var taskMap = new HashMap[SPNodeKey, BagsTask]
 
   // The programs we are actively managing. This is to prevent threads who fail from adding their observations
   // back into the queue when the program is no longer active.
   private var activePrograms = Set[SPNodeKey]()
 
+  // Create all of the threads and submit for execution.
   List.tabulate(NumThreads)(i => new BagsThread(i)).foreach(executor.submit)
 
 
@@ -166,47 +188,58 @@ object BagsManager {
     }
   }
 
-  // If a BAGS task failed to be processed properly, we should requeue it.
-  private def taskComplete(task: BagsTask, success: Boolean) = {
+  // If a BAGS task succeeded, process it accordingly. This can comprise one of two things:
+  // 1. If the task is marked as done, remove it from the map.
+  // 2. If the task is marked as not done, requeue it.
+  private def taskSuccess(task: BagsTask): Unit = {
     val obsKey = task.obsKey
-    if (success) {
-      // Check to see if the task is marked as done, and if so, remove.
-      val doneWithTask = taskMap.synchronized {
-        taskMap.get(obsKey).fold(true){t =>
-          val done = t.isDone
-          if (done) taskMap -= obsKey
-          done
-        }
+    // Check to see if the task is marked as done, and if so, remove.
+    val doneWithTask = taskMap.synchronized {
+      taskMap.get(obsKey).fold(true) { t =>
+        val done = t.isDone
+        if (done) taskMap -= obsKey
+        done
       }
+    }
 
-      // If a task is not complete and the program is still active, we add it back.
-      if (!doneWithTask) {
-        val isActiveProgram = activePrograms.synchronized(activePrograms.contains(task.observation.getProgramKey))
-        if (isActiveProgram) {
-          taskQueue.synchronized {
-            if (!taskQueue.contains(obsKey))
-              taskQueue.add(obsKey)
-          }
+    // If a task is not complete and the program is still active, we add it back.
+    if (!doneWithTask) {
+      val isActiveProgram = activePrograms.synchronized(activePrograms.contains(task.observation.getProgramKey))
+      if (isActiveProgram) {
+        taskQueue.synchronized {
+          if (!taskQueue.contains(obsKey))
+            taskQueue.add(obsKey)
         }
       }
     }
-    else {
-      val isActiveProgram = activePrograms.synchronized(activePrograms.contains(task.observation.getProgramKey))
-      if (isActiveProgram) {
-        Thread.sleep(RequeueDelay)
+  }
 
-        // We only need to do something if the task is not already in the queue.
-        taskQueue.synchronized {
-          if (!taskQueue.contains(obsKey)) {
-            val newTask = task match {
-              case BagsTask(obs, Some(ctx), None) => BagsTask(obs, None, Some(ctx))
-              case t => t
-            }
-            taskMap.synchronized(taskMap += ((obsKey, newTask)))
-            taskQueue.add(obsKey)
-          }
+  // Called when a BAGS task failed to be processed properly, in which case, we must requeue it.
+  private def taskFail(task: BagsTask, timedOut: Boolean = false): Unit = {
+    val obsKey = task.obsKey
+
+    val isActiveProgram = activePrograms.synchronized(activePrograms.contains(task.observation.getProgramKey))
+    if (isActiveProgram) {
+      // We only need to do something if the task is not already in the queue.
+      // Check to see if the taskQueue contains the key.
+      // If the key is added to the taskQueue in the interim, this is fine.
+      // It will force another lookup, but that should not be problematic.
+      val containsKey = taskQueue.synchronized(taskQueue.contains(obsKey))
+
+      if (!containsKey) {
+        // If the task has no next context, revert it back to the unprocessed state.
+        // Otherwise, simply process it as is.
+        val newTask = task match {
+          case BagsTask(obs, Some(ctx), None) => BagsTask(obs, None, Some(ctx))
+          case t => t
         }
+        taskMap.synchronized(taskMap += ((obsKey, newTask)))
+        taskQueue.synchronized(taskQueue.add(obsKey))
       }
+
+      // Pause to give things a chance to right themselves.
+      if (!timedOut)
+        Thread.sleep(RequeueDelay)
     }
   }
 
