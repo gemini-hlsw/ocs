@@ -222,6 +222,25 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
     }
     lazy val instrumentBox = new ComboBox[SPComponentType](ObservationInfo.InstList.map(_._2)) with TextRenderer[SPComponentType] {
       override def text(a: SPComponentType) = ~Option(a).flatMap(t => ObservationInfo.InstMap.get(t))
+      selection.item = ObservationInfo.DefaultInstrument
+      listenTo(selection)
+      reactions += {
+        case SelectionChanged(_) =>
+          // Update the guiders box with the newly selected instrument
+          val i = observationInfoFromForm.toContext
+          val defaultStrategy = i.flatMap(AgsRegistrar.defaultStrategy)
+          val mt = ProbeLimitsTable.loadOrThrow()
+          val strategies = ~i.map(c => AgsRegistrar.validStrategies(c).map(ObservationInfo.toSupportedStrategy(c, _, mt)))
+
+          val selected = for {
+              s <- defaultStrategy
+              c <- strategies.find(_.strategy == s)
+            } yield c
+          selected.foreach { s =>
+            updateGuidersModel(s, strategies)
+            updateGuideSpeedText()
+          }
+      }
     }
     lazy val catalogBox = new ComboBox(List[CatalogName](UCAC4, PPMXL)) with TextRenderer[CatalogName] {
       override def text(a: CatalogName) = ~Option(a).map(_.displayName)
@@ -360,15 +379,13 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
       info.foreach { i =>
         objectName.text = ~i.objectName
         instrumentBox.selection.item = i.instrument.getOrElse(ObservationInfo.DefaultInstrument)
-        // Update guiders box model
-        val guiderModel = new DefaultComboBoxModel[SupportedStrategy](new java.util.Vector((~info.map(_.validStrategies)).asJava))
         val selected = for {
-          in <- info
-          s  <- in.strategy
-          it <- in.validStrategies.find(_.strategy == s)
-        } yield it
-        selected.foreach(guiderModel.setSelectedItem)
-        guider.peer.setModel(guiderModel)
+          s <- i.strategy
+          c <- i.validStrategies.find(_.strategy == s)
+        } yield c
+        selected.foreach { s =>
+          updateGuidersModel(s, i.validStrategies)
+        }
         // Update conditions
         i.conditions.foreach { c =>
           sbBox.selection.item = c.sb
@@ -386,6 +403,11 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
       radiusEnd.updateAngle(query.radiusConstraint.maxLimit)
 
       buildLayout(query.filters.list.collect { case q: MagnitudeQueryFilter => q.mc })
+    }
+
+    def updateGuidersModel(selected: SupportedStrategy, strategies: List[SupportedStrategy]): Unit = {
+      // Update guiders box model
+      new DefaultComboBoxModel[SupportedStrategy](new java.util.Vector(strategies.asJava)) <| {_.setSelectedItem(selected)} |> guider.peer.setModel
     }
 
     def updateName(t: Option[SiderealTarget]): Unit = {
@@ -433,7 +455,7 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
       val conditions = Conditions.NOMINAL.sb(sbBox.selection.item).cc(ccBox.selection.item).iq(iqBox.selection.item)
 
       val coordinates = Coordinates(ra.value, dec.value)
-      ObservationInfo(None, objectName.text.some, coordinates.some, instrumentBox.selection.item.some, Option(guider.selection.item.strategy), guiders.toList, conditions.some, selectedCatalog, ProbeLimitsTable.loadOrThrow())
+      ObservationInfo(None, Option(objectName.text), coordinates.some, Option(instrumentBox.selection.item), Option(guider.selection.item).map(_.strategy), guiders.toList, conditions.some, selectedCatalog, ProbeLimitsTable.loadOrThrow())
     }
 
     // Make a query out of the form parameters

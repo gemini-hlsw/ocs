@@ -119,7 +119,7 @@ object ObservationInfo {
   /**
    * Converts an AgsStrategy to a simpler description to be stored in the UI model
    */
-  private def toSupportedStrategy(obsCtx: ObsContext, strategy: AgsStrategy, mt: MagnitudeTable):SupportedStrategy = {
+  def toSupportedStrategy(obsCtx: ObsContext, strategy: AgsStrategy, mt: MagnitudeTable):SupportedStrategy = {
     val pb = strategy.magnitudes(obsCtx, mt).map(k => ProbeLimits(strategy.probeBands, obsCtx, k._2)).headOption
     val queries = strategy.catalogQueries(obsCtx, mt)
     SupportedStrategy(strategy, pb.flatten, queries)
