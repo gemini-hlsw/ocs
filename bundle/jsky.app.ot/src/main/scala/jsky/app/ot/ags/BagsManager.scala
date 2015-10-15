@@ -102,6 +102,7 @@ object BagsManager {
       // Get the next task to run. This blocks on the queue.
       val task = nextTask()
 
+      // Execute the task.
       task.foreach(_.performLookup(this))
 
       // Resubmit self for execution.
