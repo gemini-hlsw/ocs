@@ -12,7 +12,6 @@ import edu.gemini.spModel.obs.ObservationStatus
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.rich.shared.immutable._
 import edu.gemini.spModel.target.env.TargetEnvironment
-import edu.gemini.spModel.target.obsComp.TargetObsComp
 import edu.gemini.shared.util.immutable.{Option => GOption}
 import jsky.app.ot.OT
 import jsky.app.ot.tpe._
@@ -60,12 +59,12 @@ object BagsManager {
           // This is reported only as a GenericError in a CatalogException, unfortunately.
           case Failure(CatalogException((e: GenericError) :: _)) =>
             LOG.warning(s"BAGS lookup for observation=${observation.getObservationID} failed: ${e.msg}")
-            taskComplete (this, success = false)
+            taskComplete(this, success = false)
 
           // For all other exceptions, print the full stack trace.
           case Failure(ex) =>
             LOG.log(Level.WARNING, s"BAGS lookup for observation=${observation.getObservationID} failed.", ex)
-            taskComplete (this, success = false)
+            taskComplete(this, success = false)
         }
       }
 
