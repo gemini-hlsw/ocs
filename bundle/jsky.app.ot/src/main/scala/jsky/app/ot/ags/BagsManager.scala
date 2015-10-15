@@ -2,10 +2,11 @@ package jsky.app.ot.ags
 
 import java.beans.{PropertyChangeEvent, PropertyChangeListener}
 import java.util.concurrent.{LinkedBlockingQueue, Executors}
-import java.util.logging.Logger
+import java.util.logging.{Level, Logger}
 
 import edu.gemini.ags.api.{AgsRegistrar, AgsStrategy}
 import edu.gemini.ags.gems.GemsGuideStars
+import edu.gemini.catalog.votable.{GenericError, CatalogException}
 import edu.gemini.pot.sp._
 import edu.gemini.spModel.obs.ObservationStatus
 import edu.gemini.spModel.obs.context.ObsContext
@@ -55,11 +56,19 @@ object BagsManager {
             }
             taskComplete(this, success = true)
 
+          // We don't want to print the stack trace if the host is simply unreachable.
+          // This is reported only as a GenericError in a CatalogException, unfortunately.
+          case Failure(CatalogException((e: GenericError) :: _)) =>
+            LOG.warning(s"BAGS lookup for observation=${observation.getObservationID} failed: ${e.msg}")
+            taskComplete (this, success = false)
+
+          // For all other exceptions, print the full stack trace.
           case Failure(ex) =>
-            LOG.warning(s"BAGS lookup for observation=${observation.getObservationID} failed. Exception=$ex")
-            taskComplete(this, success = false)
+            LOG.log(Level.WARNING, s"BAGS lookup for observation=${observation.getObservationID} failed.", ex)
+            taskComplete (this, success = false)
         }
       }
+
 
       LOG.info(s"Performing BAGS lookup for observation=${observation.getObservationID}")
       curCtx.foreach { obsCtx =>
