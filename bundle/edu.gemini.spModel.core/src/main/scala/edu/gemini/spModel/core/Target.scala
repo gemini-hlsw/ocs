@@ -21,6 +21,52 @@ sealed trait Target {
 /** Module of constructors for `Target`. */
 object Target {
 
+ val name: Target @?> String =
+    PLens(_.fold(
+      TooTarget.name.partial.run,
+      SiderealTarget.name.partial.run,
+      NonSiderealTarget.name.partial.run
+    ))
+
+  val coords: Target @?> Coordinates =
+    PLens(_.fold(
+      PLens.nil.run,
+      SiderealTarget.coordinates.partial.run,
+      PLens.nil.run
+    ))
+
+  val pm: Target @?> ProperMotion =
+    PLens(_.fold(
+      PLens.nil.run,
+      (SiderealTarget.properMotion.partial >=> PLens.somePLens[ProperMotion]).run,
+      PLens.nil.run
+    ))
+
+  val magnitudes: Target @?> List[Magnitude] =
+    PLens(_.fold(
+      PLens.nil.run,
+      SiderealTarget.magnitudes.partial.run,
+      NonSiderealTarget.magnitudes.partial.run
+    ))
+
+  val ephemeris: Target @?> Ephemeris =
+    PLens(_.fold(
+      PLens.nil.run,
+      PLens.nil.run,
+      NonSiderealTarget.ephemeris.partial.run
+    ))
+
+  val raDec: Target @?> (RightAscension, Declination) =
+    coords.xmapB(cs => (cs.ra, cs.dec))(Coordinates.tupled)
+
+  val raDecAngles: Target @?> (Angle, Angle) =
+    raDec.xmapB(_.bimap(_.toAngle, _.toAngle))(
+                _.bimap(RightAscension.fromAngle,
+                        Declination.fromAngle(_).getOrElse(throw new IllegalArgumentException("Declination out of range.")))) // hmm
+
+  val raDecDegrees: Target @?> (Double, Double) =
+    raDecAngles.xmapB(_.bimap(_.toDegrees, _.toDegrees))(_.bimap(Angle.fromDegrees, Angle.fromDegrees))
+
   /** Target of opportunity, with no coordinates. */
   case class TooTarget(name: String) extends Target {
 
