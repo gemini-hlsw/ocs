@@ -6,7 +6,7 @@ import edu.gemini.itc.base.TransmissionElement;
 import edu.gemini.itc.gems.Gems;
 import edu.gemini.itc.shared.*;
 import edu.gemini.spModel.gemini.altair.AltairParams;
-import edu.gemini.spModel.target.Library;
+import edu.gemini.spModel.target.*;
 import edu.gemini.spModel.telescope.IssPort;
 
 /**
@@ -23,36 +23,32 @@ public final class HtmlPrinter {
 
         sb.append("Source spatial profile, brightness, and spectral distribution: \n");
         sb.append("  The z = ");
-        sb.append(sdp.getRedshift());
+        sb.append(sdp.redshift());
         sb.append(" ");
-        sb.append(sdp.getSourceGeometryStr());
+        sb.append(getSourceGeometryStr(sdp));
         sb.append(" is a");
-        switch (sdp.getDistributionType()) {
-            case ELINE:
-                sb.append(String.format("n emission line, at a wavelength of %.4f microns, ", sdp.getELineWavelength().toMicrons()));
-                sb.append(String.format(
-                        "and with a width of %.2f km/s.\n  It's total flux is %.3e watts_flux on a flat continuum of flux density %.3e watts_fd_wavelength.",
-                        sdp.getELineWidth().toKilometersPerSecond(), sdp.getELineFlux().toWattsPerSquareMeter(), sdp.getELineContinuumFlux().toWattsPerSquareMeterPerMicron()));
-                break;
-            case BBODY:
-                sb.append(" " + sdp.getBBTemp() + "K Blackbody, at " + sdp.getSourceNormalization() +
-                        " " + sdp.units.displayValue() + " in the " + sdp.getNormBand().name() + " band.");
-                break;
-            case LIBRARY_STAR:
-                sb.append(" " + sdp.getSourceNormalization() + " " + sdp.units.displayValue() + " " + ((Library) sdp.distribution).sedSpectrum() +
-                        " star in the " + sdp.getNormBand().name() + " band.");
-                break;
-            case LIBRARY_NON_STAR:
-                sb.append(" " + sdp.getSourceNormalization() + " " + sdp.units.displayValue() + " " + ((Library) sdp.distribution).sedSpectrum() +
-                        " in the " + sdp.getNormBand().name() + " band.");
-                break;
-            case USER_DEFINED:
-                sb.append(" a user defined spectrum with the name: " + sdp.getUserDefinedSpectrum());
-                break;
-            case PLAW:
-                sb.append(" Power Law Spectrum, with an index of " + sdp.getPowerLawIndex()
-                        + " and " + sdp.getSourceNormalization() + " mag in the " + sdp.getNormBand().name() + " band.");
-                break;
+        if (sdp.distribution() instanceof EmissionLine) {
+            final EmissionLine eLine = (EmissionLine) sdp.distribution();
+            sb.append(String.format("n emission line, at a wavelength of %.4f microns, ", eLine.wavelength().toMicrons()));
+            sb.append(String.format(
+                    "and with a width of %.2f km/s.\n  It's total flux is %.3e watts_flux on a flat continuum of flux density %.3e watts_fd_wavelength.",
+                    eLine.width().toKilometersPerSecond(), eLine.flux().toWattsPerSquareMeter(), eLine.continuum().toWattsPerSquareMeterPerMicron()));
+        } else if (sdp.distribution() instanceof BlackBody) {
+            final double temperature = ((BlackBody) sdp.distribution()).temperature();
+            sb.append(" " + temperature + "K Blackbody, at " + sdp.norm() +
+                    " " + sdp.units().displayValue() + " in the " + sdp.normBand().name() + " band.");
+        } else if (sdp.distribution() instanceof LibraryStar) {
+            sb.append(" " + sdp.norm() + " " + sdp.units().displayValue() + " " + ((Library) sdp.distribution()).sedSpectrum() +
+                    " star in the " + sdp.normBand().name() + " band.");
+        } else if (sdp.distribution() instanceof LibraryNonStar) {
+            sb.append(" " + sdp.norm() + " " + sdp.units().displayValue() + " " + ((Library) sdp.distribution()).sedSpectrum() +
+                    " in the " + sdp.normBand().name() + " band.");
+        } else if (sdp.distribution() instanceof UserDefined) {
+            sb.append(" a user defined spectrum with the name: " + ((UserDefined) sdp.distribution()).spectrum());
+        } else if (sdp.distribution() instanceof PowerLaw) {
+            final double index = ((PowerLaw) sdp.distribution()).index();
+            sb.append(" Power Law Spectrum, with an index of " + index
+                    + " and " + sdp.norm() + " mag in the " + sdp.normBand().name() + " band.");
         }
         sb.append("\n");
         return sb.toString();
@@ -191,5 +187,14 @@ public final class HtmlPrinter {
             default:            throw new IllegalArgumentException("unknown port");
         }
     }
+
+    private static String getSourceGeometryStr(final SourceDefinition sdp) {
+        if (sdp.profile() == PointSource$.MODULE$) {
+            return "point source";
+        } else {
+            return "extended source";
+        }
+    }
+
 
 }

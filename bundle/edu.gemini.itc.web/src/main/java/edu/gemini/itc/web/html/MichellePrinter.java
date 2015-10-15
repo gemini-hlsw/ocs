@@ -6,6 +6,8 @@ import edu.gemini.itc.michelle.Michelle;
 import edu.gemini.itc.michelle.MichelleRecipe;
 import edu.gemini.itc.shared.*;
 import edu.gemini.spModel.gemini.michelle.MichelleParams;
+import edu.gemini.spModel.target.PointSource$;
+import edu.gemini.spModel.target.UniformSource$;
 import scala.Tuple2;
 
 import java.io.PrintWriter;
@@ -47,13 +49,10 @@ public final class MichellePrinter extends PrinterBase {
         if (!result.observation().isAutoAperture()) {
             _println(String.format("software aperture extent along slit = %.2f arcsec", result.observation().getApertureDiameter()));
         } else {
-            switch (result.source().getProfileType()) {
-                case UNIFORM:
-                    _println(String.format("software aperture extent along slit = %.2f arcsec", 1 / instrument.getFPMask()));
-                    break;
-                case POINT:
-                    _println(String.format("software aperture extent along slit = %.2f arcsec", 1.4 * result.iqCalc().getImageQuality()));
-                    break;
+            if (result.source().profile() == UniformSource$.MODULE$) {
+                _println(String.format("software aperture extent along slit = %.2f arcsec", 1 / instrument.getFPMask()));
+            } else if (result.source().profile() == PointSource$.MODULE$) {
+                _println(String.format("software aperture extent along slit = %.2f arcsec", 1.4 * result.iqCalc().getImageQuality()));
             }
         }
 

@@ -2,6 +2,7 @@ package edu.gemini.itc.web;
 
 import edu.gemini.itc.base.DatFile;
 import edu.gemini.itc.shared.*;
+import edu.gemini.spModel.target.UserDefined;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -78,7 +79,7 @@ public class MultipartTestServlet extends HttpServlet {
                     System.out.println(parser.getTextFile(txtFileName) + "<br>");
                 }
                 //Use this Code in Sed Factory to create a Textfile Reader for the String.
-                try (final Scanner scan = DatFile.scan(sdp.getUserDefinedSpectrum())) {
+                try (final Scanner scan = DatFile.scan(((UserDefined) sdp.distribution()).spectrum())) {
                     while (scan.hasNext()) {
                         System.out.println("x: " + scan.nextDouble() + "\ny: " + scan.nextDouble());
                     }

@@ -120,8 +120,19 @@ object Hash {
 
   def calc(src: SourceDefinition): Int =
     hash(
-      src.getProfileType.name,
-      src.getDistributionType.name,
+      src.profile match {
+        case PointSource              => "POINT"
+        case UniformSource            => "UNIFORM"
+        case GaussianSource(_)        => "GAUSSIAN"
+      },
+      src.distribution match {
+        case l: LibraryStar           => "LIBRARY_STAR"
+        case l: LibraryNonStar        => "LIBRARY_NON_STAR"
+        case BlackBody(_)             => "BBODY"
+        case EmissionLine(_, _, _, _) => "ELINE"
+        case PowerLaw(_)              => "PLAW"
+        case UserDefined(_)           => "USER_DEFINED"
+      },
       src.profile,
       src.distribution match {
         case BlackBody(t)             => f"$t%.2f"

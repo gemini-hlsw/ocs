@@ -3,7 +3,6 @@ package edu.gemini.itc.web
 import javax.servlet.http.HttpServletRequest
 
 import edu.gemini.itc.base._
-import edu.gemini.itc.shared.SourceDefinition.{Distribution, Profile, Recession}
 import edu.gemini.itc.shared._
 import edu.gemini.pot.sp.SPComponentType
 import edu.gemini.spModel.core.WavelengthConversions._
@@ -274,18 +273,17 @@ object ITCRequest {
 
   def sourceDefinitionParameters(r: ITCRequest): SourceDefinition = {
     // Get the source geometry and type
-    import SourceDefinition.Profile._
-    val (spatialProfile, norm, units) = r.enumParameter(classOf[Profile]) match {
-      case POINT    =>
+    val (spatialProfile, norm, units) = r.parameter("Profile") match {
+      case "POINT"    =>
         val norm  = r.doubleParameter("psSourceNorm")
         val units = r.enumParameter(classOf[BrightnessUnit], "psSourceUnits")
         (PointSource, norm, units)
-      case GAUSSIAN =>
+      case "GAUSSIAN" =>
         val norm  = r.doubleParameter("gaussSourceNorm")
         val units = r.enumParameter(classOf[BrightnessUnit], "gaussSourceUnits")
         val fwhm  = r.doubleParameter("gaussFwhm")
         (GaussianSource(fwhm), norm, units)
-      case UNIFORM  =>
+      case "UNIFORM"  =>
         val norm  = r.doubleParameter("usbSourceNorm")
         val units = r.enumParameter(classOf[BrightnessUnit], "usbSourceUnits")
         (UniformSource, norm, units)
@@ -298,15 +296,13 @@ object ITCRequest {
       getOrElse(sys.error(s"Unsupported wave band $bandName"))
 
     // Get Spectrum Resource
-    import SourceDefinition.Distribution._
-    val sourceSpec = r.enumParameter(classOf[Distribution])
-    val sourceDefinition = sourceSpec match {
-      case BBODY            => BlackBody(r.doubleParameter("BBTemp"))
-      case PLAW             => PowerLaw(r.doubleParameter("powerIndex"))
-      case USER_DEFINED     => UserDefined(r.userSpectrum().get)
-      case LIBRARY_STAR     => LibraryStar.findByName(r.parameter("stSpectrumType")).get
-      case LIBRARY_NON_STAR => LibraryNonStar.findByName(r.parameter("nsSpectrumType")).get
-      case ELINE            =>
+    val sourceDefinition = r.parameter("Distribution") match {
+      case "BBODY"            => BlackBody(r.doubleParameter("BBTemp"))
+      case "PLAW"             => PowerLaw(r.doubleParameter("powerIndex"))
+      case "USER_DEFINED"     => UserDefined(r.userSpectrum().get)
+      case "LIBRARY_STAR"     => LibraryStar.findByName(r.parameter("stSpectrumType")).get
+      case "LIBRARY_NON_STAR" => LibraryNonStar.findByName(r.parameter("nsSpectrumType")).get
+      case "ELINE"            =>
         val flux = r.doubleParameter("lineFlux")
         val cont = r.doubleParameter("lineContinuum")
         EmissionLine(
@@ -318,11 +314,9 @@ object ITCRequest {
     }
 
     //Get Redshift
-    import SourceDefinition.Recession._
-    val recession = r.enumParameter(classOf[Recession])
-    val redshift = recession match {
-      case REDSHIFT => r.doubleParameter("z")
-      case VELOCITY => r.doubleParameter("v") / ITCConstants.C
+    val redshift = r.parameter("Recession") match {
+      case "REDSHIFT" => r.doubleParameter("z")
+      case "VELOCITY" => r.doubleParameter("v") / ITCConstants.C
     }
 
     // WOW, finally we've got everything in place..

@@ -1,6 +1,8 @@
 package edu.gemini.itc.shared
 
+import edu.gemini.spModel.core.MagnitudeBand
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.{WaterVapor, CloudCover, SkyBackground, ImageQuality}
+import edu.gemini.spModel.target.{UniformSource, SpectralDistribution, SpatialProfile}
 
 // ==== Observing conditions
 
@@ -10,6 +12,21 @@ final case class ObservingConditions(
                       wv: WaterVapor,
                       sb: SkyBackground,
                       airmass: Double)
+
+// ==== Source definition
+final case class SourceDefinition(
+                     profile: SpatialProfile,
+                     distribution: SpectralDistribution,
+                     norm: Double,
+                     units: BrightnessUnit,
+                     normBand: MagnitudeBand,
+                     redshift: Double) {
+
+  val isUniform = profile match {
+    case UniformSource => true
+    case _             => false
+  }
+}
 
 // ==== Calculation method
 

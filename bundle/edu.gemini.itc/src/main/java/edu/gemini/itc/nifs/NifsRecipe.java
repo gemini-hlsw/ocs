@@ -7,7 +7,9 @@ import edu.gemini.itc.operation.ImageQualityCalculationFactory;
 import edu.gemini.itc.operation.SpecS2N;
 import edu.gemini.itc.operation.SpecS2NLargeSlitVisitor;
 import edu.gemini.itc.shared.*;
-import edu.gemini.spModel.core.Site;
+import edu.gemini.spModel.target.GaussianSource;
+import edu.gemini.spModel.target.PointSource$;
+import edu.gemini.spModel.target.UniformSource$;
 import scala.Option;
 import scala.Tuple2;
 
@@ -96,21 +98,17 @@ public final class NifsRecipe implements SpectroscopyRecipe {
         //IFU morphology section
         final double im_qual = altair.isDefined() ? altair.get().getAOCorrectedFWHM() : IQcalc.getImageQuality();
         final VisitableMorphology morph, haloMorphology;
-        switch (_sdParameters.getProfileType()) {
-            case POINT:
-                morph = new AOMorphology(im_qual);
-                haloMorphology = new AOMorphology(IQcalc.getImageQuality());
-                break;
-            case GAUSSIAN:
-                morph = new GaussianMorphology(im_qual);
-                haloMorphology = new GaussianMorphology(IQcalc.getImageQuality());
-                break;
-            case UNIFORM:
-                morph = new USBMorphology();
-                haloMorphology = new USBMorphology();
-                break;
-            default:
-                throw new IllegalArgumentException();
+        if (_sdParameters.profile() == PointSource$.MODULE$) {
+            morph = new AOMorphology(im_qual);
+            haloMorphology = new AOMorphology(IQcalc.getImageQuality());
+        } else if (_sdParameters.profile() instanceof GaussianSource) {
+            morph = new GaussianMorphology(im_qual);
+            haloMorphology = new GaussianMorphology(IQcalc.getImageQuality());
+        } else if (_sdParameters.profile() == UniformSource$.MODULE$) {
+            morph = new USBMorphology();
+            haloMorphology = new USBMorphology();
+        } else {
+            throw new IllegalArgumentException();
         }
         morph.accept(instrument.getIFU().getAperture());
 

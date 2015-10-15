@@ -3,6 +3,7 @@ package edu.gemini.itc.base;
 import edu.gemini.itc.shared.AnalysisMethod;
 import edu.gemini.itc.shared.ObservationDetails;
 import edu.gemini.itc.shared.SourceDefinition;
+import edu.gemini.spModel.target.EmissionLine;
 import edu.gemini.spModel.target.GaussianSource;
 import edu.gemini.spModel.target.SpatialProfile;
 
@@ -18,7 +19,7 @@ public final class Validation {
     public static void validate(final Instrument instrument, final ObservationDetails obs, final SourceDefinition source) {
         checkElineWidth(instrument, source);
         checkSourceFraction(obs.getNumExposures(), obs.getSourceFraction());
-        checkGaussianFwhm(source.profile);
+        checkGaussianFwhm(source.profile());
         checkSkyAperture(obs.getAnalysis());
     }
 
@@ -56,7 +57,7 @@ public final class Validation {
      */
     private static void checkElineWidth(final Instrument instrument, final SourceDefinition source) {
 
-        if (source.getDistributionType().equals(SourceDefinition.Distribution.ELINE)) {
+        if (source.distribution() instanceof EmissionLine) {
 
             // These values reflect the resolution of the data files we are currently using to describe the
             // atmospheric properties for the given wavelength ranges. In case the resolution of those files change,
@@ -70,9 +71,10 @@ public final class Validation {
                 default:      throw new Error();
             }
 
-            final double maxWidth = ITCConstants.C / (source.getELineWavelength().toNanometers() / resolution);
+            final EmissionLine eLine = (EmissionLine) source.distribution();
+            final double maxWidth = ITCConstants.C / (eLine.wavelength().toNanometers() / resolution);
 
-            if (source.getELineWidth().toKilometersPerSecond() < maxWidth) {
+            if (eLine.width().toKilometersPerSecond() < maxWidth) {
                 throw new IllegalArgumentException(
                     String.format(
                             "Please use a model line width > %.2f nm (or %.2f km/s) " +

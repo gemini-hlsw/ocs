@@ -10,7 +10,8 @@ import edu.gemini.itc.shared.SourceDefinition;
 import edu.gemini.itc.shared.TelescopeDetails;
 import edu.gemini.spModel.core.MagnitudeBand;
 import edu.gemini.spModel.core.Site;
-import edu.gemini.spModel.target.Library;
+import edu.gemini.spModel.core.Wavelength;
+import edu.gemini.spModel.target.*;
 import scala.Option;
 
 /**
@@ -89,52 +90,58 @@ public final class SEDFactory {
     public static VisitableSampledSpectrum getSED(final SourceDefinition sdp, final Instrument instrument) {
 
         final VisitableSampledSpectrum temp;
-        switch (sdp.getDistributionType()) {
-            case BBODY:
-                return new BlackBodySpectrum(sdp.getBBTemp(),
-                        instrument.getSampling(),
-                        sdp.getSourceNormalization(),
-                        sdp.getUnits(),
-                        sdp.getNormBand(),
-                        sdp.getRedshift());
+        if (sdp.distribution() instanceof BlackBody) {
+            return new BlackBodySpectrum(
+                    ((BlackBody) sdp.distribution()).temperature(),
+                    instrument.getSampling(),
+                    sdp.norm(),
+                    sdp.units(),
+                    sdp.normBand(),
+                    sdp.redshift());
 
-            case ELINE:
-                return new EmissionLineSpectrum(sdp.getELineWavelength(),
-                        sdp.getELineWidth(),
-                        sdp.getELineFlux(),
-                        sdp.getELineContinuumFlux(),
-                        sdp.getRedshift(),
-                        instrument.getSampling());
+        } else if (sdp.distribution() instanceof EmissionLine) {
+            final EmissionLine eLine = (EmissionLine) sdp.distribution();
+            return new EmissionLineSpectrum(
+                    // Wavelength is a value class, on the Java side wavelength() therefore returns just a Length
+                    // and not a Wavelength object, so we need to repackage it to make it a wavelength. Blech.
+                    new Wavelength(eLine.wavelength()),
+                    eLine.width(),
+                    eLine.flux(),
+                    eLine.continuum(),
+                    sdp.redshift(),
+                    instrument.getSampling());
 
-            case PLAW:
-                return new PowerLawSpectrum(sdp.getPowerLawIndex(),
-                        instrument.getObservingStart(),
-                        instrument.getObservingEnd(),
-                        instrument.getSampling(),
-                        sdp.getRedshift());
+        } else if (sdp.distribution() instanceof PowerLaw) {
+            return new PowerLawSpectrum(
+                    ((PowerLaw) sdp.distribution()).index(),
+                    instrument.getObservingStart(),
+                    instrument.getObservingEnd(),
+                    instrument.getSampling(),
+                    sdp.redshift());
 
-            case USER_DEFINED:
-                temp = getUserSED(sdp.getUserDefinedSpectrum(), instrument.getSampling());
-                temp.applyWavelengthCorrection();
-                return temp;
+        } else if (sdp.distribution() instanceof UserDefined) {
+            final UserDefined userDefined = (UserDefined) sdp.distribution();
+            temp = getUserSED(userDefined.spectrum(), instrument.getSampling());
+            temp.applyWavelengthCorrection();
+            return temp;
 
-            case LIBRARY_STAR:
-                temp = getSED(getLibraryResource(STELLAR_LIB, sdp).toLowerCase(), instrument.getSampling());
-                temp.applyWavelengthCorrection();
-                return temp;
+        } else if (sdp.distribution() instanceof LibraryStar) {
+            temp = getSED(getLibraryResource(STELLAR_LIB, sdp).toLowerCase(), instrument.getSampling());
+            temp.applyWavelengthCorrection();
+            return temp;
 
-            case LIBRARY_NON_STAR:
-                temp = getSED(getLibraryResource(NON_STELLAR_LIB, sdp), instrument.getSampling());
-                temp.applyWavelengthCorrection();
-                return temp;
+        } else if (sdp.distribution() instanceof LibraryNonStar) {
+            temp = getSED(getLibraryResource(NON_STELLAR_LIB, sdp), instrument.getSampling());
+            temp.applyWavelengthCorrection();
+            return temp;
 
-            default:
-                throw new Error("invalid distribution type");
+        } else {
+            throw new Error("invalid distribution type");
         }
     }
 
     private static String getLibraryResource(final String prefix, final SourceDefinition sdp) {
-        return prefix + "/" + ((Library) sdp.distribution).sedSpectrum() + SED_FILE_EXTENSION;
+        return prefix + "/" + ((Library) sdp.distribution()).sedSpectrum() + SED_FILE_EXTENSION;
     }
 
     public static SourceResult calculate(final Instrument instrument, final SourceDefinition sdp, final ObservingConditions odp, final TelescopeDetails tp) {
@@ -150,7 +157,7 @@ public final class SEDFactory {
         // output: redshifteed SED
 
         final VisitableSampledSpectrum sed = SEDFactory.getSED(sdp, instrument);
-        final SampledSpectrumVisitor redshift = new RedshiftVisitor(sdp.getRedshift());
+        final SampledSpectrumVisitor redshift = new RedshiftVisitor(sdp.redshift());
         sed.accept(redshift);
 
         // Must check to see if the redshift has moved the spectrum beyond
@@ -158,7 +165,7 @@ public final class SEDFactory {
         // both the normalization waveband and the observation waveband
         // (filter region).
 
-        final MagnitudeBand band = sdp.getNormBand();
+        final MagnitudeBand band = sdp.normBand();
         final double start = band.start().toNanometers();
         final double end = band.end().toNanometers();
 
@@ -171,14 +178,10 @@ public final class SEDFactory {
         }
 
         // any sed except BBODY and ELINE have normalization regions
-        switch (sdp.getDistributionType()) {
-            case ELINE:
-            case BBODY:
-                break;
-            default:
-                if (sed.getStart() > start || sed.getEnd() < end) {
-                    throw new IllegalArgumentException("Shifted spectrum lies outside of specified normalisation waveband.");
-                }
+        if (!(sdp.distribution() instanceof EmissionLine) && !(sdp.distribution() instanceof BlackBody)) {
+            if (sed.getStart() > start || sed.getEnd() < end) {
+                throw new IllegalArgumentException("Shifted spectrum lies outside of specified normalisation waveband.");
+            }
         }
 
         // Module 2
@@ -188,11 +191,11 @@ public final class SEDFactory {
         // units
         // calculates: normalized SED, resampled SED, SED adjusted for aperture
         // output: SED in common internal units
-        if (!sdp.getDistributionType().equals(SourceDefinition.Distribution.ELINE)) {
+        if (!(sdp.distribution() instanceof EmissionLine)) {
             final SampledSpectrumVisitor norm = new NormalizeVisitor(
-                    sdp.getNormBand(),
-                    sdp.getSourceNormalization(),
-                    sdp.getUnits());
+                    sdp.normBand(),
+                    sdp.norm(),
+                    sdp.units());
             sed.accept(norm);
         }
 
