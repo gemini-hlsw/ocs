@@ -38,7 +38,6 @@ import scala.collection.JavaConverters._
 import scalaz._
 import Scalaz._
 
-
 /**
  * Locally describe an ags strategy including its limits and the query that would trigger
  */
@@ -103,7 +102,7 @@ object ObservationInfo {
     InstGmosNorth.INSTRUMENT_NAME_PROP     -> SPComponentType.INSTRUMENT_GMOS,
     InstGmosSouth.INSTRUMENT_NAME_PROP     -> SPComponentType.INSTRUMENT_GMOSSOUTH,
     GNIRSConstants.INSTRUMENT_NAME_PROP    -> SPComponentType.INSTRUMENT_GNIRS,
-    Gpi.INSTRUMENT_NAME_PROP               -> SPComponentType.INSTRUMENT_GPI ,
+    //Gpi.INSTRUMENT_NAME_PROP               -> SPComponentType.INSTRUMENT_GPI, GPI Doesn't have AGS Strategies defined
     InstMichelle.INSTRUMENT_NAME_PROP      -> SPComponentType.INSTRUMENT_MICHELLE,
     InstNICI.INSTRUMENT_NAME_PROP          -> SPComponentType.INSTRUMENT_NICI,
     InstNIFS.INSTRUMENT_NAME_PROP          -> SPComponentType.INSTRUMENT_NIFS,
