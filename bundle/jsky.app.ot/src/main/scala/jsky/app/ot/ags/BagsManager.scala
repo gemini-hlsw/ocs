@@ -2,13 +2,17 @@ package jsky.app.ot.ags
 
 import java.beans.{PropertyChangeEvent, PropertyChangeListener}
 import java.util.concurrent.{LinkedBlockingQueue, Executors}
-import java.util.logging.Logger
+import java.util.logging.{Level, Logger}
 
 import edu.gemini.ags.api.{AgsRegistrar, AgsStrategy}
+import edu.gemini.ags.gems.GemsGuideStars
+import edu.gemini.catalog.votable.{GenericError, CatalogException}
 import edu.gemini.pot.sp._
+import edu.gemini.spModel.obs.ObservationStatus
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.rich.shared.immutable._
 import edu.gemini.spModel.target.env.TargetEnvironment
+import edu.gemini.shared.util.immutable.{Option => GOption}
 import jsky.app.ot.OT
 import jsky.app.ot.tpe._
 import scala.collection.JavaConverters._
@@ -38,54 +42,41 @@ object BagsManager {
       BagsTask(observation, curCtx, ctxOpt)
 
     def performLookup(): Unit = {
-      LOG.info(s"Performing BAGS lookup for observation=${observation.getObservationID}")
-
-      def resultString[A](r: Option[A]): String =
-        s"Results=${r ? "Yes" | "No"}."
-
-      // We must handle GeMS separately from other strategies, and delegate the work to the GemsGuideStarWorker.
-      def gemsLookup(obsCtx: ObsContext): Unit = {
-        LOG.info(s"BAGS GeMS lookup for observation=${observation.getObservationID} starting...")
-        Try { GemsGuideStarWorker.findGuideStars(obsCtx) } match {
-          case Success(ggs) =>
-            LOG.info(s"BAGS GeMS lookup for observation=${observation.getObservationID} successful. ${resultString(ggs.asScalaOpt)}")
-            Swing.onEDT {
-              muteObservation(observation)
-              GemsGuideStarWorker.applyResults(TpeContext(observation), ggs, true)
-              unmuteObservation(observation)
-            }
-            taskComplete(this, success = true)
-          case Failure(ex) =>
-            LOG.warning(s"BAGS GeMS lookup for observation=${observation.getObservationID} failed. Exception=$ex")
-            taskComplete(this, success = false)
-        }
-      }
-
-      // The mechanism to perform lookups for all other guide probes.
-      def otherLookup(obsCtx: ObsContext, strategy: AgsStrategy): Unit = {
-        val fut = strategy.select(obsCtx, OT.getMagnitudeTable)
-        fut.onComplete {
+      def lookup[S,T](optExtract: S => Option[T])(worker: (TpeContext, S) => Unit)(results: Try[S]): Unit = {
+        results match {
           case Success(selOpt) =>
-            LOG.info(s"BAGS lookup for observation=${observation.getObservationID} successful. ${resultString(selOpt)}")
-            Swing.onEDT {
-              muteObservation(observation)
-              GuideStarWorker.applyResults(TpeContext(observation), selOpt)
-              unmuteObservation(observation)
+            LOG.info(s"BAGS lookup for observation=${observation.getObservationID} successful. Results=${optExtract(selOpt) ? "Yes" | "No"}.")
+            if (ObservationStatus.computeFor(observation) != ObservationStatus.OBSERVED) {
+              Swing.onEDT {
+                muteObservation(observation)
+                worker(TpeContext(observation), selOpt)
+                unmuteObservation(observation)
+              }
             }
             taskComplete(this, success = true)
+
+          // We don't want to print the stack trace if the host is simply unreachable.
+          // This is reported only as a GenericError in a CatalogException, unfortunately.
+          case Failure(CatalogException((e: GenericError) :: _)) =>
+            LOG.warning(s"BAGS lookup for observation=${observation.getObservationID} failed: ${e.msg}")
+            taskComplete(this, success = false)
+
+          // For all other exceptions, print the full stack trace.
           case Failure(ex) =>
-            LOG.warning(s"BAGS lookup for observation=${observation.getObservationID} failed. Exception=$ex")
+            LOG.log(Level.WARNING, s"BAGS lookup for observation=${observation.getObservationID} failed.", ex)
             taskComplete(this, success = false)
         }
       }
 
 
+      LOG.info(s"Performing BAGS lookup for observation=${observation.getObservationID}")
       curCtx.foreach { obsCtx =>
         AgsRegistrar.currentStrategy(obsCtx).foreach { strategy =>
           if (GuideStarSupport.hasGemsComponent(observation)) {
-            gemsLookup(obsCtx)
+            lookup((x: GOption[GemsGuideStars]) => x.asScalaOpt)(GemsGuideStarWorker.applyResults(_, _, true))(Try(GemsGuideStarWorker.findGuideStars(obsCtx)))
           } else {
-            otherLookup(obsCtx, strategy)
+            val fut = strategy.select(obsCtx, OT.getMagnitudeTable)
+            fut.onComplete(lookup(identity[Option[AgsStrategy.Selection]])(GuideStarWorker.applyResults))
           }
         }
       }
