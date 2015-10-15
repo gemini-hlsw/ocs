@@ -1,10 +1,3 @@
-/*
- * Copyright 2000 Association for Universities for Research in Astronomy, Inc.,
- * Observatory Control System, Gemini Telescopes Project.
- *
- * $Id: Resources.java 4414 2004-02-03 16:21:36Z brighton $
- */
-
 package jsky.util;
 
 import java.io.BufferedInputStream;
@@ -17,7 +10,6 @@ import java.util.Properties;
 
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
-
 
 /**
  * Resources provides a central class with methods for accessing
@@ -41,7 +33,7 @@ public final class Resources {
     public static final String CONFIG_PATH = RESOURCE_PATH + "/" + CONFIG_SUBPATH + "/";
 
     // ImageCache provides a cache of already present icons.
-    private static Map<String, Icon> _rmap = new HashMap<String, Icon>();
+    private static Map<String, Icon> _rmap = new HashMap<>();
 
     // Disallow instances
     private Resources() {
@@ -56,9 +48,8 @@ public final class Resources {
         return getResource(resource, Resources.class);
     }
 
-    public static URL getResource(String resource, Class c) {
+    public static URL getResource(String resource, Class<?> c) {
         String path = RESOURCE_PATH + '/' + resource;
-        //System.out.println("getResource: " + path);
         return c.getResource(path);
     }
 
@@ -69,7 +60,6 @@ public final class Resources {
      */
     public static InputStream getResourceAsStream(String resource) {
         String path = RESOURCE_PATH + '/' + resource;
-        //System.out.println("getResource: " + path);
         return Resources.class.getResourceAsStream(path);
     }
 
@@ -91,7 +81,7 @@ public final class Resources {
         return getIcon(iconFileName, Resources.class);
     }
 
-    public static Icon getIcon(String iconFileName, Class clazz) {
+    public static Icon getIcon(String iconFileName, Class<?> clazz) {
         // First check the map under the iconFileName
         Icon icon = _rmap.get(iconFileName);
         if (icon != null) {
