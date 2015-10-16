@@ -45,7 +45,7 @@ object SingleProbeVignettingTest extends Specification with ScalaCheck with Vign
       brights <- Gen.listOfN(bands.size, Gen.chooseNum(5, 20))
     } yield {
       val mags = bands.zip(brights).map { case (band, bright) => Magnitude(bright, band, None, MagnitudeSystem.Vega) }
-      SiderealTarget(name, coords, None, None, None, None, mags.toList)
+      SiderealTarget(name, coords, mags.toList)
     }
 
   // why do i have to write this myself?
