@@ -1,6 +1,8 @@
 package jsky.app.ot.gemini.editor.targetComponent.details
 
 import java.awt.{GridBagConstraints, GridBagLayout, Insets}
+import java.text.{ParseException, NumberFormat}
+import java.util.Locale
 import javax.swing.JPanel
 
 import edu.gemini.pot.sp.ISPNode
@@ -98,17 +100,17 @@ case class NumericPropertySheet[A](title: Option[String], f: SPTarget => A, prop
   private def updateField(p: Prop[A, _], tbwe: TextBoxWidget) =
     try
       nonreentrant {
-        p.edit(f(spt), tbwe.getValue.toDouble)
+        p.edit(f(spt), p.formatter.parse(tbwe.getValue).doubleValue())
         spt.notifyOfGenericUpdate()
       }
-    catch { case _: NumberFormatException => }
+    catch { case _: ParseException => }
 
   private def transformField(p: Prop[A, _], tbwe: TextBoxWidget) =
     try {
       pairs.find(_._1 == p).foreach { w =>
-        p.transform(w._2, f(spt), tbwe.getValue.toDouble)
+        p.transform(w._2, f(spt), p.formatter.parse(tbwe.getValue).doubleValue())
       }
-    } catch { case _: NumberFormatException => }
+    } catch { case _: ParseException => }
 
 }
 
@@ -120,6 +122,7 @@ object NumericPropertySheet {
     def edit: (A, Double)                       => Unit
     def transform: (NumberBoxWidget, A, Double) => Unit = (_, _, _) => {}
     def init: (NumberBoxWidget, A)              => Unit
+    def formatter: NumberFormat = NumberFormat.getInstance(Locale.US) <| {_.setGroupingUsed(false)}
   }
 
   case class DoubleProp[A](leftCaption: String, rightCaption: String, get: A => Double, edit: (A, Double) => Unit) extends Prop[A, Double] {
@@ -130,11 +133,11 @@ object NumericPropertySheet {
       horizontalAlignment = Alignment.Left
     }
     def init: (NumberBoxWidget, A) => Unit  =  (w,a) => {
-      w.setValue(get(a))
+      w.setValue(formatter.format(get(a)))
     }
   }
 
-  case class TransformableProp[A, B](leftOptions: List[B], rightCaptions: Map[B, String], initial: B, render: B => String, get: (A, B) => Double, set: (A, B, Double) => Unit) extends Prop[A, Double] {
+  case class TransformableProp[A, B](leftOptions: List[B], rightCaptions: Map[B, String], initial: B, render: B => String, get: (A, B) => Double, set: (A, B, Double) => Unit, format: B => NumberFormat) extends Prop[A, Double] {
     val rightComponent = new Label(rightCaptions.getOrElse(initial, "")) {
       horizontalAlignment = Alignment.Left
     }
@@ -147,15 +150,15 @@ object NumericPropertySheet {
           rightComponent.text = rightCaptions.getOrElse(selection.item, "")
       }
     }
-
+    override def formatter = format(leftComponent.selection.item)
     def edit: (A, Double)          => Unit  =  (a, d) => {
       set(a, leftComponent.selection.item, d)
     }
     override def transform: (NumberBoxWidget,  A, Double)          => Unit  =  (w, a, d) => {
-      w.setValue(get(a, leftComponent.selection.item))
+      w.setValue(formatter.format(get(a, leftComponent.selection.item)))
     }
     def init: (NumberBoxWidget, A) => Unit  =  (w, a) => {
-      w.setValue(get(a, leftComponent.selection.item))
+      w.setValue(formatter.format(get(a, leftComponent.selection.item)))
     }
   }
 
@@ -168,7 +171,7 @@ object NumericPropertySheet {
     }
     def edit: (A, Double)          => Unit  =  (a, d) => set(a, unit(d))
     def init: (NumberBoxWidget, A) => Unit  =  (w, a) => {
-      w.setValue(get(a).value)
+      w.setValue(formatter.format(get(a).value))
     }
   }
 
@@ -180,7 +183,7 @@ object NumericPropertySheet {
     def unit           = rightComponent.selection.item
     def edit: (A, Double)          => Unit  =  (a, d) => set(a, unit(d))
     def init: (NumberBoxWidget, A) => Unit  =  (w, a) => {
-      w.setValue(get(a).value)
+      w.setValue(formatter.format(get(a).value))
       rightComponent.selection.item = get(a).unit
     }
   }
@@ -193,8 +196,8 @@ object NumericPropertySheet {
     def apply[A](leftCaption: String, rightCaption: String, f: A => CoordinateParam): Prop[A, Double] =
       DoubleProp(leftCaption, rightCaption, a => f(a).getValue, (a, b) => f(a).setValue(b))
 
-    def apply[A, B](leftOptions: List[B], rightCaptions: Map[B, String], initial: B, render: B => String, f: (A, B) => Double, g: (A, B, Double) => Unit): Prop[A, Double] =
-      TransformableProp(leftOptions, rightCaptions, initial, render, f, g)
+    def apply[A, B](leftOptions: List[B], rightCaptions: Map[B, String], initial: B, render: B => String, f: (A, B) => Double, g: (A, B, Double) => Unit, h: B => NumberFormat): Prop[A, Double] =
+      TransformableProp(leftOptions, rightCaptions, initial, render, f, g, h)
 
     def apply[A, B <: Quantity[B]](leftCaption: String, get: A => B, set: (A, B) => Unit, units: UnitOfMeasure[B]*): Prop[A, B] =
       units.length match {

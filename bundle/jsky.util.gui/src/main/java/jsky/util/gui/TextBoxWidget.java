@@ -1,19 +1,11 @@
-// Copyright 1997 Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-// See the file LICENSE for complete details.
-//
-// $Id: TextBoxWidget.java 6719 2005-11-08 19:35:36Z brighton $
-//
 package jsky.util.gui;
 
-import java.awt.event.ActionListener;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.util.ArrayList;
 import javax.swing.JTextField;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
-
 
 /**
  * A TextBoxWidget that permits clients to register as key press watchers.
