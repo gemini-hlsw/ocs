@@ -5,6 +5,8 @@ import edu.gemini.shared.util.immutable.ImList;
 import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.shared.util.immutable.Some;
 import edu.gemini.spModel.core.Redshift;
+import edu.gemini.spModel.core.Redshift$;
+import edu.gemini.spModel.pio.Param;
 import edu.gemini.spModel.pio.ParamSet;
 import edu.gemini.spModel.pio.Pio;
 import edu.gemini.spModel.pio.PioFactory;
@@ -33,6 +35,7 @@ public class SPTargetPio {
     private static final String _PM1 = "pm1";
     private static final String _PM2 = "pm2";
     private static final String _PARALLAX = "parallax";
+    private static final String _RV = "rv";
     private static final String _Z = "z";
     private static final String _ANODE = "anode";
     private static final String _AQ = "aq";
@@ -213,6 +216,16 @@ public class SPTargetPio {
             final CoordinateTypes.Parallax p = new CoordinateTypes.Parallax();
             p.setParam(paramSet.getParam(_PARALLAX));
             t.setParallax(p);
+
+            final Param rv = paramSet.getParam(_RV);
+            if (rv != null) {
+                try {
+                    t.setRedshift(Redshift$.MODULE$.fromRadialVelocityJava(Double.parseDouble(rv.getValue())));
+                } catch (final IllegalArgumentException ex) {
+                    //this shouldn't happen, unless corrupted data
+                    LOGGER.log(Level.WARNING, "Invalid radial velocity value: " + rv.getValue());
+                }
+            }
 
             final String z = Pio.getValue(paramSet, _Z);
             if (z != null) {

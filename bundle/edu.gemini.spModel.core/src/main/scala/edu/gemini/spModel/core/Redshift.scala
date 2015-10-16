@@ -24,6 +24,14 @@ object Redshift {
     Redshift(scala.math.sqrt(t) - 1)
   }
 
+  /**
+    * Make a new redshift assuming the value is in km/sec
+    */
+  def fromRadialVelocityJava(v: Double):Redshift = {
+    val t = (1 + v / C.toKilometersPerSecond) / (1 - v / C.toKilometersPerSecond)
+    Redshift(scala.math.sqrt(t) - 1)
+  }
+
   def fromApparentRadialVelocity(v: Velocity):Redshift =
     Redshift(v / C)
 

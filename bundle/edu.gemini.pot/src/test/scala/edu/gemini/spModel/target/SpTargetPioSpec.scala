@@ -2,12 +2,13 @@ package edu.gemini.spModel.target
 
 import edu.gemini.spModel.core.{Redshift, Arbitraries}
 import edu.gemini.spModel.core.WavelengthConversions._
-import edu.gemini.spModel.pio.ParamSet
+import edu.gemini.spModel.pio.{Pio, ParamSet}
 import edu.gemini.spModel.pio.xml.PioXmlFactory
 import edu.gemini.spModel.target.system.{ConicTarget, HmsDegTarget, ITarget}
 import org.scalacheck.{Arbitrary, Gen}
 import org.specs2.ScalaCheck
 import org.specs2.mutable.Specification
+import squants.motion.KilometersPerSecond
 
 import squants.motion.VelocityConversions._
 import squants.radio.IrradianceConversions._
@@ -51,7 +52,6 @@ object SpTargetPioSpec extends Specification with ScalaCheck with Arbitraries {
         prop { (sd: Option[SpectralDistribution], sp: Option[SpatialProfile]) =>
 
           val factory = new PioXmlFactory()
-          val paramSet = factory.createParamSet("test")
 
           val spt = new SPTarget(10, 10)
           spt.setSpatialProfile(sp)
@@ -139,6 +139,16 @@ object SpTargetPioSpec extends Specification with ScalaCheck with Arbitraries {
 
     "read RA and Dec specified as HMS/DMS for non-sidereal targets" in {
       fromHmsDms(new ConicTarget)
+    }
+
+    "convert RV values to redshift" in {
+      val fact = new PioXmlFactory
+      val ps = SPTargetPio.getParamSet(new SPTarget(new HmsDegTarget), fact)
+      // Simulate an old program without redshift but containing radial velocity
+      Pio.addParam(fact, ps, "rv", "295000")
+      ps.removeChild("z")
+      val spt = SPTargetPio.fromParamSet(ps)
+      spt.getTarget.asInstanceOf[HmsDegTarget].getRedshift must beEqualTo(Redshift.fromRadialVelocity(KilometersPerSecond(295000)))
     }
   }
 
