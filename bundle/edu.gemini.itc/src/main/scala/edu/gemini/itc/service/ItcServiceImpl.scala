@@ -1,5 +1,6 @@
 package edu.gemini.itc.service
 
+import edu.gemini.auxfile.client.AuxFileClient
 import edu.gemini.itc.acqcam.AcqCamRecipe
 import edu.gemini.itc.base._
 import edu.gemini.itc.flamingos2.Flamingos2Recipe
@@ -10,6 +11,8 @@ import edu.gemini.itc.nifs.NifsRecipe
 import edu.gemini.itc.niri.NiriRecipe
 import edu.gemini.itc.operation.ImagingS2NMethodACalculation
 import edu.gemini.itc.shared._
+import edu.gemini.spModel.core.SPProgramID
+import edu.gemini.spModel.target.{UserDefinedSpectrum, AuxFileSpectrum, SpectralDistribution}
 
 import scalaz._
 import Scalaz._
@@ -26,8 +29,23 @@ class ItcServiceImpl extends ItcService {
 
   def calculate(source: SourceDefinition, obs: ObservationDetails, cond: ObservingConditions, tele: TelescopeDetails, ins: InstrumentDetails): Result = try {
 
-    if (obs.getMethod.isImaging)  calculateImaging(source, obs, cond, tele, ins)
-    else                          calculateSpectroscopy(source, obs, cond, tele, ins)
+    // Get the SED data from an aux file. For now we can assume that the ITC service is running on the same
+    // machine as the database (localhost). In case this setup changes, we need to change this here, too.
+    def auxFileDistribution(programId: SPProgramID, name: String): SpectralDistribution = {
+      val spectrumBytes = new AuxFileClient("localhost", 8443).fetchToMemory(programId, name)
+      val spectrum      = new String(spectrumBytes)
+      UserDefinedSpectrum(name, spectrum)
+    }
+
+    // if a user defined source distribution is involved we need to read the aux file
+    val src = source.distribution match {
+      case AuxFileSpectrum(null, name) => throw new RuntimeException("undefined aux file source detected!!") // TODO: this is a workaround for a UI problem and will go away
+      case AuxFileSpectrum(id,   name) => source.copy(distribution = auxFileDistribution(id, name))
+      case _                           => source
+    }
+
+    if (obs.getMethod.isImaging)  calculateImaging(src, obs, cond, tele, ins)
+    else                          calculateSpectroscopy(src, obs, cond, tele, ins)
 
   } catch {
     case e: Throwable => ItcResult.forException(e)

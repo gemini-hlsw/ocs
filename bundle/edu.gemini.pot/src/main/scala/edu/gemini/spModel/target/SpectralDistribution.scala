@@ -1,6 +1,6 @@
 package edu.gemini.spModel.target
 
-import edu.gemini.spModel.core.Wavelength
+import edu.gemini.spModel.core.{SPProgramID, Wavelength}
 import squants.motion.Velocity
 import squants.radio.{SpectralIrradiance, Irradiance}
 
@@ -18,7 +18,9 @@ final case class PowerLaw(index: Double) extends SpectralDistribution
 final case class EmissionLine(wavelength: Wavelength, width: Velocity, flux: Irradiance, continuum: SpectralIrradiance) extends SpectralDistribution
 
 /** A user defined spectrum. */
-final case class UserDefined(spectrum: String) extends SpectralDistribution
+sealed trait UserDefined extends SpectralDistribution
+final case class UserDefinedSpectrum(name: String, spectrum: String) extends UserDefined
+final case class AuxFileSpectrum(programId: SPProgramID, name: String) extends UserDefined
 
 /** A library defined spectrum. */
 sealed trait Library extends SpectralDistribution {

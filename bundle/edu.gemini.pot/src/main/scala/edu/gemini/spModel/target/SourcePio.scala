@@ -1,5 +1,6 @@
 package edu.gemini.spModel.target
 
+import edu.gemini.spModel.core.SPProgramID
 import edu.gemini.spModel.core.WavelengthConversions._
 import edu.gemini.spModel.pio.{ParamSet, Pio, PioFactory}
 import squants.motion.Velocity
@@ -35,6 +36,10 @@ object SourcePio {
   private val LibraryNonStarName  = "LibraryNonStar"
   private val LibrarySpectrum     = "spectrum"
 
+  private val UserDefinedName     = "UserDefined"
+  private val UserDefinedAuxFile  = "auxFile"
+  private val UserDefinedProgramId= "programId"
+
 
   /** Turns a spectral distribution into a param set. */
   def toParamSet(spectralDistribution: SpectralDistribution, factory: PioFactory): ParamSet =
@@ -55,11 +60,11 @@ object SourcePio {
           (Pio.addQuantity(factory,    _, ElineFlux,       flux))                    <|
           (Pio.addQuantity(factory,    _, ElineContinuum,  continuum))
 
-      case UserDefined(spectrum)  =>
+      case AuxFileSpectrum(id, name)  =>
         // User defined distributions are for now only supported on the web app end.
-        // This is only here to satisfy the compiler. However at some point in the future
-        // we will add aux file support in the OT.
-        throw new Error("user defined spectral distributions are not supported")
+        factory.createParamSet(UserDefinedName)  <|
+          (Pio.addParam(factory, _, UserDefinedProgramId, id.toString)) <|
+          (Pio.addParam(factory, _, UserDefinedAuxFile, name))
 
       case sd: LibraryStar        =>
         factory.createParamSet(LibraryStarName)    <|
@@ -68,6 +73,9 @@ object SourcePio {
       case sd: LibraryNonStar     =>
         factory.createParamSet(LibraryNonStarName) <|
           (Pio.addParam(factory, _, LibrarySpectrum, sd.sedSpectrum))
+
+      case _                      =>
+        sys.error("unsupported spectral distribution")
 
     }
 
@@ -92,9 +100,14 @@ object SourcePio {
     val nonStar = Option(pset.getParamSet(LibraryNonStarName)).flatMap { p =>
       LibraryNonStar.findByName(Pio.getValue(p, LibrarySpectrum))
     }
+    val userDefined = Option(pset.getParamSet(UserDefinedName)).map { p =>
+      AuxFileSpectrum(
+        SPProgramID.toProgramID(Pio.getValue(p, UserDefinedProgramId)),
+        Pio.getValue(p, UserDefinedAuxFile))
+    }
 
     // at most one of these will be defined
-    bbody.orElse(plaw).orElse(eline).orElse(star).orElse(nonStar)
+    bbody.orElse(plaw).orElse(eline).orElse(star).orElse(nonStar).orElse(userDefined)
   }
 
   /** Turns a spatial profile into a param set. */

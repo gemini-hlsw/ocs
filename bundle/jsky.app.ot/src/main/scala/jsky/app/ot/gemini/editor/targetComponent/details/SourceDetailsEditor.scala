@@ -3,18 +3,23 @@ package jsky.app.ot.gemini.editor.targetComponent.details
 import java.awt.{Component, GridBagConstraints, Insets}
 import javax.swing.JPanel
 
+import edu.gemini.auxfile.client.AuxFileClient
+import edu.gemini.auxfile.copier.AuxFileType
 import edu.gemini.pot.sp.ISPNode
 import edu.gemini.shared.util.immutable.{Option => GOption}
+import edu.gemini.spModel.core.SPProgramID
 import edu.gemini.spModel.core.WavelengthConversions._
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.target._
+import jsky.app.ot.OT
 import jsky.app.ot.gemini.editor.targetComponent.TelescopePosEditor
 import jsky.app.ot.gemini.editor.targetComponent.details.NumericPropertySheet.Prop
-import squants.motion.{KilometersPerSecond, Velocity}
+import jsky.app.ot.vcs.VcsOtClient
 import squants.motion.VelocityConversions._
+import squants.motion.{KilometersPerSecond, Velocity}
 import squants.radio.IrradianceConversions._
 import squants.radio.SpectralIrradianceConversions._
-import squants.radio.{Irradiance, SpectralIrradiance, ErgsPerSecondPerSquareCentimeter, WattsPerSquareMeter, WattsPerSquareMeterPerMicron, ErgsPerSecondPerSquareCentimeterPerAngstrom}
+import squants.radio.{ErgsPerSecondPerSquareCentimeter, ErgsPerSecondPerSquareCentimeterPerAngstrom, Irradiance, SpectralIrradiance, WattsPerSquareMeter, WattsPerSquareMeterPerMicron}
 
 import scala.swing.GridBagPanel.{Anchor, Fill}
 import scala.swing.ListView.Renderer
@@ -86,6 +91,15 @@ final class SourceDetailsEditor extends GridBagPanel with TelescopePosEditor {
   private val powerLawDetails = NumericPropertySheet[PowerLaw](None, powerLawOrDefault,
     Prop("Index",       "",         _.index,                      (a, v) => setDistribution(PowerLaw(v)))
   )
+  private val emptySedFilesModel = ComboBox.newConstantModel(Seq(AuxFileSpectrum(null, "«no sed file available»")))
+  private val userDefinedDetails = new ComboBox[AuxFileSpectrum](Seq()) {
+    peer.setModel(emptySedFilesModel)
+    renderer = Renderer(_.name)
+    def distribution = selection.item match {
+      case AuxFileSpectrum(null, _) => None
+      case auxFile                  => Some(auxFile)
+    }
+  }
 
   private case class DistributionPanel(label: String, panel: Component, default: Option[SpectralDistribution])
   private val distributionPanels = List(
@@ -94,7 +108,8 @@ final class SourceDetailsEditor extends GridBagPanel with TelescopePosEditor {
     DistributionPanel("Library Non-Star", libraryNonStarDetails.peer, Some(libraryNonStarDetails.selection.item)),
     DistributionPanel("Black Body",       blackBodyDetails,           Some(defaultBlackBody)),
     DistributionPanel("Emission Line",    emissionLineDetails,        Some(defaultEmissionLine)),
-    DistributionPanel("Power Law",        powerLawDetails,            Some(defaultPowerLaw))
+    DistributionPanel("Power Law",        powerLawDetails,            Some(defaultPowerLaw)),
+    DistributionPanel("User Defined",     userDefinedDetails.peer,    Some(userDefinedDetails.selection.item))
   )
 
   private val distributions = new ComboBox[DistributionPanel](distributionPanels) {
@@ -176,11 +191,15 @@ final class SourceDetailsEditor extends GridBagPanel with TelescopePosEditor {
     profiles.selection,
     distributions.selection,
     libraryStarDetails.selection,
-    libraryNonStarDetails.selection
+    libraryNonStarDetails.selection,
+    userDefinedDetails.selection
   )
 
   listenTo(editElements:_*)
   reactions += {
+
+    case SelectionChanged(`profiles`)  =>
+      setProfile(profiles.selection.item.default)
 
     case SelectionChanged(`distributions`) =>
       setDistribution(distributions.selection.item.default)
@@ -191,14 +210,15 @@ final class SourceDetailsEditor extends GridBagPanel with TelescopePosEditor {
     case SelectionChanged(`libraryNonStarDetails`) =>
       setDistribution(libraryNonStarDetails.selection.item)
 
-    case SelectionChanged(`profiles`)  =>
-      setProfile(profiles.selection.item.default)
+    case SelectionChanged(`userDefinedDetails`) =>
+        setDistribution(userDefinedDetails.distribution)
 
   }
 
   // react to any kind of target change by updating all UI elements
-  def edit(obsContext: GOption[ObsContext], spTarget: SPTarget, node: ISPNode): Unit = {
+  def edit(obsContext: GOption[ObsContext], spTarget: SPTarget, node: ISPNode): Unit =  {
 
+    // update target
     spt = spTarget
 
     // we only show the source editor for the base/science target, and we also only need to update it if visible
@@ -207,6 +227,10 @@ final class SourceDetailsEditor extends GridBagPanel with TelescopePosEditor {
 
       deafTo(editElements:_*)
 
+      // update available user spectras (in case program has changed or files have been added/removed)
+      updateSedFiles(node.getProgramID, sedFiles(node.getProgramID))
+
+      // update UI elements to reflect the spatial profile
       spt.getTarget.getSpatialProfile match {
         case None                        => profiles.selection.item = profilePanels.head
         case Some(PointSource)           => profiles.selection.item = profilePanels(1)
@@ -214,6 +238,7 @@ final class SourceDetailsEditor extends GridBagPanel with TelescopePosEditor {
         case Some(UniformSource)         => profiles.selection.item = profilePanels(3)
       }
 
+      // update UI elements to reflect the spectral distribution
       spt.getTarget.getSpectralDistribution match {
         case None                        => distributions.selection.item = distributionPanels.head
         case Some(s: LibraryStar)        => distributions.selection.item = distributionPanels(1); libraryStarDetails.selection.item = s
@@ -221,7 +246,8 @@ final class SourceDetailsEditor extends GridBagPanel with TelescopePosEditor {
         case Some(BlackBody(_))          => distributions.selection.item = distributionPanels(3); distributionPanels(3).panel.asInstanceOf[NumericPropertySheet[BlackBody]].edit(obsContext, spTarget, node)
         case Some(EmissionLine(_,_,_,_)) => distributions.selection.item = distributionPanels(4); distributionPanels(4).panel.asInstanceOf[NumericPropertySheet[EmissionLine]].edit(obsContext, spTarget, node)
         case Some(PowerLaw(_))           => distributions.selection.item = distributionPanels(5); distributionPanels(5).panel.asInstanceOf[NumericPropertySheet[PowerLaw]].edit(obsContext, spTarget, node)
-        case Some(UserDefined(_))        => sys.error("not yet supported") // at a later stage we will add support for aux file user spectras
+        case Some(s: AuxFileSpectrum)    => distributions.selection.item = distributionPanels(6); userDefinedDetails.selection.item = s
+        case Some(s: UserDefinedSpectrum)=> sys.error("not supported") // this is only used in itc web app
       }
 
       updateUI()
@@ -241,6 +267,36 @@ final class SourceDetailsEditor extends GridBagPanel with TelescopePosEditor {
     if (!distributions.selection.item.panel.isVisible) {
       distributionPanels.foreach(_.panel.setVisible(false))
       distributions.selection.item.panel.setVisible(true)
+    }
+  }
+
+  // update the sed file combo box
+  private def updateSedFiles(programId: SPProgramID, optFiles: Option[Seq[AuxFileSpectrum]]) = {
+    optFiles match {
+      case Some(files) if files.nonEmpty =>
+        userDefinedDetails.peer.setModel(ComboBox.newConstantModel(files))
+        userDefinedDetails.enabled = true
+      case _                             =>
+        userDefinedDetails.peer.setModel(emptySedFilesModel)
+        userDefinedDetails.enabled = false
+    }
+
+  }
+
+  // get a list of all available sed files (aux files ending in ".sed")
+  private def sedFiles(programId: SPProgramID): Option[Seq[AuxFileSpectrum]] = {
+    try {
+      import scala.collection.JavaConversions._
+      VcsOtClient.unsafeGetRegistrar.registration(programId).map { peer =>
+        val aux    = new AuxFileClient(OT.getKeyChain, peer.host, peer.port)
+        val files  = aux.listAll(programId)
+        files.
+          filter(AuxFileType.getFileType(_) == AuxFileType.sed).
+          map   (f => AuxFileSpectrum(programId, f.getName)).
+          toSeq
+      }
+    } catch {
+      case _: Exception => None
     }
   }
 

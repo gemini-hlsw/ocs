@@ -43,8 +43,8 @@ public final class HtmlPrinter {
         } else if (sdp.distribution() instanceof LibraryNonStar) {
             sb.append(" " + sdp.norm() + " " + sdp.units().displayValue() + " " + ((Library) sdp.distribution()).sedSpectrum() +
                     " in the " + sdp.normBand().name() + " band.");
-        } else if (sdp.distribution() instanceof UserDefined) {
-            sb.append(" a user defined spectrum with the name: " + ((UserDefined) sdp.distribution()).spectrum());
+        } else if (sdp.distribution() instanceof UserDefinedSpectrum) {
+            sb.append(" a user defined spectrum with the name: " + ((UserDefinedSpectrum) sdp.distribution()).name());
         } else if (sdp.distribution() instanceof PowerLaw) {
             final double index = ((PowerLaw) sdp.distribution()).index();
             sb.append(" Power Law Spectrum, with an index of " + index

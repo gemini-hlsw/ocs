@@ -97,8 +97,10 @@ public final class CopyTask extends AuxFileTask {
         if (_state.getCopier().copy(progId, f)) {
             _state.removeTask(this);
 
-            // Try to send out emails.
-            wf.getMailer().notifyStored(progId, type, f.getName());
+            // Try to send out emails if notification for this file type is desired.
+            if (type.sendNotification()) {
+                wf.getMailer().notifyStored(progId, type, f.getName());
+            }
         }
     }
 }

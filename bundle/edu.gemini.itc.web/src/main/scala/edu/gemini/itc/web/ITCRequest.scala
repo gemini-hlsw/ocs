@@ -73,7 +73,7 @@ sealed abstract class ITCRequest {
 
   /** Gets the user SED text file from the request.
     * Only multipart HTTP requests will support this. */
-  def userSpectrum(): Option[String]
+  def userSpectrum(): Option[UserDefined]
 
 }
 
@@ -84,11 +84,11 @@ object ITCRequest {
 
   def from(request: HttpServletRequest): ITCRequest = new ITCRequest {
     override def parameter(name: String): String = request.getParameter(name)
-    override def userSpectrum(): Option[String] = None
+    override def userSpectrum(): Option[UserDefined] = None
   }
   def from(request: ITCMultiPartParser): ITCRequest = new ITCRequest {
     override def parameter(name: String): String = request.getParameter(name)
-    override def userSpectrum(): Option[String] = Some(request.getTextFile("specUserDef"))
+    override def userSpectrum(): Option[UserDefined] = Some(UserDefinedSpectrum(request.getRemoteFileName("specUserDef"), request.getTextFile("specUserDef")))
   }
 
   def teleParameters(r: ITCRequest): TelescopeDetails = {
@@ -299,7 +299,7 @@ object ITCRequest {
     val sourceDefinition = r.parameter("Distribution") match {
       case "BBODY"            => BlackBody(r.doubleParameter("BBTemp"))
       case "PLAW"             => PowerLaw(r.doubleParameter("powerIndex"))
-      case "USER_DEFINED"     => UserDefined(r.userSpectrum().get)
+      case "USER_DEFINED"     => r.userSpectrum().get
       case "LIBRARY_STAR"     => LibraryStar.findByName(r.parameter("stSpectrumType")).get
       case "LIBRARY_NON_STAR" => LibraryNonStar.findByName(r.parameter("nsSpectrumType")).get
       case "ELINE"            =>

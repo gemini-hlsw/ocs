@@ -119,8 +119,8 @@ public final class SEDFactory {
                     instrument.getSampling(),
                     sdp.redshift());
 
-        } else if (sdp.distribution() instanceof UserDefined) {
-            final UserDefined userDefined = (UserDefined) sdp.distribution();
+        } else if (sdp.distribution() instanceof UserDefinedSpectrum) {
+            final UserDefinedSpectrum userDefined = (UserDefinedSpectrum) sdp.distribution();
             temp = getUserSED(userDefined.spectrum(), instrument.getSampling());
             temp.applyWavelengthCorrection();
             return temp;
@@ -136,7 +136,7 @@ public final class SEDFactory {
             return temp;
 
         } else {
-            throw new Error("invalid distribution type");
+            throw new Error("invalid spectral distribution type");
         }
     }
 

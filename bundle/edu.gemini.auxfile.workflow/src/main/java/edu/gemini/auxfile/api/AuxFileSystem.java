@@ -75,6 +75,19 @@ public interface AuxFileSystem {
             throws AuxFileException;
 
     /**
+     * Fetches a remote file to memory for further processing.
+     *
+     * @param programId id of the program whose file will be fetched
+     *
+     * @param remoteFileName name of the remote file to fetch
+     *
+     * @return a byte array containing the remote file
+
+     * @throws AuxFileException if there are any problems with the request
+     */
+    byte[] fetchToMemory(SPProgramID programId, String remoteFileName) throws AuxFileException;
+
+    /**
      * Fetches the indicated remote file, storing it in the
      * <code>localFile</code>.  The content of <code>localFile</code>, if it
      * exists, will be replaced by the content of the remote file.
