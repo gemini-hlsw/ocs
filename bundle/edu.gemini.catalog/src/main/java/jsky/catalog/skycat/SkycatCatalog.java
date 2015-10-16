@@ -1,10 +1,3 @@
-/*
- * Copyright 2000 Association for Universities for Research in Astronomy, Inc.,
- * Observatory Control System, Gemini Telescopes Project.
- *
- * $Id: SkycatCatalog.java 47126 2012-08-01 15:40:43Z swalker $
- */
-
 package jsky.catalog.skycat;
 
 import jsky.catalog.*;
@@ -248,13 +241,6 @@ public class SkycatCatalog implements PlotableCatalog {
      */
     public boolean isSymbolsEdited() {
         return _entry.isSymbolsEdited();
-    }
-
-    /**
-     * Save the catalog symbol information to disk with the user's changes
-     */
-    public void saveSymbolConfig() {
-        SkycatConfigFile.getConfigFile().save();
     }
 
     /**

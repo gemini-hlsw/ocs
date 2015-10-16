@@ -1,22 +1,11 @@
-/*
- * Copyright 2000 Association for Universities for Research in Astronomy, Inc.,
- * Observatory Control System, Gemini Telescopes Project.
- *
- * $Id: NavigatorQueryTool.java 47126 2012-08-01 15:40:43Z swalker $
- */
-
 package jsky.navigator;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JPanel;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 
 import edu.gemini.catalog.api.MagnitudeLimits;
 import edu.gemini.catalog.api.RadiusLimits;
@@ -68,18 +57,16 @@ public class NavigatorQueryTool extends CatalogQueryTool implements SelectedArea
         setImageDisplay(imageDisplay);
 
         // update the RA,Dec display if a different equinox is chosen
-        getCatalogQueryPanel().addChangeListener(new ChangeListener() {
-            public void stateChanged(ChangeEvent e) {
-                JComboBox cb = (JComboBox) e.getSource();
-                String s = getCatalogQueryPanel().getLabelForComponent(cb);
-                if (s == null)
-                    return;
-                if (s.equalsIgnoreCase("equinox")) {
-                    if (_selectedArea != null)
-                        setSelectedArea(_selectedArea);
-                    else
-                        setFromImage(false, false);
-                }
+        getCatalogQueryPanel().addChangeListener(e -> {
+            JComboBox cb = (JComboBox) e.getSource();
+            String s = getCatalogQueryPanel().getLabelForComponent(cb);
+            if (s == null)
+                return;
+            if (s.equalsIgnoreCase("equinox")) {
+                if (_selectedArea != null)
+                    setSelectedArea(_selectedArea);
+                else
+                    setFromImage(false, false);
             }
         });
     }
@@ -130,21 +117,12 @@ public class NavigatorQueryTool extends CatalogQueryTool implements SelectedArea
 
         _selectAreaButton = new JButton("Select Area...");
         _selectAreaButton.setToolTipText("Drag out an area of the image to use for the query");
-        _selectAreaButton.addActionListener(new ActionListener() {
-
-            public void actionPerformed(ActionEvent e) {
-                selectArea();
-            }
-        });
+        _selectAreaButton.addActionListener(e -> selectArea());
         buttonPanel.add(_selectAreaButton);
 
         _setFromImageButton = new JButton("Set From Image");
         _setFromImageButton.setToolTipText("Set the query parameters from the currently displayed image");
-        _setFromImageButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                setFromImage(false, true);
-            }
-        });
+        _setFromImageButton.addActionListener(e -> setFromImage(false, true));
         buttonPanel.add(_setFromImageButton);
 
         return buttonPanel;

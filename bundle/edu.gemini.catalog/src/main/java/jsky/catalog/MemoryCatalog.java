@@ -1,10 +1,3 @@
-// Copyright 2002
-// Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-//
-// $Id: MemoryCatalog.java 47333 2012-08-07 16:36:02Z swalker $
-
-
 package jsky.catalog;
 
 import edu.gemini.catalog.skycat.DefaultOutputAdapter;
@@ -23,10 +16,7 @@ import jsky.util.StringTokenizerUtil;
 import javax.swing.table.DefaultTableModel;
 import java.io.*;
 import java.net.URL;
-import java.util.Enumeration;
-import java.util.List;
-import java.util.Properties;
-import java.util.Vector;
+import java.util.*;
 
 /**
  * Used to manage tabular catalog data in memory, such as the
@@ -56,13 +46,10 @@ public class MemoryCatalog extends DefaultTableModel
         implements TableQueryResult, Saveable, SaveableAsHTML {
 
     // Table property names
-    public static final String EQUINOX = "equinox";
     public static final String SYMBOL = "symbol";
     public static final String ID_COL = "id_col";
     public static final String RA_COL = "ra_col";
     public static final String DEC_COL = "dec_col";
-    public static final String X_COL = "x_col";
-    public static final String Y_COL = "y_col";
 
     /** The catalog corresponding to this table. */
     private Catalog _catalog;
@@ -157,7 +144,7 @@ public class MemoryCatalog extends DefaultTableModel
      * @param in the stream to read the catalog data from
      */
     public MemoryCatalog(Catalog catalog, InputStream in) throws IOException {
-        this(catalog, in, None.INSTANCE, -1);
+        this(catalog, in, None.instance(), -1);
     }
 
     /**
@@ -169,7 +156,7 @@ public class MemoryCatalog extends DefaultTableModel
      * @param queryArgs represents the arguments to the query that resulted in this table
      */
     public MemoryCatalog(Catalog catalog, InputStream in, QueryArgs queryArgs) throws IOException {
-        this(catalog, in, None.INSTANCE, queryArgs.getMaxRows());
+        this(catalog, in, None.instance(), queryArgs.getMaxRows());
         _queryArgs = queryArgs;
     }
 
@@ -813,9 +800,7 @@ public class MemoryCatalog extends DefaultTableModel
     /** Set the data types for column values. */
     public void setColumnClasses(Class<?>[] ar) {
         _columnClasses = new Vector<>(ar.length);
-        for (Class<?> anAr : ar) {
-            _columnClasses.add(anAr);
-        }
+        Collections.addAll(_columnClasses, ar);
     }
 
 

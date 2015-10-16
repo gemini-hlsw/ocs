@@ -157,11 +157,9 @@ public class CatalogQueryTool extends JPanel
         if (_catalog != null && _catalog.isImageServer()) {
             final JButton store = new JButton();
 
-            store.addActionListener(new ActionListener() {
-                public void actionPerformed(ActionEvent e) {
-                    if (_catalogQueryPanel != null) {
-                        _catalogQueryPanel.storeUserSelection();
-                    }
+            store.addActionListener(e -> {
+                if (_catalogQueryPanel != null) {
+                    _catalogQueryPanel.storeUserSelection();
                 }
             });
             store.setAction(StoreImageServerAction.getAction(_catalog));

@@ -9,6 +9,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ItemEvent;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * This is a helper object used to manage the various TpeImageFeatures.
@@ -89,7 +90,7 @@ final class TpeFeatureManager {
             Preferences.set(prefName, selected);
         });
 
-        final Option<Component> keyPanel = tif.getKey().isEmpty() ? None.<Component>instance() :
+        final Option<Component> keyPanel = tif.getKey().isEmpty() ? None.instance() :
                                              new Some<>(TpeToolBar.createKeyPanel(tif.getKey().getValue()));
 
         _featureMap.put(name, new TpeFeatureData(tif, btn, keyPanel));
@@ -102,17 +103,12 @@ final class TpeFeatureManager {
         }
     }
 
-    public void updateAvailableOptions(Collection<TpeImageFeature> feats, TpeContext ctx) {
+    public void updateAvailableOptions(final Collection<TpeImageFeature> feats, final TpeContext ctx) {
 
         // TpeImageFeatures are clearly meant to each have a unique name as
         // nothing in this class would work otherwise.  Here we remember those
         // that are supposed to be available.
-        final Set<String> available = new HashSet<>();
-        for (final TpeImageFeature tif : feats) {
-            if (tif.isEnabled(ctx)) {
-                available.add(tif.getName());
-            }
-        }
+        final Set<String> available = feats.stream().filter(tif -> tif.isEnabled(ctx)).map(TpeImageFeature::getName).collect(Collectors.toSet());
 
         // Walk through all the features and make them visible or not as
         // appropriate.

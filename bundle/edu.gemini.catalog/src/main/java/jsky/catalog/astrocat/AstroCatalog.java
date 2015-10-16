@@ -1,9 +1,3 @@
-// Copyright 2002
-// Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-//
-// $Id: AstroCatalog.java 39360 2011-11-25 13:02:23Z swalker $
-
 package jsky.catalog.astrocat;
 
 import jsky.catalog.*;
@@ -285,11 +279,6 @@ public class AstroCatalog implements PlotableCatalog {
     /** Return true if the user edited the plot symbol definitions otherwise false */
     public boolean isSymbolsEdited() {
         return _symbolsEdited;
-    }
-
-    /** Save the catalog symbol information to disk with the user's changes */
-    public void saveSymbolConfig() {
-        AstroCatConfig.getConfigFile().save();
     }
 
     /**
@@ -601,7 +590,7 @@ public class AstroCatalog implements PlotableCatalog {
 
 
     // Return the URL to use to query the catalog with the current parameter values
-    private URL _getQueryUrl(QueryArgs queryArgs) throws MalformedURLException, IOException, CatalogException {
+    private URL _getQueryUrl(QueryArgs queryArgs) throws IOException, CatalogException {
         // determine the query region and max rows settings
         String urlStr = _getBaseUrl();
         SearchCondition[] sc = queryArgs.getConditions();

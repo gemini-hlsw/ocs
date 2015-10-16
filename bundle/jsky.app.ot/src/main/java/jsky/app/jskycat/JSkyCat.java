@@ -1,13 +1,3 @@
-/*
- * ESO Archive
- *
- * $Id: JSkyCat.java 7729 2007-04-27 21:09:07Z gillies $
- *
- * who             when        what
- * --------------  ----------  ----------------------------------------
- * Allan Brighton  1999/05/03  Created
- */
-
 package jsky.app.jskycat;
 
 import jsky.image.gui.MainImageDisplay;
@@ -17,11 +7,8 @@ import jsky.navigator.NavigatorImageDisplayInternalFrame;
 import jsky.navigator.NavigatorInternalFrame;
 import jsky.util.I18N;
 import jsky.util.Preferences;
-import jsky.util.Resources;
 import jsky.util.gui.*;
 
-import javax.media.jai.JAI;
-import javax.media.jai.TileCache;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.WindowAdapter;
@@ -142,7 +129,7 @@ public class JSkyCat extends JFrame {
             setContentPane(desktop);
         }
 
-        NavigatorInternalFrame navigatorFrame = null;
+        NavigatorInternalFrame navigatorFrame;
         NavigatorImageDisplayInternalFrame imageFrame = null;
         if (imageFileOrUrl != null || !showNavigator) {
             imageFrame = makeNavigatorImageDisplayInternalFrame(desktop, imageFileOrUrl);
@@ -190,7 +177,7 @@ public class JSkyCat extends JFrame {
      * @param imageFileOrUrl an image file or URL to display
      */
     protected void makeFrameLayout(boolean showNavigator, String imageFileOrUrl) {
-        NavigatorFrame navigatorFrame = null;
+        NavigatorFrame navigatorFrame;
         NavigatorImageDisplayFrame imageFrame = null;
 
         if (imageFileOrUrl != null || !showNavigator) {
@@ -372,90 +359,5 @@ public class JSkyCat extends JFrame {
         }
     }
 
-
-    /**
-     * The main class of the JSkyCat application.
-     * <p>
-     * Usage: java [-Djsky.catalog.skycat.config=$SKYCAT_CONFIG]
-     *             JSkyCat [-[no]internalframes]
-     *             [-shownavigator]
-     *             [-port portNumber]
-     *             [imageFileOrUrl]
-     * <p>
-     * The <em>jsky.catalog.skycat.config</em> property defines the Skycat style catalog config file to use.
-     * (The default uses the ESO Skycat config file).
-     * <p>
-     * If -internalframes is specified, internal frames are used.
-     * The -nointernalframes option has the opposite effect.
-     * (The default is to use internal frames under Windows only).
-     * <p>
-     * If -shownavigator is specified, the catalog navigator window is displayed on startup.
-     * <p>
-     * The -port option causes the main image window to listen on a socket for client connections.
-     * This can be used to remote control the application.
-     * <p>
-     * The imageFileOrUrl argument may be an image file or URL to load.
-     */
-    public static void main(String args[]) {
-        String imageFileOrUrl = null;
-        //boolean internalFrames = (File.separatorChar == '\\');
-        boolean internalFrames = false;
-        boolean showNavigator = false;
-        int portNum = 0;
-        boolean ok = true;
-        int tilecache = 64;
-
-        for (int i = 0; i < args.length; i++) {
-            if (args[i].charAt(0) == '-') {
-                String opt = args[i];
-                if (opt.equals("-internalframes")) {
-                    internalFrames = true;
-                } else if (opt.equals("-nointernalframes")) {
-                    internalFrames = false;
-                } else if (opt.equals("-shownavigator")) {
-                    showNavigator = true;
-                } else if (opt.equals("-port")) {
-                    String arg = args[++i];
-                    portNum = Integer.parseInt(arg);
-                } else if (opt.equals("-tilecache")) {
-                    try {
-                        tilecache = Integer.parseInt(args[++i]);
-                    } catch (NumberFormatException e) {
-                        System.out.println("Warning: bad value for -tilecache option: " + args[i]);
-                    }
-                } else {
-                    System.out.println(_I18N.getString("unknownOption") + ": " + opt);
-                    ok = false;
-                    break;
-                }
-            } else {
-                if (imageFileOrUrl != null) {
-                    System.out.println(_I18N.getString("specifyOneImageOrURL") + ": " + imageFileOrUrl);
-                    ok = false;
-                    break;
-                }
-                imageFileOrUrl = args[i];
-            }
-        }
-
-        if (!ok) {
-            System.out.println("Usage: java JSkyCat [-[no]internalframes] [-shownavigator] [-port portNum] [imageFileOrUrl]");
-            System.exit(1);
-        }
-
-        // Set default log properties
-        if (System.getProperty("log4j.configuration") == null)
-            System.setProperty("log4j.configuration", Resources.getResource("logConfig.prop").toString());
-
-
-        TileCache cache = JAI.getDefaultInstance().getTileCache();
-        cache.setMemoryCapacity(tilecache * 1024 * 1024);
-        // For testing
-        // new tilecachetool.TCTool();
-
-        Theme.install();
-
-        new JSkyCat(imageFileOrUrl, internalFrames, showNavigator, portNum);
-    }
 }
 

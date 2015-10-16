@@ -25,6 +25,7 @@ import edu.gemini.spModel.obscomp.InstConfigInfo;
 import edu.gemini.spModel.too.TooType;
 import edu.gemini.spModel.type.DisplayableSpType;
 import edu.gemini.spModel.type.ObsoletableSpType;
+import edu.gemini.spModel.type.SpType;
 import edu.gemini.spModel.type.SpTypeUtil;
 import jsky.app.ot.shared.gemini.obscat.ObsCatalogInfo;
 import jsky.app.ot.userprefs.ui.PreferenceDialog;
@@ -71,7 +72,7 @@ public final class ObsCatalog extends SkycatCatalog implements CatalogUIHandler 
 
     // Used to cache instrument specific parameter information
     private static final Map<String, Tuple2<FieldDescAdapter[], Boolean>> _instParamTab =
-            new TreeMap<String, Tuple2<FieldDescAdapter[], Boolean>>();
+            new TreeMap<>();
 
     @SuppressWarnings("WeakerAccess")
     public ObsCatalog() {
@@ -93,7 +94,7 @@ public final class ObsCatalog extends SkycatCatalog implements CatalogUIHandler 
 
     // Return an array describing the query parameters for this catalog
     private static FieldDescAdapter[] newParamDesc() {
-        final Collection<FieldDescAdapter> params = new ArrayList<FieldDescAdapter>();
+        final Collection<FieldDescAdapter> params = new ArrayList<>();
         FieldDescAdapter p;
         final String wildcards = " Wildcards: * or %, ?, |";
 
@@ -254,7 +255,7 @@ public final class ObsCatalog extends SkycatCatalog implements CatalogUIHandler 
     }
 
     private static NameValue[] _getDatasetDispositionNameValues() {
-        final List<NameValue> res = new ArrayList<NameValue>();
+        final List<NameValue> res = new ArrayList<>();
         for (DatasetDisposition dispo : DatasetDisposition.values()) {
             res.add(new NameValue(dispo.getDisplayString(), dispo.getDisplayString()));
         }
@@ -272,15 +273,14 @@ public final class ObsCatalog extends SkycatCatalog implements CatalogUIHandler 
             return tup._1();
         }
 
-        final Collection<FieldDescAdapter> params = new ArrayList<FieldDescAdapter>();
+        final Collection<FieldDescAdapter> params = new ArrayList<>();
 
-        final List instConfigInfoList = ObsCatalogInfo.getInstConfigInfoList(instName);
+        final List<InstConfigInfo> instConfigInfoList = ObsCatalogInfo.getInstConfigInfoList(instName);
         if (instConfigInfoList == null) {
             return null;
         }
 
-        for (Object anInstConfigInfoList : instConfigInfoList) {
-            final InstConfigInfo info = (InstConfigInfo) anInstConfigInfoList;
+        for (InstConfigInfo info: instConfigInfoList) {
             if (info.isQueryable()) {
                 final FieldDescAdapter p = new FieldDescAdapter(info.getName());
                 p.setDescription("Select the " + info.getDescription());
@@ -288,7 +288,7 @@ public final class ObsCatalog extends SkycatCatalog implements CatalogUIHandler 
                 // SCT-295: Bryan requested that we not show obsolete choices
                 // in the browser
                 // 2009B: Inger needs obsolete choices for statistics she makes
-                final Enum[] types = showObsolete ? info.getAllTypes() : info.getValidTypes();
+                final Enum<?>[] types = showObsolete ? info.getAllTypes() : info.getValidTypes();
                 if (types != null) {
                     p.setOptions(_getEnumOptions(types));
                 }
@@ -298,7 +298,7 @@ public final class ObsCatalog extends SkycatCatalog implements CatalogUIHandler 
 
         final FieldDescAdapter[] paramDesc = new FieldDescAdapter[params.size()];
         params.toArray(paramDesc);
-        _instParamTab.put(instName, new Pair<FieldDescAdapter[], Boolean>(paramDesc, showObsolete));
+        _instParamTab.put(instName, new Pair<>(paramDesc, showObsolete));
         return paramDesc;
     }
 
@@ -328,10 +328,10 @@ public final class ObsCatalog extends SkycatCatalog implements CatalogUIHandler 
         return nv;
     }
 
-    private static NameValue[] _getEnumOptions(Enum[] types) {
+    private static NameValue[] _getEnumOptions(Enum<?>[] types) {
         int i = 0;
         final NameValue[] nv = new NameValue[types.length];
-        for (Enum e : types) {
+        for (Enum<?> e : types) {
             String displayValue = e.name();
             if (e instanceof DisplayableSpType) {
                 displayValue = ((DisplayableSpType) e).displayValue();
@@ -358,42 +358,40 @@ public final class ObsCatalog extends SkycatCatalog implements CatalogUIHandler 
         return ObsCatalogHelper.query((ObsCatalogQueryArgs) args, getConfigEntry(), queryTool.includeRemote());
     }
 
-    public static QueryManager QUERY_MANAGER = new QueryManager() {
-        public void queryDB() {
+    public static QueryManager QUERY_MANAGER = () -> {
 
-            // Create a catalog (cat) object based on the science program database
-            final IDBDatabaseService db = SPDB.get();
-            if (db == null) {
-                DialogUtil.error("SessionManager returned a null database.");
-                return;
-            }
+        // Create a catalog (cat) object based on the science program database
+        final IDBDatabaseService db = SPDB.get();
+        if (db == null) {
+            DialogUtil.error("SessionManager returned a null database.");
+            return;
+        }
 
-            // Make the catalog navigator window the main application window
-            CatalogNavigator.setMainWindow(true);
+        // Make the catalog navigator window the main application window
+        CatalogNavigator.setMainWindow(true);
 
-            // Hide the catalog tree window when this catalog is displayed
-            CatalogNavigatorMenuBar.setCatalogTreeIsVisible(ObsCatalogQueryTool.class, false);
+        // Hide the catalog tree window when this catalog is displayed
+        CatalogNavigatorMenuBar.setCatalogTreeIsVisible(ObsCatalogQueryTool.class, false);
 
-            final Navigator navigator = NavigatorManager.open();
-            if (navigator != null) {
-                navigator.setAutoQuery(false);
-                ViewerService.instance().get().registerView(navigator.getParentFrame());
+        final Navigator navigator = NavigatorManager.open();
+        if (navigator != null) {
+            navigator.setAutoQuery(false);
+            ViewerService.instance().get().registerView(navigator.getParentFrame());
 
-                // Unregister the catalog window when it is closed/hidden
-                Component w = navigator.getParentFrame();
-                w.addComponentListener(new ComponentAdapter() {
-                    @Override
-                    public void componentHidden(ComponentEvent e) {
-                        ViewerService.instance().get().unregisterView(navigator.getParentFrame());
-                    }
-                });
+            // Unregister the catalog window when it is closed/hidden
+            Component w = navigator.getParentFrame();
+            w.addComponentListener(new ComponentAdapter() {
+                @Override
+                public void componentHidden(ComponentEvent e) {
+                    ViewerService.instance().get().unregisterView(navigator.getParentFrame());
+                }
+            });
 
-                // Add the preferences panel.
-                addPreferencesItem();
+            // Add the preferences panel.
+            addPreferencesItem();
 
-                navigator.setQueryResult(INSTANCE);
+            navigator.setQueryResult(INSTANCE);
 
-            }
         }
     };
 
@@ -416,11 +414,7 @@ public final class ObsCatalog extends SkycatCatalog implements CatalogUIHandler 
                     (PreferencePanel) BrowserPreferencesPanel.instance);
 
             final PreferenceDialog dialog = new PreferenceDialog(lst);
-            addActionListener(new ActionListener() {
-                public void actionPerformed(ActionEvent e) {
-                    dialog.show(nf, BrowserPreferencesPanel.instance);
-                }
-            });
+            addActionListener(e -> dialog.show(nf, BrowserPreferencesPanel.instance));
         }}, count - 2);
         menu.insertSeparator(count - 2);
 

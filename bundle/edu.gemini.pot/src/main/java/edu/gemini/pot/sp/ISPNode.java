@@ -1,10 +1,3 @@
-// Copyright 1999 Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-// See the file LICENSE for complete details.
-//
-// $Id: ISPNode.java 46997 2012-07-26 15:51:35Z swalker $
-//
-
 package edu.gemini.pot.sp;
 
 import edu.gemini.pot.sp.version.LifespanId;
@@ -14,7 +7,6 @@ import edu.gemini.spModel.data.ISPDataObject;
 
 import java.beans.PropertyChangeListener;
 import java.util.Set;
-
 
 /**
  * This is the base interface for all the Science Program nodes.

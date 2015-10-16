@@ -1,11 +1,4 @@
-// Copyright 2003
-// Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-//
-// $Id: TablePanel.java 7983 2007-07-31 15:20:11Z swalker $
-
 package jsky.plot;
-
 
 import java.awt.BorderLayout;
 import java.awt.Component;
@@ -24,8 +17,6 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumnModel;
@@ -41,7 +32,6 @@ import jsky.util.PrintableWithDialog;
 import jsky.util.SaveableWithDialog;
 import jsky.util.gui.DialogUtil;
 import jsky.util.gui.SortedJTable;
-
 
 /**
  * A panel for displaying elevation plot data in tabular form.
@@ -122,11 +112,7 @@ public class TablePanel extends JPanel implements PrintableWithDialog, SaveableW
     public void setModel(ElevationPlotModel model) {
         _model = model;
         _update();
-        _model.addChangeListener(new ChangeListener() {
-            public void stateChanged(ChangeEvent e) {
-                _update();
-            }
-        });
+        _model.addChangeListener(e -> _update());
     }
 
     /**
@@ -166,8 +152,7 @@ public class TablePanel extends JPanel implements PrintableWithDialog, SaveableW
 
     // Create and return a new file chooser
     private JFileChooser _makeFileChooser() {
-        JFileChooser _fileChooser = new JFileChooser();
-        return _fileChooser;
+        return new JFileChooser();
     }
 
     /**
@@ -210,9 +195,9 @@ public class TablePanel extends JPanel implements PrintableWithDialog, SaveableW
         };
         int numRows = model.getRowCount();
         int numCols = model.getColumnCount();
-        Vector dataVector = new Vector(numRows);
+        Vector<Vector<Object>> dataVector = new Vector<>(numRows);
         for (int i = 0; i < numRows; i++) {
-            Vector row = new Vector(numCols);
+            Vector<Object> row = new Vector<>(numCols);
             for (int j = 0; j < numCols; j++) {
                 row.add(model.getValueAt(i, j));
             }
