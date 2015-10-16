@@ -121,5 +121,5 @@ class RadiusConstraintSpec extends SpecificationWithJUnit with ScalaCheck with A
     buildTarget(name(ra, dec), Coordinates(RightAscension.fromAngle(ra), Declination.fromAngle(dec).getOrElse(Declination.zero)))
 
   private def buildTarget(name: String, c: Coordinates): SiderealTarget =
-    SiderealTarget(name, c, Nil)
+    SiderealTarget.empty.copy(name = name, coordinates = c)
 }

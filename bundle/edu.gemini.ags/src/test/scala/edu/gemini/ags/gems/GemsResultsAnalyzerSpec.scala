@@ -1,5 +1,6 @@
 package edu.gemini.ags.gems
 
+import edu.gemini.ags.TargetsHelper
 import edu.gemini.ags.gems.mascot.MascotProgress
 import edu.gemini.ags.gems.mascot.Strehl
 import edu.gemini.catalog.votable.TestVoTableBackend
@@ -41,7 +42,7 @@ import Scalaz._
 /**
  * See OT-27
  */
-class GemsResultsAnalyzerSpec extends MascotProgress with Specification with NoTimeConversions {
+class GemsResultsAnalyzerSpec extends MascotProgress with Specification with NoTimeConversions with TargetsHelper {
   class TestGemsVoTableCatalog(file: String) extends GemsVoTableCatalog {
     override val backend = TestVoTableBackend(file)
   }
@@ -284,25 +285,25 @@ class GemsResultsAnalyzerSpec extends MascotProgress with Specification with NoT
       val cwfs3Mag = group.get(Canopus.Wfs.cwfs3).getValue.getPrimary.getValue.getTarget.getMagnitude(JMagnitude.Band.r).getValue.getBrightness
     }
     "sort targets by R magnitude" in {
-      val st1 = SiderealTarget("n", edu.gemini.spModel.core.Coordinates.zero, List(new Magnitude(10.0, MagnitudeBand.J)))
+      val st1 = target("n", edu.gemini.spModel.core.Coordinates.zero, List(new Magnitude(10.0, MagnitudeBand.J)))
       GemsResultsAnalyzer.sortTargetsByBrightness(List(st1)).head should beEqualTo(st1)
 
-      val st2 = SiderealTarget("n", edu.gemini.spModel.core.Coordinates.zero, List(new Magnitude(15.0, MagnitudeBand.J)))
+      val st2 = target("n", edu.gemini.spModel.core.Coordinates.zero, List(new Magnitude(15.0, MagnitudeBand.J)))
       GemsResultsAnalyzer.sortTargetsByBrightness(List(st1, st2)).head should beEqualTo(st1)
       GemsResultsAnalyzer.sortTargetsByBrightness(List(st1, st2))(1) should beEqualTo(st2)
 
-      val st3 = SiderealTarget("n", edu.gemini.spModel.core.Coordinates.zero, List(new Magnitude(15.0, MagnitudeBand.R)))
+      val st3 = target("n", edu.gemini.spModel.core.Coordinates.zero, List(new Magnitude(15.0, MagnitudeBand.R)))
       GemsResultsAnalyzer.sortTargetsByBrightness(List(st1, st2, st3)).head should beEqualTo(st3)
       GemsResultsAnalyzer.sortTargetsByBrightness(List(st1, st2, st3))(1) should beEqualTo(st1)
       GemsResultsAnalyzer.sortTargetsByBrightness(List(st1, st2, st3))(2) should beEqualTo(st2)
 
-      val st4 = SiderealTarget("n", edu.gemini.spModel.core.Coordinates.zero, List(new Magnitude(9.0, MagnitudeBand.R)))
+      val st4 = target("n", edu.gemini.spModel.core.Coordinates.zero, List(new Magnitude(9.0, MagnitudeBand.R)))
       GemsResultsAnalyzer.sortTargetsByBrightness(List(st1, st2, st3, st4)).head should beEqualTo(st4)
       GemsResultsAnalyzer.sortTargetsByBrightness(List(st1, st2, st3, st4))(1) should beEqualTo(st3)
       GemsResultsAnalyzer.sortTargetsByBrightness(List(st1, st2, st3, st4))(2) should beEqualTo(st1)
       GemsResultsAnalyzer.sortTargetsByBrightness(List(st1, st2, st3, st4))(3) should beEqualTo(st2)
 
-      val st5 = SiderealTarget("n", edu.gemini.spModel.core.Coordinates.zero, List(new Magnitude(19.0, MagnitudeBand.R)))
+      val st5 = target("n", edu.gemini.spModel.core.Coordinates.zero, List(new Magnitude(19.0, MagnitudeBand.R)))
       GemsResultsAnalyzer.sortTargetsByBrightness(List(st1, st2, st3, st4, st5)).head should beEqualTo(st4)
       GemsResultsAnalyzer.sortTargetsByBrightness(List(st1, st2, st3, st4, st5))(1) should beEqualTo(st3)
       GemsResultsAnalyzer.sortTargetsByBrightness(List(st1, st2, st3, st4, st5))(2) should beEqualTo(st5)
@@ -310,25 +311,25 @@ class GemsResultsAnalyzerSpec extends MascotProgress with Specification with NoT
       GemsResultsAnalyzer.sortTargetsByBrightness(List(st1, st2, st3, st4, st5))(4) should beEqualTo(st2)
     }
     "sort targets by R-like magnitude" in {
-      val st1 = SiderealTarget("n", edu.gemini.spModel.core.Coordinates.zero, List(new Magnitude(10.0, MagnitudeBand.J)))
+      val st1 = target("n", edu.gemini.spModel.core.Coordinates.zero, List(new Magnitude(10.0, MagnitudeBand.J)))
       GemsResultsAnalyzer.sortTargetsByBrightness(List(st1)).head should beEqualTo(st1)
 
-      val st2 = SiderealTarget("n", edu.gemini.spModel.core.Coordinates.zero, List(new Magnitude(15.0, MagnitudeBand.J)))
+      val st2 = target("n", edu.gemini.spModel.core.Coordinates.zero, List(new Magnitude(15.0, MagnitudeBand.J)))
       GemsResultsAnalyzer.sortTargetsByBrightness(List(st1, st2)).head should beEqualTo(st1)
       GemsResultsAnalyzer.sortTargetsByBrightness(List(st1, st2))(1) should beEqualTo(st2)
 
-      val st3 = SiderealTarget("n", edu.gemini.spModel.core.Coordinates.zero, List(new Magnitude(15.0, MagnitudeBand.R)))
+      val st3 = target("n", edu.gemini.spModel.core.Coordinates.zero, List(new Magnitude(15.0, MagnitudeBand.R)))
       GemsResultsAnalyzer.sortTargetsByBrightness(List(st1, st2, st3)).head should beEqualTo(st3)
       GemsResultsAnalyzer.sortTargetsByBrightness(List(st1, st2, st3))(1) should beEqualTo(st1)
       GemsResultsAnalyzer.sortTargetsByBrightness(List(st1, st2, st3))(2) should beEqualTo(st2)
 
-      val st4 = SiderealTarget("n", edu.gemini.spModel.core.Coordinates.zero, List(new Magnitude(9.0, MagnitudeBand._r)))
+      val st4 = target("n", edu.gemini.spModel.core.Coordinates.zero, List(new Magnitude(9.0, MagnitudeBand._r)))
       GemsResultsAnalyzer.sortTargetsByBrightness(List(st1, st2, st3, st4)).head should beEqualTo(st4)
       GemsResultsAnalyzer.sortTargetsByBrightness(List(st1, st2, st3, st4))(1) should beEqualTo(st3)
       GemsResultsAnalyzer.sortTargetsByBrightness(List(st1, st2, st3, st4))(2) should beEqualTo(st1)
       GemsResultsAnalyzer.sortTargetsByBrightness(List(st1, st2, st3, st4))(3) should beEqualTo(st2)
 
-      val st5 = SiderealTarget("n", edu.gemini.spModel.core.Coordinates.zero, List(new Magnitude(19.0, MagnitudeBand.UC)))
+      val st5 = target("n", edu.gemini.spModel.core.Coordinates.zero, List(new Magnitude(19.0, MagnitudeBand.UC)))
       GemsResultsAnalyzer.sortTargetsByBrightness(List(st1, st2, st3, st4, st5)).head should beEqualTo(st4)
       GemsResultsAnalyzer.sortTargetsByBrightness(List(st1, st2, st3, st4, st5))(1) should beEqualTo(st3)
       GemsResultsAnalyzer.sortTargetsByBrightness(List(st1, st2, st3, st4, st5))(2) should beEqualTo(st5)

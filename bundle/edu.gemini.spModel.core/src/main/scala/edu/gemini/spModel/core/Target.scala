@@ -126,8 +126,6 @@ object Target {
 
   object SiderealTarget {
 
-    def apply(name: String, coordinates: Coordinates, magnitudes: List[Magnitude]): SiderealTarget = SiderealTarget(name, coordinates, None, None, None, magnitudes)
-  
     val empty = SiderealTarget("Untitled", Coordinates.zero, None, None, None, Nil)
   
     val name:        SiderealTarget @> String          = Lens(t => Store(s => t.copy(name = s), t.name))

@@ -80,7 +80,7 @@ class VignettingTest {
 
   // Convert a string and magnitude to a SiderealTarget.
   def siderealTarget(name: String, raDecStr: String, rMag: Double): SiderealTarget =
-    SiderealTarget(name, parseCoordinates(raDecStr), List(new Magnitude(rMag, MagnitudeBand.R)))
+    SiderealTarget.empty.copy(name = name, coordinates = parseCoordinates(raDecStr), magnitudes = List(new Magnitude(rMag, MagnitudeBand.R)))
 
   // Convert a string to a base.
   def basePosition(raDecStr: String): SPTarget = {
