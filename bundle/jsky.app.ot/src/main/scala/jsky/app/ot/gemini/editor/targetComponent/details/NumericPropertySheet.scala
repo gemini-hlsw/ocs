@@ -123,7 +123,9 @@ object NumericPropertySheet {
   }
 
   case class DoubleProp[A](leftCaption: String, rightCaption: String, get: A => Double, edit: (A, Double) => Unit) extends Prop[A, Double] {
-    val leftComponent  = new Label(leftCaption)
+    val leftComponent  = new Label(leftCaption) {
+      horizontalAlignment = Alignment.Left
+    }
     val rightComponent = new Label(rightCaption)
     def init: (NumberBoxWidget, A) => Unit  =  (w,a) => {
       w.setValue(get(a))
@@ -154,7 +156,9 @@ object NumericPropertySheet {
   }
 
   case class SingleUnitQuantity[A, B <: Quantity[B]](leftCaption: String, unit: UnitOfMeasure[B], get: A => B, set: (A, B) => Unit) extends Prop[A, B] {
-    val leftComponent  = new Label(leftCaption)
+    val leftComponent  = new Label(leftCaption) {
+      horizontalAlignment = Alignment.Left
+    }
     val rightComponent = new Label(unit.symbol)
     def edit: (A, Double)          => Unit  =  (a, d) => set(a, unit(d))
     def init: (NumberBoxWidget, A) => Unit  =  (w, a) => {
@@ -163,7 +167,9 @@ object NumericPropertySheet {
   }
 
   case class MultiUnitQuantity[A, B <: Quantity[B]](leftCaption: String, units: Seq[UnitOfMeasure[B]], get: A => B, set: (A, B) => Unit) extends Prop[A, B] {
-    val leftComponent  = new Label(leftCaption)
+    val leftComponent  = new Label(leftCaption) {
+      horizontalAlignment = Alignment.Left
+    }
     val rightComponent = new ComboBox[UnitOfMeasure[B]](units) {renderer = Renderer(_.symbol)}
     def unit           = rightComponent.selection.item
     def edit: (A, Double)          => Unit  =  (a, d) => set(a, unit(d))
