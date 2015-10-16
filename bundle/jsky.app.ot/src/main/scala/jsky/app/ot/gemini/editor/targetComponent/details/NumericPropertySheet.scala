@@ -126,14 +126,18 @@ object NumericPropertySheet {
     val leftComponent  = new Label(leftCaption) {
       horizontalAlignment = Alignment.Left
     }
-    val rightComponent = new Label(rightCaption)
+    val rightComponent = new Label(rightCaption) {
+      horizontalAlignment = Alignment.Left
+    }
     def init: (NumberBoxWidget, A) => Unit  =  (w,a) => {
       w.setValue(get(a))
     }
   }
 
   case class TransformableProp[A, B](leftOptions: List[B], rightCaptions: Map[B, String], initial: B, render: B => String, get: (A, B) => Double, set: (A, B, Double) => Unit) extends Prop[A, Double] {
-    val rightComponent = new Label(rightCaptions.getOrElse(initial, ""))
+    val rightComponent = new Label(rightCaptions.getOrElse(initial, "")) {
+      horizontalAlignment = Alignment.Left
+    }
     val leftComponent  = new ComboBox[B](leftOptions) {
       selection.item = initial
       renderer = Renderer(render)
@@ -159,7 +163,9 @@ object NumericPropertySheet {
     val leftComponent  = new Label(leftCaption) {
       horizontalAlignment = Alignment.Left
     }
-    val rightComponent = new Label(unit.symbol)
+    val rightComponent = new Label(unit.symbol)  {
+      horizontalAlignment = Alignment.Left
+    }
     def edit: (A, Double)          => Unit  =  (a, d) => set(a, unit(d))
     def init: (NumberBoxWidget, A) => Unit  =  (w, a) => {
       w.setValue(get(a).value)
