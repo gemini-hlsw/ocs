@@ -72,7 +72,7 @@ trait Arbitraries {
     Arbitrary(arbitrary[Double].map(v => RadialVelocity(KilometersPerSecond(v))))
 
   implicit val arbRedshift: Arbitrary[Redshift] =
-    Arbitrary(arbitrary[Double].map(v => Redshift(v)))
+    Arbitrary(Gen.choose[Double](-1, 50.0).suchThat(_ > -1).map(v => Redshift(v))) // Redshift must be more than -1 and usually never goes above 20
 
   implicit val arbParallax: Arbitrary[Parallax] =
     Arbitrary(arbitrary[Double].map(Parallax.apply))
