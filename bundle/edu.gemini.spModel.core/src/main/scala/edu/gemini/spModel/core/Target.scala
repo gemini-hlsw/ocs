@@ -108,7 +108,6 @@ object Target {
     name: String,
     coordinates: Coordinates,
     properMotion: Option[ProperMotion],
-    radialVelocity: Option[RadialVelocity],
     redshift: Option[Redshift],
     parallax: Option[Parallax],
     magnitudes: List[Magnitude]) extends Target {
@@ -126,13 +125,12 @@ object Target {
   }
 
   object SiderealTarget {
-  
-    val empty = SiderealTarget("Untitled", Coordinates.zero, None, None, None, None, Nil)
+
+    val empty = SiderealTarget("Untitled", Coordinates.zero, None, None, None, Nil)
   
     val name:        SiderealTarget @> String          = Lens(t => Store(s => t.copy(name = s), t.name))
     val coordinates: SiderealTarget @> Coordinates     = Lens(t => Store(c => t.copy(coordinates = c), t.coordinates))
     val pm:          SiderealTarget @?> ProperMotion   = PLens(t => t.properMotion.map(p => Store(q => t.copy(properMotion = p.some), p)))
-    val rv:          SiderealTarget @?> RadialVelocity = PLens(t => t.radialVelocity.map(p => Store(q => t.copy(radialVelocity = p.some), p)))
     val z:           SiderealTarget @?> Redshift       = PLens(t => t.redshift.map(p => Store(q => t.copy(redshift = p.some), p)))
     val px:          SiderealTarget @?> Parallax       = PLens(t => t.parallax.map(p => Store(q => t.copy(parallax = p.some), p)))
     val ra:          SiderealTarget @> RightAscension  = coordinates >=> Coordinates.ra

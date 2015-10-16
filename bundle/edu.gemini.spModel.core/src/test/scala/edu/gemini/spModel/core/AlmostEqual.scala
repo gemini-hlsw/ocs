@@ -72,4 +72,10 @@ object AlmostEqual {
       def almostEqual(a: Wavelength, b: Wavelength) =
         a.toNanometers ~= b.toNanometers
     }
+
+  implicit val RedshiftAlmostEqual =
+    new AlmostEqual[Redshift] {
+      def almostEqual(a: Redshift, b: Redshift) =
+        a.redshift ~= b.redshift
+    }
 }

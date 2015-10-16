@@ -1,11 +1,3 @@
-/*
- * Copyright 2002 Association for Universities for Research in Astronomy, Inc.,
- * Observatory Control System, Gemini Telescopes Project.
- *
- * $Id: AbstractCatalogDirectory.java 38103 2011-10-19 19:47:32Z fnussber $
- */
-
-
 package jsky.catalog;
 
 import jsky.coords.CoordinateRadius;
@@ -368,6 +360,7 @@ public abstract class AbstractCatalogDirectory implements CatalogDirectory {
      * Return a list of name servers (Catalogs with serv_type
      * equal to "namesvr") to use to resolve astronomical object names.
      */
+    @Deprecated
     public List<Catalog> getNameServers() {
         return CatalogRegistry.instance.getCatalogsByType(Catalog.NAME_SERVER);
     }
@@ -447,9 +440,7 @@ public abstract class AbstractCatalogDirectory implements CatalogDirectory {
      * @return  true if <code>node</code> is a leaf
      */
     public boolean isLeaf(Object node) {
-        if (node instanceof Catalog)
-            return (!((Catalog) node).getType().equals(Catalog.DIRECTORY));
-        return false;
+        return node instanceof Catalog && (!((Catalog) node).getType().equals(Catalog.DIRECTORY));
     }
 
     /**
@@ -511,9 +502,9 @@ public abstract class AbstractCatalogDirectory implements CatalogDirectory {
         Object source = this;
         CatalogDirectory catDir = cat.getParent();
 
-        Object[] path = null;
-        int[] childIndices = null;
-        Object[] children = null;
+        Object[] path;
+        int[] childIndices;
+        Object[] children;
         if (catDir == null) {
             // must be the tree root
             path = new Catalog[1];

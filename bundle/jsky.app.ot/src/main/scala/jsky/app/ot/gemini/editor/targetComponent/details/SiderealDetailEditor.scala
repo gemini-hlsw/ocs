@@ -1,5 +1,9 @@
 package jsky.app.ot.gemini.editor.targetComponent.details
 
+import java.text.NumberFormat
+import java.util.Locale
+
+import edu.gemini.spModel.core.Redshift
 import edu.gemini.spModel.target.system.CoordinateParam.Units
 import edu.gemini.spModel.target.system.CoordinateTypes.{Epoch, Parallax}
 
@@ -12,6 +16,7 @@ import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.target.SPTarget
 import edu.gemini.spModel.target.system.{HmsDegTarget, ITarget}
 import jsky.app.ot.gemini.editor.targetComponent.MagnitudeEditor
+import squants.motion.KilometersPerSecond
 
 import scalaz.syntax.id._
 
@@ -21,19 +26,61 @@ final class SiderealDetailEditor extends TargetDetailEditor(ITarget.Tag.SIDEREAL
   // Editor Components
 
   val kind   = new TargetTypeEditor
-  val name   = new SiderealNameEditor
   val coords = new CoordinateEditor
 
   val mags   = new MagnitudeEditor <| { e =>
     e.getComponent.asInstanceOf[JComponent].setBorder(titleBorder("Magnitudes"))
   }
+  val name   = new SiderealNameEditor(mags)
+
+  sealed trait RedshiftRepresentations {
+    def formatter: NumberFormat
+  }
+  case object RadialVelocity extends RedshiftRepresentations {
+    val formatter = NumberFormat.getInstance(Locale.US) <| {_.setGroupingUsed(false)}
+  }
+  case object RedshiftZ extends RedshiftRepresentations {
+    val formatter = NumberFormat.getInstance(Locale.US) <| {_.setGroupingUsed(false)} <| {_.setMaximumFractionDigits(10)}
+  }
+  case object ApparentRadialVelocity extends RedshiftRepresentations {
+    val formatter = NumberFormat.getInstance(Locale.US) <| {_.setGroupingUsed(false)}
+  }
+
+  object RedshiftRepresentations {
+    val all: List[RedshiftRepresentations] = List(RadialVelocity, RedshiftZ, ApparentRadialVelocity)
+    val repr: Map[RedshiftRepresentations, String] = Map(RadialVelocity -> "km/sec", RedshiftZ -> "", ApparentRadialVelocity -> "km/s")
+
+    val renderLabel: RedshiftRepresentations => String = {
+      case RadialVelocity         => "RV"
+      case RedshiftZ              => "z"
+      case ApparentRadialVelocity => "cz"
+    }
+
+    val renderValue: (HmsDegTarget, RedshiftRepresentations) => Double = (t, v) => v match {
+      case RadialVelocity         =>
+        t.getRedshift.toRadialVelocity.toKilometersPerSecond
+      case RedshiftZ              =>
+        t.getRedshift.redshift
+      case ApparentRadialVelocity =>
+        t.getRedshift.toApparentRadialVelocity.toKilometersPerSecond
+    }
+    val editValue: (HmsDegTarget, RedshiftRepresentations, Double) => Unit = (t, v, d) => v match {
+      case RadialVelocity         =>
+        t.setRedshift(Redshift.fromRadialVelocity(KilometersPerSecond(d)))
+      case RedshiftZ              =>
+        t.setRedshift(Redshift(d))
+      case ApparentRadialVelocity =>
+        t.setRedshift(Redshift.fromApparentRadialVelocity(KilometersPerSecond(d)))
+    }
+    val formatter: RedshiftRepresentations => NumberFormat = (v) => v.formatter
+  }
 
   val props = NumericPropertySheet[HmsDegTarget](Some("Motion"), _.getTarget.asInstanceOf[HmsDegTarget],
     Prop("µ RA",     "mas/year", _.getPM1),
     Prop("µ Dec",    "mas/year", _.getPM2),
-    Prop("Epoch",    "years",    _.getEpoch.getValue, (t, d) => t.setEpoch(new Epoch(d, Units.YEARS))),
-    Prop("Parallax", "mas",      _.getParallax.mas,   (t, d) => t.setParallax(new Parallax(d, Units.MILLI_ARCSECS))),
-    Prop("RV",       "km/sec",   _.getRV)
+    Prop("Epoch",    "years",    _.getEpoch.getValue,    (t, d) => t.setEpoch(new Epoch(d, Units.YEARS))),
+    Prop("Parallax", "mas",      _.getParallax.mas,      (t, d) => t.setParallax(new Parallax(d, Units.MILLI_ARCSECS))),
+    Prop(RedshiftRepresentations.all, RedshiftRepresentations.repr, RedshiftZ, RedshiftRepresentations.renderLabel, RedshiftRepresentations.renderValue, RedshiftRepresentations.editValue, RedshiftRepresentations.formatter)
   )
 
   // Layout

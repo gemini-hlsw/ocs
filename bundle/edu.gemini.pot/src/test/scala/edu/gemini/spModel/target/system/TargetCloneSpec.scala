@@ -1,8 +1,12 @@
 package edu.gemini.spModel.target.system
 
 import edu.gemini.shared.skyobject.Magnitude
+import edu.gemini.spModel.core.Redshift
 import edu.gemini.spModel.target.system.CoordinateParam.Units.DEGREES
 import org.specs2.mutable.Specification
+
+import scalaz._
+import Scalaz._
 
 class TargetCloneSpec extends Specification {
 
@@ -27,6 +31,7 @@ class TargetCloneSpec extends Specification {
     "Magnitudes"                in c.checkProp(_.getMagnitudes)(a => _.setMagnitudes(a.cons(new Magnitude(Magnitude.Band.N, 123))))
     "Name"                      in c.checkProp(_.getName)(a => _.setName(a + "x"))
     "Parallax"                  in c.checkProp(_.getParallax.getValue)(a => _.getParallax.setValue(a + 1))
+    "Redshift"                  in c.checkProp(_.getRedshift)(a => _.setRedshift(a |+| Redshift(0.001)))
     "PM1"                       in c.checkProp(_.getPM1.getValue)(a => _.getPM1.setValue(a + 1))
     "PM2"                       in c.checkProp(_.getPM2.getValue)(a => _.getPM2.setValue(a + 1))
     "PropMotionDec"             in c.checkProp(_.getPropMotionDec)(a => _.setPropMotionDec(a + 1))
@@ -34,7 +39,6 @@ class TargetCloneSpec extends Specification {
     "Ra"                        in c.checkProp(_.getRa.getAs(DEGREES))(a => _.getRa.setAs(a + 1, DEGREES))
     "TrackingEpoch"             in c.checkProp(_.getTrackingEpoch)(a => _.setTrackingEpoch(a + 1))
     "TrackingParallax"          in c.checkProp(_.getTrackingParallax)(a => _.setTrackingParallax(a + 1))
-    "TrackingRadialVelocity"    in c.checkProp(_.getTrackingRadialVelocity)(a => _.setTrackingRadialVelocity(a + 1))
   }
 
   "ConicTarget Clone Properties" >> {

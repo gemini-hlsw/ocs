@@ -1,7 +1,3 @@
-//
-// $
-//
-
 package edu.gemini.wdba.tcc;
 
 import edu.gemini.shared.util.immutable.Pair;

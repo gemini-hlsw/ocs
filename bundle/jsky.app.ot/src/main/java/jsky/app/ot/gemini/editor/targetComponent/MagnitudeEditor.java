@@ -1,7 +1,3 @@
-//
-// $
-//
-
 package jsky.app.ot.gemini.editor.targetComponent;
 
 import edu.gemini.pot.sp.ISPNode;
@@ -465,6 +461,10 @@ public class MagnitudeEditor implements TelescopePosEditor {
                 }
             });
         }
+    }
+
+    public void replaceMagnitudes(ImList<Magnitude> magnitudes) {
+        target.setMagnitudes(magnitudes);
     }
 
     // Editing operations

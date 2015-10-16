@@ -1,13 +1,6 @@
-/* Copyright 2000 Association for Universities for Research in Astronomy, Inc.,
- * Observatory Control System, Gemini Telescopes Project.
- * See the file LICENSE for complete details.
- *
- * $Id: HmsDegTargetCase.java 18053 2009-02-20 20:16:23Z swalker $
- */
 package edu.gemini.spModel.target.system.test;
 
 import edu.gemini.shared.util.immutable.None;
-import edu.gemini.spModel.target.system.ITarget;
 import edu.gemini.spModel.target.system.HmsDegTarget;
 import static edu.gemini.spModel.test.TestFile.ser;
 

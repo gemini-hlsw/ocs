@@ -90,45 +90,8 @@ public final class CoordinateTypes {
     }
 
     /**
-     * The RV (radial velocity) parameter type.
-     */
-    @Deprecated
-    public static final class RV extends CoordinateParam {
-        public static final Units[] UNITS = {Units.KM_PER_SEC};
-
-        public Object clone() {
-            return super.clone();
-        }
-
-        public RV() {
-            super(0.0, UNITS[0]);
-        }
-
-        public RV(String value) {
-            super(value, UNITS[0]);
-        }
-
-        public RV(String value, Units units) {
-            super(value, units);
-        }
-
-        public RV(double value) {
-            super(value, UNITS[0]);
-        }
-
-        public RV(double value, Units units) {
-            super(value, units);
-        }
-
-        public Units[] getUnitOptions() {
-            return UNITS;
-        }
-    }
-
-    /**
      * The Parallax parameter type.
      */
-    @Deprecated
     public static final class Parallax extends CoordinateParam {
         public static final Units[] UNITS = {Units.MILLI_ARCSECS, Units.ARCSECS};
 

@@ -8,6 +8,7 @@ import java.util.regex.Pattern;
  * This filter is used to parse the output of name server catalogs when the mimetype=full-rec
  * option is used.
  */
+@Deprecated
 public class FullMimeSimbadCatalogFilter implements ICatalogFilter {
 
     private static ICatalogFilter filter;

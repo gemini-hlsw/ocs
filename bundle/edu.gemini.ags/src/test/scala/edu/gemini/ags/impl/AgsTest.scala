@@ -1,5 +1,6 @@
 package edu.gemini.ags.impl
 
+import edu.gemini.ags.TargetsHelper
 import edu.gemini.ags.api.{AgsMagnitude, AgsRegistrar, AgsStrategy}
 import edu.gemini.ags.conf.ProbeLimitsTable
 import edu.gemini.pot.sp.SPComponentType
@@ -32,7 +33,7 @@ import AlmostEqual.AlmostEqualOps
  * Support for running single-probe tests.
  */
 
-object AgsTest {
+object AgsTest extends TargetsHelper {
 
   private val magTable = ProbeLimitsTable.loadOrThrow()
 
@@ -75,7 +76,7 @@ object AgsTest {
     val ra  = Angle.fromDegrees(HHMMSS.parse(raStr).toDegrees.getMagnitude)
     val dec = Angle.fromDegrees(DDMMSS.parse(decStr.trim).toDegrees.getMagnitude)
     val sc  = Coordinates(RightAscension.fromAngle(ra), Declination.fromAngle(dec).getOrElse(Declination.zero))
-    SiderealTarget(raDecStr, sc, None, None, None, None, List(new Magnitude(rMag, MagnitudeBand.R)))
+    target(raDecStr, sc, List(new Magnitude(rMag, MagnitudeBand.R)))
   }
 
   def siderealTargets(so: (String, Double)*): List[SiderealTarget] = {
@@ -90,7 +91,7 @@ object AgsTest {
 
 case class AgsTest(ctx: ObsContext, guideProbe: GuideProbe, usable: List[(SiderealTarget, GuideSpeed)], unusable: List[SiderealTarget],
                    calculateValidArea: (ObsContext, GuideProbe) => Area
-                    = (ctx: ObsContext, probe: GuideProbe) => probe.getCorrectedPatrolField(ctx).getValue.getArea) {
+                    = (ctx: ObsContext, probe: GuideProbe) => probe.getCorrectedPatrolField(ctx).getValue.getArea) extends TargetsHelper {
   import AgsTest.{nudge, minimumDistance, magTable}
   type Point = Point2D.Double
 
@@ -273,11 +274,11 @@ case class AgsTest(ctx: ObsContext, guideProbe: GuideProbe, usable: List[(Sidere
       s"$base${ctx.getInstrument.getType.narrowType}($i)"
 
     val usableCandidates:List[(SiderealTarget, GuideSpeed)] = candidates(in).zipWithIndex.collect { case ((sc, mag, Some(gs)), i) =>
-      (SiderealTarget(name("in", i), sc, None, None, None, None, List(mag)), gs)
+      (target(name("in", i), sc, List(mag)), gs)
     }
 
     val unusableCandidates = candidates(out).zipWithIndex.map { case ((sc, mag, _), i) =>
-      SiderealTarget(name("out", i), sc, None, None, None, None, List(mag))
+      target(name("out", i), sc, List(mag))
     }
 
     copy(usable = usableCandidates, unusable = unusableCandidates)

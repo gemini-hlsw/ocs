@@ -1,13 +1,8 @@
-// Copyright 2000 Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-// See the file LICENSE for complete details.
-//
-// $Id: HmsDegTarget.java 27482 2010-10-15 18:42:07Z nbarriga $
-//
 package edu.gemini.spModel.target.system;
 
 import edu.gemini.shared.skyobject.SkyObject;
 import edu.gemini.shared.skyobject.coords.HmsDegCoordinates;
+import edu.gemini.spModel.core.Redshift;
 import edu.gemini.spModel.target.system.CoordinateParam.Units;
 import edu.gemini.spModel.target.system.CoordinateTypes.*;
 
@@ -52,8 +47,8 @@ public final class HmsDegTarget extends ITarget {
     private static final Epoch DEFAULT_EPOCH_2000 = new Epoch(2000, Units.YEARS);
     private static final PM1 DEFAULT_PM1 = new PM1();
     private static final PM2 DEFAULT_PM2 = new PM2();
-    private static final RV DEFAULT_RV = new RV();
     private static final Parallax DEFAULT_PARALLAX = new Parallax();
+    private static final Redshift DEFAULT_Z = Redshift.instance().zero();
     private static final Date DEFAULT_TAIZ = null;
     private static final String DEFAULT_NAME = "";
 
@@ -63,8 +58,8 @@ public final class HmsDegTarget extends ITarget {
     private PM2 _pm2 = DEFAULT_PM2;
     // The terms below are rarely used, but someone may want to add them
     // and a software system may be able to use them.
-    private RV _rv = DEFAULT_RV;
     private Parallax _parallax = DEFAULT_PARALLAX;
+    private Redshift _z = DEFAULT_Z;
     private Date _taiz = DEFAULT_TAIZ;
     private HMS _ra = new HMS();
     private DMS _dec = new DMS();
@@ -110,7 +105,7 @@ public final class HmsDegTarget extends ITarget {
         if (_epoch != null) result._epoch = (Epoch) _epoch.clone();
         if (_pm1 != null) result._pm1 = (PM1) _pm1.clone();
         if (_pm2 != null) result._pm2 = (PM2) _pm2.clone();
-        if (_rv != null) result._rv = (RV) _rv.clone();
+        if (_z != null) result._z = _z; // Redshift is immutable it can be freely copied
         if (_parallax != null) result._parallax = (Parallax) _parallax.clone();
         if (_taiz != null) result._taiz = (Date) _taiz.clone();
 
@@ -124,6 +119,7 @@ public final class HmsDegTarget extends ITarget {
     /**
      * Override equals to return true if both instances are the same.
      */
+    @Override
     public boolean equals(Object obj) {
         if (obj == null) return false;
         if (obj == this) return true;
@@ -139,7 +135,7 @@ public final class HmsDegTarget extends ITarget {
 
         if (!(_pm1.equals(sys._pm1))) return false;
         if (!(_pm2.equals(sys._pm2))) return false;
-        if (!(_rv.equals(sys._rv))) return false;
+        if (!(_z.equals(sys._z))) return false;
         if (!(_parallax.equals(sys._parallax))) return false;
 
         return true;
@@ -244,26 +240,21 @@ public final class HmsDegTarget extends ITarget {
 
 
     /**
-     * Gets the radial velocity object.
-     * This method returns a reference to the internal object.
+     * Gets the Redshift object.
      */
-    public RV getRV() {
-        if (_rv == null) {
-            _rv = DEFAULT_RV;
+    public Redshift getRedshift() {
+        if (_z == null) {
+            _z = DEFAULT_Z;
         }
-        return _rv;
+        return _z;
     }
-
 
     /**
-     * Sets the radial velocity.  The value of the
-     * parameter is not copied so future modification will have an effect
-     * upon the value stored in this class.  The new value can be null.
+     * Sets the redshift.
      */
-    public void setRV(RV newValue) {
-        _rv = newValue;
+    public void setRedshift(Redshift newValue) {
+        _z = newValue;
     }
-
 
     /**
      * Gets the parallax object.
@@ -335,16 +326,6 @@ public final class HmsDegTarget extends ITarget {
     /** Set the PM parallax in arcsec. */
     public void setTrackingParallax(final double newValue) {
         setParallax(new Parallax(newValue, Units.ARCSECS));
-    }
-
-    /** Get the PM radial velocity in km/s. */
-    public double getTrackingRadialVelocity() {
-        return getRV().getValue();
-    }
-
-    /** Set the PM radial velocity in km/s. */
-    public void setTrackingRadialVelocity(final double newValue) {
-        setRV(new RV(newValue));
     }
 
     /** Get the contained target epoch in Julian years. */

@@ -142,7 +142,7 @@ public final class TargetConfig extends ParamSet {
         if (pmunits.equals(TccNames.OT_PMUNITS)) pmunits = TccNames.TCC_PMUNITS;
         ps.putParameter(TccNames.PMUNITS, pmunits);
         ps.putParameter(TccNames.PARALLAX, Double.toString(target.getParallax().arcsecs()));
-        ps.putParameter(TccNames.RV, target.getRV().getStringValue());
+        ps.putParameter(TccNames.RV, Double.toString(target.getRedshift().toRadialVelocity().value()));
         return ps;
     }
 
@@ -151,14 +151,12 @@ public final class TargetConfig extends ParamSet {
         if (magList.size() == 0) return None.instance();
 
         final ParamSet ps = new ParamSet(TccNames.MAGNITUDES);
-        magList.foreach(new ApplyOp<Magnitude>() {
-            @Override public void apply(Magnitude mag) {
-                String band = mag.getBand().name();
-                String brig = String.format("%1.3f", mag.getBrightness());
-                ps.putParameter(band, brig);
-            }
+        magList.foreach(mag -> {
+            String band = mag.getBand().name();
+            String brig = String.format("%1.3f", mag.getBrightness());
+            ps.putParameter(band, brig);
         });
-        return new Some<Element>(ps);
+        return new Some<>(ps);
     }
 
     // private method to log and throw and exception
