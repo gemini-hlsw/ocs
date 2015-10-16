@@ -10,7 +10,7 @@ import edu.gemini.pot.sp.SPComponentType._
 import edu.gemini.shared.skyobject.Magnitude
 import edu.gemini.spModel.`type`.DisplayableSpType
 import edu.gemini.spModel.config2.{Config, ConfigSequence, ItemKey}
-import edu.gemini.spModel.core.{MagnitudeBand, Peer, Site, Wavelength}
+import edu.gemini.spModel.core._
 import edu.gemini.spModel.gemini.gnirs.InstGNIRS
 import edu.gemini.spModel.guide.GuideProbe
 import edu.gemini.spModel.obs.context.ObsContext
@@ -216,9 +216,9 @@ trait ItcTable extends Table {
       val value  = mag.getBrightness
       // TODO: unify band definitions from spModel core and itc shared so that we don't need this translation anymore
       val system = mag.getSystem match {
-        case Magnitude.System.Vega  => BrightnessUnit.MAG
-        case Magnitude.System.AB    => BrightnessUnit.ABMAG
-        case Magnitude.System.Jy    => BrightnessUnit.JY
+        case MagnitudeSystem.Vega  => BrightnessUnit.MAG
+        case MagnitudeSystem.AB    => BrightnessUnit.ABMAG
+        case MagnitudeSystem.Jy    => BrightnessUnit.JY
       }
       (value, ModelConverters.toNewBand(mag.getBand), system)
     }

@@ -4,7 +4,6 @@ import edu.gemini.model.p1.immutable._
 import edu.gemini.shared.{skyobject => SO}
 import edu.gemini.shared.util.immutable.DefaultImList
 import edu.gemini.spModel.core.{MagnitudeSystem, MagnitudeBand, Magnitude}
-import edu.gemini.spModel.target.system.CoordinateParam.Units
 import edu.gemini.spModel.{target => SP}
 import edu.gemini.spModel.target.system.CoordinateTypes.{PM1 => SPProperMotionRA}
 import edu.gemini.spModel.target.system.CoordinateTypes.{PM2 => SPProperMotionDec}
@@ -60,7 +59,7 @@ object SpTargetFactory {
 
       // Add apparent magnitude, if any.
       nsid.magnitude(time)
-        .map(new SO.Magnitude(SO.Magnitude.Band.AP, _, SO.Magnitude.System.AB))
+        .map(new SO.Magnitude(SO.Magnitude.Band.AP, _, MagnitudeSystem.AB))
         .foreach(spTarget.putMagnitude)
 
       spTarget
@@ -112,8 +111,8 @@ object SpTargetFactory {
     opt.toRight(s"Unexpected magnitude band: ${b.name}")
   }
 
-  private def system(s: MagnitudeSystem): Either[String, SO.Magnitude.System] = {
-    val opt = SO.Magnitude.System.values().find { _.name().equalsIgnoreCase(s.name) }
+  private def system(s: MagnitudeSystem): Either[String, MagnitudeSystem] = {
+    val opt = MagnitudeSystem.all.find { _.name.equalsIgnoreCase(s.name) }
     opt.toRight(s"Unexpected magnitude system: ${s.name}")
   }
 }

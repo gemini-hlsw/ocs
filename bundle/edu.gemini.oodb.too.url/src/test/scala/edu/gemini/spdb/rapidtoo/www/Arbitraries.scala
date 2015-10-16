@@ -1,8 +1,8 @@
 package edu.gemini.spdb.rapidtoo.www
 
 import edu.gemini.shared.skyobject.Magnitude
-import edu.gemini.shared.skyobject.Magnitude.{ Band, System }
-import edu.gemini.spModel.core.{ Angle, RightAscension, Declination }
+import edu.gemini.shared.skyobject.Magnitude.Band
+import edu.gemini.spModel.core.{MagnitudeSystem, Angle, RightAscension, Declination}
 import edu.gemini.spdb.rapidtoo.TooGuideTarget.GuideProbe
 
 import org.scalacheck._
@@ -23,15 +23,15 @@ trait Arbitraries {
   implicit val arbMagnitudeBand: Arbitrary[Band] =
     Arbitrary(oneOf(Band.values))
 
-  implicit val arbMagnitudeSystem: Arbitrary[System] =
-    Arbitrary(oneOf(System.values))
+  implicit val arbMagnitudeSystem: Arbitrary[MagnitudeSystem] =
+    Arbitrary(oneOf(MagnitudeSystem.all))
 
   implicit val arbMagnitude: Arbitrary[Magnitude] =
     Arbitrary {
       for {
         value  <- arbitrary[Short].map(n => n / 10.0)
         band   <- arbitrary[Band]
-        system <- arbitrary[System]
+        system <- arbitrary[MagnitudeSystem]
       } yield new Magnitude(band, value, system)
     }
 

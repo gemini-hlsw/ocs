@@ -13,9 +13,9 @@ class SiderealWriterTest extends WriterTestBase(SiderealReader, SiderealWriter) 
   val target5 = mkTarget("ngc004", "00:00:00.00", "00:00:00")
 
   val targets = List(
-    target1.copy(magnitudes = List(mkMag(7.0, MagnitudeBand.J, MagnitudeSystem.JY))),
+    target1.copy(magnitudes = List(mkMag(7.0, MagnitudeBand.J, MagnitudeSystem.Jy))),
     target2.copy(magnitudes = List(mkMag(8.0, MagnitudeBand.H))),
-    target3.copy(magnitudes = List(mkMag(1.0, MagnitudeBand.J), mkMag(2.0, MagnitudeBand.H), mkMag(3.0, MagnitudeBand.K, MagnitudeSystem.JY))),
+    target3.copy(magnitudes = List(mkMag(1.0, MagnitudeBand.J), mkMag(2.0, MagnitudeBand.H), mkMag(3.0, MagnitudeBand.K, MagnitudeSystem.Jy))),
     target4,
     target5
   )

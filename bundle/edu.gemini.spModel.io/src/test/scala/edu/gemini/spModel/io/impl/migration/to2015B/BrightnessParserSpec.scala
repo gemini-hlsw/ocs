@@ -1,20 +1,21 @@
 package edu.gemini.spModel.io.impl.migration.to2015B
 
+import edu.gemini.shared.skyobject.Magnitude
+import edu.gemini.shared.skyobject.Magnitude.Band
+import edu.gemini.spModel.core.MagnitudeSystem
+import edu.gemini.spModel.core.MagnitudeSystem.{Vega, AB, Jy}
 import org.specs2.mutable.Specification
 
 import scalaz.NonEmptyList
 
-import edu.gemini.shared.skyobject.Magnitude
-import edu.gemini.shared.skyobject.Magnitude.Band
-import edu.gemini.shared.skyobject.Magnitude.System
-
 object BrightnessParserSpec extends Specification {
-  import Band._, System._
 
-  def mag(n: Double, b: Band, s: System): Magnitude =
+  import Magnitude.Band._
+
+  def mag(n: Double, b: Band, s: MagnitudeSystem): Magnitude =
     new Magnitude(b, n, s)
 
-  def one(n: Double, b: Band, s: System): NonEmptyList[Magnitude] =
+  def one(n: Double, b: Band, s: MagnitudeSystem): NonEmptyList[Magnitude] =
     NonEmptyList(mag(n, b, s))
 
   // All taken from historical data

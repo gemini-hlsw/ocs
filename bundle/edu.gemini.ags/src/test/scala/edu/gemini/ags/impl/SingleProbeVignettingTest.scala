@@ -36,7 +36,7 @@ object SingleProbeVignettingTest extends Specification with ScalaCheck with Vign
     for {
       band   <- Gen.oneOf(MagnitudeBand._r, MagnitudeBand.R, MagnitudeBand.UC)
       bright <- Gen.chooseNum(5, 20)
-    } yield Magnitude(bright, band, None, MagnitudeSystem.VEGA)
+    } yield Magnitude(bright, band, None, MagnitudeSystem.Vega)
 
   def genGuideStar(ctx: ObsContext, coords: Coordinates): Gen[SiderealTarget] =
     for {
@@ -44,7 +44,7 @@ object SingleProbeVignettingTest extends Specification with ScalaCheck with Vign
       bands   <- Gen.someOf(List(_r, R, UC))
       brights <- Gen.listOfN(bands.size, Gen.chooseNum(5, 20))
     } yield {
-      val mags = bands.zip(brights).map { case (band, bright) => Magnitude(bright, band, None, MagnitudeSystem.VEGA) }
+      val mags = bands.zip(brights).map { case (band, bright) => Magnitude(bright, band, None, MagnitudeSystem.Vega) }
       SiderealTarget(name, coords, None, None, None, None, mags.toList)
     }
 

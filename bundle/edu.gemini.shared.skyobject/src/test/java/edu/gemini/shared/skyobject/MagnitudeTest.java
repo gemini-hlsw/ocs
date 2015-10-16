@@ -1,15 +1,13 @@
-//
-// $
-//
-
 package edu.gemini.shared.skyobject;
 
-import static edu.gemini.shared.skyobject.Magnitude.Band;
 import edu.gemini.shared.util.immutable.None;
 import edu.gemini.shared.util.immutable.Some;
+import edu.gemini.spModel.core.MagnitudeSystem;
+import org.junit.Test;
+
+import static edu.gemini.shared.skyobject.Magnitude.Band;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
-import org.junit.Test;
 
 
 /**
@@ -24,7 +22,7 @@ public class MagnitudeTest {
         assertEquals(Band.J, m.getBand());
         assertEquals(1.0, m.getBrightness(), DELTA);
         assertEquals(None.INSTANCE, m.getError());
-        assertEquals(Magnitude.System.DEFAULT, m.getSystem());
+        assertEquals(MagnitudeSystem.Default(), m.getSystem());
 
         try {
             new Magnitude(null, 1.0);
@@ -44,11 +42,11 @@ public class MagnitudeTest {
 
     @Test
     public void testConstructionWithSystem() {
-        Magnitude m = new Magnitude(Band.J, 1.0, 0.1, Magnitude.System.Jy);
+        Magnitude m = new Magnitude(Band.J, 1.0, 0.1, MagnitudeSystem.Jy$.MODULE$);
         assertEquals(Band.J, m.getBand());
         assertEquals(1.0, m.getBrightness(), DELTA);
         assertEquals(0.1, m.getError().getValue(), DELTA);
-        assertEquals(Magnitude.System.Jy, m.getSystem());
+        assertEquals(MagnitudeSystem.Jy$.MODULE$, m.getSystem());
     }
 
     @Test
@@ -58,7 +56,7 @@ public class MagnitudeTest {
         assertEquals(1.0, m.getBrightness(), DELTA);
         assertEquals(None.INSTANCE, m.getError());
 
-        m = new Magnitude(Band.J, 1.0, new Some<Double>(0.1));
+        m = new Magnitude(Band.J, 1.0, new Some<>(0.1));
         assertEquals(Band.J, m.getBand());
         assertEquals(1.0, m.getBrightness(), DELTA);
         assertEquals(0.1, m.getError().getValue(), DELTA);
