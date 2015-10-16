@@ -92,7 +92,7 @@ case class ObservationInfo(ctx: Option[ObsContext], objectName: Option[String], 
 }
 
 object ObservationInfo {
-  val DefaultInstrument = SPComponentType.INSTRUMENT_GMOSSOUTH
+  val DefaultInstrument = SPComponentType.INSTRUMENT_VISITOR
 
   // Observation context loaded initially with default parameters
   val zero = new ObservationInfo(None, "".some, Coordinates.zero.some, DefaultInstrument.some, None, Nil, SPSiteQuality.Conditions.BEST.some, UCAC4, ProbeLimitsTable.loadOrThrow())
