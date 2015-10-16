@@ -4,14 +4,14 @@ import scala.collection.JavaConversions._
 import scalaz.Equal
 
 /** Unit that can represent an integrated brightness or a uniform surface brightness per area. */
-sealed trait BrightnessUnit {
+sealed trait BrightnessUnit extends Product with Serializable {
   val name: String
   def displayValue: String = name
 }
 
-sealed abstract class MagnitudeSystem(val name: String) extends BrightnessUnit with Product with Serializable
+sealed abstract class MagnitudeSystem(val name: String) extends BrightnessUnit
 
-sealed abstract class SurfaceBrightness(val name: String) extends BrightnessUnit with Product with Serializable
+sealed abstract class SurfaceBrightness(val name: String) extends BrightnessUnit
 
 /** Units for integrated brightness values.
   * Note that strictly speaking these are not all magnitudes, only Vega Mag and AB Mag are magnitudes, but
@@ -24,14 +24,15 @@ object MagnitudeSystem {
   case object AB                  extends MagnitudeSystem("AB")
   case object Jy                  extends MagnitudeSystem("Jy")
 
-  // currently not supporte in OT, only available in web app
-  case object Watts               extends SurfaceBrightness("W/m²/µm")
-  case object ErgsWavelength      extends SurfaceBrightness("erg/s/cm²/Å")
-  case object ErgsFrequency       extends SurfaceBrightness("erg/s/cm²/Hz")
+  // currently not supported in OT, only available in web app
+  case object Watts               extends MagnitudeSystem("W/m²/µm")
+  case object ErgsWavelength      extends MagnitudeSystem("erg/s/cm²/Å")
+  case object ErgsFrequency       extends MagnitudeSystem("erg/s/cm²/Hz")
 
 
   val default: MagnitudeSystem = Vega
 
+  // this is used in the OT, for now we only support Vega, AB and Jy in the OT
   val all: List[MagnitudeSystem] =
     List(Vega, AB, Jy)
 
