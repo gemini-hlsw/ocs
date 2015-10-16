@@ -169,7 +169,7 @@ object ModelConverters {
       val pmRa        = RightAscensionAngularVelocity(AngularVelocity(so.getHmsDegCoordinates.getPmRa.toMilliarcsecs.getMagnitude))
       val pmDec       = DeclinationAngularVelocity(AngularVelocity(so.getHmsDegCoordinates.getPmDec.toMilliarcsecs.getMagnitude))
       val pm          = ProperMotion(pmRa, pmDec)
-      SiderealTarget(so.getName, coordinates, Some(pm), None, None, None, mags.toList)
+      SiderealTarget(so.getName, coordinates, Some(pm), None, None, mags.toList)
     }
   }
 
@@ -187,10 +187,6 @@ object ModelConverters {
         case t:HmsDegTarget => Some(ProperMotion(RightAscensionAngularVelocity(AngularVelocity(t.getPropMotionRA)), DeclinationAngularVelocity(AngularVelocity(t.getPropMotionDec))))
         case _              => None
       }
-      val rv          = sp.getTarget match {
-        case t:HmsDegTarget => Some(RadialVelocity(KilometersPerSecond(t.getRV.getValue)))
-        case _              => None
-      }
       val px          = sp.getTarget match {
         case t:HmsDegTarget => Some(Parallax(t.getParallax.mas()))
         case _              => None
@@ -199,7 +195,7 @@ object ModelConverters {
         case t:HmsDegTarget => Some(t.getRedshift)
         case _              => None
       }
-      SiderealTarget(name, coordinates, pm, rv, z, px, mags)
+      SiderealTarget(name, coordinates, pm, z, px, mags)
     }
   }
 }

@@ -290,10 +290,6 @@ trait VoTableParser {
       k.sequenceU
     }
 
-    def parseRv(rv: Option[String]): CatalogProblem \/ Option[RadialVelocity] =
-      (for {
-        r <- rv.filter(_.nonEmpty)
-      } yield CatalogAdapter.parseDoubleValue(VoTableParser.UCD_RV, r).map(p => RadialVelocity(KilometersPerSecond(p)))).sequenceU
 
     def parseZ(z: Option[String]): CatalogProblem \/ Option[Redshift] =
       (for {
@@ -318,14 +314,13 @@ trait VoTableParser {
       magnitudes.map(i => i.copy(error = magErrors.get(i.band))).filter(adapter.validMagnitude)
     }
 
-    def toSiderealTarget(id: String, ra: String, dec: String, pm: (Option[String], Option[String]), rv: Option[String], z: Option[String], plx: Option[String]): \/[CatalogProblem, SiderealTarget] = {
+    def toSiderealTarget(id: String, ra: String, dec: String, pm: (Option[String], Option[String]), z: Option[String], plx: Option[String]): \/[CatalogProblem, SiderealTarget] = {
       for {
         adapter        <- catalogAdapter
         r              <- Angle.parseDegrees(ra).leftMap(_ => FieldValueProblem(VoTableParser.UCD_RA, ra))
         d              <- Angle.parseDegrees(dec).leftMap(_ => FieldValueProblem(VoTableParser.UCD_DEC, dec))
         declination    <- Declination.fromAngle(d) \/> FieldValueProblem(VoTableParser.UCD_DEC, dec)
         properMotion   <- parseProperMotion(pm)
-        radialVelocity <- parseRv(rv)
         redshift       <- parseZ(z)
         parallax       <- parsePlx(plx)
         mags            = entries.filter(adapter.isMagnitudeField)
@@ -335,7 +330,7 @@ trait VoTableParser {
       } yield {
         val coordinates = Coordinates(RightAscension.fromAngle(r), declination)
         val combMags    = combineWithErrorsAndFilter(magnitudes, magnitudeErrs, adapter).sorted(VoTableParser.MagnitudeOrdering)
-        SiderealTarget(id, coordinates, properMotion, radialVelocity, redshift, parallax, combMags)
+        SiderealTarget(id, coordinates, properMotion, redshift, parallax, combMags)
       }
     }
 
@@ -345,10 +340,9 @@ trait VoTableParser {
       ra              <- entries.get(adapter.raField) \/> MissingValue(adapter.raField)
       dec             <- entries.get(adapter.decField) \/> MissingValue(adapter.decField)
       (pmRa, pmDec)    = (entries.get(adapter.pmRaField), entries.get(adapter.pmDecField))
-      rv               = entries.get(adapter.rvField)
       z                = entries.get(adapter.zField)
       plx              = entries.get(adapter.plxField)
-    } yield toSiderealTarget(id, ra, dec, (pmRa, pmDec), rv, z, plx)
+    } yield toSiderealTarget(id, ra, dec, (pmRa, pmDec), z, plx)
 
     result.join
   }

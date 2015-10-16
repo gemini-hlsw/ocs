@@ -7,11 +7,9 @@ import Scalaz._
  * Parallax in mas
  * Store the value in mas to avoid rounding errors
  */
-class Parallax(val mas: Double) extends AnyVal
+case class Parallax(mas: Double) extends Serializable
 
 object Parallax {
-  def apply(mas: Double):Parallax = new Parallax(mas)
-  //def fromMas(mas: Double):Option[Parallax] = (mas > 0) option new Parallax(mas)
 
   /**
    * The `No parallax`

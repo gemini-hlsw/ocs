@@ -4,7 +4,6 @@ import edu.gemini.spModel.core.WavelengthConversions._
 import org.scalacheck._
 import org.scalacheck.Gen._
 import org.scalacheck.Arbitrary._
-import squants.motion.KilometersPerSecond
 
 import scalaz.==>>
 
@@ -68,9 +67,6 @@ trait Arbitraries {
       } yield ProperMotion(deltaRA, deltaDec, epoch)
     }
 
-  implicit val arbRadialVelocity: Arbitrary[RadialVelocity] =
-    Arbitrary(arbitrary[Double].map(v => RadialVelocity(KilometersPerSecond(v))))
-
   implicit val arbRedshift: Arbitrary[Redshift] =
     Arbitrary(Gen.choose[Double](-1, 50.0).suchThat(_ > -1).map(v => Redshift(v))) // Redshift must be more than -1 and usually never goes above 20
 
@@ -109,11 +105,10 @@ trait Arbitraries {
           name           <- arbitrary[String]
           coordinates    <- arbitrary[Coordinates]
           properMotion   <- arbitrary[Option[ProperMotion]]
-          radialVelocity <- arbitrary[Option[RadialVelocity]]
           redshift       <- arbitrary[Option[Redshift]]
           parallax       <- arbitrary[Option[Parallax]]
           magnitudes     <- arbitrary[List[Magnitude]]
-      } yield Target.SiderealTarget(name, coordinates, properMotion, radialVelocity, redshift, parallax, magnitudes)
+      } yield Target.SiderealTarget(name, coordinates, properMotion, redshift, parallax, magnitudes)
     }
 
   implicit val arbNonSiderealTarget: Arbitrary[Target.NonSiderealTarget] =

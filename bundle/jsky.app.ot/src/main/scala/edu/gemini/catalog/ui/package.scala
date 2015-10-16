@@ -177,11 +177,11 @@ case class GuidingQuality(info: Option[ObservationInfo], title: String) extends 
   // Calculate the guiding quality of the target
   def target2Analysis(t: Target):Option[AgsAnalysis] = {
     (for {
-      o                                       <- info
-      s                                       <- o.strategy
-      gp                                      <- o.guideProbe
-      st @ SiderealTarget(_, _, _, _, _, _, _) = t
-      ctx                                     <- o.toContext
+      o                                     <- info
+      s                                     <- o.strategy
+      gp                                    <- o.guideProbe
+      st @ SiderealTarget(_, _, _, _, _, _) = t
+      ctx                                   <- o.toContext
     } yield s.analyze(ctx, o.mt, gp, st)).flatten
   }
 

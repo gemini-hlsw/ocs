@@ -1,7 +1,3 @@
-//
-// $
-//
-
 package edu.gemini.wdba.tcc;
 
 import edu.gemini.pot.sp.ISPObsComponent;
@@ -89,7 +85,7 @@ public final class TargetGroupTest extends TestBase {
         testTargetEnvironment(TargetEnvironment.create(base).setUserTargets(userTargets));
     }
 
-    private void testSingleGuider(int primary, SPTarget... targets) throws Exception {
+    private void testSingleGuider(SPTarget... targets) throws Exception {
 
         ImList<SPTarget> targetList = ImCollections.emptyList();
         for (int i=targets.length-1; i>=0; --i) {
@@ -112,28 +108,28 @@ public final class TargetGroupTest extends TestBase {
      * A base position and single guide target for single guider.
      */
     public void testSingleGuideTargetSingleGuider() throws Exception {
-        testSingleGuider(1, pwfs2_1);
+        testSingleGuider(pwfs2_1);
     }
 
     /**
      * A base position and multiple guide targets for a single guider.
      */
     public void testMultipleGuideTargetsSingleGuider() throws Exception {
-        testSingleGuider(1, pwfs2_1, pwfs2_2);
+        testSingleGuider(pwfs2_1, pwfs2_2);
     }
 
     /**
      * Using the second guide star as the primary wfs star.
      */
     public void testNonDefaultPrimary() throws Exception {
-        testSingleGuider(2, pwfs2_1, pwfs2_2);
+        testSingleGuider(pwfs2_1, pwfs2_2);
     }
 
     /**
      * Having no primary guide star.
      */
     public void testNoExplicitPrimary() throws Exception {
-        testSingleGuider(-1, pwfs2_1, pwfs2_2);
+        testSingleGuider(pwfs2_1, pwfs2_2);
     }
 
     /**
@@ -333,11 +329,10 @@ public final class TargetGroupTest extends TestBase {
         String actualName = param.attributeValue("value");
         assertEquals(name, actualName);
     }
-    // -------------
 
     private static class NameMap {
-        private final Map<GuideProbe, String> guiderNameMap = new HashMap<GuideProbe, String>();
-        private final Map<SPTarget, String> targetNameMap = new HashMap<SPTarget, String>();
+        private final Map<GuideProbe, String> guiderNameMap = new HashMap<>();
+        private final Map<SPTarget, String> targetNameMap = new HashMap<>();
 
         public String getGuiderName(GuideProbe guider) {
             String name = guiderNameMap.get(guider);
@@ -382,7 +377,7 @@ public final class TargetGroupTest extends TestBase {
             assertEquals(nameMap.getTargetName(targets.get(0)), val);
 
             // And that there are no nested value elements.
-            List lst = targetsParam.elements(ParamSet.VALUE);
+            List<?> lst = targetsParam.elements(ParamSet.VALUE);
             assertTrue((lst == null) || (lst.size() == 0));
         } else {
             // There are multiple elements, so make sure that they are
@@ -435,11 +430,9 @@ public final class TargetGroupTest extends TestBase {
             final String name = targetElement.attributeValue(ParamSet.NAME);
             assertNotNull(name);
 
-            Option<SPTarget> target = env.getTargets().find(new PredicateOp<SPTarget>() {
-                public Boolean apply(SPTarget spTarget) {
-                    String targetName = nameMap.getTargetName(spTarget);
-                    return name.equals(targetName);
-                }
+            Option<SPTarget> target = env.getTargets().find(spTarget -> {
+                String targetName = nameMap.getTargetName(spTarget);
+                return name.equals(targetName);
             });
 
             assertFalse(target.isEmpty());
@@ -473,20 +466,10 @@ public final class TargetGroupTest extends TestBase {
             assertNotNull(guideGroupElement);
 
             Option<SPTarget> primary = gt.getPrimary();
-//            if (primary == null) primary = gt.imList().head();
             String primaryName = null;
             if (!primary.isEmpty()) primaryName = nameMap.getTargetName(primary.getValue());
             validateGroup(guideGroupElement, name, primaryName, gt.getTargets());
         }
     }
 
-    protected static GuideProbeTargets createGuideTargets(GuideProbe guider, String... names) {
-        ImList<SPTarget> targets = ImCollections.emptyList();
-        for (int i=names.length-1; i>=0; --i) {
-            final SPTarget target = new SPTarget();
-            target.setName(names[i]);
-            targets = targets.cons(target);
-        }
-        return GuideProbeTargets.create(guider, GuideProbeTargets.NO_TARGET, GuideProbeTargets.NO_TARGET, targets).withPrimaryByIndex(1);
-    }
 }

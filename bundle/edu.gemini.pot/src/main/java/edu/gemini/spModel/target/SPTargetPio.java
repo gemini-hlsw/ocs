@@ -33,7 +33,6 @@ public class SPTargetPio {
     private static final String _PM1 = "pm1";
     private static final String _PM2 = "pm2";
     private static final String _PARALLAX = "parallax";
-    private static final String _RV = "rv";
     private static final String _Z = "z";
     private static final String _ANODE = "anode";
     private static final String _AQ = "aq";
@@ -92,7 +91,6 @@ public class SPTargetPio {
             paramSet.addParam(t.getPM1().getParam(factory, _PM1));
             paramSet.addParam(t.getPM2().getParam(factory, _PM2));
             paramSet.addParam(t.getParallax().getParam(factory, _PARALLAX));
-            paramSet.addParam(t.getRV().getParam(factory, _RV));
             Pio.addParam(factory, paramSet, _Z, Double.toString(t.getRedshift().redshift()));
         } else if (target instanceof NonSiderealTarget) {
             final NonSiderealTarget nst = (NonSiderealTarget) target;
@@ -215,10 +213,6 @@ public class SPTargetPio {
             final CoordinateTypes.Parallax p = new CoordinateTypes.Parallax();
             p.setParam(paramSet.getParam(_PARALLAX));
             t.setParallax(p);
-
-            final CoordinateTypes.RV rv = new CoordinateTypes.RV();
-            rv.setParam(paramSet.getParam(_RV));
-            t.setRV(rv);
 
             final String z = Pio.getValue(paramSet, _Z);
             if (z != null) {

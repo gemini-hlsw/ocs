@@ -70,8 +70,8 @@ object ItcParametersProvider {
         tEnv <- targetEnvironment
       } yield {
         tEnv.getBase.getTarget match {
-          case t: HmsDegTarget  => t.getRV.getValue / 299800.00 // turn radial velocity into z-shift
-          case _                => 0.0                          // non-sidereal targets are assumed to have z-shift 0
+          case t: HmsDegTarget  => t.getRedshift.redshift // turn radial velocity into z-shift
+          case _                => 0.0                    // non-sidereal targets are assumed to have z-shift 0
         }
       }
 

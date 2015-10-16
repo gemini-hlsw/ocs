@@ -9,7 +9,7 @@ import scalaz.{Monoid, Order}
  * TODO Cannot be a value class as it breaks java compatibility, convert to value class when the legacy target model disappears
  * @param redshift dimensionless measurement of redshift
  */
-case class Redshift(redshift: Double) {
+case class Redshift(redshift: Double) extends Serializable {
   def toRadialVelocity: Velocity = Redshift.C * (((redshift + 1)*(redshift + 1) - 1)/((redshift + 1)*(redshift + 1) + 1))
   def toApparentRadialVelocity: Velocity = Redshift.C * redshift
 }

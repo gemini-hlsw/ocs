@@ -1,6 +1,3 @@
-//
-//$Id: GeneralRule.java 46768 2012-07-16 18:58:53Z rnorris $
-//
 package edu.gemini.p2checker.rules.general;
 
 import edu.gemini.p2checker.api.IP2Problems;
@@ -8,9 +5,7 @@ import edu.gemini.p2checker.api.IRule;
 import edu.gemini.p2checker.api.ObservationElements;
 import edu.gemini.p2checker.api.P2Problems;
 import edu.gemini.pot.sp.*;
-import edu.gemini.shared.util.immutable.ApplyOp;
 import edu.gemini.shared.util.immutable.ImList;
-import edu.gemini.shared.util.immutable.MapOp;
 import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.spModel.config2.Config;
 import edu.gemini.spModel.config2.ConfigSequence;
@@ -40,7 +35,6 @@ import edu.gemini.spModel.target.obsComp.GuideSequence;
 import edu.gemini.spModel.target.obsComp.PwfsGuideProbe;
 import edu.gemini.spModel.target.obsComp.TargetObsComp;
 import edu.gemini.spModel.target.offset.OffsetPosList;
-import edu.gemini.spModel.target.system.CoordinateParam;
 import edu.gemini.spModel.target.system.HmsDegTarget;
 import edu.gemini.spModel.target.system.ITarget;
 import edu.gemini.spModel.target.system.NonSiderealTarget;
@@ -134,7 +128,7 @@ public class GeneralRule implements IRule {
             if (!guiders.contains(guider)) {
                 problems.addError(PREFIX+"LGS_WFS", String.format(LGS_WFS, mode.displayValue(), guider), targetComp);
             } else if (guiders.size() > 1) {
-                final Set<GuideProbe> otherGuiders = new TreeSet<GuideProbe>(GuideProbe.KeyComparator.instance);
+                final Set<GuideProbe> otherGuiders = new TreeSet<>(GuideProbe.KeyComparator.instance);
                 otherGuiders.addAll(guiders);
                 otherGuiders.remove(guider);
 
@@ -168,7 +162,7 @@ public class GeneralRule implements IRule {
             if (hasAltairComp && altairSupported) {
                 final ISPObsComponent targetComp = elements.getTargetObsComponentNode().getValue();
                 final GuideGroup guideGroup      = env.getGuideEnvironment().getPrimary().getOrNull();
-                final Set<GuideProbe> guiders    = (guideGroup == null) ? Collections.<GuideProbe>emptySet() : guideGroup.getReferencedGuiders();
+                final Set<GuideProbe> guiders    = (guideGroup == null) ? Collections.emptySet() : guideGroup.getReferencedGuiders();
                 final InstAltair altair          = (InstAltair) elements.getAOComponent().getValue();
                 final AltairParams.Mode mode     = altair.getMode();
                 isLgs = mode.guideStarType() == AltairParams.GuideStarType.LGS;
@@ -311,7 +305,7 @@ public class GeneralRule implements IRule {
         private boolean hasSameTrackingDetails(HmsDegTarget base, HmsDegTarget guide) {
             if (base.getTrackingEpoch() != guide.getTrackingEpoch()) return false;
             if (base.getTrackingParallax() !=  guide.getTrackingParallax()) return false;
-            if (base.getTrackingRadialVelocity() != guide.getTrackingRadialVelocity()) return false;
+            if (base.getRedshift() != guide.getRedshift()) return false;
             //everything is the same
             return true;
         }
@@ -325,22 +319,18 @@ public class GeneralRule implements IRule {
             if (elements.getTargetObsComp().isEmpty()) return null;
 
             // Get the set of guiders which have been assigned guide stars.
-            final Option<TargetEnvironment> env = elements.getTargetObsComp().map(new MapOp<TargetObsComp, TargetEnvironment>() {
-                @Override public TargetEnvironment apply(TargetObsComp toc) {
-                    return toc.getTargetEnvironment();
-                }
-            });
+            final Option<TargetEnvironment> env = elements.getTargetObsComp().map(TargetObsComp::getTargetEnvironment);
             final ImList<GuideProbe> guiders = GuideSequence.getRequiredGuiders(env);
-            final Set<GuideProbe> guiderSet = new HashSet<GuideProbe>();
+            final Set<GuideProbe> guiderSet = new HashSet<>();
             for (GuideProbe gp : guiders) guiderSet.add(gp);
 
             // Get all the offset position lists in the sequence.
-            final List<OffsetPosList> posListList = getPosLists(elements.getSeqComponentNode());
+            final List<OffsetPosList<?>> posListList = getPosLists(elements.getSeqComponentNode());
 
             // If any position list has an advanced guider that doesn't have
             // an assigned guide star, remember it in the "extraSet".
-            final Set<GuideProbe> extraSet = new TreeSet<GuideProbe>(GuideProbe.KeyComparator.instance);
-            for (OffsetPosList posList : posListList) {
+            final Set<GuideProbe> extraSet = new TreeSet<>(GuideProbe.KeyComparator.instance);
+            for (OffsetPosList<?> posList : posListList) {
                 Set<GuideProbe> advancedSet = posList.getAdvancedGuiding();
                 for (GuideProbe adv : advancedSet) {
                     if (!guiderSet.contains(adv)) extraSet.add(adv);
@@ -356,13 +346,13 @@ public class GeneralRule implements IRule {
             return problems;
         }
 
-        private List<OffsetPosList> getPosLists(ISPSeqComponent root)  {
-            List<OffsetPosList> res = new ArrayList<OffsetPosList>();
+        private List<OffsetPosList<?>> getPosLists(final ISPSeqComponent root)  {
+            final List<OffsetPosList<?>> res = new ArrayList<>();
             addOffsetPosLists(root, res);
             return res;
         }
 
-        private void addOffsetPosLists(ISPSeqComponent root, List<OffsetPosList> lst)  {
+        private void addOffsetPosLists(ISPSeqComponent root, List<OffsetPosList<?>> lst)  {
             final Object dataObj = root.getDataObject();
             if (dataObj instanceof SeqRepeatOffsetBase) {
                 lst.add(((SeqRepeatOffsetBase) dataObj).getPosList());
@@ -631,13 +621,11 @@ public class GeneralRule implements IRule {
 
                     // We're going to drive this off the target, so we first want to narrow it
                     // down to the TemplateParameters that correspond with this target.
-                    final List<TemplateParameters> matchingParams = new ArrayList<TemplateParameters>();
-                    TemplateParameters.foreach(templateFolderNode, new ApplyOp<TemplateParameters>() {
-                        @Override public void apply(TemplateParameters tp) {
-                            final SPTarget p1Target = tp.getTarget();
-                            if (_areTargetsEquals(p1Target, obsTarget, elements) || _isTooTarget(p1Target, elements)) {
-                                matchingParams.add(tp);
-                            }
+                    final List<TemplateParameters> matchingParams = new ArrayList<>();
+                    TemplateParameters.foreach(templateFolderNode, tp -> {
+                        final SPTarget p1Target = tp.getTarget();
+                        if (_areTargetsEquals(p1Target, obsTarget, elements) || _isTooTarget(p1Target, elements)) {
+                            matchingParams.add(tp);
                         }
                     });
 
@@ -689,17 +677,6 @@ public class GeneralRule implements IRule {
                     expected.getWaterVapor().getPercentage() <= actual.getWaterVapor().getPercentage();
         }
 
-        class Triple {
-            final String blueprintId;
-            final String targetId;
-            final String siteQualityId;
-
-            private Triple(String blueprintId, String targetId, String condsId) {
-                this.blueprintId = blueprintId;
-                this.targetId = targetId;
-                this.siteQualityId = condsId;
-            }
-        }
 
     };
 

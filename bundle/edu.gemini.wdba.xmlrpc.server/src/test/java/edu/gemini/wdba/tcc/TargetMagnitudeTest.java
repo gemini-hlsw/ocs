@@ -1,7 +1,3 @@
-//
-// $
-//
-
 package edu.gemini.wdba.tcc;
 
 import edu.gemini.shared.util.immutable.*;
@@ -86,11 +82,7 @@ public final class TargetMagnitudeTest extends TestBase {
             final String name = targetElement.attributeValue(ParamSet.NAME);
             assertNotNull(name);
 
-            Option<SPTarget> target = env.getTargets().find(new PredicateOp<SPTarget>() {
-                public Boolean apply(SPTarget spTarget) {
-                    return name.equals(spTarget.getTarget().getName());
-                }
-            });
+            Option<SPTarget> target = env.getTargets().find(spTarget -> name.equals(spTarget.getTarget().getName()));
 
             assertFalse(target.isEmpty());
 
@@ -99,9 +91,8 @@ public final class TargetMagnitudeTest extends TestBase {
         }
     }
 
-    private static String MAG_PATH = "paramset[@name='" + TccNames.MAGNITUDES + "']";
-
     private void validateMagnitudes(Element element, SPTarget target) {
+        String MAG_PATH = "paramset[@name='" + TccNames.MAGNITUDES + "']";
         final Element magGroupElement = (Element) element.selectSingleNode(MAG_PATH);
         ImList<Magnitude> mags = target.getTarget().getMagnitudes();
         if (magGroupElement == null) {
@@ -109,20 +100,18 @@ public final class TargetMagnitudeTest extends TestBase {
             return;
         }
 
-        List magElementList = magGroupElement.elements();
+        List<?> magElementList = magGroupElement.elements();
 
         // One magnitude element per magnitude in the target
         assertEquals(mags.size(), magElementList.size());
 
-        mags.foreach(new ApplyOp<Magnitude>() {
-            @Override public void apply(Magnitude mag) {
-                String path = String.format("param[@name='%s']", mag.getBand().name());
-                Element magElement = (Element) magGroupElement.selectSingleNode(path);
-                String strValue = magElement.attributeValue("value");
-                double doubleVal = Double.valueOf(strValue);
+        mags.foreach(mag -> {
+            String path = String.format("param[@name='%s']", mag.getBand().name());
+            Element magElement = (Element) magGroupElement.selectSingleNode(path);
+            String strValue = magElement.attributeValue("value");
+            double doubleVal = Double.valueOf(strValue);
 
-                assertEquals(mag.getBrightness(), doubleVal, 0.00001);
-            }
+            assertEquals(mag.getBrightness(), doubleVal, 0.00001);
         });
     }
 }

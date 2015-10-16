@@ -12,7 +12,7 @@ import edu.gemini.shared.util.immutable.{ Option => GOption }
 import edu.gemini.spModel.core.Target.SiderealTarget
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.target.SPTarget
-import edu.gemini.spModel.target.system.CoordinateTypes.{RV, Parallax}
+import edu.gemini.spModel.target.system.CoordinateTypes.Parallax
 import edu.gemini.spModel.target.system.HmsDegTarget
 import jsky.app.ot.gemini.editor.targetComponent.{MagnitudeEditor, TelescopePosEditor}
 import jsky.util.gui.{DialogUtil, TextBoxWidgetWatcher, TextBoxWidget}
@@ -96,9 +96,6 @@ final class SiderealNameEditor(mags: MagnitudeEditor) extends TelescopePosEditor
 
       i.parallax.foreach { p =>
         t.setParallax(new Parallax(p.mas))
-      }
-      i.radialVelocity.foreach {v =>
-        t.setRV(new RV(v.velocity.toKilometersPerSecond))
       }
       i.redshift.foreach {v =>
         t.setRedshift(v)
