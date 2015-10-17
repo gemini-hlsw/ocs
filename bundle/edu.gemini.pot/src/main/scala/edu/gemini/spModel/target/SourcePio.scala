@@ -102,7 +102,7 @@ object SourcePio {
     }
     val userDefined = Option(pset.getParamSet(UserDefinedName)).map { p =>
       AuxFileSpectrum(
-        SPProgramID.toProgramID(Pio.getValue(p, UserDefinedProgramId)),
+        Pio.getValue(p, UserDefinedProgramId),
         Pio.getValue(p, UserDefinedAuxFile))
     }
 

@@ -31,7 +31,8 @@ class ItcServiceImpl extends ItcService {
 
     // Get the SED data from an aux file. For now we can assume that the ITC service is running on the same
     // machine as the database (localhost). In case this setup changes, we need to change this here, too.
-    def auxFileDistribution(programId: SPProgramID, name: String): SpectralDistribution = {
+    def auxFileDistribution(id: String, name: String): SpectralDistribution = {
+      val programId     = SPProgramID.toProgramID(id)
       val spectrumBytes = new AuxFileClient("localhost", 8443).fetchToMemory(programId, name)
       val spectrum      = new String(spectrumBytes)
       UserDefinedSpectrum(name, spectrum)
@@ -39,9 +40,9 @@ class ItcServiceImpl extends ItcService {
 
     // if a user defined source distribution is involved we need to read the aux file
     val src = source.distribution match {
-      case AuxFileSpectrum(null, name) => throw new RuntimeException("undefined aux file source detected!!") // TODO: this is a workaround for a UI problem and will go away
-      case AuxFileSpectrum(id,   name) => source.copy(distribution = auxFileDistribution(id, name))
-      case _                           => source
+      case AuxFileSpectrum.Undefined    => throw new RuntimeException("The user SED is undefined.")     // "User Defined", but no SED file was available
+      case AuxFileSpectrum(anId, aName) => source.copy(distribution = auxFileDistribution(anId, aName)) // "User Defined", we need to replace placeholder with aux file
+      case _                            => source                                                       // for all other cases we can go ahead
     }
 
     if (obs.getMethod.isImaging)  calculateImaging(src, obs, cond, tele, ins)

@@ -82,9 +82,14 @@ public final class SEDFactory {
      *  ...
      * </pre>
      */
-    private static VisitableSampledSpectrum getUserSED(final String userSED, final double wavelengthInterval) {
-        final DefaultArraySpectrum as = DefaultArraySpectrum.fromUserSpectrum(userSED);
-        return new DefaultSampledSpectrum(as, wavelengthInterval);
+    private static VisitableSampledSpectrum getUserSED(final UserDefinedSpectrum userSED, final double wavelengthInterval) {
+        try {
+            final DefaultArraySpectrum as = DefaultArraySpectrum.fromUserSpectrum(userSED.spectrum());
+            return new DefaultSampledSpectrum(as, wavelengthInterval);
+
+        } catch (final Exception e) {
+            throw new Error("Could not parse user SED " + userSED.name() + ": " + e.getMessage());
+        }
     }
 
     public static VisitableSampledSpectrum getSED(final SourceDefinition sdp, final Instrument instrument) {
@@ -121,7 +126,7 @@ public final class SEDFactory {
 
         } else if (sdp.distribution() instanceof UserDefinedSpectrum) {
             final UserDefinedSpectrum userDefined = (UserDefinedSpectrum) sdp.distribution();
-            temp = getUserSED(userDefined.spectrum(), instrument.getSampling());
+            temp = getUserSED(userDefined, instrument.getSampling());
             temp.applyWavelengthCorrection();
             return temp;
 

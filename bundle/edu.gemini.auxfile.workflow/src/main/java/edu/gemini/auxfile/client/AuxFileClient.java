@@ -131,7 +131,7 @@ public final class AuxFileClient implements AuxFileSystem {
             int chunkIndex = 0;
             do {
                 chunk = server.fetchChunk(programId, remoteFileName, chunkIndex++, FileChunkSize, timestamp);
-                if (chunk == null) throw new AuxFileException("Read operation failed");
+                if (chunk == null) throw new AuxFileException("Read operation for file " + remoteFileName + " failed.");
                 timestamp = chunk.getTimestamp();
                 out.write(chunk.getChunkData());
 

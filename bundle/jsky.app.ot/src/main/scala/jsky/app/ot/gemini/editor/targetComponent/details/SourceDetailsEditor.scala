@@ -28,7 +28,7 @@ import scala.swing.{ComboBox, GridBagPanel, Label, Swing}
 import scalaz.Scalaz._
 
 
-final class SourceDetailsEditor extends GridBagPanel with TelescopePosEditor {
+final class SourceDetailsEditor extends GridBagPanel with TelescopePosEditor with ReentrancyHack {
 
   // ==== The Target
 
@@ -51,12 +51,12 @@ final class SourceDetailsEditor extends GridBagPanel with TelescopePosEditor {
     Prop("with FWHM",  "arcsec", _.fwhm, (a, v) => setProfile(GaussianSource(v)))
   )
 
-  private case class ProfilePanel(label: String, panel: Component, default: Option[SpatialProfile])
+  private case class ProfilePanel(label: String, panel: Component, value: () => Option[SpatialProfile])
   private val profilePanels = List(
-    ProfilePanel("«undefined»",              new JPanel(),          None),
-    ProfilePanel("Point Source",             pointSourceDetails,    Some(PointSource)),
-    ProfilePanel("Extended Gaussian Source", gaussianSourceDetails, Some(defaultGaussianSource)),
-    ProfilePanel("Extended Uniform Source",  uniformSourceDetails,  Some(UniformSource))
+    ProfilePanel("«undefined»",              new JPanel(),          () => None),
+    ProfilePanel("Point Source",             pointSourceDetails,    () => Some(PointSource)),
+    ProfilePanel("Extended Gaussian Source", gaussianSourceDetails, () => Some(defaultGaussianSource)),
+    ProfilePanel("Extended Uniform Source",  uniformSourceDetails,  () => Some(UniformSource))
   )
 
   private val profiles = new ComboBox[ProfilePanel](profilePanels) {
@@ -91,25 +91,37 @@ final class SourceDetailsEditor extends GridBagPanel with TelescopePosEditor {
   private val powerLawDetails = NumericPropertySheet[PowerLaw](None, powerLawOrDefault,
     Prop("Index",       "",         _.index,                      (a, v) => setDistribution(PowerLaw(v)))
   )
-  private val emptySedFilesModel = ComboBox.newConstantModel(Seq(AuxFileSpectrum(null, "«no sed file available»")))
+  private val emptySedFilesModel = ComboBox.newConstantModel(Seq(AuxFileSpectrum.Undefined))
   private val userDefinedDetails = new ComboBox[AuxFileSpectrum](Seq()) {
     peer.setModel(emptySedFilesModel)
     renderer = Renderer(_.name)
-    def distribution = selection.item match {
-      case AuxFileSpectrum(null, _) => None
-      case auxFile                  => Some(auxFile)
+    // Selects the given sed file, if it is not available (e.g. because the aux file it represents
+    // has been removed from the program) an "Undefined" placeholder is inserted instead.
+    def selectItem(s: AuxFileSpectrum) = {
+      // try to select the given aux file
+      selection.item = s
+      // if that fails, the file is not available (anymore)
+      if (peer.getModel.getSelectedItem != s) {
+        // deal with missing files: replace them with our good friend, the "Undefined" place holder
+        val oldModel = peer.getModel
+        val items    = Range(0, oldModel.getSize).map(oldModel.getElementAt)
+        val newModel = ComboBox.newConstantModel(AuxFileSpectrum.Undefined +: items)
+        peer.setModel(newModel)
+        peer.setSelectedItem(AuxFileSpectrum.Undefined)
+        setDistribution(AuxFileSpectrum.Undefined)
+      }
     }
   }
 
-  private case class DistributionPanel(label: String, panel: Component, default: Option[SpectralDistribution])
+  private case class DistributionPanel(label: String, panel: Component, value: () => Option[SpectralDistribution])
   private val distributionPanels = List(
-    DistributionPanel("«undefined»",      new JPanel(),               None),
-    DistributionPanel("Library Star",     libraryStarDetails.peer,    Some(libraryStarDetails.selection.item)),
-    DistributionPanel("Library Non-Star", libraryNonStarDetails.peer, Some(libraryNonStarDetails.selection.item)),
-    DistributionPanel("Black Body",       blackBodyDetails,           Some(defaultBlackBody)),
-    DistributionPanel("Emission Line",    emissionLineDetails,        Some(defaultEmissionLine)),
-    DistributionPanel("Power Law",        powerLawDetails,            Some(defaultPowerLaw)),
-    DistributionPanel("User Defined",     userDefinedDetails.peer,    Some(userDefinedDetails.selection.item))
+    DistributionPanel("«undefined»",      new JPanel(),               () => None),
+    DistributionPanel("Library Star",     libraryStarDetails.peer,    () => Some(libraryStarDetails.selection.item)),
+    DistributionPanel("Library Non-Star", libraryNonStarDetails.peer, () => Some(libraryNonStarDetails.selection.item)),
+    DistributionPanel("Black Body",       blackBodyDetails,           () => Some(defaultBlackBody)),
+    DistributionPanel("Emission Line",    emissionLineDetails,        () => Some(defaultEmissionLine)),
+    DistributionPanel("Power Law",        powerLawDetails,            () => Some(defaultPowerLaw)),
+    DistributionPanel("User Defined",     userDefinedDetails.peer,    () => Some(userDefinedDetails.selection.item))
   )
 
   private val distributions = new ComboBox[DistributionPanel](distributionPanels) {
@@ -199,10 +211,10 @@ final class SourceDetailsEditor extends GridBagPanel with TelescopePosEditor {
   reactions += {
 
     case SelectionChanged(`profiles`)  =>
-      setProfile(profiles.selection.item.default)
+      setProfile(profiles.selection.item.value())
 
     case SelectionChanged(`distributions`) =>
-      setDistribution(distributions.selection.item.default)
+      setDistribution(distributions.selection.item.value())
 
     case SelectionChanged(`libraryStarDetails`) =>
       setDistribution(libraryStarDetails.selection.item)
@@ -211,12 +223,12 @@ final class SourceDetailsEditor extends GridBagPanel with TelescopePosEditor {
       setDistribution(libraryNonStarDetails.selection.item)
 
     case SelectionChanged(`userDefinedDetails`) =>
-        setDistribution(userDefinedDetails.distribution)
+        setDistribution(userDefinedDetails.selection.item)
 
   }
 
   // react to any kind of target change by updating all UI elements
-  def edit(obsContext: GOption[ObsContext], spTarget: SPTarget, node: ISPNode): Unit =  {
+  def edit(obsContext: GOption[ObsContext], spTarget: SPTarget, node: ISPNode): Unit = nonreentrant {
 
     // update target
     spt = spTarget
@@ -246,7 +258,7 @@ final class SourceDetailsEditor extends GridBagPanel with TelescopePosEditor {
         case Some(BlackBody(_))          => distributions.selection.item = distributionPanels(3); distributionPanels(3).panel.asInstanceOf[NumericPropertySheet[BlackBody]].edit(obsContext, spTarget, node)
         case Some(EmissionLine(_,_,_,_)) => distributions.selection.item = distributionPanels(4); distributionPanels(4).panel.asInstanceOf[NumericPropertySheet[EmissionLine]].edit(obsContext, spTarget, node)
         case Some(PowerLaw(_))           => distributions.selection.item = distributionPanels(5); distributionPanels(5).panel.asInstanceOf[NumericPropertySheet[PowerLaw]].edit(obsContext, spTarget, node)
-        case Some(s: AuxFileSpectrum)    => distributions.selection.item = distributionPanels(6); userDefinedDetails.selection.item = s
+        case Some(s: AuxFileSpectrum)    => distributions.selection.item = distributionPanels(6); userDefinedDetails.selectItem(s)
         case Some(s: UserDefinedSpectrum)=> sys.error("not supported") // this is only used in itc web app
       }
 
@@ -292,7 +304,7 @@ final class SourceDetailsEditor extends GridBagPanel with TelescopePosEditor {
         val files  = aux.listAll(programId)
         files.
           filter(AuxFileType.getFileType(_) == AuxFileType.sed).
-          map   (f => AuxFileSpectrum(programId, f.getName)).
+          map   (f => AuxFileSpectrum(programId.toString, f.getName)).
           toSeq
       }
     } catch {
