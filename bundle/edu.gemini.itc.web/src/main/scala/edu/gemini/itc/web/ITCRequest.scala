@@ -262,9 +262,11 @@ object ITCRequest {
       case _ => throw new IllegalArgumentException("Total integration time to achieve a specific \nS/N ratio is not supported in spectroscopy mode.  \nPlease select the Total S/N method.")
     }
 
-    val analysisMethod = r.parameter("aperType") match {
+    val analysisMethodName = r.parameter("aperType")
+    val analysisMethod = analysisMethodName match {
       case "autoAper" => AutoAperture(r.doubleParameter("autoSkyAper"))
       case "userAper" => UserAperture(r.doubleParameter("userAperDiam"), r.doubleParameter("userSkyAper"))
+      case _          => throw new NoSuchElementException(s"Unknown AnalysisMethod $analysisMethodName")
     }
 
     new ObservationDetails(calculationMethod, analysisMethod)
@@ -273,7 +275,8 @@ object ITCRequest {
 
   def sourceDefinitionParameters(r: ITCRequest): SourceDefinition = {
     // Get the source geometry and type
-    val (spatialProfile, norm, units) = r.parameter("Profile") match {
+    val profileName = r.parameter("Profile")
+    val (spatialProfile, norm, units) = profileName match {
       case "POINT"    =>
         val norm  = r.doubleParameter("psSourceNorm")
         val units = r.enumParameter(classOf[BrightnessUnit], "psSourceUnits")
@@ -287,6 +290,8 @@ object ITCRequest {
         val norm  = r.doubleParameter("usbSourceNorm")
         val units = r.enumParameter(classOf[BrightnessUnit], "usbSourceUnits")
         (UniformSource, norm, units)
+      case _          =>
+        throw new NoSuchElementException(s"Unknown SpatialProfile $profileName")
     }
 
     // Get Normalization info
@@ -296,7 +301,8 @@ object ITCRequest {
       getOrElse(sys.error(s"Unsupported wave band $bandName"))
 
     // Get Spectrum Resource
-    val sourceDefinition = r.parameter("Distribution") match {
+    val distributionName = r.parameter("Distribution")
+    val sourceDefinition = distributionName match {
       case "BBODY"            => BlackBody(r.doubleParameter("BBTemp"))
       case "PLAW"             => PowerLaw(r.doubleParameter("powerIndex"))
       case "USER_DEFINED"     => r.userSpectrum().get
@@ -311,12 +317,16 @@ object ITCRequest {
           if (r.parameter("lineFluxUnits") == "watts_flux") flux.wattsPerSquareMeter else flux.ergsPerSecondPerSquareCentimeter,
           if (r.parameter("lineContinuumUnits") == "watts_fd_wavelength") cont.wattsPerSquareMeterPerMicron else cont.ergsPerSecondPerSquareCentimeterPerAngstrom
         )
+      case _                  =>
+        throw new NoSuchElementException(s"Unknown SpectralDistribution $distributionName")
     }
 
     //Get Redshift
-    val redshift = r.parameter("Recession") match {
+    val redshiftName = r.parameter("Recession")
+    val redshift = redshiftName match {
       case "REDSHIFT" => r.doubleParameter("z")
       case "VELOCITY" => r.doubleParameter("v") / ITCConstants.C
+      case _          => throw new NoSuchElementException(s"Unknown Recession $redshiftName")
     }
 
     // WOW, finally we've got everything in place..
@@ -327,7 +337,7 @@ object ITCRequest {
       case "singleIFU"  => IfuSingle(r.doubleParameter("ifuOffset"))
       case "radialIFU"  => IfuRadial(r.doubleParameter("ifuMinOffset"), r.doubleParameter("ifuMaxOffset"))
       case "summedIFU"  => IfuSummed(r.intParameter("ifuNumX"), r.intParameter("ifuNumY"), r.doubleParameter("ifuCenterX"), r.doubleParameter("ifuCenterY"))
-      case _            => throw new IllegalArgumentException()
+      case _            => throw new NoSuchElementException(s"Unknown IfuMethod ${r.parameter("ifuMethod")}")
   }
 
   def parameters(r: ITCRequest, i: InstrumentDetails): Parameters = {
