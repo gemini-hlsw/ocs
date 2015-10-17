@@ -96,7 +96,7 @@ public final class SEDFactory {
 
         final VisitableSampledSpectrum temp;
         if (sdp.distribution() instanceof BlackBody) {
-            return new BlackBodySpectrum(
+            return BlackBodySpectrum.apply(
                     ((BlackBody) sdp.distribution()).temperature(),
                     instrument.getSampling(),
                     sdp.norm(),

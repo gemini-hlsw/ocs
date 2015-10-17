@@ -346,7 +346,7 @@ class TargetEditor private (semester:Semester, target:Target, canEdit:Boolean, i
       }
 
       // The system combo
-      val system = new ComboBox(MagnitudeSystem.all.toSeq) {
+      val system = new ComboBox(MagnitudeSystem.allForOT.toSeq) {
         val magDefault = band.defaultSystem
         val magSys = mag.map(_.system).getOrElse(magDefault)
         enabled = mag.isDefined && canEdit

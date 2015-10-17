@@ -112,7 +112,7 @@ object SpTargetFactory {
   }
 
   private def system(s: MagnitudeSystem): Either[String, MagnitudeSystem] = {
-    val opt = MagnitudeSystem.all.find { _.name.equalsIgnoreCase(s.name) }
+    val opt = MagnitudeSystem.allForOT.find { _.name.equalsIgnoreCase(s.name) }
     opt.toRight(s"Unexpected magnitude system: ${s.name}")
   }
 }

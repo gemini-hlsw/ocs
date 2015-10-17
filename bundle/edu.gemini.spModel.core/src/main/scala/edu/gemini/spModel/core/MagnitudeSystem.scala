@@ -24,7 +24,7 @@ object MagnitudeSystem {
   case object AB                  extends MagnitudeSystem("AB")
   case object Jy                  extends MagnitudeSystem("Jy")
 
-  // currently not supported in OT, only available in web app
+  // currently not supported in OT, only available in ITC web app
   case object Watts               extends MagnitudeSystem("W/m²/µm")
   case object ErgsWavelength      extends MagnitudeSystem("erg/s/cm²/Å")
   case object ErgsFrequency       extends MagnitudeSystem("erg/s/cm²/Hz")
@@ -32,16 +32,32 @@ object MagnitudeSystem {
 
   val default: MagnitudeSystem = Vega
 
-  // this is used in the OT, for now we only support Vega, AB and Jy in the OT
   val all: List[MagnitudeSystem] =
+    List(Vega, AB, Jy, Watts, ErgsWavelength, ErgsFrequency)
+
+  // this is used in the OT, for now we only support Vega, AB and Jy in the OT
+  val allForOT: List[MagnitudeSystem] =
     List(Vega, AB, Jy)
+
+  def fromString(s: String): Option[MagnitudeSystem] = s match {
+    // these strings are currently used to represent MagnitudeSystem values in the ITC web forms
+    // in case they need to be changed, please also update the science regression test scripts
+    case "MAG"                  => Some(MagnitudeSystem.Vega)
+    case "ABMAG"                => Some(MagnitudeSystem.AB)
+    case "JY"                   => Some(MagnitudeSystem.Jy)
+    case "WATTS"                => Some(MagnitudeSystem.Watts)
+    case "ERGS_WAVELENGTH"      => Some(MagnitudeSystem.ErgsWavelength)
+    case "ERGS_FREQUENCY"       => Some(MagnitudeSystem.ErgsFrequency)
+    case _                      => None
+  }
+
+  def unsafeFromString(s: String): MagnitudeSystem = fromString(s).get
 
   implicit val MagnitudeSystemEqual: Equal[MagnitudeSystem] =
     Equal.equalA
 
-
   // ===== LEGACY JAVA SUPPORT =====
-  val allAsJava = new java.util.Vector[MagnitudeSystem](all)
+  val allForOTAsJava = new java.util.Vector[MagnitudeSystem](allForOT)
   val Default = default // default is a reserved key word in Java!
 
 }
@@ -55,6 +71,20 @@ object SurfaceBrightness {
   case object Watts               extends SurfaceBrightness("W/m²/µm/arcsec²")
   case object ErgsWavelength      extends SurfaceBrightness("erg/s/cm²/Å/arcsec²")
   case object ErgsFrequency       extends SurfaceBrightness("erg/s/cm²/Hz/arcsec²")
+
+  def fromString(s: String): Option[SurfaceBrightness] = s match {
+    // these strings are currently used to represent SurfaceBrightness values in the ITC web forms
+    // in case they need to be changed, please also update the science regression test scripts
+    case "MAG_PSA"              => Some(SurfaceBrightness.Vega)
+    case "ABMAG_PSA"            => Some(SurfaceBrightness.AB)
+    case "JY_PSA"               => Some(SurfaceBrightness.Jy)
+    case "WATTS_PSA"            => Some(SurfaceBrightness.Watts)
+    case "ERGS_WAVELENGTH_PSA"  => Some(SurfaceBrightness.ErgsWavelength)
+    case "ERGS_FREQUENCY_PSA"   => Some(SurfaceBrightness.ErgsFrequency)
+    case _                      => None
+  }
+
+  def unsafeFromString(s: String): SurfaceBrightness = fromString(s).get
 
   implicit val SurfaceBrightnessEqual: Equal[SurfaceBrightness] =
     Equal.equalA

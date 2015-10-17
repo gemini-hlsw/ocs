@@ -49,7 +49,7 @@ trait Arbitraries {
     Arbitrary(oneOf(MagnitudeBand.all))
 
   implicit val arbMagnitudeSystem: Arbitrary[MagnitudeSystem] =
-    Arbitrary(oneOf(MagnitudeSystem.all))
+    Arbitrary(oneOf(MagnitudeSystem.allForOT))
 
   implicit val arbEpoch: Arbitrary[Epoch] =
     Arbitrary {

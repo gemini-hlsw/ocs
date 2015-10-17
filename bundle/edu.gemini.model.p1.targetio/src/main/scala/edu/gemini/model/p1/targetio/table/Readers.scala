@@ -58,8 +58,8 @@ object Readers {
 
   private def matches(name: String, sys: MagnitudeSystem) = sys.name.equalsIgnoreCase(name)
   val readSystem: PartialFunction[Any, MagnitudeSystem] = {
-     case s: String if MagnitudeSystem.all.exists(matches(s, _)) =>
-       MagnitudeSystem.all.find(matches(s, _)).get
+     case s: String if MagnitudeSystem.allForOT.exists(matches(s, _)) =>
+       MagnitudeSystem.allForOT.find(matches(s, _)).get
   }
 
   def readOptionalSystem(band: MagnitudeBand): PartialFunction[Any, Option[MagnitudeSystem]] =

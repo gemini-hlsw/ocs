@@ -18,7 +18,7 @@ class MagParser extends RegexParsers {
     Band.values.map(b => b.toString ^^^ b).reverse.reduceLeft(_ | _) // reverse to put UC ahead of U
 
   val sys:  Parser[MagnitudeSystem] =
-    MagnitudeSystem.all.map(s => s.toString ^^^ s).reduceLeft(_ | _)
+    MagnitudeSystem.allForOT.map(s => s.toString ^^^ s).reduceLeft(_ | _)
 
   val mag: Parser[Magnitude] =
     (num <~ '/') ~ (band <~ '/') ~ sys ^^ { case n ~ b ~ s => new Magnitude(b, n, s) }
