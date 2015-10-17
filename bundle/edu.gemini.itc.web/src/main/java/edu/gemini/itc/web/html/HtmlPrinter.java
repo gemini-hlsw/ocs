@@ -6,13 +6,11 @@ import edu.gemini.itc.base.TransmissionElement;
 import edu.gemini.itc.gems.Gems;
 import edu.gemini.itc.shared.*;
 import edu.gemini.spModel.gemini.altair.AltairParams;
-import edu.gemini.spModel.target.*;
 import edu.gemini.spModel.telescope.IssPort;
 
 /**
  * This is a temporary class that helps to collect output methods (print as html) up to the point where the code
  * is separated enough that this stuff can be moved to the web module.
- * TODO: Move this code to edu.gemini.itc.web once html output code has been removed from all recipes.
  */
 public final class HtmlPrinter {
 
@@ -25,31 +23,9 @@ public final class HtmlPrinter {
         sb.append("  The z = ");
         sb.append(sdp.redshift());
         sb.append(" ");
-        sb.append(getSourceGeometryStr(sdp));
+        sb.append(HtmlUtil.sourceProfileString(sdp.profile()));
         sb.append(" is a");
-        if (sdp.distribution() instanceof EmissionLine) {
-            final EmissionLine eLine = (EmissionLine) sdp.distribution();
-            sb.append(String.format("n emission line, at a wavelength of %.4f microns, ", eLine.wavelength().toMicrons()));
-            sb.append(String.format(
-                    "and with a width of %.2f km/s.\n  It's total flux is %.3e watts_flux on a flat continuum of flux density %.3e watts_fd_wavelength.",
-                    eLine.width().toKilometersPerSecond(), eLine.flux().toWattsPerSquareMeter(), eLine.continuum().toWattsPerSquareMeterPerMicron()));
-        } else if (sdp.distribution() instanceof BlackBody) {
-            final double temperature = ((BlackBody) sdp.distribution()).temperature();
-            sb.append(" " + temperature + "K Blackbody, at " + sdp.norm() +
-                    " " + sdp.units().displayValue() + " in the " + sdp.normBand().name() + " band.");
-        } else if (sdp.distribution() instanceof LibraryStar) {
-            sb.append(" " + sdp.norm() + " " + sdp.units().displayValue() + " " + ((Library) sdp.distribution()).sedSpectrum() +
-                    " star in the " + sdp.normBand().name() + " band.");
-        } else if (sdp.distribution() instanceof LibraryNonStar) {
-            sb.append(" " + sdp.norm() + " " + sdp.units().displayValue() + " " + ((Library) sdp.distribution()).sedSpectrum() +
-                    " in the " + sdp.normBand().name() + " band.");
-        } else if (sdp.distribution() instanceof UserDefinedSpectrum) {
-            sb.append(" a user defined spectrum with the name: " + ((UserDefinedSpectrum) sdp.distribution()).name());
-        } else if (sdp.distribution() instanceof PowerLaw) {
-            final double index = ((PowerLaw) sdp.distribution()).index();
-            sb.append(" Power Law Spectrum, with an index of " + index
-                    + " and " + sdp.norm() + " mag in the " + sdp.normBand().name() + " band.");
-        }
+        sb.append(HtmlUtil.sourceDistributionString(sdp));
         sb.append("\n");
         return sb.toString();
 
@@ -179,7 +155,6 @@ public final class HtmlPrinter {
         return s;
     }
 
-    // TODO: compatibility for regression testing, can go away after regression tests have passed
     private static String portToString(final IssPort port) {
         switch (port) {
             case SIDE_LOOKING:  return "side";
@@ -187,14 +162,5 @@ public final class HtmlPrinter {
             default:            throw new IllegalArgumentException("unknown port");
         }
     }
-
-    private static String getSourceGeometryStr(final SourceDefinition sdp) {
-        if (sdp.profile() == PointSource$.MODULE$) {
-            return "point source";
-        } else {
-            return "extended source";
-        }
-    }
-
 
 }
