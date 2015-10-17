@@ -120,27 +120,8 @@ object Hash {
 
   def calc(src: SourceDefinition): Int =
     hash(
-      src.profile match {
-        case PointSource              => "POINT"
-        case UniformSource            => "UNIFORM"
-        case GaussianSource(_)        => "GAUSSIAN"
-      },
-      src.distribution match {
-        case l: LibraryStar           => "LIBRARY_STAR"
-        case l: LibraryNonStar        => "LIBRARY_NON_STAR"
-        case BlackBody(_)             => "BBODY"
-        case EmissionLine(_, _, _, _) => "ELINE"
-        case PowerLaw(_)              => "PLAW"
-        case u: UserDefined           => "USER_DEFINED"
-      },
       src.profile,
-      src.distribution match {
-        case BlackBody(t)             => f"$t%.2f"
-        case PowerLaw(i)              => f"$i%.2f"
-        case EmissionLine(w, s, f, c) => f"${w.toNanometers}%.0f ${s.toKilometersPerSecond}%.2f ${f.toWattsPerSquareMeter}%.4e ${c.toWattsPerSquareMeterPerMicron}%.4e"
-        case u: UserDefined           => "user defined" // currently not used
-        case l: Library               => l.sedSpectrum
-      },
+      src.distribution,
       src.norm,               // this is the magnitude value
       src.normBand.name,      // this is the magnitude band name
       src.redshift
