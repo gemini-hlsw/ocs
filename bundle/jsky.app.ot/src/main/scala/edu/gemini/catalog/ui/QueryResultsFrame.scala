@@ -10,7 +10,7 @@ import edu.gemini.ags.api.{AgsGuideQuality, AgsRegistrar}
 import edu.gemini.ags.conf.ProbeLimitsTable
 import edu.gemini.catalog.api._
 import edu.gemini.catalog.votable._
-import edu.gemini.pot.sp.ISPNode
+import edu.gemini.pot.sp.{SPComponentType, ISPNode}
 import edu.gemini.shared.gui.textComponent.{SelectOnFocus, TextRenderer, NumberField}
 import edu.gemini.shared.gui.{ButtonFlattener, GlassLabel, SizePreference, SortableTable}
 import edu.gemini.spModel.core.Target.SiderealTarget
@@ -220,7 +220,28 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
           doNameSearch(objectName.text)
       }
     }
-    lazy val instrumentName = new Label("")
+    lazy val instrumentBox = new ComboBox[SPComponentType](ObservationInfo.InstList.map(_._2)) with TextRenderer[SPComponentType] {
+      override def text(a: SPComponentType) = ~Option(a).flatMap(t => ObservationInfo.InstMap.get(t))
+      selection.item = ObservationInfo.DefaultInstrument
+      listenTo(selection)
+      reactions += {
+        case SelectionChanged(_) =>
+          // Update the guiders box with the newly selected instrument
+          val i = observationInfoFromForm.toContext
+          val defaultStrategy = i.flatMap(AgsRegistrar.defaultStrategy)
+          val mt = ProbeLimitsTable.loadOrThrow()
+          val strategies = ~i.map(c => AgsRegistrar.validStrategies(c).map(ObservationInfo.toSupportedStrategy(c, _, mt)))
+
+          val selected = for {
+              s <- defaultStrategy
+              c <- strategies.find(_.strategy == s)
+            } yield c
+          selected.foreach { s =>
+            updateGuidersModel(s, strategies)
+            updateGuideSpeedText()
+          }
+      }
+    }
     lazy val catalogBox = new ComboBox(List[CatalogName](UCAC4, PPMXL)) with TextRenderer[CatalogName] {
       override def text(a: CatalogName) = ~Option(a).map(_.displayName)
     }
@@ -300,7 +321,7 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
       add(dec, CC().spanX(3).growX())
       add(new Separator(Orientation.Horizontal), CC().spanX(7).growX().newline())
       add(new Label("Instrument"), CC().spanX(2).newline())
-      add(instrumentName, CC().spanX(3))
+      add(instrumentBox, CC().spanX(3).growX())
       add(new Label("Guider"), CC().spanX(2).newline())
       add(guider, CC().spanX(3).growX())
       add(new Label("Sky Background"), CC().spanX(2).newline())
@@ -357,16 +378,14 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
     def updateQuery(info: Option[ObservationInfo], query: ConeSearchCatalogQuery): Unit = {
       info.foreach { i =>
         objectName.text = ~i.objectName
-        instrumentName.text = ~i.instrumentName
-        // Update guiders box model
-        val guiderModel = new DefaultComboBoxModel[SupportedStrategy](new java.util.Vector((~info.map(_.validStrategies)).asJava))
+        instrumentBox.selection.item = i.instrument.getOrElse(ObservationInfo.DefaultInstrument)
         val selected = for {
-          in <- info
-          s  <- in.strategy
-          it <- in.validStrategies.find(_.strategy == s)
-        } yield it
-        selected.foreach(guiderModel.setSelectedItem)
-        guider.peer.setModel(guiderModel)
+          s <- i.strategy
+          c <- i.validStrategies.find(_.strategy == s)
+        } yield c
+        selected.foreach { s =>
+          updateGuidersModel(s, i.validStrategies)
+        }
         // Update conditions
         i.conditions.foreach { c =>
           sbBox.selection.item = c.sb
@@ -384,6 +403,11 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
       radiusEnd.updateAngle(query.radiusConstraint.maxLimit)
 
       buildLayout(query.filters.list.collect { case q: MagnitudeQueryFilter => q.mc })
+    }
+
+    def updateGuidersModel(selected: SupportedStrategy, strategies: List[SupportedStrategy]): Unit = {
+      // Update guiders box model
+      new DefaultComboBoxModel[SupportedStrategy](new java.util.Vector(strategies.asJava)) <| {_.setSelectedItem(selected)} |> guider.peer.setModel
     }
 
     def updateName(t: Option[SiderealTarget]): Unit = {
@@ -430,9 +454,8 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
       // TODO Change the search query for different conditions OCSADV-416
       val conditions = Conditions.NOMINAL.sb(sbBox.selection.item).cc(ccBox.selection.item).iq(iqBox.selection.item)
 
-      val inst = ObservationInfo.toInstrument(instrumentName.text)
       val coordinates = Coordinates(ra.value, dec.value)
-      ObservationInfo(None, objectName.text.some, coordinates.some, inst, Option(guider.selection.item.strategy), guiders.toList, conditions.some, selectedCatalog, ProbeLimitsTable.loadOrThrow())
+      ObservationInfo(None, Option(objectName.text), coordinates.some, Option(instrumentBox.selection.item), Option(guider.selection.item).map(_.strategy), guiders.toList, conditions.some, selectedCatalog, ProbeLimitsTable.loadOrThrow())
     }
 
     // Make a query out of the form parameters
