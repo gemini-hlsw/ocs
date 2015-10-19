@@ -15,13 +15,13 @@ public class CheckTask extends AuxFileTask {
 	}
 
 	@Override
-	public void execute(Workflow wf) throws Exception {
+    public void execute(Workflow wf) throws Exception {
         final AuxFileType type = AuxFileType.getFileType(getFile());
 
         // Try to send out emails if notification for this file type is desired.
         if (type.sendNotification()) {
-			wf.getMailer().notifyChecked(getProgId(), type, getFile().getName(), _checked);
-		}
-	}
+            wf.getMailer().notifyChecked(getProgId(), type, getFile().getName(), _checked);
+        }
+    }
 
 }
