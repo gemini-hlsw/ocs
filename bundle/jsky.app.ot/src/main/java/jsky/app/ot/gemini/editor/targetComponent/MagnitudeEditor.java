@@ -145,7 +145,7 @@ public class MagnitudeEditor implements TelescopePosEditor {
             cb = new JComboBox<Magnitude.Band>() {{
                 setToolTipText("Set magnitude band");
             }};
-            systemCb = new JComboBox<MagnitudeSystem>(MagnitudeSystem$.MODULE$.allAsJava()) {{
+            systemCb = new JComboBox<MagnitudeSystem>(MagnitudeSystem$.MODULE$.allForOTAsJava()) {{
                 setRenderer((list, value,  index,  isSelected,  cellHasFocus)  -> new JLabel(value.name()));
                 setToolTipText("Set magnitude system");
             }};

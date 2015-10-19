@@ -1,6 +1,6 @@
 package edu.gemini.itc.shared
 
-import edu.gemini.spModel.core.MagnitudeBand
+import edu.gemini.spModel.core.{BrightnessUnit, MagnitudeBand}
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.{WaterVapor, CloudCover, SkyBackground, ImageQuality}
 import edu.gemini.spModel.target.{UniformSource, SpectralDistribution, SpatialProfile}
 

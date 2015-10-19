@@ -347,7 +347,7 @@ class TemplateParametersEditor(shells: java.util.List[ISPTemplateParameters]) ex
           override def updateEnabledState(): Unit = enabled = includeBand
         }
 
-        val magSys = new BoundNullableCombo[MagnitudeSystem](MagnitudeSystem.all)(
+        val magSys = new BoundNullableCombo[MagnitudeSystem](MagnitudeSystem.allForOT)(
           show = _.name,
           get  = magOrZero(_).getSystem,
           set  = setMag((m, s) => new Magnitude(band, m.getBrightness, s))

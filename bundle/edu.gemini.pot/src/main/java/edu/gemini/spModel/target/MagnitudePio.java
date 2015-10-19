@@ -199,7 +199,7 @@ public enum MagnitudePio {
         final String systemName = Optional.ofNullable(Pio.getValue(pset, MAG_SYSTEM)).orElse(defaultSys);
         final MagnitudeSystem system;
         try {
-            system = MagnitudeSystem.allAsJava().stream().
+            system = MagnitudeSystem.allForOTAsJava().stream().
                         filter(m -> m.name().equals(systemName)).
                         findFirst().
                         get();

@@ -228,7 +228,7 @@ public final class Magnitude implements Comparable<Magnitude>, Serializable {
      */
     @Override
     public int compareTo(Magnitude that) {
-        int res = MagnitudeSystem.all().indexOf(that.system) - MagnitudeSystem.all().indexOf(this.system);
+        int res = MagnitudeSystem.allForOT().indexOf(that.system) - MagnitudeSystem.allForOT().indexOf(this.system);
         if (res != 0) return res;
 
         res = band.compareTo(that.band);

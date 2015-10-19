@@ -2,7 +2,7 @@ package edu.gemini.itc.baseline.util
 
 import edu.gemini.itc.shared.TelescopeDetails.Coating
 import edu.gemini.itc.shared._
-import edu.gemini.spModel.core.MagnitudeBand
+import edu.gemini.spModel.core.{SurfaceBrightness, MagnitudeSystem, MagnitudeBand}
 import edu.gemini.spModel.core.WavelengthConversions._
 import edu.gemini.spModel.gemini.altair.AltairParams.{FieldLens, GuideStarType}
 import edu.gemini.spModel.guide.GuideProbe
@@ -91,13 +91,13 @@ object Fixture {
     new SourceDefinition(
       GaussianSource(1.0),
       BlackBody(10000),
-      1.0e-3, BrightnessUnit.MAG, MagnitudeBand.U,
+      1.0e-3, MagnitudeSystem.Vega, MagnitudeBand.U,
       0.0
     ),
     new SourceDefinition(
       GaussianSource(1.0),
       PowerLaw(-1.0),
-      1.0e-3, BrightnessUnit.MAG, MagnitudeBand.U,
+      1.0e-3, MagnitudeSystem.Vega, MagnitudeBand.U,
       0.5
     )
   )
@@ -107,13 +107,13 @@ object Fixture {
     new SourceDefinition(
       PointSource,
       LibraryStar.A0V,
-      20.0, BrightnessUnit.MAG, MagnitudeBand.R,
+      20.0, MagnitudeSystem.Vega, MagnitudeBand.R,
       0.0
     ),
     new SourceDefinition(
       GaussianSource(1.0),
       BlackBody(8000),
-      1.0e-3, BrightnessUnit.JY, MagnitudeBand.R,
+      1.0e-3, MagnitudeSystem.Jy, MagnitudeBand.R,
       0.75
     )
   )
@@ -123,13 +123,13 @@ object Fixture {
     new SourceDefinition(
       PointSource,
       LibraryStar.A0V,
-      12.0, BrightnessUnit.MAG, MagnitudeBand.K,
+      12.0, MagnitudeSystem.Vega, MagnitudeBand.K,
       0.0
     ),
     new SourceDefinition(
       UniformSource,
       EmissionLine(2.2.microns, 250.0.kps, 5.0e-19.wattsPerSquareMeter, 1.0e-16.wattsPerSquareMeterPerMicron),
-      22.0, BrightnessUnit.MAG_PSA, MagnitudeBand.K,
+      22.0, SurfaceBrightness.Vega, MagnitudeBand.K,
       0.75
     )
   )
@@ -139,13 +139,13 @@ object Fixture {
     new SourceDefinition(
       PointSource,
       LibraryNonStar.NGC1068,
-      9.0, BrightnessUnit.ABMAG, MagnitudeBand.N,
+      9.0, MagnitudeSystem.AB, MagnitudeBand.N,
       0.0
     ),
     new SourceDefinition(
       UniformSource,
       EmissionLine(12.8.microns, 500.kps, 5.0e-19.wattsPerSquareMeter, 1.0e-16.wattsPerSquareMeterPerMicron),
-      12.0, BrightnessUnit.MAG_PSA, MagnitudeBand.N,
+      12.0, SurfaceBrightness.Vega, MagnitudeBand.N,
       1.5
     )
   )
@@ -155,13 +155,13 @@ object Fixture {
     new SourceDefinition(
       GaussianSource(1.0),
       BlackBody(10000),
-      1.0e-3, BrightnessUnit.MAG, MagnitudeBand.Q,
+      1.0e-3, MagnitudeSystem.Vega, MagnitudeBand.Q,
       0.0
     ),
     new SourceDefinition(
       UniformSource,
       PowerLaw(-1.0),
-      11.0, BrightnessUnit.MAG_PSA, MagnitudeBand.Q,
+      11.0, SurfaceBrightness.Vega, MagnitudeBand.Q,
       2.0
     )
   )
