@@ -37,8 +37,8 @@ public class ImageLabel extends LabelFigure implements CanvasFigure {
     protected CanvasFigureListenerManager listenerManager;
 
     /** Optional linked list of slave figures, which should be moved with this figure. */
-    protected LinkedList slaves;
-
+    protected final LinkedList<CanvasFigure> slaves = new LinkedList<>()
+;
     /** Make sure composites from other figures are not used here */
     protected Composite composite = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1.0F);
 
@@ -128,8 +128,6 @@ public class ImageLabel extends LabelFigure implements CanvasFigure {
 
     /** Add a slave figure. When this figure is moved, the slaves will also move. */
     public void addSlave(CanvasFigure fig) {
-        if (slaves == null)
-            slaves = new LinkedList();
         slaves.add(fig);
     }
 
