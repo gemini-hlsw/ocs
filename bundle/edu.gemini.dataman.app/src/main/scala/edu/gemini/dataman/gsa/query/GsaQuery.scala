@@ -1,5 +1,6 @@
 package edu.gemini.dataman.gsa.query
 
+import edu.gemini.dataman.core.GsaAuth
 import edu.gemini.dataman.gsa.query.GsaQueryError._
 
 import argonaut._
@@ -33,7 +34,7 @@ private[query] object GsaQuery {
   def get[A : DecodeJson](url: URL): GsaResponse[A] =
     query[A](url)(const(()))
 
-  def post[A : EncodeJson, B : DecodeJson](url: URL, a: A, auth: String): GsaResponse[B] =
+  def post[A : EncodeJson, B : DecodeJson](url: URL, a: A, auth: GsaAuth): GsaResponse[B] =
     query[B](url) { con =>
       con.setDoOutput(true)
       con.setInstanceFollowRedirects(false)
@@ -41,7 +42,7 @@ private[query] object GsaQuery {
 
       con.setRequestMethod("POST")
       con.setRequestProperty("Content-Type", s"application/json;charset=$Cset")
-      con.setRequestProperty("Cookie",       s"gemini_api_authorization=$auth")
+      con.setRequestProperty("Cookie",       s"gemini_api_authorization=${auth.value}")
 
       val json = a.asJson.spaces2
       logIf(Level.FINE) { s"GSA QA state update post:\n$json" }
@@ -66,7 +67,7 @@ private[query] object GsaQuery {
       val duration       = Duration.between(startTime, Instant.now())
       val (message, ex)  = result match {
         case \/-(_)     => (s"Retrieved result from GSA.", none[Throwable])
-        case -\/(error) => (GsaQueryError.explain(error), GsaQueryError.exception(error))
+        case -\/(error) => (error.explain, error.exception)
       }
       Log.log(LogLevel, s"End GSA query (${duration.toMillis} ms) ${url.toString}. " + message, ex.orNull)
     }

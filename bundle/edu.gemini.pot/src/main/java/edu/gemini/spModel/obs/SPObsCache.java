@@ -8,7 +8,7 @@ import edu.gemini.pot.sp.*;
 import edu.gemini.shared.util.GeminiRuntimeException;
 import edu.gemini.shared.util.immutable.None;
 import edu.gemini.shared.util.immutable.Option;
-import edu.gemini.spModel.dataset.DatasetDisposition;
+import edu.gemini.spModel.dataset.DataflowStatus;
 import edu.gemini.spModel.dataset.DatasetQaStateSums;
 import edu.gemini.spModel.obs.plannedtime.PlannedStepSummary;
 import edu.gemini.spModel.obs.plannedtime.PlannedTimeSummary;
@@ -115,13 +115,13 @@ public final class SPObsCache implements ISPEventMonitor, ISPCloneable, Serializ
 		setObsCache(obs, cache);
 	}
 
-    public static DatasetDisposition getDatasetDisposition(ISPObservation obs) {
+    public static scala.Option<DataflowStatus> getDatasetDisposition(ISPObservation obs) {
         SPObsCache cache = getObsCache(obs);
         if (cache == null) return null;
         return cache.getDatasetDisposition();
     }
 
-    public static void setDatasetDisposition(ISPObservation obs, DatasetDisposition dispo) {
+    public static void setDatasetDisposition(ISPObservation obs, scala.Option<DataflowStatus> dispo) {
         SPObsCache cache = getObsCache(obs);
         if (cache == null) cache = new SPObsCache();
         cache.setDatasetDisposition(dispo);
@@ -191,7 +191,7 @@ public final class SPObsCache implements ISPEventMonitor, ISPCloneable, Serializ
     private PlannedStepSummary _plannedSteps;
 
     // Cache of the minimum dataflow step for the observation, if any.
-    private DatasetDisposition _datasetDisposition;
+    private scala.Option<DataflowStatus> _datasetDisposition;
 
     // Sums of dataset qa state values among the datasets in this obs.
     private DatasetQaStateSums _qaSums;
@@ -269,11 +269,11 @@ public final class SPObsCache implements ISPEventMonitor, ISPCloneable, Serializ
         _plannedSteps = plannedSteps;
     }
 
-    DatasetDisposition getDatasetDisposition() {
+    scala.Option<DataflowStatus> getDatasetDisposition() {
         return _datasetDisposition;
     }
 
-    void setDatasetDisposition(DatasetDisposition dispo) {
+    void setDatasetDisposition(scala.Option<DataflowStatus> dispo) {
         _datasetDisposition = dispo;
     }
 

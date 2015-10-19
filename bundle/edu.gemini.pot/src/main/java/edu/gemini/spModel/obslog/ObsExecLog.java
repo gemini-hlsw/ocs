@@ -56,7 +56,7 @@ public final class ObsExecLog extends AbstractDataObject implements ISPMergeable
     public Object clone() {
         // don't really want to support this method ...
         ObsExecLog res = (ObsExecLog) super.clone();
-        res._obsExecRecord = new ObsExecRecord(_obsExecRecord);
+        res._obsExecRecord = _obsExecRecord.copy();
         if (completedSteps != null) {
             res.completedSteps = new ConfigSequence(completedSteps);
         }
@@ -81,7 +81,7 @@ public final class ObsExecLog extends AbstractDataObject implements ISPMergeable
     }
 
     public void setCompletedSteps(ConfigSequence seq, DatasetLabel label) {
-        final TreeSet<DatasetLabel> ts = new TreeSet<DatasetLabel>();
+        final TreeSet<DatasetLabel> ts = new TreeSet<>();
         ts.add(label);
         setCompletedSteps(seq, ts);
     }
@@ -97,10 +97,6 @@ public final class ObsExecLog extends AbstractDataObject implements ISPMergeable
             return true;
         }
     }
-
-//    private static void dumpConfig(Config c) {
-//        for (ItemEntry e : c.itemEntries()) System.out.println(e);
-//    }
 
     public void setCompletedSteps(ConfigSequence seq, SortedSet<DatasetLabel> labels) {
         if (labels.size() > 0) {
@@ -230,45 +226,37 @@ public final class ObsExecLog extends AbstractDataObject implements ISPMergeable
      */
     public static void updateObsLog(final IDBDatabaseService db, final SPObservationID obsId, final Option<DatasetLabel> label, final Option<ObsExecEvent> evt) {
 
-        ObsLog.update(db, obsId, new ObsLog.UpdateOp() {
-            @Override public void apply(final ISPObservation obs, final ObsLog log) {
-                final Option<SequenceData> seqData = label.map(new MapOp<DatasetLabel, SequenceData>() {
-                    @Override public SequenceData apply(DatasetLabel datasetLabel) {
-                        return new SequenceData(obs, datasetLabel);
-                    }
+        ObsLog.update(db, obsId, (obs, log) -> {
+            final Option<SequenceData> seqData = label.map(new MapOp<DatasetLabel, SequenceData>() {
+                @Override public SequenceData apply(DatasetLabel datasetLabel) {
+                    return new SequenceData(obs, datasetLabel);
+                }
+            });
+
+            try {
+                // Add the event to the obs record, if one was provided.
+                evt.foreach(oee -> {
+                    // Extract the config out of the sequence, if any.
+                    final Option<Config> rawConfig = seqData.flatMap(new MapOp<SequenceData, Option<Config>>() {
+                        @Override public Option<Config> apply(SequenceData sd) { return sd.config; }
+                    });
+
+                    // Add the event, but map the config to String/display values.
+                    log.execLogDataObject.getRecord().addEvent(oee, rawConfig.map(new MapOp<Config, Config>() {
+                        @Override
+                        public Config apply(Config config) {
+                            return ConfigValMapUtil.mapValues(config, ConfigValMapInstances.TO_DISPLAY_VALUE);
+                        }
+                    }).getOrNull());
                 });
 
-                try {
-                    // Add the event to the obs record, if one was provided.
-                    evt.foreach(new ApplyOp<ObsExecEvent>() {
-                        @Override public void apply(ObsExecEvent oee) {
-                            // Extract the config out of the sequence, if any.
-                            final Option<Config> rawConfig = seqData.flatMap(new MapOp<SequenceData, Option<Config>>() {
-                                @Override public Option<Config> apply(SequenceData sd) { return sd.config; }
-                            });
 
-                            // Add the event, but map the config to String/display values.
-                            log.execLogDataObject.getRecord().addEvent(oee, rawConfig.map(new MapOp<Config, Config>() {
-                                @Override
-                                public Config apply(Config config) {
-                                    return ConfigValMapUtil.mapValues(config, ConfigValMapInstances.TO_DISPLAY_VALUE);
-                                }
-                            }).getOrNull());
-                        }
-                    });
+                // Write the completed step into the obslog component
+                // (for smart gcal).
+                seqData.foreach(sd -> log.execLogDataObject.setCompletedSteps(sd.seq, sd.label));
 
-
-                    // Write the completed step into the obslog component
-                    // (for smart gcal).
-                    seqData.foreach(new ApplyOp<SequenceData>() {
-                        @Override public void apply(SequenceData sd) {
-                            log.execLogDataObject.setCompletedSteps(sd.seq, sd.label);
-                        }
-                    });
-
-                } catch (Exception ex) {
-                    throw new RuntimeException(ex);
-                }
+            } catch (Exception ex) {
+                throw new RuntimeException(ex);
             }
         });
     }

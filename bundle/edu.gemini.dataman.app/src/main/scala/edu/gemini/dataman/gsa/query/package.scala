@@ -1,5 +1,7 @@
 package edu.gemini.dataman.gsa
 
+import edu.gemini.dataman.core.{DmanFailure, DmanAction}
+
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
@@ -17,4 +19,10 @@ package object query {
   // for both parsing and formatting, which seems unfortunate.
   val TimeParse  = DateTimeFormatter.ofPattern("uuuu-MM-dd HH:mm:ss.SSSSSSxxx")
   val TimeFormat = TimeParse.withZone(ZoneId.of("Z"))
+
+  implicit class DmanOps[A](r: GsaResponse[A]) {
+    def liftDman: DmanAction[A] =
+      r.leftMap(DmanFailure.QueryFailure).liftDman
+
+  }
 }

@@ -17,7 +17,7 @@ import edu.gemini.spModel.core.Affiliate;
 import edu.gemini.spModel.core.SPProgramID;
 import edu.gemini.spModel.data.ISPDataObject;
 import edu.gemini.spModel.data.YesNoType;
-import edu.gemini.spModel.dataset.DatasetDisposition;
+import edu.gemini.spModel.dataset.DataflowStatus;
 import edu.gemini.spModel.gemini.altair.AltairParams;
 import edu.gemini.spModel.gemini.altair.InstAltair;
 import edu.gemini.spModel.gemini.obscomp.SPProgram;
@@ -34,7 +34,6 @@ import edu.gemini.spModel.pio.PioFactory;
 import edu.gemini.spModel.pio.xml.PioXmlFactory;
 import edu.gemini.spModel.target.SPTarget;
 import edu.gemini.spModel.target.obsComp.TargetObsComp;
-import edu.gemini.spModel.target.system.CoordinateParam.Units;
 import edu.gemini.spModel.target.system.ITarget;
 import edu.gemini.spModel.time.ChargeClass;
 import edu.gemini.spModel.time.ObsTimeCharges;
@@ -143,7 +142,7 @@ public class ObsQueryFunctor extends DBAbstractQueryFunctor {
 
             if (prog.getProgramID() != null)
                 ImplicitPolicyForJava.checkPermission(database, principals, new ProgramPermission.Read(prog.getProgramID()));
- 
+
             // check for program related contraints, such as AFFILIATES and PI Last Name
             if (_match(prog)) {
                 // check each observation and add a row to the result vector for any matches
@@ -694,7 +693,7 @@ public class ObsQueryFunctor extends DBAbstractQueryFunctor {
 
         // Figure out the dataflow step
         String datasetDispoStr = "No Data";
-        final DatasetDisposition dispo = DatasetDispositionService.lookupDatasetDisposition(o);
+        final DataflowStatus dispo = DatasetDispositionService.lookupDatasetDisposition(o);
         if (dispo != null) datasetDispoStr = dispo.getDisplayString();
 
         // Figure out ready status

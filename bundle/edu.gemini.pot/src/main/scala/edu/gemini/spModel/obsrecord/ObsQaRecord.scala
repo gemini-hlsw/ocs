@@ -45,13 +45,13 @@ case class ObsQaRecord(qaMap: Map[DatasetLabel, DatasetQaRecord]) {
     ps
   }
 
-  def datasetRecordsAsJava(ds: java.util.Collection[DatasetExecRecord]): java.util.List[DatasetRecord] =
-    datasetRecords(ds.asScala).asJava
-
-  def datasetRecords(ds: Traversable[DatasetExecRecord]): List[DatasetRecord] =
-    (ds:\List.empty[DatasetRecord]) { (r,l) =>
-      new DatasetRecord(apply(r.getLabel), r) :: l
+  def datasetRecordsFromJava(ds: java.util.Collection[DatasetExecRecord]): List[DatasetRecord] =
+    (ds.asScala:\List.empty[DatasetRecord]) { (r,l) =>
+      new DatasetRecord(apply(r.label), r) :: l
     }
+
+  def datasetRecordsJava(ds: java.util.Collection[DatasetExecRecord]): java.util.List[DatasetRecord] =
+    datasetRecordsFromJava(ds).asJava
 
   // Merges the two qa records unless there are conflicting edits.
   def merge(that: ObsQaRecord): Option[ObsQaRecord] = {

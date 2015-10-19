@@ -68,9 +68,7 @@ public final class DatasetQaStateSum implements Comparable, Serializable {
 
         DatasetQaStateSum that = (DatasetQaStateSum) other;
         if (_state != that._state) return false;
-        if (_count != that._count) return false;
-
-        return true;
+        return _count == that._count;
     }
 
     public int hashCode() {

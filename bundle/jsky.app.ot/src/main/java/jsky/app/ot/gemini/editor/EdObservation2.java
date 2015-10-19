@@ -15,7 +15,7 @@ import edu.gemini.shared.util.TimeValue;
 import edu.gemini.shared.util.immutable.None;
 import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.shared.util.immutable.Some;
-import edu.gemini.spModel.dataset.DatasetDisposition;
+import edu.gemini.spModel.dataset.DataflowStatus;
 import edu.gemini.spModel.dataset.DatasetQaState;
 import edu.gemini.spModel.dataset.DatasetQaStateSums;
 import edu.gemini.spModel.obs.*;
@@ -581,7 +581,7 @@ public final class EdObservation2 extends OtItemEditor<ISPObservation, SPObserva
     private void _showStatus() {
 
         // First collect the information to display.
-        final DatasetDisposition dispo = DatasetDispositionService.lookupDatasetDisposition(getNode());
+        final DataflowStatus dispo = DatasetDispositionService.lookupDatasetDisposition(getNode());
         final DatasetQaStateSums sums = DatasetQaStateSumsService.sumDatasetQaStates(getNode());
 
         final ObsQaState obsQaState;

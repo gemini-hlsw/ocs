@@ -69,7 +69,7 @@ public class ConfigMapUtil {
     static void addStartTime(DatasetRecord dset, ConfigMap m) {
         // Note that the time is being placed as a long value as a String.  It needs to be formatted in the
         // higher layers.  The second raw ut is used for navigation
-        String time = Long.toString(dset.exec.dataset.getTimestamp());
+        String time = Long.toString(dset.exec.dataset().getTimestamp());
         _setStartTime(time, m);
     }
 
@@ -128,7 +128,7 @@ public class ConfigMapUtil {
             return;
         }
 
-        String filename = dset.exec.dataset.getDhsFilename();
+        String filename = dset.exec.dataset().getDhsFilename();
         m.put(OBSLOG_FILENAMES_ITEM_NAME, filename);
     }
 
@@ -143,7 +143,7 @@ public class ConfigMapUtil {
             return;
         }
 
-        GeminiFileName first = new GeminiFileName(dsetRecords.get(0).exec.dataset.getDhsFilename());
+        GeminiFileName first = new GeminiFileName(dsetRecords.get(0).exec.dataset().getDhsFilename());
         String firstFileNumber = String.valueOf(first.getSequenceNumber());
         if (datasetCount == 1) {
             m.put(OBSLOG_FILENAMES_ITEM_NAME, firstFileNumber);
@@ -155,7 +155,7 @@ public class ConfigMapUtil {
         m.put(OBSLOG_FILENAMEPREFIX_ITEM_NAME, prefix);
 
         // Add the first to last when there is more than one dataset.  The value after - could be empty
-        GeminiFileName last = new GeminiFileName(dsetRecords.get(datasetCount - 1).exec.dataset.getDhsFilename());
+        GeminiFileName last = new GeminiFileName(dsetRecords.get(datasetCount - 1).exec.dataset().getDhsFilename());
         m.put(OBSLOG_FILENAMES_ITEM_NAME, firstFileNumber + FILE_SEP + last.getSequenceNumber());
     }
 
@@ -173,7 +173,7 @@ public class ConfigMapUtil {
     }
 
     static void addDatasetComments(List<DatasetRecord> dsets, ConfigMap m) {
-        List<DatasetRecord> comments = new ArrayList<DatasetRecord>();
+        final List<DatasetRecord> comments = new ArrayList<>();
         // I'm checking for more than one item because the main obslog comment is dataset 0 comment. Only want to add
         // comments that are after that one
         if (dsets == null || dsets.size() <= 1) {

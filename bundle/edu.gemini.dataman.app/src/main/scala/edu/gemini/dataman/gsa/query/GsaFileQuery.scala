@@ -1,5 +1,6 @@
 package edu.gemini.dataman.gsa.query
 
+import edu.gemini.dataman.core.GsaHost
 import edu.gemini.pot.sp.SPObservationID
 import edu.gemini.skycalc.ObservingNight
 import edu.gemini.spModel.core.{SPProgramID, Site}
@@ -40,9 +41,9 @@ object GsaFileQuery {
     case Site.GS => "Gemini-South"
   }
 
-  def apply(host: String, site: Site): GsaFileQuery =
+  def apply(host: GsaHost, site: Site): GsaFileQuery =
     new GsaFileQuery {
-      val prefix = s"http://$host/jsonqastate/${gsaSite(site)}/present"
+      val prefix = s"${host.protocol}://${host.host}/jsonqastate/${gsaSite(site)}/present"
 
       def url(filter: String): URL = new URL(s"$prefix/$filter")
 

@@ -72,7 +72,7 @@ public interface ObslogTableModels {
 
         public boolean isUnavailable(int row) {
             final DatasetRecord rec = records.get(row);
-            return obsLog.getExecRecord().isTentative(rec.getLabel()) || rec.exec.fileState != DatasetFileState.OK;
+            return obsLog.getExecRecord().inSummitStorage(rec.getLabel()) || rec.exec.fileState != DatasetFileState.OK;
         }
 
         public int getRowCount() {
@@ -148,7 +148,7 @@ public interface ObslogTableModels {
                     return (gs == GsaState.NONE) ? null : gs;
 
                 case COL_NEXT_STEP: {
-                    final DatasetDisposition disp = DatasetDisposition.derive(rec);
+                    final DataflowStatus disp = DataflowStatus.derive(rec);
                     return disp.isAttentionNeeded() ? disp.getDisplayString() : null;
                 }
                 default:
@@ -223,7 +223,7 @@ public interface ObslogTableModels {
                 case COL_LABEL:
                     return rec.getLabel();
                 case COL_FILENAME:
-                    return rec.exec.dataset.getDhsFilename();
+                    return rec.exec.dataset().getDhsFilename();
                 case COL_COMMENT:
                     return rec.qa.comment;
                 default:

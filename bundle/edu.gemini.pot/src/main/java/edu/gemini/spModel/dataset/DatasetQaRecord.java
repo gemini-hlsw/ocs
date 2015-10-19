@@ -13,7 +13,7 @@ import java.text.ParseException;
  * state and a comment.  Everything else is Java boilerplate and PIO boilerplate
  */
 public final class DatasetQaRecord implements Comparable, Serializable {
-    public static final DatasetQaRecord empty(DatasetLabel label) {
+    public static DatasetQaRecord empty(DatasetLabel label) {
         return new DatasetQaRecord(label, DatasetQaState.UNDEFINED, "");
     }
 
@@ -95,9 +95,7 @@ public final class DatasetQaRecord implements Comparable, Serializable {
 
         if (!label.equals(that.label)) return false;
         if (!comment.equals(that.comment)) return false;
-        if (qaState != that.qaState) return false;
-
-        return true;
+        return qaState == that.qaState;
     }
 
     @Override
@@ -110,11 +108,6 @@ public final class DatasetQaRecord implements Comparable, Serializable {
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("DatasetQaRecord{");
-        sb.append("label=").append(label);
-        sb.append(", qaState=").append(qaState);
-        sb.append(", comment='").append(comment).append('\'');
-        sb.append('}');
-        return sb.toString();
+        return "DatasetQaRecord{" + "label=" + label + ", qaState=" + qaState + ", comment='" + comment + '\'' + '}';
     }
 }

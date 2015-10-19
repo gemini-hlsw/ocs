@@ -11,7 +11,11 @@ import scalaz._
  * @param timestamp last modification time stamp of the dataset in the server
  * @param md5 hash of the version of the dataset file in the server
  */
-case class DatasetGsaState(qa: DatasetQaState, timestamp: Instant, md5: DatasetMd5)
+case class DatasetGsaState(qa: DatasetQaState, timestamp: Instant, md5: DatasetMd5) {
+  def isAfter(that: DatasetGsaState): Boolean  = timestamp.isAfter(that.timestamp)
+
+  def isBefore(that: DatasetGsaState): Boolean = timestamp.isBefore(that.timestamp)
+}
 
 object DatasetGsaState {
   implicit val EqualDatasetGsaState: Equal[DatasetGsaState] = Equal.equalA

@@ -70,7 +70,7 @@ public enum DatasetQaState implements DisplayableSpType {
     private String _displayValue;
     private String _typeCode;
 
-    private DatasetQaState(String displayValue, String typeCode, boolean isFinal) {
+    DatasetQaState(String displayValue, String typeCode, boolean isFinal) {
         _displayValue = displayValue;
         _typeCode     = typeCode;
         _isFinal      = isFinal;

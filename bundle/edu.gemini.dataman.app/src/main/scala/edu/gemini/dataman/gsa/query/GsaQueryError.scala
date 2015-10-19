@@ -1,9 +1,33 @@
 package edu.gemini.dataman.gsa.query
 
+import edu.gemini.dataman.gsa.query.GsaQueryError._
+
 import java.io.IOException
 
 /** Types of errors that may occur while processing a GSA query. */
-sealed trait GsaQueryError
+sealed trait GsaQueryError {
+  def explain: String = {
+    val explanation = this match {
+      case InvalidResponse(m)    => s"GSA server returned invalid results: $m."
+      case RequestError(code, m) => s"GSA server rejected the request (http code=$code, message=$m)."
+      case IoException(_)        => s"A network issue prevented executing the query."
+      case Unexpected(_)         => s"Unexpected exception while working with the GSA server."
+    }
+
+    val exMessage = for {
+      t <- this.exception
+      m <- Option(t.getMessage) if m.trim != ""
+    } yield m
+
+    exMessage.fold(explanation)(em => s"$explanation ($em)")
+  }
+
+  def exception: Option[Throwable] = this match {
+    case IoException(ex) => Some(ex)
+    case Unexpected(t)   => Some(t)
+    case _               => None
+  }
+}
 
 object GsaQueryError {
   /** GSA server returned an invalid response.. */
@@ -17,26 +41,4 @@ object GsaQueryError {
 
   /** Some random unexpected exception. */
   case class Unexpected(t: Throwable)             extends GsaQueryError
-
-  def exception(e: GsaQueryError): Option[Throwable] = e match {
-    case IoException(ex) => Some(ex)
-    case Unexpected(t)   => Some(t)
-    case _               => None
-  }
-
-  def explain(e: GsaQueryError): String = {
-    val explanation = e match {
-      case InvalidResponse(m)    => s"GSA server returned invalid results: $m."
-      case RequestError(code, m) => s"GSA server rejected the request (http code=$code, message=$m)."
-      case IoException(_)        => s"A network issue prevented executing the query."
-      case Unexpected(_)         => s"Unexpected exception while working with the GSA server."
-    }
-
-    val exMessage = for {
-      t <- GsaQueryError.exception(e)
-      m <- Option(t.getMessage) if m.trim != ""
-    } yield m
-
-    exMessage.fold(explanation)(em => s"$explanation ($em)")
-  }
 }

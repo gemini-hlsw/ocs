@@ -10,8 +10,8 @@ public final class DatasetRecord {
     public DatasetRecord(DatasetQaRecord qa, DatasetExecRecord exec) {
         if (qa == null) throw new NullPointerException();
         if (exec == null) throw new NullPointerException();
-        if (!qa.label.equals(exec.getLabel())) {
-            final String msg = String.format("QA and Exec records for different datasets: %s vs %s", qa.label, exec.getLabel());
+        if (!qa.label.equals(exec.label())) {
+            final String msg = String.format("QA and Exec records for different datasets: %s vs %s", qa.label, exec.label());
             throw new IllegalArgumentException(msg);
         }
         this.qa   = qa;
@@ -31,9 +31,8 @@ public final class DatasetRecord {
         final DatasetRecord that = (DatasetRecord) o;
 
         if (!exec.equals(that.exec)) return false;
-        if (!qa.equals(that.qa)) return false;
+        return qa.equals(that.qa);
 
-        return true;
     }
 
     @Override
@@ -45,10 +44,6 @@ public final class DatasetRecord {
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("DatasetRecord{");
-        sb.append("qa=").append(qa);
-        sb.append(", exec=").append(exec);
-        sb.append('}');
-        return sb.toString();
+        return "DatasetRecord{" + "qa=" + qa + ", exec=" + exec + '}';
     }
 }

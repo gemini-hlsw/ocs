@@ -1,5 +1,6 @@
 package edu.gemini.dataman.gsa.query
 
+import edu.gemini.dataman.core.{GsaAuth, GsaHost}
 import edu.gemini.spModel.core.Site
 import edu.gemini.spModel.dataset.{DatasetQaState, DatasetLabel}
 
@@ -24,10 +25,10 @@ object GsaQaUpdateQuery {
     * parameter is how the GSA service provides some minimal protection against
     * inappropriate setting of QA states.  The value is sent in a cookie that
     * is checked on the server. */
-  def apply(host: String, site: Site, auth: String): GsaQaUpdateQuery =
+  def apply(host: GsaHost.Summit, site: Site, auth: GsaAuth): GsaQaUpdateQuery =
     new GsaQaUpdateQuery {
       override def setQaStates(requests: List[Request]): GsaResponse[List[Response]] =
-        GsaQuery.post[List[Request], List[Response]](new URL(s"http://$host/update_headers"), requests, auth).map { responses =>
+        GsaQuery.post[List[Request], List[Response]](new URL(s"${host.protocol}://${host.host}/update_headers"), requests, auth).map { responses =>
           // Prepend errors for any update requests that were silently ignored.
           (requests.map(_.label).toSet &~ responses.map(_.label).toSet).toList.map { lab =>
             Response(lab, Some(s"No response returned for $lab update request."))

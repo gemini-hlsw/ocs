@@ -1,6 +1,7 @@
 package edu.gemini.dataman.osgi
 
-import edu.gemini.dataman.gsa.query.{GsaQaUpdateQuery, GsaQaUpdate, GsaQueryError, GsaFile, GsaResponse, GsaFileQuery, TimeFormat}
+import edu.gemini.dataman.core.{GsaAuth, GsaHost}
+import edu.gemini.dataman.gsa.query.{GsaQaUpdateQuery, GsaQaUpdate, GsaFile, GsaResponse, GsaFileQuery, TimeFormat}
 import edu.gemini.pot.sp.SPObservationID
 import edu.gemini.spModel.core.{Site, SPProgramID}
 import edu.gemini.spModel.dataset.{DatasetQaState, DatasetLabel}
@@ -15,7 +16,7 @@ sealed trait GsaCommands {
 }
 
 object GsaCommands {
-  def apply(gsaHost: String, site: Site, auth: String): GsaCommands =
+  def apply(gsaHost: GsaHost.Summit, site: Site, auth: GsaAuth): GsaCommands =
     new GsaCommands {
 
       val help =
@@ -81,7 +82,7 @@ object GsaCommands {
 
         // Send the request to the server and format the results in a table.
         f.fold(help) { fn =>
-          fn(GsaFileQuery(gsaHost, site)).fold(GsaQueryError.explain, format)
+          fn(GsaFileQuery(gsaHost, site)).fold(_.explain, format)
         }
       }
 
@@ -94,7 +95,7 @@ object GsaCommands {
 
         // Send the update request to the server.
         val responses = requests.flatMap { rs =>
-          GsaQaUpdateQuery(gsaHost, site, auth).setQaStates(rs).leftMap(GsaQueryError.explain)
+          GsaQaUpdateQuery(gsaHost, site, auth).setQaStates(rs).leftMap(_.explain)
         }
 
         // Format the error messages, if any.
