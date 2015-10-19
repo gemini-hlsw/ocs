@@ -5,7 +5,6 @@ import jsky.util.Preferences;
 import jsky.util.gui.GenericToolBar;
 
 import javax.swing.*;
-import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.util.logging.Logger;
 
@@ -18,16 +17,14 @@ public final class ImageShowToolbarAsMenu extends JMenu {
         super(_I18N.getString("showToolBarAs"));
         final ButtonGroup group = new ButtonGroup();
 
-        final ItemListener itemListener = new ItemListener() {
-            public void itemStateChanged(ItemEvent e) {
-                final JRadioButtonMenuItem rb = (JRadioButtonMenuItem) e.getSource();
-                if (rb.isSelected()) {
-                    final ToolBarOption tbo = ToolBarOption.getToolBarOptionForButton(rb);
-                    tbo.storeAsPreference();
+        final ItemListener itemListener = e -> {
+            final JRadioButtonMenuItem rb = (JRadioButtonMenuItem) e.getSource();
+            if (rb.isSelected()) {
+                final ToolBarOption tbo = ToolBarOption.getToolBarOptionForButton(rb);
+                tbo.storeAsPreference();
 
-                    toolBar.setShowPictures(tbo.showPictures);
-                    toolBar.setShowText(tbo.showText);
-                }
+                toolBar.setShowPictures(tbo.showPictures);
+                toolBar.setShowText(tbo.showText);
             }
         };
 

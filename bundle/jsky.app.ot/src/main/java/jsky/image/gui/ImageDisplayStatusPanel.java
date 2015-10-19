@@ -1,18 +1,8 @@
-/*
- * Copyright 2000 Association for Universities for Research in Astronomy, Inc.,
- * Observatory Control System, Gemini Telescopes Project.
- *
- * $Id: ImageDisplayStatusPanel.java 39998 2011-12-19 14:24:47Z swalker $
- */
-
-
 package jsky.image.gui;
 
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
 import java.awt.geom.Point2D;
@@ -24,15 +14,12 @@ import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 
 import jsky.coords.WorldCoords;
 import jsky.image.ImageChangeEvent;
 import jsky.image.ImageProcessor;
 import jsky.util.I18N;
 import jsky.util.Resources;
-
 
 /**
  * Displays the image coordinates, pixel value, and world coordinates at the mouse pointer
@@ -81,48 +68,28 @@ public class ImageDisplayStatusPanel extends JPanel implements MouseMotionListen
         zoomIn.setToolTipText(_I18N.getString("zoomIn"));
         zoomIn.setFocusPainted(false);
         zoomIn.setPreferredSize(new Dimension(26, 24));
-        zoomIn.addActionListener(new ActionListener() {
-
-            public void actionPerformed(ActionEvent e) {
-                zoom(true);
-            }
-        });
+        zoomIn.addActionListener(e -> zoom(true));
         add(zoomIn);
 
         JButton zoomOut = new JButton(Resources.getIcon("ZoomOut24.gif", this.getClass()));
         zoomOut.setToolTipText(_I18N.getString("zoomOut"));
         zoomOut.setFocusPainted(false);
         zoomOut.setPreferredSize(new Dimension(26, 24));
-        zoomOut.addActionListener(new ActionListener() {
-
-            public void actionPerformed(ActionEvent e) {
-                zoom(false);
-            }
-        });
+        zoomOut.addActionListener(e -> zoom(false));
         add(zoomOut);
 
         JButton zoomFit = new JButton(Resources.getIcon("AlignCenter24.gif", this.getClass()));
         zoomFit.setToolTipText(_I18N.getString("zoomFit"));
         zoomFit.setFocusPainted(false);
         zoomFit.setPreferredSize(new Dimension(26, 24));
-        zoomFit.addActionListener(new ActionListener() {
-
-            public void actionPerformed(ActionEvent e) {
-                zoomFit();
-            }
-        });
+        zoomFit.addActionListener(e -> zoomFit());
         add(zoomFit);
 
         JButton zoomNormal = new JButton(Resources.getIcon("Zoom24.gif", this.getClass()));
         zoomNormal.setToolTipText(_I18N.getString("zoomNormal"));
         zoomNormal.setFocusPainted(false);
         zoomNormal.setPreferredSize(new Dimension(26, 24));
-        zoomNormal.addActionListener(new ActionListener() {
-
-            public void actionPerformed(ActionEvent e) {
-                zoomNormal();
-            }
-        });
+        zoomNormal.addActionListener(e -> zoomNormal());
         add(zoomNormal);
 
         zoomTextField = new JTextField(0);
@@ -181,12 +148,7 @@ public class ImageDisplayStatusPanel extends JPanel implements MouseMotionListen
         ((Component) imageDisplay).addMouseMotionListener(this);
 
         // update the magnification display
-        imageDisplay.addChangeListener(new ChangeListener() {
-
-            public void stateChanged(ChangeEvent ce) {
-                imageStateChanged((ImageChangeEvent) ce);
-            }
-        });
+        imageDisplay.addChangeListener(ce -> imageStateChanged((ImageChangeEvent) ce));
     }
 
     protected void imageStateChanged(ImageChangeEvent e) {

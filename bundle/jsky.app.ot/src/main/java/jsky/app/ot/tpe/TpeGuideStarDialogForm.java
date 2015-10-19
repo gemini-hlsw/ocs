@@ -5,6 +5,7 @@ import jsky.catalog.Catalog;
 import javax.swing.*;
 import java.awt.*;
 
+@Deprecated
 public class TpeGuideStarDialogForm extends JPanel {
 
     protected final JComboBox<Catalog> catalogComboBox =new JComboBox<>();

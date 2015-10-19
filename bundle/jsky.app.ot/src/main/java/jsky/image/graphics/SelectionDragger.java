@@ -16,6 +16,7 @@ import java.awt.geom.Rectangle2D.Double;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Set;
 
 import diva.canvas.Figure;
 import diva.canvas.FigureDecorator;
@@ -61,7 +62,7 @@ public class SelectionDragger extends DragInteractor {
 
     /* The set of valid selection interactors
      */
-    private ArrayList _selectionInteractors = new ArrayList();
+    private final ArrayList<SelectionInteractor> _selectionInteractors = new ArrayList<>();
 
     /* The rubber-band
      */
@@ -73,12 +74,12 @@ public class SelectionDragger extends DragInteractor {
 
     /** A hash-set containing those figures
      */
-    private HashSet _currentFigures;
+    private HashSet<Figure> _currentFigures;
 
     /** A hash-set containing figures that overlap the rubber-band
      * but are not "hit"
      */
-    private HashSet _holdovers;
+    private HashSet<Figure> _holdovers = new HashSet<>();
 
     /* The origin points
      */
@@ -240,7 +241,7 @@ public class SelectionDragger extends DragInteractor {
 
         // Update the intersected figure set
         _intersectedFigures.setGeometry(_rubberBand);
-        HashSet freshFigures = new HashSet();
+        HashSet<Figure> freshFigures = new HashSet<>();
         for (Iterator i = _intersectedFigures.figures(); i.hasNext();) {
             Figure f = (Figure) i.next();
             if (f instanceof FigureDecorator) {
@@ -346,7 +347,7 @@ public class SelectionDragger extends DragInteractor {
         _intersectedFigures =
                 _figureLayer.getFigures().getIntersectedFigures(_rubberBand);
         _currentFigures = new HashSet();
-        _holdovers = new HashSet();
+        _holdovers = new HashSet<>();
 
         // Clear all selections
         if (_isSelecting) {
@@ -453,10 +454,11 @@ public class SelectionDragger extends DragInteractor {
     }
 
     /** Enable/disable drag-selecting */
-    public void setEnabled(boolean enabled) {
-        if (_eventLayer != null)
+    public void setEnabled(final boolean enabled) {
+        if (_eventLayer != null) {
             _eventLayer.removeLayerListener(this);
-        if (enabled)
-            _eventLayer.addLayerListener(this);
+            if (enabled)
+                _eventLayer.addLayerListener(this);
+        }
     }
 }

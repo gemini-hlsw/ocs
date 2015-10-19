@@ -1,20 +1,8 @@
-/*
- * ESO Archive
- *
- * $Id: ImageDisplayPanel.java 4414 2004-02-03 16:21:36Z brighton $
- *
- * who             when        what
- * --------------  ----------  ----------------------------------------
- * Allan Brighton  1999/05/03  Created
- */
-
 package jsky.image.gui;
 
 import java.awt.Component;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
 import java.awt.geom.Point2D;
@@ -32,8 +20,6 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 
 import jsky.coords.WorldCoords;
 import jsky.image.ImageChangeEvent;
@@ -49,6 +35,7 @@ import jsky.util.gui.GridBagUtil;
  * @version $Revision: 4414 $
  * @author Allan Brighton
  */
+@Deprecated
 public class ImageDisplayPanel extends JPanel implements MouseMotionListener {
 
     // hook to the component used to manage image operations
@@ -210,28 +197,13 @@ public class ImageDisplayPanel extends JPanel implements MouseMotionListener {
 
         lowLabel = new JLabel("Low:", right);
         lowValue = new JTextField(6);
-        lowValue.addActionListener(new ActionListener() {
-
-            public void actionPerformed(ActionEvent ev) {
-                setCutLevels();
-            }
-        });
+        lowValue.addActionListener(ev -> setCutLevels());
         highLabel = new JLabel("High:", right);
         highValue = new JTextField(6);
-        highValue.addActionListener(new ActionListener() {
-
-            public void actionPerformed(ActionEvent ev) {
-                setCutLevels();
-            }
-        });
+        highValue.addActionListener(ev -> setCutLevels());
         autocutButton = new JButton("Auto Set Cutlevels");
         autocutButton.setToolTipText("Set the image cut levels using median filtering");
-        autocutButton.addActionListener(new ActionListener() {
-
-            public void actionPerformed(ActionEvent ev) {
-                autoSetCutLevels();
-            }
-        });
+        autocutButton.addActionListener(ev -> autoSetCutLevels());
 
         // add a menu with zoom settings
         scaleLabel = new JLabel("Scale:", right);
@@ -241,12 +213,7 @@ public class ImageDisplayPanel extends JPanel implements MouseMotionListener {
         makeZoomButtons();
 
         // keep the panel display up to date with the image
-        imageProcessor.addChangeListener(new ChangeListener() {
-
-            public void stateChanged(ChangeEvent ce) {
-                updateValues();
-            }
-        });
+        imageProcessor.addChangeListener(ce -> updateValues());
     }
 
     /**
@@ -269,19 +236,16 @@ public class ImageDisplayPanel extends JPanel implements MouseMotionListener {
             addScaleMenuItem(group, s, (float) i);
         }
 
-        imageDisplay.addChangeListener(new ChangeListener() {
-
-            public void stateChanged(ChangeEvent ce) {
-                ImageChangeEvent e = (ImageChangeEvent) ce;
-                if (e.isNewScale()) {
-                    String s = getScaleLabel(imageDisplay.getScale());
-                    scaleMenu.setText(s);
-                    int n = scaleMenu.getItemCount();
-                    for (int i = 0; i < n; i++) {
-                        JRadioButtonMenuItem b = (JRadioButtonMenuItem) scaleMenu.getItem(i);
-                        if (b.getText().equals(s))
-                            b.setSelected(true);
-                    }
+        imageDisplay.addChangeListener(ce -> {
+            ImageChangeEvent e = (ImageChangeEvent) ce;
+            if (e.isNewScale()) {
+                String s = getScaleLabel(imageDisplay.getScale());
+                scaleMenu.setText(s);
+                int n = scaleMenu.getItemCount();
+                for (int i = 0; i < n; i++) {
+                    JRadioButtonMenuItem b = (JRadioButtonMenuItem) scaleMenu.getItem(i);
+                    if (b.getText().equals(s))
+                        b.setSelected(true);
                 }
             }
         });
@@ -295,12 +259,7 @@ public class ImageDisplayPanel extends JPanel implements MouseMotionListener {
     protected void addScaleMenuItem(ButtonGroup group, String label, float value) {
         JRadioButtonMenuItem b = new JRadioButtonMenuItem(label);
         b.setActionCommand(Float.toString(value));
-        b.addActionListener(new ActionListener() {
-
-            public void actionPerformed(ActionEvent e) {
-                setScale(Float.parseFloat(e.getActionCommand()));
-            }
-        });
+        b.addActionListener(e -> setScale(Float.parseFloat(e.getActionCommand())));
         group.add(b);
         scaleMenu.add(b);
     }
@@ -376,21 +335,11 @@ public class ImageDisplayPanel extends JPanel implements MouseMotionListener {
     protected void makeZoomButtons() {
         zoomInButton = new JButton(Resources.getIcon("magnify.xbm"));
         zoomInButton.setToolTipText("Zoom in");
-        zoomInButton.addActionListener(new ActionListener() {
-
-            public void actionPerformed(ActionEvent ev) {
-                incScale(true);
-            }
-        });
+        zoomInButton.addActionListener(ev -> incScale(true));
 
         zoomOutButton = new JButton(Resources.getIcon("shrink.xbm"));
         zoomInButton.setToolTipText("Zoom out");
-        zoomOutButton.addActionListener(new ActionListener() {
-
-            public void actionPerformed(ActionEvent ev) {
-                incScale(false);
-            }
-        });
+        zoomOutButton.addActionListener(ev -> incScale(false));
     }
 
 
@@ -651,7 +600,6 @@ public class ImageDisplayPanel extends JPanel implements MouseMotionListener {
             if (im != null) {
                 SampleModel sampleModel = im.getSampleModel();
                 if (sampleModel != null) {
-                    int dataType = sampleModel.getDataType();
                     if (pixel == imageProcessor.getBlank()) {
                         valueValue.setText("blank");
                     } else {

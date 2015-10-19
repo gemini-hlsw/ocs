@@ -1,10 +1,3 @@
-/*
- * Copyright 2000 Association for Universities for Research in Astronomy, Inc.,
- * Observatory Control System, Gemini Telescopes Project.
- *
- * $Id: ImageHistoryItem.java 39256 2011-11-22 17:42:49Z swalker $
- */
-
 package jsky.image.gui;
 
 import jsky.coords.WorldCoords;
@@ -210,7 +203,7 @@ public final class ImageHistoryItem extends AbstractAction implements ChangeList
     }
 
     public static LinkedList<Data> map(LinkedList<ImageHistoryItem> history) {
-        final LinkedList<Data> res = new LinkedList<Data>();
+        final LinkedList<Data> res = new LinkedList<>();
         for (ImageHistoryItem ihi : history) {
             res.add(ihi.data);
         }
@@ -218,7 +211,7 @@ public final class ImageHistoryItem extends AbstractAction implements ChangeList
     }
 
     public static LinkedList<ImageHistoryItem> apply(LinkedList<Data> data) {
-        final LinkedList<ImageHistoryItem> res = new LinkedList<ImageHistoryItem>();
+        final LinkedList<ImageHistoryItem> res = new LinkedList<>();
         for (Data d : data) {
             res.add(new ImageHistoryItem(d));
         }

@@ -1,9 +1,3 @@
-// Copyright 1997 Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-// See the file LICENSE for complete details.
-//
-// $Id: TpeImageInfo.java 4725 2004-05-14 16:32:54Z brighton $
-//
 package jsky.app.ot.tpe;
 
 import java.awt.geom.AffineTransform;
@@ -13,7 +7,6 @@ import edu.gemini.spModel.core.Angle$;
 import edu.gemini.spModel.inst.FeatureGeometry;
 import jsky.coords.WorldCoords;
 import edu.gemini.spModel.util.Angle;
-
 
 public final class TpeImageInfo {
 
@@ -93,7 +86,6 @@ public final class TpeImageInfo {
      * Set the scale of the image in pixels per arcsec.
      */
     void setPixelsPerArcsec(double d) {
-        //System.out.println("XXX TpeImageInfo: PixelsPerArcsec = " + d);
         _pixelsPerArcsec = d;
     }
 

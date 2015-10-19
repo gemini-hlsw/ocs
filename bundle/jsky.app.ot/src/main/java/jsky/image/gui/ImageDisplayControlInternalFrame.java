@@ -1,13 +1,3 @@
-/*
- * ESO Archive
- *
- * $Id: ImageDisplayControlInternalFrame.java 4414 2004-02-03 16:21:36Z brighton $
- *
- * who             when        what
- * --------------  ----------  ----------------------------------------
- * Allan Brighton  1999/11/29  Created
- */
-
 package jsky.image.gui;
 
 import java.awt.BorderLayout;
@@ -37,9 +27,6 @@ public class ImageDisplayControlInternalFrame extends JInternalFrame {
     /** Panel containing image display and controls */
     protected ImageDisplayControl imageDisplayControl;
 
-    // These are used make new frames visible by putting them in different locations
-    private static int openFrameCount = 0;
-
     /**
      * Create a top level window containing an ImageDisplayControl panel.
      *
@@ -61,7 +48,6 @@ public class ImageDisplayControlInternalFrame extends JInternalFrame {
         // set default window size and remember changes between sessions
         Preferences.manageSize(imageDisplayControl, new Dimension(600, 500));
         Preferences.manageLocation(this);
-        openFrameCount++;
 
         pack();
         setResizable(true);

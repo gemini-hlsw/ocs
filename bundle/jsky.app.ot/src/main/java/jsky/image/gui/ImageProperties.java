@@ -1,20 +1,8 @@
-/*
- * ESO Archive
- *
- * $Id: ImageProperties.java 4414 2004-02-03 16:21:36Z brighton $
- *
- * who             when        what
- * --------------  ----------  ----------------------------------------
- * Allan Brighton  1999/05/03  Created
- */
-
 package jsky.image.gui;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.FlowLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.TreeSet;
 
 import javax.media.jai.PlanarImage;
@@ -22,13 +10,10 @@ import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import javax.swing.table.DefaultTableModel;
 
 import jsky.image.ImageChangeEvent;
 import jsky.util.gui.SortedJTable;
-
 
 /**
  * Dialog to view the image properties.
@@ -64,13 +49,10 @@ public class ImageProperties extends JPanel {
         add(makeButtonPanel(), BorderLayout.SOUTH);
 
         // register to receive notification when the image changes
-        imageDisplay.addChangeListener(new ChangeListener() {
-
-            public void stateChanged(ChangeEvent ce) {
-                ImageChangeEvent e = (ImageChangeEvent) ce;
-                if (e.isNewImage() && !e.isBefore())
-                    updateDisplay();
-            }
+        imageDisplay.addChangeListener(ce -> {
+            ImageChangeEvent e = (ImageChangeEvent) ce;
+            if (e.isNewImage() && !e.isBefore())
+                updateDisplay();
         });
 
 
@@ -85,8 +67,7 @@ public class ImageProperties extends JPanel {
     JScrollPane makeTable() {
         table = new SortedJTable();
         table.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
-        JScrollPane propertyScrollPane = new JScrollPane(table);
-        return propertyScrollPane;
+        return new JScrollPane(table);
     }
 
 
@@ -99,12 +80,7 @@ public class ImageProperties extends JPanel {
 
         JButton closeButton = new JButton("Close");
         panel.add(closeButton);
-        closeButton.addActionListener(new ActionListener() {
-
-            public void actionPerformed(ActionEvent ev) {
-                close();
-            }
-        });
+        closeButton.addActionListener(ev -> close());
 
         return panel;
     }
@@ -125,8 +101,7 @@ public class ImageProperties extends JPanel {
 
         // Sort the property keyword and remove the ones that can't be displayed
         // (they might not all be strings...)
-        TreeSet treeSet = new TreeSet();
-        int n = 0;
+        TreeSet<String> treeSet = new TreeSet<>();
         for (int i = 0; i < numProperties; i++) {
             String name = propertyNames[i];
             // note: special properties may start with "#" and are not listed
@@ -135,7 +110,6 @@ public class ImageProperties extends JPanel {
             }
             // XXX who is converting the keywords to lower case?
             treeSet.add(name.toUpperCase());
-            n++;
         }
 
         Object[] keys = treeSet.toArray();

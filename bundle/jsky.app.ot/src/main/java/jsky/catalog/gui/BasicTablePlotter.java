@@ -293,11 +293,10 @@ public class BasicTablePlotter
     }
 
 
-    /*
+    /**
      * Plot the symbol for the given row.
      * The row data is taken from the given row vector.
      *
-     * @param table describes the table data
      * @param row the row number (first row is 0)
      * @param rowVec a vector containing the row elements
      * @param x the X position coordinate
@@ -332,10 +331,9 @@ public class BasicTablePlotter
     }
 
 
-    /*
+    /**
      * Plot the given symbol.
      *
-     * @param table describes the table data
      * @param row the row number (starting with 0)
      * @param symbol an object describing the symbol
      * @param x the X position coordinate

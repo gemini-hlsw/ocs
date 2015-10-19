@@ -1,19 +1,8 @@
-/*
- * $Id: NavigatorPane.java 4414 2004-02-03 16:21:36Z brighton $
- *
- * Copyright (c) 1998-2000 The Regents of the University of California.
- * All rights reserved. See the file LICENSE for details.
- */
-
 package jsky.navigator;
 
 import diva.canvas.GraphicsPane;
 import diva.canvas.CanvasLayer;
 import jsky.catalog.gui.TablePlotter;
-
-import java.awt.Graphics2D;
-import java.awt.geom.Rectangle2D;
-
 
 /**
  * A Diva GraphicsPane with a layer added for plotting catalog symbols.
@@ -57,7 +46,7 @@ public class NavigatorPane extends GraphicsPane {
         _layers[cursor++] = _overlayLayer;
         _layers[cursor++] = _foregroundLayer;
         _layers[cursor++] = _backgroundLayer;
-        _layers[cursor++] = _backgroundEventLayer;
+        _layers[cursor] = _backgroundEventLayer;
     }
 }
 

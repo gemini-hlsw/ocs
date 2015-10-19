@@ -1,15 +1,10 @@
 package jsky.image.gui;
 
-
 import edu.gemini.shared.util.immutable.Pair;
 import jsky.image.ImageChangeEvent;
 import jsky.util.I18N;
 
 import javax.swing.*;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.HashMap;
 
 public final class ImageScaleMenu extends JMenu {
@@ -34,12 +29,9 @@ public final class ImageScaleMenu extends JMenu {
                 final Pair<Integer, Integer> rational = o.createRationalScaleForIndex(i);
 
                 final JRadioButtonMenuItem b = new JRadioButtonMenuItem(o.createLabelForIndex(i));
-                b.addActionListener(new ActionListener() {
-                    @Override
-                    public void actionPerformed(ActionEvent e) {
-                        imageDisplay.setScale(scale);
-                        imageDisplay.updateImage();
-                    }
+                b.addActionListener(e -> {
+                    imageDisplay.setScale(scale);
+                    imageDisplay.updateImage();
                 });
                 group.add(b);
                 menu.add(b);
@@ -51,21 +43,17 @@ public final class ImageScaleMenu extends JMenu {
         /** Create the fit to window menu item **/
         final JMenuItem menuItem = new JMenuItem(_I18N.getString("fitImageInWindow"));
 
-        menuItem.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent ae) {
-                imageDisplay.scaleToFit();
-                imageDisplay.updateImage();
-            }
+        menuItem.addActionListener(ae -> {
+            imageDisplay.scaleToFit();
+            imageDisplay.updateImage();
         });
         add(menuItem);
 
         /** Register a change listener to set the button if the scaling is changed externally. **/
-        imageDisplay.addChangeListener(new ChangeListener() {
-            public void stateChanged(ChangeEvent ce) {
-                final ImageChangeEvent e = (ImageChangeEvent) ce;
-                if (e.isNewScale())
-                    enableButtonForScale(imageDisplay.getScale());
-            }
+        imageDisplay.addChangeListener(ce -> {
+            final ImageChangeEvent e = (ImageChangeEvent) ce;
+            if (e.isNewScale())
+                enableButtonForScale(imageDisplay.getScale());
         });
 
         // Set the default button to selected.

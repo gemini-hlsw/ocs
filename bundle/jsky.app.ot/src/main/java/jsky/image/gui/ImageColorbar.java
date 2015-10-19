@@ -1,16 +1,3 @@
-/*
- * ESO Archive
- *
- * $Id: ImageColorbar.java 4414 2004-02-03 16:21:36Z brighton $
- *
- * who             when        what
- * --------------  ----------  ----------------------------------------
- * Allan Brighton  1999/11/17  Created
- *
- * Frank Tanner    2001/12/20  Added Constructor to use only the
- * 		   most minimal of information.
- */
-
 package jsky.image.gui;
 
 import java.awt.Color;
@@ -21,14 +8,11 @@ import java.awt.event.MouseEvent;
 import javax.media.jai.LookupTableJAI;
 import javax.swing.JComponent;
 import javax.swing.SwingConstants;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import javax.swing.event.MouseInputListener;
 
 import jsky.image.BasicImageReadableProcessor;
 import jsky.image.ImageChangeEvent;
 import jsky.image.ImageProcessor;
-
 
 /**
  * This widget displays a color bar with the colors used in the image
@@ -100,13 +84,10 @@ public class ImageColorbar extends JComponent implements MouseInputListener {
         addMouseMotionListener(this);
 
         // register to receive notification when the colormap changes
-        imageProcessor.addChangeListener(new ChangeListener() {
-
-            public void stateChanged(ChangeEvent ce) {
-                ImageChangeEvent e = (ImageChangeEvent) ce;
-                if (e.isNewColormap())
-                    newColormap();
-            }
+        imageProcessor.addChangeListener(ce -> {
+            ImageChangeEvent e = (ImageChangeEvent) ce;
+            if (e.isNewColormap())
+                newColormap();
         });
 
         newColormap();

@@ -1,17 +1,9 @@
-/*
- * Copyright 2000 Association for Universities for Research in Astronomy, Inc.,
- * Observatory Control System, Gemini Telescopes Project.
- *
- * $Id: PickObjectInternalFrame.java 4414 2004-02-03 16:21:36Z brighton $
- */
-
 package jsky.image.gui;
 
 import java.awt.BorderLayout;
 import javax.swing.JInternalFrame;
 
 import jsky.util.Preferences;
-
 
 /**
  * Provides a top level window for a PickObject panel.

@@ -1,13 +1,3 @@
-/*
- * ESO Archive
- *
- * $Id: ImageDisplay.java 5923 2005-03-30 20:24:42Z brighton $
- *
- * who             when        what
- * --------------  ----------  ----------------------------------------
- * Allan Brighton  1999/05/03  Created
- */
-
 package jsky.image.gui;
 
 import java.awt.AlphaComposite;
@@ -47,7 +37,6 @@ import jsky.image.EmptyRenderedImage;
 import jsky.image.ImageProcessor;
 import jsky.image.operator.ImageOps;
 import jsky.util.gui.BasicWindowMonitor;
-
 
 /**
  * Implements a JAI (Java Advanced Imaging) based image
@@ -430,28 +419,28 @@ public class ImageDisplay extends JComponent
     }
 
 
-    private final int _XtoTileX(int x) {
+    private int _XtoTileX(int x) {
         return (int) Math.floor((double) (x - _tileGridXOffset) / _tileWidth);
     }
 
-    private final int _YtoTileY(int y) {
+    private int _YtoTileY(int y) {
         return (int) Math.floor((double) (y - _tileGridYOffset) / _tileHeight);
     }
 
-    private final int _TileXtoX(int tx) {
+    private int _TileXtoX(int tx) {
         return tx * _tileWidth + _tileGridXOffset;
     }
 
-    private final int _TileYtoY(int ty) {
+    private int _TileYtoY(int ty) {
         return ty * _tileHeight + _tileGridYOffset;
     }
 
     // speed up math min and max by inlining
-    private final int _maxInt(int a, int b) {
+    private int _maxInt(int a, int b) {
         return a > b ? a : b;
     }
 
-    private final int _minInt(int a, int b) {
+    private int _minInt(int a, int b) {
         return (a <= b) ? a : b;
     }
 

@@ -1,15 +1,4 @@
-/*
- * ESO Archive
- *
- * $Id: ImageLayer.java 4414 2004-02-03 16:21:36Z brighton $
- *
- * who             when        what
- * --------------  ----------  ----------------------------------------
- * Allan Brighton  1999/05/03  Created
- */
-
 package jsky.image.graphics;
-
 
 import java.awt.Graphics2D;
 import java.awt.geom.Rectangle2D;
@@ -18,7 +7,6 @@ import jsky.image.gui.DivaGraphicsImageDisplay;
 
 import diva.canvas.CanvasLayer;
 import diva.canvas.VisibleComponent;
-
 
 /**
  * Defines a Diva canvas layer for displaying an image.

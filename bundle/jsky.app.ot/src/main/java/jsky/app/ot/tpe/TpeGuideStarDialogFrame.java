@@ -1,10 +1,3 @@
-/*
- * Copyright 2000 Association for Universities for Research in Astronomy, Inc.,
- * Observatory Control System, Gemini Telescopes Project.
- *
- * $Id: TpeGuideStarDialogFrame.java 4725 2004-05-14 16:32:54Z brighton $
- */
-
 package jsky.app.ot.tpe;
 
 import java.awt.BorderLayout;
@@ -14,10 +7,10 @@ import javax.swing.JFrame;
 
 import jsky.util.Preferences;
 
-
 /**
  * Provides a frame containing a TpeGuideStarDialog.
  */
+@Deprecated
 class TpeGuideStarDialogFrame extends JFrame {
 
     /**

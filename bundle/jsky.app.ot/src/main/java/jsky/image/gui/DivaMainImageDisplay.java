@@ -1779,5 +1779,3 @@ public class DivaMainImageDisplay extends DivaGraphicsImageDisplay implements Ma
         return null; // no defaults here
     }
 }
-
-

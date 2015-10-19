@@ -1,10 +1,3 @@
-/*
- * Copyright 2000 Association for Universities for Research in Astronomy, Inc.,
- * Observatory Control System, Gemini Telescopes Project.
- *
- * $Id: PickObject.java 4414 2004-02-03 16:21:36Z brighton $
- */
-
 package jsky.image.gui;
 
 import java.awt.BasicStroke;
@@ -31,7 +24,6 @@ import jsky.image.ImageChangeEvent;
 import jsky.util.I18N;
 import jsky.util.Resources;
 import jsky.util.gui.DialogUtil;
-
 
 /**
  * A User interface for selecting objects (stars/galaxies) in an image.
@@ -321,7 +313,7 @@ public class PickObject extends PickObjectGUI
         magLabel.setText("" + ((int) zoomScale) + "x");
 
         Component c = (Component) _imageDisplay;
-        int w = c.getWidth(), h = c.getHeight();
+        int w = c.getWidth();
         _zoomWidth = (int) (w / zoomScale);
 
 

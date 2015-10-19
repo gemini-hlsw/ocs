@@ -1,7 +1,6 @@
 package jsky.app.ot.tpe;
 
 import edu.gemini.pot.sp.*;
-import edu.gemini.shared.util.immutable.None;
 import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.spModel.data.ISPDataObject;
 import edu.gemini.spModel.gemini.nici.SeqRepeatNiciOffset;
@@ -272,7 +271,7 @@ public class TelescopePosEditor extends JSkyCat implements TpeMouseObserver {
      * Load a cached image for the base position, or generate a blank image with
      * world coordinate support and the base position at the center.
      */
-    public void loadImage() {
+    private void loadImage() {
         double ra = 0.0;
         double dec = 0.0;
         SPTarget tp = _ctx.targets().baseOrNull();

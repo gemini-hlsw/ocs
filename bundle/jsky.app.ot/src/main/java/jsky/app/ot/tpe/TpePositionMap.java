@@ -1,9 +1,3 @@
-// Copyright 1997 Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-// See the file LICENSE for complete details.
-//
-// $Id: TpePositionMap.java 24632 2010-03-17 15:40:54Z swalker $
-//
 package jsky.app.ot.tpe;
 
 import edu.gemini.spModel.target.SPTarget;
@@ -20,7 +14,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
 
 /**
  * An auxiliary class used to maintain a mapping between telescope positions

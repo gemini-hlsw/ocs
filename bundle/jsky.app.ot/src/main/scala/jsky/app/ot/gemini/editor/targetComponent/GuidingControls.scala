@@ -1,9 +1,6 @@
 package jsky.app.ot.gemini.editor.targetComponent
 
-import edu.gemini.ags.api._
 import edu.gemini.spModel.obs.context.ObsContext
-import edu.gemini.spModel.rich.shared.immutable._
-import jsky.app.ot.OT
 
 import jsky.app.ot.ags.AgsContext
 
@@ -37,10 +34,6 @@ class GuidingControls extends GridBagPanel {
   }
 
   def update(ctxOpt: edu.gemini.shared.util.immutable.Option[ObsContext]): Unit = {
-    val analysis = (for {
-      ctx <- ctxOpt.asScalaOpt
-      str <- AgsRegistrar.currentStrategy(ctx)
-    } yield str.analyze(ctx, OT.getMagnitudeTable)).getOrElse(List.empty)
     autoGuideStarGuiderSelector.setAgsOptions(AgsContext.create(ctxOpt))
   }
 

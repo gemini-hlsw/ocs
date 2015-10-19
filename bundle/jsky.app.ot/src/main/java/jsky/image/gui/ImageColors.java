@@ -1,24 +1,10 @@
-/*
- * ESO Archive
- *
- * $Id: ImageColors.java 4414 2004-02-03 16:21:36Z brighton $
- *
- * who             when        what
- * --------------  ----------  ----------------------------------------
- * Allan Brighton  1999/12/06  Created
- *
- * Frank Tanner    2001/12/19  Changed constructor to be passed a
- *	 		       BasicImageReadableProcessor interface
- *			       instead of a full blown BasicImageDisplay.
- */
-
 package jsky.image.gui;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.FlowLayout;
-import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
@@ -30,10 +16,6 @@ import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.border.Border;
 import javax.swing.border.TitledBorder;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
 
 import jsky.image.BasicImageReadableProcessor;
 import jsky.image.ImageChangeEvent;
@@ -43,7 +25,6 @@ import jsky.image.ImageColormap;
 import jsky.image.ImageLookup;
 import jsky.image.ImageProcessor;
 import jsky.util.I18N;
-
 
 /**
  * Dialog to select image colormaps and color scaling algorithms.
@@ -69,13 +50,13 @@ public class ImageColors extends JPanel {
     String[] colormaps = ImageColorLUTs.getLUTNames();
 
     /** List displaying colormap names */
-    JList colormapList = new JList(colormaps);
+    JList<String> colormapList = new JList<>(colormaps);
 
     /** Array of predefined intensity transfer table names */
     String[] itts = ImageColorITTs.getITTNames();
 
     /** List displaying itt names */
-    JList intensityList = new JList(itts);
+    JList<String> intensityList = new JList<>(itts);
 
     /** Linear Scale button */
     protected JRadioButton linearScale = new JRadioButton(_I18N.getString("linearScale"));
@@ -107,13 +88,10 @@ public class ImageColors extends JPanel {
         add(makeMainPanel(), BorderLayout.CENTER);
         add(makeButtonPanel(), BorderLayout.SOUTH);
 
-        imageProcessor.addChangeListener(new ChangeListener() {
-
-            public void stateChanged(ChangeEvent ce) {
-                ImageChangeEvent e = (ImageChangeEvent) ce;
-                if (e.isNewColormap())
-                    updateDisplay();
-            }
+        imageProcessor.addChangeListener(ce -> {
+            ImageChangeEvent e = (ImageChangeEvent) ce;
+            if (e.isNewColormap())
+                updateDisplay();
         });
 
         // initialize the display
@@ -157,12 +135,9 @@ public class ImageColors extends JPanel {
         // default selection
         linearScale.setSelected(true);
 
-        ActionListener l = new ActionListener() {
-
-            public void actionPerformed(ActionEvent e) {
-                if (!ignoreEvents)
-                    setScaleAlgorithm(e.getActionCommand());
-            }
+        ActionListener l = e -> {
+            if (!ignoreEvents)
+                setScaleAlgorithm(e.getActionCommand());
         };
 
         linearScale.addActionListener(l);
@@ -193,6 +168,7 @@ public class ImageColors extends JPanel {
 
 
     /** Make and return the list box with the list of colormaps  */
+    @SuppressWarnings("unchecked")
     protected JPanel makeColormapListPanel() {
         JPanel panel = new JPanel();
         Border border = BorderFactory.createEtchedBorder();
@@ -205,16 +181,13 @@ public class ImageColors extends JPanel {
         panel.add(scrollPane);
 
         // Register to receive selection events
-        colormapList.addListSelectionListener(new ListSelectionListener() {
-
-            public void valueChanged(ListSelectionEvent evt) {
-                if (!ignoreEvents) {
-                    JList src = (JList) evt.getSource();
-                    if (evt.getValueIsAdjusting() == false) {
-                        Object[] selectedValues = src.getSelectedValues();
-                        if (selectedValues.length >= 1) {
-                            setColormap((String) (selectedValues[0]));
-                        }
+        colormapList.addListSelectionListener(evt -> {
+            if (!ignoreEvents) {
+                final JList<String> src = (JList<String>) evt.getSource();
+                if (!evt.getValueIsAdjusting()) {
+                    final List<String> selectedValues = src.getSelectedValuesList();
+                    if (!selectedValues.isEmpty()) {
+                        setColormap(selectedValues.get(0));
                     }
                 }
             }
@@ -234,6 +207,7 @@ public class ImageColors extends JPanel {
 
 
     /** Make and return the list box with the list of intensity tables  */
+    @SuppressWarnings("unchecked")
     protected JPanel makeIntensityListPanel() {
         JPanel panel = new JPanel();
         Border border = BorderFactory.createEtchedBorder();
@@ -245,16 +219,13 @@ public class ImageColors extends JPanel {
         panel.add(scrollPane);
 
         // Register to receive selection events
-        intensityList.addListSelectionListener(new ListSelectionListener() {
-
-            public void valueChanged(ListSelectionEvent evt) {
-                if (!ignoreEvents) {
-                    JList src = (JList) evt.getSource();
-                    if (evt.getValueIsAdjusting() == false) {
-                        Object[] selectedValues = src.getSelectedValues();
-                        if (selectedValues.length >= 1) {
-                            setIntensityLookupTable((String) (selectedValues[0]));
-                        }
+        intensityList.addListSelectionListener(evt -> {
+            if (!ignoreEvents) {
+                final JList<String> src = (JList<String>) evt.getSource();
+                if (!evt.getValueIsAdjusting()) {
+                    final List<String> selectedValues = src.getSelectedValuesList();
+                    if (!selectedValues.isEmpty()) {
+                        setIntensityLookupTable(selectedValues.get(0));
                     }
                 }
             }
@@ -283,22 +254,12 @@ public class ImageColors extends JPanel {
         JButton resetButton = new JButton(_I18N.getString("reset"));
         resetButton.setToolTipText(_I18N.getString("resetTip"));
         panel.add(resetButton);
-        resetButton.addActionListener(new ActionListener() {
-
-            public void actionPerformed(ActionEvent ev) {
-                reset();
-            }
-        });
+        resetButton.addActionListener(ev -> reset());
 
         JButton closeButton = new JButton(_I18N.getString("close"));
         closeButton.setToolTipText(_I18N.getString("closeTip"));
         panel.add(closeButton);
-        closeButton.addActionListener(new ActionListener() {
-
-            public void actionPerformed(ActionEvent ev) {
-                close();
-            }
-        });
+        closeButton.addActionListener(ev -> close());
 
         return panel;
     }

@@ -1,21 +1,12 @@
-/*
- * $Id: SymbolLayer.java 4414 2004-02-03 16:21:36Z brighton $
- *
- * Copyright (c) 1998-2000 The Regents of the University of California.
- * All rights reserved. See the file LICENSE for details.
- */
-
 package jsky.navigator;
 
 import diva.canvas.CanvasLayer;
-import diva.canvas.GraphicsPane;
 import diva.canvas.VisibleComponent;
 
 import java.awt.Graphics2D;
 import java.awt.geom.Rectangle2D;
 
 import jsky.catalog.gui.TablePlotter;
-
 
 public class SymbolLayer extends CanvasLayer implements VisibleComponent {
 
@@ -35,6 +26,7 @@ public class SymbolLayer extends CanvasLayer implements VisibleComponent {
             _plotter.paintSymbols(g, null);
     }
 
+    @Deprecated
     public void paint(Graphics2D g, Rectangle2D region) {
         if (_plotter != null)
             _plotter.paintSymbols(g, region);

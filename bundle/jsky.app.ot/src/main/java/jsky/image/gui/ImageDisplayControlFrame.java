@@ -1,13 +1,3 @@
-/*
- * ESO Archive
- *
- * $Id: ImageDisplayControlFrame.java 5923 2005-03-30 20:24:42Z brighton $
- *
- * who             when        what
- * --------------  ----------  ----------------------------------------
- * Allan Brighton  1999/05/03  Created
- */
-
 package jsky.image.gui;
 
 import java.awt.*;

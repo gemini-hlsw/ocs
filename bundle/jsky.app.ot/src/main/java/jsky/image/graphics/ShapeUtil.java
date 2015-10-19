@@ -1,15 +1,7 @@
-/*
- * Copyright 2000 Association for Universities for Research in Astronomy, Inc.,
- * Observatory Control System, Gemini Telescopes Project.
- *
- * $Id: ShapeUtil.java 4414 2004-02-03 16:21:36Z brighton $
- */
-
 package jsky.image.graphics;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Font;
 import java.awt.Shape;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Ellipse2D;
@@ -18,16 +10,11 @@ import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import javax.swing.JFrame;
-import javax.swing.SwingConstants;
 
-import diva.canvas.interactor.DragInteractor;
-import diva.canvas.interactor.Interactor;
 import diva.canvas.interactor.SelectionInteractor;
 import diva.util.java2d.Polygon2D;
-import jsky.coords.CoordinateConverter;
 import jsky.image.gui.DivaGraphicsImageDisplay;
 import jsky.util.gui.BasicWindowMonitor;
-
 
 /**
  * Utility methods for generating various common Shapes for drawing figures.
@@ -199,8 +186,7 @@ public class ShapeUtil {
                                  Point2D.Double east) {
 
         Point2D.Double south = new Point2D.Double(center.x - (north.x - center.x), center.y - (north.y - center.y));
-        Line2D.Double p = new Line2D.Double(north, south);
-        return p;
+        return new Line2D.Double(north, south);
     }
 
     /**
@@ -284,12 +270,7 @@ public class ShapeUtil {
 
         // Add some test objects
         DivaImageGraphics g = new DivaImageGraphics(imageDisplay);
-        CoordinateConverter coordinateConverter = imageDisplay.getCoordinateConverter();
         SelectionInteractor si = g.getSelectionInteractor();
-        SelectionInteractor fsi = g.getFixedSelectionInteractor();
-        DragInteractor di = g.getDragInteractor();
-        int anchor = SwingConstants.CENTER;
-        Font font = new Font("Dialog", Font.PLAIN, 10);
 
         Point2D.Double center = new Point2D.Double(50, 50);
         Point2D.Double north = new Point2D.Double(65, 20);
@@ -298,9 +279,8 @@ public class ShapeUtil {
         Color fill = Color.blue;
         Color outline = Color.yellow;
         float lineWidth = 1;
-        Interactor interactor = si;
 
-        g.add(g.makeFigure(shape, fill, outline, lineWidth, interactor));
+        g.add(g.makeFigure(shape, fill, outline, lineWidth, si));
 
         frame.getContentPane().add(imageDisplay, BorderLayout.CENTER);
         frame.pack();

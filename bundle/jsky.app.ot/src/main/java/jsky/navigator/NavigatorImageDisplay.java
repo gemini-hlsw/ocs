@@ -4,6 +4,7 @@ import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.geom.AffineTransform;
 import java.util.HashSet;
+import java.util.Set;
 
 import javax.swing.AbstractAction;
 import javax.swing.JDesktopPane;
@@ -11,7 +12,6 @@ import javax.swing.JFrame;
 import javax.swing.JInternalFrame;
 import javax.swing.JLayeredPane;
 
-import edu.gemini.catalog.ui.QueryResultsFrame;
 import jsky.catalog.Catalog;
 import jsky.catalog.CatalogDirectory;
 import jsky.catalog.TableQueryResult;
@@ -47,13 +47,13 @@ public class NavigatorImageDisplay extends DivaMainImageDisplay
     private Navigator _navigator;
 
     /** The Diva pane containing the added catalog symbol layer. */
-    private NavigatorPane _navigatorPane;
+    private final NavigatorPane _navigatorPane;
 
     /** The catalog navigator frame (or internal frame) */
     private Component _navigatorFrame;
 
     /** Set of filenames: Used to keep track of the files visited in this session. */
-    private HashSet _filesVisited = new HashSet();
+    private final Set<String> _filesVisited = new HashSet<>();
 
     /** Action to use to show the catalog window (Browse catalogs) */
     private AbstractAction _catalogBrowseAction = new AbstractAction(
