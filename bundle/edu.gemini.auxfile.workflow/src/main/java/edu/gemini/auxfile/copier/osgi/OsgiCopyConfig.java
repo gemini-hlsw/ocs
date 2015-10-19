@@ -43,18 +43,36 @@ final class OsgiCopyConfig extends CopyConfig {
         _destTmpl = getProperty(type, ctx, DEST_KEY);
     }
 
-    private static String getProperty(AuxFileType type, BundleContext ctx, String key) {
-        StringBuilder buf = new StringBuilder();
+    private static String getProperty(final AuxFileType type, final BundleContext ctx, final String key) {
+
+        final String cfgProp = buildPropertyName(type, key);
+        final String defProp = buildPropertyName(AuxFileType.other, key);
+        final String cfg = ctx.getProperty(cfgProp);
+        final String def = ctx.getProperty(defProp);
+
+        if        (cfg != null) {
+            // this aux file type has a specific config, use it
+            LOG.info("config for " + cfgProp + ": " + cfg);
+            return cfg;
+
+        } else if (def != null) {
+            // if this aux file type does not have a specific configuration we
+            // use the configuration for file type "other" as a default instead
+            LOG.info("using default config for " + cfgProp + ": " + def);
+            return def;
+
+        } else {
+            // no config found!
+            throw new RuntimeException("Missing configuration: " + cfgProp);
+        }
+    }
+
+    private static String buildPropertyName(final AuxFileType type, final String key) {
+        final StringBuilder buf = new StringBuilder();
         buf.append(CONFIG_PREFIX).append('.');
         buf.append(type.name()).append('.');
         buf.append(key);
-
-        String res = ctx.getProperty(buf.toString());
-        if (res == null) {
-            throw new RuntimeException("Missing configuration: " + buf.toString());
-        }
-
-        return res;
+        return buf.toString();
     }
 
     public AuxFileType getFileType() {

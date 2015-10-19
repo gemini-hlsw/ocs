@@ -7,6 +7,8 @@ import edu.gemini.itc.flamingos2.Flamingos2;
 import edu.gemini.itc.flamingos2.Flamingos2Recipe;
 import edu.gemini.itc.shared.*;
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2.FPUnit;
+import edu.gemini.spModel.target.PointSource$;
+import edu.gemini.spModel.target.UniformSource$;
 import scala.Tuple2;
 import scala.collection.JavaConversions;
 
@@ -57,13 +59,10 @@ public final class Flamingos2Printer extends PrinterBase {
         if (!result.parameters().observation().isAutoAperture()) {
             _println(String.format("software aperture extent along slit = %.2f arcsec", result.parameters().observation().getApertureDiameter()));
         } else {
-            switch (result.parameters().source().getProfileType()) {
-                case UNIFORM:
-                    _println(String.format("software aperture extent along slit = %.2f arcsec", 1 / instrument.getSlitSize() * result.instrument().getPixelSize()));
-                    break;
-                case POINT:
-                    _println(String.format("software aperture extent along slit = %.2f arcsec", 1.4 * result.iqCalc().getImageQuality()));
-                    break;
+            if (result.source().profile() == UniformSource$.MODULE$) {
+                _println(String.format("software aperture extent along slit = %.2f arcsec", 1 / instrument.getSlitSize() * result.instrument().getPixelSize()));
+            } else if (result.source().profile() == PointSource$.MODULE$) {
+                _println(String.format("software aperture extent along slit = %.2f arcsec", 1.4 * result.iqCalc().getImageQuality()));
             }
         }
 

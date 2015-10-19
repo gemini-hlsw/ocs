@@ -56,8 +56,9 @@ public final class GsaoiRecipe implements ImagingRecipe {
 
         // Gems specific section
         final Gems gems = new Gems(instrument.getEffectiveWavelength(),
-                _telescope.getTelescopeDiameter(), IQcalc.getImageQuality(),
-                _gsaoiParameters.gems().avgStrehl(), _gsaoiParameters.gems().strehlBand(),
+                IQcalc.getImageQuality(),
+                _gsaoiParameters.gems().avgStrehl(),
+                _gsaoiParameters.gems().strehlBand(),
                 _obsConditionParameters.iq(),
                 _sdParameters);
 

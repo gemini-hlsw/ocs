@@ -56,8 +56,8 @@ object ItcParametersProvider {
     def spectralDistribution: String \/ SpectralDistribution =
       for {
         tEnv <- targetEnvironment
-        sp   <- tEnv.getBase.getTarget.getSpectralDistribution.fold("Spectral distribution not available".left[SpectralDistribution])(_.right)
-      } yield sp
+        sd   <- tEnv.getBase.getTarget.getSpectralDistribution.fold("Spectral distribution not available".left[SpectralDistribution])(_.right)
+      } yield sd
 
     def instrumentPort: String \/ IssPort =
       Option(owner.getContextIssPort).fold("No port information available".left[IssPort])(_.right)

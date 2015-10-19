@@ -26,7 +26,7 @@ class AuxFileModel(reg: VcsRegistrar) extends Publisher {
     for {
       s <- currentState
       p <- reg.registration(s.pid)
-    } yield new AuxFileClient(OT.getKeyChain, FileChunkSize, p.host, p.port)
+    } yield new AuxFileClient(OT.getKeyChain, p.host, p.port)
 
   private def update(pid: SPProgramID, condition: AuxFileState => Boolean)(modification: AuxFileState => AuxFileState) {
     if (currentState.exists(s => s.pid == pid && condition(s))) {

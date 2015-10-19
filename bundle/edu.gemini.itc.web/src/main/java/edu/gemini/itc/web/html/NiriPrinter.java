@@ -8,8 +8,9 @@ import edu.gemini.itc.base.TransmissionElement;
 import edu.gemini.itc.niri.Niri;
 import edu.gemini.itc.niri.NiriRecipe;
 import edu.gemini.itc.shared.*;
-import edu.gemini.itc.shared.SourceDefinition.Profile;
 import edu.gemini.spModel.gemini.niri.Niri.Mask;
+import edu.gemini.spModel.target.PointSource$;
+import edu.gemini.spModel.target.UniformSource$;
 import scala.Option;
 import scala.Tuple2;
 import scala.collection.JavaConversions;
@@ -61,9 +62,9 @@ public final class NiriPrinter extends PrinterBase {
         if (!result.observation().isAutoAperture()) {
             _println(String.format("software aperture extent along slit = %.2f arcsec", result.observation().getApertureDiameter()));
         } else {
-            if (result.source().getProfileType() == Profile.UNIFORM) {
+            if (result.source().profile() == UniformSource$.MODULE$) {
                 _println(String.format("software aperture extent along slit = %.2f arcsec", 1 / instrument.getFPMask()));
-            } else if (result.source().getProfileType() == Profile.POINT) {
+            } else if (result.source().profile() == PointSource$.MODULE$) {
                 _println(String.format("software aperture extent along slit = %.2f arcsec", 1.4 * result.specS2N()[0].getImageQuality()));
             }
         }

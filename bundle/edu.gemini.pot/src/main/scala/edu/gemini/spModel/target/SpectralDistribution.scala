@@ -2,7 +2,7 @@ package edu.gemini.spModel.target
 
 import edu.gemini.spModel.core.Wavelength
 import squants.motion.Velocity
-import squants.radio.{SpectralIrradiance, Irradiance}
+import squants.radio.{Irradiance, SpectralIrradiance}
 
 /** Definitions for the spectral distribution of a source.
   * A source can be anything from a star, galaxy, quasar or planet to a comet or asteroid. */
@@ -18,7 +18,18 @@ final case class PowerLaw(index: Double) extends SpectralDistribution
 final case class EmissionLine(wavelength: Wavelength, width: Velocity, flux: Irradiance, continuum: SpectralIrradiance) extends SpectralDistribution
 
 /** A user defined spectrum. */
-final case class UserDefined(spectrum: String) extends SpectralDistribution
+sealed trait UserDefined extends SpectralDistribution {
+  def name: String
+}
+/** User defined spectrum with a name and a spectrum definition as a string. */
+final case class UserDefinedSpectrum(name: String, spectrum: String) extends UserDefined
+/** A place holder for a user defined spectrum defined by an ODB auxiliary file for the given program. */
+final case class AuxFileSpectrum(programId: String, name: String) extends UserDefined
+object AuxFileSpectrum {
+  // Place holder for invalid states, e.g. the user has selected "User Defined" for the source distribution
+  // but there are no sed files or the selected aux file has been deleted.
+  val Undefined = AuxFileSpectrum("«undefined»", "«undefined»")
+}
 
 /** A library defined spectrum. */
 sealed trait Library extends SpectralDistribution {

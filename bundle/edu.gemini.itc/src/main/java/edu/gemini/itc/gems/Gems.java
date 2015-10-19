@@ -4,6 +4,8 @@ import edu.gemini.itc.base.AOSystem;
 import edu.gemini.itc.base.SampledSpectrumVisitor;
 import edu.gemini.itc.shared.SourceDefinition;
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality;
+import edu.gemini.spModel.target.GaussianSource;
+import edu.gemini.spModel.target.PointSource$;
 
 /**
  * Gems AO class
@@ -29,7 +31,7 @@ public class Gems implements AOSystem {
      */
     public static final String GEMS_TRANSMISSION_FILENAME = "transmission";
 
-    private double wavelength, telescopeDiameter, uncorrectedSeeing;
+    private double wavelength, uncorrectedSeeing;
     private static final double geometricFactor = 1.0;
 
     private GemsBackgroundVisitor gemsBackground;
@@ -48,12 +50,11 @@ public class Gems implements AOSystem {
     private final SourceDefinition source;
 
     //Constructor
-    public Gems(double wavelength, double telescopeDiameter, double uncorrectedSeeing, double avgStrehl,
+    public Gems(double wavelength, double uncorrectedSeeing, double avgStrehl,
                 String strehlBand, SPSiteQuality.ImageQuality iq, SourceDefinition source) {
         gemsBackground = new GemsBackgroundVisitor();
         gemsTransmission = new GemsTransmissionVisitor();
         this.wavelength = wavelength;
-        this.telescopeDiameter = telescopeDiameter;
         this.uncorrectedSeeing = uncorrectedSeeing;
         this.avgStrehl = avgStrehl;
         this.strehlBand = strehlBand;
@@ -129,41 +130,39 @@ public class Gems implements AOSystem {
 
     // TODO: passing a boolean is a temporary workaround in order to deal with caller that expects this method to throw an exception
     public double getAOCorrectedFWHM(boolean doThrow) {
-        switch (source.getProfileType()) {
-            case POINT:
-                // point source
-                switch (strehlBand.charAt(0)) {
-                    case 'J':
-                        switch (iq) {
-                            case PERCENT_20: return 0.08;
-                            case PERCENT_70: return 0.13;
-                            case PERCENT_85: return 0.15;
-                        }
-                        break;
-                    case 'H':
-                        switch (iq) {
-                            case PERCENT_20: return 0.07;
-                            case PERCENT_70: return 0.10;
-                            case PERCENT_85: return 0.13;
-                        }
-                        break;
-                    case 'K':
-                        switch (iq) {
-                            case PERCENT_20: return 0.06;
-                            case PERCENT_70: return 0.09;
-                            case PERCENT_85: return 0.12;
-                        }
-                        break;
+        if (source.profile() == PointSource$.MODULE$) {
+            // point source
+            switch (strehlBand.charAt(0)) {
+                case 'J':
+                    switch (iq) {
+                        case PERCENT_20: return 0.08;
+                        case PERCENT_70: return 0.13;
+                        case PERCENT_85: return 0.15;
+                    }
+                    break;
+                case 'H':
+                    switch (iq) {
+                        case PERCENT_20: return 0.07;
+                        case PERCENT_70: return 0.10;
+                        case PERCENT_85: return 0.13;
+                    }
+                    break;
+                case 'K':
+                    switch (iq) {
+                        case PERCENT_20: return 0.06;
+                        case PERCENT_70: return 0.09;
+                        case PERCENT_85: return 0.12;
+                    }
+                    break;
 
-                    default:
-                        throw new IllegalArgumentException("Current ITC implementation for GeMS does not support band " + strehlBand);
-                }
-                break;
+                default:
+                    throw new IllegalArgumentException("Current ITC implementation for GeMS does not support band " + strehlBand);
+            }
 
-            case GAUSSIAN:
-                return source.getFWHM();
+        } else if (source.profile() instanceof GaussianSource) {
+            return ((GaussianSource) source.profile()).fwhm();
 
-            default:
+        } else {
                 return 0.0;
         }
 

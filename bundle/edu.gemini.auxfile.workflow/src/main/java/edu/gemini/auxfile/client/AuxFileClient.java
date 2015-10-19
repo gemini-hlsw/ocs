@@ -7,13 +7,13 @@ import edu.gemini.spModel.core.SPProgramID;
 import edu.gemini.util.security.auth.keychain.KeyChain;
 import edu.gemini.util.trpc.client.TrpcClient$;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.Collection;
-import java.util.Collections;
 
 /**
  * An {@link AuxFileSystem} implementation that may be used by a client
@@ -21,15 +21,17 @@ import java.util.Collections;
  */
 public final class AuxFileClient implements AuxFileSystem {
 
-    private final int chunkSize;
+    private static final int FileChunkSize = 32 * 1024;
+
     private final AuxFileServer server;
 
-    public AuxFileClient(KeyChain kc, int chunkSize, String host, int port) {
-        this.chunkSize = chunkSize;
-        this.server    = TrpcClient$.MODULE$.apply(host, port).withKeyChain(kc).proxy(AuxFileServer.class);
+    public AuxFileClient(String host, int port) {
+        this.server    = TrpcClient$.MODULE$.apply(host, port).withoutKeys().proxy(AuxFileServer.class);
     }
 
-    public int getChunkSize() { return chunkSize; }
+    public AuxFileClient(KeyChain kc, String host, int port) {
+        this.server    = TrpcClient$.MODULE$.apply(host, port).withKeyChain(kc).proxy(AuxFileServer.class);
+    }
 
     @Override public Collection<AuxFile> list(SPProgramID programId, Collection<String> fileNames) throws AuxFileException {
         return server.list(programId, fileNames);
@@ -59,7 +61,7 @@ public final class AuxFileClient implements AuxFileSystem {
     private boolean notifyListener(AuxFileChunk chunk, SPProgramID progId, String fileName, AuxFileTransferListener listener) {
         if (listener == null) return true;
 
-        final long chunkXfer  = (chunk.getChunkNumber() + 1) * chunkSize;
+        final long chunkXfer  = (chunk.getChunkNumber() + 1) * FileChunkSize;
         final long totalBytes = chunk.getFileSize();
         final long bytesXfer  = Math.min(chunkXfer, totalBytes);
 
@@ -70,9 +72,9 @@ public final class AuxFileClient implements AuxFileSystem {
 
     private AuxFileChunk readChunk(File srcFile, int chunkNumber) throws IOException {
         final long fileLength = srcFile.length();
-        final long startPos   = (long) chunkNumber * chunkSize;
+        final long startPos   = (long) chunkNumber * FileChunkSize;
         final long remaining  = fileLength - startPos;
-        final int bufSize     = (int) Math.min(remaining, chunkSize);
+        final int bufSize     = (int) Math.min(remaining, FileChunkSize);
 
         final ByteBuffer buf = ByteBuffer.allocateDirect(bufSize);
 
@@ -93,7 +95,7 @@ public final class AuxFileClient implements AuxFileSystem {
         buf.get(chunkData);
 
         final long timestamp  = srcFile.lastModified();
-        return new AuxFileChunk(chunkNumber, chunkSize, fileLength, timestamp, chunkData);
+        return new AuxFileChunk(chunkNumber, FileChunkSize, fileLength, timestamp, chunkData);
     }
 
     private static void writeChunk(AuxFileChunk chunk, File destFile) throws IOException {
@@ -120,6 +122,29 @@ public final class AuxFileClient implements AuxFileSystem {
         }
     }
 
+    @Override public byte[] fetchToMemory(final SPProgramID programId, final String remoteFileName) throws AuxFileException {
+
+        try (final ByteArrayOutputStream out = new ByteArrayOutputStream(FileChunkSize)) {
+
+            AuxFileChunk chunk;
+            long timestamp = 0;
+            int chunkIndex = 0;
+            do {
+                chunk = server.fetchChunk(programId, remoteFileName, chunkIndex++, FileChunkSize, timestamp);
+                if (chunk == null) throw new AuxFileException("Read operation for file " + remoteFileName + " failed.");
+                timestamp = chunk.getTimestamp();
+                out.write(chunk.getChunkData());
+
+            } while (chunkIndex < chunk.getTotalChunks());
+
+            return out.toByteArray();
+
+        } catch (IOException ex) {
+            throw AuxFileException.create(ex);
+
+        }
+    }
+
 
     @Override public boolean fetch(SPProgramID programId, String remoteFileName, File localFile, AuxFileTransferListener listener) throws AuxFileException {
         // Make sure the local file is writable.
@@ -137,7 +162,7 @@ public final class AuxFileClient implements AuxFileSystem {
             AuxFileChunk chunk;
             int chunkIndex = 0;
             do {
-                chunk = server.fetchChunk(programId, remoteFileName, chunkIndex++, getChunkSize(), timestamp);
+                chunk = server.fetchChunk(programId, remoteFileName, chunkIndex++, FileChunkSize, timestamp);
                 if (chunk == null) return false;
                 timestamp = chunk.getTimestamp();
                 writeChunk(chunk, tmp);

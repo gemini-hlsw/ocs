@@ -6,13 +6,11 @@ import edu.gemini.itc.base.TransmissionElement;
 import edu.gemini.itc.gems.Gems;
 import edu.gemini.itc.shared.*;
 import edu.gemini.spModel.gemini.altair.AltairParams;
-import edu.gemini.spModel.target.Library;
 import edu.gemini.spModel.telescope.IssPort;
 
 /**
  * This is a temporary class that helps to collect output methods (print as html) up to the point where the code
  * is separated enough that this stuff can be moved to the web module.
- * TODO: Move this code to edu.gemini.itc.web once html output code has been removed from all recipes.
  */
 public final class HtmlPrinter {
 
@@ -23,37 +21,11 @@ public final class HtmlPrinter {
 
         sb.append("Source spatial profile, brightness, and spectral distribution: \n");
         sb.append("  The z = ");
-        sb.append(sdp.getRedshift());
+        sb.append(sdp.redshift());
         sb.append(" ");
-        sb.append(sdp.getSourceGeometryStr());
+        sb.append(HtmlUtil.sourceProfileString(sdp.profile()));
         sb.append(" is a");
-        switch (sdp.getDistributionType()) {
-            case ELINE:
-                sb.append(String.format("n emission line, at a wavelength of %.4f microns, ", sdp.getELineWavelength().toMicrons()));
-                sb.append(String.format(
-                        "and with a width of %.2f km/s.\n  It's total flux is %.3e watts_flux on a flat continuum of flux density %.3e watts_fd_wavelength.",
-                        sdp.getELineWidth().toKilometersPerSecond(), sdp.getELineFlux().toWattsPerSquareMeter(), sdp.getELineContinuumFlux().toWattsPerSquareMeterPerMicron()));
-                break;
-            case BBODY:
-                sb.append(" " + sdp.getBBTemp() + "K Blackbody, at " + sdp.getSourceNormalization() +
-                        " " + sdp.units.displayValue() + " in the " + sdp.getNormBand().name() + " band.");
-                break;
-            case LIBRARY_STAR:
-                sb.append(" " + sdp.getSourceNormalization() + " " + sdp.units.displayValue() + " " + ((Library) sdp.distribution).sedSpectrum() +
-                        " star in the " + sdp.getNormBand().name() + " band.");
-                break;
-            case LIBRARY_NON_STAR:
-                sb.append(" " + sdp.getSourceNormalization() + " " + sdp.units.displayValue() + " " + ((Library) sdp.distribution).sedSpectrum() +
-                        " in the " + sdp.getNormBand().name() + " band.");
-                break;
-            case USER_DEFINED:
-                sb.append(" a user defined spectrum with the name: " + sdp.getUserDefinedSpectrum());
-                break;
-            case PLAW:
-                sb.append(" Power Law Spectrum, with an index of " + sdp.getPowerLawIndex()
-                        + " and " + sdp.getSourceNormalization() + " mag in the " + sdp.getNormBand().name() + " band.");
-                break;
-        }
+        sb.append(HtmlUtil.sourceDistributionString(sdp));
         sb.append("\n");
         return sb.toString();
 
@@ -183,7 +155,6 @@ public final class HtmlPrinter {
         return s;
     }
 
-    // TODO: compatibility for regression testing, can go away after regression tests have passed
     private static String portToString(final IssPort port) {
         switch (port) {
             case SIDE_LOOKING:  return "side";

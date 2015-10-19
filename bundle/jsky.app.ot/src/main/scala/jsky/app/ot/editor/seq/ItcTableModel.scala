@@ -83,7 +83,7 @@ sealed trait ItcTableModel extends AbstractTableModel {
       }
     }
 
-  protected def sourceMag       (i: ItcInputs) = f"${i.src.norm}%.2f ${i.src.getNormBand.name}"
+  protected def sourceMag       (i: ItcInputs) = f"${i.src.norm}%.2f ${i.src.normBand.name}"
 
   protected def sourceFraction  (i: ItcInputs) = f"${i.obs.getSourceFraction}%.2f"
 

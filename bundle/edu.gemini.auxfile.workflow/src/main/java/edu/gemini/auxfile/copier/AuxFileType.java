@@ -1,27 +1,45 @@
 package edu.gemini.auxfile.copier;
 
+import edu.gemini.auxfile.api.AuxFile;
+
 import java.io.File;
 
 /**
  * The supported types of auxiliary files.
  */
 public enum AuxFileType {
-    fits("FITS"),
-    other("other"),
+    fits            ("FITS",                                true),
+    sed             ("Spectral Energy Distribution",        false),
+    other           ("other",                               true)
     ;
 
-    private String _displayName;
+    private final String displayName;
+    private final boolean sendNotification;
 
-    private AuxFileType(String displayName) {
-        _displayName = displayName;
+    AuxFileType(final String displayName, final boolean sendNotification) {
+        this.displayName      = displayName;
+        this.sendNotification = sendNotification;
     }
 
     public String getDisplayName() {
-        return _displayName;
+        return displayName;
     }
 
-    public static AuxFileType getFileType(File f) {
-        String name = f.getName();
-        return name.toLowerCase().contains(".fits") ? fits : other;
+    public boolean sendNotification() {
+        return sendNotification;
+    }
+
+    public static AuxFileType getFileType(final File f) {
+        return getFileType(f.getName());
+    }
+
+    public static AuxFileType getFileType(final AuxFile f) {
+        return getFileType(f.getName());
+    }
+
+    public static AuxFileType getFileType(final String name) {
+        if      (name.toLowerCase().contains(".fits")) return fits;
+        else if (name.toLowerCase().endsWith(".sed"))  return sed;
+        else return other;
     }
 }

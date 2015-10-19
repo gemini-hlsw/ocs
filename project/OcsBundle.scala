@@ -63,7 +63,8 @@ trait OcsBundle {
       bundle_edu_gemini_shared_util,
       bundle_edu_gemini_util_osgi,
       bundle_edu_gemini_util_security,
-      bundle_edu_gemini_util_trpc
+      bundle_edu_gemini_util_trpc,
+      bundle_edu_gemini_auxfile_workflow
     )
 
   lazy val bundle_edu_gemini_itc = 

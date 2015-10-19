@@ -20,12 +20,9 @@ public class ITCMultiPartParser {
 
     private static String TEXT = "text/plain";
 
-    private final List<FileItem>          items;
     private final ArrayList<String>       fileNames = new ArrayList<>();
-    private final ArrayList<String>       parameterNames = new ArrayList<>();
     private final HashMap<String, String> files = new HashMap<>();
     private final HashMap<String, String> parameters = new HashMap<>();
-    private final HashMap<String, String> fileTypes = new HashMap<>();
     private final HashMap<String, String> remoteFileNames = new HashMap<>();
 
     /**
@@ -37,8 +34,11 @@ public class ITCMultiPartParser {
      * @throws IllegalArgumentException      Throws IllegalArgumentException if the submitted file is not
      *                                       of a type that can be handled.
      */
+    @SuppressWarnings("unchecked")
     public ITCMultiPartParser(final HttpServletRequest req, final int maxLength) {
         final DiskFileUpload upload;
+        final List<FileItem> items;
+
         try {
             upload = new DiskFileUpload();
             upload.setSizeMax(maxLength);
@@ -54,7 +54,6 @@ public class ITCMultiPartParser {
 
         for (final FileItem item : items) {
             if (item.isFormField()) {
-                parameterNames.add(item.getFieldName());
                 parameters.put(item.getFieldName(), item.getString());
             } else {
                 addFile(item);
@@ -67,17 +66,15 @@ public class ITCMultiPartParser {
     private void addFile(final FileItem file) {
         if (file.getName().length() == 0) return;  //If there is no filename exit
 
-        if (file.getContentType().equals(TEXT) || file.getName().endsWith(".dat") || file.getName().endsWith(".nm")) {
+        if (file.getContentType().equals(TEXT) || file.getName().endsWith(".dat") || file.getName().endsWith(".sed")) {
 
             files.put(file.getFieldName(), file.getString());
             fileNames.add(file.getName());
             remoteFileNames.put(file.getFieldName(), file.getName());
-            fileTypes.put(file.getFieldName(), TEXT);
 
         } else {
 
-            throw new IllegalArgumentException("Submitted file, " + file.getName()
-                    + ", is a " + file.getContentType() + " file which is not supported. ");
+            throw new IllegalArgumentException("Submitted file, " + file.getName() + ", is a " + file.getContentType() + " file which is not supported. ");
         }
 
     }
@@ -95,16 +92,6 @@ public class ITCMultiPartParser {
             throw new IllegalArgumentException("Parameter " + name + " not found in request.");
         }
         return parameter;
-    }
-
-    /**
-     * Returns true if the parameter name has been parsed.
-     *
-     * @param name String Name of the requested parameter, from the HTML form.
-     * @return Boolean. True if parameter exists.
-     */
-    public boolean parameterExists(final String name) {
-        return parameters.containsKey(name);
     }
 
     /**
@@ -131,13 +118,9 @@ public class ITCMultiPartParser {
      *
      * @param fileName the fileName identifier of the text file passed (from the html form)
      * @return returns the text file as a String.
-     * @throws IllegalArgumentException If requested file is not of type <CODE>text/plain</CODE> an IllegalArgumentException is thrown.
      */
     public String getTextFile(final String fileName) {
-        if ((fileTypes.get(fileName)).equals(TEXT))
-            return files.get(fileName);
-        else
-            throw new IllegalArgumentException("Submitted file is not a text/plain file.  Resubmit with a Text file");
+        return files.get(fileName);
     }
 
 }

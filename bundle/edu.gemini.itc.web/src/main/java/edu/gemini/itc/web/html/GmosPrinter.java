@@ -7,6 +7,8 @@ import edu.gemini.itc.gmos.GmosRecipe;
 import edu.gemini.itc.shared.*;
 import edu.gemini.spModel.gemini.gmos.GmosNorthType;
 import edu.gemini.spModel.gemini.gmos.GmosSouthType;
+import edu.gemini.spModel.target.PointSource$;
+import edu.gemini.spModel.target.UniformSource$;
 import scala.Tuple2;
 import scala.collection.JavaConversions;
 
@@ -66,13 +68,10 @@ public final class GmosPrinter extends PrinterBase {
                     if (!results[0].observation().isAutoAperture()) {
                         _println(String.format("software aperture extent along slit = %.2f arcsec", results[0].observation().getApertureDiameter()));
                     } else {
-                        switch (results[0].source().getProfileType()) {
-                            case UNIFORM:
-                                _println(String.format("software aperture extent along slit = %.2f arcsec", 1 / instrument.getSlitWidth()));
-                                break;
-                            case POINT:
-                                _println(String.format("software aperture extent along slit = %.2f arcsec", (1.4 * result.iqCalc().getImageQuality())));
-                                break;
+                        if (result.source().profile() == UniformSource$.MODULE$) {
+                            _println(String.format("software aperture extent along slit = %.2f arcsec", 1 / instrument.getSlitWidth()));
+                        } else if (result.source().profile() == PointSource$.MODULE$) {
+                            _println(String.format("software aperture extent along slit = %.2f arcsec", (1.4 * result.iqCalc().getImageQuality())));
                         }
                     }
 

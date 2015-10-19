@@ -10,7 +10,6 @@ package object auxfile {
   val DirectoryPref = "EdProgramAuxFile.Directory"
   val MaxFileSizeMb = 250
   val MaxFileSize   = MaxFileSizeMb * 1024 * 1024
-  val FileChunkSize = 32 * 1024
 
   def dirPreference: Option[File] =
     Option(Preferences.getPreferences.getPreference(DirectoryPref)).map(new File(_))
