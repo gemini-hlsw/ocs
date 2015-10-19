@@ -43,7 +43,9 @@ private[query] object GsaQuery {
       con.setRequestProperty("Content-Type", s"application/json;charset=$Cset")
       con.setRequestProperty("Cookie",       s"gemini_api_authorization=$auth")
 
-      val data = a.asJson.spaces2.getBytes(Cset)
+      val json = a.asJson.spaces2
+      logIf(Level.FINE) { s"GSA QA state update post:\n$json" }
+      val data = json.getBytes(Cset)
       con.setRequestProperty("Content-Length", data.length.toString)
       con.setFixedLengthStreamingMode(data.length)
 
@@ -52,7 +54,7 @@ private[query] object GsaQuery {
     }
 
   private def query[A : DecodeJson](url: URL)(prep: HttpURLConnection => Unit): GsaResponse[A] = {
-    Log.log(LogLevel, s"Start GSA query: ${url.toString}")
+    logIf(LogLevel) { s"Start GSA query: ${url.toString}" }
 
     val startTime = Instant.now()
     val result    = \/.fromTryCatch { unsafeDoQuery[A](url, prep) }.fold({
@@ -89,6 +91,7 @@ private[query] object GsaQuery {
       con.getResponseCode match {
         case HTTP_OK   =>
           val s = read(con.getInputStream)
+          logIf(Level.FINE) { s"GSA query response:\n$s" }
           Parse.decodeEither[A](s).leftMap { _ =>
             InvalidResponse(s"Could not parse GSA server response:\n$s")
           }
@@ -99,4 +102,9 @@ private[query] object GsaQuery {
       con.disconnect()
     }
   }
+
+  private def logIf(level: Level)(s: => String): Unit =
+    if (Log.isLoggable(level)) {
+      Log.log(level, s)
+    }
 }

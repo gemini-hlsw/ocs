@@ -7,8 +7,8 @@ import Argonaut._
 import argonaut.DecodeResult.{fail, ok}
 
 import java.text.ParseException
-import java.time.{Instant, ZoneId}
-import java.time.format.{DateTimeParseException, DateTimeFormatter}
+import java.time.Instant
+import java.time.format.DateTimeParseException
 import java.time.temporal.{TemporalAccessor, TemporalQuery}
 
 /**
@@ -56,10 +56,6 @@ private[query] object JsonCodecs {
 
   // *** GSA Timestamp Codec ***
 
-  // Time format used in the GSA JSON.  The time zone (UTC) is needed in order
-  // to encode times.
-  val TimeFormat = DateTimeFormatter.ofPattern("uuuu-MM-dd HH:mm:ss.SSSSSSxxx").withZone(ZoneId.of("Z"))
-
   implicit val EncodeJsonInstant: EncodeJson[Instant] =
     EncodeJson((i: Instant) => jString(TimeFormat.format(i)))
 
@@ -70,7 +66,7 @@ private[query] object JsonCodecs {
     DecodeJson(c =>
       c.as[String].flatMap { s =>
         try {
-          ok(TimeFormat.parse(s, new TemporalQuery[Instant]() {
+          ok(TimeParse.parse(s, new TemporalQuery[Instant]() {
             override def queryFrom(ta: TemporalAccessor): Instant = Instant.from(ta)
           }))
         } catch {

@@ -16,7 +16,7 @@ object TimeInstanceCodecSpec extends Specification {
   val ExampleInstant = Instant.parse("2011-12-03T10:15:30Z")
 
   "Time instance encode" should {
-    "produce a formated json time string" in {
+    "produce a formatted json time string" in {
       ExampleInstant.asJson must_== jString(TimeFormat.format(ExampleInstant))
     }
   }
@@ -24,6 +24,10 @@ object TimeInstanceCodecSpec extends Specification {
   "Time instance decode" should {
     "work for valid time strings" in {
       Parse.decodeEither[Instant](""""2011-12-03 10:15:30.000000+00:00"""") must_== \/-(ExampleInstant)
+    }
+
+    "handle zone offsets" in {
+      Parse.decodeEither[Instant](""""2011-12-03 08:15:30.000000-02:00"""") must_== \/-(ExampleInstant)
     }
 
     "fail for invalid time strings" in {
