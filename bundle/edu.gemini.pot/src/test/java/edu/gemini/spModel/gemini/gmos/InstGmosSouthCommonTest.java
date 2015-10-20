@@ -10,13 +10,13 @@ import junit.framework.TestCase;
  */
 public class InstGmosSouthCommonTest extends TestCase {
     public void testGetActualGain() {
-        final double actualGainHighFast = InstGmosSouth.getActualGain(GmosCommonType.AmpGain.HIGH,
+        final int actualGainHighFast = InstGmosSouth.getActualGain(GmosCommonType.AmpGain.HIGH,
                 GmosCommonType.AmpReadMode.FAST, GmosCommonType.DetectorManufacturer.E2V);
-        final double actualGainLowFast = InstGmosSouth.getActualGain(GmosCommonType.AmpGain.LOW,
+        final int actualGainLowFast = InstGmosSouth.getActualGain(GmosCommonType.AmpGain.LOW,
                 GmosCommonType.AmpReadMode.FAST, GmosCommonType.DetectorManufacturer.E2V);
-        final double actualGainHighSlow = InstGmosSouth.getActualGain(GmosCommonType.AmpGain.HIGH,
+        final int actualGainHighSlow = InstGmosSouth.getActualGain(GmosCommonType.AmpGain.HIGH,
                 GmosCommonType.AmpReadMode.SLOW, GmosCommonType.DetectorManufacturer.E2V);
-        final double actualGainLowSlow = InstGmosSouth.getActualGain(GmosCommonType.AmpGain.LOW,
+        final int actualGainLowSlow = InstGmosSouth.getActualGain(GmosCommonType.AmpGain.LOW,
                 GmosCommonType.AmpReadMode.SLOW, GmosCommonType.DetectorManufacturer.E2V);
 
         assertEquals("Problem calculating actual gain.", actualGainHighFast, 5);

@@ -364,7 +364,7 @@ public abstract class InstGmosCommon<
 
                 @Override
                 public String apply(GmosCommonType.AmpGain gain, GmosCommonType.AmpReadMode mode, GmosCommonType.DetectorManufacturer man) {
-                    return String.format("%.1f", getActualGain(gain, mode, man));
+                    return String.format("%d", getActualGain(gain, mode, man));
                 }
             }
     );
@@ -499,7 +499,7 @@ public abstract class InstGmosCommon<
      * the actual CCD Gain value based upon the CCD choices actually
      * selected.
      */
-    public static double getActualGain(final GmosCommonType.AmpGain gain,
+    public static int getActualGain(final GmosCommonType.AmpGain gain,
                                        final GmosCommonType.AmpReadMode readMode,
                                        final GmosCommonType.DetectorManufacturer detectorManufacturer) {
         // Complicated switch nesting like this cries out for building a type hierarchy.  The parallel
