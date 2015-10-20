@@ -5,6 +5,8 @@ import com.jgoodies.forms.factories.FormFactory;
 import com.jgoodies.forms.layout.*;
 import edu.gemini.pot.sp.SPComponentType;
 import edu.gemini.spModel.gemini.gmos.InstGmosCommon;
+import edu.gemini.spModel.guide.GuideOption;
+import edu.gemini.spModel.target.offset.OffsetPos;
 import jsky.app.ot.gemini.editor.ComponentEditor;
 import jsky.app.ot.gemini.parallacticangle.PositionAnglePanel;
 import jsky.util.gui.DropDownListBoxWidget;
@@ -15,22 +17,7 @@ import javax.swing.*;
 import javax.swing.border.Border;
 import java.awt.*;
 
-/*
- * Created by JFormDesigner on Tue Nov 08 20:52:19 CET 2005
- *
- * JFormDesigner use deprecated. Update this file manually, and hopefully one
- * day let's do it in a way that is easy to maintain!!
- */
-
-
-
-/**
- * @author User #1
- */
 public class GmosForm<T extends InstGmosCommon> extends JPanel {
-    public GmosForm() {
-        initComponents();
-    }
 
     private final static int leftLabelCol   = 0;
     private final static int leftWidgetCol  = 1;
@@ -40,6 +27,78 @@ public class GmosForm<T extends InstGmosCommon> extends JPanel {
     private final static int rightWidgetCol = 5;
     private final static int rightGapCol    = 6;
     public static final Border PANEL_BORDER = BorderFactory.createEmptyBorder(15, 15, 15, 15);
+
+
+    final JComboBox filterComboBox;
+    final TextBoxWidget exposureTime;
+    final JComboBox disperserComboBox;
+    final JLabel centralWavelengthLabel;
+    final TextBoxWidget centralWavelength;
+    final JLabel orderLabel;
+    final DropDownListBoxWidget<String> orderComboBox;
+    final JCheckBox preImgCheckButton;
+    final JCheckBox nsCheckButton;
+    protected final JComboBox detectorManufacturerComboBox;
+    final JLabel warning1;
+    final JRadioButton focalPlaneBuiltInButton;
+    final DropDownListBoxWidget<String> builtinComboBox;
+    final JRadioButton focalPlaneMaskButton;
+    final TextBoxWidget focalPlaneMask;
+    final JButton focalPlaneMaskPlotButton;
+    final DropDownListBoxWidget<String> customSlitWidthComboBox;
+    final JTabbedPane tabbedPane = new JTabbedPane();
+    final DropDownListBoxWidget<String> xBinComboBox = new DropDownListBoxWidget<>();
+    final DropDownListBoxWidget<String> yBinComboBox = new DropDownListBoxWidget<>();
+    final JRadioButton ccdSlowLowButton = new JRadioButton();
+    final JRadioButton ccd3AmpButton = new JRadioButton();
+    final JRadioButton ccdFastLowButton = new JRadioButton();
+    final JRadioButton ccd6AmpButton = new JRadioButton();
+    final JRadioButton ccd12AmpButton = new JRadioButton();
+    final JRadioButton ccdFastHighButton = new JRadioButton();
+    final JRadioButton ccdSlowHighButton = new JRadioButton();
+    final JLabel ccdGainLabel = new JLabel();
+    final JLabel meanReadNoiseLabel = new JLabel();
+    final JLabel ampCountLabel = new JLabel();
+    final JRadioButton transFollowXYButton = new JRadioButton();
+    final JRadioButton transFollowXYZButton = new JRadioButton();
+    final JRadioButton transFollowZButton = new JRadioButton();
+    final JRadioButton transNoFollowButton = new JRadioButton();
+    final JSpinner transDtaSpinner = new JSpinner();
+    final JLabel warning3 = new JLabel();
+    final JRadioButton noROIButton = new JRadioButton();
+    final JRadioButton ccd2Button = new JRadioButton();
+    final JRadioButton centralSpectrumButton = new JRadioButton();
+    final JRadioButton centralStampButton = new JRadioButton();
+    final JRadioButton customButton = new JRadioButton();
+    final JLabel warningCustomROI = new JLabel();
+    final GmosCustomROITableWidget customROITable = new GmosCustomROITableWidget();
+    final NumberBoxWidget xMin = new NumberBoxWidget();
+    final NumberBoxWidget yMin = new NumberBoxWidget();
+    final NumberBoxWidget xRange = new NumberBoxWidget();
+    final NumberBoxWidget yRange = new NumberBoxWidget();
+    final JButton customROINewButton = new JButton();
+    final JButton customROIPasteButton = new JButton();
+    final JButton customROIRemoveButton = new JButton();
+    final JButton customROIRemoveAllButton = new JButton();
+    final JRadioButton upLookingButton = new JRadioButton();
+    final JRadioButton sideLookingButton = new JRadioButton();
+    final JPanel nsPanel = new JPanel();
+    final GmosOffsetPosTableWidget<OffsetPos> offsetTable = new GmosOffsetPosTableWidget<>();
+    final NumberBoxWidget xOffset = new NumberBoxWidget();
+    final NumberBoxWidget yOffset = new NumberBoxWidget();
+    final DropDownListBoxWidget<GuideOption> oiwfsBox = new DropDownListBoxWidget<>();
+    final JCheckBox electronicOffsetCheckBox = new JCheckBox();
+    final JButton newButton = new JButton();
+    final JButton removeButton = new JButton();
+    final JButton removeAllButton = new JButton();
+    final NumberBoxWidget shuffleOffset = new NumberBoxWidget();
+    final NumberBoxWidget detectorRows = new NumberBoxWidget();
+    final NumberBoxWidget numNSCycles = new NumberBoxWidget();
+    final JTextField totalTime = new JTextField();
+    final JLabel warning2 = new JLabel();
+    final JLabel warning4 = new JLabel();
+
+    PositionAnglePanel<T, EdCompInstGMOS<T> > posAnglePanel;
 
     private static Insets LABEL_INSETS = new Insets(ComponentEditor.PROPERTY_ROW_GAP, 0, 0, ComponentEditor.LABEL_WIDGET_GAP);
     private static GridBagConstraints labelGbc(final int row, final int col) {
@@ -75,64 +134,13 @@ public class GmosForm<T extends InstGmosCommon> extends JPanel {
         }};
     }
 
-    private void initComponents() {
+    public GmosForm() {
         DefaultComponentFactory compFactory = DefaultComponentFactory.getInstance();
 
-        tabbedPane = new JTabbedPane();
-        xBinComboBox = new DropDownListBoxWidget();
-        yBinComboBox = new DropDownListBoxWidget();
-        ccdSlowLowButton = new JRadioButton();
-        ccd3AmpButton = new JRadioButton();
-        ccdFastLowButton = new JRadioButton();
-        ccd6AmpButton = new JRadioButton();
-        ccd12AmpButton = new JRadioButton();
-        ccdFastHighButton = new JRadioButton();
-        ccdSlowHighButton = new JRadioButton();
-        ccdGainLabel = new JLabel();
-        meanReadNoiseLabel = new JLabel();
-        ampCountLabel = new JLabel();
-        transFollowXYButton = new JRadioButton();
-        transFollowXYZButton = new JRadioButton();
-        transFollowZButton = new JRadioButton();
-        transNoFollowButton = new JRadioButton();
-        transDtaSpinner = new JSpinner();
-        warning3 = new JLabel();
-        noROIButton = new JRadioButton();
-        ccd2Button = new JRadioButton();
-        centralSpectrumButton = new JRadioButton();
-        centralStampButton = new JRadioButton();
-        customButton = new JRadioButton();
-        customROITable = new GmosCustomROITableWidget();
-        warningCustomROI = new JLabel();
-        xMin = new NumberBoxWidget();
         xMin.setAllowNegative(false);
-        yMin = new NumberBoxWidget();
         yMin.setAllowNegative(false);
-        xRange = new NumberBoxWidget();
         xRange.setAllowNegative(false);
-        yRange = new NumberBoxWidget();
         yRange.setAllowNegative(false);
-        customROINewButton = new JButton();
-        customROIPasteButton = new JButton();
-        customROIRemoveButton = new JButton();
-        customROIRemoveAllButton = new JButton();
-        upLookingButton = new JRadioButton();
-        sideLookingButton = new JRadioButton();
-        nsPanel = new JPanel();
-        offsetTable = new GmosOffsetPosTableWidget();
-        xOffset = new NumberBoxWidget();
-        yOffset = new NumberBoxWidget();
-        oiwfsBox = new DropDownListBoxWidget();
-        electronicOffsetCheckBox = new JCheckBox();
-        newButton = new JButton();
-        removeButton = new JButton();
-        removeAllButton = new JButton();
-        shuffleOffset = new NumberBoxWidget();
-        detectorRows = new NumberBoxWidget();
-        numNSCycles = new NumberBoxWidget();
-        totalTime = new JTextField();
-        warning2 = new JLabel();
-        warning4 = new JLabel();
 
         //======== this ========
         setLayout(new GridBagLayout());
@@ -187,7 +195,7 @@ public class GmosForm<T extends InstGmosCommon> extends JPanel {
         orderLabel = new JLabel("Order");
         add(orderLabel, labelGbc(orderMOSRow, leftLabelCol));
         final JPanel orderMOSPanel = new JPanel(new GridBagLayout());
-        orderComboBox = new DropDownListBoxWidget();
+        orderComboBox = new DropDownListBoxWidget<>();
         orderMOSPanel.add(orderComboBox, new GridBagConstraints() {{
             anchor = GridBagConstraints.WEST;
             insets = WIDGET_INSETS;
@@ -259,7 +267,7 @@ public class GmosForm<T extends InstGmosCommon> extends JPanel {
         focalPlaneBuiltInButton = new JRadioButton("Built-in");
         add(focalPlaneBuiltInButton, widgetGbc(fpuRow+1, rightLabelCol));
 
-        builtinComboBox = new DropDownListBoxWidget();
+        builtinComboBox = new DropDownListBoxWidget<>();
         add(builtinComboBox, widgetGbc(fpuRow+1, rightWidgetCol));
 
         focalPlaneMaskButton = new JRadioButton("Custom Mask MDF");
@@ -281,7 +289,7 @@ public class GmosForm<T extends InstGmosCommon> extends JPanel {
             anchor = GridBagConstraints.WEST;
             insets = new Insets(0, 35, 0, 0);
         }});
-        customSlitWidthComboBox = new DropDownListBoxWidget();
+        customSlitWidthComboBox = new DropDownListBoxWidget<>();
         add(customSlitWidthComboBox, widgetGbc(fpuRow+3, rightWidgetCol));
 
         //======== tabbedPane ========
@@ -853,76 +861,4 @@ public class GmosForm<T extends InstGmosCommon> extends JPanel {
         // JFormDesigner - End of component initialization  //GEN-END:initComponents
     }
 
-    // JFormDesigner - Variables declaration - DO NOT MODIFY  //GEN-BEGIN:variables
-    // Generated using JFormDesigner non-commercial license
-    JComboBox filterComboBox;
-    TextBoxWidget exposureTime;
-    JComboBox disperserComboBox;
-    JLabel centralWavelengthLabel;
-    TextBoxWidget centralWavelength;
-    JLabel orderLabel;
-    DropDownListBoxWidget orderComboBox;
-    JCheckBox preImgCheckButton;
-    JCheckBox nsCheckButton;
-    protected JComboBox detectorManufacturerComboBox;
-    JLabel warning1;
-    JRadioButton focalPlaneBuiltInButton;
-    DropDownListBoxWidget builtinComboBox;
-    JRadioButton focalPlaneMaskButton;
-    TextBoxWidget focalPlaneMask;
-    JButton focalPlaneMaskPlotButton;
-    DropDownListBoxWidget customSlitWidthComboBox;
-    JTabbedPane tabbedPane;
-    DropDownListBoxWidget xBinComboBox;
-    DropDownListBoxWidget yBinComboBox;
-    JRadioButton ccdSlowLowButton;
-    JRadioButton ccd3AmpButton;
-    JRadioButton ccdFastLowButton;
-    JRadioButton ccd6AmpButton;
-    JRadioButton ccd12AmpButton;
-    JRadioButton ccdFastHighButton;
-    JRadioButton ccdSlowHighButton;
-    JLabel ccdGainLabel;
-    JLabel meanReadNoiseLabel;
-    JLabel ampCountLabel;
-    JRadioButton transFollowXYButton;
-    JRadioButton transFollowXYZButton;
-    JRadioButton transFollowZButton;
-    JRadioButton transNoFollowButton;
-    JSpinner transDtaSpinner;
-    JLabel warning3;
-    JRadioButton noROIButton;
-    JRadioButton ccd2Button;
-    JRadioButton centralSpectrumButton;
-    JRadioButton centralStampButton;
-    JRadioButton customButton;
-    JLabel warningCustomROI;
-    GmosCustomROITableWidget customROITable;
-    NumberBoxWidget xMin;
-    NumberBoxWidget yMin;
-    NumberBoxWidget xRange;
-    NumberBoxWidget yRange;
-    JButton customROINewButton;
-    JButton customROIPasteButton;
-    JButton customROIRemoveButton;
-    JButton customROIRemoveAllButton;
-    JRadioButton upLookingButton;
-    JRadioButton sideLookingButton;
-    JPanel nsPanel;
-    GmosOffsetPosTableWidget offsetTable;
-    NumberBoxWidget xOffset;
-    NumberBoxWidget yOffset;
-    DropDownListBoxWidget oiwfsBox;
-    JCheckBox electronicOffsetCheckBox;
-    JButton newButton;
-    JButton removeButton;
-    JButton removeAllButton;
-    NumberBoxWidget shuffleOffset;
-    NumberBoxWidget detectorRows;
-    NumberBoxWidget numNSCycles;
-    JTextField totalTime;
-    JLabel warning2;
-    JLabel warning4;
-
-    PositionAnglePanel<T, EdCompInstGMOS<T> > posAnglePanel;
 }

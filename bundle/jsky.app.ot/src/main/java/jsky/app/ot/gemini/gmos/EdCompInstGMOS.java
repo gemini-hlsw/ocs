@@ -1,7 +1,3 @@
-// Copyright 1997 Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-// See the file LICENSE for complete details.
-//
 package jsky.app.ot.gemini.gmos;
 
 import edu.gemini.mask.ObjectTable;
@@ -19,7 +15,6 @@ import edu.gemini.spModel.guide.GuideOption;
 import edu.gemini.spModel.guide.StandardGuideOptions;
 import edu.gemini.spModel.target.TelescopePosWatcher;
 import edu.gemini.spModel.target.WatchablePos;
-import edu.gemini.spModel.target.env.GuideProbeTargets;
 import edu.gemini.spModel.target.env.TargetEnvironment;
 import edu.gemini.spModel.target.obsComp.TargetObsComp;
 import edu.gemini.spModel.target.offset.OffsetPos;
@@ -48,7 +43,6 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import java.awt.*;
 import java.awt.event.*;
-import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.util.List;
@@ -371,6 +365,7 @@ public abstract class EdCompInstGMOS<T extends InstGmosCommon> extends EdCompIns
     //This method will initialize the DropDownListBox with the elements
     //indicated in Enum class, and will configure the widget to show all the
     //available options.
+    @SuppressWarnings("unchecked")
     private <E extends Enum<E>> void initListBox(JComboBox<E> widget, Class<E> c, ActionListener l) {
         final SpTypeComboBoxModel<E> model = new SpTypeComboBoxModel<>(c);
         widget.setModel(model);
@@ -853,8 +848,7 @@ public abstract class EdCompInstGMOS<T extends InstGmosCommon> extends EdCompIns
 
     private boolean primaryOiwfsStarExists() {
         final TargetEnvironment env = getContextTargetEnv();
-        if (env == null) return false;
-        return env.getPrimaryGuideProbeTargets(GmosOiwfsGuideProbe.instance).exists(gt -> gt.getPrimary().isDefined());
+        return env != null && env.getPrimaryGuideProbeTargets(GmosOiwfsGuideProbe.instance).exists(gt -> gt.getPrimary().isDefined());
     }
 
     /**
@@ -1382,11 +1376,7 @@ public abstract class EdCompInstGMOS<T extends InstGmosCommon> extends EdCompIns
 
     };
 
-    private final PropertyChangeListener targetListWatcher = new PropertyChangeListener() {
-        public void propertyChange(PropertyChangeEvent evt) {
-            _checkNSValues();
-        }
-    };
+    private final PropertyChangeListener targetListWatcher = evt -> _checkNSValues();
 
 
     protected void _setWarning(JLabel label, String s) {
