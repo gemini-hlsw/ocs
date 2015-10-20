@@ -434,8 +434,13 @@
 				<td colspan="4">Detector binning (spatial direction): <input value="1" name="spatBinning" checked="checked" type="radio" /> 1 (no binning), <input value="2" name="spatBinning" type="radio" /> 2 or <input value="4" name="spatBinning" type="radio" /> 4 pixels</td>
 			</tr>
 			<tr>
-
 				<td colspan="4">Detector binning (spectral direction): <input value="1" name="specBinning" checked="checked" type="radio" /> 1 (no binning), <input value="2" name="specBinning" type="radio" /> 2 or <input value="4" name="specBinning" type="radio" /> 4 pixels</td>
+			</tr>
+			<tr>
+				<td colspan="4">
+					Amp gain:      <select name="AmpGain" size="1"><option value="LOW">Low</option><option value="HIGH">High</option></select>
+					Amp read mode: <select name="AmpReadMode" size="1"><option value="SLOW">Slow</option><option value="FAST">Fast</option></select>
+				</td>
 			</tr>
 			<tr>
 				<td colspan="4">Read noise of 3.6 e- per binned pixel</td>

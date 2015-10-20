@@ -35,6 +35,8 @@ final case class GmosParameters(
                      grating:           GmosCommonType.Disperser,
                      centralWavelength: Wavelength,
                      fpMask:            GmosCommonType.FPUnit,
+                     ampGain:           GmosCommonType.AmpGain,
+                     ampReadMode:       GmosCommonType.AmpReadMode,
                      customSlitWidth:   Option[GmosCommonType.CustomSlitWidth],
                      spatialBinning:    Int,
                      spectralBinning:   Int,

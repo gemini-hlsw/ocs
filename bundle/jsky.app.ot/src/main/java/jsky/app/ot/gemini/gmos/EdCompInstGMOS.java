@@ -1108,8 +1108,8 @@ public abstract class EdCompInstGMOS<T extends InstGmosCommon> extends EdCompIns
     }
 
     private void _updateReadoutCharacteristics() {
-        _w.ccdGainLabel.setText(getDataObject().getMeanGain());
-        _w.meanReadNoiseLabel.setText(getDataObject().getMeanReadNoise());
+        _w.ccdGainLabel.setText(String.format("%.1f", getDataObject().getMeanGain()));
+        _w.meanReadNoiseLabel.setText(String.format("%.1f", getDataObject().getMeanReadNoise()));
         _w.ampCountLabel.setText(getDataObject().getAmpCount().toString().toLowerCase());
     }
 

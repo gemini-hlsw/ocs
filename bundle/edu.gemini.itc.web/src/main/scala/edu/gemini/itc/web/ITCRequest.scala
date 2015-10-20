@@ -10,7 +10,7 @@ import edu.gemini.spModel.data.YesNoType
 import edu.gemini.spModel.gemini.acqcam.AcqCamParams
 import edu.gemini.spModel.gemini.altair.AltairParams
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2
-import edu.gemini.spModel.gemini.gmos.GmosCommonType.DetectorManufacturer
+import edu.gemini.spModel.gemini.gmos.GmosCommonType.{AmpReadMode, AmpGain, DetectorManufacturer}
 import edu.gemini.spModel.gemini.gmos.GmosNorthType.{DisperserNorth, FPUnitNorth, FilterNorth}
 import edu.gemini.spModel.gemini.gmos.GmosSouthType.{DisperserSouth, FPUnitSouth, FilterSouth}
 import edu.gemini.spModel.gemini.gnirs.GNIRSParams
@@ -150,7 +150,9 @@ object ITCRequest {
     val centralWl   = r.centralWavelengthInNanometers()
     val fpMask      = if (site.equals(Site.GN)) r.enumParameter(classOf[FPUnitNorth],    "instrumentFPMask")   else r.enumParameter(classOf[FPUnitSouth],      "instrumentFPMask")
     val ifuMethod   = if (fpMask.isIFU) Some(ifuMethodParameters(r)) else None
-    GmosParameters(filter, grating, centralWl, fpMask, None, spatBinning, specBinning, ifuMethod, ccdType, site)
+    val ampGain     = r.enumParameter(classOf[AmpGain])
+    val ampReadMode = r.enumParameter(classOf[AmpReadMode])
+    GmosParameters(filter, grating, centralWl, fpMask, ampGain, ampReadMode, None, spatBinning, specBinning, ifuMethod, ccdType, site)
   }
 
   def gnirsParameters(r: ITCRequest): GnirsParameters = {

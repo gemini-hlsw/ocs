@@ -10,18 +10,18 @@ import junit.framework.TestCase;
  */
 public class InstGmosNorthCommonTest extends TestCase {
     public void testGetActualGain() {
-        final String actualGainHighFast = InstGmosNorth.getActualGain(GmosCommonType.AmpGain.HIGH,
+        final double actualGainHighFast = InstGmosNorth.getActualGain(GmosCommonType.AmpGain.HIGH,
                 GmosCommonType.AmpReadMode.FAST, GmosCommonType.DetectorManufacturer.E2V);
-        final String actualGainLowFast = InstGmosNorth.getActualGain(GmosCommonType.AmpGain.LOW,
+        final double actualGainLowFast = InstGmosNorth.getActualGain(GmosCommonType.AmpGain.LOW,
                 GmosCommonType.AmpReadMode.FAST, GmosCommonType.DetectorManufacturer.E2V);
-        final String actualGainHighSlow = InstGmosNorth.getActualGain(GmosCommonType.AmpGain.HIGH,
+        final double actualGainHighSlow = InstGmosNorth.getActualGain(GmosCommonType.AmpGain.HIGH,
                 GmosCommonType.AmpReadMode.SLOW, GmosCommonType.DetectorManufacturer.E2V);
-        final String actualGainLowSlow = InstGmosNorth.getActualGain(GmosCommonType.AmpGain.LOW,
+        final double actualGainLowSlow = InstGmosNorth.getActualGain(GmosCommonType.AmpGain.LOW,
                 GmosCommonType.AmpReadMode.SLOW, GmosCommonType.DetectorManufacturer.E2V);
 
-        assertEquals("Problem calculating actual gain.", actualGainHighFast, "5");
-        assertEquals("Problem calculating actual gain.", actualGainLowFast, "6");
-        assertEquals("Problem calculating actual gain.", actualGainHighSlow, "1");
-        assertEquals("Problem calculating actual gain.", actualGainLowSlow, "2");
+        assertEquals("Problem calculating actual gain.", actualGainHighFast, 5);
+        assertEquals("Problem calculating actual gain.", actualGainLowFast, 6);
+        assertEquals("Problem calculating actual gain.", actualGainHighSlow, 1);
+        assertEquals("Problem calculating actual gain.", actualGainLowSlow, 2);
     }
 }

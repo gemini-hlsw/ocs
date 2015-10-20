@@ -5,6 +5,8 @@ import edu.gemini.itc.operation.*;
 import edu.gemini.itc.shared.*;
 import edu.gemini.spModel.gemini.gmos.GmosNorthType;
 import edu.gemini.spModel.gemini.gmos.GmosSouthType;
+import edu.gemini.spModel.gemini.gmos.InstGmosNorth;
+import edu.gemini.spModel.gemini.gmos.InstGmosSouth;
 import scala.Some;
 import scala.Tuple2;
 import scala.collection.JavaConversions;
@@ -21,6 +23,7 @@ import java.util.List;
 public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRecipe {
 
     private final Gmos mainInstrument;
+    private final GmosParameters gmosParameters;
     private final SourceDefinition _sdParameters;
     private final ObservationDetails _obsDetailParameters;
     private final ObservingConditions _obsConditionParameters;
@@ -37,6 +40,7 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
 
     {
         mainInstrument = createGmos(gmosParameters, obsDetailParameters);
+        this.gmosParameters = gmosParameters;
         _sdParameters = sdParameters;
         _obsDetailParameters = obsDetailParameters;
         _obsConditionParameters = obsConditionParameters;
@@ -301,14 +305,18 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
 
     // TODO: some of these warnings are similar for different instruments and could be calculated in a central place
     private List<ItcWarning> warningsForImaging(final Gmos instrument, final double peakPixelCount) {
-        final double wellLimit     = 0.95 * instrument.getWellDepth() * instrument.getSpatialBinning() * instrument.getSpectralBinning();
-        final double lowGainLimit  = 0.95 * instrument.getADSaturation() * instrument.getLowGain();
-        final double highGainLimit = 0.95 * instrument.getADSaturation() * instrument.getHighGain();
+        final double wellLimit = 0.95 * instrument.getWellDepth() * instrument.getSpatialBinning() * instrument.getSpectralBinning();
+        final double meanGain;
+        switch (gmosParameters.site()) {
+            case GN: meanGain = InstGmosNorth.getMeanGain(gmosParameters.ampGain(), gmosParameters.ampReadMode(), gmosParameters.ccdType()); break;
+            case GS: meanGain = InstGmosSouth.getMeanGain(gmosParameters.ampGain(), gmosParameters.ampReadMode(), gmosParameters.ccdType()); break;
+            default: throw new Error();
+        }
+        final double gainLimit = 0.95 * instrument.getADSaturation() *  meanGain;
 
         return new ArrayList<ItcWarning>() {{
-            if (peakPixelCount > wellLimit)     add(new ItcWarning("Warning: peak pixel may be saturating the (binned) CCD full well of " + wellLimit));
-            if (peakPixelCount > lowGainLimit)  add(new ItcWarning("Warning: peak pixel may be saturating the low gain setting of " + lowGainLimit));
-            if (peakPixelCount > highGainLimit) add(new ItcWarning("Warning: peak pixel may be saturating the high gain setting " + highGainLimit));
+            if (peakPixelCount > wellLimit)  add(new ItcWarning("Warning: peak pixel may be saturating the (binned) CCD full well of " + wellLimit));
+            if (peakPixelCount > gainLimit)  add(new ItcWarning("Warning: peak pixel may be saturating the gain limit of " + gainLimit));
         }};
     }
 

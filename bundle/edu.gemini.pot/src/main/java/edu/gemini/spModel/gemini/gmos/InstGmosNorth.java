@@ -38,8 +38,7 @@ public class InstGmosNorth extends
         implements PropertyProvider, CalibrationKeyProvider {
     private static final Logger LOG = Logger.getLogger(InstGmosCommon.class.getName());
 
-    public static final SPComponentType SP_TYPE =
-            SPComponentType.INSTRUMENT_GMOS;
+    public static final SPComponentType SP_TYPE = SPComponentType.INSTRUMENT_GMOS;
 
     // The name of the GMOS instrument configuration
     public static final String INSTRUMENT_NAME_PROP = "GMOS-N";
@@ -245,101 +244,104 @@ public class InstGmosNorth extends
     }
 
     /**
-     * This convenience method implements the algorithm for determining
-     * the actual CCD Gain value based upon the CCD choices actually
-     * selected.  The values are derived from Table 1 in the GMOSN_CCDSW
-     * requirements document
+     * {@inheritDoc}
      */
     @Override
-    public String getMeanGain(final GmosCommonType.AmpGain gain,
+    public double getMeanGain() {
+        return getMeanGain(getGainChoice(), getAmpReadMode(), getDetectorManufacturer());
+    }
+
+
+    /**
+     * Calculates the mean gain for the given parameters for GMOS North.
+     */
+    public static double getMeanGain(final GmosCommonType.AmpGain gain,
                               final GmosCommonType.AmpReadMode readMode,
                               final GmosCommonType.DetectorManufacturer detectorManufacturer) {
-        // Complicated switch nesting like this cries out for building a type hierarchy.  The parallel
-        // type classes (GmosNorthType, et al) look promising, but I'm not willing to embed this information
-        // there yet.  I'm changing this to an if-then just for brevity and lack of fall through, but
-        // really it looks like we need the ability to comfortably group properties into something
-        // that can hold this information about their combined properties.
 
         if (detectorManufacturer == GmosCommonType.DetectorManufacturer.E2V) {
             if (readMode == GmosCommonType.AmpReadMode.FAST) {
                 if (gain == GmosCommonType.AmpGain.HIGH) {
-                    return "5.0";
+                    return 5.0;
                 } else if (gain == GmosCommonType.AmpGain.LOW) {
-                    return "2.5";
+                    return 2.5;
                 }
             } else if (readMode == GmosCommonType.AmpReadMode.SLOW) {
                 if (gain == GmosCommonType.AmpGain.HIGH) {
-                    return "4.4";
+                    return 4.4;
                 } else if (gain == GmosCommonType.AmpGain.LOW) {
-                    return "2.2";
+                    return 2.2;
                 }
             }
         } else if (detectorManufacturer == GmosCommonType.DetectorManufacturer.HAMAMATSU) {
             if (readMode == GmosCommonType.AmpReadMode.FAST) {
                 if (gain == GmosCommonType.AmpGain.HIGH) {
-                    return "5.0";
+                    return 5.0;
                 } else if (gain == GmosCommonType.AmpGain.LOW) {
-                    return "2.5";
+                    return 2.5;
                 }
             } else if (readMode == GmosCommonType.AmpReadMode.SLOW) {
                 if (gain == GmosCommonType.AmpGain.HIGH) {
-                    return "4.4";
+                    return 4.4;
                 } else if (gain == GmosCommonType.AmpGain.LOW) {
-                    return "2.2";
+                    return 2.2;
                 }
             }
         }
 
-        return logAndThrowUnexpectedParametersException(gain, readMode, detectorManufacturer);
+        throw new IllegalArgumentException("unsupported configuration");
+
     }
 
     /**
-     * This convenience method implements the algorithm for determining
-     * the actual CCD Gain value based upon the CCD choices actually
-     * selected.  The values are derived from Table1 in the GMOSN_CCDSW
-     * requirements document
+     * Calculates the mean read noise for this instrument.
      */
-    @Override
-    public String getMeanReadNoise(final GmosCommonType.AmpGain gain,
-                                   final GmosCommonType.AmpReadMode readMode,
-                                   final GmosCommonType.DetectorManufacturer detectorManufacturer) {
-        // Complicated switch nesting like this cries out for building a type hierarchy.  The parallel
-        // type classes (GmosNorthType, et al) look promising, but I'm not willing to embed this information
-        // there yet.  I'm changing this to an if-then just for brevity and lack of fall through, but
-        // really it looks like we need the ability to comfortably group properties into something
-        // that can hold this information about their combined properties.
+    public double getMeanReadNoise() {
+        final GmosCommonType.AmpGain gain = getGainChoice();
+        final GmosCommonType.AmpReadMode readMode = getAmpReadMode();
+        final GmosCommonType.DetectorManufacturer detectorManufacturer = getDetectorManufacturer();
+        return getMeanReadNoise(gain, readMode, detectorManufacturer);
+    }
+
+    /**
+     * Calculates the mean read noise for the given parameters for GMOS North.
+     */
+    public static double getMeanReadNoise(final GmosCommonType.AmpGain gain,
+                                          final GmosCommonType.AmpReadMode readMode,
+                                          final GmosCommonType.DetectorManufacturer detectorManufacturer) {
 
         if (detectorManufacturer == GmosCommonType.DetectorManufacturer.E2V) {
             if (readMode == GmosCommonType.AmpReadMode.FAST) {
                 if (gain == GmosCommonType.AmpGain.HIGH) {
-                    return "7.4";
+                    return 7.4;
                 } else if (gain == GmosCommonType.AmpGain.LOW) {
-                    return "4.9";
+                    return 4.9;
                 }
             } else if (readMode == GmosCommonType.AmpReadMode.SLOW) {
                 if (gain == GmosCommonType.AmpGain.HIGH) {
-                    return "4.8";
+                    return 4.8;
                 } else if (gain == GmosCommonType.AmpGain.LOW) {
-                    return "3.4";
+                    return 3.4;
                 }
             }
         } else if (detectorManufacturer == GmosCommonType.DetectorManufacturer.HAMAMATSU) {
             if (readMode == GmosCommonType.AmpReadMode.FAST) {
                 if (gain == GmosCommonType.AmpGain.HIGH) {
-                    return "7.4";
+                    return 7.4;
                 } else if (gain == GmosCommonType.AmpGain.LOW) {
-                    return "4.9";
+                    return 4.9;
                 }
             } else if (readMode == GmosCommonType.AmpReadMode.SLOW) {
                 if (gain == GmosCommonType.AmpGain.HIGH) {
-                    return "4.8";
+                    return 4.8;
                 } else if (gain == GmosCommonType.AmpGain.LOW) {
-                    return "3.4";
+                    return 3.4;
                 }
             }
         }
 
-        return logAndThrowUnexpectedParametersException(gain, readMode, detectorManufacturer);
+        throw new IllegalArgumentException("unsupported configuration");
+
     }
 
     protected GmosCommonType.AmpCount defaultAmpCountForE2V() {
