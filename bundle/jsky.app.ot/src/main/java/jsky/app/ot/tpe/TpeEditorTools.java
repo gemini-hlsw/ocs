@@ -210,7 +210,6 @@ final class TpeEditorTools {
         // If not enabled, then we're done.
         if (!enabled) return;
 
-
         // Add create buttons according to the enabled state of each item.
         for (TpeImageFeature feature : feats) {
             if (!(feature instanceof TpeCreateableFeature)) continue;

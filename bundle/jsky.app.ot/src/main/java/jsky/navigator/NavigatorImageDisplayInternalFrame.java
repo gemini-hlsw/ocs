@@ -18,32 +18,11 @@ import jsky.image.gui.ImageDisplayToolBar;
 public class NavigatorImageDisplayInternalFrame extends ImageDisplayControlInternalFrame {
 
     /**
-     * Create a top level window containing an ImageDisplayControl panel.
-     *
-     * @param size   the size (width, height) to use for the pan and zoom windows.
-     */
-    public NavigatorImageDisplayInternalFrame(JDesktopPane desktop, int size) {
-        super(desktop, size);
-    }
-
-    /**
      * Create a top level window containing an ImageDisplayControl panel
      * with the default settings.
      */
     public NavigatorImageDisplayInternalFrame(JDesktopPane desktop) {
         super(desktop);
-    }
-
-
-    /**
-     * Create a top level window containing an ImageDisplayControl panel.
-     *
-     * @param desktop The JDesktopPane to add the frame to.
-     * @param size   the size (width, height) to use for the pan and zoom windows.
-     * @param fileOrUrl The file name or URL of an image to display.
-     */
-    public NavigatorImageDisplayInternalFrame(JDesktopPane desktop, int size, String fileOrUrl) {
-        super(desktop, size, fileOrUrl);
     }
 
     /**

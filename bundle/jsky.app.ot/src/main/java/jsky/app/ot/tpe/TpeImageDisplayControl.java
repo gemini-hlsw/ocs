@@ -66,11 +66,13 @@ public class TpeImageDisplayControl extends NavigatorImageDisplayControl {
     }
 
     /** Make and return the image display window */
+    @Override
     protected DivaMainImageDisplay makeImageDisplay() {
         return new TpeImageWidget(parent);
     }
 
     /** Make and return the status panel */
+    @Override
     protected ImageDisplayStatusPanel makeStatusPanel() {
         return new TpeImageDisplayStatusPanel();
     }

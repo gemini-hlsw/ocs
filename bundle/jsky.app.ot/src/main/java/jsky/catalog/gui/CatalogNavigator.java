@@ -242,7 +242,7 @@ public abstract class CatalogNavigator extends JPanel
                 className = "jsky.catalog.astrocat.AstroCatConfig";
             }
             try {
-                Class c = Class.forName(className);
+                Class<?> c = Class.forName(className);
                 Object o = c.getMethod("getDirectory").invoke(null);
                 if (o instanceof CatalogDirectory) {
                     _catDir = (CatalogDirectory) o;
@@ -384,8 +384,6 @@ public abstract class CatalogNavigator extends JPanel
             setResultComponent(component);
         } else {
             setQueryComponent(component);
-
-            //System.out.println("XXX _autoQuery = " + _autoQuery  + ", component is a " + component.getClass());
 
             if ((component instanceof CatalogQueryTool)
                     && (_autoQuery || ((CatalogQueryTool) component).getCatalog().isLocal())) {

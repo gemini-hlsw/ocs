@@ -81,10 +81,10 @@ public class DivaGraphicsImageDisplay extends JCanvas implements GraphicsImageDi
     private ColorModel _colorModel;
 
     /** Object used to convert coordinates */
-    private CoordinateConverter _coordinateConverter;
+    private final CoordinateConverter _coordinateConverter;
 
     /** Object used for drawing graphics over the image */
-    private CanvasGraphics _canvasGraphics;
+    private final CanvasGraphics _canvasGraphics;
 
     /** The Diva graphics layer containing the image */
     private ImageLayer _imageLayer;

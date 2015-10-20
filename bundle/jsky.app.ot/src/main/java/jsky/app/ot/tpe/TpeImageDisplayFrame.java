@@ -18,7 +18,7 @@ import java.awt.*;
 public class TpeImageDisplayFrame extends NavigatorImageDisplayFrame {
 
     /** Tool bar with Tpe specific commands */
-    TpeToolBar tpeToolBar;
+    private TpeToolBar tpeToolBar;
 
     /**
      * Create a top level window containing an ImageDisplayControl panel.
@@ -58,6 +58,7 @@ public class TpeImageDisplayFrame extends NavigatorImageDisplayFrame {
     }
 
     /** Make and return the menubar */
+    @Override
     protected ImageDisplayMenuBar makeMenuBar(DivaMainImageDisplay mainImageDisplay, ImageDisplayToolBar toolBar) {
         return new TpeImageDisplayMenuBar((TpeImageWidget) mainImageDisplay,
                                           (NavigatorImageDisplayToolBar) toolBar);
@@ -68,18 +69,19 @@ public class TpeImageDisplayFrame extends NavigatorImageDisplayFrame {
      *
      * @param size the size (width, height) to use for the pan and zoom windows.
      */
+    @Override
     protected ImageDisplayControl makeImageDisplayControl(int size) {
         return new TpeImageDisplayControl(this, size);
     }
 
     /** Make and return the toolbar */
+    @Override
     protected ImageDisplayToolBar makeToolBar(DivaMainImageDisplay mainImageDisplay) {
         // add the Tpe tool bar while we are at it...
         addTpeToolBar();
 
         // Dragging can cause problems with two tool bars...
-        ImageDisplayToolBar toolBar =
-                new TpeImageDisplayToolBar((TpeImageWidget)mainImageDisplay);
+        ImageDisplayToolBar toolBar = new TpeImageDisplayToolBar((TpeImageWidget)mainImageDisplay);
         toolBar.setFloatable(false);
         return toolBar;
     }
@@ -91,7 +93,7 @@ public class TpeImageDisplayFrame extends NavigatorImageDisplayFrame {
     }
 
     /** Return the Tool bar with OT/TPE specific commands */
-    TpeToolBar getTpeToolBar() {
+    protected TpeToolBar getTpeToolBar() {
         return tpeToolBar;
     }
 

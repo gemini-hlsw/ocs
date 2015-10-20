@@ -132,6 +132,7 @@ public class Navigator extends CatalogNavigator implements CatalogNavigatorOpene
      * Make a panel for querying a catalog
      * (Redefined from the parent class to use a CatalogQueryTool subclass).
      */
+    @Override
     protected CatalogQueryTool makeCatalogQueryTool(Catalog catalog) {
         return new NavigatorQueryTool(catalog, this, _imageDisplay);
     }
@@ -290,6 +291,7 @@ public class Navigator extends CatalogNavigator implements CatalogNavigatorOpene
     /**
      * Return a new JComponent displaying the contents of the given URL.
      */
+    @Override
     protected JComponent makeURLComponent(URL url, String contentType) throws IOException {
         String filename = url.getFile();
         String protocol = url.getProtocol();
@@ -344,6 +346,7 @@ public class Navigator extends CatalogNavigator implements CatalogNavigatorOpene
      * Open the catalog navigator window (in this case, it is already open).
      * @see CatalogNavigatorOpener
      */
+    @Override
     public void openCatalogWindow() {
     }
 
@@ -353,6 +356,7 @@ public class Navigator extends CatalogNavigator implements CatalogNavigatorOpene
      * if not null (in this case, the window is already open).
      * @see CatalogNavigatorOpener
      */
+    @Override
     public void openCatalogWindow(Catalog cat) {
         if (cat != null) {
             setAutoQuery(false);
@@ -364,6 +368,7 @@ public class Navigator extends CatalogNavigator implements CatalogNavigatorOpene
      * Open a catalog window for the named catalog, if found.
      * @see CatalogNavigatorOpener
      */
+    @Override
     public void openCatalogWindow(String name) {
         Catalog cat = getCatalogDirectory().getCatalog(name);
         if (cat != null)
@@ -375,6 +380,7 @@ public class Navigator extends CatalogNavigator implements CatalogNavigatorOpene
      * Pop up a file browser to select a local catalog file to open.
      * @see CatalogNavigatorOpener
      */
+    @Override
     public void openLocalCatalog() {
         open();
     }
@@ -382,6 +388,7 @@ public class Navigator extends CatalogNavigator implements CatalogNavigatorOpene
     /**
      * Save the current table as a FITS table in the current FITS image.
      */
+    @Override
     public void saveWithImage() {
         JComponent resultComponent = getResultComponent();
         if (!(resultComponent instanceof TableDisplayTool)) {
@@ -398,6 +405,7 @@ public class Navigator extends CatalogNavigator implements CatalogNavigatorOpene
      * Create and return a new file chooser to be used to select a local catalog file
      * to open.
      */
+    @Override
     public JFileChooser makeFileChooser() {
         JFileChooser fileChooser = new JFileChooser(new File("."));
 

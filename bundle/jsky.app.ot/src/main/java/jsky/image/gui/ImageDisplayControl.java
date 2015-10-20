@@ -1,8 +1,6 @@
 package jsky.image.gui;
 
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.net.URL;
 
 import javax.swing.*;
@@ -19,7 +17,7 @@ import jsky.util.I18N;
  */
 public class ImageDisplayControl extends JPanel {
 
-    // Used to access internationalized strings (see i18n/gui*.proprties)
+    // Used to access internationalized strings (see i18n/gui*.properties)
     private static final I18N _I18N = I18N.getInstance(ImageDisplayControl.class);
 
     /** The top level parent frame (or internal frame) used to close the window */
@@ -30,8 +28,6 @@ public class ImageDisplayControl extends JPanel {
 
     /** Panel containing the pan and zoom windows */
     protected JPanel panZoomPanel;
-
-    //protected ImageDisplayPanel imageDisplayPanel;
 
     /** Zoom window */
     protected ImageZoom imageZoom;
@@ -74,7 +70,7 @@ public class ImageDisplayControl extends JPanel {
         // having the toggle button disappear when the pan image is painted.
         panZoomPanel = new JPanel() {
 
-            public synchronized void paintComponent(Graphics g) {
+            @Override public synchronized void paintComponent(Graphics g) {
                 super.paintComponent(g);
                 panZoomToggleButton.repaint();
             }
@@ -138,13 +134,6 @@ public class ImageDisplayControl extends JPanel {
     }
 
     /**
-     * Make and return the image display panel
-     */
-    //protected ImageDisplayPanel makeImagePanel() {
-    //return new ImageDisplayPanel(imageDisplay, SwingConstants.VERTICAL);
-    //}
-
-    /**
      * Make and return the zoom window.
      *
      * @param size the size (width, height) to use for the zoom window.
@@ -160,18 +149,15 @@ public class ImageDisplayControl extends JPanel {
     protected BasicArrowButton makePanZoomToggleButton() {
         final BasicArrowButton b = new BasicArrowButton(SwingConstants.NORTH);
         b.setToolTipText(_I18N.getString("panZoomToggleTip"));
-        b.addActionListener(new ActionListener() {
-
-            public void actionPerformed(ActionEvent e) {
-                if (panZoomPanel.isVisible()) {
-                    panZoomPanel.setVisible(false);
-                    imageZoom.setActive(false);
-                    b.setDirection(SwingConstants.SOUTH);
-                } else {
-                    panZoomPanel.setVisible(true);
-                    imageZoom.setActive(true);
-                    b.setDirection(SwingConstants.NORTH);
-                }
+        b.addActionListener(e -> {
+            if (panZoomPanel.isVisible()) {
+                panZoomPanel.setVisible(false);
+                imageZoom.setActive(false);
+                b.setDirection(SwingConstants.SOUTH);
+            } else {
+                panZoomPanel.setVisible(true);
+                imageZoom.setActive(true);
+                b.setDirection(SwingConstants.NORTH);
             }
         });
 
@@ -279,5 +265,3 @@ public class ImageDisplayControl extends JPanel {
         }
     }
 }
-
-

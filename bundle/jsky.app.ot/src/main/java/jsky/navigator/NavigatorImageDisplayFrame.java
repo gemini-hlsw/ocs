@@ -52,12 +52,14 @@ public class NavigatorImageDisplayFrame extends ImageDisplayControlFrame {
     }
 
     /** Make and return the menubar */
+    @Override
     protected ImageDisplayMenuBar makeMenuBar(DivaMainImageDisplay mainImageDisplay, ImageDisplayToolBar toolBar) {
         return new NavigatorImageDisplayMenuBar((NavigatorImageDisplay) mainImageDisplay,
                                                 (NavigatorImageDisplayToolBar) toolBar);
     }
 
     /** Make and return the toolbar */
+    @Override
     protected ImageDisplayToolBar makeToolBar(DivaMainImageDisplay mainImageDisplay) {
         return new NavigatorImageDisplayToolBar((NavigatorImageDisplay) mainImageDisplay);
     }
@@ -67,6 +69,7 @@ public class NavigatorImageDisplayFrame extends ImageDisplayControlFrame {
      *
      * @param size the size (width, height) to use for the pan and zoom windows.
      */
+    @Override
     protected ImageDisplayControl makeImageDisplayControl(int size) {
         return new NavigatorImageDisplayControl(this, size);
     }

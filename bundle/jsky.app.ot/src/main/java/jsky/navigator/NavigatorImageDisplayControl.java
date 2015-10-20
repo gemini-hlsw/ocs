@@ -66,6 +66,7 @@ public class NavigatorImageDisplayControl extends ImageDisplayControl {
     }
 
     /** Make and return the image display window */
+    @Override
     protected DivaMainImageDisplay makeImageDisplay() {
         return new NavigatorImageDisplay(parent);
     }

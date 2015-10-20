@@ -106,7 +106,6 @@ public class TelescopePosEditor extends JSkyCat implements TpeMouseObserver {
 
         _tpeToolBar.getGuiderSelector().addSelectionListener(strategy -> AgsStrategyUtil.setSelection(_ctx.obsShellOrNull(), strategy));
 
-
         // Don't want the "New Window" menu item here
         _tpeMenuBar.getFileMenu().remove(_tpeMenuBar.getNewWindowMenuItem());
 
@@ -171,6 +170,7 @@ public class TelescopePosEditor extends JSkyCat implements TpeMouseObserver {
     @Override
     protected NavigatorImageDisplayFrame makeNavigatorImageDisplayFrame(String imageFileOrUrl) {
         TpeImageDisplayFrame frame = new TpeImageDisplayFrame(imageFileOrUrl);
+        // Very ugly this sets _iw indirectly on the constructor
         _iw = (TpeImageWidget) frame.getImageDisplayControl().getImageDisplay();
         return frame;
     }

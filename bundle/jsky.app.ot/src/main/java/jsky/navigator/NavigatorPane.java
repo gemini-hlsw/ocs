@@ -32,12 +32,14 @@ public class NavigatorPane extends GraphicsPane {
     /** Set the object used to draw catalog symbols */
     public void setPlotter(TablePlotter plotter) {
         _symbolLayer.setPlotter(plotter);
+
     }
 
     /**
      * Rebuild the array of layers for use by iterators.
      * Override superclass to include the new layer.
      */
+    @Override
     protected void _rebuildLayerArray() {
         _layers = new CanvasLayer[6];
         int cursor = 0;

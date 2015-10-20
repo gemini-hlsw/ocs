@@ -58,11 +58,11 @@ public class ImageDisplayControlFrame extends JFrame {
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
         addWindowListener(new WindowAdapter() {
 
-            public void windowClosing(WindowEvent e) {
+            @Override public void windowClosing(WindowEvent e) {
                 mainImageDisplay.close();
             }
 
-            public void windowClosed(WindowEvent e) {
+            @Override public void windowClosed(WindowEvent e) {
                 if (--openFrameCount == 0 && mainImageDisplay.isMainWindow())
                     mainImageDisplay.exit();
             }

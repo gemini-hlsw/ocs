@@ -1,22 +1,10 @@
-/*
- * Copyright 2000 Association for Universities for Research in Astronomy, Inc.,
- * Observatory Control System, Gemini Telescopes Project.
- *
- * $Id: NavigatorImageDisplayMenuBar.java 4414 2004-02-03 16:21:36Z brighton $
- */
-
 package jsky.navigator;
-
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 
-import jsky.catalog.Catalog;
 import jsky.image.gui.ImageDisplayMenuBar;
 import jsky.util.I18N;
-import jsky.util.Resources;
 
 /**
  * Extends the image display menubar by adding a catalog menu.
@@ -62,12 +50,7 @@ public class NavigatorImageDisplayMenuBar extends ImageDisplayMenuBar {
      */
     protected JMenuItem createSaveCatalogOverlaysWithImageMenuItem() {
         JMenuItem menuItem = new JMenuItem(_I18N.getString("saveCatalogWithImage"));
-        menuItem.addActionListener(new ActionListener() {
-
-            public void actionPerformed(ActionEvent ae) {
-                ((NavigatorImageDisplay) getImageDisplay()).saveCatalogOverlaysWithImage();
-            }
-        });
+        menuItem.addActionListener(ae -> ((NavigatorImageDisplay) getImageDisplay()).saveCatalogOverlaysWithImage());
         return menuItem;
     }
 
@@ -75,9 +58,7 @@ public class NavigatorImageDisplayMenuBar extends ImageDisplayMenuBar {
      * Create the Help menu.
      */
     protected JMenu createHelpMenu() {
-        JMenu menu = new JMenu(_I18N.getString("help"));
-        // XXX to be done...
-        return menu;
+        return new JMenu(_I18N.getString("help"));
     }
 
     /** Return the handle for the Catalog menu */
@@ -86,6 +67,7 @@ public class NavigatorImageDisplayMenuBar extends ImageDisplayMenuBar {
     }
 
     /** Return the handle for the Help menu */
+    @Override
     public JMenu getHelpMenu() {
         return _helpMenu;
     }
