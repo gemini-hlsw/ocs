@@ -2,6 +2,7 @@ package jsky.app.ot.tpe;
 
 import edu.gemini.catalog.api.MagnitudeConstraints;
 import edu.gemini.catalog.ui.QueryResultsFrame;
+import edu.gemini.catalog.ui.tpe.CatalogImageDisplay;
 import edu.gemini.shared.cat.CatalogSearchParameters;
 import edu.gemini.shared.cat.ICatalogAlgorithm;
 import edu.gemini.catalog.api.MagnitudeLimits;
@@ -28,6 +29,7 @@ import jsky.coords.WorldCoords;
 import jsky.navigator.Navigator;
 import jsky.navigator.NavigatorImageDisplay;
 import jsky.navigator.NavigatorManager;
+import jsky.navigator.NavigatorPane;
 import jsky.util.gui.DialogUtil;
 
 import javax.swing.AbstractAction;
@@ -48,7 +50,7 @@ import java.util.logging.Logger;
 /**
  * This class is concerned with drawing targets, WFS etc., on an image.
  */
-public class TpeImageWidget extends NavigatorImageDisplay implements MouseInputListener,
+public class TpeImageWidget extends CatalogImageDisplay implements MouseInputListener,
         TelescopePosWatcher, PropertyChangeListener {
 
     private static final Logger LOG = Logger.getLogger(TpeImageWidget.class.getName());
@@ -134,7 +136,7 @@ public class TpeImageWidget extends NavigatorImageDisplay implements MouseInputL
      * @param parent the parent frame or internal frame
      */
     public TpeImageWidget(Component parent) {
-        super(parent);
+        super(parent, new NavigatorPane());
 
         addMouseListener(this);
         addMouseMotionListener(this);
@@ -561,7 +563,7 @@ public class TpeImageWidget extends NavigatorImageDisplay implements MouseInputL
      * @param before set to true before the image is loaded and false afterwards
      */
     @Override
-    protected void newImage(boolean before) {
+    public void newImage(boolean before) {
         super.newImage(before);
         if (!before) {
             try {

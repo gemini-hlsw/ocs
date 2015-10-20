@@ -1,5 +1,7 @@
 package jsky.navigator;
 
+import edu.gemini.catalog.ui.tpe.CatalogDisplay;
+
 import java.awt.Component;
 
 
@@ -10,7 +12,7 @@ import java.awt.Component;
 public interface NavigatorImageDisplayManager {
 
     /** Return the image display widget */
-    NavigatorImageDisplay getImageDisplay();
+    CatalogDisplay getImageDisplay();
 
     /** Return the image display frame, creating it if needed */
     Component getImageDisplayControlFrame();

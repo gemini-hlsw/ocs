@@ -4,6 +4,7 @@ import java.net.URL
 import javax.swing.event.ChangeListener
 
 import edu.gemini.catalog.api.{MagnitudeLimits, RadiusLimits}
+import jsky.app.ot.tpe.TpeImageWidget
 import jsky.catalog.Catalog
 import jsky.catalog.CatalogDirectory
 import jsky.catalog.QueryResult
@@ -15,16 +16,18 @@ import jsky.graphics.CanvasGraphics
 import jsky.image.fits.codec.FITSImage
 import jsky.image.fits.gui.FITSKeywordsFrame
 import jsky.image.fits.gui.FITSKeywordsInternalFrame
+import jsky.image.gui.ImageDisplayMenuBar
+import jsky.image.gui.ImageDisplayToolBar
 import jsky.image.gui.{ImageGraphicsHandler, DivaMainImageDisplay}
+import jsky.navigator.NavigatorCatalogMenu
 import jsky.navigator._
-import jsky.util.I18N
 import jsky.util.Preferences
 import jsky.util.Resources
 import jsky.util.gui.DialogUtil
 import jsky.util.gui.SwingUtil
 import javax.swing._
 import java.awt._
-import java.awt.event.ActionEvent
+import java.awt.event.{ActionListener, ActionEvent}
 import java.awt.geom.AffineTransform
 import java.util.HashSet
 import java.util.Set
@@ -114,8 +117,7 @@ trait CatalogDisplay {
   * Extends the DivaMainImageDisplay class by adding support for
   * browsing catalogs and plotting catalog symbols on the image.
   */
-class CatalogImageDisplay(parent: Component, val _navigatorPane:NavigatorPane = new NavigatorPane) extends DivaMainImageDisplay(_navigatorPane, parent) with CatalogNavigatorOpener with CatalogDisplay {
-  private val _I18N: I18N = I18N.getInstance(this.getClass)
+class CatalogImageDisplay(parent: Component, navigatorPane:NavigatorPane) extends DivaMainImageDisplay(navigatorPane, parent) with CatalogNavigatorOpener with CatalogDisplay {
 
   /** The instance of the catalog navigator to use with this image display. */
   private var _navigator: Navigator = null
@@ -125,7 +127,7 @@ class CatalogImageDisplay(parent: Component, val _navigatorPane:NavigatorPane = 
   /** Set of filenames: Used to keep track of the files visited in this session. */
   private final val _filesVisited: Set[String] = new HashSet[String]
   /** Action to use to show the catalog window (Browse catalogs) */
-  private val _catalogBrowseAction: AbstractAction = new AbstractAction(s"${_I18N.getString("browse")}...", Resources.getIcon("Catalog24.gif")) {
+  private val _catalogBrowseAction: AbstractAction = new AbstractAction("Browse...", Resources.getIcon("Catalog24.gif")) {
     def actionPerformed(evt: ActionEvent) {
       try {
         openCatalogWindow()
@@ -137,7 +139,7 @@ class CatalogImageDisplay(parent: Component, val _navigatorPane:NavigatorPane = 
   }
 
   /** Return the Diva pane containing the added catalog symbol layer. */
-  override def getNavigatorPane: NavigatorPane = _navigatorPane
+  override def getNavigatorPane: NavigatorPane = navigatorPane
 
   /**
     * Open up another window like this one and return a reference to it.
@@ -356,3 +358,75 @@ class CatalogImageDisplay(parent: Component, val _navigatorPane:NavigatorPane = 
     */
   def filterQueryResult(queryResult: QueryResult): QueryResult = queryResult
 }
+
+/**
+  * Extends the image display menubar by adding a catalog menu.
+  */
+class CatalogImageDisplayMenuBar(protected val imageDisplay: CatalogImageDisplay, toolBar: ImageDisplayToolBar) extends ImageDisplayMenuBar(imageDisplay, toolBar) {
+  /** Handle for the Image menu */
+  private val _catalogMenu= new NavigatorCatalogMenu(imageDisplay, true)
+  /** Handle for the Help menu */
+  private val _helpMenu = new JMenu("Help")
+
+  // TODO These two items don't seem to be used, check if they could be deprecated
+  val pickObjectMenuItem = getPickObjectMenuItem
+  getViewMenu.remove(pickObjectMenuItem)
+  _catalogMenu.add(pickObjectMenuItem)
+  _catalogMenu.addSeparator()
+  _catalogMenu.add(createSaveCatalogOverlaysWithImageMenuItem)
+  add(_catalogMenu)
+
+  /**
+    * Create a menu item for saving the current catalog overlays as a FITS table in the image file.
+    */
+  private def createSaveCatalogOverlaysWithImageMenuItem: JMenuItem = {
+    val menuItem = new JMenuItem("Save Catalog Overlays With Image")
+    menuItem.addActionListener(new ActionListener() {
+      override def actionPerformed(e: ActionEvent): Unit = imageDisplay.saveCatalogOverlaysWithImage()
+    })
+    menuItem
+  }
+
+  /** Return the handle for the Catalog menu */
+  def getCatalogMenu: JMenu = _catalogMenu
+
+  /** Return the handle for the Help menu */
+  override def getHelpMenu: JMenu = _helpMenu
+}
+
+/**
+  * A tool bar for the image display window.
+  */
+class CatalogImageDisplayToolBar(tpe: TpeImageWidget) extends ImageDisplayToolBar(tpe) {
+  private lazy val catalogButton: JButton = makeButton("Show the catalog window", tpe.getCatalogBrowseAction)
+
+  /**
+    * Add the items to the tool bar.
+    */
+  protected override def addToolBarItems(): Unit = {
+    super.addToolBarItems()
+    addSeparator()
+    add(makeCatalogButton)
+  }
+
+  /**
+    * Make the catalog button, if it does not yet exists. Otherwise update the display
+    * using the current options for displaying text or icons.
+    *
+    * @return the catalog button
+    */
+  protected def makeCatalogButton: JButton = {
+    updateButton(catalogButton, "Catalogs", Resources.getIcon("Catalog24.gif", this.getClass))
+    catalogButton
+  }
+
+  /**
+    * Update the toolbar display using the current text/pictures options.
+    * (redefined from the parent class).
+    */
+  override def update() {
+    super.update()
+    makeCatalogButton
+  }
+}
+

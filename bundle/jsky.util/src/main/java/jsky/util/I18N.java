@@ -1,10 +1,3 @@
-/*
- * Copyright 2002 Association for Universities for Research in Astronomy, Inc.,
- * Observatory Control System, Gemini Telescopes Project.
- *
- * $Id: I18N.java 4414 2004-02-03 16:21:36Z brighton $
- */
-
 package jsky.util;
 
 import java.text.MessageFormat;
@@ -41,13 +34,13 @@ public class I18N {
      * Return an instance of I18N, initialized to use i18n/gui_<locale>.properties,
      * relative to the package directory for the given class.
      */
-    public static I18N getInstance(Class c) {
+    public static I18N getInstance(Class<?> c) {
         return new I18N(c);
     }
 
     // Initialize to use i18n/gui_<locale>.properties, relative to the
     // package directory for the given class.
-    private I18N(Class c) {
+    private I18N(Class<?> c) {
         _class    = c;
         _baseName = c.getPackage().getName() + ".i18n.gui";
     }
@@ -80,8 +73,7 @@ public class I18N {
         if (pattern == null) return null;
         MessageFormat mf = new MessageFormat(pattern);
         mf.setLocale(_locale);
-        String result = mf.format(params);
-        return result;
+        return mf.format(params);
     }
 
     /**

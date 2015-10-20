@@ -9,6 +9,7 @@ import jsky.util.Resources;
 /**
  * A tool bar for the image display window.
  */
+@Deprecated
 public class NavigatorImageDisplayToolBar extends ImageDisplayToolBar {
 
     // Used to access internationalized strings (see i18n/gui*.properties)

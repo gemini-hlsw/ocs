@@ -1,5 +1,6 @@
 package jsky.app.ot.tpe;
 
+import edu.gemini.catalog.ui.tpe.CatalogDisplay;
 import edu.gemini.pot.sp.*;
 import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.spModel.data.ISPDataObject;
@@ -426,8 +427,8 @@ public class TelescopePosEditor extends JSkyCat implements TpeMouseObserver {
 
         final Navigator nav = NavigatorManager.get();
         nav.setImageDisplayManager(new NavigatorImageDisplayManager() {
-            @Override public NavigatorImageDisplay getImageDisplay() {
-                NavigatorImageDisplay imageDisplay = getImageWidget();
+            @Override public CatalogDisplay getImageDisplay() {
+                CatalogDisplay imageDisplay = getImageWidget();
                 imageDisplay.setNavigator(nav);
                 return imageDisplay;
             }

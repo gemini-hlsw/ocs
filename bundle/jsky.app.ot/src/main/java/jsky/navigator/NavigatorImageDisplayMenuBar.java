@@ -12,6 +12,7 @@ import jsky.util.I18N;
  * @version $Revision: 4414 $
  * @author Allan Brighton
  */
+@Deprecated
 public class NavigatorImageDisplayMenuBar extends ImageDisplayMenuBar {
 
     // Used to access internationalized strings (see i18n/gui*.proprties)

@@ -1,12 +1,13 @@
 package jsky.app.ot.tpe;
 
 import javax.swing.*;
-import jsky.navigator.NavigatorImageDisplayToolBar;
+
+import edu.gemini.catalog.ui.tpe.CatalogImageDisplayToolBar;
 
 /**
  * A tool bar for the image display window.
  */
-public class TpeImageDisplayToolBar extends NavigatorImageDisplayToolBar {
+public class TpeImageDisplayToolBar extends CatalogImageDisplayToolBar {
 
     // toolbar buttons
     private JButton skyImageButton;
@@ -22,7 +23,9 @@ public class TpeImageDisplayToolBar extends NavigatorImageDisplayToolBar {
     /**
      * Add the items to the tool bar.
      */
-    protected void addToolBarItems() {
+    @Override
+    public void addToolBarItems() {
+        // This is very poor. This is called before the super constructor completes...
         super.addToolBarItems();
 
         addSeparator();
