@@ -1,6 +1,5 @@
 package jsky.app.ot.gemini.gmos;
 
-import edu.gemini.mask.ObjectTable;
 import edu.gemini.pot.sp.ISPNode;
 import edu.gemini.pot.sp.ISPObservation;
 import edu.gemini.pot.sp.ISPSeqComponent;
@@ -32,8 +31,6 @@ import jsky.app.ot.gemini.editor.EdCompInstBase;
 import jsky.app.ot.nsp.SPTreeEditUtil;
 import jsky.app.ot.tpe.TelescopePosEditor;
 import jsky.app.ot.tpe.TpeManager;
-import jsky.catalog.skycat.SkycatCatalog;
-import jsky.navigator.NavigatorManager;
 import jsky.util.gui.*;
 import scala.Option;
 import scala.Some;
@@ -44,7 +41,6 @@ import javax.swing.event.ChangeListener;
 import java.awt.*;
 import java.awt.event.*;
 import java.beans.PropertyChangeListener;
-import java.io.File;
 import java.util.List;
 
 /**
@@ -152,9 +148,6 @@ public abstract class EdCompInstGMOS<T extends InstGmosCommon> extends EdCompIns
 
     // Custom ROIs
     private final GmosCustomROITableWidget _customROITable;
-
-    // Used to load a custom focal plane mask
-    private static JFileChooser _fileChooser;
 
     // Current nod & shuffle offset position being edited
     private OffsetPos _curPos;
@@ -342,7 +335,7 @@ public abstract class EdCompInstGMOS<T extends InstGmosCommon> extends EdCompIns
 
         // Create the property change listeners for the parallactic angle panel.
         updateParallacticAnglePCL = evt -> _w.posAnglePanel.updateParallacticControls();
-        updateUnboundedAnglePCL   = evt -> _w.posAnglePanel.updateUnboundedControls();
+        updateUnboundedAnglePCL = evt -> _w.posAnglePanel.updateUnboundedControls();
     }
 
     private Site getSite() {
@@ -448,7 +441,8 @@ public abstract class EdCompInstGMOS<T extends InstGmosCommon> extends EdCompIns
         inst.addPropertyChangeListener(InstGmosCommon.FPU_MODE_PROP.getName(),          updateUnboundedAnglePCL);
     }
 
-    @Override protected void cleanup() {
+    @Override
+    protected void cleanup() {
         super.cleanup();
 
         final T inst = getDataObject();
@@ -786,7 +780,7 @@ public abstract class EdCompInstGMOS<T extends InstGmosCommon> extends EdCompIns
         for (OffsetPos op : _opl.getAllPositions()) {
             double p = op.getXaxis();
             double q = op.getYaxis();
-            if (Math.sqrt(p*p + q*q) > 1) {
+            if (Math.sqrt(p * p + q * q) > 1) {
                 sufficientlySmall = false;
                 break;
             }
@@ -953,9 +947,6 @@ public abstract class EdCompInstGMOS<T extends InstGmosCommon> extends EdCompIns
             _w.focalPlaneMask.setEnabled(enabled);
             _w.focalPlaneMaskPlotButton.setEnabled(enabled);
             _updateFPU();
-        } else if (w == _w.focalPlaneMaskPlotButton) {
-            _plotFocalPlaneMask();
-        } else if (w == _w.ccdSlowLowButton) {
             getDataObject().setAmpReadMode(AmpReadMode.SLOW);
             getDataObject().setGainChoice(AmpGain.LOW);
 //            getDataObject().setGainReadCombo(AmpGainReadCombo.SLOW_LOW);
@@ -1284,6 +1275,7 @@ public abstract class EdCompInstGMOS<T extends InstGmosCommon> extends EdCompIns
 
     /**
      * Gets a new validated ROI based on the values in the text edit components if those values are valid numbers.
+     *
      * @return a new ROI based on the parsed numbers if the ROI is valid for the current configuration, None otherwise
      */
     private Option<ROIDescription> editedROI() {
@@ -1463,56 +1455,5 @@ public abstract class EdCompInstGMOS<T extends InstGmosCommon> extends EdCompIns
         _checkWavelength(getDataObject().getDisperserLambda());
     }
 
-
-    // Create and return a new file chooser for selecting a mask file
-    private static JFileChooser _makeFileChooser() {
-        final JFileChooser _fileChooser = new JFileChooser(new File("."));
-
-        final ExampleFileFilter fitsFilter = new ExampleFileFilter(new String[]{
-                "fits", "fits.gz", "fits.Z"}, "FITS Files");
-        _fileChooser.addChoosableFileFilter(fitsFilter);
-
-        _fileChooser.setFileFilter(fitsFilter);
-
-        return _fileChooser;
-    }
-
-    // Get the name of an MDF file from the user. This is a FITS file containing a FITS table.
-    // Plot the table as a catalog using a predefined catalog header.
-    private void _plotFocalPlaneMask() {
-        if (_fileChooser == null) {
-            _fileChooser = _makeFileChooser();
-        }
-        final int option = _fileChooser.showOpenDialog(null);
-        if (option == JFileChooser.APPROVE_OPTION && _fileChooser.getSelectedFile() != null) {
-            _plotFocalPlaneMask(_fileChooser.getSelectedFile().getAbsolutePath());
-        }
-    }
-
-    // Load a FITS object table file, display the table, and plot the
-    // objects on the image
-    private void _plotFocalPlaneMask(String filename) {
-        final SkycatCatalog catalog;
-        try {
-            catalog = ObjectTable.makeCatalog(filename);
-        } catch (Exception e) {
-            DialogUtil.error(_w, e);
-            return;
-        }
-        if (catalog != null) {
-
-            // TPE REFACTOR -- what is this?
-            TelescopePosEditor tpe = TpeManager.get();
-            if (tpe == null) {
-                tpe = TpeManager.open();
-                tpe.reset(getNode());
-            }
-            tpe.getImageWidget().openCatalogWindow();
-            tpe.getImageWidget().openCatalogWindow(catalog);
-
-            // This makes sure the ObjectTableDisplay component is reused for query results
-            ((ObjectTable) catalog.getTable()).makeComponent(NavigatorManager.get());
-        }
-    }
 }
 
