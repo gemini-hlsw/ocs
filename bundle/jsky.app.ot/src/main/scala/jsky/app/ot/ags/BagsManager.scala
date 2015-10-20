@@ -143,7 +143,7 @@ final class BagsManager(executor: ScheduledThreadPoolExecutor) {
                     // If we timed out, we don't want to delay.
                     case Failure(ex: TimeoutException) =>
                       LOG.warning(s"$bagsIdMsg failed: ${ex.getMessage}")
-                      enqueue(obs, 5000L)
+                      enqueue(obs, 0L)
 
                     // For all other exceptions, print the full stack trace.
                     case Failure(ex) =>
