@@ -34,7 +34,8 @@ public class NavigatorImageDisplayMenuBar extends ImageDisplayMenuBar {
                                         NavigatorImageDisplayToolBar toolBar) {
         super(imageDisplay, toolBar);
 
-        add(_catalogMenu = new NavigatorCatalogMenu(imageDisplay, true));
+        // Note, removed because it is a deprecated class
+        // add(_catalogMenu = new NavigatorCatalogMenu(imageDisplay, true));
 
         // move the Pick Object menu item to the Catalog menu
         JMenuItem pickObjectMenuItem = getPickObjectMenuItem();

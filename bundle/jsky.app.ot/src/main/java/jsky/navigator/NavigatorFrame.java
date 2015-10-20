@@ -14,6 +14,7 @@ import java.awt.*;
 /**
  * Provides a top level window and menubar for the Navigator class.
  */
+@Deprecated
 public class NavigatorFrame extends JFrame {
 
     /** Main panel */
@@ -49,7 +50,8 @@ public class NavigatorFrame extends JFrame {
         NavigatorToolBar toolbar = new NavigatorToolBar(navigator);
         getContentPane().add(toolbar, BorderLayout.NORTH);
         getContentPane().add(navigator, BorderLayout.CENTER);
-        setJMenuBar(new NavigatorMenuBar(navigator, toolbar));
+        // NOTE Deleted because NavigatorMenuBar is deprecated
+        //setJMenuBar(new NavigatorMenuBar(navigator, toolbar));
 
         // set default window size and remember changes between sessions
         Preferences.manageSize(navigator, new Dimension(650, 650));

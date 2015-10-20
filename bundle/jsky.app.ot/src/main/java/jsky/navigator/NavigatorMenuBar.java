@@ -21,6 +21,7 @@ import jsky.util.I18N;
  * @version $Revision: 4414 $
  * @author Allan Brighton
  */
+@Deprecated
 public class NavigatorMenuBar extends CatalogNavigatorMenuBar {
 
     // Used to access internationalized strings (see i18n/gui*.proprties)
@@ -35,12 +36,13 @@ public class NavigatorMenuBar extends CatalogNavigatorMenuBar {
      */
     public NavigatorMenuBar(Navigator navigator, NavigatorToolBar toolbar) {
         super(navigator, toolbar);
-        //add(_helpMenu = createHelpMenu());
     }
 
     /** Add a catalog menu to the catalog navigator frame */
     protected JMenu createCatalogMenu() {
         Navigator navigator = (Navigator) getNavigator();
+        // NOTE Removed during transition to new catalogs
+        /*
         JMenu menu = new NavigatorCatalogMenu(navigator, false);
 
         CatalogTree catalogTree = navigator.getCatalogTree();
@@ -56,9 +58,9 @@ public class NavigatorMenuBar extends CatalogNavigatorMenuBar {
         menu.add(catalogTree.getToTopAction());
         menu.add(catalogTree.getMoveUpAction());
         menu.add(catalogTree.getMoveDownAction());
-        menu.add(catalogTree.getToBottomAction());
+        menu.add(catalogTree.getToBottomAction());*/
 
-        return menu;
+        return new JMenu("Catalog");
     }
 
 

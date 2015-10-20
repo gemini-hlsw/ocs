@@ -22,6 +22,7 @@ import jsky.util.gui.ProxyServerDialog;
  * @version $Revision: 7122 $
  * @author Allan Brighton
  */
+@Deprecated
 public class NavigatorCatalogMenu extends JMenu implements TreeModelListener {
 
     // Used to access internationalized strings (see i18n/gui*.proprties)
@@ -204,7 +205,7 @@ public class NavigatorCatalogMenu extends JMenu implements TreeModelListener {
      */
     private JMenuItem _createCatalogBrowseMenuItem() {
         JMenuItem menuItem = new JMenuItem(_I18N.getString("browse") + "...");
-        menuItem.addActionListener(ae -> _opener.openCatalogWindow());
+        //menuItem.addActionListener(ae -> _opener.openCatalogWindow());
         return menuItem;
     }
 
@@ -213,7 +214,7 @@ public class NavigatorCatalogMenu extends JMenu implements TreeModelListener {
      */
     private JMenuItem _createCatalogNewBrowseMenuItem() {
         JMenuItem menuItem = new JMenuItem("New Browse ...");
-        menuItem.addActionListener(ae -> _opener.openCatalogWindow());
+        //menuItem.addActionListener(ae -> _opener.openCatalogWindow());
         return menuItem;
     }
 

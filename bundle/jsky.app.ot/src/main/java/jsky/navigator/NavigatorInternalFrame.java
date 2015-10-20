@@ -54,7 +54,8 @@ public class NavigatorInternalFrame extends JInternalFrame {
         NavigatorToolBar toolbar = new NavigatorToolBar(navigator);
         getContentPane().add(toolbar, BorderLayout.NORTH);
         getContentPane().add(navigator, BorderLayout.CENTER);
-        setJMenuBar(new NavigatorMenuBar(navigator, toolbar));
+        // NOTE Deleted because NavigatorMenuBar is deprecated
+        //setJMenuBar(new NavigatorMenuBar(navigator, toolbar));
 
         // set default window size and remember changes between sessions
         Preferences.manageSize(navigator, new Dimension(650, 650));

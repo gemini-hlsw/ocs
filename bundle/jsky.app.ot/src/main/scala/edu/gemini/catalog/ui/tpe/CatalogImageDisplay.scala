@@ -19,7 +19,6 @@ import jsky.image.fits.gui.FITSKeywordsInternalFrame
 import jsky.image.gui.ImageDisplayMenuBar
 import jsky.image.gui.ImageDisplayToolBar
 import jsky.image.gui.{ImageGraphicsHandler, DivaMainImageDisplay}
-import jsky.navigator.NavigatorCatalogMenu
 import jsky.navigator._
 import jsky.util.Preferences
 import jsky.util.Resources
@@ -117,7 +116,7 @@ trait CatalogDisplay {
   * Extends the DivaMainImageDisplay class by adding support for
   * browsing catalogs and plotting catalog symbols on the image.
   */
-class CatalogImageDisplay(parent: Component, navigatorPane:NavigatorPane) extends DivaMainImageDisplay(navigatorPane, parent) with CatalogNavigatorOpener with CatalogDisplay {
+class CatalogImageDisplay(parent: Component, navigatorPane: NavigatorPane) extends DivaMainImageDisplay(navigatorPane, parent) with CatalogNavigatorOpener with CatalogDisplay {
 
   /** The instance of the catalog navigator to use with this image display. */
   private var _navigator: Navigator = null
@@ -330,7 +329,7 @@ class CatalogImageDisplay(parent: Component, navigatorPane:NavigatorPane) extend
   */
 class CatalogImageDisplayMenuBar(protected val imageDisplay: CatalogImageDisplay, toolBar: ImageDisplayToolBar) extends ImageDisplayMenuBar(imageDisplay, toolBar) {
   /** Handle for the Image menu */
-  private val _catalogMenu= new NavigatorCatalogMenu(imageDisplay, true)
+  private val _catalogMenu = new JMenu("Catalog")
   /** Handle for the Help menu */
   private val _helpMenu = new JMenu("Help")
 
