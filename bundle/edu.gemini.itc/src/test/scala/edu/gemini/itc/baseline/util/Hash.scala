@@ -1,8 +1,6 @@
 package edu.gemini.itc.baseline.util
 
 import edu.gemini.itc.shared._
-import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.CloudCover
-import edu.gemini.spModel.target._
 
 // TEMPORARY helper
 // All input objects will become immutable data only objects (probably Scala case classes).
@@ -124,7 +122,7 @@ object Hash {
       src.distribution,
       src.norm,               // this is the magnitude value
       src.normBand.name,      // this is the magnitude band name
-      src.redshift
+      src.redshift.redshift
     )
 
   def calc(tp: TelescopeDetails): Int =

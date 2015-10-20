@@ -342,8 +342,8 @@ object ITCRequest {
     //Get Redshift
     val redshiftName = r.parameter("Recession")
     val redshift = redshiftName match {
-      case "REDSHIFT" => r.doubleParameter("z")
-      case "VELOCITY" => r.doubleParameter("v") / ITCConstants.C
+      case "REDSHIFT" => Redshift(r.doubleParameter("z"))
+      case "VELOCITY" => Redshift(r.doubleParameter("v") / ITCConstants.C)
       case _          => throw new NoSuchElementException(s"Unknown Recession $redshiftName")
     }
 

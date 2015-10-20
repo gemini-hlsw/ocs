@@ -1,6 +1,6 @@
 package edu.gemini.itc.shared
 
-import edu.gemini.spModel.core.{BrightnessUnit, MagnitudeBand}
+import edu.gemini.spModel.core.{Redshift, BrightnessUnit, MagnitudeBand}
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.{WaterVapor, CloudCover, SkyBackground, ImageQuality}
 import edu.gemini.spModel.target.{UniformSource, SpectralDistribution, SpatialProfile}
 
@@ -20,7 +20,7 @@ final case class SourceDefinition(
                      norm: Double,
                      units: BrightnessUnit,
                      normBand: MagnitudeBand,
-                     redshift: Double) {
+                     redshift: Redshift) {
 
   val isUniform = profile match {
     case UniformSource => true

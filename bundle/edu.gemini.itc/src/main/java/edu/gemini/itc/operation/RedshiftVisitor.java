@@ -1,17 +1,8 @@
-// This software is Copyright(c) 2010 Association of Universities for
-// Research in Astronomy, Inc.  This software was prepared by the
-// Association of Universities for Research in Astronomy, Inc. (AURA)
-// acting as operator of the Gemini Observatory under a cooperative
-// agreement with the National Science Foundation. This software may 
-// only be used or copied as described in the license set out in the 
-// file LICENSE included with the distribution package.
-//
-// $Id: RedshiftVisitor.java,v 1.3 2003/11/21 14:31:02 shane Exp $
-//
 package edu.gemini.itc.operation;
 
 import edu.gemini.itc.base.SampledSpectrum;
 import edu.gemini.itc.base.SampledSpectrumVisitor;
+import edu.gemini.spModel.core.Redshift;
 
 /**
  * This visitor performs a redshift on the spectrum.
@@ -23,24 +14,22 @@ public class RedshiftVisitor implements SampledSpectrumVisitor {
      */
     public static final double MIN_SHIFT = 0.0001;
 
-    private double _z = 0;  // z = v / c
+    private final double _z;  // z = v / c
 
     /**
      * @param z redshift = velocity / c
      */
-    public RedshiftVisitor(double z) {
-        _z = z;
+    public RedshiftVisitor(final Redshift redshift) {
+        _z = redshift.redshift();
     }
 
     /**
      * Performs the redshift on specified spectrum.
      */
-    public void visit(SampledSpectrum sed) {
-        // only shift if greater than MIN_SHIFT
-        if (getShift() <= MIN_SHIFT) return;  // No scaling to be done.
-
-        sed.rescaleX(1.0 + getShift());
-        return;
+    public void visit(final SampledSpectrum sed) {
+        if (getShift() > MIN_SHIFT) {
+            sed.rescaleX(1.0 + getShift());
+        }
     }
 
     /**
@@ -50,14 +39,4 @@ public class RedshiftVisitor implements SampledSpectrumVisitor {
         return _z;
     }
 
-    /**
-     * Sets the redshift.
-     */
-    public void setShift(double z) {
-        _z = z;
-    }
-
-    public String toString() {
-        return "Redshift z = " + getShift();
-    }
 }

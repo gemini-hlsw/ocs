@@ -1,7 +1,7 @@
 package edu.gemini.itc.operation
 
 import edu.gemini.itc.base.{SampledSpectrumVisitor, ZeroMagnitudeStar, VisitableSampledSpectrum, DefaultSampledSpectrum}
-import edu.gemini.spModel.core.{SurfaceBrightness, MagnitudeSystem, BrightnessUnit, MagnitudeBand}
+import edu.gemini.spModel.core._
 
 /**
  * This class creates a black body spectrum over the interval defined by the
@@ -182,20 +182,20 @@ final class BlackBodySpectrum(spectrum: DefaultSampledSpectrum) extends Visitabl
 
 object BlackBodySpectrum {
 
-  def apply(temp: Double, interval: Double, flux: Double, units: BrightnessUnit, band: MagnitudeBand, z: Double) = {
+  def apply(temp: Double, interval: Double, flux: Double, units: BrightnessUnit, band: MagnitudeBand, redshift: Redshift) = {
 
     //rescale the start and end depending on the redshift
-    val start: Double = 300 / (1 + z)
-    val end: Double = 30000 / (1 + z)
-
-    val n: Int = ((end - start) / interval + 1).toInt
-    val fluxArray: Array[Double] = new Array[Double](n + 40)
+    val z         = redshift.redshift
+    val start     =   300 / (1 + z)
+    val end       = 30000 / (1 + z)
+    val n         = ((end - start) / interval + 1).toInt
+    val fluxArray = new Array[Double](n + 40)
 
     //if units need to be converted do it.
     val magFlux = convertToMag(flux, units, band)
 
-    var i: Int = 0
-    var wavelength: Double = start
+    var i = 0
+    var wavelength = start
     while (wavelength <= end) {
       fluxArray(i) = blackbodyFlux(wavelength, temp)
       i = i + 1
@@ -205,12 +205,12 @@ object BlackBodySpectrum {
     val spectrum = new DefaultSampledSpectrum(fluxArray, start, interval)
 
     //with blackbody convert W m^2 um^-1 to phot....
-    val zeropoint: Double = ZeroMagnitudeStar.getAverageFlux(band)
-    val phot_norm: Double = zeropoint * Math.pow(10.0, -0.4 * magFlux)
-    val average: Double = spectrum.getAverage(band.start.toNanometers / (1 + z), band.end.toNanometers / (1 + z))
+    val zeropoint = ZeroMagnitudeStar.getAverageFlux(band)
+    val phot_norm = zeropoint * Math.pow(10.0, -0.4 * magFlux)
+    val average   = spectrum.getAverage(band.start.toNanometers / (1 + z), band.end.toNanometers / (1 + z))
 
     // Calculate multiplier.
-    val multiplier: Double = phot_norm / average
+    val multiplier = phot_norm / average
     spectrum.rescaleY(multiplier)
     
     new BlackBodySpectrum(spectrum)

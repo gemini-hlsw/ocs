@@ -5,6 +5,7 @@ import edu.gemini.pot.sp.ISPObservation
 import edu.gemini.spModel.config.ConfigBridge
 import edu.gemini.spModel.config.map.ConfigValMapInstances
 import edu.gemini.spModel.config2.ConfigSequence
+import edu.gemini.spModel.core.Redshift
 import edu.gemini.spModel.obscomp.SPInstObsComp
 import edu.gemini.spModel.target.env.TargetEnvironment
 import edu.gemini.spModel.target.system.HmsDegTarget
@@ -27,7 +28,7 @@ trait ItcParametersProvider {
   def targetEnvironment: String \/ TargetEnvironment
   def spectralDistribution: String \/ SpectralDistribution
   def spatialProfile: String \/ SpatialProfile
-  def redshift: String \/ Double
+  def redshift: String \/ Redshift
 }
 
 object ItcParametersProvider {
@@ -65,13 +66,13 @@ object ItcParametersProvider {
     def targetEnvironment: String \/ TargetEnvironment =
       Option(owner.getContextTargetEnv).fold("No target environment available".left[TargetEnvironment])(_.right)
 
-    def redshift: String \/ Double =
+    def redshift: String \/ Redshift =
       for {
         tEnv <- targetEnvironment
       } yield {
         tEnv.getBase.getTarget match {
-          case t: HmsDegTarget  => t.getRedshift.redshift // turn radial velocity into z-shift
-          case _                => 0.0                    // non-sidereal targets are assumed to have z-shift 0
+          case t: HmsDegTarget  => t.getRedshift // get z-shift for this target
+          case _                => Redshift(0.0) // non-sidereal targets are assumed to have z-shift 0
         }
       }
 
