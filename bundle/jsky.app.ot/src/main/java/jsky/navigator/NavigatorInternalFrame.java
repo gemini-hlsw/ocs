@@ -1,15 +1,4 @@
-/*
- * ESO Archive
- *
- * $Id: NavigatorInternalFrame.java 4414 2004-02-03 16:21:36Z brighton $
- *
- * who             when        what
- * --------------  ----------  ----------------------------------------
- * Allan Brighton  2000/01/06  Created
- */
-
 package jsky.navigator;
-
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -25,11 +14,11 @@ import jsky.catalog.gui.TablePlotter;
 import jsky.image.gui.MainImageDisplay;
 import jsky.util.Preferences;
 
-
 /**
  * Provides a top level window (internal frame version) for a
  * Navigator panel.
  */
+@Deprecated
 public class NavigatorInternalFrame extends JInternalFrame {
 
     /** Main panel */
@@ -100,18 +89,6 @@ public class NavigatorInternalFrame extends JInternalFrame {
     public NavigatorInternalFrame(JDesktopPane desktop) {
         this(desktop, CatalogNavigator.getCatalogDirectory());
     }
-
-    /**
-     * Create a top level window containing a Navigator panel and
-     * display the contents of the default catalog directory in it.
-     *
-     * @param imageDisplay optional widget to use to display images (if not specified,
-     *                     or null, a new window will be created)
-     */
-    public NavigatorInternalFrame(JDesktopPane desktop, MainImageDisplay imageDisplay) {
-        this(desktop, CatalogNavigator.getCatalogDirectory(), imageDisplay);
-    }
-
 
     /** Return the navigator panel. */
     public Navigator getNavigator() {

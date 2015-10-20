@@ -28,6 +28,7 @@ public class JSkyCat extends JFrame {
     protected JFileChooser fileChooser;
 
     /** Main window, when using internal frames */
+    @Deprecated // Not used in the OT
     protected static JDesktopPane desktop;
 
     /** The main image frame (or internal frame) */
@@ -40,19 +41,17 @@ public class JSkyCat extends JFrame {
      *
      * @param imageFileOrUrl an image file or URL to display
      * @param internalFrames if true, use internal frames
-     * @param showNavigator if true, display the catalog navigator on startup
      * @param portNum if not zero, listen on this port for remote control commnds
      *
      * @see JSkyCatRemoteControl
      */
-    public JSkyCat(String imageFileOrUrl, boolean internalFrames, boolean showNavigator,
-                   int portNum) {
+    private JSkyCat(String imageFileOrUrl, boolean internalFrames, int portNum) {
         super("JSky");
 
         if (internalFrames || desktop != null) {
-            makeInternalFrameLayout(showNavigator, imageFileOrUrl);
+            makeInternalFrameLayout(imageFileOrUrl);
         } else {
-            makeFrameLayout(showNavigator, imageFileOrUrl);
+            makeFrameLayout(imageFileOrUrl);
         }
 
         // Clean up on exit
@@ -72,22 +71,9 @@ public class JSkyCat extends JFrame {
      * given image file or URL, if not null.
      *
      * @param imageFileOrUrl an image file or URL to display
-     * @param internalFrames if true, use internal frames
-     * @param showNavigator if true, display the catalog navigator on startup
-     */
-    public JSkyCat(String imageFileOrUrl, boolean internalFrames, boolean showNavigator) {
-        this(imageFileOrUrl, internalFrames, showNavigator, 0);
-    }
-
-
-    /**
-     * Create the JSkyCat application class and display the contents of the
-     * given image file or URL, if not null.
-     *
-     * @param imageFileOrUrl an image file or URL to display
      */
     public JSkyCat(String imageFileOrUrl) {
-        this(imageFileOrUrl, false, false, 0);
+        this(imageFileOrUrl, false, 0);
     }
 
     /** Return the JDesktopPane, if using internal frames, otherwise null */
@@ -103,10 +89,10 @@ public class JSkyCat extends JFrame {
     /**
      * Do the window layout using internal frames
      *
-     * @param showNavigator if true, display the catalog navigator on startup
      * @param imageFileOrUrl an image file or URL to display
      */
-    protected void makeInternalFrameLayout(boolean showNavigator, String imageFileOrUrl) {
+    @Deprecated //Not in use
+    protected void makeInternalFrameLayout(String imageFileOrUrl) {
         boolean ownDesktop = false;   // true if this class owns the desktop
         if (desktop == null) {
             setJMenuBar(makeMenuBar());
@@ -129,16 +115,13 @@ public class JSkyCat extends JFrame {
             setContentPane(desktop);
         }
 
-        NavigatorInternalFrame navigatorFrame;
-        NavigatorImageDisplayInternalFrame imageFrame = null;
-        if (imageFileOrUrl != null || !showNavigator) {
-            imageFrame = makeNavigatorImageDisplayInternalFrame(desktop, imageFileOrUrl);
+        NavigatorImageDisplayInternalFrame imageFrame = makeNavigatorImageDisplayInternalFrame(desktop, imageFileOrUrl);
             this.imageFrame = imageFrame;
             desktop.add(imageFrame, JLayeredPane.DEFAULT_LAYER);
             desktop.moveToFront(imageFrame);
             imageFrame.setVisible(true);
-        }
 
+        /*
         if (showNavigator) {
             if (imageFrame != null) {
                 MainImageDisplay imageDisplay = imageFrame.getImageDisplayControl().getImageDisplay();
@@ -154,7 +137,7 @@ public class JSkyCat extends JFrame {
             desktop.moveToFront(navigatorFrame);
             navigatorFrame.setLocation(0, 0);
             navigatorFrame.setVisible(true);
-        }
+        }*/
 
         if (ownDesktop) {
             pack();
@@ -173,19 +156,13 @@ public class JSkyCat extends JFrame {
     /**
      * Do the window layout using normal frames
      *
-     * @param showNavigator if true, display the catalog navigator on startup
      * @param imageFileOrUrl an image file or URL to display
      */
-    protected void makeFrameLayout(boolean showNavigator, String imageFileOrUrl) {
-        NavigatorFrame navigatorFrame;
-        NavigatorImageDisplayFrame imageFrame = null;
+    protected void makeFrameLayout(String imageFileOrUrl) {
+        //NavigatorFrame navigatorFrame;
+        this.imageFrame = makeNavigatorImageDisplayFrame(imageFileOrUrl);
 
-        if (imageFileOrUrl != null || !showNavigator) {
-            imageFrame = makeNavigatorImageDisplayFrame(imageFileOrUrl);
-            this.imageFrame = imageFrame;
-        }
-
-        if (showNavigator) {
+        /*if (showNavigator) {
             if (imageFrame != null) {
                 MainImageDisplay imageDisplay = imageFrame.getImageDisplayControl().getImageDisplay();
                 navigatorFrame = makeNavigatorFrame(imageDisplay);
@@ -198,9 +175,8 @@ public class JSkyCat extends JFrame {
             }
             navigatorFrame.setLocation(0, 0);
             navigatorFrame.setVisible(true);
-        }
+        }*/
     }
-
 
     /** Make and return the application menubar (used when internal frames are in use) */
     protected JMenuBar makeMenuBar() {
@@ -214,7 +190,7 @@ public class JSkyCat extends JFrame {
      * @param desktop used to display the internal frame
      * @param imageFileOrUrl specifies the iamge file or URL to display
      */
-    protected NavigatorImageDisplayInternalFrame makeNavigatorImageDisplayInternalFrame(JDesktopPane desktop, String imageFileOrUrl) {
+    private NavigatorImageDisplayInternalFrame makeNavigatorImageDisplayInternalFrame(JDesktopPane desktop, String imageFileOrUrl) {
         NavigatorImageDisplayInternalFrame f = new NavigatorImageDisplayInternalFrame(desktop, imageFileOrUrl);
         f.getImageDisplayControl().getImageDisplay().setTitle(getAppName());
         return f;
@@ -241,28 +217,6 @@ public class JSkyCat extends JFrame {
         f.setVisible(true);
         return f;
     }
-
-    /**
-     * Make and return an internal frame for displaying catalog information.
-     *
-     * @param desktop used to display the internal frame
-     * @param imageDisplay used to display images from image servers
-     */
-    protected NavigatorInternalFrame makeNavigatorInternalFrame(JDesktopPane desktop, MainImageDisplay imageDisplay) {
-        NavigatorInternalFrame f = new NavigatorInternalFrame(desktop, imageDisplay);
-        f.setVisible(true);
-        return f;
-    }
-
-    /**
-     * Make and return a frame for displaying catalog information.
-     *
-     * @param imageDisplay used to display images from image servers
-     */
-    protected NavigatorFrame makeNavigatorFrame(MainImageDisplay imageDisplay) {
-        return new NavigatorFrame(imageDisplay);
-    }
-
 
     /**
      * Create and return a new file chooser to be used to select a local catalog file

@@ -95,7 +95,7 @@ public class TelescopePosEditor extends JSkyCat implements TpeMouseObserver {
      * given image file or URL, if not null.
      */
     public TelescopePosEditor() {
-        super(null, false, false);
+        super(null);
 
         _iw.setTitle("Position Editor");
 
@@ -168,6 +168,7 @@ public class TelescopePosEditor extends JSkyCat implements TpeMouseObserver {
      *
      * @param imageFileOrUrl specifies the image file or URL to display
      */
+    @Override
     protected NavigatorImageDisplayFrame makeNavigatorImageDisplayFrame(String imageFileOrUrl) {
         TpeImageDisplayFrame frame = new TpeImageDisplayFrame(imageFileOrUrl);
         _iw = (TpeImageWidget) frame.getImageDisplayControl().getImageDisplay();
@@ -425,13 +426,13 @@ public class TelescopePosEditor extends JSkyCat implements TpeMouseObserver {
 
         final Navigator nav = NavigatorManager.get();
         nav.setImageDisplayManager(new NavigatorImageDisplayManager() {
-            public NavigatorImageDisplay getImageDisplay() {
+            @Override public NavigatorImageDisplay getImageDisplay() {
                 NavigatorImageDisplay imageDisplay = getImageWidget();
                 imageDisplay.setNavigator(nav);
                 return imageDisplay;
             }
 
-            public Component getImageDisplayControlFrame() {
+            @Override public Component getImageDisplayControlFrame() {
                 return getImageDisplay().getParentFrame();
             }
         });
@@ -473,6 +474,7 @@ public class TelescopePosEditor extends JSkyCat implements TpeMouseObserver {
     /**
      * Receive a mouse event in the image widget.
      */
+    @Override
     public void tpeMouseEvent(TpeImageWidget iw, TpeMouseEvent mouseEvent) {
         // only interested in button 1 here
         if (mouseEvent.mouseEvent.getButton() > 1)
