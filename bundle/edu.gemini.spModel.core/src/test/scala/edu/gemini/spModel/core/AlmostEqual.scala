@@ -44,9 +44,8 @@ object AlmostEqual {
   implicit val RightAscensionAlmostEqual = by((_: RightAscension).toAngle)
   implicit val DeclinationAlmostEqual = by((_: Declination).toAngle)
   implicit val WavelengthAlmostEqual = by((_: Wavelength).toNanometers)
-  implicit val RedshiftAlmostEqual = by((_: Redshift).redshift)
-  implicit val ParallaxAlmostEqual = by((_: Parallax).angle)
-  implicit val RadialVelocityAlmostEqual = by((_: RadialVelocity).velocity.toKilometersPerSecond)
+  implicit val RedshiftAlmostEqual = by((_: Redshift).z)
+  implicit val ParallaxAlmostEqual = by((_: Parallax).mas)
   implicit val EpochAlmostEqual = by((_: Epoch).year)
 
   implicit val CoordinatesAlmostEqual =
@@ -82,7 +81,6 @@ object AlmostEqual {
         (a.name           == b.name)           &&
         (a.coordinates    ~= b.coordinates)    &&
         (a.properMotion   ~= b.properMotion)   &&
-        (a.radialVelocity ~= b.radialVelocity) &&
         (a.redshift       ~= b.redshift)       &&
         (a.parallax       ~= b.parallax)       &&
         (a.magnitudes     ~= b.magnitudes)

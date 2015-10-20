@@ -37,7 +37,6 @@ object TargetParamCodecsSpec extends Specification with ScalaCheck with Arbitrar
     close[Redshift]
     close[Angle]
     close[Parallax]
-    close[RadialVelocity]
     close[RA]
     exact[MagnitudeBand]
     exact[MagnitudeSystem]

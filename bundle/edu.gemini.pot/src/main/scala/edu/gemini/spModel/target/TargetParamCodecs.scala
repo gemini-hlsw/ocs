@@ -12,19 +12,16 @@ import scalaz._, Scalaz._
 object TargetParamCodecs {
 
   implicit val RedshiftParamCodec: ParamCodec[Redshift] =
-    ParamCodec[Double].xmap(Redshift(_), _.redshift)
+    ParamCodec[Double].xmap(Redshift(_), _.z)
 
   implicit val AngleParamCodec: ParamCodec[Angle] =
     ParamCodec[Double].xmap(Angle.fromDegrees, _.toDegrees)
 
   implicit val ParallaxParamCodec: ParamCodec[Parallax] =
-    ParamCodec[Angle].xmap(Parallax(_), _.angle)
+    ParamCodec[Double].xmap(Parallax(_), _.mas)
 
   implicit val VelocityParamCodec: ParamCodec[Velocity] =
     ParamCodec[Double].xmap(KilometersPerSecond(_), _.toKilometersPerSecond)
-
-  implicit val RadialVelocityParamCodec: ParamCodec[RadialVelocity] =
-    ParamCodec[Velocity].xmap(RadialVelocity(_), _.velocity)
 
   implicit val RaParamCodec: ParamCodec[RA] =
     ParamCodec[Angle].xmap(RA.fromAngle, _.toAngle)

@@ -23,7 +23,7 @@ object TargetParamSetCodecs {
       .withParam("epoch",     ProperMotion.epoch)
 
   implicit val MagnitudeParamSetCodec: ParamSetCodec[Magnitude] =
-    ParamSetCodec.initial(Magnitude(Double.NaN, MagnitudeBand.R, None, MagnitudeSystem.VEGA))
+    ParamSetCodec.initial(Magnitude(Double.NaN, MagnitudeBand.R, None, MagnitudeSystem.Vega))
       .withParam("value",         Magnitude.value)
       .withParam("band",          Magnitude.band)
       .withParam("system",        Magnitude.system)
@@ -37,7 +37,6 @@ object TargetParamSetCodecs {
   implicit val SiderealTargetParamSetCodec: ParamSetCodec[SiderealTarget] = 
     ParamSetCodec.initial(SiderealTarget.empty)
       .withParam("name",                     SiderealTarget.name)
-      .withOptionalParam("radial-velocity",  SiderealTarget.radialVelocity)
       .withOptionalParam("redshift",         SiderealTarget.redshift)
       .withOptionalParam("parallax",         SiderealTarget.parallax)
       .withManyParamSet("magnitude",         SiderealTarget.magnitudes)

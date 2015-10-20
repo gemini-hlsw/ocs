@@ -117,7 +117,6 @@ object Target {
     val name:           SiderealTarget @> String          = Lens(t => Store(s => t.copy(name = s), t.name))
     val coordinates:    SiderealTarget @> Coordinates     = Lens(t => Store(c => t.copy(coordinates = c), t.coordinates))
     val properMotion:   SiderealTarget @> Option[ProperMotion]   = Lens(t => Store(c => t.copy(properMotion = c), t.properMotion))
-    val radialVelocity: SiderealTarget @> Option[RadialVelocity] = Lens(t => Store(s => t.copy(radialVelocity = s), t.radialVelocity))
     val redshift:       SiderealTarget @> Option[Redshift] = Lens(t => Store(s => t.copy(redshift = s), t.redshift))
     val parallax:       SiderealTarget @> Option[Parallax] = Lens(t => Store(s => t.copy(parallax = s), t.parallax))
     val magnitudes:     SiderealTarget @> List[Magnitude] = Lens(t => Store(c => t.copy(magnitudes = c), t.magnitudes))
