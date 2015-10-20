@@ -1,7 +1,3 @@
-//
-// $Id: InstGmosCommon.java 45103 2012-05-08 21:57:40Z swalker $
-//
-
 package edu.gemini.spModel.gemini.gmos;
 
 import edu.gemini.pot.sp.ISPObservation;
@@ -368,7 +364,7 @@ public abstract class InstGmosCommon<
 
                 @Override
                 public String apply(GmosCommonType.AmpGain gain, GmosCommonType.AmpReadMode mode, GmosCommonType.DetectorManufacturer man) {
-                    return getActualGain(gain, mode, man);
+                    return String.format("%d", getActualGain(gain, mode, man));
                 }
             }
     );
@@ -489,7 +485,7 @@ public abstract class InstGmosCommon<
      * <p/>
      * The E2V CCD's are being replaced in GMOS-B by Hamamatsu CCDs
      */
-    public String getActualGain() {
+    public double getActualGain() {
         final GmosCommonType.AmpGain gain = getGainChoice();
         final GmosCommonType.AmpReadMode readMode = getAmpReadMode();
         final GmosCommonType.DetectorManufacturer detectorManufacturer = getDetectorManufacturer();
@@ -503,7 +499,7 @@ public abstract class InstGmosCommon<
      * the actual CCD Gain value based upon the CCD choices actually
      * selected.
      */
-    public static String getActualGain(final GmosCommonType.AmpGain gain,
+    public static int getActualGain(final GmosCommonType.AmpGain gain,
                                        final GmosCommonType.AmpReadMode readMode,
                                        final GmosCommonType.DetectorManufacturer detectorManufacturer) {
         // Complicated switch nesting like this cries out for building a type hierarchy.  The parallel
@@ -515,87 +511,46 @@ public abstract class InstGmosCommon<
         if (detectorManufacturer == GmosCommonType.DetectorManufacturer.E2V) {
             if (readMode == GmosCommonType.AmpReadMode.FAST) {
                 if (gain == GmosCommonType.AmpGain.HIGH) {
-                    return "5";
+                    return 5;
                 } else if (gain == GmosCommonType.AmpGain.LOW) {
-                    return "6";
+                    return 6;
                 }
             } else if (readMode == GmosCommonType.AmpReadMode.SLOW) {
                 if (gain == GmosCommonType.AmpGain.HIGH) {
-                    return "1";
+                    return 1;
                 } else if (gain == GmosCommonType.AmpGain.LOW) {
-                    return "2";
+                    return 2;
                 }
             }
         } else if (detectorManufacturer == GmosCommonType.DetectorManufacturer.HAMAMATSU) {
             if (readMode == GmosCommonType.AmpReadMode.FAST) {
                 if (gain == GmosCommonType.AmpGain.HIGH) {
-                    return "5";
+                    return 5;
                 } else if (gain == GmosCommonType.AmpGain.LOW) {
-                    return "6";
+                    return 6;
                 }
             } else if (readMode == GmosCommonType.AmpReadMode.SLOW) {
                 if (gain == GmosCommonType.AmpGain.HIGH) {
-                    return "1";
+                    return 1;
                 } else if (gain == GmosCommonType.AmpGain.LOW) {
-                    return "2";
+                    return 2;
                 }
             }
         }
 
-        return logAndThrowUnexpectedParametersException(gain, readMode, detectorManufacturer);
-    }
-
-    public String getMeanGain() {
-        final GmosCommonType.AmpGain gain = getGainChoice();
-        final GmosCommonType.AmpReadMode readMode = getAmpReadMode();
-        final GmosCommonType.DetectorManufacturer detectorManufacturer = getDetectorManufacturer();
-
-        return getMeanGain(gain, readMode, detectorManufacturer);
+        throw new IllegalArgumentException("unsupported configuration");
     }
 
     /**
-     * This convenience method implements the algorithm for determining
-     * the actual CCD Gain value based upon the CCD choices actually
-     * selected. See InstGmosSouth and InstGmostNorth for the implementations
-     * and sources for the values.
+     * Calculates the mean gain.
      */
-    public abstract String getMeanGain(final GmosCommonType.AmpGain gain,
-                                       final GmosCommonType.AmpReadMode readMode,
-                                       final GmosCommonType.DetectorManufacturer detectorManufacturer);
+    public abstract double getMeanGain();
 
-
-    public String getMeanReadNoise() {
-        final GmosCommonType.AmpGain gain = getGainChoice();
-        final GmosCommonType.AmpReadMode readMode = getAmpReadMode();
-        final GmosCommonType.DetectorManufacturer detectorManufacturer = getDetectorManufacturer();
-
-        return getMeanReadNoise(gain, readMode, detectorManufacturer);
-    }
 
     /**
-     * This convenience method implements the algorithm for determining
-     * the actual CCD Gain value based upon the CCD choices actually
-     * selected.  See InstGmosSouth and InstGmostNorth for the implementations
-     * and sources for the values.
+     * Calculates the mean read noise.
      */
-    public abstract String getMeanReadNoise(final GmosCommonType.AmpGain gain,
-                                            final GmosCommonType.AmpReadMode readMode,
-                                            final GmosCommonType.DetectorManufacturer detectorManufacturer);
-
-    protected static String logAndThrowUnexpectedParametersException(
-            final GmosCommonType.AmpGain gain,
-            final GmosCommonType.AmpReadMode readMode,
-            final GmosCommonType.DetectorManufacturer detectorManufacturer) {
-        final StringBuffer warningMessage = new StringBuffer(128);
-
-        warningMessage.append(
-                "Unanticipated parameter values when calculating actual readnoise." +
-                        "[" + gain + "] " +
-                        "[" + readMode + "] " +
-                        "[" + detectorManufacturer + "]");
-        LOG.warning(warningMessage.toString());
-        throw new IllegalArgumentException(warningMessage.toString());
-    }
+    public abstract double getMeanReadNoise();
 
     /**
      * Set the CCD readout speed.
@@ -665,34 +620,6 @@ public abstract class InstGmosCommon<
         GmosCommonType.AmpGain oldValue = getGainChoice();
         setGainChoice(GmosCommonType.AmpGain.getAmpGain(name, oldValue));
     }
-
-
-//    protected GMOSParams.DisperserData _getDisperserData(String name) {
-//        return GMOSParams.DisperserData.valueOf(name);
-//    }
-
-//    protected GMOSParams.DisperserData _getDisperserData(String name, String order, String lambda) {
-//        return GMOSParams.DisperserData.valueOf(name, order, lambda);
-//    }
-
-//    public void setDisperserName(String name) {
-//        // Slightly inefficient, but okay for small objects.
-//        if (name == null) return;
-//        setDisperserValue(GMOSParams.Disperser.getDisperser(name,
-//                                                 getDisperser().getDisperser()));
-//    }
-
-//    public void setDisperser(GMOSParams.DisperserData newValue) {
-//        GMOSParams.DisperserData oldValue = getDisperser();
-//        if (oldValue != newValue) {
-//            _disperser = new GMOSParams.DisperserData(newValue);
-//            firePropertyChange(GMOSConstants.DISPERSER_PROP, oldValue, newValue);
-//        }
-//    }
-
-//    protected void _setDisperser(GMOSParams.DisperserData d) {
-//        _disperser = d;
-//    }
 
     /**
      * Get the disperser.
@@ -942,11 +869,6 @@ public abstract class InstGmosCommon<
         F newValue = (F) bridge.parse(name, oldValue);
         setFilter(newValue);
     }
-
-//    protected void _setFilter(GMOSParams.Filter f) {
-//        _filter = f;
-//    }
-
 
     /**
      * Set the X CCD binning.
@@ -1300,44 +1222,7 @@ public abstract class InstGmosCommon<
         return _detectorRows;
     }
 
-    /**
-     * Get the number detector rows as a string
-     */
-//    public final String getDetectorRowsAsString() {
-//        return Integer.toString(_detectorRows);
-//    }
 
-
-    // Update the detector rows value, based on the current shuffle offset value.
-    //
-    // From Phil's email:
-    //
-    // "The shuffle offset can be specified either in arcsec on the sky or in
-    // (unbinned) detector rows. The charge can only be shuffled in integer
-    // rows.  The conversion between shuffle offset and detector rows is:
-    //
-    //    rows = nint(arcsec/ 0.0727)
-    //
-    // where nint is nearest integer and 0.0727 arcsec is the GMOS pixel size.
-    // The number of rows should be a (rounded up) multiple of
-    // the Y-binning (from the GMOS CCD readout tab) e.g. if the calculation
-    // gives rows=7 and Ybinning=2 then the final value should be rows=8."
-    //
-//    private void _updateDetectorRows() {
-//        double pixelSize = getPixelSize();
-//        int    yBin      = getCcdYBinning().getValue();
-//        _detectorRows = calculateDetectorRows(_shuffleOffset, pixelSize, yBin);
-//        // hmm, should fire a property change here, one would think ...
-//    }
-
-    /**
-     * Calculates the default number of detector rows for the given detector
-     * manufacturer and y binning setting.
-     */
-//    public static int calculateDefaultDetectorRows(GmosCommonType.DetectorManufacturer dm, int yBin) {
-//        return calculateDetectorRows(dm.shuffleOffsetArcsec(), dm.pixelSize(), yBin);
-//    }
-//
     public static int calculateDetectorRows(double shuffleOffsetArcsec, double pixelSize, int yBin) {
         // Round to nearest int.
         int r = (int) (shuffleOffsetArcsec / pixelSize + 0.5);
@@ -1346,11 +1231,6 @@ public abstract class InstGmosCommon<
         int mod = r % yBin;
         return (mod == 0) ? r : r + (yBin - mod);
     }
-
-//    public static double calculateDefaultShuffleOffset(GmosCommonType.DetectorManufacturer dm, int yBin) {
-//
-//        return calculateShuffleOffset(dm.shuffleOffsetPixels(), dm.pixelSize(), yBin);
-//    }
 
     public static double calculateShuffleOffset(int detectorRows, double pixelSize, int yBin) {
         return pixelSize * detectorRows;
@@ -1361,24 +1241,6 @@ public abstract class InstGmosCommon<
         int mod = rawDetectorRows % yBin;
         return (mod == 0) ? rawDetectorRows : rawDetectorRows + (yBin - mod);
     }
-
-
-    // Update the shuffle offset based on the value of the detector rows
-    // (see _updateDetectorRows).
-//    private void _updateShuffleOffset() {
-//        _shuffleOffset = _detectorRows * getPixelSize();
-//    }
-
-
-    /**
-     * Set the exposure time (force integer value).
-     */
-    // SW: removing this since you cannot enforce it in the instrument iterator
-    // anyway and it causes problems when trying to edit fractional seconds
-    // in the first step of the instrument iterator
-//    public void setExposureTime(double newValue) {
-//        super.setExposureTime((int) newValue);
-//    }
 
     /**
      * Set the number of nod & shuffle cycles

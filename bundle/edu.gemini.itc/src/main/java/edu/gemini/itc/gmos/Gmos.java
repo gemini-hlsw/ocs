@@ -27,8 +27,6 @@ public abstract class Gmos extends Instrument implements BinningProvider {
     // Instrument reads its configuration from here.
     private static final double WELL_DEPTH = 125000.0;
     private static final double AD_SATURATION = 56636;
-    private static final double HIGH_GAIN = 4.4;
-    private static final double LOW_GAIN = 2.18;
     private static final int DETECTOR_PIXELS = 6218;
 
     // Used as a desperate solution when multiple detectors need to be handled differently (See REL-478).
@@ -240,14 +238,6 @@ public abstract class Gmos extends Instrument implements BinningProvider {
 
     public double getADSaturation() {
         return AD_SATURATION;
-    }
-
-    public double getHighGain() {
-        return HIGH_GAIN;
-    }
-
-    public double getLowGain() {
-        return LOW_GAIN;
     }
 
     public IFUComponent getIFU() {

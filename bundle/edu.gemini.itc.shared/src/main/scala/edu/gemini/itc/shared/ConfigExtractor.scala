@@ -38,6 +38,8 @@ object ConfigExtractor {
   private val NdFilterKey         = new ItemKey("instrument:ndFilter")
   private val FpuKey              = new ItemKey("instrument:fpu")
   private val DisperserKey        = new ItemKey("instrument:disperser")
+  private val AmpReadModeKey      = new ItemKey("instrument:ampReadMode")
+  private val AmpGainKey          = new ItemKey("instrument:gainChoice")
   private val CcdXBinKey          = new ItemKey("instrument:ccdXBinning")           // X aka spectral binning
   private val CcdYBinKey          = new ItemKey("instrument:ccdYBinning")           // Y aka spatial binning
   private val ReadModeKey         = new ItemKey("instrument:readMode")
@@ -134,13 +136,15 @@ object ConfigExtractor {
       customSlit  <- extractCustomSlit
       filter      <- extract[Filter]        (c, FilterKey)
       grating     <- extract[Disperser]     (c, DisperserKey)
+      gain        <- extract[AmpGain]       (c, AmpGainKey)
+      readMode    <- extract[AmpReadMode]   (c, AmpReadModeKey)
       specBin     <- extract[Binning]       (c, CcdXBinKey)
       spatBin     <- extract[Binning]       (c, CcdYBinKey)
       ccdType     <- extract[DetectorManufacturer](c, CcdManufacturerKey)
       wavelen     <- extractObservingWavelength(c)
     } yield {
       val ifuMethod = extractIfu(mask)
-      GmosParameters(filter, grating, wavelen, mask, customSlit, spatBin.getValue, specBin.getValue, ifuMethod, ccdType, site)
+      GmosParameters(filter, grating, wavelen, mask, gain, readMode, customSlit, spatBin.getValue, specBin.getValue, ifuMethod, ccdType, site)
     }
 
   }
