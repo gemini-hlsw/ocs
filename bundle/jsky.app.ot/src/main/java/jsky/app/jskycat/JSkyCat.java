@@ -116,28 +116,10 @@ public class JSkyCat extends JFrame {
         }
 
         NavigatorImageDisplayInternalFrame imageFrame = makeNavigatorImageDisplayInternalFrame(desktop, imageFileOrUrl);
-            this.imageFrame = imageFrame;
-            desktop.add(imageFrame, JLayeredPane.DEFAULT_LAYER);
-            desktop.moveToFront(imageFrame);
-            imageFrame.setVisible(true);
-
-        /*
-        if (showNavigator) {
-            if (imageFrame != null) {
-                MainImageDisplay imageDisplay = imageFrame.getImageDisplayControl().getImageDisplay();
-                navigatorFrame = makeNavigatorInternalFrame(desktop, imageDisplay);
-                Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
-                int x = Math.min(screen.width - imageFrame.getWidth(), navigatorFrame.getWidth());
-                imageFrame.setLocation(x, 0);
-                imageFrame.setNavigator(navigatorFrame.getNavigator());
-            } else {
-                navigatorFrame = makeNavigatorInternalFrame(desktop, null);
-            }
-            desktop.add(navigatorFrame, JLayeredPane.DEFAULT_LAYER);
-            desktop.moveToFront(navigatorFrame);
-            navigatorFrame.setLocation(0, 0);
-            navigatorFrame.setVisible(true);
-        }*/
+        this.imageFrame = imageFrame;
+        desktop.add(imageFrame, JLayeredPane.DEFAULT_LAYER);
+        desktop.moveToFront(imageFrame);
+        imageFrame.setVisible(true);
 
         if (ownDesktop) {
             pack();
@@ -159,23 +141,7 @@ public class JSkyCat extends JFrame {
      * @param imageFileOrUrl an image file or URL to display
      */
     protected void makeFrameLayout(String imageFileOrUrl) {
-        //NavigatorFrame navigatorFrame;
         this.imageFrame = makeNavigatorImageDisplayFrame(imageFileOrUrl);
-
-        /*if (showNavigator) {
-            if (imageFrame != null) {
-                MainImageDisplay imageDisplay = imageFrame.getImageDisplayControl().getImageDisplay();
-                navigatorFrame = makeNavigatorFrame(imageDisplay);
-                Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
-                int x = Math.min(screen.width - imageFrame.getWidth(), navigatorFrame.getWidth());
-                imageFrame.setLocation(x, 0);
-                imageFrame.setNavigator(navigatorFrame.getNavigator());
-            } else {
-                navigatorFrame = makeNavigatorFrame(null);
-            }
-            navigatorFrame.setLocation(0, 0);
-            navigatorFrame.setVisible(true);
-        }*/
     }
 
     /** Make and return the application menubar (used when internal frames are in use) */

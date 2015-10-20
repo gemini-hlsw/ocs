@@ -51,22 +51,6 @@ public class NavigatorImageDisplayFrame extends ImageDisplayControlFrame {
         super(fileOrUrl);
     }
 
-    /**
-     * Set the instance of the catalog navigator to use with this image.
-     */
-    public void setNavigator(Navigator navigator) {
-        NavigatorImageDisplay imageDisplay = (NavigatorImageDisplay) imageDisplayControl.getImageDisplay();
-        imageDisplay.setNavigator(navigator);
-    }
-
-    /**
-     * Return the instance of the catalog navigator used with this image.
-     */
-    public Navigator getNavigator() {
-        NavigatorImageDisplay imageDisplay = (NavigatorImageDisplay) imageDisplayControl.getImageDisplay();
-        return imageDisplay.getNavigator();
-    }
-
     /** Make and return the menubar */
     protected ImageDisplayMenuBar makeMenuBar(DivaMainImageDisplay mainImageDisplay, ImageDisplayToolBar toolBar) {
         return new NavigatorImageDisplayMenuBar((NavigatorImageDisplay) mainImageDisplay,
