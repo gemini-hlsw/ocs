@@ -1,7 +1,3 @@
-/**
- * $Id: MaskDisplay.java 6528 2005-08-04 10:02:48Z brighton $
- */
-
 package edu.gemini.mask;
 
 import jsky.image.gui.MainImageDisplay;
@@ -19,14 +15,11 @@ import java.awt.AlphaComposite;
 import java.awt.geom.Point2D;
 import java.awt.geom.Line2D;
 import java.util.List;
-import java.util.Iterator;
 import java.util.ArrayList;
 
 import diva.util.java2d.Polygon2D;
 
 import javax.swing.JComponent;
-import javax.swing.event.ChangeListener;
-import javax.swing.event.ChangeEvent;
 
 /**
  * Displays the mask related items as an image overlay.
@@ -53,9 +46,9 @@ class MaskDisplay implements ImageGraphicsHandler {
     private ObjectTable _table;
 
     // figures to display
-    private List _gaps = new ArrayList();
-    private List _slits = new ArrayList();
-    private List _bands = new ArrayList();
+    private List<MaskFigure> _gaps = new ArrayList<>();
+    private List<MaskFigure> _slits = new ArrayList<>();
+    private List<MaskFigure> _bands = new ArrayList<>();
 
     private boolean _showGaps;
     private boolean _showSlits;
@@ -77,18 +70,10 @@ class MaskDisplay implements ImageGraphicsHandler {
         }
     }
 
-
-    // --
-
-
     MaskDisplay(MainImageDisplay imageDisplay) {
         _imageDisplay = imageDisplay;
         _imageDisplay.addImageGraphicsHandler(this);
-        _imageDisplay.addChangeListener(new ChangeListener() {
-            public void stateChanged(ChangeEvent e) {
-                updateFigures();
-            }
-        });
+        _imageDisplay.addChangeListener(e -> updateFigures());
         _cc = _imageDisplay.getCoordinateConverter();
     }
 
@@ -322,17 +307,17 @@ class MaskDisplay implements ImageGraphicsHandler {
 
             double prevY = 1;
             BandDef.Band[] bands = bandDef.getBands();
-            for (int i = 0; i < bands.length; i++) {
-                double y = bands[i].getYPos();
-                double bandHeight = bands[i].getHeight();
+            for (BandDef.Band band : bands) {
+                double y = band.getYPos();
+                double bandHeight = band.getHeight();
 
                 // outside (forbidden) area
                 if (prevY < y) {
                     Polygon2D.Double pgOut = new Polygon2D.Double(new double[]{
-                        1, prevY,
-                        imageWidth, prevY,
-                        imageWidth, y,
-                        1, y
+                            1, prevY,
+                            imageWidth, prevY,
+                            imageWidth, y,
+                            1, y
                     });
                     pgOut.closePath();
                     _bands.add(new MaskFigure(pgOut, BAND_COLOR, BAND_COMPOSITE));
@@ -340,10 +325,10 @@ class MaskDisplay implements ImageGraphicsHandler {
 
                 // inside area
                 Polygon2D.Double pgIn = new Polygon2D.Double(new double[]{
-                    1, y,
-                    imageWidth, y,
-                    imageWidth, y + bandHeight,
-                    1, y + bandHeight
+                        1, y,
+                        imageWidth, y,
+                        imageWidth, y + bandHeight,
+                        1, y + bandHeight
                 });
                 _bands.add(new MaskFigure(pgIn, BAND_COLOR, null));
                 prevY = y + bandHeight;
@@ -381,20 +366,16 @@ class MaskDisplay implements ImageGraphicsHandler {
         }
     }
 
-    private void _drawMaskFigures(List items, Graphics2D g) {
+    private void _drawMaskFigures(List<MaskFigure> items, Graphics2D g) {
         g.setStroke(DEFAULT_STROKE);
-        if (items.size() != 0) {
-            Iterator it = items.iterator();
-            while(it.hasNext()) {
-                MaskFigure fig = (MaskFigure)it.next();
-                g.setColor(fig.color);
-                Shape shape = _imageToScreenCoords(fig.shape);
-                g.draw(shape);
-                if (fig.composite != null) {
-                    g.setComposite(fig.composite);
-                    g.fill(shape);
-                    g.setPaintMode();
-                }
+        for (MaskFigure fig: items) {
+            g.setColor(fig.color);
+            Shape shape = _imageToScreenCoords(fig.shape);
+            g.draw(shape);
+            if (fig.composite != null) {
+                g.setComposite(fig.composite);
+                g.fill(shape);
+                g.setPaintMode();
             }
         }
     }

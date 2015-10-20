@@ -10,13 +10,11 @@ import jsky.util.gui.*;
 import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableModel;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
-import java.util.Hashtable;
-
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Dialog for editing the mask making parameters and generating the mask files.
@@ -31,7 +29,7 @@ public class MaskDialog implements PropertyChangeListener {
     private MainImageDisplay _imageDisplay;
 
     // Links property names to widgets
-    private Hashtable _propTable = new Hashtable();
+    private Map<String, JComponent> _propTable = new HashMap<>();
 
     // Holds the values being edited here
     private MaskParams _maskParams;
@@ -179,10 +177,10 @@ public class MaskDialog implements PropertyChangeListener {
             public int getColumnCount() { return _columnNames.length; }
             public Object getValueAt(int row, int col) {
                 switch(col) {
-                    case 0: return new Integer(bands[row].getNum());
+                    case 0: return bands[row].getNum();
                     case 1: return bands[row].getName();
-                    case 2: return new Double(bands[row].getYPos());
-                    case 3: return new Double(bands[row].getHeight());
+                    case 2: return bands[row].getYPos();
+                    case 3: return bands[row].getHeight();
                 }
                 return null;
             }
@@ -331,42 +329,47 @@ public class MaskDialog implements PropertyChangeListener {
 
     // Called when one of the mask parameters changes. Update the GUI to display the
     // new value, being careful to avoid recursion.
-    public void propertyChange(PropertyChangeEvent evt) {
-        String name = evt.getPropertyName();
-        Object value = evt.getNewValue();
+    public void propertyChange(final PropertyChangeEvent evt) {
+        final String name = evt.getPropertyName();
+        final Object value = evt.getNewValue();
 
-        if (name.equals(BandDef.SHUFFLE_MODE)) {
-            _shuffleModeChanged();
-        } else if (name.equals(MaskParams.INSTRUMENT)) {
-            _instrumentChanged();
-        } else if (name.equals(BandDef.BANDS)) {
-            _w.bandTable.setModel(_getBandsTableModel((BandDef.Band[])value));
-        } else {
-            Object w = _propTable.get(name);
-            if (w instanceof NumberBoxWidget) {
-                Number n = (Number)value;
-                NumberBoxWidget nbw = (NumberBoxWidget)w;
-                if (n instanceof Double) {
-                    if (!n.equals(new Double(nbw.getDoubleValue(n.doubleValue())))) {
-                        nbw.setValue(n.doubleValue());
+        switch (name) {
+            case BandDef.SHUFFLE_MODE:
+                _shuffleModeChanged();
+                break;
+            case MaskParams.INSTRUMENT:
+                _instrumentChanged();
+                break;
+            case BandDef.BANDS:
+                _w.bandTable.setModel(_getBandsTableModel((BandDef.Band[]) value));
+                break;
+            default:
+                final Object w = _propTable.get(name);
+                if (w instanceof NumberBoxWidget) {
+                    Number n = (Number) value;
+                    NumberBoxWidget nbw = (NumberBoxWidget) w;
+                    if (n instanceof Double) {
+                        if (!n.equals(nbw.getDoubleValue(n.doubleValue()))) {
+                            nbw.setValue(n.doubleValue());
+                        }
+                    } else if (n instanceof Integer) {
+                        if (!n.equals(nbw.getIntegerValue(n.intValue()))) {
+                            nbw.setValue(n.intValue());
+                        }
                     }
-                } else if (n instanceof Integer) {
-                    if (!n.equals(new Integer(nbw.getIntegerValue(n.intValue())))) {
-                        nbw.setValue(n.intValue());
+                } else if (w instanceof JTextField) {
+                    String s = value.toString();
+                    JTextField tf = (JTextField) w;
+                    if (!s.equals(tf.getText())) {
+                        tf.setText(s);
+                    }
+                } else if (w instanceof JComboBox) {
+                    JComboBox cb = (JComboBox) w;
+                    if (!value.equals(cb.getSelectedItem())) {
+                        cb.setSelectedItem(value);
                     }
                 }
-            } else if (w instanceof JTextField) {
-                String s = value.toString();
-                JTextField tf = (JTextField)w;
-                if (!s.equals(tf.getText())) {
-                    tf.setText(s);
-                }
-            } else if (w instanceof JComboBox) {
-                JComboBox cb = (JComboBox)w;
-                if (!value.equals(cb.getSelectedItem())) {
-                    cb.setSelectedItem(value);
-                }
-            }
+                break;
         }
     }
 

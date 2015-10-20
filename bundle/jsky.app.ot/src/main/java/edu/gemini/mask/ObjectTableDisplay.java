@@ -1,7 +1,3 @@
-/**
- * $Id: ObjectTableDisplay.java 6719 2005-11-08 19:35:36Z brighton $
- */
-
 package edu.gemini.mask;
 
 import jsky.catalog.gui.TableDisplayTool;
@@ -12,16 +8,11 @@ import jsky.navigator.Navigator;
 import jsky.navigator.NavigatorManager;
 import jsky.util.gui.DialogUtil;
 import jsky.util.gui.SortedJTable;
-import jsky.util.gui.TextBoxWidgetWatcher;
 import jsky.util.gui.TextBoxWidget;
 import jsky.image.gui.MainImageDisplay;
 
 import javax.swing.JPanel;
 import javax.swing.JCheckBox;
-import javax.swing.event.ListSelectionListener;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ChangeListener;
-import javax.swing.event.ChangeEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import java.awt.BorderLayout;
@@ -64,11 +55,9 @@ public class ObjectTableDisplay extends TableDisplayTool
 
         // update GUI when the table data changes
         _navigator = (Navigator)display;
-        _navigator.addChangeListener(new ChangeListener() {
-            public void stateChanged(ChangeEvent e) {
-                _tableChanged(getTable());
-                _maskDisplay.setEnabled(ObjectTableDisplay.this == _navigator.getResultComponent());
-            }
+        _navigator.addChangeListener(e -> {
+            _tableChanged(getTable());
+            _maskDisplay.setEnabled(ObjectTableDisplay.this == _navigator.getResultComponent());
         });
         _tableChanged(tableQueryResult);
     }
@@ -156,21 +145,19 @@ public class ObjectTableDisplay extends TableDisplayTool
 
         // clear input fields when table selection changes, and disable if there is no
         // selection
-        getSortedJTable().getSelectionModel().addListSelectionListener(new ListSelectionListener() {
-            public void valueChanged(ListSelectionEvent e) {
-                _maskButtonPanel.slitPosX.setText("");
-                _maskButtonPanel.slitPosY.setText("");
-                _maskButtonPanel.slitSizeX.setText("");
-                _maskButtonPanel.slitSizeY.setText("");
-                _maskButtonPanel.slitTilt.setText("");
+        getSortedJTable().getSelectionModel().addListSelectionListener(e -> {
+            _maskButtonPanel.slitPosX.setText("");
+            _maskButtonPanel.slitPosY.setText("");
+            _maskButtonPanel.slitSizeX.setText("");
+            _maskButtonPanel.slitSizeY.setText("");
+            _maskButtonPanel.slitTilt.setText("");
 
-                boolean enabled = (getSortedJTable().getSelectedRowCount() != 0);
-                _maskButtonPanel.slitPosX.setEnabled(enabled);
-                _maskButtonPanel.slitPosY.setEnabled(enabled);
-                _maskButtonPanel.slitSizeX.setEnabled(enabled);
-                _maskButtonPanel.slitSizeY.setEnabled(enabled);
-                _maskButtonPanel.slitTilt.setEnabled(enabled);
-            }
+            boolean enabled1 = (getSortedJTable().getSelectedRowCount() != 0);
+            _maskButtonPanel.slitPosX.setEnabled(enabled1);
+            _maskButtonPanel.slitPosY.setEnabled(enabled1);
+            _maskButtonPanel.slitSizeX.setEnabled(enabled1);
+            _maskButtonPanel.slitSizeY.setEnabled(enabled1);
+            _maskButtonPanel.slitTilt.setEnabled(enabled1);
         });
 
         _maskButtonPanel.p0Button.addActionListener(this);
@@ -179,13 +166,11 @@ public class ObjectTableDisplay extends TableDisplayTool
         _maskButtonPanel.p3Button.addActionListener(this);
         _maskButtonPanel.pXButton.addActionListener(this);
 
-        _maskButtonPanel.designMaskButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent ev) {
-                try {
-                    _designMask();
-                } catch (Exception e) {
-                    DialogUtil.error(getParent(), e);
-                }
+        _maskButtonPanel.designMaskButton.addActionListener(ev -> {
+            try {
+                _designMask();
+            } catch (Exception e) {
+                DialogUtil.error(getParent(), e);
             }
         });
 
@@ -196,11 +181,9 @@ public class ObjectTableDisplay extends TableDisplayTool
         _plotGapsButton = new JCheckBox("Show Gaps");
         _plotGapsButton.setToolTipText("Toggle the visualization of the gaps on the detector chips");
         panel.add(_plotGapsButton);
-        _plotGapsButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent ev) {
-                _maskDisplay.setShowGaps(_plotGapsButton.isSelected());
-                _maskDisplay.repaintImage();
-            }
+        _plotGapsButton.addActionListener(ev -> {
+            _maskDisplay.setShowGaps(_plotGapsButton.isSelected());
+            _maskDisplay.repaintImage();
         });
     }
 
@@ -208,11 +191,9 @@ public class ObjectTableDisplay extends TableDisplayTool
         _plotSlitsButton = new JCheckBox("Show Slits");
         _plotSlitsButton.setToolTipText("Toggle the visualization of the slits and spectrum overlay");
         panel.add(_plotSlitsButton);
-        _plotSlitsButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent ev) {
-                _maskDisplay.setShowSlits(_plotSlitsButton.isSelected());
-                _maskDisplay.repaintImage();
-            }
+        _plotSlitsButton.addActionListener(ev -> {
+            _maskDisplay.setShowSlits(_plotSlitsButton.isSelected());
+            _maskDisplay.repaintImage();
         });
     }
 
@@ -221,11 +202,9 @@ public class ObjectTableDisplay extends TableDisplayTool
         _plotBandsButton = new JCheckBox("Show N&S Bands");
         _plotBandsButton.setToolTipText("Toggle the visualization of the nod & shuffle bands");
         panel.add(_plotBandsButton);
-        _plotBandsButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent ev) {
-                _maskDisplay.setShowBands(_plotBandsButton.isSelected());
-                _maskDisplay.repaintImage();
-            }
+        _plotBandsButton.addActionListener(ev -> {
+            _maskDisplay.setShowBands(_plotBandsButton.isSelected());
+            _maskDisplay.repaintImage();
         });
     }
 
@@ -289,8 +268,8 @@ public class ObjectTableDisplay extends TableDisplayTool
         ObjectTable table = (ObjectTable)getTable();
         SortedJTable t = getSortedJTable();
         int[] rows = t.getSelectedRows();
-        for(int i = 0; i < rows.length; i++) {
-            table.setValueAt(value, rows[i], col);
+        for (int row : rows) {
+            table.setValueAt(value, row, col);
         }
     }
 }

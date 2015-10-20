@@ -446,8 +446,7 @@ public class ObjectTable extends SkycatTable implements CatalogUIHandler {
 
 
     protected MemoryCatalog makeQueryResult(FieldDesc[] fields, Vector dataRows) {
-        ObjectTable table = new ObjectTable(this, fields, dataRows);
-        return table;
+        return new ObjectTable(this, fields, dataRows);
     }
 
     // Create and return the default column descriptions for a new table
