@@ -76,6 +76,6 @@ object AlmostEqual {
   implicit val RedshiftAlmostEqual =
     new AlmostEqual[Redshift] {
       def almostEqual(a: Redshift, b: Redshift) =
-        a.redshift ~= b.redshift
+        a.z ~= b.z
     }
 }
