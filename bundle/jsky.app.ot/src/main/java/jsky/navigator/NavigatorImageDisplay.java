@@ -12,6 +12,7 @@ import javax.swing.JFrame;
 import javax.swing.JInternalFrame;
 import javax.swing.JLayeredPane;
 
+import edu.gemini.catalog.ui.tpe.CatalogDisplay;
 import jsky.catalog.Catalog;
 import jsky.catalog.CatalogDirectory;
 import jsky.catalog.TableQueryResult;
@@ -37,8 +38,9 @@ import jsky.catalog.gui.CatalogNavigator;
  * @version $Revision: 37930 $
  * @author Allan Brighton
  */
+@Deprecated
 public class NavigatorImageDisplay extends DivaMainImageDisplay
-        implements CatalogNavigatorOpener {
+    implements CatalogNavigatorOpener, CatalogDisplay {
 
     // Used to access internationalized strings (see i18n/gui*.proprties)
     private static final I18N _I18N = I18N.getInstance(NavigatorImageDisplay.class);
@@ -80,6 +82,7 @@ public class NavigatorImageDisplay extends DivaMainImageDisplay
     }
 
     /** Return the Diva pane containing the added catalog symbol layer. */
+    @Override
     public NavigatorPane getNavigatorPane() {
         return _navigatorPane;
     }
@@ -111,6 +114,7 @@ public class NavigatorImageDisplay extends DivaMainImageDisplay
     /**
      * Set the instance of the catalog navigator to use with this image display.
      */
+    @Override
     public void setNavigator(Navigator navigator) {
         _navigator = navigator;
         _navigatorFrame = navigator.getRootComponent();
@@ -188,6 +192,7 @@ public class NavigatorImageDisplay extends DivaMainImageDisplay
     /**
      * Save (or update) the given table as a FITS table in the current FITS image.
      */
+    @Override
     public void saveFITSTable(TableQueryResult table) {
         FITSImage fitsImage = getFitsImage();
         if (fitsImage == null) {
@@ -331,6 +336,7 @@ public class NavigatorImageDisplay extends DivaMainImageDisplay
      * Add the currently selected object in the "Pick Object" window to the currently
      * displayed table, or create a new table if none is being displayed.
      */
+    @Override
     protected void pickedObject() {
         if (_navigatorFrame == null)
             makeNavigatorFrame();

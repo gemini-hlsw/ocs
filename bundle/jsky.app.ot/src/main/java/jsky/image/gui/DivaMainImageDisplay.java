@@ -1307,6 +1307,7 @@ public class DivaMainImageDisplay extends DivaGraphicsImageDisplay implements Ma
      * Called when an object is selected in the Pick Object window.
      */
     protected void pickedObject() {
+        // Do Nothing
     }
 
     /**

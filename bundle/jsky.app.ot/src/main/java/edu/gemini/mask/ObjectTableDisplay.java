@@ -1,5 +1,6 @@
 package edu.gemini.mask;
 
+import edu.gemini.catalog.ui.tpe.CatalogDisplay;
 import jsky.catalog.gui.TableDisplayTool;
 import jsky.catalog.gui.QueryResultDisplay;
 import jsky.catalog.TableQueryResult;
@@ -37,7 +38,7 @@ public class ObjectTableDisplay extends TableDisplayTool
     private Navigator _navigator;
 
     // Reference to main image display widget
-    private MainImageDisplay _imageDisplay = NavigatorManager.get().getImageDisplay();
+    private CatalogDisplay _imageDisplay = NavigatorManager.get().getImageDisplay();
 
     // Used to visualize the mask items on the image
     private MaskDisplay _maskDisplay = new MaskDisplay(_imageDisplay);

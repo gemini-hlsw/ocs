@@ -9,6 +9,7 @@ import javax.swing.JPanel;
 
 import edu.gemini.catalog.api.MagnitudeLimits;
 import edu.gemini.catalog.api.RadiusLimits;
+import edu.gemini.catalog.ui.tpe.CatalogDisplay;
 import jsky.catalog.Catalog;
 import jsky.catalog.QueryArgs;
 import jsky.catalog.QueryResult;
@@ -20,9 +21,7 @@ import jsky.coords.CoordinateRadius;
 import jsky.coords.WorldCoordinateConverter;
 import jsky.coords.WorldCoords;
 import jsky.graphics.SelectedAreaListener;
-import jsky.image.gui.MainImageDisplay;
 import jsky.util.gui.DialogUtil;
-
 
 /**
  * Displays a panel for entering query parameters for a catalog search.
@@ -32,7 +31,7 @@ import jsky.util.gui.DialogUtil;
 public class NavigatorQueryTool extends CatalogQueryTool implements SelectedAreaListener {
 
     /** Reference to the main image display window */
-    private MainImageDisplay _imageDisplay;
+    private CatalogDisplay _imageDisplay;
 
     /** Panel button to select an image area. */
     private JButton _selectAreaButton;
@@ -52,7 +51,7 @@ public class NavigatorQueryTool extends CatalogQueryTool implements SelectedArea
      * @param imageDisplay the image display to use to plot catalog symbols
      */
     public NavigatorQueryTool(final Catalog catalog, QueryResultDisplay queryResultDisplay,
-                              MainImageDisplay imageDisplay) {
+                              CatalogDisplay imageDisplay) {
         super(catalog, queryResultDisplay);
         setImageDisplay(imageDisplay);
 
@@ -89,12 +88,12 @@ public class NavigatorQueryTool extends CatalogQueryTool implements SelectedArea
 
 
     /** Return a reference to the main image display window, or null if there isn't one. */
-    public MainImageDisplay getImageDisplay() {
+    public CatalogDisplay getImageDisplay() {
         return _imageDisplay;
     }
 
     /** Set the window used to display images (from image servers, etc...). */
-    public void setImageDisplay(MainImageDisplay im) {
+    public void setImageDisplay(CatalogDisplay im) {
         _imageDisplay = im;
         updateImageButtonStates();
         Catalog catalog = getCatalog();
@@ -191,6 +190,7 @@ public class NavigatorQueryTool extends CatalogQueryTool implements SelectedArea
      *  "Set From Image" button
      */
     protected void setFromImage(boolean useDefaultSize, boolean buttonPressed) {
+        // Unsupported on the new catalog
         _selectedArea = null;
         if (_imageDisplay == null)
             return;

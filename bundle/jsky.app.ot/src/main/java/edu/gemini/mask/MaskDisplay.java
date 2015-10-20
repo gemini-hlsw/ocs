@@ -1,6 +1,6 @@
 package edu.gemini.mask;
 
-import jsky.image.gui.MainImageDisplay;
+import edu.gemini.catalog.ui.tpe.CatalogDisplay;
 import jsky.image.gui.ImageGraphicsHandler;
 import jsky.image.gui.BasicImageDisplay;
 import jsky.coords.CoordinateConverter;
@@ -37,7 +37,7 @@ class MaskDisplay implements ImageGraphicsHandler {
     private static final Composite BAND_COMPOSITE = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.50F);
 
     // Reference to main image display widget
-    private MainImageDisplay _imageDisplay;
+    private CatalogDisplay _imageDisplay;
 
     // Usd to convert coordinates for display
     private CoordinateConverter _cc;
@@ -70,7 +70,7 @@ class MaskDisplay implements ImageGraphicsHandler {
         }
     }
 
-    MaskDisplay(MainImageDisplay imageDisplay) {
+    MaskDisplay(CatalogDisplay imageDisplay) {
         _imageDisplay = imageDisplay;
         _imageDisplay.addImageGraphicsHandler(this);
         _imageDisplay.addChangeListener(e -> updateFigures());

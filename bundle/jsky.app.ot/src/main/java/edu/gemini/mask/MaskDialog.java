@@ -1,10 +1,10 @@
 package edu.gemini.mask;
 
+import edu.gemini.catalog.ui.tpe.CatalogDisplay;
 import edu.gemini.spModel.gemini.gmos.GmosCommonType;
 import edu.gemini.spModel.gemini.gmos.GmosNorthType;
 import edu.gemini.spModel.gemini.gmos.GmosSouthType;
 import jsky.image.fits.codec.FITSImage;
-import jsky.image.gui.MainImageDisplay;
 import jsky.util.gui.*;
 
 import javax.swing.*;
@@ -26,7 +26,7 @@ public class MaskDialog implements PropertyChangeListener {
 
     // Reference to the image display, needed to get the binning
     // factor and current image height.
-    private MainImageDisplay _imageDisplay;
+    private CatalogDisplay _imageDisplay;
 
     // Links property names to widgets
     private Map<String, JComponent> _propTable = new HashMap<>();
@@ -34,7 +34,7 @@ public class MaskDialog implements PropertyChangeListener {
     // Holds the values being edited here
     private MaskParams _maskParams;
 
-    public MaskDialog(ObjectTable table, MainImageDisplay imageDisplay) {
+    public MaskDialog(ObjectTable table, CatalogDisplay imageDisplay) {
         _maskParams = table.getMaskParams();
         _imageDisplay = imageDisplay;
         _initPropTable();

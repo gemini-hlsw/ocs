@@ -1,5 +1,6 @@
 package jsky.navigator;
 
+import edu.gemini.catalog.ui.tpe.CatalogDisplay;
 import jsky.catalog.Catalog;
 import jsky.catalog.FieldDesc;
 import jsky.catalog.TableQueryResult;
@@ -43,7 +44,7 @@ public class Navigator extends CatalogNavigator implements CatalogNavigatorOpene
     private Component _imageDisplayControlFrame;
 
     // Used to display images
-    private NavigatorImageDisplay _imageDisplay;
+    private CatalogDisplay _imageDisplay;
 
     // Action to use to show the image window.
     private AbstractAction _imageDisplayAction = new AbstractAction("Image") {
@@ -104,12 +105,12 @@ public class Navigator extends CatalogNavigator implements CatalogNavigatorOpene
 
 
     /** Return the image display widget. */
-    public MainImageDisplay getImageDisplay() {
+    public CatalogDisplay getImageDisplay() {
         return _imageDisplay;
     }
 
     /** Set the image display to use for plotting catalog objects. */
-    protected void setImageDisplay(NavigatorImageDisplay imageDisplay) {
+    public void setImageDisplay(CatalogDisplay imageDisplay) {
         _imageDisplay = imageDisplay;
         setImageDisplayControlFrame(imageDisplay.getParentFrame());
         notifyNewImageDisplay();
@@ -141,6 +142,7 @@ public class Navigator extends CatalogNavigator implements CatalogNavigatorOpene
      * Make an ImageDisplayControlFrame or ...InternalFrame, depending
      * on what type of frames are being used.
      */
+    @Deprecated
     protected void makeImageDisplayControlFrame() {
         if (_imageDisplayMgr != null) {
             _imageDisplay = _imageDisplayMgr.getImageDisplay();
@@ -214,8 +216,6 @@ public class Navigator extends CatalogNavigator implements CatalogNavigatorOpene
                 suffix = ".tmp";  // other image formats...
 
             File file = File.createTempFile("jsky", suffix, new File(dir));
-
-            // System.out.println("XXX loadImage: file = " + file);
 
             ProgressPanel progressPanel = getProgressPanel();
             ProgressBarFilterInputStream in = progressPanel.getLoggedInputStream(url);
@@ -389,6 +389,7 @@ public class Navigator extends CatalogNavigator implements CatalogNavigatorOpene
      * Save the current table as a FITS table in the current FITS image.
      */
     @Override
+    @Deprecated
     public void saveWithImage() {
         JComponent resultComponent = getResultComponent();
         if (!(resultComponent instanceof TableDisplayTool)) {
