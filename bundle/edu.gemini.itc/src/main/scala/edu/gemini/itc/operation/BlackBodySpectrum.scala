@@ -185,7 +185,7 @@ object BlackBodySpectrum {
   def apply(temp: Double, interval: Double, flux: Double, units: BrightnessUnit, band: MagnitudeBand, redshift: Redshift) = {
 
     //rescale the start and end depending on the redshift
-    val z         = redshift.redshift
+    val z         = redshift.z
     val start     =   300 / (1 + z)
     val end       = 30000 / (1 + z)
     val n         = ((end - start) / interval + 1).toInt

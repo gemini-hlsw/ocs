@@ -2,7 +2,6 @@ package edu.gemini.itc.web
 
 import javax.servlet.http.HttpServletRequest
 
-import edu.gemini.itc.base._
 import edu.gemini.itc.shared._
 import edu.gemini.pot.sp.SPComponentType
 import edu.gemini.spModel.core.WavelengthConversions._
@@ -24,6 +23,7 @@ import edu.gemini.spModel.gemini.trecs.TReCSParams
 import edu.gemini.spModel.guide.GuideProbe
 import edu.gemini.spModel.target._
 import edu.gemini.spModel.telescope.IssPort
+import squants.motion.KilometersPerSecond
 import squants.motion.VelocityConversions._
 import squants.radio.IrradianceConversions._
 import squants.radio.SpectralIrradianceConversions._
@@ -343,7 +343,7 @@ object ITCRequest {
     val redshiftName = r.parameter("Recession")
     val redshift = redshiftName match {
       case "REDSHIFT" => Redshift(r.doubleParameter("z"))
-      case "VELOCITY" => Redshift(r.doubleParameter("v") / ITCConstants.C)
+      case "VELOCITY" => Redshift.fromApparentRadialVelocity(KilometersPerSecond(r.doubleParameter("v")))
       case _          => throw new NoSuchElementException(s"Unknown Recession $redshiftName")
     }
 

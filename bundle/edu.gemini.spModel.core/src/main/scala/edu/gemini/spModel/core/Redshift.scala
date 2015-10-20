@@ -7,11 +7,11 @@ import scalaz.{Monoid, Order}
 /**
  * Specification of Radial velocity
  * TODO Cannot be a value class as it breaks java compatibility, convert to value class when the legacy target model disappears
- * @param redshift dimensionless measurement of redshift
+ * @param z dimensionless measurement of redshift
  */
-case class Redshift(redshift: Double) extends Serializable {
-  def toRadialVelocity: Velocity = Redshift.C * (((redshift + 1)*(redshift + 1) - 1)/((redshift + 1)*(redshift + 1) + 1))
-  def toApparentRadialVelocity: Velocity = Redshift.C * redshift
+case class Redshift(z: Double) extends Serializable {
+  def toRadialVelocity: Velocity = Redshift.C * (((z + 1)*(z + 1) - 1)/((z + 1)*(z + 1) + 1))
+  def toApparentRadialVelocity: Velocity = Redshift.C * z
 }
 
 object Redshift {
@@ -43,11 +43,11 @@ object Redshift {
 
   /** @group Typeclass Instances */
   implicit val order: Order[Redshift] =
-    Order.orderBy(_.redshift)
+    Order.orderBy(_.z)
 
   /** @group Typeclass Instances */
   implicit val ordering: scala.Ordering[Redshift] =
-    scala.Ordering.by(_.redshift)
+    scala.Ordering.by(_.z)
 
   /**
    * Additive monoid for `Redshift`
@@ -56,7 +56,7 @@ object Redshift {
   implicit val monoid: Monoid[Redshift] =
     new Monoid[Redshift] {
       val zero = Redshift.zero
-      def append(a: Redshift, b: => Redshift): Redshift = Redshift(a.redshift + b.redshift)
+      def append(a: Redshift, b: => Redshift): Redshift = Redshift(a.z + b.z)
     }
 
 }

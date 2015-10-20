@@ -60,7 +60,7 @@ final class SiderealDetailEditor extends TargetDetailEditor(ITarget.Tag.SIDEREAL
       case RadialVelocity         =>
         t.getRedshift.toRadialVelocity.toKilometersPerSecond
       case RedshiftZ              =>
-        t.getRedshift.redshift
+        t.getRedshift.z
       case ApparentRadialVelocity =>
         t.getRedshift.toApparentRadialVelocity.toKilometersPerSecond
     }

@@ -20,7 +20,7 @@ public class RedshiftVisitor implements SampledSpectrumVisitor {
      * @param z redshift = velocity / c
      */
     public RedshiftVisitor(final Redshift redshift) {
-        _z = redshift.redshift();
+        _z = redshift.z();
     }
 
     /**

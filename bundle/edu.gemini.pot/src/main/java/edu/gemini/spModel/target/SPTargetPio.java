@@ -94,7 +94,7 @@ public class SPTargetPio {
             paramSet.addParam(t.getPM1().getParam(factory, _PM1));
             paramSet.addParam(t.getPM2().getParam(factory, _PM2));
             paramSet.addParam(t.getParallax().getParam(factory, _PARALLAX));
-            Pio.addParam(factory, paramSet, _Z, Double.toString(t.getRedshift().redshift()));
+            Pio.addParam(factory, paramSet, _Z, Double.toString(t.getRedshift().z()));
         } else if (target instanceof NonSiderealTarget) {
             final NonSiderealTarget nst = (NonSiderealTarget) target;
 

@@ -20,7 +20,7 @@ public class PowerLawSpectrum extends DefaultSampledSpectrum {
         double _end = 1.8 * end;//1.2
 
         //shift start and end depending on redshift
-        final double z = redshift.redshift();
+        final double z = redshift.z();
         _start /= (1 + z);
         _end /= (1 + z);
 

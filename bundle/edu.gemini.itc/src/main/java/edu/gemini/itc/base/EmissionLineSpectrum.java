@@ -25,7 +25,7 @@ public final class EmissionLineSpectrum implements VisitableSampledSpectrum {
                                 final SpectralIrradiance continuum, final Redshift redshift, final double interval) {
 
         //shift start and end depending on redshift
-        final double z     = redshift.redshift();
+        final double z     = redshift.z();
         final double start = 300 / (1 + z);
         final double end = 30000 / (1 + z);
 

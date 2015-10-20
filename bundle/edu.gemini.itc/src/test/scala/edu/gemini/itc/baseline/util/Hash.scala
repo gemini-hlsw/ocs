@@ -122,7 +122,7 @@ object Hash {
       src.distribution,
       src.norm,               // this is the magnitude value
       src.normBand.name,      // this is the magnitude band name
-      src.redshift.redshift
+      src.redshift.z
     )
 
   def calc(tp: TelescopeDetails): Int =

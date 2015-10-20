@@ -21,7 +21,7 @@ public final class HtmlPrinter {
 
         sb.append("Source spatial profile, brightness, and spectral distribution: \n");
         sb.append("  The z = ");
-        sb.append(sdp.redshift().redshift());
+        sb.append(sdp.redshift().z());
         sb.append(" ");
         sb.append(HtmlUtil.sourceProfileString(sdp.profile()));
         sb.append(" is a");
