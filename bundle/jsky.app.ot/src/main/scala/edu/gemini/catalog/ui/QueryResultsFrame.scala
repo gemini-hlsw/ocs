@@ -10,7 +10,7 @@ import edu.gemini.ags.api.{AgsGuideQuality, AgsRegistrar}
 import edu.gemini.ags.conf.ProbeLimitsTable
 import edu.gemini.catalog.api._
 import edu.gemini.catalog.votable._
-import edu.gemini.pot.sp.{SPComponentType, ISPNode}
+import edu.gemini.pot.sp.SPComponentType
 import edu.gemini.shared.gui.textComponent.{SelectOnFocus, TextRenderer, NumberField}
 import edu.gemini.shared.gui.{ButtonFlattener, GlassLabel, SizePreference, SortableTable}
 import edu.gemini.spModel.core.SiderealTarget
@@ -21,7 +21,7 @@ import edu.gemini.spModel.core._
 import edu.gemini.ui.miglayout.MigPanel
 import edu.gemini.ui.miglayout.constraints._
 import jsky.app.ot.gemini.editor.targetComponent.GuidingIcon
-import jsky.app.ot.tpe.TpeContext
+import jsky.app.ot.tpe.{TpeManager, TpeContext}
 import jsky.app.ot.util.Resources
 
 import scala.swing.Reactions.Reaction
@@ -66,6 +66,15 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
     }
   }
 
+  private lazy val plotButton = new Button("Plot") {
+    reactions += {
+      case ButtonClicked(_) =>
+        val tpe = TpeManager.open()
+        tpe.reset(node.get.node.get)
+        TpePlotter.plot(tpe.getImageWidget, resultsTable.model.asInstanceOf[TargetsModel])
+    }
+  }
+
   private lazy val scrollPane = new ScrollPane() {
     contents = resultsTable
   }
@@ -94,10 +103,11 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
     add(new BorderPanel() {
       border = titleBorder(title)
       add(scrollPane, BorderPanel.Position.Center)
-    }, CC().grow().spanX(2).pushY().pushX())
+    }, CC().grow().spanX(3).pushY().pushX())
     // Labels and command buttons at the bottom
     add(resultsLabel, CC().alignX(LeftAlign).alignY(BaselineAlign).newline().gap(10.px, 10.px, 10.px, 10.px))
     add(errorLabel, CC().alignX(LeftAlign).alignY(BaselineAlign).gap(10.px, 10.px, 10.px, 10.px))
+    add(plotButton, CC().alignX(RightAlign).alignY(BaselineAlign).gap(10.px, 10.px, 10.px, 10.px))
     add(closeButton, CC().alignX(RightAlign).alignY(BaselineAlign).gap(10.px, 10.px, 10.px, 10.px))
   }
 
@@ -562,12 +572,11 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
   // Public interface
   val instance = this
 
-  def showOn(n: ISPNode) {
-    TpeContext.apply(n).obsContext.foreach(showOn)
-  }
+  var node:Option[TpeContext] = None
 
-  def showOn(obsCtx: Option[ObsContext]): Unit = {
-    obsCtx.orElse(ObservationInfo.zero.toContext).foreach(showOn)
+  def showOn(n: TpeContext) {
+    node = Option(n)
+    n.obsContext.foreach(showOn)
   }
 
   def showOn(obsCtx: ObsContext) {

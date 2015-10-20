@@ -1087,7 +1087,7 @@ public class TpeImageWidget extends NavigatorImageDisplay implements MouseInputL
         if (GuideStarSupport.hasGemsComponent(_ctx)) {
             showGemsGuideStarSearchDialog();
         } else {
-            QueryResultsFrame.instance().showOn(_ctx.obsContext());
+            QueryResultsFrame.instance().showOn(_ctx);
         }
     }
 
