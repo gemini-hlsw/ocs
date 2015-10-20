@@ -21,11 +21,7 @@ sealed trait Target {
 /** Module of constructors for `Target`. */
 object Target {
 
-  ///
-  /// TARGET LENSES
-  ///
-
-  val name: Target @?> String =
+ val name: Target @?> String =
     PLens(_.fold(
       TooTarget.name.partial.run,
       SiderealTarget.name.partial.run,
@@ -42,7 +38,7 @@ object Target {
   val pm: Target @?> ProperMotion =
     PLens(_.fold(
       PLens.nil.run,
-      SiderealTarget.pm.run,
+      (SiderealTarget.properMotion.partial >=> PLens.somePLens[ProperMotion]).run,
       PLens.nil.run
     ))
 
@@ -60,13 +56,6 @@ object Target {
       NonSiderealTarget.ephemeris.partial.run
     ))
 
-  val horizonsDesignation: Target @?> HorizonsDesignation =
-    PLens(_.fold(
-      PLens.nil.run,
-      PLens.nil.run,
-      NonSiderealTarget.horizonsDesignation.run
-    ))
-
   val raDec: Target @?> (RightAscension, Declination) =
     coords.xmapB(cs => (cs.ra, cs.dec))(Coordinates.tupled)
 
@@ -77,10 +66,6 @@ object Target {
 
   val raDecDegrees: Target @?> (Double, Double) =
     raDecAngles.xmapB(_.bimap(_.toDegrees, _.toDegrees))(_.bimap(Angle.fromDegrees, Angle.fromDegrees))
-
-  ///
-  /// TARGET OF OPPORTUNITY
-  ///
 
   /** Target of opportunity, with no coordinates. */
   case class TooTarget(name: String) extends Target {
@@ -96,6 +81,7 @@ object Target {
   }
 
   object TooTarget extends (String => TooTarget) {
+    val empty = TooTarget("Untitled")
     val name: TooTarget @> String = Lens(t => Store(s => t.copy(name = s), t.name))
   }
 
@@ -128,14 +114,15 @@ object Target {
 
     val empty = SiderealTarget("Untitled", Coordinates.zero, None, None, None, Nil)
   
-    val name:        SiderealTarget @> String          = Lens(t => Store(s => t.copy(name = s), t.name))
-    val coordinates: SiderealTarget @> Coordinates     = Lens(t => Store(c => t.copy(coordinates = c), t.coordinates))
-    val pm:          SiderealTarget @?> ProperMotion   = PLens(t => t.properMotion.map(p => Store(q => t.copy(properMotion = p.some), p)))
-    val z:           SiderealTarget @?> Redshift       = PLens(t => t.redshift.map(p => Store(q => t.copy(redshift = p.some), p)))
-    val px:          SiderealTarget @?> Parallax       = PLens(t => t.parallax.map(p => Store(q => t.copy(parallax = p.some), p)))
+    val name:           SiderealTarget @> String          = Lens(t => Store(s => t.copy(name = s), t.name))
+    val coordinates:    SiderealTarget @> Coordinates     = Lens(t => Store(c => t.copy(coordinates = c), t.coordinates))
+    val properMotion:   SiderealTarget @> Option[ProperMotion]   = Lens(t => Store(c => t.copy(properMotion = c), t.properMotion))
+    val redshift:       SiderealTarget @> Option[Redshift] = Lens(t => Store(s => t.copy(redshift = s), t.redshift))
+    val parallax:       SiderealTarget @> Option[Parallax] = Lens(t => Store(s => t.copy(parallax = s), t.parallax))
+    val magnitudes:     SiderealTarget @> List[Magnitude] = Lens(t => Store(c => t.copy(magnitudes = c), t.magnitudes))
+
     val ra:          SiderealTarget @> RightAscension  = coordinates >=> Coordinates.ra
     val dec:         SiderealTarget @> Declination     = coordinates >=> Coordinates.dec
-    val magnitudes:  SiderealTarget @> List[Magnitude] = Lens(t => Store(c => t.copy(magnitudes = c), t.magnitudes))
 
   }
 
@@ -161,10 +148,16 @@ object Target {
   }
 
   object NonSiderealTarget {
+
+    val empty = NonSiderealTarget("Untitled", ==>>.empty, None, Nil)
+
     val ephemeris:           NonSiderealTarget @> Ephemeris            = Lens(t => Store(s => t.copy(ephemeris = s), t.ephemeris))
     val name:                NonSiderealTarget @> String               = Lens(t => Store(s => t.copy(name = s), t.name))
-    val horizonsDesignation: NonSiderealTarget @?> HorizonsDesignation = PLens(t => t.horizonsDesignation.map(p => Store(q => t.copy(horizonsDesignation = p.some), p)))
+    val horizonsDesignation: NonSiderealTarget @> Option[HorizonsDesignation] = Lens(t => Store(s => t.copy(horizonsDesignation = s), t.horizonsDesignation))
     val magnitudes:          NonSiderealTarget @> List[Magnitude]      = Lens(t => Store(c => t.copy(magnitudes = c), t.magnitudes))
+
+    val ephemerisElements: NonSiderealTarget @> List[(Long, Coordinates)] = ephemeris.xmapB(_.toList)(==>>.fromList(_))
+
   }
   
 }

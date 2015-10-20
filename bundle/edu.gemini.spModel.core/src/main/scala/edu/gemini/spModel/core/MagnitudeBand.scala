@@ -51,6 +51,12 @@ object MagnitudeBand {
   lazy val all: List[MagnitudeBand] =
     List(_u, _g, _r, _i, _z, U, B, V, UC, R, I, Y, J, H, K, L, M, N, Q, AP)
 
+  def fromString(s: String): Option[MagnitudeBand] =
+    all.find(_.name == s)
+
+  def unsafeFromString(s: String): MagnitudeBand =
+    fromString(s).getOrElse(sys.error("Unknown magnitude band: " + s))
+
   // order by central wavelength; make sure that AP always shows up last because it's sort of a special case
   implicit val MagnitudeBandOrder: scalaz.Order[MagnitudeBand] =
     scalaz.Order.orderBy {

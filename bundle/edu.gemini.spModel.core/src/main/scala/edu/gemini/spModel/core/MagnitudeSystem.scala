@@ -39,6 +39,12 @@ object MagnitudeSystem {
   val allForOT: List[MagnitudeSystem] =
     List(Vega, AB, Jy)
 
+  def fromString(s: String): Option[MagnitudeSystem] =
+    all.find(_.name == s)
+
+  def unsafeFromString(s: String): MagnitudeSystem =
+    fromString(s).getOrElse(sys.error("Unknown magnitude system: " + s))
+
   implicit val MagnitudeSystemEqual: Equal[MagnitudeSystem] =
     Equal.equalA
 
