@@ -15,10 +15,10 @@ import edu.gemini.spModel.core.MagnitudeBand;
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2;
 import edu.gemini.spModel.gemini.gems.GemsInstrument;
 import edu.gemini.spModel.gems.GemsTipTiltMode;
-import edu.gemini.spModel.guide.GuideProbe;
 import edu.gemini.spModel.obs.context.ObsContext;
 import edu.gemini.spModel.obscomp.SPInstObsComp;
 import edu.gemini.spModel.target.SPTarget;
+import edu.gemini.spModel.target.env.GuideEnvironment;
 import edu.gemini.spModel.target.env.GuideGroup;
 import edu.gemini.spModel.target.env.GuideProbeTargets;
 import edu.gemini.spModel.target.env.TargetEnvironment;
@@ -144,29 +144,39 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
 
         final TargetObsComp targetObsComp = ctx.targets().orNull();
         if (targetObsComp != null) {
-            // Clear out all the old targets.
-            final TargetEnvironment oldEnv     = targetObsComp.getTargetEnvironment();
-            final Set<GuideProbe> oldProbes    = oldEnv.getGuideEnvironment().getReferencedGuiders();
-            final TargetEnvironment clearedEnv = oldProbes.stream().reduce(oldEnv, (TargetEnvironment curEnv, GuideProbe gp) -> {
-                final Option<GuideProbeTargets> oldGptOpt = curEnv.getPrimaryGuideProbeTargets(gp);
-                final GuideProbeTargets newGpt = oldGptOpt.getOrElse(GuideProbeTargets.create(gp)).withBagsTarget(GuideProbeTargets.NO_TARGET);
-                return curEnv.putPrimaryGuideProbeTargets(newGpt);
-            }, (te1, te2) -> te2);
+            final TargetEnvironment oldEnv = targetObsComp.getTargetEnvironment();
+
+            // If this is called from BAGS, we need to find out if there was a previous BAGS guide group and whether
+            // or not it was the primary group.
+            final boolean makeBagsGroupPrimary;
+            final TargetEnvironment clearedEnv;
+            if (isBags) {
+                final GuideEnvironment guideEnv = oldEnv.getGuideEnvironment();
+                final Option<GuideGroup> bagsGroup = guideEnv.getOptions().find(gg -> gg.getAll().exists(GuideProbeTargets::primaryIsBagsTarget));
+                makeBagsGroupPrimary = guideEnv.getOptions().isEmpty() || bagsGroup.exists(bg -> oldEnv.getGuideEnvironment().getPrimary().exists(bg::equals));
+                clearedEnv = BagsManager.clearBagsTargets(oldEnv);
+            } else {
+                makeBagsGroupPrimary = false;
+                clearedEnv = oldEnv;
+            }
 
             // If this is BAGS running, denote the primary selected targets as the BAGS targets.
             // This is a horrible way to do things, but we don't want to mess with the actual GeMS lookup code so we
             // transform the guide group as necessary for BAGS.
             final TargetEnvironment finalEnv = gemsGuideStarsOpt.map(gemsGuideStars -> {
-                final GuideGroup gg;
+                // Determine / adapt the new guide group representing the GeMS selection.
+                final GuideGroup group;
                 if (isBags) {
                     final ImList<GuideProbeTargets> gptList = gemsGuideStars.guideGroup().getAll().map(gpt ->
-                        gpt.getPrimary().map(primary -> gpt.removeTarget(primary).withBagsTarget(primary)).getOrElse(gpt)
+                                    gpt.getPrimary().map(primary -> gpt.removeTarget(primary).withBagsTarget(primary)).getOrElse(gpt)
                     );
-                    gg = gemsGuideStars.guideGroup().putAll(gptList);
+                    group = gemsGuideStars.guideGroup().putAll(gptList);
+                    return makeBagsGroupPrimary ? clearedEnv.setPrimaryGuideGroup(group) :
+                            clearedEnv.setGuideEnvironment(clearedEnv.getGuideEnvironment().setOptions(clearedEnv.getGroups().cons(group)));
                 } else {
-                    gg = gemsGuideStars.guideGroup();
+                    group = gemsGuideStars.guideGroup();
+                    return clearedEnv.setPrimaryGuideGroup(group);
                 }
-                return clearedEnv.setPrimaryGuideGroup(gg);
             }).getOrElse(clearedEnv);
 
             // If BAGS is running, only change if the target environments differ.
@@ -358,13 +368,10 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
             return gemsGuideStarsList;
         }
         final edu.gemini.spModel.core.Angle positionAngle = gemsGuideStarsList.get(0).pa();
-        final List<GemsGuideStars> result = new ArrayList<>(gemsGuideStarsList.size());
-        for (final GemsGuideStars gemsGuideStars : gemsGuideStarsList) {
-            if (positionAngle.equals(gemsGuideStars.pa())) {
-                result.add(gemsGuideStars);
-            }
-        }
-        return result;
+
+        return gemsGuideStarsList.stream().collect(ArrayList<GemsGuideStars>::new, (alst, ggs) -> {
+            if (positionAngle.equals(ggs.pa())) alst.add(ggs);
+        }, ArrayList::addAll);
     }
 
 

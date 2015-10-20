@@ -24,6 +24,7 @@ import edu.gemini.spModel.util.SPTreeUtil;
 import jsky.app.ot.OT;
 import jsky.app.ot.OTOptions;
 import jsky.app.ot.ags.BagsManager;
+import jsky.app.ot.ags.BagsManager$;
 import jsky.app.ot.editor.EdObsGroup;
 import jsky.app.ot.editor.OtItemEditor;
 import jsky.app.ot.editor.eng.EngEditor;
@@ -674,7 +675,7 @@ public final class SPViewer extends SPViewerGUI implements PropertyChangeListene
 
             // If there was an old root, clean up
             if (getRoot() != null) {
-                BagsManager.unregisterProgram(getRoot());
+                BagsManager$.MODULE$.instance().watch(getRoot());
                 getDatabase().checkpoint();
                 getRoot().removePropertyChangeListener(ISPProgram.DATA_OBJECT_KEY, authListener);
                 updateEngToolWindow(null);
@@ -719,7 +720,7 @@ public final class SPViewer extends SPViewerGUI implements PropertyChangeListene
                     _checker.check(getRoot(), getTree(), OT.getMagnitudeTable());
                 }
 
-                BagsManager.registerProgram(root);
+                BagsManager$.MODULE$.instance().watch(root);
             }
 
             // Finally, update title and actions
@@ -884,7 +885,7 @@ public final class SPViewer extends SPViewerGUI implements PropertyChangeListene
             return;
         }
         if (p != null) {
-            BagsManager.unregisterProgram(p);
+            BagsManager$.MODULE$.instance().unwatch(p);
             treeSnapshots.remove(p.getNodeKey());
         }
         tryNavigate(_history.delete());
@@ -892,7 +893,7 @@ public final class SPViewer extends SPViewerGUI implements PropertyChangeListene
 
     public void closeProgram(ISPProgram node) {
         if (node != null) {
-            BagsManager.unregisterProgram(node);
+            BagsManager$.MODULE$.instance().unwatch(node);
             treeSnapshots.remove(node.getNodeKey());
         }
         tryNavigate(_history.delete(node));
@@ -902,7 +903,7 @@ public final class SPViewer extends SPViewerGUI implements PropertyChangeListene
     private void closeViewer() {
         // TODO: Do not know if we need to do this?
         if (getRoot() != null)
-            BagsManager.unregisterProgram(getRoot());
+            BagsManager$.MODULE$.instance().unwatch(getRoot());
 
         tryNavigate(_history.empty());
         treeSnapshots.clear();
