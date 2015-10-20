@@ -2,14 +2,10 @@ package jsky.app.ot.tpe
 
 import edu.gemini.ags.api.AgsStrategy
 import edu.gemini.spModel.guide.GuideProbe
-import edu.gemini.spModel.rich.shared.immutable._
-import edu.gemini.spModel.target.env.GuideProbeTargets
 import jsky.app.ot.ags.BagsManager
 import jsky.app.ot.gemini.altair.Altair_WFS_Feature
 import jsky.app.ot.gemini.inst.OIWFS_Feature
 import jsky.app.ot.gemini.tpe.TpePWFSFeature
-
-import scala.collection.JavaConverters._
 
 // Perform the lookup of non-GeMS guide stars and apply the results to the TPE.
 object GuideStarWorker {
@@ -37,16 +33,9 @@ object GuideStarWorker {
   private def applySelection(ctx: TpeContext, selOpt: Option[AgsStrategy.Selection]): Unit = {
     // Find out which guide probes previously had assignments, but no longer do.
     val oldEnv = ctx.targets.envOrDefault
-    val allProbes = oldEnv.getGuideEnvironment.getReferencedGuiders.asScala.toSet
-    val assignedProbes = selOpt.map(_.assignments.map(_.guideProbe)).toList.flatten
-    val unassignedProbes = allProbes -- assignedProbes
 
-    // Clear out the guide probes that no longer have a valid assignment.
-    val clearedEnv = (oldEnv /: unassignedProbes) { (curEnv, gp) =>
-      val oldGpt = curEnv.getPrimaryGuideProbeTargets(gp).asScalaOpt
-      val newGpt = oldGpt.getOrElse(GuideProbeTargets.create(gp)).withBagsTarget(GuideProbeTargets.NO_TARGET)
-      curEnv.putPrimaryGuideProbeTargets(newGpt)
-    }
+    // Clear out the old BAGS targets
+    val clearedEnv = BagsManager.clearBagsTargets(oldEnv)
 
     // Apply the new selection.
     val newEnv = selOpt.fold(clearedEnv)(_.applyTo(clearedEnv))
