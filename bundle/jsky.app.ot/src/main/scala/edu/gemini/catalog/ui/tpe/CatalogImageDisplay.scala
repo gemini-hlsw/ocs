@@ -142,30 +142,6 @@ class CatalogImageDisplay(parent: Component, navigatorPane:NavigatorPane) extend
   override def getNavigatorPane: NavigatorPane = navigatorPane
 
   /**
-    * Open up another window like this one and return a reference to it.
-    * <p>
-    * Note: derived classes should redefine this to return an instance of the
-    * correct class, which should be derived JFrame or JInternalFrame.
-    */
-  override def newWindow: Component = {
-    val desktop: JDesktopPane = getDesktop
-    if (desktop != null) {
-      val f = new NavigatorImageDisplayInternalFrame(desktop)
-      f.getImageDisplayControl.getImageDisplay.setTitle(getTitle)
-      f.setVisible(true)
-      desktop.add(f, JLayeredPane.DEFAULT_LAYER)
-      desktop.moveToFront(f)
-      f.setVisible(true)
-      f
-    } else {
-      val f: NavigatorImageDisplayFrame = new NavigatorImageDisplayFrame
-      f.getImageDisplayControl.getImageDisplay.setTitle(getTitle)
-      f.setVisible(true)
-      f
-    }
-  }
-
-  /**
     * Set the instance of the catalog navigator to use with this image display.
     */
   override def setNavigator(navigator: Navigator):Unit = {
@@ -182,36 +158,26 @@ class CatalogImageDisplay(parent: Component, navigatorPane:NavigatorPane) extend
     * Open the catalog navigator window.
     */
   def openCatalogWindow(): Unit = {
-    if (_navigatorFrame == null) makeNavigatorFrame()
-    showNavigatorFrame(null)
+    println("OPEN CN")
+    //QueryResultsFrame.showOn(ctx)
   }
 
   /**
     * Display the interface for the given catalog, if not null, otherwise just
     * open the catalog navigator window.
     */
-  def openCatalogWindow(cat: Catalog):Unit = {
-    if (_navigatorFrame == null) makeNavigatorFrame()
-    showNavigatorFrame(cat)
+  override def openCatalogWindow(cat: Catalog):Unit = {
+    throw new UnsupportedOperationException()
   }
 
   /** Open a catalog window for the named catalog, if found. */
-  def openCatalogWindow(name: String) {
-    var dir: CatalogDirectory = null
-    try {
-      dir = CatalogNavigator.getCatalogDirectory
-      val cat = dir.getCatalog(name)
-      Option(cat).foreach(openCatalogWindow)
-    } catch {
-      case e: Exception =>
-        DialogUtil.error(e)
-    }
+  override def openCatalogWindow(name: String) {
+    throw new UnsupportedOperationException()
   }
 
   /** Pop up a file browser to select a local catalog file to open. */
   def openLocalCatalog(): Unit = {
-    openCatalogWindow()
-    _navigator.open()
+    throw new UnsupportedOperationException()
   }
 
   /** Display the FITS table at the given HDU index. */

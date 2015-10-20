@@ -374,29 +374,6 @@ public class DivaMainImageDisplay extends DivaGraphicsImageDisplay implements Ma
     }
 
     /**
-     * Open up another window like this one and return a reference to it.
-     * <p/>
-     * Note: derived classes should redefine this to return an instance of the
-     * correct class, which should be derived JFrame or JInternalFrame.
-     */
-    public Component newWindow() {
-        if (_desktop != null) {
-            ImageDisplayControlInternalFrame f = new ImageDisplayControlInternalFrame(_desktop);
-            f.getImageDisplayControl().getImageDisplay().setTitle(getTitle());
-            _desktop.add(f, JLayeredPane.DEFAULT_LAYER);
-            _desktop.moveToFront(f);
-            f.setVisible(true);
-            return f;
-        } else {
-            ImageDisplayControlFrame f = new ImageDisplayControlFrame();
-            f.getImageDisplayControl().getImageDisplay().setTitle(getTitle());
-            f.setVisible(true);
-            return f;
-        }
-    }
-
-
-    /**
      * Return the object that manages interactive drawing on the image
      */
     public CanvasDraw getCanvasDraw() {

@@ -1,10 +1,3 @@
-/*
- * Copyright 2000 Association for Universities for Research in Astronomy, Inc.,
- * Observatory Control System, Gemini Telescopes Project.
- *
- * $Id: TpeImageDisplayControl.java 39998 2011-12-19 14:24:47Z swalker $
- */
-
 package jsky.app.ot.tpe;
 
 import java.awt.*;

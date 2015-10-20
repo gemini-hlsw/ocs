@@ -8,10 +8,10 @@ import jsky.catalog.gui.CatalogNavigator;
 import jsky.util.gui.DialogUtil;
 import jsky.util.gui.SwingUtil;
 
-
 /**
  * This class manages access to the Navigator window on behalf of clients.
  */
+@Deprecated
 public final class NavigatorManager {
 
     /**

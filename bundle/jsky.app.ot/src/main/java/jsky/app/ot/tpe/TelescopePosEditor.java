@@ -107,9 +107,6 @@ public class TelescopePosEditor extends JSkyCat implements TpeMouseObserver {
 
         _tpeToolBar.getGuiderSelector().addSelectionListener(strategy -> AgsStrategyUtil.setSelection(_ctx.obsShellOrNull(), strategy));
 
-        // Don't want the "New Window" menu item here
-        _tpeMenuBar.getFileMenu().remove(_tpeMenuBar.getNewWindowMenuItem());
-
         _editorTools = new TpeEditorTools(this);
 
         //

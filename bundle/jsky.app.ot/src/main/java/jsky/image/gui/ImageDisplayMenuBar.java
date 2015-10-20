@@ -53,9 +53,6 @@ public class ImageDisplayMenuBar extends JMenuBar {
     private final JMenu _goMenu;
     private final JMenu _graphicsMenu;
 
-    /** File menu items needed externally. **/
-    private final JMenuItem _newWindowMenuItem;
-
     /** View menu items needed externally. **/
     private final JMenuItem _imagePropertiesMenuItem;
     private final JMenuItem _fitsKeywordsMenuItem;
@@ -75,7 +72,6 @@ public class ImageDisplayMenuBar extends JMenuBar {
         _toolBar = toolBar;
 
         /** FILE MENU **/
-        _newWindowMenuItem = createFileNewWindowMenuItem();
         _fileMenu = createFileMenu();
         add(_fileMenu);
 
@@ -159,7 +155,6 @@ public class ImageDisplayMenuBar extends JMenuBar {
         menu.add(_imageDisplay.getPrintPreviewAction());
         menu.add(_imageDisplay.getPrintAction());
         menu.addSeparator();
-        menu.add(_newWindowMenuItem);
         menu.add(createFileCloseMenuItem());
         return menu;
     }
@@ -180,16 +175,6 @@ public class ImageDisplayMenuBar extends JMenuBar {
     protected JMenuItem createFileClearImageMenuItem() {
         final JMenuItem menuItem = new JMenuItem(_I18N.getString("clearImage"));
         menuItem.addActionListener(ae -> _imageDisplay.clear());
-        return menuItem;
-    }
-
-
-    /**
-     * Create the File => "New Window" menu item
-     */
-    protected JMenuItem createFileNewWindowMenuItem() {
-        final JMenuItem menuItem = new JMenuItem(_I18N.getString("newWindow"));
-        menuItem.addActionListener(ae -> _imageDisplay.newWindow());
         return menuItem;
     }
 
@@ -355,11 +340,6 @@ public class ImageDisplayMenuBar extends JMenuBar {
     /** Return the handle for the Graphics menu */
     public JMenu getGraphicsMenu() {
         return _graphicsMenu;
-    }
-
-    /** Return the File => "New Window" menu item */
-    public JMenuItem getNewWindowMenuItem() {
-        return _newWindowMenuItem;
     }
 
     /** Return the Pick Object menu item */

@@ -88,30 +88,6 @@ public class NavigatorImageDisplay extends DivaMainImageDisplay
     }
 
     /**
-     * Open up another window like this one and return a reference to it.
-     * <p>
-     * Note: derived classes should redefine this to return an instance of the
-     * correct class, which should be derived JFrame or JInternalFrame.
-     */
-    public Component newWindow() {
-        JDesktopPane desktop = getDesktop();
-        if (desktop != null) {
-            NavigatorImageDisplayInternalFrame f = new NavigatorImageDisplayInternalFrame(desktop);
-            f.getImageDisplayControl().getImageDisplay().setTitle(getTitle());
-            f.setVisible(true);
-            desktop.add(f, JLayeredPane.DEFAULT_LAYER);
-            desktop.moveToFront(f);
-            f.setVisible(true);
-            return f;
-        } else {
-            NavigatorImageDisplayFrame f = new NavigatorImageDisplayFrame();
-            f.getImageDisplayControl().getImageDisplay().setTitle(getTitle());
-            f.setVisible(true);
-            return f;
-        }
-    }
-
-    /**
      * Set the instance of the catalog navigator to use with this image display.
      */
     @Override

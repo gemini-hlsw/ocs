@@ -27,7 +27,6 @@ import jsky.coords.Coordinates;
 import jsky.catalog.gui.NamedCoordinates;
 import jsky.coords.WorldCoords;
 import jsky.navigator.Navigator;
-import jsky.navigator.NavigatorImageDisplay;
 import jsky.navigator.NavigatorManager;
 import jsky.navigator.NavigatorPane;
 import jsky.util.gui.DialogUtil;

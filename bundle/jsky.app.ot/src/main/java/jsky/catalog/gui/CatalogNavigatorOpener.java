@@ -13,12 +13,15 @@ public interface CatalogNavigatorOpener {
     void openCatalogWindow();
 
     /** Open the catalog window and display the interface for given catalog, if not null. */
+    @Deprecated
     void openCatalogWindow(Catalog cat);
 
     /** Open a catalog window for the named catalog, if found. */
+    @Deprecated
     void openCatalogWindow(String name);
 
     /** Pop up a file browser to select a local catalog file to open. */
+    @Deprecated
     void openLocalCatalog();
 }
 
