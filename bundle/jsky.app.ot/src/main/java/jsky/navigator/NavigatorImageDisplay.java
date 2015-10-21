@@ -123,6 +123,7 @@ public class NavigatorImageDisplay extends DivaMainImageDisplay
     }
 
     /** Open a catalog window for the named catalog, if found. */
+    @Deprecated
     public void openCatalogWindow(String name) {
         CatalogDirectory dir;
         try {
@@ -138,9 +139,9 @@ public class NavigatorImageDisplay extends DivaMainImageDisplay
     }
 
     /** Pop up a file browser to select a local catalog file to open. */
+    @Deprecated
     public void openLocalCatalog() {
-        openCatalogWindow();
-        _navigator.open();
+        throw new UnsupportedOperationException();
     }
 
 

@@ -5,7 +5,6 @@ import jsky.image.gui.ImageDisplayControl;
 import jsky.image.gui.ImageDisplayMenuBar;
 import jsky.image.gui.ImageDisplayToolBar;
 import jsky.navigator.NavigatorImageDisplayFrame;
-import jsky.navigator.NavigatorImageDisplayToolBar;
 
 import java.awt.*;
 

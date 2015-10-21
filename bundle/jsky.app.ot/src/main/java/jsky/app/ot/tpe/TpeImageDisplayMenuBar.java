@@ -103,7 +103,7 @@ public class TpeImageDisplayMenuBar extends CatalogImageDisplayMenuBar {
     }
 
     /**
-     * Create and return a menu for the given name and choice propery.
+     * Create and return a menu for the given name and choice property.
      */
     private JMenu _createChoicePropertyMenu(final BasicPropertyList.ChoiceProperty cp,
                                             final BasicPropertyList pl) {

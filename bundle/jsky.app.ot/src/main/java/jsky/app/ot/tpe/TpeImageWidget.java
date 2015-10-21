@@ -1088,8 +1088,12 @@ public class TpeImageWidget extends CatalogImageDisplay implements MouseInputLis
         if (GuideStarSupport.hasGemsComponent(_ctx)) {
             showGemsGuideStarSearchDialog();
         } else {
-            QueryResultsFrame.instance().showOn(_ctx);
+            openCatalogNavigator();
         }
+    }
+
+    public void openCatalogNavigator() {
+        QueryResultsFrame.instance().showOn(_ctx);
     }
 
     private void showGemsGuideStarSearchDialog() {

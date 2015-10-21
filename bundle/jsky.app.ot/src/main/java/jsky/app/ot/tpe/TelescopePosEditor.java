@@ -98,6 +98,7 @@ public class TelescopePosEditor extends JSkyCat implements TpeMouseObserver {
     public TelescopePosEditor() {
         super(null);
 
+        // This is terrible, the constructor of JSkyCat sets _iw indirectly calling makeNavigatorImageDisplayFrame
         _iw.setTitle("Position Editor");
 
         // get the TPE toolbar handle
@@ -238,7 +239,6 @@ public class TelescopePosEditor extends JSkyCat implements TpeMouseObserver {
     public void selectFeature(TpeImageFeature tif) {
         _featureMan.setSelected(tif, true);
     }
-
 
     /**
      * Update the position list's base position to coincide with the location
@@ -416,11 +416,6 @@ public class TelescopePosEditor extends JSkyCat implements TpeMouseObserver {
         Catalog c = CatalogNavigator.getCatalogDirectory().getCatalog(args[0]);
 
         if (c == null || !c.isImageServer()) return;
-
-//        // XXX REL-201: This prevents a bug related to the progress dialog, which
-//        // is displayed during the background query started below and refers to the
-//        // catalog window as its modal dialog parent frame.
-//        getImageWidget().openCatalogWindow();
 
         final Navigator nav = NavigatorManager.get();
         nav.setImageDisplayManager(new NavigatorImageDisplayManager() {

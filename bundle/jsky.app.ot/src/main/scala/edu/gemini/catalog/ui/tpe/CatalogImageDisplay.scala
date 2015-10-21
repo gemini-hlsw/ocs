@@ -126,7 +126,7 @@ class CatalogImageDisplay(parent: Component, navigatorPane: NavigatorPane) exten
   /** Set of filenames: Used to keep track of the files visited in this session. */
   private final val _filesVisited: Set[String] = new HashSet[String]
   /** Action to use to show the catalog window (Browse catalogs) */
-  private val _catalogBrowseAction: AbstractAction = new AbstractAction("Browse...", Resources.getIcon("Catalog24.gif")) {
+  private val _catalogBrowseAction: Action = new AbstractAction("Browse...", Resources.getIcon("Catalog24.gif")) {
     def actionPerformed(evt: ActionEvent) {
       try {
         openCatalogWindow()
@@ -156,9 +156,8 @@ class CatalogImageDisplay(parent: Component, navigatorPane: NavigatorPane) exten
   /**
     * Open the catalog navigator window.
     */
-  def openCatalogWindow(): Unit = {
-    println("OPEN CN")
-    //QueryResultsFrame.showOn(ctx)
+  override def openCatalogWindow(): Unit = {
+    // TODO Open the catalog
   }
 
   /**
@@ -316,7 +315,7 @@ class CatalogImageDisplay(parent: Component, navigatorPane: NavigatorPane) exten
     _navigator.addPickedObjectToTable(stats, getPickObjectPanel.isUpdate)
   }
 
-  def getCatalogBrowseAction: AbstractAction = _catalogBrowseAction
+  def getCatalogBrowseAction: Action = _catalogBrowseAction
 
   /**
     * Can be overridden in a derived class to filter the result of a catalog query.
@@ -344,6 +343,7 @@ class CatalogImageDisplayMenuBar(protected val imageDisplay: CatalogImageDisplay
   /**
     * Create a menu item for saving the current catalog overlays as a FITS table in the image file.
     */
+  @Deprecated
   private def createSaveCatalogOverlaysWithImageMenuItem: JMenuItem = {
     val menuItem = new JMenuItem("Save Catalog Overlays With Image")
     menuItem.addActionListener(new ActionListener() {

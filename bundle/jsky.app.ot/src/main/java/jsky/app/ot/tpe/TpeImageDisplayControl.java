@@ -25,39 +25,6 @@ public class TpeImageDisplayControl extends NavigatorImageDisplayControl {
         super(parent, size);
     }
 
-    /**
-     * Make a TpeImageDisplayControl widget with the default settings.
-     *
-     * @param parent The top level parent frame (or internal frame) used to close the window
-     */
-    public TpeImageDisplayControl(Component parent) {
-        super(parent);
-    }
-
-
-    /**
-     * Make a TpeImageDisplayControl widget with the default settings and display the contents
-     * of the image file pointed to by the URL.
-     *
-     * @param parent The top level parent frame (or internal frame) used to close the window
-     * @param url The URL for the image to load
-     */
-    public TpeImageDisplayControl(Component parent, URL url) {
-        super(parent, url);
-    }
-
-
-    /**
-     * Make a TpeImageDisplayControl widget with the default settings and display the contents
-     * of the image file.
-     *
-     * @param parent The top level parent frame (or internal frame) used to close the window
-     * @param filename The image file to load
-     */
-    public TpeImageDisplayControl(Component parent, String filename) {
-        super(parent, filename);
-    }
-
     /** Make and return the image display window */
     @Override
     protected DivaMainImageDisplay makeImageDisplay() {
