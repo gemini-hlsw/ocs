@@ -24,10 +24,10 @@ public final class Flamingos2Printer extends PrinterBase {
     private final Flamingos2Recipe recipe;
     private final boolean isImaging;
 
-    public Flamingos2Printer(final Parameters p, final Flamingos2Parameters ip, final PlottingDetails pdp, final PrintWriter out) {
+    public Flamingos2Printer(final ItcParameters p, final Flamingos2Parameters instr, final PlottingDetails pdp, final PrintWriter out) {
         super(out);
         this.pdp       = pdp;
-        this.recipe    = new Flamingos2Recipe(p.source(), p.observation(), p.conditions(), ip, p.telescope());
+        this.recipe    = new Flamingos2Recipe(p, instr);
         this.isImaging = p.observation().getMethod().isImaging();
     }
 
@@ -126,7 +126,7 @@ public final class Flamingos2Printer extends PrinterBase {
         printConfiguration((Flamingos2) result.instrument(), result.parameters());
     }
 
-    private void printConfiguration(final Flamingos2 instrument, final Parameters p) {
+    private void printConfiguration(final Flamingos2 instrument, final ItcParameters p) {
         _print("<HR align=left SIZE=3>");
         _println("<b>Input Parameters:</b>");
         _println("Instrument: Flamingos 2\n");

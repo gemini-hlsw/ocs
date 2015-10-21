@@ -14,6 +14,7 @@ import java.util.List;
  */
 public final class GsaoiRecipe implements ImagingRecipe {
 
+    private final ItcParameters p;
     private final Gsaoi instrument;
     private final GsaoiParameters _gsaoiParameters;
     private final ObservingConditions _obsConditionParameters;
@@ -24,19 +25,16 @@ public final class GsaoiRecipe implements ImagingRecipe {
     /**
      * Constructs a GsaoiRecipe given the parameters. Useful for testing.
      */
-    public GsaoiRecipe(final SourceDefinition sdParameters,
-                       final ObservationDetails obsDetailParameters,
-                       final ObservingConditions obsConditionParameters,
-                       final GsaoiParameters gsaoiParameters,
-                       final TelescopeDetails telescope)
+    public GsaoiRecipe(final ItcParameters p, final GsaoiParameters instr)
 
     {
-        instrument = new Gsaoi(gsaoiParameters, obsDetailParameters);
-        _sdParameters = sdParameters;
-        _obsDetailParameters = obsDetailParameters;
-        _obsConditionParameters = obsConditionParameters;
-        _gsaoiParameters = gsaoiParameters;
-        _telescope = telescope;
+        this.p                  = p;
+        instrument              = new Gsaoi(instr, p.observation());
+        _sdParameters           = p.source();
+        _obsDetailParameters    = p.observation();
+        _obsConditionParameters = p.conditions();
+        _gsaoiParameters        = instr;
+        _telescope              = p.telescope();
 
         // some general validations
         Validation.validate(instrument, _obsDetailParameters, _sdParameters);
@@ -111,7 +109,6 @@ public final class GsaoiRecipe implements ImagingRecipe {
         IS2Ncalc.setSecondarySourceFraction(halo_source_fraction);
         IS2Ncalc.calculate();
 
-        final Parameters p = new Parameters(_sdParameters, _obsDetailParameters, _obsConditionParameters, _telescope);
         final List<ItcWarning> warnings = warningsForImaging(instrument, peak_pixel_count);
         return ImagingResult.apply(p, instrument, IQcalc, SFcalc, peak_pixel_count, IS2Ncalc, gems, warnings);
     }

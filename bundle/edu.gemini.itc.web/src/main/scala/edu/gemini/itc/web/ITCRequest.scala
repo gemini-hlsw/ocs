@@ -360,12 +360,12 @@ object ITCRequest {
       case _            => throw new NoSuchElementException(s"Unknown IfuMethod ${r.parameter("ifuMethod")}")
   }
 
-  def parameters(r: ITCRequest, i: InstrumentDetails): Parameters = {
+  def parameters(r: ITCRequest, i: InstrumentDetails): ItcParameters = {
     val source        = ITCRequest.sourceDefinitionParameters(r)
     val observation   = ITCRequest.observationParameters(r, i)
     val conditions    = ITCRequest.obsConditionParameters(r)
     val telescope     = ITCRequest.teleParameters(r)
-    Parameters(source, observation, conditions, telescope)
+    ItcParameters(source, observation, conditions, telescope, i)
   }
 
 }

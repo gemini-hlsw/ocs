@@ -19,6 +19,7 @@ public final class GnirsRecipe implements SpectroscopyRecipe {
 
     public static final int ORDERS = 6;
 
+    private final ItcParameters p;
     private final Gnirs instrument;
     private final SourceDefinition _sdParameters;
     private final ObservationDetails _obsDetailParameters;
@@ -33,19 +34,16 @@ public final class GnirsRecipe implements SpectroscopyRecipe {
     /**
      * Constructs a GnirsRecipe given the parameters. Useful for testing.
      */
-    public GnirsRecipe(final SourceDefinition sdParameters,
-                       final ObservationDetails obsDetailParameters,
-                       final ObservingConditions obsConditionParameters,
-                       final GnirsParameters gnirsParameters,
-                       final TelescopeDetails telescope)
+    public GnirsRecipe(final ItcParameters p, final GnirsParameters instr)
 
     {
-        instrument = new Gnirs(gnirsParameters, obsDetailParameters);
-        _sdParameters = sdParameters;
-        _obsDetailParameters = obsDetailParameters;
-        _obsConditionParameters = obsConditionParameters;
-        _gnirsParameters = gnirsParameters;
-        _telescope = telescope;
+        this.p                  = p;
+        instrument              = new Gnirs(instr, p.observation());
+        _sdParameters           = p.source();
+        _obsDetailParameters    = p.observation();
+        _obsConditionParameters = p.conditions();
+        _gnirsParameters        = instr;
+        _telescope              = p.telescope();
 
         signalOrder = new VisitableSampledSpectrum[ORDERS];
         backGroundOrder = new VisitableSampledSpectrum[ORDERS];
@@ -220,7 +218,6 @@ public final class GnirsRecipe implements SpectroscopyRecipe {
 
         }
 
-        final Parameters p = new Parameters(_sdParameters, _obsDetailParameters, _obsConditionParameters, _telescope);
         final SpecS2N[] specS2Narr = new SpecS2N[] {specS2N};
         return new GnirsSpectroscopyResult(p, instrument, SFcalc, IQcalc, specS2Narr, st, Option.<AOSystem>empty(), signalOrder, backGroundOrder, finalS2NOrder, ImagingResult.NoWarnings());
 

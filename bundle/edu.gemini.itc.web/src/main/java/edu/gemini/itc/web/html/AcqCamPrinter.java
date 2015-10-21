@@ -6,8 +6,8 @@ import edu.gemini.itc.base.ImagingResult;
 import edu.gemini.itc.base.Instrument;
 import edu.gemini.itc.base.TransmissionElement;
 import edu.gemini.itc.shared.AcquisitionCamParameters;
+import edu.gemini.itc.shared.ItcParameters;
 import edu.gemini.itc.shared.ItcWarning;
-import edu.gemini.itc.shared.Parameters;
 import scala.collection.JavaConversions;
 
 import java.io.PrintWriter;
@@ -19,9 +19,9 @@ public final class AcqCamPrinter extends PrinterBase {
 
     private final AcqCamRecipe  recipe;
 
-    public AcqCamPrinter(final Parameters p, final AcquisitionCamParameters ip, final PrintWriter out) {
+    public AcqCamPrinter(final ItcParameters p, final AcquisitionCamParameters instr, final PrintWriter out) {
         super(out);
-        recipe = new AcqCamRecipe(p.source(), p.observation(), p.conditions(), p.telescope(), ip);
+        recipe = new AcqCamRecipe(p, instr);
     }
 
     public void writeOutput() {

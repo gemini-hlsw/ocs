@@ -24,9 +24,9 @@ public final class GmosPrinter extends PrinterBase {
     private final PlottingDetails pdp;
     private final boolean isImaging;
 
-    public GmosPrinter(final Parameters p, final GmosParameters ip, final PlottingDetails pdp, final PrintWriter out) {
+    public GmosPrinter(final ItcParameters p, final GmosParameters instr, final PlottingDetails pdp, final PrintWriter out) {
         super(out);
-        this.recipe         = new GmosRecipe(p.source(), p.observation(), p.conditions(), ip, p.telescope());
+        this.recipe         = new GmosRecipe(p, instr);
         this.pdp            = pdp;
         this.isImaging      = p.observation().getMethod().isImaging();
     }
@@ -149,7 +149,7 @@ public final class GmosPrinter extends PrinterBase {
         printConfiguration(results.head().parameters(), mainInstrument);
     }
 
-    private void printConfiguration(final Parameters p, final Gmos mainInstrument) {
+    private void printConfiguration(final ItcParameters p, final Gmos mainInstrument) {
         _println("");
 
         _print("<HR align=left SIZE=3>");
@@ -165,7 +165,7 @@ public final class GmosPrinter extends PrinterBase {
         _println(HtmlPrinter.printParameterSummary(p.observation()));
     }
 
-    private String gmosToString(final Gmos instrument, final Parameters p) {
+    private String gmosToString(final Gmos instrument, final ItcParameters p) {
 
         String s = "Instrument configuration: \n";
         s += HtmlPrinter.opticalComponentsToString(instrument);

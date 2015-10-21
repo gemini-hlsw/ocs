@@ -6,8 +6,8 @@ import edu.gemini.itc.gsaoi.Camera;
 import edu.gemini.itc.gsaoi.Gsaoi;
 import edu.gemini.itc.gsaoi.GsaoiRecipe;
 import edu.gemini.itc.shared.GsaoiParameters;
+import edu.gemini.itc.shared.ItcParameters;
 import edu.gemini.itc.shared.ItcWarning;
-import edu.gemini.itc.shared.Parameters;
 import scala.collection.JavaConversions;
 
 import java.io.PrintWriter;
@@ -20,9 +20,9 @@ public final class GsaoiPrinter extends PrinterBase {
 
     private final GsaoiRecipe recipe;
 
-    public GsaoiPrinter(final Parameters p, final GsaoiParameters ip, final PrintWriter out) {
+    public GsaoiPrinter(final ItcParameters p, final GsaoiParameters instr, final PrintWriter out) {
         super(out);
-        recipe = new GsaoiRecipe(p.source(), p.observation(), p.conditions(), ip, p.telescope());
+        recipe = new GsaoiRecipe(p, instr);
     }
 
     /**

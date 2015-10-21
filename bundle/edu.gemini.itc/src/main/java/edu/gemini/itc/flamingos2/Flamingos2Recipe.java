@@ -13,6 +13,7 @@ import java.util.List;
  */
 public final class Flamingos2Recipe implements ImagingRecipe, SpectroscopyRecipe {
 
+    private final ItcParameters p;
     private final Flamingos2 instrument;
     private final Flamingos2Parameters _flamingos2Parameters;
     private final ObservingConditions _obsConditionParameters;
@@ -24,17 +25,14 @@ public final class Flamingos2Recipe implements ImagingRecipe, SpectroscopyRecipe
      * Constructs an Flamingos 2 object given the parameters. Useful for
      * testing.
      */
-    public Flamingos2Recipe(final SourceDefinition sdParameters,
-                            final ObservationDetails obsDetailParameters,
-                            final ObservingConditions obsConditionParameters,
-                            final Flamingos2Parameters flamingos2Parameters,
-                            final TelescopeDetails telescope) {
-        instrument = new Flamingos2(flamingos2Parameters);
-        _sdParameters = sdParameters;
-        _obsDetailParameters = obsDetailParameters;
-        _obsConditionParameters = obsConditionParameters;
-        _flamingos2Parameters = flamingos2Parameters;
-        _telescope = telescope;
+    public Flamingos2Recipe(final ItcParameters p, final Flamingos2Parameters instr) {
+        this.p                  = p;
+        instrument              = new Flamingos2(instr);
+        _sdParameters           = p.source();
+        _obsDetailParameters    = p.observation();
+        _obsConditionParameters = p.conditions();
+        _flamingos2Parameters   = instr;
+        _telescope              = p.telescope();
 
         validateInputParameters();
     }
@@ -138,7 +136,6 @@ public final class Flamingos2Recipe implements ImagingRecipe, SpectroscopyRecipe
         final SpecS2NLargeSlitVisitor[] specS2Narr = new SpecS2NLargeSlitVisitor[1];
         specS2Narr[0] = specS2N;
 
-        final Parameters p = new Parameters(_sdParameters, _obsDetailParameters, _obsConditionParameters, _telescope);
         return SpectroscopyResult$.MODULE$.apply(p, instrument, SFcalc, IQcalc, specS2Narr, st);
     }
 
@@ -181,7 +178,6 @@ public final class Flamingos2Recipe implements ImagingRecipe, SpectroscopyRecipe
         final ImagingS2NCalculatable IS2Ncalc = ImagingS2NCalculationFactory.getCalculationInstance(_obsDetailParameters, instrument, SFcalc, sed_integral, sky_integral);
         IS2Ncalc.calculate();
 
-        final Parameters p = new Parameters(_sdParameters, _obsDetailParameters, _obsConditionParameters, _telescope);
         final List<ItcWarning> warnings = warningsForImaging(instrument, peak_pixel_count);
         return ImagingResult.apply(p, instrument, IQcalc, SFcalc, peak_pixel_count, IS2Ncalc, warnings);
     }

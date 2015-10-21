@@ -22,6 +22,7 @@ import java.util.List;
  */
 public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRecipe {
 
+    private final ItcParameters p;
     private final Gmos mainInstrument;
     private final GmosParameters gmosParameters;
     private final SourceDefinition _sdParameters;
@@ -32,19 +33,16 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
     /**
      * Constructs a GmosRecipe given the parameters. Useful for testing.
      */
-    public GmosRecipe(final SourceDefinition sdParameters,
-                      final ObservationDetails obsDetailParameters,
-                      final ObservingConditions obsConditionParameters,
-                      final GmosParameters gmosParameters,
-                      final TelescopeDetails telescope)
+    public GmosRecipe(final ItcParameters p, final GmosParameters instr)
 
     {
-        mainInstrument = createGmos(gmosParameters, obsDetailParameters);
-        this.gmosParameters = gmosParameters;
-        _sdParameters = sdParameters;
-        _obsDetailParameters = obsDetailParameters;
-        _obsConditionParameters = obsConditionParameters;
-        _telescope = telescope;
+        this.p                  = p;
+        mainInstrument          = createGmos(instr, p.observation());
+        gmosParameters          = instr;
+        _sdParameters           = p.source();
+        _obsDetailParameters    = p.observation();
+        _obsConditionParameters = p.conditions();
+        _telescope              = p.telescope();
 
         // some general validations
         Validation.validate(mainInstrument, _obsDetailParameters, _sdParameters);
@@ -247,7 +245,6 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
 
         }
 
-        final Parameters p = new Parameters(_sdParameters, _obsDetailParameters, _obsConditionParameters, _telescope);
         final List<ItcWarning> warnings = warningsForSpectroscopy(mainInstrument);
         return SpectroscopyResult$.MODULE$.apply(p, instrument, SFcalc, IQcalc, specS2N, st, warnings);
 
@@ -297,7 +294,6 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
         final ImagingS2NCalculatable IS2Ncalc = ImagingS2NCalculationFactory.getCalculationInstance(_obsDetailParameters, instrument, SFcalc, sed_integral, sky_integral);
         IS2Ncalc.calculate();
 
-        final Parameters p = new Parameters(_sdParameters, _obsDetailParameters, _obsConditionParameters, _telescope);
         final List<ItcWarning> warnings = warningsForImaging(instrument, peak_pixel_count);
         return ImagingResult.apply(p, instrument, IQcalc, SFcalc, peak_pixel_count, IS2Ncalc, warnings);
 

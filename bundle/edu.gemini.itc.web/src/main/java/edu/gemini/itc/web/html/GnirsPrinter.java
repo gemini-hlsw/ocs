@@ -20,10 +20,10 @@ public final class GnirsPrinter extends PrinterBase {
     private final PlottingDetails pdp;
     private final GnirsRecipe recipe;
 
-    public GnirsPrinter(final Parameters p, final GnirsParameters ip, final PlottingDetails pdp, final PrintWriter out) {
+    public GnirsPrinter(final ItcParameters p, final GnirsParameters instr, final PlottingDetails pdp, final PrintWriter out) {
         super(out);
         this.pdp        = pdp;
-        this.recipe     = new GnirsRecipe(p.source(), p.observation(), p.conditions(), ip, p.telescope());
+        this.recipe     = new GnirsRecipe(p, instr);
     }
 
     public void writeOutput() {
@@ -115,7 +115,7 @@ public final class GnirsPrinter extends PrinterBase {
 
     }
 
-    private String gnirsToString(final Gnirs instrument, final Parameters p) {
+    private String gnirsToString(final Gnirs instrument, final ItcParameters p) {
 
         String s = "Instrument configuration: \n";
         s += HtmlPrinter.opticalComponentsToString(instrument);

@@ -1,7 +1,7 @@
 package edu.gemini.itc.base
 
 import edu.gemini.itc.operation._
-import edu.gemini.itc.shared.{ItcWarning, Parameters}
+import edu.gemini.itc.shared.{ItcParameters, ItcWarning}
 
 import scala.collection.JavaConversions._
 
@@ -15,7 +15,7 @@ import scala.collection.JavaConversions._
 
 sealed trait Result {
   def warnings:   List[ItcWarning]
-  def parameters: Parameters
+  def parameters: ItcParameters
   def instrument: Instrument
 
   // Accessors for convenience.
@@ -27,7 +27,7 @@ sealed trait Result {
 
 /* Internal object for imaging results. */
 final case class ImagingResult(
-                      parameters:       Parameters,
+                      parameters:       ItcParameters,
                       instrument:       Instrument,
                       iqCalc:           ImageQualityCalculatable,
                       sfCalc:           SourceFraction,
@@ -41,16 +41,16 @@ object ImagingResult {
   // Helper for Java usage
   val NoWarnings = List[ItcWarning]()
 
-  def apply(parameters: Parameters, instrument: Instrument, iqCalc: ImageQualityCalculatable, sfCalc: SourceFraction, peakPixelCount: Double, IS2Ncalc: ImagingS2NCalculatable) =
+  def apply(parameters: ItcParameters, instrument: Instrument, iqCalc: ImageQualityCalculatable, sfCalc: SourceFraction, peakPixelCount: Double, IS2Ncalc: ImagingS2NCalculatable) =
     new ImagingResult(parameters, instrument, iqCalc, sfCalc, peakPixelCount, IS2Ncalc, None)
 
-  def apply(parameters: Parameters, instrument: Instrument, IQcalc: ImageQualityCalculatable, SFcalc: SourceFraction, peakPixelCount: Double, IS2Ncalc: ImagingS2NCalculatable, aoSystem: AOSystem) =
+  def apply(parameters: ItcParameters, instrument: Instrument, IQcalc: ImageQualityCalculatable, SFcalc: SourceFraction, peakPixelCount: Double, IS2Ncalc: ImagingS2NCalculatable, aoSystem: AOSystem) =
     new ImagingResult(parameters, instrument, IQcalc, SFcalc, peakPixelCount, IS2Ncalc, Some(aoSystem))
 
-  def apply(parameters: Parameters, instrument: Instrument, IQcalc: ImageQualityCalculatable, SFcalc: SourceFraction, peakPixelCount: Double, IS2Ncalc: ImagingS2NCalculatable, warnings: java.util.List[ItcWarning]) =
+  def apply(parameters: ItcParameters, instrument: Instrument, IQcalc: ImageQualityCalculatable, SFcalc: SourceFraction, peakPixelCount: Double, IS2Ncalc: ImagingS2NCalculatable, warnings: java.util.List[ItcWarning]) =
     new ImagingResult(parameters, instrument, IQcalc, SFcalc, peakPixelCount, IS2Ncalc, None, warnings.toList)
 
-  def apply(parameters: Parameters, instrument: Instrument, IQcalc: ImageQualityCalculatable, SFcalc: SourceFraction, peakPixelCount: Double, IS2Ncalc: ImagingS2NCalculatable, aoSystem: AOSystem, warnings: java.util.List[ItcWarning]) =
+  def apply(parameters: ItcParameters, instrument: Instrument, IQcalc: ImageQualityCalculatable, SFcalc: SourceFraction, peakPixelCount: Double, IS2Ncalc: ImagingS2NCalculatable, aoSystem: AOSystem, warnings: java.util.List[ItcWarning]) =
     new ImagingResult(parameters, instrument, IQcalc, SFcalc, peakPixelCount, IS2Ncalc, Some(aoSystem), warnings.toList)
 }
 
@@ -64,7 +64,7 @@ sealed trait SpectroscopyResult extends Result {
 
 /* Internal object for generic spectroscopy results (all instruments except for GNIRS). */
 final case class GenericSpectroscopyResult(
-                      parameters:       Parameters,
+                      parameters:       ItcParameters,
                       instrument:       Instrument,
                       sfCalc:           SourceFraction,
                       iqCalc:           ImageQualityCalculatable,
@@ -78,7 +78,7 @@ final case class GenericSpectroscopyResult(
  * used for the other instruments, but right now I don't understand the calculations well enough to figure out
  * how to do that in a meaningful way. */
 final case class GnirsSpectroscopyResult(
-                      parameters:       Parameters,
+                      parameters:       ItcParameters,
                       instrument:       Instrument,
                       sfCalc:           SourceFraction,
                       iqCalc:           ImageQualityCalculatable,
@@ -92,10 +92,10 @@ final case class GnirsSpectroscopyResult(
 
 object SpectroscopyResult {
 
-  def apply(parameters: Parameters, instrument: Instrument, sfCalc: SourceFraction, iqCalc: ImageQualityCalculatable, specS2N: Array[SpecS2N], st: SlitThroughput) =
+  def apply(parameters: ItcParameters, instrument: Instrument, sfCalc: SourceFraction, iqCalc: ImageQualityCalculatable, specS2N: Array[SpecS2N], st: SlitThroughput) =
     new GenericSpectroscopyResult(parameters, instrument, sfCalc, iqCalc, specS2N, st, None)
 
-  def apply(parameters: Parameters, instrument: Instrument, sfCalc: SourceFraction, iqCalc: ImageQualityCalculatable, specS2N: Array[SpecS2N], st: SlitThroughput, warnings: java.util.List[ItcWarning]) =
+  def apply(parameters: ItcParameters, instrument: Instrument, sfCalc: SourceFraction, iqCalc: ImageQualityCalculatable, specS2N: Array[SpecS2N], st: SlitThroughput, warnings: java.util.List[ItcWarning]) =
     new GenericSpectroscopyResult(parameters, instrument, sfCalc, iqCalc, specS2N, st, None, warnings.toList)
 
 }

@@ -19,9 +19,9 @@ public final class NifsPrinter extends PrinterBase {
     private final NifsRecipe recipe;
     private final PlottingDetails pdp;
 
-    public NifsPrinter(final Parameters p, final NifsParameters ip, final PlottingDetails pdp, final PrintWriter out) {
+    public NifsPrinter(final ItcParameters p, final NifsParameters instr, final PlottingDetails pdp, final PrintWriter out) {
         super(out);
-        this.recipe = new NifsRecipe(p.source(), p.observation(), p.conditions(), ip, p.telescope());
+        this.recipe = new NifsRecipe(p, instr);
         this.pdp    = pdp;
     }
 

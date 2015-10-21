@@ -98,30 +98,30 @@ object Baseline {
   // ====
 
   def executeAcqCamRecipe(f: Fixture[AcquisitionCamParameters]): Output =
-    cookRecipe(w => new AcqCamPrinter(Parameters(f.src, f.odp, f.ocp, f.tep), f.ins, w))
+    cookRecipe(w => new AcqCamPrinter(ItcParameters(f.src, f.odp, f.ocp, f.tep, f.ins), f.ins, w))
 
   def executeF2Recipe(f: Fixture[Flamingos2Parameters]): Output =
-    cookRecipe(w => new Flamingos2Printer(Parameters(f.src, f.odp, f.ocp, f.tep), f.ins, f.pdp, w))
+    cookRecipe(w => new Flamingos2Printer(ItcParameters(f.src, f.odp, f.ocp, f.tep, f.ins), f.ins, f.pdp, w))
 
   def executeGmosRecipe(f: Fixture[GmosParameters]): Output =
-    cookRecipe(w => new GmosPrinter(Parameters(f.src, f.odp, f.ocp, f.tep), f.ins, f.pdp, w))
+    cookRecipe(w => new GmosPrinter(ItcParameters(f.src, f.odp, f.ocp, f.tep, f.ins), f.ins, f.pdp, w))
 
   def executeGnirsRecipe(f: Fixture[GnirsParameters]): Output =
-    cookRecipe(w => new GnirsPrinter(Parameters(f.src, f.odp, f.ocp, f.tep), f.ins, f.pdp, w))
+    cookRecipe(w => new GnirsPrinter(ItcParameters(f.src, f.odp, f.ocp, f.tep, f.ins), f.ins, f.pdp, w))
 
   def executeGsaoiRecipe(f: Fixture[GsaoiParameters]): Output =
-    cookRecipe(w => new GsaoiPrinter(Parameters(f.src, f.odp, f.ocp, f.tep), f.ins, w))
+    cookRecipe(w => new GsaoiPrinter(ItcParameters(f.src, f.odp, f.ocp, f.tep, f.ins), f.ins, w))
 
   def executeMichelleRecipe(f: Fixture[MichelleParameters]): Output =
-    cookRecipe(w => new MichellePrinter(Parameters(f.src, f.odp, f.ocp, f.tep), f.ins, f.pdp, w))
+    cookRecipe(w => new MichellePrinter(ItcParameters(f.src, f.odp, f.ocp, f.tep, f.ins), f.ins, f.pdp, w))
 
   def executeNifsRecipe(f: Fixture[NifsParameters]): Output =
-    cookRecipe(w => new NifsPrinter(Parameters(f.src, f.odp, f.ocp, f.tep), f.ins, f.pdp, w))
+    cookRecipe(w => new NifsPrinter(ItcParameters(f.src, f.odp, f.ocp, f.tep, f.ins), f.ins, f.pdp, w))
 
   def executeNiriRecipe(f: Fixture[NiriParameters]): Output =
-    cookRecipe(w => new NiriPrinter(Parameters(f.src, f.odp, f.ocp, f.tep), f.ins, f.pdp, w))
+    cookRecipe(w => new NiriPrinter(ItcParameters(f.src, f.odp, f.ocp, f.tep, f.ins), f.ins, f.pdp, w))
 
   def executeTrecsRecipe(f: Fixture[TRecsParameters]): Output =
-    cookRecipe(w => new TRecsPrinter(Parameters(f.src, f.odp, f.ocp, f.tep), f.ins, f.pdp, w))
+    cookRecipe(w => new TRecsPrinter(ItcParameters(f.src, f.odp, f.ocp, f.tep, f.ins), f.ins, f.pdp, w))
 
 }

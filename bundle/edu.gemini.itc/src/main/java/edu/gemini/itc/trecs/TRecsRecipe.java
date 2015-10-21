@@ -3,7 +3,6 @@ package edu.gemini.itc.trecs;
 import edu.gemini.itc.base.*;
 import edu.gemini.itc.operation.*;
 import edu.gemini.itc.shared.*;
-import edu.gemini.spModel.core.Site;
 import scala.Tuple2;
 
 import java.util.ArrayList;
@@ -14,6 +13,7 @@ import java.util.List;
  */
 public final class TRecsRecipe implements ImagingRecipe, SpectroscopyRecipe {
 
+    private final ItcParameters p;
     private final TRecs instrument;
     private final SourceDefinition _sdParameters;
     private final ObservationDetails _obsDetailParameters;
@@ -23,17 +23,14 @@ public final class TRecsRecipe implements ImagingRecipe, SpectroscopyRecipe {
     /**
      * Constructs a TRecsRecipe given the parameters. Useful for testing.
      */
-    public TRecsRecipe(final SourceDefinition sdParameters,
-                       final ObservationDetails obsDetailParameters,
-                       final ObservingConditions obsConditionParameters,
-                       final TRecsParameters trecsParameters,
-                       final TelescopeDetails telescope) {
-
-        instrument = new TRecs(trecsParameters, obsDetailParameters);
-        _sdParameters = sdParameters;
-        _obsDetailParameters = correctedObsDetails(trecsParameters, obsDetailParameters);
-        _obsConditionParameters = obsConditionParameters;
-        _telescope = telescope;
+    public TRecsRecipe(final ItcParameters p, final TRecsParameters instr) {
+        instrument              = new TRecs(instr, p.observation());
+        _sdParameters           = p.source();
+        _obsDetailParameters    = correctedObsDetails(instr, p.observation());
+        _obsConditionParameters = p.conditions();
+        _telescope              = p.telescope();
+        // update parameters with "corrected" version
+        this.p                  = new ItcParameters(p.source(), _obsDetailParameters, p.conditions(), p.telescope(), p.instrument());
 
         validateInputParameters();
     }
@@ -167,7 +164,6 @@ public final class TRecsRecipe implements ImagingRecipe, SpectroscopyRecipe {
         specS2N.setBackgroundSpectrum(sky);
         sed.accept(specS2N);
 
-        final Parameters p = new Parameters(_sdParameters, _obsDetailParameters, _obsConditionParameters, _telescope);
         final SpecS2NLargeSlitVisitor[] specS2Narr = new SpecS2NLargeSlitVisitor[1];
         specS2Narr[0] = specS2N;
         return SpectroscopyResult$.MODULE$.apply(p, instrument, null, IQcalc, specS2Narr, st); // TODO SFCalc not needed!
@@ -217,7 +213,6 @@ public final class TRecsRecipe implements ImagingRecipe, SpectroscopyRecipe {
         final ImagingS2NCalculatable IS2Ncalc = ImagingS2NCalculationFactory.getCalculationInstance(_obsDetailParameters, instrument, SFcalc, sed_integral, sky_integral);
         IS2Ncalc.calculate();
 
-        final Parameters p = new Parameters(_sdParameters, _obsDetailParameters, _obsConditionParameters, _telescope);
         return ImagingResult.apply(p, instrument, IQcalc, SFcalc, peak_pixel_count, IS2Ncalc);
 
     }

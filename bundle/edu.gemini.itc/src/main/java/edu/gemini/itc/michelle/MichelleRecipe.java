@@ -3,7 +3,6 @@ package edu.gemini.itc.michelle;
 import edu.gemini.itc.base.*;
 import edu.gemini.itc.operation.*;
 import edu.gemini.itc.shared.*;
-import edu.gemini.spModel.core.Site;
 import edu.gemini.spModel.data.YesNoType;
 import scala.Tuple2;
 
@@ -16,7 +15,7 @@ import java.util.List;
  */
 public final class MichelleRecipe implements ImagingRecipe, SpectroscopyRecipe {
 
-    // Parameters from the web page.
+    private final ItcParameters p;
     private final Michelle instrument;
     private final SourceDefinition _sdParameters;
     private final ObservationDetails _obsDetailParameters;
@@ -27,16 +26,14 @@ public final class MichelleRecipe implements ImagingRecipe, SpectroscopyRecipe {
      * Constructs a MichelleRecipe given the parameters.
      * Useful for testing.
      */
-    public MichelleRecipe(final SourceDefinition sdParameters,
-                          final ObservationDetails obsDetailParameters,
-                          final ObservingConditions obsConditionParameters,
-                          final MichelleParameters michelleParameters,
-                          final TelescopeDetails telescope) {
-        instrument = new Michelle(michelleParameters, obsDetailParameters);
-        _sdParameters = sdParameters;
-        _obsDetailParameters = correctedObsDetails(michelleParameters, obsDetailParameters);
-        _obsConditionParameters = obsConditionParameters;
-        _telescope = telescope;
+    public MichelleRecipe(final ItcParameters p, final MichelleParameters instr) {
+        instrument              = new Michelle(instr, p.observation());
+        _sdParameters           = p.source();
+        _obsDetailParameters    = correctedObsDetails(instr, p.observation());
+        _obsConditionParameters = p.conditions();
+        _telescope              = p.telescope();
+        // update parameters with "corrected" version
+        this.p                  = new ItcParameters(p.source(), _obsDetailParameters, p.conditions(), p.telescope(), p.instrument());
 
         // some general validations
         Validation.validate(instrument, _obsDetailParameters, _sdParameters);
@@ -169,8 +166,6 @@ public final class MichelleRecipe implements ImagingRecipe, SpectroscopyRecipe {
         specS2N.setBackgroundSpectrum(sky);
         sed.accept(specS2N);
 
-
-        final Parameters p = new Parameters(_sdParameters, _obsDetailParameters, _obsConditionParameters, _telescope);
         final SpecS2N[] specS2Narr = new SpecS2N[1];
         specS2Narr[0] = specS2N;
         return SpectroscopyResult$.MODULE$.apply(p, instrument, SFcalc, IQcalc, specS2Narr, st);
@@ -215,7 +210,6 @@ public final class MichelleRecipe implements ImagingRecipe, SpectroscopyRecipe {
         final ImagingS2NCalculatable IS2Ncalc = ImagingS2NCalculationFactory.getCalculationInstance(_obsDetailParameters, instrument, SFcalc, sed_integral, sky_integral);
         IS2Ncalc.calculate();
 
-        final Parameters p = new Parameters(_sdParameters, _obsDetailParameters, _obsConditionParameters, _telescope);
         return ImagingResult.apply(p, instrument, IQcalc, SFcalc, peak_pixel_count, IS2Ncalc);
 
     }

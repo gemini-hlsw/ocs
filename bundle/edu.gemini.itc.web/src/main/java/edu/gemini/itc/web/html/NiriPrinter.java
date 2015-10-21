@@ -30,9 +30,9 @@ public final class NiriPrinter extends PrinterBase {
     /**
      * Constructs a NiriRecipe given the parameters. Useful for testing.
      */
-    public NiriPrinter(final Parameters p, final NiriParameters ip, final PlottingDetails pdp, final PrintWriter out) {
+    public NiriPrinter(final ItcParameters p, final NiriParameters instr, final PlottingDetails pdp, final PrintWriter out) {
         super(out);
-        this.recipe    = new NiriRecipe(p.source(), p.observation(), p.conditions(), ip, p.telescope());
+        this.recipe    = new NiriRecipe(p, instr);
         this.isImaging = p.observation().getMethod().isImaging();
         this.pdp       = pdp;
     }
@@ -136,7 +136,7 @@ public final class NiriPrinter extends PrinterBase {
 
     }
 
-    private void printConfiguration(final Parameters p, final Niri instrument, final Option<AOSystem> ao) {
+    private void printConfiguration(final ItcParameters p, final Niri instrument, final Option<AOSystem> ao) {
         _print("<HR align=left SIZE=3>");
         _println("<b>Input Parameters:</b>");
         _println("Instrument: " + instrument.getName() + "\n");

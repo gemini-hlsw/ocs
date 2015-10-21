@@ -23,6 +23,7 @@ import java.util.List;
  */
 public final class NifsRecipe implements SpectroscopyRecipe {
 
+    private final ItcParameters p;
     private final Nifs instrument;
     private final SourceDefinition _sdParameters;
     private final ObservationDetails _obsDetailParameters;
@@ -34,19 +35,14 @@ public final class NifsRecipe implements SpectroscopyRecipe {
      * Constructs a NifsRecipe given the parameters.
      * Useful for testing.
      */
-    public NifsRecipe(final SourceDefinition sdParameters,
-                      final ObservationDetails obsDetailParameters,
-                      final ObservingConditions obsConditionParameters,
-                      final NifsParameters nifsParameters,
-                      final TelescopeDetails telescope)
-
-    {
-        instrument = new Nifs(nifsParameters, obsDetailParameters);
-        _sdParameters = sdParameters;
-        _obsDetailParameters = obsDetailParameters;
-        _obsConditionParameters = obsConditionParameters;
-        _nifsParameters = nifsParameters;
-        _telescope = telescope;
+    public NifsRecipe(final ItcParameters p, final NifsParameters instr) {
+        this.p                  = p;
+        instrument              = new Nifs(instr, p.observation());
+        _sdParameters           = p.source();
+        _obsDetailParameters    = p.observation();
+        _obsConditionParameters = p.conditions();
+        _nifsParameters         = instr;
+        _telescope              = p.telescope();
 
         // some general validations
         Validation.validate(instrument, _obsDetailParameters, _sdParameters);
@@ -184,7 +180,6 @@ public final class NifsRecipe implements SpectroscopyRecipe {
             specS2Narr[i++] = specS2N;
         }
 
-        final Parameters p = new Parameters(_sdParameters, _obsDetailParameters, _obsConditionParameters, _telescope);
         // TODO: no SFCalc and ST for Nifs, introduce specific result type? or optional values? work with null for now
         return new GenericSpectroscopyResult(p, instrument, null, IQcalc, specS2Narr, null, altair, ImagingResult.NoWarnings());
     }
