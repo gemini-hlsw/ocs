@@ -4,6 +4,7 @@ import java.net.URL
 import javax.swing.event.ChangeListener
 
 import edu.gemini.catalog.api.{MagnitudeLimits, RadiusLimits}
+import edu.gemini.catalog.ui.QueryResultsFrame
 import jsky.app.ot.tpe.TpeImageWidget
 import jsky.catalog.Catalog
 import jsky.catalog.QueryResult
@@ -277,12 +278,7 @@ class CatalogImageDisplay(parent: Component, navigatorPane: NavigatorPane) exten
   @Deprecated
   protected override def transformGraphics(trans: AffineTransform) {
     super.transformGraphics(trans)
-    Option(_navigator).foreach { n =>
-      val plotter = n.getPlotter
-      Option(plotter).foreach { p =>
-        p.transformGraphics(trans)
-      }
-    }
+    QueryResultsFrame.transformGraphics(trans)
   }
 
   /** Save any current catalog overlays as a FITS table in the image file. */

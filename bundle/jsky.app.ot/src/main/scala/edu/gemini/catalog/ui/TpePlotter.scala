@@ -1,21 +1,15 @@
 package edu.gemini.catalog.ui
 
+import java.awt.geom.AffineTransform
 import java.net.URL
 import java.util
 import javax.swing.event.TableModelListener
-import javax.swing.table.TableModel
 
-import diva.canvas.CanvasLayer
 import edu.gemini.catalog.ui.tpe.CatalogImageDisplay
-import edu.gemini.spModel.core.Target.SiderealTarget
 import jsky.app.ot.tpe.TpeImageWidget
 import jsky.catalog._
 import jsky.catalog.gui.BasicTablePlotter
-import jsky.coords.{CoordinateConverter, CoordinateRadius, Coordinates, WorldCoordinates}
-import jsky.graphics.CanvasGraphics
-import jsky.image.graphics.DivaImageGraphics
-import jsky.image.gui.ImageDisplay
-import jsky.navigator.NavigatorPane
+import jsky.coords.{CoordinateRadius, Coordinates, WorldCoordinates}
 import scalaz._
 import Scalaz._
 
@@ -24,7 +18,6 @@ import scala.collection.JavaConverters._
 class TpePlotter(display: CatalogImageDisplay) {
   val plotter = new BasicTablePlotter() <| {_.setCanvasGraphics(display.getCanvasGraphics)}  <| {_.setCoordinateConverter(display.getCoordinateConverter)}
   display.getNavigatorPane.setPlotter(plotter)
-
 
   case object CatalogAdapter extends PlotableCatalog {
     override def getNumSymbols: Int = ???
@@ -168,5 +161,12 @@ class TpePlotter(display: CatalogImageDisplay) {
    */
   def plot(display: TpeImageWidget, model: TargetsModel): Unit = {
     plotter.plot(TableQueryResultAdapter(model))
+  }
+
+  /**
+    * Called when the view changes, e.g. with zoom in/out
+    */
+  def transformGraphics(trans: AffineTransform): Unit = {
+    plotter.transformGraphics(trans)
   }
 }

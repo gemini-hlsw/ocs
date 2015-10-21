@@ -1,6 +1,7 @@
 package edu.gemini.catalog.ui
 
 import java.awt.Color
+import java.awt.geom.AffineTransform
 import javax.swing.BorderFactory._
 import javax.swing.border.Border
 import javax.swing.{UIManager, DefaultComboBoxModel}
@@ -575,6 +576,10 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
 
   var node:Option[TpeContext] = None
   var plotter:Option[TpePlotter] = None
+
+  def transformGraphics(trans: AffineTransform): Unit = {
+    plotter.foreach(_.transformGraphics(trans))
+  }
 
   def showOn(i: CatalogImageDisplay, n: TpeContext) {
     node = Option(n)
