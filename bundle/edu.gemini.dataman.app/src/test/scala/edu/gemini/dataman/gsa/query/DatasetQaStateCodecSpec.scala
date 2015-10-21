@@ -24,10 +24,14 @@ object DatasetQaStateCodecSpec extends Specification {
       Parse.decodeEither[DatasetQaState](s""""${PASS.displayValue}"""") must_== \/-(PASS)
     }
 
+    "ignore case when parsing" in {
+      Parse.decodeEither[DatasetQaState](s""""pAsS"""") must_== \/-(PASS)
+    }
+
     "fail for invalid qa states" in {
-      Parse.decodeEither[DatasetQaState](s""""PASS"""") match {
-        case -\/(m) => m.startsWith(invalidDatasetQaState("PASS"))
-        case _      => failure("expected to fail on input `PASS`")
+      Parse.decodeEither[DatasetQaState](s""""FOO"""") match {
+        case -\/(m) => m.startsWith(invalidDatasetQaState("FOO"))
+        case _      => failure("expected to fail on input `FOO`")
       }
     }
   }

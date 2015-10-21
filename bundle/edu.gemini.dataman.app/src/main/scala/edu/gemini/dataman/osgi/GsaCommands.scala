@@ -59,8 +59,8 @@ object GsaCommands {
 
       def list(arg: String): String = {
         def format(lst: List[GsaFile]): String = {
-          val rows = List("Dataset Label", "QA State", "Time", "Filename") :: lst.sortBy(_.label).map { f =>
-            List(f.label.toString, f.qa.displayValue, TimeFormat.format(f.time), f.filename)
+          val rows = List("Dataset Label", "QA State", "Time", "MD5", "Filename") :: lst.sortBy(_.label).map { f =>
+            List(f.label.toString, f.state.qa.displayValue, TimeFormat.format(f.state.timestamp), f.state.md5.hexString, f.filename)
           }
           rows.transpose.map { col =>
             val w = col.maxBy(_.length).length

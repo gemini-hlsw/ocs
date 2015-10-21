@@ -1,6 +1,6 @@
 package edu.gemini.dataman.gsa.query
 
-import edu.gemini.spModel.dataset.{DatasetQaState, DatasetLabel}
+import edu.gemini.spModel.dataset.{DatasetGsaState, DatasetMd5, DatasetQaState, DatasetLabel}
 
 import argonaut._
 import Argonaut._
@@ -16,6 +16,20 @@ import java.time.temporal.{TemporalAccessor, TemporalQuery}
  * encoded by the GSA server.
  */
 private[query] object JsonCodecs {
+
+  // *** DatasetMd5 Codec ***
+
+  def invalidMd5(s: String): String =
+    s"Could not parse `$s` as an MD5 value"
+
+  implicit val CodecDatasetMd5: CodecJson[DatasetMd5] =
+    CodecJson(
+      (md5: DatasetMd5) => jString(md5.hexString),
+      c => c.as[String].flatMap { hexString =>
+        DatasetMd5.parse(hexString).fold(fail[DatasetMd5](invalidMd5(hexString), c.history))(ok)
+      }
+    )
+
 
   // *** DatasetLabel Codec ***
 
@@ -39,7 +53,7 @@ private[query] object JsonCodecs {
 
   // *** DatasetQaState Codec ***
 
-  implicit def EncodeJsonDatasetQaState: EncodeJson[DatasetQaState] =
+  implicit val EncodeJsonDatasetQaState: EncodeJson[DatasetQaState] =
     EncodeJson((qa: DatasetQaState) => jString(qa.displayValue))
 
   def invalidDatasetQaState(s: String): String =
@@ -74,4 +88,9 @@ private[query] object JsonCodecs {
         }
       }
     )
+
+  // *** DatasetGsaState Codec ***
+
+  implicit val CodecDatasetGsaState: CodecJson[DatasetGsaState] =
+    casecodec3(DatasetGsaState.apply, DatasetGsaState.unapply)("qa_state", "entrytime", "data_md5")
 }
