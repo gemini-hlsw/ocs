@@ -1,8 +1,3 @@
-// Copyright 2001 Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-//
-// $Id: ObsCatalog.java 46733 2012-07-12 20:43:36Z rnorris $
-//
 package jsky.app.ot.gemini.obscat;
 
 import edu.gemini.pot.client.SPDB;
@@ -53,7 +48,6 @@ import java.awt.*;
 import java.awt.event.*;
 import java.util.*;
 import java.util.List;
-
 
 /**
  * A class for querying the science program database for observations
@@ -401,6 +395,7 @@ public final class ObsCatalog extends SkycatCatalog implements CatalogUIHandler 
     private static synchronized void addPreferencesItem() {
         if (addedPreferences) return;
 
+        // TODO FIXME, nf is null
         final NavigatorFrame nf = (NavigatorFrame) NavigatorManager.get().getParentFrame();
         final JMenuBar mb = nf.getJMenuBar();
         final JMenu menu = mb.getMenu(0);

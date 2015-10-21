@@ -1,13 +1,3 @@
-/*
- * ESO Archive
- *
- * $Id: ProgressBarFilterInputStream.java 4414 2004-02-03 16:21:36Z brighton $
- *
- * who             when        what
- * --------------  ----------  ----------------------------------------
- * Allan Brighton  2000/01/24  Created
- */
-
 package jsky.util.gui;
 
 import java.awt.BorderLayout;
@@ -27,7 +17,6 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JButton;
 
-
 /**
  * Monitors reading from a given stream or URL and updates a given progress
  * bar and text field to show the amount of data read so far.
@@ -37,37 +26,37 @@ public class ProgressBarFilterInputStream extends FilterInputStream {
     /**
      * The progress bar to use
      */
-    protected ProgressBarUtil progressBar;
+    private final ProgressBarUtil progressBar;
 
     /**
      * Text field used to display status information
      */
-    JTextField statusField;
+    private final JTextField statusField;
 
     /**
      * The model for the progress bar
      */
-    protected DefaultBoundedRangeModel model;
+    private DefaultBoundedRangeModel model;
 
     /**
      * The number of bytes read so far
      */
-    protected int nread = 0;
+    private int nread = 0;
 
     /**
      * The size of the data in bytes, if known, otherwise 0
      */
-    protected int size = 0;
+    private int size = 0;
 
     /**
      * Time in ms of last update (used to slow down text field updates)
      */
-    protected long updateTime = 0L;
+    private long updateTime = 0L;
 
     /**
      * Set this to interrupt the reading and throw an exception
      */
-    protected boolean interrupted = false;
+    private volatile boolean interrupted = false;
 
 
     /**
@@ -161,12 +150,7 @@ public class ProgressBarFilterInputStream extends FilterInputStream {
      */
     public void setSize(final int size) {
         if (!SwingUtilities.isEventDispatchThread()) {
-            SwingUtilities.invokeLater(new Runnable() {
-
-                public void run() {
-                    setSize(size);
-                }
-            });
+            SwingUtilities.invokeLater(() -> setSize(size));
             return;
         }
 
@@ -195,12 +179,7 @@ public class ProgressBarFilterInputStream extends FilterInputStream {
         long t = System.currentTimeMillis();
         if ((t - updateTime) > 200) {
             if (!SwingUtilities.isEventDispatchThread()) {
-                SwingUtilities.invokeLater(new Runnable() {
-
-                    public void run() {
-                        setNumBytesRead(n);
-                    }
-                });
+                SwingUtilities.invokeLater(() -> setNumBytesRead(n));
                 return;
             }
 
@@ -219,12 +198,7 @@ public class ProgressBarFilterInputStream extends FilterInputStream {
      */
     public void clear() {
         if (!SwingUtilities.isEventDispatchThread()) {
-            SwingUtilities.invokeLater(new Runnable() {
-
-                public void run() {
-                    clear();
-                }
-            });
+            SwingUtilities.invokeLater(this::clear);
             return;
         }
 

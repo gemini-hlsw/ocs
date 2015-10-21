@@ -1,8 +1,3 @@
-// Copyright 2001 Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-//
-// $Id: CatalogUIHandler.java 4414 2004-02-03 16:21:36Z brighton $
-
 package jsky.catalog.gui;
 
 import javax.swing.JComponent;
@@ -11,12 +6,11 @@ import jsky.catalog.Catalog;
 import jsky.catalog.QueryResult;
 import jsky.catalog.TableQueryResult;
 
-
 /**
  * Defines the interface for classes wishing to define thier own catalog
  * query or query result components.
  */
-public abstract interface CatalogUIHandler {
+public interface CatalogUIHandler {
 
     /**
      * This interface may be implemented by Catalog and QueryResult objects that
@@ -27,5 +21,5 @@ public abstract interface CatalogUIHandler {
      * @return a user interface component for the catalog or queryResult object, or null,
      *         in which case a default component will be used, based on the object type
      */
-    public JComponent makeComponent(QueryResultDisplay display);
+    JComponent makeComponent(QueryResultDisplay display);
 }

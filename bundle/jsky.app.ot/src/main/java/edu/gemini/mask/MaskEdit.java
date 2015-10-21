@@ -1,7 +1,3 @@
-/**
- * $Id: MaskEdit.java 6526 2005-08-03 21:27:13Z brighton $
- */
-
 package edu.gemini.mask;
 
 import jsky.util.gui.Theme;
@@ -33,6 +29,7 @@ import java.io.File;
 /**
  * Main class for the mask editing software
  */
+@Deprecated
 public class MaskEdit extends JFrame {
 
     // image display
@@ -141,7 +138,7 @@ public class MaskEdit extends JFrame {
     // Load a FITS object table file, display the table, and plot the
     // objects on the image
     private void _loadFitsTable(String filename) {
-        SkycatCatalog catalog = null;
+        SkycatCatalog catalog;
         try {
             catalog = ObjectTable.makeCatalog(filename);
         } catch (Exception e) {
@@ -198,12 +195,10 @@ public class MaskEdit extends JFrame {
         // Set the default catalog config file URL
         SkycatConfigFile.setConfigFile(Resources.getResource("conf/skycat.cfg"));
 
-        SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
-                String imageFile = (args.length > 0 ? args[0] : null);
-                String objectTable = (args.length > 1 ? args[1] : null);
-                new MaskEdit(imageFile, objectTable);
-            }
+        SwingUtilities.invokeLater(() -> {
+            String imageFile = (args.length > 0 ? args[0] : null);
+            String objectTable = (args.length > 1 ? args[1] : null);
+            new MaskEdit(imageFile, objectTable);
         });
     }
 }

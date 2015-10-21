@@ -1,10 +1,4 @@
-// Copyright 2001 Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-//
-// $Id: ObsCatalogQueryTool.java 6175 2005-05-24 10:45:00Z brighton $
-
 package jsky.app.ot.gemini.obscat;
-
 
 import jsky.catalog.Catalog;
 import jsky.catalog.gui.CatalogQueryPanel;
@@ -13,12 +7,9 @@ import jsky.catalog.gui.QueryResultDisplay;
 import jsky.util.Preferences;
 
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 import static java.awt.GridBagConstraints.*;
 import javax.swing.*;
-
 
 /**
  * Defines the user interface for querying an ObsCatalog. This replaces the default
@@ -50,11 +41,7 @@ public final class ObsCatalogQueryTool extends CatalogQueryTool {
         remote = new JCheckBox("Include Remote Programs") {{
             setToolTipText("Check to include programs in the remote database in query results.");
             setSelected(Preferences.get(PREF_KEY + ".remote", true));
-            addActionListener(new ActionListener() {
-                @Override public void actionPerformed(ActionEvent e) {
-                    Preferences.set(PREF_KEY + ".remote", isSelected());
-                }
-            });
+            addActionListener(e -> Preferences.set(PREF_KEY + ".remote", isSelected()));
         }};
 
         final JPanel res = new JPanel(new GridBagLayout());

@@ -1,13 +1,3 @@
-/*
- * ESO Archive
- *
- * $Id: CatalogQueryTool.java 7122 2006-06-06 16:38:01Z anunez $
- *
- * who             when        what
- * --------------  ----------  ----------------------------------------
- * Allan Brighton  1999/06/02  Created
- */
-
 package jsky.catalog.gui;
 
 import java.awt.FlowLayout;
@@ -44,12 +34,12 @@ public class CatalogQueryTool extends JPanel
     /**
      * The catalog to use
      */
-    private Catalog _catalog;
+    private final Catalog _catalog;
 
     /**
      * Panel containing labels and entries for searching the catalog
      */
-    private CatalogQueryPanel _catalogQueryPanel;
+    private final CatalogQueryPanel _catalogQueryPanel;
 
     /**
      * Used to display query results
@@ -68,12 +58,11 @@ public class CatalogQueryTool extends JPanel
      * @param catalog    The catalog to use.
      * @param scrollable set to true to allow scrolling of the query panel
      */
-    public CatalogQueryTool(Catalog catalog, boolean scrollable) {
+    private CatalogQueryTool(Catalog catalog, boolean scrollable) {
         _catalog = catalog;
         JLabel _catalogTitleLabel = makeCatalogPanelLabel(catalog);
         _catalogQueryPanel = makeCatalogQueryPanel(catalog);
         _catalogQueryPanel.addActionListener(this);
-
 
         GridBagUtil layout = new GridBagUtil(this);
         layout.add(_catalogTitleLabel, 0, 0, 1, 1, 0.0, 0.0,

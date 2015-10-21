@@ -1,8 +1,3 @@
-// Copyright 2001 Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-//
-// $Id: ObsCatalogQueryResult.java 6821 2005-12-07 12:15:24Z brighton $
-//
 package jsky.app.ot.gemini.obscat;
 
 import edu.gemini.spModel.core.SPProgramID;
@@ -19,7 +14,6 @@ import javax.swing.JComponent;
 import java.util.List;
 import java.util.Properties;
 import java.util.Vector;
-
 
 /**
  * Holds the result of a query to an ObsCatalog.
