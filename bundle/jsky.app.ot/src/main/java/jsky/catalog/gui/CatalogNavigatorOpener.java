@@ -7,6 +7,7 @@ import jsky.catalog.Catalog;
  * open the catalog navigator window to display the contents of a
  * given catalog.
  */
+@Deprecated
 public interface CatalogNavigatorOpener {
 
     /** Open the catalog window. */

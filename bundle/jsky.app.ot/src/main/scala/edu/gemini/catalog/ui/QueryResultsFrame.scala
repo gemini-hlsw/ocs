@@ -9,6 +9,7 @@ import edu.gemini.ags.api.AgsMagnitude.MagnitudeTable
 import edu.gemini.ags.api.{AgsGuideQuality, AgsRegistrar}
 import edu.gemini.ags.conf.ProbeLimitsTable
 import edu.gemini.catalog.api._
+import edu.gemini.catalog.ui.tpe.CatalogImageDisplay
 import edu.gemini.catalog.votable._
 import edu.gemini.pot.sp.SPComponentType
 import edu.gemini.shared.gui.textComponent.{SelectOnFocus, TextRenderer, NumberField}
@@ -71,7 +72,7 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
       case ButtonClicked(_) =>
         val tpe = TpeManager.open()
         tpe.reset(node.get.node.get)
-        TpePlotter.plot(tpe.getImageWidget, resultsTable.model.asInstanceOf[TargetsModel])
+        plotter.foreach(_.plot(tpe.getImageWidget, resultsTable.model.asInstanceOf[TargetsModel]))
     }
   }
 
@@ -573,9 +574,11 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
   val instance = this
 
   var node:Option[TpeContext] = None
+  var plotter:Option[TpePlotter] = None
 
-  def showOn(n: TpeContext) {
+  def showOn(i: CatalogImageDisplay, n: TpeContext) {
     node = Option(n)
+    plotter = Option(new TpePlotter(i))
     n.obsContext.foreach(showOn)
   }
 

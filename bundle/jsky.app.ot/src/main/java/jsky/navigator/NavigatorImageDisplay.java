@@ -13,6 +13,7 @@ import javax.swing.JInternalFrame;
 import javax.swing.JLayeredPane;
 
 import edu.gemini.catalog.ui.tpe.CatalogDisplay;
+import jsky.app.ot.tpe.TpeContext;
 import jsky.catalog.Catalog;
 import jsky.catalog.CatalogDirectory;
 import jsky.catalog.TableQueryResult;
@@ -283,6 +284,7 @@ public class NavigatorImageDisplay extends DivaMainImageDisplay
     /**
      * Transform the image graphics using the given AffineTransform.
      */
+    @Override
     protected void transformGraphics(AffineTransform trans) {
         super.transformGraphics(trans);
         if (_navigator != null) {

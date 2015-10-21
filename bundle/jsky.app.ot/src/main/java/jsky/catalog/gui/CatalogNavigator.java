@@ -52,6 +52,7 @@ import jsky.util.gui.*;
  * The tree display is based on a top level catalog directory. The details must be defined
  * in a derived class.
  */
+@Deprecated
 public abstract class CatalogNavigator extends JPanel
         implements QueryResultDisplay, GenericToolBarTarget, HTMLQueryResultHandler {
 

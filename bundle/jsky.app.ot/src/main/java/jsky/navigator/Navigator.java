@@ -32,6 +32,7 @@ import java.util.Vector;
  * Extends CatalogNavigator to include support for displaying images
  * and plotting catalog data in images.
  */
+@Deprecated
 public class Navigator extends CatalogNavigator implements CatalogNavigatorOpener {
 
     // Used for message logging

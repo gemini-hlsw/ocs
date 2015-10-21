@@ -181,7 +181,7 @@ public class DivaGraphicsImageDisplay extends JCanvas implements GraphicsImageDi
         imageProcessor.setName(name);
         _coordinateConverter = new ImageCoordinateConverter(this);
         setBackground(Color.black);
-        setPreferredSize(new Dimension(255, 255));	// default size
+        setPreferredSize(new Dimension(255, 255));  // default size
         _canvasGraphics = makeCanvasGraphics();
 
         // handle resize events

@@ -1093,7 +1093,7 @@ public class TpeImageWidget extends CatalogImageDisplay implements MouseInputLis
     }
 
     public void openCatalogNavigator() {
-        QueryResultsFrame.instance().showOn(_ctx);
+        QueryResultsFrame.instance().showOn(this, _ctx);
     }
 
     private void showGemsGuideStarSearchDialog() {

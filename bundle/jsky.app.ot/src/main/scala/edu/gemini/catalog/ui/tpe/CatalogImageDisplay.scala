@@ -238,9 +238,9 @@ class CatalogImageDisplay(parent: Component, navigatorPane: NavigatorPane) exten
   protected override def newImage(before: Boolean) {
     super.newImage(before)
     if (!before) {
-      if (_navigatorFrame == null && !CatalogNavigator.isMainWindow) {
+      /*if (_navigatorFrame == null && !CatalogNavigator.isMainWindow) {
         makeNavigatorFrame()
-      }
+      }*/
       if (_navigatorFrame != null) {
         val plotter = _navigator.getPlotter
         Option(plotter).foreach(_.replotAll())
@@ -274,6 +274,7 @@ class CatalogImageDisplay(parent: Component, navigatorPane: NavigatorPane) exten
   /**
     * Transform the image graphics using the given AffineTransform.
     */
+  @Deprecated
   protected override def transformGraphics(trans: AffineTransform) {
     super.transformGraphics(trans)
     Option(_navigator).foreach { n =>

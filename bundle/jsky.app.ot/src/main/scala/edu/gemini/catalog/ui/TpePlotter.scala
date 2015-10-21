@@ -6,6 +6,7 @@ import javax.swing.event.TableModelListener
 import javax.swing.table.TableModel
 
 import diva.canvas.CanvasLayer
+import edu.gemini.catalog.ui.tpe.CatalogImageDisplay
 import edu.gemini.spModel.core.Target.SiderealTarget
 import jsky.app.ot.tpe.TpeImageWidget
 import jsky.catalog._
@@ -15,10 +16,15 @@ import jsky.graphics.CanvasGraphics
 import jsky.image.graphics.DivaImageGraphics
 import jsky.image.gui.ImageDisplay
 import jsky.navigator.NavigatorPane
+import scalaz._
+import Scalaz._
 
 import scala.collection.JavaConverters._
 
-object TpePlotter {
+class TpePlotter(display: CatalogImageDisplay) {
+  val plotter = new BasicTablePlotter() <| {_.setCanvasGraphics(display.getCanvasGraphics)}  <| {_.setCoordinateConverter(display.getCoordinateConverter)}
+  display.getNavigatorPane.setPlotter(plotter)
+
 
   case object CatalogAdapter extends PlotableCatalog {
     override def getNumSymbols: Int = ???
@@ -161,13 +167,6 @@ object TpePlotter {
    * Plot the given table data.
    */
   def plot(display: TpeImageWidget, model: TargetsModel): Unit = {
-    val plotter = new BasicTablePlotter()
-    plotter.setCanvasGraphics(display.getCanvasGraphics)
-    plotter.setCoordinateConverter(display.getCoordinateConverter)
-    display.getNavigatorPane.setPlotter(plotter)
-
-    //_imageDisplay.getNavigatorPane.setPlotter(plotter)
-
     plotter.plot(TableQueryResultAdapter(model))
   }
 }
