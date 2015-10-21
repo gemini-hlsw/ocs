@@ -1,6 +1,6 @@
 package edu.gemini.spModel.target
 
-import edu.gemini.spModel.core.{Redshift, Arbitraries}
+import edu.gemini.spModel.core.{LibraryNonStar, LibraryStar, EmissionLine, PowerLaw, BlackBody, SpectralDistribution, GaussianSource, UniformSource, PointSource, SpatialProfile, Redshift, Arbitraries}
 import edu.gemini.spModel.core.WavelengthConversions._
 import edu.gemini.spModel.pio.{Pio, ParamSet}
 import edu.gemini.spModel.pio.xml.PioXmlFactory

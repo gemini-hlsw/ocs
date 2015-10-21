@@ -1,7 +1,7 @@
 package edu.gemini.itc.web.html
 
 import edu.gemini.itc.shared.SourceDefinition
-import edu.gemini.spModel.target._
+import edu.gemini.spModel.core._
 
 /**
  * HTML Utils

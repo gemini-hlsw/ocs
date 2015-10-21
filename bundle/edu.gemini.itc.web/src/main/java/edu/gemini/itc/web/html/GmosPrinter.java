@@ -7,8 +7,8 @@ import edu.gemini.itc.gmos.GmosRecipe;
 import edu.gemini.itc.shared.*;
 import edu.gemini.spModel.gemini.gmos.GmosNorthType;
 import edu.gemini.spModel.gemini.gmos.GmosSouthType;
-import edu.gemini.spModel.target.PointSource$;
-import edu.gemini.spModel.target.UniformSource$;
+import edu.gemini.spModel.core.PointSource$;
+import edu.gemini.spModel.core.UniformSource$;
 import scala.Tuple2;
 import scala.collection.JavaConversions;
 

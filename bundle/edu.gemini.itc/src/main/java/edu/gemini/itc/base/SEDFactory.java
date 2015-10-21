@@ -8,10 +8,16 @@ import edu.gemini.itc.operation.*;
 import edu.gemini.itc.shared.ObservingConditions;
 import edu.gemini.itc.shared.SourceDefinition;
 import edu.gemini.itc.shared.TelescopeDetails;
+import edu.gemini.spModel.core.BlackBody;
+import edu.gemini.spModel.core.EmissionLine;
+import edu.gemini.spModel.core.Library;
+import edu.gemini.spModel.core.LibraryNonStar;
+import edu.gemini.spModel.core.LibraryStar;
 import edu.gemini.spModel.core.MagnitudeBand;
+import edu.gemini.spModel.core.PowerLaw;
 import edu.gemini.spModel.core.Site;
+import edu.gemini.spModel.core.UserDefinedSpectrum;
 import edu.gemini.spModel.core.Wavelength;
-import edu.gemini.spModel.target.*;
 import scala.Option;
 
 /**

@@ -1,8 +1,8 @@
 package edu.gemini.spModel.io.impl.migration.to2016A
 
 import edu.gemini.pot.sp.{ISPObservation, ISPProgram, SPComponentType}
+import edu.gemini.spModel.core.EmissionLine
 import edu.gemini.spModel.io.impl.migration.MigrationTest
-import edu.gemini.spModel.target.EmissionLine
 import edu.gemini.spModel.target.obsComp.TargetObsComp
 import org.junit.{Assert, Test}
 import squants.motion.KilometersPerSecond

@@ -11,8 +11,7 @@ import edu.gemini.itc.nifs.NifsRecipe
 import edu.gemini.itc.niri.NiriRecipe
 import edu.gemini.itc.operation.ImagingS2NMethodACalculation
 import edu.gemini.itc.shared._
-import edu.gemini.spModel.core.SPProgramID
-import edu.gemini.spModel.target.{UserDefinedSpectrum, AuxFileSpectrum, SpectralDistribution}
+import edu.gemini.spModel.core.{AuxFileSpectrum, UserDefinedSpectrum, SpectralDistribution, SPProgramID}
 
 import scalaz._
 import Scalaz._

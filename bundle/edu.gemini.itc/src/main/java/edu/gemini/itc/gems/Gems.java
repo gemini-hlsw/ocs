@@ -4,8 +4,8 @@ import edu.gemini.itc.base.AOSystem;
 import edu.gemini.itc.base.SampledSpectrumVisitor;
 import edu.gemini.itc.shared.SourceDefinition;
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality;
-import edu.gemini.spModel.target.GaussianSource;
-import edu.gemini.spModel.target.PointSource$;
+import edu.gemini.spModel.core.GaussianSource;
+import edu.gemini.spModel.core.PointSource$;
 
 /**
  * Gems AO class

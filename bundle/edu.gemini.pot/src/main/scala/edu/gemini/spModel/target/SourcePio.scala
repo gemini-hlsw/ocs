@@ -1,6 +1,6 @@
 package edu.gemini.spModel.target
 
-import edu.gemini.spModel.core.SPProgramID
+import edu.gemini.spModel.core.{LibraryNonStar, LibraryStar, AuxFileSpectrum, EmissionLine, PowerLaw, BlackBody, SpectralDistribution, GaussianSource, UniformSource, PointSource, SpatialProfile, SPProgramID}
 import edu.gemini.spModel.core.WavelengthConversions._
 import edu.gemini.spModel.pio.{ParamSet, Pio, PioFactory}
 import squants.motion.Velocity

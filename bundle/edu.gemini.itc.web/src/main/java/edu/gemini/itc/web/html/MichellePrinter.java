@@ -6,8 +6,8 @@ import edu.gemini.itc.michelle.Michelle;
 import edu.gemini.itc.michelle.MichelleRecipe;
 import edu.gemini.itc.shared.*;
 import edu.gemini.spModel.gemini.michelle.MichelleParams;
-import edu.gemini.spModel.target.PointSource$;
-import edu.gemini.spModel.target.UniformSource$;
+import edu.gemini.spModel.core.PointSource$;
+import edu.gemini.spModel.core.UniformSource$;
 import scala.Tuple2;
 
 import java.io.PrintWriter;

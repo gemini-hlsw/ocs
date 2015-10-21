@@ -7,9 +7,9 @@ import edu.gemini.itc.operation.ImageQualityCalculationFactory;
 import edu.gemini.itc.operation.SpecS2N;
 import edu.gemini.itc.operation.SpecS2NLargeSlitVisitor;
 import edu.gemini.itc.shared.*;
-import edu.gemini.spModel.target.GaussianSource;
-import edu.gemini.spModel.target.PointSource$;
-import edu.gemini.spModel.target.UniformSource$;
+import edu.gemini.spModel.core.GaussianSource;
+import edu.gemini.spModel.core.PointSource$;
+import edu.gemini.spModel.core.UniformSource$;
 import scala.Option;
 import scala.Tuple2;
 
