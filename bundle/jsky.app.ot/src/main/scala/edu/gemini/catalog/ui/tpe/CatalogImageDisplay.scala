@@ -6,7 +6,6 @@ import javax.swing.event.ChangeListener
 import edu.gemini.catalog.api.{MagnitudeLimits, RadiusLimits}
 import jsky.app.ot.tpe.TpeImageWidget
 import jsky.catalog.Catalog
-import jsky.catalog.CatalogDirectory
 import jsky.catalog.QueryResult
 import jsky.catalog.TableQueryResult
 import jsky.catalog.gui.CatalogNavigator
