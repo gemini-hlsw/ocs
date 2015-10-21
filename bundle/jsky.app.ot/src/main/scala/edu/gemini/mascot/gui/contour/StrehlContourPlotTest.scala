@@ -5,7 +5,6 @@ import java.awt.geom.AffineTransform
 import edu.gemini.ags.gems.mascot.{Strehl, Mascot, Star}
 import javax.swing.JOptionPane
 
-import edu.gemini.spModel.core.Target.SiderealTarget
 import edu.gemini.spModel.core._
 
 /**

@@ -6,7 +6,7 @@ import java.util.logging.Logger
 
 import edu.gemini.catalog.api.{NameCatalogQuery, ConeSearchCatalogQuery, CatalogQuery}
 import edu.gemini.spModel.core.Angle
-import edu.gemini.spModel.core.Target.SiderealTarget
+import edu.gemini.spModel.core.SiderealTarget
 import org.apache.commons.httpclient.{NameValuePair, HttpClient}
 import org.apache.commons.httpclient.methods.GetMethod
 

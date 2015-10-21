@@ -2,7 +2,6 @@ package edu.gemini.ags.gems
 
 import edu.gemini.ags.TargetsHelper
 import edu.gemini.catalog.api._
-import edu.gemini.spModel.core.Target.SiderealTarget
 import edu.gemini.spModel.core._
 import edu.gemini.spModel.core.AngleSyntax._
 

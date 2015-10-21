@@ -2,30 +2,33 @@ package edu.gemini.spModel.core
 
 import scalaz._, Scalaz._
 
-/** Algebraic type for targets of observation. */
-sealed trait Target {
+/** 
+ * Algebraic type for targets of observation. 
+ */
+sealed trait Target extends Product with Serializable {
 
-  /** A human-readable name for this `Target`. */
+  /** A human-readable name for this Target. */
   def name: String
 
   /** Coordinates (if known) for this target at the specified UNIX time. */
   def coords(time: Long): Option[Coordinates]
 
   /** Alternative to pattern-matching. */
-  def fold[A](too: Target.TooTarget         => A,
-              sid: Target.SiderealTarget    => A,
-              non: Target.NonSiderealTarget => A): A
+  def fold[A](too: TooTarget         => A,
+              sid: SiderealTarget    => A,
+              non: NonSiderealTarget => A): A
 
 }
 
-/** Module of constructors for `Target`. */
-object Target {
+object Target extends TargetLenses
 
- val name: Target @?> String =
-    PLens(_.fold(
-      TooTarget.name.partial.run,
-      SiderealTarget.name.partial.run,
-      NonSiderealTarget.name.partial.run
+trait TargetLenses {
+
+  val name: Target @> String =
+    Lens(_.fold(
+      TooTarget.name.run,
+      SiderealTarget.name.run,
+      NonSiderealTarget.name.run
     ))
 
   val coords: Target @?> Coordinates =
@@ -49,115 +52,148 @@ object Target {
       NonSiderealTarget.magnitudes.partial.run
     ))
 
-  val ephemeris: Target @?> Ephemeris =
-    PLens(_.fold(
-      PLens.nil.run,
-      PLens.nil.run,
-      NonSiderealTarget.ephemeris.partial.run
-    ))
-
-  val raDec: Target @?> (RightAscension, Declination) =
-    coords.xmapB(cs => (cs.ra, cs.dec))(Coordinates.tupled)
-
-  val raDecAngles: Target @?> (Angle, Angle) =
-    raDec.xmapB(_.bimap(_.toAngle, _.toAngle))(
-                _.bimap(RightAscension.fromAngle,
-                        Declination.fromAngle(_).getOrElse(throw new IllegalArgumentException("Declination out of range.")))) // hmm
-
-  val raDecDegrees: Target @?> (Double, Double) =
-    raDecAngles.xmapB(_.bimap(_.toDegrees, _.toDegrees))(_.bimap(Angle.fromDegrees, Angle.fromDegrees))
-
-  /** Target of opportunity, with no coordinates. */
-  case class TooTarget(name: String) extends Target {
-
-    def coords(time: Long) = 
-      None
-    
-    def fold[A](too: Target.TooTarget => A,
-                sid: Target.SiderealTarget => A,
-                non: Target.NonSiderealTarget => A): A = 
-      too(this)
-  
-  }
-
-  object TooTarget extends (String => TooTarget) {
-    val empty = TooTarget("Untitled")
-    val name: TooTarget @> String = Lens(t => Store(s => t.copy(name = s), t.name))
-  }
-
-  ///
-  /// SIDEREAL TARGET
-  ///
-
-  /** Sidereal target with optional proper motion. */
-  case class SiderealTarget(
-    name: String,
-    coordinates: Coordinates,
-    properMotion: Option[ProperMotion],
-    redshift: Option[Redshift],
-    parallax: Option[Parallax],
-    magnitudes: List[Magnitude]) extends Target {
-
-    def coords(date: Long) = 
-      Some(coordinates)
-  
-    def fold[A](too: Target.TooTarget => A,
-                sid: Target.SiderealTarget => A,
-                non: Target.NonSiderealTarget => A): A = 
-      sid(this)
-
-    def magnitudeIn(band: MagnitudeBand): Option[Magnitude] = magnitudes.find(_.band === band)
-
-  }
-
-  object SiderealTarget {
-
-    val empty = SiderealTarget("Untitled", Coordinates.zero, None, None, None, Nil)
-  
-    val name:           SiderealTarget @> String          = Lens(t => Store(s => t.copy(name = s), t.name))
-    val coordinates:    SiderealTarget @> Coordinates     = Lens(t => Store(c => t.copy(coordinates = c), t.coordinates))
-    val properMotion:   SiderealTarget @> Option[ProperMotion]   = Lens(t => Store(c => t.copy(properMotion = c), t.properMotion))
-    val redshift:       SiderealTarget @> Option[Redshift] = Lens(t => Store(s => t.copy(redshift = s), t.redshift))
-    val parallax:       SiderealTarget @> Option[Parallax] = Lens(t => Store(s => t.copy(parallax = s), t.parallax))
-    val magnitudes:     SiderealTarget @> List[Magnitude] = Lens(t => Store(c => t.copy(magnitudes = c), t.magnitudes))
-
-    val ra:          SiderealTarget @> RightAscension  = coordinates >=> Coordinates.ra
-    val dec:         SiderealTarget @> Declination     = coordinates >=> Coordinates.dec
-
-  }
-
-  ///
-  /// NONSIDEREAL TARGET
-  ///
-
-  /** Nonsidereal target with an ephemeris. */
-  case class NonSiderealTarget(
-    name: String,
-    ephemeris: Ephemeris,
-    horizonsDesignation: Option[HorizonsDesignation],
-    magnitudes: List[Magnitude]) extends Target {
-
-    def fold[A](too: Target.TooTarget => A,
-                sid: Target.SiderealTarget => A,
-                non: Target.NonSiderealTarget => A): A = 
-      non(this)
-
-    def coords(date: Long): Option[Coordinates] =
-      ephemeris.iLookup(date)
-
-  }
-
-  object NonSiderealTarget {
-
-    val empty = NonSiderealTarget("Untitled", ==>>.empty, None, Nil)
-
-    val ephemeris:           NonSiderealTarget @> Ephemeris            = Lens(t => Store(s => t.copy(ephemeris = s), t.ephemeris))
-    val name:                NonSiderealTarget @> String               = Lens(t => Store(s => t.copy(name = s), t.name))
-    val horizonsDesignation: NonSiderealTarget @> Option[HorizonsDesignation] = Lens(t => Store(s => t.copy(horizonsDesignation = s), t.horizonsDesignation))
-    val magnitudes:          NonSiderealTarget @> List[Magnitude]      = Lens(t => Store(c => t.copy(magnitudes = c), t.magnitudes))
-
-    val ephemerisElements: NonSiderealTarget @> List[(Long, Coordinates)] = ephemeris.xmapB(_.toList)(==>>.fromList(_))
-
-  }
-  
 }
+
+
+/**
+ * Target of opportunity, with no coordinates.
+ * @param name a human-readable name
+ */
+case class TooTarget(name: String) extends Target {
+
+  /** Always returns [[None]] */
+  def coords(time: Long): Option[Coordinates] =
+    None
+
+  def fold[A](too: TooTarget => A, sid: SiderealTarget => A, non: NonSiderealTarget => A): A =
+    too(this)
+
+}
+
+object TooTarget extends TooTargetLenses {
+  val empty = TooTarget("Untitled")
+}
+
+trait TooTargetLenses {
+  val name: TooTarget @> String =
+    Lens.lensu((a, b) => a.copy(name = b), _.name)
+}
+
+/**
+ * Properties in common for defined (non-TOO) targets.
+ */
+sealed trait DefinedTarget extends Target {
+
+  def magnitudes: List[Magnitude]
+
+  def magnitudeIn(b: MagnitudeBand): Option[Magnitude] =
+    magnitudes.find(_.band == b)
+
+}
+
+
+/**
+ * Sidereal target with optional proper motion.
+ * @param name a human-readable name
+ * @param coordinates target coordinates
+ * @param properMotion optional proper motion information
+ * @param redshift optional target redshift
+ * @param parallax optional parallax
+ * @param magnitudes list of magnitudes
+ */
+case class SiderealTarget(
+  name:         String,
+  coordinates:  Coordinates,
+  properMotion: Option[ProperMotion],
+  redshift:     Option[Redshift],
+  parallax:     Option[Parallax],
+  magnitudes:   List[Magnitude])
+extends DefinedTarget {
+
+  /** Returns the fixed coordinates; proper motion is not yet taken into account. */
+  def coords(date: Long): Option[Coordinates] =
+    Some(coordinates)
+
+  def fold[A](too: TooTarget => A, sid: SiderealTarget => A, non: NonSiderealTarget => A): A =
+    sid(this)
+
+}
+
+object SiderealTarget extends SiderealTargetLenses {
+  val empty = SiderealTarget("Untitled", Coordinates.zero, None, None, None, Nil)
+}
+
+trait SiderealTargetLenses {
+
+  val name: SiderealTarget @> String =
+    Lens.lensu((a, b) => a.copy(name = b), _.name)
+
+  val coordinates: SiderealTarget @> Coordinates =
+    Lens.lensu((a, b) => a.copy(coordinates = b), _.coordinates)
+
+  val properMotion: SiderealTarget @> Option[ProperMotion] =
+    Lens.lensu((a, b) => a.copy(properMotion = b), _.properMotion)
+
+  val redshift: SiderealTarget @> Option[Redshift] =
+    Lens.lensu((a, b) => a.copy(redshift = b), _.redshift)
+
+  val parallax: SiderealTarget @> Option[Parallax] =
+    Lens.lensu((a, b) => a.copy(parallax = b), _.parallax)
+
+  val magnitudes: SiderealTarget @> List[Magnitude] =
+    Lens.lensu((a, b) => a.copy(magnitudes = b), _.magnitudes)
+
+  val ra: SiderealTarget @> RightAscension =
+    coordinates >=> Coordinates.ra
+
+  val dec: SiderealTarget @> Declination =
+    coordinates >=> Coordinates.dec
+
+}
+
+
+/**
+ * Nonsidereal target with an ephemeris.
+ * @param name a human-readable name
+ * @param ephemeris a map from points in time to coordinates
+ * @param horizonsDesignation optional unique Horizons identifier
+ * @param magnitudes list of magnitudes
+ */
+case class NonSiderealTarget(
+  name:                String,
+  ephemeris:           Ephemeris,
+  horizonsDesignation: Option[HorizonsDesignation],
+  magnitudes:          List[Magnitude]
+) extends DefinedTarget {
+
+  def coords(date: Long): Option[Coordinates] =
+    ephemeris.iLookup(date)
+
+  def fold[A](too: TooTarget => A, sid: SiderealTarget => A,non: NonSiderealTarget => A): A =
+    non(this)
+
+}
+
+object NonSiderealTarget extends NonSiderealTargetLenses {
+  val empty = NonSiderealTarget("Untitled", ==>>.empty, None, Nil)
+}
+
+trait NonSiderealTargetLenses {
+
+  val ephemeris: NonSiderealTarget @> Ephemeris =
+    Lens.lensu((a, b) => a.copy(ephemeris = b), _.ephemeris)
+
+  val name: NonSiderealTarget @> String =
+    Lens.lensu((a, b) => a.copy(name = b), _.name)
+
+  val horizonsDesignation: NonSiderealTarget @> Option[HorizonsDesignation] =
+    Lens.lensu((a, b) => a.copy(horizonsDesignation = b), _.horizonsDesignation)
+
+  val magnitudes: NonSiderealTarget @> List[Magnitude] =
+    Lens.lensu((a, b) => a.copy(magnitudes = b), _.magnitudes)
+
+  val ephemerisElements: NonSiderealTarget @> List[(Long, Coordinates)] =
+    ephemeris.xmapB(_.toList)(==>>.fromList(_))
+
+}
+

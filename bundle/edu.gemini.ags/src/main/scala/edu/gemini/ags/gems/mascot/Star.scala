@@ -3,7 +3,6 @@ package edu.gemini.ags.gems.mascot
 import MascotConf._
 
 import edu.gemini.spModel.core._
-import edu.gemini.spModel.core.Target.SiderealTarget
 
 /**
  * An object in a Mascot starlist, extracted from the results of a query to a suitable catalog.

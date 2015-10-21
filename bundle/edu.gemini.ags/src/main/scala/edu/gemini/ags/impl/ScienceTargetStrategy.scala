@@ -5,7 +5,7 @@ import edu.gemini.pot.ModelConverters._
 import edu.gemini.ags.api.{AgsAnalysis, AgsStrategy}
 import edu.gemini.spModel.ags.AgsStrategyKey
 import edu.gemini.spModel.core.BandsList
-import edu.gemini.spModel.core.Target.SiderealTarget
+import edu.gemini.spModel.core.SiderealTarget
 import edu.gemini.spModel.guide.{ValidatableGuideProbe, GuideProbe}
 import edu.gemini.spModel.obs.context.ObsContext
 

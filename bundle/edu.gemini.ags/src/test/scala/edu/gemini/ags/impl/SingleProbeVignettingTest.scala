@@ -7,7 +7,6 @@ import edu.gemini.pot.ModelConverters._
 import edu.gemini.spModel.ags.AgsStrategyKey.GmosNorthOiwfsKey
 import edu.gemini.spModel.core._
 import edu.gemini.spModel.core.MagnitudeBand.{_r, R, UC}
-import edu.gemini.spModel.core.Target.SiderealTarget
 import edu.gemini.spModel.gemini.gmos.{InstGmosNorth, GmosOiwfsGuideProbe}
 import edu.gemini.spModel.inst.VignettingArbitraries
 import edu.gemini.spModel.obs.context.ObsContext

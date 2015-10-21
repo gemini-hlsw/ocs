@@ -5,7 +5,6 @@ import java.util.logging.Logger
 import edu.gemini.ags.gems.mascot.{MascotCat, MascotProgress, Strehl}
 import edu.gemini.catalog.api.MagnitudeConstraints
 import edu.gemini.spModel.core._
-import edu.gemini.spModel.core.Target.SiderealTarget
 import edu.gemini.spModel.gemini.gems.Canopus
 import edu.gemini.spModel.gemini.gsaoi.{GsaoiOdgw, Gsaoi}
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality

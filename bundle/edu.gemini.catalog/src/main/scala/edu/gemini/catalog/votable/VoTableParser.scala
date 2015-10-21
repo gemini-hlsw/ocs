@@ -4,7 +4,6 @@ import java.io.{ByteArrayInputStream, InputStream}
 
 import edu.gemini.catalog.api.CatalogName
 import edu.gemini.spModel.core._
-import edu.gemini.spModel.core.Target.SiderealTarget
 import squants.motion.KilometersPerSecond
 
 import scala.io.Source

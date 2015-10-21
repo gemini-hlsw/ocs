@@ -3,7 +3,6 @@ package edu.gemini.ags.gems.mascot
 import edu.gemini.ags.gems.UCAC3Regression
 import edu.gemini.catalog.api.{PPMXL, RadiusConstraint, CatalogQuery}
 import edu.gemini.catalog.votable.{TestVoTableBackend, VoTableClient}
-import edu.gemini.spModel.core.Target.SiderealTarget
 import edu.gemini.spModel.core._
 import edu.gemini.spModel.target.SPTarget
 import edu.gemini.spModel.target.env.TargetEnvironment

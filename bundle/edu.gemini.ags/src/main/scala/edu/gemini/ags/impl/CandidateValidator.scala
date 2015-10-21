@@ -2,7 +2,7 @@ package edu.gemini.ags.impl
 
 import edu.gemini.ags.api.AgsMagnitude.MagnitudeTable
 import edu.gemini.spModel.core.Coordinates
-import edu.gemini.spModel.core.Target.SiderealTarget
+import edu.gemini.spModel.core.SiderealTarget
 import edu.gemini.spModel.guide.GuideStarValidation
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.target.SPTarget

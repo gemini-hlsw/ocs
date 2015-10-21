@@ -4,7 +4,6 @@ import edu.gemini.ags.api.AgsMagnitude
 import edu.gemini.ags.api.AgsMagnitude.{MagnitudeCalc, MagnitudeTable}
 import edu.gemini.catalog.api._
 import edu.gemini.pot.ModelConverters._
-import edu.gemini.spModel.core.Target.SiderealTarget
 import edu.gemini.spModel.core._
 import edu.gemini.spModel.gemini.altair.AltairAowfsGuider
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2OiwfsGuideProbe

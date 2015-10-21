@@ -1,6 +1,6 @@
 package jsky.app.ot.tpe.gems
 
-import edu.gemini.spModel.core.{MagnitudeBand, Target}
+import edu.gemini.spModel.core.{MagnitudeBand, SiderealTarget}
 import jsky.coords.{DMS, HMS}
 import scala.collection.JavaConverters._
 
@@ -11,7 +11,7 @@ object CatalogUtils4Java {
   /**
    * Build a row of data items from a Sidereal Target from UCAC4 (Containing r' and UC)
    */
-  def makeUCAC4Row(siderealTarget: Target.SiderealTarget, nirBand: String, unusedBands: Array[String]): java.util.Vector[AnyRef] = {
+  def makeUCAC4Row(siderealTarget: SiderealTarget, nirBand: String, unusedBands: Array[String]): java.util.Vector[AnyRef] = {
     new java.util.Vector[AnyRef](Vector[AnyRef](
       Boolean.box(x = true),
       siderealTarget.name,
@@ -26,7 +26,7 @@ object CatalogUtils4Java {
   /**
    * Build a row of data items from a Sidereal Target
    */
-  def makeRow(siderealTarget: Target.SiderealTarget, nirBand: String, unusedBands: Array[String]): java.util.Vector[AnyRef] = {
+  def makeRow(siderealTarget: SiderealTarget, nirBand: String, unusedBands: Array[String]): java.util.Vector[AnyRef] = {
     new java.util.Vector[AnyRef](Vector[AnyRef](
       Boolean.box(x = true),
       siderealTarget.name,

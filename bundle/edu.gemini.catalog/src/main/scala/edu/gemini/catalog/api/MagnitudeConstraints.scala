@@ -1,7 +1,7 @@
 package edu.gemini.catalog.api
 
 import edu.gemini.catalog.api.MagnitudeLimits.{SaturationLimit, FaintnessLimit}
-import edu.gemini.spModel.core.Target.SiderealTarget
+import edu.gemini.spModel.core.SiderealTarget
 import edu.gemini.spModel.core.{SingleBand, BandsList, MagnitudeBand, Magnitude}
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.Conditions
 

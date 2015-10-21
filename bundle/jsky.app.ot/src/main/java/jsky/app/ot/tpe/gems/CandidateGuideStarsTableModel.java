@@ -1,7 +1,7 @@
 package jsky.app.ot.tpe.gems;
 
 import edu.gemini.ags.gems.GemsUtils4Java;
-import edu.gemini.spModel.core.Target;
+import edu.gemini.spModel.core.SiderealTarget;
 import edu.gemini.catalog.api.UCAC4$;
 import jsky.catalog.Catalog;
 import jsky.catalog.FieldDesc;
@@ -43,7 +43,7 @@ class CandidateGuideStarsTableModel extends DefaultTableModel {
     private Vector<String> _columnNames;
 
     // SkyObjects corresponding to the table rows
-    private List<Target.SiderealTarget> _siderealTargets;
+    private List<SiderealTarget> _siderealTargets;
 
     public CandidateGuideStarsTableModel(GemsGuideStarSearchModel model) {
         _model = model;
@@ -90,7 +90,7 @@ class CandidateGuideStarsTableModel extends DefaultTableModel {
     private Vector<Vector<Object>> makeDataVector() {
         _siderealTargets = GemsUtils4Java.uniqueTargets(_model.getGemsCatalogSearchResults());
         Vector<Vector<Object>> rows = new Vector<>();
-        for (Target.SiderealTarget siderealTarget : _siderealTargets) {
+        for (SiderealTarget siderealTarget : _siderealTargets) {
             if (_isUCAC4) {
                 rows.add(CatalogUtils4Java.makeUCAC4Row(siderealTarget, _nirBand, _unusedBands));
             } else {
@@ -172,8 +172,8 @@ class CandidateGuideStarsTableModel extends DefaultTableModel {
      * Returns a list of SkyObjects corresponding to the checked (or unchecked) rows in the table
      * @param checked if true, return the checked rows (candidates), otherwise the unchecked (non-candidates)
      */
-    public List<Target.SiderealTarget> getCandidates(boolean checked) {
-        List<Target.SiderealTarget> result = new ArrayList<>();
+    public List<SiderealTarget> getCandidates(boolean checked) {
+        List<SiderealTarget> result = new ArrayList<>();
         int numRows = getRowCount();
         int col = Cols.CHECK.ordinal();
         for(int row = 0; row < numRows; row++) {

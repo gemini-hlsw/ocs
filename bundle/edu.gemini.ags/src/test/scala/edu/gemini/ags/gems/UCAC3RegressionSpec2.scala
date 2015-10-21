@@ -5,7 +5,6 @@ import edu.gemini.catalog.api._
 import edu.gemini.shared.util.immutable.ScalaConverters._
 import edu.gemini.shared.util.immutable.{None => JNone}
 import edu.gemini.spModel.core.AngleSyntax._
-import edu.gemini.spModel.core.Target.SiderealTarget
 import edu.gemini.spModel.core._
 import edu.gemini.spModel.gemini.gems.Canopus
 import edu.gemini.spModel.gemini.gsaoi.GsaoiOdgw

@@ -4,7 +4,7 @@ import java.util.logging.Logger
 
 import edu.gemini.ags.gems.mascot.Mascot.ProgressFunction
 import edu.gemini.spModel.core.Coordinates
-import edu.gemini.spModel.core.Target.SiderealTarget
+import edu.gemini.spModel.core.SiderealTarget
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.pot.ModelConverters._
 import edu.gemini.shared.util.immutable.ScalaConverters._

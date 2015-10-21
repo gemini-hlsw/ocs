@@ -1,6 +1,5 @@
 package edu.gemini.catalog.api
 
-import edu.gemini.spModel.core.Target.SiderealTarget
 import edu.gemini.spModel.core._
 
 import scalaz._

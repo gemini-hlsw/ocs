@@ -8,7 +8,6 @@ import edu.gemini.pot.ModelConverters._
 import edu.gemini.shared.util.immutable.{ None => JNone }
 import edu.gemini.skycalc.{Offset, DDMMSS, HHMMSS}
 import edu.gemini.spModel.core._
-import edu.gemini.spModel.core.Target.SiderealTarget
 import edu.gemini.spModel.gemini.altair.{InstAltair, AltairParams}
 import edu.gemini.spModel.gemini.inst.InstRegistry
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.Conditions

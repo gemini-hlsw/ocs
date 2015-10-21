@@ -4,7 +4,6 @@ import java.net.URL
 
 import edu.gemini.catalog.api.{SIMBAD, PPMXL, UCAC4}
 import edu.gemini.spModel.core._
-import edu.gemini.spModel.core.Target.SiderealTarget
 import org.specs2.mutable.SpecificationWithJUnit
 import squants.motion.KilometersPerSecond
 

@@ -2,7 +2,6 @@ package edu.gemini.pot
 
 import edu.gemini.shared.skyobject
 import edu.gemini.skycalc
-import edu.gemini.spModel.core.Target.SiderealTarget
 import edu.gemini.spModel.core._
 import edu.gemini.spModel.core.AngleSyntax._
 import edu.gemini.spModel.rich.shared.immutable._

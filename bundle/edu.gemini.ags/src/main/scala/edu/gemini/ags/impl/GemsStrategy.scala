@@ -8,7 +8,7 @@ import edu.gemini.catalog.api._
 import edu.gemini.catalog.votable._
 import edu.gemini.pot.sp.SPComponentType
 import edu.gemini.pot.ModelConverters._
-import edu.gemini.spModel.core.Target.SiderealTarget
+import edu.gemini.spModel.core.SiderealTarget
 
 import edu.gemini.spModel.ags.AgsStrategyKey.GemsKey
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2OiwfsGuideProbe

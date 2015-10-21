@@ -20,7 +20,7 @@ object GemsUtils4Java {
   /**
    * Returns a list of unique targets in the given search results.
    */
-  def uniqueTargets(list: java.util.List[GemsCatalogSearchResults]): java.util.List[Target.SiderealTarget] = {
+  def uniqueTargets(list: java.util.List[GemsCatalogSearchResults]): java.util.List[SiderealTarget] = {
     import collection.breakOut
     new java.util.ArrayList(list.asScala.flatMap(_.results).groupBy(_.name).map(_._2.head)(breakOut).asJava)
   }

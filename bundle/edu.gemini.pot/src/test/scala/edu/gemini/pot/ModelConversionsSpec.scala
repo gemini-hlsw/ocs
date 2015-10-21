@@ -3,7 +3,6 @@ package edu.gemini.pot
 import edu.gemini.pot.ModelConverters._
 import edu.gemini.shared.skyobject
 import edu.gemini.skycalc
-import edu.gemini.spModel.core.Target.SiderealTarget
 import edu.gemini.spModel.core._
 import edu.gemini.spModel.target.SPTarget
 import edu.gemini.spModel.target.system.HmsDegTarget

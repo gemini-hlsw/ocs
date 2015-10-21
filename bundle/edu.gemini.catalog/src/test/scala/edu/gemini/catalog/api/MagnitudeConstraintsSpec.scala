@@ -1,7 +1,6 @@
 package edu.gemini.catalog.api
 
 import edu.gemini.catalog.api.MagnitudeLimits.{SaturationLimit, FaintnessLimit}
-import edu.gemini.spModel.core.Target.SiderealTarget
 import edu.gemini.spModel.core._
 import org.specs2.mutable.SpecificationWithJUnit
 
