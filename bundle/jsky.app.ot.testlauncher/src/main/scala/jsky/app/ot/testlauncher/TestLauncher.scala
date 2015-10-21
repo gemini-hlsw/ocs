@@ -57,6 +57,7 @@ object TestLauncher extends App {
   val programArgRegex = "-program=(.*)".r
   args.foreach {
     case programArgRegex(programID) => ViewerService.instance.map(_.loadAndView(SPProgramID.toProgramID(programID)))
+    case _                          =>
   }
 
 }
