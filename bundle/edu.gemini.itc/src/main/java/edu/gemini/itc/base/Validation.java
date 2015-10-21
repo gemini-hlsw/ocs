@@ -3,9 +3,9 @@ package edu.gemini.itc.base;
 import edu.gemini.itc.shared.AnalysisMethod;
 import edu.gemini.itc.shared.ObservationDetails;
 import edu.gemini.itc.shared.SourceDefinition;
-import edu.gemini.spModel.target.EmissionLine;
-import edu.gemini.spModel.target.GaussianSource;
-import edu.gemini.spModel.target.SpatialProfile;
+import edu.gemini.spModel.core.EmissionLine;
+import edu.gemini.spModel.core.GaussianSource;
+import edu.gemini.spModel.core.SpatialProfile;
 
 /**
  * This is a collection of validation methods that originally were implemented repeatedly for the different

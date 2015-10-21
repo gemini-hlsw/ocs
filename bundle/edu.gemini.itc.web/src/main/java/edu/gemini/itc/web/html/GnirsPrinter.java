@@ -5,8 +5,8 @@ import edu.gemini.itc.base.SpectroscopyResult;
 import edu.gemini.itc.gnirs.Gnirs;
 import edu.gemini.itc.gnirs.GnirsRecipe;
 import edu.gemini.itc.shared.*;
-import edu.gemini.spModel.target.PointSource$;
-import edu.gemini.spModel.target.UniformSource$;
+import edu.gemini.spModel.core.PointSource$;
+import edu.gemini.spModel.core.UniformSource$;
 import scala.Tuple2;
 
 import java.io.PrintWriter;

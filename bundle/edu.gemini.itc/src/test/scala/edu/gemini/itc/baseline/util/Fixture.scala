@@ -2,7 +2,7 @@ package edu.gemini.itc.baseline.util
 
 import edu.gemini.itc.shared.TelescopeDetails.Coating
 import edu.gemini.itc.shared._
-import edu.gemini.spModel.core.{Redshift, SurfaceBrightness, MagnitudeSystem, MagnitudeBand}
+import edu.gemini.spModel.core.{LibraryNonStar, LibraryStar, EmissionLine, PowerLaw, BlackBody, GaussianSource, UniformSource, PointSource, Redshift, SurfaceBrightness, MagnitudeSystem, MagnitudeBand}
 import edu.gemini.spModel.core.WavelengthConversions._
 import edu.gemini.spModel.gemini.altair.AltairParams.{FieldLens, GuideStarType}
 import edu.gemini.spModel.guide.GuideProbe

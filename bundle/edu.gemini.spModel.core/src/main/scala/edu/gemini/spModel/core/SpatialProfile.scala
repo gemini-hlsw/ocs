@@ -1,4 +1,4 @@
-package edu.gemini.spModel.target
+package edu.gemini.spModel.core
 
 sealed trait SpatialProfile extends Serializable
 case object PointSource extends SpatialProfile

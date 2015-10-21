@@ -7,7 +7,7 @@ import edu.gemini.auxfile.client.AuxFileClient
 import edu.gemini.auxfile.copier.AuxFileType
 import edu.gemini.pot.sp.ISPNode
 import edu.gemini.shared.util.immutable.{Option => GOption}
-import edu.gemini.spModel.core.SPProgramID
+import edu.gemini.spModel.core.{LibraryNonStar, LibraryStar, AuxFileSpectrum, UserDefinedSpectrum, EmissionLine, PowerLaw, BlackBody, SpectralDistribution, GaussianSource, UniformSource, PointSource, SpatialProfile, SPProgramID}
 import edu.gemini.spModel.core.WavelengthConversions._
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.target._

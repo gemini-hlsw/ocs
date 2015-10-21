@@ -5,7 +5,7 @@ import edu.gemini.itc.shared.ObservingConditions;
 import edu.gemini.itc.shared.SourceDefinition;
 import edu.gemini.itc.shared.TelescopeDetails;
 import edu.gemini.spModel.guide.GuideProbe;
-import edu.gemini.spModel.target.GaussianSource;
+import edu.gemini.spModel.core.GaussianSource;
 
 public final class ImageQualityCalculationFactory {
 

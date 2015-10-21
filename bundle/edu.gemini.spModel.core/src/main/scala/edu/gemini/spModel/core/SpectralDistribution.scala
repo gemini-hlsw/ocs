@@ -1,6 +1,5 @@
-package edu.gemini.spModel.target
+package edu.gemini.spModel.core
 
-import edu.gemini.spModel.core.Wavelength
 import squants.motion.Velocity
 import squants.radio.{Irradiance, SpectralIrradiance}
 

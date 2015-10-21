@@ -2,7 +2,7 @@ package edu.gemini.itc.web;
 
 import edu.gemini.itc.base.DatFile;
 import edu.gemini.itc.shared.*;
-import edu.gemini.spModel.target.UserDefinedSpectrum;
+import edu.gemini.spModel.core.UserDefinedSpectrum;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;

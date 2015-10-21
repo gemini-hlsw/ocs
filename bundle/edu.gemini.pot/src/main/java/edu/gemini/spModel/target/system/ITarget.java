@@ -3,8 +3,8 @@ package edu.gemini.spModel.target.system;
 import edu.gemini.shared.skyobject.Magnitude;
 import edu.gemini.shared.util.immutable.*;
 import edu.gemini.skycalc.Coordinates;
-import edu.gemini.spModel.target.SpatialProfile;
-import edu.gemini.spModel.target.SpectralDistribution;
+import edu.gemini.spModel.core.SpatialProfile;
+import edu.gemini.spModel.core.SpectralDistribution;
 import edu.gemini.spModel.target.system.CoordinateTypes.Epoch;
 
 import java.io.Serializable;

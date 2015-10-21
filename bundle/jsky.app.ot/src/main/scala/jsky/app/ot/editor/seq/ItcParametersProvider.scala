@@ -5,11 +5,10 @@ import edu.gemini.pot.sp.ISPObservation
 import edu.gemini.spModel.config.ConfigBridge
 import edu.gemini.spModel.config.map.ConfigValMapInstances
 import edu.gemini.spModel.config2.ConfigSequence
-import edu.gemini.spModel.core.Redshift
+import edu.gemini.spModel.core.{SpectralDistribution, SpatialProfile, Redshift}
 import edu.gemini.spModel.obscomp.SPInstObsComp
 import edu.gemini.spModel.target.env.TargetEnvironment
 import edu.gemini.spModel.target.system.HmsDegTarget
-import edu.gemini.spModel.target.{SpatialProfile, SpectralDistribution}
 import edu.gemini.spModel.telescope.IssPort
 
 import scalaz._
