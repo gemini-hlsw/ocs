@@ -1,6 +1,6 @@
 package jsky.app.ot.tpe;
 
-import edu.gemini.catalog.ui.tpe.CatalogDisplay;
+import edu.gemini.catalog.ui.tpe.ImageCatalogLoader;
 import edu.gemini.pot.sp.*;
 import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.spModel.data.ISPDataObject;
@@ -23,7 +23,6 @@ import jsky.catalog.Catalog;
 import jsky.catalog.CatalogException;
 import jsky.catalog.QueryArgs;
 import jsky.catalog.gui.CatalogNavigator;
-import jsky.catalog.gui.CatalogQueryTool;
 import jsky.catalog.skycat.SkycatCatalog;
 import jsky.coords.CoordinateConverter;
 import jsky.coords.WorldCoords;
@@ -409,19 +408,6 @@ public class TelescopePosEditor extends JSkyCat implements TpeMouseObserver {
 
         if (c == null || !c.isImageServer()) return;
 
-        final Navigator nav = NavigatorManager.get();
-        nav.setImageDisplayManager(new NavigatorImageDisplayManager() {
-            @Override public CatalogDisplay getImageDisplay() {
-                final CatalogDisplay imageDisplay = getImageWidget();
-                imageDisplay.setNavigator(nav);
-                return imageDisplay;
-            }
-
-            @Override public Component getImageDisplayControlFrame() {
-                return getImageDisplay().getParentFrame();
-            }
-        });
-        final CatalogQueryTool cqt = new CatalogQueryTool(c, nav);
         final QueryArgs queryArgs = new BasicQueryArgs(c);
         queryArgs.setParamValue(0, null);
         queryArgs.setParamValue(1, c.getName());
@@ -450,7 +436,7 @@ public class TelescopePosEditor extends JSkyCat implements TpeMouseObserver {
                 return true;
             })).getOrElse(false);
         if (go) {
-            cqt.setQueryResult(c.query(queryArgs)); // throws; can't go in block above
+            ImageCatalogLoader.instance().display4Java(getImageWidget(), c.query(queryArgs));
         }
     }
 

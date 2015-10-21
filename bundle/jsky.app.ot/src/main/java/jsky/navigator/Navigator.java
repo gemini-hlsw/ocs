@@ -38,9 +38,6 @@ public class Navigator extends CatalogNavigator implements CatalogNavigatorOpene
     // Used for message logging
     private static Logger LOG = Logger.getLogger(Navigator.class.getName());
 
-    // An optional object that can be used to create the image display frame when needed.
-    private NavigatorImageDisplayManager _imageDisplayMgr;
-
     // Top level image window (frame or internal frame version)
     private Component _imageDisplayControlFrame;
 
@@ -98,13 +95,6 @@ public class Navigator extends CatalogNavigator implements CatalogNavigatorOpene
         this(parent, catalogTree, plotter, null);
     }
 
-
-    /** Specify an (optional) object that can be used to create the image display frame when needed. */
-    public void setImageDisplayManager(NavigatorImageDisplayManager imageDisplayMgr) {
-        _imageDisplayMgr = imageDisplayMgr;
-    }
-
-
     /** Return the image display widget. */
     public CatalogDisplay getImageDisplay() {
         return _imageDisplay;
@@ -145,25 +135,20 @@ public class Navigator extends CatalogNavigator implements CatalogNavigatorOpene
      */
     @Deprecated
     protected void makeImageDisplayControlFrame() {
-        if (_imageDisplayMgr != null) {
-            _imageDisplay = _imageDisplayMgr.getImageDisplay();
-            _imageDisplayControlFrame = _imageDisplayMgr.getImageDisplayControlFrame();
-        } else {
-            Component parent = getParentFrame();
-            if (parent instanceof JFrame) {
-                _imageDisplayControlFrame = new NavigatorImageDisplayFrame();
-                _imageDisplayControlFrame.setVisible(true);
-                _imageDisplay = (NavigatorImageDisplay)
-                        ((NavigatorImageDisplayFrame) _imageDisplayControlFrame).getImageDisplayControl().getImageDisplay();
-            } else if (parent instanceof JInternalFrame) {
-                JDesktopPane desktop = getDesktop();
-                _imageDisplayControlFrame = new NavigatorImageDisplayInternalFrame(desktop);
-                _imageDisplayControlFrame.setVisible(true);
-                _imageDisplay = (NavigatorImageDisplay)
-                        ((NavigatorImageDisplayInternalFrame) _imageDisplayControlFrame).getImageDisplayControl().getImageDisplay();
-                desktop.add(_imageDisplayControlFrame, JLayeredPane.DEFAULT_LAYER);
-                desktop.moveToFront(_imageDisplayControlFrame);
-            }
+        Component parent = getParentFrame();
+        if (parent instanceof JFrame) {
+            _imageDisplayControlFrame = new NavigatorImageDisplayFrame();
+            _imageDisplayControlFrame.setVisible(true);
+            _imageDisplay = (NavigatorImageDisplay)
+                    ((NavigatorImageDisplayFrame) _imageDisplayControlFrame).getImageDisplayControl().getImageDisplay();
+        } else if (parent instanceof JInternalFrame) {
+            JDesktopPane desktop = getDesktop();
+            _imageDisplayControlFrame = new NavigatorImageDisplayInternalFrame(desktop);
+            _imageDisplayControlFrame.setVisible(true);
+            _imageDisplay = (NavigatorImageDisplay)
+                    ((NavigatorImageDisplayInternalFrame) _imageDisplayControlFrame).getImageDisplayControl().getImageDisplay();
+            desktop.add(_imageDisplayControlFrame, JLayeredPane.DEFAULT_LAYER);
+            desktop.moveToFront(_imageDisplayControlFrame);
         }
 
         _imageDisplay.setNavigator(this);

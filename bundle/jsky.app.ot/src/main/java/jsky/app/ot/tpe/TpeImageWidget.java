@@ -102,10 +102,6 @@ public class TpeImageWidget extends CatalogImageDisplay implements MouseInputLis
                 tpe.getSkyImage();
             } catch (Exception e) {
                 DialogUtil.error(e);
-            } finally {
-                //make sure the navigator is closed properly
-                final Navigator nav = NavigatorManager.get();
-                nav.close();
             }
         }
     };
