@@ -4,7 +4,7 @@ import edu.gemini.ags.gems.GemsGuideStarSearchOptions.*;
 import edu.gemini.ags.gems.GemsGuideStars;
 import edu.gemini.pot.ModelConverters;
 import edu.gemini.shared.util.immutable.Option;
-import edu.gemini.spModel.core.Target;
+import edu.gemini.spModel.core.SiderealTarget;
 import edu.gemini.spModel.obs.SchedulingBlock;
 import edu.gemini.spModel.obs.context.ObsContext;
 import edu.gemini.spModel.target.env.TargetEnvironment;
