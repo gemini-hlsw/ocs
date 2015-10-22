@@ -97,8 +97,10 @@ final class BagsManager(executor: ScheduledThreadPoolExecutor) {
       synchronized {
         val key = obs.getNodeKey
         state += key
-        executor.schedule(new Runnable {
-          def run(): Unit =
+        executor.schedule(new Thread {
+          setPriority(Thread.NORM_PRIORITY - 1)
+
+          override def run(): Unit =
 
           // If dequeue is false this means that (a) another task scheduled *after* me ended up
           // running before me, so their result is as good as mine would have been and we're done;
