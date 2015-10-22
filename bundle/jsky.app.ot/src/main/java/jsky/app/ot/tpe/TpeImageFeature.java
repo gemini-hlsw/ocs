@@ -161,8 +161,6 @@ public abstract class TpeImageFeature implements TelescopePosWatcher {
      */
     public abstract void draw(Graphics g, TpeImageInfo tii);
 
-
-
     // -- Utility methods for monitoring telescope positions --
 
     private final PropertyChangeListener targetEnvListener = evt -> {
