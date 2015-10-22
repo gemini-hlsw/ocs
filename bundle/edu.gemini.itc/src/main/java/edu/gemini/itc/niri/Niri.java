@@ -7,8 +7,6 @@ import edu.gemini.itc.shared.ObservationDetails;
 import edu.gemini.spModel.core.Site;
 import edu.gemini.spModel.gemini.niri.Niri.Disperser;
 import edu.gemini.spModel.gemini.niri.Niri.Mask;
-import edu.gemini.spModel.gemini.niri.Niri.ReadMode;
-import edu.gemini.spModel.gemini.niri.Niri.WellDepth;
 
 /**
  * Niri specification class
@@ -26,13 +24,6 @@ public class Niri extends Instrument {
 
     // Instrument reads its configuration from here.
     private static final String FILENAME = "niri" + getSuffix();
-
-    private static final double LOW_BACK_WELL_DEPTH = 200000.0;
-    private static final double HIGH_BACK_WELL_DEPTH = 280000.0; //updated Feb 13. 2001
-
-    private static final double LOW_BACK_READ_NOISE = 12.0;
-    private static final double MED_BACK_READ_NOISE = 35.0;
-    private static final double HIGH_BACK_READ_NOISE = 70.0;
 
     private final NiriParameters params;
 
@@ -152,20 +143,7 @@ public class Niri extends Instrument {
     }
 
     public double getReadNoise() {
-        switch (params.readMode()) {
-            case IMAG_SPEC_NB:      return LOW_BACK_READ_NOISE;
-            case IMAG_1TO25:        return MED_BACK_READ_NOISE;
-            case IMAG_SPEC_3TO5:    return HIGH_BACK_READ_NOISE;
-            default:                throw new Error();
-        }
-    }
-
-    public ReadMode getReadMode() {
-        return params.readMode();
-    }
-
-    public Mask getFocalPlaneMask() {
-        return params.mask();
+        return params.readMode().getReadNoise();
     }
 
     /**
@@ -206,18 +184,6 @@ public class Niri extends Instrument {
 
     public double getSpectralPixelWidth() {
         return _grismOptics.getPixelWidth();
-    }
-
-    public double getWellDepthValue() {
-        switch (params.wellDepth()) {
-            case SHALLOW:   return LOW_BACK_WELL_DEPTH;
-            case DEEP:      return HIGH_BACK_WELL_DEPTH;
-            default:        throw new Error();
-        }
-    }
-
-    public WellDepth getWellDepth() {
-        return params.wellDepth();
     }
 
     public double getFPMask() {

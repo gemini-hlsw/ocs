@@ -23,6 +23,7 @@ import java.util.UUID;
  */
 public final class NiriPrinter extends PrinterBase {
 
+    private final NiriParameters instr;
     private final PlottingDetails pdp;
     private final NiriRecipe recipe;
     private final boolean isImaging;
@@ -32,6 +33,7 @@ public final class NiriPrinter extends PrinterBase {
      */
     public NiriPrinter(final ItcParameters p, final NiriParameters instr, final PlottingDetails pdp, final PrintWriter out) {
         super(out);
+        this.instr     = instr;
         this.recipe    = new NiriRecipe(p, instr);
         this.isImaging = p.observation().getMethod().isImaging();
         this.pdp       = pdp;
@@ -124,7 +126,7 @@ public final class NiriPrinter extends PrinterBase {
 
         _println("");
         _println(String.format("The peak pixel signal + background is %.0f. This is %.0f%% of the full well depth of %.0f.",
-                result.peakPixelCount(), result.peakPixelCount() / instrument.getWellDepthValue() * 100, instrument.getWellDepthValue()));
+                result.peakPixelCount(), result.peakPixelCount() / instr.wellDepth().depth() * 100, instr.wellDepth().depth()));
 
         for (final ItcWarning warning : JavaConversions.asJavaList(result.warnings())) {
             _println(warning.msg());
@@ -159,10 +161,10 @@ public final class NiriPrinter extends PrinterBase {
         for (final TransmissionElement te : instrument.getComponents()) {
             s += "<LI>" + te.toString() + "<BR>";
         }
-        if (instrument.getFocalPlaneMask() != Mask.MASK_IMAGING)
-            s += "<LI>Focal Plane Mask: " + instrument.getFocalPlaneMask().displayValue() + "\n";
-        s += "<LI>Read Mode: " + instrument.getReadMode().displayValue() + "\n";
-        s += "<LI>Detector Bias: " + instrument.getWellDepth().displayValue() + "\n";
+        if (instr.mask() != Mask.MASK_IMAGING)
+            s += "<LI>Focal Plane Mask: " + instr.mask().displayValue() + "\n";
+        s += "<LI>Read Mode: " + instr.readMode().displayValue() + "\n";
+        s += "<LI>Detector Bias: " + instr.wellDepth().displayValue() + "\n";
 
         s += "<BR>Pixel Size: " + instrument.getPixelSize() + "<BR>";
 

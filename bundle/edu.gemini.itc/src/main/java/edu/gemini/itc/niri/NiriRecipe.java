@@ -164,7 +164,7 @@ public final class NiriRecipe implements ImagingRecipe, SpectroscopyRecipe {
                 _obsDetailParameters.getSourceFraction(),
                 _obsDetailParameters.getExposureTime(),
                 instrument.getDarkCurrent(),
-                instrument.getReadNoise());
+                niriParameters.readMode().getReadNoise());
         specS2N.setSourceSpectrum(calcSource.sed);
         specS2N.setBackgroundSpectrum(calcSource.sky);
         if (altair.isDefined())
@@ -260,14 +260,14 @@ public final class NiriRecipe implements ImagingRecipe, SpectroscopyRecipe {
         }
         IS2Ncalc.calculate();
 
-        final List<ItcWarning>  w = warningsForImaging(instrument, peak_pixel_count);
+        final List<ItcWarning>  w = warningsForImaging(peak_pixel_count);
         return new ImagingResult(p, instrument, IQcalc, SFcalc, peak_pixel_count, IS2Ncalc, altair, JavaConversions.asScalaBuffer(w).toList());
 
     }
 
     // TODO: some of these warnings are similar for different instruments and could be calculated in a central place
-    private List<ItcWarning> warningsForImaging(final Niri instrument, final double peakPixelCount) {
-        final double wellLimit = 0.8 * instrument.getWellDepthValue();
+    private List<ItcWarning> warningsForImaging(final double peakPixelCount) {
+        final double wellLimit = 0.8 * niriParameters.wellDepth().depth();
         return new ArrayList<ItcWarning>() {{
             if (peakPixelCount > wellLimit) add(new ItcWarning("Warning: peak pixel exceeds 80% of the well depth and may be saturated"));
         }};
