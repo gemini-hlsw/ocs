@@ -4,12 +4,13 @@ import edu.gemini.ags.gems.GemsGuideStarSearchOptions.*;
 import edu.gemini.ags.gems.GemsGuideStars;
 import edu.gemini.pot.ModelConverters;
 import edu.gemini.shared.util.immutable.Option;
-import edu.gemini.spModel.core.SiderealTarget;
+import edu.gemini.spModel.core.Target;
+import edu.gemini.spModel.obs.SchedulingBlock;
+import edu.gemini.spModel.obs.context.ObsContext;
 import edu.gemini.spModel.target.env.TargetEnvironment;
 import edu.gemini.spModel.target.obsComp.TargetObsComp;
 import jsky.app.ot.tpe.GemsGuideStarWorker;
 import jsky.app.ot.tpe.TpeImageWidget;
-import jsky.app.ot.tpe.TpeManager;
 import jsky.catalog.Catalog;
 import jsky.catalog.gui.TablePlotter;
 import jsky.catalog.skycat.SkycatConfigFile;
@@ -170,10 +171,10 @@ public class GemsGuideStarSearchDialog extends JFrame {
         return tpe.getContext().targets().envOrDefault();
     }
 
-    public GemsGuideStarSearchDialog() {
+    public GemsGuideStarSearchDialog(TpeImageWidget tpe) {
         super("GeMS Guide Star Search");
-        _tpe = TpeManager.create().getImageWidget();
-        _plotter = _tpe.getNavigator().getPlotter();
+        _tpe = tpe;
+        _plotter = tpe.plotter();
         // TPE REFACTOR -- i suppose we're assuming this isn't created from
         // scratch, in which case we'd have no environment yet
         _savedTargetEnv = getEnvironment(_tpe);
@@ -592,7 +593,7 @@ public class GemsGuideStarSearchDialog extends JFrame {
     }
 
     private void analyzeDone() {
-        final Option<Long> when = _tpe.getObsContext().flatMap(c -> c.getSchedulingBlock()).map(b -> b.start());
+        final Option<Long> when = _tpe.getObsContext().flatMap(ObsContext::getSchedulingBlock).map(SchedulingBlock::start);
         CandidateAsterismsTreeTableModel treeTableModel = new CandidateAsterismsTreeTableModel(
                 _model.getGemsGuideStars(), ModelConverters.toOldBand(_model.getBand().getBand()), when);
         _candidateAsterismsTreeTable.setTreeTableModel(treeTableModel);

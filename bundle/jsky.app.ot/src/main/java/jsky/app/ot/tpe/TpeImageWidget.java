@@ -1093,7 +1093,7 @@ public class TpeImageWidget extends CatalogImageDisplay implements MouseInputLis
 
     private void showGemsGuideStarSearchDialog() {
         if (_gemsGuideStarSearchDialog == null) {
-            _gemsGuideStarSearchDialog = new GemsGuideStarSearchDialog();
+            _gemsGuideStarSearchDialog = new GemsGuideStarSearchDialog(this);
         } else {
             _gemsGuideStarSearchDialog.reset();
             _gemsGuideStarSearchDialog.setVisible(true);

@@ -16,8 +16,6 @@ import Scalaz._
 import scala.collection.JavaConverters._
 
 class TpePlotter(display: CatalogImageDisplay) {
-  val plotter = new BasicTablePlotter(display.getCanvasGraphics, display.getCoordinateConverter)
-  display.getNavigatorPane.setPlotter(plotter)
 
   case object CatalogAdapter extends PlotableCatalog {
     override def getNumSymbols: Int = ???
@@ -160,13 +158,13 @@ class TpePlotter(display: CatalogImageDisplay) {
    * Plot the given table data.
    */
   def plot(display: TpeImageWidget, model: TargetsModel): Unit = {
-    plotter.plot(TableQueryResultAdapter(model))
+    display.plotter.plot(TableQueryResultAdapter(model))
   }
 
   /**
     * Called when the view changes, e.g. with zoom in/out
     */
   def transformGraphics(trans: AffineTransform): Unit = {
-    plotter.transformGraphics(trans)
+    display.plotter.transformGraphics(trans)
   }
 }

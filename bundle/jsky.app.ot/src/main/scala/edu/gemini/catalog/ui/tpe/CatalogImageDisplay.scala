@@ -9,7 +9,7 @@ import jsky.app.ot.tpe.TpeImageWidget
 import jsky.catalog.Catalog
 import jsky.catalog.QueryResult
 import jsky.catalog.TableQueryResult
-import jsky.catalog.gui.{BasicTablePlotter, CatalogNavigator, CatalogNavigatorOpener}
+import jsky.catalog.gui.{TablePlotter, BasicTablePlotter, CatalogNavigatorOpener}
 import jsky.coords.{WorldCoords, WorldCoordinateConverter, CoordinateConverter}
 import jsky.graphics.CanvasGraphics
 import jsky.image.fits.codec.FITSImage
@@ -30,10 +30,15 @@ import java.awt.geom.AffineTransform
 import java.util.HashSet
 import java.util.Set
 
+import scalaz._
+import Scalaz._
+
 /**
   * Interface to encapsulate an object that can display a catalog and interact with the TPE
   */
 trait CatalogDisplay {
+  def plotter: TablePlotter
+
   def getParentFrame: Component
 
   def saveFITSTable(table: TableQueryResult): Unit
@@ -116,7 +121,7 @@ trait CatalogDisplay {
   * browsing catalogs and plotting catalog symbols on the image.
   */
 class CatalogImageDisplay(parent: Component, navigatorPane: NavigatorPane) extends DivaMainImageDisplay(navigatorPane, parent) with CatalogNavigatorOpener with CatalogDisplay {
-  val plotter = new BasicTablePlotter(getCanvasGraphics, getCoordinateConverter)
+  val plotter = new BasicTablePlotter(getCanvasGraphics, getCoordinateConverter) <| {navigatorPane.setPlotter}
 
   /** The instance of the catalog navigator to use with this image display. */
   private var _navigator: Navigator = null

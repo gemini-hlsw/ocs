@@ -7,13 +7,10 @@ import java.util.HashSet;
 import java.util.Set;
 
 import javax.swing.AbstractAction;
-import javax.swing.JDesktopPane;
 import javax.swing.JFrame;
 import javax.swing.JInternalFrame;
-import javax.swing.JLayeredPane;
 
 import edu.gemini.catalog.ui.tpe.CatalogDisplay;
-import jsky.app.ot.tpe.TpeContext;
 import jsky.catalog.Catalog;
 import jsky.catalog.CatalogDirectory;
 import jsky.catalog.TableQueryResult;
@@ -64,7 +61,7 @@ public class NavigatorImageDisplay extends DivaMainImageDisplay
             Resources.getIcon("Catalog24.gif")) {
         public void actionPerformed(ActionEvent evt) {
             try {
-                openCatalogWindow();
+                throw new UnsupportedOperationException();
             } catch (Exception e) {
                 DialogUtil.error(e);
             }
@@ -165,6 +162,11 @@ public class NavigatorImageDisplay extends DivaMainImageDisplay
         } catch (Exception e) {
             DialogUtil.error(this, e);
         }
+    }
+
+    @Override
+    public TablePlotter plotter() {
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -341,4 +343,5 @@ public class NavigatorImageDisplay extends DivaMainImageDisplay
     public QueryResult filterQueryResult(QueryResult queryResult) {
         return queryResult;
     }
+
 }
