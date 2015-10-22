@@ -3,7 +3,7 @@ package jsky.app.ot.tpe.gems;
 import edu.gemini.pot.ModelConverters;
 import edu.gemini.skycalc.Angle;
 import edu.gemini.spModel.core.MagnitudeBand;
-import edu.gemini.spModel.core.Target;
+import edu.gemini.spModel.core.SiderealTarget;
 import edu.gemini.spModel.gems.GemsTipTiltMode;
 import edu.gemini.ags.gems.GemsCatalogSearchResults;
 import edu.gemini.ags.gems.GemsGuideStars;
@@ -88,7 +88,7 @@ class GemsGuideStarSearchController {
      * @param excludeCandidates list of SkyObjects to exclude
      */
     // Called from the TPE
-    public void analyze(List<Target.SiderealTarget> excludeCandidates) throws Exception {
+    public void analyze(List<SiderealTarget> excludeCandidates) throws Exception {
         TpeImageWidget tpe = TpeManager.create().getImageWidget();
         WorldCoords basePos = tpe.getBasePos();
         ObsContext obsContext = _worker.getObsContext(basePos.getRaDeg(), basePos.getDecDeg());
@@ -99,11 +99,11 @@ class GemsGuideStarSearchController {
 
     // Returns a list of the given gemsCatalogSearchResults, with any SkyObjects removed that are not
     // in the candidates list.
-    private List<GemsCatalogSearchResults> filter(List<Target.SiderealTarget> excludeCandidates,
+    private List<GemsCatalogSearchResults> filter(List<SiderealTarget> excludeCandidates,
                                                   List<GemsCatalogSearchResults> gemsCatalogSearchResults) {
         List<GemsCatalogSearchResults> results = new ArrayList<>();
         for (GemsCatalogSearchResults in : gemsCatalogSearchResults) {
-            List<Target.SiderealTarget> siderealTargets = new ArrayList<>(in.results().size());
+            List<SiderealTarget> siderealTargets = new ArrayList<>(in.results().size());
             siderealTargets.addAll(in.resultsAsJava());
             siderealTargets = removeAll(siderealTargets, excludeCandidates);
             if (!siderealTargets.isEmpty()) {
@@ -115,15 +115,15 @@ class GemsGuideStarSearchController {
     }
 
     // Removes all the objects in the targets list that are also in the excludeCandidates list by comparing names
-    private List<Target.SiderealTarget> removeAll(List<Target.SiderealTarget> targets, List<Target.SiderealTarget> excludeCandidates) {
+    private List<SiderealTarget> removeAll(List<SiderealTarget> targets, List<SiderealTarget> excludeCandidates) {
         return targets.stream().filter(siderealTarget -> !contains(excludeCandidates, siderealTarget)).collect(Collectors.toList());
     }
 
     // Returns true if a SkyObject with the same name is in the list
-    private boolean contains(List<Target.SiderealTarget> targets, Target.SiderealTarget target) {
+    private boolean contains(List<SiderealTarget> targets, SiderealTarget target) {
         String name = target.name();
         if (name != null) {
-            for (Target.SiderealTarget s : targets) {
+            for (SiderealTarget s : targets) {
                 if (name.equals(s.name())) return true;
             }
         }

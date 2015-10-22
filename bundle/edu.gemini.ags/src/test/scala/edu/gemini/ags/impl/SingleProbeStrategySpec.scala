@@ -8,7 +8,6 @@ import edu.gemini.catalog.votable.{CannedBackend, TestVoTableBackend}
 import edu.gemini.pot.ModelConverters.NewAngle2Old
 import edu.gemini.skycalc.{Angle => SkycalcAngle, Offset => SkycalcOffset}
 import edu.gemini.spModel.ags.AgsStrategyKey._
-import edu.gemini.spModel.core.Target.SiderealTarget
 import edu.gemini.spModel.core.MagnitudeBand.{_r, R, UC}
 import edu.gemini.spModel.core.MagnitudeSystem.Vega
 import edu.gemini.spModel.core._

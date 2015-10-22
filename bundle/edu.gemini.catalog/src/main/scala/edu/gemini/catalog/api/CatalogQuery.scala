@@ -1,7 +1,7 @@
 package edu.gemini.catalog.api
 
 import edu.gemini.spModel.core.Coordinates
-import edu.gemini.spModel.core.Target.SiderealTarget
+import edu.gemini.spModel.core.SiderealTarget
 
 import scalaz._
 import Scalaz._

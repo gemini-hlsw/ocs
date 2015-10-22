@@ -1,6 +1,6 @@
 package edu.gemini.spModel.core
 
-import edu.gemini.spModel.core.Target.SiderealTarget
+import edu.gemini.spModel.core.SiderealTarget
 
 import scalaz._
 import Scalaz._

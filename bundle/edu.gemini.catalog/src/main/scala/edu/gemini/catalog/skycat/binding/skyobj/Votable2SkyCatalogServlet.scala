@@ -4,7 +4,6 @@ import javax.servlet.http.{HttpServletRequest, HttpServletResponse, HttpServlet}
 import edu.gemini.catalog.api._
 import edu.gemini.catalog.votable.VoTableClient
 import edu.gemini.shared.skyobject.Magnitude.Band
-import edu.gemini.spModel.core.Target.SiderealTarget
 import edu.gemini.spModel.core._
 import edu.gemini.pot.ModelConverters._
 

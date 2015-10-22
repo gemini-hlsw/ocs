@@ -9,7 +9,7 @@ import edu.gemini.pot.ModelConverters._
 import edu.gemini.shared.gui.GlassLabel
 import edu.gemini.shared.util.immutable.ScalaConverters._
 import edu.gemini.shared.util.immutable.{ Option => GOption }
-import edu.gemini.spModel.core.Target.SiderealTarget
+import edu.gemini.spModel.core.SiderealTarget
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.target.SPTarget
 import edu.gemini.spModel.target.system.CoordinateTypes.Parallax

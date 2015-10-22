@@ -1,6 +1,6 @@
 package edu.gemini.ags
 
-import edu.gemini.spModel.core.Target.SiderealTarget
+import edu.gemini.spModel.core.SiderealTarget
 import edu.gemini.spModel.core.{Magnitude, Coordinates}
 
 trait TargetsHelper {

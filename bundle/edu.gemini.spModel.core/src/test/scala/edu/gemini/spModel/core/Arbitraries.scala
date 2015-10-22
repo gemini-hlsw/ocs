@@ -83,8 +83,8 @@ trait Arbitraries {
       } yield Magnitude(value, band, error, system)
     }
 
-  implicit val arbTooTarget: Arbitrary[Target.TooTarget] =
-    Arbitrary(arbitrary[String].map(Target.TooTarget))
+  implicit val arbTooTarget: Arbitrary[TooTarget] =
+    Arbitrary(arbitrary[String].map(TooTarget(_)))
 
   implicit val arbHorizonsDesignation: Arbitrary[HorizonsDesignation] =
     Arbitrary {
@@ -99,7 +99,7 @@ trait Arbitraries {
       } yield des
     }
 
-  implicit val arbSiderealTarget: Arbitrary[Target.SiderealTarget] =
+  implicit val arbSiderealTarget: Arbitrary[SiderealTarget] =
     Arbitrary {
       for {
           name           <- arbitrary[String]
@@ -108,24 +108,24 @@ trait Arbitraries {
           redshift       <- arbitrary[Option[Redshift]]
           parallax       <- arbitrary[Option[Parallax]]
           magnitudes     <- arbitrary[List[Magnitude]]
-      } yield Target.SiderealTarget(name, coordinates, properMotion, redshift, parallax, magnitudes)
+      } yield SiderealTarget(name, coordinates, properMotion, redshift, parallax, magnitudes)
     }
 
-  implicit val arbNonSiderealTarget: Arbitrary[Target.NonSiderealTarget] =
+  implicit val arbNonSiderealTarget: Arbitrary[NonSiderealTarget] =
     Arbitrary {
       for {
          name         <- arbitrary[String]
          ephemeris    <- arbitrary[List[(Long, Coordinates)]]
          horizonsDesignation <- arbitrary[Option[HorizonsDesignation]]
          magnitudes   <- arbitrary[List[Magnitude]]
-      } yield Target.NonSiderealTarget(name, ==>>.fromList(ephemeris), horizonsDesignation, magnitudes)
+      } yield NonSiderealTarget(name, ==>>.fromList(ephemeris), horizonsDesignation, magnitudes)
     }
 
   implicit val arbTarget: Arbitrary[Target] =
     Arbitrary(oneOf(
-      arbitrary[Target.TooTarget],
-      arbitrary[Target.SiderealTarget],
-      arbitrary[Target.NonSiderealTarget]))
+      arbitrary[TooTarget],
+      arbitrary[SiderealTarget],
+      arbitrary[NonSiderealTarget]))
 
   implicit val arbWavelength: Arbitrary[Wavelength] =
     Arbitrary(arbitrary[Short].map(n => Math.abs(n).nm))

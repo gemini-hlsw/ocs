@@ -8,7 +8,6 @@ import edu.gemini.ags.conf.ProbeLimitsTable
 import edu.gemini.catalog.api.{UCAC4, CatalogName, CatalogQuery}
 import edu.gemini.pot.sp.SPComponentType
 import edu.gemini.shared.util.immutable.{None => JNone, Some => JSome}
-import edu.gemini.spModel.core.Target.SiderealTarget
 import edu.gemini.spModel.core._
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2
 import edu.gemini.spModel.gemini.gmos.{InstGmosSouth, InstGmosNorth}
@@ -160,7 +159,7 @@ abstract class CatalogNavigatorColumn[T >: Null: Manifest] {
 }
 
 case class IdColumn(title: String) extends CatalogNavigatorColumn[String] {
-  override val lens = Target.name
+  override val lens = Target.name.partial
 
   def ordering = implicitly[scala.math.Ordering[String]]
 }

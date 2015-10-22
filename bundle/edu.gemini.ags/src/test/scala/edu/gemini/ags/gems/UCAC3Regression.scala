@@ -4,7 +4,7 @@ import edu.gemini.ags.gems.mascot.Star
 import edu.gemini.pot.ModelConverters._
 import edu.gemini.shared.util.immutable.{Some => JSome, None => JNone }
 import edu.gemini.spModel.core.AlmostEqual._
-import edu.gemini.spModel.core.Target.SiderealTarget
+import edu.gemini.spModel.core.SiderealTarget
 import edu.gemini.spModel.core.{Angle, MagnitudeBand, Site}
 import edu.gemini.spModel.gemini.gems.Gems
 import edu.gemini.spModel.gemini.gsaoi.Gsaoi

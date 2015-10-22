@@ -8,7 +8,7 @@ import edu.gemini.pot.ModelConverters._
 import edu.gemini.skycalc
 import edu.gemini.spModel.ags.AgsStrategyKey
 import edu.gemini.spModel.core.{Coordinates, Angle}
-import edu.gemini.spModel.core.Target.SiderealTarget
+import edu.gemini.spModel.core.SiderealTarget
 import edu.gemini.spModel.guide.{ValidatableGuideProbe, VignettingGuideProbe, GuideProbe}
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.target.system.CoordinateParam.Units

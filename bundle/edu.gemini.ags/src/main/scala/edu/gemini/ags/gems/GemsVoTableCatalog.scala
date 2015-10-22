@@ -2,7 +2,7 @@ package edu.gemini.ags.gems
 
 import edu.gemini.catalog.api._
 import edu.gemini.catalog.votable._
-import edu.gemini.spModel.core.Target.SiderealTarget
+import edu.gemini.spModel.core.SiderealTarget
 import edu.gemini.spModel.core.{Angle, MagnitudeBand, Coordinates}
 import edu.gemini.spModel.gemini.gems.GemsInstrument
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.Conditions

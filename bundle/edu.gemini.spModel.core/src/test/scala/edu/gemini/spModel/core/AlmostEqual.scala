@@ -76,8 +76,8 @@ object AlmostEqual {
     }
 
   implicit val SiderealTargetAlmostEqual =
-    new AlmostEqual[Target.SiderealTarget] {
-      def almostEqual(a: Target.SiderealTarget, b: Target.SiderealTarget) =
+    new AlmostEqual[SiderealTarget] {
+      def almostEqual(a: SiderealTarget, b: SiderealTarget) =
         (a.name           == b.name)           &&
         (a.coordinates    ~= b.coordinates)    &&
         (a.properMotion   ~= b.properMotion)   &&
@@ -87,8 +87,8 @@ object AlmostEqual {
     }
 
   implicit val NonSiderealTargetAlmostEqual =
-    new AlmostEqual[Target.NonSiderealTarget] {
-      def almostEqual(a: Target.NonSiderealTarget, b: Target.NonSiderealTarget) =
+    new AlmostEqual[NonSiderealTarget] {
+      def almostEqual(a: NonSiderealTarget, b: NonSiderealTarget) =
         (a.name == b.name) &&
         (a.ephemeris.toList ~= b.ephemeris.toList) &&
         (a.horizonsDesignation == b.horizonsDesignation) &&
@@ -99,9 +99,9 @@ object AlmostEqual {
     new AlmostEqual[Target] {
       def almostEqual(a: Target, b: Target) =
         (a, b) match {
-          case (a: Target.TooTarget, b: Target.TooTarget) => a == b
-          case (a: Target.SiderealTarget, b: Target.SiderealTarget) => a ~= b
-          case (a: Target.NonSiderealTarget, b: Target.NonSiderealTarget) => a ~= b
+          case (a: TooTarget, b: TooTarget) => a == b
+          case (a: SiderealTarget, b: SiderealTarget) => a ~= b
+          case (a: NonSiderealTarget, b: NonSiderealTarget) => a ~= b
           case _ => false
         }
     }

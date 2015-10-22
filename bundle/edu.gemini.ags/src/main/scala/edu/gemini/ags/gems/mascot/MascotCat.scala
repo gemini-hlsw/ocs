@@ -4,7 +4,7 @@ import java.util.logging.Logger
 
 import edu.gemini.ags.gems.mascot.Mascot.ProgressFunction
 import edu.gemini.spModel.core.{BandsList, MagnitudeBand}
-import edu.gemini.spModel.core.Target.SiderealTarget
+import edu.gemini.spModel.core.SiderealTarget
 import java.util.concurrent.CancellationException
 
 /**

@@ -10,7 +10,6 @@ import edu.gemini.shared.util.immutable.{None => JNone}
 import edu.gemini.skycalc.Coordinates
 import edu.gemini.skycalc.Offset
 import edu.gemini.pot.ModelConverters._
-import edu.gemini.spModel.core.Target.SiderealTarget
 import edu.gemini.spModel.core.Magnitude
 import edu.gemini.spModel.core._
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2

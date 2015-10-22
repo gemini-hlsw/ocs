@@ -6,7 +6,6 @@ import edu.gemini.pot.ModelConverters._
 import edu.gemini.pot.sp.SPComponentType
 import edu.gemini.shared.util.immutable.{ None => JNone }
 import edu.gemini.skycalc.{DDMMSS, HHMMSS}
-import edu.gemini.spModel.core.Target.SiderealTarget
 import edu.gemini.spModel.core._
 import edu.gemini.spModel.core.AngleSyntax._
 import edu.gemini.spModel.gemini.flamingos2.{Flamingos2OiwfsGuideProbe, Flamingos2}

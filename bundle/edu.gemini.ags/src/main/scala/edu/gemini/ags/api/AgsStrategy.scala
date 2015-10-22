@@ -6,7 +6,7 @@ import edu.gemini.catalog.api.CatalogQuery
 import edu.gemini.pot.ModelConverters._
 import edu.gemini.spModel.ags.AgsStrategyKey
 import edu.gemini.spModel.core.{BandsList, Angle}
-import edu.gemini.spModel.core.Target.SiderealTarget
+import edu.gemini.spModel.core.SiderealTarget
 import edu.gemini.spModel.guide.{GuideStarValidation, ValidatableGuideProbe, GuideProbe}
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.rich.shared.immutable._

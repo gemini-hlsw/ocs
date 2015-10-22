@@ -1,6 +1,5 @@
 package edu.gemini.ags.gems.mascot
 
-import edu.gemini.spModel.core.Target.SiderealTarget
 import edu.gemini.spModel.core._
 import org.junit.Test
 import org.junit.Assert._
