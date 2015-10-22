@@ -142,8 +142,6 @@ public class ImageDisplayControlFrame extends JFrame {
 
         ImageDisplayControlFrame frame = new ImageDisplayControlFrame(size, fileOrUrl);
 
-//        frame.getImageDisplayControl().setImageBackground(Color.white); // test
-
         frame.setVisible(true);
     }
 }

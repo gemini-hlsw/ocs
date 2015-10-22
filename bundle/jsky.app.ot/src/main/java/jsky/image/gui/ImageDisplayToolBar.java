@@ -14,6 +14,7 @@ public class ImageDisplayToolBar extends GenericToolBar {
     // Used to access internationalized strings (see i18n/gui*.properties)
     private static final I18N _I18N = I18N.getInstance(ImageDisplayToolBar.class);
 
+
     /** The target ImageDisplay object */
     protected DivaMainImageDisplay imageDisplay;
 
@@ -71,4 +72,9 @@ public class ImageDisplayToolBar extends GenericToolBar {
 
         makeCutLevelsButton();
     }
+
+    protected DivaMainImageDisplay getImageDisplay() {
+        return imageDisplay;
+    }
+
 }

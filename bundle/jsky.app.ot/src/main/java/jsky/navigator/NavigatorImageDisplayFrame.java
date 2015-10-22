@@ -35,13 +35,7 @@ public class NavigatorImageDisplayFrame extends ImageDisplayControlFrame {
     @Override
     protected ImageDisplayMenuBar makeMenuBar(DivaMainImageDisplay mainImageDisplay, ImageDisplayToolBar toolBar) {
         return new NavigatorImageDisplayMenuBar((NavigatorImageDisplay) mainImageDisplay,
-                                                (NavigatorImageDisplayToolBar) toolBar);
-    }
-
-    /** Make and return the toolbar */
-    @Override
-    protected ImageDisplayToolBar makeToolBar(DivaMainImageDisplay mainImageDisplay) {
-        return new NavigatorImageDisplayToolBar((NavigatorImageDisplay) mainImageDisplay);
+                                                 toolBar);
     }
 
     /**

@@ -4,6 +4,7 @@ import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 
 import jsky.image.gui.ImageDisplayMenuBar;
+import jsky.image.gui.ImageDisplayToolBar;
 import jsky.util.I18N;
 
 /**
@@ -31,7 +32,7 @@ public class NavigatorImageDisplayMenuBar extends ImageDisplayMenuBar {
      * @param toolBar the toolbar associated with this menubar (shares some actions)
      */
     public NavigatorImageDisplayMenuBar(NavigatorImageDisplay imageDisplay,
-                                        NavigatorImageDisplayToolBar toolBar) {
+                                        ImageDisplayToolBar toolBar) {
         super(imageDisplay, toolBar);
 
         // Note, removed because it is a deprecated class

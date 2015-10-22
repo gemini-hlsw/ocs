@@ -5,7 +5,6 @@ import javax.swing.event.ChangeListener
 
 import edu.gemini.catalog.api.{MagnitudeLimits, RadiusLimits}
 import edu.gemini.catalog.ui.QueryResultsFrame
-import jsky.app.ot.tpe.TpeImageWidget
 import jsky.catalog.Catalog
 import jsky.catalog.QueryResult
 import jsky.catalog.TableQueryResult
@@ -359,40 +358,3 @@ class CatalogImageDisplayMenuBar(protected val imageDisplay: CatalogImageDisplay
   /** Return the handle for the Help menu */
   override def getHelpMenu: JMenu = _helpMenu
 }
-
-/**
-  * A tool bar for the image display window.
-  */
-class CatalogImageDisplayToolBar(tpe: TpeImageWidget) extends ImageDisplayToolBar(tpe) {
-  private lazy val catalogButton: JButton = makeButton("Show the catalog window", tpe.getCatalogBrowseAction)
-
-  /**
-    * Add the items to the tool bar.
-    */
-  protected override def addToolBarItems(): Unit = {
-    super.addToolBarItems()
-    addSeparator()
-    add(makeCatalogButton)
-  }
-
-  /**
-    * Make the catalog button, if it does not yet exists. Otherwise update the display
-    * using the current options for displaying text or icons.
-    *
-    * @return the catalog button
-    */
-  protected def makeCatalogButton: JButton = {
-    updateButton(catalogButton, "Catalogs", Resources.getIcon("Catalog24.gif", this.getClass))
-    catalogButton
-  }
-
-  /**
-    * Update the toolbar display using the current text/pictures options.
-    * (redefined from the parent class).
-    */
-  override def update() {
-    super.update()
-    makeCatalogButton
-  }
-}
-
