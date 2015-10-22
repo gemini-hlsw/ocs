@@ -36,9 +36,8 @@ import java.awt.geom.Point2D;
 import java.beans.PropertyChangeListener;
 import java.io.IOException;
 
-import java.util.HashSet;
-import java.util.Set;
-import java.util.Vector;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Implements a telescope position editor for the Gemini telescope
@@ -54,12 +53,12 @@ public class TelescopePosEditor extends JSkyCat implements TpeMouseObserver {
     /**
      * All feature class names
      */
-    private static final Vector<String> _featureClasses = new Vector<>();
+    private static final java.util.List<Class<?>> _featureClasses = new ArrayList<>();
 
     /**
      * List of all features
      */
-    private final Vector<TpeImageFeature> _allFeatures;
+    private final java.util.List<TpeImageFeature> _allFeatures;
 
     private TpeContext _ctx = TpeContext.empty();
 
@@ -119,9 +118,7 @@ public class TelescopePosEditor extends JSkyCat implements TpeMouseObserver {
         // Get the list of all features and add them to the user
         // interface in the order in which they were registered
         _allFeatures = _createFeatures();
-        for (int i = 0; i < _allFeatures.size(); ++i) {
-            _addFeature(_allFeatures.elementAt(i));
-        }
+        _allFeatures.forEach(this::_addFeature);
 
         // Select the "Browse" tool.
         _editorTools.gotoBrowseMode();
@@ -184,8 +181,8 @@ public class TelescopePosEditor extends JSkyCat implements TpeMouseObserver {
      * Register an independent feature.  These features will be
      * created when a TelescopePositionEditor is created.
      */
-    public static void registerFeature(String className) {
-        _featureClasses.addElement(className);
+    public static void registerFeature(Class<?> clazz) {
+        _featureClasses.add(clazz);
     }
 
     /**
@@ -203,13 +200,8 @@ public class TelescopePosEditor extends JSkyCat implements TpeMouseObserver {
     /**
      * Instantiate all the TpeImageFeatures indicated in the given Vector.
      */
-    private static Vector<TpeImageFeature> _createFeatures() {
-        final Vector<TpeImageFeature> v = new Vector<>();
-        for (int i = 0; i < TelescopePosEditor._featureClasses.size(); ++i) {
-            final String className = TelescopePosEditor._featureClasses.elementAt(i);
-            v.addElement(TpeImageFeature.createFeature(className));
-        }
-        return v;
+    private static java.util.List<TpeImageFeature> _createFeatures() {
+        return TelescopePosEditor._featureClasses.stream().map(TpeImageFeature::createFeature).collect(Collectors.toList());
     }
 
     /**

@@ -220,23 +220,23 @@ public final class OT {
         // Register the (partly Gemini specific) position editor features.
         // Note that the order of the buttons in the position editor toolbar
         // will correspond to the order in which the features are registered.
-        final String[] features = new String[]{
-                "jsky.app.ot.tpe.feat.TpeBasePosFeature",
-                "jsky.app.ot.tpe.feat.TpeGuidePosFeature",
-                "jsky.app.ot.tpe.feat.TpeTargetPosFeature",
-                "jsky.app.ot.tpe.feat.TpeCatalogFeature",
-                "jsky.app.ot.gemini.tpe.EdIterOffsetFeature",
-                "jsky.app.ot.gemini.acqcam.TpeAcqCameraFeature",
-                "jsky.app.ot.gemini.altair.Altair_WFS_Feature",
-                "jsky.app.ot.gemini.gems.CanopusFeature",
-                "jsky.app.ot.gemini.gsaoi.GsaoiOdgwFeature",
-                "jsky.app.ot.gemini.gems.StrehlFeature",
-                "jsky.app.ot.gemini.inst.OIWFS_Feature",
-                "jsky.app.ot.gemini.tpe.TpePWFSFeature",
-                "jsky.app.ot.gemini.inst.SciAreaFeature",
+        final Class<?>[] features = new Class<?>[]{
+                jsky.app.ot.tpe.feat.TpeBasePosFeature.class,
+                jsky.app.ot.tpe.feat.TpeGuidePosFeature.class,
+                jsky.app.ot.tpe.feat.TpeTargetPosFeature.class,
+                jsky.app.ot.tpe.feat.TpeCatalogFeature.class,
+                jsky.app.ot.gemini.tpe.EdIterOffsetFeature.class,
+                jsky.app.ot.gemini.acqcam.TpeAcqCameraFeature.class,
+                jsky.app.ot.gemini.altair.Altair_WFS_Feature.class,
+                jsky.app.ot.gemini.gems.CanopusFeature.class,
+                jsky.app.ot.gemini.gsaoi.GsaoiOdgwFeature.class,
+                jsky.app.ot.gemini.gems.StrehlFeature.class,
+                jsky.app.ot.gemini.inst.OIWFS_Feature.class,
+                jsky.app.ot.gemini.tpe.TpePWFSFeature.class,
+                jsky.app.ot.gemini.inst.SciAreaFeature.class,
         };
 
-        for (final String featureClass : features) {
+        for (final Class<?> featureClass : features) {
             TelescopePosEditor.registerFeature(featureClass);
         }
 

@@ -61,11 +61,10 @@ public abstract class TpeImageFeature implements TelescopePosWatcher {
     /**
      * Instantiate a TpeImageFeature from a fully qualified class name.
      */
-    public static TpeImageFeature createFeature(String className) {
+    public static TpeImageFeature createFeature(Class<?> clazz) {
         TpeImageFeature tif = null;
         try {
-            Class c = Class.forName(className);
-            tif = (TpeImageFeature) c.newInstance();
+            tif = (TpeImageFeature) clazz.newInstance();
         } catch (Exception ex) {
             DialogUtil.error(ex);
         }
