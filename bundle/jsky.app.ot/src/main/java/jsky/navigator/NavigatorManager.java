@@ -1,11 +1,5 @@
 package jsky.navigator;
 
-import javax.swing.JDesktopPane;
-import javax.swing.JLayeredPane;
-
-import jsky.catalog.CatalogDirectory;
-import jsky.catalog.gui.CatalogNavigator;
-import jsky.util.gui.DialogUtil;
 import jsky.util.gui.SwingUtil;
 
 /**
@@ -44,23 +38,7 @@ public final class NavigatorManager {
      */
     public static Navigator create() {
         if (_navigator == null) {
-            CatalogDirectory dir;
-            try {
-                dir = CatalogNavigator.getCatalogDirectory();
-            } catch (Exception e) {
-                DialogUtil.error(e);
-                return null;
-            }
-
-            JDesktopPane desktop = DialogUtil.getDesktop();
-            if (desktop == null) {
-                _navigator = new NavigatorFrame().getNavigator();
-            } else {
-                NavigatorInternalFrame f = new NavigatorInternalFrame(desktop);
-                _navigator = f.getNavigator();
-                desktop.add(f, JLayeredPane.DEFAULT_LAYER);
-                desktop.moveToFront(f);
-            }
+            _navigator = new NavigatorFrame().getNavigator();
         }
 
         return _navigator;

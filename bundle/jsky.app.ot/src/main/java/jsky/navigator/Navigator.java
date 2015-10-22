@@ -134,14 +134,6 @@ public class Navigator extends CatalogNavigator implements CatalogNavigatorOpene
             _imageDisplayControlFrame.setVisible(true);
             _imageDisplay = (NavigatorImageDisplay)
                     ((NavigatorImageDisplayFrame) _imageDisplayControlFrame).getImageDisplayControl().getImageDisplay();
-        } else if (parent instanceof JInternalFrame) {
-            JDesktopPane desktop = getDesktop();
-            _imageDisplayControlFrame = new NavigatorImageDisplayInternalFrame(desktop);
-            _imageDisplayControlFrame.setVisible(true);
-            _imageDisplay = (NavigatorImageDisplay)
-                    ((NavigatorImageDisplayInternalFrame) _imageDisplayControlFrame).getImageDisplayControl().getImageDisplay();
-            desktop.add(_imageDisplayControlFrame, JLayeredPane.DEFAULT_LAYER);
-            desktop.moveToFront(_imageDisplayControlFrame);
         }
 
         _imageDisplay.setNavigator(this);
