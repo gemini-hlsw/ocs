@@ -3,7 +3,6 @@ package jsky.app.ot.tpe.gems;
 import edu.gemini.ags.gems.GemsUtils4Java;
 import edu.gemini.spModel.core.SiderealTarget;
 import edu.gemini.catalog.api.UCAC4$;
-import jsky.catalog.Catalog;
 import jsky.catalog.FieldDesc;
 import jsky.catalog.FieldDescAdapter;
 import jsky.catalog.TableQueryResult;
@@ -137,21 +136,15 @@ class CandidateGuideStarsTableModel extends DefaultTableModel {
         return fields.toArray(fd);
     }
 
-    public TableQueryResult getTableQueryResult(Catalog cat) {
-        final SkycatConfigEntry configEntry;
-        if (cat instanceof SkycatCatalog) {
-            configEntry = ((SkycatCatalog) cat).getConfigEntry();
-        } else if (cat instanceof SkycatTable) {
-            configEntry = ((SkycatTable) cat).getConfigEntry();
-        } else {
-            throw new RuntimeException("Expected a skycat catalog or table");
-        }
-
-        Properties props = (Properties)configEntry.getProperties().clone();
+    @SuppressWarnings("unchecked")
+    public TableQueryResult getTableQueryResult() {
         String raPosition = String.valueOf(_columnNames.indexOf(RA_TITLE));
         String decPosition = String.valueOf(_columnNames.indexOf(DEC_TITLE));
+        Properties props = new Properties();
         props.setProperty(SkycatConfigFile.RA_COL, raPosition);
         props.setProperty(SkycatConfigFile.DEC_COL, decPosition);
+        props.setProperty(SkycatConfigFile.SERV_TYPE, "catalog");
+        props.setProperty(SkycatConfigFile.LONG_NAME, "ucac4");
         SkycatConfigEntry entry = new SkycatConfigEntry(props);
         SkycatTable skycatTable = new SkycatTable(entry, getDataVector(), getFields()) {
             @Override

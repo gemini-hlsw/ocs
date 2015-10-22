@@ -45,10 +45,10 @@ class ImageCatalogLoader {
     */
   private def imageToTmpFile(url: URL, contentType: String, in: ProgressBarFilterInputStream): Throwable \/ (File, URL) = {
     val dir = Preferences.getPreferences.getCacheDir.getPath
-    val suffix = contentType match {
-      case s if s.endsWith("hfits")                        =>  ".hfits"
-      case s if s.endsWith("zfits") || s == "image/x-fits" => ".fits.gz"
-      case s if s.endsWith("fits")                         => ".fits"
+    val suffix = Option(contentType) match {
+      case Some(s) if s.endsWith("hfits")                        =>  ".hfits"
+      case Some(s) if s.endsWith("zfits") || s == "image/x-fits" => ".fits.gz"
+      case Some(s) if s.endsWith("fits")                         => ".fits"
       case _                                               => ".tmp"
     }
 

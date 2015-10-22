@@ -11,9 +11,7 @@ import edu.gemini.spModel.target.env.TargetEnvironment;
 import edu.gemini.spModel.target.obsComp.TargetObsComp;
 import jsky.app.ot.tpe.GemsGuideStarWorker;
 import jsky.app.ot.tpe.TpeImageWidget;
-import jsky.catalog.Catalog;
 import jsky.catalog.gui.TablePlotter;
-import jsky.catalog.skycat.SkycatConfigFile;
 import jsky.util.Preferences;
 import jsky.util.gui.SwingWorker;
 import jsky.util.gui.DialogUtil;
@@ -517,9 +515,6 @@ public class GemsGuideStarSearchDialog extends JFrame {
     }
 
     private void queryDone() {
-        Catalog cat = SkycatConfigFile.getConfigFile().getCatalog(_model.getCatalog().catalogName());
-        _candidateGuideStarsTable.setCatalog(cat);
-
         CandidateGuideStarsTableModel tableModel = new CandidateGuideStarsTableModel(_model);
         try {
             _candidateGuideStarsTable.setTableModel(tableModel);

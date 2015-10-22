@@ -84,7 +84,7 @@ public class ProgressPanel extends JPanel implements ActionListener, StatusLogge
 
 
     /**
-     * Initialize the progreass panel. This method may be called from any
+     * Initialize the progress panel. This method may be called from any
      * thread, but will always run in the event dispatching thread.
      */
     protected void init() {
