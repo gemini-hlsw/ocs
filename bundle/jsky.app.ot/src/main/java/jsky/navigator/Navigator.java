@@ -252,8 +252,8 @@ public class Navigator extends CatalogNavigator implements CatalogNavigatorOpene
         // initialize the symbol plotter
         TablePlotter plotter = getPlotter();
         if (plotter != null) {
-            plotter.setCanvasGraphics(_imageDisplay.getCanvasGraphics());
-            plotter.setCoordinateConverter(_imageDisplay.getCoordinateConverter());
+            //plotter.setCanvasGraphics(_imageDisplay.getCanvasGraphics());
+            //plotter.setCoordinateConverter(_imageDisplay.getCoordinateConverter());
             _imageDisplay.getNavigatorPane().setPlotter(plotter);
         }
     }

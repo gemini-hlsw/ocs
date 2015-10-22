@@ -16,7 +16,7 @@ import Scalaz._
 import scala.collection.JavaConverters._
 
 class TpePlotter(display: CatalogImageDisplay) {
-  val plotter = new BasicTablePlotter() <| {_.setCanvasGraphics(display.getCanvasGraphics)}  <| {_.setCoordinateConverter(display.getCoordinateConverter)}
+  val plotter = new BasicTablePlotter(display.getCanvasGraphics, display.getCoordinateConverter)
   display.getNavigatorPane.setPlotter(plotter)
 
   case object CatalogAdapter extends PlotableCatalog {

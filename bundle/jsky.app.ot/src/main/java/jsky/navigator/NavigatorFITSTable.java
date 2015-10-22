@@ -1,10 +1,3 @@
-/*
- * Copyright 2000 Association for Universities for Research in Astronomy, Inc.,
- * Observatory Control System, Gemini Telescopes Project.
- *
- * $Id: NavigatorFITSTable.java 6525 2005-08-03 21:13:39Z brighton $
- */
-
 package jsky.navigator;
 
 import java.io.IOException;
@@ -428,7 +421,7 @@ public class NavigatorFITSTable extends SkycatTable {
         for (int colIndex = 0; colIndex < ncols; colIndex++) {
             row[colIndex] = "-";
         }
-        data[newRowIndex++] = row;
+        data[newRowIndex] = row;
 
         BinaryTable binTable = new BinaryTable(data);
         FitsFactory.setUseAsciiTables(false);

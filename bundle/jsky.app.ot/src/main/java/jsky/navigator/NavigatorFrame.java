@@ -31,7 +31,7 @@ public class NavigatorFrame extends JFrame {
     public NavigatorFrame(MainImageDisplay imageDisplay) {
         super("Catalog Navigator");
 
-        TablePlotter plotter = new BasicTablePlotter();
+        TablePlotter plotter = new BasicTablePlotter(imageDisplay.getCanvasGraphics(), imageDisplay.getCoordinateConverter());
 
         navigator = new Navigator(this, plotter, imageDisplay);
 
