@@ -159,7 +159,7 @@ public class DivaMainImageDisplay extends DivaGraphicsImageDisplay implements Ma
     /**
      * Utility object used to control background thread
      */
-    private SwingWorker _worker;
+    private jsky.util.gui.SwingWorker _worker;
 
     /**
      * Stack of ImageHistoryItem, used to go back to a previous image
