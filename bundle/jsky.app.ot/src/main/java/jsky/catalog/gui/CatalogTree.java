@@ -1,17 +1,9 @@
-/*
- * Copyright 2002 Association for Universities for Research in Astronomy, Inc.,
- * Observatory Control System, Gemini Telescopes Project.
- *
- * $Id: CatalogTree.java 38328 2011-11-02 14:08:05Z abrighton $
- */
-
 package jsky.catalog.gui;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
@@ -19,36 +11,31 @@ import java.net.URL;
 import java.net.URLConnection;
 
 import javax.swing.AbstractAction;
-import javax.swing.JFrame;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTree;
 import javax.swing.ToolTipManager;
-import javax.swing.event.TreeSelectionEvent;
-import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.TreeCellRenderer;
 import javax.swing.tree.TreePath;
 
 import jsky.catalog.*;
-import jsky.catalog.astrocat.AstroCatConfig;
 import jsky.util.I18N;
 import jsky.util.gui.SwingWorker;
 import jsky.util.Resources;
-import jsky.util.gui.BasicWindowMonitor;
 import jsky.util.gui.ClipboardHelper;
 import jsky.util.gui.DialogUtil;
 import jsky.util.gui.ProgressPanel;
 
-
 /**
  * Used to display a catalog hierarchy.
  */
+@Deprecated
 public class CatalogTree extends JPanel
         implements QueryResultDisplay, QueryResultHandler {
 
-    // Used to access internationalized strings (see i18n/gui*.proprties)
+    // Used to access internationalized strings (see i18n/gui*.properties)
     private static final I18N _I18N = I18N.getInstance(CatalogTree.class);
 
     // The tree widget
@@ -205,14 +192,12 @@ public class CatalogTree extends JPanel
         ToolTipManager.sharedInstance().registerComponent(_tree);
 
         // Listen for when the selection changes.
-        _tree.addTreeSelectionListener(new TreeSelectionListener() {
-            public void valueChanged(TreeSelectionEvent e) {
-                try {
-                    _nodeSelected();
-                    updateEnabledStates();
-                } catch (Exception ex) {
-                    DialogUtil.error(ex);
-                }
+        _tree.addTreeSelectionListener(e -> {
+            try {
+                _nodeSelected();
+                updateEnabledStates();
+            } catch (Exception ex) {
+                DialogUtil.error(ex);
             }
         });
 
@@ -319,7 +304,6 @@ public class CatalogTree extends JPanel
         if (selectedNode == null) {
             return;
         }
-        //System.out.println("XXX selected path = " + TclUtil.makeList(selectedNode.getPath()));
 
         if (selectedNode == _rootCatDir) {
             if (_queryResultDisplay != null)
@@ -478,12 +462,7 @@ public class CatalogTree extends JPanel
      */
     public JMenuItem makeReloadMenuItem() {
         JMenuItem menuItem = new JMenuItem(_I18N.getString("reloadConfigFile"));
-        menuItem.addActionListener(new ActionListener() {
-
-            public void actionPerformed(ActionEvent ae) {
-                reload();
-            }
-        });
+        menuItem.addActionListener(ae -> reload());
         return menuItem;
     }
 
@@ -704,20 +683,5 @@ public class CatalogTree extends JPanel
         }
     }
 
-
-    /**
-     * test main
-     */
-    public static void main(String[] args) {
-        JFrame frame = new JFrame("CatalogTree");
-
-        CatalogDirectory catDir = AstroCatConfig.getConfigFile();
-        CatalogTree catTree = new CatalogTree(catDir);
-
-        frame.getContentPane().add(catTree, BorderLayout.CENTER);
-        frame.pack();
-        frame.setVisible(true);
-        frame.addWindowListener(new BasicWindowMonitor());
-    }
 }
 

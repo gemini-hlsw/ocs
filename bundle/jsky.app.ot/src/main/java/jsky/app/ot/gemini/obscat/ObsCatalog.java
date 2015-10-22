@@ -360,12 +360,6 @@ public final class ObsCatalog extends SkycatCatalog implements CatalogUIHandler 
             return;
         }
 
-        // Make the catalog navigator window the main application window
-        CatalogNavigator.setMainWindow(true);
-
-        // Hide the catalog tree window when this catalog is displayed
-        CatalogNavigatorMenuBar.setCatalogTreeIsVisible(ObsCatalogQueryTool.class, false);
-
         final Navigator navigator = NavigatorManager.open();
         if (navigator != null) {
             navigator.setAutoQuery(false);
@@ -394,7 +388,8 @@ public final class ObsCatalog extends SkycatCatalog implements CatalogUIHandler 
     private static synchronized void addPreferencesItem() {
         if (addedPreferences) return;
 
-        // TODO FIXME, nf is null
+        // FIXME, This used to open the browser preferences from the menu, however we don't have a menu on the CatalogNavigator anymore
+        /*
         final NavigatorFrame nf = (NavigatorFrame) NavigatorManager.get().getParentFrame();
         final JMenuBar mb = nf.getJMenuBar();
         final JMenu menu = mb.getMenu(0);
@@ -410,7 +405,7 @@ public final class ObsCatalog extends SkycatCatalog implements CatalogUIHandler 
             final PreferenceDialog dialog = new PreferenceDialog(lst);
             addActionListener(e -> dialog.show(nf, BrowserPreferencesPanel.instance));
         }}, count - 2);
-        menu.insertSeparator(count - 2);
+        menu.insertSeparator(count - 2);*/
 
         addedPreferences = true;
     }

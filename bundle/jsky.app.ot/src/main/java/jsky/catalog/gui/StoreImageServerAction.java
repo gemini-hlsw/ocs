@@ -1,7 +1,5 @@
 package jsky.catalog.gui;
 
-import jsky.navigator.NavigatorManager;
-import jsky.navigator.Navigator;
 import jsky.catalog.Catalog;
 import jsky.util.Preferences;
 
@@ -31,6 +29,7 @@ public class StoreImageServerAction extends AbstractAction {
         cat = catalog;
     }
 
+    @SuppressWarnings("unchecked")
     public void actionPerformed(ActionEvent e) {
         Preferences.set(Catalog.SKY_USER_CATALOG, cat.getName());
         List<AbstractButton> list = (List<AbstractButton>)getValue("MenuItem");
@@ -38,12 +37,6 @@ public class StoreImageServerAction extends AbstractAction {
             for (AbstractButton b: list) {
                 b.setSelected(true);
             }
-            //update the TreeCell, to reflect the user selection
-            Navigator nav = NavigatorManager.get();
-            if (nav == null) return;
-            CatalogTree tree = nav.getCatalogTree();
-            if (tree == null) return;
-            tree.repaint();
         }
     }
 
@@ -58,10 +51,11 @@ public class StoreImageServerAction extends AbstractAction {
         return action;
     }
 
+    @SuppressWarnings("unchecked")
     public void appendValue(String key, AbstractButton b) {
         List<AbstractButton> l = (List<AbstractButton>)getValue(key);
         if (l == null) {
-            l = new ArrayList<AbstractButton>();
+            l = new ArrayList<>();
             putValue(key, l);
         }
         l.add(b);

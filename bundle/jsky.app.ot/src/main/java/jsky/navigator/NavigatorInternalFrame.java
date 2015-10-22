@@ -36,20 +36,16 @@ public class NavigatorInternalFrame extends JInternalFrame {
      * set it to display the contents of the given catalog directory.
      *
      * @param desktop The JDesktopPane to add the frame to.
-     * @param catDir The top level catalog directory to display
      * @param imageDisplay optional widget to use to display images (if not specified,
      *                     or null, a new window will be created)
      */
-    public NavigatorInternalFrame(JDesktopPane desktop, CatalogDirectory catDir,
-                                  MainImageDisplay imageDisplay) {
+    public NavigatorInternalFrame(JDesktopPane desktop, MainImageDisplay imageDisplay) {
         super("Catalog Navigator", true, false, true, true);
 
-        CatalogTree catalogTree = new CatalogTree(catDir);
         TablePlotter plotter = new BasicTablePlotter();
 
-        navigator = new Navigator(this, catalogTree, plotter, imageDisplay);
+        navigator = new Navigator(this, plotter, imageDisplay);
         navigator.setDesktop(desktop);
-        catalogTree.setQueryResult(catDir);
 
         NavigatorToolBar toolbar = new NavigatorToolBar(navigator);
         getContentPane().add(toolbar, BorderLayout.NORTH);
@@ -68,27 +64,14 @@ public class NavigatorInternalFrame extends JInternalFrame {
         setDefaultCloseOperation(HIDE_ON_CLOSE);
     }
 
-
     /**
      * Create a top level window containing a Navigator panel and
      * display the contents of the given catalog directory in it.
      *
      * @param desktop The JDesktopPane to add the frame to.
-     * @param catDir The top level catalog directory to display
-     */
-    public NavigatorInternalFrame(JDesktopPane desktop, CatalogDirectory catDir) {
-        this(desktop, catDir, null);
-    }
-
-
-    /**
-     * Create a top level window containing a Navigator panel and
-     * display the contents of the default catalog directory in it.
-     *
-     * @param desktop The JDesktopPane to add the frame to.
      */
     public NavigatorInternalFrame(JDesktopPane desktop) {
-        this(desktop, CatalogNavigator.getCatalogDirectory());
+        this(desktop, null);
     }
 
     /** Return the navigator panel. */

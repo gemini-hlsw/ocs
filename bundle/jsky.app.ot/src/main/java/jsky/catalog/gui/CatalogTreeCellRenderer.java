@@ -1,13 +1,3 @@
-/*
- * ESO Archive
- *
- * $Id: CatalogTreeCellRenderer.java 7129 2006-06-07 15:09:10Z anunez $
- *
- * who             when        what
- * --------------  ----------  ----------------------------------------
- * Allan Brighton  2000/01/27  Created
- */
-
 package jsky.catalog.gui;
 
 import java.awt.Component;
@@ -25,6 +15,7 @@ import jsky.util.Preferences;
  * This local class is used to override the default tree node
  * renderer and provide special catalog dependent icons.
  */
+@Deprecated
 public class CatalogTreeCellRenderer extends DefaultTreeCellRenderer {
 
     private Icon _imagesvrIcon = Resources.getIcon("imagesvr.gif");

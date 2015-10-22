@@ -57,9 +57,6 @@ public class Navigator extends CatalogNavigator implements CatalogNavigatorOpene
      *
      * @param parent the parent component
      *
-     * @param catalogTree a CatalogTree (normally a subclass of CatalogTree
-     *                    that knows about certain types of catalogs)
-     *
      * @param plotter the object to use to plot catalog table data
      *                (when the plot button is pressed)
      *
@@ -67,9 +64,8 @@ public class Navigator extends CatalogNavigator implements CatalogNavigatorOpene
      *                     or null, a new window will be created)
      *
      */
-    public Navigator(Component parent, CatalogTree catalogTree,
-                     TablePlotter plotter, MainImageDisplay imageDisplay) {
-        super(parent, catalogTree, plotter);
+    public Navigator(Component parent, TablePlotter plotter, MainImageDisplay imageDisplay) {
+        super(parent, plotter);
 
         if (imageDisplay != null) {
             _imageDisplay = (NavigatorImageDisplay) imageDisplay;
@@ -84,15 +80,12 @@ public class Navigator extends CatalogNavigator implements CatalogNavigatorOpene
      *
      * @param parent the parent component
      *
-     * @param catalogTree a CatalogTree (normally a subclass of CatalogTree
-     *                    that knows about certain types of catalogs)
-     *
      * @param plotter the object to use to plot catalog table data
      *                (when the plot button is pressed)
      *
      */
-    public Navigator(Component parent, CatalogTree catalogTree, TablePlotter plotter) {
-        this(parent, catalogTree, plotter, null);
+    public Navigator(Component parent, TablePlotter plotter) {
+        this(parent, plotter, null);
     }
 
     /** Return the image display widget. */

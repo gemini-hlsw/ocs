@@ -1,9 +1,6 @@
 package jsky.navigator;
 
-import jsky.catalog.CatalogDirectory;
 import jsky.catalog.gui.BasicTablePlotter;
-import jsky.catalog.gui.CatalogNavigator;
-import jsky.catalog.gui.CatalogTree;
 import jsky.catalog.gui.TablePlotter;
 import jsky.image.gui.MainImageDisplay;
 import jsky.util.Preferences;
@@ -28,30 +25,17 @@ public class NavigatorFrame extends JFrame {
      * Create a top level window containing a Navigator panel and
      * display the contents of the given catalog directory in it.
      *
-     * @param catDir The top level catalog directory to display
-     *
      * @param imageDisplay optional widget to use to display images (if not specified,
      *                     or null, a new window will be created)
      */
-    public NavigatorFrame(CatalogDirectory catDir, MainImageDisplay imageDisplay) {
+    public NavigatorFrame(MainImageDisplay imageDisplay) {
         super("Catalog Navigator");
 
-        CatalogTree catalogTree = new CatalogTree(catDir);
         TablePlotter plotter = new BasicTablePlotter();
 
-        navigator = new Navigator(this, catalogTree, plotter, imageDisplay);
-        catalogTree.setQueryResult(catDir);
+        navigator = new Navigator(this, plotter, imageDisplay);
 
-        // Selecting a catalog from the menu turns autoQuery on, but selecting one from the tree should
-        // turn it off again
-        catalogTree.getTree().addTreeSelectionListener(e -> navigator.setAutoQuery(false));
-
-
-        NavigatorToolBar toolbar = new NavigatorToolBar(navigator);
-        getContentPane().add(toolbar, BorderLayout.NORTH);
         getContentPane().add(navigator, BorderLayout.CENTER);
-        // NOTE Deleted because NavigatorMenuBar is deprecated
-        //setJMenuBar(new NavigatorMenuBar(navigator, toolbar));
 
         // set default window size and remember changes between sessions
         Preferences.manageSize(navigator, new Dimension(650, 650));
@@ -62,30 +46,9 @@ public class NavigatorFrame extends JFrame {
     /**
      * Create a top level window containing a Navigator panel and
      * display the contents of the given catalog directory in it.
-     *
-     * @param catDir The top level catalog directory to display
-     */
-    public NavigatorFrame(CatalogDirectory catDir) {
-        this(catDir, null);
-    }
-
-    /**
-     * Create a top level window containing a Navigator panel and
-     * display the contents of the default catalog directory in it.
      */
     public NavigatorFrame() {
-        this(CatalogNavigator.getCatalogDirectory());
-    }
-
-    /**
-     * Create a top level window containing a Navigator panel and
-     * display the contents of the default catalog directory in it.
-     *
-     * @param imageDisplay optional widget to use to display images (if not specified,
-     *                     or null, a new window will be created)
-     */
-    public NavigatorFrame(MainImageDisplay imageDisplay) {
-        this(CatalogNavigator.getCatalogDirectory(), imageDisplay);
+        this(null);
     }
 
 
@@ -104,13 +67,5 @@ public class NavigatorFrame extends JFrame {
         super.setVisible(b);
     }
 
-
-    /**
-     * test main
-     */
-    public static void main(String[] args) {
-        NavigatorFrame f = new NavigatorFrame();
-        f.setVisible(true);
-    }
 }
 

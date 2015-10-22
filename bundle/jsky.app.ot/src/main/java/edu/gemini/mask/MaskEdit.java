@@ -8,11 +8,9 @@ import jsky.navigator.Navigator;
 import jsky.navigator.NavigatorManager;
 import jsky.navigator.NavigatorFrame;
 import jsky.navigator.NavigatorMenuBar;
-import jsky.navigator.NavigatorQueryTool;
 import jsky.catalog.skycat.SkycatCatalog;
 import jsky.catalog.skycat.SkycatConfigFile;
 import jsky.catalog.Catalog;
-import jsky.catalog.gui.CatalogNavigatorMenuBar;
 
 import javax.media.jai.JAI;
 import javax.media.jai.TileCache;
@@ -167,9 +165,6 @@ public class MaskEdit extends JFrame {
         f.setTitle("MaskEdit: Navigator");
         NavigatorMenuBar menuBar = (NavigatorMenuBar)f.getJMenuBar();
         _addMaskMenu(menuBar);
-
-        // don't display the catalog tree
-        CatalogNavigatorMenuBar.setCatalogTreeIsVisible(NavigatorQueryTool.class, false);
 
         // Make the navigator Open action handle FITS ObjectTables
         navigator.setOpenAction(new AbstractAction("Open") {

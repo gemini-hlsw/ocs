@@ -54,9 +54,9 @@ public final class NavigatorManager {
 
             JDesktopPane desktop = DialogUtil.getDesktop();
             if (desktop == null) {
-                _navigator = new NavigatorFrame(dir).getNavigator();
+                _navigator = new NavigatorFrame().getNavigator();
             } else {
-                NavigatorInternalFrame f = new NavigatorInternalFrame(desktop, dir);
+                NavigatorInternalFrame f = new NavigatorInternalFrame(desktop);
                 _navigator = f.getNavigator();
                 desktop.add(f, JLayeredPane.DEFAULT_LAYER);
                 desktop.moveToFront(f);

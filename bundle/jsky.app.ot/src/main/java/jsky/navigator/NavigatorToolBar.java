@@ -9,6 +9,7 @@ import jsky.util.gui.GenericToolBar;
 /**
  * A tool bar for the Navigator window.
  */
+@Deprecated
 public class NavigatorToolBar extends GenericToolBar {
 
     // Used to access internationalized strings (see i18n/gui*.proprties)

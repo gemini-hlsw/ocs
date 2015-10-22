@@ -238,7 +238,7 @@ public class NavigatorImageDisplay extends DivaMainImageDisplay
         super.newImage(before);
 
         if (!before) {
-            if (_navigatorFrame == null && !CatalogNavigator.isMainWindow()) {
+            if (_navigatorFrame == null) {
                 makeNavigatorFrame();
             }
 

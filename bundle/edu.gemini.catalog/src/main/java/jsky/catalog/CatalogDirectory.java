@@ -1,13 +1,3 @@
-/*
- * ESO Archive
- *
- * $Id: CatalogDirectory.java 4414 2004-02-03 16:21:36Z brighton $
- *
- * who             when        what
- * --------------  ----------  ----------------------------------------
- * Allan Brighton  2000/01/05  Created
- */
-
 package jsky.catalog;
 
 import java.net.URL;
@@ -16,11 +6,11 @@ import java.util.List;
 import javax.swing.event.ChangeListener;
 import javax.swing.tree.TreeModel;
 
-
 /**
  * This defines the interface for a catalog directory, allowing catalogs
  * to be organized in a hierarchy.
  */
+@Deprecated
 public interface CatalogDirectory extends Catalog, TreeModel {
 
     /** Return the number of catalogs in this directory */
