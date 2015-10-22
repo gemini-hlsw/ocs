@@ -16,7 +16,8 @@ import Scalaz._
   * value pairs for spectroscopy.
   */
 sealed trait ItcResult extends Serializable {
-  def warnings:   List[ItcWarning]
+  def peakPixelFlux(ccd: Int = 0):  Int
+  def warnings:                     List[ItcWarning]
 }
 
 // === IMAGING RESULTS
@@ -25,6 +26,7 @@ final case class ImgData(singleSNRatio: Double, totalSNRatio: Double, peakPixelF
 
 final case class ItcImagingResult(ccds: List[ImgData], warnings: List[ItcWarning]) extends ItcResult {
   def ccd(i: Int) = ccds(i % ccds.length)
+  def peakPixelFlux(ccdIx: Int = 0) = ccd(ccdIx).peakPixelFlux.toInt
 }
 
 // === SPECTROSCOPY RESULTS
@@ -76,6 +78,22 @@ final case class ItcSpectroscopyResult(charts: List[SpcChartData], warnings: Lis
     * This method will fail if the result (chart/data) you're looking for does not exist.
     */
   def allSeries(ct: SpcChartType, dt: SpcDataType): List[SpcSeriesData] = chart(ct).allSeries(dt)
+
+  def peakPixelFlux(ccd: Int = 0): Int = {
+    // zip signal and background values, sum them and return max value (i.e. max(signal + background))
+    def maxSum(s: SpcSeriesData, b: SpcSeriesData) =
+      s.yValues.zip(b.yValues).map(p => p._1 + p._2).max.round
+
+    // zip signal and background value arrays and return max of all maximums
+    // e.g. GNIRS with cross dispersion will have several arrays for signal and background, one for each order
+    def maxAllSum(s: List[SpcSeriesData], b: List[SpcSeriesData]) =
+      s.zip(b).map(p => maxSum(p._1, p._2)).max
+
+    val signal     = allSeries(SignalChart, SignalData)
+    val background = allSeries(SignalChart, BackgroundData)
+    maxAllSum(signal, background).toInt
+  }
+
 }
 
 object ItcSpectroscopyResult {

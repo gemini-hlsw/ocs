@@ -88,30 +88,13 @@ sealed trait ItcTableModel extends AbstractTableModel {
   protected def sourceFraction  (i: ItcParameters) = f"${i.observation.getSourceFraction}%.2f"
 
 
-  protected def spcPeakElectrons(result: Future[ItcService.Result]) = {
-    // zip signal and background values, sum them and return max value (i.e. max(signal + background))
-    def maxSum(s: SpcSeriesData, b: SpcSeriesData) =
-      s.yValues.zip(b.yValues).map(p => p._1 + p._2).max.round
+  protected def peakPixelFlux(result: Future[ItcService.Result], ccd: Int = 0) = serviceResult(result).map(_.peakPixelFlux(ccd))
 
-    // zip signal and background value arrays and return max of all maximums
-    // e.g. GNIRS with cross dispersion will have several arrays for signal and background, one for each order
-    def maxAllSum(s: List[SpcSeriesData], b: List[SpcSeriesData]) =
-      s.zip(b).map(p => maxSum(p._1, p._2)).max
-
-    val r = spectroscopyResult(result)
-    for {
-      signal     <- r.map(_.allSeries(SignalChart, SignalData))
-      background <- r.map(_.allSeries(SignalChart, BackgroundData))
-
-    } yield maxAllSum(signal, background)
-  }
 
   protected def spcPeakSNSingle (result: Future[ItcService.Result]) = spectroscopyResult(result).map(_.allSeries(S2NChart, SingleS2NData).map(_.yValues.max).max)
 
   protected def spcPeakSNFinal  (result: Future[ItcService.Result]) = spectroscopyResult(result).map(_.allSeries(S2NChart, FinalS2NData).map(_.yValues.max).max)
 
-
-  protected def imgPeakPixelFlux(result: Future[ItcService.Result], ccd: Int = 0) = imagingResult(result).map(_.ccd(ccd).peakPixelFlux.toInt)
 
   protected def imgSingleSNRatio(result: Future[ItcService.Result], ccd: Int = 0) = imagingResult(result).map(_.ccd(ccd).singleSNRatio)
 
@@ -175,7 +158,7 @@ sealed trait ItcImagingTableModel extends ItcTableModel
 class ItcGenericImagingTableModel(val keys: List[ItemKey], val uniqueSteps: List[ItcUniqueConfig], val inputs: List[String\/ItcParameters], val res: List[Future[ItcService.Result]], showCoadds: Boolean = false) extends ItcImagingTableModel {
   val headers = if (showCoadds) HeadersWithCoadds else Headers
   val results = List(
-    Column("Peak",            (c, i, r) => imgPeakPixelFlux(r),          tooltip = ItcTableModel.PeakPixelTooltip),
+    Column("Peak",            (c, i, r) => peakPixelFlux   (r),          tooltip = ItcTableModel.PeakPixelTooltip),
     Column("S/N Single",      (c, i, r) => imgSingleSNRatio(r)),
     Column("S/N Total",       (c, i, r) => imgTotalSNRatio (r))
   )
@@ -185,13 +168,13 @@ class ItcGenericImagingTableModel(val keys: List[ItemKey], val uniqueSteps: List
 class ItcGmosImagingTableModel(val keys: List[ItemKey], val uniqueSteps: List[ItcUniqueConfig], val inputs: List[String\/ItcParameters], val res: List[Future[ItcService.Result]]) extends ItcImagingTableModel {
   val headers = Headers
   val results = List(
-    Column("CCD1\nPeak",       (c, i, r) => imgPeakPixelFlux(r, ccd=0),   tooltip = ItcTableModel.PeakPixelTooltip + " for CCD 1"),
+    Column("CCD1\nPeak",       (c, i, r) => peakPixelFlux   (r, ccd=0),   tooltip = ItcTableModel.PeakPixelTooltip + " for CCD 1"),
     Column("CCD1\nS/N Single", (c, i, r) => imgSingleSNRatio(r, ccd=0)),
     Column("CCD1\nS/N Total",  (c, i, r) => imgTotalSNRatio (r, ccd=0)),
-    Column("CCD2\nPeak",       (c, i, r) => imgPeakPixelFlux(r, ccd=1),   tooltip = ItcTableModel.PeakPixelTooltip + " for CCD 2"),
+    Column("CCD2\nPeak",       (c, i, r) => peakPixelFlux   (r, ccd=1),   tooltip = ItcTableModel.PeakPixelTooltip + " for CCD 2"),
     Column("CCD2\nS/N Single", (c, i, r) => imgSingleSNRatio(r, ccd=1)),
     Column("CCD2\nS/N Total",  (c, i, r) => imgTotalSNRatio (r, ccd=1)),
-    Column("CCD3\nPeak",       (c, i, r) => imgPeakPixelFlux(r, ccd=2),   tooltip = ItcTableModel.PeakPixelTooltip + " for CCD 3"),
+    Column("CCD3\nPeak",       (c, i, r) => peakPixelFlux   (r, ccd=2),   tooltip = ItcTableModel.PeakPixelTooltip + " for CCD 3"),
     Column("CCD3\nS/N Single", (c, i, r) => imgSingleSNRatio(r, ccd=2)),
     Column("CCD3\nS/N Total",  (c, i, r) => imgTotalSNRatio (r, ccd=2))
   )
@@ -199,10 +182,10 @@ class ItcGmosImagingTableModel(val keys: List[ItemKey], val uniqueSteps: List[It
 
 class ItcGsaoiImagingTableModel(val keys: List[ItemKey], val uniqueSteps: List[ItcUniqueConfig], val inputs: List[String\/ItcParameters], val res: List[Future[ItcService.Result]]) extends ItcImagingTableModel {
   val headers = HeadersWithCoadds ++ List(
-    Column("Strehl",          (c, i, r) => gems(i),                      tooltip = "Estimated Strehl and band")
+    Column("Strehl",          (c, i, r) => gems(i),                    tooltip = "Estimated Strehl and band")
   )
   val results = List(
-    Column("Peak",            (c, i, r) => imgPeakPixelFlux(r),          tooltip = ItcTableModel.PeakPixelTooltip),
+    Column("Peak",            (c, i, r) => peakPixelFlux   (r),        tooltip = ItcTableModel.PeakPixelTooltip),
     Column("S/N Single",      (c, i, r) => imgSingleSNRatio(r)),
     Column("S/N Total",       (c, i, r) => imgTotalSNRatio (r))
   )
@@ -221,7 +204,7 @@ sealed trait ItcSpectroscopyTableModel extends ItcTableModel
 class ItcGenericSpectroscopyTableModel(val keys: List[ItemKey], val uniqueSteps: List[ItcUniqueConfig], val inputs: List[String\/ItcParameters], val res: List[Future[ItcService.Result]], showCoadds: Boolean = false) extends ItcSpectroscopyTableModel {
   val headers = if (showCoadds) HeadersWithCoadds else Headers
   val results = List(
-    Column("Peak",            (c, i, r) => spcPeakElectrons(r),          tooltip = ItcTableModel.PeakElectronTooltip),
+    Column("Peak",            (c, i, r) => peakPixelFlux(r),          tooltip = ItcTableModel.PeakElectronTooltip),
     Column("S/N Single",      (c, i, r) => spcPeakSNSingle(r)),
     Column("S/N Total",       (c, i, r) => spcPeakSNFinal(r))
   )
@@ -234,12 +217,12 @@ class ItcGnirsSpectroscopyTableModel(val keys: List[ItemKey], val uniqueSteps: L
     if (xDisp)
       // ITC does not provide S/N Single values for cross dispersion
       List(
-        Column("Peak",            (c, i, r) => spcPeakElectrons(r),          tooltip = ItcTableModel.PeakElectronTooltip),
+        Column("Peak",            (c, i, r) => peakPixelFlux(r),     tooltip = ItcTableModel.PeakElectronTooltip),
         Column("S/N Total",       (c, i, r) => spcPeakSNFinal(r))
       )
     else
       List(
-        Column("Peak",            (c, i, r) => spcPeakElectrons(r),          tooltip = ItcTableModel.PeakElectronTooltip),
+        Column("Peak",            (c, i, r) => peakPixelFlux(r),     tooltip = ItcTableModel.PeakElectronTooltip),
         Column("S/N Single",      (c, i, r) => spcPeakSNSingle(r)),
         Column("S/N Total",       (c, i, r) => spcPeakSNFinal(r))
       )
