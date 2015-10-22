@@ -1,5 +1,6 @@
 package jsky.app.ot.tpe.gems;
 
+import edu.gemini.catalog.ui.tpe.CatalogImageDisplay;
 import edu.gemini.pot.ModelConverters;
 import edu.gemini.skycalc.Angle;
 import edu.gemini.spModel.core.MagnitudeBand;
@@ -24,29 +25,31 @@ import java.util.stream.Collectors;
  * OT-111: Controller for GemsGuideStarSearchDialog
  */
 class GemsGuideStarSearchController {
-    private GemsGuideStarSearchModel _model;
-    private GemsGuideStarWorker _worker;
-    private GemsGuideStarSearchDialog _dialog;
+    private final GemsGuideStarSearchModel _model;
+    private final GemsGuideStarWorker _worker;
+    private final GemsGuideStarSearchDialog _dialog;
+    private final CatalogImageDisplay _tpe;
 
     /**
      * Constructor
      * @param model the overall GUI model
      * @param worker does the background tasks like query, analyze
      * @param dialog the main dialog
+     * @param imageDisplay the Tpe reference
      */
     public GemsGuideStarSearchController(GemsGuideStarSearchModel model, GemsGuideStarWorker worker,
-                                         GemsGuideStarSearchDialog dialog) {
+                                         GemsGuideStarSearchDialog dialog, CatalogImageDisplay imageDisplay) {
         _model = model;
         _worker = worker;
         _dialog = dialog;
+        _tpe = imageDisplay;
     }
 
     /**
      * Searches for guide star candidates and saves the results in the model
      */
     public void query() throws Exception {
-        TpeImageWidget tpe = TpeManager.create().getImageWidget();
-        WorldCoords basePos = tpe.getBasePos();
+        WorldCoords basePos = _tpe.getBasePos();
         ObsContext obsContext = _worker.getObsContext(basePos.getRaDeg(), basePos.getDecDeg());
         Set<edu.gemini.spModel.core.Angle> posAngles = getPosAngles(obsContext);
 

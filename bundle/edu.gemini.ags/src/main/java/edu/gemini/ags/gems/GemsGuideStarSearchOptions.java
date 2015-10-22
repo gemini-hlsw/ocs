@@ -28,8 +28,6 @@ public class GemsGuideStarSearchOptions {
     public enum CatalogChoice {
         PPMXL_GEMINI("PPMXL@Gemini", "PPMXL at Gemini"),
         UCAC4_GEMINI("UCAC4", "UCAC4 at Gemini"),
-        //NOMAD1_CDS("NOMAD1@CDS", "NOMAD1 at CDS"),
-        //USER_CATALOG("user", "User Catalog"),
         ;
 
         public static CatalogChoice DEFAULT = UCAC4_GEMINI;

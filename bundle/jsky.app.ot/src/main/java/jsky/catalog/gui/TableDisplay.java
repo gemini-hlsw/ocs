@@ -1,13 +1,3 @@
-/*
- * ESO Archive
- *
- * $Id: TableDisplay.java 7983 2007-07-31 15:20:11Z swalker $
- *
- * who             when        what
- * --------------  ----------  ----------------------------------------
- * Allan Brighton  1999/05/12  Created
- */
-
 package jsky.catalog.gui;
 
 import jsky.catalog.FieldDesc;
