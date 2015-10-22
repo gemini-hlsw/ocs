@@ -168,7 +168,11 @@ object ModelConverters {
       val pmRa        = RightAscensionAngularVelocity(AngularVelocity(so.getHmsDegCoordinates.getPmRa.toMilliarcsecs.getMagnitude))
       val pmDec       = DeclinationAngularVelocity(AngularVelocity(so.getHmsDegCoordinates.getPmDec.toMilliarcsecs.getMagnitude))
       val pm          = ProperMotion(pmRa, pmDec)
-      SiderealTarget(so.getName, coordinates, Some(pm), None, None, mags.toList)
+      SiderealTarget.empty.copy(
+        name         = so.getName,
+        coordinates  = coordinates,
+        properMotion = Some(pm),
+        magnitudes   = mags.toList)
     }
   }
 
@@ -194,7 +198,13 @@ object ModelConverters {
         case t:HmsDegTarget => Some(t.getRedshift)
         case _              => None
       }
-      SiderealTarget(name, coordinates, pm, z, px, mags)
+      SiderealTarget.empty.copy(
+        name         = name,
+        coordinates  = coordinates,
+        properMotion = pm,
+        redshift     = z,
+        parallax     = px,
+        magnitudes   = mags)
     }
   }
 }

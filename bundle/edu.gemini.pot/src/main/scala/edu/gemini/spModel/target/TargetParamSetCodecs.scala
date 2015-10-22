@@ -34,14 +34,34 @@ object TargetParamSetCodecs {
       .withParam("time",           Lens.firstLens[Long, Coordinates])
       .withParamSet("coordinates", Lens.secondLens[Long, Coordinates])
 
+  implicit val SpectralDistributionParamSetCodec: ParamSetCodec[SpectralDistribution] =
+    new ParamSetCodec[SpectralDistribution] {
+      val pf = new PioXmlFactory
+      def encode(key: String, a: SpectralDistribution): ParamSet =
+        pf.createParamSet(key) <| (_.addParamSet(SourcePio.toParamSet(a, pf)))
+      def decode(ps: ParamSet): \/[PioError, SpectralDistribution] =
+        SourcePio.distributionFromParamSet(ps) \/> GeneralError("SpectralDistribution")
+    }
+
+  implicit val SpatialProfileParamSetCodec: ParamSetCodec[SpatialProfile] =
+    new ParamSetCodec[SpatialProfile] {
+      val pf = new PioXmlFactory
+      def encode(key: String, a: SpatialProfile): ParamSet =
+        pf.createParamSet(key) <| (_.addParamSet(SourcePio.toParamSet(a, pf)))
+      def decode(ps: ParamSet): \/[PioError, SpatialProfile] =
+        SourcePio.profileFromParamSet(ps) \/> GeneralError("SpectralDistribution")
+    }
+
   implicit val SiderealTargetParamSetCodec: ParamSetCodec[SiderealTarget] = 
     ParamSetCodec.initial(SiderealTarget.empty)
-      .withParam("name",                     SiderealTarget.name)
-      .withOptionalParam("redshift",         SiderealTarget.redshift)
-      .withOptionalParam("parallax",         SiderealTarget.parallax)
-      .withManyParamSet("magnitude",         SiderealTarget.magnitudes)
-      .withParamSet("coordinates",           SiderealTarget.coordinates)
-      .withOptionalParamSet("proper-motion", SiderealTarget.properMotion)
+      .withParam("name",                             SiderealTarget.name)
+      .withOptionalParam("redshift",                 SiderealTarget.redshift)
+      .withOptionalParam("parallax",                 SiderealTarget.parallax)
+      .withManyParamSet("magnitude",                 SiderealTarget.magnitudes)
+      .withParamSet("coordinates",                   SiderealTarget.coordinates)
+      .withOptionalParamSet("proper-motion",         SiderealTarget.properMotion)
+      .withOptionalParamSet("spectral-distribution", SiderealTarget.spectralDistribution)
+      .withOptionalParamSet("spatial-profile",       SiderealTarget.spatialProfile)
 
   implicit val TooTargetParamSetCodec: ParamSetCodec[TooTarget] =
     ParamSetCodec.initial(TooTarget.empty)
@@ -89,10 +109,12 @@ object TargetParamSetCodecs {
 
   implicit val NonSiderealTargetParamSetCodec: ParamSetCodec[NonSiderealTarget] =
     ParamSetCodec.initial(NonSiderealTarget.empty)
-      .withParam("name",                     NonSiderealTarget.name)
+      .withParam("name",                             NonSiderealTarget.name)
       .withOptionalParamSet("horizons-designation",  NonSiderealTarget.horizonsDesignation)
-      .withManyParamSet("ephemeris-element", NonSiderealTarget.ephemerisElements)
-      .withManyParamSet("magnitude",         NonSiderealTarget.magnitudes)
+      .withManyParamSet("ephemeris-element",         NonSiderealTarget.ephemerisElements)
+      .withManyParamSet("magnitude",                 NonSiderealTarget.magnitudes)
+      .withOptionalParamSet("spectral-distribution", NonSiderealTarget.spectralDistribution)
+      .withOptionalParamSet("spatial-profile",       NonSiderealTarget.spatialProfile)
 
   implicit val TargetParamSetCodec: ParamSetCodec[Target] =
     new ParamSetCodec[Target] {

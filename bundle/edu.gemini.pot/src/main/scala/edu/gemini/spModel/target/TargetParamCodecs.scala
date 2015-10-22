@@ -6,6 +6,7 @@ import edu.gemini.spModel.pio.Param
 import edu.gemini.spModel.pio.codec._
 
 import squants.motion.{ Velocity, KilometersPerSecond }
+import squants.radio.{SpectralIrradiance, Irradiance}
 
 import scalaz._, Scalaz._
 
