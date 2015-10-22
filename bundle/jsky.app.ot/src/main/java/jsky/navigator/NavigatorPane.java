@@ -10,14 +10,13 @@ import jsky.catalog.gui.TablePlotter;
 public class NavigatorPane extends GraphicsPane {
 
     /** A layer on which to draw catalog symbols */
-    private SymbolLayer _symbolLayer;
+    private final SymbolLayer _symbolLayer = new SymbolLayer();
 
     /**
      * Initialize a new NavigatorPane, which is a Diva GraphicsPane with a layer added
      * for catalog symbols.
      */
     public NavigatorPane() {
-        _symbolLayer = new SymbolLayer();
         _initNewLayer(_symbolLayer);
         _rebuildLayerArray();
     }
@@ -41,14 +40,13 @@ public class NavigatorPane extends GraphicsPane {
      */
     @Override
     protected void _rebuildLayerArray() {
-        _layers = new CanvasLayer[6];
-        int cursor = 0;
-        _layers[cursor++] = _foregroundEventLayer;
-        _layers[cursor++] = _symbolLayer;
-        _layers[cursor++] = _overlayLayer;
-        _layers[cursor++] = _foregroundLayer;
-        _layers[cursor++] = _backgroundLayer;
-        _layers[cursor] = _backgroundEventLayer;
+        _layers = new CanvasLayer[] {
+                _foregroundEventLayer,
+                _symbolLayer,
+                _overlayLayer,
+                _foregroundLayer,
+                _backgroundLayer,
+                _backgroundEventLayer};
     }
 }
 

@@ -20,7 +20,6 @@ import edu.gemini.spModel.obscomp.InstConfigInfo;
 import edu.gemini.spModel.too.TooType;
 import edu.gemini.spModel.type.DisplayableSpType;
 import edu.gemini.spModel.type.ObsoletableSpType;
-import edu.gemini.spModel.type.SpType;
 import edu.gemini.spModel.type.SpTypeUtil;
 import jsky.app.ot.shared.gemini.obscat.ObsCatalogInfo;
 import jsky.app.ot.userprefs.ui.PreferenceDialog;
