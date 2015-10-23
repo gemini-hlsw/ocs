@@ -1,10 +1,3 @@
-/*
- * Copyright 2000 Association for Universities for Research in Astronomy, Inc.,
- * Observatory Control System, Gemini Telescopes Project.
- *
- * $Id: DMS.java 7518 2007-01-02 20:39:21Z rnorris $
- */
-
 package jsky.coords;
 
 import java.io.Serializable;
@@ -51,7 +44,7 @@ public class DMS implements Serializable {
      * This case shows up in DMS values with zero degrees and negative values,
      * such as "-00 24 32"
      */
-    private static final Double minusZero = new Double(-0.0);
+    private static final Double minusZero = -0.0;
 
     /* true if value has been initialized */
     private boolean initialized = false;
@@ -92,7 +85,7 @@ public class DMS implements Serializable {
         StringTokenizer tok = new StringTokenizer(s, ": ");
         int n = 0;
         while (n < 3 && tok.hasMoreTokens()) {
-            vals[n++] = Double.valueOf(tok.nextToken()).doubleValue();
+            vals[n++] = Double.valueOf(tok.nextToken());
         }
 
         if (n >= 2) {

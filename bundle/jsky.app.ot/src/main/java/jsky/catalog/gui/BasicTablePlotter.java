@@ -29,6 +29,7 @@ import java.awt.geom.Ellipse2D;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.*;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -48,9 +49,6 @@ public class BasicTablePlotter
         implements TablePlotter, LayerListener, ChangeListener {
     private static final Logger LOG = Logger.getLogger(BasicTablePlotter.class.getName());
 
-    /** The object to use to draw catalog symbols */
-    private DivaImageGraphics _imageGraphics;
-
     /** The Diva layer to use to draw catalog symbols */
     private CanvasLayer _layer;
 
@@ -61,13 +59,13 @@ public class BasicTablePlotter
     private double _imageEquinox = 2000.;
 
     /** List of (table, symbolList) pairs, used to keep track of symbols for tables. */
-    private LinkedList<TableListItem> _tableList = new LinkedList<>();
+    private List<TableListItem> _tableList = new LinkedList<>();
 
     /** Array of (symbol, figureList) pairs (for each table, which may have multiple plot symbols) */
     private SymbolListItem[] _symbolAr;
 
     /** List of (shape, rowNum) pairs (for each table/symbol entry). */
-    private LinkedList<FigureListItem> _figureList;
+    private List<FigureListItem> _figureList;
 
     /** If true, catalog symbols are visible, otherwise hidden */
     private boolean _visible = true;
@@ -94,7 +92,9 @@ public class BasicTablePlotter
      * @param cc             Return the object used to convert to screen coordinates for drawing
      */
     public BasicTablePlotter(final CanvasGraphics canvasGraphics, final CoordinateConverter cc) {
-        _imageGraphics = (DivaImageGraphics) canvasGraphics;
+        /* The object to use to draw catalog symbols */
+        // TODO Make the castings safer
+        DivaImageGraphics _imageGraphics = (DivaImageGraphics) canvasGraphics;
         final NavigatorPane pane = (NavigatorPane) _imageGraphics.getGraphicsPane();
         _layer = pane.getSymbolLayer();
         pane.getBackgroundEventLayer().addLayerListener(this);
@@ -567,7 +567,7 @@ public class BasicTablePlotter
     @SuppressWarnings("unchecked")
     @Override
     public void replotAll() {
-        final LinkedList<TableListItem> list = (LinkedList<TableListItem>) _tableList.clone();
+        final LinkedList<TableListItem> list = new LinkedList<>(_tableList);
         _tableList = new LinkedList<>();
         for (TableListItem tli: list) {
             tli.inRange = tableInRange(tli.table);
@@ -713,13 +713,6 @@ public class BasicTablePlotter
     public void setVisible(final boolean isVisible) {
         _visible = isVisible;
     }
-
-
-    /** Return true if catalog symbols are visible, false if they are hidden. */
-    private boolean isVisible() {
-        return _visible;
-    }
-
 
     /**
      * Return a panel to use to configure the plot symbols for the given table.

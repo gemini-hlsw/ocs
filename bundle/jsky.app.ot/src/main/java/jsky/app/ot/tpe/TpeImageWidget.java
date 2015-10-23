@@ -457,8 +457,6 @@ public class TpeImageWidget extends CatalogImageDisplay implements MouseInputLis
      * Convert a TaggedPos to a screen coordinates.
      */
     public Point2D.Double taggedPosToScreenCoords(final WatchablePos tp) {
-//        if (!tp.isValid()) return null;
-
         if (tp instanceof OffsetPosBase) {
             final double x = ((OffsetPosBase) tp).getXaxis();
             final double y = ((OffsetPosBase) tp).getYaxis();
@@ -466,7 +464,6 @@ public class TpeImageWidget extends CatalogImageDisplay implements MouseInputLis
         }
 
         // Get the equinox assumed by the coordinate conversion methods (depends on current image)
-        //double equinox = getCoordinateConverter().getEquinox();
         final ITarget target = ((SPTarget) tp).getTarget();
         final Option<Long> when = _ctx.schedulingBlockJava().map(SchedulingBlock::start);
         final double x = target.getRaDegrees(when).getOrElse(0.0);

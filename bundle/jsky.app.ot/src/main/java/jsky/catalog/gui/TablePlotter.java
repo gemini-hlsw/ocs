@@ -10,7 +10,6 @@ import javax.swing.JPanel;
 import jsky.catalog.TablePlotSymbol;
 import jsky.catalog.TableQueryResult;
 import jsky.coords.CoordinateConverter;
-import jsky.graphics.CanvasGraphics;
 
 /**
  * This defines the interface for plotting the contents of a catalog table.

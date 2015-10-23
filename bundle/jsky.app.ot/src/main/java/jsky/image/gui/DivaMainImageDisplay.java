@@ -1351,6 +1351,7 @@ public class DivaMainImageDisplay extends DivaGraphicsImageDisplay implements Ma
     /**
      * Return the top level parent frame (or internal frame) used to close the window
      */
+    @Override
     public Component getRootComponent() {
         return _parent;
     }
@@ -1424,6 +1425,7 @@ public class DivaMainImageDisplay extends DivaGraphicsImageDisplay implements Ma
      * @param ra  RA center coordinate in deg J2000
      * @param dec Dec center coordinate in deg J2000
      */
+    @Override
     public void blankImage(double ra, double dec) {
         if (!checkSave())
             return;
@@ -1439,6 +1441,7 @@ public class DivaMainImageDisplay extends DivaGraphicsImageDisplay implements Ma
     /**
      * Set to true if the image file has been modified and needs saving.
      */
+    @Override
     public void setSaveNeeded(boolean b) {
         saveNeeded = b;
 
@@ -1454,7 +1457,7 @@ public class DivaMainImageDisplay extends DivaGraphicsImageDisplay implements Ma
      * @return false if the user pressed Cancel when asked to save the file,
      *         otherwise true
      */
-    protected boolean checkSave() {
+    private boolean checkSave() {
         if (saveNeeded) {
             String s = _filename;
             if (s != null) {
@@ -1496,6 +1499,7 @@ public class DivaMainImageDisplay extends DivaGraphicsImageDisplay implements Ma
      * Pop up a dialog to ask the user for a file name, and then save the image
      * to the selected file.
      */
+    @Override
     public void saveAs() {
         if (_saveDialog == null)
             _saveDialog = new ImageSaveDialog(this);
@@ -1507,6 +1511,7 @@ public class DivaMainImageDisplay extends DivaGraphicsImageDisplay implements Ma
      * based on the file suffix, which should be one of ".fits", ".jpg",
      * ".png", or ".tif".
      */
+    @Override
     public void saveAs(String filename) {
         String s = filename.toLowerCase();
         String tmpFile = filename + ".TMP";
@@ -1585,14 +1590,13 @@ public class DivaMainImageDisplay extends DivaGraphicsImageDisplay implements Ma
         _noStack = false;
     }
 
-
     /**
      * Paint the image and graphics to the given graphics object (for save and print features)
      */
+    @Override
     public void paintImageAndGraphics(Graphics2D g2D) {
         getCanvasPane().paint(g2D);
     }
-
 
     /**
      * Display a preview of the what the printed image view will look like.
@@ -1606,6 +1610,7 @@ public class DivaMainImageDisplay extends DivaGraphicsImageDisplay implements Ma
     /**
      * Pop up a dialog for printing the image.
      */
+    @Override
     public void print() {
         try {
             if (_printDialog == null)
@@ -1720,6 +1725,7 @@ public class DivaMainImageDisplay extends DivaGraphicsImageDisplay implements Ma
      * The position returned here should be used as the base position
      * for any catalog or image server requests.
      */
+    @Override
     public WorldCoords getBasePos() {
         if (isWCS()) {
             WorldCoordinateConverter wcs = getWCS();
@@ -1736,6 +1742,7 @@ public class DivaMainImageDisplay extends DivaGraphicsImageDisplay implements Ma
      * @param useImageSize if true, use the image size to get the search radius
      * @return radius values
      */
+    @Override
     public RadiusLimits getDefaultSearchRadius(WorldCoords centerPos, boolean useImageSize) {
         Point2D.Double p1 = new Point2D.Double(1., 1.);
         WorldCoordinateConverter wcs = getWCS();
@@ -1753,6 +1760,7 @@ public class DivaMainImageDisplay extends DivaGraphicsImageDisplay implements Ma
      *
      * @return magnitude limits including band
      */
+    @Override
     public MagnitudeLimits getDefaultSearchMagRange() {
         return null; // no defaults here
     }

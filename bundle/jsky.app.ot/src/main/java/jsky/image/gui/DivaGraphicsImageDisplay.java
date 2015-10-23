@@ -372,7 +372,7 @@ public class DivaGraphicsImageDisplay extends JCanvas implements GraphicsImageDi
      * @param before If true, it is before loading the image, otherwise afterwards.
      */
     protected void newImage(boolean before) {
-        if (before) {	       // before loading image
+        if (before) {       // before loading image
             if (_fitsImage != null) {
                 _fitsImage.clearTileCache();
             }
@@ -380,7 +380,7 @@ public class DivaGraphicsImageDisplay extends JCanvas implements GraphicsImageDi
             _centered = true;
             if (!_noInitWCS)
                 _wcs = null;
-        } else {			// after loading image
+        } else {    // after loading image
             _affineTransform = getAffineTransform();
             PlanarImage im = getImage();
             if (im != null) {

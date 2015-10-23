@@ -5,7 +5,7 @@ import javax.swing.table._
 import edu.gemini.ags.api.AgsMagnitude.MagnitudeTable
 import edu.gemini.ags.api.{AgsAnalysis, AgsGuideQuality, AgsRegistrar, AgsStrategy}
 import edu.gemini.ags.conf.ProbeLimitsTable
-import edu.gemini.catalog.api.{UCAC4, CatalogName, CatalogQuery}
+import edu.gemini.catalog.api.{RadiusConstraint, UCAC4, CatalogName, CatalogQuery}
 import edu.gemini.pot.sp.SPComponentType
 import edu.gemini.shared.util.immutable.{None => JNone, Some => JSome}
 import edu.gemini.spModel.core._
@@ -255,7 +255,7 @@ case class MagnitudeColumn(band: MagnitudeBand) extends CatalogNavigatorColumn[M
 /**
  * Data model for the main table of the catalog navigator
  */
-case class TargetsModel(info: Option[ObservationInfo], base: Coordinates, targets: List[SiderealTarget]) extends AbstractTableModel {
+case class TargetsModel(info: Option[ObservationInfo], base: Coordinates, radiusConstraint: RadiusConstraint, targets: List[SiderealTarget]) extends AbstractTableModel {
   // Required to give limits to the existential type list
   type ColumnsList = List[CatalogNavigatorColumn[A] forSome { type A >: Null <: AnyRef}]
 

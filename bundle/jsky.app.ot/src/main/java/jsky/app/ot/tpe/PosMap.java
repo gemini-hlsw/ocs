@@ -4,7 +4,6 @@ import edu.gemini.spModel.target.SPTarget;
 import edu.gemini.spModel.target.TelescopePosWatcher;
 import edu.gemini.spModel.target.WatchablePos;
 import edu.gemini.spModel.target.offset.OffsetPosBase;
-import edu.gemini.spModel.target.system.CoordinateParam;
 import edu.gemini.spModel.telescope.IssPort;
 
 import java.awt.geom.Point2D;
@@ -338,6 +337,7 @@ public abstract class PosMap <K, T extends WatchablePos>
     }
 
 
+    @SuppressWarnings("unchecked")
     public void telescopePosUpdate(WatchablePos tp) {
         Map<K, PosMapEntry<T>> posTable = getPosTable();
         if (posTable == null) return;

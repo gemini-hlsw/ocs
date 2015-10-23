@@ -1,27 +1,86 @@
 package edu.gemini.catalog.ui
 
-import java.awt.geom.AffineTransform
 import java.net.URL
 import java.util
 import javax.swing.event.TableModelListener
 
 import edu.gemini.catalog.ui.tpe.CatalogImageDisplay
-import jsky.app.ot.tpe.TpeImageWidget
 import jsky.catalog._
-import jsky.catalog.gui.BasicTablePlotter
-import jsky.coords.{CoordinateRadius, Coordinates, WorldCoordinates}
+import jsky.coords._
+import jsky.util.gui.StatusLogger
 import scalaz._
 import Scalaz._
 
 import scala.collection.JavaConverters._
 
-class TpePlotter(display: CatalogImageDisplay) {
+/**
+  * Encapsulates adapters to make the display plotter believe it is being used with an old-world catalog
+  * The implementation is minimal to get through plotting, it will be expanded if necessary
+  *
+  * Some day BasicTablePlotter will work using the new API rather than the other way around
+  */
+case class TpePlotter(display: CatalogImageDisplay) {
+
+  case class QueryArgsAdapter(model: TargetsModel) extends QueryArgs {
+    override def getCatalog: Catalog = ???
+
+    override def getStatusLogger: StatusLogger = ???
+
+    override def getParamValueAsInt(label: String, defaultValue: Int): Int = ???
+
+    override def setParamValueRange(label: String, minValue: scala.Any, maxValue: scala.Any): Unit = ???
+
+    override def setParamValueRange(label: String, minValue: Double, maxValue: Double): Unit = ???
+
+    override def getQueryType: String = ???
+
+    override def getId: String = ???
+
+    override def getMaxRows: Int = ???
+
+    override def getParamValue(i: Int): AnyRef = ???
+
+    override def getParamValue(label: String): AnyRef = ???
+
+    override def getConditions: Array[SearchCondition] = ???
+
+    override def setRegion(region: CoordinateRadius): Unit = ???
+
+    override def setId(id: String): Unit = ???
+
+    override def copy(): QueryArgs = ???
+
+    override def setMaxRows(maxRows: Int): Unit = ???
+
+    override def getParamValueAsString(label: String, defaultValue: String): String = ???
+
+    override def setQueryType(queryType: String): Unit = ???
+
+    override def getParamValueAsDouble(label: String, defaultValue: Double): Double = ???
+
+    override def setParamValues(values: Array[AnyRef]): Unit = ???
+
+    override def setParamValue(i: Int, value: scala.Any): Unit = ???
+
+    override def setParamValue(label: String, value: scala.Any): Unit = ???
+
+    override def setParamValue(label: String, value: Int): Unit = ???
+
+    override def setParamValue(label: String, value: Double): Unit = ???
+
+    override def getRegion: CoordinateRadius = {
+      val raHMS = model.base.ra.toAngle.toHMS
+      val decDMS = model.base.dec.toDegrees
+      val c = new WorldCoords(new HMS(raHMS.hours, raHMS.minutes, raHMS.seconds), new DMS(decDMS))
+      new CoordinateRadius(c, model.radiusConstraint.maxLimit.toArcmins)
+    }
+  }
 
   /**
     * This is a horrible class to adapt the new catalog api to the old one to reduce the amount of conversion of the code
     * It has many unimplemented method that will likely blow in the most unexpected places
     */
-  case object CatalogAdapter extends PlotableCatalog {
+  case class CatalogAdapter(model: TargetsModel) extends PlotableCatalog {
     override def getNumSymbols: Int = ???
 
     override def setSymbols(symbols: Array[TablePlotSymbol]): Unit = ???
@@ -40,7 +99,7 @@ class TpePlotter(display: CatalogImageDisplay) {
 
     override def setParent(catDir: CatalogDirectory): Unit = ???
 
-    override def getName: String = ???
+    override def getName: String = "catalog"
 
     override def isLocal: Boolean = ???
 
@@ -60,13 +119,13 @@ class TpePlotter(display: CatalogImageDisplay) {
 
     override def getPath: Array[Catalog] = ???
 
-    override def getNumParams: Int = ???
+    override def getNumParams: Int = 0
 
     override def getParamDesc(i: Int): FieldDesc = ???
 
     override def getParamDesc(name: String): FieldDesc = ???
 
-    override def getQueryArgs: QueryArgs = ???
+    override def getQueryArgs: QueryArgs = QueryArgsAdapter(model)
 
     override def query(queryArgs: QueryArgs): QueryResult = ???
 
@@ -75,7 +134,7 @@ class TpePlotter(display: CatalogImageDisplay) {
 
   /** Query Result Adapter to let the BasicTablePlotter work */
   case class TableQueryResultAdapter(model: TargetsModel) extends TableQueryResult {
-    val catalog = CatalogAdapter
+    val catalog = CatalogAdapter(model)
     // Table QueryResult methods
     override def getCatalog: Catalog = catalog
 
@@ -97,7 +156,7 @@ class TpePlotter(display: CatalogImageDisplay) {
 
     override def getWCSCenter: WorldCoordinates = ???
 
-    override def getQueryArgs: QueryArgs = ???
+    override def getQueryArgs: QueryArgs = catalog.getQueryArgs
 
     override def setQueryArgs(queryArgs: QueryArgs): Unit = ???
 
@@ -165,10 +224,4 @@ class TpePlotter(display: CatalogImageDisplay) {
     display.plotter.plot(TableQueryResultAdapter(model))
   }
 
-  /**
-    * Called when the view changes, e.g. with zoom in/out
-    */
-  def transformGraphics(trans: AffineTransform): Unit = {
-    display.plotter.transformGraphics(trans)
-  }
 }

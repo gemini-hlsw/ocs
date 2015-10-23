@@ -123,23 +123,15 @@ class CatalogImageDisplay(parent: Component, navigatorPane: NavigatorPane) exten
   val plotter = new BasicTablePlotter(getCanvasGraphics, getCoordinateConverter) <| {navigatorPane.setPlotter}
 
   /** The instance of the catalog navigator to use with this image display. */
+  @Deprecated
   private var _navigator: Navigator = null
+  @Deprecated
   /** The catalog navigator frame (or internal frame) */
   private var _navigatorFrame: Component = null
 
+  // TODO Move to scala collection
   /** Set of filenames: Used to keep track of the files visited in this session. */
   private final val _filesVisited: Set[String] = new HashSet[String]
-  /** Action to use to show the catalog window (Browse catalogs) */
-  private val _catalogBrowseAction: Action = new AbstractAction("Browse...", Resources.getIcon("Catalog24.gif")) {
-    def actionPerformed(evt: ActionEvent) {
-      try {
-        openCatalogWindow()
-      } catch {
-        case e: Exception =>
-          DialogUtil.error(e)
-      }
-    }
-  }
 
   /** Return the Diva pane containing the added catalog symbol layer. */
   override def getNavigatorPane: NavigatorPane = navigatorPane
@@ -246,9 +238,8 @@ class CatalogImageDisplay(parent: Component, navigatorPane: NavigatorPane) exten
       /*if (_navigatorFrame == null && !CatalogNavigator.isMainWindow) {
         makeNavigatorFrame()
       }*/
+      Option(plotter).foreach(_.replotAll())
       if (_navigatorFrame != null) {
-        val plotter = _navigator.getPlotter
-        Option(plotter).foreach(_.replotAll())
         val filename = getFilename
         val fitsImage = getFitsImage
         if (fitsImage != null && filename != null) {
@@ -282,18 +273,15 @@ class CatalogImageDisplay(parent: Component, navigatorPane: NavigatorPane) exten
   @Deprecated
   protected override def transformGraphics(trans: AffineTransform) {
     super.transformGraphics(trans)
-    QueryResultsFrame.transformGraphics(trans)
+    plotter.transformGraphics(trans)
   }
 
   /** Save any current catalog overlays as a FITS table in the image file. */
   def saveCatalogOverlaysWithImage(): Unit = {
-    Option(_navigator).foreach { n =>
-      val plotter = n.getPlotter
-      Option(plotter).foreach { p =>
-        val tables = p.getTables
-        Option(tables).foreach { t =>
-          for (table <- t) saveFITSTable(table)
-        }
+    Option(plotter).foreach { p =>
+      val tables = p.getTables
+      Option(tables).foreach { t =>
+        for (table <- t) saveFITSTable(table)
       }
     }
   }
@@ -314,8 +302,6 @@ class CatalogImageDisplay(parent: Component, navigatorPane: NavigatorPane) exten
     }
     _navigator.addPickedObjectToTable(stats, getPickObjectPanel.isUpdate)
   }
-
-  def getCatalogBrowseAction: Action = _catalogBrowseAction
 
   /**
     * Can be overridden in a derived class to filter the result of a catalog query.

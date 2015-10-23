@@ -1,7 +1,6 @@
 package edu.gemini.catalog.ui
 
 import java.awt.Color
-import java.awt.geom.AffineTransform
 import javax.swing.BorderFactory._
 import javax.swing.border.Border
 import javax.swing.{UIManager, DefaultComboBoxModel}
@@ -154,9 +153,8 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
   }
 
   private def plotResults(): Unit = {
-    //val tpe = TpeManager.open()
-    //tpe.reset(node.get.node.get)
-    plotter.foreach(_.plot(resultsTable.model.asInstanceOf[TargetsModel]))
+    val tpe = TpeManager.open()
+    TpePlotter(tpe.getImageWidget).plot(resultsTable.model.asInstanceOf[TargetsModel])
   }
 
   /**
@@ -165,7 +163,7 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
   def updateResults(info: Option[ObservationInfo], queryResult: QueryResult): Unit = {
     queryResult.query match {
       case q: ConeSearchCatalogQuery =>
-        val model = TargetsModel(info, q.base, queryResult.result.targets.rows)
+        val model = TargetsModel(info, q.base, q.radiusConstraint, queryResult.result.targets.rows)
         resultsTable.model = model
 
         // The sorting logic may change if the list of magnitudes changes
@@ -581,28 +579,16 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
   // Public interface
   val instance = this
 
-  // TODO Transform these to vals
-  var node:Option[TpeContext] = None
-  var plotter:Option[TpePlotter] = None
-
-  def transformGraphics(trans: AffineTransform): Unit = {
-    plotter.foreach(_.transformGraphics(trans))
-  }
-
   def showOn(i: CatalogImageDisplay, n: TpeContext) {
-    node = Option(n)
-    plotter = Option(new TpePlotter(i))
-    n.obsContext.foreach(showOn)
+    Option(n).flatMap(_.obsContext).foreach(showOn)
   }
 
   def showOn(obsCtx: ObsContext) {
-    // TODO The user should be able to select the strategy OCSADV-403
     AgsRegistrar.currentStrategy(obsCtx).foreach { strategy =>
       val mt = ProbeLimitsTable.loadOrThrow()
       // TODO Use only the first query, GEMS isn't supported yet OCSADV-242, OCSADV-239
       strategy.catalogQueries(obsCtx, mt).headOption.foreach {
         case q: ConeSearchCatalogQuery =>
-          // OCSADV-403 Display all the rows, removing the magnitude constraints
           showWithQuery(obsCtx, mt, q.copy(magnitudeConstraints = Nil))
         case _ =>
         // Ignore named queries
