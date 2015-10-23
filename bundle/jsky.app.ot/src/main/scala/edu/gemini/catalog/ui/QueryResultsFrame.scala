@@ -57,7 +57,7 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
           new GuidingFeedbackRenderer().componentFor(this, isSelected, focused, q, row, column)
         case (m: TargetsModel, value) =>
           // Delegate rendering to the model
-          m.rendererComponent(value ,isSelected, focused, row, column).getOrElse(super.rendererComponent(isSelected, focused, row, column))
+          m.rendererComponent(value ,isSelected, focused, row, column, this.peer).getOrElse(super.rendererComponent(isSelected, focused, row, column))
       }
   }
 

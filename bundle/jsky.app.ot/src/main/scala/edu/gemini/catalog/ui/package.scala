@@ -1,5 +1,6 @@
 package edu.gemini.catalog.ui
 
+import javax.swing.JTable
 import javax.swing.table._
 
 import edu.gemini.ags.api.AgsMagnitude.MagnitudeTable
@@ -32,7 +33,7 @@ import jsky.app.ot.gemini.editor.targetComponent.GuidingFeedback.ProbeLimits
 import edu.gemini.pot.ModelConverters._
 
 import scala.language.existentials
-import scala.swing.{Alignment, Label, Component}
+import scala.swing.{Table, Alignment, Label, Component}
 import scala.collection.JavaConverters._
 import scalaz._
 import Scalaz._
@@ -287,10 +288,21 @@ case class TargetsModel(info: Option[ObservationInfo], base: Coordinates, radius
 
   override def getColumnClass(columnIndex: Int): Class[_] = columns(columnIndex).clazz
 
-  def rendererComponent(value: Any, isSelected: Boolean, hasFocus: Boolean, row: Int, column: Int): Option[Component]= {
+  def rendererComponent(value: Any, isSelected: Boolean, hasFocus: Boolean, row: Int, column: Int, table: JTable): Option[Component]= {
     columns.lift(column).flatMap { c =>
       c.displayValue(value).map(new Label(_) {
         horizontalAlignment = Alignment.Right
+
+        // Required to set the background
+        opaque = true
+
+        if (isSelected) {
+          background = table.getSelectionBackground
+          foreground = table.getSelectionForeground
+        } else {
+          background = table.getBackground
+          foreground = table.getForeground
+        }
       })
     }
   }
