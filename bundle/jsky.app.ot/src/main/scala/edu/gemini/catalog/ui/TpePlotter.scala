@@ -1,5 +1,6 @@
 package edu.gemini.catalog.ui
 
+import java.awt.Color
 import java.net.URL
 import java.util
 import javax.swing.event.TableModelListener
@@ -92,7 +93,7 @@ case class TpePlotter(display: CatalogImageDisplay) {
     override def getSymbolDesc(i: Int): TablePlotSymbol = ???
 
     override def getSymbols: Array[TablePlotSymbol] = {
-      Array(new TablePlotSymbol())
+      Array(new TablePlotSymbol() <| {_.setFg(Color.red)} <| {_.setShape(TablePlotSymbol.CIRCLE)})
     }
 
     override def getType: String = ???
