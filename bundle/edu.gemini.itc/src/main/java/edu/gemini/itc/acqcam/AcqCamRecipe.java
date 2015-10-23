@@ -36,6 +36,10 @@ public final class AcqCamRecipe implements ImagingRecipe {
         Validation.validate(instrument, _obsDetailParameters, _sdParameters);
     }
 
+    public ItcImagingResult serviceResult(final ImagingResult r) {
+        return Recipe$.MODULE$.serviceResult(r);
+    }
+
     /**
      * Performs recipe calculation.
      */

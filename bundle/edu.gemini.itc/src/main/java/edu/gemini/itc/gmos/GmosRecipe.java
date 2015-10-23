@@ -48,16 +48,19 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
         Validation.validate(mainInstrument, _obsDetailParameters, _sdParameters);
     }
 
-    public Tuple2<ItcSpectroscopyResult, SpectroscopyResult[]> calculateSpectroscopy() {
-        final SpectroscopyResult[] r = doCalculateSpectroscopy();
+    public ItcImagingResult serviceResult(final ImagingResult[] r) {
+        return Recipe$.MODULE$.serviceResult(r);
+    }
+
+    public ItcSpectroscopyResult serviceResult(final SpectroscopyResult[] r) {
         final List<SpcChartData> dataSets = new ArrayList<SpcChartData>() {{
             add(createGmosChart(r, 0));
             add(createGmosChart(r, 1));
         }};
-        return new Tuple2<>(ItcSpectroscopyResult.apply(dataSets, new ArrayList<>()), r);
+        return ItcSpectroscopyResult.apply(dataSets, new ArrayList<>());
     }
 
-    private SpectroscopyResult[] doCalculateSpectroscopy() {
+    public SpectroscopyResult[] calculateSpectroscopy() {
         final Gmos[] ccdArray = mainInstrument.getDetectorCcdInstruments();
         final SpectroscopyResult[] results = new SpectroscopyResult[ccdArray.length];
         for (int i = 0; i < ccdArray.length; i++) {
@@ -67,15 +70,13 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
         return results;
     }
 
-    public NonEmptyList<ImagingResult> calculateImaging() {
+    public ImagingResult[] calculateImaging() {
         final Gmos[] ccdArray = mainInstrument.getDetectorCcdInstruments();
         final List<ImagingResult> results = new ArrayList<>();
         for (final Gmos instrument : ccdArray) {
             results.add(calculateImagingDo(instrument));
         }
-        // we know there is at least one CCD, so we can return this as a scala non-empty list
-        final scala.collection.Seq<ImagingResult> sResults = JavaConversions.asScalaBuffer(results);
-        return NonEmptyList$.MODULE$.apply(sResults.head(), sResults.tail().toSeq());
+        return results.toArray(new ImagingResult[results.size()]);
     }
 
     private Gmos createGmos(final GmosParameters parameters, final ObservationDetails observationDetails) {

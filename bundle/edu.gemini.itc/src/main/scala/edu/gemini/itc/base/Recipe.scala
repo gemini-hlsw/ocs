@@ -2,6 +2,7 @@ package edu.gemini.itc.base
 
 import java.util
 
+import edu.gemini.itc.operation.ImagingS2NMethodACalculation
 import edu.gemini.itc.shared._
 
 import scala.collection.JavaConversions._
@@ -13,20 +14,25 @@ sealed trait Recipe
 
 trait ImagingRecipe extends Recipe {
   def calculateImaging(): ImagingResult
+  def serviceResult(r: ImagingResult): ItcImagingResult
 }
 
 trait ImagingArrayRecipe extends Recipe {
-  def calculateImaging(): NonEmptyList[ImagingResult]
+  def calculateImaging(): Array[ImagingResult]
+  def serviceResult(r: Array[ImagingResult]): ItcImagingResult
 }
 
 
 trait SpectroscopyRecipe extends Recipe {
-  def calculateSpectroscopy(): (ItcSpectroscopyResult, SpectroscopyResult)
+  def calculateSpectroscopy(): SpectroscopyResult
+  def serviceResult(r: SpectroscopyResult): ItcSpectroscopyResult
 }
 
 
 trait SpectroscopyArrayRecipe extends Recipe {
-  def calculateSpectroscopy(): (ItcSpectroscopyResult, Array[SpectroscopyResult])
+  def calculateSpectroscopy(): Array[SpectroscopyResult]
+  def serviceResult(r: Array[SpectroscopyResult]): ItcSpectroscopyResult
+
 }
 
 object Recipe {
@@ -69,5 +75,24 @@ object Recipe {
     new SpcChartData(S2NChart, title, "Wavelength (nm)", "Signal / Noise per spectral pixel", data.toList)
   }
 
+
+  // Helper
+
+  def toImgData(result: ImagingResult): ImgData = result.is2nCalc match {
+    case i: ImagingS2NMethodACalculation  => ImgData(i.singleSNRatio(), i.totalSNRatio(), result.peakPixelCount)
+    case _                                => throw new NotImplementedError // TODO TODO TODO
+  }
+
+  // combine all warnings for the different CCDs and prepend a "CCD x:" in front of them
+  def combineWarnings[A <: edu.gemini.itc.base.Result](rs: List[A]): List[ItcWarning] =
+    if (rs.size > 1)
+      rs.zipWithIndex.flatMap { case (r, i) => r.warnings.map(w => new ItcWarning(s"CCD $i: ${w.msg}")) }
+    else
+      rs.head.warnings
+
+
+  def serviceResult(r: ImagingResult): ItcImagingResult = ItcImagingResult(List(toImgData(r)), r.warnings)
+
+  def serviceResult(r: Array[ImagingResult]): ItcImagingResult = ItcImagingResult(r.map(toImgData).toList, combineWarnings(r.toList))
 }
 

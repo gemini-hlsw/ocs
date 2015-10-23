@@ -53,8 +53,8 @@ public final class GnirsRecipe implements SpectroscopyRecipe {
         Validation.validate(instrument, _obsDetailParameters, _sdParameters);
     }
 
-    public Tuple2<ItcSpectroscopyResult, SpectroscopyResult> calculateSpectroscopy() {
-        final GnirsSpectroscopyResult r = doCalculateSpectroscopy();
+    public ItcSpectroscopyResult serviceResult(SpectroscopyResult res) {
+        final GnirsSpectroscopyResult r = (GnirsSpectroscopyResult) res;
         final List<SpcChartData> dataSets = new ArrayList<SpcChartData>() {{
             if (instrument.XDisp_IsUsed()) {
                 add(createGnirsSignalChart(r));
@@ -64,10 +64,10 @@ public final class GnirsRecipe implements SpectroscopyRecipe {
                 add(Recipe$.MODULE$.createS2NChart(r));
             }
         }};
-        return new Tuple2<>(ItcSpectroscopyResult.apply(dataSets, new ArrayList<>()), r);
+        return ItcSpectroscopyResult.apply(dataSets, new ArrayList<>());
     }
 
-    private GnirsSpectroscopyResult doCalculateSpectroscopy() {
+    public GnirsSpectroscopyResult calculateSpectroscopy() {
         // Module 1b
         // Define the source energy (as function of wavelength).
         //

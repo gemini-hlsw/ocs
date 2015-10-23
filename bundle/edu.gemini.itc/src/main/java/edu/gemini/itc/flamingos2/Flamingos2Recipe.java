@@ -54,16 +54,19 @@ public final class Flamingos2Recipe implements ImagingRecipe, SpectroscopyRecipe
         Validation.validate(instrument, _obsDetailParameters, _sdParameters);
     }
 
-    public Tuple2<ItcSpectroscopyResult, SpectroscopyResult> calculateSpectroscopy() {
-        final SpectroscopyResult r = doCalculateSpectroscopy();
+    public ItcImagingResult serviceResult(final ImagingResult r) {
+        return Recipe$.MODULE$.serviceResult(r);
+    }
+
+    public ItcSpectroscopyResult serviceResult(final SpectroscopyResult r) {
         final List<SpcChartData> dataSets = new ArrayList<SpcChartData>() {{
             add(Recipe$.MODULE$.createSignalChart(r));
             add(Recipe$.MODULE$.createS2NChart(r));
         }};
-        return new Tuple2<>(ItcSpectroscopyResult.apply(dataSets, new ArrayList<>()), r);
+        return ItcSpectroscopyResult.apply(dataSets, new ArrayList<>());
     }
 
-    private SpectroscopyResult doCalculateSpectroscopy() {
+    public SpectroscopyResult calculateSpectroscopy() {
         // Start of morphology section of ITC
 
         // Module 1a

@@ -69,18 +69,16 @@ class ItcServiceImpl extends ItcService {
 
   private def imagingResult(recipe: ImagingRecipe): Result = {
     val r = recipe.calculateImaging()
-    ItcResult.forResult(ItcImagingResult(List(toImgData(r)), r.warnings))
+    val s = recipe.serviceResult(r)
+    ItcResult.forResult(s)
   }
 
   private def imagingResult(recipe: ImagingArrayRecipe): Result = {
     val r = recipe.calculateImaging()
-    ItcResult.forResult(ItcImagingResult(r.map(toImgData).toList, combineWarnings(r.toList)))
+    val s = recipe.serviceResult(r)
+    ItcResult.forResult(s)
   }
 
-  private def toImgData(result: ImagingResult): ImgData = result.is2nCalc match {
-    case i: ImagingS2NMethodACalculation  => ImgData(i.singleSNRatio(), i.totalSNRatio(), result.peakPixelCount)
-    case _                                => throw new NotImplementedError
-  }
 
   // === Spectroscopy
 
@@ -99,22 +97,16 @@ class ItcServiceImpl extends ItcService {
 
   private def spectroscopyResult(recipe: SpectroscopyRecipe): Result = {
     val r = recipe.calculateSpectroscopy()
-    ItcResult.forResult(ItcSpectroscopyResult(r._1.charts, r._2.warnings))
+    val s = recipe.serviceResult(r)
+    ItcResult.forResult(s)
   }
 
   private def spectroscopyResult(recipe: SpectroscopyArrayRecipe): Result = {
     val r = recipe.calculateSpectroscopy()
-    val c = r._1.charts
-    val w = combineWarnings(r._2.toList)
-    ItcResult.forResult(ItcSpectroscopyResult(c, w))
+    val s = recipe.serviceResult(r)
+    ItcResult.forResult(s)
   }
 
-  // combine all warnings for the different CCDs and prepend a "CCD x:" in front of them
-  private def combineWarnings[A <: edu.gemini.itc.base.Result](rs: List[A]): List[ItcWarning] =
-    if (rs.size > 1)
-      rs.zipWithIndex.flatMap { case (r, i) => r.warnings.map(w => new ItcWarning(s"CCD $i: ${w.msg}")) }
-    else
-      rs.head.warnings
 
 
 }

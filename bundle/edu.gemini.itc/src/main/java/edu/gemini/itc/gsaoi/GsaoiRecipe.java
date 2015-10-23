@@ -40,6 +40,10 @@ public final class GsaoiRecipe implements ImagingRecipe {
         Validation.validate(instrument, _obsDetailParameters, _sdParameters);
     }
 
+    public ItcImagingResult serviceResult(final ImagingResult r) {
+        return Recipe$.MODULE$.serviceResult(r);
+    }
+
     public ImagingResult calculateImaging() {
         // Module 1b
         // Define the source energy (as function of wavelength).

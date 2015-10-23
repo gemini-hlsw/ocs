@@ -26,9 +26,10 @@ public final class NifsPrinter extends PrinterBase {
     }
 
     public void writeOutput() {
-        final Tuple2<ItcSpectroscopyResult, SpectroscopyResult> r = recipe.calculateSpectroscopy();
-        final UUID id = cache(r._1());
-        writeSpectroscopyOutput(id, r._2());
+        final SpectroscopyResult r = recipe.calculateSpectroscopy();
+        final ItcSpectroscopyResult s = recipe.serviceResult(r);
+        final UUID id = cache(s);
+        writeSpectroscopyOutput(id, r);
     }
 
     private void writeSpectroscopyOutput(final UUID id, final SpectroscopyResult result) {

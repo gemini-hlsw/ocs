@@ -34,9 +34,10 @@ public final class TRecsPrinter extends PrinterBase {
             final ImagingResult result = recipe.calculateImaging();
             writeImagingOutput(result);
         } else {
-            final Tuple2<ItcSpectroscopyResult, SpectroscopyResult> r = recipe.calculateSpectroscopy();
-            final UUID id = cache(r._1());
-            writeSpectroscopyOutput(id, r._2());
+            final SpectroscopyResult r = recipe.calculateSpectroscopy();
+            final ItcSpectroscopyResult s = recipe.serviceResult(r);
+            final UUID id = cache(s);
+            writeSpectroscopyOutput(id, r);
         }
     }
 

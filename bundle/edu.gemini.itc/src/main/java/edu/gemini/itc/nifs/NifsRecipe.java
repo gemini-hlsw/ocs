@@ -51,17 +51,16 @@ public final class NifsRecipe implements SpectroscopyRecipe {
     /**
      * Performs recipe calculation.
      */
-    public Tuple2<ItcSpectroscopyResult, SpectroscopyResult> calculateSpectroscopy() {
-        final SpectroscopyResult r = doCalculateSpectroscopy();
+    public ItcSpectroscopyResult serviceResult(final SpectroscopyResult r) {
         final List<SpcChartData> dataSets = new ArrayList<>();
         for (int i = 0; i < r.specS2N().length; i++) {
             dataSets.add(createNifsSignalChart(r, i));
             dataSets.add(createNifsS2NChart(r, i));
         }
-        return new Tuple2<>(ItcSpectroscopyResult.apply(dataSets, new ArrayList<>()), r);
+        return ItcSpectroscopyResult.apply(dataSets, new ArrayList<>());
     }
 
-    private SpectroscopyResult doCalculateSpectroscopy() {
+    public SpectroscopyResult calculateSpectroscopy() {
 
         // Calculate image quality
         final ImageQualityCalculatable IQcalc = ImageQualityCalculationFactory.getCalculationInstance(_sdParameters, _obsConditionParameters, _telescope, instrument);

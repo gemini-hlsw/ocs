@@ -54,16 +54,19 @@ public final class NiriRecipe implements ImagingRecipe, SpectroscopyRecipe {
 
     }
 
-    public Tuple2<ItcSpectroscopyResult, SpectroscopyResult> calculateSpectroscopy() {
-        final SpectroscopyResult r = doCalculateSpectroscopy();
+    public ItcImagingResult serviceResult(final ImagingResult r) {
+        return Recipe$.MODULE$.serviceResult(r);
+    }
+
+    public ItcSpectroscopyResult serviceResult(final SpectroscopyResult r) {
         final List<SpcChartData> dataSets = new ArrayList<SpcChartData>() {{
             add(Recipe$.MODULE$.createSignalChart(r, 0));
             add(Recipe$.MODULE$.createS2NChart(r, 0));
         }};
-        return new Tuple2<>(ItcSpectroscopyResult.apply(dataSets, new ArrayList<>()), r);
+        return ItcSpectroscopyResult.apply(dataSets, new ArrayList<>());
     }
 
-    private SpectroscopyResult doCalculateSpectroscopy() {
+    public SpectroscopyResult calculateSpectroscopy() {
         // Module 1b
         // Define the source energy (as function of wavelength).
         //

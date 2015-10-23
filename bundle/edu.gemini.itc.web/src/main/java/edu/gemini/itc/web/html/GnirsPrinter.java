@@ -27,9 +27,10 @@ public final class GnirsPrinter extends PrinterBase {
     }
 
     public void writeOutput() {
-        final Tuple2<ItcSpectroscopyResult, SpectroscopyResult> r = recipe.calculateSpectroscopy();
-        final UUID id = cache(r._1());
-        writeSpectroscopyOutput(id, (GnirsSpectroscopyResult) r._2());
+        final GnirsSpectroscopyResult r = recipe.calculateSpectroscopy();
+        final ItcSpectroscopyResult s = recipe.serviceResult(r);
+        final UUID id = cache(s);
+        writeSpectroscopyOutput(id, r);
     }
 
     private void writeSpectroscopyOutput(final UUID id, final GnirsSpectroscopyResult result) {

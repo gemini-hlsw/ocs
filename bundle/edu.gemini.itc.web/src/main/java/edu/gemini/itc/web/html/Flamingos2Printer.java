@@ -39,10 +39,11 @@ public final class Flamingos2Printer extends PrinterBase {
             final ImagingResult result = recipe.calculateImaging();
             writeImagingOutput(result);
         } else {
-            final Tuple2<ItcSpectroscopyResult, SpectroscopyResult> r = recipe.calculateSpectroscopy();
-            final UUID id = cache(r._1());
-            writeSpectroscopyOutput(id, r._2());
-            validatePlottingDetails(pdp, r._2().instrument());
+            final SpectroscopyResult r = recipe.calculateSpectroscopy();
+            final ItcSpectroscopyResult s = recipe.serviceResult(r);
+            final UUID id = cache(s);
+            writeSpectroscopyOutput(id, r);
+            validatePlottingDetails(pdp, r.instrument());
         }
     }
 

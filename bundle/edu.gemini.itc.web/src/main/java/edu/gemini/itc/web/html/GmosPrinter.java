@@ -5,11 +5,10 @@ import edu.gemini.itc.base.SpectroscopyResult;
 import edu.gemini.itc.gmos.Gmos;
 import edu.gemini.itc.gmos.GmosRecipe;
 import edu.gemini.itc.shared.*;
-import edu.gemini.spModel.gemini.gmos.GmosNorthType;
-import edu.gemini.spModel.gemini.gmos.GmosSouthType;
 import edu.gemini.spModel.core.PointSource$;
 import edu.gemini.spModel.core.UniformSource$;
-import scala.Tuple2;
+import edu.gemini.spModel.gemini.gmos.GmosNorthType;
+import edu.gemini.spModel.gemini.gmos.GmosSouthType;
 import scala.collection.JavaConversions;
 
 import java.io.PrintWriter;
@@ -36,12 +35,13 @@ public final class GmosPrinter extends PrinterBase {
      */
     public void writeOutput() {
         if (isImaging) {
-            final scalaz.NonEmptyList<ImagingResult> results = recipe.calculateImaging();
+            final ImagingResult[] results = recipe.calculateImaging();
             writeImagingOutput(results);
         } else {
-            final Tuple2<ItcSpectroscopyResult, SpectroscopyResult[]> r = recipe.calculateSpectroscopy();
-            final UUID id = cache(r._1());
-            writeSpectroscopyOutput(id, r._2());
+            final SpectroscopyResult[] r = recipe.calculateSpectroscopy();
+            final ItcSpectroscopyResult s = recipe.serviceResult(r);
+            final UUID id = cache(s);
+            writeSpectroscopyOutput(id, r);
         }
     }
 
@@ -110,9 +110,9 @@ public final class GmosPrinter extends PrinterBase {
     }
 
 
-    private void writeImagingOutput(final scalaz.NonEmptyList<ImagingResult> results) {
+    private void writeImagingOutput(final ImagingResult[] results) {
 
-        final Gmos mainInstrument = (Gmos) results.head().instrument(); // main instrument
+        final Gmos mainInstrument = (Gmos) results[0].instrument(); // main instrument
 
         _println("");
 
@@ -122,13 +122,13 @@ public final class GmosPrinter extends PrinterBase {
             final String ccdName = instrument.getDetectorCcdName();
             final String forCcdName = ccdName.length() == 0 ? "" : " for " + ccdName;
 
-            final ImagingResult result = results.list().apply(ccdIndex);
+            final ImagingResult result = results[ccdIndex];
 
             if (ccdIndex == 0) {
                 _print(CalculatablePrinter.getTextResult(result.sfCalc()));
                 _println(CalculatablePrinter.getTextResult(result.iqCalc()));
                 _println("Sky subtraction aperture = "
-                        + results.head().observation().getSkyApertureDiameter()
+                        + results[0].observation().getSkyApertureDiameter()
                         + " times the software aperture.\n");
                 _println("Read noise: " + instrument.getReadNoise());
             }
@@ -146,7 +146,7 @@ public final class GmosPrinter extends PrinterBase {
 
         }
 
-        printConfiguration(results.head().parameters(), mainInstrument);
+        printConfiguration(results[0].parameters(), mainInstrument);
     }
 
     private void printConfiguration(final ItcParameters p, final Gmos mainInstrument) {

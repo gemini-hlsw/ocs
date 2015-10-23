@@ -75,16 +75,19 @@ public final class MichelleRecipe implements ImagingRecipe, SpectroscopyRecipe {
 
     }
 
-    public Tuple2<ItcSpectroscopyResult, SpectroscopyResult> calculateSpectroscopy() {
-        final SpectroscopyResult r = doCalculateSpectroscopy();
+    public ItcImagingResult serviceResult(final ImagingResult r) {
+        return Recipe$.MODULE$.serviceResult(r);
+    }
+
+    public ItcSpectroscopyResult serviceResult(final SpectroscopyResult r) {
         final List<SpcChartData> dataSets = new ArrayList<SpcChartData>() {{
             add(Recipe$.MODULE$.createSignalChart(r, 0));
             add(Recipe$.MODULE$.createS2NChart(r, 0));
         }};
-        return new Tuple2<>(ItcSpectroscopyResult.apply(dataSets, new ArrayList<>()), r);
+        return ItcSpectroscopyResult.apply(dataSets, new ArrayList<>());
     }
 
-    private SpectroscopyResult doCalculateSpectroscopy() {
+    public SpectroscopyResult calculateSpectroscopy() {
 
         // Get the summed source and sky
         final SEDFactory.SourceResult calcSource = SEDFactory.calculate(instrument, _sdParameters, _obsConditionParameters, _telescope);
