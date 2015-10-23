@@ -4,7 +4,6 @@ import java.net.URL
 import javax.swing.event.ChangeListener
 
 import edu.gemini.catalog.api.{MagnitudeLimits, RadiusLimits}
-import edu.gemini.catalog.ui.QueryResultsFrame
 import jsky.catalog.Catalog
 import jsky.catalog.QueryResult
 import jsky.catalog.TableQueryResult
@@ -18,10 +17,7 @@ import jsky.image.gui.ImageDisplayMenuBar
 import jsky.image.gui.ImageDisplayToolBar
 import jsky.image.gui.{ImageGraphicsHandler, DivaMainImageDisplay}
 import jsky.navigator._
-import jsky.util.Preferences
-import jsky.util.Resources
 import jsky.util.gui.DialogUtil
-import jsky.util.gui.SwingUtil
 import javax.swing._
 import java.awt._
 import java.awt.event.{ActionListener, ActionEvent}
@@ -122,13 +118,6 @@ trait CatalogDisplay {
 class CatalogImageDisplay(parent: Component, navigatorPane: NavigatorPane) extends DivaMainImageDisplay(navigatorPane, parent) with CatalogNavigatorOpener with CatalogDisplay {
   val plotter = new BasicTablePlotter(getCanvasGraphics, getCoordinateConverter) <| {navigatorPane.setPlotter}
 
-  /** The instance of the catalog navigator to use with this image display. */
-  @Deprecated
-  private var _navigator: Navigator = null
-  @Deprecated
-  /** The catalog navigator frame (or internal frame) */
-  private var _navigatorFrame: Component = null
-
   // TODO Move to scala collection
   /** Set of filenames: Used to keep track of the files visited in this session. */
   private final val _filesVisited: Set[String] = new HashSet[String]
@@ -139,15 +128,7 @@ class CatalogImageDisplay(parent: Component, navigatorPane: NavigatorPane) exten
   /**
     * Set the instance of the catalog navigator to use with this image display.
     */
-  override def setNavigator(navigator: Navigator):Unit = {
-    _navigator = navigator
-    _navigatorFrame = navigator.getRootComponent
-  }
-
-  /**
-    * Return the instance of the catalog navigator used with this image display.
-    */
-  def getNavigator: Navigator = _navigator
+  override def setNavigator(navigator: Navigator):Unit = ???
 
   /**
     * Open the catalog navigator window.
@@ -200,33 +181,6 @@ class CatalogImageDisplay(parent: Component, navigatorPane: NavigatorPane) exten
   override def saveFITSTable(table: TableQueryResult):Unit = throw new UnsupportedOperationException()
 
   /**
-    * If the given catalog argument is null, display the catalog window ("Browse" mode),
-    * otherwise query the catalog using the default arguments for the current image.
-    */
-  protected def showNavigatorFrame(cat: Catalog):Unit = {
-    if (cat != null) {
-      _navigator.setAutoQuery(true)
-      _navigator.setQueryResult(cat)
-      if (cat.isImageServer) {
-        Preferences.set(Catalog.SKY_USER_CATALOG, cat.getName)
-      }
-    } else {
-      _navigator.setAutoQuery(false)
-      SwingUtil.showFrame(_navigatorFrame)
-    }
-  }
-
-  /**
-    * Make a NavigatorFrame or NavigatorInternalFrame, depending
-    * on what type of frames are being used.
-    */
-  protected def makeNavigatorFrame(): Unit = {
-    _navigator = NavigatorManager.create
-    _navigatorFrame = _navigator.getParentFrame
-    _navigator.setImageDisplay(this)
-  }
-
-  /**
     * This method is called before and after a new image is loaded, each time
     * with a different argument.
     *
@@ -235,11 +189,10 @@ class CatalogImageDisplay(parent: Component, navigatorPane: NavigatorPane) exten
   protected override def newImage(before: Boolean) {
     super.newImage(before)
     if (!before) {
-      /*if (_navigatorFrame == null && !CatalogNavigator.isMainWindow) {
-        makeNavigatorFrame()
-      }*/
+      // replot
       Option(plotter).foreach(_.replotAll())
-      if (_navigatorFrame != null) {
+      // TODO Fix saving the tables
+      /*if (_navigatorFrame != null) {
         val filename = getFilename
         val fitsImage = getFitsImage
         if (fitsImage != null && filename != null) {
@@ -253,17 +206,7 @@ class CatalogImageDisplay(parent: Component, navigatorPane: NavigatorPane) exten
             }
           }
         }
-      }
-    }
-  }
-
-  /** Cleanup when the window is no longer needed. */
-  override def dispose(): Unit = {
-    super.dispose()
-    Option(_navigatorFrame).foreach {
-      case frame: JFrame         => frame.dispose()
-      case frame: JInternalFrame => frame.dispose()
-      case _                     => //
+      }*/
     }
   }
 
@@ -293,14 +236,14 @@ class CatalogImageDisplay(parent: Component, navigatorPane: NavigatorPane) exten
     * displayed table, or create a new table if none is being displayed.
     */
   protected override def pickedObject(): Unit = {
-    if (_navigatorFrame == null) makeNavigatorFrame()
-    if (_navigator == null) return
     val stats = getPickObjectPanel.getStatistics
     if (stats == null) {
       DialogUtil.error("No object was selected")
       return
     }
-    _navigator.addPickedObjectToTable(stats, getPickObjectPanel.isUpdate)
+    // TODO Support picked objects
+    //_navigator.addPickedObjectToTable(stats, getPickObjectPanel.isUpdate)
+    ???
   }
 
   /**

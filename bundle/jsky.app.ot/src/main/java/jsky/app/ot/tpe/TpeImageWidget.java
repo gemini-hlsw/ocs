@@ -26,7 +26,6 @@ import jsky.coords.CoordinateConverter;
 import jsky.coords.Coordinates;
 import jsky.catalog.gui.NamedCoordinates;
 import jsky.coords.WorldCoords;
-import jsky.navigator.Navigator;
 import jsky.navigator.NavigatorPane;
 import jsky.util.gui.DialogUtil;
 
@@ -575,12 +574,8 @@ public class TpeImageWidget extends CatalogImageDisplay implements MouseInputLis
      * point to the center of the symbol and return the world coordinates position
      * from the catalog table row. Otherwise, return null and do nothing.
      */
-    protected NamedCoordinates getCatalogPosition(Point2D.Double p) {
-        final Navigator nav = getNavigator();
-        if (nav == null) {
-            return null;
-        }
-        final TablePlotter plotter = nav.getPlotter();
+    protected NamedCoordinates getCatalogPosition(final Point2D.Double p) {
+        final TablePlotter plotter = plotter();
         if (plotter == null) {
             return null;
         }
@@ -621,7 +616,7 @@ public class TpeImageWidget extends CatalogImageDisplay implements MouseInputLis
     public void displayFITSTable(final int hdu) {
         super.displayFITSTable(hdu);
         // make the navigator window pop up in this case
-        super.showNavigatorFrame(null);
+        // TODO Check if this is needed
     }
 
 
