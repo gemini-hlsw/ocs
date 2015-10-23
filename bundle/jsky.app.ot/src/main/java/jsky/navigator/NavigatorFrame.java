@@ -48,7 +48,7 @@ public class NavigatorFrame extends JFrame {
      * display the contents of the given catalog directory in it.
      */
     public NavigatorFrame() {
-        this(null);
+        this(new NavigatorImageDisplay(null));
     }
 
 
