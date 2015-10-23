@@ -17,6 +17,10 @@ import scala.collection.JavaConverters._
 
 class TpePlotter(display: CatalogImageDisplay) {
 
+  /**
+    * This is a horrible class to adapt the new catalog api to the old one to reduce the amount of conversion of the code
+    * It has many unimplemented method that will likely blow in the most unexpected places
+    */
   case object CatalogAdapter extends PlotableCatalog {
     override def getNumSymbols: Int = ???
 
@@ -157,7 +161,7 @@ class TpePlotter(display: CatalogImageDisplay) {
   /**
    * Plot the given table data.
    */
-  def plot(display: TpeImageWidget, model: TargetsModel): Unit = {
+  def plot(model: TargetsModel): Unit = {
     display.plotter.plot(TableQueryResultAdapter(model))
   }
 

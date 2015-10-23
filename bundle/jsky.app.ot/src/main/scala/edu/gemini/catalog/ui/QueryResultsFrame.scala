@@ -71,9 +71,7 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
   private lazy val plotButton = new Button("Plot") {
     reactions += {
       case ButtonClicked(_) =>
-        val tpe = TpeManager.open()
-        tpe.reset(node.get.node.get)
-        plotter.foreach(_.plot(tpe.getImageWidget, resultsTable.model.asInstanceOf[TargetsModel]))
+        plotResults()
     }
   }
 
@@ -155,6 +153,12 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
     }
   }
 
+  private def plotResults(): Unit = {
+    //val tpe = TpeManager.open()
+    //tpe.reset(node.get.node.get)
+    plotter.foreach(_.plot(resultsTable.model.asInstanceOf[TargetsModel]))
+  }
+
   /**
    * Called after  a query completes to update the UI according to the results
    */
@@ -177,6 +181,9 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
 
         // Update the query form
         QueryForm.updateQuery(info, q)
+
+        // Plot the results when they arrive
+        plotResults()
       case _ =>
     }
   }
@@ -574,6 +581,7 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
   // Public interface
   val instance = this
 
+  // TODO Transform these to vals
   var node:Option[TpeContext] = None
   var plotter:Option[TpePlotter] = None
 
