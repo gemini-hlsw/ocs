@@ -7,6 +7,7 @@ import edu.gemini.spModel.data.YesNoType;
 import scala.Tuple2;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -76,7 +77,7 @@ public final class MichelleRecipe implements ImagingRecipe, SpectroscopyRecipe {
     }
 
     public ItcImagingResult serviceResult(final ImagingResult r) {
-        return Recipe$.MODULE$.serviceResult(r);
+        return Recipe$.MODULE$.serviceResult(r, Collections.emptyList());
     }
 
     public ItcSpectroscopyResult serviceResult(final SpectroscopyResult r) {

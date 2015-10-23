@@ -41,7 +41,8 @@ public final class GsaoiRecipe implements ImagingRecipe {
     }
 
     public ItcImagingResult serviceResult(final ImagingResult r) {
-        return Recipe$.MODULE$.serviceResult(r);
+        final List<ItcWarning> warnings = warningsForImaging(instrument, r.peakPixelCount());
+        return Recipe$.MODULE$.serviceResult(r, warnings);
     }
 
     public ImagingResult calculateImaging() {
@@ -113,8 +114,7 @@ public final class GsaoiRecipe implements ImagingRecipe {
         IS2Ncalc.setSecondarySourceFraction(halo_source_fraction);
         IS2Ncalc.calculate();
 
-        final List<ItcWarning> warnings = warningsForImaging(instrument, peak_pixel_count);
-        return ImagingResult.apply(p, instrument, IQcalc, SFcalc, peak_pixel_count, IS2Ncalc, gems, warnings);
+        return ImagingResult.apply(p, instrument, IQcalc, SFcalc, peak_pixel_count, IS2Ncalc, gems);
     }
 
     // TODO: some of these warnings are similar for different instruments and could be calculated in a central place

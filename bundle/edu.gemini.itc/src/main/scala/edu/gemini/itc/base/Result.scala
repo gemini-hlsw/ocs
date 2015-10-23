@@ -14,7 +14,6 @@ import scala.collection.JavaConversions._
  */
 
 sealed trait Result {
-  def warnings:   List[ItcWarning]
   def parameters: ItcParameters
   def instrument: Instrument
 
@@ -33,13 +32,9 @@ final case class ImagingResult(
                       sfCalc:           SourceFraction,
                       peakPixelCount:   Double,
                       is2nCalc:         ImagingS2NCalculatable,
-                      aoSystem:         Option[AOSystem],
-                      warnings:         List[ItcWarning] = List()) extends Result
+                      aoSystem:         Option[AOSystem]) extends Result
 
 object ImagingResult {
-
-  // Helper for Java usage
-  val NoWarnings = List[ItcWarning]()
 
   def apply(parameters: ItcParameters, instrument: Instrument, iqCalc: ImageQualityCalculatable, sfCalc: SourceFraction, peakPixelCount: Double, IS2Ncalc: ImagingS2NCalculatable) =
     new ImagingResult(parameters, instrument, iqCalc, sfCalc, peakPixelCount, IS2Ncalc, None)
@@ -47,11 +42,6 @@ object ImagingResult {
   def apply(parameters: ItcParameters, instrument: Instrument, IQcalc: ImageQualityCalculatable, SFcalc: SourceFraction, peakPixelCount: Double, IS2Ncalc: ImagingS2NCalculatable, aoSystem: AOSystem) =
     new ImagingResult(parameters, instrument, IQcalc, SFcalc, peakPixelCount, IS2Ncalc, Some(aoSystem))
 
-  def apply(parameters: ItcParameters, instrument: Instrument, IQcalc: ImageQualityCalculatable, SFcalc: SourceFraction, peakPixelCount: Double, IS2Ncalc: ImagingS2NCalculatable, warnings: java.util.List[ItcWarning]) =
-    new ImagingResult(parameters, instrument, IQcalc, SFcalc, peakPixelCount, IS2Ncalc, None, warnings.toList)
-
-  def apply(parameters: ItcParameters, instrument: Instrument, IQcalc: ImageQualityCalculatable, SFcalc: SourceFraction, peakPixelCount: Double, IS2Ncalc: ImagingS2NCalculatable, aoSystem: AOSystem, warnings: java.util.List[ItcWarning]) =
-    new ImagingResult(parameters, instrument, IQcalc, SFcalc, peakPixelCount, IS2Ncalc, Some(aoSystem), warnings.toList)
 }
 
 sealed trait SpectroscopyResult extends Result {
@@ -70,8 +60,7 @@ final case class GenericSpectroscopyResult(
                       iqCalc:           ImageQualityCalculatable,
                       specS2N:          Array[SpecS2N],
                       st:               SlitThroughput,
-                      aoSystem:         Option[AOSystem],
-                      warnings:         List[ItcWarning] = List()) extends SpectroscopyResult
+                      aoSystem:         Option[AOSystem]) extends SpectroscopyResult
 
 /* Internal object for GNIRS spectroscopy results.
  * I somehow think it should be possible to unify this in a clever way with the "generic" spectroscopy result
@@ -87,16 +76,12 @@ final case class GnirsSpectroscopyResult(
                       aoSystem:         Option[AOSystem],
                       signalOrder:      Array[VisitableSampledSpectrum],
                       backGroundOrder:  Array[VisitableSampledSpectrum],
-                      finalS2NOrder:    Array[VisitableSampledSpectrum],
-                      warnings:         List[ItcWarning] = List()) extends SpectroscopyResult
+                      finalS2NOrder:    Array[VisitableSampledSpectrum]) extends SpectroscopyResult
 
 object SpectroscopyResult {
 
   def apply(parameters: ItcParameters, instrument: Instrument, sfCalc: SourceFraction, iqCalc: ImageQualityCalculatable, specS2N: Array[SpecS2N], st: SlitThroughput) =
     new GenericSpectroscopyResult(parameters, instrument, sfCalc, iqCalc, specS2N, st, None)
-
-  def apply(parameters: ItcParameters, instrument: Instrument, sfCalc: SourceFraction, iqCalc: ImageQualityCalculatable, specS2N: Array[SpecS2N], st: SlitThroughput, warnings: java.util.List[ItcWarning]) =
-    new GenericSpectroscopyResult(parameters, instrument, sfCalc, iqCalc, specS2N, st, None, warnings.toList)
 
 }
 

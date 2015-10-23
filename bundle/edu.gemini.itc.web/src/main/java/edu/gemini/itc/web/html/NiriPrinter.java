@@ -42,7 +42,8 @@ public final class NiriPrinter extends PrinterBase {
     public void writeOutput() {
         if (isImaging) {
             final ImagingResult result = recipe.calculateImaging();
-            writeImagingOutput(result);
+            final ItcImagingResult s = recipe.serviceResult(result);
+            writeImagingOutput(result, s);
         } else {
             final SpectroscopyResult r = recipe.calculateSpectroscopy();
             final ItcSpectroscopyResult s = recipe.serviceResult(r);
@@ -106,7 +107,7 @@ public final class NiriPrinter extends PrinterBase {
 
     }
 
-    private void writeImagingOutput(final ImagingResult result) {
+    private void writeImagingOutput(final ImagingResult result, final ItcImagingResult s) {
 
         final Niri instrument = (Niri) result.instrument();
 
@@ -129,7 +130,7 @@ public final class NiriPrinter extends PrinterBase {
         _println(String.format("The peak pixel signal + background is %.0f. This is %.0f%% of the full well depth of %.0f.",
                 result.peakPixelCount(), result.peakPixelCount() / instr.wellDepth().depth() * 100, instr.wellDepth().depth()));
 
-        for (final ItcWarning warning : JavaConversions.asJavaList(result.warnings())) {
+        for (final ItcWarning warning : JavaConversions.asJavaList(s.warnings())) {
             _println(warning.msg());
         }
 

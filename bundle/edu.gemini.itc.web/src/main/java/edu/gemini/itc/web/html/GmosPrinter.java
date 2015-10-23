@@ -36,7 +36,8 @@ public final class GmosPrinter extends PrinterBase {
     public void writeOutput() {
         if (isImaging) {
             final ImagingResult[] results = recipe.calculateImaging();
-            writeImagingOutput(results);
+            final ItcImagingResult s = recipe.serviceResult(results);
+            writeImagingOutput(results, s);
         } else {
             final SpectroscopyResult[] r = recipe.calculateSpectroscopy();
             final ItcSpectroscopyResult s = recipe.serviceResult(r);
@@ -110,7 +111,7 @@ public final class GmosPrinter extends PrinterBase {
     }
 
 
-    private void writeImagingOutput(final ImagingResult[] results) {
+    private void writeImagingOutput(final ImagingResult[] results, final ItcImagingResult s) {
 
         final Gmos mainInstrument = (Gmos) results[0].instrument(); // main instrument
 
@@ -140,7 +141,7 @@ public final class GmosPrinter extends PrinterBase {
             _println("");
             _println(String.format("The peak pixel signal + background is %.0f. ", result.peakPixelCount()));
 
-            for (final ItcWarning warning : JavaConversions.asJavaList(result.warnings())) {
+            for (final ItcWarning warning : JavaConversions.asJavaList(s.warnings())) {
                 _println(warning.msg());
             }
 

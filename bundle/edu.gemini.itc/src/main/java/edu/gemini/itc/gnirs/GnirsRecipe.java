@@ -219,7 +219,7 @@ public final class GnirsRecipe implements SpectroscopyRecipe {
         }
 
         final SpecS2N[] specS2Narr = new SpecS2N[] {specS2N};
-        return new GnirsSpectroscopyResult(p, instrument, SFcalc, IQcalc, specS2Narr, st, Option.<AOSystem>empty(), signalOrder, backGroundOrder, finalS2NOrder, ImagingResult.NoWarnings());
+        return new GnirsSpectroscopyResult(p, instrument, SFcalc, IQcalc, specS2Narr, st, Option.<AOSystem>empty(), signalOrder, backGroundOrder, finalS2NOrder);
 
     }
 

@@ -6,6 +6,7 @@ import edu.gemini.itc.gsaoi.Camera;
 import edu.gemini.itc.gsaoi.Gsaoi;
 import edu.gemini.itc.gsaoi.GsaoiRecipe;
 import edu.gemini.itc.shared.GsaoiParameters;
+import edu.gemini.itc.shared.ItcImagingResult;
 import edu.gemini.itc.shared.ItcParameters;
 import edu.gemini.itc.shared.ItcWarning;
 import scala.collection.JavaConversions;
@@ -30,10 +31,11 @@ public final class GsaoiPrinter extends PrinterBase {
      */
     public void writeOutput() {
         final ImagingResult result = recipe.calculateImaging();
-        writeImagingOutput(result);
+        final ItcImagingResult s = recipe.serviceResult(result);
+        writeImagingOutput(result, s);
     }
 
-    private void writeImagingOutput(final ImagingResult result) {
+    private void writeImagingOutput(final ImagingResult result, final ItcImagingResult s) {
 
         final Gsaoi instrument = (Gsaoi) result.instrument();
 
@@ -52,7 +54,7 @@ public final class GsaoiPrinter extends PrinterBase {
         // REL-1353
         final int peak_pixel_percent = (int) (100 * result.peakPixelCount() / Gsaoi.WELL_DEPTH);
         _println("This is " + peak_pixel_percent + "% of the full well depth of " + Gsaoi.WELL_DEPTH + " electrons");
-        for (final ItcWarning warning : JavaConversions.asJavaList(result.warnings())) {
+        for (final ItcWarning warning : JavaConversions.asJavaList(s.warnings())) {
             _println(warning.msg());
         }
 

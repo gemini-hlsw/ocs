@@ -37,7 +37,8 @@ public final class AcqCamRecipe implements ImagingRecipe {
     }
 
     public ItcImagingResult serviceResult(final ImagingResult r) {
-        return Recipe$.MODULE$.serviceResult(r);
+        final List<ItcWarning>  warnings = warningsForImaging(instrument, r.peakPixelCount());
+        return Recipe$.MODULE$.serviceResult(r, warnings);
     }
 
     /**
@@ -92,8 +93,7 @@ public final class AcqCamRecipe implements ImagingRecipe {
         final ImagingS2NCalculatable IS2Ncalc = ImagingS2NCalculationFactory.getCalculationInstance(_obsDetailParameters, instrument, SFcalc, sed_integral, sky_integral);
         IS2Ncalc.calculate();
 
-        final List<ItcWarning>  warnings = warningsForImaging(instrument, peak_pixel_count);
-        return ImagingResult.apply(p, instrument, IQcalc, SFcalc, peak_pixel_count, IS2Ncalc, warnings);
+        return ImagingResult.apply(p, instrument, IQcalc, SFcalc, peak_pixel_count, IS2Ncalc);
 
     }
 

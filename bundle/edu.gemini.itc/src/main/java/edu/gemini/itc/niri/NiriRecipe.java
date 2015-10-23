@@ -55,7 +55,8 @@ public final class NiriRecipe implements ImagingRecipe, SpectroscopyRecipe {
     }
 
     public ItcImagingResult serviceResult(final ImagingResult r) {
-        return Recipe$.MODULE$.serviceResult(r);
+        final List<ItcWarning>  w = warningsForImaging(r.peakPixelCount());
+        return Recipe$.MODULE$.serviceResult(r, w);
     }
 
     public ItcSpectroscopyResult serviceResult(final SpectroscopyResult r) {
@@ -179,7 +180,7 @@ public final class NiriRecipe implements ImagingRecipe, SpectroscopyRecipe {
 
         final SpecS2N[] specS2Narr = new SpecS2N[1];
         specS2Narr[0] = specS2N;
-        return new GenericSpectroscopyResult(p, instrument, SFcalc, IQcalc, specS2Narr, st, altair, ImagingResult.NoWarnings());
+        return new GenericSpectroscopyResult(p, instrument, SFcalc, IQcalc, specS2Narr, st, altair);
     }
 
     public ImagingResult calculateImaging() {
@@ -263,8 +264,7 @@ public final class NiriRecipe implements ImagingRecipe, SpectroscopyRecipe {
         }
         IS2Ncalc.calculate();
 
-        final List<ItcWarning>  w = warningsForImaging(peak_pixel_count);
-        return new ImagingResult(p, instrument, IQcalc, SFcalc, peak_pixel_count, IS2Ncalc, altair, JavaConversions.asScalaBuffer(w).toList());
+        return new ImagingResult(p, instrument, IQcalc, SFcalc, peak_pixel_count, IS2Ncalc, altair);
 
     }
 

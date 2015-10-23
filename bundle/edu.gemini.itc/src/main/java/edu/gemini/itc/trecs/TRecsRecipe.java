@@ -6,6 +6,7 @@ import edu.gemini.itc.shared.*;
 import scala.Tuple2;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -78,7 +79,7 @@ public final class TRecsRecipe implements ImagingRecipe, SpectroscopyRecipe {
     }
 
     public ItcImagingResult serviceResult(final ImagingResult r) {
-        return Recipe$.MODULE$.serviceResult(r);
+        return Recipe$.MODULE$.serviceResult(r, Collections.emptyList());
     }
 
     public ItcSpectroscopyResult serviceResult(final SpectroscopyResult r) {

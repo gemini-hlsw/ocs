@@ -180,7 +180,7 @@ public final class NifsRecipe implements SpectroscopyRecipe {
         }
 
         // TODO: no SFCalc and ST for Nifs, introduce specific result type? or optional values? work with null for now
-        return new GenericSpectroscopyResult(p, instrument, null, IQcalc, specS2Narr, null, altair, ImagingResult.NoWarnings());
+        return new GenericSpectroscopyResult(p, instrument, null, IQcalc, specS2Narr, null, altair);
     }
 
     // NIFS CHARTS

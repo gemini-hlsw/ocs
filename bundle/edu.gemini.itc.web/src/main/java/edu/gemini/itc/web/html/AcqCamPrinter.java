@@ -6,6 +6,7 @@ import edu.gemini.itc.base.ImagingResult;
 import edu.gemini.itc.base.Instrument;
 import edu.gemini.itc.base.TransmissionElement;
 import edu.gemini.itc.shared.AcquisitionCamParameters;
+import edu.gemini.itc.shared.ItcImagingResult;
 import edu.gemini.itc.shared.ItcParameters;
 import edu.gemini.itc.shared.ItcWarning;
 import scala.collection.JavaConversions;
@@ -26,11 +27,12 @@ public final class AcqCamPrinter extends PrinterBase {
 
     public void writeOutput() {
         final ImagingResult result = recipe.calculateImaging();
-        writeImagingOutput(result);
+        final ItcImagingResult s = recipe.serviceResult(result);
+        writeImagingOutput(result, s);
     }
 
 
-    private void writeImagingOutput(final ImagingResult result) {
+    private void writeImagingOutput(final ImagingResult result, final ItcImagingResult s) {
 
         // we know this is the acq cam
         final AcquisitionCamera instrument = (AcquisitionCamera) result.instrument();
@@ -46,7 +48,7 @@ public final class AcqCamPrinter extends PrinterBase {
                 "The peak pixel signal + background is %.0f. This is %.0f%% of the full well depth of %.0f.",
                 result.peakPixelCount(), result.peakPixelCount() / instrument.getWellDepth() * 100, instrument.getWellDepth()));
 
-        for (final ItcWarning warning : JavaConversions.asJavaList(result.warnings())) {
+        for (final ItcWarning warning : JavaConversions.asJavaList(s.warnings())) {
             _println(warning.msg());
         }
 
