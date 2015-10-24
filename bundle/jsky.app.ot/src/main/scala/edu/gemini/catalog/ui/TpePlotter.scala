@@ -104,7 +104,7 @@ case class TpePlotter(display: CatalogImageDisplay) {
 
     override def isLocal: Boolean = ???
 
-    override def getId: String = ???
+    override def getId: String = ~model.info.map(_.catalog.id)
 
     override def isImageServer: Boolean = ???
 
@@ -139,21 +139,23 @@ case class TpePlotter(display: CatalogImageDisplay) {
     // Table QueryResult methods
     override def getCatalog: Catalog = catalog
 
-    override def getDataVector: util.Vector[util.Vector[AnyRef]] = new util.Vector(model.targets.map { t =>
-      new util.Vector[AnyRef](List(t.coordinates.ra.toAngle.formatHMS, t.coordinates.dec.formatDMS).asJavaCollection)
+    override def getDataVector: java.util.Vector[java.util.Vector[AnyRef]] = new java.util.Vector(model.targets.map { t =>
+      new java.util.Vector[AnyRef](List(t.name, t.coordinates.ra.toAngle.formatHMS, t.coordinates.dec.formatDMS).asJavaCollection)
     }.asJavaCollection)
 
     override def getColumnDesc(i: Int): FieldDesc = ???
 
     override def getColumnIndex(name: String): Int = ???
 
-    override def getColumnIdentifiers: util.Vector[String] = ???
+    override def getColumnIdentifiers: java.util.List[String] = {
+      List.empty[String].asJava
+    }
 
     override def hasCoordinates: Boolean = ???
 
     override def getCoordinates(rowIndex: Int): Coordinates = ???
 
-    override def getRowCoordinates: RowCoordinates = new RowCoordinates(0, 1, 2000)
+    override def getRowCoordinates: RowCoordinates = new RowCoordinates(1, 2, 2000) <| {_.setIdCol(0)}
 
     override def getWCSCenter: WorldCoordinates = ???
 
