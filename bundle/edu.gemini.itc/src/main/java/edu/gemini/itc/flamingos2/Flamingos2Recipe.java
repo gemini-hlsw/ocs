@@ -3,7 +3,6 @@ package edu.gemini.itc.flamingos2;
 import edu.gemini.itc.base.*;
 import edu.gemini.itc.operation.*;
 import edu.gemini.itc.shared.*;
-import scala.Tuple2;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -55,8 +54,7 @@ public final class Flamingos2Recipe implements ImagingRecipe, SpectroscopyRecipe
     }
 
     public ItcImagingResult serviceResult(final ImagingResult r) {
-        final List<ItcWarning> warnings = warningsForImaging(instrument, r.peakPixelCount());
-        return Recipe$.MODULE$.serviceResult(r, warnings);
+        return Recipe$.MODULE$.serviceResult(r);
     }
 
     public ItcSpectroscopyResult serviceResult(final SpectroscopyResult r) {
@@ -64,7 +62,7 @@ public final class Flamingos2Recipe implements ImagingRecipe, SpectroscopyRecipe
             add(Recipe$.MODULE$.createSignalChart(r));
             add(Recipe$.MODULE$.createS2NChart(r));
         }};
-        return ItcSpectroscopyResult.apply(dataSets, new ArrayList<>());
+        return ItcSpectroscopyResult.apply(dataSets, Recipe$.MODULE$.collectWarnings(r));
     }
 
     public SpectroscopyResult calculateSpectroscopy() {
@@ -184,20 +182,5 @@ public final class Flamingos2Recipe implements ImagingRecipe, SpectroscopyRecipe
 
         return ImagingResult.apply(p, instrument, IQcalc, SFcalc, peak_pixel_count, IS2Ncalc);
     }
-
-    // TODO: some of these warnings are similar for different instruments and could be calculated in a central place
-    private List<ItcWarning> warningsForImaging(final Flamingos2 instrument, final double peakPixelCount) {
-        final double wellLimit = instrument.getWellDepth();
-        final double linearityLimit = 98000;
-        return new ArrayList<ItcWarning>() {{
-            if (peakPixelCount > 0.8*linearityLimit)
-                add(new ItcWarning(
-                        String.format("Warning: peak pixel is %.2f%% of the linearity limit of %.0f e- (linearity is better than 0.5%% below %.0f e-).",
-                        peakPixelCount/linearityLimit*100, linearityLimit, linearityLimit)));
-            if (peakPixelCount > 0.8*wellLimit)
-                add(new ItcWarning("Warning: peak pixel exceeds 80% of the well depth and may be saturated"));
-        }};
-    }
-
 
 }

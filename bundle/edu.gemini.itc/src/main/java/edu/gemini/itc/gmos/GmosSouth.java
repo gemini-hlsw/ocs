@@ -1,7 +1,14 @@
 package edu.gemini.itc.gmos;
 
+import edu.gemini.itc.base.GainLimit;
+import edu.gemini.itc.base.SaturationLimit;
+import edu.gemini.itc.base.WarningLimit;
 import edu.gemini.itc.shared.GmosParameters;
 import edu.gemini.itc.shared.ObservationDetails;
+import edu.gemini.spModel.gemini.gmos.InstGmosSouth;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Gmos specification class
@@ -42,5 +49,13 @@ public final class GmosSouth extends Gmos {
     protected String[] getCcdNames() {
         return DETECTOR_CCD_NAMES;
     }
+
+    @Override public List<WarningLimit> warnings() {
+        return new ArrayList<WarningLimit>() {{
+            add(new SaturationLimit(getWellDepth() * getSpatialBinning() * getSpectralBinning(), 0.95));
+            add(new GainLimit(getADSaturation() * InstGmosSouth.getMeanGain(gp.ampGain(), gp.ampReadMode(), gp.ccdType()), 0.95));
+        }};
+    }
+
 
 }

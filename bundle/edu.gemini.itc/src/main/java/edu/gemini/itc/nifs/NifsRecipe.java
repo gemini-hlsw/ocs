@@ -11,7 +11,6 @@ import edu.gemini.spModel.core.GaussianSource;
 import edu.gemini.spModel.core.PointSource$;
 import edu.gemini.spModel.core.UniformSource$;
 import scala.Option;
-import scala.Tuple2;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -57,7 +56,7 @@ public final class NifsRecipe implements SpectroscopyRecipe {
             dataSets.add(createNifsSignalChart(r, i));
             dataSets.add(createNifsS2NChart(r, i));
         }
-        return ItcSpectroscopyResult.apply(dataSets, new ArrayList<>());
+        return ItcSpectroscopyResult.apply(dataSets, Recipe$.MODULE$.collectWarnings(r));
     }
 
     public SpectroscopyResult calculateSpectroscopy() {

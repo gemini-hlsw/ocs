@@ -8,6 +8,9 @@ import edu.gemini.spModel.gemini.gmos.GmosNorthType;
 import edu.gemini.spModel.gemini.gmos.GmosSouthType;
 import scala.Option;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Gmos specification class
  */
@@ -323,4 +326,14 @@ public abstract class Gmos extends Instrument implements BinningProvider {
         }
 
     }
+
+    @Override
+    public List<ItcWarning> spectroscopyWarnings(final SpectroscopyResult r) {
+        final boolean isIfu2 = getFpMask() == GmosNorthType.FPUnitNorth.IFU_1 || getFpMask() == GmosSouthType.FPUnitSouth.IFU_1;
+        return new ArrayList<ItcWarning>() {{
+            // OCSADV-361: warn that results produced for 2 slit IFUs are not entirely correct
+            if (isIfu2) add(new ItcWarning("Warning: chip gaps are shown at the wrong wavelengths in IFU-2 mode."));
+        }};
+    }
+
 }

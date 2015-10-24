@@ -4,10 +4,8 @@ import edu.gemini.itc.base.*;
 import edu.gemini.itc.operation.*;
 import edu.gemini.itc.shared.*;
 import edu.gemini.spModel.data.YesNoType;
-import scala.Tuple2;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -77,7 +75,7 @@ public final class MichelleRecipe implements ImagingRecipe, SpectroscopyRecipe {
     }
 
     public ItcImagingResult serviceResult(final ImagingResult r) {
-        return Recipe$.MODULE$.serviceResult(r, Collections.emptyList());
+        return Recipe$.MODULE$.serviceResult(r);
     }
 
     public ItcSpectroscopyResult serviceResult(final SpectroscopyResult r) {
@@ -85,7 +83,7 @@ public final class MichelleRecipe implements ImagingRecipe, SpectroscopyRecipe {
             add(Recipe$.MODULE$.createSignalChart(r, 0));
             add(Recipe$.MODULE$.createS2NChart(r, 0));
         }};
-        return ItcSpectroscopyResult.apply(dataSets, new ArrayList<>());
+        return ItcSpectroscopyResult.apply(dataSets, Recipe$.MODULE$.collectWarnings(r));
     }
 
     public SpectroscopyResult calculateSpectroscopy() {

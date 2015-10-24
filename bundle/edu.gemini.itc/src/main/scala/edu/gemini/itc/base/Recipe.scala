@@ -76,24 +76,30 @@ object Recipe {
   }
 
 
+  // warnings
+
+  def collectGenericWarnings(r: Result): List[ItcWarning] = {
+      r.instrument.warnings().flatMap(_.warning(r)).toList
+  }
+
+  def collectWarnings(r: ImagingResult): List[ItcWarning] = {
+    collectGenericWarnings(r) ++ r.instrument.imagingWarnings(r).toList
+  }
+
+  def collectWarnings(r: SpectroscopyResult): List[ItcWarning] = {
+    collectGenericWarnings(r) ++ r.instrument.spectroscopyWarnings(r).toList
+  }
+
   // Helper
 
   def toImgData(result: ImagingResult): ImgData = result.is2nCalc match {
-    case i: ImagingS2NMethodACalculation       => ImgData(i.singleSNRatio(), i.totalSNRatio(), result.peakPixelCount)
-    case i: ImagingPointS2NMethodBCalculation  => ImgData(0.0 /* TODO value not known for this mode */, i.effectiveS2N(), result.peakPixelCount)
+    case i: ImagingS2NMethodACalculation       => ImgData(i.singleSNRatio(), i.totalSNRatio(), result.peakPixelCount, collectWarnings(result))
+    case i: ImagingPointS2NMethodBCalculation  => ImgData(0.0 /* TODO value not known for this mode */, i.effectiveS2N(), result.peakPixelCount, collectWarnings(result))
     case _                                     => throw new NotImplementedError("unknown s2n calc method")
   }
 
-  // combine all warnings for the different CCDs and prepend a "CCD x:" in front of them
-//  def combineWarnings[A <: edu.gemini.itc.base.Result](rs: List[A]): List[ItcWarning] =
-//    if (rs.size > 1)
-//      rs.zipWithIndex.flatMap { case (r, i) => r.warnings.map(w => new ItcWarning(s"CCD $i: ${w.msg}")) }
-//    else
-//      rs.head.warnings
+  def serviceResult(r: ImagingResult): ItcImagingResult = ItcImagingResult(List(toImgData(r)))
 
-
-  def serviceResult(r: ImagingResult, w: java.util.List[ItcWarning]): ItcImagingResult = ItcImagingResult(List(toImgData(r)), w.toList)
-
-  def serviceResult(r: Array[ImagingResult], w: java.util.List[ItcWarning]): ItcImagingResult = ItcImagingResult(r.map(toImgData).toList, w.toList)
+  def serviceResult(r: Array[ImagingResult]): ItcImagingResult = ItcImagingResult(r.map(toImgData).toList)
 }
 

@@ -8,6 +8,9 @@ import edu.gemini.spModel.core.Site;
 import edu.gemini.spModel.gemini.niri.Niri.Disperser;
 import edu.gemini.spModel.gemini.niri.Niri.Mask;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Niri specification class
  */
@@ -243,6 +246,12 @@ public class Niri extends Instrument {
      */
     public static String getPrefix() {
         return INSTR_PREFIX;
+    }
+
+    @Override public List<WarningLimit> warnings() {
+        return new ArrayList<WarningLimit>() {{
+            add(new SaturationLimit(params.wellDepth().depth(), 0.80));
+        }};
     }
 
 }

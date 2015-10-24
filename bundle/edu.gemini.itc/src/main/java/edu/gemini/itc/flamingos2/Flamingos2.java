@@ -7,6 +7,8 @@ import edu.gemini.spModel.gemini.flamingos2.Flamingos2.FPUnit;
 import scala.Option;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Flamingos 2 specification class
@@ -162,4 +164,13 @@ public final class Flamingos2 extends Instrument {
         }
 
     }
+
+    @Override public List<WarningLimit> warnings() {
+        return new ArrayList<WarningLimit>() {{
+            add(new SaturationLimit(getWellDepth(), 0.80));
+            add(new LinearityLimit(98000, 0.80, Double.MAX_VALUE));       // TODO use well depth??
+        }};
+    }
+
+
 }

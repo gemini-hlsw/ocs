@@ -3,8 +3,6 @@ package edu.gemini.itc.base
 import edu.gemini.itc.operation._
 import edu.gemini.itc.shared.{ItcParameters, ItcWarning}
 
-import scala.collection.JavaConversions._
-
 /*
  * Helper objects that are used to pass around results of imaging and spectroscopy calculations.
  * These objects also contain the parameter objects that were used for the calculations so that input values
@@ -16,12 +14,39 @@ import scala.collection.JavaConversions._
 sealed trait Result {
   def parameters: ItcParameters
   def instrument: Instrument
+  def peakPixelCount: Double
 
   // Accessors for convenience.
   val source      = parameters.source
   val observation = parameters.observation
   val telescope   = parameters.telescope
   val conditions  = parameters.conditions
+}
+
+/* Warning limits */
+sealed trait WarningLimit {
+  def message(value: Double): String
+  def maxValue: Double
+  def lowLimit: Double    // as a fraction of the max value
+  def maxLimit: Double    // as a fraction of the max value
+
+  def lowWarnLevel = maxValue * lowLimit
+  def maxWarnLevel = maxValue * maxLimit
+  def warn(value: Double): Boolean = value >= lowWarnLevel && value < maxWarnLevel
+  def value(r: Result): Double = r.peakPixelCount // currently peak pixel count is the only value we're looking at
+  def warning(r: Result) = if (warn(value(r))) Some(ItcWarning(message(value(r)))) else None
+}
+
+final case class SaturationLimit(maxValue: Double, lowLimit: Double) extends WarningLimit {
+  val maxLimit: Double = Double.MaxValue
+  def message(value: Double) = f"Warning: peak pixel exceeds ${lowLimit*100.0}%.0f%% of the well depth limit of $lowWarnLevel%.0f and may be saturated."
+}
+final case class GainLimit(maxValue: Double, lowLimit: Double) extends WarningLimit {
+  val maxLimit: Double = Double.MaxValue
+  def message(value: Double) = f"Warning: peak pixel exceeds ${lowLimit*100.0}%.0f%% of the gain limit of $lowWarnLevel%.0f and may be saturated."
+}
+final case class LinearityLimit(maxValue: Double, lowLimit: Double, maxLimit: Double = Double.MaxValue) extends WarningLimit {
+  def message(value: Double) = f"Warning: peak pixel exceeds ${lowLimit*100.0}%.0f%% of the linearity limit of $lowWarnLevel%.0f and will cause deviations."
 }
 
 /* Internal object for imaging results. */
@@ -50,6 +75,7 @@ sealed trait SpectroscopyResult extends Result {
   val specS2N: Array[SpecS2N]
   val st: SlitThroughput
   val aoSystem: Option[AOSystem]
+  lazy val peakPixelCount: Double = specS2N.map(_.getPeakPixelCount).max
 }
 
 /* Internal object for generic spectroscopy results (all instruments except for GNIRS). */

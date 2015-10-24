@@ -64,7 +64,7 @@ public final class GnirsRecipe implements SpectroscopyRecipe {
                 add(Recipe$.MODULE$.createS2NChart(r));
             }
         }};
-        return ItcSpectroscopyResult.apply(dataSets, new ArrayList<>());
+        return ItcSpectroscopyResult.apply(dataSets, Recipe$.MODULE$.collectWarnings(res));
     }
 
     public GnirsSpectroscopyResult calculateSpectroscopy() {

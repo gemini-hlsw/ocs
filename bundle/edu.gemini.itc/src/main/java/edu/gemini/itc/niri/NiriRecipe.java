@@ -5,8 +5,6 @@ import edu.gemini.itc.base.*;
 import edu.gemini.itc.operation.*;
 import edu.gemini.itc.shared.*;
 import scala.Option;
-import scala.Tuple2;
-import scala.collection.JavaConversions;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -55,8 +53,7 @@ public final class NiriRecipe implements ImagingRecipe, SpectroscopyRecipe {
     }
 
     public ItcImagingResult serviceResult(final ImagingResult r) {
-        final List<ItcWarning>  w = warningsForImaging(r.peakPixelCount());
-        return Recipe$.MODULE$.serviceResult(r, w);
+        return Recipe$.MODULE$.serviceResult(r);
     }
 
     public ItcSpectroscopyResult serviceResult(final SpectroscopyResult r) {
@@ -64,7 +61,7 @@ public final class NiriRecipe implements ImagingRecipe, SpectroscopyRecipe {
             add(Recipe$.MODULE$.createSignalChart(r, 0));
             add(Recipe$.MODULE$.createS2NChart(r, 0));
         }};
-        return ItcSpectroscopyResult.apply(dataSets, new ArrayList<>());
+        return ItcSpectroscopyResult.apply(dataSets, Recipe$.MODULE$.collectWarnings(r));
     }
 
     public SpectroscopyResult calculateSpectroscopy() {
@@ -266,14 +263,6 @@ public final class NiriRecipe implements ImagingRecipe, SpectroscopyRecipe {
 
         return new ImagingResult(p, instrument, IQcalc, SFcalc, peak_pixel_count, IS2Ncalc, altair);
 
-    }
-
-    // TODO: some of these warnings are similar for different instruments and could be calculated in a central place
-    private List<ItcWarning> warningsForImaging(final double peakPixelCount) {
-        final double wellLimit = 0.8 * niriParameters.wellDepth().depth();
-        return new ArrayList<ItcWarning>() {{
-            if (peakPixelCount > wellLimit) add(new ItcWarning("Warning: peak pixel exceeds 80% of the well depth and may be saturated"));
-        }};
     }
 
 }

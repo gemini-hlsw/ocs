@@ -22,9 +22,18 @@ sealed trait ItcResult extends Serializable {
 
 // === IMAGING RESULTS
 
-final case class ImgData(singleSNRatio: Double, totalSNRatio: Double, peakPixelFlux: Double)
+final case class ImgData(singleSNRatio: Double, totalSNRatio: Double, peakPixelFlux: Double, warnings: List[ItcWarning])
 
-final case class ItcImagingResult(ccds: List[ImgData], warnings: List[ItcWarning]) extends ItcResult {
+final case class ItcImagingResult(ccds: List[ImgData]) extends ItcResult {
+  def warnings = {
+    def concatWarnings =
+      ccds.zipWithIndex.flatMap { case (c, i) =>
+        c.warnings.map(w => new ItcWarning(s"CCD $i: ${w.msg}"))
+      }
+
+    if (ccds.length > 1) concatWarnings
+    else ccds.head.warnings
+  }
   def ccd(i: Int) = ccds(i % ccds.length)
   def peakPixelFlux(ccdIx: Int = 0) = ccd(ccdIx).peakPixelFlux.toInt
 }
@@ -99,8 +108,8 @@ final case class ItcSpectroscopyResult(charts: List[SpcChartData], warnings: Lis
 object ItcSpectroscopyResult {
 
   // java compatibility
-  def apply(charts: java.util.List[SpcChartData], warnings: java.util.List[ItcWarning]) =
-    new ItcSpectroscopyResult(charts.toList, warnings.toList)
+  def apply(charts: java.util.List[SpcChartData], warnings: List[ItcWarning]) =
+    new ItcSpectroscopyResult(charts.toList, warnings)
 
 }
 

@@ -4,6 +4,9 @@ import edu.gemini.itc.base.*;
 import edu.gemini.itc.shared.AcquisitionCamParameters;
 import edu.gemini.spModel.core.Site;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Aquisition Camera specification class
  */
@@ -67,5 +70,11 @@ public class AcquisitionCamera extends Instrument {
 
     public double getWellDepth() {
         return WELL_DEPTH;
+    }
+
+    @Override public List<WarningLimit> warnings() {
+        return new ArrayList<WarningLimit>() {{
+            add(new SaturationLimit(getWellDepth(), 0.80));
+        }};
     }
 }

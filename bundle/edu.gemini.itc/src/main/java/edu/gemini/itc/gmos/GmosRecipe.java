@@ -49,11 +49,7 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
     }
 
     public ItcImagingResult serviceResult(final ImagingResult[] r) {
-        final List<ItcWarning> warnings = new ArrayList<>();
-        for (int i = 0; i < mainInstrument.getDetectorCcdInstruments().length; i++) {
-            warnings.addAll(warningsForImaging(i, mainInstrument, r[i].peakPixelCount()));
-        }
-        return Recipe$.MODULE$.serviceResult(r, warnings);
+        return Recipe$.MODULE$.serviceResult(r);
     }
 
     public ItcSpectroscopyResult serviceResult(final SpectroscopyResult[] r) {
@@ -61,11 +57,7 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
             add(createGmosChart(r, 0));
             add(createGmosChart(r, 1));
         }};
-        final List<ItcWarning> warnings = new ArrayList<>();
-        for (int i = 0; i < mainInstrument.getDetectorCcdInstruments().length; i++) {
-            warnings.addAll(warningsForSpectroscopy(i, mainInstrument));
-        }
-        return ItcSpectroscopyResult.apply(dataSets, warnings);
+        return ItcSpectroscopyResult.apply(dataSets, Recipe$.MODULE$.collectWarnings(r[0]));
     }
 
     public SpectroscopyResult[] calculateSpectroscopy() {
@@ -258,17 +250,6 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
 
     }
 
-    private List<ItcWarning> warningsForSpectroscopy(final int i,  final Gmos instrument) {
-        final boolean isIfu2 = instrument.getFpMask() == GmosNorthType.FPUnitNorth.IFU_1 || instrument.getFpMask() == GmosSouthType.FPUnitSouth.IFU_1;
-        final String ccdPrefix = instrument.getDetectorCcdInstruments().length > 1 ? "CCD " + i + ": " : "";
-
-        return new ArrayList<ItcWarning>() {{
-            // OCSADV-361: warn that results produced for 2 slit IFUs are not entirely correct
-            if (isIfu2) add(new ItcWarning(ccdPrefix + "Warning: chip gaps are shown at the wrong wavelengths in IFU-2 mode."));
-        }};
-    }
-
-
     private ImagingResult calculateImagingDo(final Gmos instrument) {
 
         // Start of morphology section of ITC
@@ -306,24 +287,6 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
 
         return ImagingResult.apply(p, instrument, IQcalc, SFcalc, peak_pixel_count, IS2Ncalc);
 
-    }
-
-    // TODO: some of these warnings are similar for different instruments and could be calculated in a central place
-    private List<ItcWarning> warningsForImaging(final int i, final Gmos instrument, final double peakPixelCount) {
-        final double wellLimit = 0.95 * instrument.getWellDepth() * instrument.getSpatialBinning() * instrument.getSpectralBinning();
-        final double meanGain;
-        switch (gmosParameters.site()) {
-            case GN: meanGain = InstGmosNorth.getMeanGain(gmosParameters.ampGain(), gmosParameters.ampReadMode(), gmosParameters.ccdType()); break;
-            case GS: meanGain = InstGmosSouth.getMeanGain(gmosParameters.ampGain(), gmosParameters.ampReadMode(), gmosParameters.ccdType()); break;
-            default: throw new Error();
-        }
-        final double gainLimit = 0.95 * instrument.getADSaturation() *  meanGain;
-        final String ccdPrefix = instrument.getDetectorCcdInstruments().length > 1 ? "CCD " + i + ": " : "";
-
-        return new ArrayList<ItcWarning>() {{
-            if (peakPixelCount > wellLimit)  add(new ItcWarning(ccdPrefix + "Warning: peak pixel may be saturating the (binned) CCD full well of " + wellLimit));
-            if (peakPixelCount > gainLimit)  add(new ItcWarning(ccdPrefix + "Warning: peak pixel may be saturating the gain limit of " + gainLimit));
-        }};
     }
 
     // == GMOS CHARTS
