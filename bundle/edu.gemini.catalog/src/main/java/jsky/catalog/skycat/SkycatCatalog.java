@@ -19,7 +19,6 @@ import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
-import java.util.Vector;
 
 /**
  * Represents a catalog as described in a Skycat style catalog
@@ -1155,7 +1154,7 @@ public class SkycatCatalog implements PlotableCatalog {
                 TableQueryResult tqr = (TableQueryResult) r;
                 if (tqr.getRowCount() > 0) {
                     wc = (WorldCoords) tqr.getCoordinates(0);
-                    Vector<String> v = tqr.getColumnIdentifiers();
+                    List<String> v = tqr.getColumnIdentifiers();
                     for (String s : v) {
                         System.out.println("Column: " + s);
                     }

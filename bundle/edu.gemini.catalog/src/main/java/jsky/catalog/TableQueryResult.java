@@ -1,5 +1,6 @@
 package jsky.catalog;
 
+import java.util.List;
 import java.util.Vector;
 
 import javax.swing.table.TableModel;
@@ -29,7 +30,7 @@ public interface TableQueryResult extends Catalog, TableModel {
      int getColumnIndex(String name);
 
     /** Return a vector of column headings for this table. */
-     Vector<String> getColumnIdentifiers();
+     List<String> getColumnIdentifiers();
 
     /** Return true if the table has coordinate columns, such as (ra, dec) */
      boolean hasCoordinates();

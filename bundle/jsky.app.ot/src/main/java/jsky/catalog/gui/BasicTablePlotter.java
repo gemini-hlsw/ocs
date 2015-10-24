@@ -32,6 +32,7 @@ import java.util.*;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 /**
  * Implements basic plotting of catalog tables on in an image window.
@@ -582,22 +583,15 @@ public class BasicTablePlotter
     /** Return an array containing the tables managed by this object. */
     @Override
     public TableQueryResult[] getTables() {
-        int n = _tableList.size();
-        if (n == 0)
-            return null;
-        final Vector<TableQueryResult> tableVec = new Vector<>(n);
-        for (TableListItem item: _tableList) {
-            if (item.inRange) {
-                tableVec.add(item.table);
+        if (!_tableList.isEmpty()) {
+            final List<TableQueryResult> tableVec = _tableList.stream().filter(item -> item.inRange).map(item -> item.table).collect(Collectors.toList());
+            if (!tableVec.isEmpty()) {
+                final TableQueryResult[] tables = new TableQueryResult[tableVec.size()];
+                tableVec.toArray(tables);
+                return tables;
             }
         }
-        n = tableVec.size();
-        if (n == 0)
-            return null;
-        final TableQueryResult[] tables = new TableQueryResult[n];
-        for (int i = 0; i < n; i++)
-            tables[i] = tableVec.get(i);
-        return tables;
+        return null;
     }
 
     /** Schedule a repaint of the area given by the given shape */
@@ -608,20 +602,14 @@ public class BasicTablePlotter
     /** Set the selection state of the symbol corresponding to the given table row */
     private void selectSymbol(final TableQueryResult table, final int tableRow, final boolean selected) {
         // Find the plot symbol for the given row in the given table
-        for (TableListItem tli: _tableList) {
-            if (tli.table == table) {
-                for (SymbolListItem sli: tli.symbolAr) {
-                    for (FigureListItem fli: sli.figureList) {
-                        if (fli.row == tableRow) {
-                            if (fli.selected != selected) {
-                                fli.selected = selected;
-                                repaint(fli.shape);
-                            }
-                        }
-                    }
-                }
+        _tableList.stream().filter(tli -> tli.table == table).forEach(tli -> {
+            for (SymbolListItem sli : tli.symbolAr) {
+                sli.figureList.stream().filter(fli -> fli.row == tableRow).filter(fli -> fli.selected != selected).forEach(fli -> {
+                    fli.selected = selected;
+                    repaint(fli.shape);
+                });
             }
-        }
+        });
         fireTableSelectionEvent(table, tableRow, selected);
 
     }
@@ -744,24 +732,24 @@ public class BasicTablePlotter
             for (SymbolListItem sli: tli.symbolAr) {
                 g2d.setColor(sli.symbol.getFg());
                 // plot each figure
-                for (FigureListItem fli: sli.figureList) {
-                    if (region == null || fli.shape.intersects(region)) {
-                        if (fli.selected) {
-                            // draw selected symbols with a thicker stroke
-                            final Stroke stroke = g2d.getStroke();
-                            g2d.setStroke(_selectedStroke);
-                            g2d.draw(fli.shape);
-                            g2d.setStroke(stroke);
-                        } else {
-                            g2d.draw(fli.shape);
-                        }
-                        // If there is a label for the symbol, draw it too
-                        if (fli.label != null) {
-                            final Rectangle2D r = fli.shape.getBounds();
-                            g2d.drawString(fli.label, (float) r.getCenterX(), (float) r.getCenterY());
-                        }
+                // draw selected symbols with a thicker stroke
+                // If there is a label for the symbol, draw it too
+                sli.figureList.stream().filter(fli -> region == null || fli.shape.intersects(region)).forEach(fli -> {
+                    if (fli.selected) {
+                        // draw selected symbols with a thicker stroke
+                        final Stroke stroke = g2d.getStroke();
+                        g2d.setStroke(_selectedStroke);
+                        g2d.draw(fli.shape);
+                        g2d.setStroke(stroke);
+                    } else {
+                        g2d.draw(fli.shape);
                     }
-                }
+                    // If there is a label for the symbol, draw it too
+                    if (fli.label != null) {
+                        final Rectangle2D r = fli.shape.getBounds();
+                        g2d.drawString(fli.label, (float) r.getCenterX(), (float) r.getCenterY());
+                    }
+                });
             }
         }
     }
@@ -951,6 +939,7 @@ public class BasicTablePlotter
     // Creates a CatalogHeader and CatalogRow from the corresponding Collections
     @SuppressWarnings("varargs")
     private static Tuple2<CatalogHeader, CatalogRow> wrap(final Collection<String> header, final Collection<Object> row) {
+        //noinspection unchecked
         ImList<Tuple2<String,Class<?>>> colLst = DefaultImList.create();
         for (String col : header) {
             colLst = colLst.append(new Pair<>(col, String.class));
@@ -962,48 +951,48 @@ public class BasicTablePlotter
 
     // Creates a SkyObject, if possible, using the given table query result
     // and row of data.
-    private static Option<SkyObject> toSkyObject(final TableQueryResult table, Vector<Object> row) {
-        final Vector<String> columnIdentifiers = table.getColumnIdentifiers();
+    private static Option<SkyObject> toSkyObject(final TableQueryResult table, final Vector<Object> row) {
+        final List<String> columnIdentifiers = table.getColumnIdentifiers();
         final String catid = table.getId();
         final Option<SkyObjectFactory> fact = SkyObjectFactoryRegistrar.instance.lookup(catid);
-        if (!fact.isEmpty()) {
+        return fact.flatMap(skyObjectFactory -> {
             final Tuple2<CatalogHeader, CatalogRow> cat = wrap(columnIdentifiers, row);
             try {
                 return new Some<>(fact.getValue().create(cat._1(), cat._2()));
             } catch (edu.gemini.catalog.skycat.CatalogException ex) {
                 LOG.log(Level.WARNING, ex.getMessage(), ex);
             }
-        }
-        return None.instance();
+            return None.instance();
+        });
     }
 
     // Extracts random, vague, useless "brightness" information from the results.
     // This is the pre-SkyObject way of doing this.
-    private static Option<String> extractBrightness(final TableQueryResult table, Vector<Object> row) {
-        final Vector<String> columnIdentifiers = table.getColumnIdentifiers();
+    private static Option<String> extractBrightness(final TableQueryResult table, final Vector<Object> row) {
+        final List<String> columnIdentifiers = table.getColumnIdentifiers();
 
-        String brightness = "";
+        StringBuilder brightness = new StringBuilder("");
         final int numCols = columnIdentifiers.size();
         for (int col = 0; col < numCols; col++) {
             final String s = columnIdentifiers.get(col);
             final String sl = s.toLowerCase();
-            if (sl.equals("mag")) {
+            if (sl.equals(TableSymbolConfig.MAG)) {
                 final Object o = row.get(col);
                 if (o != null) {
-                    brightness = o + " mag";
+                    brightness.append(o).append(" mag");
                     break;
                 }
-            } else if (sl.endsWith("mag") && !sl.startsWith("e")) {
+            } else if (sl.endsWith(TableSymbolConfig.MAG) && !sl.startsWith("e")) {
                 final Object o = row.get(col);
                 if (o != null) {
                     if (brightness.length() != 0)
-                        brightness += ", ";
-                    brightness = brightness + o + s.charAt(0);
+                        brightness.append(", ");
+                    brightness.append(brightness).append(o).append(s.charAt(0));
                 }
             }
         }
         //noinspection unchecked
-        return "".equals(brightness) ? None.INSTANCE : new Some<>(brightness);
+        return brightness.length() == 0 ? None.INSTANCE : new Some<>(brightness.toString());
     }
 
     /**
