@@ -37,8 +37,7 @@ public final class AcqCamRecipe implements ImagingRecipe {
     }
 
     public ItcImagingResult serviceResult(final ImagingResult r) {
-        final List<ItcWarning>  warnings = warningsForImaging(instrument, r.peakPixelCount());
-        return Recipe$.MODULE$.serviceResult(r, warnings);
+        return Recipe$.MODULE$.serviceResult(r);
     }
 
     /**
@@ -95,14 +94,6 @@ public final class AcqCamRecipe implements ImagingRecipe {
 
         return ImagingResult.apply(p, instrument, IQcalc, SFcalc, peak_pixel_count, IS2Ncalc);
 
-    }
-
-    // TODO: some of these warnings are similar for different instruments and could be calculated in a central place
-    private List<ItcWarning> warningsForImaging(final AcquisitionCamera instrument, final double peakPixelCount) {
-        final double wellLimit = 0.8 * instrument.getWellDepth();
-        return new ArrayList<ItcWarning>() {{
-            if (peakPixelCount > wellLimit) add(new ItcWarning("Warning: peak pixel exceeds 80% of the well depth and may be saturated"));
-        }};
     }
 
 }

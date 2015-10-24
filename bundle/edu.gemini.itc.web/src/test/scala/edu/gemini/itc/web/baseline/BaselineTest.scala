@@ -43,15 +43,15 @@ class BaselineTest {
     baselines().foreach { b => assertTrue(Baseline.checkAgainstBaseline(b)) }
 
   private def baselines(): Seq[Baseline] =
-//    executeAll(BaselineAcqCam.Fixtures, executeAcqCamRecipe) ++
-//      executeAll(BaselineF2.Fixtures, executeF2Recipe) ++
-      executeAll(BaselineGmos.Fixtures, executeGmosRecipe) // ++
-//      executeAll(BaselineGnirs.Fixtures, executeGnirsRecipe) ++
-//      executeAll(BaselineGsaoi.Fixtures, executeGsaoiRecipe) ++
-//      executeAll(BaselineMichelle.Fixtures, executeMichelleRecipe) ++
-//      executeAll(BaselineNifs.Fixtures, executeNifsRecipe) ++
-//      executeAll(BaselineNiri.Fixtures, executeNiriRecipe) ++
-//      executeAll(BaselineTRecs.Fixtures, executeTrecsRecipe)
+    executeAll(BaselineAcqCam.Fixtures, executeAcqCamRecipe) ++
+      executeAll(BaselineF2.Fixtures, executeF2Recipe) ++
+      executeAll(BaselineGmos.Fixtures, executeGmosRecipe) ++
+      executeAll(BaselineGnirs.Fixtures, executeGnirsRecipe) ++
+      executeAll(BaselineGsaoi.Fixtures, executeGsaoiRecipe) ++
+      executeAll(BaselineMichelle.Fixtures, executeMichelleRecipe) ++
+      executeAll(BaselineNifs.Fixtures, executeNifsRecipe) ++
+      executeAll(BaselineNiri.Fixtures, executeNiriRecipe) ++
+      executeAll(BaselineTRecs.Fixtures, executeTrecsRecipe)
 
   private def executeAll[T <: InstrumentDetails](fs: Seq[Fixture[T]], recipe: (Fixture[T]) => Output): Seq[Baseline] = {
     require(fs.size > 10, "Not enough fixtures " + fs.size) // make sure there's a good number of fixtures

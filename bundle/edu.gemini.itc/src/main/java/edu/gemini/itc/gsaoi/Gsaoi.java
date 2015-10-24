@@ -5,6 +5,9 @@ import edu.gemini.itc.shared.GsaoiParameters;
 import edu.gemini.itc.shared.ObservationDetails;
 import edu.gemini.spModel.core.Site;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Gsaoi specification class
  */
@@ -94,6 +97,13 @@ public final class Gsaoi extends Instrument {
      */
     public static String getPrefix() {
         return INSTR_PREFIX;
+    }
+
+    @Override public List<WarningLimit> warnings() {
+        return new ArrayList<WarningLimit>() {{
+            add(new LinearityLimit(Gsaoi.WELL_DEPTH, 0.65, 0.85));
+            add(new SaturationLimit(Gsaoi.WELL_DEPTH, 0.85));
+        }};
     }
 
 }
