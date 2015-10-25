@@ -5,7 +5,6 @@ import diva.canvas.DamageRegion;
 import diva.canvas.TransformContext;
 import diva.canvas.event.LayerEvent;
 import diva.canvas.event.LayerListener;
-import edu.gemini.catalog.skycat.table.*;
 import edu.gemini.shared.skyobject.SkyObject;
 import edu.gemini.shared.util.immutable.*;
 import jsky.catalog.*;
@@ -29,7 +28,6 @@ import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.*;
 import java.util.List;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 /**
@@ -46,7 +44,6 @@ import java.util.stream.Collectors;
  */
 public class BasicTablePlotter
         implements TablePlotter, LayerListener, ChangeListener {
-    private static final Logger LOG = Logger.getLogger(BasicTablePlotter.class.getName());
 
     /** The Diva layer to use to draw catalog symbols */
     private CanvasLayer _layer;
@@ -934,19 +931,6 @@ public class BasicTablePlotter
         }
     }
 
-    // Creates a CatalogHeader and CatalogRow from the corresponding Collections
-    @SuppressWarnings("varargs")
-    private static Tuple2<CatalogHeader, CatalogRow> wrap(final Collection<String> header, final Collection<Object> row) {
-        //noinspection unchecked
-        ImList<Tuple2<String,Class<?>>> colLst = DefaultImList.create();
-        for (String col : header) {
-            colLst = colLst.append(new Pair<>(col, String.class));
-        }
-        return new Pair<>(
-                new DefaultCatalogHeader(colLst),
-                new DefaultCatalogRow(DefaultImList.create(row)));
-    }
-
     /**
      * If the given screen coordinates point is within a displayed catalog symbol, set it to
      * point to the center of the symbol and return the name and coordinates (and brightness,
@@ -962,42 +946,17 @@ public class BasicTablePlotter
                 for (FigureListItem fli: sli.figureList) {
                     // assume symbol has already been selected
                     if (fli.selected && sli.symbol.getBoundingShape(fli.shape).contains(p)) {
-                        RowCoordinates rowCoords = tli.table.getRowCoordinates();
-                        if (!rowCoords.isWCS())
-                            return null;
-                        return tli.table.getSkyObject(fli.row);
-                        // TODO Do we need to compensate for coordinate adjustment?
-                        /*final Vector<Vector<Object>> dataVec = tli.table.getDataVector();
-                        _imageEquinox = _coordinateConverter.getEquinox();
-                        final Vector<Object> rowVec = dataVec.get(fli.row);
+                        Option<SkyObject> skyObject = tli.table.getSkyObject(fli.row);
+                        skyObject.forEach(s -> {
+                            // This is a bit strange, we convert the incoming parameter to the position of the
+                            // object and it also side-effects setting the equinox
+                            _imageEquinox = _coordinateConverter.getEquinox();
+                            p.x = s.getCoordinates().toHmsDeg(0).getRa().toDegrees().getMagnitude();
+                            p.y = s.getCoordinates().toHmsDeg(0).getDec().toDegrees().getMagnitude();
+                            _coordinateConverter.convertCoords(p, CoordinateConverter.WORLD, CoordinateConverter.SCREEN, false);
 
-                        // get the world coordinates
-                        final Coordinates cpos = rowCoords.getCoordinates(rowVec);
-                        if (cpos == null) {
-                            return null;
-                        }
-                        final WorldCoords pos = (WorldCoords) cpos;
-
-                        // modify the parameter to point to the center of the symbol
-                        final double[] radec = pos.getRaDec(_imageEquinox);
-                        p.x = radec[0];
-                        p.y = radec[1];
-                        _coordinateConverter.convertCoords(p, CoordinateConverter.WORLD, CoordinateConverter.SCREEN, false);
-
-                        // get the id of the catalog symbol
-                        final int idCol = rowCoords.getIdCol();
-                        String id = null;
-                        if (idCol != -1) {
-                            Object o = rowVec.get(idCol);
-                            if (o != null) {
-                                id = o.toString();
-                            }
-                        }
-
-                        final Option<String>   brightness = extractBrightness(tli.table, rowVec);
-                        final Option<SkyObject> skyObject = toSkyObject(id, tli.table, rowVec);
-                        return new NamedCoordinates(id, pos, brightness, skyObject);
-                        return null;*/
+                        });
+                        return skyObject;
                     }
                 }
             }
