@@ -7,7 +7,7 @@ import jsky.catalog.QueryResult;
 import jsky.catalog.TableQueryResult;
 
 /**
- * Defines the interface for classes wishing to define thier own catalog
+ * Defines the interface for classes wishing to define their own catalog
  * query or query result components.
  */
 public interface CatalogUIHandler {

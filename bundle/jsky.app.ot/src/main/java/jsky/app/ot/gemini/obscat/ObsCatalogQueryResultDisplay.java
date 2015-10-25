@@ -34,8 +34,6 @@ import jsky.util.gui.TabbedPanel;
 
 import javax.swing.*;
 import javax.swing.border.LineBorder;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -58,7 +56,7 @@ import java.util.*;
  */
 public final class ObsCatalogQueryResultDisplay extends TableDisplayTool implements ListSelectionListener {
 
-    // Icons displayed with the pogram id to indicate whether or not an observation belongs to a group
+    // Icons displayed with the program id to indicate whether or not an observation belongs to a group
     private static final Icon OBS_ICON = Resources.getIcon("noObsGroup.gif");
     private static final Icon GROUP_ICON = Resources.getIcon("obsGroup.gif");
 
@@ -66,26 +64,20 @@ public final class ObsCatalogQueryResultDisplay extends TableDisplayTool impleme
     private final JButton _otButton = new JButton("Show Observation") {{
         setEnabled(false);
         setToolTipText("Show the selected observation in the OT (Observing Tool)");
-        addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                _showSelectedObservation();
-            }
-        });
+        addActionListener(e -> _showSelectedObservation());
     }};
 
     // Button to add the selected observation to the session queue
     private final JButton _addToSessionQueueButton = new JButton("Add to Queue") {{
         setEnabled(false);
         setToolTipText("Add the selected observation to the session queue");
-        addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                try {
-                    final SPObservationID obsId = (SPObservationID) getSelectedRowValue(ObsCatalogInfo.OBS_ID);
-                    if (obsId != null)
-                        SessionQueue.INSTANCE.addObservation(obsId);
-                } catch (Exception ex) {
-                    DialogUtil.error(ex);
-                }
+        addActionListener(e -> {
+            try {
+                final SPObservationID obsId = (SPObservationID) getSelectedRowValue(ObsCatalogInfo.OBS_ID);
+                if (obsId != null)
+                    SessionQueue.INSTANCE.addObservation(obsId);
+            } catch (Exception ex) {
+                DialogUtil.error(ex);
             }
         });
     }};
@@ -128,11 +120,7 @@ public final class ObsCatalogQueryResultDisplay extends TableDisplayTool impleme
     // Button to display the session queue
     private final JButton _displaySessionQueueButton = new JButton("Display Session Queue") {{
         setToolTipText("Display the session queue window");
-        addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                SessionQueuePanel.getInstance().showFrame();
-            }
-        });
+        addActionListener(e -> SessionQueuePanel.getInstance().showFrame());
     }};
 
 
@@ -209,21 +197,19 @@ public final class ObsCatalogQueryResultDisplay extends TableDisplayTool impleme
                 for (int i = 0; i < columnModel.getColumnCount(); i++) {
                     final TableColumn col = columnModel.getColumn(i);
                     final TableCellRenderer tcr = col.getCellRenderer();
-                    col.setCellRenderer(new TableCellRenderer() {
-                        public Component getTableCellRendererComponent(JTable t, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-                            final TableCellRenderer r = (tcr != null) ? tcr : defaultTcr;
-                            final Component c = r.getTableCellRendererComponent(t, value, isSelected, hasFocus, row, column);
+                    col.setCellRenderer((t, value, isSelected, hasFocus, row, column) -> {
+                        final TableCellRenderer r = (tcr != null) ? tcr : defaultTcr;
+                        final Component c = r.getTableCellRendererComponent(t, value, isSelected, hasFocus, row, column);
 
-                            // Ok, now figure out whether it's local or not
-                            final ObsCatalogQueryResult result = (ObsCatalogQueryResult) queryResult;
-                            final int resultRow = table.getSortedRowIndex(row);
-                            final DB db = result.getDatabase(resultRow);
-                            if (db != null) // don't ask
-                                c.setForeground(db.isLocal() ? Color.BLACK : Color.GRAY);
+                        // Ok, now figure out whether it's local or not
+                        final ObsCatalogQueryResult result = (ObsCatalogQueryResult) queryResult;
+                        final int resultRow = table.getSortedRowIndex(row);
+                        final DB db = result.getDatabase(resultRow);
+                        if (db != null) // don't ask
+                            c.setForeground(db.isLocal() ? Color.BLACK : Color.GRAY);
 
-                            // Done
-                            return c;
-                        }
+                        // Done
+                        return c;
                     });
                 }
 
@@ -283,13 +269,11 @@ public final class ObsCatalogQueryResultDisplay extends TableDisplayTool impleme
         ElevationPlotManager.show(targets, preferredSite, plugin);
 
         // Redisplay elevation plot if plugin settings change
-        plugin.setChangeListener(new ChangeListener() {
-            public void stateChanged(ChangeEvent e) {
-                try {
-                    _elevationPlot(obs);
-                } catch (Exception ex) {
-                    DialogUtil.error(ex);
-                }
+        plugin.setChangeListener(e -> {
+            try {
+                _elevationPlot(obs);
+            } catch (Exception ex) {
+                DialogUtil.error(ex);
             }
         });
     }
@@ -298,7 +282,7 @@ public final class ObsCatalogQueryResultDisplay extends TableDisplayTool impleme
     // Return an array of targets given an array of observations.
     private TargetDesc[] _getTargets(ISPObservation[] obs, boolean useTargetName) {
         final IDBDatabaseService db = SPDB.get();
-        final List<TargetDesc> result = new ArrayList<TargetDesc>();
+        final List<TargetDesc> result = new ArrayList<>();
         for (ISPObservation ob : obs) {
             final TargetDesc targetDesc = ObsTargetDesc.getTargetDesc(db, ob, useTargetName);
             if (targetDesc != null) {
@@ -320,9 +304,9 @@ public final class ObsCatalogQueryResultDisplay extends TableDisplayTool impleme
     private Map<Integer, ISPProgram> loadPrograms(int[] indices) {
         // get the vector of (progId, obsId, groupName) corresponding to the table rows
         final ObsCatalogQueryResult queryResult = (ObsCatalogQueryResult) getTable();
-        final Map<SPNodeKey, ISPProgram> localProgs = new TreeMap<SPNodeKey, ISPProgram>();
-        final Map<SPProgramID, ISPProgram> remoteProgs = new TreeMap<SPProgramID, ISPProgram>();
-        final Map<Integer, ISPProgram> result = new TreeMap<Integer, ISPProgram>();
+        final Map<SPNodeKey, ISPProgram> localProgs = new TreeMap<>();
+        final Map<SPProgramID, ISPProgram> remoteProgs = new TreeMap<>();
+        final Map<Integer, ISPProgram> result = new TreeMap<>();
 
         for (int index : indices) {
             final int rowIndex = getSortedJTable().getSortedRowIndex(index);
@@ -352,13 +336,11 @@ public final class ObsCatalogQueryResultDisplay extends TableDisplayTool impleme
         // Ok this is poor. We need to update the database in the results, but we need to
         // do it later because it will blow away the selection (which is needed to complete
         // the work some callers are doing).
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override public void run() {
-                for (SPProgramID pid : remoteProgs.keySet()) {
-                    queryResult.updateDatabase(pid, Local$.MODULE$);
-                }
-                getTableDisplay().update();
+        SwingUtilities.invokeLater(() -> {
+            for (SPProgramID pid : remoteProgs.keySet()) {
+                queryResult.updateDatabase(pid, Local$.MODULE$);
             }
+            getTableDisplay().update();
         });
 
         return result;
@@ -448,16 +430,8 @@ public final class ObsCatalogQueryResultDisplay extends TableDisplayTool impleme
         final JTabbedPane tabbedPane = configPanel.getTabbedPane();
         tabbedPane.add(_tableConfig, "Show Table Columns");
 
-        final ActionListener applyListener = new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                _tableConfig.apply();
-            }
-        };
-        final ActionListener cancelListener = new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                _tableConfig.cancel();
-            }
-        };
+        final ActionListener applyListener = e -> _tableConfig.apply();
+        final ActionListener cancelListener = e -> _tableConfig.cancel();
         configPanel.getApplyButton().addActionListener(applyListener);
         configPanel.getOKButton().addActionListener(applyListener);
         configPanel.getCancelButton().addActionListener(cancelListener);

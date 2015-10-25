@@ -161,31 +161,6 @@ public class CatalogQueryTool extends JPanel
         return buttonPanel;
     }
 
-
-    /**
-     * Set the object used to diplay the result of a query
-     */
-    public void setQueryResultDisplay(QueryResultDisplay q) {
-        _queryResultDisplay = q;
-    }
-
-    /**
-     * Return the object used to diplay the result of a query
-     */
-    public QueryResultDisplay getQueryResultDisplay() {
-        return _queryResultDisplay;
-    }
-
-    /**
-     * Stop the background loading thread if it is running
-     */
-    public void interrupt() {
-        if (_worker != null) {
-            _worker.interrupt();
-        }
-        _worker = null;
-    }
-
     /**
      * Return the name of this component (based on the data being displayed)
      */
@@ -195,14 +170,12 @@ public class CatalogQueryTool extends JPanel
         return _I18N.getString("catalog");
     }
 
-
     /**
      * Return the catalog for this object
      */
     public Catalog getCatalog() {
         return _catalog;
     }
-
 
     /**
      * Return the panel containing labels and entries for searching the catalog
@@ -211,15 +184,14 @@ public class CatalogQueryTool extends JPanel
         return _catalogQueryPanel;
     }
 
-
     /**
      * Called when return is typed in one of the query panel text fields
      * to start the query.
      */
+    @Override
     public void actionPerformed(ActionEvent ev) {
         search();
     }
-
 
     /**
      * Query the catalog based on the settings in the query panel and display
@@ -232,6 +204,7 @@ public class CatalogQueryTool extends JPanel
         // run in a separate thread, so the user can monitor progress and cancel it, if needed
         _worker = new SwingWorker() {
 
+            @Override
             public Object construct() {
                 try {
                     QueryArgs queryArgs = _catalogQueryPanel.getQueryArgs();
@@ -241,6 +214,7 @@ public class CatalogQueryTool extends JPanel
                 }
             }
 
+            @Override
             public void finished() {
                 _worker = null;
                 Object o = getValue();
@@ -278,7 +252,6 @@ public class CatalogQueryTool extends JPanel
         _worker.start();
     }
 
-
     /**
      * Display the given query result.
      */
@@ -286,10 +259,10 @@ public class CatalogQueryTool extends JPanel
         _queryResultDisplay.setQueryResult(queryResult);
     }
 
-
     /**
      * Store the current settings in a serializable object and return the object.
      */
+    @Override
     public Object storeSettings() {
         return _catalogQueryPanel.storeSettings();
     }

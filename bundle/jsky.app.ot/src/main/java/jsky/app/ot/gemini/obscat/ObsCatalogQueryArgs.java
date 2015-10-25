@@ -1,8 +1,3 @@
-// Copyright 2002 Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-//
-// $Id: ObsCatalogQueryArgs.java 6987 2006-05-01 18:05:34Z shane $
-
 package jsky.app.ot.gemini.obscat;
 
 import jsky.app.ot.shared.gemini.obscat.ObsCatalogInfo;
@@ -11,7 +6,6 @@ import jsky.util.NameValue;
 
 import java.util.ArrayList;
 import java.util.List;
-
 
 /**
  * Adds instrument specific parameters to the basic query arguments.
@@ -121,7 +115,7 @@ public final class ObsCatalogQueryArgs extends BasicQueryArgs {
         final SearchCondition[][] result = new SearchCondition[_instruments.length][];
         for (int i = 0; i < _instruments.length; i++) {
             int n = _instParams[i].length;
-            final List<SearchCondition> v = new ArrayList<SearchCondition>(n);
+            final List<SearchCondition> v = new ArrayList<>(n);
             for (int j = 0; j < n; j++) {
                 if (_instValues[i][j] != null) {
                     final FieldDesc p = _instParams[i][j];
@@ -136,8 +130,6 @@ public final class ObsCatalogQueryArgs extends BasicQueryArgs {
                             strArray[k] = ((NameValue) nvArray[k]).getValue().toString();
                         }
                         v.add(new ArraySearchCondition(p, strArray));
-//                    } else if (_instValues[i][j] instanceof Object[]) {
-//                        v.add(new ArraySearchCondition(p, (Object[]) _instValues[i][j]));
                     } else if (_instValues[i][j] instanceof Comparable) {
                         v.add(new ValueSearchCondition(p, (Comparable) _instValues[i][j]));
                     }
@@ -157,4 +149,3 @@ public final class ObsCatalogQueryArgs extends BasicQueryArgs {
         return result;
     }
 }
-

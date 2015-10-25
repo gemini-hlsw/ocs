@@ -51,7 +51,7 @@ import java.util.List;
 /**
  * A class for querying the science program database for observations
  * matching a given set of constraints. This class treats the science
- * program database as a catalog that can be querried in the usual
+ * program database as a catalog that can be queried in the usual
  * way. It extends the SkycatCatalog class so that it fits in with the
  * existing catalogs and so that the base positions of the
  * observations found can be easily plotted on an image.
@@ -339,7 +339,6 @@ public final class ObsCatalog extends SkycatCatalog implements CatalogUIHandler 
         return nv;
     }
 
-
     /**
      * Query the spdb using the given argument and return the resulting table.
      *
@@ -381,7 +380,6 @@ public final class ObsCatalog extends SkycatCatalog implements CatalogUIHandler 
 
         }
     };
-
 
     private static boolean addedPreferences = false;
 

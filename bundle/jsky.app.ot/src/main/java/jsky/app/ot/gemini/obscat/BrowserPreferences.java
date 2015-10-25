@@ -13,8 +13,6 @@ import jsky.app.ot.userprefs.model.PreferencesSupport;
  */
 public final class BrowserPreferences implements ExternalizablePreferences {
 
-    // --Commented out by Inspection (4/2/13 1:04 PM):public static final BrowserPreferences DEFAULT = (new Builder()).build();
-
     public static class Builder {
         private boolean showObsoleteOptions = true;
 
@@ -79,7 +77,7 @@ public final class BrowserPreferences implements ExternalizablePreferences {
     }
 
     private static final PreferencesSupport<BrowserPreferences> sup =
-            new PreferencesSupport<BrowserPreferences>(BROWSER_PREFS, new Factory());
+            new PreferencesSupport<>(BROWSER_PREFS, new Factory());
 
     public static BrowserPreferences fetch() {
         return sup.fetch();

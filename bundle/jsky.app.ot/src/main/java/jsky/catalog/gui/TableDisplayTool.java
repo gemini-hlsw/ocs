@@ -377,20 +377,10 @@ public class TableDisplayTool extends JPanel
         _configPanel.getCancelButton().addActionListener(cancelListener);
     }
 
-
     /** Panel used to configure the table and plot symbol display */
     public TabbedPanel getConfigPanel() {
         return _configPanel;
     }
-
-
-    /** Hide any popup windows associated with this window */
-    public void hidePopups() {
-        if (_configFrame != null) {
-            _configFrame.setVisible(false);
-        }
-    }
-
 
     /**
      * Return the name of this component (based on the data being displayed)
@@ -400,7 +390,6 @@ public class TableDisplayTool extends JPanel
             return _table.getName();
         return _I18N.getString("table");
     }
-
 
     /**
      * Display the given query results. Tabular data is displayed in

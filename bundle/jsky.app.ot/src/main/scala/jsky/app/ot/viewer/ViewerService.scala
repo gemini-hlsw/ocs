@@ -39,7 +39,7 @@ class ViewerService(localOdb: IDBDatabaseService, reg: VcsRegistrar) extends OtV
   /** Unregister a view; if this is the last registered view the application is shut down. */
   def unregisterView(view: AnyRef) = synchronized {
     views -= view
-    if (views.size == 0) {
+    if (views.isEmpty) {
       // this is a bit brutal, would be nice to have a softer shutdown; e.g. notify all registered views/plugins first
       System.exit(0)
     }

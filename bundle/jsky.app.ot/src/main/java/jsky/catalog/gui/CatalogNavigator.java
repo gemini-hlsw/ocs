@@ -299,20 +299,6 @@ public abstract class CatalogNavigator extends JPanel
     }
 
     /**
-     * Return the JDesktopPane, if using internal frames, otherwise null
-     */
-    public JDesktopPane getDesktop() {
-        return _desktop;
-    }
-
-    /**
-     * Set the JDesktopPane to use for top level windows, if using internal frames
-     */
-    public void setDesktop(JDesktopPane desktop) {
-        _desktop = desktop;
-    }
-
-    /**
      * Set to true to query catalogs automatically when selected
      */
     public void setAutoQuery(boolean b) {
@@ -620,22 +606,6 @@ public abstract class CatalogNavigator extends JPanel
                 }
             };
             _worker.start();
-        }
-    }
-
-    /**
-     * Update the frame's title to display the name of the given catalog
-     */
-    private void _updateTitle(Catalog catalog) {
-        String title = _I18N.getString("catalogNavigator");
-        String s = catalog.getTitle();
-        if (s != null && s.length() > 0)
-            title += " - " + s;
-        if (_parent != null) {
-            if (_parent instanceof JFrame)
-                ((JFrame) _parent).setTitle(title);
-            else
-                ((JInternalFrame) _parent).setTitle(title);
         }
     }
 

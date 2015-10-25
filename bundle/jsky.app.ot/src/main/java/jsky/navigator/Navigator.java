@@ -101,7 +101,6 @@ public class Navigator extends CatalogNavigator implements CatalogNavigatorOpene
         initSymbolPlotter();
     }
 
-
     /** Set the frame belonging to the image display widget. */
     protected void setImageDisplayControlFrame(Component imageDisplayControlFrame) {
         _imageDisplayControlFrame = imageDisplayControlFrame;
@@ -111,7 +110,6 @@ public class Navigator extends CatalogNavigator implements CatalogNavigatorOpene
     public Action getImageDisplayAction() {
         return _imageDisplayAction;
     }
-
 
     /**
      * Make a panel for querying a catalog
@@ -147,7 +145,6 @@ public class Navigator extends CatalogNavigator implements CatalogNavigatorOpene
         showImageDisplay();
         _imageDisplay.setFilename(filename, url);
     }
-
 
     /**
      * Show the image display window.
@@ -252,12 +249,9 @@ public class Navigator extends CatalogNavigator implements CatalogNavigatorOpene
         // initialize the symbol plotter
         TablePlotter plotter = getPlotter();
         if (plotter != null) {
-            //plotter.setCanvasGraphics(_imageDisplay.getCanvasGraphics());
-            //plotter.setCoordinateConverter(_imageDisplay.getCoordinateConverter());
             _imageDisplay.getNavigatorPane().setPlotter(plotter);
         }
     }
-
 
     /**
      * Return a new JComponent displaying the contents of the given URL.

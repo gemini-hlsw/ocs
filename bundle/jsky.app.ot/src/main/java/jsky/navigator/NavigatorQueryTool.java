@@ -28,6 +28,7 @@ import jsky.util.gui.DialogUtil;
  * This class extends the parent class by adding some
  * buttons to set the search area based on the current image display.
  */
+@Deprecated
 public class NavigatorQueryTool extends CatalogQueryTool implements SelectedAreaListener {
 
     /** Reference to the main image display window */
@@ -70,24 +71,6 @@ public class NavigatorQueryTool extends CatalogQueryTool implements SelectedArea
         });
     }
 
-
-    /**
-     * Create a NavigatorQueryTool for searching the given catalog.
-     *
-     * @param catalog The catalog to use.
-     * @param queryResultDisplay use to display query results
-     */
-    public NavigatorQueryTool(Catalog catalog, QueryResultDisplay queryResultDisplay) {
-        this(catalog, queryResultDisplay, null);
-
-        if (queryResultDisplay instanceof Navigator) {
-            Navigator navigator = (Navigator) queryResultDisplay;
-            setImageDisplay(navigator.getImageDisplay());
-        }
-    }
-
-
-    /** Return a reference to the main image display window, or null if there isn't one. */
     public CatalogDisplay getImageDisplay() {
         return _imageDisplay;
     }
