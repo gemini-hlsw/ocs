@@ -2,6 +2,7 @@ package jsky.catalog;
 
 import edu.gemini.catalog.skycat.DefaultOutputAdapter;
 import edu.gemini.catalog.skycat.SkycatOutputAdapter;
+import edu.gemini.shared.skyobject.SkyObject;
 import edu.gemini.shared.util.immutable.None;
 import edu.gemini.shared.util.immutable.Option;
 import jsky.catalog.skycat.SkycatCatalog;
@@ -234,6 +235,11 @@ public class MemoryCatalog extends DefaultTableModel
      */
     public Catalog getCatalog() {
         return _catalog;
+    }
+
+    @Override
+    public Option<SkyObject> getSkyObject(int i) {
+        return None.instance();
     }
 
     /**

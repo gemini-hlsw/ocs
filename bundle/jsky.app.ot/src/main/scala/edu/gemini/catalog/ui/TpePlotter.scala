@@ -2,10 +2,14 @@ package edu.gemini.catalog.ui
 
 import java.awt.Color
 import java.net.URL
-import java.util
 import javax.swing.event.TableModelListener
 
 import edu.gemini.catalog.ui.tpe.CatalogImageDisplay
+import edu.gemini.shared.skyobject.SkyObject
+import edu.gemini.pot.ModelConverters._
+import edu.gemini.spModel.core.MagnitudeBand
+import edu.gemini.shared.util.immutable.{Option => JOption}
+import edu.gemini.shared.util.immutable.ScalaConverters._
 import jsky.catalog._
 import jsky.coords._
 import jsky.util.gui.StatusLogger
@@ -140,7 +144,11 @@ case class TpePlotter(display: CatalogImageDisplay) {
     override def getCatalog: Catalog = catalog
 
     override def getDataVector: java.util.Vector[java.util.Vector[AnyRef]] = new java.util.Vector(model.targets.map { t =>
-      new java.util.Vector[AnyRef](List(t.name, t.coordinates.ra.toAngle.formatHMS, t.coordinates.dec.formatDMS).asJavaCollection)
+      val mags = MagnitudeBand.all.map(t.magnitudeIn).collect {
+        case Some(v) => Double.box(v.value)
+        case None    => null // This is required for the Java side of plotting
+      }
+      new java.util.Vector[AnyRef]((List(t.name, t.coordinates.ra.toAngle.formatHMS, t.coordinates.dec.formatDMS) ::: mags).asJavaCollection)
     }.asJavaCollection)
 
     override def getColumnDesc(i: Int): FieldDesc = ???
@@ -148,7 +156,8 @@ case class TpePlotter(display: CatalogImageDisplay) {
     override def getColumnIndex(name: String): Int = ???
 
     override def getColumnIdentifiers: java.util.List[String] = {
-      List.empty[String].asJava
+      val mags = MagnitudeBand.all.map(_.name + "mag")
+      (List("Id", "RAJ2000", "DECJ2000") ::: mags).asJava
     }
 
     override def hasCoordinates: Boolean = ???
@@ -218,6 +227,8 @@ case class TpePlotter(display: CatalogImageDisplay) {
     override def setValueAt(aValue: scala.Any, rowIndex: Int, columnIndex: Int): Unit = model.setValueAt(aValue, rowIndex, columnIndex)
 
     override def addTableModelListener(l: TableModelListener): Unit = model.addTableModelListener(l)
+
+    override def getSkyObject(i: Int): JOption[SkyObject] = model.targets.lift(i).map(_.toOldModel).asGeminiOpt
   }
 
   /**

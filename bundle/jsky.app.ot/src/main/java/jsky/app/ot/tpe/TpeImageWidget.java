@@ -7,6 +7,8 @@ import edu.gemini.shared.cat.CatalogSearchParameters;
 import edu.gemini.shared.cat.ICatalogAlgorithm;
 import edu.gemini.catalog.api.MagnitudeLimits;
 import edu.gemini.catalog.api.RadiusLimits;
+import edu.gemini.shared.skyobject.SkyObject;
+import edu.gemini.shared.skyobject.coords.HmsDegCoordinates;
 import edu.gemini.shared.util.immutable.*;
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality;
 import edu.gemini.spModel.obs.SchedulingBlock;
@@ -23,8 +25,6 @@ import jsky.app.ot.util.Resources;
 import jsky.app.ot.util.ScreenMath;
 import jsky.catalog.gui.TablePlotter;
 import jsky.coords.CoordinateConverter;
-import jsky.coords.Coordinates;
-import jsky.catalog.gui.NamedCoordinates;
 import jsky.coords.WorldCoords;
 import jsky.navigator.NavigatorPane;
 import jsky.util.gui.DialogUtil;
@@ -513,25 +513,18 @@ public class TpeImageWidget extends CatalogImageDisplay implements MouseInputLis
         final Point2D.Double mp = new Point2D.Double(evt.getX(), evt.getY());
 
         // snap to catalog symbol position, if user clicked on one
-        NamedCoordinates namedCoords = null; // object id and coordinates of a catalog symbol
-        if (evt.getID() == MouseEvent.MOUSE_CLICKED) {
-            namedCoords = getCatalogPosition(mp);
-        }
-
         final Point2D.Double p = new Point2D.Double(mp.x, mp.y);
         getCoordinateConverter().screenToUserCoords(p, false);
-        if (namedCoords == null) {
-            tme.pos = userToWorldCoords(p.x, p.y);
+        if (evt.getID() == MouseEvent.MOUSE_CLICKED) {
+            Option<SkyObject> skyObject = getCatalogPosition(mp);
+            skyObject.forEach(s -> {
+                final HmsDegCoordinates coords = s.getCoordinates().toHmsDeg(0);
+                tme.pos = new WorldCoords(coords.getRa().toDegrees().getMagnitude(), coords.getDec().toDegrees().getMagnitude());
+                tme.name = s.getName();
+            });
+            tme.setSkyObject(skyObject);
         } else {
-            final Coordinates coords = namedCoords.getCoordinates();
-            if (coords instanceof WorldCoords) {
-                tme.pos = (WorldCoords) coords;
-                tme.name = namedCoords.getName();
-                tme.setBrightness(namedCoords.getBrightness());
-                tme.setSkyObject(namedCoords.getSkyObject());
-            } else {
-                tme.pos = userToWorldCoords(p.x, p.y);
-            }
+            tme.pos = userToWorldCoords(p.x, p.y);
         }
 
         tme.id = evt.getID();
@@ -574,12 +567,12 @@ public class TpeImageWidget extends CatalogImageDisplay implements MouseInputLis
      * point to the center of the symbol and return the world coordinates position
      * from the catalog table row. Otherwise, return null and do nothing.
      */
-    protected NamedCoordinates getCatalogPosition(final Point2D.Double p) {
+    private Option<SkyObject> getCatalogPosition(final Point2D.Double p) {
         final TablePlotter plotter = plotter();
         if (plotter == null) {
             return null;
         }
-        return plotter.getCatalogPosition(p);
+        return plotter.getCatalogObjectAt(p);
     }
 
     /**

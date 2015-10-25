@@ -9,7 +9,6 @@ import edu.gemini.catalog.skycat.table.*;
 import edu.gemini.shared.skyobject.SkyObject;
 import edu.gemini.shared.util.immutable.*;
 import jsky.catalog.*;
-import jsky.catalog.skycat.SkyObjectFactoryRegistrar;
 import jsky.coords.*;
 import jsky.graphics.CanvasGraphics;
 import jsky.image.graphics.DivaImageGraphics;
@@ -30,7 +29,6 @@ import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.*;
 import java.util.List;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
@@ -949,59 +947,13 @@ public class BasicTablePlotter
                 new DefaultCatalogRow(DefaultImList.create(row)));
     }
 
-    // Creates a SkyObject, if possible, using the given table query result
-    // and row of data.
-    private static Option<SkyObject> toSkyObject(final TableQueryResult table, final Vector<Object> row) {
-        final List<String> columnIdentifiers = table.getColumnIdentifiers();
-        final String catid = table.getId();
-        final Option<SkyObjectFactory> fact = SkyObjectFactoryRegistrar.instance.lookup(catid);
-        return fact.flatMap(skyObjectFactory -> {
-            final Tuple2<CatalogHeader, CatalogRow> cat = wrap(columnIdentifiers, row);
-            try {
-                return new Some<>(fact.getValue().create(cat._1(), cat._2()));
-            } catch (edu.gemini.catalog.skycat.CatalogException ex) {
-                LOG.log(Level.WARNING, ex.getMessage(), ex);
-            }
-            return None.instance();
-        });
-    }
-
-    // Extracts random, vague, useless "brightness" information from the results.
-    // This is the pre-SkyObject way of doing this.
-    private static Option<String> extractBrightness(final TableQueryResult table, final Vector<Object> row) {
-        final List<String> columnIdentifiers = table.getColumnIdentifiers();
-
-        StringBuilder brightness = new StringBuilder("");
-        final int numCols = columnIdentifiers.size();
-        for (int col = 0; col < numCols; col++) {
-            final String s = columnIdentifiers.get(col);
-            final String sl = s.toLowerCase();
-            if (sl.equals(TableSymbolConfig.MAG)) {
-                final Object o = row.get(col);
-                if (o != null) {
-                    brightness.append(o).append(" mag");
-                    break;
-                }
-            } else if (sl.endsWith(TableSymbolConfig.MAG) && !sl.startsWith("e")) {
-                final Object o = row.get(col);
-                if (o != null) {
-                    if (brightness.length() != 0)
-                        brightness.append(", ");
-                    brightness.append(brightness).append(o).append(s.charAt(0));
-                }
-            }
-        }
-        //noinspection unchecked
-        return brightness.length() == 0 ? None.INSTANCE : new Some<>(brightness.toString());
-    }
-
     /**
      * If the given screen coordinates point is within a displayed catalog symbol, set it to
      * point to the center of the symbol and return the name and coordinates (and brightness,
      * if known) from the catalog table row. Otherwise, return null and do nothing.
      */
     @Override
-    public NamedCoordinates getCatalogPosition(final Point2D.Double p) {
+    public Option<SkyObject> getCatalogObjectAt(final Point2D.Double p) {
         // Find the plot symbol under the mouse pointer
         for (TableListItem tli: _tableList) {
             if (!tli.inRange)
@@ -1013,14 +965,17 @@ public class BasicTablePlotter
                         RowCoordinates rowCoords = tli.table.getRowCoordinates();
                         if (!rowCoords.isWCS())
                             return null;
-                        final Vector<Vector<Object>> dataVec = tli.table.getDataVector();
+                        return tli.table.getSkyObject(fli.row);
+                        // TODO Do we need to compensate for coordinate adjustment?
+                        /*final Vector<Vector<Object>> dataVec = tli.table.getDataVector();
                         _imageEquinox = _coordinateConverter.getEquinox();
                         final Vector<Object> rowVec = dataVec.get(fli.row);
 
                         // get the world coordinates
                         final Coordinates cpos = rowCoords.getCoordinates(rowVec);
-                        if (cpos == null)
+                        if (cpos == null) {
                             return null;
+                        }
                         final WorldCoords pos = (WorldCoords) cpos;
 
                         // modify the parameter to point to the center of the symbol
@@ -1040,13 +995,14 @@ public class BasicTablePlotter
                         }
 
                         final Option<String>   brightness = extractBrightness(tli.table, rowVec);
-                        final Option<SkyObject> skyObject = toSkyObject(tli.table, rowVec);
+                        final Option<SkyObject> skyObject = toSkyObject(id, tli.table, rowVec);
                         return new NamedCoordinates(id, pos, brightness, skyObject);
+                        return null;*/
                     }
                 }
             }
         }
-        return null;
+        return None.instance();
     }
 
 
