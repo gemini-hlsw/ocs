@@ -90,7 +90,8 @@ abstract class TemplateSpec(xmlName: String) { this: Specification =>
   def checkLibs(label: String, tg: ISPTemplateGroup, incl: Set[Int], excl: Set[Int]) = {
     val ls = libs(tg)
     s"$label should include ${incl.mkString("{", ",", "}")} and exclude ${excl.mkString("{", ",", "}")}." in {
-      ls.filter(incl) == incl && ls.filter(excl).isEmpty
+      if (ls.filter(incl) == incl && ls.filter(excl).isEmpty) ok
+      else failure("Failed: Actual library ids: " + ls)
     }
   }
 

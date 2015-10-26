@@ -61,7 +61,7 @@
         <container kind="obsComp" type="AO" version="2009A-1" subtype="GeMS" key="70181aa3-19fb-419a-aa5f-23dc628aac0d" name="GeMS Adaptive Optics">
           <paramset name="GeMS Adaptive Optics" kind="dataObj">
             <param name="adc" value="OFF"/>
-            <param name="dichroicBeamsplitter" value="WAVELENGTH_850NM"/>
+            <param name="dichroicBeamsplitter" value="WAVELENGTH_B"/>
             <param name="astrometricMode" value="REGULAR"/>
           </paramset>
         </container>
@@ -179,7 +179,7 @@
         <container kind="obsComp" type="AO" version="2009A-1" subtype="GeMS" key="3c8aaf66-424e-409f-ab7b-90df75b567ed" name="GeMS Adaptive Optics">
           <paramset name="GeMS Adaptive Optics" kind="dataObj">
             <param name="adc" value="OFF"/>
-            <param name="dichroicBeamsplitter" value="WAVELENGTH_850NM"/>
+            <param name="dichroicBeamsplitter" value="WAVELENGTH_B"/>
             <param name="astrometricMode" value="REGULAR"/>
           </paramset>
         </container>
@@ -297,7 +297,7 @@
         <container kind="obsComp" type="AO" version="2009A-1" subtype="GeMS" key="1b0dc6db-cd3b-4bfb-8c8b-a7d2bd4afb5d" name="GeMS Adaptive Optics">
           <paramset name="GeMS Adaptive Optics" kind="dataObj">
             <param name="adc" value="OFF"/>
-            <param name="dichroicBeamsplitter" value="WAVELENGTH_850NM"/>
+            <param name="dichroicBeamsplitter" value="WAVELENGTH_B"/>
             <param name="astrometricMode" value="REGULAR"/>
           </paramset>
         </container>

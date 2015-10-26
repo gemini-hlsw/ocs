@@ -673,7 +673,7 @@ http://www.gemini.edu/sciops/observing-gemini/phase-ii-and-s/w-tools/finding-cha
         </container>
         <container kind="obsComp" type="AO" version="2006B-1" subtype="Altair" key="4e4120e0-c61d-49ea-9854-e51637084ad8" name="Altair Adaptive Optics">
           <paramset name="Altair Adaptive Optics" kind="dataObj">
-            <param name="wavelength" value="WAVELENGTH_850NM"/>
+            <param name="wavelength" value="WAVELENGTH_B"/>
             <param name="adc" value="OFF"/>
             <param name="cassRotator" value="FOLLOWING"/>
             <param name="ndFilter" value="OUT"/>
@@ -765,7 +765,7 @@ http://www.gemini.edu/sciops/observing-gemini/phase-ii-and-s/w-tools/finding-cha
         </container>
         <container kind="obsComp" type="AO" version="2006B-1" subtype="Altair" key="f13e1aaf-65b7-4a21-836c-cb21a80f4270" name="Altair Adaptive Optics">
           <paramset name="Altair Adaptive Optics" kind="dataObj">
-            <param name="wavelength" value="WAVELENGTH_850NM"/>
+            <param name="wavelength" value="WAVELENGTH_B"/>
             <param name="adc" value="OFF"/>
             <param name="cassRotator" value="FOLLOWING"/>
             <param name="ndFilter" value="OUT"/>

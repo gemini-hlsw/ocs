@@ -6,6 +6,7 @@ import edu.gemini.spModel.gemini.obscomp.SPSiteQuality
 import scala.collection.JavaConverters._
 import edu.gemini.spModel.target.SPTarget
 import edu.gemini.model.p1.immutable._
+import edu.gemini.shared.util.immutable.ScalaConverters._
 import edu.gemini.spModel.template._
 import edu.gemini.spModel.gemini.gnirs.blueprint.SpGnirsBlueprintSpectroscopy
 import edu.gemini.spModel.gemini.nifs.blueprint.SpNifsBlueprintBase
@@ -157,18 +158,16 @@ object F2LongslitPartitioner extends Partitioner {
   }).getOrElse(3)
 }
 
-// IF          R < 6.5 INCLUDE {1}
-// ELIF 6.5 <= R < 10  INCLUDE {2}
-// ELIF 10  <= R < 21  INCLUDE {3}
-// ELIF 21  <= R       INCLUDE {4}
-// ELSE INCLUDE {1},{2},{3},{4} # No magnitude given so include all
-
+// R = Phase-I target R-band or V-band magnitude
+//... ELIF FIBER-MODE == 1 AND READ-MODE == Slow:
+//IF   R> 10 INCLUDE {3}
+//ELIF R<=10 INCLUDE {4}
+//ELSE       INCLUDE {3,4}
 object GracesPartitioner extends Partitioner {
-  import edu.gemini.shared.skyobject.Magnitude.Band.R
-  def bucket(t:SPTarget):Int = Option(t.getTarget.getMagnitude(R).getOrNull).map(_.getBrightness).map {R =>
-         if (R <= 6.5) 1
-    else if (R <= 10)  2
-    else if (R <= 21)  3
-    else               4
-  }.getOrElse(5) // no R-mag is treated differently
+  import edu.gemini.shared.skyobject.Magnitude.Band.{ R, V }
+  def bucket(t:SPTarget):Int =
+    (t.getTarget.getMagnitude(R).asScalaOpt orElse
+     t.getTarget.getMagnitude(V).asScalaOpt).map(_.getBrightness).map { mag =>
+         if (mag > 10) 1 else 2
+     }.getOrElse(3) // no R/V-mag is treated differently
 }
