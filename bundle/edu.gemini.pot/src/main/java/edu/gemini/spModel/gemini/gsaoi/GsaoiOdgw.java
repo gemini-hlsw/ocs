@@ -8,9 +8,7 @@ import edu.gemini.spModel.guide.*;
 import edu.gemini.spModel.obs.SchedulingBlock;
 import edu.gemini.spModel.obs.context.ObsContext;
 import edu.gemini.spModel.target.SPTarget;
-import edu.gemini.spModel.target.env.GuideGroup;
-import edu.gemini.spModel.target.env.GuideProbeTargets;
-import edu.gemini.spModel.target.env.TargetEnvironment;
+import edu.gemini.spModel.target.env.*;
 
 import java.awt.geom.Area;
 import java.util.*;
@@ -233,11 +231,11 @@ public enum GsaoiOdgw implements ValidatableGuideProbe {
 
                     final GuideProbeTargets gptOld = gtMap.get(odgw);
                     final boolean primaryIsBags = gptOld != null && gptOld.getBagsTarget().exists(primary::equals);
-                    final Option<SPTarget> bagsTarget = primaryIsBags ? new Some<>(primary) : GuideProbeTargets.NO_TARGET;
-                    final GuideProbeTargets gptNew = GuideProbeTargets.create(odgw, bagsTarget, new Some<>(primary), imLst);
+                    final BagsStatus bagsStatus = primaryIsBags ? BagsSuccessWithTarget$.MODULE$.apply(primary) : BagsLookupPending$.MODULE$;
+                    final GuideProbeTargets gptNew = GuideProbeTargets.create(odgw, bagsStatus, new Some<>(primary), imLst);
                     gtMap.put(odgw, gptNew);
 
-                    if (!updated && (gptOld == null || targetsUpdated(imLst, gptOld.getTargets()) || !gptOld.getBagsTarget().equals(bagsTarget))) {
+                    if (!updated && (gptOld == null || targetsUpdated(imLst, gptOld.getTargets()) || !gptOld.getBagsTarget().equals(bagsStatus.bagsStarAsJava()))) {
                         updated = true;
                     }
                 }
