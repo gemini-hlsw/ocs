@@ -262,13 +262,16 @@ object ConfigExtractor {
   // Gets the observing wavelength from the configuration.
   // For imaging this corresponds to the mid point of the selected filter, for spectroscopy the value
   // is defined by the user. Unit is microns [um]. Note that for Acq Cam the observing wavelength
-  // is not defined, instead we need to get the wavelength from the color filter. Also some special
-  // magic is needed for GNIRS.
+  // is not defined, instead we need to get the wavelength from the color filter. Some special magic
+  // is needed for GNIRS where the wavelength value can be either a string or (in case of GNIRS sequence
+  // iterators) a GNIRSParams.Wavelength. Fascinating.
   def extractObservingWavelength(c: Config): String \/ Wavelength = {
     val instrument = extract[String](c, InstrumentKey).getOrElse("")
     (instrument match {
       case "AcqCam" =>
         extract[AcqCamParams.ColorFilter](c, ColorFilterKey).map(_.getCentralWavelength.toDouble)
+      case "GNIRS" if extractWithThrowable[String](c, ObsWavelengthKey).isRight =>
+        extract[String](c, ObsWavelengthKey).map(_.toDouble)
       case "GNIRS" =>
         extract[GNIRSParams.Wavelength](c, ObsWavelengthKey).map(_.doubleValue())
       case _ =>
