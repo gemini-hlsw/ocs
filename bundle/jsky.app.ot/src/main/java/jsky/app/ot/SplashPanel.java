@@ -1,6 +1,7 @@
 package jsky.app.ot;
 
 import edu.gemini.pot.sp.ISPProgramNode;
+import jsky.app.ot.gemini.obscat.ObsCatalog;
 import jsky.app.ot.plugin.OtActionPlugin;
 import jsky.app.ot.plugin.OtContext;
 import jsky.app.ot.userprefs.observer.ObservingPeer;
@@ -93,7 +94,7 @@ public final class SplashPanel extends JPanel implements PluginConsumer, ActionL
             }));
 
             // OT Browser
-            add(new JButton(new QueryAction()));
+            add(new JButton(new QueryAction(ObsCatalog.QUERY_MANAGER)));
 
             // Import XML
             add(new JButton(new ImportAction() {

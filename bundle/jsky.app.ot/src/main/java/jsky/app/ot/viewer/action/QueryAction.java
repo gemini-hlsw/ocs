@@ -12,20 +12,15 @@ import java.awt.event.ActionEvent;
  */
 public final class QueryAction extends AbstractAction {
     // An object that can display a window for querying the science program database
-    private static QueryManager _queryManager = null;
+    private final QueryManager _queryManager;
 
     /**
      * Set the (observatory specific) object responsible for displaying a window where
-     * the user can query the science program database.
-     * This method should be called once when the application starts. Callers should
-     * use the OpenActions.QueryAction class for menu and toolbar items.
+     * the user can query the science program database
      */
-    public static void setQueryManager(final QueryManager queryManager) {
-        _queryManager = queryManager;
-    }
-
-    public QueryAction() {
+    public QueryAction(final QueryManager queryManager) {
         super("OT Browser...");
+        _queryManager = queryManager;
         if (_queryManager == null) {
             setEnabled(false);
         }

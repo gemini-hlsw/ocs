@@ -201,21 +201,7 @@ public final class OT {
      * called once when OT starts.
      */
     private static void initUI() {
-        initUI(ObsCatalog.QUERY_MANAGER);
-    }
-
-
-    /**
-     * For testing it's often useful to forego the obs catalog stuff. so pass null for qm.
-     */
-    private static void initUI(final QueryManager qm) {
-
         initSwing();
-
-        // Add the observatory specific hook for the OT Browser
-        if (qm != null) {
-            QueryAction.setQueryManager(qm);
-        }
 
         // Register the (partly Gemini specific) position editor features.
         // Note that the order of the buttons in the position editor toolbar
