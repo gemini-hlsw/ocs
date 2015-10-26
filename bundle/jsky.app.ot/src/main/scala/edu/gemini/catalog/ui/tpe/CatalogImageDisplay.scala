@@ -336,7 +336,7 @@ class NavigatorCatalogMenu(opener: CatalogImageDisplay) {
 
   private def userPreferredCatalog: Option[Catalog] = {
     val args = Preferences.get(Catalog.SKY_USER_CATALOG, Catalog.DEFAULT_IMAGE_SERVER).split("\\*")
-    val t = (args.length <= 0) option {
+    val t = args.nonEmpty option {
       val c = CatalogNavigator.getCatalogDirectory.getCatalog(args(0))
       Option(c).filter(_.isImageServer)
     }

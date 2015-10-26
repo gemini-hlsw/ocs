@@ -1,9 +1,3 @@
-// Copyright 2000 Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-// See the file LICENSE for complete details.
-//
-// $Id: OT.java 47190 2012-08-02 18:40:21Z swalker $
-//
 package jsky.app.ot;
 
 import edu.gemini.ags.api.AgsMagnitude;
@@ -14,7 +8,6 @@ import edu.gemini.pot.sp.ISPRootNode;
 import edu.gemini.pot.sp.SPNodeKey;
 import edu.gemini.pot.spdb.ProgramEvent;
 import edu.gemini.pot.spdb.ProgramEventListener;
-import edu.gemini.shared.util.immutable.ApplyOp;
 import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.sp.vcs.reg.VcsRegistrar;
 import edu.gemini.spModel.core.Peer;
@@ -28,7 +21,6 @@ import edu.gemini.spModel.smartgcal.repository.CalibrationRemoteRepository;
 import edu.gemini.spModel.smartgcal.repository.CalibrationResourceRepository;
 import edu.gemini.spModel.smartgcal.repository.CalibrationUpdater;
 import edu.gemini.util.security.auth.keychain.KeyChain;
-import jsky.app.ot.gemini.obscat.ObsCatalog;
 import jsky.app.ot.modelconfig.Flamingos2Config;
 import jsky.app.ot.modelconfig.GemsConfig;
 import jsky.app.ot.modelconfig.ModelConfig;
@@ -39,7 +31,7 @@ import jsky.app.ot.userprefs.observer.ObservingSite;
 import jsky.app.ot.util.Resources;
 import jsky.app.ot.vcs.vm.VmUpdater;
 import jsky.app.ot.viewer.*;
-import jsky.app.ot.viewer.action.QueryAction;
+import jsky.util.ProxyServerUtil;
 import jsky.util.gui.BrowserControl;
 import jsky.util.gui.DialogUtil;
 import jsky.util.gui.Theme;
@@ -265,7 +257,7 @@ public final class OT {
         void updateEditableState();
     }
 
-    private static final List<EditableStateListener> editableStateListeners = new ArrayList<EditableStateListener>();
+    private static final List<EditableStateListener> editableStateListeners = new ArrayList<>();
 
     /**
      * Fires a property change event that causes the editable states to be updated
@@ -276,7 +268,7 @@ public final class OT {
         final SPNodeKey root = src.getProgramKey();
         final List<EditableStateListener> copy;
         synchronized (editableStateListeners) {
-            copy = new ArrayList<EditableStateListener>(editableStateListeners);
+            copy = new ArrayList<>(editableStateListeners);
         }
 
         for (final EditableStateListener esl : copy) {
@@ -319,12 +311,9 @@ public final class OT {
     private static void initModelConfig() {
         try {
             final Option<ModelConfig> mc = ModelConfig.load();
-            mc.foreach(new ApplyOp<ModelConfig>() {
-                @Override
-                public void apply(final ModelConfig modelConfig) {
-                    GemsConfig.instance.apply(modelConfig);
-                    Flamingos2Config.instance.apply(modelConfig);
-                }
+            mc.foreach(modelConfig -> {
+                GemsConfig.instance.apply(modelConfig);
+                Flamingos2Config.instance.apply(modelConfig);
             });
         } catch (IOException ex) {
             LOG.log(Level.WARNING, "Could not load model config.", ex);
@@ -403,16 +392,14 @@ public final class OT {
 
             // If we have an open viewer for this program, replace it.
             @Override public void programReplaced(final ProgramEvent<ISPProgram> pme) {
-                SwingUtilities.invokeLater(new Runnable() {
-                    public void run() {
-                        final ISPProgram newProgram = pme.getNewProgram();
-                        final SPNodeKey  key = newProgram.getNodeKey();
-                        for (SPViewer v : SPViewer.instances()) {
-                            final ISPRootNode root = v.getRoot();
-                            if ((root != null) && root.getNodeKey().equals(key)) {
-                                v.replaceRoot(newProgram);
-                                break;
-                            }
+                SwingUtilities.invokeLater(() -> {
+                    final ISPProgram newProgram = pme.getNewProgram();
+                    final SPNodeKey  key = newProgram.getNodeKey();
+                    for (SPViewer v : SPViewer.instances()) {
+                        final ISPRootNode root = v.getRoot();
+                        if ((root != null) && root.getNodeKey().equals(key)) {
+                            v.replaceRoot(newProgram);
+                            break;
                         }
                     }
                 });
@@ -447,6 +434,7 @@ public final class OT {
     public static void open(final KeyChain auth, final AgsMagnitude.MagnitudeTable magTable, final VcsRegistrar reg, final File storageDir) {
 
         // Init all the things
+        ProxyServerUtil.init();
         initAuth(auth);
         initMagnitudeTable(magTable);
         initLogging();
