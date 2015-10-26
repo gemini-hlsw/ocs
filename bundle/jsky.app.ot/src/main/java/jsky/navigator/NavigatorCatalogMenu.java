@@ -1,8 +1,6 @@
 package jsky.navigator;
 
 import javax.swing.*;
-import javax.swing.event.TreeModelEvent;
-import javax.swing.event.TreeModelListener;
 
 import edu.gemini.catalog.ui.tpe.CatalogImageDisplay;
 import edu.gemini.shared.util.immutable.None;
@@ -11,7 +9,6 @@ import edu.gemini.shared.util.immutable.Some;
 import jsky.catalog.Catalog;
 import jsky.catalog.CatalogDirectory;
 import jsky.catalog.gui.CatalogNavigator;
-import jsky.catalog.gui.CatalogNavigatorOpener;
 import jsky.catalog.gui.StoreImageServerAction;
 import jsky.util.I18N;
 import jsky.util.ProxyServerUtil;
@@ -26,19 +23,19 @@ import jsky.util.gui.ProxyServerDialog;
  * @version $Revision: 7122 $
  * @author Allan Brighton
  */
-public class NavigatorCatalogMenu extends JMenu implements TreeModelListener {
+public class NavigatorCatalogMenu {
 
-    // Used to access internationalized strings (see i18n/gui*.proprties)
+    // Used to access internationalized strings (see i18n/gui*.properties)
     private static final I18N _I18N = I18N.getInstance(NavigatorCatalogMenu.class);
 
     /** Object responsible for loading the sky image */
     private CatalogImageDisplay _opener;
 
     /** Image server submenu */
-    private JMenu _imageServerMenu;
+    private final Option<JMenu> _imageServerMenu;
 
     /** The "Proxy Settings" menu item */
-    private JMenuItem _proxyMenuItem;
+    private final Option<JMenuItem> _proxyMenuItem;
 
     // This restores any proxy settings from a previous session
     static {
@@ -51,70 +48,48 @@ public class NavigatorCatalogMenu extends JMenu implements TreeModelListener {
      * @param opener the object responsible for creating and displaying the catalog window
      */
     public NavigatorCatalogMenu(CatalogImageDisplay opener) {
-        super(_I18N.getString("catalog"));
+        //super(_I18N.getString("catalog"));
         _opener = opener;
 
-        addMenuItems();
-    }
-
-    /** Add the catalog menu items. */
-    public void addMenuItems() {
         CatalogDirectory dir;
         try {
             dir = CatalogNavigator.getCatalogDirectory();
         } catch (Exception e) {
             DialogUtil.error(e);
+            _imageServerMenu = None.instance();
+            _proxyMenuItem = None.instance();
             return;
         }
+        _imageServerMenu = new Some<>(new JMenu(_I18N.getString("imageServers")));
+        _createCatalogSubMenu(dir);
 
-        // update menu when the config file changes
-        dir.removeTreeModelListener(this);
-        dir.addTreeModelListener(this);
+        _proxyMenuItem = new Some<>(new JMenuItem(_I18N.getString("proxySettings")));
+        _createProxySettingsMenuItem();
 
-        _imageServerMenu = _createCatalogSubMenu(this, _imageServerMenu, true, dir, _I18N.getString("imageServers"));
-
-        if (_proxyMenuItem == null) {
-            add(_proxyMenuItem = _createProxySettingsMenuItem());
-        }
     }
 
     /**
      * Create and return a submenu listing catalogs of the given type.
      *
-     * @param parentMenu the menu to add the new menu to
-     * @param oldMenu if not null, update this menu, otherwise create a new one
-     * @param clearMenu if true and oldMenu is not null, clear out the old menu, otherwise add to it
      * @param dir the catalog directory (config file) reference
-     * @param label the label for the submenu
      * @return the ne or updated menu
      */
-    private JMenu _createCatalogSubMenu(JMenu parentMenu, JMenu oldMenu, boolean clearMenu,
-                                        CatalogDirectory dir, String label) {
-        JMenu menu = oldMenu;
-        if (menu == null) {
-            menu = new JMenu(label);
-            parentMenu.add(menu);
-        } else if (clearMenu) {
-            menu.removeAll();
-        }
-
-        if (dir == null) {
-            return menu;
-        }
-        int n = dir.getNumCatalogs();
-        ButtonGroup b = new ButtonGroup();
-        Option<Catalog> userCat = _getUserCatalog();
-        for (int i = 0; i < n; i++) {
-            Catalog cat = dir.getCatalog(i);
-            if (cat.isImageServer()) {
-                JMenuItem mi = _createCatalogMenuItem(cat);
-                menu.add(mi);
-                b.add(mi);
-                //Mark this catalog as selected if this is the catalog selected previously by the user
-                userCat.filter(c -> c.getName().equals(cat.getName())).foreach(c -> mi.setSelected(true));
+    private void _createCatalogSubMenu(CatalogDirectory dir) {
+        if (dir != null) {
+            int n = dir.getNumCatalogs();
+            ButtonGroup b = new ButtonGroup();
+            Option<Catalog> userCat = _getUserCatalog();
+            for (int i = 0; i < n; i++) {
+                Catalog cat = dir.getCatalog(i);
+                if (cat.isImageServer()) {
+                    JMenuItem mi = _createCatalogMenuItem(cat);
+                    _imageServerMenu.foreach(m -> m.add(mi));
+                    b.add(mi);
+                    //Mark this catalog as selected if this is the catalog selected previously by the user
+                    userCat.filter(c -> c.getName().equals(cat.getName())).foreach(c -> mi.setSelected(true));
+                }
             }
         }
-        return menu;
     }
 
     /**
@@ -149,31 +124,20 @@ public class NavigatorCatalogMenu extends JMenu implements TreeModelListener {
     /**
      * Create the Catalog => "Proxy Settings..." menu item
      */
-    private JMenuItem _createProxySettingsMenuItem() {
-        JMenuItem menuItem = new JMenuItem(_I18N.getString("proxySettings"));
-        menuItem.addActionListener(ae -> {
+    private void _createProxySettingsMenuItem() {
+        _proxyMenuItem.foreach(m -> m.addActionListener(ae -> {
             ProxyServerDialog proxyDialog = new ProxyServerDialog();
             proxyDialog.setVisible(true);
-        });
-        return menuItem;
+        }));
     }
 
-    // -- implement the TreeModelListener interface
-    // (so we can update the menus whenever the catalog tree is changed)
 
-    public void treeNodesChanged(TreeModelEvent e) {
-        addMenuItems();
+    public Option<JMenu> getImageServerMenu() {
+        return _imageServerMenu;
     }
 
-    public void treeNodesInserted(TreeModelEvent e) {
-        addMenuItems();
+    public Option<JMenuItem> getProxyMenuItem() {
+        return _proxyMenuItem;
     }
 
-    public void treeNodesRemoved(TreeModelEvent e) {
-        addMenuItems();
-    }
-
-    public void treeStructureChanged(TreeModelEvent e) {
-        addMenuItems();
-    }
 }

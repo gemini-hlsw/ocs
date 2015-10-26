@@ -4,10 +4,11 @@ import java.net.URL
 import javax.swing.event.ChangeListener
 
 import edu.gemini.catalog.api.{MagnitudeLimits, RadiusLimits}
-import jsky.catalog.Catalog
+import edu.gemini.shared.util.immutable.ApplyOp
+import edu.gemini.shared.util.immutable.ScalaConverters._
 import jsky.catalog.QueryResult
 import jsky.catalog.TableQueryResult
-import jsky.catalog.gui.{TablePlotter, BasicTablePlotter, CatalogNavigatorOpener}
+import jsky.catalog.gui.{TablePlotter, BasicTablePlotter}
 import jsky.coords.{WorldCoords, WorldCoordinateConverter, CoordinateConverter}
 import jsky.graphics.CanvasGraphics
 import jsky.image.fits.codec.FITSImage
@@ -246,7 +247,9 @@ class CatalogImageDisplayMenuBar(protected val imageDisplay: CatalogImageDisplay
   // TODO These two items don't seem to be used, check if they could be deprecated
   val pickObjectMenuItem = getPickObjectMenuItem
   getViewMenu.remove(pickObjectMenuItem)
-  _catalogMenu.add(catalogTreeMenu)
+  catalogTreeMenu.getImageServerMenu.asScalaOpt.foreach(_catalogMenu.add)
+  catalogTreeMenu.getProxyMenuItem.asScalaOpt.foreach(_catalogMenu.add)
+
   _catalogMenu.add(pickObjectMenuItem)
   _catalogMenu.addSeparator()
   _catalogMenu.add(createSaveCatalogOverlaysWithImageMenuItem)
