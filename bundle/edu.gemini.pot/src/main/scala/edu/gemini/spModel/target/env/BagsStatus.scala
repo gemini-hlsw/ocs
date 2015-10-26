@@ -56,13 +56,22 @@ object BagsStatus {
   val BagsTargetParamSetName: String = "bagsTarget"
 
 
+//  def fromParamSet(parent: ParamSet): BagsStatus = {
+//    Option(parent.getParamSet(BagsStatusParamSetName)).map { ps =>
+//      Option(ps.getParam(BagsStatusParamName).getValue) match {
+//        case Some(BagsSuccessNoTargets.id)  => BagsSuccessNoTargets
+//        case Some(BagsSuccessWithTarget.id) =>
+//          Option(ps.getParamSet(BagsTargetParamSetName)).map(bps => BagsSuccessWithTarget(SPTarget.fromParamSet(bps))).getOrElse(BagsLookupPending)
+//        case _ => BagsLookupPending
+//      }
+//    }.getOrElse(BagsLookupPending)
+//  }
   def fromParamSet(parent: ParamSet): BagsStatus = {
-    Option(parent.getParamSet(BagsStatusParamSetName)).map { ps =>
-      Option(ps.getParam(BagsStatusParamName).getValue) match {
-        case Some(BagsSuccessNoTargets.id)  => BagsSuccessNoTargets
-        case Some(BagsSuccessWithTarget.id) =>
+    Option(parent.getParamSet(BagsStatusParamSetName)).flatMap { ps =>
+      Option(ps.getParam(BagsStatusParamName).getValue).collect {
+        case BagsSuccessNoTargets.id  => BagsSuccessNoTargets
+        case BagsSuccessWithTarget.id =>
           Option(ps.getParamSet(BagsTargetParamSetName)).map(bps => BagsSuccessWithTarget(SPTarget.fromParamSet(bps))).getOrElse(BagsLookupPending)
-        case _ => BagsLookupPending
       }
     }.getOrElse(BagsLookupPending)
   }
