@@ -2,7 +2,7 @@
 <!DOCTYPE document PUBLIC "-//Gemini Observatory//DTD for Storage of P1 and P2 Documents//EN" "http://ftp.gemini.edu/Support/xml/dtds/SpXML2.dtd">
 
 <document>
-  <container kind="program" type="Program" version="2015A-1" subtype="basic" key="d4ad9f8d-e5d1-4e36-a7c0-189f1d62531d" name="GMOS-S-BP">
+  <container kind="program" type="Program" version="2015B-1" subtype="basic" key="d4ad9f8d-e5d1-4e36-a7c0-189f1d62531d" name="GMOS-S-BP">
     <paramset name="Science Program" kind="dataObj">
       <param name="title" value="GMOS-S PHASE I/II MAPPING BPS"/>
       <param name="programMode" value="QUEUE"/>
@@ -555,14 +555,12 @@ between the CCDs and get full wavelength coverage.
                 <param name="name" value="CuAr"/>
                 <param name="system" value="J2000"/>
                 <param name="epoch" value="2000.0" units="years"/>
-                <param name="brightness" value=""/>
                 <param name="c1" value="00:00:00.000"/>
                 <param name="c2" value="00:00:00.00"/>
                 <param name="pm1" value="0.0" units="arcsecs/year"/>
                 <param name="pm2" value="0.0" units="arcsecs/year"/>
                 <param name="parallax" value="0.0" units="arcsecs"/>
                 <param name="rv" value="0.0" units="km/sec"/>
-                <param name="wavelength" value="-1.0" units="angstroms"/>
               </paramset>
               <paramset name="guideEnv">
                 <param name="active">
@@ -1013,14 +1011,12 @@ is taken.
                 <param name="name" value="CuAr"/>
                 <param name="system" value="J2000"/>
                 <param name="epoch" value="2000.0" units="years"/>
-                <param name="brightness" value=""/>
                 <param name="c1" value="00:00:00.000"/>
                 <param name="c2" value="00:00:00.00"/>
                 <param name="pm1" value="0.0" units="arcsecs/year"/>
                 <param name="pm2" value="0.0" units="arcsecs/year"/>
                 <param name="parallax" value="0.0" units="arcsecs"/>
                 <param name="rv" value="0.0" units="km/sec"/>
-                <param name="wavelength" value="-1.0" units="angstroms"/>
               </paramset>
               <paramset name="guideEnv">
                 <param name="active">
@@ -1118,14 +1114,12 @@ is taken.
                 <param name="name" value="Twilight"/>
                 <param name="system" value="J2000"/>
                 <param name="epoch" value="2000.0" units="years"/>
-                <param name="brightness" value=""/>
                 <param name="c1" value="00:00:00.000"/>
                 <param name="c2" value="00:00:00.00"/>
                 <param name="pm1" value="0.0" units="arcsecs/year"/>
                 <param name="pm2" value="0.0" units="arcsecs/year"/>
                 <param name="parallax" value="0.0" units="arcsecs"/>
                 <param name="rv" value="0.0" units="km/sec"/>
-                <param name="wavelength" value="-1.0" units="angstroms"/>
               </paramset>
               <paramset name="guideEnv">
                 <param name="active">
@@ -1776,14 +1770,12 @@ required.
                 <param name="name" value="CuAr"/>
                 <param name="system" value="J2000"/>
                 <param name="epoch" value="2000.0" units="years"/>
-                <param name="brightness" value=""/>
                 <param name="c1" value="00:00:00.000"/>
                 <param name="c2" value="00:00:00.00"/>
                 <param name="pm1" value="0.0" units="arcsecs/year"/>
                 <param name="pm2" value="0.0" units="arcsecs/year"/>
                 <param name="parallax" value="0.0" units="arcsecs"/>
                 <param name="rv" value="0.0" units="km/sec"/>
-                <param name="wavelength" value="-1.0" units="angstroms"/>
               </paramset>
               <paramset name="guideEnv">
                 <param name="active">
@@ -2247,14 +2239,12 @@ when conditions are convenient for observing baseline standards.
                 <param name="name" value="CuAr"/>
                 <param name="system" value="J2000"/>
                 <param name="epoch" value="2000.0" units="years"/>
-                <param name="brightness" value=""/>
                 <param name="c1" value="00:00:00.000"/>
                 <param name="c2" value="00:00:00.00"/>
                 <param name="pm1" value="0.0" units="arcsecs/year"/>
                 <param name="pm2" value="0.0" units="arcsecs/year"/>
                 <param name="parallax" value="0.0" units="arcsecs"/>
                 <param name="rv" value="0.0" units="km/sec"/>
-                <param name="wavelength" value="-1.0" units="angstroms"/>
               </paramset>
               <paramset name="guideEnv">
                 <param name="active">
@@ -2383,14 +2373,12 @@ is taken.
                 <param name="name" value="Twilight"/>
                 <param name="system" value="J2000"/>
                 <param name="epoch" value="2000.0" units="years"/>
-                <param name="brightness" value=""/>
                 <param name="c1" value="00:00:00.000"/>
                 <param name="c2" value="00:00:00.00"/>
                 <param name="pm1" value="0.0" units="arcsecs/year"/>
                 <param name="pm2" value="0.0" units="arcsecs/year"/>
                 <param name="parallax" value="0.0" units="arcsecs"/>
                 <param name="rv" value="0.0" units="km/sec"/>
-                <param name="wavelength" value="-1.0" units="angstroms"/>
               </paramset>
               <paramset name="guideEnv">
                 <param name="active">
@@ -2534,14 +2522,12 @@ The exposure is taken on the sky so the Translation stage should be
                 <param name="name" value="Dark"/>
                 <param name="system" value="J2000"/>
                 <param name="epoch" value="2000.0" units="years"/>
-                <param name="brightness" value=""/>
                 <param name="c1" value="00:00:00.000"/>
                 <param name="c2" value="00:00:00.00"/>
                 <param name="pm1" value="0.0" units="arcsecs/year"/>
                 <param name="pm2" value="0.0" units="arcsecs/year"/>
                 <param name="parallax" value="0.0" units="arcsecs"/>
                 <param name="rv" value="0.0" units="km/sec"/>
-                <param name="wavelength" value="-1.0" units="angstroms"/>
               </paramset>
               <paramset name="guideEnv">
                 <param name="active">
@@ -3300,14 +3286,12 @@ masks for use, with a technical limit of 99 masks).
                 <param name="name" value="CuAr"/>
                 <param name="system" value="J2000"/>
                 <param name="epoch" value="2000.0" units="years"/>
-                <param name="brightness" value=""/>
                 <param name="c1" value="00:00:00.000"/>
                 <param name="c2" value="00:00:00.00"/>
                 <param name="pm1" value="0.0" units="arcsecs/year"/>
                 <param name="pm2" value="0.0" units="arcsecs/year"/>
                 <param name="parallax" value="0.0" units="arcsecs"/>
                 <param name="rv" value="0.0" units="km/sec"/>
-                <param name="wavelength" value="-1.0" units="angstroms"/>
               </paramset>
               <paramset name="guideEnv">
                 <param name="active">
@@ -3425,6 +3409,7 @@ wavelength coverage.
             <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartArc" key="d2ebac7f-917b-47d5-8d23-7defef6e23e1" name="Arc">
               <paramset name="Arc" kind="dataObj">
                 <param name="repeatCount" value="1"/>
+                <param name="class" value="DAY_CAL"/>
                 <param name="coadds" value="1"/>
                 <param name="exposureTime" value="10.0"/>
               </paramset>
@@ -3449,14 +3434,12 @@ wavelength coverage.
                 <param name="name" value="Mask image"/>
                 <param name="system" value="J2000"/>
                 <param name="epoch" value="2000.0" units="years"/>
-                <param name="brightness" value=""/>
                 <param name="c1" value="00:00:00.000"/>
                 <param name="c2" value="00:00:00.00"/>
                 <param name="pm1" value="0.0" units="arcsecs/year"/>
                 <param name="pm2" value="0.0" units="arcsecs/year"/>
                 <param name="parallax" value="0.0" units="arcsecs"/>
                 <param name="rv" value="0.0" units="km/sec"/>
-                <param name="wavelength" value="-1.0" units="angstroms"/>
               </paramset>
               <paramset name="guideEnv">
                 <param name="active">
@@ -3594,14 +3577,12 @@ Gemini Staff.</value>
                 <param name="name" value="Twilight"/>
                 <param name="system" value="J2000"/>
                 <param name="epoch" value="2000.0" units="years"/>
-                <param name="brightness" value=""/>
                 <param name="c1" value="00:00:00.000"/>
                 <param name="c2" value="00:00:00.00"/>
                 <param name="pm1" value="0.0" units="arcsecs/year"/>
                 <param name="pm2" value="0.0" units="arcsecs/year"/>
                 <param name="parallax" value="0.0" units="arcsecs"/>
                 <param name="rv" value="0.0" units="km/sec"/>
-                <param name="wavelength" value="-1.0" units="angstroms"/>
               </paramset>
               <paramset name="guideEnv">
                 <param name="active">
@@ -4109,14 +4090,12 @@ it possible to order the exposures as follows:
                 <param name="name" value="CuAr"/>
                 <param name="system" value="J2000"/>
                 <param name="epoch" value="2000.0" units="years"/>
-                <param name="brightness" value=""/>
                 <param name="c1" value="00:00:00.000"/>
                 <param name="c2" value="00:00:00.00"/>
                 <param name="pm1" value="0.0" units="arcsecs/year"/>
                 <param name="pm2" value="0.0" units="arcsecs/year"/>
                 <param name="parallax" value="0.0" units="arcsecs"/>
                 <param name="rv" value="0.0" units="km/sec"/>
-                <param name="wavelength" value="-1.0" units="angstroms"/>
               </paramset>
               <paramset name="guideEnv">
                 <param name="active">
@@ -4932,14 +4911,12 @@ masks for use, with a technical limit of 99 masks).
                 <param name="name" value="Dark"/>
                 <param name="system" value="J2000"/>
                 <param name="epoch" value="2000.0" units="years"/>
-                <param name="brightness" value=""/>
                 <param name="c1" value="00:00:00.000"/>
                 <param name="c2" value="00:00:00.00"/>
                 <param name="pm1" value="0.0" units="arcsecs/year"/>
                 <param name="pm2" value="0.0" units="arcsecs/year"/>
                 <param name="parallax" value="0.0" units="arcsecs"/>
                 <param name="rv" value="0.0" units="km/sec"/>
-                <param name="wavelength" value="-1.0" units="angstroms"/>
               </paramset>
               <paramset name="guideEnv">
                 <param name="active">
@@ -5095,14 +5072,12 @@ closed for bad weather.</value>
                 <param name="name" value="CuAr"/>
                 <param name="system" value="J2000"/>
                 <param name="epoch" value="2000.0" units="years"/>
-                <param name="brightness" value=""/>
                 <param name="c1" value="00:00:00.000"/>
                 <param name="c2" value="00:00:00.00"/>
                 <param name="pm1" value="0.0" units="arcsecs/year"/>
                 <param name="pm2" value="0.0" units="arcsecs/year"/>
                 <param name="parallax" value="0.0" units="arcsecs"/>
                 <param name="rv" value="0.0" units="km/sec"/>
-                <param name="wavelength" value="-1.0" units="angstroms"/>
               </paramset>
               <paramset name="guideEnv">
                 <param name="active">
@@ -5221,6 +5196,7 @@ wavelength coverage.
             <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartArc" key="cbd45fee-1f08-45d2-904a-4ca58e546e47" name="Arc">
               <paramset name="Arc" kind="dataObj">
                 <param name="repeatCount" value="1"/>
+                <param name="class" value="DAY_CAL"/>
                 <param name="coadds" value="1"/>
                 <param name="exposureTime" value="10.0"/>
               </paramset>
@@ -5245,14 +5221,12 @@ wavelength coverage.
                 <param name="name" value="Twilight"/>
                 <param name="system" value="J2000"/>
                 <param name="epoch" value="2000.0" units="years"/>
-                <param name="brightness" value=""/>
                 <param name="c1" value="00:00:00.000"/>
                 <param name="c2" value="00:00:00.00"/>
                 <param name="pm1" value="0.0" units="arcsecs/year"/>
                 <param name="pm2" value="0.0" units="arcsecs/year"/>
                 <param name="parallax" value="0.0" units="arcsecs"/>
                 <param name="rv" value="0.0" units="km/sec"/>
-                <param name="wavelength" value="-1.0" units="angstroms"/>
               </paramset>
               <paramset name="guideEnv">
                 <param name="active">
@@ -5757,14 +5731,12 @@ it possible to order the exposures as follows:
                 <param name="name" value="CuAr"/>
                 <param name="system" value="J2000"/>
                 <param name="epoch" value="2000.0" units="years"/>
-                <param name="brightness" value=""/>
                 <param name="c1" value="00:00:00.000"/>
                 <param name="c2" value="00:00:00.00"/>
                 <param name="pm1" value="0.0" units="arcsecs/year"/>
                 <param name="pm2" value="0.0" units="arcsecs/year"/>
                 <param name="parallax" value="0.0" units="arcsecs"/>
                 <param name="rv" value="0.0" units="km/sec"/>
-                <param name="wavelength" value="-1.0" units="angstroms"/>
               </paramset>
               <paramset name="guideEnv">
                 <param name="active">
@@ -6226,14 +6198,12 @@ For help setting up the acquistion, see the Description note for the "Longslit A
                 <param name="name" value="CuAr"/>
                 <param name="system" value="J2000"/>
                 <param name="epoch" value="2000.0" units="years"/>
-                <param name="brightness" value=""/>
                 <param name="c1" value="00:00:00.000"/>
                 <param name="c2" value="00:00:00.00"/>
                 <param name="pm1" value="0.0" units="arcsecs/year"/>
                 <param name="pm2" value="0.0" units="arcsecs/year"/>
                 <param name="parallax" value="0.0" units="arcsecs"/>
                 <param name="rv" value="0.0" units="km/sec"/>
-                <param name="wavelength" value="-1.0" units="angstroms"/>
               </paramset>
               <paramset name="guideEnv">
                 <param name="active">
@@ -6362,14 +6332,12 @@ The readout is "fast" in order to save time.
                 <param name="name" value="Twilight"/>
                 <param name="system" value="J2000"/>
                 <param name="epoch" value="2000.0" units="years"/>
-                <param name="brightness" value=""/>
                 <param name="c1" value="00:00:00.000"/>
                 <param name="c2" value="00:00:00.00"/>
                 <param name="pm1" value="0.0" units="arcsecs/year"/>
                 <param name="pm2" value="0.0" units="arcsecs/year"/>
                 <param name="parallax" value="0.0" units="arcsecs"/>
                 <param name="rv" value="0.0" units="km/sec"/>
-                <param name="wavelength" value="-1.0" units="angstroms"/>
               </paramset>
               <paramset name="guideEnv">
                 <param name="active">
@@ -6519,14 +6487,12 @@ on the side-looking ISS port.
                 <param name="name" value="CuAr"/>
                 <param name="system" value="J2000"/>
                 <param name="epoch" value="2000.0" units="years"/>
-                <param name="brightness" value=""/>
                 <param name="c1" value="00:00:00.000"/>
                 <param name="c2" value="00:00:00.00"/>
                 <param name="pm1" value="0.0" units="arcsecs/year"/>
                 <param name="pm2" value="0.0" units="arcsecs/year"/>
                 <param name="parallax" value="0.0" units="arcsecs"/>
                 <param name="rv" value="0.0" units="km/sec"/>
-                <param name="wavelength" value="-1.0" units="angstroms"/>
               </paramset>
               <paramset name="guideEnv">
                 <param name="active">
@@ -7198,14 +7164,12 @@ Assumed Conditions: IQ=70%, CC=50%, SB=50%, WV=Any (good IQ, photometric, dark)<
                 <param name="name" value="CuAr"/>
                 <param name="system" value="J2000"/>
                 <param name="epoch" value="2000.0" units="years"/>
-                <param name="brightness" value=""/>
                 <param name="c1" value="00:00:00.000"/>
                 <param name="c2" value="00:00:00.00"/>
                 <param name="pm1" value="0.0" units="arcsecs/year"/>
                 <param name="pm2" value="0.0" units="arcsecs/year"/>
                 <param name="parallax" value="0.0" units="arcsecs"/>
                 <param name="rv" value="0.0" units="km/sec"/>
-                <param name="wavelength" value="-1.0" units="angstroms"/>
               </paramset>
               <paramset name="guideEnv">
                 <param name="active">
@@ -7334,14 +7298,12 @@ The readout is "fast" in order to save time.
                 <param name="name" value="Dark"/>
                 <param name="system" value="J2000"/>
                 <param name="epoch" value="2000.0" units="years"/>
-                <param name="brightness" value=""/>
                 <param name="c1" value="00:00:00.000"/>
                 <param name="c2" value="00:00:00.00"/>
                 <param name="pm1" value="0.0" units="milli-arcsecs/year"/>
                 <param name="pm2" value="0.0" units="milli-arcsecs/year"/>
                 <param name="parallax" value="0.0" units="arcsecs"/>
                 <param name="rv" value="0.0" units="km/sec"/>
-                <param name="wavelength" value="-1.0" units="angstroms"/>
               </paramset>
               <paramset name="guideEnv">
                 <param name="active">
@@ -7494,14 +7456,12 @@ Number of Nod &amp; Shuffle observations is set to 15.</value>
                 <param name="name" value="Twilight"/>
                 <param name="system" value="J2000"/>
                 <param name="epoch" value="2000.0" units="years"/>
-                <param name="brightness" value=""/>
                 <param name="c1" value="00:00:00.000"/>
                 <param name="c2" value="00:00:00.00"/>
                 <param name="pm1" value="0.0" units="arcsecs/year"/>
                 <param name="pm2" value="0.0" units="arcsecs/year"/>
                 <param name="parallax" value="0.0" units="arcsecs"/>
                 <param name="rv" value="0.0" units="km/sec"/>
-                <param name="wavelength" value="-1.0" units="angstroms"/>
               </paramset>
               <paramset name="guideEnv">
                 <param name="active">
@@ -7630,14 +7590,12 @@ The exposure is taken on the sky so the Translation stage should be
                 <param name="name" value="CuAr"/>
                 <param name="system" value="J2000"/>
                 <param name="epoch" value="2000.0" units="years"/>
-                <param name="brightness" value=""/>
                 <param name="c1" value="00:00:00.000"/>
                 <param name="c2" value="00:00:00.00"/>
                 <param name="pm1" value="0.0" units="arcsecs/year"/>
                 <param name="pm2" value="0.0" units="arcsecs/year"/>
                 <param name="parallax" value="0.0" units="arcsecs"/>
                 <param name="rv" value="0.0" units="km/sec"/>
-                <param name="wavelength" value="-1.0" units="angstroms"/>
               </paramset>
               <paramset name="guideEnv">
                 <param name="active">
@@ -7728,6 +7686,7 @@ the CCDs and get full  wavelength coverage.
             <container kind="seqComp" type="Observer" version="2009A-1" subtype="SmartArc" key="1ccb5e80-7f09-4f69-80f8-facc9647a2b4" name="Arc">
               <paramset name="Arc" kind="dataObj">
                 <param name="repeatCount" value="1"/>
+                <param name="class" value="DAY_CAL"/>
                 <param name="coadds" value="1"/>
                 <param name="exposureTime" value="10.0"/>
               </paramset>
@@ -8397,6 +8356,7 @@ it possible to order the exposures as follows:
     <paramset name="node">
       <param name="key" value="d2ebac7f-917b-47d5-8d23-7defef6e23e1"/>
       <param name="b2c7a5b2-7f0b-4df4-9d0c-5a3355e0a904" value="1"/>
+      <param name="b6b59e2a-8a74-4c96-a943-1a6aa19511de" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="5425fde5-6373-4227-b433-3f7dd9574ee1"/>
@@ -9565,6 +9525,7 @@ it possible to order the exposures as follows:
     <paramset name="node">
       <param name="key" value="cbd45fee-1f08-45d2-904a-4ca58e546e47"/>
       <param name="b2c7a5b2-7f0b-4df4-9d0c-5a3355e0a904" value="1"/>
+      <param name="b6b59e2a-8a74-4c96-a943-1a6aa19511de" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="66799d86-7cfa-4afa-af56-e63755c236b1"/>
@@ -10274,6 +10235,7 @@ it possible to order the exposures as follows:
     <paramset name="node">
       <param name="key" value="1ccb5e80-7f09-4f69-80f8-facc9647a2b4"/>
       <param name="b2c7a5b2-7f0b-4df4-9d0c-5a3355e0a904" value="1"/>
+      <param name="b6b59e2a-8a74-4c96-a943-1a6aa19511de" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="50bb3c29-5a4a-44e8-b7e8-060783428d07"/>
