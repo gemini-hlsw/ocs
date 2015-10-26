@@ -261,9 +261,12 @@ class CatalogImageDisplayMenuBar(protected val imageDisplay: CatalogImageDisplay
   /** Handle for the Help menu */
   private val _helpMenu = new JMenu("Help")
 
+  val catalogTreeMenu = new NavigatorCatalogMenu(imageDisplay)
+
   // TODO These two items don't seem to be used, check if they could be deprecated
   val pickObjectMenuItem = getPickObjectMenuItem
   getViewMenu.remove(pickObjectMenuItem)
+  _catalogMenu.add(catalogTreeMenu)
   _catalogMenu.add(pickObjectMenuItem)
   _catalogMenu.addSeparator()
   _catalogMenu.add(createSaveCatalogOverlaysWithImageMenuItem)
