@@ -2,7 +2,7 @@
 <!DOCTYPE document PUBLIC "-//Gemini Observatory//DTD for Storage of P1 and P2 Documents//EN" "http://ftp.gemini.edu/Support/xml/dtds/SpXML2.dtd">
 
 <document>
-  <container kind="program" type="Program" version="2015A-1" subtype="basic" key="4d64921b-5840-4c5f-aeee-69d713eb8292" name="GPI-BP">
+  <container kind="program" type="Program" version="2015B-1" subtype="basic" key="4d64921b-5840-4c5f-aeee-69d713eb8292" name="GPI-BP">
     <paramset name="Science Program" kind="dataObj">
       <param name="title" value="GPI PHASE I/II MAPPING BPS"/>
       <param name="programMode" value="QUEUE"/>
@@ -25,7 +25,7 @@
     </paramset>
     <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="814fc155-f5e8-41cf-9988-43665f1fa0d7" name="Note">
       <paramset name="Note" kind="dataObj">
-        <param name="title" value="Next libID = 8"/>
+        <param name="title" value="Next libID = 9"/>
         <param name="NoteText" value=""/>
       </paramset>
     </container>
@@ -70,6 +70,18 @@
             <param name="alwaysRestoreModel" value="false"/>
             <param name="useAo" value="true"/>
             <param name="useCal" value="true"/>
+            <param name="aoOptimize" value="true"/>
+            <param name="alignFpmPinholeBias" value="false"/>
+          </paramset>
+        </container>
+        <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="40161cdb-1742-4ee6-9b8d-eadccd5351c6" name="Note">
+          <paramset name="Note" kind="dataObj">
+            <param name="title" value="DO not EDIT"/>
+            <param name="NoteText">
+              <value>The Acquisition is ONLY to trigger the proper internal calibrations. NO frames are taken so the PI should NOT edit the observation. 
+Fredrik Rantakyro 20150825
+</value>
+            </param>
           </paramset>
         </container>
         <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="a2b1e055-7185-41eb-a258-ad5d54df0b48" name="Observing Log">
@@ -131,6 +143,8 @@
             <param name="alwaysRestoreModel" value="false"/>
             <param name="useAo" value="true"/>
             <param name="useCal" value="true"/>
+            <param name="aoOptimize" value="true"/>
+            <param name="alignFpmPinholeBias" value="false"/>
           </paramset>
         </container>
         <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="f09e38c7-2913-4811-b54f-9a91d0c11af3" name="Observing Log">
@@ -192,6 +206,8 @@
             <param name="alwaysRestoreModel" value="false"/>
             <param name="useAo" value="true"/>
             <param name="useCal" value="true"/>
+            <param name="aoOptimize" value="true"/>
+            <param name="alignFpmPinholeBias" value="false"/>
           </paramset>
         </container>
         <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="35bfbd25-64fe-459f-9c59-6a57b334ce56" name="Observing Log">
@@ -253,7 +269,7 @@
       </container>
       <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="4d3e7e08-eae6-4509-b216-f56cbfabaeae" name="GPI-BP-4">
         <paramset name="Observation" kind="dataObj">
-          <param name="title" value="GPI Arc"/>
+          <param name="title" value="GPI Arc (H-band for K1 and K2)"/>
           <param name="libraryId" value="4"/>
           <param name="priority" value="MEDIUM"/>
           <param name="tooOverrideRapid" value="false"/>
@@ -262,6 +278,98 @@
           <param name="overrideQaState" value="false"/>
         </paramset>
         <container kind="obsComp" type="Instrument" version="2009A-1" subtype="GPI" key="6a1f3fc8-7407-4db8-ab41-61e683deb903" name="GPI">
+          <paramset name="GPI" kind="dataObj">
+            <param name="exposureTime" value="1.49"/>
+            <param name="posAngle" value="0"/>
+            <param name="coadds" value="1"/>
+            <param name="astrometricFieldEnum" value="NO"/>
+            <param name="adc" value="IN"/>
+            <param name="observingMode" value="DIRECT_H_BAND"/>
+            <param name="disperser" value="PRISM"/>
+            <param name="detectorStartX" value="0"/>
+            <param name="detectorStartY" value="0"/>
+            <param name="detectorEndX" value="2047"/>
+            <param name="detectorEndY" value="2047"/>
+            <param name="entranceShutter" value="OPEN"/>
+            <param name="scienceArmShutter" value="OPEN"/>
+            <param name="calEntranceShutter" value="OPEN"/>
+            <param name="referenceArmShutter" value="OPEN"/>
+            <param name="irLaserLamp" value="OFF"/>
+            <param name="visibleLaserLamp" value="OFF"/>
+            <param name="superContinuumLamp" value="OFF"/>
+            <param name="artificialSourceAttenuation" value="60.0"/>
+            <param name="pupilCamera" value="OUT"/>
+            <param name="detectorSamplingMode" value="UTR"/>
+            <param name="alwaysRestoreModel" value="false"/>
+            <param name="useAo" value="true"/>
+            <param name="useCal" value="false"/>
+            <param name="aoOptimize" value="true"/>
+            <param name="alignFpmPinholeBias" value="false"/>
+          </paramset>
+        </container>
+        <container kind="obsComp" type="Scheduling" version="2009A-1" subtype="conditions" key="a0679449-a204-431b-8a65-929a56ba211e" name="Observing Conditions">
+          <paramset name="Observing Conditions" kind="dataObj">
+            <param name="CloudCover" value="ANY"/>
+            <param name="ImageQuality" value="ANY"/>
+            <param name="SkyBackground" value="ANY"/>
+            <param name="WaterVapor" value="ANY"/>
+            <param name="ElevationConstraintType" value="NONE"/>
+            <param name="ElevationConstraintMin" value="0.0"/>
+            <param name="ElevationConstraintMax" value="0.0"/>
+            <paramset name="timing-window-list"/>
+          </paramset>
+        </container>
+        <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="9adf8366-24e6-4b8e-b864-bfd2dad4bb23" name="Note">
+          <paramset name="Note" kind="dataObj">
+            <param name="title" value="DO not EDIT"/>
+            <param name="NoteText">
+              <value>The ARC is fixed to H-direct as arcs in K1/K2 would take 1h+, thus do NOT EDIT any of the configuartion in the observation. 
+Fredrik Rantakyro 20150825
+</value>
+            </param>
+          </paramset>
+        </container>
+        <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="68bb9373-f04c-42c3-8ad0-aec4593a3aa4" name="Observing Log">
+          <paramset name="Observing Log" kind="dataObj">
+            <paramset name="obsQaRecord"/>
+          </paramset>
+        </container>
+        <container kind="obsExecLog" type="ObsLog" version="2009A-1" subtype="exec" key="3e2e9eb2-6106-4495-a9e5-e7411f315eb1" name="Observation Exec Log">
+          <paramset name="Observation Exec Log" kind="dataObj">
+            <paramset name="obsExecRecord">
+              <paramset name="datasets"/>
+              <paramset name="events"/>
+              <paramset name="configMap"/>
+            </paramset>
+          </paramset>
+        </container>
+        <container kind="seqComp" type="Iterator" version="2012A-1" subtype="base" key="634c461b-5d04-4bce-9f24-0bdeb32824c6" name="Sequence">
+          <paramset name="Sequence" kind="dataObj"/>
+          <container kind="seqComp" type="Observer" version="2009A-1" subtype="GemFlat" key="97888c13-9f9e-4209-afca-be3a8e4a716a" name="Manual Flat/Arc">
+            <paramset name="Manual Flat/Arc" kind="dataObj">
+              <param name="repeatCount" value="1"/>
+              <param name="class" value="PROG_CAL"/>
+              <param name="coadds" value="2"/>
+              <param name="exposureTime" value="30.0"/>
+              <param name="lamp" value="AR_ARC"/>
+              <param name="shutter" value="CLOSED"/>
+              <param name="filter" value="NONE"/>
+              <param name="diffuser" value="IR"/>
+            </paramset>
+          </container>
+        </container>
+      </container>
+      <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="82f5155d-433c-4017-978d-8363c562df55" name="GPI-BP-8">
+        <paramset name="Observation" kind="dataObj">
+          <param name="title" value="GPI Acquisition with embedded ARC"/>
+          <param name="libraryId" value="8"/>
+          <param name="priority" value="MEDIUM"/>
+          <param name="tooOverrideRapid" value="false"/>
+          <param name="phase2Status" value="INACTIVE"/>
+          <param name="qaState" value="UNDEFINED"/>
+          <param name="overrideQaState" value="false"/>
+        </paramset>
+        <container kind="obsComp" type="Instrument" version="2009A-1" subtype="GPI" key="92c5b3e9-6178-4b65-8981-9256bee0bd0e" name="GPI">
           <paramset name="GPI" kind="dataObj">
             <param name="exposureTime" value="1.49"/>
             <param name="posAngle" value="0"/>
@@ -286,26 +394,26 @@
             <param name="alwaysRestoreModel" value="false"/>
             <param name="useAo" value="true"/>
             <param name="useCal" value="true"/>
+            <param name="aoOptimize" value="true"/>
+            <param name="alignFpmPinholeBias" value="false"/>
           </paramset>
         </container>
-        <container kind="obsComp" type="Scheduling" version="2009A-1" subtype="conditions" key="a0679449-a204-431b-8a65-929a56ba211e" name="Observing Conditions">
-          <paramset name="Observing Conditions" kind="dataObj">
-            <param name="CloudCover" value="ANY"/>
-            <param name="ImageQuality" value="ANY"/>
-            <param name="SkyBackground" value="ANY"/>
-            <param name="WaterVapor" value="ANY"/>
-            <param name="ElevationConstraintType" value="NONE"/>
-            <param name="ElevationConstraintMin" value="0.0"/>
-            <param name="ElevationConstraintMax" value="0.0"/>
-            <paramset name="timing-window-list"/>
+        <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="c5e6055c-1039-4447-80b8-46cf61501fe2" name="Note">
+          <paramset name="Note" kind="dataObj">
+            <param name="title" value="DO not EDIT"/>
+            <param name="NoteText">
+              <value>The Acquisition is ONLY to trigger the proper internal calibrations. NO frames are taken so the PI should NOT edit the observation. 
+Fredrik Rantakyro 20150825
+</value>
+            </param>
           </paramset>
         </container>
-        <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="68bb9373-f04c-42c3-8ad0-aec4593a3aa4" name="Observing Log">
+        <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="f57f9b09-7bbe-4b1a-8455-210092d72c56" name="Observing Log">
           <paramset name="Observing Log" kind="dataObj">
             <paramset name="obsQaRecord"/>
           </paramset>
         </container>
-        <container kind="obsExecLog" type="ObsLog" version="2009A-1" subtype="exec" key="3e2e9eb2-6106-4495-a9e5-e7411f315eb1" name="Observation Exec Log">
+        <container kind="obsExecLog" type="ObsLog" version="2009A-1" subtype="exec" key="428af394-9661-4a8a-a78c-ac80321dd4c6" name="Observation Exec Log">
           <paramset name="Observation Exec Log" kind="dataObj">
             <paramset name="obsExecRecord">
               <paramset name="datasets"/>
@@ -314,18 +422,24 @@
             </paramset>
           </paramset>
         </container>
-        <container kind="seqComp" type="Iterator" version="2012A-1" subtype="base" key="634c461b-5d04-4bce-9f24-0bdeb32824c6" name="Sequence">
+        <container kind="seqComp" type="Iterator" version="2012A-1" subtype="base" key="2d8c44fb-1651-448f-b354-e4a73e009a18" name="Sequence">
           <paramset name="Sequence" kind="dataObj"/>
-          <container kind="seqComp" type="Observer" version="2009A-1" subtype="GemFlat" key="97888c13-9f9e-4209-afca-be3a8e4a716a" name="Manual Flat/Arc">
+          <container kind="seqComp" type="Observer" version="2009A-1" subtype="GemFlat" key="75104e56-c324-421a-836a-097e8d06b35d" name="Manual Flat/Arc">
             <paramset name="Manual Flat/Arc" kind="dataObj">
               <param name="repeatCount" value="1"/>
-              <param name="class" value="PARTNER_CAL"/>
-              <param name="coadds" value="2"/>
+              <param name="class" value="PROG_CAL"/>
+              <param name="coadds" value="1"/>
               <param name="exposureTime" value="30.0"/>
               <param name="lamp" value="AR_ARC"/>
               <param name="shutter" value="CLOSED"/>
               <param name="filter" value="NONE"/>
               <param name="diffuser" value="IR"/>
+            </paramset>
+          </container>
+          <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="4cdf49f5-c508-42c9-b07b-cad0fead735c" name="Observe">
+            <paramset name="Observe" kind="dataObj">
+              <param name="repeatCount" value="2"/>
+              <param name="class" value="ACQ"/>
             </paramset>
           </container>
         </container>
@@ -372,6 +486,8 @@
             <param name="alwaysRestoreModel" value="false"/>
             <param name="useAo" value="true"/>
             <param name="useCal" value="true"/>
+            <param name="aoOptimize" value="true"/>
+            <param name="alignFpmPinholeBias" value="false"/>
           </paramset>
         </container>
         <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="afd7ff83-853e-4e03-9f39-934880638e44" name="Observing Log">
@@ -438,6 +554,8 @@
             <param name="alwaysRestoreModel" value="false"/>
             <param name="useAo" value="true"/>
             <param name="useCal" value="true"/>
+            <param name="aoOptimize" value="true"/>
+            <param name="alignFpmPinholeBias" value="false"/>
           </paramset>
         </container>
         <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="92554058-f826-4203-b33c-151382777805" name="Observing Log">
@@ -541,6 +659,8 @@
             <param name="alwaysRestoreModel" value="false"/>
             <param name="useAo" value="true"/>
             <param name="useCal" value="true"/>
+            <param name="aoOptimize" value="true"/>
+            <param name="alignFpmPinholeBias" value="false"/>
           </paramset>
         </container>
         <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="d907df16-ee89-467f-a9cb-966fb7d2a15e" name="Observing Log">
@@ -672,6 +792,10 @@
   </container>
   <container kind="versions" type="versions" version="1.0">
     <paramset name="node">
+      <param name="key" value="40161cdb-1742-4ee6-9b8d-eadccd5351c6"/>
+      <param name="dcf5e333-0269-448c-823a-1260e0272e64" value="172"/>
+    </paramset>
+    <paramset name="node">
       <param name="key" value="a5ac0ea2-f010-49ea-bec6-e94b81959b6c"/>
       <param name="3da82fb4-11cc-4fb4-9a43-86c54d94b131" value="1"/>
     </paramset>
@@ -680,12 +804,20 @@
       <param name="3da82fb4-11cc-4fb4-9a43-86c54d94b131" value="1"/>
     </paramset>
     <paramset name="node">
+      <param name="key" value="2d8c44fb-1651-448f-b354-e4a73e009a18"/>
+      <param name="dcf5e333-0269-448c-823a-1260e0272e64" value="3"/>
+    </paramset>
+    <paramset name="node">
       <param name="key" value="79072656-43fe-4043-a36e-67e0a9011ed3"/>
       <param name="3da82fb4-11cc-4fb4-9a43-86c54d94b131" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="68bb9373-f04c-42c3-8ad0-aec4593a3aa4"/>
       <param name="3da82fb4-11cc-4fb4-9a43-86c54d94b131" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="c5e6055c-1039-4447-80b8-46cf61501fe2"/>
+      <param name="dcf5e333-0269-448c-823a-1260e0272e64" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="5c94da70-4540-4deb-a26c-979009d7a880"/>
@@ -730,6 +862,7 @@
     <paramset name="node">
       <param name="key" value="6a1f3fc8-7407-4db8-ab41-61e683deb903"/>
       <param name="3da82fb4-11cc-4fb4-9a43-86c54d94b131" value="14"/>
+      <param name="dcf5e333-0269-448c-823a-1260e0272e64" value="3"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="a0679449-a204-431b-8a65-929a56ba211e"/>
@@ -744,6 +877,7 @@
       <param name="3da82fb4-11cc-4fb4-9a43-86c54d94b131" value="20"/>
       <param name="86f6507c-e2aa-4582-aba5-b7ab67869557" value="2"/>
       <param name="4cbb3a6f-6796-4226-8bae-e41a9e10f9b8" value="1"/>
+      <param name="dcf5e333-0269-448c-823a-1260e0272e64" value="27"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="33f0ce56-b1b0-4bdd-a408-a1a9025f7d8c"/>
@@ -760,6 +894,10 @@
     <paramset name="node">
       <param name="key" value="ce8834cd-119f-4190-b9b6-54ab9dfcb905"/>
       <param name="3da82fb4-11cc-4fb4-9a43-86c54d94b131" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="9adf8366-24e6-4b8e-b864-bfd2dad4bb23"/>
+      <param name="dcf5e333-0269-448c-823a-1260e0272e64" value="128"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="35bfbd25-64fe-459f-9c59-6a57b334ce56"/>
@@ -794,12 +932,20 @@
       <param name="3da82fb4-11cc-4fb4-9a43-86c54d94b131" value="19"/>
     </paramset>
     <paramset name="node">
+      <param name="key" value="428af394-9661-4a8a-a78c-ac80321dd4c6"/>
+      <param name="dcf5e333-0269-448c-823a-1260e0272e64" value="2"/>
+    </paramset>
+    <paramset name="node">
       <param name="key" value="d0e5cb57-1398-4dce-8731-27c15d1c3d51"/>
       <param name="3da82fb4-11cc-4fb4-9a43-86c54d94b131" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="6878622f-b29c-4ab4-b993-2f9c3e8246e1"/>
       <param name="3da82fb4-11cc-4fb4-9a43-86c54d94b131" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="75104e56-c324-421a-836a-097e8d06b35d"/>
+      <param name="dcf5e333-0269-448c-823a-1260e0272e64" value="3"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="e36f15f8-e1d1-4c6d-bb54-726becd76c21"/>
@@ -853,6 +999,7 @@
     <paramset name="node">
       <param name="key" value="a999952e-7ae7-4d4c-b003-0f192ef4059f"/>
       <param name="3da82fb4-11cc-4fb4-9a43-86c54d94b131" value="26"/>
+      <param name="dcf5e333-0269-448c-823a-1260e0272e64" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="b5429d48-047c-4ac1-bec5-94a2af8bb1ea"/>
@@ -874,6 +1021,7 @@
       <param name="key" value="31975b55-a30e-4d1d-83f6-0e5e12542f5a"/>
       <param name="258cf81e-b917-41b0-9709-837c50650dcf" value="1"/>
       <param name="3da82fb4-11cc-4fb4-9a43-86c54d94b131" value="14"/>
+      <param name="dcf5e333-0269-448c-823a-1260e0272e64" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="92554058-f826-4203-b33c-151382777805"/>
@@ -886,6 +1034,10 @@
     <paramset name="node">
       <param name="key" value="b4d60152-ce40-451d-abd7-652128f852ca"/>
       <param name="258cf81e-b917-41b0-9709-837c50650dcf" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="4cdf49f5-c508-42c9-b07b-cad0fead735c"/>
+      <param name="dcf5e333-0269-448c-823a-1260e0272e64" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="549a2569-ff3c-4258-b3ce-6ce1b799d80c"/>
@@ -907,6 +1059,7 @@
       <param name="key" value="97888c13-9f9e-4209-afca-be3a8e4a716a"/>
       <param name="3da82fb4-11cc-4fb4-9a43-86c54d94b131" value="7"/>
       <param name="86f6507c-e2aa-4582-aba5-b7ab67869557" value="1"/>
+      <param name="98b19db1-7baf-44be-b6c9-792ebc210454" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="3c58d36a-e103-4c12-892b-dec7f8db2859"/>
@@ -920,6 +1073,7 @@
       <param name="key" value="814fc155-f5e8-41cf-9988-43665f1fa0d7"/>
       <param name="258cf81e-b917-41b0-9709-837c50650dcf" value="1"/>
       <param name="3da82fb4-11cc-4fb4-9a43-86c54d94b131" value="2"/>
+      <param name="dcf5e333-0269-448c-823a-1260e0272e64" value="2"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="445643cd-ceef-4645-b871-5ffbbaaf2e22"/>
@@ -928,6 +1082,10 @@
     <paramset name="node">
       <param name="key" value="be3df480-af03-405d-896e-31072b66d1d3"/>
       <param name="258cf81e-b917-41b0-9709-837c50650dcf" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="f57f9b09-7bbe-4b1a-8455-210092d72c56"/>
+      <param name="dcf5e333-0269-448c-823a-1260e0272e64" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="77c030a8-2996-4b64-9884-5bae36ce9db5"/>
@@ -945,6 +1103,10 @@
     <paramset name="node">
       <param name="key" value="50a9f86f-c03b-41d2-bb08-d29d4b2bb558"/>
       <param name="3da82fb4-11cc-4fb4-9a43-86c54d94b131" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="92c5b3e9-6178-4b65-8981-9256bee0bd0e"/>
+      <param name="dcf5e333-0269-448c-823a-1260e0272e64" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="313ca569-4623-4949-8611-614805acceeb"/>
@@ -1014,6 +1176,10 @@
     <paramset name="node">
       <param name="key" value="634c461b-5d04-4bce-9f24-0bdeb32824c6"/>
       <param name="3da82fb4-11cc-4fb4-9a43-86c54d94b131" value="5"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="82f5155d-433c-4017-978d-8363c562df55"/>
+      <param name="dcf5e333-0269-448c-823a-1260e0272e64" value="17"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="bb9ebbfd-e289-43db-976d-01ea64705018"/>
