@@ -4,11 +4,8 @@ import java.net.URL
 import javax.swing.event.ChangeListener
 
 import edu.gemini.catalog.api.{MagnitudeLimits, RadiusLimits}
-import edu.gemini.shared.util.immutable.ApplyOp
-import edu.gemini.shared.util.immutable.ScalaConverters._
-import jsky.catalog.QueryResult
-import jsky.catalog.TableQueryResult
-import jsky.catalog.gui.{TablePlotter, BasicTablePlotter}
+import jsky.catalog.{Catalog, CatalogDirectory, QueryResult, TableQueryResult}
+import jsky.catalog.gui.{StoreImageServerAction, CatalogNavigator, TablePlotter, BasicTablePlotter}
 import jsky.coords.{WorldCoords, WorldCoordinateConverter, CoordinateConverter}
 import jsky.graphics.CanvasGraphics
 import jsky.image.fits.codec.FITSImage
@@ -18,7 +15,8 @@ import jsky.image.gui.ImageDisplayMenuBar
 import jsky.image.gui.ImageDisplayToolBar
 import jsky.image.gui.{ImageGraphicsHandler, DivaMainImageDisplay}
 import jsky.navigator._
-import jsky.util.gui.DialogUtil
+import jsky.util.{Preferences, ProxyServerUtil, I18N}
+import jsky.util.gui.{ProxyServerDialog, DialogUtil}
 import javax.swing._
 import java.awt._
 import java.awt.event.{ActionListener, ActionEvent}
@@ -247,8 +245,8 @@ class CatalogImageDisplayMenuBar(protected val imageDisplay: CatalogImageDisplay
   // TODO These two items don't seem to be used, check if they could be deprecated
   val pickObjectMenuItem = getPickObjectMenuItem
   getViewMenu.remove(pickObjectMenuItem)
-  catalogTreeMenu.getImageServerMenu.asScalaOpt.foreach(_catalogMenu.add)
-  catalogTreeMenu.getProxyMenuItem.asScalaOpt.foreach(_catalogMenu.add)
+  catalogTreeMenu.imageServersMenu.foreach(_catalogMenu.add)
+  catalogTreeMenu.proxyMenuItem.foreach(_catalogMenu.add)
 
   _catalogMenu.add(pickObjectMenuItem)
   _catalogMenu.addSeparator()
@@ -272,4 +270,90 @@ class CatalogImageDisplayMenuBar(protected val imageDisplay: CatalogImageDisplay
 
   /** Return the handle for the Help menu */
   override def getHelpMenu: JMenu = _helpMenu
+}
+
+/**
+  * Create the menubar for the given main image display.
+  *
+  * @param opener the object responsible for creating and displaying the catalog window
+  */
+class NavigatorCatalogMenu(opener: CatalogImageDisplay) {
+
+  val (imageServersMenu, proxyMenuItem) = {
+    try {
+      val dir = CatalogNavigator.getCatalogDirectory
+      val imageMenu = imageServersSubMenu(dir)
+      (imageMenu.some, proxySettingsMenuItem().some)
+    } catch {
+      case e: Exception =>
+        DialogUtil.error(e)
+        (None, None)
+    }
+  }
+
+  /**
+    * Create and return a submenu listing catalogs of the given type.
+    *
+    * @param dir the catalog directory (config file) reference
+    * @return the ne or updated menu
+    */
+  private def imageServersSubMenu(dir: CatalogDirectory): JMenu = {
+    val menu = new JMenu("Image Servers")
+    Option(dir).foreach { d =>
+      val n = d.getNumCatalogs
+      val b = new ButtonGroup
+      val userCat = userPreferredCatalog
+
+      for {
+        i <- 0 until n
+        c = d.getCatalog(i)
+        if c.isImageServer
+      } {
+        val mi = imageServersMenuItem(c)
+        menu.add(mi)
+        b.add(mi)
+        userCat.filter(k => k.getName.equals(c.getName)).foreach(_ => mi.setSelected(true))
+      }
+    }
+    menu
+  }
+
+  /**
+    * Create a menu item for accessing a specific catalog.
+    */
+  private def imageServersMenuItem(cat: Catalog): JMenuItem = {
+    val a = StoreImageServerAction.getAction(cat)
+    val menuItem = new JRadioButtonMenuItem(a) <| {_.setText(cat.getName)} <| {_.addActionListener(new ActionListener() {
+        override def actionPerformed(e: ActionEvent): Unit = {
+          // First save the preference, then load the image
+          a.actionPerformed(e)
+          opener.loadSkyImage()
+        }
+      })}
+    a.appendValue("MenuItem", menuItem)
+    menuItem
+  }
+
+  private def userPreferredCatalog: Option[Catalog] = {
+    val args = Preferences.get(Catalog.SKY_USER_CATALOG, Catalog.DEFAULT_IMAGE_SERVER).split("\\*")
+    val t = (args.length <= 0) option {
+      val c = CatalogNavigator.getCatalogDirectory.getCatalog(args(0))
+      Option(c).filter(_.isImageServer)
+    }
+    t.flatten
+  }
+
+  /**
+    * Create the Catalog => "Proxy Settings..." menu item
+    */
+  private def proxySettingsMenuItem(): JMenuItem = {
+    val proxyMenu = new JMenuItem("Proxy Settings...")
+    proxyMenu.addActionListener(new ActionListener {
+      override def actionPerformed(e: ActionEvent): Unit = {
+        new ProxyServerDialog() <| {_.setVisible(true)}
+      }
+    })
+    proxyMenu
+  }
+
 }
