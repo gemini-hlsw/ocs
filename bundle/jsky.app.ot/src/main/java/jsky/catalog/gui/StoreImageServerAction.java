@@ -12,7 +12,7 @@ import java.util.ArrayList;
 /**
  * This action saves the catalog selection based on user selection.
  * It also updates the user interface associated to the catalog,
- * specifically the AbstracButtons that need to show up as selected.
+ * specifically the AbstractButtons that need to show up as selected.
  *
  * This class provides a factory that allows the creation of only
  * one action associated to every singe catalog. Every action can
@@ -40,7 +40,7 @@ public class StoreImageServerAction extends AbstractAction {
         }
     }
 
-    private static HashMap<Catalog, StoreImageServerAction> map = new HashMap<Catalog, StoreImageServerAction>();
+    private static HashMap<Catalog, StoreImageServerAction> map = new HashMap<>();
 
     public static StoreImageServerAction getAction(Catalog cat) {
         StoreImageServerAction action = map.get(cat);

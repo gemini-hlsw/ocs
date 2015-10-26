@@ -95,12 +95,7 @@ public class TpeImageWidget extends CatalogImageDisplay implements MouseInputLis
         }
 
         @Override public void actionPerformed(ActionEvent evt) {
-            try {
-                TelescopePosEditor tpe = TpeManager.open();
-                tpe.getSkyImage();
-            } catch (Exception e) {
-                DialogUtil.error(e);
-            }
+            loadSkyImage();
         }
     };
 
@@ -294,6 +289,16 @@ public class TpeImageWidget extends CatalogImageDisplay implements MouseInputLis
 
     public synchronized void deleteViewObserver(final TpeViewObserver obs) {
         _viewObs.removeElement(obs);
+    }
+
+    @Override
+    public void loadSkyImage() {
+        try {
+            TelescopePosEditor tpe = TpeManager.open();
+            tpe.getSkyImage(_ctx);
+        } catch (Exception e) {
+            DialogUtil.error(e);
+        }
     }
 
 

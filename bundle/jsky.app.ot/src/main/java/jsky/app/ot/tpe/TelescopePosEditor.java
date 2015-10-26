@@ -384,7 +384,7 @@ public class TelescopePosEditor extends JSkyCat implements TpeMouseObserver {
      * @throws IOException      If a problem happens reading from the catalog
      * @throws CatalogException if a Catalog Problem is found
      */
-    public void getSkyImage() throws IOException, CatalogException {
+    public void getSkyImage(TpeContext ctx) throws IOException, CatalogException {
         String catalogProperties = Preferences.get(Catalog.SKY_USER_CATALOG);
         // If no properties, show the catalog browser
         if (catalogProperties == null) {
@@ -404,10 +404,10 @@ public class TelescopePosEditor extends JSkyCat implements TpeMouseObserver {
         queryArgs.setParamValue(0, null);
         queryArgs.setParamValue(1, c.getName());
 
-        final SPTarget _baseTarget = _ctx.targets().baseOrNull();
+        final SPTarget _baseTarget = ctx.targets().baseOrNull();
         if (_baseTarget == null) return;
 
-        final Option<Long> when = _ctx.schedulingBlockJava().map(SchedulingBlock::start);
+        final Option<Long> when = ctx.schedulingBlockJava().map(SchedulingBlock::start);
         final boolean go = // true if coords are known
             _baseTarget.getTarget().getRaString(when).flatMap(ra ->
             _baseTarget.getTarget().getDecString(when).map(dec -> {

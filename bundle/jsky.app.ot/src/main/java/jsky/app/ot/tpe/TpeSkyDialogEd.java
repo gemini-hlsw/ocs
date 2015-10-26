@@ -12,6 +12,7 @@ import java.awt.*;
 /**
  * Editor for the SkyDialogForm
  */
+@Deprecated
 public class TpeSkyDialogEd {
 
     private  TpeSkyDialogForm _dialog;
@@ -47,7 +48,7 @@ public class TpeSkyDialogEd {
         //perform the query
         TelescopePosEditor tpe = TpeManager.open();
         try {
-            tpe.getSkyImage();
+            tpe.getSkyImage(null);
         } catch (Exception ex) {
             DialogUtil.error(parent, ex);
         }

@@ -4,6 +4,7 @@ import javax.swing.*;
 import javax.swing.event.TreeModelEvent;
 import javax.swing.event.TreeModelListener;
 
+import edu.gemini.catalog.ui.tpe.CatalogImageDisplay;
 import edu.gemini.shared.util.immutable.None;
 import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.shared.util.immutable.Some;
@@ -30,8 +31,8 @@ public class NavigatorCatalogMenu extends JMenu implements TreeModelListener {
     // Used to access internationalized strings (see i18n/gui*.proprties)
     private static final I18N _I18N = I18N.getInstance(NavigatorCatalogMenu.class);
 
-    /** Object responsible for creating and/or displaying the catalog window. */
-    //private CatalogNavigatorOpener _opener;
+    /** Object responsible for loading the sky image */
+    private CatalogImageDisplay _opener;
 
     /** Image server submenu */
     private JMenu _imageServerMenu;
@@ -49,9 +50,9 @@ public class NavigatorCatalogMenu extends JMenu implements TreeModelListener {
      *
      * @param opener the object responsible for creating and displaying the catalog window
      */
-    public NavigatorCatalogMenu(CatalogNavigatorOpener opener) {
+    public NavigatorCatalogMenu(CatalogImageDisplay opener) {
         super(_I18N.getString("catalog"));
-        //_opener = opener;
+        _opener = opener;
 
         addMenuItems();
     }
@@ -124,8 +125,12 @@ public class NavigatorCatalogMenu extends JMenu implements TreeModelListener {
         final JMenuItem menuItem = new JRadioButtonMenuItem(a);
         menuItem.setText(cat.getName());
         a.appendValue("MenuItem", menuItem);
+        menuItem.addActionListener(ae -> {
+            // First save the preference, then load the image
+            a.actionPerformed(ae);
+            _opener.loadSkyImage();
+        });
         return menuItem;
-        //menuItem.addActionListener(ae -> _opener.openCatalogWindow(cat));
     }
 
      private Option<Catalog> _getUserCatalog() {

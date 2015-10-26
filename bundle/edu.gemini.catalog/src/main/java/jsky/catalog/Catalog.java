@@ -32,7 +32,7 @@ public interface Catalog extends QueryResult, Cloneable {
     /** Value returned by getType() for local catalog files. */
     String LOCAL = "local";
 
-    /** Propery to store user preferences prefences */
+    /** Property to store user preferences prefences */
     String SKY_USER_CATALOG = "jsky.catalog.sky";
 
     /** Implementation of the clone method (makes a shallow copy). */

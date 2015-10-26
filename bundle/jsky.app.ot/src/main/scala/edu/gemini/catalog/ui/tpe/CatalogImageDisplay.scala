@@ -115,7 +115,7 @@ trait CatalogDisplay {
   * Extends the DivaMainImageDisplay class by adding support for
   * browsing catalogs and plotting catalog symbols on the image.
   */
-class CatalogImageDisplay(parent: Component, navigatorPane: NavigatorPane) extends DivaMainImageDisplay(navigatorPane, parent) with CatalogNavigatorOpener with CatalogDisplay {
+abstract class CatalogImageDisplay(parent: Component, navigatorPane: NavigatorPane) extends DivaMainImageDisplay(navigatorPane, parent) with CatalogNavigatorOpener with CatalogDisplay {
   val plotter = new BasicTablePlotter(getCanvasGraphics, getCoordinateConverter) <| {navigatorPane.setPlotter}
 
   // TODO Move to scala collection
@@ -129,6 +129,11 @@ class CatalogImageDisplay(parent: Component, navigatorPane: NavigatorPane) exten
     * Set the instance of the catalog navigator to use with this image display.
     */
   override def setNavigator(navigator: Navigator):Unit = ???
+
+  /**
+    * Load the sky image for the current location
+   */
+  def loadSkyImage(): Unit
 
   /**
     * Open the catalog navigator window.
