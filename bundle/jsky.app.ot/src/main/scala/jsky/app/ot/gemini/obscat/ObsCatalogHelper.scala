@@ -87,7 +87,7 @@ object ObsCatalogHelper {
   private def pid(data: DataRow) = data.get(0).asInstanceOf[SPProgramID]
 
   // Entry point. Run the specified query against all databases.
-  def query(queryArgs: ObsCatalogQueryArgs, configEntry: SkycatConfigEntry, includeRemote: Boolean): QueryResult = {
+  def query(queryArgs: ObsCatalogQueryArgs, configEntry: SkycatConfigEntry, includeRemote: Boolean): ObsCatalogQueryResult = {
 
     // Run the requested query on the given runner. DB is used for error reporting.
     def run(db: DB, qr: IDBQueryRunner): Result = {
@@ -121,7 +121,7 @@ object ObsCatalogHelper {
       // longer; underlying socket timeouts should happen first.
       val all = awaitAll(TIMEOUT_MS, fs: _*).asInstanceOf[List[Option[Validation[QueryFailure, Result]]]]
       val noAnswerDbs = all.zip(databases(includeRemote)).filter(_._1.isEmpty).map(_._2)
-      if (noAnswerDbs.size > 0) {
+      if (noAnswerDbs.nonEmpty) {
         val noAnswerString = noAnswerDbs.map {
           case Local     => "Local"
           case Remote(p) => p.displayName()

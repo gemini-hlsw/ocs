@@ -214,7 +214,8 @@ public final class ObsCatalogQueryPanel extends CatalogQueryPanel {
      *
      * @return the QueryArgs object to use for a catalog query.
      */
-    public QueryArgs getQueryArgs() {
+    @Override
+    public ObsCatalogQueryArgs getQueryArgs() {
         final ObsCatalog catalog = (ObsCatalog) getCatalog();
         final ObsCatalogQueryArgs queryArgs = new ObsCatalogQueryArgs(catalog);
         initQueryArgs(queryArgs);

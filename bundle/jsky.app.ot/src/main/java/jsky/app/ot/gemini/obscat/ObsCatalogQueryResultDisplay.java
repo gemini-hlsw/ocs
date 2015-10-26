@@ -1,8 +1,3 @@
-// Copyright 2001 Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-//
-// $Id: ObsCatalogQueryResultDisplay.java 46768 2012-07-16 18:58:53Z rnorris $
-//
 package jsky.app.ot.gemini.obscat;
 
 import edu.gemini.pot.client.SPDB;
@@ -47,7 +42,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.*;
-
 
 /**
  * Displays the results of an ObsCatalog query in a table.
@@ -128,8 +122,8 @@ public final class ObsCatalogQueryResultDisplay extends TableDisplayTool impleme
     private final ObsCatalogTableColumnConfigPanel _tableConfig =
             new ObsCatalogTableColumnConfigPanel(getTableDisplay());
 
-    public ObsCatalogQueryResultDisplay(TableQueryResult tableQueryResult, QueryResultDisplay queryResultDisplay) {
-        super(tableQueryResult, queryResultDisplay, null);
+    public ObsCatalogQueryResultDisplay(TableQueryResult tableQueryResult) {
+        super(tableQueryResult, null, null);
 
         // Configure some options on the table
         final SortedJTable jt = getSortedJTable();

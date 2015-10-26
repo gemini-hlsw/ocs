@@ -20,7 +20,7 @@ import java.util.Vector;
  *
  * @author Allan Brighton
  */
-public class ObsCatalogQueryResult extends SkycatTable implements CatalogUIHandler {
+public class ObsCatalogQueryResult extends SkycatTable {
 
     // A vector of (progId, obsId, groupName) rows, corresponding to the data rows
     private final Vector _idRows;
@@ -35,9 +35,6 @@ public class ObsCatalogQueryResult extends SkycatTable implements CatalogUIHandl
 
     /** The index of the observation group name in a vector row */
     public static final int GROUP = 2;
-
-    // Cached reference to the widget displaying the query results
-    private static ObsCatalogQueryResultDisplay _queryResultDisplay;
 
     /**
      * Construct a new ObsCatalogQueryResult with the given data.
@@ -72,15 +69,6 @@ public class ObsCatalogQueryResult extends SkycatTable implements CatalogUIHandl
         }
     }
 
-    /** Implement the {@link CatalogUIHandler} interface to get a custom GUI */
-    public JComponent makeComponent(QueryResultDisplay display) {
-        if (_queryResultDisplay == null)
-            _queryResultDisplay = new ObsCatalogQueryResultDisplay(this, display);
-        else
-            _queryResultDisplay.setQueryResult(this);
-        return _queryResultDisplay;
-    }
-
     // Redefined from base class to update _idRows or disable
     public void removeRow(int row) {
         super.removeRow(row);
@@ -88,15 +76,17 @@ public class ObsCatalogQueryResult extends SkycatTable implements CatalogUIHandl
             _idRows.remove(row);
         }
     }
+
     public void addRow(Vector rowData) {
         DialogUtil.error("Can't add rows to this table: Not implemented.");
     }
+
     public void setReadOnly(boolean b) {
         if (!b) {
             DialogUtil.error("Can't edit rows in this table: Not implemented.");
             return;
         }
-        super.setReadOnly(b);
+        super.setReadOnly(true);
     }
     public boolean isCellEditable(int rowIndex, int columnIndex) {
         return false;

@@ -146,21 +146,7 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
   }
 
   // Set initial size
-  adjustSize()
-  // Update location according to the last save position
-  SizePreference.getPosition(this.getClass).foreach { p =>
-    location = p
-  }
-
-  // Save position and dimensions
-  listenTo(this)
-  reactions += {
-    case _: UIElementResized =>
-      SizePreference.setDimension(getClass, Some(this.size))
-    case _: UIElementMoved =>
-      SizePreference.setPosition(getClass, Some(this.location))
-  }
-
+  adjustSize(false)
 
   /** Create a titled border with inner and outer padding. */
   def titleBorder(title: String): Border =

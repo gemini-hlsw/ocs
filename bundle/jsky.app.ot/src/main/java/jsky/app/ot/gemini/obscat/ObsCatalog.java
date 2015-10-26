@@ -66,7 +66,7 @@ public final class ObsCatalog extends SkycatCatalog implements CatalogUIHandler 
     }
 
     // Return the configuration entry for this catalog.
-    private static SkycatConfigEntry newConfigEntry() {
+    public static SkycatConfigEntry newConfigEntry() {
         final SkycatConfigEntry _configEntry;
         final Properties p = new Properties();
         p.setProperty(SkycatConfigFile.SERV_TYPE, "catalog");
@@ -352,17 +352,26 @@ public final class ObsCatalog extends SkycatCatalog implements CatalogUIHandler 
             return;
         }
 
-        final Navigator navigator = NavigatorManager.open();
-        if (navigator != null) {
+        //final Navigator navigator = NavigatorManager.open();
+        final scala.swing.Frame browserFrame = ObsCatalogFrame.instance();
+        browserFrame.visible_$eq(true);
+        ViewerService.instance().get().registerView(browserFrame);
+        browserFrame.peer().addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentHidden(ComponentEvent e) {
+                ViewerService.instance().get().unregisterView(browserFrame);
+            }
+        });
+
+        /*if (navigator != null) {
             navigator.setAutoQuery(false);
-            ViewerService.instance().get().registerView(navigator.getParentFrame());
 
             // Unregister the catalog window when it is closed/hidden
             Component w = navigator.getParentFrame();
             w.addComponentListener(new ComponentAdapter() {
                 @Override
                 public void componentHidden(ComponentEvent e) {
-                    ViewerService.instance().get().unregisterView(navigator.getParentFrame());
+                    ViewerService.instance().get().unregisterView(browserFrame);
                 }
             });
 
@@ -370,8 +379,9 @@ public final class ObsCatalog extends SkycatCatalog implements CatalogUIHandler 
             addPreferencesItem();
 
             navigator.setQueryResult(INSTANCE);
+            //browserFrame.setContentPane(new JPanel(INSTANCE.makeComponent()));
 
-        }
+        }*/
     };
 
     private static boolean addedPreferences = false;
@@ -408,7 +418,8 @@ public final class ObsCatalog extends SkycatCatalog implements CatalogUIHandler 
      */
     public JComponent makeComponent(QueryResultDisplay display) {
         queryTool = new ObsCatalogQueryTool(this, display);
-        return queryTool;
+//        System.out.println(queryTool.includeRemote());
+        return queryTool.makeButtonPanel().peer();
     }
 
 }
