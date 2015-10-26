@@ -463,7 +463,7 @@ public class TpeGuideStarDialog extends TpeGuideStarDialogForm
         String selectedInst = _getSelectedInst();
 
         _iw.setCatalogAlgorithm(_getCatalogAlgorithm(guideTag, inst, selectedInst));
-        _iw.openCatalogWindow(cat);
+        //_iw.openCatalogWindow(cat);
     }
 
 

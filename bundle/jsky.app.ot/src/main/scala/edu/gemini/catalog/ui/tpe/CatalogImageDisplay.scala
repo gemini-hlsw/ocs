@@ -115,7 +115,7 @@ trait CatalogDisplay {
   * Extends the DivaMainImageDisplay class by adding support for
   * browsing catalogs and plotting catalog symbols on the image.
   */
-abstract class CatalogImageDisplay(parent: Component, navigatorPane: NavigatorPane) extends DivaMainImageDisplay(navigatorPane, parent) with CatalogNavigatorOpener with CatalogDisplay {
+abstract class CatalogImageDisplay(parent: Component, navigatorPane: NavigatorPane) extends DivaMainImageDisplay(navigatorPane, parent) with CatalogDisplay {
   val plotter = new BasicTablePlotter(getCanvasGraphics, getCoordinateConverter) <| {navigatorPane.setPlotter}
 
   // TODO Move to scala collection
@@ -135,37 +135,12 @@ abstract class CatalogImageDisplay(parent: Component, navigatorPane: NavigatorPa
    */
   def loadSkyImage(): Unit
 
-  /**
-    * Open the catalog navigator window.
-    */
-  override def openCatalogWindow(): Unit = {
-    // TODO Open the catalog
-  }
-
-  /**
-    * Display the interface for the given catalog, if not null, otherwise just
-    * open the catalog navigator window.
-    */
-  override def openCatalogWindow(cat: Catalog):Unit = {
-    throw new UnsupportedOperationException()
-  }
-
-  /** Open a catalog window for the named catalog, if found. */
-  override def openCatalogWindow(name: String) {
-    throw new UnsupportedOperationException()
-  }
-
-  /** Pop up a file browser to select a local catalog file to open. */
-  def openLocalCatalog(): Unit = {
-    throw new UnsupportedOperationException()
-  }
-
   /** Display the FITS table at the given HDU index. */
   override def displayFITSTable(hdu: Int):Unit = {
     try {
       val fitsImage = getFitsImage
       val table = new NavigatorFITSTable(getFilename, fitsImage.getFits, hdu)
-      openCatalogWindow(table.getCatalog)
+      //openCatalogWindow(table.getCatalog)
       val fitsKeywordsFrame = getFitsKeywordsFrame
       Option(fitsKeywordsFrame).foreach {
         case frame: FITSKeywordsFrame =>
