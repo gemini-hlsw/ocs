@@ -30,62 +30,115 @@ final class CaApplyRecord {
     private ReadOnlyClientEpicsChannel<Integer> val;
     private ReadOnlyClientEpicsChannel<String> mess;
 
+    private ChannelListener<Integer> valListener;
+
     CaApplyRecord(String epicsName, EpicsService epicsService) {
         this.epicsName = epicsName;
 
         epicsReader = new EpicsReaderImpl(epicsService);
         epicsWriter = new EpicsWriterImpl(epicsService);
-        dir = epicsWriter.getEnumChannel(epicsName + DIR_SUFFIX,
-                CadDirective.class);
-        val = epicsReader.getIntegerChannel(epicsName + VAL_SUFFIX);
-        mess = epicsReader.getStringChannel(epicsName + MSG_SUFFIX);
+
+        updateChannels();
     }
 
-    void unbind() {
-
-        try {
-            epicsWriter.destroyChannel(dir);
-        } catch (CAException e) {
-            LOG.warning(e.getMessage());
+    synchronized void updateChannels() {
+        if (dir == null) {
+            try {
+                dir = epicsWriter.getEnumChannel(epicsName + DIR_SUFFIX, CadDirective.class);
+            } catch (Throwable e) {
+                LOG.warning(e.getMessage());
+            }
         }
-        dir = null;
-
-        try {
-            epicsReader.destroyChannel(val);
-        } catch (CAException e) {
-            LOG.warning(e.getMessage());
+        if (val == null) {
+            try {
+                val = epicsReader.getIntegerChannel(epicsName + VAL_SUFFIX);
+                if (valListener != null) {
+                    val.registerListener(valListener);
+                }
+            } catch (Throwable e) {
+                LOG.warning(e.getMessage());
+            }
         }
-        val = null;
-
-        try {
-            epicsReader.destroyChannel(mess);
-        } catch (CAException e) {
-            LOG.warning(e.getMessage());
+        if (mess == null) {
+            try {
+                mess = epicsReader.getStringChannel(epicsName + MSG_SUFFIX);
+            } catch (Throwable e) {
+                LOG.warning(e.getMessage());
+            }
         }
-        mess = null;
+    }
+
+    synchronized void unbind() {
+        assert(epicsReader!=null);
+        assert(epicsWriter!=null);
+
+        if(dir!=null) {
+            try {
+                epicsWriter.destroyChannel(dir);
+            } catch (CAException e) {
+                LOG.warning(e.getMessage());
+            }
+            dir = null;
+        }
+
+        if(val!=null) {
+            try {
+                epicsReader.destroyChannel(val);
+            } catch (CAException e) {
+                LOG.warning(e.getMessage());
+            }
+            val = null;
+        }
+
+        if(mess!=null) {
+            try {
+                epicsReader.destroyChannel(mess);
+            } catch (CAException e) {
+                LOG.warning(e.getMessage());
+            }
+            mess = null;
+        }
 
         epicsWriter = null;
         epicsReader = null;
     }
     
-    void registerValListener(ChannelListener<Integer> listener) throws CAException {
-        val.registerListener(listener);
+    synchronized void registerValListener(ChannelListener<Integer> listener) throws CAException {
+        if(val!=null) {
+            val.registerListener(listener);
+        }
+        valListener = listener;
     }
     
-    void unregisterValListener(ChannelListener<Integer> listener) throws CAException {
-        val.unRegisterListener(listener);
+    synchronized void unregisterValListener(ChannelListener<Integer> listener) throws CAException {
+        if(val!=null) {
+            val.unRegisterListener(listener);
+        }
+        valListener = null;
     }
     
-    int getValValue() throws CAException, TimeoutException {
-        return val.getFirst();
+    synchronized int getValValue() throws CAException, TimeoutException {
+        if(val!=null) {
+            return val.getFirst();
+        } else {
+            throw new CAException("Tried to read from unbound channel  " + epicsName + VAL_SUFFIX);
+        }
     }
 
-    String getMessValue() throws CAException, TimeoutException {
-        return mess.getFirst();
+    synchronized String getMessValue() throws CAException, TimeoutException {
+        if(mess!=null) {
+            return mess.getFirst();
+        } else {
+            throw new CAException("Tried to read from unbound channel  " + epicsName + MSG_SUFFIX);
+        }
     }
     
-    void setDir(CadDirective directive) throws CAException, TimeoutException {
-        dir.setValue(directive);
+    synchronized void setDir(CadDirective directive) throws CAException, TimeoutException {
+        if(dir!=null) {
+            dir.setValue(directive);
+        } else {
+            throw new CAException("Tried to read from unbound channel  " + epicsName + DIR_SUFFIX);
+        }
     }
     
     public String getEpicsName() {

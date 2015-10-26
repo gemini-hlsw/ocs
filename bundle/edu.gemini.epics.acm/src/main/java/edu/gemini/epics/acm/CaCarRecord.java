@@ -24,32 +24,63 @@ final class CaCarRecord {
     private ReadOnlyClientEpicsChannel<CarState> val;
     private ReadOnlyClientEpicsChannel<String> omss;
 
+    private ChannelListener<Integer> clidListener;
+    private ChannelListener<CarState> valListener;
+
     CaCarRecord(String epicsName, EpicsService epicsService) {
         this.epicsName = epicsName;
         epicsReader = new EpicsReaderImpl(epicsService);
-        clid = epicsReader.getIntegerChannel(epicsName + CAR_CLID_SUFFIX);
-        val = epicsReader.getEnumChannel(epicsName + CAR_VAL_SUFFIX,
-                CarState.class);
-        omss = epicsReader.getStringChannel(epicsName + CAR_OMSS_SUFFIX);
+
+        updateChannels();
     }
 
-    void unbind() {
+    synchronized void updateChannels() {
         try {
-            epicsReader.destroyChannel(clid);
+            clid = epicsReader.getIntegerChannel(epicsName + CAR_CLID_SUFFIX);
+            if(clidListener!=null) {
+                clid.registerListener(clidListener);
+            }
+        } catch(Throwable e) {
+            LOG.warning(e.getMessage());
+        }
+        try {
+            val = epicsReader.getEnumChannel(epicsName + CAR_VAL_SUFFIX, CarState.class);
+            if(valListener!=null) {
+                val.registerListener(valListener);
+            }
+        } catch(Throwable e) {
+            LOG.warning(e.getMessage());
+        }
+        try {
+            omss = epicsReader.getStringChannel(epicsName + CAR_OMSS_SUFFIX);
+        } catch(Throwable e) {
+            LOG.warning(e.getMessage());
+        }
+    }
+
+    synchronized void unbind() {
+        try {
+            if(clid!=null) {
+                epicsReader.destroyChannel(clid);
+            }
         } catch (CAException e) {
             LOG.warning(e.getMessage());
         }
         clid = null;
 
         try {
-            epicsReader.destroyChannel(val);
+            if(val!=null){
+                epicsReader.destroyChannel(val);
+            }
         } catch (CAException e) {
             LOG.warning(e.getMessage());
         }
         val = null;
 
         try {
-            epicsReader.destroyChannel(omss);
+            if(omss!=null) {
+                epicsReader.destroyChannel(omss);
+            }
         } catch (CAException e) {
             LOG.warning(e.getMessage());
         }
@@ -63,19 +94,31 @@ final class CaCarRecord {
     }
 
     void registerClidListener(ChannelListener<Integer> listener) throws CAException {
-        clid.registerListener(listener);
+        if(clid!=null) {
+            clid.registerListener(listener);
+        }
+        clidListener = listener;
     }
 
     void unregisterClidListener(ChannelListener<Integer> listener) throws CAException {
-        clid.unRegisterListener(listener);
+        if(clid!=null) {
+            clid.unRegisterListener(listener);
+        }
+        clidListener = null;
     }
 
     void registerValListener(ChannelListener<CarState> listener) throws CAException {
-        val.registerListener(listener);
+        if(val!=null) {
+            val.registerListener(listener);
+        }
+        valListener = listener;
     }
 
     void unregisterValListener(ChannelListener<CarState> listener) throws CAException {
-        val.unRegisterListener(listener);
+        if(val!=null) {
+            val.unRegisterListener(listener);
+        }
+        valListener = null;
     }
 
     CarState getValValue() throws CAException, TimeoutException {
