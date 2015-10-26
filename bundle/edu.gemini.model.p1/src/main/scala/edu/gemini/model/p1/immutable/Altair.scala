@@ -45,6 +45,7 @@ case object AltairNone extends Altair {
 }
 
 case class AltairLGS(pwfs1: Boolean, aowfs: Boolean = false, oiwfs: Boolean = false) extends AltairAO {
+  // At most one can be true
   require((!pwfs1 && !aowfs && !oiwfs) || (pwfs1 ^ aowfs ^ oiwfs))
   require(!(pwfs1 && aowfs && oiwfs))
   val fieldLens = true
