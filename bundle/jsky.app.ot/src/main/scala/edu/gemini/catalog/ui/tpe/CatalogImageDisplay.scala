@@ -15,7 +15,7 @@ import jsky.image.gui.ImageDisplayMenuBar
 import jsky.image.gui.ImageDisplayToolBar
 import jsky.image.gui.{ImageGraphicsHandler, DivaMainImageDisplay}
 import jsky.navigator._
-import jsky.util.{Preferences, ProxyServerUtil, I18N}
+import jsky.util.Preferences
 import jsky.util.gui.{ProxyServerDialog, DialogUtil}
 import javax.swing._
 import java.awt._

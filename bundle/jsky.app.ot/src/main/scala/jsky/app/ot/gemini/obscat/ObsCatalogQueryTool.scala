@@ -36,7 +36,7 @@ final class ObsCatalogQueryTool(catalog: Catalog, display: QueryResultDisplay) e
       }
     }
 
-    val panel = new MigPanel(LC().fill().insets(0).debug(100)) {
+    val panel = new MigPanel(LC().fill().insets(0)) {
       add(Component.wrap(makeSaveAsButton()), CC().alignX(RightAlign))
       add(remote, CC().alignX(RightAlign).pushX())
       add(Component.wrap(ObsCatalogQueryTool.super.makeButtonPanel()), CC().alignX(RightAlign))
