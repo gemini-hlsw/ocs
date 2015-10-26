@@ -385,13 +385,7 @@ public class TelescopePosEditor extends JSkyCat implements TpeMouseObserver {
      * @throws CatalogException if a Catalog Problem is found
      */
     public void getSkyImage(TpeContext ctx) throws IOException, CatalogException {
-        String catalogProperties = Preferences.get(Catalog.SKY_USER_CATALOG);
-        // If no properties, show the catalog browser
-        if (catalogProperties == null) {
-            TpeSkyDialogEd ed = TpeSkyDialogEd.getInstance();
-            ed.showDialog(getImageFrame());
-            return;
-        }
+        String catalogProperties = Preferences.get(Catalog.SKY_USER_CATALOG, Catalog.DEFAULT_IMAGE_SERVER);
 
         String args[] = catalogProperties.split("\\*");
 

@@ -134,20 +134,15 @@ public class NavigatorCatalogMenu extends JMenu implements TreeModelListener {
     }
 
      private Option<Catalog> _getUserCatalog() {
-        String catalogProperties = Preferences.get(Catalog.SKY_USER_CATALOG);
-        // If no properties, show the catalog browser
-        if (catalogProperties == null) {
-            return None.instance();
-        } else {
-            String args[] = catalogProperties.split("\\*");
-            if (args.length <= 0) return None.instance();
+        String catalogProperties = Preferences.get(Catalog.SKY_USER_CATALOG, Catalog.DEFAULT_IMAGE_SERVER);
+        String args[] = catalogProperties.split("\\*");
+        if (args.length <= 0) return None.instance();
 
-            Catalog c = CatalogNavigator.getCatalogDirectory().getCatalog(args[0]);
+        Catalog c = CatalogNavigator.getCatalogDirectory().getCatalog(args[0]);
 
-            if (c == null || !c.isImageServer()) return None.instance();
+        if (c == null || !c.isImageServer()) return None.instance();
 
-            return new Some<>(c);
-        }
+        return new Some<>(c);
     }
 
 
