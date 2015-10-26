@@ -44,3 +44,5 @@ OsgiKeys.dynamicImportPackage := Seq("")
 OsgiKeys.exportPackage := Seq(
   "edu.gemini.epics.acm"
 )
+
+OsgiKeys.additionalHeaders += ("Import-Package" -> "!sun.misc,!sun.misc.*,*")
