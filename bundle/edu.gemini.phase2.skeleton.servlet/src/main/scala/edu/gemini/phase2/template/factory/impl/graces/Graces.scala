@@ -30,40 +30,47 @@ case class Graces(blueprint: SpGracesBlueprint, exampleTarget: Option[SPTarget])
       this.db = None
     }
 
-  // R = Phase-I target R-band magnitude
+  // R = Phase-I target R-band or V-band magnitude
   val rMag: Option[Double] =
     for {
       t <- exampleTarget
-      m <- t.getTarget.getMagnitude(Band.R).asScalaOpt
+      m <- t.getTarget.getMagnitude(Band.R).asScalaOpt orElse
+           t.getTarget.getMagnitude(Band.V).asScalaOpt
     } yield m.getBrightness
 
-  // IF          R < 6.5 INCLUDE {1}
-  // ELIF 6.5 <= R < 10  INCLUDE {2}
-  // ELIF 10  <= R < 21  INCLUDE {3}
-  // ELIF 21  <= R       INCLUDE {4}
-  // ELSE INCLUDE {1},{2},{3},{4} # No magnitude given so include all
-  val acq = rMag.map { r =>
-         if (r <= 6.5) List(1)
-    else if (r <= 10)  List(2)
-    else if (r <= 21)  List(3)
-    else              List(4)
-  } .getOrElse(List(1, 2, 3, 4))
+  //  IF FIBER-MODE == 1 AND (READ-MODE == Normal OR READ-MODE == Fast):
+  //    IF   R> 10 INCLUDE {1}
+  //  ELIF R<=10 INCLUDE {2}
+  //  ELSE       INCLUDE {1,2} # Unknown brightness, so include both
+  //
+  //  ELIF FIBER-MODE == 1 AND READ-MODE == Slow:
+  //    IF   R> 10 INCLUDE {3}
+  //  ELIF R<=10 INCLUDE {4}
+  //  ELSE       INCLUDE {3,4}
+  //
+  //  ELIF FIBER-MODE == 2 AND (READ-MODE == Normal OR READ-MODE == Fast):
+  //    IF   R> 10 INCLUDE {5}
+  //  ELIF R<=10 INCLUDE {6}
+  //  ELSE       INCLUDE {5,6}
+  //
+  //  ELIF FIBER-MODE == 2 AND READ-MODE == Slow:
+  //    IF   R> 10 INCLUDE {7}
+  //  ELIF R<=10 INCLUDE {8}
+  //  ELSE       INCLUDE {7,8}
 
-  // IF   FIBER-MODE == 1 AND READ-MODE == Fast   INCLUDE {5}
-  // ELIF FIBER-MODE == 1 AND READ-MODE == Normal INCLUDE {6}
-  // ELIF FIBER-MODE == 1 AND READ-MODE == Slow   INCLUDE {7}
-  // ELIF FIBER-MODE == 2 AND READ-MODE == Fast   INCLUDE {8}
-  // ELIF FIBER-MODE == 2 AND READ-MODE == Normal INCLUDE {9}
-  // ELIF FIBER-MODE == 2 AND READ-MODE == Slow   INCLUDE {10}
+  def select(gt10: Int, lte10: Int): List[Int] =
+    rMag.map(m => if (m > 10) List(gt10) else List(lte10)).getOrElse(List(gt10, lte10))
+
   val sci = (blueprint.getFiberMode, blueprint.getReadMode) match {
-    case (ONE_FIBER, FAST)   => 5
-    case (ONE_FIBER, NORMAL) => 6
-    case (ONE_FIBER, SLOW)   => 7
-    case (TWO_FIBER, FAST)   => 8
-    case (TWO_FIBER, NORMAL) => 9
-    case (TWO_FIBER, SLOW)   => 10
+
+    case (ONE_FIBER, NORMAL | FAST) => select(1, 2)
+    case (ONE_FIBER, SLOW)          => select(3, 4)
+
+    case (TWO_FIBER, NORMAL | FAST) => select(5, 6)
+    case (TWO_FIBER, SLOW)          => select(7, 8)
+
   }
 
-  include(sci :: acq : _*) in TargetGroup
+  include(sci : _*) in TargetGroup
 
 }
