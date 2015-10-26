@@ -45,9 +45,9 @@ public final class ObsCatalogQueryTool extends CatalogQueryTool {
         }};
 
         final JPanel res = new JPanel(new GridBagLayout());
-        res.add(new JPanel(),            new GridBagConstraints(0, 0, 1, 1, 1.0, 0.0, CENTER, HORIZONTAL, new Insets(0,0,0, 0), 0, 0));
-        res.add(remote,                  new GridBagConstraints(1, 0, 1, 1, 0.0, 0.0, CENTER, NONE,       new Insets(0,0,0,10), 0, 0));
-        res.add(super.makeButtonPanel(), new GridBagConstraints(2, 0, 1, 1, 0.0, 0.0, CENTER, NONE,       new Insets(0,0,0, 0), 0, 0));
+        res.add(super.makeSaveAsButton(), new GridBagConstraints(0, 0, 1, 1, 1.0, 0.0, WEST,   NONE, new Insets(0,10,0,0), 0, 0));
+        res.add(remote,                   new GridBagConstraints(1, 0, 1, 1, 0.0, 0.0, CENTER, NONE, new Insets(0,0,0,10), 0, 0));
+        res.add(super.makeButtonPanel(),  new GridBagConstraints(2, 0, 1, 1, 0.0, 0.0, CENTER, NONE, new Insets(0,0,0, 0), 0, 0));
         return res;
     }
 

@@ -129,6 +129,15 @@ public class CatalogQueryTool extends JPanel
         return new CatalogQueryPanel(catalog, 2);
     }
 
+    protected JButton makeSaveAsButton() {
+        return new JButton("Save As...") {{
+            addActionListener(e -> {
+                if (_queryResultDisplay instanceof CatalogNavigator) {
+                    ((CatalogNavigator)_queryResultDisplay).saveAs();
+                }
+            });
+        }};
+    }
 
     /**
      * Make and return the button panel
