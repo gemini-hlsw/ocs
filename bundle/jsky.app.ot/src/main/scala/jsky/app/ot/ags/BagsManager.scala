@@ -62,7 +62,7 @@ final class BagsManager(executor: ScheduledThreadPoolExecutor) {
       prog.addStructureChangeListener(StructurePropertyChangeListener)
       prog.addCompositeChangeListener(CompositePropertyChangeListener)
     }
-    prog.getAllObservations.asScala.foreach(enqueue(_, 0L))
+    prog.getAllObservations.asScala.foreach(enqueue(_, 0L, initialEnqueue = true))
   }
 
   /**
@@ -92,20 +92,22 @@ final class BagsManager(executor: ScheduledThreadPoolExecutor) {
    * Atomically enqueue a task that will consider the specified observation for BAGS lookup, after
    * a delay of at least `delay` milliseconds.
    */
-  def enqueue(observation: ISPObservation, delay: Long): Unit =
+  def enqueue(observation: ISPObservation, delay: Long, initialEnqueue: Boolean = false): Unit =
     Option(observation).foreach { obs =>
       synchronized {
         val key = obs.getNodeKey
         state += key
-        executor.schedule(new Runnable {
-          def run(): Unit =
+        executor.schedule(new Thread {
+          setPriority(Thread.NORM_PRIORITY - 1)
+
+          override def run(): Unit =
 
           // If dequeue is false this means that (a) another task scheduled *after* me ended up
           // running before me, so their result is as good as mine would have been and we're done;
           // or (b) we don't care about that program anymore, so we're done.
             if (dequeue(key, obs.getProgramID)) {
               // Otherwise construct an obs context, verify that it's bagworthy, and go
-              ObsContext.create(obs).asScalaOpt.filter(_.isEligibleForBags).foreach { ctx =>
+              ObsContext.create(obs).asScalaOpt.filter(o => !initialEnqueue || o.isEligibleForBags).foreach { ctx =>
 
                 //   do the lookup
                 //   on success {
@@ -143,7 +145,7 @@ final class BagsManager(executor: ScheduledThreadPoolExecutor) {
                     // If we timed out, we don't want to delay.
                     case Failure(ex: TimeoutException) =>
                       LOG.warning(s"$bagsIdMsg failed: ${ex.getMessage}")
-                      enqueue(obs, 5000L)
+                      enqueue(obs, 0L)
 
                     // For all other exceptions, print the full stack trace.
                     case Failure(ex) =>
