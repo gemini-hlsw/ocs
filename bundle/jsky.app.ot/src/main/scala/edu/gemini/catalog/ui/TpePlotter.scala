@@ -24,7 +24,7 @@ import scala.collection.JavaConverters._
   *
   * Some day BasicTablePlotter will work using the new API rather than the other way around
   */
-case class TpePlotter(display: CatalogImageDisplay) {
+object adapters {
 
   case class QueryArgsAdapter(model: TargetsModel) extends QueryArgs {
     override def getCatalog: Catalog = ???
@@ -135,18 +135,20 @@ case class TpePlotter(display: CatalogImageDisplay) {
     override def query(queryArgs: QueryArgs): QueryResult = ???
 
     override def getTitle: String = ???
+
   }
 
-  /** Query Result Adapter to let the BasicTablePlotter work */
+  /** Table Query Result Adapter to let the BasicTablePlotter work */
   case class TableQueryResultAdapter(model: TargetsModel) extends TableQueryResult {
-    val catalog = CatalogAdapter(model)
+    val catalog = new CatalogAdapter(model)
+
     // Table QueryResult methods
     override def getCatalog: Catalog = catalog
 
     override def getDataVector: java.util.Vector[java.util.Vector[AnyRef]] = new java.util.Vector(model.targets.map { t =>
       val mags = MagnitudeBand.all.map(t.magnitudeIn).collect {
         case Some(v) => Double.box(v.value)
-        case None    => null // This is required for the Java side of plotting
+        case None => null // This is required for the Java side of plotting
       }
       new java.util.Vector[AnyRef]((List(t.name, t.coordinates.ra.toAngle.formatHMS, t.coordinates.dec.formatDMS) ::: mags).asJavaCollection)
     }.asJavaCollection)
@@ -164,7 +166,9 @@ case class TpePlotter(display: CatalogImageDisplay) {
 
     override def getCoordinates(rowIndex: Int): Coordinates = ???
 
-    override def getRowCoordinates: RowCoordinates = new RowCoordinates(1, 2, 2000) <| {_.setIdCol(0)}
+    override def getRowCoordinates: RowCoordinates = new RowCoordinates(1, 2, 2000) <| {
+      _.setIdCol(0)
+    }
 
     override def getWCSCenter: WorldCoordinates = ???
 
@@ -229,13 +233,28 @@ case class TpePlotter(display: CatalogImageDisplay) {
     override def addTableModelListener(l: TableModelListener): Unit = model.addTableModelListener(l)
 
     override def getSkyObject(i: Int): JOption[SkyObject] = model.targets.lift(i).map(_.toOldModel).asGeminiOpt
+
   }
+
+}
+
+case class TpePlotter(display: CatalogImageDisplay) {
+  import adapters.TableQueryResultAdapter
 
   /**
    * Plot the given table data.
    */
   def plot(model: TargetsModel): Unit = {
-    display.plotter.plot(TableQueryResultAdapter(model))
+    val qr = TableQueryResultAdapter(model)
+    display.plotter.plot(qr)
+  }
+
+  /**
+   * Unplot the given target model
+   */
+  def unplot(model: TargetsModel): Unit = {
+    val qr = TableQueryResultAdapter(model)
+    display.plotter.unplot(qr)
   }
 
 }

@@ -543,7 +543,7 @@ public class BasicTablePlotter
         final ListIterator<TableListItem> it = _tableList.listIterator(0);
         while (it.hasNext()) {
             TableListItem item = it.next();
-            if (item.table == table) {
+            if (item.table.equals(table)) {
                 it.remove();
                 _layer.repaint();
                 break;

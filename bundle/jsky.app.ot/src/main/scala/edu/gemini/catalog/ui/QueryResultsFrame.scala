@@ -153,8 +153,21 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
   }
 
   private def plotResults(): Unit = {
-    val tpe = TpeManager.open()
-    TpePlotter(tpe.getImageWidget).plot(resultsTable.model.asInstanceOf[TargetsModel])
+    resultsTable.model match {
+      case t: TargetsModel =>
+        val tpe = TpeManager.open()
+        TpePlotter(tpe.getImageWidget).plot(t)
+      case _               => // Ignore, it shouldn't happen
+    }
+  }
+
+  private def unplotCurrent(): Unit = {
+    resultsTable.model match {
+      case t: TargetsModel =>
+        val tpe = TpeManager.get()
+        TpePlotter(tpe.getImageWidget).unplot(t)
+      case _               => // Ignore, it shouldn't happen
+    }
   }
 
   /**
@@ -163,6 +176,8 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
   def updateResults(info: Option[ObservationInfo], queryResult: QueryResult): Unit = {
     queryResult.query match {
       case q: ConeSearchCatalogQuery =>
+        unplotCurrent()
+
         val model = TargetsModel(info, q.base, q.radiusConstraint, queryResult.result.targets.rows)
         resultsTable.model = model
 
