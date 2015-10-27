@@ -56,7 +56,11 @@ public class Flamingos2Support implements ITccInstrumentSupport {
 
     public String getTccConfigInstrument() {
         Flamingos2 inst = (Flamingos2) _oe.getInstrument();
-        return (inst.getIssPort() == IssPort.SIDE_LOOKING) ? "F25" : "F2";
+        if (_oe.containsTargets(PwfsGuideProbe.pwfs2)) {
+            return (inst.getIssPort() == IssPort.SIDE_LOOKING) ? "F25_P2" : "F2_P2";
+        } else {
+            return (inst.getIssPort() == IssPort.SIDE_LOOKING) ? "F25" : "F2";
+        }
     }
 
     /**

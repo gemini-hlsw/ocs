@@ -1,10 +1,24 @@
 package edu.gemini.wdba.tcc;
 
+import edu.gemini.shared.util.immutable.DefaultImList;
+import edu.gemini.shared.util.immutable.ImCollections;
+import edu.gemini.shared.util.immutable.ImList;
 import edu.gemini.shared.util.immutable.Pair;
+import edu.gemini.spModel.ext.ObservationNode;
+import edu.gemini.spModel.ext.TargetNode;
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2;
+import edu.gemini.spModel.guide.GuideProbe;
+import edu.gemini.spModel.target.SPTarget;
+import edu.gemini.spModel.target.env.GuideProbeTargets;
+import edu.gemini.spModel.target.env.TargetEnvironment;
+import edu.gemini.spModel.target.obsComp.PwfsGuideProbe;
+import edu.gemini.spModel.target.obsComp.TargetObsComp;
 import edu.gemini.spModel.telescope.IssPort;
 import org.junit.Test;
 import scala.actors.threadpool.Arrays;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static edu.gemini.spModel.gemini.flamingos2.Flamingos2.Disperser;
 import static edu.gemini.spModel.gemini.flamingos2.Flamingos2.Filter;
@@ -14,8 +28,46 @@ import static edu.gemini.spModel.gemini.flamingos2.Flamingos2.Filter;
  */
 public final class Flamingos2SupportTest extends InstrumentSupportTestBase<Flamingos2> {
 
+    private SPTarget base;
+
+
     public Flamingos2SupportTest() {
         super(Flamingos2.SP_TYPE);
+
+        base = new SPTarget();
+        base.setName("Base Pos");
+    }
+
+    private static GuideProbeTargets createGuideTargets(GuideProbe probe) {
+        final SPTarget target = new SPTarget();
+        return GuideProbeTargets.create(probe, target).withExistingPrimary(target);
+    }
+
+
+    private TargetEnvironment create(GuideProbe... probes) {
+        ImList<GuideProbeTargets> gtCollection = createGuideTargetsList(probes);
+        ImList<SPTarget> userTargets = ImCollections.emptyList();
+        return TargetEnvironment.create(base).setAllPrimaryGuideProbeTargets(gtCollection).setUserTargets(userTargets);
+    }
+
+    private static ImList<GuideProbeTargets> createGuideTargetsList(GuideProbe... probes) {
+        List<GuideProbeTargets> res = new ArrayList<GuideProbeTargets>();
+        for (GuideProbe probe : probes) {
+            res.add(createGuideTargets(probe));
+        }
+        return DefaultImList.create(res);
+    }
+
+    private void setTargetEnv(GuideProbe... probes) throws Exception {
+        TargetEnvironment env = create(probes);
+
+        // Store the target environment.
+        ObservationNode obsNode = getObsNode();
+        TargetNode targetNode = obsNode.getTarget();
+
+        TargetObsComp obsComp = targetNode.getDataObject();
+        obsComp.setTargetEnvironment(env);
+        targetNode.getRemoteNode().setDataObject(obsComp);
     }
 
     public void testF2_SIDE() throws Exception {
@@ -34,6 +86,26 @@ public final class Flamingos2SupportTest extends InstrumentSupportTestBase<Flami
         setInstrument(flam2);
 
         verifyInstrumentConfig(getSouthResults(), "F2");
+    }
+
+    public void testF2_P2_SIDE() throws Exception {
+        final Flamingos2 flam2 = getInstrument();
+        flam2.setIssPort(IssPort.SIDE_LOOKING);
+        assertEquals(flam2.getDisperser(), Flamingos2.Disperser.NONE);
+        setInstrument(flam2);
+        setTargetEnv(PwfsGuideProbe.pwfs2);
+
+        verifyInstrumentConfig(getSouthResults(), "F25_P2");
+    }
+
+    public void testF2_P2_UP() throws Exception {
+        final Flamingos2 flam2 = getInstrument();
+        flam2.setIssPort(IssPort.UP_LOOKING);
+        assertEquals(flam2.getDisperser(), Flamingos2.Disperser.NONE);
+        setInstrument(flam2);
+        setTargetEnv(PwfsGuideProbe.pwfs2);
+
+        verifyInstrumentConfig(getSouthResults(), "F2_P2");
     }
 
     public void testF2_SIDE_SPEC() throws Exception {
