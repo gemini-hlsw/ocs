@@ -5,6 +5,10 @@ import org.scalacheck._
 import org.scalacheck.Gen._
 import org.scalacheck.Arbitrary._
 
+import squants.motion.VelocityConversions._
+import squants.radio.IrradianceConversions._
+import squants.radio.SpectralIrradianceConversions._
+
 import scalaz.==>>
 
 trait Arbitraries {
@@ -83,6 +87,29 @@ trait Arbitraries {
       } yield Magnitude(value, band, error, system)
     }
 
+  implicit val arbDistribution = Arbitrary[SpectralDistribution] {
+    Gen.oneOf(
+      BlackBody(8000),
+      BlackBody(10000),
+      PowerLaw(0),
+      PowerLaw(1),
+      EmissionLine(450.nm, 150.kps, 13.ergsPerSecondPerSquareCentimeter, 22.wattsPerSquareMeterPerMicron),
+      EmissionLine(550.nm, 400.kps, 23.wattsPerSquareMeter, 42.ergsPerSecondPerSquareCentimeterPerAngstrom),
+      LibraryStar.A0V,
+      LibraryStar.A5III,
+      LibraryNonStar.NGC2023,
+      LibraryNonStar.GammaDra
+    )
+  }
+  implicit val arbProfile = Arbitrary[SpatialProfile] {
+    Gen.oneOf(
+      PointSource,
+      UniformSource,
+      GaussianSource(0.5),
+      GaussianSource(0.75)
+    )
+  }
+
   implicit val arbTooTarget: Arbitrary[TooTarget] =
     Arbitrary(arbitrary[String].map(TooTarget(_)))
 
@@ -108,17 +135,21 @@ trait Arbitraries {
           redshift       <- arbitrary[Option[Redshift]]
           parallax       <- arbitrary[Option[Parallax]]
           magnitudes     <- arbitrary[List[Magnitude]]
-      } yield SiderealTarget(name, coordinates, properMotion, redshift, parallax, magnitudes)
+          spectralDistr  <- arbitrary[Option[SpectralDistribution]]
+          spatialProfile <- arbitrary[Option[SpatialProfile]]
+      } yield SiderealTarget(name, coordinates, properMotion, redshift, parallax, magnitudes, spectralDistr, spatialProfile)
     }
 
   implicit val arbNonSiderealTarget: Arbitrary[NonSiderealTarget] =
     Arbitrary {
       for {
-         name         <- arbitrary[String]
-         ephemeris    <- arbitrary[List[(Long, Coordinates)]]
-         horizonsDesignation <- arbitrary[Option[HorizonsDesignation]]
-         magnitudes   <- arbitrary[List[Magnitude]]
-      } yield NonSiderealTarget(name, ==>>.fromList(ephemeris), horizonsDesignation, magnitudes)
+         name           <- arbitrary[String]
+         ephemeris      <- arbitrary[List[(Long, Coordinates)]]
+         horizonsDes    <- arbitrary[Option[HorizonsDesignation]]
+         magnitudes     <- arbitrary[List[Magnitude]]
+         spectralDistr  <- arbitrary[Option[SpectralDistribution]]
+         spatialProfile <- arbitrary[Option[SpatialProfile]]
+      } yield NonSiderealTarget(name, ==>>.fromList(ephemeris), horizonsDes, magnitudes, spectralDistr, spatialProfile)
     }
 
   implicit val arbTarget: Arbitrary[Target] =

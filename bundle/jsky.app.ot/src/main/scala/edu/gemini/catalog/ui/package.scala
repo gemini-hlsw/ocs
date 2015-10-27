@@ -171,7 +171,7 @@ case class GuidingQuality(info: Option[ObservationInfo], title: String) extends 
       o                                     <- info
       s                                     <- o.strategy
       gp                                    <- o.guideProbe
-      st @ SiderealTarget(_, _, _, _, _, _) = t
+      st @ SiderealTarget(_, _, _, _, _, _, _, _) = t
       ctx                                   <- o.toContext
     } yield s.analyze(ctx, o.mt, gp, st)).flatten
   }

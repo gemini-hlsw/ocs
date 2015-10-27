@@ -329,7 +329,13 @@ trait VoTableParser {
       } yield {
         val coordinates = Coordinates(RightAscension.fromAngle(r), declination)
         val combMags    = combineWithErrorsAndFilter(magnitudes, magnitudeErrs, adapter).sorted(VoTableParser.MagnitudeOrdering)
-        SiderealTarget(id, coordinates, properMotion, redshift, parallax, combMags)
+        SiderealTarget.empty.copy(
+          name         = id,
+          coordinates  = coordinates,
+          properMotion = properMotion,
+          redshift     = redshift,
+          parallax     = parallax,
+          magnitudes   = combMags)
       }
     }
 

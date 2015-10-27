@@ -56,7 +56,7 @@ trait TargetLenses {
 
 
 /**
- * Target of opportunity, with no coordinates.
+ * Target of opportunity, with no coordinates. Use '''TooTarget.empty''' if no name is given.
  * @param name a human-readable name
  */
 case class TooTarget(name: String) extends Target {
@@ -80,11 +80,15 @@ trait TooTargetLenses {
 }
 
 /**
- * Properties in common for defined (non-TOO) targets.
+ * Properties and derived methods in common for defined (non-TOO) targets.
  */
 sealed trait DefinedTarget extends Target {
 
   def magnitudes: List[Magnitude]
+
+  def spectralDistribution: Option[SpectralDistribution]
+
+  def spatialProfile: Option[SpatialProfile]
 
   def magnitudeIn(b: MagnitudeBand): Option[Magnitude] =
     magnitudes.find(_.band == b)
@@ -93,22 +97,27 @@ sealed trait DefinedTarget extends Target {
 
 
 /**
- * Sidereal target with optional proper motion.
+ * Sidereal target with optional proper motion. Note that the preferred method of construction is
+ * via '''SiderealTarget.empty.copy(...)''' with named arguments.
  * @param name a human-readable name
  * @param coordinates target coordinates
  * @param properMotion optional proper motion information
  * @param redshift optional target redshift
  * @param parallax optional parallax
  * @param magnitudes list of magnitudes
+ * @param spectralDistribution optional spectral distribution, for ITC
+ * @param spatialProfile optional spectral distribution, for ITC
  */
 case class SiderealTarget(
-  name:         String,
-  coordinates:  Coordinates,
-  properMotion: Option[ProperMotion],
-  redshift:     Option[Redshift],
-  parallax:     Option[Parallax],
-  magnitudes:   List[Magnitude])
-extends DefinedTarget {
+  name:                 String,
+  coordinates:          Coordinates,
+  properMotion:         Option[ProperMotion],
+  redshift:             Option[Redshift],
+  parallax:             Option[Parallax],
+  magnitudes:           List[Magnitude],
+  spectralDistribution: Option[SpectralDistribution],
+  spatialProfile:       Option[SpatialProfile]
+) extends DefinedTarget {
 
   /** Returns the fixed coordinates; proper motion is not yet taken into account. */
   def coords(date: Long): Option[Coordinates] =
@@ -120,7 +129,7 @@ extends DefinedTarget {
 }
 
 object SiderealTarget extends SiderealTargetLenses {
-  val empty = SiderealTarget("Untitled", Coordinates.zero, None, None, None, Nil)
+  val empty = SiderealTarget("Untitled", Coordinates.zero, None, None, None, Nil, None, None)
 }
 
 trait SiderealTargetLenses {
@@ -143,6 +152,12 @@ trait SiderealTargetLenses {
   val magnitudes: SiderealTarget @> List[Magnitude] =
     Lens.lensu((a, b) => a.copy(magnitudes = b), _.magnitudes)
 
+  val spectralDistribution: SiderealTarget @> Option[SpectralDistribution] =
+    Lens.lensu((a, b) => a.copy(spectralDistribution = b), _.spectralDistribution)
+
+  val spatialProfile: SiderealTarget @> Option[SpatialProfile] =
+    Lens.lensu((a, b) => a.copy(spatialProfile = b), _.spatialProfile)
+
   val ra: SiderealTarget @> RightAscension =
     coordinates >=> Coordinates.ra
 
@@ -153,17 +168,22 @@ trait SiderealTargetLenses {
 
 
 /**
- * Nonsidereal target with an ephemeris.
+ * Nonsidereal target with an ephemeris. Note that the preferred method of construction is
+ * via '''NonSiderealTarget.empty.copy(...)''' with named arguments.
  * @param name a human-readable name
  * @param ephemeris a map from points in time to coordinates
  * @param horizonsDesignation optional unique Horizons identifier
  * @param magnitudes list of magnitudes
+ * @param spectralDistribution optional spectral distribution, for ITC
+ * @param spatialProfile optional spectral distribution, for ITC
  */
 case class NonSiderealTarget(
-  name:                String,
-  ephemeris:           Ephemeris,
-  horizonsDesignation: Option[HorizonsDesignation],
-  magnitudes:          List[Magnitude]
+  name:                 String,
+  ephemeris:            Ephemeris,
+  horizonsDesignation:  Option[HorizonsDesignation],
+  magnitudes:           List[Magnitude],
+  spectralDistribution: Option[SpectralDistribution],
+  spatialProfile:       Option[SpatialProfile]
 ) extends DefinedTarget {
 
   def coords(date: Long): Option[Coordinates] =
@@ -175,7 +195,7 @@ case class NonSiderealTarget(
 }
 
 object NonSiderealTarget extends NonSiderealTargetLenses {
-  val empty = NonSiderealTarget("Untitled", ==>>.empty, None, Nil)
+  val empty = NonSiderealTarget("Untitled", ==>>.empty, None, Nil, None, None)
 }
 
 trait NonSiderealTargetLenses {
@@ -194,6 +214,12 @@ trait NonSiderealTargetLenses {
 
   val ephemerisElements: NonSiderealTarget @> List[(Long, Coordinates)] =
     ephemeris.xmapB(_.toList)(==>>.fromList(_))
+
+  val spectralDistribution: NonSiderealTarget @> Option[SpectralDistribution] =
+    Lens.lensu((a, b) => a.copy(spectralDistribution = b), _.spectralDistribution)
+
+  val spatialProfile: NonSiderealTarget @> Option[SpatialProfile] =
+    Lens.lensu((a, b) => a.copy(spatialProfile = b), _.spatialProfile)
 
 }
 

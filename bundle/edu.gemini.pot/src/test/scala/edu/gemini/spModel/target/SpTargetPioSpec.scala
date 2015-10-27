@@ -1,18 +1,12 @@
 package edu.gemini.spModel.target
 
-import edu.gemini.spModel.core.{LibraryNonStar, LibraryStar, EmissionLine, PowerLaw, BlackBody, SpectralDistribution, GaussianSource, UniformSource, PointSource, SpatialProfile, Redshift, Arbitraries}
-import edu.gemini.spModel.core.WavelengthConversions._
+import edu.gemini.spModel.core.{SpectralDistribution, SpatialProfile, Redshift, Arbitraries}
 import edu.gemini.spModel.pio.{Pio, ParamSet}
 import edu.gemini.spModel.pio.xml.PioXmlFactory
 import edu.gemini.spModel.target.system.{ConicTarget, HmsDegTarget, ITarget}
-import org.scalacheck.{Arbitrary, Gen}
 import org.specs2.ScalaCheck
 import org.specs2.mutable.Specification
 import squants.motion.KilometersPerSecond
-
-import squants.motion.VelocityConversions._
-import squants.radio.IrradianceConversions._
-import squants.radio.SpectralIrradianceConversions._
 
 import edu.gemini.shared.util.immutable.{ None => JNone }
 import edu.gemini.shared.util.immutable.ScalaConverters._
@@ -24,28 +18,6 @@ import edu.gemini.shared.util.immutable.ScalaConverters._
 object SpTargetPioSpec extends Specification with ScalaCheck with Arbitraries {
 
   {
-    implicit val arbDistribution = Arbitrary[SpectralDistribution] {
-      Gen.oneOf(
-        BlackBody(8000),
-        BlackBody(10000),
-        PowerLaw(0),
-        PowerLaw(1),
-        EmissionLine(450.nm, 150.kps, 13.ergsPerSecondPerSquareCentimeter, 22.wattsPerSquareMeterPerMicron),
-        EmissionLine(550.nm, 400.kps, 23.wattsPerSquareMeter, 42.ergsPerSecondPerSquareCentimeterPerAngstrom),
-        LibraryStar.A0V,
-        LibraryStar.A5III,
-        LibraryNonStar.NGC2023,
-        LibraryNonStar.GammaDra
-      )
-    }
-    implicit val arbProfile = Arbitrary[SpatialProfile] {
-      Gen.oneOf(
-        PointSource,
-        UniformSource,
-        GaussianSource(0.5),
-        GaussianSource(0.75)
-      )
-    }
 
     "SPTargetPio" should {
       "store source profile and distribution" !
