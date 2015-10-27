@@ -24,6 +24,7 @@ import edu.gemini.ui.miglayout.constraints._
 import jsky.app.ot.gemini.editor.targetComponent.GuidingIcon
 import jsky.app.ot.tpe.{TpeManager, TpeContext}
 import jsky.app.ot.util.Resources
+import jsky.catalog.gui.{SymbolSelectionEvent, SymbolSelectionListener}
 
 import scala.swing.Reactions.Reaction
 import scala.swing._
@@ -56,6 +57,15 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
       case TableRowsSelected(source, range, false) =>
         selectResults(source.selection.rows.toSet.map(viewToModelRow))
     }
+    TpeManager.get().getImageWidget.plotter.addSymbolSelectionListener(new SymbolSelectionListener {
+      override def symbolDeselected(e: SymbolSelectionEvent): Unit = {
+        selection.rows -= modelToViewRow(e.getRow)
+      }
+
+      override def symbolSelected(e: SymbolSelectionEvent): Unit = {
+        selection.rows += modelToViewRow(e.getRow)
+      }
+    })
 
     override def rendererComponent(isSelected: Boolean, focused: Boolean, row: Int, column: Int) =
       // Note that we need to use the same conversions as indicated on SortableTable to get the value
