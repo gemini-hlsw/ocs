@@ -23,7 +23,6 @@ import jsky.app.ot.util.OtColor;
 import jsky.app.ot.util.PolygonD;
 import jsky.app.ot.util.Resources;
 import jsky.app.ot.util.ScreenMath;
-import jsky.catalog.gui.TablePlotter;
 import jsky.coords.CoordinateConverter;
 import jsky.coords.WorldCoords;
 import jsky.navigator.NavigatorPane;
@@ -528,6 +527,9 @@ public class TpeImageWidget extends CatalogImageDisplay implements MouseInputLis
                 tme.name = s.getName();
             });
             tme.setSkyObject(skyObject);
+            if (!skyObject.isDefined()) {
+                tme.pos = userToWorldCoords(p.x, p.y);
+            }
         } else {
             tme.pos = userToWorldCoords(p.x, p.y);
         }
@@ -573,11 +575,7 @@ public class TpeImageWidget extends CatalogImageDisplay implements MouseInputLis
      * from the catalog table row. Otherwise, return null and do nothing.
      */
     private Option<SkyObject> getCatalogPosition(final Point2D.Double p) {
-        final TablePlotter plotter = plotter();
-        if (plotter == null) {
-            return null;
-        }
-        return plotter.getCatalogObjectAt(p);
+        return plotter().getCatalogObjectAt(p);
     }
 
     /**
