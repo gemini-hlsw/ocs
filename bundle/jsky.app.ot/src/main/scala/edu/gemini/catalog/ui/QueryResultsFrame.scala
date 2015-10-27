@@ -57,7 +57,7 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
       case TableRowsSelected(source, range, false) =>
         selectResults(source.selection.rows.toSet.map(viewToModelRow))
     }
-    TpeManager.get().getImageWidget.plotter.addSymbolSelectionListener(new SymbolSelectionListener {
+    Option(TpeManager.get()).foreach(_.getImageWidget.plotter.addSymbolSelectionListener(new SymbolSelectionListener {
       override def symbolDeselected(e: SymbolSelectionEvent): Unit = {
         selection.rows -= modelToViewRow(e.getRow)
       }
@@ -65,7 +65,7 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
       override def symbolSelected(e: SymbolSelectionEvent): Unit = {
         selection.rows += modelToViewRow(e.getRow)
       }
-    })
+    }))
 
     override def rendererComponent(isSelected: Boolean, focused: Boolean, row: Int, column: Int) =
       // Note that we need to use the same conversions as indicated on SortableTable to get the value
@@ -81,13 +81,6 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
   private lazy val closeButton = new Button("Close") {
     reactions += {
       case ButtonClicked(_) => QueryResultsFrame.visible = false
-    }
-  }
-
-  private lazy val plotButton = new Button("Plot") {
-    reactions += {
-      case ButtonClicked(_) =>
-        plotResults()
     }
   }
 
@@ -123,7 +116,6 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
     // Labels and command buttons at the bottom
     add(resultsLabel, CC().alignX(LeftAlign).alignY(BaselineAlign).newline().gap(10.px, 10.px, 10.px, 10.px))
     add(errorLabel, CC().alignX(LeftAlign).alignY(BaselineAlign).gap(10.px, 10.px, 10.px, 10.px))
-    add(plotButton, CC().alignX(RightAlign).alignY(BaselineAlign).gap(10.px, 10.px, 10.px, 10.px))
     add(closeButton, CC().alignX(RightAlign).alignY(BaselineAlign).gap(10.px, 10.px, 10.px, 10.px))
   }
 
