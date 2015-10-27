@@ -1,7 +1,7 @@
 package edu.gemini.spModel.gemini.flamingos2
 
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2.LyotWheel.{OPEN, LOW, HIGH}
-import edu.gemini.spModel.gemini.flamingos2.Flamingos2.FPUnit.{CUSTOM_MASK, FPU_NONE}
+import edu.gemini.spModel.gemini.flamingos2.Flamingos2.FPUnit._
 
 import edu.gemini.spModel.inst.ScienceAreaGeometry
 import edu.gemini.spModel.obs.context.ObsContext
@@ -20,8 +20,8 @@ object F2ScienceAreaGeometry extends ScienceAreaGeometry {
         val plateScale       = f2.getLyotWheel.getPlateScale
         val scienceAreaWidth = scienceAreaDimensions(f2)._1
         f2.getFpu match {
-          case Flamingos2.FPUnit.FPU_NONE    => Some(imagingFOV(plateScale))
-          case Flamingos2.FPUnit.CUSTOM_MASK => Some(mosFOV(plateScale))
+          case FPU_NONE                      => Some(imagingFOV(plateScale))
+          case CUSTOM_MASK                   => Some(mosFOV(plateScale))
           case _ if f2.getFpu.isLongslit     => Some(longSlitFOV(plateScale, scienceAreaWidth))
           case _                             => None
         }
@@ -34,7 +34,7 @@ object F2ScienceAreaGeometry extends ScienceAreaGeometry {
       case OPEN | HIGH | LOW =>
         val plateScale = f2.getLyotWheel.getPlateScale
         f2.getFpu match {
-          case FPU_NONE =>
+          case FPU_NONE | PINHOLE | SUBPIX_PINHOLE =>
             val size = ImagingFOVSize * plateScale
             (size, size)
           case CUSTOM_MASK =>
