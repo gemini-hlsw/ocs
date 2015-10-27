@@ -382,6 +382,7 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
      * Andy S. is aware of this and we plan to revise the smartgcal design at some point in the future.
      */
     public enum CustomSlitWidth implements DisplayableSpType, SequenceableSpType {
+        OTHER("Other", FPUnit.CUSTOM_MASK),
         CUSTOM_WIDTH_1_PIX("1 Pixel", FPUnit.LONGSLIT_1),
         CUSTOM_WIDTH_2_PIX("2 Pixel", FPUnit.LONGSLIT_2),
         CUSTOM_WIDTH_3_PIX("3 Pixel", FPUnit.LONGSLIT_3),
@@ -389,24 +390,27 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
         CUSTOM_WIDTH_6_PIX("6 Pixel", FPUnit.LONGSLIT_6),
         CUSTOM_WIDTH_8_PIX("8 Pixel", FPUnit.LONGSLIT_8);
 
-        public static final CustomSlitWidth DEFAULT = CUSTOM_WIDTH_1_PIX;
+        public static final CustomSlitWidth DEFAULT = OTHER;
         public static final ItemKey KEY = new ItemKey(INSTRUMENT_KEY, "customSlitWidth");
 
         private final String displayValue;
-        private final FPUnit smartgcalUnit;
+        private final FPUnit fpUnit;
 
         CustomSlitWidth(final String name, final FPUnit smartgcalUnit) {
             this.displayValue = name;
-            this.smartgcalUnit = smartgcalUnit;
+            this.fpUnit       = smartgcalUnit;
         }
         public String displayValue() {
             return displayValue;
         }
-        public int width() {
-            return smartgcalUnit.getSlitWidth();
+        public Option<Integer> width() {
+            switch (fpUnit) {
+                case CUSTOM_MASK:   return None.instance();
+                default:            return new Some<>(fpUnit.getSlitWidth());
+            }
         }
         public FPUnit smartgcalFPUnit() {
-            return smartgcalUnit;
+            return fpUnit;
         }
         public String sequenceValue() {
             return name();

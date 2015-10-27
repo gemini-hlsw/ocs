@@ -48,8 +48,8 @@ object BaselineF2 {
     Flamingos2Parameters(
       Filter.H,
       Disperser.R3000,
-      FPUnit.LONGSLIT_8,
-      None,
+      FPUnit.CUSTOM_MASK,
+      Some(CustomSlitWidth.CUSTOM_WIDTH_8_PIX),
       ReadMode.BRIGHT_OBJECT_SPEC)
   ))
 
