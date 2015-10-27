@@ -2,7 +2,9 @@ package edu.gemini.phase2.template.factory.impl
 
 import edu.gemini.phase2.core.model.{ObsComponentShell, ObservationShell, GroupShell}
 import edu.gemini.phase2.template.factory.api.{BlueprintExpansion, TemplateFactory}
+import edu.gemini.phase2.template.factory.impl.phoenix.Phoenix
 import edu.gemini.spModel.gemini.gmos.blueprint._
+import edu.gemini.spModel.gemini.phoenix.blueprint.SpPhoenixBlueprint
 import edu.gemini.spModel.rich.pot.sp._
 import edu.gemini.spModel.template.{Phase1Group, SpBlueprint}
 
@@ -108,6 +110,9 @@ case class TemplateFactoryImpl(db: TemplateDb) extends TemplateFactory {
 
       // GRACES
       case b: SpGracesBlueprint => Right(Graces(b, sampleTarget))
+
+      // PHOENIX
+      case b: SpPhoenixBlueprint => Right(Phoenix(b))
 
       // VISITOR
       case b: SpVisitorBlueprint => Right(Visitor(b))

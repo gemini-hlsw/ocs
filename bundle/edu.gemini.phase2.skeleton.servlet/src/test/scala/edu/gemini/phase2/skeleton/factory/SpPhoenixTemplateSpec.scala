@@ -2,6 +2,7 @@ package edu.gemini.phase2.skeleton.factory
 
 import edu.gemini.model.p1.immutable.PhoenixBlueprint
 import edu.gemini.model.p1.mutable.{PhoenixFilter, PhoenixFocalPlaneUnit}
+import edu.gemini.spModel.core.MagnitudeBand
 import edu.gemini.spModel.gemini.phoenix.PhoenixParams.{Filter, Mask}
 import edu.gemini.spModel.gemini.phoenix.blueprint.SpPhoenixBlueprint
 
@@ -16,7 +17,7 @@ import org.specs2.mutable.Specification
 
 import scalaz._, Scalaz._
 
-object SpPhonixTemplateSpec extends Specification with ScalaCheck {
+object SpPhoenixTemplateSpec extends TemplateSpec("PHOENIX_BP.xml") with Specification with ScalaCheck {
 
   implicit val ArbitraryP1PhoenixMask: Arbitrary[PhoenixFocalPlaneUnit] =
     Arbitrary(Gen.oneOf(PhoenixFocalPlaneUnit.values))
@@ -39,7 +40,14 @@ object SpPhonixTemplateSpec extends Specification with ScalaCheck {
         case x => failure(x.toString)
       }
     }
+  }
 
+  "Skeleton Generation" should {
+    "Always Succeed" ! forAll { (b: PhoenixBlueprint) =>
+      expand(proposal(b, Nil, MagnitudeBand.H)) { (p, sp) =>
+        true
+      }
+    }
   }
 
 }
