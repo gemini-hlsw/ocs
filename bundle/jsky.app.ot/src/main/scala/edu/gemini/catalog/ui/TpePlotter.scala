@@ -4,6 +4,8 @@ import java.awt.Color
 import java.net.URL
 import javax.swing.event.TableModelListener
 
+import edu.gemini.ags.api.AgsGuideQuality._
+import edu.gemini.ags.api.AgsGuideQuality
 import edu.gemini.catalog.ui.tpe.CatalogImageDisplay
 import edu.gemini.shared.skyobject.SkyObject
 import edu.gemini.pot.ModelConverters._
@@ -81,6 +83,46 @@ object adapters {
     }
   }
 
+
+
+  // This is a hack to change the symbol dynamically depending on the guiding quality
+  sealed trait GuideQualitySymbol extends TablePlotSymbol {
+    val quality: Option[AgsGuideQuality]
+
+    override def getCond(rowVec: java.util.Vector[AnyRef]): Boolean =
+      rowVec.asScala.contains(quality)
+  }
+
+  case object DeliversRequestedIqSymbol extends GuideQualitySymbol {
+    val quality = DeliversRequestedIq.some
+    setFg(Color.green)
+    setShape(TablePlotSymbol.CIRCLE)
+  }
+
+  case object PossibleIqDegradationSymbol extends GuideQualitySymbol {
+    val quality = PossibleIqDegradation.some
+    setFg(Color.green)
+    setShape(TablePlotSymbol.ELLIPSE)
+  }
+
+  case object IqDegradationSymbol extends GuideQualitySymbol {
+    val quality = IqDegradation.some
+    setFg(Color.yellow)
+    setShape(TablePlotSymbol.CIRCLE)
+  }
+
+  case object PossiblyUnusableSymbol extends GuideQualitySymbol {
+    val quality = PossiblyUnusable.some
+    setFg(Color.orange)
+    setShape(TablePlotSymbol.CIRCLE)
+  }
+
+  case object UnusableSymbol extends GuideQualitySymbol {
+    val quality = Unusable.some
+    setFg(Color.red)
+    setShape(TablePlotSymbol.CIRCLE)
+  }
+
   /**
     * This is a horrible class to adapt the new catalog api to the old one to reduce the amount of conversion of the code
     * It has many unimplemented method that will likely blow in the most unexpected places
@@ -96,9 +138,7 @@ object adapters {
 
     override def getSymbolDesc(i: Int): TablePlotSymbol = ???
 
-    override def getSymbols: Array[TablePlotSymbol] = {
-      Array(new TablePlotSymbol() <| {_.setFg(Color.red)} <| {_.setShape(TablePlotSymbol.CIRCLE)})
-    }
+    override def getSymbols: Array[TablePlotSymbol] = Array(DeliversRequestedIqSymbol, PossibleIqDegradationSymbol, IqDegradationSymbol, PossiblyUnusableSymbol, UnusableSymbol)
 
     override def getType: String = ???
 
@@ -150,7 +190,7 @@ object adapters {
         case Some(v) => Double.box(v.value)
         case None => null // This is required for the Java side of plotting
       }
-      new java.util.Vector[AnyRef]((List(t.name, t.coordinates.ra.toAngle.formatHMS, t.coordinates.dec.formatDMS, GuidingQuality.target2Analysis(model.info, t)) ::: mags).asJavaCollection)
+      new java.util.Vector[AnyRef]((List(t.name, t.coordinates.ra.toAngle.formatHMS, t.coordinates.dec.formatDMS, GuidingQuality.target2Analysis(model.info, t).map(_.quality)) ::: mags).asJavaCollection)
     }.asJavaCollection)
 
     override def getColumnDesc(i: Int): FieldDesc = ???
