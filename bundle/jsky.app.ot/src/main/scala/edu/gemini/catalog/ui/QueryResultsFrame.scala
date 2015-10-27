@@ -276,6 +276,17 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
     }
     lazy val catalogBox = new ComboBox(List[CatalogName](UCAC4, PPMXL)) with TextRenderer[CatalogName] {
       override def text(a: CatalogName) = ~Option(a).map(_.displayName)
+
+      listenTo(selection)
+      reactions += {
+        case SelectionChanged(_) =>
+          val supportedBands = selection.item.supportedBands
+          // Go through the magnitude selectors and remove those not supported
+          val toRemove = magnitudeControls.filter(mc => !supportedBands.contains(mc.bandCB.selection.item))
+          magnitudeControls --= toRemove
+          buildLayout(currentFilters)
+          revalidateFrame()
+      }
     }
     lazy val guider = new ComboBox(List.empty[SupportedStrategy]) with TextRenderer[SupportedStrategy] {
       override def text(a: SupportedStrategy) = ~Option(a).map(_.strategy.key.displayName)
@@ -325,13 +336,6 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
 
     // Contains the list of controls on the UI to make magnitude filters
     val magnitudeControls = mutable.ListBuffer.empty[MagnitudeFilterControls]
-
-    // Supported bands, remove R-Like duplicates
-    val bands = MagnitudeBand.all.collect {
-      case MagnitudeBand.R  => MagnitudeBand._r
-      case MagnitudeBand.UC => MagnitudeBand._r
-      case b                => b
-    }.distinct
 
     /**
      * Reconstructs the layout depending on the magnitude constraints
@@ -455,11 +459,11 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
     }
 
     // Makes a combo box out of the supported bands
-    private def bandsBoxes(bandsList: BandsList): List[ComboBox[MagnitudeBand]] = {
-      def bandComboBox(band: MagnitudeBand) = new ComboBox(bands) with TextRenderer[MagnitudeBand] {
+    private def bandsBoxes(catalog: CatalogName, bandsList: BandsList): List[ComboBox[MagnitudeBand]] = {
+      def bandComboBox(band: MagnitudeBand) = new ComboBox(catalog.supportedBands) with TextRenderer[MagnitudeBand] {
         selection.item = band
 
-        override def text(a: MagnitudeBand) = a.name
+        override def text(a: MagnitudeBand) = a.name.padTo(2, " ").mkString("")
       }
 
       bandsList match {
@@ -548,7 +552,7 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
       val sat = new NumberField(mc.saturationConstraint.map(_.brightness)) {
         reactions += queryButtonEnabling
       }
-      bandsBoxes(mc.searchBands).map(MagnitudeFilterControls(addMagnitudeRowButton(index), faint, new Label("-"), sat, _, removeMagnitudeRowButton(index)))
+      bandsBoxes(catalogBox.selection.item, mc.searchBands).map(MagnitudeFilterControls(addMagnitudeRowButton(index), faint, new Label("-"), sat, _, removeMagnitudeRowButton(index)))
     }
 
   }
