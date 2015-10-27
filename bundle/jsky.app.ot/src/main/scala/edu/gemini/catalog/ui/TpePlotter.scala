@@ -150,7 +150,7 @@ object adapters {
         case Some(v) => Double.box(v.value)
         case None => null // This is required for the Java side of plotting
       }
-      new java.util.Vector[AnyRef]((List(t.name, t.coordinates.ra.toAngle.formatHMS, t.coordinates.dec.formatDMS) ::: mags).asJavaCollection)
+      new java.util.Vector[AnyRef]((List(t.name, t.coordinates.ra.toAngle.formatHMS, t.coordinates.dec.formatDMS, GuidingQuality.target2Analysis(model.info, t)) ::: mags).asJavaCollection)
     }.asJavaCollection)
 
     override def getColumnDesc(i: Int): FieldDesc = ???
@@ -159,7 +159,7 @@ object adapters {
 
     override def getColumnIdentifiers: java.util.List[String] = {
       val mags = MagnitudeBand.all.map(_.name + "mag")
-      (List("Id", "RAJ2000", "DECJ2000") ::: mags).asJava
+      (List("Id", "RAJ2000", "DECJ2000", "GQ") ::: mags).asJava
     }
 
     override def hasCoordinates: Boolean = ???

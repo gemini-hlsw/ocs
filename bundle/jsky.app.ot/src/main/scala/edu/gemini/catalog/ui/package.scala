@@ -165,9 +165,9 @@ case class IdColumn(title: String) extends CatalogNavigatorColumn[String] {
   def ordering = implicitly[scala.math.Ordering[String]]
 }
 
-case class GuidingQuality(info: Option[ObservationInfo], title: String) extends CatalogNavigatorColumn[AgsGuideQuality] {
+object GuidingQuality {
   // Calculate the guiding quality of the target
-  def target2Analysis(t: Target):Option[AgsAnalysis] = {
+  def target2Analysis(info: Option[ObservationInfo], t: Target):Option[AgsAnalysis] = {
     (for {
       o                                     <- info
       s                                     <- o.strategy
@@ -176,8 +176,10 @@ case class GuidingQuality(info: Option[ObservationInfo], title: String) extends 
       ctx                                   <- o.toContext
     } yield s.analyze(ctx, o.mt, gp, st)).flatten
   }
+}
 
-  val gf: SiderealTarget @?> AgsGuideQuality = PLens(t => target2Analysis(t).map(p => Store(q => sys.error("Not in use"), p.quality)))
+case class GuidingQuality(info: Option[ObservationInfo], title: String) extends CatalogNavigatorColumn[AgsGuideQuality] {
+  val gf: SiderealTarget @?> AgsGuideQuality = PLens(t => GuidingQuality.target2Analysis(info, t).map(p => Store(q => sys.error("Not in use"), p.quality)))
 
   override val lens: Target @?> AgsGuideQuality = PLens(_.fold(
     PLens.nil.run,
