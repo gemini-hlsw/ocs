@@ -42,7 +42,4 @@ class GuidingControls extends GridBagPanel {
     autoGuideStarGuiderSelector.getUi.setVisible(supports)
   }
 
-  def supportsNewManualGS(supports: Boolean) {
-    manualGuideStarButton.visible = supports
-  }
 }
