@@ -49,6 +49,13 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
   }
 
   private lazy val resultsTable = new Table() with SortableTable with TableColumnsAdjuster {
+    selection.elementMode = Table.ElementMode.Row
+    listenTo(selection)
+
+    reactions += {
+      case TableRowsSelected(source, range, false) =>
+        selectResults(source.selection.rows.toSet.map(viewToModelRow))
+    }
 
     override def rendererComponent(isSelected: Boolean, focused: Boolean, row: Int, column: Int) =
       // Note that we need to use the same conversions as indicated on SortableTable to get the value
@@ -157,6 +164,15 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
       case t: TargetsModel =>
         val tpe = TpeManager.open()
         TpePlotter(tpe.getImageWidget).plot(t)
+      case _               => // Ignore, it shouldn't happen
+    }
+  }
+
+  private def selectResults(selected: Set[Int]): Unit = {
+    resultsTable.model match {
+      case t: TargetsModel =>
+        val tpe = TpeManager.get()
+        TpePlotter(tpe.getImageWidget).select(t, selected)
       case _               => // Ignore, it shouldn't happen
     }
   }

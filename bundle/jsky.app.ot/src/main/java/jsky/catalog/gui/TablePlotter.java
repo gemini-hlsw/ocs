@@ -39,6 +39,8 @@ public interface TablePlotter {
     /** Select the symbol corresponding to the given table row */
     void selectSymbol(TableQueryResult table, int tableRow);
 
+    void deselectAll(TableQueryResult table);
+
     /** Deselect the symbol corresponding to the given table row */
     void deselectSymbol(TableQueryResult table, int tableRow);
 

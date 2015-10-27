@@ -597,7 +597,7 @@ public class BasicTablePlotter
     /** Set the selection state of the symbol corresponding to the given table row */
     private void selectSymbol(final TableQueryResult table, final int tableRow, final boolean selected) {
         // Find the plot symbol for the given row in the given table
-        _tableList.stream().filter(tli -> tli.table == table).forEach(tli -> {
+        _tableList.stream().filter(tli -> tli.table.equals(table)).forEach(tli -> {
             for (SymbolListItem sli : tli.symbolAr) {
                 sli.figureList.stream().filter(fli -> fli.row == tableRow).filter(fli -> fli.selected != selected).forEach(fli -> {
                     fli.selected = selected;
@@ -606,13 +606,26 @@ public class BasicTablePlotter
             }
         });
         fireTableSelectionEvent(table, tableRow, selected);
-
     }
 
     /** Select the symbol corresponding to the given table row */
     @Override
     public void selectSymbol(final TableQueryResult table, final int tableRow) {
         selectSymbol(table, tableRow, true);
+    }
+
+    /** Deselect the symbol corresponding to the given table row */
+    @Override
+    public void deselectAll(final TableQueryResult table) {
+        _tableList.stream().filter(tli -> tli.table.equals(table)).forEach(tli -> {
+            for (SymbolListItem sli : tli.symbolAr) {
+                sli.figureList.stream().filter(fli -> fli.selected).forEach(fli -> {
+                    fli.selected = false;
+                    repaint(fli.shape);
+                });
+            }
+        });
+        // TODO Should it fire table selection events?
     }
 
     /** Deselect the symbol corresponding to the given table row */

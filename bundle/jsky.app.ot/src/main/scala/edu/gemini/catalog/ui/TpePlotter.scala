@@ -257,4 +257,13 @@ case class TpePlotter(display: CatalogImageDisplay) {
     display.plotter.unplot(qr)
   }
 
+  /**
+   * Plot the given table data.
+   */
+  def select(model: TargetsModel, selected: Set[Int]): Unit = {
+    val qr = TableQueryResultAdapter(model)
+    display.plotter.deselectAll(qr)
+    selected.foreach(display.plotter.selectSymbol(qr, _))
+  }
+
 }
