@@ -19,7 +19,7 @@ Template library:
 
 
 INCLUDE {1} {2} {3} {4} IN target-specific Scheduling Group (in order)
-    INCLUDE the notes "How to use the observations in this folder" and "Darks, Flats and Arcs" IN the target-specific Scheduling Group
+    INCLUDE the notes "How to use the observations in this folder" and "Darks, Flats, and Arcs" IN the target-specific Scheduling Group
     SET FOCAL PLANE MASK from Phase-I (in all observations)
     SET FILTER from Phase-I (in all observations)
     SET the Exposure Time for the science observation (from {1}) based on the filter:
@@ -36,7 +36,7 @@ case class Phoenix(blueprint: SpPhoenixBlueprint) extends PhoenixBase {
   val filterGroup = PhoenixFilterGroup.forFilter(blueprint.filter)
 
   include(1, 2, 3, 4) in TargetGroup
-  addNote("How to use the observations in this folder", "Darks, Flats and Arcs") in TargetGroup
+  addNote("How to use the observations in this folder", "Darks, Flats, and Arcs") in TargetGroup
   forGroup(TargetGroup)(setFilter(blueprint.filter), setFpu(blueprint.fpu))
   forObs(1)(
     setExposureTime(
