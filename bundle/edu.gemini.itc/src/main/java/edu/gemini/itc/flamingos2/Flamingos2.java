@@ -71,8 +71,9 @@ public final class Flamingos2 extends Instrument {
 
     public double getSlitSize() {
         switch (params.mask()) {
-            case FPU_NONE: return 1;
-            default: return params.mask().getSlitWidth();
+            case FPU_NONE:      return 1;
+            case CUSTOM_MASK:   return params.customSlitWidth().get().width();
+            default:            return params.mask().getSlitWidth();
         }
     }
 

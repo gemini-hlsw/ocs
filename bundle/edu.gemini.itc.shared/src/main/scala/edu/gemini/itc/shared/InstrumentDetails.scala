@@ -28,6 +28,7 @@ final case class Flamingos2Parameters(
                      filter:            Flamingos2.Filter,
                      grism:             Flamingos2.Disperser,
                      mask:              Flamingos2.FPUnit,
+                     customSlitWidth:   Option[Flamingos2.CustomSlitWidth],
                      readMode:          Flamingos2.ReadMode) extends InstrumentDetails
 
 final case class GmosParameters(

@@ -59,6 +59,9 @@ public class Flamingos2Editor extends ComponentEditor<ISPObsComponent, Flamingos
             mdfLabel.setVisible(visible);
             mdfCtrl.getComponent().setVisible(visible);
             mdfCtrl.getComponent().setEnabled(visible);
+            slitWidthLabel.setVisible(visible);
+            customSlitCtrl.getComponent().setVisible(visible);
+            customSlitCtrl.getComponent().setEnabled(visible);
         }
     }
 
@@ -326,6 +329,8 @@ public class Flamingos2Editor extends ComponentEditor<ISPObsComponent, Flamingos
 
     private final JLabel mdfLabel;
     private final TextFieldPropertyCtrl<Flamingos2, String> mdfCtrl;
+    private final JLabel slitWidthLabel;
+    private final ComboPropertyCtrl<Flamingos2, Flamingos2.CustomSlitWidth> customSlitCtrl;
 
     private final JCheckBox preImaging;
 
@@ -391,10 +396,17 @@ public class Flamingos2Editor extends ComponentEditor<ISPObsComponent, Flamingos
         // FPU mask.
         PropertyDescriptor pd = Flamingos2.FPU_MASK_PROP;
         mdfCtrl = TextFieldPropertyCtrl.createStringInstance(pd);
+        customSlitCtrl = ComboPropertyCtrl.enumInstance(Flamingos2.CUSTOM_SLIT_WIDTH_PROP);
+
         mdfLabel = new JLabel("Custom MDF");
         pan.add(mdfLabel, propLabelGbc(leftLabelCol, row+1));
         gbc = propWidgetGbc(leftWidgetCol, row+1);
         pan.add(mdfCtrl.getComponent(), gbc);
+
+        slitWidthLabel = new JLabel("Slit Width");
+        pan.add(slitWidthLabel, propLabelGbc(leftLabelCol, row+2));
+        gbc = propWidgetGbc(leftWidgetCol, row+2);
+        pan.add(customSlitCtrl.getComponent(), gbc);
 
         // MOS pre-imaging: takes up two rows to accommodate the Custom MDF and exposure time warning.
         preImaging = new JCheckBox("MOS pre-imaging");
@@ -418,8 +430,8 @@ public class Flamingos2Editor extends ComponentEditor<ISPObsComponent, Flamingos
         pan.add(exposureTimeWarning, warningLabelGbc(rightLabelCol, row+1, rightWidth));
 
 
-        // Increment the row by 2 since previous widgets were allotted for two rows.
-        row += 2;
+        // Increment the row by 3 since previous widgets were allotted for three rows.
+        row += 3;
 
         // -------- SEPARATORS --------
         pan.add(new JSeparator(), separatorGbc(leftLabelCol, row, leftWidth));
@@ -458,12 +470,10 @@ public class Flamingos2Editor extends ComponentEditor<ISPObsComponent, Flamingos
 
         final JTabbedPane tabPane = new JTabbedPane();
 
-        readModeCtrl = new RadioPropertyCtrl<Flamingos2, Flamingos2.ReadMode>(Flamingos2.READMODE_PROP);
-        portCtrl     = new RadioPropertyCtrl<Flamingos2, IssPort>(Flamingos2.PORT_PROP);
+        readModeCtrl = new RadioPropertyCtrl<>(Flamingos2.READMODE_PROP);
+        portCtrl     = new RadioPropertyCtrl<>(Flamingos2.PORT_PROP);
 
-//        eoff = new ElectronicOffsetEditor();
         tabPane.addTab("Read Mode", getTabPanel(readModeCtrl.getComponent()));
-//        tabPane.addTab("Electronic Offsetting", getTabPanel(eoff));
         tabPane.addTab("ISS Port", getTabPanel(portCtrl.getComponent()));
 
         gbc = new GridBagConstraints();
@@ -491,7 +501,7 @@ public class Flamingos2Editor extends ComponentEditor<ISPObsComponent, Flamingos
         readoutModeCtrl = ComboPropertyCtrl.optionEnumInstance(Flamingos2.READOUT_MODE_PROP, Flamingos2.ReadoutMode.class);
         readsCtrl = ComboPropertyCtrl.optionEnumInstance(Flamingos2.READS_PROP, Flamingos2.Reads.class);
 
-        eOffsetCtrl = new CheckboxPropertyCtrl<Flamingos2>(Flamingos2.USE_ELECTRONIC_OFFSETTING_PROP);
+        eOffsetCtrl = new CheckboxPropertyCtrl<>(Flamingos2.USE_ELECTRONIC_OFFSETTING_PROP);
     }
 
     private static JPanel getTabPanel(JComponent comp) {
@@ -547,6 +557,7 @@ public class Flamingos2Editor extends ComponentEditor<ISPObsComponent, Flamingos
     public void handlePostDataObjectUpdate(Flamingos2 inst) {
         fpuCtrl.setBean(inst);
         mdfCtrl.setBean(inst);
+        customSlitCtrl.setBean(inst);
 
         filterCtrl.setBean(inst);
         disperserCtrl.setBean(inst);
@@ -555,8 +566,6 @@ public class Flamingos2Editor extends ComponentEditor<ISPObsComponent, Flamingos
         expTimeCtrl.setBean(inst);
         readModeCtrl.setBean(inst);
         portCtrl.setBean(inst);
-
-//        eoff.handlePostDataObjectUpdate(inst, getProgData());
 
         deckerCtrl.setBean(inst);
         readoutModeCtrl.setBean(inst);
@@ -586,60 +595,3 @@ public class Flamingos2Editor extends ComponentEditor<ISPObsComponent, Flamingos
         inst.addPropertyChangeListener(Flamingos2.FPU_PROP.getName(),            updateUnboundedAnglePCL);
     }
 }
-
-
-
-/// Cut from the original Flamingos2 editor
-
-/*
-    // Create and return a new file chooser for selecting a mask file
-    private static JFileChooser _makeFileChooser() {
-        JFileChooser _fileChooser = new JFileChooser(new File("."));
-
-        ExampleFileFilter fitsFilter = new ExampleFileFilter(new String[]{
-            "fits", "fits.gz", "fits.Z"}, "FITS Files");
-        _fileChooser.addChoosableFileFilter(fitsFilter);
-
-        _fileChooser.setFileFilter(fitsFilter);
-
-        return _fileChooser;
-    }
-
-
-    // Get the name of an MDF file from the user. This is a FITS file containing a FITS table.
-    // Plot the table as a catalog using a predefined catalog header.
-    private void _plotFocalPlaneMask() {
-        if (_fileChooser == null) {
-            _fileChooser = _makeFileChooser();
-        }
-        int option = _fileChooser.showOpenDialog(null);
-        if (option == JFileChooser.APPROVE_OPTION && _fileChooser.getSelectedFile() != null) {
-            _plotFocalPlaneMask(_fileChooser.getSelectedFile().getAbsolutePath());
-        }
-    }
-
-    // Load a FITS object table file, display the table, and plot the
-    // objects on the image
-    private void _plotFocalPlaneMask(String filename) {
-        SkycatCatalog catalog;
-        try {
-            catalog = ObjectTable.makeCatalog(filename);
-        } catch (Exception e) {
-            DialogUtil.error(_w, e);
-            return;
-        }
-        if (catalog != null) {
-            TelescopePosEditor tpe = TpeManager.get();
-            if (tpe == null) {
-                tpe = TpeManager.open();
-                tpe.setProg(_progData.getProgNode());
-            }
-            tpe.getImageWidget().openCatalogWindow();
-            tpe.getImageWidget().openCatalogWindow(catalog);
-
-            // This makes sure the ObjectTableDisplay component is reused for query results
-            ((ObjectTable)catalog.getTable()).makeComponent(NavigatorManager.get());
-        }
-    }
-
- */
