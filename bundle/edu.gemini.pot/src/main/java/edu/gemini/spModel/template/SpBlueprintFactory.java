@@ -16,6 +16,8 @@ import edu.gemini.spModel.gemini.nici.blueprint.SpNiciBlueprintStandard;
 import edu.gemini.spModel.gemini.nifs.blueprint.SpNifsBlueprint;
 import edu.gemini.spModel.gemini.nifs.blueprint.SpNifsBlueprintAo;
 import edu.gemini.spModel.gemini.niri.blueprint.SpNiriBlueprint;
+import edu.gemini.spModel.gemini.phoenix.blueprint.SpPhoenixBlueprint;
+import edu.gemini.spModel.gemini.phoenix.blueprint.SpPhoenixBlueprint$;
 import edu.gemini.spModel.gemini.texes.blueprint.SpTexesBlueprint;
 import edu.gemini.spModel.gemini.trecs.blueprint.SpTrecsBlueprintImaging;
 import edu.gemini.spModel.gemini.trecs.blueprint.SpTrecsBlueprintSpectroscopy;
@@ -87,6 +89,13 @@ public final class SpBlueprintFactory {
             } catch (Exception e) {
                 LOGGER.log(Level.WARNING, "Trouble mapping ctor for " + c.getName(), e);
             }
+        }
+
+        // That's awful ^^ .. for Blueprints defined in Scala we'll just do it this way.
+        try {
+            ctors.put(SpPhoenixBlueprint$.MODULE$.PARAM_SET_NAME(), SpPhoenixBlueprint.class.getConstructor(ParamSet.class));
+        } catch (Exception e) {
+            LOGGER.log(Level.WARNING, "Trouble mapping blueprint constructor.", e);
         }
 
     }
