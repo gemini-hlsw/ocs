@@ -390,9 +390,6 @@ public final class ObsCatalogQueryResultDisplay extends TableDisplayTool impleme
         return null;
     }
 
-
-
-
     // Display the selected observation in the OT.
     private void _showSelectedObservation() {
         final ISPProgram prog = loadSelectedProgram();

@@ -10,8 +10,6 @@ import jsky.util.gui.MultiSelectComboBox;
 import javax.swing.*;
 import java.awt.GridBagConstraints;
 import java.awt.Insets;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.Serializable;
 import java.util.Enumeration;
 import java.util.Hashtable;
@@ -42,7 +40,6 @@ public final class ObsCatalogQueryPanel extends CatalogQueryPanel {
     /** Instrument combo box */
     private MultiSelectComboBox _instComboBox;
 
-
     /**
      * Initialize a query panel for the given catalog.
      *
@@ -53,12 +50,12 @@ public final class ObsCatalogQueryPanel extends CatalogQueryPanel {
         super(catalog, numCols);
     }
 
-
     /**
      * Make the display panel items.
      * (Redefined from the parent class version to add a tabbed pane for the
      * instrument specific items).
      */
+    @Override
     protected void makePanelItems() {
         super.makePanelItems();
 
@@ -109,6 +106,7 @@ public final class ObsCatalogQueryPanel extends CatalogQueryPanel {
     /**
      * Make and return a combo box with the values that the given field may have.
      */
+    @Override
     protected JComponent makeComboBox(FieldDesc p) {
         final int n = p.getNumOptions();
 
@@ -130,6 +128,7 @@ public final class ObsCatalogQueryPanel extends CatalogQueryPanel {
     /**
      * Remove the panel items.
      */
+    @Override
     protected void removePanelItems() {
         super.removePanelItems();
         remove(_tabbedPane);
@@ -154,6 +153,7 @@ public final class ObsCatalogQueryPanel extends CatalogQueryPanel {
      * @param layout utility object used for the layout
      * @return the number of rows in the layout
      */
+    @Override
     protected int doGridBagLayout(GridBagUtil layout) {
 
         // put the non-instrument specific items in the first pane
@@ -231,7 +231,6 @@ public final class ObsCatalogQueryPanel extends CatalogQueryPanel {
                 }
             }
         }
-
         return queryArgs;
     }
 
@@ -240,6 +239,7 @@ public final class ObsCatalogQueryPanel extends CatalogQueryPanel {
      * Overrides parent version to allow value ranges (with ">", "<", "<=", ">=") in numerical
      * text fields and to use a MultiSelectComboBox instead of JComboBox for choices.
      */
+    @Override
     protected Object getValue(FieldDesc p, JComponent c) {
         if (p.getNumOptions() > 0) {
             // must be a combo box
@@ -282,6 +282,7 @@ public final class ObsCatalogQueryPanel extends CatalogQueryPanel {
      * Initialize a QueryArgs object based on the current panel settings
      * so that can be passed to the Catalog.query() method.
      */
+    @Override
     public void initQueryArgs(QueryArgs queryArgs) {
         super.initQueryArgs(queryArgs);
 
@@ -307,6 +308,7 @@ public final class ObsCatalogQueryPanel extends CatalogQueryPanel {
     }
 
     /** Store the current settings in a serializable object and return the object. */
+    @Override
     public Object storeSettings() {
         final Hashtable map = (Hashtable) super.storeSettings();
 
@@ -331,6 +333,7 @@ public final class ObsCatalogQueryPanel extends CatalogQueryPanel {
     }
 
     /** Restore the settings previously stored. */
+    @Override
     public boolean restoreSettings(Object obj) {
         if (obj instanceof Hashtable[]) {
             final Hashtable[] maps = (Hashtable[]) obj;

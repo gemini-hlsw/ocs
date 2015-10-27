@@ -1,13 +1,3 @@
-/*
- * ESO Archive
- *
- * $Id: CatalogQueryPanel.java 39998 2011-12-19 14:24:47Z swalker $
- *
- * who             when        what
- * --------------  ----------  ----------------------------------------
- * Allan Brighton  1999/06/02  Created
- */
-
 package jsky.catalog.gui;
 
 import jsky.catalog.*;
@@ -28,7 +18,6 @@ import java.text.NumberFormat;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Locale;
-
 
 /**
  * Displays a panel containing widgets to use for searching a given
@@ -93,38 +82,6 @@ public class CatalogQueryPanel extends JPanel
         doGridBagLayout(_layout);
     }
 
-    /**
-     * Create a CatalogQueryPanel containing catalog specific labels and
-     * components for the search parameters specified in the catalog configuration
-     * file.
-     *
-     * @param catalog the catalog to use
-     */
-    public CatalogQueryPanel(Catalog catalog) {
-        this(catalog, 2);
-    }
-
-
-    /**
-     * This constructor is for use by derived classes. The doLayout flag can be set to
-     * false to delay the calling of the GUI creation methods makePanelItems() and
-     * doGridBagLayout() until the derived class has had a chance to do something.
-     *
-     * @param catalog the catalog to use
-     * @param numCols the number of columns to use for the display (should be an even number)
-     * @param doLayout if true, layout the GUI layout, otherwise the derived class must do it
-     */
-    protected CatalogQueryPanel(Catalog catalog, int numCols, boolean doLayout) {
-        _catalog = catalog;
-        _numCols = numCols;
-        nf.setGroupingUsed(false);
-        if (doLayout) {
-            makePanelItems();
-            doGridBagLayout(_layout);
-        }
-    }
-
-
     /** Return the number of columns to use for the display (should be an even number) */
     protected int getNumCols() {
         return _numCols;
@@ -140,7 +97,6 @@ public class CatalogQueryPanel extends JPanel
         revalidate();
         repaint();
     }
-
 
     /**
      * Register to receive action events from this object whenever
@@ -173,7 +129,6 @@ public class CatalogQueryPanel extends JPanel
     public void actionPerformed(ActionEvent e) {
         fireActionEvent();
     }
-
 
     /**
      * Register to receive change events from this object whenever
@@ -211,12 +166,10 @@ public class CatalogQueryPanel extends JPanel
         return new JLabel(s, JLabel.LEFT);
     }
 
-
     /** Return the catalog for this object */
     public Catalog getCatalog() {
         return _catalog;
     }
-
 
     /**
      * Make and return the component for entering the value of the
@@ -237,7 +190,6 @@ public class CatalogQueryPanel extends JPanel
         return tf;
     }
 
-
     /**
      * Make and return a text field with the given width.
      */
@@ -246,7 +198,6 @@ public class CatalogQueryPanel extends JPanel
         tf.addActionListener(this);
         return tf;
     }
-
 
     /**
      * Make and return a combo box with the values that the given field may have.
@@ -272,7 +223,6 @@ public class CatalogQueryPanel extends JPanel
         cb.setPreferredSize(MIN_COMPONENT_SIZE);
         return cb;
     }
-
 
     /**
      * Make the display panel items
@@ -300,7 +250,6 @@ public class CatalogQueryPanel extends JPanel
         }
     }
 
-
     /**
      * Remove the panel items.
      */
@@ -312,7 +261,6 @@ public class CatalogQueryPanel extends JPanel
                 remove(_components[i]);
         }
     }
-
 
     /** Return the text of the label corresponding to the given display component, or null if not found. */
     public String getLabelForComponent(JComponent c) {
@@ -377,7 +325,6 @@ public class CatalogQueryPanel extends JPanel
         return row;
     }
 
-
     /**
      * Initialize a QueryArgs object based on the current panel settings
      * that can be passed to the Catalog.query() method.
@@ -420,7 +367,6 @@ public class CatalogQueryPanel extends JPanel
         return queryArgs;
     }
 
-
     /**
      * Set the values displayed in the query panel from the given object.
      *
@@ -435,7 +381,6 @@ public class CatalogQueryPanel extends JPanel
                 setValue(i, value);
         }
     }
-
 
     /** Return the value in the given component, or null if there is no value there. */
     protected Object getValue(FieldDesc p, JComponent c) {
@@ -473,7 +418,6 @@ public class CatalogQueryPanel extends JPanel
         return getValue(_catalog.getParamDesc(i), _components[i]);
     }
 
-
     /** Set the value in the named component. */
     protected void setValue(String label, Object value) {
         int n = _catalog.getNumParams();
@@ -489,7 +433,6 @@ public class CatalogQueryPanel extends JPanel
             }
         }
     }
-
 
     /** Set the value in the given component. */
     protected void setValue(int i, Object value) {
@@ -508,7 +451,6 @@ public class CatalogQueryPanel extends JPanel
             ((MultiSelectComboBox) c).setSelectedObjects((Object[])value);
         }
     }
-
 
     /** Store the current settings in a serializable object and return the object. */
     public Object storeSettings() {
