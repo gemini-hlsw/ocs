@@ -85,12 +85,20 @@ object ConfigExtractor {
 
   private def extractF2(c: Config): String \/ Flamingos2Parameters = {
     import Flamingos2._
+
+    // Gets the optional custom slit width (only set for custom mask)
+    def extractCustomSlitWidth(mask: FPUnit): String \/ Option[Flamingos2.CustomSlitWidth] = mask match {
+      case FPUnit.CUSTOM_MASK => extract[Flamingos2.CustomSlitWidth](c, CustomSlitWidthKey).map(Some(_))
+      case _                  => None.right
+    }
+
     for {
       filter      <- extract[Filter]        (c, FilterKey)
       grism       <- extract[Disperser]     (c, DisperserKey)
       mask        <- extract[FPUnit]        (c, FpuKey)
+      customSlit  <- extractCustomSlitWidth(mask)
       readMode    <- extract[ReadMode]      (c, ReadModeKey)
-    } yield Flamingos2Parameters(filter, grism, mask, readMode)
+    } yield Flamingos2Parameters(filter, grism, mask, customSlit, readMode)
   }
 
   private def extractGnirs(c: Config): String \/ GnirsParameters = {

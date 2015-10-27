@@ -71,8 +71,21 @@ public final class Flamingos2 extends Instrument {
 
     public double getSlitSize() {
         switch (params.mask()) {
-            case FPU_NONE: return 1;
-            default: return params.mask().getSlitWidth();
+            case FPU_NONE:
+                return 1;
+            case CUSTOM_MASK:
+                // There are two possible errors here: a programming error in case "Custom Mask" is set but
+                // no custom slit width is sent to ITC or the case where the custom mask slit width is set
+                // to "Other" (i.e. unknown).
+                if (params.customSlitWidth().isEmpty()) {
+                    throw new Error("Custom slit width is missing.");
+                }
+                if (params.customSlitWidth().get().width().isEmpty()) {
+                    throw new IllegalArgumentException("Custom masks with unknown slit widths are not supported.");
+                }
+                return params.customSlitWidth().get().width().getValue();
+            default:
+                return params.mask().getSlitWidth();
         }
     }
 

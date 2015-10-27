@@ -3,8 +3,8 @@ package edu.gemini.spModel.gemini.flamingos2;
 import edu.gemini.pot.sp.ISPObsComponent;
 import edu.gemini.pot.sp.ISPObservation;
 import edu.gemini.pot.sp.SPComponentType;
-import edu.gemini.skycalc.Angle;
 import edu.gemini.shared.util.immutable.*;
+import edu.gemini.skycalc.Angle;
 import edu.gemini.spModel.config.injector.ConfigInjector;
 import edu.gemini.spModel.config.injector.obswavelength.ObsWavelengthCalc2;
 import edu.gemini.spModel.config2.Config;
@@ -341,13 +341,6 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
             return fpu == FPUnit.FPU_NONE;
         }
 
-        /**
-         * Test to see if FPU is in spectroscopic mode.
-         */
-        public static boolean isSpectroscopic(FPUnit fpu) {
-            return fpu.isLongslit();
-        }
-
         public Decker getDecker() {
             return _decker;
         }
@@ -378,6 +371,54 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
             }
             return None.instance();
         }
+    }
+
+    /**
+     * Custom slit widths
+     * The current smartgcal design did not anticipate custom masks with arbitrary slit widths and
+     * the lookup mechanism in use today only works with the F2 FPUnits implemented as enums.
+     * In order to be able to use smartgcals for custom masks, we currently only support a limited set
+     * of custom slits which each correspond to one of the F2 FPUnits. The same is true for GMOS btw.
+     * Andy S. is aware of this and we plan to revise the smartgcal design at some point in the future.
+     */
+    public enum CustomSlitWidth implements DisplayableSpType, SequenceableSpType {
+        OTHER("Other", FPUnit.CUSTOM_MASK),
+        CUSTOM_WIDTH_1_PIX("1 Pixel", FPUnit.LONGSLIT_1),
+        CUSTOM_WIDTH_2_PIX("2 Pixel", FPUnit.LONGSLIT_2),
+        CUSTOM_WIDTH_3_PIX("3 Pixel", FPUnit.LONGSLIT_3),
+        CUSTOM_WIDTH_4_PIX("4 Pixel", FPUnit.LONGSLIT_4),
+        CUSTOM_WIDTH_6_PIX("6 Pixel", FPUnit.LONGSLIT_6),
+        CUSTOM_WIDTH_8_PIX("8 Pixel", FPUnit.LONGSLIT_8);
+
+        public static final CustomSlitWidth DEFAULT = OTHER;
+        public static final ItemKey KEY = new ItemKey(INSTRUMENT_KEY, "customSlitWidth");
+
+        private final String displayValue;
+        private final FPUnit fpUnit;
+
+        CustomSlitWidth(final String name, final FPUnit smartgcalUnit) {
+            this.displayValue = name;
+            this.fpUnit       = smartgcalUnit;
+        }
+        public String displayValue() {
+            return displayValue;
+        }
+        public Option<Integer> width() {
+            switch (fpUnit) {
+                case CUSTOM_MASK:   return None.instance();
+                default:            return new Some<>(fpUnit.getSlitWidth());
+            }
+        }
+        public FPUnit smartgcalFPUnit() {
+            return fpUnit;
+        }
+        public String sequenceValue() {
+            return name();
+        }
+        public String toString() {
+            return displayValue();
+        }
+
     }
 
     /**
@@ -500,7 +541,7 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
 
         private final String displayValue;
 
-        private Decker(String displayValue) { this.displayValue = displayValue; }
+        Decker(String displayValue) { this.displayValue = displayValue; }
         public String description() { return displayValue; }
         public String displayValue() { return displayValue; }
         public String logValue() { return displayValue; }
@@ -526,7 +567,7 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
 
         private final String displayValue;
 
-        private ReadoutMode(String displayValue) { this.displayValue = displayValue; }
+        ReadoutMode(String displayValue) { this.displayValue = displayValue; }
         public String description() { return displayValue; }
         public String displayValue() { return displayValue; }
         public String logValue() { return displayValue; }
@@ -601,18 +642,13 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
     public static final PropertyDescriptor LYOT_WHEEL_PROP;
     public static final PropertyDescriptor FPU_PROP;
     public static final PropertyDescriptor FPU_MASK_PROP;
+    public static final PropertyDescriptor CUSTOM_SLIT_WIDTH_PROP;
     public static final PropertyDescriptor PORT_PROP;
-
-    //public static final PropertyDescriptor COADDS_PROP;
     public static final PropertyDescriptor EXPOSURE_TIME_PROP;
     public static final PropertyDescriptor POS_ANGLE_PROP;
     public static final PropertyDescriptor POS_ANGLE_CONSTRAINT_PROP;
-
     public static final PropertyDescriptor MOS_PREIMAGING_PROP;
-
     public static final PropertyDescriptor USE_ELECTRONIC_OFFSETTING_PROP;
-//    public static final PropertyDescriptor ELECTRONIC_OFFSET_PROP;
-
     public static final PropertyDescriptor WINDOW_COVER_PROP;
     public static final PropertyDescriptor DECKER_PROP;
     public static final PropertyDescriptor READOUT_MODE_PROP;
@@ -694,22 +730,16 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
         FPU_PROP.setDisplayName("Focal Plane Unit");
         FPU_MASK_PROP = initProp("fpuCustomMask", query_no, iter_yes);
         FPU_MASK_PROP.setDisplayName("Custom MDF");
+        CUSTOM_SLIT_WIDTH_PROP = initProp(CustomSlitWidth.KEY.getName(), query_no, iter_yes);
+        CUSTOM_SLIT_WIDTH_PROP.setDisplayName("Slit Width");
         PORT_PROP = initProp(IssPortProvider.PORT_PROPERTY_NAME, query_no, iter_no);
         MOS_PREIMAGING_PROP = initProp("mosPreimaging", query_yes, iter_no);
-
-        //COADDS_PROP                 = initProp("coadds", query_no, iter_yes);
-        //Exposure time property configured with special methods to accept only
-        //integers
-//        EXPOSURE_TIME_PROP = initProp("exposureTime2", query_no, iter_yes);
-//        EXPOSURE_TIME_PROP.setDisplayName("Exposure Time");
-//        EXPOSURE_TIME_PROP.setName("exposureTime");
 
         EXPOSURE_TIME_PROP = initProp("exposureTime", query_no, iter_yes);
         POS_ANGLE_PROP     = initProp("posAngle", query_no, iter_no);
         POS_ANGLE_CONSTRAINT_PROP = initProp("posAngleConstraint", query_no, iter_no);
 
         USE_ELECTRONIC_OFFSETTING_PROP = initProp("useElectronicOffsetting", query_no, iter_no);
-//        ELECTRONIC_OFFSET_PROP = initProp("electronicOffset", query_no, iter_no);
 
         WINDOW_COVER_PROP = initProp("windowCover", query_no, iter_yes);
         WINDOW_COVER_PROP.setExpert(true);
@@ -742,6 +772,7 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
 
     private FPUnit _fpu = FPUnit.DEFAULT;
     private String _fpuMaskLabel = EMPTY_STRING;
+    private CustomSlitWidth customSlitWidth = CustomSlitWidth.DEFAULT;
 
     private Option<WindowCover> windowCover = None.instance();
     private Decker decker = _fpu.getDecker();
@@ -752,7 +783,6 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
     private boolean _isMosPreimaging = DEFAULT_IS_MOS_PREIMAGING;
 
     private boolean eOffsetting = false;
-    private double eOffset = 0.0;
 
     public Flamingos2() {
         super(SP_TYPE);
@@ -805,8 +835,8 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
         return 95.0;
     }
 
-    @Override public CategorizedTimeGroup calc(Config cur, Option<Config> prev) {
-        Collection<CategorizedTime> times = new ArrayList<CategorizedTime>();
+    @Override public CategorizedTimeGroup calc(final Config cur, final Option<Config> prev) {
+        final Collection<CategorizedTime> times = new ArrayList<>();
 
         if (PlannedTime.isUpdated(cur, prev, FPUnit.KEY)) {
             times.add(CategorizedTime.fromSeconds(Category.CONFIG_CHANGE, getFpuChangeOverheadSec(), "FPU"));
@@ -818,7 +848,7 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
             times.add(CategorizedTime.fromSeconds(Category.CONFIG_CHANGE, getDisperserChangeOverheadSec(), "Disperser"));
         }
 
-        ReadMode mode = (ReadMode) cur.getItemValue(ReadMode.KEY);
+        final ReadMode mode = (ReadMode) cur.getItemValue(ReadMode.KEY);
         times.add(CategorizedTime.fromSeconds(Category.READOUT, mode.readoutTimeSec()));
         times.add(CategorizedTime.fromSeconds(Category.EXPOSURE, ExposureCalculator.instance.exposureTimeSec(cur)));
         times.add(Category.DHS_OVERHEAD); // REL-1678
@@ -1064,6 +1094,18 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
         return _fpuMaskLabel;
     }
 
+    public CustomSlitWidth getCustomSlitWidth() {
+        return customSlitWidth;
+    }
+
+    public void setCustomSlitWidth(final CustomSlitWidth newValue) {
+        final CustomSlitWidth oldValue = getCustomSlitWidth();
+        if (oldValue != newValue) {
+            customSlitWidth = newValue;
+            firePropertyChange(CUSTOM_SLIT_WIDTH_PROP.getName(), oldValue, newValue);
+        }
+    }
+
     /** Return yes if this is a MOS Pre-imaging observation */
     public YesNoType getMosPreimaging() {
       return _isMosPreimaging ? YesNoType.YES : YesNoType.NO;
@@ -1142,10 +1184,6 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
         }
     }
 
-    public double getMaxElectronicOffsetDistance() {
-        return 1.49;
-    }
-
     public boolean getUseElectronicOffsetting() {
         return eOffsetting;
     }
@@ -1162,30 +1200,11 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
         return Flamingos2OiwfsGuideProbe.instance;
     }
 
-    public double getElectronicOffset() {
-        return eOffset;
-    }
-
-    public void setElectronicOffset(double newValue) {
-        double max = getMaxElectronicOffsetDistance();
-        if (newValue > max) {
-            newValue = max;
-        } else if (newValue < -max) {
-            newValue = -max;
-        }
-
-        double oldValue = getElectronicOffset();
-        if (oldValue != newValue) {
-            this.eOffset = newValue;
-//            firePropertyChange(ELECTRONIC_OFFSET_PROP.getName(), oldValue, newValue);
-        }
-    }
-
     /**
      * Return a parameter set describing the current state of this object.
      */
-    public ParamSet getParamSet(PioFactory factory) {
-        ParamSet paramSet = super.getParamSet(factory);
+    public ParamSet getParamSet(final PioFactory factory) {
+        final ParamSet paramSet = super.getParamSet(factory);
 
         Pio.addParam(factory, paramSet, DISPERSER_PROP, _disperser.name());
         Pio.addParam(factory, paramSet, FILTER_PROP, _filter.name());
@@ -1198,6 +1217,7 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
         Pio.addParam(factory, paramSet, FPU_PROP, _fpu.name());
         if (_fpu == FPUnit.CUSTOM_MASK) {
             Pio.addParam(factory, paramSet, FPU_MASK_PROP, _fpuMaskLabel);
+            Pio.addParam(factory, paramSet, CUSTOM_SLIT_WIDTH_PROP, customSlitWidth.name());
         }
 
         Pio.addParam(factory, paramSet, MOS_PREIMAGING_PROP.getName(), getMosPreimaging().name());
@@ -1222,7 +1242,7 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
     /**
      * Set the state of this object from the given parameter set.
      */
-    public void setParamSet(ParamSet paramSet) {
+    public void setParamSet(final ParamSet paramSet) {
         super.setParamSet(paramSet);
 
         String v;
@@ -1259,6 +1279,9 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
         v = Pio.getValue(paramSet, FPU_MASK_PROP);
         if (v != null) setFpuCustomMask(v);
 
+        v = Pio.getValue(paramSet, CUSTOM_SLIT_WIDTH_PROP);
+        if (v != null) setCustomSlitWidth(CustomSlitWidth.valueOf(v));
+
         setUseElectronicOffsetting(Pio.getBooleanValue(paramSet, USE_ELECTRONIC_OFFSETTING_PROP.getName(), false));
 
         v = Pio.getValue(paramSet, MOS_PREIMAGING_PROP.getName());
@@ -1287,7 +1310,7 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
      * Return the configuration for this component.
      */
     public ISysConfig getSysConfig() {
-        ISysConfig sc = new DefaultSysConfig(INSTRUMENT_CONFIG_NAME);
+        final ISysConfig sc = new DefaultSysConfig(INSTRUMENT_CONFIG_NAME);
 
         // Fill in the current values.
         sc.putParameter(StringParameter.getInstance(ISPDataObject.VERSION_PROP, getVersion()));
@@ -1302,12 +1325,11 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
 
         sc.putParameter(DefaultParameter.getInstance(FPU_PROP, getFpu()));
         if (getFpu() == FPUnit.CUSTOM_MASK) {
-            sc.putParameter(DefaultParameter.getInstance(FPU_MASK_PROP,
-                                                           getFpuCustomMask()));
+            sc.putParameter(DefaultParameter.getInstance(FPU_MASK_PROP, getFpuCustomMask()));
+            sc.putParameter(DefaultParameter.getInstance(CUSTOM_SLIT_WIDTH_PROP.getName(), getCustomSlitWidth()));
         }
 
-        sc.putParameter(DefaultParameter.getInstance(MOS_PREIMAGING_PROP.getName(),
-                                                      getMosPreimaging()));
+        sc.putParameter(DefaultParameter.getInstance(MOS_PREIMAGING_PROP.getName(), getMosPreimaging()));
 
         sc.putParameter(DefaultParameter.getInstance(USE_ELECTRONIC_OFFSETTING_PROP.getName(), getUseElectronicOffsetting()));
 
@@ -1355,13 +1377,20 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
     /**
      * {@inheritDoc}
      */
-    @Override public CalibrationKey extractKey(ISysConfig instrument) {
-        //-- get all values needed for smartgcal lookup
-        Disperser disperser = (Disperser) get(instrument, DISPERSER_PROP);
-        Filter filter = (Filter) get(instrument, FILTER_PROP);
-        FPUnit fpUnit = (FPUnit) get(instrument, FPU_PROP);
+    @Override public CalibrationKey extractKey(final ISysConfig instrument) {
+        // -- get all values needed for smartgcal lookup
+        final Disperser disperser = (Disperser) get(instrument, DISPERSER_PROP);
+        final Filter filter = (Filter) get(instrument, FILTER_PROP);
+        // -- for custom masks we need to translate the slit width to a known FPU enum value with the same slit width
+        final FPUnit fpUnit = (FPUnit) get(instrument, FPU_PROP);
+        final FPUnit gcalLookupUnit;
+        if (fpUnit == FPUnit.CUSTOM_MASK) {
+            gcalLookupUnit = ((CustomSlitWidth) get(instrument, CUSTOM_SLIT_WIDTH_PROP)).smartgcalFPUnit();
+        } else {
+            gcalLookupUnit = fpUnit;
+        }
         // create and return lookup key
-        ConfigKeyFlamingos2 config = new ConfigKeyFlamingos2(disperser, filter, fpUnit);
+        ConfigKeyFlamingos2 config = new ConfigKeyFlamingos2(disperser, filter, gcalLookupUnit);
         return new CalibrationKeyImpl(config);
     }
 

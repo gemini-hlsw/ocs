@@ -137,7 +137,7 @@ object ITCRequest {
     val grism       = r.enumParameter(classOf[Flamingos2.Disperser])
     val readMode    = r.enumParameter(classOf[Flamingos2.ReadMode])
     val fpMask      = r.enumParameter(classOf[Flamingos2.FPUnit])
-    Flamingos2Parameters(filter, grism, fpMask, readMode)
+    Flamingos2Parameters(filter, grism, fpMask, None, readMode)
   }
 
   def gmosParameters(r: ITCRequest): GmosParameters = {

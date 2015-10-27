@@ -49,8 +49,6 @@ public final class Flamingos2Recipe implements ImagingRecipe, SpectroscopyRecipe
             }
             switch (_flamingos2Parameters.mask()) {
                 case FPU_NONE:      throw new IllegalArgumentException("In spectroscopy mode, a FP must be selected");
-                // NOTE: Currently it is not possible to set a slit width for custom masks for F2 in the OT
-                case CUSTOM_MASK:   throw new IllegalArgumentException("Custom masks with unknown slit widths are not supported");
             }
         }
 
