@@ -2,7 +2,7 @@ package edu.gemini.model.p1.immutable
 
 import edu.gemini.model.p1.{mutable => M}
 
-object GnirsBlueprintImaging {
+object GnirsBlueprintImaging extends ((Altair, GnirsPixelScale, GnirsFilter) => GnirsBlueprintImaging)  {
 
   def apply(m:M.GnirsBlueprintImaging):GnirsBlueprintImaging = new GnirsBlueprintImaging(m)
 

@@ -2,7 +2,8 @@ package edu.gemini.model.p1.immutable
 
 import edu.gemini.model.p1.{mutable => M}
 
-object GnirsBlueprintSpectroscopy {
+object GnirsBlueprintSpectroscopy
+  extends ((Altair, GnirsPixelScale, GnirsDisperser, GnirsCrossDisperser, GnirsFpu, GnirsCentralWavelength) => GnirsBlueprintSpectroscopy) {
 
   def apply(m:M.GnirsBlueprintSpectroscopy):GnirsBlueprintSpectroscopy = new GnirsBlueprintSpectroscopy(m)
 
