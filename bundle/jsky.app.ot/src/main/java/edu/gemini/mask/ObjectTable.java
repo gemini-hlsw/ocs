@@ -509,7 +509,6 @@ public class ObjectTable extends SkycatTable implements CatalogUIHandler {
         }
     }
 
-
     // Return a catalog configuration entry for a local catalog file
     // with plot symbol information
     private static SkycatConfigEntry _makeConfigEntry(String filename) {
@@ -525,11 +524,7 @@ public class ObjectTable extends SkycatTable implements CatalogUIHandler {
         if (i == null) {
             return 0;
         }
-        return i.intValue();
-    }
-
-    private void _setIntValue(int i, int row, int col) {
-        setValueAt(new Integer(i), row, col);
+        return i;
     }
 
     private String _getStringValue(int row, int col) {
@@ -540,20 +535,12 @@ public class ObjectTable extends SkycatTable implements CatalogUIHandler {
         return s;
     }
 
-    private void _setStringValue(String s, int row, int col) {
-        setValueAt(s, row, col);
-    }
-
     private double _getDoubleValue(int row, int col) {
         Number n = (Number)getValueAt(row, col);
         if (n == null) {
             return 0.;
         }
         return n.doubleValue();
-    }
-
-    private void _setDoubleValue(double d, int row, int col) {
-        setValueAt(new Double(d), row, col);
     }
 
     private float _getFloatValue(int row, int col) {
@@ -564,142 +551,64 @@ public class ObjectTable extends SkycatTable implements CatalogUIHandler {
         return n.floatValue();
     }
 
-//    private void _setFloatValue(float d, int row, int col) {
-//        setValueAt(new Float(d), row, col);
-//    }
-
     public int getId(int row) {
         return _getIntValue(row, ID_COL);
     }
-
-    public void setId(int row, int id) {
-        _setIntValue(id, row, ID_COL);
-    }
-
 
     public double getRa(int row) {
         return _getDoubleValue(row, RA_COL);
     }
 
-    public void setRa(int row, double ra) {
-        _setDoubleValue(ra, row, RA_COL);
-    }
-
-
     public double getDec(int row) {
         return _getDoubleValue(row, DEC_COL);
     }
-
-    public void setDec(int row, double dec) {
-        _setDoubleValue(dec, row, DEC_COL);
-    }
-
 
     public double getXCcd(int row) {
         return _getDoubleValue(row, X_CCD_COL);
     }
 
-    public void setXCcd(int row, double xCcd) {
-        _setDoubleValue(xCcd, row, X_CCD_COL);
-    }
-
-
     public double getYCcd(int row) {
         return _getDoubleValue(row, Y_CCD_COL);
     }
-
-    public void setYCcd(int row, double yCcd) {
-        _setDoubleValue(yCcd, row, Y_CCD_COL);
-    }
-
 
     public double getSpecPosX(int row) {
         return _getDoubleValue(row, SPECPOS_X_COL);
     }
 
-    public void setSpecPosX(int row, double specPosX) {
-        _setDoubleValue(specPosX, row, SPECPOS_X_COL);
-    }
-
-
     public double getSpecPosY(int row) {
         return _getDoubleValue(row, SPECPOS_Y_COL);
     }
-
-    public void setSpecPosY(int row, double specPosY) {
-        _setDoubleValue(specPosY, row, SPECPOS_Y_COL);
-    }
-
 
     public double getSlitPosX(int row) {
         return _getDoubleValue(row, SLITPOS_X_COL);
     }
 
-    public void setSlitPosX(int row, double slitPosX) {
-        _setDoubleValue(slitPosX, row, SLITPOS_X_COL);
-    }
-
-
     public double getSlitPosY(int row) {
         return _getDoubleValue(row, SLITPOS_Y_COL);
     }
-
-    public void setSlitPosY(int row, double slitPosY) {
-        _setDoubleValue(slitPosY, row, SLITPOS_Y_COL);
-    }
-
 
     public double getSlitSizeX(int row) {
         return _getDoubleValue(row, SLITSIZE_X_COL);
     }
 
-    public void setSlitSizeX(int row, double slitSizeX) {
-        _setDoubleValue(slitSizeX, row, SLITSIZE_X_COL);
-    }
-
-
     public double getSlitSizeY(int row) {
         return _getDoubleValue(row, SLITSIZE_Y_COL);
     }
-
-    public void setSlitSizeY(int row, double slitSizeY) {
-        _setDoubleValue(slitSizeY, row, SLITSIZE_Y_COL);
-    }
-
 
     public double getSlitTilt(int row) {
         return _getDoubleValue(row, SLITTILT_COL);
     }
 
-    public void setSlitTilt(int row, double slitTilt) {
-        _setDoubleValue(slitTilt, row, SLITTILT_COL);
-    }
-
-
     public double getMag(int row) {
         return _getDoubleValue(row, MAG_COL);
     }
-
-    public void setMag(int row, double mag) {
-        _setDoubleValue(mag, row, MAG_COL);
-    }
-
 
     public String getPriority(int row) {
         return _getStringValue(row, PRIORITY_COL);
     }
 
-    public void setPriority(int row, String priority) {
-        _setStringValue(priority, row, PRIORITY_COL);
-    }
-
-
     public String getSlitType(int row) {
         return _getStringValue(row, SLITTYPE_COL);
-    }
-
-    public void setSlitType(int row, String slitType) {
-        _setStringValue(slitType, row, SLITTYPE_COL);
     }
 
 }
