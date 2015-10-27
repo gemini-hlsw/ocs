@@ -8,9 +8,7 @@ import edu.gemini.spModel.guide.*;
 import edu.gemini.spModel.obs.SchedulingBlock;
 import edu.gemini.spModel.obs.context.ObsContext;
 import edu.gemini.spModel.target.SPTarget;
-import edu.gemini.spModel.target.env.GuideGroup;
-import edu.gemini.spModel.target.env.GuideProbeTargets;
-import edu.gemini.spModel.target.env.TargetEnvironment;
+import edu.gemini.spModel.target.env.*;
 
 import java.awt.geom.Area;
 import java.util.*;
@@ -198,20 +196,10 @@ public enum GsaoiOdgw implements ValidatableGuideProbe {
             // Map all the old GuideTargets in the old target environment, keyed
             // by their guider.  This will include all guiders in use, not just
             // GsaoiOdgw.
-//            boolean enabled = true;
             final TargetEnvironment env = ctx.getTargets();
-            final Map<GuideProbe, GuideProbeTargets> gtMap = new HashMap<>();
-
             final GuideGroup grp = env.getOrCreatePrimaryGuideGroup();
-            for (final GuideProbeTargets gt : grp) {
-                gtMap.put(gt.getGuider(), gt);
-
-                // All ODGW should be disabled if any are disabled.
-                // TODO: GuideProbeTargets.isEnabled
-//                if (enabled && (gt.getGuider() instanceof GsaoiOdgw)) {
-//                    enabled = gt.isEnabled();
-//                }
-            }
+            final Map<GuideProbe, GuideProbeTargets> gtMap = new HashMap<>();
+            grp.getAll().foreach(gt -> gtMap.put(gt.getGuider(), gt));
 
             // Create the optimized target environment.
             boolean updated = false;
@@ -233,11 +221,12 @@ public enum GsaoiOdgw implements ValidatableGuideProbe {
 
                     final GuideProbeTargets gptOld = gtMap.get(odgw);
                     final boolean primaryIsBags = gptOld != null && gptOld.getBagsTarget().exists(primary::equals);
-                    final Option<SPTarget> bagsTarget = primaryIsBags ? new Some<>(primary) : GuideProbeTargets.NO_TARGET;
-                    final GuideProbeTargets gptNew = GuideProbeTargets.create(odgw, bagsTarget, new Some<>(primary), imLst);
+                    final GuideProbeTargets gptTmp = GuideProbeTargets.create(odgw, imLst).withExistingPrimary(primary);
+                    final GuideProbeTargets gptNew = primaryIsBags ? gptTmp.withBagsTarget(primary) : gptTmp;
                     gtMap.put(odgw, gptNew);
 
-                    if (!updated && (gptOld == null || targetsUpdated(imLst, gptOld.getTargets()) || !gptOld.getBagsTarget().equals(bagsTarget))) {
+                    if (!updated && (gptOld == null || targetsUpdated(imLst, gptOld.getTargets())
+                            || !gptOld.getBagsTarget().equals(gptNew.getBagsStatus().bagsStarAsJava()))) {
                         updated = true;
                     }
                 }
@@ -254,8 +243,8 @@ public enum GsaoiOdgw implements ValidatableGuideProbe {
         }
 
         private boolean targetsUpdated(ImList<SPTarget> lst1, ImList<SPTarget> lst2) {
-            Set<SPTarget> targets1 = new HashSet<SPTarget>(lst1.toList());
-            Set<SPTarget> targets2 = new HashSet<SPTarget>(lst2.toList());
+            Set<SPTarget> targets1 = new HashSet<>(lst1.toList());
+            Set<SPTarget> targets2 = new HashSet<>(lst2.toList());
             return !targets1.equals(targets2);
         }
 
@@ -267,7 +256,7 @@ public enum GsaoiOdgw implements ValidatableGuideProbe {
 
     private final GsaoiDetectorArray.Id id;
 
-    private GsaoiOdgw(GsaoiDetectorArray.Id id) {
+    GsaoiOdgw(GsaoiDetectorArray.Id id) {
         this.id = id;
     }
 
@@ -306,7 +295,7 @@ public enum GsaoiOdgw implements ValidatableGuideProbe {
     }
 
     public Option<GuideProbeGroup> getGroup() {
-        return new Some<GuideProbeGroup>(Group.instance);
+        return new Some<>(Group.instance);
     }
 
     /**
