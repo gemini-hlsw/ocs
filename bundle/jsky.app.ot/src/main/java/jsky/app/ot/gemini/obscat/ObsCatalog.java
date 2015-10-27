@@ -334,7 +334,7 @@ public final class ObsCatalog extends SkycatCatalog {
      */
     @Override
     public QueryResult query(QueryArgs args) {
-        return ObsCatalogHelper.query((ObsCatalogQueryArgs) args, getConfigEntry(), false);
+        throw new UnsupportedOperationException();
     }
 
     public static QueryManager QUERY_MANAGER = () -> {
