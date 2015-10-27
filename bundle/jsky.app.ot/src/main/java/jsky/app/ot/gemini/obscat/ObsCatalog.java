@@ -25,18 +25,12 @@ import jsky.app.ot.viewer.ViewerService;
 import jsky.catalog.FieldDescAdapter;
 import jsky.catalog.QueryArgs;
 import jsky.catalog.QueryResult;
-import jsky.catalog.gui.CatalogUIHandler;
-import jsky.catalog.gui.QueryResultDisplay;
 import jsky.catalog.skycat.SkycatCatalog;
 import jsky.catalog.skycat.SkycatConfigEntry;
 import jsky.catalog.skycat.SkycatConfigFile;
-import jsky.navigator.Navigator;
-import jsky.navigator.NavigatorManager;
 import jsky.util.NameValue;
 import jsky.util.gui.DialogUtil;
 
-import javax.swing.*;
-import java.awt.*;
 import java.awt.event.*;
 import java.util.*;
 import java.util.List;
@@ -51,7 +45,7 @@ import java.util.List;
  *
  * @author Allan Brighton
  */
-public final class ObsCatalog extends SkycatCatalog implements CatalogUIHandler {
+public final class ObsCatalog extends SkycatCatalog {
 
     // A shared instance of this class */
     public static final ObsCatalog INSTANCE = new ObsCatalog();
@@ -340,7 +334,7 @@ public final class ObsCatalog extends SkycatCatalog implements CatalogUIHandler 
      */
     @Override
     public QueryResult query(QueryArgs args) {
-        return ObsCatalogHelper.query((ObsCatalogQueryArgs) args, getConfigEntry(), queryTool.includeRemote());
+        return ObsCatalogHelper.query((ObsCatalogQueryArgs) args, getConfigEntry(), false);
     }
 
     public static QueryManager QUERY_MANAGER = () -> {
@@ -411,16 +405,6 @@ public final class ObsCatalog extends SkycatCatalog implements CatalogUIHandler 
         addedPreferences = true;
     }
 
-    private ObsCatalogQueryTool queryTool;
-
-    /**
-     * Implement the {@link CatalogUIHandler} interface to get a custom GUI
-     */
-    public JComponent makeComponent(QueryResultDisplay display) {
-        queryTool = new ObsCatalogQueryTool(this, display);
-//        System.out.println(queryTool.includeRemote());
-        return queryTool.makeButtonPanel().peer();
-    }
 
 }
 
