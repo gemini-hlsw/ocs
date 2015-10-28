@@ -336,13 +336,14 @@ object FilterElement {
     }
 
     def filter = init match {
-      case IsActive(_) => IsActive(selection)
-      case IsCompleted(_) => IsCompleted(selection)
-      case IsRollover(_) => IsRollover(selection)
-      case HasTimingConstraints(_) => HasTimingConstraints(selection)
+      case IsActive(_)                => IsActive(selection)
+      case IsCompleted(_)             => IsCompleted(selection)
+      case IsRollover(_)              => IsRollover(selection)
+      case HasTimingConstraints(_)    => HasTimingConstraints(selection)
       case HasElevationConstraints(_) => HasElevationConstraints(selection)
-      case HasPreImaging(_) => HasPreImaging(selection)
-      case IsNonSidereal(_) => IsNonSidereal(selection)
+      case HasPreImaging(_)           => HasPreImaging(selection)
+      case IsNonSidereal(_)           => IsNonSidereal(selection)
+      case HasDummyTarget(_)          => HasDummyTarget(selection)
     }
 
     private def selection: Option[Boolean] =
