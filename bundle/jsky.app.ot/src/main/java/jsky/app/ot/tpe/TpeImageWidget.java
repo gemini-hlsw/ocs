@@ -749,22 +749,18 @@ public class TpeImageWidget extends CatalogImageDisplay implements MouseInputLis
         final Option<ObsContext> ctxOpt = getObsContext();
         if (!ctxOpt.isEmpty()) {
             final ObsContext ctx = ctxOpt.getValue();
-            for (TpeImageFeature tif : _featureList) {
-                if (tif instanceof TpeDragSensitive) {
-                    ((TpeDragSensitive) tif).handleDragStopped(ctx);
-                }
-            }
+            _featureList.stream().filter(tif -> tif instanceof TpeDragSensitive).forEach(tif ->
+                ((TpeDragSensitive) tif).handleDragStopped(ctx)
+            );
         }
 
     }
 
     public void action(final TpeMouseEvent tme) {
         if (!_imgInfoValid) return;
-        for (TpeImageFeature tif : _featureList) {
-            if (tif instanceof TpeActionableFeature) {
-                ((TpeActionableFeature) tif).action(tme);
-            }
-        }
+        _featureList.stream().filter(tif -> tif instanceof TpeActionableFeature).forEach(tif ->
+            ((TpeActionableFeature) tif).action(tme)
+        );
     }
 
     /**
@@ -1085,6 +1081,11 @@ public class TpeImageWidget extends CatalogImageDisplay implements MouseInputLis
         } else {
             _gemsGuideStarSearchDialog.reset();
             _gemsGuideStarSearchDialog.setVisible(true);
+        }
+        try {
+            _gemsGuideStarSearchDialog.query();
+        } catch (Exception e) {
+            DialogUtil.error(e);
         }
     }
 

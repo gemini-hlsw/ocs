@@ -473,7 +473,7 @@ public class GemsGuideStarSearchDialog extends JFrame {
                 && _allowPosAngleChangesCheckBox.isSelected();
     }
 
-    private void query() throws Exception {
+    public void query() throws Exception {
         setState(State.QUERY);
         CatalogChoice catalogChoice = (CatalogChoice) _catalogComboBox.getSelectedItem();
         _model.setCatalog(catalogChoice);
