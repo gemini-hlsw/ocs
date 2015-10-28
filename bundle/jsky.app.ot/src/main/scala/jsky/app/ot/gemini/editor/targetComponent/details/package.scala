@@ -53,10 +53,7 @@ package object details {
   }
 
   implicit class SolarObjectOps(obj: NamedTarget.SolarObject) {
-    def objectType = obj match {
-      case NamedTarget.SolarObject.PLUTO => ObjectType.MINOR_BODY
-      case _ => ObjectType.MAJOR_BODY
-    }
+    def objectType = ObjectType.MAJOR_BODY
   }
 
   implicit class CoordinateParamOps(p: CoordinateParam) {

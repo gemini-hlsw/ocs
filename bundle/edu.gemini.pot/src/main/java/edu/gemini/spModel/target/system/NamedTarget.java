@@ -28,8 +28,7 @@ public final class NamedTarget extends NonSiderealTarget {
         JUPITER("Jupiter", 599),
         SATURN ("Saturn",  699),
         URANUS ("Uranus",  799),
-        NEPTUNE("Neptune", 899),
-        PLUTO  ("Pluto",   999);
+        NEPTUNE("Neptune", 899);
 
         private final String _displayValue;
         public final int queryId; // search for this
