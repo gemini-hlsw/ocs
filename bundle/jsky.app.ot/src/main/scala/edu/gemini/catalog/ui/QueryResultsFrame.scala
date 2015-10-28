@@ -289,6 +289,7 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
           selected.foreach { s =>
             updateGuidersModel(s, strategies)
             updateGuideSpeedText()
+            magnitudeFiltersFromControls(s.query.headOption)
           }
       }
     }
@@ -313,17 +314,10 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
       reactions += {
         case SelectionChanged(_) =>
           updateGuideSpeedText()
-          val t = selection.item.query.headOption.collect {
-            case ConeSearchCatalogQuery(_, _, _, mc, _) => mc
-          }
-          t.foreach { m =>
-            magnitudeControls.clear()
-            magnitudeControls ++= m.zipWithIndex.flatMap(Function.tupled(filterControls))
-            buildLayout(currentFilters)
-            revalidateFrame()
-          }
+          magnitudeFiltersFromControls(selection.item.query.headOption)
       }
     }
+
     lazy val sbBox = new ComboBox(List(SPSiteQuality.SkyBackground.values(): _*)) with TextRenderer[SPSiteQuality.SkyBackground] {
       override def text(a: SPSiteQuality.SkyBackground) = a.displayValue()
     }
@@ -436,6 +430,19 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
         sel <- guider.selection.item.some
         probeLimit <- sel.limits
       } limitsLabel.text = probeLimit.detailRange
+
+    /**
+      * Updates the magnitude filters when the controls change
+      */
+    def magnitudeFiltersFromControls(query: Option[CatalogQuery]): Unit = {
+      query.collect {
+        case ConeSearchCatalogQuery(_, _, _, mc, _) =>
+          magnitudeControls.clear()
+          magnitudeControls ++= mc.zipWithIndex.flatMap(Function.tupled(filterControls))
+      }
+      buildLayout(currentFilters)
+      revalidateFrame()
+    }
 
     /**
      * Update query form according to the passed values
