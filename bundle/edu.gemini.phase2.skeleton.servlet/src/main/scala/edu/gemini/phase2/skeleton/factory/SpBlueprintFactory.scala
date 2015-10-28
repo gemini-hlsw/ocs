@@ -9,6 +9,8 @@ import edu.gemini.spModel.gemini.gmos.blueprint._
 import edu.gemini.spModel.gemini.gmos.{GmosCommonType, GmosNorthType, GmosSouthType}
 import edu.gemini.spModel.gemini.michelle.MichelleParams
 import edu.gemini.spModel.gemini.michelle.blueprint.{SpMichelleBlueprintSpectroscopy, SpMichelleBlueprintImaging}
+import edu.gemini.spModel.gemini.phoenix.PhoenixParams
+import edu.gemini.spModel.gemini.phoenix.blueprint.SpPhoenixBlueprint
 
 import edu.gemini.spModel.template.SpBlueprint
 
@@ -65,6 +67,7 @@ object SpBlueprintFactory {
       case b: TrecsBlueprintSpectroscopy    => Trecs.spectroscopy(b)
       case b: NiriBlueprint                 => NiriHandler(b)
       case b: TexesBlueprint                => TexesHandler(b)
+      case b: PhoenixBlueprint              => PhoenixHandler(b)
 
       // Visitors blueprints
       case b: VisitorBlueprint              => VisitorHandler(b)
@@ -405,6 +408,19 @@ object SpBlueprintFactory {
         d <- disperser(b.disperser).right
         o <- observingMode(b.observingMode).right
       } yield new SpGpiBlueprint(d, o)
+  }
+
+  object PhoenixHandler {
+
+    private def fpu(m: PhoenixFocalPlaneUnit) = spEnum(m, classOf[PhoenixParams.Mask])
+    private def filter(f: PhoenixFilter) = spEnum(f, classOf[PhoenixParams.Filter])
+
+    def apply(b: PhoenixBlueprint): Either[String, SpPhoenixBlueprint] =
+      for {
+        m <- fpu(b.fpu).right
+        f <- filter(b.filter).right
+      } yield SpPhoenixBlueprint(m, f)
+
   }
 
 }

@@ -1,0 +1,610 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE document PUBLIC "-//Gemini Observatory//DTD for Storage of P1 and P2 Documents//EN" "http://ftp.gemini.edu/Support/xml/dtds/SpXML2.dtd">
+
+<document>
+  <container kind="program" type="Program" version="2015B-1" subtype="basic" key="8025163c-02be-440b-b921-2c422e718721" name="">
+    <paramset name="Science Program" kind="dataObj">
+      <param name="title" value="PHOENIX PHASE I/II MAPPING BPS"/>
+      <param name="programMode" value="QUEUE"/>
+      <param name="tooType" value="none"/>
+      <param name="programStatus" value="PHASE2"/>
+      <param name="nextObsId" value="1"/>
+      <paramset name="piInfo">
+        <param name="firstName" value="Bryan"/>
+        <param name="lastName" value="Miller"/>
+        <param name="email" value=""/>
+        <param name="phone" value=""/>
+      </paramset>
+      <param name="contactPerson" value="bmiller@gemini.edu"/>
+      <param name="queueBand" value="1"/>
+      <param name="isLibrary" value="true"/>
+      <paramset name="timeAcct"/>
+      <param name="awardedTime" value="0.0" units="hours"/>
+      <param name="fetched" value="true"/>
+      <param name="completed" value="false"/>
+      <param name="notifyPi" value="YES"/>
+    </paramset>
+    <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="8d5ed073-23dd-4eae-8e66-d071fa79292f" name="Note">
+      <paramset name="Note" kind="dataObj">
+        <param name="title" value="Next libID=5"/>
+        <param name="NoteText" value=""/>
+      </paramset>
+    </container>
+    <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="b1573f3f-f574-40f4-95ca-3c14132b869a" name="Note">
+      <paramset name="Note" kind="dataObj">
+        <param name="title" value="How to use the observations in this folder"/>
+        <param name="NoteText">
+          <value>Use these observations if your science target is a point source and you are observing in the JHK region (1-2.5mu)
+
+- Copy the science observation to your programme, and add the correct target and guide star. Check the web pages for more information on how to select the guide star.  The guide stars for Phoenix can be selected within the annulus  4.5-6.8 arcmin for PWFS2.
+- Be sure that your guide star is bright enough for the conditions requested. 
+- Check your target for proper motion. Since the FOV is only ~15 arcsec diameter, an unnacounted-for proper motion can leave the target out of view. The "resolve" feature will retrieve known proper motions.
+- Set the instrument to the correct configuration. We reccomend at least 3digit precision when setting the central wavelength in microns (2 in wavenumbers). 
+- Set the correct exposure time. We strongly recommend not going longer than the following exposure times. 
+     JHK : 1200 sec
+        L  : 300 sec
+        M : 120 sec 
+- VERY IMPORTANT: coadding must be used in the L band for integration times longer than 200sec and in the M band longer than 30 sec. This is the limit to avoid saturation of the frames given the sky + telescope thermal emission. 
+- Remember that the worse your conditions in terms of Cloud Cover and Water Vapour the faster the sky emission will vary and the stronger the background will be. 
+- Set the offset pattern and number of repeats. The example uses the most common offset pattern, a single ABBA with the two positions 5arcsec apart. Remember:
+     ** the Phoenix slit is 14sec long and you should allow for at least 1arcsec between target position and the edges **
+     ** Only the following offset patterns are currently supported:  ABBA, AB, slitscan (several positions along the slit) **
+     ** if your  programme allow for very poor seeing conditions and/or your targets are very bright, you may want to change the size of the offset to 3.5 or even 4 arcsec (the two positions will be 7 or 8 arcsec apart). This will avoid overlaping of the wings of the PSF in the sky subtracted frame.
+- once you get one observation on a given grating setting done in your programme, copy and paste that one - so you will inherit the instrument configuration.
+
+Telluric standards:
+
+- Telluric standards are used for removing the atmosphere absorption lines: in this case, airmass match is very important. There are two ways of handling the telluric observations in Phoenix.
+     1) Create a template observation with the correct instrument configuration, but NO TARGET component. We will add an appropriate star from the bright star list (http://www.noao.edu/usgp/phoenix/telcor_south.html) as required. Add a note including information on:
+         - required airmass match (the default is within 0.1 of the effective airmass of the target observation)
+         - required S/N on the telluric (the default is that the tellurics wil lhave S/N&gt; 400)
+         - any other specific requirements about the data see below if you have specific requests in terms of the characteristics of the target.
+
+    2) Search for a telluric star yourself. This is required if you need a specific spectral type (or other target characteristic such as metallicity, rotation velocity etc) and very much appreciated even if not. If going this way, please try to pick a reasonably bright star for the telluric correction - the more time we spend on tellurics, the less time is available to observe yours (or others) science targets! Remember that the final S/N in your science spectrum after reduction will be affected by the telluric correction, so you need the telluric spectrum to have S/N higher than the final desired S/N on your science target.
+
+- Telluric observations will be taken immediatelly before or after the science target. If your science observation is very long (more than 1.5hr, you may want to define two telluric standards, one that provides a better airmass match if observed BEFORE the target, other that works for AFTER)  See the Gemini Webpages for more details:
+http://www.gemini.edu/sciops/instruments/phoenix/phoenixCalibrations.html
+http://www.gemini.edu/sciops/instruments/nir/specstandards
+
+-The offset pattern for tellurics SHOULD NOT match the offset pattern of your science targets.  Very bright targets can cause persistence on the Phoenix detector and complicate the processing of the data.
+
+Other calibrations:
+
+Please see the note "Darks, Flats, and Arcs" about wavelength calibrators
+</value>
+        </param>
+      </paramset>
+    </container>
+    <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="195e00fe-a627-46c9-8c19-d3d1f8285327" name="">
+      <paramset name="Observation" kind="dataObj">
+        <param name="title" value="Science Observation"/>
+        <param name="libraryId" value="1"/>
+        <param name="priority" value="LOW"/>
+        <param name="tooOverrideRapid" value="false"/>
+        <param name="phase2Status" value="PI_TO_COMPLETE"/>
+        <param name="qaState" value="UNDEFINED"/>
+        <param name="overrideQaState" value="false"/>
+      </paramset>
+      <container kind="obsComp" type="Instrument" version="2006B-1" subtype="Phoenix" key="c2af3a3a-55c1-4e2d-a97c-3f6cb0b2fa07" name="Phoenix">
+        <paramset name="Phoenix" kind="dataObj">
+          <param name="exposureTime" value="900.0"/>
+          <param name="posAngle" value="90"/>
+          <param name="coadds" value="1"/>
+          <param name="filter" value="K4396"/>
+          <param name="mask" value="MASK_3"/>
+          <param name="gratingWavelength" value="2.2789"/>
+          <param name="gratingWavenumber" value="4386.9"/>
+        </paramset>
+      </container>
+      <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="78df90b7-383e-48c0-a40b-97935ed98dff" name="Observing Log">
+        <paramset name="Observing Log" kind="dataObj">
+          <paramset name="obsQaRecord"/>
+        </paramset>
+      </container>
+      <container kind="obsExecLog" type="ObsLog" version="2009A-1" subtype="exec" key="e723683c-d051-4fcf-ae24-1247808497fc" name="Observation Exec Log">
+        <paramset name="Observation Exec Log" kind="dataObj">
+          <paramset name="obsExecRecord">
+            <paramset name="datasets"/>
+            <paramset name="events"/>
+            <paramset name="configMap"/>
+          </paramset>
+        </paramset>
+      </container>
+      <container kind="seqComp" type="Iterator" version="2012A-1" subtype="base" key="9a52f326-483f-431f-8bcc-b89747188878" name="Sequence">
+        <paramset name="Sequence" kind="dataObj"/>
+        <container kind="seqComp" type="Iterator" version="2009A-1" subtype="repeat" key="e86c532d-66f2-489e-b68e-fc3282c42e5a" name="Repeat">
+          <paramset name="Repeat" kind="dataObj">
+            <param name="repeatCount" value="1"/>
+          </paramset>
+          <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="6050ffd9-bf64-4887-b34f-06450825d7b2" name="Offset">
+            <paramset name="Offset" kind="dataObj">
+              <paramset name="offsets">
+                <paramset name="Offset0" sequence="0">
+                  <param name="p" value="0.0"/>
+                  <param name="q" value="-2.5"/>
+                  <param name="defaultGuideOption" value="on"/>
+                </paramset>
+                <paramset name="Offset1" sequence="1">
+                  <param name="p" value="0.0"/>
+                  <param name="q" value="2.5"/>
+                  <param name="defaultGuideOption" value="on"/>
+                </paramset>
+                <paramset name="Offset2" sequence="2">
+                  <param name="p" value="0.0"/>
+                  <param name="q" value="2.5"/>
+                  <param name="defaultGuideOption" value="on"/>
+                </paramset>
+                <paramset name="Offset3" sequence="3">
+                  <param name="p" value="0.0"/>
+                  <param name="q" value="-2.5"/>
+                  <param name="defaultGuideOption" value="on"/>
+                </paramset>
+              </paramset>
+            </paramset>
+            <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="3e181421-2ad7-4586-8a52-c1220525d46c" name="Observe">
+              <paramset name="Observe" kind="dataObj">
+                <param name="repeatCount" value="1"/>
+                <param name="class" value="SCIENCE"/>
+              </paramset>
+            </container>
+          </container>
+        </container>
+      </container>
+    </container>
+    <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="f9313614-c317-4d2e-8e1b-35ff018be805" name="">
+      <paramset name="Observation" kind="dataObj">
+        <param name="title" value="Telluric standard"/>
+        <param name="libraryId" value="2"/>
+        <param name="priority" value="LOW"/>
+        <param name="tooOverrideRapid" value="false"/>
+        <param name="phase2Status" value="PI_TO_COMPLETE"/>
+        <param name="qaState" value="UNDEFINED"/>
+        <param name="overrideQaState" value="false"/>
+      </paramset>
+      <container kind="obsComp" type="Instrument" version="2006B-1" subtype="Phoenix" key="a3bba7f9-4bb6-445e-8c1f-cd1e7ede0ea2" name="Phoenix">
+        <paramset name="Phoenix" kind="dataObj">
+          <param name="exposureTime" value="1.0"/>
+          <param name="posAngle" value="90"/>
+          <param name="coadds" value="1"/>
+          <param name="filter" value="K4396"/>
+          <param name="mask" value="MASK_3"/>
+          <param name="gratingWavelength" value="2.2789"/>
+          <param name="gratingWavenumber" value="4386.9"/>
+        </paramset>
+      </container>
+      <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="d0a2543a-2a36-4465-af56-63312db32642" name="Observing Log">
+        <paramset name="Observing Log" kind="dataObj">
+          <paramset name="obsQaRecord"/>
+        </paramset>
+      </container>
+      <container kind="obsExecLog" type="ObsLog" version="2009A-1" subtype="exec" key="5da6c96f-3ad5-4d0c-943c-4663c4abd7d6" name="Observation Exec Log">
+        <paramset name="Observation Exec Log" kind="dataObj">
+          <paramset name="obsExecRecord">
+            <paramset name="datasets"/>
+            <paramset name="events"/>
+            <paramset name="configMap"/>
+          </paramset>
+        </paramset>
+      </container>
+      <container kind="seqComp" type="Iterator" version="2012A-1" subtype="base" key="7d5eddb1-0f34-45b5-a3b1-544a2065c205" name="Sequence">
+        <paramset name="Sequence" kind="dataObj"/>
+        <container kind="seqComp" type="Iterator" version="2009A-1" subtype="repeat" key="d11af058-3d1d-4c99-a198-f65585bc3867" name="Repeat">
+          <paramset name="Repeat" kind="dataObj">
+            <param name="repeatCount" value="1"/>
+          </paramset>
+          <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="5e62b2d1-f88b-4056-bed2-e94cab9fc018" name="Offset">
+            <paramset name="Offset" kind="dataObj">
+              <paramset name="offsets">
+                <paramset name="Offset0" sequence="0">
+                  <param name="p" value="0.0"/>
+                  <param name="q" value="-4.0"/>
+                  <param name="defaultGuideOption" value="on"/>
+                </paramset>
+                <paramset name="Offset1" sequence="1">
+                  <param name="p" value="0.0"/>
+                  <param name="q" value="4.0"/>
+                  <param name="defaultGuideOption" value="on"/>
+                </paramset>
+                <paramset name="Offset2" sequence="2">
+                  <param name="p" value="0.0"/>
+                  <param name="q" value="4.0"/>
+                  <param name="defaultGuideOption" value="on"/>
+                </paramset>
+                <paramset name="Offset3" sequence="3">
+                  <param name="p" value="0.0"/>
+                  <param name="q" value="-4.0"/>
+                  <param name="defaultGuideOption" value="on"/>
+                </paramset>
+              </paramset>
+            </paramset>
+            <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="9229c496-5148-4a08-9f41-ee2e7c0136e4" name="Observe">
+              <paramset name="Observe" kind="dataObj">
+                <param name="repeatCount" value="1"/>
+                <param name="class" value="PARTNER_CAL"/>
+              </paramset>
+            </container>
+          </container>
+        </container>
+      </container>
+    </container>
+    <container kind="group" type="Group" version="2009A-1" subtype="group" key="aab364c3-da75-4d1a-a4ff-0908ea0470c1" name="Group">
+      <paramset name="Group" kind="dataObj">
+        <param name="title" value="Darks and Flats"/>
+        <param name="GroupType" value="TYPE_FOLDER"/>
+        <param name="libraryId" value=""/>
+      </paramset>
+      <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="a496282b-a229-4a62-8c0b-1c8515e15006" name="Note">
+        <paramset name="Note" kind="dataObj">
+          <param name="title" value="Darks, Flats, and Arcs"/>
+          <param name="NoteText">
+            <value>
+Flats are required for each grating setting, each time the setting is observed. Phoenix flats are Partner Calibrations, and are taken during the night, as repositioning of the grating is exact only to a few pixels, so the flats must be taken before the grating is moved to another setting.
+
+   *** PIs must take this into consideration when asking for observations of the same target in multiple settings to be taken in sequence, as they incurr in quite a large overhead for calibrations ***
+
+Darks are needed to process the flats and therefore must use the same observing time as the Flats themselves.
+
+How to use these observations:
+- copy the folder "Darks and Flats" to your programme
+- set the Phoenix configuration to the correct one (you can remove the placeholder and copy from a science observation, for example)
+- there is no need to set the exposure time in the flat or dark - those will be decided at the telescope by the observer, depending on the individual settings. Flats are usually taken on sets of 10-15, having 2000-2500 cts each, which yields a S/N~400.
+- you will need Flat/Dark observations for each grating setting requested. Please use different folders for each one.
+- set the observations to For Review
+
+As data are taken, the observer will clone the Flat/Dark observation as needed, which is why having them on different folders will help keeping the programme organized.  The YYYYMMDD date placeholder in the titles are used for internal bookkeeping and should NOT be filled in by PIs.
+
+A NOTE ON ARCS:
+
+Phoenix uses its own HollowCathod (ThAr) lamp, instead of the ones from the facility calibration unit. HOWEVER, the arc lines are few and sparse at this resolution. Wavelength calibration is best achieved using the telluric lines in the spectrum itself. If your programme contains observations in a region with few telluric lines, the spectrum of a K giant can be obtained to provide the wavelength reference. If your programme requires a very precise wavelength reference, and you are concerned about flexure effects, PLEASE CHECK the ThAr atlas  (http://www.noao.edu/usgp/phoenix/tharne/) to be sure that there are lines of sufficient brightness in the region.  Arc lamps are PROGRAM CALIBRATION and therefore will be charged against the programme.
+
+WAVELENGTH CALIBRATION IN L and M
+
+There are no arc calibrators in the L and M regions - the thermal emission from the lamp itself dominates the spectrum. However, the multitude of sky lines above 3mu provide more than enough reference for wavelength calibration.</value>
+          </param>
+        </paramset>
+      </container>
+      <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="c98b2b2b-3ed5-444d-957a-403b3308f226" name="">
+        <paramset name="Observation" kind="dataObj">
+          <param name="title" value="Darks - YYYYMMDD"/>
+          <param name="libraryId" value="3"/>
+          <param name="priority" value="LOW"/>
+          <param name="tooOverrideRapid" value="false"/>
+          <param name="phase2Status" value="PI_TO_COMPLETE"/>
+          <param name="qaState" value="UNDEFINED"/>
+          <param name="overrideQaState" value="false"/>
+        </paramset>
+        <container kind="obsComp" type="Telescope" version="2009B-1" subtype="targetEnv" key="eb5f025f-4831-4033-a0cc-991e6dcda1c8" name="Targets">
+          <paramset name="Targets" kind="dataObj">
+            <paramset name="targetEnv">
+              <paramset name="base">
+                <param name="name" value="Dark"/>
+                <param name="system" value="J2000"/>
+                <param name="epoch" value="2000.0" units="years"/>
+                <param name="c1" value="00:00:00.000"/>
+                <param name="c2" value="00:00:00.00"/>
+                <param name="pm1" value="0.0" units="milli-arcsecs/year"/>
+                <param name="pm2" value="0.0" units="milli-arcsecs/year"/>
+                <param name="parallax" value="0.0" units="arcsecs"/>
+                <param name="rv" value="0.0" units="km/sec"/>
+              </paramset>
+              <paramset name="guideEnv">
+                <param name="active">
+                  <value sequence="0">PWFS1</value>
+                  <value sequence="1">PWFS2</value>
+                </param>
+              </paramset>
+            </paramset>
+          </paramset>
+        </container>
+        <container kind="obsComp" type="Instrument" version="2006B-1" subtype="Phoenix" key="be7fdcd3-4a6b-46be-97c9-6b061440541b" name="Phoenix">
+          <paramset name="Phoenix" kind="dataObj">
+            <param name="exposureTime" value="1.0"/>
+            <param name="posAngle" value="90"/>
+            <param name="coadds" value="1"/>
+            <param name="filter" value="H6420"/>
+            <param name="mask" value="MASK_3"/>
+            <param name="gratingWavelength" value="1.555"/>
+            <param name="gratingWavenumber" value="6429.13"/>
+          </paramset>
+        </container>
+        <container kind="obsComp" type="Scheduling" version="2009A-1" subtype="conditions" key="a42bd36d-fcf4-4c46-b00c-270d15676b80" name="Observing Conditions">
+          <paramset name="Observing Conditions" kind="dataObj">
+            <param name="CloudCover" value="ANY"/>
+            <param name="ImageQuality" value="ANY"/>
+            <param name="SkyBackground" value="ANY"/>
+            <param name="WaterVapor" value="ANY"/>
+            <param name="ElevationConstraintType" value="NONE"/>
+            <param name="ElevationConstraintMin" value="0.0"/>
+            <param name="ElevationConstraintMax" value="0.0"/>
+            <paramset name="timing-window-list"/>
+          </paramset>
+        </container>
+        <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="749d08e2-c718-431f-8fb0-063a8e25b6da" name="Observing Log">
+          <paramset name="Observing Log" kind="dataObj">
+            <paramset name="obsQaRecord"/>
+          </paramset>
+        </container>
+        <container kind="obsExecLog" type="ObsLog" version="2009A-1" subtype="exec" key="bbd8d1f5-e381-4779-b3ef-c57eacaaa58a" name="Observation Exec Log">
+          <paramset name="Observation Exec Log" kind="dataObj">
+            <paramset name="obsExecRecord">
+              <paramset name="datasets"/>
+              <paramset name="events"/>
+              <paramset name="configMap"/>
+            </paramset>
+          </paramset>
+        </container>
+        <container kind="seqComp" type="Iterator" version="2012A-1" subtype="base" key="687ec007-ea98-4da1-a828-2a7e3b78f198" name="Sequence">
+          <paramset name="Sequence" kind="dataObj"/>
+          <container kind="seqComp" type="Observer" version="2009A-1" subtype="dark" key="844e9839-df1b-45d6-a5ef-cc7ae38a4e0d" name="Manual Dark">
+            <paramset name="Manual Dark" kind="dataObj">
+              <param name="repeatCount" value="10"/>
+              <param name="class" value="DAY_CAL"/>
+              <param name="coadds" value="1"/>
+              <param name="exposureTime" value="1.0"/>
+            </paramset>
+          </container>
+        </container>
+      </container>
+      <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="3e4e5408-74ee-44d9-bec2-f8a139099ee2" name="">
+        <paramset name="Observation" kind="dataObj">
+          <param name="title" value="Flats - YYYYMMDD"/>
+          <param name="libraryId" value="4"/>
+          <param name="priority" value="LOW"/>
+          <param name="tooOverrideRapid" value="false"/>
+          <param name="phase2Status" value="PI_TO_COMPLETE"/>
+          <param name="qaState" value="UNDEFINED"/>
+          <param name="overrideQaState" value="false"/>
+        </paramset>
+        <container kind="obsComp" type="Telescope" version="2009B-1" subtype="targetEnv" key="98e3f990-21e8-4014-99a4-e5dc382e2f0e" name="Targets">
+          <paramset name="Targets" kind="dataObj">
+            <paramset name="targetEnv">
+              <paramset name="base">
+                <param name="name" value="Flat"/>
+                <param name="system" value="J2000"/>
+                <param name="epoch" value="2000.0" units="years"/>
+                <param name="c1" value="00:00:00.000"/>
+                <param name="c2" value="00:00:00.00"/>
+                <param name="pm1" value="0.0" units="milli-arcsecs/year"/>
+                <param name="pm2" value="0.0" units="milli-arcsecs/year"/>
+                <param name="parallax" value="0.0" units="arcsecs"/>
+                <param name="rv" value="0.0" units="km/sec"/>
+              </paramset>
+              <paramset name="guideEnv">
+                <param name="active">
+                  <value sequence="0">PWFS1</value>
+                  <value sequence="1">PWFS2</value>
+                </param>
+              </paramset>
+            </paramset>
+          </paramset>
+        </container>
+        <container kind="obsComp" type="Instrument" version="2006B-1" subtype="Phoenix" key="d8589841-0a52-4a8b-b9b1-ee70813d3810" name="Phoenix">
+          <paramset name="Phoenix" kind="dataObj">
+            <param name="exposureTime" value="1.0"/>
+            <param name="posAngle" value="90"/>
+            <param name="coadds" value="1"/>
+            <param name="filter" value="H6420"/>
+            <param name="mask" value="MASK_3"/>
+            <param name="gratingWavelength" value="1.555"/>
+            <param name="gratingWavenumber" value="6429.13"/>
+          </paramset>
+        </container>
+        <container kind="obsComp" type="Scheduling" version="2009A-1" subtype="conditions" key="5574c54d-e59c-435f-968a-e23cb1b431f9" name="Observing Conditions">
+          <paramset name="Observing Conditions" kind="dataObj">
+            <param name="CloudCover" value="ANY"/>
+            <param name="ImageQuality" value="ANY"/>
+            <param name="SkyBackground" value="ANY"/>
+            <param name="WaterVapor" value="ANY"/>
+            <param name="ElevationConstraintType" value="NONE"/>
+            <param name="ElevationConstraintMin" value="0.0"/>
+            <param name="ElevationConstraintMax" value="0.0"/>
+            <paramset name="timing-window-list"/>
+          </paramset>
+        </container>
+        <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="bda269c4-f2ec-4d74-9fed-b7c2745f5780" name="Observing Log">
+          <paramset name="Observing Log" kind="dataObj">
+            <paramset name="obsQaRecord"/>
+          </paramset>
+        </container>
+        <container kind="obsExecLog" type="ObsLog" version="2009A-1" subtype="exec" key="b7ca8e9e-a742-4e9d-8c1e-4490f522a277" name="Observation Exec Log">
+          <paramset name="Observation Exec Log" kind="dataObj">
+            <paramset name="obsExecRecord">
+              <paramset name="datasets"/>
+              <paramset name="events"/>
+              <paramset name="configMap"/>
+            </paramset>
+          </paramset>
+        </container>
+        <container kind="seqComp" type="Iterator" version="2012A-1" subtype="base" key="b3e0442d-e87b-46ce-afd1-7131a7429c1e" name="Sequence">
+          <paramset name="Sequence" kind="dataObj"/>
+          <container kind="seqComp" type="Observer" version="2009A-1" subtype="GemFlat" key="2cd7d141-05ad-4aa9-a633-0cc685866de4" name="Manual Flat/Arc">
+            <paramset name="Manual Flat/Arc" kind="dataObj">
+              <param name="repeatCount" value="10"/>
+              <param name="class" value="PARTNER_CAL"/>
+              <param name="coadds" value="1"/>
+              <param name="exposureTime" value="1.0"/>
+              <param name="lamp" value="QUARTZ"/>
+              <param name="shutter" value="CLOSED"/>
+              <param name="filter" value="NONE"/>
+              <param name="diffuser" value="VISIBLE"/>
+            </paramset>
+          </container>
+        </container>
+      </container>
+    </container>
+  </container>
+  <container kind="versions" type="versions" version="1.0">
+    <paramset name="node">
+      <param name="key" value="687ec007-ea98-4da1-a828-2a7e3b78f198"/>
+      <param name="60c518c0-8fcf-46e7-a014-13bd36f2f346" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="749d08e2-c718-431f-8fb0-063a8e25b6da"/>
+      <param name="60c518c0-8fcf-46e7-a014-13bd36f2f346" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="9e889ae4-d2b8-423b-ba4f-5c0a5d276775"/>
+      <param name="60c518c0-8fcf-46e7-a014-13bd36f2f346" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="6050ffd9-bf64-4887-b34f-06450825d7b2"/>
+      <param name="60c518c0-8fcf-46e7-a014-13bd36f2f346" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="aab364c3-da75-4d1a-a4ff-0908ea0470c1"/>
+      <param name="60c518c0-8fcf-46e7-a014-13bd36f2f346" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="f00516a1-ae89-4229-a9c5-baf129c1eff4"/>
+      <param name="60c518c0-8fcf-46e7-a014-13bd36f2f346" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="d0a2543a-2a36-4465-af56-63312db32642"/>
+      <param name="60c518c0-8fcf-46e7-a014-13bd36f2f346" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="c2af3a3a-55c1-4e2d-a97c-3f6cb0b2fa07"/>
+      <param name="60c518c0-8fcf-46e7-a014-13bd36f2f346" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="d11af058-3d1d-4c99-a198-f65585bc3867"/>
+      <param name="60c518c0-8fcf-46e7-a014-13bd36f2f346" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="61cc104a-6edf-4727-925a-4f40ee162809"/>
+      <param name="60c518c0-8fcf-46e7-a014-13bd36f2f346" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="5da6c96f-3ad5-4d0c-943c-4663c4abd7d6"/>
+      <param name="60c518c0-8fcf-46e7-a014-13bd36f2f346" value="2"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="5e62b2d1-f88b-4056-bed2-e94cab9fc018"/>
+      <param name="60c518c0-8fcf-46e7-a014-13bd36f2f346" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="78df90b7-383e-48c0-a40b-97935ed98dff"/>
+      <param name="60c518c0-8fcf-46e7-a014-13bd36f2f346" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="2cd7d141-05ad-4aa9-a633-0cc685866de4"/>
+      <param name="60c518c0-8fcf-46e7-a014-13bd36f2f346" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="b3e0442d-e87b-46ce-afd1-7131a7429c1e"/>
+      <param name="60c518c0-8fcf-46e7-a014-13bd36f2f346" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="5574c54d-e59c-435f-968a-e23cb1b431f9"/>
+      <param name="60c518c0-8fcf-46e7-a014-13bd36f2f346" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="195e00fe-a627-46c9-8c19-d3d1f8285327"/>
+      <param name="60c518c0-8fcf-46e7-a014-13bd36f2f346" value="33"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="9a52f326-483f-431f-8bcc-b89747188878"/>
+      <param name="60c518c0-8fcf-46e7-a014-13bd36f2f346" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="fdb137f0-eb8a-4753-9ff4-de8e4df7edbc"/>
+      <param name="60c518c0-8fcf-46e7-a014-13bd36f2f346" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="e86c532d-66f2-489e-b68e-fc3282c42e5a"/>
+      <param name="60c518c0-8fcf-46e7-a014-13bd36f2f346" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="bbd8d1f5-e381-4779-b3ef-c57eacaaa58a"/>
+      <param name="60c518c0-8fcf-46e7-a014-13bd36f2f346" value="2"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="3e181421-2ad7-4586-8a52-c1220525d46c"/>
+      <param name="60c518c0-8fcf-46e7-a014-13bd36f2f346" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="a496282b-a229-4a62-8c0b-1c8515e15006"/>
+      <param name="60c518c0-8fcf-46e7-a014-13bd36f2f346" value="50"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="bda269c4-f2ec-4d74-9fed-b7c2745f5780"/>
+      <param name="60c518c0-8fcf-46e7-a014-13bd36f2f346" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="8d5ed073-23dd-4eae-8e66-d071fa79292f"/>
+      <param name="60c518c0-8fcf-46e7-a014-13bd36f2f346" value="15"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="844e9839-df1b-45d6-a5ef-cc7ae38a4e0d"/>
+      <param name="60c518c0-8fcf-46e7-a014-13bd36f2f346" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="8025163c-02be-440b-b921-2c422e718721"/>
+      <param name="60c518c0-8fcf-46e7-a014-13bd36f2f346" value="42"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="a19cddd9-ce91-48cd-967b-535aa05993a0"/>
+      <param name="60c518c0-8fcf-46e7-a014-13bd36f2f346" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="c98b2b2b-3ed5-444d-957a-403b3308f226"/>
+      <param name="60c518c0-8fcf-46e7-a014-13bd36f2f346" value="5"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="f9313614-c317-4d2e-8e1b-35ff018be805"/>
+      <param name="60c518c0-8fcf-46e7-a014-13bd36f2f346" value="26"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="9229c496-5148-4a08-9f41-ee2e7c0136e4"/>
+      <param name="60c518c0-8fcf-46e7-a014-13bd36f2f346" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="b1573f3f-f574-40f4-95ca-3c14132b869a"/>
+      <param name="60c518c0-8fcf-46e7-a014-13bd36f2f346" value="313"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="98e3f990-21e8-4014-99a4-e5dc382e2f0e"/>
+      <param name="60c518c0-8fcf-46e7-a014-13bd36f2f346" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="a42bd36d-fcf4-4c46-b00c-270d15676b80"/>
+      <param name="60c518c0-8fcf-46e7-a014-13bd36f2f346" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="3e4e5408-74ee-44d9-bec2-f8a139099ee2"/>
+      <param name="60c518c0-8fcf-46e7-a014-13bd36f2f346" value="5"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="7d5eddb1-0f34-45b5-a3b1-544a2065c205"/>
+      <param name="60c518c0-8fcf-46e7-a014-13bd36f2f346" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="be7fdcd3-4a6b-46be-97c9-6b061440541b"/>
+      <param name="60c518c0-8fcf-46e7-a014-13bd36f2f346" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="c8697868-c207-4e59-8765-b438ece77e38"/>
+      <param name="60c518c0-8fcf-46e7-a014-13bd36f2f346" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="d8589841-0a52-4a8b-b9b1-ee70813d3810"/>
+      <param name="60c518c0-8fcf-46e7-a014-13bd36f2f346" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="a3bba7f9-4bb6-445e-8c1f-cd1e7ede0ea2"/>
+      <param name="60c518c0-8fcf-46e7-a014-13bd36f2f346" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="e723683c-d051-4fcf-ae24-1247808497fc"/>
+      <param name="60c518c0-8fcf-46e7-a014-13bd36f2f346" value="2"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="eb5f025f-4831-4033-a0cc-991e6dcda1c8"/>
+      <param name="60c518c0-8fcf-46e7-a014-13bd36f2f346" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="b7ca8e9e-a742-4e9d-8c1e-4490f522a277"/>
+      <param name="60c518c0-8fcf-46e7-a014-13bd36f2f346" value="2"/>
+    </paramset>
+  </container>
+</document>

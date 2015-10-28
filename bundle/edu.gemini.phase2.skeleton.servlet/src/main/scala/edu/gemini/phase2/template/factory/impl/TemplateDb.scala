@@ -34,6 +34,7 @@ object TemplateDb {
     "NICI_BP.xml",
     "NIFS_BP.xml",
     "NIRI_BP.xml",
+    "PHOENIX_BP.xml",
     "TEXES_BP.xml",
     "TRECS_BP.xml",
     "VISITOR_BP.xml"
