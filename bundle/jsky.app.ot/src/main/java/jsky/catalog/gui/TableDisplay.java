@@ -44,7 +44,9 @@ public class TableDisplay extends JPanel
         @Override
         public void setValue(Object value) {
             if (value instanceof Double) {
-                setText(String.format("%.2f", value));
+                setText(String.format("%.2f", (Double)value));
+            } else {
+                setText("");
             }
         }
     };

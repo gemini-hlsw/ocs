@@ -29,6 +29,7 @@ class CandidateGuideStarsTable extends TableDisplay {
                 try {
                     selectRow(e.getRow());
                 } catch (Exception ex) {
+                    // Ignore
                 }
                 _ignoreSelection = false;
             }
@@ -40,6 +41,7 @@ class CandidateGuideStarsTable extends TableDisplay {
                 try {
                     deselectRow(e.getRow());
                 } catch (Exception ex) {
+                    // Ignore
                 }
                 _ignoreSelection = false;
             }
