@@ -4,6 +4,7 @@ import java.io.File
 import javax.swing.ImageIcon
 
 import edu.gemini.catalog.ui.PreferredSizeFrame
+import edu.gemini.shared.gui.textComponent.TextRenderer
 import edu.gemini.ui.miglayout.MigPanel
 import edu.gemini.ui.miglayout.constraints._
 import edu.gemini.shared.util.immutable.ScalaConverters._
@@ -14,7 +15,10 @@ import jsky.util.Preferences
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.swing._
-import scala.swing.event.ButtonClicked
+import scala.swing.event.{SelectionChanged, ButtonClicked}
+
+import scalaz._
+import Scalaz._
 
 object ObsCatalogFrame extends Frame with PreferredSizeFrame {
   val instance = this
@@ -30,11 +34,27 @@ object ObsCatalogFrame extends Frame with PreferredSizeFrame {
   adjustSize(true)
 }
 
+protected object ObsQueryPreset {
+
+  sealed trait ObsQueryPreset {
+    val name: String
+  }
+
+  case object SaveNewPreset extends ObsQueryPreset {
+    val name = "Save New Preset..."
+  }
+
+  case class SavedPreset(name: String) extends ObsQueryPreset {}
+
+}
+
 /**
   * Defines the user interface for querying an ObsCatalog.
   * @param catalog the catalog, for which a user interface component is being generated
   */
 final class ObsCatalogQueryTool(catalog: Catalog) {
+  import ObsQueryPreset._
+
   val PREF_KEY = classOf[ObsCatalogQueryTool].getName
 
   val queryPanel = new ObsCatalogQueryPanel(catalog, 6)
@@ -48,6 +68,17 @@ final class ObsCatalogQueryTool(catalog: Catalog) {
             Preferences.set(PREF_KEY + ".remote", selected)
         }
       }
+
+  val presetsCB = new ComboBox[ObsQueryPreset](List(SaveNewPreset)) with TextRenderer[ObsQueryPreset] {
+    override def text(a: ObsQueryPreset): String = ~Option(a).map(_.name)
+
+    listenTo(selection)
+
+    reactions += {
+      case SelectionChanged(e) if selection.item == SaveNewPreset =>
+        queryPanel.storeSettings()
+    }
+  }
 
   val toolsButton = new Button("") {
     tooltip = "Preferences..."
@@ -75,6 +106,7 @@ final class ObsCatalogQueryTool(catalog: Catalog) {
 
   val buttonPanel: Component = new MigPanel(LC().fill().insets(0)) {
       add(toolsButton, CC().alignX(RightAlign))
+      add(presetsCB, CC().alignX(RightAlign).growY())
       add(remote, CC().alignX(RightAlign).pushX())
       add(queryButton, CC().alignX(RightAlign))
     }
