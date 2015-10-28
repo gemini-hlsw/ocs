@@ -313,6 +313,15 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
       reactions += {
         case SelectionChanged(_) =>
           updateGuideSpeedText()
+          val t = selection.item.query.headOption.collect {
+            case ConeSearchCatalogQuery(_, _, _, mc, _) => mc
+          }
+          t.foreach { m =>
+            magnitudeControls.clear()
+            magnitudeControls ++= m.zipWithIndex.flatMap(Function.tupled(filterControls))
+            buildLayout(currentFilters)
+            revalidateFrame()
+          }
       }
     }
     lazy val sbBox = new ComboBox(List(SPSiteQuality.SkyBackground.values(): _*)) with TextRenderer[SPSiteQuality.SkyBackground] {
@@ -527,8 +536,7 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
 
         // Start with the guider's query and update it with the values on the UI
         val calculatedQuery = guider.selection.item.query.headOption.collect {
-          case c: ConeSearchCatalogQuery if currentFilters.nonEmpty => c.copy(base = coordinates, radiusConstraint = radiusConstraint, magnitudeConstraints = currentFilters, catalog = selectedCatalog)
-          case c: ConeSearchCatalogQuery                            => c.copy(base = coordinates, radiusConstraint = radiusConstraint, catalog = selectedCatalog) // Use the magnitude constraints from the guider
+          case c: ConeSearchCatalogQuery => c.copy(base = coordinates, radiusConstraint = radiusConstraint, magnitudeConstraints = currentFilters, catalog = selectedCatalog)
         }
         (info.some, calculatedQuery.getOrElse(defaultQuery))
       }
