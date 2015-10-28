@@ -83,7 +83,7 @@ public final class MichelleRecipe implements ImagingRecipe, SpectroscopyRecipe {
             add(Recipe$.MODULE$.createSignalChart(r, 0));
             add(Recipe$.MODULE$.createS2NChart(r, 0));
         }};
-        return ItcSpectroscopyResult.apply(dataSets, Recipe$.MODULE$.collectWarnings(r));
+        return ItcSpectroscopyResult.apply(dataSets, Warning.collectWarnings(r));
     }
 
     public SpectroscopyResult calculateSpectroscopy() {

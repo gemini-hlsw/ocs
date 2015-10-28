@@ -212,14 +212,14 @@ public final class Nifs extends Instrument {
         return _readNoiseValue;
     }
 
-    @Override public List<LimitWarning> warnings() {
+    @Override public List<WarningRule> warnings() {
         // values are taken from instrument's web documentation
         final double WellDepth      = 134400;
         final double LinearityLimit = 106400;
 
-        return new ArrayList<LimitWarning>() {{
-            add(new LinearityLimit(LinearityLimit, 0.80));
-            add(new SaturationLimit(WellDepth, 0.80));
+        return new ArrayList<WarningRule>() {{
+            add(new LinearityLimitRule(LinearityLimit, 0.80));
+            add(new SaturationLimitRule(WellDepth, 0.80));
         }};
     }
 

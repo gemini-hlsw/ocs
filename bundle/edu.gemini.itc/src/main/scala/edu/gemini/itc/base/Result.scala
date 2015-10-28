@@ -24,37 +24,6 @@ sealed trait Result {
   val conditions  = parameters.conditions
 }
 
-/* Warning limits */
-sealed trait LimitWarning {
-  def message(value: Double): String
-  def limit: Double
-  def warnAtFraction: Double         // e.g. 0.8 = 80%
-  def value(r: Result): Double      // extraction method to get value from result
-
-  def warnLevel                     = limit * warnAtFraction
-  def warn(value: Double): Boolean  = value >= warnLevel
-  def percentOfLimit(value: Double) = (value / limit ) * 100.0
-  def warning(r: Result) = {
-    val v = value(r)
-    if (warn(v)) Some(ItcWarning(message(v))) else None
-  }
-
-}
-
-sealed trait PeakPixelLimit extends LimitWarning {
-  def value(r: Result): Double = r.peakPixelCount
-}
-
-final case class SaturationLimit(limit: Double, warnAtFraction: Double) extends PeakPixelLimit {
-  def message(value: Double) = f"Peak pixel count is ${percentOfLimit(value)}%.0f%% of the well depth limit of $limit%.0f e-."
-}
-final case class GainLimit(limit: Double, warnAtFraction: Double) extends PeakPixelLimit {
-  def message(value: Double) = f"Peak pixel count is ${percentOfLimit(value)}%.0f%% of the gain limit of $limit%.0f e-."
-}
-final case class LinearityLimit(limit: Double, warnAtFraction: Double) extends PeakPixelLimit {
-  def message(value: Double) = f"Peak pixel count is ${percentOfLimit(value)}%.0f%% of the linearity limit of $limit%.0f e-."
-}
-
 /* Internal object for imaging results. */
 final case class ImagingResult(
                       parameters:       ItcParameters,

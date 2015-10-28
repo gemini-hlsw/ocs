@@ -7,9 +7,6 @@ import edu.gemini.itc.shared._
 
 import scala.collection.JavaConversions._
 
-import scalaz._
-import Scalaz._
-
 sealed trait Recipe
 
 trait ImagingRecipe extends Recipe {
@@ -76,30 +73,15 @@ object Recipe {
   }
 
 
-  // warnings
-
-  def collectGenericWarnings(r: Result): List[ItcWarning] = {
-      r.instrument.warnings().flatMap(_.warning(r)).toList
-  }
-
-  def collectWarnings(r: ImagingResult): List[ItcWarning] = {
-    collectGenericWarnings(r) ++ r.instrument.imagingWarnings(r).toList
-  }
-
-  def collectWarnings(r: SpectroscopyResult): List[ItcWarning] = {
-    collectGenericWarnings(r) ++ r.instrument.spectroscopyWarnings(r).toList
-  }
-
-  // Helper
-
   def toImgData(result: ImagingResult): ImgData = result.is2nCalc match {
-    case i: ImagingS2NMethodACalculation       => ImgData(i.singleSNRatio(), i.totalSNRatio(), result.peakPixelCount, collectWarnings(result))
-    case i: ImagingPointS2NMethodBCalculation  => ImgData(0.0 /* TODO value not known for this mode */, i.effectiveS2N(), result.peakPixelCount, collectWarnings(result))
+    case i: ImagingS2NMethodACalculation       => ImgData(i.singleSNRatio(), i.totalSNRatio(), result.peakPixelCount, Warning.collectWarnings(result))
+    case i: ImagingPointS2NMethodBCalculation  => ImgData(0.0 /* TODO value not known for this mode */, i.effectiveS2N(), result.peakPixelCount, Warning.collectWarnings(result))
     case _                                     => throw new NotImplementedError("unknown s2n calc method")
   }
 
   def serviceResult(r: ImagingResult): ItcImagingResult = ItcImagingResult(List(toImgData(r)))
 
   def serviceResult(r: Array[ImagingResult]): ItcImagingResult = ItcImagingResult(r.map(toImgData).toList)
+
 }
 

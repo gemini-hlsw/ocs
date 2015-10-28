@@ -1,8 +1,7 @@
 package edu.gemini.itc.gmos;
 
-import edu.gemini.itc.base.GainLimit;
-import edu.gemini.itc.base.SaturationLimit;
-import edu.gemini.itc.base.LimitWarning;
+import edu.gemini.itc.base.SaturationLimitRule;
+import edu.gemini.itc.base.WarningRule;
 import edu.gemini.itc.shared.GmosParameters;
 import edu.gemini.itc.shared.ObservationDetails;
 import edu.gemini.spModel.gemini.gmos.InstGmosNorth;
@@ -53,13 +52,13 @@ public final class GmosNorth extends Gmos {
         return DETECTOR_CCD_NAMES;
     }
 
-    @Override public List<LimitWarning> warnings() {
+    @Override public List<WarningRule> warnings() {
         // value taken from instrument's web documentation
         final double WellDepth = 105000;
 
-        return new ArrayList<LimitWarning>() {{
-            add(new SaturationLimit(WellDepth * getSpatialBinning() * getSpectralBinning(), 0.95));
-            add(new GainLimit(getADSaturation() * InstGmosNorth.getMeanGain(gp.ampGain(), gp.ampReadMode(), gp.ccdType()), 0.95));
+        return new ArrayList<WarningRule>() {{
+            add(new SaturationLimitRule(WellDepth * getSpatialBinning() * getSpectralBinning(), 0.95));
+            add(new AdLimitRule(getADSaturation() * InstGmosNorth.getMeanGain(gp.ampGain(), gp.ampReadMode(), gp.ccdType()), 0.95));
         }};
     }
 

@@ -75,20 +75,11 @@ public final class Gnirs extends Instrument {
         }
 
         //set read noise by exporsure time
-
-        // TODO! THIS CAN BE SIMPLIFIED!
-
         if (odp.getExposureTime() <= 1.0) {
-            _wellDepth = DEEP_WELL;
+            _wellDepth      = DEEP_WELL;
             _linearityLimit = DEEP_WELL_LINEARTY_LIMIT;
-        } else if (odp.getExposureTime() <= 20.0) {
-            _wellDepth = SHALLOW_WELL;
-            _linearityLimit = SHALLOW_WELL_LINEARITY_LIMIT;
-        } else if (odp.getExposureTime() <= 60.0) {
-            _wellDepth = SHALLOW_WELL;
-            _linearityLimit = SHALLOW_WELL_LINEARITY_LIMIT;
         } else {
-            _wellDepth = SHALLOW_WELL;
+            _wellDepth      = SHALLOW_WELL;
             _linearityLimit = SHALLOW_WELL_LINEARITY_LIMIT;
         }
 
@@ -300,10 +291,10 @@ public final class Gnirs extends Instrument {
         return !params.crossDispersed().equals(GNIRSParams.CrossDispersed.NO);
     }
 
-    @Override public List<LimitWarning> warnings() {
-        return new ArrayList<LimitWarning>() {{
-            add(new LinearityLimit(_wellDepth, 0.80));
-            add(new SaturationLimit(_linearityLimit, 0.80));
+    @Override public List<WarningRule> warnings() {
+        return new ArrayList<WarningRule>() {{
+            add(new LinearityLimitRule(_wellDepth, 0.80));
+            add(new SaturationLimitRule(_linearityLimit, 0.80));
         }};
     }
 

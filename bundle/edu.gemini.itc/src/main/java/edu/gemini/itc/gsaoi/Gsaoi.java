@@ -97,14 +97,14 @@ public final class Gsaoi extends Instrument {
         return INSTR_PREFIX;
     }
 
-    @Override public List<LimitWarning> warnings() {
+    @Override public List<WarningRule> warnings() {
         // values are taken from instrument's web documentation
         final double WellDepth      = 126000;
         final double LinearityLimit = 96000;
 
-        return new ArrayList<LimitWarning>() {{
-            add(new LinearityLimit(LinearityLimit, 0.80));
-            add(new SaturationLimit(WellDepth, 0.85));
+        return new ArrayList<WarningRule>() {{
+            add(new LinearityLimitRule(LinearityLimit, 0.80));
+            add(new SaturationLimitRule(WellDepth, 0.85));
         }};
     }
 

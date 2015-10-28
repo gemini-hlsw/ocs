@@ -24,7 +24,6 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
 
     private final ItcParameters p;
     private final Gmos mainInstrument;
-    private final GmosParameters gmosParameters;
     private final SourceDefinition _sdParameters;
     private final ObservationDetails _obsDetailParameters;
     private final ObservingConditions _obsConditionParameters;
@@ -38,7 +37,6 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
     {
         this.p                  = p;
         mainInstrument          = createGmos(instr, p.observation());
-        gmosParameters          = instr;
         _sdParameters           = p.source();
         _obsDetailParameters    = p.observation();
         _obsConditionParameters = p.conditions();
@@ -57,7 +55,7 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
             add(createGmosChart(r, 0));
             add(createGmosChart(r, 1));
         }};
-        return ItcSpectroscopyResult.apply(dataSets, Recipe$.MODULE$.collectWarnings(r[0]));
+        return ItcSpectroscopyResult.apply(dataSets, Warning.collectWarnings(r[0]));
     }
 
     public SpectroscopyResult[] calculateSpectroscopy() {
