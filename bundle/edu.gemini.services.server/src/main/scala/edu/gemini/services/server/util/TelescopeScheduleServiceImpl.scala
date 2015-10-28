@@ -1,24 +1,21 @@
 package edu.gemini.services.server.util
 
+import java.net.URI
+
 import edu.gemini.pot.sp.SPComponentType
-import edu.gemini.services.client.Calendar.Entry
+import edu.gemini.services.client.Calendar.{AllDayEvent, Entry}
+import edu.gemini.services.client.TelescopeSchedule.{LaserConstraint, LaserSchedule, ShutdownSchedule, _}
 import edu.gemini.services.client._
 import edu.gemini.services.server.telescope.LttsService
 import edu.gemini.skycalc.TimeUtils
 import edu.gemini.spModel.core.ProgramId
 import edu.gemini.spModel.gemini.inst.InstRegistry
 import edu.gemini.util.skycalc.calc.Interval
-import edu.gemini.services.client.TelescopeSchedule._
-import edu.gemini.services.client.TelescopeSchedule.LaserConstraint
-import edu.gemini.services.client.TelescopeSchedule.FastTurnaroundSchedule
-import edu.gemini.services.client.Calendar.AllDayEvent
-import edu.gemini.services.client.TelescopeSchedule.ShutdownSchedule
-import edu.gemini.services.client.TelescopeSchedule.LaserSchedule
+
 import scala.collection.JavaConversions._
 import scala.concurrent.Await
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
-import java.net.URI
 
 /**
  * Implementation for the telescope schedule service.
@@ -46,7 +43,6 @@ class TelescopeScheduleServiceImpl(calendarService: CalendarService, lttsService
       instrumentSchedules(events, range),
       programSchedules(events),
       laserSchedule,
-      fastTurnaroundSchedule(events),
       shutdownSchedule(events),
       weatherSchedule(events),
       engineeringSchedule(events)
@@ -72,7 +68,6 @@ class TelescopeScheduleServiceImpl(calendarService: CalendarService, lttsService
   // ====
 
   private def laserSchedule(range: Interval) = lttsService.getNights(range).map(n => LaserSchedule(n.map(LaserConstraint)))
-  private def fastTurnaroundSchedule(events: Seq[Entry]) = FastTurnaroundSchedule(filter(events, "Fast Turnaround").map(FastTurnaroundConstraint))
   private def shutdownSchedule(events: Seq[Entry]) = ShutdownSchedule(filter(events, "Shutdown").map(ShutdownConstraint))
   private def engineeringSchedule(events: Seq[Entry]) = EngineeringSchedule(filter(events, "Engineering").map(EngineeringConstraint))
   private def weatherSchedule(events: Seq[Entry]) = WeatherSchedule(filter(events, "Weather").map(WeatherConstraint))
@@ -123,7 +118,6 @@ class TelescopeScheduleServiceImpl(calendarService: CalendarService, lttsService
     case c: InstrumentConstraint => s"Instrument ${c.instrument.readableStr} - Off"
     case c: ProgramConstraint => s"Program ${c.id}"
     case c: LaserConstraint => "Laser"
-    case c: FastTurnaroundConstraint => "Fast Turnaround"
     case c: ShutdownConstraint => "Shutdown"
     case c: EngineeringConstraint => "Engineering"
     case c: WeatherConstraint => "Weather"

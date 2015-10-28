@@ -49,8 +49,8 @@ class ConstraintsSelector(ctx: QvContext) extends Publisher {
       Set(EngineeringConstraint, ShutdownConstraint, WeatherConstraint)),
     ConstraintBtn(
       "Programs",
-      "Take fast turnaround, laser availability and classical observing restrictions into account.",
-      Set(FastTurnaroundConstraint, LaserConstraint, ProgramConstraint))
+      "Take laser availability and classical observing restrictions into account.",
+      Set(LaserConstraint, ProgramConstraint))
   )
 
   private val buttons = mainConstraintsBtns ++ scheduleConstraintsBtns

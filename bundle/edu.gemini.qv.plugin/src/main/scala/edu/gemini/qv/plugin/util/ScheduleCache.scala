@@ -36,7 +36,6 @@ object ScheduleCache {
 
   sealed abstract class ScheduleConstraint(val label: String) extends ConstraintType
   object InstrumentConstraint extends ScheduleConstraint("Instrument")
-  object FastTurnaroundConstraint extends ScheduleConstraint("Fast Turnaround")
   object ProgramConstraint extends ScheduleConstraint("Program")
   object LaserConstraint extends ScheduleConstraint("Laser")
   object ShutdownConstraint extends ScheduleConstraint("Shutdown")
@@ -44,20 +43,20 @@ object ScheduleCache {
   object EngineeringConstraint extends ScheduleConstraint("Engineering")
 
   val Constraints = Set(
-    InstrumentConstraint, FastTurnaroundConstraint, ProgramConstraint,
-    LaserConstraint, ShutdownConstraint, WeatherConstraint, EngineeringConstraint
+    InstrumentConstraint, ProgramConstraint, LaserConstraint,
+    ShutdownConstraint, WeatherConstraint, EngineeringConstraint
   )
 
 }
 
 /**
- *
+ * This cache stores all scheduling constraints which are currently stored in a Google calendar and
+ * makes them available as "solutions", i.e. objects which define a set of time spans.
  */
 class ScheduleCache extends Publisher {
 
   sealed trait ScheduleKey
   case class InstrumentKey(instrument: SPComponentType) extends ScheduleKey
-  case object FastTurnaroundKey extends ScheduleKey
   case class ProgramKey(programId: ProgramId) extends ScheduleKey
   case object LaserKey extends ScheduleKey
   case object ShutdownKey extends ScheduleKey
@@ -87,11 +86,6 @@ class ScheduleCache extends Publisher {
     case InstrumentConstraint =>
       val key = InstrumentKey(observation.getInstrumentComponentType)
       scheduleMap.getOrElse(key, Solution.Always)
-    case FastTurnaroundConstraint =>
-      observation.getProg.getType match {
-        case Some(ProgramType.FastTurnaround) => scheduleMap.getOrElse(FastTurnaroundKey, Solution.Always)
-        case _ => Solution.Always
-      }
     case ProgramConstraint =>
       val programId = ProgramId.parse(observation.getProg.getProgramId.stringValue)
       observation.getProg.getType match {
@@ -157,7 +151,6 @@ class ScheduleCache extends Publisher {
     schedule.instrumentSchedules.map(s =>
       scheduleMap.put(new InstrumentKey(s.instrument), Solution.Always.reduce(s.intervals))
     )
-    scheduleMap.put(FastTurnaroundKey, Solution(schedule.fastTurnaroundSchedule.intervals))
     schedule.programSchedules.map(s =>
       scheduleMap.put(new ProgramKey(s.id), Solution(s.intervals))
     )

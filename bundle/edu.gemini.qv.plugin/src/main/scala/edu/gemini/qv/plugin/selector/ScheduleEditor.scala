@@ -25,6 +25,7 @@ import scala.util.Failure
 import scala.util.Success
 
 /**
+ * Editor UI that allows to add, delete and edit schedule constraints in the calendar.
  */
 class ScheduleEditor(ctx: QvContext, scheduleCache: ScheduleCache) extends Dialog {
 
@@ -177,20 +178,19 @@ class ScheduleEditor(ctx: QvContext, scheduleCache: ScheduleCache) extends Dialo
 
   def update(): Unit = {
     instruments.visible = constraints.selection.item == InstrumentConstraint
-    programs.visible = constraints.selection.item == ProgramConstraint
-    addBtn.visible = constraints.selection.item != LaserConstraint
-    scroll.contents = constraints.selection.item match {
-      case InstrumentConstraint =>
+    programs.visible    = constraints.selection.item == ProgramConstraint
+    addBtn.visible      = constraints.selection.item != LaserConstraint
+    scroll.contents     = constraints.selection.item match {
+      case InstrumentConstraint     =>
         val constraints = schedule.instrumentSchedule(instruments.selection.item).map(_.constraints).getOrElse(Seq())
         constraintsPanel(constraints)
-      case ProgramConstraint =>
+      case ProgramConstraint        =>
         val constraints = schedule.programSchedule(programs.selection.item).map(_.constraints).getOrElse(Seq())
         constraintsPanel(constraints)
       case LaserConstraint => constraintsPanel(schedule.laserSchedule.constraints)
-      case FastTurnaroundConstraint => constraintsPanel(schedule.fastTurnaroundSchedule.constraints)
-      case ShutdownConstraint => constraintsPanel(schedule.shutdownSchedule.constraints)
-      case EngineeringConstraint => constraintsPanel(schedule.engineeringSchedule.constraints)
-      case WeatherConstraint => constraintsPanel(schedule.weatherSchedule.constraints)
+      case ShutdownConstraint       => constraintsPanel(schedule.shutdownSchedule.constraints)
+      case EngineeringConstraint    => constraintsPanel(schedule.engineeringSchedule.constraints)
+      case WeatherConstraint        => constraintsPanel(schedule.weatherSchedule.constraints)
     }
   }
 
@@ -227,13 +227,12 @@ class ScheduleEditor(ctx: QvContext, scheduleCache: ScheduleCache) extends Dialo
   }
 
   def createConstraint(i: Interval) = constraints.selection.item match {
-      case InstrumentConstraint => TelescopeSchedule.InstrumentConstraint(instruments.selection.item, i)
-      case ProgramConstraint => TelescopeSchedule.ProgramConstraint(programs.selection.item, i)
-      case LaserConstraint => TelescopeSchedule.LaserConstraint(i)
-      case WeatherConstraint => TelescopeSchedule.WeatherConstraint(i)
-      case FastTurnaroundConstraint => TelescopeSchedule.FastTurnaroundConstraint(i)
-      case ShutdownConstraint => TelescopeSchedule.ShutdownConstraint(i)
-      case EngineeringConstraint => TelescopeSchedule.EngineeringConstraint(i)
+      case InstrumentConstraint   => TelescopeSchedule.InstrumentConstraint(instruments.selection.item, i)
+      case ProgramConstraint      => TelescopeSchedule.ProgramConstraint(programs.selection.item, i)
+      case LaserConstraint        => TelescopeSchedule.LaserConstraint(i)
+      case WeatherConstraint      => TelescopeSchedule.WeatherConstraint(i)
+      case ShutdownConstraint     => TelescopeSchedule.ShutdownConstraint(i)
+      case EngineeringConstraint  => TelescopeSchedule.EngineeringConstraint(i)
     }
 
   def newConstraint() {

@@ -313,24 +313,23 @@ trait VisibilityChart {
       })
 
     val schedule = SolutionProvider(site).telescopeSchedule
-    constraints.toSeq.map {
+    constraints.toSeq.flatMap {
         case InstrumentConstraint     =>
           val paint = new GradientPaint(0, 0, new Color(0, 0, 0), 0, 100, new Color(255, 255, 255, 30))
-          schedule.instrumentSchedules.map(is => {
+          schedule.instrumentSchedules.flatMap(is => {
             markers(s"${is.instrument.readableStr}-Off", paint, is.intervals, labelAtBottom = true)
-          }).flatten
+          })
         case ProgramConstraint      =>
-          schedule.programSchedules.map(cs => {
+          schedule.programSchedules.flatMap(cs => {
             val paint = if (cs.id.ptype == Some(Classical)) claColor else prgColor
             markers(cs.id.toString, paint, cs.intervals)
-          }).flatten
-        case FastTurnaroundConstraint => markers(FastTurnaroundConstraint.label, ftpColor, schedule.fastTurnaroundSchedule.intervals)
+          })
         case LaserConstraint          => markers(LaserConstraint.label, lasColor, schedule.laserSchedule.intervals)
         case ShutdownConstraint       => markers(ShutdownConstraint.label, redColor, schedule.shutdownSchedule.intervals)
         case EngineeringConstraint    => markers(EngineeringConstraint.label, redColor, schedule.engineeringSchedule.intervals)
         case WeatherConstraint        => markers(EngineeringConstraint.label, redColor, schedule.engineeringSchedule.intervals)
         case _ => Seq()
-    }.flatten
+    }
   }
 
 
