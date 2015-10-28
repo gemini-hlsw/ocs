@@ -47,7 +47,6 @@ public final class BrowserPreferences implements ExternalizablePreferences {
     private static final String BROWSER_PREFS         = "browser";
     private static final String OBSOLETE_OPTION_PARAM = "showObsolete";
 
-
     private final boolean showObsoleteOptions;
 
     private BrowserPreferences(Builder builder) {

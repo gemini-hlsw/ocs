@@ -1,7 +1,3 @@
-//
-// $
-//
-
 package jsky.app.ot.userprefs.ui;
 
 import edu.gemini.shared.util.immutable.*;
@@ -63,7 +59,7 @@ public final class PreferenceDialog {
 
             // Add the new UI that we will be editing.
             Component ui = panel.getUserInterface();
-            current = new Some<Component>(ui);
+            current = new Some<>(ui);
             content.add(ui, BorderLayout.CENTER);
 
             // Resize and re-layout everything
@@ -73,25 +69,21 @@ public final class PreferenceDialog {
         private JComponent createToolBar(ImList<PreferencePanel> panels) {
 
             // Map the UserPreferencesPanel collection to Actions
-            ImList<Action> actions = panels.map(new MapOp<PreferencePanel, Action>() {
-                public Action apply(final PreferencePanel pan) {
-                    return new AbstractAction(pan.getDisplayName()) {
-                        {
-                            Option<Icon> icon = pan.getIcon();
-                            if (!None.instance().equals(icon)) {
-                                putValue(Action.SMALL_ICON, icon.getValue());
-                            }
+            ImList<Action> actions = panels.map( pan -> new AbstractAction(pan.getDisplayName()) {
+                {
+                    Option<Icon> icon = pan.getIcon();
+                    if (!None.instance().equals(icon)) {
+                        putValue(Action.SMALL_ICON, icon.getValue());
+                    }
 
-                            Option<String> tip = pan.getToolTip();
-                            if (!None.instance().equals(tip)) {
-                                putValue(Action.SHORT_DESCRIPTION, tip.getValue());
-                            }
-                        }
+                    Option<String> tip = pan.getToolTip();
+                    if (!None.instance().equals(tip)) {
+                        putValue(Action.SHORT_DESCRIPTION, tip.getValue());
+                    }
+                }
 
-                        public void actionPerformed(ActionEvent evt) {
-                            Dialog.this.show(pan);
-                        }
-                    };
+                public void actionPerformed(ActionEvent evt) {
+                    Dialog.this.show(pan);
                 }
             });
 
@@ -112,7 +104,7 @@ public final class PreferenceDialog {
     /**
      * Shows the dialog with the first panel open.
      *
-     * @frame show the dialog box on the screen relative to the position of
+     * @param frame show the dialog box on the screen relative to the position of
      * the given frame, if any
      */
     public void show(Frame frame) {
@@ -123,9 +115,9 @@ public final class PreferenceDialog {
      * Shows the dialog with the given panel open, assuming this object was
      * constructed with this panel in the list of panels to include.
      *
-     * @frame show the dialog box on the screen relative to the position of
+     * @param frame show the dialog box on the screen relative to the position of
      * the given frame, if any
-     * @panel panel to display
+     * @param panel panel to display
      */
     public void show(Frame frame, PreferencePanel panel) {
         int index = (panel == null) ? -1 : panels.indexOf(panel);

@@ -20,7 +20,7 @@ public enum BrowserPreferencesPanel implements PreferencePanel {
 
     private final JPanel panel = new JPanel(new GridBagLayout());
 
-    private BrowserPreferencesPanel() {
+    BrowserPreferencesPanel() {
 
         final JPanel optPanel = new JPanel(new GridBagLayout());
         optPanel.setBorder(BorderFactory.createEmptyBorder(20, 10, 20, 10));
@@ -59,7 +59,7 @@ public enum BrowserPreferencesPanel implements PreferencePanel {
                          BorderFactory.createEmptyBorder(5, 5 , 5, 5)));
         }};
 
-        final JLabel msg = new JLabel("Restart the OT Browser for changes to take effect.") {{
+        final JLabel msg = new JLabel("Restart the OT for changes to take effect.") {{
             setForeground(Color.black);
             setFont(getFont().deriveFont(getFont().getSize2D()-2));
         }};

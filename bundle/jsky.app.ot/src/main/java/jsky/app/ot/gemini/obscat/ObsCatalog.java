@@ -356,55 +356,7 @@ public final class ObsCatalog extends SkycatCatalog {
                 ViewerService.instance().get().unregisterView(browserFrame);
             }
         });
-
-        /*if (navigator != null) {
-            navigator.setAutoQuery(false);
-
-            // Unregister the catalog window when it is closed/hidden
-            Component w = navigator.getParentFrame();
-            w.addComponentListener(new ComponentAdapter() {
-                @Override
-                public void componentHidden(ComponentEvent e) {
-                    ViewerService.instance().get().unregisterView(browserFrame);
-                }
-            });
-
-            // Add the preferences panel.
-            addPreferencesItem();
-
-            navigator.setQueryResult(INSTANCE);
-            //browserFrame.setContentPane(new JPanel(INSTANCE.makeComponent()));
-
-        }*/
     };
-
-    private static boolean addedPreferences = false;
-
-    private static synchronized void addPreferencesItem() {
-        if (addedPreferences) return;
-
-        // FIXME, This used to open the browser preferences from the menu, however we don't have a menu on the CatalogNavigator anymore
-        /*
-        final NavigatorFrame nf = (NavigatorFrame) NavigatorManager.get().getParentFrame();
-        final JMenuBar mb = nf.getJMenuBar();
-        final JMenu menu = mb.getMenu(0);
-
-        final String name = "Preferences ...";
-
-        // Add the "Preferences ..." item
-        final int count = menu.getMenuComponentCount();
-        menu.insert(new JMenuItem(name) {{
-            final ImList<PreferencePanel> lst = DefaultImList.create(
-                    (PreferencePanel) BrowserPreferencesPanel.instance);
-
-            final PreferenceDialog dialog = new PreferenceDialog(lst);
-            addActionListener(e -> dialog.show(nf, BrowserPreferencesPanel.instance));
-        }}, count - 2);
-        menu.insertSeparator(count - 2);*/
-
-        addedPreferences = true;
-    }
-
 
 }
 
