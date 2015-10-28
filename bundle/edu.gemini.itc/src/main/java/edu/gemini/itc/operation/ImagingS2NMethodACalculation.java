@@ -7,7 +7,6 @@ public final class ImagingS2NMethodACalculation extends ImagingS2NCalculation {
 
     private final int number_exposures;
     private final double frac_with_source;
-    private double exp_s2n, final_s2n;
 
     public ImagingS2NMethodACalculation(final ObservationDetails obs,
                                         final Instrument instrument,
@@ -25,31 +24,20 @@ public final class ImagingS2NMethodACalculation extends ImagingS2NCalculation {
     public void calculate() {
         super.calculate();
 
-        double epsilon = 0.2;
-        double number_source_exposures = number_exposures * frac_with_source;
-        int iNumExposures = (int) (number_source_exposures + 0.5);
-        double diff = number_source_exposures - iNumExposures;
+        final double epsilon = 0.2;
+        final double number_source_exposures = numberSourceExposures();
+        final int iNumExposures = (int) (number_source_exposures + 0.5);
+        final double diff = number_source_exposures - iNumExposures;
         if (Math.abs(diff) > epsilon) {
             throw new IllegalArgumentException(
                     "Fraction with source value produces non-integral number of source exposures with source (" +
                             number_source_exposures + " vs. " + iNumExposures + ").");
         }
 
-        exp_s2n = signal / noise;
-
-
-        final_s2n = Math.sqrt(number_source_exposures) * signal /
-                Math.sqrt(signal + noiseFactor * sourceless_noise *
-                        sourceless_noise);
-
     }
 
-    public double singleSNRatio() {
-        return exp_s2n;
-    }
-
-    public double totalSNRatio() {
-        return final_s2n;
+    @Override public double numberSourceExposures() {
+        return number_exposures * frac_with_source;
     }
 
 }

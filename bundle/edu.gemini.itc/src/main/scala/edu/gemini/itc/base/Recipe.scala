@@ -2,7 +2,6 @@ package edu.gemini.itc.base
 
 import java.util
 
-import edu.gemini.itc.operation.{ImagingPointS2NMethodBCalculation, ImagingS2NMethodACalculation}
 import edu.gemini.itc.shared._
 
 import scala.collection.JavaConversions._
@@ -72,16 +71,14 @@ object Recipe {
     new SpcChartData(S2NChart, title, "Wavelength (nm)", "Signal / Noise per spectral pixel", data.toList)
   }
 
+  def toImgData(r: ImagingResult): ImgData =
+    ImgData(r.is2nCalc.singleSNRatio(), r.is2nCalc.totalSNRatio(), r.peakPixelCount, Warning.collectWarnings(r))
 
-  def toImgData(result: ImagingResult): ImgData = result.is2nCalc match {
-    case i: ImagingS2NMethodACalculation       => ImgData(i.singleSNRatio(), i.totalSNRatio(), result.peakPixelCount, Warning.collectWarnings(result))
-    case i: ImagingPointS2NMethodBCalculation  => ImgData(0.0 /* TODO value not known for this mode */, i.effectiveS2N(), result.peakPixelCount, Warning.collectWarnings(result))
-    case _                                     => throw new NotImplementedError("unknown s2n calc method")
-  }
+  def serviceResult(r: ImagingResult): ItcImagingResult =
+    ItcImagingResult(List(toImgData(r)))
 
-  def serviceResult(r: ImagingResult): ItcImagingResult = ItcImagingResult(List(toImgData(r)))
-
-  def serviceResult(r: Array[ImagingResult]): ItcImagingResult = ItcImagingResult(r.map(toImgData).toList)
+  def serviceResult(r: Array[ImagingResult]): ItcImagingResult =
+    ItcImagingResult(r.map(toImgData).toList)
 
 }
 
