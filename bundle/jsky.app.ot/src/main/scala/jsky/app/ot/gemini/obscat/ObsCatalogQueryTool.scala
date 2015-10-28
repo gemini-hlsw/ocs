@@ -47,7 +47,10 @@ final class ObsCatalogQueryTool(catalog: Catalog) {
 
   val saveAsButton =
     new Button("Save As...") {
-
+      reactions += {
+        case ButtonClicked(_) =>
+          queryResults.saveAs()
+      }
     }
 
   val queryButton: Button = {
