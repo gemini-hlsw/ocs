@@ -91,7 +91,8 @@ public final class SpBlueprintFactory {
             }
         }
 
-        // That's awful ^^ .. for Blueprints defined in Scala we'll just do it this way.
+        // It's tricky to generate the required static field in Scala so we'll just do it this way.
+        // This needs to be refactored ... it's awful.
         try {
             ctors.put(SpPhoenixBlueprint$.MODULE$.PARAM_SET_NAME(), SpPhoenixBlueprint.class.getConstructor(ParamSet.class));
         } catch (Exception e) {

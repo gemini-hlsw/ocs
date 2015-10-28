@@ -9,8 +9,8 @@ trait PhoenixBase extends GroupInitializer[SpPhoenixBlueprint] with TemplateDsl2
   val seqConfigCompType = SeqConfigPhoenix.SP_TYPE
   val instCompType      = InstPhoenix.SP_TYPE
   val db                = None
-  val setFpu            = mutateStatic[PhoenixParams.Mask]((a, b) => a.setMask(b))
-  val setFilter         = mutateStatic[PhoenixParams.Filter]((a, b) => a.setFilter(b))
-  val setExposureTime   = mutateStatic[Double]((a, b) => a.setExposureTime(b))
-  val setCoadds         = mutateStatic[Int]((a, b) => a.setCoadds(b))
+  val setFpu            = mutateStatic[PhoenixParams.Mask](_ setMask _)
+  val setFilter         = mutateStatic[PhoenixParams.Filter](_ setFilter _)
+  val setExposureTime   = mutateStatic[Double](_ setExposureTime _)
+  val setCoadds         = mutateStatic[Int](_ setCoadds _)
 }

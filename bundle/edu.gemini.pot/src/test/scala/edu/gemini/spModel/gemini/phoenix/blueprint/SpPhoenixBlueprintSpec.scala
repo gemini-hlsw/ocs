@@ -17,7 +17,7 @@ import org.specs2.mutable.Specification
 import scala.collection.JavaConverters._
 import scalaz._, Scalaz._
 
-object SpPhonixBlueprintSpec extends Specification with ScalaCheck {
+object SpPhoenixBlueprintSpec extends Specification with ScalaCheck {
 
   implicit val ArbitraryPhoenixMask: Arbitrary[Mask] =
     Arbitrary(Gen.oneOf(Mask.values))
