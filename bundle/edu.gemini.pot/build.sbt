@@ -108,6 +108,7 @@ OsgiKeys.exportPackage := Seq(
   "edu.gemini.spModel.gemini.phase1",
   "edu.gemini.spModel.gemini.phoenix",
   "edu.gemini.spModel.gemini.phoenix.test",
+  "edu.gemini.spModel.gemini.phoenix.blueprint",
   "edu.gemini.spModel.gemini.plan",
   "edu.gemini.spModel.gemini.plan.test",
   "edu.gemini.spModel.gemini.security",
