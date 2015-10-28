@@ -46,7 +46,7 @@ public class SPTargetPio {
     private static final String _PERIHELION = "perihelion";
     private static final String _EPOCH_OF_PERIHELION = "epochOfPeri";
 
-    private static final DateFormat formatter = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.FULL);
+    public static final DateFormat formatter = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.FULL);
     static {
         formatter.setTimeZone(TimeZone.getTimeZone("UTC"));
     }
