@@ -350,6 +350,8 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
       def updateAngle(angle: Angle): Unit = {
         text = f"${angle.toArcmins}%2.2f"
       }
+
+      override def valid(d: Double): Boolean = d >= 0
     }
 
     // Contains the list of controls on the UI to make magnitude filters
