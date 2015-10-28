@@ -260,16 +260,21 @@ public final class GuideProbeTargets implements Serializable, TargetContainer, I
         if (!primaryTarget.exists(target::equals))
             return removeTarget(target);
 
-        final Option<SPTarget> bagsTargetNew = possiblyRemoveTarget.apply(bagsTarget, target);
-        final ImList<SPTarget> manualTargetsNew = manualTargets.remove(target);
+        // This should technically never be the BAGS target, but in case it is, we handle it separately.
+        if (bagsTarget.exists(target::equals)) {
+            // The new primary is whatever is at the head of the manual targets list, if anything.
+            final Option<SPTarget> primaryTargetNew = manualTargets.headOption();
+            return new GuideProbeTargets(guider, NO_TARGET, primaryTargetNew, manualTargets);
+        } else {
+            final ImList<SPTarget> manualTargetsNew = manualTargets.remove(target);
 
-        // We are removing the primary target, so determine the new primary if one can be chosen.
-        final ImList<SPTarget> oldTargets = getTargets();
-        final int oldIndex = oldTargets.indexOf(target);
-        final int newIndex = oldIndex+1 < oldTargets.size() ? oldIndex+1
-                : (oldIndex-1 >= 0 ? oldIndex-1 : -1);
-        final Option<SPTarget> primaryTargetNew = newIndex == -1 ? NO_TARGET : new Some<>(oldTargets.get(newIndex));
-        return new GuideProbeTargets(guider, bagsTargetNew, primaryTargetNew, manualTargetsNew);
+            // Find the new primary target.
+            final int oldIndex = manualTargets.indexOf(target);
+            final int newIndex = oldIndex + 1 < manualTargets.size() ? oldIndex + 1
+                    : (oldIndex - 1 >= 0 ? oldIndex - 1 : -1);
+            final Option<SPTarget> primaryTargetNew = newIndex == -1 ? bagsTarget : new Some<>(manualTargets.get(newIndex));
+            return new GuideProbeTargets(guider, bagsTarget, primaryTargetNew, manualTargetsNew);
+        }
     }
 
     /**
