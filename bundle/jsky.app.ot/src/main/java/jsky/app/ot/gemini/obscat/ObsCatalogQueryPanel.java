@@ -38,7 +38,7 @@ public final class ObsCatalogQueryPanel extends CatalogQueryPanel {
     private JComponent[][] _panelComponents;
 
     /** Instrument combo box */
-    private MultiSelectComboBox _instComboBox;
+    private MultiSelectComboBox<String> _instComboBox;
 
     /**
      * Initialize a query panel for the given catalog.
@@ -56,6 +56,7 @@ public final class ObsCatalogQueryPanel extends CatalogQueryPanel {
      * instrument specific items).
      */
     @Override
+    @SuppressWarnings("unchecked")
     protected void makePanelItems() {
         super.makePanelItems();
 
@@ -77,20 +78,22 @@ public final class ObsCatalogQueryPanel extends CatalogQueryPanel {
                 // Instrument specific items
                 _panels[i].setName(instruments[i - 1]);
                 final FieldDescAdapter[] params = ObsCatalog.getInstrumentParamDesc(instruments[i - 1]);
-                final int n = params.length;
-                _panelLabels[i] = new JLabel[n];
-                _panelComponents[i] = new JComponent[n];
+                if (params != null) {
+                    final int n = params.length;
+                    _panelLabels[i] = new JLabel[n];
+                    _panelComponents[i] = new JComponent[n];
 
-                for (int j = 0; j < n; j++) {
-                    _panelLabels[i][j] = makeLabel(params[j].getName());
-                    _panelComponents[i][j] = makeComponent(params[j]);
+                    for (int j = 0; j < n; j++) {
+                        _panelLabels[i][j] = makeLabel(params[j].getName());
+                        _panelComponents[i][j] = makeComponent(params[j]);
+                    }
                 }
             }
         }
 
         // link the instrument combo box with the tabbed pane containing the instrument
         // specific options
-        _instComboBox = (MultiSelectComboBox) getComponentForLabel(ObsCatalogInfo.INSTRUMENT);
+        _instComboBox = (MultiSelectComboBox<String>) getComponentForLabel(ObsCatalogInfo.INSTRUMENT);
         _instComboBox.addActionListener(e -> {
             final int n = _instComboBox.getModel().getSize();
             for (int i = 0; i < n; i++) {
@@ -115,7 +118,7 @@ public final class ObsCatalogQueryPanel extends CatalogQueryPanel {
             ar[i] = new NameValue(p.getOptionName(i), p.getOptionValue(i));
         }
 
-        final MultiSelectComboBox cb = new MultiSelectComboBox(ar);
+        final MultiSelectComboBox<NameValue> cb = new MultiSelectComboBox<>(ar);
 
         final String s = p.getDescription();
         if (s != null) cb.setToolTipText(s);
@@ -225,10 +228,12 @@ public final class ObsCatalogQueryPanel extends CatalogQueryPanel {
             for (String instrument : instruments) {
                 final int instIndex = ObsCatalogInfo.getInstIndex(instrument) + 1;
                 final FieldDesc[] params = ObsCatalog.getInstrumentParamDesc(instrument);
-                for (int j = 0; j < _panelLabels[instIndex].length; j++) {
-                    final Object value = getValue(params[j], _panelComponents[instIndex][j]);
-                    if (value != null)
-                        queryArgs.setInstParamValue(instrument, j, value);
+                if (params != null) {
+                    for (int j = 0; j < _panelLabels[instIndex].length; j++) {
+                        final Object value = getValue(params[j], _panelComponents[instIndex][j]);
+                        if (value != null)
+                            queryArgs.setInstParamValue(instrument, j, value);
+                    }
                 }
             }
         }
@@ -241,10 +246,11 @@ public final class ObsCatalogQueryPanel extends CatalogQueryPanel {
      * text fields and to use a MultiSelectComboBox instead of JComboBox for choices.
      */
     @Override
+    @SuppressWarnings("unchecked")
     protected Object getValue(FieldDesc p, JComponent c) {
         if (p.getNumOptions() > 0) {
             // must be a combo box
-            final MultiSelectComboBox cb = (MultiSelectComboBox) c;
+            final MultiSelectComboBox<NameValue> cb = (MultiSelectComboBox<NameValue>) c;
 
             // TODO: here we could convert from the "name" to the value
             // maybe a better idea though is to have the combo box return
