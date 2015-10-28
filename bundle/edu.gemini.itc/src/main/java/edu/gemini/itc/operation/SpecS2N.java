@@ -21,11 +21,15 @@ public interface SpecS2N {
     default double getPeakPixelCount() {
         final double[] sig = getSignalSpectrum().getValues();
         final double[] bck = getBackgroundSpectrum().getValues();
-        // TODO: check fi these conditions really hold true
-        assert getSignalSpectrum().getStart() == getBackgroundSpectrum().getStart();
-        assert getSignalSpectrum().getEnd() == getBackgroundSpectrum().getEnd();
-        assert sig.length == bck.length;
-        return IntStream.range(0, sig.length).mapToDouble(i -> bck[i] + sig[i]).max().getAsDouble(); // TODO how to avoid optional?
+
+        // This is a set of conditions that need to hold true for the peak pixel calculation.
+        // I am adding these assertions to avoid problems with future refactorings.
+        if (getSignalSpectrum().getStart() != getBackgroundSpectrum().getStart()) throw new Error();
+        if (getSignalSpectrum().getEnd()   != getBackgroundSpectrum().getEnd())   throw new Error();
+        if (sig.length != bck.length)                                             throw new Error();
+
+        // Calculate the peak pixel
+        return IntStream.range(0, sig.length).mapToDouble(i -> bck[i] + sig[i]).max().getAsDouble();
     }
 
 }
