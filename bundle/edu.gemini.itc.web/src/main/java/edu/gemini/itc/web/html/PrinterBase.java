@@ -1,12 +1,12 @@
 package edu.gemini.itc.web.html;
 
-import edu.gemini.itc.base.*;
+import edu.gemini.itc.base.Instrument;
 import edu.gemini.itc.shared.*;
 import edu.gemini.itc.web.servlets.FilesServlet;
 import edu.gemini.itc.web.servlets.ServerInfo;
+import scala.collection.JavaConversions;
 
 import java.io.PrintWriter;
-import java.util.Collection;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -114,8 +114,8 @@ public abstract class PrinterBase {
     }
 
 
-    protected void _printWarnings(final Collection<ItcWarning> warnings) {
-        for (final ItcWarning w : warnings) {
+    protected void _printWarnings(final scala.collection.immutable.Seq<ItcWarning> warnings) {
+        for (final ItcWarning w : JavaConversions.asJavaList(warnings)) {
             _print("Warning: " + w.msg());
         }
         _println("");

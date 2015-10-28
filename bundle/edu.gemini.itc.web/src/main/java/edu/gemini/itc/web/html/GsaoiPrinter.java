@@ -8,8 +8,6 @@ import edu.gemini.itc.gsaoi.GsaoiRecipe;
 import edu.gemini.itc.shared.GsaoiParameters;
 import edu.gemini.itc.shared.ItcImagingResult;
 import edu.gemini.itc.shared.ItcParameters;
-import edu.gemini.itc.shared.ItcWarning;
-import scala.collection.JavaConversions;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -51,7 +49,7 @@ public final class GsaoiPrinter extends PrinterBase {
         _println("");
         _println(String.format("The peak pixel signal + background is %.0f", result.peakPixelCount()));
 
-        _printWarnings(JavaConversions.asJavaList(s.warnings()));
+        _printWarnings(s.warnings());
 
         _print("<HR align=left SIZE=3>");
 

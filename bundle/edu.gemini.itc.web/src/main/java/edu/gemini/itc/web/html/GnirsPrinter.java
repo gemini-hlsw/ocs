@@ -30,10 +30,10 @@ public final class GnirsPrinter extends PrinterBase {
         final GnirsSpectroscopyResult r = recipe.calculateSpectroscopy();
         final ItcSpectroscopyResult s = recipe.serviceResult(r);
         final UUID id = cache(s);
-        writeSpectroscopyOutput(id, r);
+        writeSpectroscopyOutput(id, r, s);
     }
 
-    private void writeSpectroscopyOutput(final UUID id, final GnirsSpectroscopyResult result) {
+    private void writeSpectroscopyOutput(final UUID id, final GnirsSpectroscopyResult result, final ItcSpectroscopyResult s) {
         _println("");
 
         final Gnirs instrument = (Gnirs) result.instrument();
@@ -62,6 +62,9 @@ public final class GnirsPrinter extends PrinterBase {
         _println(String.format("Requested total integration time = %.2f secs, of which %.2f secs is on source.",
                 result.observation().getExposureTime() * result.observation().getNumExposures(),
                 result.observation().getExposureTime() * result.observation().getNumExposures() * result.observation().getSourceFraction()));
+
+        _println("");
+        _printWarnings(s.warnings());
 
         _print("<HR align=left SIZE=3>");
 

@@ -9,7 +9,6 @@ import edu.gemini.spModel.core.PointSource$;
 import edu.gemini.spModel.core.UniformSource$;
 import edu.gemini.spModel.gemini.gmos.GmosNorthType;
 import edu.gemini.spModel.gemini.gmos.GmosSouthType;
-import scala.collection.JavaConversions;
 
 import java.io.PrintWriter;
 import java.util.UUID;
@@ -42,11 +41,11 @@ public final class GmosPrinter extends PrinterBase {
             final SpectroscopyResult[] r = recipe.calculateSpectroscopy();
             final ItcSpectroscopyResult s = recipe.serviceResult(r);
             final UUID id = cache(s);
-            writeSpectroscopyOutput(id, r);
+            writeSpectroscopyOutput(id, r, s);
         }
     }
 
-    private void writeSpectroscopyOutput(final UUID id, final SpectroscopyResult[] results) {
+    private void writeSpectroscopyOutput(final UUID id, final SpectroscopyResult[] results, final ItcSpectroscopyResult s) {
 
         final Gmos mainInstrument = (Gmos) results[0].instrument(); // main instrument
 
@@ -84,6 +83,10 @@ public final class GmosPrinter extends PrinterBase {
                 _println("Sky subtraction aperture = " + results[0].observation().getSkyApertureDiameter() + " times the software aperture.");
                 _println("");
                 _println(String.format("Requested total integration time = %.2f secs, of which %.2f secs is on source.", exposure_time * number_exposures, exposure_time * number_exposures * frac_with_source));
+
+                _println("");
+                _printWarnings(s.warnings());
+
                 _print("<HR align=left SIZE=3>");
             }
 
@@ -141,7 +144,7 @@ public final class GmosPrinter extends PrinterBase {
             _println("");
             _println(String.format("The peak pixel signal + background is %.0f. ", result.peakPixelCount()));
 
-            _printWarnings(JavaConversions.asJavaList(s.warnings()));
+            _printWarnings(s.warnings());
 
         }
 

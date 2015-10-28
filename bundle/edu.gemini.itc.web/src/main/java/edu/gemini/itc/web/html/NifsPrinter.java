@@ -29,10 +29,10 @@ public final class NifsPrinter extends PrinterBase {
         final SpectroscopyResult r = recipe.calculateSpectroscopy();
         final ItcSpectroscopyResult s = recipe.serviceResult(r);
         final UUID id = cache(s);
-        writeSpectroscopyOutput(id, r);
+        writeSpectroscopyOutput(id, r, s);
     }
 
-    private void writeSpectroscopyOutput(final UUID id, final SpectroscopyResult result) {
+    private void writeSpectroscopyOutput(final UUID id, final SpectroscopyResult result, final ItcSpectroscopyResult s) {
 
         final Nifs instrument = (Nifs) result.instrument();
 
@@ -48,6 +48,9 @@ public final class NifsPrinter extends PrinterBase {
 
         _println(String.format("derived image halo size (FWHM) for a point source = %.2f arcsec\n", result.iqCalc().getImageQuality()));
         _println(String.format("Requested total integration time = %.2f secs, of which %.2f secs is on source.", exposure_time * number_exposures, exposure_time * number_exposures * frac_with_source));
+
+        _println("");
+        _printWarnings(s.warnings());
 
         _print("<HR align=left SIZE=3>");
 

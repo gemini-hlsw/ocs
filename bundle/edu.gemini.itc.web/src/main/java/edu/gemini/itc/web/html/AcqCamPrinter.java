@@ -43,7 +43,7 @@ public final class AcqCamPrinter extends PrinterBase {
         _println(CalculatablePrinter.getTextResult(result.iqCalc()));
         _println(CalculatablePrinter.getTextResult(result.is2nCalc(), result.observation()));
 
-        _printWarnings(JavaConversions.asJavaList(s.warnings()));
+        _printWarnings(s.warnings());
 
         printConfiguration(result);
 

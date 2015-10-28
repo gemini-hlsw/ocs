@@ -6,11 +6,9 @@ import edu.gemini.itc.base.TransmissionElement;
 import edu.gemini.itc.flamingos2.Flamingos2;
 import edu.gemini.itc.flamingos2.Flamingos2Recipe;
 import edu.gemini.itc.shared.*;
-import edu.gemini.spModel.gemini.flamingos2.Flamingos2.FPUnit;
 import edu.gemini.spModel.core.PointSource$;
 import edu.gemini.spModel.core.UniformSource$;
-import scala.Tuple2;
-import scala.collection.JavaConversions;
+import edu.gemini.spModel.gemini.flamingos2.Flamingos2.FPUnit;
 
 import java.io.PrintWriter;
 import java.util.UUID;
@@ -43,12 +41,12 @@ public final class Flamingos2Printer extends PrinterBase {
             final SpectroscopyResult r = recipe.calculateSpectroscopy();
             final ItcSpectroscopyResult s = recipe.serviceResult(r);
             final UUID id = cache(s);
-            writeSpectroscopyOutput(id, r);
+            writeSpectroscopyOutput(id, r, s);
             validatePlottingDetails(pdp, r.instrument());
         }
     }
 
-    private void writeSpectroscopyOutput(final UUID id, final SpectroscopyResult result) {
+    private void writeSpectroscopyOutput(final UUID id, final SpectroscopyResult result, final ItcSpectroscopyResult s) {
 
         // we know this is Flamingos
         final Flamingos2 instrument = (Flamingos2) result.instrument();
@@ -79,6 +77,9 @@ public final class Flamingos2Printer extends PrinterBase {
         _println(String.format(
                 "Requested total integration time = %.2f secs, of which %.2f secs is on source.",
                 totExpTime, totExpTime * result.specS2N()[0].getSpecFracWithSource()));
+
+        _println("");
+        _printWarnings(s.warnings());
 
         _print("<HR align=left SIZE=3>");
 
@@ -114,7 +115,7 @@ public final class Flamingos2Printer extends PrinterBase {
         _println(CalculatablePrinter.getTextResult(result.iqCalc()));
         _println(CalculatablePrinter.getTextResult(result.is2nCalc(), result.observation()));
 
-        _printWarnings(JavaConversions.asJavaList(s.warnings()));
+        _printWarnings(s.warnings());
 
         printConfiguration((Flamingos2) result.instrument(), result.parameters());
     }

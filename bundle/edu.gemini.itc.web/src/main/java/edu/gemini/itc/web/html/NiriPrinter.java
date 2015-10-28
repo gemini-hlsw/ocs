@@ -48,11 +48,11 @@ public final class NiriPrinter extends PrinterBase {
             final SpectroscopyResult r = recipe.calculateSpectroscopy();
             final ItcSpectroscopyResult s = recipe.serviceResult(r);
             final UUID id = cache(s);
-            writeSpectroscopyOutput(id, r);
+            writeSpectroscopyOutput(id, r, s);
         }
     }
 
-    private void writeSpectroscopyOutput(final UUID id, final SpectroscopyResult result) {
+    private void writeSpectroscopyOutput(final UUID id, final SpectroscopyResult result, final ItcSpectroscopyResult s) {
 
         final Niri instrument = (Niri) result.instrument();
 
@@ -84,6 +84,9 @@ public final class NiriPrinter extends PrinterBase {
                 "Requested total integration time = %.2f secs, of which %.2f secs is on source.",
                 result.observation().getExposureTime() * result.observation().getNumExposures(),
                 result.observation().getExposureTime() * result.observation().getNumExposures() * result.observation().getSourceFraction()));
+
+        _println("");
+        _printWarnings(s.warnings());
 
         _print("<HR align=left SIZE=3>");
 
@@ -126,7 +129,7 @@ public final class NiriPrinter extends PrinterBase {
         _println(CalculatablePrinter.getTextResult(result.is2nCalc(), result.observation()));
         _println(CalculatablePrinter.getBackgroundLimitResult(result.is2nCalc()));
 
-        _printWarnings(JavaConversions.asJavaList(s.warnings()));
+        _printWarnings(s.warnings());
 
         printConfiguration(result.parameters(), instrument, result.aoSystem());
 
