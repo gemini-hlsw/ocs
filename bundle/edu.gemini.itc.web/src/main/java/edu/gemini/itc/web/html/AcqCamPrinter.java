@@ -43,16 +43,7 @@ public final class AcqCamPrinter extends PrinterBase {
         _println(CalculatablePrinter.getTextResult(result.iqCalc()));
         _println(CalculatablePrinter.getTextResult(result.is2nCalc(), result.observation()));
 
-        _println("");
-        _println(String.format(
-                "The peak pixel signal + background is %.0f. This is %.0f%% of the full well depth of %.0f.",
-                result.peakPixelCount(), result.peakPixelCount() / instrument.getWellDepth() * 100, instrument.getWellDepth()));
-
-        for (final ItcWarning warning : JavaConversions.asJavaList(s.warnings())) {
-            _println(warning.msg());
-        }
-
-        _println("");
+        _printWarnings(JavaConversions.asJavaList(s.warnings()));
 
         printConfiguration(result);
 

@@ -68,13 +68,9 @@ public class AcquisitionCamera extends Instrument {
         return INSTR_PREFIX;
     }
 
-    public double getWellDepth() {
-        return WELL_DEPTH;
-    }
-
     @Override public List<WarningLimit> warnings() {
         return new ArrayList<WarningLimit>() {{
-            add(new SaturationLimit(getWellDepth(), 0.80));
+            add(new SaturationLimit(WELL_DEPTH, 0.80));
         }};
     }
 }

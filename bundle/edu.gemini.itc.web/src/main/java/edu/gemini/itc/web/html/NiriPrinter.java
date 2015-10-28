@@ -126,15 +126,7 @@ public final class NiriPrinter extends PrinterBase {
         _println(CalculatablePrinter.getTextResult(result.is2nCalc(), result.observation()));
         _println(CalculatablePrinter.getBackgroundLimitResult(result.is2nCalc()));
 
-        _println("");
-        _println(String.format("The peak pixel signal + background is %.0f. This is %.0f%% of the full well depth of %.0f.",
-                result.peakPixelCount(), result.peakPixelCount() / instr.wellDepth().depth() * 100, instr.wellDepth().depth()));
-
-        for (final ItcWarning warning : JavaConversions.asJavaList(s.warnings())) {
-            _println(warning.msg());
-        }
-
-        _println("");
+        _printWarnings(JavaConversions.asJavaList(s.warnings()));
 
         printConfiguration(result.parameters(), instrument, result.aoSystem());
 

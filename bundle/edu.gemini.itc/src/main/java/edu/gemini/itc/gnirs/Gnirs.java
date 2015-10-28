@@ -9,6 +9,9 @@ import edu.gemini.spModel.gemini.gnirs.GNIRSParams;
 import edu.gemini.spModel.gemini.gnirs.GNIRSParams.Disperser;
 import edu.gemini.spModel.gemini.gnirs.GNIRSParams.SlitWidth;
 
+import java.util.ArrayList;
+import java.util.List;
+
 
 /**
  * Gnirs specification class
@@ -285,6 +288,13 @@ public final class Gnirs extends Instrument {
 
     private boolean isXDispUsed() {
         return !params.crossDispersed().equals(GNIRSParams.CrossDispersed.NO);
+    }
+
+    @Override public List<WarningLimit> warnings() {
+        return new ArrayList<WarningLimit>() {{
+            add(new LinearityLimit(_wellDepth, 0.50));
+            add(new SaturationLimit(_wellDepth, 0.80));
+        }};
     }
 
 

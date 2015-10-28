@@ -6,6 +6,7 @@ import edu.gemini.itc.web.servlets.FilesServlet;
 import edu.gemini.itc.web.servlets.ServerInfo;
 
 import java.io.PrintWriter;
+import java.util.Collection;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -110,6 +111,14 @@ public abstract class PrinterBase {
                 "&" + FilesServlet.ParamChartIndex  + "=" + index +
                 "&" + FilesServlet.ParamId          + "=" + id +
                 toPlotLimits(pd) + "\"/>");
+    }
+
+
+    protected void _printWarnings(final Collection<ItcWarning> warnings) {
+        for (final ItcWarning w : warnings) {
+            _print("Warning: " + w.msg());
+        }
+        _println("");
     }
 
     private String toPlotLimits(final PlottingDetails pd) {

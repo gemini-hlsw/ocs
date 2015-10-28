@@ -13,7 +13,7 @@ import java.util.List;
  */
 public final class Gsaoi extends Instrument {
 
-    public static final int WELL_DEPTH = 126000;
+    private static final int WELL_DEPTH = 126000;
 
     /**
      * Related files will be in this subdir of lib
@@ -101,8 +101,8 @@ public final class Gsaoi extends Instrument {
 
     @Override public List<WarningLimit> warnings() {
         return new ArrayList<WarningLimit>() {{
-            add(new LinearityLimit(Gsaoi.WELL_DEPTH, 0.65, 0.85));
-            add(new SaturationLimit(Gsaoi.WELL_DEPTH, 0.85));
+            add(new LinearityLimit(WELL_DEPTH, 0.65));
+            add(new SaturationLimit(WELL_DEPTH, 0.85));
         }};
     }
 

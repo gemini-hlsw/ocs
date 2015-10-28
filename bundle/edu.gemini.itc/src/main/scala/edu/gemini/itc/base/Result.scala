@@ -4,11 +4,12 @@ import edu.gemini.itc.operation._
 import edu.gemini.itc.shared.{ItcParameters, ItcWarning}
 
 /*
- * Helper objects that are used to pass around results of imaging and spectroscopy calculations.
+ * Helper objects that are used to pass around detailed results of imaging and spectroscopy calculations internally.
  * These objects also contain the parameter objects that were used for the calculations so that input values
  * can become a part of the output after the calculations have been performed, e.g. when the input parameters
- * and results need to be printed to a web page. Note that the ITC service will not return these objects but
- * simplified result objects which helps to contain ITC internals.
+ * and results need to be printed to a web page. The ITC service will not return these objects but simplified
+ * result objects which helps to contain ITC internals however these detailed results are used by the web
+ * application to produce detailed HTML output.
  */
 
 sealed trait Result {
@@ -27,26 +28,22 @@ sealed trait Result {
 sealed trait WarningLimit {
   def message(value: Double): String
   def maxValue: Double
-  def lowLimit: Double    // as a fraction of the max value
-  def maxLimit: Double    // as a fraction of the max value
+  def lowLimit: Double    // as a fraction of the max value; e.g. 0.80 = 80%
 
-  def lowWarnLevel = maxValue * lowLimit
-  def maxWarnLevel = maxValue * maxLimit
-  def warn(value: Double): Boolean = value >= lowWarnLevel && value < maxWarnLevel
+  def warnLevel = maxValue * lowLimit
+  def warn(value: Double): Boolean = value >= warnLevel
   def value(r: Result): Double = r.peakPixelCount // currently peak pixel count is the only value we're looking at
   def warning(r: Result) = if (warn(value(r))) Some(ItcWarning(message(value(r)))) else None
 }
 
 final case class SaturationLimit(maxValue: Double, lowLimit: Double) extends WarningLimit {
-  val maxLimit: Double = Double.MaxValue
-  def message(value: Double) = f"Warning: peak pixel exceeds ${lowLimit*100.0}%.0f%% of the well depth limit of $lowWarnLevel%.0f and may be saturated."
+  def message(value: Double) = f"Peak pixel count of $value%.0f exceeds ${lowLimit*100.0}%.0f%% of the well depth limit of $maxValue%.0f and may be saturated."
 }
 final case class GainLimit(maxValue: Double, lowLimit: Double) extends WarningLimit {
-  val maxLimit: Double = Double.MaxValue
-  def message(value: Double) = f"Warning: peak pixel exceeds ${lowLimit*100.0}%.0f%% of the gain limit of $lowWarnLevel%.0f and may be saturated."
+  def message(value: Double) = f"Peak pixel count of $value%.0f exceeds ${lowLimit*100.0}%.0f%% of the gain limit of $maxValue%.0f and may be saturated."
 }
-final case class LinearityLimit(maxValue: Double, lowLimit: Double, maxLimit: Double = Double.MaxValue) extends WarningLimit {
-  def message(value: Double) = f"Warning: peak pixel exceeds ${lowLimit*100.0}%.0f%% of the linearity limit of $lowWarnLevel%.0f and will cause deviations."
+final case class LinearityLimit(maxValue: Double, lowLimit: Double) extends WarningLimit {
+  def message(value: Double) = f"Peak pixel count of $value%.0f exceeds ${lowLimit*100.0}%.0f%% of the linearity limit of $maxValue%.0f and will cause deviations."
 }
 
 /* Internal object for imaging results. */

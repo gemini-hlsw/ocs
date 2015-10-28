@@ -147,10 +147,6 @@ public final class Flamingos2 extends Instrument {
         return _grismOptics.get().getPixelWidth();
     }
 
-    public double getWellDepth() {
-        return WELL_DEPTH;
-    }
-
     public FPUnit getFocalPlaneMask() {
         return params.mask();
     }
@@ -167,8 +163,8 @@ public final class Flamingos2 extends Instrument {
 
     @Override public List<WarningLimit> warnings() {
         return new ArrayList<WarningLimit>() {{
-            add(new SaturationLimit(getWellDepth(), 0.80));
-            add(new LinearityLimit(98000, 0.80, Double.MAX_VALUE));       // TODO use well depth??
+            add(new LinearityLimit(WELL_DEPTH, 0.50));
+            add(new SaturationLimit(WELL_DEPTH, 0.80));
         }};
     }
 

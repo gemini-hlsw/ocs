@@ -141,9 +141,7 @@ public final class GmosPrinter extends PrinterBase {
             _println("");
             _println(String.format("The peak pixel signal + background is %.0f. ", result.peakPixelCount()));
 
-            for (final ItcWarning warning : JavaConversions.asJavaList(s.ccd(ccdIndex).warnings())) {
-                _println(warning.msg());
-            }
+            _printWarnings(JavaConversions.asJavaList(s.warnings()));
 
         }
 

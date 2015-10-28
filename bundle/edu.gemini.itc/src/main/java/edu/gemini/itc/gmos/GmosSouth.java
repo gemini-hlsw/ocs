@@ -15,6 +15,8 @@ import java.util.List;
  */
 public final class GmosSouth extends Gmos {
 
+    private static final double WELL_DEPTH = 106000.0;
+
     /**
      * /** Related files will start with this prefix
      */
@@ -52,7 +54,7 @@ public final class GmosSouth extends Gmos {
 
     @Override public List<WarningLimit> warnings() {
         return new ArrayList<WarningLimit>() {{
-            add(new SaturationLimit(getWellDepth() * getSpatialBinning() * getSpectralBinning(), 0.95));
+            add(new SaturationLimit(WELL_DEPTH * getSpatialBinning() * getSpectralBinning(), 0.95));
             add(new GainLimit(getADSaturation() * InstGmosSouth.getMeanGain(gp.ampGain(), gp.ampReadMode(), gp.ccdType()), 0.95));
         }};
     }

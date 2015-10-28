@@ -28,8 +28,7 @@ public abstract class Gmos extends Instrument implements BinningProvider {
     public static final String INSTR_DIR = "gmos";
 
     // Instrument reads its configuration from here.
-    private static final double WELL_DEPTH = 125000.0;
-    private static final double AD_SATURATION = 56636;
+    private static final double AD_SATURATION = 65535;
     private static final int DETECTOR_PIXELS = 6218;
 
     // Used as a desperate solution when multiple detectors need to be handled differently (See REL-478).
@@ -221,10 +220,6 @@ public abstract class Gmos extends Instrument implements BinningProvider {
 
     public double getSpectralPixelWidth() {
         return _gratingOptics.getPixelWidth();
-    }
-
-    public double getWellDepth() {
-        return WELL_DEPTH;
     }
 
     public double getSampling() {

@@ -6,7 +6,6 @@ import edu.gemini.itc.base.WarningLimit;
 import edu.gemini.itc.shared.GmosParameters;
 import edu.gemini.itc.shared.ObservationDetails;
 import edu.gemini.spModel.gemini.gmos.InstGmosNorth;
-import scala.Option;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,6 +14,8 @@ import java.util.List;
  * Gmos specification class
  */
 public final class GmosNorth extends Gmos {
+
+    private static final double WELL_DEPTH = 105000.0;
 
     /**
      * Related files will start with this prefix
@@ -56,7 +57,7 @@ public final class GmosNorth extends Gmos {
 
     @Override public List<WarningLimit> warnings() {
         return new ArrayList<WarningLimit>() {{
-            add(new SaturationLimit(getWellDepth() * getSpatialBinning() * getSpectralBinning(), 0.95));
+            add(new SaturationLimit(WELL_DEPTH * getSpatialBinning() * getSpectralBinning(), 0.95));
             add(new GainLimit(getADSaturation() * InstGmosNorth.getMeanGain(gp.ampGain(), gp.ampReadMode(), gp.ccdType()), 0.95));
         }};
     }
