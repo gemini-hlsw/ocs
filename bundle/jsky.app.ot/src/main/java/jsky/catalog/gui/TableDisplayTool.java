@@ -78,7 +78,6 @@ public class TableDisplayTool extends JPanel
     private JButton _plotButton;
     private JButton _unplotButton;
     private JButton _unplotAllButton;
-    private JButton _configButton;
 
     // JFrame or JInternalFrame for _configPanel
     private Component _configFrame;
@@ -225,7 +224,7 @@ public class TableDisplayTool extends JPanel
         panel.add(_unplotAllButton);
         _unplotAllButton.addActionListener(ev -> unplotAll());
 
-        _configButton = new JButton(_I18N.getString("configure"));
+        JButton _configButton = new JButton(_I18N.getString("configure"));
         _configButton.setToolTipText(_I18N.getString("configureTip"));
         panel.add(_configButton);
         _configButton.addActionListener(ev -> configure());
@@ -249,10 +248,6 @@ public class TableDisplayTool extends JPanel
 
     public JButton getUnplotAllButton() {
         return _unplotAllButton;
-    }
-
-    public JButton getConfigButton() {
-        return _configButton;
     }
 
     /** Plot the contents of the table. */

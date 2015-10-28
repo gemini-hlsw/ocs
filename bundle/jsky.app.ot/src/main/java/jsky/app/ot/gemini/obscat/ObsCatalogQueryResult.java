@@ -3,14 +3,11 @@ package jsky.app.ot.gemini.obscat;
 import edu.gemini.spModel.core.SPProgramID;
 import jsky.app.ot.shared.gemini.obscat.ObsCatalogInfo;
 import jsky.catalog.FieldDescAdapter;
-import jsky.catalog.gui.CatalogUIHandler;
-import jsky.catalog.gui.QueryResultDisplay;
 import jsky.catalog.skycat.SkycatConfigEntry;
 import jsky.catalog.skycat.SkycatConfigFile;
 import jsky.catalog.skycat.SkycatTable;
 import jsky.util.gui.DialogUtil;
 
-import javax.swing.JComponent;
 import java.util.List;
 import java.util.Properties;
 import java.util.Vector;

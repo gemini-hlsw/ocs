@@ -49,14 +49,6 @@ final class ObsCatalogQueryTool(catalog: Catalog) {
         }
       }
 
-  val saveAsButton =
-    new Button("Save As...") {
-      reactions += {
-        case ButtonClicked(_) =>
-          queryResults.saveAs()
-      }
-    }
-
   val toolsButton = new Button("") {
     tooltip = "Preferences..."
     icon = new ImageIcon(getClass.getResource("/resources/images/eclipse/engineering.gif"))
@@ -83,7 +75,6 @@ final class ObsCatalogQueryTool(catalog: Catalog) {
 
   val buttonPanel: Component = new MigPanel(LC().fill().insets(0)) {
       add(toolsButton, CC().alignX(RightAlign))
-      add(saveAsButton, CC().alignX(RightAlign))
       add(remote, CC().alignX(RightAlign).pushX())
       add(queryButton, CC().alignX(RightAlign))
     }

@@ -17,6 +17,7 @@ import jsky.app.ot.viewer.OpenUtils;
 import jsky.app.ot.viewer.SPElevationPlotPlugin;
 import jsky.app.ot.viewer.ViewerManager;
 import jsky.app.ot.viewer.open.OpenDialog;
+import jsky.catalog.QueryResult;
 import jsky.catalog.TableQueryResult;
 import jsky.catalog.gui.QueryResultDisplay;
 import jsky.catalog.gui.TableDisplay;
@@ -59,6 +60,12 @@ public final class ObsCatalogQueryResultDisplay extends TableDisplayTool impleme
         setEnabled(false);
         setToolTipText("Show the selected observation in the OT (Observing Tool)");
         addActionListener(e -> _showSelectedObservation());
+    }};
+
+    // Button to save the results in text format
+    private final JButton _saveAsButton = new JButton("Save As...") {{
+        setEnabled(false);
+        addActionListener(e -> saveAs());
     }};
 
     // Button to add the selected observation to the session queue
@@ -117,7 +124,6 @@ public final class ObsCatalogQueryResultDisplay extends TableDisplayTool impleme
         addActionListener(e -> SessionQueuePanel.getInstance().showFrame());
     }};
 
-
     // Panel inside configPanel used to select columns to display
     private final ObsCatalogTableColumnConfigPanel _tableConfig =
             new ObsCatalogTableColumnConfigPanel(getTableDisplay());
@@ -144,6 +150,7 @@ public final class ObsCatalogQueryResultDisplay extends TableDisplayTool impleme
 
         // Add some buttons
         final JPanel buttonPanel = getButtonPanel();
+        buttonPanel.add(_saveAsButton);
         buttonPanel.add(_otButton);
         buttonPanel.add(_elevationPlotButton);
         if (OTOptions.isStaffGlobally()) {
@@ -161,7 +168,6 @@ public final class ObsCatalogQueryResultDisplay extends TableDisplayTool impleme
         if (show == null || show.length != defaultShow.length) {
             tableDisplay.setShow(defaultShow);
         }
-
     }
 
     // Return an array indicating which table columns in a query result should be displayed by default
@@ -248,7 +254,6 @@ public final class ObsCatalogQueryResultDisplay extends TableDisplayTool impleme
         };
     }
 
-
     // Display an elevation plot for the selected observations
     private void _elevationPlot(final ISPObservation[] obs) {
         final SPElevationPlotPlugin plugin = SPElevationPlotPlugin.getInstance();
@@ -272,7 +277,6 @@ public final class ObsCatalogQueryResultDisplay extends TableDisplayTool impleme
         });
     }
 
-
     // Return an array of targets given an array of observations.
     private TargetDesc[] _getTargets(ISPObservation[] obs, boolean useTargetName) {
         final IDBDatabaseService db = SPDB.get();
@@ -287,7 +291,6 @@ public final class ObsCatalogQueryResultDisplay extends TableDisplayTool impleme
         result.toArray(targets);
         return targets;
     }
-
 
     // Return the currently selected science program object. If that can't be done, return null.
     private ISPProgram loadSelectedProgram() {
@@ -349,7 +352,6 @@ public final class ObsCatalogQueryResultDisplay extends TableDisplayTool impleme
         final int i = table.getSelectedRow();
         return (i >= 0) ? table.getSortedRowIndex(i) : i;
     }
-
 
     // Return the currently selected observation, or null
     private ISPObservation _getSelectedObservation(ISPProgram prog) {
@@ -452,6 +454,12 @@ public final class ObsCatalogQueryResultDisplay extends TableDisplayTool impleme
                     SPElevationPlotPlugin.getInstance().restoreSettings(ar[1]);
         }
         return false;
+    }
+
+    @Override
+    public void setQueryResult(QueryResult queryResult) {
+        _saveAsButton.setEnabled(true);
+        super.setQueryResult(queryResult);
     }
 
 }
