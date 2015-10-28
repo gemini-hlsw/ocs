@@ -6,11 +6,9 @@ import edu.gemini.itc.base.TransmissionElement;
 import edu.gemini.itc.flamingos2.Flamingos2;
 import edu.gemini.itc.flamingos2.Flamingos2Recipe;
 import edu.gemini.itc.shared.*;
-import edu.gemini.spModel.gemini.flamingos2.Flamingos2.FPUnit;
 import edu.gemini.spModel.core.PointSource$;
 import edu.gemini.spModel.core.UniformSource$;
-import scala.Tuple2;
-import scala.collection.JavaConversions;
+import edu.gemini.spModel.gemini.flamingos2.Flamingos2.FPUnit;
 
 import java.io.PrintWriter;
 import java.util.UUID;
@@ -24,10 +22,10 @@ public final class Flamingos2Printer extends PrinterBase {
     private final Flamingos2Recipe recipe;
     private final boolean isImaging;
 
-    public Flamingos2Printer(final Parameters p, final Flamingos2Parameters ip, final PlottingDetails pdp, final PrintWriter out) {
+    public Flamingos2Printer(final ItcParameters p, final Flamingos2Parameters instr, final PlottingDetails pdp, final PrintWriter out) {
         super(out);
         this.pdp       = pdp;
-        this.recipe    = new Flamingos2Recipe(p.source(), p.observation(), p.conditions(), ip, p.telescope());
+        this.recipe    = new Flamingos2Recipe(p, instr);
         this.isImaging = p.observation().getMethod().isImaging();
     }
 
@@ -37,16 +35,18 @@ public final class Flamingos2Printer extends PrinterBase {
     public void writeOutput() {
         if (isImaging) {
             final ImagingResult result = recipe.calculateImaging();
-            writeImagingOutput(result);
+            final ItcImagingResult s = recipe.serviceResult(result);
+            writeImagingOutput(result, s);
         } else {
-            final Tuple2<ItcSpectroscopyResult, SpectroscopyResult> r = recipe.calculateSpectroscopy();
-            final UUID id = cache(r._1());
-            writeSpectroscopyOutput(id, r._2());
-            validatePlottingDetails(pdp, r._2().instrument());
+            final SpectroscopyResult r = recipe.calculateSpectroscopy();
+            final ItcSpectroscopyResult s = recipe.serviceResult(r);
+            final UUID id = cache(s);
+            writeSpectroscopyOutput(id, r, s);
+            validatePlottingDetails(pdp, r.instrument());
         }
     }
 
-    private void writeSpectroscopyOutput(final UUID id, final SpectroscopyResult result) {
+    private void writeSpectroscopyOutput(final UUID id, final SpectroscopyResult result, final ItcSpectroscopyResult s) {
 
         // we know this is Flamingos
         final Flamingos2 instrument = (Flamingos2) result.instrument();
@@ -78,6 +78,9 @@ public final class Flamingos2Printer extends PrinterBase {
                 "Requested total integration time = %.2f secs, of which %.2f secs is on source.",
                 totExpTime, totExpTime * result.specS2N()[0].getSpecFracWithSource()));
 
+        _println("");
+        _printWarnings(s.warnings());
+
         _print("<HR align=left SIZE=3>");
 
         _println("<p style=\"page-break-inside: never\">");
@@ -101,7 +104,7 @@ public final class Flamingos2Printer extends PrinterBase {
     }
 
 
-    private void writeImagingOutput(final ImagingResult result) {
+    private void writeImagingOutput(final ImagingResult result, final ItcImagingResult s) {
 
         // we know this is Flamingos
         final Flamingos2 instrument = (Flamingos2) result.instrument();
@@ -112,21 +115,12 @@ public final class Flamingos2Printer extends PrinterBase {
         _println(CalculatablePrinter.getTextResult(result.iqCalc()));
         _println(CalculatablePrinter.getTextResult(result.is2nCalc(), result.observation()));
 
-        _println("");
-        _println(String.format(
-                "The peak pixel signal + background is %.0f. This is %.0f%% of the full well depth of %.0f.",
-                result.peakPixelCount(), result.peakPixelCount() / instrument.getWellDepth() * 100, instrument.getWellDepth()));
-
-        for (final ItcWarning warning : JavaConversions.asJavaList(result.warnings())) {
-            _println(warning.msg());
-        }
-
-        _println("");
+        _printWarnings(s.warnings());
 
         printConfiguration((Flamingos2) result.instrument(), result.parameters());
     }
 
-    private void printConfiguration(final Flamingos2 instrument, final Parameters p) {
+    private void printConfiguration(final Flamingos2 instrument, final ItcParameters p) {
         _print("<HR align=left SIZE=3>");
         _println("<b>Input Parameters:</b>");
         _println("Instrument: Flamingos 2\n");

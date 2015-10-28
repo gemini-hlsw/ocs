@@ -20,19 +20,20 @@ public final class GnirsPrinter extends PrinterBase {
     private final PlottingDetails pdp;
     private final GnirsRecipe recipe;
 
-    public GnirsPrinter(final Parameters p, final GnirsParameters ip, final PlottingDetails pdp, final PrintWriter out) {
+    public GnirsPrinter(final ItcParameters p, final GnirsParameters instr, final PlottingDetails pdp, final PrintWriter out) {
         super(out);
         this.pdp        = pdp;
-        this.recipe     = new GnirsRecipe(p.source(), p.observation(), p.conditions(), ip, p.telescope());
+        this.recipe     = new GnirsRecipe(p, instr);
     }
 
     public void writeOutput() {
-        final Tuple2<ItcSpectroscopyResult, SpectroscopyResult> r = recipe.calculateSpectroscopy();
-        final UUID id = cache(r._1());
-        writeSpectroscopyOutput(id, (GnirsSpectroscopyResult) r._2());
+        final GnirsSpectroscopyResult r = recipe.calculateSpectroscopy();
+        final ItcSpectroscopyResult s = recipe.serviceResult(r);
+        final UUID id = cache(s);
+        writeSpectroscopyOutput(id, r, s);
     }
 
-    private void writeSpectroscopyOutput(final UUID id, final GnirsSpectroscopyResult result) {
+    private void writeSpectroscopyOutput(final UUID id, final GnirsSpectroscopyResult result, final ItcSpectroscopyResult s) {
         _println("");
 
         final Gnirs instrument = (Gnirs) result.instrument();
@@ -61,6 +62,9 @@ public final class GnirsPrinter extends PrinterBase {
         _println(String.format("Requested total integration time = %.2f secs, of which %.2f secs is on source.",
                 result.observation().getExposureTime() * result.observation().getNumExposures(),
                 result.observation().getExposureTime() * result.observation().getNumExposures() * result.observation().getSourceFraction()));
+
+        _println("");
+        _printWarnings(s.warnings());
 
         _print("<HR align=left SIZE=3>");
 
@@ -115,7 +119,7 @@ public final class GnirsPrinter extends PrinterBase {
 
     }
 
-    private String gnirsToString(final Gnirs instrument, final Parameters p) {
+    private String gnirsToString(final Gnirs instrument, final ItcParameters p) {
 
         String s = "Instrument configuration: \n";
         s += HtmlPrinter.opticalComponentsToString(instrument);

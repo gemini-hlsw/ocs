@@ -6,14 +6,12 @@ import edu.gemini.itc.operation.*;
 import edu.gemini.itc.shared.*;
 import scala.Some;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * This class performs the calculations for Gsaoi used for imaging.
  */
 public final class GsaoiRecipe implements ImagingRecipe {
 
+    private final ItcParameters p;
     private final Gsaoi instrument;
     private final GsaoiParameters _gsaoiParameters;
     private final ObservingConditions _obsConditionParameters;
@@ -24,22 +22,23 @@ public final class GsaoiRecipe implements ImagingRecipe {
     /**
      * Constructs a GsaoiRecipe given the parameters. Useful for testing.
      */
-    public GsaoiRecipe(final SourceDefinition sdParameters,
-                       final ObservationDetails obsDetailParameters,
-                       final ObservingConditions obsConditionParameters,
-                       final GsaoiParameters gsaoiParameters,
-                       final TelescopeDetails telescope)
+    public GsaoiRecipe(final ItcParameters p, final GsaoiParameters instr)
 
     {
-        instrument = new Gsaoi(gsaoiParameters, obsDetailParameters);
-        _sdParameters = sdParameters;
-        _obsDetailParameters = obsDetailParameters;
-        _obsConditionParameters = obsConditionParameters;
-        _gsaoiParameters = gsaoiParameters;
-        _telescope = telescope;
+        this.p                  = p;
+        instrument              = new Gsaoi(instr, p.observation());
+        _sdParameters           = p.source();
+        _obsDetailParameters    = p.observation();
+        _obsConditionParameters = p.conditions();
+        _gsaoiParameters        = instr;
+        _telescope              = p.telescope();
 
         // some general validations
         Validation.validate(instrument, _obsDetailParameters, _sdParameters);
+    }
+
+    public ItcImagingResult serviceResult(final ImagingResult r) {
+        return Recipe$.MODULE$.serviceResult(r);
     }
 
     public ImagingResult calculateImaging() {
@@ -111,18 +110,7 @@ public final class GsaoiRecipe implements ImagingRecipe {
         IS2Ncalc.setSecondarySourceFraction(halo_source_fraction);
         IS2Ncalc.calculate();
 
-        final Parameters p = new Parameters(_sdParameters, _obsDetailParameters, _obsConditionParameters, _telescope);
-        final List<ItcWarning> warnings = warningsForImaging(instrument, peak_pixel_count);
-        return ImagingResult.apply(p, instrument, IQcalc, SFcalc, peak_pixel_count, IS2Ncalc, gems, warnings);
-    }
-
-    // TODO: some of these warnings are similar for different instruments and could be calculated in a central place
-    private List<ItcWarning> warningsForImaging(final Gsaoi instrument, final double peakPixelCount) {
-        final int peakPixelPercent = (int) (100 * peakPixelCount / Gsaoi.WELL_DEPTH);
-        return new ArrayList<ItcWarning>() {{
-            if (peakPixelPercent > 65 && peakPixelPercent <= 85) add(new ItcWarning("Warning: the peak pixel + background level exceeds 65% of the well depth and will cause deviations from linearity of more than 5%."));
-            if (peakPixelPercent > 85)                           add(new ItcWarning("Warning: the peak pixel + background level exceeds 85% of the well depth and may cause saturation."));
-        }};
+        return ImagingResult.apply(p, instrument, IQcalc, SFcalc, peak_pixel_count, IS2Ncalc, gems);
     }
 
 

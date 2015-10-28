@@ -4,6 +4,9 @@ import edu.gemini.itc.base.*;
 import edu.gemini.itc.shared.AcquisitionCamParameters;
 import edu.gemini.spModel.core.Site;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Aquisition Camera specification class
  */
@@ -20,10 +23,6 @@ public class AcquisitionCamera extends Instrument {
 
     // Instrument reads its configuration from here.
     private static final String FILENAME = "acquisition_camera" + getSuffix();
-
-    // Well Depth
-    private static final double WELL_DEPTH = 98940.0;
-
 
     // Keep a reference to the color filter to ask for effective wavelength
     private Filter _colorFilter;
@@ -65,7 +64,12 @@ public class AcquisitionCamera extends Instrument {
         return INSTR_PREFIX;
     }
 
-    public double getWellDepth() {
-        return WELL_DEPTH;
+    @Override public List<WarningRule> warnings() {
+        // value taken from instrument's web documentation
+        final double WellDepth = 98940;
+
+        return new ArrayList<WarningRule>() {{
+            add(new SaturationLimitRule(WellDepth, 0.80));
+        }};
     }
 }

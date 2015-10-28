@@ -6,9 +6,8 @@ import edu.gemini.itc.gsaoi.Camera;
 import edu.gemini.itc.gsaoi.Gsaoi;
 import edu.gemini.itc.gsaoi.GsaoiRecipe;
 import edu.gemini.itc.shared.GsaoiParameters;
-import edu.gemini.itc.shared.ItcWarning;
-import edu.gemini.itc.shared.Parameters;
-import scala.collection.JavaConversions;
+import edu.gemini.itc.shared.ItcImagingResult;
+import edu.gemini.itc.shared.ItcParameters;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -20,9 +19,9 @@ public final class GsaoiPrinter extends PrinterBase {
 
     private final GsaoiRecipe recipe;
 
-    public GsaoiPrinter(final Parameters p, final GsaoiParameters ip, final PrintWriter out) {
+    public GsaoiPrinter(final ItcParameters p, final GsaoiParameters instr, final PrintWriter out) {
         super(out);
-        recipe = new GsaoiRecipe(p.source(), p.observation(), p.conditions(), ip, p.telescope());
+        recipe = new GsaoiRecipe(p, instr);
     }
 
     /**
@@ -30,10 +29,11 @@ public final class GsaoiPrinter extends PrinterBase {
      */
     public void writeOutput() {
         final ImagingResult result = recipe.calculateImaging();
-        writeImagingOutput(result);
+        final ItcImagingResult s = recipe.serviceResult(result);
+        writeImagingOutput(result, s);
     }
 
-    private void writeImagingOutput(final ImagingResult result) {
+    private void writeImagingOutput(final ImagingResult result, final ItcImagingResult s) {
 
         final Gsaoi instrument = (Gsaoi) result.instrument();
 
@@ -49,14 +49,7 @@ public final class GsaoiPrinter extends PrinterBase {
         _println("");
         _println(String.format("The peak pixel signal + background is %.0f", result.peakPixelCount()));
 
-        // REL-1353
-        final int peak_pixel_percent = (int) (100 * result.peakPixelCount() / Gsaoi.WELL_DEPTH);
-        _println("This is " + peak_pixel_percent + "% of the full well depth of " + Gsaoi.WELL_DEPTH + " electrons");
-        for (final ItcWarning warning : JavaConversions.asJavaList(result.warnings())) {
-            _println(warning.msg());
-        }
-
-        _println("");
+        _printWarnings(s.warnings());
 
         _print("<HR align=left SIZE=3>");
 

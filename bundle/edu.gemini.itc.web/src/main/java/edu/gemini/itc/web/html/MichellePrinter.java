@@ -5,9 +5,9 @@ import edu.gemini.itc.base.SpectroscopyResult;
 import edu.gemini.itc.michelle.Michelle;
 import edu.gemini.itc.michelle.MichelleRecipe;
 import edu.gemini.itc.shared.*;
-import edu.gemini.spModel.gemini.michelle.MichelleParams;
 import edu.gemini.spModel.core.PointSource$;
 import edu.gemini.spModel.core.UniformSource$;
+import edu.gemini.spModel.gemini.michelle.MichelleParams;
 import scala.Tuple2;
 
 import java.io.PrintWriter;
@@ -22,9 +22,9 @@ public final class MichellePrinter extends PrinterBase {
     private final PlottingDetails pdp;
     private final boolean isImaging;
 
-    public MichellePrinter(final Parameters p, final MichelleParameters ip, final PlottingDetails pdp, final PrintWriter out) {
+    public MichellePrinter(final ItcParameters p, final MichelleParameters instr, final PlottingDetails pdp, final PrintWriter out) {
         super(out);
-        this.recipe    = new MichelleRecipe(p.source(), p.observation(), p.conditions(), ip, p.telescope());
+        this.recipe    = new MichelleRecipe(p, instr);
         this.pdp       = pdp;
         this.isImaging = p.observation().getMethod().isImaging();
     }
@@ -34,9 +34,10 @@ public final class MichellePrinter extends PrinterBase {
             final ImagingResult result = recipe.calculateImaging();
             writeImagingOutput(result);
         } else {
-            final Tuple2<ItcSpectroscopyResult, SpectroscopyResult> r = recipe.calculateSpectroscopy();
-            final UUID id = cache(r._1());
-            writeSpectroscopyOutput(id, r._2());
+            final SpectroscopyResult r = recipe.calculateSpectroscopy();
+            final ItcSpectroscopyResult s = recipe.serviceResult(r);
+            final UUID id = cache(s);
+            writeSpectroscopyOutput(id, r);
         }
     }
 
@@ -180,7 +181,7 @@ public final class MichellePrinter extends PrinterBase {
 
     }
 
-    private String michelleToString(final Michelle instrument, final Parameters p) {
+    private String michelleToString(final Michelle instrument, final ItcParameters p) {
 
         String s = "Instrument configuration: \n";
         s += HtmlPrinter.opticalComponentsToString(instrument);

@@ -333,19 +333,19 @@ public final class Niri {
 
         IMAG_SPEC_NB(
                 "1-2.5um: Faint Object Narrow-band Imaging/Spectroscopy",
-                "low background", "12 e-",
+                "low background", 12.0,
                 new double[]{0.654, 2.276, 4.980, 8.762},
                 ">44 sec", "LowRN"),
 
         IMAG_1TO25(
                 "1-2.5um: JHK and Bright Object Narrow-band Imaging/Spectroscopy",
-                "high background", "35 e-",
+                "high background", 35.0,
                 new double[]{0.043, 0.144, 0.313, 0.548},
                 ">2.7 sec", "MedRN"),
 
         IMAG_SPEC_3TO5(
                 "3-5um: Imaging/Spectroscopy",
-                "highest flux/thermal", "70 e-",
+                "highest flux/thermal", 70.0,
                 new double[]{0.02, 0.052, 0.106, 0.179},
                 ">0.9 sec", "HiRN"),;
 
@@ -357,7 +357,7 @@ public final class Niri {
 
         private final String _displayValue;
         private final String _description;
-        private final String _readNoise;
+        private final double _readNoise;
         private final double[] _minExp;
         private final String _recommendedExp;
         private final String _logValue;
@@ -368,7 +368,7 @@ public final class Niri {
         // each of these at indexes 0,1,2,3.
         // The recommened exposure time is just for display (XXX should it be
         // an array also?)
-        ReadMode(final String displayValue, final String description, final String readNoise,
+        ReadMode(final String displayValue, final String description, final double readNoise,
                          final double[] minExp, final String recommendedExp, final String logValue) {
             _displayValue = displayValue;
             _description = description;
@@ -419,7 +419,7 @@ public final class Niri {
             return SpTypeUtil.oldValueOf(ReadMode.class, name, nvalue);
         }
 
-        public String getReadNoise() {
+        public double getReadNoise() {
             return _readNoise;
         }
 
@@ -874,32 +874,44 @@ public final class Niri {
      */
     public enum WellDepth implements DisplayableSpType, DescribableSpType, SequenceableSpType {
 
-        SHALLOW("shallow well", "1-2.5 um only"),
-        DEEP("deep well", "3-5 um"),;
+        SHALLOW("shallow well", "1-2.5 um only", 200000.0, 123000.0),
+        DEEP   ("deep well",    "3-5 um",        280000.0, 184500.0);
 
         /**
          * The default WellDepth value *
          */
         public static final WellDepth DEFAULT = SHALLOW;
 
-        private final String _displayValue;
-        private final String _description;
+        private final String displayValue;
+        private final String description;
+        private final double wellDepth;
+        private final double linearityLimit;
 
-        WellDepth(final String displayValue, final String description) {
-            _displayValue = displayValue;
-            _description = description;
+        WellDepth(final String displayValue, final String description, final double wellDepth, final double linearityLimit) {
+            this.displayValue   = displayValue;
+            this.description    = description;
+            this.wellDepth      = wellDepth;
+            this.linearityLimit = linearityLimit;
         }
 
         public String displayValue() {
-            return _displayValue;
+            return displayValue;
         }
 
         public String description() {
-            return _description;
+            return description;
+        }
+
+        public double depth() {
+            return wellDepth;
+        }
+
+        public double linearityLimit() {
+            return linearityLimit;
         }
 
         public String sequenceValue() {
-            return _displayValue;
+            return displayValue;
         }
 
         /**

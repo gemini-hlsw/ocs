@@ -1,11 +1,13 @@
 package edu.gemini.itc.base;
 
 import edu.gemini.itc.niri.GrismOptics;
+import edu.gemini.itc.shared.ItcWarning;
 import edu.gemini.spModel.core.Site;
 import scala.Option;
 import scala.Some;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -257,6 +259,20 @@ public abstract class Instrument {
 
     public List<TransmissionElement> getComponents() {
         return new ArrayList<>(components);
+    }
+
+    // === Warnings
+
+    public List<WarningRule> warnings() {
+        return Collections.emptyList();
+    }
+
+    public List<ItcWarning> imagingWarnings(final ImagingResult result) {
+        return Collections.emptyList();
+    }
+
+    public List<ItcWarning> spectroscopyWarnings(final SpectroscopyResult result) {
+        return Collections.emptyList();
     }
 }
 

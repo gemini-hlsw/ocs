@@ -23,6 +23,7 @@ import java.util.UUID;
  */
 public final class NiriPrinter extends PrinterBase {
 
+    private final NiriParameters instr;
     private final PlottingDetails pdp;
     private final NiriRecipe recipe;
     private final boolean isImaging;
@@ -30,9 +31,10 @@ public final class NiriPrinter extends PrinterBase {
     /**
      * Constructs a NiriRecipe given the parameters. Useful for testing.
      */
-    public NiriPrinter(final Parameters p, final NiriParameters ip, final PlottingDetails pdp, final PrintWriter out) {
+    public NiriPrinter(final ItcParameters p, final NiriParameters instr, final PlottingDetails pdp, final PrintWriter out) {
         super(out);
-        this.recipe    = new NiriRecipe(p.source(), p.observation(), p.conditions(), ip, p.telescope());
+        this.instr     = instr;
+        this.recipe    = new NiriRecipe(p, instr);
         this.isImaging = p.observation().getMethod().isImaging();
         this.pdp       = pdp;
     }
@@ -40,15 +42,17 @@ public final class NiriPrinter extends PrinterBase {
     public void writeOutput() {
         if (isImaging) {
             final ImagingResult result = recipe.calculateImaging();
-            writeImagingOutput(result);
+            final ItcImagingResult s = recipe.serviceResult(result);
+            writeImagingOutput(result, s);
         } else {
-            final Tuple2<ItcSpectroscopyResult, SpectroscopyResult> r = recipe.calculateSpectroscopy();
-            final UUID id = cache(r._1());
-            writeSpectroscopyOutput(id, r._2());
+            final SpectroscopyResult r = recipe.calculateSpectroscopy();
+            final ItcSpectroscopyResult s = recipe.serviceResult(r);
+            final UUID id = cache(s);
+            writeSpectroscopyOutput(id, r, s);
         }
     }
 
-    private void writeSpectroscopyOutput(final UUID id, final SpectroscopyResult result) {
+    private void writeSpectroscopyOutput(final UUID id, final SpectroscopyResult result, final ItcSpectroscopyResult s) {
 
         final Niri instrument = (Niri) result.instrument();
 
@@ -81,6 +85,9 @@ public final class NiriPrinter extends PrinterBase {
                 result.observation().getExposureTime() * result.observation().getNumExposures(),
                 result.observation().getExposureTime() * result.observation().getNumExposures() * result.observation().getSourceFraction()));
 
+        _println("");
+        _printWarnings(s.warnings());
+
         _print("<HR align=left SIZE=3>");
 
         _println("<p style=\"page-break-inside: never\">");
@@ -103,7 +110,7 @@ public final class NiriPrinter extends PrinterBase {
 
     }
 
-    private void writeImagingOutput(final ImagingResult result) {
+    private void writeImagingOutput(final ImagingResult result, final ItcImagingResult s) {
 
         final Niri instrument = (Niri) result.instrument();
 
@@ -122,21 +129,13 @@ public final class NiriPrinter extends PrinterBase {
         _println(CalculatablePrinter.getTextResult(result.is2nCalc(), result.observation()));
         _println(CalculatablePrinter.getBackgroundLimitResult(result.is2nCalc()));
 
-        _println("");
-        _println(String.format("The peak pixel signal + background is %.0f. This is %.0f%% of the full well depth of %.0f.",
-                result.peakPixelCount(), result.peakPixelCount() / instrument.getWellDepthValue() * 100, instrument.getWellDepthValue()));
-
-        for (final ItcWarning warning : JavaConversions.asJavaList(result.warnings())) {
-            _println(warning.msg());
-        }
-
-        _println("");
+        _printWarnings(s.warnings());
 
         printConfiguration(result.parameters(), instrument, result.aoSystem());
 
     }
 
-    private void printConfiguration(final Parameters p, final Niri instrument, final Option<AOSystem> ao) {
+    private void printConfiguration(final ItcParameters p, final Niri instrument, final Option<AOSystem> ao) {
         _print("<HR align=left SIZE=3>");
         _println("<b>Input Parameters:</b>");
         _println("Instrument: " + instrument.getName() + "\n");
@@ -159,10 +158,10 @@ public final class NiriPrinter extends PrinterBase {
         for (final TransmissionElement te : instrument.getComponents()) {
             s += "<LI>" + te.toString() + "<BR>";
         }
-        if (instrument.getFocalPlaneMask() != Mask.MASK_IMAGING)
-            s += "<LI>Focal Plane Mask: " + instrument.getFocalPlaneMask().displayValue() + "\n";
-        s += "<LI>Read Mode: " + instrument.getReadMode().displayValue() + "\n";
-        s += "<LI>Detector Bias: " + instrument.getWellDepth().displayValue() + "\n";
+        if (instr.mask() != Mask.MASK_IMAGING)
+            s += "<LI>Focal Plane Mask: " + instr.mask().displayValue() + "\n";
+        s += "<LI>Read Mode: " + instr.readMode().displayValue() + "\n";
+        s += "<LI>Detector Bias: " + instr.wellDepth().displayValue() + "\n";
 
         s += "<BR>Pixel Size: " + instrument.getPixelSize() + "<BR>";
 

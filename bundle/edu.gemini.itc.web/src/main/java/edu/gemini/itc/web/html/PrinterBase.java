@@ -1,9 +1,10 @@
 package edu.gemini.itc.web.html;
 
-import edu.gemini.itc.base.*;
+import edu.gemini.itc.base.Instrument;
 import edu.gemini.itc.shared.*;
 import edu.gemini.itc.web.servlets.FilesServlet;
 import edu.gemini.itc.web.servlets.ServerInfo;
+import scala.collection.JavaConversions;
 
 import java.io.PrintWriter;
 import java.util.Optional;
@@ -110,6 +111,14 @@ public abstract class PrinterBase {
                 "&" + FilesServlet.ParamChartIndex  + "=" + index +
                 "&" + FilesServlet.ParamId          + "=" + id +
                 toPlotLimits(pd) + "\"/>");
+    }
+
+
+    protected void _printWarnings(final scala.collection.immutable.Seq<ItcWarning> warnings) {
+        for (final ItcWarning w : JavaConversions.asJavaList(warnings)) {
+            _print("Warning: " + w.msg());
+        }
+        _println("");
     }
 
     private String toPlotLimits(final PlottingDetails pd) {

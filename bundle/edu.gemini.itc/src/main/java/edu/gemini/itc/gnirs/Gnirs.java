@@ -9,6 +9,9 @@ import edu.gemini.spModel.gemini.gnirs.GNIRSParams;
 import edu.gemini.spModel.gemini.gnirs.GNIRSParams.Disperser;
 import edu.gemini.spModel.gemini.gnirs.GNIRSParams.SlitWidth;
 
+import java.util.ArrayList;
+import java.util.List;
+
 
 /**
  * Gnirs specification class
@@ -28,9 +31,11 @@ public final class Gnirs extends Instrument {
 
     private static final String FILENAME = "gnirs" + getSuffix();
 
-    // Instrument reads its configuration from here.
+    // Values taken from instrument's web documentation
     private static final double SHALLOW_WELL = 90000.0;
     private static final double DEEP_WELL = 180000.0;
+    private static final double SHALLOW_WELL_LINEARITY_LIMIT = 65000;
+    private static final double DEEP_WELL_LINEARTY_LIMIT = 130000.0;
 
     public static final int DETECTOR_PIXELS = 1024;
 
@@ -48,6 +53,7 @@ public final class Gnirs extends Instrument {
     protected final TransmissionElement _camera;
     protected final boolean _XDisp;
     protected final double _wellDepth;
+    protected final double _linearityLimit;
 
     public Gnirs(GnirsParameters gp, ObservationDetails odp) {
         super(Site.GN, Bands.NEAR_IR, INSTR_DIR, FILENAME);
@@ -70,13 +76,11 @@ public final class Gnirs extends Instrument {
 
         //set read noise by exporsure time
         if (odp.getExposureTime() <= 1.0) {
-            _wellDepth = DEEP_WELL;
-        } else if (odp.getExposureTime() <= 20.0) {
-            _wellDepth = SHALLOW_WELL;
-        } else if (odp.getExposureTime() <= 60.0) {
-            _wellDepth = SHALLOW_WELL;
+            _wellDepth      = DEEP_WELL;
+            _linearityLimit = DEEP_WELL_LINEARTY_LIMIT;
         } else {
-            _wellDepth = SHALLOW_WELL;
+            _wellDepth      = SHALLOW_WELL;
+            _linearityLimit = SHALLOW_WELL_LINEARITY_LIMIT;
         }
 
         //Select filter depending on if Cross dispersion is used.
@@ -285,6 +289,13 @@ public final class Gnirs extends Instrument {
 
     private boolean isXDispUsed() {
         return !params.crossDispersed().equals(GNIRSParams.CrossDispersed.NO);
+    }
+
+    @Override public List<WarningRule> warnings() {
+        return new ArrayList<WarningRule>() {{
+            add(new LinearityLimitRule(_wellDepth, 0.80));
+            add(new SaturationLimitRule(_linearityLimit, 0.80));
+        }};
     }
 
 

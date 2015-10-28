@@ -11,5 +11,9 @@ public interface ImagingS2NCalculatable extends Calculatable {
     double getVarDark();
     double getVarReadout();
 
+    double numberSourceExposures();
+
+    double singleSNRatio();
+    double totalSNRatio();
 
 }

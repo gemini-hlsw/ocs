@@ -7,6 +7,8 @@ import edu.gemini.spModel.gemini.flamingos2.Flamingos2.FPUnit;
 import scala.Option;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Flamingos 2 specification class
@@ -16,7 +18,6 @@ public final class Flamingos2 extends Instrument {
     private static final String FILENAME = "flamingos2" + getSuffix();
     public static final String INSTR_DIR = "flamingos2";
     public static final String INSTR_PREFIX = "";
-    private static final double WELL_DEPTH = 155400;
     public static String getPrefix() {
         return INSTR_PREFIX;
     }
@@ -145,10 +146,6 @@ public final class Flamingos2 extends Instrument {
         return _grismOptics.get().getPixelWidth();
     }
 
-    public double getWellDepth() {
-        return WELL_DEPTH;
-    }
-
     public FPUnit getFocalPlaneMask() {
         return params.mask();
     }
@@ -162,4 +159,17 @@ public final class Flamingos2 extends Instrument {
         }
 
     }
+
+    @Override public List<WarningRule> warnings() {
+        // values are taken from instrument's web documentation
+        final double WellDepth      = 155400;
+        final double LinearityLimit = 98000;
+
+        return new ArrayList<WarningRule>() {{
+            add(new LinearityLimitRule(LinearityLimit, 0.80));
+            add(new SaturationLimitRule(WellDepth, 0.80));
+        }};
+    }
+
+
 }

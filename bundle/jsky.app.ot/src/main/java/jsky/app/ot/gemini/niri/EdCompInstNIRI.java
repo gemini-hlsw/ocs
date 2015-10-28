@@ -176,19 +176,19 @@ public final class EdCompInstNIRI extends EdCompInstBase<InstNIRI>
         if (readMode == ReadMode.IMAG_SPEC_NB) {
             _w.readModeNarrowBandButton.setSelected(true);
             _w.readModeMinExpTime.setText(readMode.getMinExpAsString(roi));
-            _w.readModeNoise.setText(readMode.getReadNoise());
+            _w.readModeNoise.setText(String.format("%.0f e-", readMode.getReadNoise()));
             _w.readModeRecMinExpTime.setText(readMode.getRecommendedMinExp());
             _w.readModeLowBgLabel.setEnabled(enabled);
         } else if (readMode == ReadMode.IMAG_1TO25) {
             _w.readMode1To25Button.setSelected(true);
             _w.readModeMinExpTime.setText(readMode.getMinExpAsString(roi));
-            _w.readModeNoise.setText(readMode.getReadNoise());
+            _w.readModeNoise.setText(String.format("%.0f e-", readMode.getReadNoise()));
             _w.readModeRecMinExpTime.setText(readMode.getRecommendedMinExp());
             _w.readModeMediumBgLabel.setEnabled(enabled);
         } else if (readMode == ReadMode.IMAG_SPEC_3TO5) {
             _w.readMode3To5Button.setSelected(true);
             _w.readModeMinExpTime.setText(readMode.getMinExpAsString(roi));
-            _w.readModeNoise.setText(readMode.getReadNoise());
+            _w.readModeNoise.setText(String.format("%.0f e-", readMode.getReadNoise()));
             _w.readModeRecMinExpTime.setText(readMode.getRecommendedMinExp());
             _w.readModeHighBgLabel.setEnabled(enabled);
         }

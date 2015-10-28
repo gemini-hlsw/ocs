@@ -17,13 +17,20 @@ public abstract class ImagingS2NCalculation implements ImagingS2NCalculatable {
     private final double skyAper;
     private final int    elfinParam;
 
-    double var_source, var_background, var_dark, var_readout,
-            noise, sourceless_noise, signal,
-            read_noise, pixel_size,
-            exposure_time, noiseFactor;
+    protected double var_source;
+    protected double var_background;
+    protected double var_dark;
+    protected double var_readout;
+    protected double noise;
+    protected double sourceless_noise;
+    protected double signal;
+    protected double noiseFactor;
+    protected double read_noise;
+    protected double pixel_size;
+    protected double exposure_time;
 
-    double secondary_integral = 0;
-    double secondary_source_fraction = 0;
+    protected double secondary_integral = 0;
+    protected double secondary_source_fraction = 0;
 
     public ImagingS2NCalculation( final ObservationDetails obs, final Instrument instrument,final SourceFraction sourceFrac, final double sed_integral, final double sky_integral) {
         this.sed_integral    = sed_integral;
@@ -76,5 +83,14 @@ public abstract class ImagingS2NCalculation implements ImagingS2NCalculatable {
     public double getVarReadout() { return var_readout; }
     public double getNoise() { return noise; }
     public double getSignal() { return signal; }
+
+    @Override public double totalSNRatio() {
+        return Math.sqrt(numberSourceExposures()) * signal / Math.sqrt(signal + noiseFactor * sourceless_noise * sourceless_noise);
+    }
+
+    public double singleSNRatio() {
+        return signal / noise;
+    }
+
 
 }

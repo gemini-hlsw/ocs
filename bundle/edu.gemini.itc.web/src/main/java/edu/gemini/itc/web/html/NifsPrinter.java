@@ -19,19 +19,20 @@ public final class NifsPrinter extends PrinterBase {
     private final NifsRecipe recipe;
     private final PlottingDetails pdp;
 
-    public NifsPrinter(final Parameters p, final NifsParameters ip, final PlottingDetails pdp, final PrintWriter out) {
+    public NifsPrinter(final ItcParameters p, final NifsParameters instr, final PlottingDetails pdp, final PrintWriter out) {
         super(out);
-        this.recipe = new NifsRecipe(p.source(), p.observation(), p.conditions(), ip, p.telescope());
+        this.recipe = new NifsRecipe(p, instr);
         this.pdp    = pdp;
     }
 
     public void writeOutput() {
-        final Tuple2<ItcSpectroscopyResult, SpectroscopyResult> r = recipe.calculateSpectroscopy();
-        final UUID id = cache(r._1());
-        writeSpectroscopyOutput(id, r._2());
+        final SpectroscopyResult r = recipe.calculateSpectroscopy();
+        final ItcSpectroscopyResult s = recipe.serviceResult(r);
+        final UUID id = cache(s);
+        writeSpectroscopyOutput(id, r, s);
     }
 
-    private void writeSpectroscopyOutput(final UUID id, final SpectroscopyResult result) {
+    private void writeSpectroscopyOutput(final UUID id, final SpectroscopyResult result, final ItcSpectroscopyResult s) {
 
         final Nifs instrument = (Nifs) result.instrument();
 
@@ -47,6 +48,9 @@ public final class NifsPrinter extends PrinterBase {
 
         _println(String.format("derived image halo size (FWHM) for a point source = %.2f arcsec\n", result.iqCalc().getImageQuality()));
         _println(String.format("Requested total integration time = %.2f secs, of which %.2f secs is on source.", exposure_time * number_exposures, exposure_time * number_exposures * frac_with_source));
+
+        _println("");
+        _printWarnings(s.warnings());
 
         _print("<HR align=left SIZE=3>");
 

@@ -11,7 +11,6 @@ import edu.gemini.spModel.core.GaussianSource;
 import edu.gemini.spModel.core.PointSource$;
 import edu.gemini.spModel.core.UniformSource$;
 import scala.Option;
-import scala.Tuple2;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -23,6 +22,7 @@ import java.util.List;
  */
 public final class NifsRecipe implements SpectroscopyRecipe {
 
+    private final ItcParameters p;
     private final Nifs instrument;
     private final SourceDefinition _sdParameters;
     private final ObservationDetails _obsDetailParameters;
@@ -34,19 +34,14 @@ public final class NifsRecipe implements SpectroscopyRecipe {
      * Constructs a NifsRecipe given the parameters.
      * Useful for testing.
      */
-    public NifsRecipe(final SourceDefinition sdParameters,
-                      final ObservationDetails obsDetailParameters,
-                      final ObservingConditions obsConditionParameters,
-                      final NifsParameters nifsParameters,
-                      final TelescopeDetails telescope)
-
-    {
-        instrument = new Nifs(nifsParameters, obsDetailParameters);
-        _sdParameters = sdParameters;
-        _obsDetailParameters = obsDetailParameters;
-        _obsConditionParameters = obsConditionParameters;
-        _nifsParameters = nifsParameters;
-        _telescope = telescope;
+    public NifsRecipe(final ItcParameters p, final NifsParameters instr) {
+        this.p                  = p;
+        instrument              = new Nifs(instr, p.observation());
+        _sdParameters           = p.source();
+        _obsDetailParameters    = p.observation();
+        _obsConditionParameters = p.conditions();
+        _nifsParameters         = instr;
+        _telescope              = p.telescope();
 
         // some general validations
         Validation.validate(instrument, _obsDetailParameters, _sdParameters);
@@ -55,17 +50,16 @@ public final class NifsRecipe implements SpectroscopyRecipe {
     /**
      * Performs recipe calculation.
      */
-    public Tuple2<ItcSpectroscopyResult, SpectroscopyResult> calculateSpectroscopy() {
-        final SpectroscopyResult r = doCalculateSpectroscopy();
+    public ItcSpectroscopyResult serviceResult(final SpectroscopyResult r) {
         final List<SpcChartData> dataSets = new ArrayList<>();
         for (int i = 0; i < r.specS2N().length; i++) {
             dataSets.add(createNifsSignalChart(r, i));
             dataSets.add(createNifsS2NChart(r, i));
         }
-        return new Tuple2<>(ItcSpectroscopyResult.apply(dataSets, new ArrayList<>()), r);
+        return ItcSpectroscopyResult.apply(dataSets, Warning.collectWarnings(r));
     }
 
-    private SpectroscopyResult doCalculateSpectroscopy() {
+    public SpectroscopyResult calculateSpectroscopy() {
 
         // Calculate image quality
         final ImageQualityCalculatable IQcalc = ImageQualityCalculationFactory.getCalculationInstance(_sdParameters, _obsConditionParameters, _telescope, instrument);
@@ -184,9 +178,8 @@ public final class NifsRecipe implements SpectroscopyRecipe {
             specS2Narr[i++] = specS2N;
         }
 
-        final Parameters p = new Parameters(_sdParameters, _obsDetailParameters, _obsConditionParameters, _telescope);
         // TODO: no SFCalc and ST for Nifs, introduce specific result type? or optional values? work with null for now
-        return new GenericSpectroscopyResult(p, instrument, null, IQcalc, specS2Narr, null, altair, ImagingResult.NoWarnings());
+        return new GenericSpectroscopyResult(p, instrument, null, IQcalc, specS2Narr, null, altair);
     }
 
     // NIFS CHARTS

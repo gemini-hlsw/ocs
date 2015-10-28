@@ -66,7 +66,7 @@ public final class CalculatablePrinter {
             sb.append(" exposures");
         sb.append(", the effective S/N for the whole observation is ");
 
-        sb.append(String.format("%.2f (including sky subtraction)\n\n", s2n.effectiveS2N()));
+        sb.append(String.format("%.2f (including sky subtraction)\n\n", s2n.totalSNRatio()));
 
         final double totReqTime = s2n.reqNumberExposures() * obs.getExposureTime();
         final double srcReqTime = totReqTime * obs.getSourceFraction();

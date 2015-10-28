@@ -103,7 +103,7 @@ public final class CalculationServlet extends HttpServlet {
      */
     private void writeOutput(final ITCRequest r, final PrintWriter out) {
         final InstrumentDetails ip  = ITCRequest.instrumentParameters(r);
-        final Parameters p          = ITCRequest.parameters(r, ip);
+        final ItcParameters p       = ITCRequest.parameters(r, ip);
         final PrinterBase printer;
         if      (ip instanceof AcquisitionCamParameters) printer = new AcqCamPrinter(p, (AcquisitionCamParameters) ip, out);
         else if (ip instanceof Flamingos2Parameters)     printer = new Flamingos2Printer(p, (Flamingos2Parameters) ip, ITCRequest.plotParameters(r), out);

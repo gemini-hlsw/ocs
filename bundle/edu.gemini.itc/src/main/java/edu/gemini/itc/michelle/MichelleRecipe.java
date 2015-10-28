@@ -3,9 +3,7 @@ package edu.gemini.itc.michelle;
 import edu.gemini.itc.base.*;
 import edu.gemini.itc.operation.*;
 import edu.gemini.itc.shared.*;
-import edu.gemini.spModel.core.Site;
 import edu.gemini.spModel.data.YesNoType;
-import scala.Tuple2;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,7 +14,7 @@ import java.util.List;
  */
 public final class MichelleRecipe implements ImagingRecipe, SpectroscopyRecipe {
 
-    // Parameters from the web page.
+    private final ItcParameters p;
     private final Michelle instrument;
     private final SourceDefinition _sdParameters;
     private final ObservationDetails _obsDetailParameters;
@@ -27,16 +25,14 @@ public final class MichelleRecipe implements ImagingRecipe, SpectroscopyRecipe {
      * Constructs a MichelleRecipe given the parameters.
      * Useful for testing.
      */
-    public MichelleRecipe(final SourceDefinition sdParameters,
-                          final ObservationDetails obsDetailParameters,
-                          final ObservingConditions obsConditionParameters,
-                          final MichelleParameters michelleParameters,
-                          final TelescopeDetails telescope) {
-        instrument = new Michelle(michelleParameters, obsDetailParameters);
-        _sdParameters = sdParameters;
-        _obsDetailParameters = correctedObsDetails(michelleParameters, obsDetailParameters);
-        _obsConditionParameters = obsConditionParameters;
-        _telescope = telescope;
+    public MichelleRecipe(final ItcParameters p, final MichelleParameters instr) {
+        instrument              = new Michelle(instr, p.observation());
+        _sdParameters           = p.source();
+        _obsDetailParameters    = correctedObsDetails(instr, p.observation());
+        _obsConditionParameters = p.conditions();
+        _telescope              = p.telescope();
+        // update parameters with "corrected" version
+        this.p                  = new ItcParameters(p.source(), _obsDetailParameters, p.conditions(), p.telescope(), p.instrument());
 
         // some general validations
         Validation.validate(instrument, _obsDetailParameters, _sdParameters);
@@ -78,16 +74,19 @@ public final class MichelleRecipe implements ImagingRecipe, SpectroscopyRecipe {
 
     }
 
-    public Tuple2<ItcSpectroscopyResult, SpectroscopyResult> calculateSpectroscopy() {
-        final SpectroscopyResult r = doCalculateSpectroscopy();
+    public ItcImagingResult serviceResult(final ImagingResult r) {
+        return Recipe$.MODULE$.serviceResult(r);
+    }
+
+    public ItcSpectroscopyResult serviceResult(final SpectroscopyResult r) {
         final List<SpcChartData> dataSets = new ArrayList<SpcChartData>() {{
             add(Recipe$.MODULE$.createSignalChart(r, 0));
             add(Recipe$.MODULE$.createS2NChart(r, 0));
         }};
-        return new Tuple2<>(ItcSpectroscopyResult.apply(dataSets, new ArrayList<>()), r);
+        return ItcSpectroscopyResult.apply(dataSets, Warning.collectWarnings(r));
     }
 
-    private SpectroscopyResult doCalculateSpectroscopy() {
+    public SpectroscopyResult calculateSpectroscopy() {
 
         // Get the summed source and sky
         final SEDFactory.SourceResult calcSource = SEDFactory.calculate(instrument, _sdParameters, _obsConditionParameters, _telescope);
@@ -169,8 +168,6 @@ public final class MichelleRecipe implements ImagingRecipe, SpectroscopyRecipe {
         specS2N.setBackgroundSpectrum(sky);
         sed.accept(specS2N);
 
-
-        final Parameters p = new Parameters(_sdParameters, _obsDetailParameters, _obsConditionParameters, _telescope);
         final SpecS2N[] specS2Narr = new SpecS2N[1];
         specS2Narr[0] = specS2N;
         return SpectroscopyResult$.MODULE$.apply(p, instrument, SFcalc, IQcalc, specS2Narr, st);
@@ -215,7 +212,6 @@ public final class MichelleRecipe implements ImagingRecipe, SpectroscopyRecipe {
         final ImagingS2NCalculatable IS2Ncalc = ImagingS2NCalculationFactory.getCalculationInstance(_obsDetailParameters, instrument, SFcalc, sed_integral, sky_integral);
         IS2Ncalc.calculate();
 
-        final Parameters p = new Parameters(_sdParameters, _obsDetailParameters, _obsConditionParameters, _telescope);
         return ImagingResult.apply(p, instrument, IQcalc, SFcalc, peak_pixel_count, IS2Ncalc);
 
     }

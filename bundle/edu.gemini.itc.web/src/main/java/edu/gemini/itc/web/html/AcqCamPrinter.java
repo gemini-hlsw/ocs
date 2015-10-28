@@ -6,8 +6,9 @@ import edu.gemini.itc.base.ImagingResult;
 import edu.gemini.itc.base.Instrument;
 import edu.gemini.itc.base.TransmissionElement;
 import edu.gemini.itc.shared.AcquisitionCamParameters;
+import edu.gemini.itc.shared.ItcImagingResult;
+import edu.gemini.itc.shared.ItcParameters;
 import edu.gemini.itc.shared.ItcWarning;
-import edu.gemini.itc.shared.Parameters;
 import scala.collection.JavaConversions;
 
 import java.io.PrintWriter;
@@ -19,18 +20,19 @@ public final class AcqCamPrinter extends PrinterBase {
 
     private final AcqCamRecipe  recipe;
 
-    public AcqCamPrinter(final Parameters p, final AcquisitionCamParameters ip, final PrintWriter out) {
+    public AcqCamPrinter(final ItcParameters p, final AcquisitionCamParameters instr, final PrintWriter out) {
         super(out);
-        recipe = new AcqCamRecipe(p.source(), p.observation(), p.conditions(), p.telescope(), ip);
+        recipe = new AcqCamRecipe(p, instr);
     }
 
     public void writeOutput() {
         final ImagingResult result = recipe.calculateImaging();
-        writeImagingOutput(result);
+        final ItcImagingResult s = recipe.serviceResult(result);
+        writeImagingOutput(result, s);
     }
 
 
-    private void writeImagingOutput(final ImagingResult result) {
+    private void writeImagingOutput(final ImagingResult result, final ItcImagingResult s) {
 
         // we know this is the acq cam
         final AcquisitionCamera instrument = (AcquisitionCamera) result.instrument();
@@ -41,16 +43,7 @@ public final class AcqCamPrinter extends PrinterBase {
         _println(CalculatablePrinter.getTextResult(result.iqCalc()));
         _println(CalculatablePrinter.getTextResult(result.is2nCalc(), result.observation()));
 
-        _println("");
-        _println(String.format(
-                "The peak pixel signal + background is %.0f. This is %.0f%% of the full well depth of %.0f.",
-                result.peakPixelCount(), result.peakPixelCount() / instrument.getWellDepth() * 100, instrument.getWellDepth()));
-
-        for (final ItcWarning warning : JavaConversions.asJavaList(result.warnings())) {
-            _println(warning.msg());
-        }
-
-        _println("");
+        _printWarnings(s.warnings());
 
         printConfiguration(result);
 

@@ -72,8 +72,3 @@ sealed trait IfuMethod
 final case class IfuSingle(offset: Double) extends IfuMethod
 final case class IfuRadial(minOffset: Double, maxOffset: Double) extends IfuMethod
 final case class IfuSummed(numX: Int, numY: Int, centerX: Double, centerY: Double) extends IfuMethod
-
-
-// ===== RESULTS
-final case class Parameters(source: SourceDefinition, observation: ObservationDetails, conditions: ObservingConditions, telescope: TelescopeDetails)
-

@@ -22,8 +22,8 @@ import java.util.List;
  */
 public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRecipe {
 
+    private final ItcParameters p;
     private final Gmos mainInstrument;
-    private final GmosParameters gmosParameters;
     private final SourceDefinition _sdParameters;
     private final ObservationDetails _obsDetailParameters;
     private final ObservingConditions _obsConditionParameters;
@@ -32,34 +32,33 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
     /**
      * Constructs a GmosRecipe given the parameters. Useful for testing.
      */
-    public GmosRecipe(final SourceDefinition sdParameters,
-                      final ObservationDetails obsDetailParameters,
-                      final ObservingConditions obsConditionParameters,
-                      final GmosParameters gmosParameters,
-                      final TelescopeDetails telescope)
+    public GmosRecipe(final ItcParameters p, final GmosParameters instr)
 
     {
-        mainInstrument = createGmos(gmosParameters, obsDetailParameters);
-        this.gmosParameters = gmosParameters;
-        _sdParameters = sdParameters;
-        _obsDetailParameters = obsDetailParameters;
-        _obsConditionParameters = obsConditionParameters;
-        _telescope = telescope;
+        this.p                  = p;
+        mainInstrument          = createGmos(instr, p.observation());
+        _sdParameters           = p.source();
+        _obsDetailParameters    = p.observation();
+        _obsConditionParameters = p.conditions();
+        _telescope              = p.telescope();
 
         // some general validations
         Validation.validate(mainInstrument, _obsDetailParameters, _sdParameters);
     }
 
-    public Tuple2<ItcSpectroscopyResult, SpectroscopyResult[]> calculateSpectroscopy() {
-        final SpectroscopyResult[] r = doCalculateSpectroscopy();
+    public ItcImagingResult serviceResult(final ImagingResult[] r) {
+        return Recipe$.MODULE$.serviceResult(r);
+    }
+
+    public ItcSpectroscopyResult serviceResult(final SpectroscopyResult[] r) {
         final List<SpcChartData> dataSets = new ArrayList<SpcChartData>() {{
             add(createGmosChart(r, 0));
             add(createGmosChart(r, 1));
         }};
-        return new Tuple2<>(ItcSpectroscopyResult.apply(dataSets, new ArrayList<>()), r);
+        return ItcSpectroscopyResult.apply(dataSets, Warning.collectWarnings(r[0]));
     }
 
-    private SpectroscopyResult[] doCalculateSpectroscopy() {
+    public SpectroscopyResult[] calculateSpectroscopy() {
         final Gmos[] ccdArray = mainInstrument.getDetectorCcdInstruments();
         final SpectroscopyResult[] results = new SpectroscopyResult[ccdArray.length];
         for (int i = 0; i < ccdArray.length; i++) {
@@ -69,15 +68,13 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
         return results;
     }
 
-    public NonEmptyList<ImagingResult> calculateImaging() {
+    public ImagingResult[] calculateImaging() {
         final Gmos[] ccdArray = mainInstrument.getDetectorCcdInstruments();
         final List<ImagingResult> results = new ArrayList<>();
         for (final Gmos instrument : ccdArray) {
             results.add(calculateImagingDo(instrument));
         }
-        // we know there is at least one CCD, so we can return this as a scala non-empty list
-        final scala.collection.Seq<ImagingResult> sResults = JavaConversions.asScalaBuffer(results);
-        return NonEmptyList$.MODULE$.apply(sResults.head(), sResults.tail().toSeq());
+        return results.toArray(new ImagingResult[results.size()]);
     }
 
     private Gmos createGmos(final GmosParameters parameters, final ObservationDetails observationDetails) {
@@ -247,20 +244,9 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
 
         }
 
-        final Parameters p = new Parameters(_sdParameters, _obsDetailParameters, _obsConditionParameters, _telescope);
-        final List<ItcWarning> warnings = warningsForSpectroscopy(mainInstrument);
-        return SpectroscopyResult$.MODULE$.apply(p, instrument, SFcalc, IQcalc, specS2N, st, warnings);
+        return SpectroscopyResult$.MODULE$.apply(p, instrument, SFcalc, IQcalc, specS2N, st);
 
     }
-
-    private List<ItcWarning> warningsForSpectroscopy(final Gmos instrument) {
-        final boolean isIfu2 = instrument.getFpMask() == GmosNorthType.FPUnitNorth.IFU_1 || instrument.getFpMask() == GmosSouthType.FPUnitSouth.IFU_1;
-        return new ArrayList<ItcWarning>() {{
-            // OCSADV-361: warn that results produced for 2 slit IFUs are not entirely correct
-            if (isIfu2) add(new ItcWarning("Warning: chip gaps are shown at the wrong wavelengths in IFU-2 mode."));
-        }};
-    }
-
 
     private ImagingResult calculateImagingDo(final Gmos instrument) {
 
@@ -297,27 +283,8 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
         final ImagingS2NCalculatable IS2Ncalc = ImagingS2NCalculationFactory.getCalculationInstance(_obsDetailParameters, instrument, SFcalc, sed_integral, sky_integral);
         IS2Ncalc.calculate();
 
-        final Parameters p = new Parameters(_sdParameters, _obsDetailParameters, _obsConditionParameters, _telescope);
-        final List<ItcWarning> warnings = warningsForImaging(instrument, peak_pixel_count);
-        return ImagingResult.apply(p, instrument, IQcalc, SFcalc, peak_pixel_count, IS2Ncalc, warnings);
+        return ImagingResult.apply(p, instrument, IQcalc, SFcalc, peak_pixel_count, IS2Ncalc);
 
-    }
-
-    // TODO: some of these warnings are similar for different instruments and could be calculated in a central place
-    private List<ItcWarning> warningsForImaging(final Gmos instrument, final double peakPixelCount) {
-        final double wellLimit = 0.95 * instrument.getWellDepth() * instrument.getSpatialBinning() * instrument.getSpectralBinning();
-        final double meanGain;
-        switch (gmosParameters.site()) {
-            case GN: meanGain = InstGmosNorth.getMeanGain(gmosParameters.ampGain(), gmosParameters.ampReadMode(), gmosParameters.ccdType()); break;
-            case GS: meanGain = InstGmosSouth.getMeanGain(gmosParameters.ampGain(), gmosParameters.ampReadMode(), gmosParameters.ccdType()); break;
-            default: throw new Error();
-        }
-        final double gainLimit = 0.95 * instrument.getADSaturation() *  meanGain;
-
-        return new ArrayList<ItcWarning>() {{
-            if (peakPixelCount > wellLimit)  add(new ItcWarning("Warning: peak pixel may be saturating the (binned) CCD full well of " + wellLimit));
-            if (peakPixelCount > gainLimit)  add(new ItcWarning("Warning: peak pixel may be saturating the gain limit of " + gainLimit));
-        }};
     }
 
     // == GMOS CHARTS

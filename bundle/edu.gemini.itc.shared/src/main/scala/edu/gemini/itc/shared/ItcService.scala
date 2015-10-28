@@ -16,15 +16,26 @@ import Scalaz._
   * value pairs for spectroscopy.
   */
 sealed trait ItcResult extends Serializable {
-  def warnings:   List[ItcWarning]
+  def peakPixelFlux(ccd: Int = 0):  Int
+  def warnings:                     List[ItcWarning]
 }
 
 // === IMAGING RESULTS
 
-final case class ImgData(singleSNRatio: Double, totalSNRatio: Double, peakPixelFlux: Double)
+final case class ImgData(singleSNRatio: Double, totalSNRatio: Double, peakPixelFlux: Double, warnings: List[ItcWarning])
 
-final case class ItcImagingResult(ccds: List[ImgData], warnings: List[ItcWarning]) extends ItcResult {
+final case class ItcImagingResult(ccds: List[ImgData]) extends ItcResult {
+  def warnings = {
+    def concatWarnings =
+      ccds.zipWithIndex.flatMap { case (c, i) =>
+        c.warnings.map(w => new ItcWarning(s"CCD $i: ${w.msg}"))
+      }
+
+    if (ccds.length > 1) concatWarnings
+    else ccds.head.warnings
+  }
   def ccd(i: Int) = ccds(i % ccds.length)
+  def peakPixelFlux(ccdIx: Int = 0) = ccd(ccdIx).peakPixelFlux.toInt
 }
 
 // === SPECTROSCOPY RESULTS
@@ -76,13 +87,29 @@ final case class ItcSpectroscopyResult(charts: List[SpcChartData], warnings: Lis
     * This method will fail if the result (chart/data) you're looking for does not exist.
     */
   def allSeries(ct: SpcChartType, dt: SpcDataType): List[SpcSeriesData] = chart(ct).allSeries(dt)
+
+  def peakPixelFlux(ccd: Int = 0): Int = {
+    // zip signal and background values, sum them and return max value (i.e. max(signal + background))
+    def maxSum(s: SpcSeriesData, b: SpcSeriesData) =
+      s.yValues.zip(b.yValues).map(p => p._1 + p._2).max.round
+
+    // zip signal and background value arrays and return max of all maximums
+    // e.g. GNIRS with cross dispersion will have several arrays for signal and background, one for each order
+    def maxAllSum(s: List[SpcSeriesData], b: List[SpcSeriesData]) =
+      s.zip(b).map(p => maxSum(p._1, p._2)).max
+
+    val signal     = allSeries(SignalChart, SignalData)
+    val background = allSeries(SignalChart, BackgroundData)
+    maxAllSum(signal, background).toInt
+  }
+
 }
 
 object ItcSpectroscopyResult {
 
   // java compatibility
-  def apply(charts: java.util.List[SpcChartData], warnings: java.util.List[ItcWarning]) =
-    new ItcSpectroscopyResult(charts.toList, warnings.toList)
+  def apply(charts: java.util.List[SpcChartData], warnings: List[ItcWarning]) =
+    new ItcSpectroscopyResult(charts.toList, warnings)
 
 }
 
@@ -108,7 +135,7 @@ trait ItcService {
 
   import edu.gemini.itc.shared.ItcService._
 
-  def calculate(source: SourceDefinition, obs: ObservationDetails, cond: ObservingConditions, tele: TelescopeDetails, instr: InstrumentDetails): Result
+  def calculate(p: ItcParameters): Result
 
 }
 
@@ -116,16 +143,21 @@ sealed trait ItcMessage
 final case class ItcError(msg: String) extends ItcMessage
 final case class ItcWarning(msg: String) extends ItcMessage
 
-case class ItcInputs(src: SourceDefinition, obs: ObservationDetails, cond: ObservingConditions, tele: TelescopeDetails, instr: InstrumentDetails)
+case class ItcParameters(
+              source: SourceDefinition,
+              observation: ObservationDetails,
+              conditions: ObservingConditions,
+              telescope: TelescopeDetails,
+              instrument: InstrumentDetails)
 
 object ItcService {
 
   type Result = ItcError \/ ItcResult
 
   /** Performs an ITC call on the given host. */
-  def calculate(peer: Peer, inputs: ItcInputs): Future[Result] =
+  def calculate(peer: Peer, inputs: ItcParameters): Future[Result] =
     TrpcClient(peer).withoutKeys future { r =>
-      r[ItcService].calculate(inputs.src, inputs.obs, inputs.cond, inputs.tele, inputs.instr)
+      r[ItcService].calculate(inputs)
     }
 
 }

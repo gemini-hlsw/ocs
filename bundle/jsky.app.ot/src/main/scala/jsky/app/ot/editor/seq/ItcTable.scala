@@ -116,7 +116,7 @@ trait ItcTable extends Table {
 
   }
 
-  protected def extractInputs(instrument: SPInstObsComp, uc: ItcUniqueConfig, method: Double => CalculationMethod): String \/ ItcInputs =
+  protected def extractInputs(instrument: SPInstObsComp, uc: ItcUniqueConfig, method: Double => CalculationMethod): String \/ ItcParameters =
     for {
       cond      <- parameters.conditions
       port      <- parameters.instrumentPort
@@ -128,9 +128,9 @@ trait ItcTable extends Table {
       ins       <- ConfigExtractor.extractInstrumentDetails(instrument, probe, targetEnv, uc.config, cond)
       srcFrac   <- extractSourceFraction(uc, instrument)
 
-    } yield ItcInputs(src, new ObservationDetails(method(srcFrac), analysis), cond, tele, ins)
+    } yield ItcParameters(src, new ObservationDetails(method(srcFrac), analysis), cond, tele, ins)
 
-  protected def doServiceCall(peer: Peer, inputs: String \/ ItcInputs): Future[ItcService.Result] = inputs match {
+  protected def doServiceCall(peer: Peer, inputs: String \/ ItcParameters): Future[ItcService.Result] = inputs match {
 
     case -\/(err) =>
       Future.successful(ItcError(err).left).andThen { case _ => updateResults() }

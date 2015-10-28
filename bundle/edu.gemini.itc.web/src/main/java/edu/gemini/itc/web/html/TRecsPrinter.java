@@ -22,9 +22,9 @@ public final class TRecsPrinter extends PrinterBase {
     private final PlottingDetails pdp;
     private final boolean isImaging;
 
-    public TRecsPrinter(final Parameters p, final TRecsParameters ip, final PlottingDetails pdp, final PrintWriter out) {
+    public TRecsPrinter(final ItcParameters p, final TRecsParameters instr, final PlottingDetails pdp, final PrintWriter out) {
         super(out);
-        this.recipe    = new TRecsRecipe(p.source(), p.observation(), p.conditions(), ip, p.telescope());
+        this.recipe    = new TRecsRecipe(p, instr);
         this.pdp       = pdp;
         this.isImaging = p.observation().getMethod().isImaging();
     }
@@ -34,9 +34,10 @@ public final class TRecsPrinter extends PrinterBase {
             final ImagingResult result = recipe.calculateImaging();
             writeImagingOutput(result);
         } else {
-            final Tuple2<ItcSpectroscopyResult, SpectroscopyResult> r = recipe.calculateSpectroscopy();
-            final UUID id = cache(r._1());
-            writeSpectroscopyOutput(id, r._2());
+            final SpectroscopyResult r = recipe.calculateSpectroscopy();
+            final ItcSpectroscopyResult s = recipe.serviceResult(r);
+            final UUID id = cache(s);
+            writeSpectroscopyOutput(id, r);
         }
     }
 
@@ -136,7 +137,7 @@ public final class TRecsPrinter extends PrinterBase {
         _println(HtmlPrinter.printParameterSummary(result.observation()));
     }
 
-    private String trecsToString(final TRecs instrument, final Parameters p) {
+    private String trecsToString(final TRecs instrument, final ItcParameters p) {
 
         String s = "Instrument configuration: \n";
         s += HtmlPrinter.opticalComponentsToString(instrument);

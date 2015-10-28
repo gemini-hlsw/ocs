@@ -5,12 +5,13 @@ import edu.gemini.itc.shared.GsaoiParameters;
 import edu.gemini.itc.shared.ObservationDetails;
 import edu.gemini.spModel.core.Site;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Gsaoi specification class
  */
 public final class Gsaoi extends Instrument {
-
-    public static final int WELL_DEPTH = 126000;
 
     /**
      * Related files will be in this subdir of lib
@@ -94,6 +95,17 @@ public final class Gsaoi extends Instrument {
      */
     public static String getPrefix() {
         return INSTR_PREFIX;
+    }
+
+    @Override public List<WarningRule> warnings() {
+        // values are taken from instrument's web documentation
+        final double WellDepth      = 126000;
+        final double LinearityLimit = 96000;
+
+        return new ArrayList<WarningRule>() {{
+            add(new LinearityLimitRule(LinearityLimit, 0.80));
+            add(new SaturationLimitRule(WellDepth, 0.85));
+        }};
     }
 
 }

@@ -6,27 +6,29 @@ import edu.gemini.itc.shared._
 
 import scala.collection.JavaConversions._
 
-import scalaz._
-import Scalaz._
-
 sealed trait Recipe
 
 trait ImagingRecipe extends Recipe {
   def calculateImaging(): ImagingResult
+  def serviceResult(r: ImagingResult): ItcImagingResult
 }
 
 trait ImagingArrayRecipe extends Recipe {
-  def calculateImaging(): NonEmptyList[ImagingResult]
+  def calculateImaging(): Array[ImagingResult]
+  def serviceResult(r: Array[ImagingResult]): ItcImagingResult
 }
 
 
 trait SpectroscopyRecipe extends Recipe {
-  def calculateSpectroscopy(): (ItcSpectroscopyResult, SpectroscopyResult)
+  def calculateSpectroscopy(): SpectroscopyResult
+  def serviceResult(r: SpectroscopyResult): ItcSpectroscopyResult
 }
 
 
 trait SpectroscopyArrayRecipe extends Recipe {
-  def calculateSpectroscopy(): (ItcSpectroscopyResult, Array[SpectroscopyResult])
+  def calculateSpectroscopy(): Array[SpectroscopyResult]
+  def serviceResult(r: Array[SpectroscopyResult]): ItcSpectroscopyResult
+
 }
 
 object Recipe {
@@ -68,6 +70,15 @@ object Recipe {
     data.add(new SpcSeriesData(FinalS2NData,  "Final S/N  ",    result.specS2N(index).getFinalS2NSpectrum.getData))
     new SpcChartData(S2NChart, title, "Wavelength (nm)", "Signal / Noise per spectral pixel", data.toList)
   }
+
+  def toImgData(r: ImagingResult): ImgData =
+    ImgData(r.is2nCalc.singleSNRatio(), r.is2nCalc.totalSNRatio(), r.peakPixelCount, Warning.collectWarnings(r))
+
+  def serviceResult(r: ImagingResult): ItcImagingResult =
+    ItcImagingResult(List(toImgData(r)))
+
+  def serviceResult(r: Array[ImagingResult]): ItcImagingResult =
+    ItcImagingResult(r.map(toImgData).toList)
 
 }
 

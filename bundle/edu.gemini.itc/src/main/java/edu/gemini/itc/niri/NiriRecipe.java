@@ -5,8 +5,6 @@ import edu.gemini.itc.base.*;
 import edu.gemini.itc.operation.*;
 import edu.gemini.itc.shared.*;
 import scala.Option;
-import scala.Tuple2;
-import scala.collection.JavaConversions;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,8 +14,9 @@ import java.util.List;
  */
 public final class NiriRecipe implements ImagingRecipe, SpectroscopyRecipe {
 
+    private final ItcParameters p;
     private final Niri instrument;
-    private final NiriParameters _niriParameters;
+    private final NiriParameters niriParameters;
     private final ObservingConditions _obsConditionParameters;
     private final ObservationDetails _obsDetailParameters;
     private final SourceDefinition _sdParameters;
@@ -26,25 +25,22 @@ public final class NiriRecipe implements ImagingRecipe, SpectroscopyRecipe {
     /**
      * Constructs a NiriRecipe given the parameters.
      */
-    public NiriRecipe(final SourceDefinition sdParameters,
-                      final ObservationDetails obsDetailParameters,
-                      final ObservingConditions obsConditionParameters,
-                      final NiriParameters niriParameters,
-                      final TelescopeDetails telescope)
+    public NiriRecipe(final ItcParameters p, final NiriParameters instr)
 
     {
-        instrument = new Niri(niriParameters, obsDetailParameters);
-        _sdParameters = sdParameters;
-        _obsDetailParameters = obsDetailParameters;
-        _obsConditionParameters = obsConditionParameters;
-        _niriParameters = niriParameters;
-        _telescope = telescope;
+        this.p                  = p;
+        niriParameters          = instr;
+        _sdParameters           = p.source();
+        _obsDetailParameters    = p.observation();
+        _obsConditionParameters = p.conditions();
+        _telescope              = p.telescope();
+        instrument = new Niri(niriParameters, _obsDetailParameters);
 
         validateInputParameters();
     }
 
     private void validateInputParameters() {
-        if (_niriParameters.altair().isDefined()) {
+        if (niriParameters.altair().isDefined()) {
             if (_obsDetailParameters.getMethod().isSpectroscopy()) {
                 throw new IllegalArgumentException(
                         "Altair cannot currently be used with Spectroscopy mode in the ITC.  Please deselect either altair or spectroscopy and resubmit the form.");
@@ -56,16 +52,19 @@ public final class NiriRecipe implements ImagingRecipe, SpectroscopyRecipe {
 
     }
 
-    public Tuple2<ItcSpectroscopyResult, SpectroscopyResult> calculateSpectroscopy() {
-        final SpectroscopyResult r = doCalculateSpectroscopy();
+    public ItcImagingResult serviceResult(final ImagingResult r) {
+        return Recipe$.MODULE$.serviceResult(r);
+    }
+
+    public ItcSpectroscopyResult serviceResult(final SpectroscopyResult r) {
         final List<SpcChartData> dataSets = new ArrayList<SpcChartData>() {{
             add(Recipe$.MODULE$.createSignalChart(r, 0));
             add(Recipe$.MODULE$.createS2NChart(r, 0));
         }};
-        return new Tuple2<>(ItcSpectroscopyResult.apply(dataSets, new ArrayList<>()), r);
+        return ItcSpectroscopyResult.apply(dataSets, Warning.collectWarnings(r));
     }
 
-    private SpectroscopyResult doCalculateSpectroscopy() {
+    public SpectroscopyResult calculateSpectroscopy() {
         // Module 1b
         // Define the source energy (as function of wavelength).
         //
@@ -79,8 +78,8 @@ public final class NiriRecipe implements ImagingRecipe, SpectroscopyRecipe {
 
         // Altair specific section
         final Option<AOSystem> altair;
-        if (_niriParameters.altair().isDefined()) {
-            final Altair ao = new Altair(instrument.getEffectiveWavelength(), _telescope.getTelescopeDiameter(), IQcalc.getImageQuality(), _niriParameters.altair().get(), 0.0);
+        if (niriParameters.altair().isDefined()) {
+            final Altair ao = new Altair(instrument.getEffectiveWavelength(), _telescope.getTelescopeDiameter(), IQcalc.getImageQuality(), niriParameters.altair().get(), 0.0);
             altair = Option.apply((AOSystem) ao);
         } else {
             altair = Option.empty();
@@ -166,7 +165,7 @@ public final class NiriRecipe implements ImagingRecipe, SpectroscopyRecipe {
                 _obsDetailParameters.getSourceFraction(),
                 _obsDetailParameters.getExposureTime(),
                 instrument.getDarkCurrent(),
-                instrument.getReadNoise());
+                niriParameters.readMode().getReadNoise());
         specS2N.setSourceSpectrum(calcSource.sed);
         specS2N.setBackgroundSpectrum(calcSource.sky);
         if (altair.isDefined())
@@ -176,10 +175,9 @@ public final class NiriRecipe implements ImagingRecipe, SpectroscopyRecipe {
 
         calcSource.sed.accept(specS2N);
 
-        final Parameters p = new Parameters(_sdParameters, _obsDetailParameters, _obsConditionParameters, _telescope);
         final SpecS2N[] specS2Narr = new SpecS2N[1];
         specS2Narr[0] = specS2N;
-        return new GenericSpectroscopyResult(p, instrument, SFcalc, IQcalc, specS2Narr, st, altair, ImagingResult.NoWarnings());
+        return new GenericSpectroscopyResult(p, instrument, SFcalc, IQcalc, specS2Narr, st, altair);
     }
 
     public ImagingResult calculateImaging() {
@@ -196,8 +194,8 @@ public final class NiriRecipe implements ImagingRecipe, SpectroscopyRecipe {
 
         // Altair specific section
         final Option<AOSystem> altair;
-        if (_niriParameters.altair().isDefined()) {
-            final Altair ao = new Altair(instrument.getEffectiveWavelength(), _telescope.getTelescopeDiameter(), IQcalc.getImageQuality(), _niriParameters.altair().get(), 0.0);
+        if (niriParameters.altair().isDefined()) {
+            final Altair ao = new Altair(instrument.getEffectiveWavelength(), _telescope.getTelescopeDiameter(), IQcalc.getImageQuality(), niriParameters.altair().get(), 0.0);
             altair = Option.apply((AOSystem) ao);
         } else {
             altair = Option.empty();
@@ -263,18 +261,8 @@ public final class NiriRecipe implements ImagingRecipe, SpectroscopyRecipe {
         }
         IS2Ncalc.calculate();
 
-        final Parameters        p = new Parameters(_sdParameters, _obsDetailParameters, _obsConditionParameters, _telescope);
-        final List<ItcWarning>  w = warningsForImaging(instrument, peak_pixel_count);
-        return new ImagingResult(p, instrument, IQcalc, SFcalc, peak_pixel_count, IS2Ncalc, altair, JavaConversions.asScalaBuffer(w).toList());
+        return new ImagingResult(p, instrument, IQcalc, SFcalc, peak_pixel_count, IS2Ncalc, altair);
 
-    }
-
-    // TODO: some of these warnings are similar for different instruments and could be calculated in a central place
-    private List<ItcWarning> warningsForImaging(final Niri instrument, final double peakPixelCount) {
-        final double wellLimit = 0.8 * instrument.getWellDepthValue();
-        return new ArrayList<ItcWarning>() {{
-            if (peakPixelCount > wellLimit) add(new ItcWarning("Warning: peak pixel exceeds 80% of the well depth and may be saturated"));
-        }};
     }
 
 }

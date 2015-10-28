@@ -8,6 +8,9 @@ import edu.gemini.spModel.gemini.gmos.GmosNorthType;
 import edu.gemini.spModel.gemini.gmos.GmosSouthType;
 import scala.Option;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Gmos specification class
  */
@@ -25,8 +28,7 @@ public abstract class Gmos extends Instrument implements BinningProvider {
     public static final String INSTR_DIR = "gmos";
 
     // Instrument reads its configuration from here.
-    private static final double WELL_DEPTH = 125000.0;
-    private static final double AD_SATURATION = 56636;
+    private static final double AD_SATURATION = 65535;
     private static final int DETECTOR_PIXELS = 6218;
 
     // Used as a desperate solution when multiple detectors need to be handled differently (See REL-478).
@@ -220,10 +222,6 @@ public abstract class Gmos extends Instrument implements BinningProvider {
         return _gratingOptics.getPixelWidth();
     }
 
-    public double getWellDepth() {
-        return WELL_DEPTH;
-    }
-
     public double getSampling() {
         return _sampling;
     }
@@ -323,4 +321,14 @@ public abstract class Gmos extends Instrument implements BinningProvider {
         }
 
     }
+
+    @Override
+    public List<ItcWarning> spectroscopyWarnings(final SpectroscopyResult r) {
+        final boolean isIfu2 = getFpMask() == GmosNorthType.FPUnitNorth.IFU_1 || getFpMask() == GmosSouthType.FPUnitSouth.IFU_1;
+        return new ArrayList<ItcWarning>() {{
+            // OCSADV-361: warn that results produced for 2 slit IFUs are not entirely correct
+            if (isIfu2) add(new ItcWarning("Warning: chip gaps are shown at the wrong wavelengths in IFU-2 mode."));
+        }};
+    }
+
 }

@@ -12,6 +12,7 @@ import java.util.List;
  */
 public final class AcqCamRecipe implements ImagingRecipe {
 
+    private final ItcParameters p;
     private final AcquisitionCamera instrument;
     private final SourceDefinition _sdParameters;
     private final ObservationDetails _obsDetailParameters;
@@ -22,20 +23,21 @@ public final class AcqCamRecipe implements ImagingRecipe {
      * Constructs an AcqCamRecipe given the parameters.
      * Useful for testing.
      */
-    public AcqCamRecipe(final SourceDefinition sdParameters,
-                        final ObservationDetails obsDetailParameters,
-                        final ObservingConditions obsConditionParameters,
-                        final TelescopeDetails telescope,
-                        final AcquisitionCamParameters acqCamParameters) {
+    public AcqCamRecipe(final ItcParameters p, final AcquisitionCamParameters instr) {
 
-        instrument = new AcquisitionCamera(acqCamParameters);
-        _sdParameters = sdParameters;
-        _obsDetailParameters = obsDetailParameters;
-        _obsConditionParameters = obsConditionParameters;
-        _telescope = telescope;
+        this.p                  = p;
+        instrument              = new AcquisitionCamera(instr);
+        _sdParameters           = p.source();
+        _obsDetailParameters    = p.observation();
+        _obsConditionParameters = p.conditions();
+        _telescope              = p.telescope();
 
         // some general validations
         Validation.validate(instrument, _obsDetailParameters, _sdParameters);
+    }
+
+    public ItcImagingResult serviceResult(final ImagingResult r) {
+        return Recipe$.MODULE$.serviceResult(r);
     }
 
     /**
@@ -90,18 +92,8 @@ public final class AcqCamRecipe implements ImagingRecipe {
         final ImagingS2NCalculatable IS2Ncalc = ImagingS2NCalculationFactory.getCalculationInstance(_obsDetailParameters, instrument, SFcalc, sed_integral, sky_integral);
         IS2Ncalc.calculate();
 
-        final Parameters p = new Parameters(_sdParameters, _obsDetailParameters, _obsConditionParameters, _telescope);
-        final List<ItcWarning>  warnings = warningsForImaging(instrument, peak_pixel_count);
-        return ImagingResult.apply(p, instrument, IQcalc, SFcalc, peak_pixel_count, IS2Ncalc, warnings);
+        return ImagingResult.apply(p, instrument, IQcalc, SFcalc, peak_pixel_count, IS2Ncalc);
 
-    }
-
-    // TODO: some of these warnings are similar for different instruments and could be calculated in a central place
-    private List<ItcWarning> warningsForImaging(final AcquisitionCamera instrument, final double peakPixelCount) {
-        final double wellLimit = 0.8 * instrument.getWellDepth();
-        return new ArrayList<ItcWarning>() {{
-            if (peakPixelCount > wellLimit) add(new ItcWarning("Warning: peak pixel exceeds 80% of the well depth and may be saturated"));
-        }};
     }
 
 }

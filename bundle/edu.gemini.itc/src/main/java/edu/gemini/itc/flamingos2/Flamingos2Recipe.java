@@ -3,7 +3,6 @@ package edu.gemini.itc.flamingos2;
 import edu.gemini.itc.base.*;
 import edu.gemini.itc.operation.*;
 import edu.gemini.itc.shared.*;
-import scala.Tuple2;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,6 +12,7 @@ import java.util.List;
  */
 public final class Flamingos2Recipe implements ImagingRecipe, SpectroscopyRecipe {
 
+    private final ItcParameters p;
     private final Flamingos2 instrument;
     private final Flamingos2Parameters _flamingos2Parameters;
     private final ObservingConditions _obsConditionParameters;
@@ -24,17 +24,14 @@ public final class Flamingos2Recipe implements ImagingRecipe, SpectroscopyRecipe
      * Constructs an Flamingos 2 object given the parameters. Useful for
      * testing.
      */
-    public Flamingos2Recipe(final SourceDefinition sdParameters,
-                            final ObservationDetails obsDetailParameters,
-                            final ObservingConditions obsConditionParameters,
-                            final Flamingos2Parameters flamingos2Parameters,
-                            final TelescopeDetails telescope) {
-        instrument = new Flamingos2(flamingos2Parameters);
-        _sdParameters = sdParameters;
-        _obsDetailParameters = obsDetailParameters;
-        _obsConditionParameters = obsConditionParameters;
-        _flamingos2Parameters = flamingos2Parameters;
-        _telescope = telescope;
+    public Flamingos2Recipe(final ItcParameters p, final Flamingos2Parameters instr) {
+        this.p                  = p;
+        instrument              = new Flamingos2(instr);
+        _sdParameters           = p.source();
+        _obsDetailParameters    = p.observation();
+        _obsConditionParameters = p.conditions();
+        _flamingos2Parameters   = instr;
+        _telescope              = p.telescope();
 
         validateInputParameters();
     }
@@ -56,16 +53,19 @@ public final class Flamingos2Recipe implements ImagingRecipe, SpectroscopyRecipe
         Validation.validate(instrument, _obsDetailParameters, _sdParameters);
     }
 
-    public Tuple2<ItcSpectroscopyResult, SpectroscopyResult> calculateSpectroscopy() {
-        final SpectroscopyResult r = doCalculateSpectroscopy();
+    public ItcImagingResult serviceResult(final ImagingResult r) {
+        return Recipe$.MODULE$.serviceResult(r);
+    }
+
+    public ItcSpectroscopyResult serviceResult(final SpectroscopyResult r) {
         final List<SpcChartData> dataSets = new ArrayList<SpcChartData>() {{
             add(Recipe$.MODULE$.createSignalChart(r));
             add(Recipe$.MODULE$.createS2NChart(r));
         }};
-        return new Tuple2<>(ItcSpectroscopyResult.apply(dataSets, new ArrayList<>()), r);
+        return ItcSpectroscopyResult.apply(dataSets, Warning.collectWarnings(r));
     }
 
-    private SpectroscopyResult doCalculateSpectroscopy() {
+    public SpectroscopyResult calculateSpectroscopy() {
         // Start of morphology section of ITC
 
         // Module 1a
@@ -138,7 +138,6 @@ public final class Flamingos2Recipe implements ImagingRecipe, SpectroscopyRecipe
         final SpecS2NLargeSlitVisitor[] specS2Narr = new SpecS2NLargeSlitVisitor[1];
         specS2Narr[0] = specS2N;
 
-        final Parameters p = new Parameters(_sdParameters, _obsDetailParameters, _obsConditionParameters, _telescope);
         return SpectroscopyResult$.MODULE$.apply(p, instrument, SFcalc, IQcalc, specS2Narr, st);
     }
 
@@ -181,24 +180,7 @@ public final class Flamingos2Recipe implements ImagingRecipe, SpectroscopyRecipe
         final ImagingS2NCalculatable IS2Ncalc = ImagingS2NCalculationFactory.getCalculationInstance(_obsDetailParameters, instrument, SFcalc, sed_integral, sky_integral);
         IS2Ncalc.calculate();
 
-        final Parameters p = new Parameters(_sdParameters, _obsDetailParameters, _obsConditionParameters, _telescope);
-        final List<ItcWarning> warnings = warningsForImaging(instrument, peak_pixel_count);
-        return ImagingResult.apply(p, instrument, IQcalc, SFcalc, peak_pixel_count, IS2Ncalc, warnings);
+        return ImagingResult.apply(p, instrument, IQcalc, SFcalc, peak_pixel_count, IS2Ncalc);
     }
-
-    // TODO: some of these warnings are similar for different instruments and could be calculated in a central place
-    private List<ItcWarning> warningsForImaging(final Flamingos2 instrument, final double peakPixelCount) {
-        final double wellLimit = instrument.getWellDepth();
-        final double linearityLimit = 98000;
-        return new ArrayList<ItcWarning>() {{
-            if (peakPixelCount > 0.8*linearityLimit)
-                add(new ItcWarning(
-                        String.format("Warning: peak pixel is %.2f%% of the linearity limit of %.0f e- (linearity is better than 0.5%% below %.0f e-).",
-                        peakPixelCount/linearityLimit*100, linearityLimit, linearityLimit)));
-            if (peakPixelCount > 0.8*wellLimit)
-                add(new ItcWarning("Warning: peak pixel exceeds 80% of the well depth and may be saturated"));
-        }};
-    }
-
 
 }
