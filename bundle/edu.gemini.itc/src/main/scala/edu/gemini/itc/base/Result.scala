@@ -25,25 +25,34 @@ sealed trait Result {
 }
 
 /* Warning limits */
-sealed trait WarningLimit {
+sealed trait LimitWarning {
   def message(value: Double): String
-  def maxValue: Double
-  def lowLimit: Double    // as a fraction of the max value; e.g. 0.80 = 80%
+  def limit: Double
+  def warnAtFraction: Double         // e.g. 0.8 = 80%
+  def value(r: Result): Double      // extraction method to get value from result
 
-  def warnLevel = maxValue * lowLimit
-  def warn(value: Double): Boolean = value >= warnLevel
-  def value(r: Result): Double = r.peakPixelCount // currently peak pixel count is the only value we're looking at
-  def warning(r: Result) = if (warn(value(r))) Some(ItcWarning(message(value(r)))) else None
+  def warnLevel                     = limit * warnAtFraction
+  def warn(value: Double): Boolean  = value >= warnLevel
+  def percentOfLimit(value: Double) = (value / limit ) * 100.0
+  def warning(r: Result) = {
+    val v = value(r)
+    if (warn(v)) Some(ItcWarning(message(v))) else None
+  }
+
 }
 
-final case class SaturationLimit(maxValue: Double, lowLimit: Double) extends WarningLimit {
-  def message(value: Double) = f"Peak pixel count of $value%.0f exceeds ${lowLimit*100.0}%.0f%% of the well depth limit of $maxValue%.0f and may be saturated."
+sealed trait PeakPixelLimit extends LimitWarning {
+  def value(r: Result): Double = r.peakPixelCount
 }
-final case class GainLimit(maxValue: Double, lowLimit: Double) extends WarningLimit {
-  def message(value: Double) = f"Peak pixel count of $value%.0f exceeds ${lowLimit*100.0}%.0f%% of the gain limit of $maxValue%.0f and may be saturated."
+
+final case class SaturationLimit(limit: Double, warnAtFraction: Double) extends PeakPixelLimit {
+  def message(value: Double) = f"Peak pixel count is ${percentOfLimit(value)}%.0f%% of the well depth limit of $limit%.0f e-."
 }
-final case class LinearityLimit(maxValue: Double, lowLimit: Double) extends WarningLimit {
-  def message(value: Double) = f"Peak pixel count of $value%.0f exceeds ${lowLimit*100.0}%.0f%% of the linearity limit of $maxValue%.0f and will cause deviations."
+final case class GainLimit(limit: Double, warnAtFraction: Double) extends PeakPixelLimit {
+  def message(value: Double) = f"Peak pixel count is ${percentOfLimit(value)}%.0f%% of the gain limit of $limit%.0f e-."
+}
+final case class LinearityLimit(limit: Double, warnAtFraction: Double) extends PeakPixelLimit {
+  def message(value: Double) = f"Peak pixel count is ${percentOfLimit(value)}%.0f%% of the linearity limit of $limit%.0f e-."
 }
 
 /* Internal object for imaging results. */

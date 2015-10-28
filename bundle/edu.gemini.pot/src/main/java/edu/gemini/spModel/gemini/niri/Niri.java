@@ -874,38 +874,44 @@ public final class Niri {
      */
     public enum WellDepth implements DisplayableSpType, DescribableSpType, SequenceableSpType {
 
-        SHALLOW("shallow well", "1-2.5 um only", 200000.0),
-        DEEP("deep well", "3-5 um", 280000.0),;
+        SHALLOW("shallow well", "1-2.5 um only", 200000.0, 123000.0),
+        DEEP   ("deep well",    "3-5 um",        280000.0, 184500.0);
 
         /**
          * The default WellDepth value *
          */
         public static final WellDepth DEFAULT = SHALLOW;
 
-        private final String _displayValue;
-        private final String _description;
-        private final double _depth;
+        private final String displayValue;
+        private final String description;
+        private final double wellDepth;
+        private final double linearityLimit;
 
-        WellDepth(final String displayValue, final String description, final double depth) {
-            _displayValue = displayValue;
-            _description = description;
-            _depth = depth;
+        WellDepth(final String displayValue, final String description, final double wellDepth, final double linearityLimit) {
+            this.displayValue   = displayValue;
+            this.description    = description;
+            this.wellDepth      = wellDepth;
+            this.linearityLimit = linearityLimit;
         }
 
         public String displayValue() {
-            return _displayValue;
+            return displayValue;
         }
 
         public String description() {
-            return _description;
+            return description;
         }
 
         public double depth() {
-            return _depth;
+            return wellDepth;
+        }
+
+        public double linearityLimit() {
+            return linearityLimit;
         }
 
         public String sequenceValue() {
-            return _displayValue;
+            return displayValue;
         }
 
         /**

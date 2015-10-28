@@ -263,7 +263,7 @@ public abstract class Instrument {
 
     // === Warnings
 
-    public List<WarningLimit> warnings() {
+    public List<LimitWarning> warnings() {
         return Collections.emptyList();
     }
 

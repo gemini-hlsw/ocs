@@ -2,7 +2,7 @@ package edu.gemini.itc.gmos;
 
 import edu.gemini.itc.base.GainLimit;
 import edu.gemini.itc.base.SaturationLimit;
-import edu.gemini.itc.base.WarningLimit;
+import edu.gemini.itc.base.LimitWarning;
 import edu.gemini.itc.shared.GmosParameters;
 import edu.gemini.itc.shared.ObservationDetails;
 import edu.gemini.spModel.gemini.gmos.InstGmosSouth;
@@ -14,8 +14,6 @@ import java.util.List;
  * Gmos specification class
  */
 public final class GmosSouth extends Gmos {
-
-    private static final double WELL_DEPTH = 106000.0;
 
     /**
      * /** Related files will start with this prefix
@@ -52,9 +50,12 @@ public final class GmosSouth extends Gmos {
         return DETECTOR_CCD_NAMES;
     }
 
-    @Override public List<WarningLimit> warnings() {
-        return new ArrayList<WarningLimit>() {{
-            add(new SaturationLimit(WELL_DEPTH * getSpatialBinning() * getSpectralBinning(), 0.95));
+    @Override public List<LimitWarning> warnings() {
+        // value taken from instrument's web documentation
+        final double WellDepth = 106000;
+
+        return new ArrayList<LimitWarning>() {{
+            add(new SaturationLimit(WellDepth * getSpatialBinning() * getSpectralBinning(), 0.95));
             add(new GainLimit(getADSaturation() * InstGmosSouth.getMeanGain(gp.ampGain(), gp.ampReadMode(), gp.ccdType()), 0.95));
         }};
     }

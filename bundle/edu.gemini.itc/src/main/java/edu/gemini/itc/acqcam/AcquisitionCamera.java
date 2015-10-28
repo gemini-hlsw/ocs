@@ -24,10 +24,6 @@ public class AcquisitionCamera extends Instrument {
     // Instrument reads its configuration from here.
     private static final String FILENAME = "acquisition_camera" + getSuffix();
 
-    // Well Depth
-    private static final double WELL_DEPTH = 98940.0;
-
-
     // Keep a reference to the color filter to ask for effective wavelength
     private Filter _colorFilter;
 
@@ -68,9 +64,12 @@ public class AcquisitionCamera extends Instrument {
         return INSTR_PREFIX;
     }
 
-    @Override public List<WarningLimit> warnings() {
-        return new ArrayList<WarningLimit>() {{
-            add(new SaturationLimit(WELL_DEPTH, 0.80));
+    @Override public List<LimitWarning> warnings() {
+        // value taken from instrument's web documentation
+        final double WellDepth = 98940;
+
+        return new ArrayList<LimitWarning>() {{
+            add(new SaturationLimit(WellDepth, 0.80));
         }};
     }
 }

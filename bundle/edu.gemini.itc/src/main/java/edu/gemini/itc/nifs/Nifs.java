@@ -25,7 +25,6 @@ public final class Nifs extends Instrument {
     // Instrument reads its configuration from here.
     private static final String FILENAME = "nifs" + getSuffix();
 
-    private static final double WELL_DEPTH = 134400;
     public static final int DETECTOR_PIXELS = 2048;
 
     // Keep a reference to the color filter to ask for effective wavelength
@@ -213,10 +212,14 @@ public final class Nifs extends Instrument {
         return _readNoiseValue;
     }
 
-    @Override public List<WarningLimit> warnings() {
-        return new ArrayList<WarningLimit>() {{
-            add(new LinearityLimit(WELL_DEPTH, 0.50));
-            add(new SaturationLimit(WELL_DEPTH, 0.80));
+    @Override public List<LimitWarning> warnings() {
+        // values are taken from instrument's web documentation
+        final double WellDepth      = 134400;
+        final double LinearityLimit = 106400;
+
+        return new ArrayList<LimitWarning>() {{
+            add(new LinearityLimit(LinearityLimit, 0.80));
+            add(new SaturationLimit(WellDepth, 0.80));
         }};
     }
 

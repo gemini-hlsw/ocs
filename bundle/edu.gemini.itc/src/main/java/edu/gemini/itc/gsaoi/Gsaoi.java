@@ -13,8 +13,6 @@ import java.util.List;
  */
 public final class Gsaoi extends Instrument {
 
-    private static final int WELL_DEPTH = 126000;
-
     /**
      * Related files will be in this subdir of lib
      */
@@ -99,10 +97,14 @@ public final class Gsaoi extends Instrument {
         return INSTR_PREFIX;
     }
 
-    @Override public List<WarningLimit> warnings() {
-        return new ArrayList<WarningLimit>() {{
-            add(new LinearityLimit(WELL_DEPTH, 0.65));
-            add(new SaturationLimit(WELL_DEPTH, 0.85));
+    @Override public List<LimitWarning> warnings() {
+        // values are taken from instrument's web documentation
+        final double WellDepth      = 126000;
+        final double LinearityLimit = 96000;
+
+        return new ArrayList<LimitWarning>() {{
+            add(new LinearityLimit(LinearityLimit, 0.80));
+            add(new SaturationLimit(WellDepth, 0.85));
         }};
     }
 
