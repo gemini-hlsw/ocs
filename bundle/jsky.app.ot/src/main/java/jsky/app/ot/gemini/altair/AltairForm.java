@@ -116,7 +116,7 @@ public class AltairForm extends JPanel {
 
         //---- lgsRadioButton ----
         lgsRadioButton.setText("Laser Guide Star + AOWFS TTF");
-        lgsP1RadioButton.setToolTipText("LGS using AOWFS to measure Tip, Tilt, and Focus");
+        lgsRadioButton.setToolTipText("LGS using AOWFS to measure Tip, Tilt, and Focus");
         add(lgsRadioButton, new GridBagConstraints(1, 9, 1, 1, 0.0, 0.0,
                 GridBagConstraints.WEST, GridBagConstraints.NONE,
                 new Insets(0, 11, 0, 0), 0, 0));
