@@ -19,7 +19,6 @@ import edu.gemini.spModel.config2.ItemKey;
 import edu.gemini.spModel.core.Site;
 import edu.gemini.spModel.data.YesNoType;
 import edu.gemini.spModel.gemini.gmos.GmosCommonType.*;
-import static edu.gemini.spModel.gemini.gmos.GmosCommonType.DetectorManufacturer.HAMAMATSU;
 import edu.gemini.spModel.gemini.gmos.GmosNorthType.DisperserNorth;
 import edu.gemini.spModel.gemini.gmos.GmosNorthType.FPUnitNorth;
 import edu.gemini.spModel.gemini.gmos.GmosNorthType.FilterNorth;
@@ -41,6 +40,8 @@ import scala.runtime.AbstractFunction2;
 
 import java.beans.PropertyDescriptor;
 import java.util.*;
+
+import static edu.gemini.spModel.gemini.gmos.GmosCommonType.DetectorManufacturer.HAMAMATSU;
 
 /**
  * GMOS Rule set
@@ -902,10 +903,10 @@ public final class GmosRule implements IRule {
     private static ScienceRule N_S_FPU_SPECTROSCOPIC_RULE = new ScienceRule(
             new ScienceRule.IScienceChecker() {
                 private static final String MESSAGE_SOUTH = "For Nod and Shuffle, either a Nod and Shuffle slit, " +
-                        "or a mask or the IFU must be selected";
+                        "or a Custom mask or Nod and Shuffle IFU option must be selected";
 
                 private static final String MESSAGE_NORTH = "For Nod and Shuffle, either a Nod and Shuffle slit " +
-                        "or a mask must be selected";
+                        "or a Custom mask must be selected";
 
                 private String _message = MESSAGE_NORTH;
 
@@ -915,7 +916,8 @@ public final class GmosRule implements IRule {
                     } else {
                         _message = MESSAGE_NORTH;
                     }
-                    return !getFPU(config, elems).isNS();
+                    final FPUnit fpu = getFPU(config, elems);
+                    return !(fpu.isNS() || fpu == FPUnitNorth.CUSTOM_MASK || fpu == FPUnitSouth.CUSTOM_MASK);
                 }
 
                 public String getMessage() {
