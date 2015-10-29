@@ -310,7 +310,7 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
       }
     }
     lazy val guider = new ComboBox(List.empty[SupportedStrategy]) with TextRenderer[SupportedStrategy] {
-      override def text(a: SupportedStrategy) = ~Option(a).map(_.strategy.key.displayName)
+      override def text(a: SupportedStrategy) = ~Option(a).map(s => s.strategy.key.displayName + ~s.altairMode.map(m => s" + ${m.displayValue()}"))
 
       listenTo(selection)
       reactions += {

@@ -10,6 +10,7 @@ import edu.gemini.catalog.api.{RadiusConstraint, UCAC4, CatalogName, CatalogQuer
 import edu.gemini.pot.sp.SPComponentType
 import edu.gemini.shared.util.immutable.{None => JNone, Some => JSome}
 import edu.gemini.shared.util.immutable.ScalaConverters._
+import edu.gemini.spModel.ags.AgsStrategyKey.AltairAowfsKey
 import edu.gemini.spModel.core._
 import edu.gemini.spModel.gemini.altair.{AltairParams, InstAltair}
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2
@@ -43,7 +44,10 @@ import Scalaz._
 /**
  * Locally describe an ags strategy including its limits and the query that would trigger
  */
-case class SupportedStrategy(strategy: AgsStrategy, limits: Option[ProbeLimits], query: List[CatalogQuery], altairMode: Option[AltairParams.Mode])
+case class SupportedStrategy(strategy: AgsStrategy, limits: Option[ProbeLimits], query: List[CatalogQuery], altairMode: Option[AltairParams.Mode]) {
+  // If the strategy has an altair mode, expand it to contain all supported modes
+  def expandAltairModes: List[SupportedStrategy] = (strategy.key == AltairAowfsKey) ? AltairParams.Mode.values().toList.map(m => copy(altairMode = m.some)) | List(copy(altairMode = None))
+}
 
 /**
  * Describes the observation used to do a Guide Star Search
@@ -138,7 +142,7 @@ object ObservationInfo {
     Option(ctx.getTargets.getBase).map(_.getTarget.getSkycalcCoordinates.toNewModel),
     Option(ctx.getInstrument.getType),
     AgsRegistrar.currentStrategy(ctx).map(toSupportedStrategy(ctx, _, mt)),
-    AgsRegistrar.validStrategies(ctx).map(toSupportedStrategy(ctx, _, mt)),
+    AgsRegistrar.validStrategies(ctx).flatMap(toSupportedStrategy(ctx, _, mt).expandAltairModes),
     ctx.getConditions.some,
     UCAC4,
     mt)
