@@ -120,14 +120,6 @@ public class CatalogNavigatorMenuBar extends JMenuBar {
     }
 
     /**
-     * Set the current catalog window (for the Go/history menu, which may be shared by
-     * multiple catalog windows);
-     */
-    public static void setCurrentCatalogNavigator(CatalogNavigator navigator) {
-        _currentCatalogNavigator = navigator;
-    }
-
-    /**
      * Create the File menu.
      */
     protected JMenu createFileMenu() {
@@ -175,7 +167,6 @@ public class CatalogNavigatorMenuBar extends JMenuBar {
         menuItem.addActionListener(ae -> _navigator.close());
         return menuItem;
     }
-
 
     /**
      * Create the View menu.
@@ -268,6 +259,7 @@ public class CatalogNavigatorMenuBar extends JMenuBar {
             try {
                 ar[Integer.parseInt(pref)].setSelected(true);
             } catch (Exception e) {
+                // Ignore
             }
         }
 

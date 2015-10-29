@@ -1,7 +1,7 @@
 package jsky.app.ot.gemini.obscat
 
 import java.io.File
-import javax.swing.ImageIcon
+import javax.swing.{DefaultComboBoxModel, ImageIcon}
 
 import edu.gemini.catalog.ui.PreferredSizeFrame
 import edu.gemini.shared.gui.textComponent.TextRenderer
@@ -11,8 +11,10 @@ import edu.gemini.shared.util.immutable.ScalaConverters._
 import jsky.app.ot.userprefs.ui.{PreferencePanel, PreferenceDialog}
 import jsky.catalog.{FieldDescAdapter, Catalog}
 import jsky.util.Preferences
+import jsky.util.gui.DialogUtil
 
 import scala.concurrent.Future
+import scala.collection.JavaConverters._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.swing._
 import scala.swing.event.{SelectionChanged, ButtonClicked}
@@ -34,18 +36,42 @@ object ObsCatalogFrame extends Frame with PreferredSizeFrame {
   adjustSize(true)
 }
 
-protected object ObsQueryPreset {
+case class OTBrowserInstrumentSelection(selection: Option[Map[String, Map[String, AnyRef]]])
+
+case class OTBrowserPreset(name: String, selection: OTBrowserInstrumentSelection)
+
+protected object OTBrowserPresetChoice {
 
   sealed trait ObsQueryPreset {
-    val name: String
+    def name: String
   }
 
   case object SaveNewPreset extends ObsQueryPreset {
     val name = "Save New Preset..."
   }
 
-  case class SavedPreset(name: String) extends ObsQueryPreset {}
+  case class SavedPreset(preset: OTBrowserPreset) extends ObsQueryPreset {
+    val name = preset.name
+  }
 
+}
+
+class OTBrowserQueryPanel(catalog: Catalog) extends ObsCatalogQueryPanel(catalog, 6) {
+  /** Store the current settings in a serializable object and return the object. */
+  def instrumentSelection: OTBrowserInstrumentSelection = {
+    val instIndexes = Option(_getInstIndexes).map(_.toList)
+    val instruments = Option(_getInstruments).map(_.toList)
+    val values = (instIndexes |@| instruments) { (idx, inst) =>
+      inst.zipWithIndex.map { case (instrument, i) =>
+        val params = ObsCatalog.getInstrumentParamDesc(instrument)
+        val p = params.toList.zipWithIndex.map { case (param, j) =>
+          (param.getName, getValue(param, _panelComponents(idx(i) + 1)(j)))
+        }
+        (instrument, p.toMap)
+      }.toMap
+    }
+    OTBrowserInstrumentSelection(values)
+  }
 }
 
 /**
@@ -53,11 +79,11 @@ protected object ObsQueryPreset {
   * @param catalog the catalog, for which a user interface component is being generated
   */
 final class ObsCatalogQueryTool(catalog: Catalog) {
-  import ObsQueryPreset._
+  import OTBrowserPresetChoice._
 
   val PREF_KEY = classOf[ObsCatalogQueryTool].getName
 
-  val queryPanel = new ObsCatalogQueryPanel(catalog, 6)
+  val queryPanel = new OTBrowserQueryPanel(catalog)
   val queryResults = new ObsCatalogQueryResultDisplay(new ObsCatalogQueryResult(ObsCatalog.INSTANCE.getConfigEntry, new java.util.Vector(), new java.util.Vector(), new java.util.ArrayList(), Array[FieldDescAdapter]()))
   val remote = new CheckBox("Include Remote Programs") {
         tooltip = "Check to include programs in the remote database in query results."
@@ -73,10 +99,16 @@ final class ObsCatalogQueryTool(catalog: Catalog) {
     override def text(a: ObsQueryPreset): String = ~Option(a).map(_.name)
 
     listenTo(selection)
-
     reactions += {
       case SelectionChanged(e) if selection.item == SaveNewPreset =>
-        queryPanel.storeSettings()
+        val name = DialogUtil.input(ObsCatalogFrame.instance.peer, "Enter a name for this query")
+        Option(name).filter(_.nonEmpty).foreach { n =>
+          val preset = SavedPreset(OTBrowserPreset(n, queryPanel.instrumentSelection))
+          val previousModel = this.peer.getModel
+          val existingElements = (0 until previousModel.getSize).map(previousModel.getElementAt)
+          val model = new DefaultComboBoxModel[ObsQueryPreset]((preset :: existingElements.toList).toArray)
+          this.peer.setModel(model)
+        }
     }
   }
 

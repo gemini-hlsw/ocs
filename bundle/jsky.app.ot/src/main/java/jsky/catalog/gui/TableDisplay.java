@@ -111,7 +111,6 @@ public class TableDisplay extends JPanel
 
         // handle resize events
         addComponentListener(new ComponentAdapter() {
-
             public void componentResized(ComponentEvent e) {
                 resize();
             }

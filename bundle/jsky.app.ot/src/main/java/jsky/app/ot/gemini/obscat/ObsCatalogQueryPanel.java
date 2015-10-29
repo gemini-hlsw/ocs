@@ -20,7 +20,7 @@ import java.util.Hashtable;
  *
  * @author Allan Brighton
  */
-public final class ObsCatalogQueryPanel extends CatalogQueryPanel {
+public class ObsCatalogQueryPanel extends CatalogQueryPanel {
 
     // For choosing instrument specific options
     private JTabbedPane _tabbedPane;
@@ -35,7 +35,7 @@ public final class ObsCatalogQueryPanel extends CatalogQueryPanel {
     private JLabel[][] _panelLabels;
 
     /** Array(InstIndex, row) of components displayed next to the labels */
-    private JComponent[][] _panelComponents;
+    protected JComponent[][] _panelComponents;
 
     /** Instrument combo box */
     private MultiSelectComboBox<String> _instComboBox;
@@ -300,7 +300,7 @@ public final class ObsCatalogQueryPanel extends CatalogQueryPanel {
     }
 
     // Return the index of the selected instruments, or null if none are selected
-    private int[] _getInstIndexes() {
+    protected int[] _getInstIndexes() {
         if (_instComboBox == null || _instComboBox.getSelectionCount() == 0)
             return null;
 
@@ -308,7 +308,7 @@ public final class ObsCatalogQueryPanel extends CatalogQueryPanel {
     }
 
     // Return an array with the names of the selected instruments, or null if none are selected
-    private String[] _getInstruments() {
+    protected String[] _getInstruments() {
         if (_instComboBox == null || _instComboBox.getSelectionCount() == 0)
             return null;
         return _instComboBox.getSelected();

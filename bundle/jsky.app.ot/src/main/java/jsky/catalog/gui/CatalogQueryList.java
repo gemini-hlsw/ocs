@@ -1,10 +1,3 @@
-/*
- * Copyright 2003 Association for Universities for Research in Astronomy, Inc.,
- * Observatory Control System, Gemini Telescopes Project.
- *
- * $Id: CatalogQueryList.java 25133 2010-04-16 22:23:28Z swalker $
- */
-
 package jsky.catalog.gui;
 
 import java.util.*;
@@ -15,7 +8,7 @@ import java.util.*;
 public class CatalogQueryList {
 
     // List of CatalogQueryItem, for previously saved queries.
-    private final LinkedList<CatalogQueryItem> _queryList = new LinkedList<CatalogQueryItem>();
+    private final LinkedList<CatalogQueryItem> _queryList = new LinkedList<>();
 
     /** Constructor */
     public CatalogQueryList() {
