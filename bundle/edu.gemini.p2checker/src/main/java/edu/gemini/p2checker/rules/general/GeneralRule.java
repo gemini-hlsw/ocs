@@ -123,25 +123,39 @@ public class GeneralRule implements IRule {
         //TODO: Rule to check if the WFS is in the patrol field, whatever that means
         //private static final String WFS_OUT_PATROL_FIELD_TEMPLATE = "%s outside of the patrol field";
 
+        private String formatGuiderString(final Iterator<GuideProbe> iter) {
+            if (iter == null || !iter.hasNext())
+                return "";
+
+            final StringBuilder buf = new StringBuilder();
+            buf.append(iter.next().getKey());
+            while (iter.hasNext()) {
+                buf.append(", ").append(iter.next().getKey());
+            }
+            return buf.toString();
+        }
+
         private void reportAltairLgsGuideIssues(P2Problems problems, Set<GuideProbe> guiders, AltairParams.Mode mode, ISPObsComponent targetComp) {
-            final GuideProbe guider = mode.guider();
-            if (!guiders.contains(guider)) {
-                problems.addError(PREFIX+"LGS_WFS", String.format(LGS_WFS, mode.displayValue(), guider), targetComp);
-            } else if (guiders.size() > 1) {
+            final ImList<GuideProbe> usedGuiders = mode.guiders();
+
+            // Check to see if we are using any guiders that are not in the set of guiders in the parameter list.
+            // Then check to see if there are any unused guiders in the set of guiders parameter list.
+            // TODO: Not sure if we want to display one P2 error per used guider, or one message with all used guiders.
+            final ImList<GuideProbe> badGuiders = usedGuiders.filter(gp -> !guiders.contains(gp));
+            if (badGuiders.nonEmpty()) {
+                final String badGuiderNames = formatGuiderString(badGuiders.iterator());
+                problems.addError(PREFIX + "LGS_WFS", String.format(LGS_WFS, mode.displayValue(), badGuiderNames), targetComp);
+                //badGuiders.foreach(g -> problems.addError(PREFIX + "LGS_WFS", String.format(LGS_WFS, mode.displayValue(), g), targetComp));
+            } else if (guiders.size() - usedGuiders.size() > 1) {
                 final Set<GuideProbe> otherGuiders = new TreeSet<>(GuideProbe.KeyComparator.instance);
                 otherGuiders.addAll(guiders);
-                otherGuiders.remove(guider);
+                badGuiders.foreach(otherGuiders::remove);
 
                 // Format the guider names
-                final StringBuilder buf = new StringBuilder();
-                final Iterator<GuideProbe> it = otherGuiders.iterator();
-                buf.append(it.next().getKey());
-                while (it.hasNext()) {
-                    buf.append(", ").append(it.next().getKey());
-                }
-
-                final String msg = String.format(NO_AO_OTHER, guider.getKey(), buf.toString());
-                problems.addError(PREFIX+"NO_AO_OTHER", msg, targetComp);
+                final String guiderNames     = formatGuiderString(otherGuiders.iterator());
+                final String usedGuiderNames = formatGuiderString(usedGuiders.iterator());
+                problems.addError(PREFIX+"NO_AO_OTHER", String.format(NO_AO_OTHER, usedGuiderNames, guiderNames), targetComp);
+                //usedGuiders.foreach(g -> problems.addError(PREFIX+"NO_AO_OTHER", String.format(NO_AO_OTHER, g.getKey(), guiderNames), targetComp));
             }
         }
 

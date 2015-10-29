@@ -9,6 +9,7 @@ package edu.gemini.spModel.gemini.altair;
 import edu.gemini.pot.sp.ISPObsComponent;
 import edu.gemini.pot.sp.ISPObservation;
 import edu.gemini.pot.sp.SPComponentType;
+import edu.gemini.shared.util.immutable.ImList;
 import edu.gemini.spModel.ao.AOConstants;
 import edu.gemini.spModel.data.AbstractDataObject;
 import edu.gemini.spModel.data.ISPDataObject;
@@ -362,16 +363,16 @@ public final class InstAltair extends AbstractDataObject implements PropertyProv
     private static final Collection<GuideProbe> ANTI_GUIDERS    =
             GuideProbeUtil.instance.createCollection(PwfsGuideProbe.pwfs1, PwfsGuideProbe.pwfs2);
 
-    private static Set<GuideProbe> allMinus(GuideProbe guideProbe) {
+    private static Set<GuideProbe> allMinus(final ImList<GuideProbe> guideProbes) {
         final Set<GuideProbe> guiders = new TreeSet<>(GuideProbe.KeyComparator.instance);
         guiders.addAll(GuideProbeMap.instance.values());
-        guiders.remove(guideProbe);
+        guideProbes.foreach(guiders::remove);
         return guiders;
     }
 
     public Collection<GuideProbe> getConsumedGuideProbes() {
         if (getGuideStarType() == GuideStarType.LGS) {
-            return allMinus(getMode().guider());
+            return allMinus(getMode().guiders());
         } else {
             return ANTI_GUIDERS;
         }
