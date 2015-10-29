@@ -14,7 +14,6 @@ import jsky.util.Preferences
 import jsky.util.gui.DialogUtil
 
 import scala.concurrent.Future
-import scala.collection.JavaConverters._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.swing._
 import scala.swing.event.{SelectionChanged, ButtonClicked}
@@ -57,7 +56,6 @@ protected object OTBrowserPresetChoice {
 }
 
 class OTBrowserQueryPanel(catalog: Catalog) extends ObsCatalogQueryPanel(catalog, 6) {
-  /** Store the current settings in a serializable object and return the object. */
   def instrumentSelection: OTBrowserInstrumentSelection = {
     val instIndexes = Option(_getInstIndexes).map(_.toList)
     val instruments = Option(_getInstruments).map(_.toList)
@@ -71,6 +69,17 @@ class OTBrowserQueryPanel(catalog: Catalog) extends ObsCatalogQueryPanel(catalog
       }.toMap
     }
     OTBrowserInstrumentSelection(values)
+  }
+
+  def restoreSelection(selection : OTBrowserInstrumentSelection): Unit = {
+    selection.selection.foreach { m =>
+      m.foreach {
+        case (inst, s) =>
+          s.foreach { v =>
+            Option(getInstComponentForLabel(inst, v._1)).foreach { setValue(_, v._2) }
+          }
+      }
+    }
   }
 }
 
@@ -100,7 +109,7 @@ final class ObsCatalogQueryTool(catalog: Catalog) {
 
     listenTo(selection)
     reactions += {
-      case SelectionChanged(e) if selection.item == SaveNewPreset =>
+      case SelectionChanged(_) if selection.item == SaveNewPreset =>
         val name = DialogUtil.input(ObsCatalogFrame.instance.peer, "Enter a name for this query")
         Option(name).filter(_.nonEmpty).foreach { n =>
           val preset = SavedPreset(OTBrowserPreset(n, queryPanel.instrumentSelection))
@@ -108,6 +117,12 @@ final class ObsCatalogQueryTool(catalog: Catalog) {
           val existingElements = (0 until previousModel.getSize).map(previousModel.getElementAt)
           val model = new DefaultComboBoxModel[ObsQueryPreset]((preset :: existingElements.toList).toArray)
           this.peer.setModel(model)
+        }
+      case SelectionChanged(_)                                    =>
+        selection.item match {
+          case SavedPreset(preset) =>
+            queryPanel.restoreSelection(preset.selection)
+          case _                   => // Should not happen
         }
     }
   }
