@@ -459,7 +459,10 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
     def updateQuery(info: Option[ObservationInfo], query: ConeSearchCatalogQuery): Unit = {
       info.foreach { i =>
         objectName.text = ~i.objectName
+        // Skip listening or the selection update will trickle down to the other controls
+        instrumentBox.deafTo(instrumentBox.selection)
         instrumentBox.selection.item = i.instrument.getOrElse(ObservationInfo.DefaultInstrument)
+        instrumentBox.listenTo(instrumentBox.selection)
         val selected = for {
           s <- i.strategy
           c <- i.validStrategies.find(p => p.strategy == s.strategy && p.altairMode == s.altairMode)
