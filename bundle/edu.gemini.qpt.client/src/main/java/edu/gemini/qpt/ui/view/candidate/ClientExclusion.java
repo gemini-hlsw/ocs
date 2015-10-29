@@ -30,7 +30,8 @@ public enum ClientExclusion {
     HIDDEN_PCAL("Program is of type " + StructuredProgramID.Type.CAL.getDescription(), VIEW_SP_CAL),
 	HIDDEN_INACTIVE_PROGRAMS("Program is inactive.", VIEW_INACTIVE_PROGRAMS),
 
-	HIDDEN_CALS("Obs is a calibration.", VIEW_CALIBRATIONS),
+	HIDDEN_NIGHT_CALS("Obs is a nighttime calibration.", VIEW_NIGHTTIME_CALIBRATIONS),
+	HIDDEN_DAY_CALS("Obs is a daytime calibration.", VIEW_DAYTIME_CALIBRATIONS),
 	HIDDEN_SCI("Obs is science.", VIEW_SCIENCE_OBS),
 
 	HIDDEN_OVER_QUALIFIED_OBSERVATIONS("Obs is over-qualified.", VIEW_OVER_QUALIFIED_OBSERVATIONS),
@@ -63,30 +64,35 @@ public enum ClientExclusion {
         // Daily Engineering and Calibration observations are not filtered by band
         if ( !obs.getProg().isEngOrCal() ) {
             switch (obs.getProg().getBand()) {
-            case 1: if (!VIEW_BAND_1.get()) return HIDDEN_BAND_1; break;
-            case 2: if (!VIEW_BAND_2.get()) return HIDDEN_BAND_2; break;
-            case 3: if (!VIEW_BAND_3.get()) return HIDDEN_BAND_3; break;
-            case 4: if (!VIEW_BAND_4.get()) return HIDDEN_BAND_4; break;
+                case 1: if (!VIEW_BAND_1.get()) return HIDDEN_BAND_1; break;
+                case 2: if (!VIEW_BAND_2.get()) return HIDDEN_BAND_2; break;
+                case 3: if (!VIEW_BAND_3.get()) return HIDDEN_BAND_3; break;
+                case 4: if (!VIEW_BAND_4.get()) return HIDDEN_BAND_4; break;
             default:
                 LOGGER.warning("Program " + obs.getProg() + " has unexpected science band: " + obs.getProg().getBand());
             }
         }
 		// SP Type filtering
 		switch (obs.getProg().getStructuredProgramId().getType()) {
-        case LP: if (!VIEW_SP_LP.get()) return HIDDEN_LP; break;
-		case C: if (!VIEW_SP_C.get()) return HIDDEN_C; break;
-        case FT: if (!VIEW_SP_FT.get()) return HIDDEN_FT; break;
-		case Q: if (!VIEW_SP_Q.get()) return HIDDEN_Q; break;
-		case SV: if (!VIEW_SP_SV.get()) return HIDDEN_SV; break;
-		case DD: if (!VIEW_SP_DD.get()) return HIDDEN_DD; break;
-		case DS: if (!VIEW_SP_DS.get()) return HIDDEN_DS; break;
-        case ENG: if (!VIEW_SP_ENG.get()) return HIDDEN_ENG; break;
-        case CAL: if (!VIEW_SP_CAL.get()) return HIDDEN_PCAL; break;
+			case LP: 	if (!VIEW_SP_LP.get()) 	return HIDDEN_LP; 	break;
+			case C: 	if (!VIEW_SP_C.get()) 	return HIDDEN_C; 	break;
+			case FT: 	if (!VIEW_SP_FT.get()) 	return HIDDEN_FT; 	break;
+			case Q: 	if (!VIEW_SP_Q.get()) 	return HIDDEN_Q; 	break;
+			case SV: 	if (!VIEW_SP_SV.get()) 	return HIDDEN_SV; 	break;
+			case DD: 	if (!VIEW_SP_DD.get()) 	return HIDDEN_DD; 	break;
+			case DS: 	if (!VIEW_SP_DS.get()) 	return HIDDEN_DS; 	break;
+			case ENG: 	if (!VIEW_SP_ENG.get()) return HIDDEN_ENG; 	break;
+			case CAL: 	if (!VIEW_SP_CAL.get()) return HIDDEN_PCAL; break;
 		}
 		
-		// Obs type
-        if (obs.getObsClass().isCalibration() && !VIEW_CALIBRATIONS.get()) return HIDDEN_CALS;
-        if (!obs.getObsClass().isCalibration() && !VIEW_SCIENCE_OBS.get())  return HIDDEN_SCI;
+		// Obs type filtering
+        // (ObsQueryFunctor/MiniModel is configured to let only the obs classes through listed below.)
+		switch (obs.getObsClass()) {
+            case PROG_CAL:      if (!VIEW_NIGHTTIME_CALIBRATIONS.get()) return HIDDEN_NIGHT_CALS;   break;
+            case PARTNER_CAL:   if (!VIEW_NIGHTTIME_CALIBRATIONS.get()) return HIDDEN_NIGHT_CALS;   break;
+            case DAY_CAL:       if (!VIEW_DAYTIME_CALIBRATIONS.get())   return HIDDEN_DAY_CALS;     break;
+            case SCIENCE:       if (!VIEW_SCIENCE_OBS.get())            return HIDDEN_SCI;          break;
+        }
 
 		// Flag-based filters
 		if (!VIEW_LOW_IN_SKY.get() && flags.contains(Flag.ELEVATION_CNS))  return HIDDEN_LOW_IN_SKY;
@@ -107,7 +113,7 @@ public enum ClientExclusion {
 	private final String string;
 	private final BooleanViewPreference pref;
 
-	private ClientExclusion(final String string, final BooleanViewPreference pref) {
+	ClientExclusion(final String string, final BooleanViewPreference pref) {
 		this.string = string;
 		this.pref = pref;
 	}

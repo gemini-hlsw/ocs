@@ -95,7 +95,7 @@ public class ShellAdvisor implements IShellAdvisor, PropertyChangeListener {
 		final IViewAdvisor.Relation relation;
 		final ViewAdvisor relative;
 
-		private ViewAdvisor(IViewAdvisor advisor, Relation relation, ViewAdvisor relative) {
+		ViewAdvisor(IViewAdvisor advisor, Relation relation, ViewAdvisor relative) {
 			this.advisor = advisor;
 			this.relation = relation;
 			this.relative = relative;
@@ -121,7 +121,7 @@ public class ShellAdvisor implements IShellAdvisor, PropertyChangeListener {
 		final IActionManager.Relation relation;
 		final Menu relative;
 
-		private Menu(edu.gemini.ui.workspace.IActionManager.Relation relation, Menu relative) {
+		Menu(edu.gemini.ui.workspace.IActionManager.Relation relation, Menu relative) {
 			this.relation = relation;
 			this.relative = relative;
 		}
@@ -228,7 +228,8 @@ public class ShellAdvisor implements IShellAdvisor, PropertyChangeListener {
 			null,
 			new BooleanPreferenceAction(VIEW_INACTIVE_PROGRAMS, VIEW_ALL, "Inactive Programs"),
 			new BooleanPreferenceAction(VIEW_SCIENCE_OBS, VIEW_ALL, "Science Observations"),
-			new BooleanPreferenceAction(VIEW_CALIBRATIONS, VIEW_ALL, "Calibration Observations"),
+			new BooleanPreferenceAction(VIEW_NIGHTTIME_CALIBRATIONS, VIEW_ALL, "Nighttime Calibration Observations"),
+			new BooleanPreferenceAction(VIEW_DAYTIME_CALIBRATIONS, VIEW_ALL, "Daytime Calibration Observations"),
 			null,
 			new BooleanPreferenceAction(VIEW_BAND_1, VIEW_ALL, "Science Band 1", KeyEvent.VK_1),
 			new BooleanPreferenceAction(VIEW_BAND_2, VIEW_ALL, "Science Band 2", KeyEvent.VK_2),
