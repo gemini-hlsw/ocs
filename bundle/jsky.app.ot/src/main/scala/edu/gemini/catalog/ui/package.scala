@@ -52,7 +52,16 @@ case class SupportedStrategy(strategy: AgsStrategy, limits: Option[ProbeLimits],
 /**
  * Describes the observation used to do a Guide Star Search
  */
-case class ObservationInfo(ctx: Option[ObsContext], objectName: Option[String], baseCoordinates: Option[Coordinates], instrument: Option[SPComponentType], strategy: Option[SupportedStrategy], validStrategies: List[SupportedStrategy], conditions: Option[Conditions], catalog: CatalogName, mt: MagnitudeTable) {
+case class ObservationInfo(ctx: Option[ObsContext],
+                           objectName: Option[String],
+                           baseCoordinates: Option[Coordinates],
+                           instrument: Option[SPComponentType],
+                           strategy: Option[SupportedStrategy],
+                           validStrategies: List[SupportedStrategy],
+                           conditions: Option[Conditions],
+                           positionAngle: Angle,
+                           catalog: CatalogName,
+                           mt: MagnitudeTable) {
   def catalogQuery:List[CatalogQuery] = validStrategies.collect {
       case SupportedStrategy(s, _, query, _) if s == strategy => query
     }.flatten
@@ -95,7 +104,7 @@ case class ObservationInfo(ctx: Option[ObsContext], objectName: Option[String], 
       val altair = strategy.collect {
         case SupportedStrategy(_, _, _, Some(m)) => new InstAltair() <| {_.setMode(m)}
       }
-      ObsContext.create(env, i, new JSome(s), cond, null, altair.orNull, JNone.instance())
+      ObsContext.create(env, i, new JSome(s), cond, null, altair.orNull, JNone.instance()).withPositionAngle(positionAngle.toOldModel)
     }
   }
 }
@@ -104,7 +113,7 @@ object ObservationInfo {
   val DefaultInstrument = SPComponentType.INSTRUMENT_VISITOR
 
   // Observation context loaded initially with default parameters
-  val zero = new ObservationInfo(None, "".some, Coordinates.zero.some, DefaultInstrument.some, None, Nil, SPSiteQuality.Conditions.BEST.some, UCAC4, ProbeLimitsTable.loadOrThrow())
+  val zero = new ObservationInfo(None, "".some, Coordinates.zero.some, DefaultInstrument.some, None, Nil, SPSiteQuality.Conditions.BEST.some, Angle.zero, UCAC4, ProbeLimitsTable.loadOrThrow())
 
   val InstList = List(
     Flamingos2.INSTRUMENT_NAME_PROP        -> SPComponentType.INSTRUMENT_FLAMINGOS2,
@@ -144,6 +153,7 @@ object ObservationInfo {
     AgsRegistrar.currentStrategy(ctx).map(toSupportedStrategy(ctx, _, mt)),
     AgsRegistrar.validStrategies(ctx).flatMap(toSupportedStrategy(ctx, _, mt).expandAltairModes),
     ctx.getConditions.some,
+    ctx.getPositionAngle.toNewModel,
     UCAC4,
     mt)
 
