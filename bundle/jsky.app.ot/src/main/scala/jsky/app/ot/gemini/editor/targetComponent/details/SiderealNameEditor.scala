@@ -89,6 +89,7 @@ final class SiderealNameEditor(mags: MagnitudeEditor) extends TelescopePosEditor
       i.properMotion.foreach { pm =>
         t.setPropMotionRA(pm.deltaRA.velocity.masPerYear)
         t.setPropMotionDec(pm.deltaDec.velocity.masPerYear)
+        t.setEpoch(pm.epoch.toOldModel)
       }
       // TODO: Should we pass the time?
       t.setRaString(i.coordinates.ra.toAngle.formatHMS)

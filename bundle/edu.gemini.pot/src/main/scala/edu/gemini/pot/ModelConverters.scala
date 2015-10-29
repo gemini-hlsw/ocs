@@ -7,8 +7,7 @@ import edu.gemini.spModel.core.AngleSyntax._
 import edu.gemini.spModel.rich.shared.immutable._
 import edu.gemini.spModel.target.SPTarget
 import edu.gemini.spModel.target.offset.OffsetPosBase
-import edu.gemini.spModel.target.system.HmsDegTarget
-import squants.motion.KilometersPerSecond
+import edu.gemini.spModel.target.system.{CoordinateTypes, HmsDegTarget}
 
 import scalaz._
 import Scalaz._
@@ -39,6 +38,10 @@ object ModelConverters {
 
   implicit class NewAngle2Old(val angle: Angle) extends AnyVal {
     def toOldModel: skycalc.Angle = skycalc.Angle.degrees(angle.toDegrees)
+  }
+
+  implicit class NewEpoch2Old(val epoch: Epoch) extends AnyVal{
+    def toOldModel: CoordinateTypes.Epoch = new CoordinateTypes.Epoch(epoch.year)
   }
 
   // We need a way to convert angles from [0,maxValOfUnit) to [-maxValOfUnit/2,maxValOfUnit/2) for a number of purposes.
