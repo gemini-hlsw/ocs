@@ -9,26 +9,18 @@ import java.awt.*;
 
 public class AltairForm extends JPanel {
     public AltairForm() {
-        JLabel adcLabel = new JLabel();
-        JLabel beamSplitterLabel = new JLabel();
         adcCheck = new CheckBoxWidget();
         eight50Button = new OptionWidget();
         oneButton = new OptionWidget();
-        JLabel cassRotatorLabel = new JLabel();
         cassRotatorFollowingButton = new JRadioButton();
         cassRotatorFixedButton = new JRadioButton();
-        JLabel ndFilterLabel = new JLabel();
         ndFilterInButton = new JRadioButton();
         ndFilterOutButton = new JRadioButton();
-        JLabel guideStarType = new JLabel();
         ngsRadioButton = new JRadioButton();
         ngsWithFieldLensRadioButton = new JRadioButton();
         lgsRadioButton = new JRadioButton();
         lgsP1RadioButton = new JRadioButton();
         lgsOiRadioButton = new JRadioButton();
-        JLabel withFlLabel1 = new JLabel();
-        JLabel withFlLabel2 = new JLabel();
-        JLabel withFlLabel3 = new JLabel();
 
         //======== this ========
         setMinimumSize(new Dimension(400, 453));
@@ -37,8 +29,7 @@ public class AltairForm extends JPanel {
         setLayout(new GridBagLayout());
 
         //---- adcLabel ----
-        adcLabel.setToolTipText("");
-        adcLabel.setText("Atmospheric Dispersion Corrector");
+        final JLabel adcLabel = new JLabel("Atmospheric Dispersion Corrector");
         add(adcLabel, new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0,
                 GridBagConstraints.EAST, GridBagConstraints.NONE,
                 new Insets(11, 11, 0, 0), 0, 0));
@@ -51,8 +42,7 @@ public class AltairForm extends JPanel {
                 new Insets(11, 11, 0, 0), 0, 0));
 
         //---- beamSplitterLabel ----
-        beamSplitterLabel.setToolTipText("");
-        beamSplitterLabel.setText("Dichroic Beamsplitter");
+        final JLabel beamSplitterLabel = new JLabel("Dichroic Beamsplitter");
         add(beamSplitterLabel, new GridBagConstraints(0, 1, 1, 1, 0.0, 0.0,
                 GridBagConstraints.EAST, GridBagConstraints.NONE,
                 new Insets(11, 11, 0, 0), 0, 0));
@@ -70,9 +60,8 @@ public class AltairForm extends JPanel {
                 new Insets(0, 11, 0, 0), 0, 0));
 
         //---- cassRotatorLabel ----
-        cassRotatorLabel.setToolTipText("");
+        final JLabel cassRotatorLabel = new JLabel("Cass Rotator");
         cassRotatorLabel.setVerifyInputWhenFocusTarget(true);
-        cassRotatorLabel.setText("Cass Rotator");
         add(cassRotatorLabel, new GridBagConstraints(0, 3, 1, 1, 0.0, 0.0,
                 GridBagConstraints.EAST, GridBagConstraints.NONE,
                 new Insets(11, 11, 0, 0), 0, 0));
@@ -90,7 +79,7 @@ public class AltairForm extends JPanel {
                 new Insets(0, 11, 0, 0), 0, 0));
 
         //---- ndFilterLabel ----
-        ndFilterLabel.setText("ND Filter");
+        final JLabel ndFilterLabel = new JLabel("ND Filter");
         add(ndFilterLabel, new GridBagConstraints(0, 5, 1, 1, 0.0, 0.0,
                 GridBagConstraints.EAST, GridBagConstraints.NONE,
                 new Insets(11, 11, 0, 0), 0, 0));
@@ -108,7 +97,7 @@ public class AltairForm extends JPanel {
                 new Insets(0, 11, 0, 0), 0, 0));
 
         //---- guideStarType ----
-        guideStarType.setText("Guide Star Type");
+        final JLabel guideStarType = new JLabel("Guide Star Type");
         add(guideStarType, new GridBagConstraints(0, 7, 1, 1, 0.0, 0.0,
                 GridBagConstraints.EAST, GridBagConstraints.NONE,
                 new Insets(11, 11, 0, 0), 0, 0));
@@ -126,21 +115,24 @@ public class AltairForm extends JPanel {
                 new Insets(0, 11, 0, 0), 0, 0));
 
         //---- lgsRadioButton ----
-        lgsRadioButton.setText("Laser Guide Star + AOWFS");
+        lgsRadioButton.setText("Laser Guide Star + AOWFS TTF");
+        lgsP1RadioButton.setToolTipText("LGS using AOWFS to measure Tip, Tilt, and Focus");
         add(lgsRadioButton, new GridBagConstraints(1, 9, 1, 1, 0.0, 0.0,
                 GridBagConstraints.WEST, GridBagConstraints.NONE,
                 new Insets(0, 11, 0, 0), 0, 0));
-        withFlLabel1.setText("(with Field Lens)");
+
+        final JLabel withFlLabel1 = new JLabel("(with Field Lens)");
         add(withFlLabel1, new GridBagConstraints(2, 9, 1, 1, 1.0, 0.0,
                 GridBagConstraints.WEST, GridBagConstraints.NONE,
                 new Insets(0, 11, 0, 0), 0, 0));
 
         //---- lgsP1RadioButton ----
-        lgsP1RadioButton.setText("Laser Guide Star + PWFS1");
+        lgsP1RadioButton.setText("Laser Guide Star + PWFS1 TTF");
+        lgsP1RadioButton.setToolTipText("LGS using PWFS1 to measure Tip, Tilt, and Focus");
         add(lgsP1RadioButton, new GridBagConstraints(1, 10, 1, 1, 0.0, 0.0,
                 GridBagConstraints.WEST, GridBagConstraints.NONE,
                 new Insets(0, 11, 0, 0), 0, 0));
-        withFlLabel2.setText("(with Field Lens)");
+        final JLabel withFlLabel2 = new JLabel("(with Field Lens)");
         add(withFlLabel2, new GridBagConstraints(2, 10, 1, 1, 1.0, 0.0,
                 GridBagConstraints.WEST, GridBagConstraints.NONE,
                 new Insets(0, 11, 0, 0), 0, 0));
@@ -148,11 +140,12 @@ public class AltairForm extends JPanel {
         //---- lgsP1RadioButton ----
         // LAYOUT NOTE: bring both elements to the top left and let the last element
         // consume all remaining space (fill weight = 1.0 for x and y)
-        lgsOiRadioButton.setText("Laser Guide Star + OIWFS");
+        lgsOiRadioButton.setText("Laser Guide Star + OIWFS TTF");
+        lgsOiRadioButton.setToolTipText("LGS using OIWFS to measure Tip, Tilt, and Focus");
         add(lgsOiRadioButton, new GridBagConstraints(1, 11, 1, 1, 0.0, 0.0,
                 GridBagConstraints.NORTHWEST, GridBagConstraints.NONE,
                 new Insets(0, 11, 0, 0), 0, 0));
-        withFlLabel3.setText("(with Field Lens)");
+        final JLabel withFlLabel3 = new JLabel("(with Field Lens)");
         add(withFlLabel3, new GridBagConstraints(2, 11, 1, 1, 1.0, 1.0,
                 GridBagConstraints.NORTHWEST, GridBagConstraints.NONE,
                 new Insets(0, 11, 0, 0), 0, 0));
