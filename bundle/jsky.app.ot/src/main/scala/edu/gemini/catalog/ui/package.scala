@@ -9,7 +9,9 @@ import edu.gemini.ags.conf.ProbeLimitsTable
 import edu.gemini.catalog.api.{RadiusConstraint, UCAC4, CatalogName, CatalogQuery}
 import edu.gemini.pot.sp.SPComponentType
 import edu.gemini.shared.util.immutable.{None => JNone, Some => JSome}
+import edu.gemini.shared.util.immutable.ScalaConverters._
 import edu.gemini.spModel.core._
+import edu.gemini.spModel.gemini.altair.{AltairParams, InstAltair}
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2
 import edu.gemini.spModel.gemini.gmos.{InstGmosSouth, InstGmosNorth}
 import edu.gemini.spModel.gemini.gnirs.{GNIRSConstants, InstGNIRS}
@@ -33,7 +35,7 @@ import jsky.app.ot.gemini.editor.targetComponent.GuidingFeedback.ProbeLimits
 import edu.gemini.pot.ModelConverters._
 
 import scala.language.existentials
-import scala.swing.{Table, Alignment, Label, Component}
+import scala.swing.{Alignment, Label, Component}
 import scala.collection.JavaConverters._
 import scalaz._
 import Scalaz._
@@ -41,21 +43,21 @@ import Scalaz._
 /**
  * Locally describe an ags strategy including its limits and the query that would trigger
  */
-case class SupportedStrategy(strategy: AgsStrategy, limits: Option[ProbeLimits], query: List[CatalogQuery])
+case class SupportedStrategy(strategy: AgsStrategy, limits: Option[ProbeLimits], query: List[CatalogQuery], altairMode: Option[AltairParams.Mode])
 
 /**
  * Describes the observation used to do a Guide Star Search
  */
-case class ObservationInfo(ctx: Option[ObsContext], objectName: Option[String], baseCoordinates: Option[Coordinates], instrument: Option[SPComponentType], strategy: Option[AgsStrategy], validStrategies: List[SupportedStrategy], conditions: Option[Conditions], catalog: CatalogName, mt: MagnitudeTable) {
+case class ObservationInfo(ctx: Option[ObsContext], objectName: Option[String], baseCoordinates: Option[Coordinates], instrument: Option[SPComponentType], strategy: Option[SupportedStrategy], validStrategies: List[SupportedStrategy], conditions: Option[Conditions], catalog: CatalogName, mt: MagnitudeTable) {
   def catalogQuery:List[CatalogQuery] = validStrategies.collect {
-      case SupportedStrategy(s, _, query) if s == strategy => query
+      case SupportedStrategy(s, _, query, _) if s == strategy => query
     }.flatten
 
   /**
    * Attempts to find the guide probe for the selected strategy
    */
   def guideProbe: Option[ValidatableGuideProbe] =
-    strategy.flatMap(_.guideProbes.headOption.collect {
+    strategy.flatMap(_.strategy.guideProbes.headOption.collect {
                       case v: ValidatableGuideProbe => v
                     })
 
@@ -84,9 +86,12 @@ case class ObservationInfo(ctx: Option[ObsContext], objectName: Option[String], 
     (baseCoordinates |@| inst |@| site |@| conditions){ (c, i, s, cond) =>
       val target = new SPTarget(c.ra.toAngle.toDegrees, c.dec.toDegrees) <| {_.setName(~objectName)}
       val env = TargetEnvironment.create(target)
-      // To calculate analysis of guide quality, it is required the site, insturment and conditions
+      // To calculate analysis of guide quality, it is required the site, instrument and conditions
       // TODO Verify if we need offsets, AO info and scheduling block
-      ObsContext.create(env, i, new JSome(s), cond, null, null, JNone.instance())
+      val altair = strategy.collect {
+        case SupportedStrategy(_, _, _, Some(m)) => new InstAltair() <| {_.setMode(m)}
+      }
+      ObsContext.create(env, i, new JSome(s), cond, null, altair.orNull, JNone.instance())
     }
   }
 }
@@ -121,7 +126,10 @@ object ObservationInfo {
   def toSupportedStrategy(obsCtx: ObsContext, strategy: AgsStrategy, mt: MagnitudeTable):SupportedStrategy = {
     val pb = strategy.magnitudes(obsCtx, mt).map(k => ProbeLimits(strategy.probeBands, obsCtx, k._2)).headOption
     val queries = strategy.catalogQueries(obsCtx, mt)
-    SupportedStrategy(strategy, pb.flatten, queries)
+    val mode = obsCtx.getAOComponent.asScalaOpt.collect {
+      case a: InstAltair => a.getMode
+    }
+    SupportedStrategy(strategy, pb.flatten, queries, mode)
   }
 
   def apply(ctx: ObsContext, mt: MagnitudeTable):ObservationInfo = ObservationInfo(
@@ -129,7 +137,7 @@ object ObservationInfo {
     Option(ctx.getTargets.getBase).map(_.getTarget.getName),
     Option(ctx.getTargets.getBase).map(_.getTarget.getSkycalcCoordinates.toNewModel),
     Option(ctx.getInstrument.getType),
-    AgsRegistrar.currentStrategy(ctx),
+    AgsRegistrar.currentStrategy(ctx).map(toSupportedStrategy(ctx, _, mt)),
     AgsRegistrar.validStrategies(ctx).map(toSupportedStrategy(ctx, _, mt)),
     ctx.getConditions.some,
     UCAC4,
@@ -169,12 +177,12 @@ object GuidingQuality {
   // Calculate the guiding quality of the target
   def target2Analysis(info: Option[ObservationInfo], t: Target):Option[AgsAnalysis] = {
     (for {
-      o                                     <- info
-      s                                     <- o.strategy
-      gp                                    <- o.guideProbe
+      o                                           <- info
+      s                                           <- o.strategy
+      gp                                          <- o.guideProbe
       st @ SiderealTarget(_, _, _, _, _, _, _, _) = t
-      ctx                                   <- o.toContext
-    } yield s.analyze(ctx, o.mt, gp, st)).flatten
+      ctx                                         <- o.toContext
+    } yield s.strategy.analyze(ctx, o.mt, gp, st)).flatten
   }
 }
 

@@ -14,7 +14,9 @@ import edu.gemini.catalog.votable._
 import edu.gemini.pot.sp.SPComponentType
 import edu.gemini.shared.gui.textComponent.{SelectOnFocus, TextRenderer, NumberField}
 import edu.gemini.shared.gui.{ButtonFlattener, GlassLabel, SizePreference, SortableTable}
+import edu.gemini.spModel.ags.AgsStrategyKey.AltairAowfsKey
 import edu.gemini.spModel.core.SiderealTarget
+import edu.gemini.spModel.gemini.altair.InstAltair
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.Conditions
 import edu.gemini.spModel.obs.context.ObsContext
@@ -453,7 +455,7 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
         instrumentBox.selection.item = i.instrument.getOrElse(ObservationInfo.DefaultInstrument)
         val selected = for {
           s <- i.strategy
-          c <- i.validStrategies.find(_.strategy == s)
+          c <- i.validStrategies.find(_.strategy == s.strategy)
         } yield c
         selected.foreach { s =>
           updateGuidersModel(s, i.validStrategies)
@@ -527,7 +529,7 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
       val conditions = Conditions.NOMINAL.sb(sbBox.selection.item).cc(ccBox.selection.item).iq(iqBox.selection.item)
 
       val coordinates = Coordinates(ra.value, dec.value)
-      ObservationInfo(None, Option(objectName.text), coordinates.some, Option(instrumentBox.selection.item), Option(guider.selection.item).map(_.strategy), guiders.toList, conditions.some, selectedCatalog, ProbeLimitsTable.loadOrThrow())
+      ObservationInfo(None, Option(objectName.text), coordinates.some, Option(instrumentBox.selection.item), Option(guider.selection.item), guiders.toList, conditions.some, selectedCatalog, ProbeLimitsTable.loadOrThrow())
     }
 
     // Make a query out of the form parameters
