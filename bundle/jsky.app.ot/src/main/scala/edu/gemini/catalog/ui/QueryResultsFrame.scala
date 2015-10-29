@@ -455,7 +455,7 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
         instrumentBox.selection.item = i.instrument.getOrElse(ObservationInfo.DefaultInstrument)
         val selected = for {
           s <- i.strategy
-          c <- i.validStrategies.find(_.strategy == s.strategy)
+          c <- i.validStrategies.find(p => p.strategy == s.strategy && p.altairMode == s.altairMode)
         } yield c
         selected.foreach { s =>
           updateGuidersModel(s, i.validStrategies)
