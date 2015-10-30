@@ -38,11 +38,6 @@ object BagsResult {
     override val target = Some(tgt)
     override def clone = WithTarget(tgt.clone())
     override def toString = s"$id(${target.toString})"
-
-    override def equals(obj: scala.Any): Boolean = obj match {
-      case WithTarget(otgt) => tgt.equals(otgt)
-      case _                => false
-    }
   }
   object WithTarget {
     val id = "WithTarget"
