@@ -43,6 +43,7 @@ protected object OTBrowserPresetChoice {
 
   sealed trait ObsQueryPreset {
     def name: String
+    def isPreset: Boolean = false
   }
 
   case object SaveNewPreset extends ObsQueryPreset {
@@ -51,6 +52,11 @@ protected object OTBrowserPresetChoice {
 
   case class SavedPreset(preset: OTBrowserPreset) extends ObsQueryPreset {
     val name = preset.name
+    override def isPreset = true
+  }
+
+  case class DeletePreset(preset: SavedPreset) extends ObsQueryPreset {
+    val name = s"""Delete Preset "${preset.name}""""
   }
 
 }
@@ -114,12 +120,22 @@ final class ObsCatalogQueryTool(catalog: Catalog) {
         Option(name).filter(_.nonEmpty).foreach { n =>
           val preset = SavedPreset(OTBrowserPreset(n, queryPanel.instrumentSelection))
           val previousModel = this.peer.getModel
-          val existingElements = (0 until previousModel.getSize).map(previousModel.getElementAt)
-          val model = new DefaultComboBoxModel[ObsQueryPreset]((preset :: existingElements.toList).toArray)
+          val existingElements = (0 until previousModel.getSize).map(previousModel.getElementAt).filter(_.isPreset)
+          val model = new DefaultComboBoxModel[ObsQueryPreset]((preset :: existingElements.toList ::: List(SaveNewPreset, DeletePreset(preset))).toArray)
+          model.setSelectedItem(preset)
           this.peer.setModel(model)
         }
       case SelectionChanged(_)                                    =>
         selection.item match {
+          case DeletePreset(preset) =>
+            val previousModel = this.peer.getModel
+            val existingElements = (0 until previousModel.getSize).map(previousModel.getElementAt).filter(_.isPreset).filterNot(_.name == preset.name)
+            val head = existingElements.headOption.collect {
+              case s @ SavedPreset(_) => DeletePreset(s)
+            }
+            val model = new DefaultComboBoxModel[ObsQueryPreset]((existingElements.toList ::: (SaveNewPreset :: head.toList)).toArray)
+            head.foreach(model.setSelectedItem)
+            this.peer.setModel(model)
           case SavedPreset(preset) =>
             queryPanel.restoreSelection(preset.selection)
           case _                   => // Should not happen
