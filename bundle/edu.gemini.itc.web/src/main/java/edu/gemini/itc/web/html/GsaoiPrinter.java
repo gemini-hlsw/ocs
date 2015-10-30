@@ -49,6 +49,10 @@ public final class GsaoiPrinter extends PrinterBase {
         _println("");
         _println(String.format("The peak pixel signal + background is %.0f", result.peakPixelCount()));
 
+        final int peak_pixel_percent = (int) (100 * result.peakPixelCount() / result.instrument().wellDepth());
+        _println("This is " + peak_pixel_percent + "% of the full well depth of " + result.instrument().wellDepth() + " electrons");
+
+        _println("");
         _printWarnings(s.warnings());
 
         _print("<HR align=left SIZE=3>");

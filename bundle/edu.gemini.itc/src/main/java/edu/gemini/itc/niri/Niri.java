@@ -248,6 +248,14 @@ public class Niri extends Instrument {
         return INSTR_PREFIX;
     }
 
+    @Override public double wellDepth() {
+        return params.wellDepth().depth();
+    }
+
+    @Override public double gain() {
+        return 12.3;
+    }
+
     @Override public List<WarningRule> warnings() {
         return new ArrayList<WarningRule>() {{
             add(new LinearityLimitRule(params.wellDepth().depth(), 0.80));

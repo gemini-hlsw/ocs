@@ -29,7 +29,7 @@ public interface SpecS2N {
         if (sig.length != bck.length)                                             throw new Error();
 
         // Calculate the peak pixel
-        return IntStream.range(0, sig.length).mapToDouble(i -> bck[i] + sig[i]).max().getAsDouble();
+        return IntStream.range(0, sig.length).mapToDouble(i -> bck[i]*bck[i] + sig[i]).max().getAsDouble();
     }
 
 }

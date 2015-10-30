@@ -228,4 +228,12 @@ public final class TRecs extends Instrument {
         return INSTR_PREFIX;
     }
 
+    @Override public double wellDepth() {
+        return WELL_DEPTH;
+    }
+
+    @Override public double gain() {
+        return 1.0;
+    }
+
 }

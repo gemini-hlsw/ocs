@@ -12,6 +12,11 @@ import java.util.List;
  * Nifs specification class
  */
 public final class Nifs extends Instrument {
+
+    // values are taken from instrument's web documentation
+    private static final double WellDepth      = 134400;
+    private static final double LinearityLimit = 106400;
+
     /**
      * Related files will be in this subdir of lib
      */
@@ -212,11 +217,16 @@ public final class Nifs extends Instrument {
         return _readNoiseValue;
     }
 
-    @Override public List<WarningRule> warnings() {
-        // values are taken from instrument's web documentation
-        final double WellDepth      = 134400;
-        final double LinearityLimit = 106400;
 
+    @Override public double wellDepth() {
+        return WellDepth;
+    }
+
+    @Override public double gain() {
+        return 1.3;
+    }
+
+    @Override public List<WarningRule> warnings() {
         return new ArrayList<WarningRule>() {{
             add(new LinearityLimitRule(LinearityLimit, 0.80));
             add(new SaturationLimitRule(WellDepth, 0.80));

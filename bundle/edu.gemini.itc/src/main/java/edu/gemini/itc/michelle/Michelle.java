@@ -219,4 +219,14 @@ public final class Michelle extends Instrument {
     public double getCentralWavelength() {
         return _centralWavelength;
     }
+
+    @Override public double wellDepth() {
+        return WELL_DEPTH;
+    }
+
+    @Override public double gain() {
+        return 1.0;
+    }
+
+
 }

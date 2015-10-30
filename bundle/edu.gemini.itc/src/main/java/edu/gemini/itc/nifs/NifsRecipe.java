@@ -56,7 +56,7 @@ public final class NifsRecipe implements SpectroscopyRecipe {
             dataSets.add(createNifsSignalChart(r, i));
             dataSets.add(createNifsS2NChart(r, i));
         }
-        return ItcSpectroscopyResult.apply(dataSets, Warning.collectWarnings(r));
+        return Recipe$.MODULE$.serviceResult(r, dataSets);
     }
 
     public SpectroscopyResult calculateSpectroscopy() {

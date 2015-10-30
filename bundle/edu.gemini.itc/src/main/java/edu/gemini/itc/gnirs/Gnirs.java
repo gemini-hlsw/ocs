@@ -291,10 +291,19 @@ public final class Gnirs extends Instrument {
         return !params.crossDispersed().equals(GNIRSParams.CrossDispersed.NO);
     }
 
+
+    @Override public double wellDepth() {
+        return _wellDepth;
+    }
+
+    @Override public double gain() {
+        return 13.5;
+    }
+
     @Override public List<WarningRule> warnings() {
         return new ArrayList<WarningRule>() {{
-            add(new LinearityLimitRule(_wellDepth, 0.80));
-            add(new SaturationLimitRule(_linearityLimit, 0.80));
+            add(new LinearityLimitRule(_linearityLimit, 0.80));
+            add(new SaturationLimitRule(_wellDepth, 0.80));
         }};
     }
 
