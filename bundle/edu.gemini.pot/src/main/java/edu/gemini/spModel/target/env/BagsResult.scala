@@ -11,11 +11,6 @@ sealed trait BagsResult extends Cloneable {
   def targetAsJava: GOption[SPTarget] = target.asGeminiOpt
   override def clone: BagsResult = this
 
-  override def equals(obj: scala.Any): Boolean = obj match {
-    case other: BagsResult => target.equals(other.target) && id.equals(other.id)
-    case _                 => false
-  }
-
   def getParamSet(factory: PioFactory): ParamSet = {
     val paramSet = factory.createParamSet(BagsResult.BagsResultParamSetName)
     Pio.addParam(factory, paramSet, BagsResult.BagsResultParamIdName, id)
@@ -43,6 +38,11 @@ object BagsResult {
     override val target = Some(tgt)
     override def clone = WithTarget(tgt.clone())
     override def toString = s"$id(${target.toString})"
+
+    override def equals(obj: scala.Any): Boolean = obj match {
+      case WithTarget(otgt) => tgt.equals(otgt)
+      case _                => false
+    }
   }
   object WithTarget {
     val id = "WithTarget"
