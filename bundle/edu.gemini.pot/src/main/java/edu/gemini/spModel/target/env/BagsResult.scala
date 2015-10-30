@@ -8,7 +8,6 @@ import edu.gemini.spModel.rich.shared.immutable._
 
 sealed trait BagsResult extends Cloneable {
   val id: String
-  val observationHash: String = ""
   val target: Option[SPTarget] = None
   def targetAsJava: GOption[SPTarget] = target.asGeminiOpt
   override def clone: BagsResult = this
