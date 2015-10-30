@@ -11,6 +11,11 @@ import java.util.List;
  * Aquisition Camera specification class
  */
 public class AcquisitionCamera extends Instrument {
+
+    // value taken from instrument's web documentation
+    private final static double WellDepth = 98940;
+
+
     /**
      * Related files will be in this subdir of lib
      */
@@ -64,10 +69,19 @@ public class AcquisitionCamera extends Instrument {
         return INSTR_PREFIX;
     }
 
-    @Override public List<WarningRule> warnings() {
-        // value taken from instrument's web documentation
-        final double WellDepth = 98940;
 
+    @Override public double wellDepth() {
+        return WellDepth;
+    }
+
+    @Override public double gain() {
+        // TODO: the correct value is 0.71 for GN and 1.01 for GS
+        // Currently we don't know which acq cam (GN / GS) we are talking about, so for now
+        // Andy suggested to just use the GS value. In the future we might want to improve this.
+        return 1.01;
+    }
+
+    @Override public List<WarningRule> warnings() {
         return new ArrayList<WarningRule>() {{
             add(new SaturationLimitRule(WellDepth, 0.80));
         }};

@@ -71,14 +71,31 @@ object Recipe {
     new SpcChartData(S2NChart, title, "Wavelength (nm)", "Signal / Noise per spectral pixel", data.toList)
   }
 
-  def toImgData(r: ImagingResult): ImgData =
-    ImgData(r.is2nCalc.singleSNRatio(), r.is2nCalc.totalSNRatio(), r.peakPixelCount, Warning.collectWarnings(r))
+  // === Imaging
+
+  def toCcdData(r: ImagingResult): ItcCcd =
+    ItcCcd(r.is2nCalc.singleSNRatio(), r.is2nCalc.totalSNRatio(), r.peakPixelCount, r.instrument.wellDepth, r.instrument.gain, Warning.collectWarnings(r))
 
   def serviceResult(r: ImagingResult): ItcImagingResult =
-    ItcImagingResult(List(toImgData(r)))
+    ItcImagingResult(List(toCcdData(r)))
 
   def serviceResult(r: Array[ImagingResult]): ItcImagingResult =
-    ItcImagingResult(r.map(toImgData).toList)
+    ItcImagingResult(r.map(toCcdData).toList)
+
+  // === Spectroscopy
+
+  def toCcdData(r: SpectroscopyResult, charts: List[SpcChartData]): ItcCcd = {
+    val s2nChart: SpcChartData = charts.find(_.chartType == S2NChart).get // TODO: what to do if we don't have a SNChart ?? should we specifically request an s2n chart to make sure it's there??
+    val singleSNRatio: Double = s2nChart.allSeries(SingleS2NData).map(_.yValues.max).max
+    val totalSNRatio: Double  = s2nChart.allSeries(FinalS2NData).map(_.yValues.max).max
+    ItcCcd(singleSNRatio, totalSNRatio, r.peakPixelCount, r.instrument.wellDepth, r.instrument.gain, Warning.collectWarnings(r))
+  }
+
+  def serviceResult(r: SpectroscopyResult, charts: java.util.List[SpcChartData]): ItcSpectroscopyResult =
+    ItcSpectroscopyResult(List(toCcdData(r, charts.toList)), charts.toList)
+
+  def serviceResult(rs: Array[SpectroscopyResult], charts: java.util.List[SpcChartData]): ItcSpectroscopyResult =
+    ItcSpectroscopyResult(rs.map(r => toCcdData(r, charts.toList)).toList, charts.toList)
 
 }
 

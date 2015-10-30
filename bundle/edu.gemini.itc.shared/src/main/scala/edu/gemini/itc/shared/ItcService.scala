@@ -12,20 +12,40 @@ import scalaz._
 import Scalaz._
 
 /** The data structures here are an attempt to unify the results produced by the different instrument recipes.
-  * Results are either a few simple numbers in case of imaging or a set of charts made up by data series with (x,y)
-  * value pairs for spectroscopy.
+  * Results are either a few simple numbers in case of imaging or some numbers and a set of charts made up by
+  * data series with (x,y) value pairs for spectroscopy. Note that some of the results are given on a per CCD
+  * basis. For now GMOS is the only instrument with more than one CCD, GHOST may be the next one to support
+  * several CCDs.
+  *
+  * The main purpose of the classes here is to serve as data transfer objects and to decouple the internal ITC
+  * result representation (which contains many data types which are only relevant to ITC) from the service interface.
+  * The internal result representations (ImagingResult and SpectroscopyResult) can potentially be replaced with
+  * the result objects here in the future.
   */
-sealed trait ItcResult extends Serializable {
-  def peakPixelFlux(ccd: Int = 0):  Int
-  def warnings:                     List[ItcWarning]
+
+/** Representation of relevant ITC calculation results for an instrument's CCD.
+  * In particular the well depth and amp gain are CCD specific and can be different for different CCDs in the
+  * same instrument (e.g. GMOS).
+  */
+final case class ItcCcd(
+    singleSNRatio:          Double,     // the final SN ratio for a single image
+    totalSNRatio:           Double,     // the total SN ratio for all images
+    peakPixelFlux:          Double,     // the highest e- count for all pixels on the CCD
+    wellDepth:              Double,     // the well depth (max e- count per pixel) for this CCD
+    ampGain:                Double,     // the amplifier gain for this CCD (used to calculate ADU)
+    warnings: List[ItcWarning]          // the warnings provided by ITC for this CCD
+) {
+  val percentFullWell = peakPixelFlux / wellDepth * 100.0   // the max percentage of the well saturation for peak pixel
+  val adu             = (peakPixelFlux / ampGain).toInt     // the ADU value
 }
 
-// === IMAGING RESULTS
+sealed trait ItcResult extends Serializable {
+  def ccds:                         List[ItcCcd]
 
-final case class ImgData(singleSNRatio: Double, totalSNRatio: Double, peakPixelFlux: Double, warnings: List[ItcWarning])
+  def ccd(i: Int)                   = ccds(i % ccds.length)
+  def peakPixelFlux(ccdIx: Int = 0) = ccd(ccdIx).peakPixelFlux.toInt
 
-final case class ItcImagingResult(ccds: List[ImgData]) extends ItcResult {
-  def warnings = {
+  val warnings: List[ItcWarning] = {
     def concatWarnings =
       ccds.zipWithIndex.flatMap { case (c, i) =>
         c.warnings.map(w => new ItcWarning(s"CCD $i: ${w.msg}"))
@@ -34,9 +54,14 @@ final case class ItcImagingResult(ccds: List[ImgData]) extends ItcResult {
     if (ccds.length > 1) concatWarnings
     else ccds.head.warnings
   }
-  def ccd(i: Int) = ccds(i % ccds.length)
-  def peakPixelFlux(ccdIx: Int = 0) = ccd(ccdIx).peakPixelFlux.toInt
+
 }
+
+
+// === IMAGING RESULTS
+
+final case class ItcImagingResult(ccds: List[ItcCcd]) extends ItcResult
+
 
 // === SPECTROSCOPY RESULTS
 
@@ -72,11 +97,11 @@ final case class SpcChartData(chartType: SpcChartType, title: String, xAxisLabel
   def allSeriesAsJava(t: SpcDataType): java.util.List[SpcSeriesData] = series.filter(_.dataType == t)
 }
 
-/** The result of a spectroscpy ITC calculation is a set of charts and text files.
+/** The result of a spectroscopy ITC calculation is some numbers per CCD and a set of charts.
   * Individual charts and data series can be referenced by their types and an index. For most instruments there
   * is only one chart and data series of each type, however for NIFS for example there will be several charts
   * of each type in case of multiple IFU elements. */
-final case class ItcSpectroscopyResult(charts: List[SpcChartData], warnings: List[ItcWarning]) extends ItcResult {
+final case class ItcSpectroscopyResult(ccds: List[ItcCcd], charts: List[SpcChartData]) extends ItcResult {
 
   /** Gets chart data by type and index.
     * This method will fail if the result you're looking for does not exist.
@@ -87,29 +112,6 @@ final case class ItcSpectroscopyResult(charts: List[SpcChartData], warnings: Lis
     * This method will fail if the result (chart/data) you're looking for does not exist.
     */
   def allSeries(ct: SpcChartType, dt: SpcDataType): List[SpcSeriesData] = chart(ct).allSeries(dt)
-
-  def peakPixelFlux(ccd: Int = 0): Int = {
-    // zip signal and background values, sum them and return max value (i.e. max(signal + background))
-    def maxSum(s: SpcSeriesData, b: SpcSeriesData) =
-      s.yValues.zip(b.yValues).map(p => p._1 + p._2).max.round
-
-    // zip signal and background value arrays and return max of all maximums
-    // e.g. GNIRS with cross dispersion will have several arrays for signal and background, one for each order
-    def maxAllSum(s: List[SpcSeriesData], b: List[SpcSeriesData]) =
-      s.zip(b).map(p => maxSum(p._1, p._2)).max
-
-    val signal     = allSeries(SignalChart, SignalData)
-    val background = allSeries(SignalChart, BackgroundData)
-    maxAllSum(signal, background).toInt
-  }
-
-}
-
-object ItcSpectroscopyResult {
-
-  // java compatibility
-  def apply(charts: java.util.List[SpcChartData], warnings: List[ItcWarning]) =
-    new ItcSpectroscopyResult(charts.toList, warnings)
 
 }
 

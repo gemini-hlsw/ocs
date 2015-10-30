@@ -15,6 +15,11 @@ import java.util.List;
  */
 public final class Flamingos2 extends Instrument {
 
+    // values are taken from instrument's web documentation
+    private static final double AmpGain        = 4.44;
+    private static final double WellDepth      = 155400;
+    private static final double LinearityLimit = 98000;
+
     private static final String FILENAME = "flamingos2" + getSuffix();
     public static final String INSTR_DIR = "flamingos2";
     public static final String INSTR_PREFIX = "";
@@ -160,11 +165,15 @@ public final class Flamingos2 extends Instrument {
 
     }
 
-    @Override public List<WarningRule> warnings() {
-        // values are taken from instrument's web documentation
-        final double WellDepth      = 155400;
-        final double LinearityLimit = 98000;
+    @Override public double wellDepth() {
+        return WellDepth;
+    }
 
+    @Override public double gain() {
+        return AmpGain;
+    }
+
+    @Override public List<WarningRule> warnings() {
         return new ArrayList<WarningRule>() {{
             add(new LinearityLimitRule(LinearityLimit, 0.80));
             add(new SaturationLimitRule(WellDepth, 0.80));

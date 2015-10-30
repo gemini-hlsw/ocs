@@ -261,6 +261,16 @@ public abstract class Instrument {
         return new ArrayList<>(components);
     }
 
+
+    // === Common values (should be defined per CCD)
+
+    // Well depth and gain are actually properties of the different CCDs of the instrument, so in the future these
+    // values should be defined on a CCD data structure of which each instrument can have more than one; currently
+    // ITC uses copies of the instrument to implement several CCDs for GMOS, however this is a very peculiar design
+    // to deal with one instrument that has several CCDs, if I may say so.
+    public abstract double wellDepth();
+    public abstract double gain();
+
     // === Warnings
 
     public List<WarningRule> warnings() {

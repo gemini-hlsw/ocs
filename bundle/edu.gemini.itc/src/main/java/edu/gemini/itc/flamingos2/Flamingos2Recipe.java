@@ -62,7 +62,7 @@ public final class Flamingos2Recipe implements ImagingRecipe, SpectroscopyRecipe
             add(Recipe$.MODULE$.createSignalChart(r));
             add(Recipe$.MODULE$.createS2NChart(r));
         }};
-        return ItcSpectroscopyResult.apply(dataSets, Warning.collectWarnings(r));
+        return Recipe$.MODULE$.serviceResult(r, dataSets);
     }
 
     public SpectroscopyResult calculateSpectroscopy() {

@@ -55,7 +55,7 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
             add(createGmosChart(r, 0));
             add(createGmosChart(r, 1));
         }};
-        return ItcSpectroscopyResult.apply(dataSets, Warning.collectWarnings(r[0]));
+        return Recipe$.MODULE$.serviceResult(r, dataSets);
     }
 
     public SpectroscopyResult[] calculateSpectroscopy() {
