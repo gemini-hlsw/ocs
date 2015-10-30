@@ -260,21 +260,22 @@ public final class ObsCatalog extends SkycatCatalog {
             return null;
         }
 
-        for (InstConfigInfo info: instConfigInfoList) {
-            if (info.isQueryable()) {
-                final FieldDescAdapter p = new FieldDescAdapter(info.getName());
-                p.setDescription("Select the " + info.getDescription());
+        // SCT-295: Bryan requested that we not show obsolete choices
+        // in the browser
+        // 2009B: Inger needs obsolete choices for statistics she makes
+        instConfigInfoList.stream().filter(InstConfigInfo::isQueryable).forEach(info -> {
+            final FieldDescAdapter p = new FieldDescAdapter(info.getName());
+            p.setDescription("Select the " + info.getDescription());
 
-                // SCT-295: Bryan requested that we not show obsolete choices
-                // in the browser
-                // 2009B: Inger needs obsolete choices for statistics she makes
-                final Enum<?>[] types = showObsolete ? info.getAllTypes() : info.getValidTypes();
-                if (types != null) {
-                    p.setOptions(_getEnumOptions(types));
-                }
-                params.add(p);
+            // SCT-295: Bryan requested that we not show obsolete choices
+            // in the browser
+            // 2009B: Inger needs obsolete choices for statistics she makes
+            final Enum<?>[] types = showObsolete ? info.getAllTypes() : info.getValidTypes();
+            if (types != null) {
+                p.setOptions(_getEnumOptions(types));
             }
-        }
+            params.add(p);
+        });
 
         final FieldDescAdapter[] paramDesc = new FieldDescAdapter[params.size()];
         params.toArray(paramDesc);

@@ -10,9 +10,6 @@ import jsky.util.gui.MultiSelectComboBox;
 import javax.swing.*;
 import java.awt.GridBagConstraints;
 import java.awt.Insets;
-import java.io.Serializable;
-import java.util.Enumeration;
-import java.util.Hashtable;
 
 /**
  * Defines the main panel for querying an ObsCatalog. This replaces the default
@@ -269,12 +266,14 @@ public class ObsCatalogQueryPanel extends CatalogQueryPanel {
     }
 
     /** Set the value in the given component. */
+    @SuppressWarnings("unchecked")
     protected void setValue(JComponent c, Object value) {
         if (c instanceof MultiSelectComboBox) {
-            if (value instanceof Object[])
-                ((MultiSelectComboBox) c).setSelectedObjects((Object[]) value);
-            else
-                ((MultiSelectComboBox) c).setSelectedObjects(new Object[]{value});
+            if (value instanceof Object[]) {
+                ((MultiSelectComboBox<Object>) c).setSelectedObjects((Object[]) value);
+            } else {
+                ((MultiSelectComboBox<Object>) c).setSelectedObjects(new Object[]{value});
+            }
         } else if (c instanceof JTextField) {
             final String s;
             if (value instanceof Double)
@@ -314,51 +313,4 @@ public class ObsCatalogQueryPanel extends CatalogQueryPanel {
         return _instComboBox.getSelected();
     }
 
-    /** Store the current settings in a serializable object and return the object. */
-    @Override
-    public Object storeSettings() {
-        final Hashtable map = (Hashtable) super.storeSettings();
-
-        final Hashtable<String, Hashtable<String,Object>> hashTable = new Hashtable<>();
-        final int[] instIndexes = _getInstIndexes();
-        if (instIndexes != null) {
-            final String[] instruments = _getInstruments();
-            for (int i = 0; i < instruments.length; i++) {
-                final String inst = instruments[i];
-                final FieldDesc[] params = ObsCatalog.getInstrumentParamDesc(inst);
-                final Hashtable<String,Object> instMap = new Hashtable<>();
-                for (int j = 0; j < params.length; j++) {
-                    final String name = params[j].getName();
-                    final Object value = getValue(params[j], _panelComponents[instIndexes[i] + 1][j]);
-                    if (name != null && value instanceof Serializable)
-                        instMap.put(name, value);
-                }
-                hashTable.put(inst, instMap);
-            }
-        }
-        return new Hashtable[]{map, hashTable};
-    }
-
-    /** Restore the settings previously stored. */
-    @Override
-    public boolean restoreSettings(Object obj) {
-        if (obj instanceof Hashtable[]) {
-            final Hashtable[] maps = (Hashtable[]) obj;
-            if (maps.length == 2 && super.restoreSettings(maps[0])) {
-                for (Enumeration e = maps[1].keys(); e.hasMoreElements();) {
-                    final String inst = (String) e.nextElement();
-                    final Hashtable instMap = (Hashtable) maps[1].get(inst);
-                    for (e = instMap.keys(); e.hasMoreElements();) {
-                        final String name = (String) e.nextElement();
-                        final Object value = instMap.get(name);
-                        final JComponent c = getInstComponentForLabel(inst, name);
-                        if (c != null)
-                            setValue(c, value);
-                    }
-                }
-                return true;
-            }
-        }
-        return false;
-    }
 }

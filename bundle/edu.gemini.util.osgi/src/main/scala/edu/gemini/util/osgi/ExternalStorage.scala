@@ -104,9 +104,6 @@ trait ExternalStorage {
    * file which will be used as the target of the migrated file and does not exist yet.
    * The migration method is expected to take the first file as the input and read and transform it as
    * needed and write the result to the second file.
-   * @param fromName
-   * @param toName
-   * @param migrate
    */
   case class MigrationStep(fromName: String, toName: String, migrate: (File, File) => Unit)
   
