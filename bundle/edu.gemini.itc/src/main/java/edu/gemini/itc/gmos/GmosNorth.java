@@ -66,7 +66,7 @@ public final class GmosNorth extends Gmos {
     @Override public List<WarningRule> warnings() {
         return new ArrayList<WarningRule>() {{
             add(new SaturationLimitRule(WellDepth * getSpatialBinning() * getSpectralBinning(), 0.95));
-            add(new AdLimitRule(getADSaturation() * gain(), 0.95));
+            add(new AdLimitRule(getADSaturation(), 0.95));
         }};
     }
 
