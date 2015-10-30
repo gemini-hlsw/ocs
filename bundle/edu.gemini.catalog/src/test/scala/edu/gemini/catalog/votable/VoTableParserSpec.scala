@@ -519,6 +519,7 @@ class VoTableParserSpec extends SpecificationWithJUnit with VoTableParser {
       imag should beEqualTo(\/.right(Some(Magnitude(5, MagnitudeBand._i, 0.34.some, MagnitudeSystem.AB))))
     }
     "parse simbad named queries" in {
+      // From http://simbad.u-strasbg.fr/simbad/sim-id?Ident=Vega&output.format=VOTable
       val xmlFile = "simbad-vega.xml"
       // The sample has only one row
       val result = VoTableParser.parse(SIMBAD, getClass.getResourceAsStream(s"/$xmlFile")).getOrElse(ParsedVoResource(Nil)).tables.headOption.flatMap(_.rows.headOption).get
@@ -545,6 +546,7 @@ class VoTableParserSpec extends SpecificationWithJUnit with VoTableParser {
       result.map(_.magnitudeIn(MagnitudeBand.K)) should beEqualTo(\/.right(Some(new Magnitude(0.13, MagnitudeBand.K))))
     }
     "parse simbad named queries with sloan magnitudes" in {
+      // From http://simbad.u-strasbg.fr/simbad/sim-id?Ident=2MFGC6625&output.format=VOTable
       val xmlFile = "simbad-2MFGC6625.xml"
       // The sample has only one row
       val result = VoTableParser.parse(SIMBAD, getClass.getResourceAsStream(s"/$xmlFile")).getOrElse(ParsedVoResource(Nil)).tables.headOption.flatMap(_.rows.headOption).get
@@ -567,6 +569,7 @@ class VoTableParserSpec extends SpecificationWithJUnit with VoTableParser {
       result.map(_.magnitudeIn(MagnitudeBand._z)) should beEqualTo(\/.right(Some(new Magnitude(17.015, MagnitudeBand._z, 0.011))))
     }
     "parse simbad named queries with mixed magnitudes" in {
+      // From http://simbad.u-strasbg.fr/simbad/sim-id?Ident=2SLAQ%20J000008.13%2B001634.6&output.format=VOTable
       val xmlFile = "simbad-J000008.13.xml"
       // The sample has only one row
       val result = VoTableParser.parse(SIMBAD, getClass.getResourceAsStream(s"/$xmlFile")).getOrElse(ParsedVoResource(Nil)).tables.headOption.flatMap(_.rows.headOption).get
@@ -584,9 +587,10 @@ class VoTableParserSpec extends SpecificationWithJUnit with VoTableParser {
       // magnitudes
       result.map(_.magnitudeIn(MagnitudeBand.B)) should beEqualTo(\/.right(Some(new Magnitude(20.35, MagnitudeBand.B))))
       result.map(_.magnitudeIn(MagnitudeBand.V)) should beEqualTo(\/.right(Some(new Magnitude(20.03, MagnitudeBand.V))))
-      result.map(_.magnitudeIn(MagnitudeBand.J)) should beEqualTo(\/.right(Some(new Magnitude(19.399, MagnitudeBand.J, 0.073))))
-      result.map(_.magnitudeIn(MagnitudeBand.H)) should beEqualTo(\/.right(Some(new Magnitude(19.416, MagnitudeBand.H, 0.137))))
-      result.map(_.magnitudeIn(MagnitudeBand.K)) should beEqualTo(\/.right(Some(new Magnitude(19.176, MagnitudeBand.K, 0.115))))
+      // Bands J, H and K for this target have no standard magnitude system
+      result.map(_.magnitudeIn(MagnitudeBand.J)) should beEqualTo(\/.right(Some(new Magnitude(19.399, MagnitudeBand.J, 0.073, MagnitudeSystem.AB))))
+      result.map(_.magnitudeIn(MagnitudeBand.H)) should beEqualTo(\/.right(Some(new Magnitude(19.416, MagnitudeBand.H, 0.137, MagnitudeSystem.AB))))
+      result.map(_.magnitudeIn(MagnitudeBand.K)) should beEqualTo(\/.right(Some(new Magnitude(19.176, MagnitudeBand.K, 0.115, MagnitudeSystem.AB))))
       result.map(_.magnitudeIn(MagnitudeBand._u)) should beEqualTo(\/.right(Some(new Magnitude(20.233, MagnitudeBand._u, 0.054))))
       result.map(_.magnitudeIn(MagnitudeBand._g)) should beEqualTo(\/.right(Some(new Magnitude(20.201, MagnitudeBand._g, 0.021))))
       result.map(_.magnitudeIn(MagnitudeBand._r)) should beEqualTo(\/.right(Some(new Magnitude(19.929, MagnitudeBand._r, 0.021))))
