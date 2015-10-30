@@ -6,12 +6,6 @@ import edu.gemini.spModel.pio.{Pio, PioFactory, ParamSet}
 import edu.gemini.spModel.target.SPTarget
 import edu.gemini.spModel.rich.shared.immutable._
 
-// The result of a BAGS lookup, as stored in GuideProbeTargets.
-// We store as a checksum the checksum of the parent observation node, without having the BagsResult
-// contribute to the checksum. This allows us to use the checksum to determine whether the parent
-// observation has changed in any way, minus the BagsResult, which lets the BagsManager determine when
-// an observation is opened whether or not it should be queued for lookup, and also allows us to work
-// around synchronization issues that arise from BAGS.
 sealed trait BagsResult extends Cloneable {
   val id: String
   val observationHash: String = ""
