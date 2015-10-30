@@ -1,5 +1,8 @@
 package edu.gemini.spModel.target.system;
 
+//noinspection UnusedImport
+import edu.gemini.spModel.target.system.CoordinateParam.Units; //Don't delete, it triggers a weird compilation bug
+
 /**
  * A container class for localizing the various parameter types used by
  * the target coordinate systems.
