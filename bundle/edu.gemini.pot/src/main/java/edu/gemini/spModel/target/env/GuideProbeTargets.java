@@ -535,19 +535,23 @@ public final class GuideProbeTargets implements Serializable, TargetContainer, I
 
 
     public static final String GUIDER_PARAM_SET_NAME = "guider";
+    public static final String MANUAL_TARGETS_PARAM_SET_NAME = "manualTargets";
 
     public ParamSet getParamSet(final PioFactory factory) {
         final ParamSet paramSet = factory.createParamSet(GUIDER_PARAM_SET_NAME);
 
         Pio.addParam(factory, paramSet, "key", getGuider().getKey());
-        bagsResult.getParamSet(factory);
+        paramSet.addParamSet(bagsResult.getParamSet(factory));
+
 
         // If a primary target is set, store the index.
         getPrimaryIndex().foreach(i ->
             Pio.addIntParam(factory, paramSet, "primary", i)
         );
 
-        getManualTargets().foreach(t -> paramSet.addParamSet(t.getParamSet(factory)));
+        final ParamSet mtParamSet = factory.createParamSet(MANUAL_TARGETS_PARAM_SET_NAME);
+        getManualTargets().foreach(t -> mtParamSet.addParamSet(t.getParamSet(factory)));
+        paramSet.addParamSet(mtParamSet);
 
         return paramSet;
     }
@@ -567,7 +571,8 @@ public final class GuideProbeTargets implements Serializable, TargetContainer, I
 
 
         final List<SPTarget> lst = new ArrayList<>();
-        parent.getParamSets().forEach(ps -> lst.add(SPTarget.fromParamSet(ps)));
+        ImOption.apply(parent.getParamSet(MANUAL_TARGETS_PARAM_SET_NAME)).foreach(mtps -> mtps.getParamSets().forEach(ps -> lst.add(SPTarget.fromParamSet(ps))));
+
         final ImList<SPTarget> manualTargets = DefaultImList.create(lst);
 
         final GuideProbeTargets gpt = new GuideProbeTargets(probe, bagsResult, NO_TARGET, manualTargets);
