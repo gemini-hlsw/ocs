@@ -85,9 +85,11 @@ object Recipe {
   // === Spectroscopy
 
   def toCcdData(r: SpectroscopyResult, charts: List[SpcChartData]): ItcCcd = {
-    val s2nChart: SpcChartData = charts.find(_.chartType == S2NChart).get // TODO: what to do if we don't have a SNChart ?? should we specifically request an s2n chart to make sure it's there??
-    val singleSNRatio: Double = s2nChart.allSeries(SingleS2NData).map(_.yValues.max).max
-    val totalSNRatio: Double  = s2nChart.allSeries(FinalS2NData).map(_.yValues.max).max
+    val s2nChart: SpcChartData = charts.find(_.chartType == S2NChart).get
+    val singleSNRatioVals: List[Double] = s2nChart.allSeries(SingleS2NData).map(_.yValues.max)
+    val singleSNRatio: Double           = if (singleSNRatioVals.isEmpty) 0 else singleSNRatioVals.max
+    val totalSNRatioVals: List[Double]  = s2nChart.allSeries(FinalS2NData).map(_.yValues.max)
+    val totalSNRatio: Double            = if (totalSNRatioVals.isEmpty) 0 else totalSNRatioVals.max
     ItcCcd(singleSNRatio, totalSNRatio, r.peakPixelCount, r.instrument.wellDepth, r.instrument.gain, Warning.collectWarnings(r))
   }
 
