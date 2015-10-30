@@ -6,11 +6,10 @@ import javax.swing.table._
 import edu.gemini.ags.api.AgsMagnitude.MagnitudeTable
 import edu.gemini.ags.api.{AgsAnalysis, AgsGuideQuality, AgsRegistrar, AgsStrategy}
 import edu.gemini.ags.conf.ProbeLimitsTable
-import edu.gemini.catalog.api.{RadiusConstraint, UCAC4, CatalogName, CatalogQuery}
+import edu.gemini.catalog.api._
 import edu.gemini.pot.sp.SPComponentType
 import edu.gemini.shared.util.immutable.{None => JNone, Some => JSome}
 import edu.gemini.shared.util.immutable.ScalaConverters._
-import edu.gemini.spModel.ags.AgsStrategyKey.AltairAowfsKey
 import edu.gemini.spModel.core._
 import edu.gemini.spModel.gemini.altair.{AltairParams, InstAltair}
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2
@@ -44,9 +43,11 @@ import Scalaz._
 /**
  * Locally describe an ags strategy including its limits and the query that would trigger
  */
-case class SupportedStrategy(strategy: AgsStrategy, limits: Option[ProbeLimits], query: List[CatalogQuery], altairMode: Option[AltairParams.Mode]) {
-  // If the strategy has an altair mode, expand it to contain all supported modes
-  def expandAltairModes: List[SupportedStrategy] = (strategy.key == AltairAowfsKey) ? AltairParams.Mode.values().toList.map(m => copy(altairMode = m.some)) | List(copy(altairMode = None))
+case class SupportedStrategy(strategy: AgsStrategy, limits: Option[ProbeLimits], query: List[CatalogQuery], altairMode: Option[AltairParams.Mode])
+
+object SupportedStrategy {
+  implicit val order:Order[SupportedStrategy] = Order.orderBy(_.strategy.key.id)
+  implicit val ordering:scala.Ordering[SupportedStrategy] = order.toScalaOrdering
 }
 
 /**
@@ -71,8 +72,8 @@ case class ObservationInfo(ctx: Option[ObsContext],
    */
   def guideProbe: Option[ValidatableGuideProbe] =
     strategy.flatMap(_.strategy.guideProbes.headOption.collect {
-                      case v: ValidatableGuideProbe => v
-                    })
+      case v: ValidatableGuideProbe => v
+    })
 
   /**
    * An obscontext is required for guide quality calculation. The method below will attempt to create a context out of the information on the query form
@@ -100,7 +101,7 @@ case class ObservationInfo(ctx: Option[ObsContext],
       val target = new SPTarget(c.ra.toAngle.toDegrees, c.dec.toDegrees) <| {_.setName(~objectName)}
       val env = TargetEnvironment.create(target)
       // To calculate analysis of guide quality, it is required the site, instrument and conditions
-      // TODO Verify if we need offsets, AO info and scheduling block
+      // TODO Verify if we need offsets and scheduling block
       val altair = strategy.collect {
         case SupportedStrategy(_, _, _, Some(m)) => new InstAltair() <| {_.setMode(m)}
       }
@@ -145,13 +146,19 @@ object ObservationInfo {
     SupportedStrategy(strategy, pb.flatten, queries, mode)
   }
 
+  def expandAltairModes(obsCtx: ObsContext): List[ObsContext] = obsCtx.getAOComponent.asScalaOpt match {
+    case Some(i: InstAltair) => AltairParams.Mode.values().toList.map(m => obsCtx.withAOComponent(new InstAltair() <| {_.setMode(m)})) :+ obsCtx.withoutAOComponent()
+    case _                   => List(obsCtx)
+  }
+  
+
   def apply(ctx: ObsContext, mt: MagnitudeTable):ObservationInfo = ObservationInfo(
     ctx.some,
     Option(ctx.getTargets.getBase).map(_.getTarget.getName),
     Option(ctx.getTargets.getBase).map(_.getTarget.getSkycalcCoordinates.toNewModel),
     Option(ctx.getInstrument.getType),
     AgsRegistrar.currentStrategy(ctx).map(toSupportedStrategy(ctx, _, mt)),
-    AgsRegistrar.validStrategies(ctx).flatMap(toSupportedStrategy(ctx, _, mt).expandAltairModes),
+    expandAltairModes(ctx).flatMap(c => AgsRegistrar.validStrategies(c).map(toSupportedStrategy(c, _, mt))).sorted,
     ctx.getConditions.some,
     ctx.getPositionAngle.toNewModel,
     UCAC4,

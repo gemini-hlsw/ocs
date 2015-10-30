@@ -14,9 +14,8 @@ import edu.gemini.catalog.votable._
 import edu.gemini.pot.sp.SPComponentType
 import edu.gemini.shared.gui.textComponent.{SelectOnFocus, TextRenderer, NumberField}
 import edu.gemini.shared.gui.{ButtonFlattener, GlassLabel, SizePreference, SortableTable}
-import edu.gemini.spModel.ags.AgsStrategyKey.AltairAowfsKey
 import edu.gemini.spModel.core.SiderealTarget
-import edu.gemini.spModel.gemini.altair.InstAltair
+import edu.gemini.spModel.gemini.altair.AltairParams
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.Conditions
 import edu.gemini.spModel.obs.context.ObsContext
@@ -109,7 +108,7 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
   QueryForm.buildLayout(Nil)
   contents = new MigPanel(LC().fill().insets(0).gridGap("0px", "0px").debug(0)) {
     // Query Form
-    add(QueryForm, CC().alignY(TopAlign).minWidth(280.px))
+    add(QueryForm, CC().alignY(TopAlign).minWidth(320.px))
     // Results Table
     add(new BorderPanel() {
       border = titleBorder(title)
@@ -310,7 +309,13 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
       }
     }
     lazy val guider = new ComboBox(List.empty[SupportedStrategy]) with TextRenderer[SupportedStrategy] {
-      override def text(a: SupportedStrategy) = ~Option(a).map(s => s.strategy.key.displayName + ~s.altairMode.map(m => s" + ${m.displayValue()}"))
+      override def text(a: SupportedStrategy) = ~Option(a).map(s => {
+        if (s.altairMode == AltairParams.Mode.LGS_P1.some) {
+          AltairParams.Mode.LGS_P1.displayValue
+        } else {
+          s.strategy.key.displayName + ~s.altairMode.map(m => s"+${m.displayValue()}")
+        }
+      })
 
       listenTo(selection)
       reactions += {
@@ -391,7 +396,7 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
       add(new Label("Instrument"), CC().spanX(2).newline())
       add(instrumentBox, CC().spanX(3).growX())
       add(new Label("Guider"), CC().spanX(2).newline())
-      add(guider, CC().spanX(3).growX())
+      add(guider, CC().spanX(3).growX().pushX())
       add(new Label("Sky Background"), CC().spanX(2).newline())
       add(sbBox, CC().spanX(3).growX())
       add(new Label("Cloud Cover"), CC().spanX(2).newline())
