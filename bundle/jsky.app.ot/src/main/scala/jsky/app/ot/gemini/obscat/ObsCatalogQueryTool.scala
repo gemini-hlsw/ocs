@@ -35,9 +35,11 @@ object ObsCatalogFrame extends Frame with PreferredSizeFrame {
   adjustSize(true)
 }
 
+case class OTCatalogSelection(selection: Map[String, AnyRef])
+
 case class OTBrowserInstrumentSelection(selection: Option[Map[String, Map[String, AnyRef]]])
 
-case class OTBrowserPreset(name: String, selection: OTBrowserInstrumentSelection)
+case class OTBrowserPreset(name: String, catalog: OTCatalogSelection, instruments: OTBrowserInstrumentSelection)
 
 protected object OTBrowserPresetChoice {
 
@@ -62,7 +64,15 @@ protected object OTBrowserPresetChoice {
 }
 
 class OTBrowserQueryPanel(catalog: Catalog) extends ObsCatalogQueryPanel(catalog, 6) {
-  def instrumentSelection: OTBrowserInstrumentSelection = {
+  private def catalogSelection: OTCatalogSelection = {
+    val n = Math.min(_components.length, _catalog.getNumParams)
+    val s = (0 until n).map(i => (i, Option(_components(i)))).map {
+      case (i, c) => (_catalog.getParamDesc(i).getName, Option(getValue(i)).getOrElse(""))
+    }
+    OTCatalogSelection(s.toMap)
+  }
+
+  private def instrumentSelection: OTBrowserInstrumentSelection = {
     val instIndexes = Option(_getInstIndexes).map(_.toList)
     val instruments = Option(_getInstruments).map(_.toList)
     val values = (instIndexes |@| instruments) { (idx, inst) =>
@@ -77,8 +87,12 @@ class OTBrowserQueryPanel(catalog: Catalog) extends ObsCatalogQueryPanel(catalog
     OTBrowserInstrumentSelection(values)
   }
 
-  def restoreSelection(selection : OTBrowserInstrumentSelection): Unit = {
-    selection.selection.foreach { m =>
+  def selectionPreset(name: String): OTBrowserPreset = OTBrowserPreset(name, catalogSelection, instrumentSelection)
+
+  def restorePreset(preset: OTBrowserPreset): Unit = {
+    preset.catalog.selection.foreach(Function.tupled(setValue))
+
+    preset.instruments.selection.foreach { m =>
       m.foreach {
         case (inst, s) =>
           s.foreach { v =>
@@ -122,7 +136,7 @@ final class ObsCatalogQueryTool(catalog: Catalog) {
         val existingNames = existingPresets.map(_.name)
 
         Option(name).filter(_.nonEmpty).filterNot(existingNames.contains).foreach { n =>
-          val preset = SavedPreset(OTBrowserPreset(n, queryPanel.instrumentSelection))
+          val preset = SavedPreset(queryPanel.selectionPreset(name))
           val model = new DefaultComboBoxModel[ObsQueryPreset]((preset :: existingPresets.toList ::: List(SaveNewPreset, DeletePreset(preset))).toArray)
           model.setSelectedItem(preset)
           this.peer.setModel(model)
@@ -142,7 +156,7 @@ final class ObsCatalogQueryTool(catalog: Catalog) {
             head.foreach(model.setSelectedItem)
             this.peer.setModel(model)
           case SavedPreset(preset) =>
-            queryPanel.restoreSelection(preset.selection)
+            queryPanel.restorePreset(preset)
           case _                   => // Should not happen
         }
     }

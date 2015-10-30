@@ -34,13 +34,13 @@ public class CatalogQueryPanel extends JPanel
     protected static final Insets VALUE_INSETS = new Insets(6, 6, 0, 3);
 
     /** Catalog we are accesing */
-    private Catalog _catalog;
+    protected Catalog _catalog;
 
     /** Array of labels displayed */
     private JLabel[] _labels;
 
     /** Array of components displayed next to the labels */
-    private JComponent[] _components;
+    protected JComponent[] _components;
 
     /** List of listeners for action events (called when <Enter> is typed in a text box). */
     private EventListenerList _actionListenerList = new EventListenerList();
@@ -453,6 +453,7 @@ public class CatalogQueryPanel extends JPanel
     }
 
     /** Store the current settings in a serializable object and return the object. */
+    @Override
     public Object storeSettings() {
         Hashtable<String, Object> map = new Hashtable<>();
         int n = Math.min(_components.length, _catalog.getNumParams());
@@ -469,6 +470,7 @@ public class CatalogQueryPanel extends JPanel
     }
 
     /** Restore the settings previously stored. */
+    @Override
     public boolean restoreSettings(Object obj) {
         if (obj instanceof Hashtable) {
             Hashtable map = (Hashtable) obj;
