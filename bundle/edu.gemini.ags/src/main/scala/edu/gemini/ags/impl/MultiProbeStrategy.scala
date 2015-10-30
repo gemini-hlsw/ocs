@@ -13,7 +13,16 @@ import scala.concurrent.Future
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-
+/**
+ * Represents an AGS strategy consisting of multiple substrategies.
+ *
+ * There are several inherent shortcomings with this:
+ * 1. select requires a position angle, and querying each substrategy may return a number of position angles.
+ *    In the current implementation, the position angle for the first strategy is returned.
+ * 2. probeBands must return one of a fixed number of BandsLists. We currently try to find a common one, or one
+ *    that is a subset of all of those of the substrategies. If that is not possible, we try to find a single band
+ *    that is a subset of those of the substrategies. If that fails, we just return R.
+ */
 case class MultiProbeStrategy(key: AgsStrategyKey, strategies: List[AgsStrategy]) extends AgsStrategy {
   override def magnitudes(ctx: ObsContext, mt: MagnitudeTable): List[(GuideProbe, AgsMagnitude.MagnitudeCalc)] =
     strategies.flatMap(_.magnitudes(ctx, mt))
@@ -52,8 +61,8 @@ case class MultiProbeStrategy(key: AgsStrategyKey, strategies: List[AgsStrategy]
       val bLSet = Set(bL.bands.list)
       bandsLL.forall(bL2 => bLSet.subsetOf(Set(bL2.bands.list)))
     }).getOrElse {
-      // TODO: We must have A band, at least, that is a subset of all the bands.
-      // TODO: Otherwise bork and return R bands list. Not sure what else to do here.
+      // We must have a band, at least, that is a subset of all the bands.
+      // Otherwise bork and return R bands list. Not sure what else to do here.
       val bandInt = bandsLL.map(bL => bL.bands.list.toSet).reduce((s1,s2) => s1.intersect(s2))
       bandInt.headOption.map(SingleBand).getOrElse(RBandsList)
     }
