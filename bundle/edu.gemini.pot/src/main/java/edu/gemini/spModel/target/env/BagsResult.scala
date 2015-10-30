@@ -1,7 +1,6 @@
 package edu.gemini.spModel.target.env
 
 import edu.gemini.shared.util.immutable.{Option => GOption}
-import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.pio.{Pio, PioFactory, ParamSet}
 import edu.gemini.spModel.target.SPTarget
 import edu.gemini.spModel.rich.shared.immutable._
