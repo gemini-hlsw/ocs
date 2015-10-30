@@ -88,6 +88,9 @@
 <FIELD ID="FLUX_ERROR_U" name="FLUX_ERROR_U" datatype="float" precision="3" ucd="stat.error;phot.mag">
 <DESCRIPTION>flux error</DESCRIPTION>
 </FIELD>
+<FIELD ID="FLUX_SYSTEM_U" name="FLUX_SYSTEM_U" datatype="char" ucd="instr.precision;phot.flux" arraysize="*">
+<DESCRIPTION>flux system A=AB V=Vega</DESCRIPTION>
+</FIELD>
 <FIELD ID="FLUX_BIBCODE_U" name="FLUX_BIBCODE_U" datatype="char" width="19" ucd="meta.bib.bibcode;phot.flux" arraysize="*">
 <DESCRIPTION>flux reference</DESCRIPTION>
 </FIELD>
@@ -111,6 +114,9 @@
 </FIELD>
 <FIELD ID="FLUX_ERROR_B" name="FLUX_ERROR_B" datatype="float" precision="3" ucd="stat.error;phot.mag">
 <DESCRIPTION>flux error</DESCRIPTION>
+</FIELD>
+<FIELD ID="FLUX_SYSTEM_B" name="FLUX_SYSTEM_B" datatype="char" ucd="instr.precision;phot.flux" arraysize="*">
+<DESCRIPTION>flux system A=AB V=Vega</DESCRIPTION>
 </FIELD>
 <FIELD ID="FLUX_BIBCODE_B" name="FLUX_BIBCODE_B" datatype="char" width="19" ucd="meta.bib.bibcode;phot.flux" arraysize="*">
 <DESCRIPTION>flux reference</DESCRIPTION>
@@ -136,6 +142,9 @@
 <FIELD ID="FLUX_ERROR_V" name="FLUX_ERROR_V" datatype="float" precision="3" ucd="stat.error;phot.mag">
 <DESCRIPTION>flux error</DESCRIPTION>
 </FIELD>
+<FIELD ID="FLUX_SYSTEM_V" name="FLUX_SYSTEM_V" datatype="char" ucd="instr.precision;phot.flux" arraysize="*">
+<DESCRIPTION>flux system A=AB V=Vega</DESCRIPTION>
+</FIELD>
 <FIELD ID="FLUX_BIBCODE_V" name="FLUX_BIBCODE_V" datatype="char" width="19" ucd="meta.bib.bibcode;phot.flux" arraysize="*">
 <DESCRIPTION>flux reference</DESCRIPTION>
 </FIELD>
@@ -159,6 +168,9 @@
 </FIELD>
 <FIELD ID="FLUX_ERROR_R" name="FLUX_ERROR_R" datatype="float" precision="3" ucd="stat.error;phot.mag">
 <DESCRIPTION>flux error</DESCRIPTION>
+</FIELD>
+<FIELD ID="FLUX_SYSTEM_R" name="FLUX_SYSTEM_R" datatype="char" ucd="instr.precision;phot.flux" arraysize="*">
+<DESCRIPTION>flux system A=AB V=Vega</DESCRIPTION>
 </FIELD>
 <FIELD ID="FLUX_BIBCODE_R" name="FLUX_BIBCODE_R" datatype="char" width="19" ucd="meta.bib.bibcode;phot.flux" arraysize="*">
 <DESCRIPTION>flux reference</DESCRIPTION>
@@ -184,6 +196,9 @@
 <FIELD ID="FLUX_ERROR_I" name="FLUX_ERROR_I" datatype="float" precision="3" ucd="stat.error;phot.mag">
 <DESCRIPTION>flux error</DESCRIPTION>
 </FIELD>
+<FIELD ID="FLUX_SYSTEM_I" name="FLUX_SYSTEM_I" datatype="char" ucd="instr.precision;phot.flux" arraysize="*">
+<DESCRIPTION>flux system A=AB V=Vega</DESCRIPTION>
+</FIELD>
 <FIELD ID="FLUX_BIBCODE_I" name="FLUX_BIBCODE_I" datatype="char" width="19" ucd="meta.bib.bibcode;phot.flux" arraysize="*">
 <DESCRIPTION>flux reference</DESCRIPTION>
 </FIELD>
@@ -207,6 +222,9 @@
 </FIELD>
 <FIELD ID="FLUX_ERROR_J" name="FLUX_ERROR_J" datatype="float" precision="3" ucd="stat.error;phot.mag">
 <DESCRIPTION>flux error</DESCRIPTION>
+</FIELD>
+<FIELD ID="FLUX_SYSTEM_J" name="FLUX_SYSTEM_J" datatype="char" ucd="instr.precision;phot.flux" arraysize="*">
+<DESCRIPTION>flux system A=AB V=Vega</DESCRIPTION>
 </FIELD>
 <FIELD ID="FLUX_BIBCODE_J" name="FLUX_BIBCODE_J" datatype="char" width="19" ucd="meta.bib.bibcode;phot.flux" arraysize="*">
 <DESCRIPTION>flux reference</DESCRIPTION>
@@ -232,6 +250,9 @@
 <FIELD ID="FLUX_ERROR_H" name="FLUX_ERROR_H" datatype="float" precision="3" ucd="stat.error;phot.mag">
 <DESCRIPTION>flux error</DESCRIPTION>
 </FIELD>
+<FIELD ID="FLUX_SYSTEM_H" name="FLUX_SYSTEM_H" datatype="char" ucd="instr.precision;phot.flux" arraysize="*">
+<DESCRIPTION>flux system A=AB V=Vega</DESCRIPTION>
+</FIELD>
 <FIELD ID="FLUX_BIBCODE_H" name="FLUX_BIBCODE_H" datatype="char" width="19" ucd="meta.bib.bibcode;phot.flux" arraysize="*">
 <DESCRIPTION>flux reference</DESCRIPTION>
 </FIELD>
@@ -255,6 +276,9 @@
 </FIELD>
 <FIELD ID="FLUX_ERROR_K" name="FLUX_ERROR_K" datatype="float" precision="3" ucd="stat.error;phot.mag">
 <DESCRIPTION>flux error</DESCRIPTION>
+</FIELD>
+<FIELD ID="FLUX_SYSTEM_K" name="FLUX_SYSTEM_K" datatype="char" ucd="instr.precision;phot.flux" arraysize="*">
+<DESCRIPTION>flux system A=AB V=Vega</DESCRIPTION>
 </FIELD>
 <FIELD ID="FLUX_BIBCODE_K" name="FLUX_BIBCODE_K" datatype="char" width="19" ucd="meta.bib.bibcode;phot.flux" arraysize="*">
 <DESCRIPTION>flux reference</DESCRIPTION>
@@ -280,6 +304,9 @@
 <FIELD ID="FLUX_ERROR_u" name="FLUX_ERROR_u" datatype="float" precision="3" ucd="stat.error;phot.mag">
 <DESCRIPTION>flux error</DESCRIPTION>
 </FIELD>
+<FIELD ID="FLUX_SYSTEM_u" name="FLUX_SYSTEM_u" datatype="char" ucd="instr.precision;phot.flux" arraysize="*">
+<DESCRIPTION>flux system A=AB V=Vega</DESCRIPTION>
+</FIELD>
 <FIELD ID="FLUX_BIBCODE_u" name="FLUX_BIBCODE_u" datatype="char" width="19" ucd="meta.bib.bibcode;phot.flux" arraysize="*">
 <DESCRIPTION>flux reference</DESCRIPTION>
 </FIELD>
@@ -303,6 +330,9 @@
 </FIELD>
 <FIELD ID="FLUX_ERROR_g" name="FLUX_ERROR_g" datatype="float" precision="3" ucd="stat.error;phot.mag">
 <DESCRIPTION>flux error</DESCRIPTION>
+</FIELD>
+<FIELD ID="FLUX_SYSTEM_g" name="FLUX_SYSTEM_g" datatype="char" ucd="instr.precision;phot.flux" arraysize="*">
+<DESCRIPTION>flux system A=AB V=Vega</DESCRIPTION>
 </FIELD>
 <FIELD ID="FLUX_BIBCODE_g" name="FLUX_BIBCODE_g" datatype="char" width="19" ucd="meta.bib.bibcode;phot.flux" arraysize="*">
 <DESCRIPTION>flux reference</DESCRIPTION>
@@ -328,6 +358,9 @@
 <FIELD ID="FLUX_ERROR_r" name="FLUX_ERROR_r" datatype="float" precision="3" ucd="stat.error;phot.mag">
 <DESCRIPTION>flux error</DESCRIPTION>
 </FIELD>
+<FIELD ID="FLUX_SYSTEM_r" name="FLUX_SYSTEM_r" datatype="char" ucd="instr.precision;phot.flux" arraysize="*">
+<DESCRIPTION>flux system A=AB V=Vega</DESCRIPTION>
+</FIELD>
 <FIELD ID="FLUX_BIBCODE_r" name="FLUX_BIBCODE_r" datatype="char" width="19" ucd="meta.bib.bibcode;phot.flux" arraysize="*">
 <DESCRIPTION>flux reference</DESCRIPTION>
 </FIELD>
@@ -352,6 +385,9 @@
 <FIELD ID="FLUX_ERROR_i" name="FLUX_ERROR_i" datatype="float" precision="3" ucd="stat.error;phot.mag">
 <DESCRIPTION>flux error</DESCRIPTION>
 </FIELD>
+<FIELD ID="FLUX_SYSTEM_i" name="FLUX_SYSTEM_i" datatype="char" ucd="instr.precision;phot.flux" arraysize="*">
+<DESCRIPTION>flux system A=AB V=Vega</DESCRIPTION>
+</FIELD>
 <FIELD ID="FLUX_BIBCODE_i" name="FLUX_BIBCODE_i" datatype="char" width="19" ucd="meta.bib.bibcode;phot.flux" arraysize="*">
 <DESCRIPTION>flux reference</DESCRIPTION>
 </FIELD>
@@ -375,6 +411,9 @@
 </FIELD>
 <FIELD ID="FLUX_ERROR_z" name="FLUX_ERROR_z" datatype="float" precision="3" ucd="stat.error;phot.mag">
 <DESCRIPTION>flux error</DESCRIPTION>
+</FIELD>
+<FIELD ID="FLUX_SYSTEM_z" name="FLUX_SYSTEM_z" datatype="char" ucd="instr.precision;phot.flux" arraysize="*">
+<DESCRIPTION>flux system A=AB V=Vega</DESCRIPTION>
 </FIELD>
 <FIELD ID="FLUX_BIBCODE_z" name="FLUX_BIBCODE_z" datatype="char" width="19" ucd="meta.bib.bibcode;phot.flux" arraysize="*">
 <DESCRIPTION>flux reference</DESCRIPTION>
@@ -1326,7 +1365,7 @@
 </FIELD>
 <DATA>
 <TABLEDATA>
-<TR><TD>Vega</TD><TD></TD><TD>* alf Lyr</TD><TD>PulsV*delSct</TD><TD>279.23473479</TD><TD>+38.78368896</TD><TD>3.51</TD><TD>2.81</TD><TD>90</TD><TD>200.94</TD><TD>286.23</TD><TD>0.32</TD><TD>0.40</TD><TD>0</TD><TD>130.23</TD><TD>-20.60</TD><TD>-0.000069</TD><TD></TD><TD></TD><TD></TD><TD></TD><TD>A0Va</TD><TD></TD><TD></TD><TD>U</TD><TD>0.03</TD><TD></TD><TD>2002yCat.2237....0D</TD><TD></TD><TD></TD><TD>C</TD><TD>U</TD><TD>B</TD><TD>0.03</TD><TD></TD><TD>2002yCat.2237....0D</TD><TD></TD><TD></TD><TD>C</TD><TD>B</TD><TD>V</TD><TD>0.03</TD><TD></TD><TD>2002yCat.2237....0D</TD><TD></TD><TD></TD><TD>C</TD><TD>V</TD><TD>R</TD><TD>0.07</TD><TD></TD><TD>2002yCat.2237....0D</TD><TD></TD><TD></TD><TD>C</TD><TD>R</TD><TD>I</TD><TD>0.10</TD><TD></TD><TD>2002yCat.2237....0D</TD><TD></TD><TD></TD><TD>C</TD><TD>I</TD><TD>J</TD><TD>-0.18</TD><TD></TD><TD>2003yCat.2246....0C</TD><TD></TD><TD></TD><TD>C</TD><TD>J</TD><TD>H</TD><TD>-0.03</TD><TD></TD><TD>2003yCat.2246....0C</TD><TD></TD><TD></TD><TD>C</TD><TD>H</TD><TD>K</TD><TD>0.13</TD><TD></TD><TD>2003yCat.2246....0C</TD><TD></TD><TD></TD><TD>C</TD><TD>K</TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD>6.71</TD><TD>0.25</TD><TD>4.56</TD><TD>0.02</TD><TD>5.66</TD><TD>0.23</TD><TD></TD><TD></TD><TD>V</TD><TD>1973SAOSR.350....1D</TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD>1.80E+06</TD><TD></TD><TD>km</TD><TD></TD><TD></TD><TD></TD><TD>2007ApJ...660.1556R</TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD>9519</TD><TD>3.88</TD><TD>|</TD><TD></TD><TD>|SUN</TD><TD>|</TD><TD>|2003AJ....126.2048</TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD>1.505</TD><TD>0.959</TD><TD>0.900</TD><TD>1.510</TD><TD>1.662</TD><TD>2.168</TD><TD>10</TD><TD>0.010</TD><TD>0.060</TD><TD>8</TD><TD>0.027</TD><TD></TD><TD>1976A&amp;AS...26..275R</TD><TD>0.124</TD><TD>005</TD><TD>0.50</TD><TD></TD><TD>B</TD><TD>-17</TD><TD>-6</TD><TD>-8</TD><TD>1969VeARI..22....1G</TD><TD></TD><TD></TD><TD></TD><TD></TD><TD>2.903</TD><TD></TD><TD>9</TD><TD></TD><TD></TD><TD>V</TD><TD></TD><TD>1998A&amp;AS..129..431H</TD><TD>1342237138</TD><TD>18 36 56.34</TD><TD>+38 47 01.3</TD><TD></TD><TD></TD><TD></TD><TD></TD><TD>18 35 15.1</TD><TD>+38 44 16</TD><TD>25</TD><TD>5</TD><TD>72</TD><TD>41.56</TD><TD></TD><TD>11.02</TD><TD></TD><TD>9.51</TD><TD></TD><TD>7.76</TD><TD></TD><TD>4</TD><TD>5</TD><TD>8</TD><TD>9</TD><TD>----</TD><TD>24</TD><TD>3</TD><TD>8</TD><TD>1988NASAR1190....1B</TD><TD></TD><TD>-0.06</TD><TD>3</TD><TD>0.06</TD><TD>1.03</TD><TD>*</TD><TD>-4.99</TD><TD>1</TD><TD>0.01</TD><TD>0.03</TD><TD>1969IRC...C......0N</TD><TD></TD><TD>50301801</TD><TD>279.3998</TD><TD>+38.9664</TD><TD>HD 172167</TD><TD></TD><TD>PHCAL</TD><TD>30</TD><TD>L</TD><TD>SWP</TD><TD>30549</TD><TD>L</TD><TD>15984</TD><TD>FU</TD><TD>870317</TD><TD>004700</TD><TD>000001</TD><TD>T</TD><TD>500</TD><TD>G</TD><TD>C=180,B=15</TD><TD>*</TD><TD>1996IUEML.C......0I</TD><TD>0.03</TD><TD></TD><TD></TD><TD>0.03</TD><TD></TD><TD></TD><TD>0.03</TD><TD></TD><TD></TD><TD>0.07</TD><TD></TD><TD></TD><TD>0.10</TD><TD></TD><TD></TD><TD>0.00</TD><TD></TD><TD></TD><TD>0.00</TD><TD></TD><TD></TD><TD>0.00</TD><TD></TD><TD></TD><TD>-0.01</TD><TD></TD><TD></TD><TD>-0.01</TD><TD></TD><TD></TD><TD>0.00</TD><TD></TD><TD></TD><TD>2002yCat.2237.....D</TD><TD></TD><TD></TD><TD>A0V</TD><TD>2009MNRAS.396.1895C</TD><TD>-13.9</TD><TD>A</TD><TD>308</TD><TD></TD><TD>##</TD><TD></TD><TD>1979IAUS...30...57E</TD><TD>0.130</TD><TD>000</TD><TD></TD><TD>2007A&amp;A...474..653V</TD><TD>+0.201</TD><TD>0.000</TD><TD>+0.286</TD><TD>0.000</TD><TD>ICRS</TD><TD>2007A&amp;A...474..653V</TD><TD>18 36 56.34 +</TD><TD>38 47  1.29</TD><TD>0.094</TD><TD>0.081</TD><TD>2000</TD><TD>1991.25</TD><TD>1997A&amp;A...323L..49P</TD><TD>18 36 56.186</TD><TD>+38 46 58.78</TD><TD></TD><TD>0.000</TD><TD></TD><TD>0.000</TD><TD>0</TD><TD>2000</TD><TD>1991.25</TD><TD>2007A&amp;A...474..653V</TD><TD></TD><TD>24</TD><TD></TD><TD>0</TD><TD>D</TD><TD>2007A&amp;A...463..671R</TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD>18 35 14.655</TD><TD>+38 44 09.68</TD><TD>0.03</TD><TD>+0.200</TD><TD>001</TD><TD>+0.285</TD><TD>001</TD><TD>1966SAO...C......0S</TD><TD>0.09</TD><TD>1.10</TD><TD>-0.10</TD><TD>1.14</TD><TD>-0.41</TD><TD>0.35</TD><TD>-0.56</TD><TD>0.33</TD><TD>1978TD1...C......0T</TD><TD>(E)</TD><TD>0.03</TD><TD>+0.00</TD><TD>-0.01</TD><TD>?  1</TD><TD>V</TD><TD>1986EgUBV........0M</TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD>0.003</TD><TD>0.003</TD><TD>0.157</TD><TD>0.003</TD><TD>1.088</TD><TD>0.004</TD><TD></TD><TD>41</TD><TD></TD><TD></TD><TD>V</TD><TD></TD><TD>1998A&amp;AS..129..431H</TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD>@2900336</TD></TR>
+<TR><TD>Vega</TD><TD></TD><TD>* alf Lyr</TD><TD>PulsV*delSct</TD><TD>279.23473479</TD><TD>+38.78368896</TD><TD>3.51</TD><TD>2.81</TD><TD>90</TD><TD>200.94</TD><TD>286.23</TD><TD>0.32</TD><TD>0.40</TD><TD>0</TD><TD>130.23</TD><TD>-20.60</TD><TD>-0.000069</TD><TD></TD><TD></TD><TD></TD><TD></TD><TD>A0Va</TD><TD></TD><TD></TD><TD>U</TD><TD>0.03</TD><TD></TD><TD>Vega</TD><TD>2002yCat.2237....0D</TD><TD></TD><TD></TD><TD>C</TD><TD>U</TD><TD>B</TD><TD>0.03</TD><TD></TD><TD>Vega</TD><TD>2002yCat.2237....0D</TD><TD></TD><TD></TD><TD>C</TD><TD>B</TD><TD>V</TD><TD>0.03</TD><TD></TD><TD>Vega</TD><TD>2002yCat.2237....0D</TD><TD></TD><TD></TD><TD>C</TD><TD>V</TD><TD>R</TD><TD>0.07</TD><TD></TD><TD>Vega</TD><TD>2002yCat.2237....0D</TD><TD></TD><TD></TD><TD>C</TD><TD>R</TD><TD>I</TD><TD>0.10</TD><TD></TD><TD>Vega</TD><TD>2002yCat.2237....0D</TD><TD></TD><TD></TD><TD>C</TD><TD>I</TD><TD>J</TD><TD>-0.18</TD><TD></TD><TD>Vega</TD><TD>2003yCat.2246....0C</TD><TD></TD><TD></TD><TD>C</TD><TD>J</TD><TD>H</TD><TD>-0.03</TD><TD></TD><TD>Vega</TD><TD>2003yCat.2246....0C</TD><TD></TD><TD></TD><TD>C</TD><TD>H</TD><TD>K</TD><TD>0.13</TD><TD></TD><TD>Vega</TD><TD>2003yCat.2246....0C</TD><TD></TD><TD></TD><TD>C</TD><TD>K</TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD>6.71</TD><TD>0.25</TD><TD>4.56</TD><TD>0.02</TD><TD>5.66</TD><TD>0.23</TD><TD></TD><TD></TD><TD>V</TD><TD>1973SAOSR.350....1D</TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD>1.80E+06</TD><TD></TD><TD>km</TD><TD></TD><TD></TD><TD></TD><TD>2007ApJ...660.1556R</TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD>9519</TD><TD>3.88</TD><TD>|</TD><TD></TD><TD>|SUN</TD><TD>|</TD><TD>|2003AJ....126.2048</TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD>1.505</TD><TD>0.959</TD><TD>0.900</TD><TD>1.510</TD><TD>1.662</TD><TD>2.168</TD><TD>10</TD><TD>0.010</TD><TD>0.060</TD><TD>8</TD><TD>0.027</TD><TD></TD><TD>1976A&amp;AS...26..275R</TD><TD>0.124</TD><TD>005</TD><TD>0.50</TD><TD></TD><TD>B</TD><TD>-17</TD><TD>-6</TD><TD>-8</TD><TD>1969VeARI..22....1G</TD><TD></TD><TD></TD><TD></TD><TD></TD><TD>2.903</TD><TD></TD><TD>9</TD><TD></TD><TD></TD><TD>V</TD><TD></TD><TD>1998A&amp;AS..129..431H</TD><TD>1342237138</TD><TD>18 36 56.34</TD><TD>+38 47 01.3</TD><TD></TD><TD></TD><TD></TD><TD></TD><TD>18 35 15.1</TD><TD>+38 44 16</TD><TD>25</TD><TD>5</TD><TD>72</TD><TD>41.56</TD><TD></TD><TD>11.02</TD><TD></TD><TD>9.51</TD><TD></TD><TD>7.76</TD><TD></TD><TD>4</TD><TD>5</TD><TD>8</TD><TD>9</TD><TD>----</TD><TD>24</TD><TD>3</TD><TD>8</TD><TD>1988NASAR1190....1B</TD><TD></TD><TD>-0.06</TD><TD>3</TD><TD>0.06</TD><TD>1.03</TD><TD>*</TD><TD>-4.99</TD><TD>1</TD><TD>0.01</TD><TD>0.03</TD><TD>1969IRC...C......0N</TD><TD></TD><TD>50301801</TD><TD>279.3998</TD><TD>+38.9664</TD><TD>HD 172167</TD><TD></TD><TD>PHCAL</TD><TD>30</TD><TD>L</TD><TD>SWP</TD><TD>30549</TD><TD>L</TD><TD>15984</TD><TD>FU</TD><TD>870317</TD><TD>004700</TD><TD>000001</TD><TD>T</TD><TD>500</TD><TD>G</TD><TD>C=180,B=15</TD><TD>*</TD><TD>1996IUEML.C......0I</TD><TD>0.03</TD><TD></TD><TD></TD><TD>0.03</TD><TD></TD><TD></TD><TD>0.03</TD><TD></TD><TD></TD><TD>0.07</TD><TD></TD><TD></TD><TD>0.10</TD><TD></TD><TD></TD><TD>0.00</TD><TD></TD><TD></TD><TD>0.00</TD><TD></TD><TD></TD><TD>0.00</TD><TD></TD><TD></TD><TD>-0.01</TD><TD></TD><TD></TD><TD>-0.01</TD><TD></TD><TD></TD><TD>0.00</TD><TD></TD><TD></TD><TD>2002yCat.2237.....D</TD><TD></TD><TD></TD><TD>A0V</TD><TD>2009MNRAS.396.1895C</TD><TD>-13.9</TD><TD>A</TD><TD>308</TD><TD></TD><TD>##</TD><TD></TD><TD>1979IAUS...30...57E</TD><TD>0.130</TD><TD>000</TD><TD></TD><TD>2007A&amp;A...474..653V</TD><TD>+0.201</TD><TD>0.000</TD><TD>+0.286</TD><TD>0.000</TD><TD>ICRS</TD><TD>2007A&amp;A...474..653V</TD><TD>18 36 56.34 +</TD><TD>38 47  1.29</TD><TD>0.094</TD><TD>0.081</TD><TD>2000</TD><TD>1991.25</TD><TD>1997A&amp;A...323L..49P</TD><TD>18 36 56.186</TD><TD>+38 46 58.78</TD><TD></TD><TD>0.000</TD><TD></TD><TD>0.000</TD><TD>0</TD><TD>2000</TD><TD>1991.25</TD><TD>2007A&amp;A...474..653V</TD><TD></TD><TD>24</TD><TD></TD><TD>0</TD><TD>D</TD><TD>2007A&amp;A...463..671R</TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD>18 35 14.655</TD><TD>+38 44 09.68</TD><TD>0.03</TD><TD>+0.200</TD><TD>001</TD><TD>+0.285</TD><TD>001</TD><TD>1966SAO...C......0S</TD><TD>0.09</TD><TD>1.10</TD><TD>-0.10</TD><TD>1.14</TD><TD>-0.41</TD><TD>0.35</TD><TD>-0.56</TD><TD>0.33</TD><TD>1978TD1...C......0T</TD><TD>(E)</TD><TD>0.03</TD><TD>+0.00</TD><TD>-0.01</TD><TD>?  1</TD><TD>V</TD><TD>1986EgUBV........0M</TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD>0.003</TD><TD>0.003</TD><TD>0.157</TD><TD>0.003</TD><TD>1.088</TD><TD>0.004</TD><TD></TD><TD>41</TD><TD></TD><TD></TD><TD>V</TD><TD></TD><TD>1998A&amp;AS..129..431H</TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD></TD><TD>@2900336</TD></TR>
 
 </TABLEDATA>
 
