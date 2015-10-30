@@ -290,7 +290,7 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
                     final GuideProbe guideProbe = gt.getGuider();
                     final boolean isActive = ctx.exists(c -> GuideProbeUtil.instance.isAvailable(c, guideProbe));
                     final Option<SPTarget> primary = gt.getPrimary();
-                    final Option<SPTarget> bagsTarget = gt.getBagsTarget();
+                    final Option<SPTarget> bagsTarget = gt.getBagsResult().targetAsJava();
 
                     // If the first target is a bags target, we do not add to the index.
                     final int bagsIndexModifier = bagsTarget.isDefined() ? 0 : 1;
@@ -316,7 +316,7 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
                         final GuideProbe guideProbe = gt.getGuider();
                         final boolean isActive = ctx.exists(c -> GuideProbeUtil.instance.isAvailable(c, guideProbe));
                         final Option<SPTarget> primary = gt.getPrimary();
-                        final Option<SPTarget> bagsTarget = gt.getBagsTarget();
+                        final Option<SPTarget> bagsTarget = gt.getBagsResult().targetAsJava();
 
                         // If the first target is a bags target, we do not add to the index.
                         final int bagsIndexModifier = bagsTarget.isDefined() ? 0 : 1;
@@ -1005,7 +1005,7 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
         final GuideProbeTargets src = targetList.get(0);
 
         // A bags target cannot be moved.
-        final boolean isBagsTarget = src.getBagsTarget().getOrElse(null) == target;
+        final boolean isBagsTarget = src.getBagsResult().targetAsJava().exists(target::equals);
         if (isBagsTarget)
             return;
 

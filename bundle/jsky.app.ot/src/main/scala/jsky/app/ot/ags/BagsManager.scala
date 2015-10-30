@@ -13,7 +13,7 @@ import edu.gemini.spModel.core.SPProgramID
 import edu.gemini.spModel.obs.ObservationStatus
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.rich.shared.immutable._
-import edu.gemini.spModel.target.env.{OptionsList, GuideProbeTargets, TargetEnvironment}
+import edu.gemini.spModel.target.env.{BagsResult, OptionsList, GuideProbeTargets, TargetEnvironment}
 import jsky.app.ot.OT
 import jsky.app.ot.tpe.{TpeContext, GuideStarSupport, GemsGuideStarWorker, GuideStarWorker}
 
@@ -36,7 +36,10 @@ final class BagsManager(executor: ScheduledThreadPoolExecutor) {
       val targets = ctx.getTargets
       val prgs    = targets.getGuideEnvironment.getPrimaryReferencedGuiders
       prgs.isEmpty || prgs.asScala.exists { gp =>
-        targets.getPrimaryGuideProbeTargets(gp).asScalaOpt.forall(_.getBagsTarget.isEmpty)
+        targets.getPrimaryGuideProbeTargets(gp).asScalaOpt.exists(_.getBagsResult match {
+          case BagsResult.NoSearchPerformed => true
+          case _                            => false
+        })
       }
     }
   }
@@ -203,18 +206,18 @@ object BagsManager {
   // Check two target environments to see if the BAGS targets match exactly between them.
   def bagsTargetsMatch(oldEnv: TargetEnvironment, newEnv: TargetEnvironment): Boolean = {
     // Find a group with a BAGS target in it in the old and new envs.
-    val oldGroup = oldEnv.getGroups.asScala.find(gg => gg.getAll.asScala.exists(_.getBagsTarget.isDefined))
-    val newGroup = newEnv.getGroups.asScala.find(gg => gg.getAll.asScala.exists(_.getBagsTarget.isDefined))
+    val oldGroup = oldEnv.getGroups.asScala.find(gg => gg.getAll.asScala.exists(_.getBagsResult.target.isDefined))
+    val newGroup = newEnv.getGroups.asScala.find(gg => gg.getAll.asScala.exists(_.getBagsResult.target.isDefined))
 
     // Now compare the two groups to see if they have the same BAGS targets.
     // Filter the GuideProbeTargets of the oldGroup to make sure that we are only looking at GPTs with BAGS.
-    val oldGpt = oldGroup.toList.flatMap(gg => gg.getAll.asScala.filter(_.getBagsTarget.isDefined))
-    val newGpt = newGroup.toList.flatMap(gg => gg.getAll.asScala.filter(_.getBagsTarget.isDefined))
+    val oldGpt = oldGroup.toList.flatMap(gg => gg.getAll.asScala.filter(_.getBagsResult.target.isDefined))
+    val newGpt = newGroup.toList.flatMap(gg => gg.getAll.asScala.filter(_.getBagsResult.target.isDefined))
 
     // Now compare the two lists to make sure they have the same BAGS targets.
     (oldGpt.size == newGpt.size) &&
       oldGpt.forall(ogpt => newGpt.exists(ngpt => ngpt.getGuider == ogpt.getGuider &&
-        ngpt.getBagsTarget.getValue.getTarget.equals(ogpt.getBagsTarget.getValue.getTarget)))
+        ngpt.getBagsResult.target.get.getTarget.equals(ogpt.getBagsResult.target.get.getTarget)))
   }
 
   // Given a target environment, clear all of the BAGS targets from it.
@@ -223,7 +226,7 @@ object BagsManager {
     val newGuideEnv = oldGuideEnv.getOptions.asScala.foldLeft(oldGuideEnv) { (ge, gg) =>
       // For this guide group, iterate over all GuideProbeTargets and eliminate the BAGS targets. Filter out any
       // GuideProbeTargets that are left empty as a result as we no longer need them.
-      val bagslessGpts = gg.getAll.asScala.map(_.withBagsTarget(GuideProbeTargets.NO_TARGET)).filter(_.containsTargets)
+      val bagslessGpts = gg.getAll.asScala.map(_.withBagsResult(GuideProbeTargets.DEFAULT_BAGS_RESULT)).filter(_.containsTargets)
 
       // If there are still any targets left, replace gg in the guide environment with a new guide group.
       // If there are no targets left, remove gg from the guide environment.

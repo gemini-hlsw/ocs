@@ -18,10 +18,7 @@ import edu.gemini.spModel.gems.GemsTipTiltMode;
 import edu.gemini.spModel.obs.context.ObsContext;
 import edu.gemini.spModel.obscomp.SPInstObsComp;
 import edu.gemini.spModel.target.SPTarget;
-import edu.gemini.spModel.target.env.GuideEnvironment;
-import edu.gemini.spModel.target.env.GuideGroup;
-import edu.gemini.spModel.target.env.GuideProbeTargets;
-import edu.gemini.spModel.target.env.TargetEnvironment;
+import edu.gemini.spModel.target.env.*;
 import edu.gemini.spModel.target.obsComp.TargetObsComp;
 import jsky.app.ot.ags.BagsManager;
 import jsky.coords.WorldCoords;
@@ -168,7 +165,7 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
                 final GuideGroup group;
                 if (isBags) {
                     final ImList<GuideProbeTargets> gptList = gemsGuideStars.guideGroup().getAll().map(gpt ->
-                                    gpt.getPrimary().map(primary -> gpt.removeTarget(primary).withBagsTarget(primary)).getOrElse(gpt)
+                                    gpt.getPrimary().map(primary -> gpt.removeTarget(primary).withBagsResult(BagsResult.WithTarget$.MODULE$.apply(primary))).getOrElse(gpt)
                     );
                     group = gemsGuideStars.guideGroup().putAll(gptList);
                     return makeBagsGroupPrimary ? clearedEnv.setPrimaryGuideGroup(group) :

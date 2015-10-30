@@ -93,7 +93,7 @@ public final class TargetGroupTest extends TestBase {
         }
 
         final Option<SPTarget> primaryTarget = targetList.headOption();
-        GuideProbeTargets gt = GuideProbeTargets.create(PwfsGuideProbe.pwfs2, GuideProbeTargets.NO_TARGET, primaryTarget, targetList);
+        GuideProbeTargets gt = GuideProbeTargets.create(PwfsGuideProbe.pwfs2, primaryTarget, targetList);
 
         ImList<GuideProbeTargets> gtCollection = DefaultImList.create(gt);
         ImList<SPTarget> userTargets = ImCollections.emptyList();
@@ -149,8 +149,7 @@ public final class TargetGroupTest extends TestBase {
         ImList<SPTarget> targetList;
         targetList = ImCollections.singletonList(guide2).cons(guide1);
 
-        GuideProbeTargets gt = GuideProbeTargets.create(GmosOiwfsGuideProbe.instance, GuideProbeTargets.NO_TARGET,
-                GuideProbeTargets.NO_TARGET, targetList).withPrimaryByIndex(1);
+        GuideProbeTargets gt = GuideProbeTargets.create(GmosOiwfsGuideProbe.instance, GuideProbeTargets.NO_TARGET, targetList).withPrimaryByIndex(1);
         nameMap.putGuiderName(GmosOiwfsGuideProbe.instance, "OIWFS");
 
         ImList<GuideProbeTargets> gtCollection = DefaultImList.create(gt);
@@ -166,12 +165,10 @@ public final class TargetGroupTest extends TestBase {
 
         // Create the target environment with multiple guiders.
         final ImList<SPTarget> targetList1 = ImCollections.singletonList(pwfs1_2).cons(pwfs1_1);
-        final GuideProbeTargets pwfs1 = GuideProbeTargets.create(PwfsGuideProbe.pwfs1, GuideProbeTargets.NO_TARGET,
-                new Some<>(pwfs1_1), targetList1);
+        final GuideProbeTargets pwfs1 = GuideProbeTargets.create(PwfsGuideProbe.pwfs1, new Some<>(pwfs1_1), targetList1);
 
         final ImList<SPTarget> targetList2 = ImCollections.singletonList(pwfs2_2).cons(pwfs2_1);
-        GuideProbeTargets pwfs2 = GuideProbeTargets.create(PwfsGuideProbe.pwfs2, GuideProbeTargets.NO_TARGET,
-                new Some<>(pwfs2_1), targetList2);
+        GuideProbeTargets pwfs2 = GuideProbeTargets.create(PwfsGuideProbe.pwfs2, new Some<>(pwfs2_1), targetList2);
 
         final TargetEnvironment env = TargetEnvironment.create(base).
             putPrimaryGuideProbeTargets(pwfs1).putPrimaryGuideProbeTargets(pwfs2);
@@ -183,12 +180,10 @@ public final class TargetGroupTest extends TestBase {
 
         // Create the target environment with multiple guiders.
         final ImList<SPTarget> targetList1 = ImCollections.singletonList(pwfs1_2).cons(pwfs1_1);
-        final GuideProbeTargets pwfs1 = GuideProbeTargets.create(PwfsGuideProbe.pwfs1, GuideProbeTargets.NO_TARGET,
-                new Some<>(pwfs1_1), targetList1);
+        final GuideProbeTargets pwfs1 = GuideProbeTargets.create(PwfsGuideProbe.pwfs1, new Some<>(pwfs1_1), targetList1);
 
         final ImList<SPTarget> targetList2 = ImCollections.singletonList(pwfs2_2).cons(pwfs2_1);
-        GuideProbeTargets pwfs2 = GuideProbeTargets.create(PwfsGuideProbe.pwfs2, GuideProbeTargets.NO_TARGET,
-                new Some<>(pwfs2_1), targetList2).withPrimaryByIndex(None.INTEGER);
+        GuideProbeTargets pwfs2 = GuideProbeTargets.create(PwfsGuideProbe.pwfs2, new Some<>(pwfs2_1), targetList2).withPrimaryByIndex(None.INTEGER);
 
         final TargetEnvironment env = TargetEnvironment.create(base).
                 putPrimaryGuideProbeTargets(pwfs1).putPrimaryGuideProbeTargets(pwfs2);
@@ -201,8 +196,7 @@ public final class TargetGroupTest extends TestBase {
         final SPTarget oiwfsTarget = new SPTarget();
 
         final ImList<SPTarget> targetList = ImCollections.singletonList(oiwfsTarget);
-        GuideProbeTargets gt = GuideProbeTargets.create(GmosOiwfsGuideProbe.instance, GuideProbeTargets.NO_TARGET,
-                new Some<>(oiwfsTarget), targetList);
+        GuideProbeTargets gt = GuideProbeTargets.create(GmosOiwfsGuideProbe.instance, new Some<>(oiwfsTarget), targetList);
 
         final TargetEnvironment env = TargetEnvironment.create(base).putPrimaryGuideProbeTargets(gt);
 
@@ -223,8 +217,7 @@ public final class TargetGroupTest extends TestBase {
         final SPTarget odgwTarget = new SPTarget();
 
         final ImList<SPTarget> targetList = ImCollections.singletonList(odgwTarget);
-        final GuideProbeTargets gt = GuideProbeTargets.create(GsaoiOdgw.odgw1, GuideProbeTargets.NO_TARGET,
-                new Some<>(odgwTarget), targetList);
+        final GuideProbeTargets gt = GuideProbeTargets.create(GsaoiOdgw.odgw1, new Some<>(odgwTarget), targetList);
 
         final TargetEnvironment env = TargetEnvironment.create(base).putPrimaryGuideProbeTargets(gt);
 
@@ -245,8 +238,7 @@ public final class TargetGroupTest extends TestBase {
         final SPTarget aowfsTarget = new SPTarget();
 
         final ImList<SPTarget> targetList = ImCollections.singletonList(aowfsTarget);
-        final GuideProbeTargets gt = GuideProbeTargets.create(AltairAowfsGuider.instance, GuideProbeTargets.NO_TARGET,
-                new Some<>(aowfsTarget), targetList);
+        final GuideProbeTargets gt = GuideProbeTargets.create(AltairAowfsGuider.instance, new Some<>(aowfsTarget), targetList);
 
         final TargetEnvironment env = TargetEnvironment.create(base).putPrimaryGuideProbeTargets(gt);
 
@@ -267,8 +259,7 @@ public final class TargetGroupTest extends TestBase {
         final SPTarget cwfsTarget = new SPTarget();
 
         final ImList<SPTarget> targetList = ImCollections.singletonList(cwfsTarget);
-        final GuideProbeTargets gt = GuideProbeTargets.create(Canopus.Wfs.cwfs1, GuideProbeTargets.NO_TARGET,
-                new Some<>(cwfsTarget), targetList);
+        final GuideProbeTargets gt = GuideProbeTargets.create(Canopus.Wfs.cwfs1, new Some<>(cwfsTarget), targetList);
 
         final TargetEnvironment env = TargetEnvironment.create(base).putPrimaryGuideProbeTargets(gt);
 
@@ -287,13 +278,11 @@ public final class TargetGroupTest extends TestBase {
 
     public void testDefaultGroupName() throws Exception {
         final ImList<SPTarget> targetList1 = ImCollections.singletonList(pwfs1_1);
-        final GuideProbeTargets gpt_pwfs1_1 = GuideProbeTargets.create(PwfsGuideProbe.pwfs1, GuideProbeTargets.NO_TARGET,
-                new Some<>(pwfs1_1), targetList1);
+        final GuideProbeTargets gpt_pwfs1_1 = GuideProbeTargets.create(PwfsGuideProbe.pwfs1, new Some<>(pwfs1_1), targetList1);
         final ImList<GuideProbeTargets> gpt1 = ImCollections.singletonList(gpt_pwfs1_1);
 
         final ImList<SPTarget> targetList2 = ImCollections.singletonList(pwfs1_2);
-        final GuideProbeTargets gpt_pwfs1_2 = GuideProbeTargets.create(PwfsGuideProbe.pwfs1, GuideProbeTargets.NO_TARGET,
-                new Some<>(pwfs1_2), targetList2);
+        final GuideProbeTargets gpt_pwfs1_2 = GuideProbeTargets.create(PwfsGuideProbe.pwfs1, new Some<>(pwfs1_2), targetList2);
         final ImList<GuideProbeTargets> gpt2 = ImCollections.singletonList(gpt_pwfs1_2);
 
         // grp1 -> "Explict Name"

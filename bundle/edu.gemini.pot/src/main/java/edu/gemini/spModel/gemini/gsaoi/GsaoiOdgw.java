@@ -8,6 +8,7 @@ import edu.gemini.spModel.guide.*;
 import edu.gemini.spModel.obs.SchedulingBlock;
 import edu.gemini.spModel.obs.context.ObsContext;
 import edu.gemini.spModel.target.SPTarget;
+import edu.gemini.spModel.target.env.BagsResult;
 import edu.gemini.spModel.target.env.GuideGroup;
 import edu.gemini.spModel.target.env.GuideProbeTargets;
 import edu.gemini.spModel.target.env.TargetEnvironment;
@@ -94,7 +95,7 @@ public enum GsaoiOdgw implements ValidatableGuideProbe {
                 return env;
 
             final GuideProbeTargets gptNew = gptOpt.map(gpt -> isBags
-                    ? gpt.withBagsTarget(guideStar)
+                    ? gpt.withBagsResult(BagsResult.WithTarget$.MODULE$.apply(guideStar))
                     : gpt.addManualTarget(guideStar)).
                     getOrElse(GuideProbeTargets.create(probe, guideStar)).
                     withExistingPrimary(guideStar);
@@ -232,12 +233,12 @@ public enum GsaoiOdgw implements ValidatableGuideProbe {
                     final SPTarget primary = primaryMap.get(odgw);
 
                     final GuideProbeTargets gptOld = gtMap.get(odgw);
-                    final boolean primaryIsBags = gptOld != null && gptOld.getBagsTarget().exists(primary::equals);
-                    final Option<SPTarget> bagsTarget = primaryIsBags ? new Some<>(primary) : GuideProbeTargets.NO_TARGET;
+                    final boolean primaryIsBags = gptOld != null && gptOld.primaryIsBagsTarget();
+                    final BagsResult bagsTarget = primaryIsBags ? BagsResult.WithTarget$.MODULE$.apply(primary) : GuideProbeTargets.DEFAULT_BAGS_RESULT;
                     final GuideProbeTargets gptNew = GuideProbeTargets.create(odgw, bagsTarget, new Some<>(primary), imLst);
                     gtMap.put(odgw, gptNew);
 
-                    if (!updated && (gptOld == null || targetsUpdated(imLst, gptOld.getTargets()) || !gptOld.getBagsTarget().equals(bagsTarget))) {
+                    if (!updated && (gptOld == null || targetsUpdated(imLst, gptOld.getTargets()) || !gptOld.getBagsResult().equals(bagsTarget))) {
                         updated = true;
                     }
                 }
