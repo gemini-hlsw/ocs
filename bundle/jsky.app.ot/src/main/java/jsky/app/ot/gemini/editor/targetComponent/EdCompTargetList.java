@@ -139,7 +139,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
      */
     private void updateRemovePrimaryButtons(final TargetEnvironment env) {
         final boolean editable   = OTOptions.areRootAndCurrentObsIfAnyEditable(getProgram(), getContextObservation());
-        final boolean curNotBags = !env.getGroups().exists(gg -> gg.getAllContaining(_curPos).exists(gpt -> gpt.getBagsTarget().exists(_curPos::equals)));
+        final boolean curNotBags = !env.getGroups().exists(gg -> gg.getAllContaining(_curPos).exists(gpt -> gpt.getBagsResult().targetAsJava().exists(_curPos::equals)));
         final boolean curNotBase = _curPos != env.getBase();
         _w.removeButton.setEnabled(curNotBase && curNotBags && editable);
         _w.primaryButton.setEnabled(enablePrimary(_curPos, env) && editable);
@@ -580,7 +580,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         _w.detailEditor.edit(getObsContext(env), _curPos, getNode());
 
         // TODO: Why is this doing nothing???
-        // final boolean isBags = _curPos != null && env.getGroups().exists(gg -> gg.getAllContaining(_curPos).exists(gpt -> gpt.getBagsTarget().exists(_curPos::equals)));
+        // final boolean isBags = _curPos != null && env.getGroups().exists(gg -> gg.getAllContaining(_curPos).exists(gpt -> gpt.getBagsResult().exists(_curPos::equals)));
         // _w.detailEditor.allEditorsJava().stream().filter(ed -> _w.detailEditor.curDetailEditorJava().forall(cur -> cur != ed)).forEach(ed -> updateEnabledState(new Component[]{ed}, !isBags));
     }
 

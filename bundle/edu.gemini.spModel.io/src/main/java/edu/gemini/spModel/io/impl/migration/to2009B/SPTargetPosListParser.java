@@ -76,8 +76,7 @@ enum SPTargetPosListParser {
         public void addTarget(SPTarget target, Targets targets) {
             GuideProbeTargets gt = targets.guideMap.get(guider);
             if (gt == null) {
-                gt = GuideProbeTargets.create(guider, GuideProbeTargets.NO_TARGET,
-                        GuideProbeTargets.NO_TARGET, ImCollections.singletonList(target));
+                gt = GuideProbeTargets.create(guider, GuideProbeTargets.NO_TARGET, ImCollections.singletonList(target));
             } else {
                 gt = gt.addManualTarget(target);
             }

@@ -12,7 +12,7 @@ import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.rich.shared.immutable._
 import edu.gemini.shared.util.immutable.{Option => JOption, Some => JSome}
 import edu.gemini.spModel.target.SPTarget
-import edu.gemini.spModel.target.env.{GuideProbeTargets, TargetEnvironment}
+import edu.gemini.spModel.target.env.{BagsResult, GuideProbeTargets, TargetEnvironment}
 import edu.gemini.spModel.target.system.HmsDegTarget
 
 import scala.concurrent.Future
@@ -89,7 +89,7 @@ object AgsStrategy {
       (env /: assignments) { (curEnv, ass) =>
         val target = new SPTarget(HmsDegTarget.fromSkyObject(ass.guideStar.toOldModel))
         val oldGpt = curEnv.getPrimaryGuideProbeTargets(ass.guideProbe).asScalaOpt
-        val newGpt = oldGpt.getOrElse(GuideProbeTargets.create(ass.guideProbe)).withBagsTarget(target)
+        val newGpt = oldGpt.getOrElse(GuideProbeTargets.create(ass.guideProbe)).withBagsResult(BagsResult.WithTarget(target))
         curEnv.putPrimaryGuideProbeTargets(newGpt)
       }
   }
