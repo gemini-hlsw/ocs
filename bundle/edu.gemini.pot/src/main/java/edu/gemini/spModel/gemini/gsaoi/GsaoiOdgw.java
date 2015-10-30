@@ -234,11 +234,11 @@ public enum GsaoiOdgw implements ValidatableGuideProbe {
 
                     final GuideProbeTargets gptOld = gtMap.get(odgw);
                     final boolean primaryIsBags = gptOld != null && gptOld.primaryIsBagsTarget();
-                    final BagsResult bagsTarget = primaryIsBags ? BagsResult.WithTarget$.MODULE$.apply(primary) : GuideProbeTargets.DEFAULT_BAGS_RESULT;
-                    final GuideProbeTargets gptNew = GuideProbeTargets.create(odgw, bagsTarget, new Some<>(primary), imLst);
+                    final BagsResult bagsResult = primaryIsBags ? BagsResult.WithTarget$.MODULE$.apply(primary) : GuideProbeTargets.DEFAULT_BAGS_RESULT;
+                    final GuideProbeTargets gptNew = GuideProbeTargets.create(odgw, bagsResult, new Some<>(primary), imLst);
                     gtMap.put(odgw, gptNew);
 
-                    if (!updated && (gptOld == null || targetsUpdated(imLst, gptOld.getTargets()) || !gptOld.getBagsResult().equals(bagsTarget))) {
+                    if (!updated && (gptOld == null || targetsUpdated(imLst, gptOld.getTargets()) || !gptOld.getBagsResult().equals(bagsResult))) {
                         updated = true;
                     }
                 }
