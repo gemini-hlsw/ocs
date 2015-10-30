@@ -12,7 +12,7 @@ sealed trait BagsResult extends Cloneable {
   override def clone: BagsResult = this
 
   override def equals(obj: scala.Any): Boolean = obj match {
-    case other: BagsResult => target.equals(other.target)
+    case other: BagsResult => target.equals(other.target) && id.equals(other.id)
     case _                 => false
   }
 
