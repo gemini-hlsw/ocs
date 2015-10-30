@@ -56,7 +56,7 @@ protected object OTBrowserPresetChoice {
   }
 
   case class DeletePreset(preset: SavedPreset) extends ObsQueryPreset {
-    val name = s"""Delete Preset "${preset.name}""""
+    val name = s"""Delete Preset '${preset.name}'"""
   }
 
 }
@@ -117,13 +117,18 @@ final class ObsCatalogQueryTool(catalog: Catalog) {
     reactions += {
       case SelectionChanged(_) if selection.item == SaveNewPreset =>
         val name = DialogUtil.input(ObsCatalogFrame.instance.peer, "Enter a name for this query")
-        Option(name).filter(_.nonEmpty).foreach { n =>
+        val previousModel = this.peer.getModel
+        val existingPresets = (0 until previousModel.getSize).map(previousModel.getElementAt).filter(_.isPreset)
+        val existingNames = existingPresets.map(_.name)
+
+        Option(name).filter(_.nonEmpty).filterNot(existingNames.contains).foreach { n =>
           val preset = SavedPreset(OTBrowserPreset(n, queryPanel.instrumentSelection))
-          val previousModel = this.peer.getModel
-          val existingElements = (0 until previousModel.getSize).map(previousModel.getElementAt).filter(_.isPreset)
-          val model = new DefaultComboBoxModel[ObsQueryPreset]((preset :: existingElements.toList ::: List(SaveNewPreset, DeletePreset(preset))).toArray)
+          val model = new DefaultComboBoxModel[ObsQueryPreset]((preset :: existingPresets.toList ::: List(SaveNewPreset, DeletePreset(preset))).toArray)
           model.setSelectedItem(preset)
           this.peer.setModel(model)
+        }
+        existingNames.find(_ == name).foreach { n =>
+          DialogUtil.error(s"Name '$n' already in used")
         }
       case SelectionChanged(_)                                    =>
         selection.item match {
