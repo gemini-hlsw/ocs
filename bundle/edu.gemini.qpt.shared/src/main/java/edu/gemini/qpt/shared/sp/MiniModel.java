@@ -26,14 +26,15 @@ import java.util.concurrent.TimeoutException;
 public class MiniModel {
 
     /** Set of observation classes that are considered to be relevant by default (QPT). */
-    private static final Set<ObsClass> RELEVANT_OBS_CLASSES = new HashSet<ObsClass>();
+    private static final Set<ObsClass> RELEVANT_OBS_CLASSES = new HashSet<>();
     static {
         RELEVANT_OBS_CLASSES.add(ObsClass.PARTNER_CAL);
         RELEVANT_OBS_CLASSES.add(ObsClass.PROG_CAL);
+        RELEVANT_OBS_CLASSES.add(ObsClass.DAY_CAL);
         RELEVANT_OBS_CLASSES.add(ObsClass.SCIENCE);
     }
     /** Set of observation statuses that are considered to be relevant by default (QPT). */
-    private static final Set<ObservationStatus> RELEVANT_OBS_STATUSES = new HashSet<ObservationStatus>();
+    private static final Set<ObservationStatus> RELEVANT_OBS_STATUSES = new HashSet<>();
     static {
         RELEVANT_OBS_STATUSES.add(ObservationStatus.READY);
         RELEVANT_OBS_STATUSES.add(ObservationStatus.ONGOING);
@@ -43,7 +44,7 @@ public class MiniModel {
     private final SortedSet<Obs> allObservations;
     private final SortedSet<String> misconfiguredObservations;
     private final SortedSet<String> allSemesters;
-    private final Map<String, Obs> obsMap = new TreeMap<String, Obs>();
+    private final Map<String, Obs> obsMap = new TreeMap<>();
     private final Site site;
     private final long timestamp = System.currentTimeMillis();
     private final Map<SPProgramID, ProgramExclusion> programExclusions;
@@ -56,12 +57,12 @@ public class MiniModel {
                       Map<SPProgramID, ProgramExclusion> programExclusions,
                       Map<SPObservationID, ObsExclusion> obsExclusions) {
         this.site = site;
-        this.programs = Collections.unmodifiableSortedSet(new TreeSet<Prog>(programs));
-        this.misconfiguredObservations = Collections.unmodifiableSortedSet(new TreeSet<String>(misconfiguredObservations));
-        this.allSemesters = Collections.unmodifiableSortedSet(new TreeSet<String>(allSemesters));
+        this.programs = Collections.unmodifiableSortedSet(new TreeSet<>(programs));
+        this.misconfiguredObservations = Collections.unmodifiableSortedSet(new TreeSet<>(misconfiguredObservations));
+        this.allSemesters = Collections.unmodifiableSortedSet(new TreeSet<>(allSemesters));
         this.programExclusions = Collections.unmodifiableMap(programExclusions);
         this.obsExclusions = Collections.unmodifiableMap(obsExclusions);
-        SortedSet<Obs> accum = new TreeSet<Obs>();
+        SortedSet<Obs> accum = new TreeSet<>();
         for (Prog prog: programs) accum.addAll(prog.getFullObsSet());
         allObservations = Collections.unmodifiableSortedSet(accum);
         for (Obs obs: allObservations) obsMap.put(obs.getObsId(), obs);

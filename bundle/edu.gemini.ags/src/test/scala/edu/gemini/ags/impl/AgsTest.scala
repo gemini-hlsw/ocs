@@ -243,7 +243,7 @@ case class AgsTest(ctx: ObsContext, guideProbe: GuideProbe, usable: List[(Sidere
       val m    = GuideSpeed.values.toList.map { gs => gs -> mc.apply(ctx.getConditions, gs) }.toMap
       val fast = m(FAST)
       // Randomly pick one of the allowed bands
-      val band = strategy.probeBands.bands.list(scala.util.Random.nextInt(strategy.probeBands.bands.size))
+      val band = strategy.probeBands.bands(scala.util.Random.nextInt(strategy.probeBands.bands.size))
 
       def magList(base: Double)(adjs: (Double, Option[GuideSpeed])*): List[(Magnitude, Option[GuideSpeed])] =
         adjs.toList.map { case (adj, gs) => (new Magnitude(base + adj, band), gs) }

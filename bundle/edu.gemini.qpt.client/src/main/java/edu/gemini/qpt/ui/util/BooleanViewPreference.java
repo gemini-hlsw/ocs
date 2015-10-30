@@ -1,8 +1,5 @@
 package edu.gemini.qpt.ui.util;
 
-
-
-
 public enum BooleanViewPreference implements PreferenceManager.Key<Boolean> {
 
 	// Show All (normally off)
@@ -22,8 +19,9 @@ public enum BooleanViewPreference implements PreferenceManager.Key<Boolean> {
 //	VIEW_BAND_0("Non-Queue Programs", false),
 	VIEW_INACTIVE_PROGRAMS(false),	
 	VIEW_SCIENCE_OBS(true),
-	VIEW_CALIBRATIONS(false),
-	
+	VIEW_NIGHTTIME_CALIBRATIONS(false),
+	VIEW_DAYTIME_CALIBRATIONS(false),
+
 	VIEW_BAND_1(true),
 	VIEW_BAND_2(true),
 	VIEW_BAND_3(true),

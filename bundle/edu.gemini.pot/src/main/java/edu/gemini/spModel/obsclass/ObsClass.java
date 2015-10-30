@@ -1,7 +1,3 @@
-//
-// $Id: ObsClass.java 44610 2012-04-18 18:57:38Z swalker $
-//
-
 package edu.gemini.spModel.obsclass;
 
 import edu.gemini.spModel.time.ChargeClass;
@@ -110,7 +106,7 @@ public enum ObsClass implements DisplayableSpType, LoggableSpType, SequenceableS
     private String _logValue;
 
 
-    private ObsClass(String headerVal, String displayVal, int priority, ChargeClass charge, String logValue) {
+    ObsClass(String headerVal, String displayVal, int priority, ChargeClass charge, String logValue) {
         _headerValue  = headerVal;
         _displayValue = displayVal;
         _priority     = priority;

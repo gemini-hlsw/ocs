@@ -3,10 +3,9 @@ package edu.gemini.ags.api
 import edu.gemini.ags.api.AgsGuideQuality.Unusable
 import edu.gemini.ags.api.AgsMagnitude._
 import edu.gemini.pot.ModelConverters._
-import edu.gemini.spModel.core.SiderealTarget
-import edu.gemini.spModel.core.{BandsList, Magnitude}
+import edu.gemini.spModel.core.{BandsList, Magnitude, SiderealTarget}
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.ImageQuality
-import edu.gemini.spModel.guide.{GuideStarValidation, ValidatableGuideProbe, GuideProbe, GuideProbeGroup, GuideSpeed}
+import edu.gemini.spModel.guide.{GuideProbe, GuideProbeGroup, GuideSpeed, GuideStarValidation, ValidatableGuideProbe}
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.rich.shared.immutable._
 import edu.gemini.spModel.target.SPTarget
@@ -102,7 +101,7 @@ object AgsAnalysis {
       if (probeBands.bands.length == 1) {
         s"${p}uide star ${probeBands.bands.head}-band magnitude is missing. Cannot determine guiding performance."
       } else {
-        s"${p}uide star ${probeBands.bands.map(_.name).list.mkString(", ")}-band magnitudes are missing. Cannot determine guiding performance."
+        s"${p}uide star ${probeBands.bands.map(_.name).mkString(", ")}-band magnitudes are missing. Cannot determine guiding performance."
       }
     }
     override val quality = AgsGuideQuality.PossiblyUnusable
@@ -157,8 +156,8 @@ object AgsAnalysis {
   }
 
   private def magnitudeAnalysis(ctx: ObsContext, mt: MagnitudeTable, guideProbe: ValidatableGuideProbe, guideStar: SiderealTarget, bands: BandsList): Option[AgsAnalysis] = {
-    import GuideSpeed._
     import AgsGuideQuality._
+    import GuideSpeed._
 
     val conds = ctx.getConditions
 
@@ -200,7 +199,7 @@ object AgsAnalysis {
     }
 
     // Find the first band in the guide star that is on the list of possible bands
-    def usableMagnitude:Option[Magnitude] = bands.bands.list.map(guideStar.magnitudeIn).find(_.isDefined).flatten
+    def usableMagnitude:Option[Magnitude] = bands.bands.map(guideStar.magnitudeIn).find(_.isDefined).flatten
 
     for {
       mc  <- mt(ctx, guideProbe)

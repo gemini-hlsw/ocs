@@ -1,7 +1,5 @@
 package edu.gemini.spModel.core
 
-import edu.gemini.spModel.core.SiderealTarget
-
 import scalaz._
 import Scalaz._
 
@@ -10,9 +8,9 @@ import Scalaz._
  * It is used, e.g. to extract a magnitude from a target
  */
 sealed trait BandsList {
-  val bands: NonEmptyList[MagnitudeBand]
-  def extract(t: SiderealTarget) = bands.map(t.magnitudeIn).list.find(_.isDefined).flatten
-  def bandSupported(b: MagnitudeBand) = bands.list.contains(b)
+  val bands: List[MagnitudeBand]
+  def extract(t: SiderealTarget) = bands.map(t.magnitudeIn).find(_.isDefined).flatten
+  def bandSupported(b: MagnitudeBand) = bands.contains(b)
 }
 
 /**
@@ -21,21 +19,21 @@ sealed trait BandsList {
 case object RBandsList extends BandsList {
   val instance = this
 
-  val bands = NonEmptyList(MagnitudeBand._r, MagnitudeBand.R, MagnitudeBand.UC)
+  val bands = List(MagnitudeBand._r, MagnitudeBand.R, MagnitudeBand.UC)
 }
 
 /**
  * Extractor for Nici containing 4 bands
  */
 case object NiciBandsList extends BandsList {
-  val bands = NonEmptyList(MagnitudeBand._r, MagnitudeBand.R, MagnitudeBand.UC, MagnitudeBand.V)
+  val bands = List(MagnitudeBand._r, MagnitudeBand.R, MagnitudeBand.UC, MagnitudeBand.V)
 }
 
 /**
  * Extracts a single band from a target if available
  */
 case class SingleBand(band: MagnitudeBand) extends BandsList {
-  val bands = NonEmptyList(band)
+  val bands = List(band)
 }
 
 object BandsList {
