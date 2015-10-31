@@ -1,7 +1,7 @@
 package jsky.app.ot.gemini.editor.targetComponent.details
 
 import java.awt.{GridBagConstraints, GridBagLayout, Insets}
-import java.text.{ParseException, NumberFormat}
+import java.text.{DecimalFormat, NumberFormat, ParseException}
 import java.util.Locale
 import javax.swing.JPanel
 
@@ -16,8 +16,8 @@ import jsky.util.gui.{NumberBoxWidget, TextBoxWidget, TextBoxWidgetWatcher}
 import squants.{Quantity, UnitOfMeasure}
 
 import scala.swing.ListView.Renderer
-import scala.swing.event.SelectionChanged
 import scala.swing._
+import scala.swing.event.SelectionChanged
 import scalaz.std.list._
 import scalaz.syntax.functor._
 import scalaz.syntax.id._
@@ -100,7 +100,7 @@ case class NumericPropertySheet[A](title: Option[String], f: SPTarget => A, prop
   private def updateField(p: Prop[A, _], tbwe: TextBoxWidget) =
     try
       nonreentrant {
-        p.edit(f(spt), p.formatter.parse(tbwe.getValue).doubleValue())
+        p.edit(f(spt), parse(tbwe.getValue))
         spt.notifyOfGenericUpdate()
       }
     catch { case _: ParseException => }
@@ -108,13 +108,29 @@ case class NumericPropertySheet[A](title: Option[String], f: SPTarget => A, prop
   private def transformField(p: Prop[A, _], tbwe: TextBoxWidget) =
     try {
       pairs.find(_._1 == p).foreach { w =>
-        p.transform(w._2, f(spt), p.formatter.parse(tbwe.getValue).doubleValue())
+        p.transform(w._2, f(spt), parse(tbwe.getValue))
       }
     } catch { case _: ParseException => }
+
+  private def parse(s: String) =
+    NumericPropertySheet.ParseFormatter.
+      parse(s.toUpperCase). // turn 1.23e-3 into upper case 1.23E-3; NumericFormatter only allows capital E!
+      doubleValue()         // formatter deals with empty string and incomplete exp numbers like 1e 1e- etc
 
 }
 
 object NumericPropertySheet {
+
+  private val MaxFractionDigits   = 12
+  private val ExpLimit            = 6
+  private val SmallLimit          = Math.pow(10, -ExpLimit)
+  private val BigLimit            = Math.pow(10, ExpLimit)
+  private val ExpNumbersFormatter = new DecimalFormat("0.#E0") <|
+                                        { _.setMaximumFractionDigits(MaxFractionDigits) }
+  private val NumbersFormatter    = NumberFormat.getInstance(Locale.US) <|
+                                        { _.setGroupingUsed(false) }    <|
+                                        { _.setMaximumFractionDigits(MaxFractionDigits) }
+  private val ParseFormatter      = NumbersFormatter
 
   sealed trait Prop[A, B] {
     def leftComponent: Component
@@ -122,7 +138,12 @@ object NumericPropertySheet {
     def edit: (A, Double)                       => Unit
     def transform: (NumberBoxWidget, A, Double) => Unit = (_, _, _) => {}
     def init: (NumberBoxWidget, A)              => Unit
-    def formatter: NumberFormat = NumberFormat.getInstance(Locale.US) <| {_.setGroupingUsed(false)}
+    def format(v: Double) = formatter(v).format(v)
+    def formatter(v: Double) = v match {
+      case d if Math.abs(d) < SmallLimit && d != 0 => ExpNumbersFormatter // use exponential notation for small numbers
+      case d if Math.abs(d) > BigLimit             => ExpNumbersFormatter // use exponential notation for big numbers
+      case d                                       => NumbersFormatter    // use standard notation for all others
+    }
   }
 
   case class DoubleProp[A](leftCaption: String, rightCaption: String, get: A => Double, edit: (A, Double) => Unit) extends Prop[A, Double] {
@@ -133,7 +154,7 @@ object NumericPropertySheet {
       horizontalAlignment = Alignment.Left
     }
     def init: (NumberBoxWidget, A) => Unit  =  (w,a) => {
-      w.setValue(formatter.format(get(a)))
+      w.setValue(format(get(a)))
     }
   }
 
@@ -150,15 +171,15 @@ object NumericPropertySheet {
           rightComponent.text = rightCaptions.getOrElse(selection.item, "")
       }
     }
-    override def formatter = format(leftComponent.selection.item)
+    override def formatter(v: Double) = format(leftComponent.selection.item)
     def edit: (A, Double)          => Unit  =  (a, d) => {
       set(a, leftComponent.selection.item, d)
     }
     override def transform: (NumberBoxWidget,  A, Double)          => Unit  =  (w, a, d) => {
-      w.setValue(formatter.format(get(a, leftComponent.selection.item)))
+      w.setValue(format(get(a, leftComponent.selection.item)))
     }
     def init: (NumberBoxWidget, A) => Unit  =  (w, a) => {
-      w.setValue(formatter.format(get(a, leftComponent.selection.item)))
+      w.setValue(format(get(a, leftComponent.selection.item)))
     }
   }
 
@@ -171,7 +192,7 @@ object NumericPropertySheet {
     }
     def edit: (A, Double)          => Unit  =  (a, d) => set(a, unit(d))
     def init: (NumberBoxWidget, A) => Unit  =  (w, a) => {
-      w.setValue(formatter.format(get(a).value))
+      w.setValue(format(get(a).value))
     }
   }
 
@@ -183,7 +204,7 @@ object NumericPropertySheet {
     def unit           = rightComponent.selection.item
     def edit: (A, Double)          => Unit  =  (a, d) => set(a, unit(d))
     def init: (NumberBoxWidget, A) => Unit  =  (w, a) => {
-      w.setValue(formatter.format(get(a).value))
+      w.setValue(format(get(a).value))
       rightComponent.selection.item = get(a).unit
     }
   }
