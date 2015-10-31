@@ -12,7 +12,7 @@ import edu.gemini.util.security.auth.keychain.Action._
 import edu.gemini.util.security.auth.ui.PasswordDialog
 
 import jsky.app.ot.OT
-import jsky.app.ot.gemini.obscat.CatalogQueryHistory
+import jsky.app.ot.gemini.obscat.OTBrowserPresets
 import jsky.app.ot.plugin.{OtActionPlugin, OtViewerService}
 import jsky.app.ot.vcs.VcsOtClient
 import jsky.app.ot.viewer.ViewerService
@@ -58,7 +58,8 @@ class Activator extends BundleActivator {
           OT.open(auth, magTable, reg, storage)
           LOG.info("Call to OT.open() took %d ms.".format(System.currentTimeMillis - start))
 
-          CatalogQueryHistory.load(ExternalStorage.getExternalDataRoot(ctx))
+          OTBrowserPresets.dir = Some(ExternalStorage.getExternalDataRoot(ctx))
+          OTBrowserPresets.load()
         }
       })
 
@@ -93,7 +94,6 @@ class Activator extends BundleActivator {
 
   override def stop(ctx: BundleContext) {
     LOG.info("Stop jsky.app.ot")
-    CatalogQueryHistory.save(ExternalStorage.getExternalDataRoot(ctx))
     tracker.close()
     tracker = null
   }

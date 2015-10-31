@@ -21,25 +21,11 @@ import scala.swing.event.{SelectionChanged, ButtonClicked}
 import scalaz._
 import Scalaz._
 
-object ObsCatalogFrame extends Frame with PreferredSizeFrame {
-  val instance = this
+case class OTCatalogSelection(selection: Map[String, AnyRef]) extends Serializable
 
-  title = "Gemini Science Program Database"
+case class OTBrowserInstrumentSelection(selection: Option[Map[String, Map[String, AnyRef]]]) extends Serializable
 
-  val cqt = new ObsCatalogQueryTool(ObsCatalog.INSTANCE)
-  contents = new MigPanel(LC().insets(0).fill().minWidth(1200.px)) {
-    add(Component.wrap(cqt.queryPanel), CC().alignY(TopAlign).growX())
-    add(cqt.buttonPanel, CC().newline().growX().gap(10.px, 10.px, 10.px, 10.px))
-    add(Component.wrap(cqt.queryResults), CC().newline().growX().growY().pushY())
-  }
-  adjustSize(true)
-}
-
-case class OTCatalogSelection(selection: Map[String, AnyRef])
-
-case class OTBrowserInstrumentSelection(selection: Option[Map[String, Map[String, AnyRef]]])
-
-case class OTBrowserPreset(name: String, catalog: OTCatalogSelection, instruments: OTBrowserInstrumentSelection)
+case class OTBrowserPreset(name: String, catalog: OTCatalogSelection, instruments: OTBrowserInstrumentSelection) extends Serializable
 
 protected object OTBrowserPresetChoice {
 
@@ -62,6 +48,23 @@ protected object OTBrowserPresetChoice {
   }
 
 }
+
+object ObsCatalogFrame extends Frame with PreferredSizeFrame {
+  val instance = this
+
+  def loadPresets(presets: List[OTBrowserPresetChoice.ObsQueryPreset]):Unit = cqt.loadPreset(presets)
+
+  title = "Gemini Science Program Database"
+
+  lazy val cqt = new ObsCatalogQueryTool(ObsCatalog.INSTANCE)
+  contents = new MigPanel(LC().insets(0).fill().minWidth(1200.px)) {
+    add(Component.wrap(cqt.queryPanel), CC().alignY(TopAlign).growX())
+    add(cqt.buttonPanel, CC().newline().growX().gap(10.px, 10.px, 10.px, 10.px))
+    add(Component.wrap(cqt.queryResults), CC().newline().growX().growY().pushY())
+  }
+  adjustSize(true)
+}
+
 
 class OTBrowserQueryPanel(catalog: Catalog) extends ObsCatalogQueryPanel(catalog, 6) {
   private def catalogSelection: OTCatalogSelection = {
@@ -140,6 +143,8 @@ final class ObsCatalogQueryTool(catalog: Catalog) {
           val model = new DefaultComboBoxModel[ObsQueryPreset]((preset :: existingPresets.toList ::: List(SaveNewPreset, DeletePreset(preset))).toArray)
           model.setSelectedItem(preset)
           this.peer.setModel(model)
+          val toSave = (0 until model.getSize).map(model.getElementAt).filter(_.isPreset)
+          OTBrowserPresets.save(toSave.toList)
         }
         existingNames.find(_ == name).foreach { n =>
           DialogUtil.error(s"Name '$n' already in used")
@@ -156,10 +161,21 @@ final class ObsCatalogQueryTool(catalog: Catalog) {
             head.foreach(model.setSelectedItem)
             this.peer.setModel(model)
           case SavedPreset(preset) =>
+            println("Selected")
             queryPanel.restorePreset(preset)
           case _                   => // Should not happen
         }
     }
+  }
+
+  def loadPreset(presets: List[ObsQueryPreset]):Unit = {
+    val selected = presets.headOption.collect {
+      case s: SavedPreset => s
+    }
+    val extras = SaveNewPreset :: ~selected.map(p => List(DeletePreset(p)))
+    val model = new DefaultComboBoxModel[ObsQueryPreset]((presets ::: extras).toArray)
+    selected.foreach(model.setSelectedItem)
+    presetsCB.peer.setModel(model)
   }
 
   val toolsButton = new Button("") {
