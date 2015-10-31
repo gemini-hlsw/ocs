@@ -15,15 +15,18 @@ import jsky.util.gui.DialogUtil
 
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.collection.JavaConverters._
 import scala.swing._
 import scala.swing.event.{SelectionChanged, ButtonClicked}
 
 import scalaz._
 import Scalaz._
 
-case class OTCatalogSelection(selection: Map[String, java.io.Serializable]) extends Serializable
+// NOTE Serialization is totally screwed, I need to make the types explicit for it to work
+// TODO Port this to a sane system, e.g. Json serialization
+case class OTCatalogSelection(selection: java.util.HashMap[String, java.io.Serializable]) extends Serializable
 
-case class OTBrowserInstrumentSelection(selection: Option[Map[String, Map[String, java.io.Serializable]]]) extends Serializable
+case class OTBrowserInstrumentSelection(selection: Option[java.util.HashMap[String, java.util.HashMap[String, java.io.Serializable]]]) extends Serializable
 
 case class OTBrowserPreset(name: String, catalog: OTCatalogSelection, instruments: OTBrowserInstrumentSelection) extends Serializable
 
@@ -73,7 +76,7 @@ class OTBrowserQueryPanel(catalog: Catalog) extends ObsCatalogQueryPanel(catalog
       case (i, c) =>
         (_catalog.getParamDesc(i).getName, Option(getValue(i)).getOrElse(""))
     }
-    OTCatalogSelection(s.toMap)
+    OTCatalogSelection(new java.util.HashMap[String, java.io.Serializable](s.toMap.asJava))
   }
 
   private def instrumentSelection: OTBrowserInstrumentSelection = {
@@ -85,21 +88,22 @@ class OTBrowserQueryPanel(catalog: Catalog) extends ObsCatalogQueryPanel(catalog
         val p = params.toList.zipWithIndex.map { case (param, j) =>
           (param.getName, getValue(param, _panelComponents(idx(i) + 1)(j)))
         }
-        (instrument, p.toMap)
+        (instrument, new java.util.HashMap[String, java.io.Serializable](p.toMap.asJava))
       }.toMap
     }
-    OTBrowserInstrumentSelection(values)
+    // types need to be explicit
+    OTBrowserInstrumentSelection(values.map(k => new java.util.HashMap[String, java.util.HashMap[String, java.io.Serializable]](k.asJava)))
   }
 
   def selectionPreset(name: String): OTBrowserPreset = OTBrowserPreset(name, catalogSelection, instrumentSelection)
 
   def restorePreset(preset: OTBrowserPreset): Unit = {
-    preset.catalog.selection.foreach(Function.tupled(setValue))
+    preset.catalog.selection.asScala.foreach(Function.tupled(setValue))
 
     preset.instruments.selection.foreach { m =>
-      m.foreach {
+      m.asScala.foreach {
         case (inst, s) =>
-          s.foreach { v =>
+          s.asScala.foreach { v =>
             Option(getInstComponentForLabel(inst, v._1)).foreach { setValue(_, v._2) }
           }
       }

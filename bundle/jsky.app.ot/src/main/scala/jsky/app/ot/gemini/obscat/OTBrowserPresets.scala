@@ -25,7 +25,6 @@ object OTBrowserPresets {
       block
     } catch {
       case ex: Exception =>
-        ex.printStackTrace()
         Log.log(Level.WARNING, "Problem with browser query save/restore", ex)
     }
 
