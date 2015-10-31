@@ -536,7 +536,6 @@ public final class GuideProbeTargets implements Serializable, TargetContainer, I
 
 
     public static final String GUIDER_PARAM_SET_NAME = "guider";
-    public static final String MANUAL_TARGETS_PARAM_SET_NAME = "manualTargets";
 
     public ParamSet getParamSet(final PioFactory factory) {
         final ParamSet paramSet = factory.createParamSet(GUIDER_PARAM_SET_NAME);
