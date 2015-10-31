@@ -253,7 +253,7 @@ public class InstGmosSouth extends
     }
 
     /**
-     * Calculates the mean gain for the given parameters for GMOS South.
+     * Calculates the mean gain for the given parameters for GMOS.
      */
     public static double getMeanGain(final GmosCommonType.AmpGain gain,
                                      final GmosCommonType.AmpReadMode readMode,
@@ -276,16 +276,16 @@ public class InstGmosSouth extends
         } else if (detectorManufacturer == GmosCommonType.DetectorManufacturer.HAMAMATSU) {
             if (readMode == GmosCommonType.AmpReadMode.FAST) {
                 if (gain == GmosCommonType.AmpGain.HIGH) {
-                    return 5.1;
+                    return 5.2;
                 } else if (gain == GmosCommonType.AmpGain.LOW) {
-                    return 1.4;
+                    return 1.6;
                 }
             } else if (readMode == GmosCommonType.AmpReadMode.SLOW) {
                 if (gain == GmosCommonType.AmpGain.HIGH) {
                     // NOTE: This value was never specified, and indeed, it is not of much interest.
                     return 4.4;
                 } else if (gain == GmosCommonType.AmpGain.LOW) {
-                    return 1.7;
+                    return 1.8;
                 }
             }
         }
@@ -305,7 +305,7 @@ public class InstGmosSouth extends
     }
 
     /**
-     * Calculates the mean read noise for the given parameters for GMOS North.
+     * Calculates the mean read noise for the given parameters for GMOS.
      */
     public static double getMeanReadNoise(final GmosCommonType.AmpGain gain,
                                           final GmosCommonType.AmpReadMode readMode,
@@ -328,9 +328,9 @@ public class InstGmosSouth extends
         } else if (detectorManufacturer == GmosCommonType.DetectorManufacturer.HAMAMATSU) {
             if (readMode == GmosCommonType.AmpReadMode.FAST) {
                 if (gain == GmosCommonType.AmpGain.HIGH) {
-                    return 7.7;
+                    return 7.9;
                 } else if (gain == GmosCommonType.AmpGain.LOW) {
-                    return 5.6;
+                    return 6.6;
                 }
             } else if (readMode == GmosCommonType.AmpReadMode.SLOW) {
                 if (gain == GmosCommonType.AmpGain.HIGH) {
