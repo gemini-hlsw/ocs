@@ -28,7 +28,7 @@ case class OTCatalogSelection(selection: java.util.HashMap[String, java.io.Seria
 
 case class OTBrowserInstrumentSelection(selection: Option[java.util.HashMap[String, java.util.HashMap[String, java.io.Serializable]]]) extends Serializable
 
-case class OTBrowserPreset(name: String, catalog: OTCatalogSelection, instruments: OTBrowserInstrumentSelection) extends Serializable
+case class OTBrowserPreset(name: String, includeRemote: Boolean, catalog: OTCatalogSelection, instruments: OTBrowserInstrumentSelection) extends Serializable
 
 case class OTBrowserConf(selected: String, presets: List[OTBrowserPreset]) extends Serializable
 
@@ -101,7 +101,7 @@ class OTBrowserQueryPanel(catalog: Catalog) extends ObsCatalogQueryPanel(catalog
     OTBrowserInstrumentSelection(values.map(k => new java.util.HashMap[String, java.util.HashMap[String, java.io.Serializable]](k.asJava)))
   }
 
-  def selectionPreset(name: String): OTBrowserPreset = OTBrowserPreset(name, catalogSelection, instrumentSelection)
+  def selectionPreset(name: String, includeRemote: Boolean): OTBrowserPreset = OTBrowserPreset(name, includeRemote, catalogSelection, instrumentSelection)
 
   def restorePreset(preset: OTBrowserPreset): Unit = {
     preset.catalog.selection.asScala.foreach(Function.tupled(setValue))
@@ -152,7 +152,7 @@ final class ObsCatalogQueryTool(catalog: Catalog) {
             val existingNames = existingPresets.map(_.name)
 
             Option(name).filter(_.nonEmpty).filterNot(existingNames.contains).foreach { n =>
-              val preset = SavedPreset(queryPanel.selectionPreset(name))
+              val preset = SavedPreset(queryPanel.selectionPreset(name, remote.selected))
               val model = new DefaultComboBoxModel[ObsQueryPreset]((preset :: existingPresets.toList ::: List(SaveNewPreset, SaveExistingPreset(preset), DeletePreset(preset))).toArray)
               model.setSelectedItem(preset)
               this.peer.setModel(model)
@@ -174,7 +174,7 @@ final class ObsCatalogQueryTool(catalog: Catalog) {
             OTBrowserPresetsPersistence.saveAsync(presetsToSave(model))
             this.peer.setModel(model)
           case SaveExistingPreset(preset) =>
-            val updatedPreset = SavedPreset(queryPanel.selectionPreset(preset.name))
+            val updatedPreset = SavedPreset(queryPanel.selectionPreset(preset.name, remote.selected))
             val previousModel = this.peer.getModel
             val existingElements = (0 until previousModel.getSize).map(previousModel.getElementAt).filter(_.hasSettings).collect {
               case s @ SavedPreset(p) if p.name == preset.name => updatedPreset
@@ -193,6 +193,7 @@ final class ObsCatalogQueryTool(catalog: Catalog) {
             OTBrowserPresetsPersistence.saveAsync(presetsToSave(model))
             this.peer.setModel(model)
             this.selection.item = s
+            remote.selected = preset.includeRemote
             queryPanel.restorePreset(preset)
             doQuery()
           case _                   => // Should not happen
@@ -208,8 +209,11 @@ final class ObsCatalogQueryTool(catalog: Catalog) {
     val extras = SaveNewPreset :: ~selected.map(p => List(SaveExistingPreset(p), DeletePreset(p)))
     val sp:List[ObsQueryPreset] = conf.presets.map(SavedPreset.apply)
     val model = new DefaultComboBoxModel[ObsQueryPreset]((sp ::: extras).toArray)
-    selected.foreach(model.setSelectedItem)
-    selected.foreach(s => queryPanel.restorePreset(s.preset))
+    selected.foreach { s =>
+      model.setSelectedItem(s)
+      queryPanel.restorePreset(s.preset)
+      remote.selected = conf.presets.find(_.name == conf.selected).exists(_.includeRemote)
+    }
     presetsCB.peer.setModel(model)
   }
 
