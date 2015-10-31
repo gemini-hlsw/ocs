@@ -5,6 +5,7 @@ import jsky.app.ot.gemini.obscat.OTBrowserPresetChoice.SavedPreset
 import java.io._
 import java.util.logging.{Level, Logger}
 
+import scala.concurrent.{ExecutionContext, Future}
 import scalaz._
 import Scalaz._
 
@@ -45,7 +46,9 @@ object OTBrowserPresets {
     dir.ifNone(Log.warning("Must initialize the OTBrowser history"))
   }
 
-  def save(presets: List[OTBrowserPresetChoice.ObsQueryPreset]): Unit = catchingAll {
+  def saveAsync(presets: List[OTBrowserPresetChoice.ObsQueryPreset])(implicit ctx: ExecutionContext): Future[Unit] = Future.apply(save(presets))
+
+  private def save(presets: List[OTBrowserPresetChoice.ObsQueryPreset]): Unit = catchingAll {
     dir.foreach { d =>
       Log.info("Saving catalog query history")
       val f = new File(d, otBrowserFile)
