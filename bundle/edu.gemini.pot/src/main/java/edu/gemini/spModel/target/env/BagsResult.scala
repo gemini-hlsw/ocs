@@ -5,6 +5,8 @@ import edu.gemini.spModel.pio.{Pio, PioFactory, ParamSet}
 import edu.gemini.spModel.target.SPTarget
 import edu.gemini.spModel.rich.shared.immutable._
 
+import scala.collection.JavaConverters._
+
 sealed trait BagsResult extends Cloneable {
   val id: String
   val target: Option[SPTarget] = None
@@ -17,6 +19,7 @@ sealed trait BagsResult extends Cloneable {
     target.foreach { t =>
       val bagsParamSet = factory.createParamSet(BagsResult.BagsTargetParamSetName)
       bagsParamSet.addParamSet(t.getParamSet(factory))
+      paramSet.addParamSet(bagsParamSet)
     }
     paramSet
   }
@@ -52,7 +55,7 @@ object BagsResult {
     Option(parent.getParamSet(BagsResultParamSetName)).flatMap { ps =>
       // We get the param ID and then use that to construct the object.
       val paramId = Option(ps.getParam(BagsResultParamIdName)).map(_.getValue)
-      val target = Option(ps.getParamSet(BagsTargetParamSetName)).map(SPTarget.fromParamSet)
+      val target = Option(ps.getParamSet(BagsTargetParamSetName)).flatMap(_.getParamSets.asScala.headOption).map(SPTarget.fromParamSet)
 
       paramId.collect {
         case NoTargetFound.id => NoTargetFound

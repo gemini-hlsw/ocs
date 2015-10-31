@@ -7,6 +7,7 @@ import edu.gemini.spModel.pio.ParamSet;
 import edu.gemini.spModel.pio.Pio;
 import edu.gemini.spModel.pio.PioFactory;
 import edu.gemini.spModel.target.SPTarget;
+import edu.gemini.spModel.target.SPTargetPio;
 
 import java.io.Serializable;
 import java.util.*;
@@ -540,7 +541,8 @@ public final class GuideProbeTargets implements Serializable, TargetContainer, I
         final ParamSet paramSet = factory.createParamSet(GUIDER_PARAM_SET_NAME);
 
         Pio.addParam(factory, paramSet, "key", getGuider().getKey());
-        bagsResult.getParamSet(factory);
+        paramSet.addParamSet(bagsResult.getParamSet(factory));
+
 
         // If a primary target is set, store the index.
         getPrimaryIndex().foreach(i ->
@@ -567,7 +569,7 @@ public final class GuideProbeTargets implements Serializable, TargetContainer, I
 
 
         final List<SPTarget> lst = new ArrayList<>();
-        parent.getParamSets().forEach(ps -> lst.add(SPTarget.fromParamSet(ps)));
+        parent.getParamSets(SPTargetPio.PARAM_SET_NAME).forEach(ps -> lst.add(SPTarget.fromParamSet(ps)));
         final ImList<SPTarget> manualTargets = DefaultImList.create(lst);
 
         final GuideProbeTargets gpt = new GuideProbeTargets(probe, bagsResult, NO_TARGET, manualTargets);
