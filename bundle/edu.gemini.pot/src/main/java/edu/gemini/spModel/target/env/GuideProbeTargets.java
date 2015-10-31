@@ -7,6 +7,7 @@ import edu.gemini.spModel.pio.ParamSet;
 import edu.gemini.spModel.pio.Pio;
 import edu.gemini.spModel.pio.PioFactory;
 import edu.gemini.spModel.target.SPTarget;
+import edu.gemini.spModel.target.SPTargetPio;
 
 import java.io.Serializable;
 import java.util.*;
@@ -549,9 +550,10 @@ public final class GuideProbeTargets implements Serializable, TargetContainer, I
             Pio.addIntParam(factory, paramSet, "primary", i)
         );
 
-        final ParamSet mtParamSet = factory.createParamSet(MANUAL_TARGETS_PARAM_SET_NAME);
-        getManualTargets().foreach(t -> mtParamSet.addParamSet(t.getParamSet(factory)));
-        paramSet.addParamSet(mtParamSet);
+//        final ParamSet mtParamSet = factory.createParamSet(MANUAL_TARGETS_PARAM_SET_NAME);
+//        getManualTargets().foreach(t -> mtParamSet.addParamSet(t.getParamSet(factory)));
+//        paramSet.addParamSet(mtParamSet);
+        getManualTargets().foreach(t -> paramSet.addParamSet(t.getParamSet(factory)));
 
         return paramSet;
     }
@@ -571,7 +573,8 @@ public final class GuideProbeTargets implements Serializable, TargetContainer, I
 
 
         final List<SPTarget> lst = new ArrayList<>();
-        ImOption.apply(parent.getParamSet(MANUAL_TARGETS_PARAM_SET_NAME)).foreach(mtps -> mtps.getParamSets().forEach(ps -> lst.add(SPTarget.fromParamSet(ps))));
+        parent.getParamSets(SPTargetPio.PARAM_SET_NAME).forEach(ps -> lst.add(SPTarget.fromParamSet(ps)));
+        //ImOption.apply(parent.getParamSet(MANUAL_TARGETS_PARAM_SET_NAME)).foreach(mtps -> mtps.getParamSets().forEach(ps -> lst.add(SPTarget.fromParamSet(ps))));
 
         final ImList<SPTarget> manualTargets = DefaultImList.create(lst);
 
