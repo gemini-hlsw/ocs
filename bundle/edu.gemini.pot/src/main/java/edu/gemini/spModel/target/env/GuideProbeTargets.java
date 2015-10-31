@@ -550,9 +550,6 @@ public final class GuideProbeTargets implements Serializable, TargetContainer, I
             Pio.addIntParam(factory, paramSet, "primary", i)
         );
 
-//        final ParamSet mtParamSet = factory.createParamSet(MANUAL_TARGETS_PARAM_SET_NAME);
-//        getManualTargets().foreach(t -> mtParamSet.addParamSet(t.getParamSet(factory)));
-//        paramSet.addParamSet(mtParamSet);
         getManualTargets().foreach(t -> paramSet.addParamSet(t.getParamSet(factory)));
 
         return paramSet;
@@ -574,8 +571,6 @@ public final class GuideProbeTargets implements Serializable, TargetContainer, I
 
         final List<SPTarget> lst = new ArrayList<>();
         parent.getParamSets(SPTargetPio.PARAM_SET_NAME).forEach(ps -> lst.add(SPTarget.fromParamSet(ps)));
-        //ImOption.apply(parent.getParamSet(MANUAL_TARGETS_PARAM_SET_NAME)).foreach(mtps -> mtps.getParamSets().forEach(ps -> lst.add(SPTarget.fromParamSet(ps))));
-
         final ImList<SPTarget> manualTargets = DefaultImList.create(lst);
 
         final GuideProbeTargets gpt = new GuideProbeTargets(probe, bagsResult, NO_TARGET, manualTargets);
