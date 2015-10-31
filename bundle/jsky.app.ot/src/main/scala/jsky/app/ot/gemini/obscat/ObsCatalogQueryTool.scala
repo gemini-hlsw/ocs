@@ -52,6 +52,10 @@ protected object OTBrowserPresetChoice {
     val name = s"""Delete Preset '${preset.name}'"""
   }
 
+  case class SaveExistingPreset(preset: SavedPreset) extends ObsQueryPreset {
+    val name = s"""Save Preset '${preset.name}'"""
+  }
+
 }
 
 object ObsCatalogFrame extends Frame with PreferredSizeFrame {
@@ -149,7 +153,7 @@ final class ObsCatalogQueryTool(catalog: Catalog) {
 
             Option(name).filter(_.nonEmpty).filterNot(existingNames.contains).foreach { n =>
               val preset = SavedPreset(queryPanel.selectionPreset(name))
-              val model = new DefaultComboBoxModel[ObsQueryPreset]((preset :: existingPresets.toList ::: List(SaveNewPreset, DeletePreset(preset))).toArray)
+              val model = new DefaultComboBoxModel[ObsQueryPreset]((preset :: existingPresets.toList ::: List(SaveNewPreset, SaveExistingPreset(preset), DeletePreset(preset))).toArray)
               model.setSelectedItem(preset)
               this.peer.setModel(model)
               // Optimistically assume the save works ok
@@ -162,13 +166,24 @@ final class ObsCatalogQueryTool(catalog: Catalog) {
             val previousModel = this.peer.getModel
             val existingElements = (0 until previousModel.getSize).map(previousModel.getElementAt).filter(_.hasSettings).filterNot(_.name == preset.name)
             val head = existingElements.headOption.collect {
-              case s @ SavedPreset(_) => DeletePreset(s)
+              case s @ SavedPreset(_) => List(SaveExistingPreset(s), DeletePreset(s))
             }
-            val model = new DefaultComboBoxModel[ObsQueryPreset]((existingElements.toList ::: (SaveNewPreset :: head.toList)).toArray)
+            val model = new DefaultComboBoxModel[ObsQueryPreset]((existingElements.toList ::: (SaveNewPreset :: ~head)).toArray)
             existingElements.headOption.foreach(model.setSelectedItem)
             // Optimistically assume the save works ok
             OTBrowserPresetsPersistence.saveAsync(presetsToSave(model))
             this.peer.setModel(model)
+          case SaveExistingPreset(preset) =>
+            val updatedPreset = SavedPreset(queryPanel.selectionPreset(preset.name))
+            val previousModel = this.peer.getModel
+            val existingElements = (0 until previousModel.getSize).map(previousModel.getElementAt).filter(_.hasSettings).collect {
+              case s @ SavedPreset(p) if p.name == preset.name => updatedPreset
+              case q: ObsQueryPreset                           => q
+            }
+            val model = new DefaultComboBoxModel[ObsQueryPreset]((existingElements.toList ::: List(SaveNewPreset, SaveExistingPreset(updatedPreset), DeletePreset(updatedPreset))).toArray)
+            this.peer.setModel(model)
+            // Save the updated preset
+            OTBrowserPresetsPersistence.saveAsync(presetsToSave(model))
           case SavedPreset(preset) =>
             // Save the updated selection
             peer.getModel match {
@@ -186,7 +201,7 @@ final class ObsCatalogQueryTool(catalog: Catalog) {
 
   def loadPreset(conf: OTBrowserConf):Unit = {
     val selected = conf.presets.find(_.name == conf.selected).map(SavedPreset.apply)
-    val extras = SaveNewPreset :: ~selected.map(p => List(DeletePreset(p)))
+    val extras = SaveNewPreset :: ~selected.map(p => List(SaveExistingPreset(p), DeletePreset(p)))
     val sp:List[ObsQueryPreset] = conf.presets.map(SavedPreset.apply)
     val model = new DefaultComboBoxModel[ObsQueryPreset]((sp ::: extras).toArray)
     selected.foreach(model.setSelectedItem)
