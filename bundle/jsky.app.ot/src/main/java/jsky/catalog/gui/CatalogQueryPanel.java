@@ -383,7 +383,7 @@ public class CatalogQueryPanel extends JPanel
     }
 
     /** Return the value in the given component, or null if there is no value there. */
-    protected Object getValue(FieldDesc p, JComponent c) {
+    protected Serializable getValue(FieldDesc p, JComponent c) {
         if (p.getNumOptions() > 0) {
             // must be a combo box
             JComboBox cb = (JComboBox) c;
@@ -414,7 +414,7 @@ public class CatalogQueryPanel extends JPanel
     }
 
     /** Return the value in the ith component, or null if there is no value there. */
-    protected Object getValue(int i) {
+    protected Serializable getValue(int i) {
         return getValue(_catalog.getParamDesc(i), _components[i]);
     }
 
@@ -462,7 +462,7 @@ public class CatalogQueryPanel extends JPanel
                 String name = _catalog.getParamDesc(i).getName();
                 Object value = getValue(i);
                 if (value == null) value = "";
-                if (name != null && value instanceof Serializable)
+                if (name != null)
                     map.put(name, value);
             }
         }

@@ -150,11 +150,13 @@ public class FieldDescAdapter implements FieldDesc, Serializable {
     //}
 
     /** Parse the given string into the correct class type for this field and return the value. */
+    @Override
     public Object getValue(String s) {
         return FieldFormat.getValue(this, s);
     }
 
     /** Return the default value for this field, or null if there is no default. */
+    @Override
     public Object getDefaultValue() {
         return _defaultValue;
     }
@@ -176,6 +178,7 @@ public class FieldDescAdapter implements FieldDesc, Serializable {
      * If the field may only have a limited number of values, return the number
      * of values, otherwise 0.
      */
+    @Override
     public int getNumOptions() {
         if (_options == null)
             return 0;
@@ -183,12 +186,14 @@ public class FieldDescAdapter implements FieldDesc, Serializable {
     }
 
     /** Return the index of the default option, or -1 if there is no default. */
+    @Override
     public int getDefaultOptionIndex() {
         // make the first option the default, if there is one
         return 0;
     }
 
     /** Return the name of the ith option for this field. */
+    @Override
     public String getOptionName(int i) {
         if (_options == null)
             return null;
@@ -196,10 +201,11 @@ public class FieldDescAdapter implements FieldDesc, Serializable {
     }
 
     /** Return the value of the ith option for this field. */
-    public Object getOptionValue(int i) {
+    @Override
+    public Serializable getOptionValue(int i) {
         if (_options == null)
             return null;
-        return _options[i].getValue();
+        return (Serializable)_options[i].getValue();
     }
 
 
@@ -321,7 +327,7 @@ public class FieldDescAdapter implements FieldDesc, Serializable {
      * Parses the value entered by the user.
      */
     @Override
-    public Object parse(String s) {
+    public Serializable parse(String s) {
         return FieldFormat.getValue(this, s); // default is to parse the string according to rules in FieldFormat class
     }
 

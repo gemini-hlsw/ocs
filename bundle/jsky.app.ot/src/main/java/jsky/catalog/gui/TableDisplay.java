@@ -80,7 +80,7 @@ public class TableDisplay extends JPanel
         try {
             _showTab = (Hashtable) Preferences.getPreferences().deserialize(SHOW_TAB_FILE_NAME);
         } catch (Exception e) {
-            e.printStackTrace();
+            // Ignore
         }
     }
 

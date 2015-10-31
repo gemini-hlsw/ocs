@@ -1,15 +1,6 @@
-/*
- * ESO Archive
- *
- * $Id: FieldDesc.java 38103 2011-10-19 19:47:32Z fnussber $
- *
- * who             when        what
- * --------------  ----------  ----------------------------------------
- * Allan Brighton  1999/07/28  Created
- */
-
 package jsky.catalog;
 
+import java.io.Serializable;
 import java.net.*;
 
 /**
@@ -18,7 +9,7 @@ import java.net.*;
  * description. Any of the methods may return null, if the information
  * is not known, although normally, at least a field name should be
  * provided. To save work, classes that implement this interface may be
- * derived from FieldDescAdatper and override as many of the methods as
+ * derived from FieldDescAdapter and override as many of the methods as
  * needed.
  */
 public interface FieldDesc {
@@ -94,7 +85,7 @@ public interface FieldDesc {
     String getOptionName(int i);
 
     /** Return the value of the ith option for this field. */
-    Object getOptionValue(int i);
+    Serializable getOptionValue(int i);
 
     /** Return true if the given value is valid for this field, otherwise false. */
     boolean isValid(Object value);
@@ -118,7 +109,7 @@ public interface FieldDesc {
     String getDisplayString(Object v);
 
     /** Parses the value entered by the user. */
-    Object parse(String s);
+    Serializable parse(String s);
 }
 
 

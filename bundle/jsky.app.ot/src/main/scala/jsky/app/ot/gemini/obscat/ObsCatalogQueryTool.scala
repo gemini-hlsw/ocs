@@ -21,9 +21,9 @@ import scala.swing.event.{SelectionChanged, ButtonClicked}
 import scalaz._
 import Scalaz._
 
-case class OTCatalogSelection(selection: Map[String, AnyRef]) extends Serializable
+case class OTCatalogSelection(selection: Map[String, java.io.Serializable]) extends Serializable
 
-case class OTBrowserInstrumentSelection(selection: Option[Map[String, Map[String, AnyRef]]]) extends Serializable
+case class OTBrowserInstrumentSelection(selection: Option[Map[String, Map[String, java.io.Serializable]]]) extends Serializable
 
 case class OTBrowserPreset(name: String, catalog: OTCatalogSelection, instruments: OTBrowserInstrumentSelection) extends Serializable
 
@@ -70,7 +70,8 @@ class OTBrowserQueryPanel(catalog: Catalog) extends ObsCatalogQueryPanel(catalog
   private def catalogSelection: OTCatalogSelection = {
     val n = Math.min(_components.length, _catalog.getNumParams)
     val s = (0 until n).map(i => (i, Option(_components(i)))).map {
-      case (i, c) => (_catalog.getParamDesc(i).getName, Option(getValue(i)).getOrElse(""))
+      case (i, c) =>
+        (_catalog.getParamDesc(i).getName, Option(getValue(i)).getOrElse(""))
     }
     OTCatalogSelection(s.toMap)
   }

@@ -10,6 +10,7 @@ import jsky.util.gui.MultiSelectComboBox;
 import javax.swing.*;
 import java.awt.GridBagConstraints;
 import java.awt.Insets;
+import java.io.Serializable;
 
 /**
  * Defines the main panel for querying an ObsCatalog. This replaces the default
@@ -244,7 +245,7 @@ public class ObsCatalogQueryPanel extends CatalogQueryPanel {
      */
     @Override
     @SuppressWarnings("unchecked")
-    protected Object getValue(FieldDesc p, JComponent c) {
+    protected Serializable getValue(FieldDesc p, JComponent c) {
         if (p.getNumOptions() > 0) {
             // must be a combo box
             final MultiSelectComboBox<NameValue> cb = (MultiSelectComboBox<NameValue>) c;
