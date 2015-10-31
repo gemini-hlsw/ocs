@@ -277,10 +277,13 @@ public class ObsCatalogQueryPanel extends CatalogQueryPanel {
             }
         } else if (c instanceof JTextField) {
             final String s;
-            if (value instanceof Double)
+            if (value instanceof Double) {
                 s = nf.format(((Double) value).doubleValue());
-            else
+            } else if (value == null) {
+                s = "";
+            } else {
                 s = value.toString();
+            }
             ((JTextField) c).setText(s);
         }
     }
