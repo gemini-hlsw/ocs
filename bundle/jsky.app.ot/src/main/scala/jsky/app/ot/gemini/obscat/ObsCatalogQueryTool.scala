@@ -36,6 +36,7 @@ protected object OTBrowserPresetChoice {
 
   sealed trait ObsQueryPreset {
     def name: String
+    def hasSettings: Boolean = false
   }
 
   case object SaveNewPreset extends ObsQueryPreset {
@@ -44,6 +45,7 @@ protected object OTBrowserPresetChoice {
 
   case class SavedPreset(preset: OTBrowserPreset) extends ObsQueryPreset {
     val name = preset.name
+    override def hasSettings = true
   }
 
   case class DeletePreset(preset: SavedPreset) extends ObsQueryPreset {
@@ -137,37 +139,42 @@ final class ObsCatalogQueryTool(catalog: Catalog) {
 
     listenTo(selection)
     reactions += {
-      case SelectionChanged(_) if selection.item == SaveNewPreset =>
-        val name = DialogUtil.input(ObsCatalogFrame.instance.peer, "Enter a name for this query")
-        val previousModel = this.peer.getModel
-        val existingPresets:List[ObsQueryPreset] = (0 until previousModel.getSize).map(previousModel.getElementAt).collect { case p: SavedPreset => p }.toList
-        val existingNames = existingPresets.map(_.name)
-
-        Option(name).filter(_.nonEmpty).filterNot(existingNames.contains).foreach { n =>
-          val preset = SavedPreset(queryPanel.selectionPreset(name))
-          val model = new DefaultComboBoxModel[ObsQueryPreset]((preset :: existingPresets.toList ::: List(SaveNewPreset, DeletePreset(preset))).toArray)
-          model.setSelectedItem(preset)
-          this.peer.setModel(model)
-          // Optimistically assume the save worked ok
-          OTBrowserPresets.saveAsync(presetsToSave(model))
-        }
-        existingNames.find(_ == name).foreach { n =>
-          DialogUtil.error(s"Name '$n' already in used")
-        }
       case SelectionChanged(_)                                    =>
         selection.item match {
+          case SaveNewPreset       =>
+            val name = DialogUtil.input(ObsCatalogFrame.instance.peer, "Enter a name for this query")
+            val previousModel = this.peer.getModel
+            val existingPresets = (0 until previousModel.getSize).map(previousModel.getElementAt).filter(_.hasSettings)
+            val existingNames = existingPresets.map(_.name)
+
+            Option(name).filter(_.nonEmpty).filterNot(existingNames.contains).foreach { n =>
+              val preset = SavedPreset(queryPanel.selectionPreset(name))
+              val model = new DefaultComboBoxModel[ObsQueryPreset]((preset :: existingPresets.toList ::: List(SaveNewPreset, DeletePreset(preset))).toArray)
+              model.setSelectedItem(preset)
+              this.peer.setModel(model)
+              // Optimistically assume the save works ok
+              OTBrowserPresets.saveAsync(presetsToSave(model))
+            }
+            existingNames.find(_ == name).foreach { n =>
+              DialogUtil.error(s"Name '$n' already in used")
+            }
           case DeletePreset(preset) =>
             val previousModel = this.peer.getModel
-            val existingElements:List[ObsQueryPreset] = (0 until previousModel.getSize).map(previousModel.getElementAt).collect { case p: SavedPreset => p }.filterNot(_.name == preset.name).toList
+            val existingElements = (0 until previousModel.getSize).map(previousModel.getElementAt).filter(_.hasSettings).filterNot(_.name == preset.name)
             val head = existingElements.headOption.collect {
               case s @ SavedPreset(_) => DeletePreset(s)
             }
             val model = new DefaultComboBoxModel[ObsQueryPreset]((existingElements.toList ::: (SaveNewPreset :: head.toList)).toArray)
             head.foreach(model.setSelectedItem)
             this.peer.setModel(model)
-            // Optimistically assume the save worked ok
+            // Optimistically assume the save works ok
             OTBrowserPresets.saveAsync(presetsToSave(model))
           case SavedPreset(preset) =>
+            // Save the updated selection
+            peer.getModel match {
+              case d: DefaultComboBoxModel[ObsQueryPreset] =>
+                OTBrowserPresets.saveAsync(presetsToSave(d))
+            }
             queryPanel.restorePreset(preset)
           case _                   => // Should not happen
         }
