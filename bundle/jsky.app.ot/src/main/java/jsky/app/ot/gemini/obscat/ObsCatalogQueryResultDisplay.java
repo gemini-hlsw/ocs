@@ -68,6 +68,11 @@ public final class ObsCatalogQueryResultDisplay extends TableDisplayTool impleme
         addActionListener(e -> saveAs());
     }};
 
+    // Button to save the results in text format
+    private final JButton _closeButton = new JButton("Close") {{
+        addActionListener(e -> SwingUtilities.getWindowAncestor(this).setVisible(false));
+    }};
+
     // Button to add the selected observation to the session queue
     private final JButton _addToSessionQueueButton = new JButton("Add to Queue") {{
         setEnabled(false);
@@ -157,6 +162,7 @@ public final class ObsCatalogQueryResultDisplay extends TableDisplayTool impleme
             buttonPanel.add(_addToSessionQueueButton);
             buttonPanel.add(_displaySessionQueueButton);
         }
+        buttonPanel.add(_closeButton);
 
         // Keep track of the table selection, to enable/disable the button
         jt.getSelectionModel().addListSelectionListener(this);
