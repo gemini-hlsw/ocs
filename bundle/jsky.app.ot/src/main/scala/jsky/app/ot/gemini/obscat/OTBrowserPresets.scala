@@ -35,25 +35,27 @@ object OTBrowserPresets {
       val f = new File(d, otBrowserFile)
       if (f.exists()) {
         val in = new ObjectInputStream(new FileInputStream(f))
+        val name = in.readUTF()
         val p = (0 until in.readInt()).map { _ =>
-          in.readObject().asInstanceOf[SavedPreset]
+          in.readObject().asInstanceOf[OTBrowserPreset]
         }
-        ObsCatalogFrame.loadPresets(p.toList)
+        ObsCatalogFrame.loadPresets(OTBrowserConf(name, p.toList))
       }
       Log.info("Finished loading catalog query history")
     }
     dir.ifNone(Log.warning("Must initialize the OTBrowser history"))
   }
 
-  def saveAsync(presets: List[OTBrowserPresetChoice.ObsQueryPreset])(implicit ctx: ExecutionContext): Future[Unit] = Future.apply(save(presets))
+  def saveAsync(conf: OTBrowserConf)(implicit ctx: ExecutionContext): Future[Unit] = Future.apply(save(conf))
 
-  private def save(presets: List[OTBrowserPresetChoice.ObsQueryPreset]): Unit = catchingAll {
+  private def save(conf: OTBrowserConf): Unit = catchingAll {
     dir.foreach { d =>
       Log.info("Saving catalog query history")
       val f = new File(d, otBrowserFile)
       val out = new ObjectOutputStream(new FileOutputStream(f))
-      out.writeInt(presets.length)
-      presets.foreach { ql =>
+      out.writeUTF(conf.selected)
+      out.writeInt(conf.presets.size)
+      conf.presets.foreach { ql =>
         out.writeObject(ql)
       }
       out.close()

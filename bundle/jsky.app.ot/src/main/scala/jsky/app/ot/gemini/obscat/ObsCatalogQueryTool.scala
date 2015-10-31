@@ -30,11 +30,12 @@ case class OTBrowserInstrumentSelection(selection: Option[java.util.HashMap[Stri
 
 case class OTBrowserPreset(name: String, catalog: OTCatalogSelection, instruments: OTBrowserInstrumentSelection) extends Serializable
 
+case class OTBrowserConf(selected: String, presets: List[OTBrowserPreset]) extends Serializable
+
 protected object OTBrowserPresetChoice {
 
   sealed trait ObsQueryPreset {
     def name: String
-    def isPreset: Boolean = false
   }
 
   case object SaveNewPreset extends ObsQueryPreset {
@@ -43,7 +44,6 @@ protected object OTBrowserPresetChoice {
 
   case class SavedPreset(preset: OTBrowserPreset) extends ObsQueryPreset {
     val name = preset.name
-    override def isPreset = true
   }
 
   case class DeletePreset(preset: SavedPreset) extends ObsQueryPreset {
@@ -55,7 +55,7 @@ protected object OTBrowserPresetChoice {
 object ObsCatalogFrame extends Frame with PreferredSizeFrame {
   val instance = this
 
-  def loadPresets(presets: List[OTBrowserPresetChoice.ObsQueryPreset]):Unit = Swing.onEDT(cqt.loadPreset(presets))
+  def loadPresets(conf: OTBrowserConf):Unit = Swing.onEDT(cqt.loadPreset(conf))
 
   title = "Gemini Science Program Database"
 
@@ -140,7 +140,7 @@ final class ObsCatalogQueryTool(catalog: Catalog) {
       case SelectionChanged(_) if selection.item == SaveNewPreset =>
         val name = DialogUtil.input(ObsCatalogFrame.instance.peer, "Enter a name for this query")
         val previousModel = this.peer.getModel
-        val existingPresets = (0 until previousModel.getSize).map(previousModel.getElementAt).filter(_.isPreset)
+        val existingPresets:List[ObsQueryPreset] = (0 until previousModel.getSize).map(previousModel.getElementAt).collect { case p: SavedPreset => p }.toList
         val existingNames = existingPresets.map(_.name)
 
         Option(name).filter(_.nonEmpty).filterNot(existingNames.contains).foreach { n =>
@@ -158,7 +158,7 @@ final class ObsCatalogQueryTool(catalog: Catalog) {
         selection.item match {
           case DeletePreset(preset) =>
             val previousModel = this.peer.getModel
-            val existingElements = (0 until previousModel.getSize).map(previousModel.getElementAt).filter(_.isPreset).filterNot(_.name == preset.name)
+            val existingElements:List[ObsQueryPreset] = (0 until previousModel.getSize).map(previousModel.getElementAt).collect { case p: SavedPreset => p }.filterNot(_.name == preset.name).toList
             val head = existingElements.headOption.collect {
               case s @ SavedPreset(_) => DeletePreset(s)
             }
@@ -174,16 +174,16 @@ final class ObsCatalogQueryTool(catalog: Catalog) {
     }
   }
 
-  def presetsToSave(model: DefaultComboBoxModel[ObsQueryPreset]): List[ObsQueryPreset] =
-    (0 until model.getSize).map(model.getElementAt).filter(_.isPreset).toList
+  def presetsToSave(model: DefaultComboBoxModel[ObsQueryPreset]): OTBrowserConf =
+    OTBrowserConf(model.getSelectedItem.asInstanceOf[ObsQueryPreset].name, (0 until model.getSize).map(model.getElementAt).collect { case q: SavedPreset => q.preset}.toList)
 
-  def loadPreset(presets: List[ObsQueryPreset]):Unit = {
-    val selected = presets.headOption.collect {
-      case s: SavedPreset => s
-    }
+  def loadPreset(conf: OTBrowserConf):Unit = {
+    val selected = conf.presets.find(_.name == conf.selected).map(SavedPreset.apply)
     val extras = SaveNewPreset :: ~selected.map(p => List(DeletePreset(p)))
-    val model = new DefaultComboBoxModel[ObsQueryPreset]((presets ::: extras).toArray)
+    val sp:List[ObsQueryPreset] = conf.presets.map(SavedPreset.apply)
+    val model = new DefaultComboBoxModel[ObsQueryPreset]((sp ::: extras).toArray)
     selected.foreach(model.setSelectedItem)
+    selected.foreach(s => queryPanel.restorePreset(s.preset))
     presetsCB.peer.setModel(model)
   }
 
