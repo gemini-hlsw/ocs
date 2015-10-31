@@ -1,7 +1,3 @@
-//
-// $Id: InstGmosSouth.java 45751 2012-06-04 15:28:44Z swalker $
-//
-
 package edu.gemini.spModel.gemini.gmos;
 
 import edu.gemini.pot.sp.SPComponentType;
@@ -25,18 +21,12 @@ import edu.gemini.spModel.obscomp.InstConfigInfo;
 import java.beans.IntrospectionException;
 import java.beans.PropertyDescriptor;
 import java.util.*;
-import java.util.logging.Logger;
 
-/**
- *
- */
 public class InstGmosSouth extends
         InstGmosCommon<GmosSouthType.DisperserSouth,
                 GmosSouthType.FilterSouth,
                 GmosSouthType.FPUnitSouth,
                 GmosSouthType.StageModeSouth> implements PropertyProvider, CalibrationKeyProvider {
-    private static final Logger LOG = Logger.getLogger(InstGmosCommon.class.getName());
-
     public static final SPComponentType SP_TYPE =
             SPComponentType.INSTRUMENT_GMOSSOUTH;
 
@@ -47,7 +37,7 @@ public class InstGmosSouth extends
     public static final PropertyDescriptor FILTER_PROP;
     public static final PropertyDescriptor FPUNIT_PROP;
 
-    private static final Map<String, PropertyDescriptor> PRIVATE_PROP_MAP = new TreeMap<String, PropertyDescriptor>();
+    private static final Map<String, PropertyDescriptor> PRIVATE_PROP_MAP = new TreeMap<>();
     public static final Map<String, PropertyDescriptor> PROPERTY_MAP = Collections.unmodifiableMap(PRIVATE_PROP_MAP);
 
     private static PropertyDescriptor initProp(String propName, String getMethod, String setMethod) {
@@ -358,7 +348,7 @@ public class InstGmosSouth extends
         return GmosOiwfsGuideProbe.instance;
     }
 
-    private static Collection<GuideProbe> GUIDE_PROBES = GuideProbeUtil.instance.createCollection(GmosOiwfsGuideProbe.instance);
+    private static final Collection<GuideProbe> GUIDE_PROBES = GuideProbeUtil.instance.createCollection(GmosOiwfsGuideProbe.instance);
 
     @Override
     public Collection<GuideProbe> getGuideProbes() {
