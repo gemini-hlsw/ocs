@@ -194,6 +194,7 @@ final class ObsCatalogQueryTool(catalog: Catalog) {
             this.peer.setModel(model)
             this.selection.item = s
             queryPanel.restorePreset(preset)
+            doQuery()
           case _                   => // Should not happen
         }
     }
@@ -228,11 +229,15 @@ final class ObsCatalogQueryTool(catalog: Catalog) {
       tooltip = "Start the Query"
       reactions += {
         case ButtonClicked(_) =>
-          Future.apply(ObsCatalogHelper.query(queryPanel.getQueryArgs, ObsCatalog.newConfigEntry(), remote.selected)).onSuccess {
-            case r =>
-              queryResults.setQueryResult(r)
-          }
+          doQuery()
       }
+    }
+  }
+
+  protected def doQuery(): Unit = {
+    Future.apply(ObsCatalogHelper.query(queryPanel.getQueryArgs, ObsCatalog.newConfigEntry(), remote.selected)).onSuccess {
+      case r =>
+        queryResults.setQueryResult(r)
     }
   }
 
