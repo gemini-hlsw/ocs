@@ -12,7 +12,7 @@ import Scalaz._
 /**
  * Support for loading and storing the browser query history.
  */
-object OTBrowserPresets {
+object OTBrowserPresetsPersistence {
   val Log = Logger.getLogger(getClass.getName)
 
   val otBrowserFile = "otBrowserPresets.ser"

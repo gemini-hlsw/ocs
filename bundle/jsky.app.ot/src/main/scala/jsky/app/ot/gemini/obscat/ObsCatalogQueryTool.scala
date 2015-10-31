@@ -153,7 +153,7 @@ final class ObsCatalogQueryTool(catalog: Catalog) {
               model.setSelectedItem(preset)
               this.peer.setModel(model)
               // Optimistically assume the save works ok
-              OTBrowserPresets.saveAsync(presetsToSave(model))
+              OTBrowserPresetsPersistence.saveAsync(presetsToSave(model))
             }
             existingNames.find(_ == name).foreach { n =>
               DialogUtil.error(s"Name '$n' already in used")
@@ -167,13 +167,13 @@ final class ObsCatalogQueryTool(catalog: Catalog) {
             val model = new DefaultComboBoxModel[ObsQueryPreset]((existingElements.toList ::: (SaveNewPreset :: head.toList)).toArray)
             existingElements.headOption.foreach(model.setSelectedItem)
             // Optimistically assume the save works ok
-            OTBrowserPresets.saveAsync(presetsToSave(model))
+            OTBrowserPresetsPersistence.saveAsync(presetsToSave(model))
             this.peer.setModel(model)
           case SavedPreset(preset) =>
             // Save the updated selection
             peer.getModel match {
               case d: DefaultComboBoxModel[ObsQueryPreset] =>
-                OTBrowserPresets.saveAsync(presetsToSave(d))
+                OTBrowserPresetsPersistence.saveAsync(presetsToSave(d))
             }
             queryPanel.restorePreset(preset)
           case _                   => // Should not happen

@@ -1,7 +1,7 @@
 package jsky.app.ot.gemini.obscat
 
 import jsky.app.ot.OT
-import jsky.catalog.{ArraySearchCondition, QueryResult}
+import jsky.catalog.ArraySearchCondition
 import edu.gemini.pot.spdb.IDBQueryRunner
 import edu.gemini.pot.client.SPDB
 import jsky.app.ot.shared.gemini.obscat.{ObsCatalogInfo, ObsQueryFunctor}
@@ -175,7 +175,7 @@ object ObsCatalogHelper {
 
         case _: ConnectException =>
           """|Could not connect to the %s.
-            |The database may be down for maintainance, or you may have a network issue.""".stripMargin.format(desc)
+            |The database may be down for maintenance, or you may have a network issue.""".stripMargin.format(desc)
 
         case _: NoSuchElementException =>
           """|The %s is not accepting query requests right now.

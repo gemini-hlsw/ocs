@@ -3,7 +3,7 @@ package jsky.app.ot.testlauncher
 import edu.gemini.ags.conf.ProbeLimitsTable
 import edu.gemini.qv.plugin.{QvTool, ShowQvToolAction}
 import edu.gemini.sp.vcs2.{VcsServer, Vcs}
-import jsky.app.ot.gemini.obscat.OTBrowserPresets
+import jsky.app.ot.gemini.obscat.OTBrowserPresetsPersistence
 import jsky.app.ot.vcs.VcsOtClient
 import jsky.app.ot.viewer.plugin.PluginRegistry
 
@@ -56,8 +56,8 @@ object TestLauncher extends App {
 
   // Initialize query browser history
   // NOTE must be de done after starting the OT
-  OTBrowserPresets.dir = Some(dir)
-  OTBrowserPresets.load()
+  OTBrowserPresetsPersistence.dir = Some(dir)
+  OTBrowserPresetsPersistence.load()
 
   // You can pass an argument -program=PROGID to autolaunch the given program
   // Do simple parsing, errors on argument format or program id will be ignored
