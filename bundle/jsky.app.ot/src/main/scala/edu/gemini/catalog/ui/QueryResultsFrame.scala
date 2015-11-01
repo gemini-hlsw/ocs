@@ -40,6 +40,15 @@ import Scalaz._
  * Frame to display the Query controls and results
  */
 object QueryResultsFrame extends Frame with PreferredSizeFrame {
+  private sealed trait PlotState {
+    def flipAction: String
+  }
+  private case object PlottedState extends PlotState {
+    override val flipAction = "Unplot"
+  }
+  private case object UnplottedState extends PlotState {
+    override val flipAction = "Plot"
+  }
 
   private class GuidingFeedbackRenderer extends Table.AbstractRenderer[AgsGuideQuality, Label](new Label) {
     override def configure(t: Table, sel: Boolean, foc: Boolean, value: AgsGuideQuality, row: Int, col: Int): Unit = {
@@ -85,6 +94,20 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
     }
   }
 
+  private lazy val unplotButton = new Button(PlottedState.flipAction) {
+    reactions += {
+      case ButtonClicked(_) =>
+        text match {
+          case PlottedState.flipAction =>
+            unplotCurrent()
+            text = UnplottedState.flipAction
+          case UnplottedState.flipAction =>
+            plotResults()
+            text = PlottedState.flipAction
+        }
+    }
+  }
+
   private lazy val scrollPane = new ScrollPane() {
     contents = resultsTable
   }
@@ -113,10 +136,11 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
     add(new BorderPanel() {
       border = titleBorder(title)
       add(scrollPane, BorderPanel.Position.Center)
-    }, CC().grow().spanX(3).pushY().pushX())
+    }, CC().grow().spanX(4).pushY().pushX())
     // Labels and command buttons at the bottom
     add(resultsLabel, CC().alignX(LeftAlign).alignY(BaselineAlign).newline().gap(10.px, 10.px, 10.px, 10.px))
     add(errorLabel, CC().alignX(LeftAlign).alignY(BaselineAlign).gap(10.px, 10.px, 10.px, 10.px))
+    add(unplotButton, CC().alignX(RightAlign).alignY(BaselineAlign).gap(10.px, 10.px, 10.px, 10.px))
     add(closeButton, CC().alignX(RightAlign).alignY(BaselineAlign).gap(10.px, 10.px, 10.px, 10.px))
   }
 
