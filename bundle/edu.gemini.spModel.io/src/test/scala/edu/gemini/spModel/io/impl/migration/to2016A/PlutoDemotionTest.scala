@@ -12,7 +12,7 @@ import scala.collection.JavaConverters._
 class PlutoDemotionTest extends MigrationTest {
 
   @Test def testTemplateConversion(): Unit =
-    withTestProgram("pluto.xml", { (_,p) => validateProgram(p) })
+    withTestProgram("GN-2011B-Q-40.xml", { (_,p) => validateProgram(p) })
 
   private def validateProgram(p: ISPProgram): Unit = {
     p.getAllObservations.asScala.foreach(validateObservation)
@@ -25,17 +25,11 @@ class PlutoDemotionTest extends MigrationTest {
       .getTargetEnvironment
       .getBase match {
 
-      case sp: SPTarget =>
+      case sp: SPTarget if (sp.getTarget.getName == "Pluto") =>
 
         sp.getTarget match {
 
           case ct: ConicTarget => // we know system is correct
-
-            // These are preserved from the fixture
-            Assert.assertEquals("Name", "Pluto", ct.getName)
-            Assert.assertEquals("ValidAt", "10/28/15 7:39:58 PM UTC", SPTargetPio.formatter.format(ct.getDateForPosition))
-            Assert.assertEquals("RA", "15:41:38.380", ct.getRa.toString)
-            Assert.assertEquals("Dec", "-15:52:28.70", ct.getDec.toString)
 
             // These are all new
             Assert.assertEquals("Epoch", 2457217.5, ct.getEpoch.getValue, 0.00001)
@@ -51,6 +45,9 @@ class PlutoDemotionTest extends MigrationTest {
           case t => Assert.fail("Expected ConicTarget, found " + t)
 
         }
+
+      case _ => // not Pluto, skip
+
     }
   }
 
