@@ -9,9 +9,6 @@ import edu.gemini.spModel.core.SPBadIDException;
 import java.io.Serializable;
 import java.text.ParseException;
 
-import java.util.logging.Logger;
-import java.util.logging.Level;
-
 
 /**
  * A dataset label identifies a dataset by its observation id and sequence
@@ -19,8 +16,6 @@ import java.util.logging.Level;
  * the parsing of the label into its constituent parts.
  */
 public final class DatasetLabel implements Comparable<DatasetLabel>, Serializable {
-    private static final Logger LOG = Logger.getLogger(DatasetLabel.class.getName());
-
     public static final DatasetLabel[] EMPTY_ARRAY = new DatasetLabel[0];
 
     private static final long serialVersionUID = 1;
@@ -55,8 +50,7 @@ public final class DatasetLabel implements Comparable<DatasetLabel>, Serializabl
         try {
             _observationId = new SPObservationID(idStr);
         } catch (SPBadIDException ex) {
-            LOG.log(Level.WARNING, ex.getMessage(), ex);
-            throw new ParseException("invalid obs id", 0);
+            throw new ParseException("invalid obs id: " + ex.getMessage(), 0);
         }
         if ((pos + 1) >= dsetLabel.length()) {
             throw new ParseException("missing index #", pos + 1);
