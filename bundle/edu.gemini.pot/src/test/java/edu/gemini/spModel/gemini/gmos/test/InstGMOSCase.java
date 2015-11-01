@@ -18,12 +18,14 @@ import org.junit.Test;
  */
 public final class InstGMOSCase {
     private InstGmosNorth _t1;
+    private InstGmosSouth _t2;
 
     static final private double _ERROR = .00001;
 
     @Before
     public void setUp() throws Exception {
         _t1 = new InstGmosNorth();
+        _t2 = new InstGmosSouth();
     }
 
     @Test
@@ -59,6 +61,74 @@ public final class InstGMOSCase {
         assertTrue(_t1.getDisperserOrder() == GmosCommonType.Order.DEFAULT);
         assertEquals(InstGmosCommon.DEFAULT_DISPERSER_LAMBDA, _t1.getDisperserLambda(), _ERROR);
     }
+
+    /**
+     * Test Mean Gain values
+     */
+    @Test
+    public void testMeanGainValues() {
+        //Gemini North Specs
+        _t1.setAmpReadMode(GmosCommonType.AmpReadMode.SLOW);
+        _t1.setGainChoice(GmosCommonType.AmpGain.LOW);
+        assertEquals(2.2, _t1.getMeanGain(), _ERROR);
+
+        _t1.setAmpReadMode(GmosCommonType.AmpReadMode.FAST);
+        _t1.setGainChoice(GmosCommonType.AmpGain.LOW);
+        assertEquals(2.5, _t1.getMeanGain(), _ERROR);
+
+        _t1.setAmpReadMode(GmosCommonType.AmpReadMode.FAST);
+        _t1.setGainChoice(GmosCommonType.AmpGain.HIGH);
+        assertEquals(5.0, _t1.getMeanGain(), _ERROR);
+
+
+        //Gemini South Specs
+        _t2.setAmpReadMode(GmosCommonType.AmpReadMode.SLOW);
+        _t2.setGainChoice(GmosCommonType.AmpGain.LOW);
+        assertEquals(1.8, _t2.getMeanGain(), _ERROR);
+
+        _t2.setAmpReadMode(GmosCommonType.AmpReadMode.FAST);
+        _t2.setGainChoice(GmosCommonType.AmpGain.LOW);
+        assertEquals(1.6, _t2.getMeanGain(), _ERROR);
+
+        _t2.setAmpReadMode(GmosCommonType.AmpReadMode.FAST);
+        _t2.setGainChoice(GmosCommonType.AmpGain.HIGH);
+        assertEquals(5.2, _t2.getMeanGain(), _ERROR);
+    }
+
+
+    /**
+     * Test Read Noise values
+     */
+    @Test
+    public void testMeanReadNoiseValues() {
+        //Gemini North Specs
+        _t1.setAmpReadMode(GmosCommonType.AmpReadMode.SLOW);
+        _t1.setGainChoice(GmosCommonType.AmpGain.LOW);
+        assertEquals(3.4, _t1.getMeanReadNoise(), _ERROR);
+
+        _t1.setAmpReadMode(GmosCommonType.AmpReadMode.FAST);
+        _t1.setGainChoice(GmosCommonType.AmpGain.LOW);
+        assertEquals(4.9, _t1.getMeanReadNoise(), _ERROR);
+
+        _t1.setAmpReadMode(GmosCommonType.AmpReadMode.FAST);
+        _t1.setGainChoice(GmosCommonType.AmpGain.HIGH);
+        assertEquals(7.4, _t1.getMeanReadNoise(), _ERROR);
+
+        //Gemini South Specs
+        _t2.setAmpReadMode(GmosCommonType.AmpReadMode.SLOW);
+        _t2.setGainChoice(GmosCommonType.AmpGain.LOW);
+        assertEquals(4.0, _t2.getMeanReadNoise(), _ERROR);
+
+        _t2.setAmpReadMode(GmosCommonType.AmpReadMode.FAST);
+        _t2.setGainChoice(GmosCommonType.AmpGain.LOW);
+        assertEquals(6.6, _t2.getMeanReadNoise(), _ERROR);
+
+        _t2.setAmpReadMode(GmosCommonType.AmpReadMode.FAST);
+        _t2.setGainChoice(GmosCommonType.AmpGain.HIGH);
+        assertEquals(7.9, _t2.getMeanReadNoise(), _ERROR);
+    }
+
+
 
     /**
      * Test cloneable
