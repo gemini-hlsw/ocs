@@ -60,8 +60,8 @@ object To2016A extends Migration {
     }
 
   // Params taken from a program with a properly resolved Pluto (now an asteroid). This includes
-  // only the system and orbital elements.
-  lazy val plutoParams: List[Param] = {
+  // only the system and orbital elements. Get a FRESH set of params each time! (important)
+  def plutoParams: List[Param] = {
     PioXmlUtil.read(
       <document>
         <container>
