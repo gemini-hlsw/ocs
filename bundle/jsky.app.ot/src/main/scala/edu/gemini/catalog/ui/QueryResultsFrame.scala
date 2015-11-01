@@ -12,6 +12,7 @@ import edu.gemini.catalog.api._
 import edu.gemini.catalog.ui.tpe.CatalogImageDisplay
 import edu.gemini.catalog.votable._
 import edu.gemini.pot.sp.SPComponentType
+import edu.gemini.pot.ModelConverters._
 import edu.gemini.shared.gui.textComponent.{SelectOnFocus, TextRenderer, NumberField}
 import edu.gemini.shared.gui.{ButtonFlattener, GlassLabel, SizePreference, SortableTable}
 import edu.gemini.spModel.core.SiderealTarget
@@ -349,13 +350,10 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
       }
     }
 
-    lazy val paBox = new NumberField(None) {
-      visible = false
+    // PA and offsets must be mutable, the rest of the model lives on the UI
+    var pa = Angle.zero
+    var offsets = Set.empty[Offset]
 
-      def pa = Angle.fromDegrees(text.toDouble)
-
-      def pa_=(d: Double) = text = d.toString
-    }
     lazy val sbBox = new ComboBox(List(SPSiteQuality.SkyBackground.values(): _*)) with TextRenderer[SPSiteQuality.SkyBackground] {
       override def text(a: SPSiteQuality.SkyBackground) = a.displayValue()
     }
@@ -505,7 +503,8 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
           ccBox.selection.item = c.cc
           iqBox.selection.item = c.iq
         }
-        i.ctx.map(_.getPositionAngle).foreach(a => paBox.pa = a.toDegrees.getMagnitude)
+        i.ctx.map(_.getPositionAngle).foreach(a => pa = a.toNewModel)
+        i.ctx.map(_.getSciencePositions).foreach(o => offsets = o.asScala.map(_.toNewModel).toSet)
         updateGuideSpeedText()
       }
       // Update the RA
@@ -571,7 +570,7 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
       val conditions = Conditions.NOMINAL.sb(sbBox.selection.item).cc(ccBox.selection.item).iq(iqBox.selection.item)
 
       val coordinates = Coordinates(ra.value, dec.value)
-      ObservationInfo(None, Option(objectName.text), coordinates.some, Option(instrumentBox.selection.item), Option(guider.selection.item), guiders.toList, conditions.some, paBox.pa, selectedCatalog, ProbeLimitsTable.loadOrThrow())
+      ObservationInfo(None, Option(objectName.text), coordinates.some, Option(instrumentBox.selection.item), Option(guider.selection.item), guiders.toList, conditions.some, pa, offsets, selectedCatalog, ProbeLimitsTable.loadOrThrow())
     }
 
     // Make a query out of the form parameters

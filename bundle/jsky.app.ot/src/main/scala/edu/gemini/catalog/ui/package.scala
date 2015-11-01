@@ -51,7 +51,8 @@ object SupportedStrategy {
 }
 
 /**
- * Describes the observation used to do a Guide Star Search
+ * Describes the observation used to do a Guide Star Search, it is pretty much a copy of ObsContext but it can be built
+ * out of the query fields on the CQT
  */
 case class ObservationInfo(ctx: Option[ObsContext],
                            objectName: Option[String],
@@ -61,6 +62,7 @@ case class ObservationInfo(ctx: Option[ObsContext],
                            validStrategies: List[SupportedStrategy],
                            conditions: Option[Conditions],
                            positionAngle: Angle,
+                           offsets: Set[Offset],
                            catalog: CatalogName,
                            mt: MagnitudeTable) {
   def catalogQuery:List[CatalogQuery] = validStrategies.collect {
@@ -101,11 +103,10 @@ case class ObservationInfo(ctx: Option[ObsContext],
       val target = new SPTarget(c.ra.toAngle.toDegrees, c.dec.toDegrees) <| {_.setName(~objectName)}
       val env = TargetEnvironment.create(target)
       // To calculate analysis of guide quality, it is required the site, instrument and conditions
-      // TODO Verify if we need offsets and scheduling block
       val altair = strategy.collect {
         case SupportedStrategy(_, _, _, Some(m)) => new InstAltair() <| {_.setMode(m)}
       }
-      ObsContext.create(env, i, new JSome(s), cond, null, altair.orNull, JNone.instance()).withPositionAngle(positionAngle.toOldModel)
+      ObsContext.create(env, i, new JSome(s), cond, offsets.map(_.toOldModel).asJava, altair.orNull, JNone.instance()).withPositionAngle(positionAngle.toOldModel)
     }
   }
 }
@@ -114,7 +115,7 @@ object ObservationInfo {
   val DefaultInstrument = SPComponentType.INSTRUMENT_VISITOR
 
   // Observation context loaded initially with default parameters
-  val zero = new ObservationInfo(None, "".some, Coordinates.zero.some, DefaultInstrument.some, None, Nil, SPSiteQuality.Conditions.BEST.some, Angle.zero, UCAC4, ProbeLimitsTable.loadOrThrow())
+  val zero = new ObservationInfo(None, "".some, Coordinates.zero.some, DefaultInstrument.some, None, Nil, SPSiteQuality.Conditions.BEST.some, Angle.zero, Set.empty, UCAC4, ProbeLimitsTable.loadOrThrow())
 
   val InstList = List(
     Flamingos2.INSTRUMENT_NAME_PROP        -> SPComponentType.INSTRUMENT_FLAMINGOS2,
@@ -161,6 +162,7 @@ object ObservationInfo {
     expandAltairModes(ctx).flatMap(c => AgsRegistrar.validStrategies(c).map(toSupportedStrategy(c, _, mt))).sorted,
     ctx.getConditions.some,
     ctx.getPositionAngle.toNewModel,
+    ctx.getSciencePositions.asScala.map(_.toNewModel).toSet,
     UCAC4,
     mt)
 
