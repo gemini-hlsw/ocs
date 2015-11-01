@@ -104,7 +104,7 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
     def reset(): Unit = text = ""
   }
 
-  title = "Query Results"
+  title = "Catalog Query Tool"
   QueryForm.buildLayout(Nil)
   contents = new MigPanel(LC().fill().insets(0).gridGap("0px", "0px").debug(0)) {
     // Query Form
