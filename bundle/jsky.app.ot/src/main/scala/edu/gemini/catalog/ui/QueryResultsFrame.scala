@@ -520,9 +520,11 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
         override def text(a: MagnitudeBand) = a.name.padTo(2, " ").mkString("")
       }
 
+      val rRepresentative = catalog.rBand
+
       bandsList match {
-        case RBandsList       => List(bandComboBox(MagnitudeBand._r)) // TODO Should we represent the R-Family as a separate entry on the combo box?
-        case NiciBandsList    => List(bandComboBox(MagnitudeBand._r), bandComboBox(MagnitudeBand.V))
+        case RBandsList       => List(bandComboBox(rRepresentative)) // TODO Should we represent the R-Family as a separate entry on the combo box?
+        case NiciBandsList    => List(bandComboBox(rRepresentative), bandComboBox(MagnitudeBand.V))
         case SingleBand(band) => List(bandComboBox(band))
       }
     }
@@ -531,7 +533,7 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
     private def currentFilters: List[MagnitudeConstraints] =
       magnitudeControls.map {
         case MagnitudeFilterControls(_, faintess, _, saturation, bandCB, _) =>
-          MagnitudeConstraints(BandsList.bandList(bandCB.selection.item), FaintnessConstraint(faintess.text.toDouble), SaturationConstraint(saturation.text.toDouble).some)
+          MagnitudeConstraints(SingleBand(bandCB.selection.item), FaintnessConstraint(faintess.text.toDouble), SaturationConstraint(saturation.text.toDouble).some)
       }.toList
 
     def observationInfoFromForm: ObservationInfo = {

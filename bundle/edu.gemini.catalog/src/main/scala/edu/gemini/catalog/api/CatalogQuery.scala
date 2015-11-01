@@ -19,15 +19,18 @@ case class MagnitudeQueryFilter(mc: MagnitudeConstraints) extends QueryResultsFi
 
 sealed abstract class CatalogName(val id: String, val displayName: String) {
   def supportedBands: List[MagnitudeBand] = Nil
+  // Indicates what is the band used when a generic R band is requried
+  def rBand: MagnitudeBand = MagnitudeBand.UC
 }
 
 case object SDSS extends CatalogName("sdss9", "SDSS9 @ Gemini")
 case object GSC234 extends CatalogName("gsc234", "GSC234 @ Gemini")
 case object PPMXL extends CatalogName("ppmxl", "PPMXL @ Gemini") {
-  override def supportedBands = List(MagnitudeBand.B, MagnitudeBand.R, MagnitudeBand.I, MagnitudeBand.J, MagnitudeBand.H, MagnitudeBand.K)
+  override val supportedBands = List(MagnitudeBand.B, MagnitudeBand.R, MagnitudeBand.I, MagnitudeBand.J, MagnitudeBand.H, MagnitudeBand.K)
+  override val rBand: MagnitudeBand = MagnitudeBand.R
 }
 case object UCAC4 extends CatalogName("ucac4", "UCAC4 @ Gemini") {
-  override def supportedBands = List(MagnitudeBand._g, MagnitudeBand._r, MagnitudeBand._i, MagnitudeBand.B, MagnitudeBand.V, MagnitudeBand.UC, MagnitudeBand.J, MagnitudeBand.H, MagnitudeBand.K)
+  override val  supportedBands = List(MagnitudeBand._g, MagnitudeBand._r, MagnitudeBand._i, MagnitudeBand.B, MagnitudeBand.V, MagnitudeBand.UC, MagnitudeBand.J, MagnitudeBand.H, MagnitudeBand.K)
 }
 case object TWOMASS_PSC extends CatalogName("twomass_psc", "TwoMass PSC @ Gemini")
 case object TWOMASS_XSC extends CatalogName("twomass_xsc", "TwoMass XSC @ Gemini")
