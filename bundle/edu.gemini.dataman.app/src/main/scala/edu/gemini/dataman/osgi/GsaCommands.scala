@@ -1,9 +1,9 @@
 package edu.gemini.dataman.osgi
 
-import edu.gemini.dataman.core.{GsaAuth, GsaHost}
-import edu.gemini.dataman.gsa.query.{GsaQaUpdateQuery, GsaQaUpdate, GsaFile, GsaResponse, GsaFileQuery, TimeFormat}
-import edu.gemini.pot.sp.SPObservationID
-import edu.gemini.spModel.core.{Site, SPProgramID}
+import edu.gemini.dataman.app.{DmanActionExec, GsaPollActions}
+import edu.gemini.dataman.core._
+import edu.gemini.dataman.query.{GsaRecordQuery, GsaQaUpdateQuery, GsaResponse, TimeFormat}
+import edu.gemini.pot.spdb.IDBDatabaseService
 import edu.gemini.spModel.dataset.{DatasetQaState, DatasetLabel}
 
 import scalaz._
@@ -16,7 +16,7 @@ sealed trait GsaCommands {
 }
 
 object GsaCommands {
-  def apply(gsaHost: GsaHost.Summit, site: Site, auth: GsaAuth): GsaCommands =
+  def apply(config: DmanConfig, odb: IDBDatabaseService): GsaCommands =
     new GsaCommands {
 
       val help =
@@ -32,34 +32,25 @@ object GsaCommands {
           |GSA Commands:
           |
           |  gsa list <list-query>                    Fetches a listing of the corresponding datasets.
+          |  gsa sync <list-query>                    Fetches a listing and applies any changes to the program.
           |  gsa set <qa-state> <dataset-label> ...   Sets one or more dataset QA states.
           |
         """.stripMargin
 
-      sealed trait Id
-
-      case class ProgId(pid: SPProgramID) extends Id
-      case class ObsId(oid: SPObservationID) extends Id
-      case class DatasetId(label: DatasetLabel) extends Id
-
-      def parseId(s: String): Option[Id] = {
-        def parse[A](c: String => A): Option[A] =
-          \/.fromTryCatch { c(s) }.toOption
-
-        parse(s => DatasetId(new DatasetLabel(s)))  orElse
-         parse(s => ObsId(new SPObservationID(s)))  orElse
-         parse(s => ProgId(SPProgramID.toProgramID(s)))
-      }
+      val exec        = DmanActionExec(config, odb)
+      val summitSync  = GsaPollActions(config.summitHost, config.site, odb)
+      val archiveSync = GsaPollActions(config.archiveHost, config.site, odb)
 
       override def gsa(args: Array[String]): String =
         args.toList match {
           case List("list", a)            => list(a)
+          case List("sync", a)            => sync(a)
           case "set" :: qaState :: labels => set(qaState, labels)
           case _                          => help
         }
 
       def list(arg: String): String = {
-        def format(lst: List[GsaFile]): String = {
+        def format(lst: List[GsaRecord]): String = {
           val rows = List("Dataset Label", "QA State", "Time", "MD5", "Filename") :: lst.sortBy(_.label).map { f =>
             List(f.label.toString, f.state.qa.displayValue, TimeFormat.format(f.state.timestamp), f.state.md5.hexString, f.filename)
           }
@@ -70,19 +61,37 @@ object GsaCommands {
         }
 
         // Figure out which query to run, if any.
-        val f: Option[GsaFileQuery => GsaResponse[List[GsaFile]]] = arg match {
+        val f: Option[GsaRecordQuery => GsaResponse[List[GsaRecord]]] = arg match {
           case "tonight" => Some(_.tonight)
           case "week"    => Some(_.thisWeek)
-          case id0       => parseId(id0).map {
-            case DatasetId(lab) => (q: GsaFileQuery) => q.dataset(lab).map(_.toList)
-            case ObsId(oid)     => (q: GsaFileQuery) => q.observation(oid)
-            case ProgId(pid)    => (q: GsaFileQuery) => q.program(pid)
+          case id0       => DmanId.parse(id0).map {
+            case DmanId.Dset(lab) => (q: GsaRecordQuery) => q.dataset(lab).map(_.toList)
+            case DmanId.Obs(oid)  => (q: GsaRecordQuery) => q.observation(oid)
+            case DmanId.Prog(pid) => (q: GsaRecordQuery) => q.program(pid)
           }
         }
 
         // Send the request to the server and format the results in a table.
         f.fold(help) { fn =>
-          fn(GsaFileQuery(gsaHost, site)).fold(_.explain, format)
+          fn(GsaRecordQuery(config.summitHost, config.site)).fold(_.explain, format)
+        }
+      }
+
+      def sync(arg: String): String = {
+        // Figure out which update to run, if any.
+        val f: Option[GsaPollActions => DmanAction[DatasetUpdates]] = arg match {
+          case "tonight" => Some(_.tonight)
+          case "week"    => Some(_.thisWeek)
+          case id0       => DmanId.parse(id0).map {
+            case DmanId.Dset(lab) => (p: GsaPollActions) => p.dataset(lab)
+            case DmanId.Obs(oid)  => (p: GsaPollActions) => p.observation(oid)
+            case DmanId.Prog(pid) => (p: GsaPollActions) => p.program(pid)
+          }
+        }
+
+        f.fold(help) { fn =>
+          exec.fork(fn(summitSync))
+          s"Sync $arg forked."
         }
       }
 
@@ -91,16 +100,16 @@ object GsaCommands {
         val requests = for {
           qa <- DatasetQaState.values.find(_.displayValue.toLowerCase == qaString.toLowerCase) \/> s"Could not parse `$qaString` as a QA state."
           ls <- labelStrings.map { s => \/.fromTryCatch(new DatasetLabel(s)).leftMap(_ => s"Could not parse `$s` as a dataset label.") }.sequenceU
-        } yield ls.map { lab => GsaQaUpdate.Request(lab, qa) }
+        } yield ls.map { lab => QaRequest(lab, qa) }
 
         // Send the update request to the server.
         val responses = requests.flatMap { rs =>
-          GsaQaUpdateQuery(gsaHost, site, auth).setQaStates(rs).leftMap(_.explain)
+          GsaQaUpdateQuery(config.summitHost, config.site, config.gsaAuth).setQaStates(rs).leftMap(_.explain)
         }
 
         // Format the error messages, if any.
         responses.fold(identity, _.sortBy(_.label).collect {
-          case GsaQaUpdate.Response(label, Some(m)) => s"$label: $m"
+          case QaResponse(label, Some(m)) => s"$label: $m"
         }.mkString("\n"))
       }
     }

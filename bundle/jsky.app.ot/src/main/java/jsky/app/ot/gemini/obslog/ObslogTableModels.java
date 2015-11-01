@@ -72,7 +72,7 @@ public interface ObslogTableModels {
 
         public boolean isUnavailable(int row) {
             final DatasetRecord rec = records.get(row);
-            return obsLog.getExecRecord().inSummitStorage(rec.getLabel()) || rec.exec.fileState != DatasetFileState.OK;
+            return !obsLog.getExecRecord().inSummitStorage(rec.getLabel());
         }
 
         public int getRowCount() {
@@ -103,14 +103,14 @@ public interface ObslogTableModels {
      */
     class DatasetAnalysisTableModel extends AbstractDatasetRecordTableModel {
 
-        public static final int COL_LABEL = 0;
+        public static final int COL_LABEL    = 0;
         public static final int COL_FILENAME = 1;
         public static final int COL_QA_STATE = 2;
-        public static final int COL_GSA_STATE = 3;
-        public static final int COL_NEXT_STEP = 4;
+        public static final int COL_STATUS   = 3;
+        public static final int COL_DETAIL   = 4;
 
         private static final String[] COL_NAMES = new String[]{
-                "Label", "Filename", "QA State", "GSA State", "Next Step",
+                "Label", "Filename", "QA State", "Dataset Status", "Detail"
         };
 
         public DatasetAnalysisTableModel(ObsLog log) {
@@ -135,7 +135,7 @@ public interface ObslogTableModels {
                 case COL_LABEL:
                     return rec.getLabel();
                 case COL_FILENAME:
-                    return rec.exec.dataset.getDhsFilename();
+                    return rec.exec.dataset().getDhsFilename();
 
                 case COL_QA_STATE:
                     final DatasetQaState qs = rec.qa.qaState;
@@ -143,13 +143,15 @@ public interface ObslogTableModels {
                         return qs.displayValue() + "*";
                     return qs;
 
-                case COL_GSA_STATE:
-                    final GsaState gs = rec.exec.gsaState;
-                    return (gs == GsaState.NONE) ? null : gs;
+                case COL_STATUS: {
+                    return DataflowStatus$.MODULE$.derive(rec);
+//                    final DataflowStatus disp = DataflowStatus$.MODULE$.derive(rec);
+//                    return disp.description();
+                }
 
-                case COL_NEXT_STEP: {
-                    final DataflowStatus disp = DataflowStatus.derive(rec);
-                    return disp.isAttentionNeeded() ? disp.getDisplayString() : null;
+                case COL_DETAIL: {
+                    final scala.Option<String> detail = DataflowStatus$.MODULE$.detail(rec);
+                    return detail.isEmpty() ? "" : detail.get();
                 }
                 default:
                     throw new IllegalArgumentException("Unknown column: " + col);
@@ -162,10 +164,6 @@ public interface ObslogTableModels {
                 case COL_QA_STATE:
                     final DatasetQaState qaState = (DatasetQaState) val;
                     obsLog.qaLogDataObject.setQaState(rec.getLabel(), qaState);
-
-                    // TODO: what to do here... we cannot change the exec record
-                    // in the client side
-//                    rec.setGsaState(GsaState.NONE);
                     break;
                 default:
                     throw new IllegalArgumentException("Cannot modify value in column: " + col);
@@ -173,7 +171,7 @@ public interface ObslogTableModels {
         }
 
         protected void propertyChange(int row, ObsQaLog.Event event) {
-            if (event.isQaStateUpdated()) fireTableCellUpdated(row, COL_QA_STATE);
+            if (event.isQaStateUpdated())  fireTableRowsUpdated(row, row);
         }
 
     }

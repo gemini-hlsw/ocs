@@ -58,17 +58,10 @@ def common(version: Version) = AppConfig(
     "edu.gemini.auxfile.other.dest"                    -> "/please/specify/in/host/specific/property/file",
     "edu.gemini.auxfile.other.host"                    -> "gnconfig.gemini.edu",
     "edu.gemini.auxfile.server"                        -> "true",
-    "edu.gemini.dataman.dbScanMinutes"                 -> "15",
-    "edu.gemini.dataman.gsaCrcUrl"                     -> "http://www.cadc-ccda.hia-iha.nrc-cnrc.gc.ca/cadcbin/geminiInfo?file=%FILE%&options=-ufilecrc",
-    "edu.gemini.dataman.gsa.query.host"                -> "hbffits2.hi.gemini.edu",
-    "edu.gemini.dataman.xfer.cadcGroup.gsa"            -> "cadcops",
-    "edu.gemini.dataman.xfer.cadcRoot.gsa"             -> "/home/cadcops/installed/mdIngest",
-    "edu.gemini.dataman.xfer.destDir.gsa"              -> "/u1/CADC/dataflow",
-    "edu.gemini.dataman.xfer.mdIngestScript.gsa"       -> "/home/cadcops/installed/mdIngest/mdIngest",
-    "edu.gemini.dataman.xfer.tempDir.gsa"              -> "/u1/CADC/dataflow/.xfer",
-    "edu.gemini.dirmon.activeSetPollPeriod"            -> "5000",
-    "edu.gemini.dirmon.activeSetSize"                  -> "100",
-    "edu.gemini.dirmon.fullDirPollPeriod"              -> "120000",
+    "edu.gemini.dataman.gsa.archive.host"              -> "archive.gemini.edu",
+    "edu.gemini.dataman.poll.tonight"                  -> "PT1M",
+    "edu.gemini.dataman.poll.thisWeek"                 -> "PT15M",
+    "edu.gemini.dataman.poll.allPrograms"              -> "P1D",
     "edu.gemini.filefilter.excludes"                   -> "tmp.*",
     "edu.gemini.filefilter.excludes.2"                 -> ".*b\\.fits",
     "edu.gemini.filefilter.includes"                   -> ".*\\.fits",
@@ -186,19 +179,7 @@ def rnorris(version: Version) = AppConfig(
   props = Map(
     "edu.gemini.auxfile.fits.host"               -> "gsconfig.gemini.edu",
     "edu.gemini.auxfile.root"                    -> "/Users/rnorris/.auxfile",
-    "edu.gemini.dataman.gsaXferUrl"              -> "http://www.cadc-ccda.hia-iha.nrc-cnrc.gc.ca/cadcbin/etransferState?source=gsags&file=%FILE%&mode=file&format=text&timezone=utc&reverse=1",
-    "edu.gemini.dataman.rawDir"                  -> "/Users/rnorris/tmp/dataman/raw",
-    "edu.gemini.dataman.workDir"                 -> "/Users/rnorris/tmp/dataman/work",
-    "edu.gemini.dataman.xfer.cadcGroup.gsa"      -> "rnorris",
-    "edu.gemini.dataman.xfer.cadcRoot.gsa"       -> "/Users/rnorris/tmp/dataman/cadc",
-    "edu.gemini.dataman.xfer.destDir.base"       -> "/Users/rnorris/tmp/dataman/base",
-    "edu.gemini.dataman.xfer.destDir.gsa"        -> "/Users/rnorris/tmp/dataman/gsa",
-    "edu.gemini.dataman.xfer.host.base"          -> "cookie",
-    "edu.gemini.dataman.xfer.host.gsa"           -> "cookie",
-    "edu.gemini.dataman.xfer.mdIngestScript.gsa" -> "/Users/rnorris/tmp/dataman/cadc/mdIngest",
-    "edu.gemini.dataman.xfer.tempDir.base"       -> "/Users/rnorris/tmp/dataman/base/.xfer",
-    "edu.gemini.dataman.xfer.tempDir.gsa"        -> "/Users/rnorris/tmp/dataman/gsa/.xfer",
-    "edu.gemini.datasetfile.workDir"             -> "/Users/rnorris/tmp/dataman/work",
+    "edu.gemini.dataman.gsa.summit.host"         -> "hbffits2.hi.gemini.edu",
     "edu.gemini.spdb.dir"                        -> "/Users/rnorris/.spdb/",
     "edu.gemini.util.trpc.name"                  -> "Rob's ODB (Test)"
   )
@@ -226,19 +207,7 @@ def swalker(version: Version) = AppConfig(
     "edu.gemini.auxfile.fits.host"               -> "gsconfig.gemini.edu",
     "edu.gemini.auxfile.other.dest"              -> "/gemsoft/var/data/finder/GSqueue/Finders-Test/@SEMESTER@/@PROG_ID@",
     "edu.gemini.auxfile.root"                    -> "/Users/swalker/.auxfile",
-    "edu.gemini.dataman.gsaXferUrl"              -> "http://www.cadc-ccda.hia-iha.nrc-cnrc.gc.ca/cadcbin/etransferState?source=gsags&file=%FILE%&mode=file&format=text&timezone=utc&reverse=1",
-    "edu.gemini.dataman.rawDir"                  -> "/Users/swalker/dataman/raw",
-    "edu.gemini.dataman.workDir"                 -> "/Users/swalker/dataman/work",
-    "edu.gemini.dataman.xfer.cadcGroup.gsa"      -> "staff",
-    "edu.gemini.dataman.xfer.cadcRoot.gsa"       -> "/Users/swalker/dataman/cadc",
-    "edu.gemini.dataman.xfer.destDir.base"       -> "/Users/swalker/dataman/base",
-    "edu.gemini.dataman.xfer.destDir.gsa"        -> "/Users/swalker/dataman/gsa",
-    "edu.gemini.dataman.xfer.host.base"          -> "localhost",
-    "edu.gemini.dataman.xfer.host.gsa"           -> "localhost",
-    "edu.gemini.dataman.xfer.mdIngestScript.gsa" -> "/Users/swalker/dataman/cadc/mdIngest",
-    "edu.gemini.dataman.xfer.tempDir.base"       -> "/Users/swalker/dataman/base/.xfer",
-    "edu.gemini.dataman.xfer.tempDir.gsa"        -> "/Users/swalker/dataman/gsa/.xfer",
-    "edu.gemini.datasetfile.workDir"             -> "/Users/swalker/dataman/work",
+    "edu.gemini.dataman.gsa.summit.host"         -> "hbffits2.hi.gemini.edu",
     "edu.gemini.services.server.start"           -> "false",
     "edu.gemini.smartgcal.host"                  -> "localhost",
     "edu.gemini.spdb.dir"                        -> "/Users/swalker/.spdb/",
@@ -262,13 +231,14 @@ def fnussber(version: Version) = AppConfig(
     "-Dcron.archive.edu.gemini.dbTools.html.ftpDestDir=/Users/fnussber/.spdb/cron"
   ),
   props = Map(
-    "edu.gemini.smartgcal.host"     -> "localhost",
-    "edu.gemini.spdb.dir"           -> "/Users/fnussber/.spdb/",
-    "edu.gemini.auxfile.root"       -> "/Users/fnussber/.auxfile",
-    "edu.gemini.util.trpc.name"     -> "Florian's ODB (Test)",
-    "edu.gemini.auxfile.fits.dest"  -> "/gemsoft/var/data/ictd/test/GS@SEMESTER@/@PROG_ID@",
-    "edu.gemini.auxfile.other.dest" -> "/gemsoft/var/data/finder/GSqueue/Finders-Test/@SEMESTER@/@PROG_ID@",
-    "edu.gemini.auxfile.fits.host"  -> "gsconfig.gemini.edu"
+    "edu.gemini.smartgcal.host"          -> "localhost",
+    "edu.gemini.spdb.dir"                -> "/Users/fnussber/.spdb/",
+    "edu.gemini.auxfile.root"            -> "/Users/fnussber/.auxfile",
+    "edu.gemini.dataman.gsa.summit.host" -> "hbffits2.hi.gemini.edu",
+    "edu.gemini.util.trpc.name"          -> "Florian's ODB (Test)",
+    "edu.gemini.auxfile.fits.dest"       -> "/gemsoft/var/data/ictd/test/GS@SEMESTER@/@PROG_ID@",
+    "edu.gemini.auxfile.other.dest"      -> "/gemsoft/var/data/finder/GSqueue/Finders-Test/@SEMESTER@/@PROG_ID@",
+    "edu.gemini.auxfile.fits.host"       -> "gsconfig.gemini.edu"
   )
 ) extending List(with_gogo(version), fnussber_credentials(version))
 
@@ -295,6 +265,7 @@ def sraaphorst(version: Version) = AppConfig(
     "edu.gemini.auxfile.fits.dest"         -> "/gemsoft/var/data/ictd/test/GS@SEMESTER@/@PROG_ID@",
     "edu.gemini.auxfile.other.dest"        -> "/gemsoft/var/data/finder/GSqueue/Finders-Test/@SEMESTER@/@PROG_ID@",
     "edu.gemini.auxfile.fits.host"         -> "gsconfig.gemini.edu",
+    "edu.gemini.dataman.gsa.summit.host"   -> "hbffits2.hi.gemini.edu",
     "edu.gemini.dbTools.archive.directory" -> "/Users/sraaphor/tmp/archiver"
   )
 ) extending List(with_gogo(version), sraaphorst_credentials(version))
@@ -309,12 +280,13 @@ def cquiroz(version: Version) = AppConfig(
     "-Dedu.gemini.site=south"
   ),
   props = Map(
-    "edu.gemini.spdb.dir"           -> "/Users/cquiroz/.spdb/",
-    "edu.gemini.auxfile.root"       -> "/Users/cquiroz/.auxfile",
-    "edu.gemini.util.trpc.name"     -> "Carlos's ODB (Test)",
-    "edu.gemini.auxfile.fits.dest"  -> "/gemsoft/var/data/ictd/test/GS@SEMESTER@/@PROG_ID@",
-    "edu.gemini.auxfile.other.dest" -> "/gemsoft/var/data/finder/GSqueue/Finders-Test/@SEMESTER@/@PROG_ID@",
-    "edu.gemini.auxfile.fits.host"  -> "gsconfig.gemini.edu"
+    "edu.gemini.spdb.dir"                  -> "/Users/cquiroz/.spdb/",
+    "edu.gemini.auxfile.root"              -> "/Users/cquiroz/.auxfile",
+    "edu.gemini.dataman.gsa.summit.host"   -> "hbffits2.hi.gemini.edu",
+    "edu.gemini.util.trpc.name"            -> "Carlos's ODB (Test)",
+    "edu.gemini.auxfile.fits.dest"         -> "/gemsoft/var/data/ictd/test/GS@SEMESTER@/@PROG_ID@",
+    "edu.gemini.auxfile.other.dest"        -> "/gemsoft/var/data/finder/GSqueue/Finders-Test/@SEMESTER@/@PROG_ID@",
+    "edu.gemini.auxfile.fits.host"         -> "gsconfig.gemini.edu"
   )
 ) extending List(with_gogo(version), cquiroz_credentials(version))
 
@@ -328,12 +300,13 @@ def jluhrs(version: Version) = AppConfig(
     "-Dedu.gemini.site=south"
   ),
   props = Map(
-    "edu.gemini.spdb.dir"           -> "/home1/jluhrs/.spdb/",
-    "edu.gemini.auxfile.root"       -> "/home1/jluhrs/.auxfile",
-    "edu.gemini.util.trpc.name"     -> "Javier's ODB (Test)",
-    "edu.gemini.auxfile.fits.dest"  -> "/gemsoft/var/data/ictd/test/GS@SEMESTER@/@PROG_ID@",
-    "edu.gemini.auxfile.other.dest" -> "/gemsoft/var/data/finder/GSqueue/Finders-Test/@SEMESTER@/@PROG_ID@",
-    "edu.gemini.auxfile.fits.host"  -> "gsconfig.gemini.edu"
+    "edu.gemini.spdb.dir"                -> "/home1/jluhrs/.spdb/",
+    "edu.gemini.auxfile.root"            -> "/home1/jluhrs/.auxfile",
+    "edu.gemini.dataman.gsa.summit.host" -> "hbffits2.hi.gemini.edu",
+    "edu.gemini.util.trpc.name"          -> "Javier's ODB (Test)",
+    "edu.gemini.auxfile.fits.dest"       -> "/gemsoft/var/data/ictd/test/GS@SEMESTER@/@PROG_ID@",
+    "edu.gemini.auxfile.other.dest"      -> "/gemsoft/var/data/finder/GSqueue/Finders-Test/@SEMESTER@/@PROG_ID@",
+    "edu.gemini.auxfile.fits.host"       -> "gsconfig.gemini.edu"
   )
 ) extending List(with_gogo(version), jluhrs_credentials(version))
 
@@ -359,19 +332,7 @@ def abrighton(version: Version) = AppConfig(
     "edu.gemini.auxfile.fits.host"               -> "gsconfig.gemini.edu",
     "edu.gemini.auxfile.other.dest"              -> "/gemsoft/var/data/finder/GSqueue/Finders-Test/@SEMESTER@/@PROG_ID@",
     "edu.gemini.auxfile.root"                    -> "/Users/abrighto/.auxfile",
-    "edu.gemini.dataman.gsaXferUrl"              -> "http://www.cadc-ccda.hia-iha.nrc-cnrc.gc.ca/cadcbin/etransferState?source=gsags&file=%FILE%&mode=file&format=text&timezone=utc&reverse=1",
-    "edu.gemini.dataman.rawDir"                  -> "/Users/abrighto/dataman/raw",
-    "edu.gemini.dataman.workDir"                 -> "/Users/abrighto/dataman/work",
-    "edu.gemini.dataman.xfer.cadcGroup.gsa"      -> "staff",
-    "edu.gemini.dataman.xfer.cadcRoot.gsa"       -> "/Users/abrighto/dataman/cadc",
-    "edu.gemini.dataman.xfer.destDir.base"       -> "/Users/abrighto/dataman/base",
-    "edu.gemini.dataman.xfer.destDir.gsa"        -> "/Users/abrighto/dataman/gsa",
-    "edu.gemini.dataman.xfer.host.base"          -> "localhost",
-    "edu.gemini.dataman.xfer.host.gsa"           -> "localhost",
-    "edu.gemini.dataman.xfer.mdIngestScript.gsa" -> "/Users/abrighto/dataman/cadc/mdIngest",
-    "edu.gemini.dataman.xfer.tempDir.base"       -> "/Users/abrighto/dataman/base/.xfer",
-    "edu.gemini.dataman.xfer.tempDir.gsa"        -> "/Users/abrighto/dataman/gsa/.xfer",
-    "edu.gemini.datasetfile.workDir"             -> "/Users/abrighto/dataman/work",
+    "edu.gemini.dataman.gsa.summit.host"         -> "hbffits2.hi.gemini.edu",
     "edu.gemini.smartgcal.host"                  -> "localhost",
     "edu.gemini.spdb.dir"                        -> "/Users/abrighto/.spdb/",
     "edu.gemini.util.trpc.name"                  -> "Brightons's ODB (Test)"
@@ -463,17 +424,13 @@ def gnodbtest(version: Version) = AppConfig(
     "-Dcron.odbMail.SITE_SMTP_SERVER=smtp.hi.gemini.edu"
   ),
   props = Map(
-    "edu.gemini.auxfile.fits.dest"     -> "/gemsoft/var/data/ictd/test/GN@SEMESTER@/@PROG_ID@",
-    "edu.gemini.auxfile.fits.host"     -> "gnconfig.gemini.edu",
-    "edu.gemini.auxfile.other.dest"    -> "/gemsoft/var/data/finder/GNqueue/Finders-Test/@SEMESTER@/@PROG_ID@",
-    "edu.gemini.dataman.gsaXferUrl"    -> "http://www.cadc-ccda.hia-iha.nrc-cnrc.gc.ca/cadcbin/etransferState?source=gsagn&file=%FILE%&mode=file&format=text&timezone=utc&reverse=1",
-    "edu.gemini.dataman.rawDir"        -> "/mount/wikiwiki/dhs",
-    "edu.gemini.dataman.workDir"       -> "/mount/wikiwiki/dataflow",
-    "edu.gemini.dataman.xfer.host.gsa" -> "gsagn",
-    "edu.gemini.datasetfile.workDir"   -> "/mount/wikiwiki/dataflow",
-    "edu.gemini.oodb.mail.smtpHost"    -> "smtp.hi.gemini.edu",
-    "edu.gemini.util.trpc.name"        -> "Gemini North ODB (Test)",
-    "osgi.shell.telnet.ip"             -> "10.1.5.83"
+    "edu.gemini.auxfile.fits.dest"       -> "/gemsoft/var/data/ictd/test/GN@SEMESTER@/@PROG_ID@",
+    "edu.gemini.auxfile.fits.host"       -> "gnconfig.gemini.edu",
+    "edu.gemini.auxfile.other.dest"      -> "/gemsoft/var/data/finder/GNqueue/Finders-Test/@SEMESTER@/@PROG_ID@",
+    "edu.gemini.dataman.gsa.summit.host" -> "hbffits2.hi.gemini.edu",
+    "edu.gemini.oodb.mail.smtpHost"      -> "smtp.hi.gemini.edu",
+    "edu.gemini.util.trpc.name"          -> "Gemini North ODB (Test)",
+    "osgi.shell.telnet.ip"               -> "10.1.5.83"
   )
 ) extending List(odbtest(version), gnodbtest_credentials(version))
 
@@ -492,12 +449,7 @@ def gnodb(version: Version) = AppConfig(
     "edu.gemini.auxfile.fits.host"         -> "gnconfig.gemini.edu",
     "edu.gemini.auxfile.other.dest"        -> "/gemsoft/var/data/finder/GNqueue/Finders/@SEMESTER@/@PROG_ID@",
     "edu.gemini.auxfile.root"              -> "/mount/wikiwiki/odbhome/ugemini/auxfile",
-    "edu.gemini.dataman.gsaXferUrl"        -> "http://www.cadc-ccda.hia-iha.nrc-cnrc.gc.ca/cadcbin/etransferState?source=gsagn&file=%FILE%&mode=file&format=text&timezone=utc&reverse=1",
-    "edu.gemini.dataman.gsa.query.host"    -> "fits.hi.gemini.edu",
-    "edu.gemini.dataman.rawDir"            -> "/mount/wikiwiki/dhs",
-    "edu.gemini.dataman.workDir"           -> "/mount/wikiwiki/dataflow",
-    "edu.gemini.dataman.xfer.host.gsa"     -> "gsagn",
-    "edu.gemini.datasetfile.workDir"       -> "/mount/wikiwiki/dataflow",
+    "edu.gemini.dataman.gsa.summit.host"   -> "fits.hi.gemini.edu",
     "edu.gemini.dbTools.archive.directory" -> "/mount/wikiwiki/odbhome/ugemini/spdb/spdb.archive",
     "edu.gemini.oodb.mail.smtpHost"        -> "smtp.hi.gemini.edu",
     "edu.gemini.spdb.dir"                  -> "/mount/wikiwiki/odbhome/ugemini/spdb/spdb.active",
@@ -517,17 +469,13 @@ def gsodbtest(version: Version) = AppConfig(
     "-Dcron.odbMail.SITE_SMTP_SERVER=smtp.cl.gemini.edu"
   ),
   props = Map(
-    "edu.gemini.auxfile.fits.dest"     -> "/gemsoft/var/data/ictd/test/GS@SEMESTER@/@PROG_ID@",
-    "edu.gemini.auxfile.fits.host"     -> "gsconfig.gemini.edu",
-    "edu.gemini.auxfile.other.dest"    -> "/gemsoft/var/data/finder/GSqueue/Finders-Test/@SEMESTER@/@PROG_ID@",
-    "edu.gemini.dataman.gsaXferUrl"    -> "http://www.cadc-ccda.hia-iha.nrc-cnrc.gc.ca/cadcbin/etransferState?source=gsags&file=%FILE%&mode=file&format=text&timezone=utc&reverse=1",
-    "edu.gemini.dataman.rawDir"        -> "/mount/petrohue/dhs",
-    "edu.gemini.dataman.workDir"       -> "/mount/petrohue/dataflow",
-    "edu.gemini.dataman.xfer.host.gsa" -> "gsags",
-    "edu.gemini.datasetfile.workDir"   -> "/mount/petrohue/dataflow",
-    "edu.gemini.oodb.mail.smtpHost"    -> "smtp.cl.gemini.edu",
-    "edu.gemini.util.trpc.name"        -> "Gemini South ODB (Test)",
-    "osgi.shell.telnet.ip"             -> "172.17.55.81"
+    "edu.gemini.auxfile.fits.dest"       -> "/gemsoft/var/data/ictd/test/GS@SEMESTER@/@PROG_ID@",
+    "edu.gemini.auxfile.fits.host"       -> "gsconfig.gemini.edu",
+    "edu.gemini.auxfile.other.dest"      -> "/gemsoft/var/data/finder/GSqueue/Finders-Test/@SEMESTER@/@PROG_ID@",
+    "edu.gemini.dataman.gsa.summit.host" -> "sbffits2.cl.gemini.edu",
+    "edu.gemini.oodb.mail.smtpHost"      -> "smtp.cl.gemini.edu",
+    "edu.gemini.util.trpc.name"          -> "Gemini South ODB (Test)",
+    "osgi.shell.telnet.ip"               -> "172.17.55.81"
   )
 ) extending List(odbtest(version), gsodbtest_credentials(version))
 
@@ -546,12 +494,7 @@ def gsodb(version: Version) = AppConfig(
     "edu.gemini.auxfile.fits.host"         -> "gsconfig.gemini.edu",
     "edu.gemini.auxfile.other.dest"        -> "/gemsoft/var/data/finder/GSqueue/Finders/@SEMESTER@/@PROG_ID@",
     "edu.gemini.auxfile.root"              -> "/mount/petrohue/odbhome/ugemini/auxfile",
-    "edu.gemini.dataman.gsaXferUrl"        -> "http://www.cadc-ccda.hia-iha.nrc-cnrc.gc.ca/cadcbin/etransferState?source=gsags&file=%FILE%&mode=file&format=text&timezone=utc&reverse=1",
-    "edu.gemini.dataman.gsa.query.host"    -> "fits.cl.gemini.edu",
-    "edu.gemini.dataman.rawDir"            -> "/mount/petrohue/dhs",
-    "edu.gemini.dataman.workDir"           -> "/mount/petrohue/dataflow",
-    "edu.gemini.dataman.xfer.host.gsa"     -> "gsags",
-    "edu.gemini.datasetfile.workDir"       -> "/mount/petrohue/dataflow",
+    "edu.gemini.dataman.gsa.summit.host"   -> "fits.cl.gemini.edu",
     "edu.gemini.dbTools.archive.directory" -> "/mount/petrohue/odbhome/ugemini/spdb/spdb.archive",
     "edu.gemini.oodb.mail.smtpHost"        -> "smtp.cl.gemini.edu",
     "edu.gemini.spdb.dir"                  -> "/mount/petrohue/odbhome/ugemini/spdb/spdb.active",

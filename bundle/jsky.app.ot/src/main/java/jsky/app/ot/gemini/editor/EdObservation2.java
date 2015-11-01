@@ -581,7 +581,7 @@ public final class EdObservation2 extends OtItemEditor<ISPObservation, SPObserva
     private void _showStatus() {
 
         // First collect the information to display.
-        final DataflowStatus dispo = DatasetDispositionService.lookupDatasetDisposition(getNode());
+        final scala.Option<DataflowStatus> dispo = DatasetDispositionService.lookupDatasetDisposition(getNode());
         final DatasetQaStateSums sums = DatasetQaStateSumsService.sumDatasetQaStates(getNode());
 
         final ObsQaState obsQaState;
@@ -593,7 +593,7 @@ public final class EdObservation2 extends OtItemEditor<ISPObservation, SPObserva
         final boolean override = getDataObject().isOverrideQaState();
 
         // Format the dataset disposition ("dataflow step").
-        final String statusString = (dispo == null) ? "No Data" : dispo.getDisplayString();
+        final String statusString = (dispo.isEmpty()) ? "No Data" : dispo.get().description();
 
         // Format the summary of dataset information.
         String sumsStr = "(No Data)";

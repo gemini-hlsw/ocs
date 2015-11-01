@@ -333,6 +333,8 @@ public class ObsQueryFunctor extends DBAbstractQueryFunctor {
                     final ObsQaState qa = ObsQaStateService.getObsQaState(o);
                     if (!a_sc.isTrueFor(qa.name())) return false;
 
+                    // DMAN TODO: why was this commented out?  Do we not need to
+                    // match on dataflow step?  Why is it in the menu of options?
 //                } else if (name.equals(ObsCatalogInfo.DATAFLOW_STEP)) {
 //                    final DatasetDisposition dispo;
 //                    dispo = DatasetDispositionService.lookupDatasetDisposition(o);
@@ -692,9 +694,8 @@ public class ObsQueryFunctor extends DBAbstractQueryFunctor {
         final ObsQaState qaState = ObsQaStateService.getObsQaState(o);
 
         // Figure out the dataflow step
-        String datasetDispoStr = "No Data";
-        final DataflowStatus dispo = DatasetDispositionService.lookupDatasetDisposition(o);
-        if (dispo != null) datasetDispoStr = dispo.getDisplayString();
+        final scala.Option<DataflowStatus> dispo = DatasetDispositionService.lookupDatasetDisposition(o);
+        final String datasetDispoStr = dispo.isEmpty() ? "No Data" : dispo.get().description();
 
         // Figure out ready status
         final boolean ready = status.isScheduleable();

@@ -1,0 +1,984 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE document PUBLIC "-//Gemini Observatory//DTD for Storage of P1 and P2 Documents//EN" "http://ftp.gemini.edu/Support/xml/dtds/SpXML2.dtd">
+
+<document>
+  <container kind="program" type="Program" version="2015B-1" subtype="basic" key="0dc1dbf0-43b8-4b27-86c4-dda302d45f4e" name="GS-2015B-Q-1234">
+    <paramset name="Science Program" kind="dataObj">
+      <param name="title" value="Test Dataset Migration"/>
+      <param name="programMode" value="QUEUE"/>
+      <param name="tooType" value="none"/>
+      <param name="programStatus" value="PHASE2"/>
+      <param name="nextObsId" value="1"/>
+      <paramset name="piInfo">
+        <param name="firstName" value="John"/>
+        <param name="lastName" value="Doe"/>
+        <param name="email" value="jdoe@bovine.edu"/>
+        <param name="phone" value="123-4567"/>
+        <param name="affiliate" value="CHILE"/>
+      </paramset>
+      <param name="contactPerson" value="jdoe@gemini.edu"/>
+      <param name="ngoEmail" value="jdoe@yahoo.com"/>
+      <param name="queueBand" value="1"/>
+      <param name="isThesis" value="true"/>
+      <paramset name="timeAcct">
+        <paramset name="timeAcctAlloc">
+          <param name="category" value="CL"/>
+          <param name="hours" value="1.5"/>
+        </paramset>
+      </paramset>
+      <param name="awardedTime" value="1.5" units="hours"/>
+      <param name="fetched" value="true"/>
+      <param name="completed" value="false"/>
+      <param name="notifyPi" value="YES"/>
+      <paramset name="phase1">
+        <param name="abstract">
+          <value>Test Dataset Migration</value>
+        </param>
+        <param name="category" value="Extragalactic"/>
+        <param name="keyword" value="Quasars"/>
+        <param name="keyword" value="Black hole physics"/>
+        <paramset name="investigators">
+          <paramset name="pi">
+            <param name="first" value="John"/>
+            <param name="last" value="Doe"/>
+            <param name="email" value="jdoe@bovine.edu"/>
+          </paramset>
+        </paramset>
+      </paramset>
+    </paramset>
+      <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="fe959cfc-7fcb-4d71-8fd9-8fe82b544946" name="GS-2015B-Q-1234-121">
+        <paramset name="Observation" kind="dataObj">
+          <param name="title" value="Longslit: Acq (NEO)"/>
+          <param name="libraryId" value=""/>
+          <param name="priority" value="HIGH"/>
+          <param name="tooOverrideRapid" value="false"/>
+          <param name="phase2Status" value="PHASE_2_COMPLETE"/>
+          <param name="execStatusOverride" value="OBSERVED"/>
+          <param name="schedulingBlockStart" value="1444633112937"/>
+          <param name="schedulingBlockDuration" value="166426"/>
+          <param name="qaState" value="UNDEFINED"/>
+          <param name="overrideQaState" value="false"/>
+          <param name="originatingTemplate" value="ea4e2bad-81a7-43b1-97a4-933651e4be50"/>
+        </paramset>
+        <container kind="obsComp" type="Instrument" version="2009A-1" subtype="GMOSSouth" key="4191b59e-fbf6-4ec0-baa5-1f75684fdec4" name="GMOS-S">
+          <paramset name="GMOS-S" kind="dataObj">
+            <param name="exposureTime" value="10.0"/>
+            <param name="posAngle" value="114.05"/>
+            <param name="coadds" value="1"/>
+            <paramset name="parallacticAngleDuration">
+              <param name="parallacticAngleDurationMode" value="REMAINING_TIME"/>
+              <param name="explicitDuration" value="0"/>
+            </paramset>
+            <param name="adc" value="NONE"/>
+            <param name="ampCount" value="TWELVE"/>
+            <param name="gainChoice" value="LOW"/>
+            <param name="ampReadMode" value="FAST"/>
+            <param name="detectorManufacturer" value="HAMAMATSU"/>
+            <param name="disperser" value="MIRROR"/>
+            <param name="fpuMode" value="BUILTIN"/>
+            <param name="fpu" value="LONGSLIT_5"/>
+            <param name="filter" value="r_G0326"/>
+            <param name="ccdXBinning" value="TWO"/>
+            <param name="ccdYBinning" value="TWO"/>
+            <param name="issPort" value="SIDE_LOOKING"/>
+            <param name="posAngleConstraint" value="PARALLACTIC_ANGLE"/>
+            <param name="stageMode" value="FOLLOW_XYZ"/>
+            <param name="dtaXOffset" value="ZERO"/>
+            <param name="builtinROI" value="CCD2"/>
+            <param name="useNS" value="FALSE"/>
+            <param name="mosPreimaging" value="NO"/>
+          </paramset>
+        </container>
+        <container kind="obsComp" type="Scheduling" version="2009A-1" subtype="conditions" key="32138f23-31f8-4cf7-8803-950030f4a283" name="Observing Conditions">
+          <paramset name="Observing Conditions" kind="dataObj">
+            <param name="CloudCover" value="ANY"/>
+            <param name="ImageQuality" value="ANY"/>
+            <param name="SkyBackground" value="ANY"/>
+            <param name="WaterVapor" value="ANY"/>
+            <param name="ElevationConstraintType" value="AIRMASS"/>
+            <param name="ElevationConstraintMin" value="1.0"/>
+            <param name="ElevationConstraintMax" value="2.0"/>
+            <paramset name="timing-window-list">
+              <paramset name="timing-window">
+                <param name="start" value="1444586400000"/>
+                <param name="duration" value="172800000"/>
+                <param name="repeat" value="0"/>
+                <param name="period" value="0"/>
+              </paramset>
+            </paramset>
+          </paramset>
+        </container>
+        <container kind="obsComp" type="Telescope" version="2009B-1" subtype="targetEnv" key="d4492f12-9f0f-42c3-8c28-cf2a4031e6ac" name="Targets">
+          <paramset name="Targets" kind="dataObj">
+            <param name="title" value="Minor Planet: 2015 TC25"/>
+            <paramset name="targetEnv">
+              <paramset name="base">
+                <param name="name" value="1234 TC25"/>
+                <param name="horizons-object-id" value="123456"/>
+                <param name="horizons-object-type" value="1"/>
+                <param name="c1" value="00:11:22.333"/>
+                <param name="c2" value="44:55:00.11"/>
+                <param name="validAt" value="10/12/15 6:45:59 AM UTC"/>
+                <param name="system" value="MPC minor planet"/>
+                <param name="epoch" value="2457306.5" units="JD"/>
+                <param name="anode" value="21.66831140133961" units="degrees"/>
+                <param name="aq" value="1.102750648960297" units="au"/>
+                <param name="e" value="0.157126252463231"/>
+                <param name="inclination" value="1.218236720231697" units="degrees"/>
+                <param name="lm" value="312.40954725164" units="degrees"/>
+                <param name="n" value="0.0" units="degrees/day"/>
+                <param name="perihelion" value="58.14412082697038" units="degrees"/>
+                <param name="epochOfPeri" value="2457362.415439855" units="JD"/>
+              </paramset>
+              <paramset name="guideEnv">
+                <param name="active">
+                  <value sequence="0">GMOS OIWFS</value>
+                  <value sequence="1">PWFS1</value>
+                  <value sequence="2">PWFS2</value>
+                </param>
+              </paramset>
+            </paramset>
+          </paramset>
+        </container>
+        <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="eb90aaba-00b7-42bd-94f8-ecd1befb09ab" name="Observing Log">
+          <paramset name="Observing Log" kind="dataObj">
+            <paramset name="obsQaRecord">
+              <paramset name="datasetQa">
+                <param name="label" value="GS-2015B-Q-1234-001"/>
+                <param name="qaState" value="PASS"/>
+                <param name="comment">
+                  <value>Offsets sent: P=4.1463  Q=0.0000  IAA=-9999.0000  IPA=-9999.0000
+</value>
+                </param>
+              </paramset>
+              <paramset name="datasetQa">
+                <param name="label" value="GS-2015B-Q-1234-003"/>
+                <param name="qaState" value="PASS"/>
+                <param name="comment">
+                  <value>Offsets sent: P=0.1499  Q=0.0000  IAA=-9999.0000  IPA=-9999.0000
+</value>
+                </param>
+              </paramset>
+              <paramset name="datasetQa">
+                <param name="label" value="GS-2015B-Q-1234-002"/>
+                <param name="qaState" value="USABLE"/>
+              </paramset>
+            </paramset>
+          </paramset>
+        </container>
+        <container kind="obsExecLog" type="ObsLog" version="2009A-1" subtype="exec" key="bc32cccc-4bf6-48fe-9034-1d143af716f6" name="Observation Exec Log">
+          <paramset name="Observation Exec Log" kind="dataObj">
+            <paramset name="obsExecRecord">
+              <paramset name="datasets">
+                <paramset name="datasetRecord">
+                  <param name="syncTime" value="1444636485000"/>
+                  <param name="datasetFileState" value="OK"/>
+                  <param name="gsaState" value="ACCEPTED"/>
+                  <paramset name="dataset">
+                    <param name="datasetLabel" value="GS-2015B-Q-1234-001"/>
+                    <param name="dhsFilename" value="S20151012S0058"/>
+                    <param name="timestamp" value="1444632622760"/>
+                  </paramset>
+                </paramset>
+                <paramset name="datasetRecord">
+                  <param name="syncTime" value="1444636485000"/>
+                  <param name="datasetFileState" value="OK"/>
+                  <param name="gsaState" value="ACCEPTED"/>
+                  <paramset name="dataset">
+                    <param name="datasetLabel" value="GS-2015B-Q-1234-002"/>
+                    <param name="dhsFilename" value="S20151012S0059"/>
+                    <param name="timestamp" value="1444632763771"/>
+                  </paramset>
+                </paramset>
+                <paramset name="datasetRecord">
+                  <param name="syncTime" value="1444636485000"/>
+                  <param name="datasetFileState" value="OK"/>
+                  <param name="gsaState" value="ACCEPTED"/>
+                  <paramset name="dataset">
+                    <param name="datasetLabel" value="GS-2015B-Q-1234-003"/>
+                    <param name="dhsFilename" value="S20151012S0060"/>
+                    <param name="timestamp" value="1444632895062"/>
+                  </paramset>
+                </paramset>
+                <paramset name="datasetRecord">
+                  <param name="syncTime" value="1444636485000"/>
+                  <param name="datasetFileState" value="OK"/>
+                  <param name="gsaState" value="ACCEPTED"/>
+                  <paramset name="dataset">
+                    <param name="datasetLabel" value="GS-2015B-Q-1234-004"/>
+                    <param name="dhsFilename" value="S20151012S0061"/>
+                    <param name="timestamp" value="1444633004583"/>
+                  </paramset>
+                </paramset>
+              </paramset>
+              <paramset name="events">
+                <paramset name="event" kind="StartVisit">
+                  <param name="timestamp" value="1444631833453"/>
+                  <param name="obsid" value="GS-2015B-Q-1234"/>
+                </paramset>
+                <paramset name="event" kind="StartSequence">
+                  <param name="timestamp" value="1444631833454"/>
+                  <param name="obsid" value="GS-2015B-Q-1234"/>
+                </paramset>
+                <paramset name="event" kind="PauseObserve">
+                  <param name="timestamp" value="1444631834479"/>
+                  <param name="obsid" value="GS-2015B-Q-1234"/>
+                  <param name="reason" value=""/>
+                </paramset>
+                <paramset name="event" kind="EndVisit">
+                  <param name="timestamp" value="1444632408915"/>
+                  <param name="obsid" value="GS-2015B-Q-1234"/>
+                </paramset>
+                <paramset name="event" kind="StartVisit">
+                  <param name="timestamp" value="1444632618674"/>
+                  <param name="obsid" value="GS-2015B-Q-1234"/>
+                </paramset>
+                <paramset name="event" kind="StartSequence">
+                  <param name="timestamp" value="1444632618675"/>
+                  <param name="obsid" value="GS-2015B-Q-1234"/>
+                </paramset>
+                <paramset name="event" kind="StartDataset">
+                  <param name="timestamp" value="1444632622761"/>
+                  <param name="obsid" value="GS-2015B-Q-1234"/>
+                  <paramset name="dataset">
+                    <param name="datasetLabel" value="GS-2015B-Q-1234-001"/>
+                    <param name="dhsFilename" value="S20151012S0058"/>
+                    <param name="timestamp" value="1444632622760"/>
+                  </paramset>
+                </paramset>
+                <paramset name="event" kind="EndDataset">
+                  <param name="timestamp" value="1444632651243"/>
+                  <param name="obsid" value="GS-2015B-Q-1234"/>
+                  <param name="datasetLabel" value="GS-2015B-Q-1234-001"/>
+                </paramset>
+                <paramset name="event" kind="PauseObserve">
+                  <param name="timestamp" value="1444632651254"/>
+                  <param name="obsid" value="GS-2015B-Q-1234"/>
+                  <param name="reason" value=""/>
+                </paramset>
+                <paramset name="event" kind="ContinueObserve">
+                  <param name="timestamp" value="1444632678117"/>
+                  <param name="obsid" value="GS-2015B-Q-1234"/>
+                </paramset>
+                <paramset name="event" kind="StartDataset">
+                  <param name="timestamp" value="1444632763772"/>
+                  <param name="obsid" value="GS-2015B-Q-1234"/>
+                  <paramset name="dataset">
+                    <param name="datasetLabel" value="GS-2015B-Q-1234-002"/>
+                    <param name="dhsFilename" value="S20151012S0059"/>
+                    <param name="timestamp" value="1444632763771"/>
+                  </paramset>
+                </paramset>
+                <paramset name="event" kind="EndDataset">
+                  <param name="timestamp" value="1444632798998"/>
+                  <param name="obsid" value="GS-2015B-Q-1234"/>
+                  <param name="datasetLabel" value="GS-2015B-Q-1234-002"/>
+                </paramset>
+                <paramset name="event" kind="PauseObserve">
+                  <param name="timestamp" value="1444632799006"/>
+                  <param name="obsid" value="GS-2015B-Q-1234"/>
+                  <param name="reason" value=""/>
+                </paramset>
+                <paramset name="event" kind="PauseObserve">
+                  <param name="timestamp" value="1444632872906"/>
+                  <param name="obsid" value="GS-2015B-Q-1234"/>
+                  <param name="reason" value=""/>
+                </paramset>
+                <paramset name="event" kind="ContinueObserve">
+                  <param name="timestamp" value="1444632890817"/>
+                  <param name="obsid" value="GS-2015B-Q-1234"/>
+                </paramset>
+                <paramset name="event" kind="StartDataset">
+                  <param name="timestamp" value="1444632895063"/>
+                  <param name="obsid" value="GS-2015B-Q-1234"/>
+                  <paramset name="dataset">
+                    <param name="datasetLabel" value="GS-2015B-Q-1234-003"/>
+                    <param name="dhsFilename" value="S20151012S0060"/>
+                    <param name="timestamp" value="1444632895062"/>
+                  </paramset>
+                </paramset>
+                <paramset name="event" kind="EndDataset">
+                  <param name="timestamp" value="1444632940263"/>
+                  <param name="obsid" value="GS-2015B-Q-1234"/>
+                  <param name="datasetLabel" value="GS-2015B-Q-1234-003"/>
+                </paramset>
+                <paramset name="event" kind="PauseObserve">
+                  <param name="timestamp" value="1444632940282"/>
+                  <param name="obsid" value="GS-2015B-Q-1234"/>
+                  <param name="reason" value=""/>
+                </paramset>
+                <paramset name="event" kind="ContinueObserve">
+                  <param name="timestamp" value="1444633000524"/>
+                  <param name="obsid" value="GS-2015B-Q-1234"/>
+                </paramset>
+                <paramset name="event" kind="StartDataset">
+                  <param name="timestamp" value="1444633004584"/>
+                  <param name="obsid" value="GS-2015B-Q-1234"/>
+                  <paramset name="dataset">
+                    <param name="datasetLabel" value="GS-2015B-Q-1234-004"/>
+                    <param name="dhsFilename" value="S20151012S0061"/>
+                    <param name="timestamp" value="1444633004583"/>
+                  </paramset>
+                </paramset>
+                <paramset name="event" kind="EndDataset">
+                  <param name="timestamp" value="1444633049770"/>
+                  <param name="obsid" value="GS-2015B-Q-1234"/>
+                  <param name="datasetLabel" value="GS-2015B-Q-1234-004"/>
+                </paramset>
+                <paramset name="event" kind="EndSequence">
+                  <param name="timestamp" value="1444633049774"/>
+                  <param name="obsid" value="GS-2015B-Q-1234"/>
+                </paramset>
+                <paramset name="event" kind="EndVisit">
+                  <param name="timestamp" value="1444633090796"/>
+                  <param name="obsid" value="GS-2015B-Q-1234"/>
+                </paramset>
+              </paramset>
+              <paramset name="configMap">
+                <paramset name="configMapEntry">
+                  <param name="datasetLabels" value="GS-2015B-Q-1234-001"/>
+                  <paramset name="config">
+                    <paramset name="item">
+                      <param name="key" value="instrument:adc"/>
+                      <param name="value" value="No Correction"/>
+                    </paramset>
+                    <paramset name="item">
+                      <param name="key" value="instrument:ampCount"/>
+                      <param name="value" value="Twelve"/>
+                    </paramset>
+                    <paramset name="item">
+                      <param name="key" value="instrument:ampReadMode"/>
+                      <param name="value" value="Fast"/>
+                    </paramset>
+                    <paramset name="item">
+                      <param name="key" value="instrument:builtinROI"/>
+                      <param name="value" value="CCD 2"/>
+                    </paramset>
+                    <paramset name="item">
+                      <param name="key" value="instrument:ccdXBinning"/>
+                      <param name="value" value="2"/>
+                    </paramset>
+                    <paramset name="item">
+                      <param name="key" value="instrument:ccdYBinning"/>
+                      <param name="value" value="2"/>
+                    </paramset>
+                    <paramset name="item">
+                      <param name="key" value="instrument:detectorManufacturer"/>
+                      <param name="value" value="HAMAMATSU"/>
+                    </paramset>
+                    <paramset name="item">
+                      <param name="key" value="instrument:disperser"/>
+                      <param name="value" value="Mirror"/>
+                    </paramset>
+                    <paramset name="item">
+                      <param name="key" value="instrument:dtaXOffset"/>
+                      <param name="value" value="0"/>
+                    </paramset>
+                    <paramset name="item">
+                      <param name="key" value="instrument:exposureTime"/>
+                      <param name="value" value="10.0"/>
+                    </paramset>
+                    <paramset name="item">
+                      <param name="key" value="instrument:filter"/>
+                      <param name="value" value="r_G0326"/>
+                    </paramset>
+                    <paramset name="item">
+                      <param name="key" value="instrument:fpu"/>
+                      <param name="value" value="None"/>
+                    </paramset>
+                    <paramset name="item">
+                      <param name="key" value="instrument:fpuMode"/>
+                      <param name="value" value="Builtin"/>
+                    </paramset>
+                    <paramset name="item">
+                      <param name="key" value="instrument:gainChoice"/>
+                      <param name="value" value="Low"/>
+                    </paramset>
+                    <paramset name="item">
+                      <param name="key" value="instrument:gainSetting"/>
+                      <param name="value" value="6"/>
+                    </paramset>
+                    <paramset name="item">
+                      <param name="key" value="instrument:instrument"/>
+                      <param name="value" value="GMOS-S"/>
+                    </paramset>
+                    <paramset name="item">
+                      <param name="key" value="instrument:mosPreimaging"/>
+                      <param name="value" value="No"/>
+                    </paramset>
+                    <paramset name="item">
+                      <param name="key" value="instrument:observingWavelength"/>
+                      <param name="value" value="0.630"/>
+                    </paramset>
+                    <paramset name="item">
+                      <param name="key" value="instrument:port"/>
+                      <param name="value" value="side-looking"/>
+                    </paramset>
+                    <paramset name="item">
+                      <param name="key" value="instrument:posAngle"/>
+                      <param name="value" value="114.04643837710438"/>
+                    </paramset>
+                    <paramset name="item">
+                      <param name="key" value="instrument:stageMode"/>
+                      <param name="value" value="Follow in XYZ(focus)"/>
+                    </paramset>
+                    <paramset name="item">
+                      <param name="key" value="instrument:version"/>
+                      <param name="value" value="2009A-1"/>
+                    </paramset>
+                    <paramset name="item">
+                      <param name="key" value="observe:class"/>
+                      <param name="value" value="acq"/>
+                    </paramset>
+                    <paramset name="item">
+                      <param name="key" value="observe:exposureTime"/>
+                      <param name="value" value="10.0"/>
+                    </paramset>
+                    <paramset name="item">
+                      <param name="key" value="observe:object"/>
+                      <param name="value" value="2015 TC25"/>
+                    </paramset>
+                    <paramset name="item">
+                      <param name="key" value="observe:observeType"/>
+                      <param name="value" value="OBJECT"/>
+                    </paramset>
+                    <paramset name="item">
+                      <param name="key" value="observe:sciBand"/>
+                      <param name="value" value="1"/>
+                    </paramset>
+                    <paramset name="item">
+                      <param name="key" value="observe:status"/>
+                      <param name="value" value="ready"/>
+                    </paramset>
+                    <paramset name="item">
+                      <param name="key" value="ocs:obsConditions:CloudCover"/>
+                      <param name="value" value="100"/>
+                    </paramset>
+                    <paramset name="item">
+                      <param name="key" value="ocs:obsConditions:ImageQuality"/>
+                      <param name="value" value="100"/>
+                    </paramset>
+                    <paramset name="item">
+                      <param name="key" value="ocs:obsConditions:MaxAirmass"/>
+                      <param name="value" value="2.0"/>
+                    </paramset>
+                    <paramset name="item">
+                      <param name="key" value="ocs:obsConditions:MinAirmass"/>
+                      <param name="value" value="1.0"/>
+                    </paramset>
+                    <paramset name="item">
+                      <param name="key" value="ocs:obsConditions:SkyBackground"/>
+                      <param name="value" value="100"/>
+                    </paramset>
+                    <paramset name="item">
+                      <param name="key" value="ocs:obsConditions:TimingWindowDuration0"/>
+                      <param name="value" value="172800000"/>
+                    </paramset>
+                    <paramset name="item">
+                      <param name="key" value="ocs:obsConditions:TimingWindowPeriod0"/>
+                      <param name="value" value="0"/>
+                    </paramset>
+                    <paramset name="item">
+                      <param name="key" value="ocs:obsConditions:TimingWindowRepeat0"/>
+                      <param name="value" value="0"/>
+                    </paramset>
+                    <paramset name="item">
+                      <param name="key" value="ocs:obsConditions:TimingWindowStart0"/>
+                      <param name="value" value="1444586400000"/>
+                    </paramset>
+                    <paramset name="item">
+                      <param name="key" value="ocs:obsConditions:WaterVapor"/>
+                      <param name="value" value="100"/>
+                    </paramset>
+                    <paramset name="item">
+                      <param name="key" value="ocs:observationId"/>
+                      <param name="value" value="GS-2015B-Q-1234"/>
+                    </paramset>
+                    <paramset name="item">
+                      <param name="key" value="ocs:programId"/>
+                      <param name="value" value="GS-2015B-Q-1234"/>
+                    </paramset>
+                  </paramset>
+                </paramset>
+                <paramset name="configMapEntry">
+                  <param name="datasetLabels" value="GS-2015B-Q-1234-002"/>
+                  <paramset name="config">
+                    <paramset name="item">
+                      <param name="key" value="instrument:adc"/>
+                      <param name="value" value="No Correction"/>
+                    </paramset>
+                    <paramset name="item">
+                      <param name="key" value="instrument:ampCount"/>
+                      <param name="value" value="Twelve"/>
+                    </paramset>
+                    <paramset name="item">
+                      <param name="key" value="instrument:ampReadMode"/>
+                      <param name="value" value="Fast"/>
+                    </paramset>
+                    <paramset name="item">
+                      <param name="key" value="instrument:builtinROI"/>
+                      <param name="value" value="Central Stamp"/>
+                    </paramset>
+                    <paramset name="item">
+                      <param name="key" value="instrument:ccdXBinning"/>
+                      <param name="value" value="1"/>
+                    </paramset>
+                    <paramset name="item">
+                      <param name="key" value="instrument:ccdYBinning"/>
+                      <param name="value" value="1"/>
+                    </paramset>
+                    <paramset name="item">
+                      <param name="key" value="instrument:detectorManufacturer"/>
+                      <param name="value" value="HAMAMATSU"/>
+                    </paramset>
+                    <paramset name="item">
+                      <param name="key" value="instrument:disperser"/>
+                      <param name="value" value="Mirror"/>
+                    </paramset>
+                    <paramset name="item">
+                      <param name="key" value="instrument:dtaXOffset"/>
+                      <param name="value" value="0"/>
+                    </paramset>
+                    <paramset name="item">
+                      <param name="key" value="instrument:exposureTime"/>
+                      <param name="value" value="20.0"/>
+                    </paramset>
+                    <paramset name="item">
+                      <param name="key" value="instrument:filter"/>
+                      <param name="value" value="r_G0326"/>
+                    </paramset>
+                    <paramset name="item">
+                      <param name="key" value="instrument:fpu"/>
+                      <param name="value" value="Longslit 1.50 arcsec"/>
+                    </paramset>
+                    <paramset name="item">
+                      <param name="key" value="instrument:fpuMode"/>
+                      <param name="value" value="Builtin"/>
+                    </paramset>
+                    <paramset name="item">
+                      <param name="key" value="instrument:gainChoice"/>
+                      <param name="value" value="Low"/>
+                    </paramset>
+                    <paramset name="item">
+                      <param name="key" value="instrument:gainSetting"/>
+                      <param name="value" value="6"/>
+                    </paramset>
+                    <paramset name="item">
+                      <param name="key" value="instrument:instrument"/>
+                      <param name="value" value="GMOS-S"/>
+                    </paramset>
+                    <paramset name="item">
+                      <param name="key" value="instrument:mosPreimaging"/>
+                      <param name="value" value="No"/>
+                    </paramset>
+                    <paramset name="item">
+                      <param name="key" value="instrument:observingWavelength"/>
+                      <param name="value" value="0.630"/>
+                    </paramset>
+                    <paramset name="item">
+                      <param name="key" value="instrument:port"/>
+                      <param name="value" value="side-looking"/>
+                    </paramset>
+                    <paramset name="item">
+                      <param name="key" value="instrument:posAngle"/>
+                      <param name="value" value="114.04643837710438"/>
+                    </paramset>
+                    <paramset name="item">
+                      <param name="key" value="instrument:stageMode"/>
+                      <param name="value" value="Follow in XYZ(focus)"/>
+                    </paramset>
+                    <paramset name="item">
+                      <param name="key" value="instrument:version"/>
+                      <param name="value" value="2009A-1"/>
+                    </paramset>
+                    <paramset name="item">
+                      <param name="key" value="observe:class"/>
+                      <param name="value" value="acq"/>
+                    </paramset>
+                    <paramset name="item">
+                      <param name="key" value="observe:exposureTime"/>
+                      <param name="value" value="20.0"/>
+                    </paramset>
+                    <paramset name="item">
+                      <param name="key" value="observe:object"/>
+                      <param name="value" value="2015 TC25"/>
+                    </paramset>
+                    <paramset name="item">
+                      <param name="key" value="observe:observeType"/>
+                      <param name="value" value="OBJECT"/>
+                    </paramset>
+                    <paramset name="item">
+                      <param name="key" value="observe:sciBand"/>
+                      <param name="value" value="1"/>
+                    </paramset>
+                    <paramset name="item">
+                      <param name="key" value="observe:status"/>
+                      <param name="value" value="ready"/>
+                    </paramset>
+                    <paramset name="item">
+                      <param name="key" value="ocs:obsConditions:CloudCover"/>
+                      <param name="value" value="100"/>
+                    </paramset>
+                    <paramset name="item">
+                      <param name="key" value="ocs:obsConditions:ImageQuality"/>
+                      <param name="value" value="100"/>
+                    </paramset>
+                    <paramset name="item">
+                      <param name="key" value="ocs:obsConditions:MaxAirmass"/>
+                      <param name="value" value="2.0"/>
+                    </paramset>
+                    <paramset name="item">
+                      <param name="key" value="ocs:obsConditions:MinAirmass"/>
+                      <param name="value" value="1.0"/>
+                    </paramset>
+                    <paramset name="item">
+                      <param name="key" value="ocs:obsConditions:SkyBackground"/>
+                      <param name="value" value="100"/>
+                    </paramset>
+                    <paramset name="item">
+                      <param name="key" value="ocs:obsConditions:TimingWindowDuration0"/>
+                      <param name="value" value="172800000"/>
+                    </paramset>
+                    <paramset name="item">
+                      <param name="key" value="ocs:obsConditions:TimingWindowPeriod0"/>
+                      <param name="value" value="0"/>
+                    </paramset>
+                    <paramset name="item">
+                      <param name="key" value="ocs:obsConditions:TimingWindowRepeat0"/>
+                      <param name="value" value="0"/>
+                    </paramset>
+                    <paramset name="item">
+                      <param name="key" value="ocs:obsConditions:TimingWindowStart0"/>
+                      <param name="value" value="1444586400000"/>
+                    </paramset>
+                    <paramset name="item">
+                      <param name="key" value="ocs:obsConditions:WaterVapor"/>
+                      <param name="value" value="100"/>
+                    </paramset>
+                    <paramset name="item">
+                      <param name="key" value="ocs:observationId"/>
+                      <param name="value" value="GS-2015B-Q-1234"/>
+                    </paramset>
+                    <paramset name="item">
+                      <param name="key" value="ocs:programId"/>
+                      <param name="value" value="GS-2015B-Q-1234"/>
+                    </paramset>
+                  </paramset>
+                </paramset>
+                <paramset name="configMapEntry">
+                  <param name="datasetLabels">
+                    <value sequence="0">GS-2015B-Q-1234-003</value>
+                    <value sequence="1">GS-2015B-Q-1234-004</value>
+                  </param>
+                  <paramset name="config">
+                    <paramset name="item">
+                      <param name="key" value="instrument:adc"/>
+                      <param name="value" value="No Correction"/>
+                    </paramset>
+                    <paramset name="item">
+                      <param name="key" value="instrument:ampCount"/>
+                      <param name="value" value="Twelve"/>
+                    </paramset>
+                    <paramset name="item">
+                      <param name="key" value="instrument:ampReadMode"/>
+                      <param name="value" value="Fast"/>
+                    </paramset>
+                    <paramset name="item">
+                      <param name="key" value="instrument:builtinROI"/>
+                      <param name="value" value="Central Stamp"/>
+                    </paramset>
+                    <paramset name="item">
+                      <param name="key" value="instrument:ccdXBinning"/>
+                      <param name="value" value="1"/>
+                    </paramset>
+                    <paramset name="item">
+                      <param name="key" value="instrument:ccdYBinning"/>
+                      <param name="value" value="1"/>
+                    </paramset>
+                    <paramset name="item">
+                      <param name="key" value="instrument:detectorManufacturer"/>
+                      <param name="value" value="HAMAMATSU"/>
+                    </paramset>
+                    <paramset name="item">
+                      <param name="key" value="instrument:disperser"/>
+                      <param name="value" value="Mirror"/>
+                    </paramset>
+                    <paramset name="item">
+                      <param name="key" value="instrument:dtaXOffset"/>
+                      <param name="value" value="0"/>
+                    </paramset>
+                    <paramset name="item">
+                      <param name="key" value="instrument:exposureTime"/>
+                      <param name="value" value="30.0"/>
+                    </paramset>
+                    <paramset name="item">
+                      <param name="key" value="instrument:filter"/>
+                      <param name="value" value="r_G0326"/>
+                    </paramset>
+                    <paramset name="item">
+                      <param name="key" value="instrument:fpu"/>
+                      <param name="value" value="Longslit 1.50 arcsec"/>
+                    </paramset>
+                    <paramset name="item">
+                      <param name="key" value="instrument:fpuMode"/>
+                      <param name="value" value="Builtin"/>
+                    </paramset>
+                    <paramset name="item">
+                      <param name="key" value="instrument:gainChoice"/>
+                      <param name="value" value="Low"/>
+                    </paramset>
+                    <paramset name="item">
+                      <param name="key" value="instrument:gainSetting"/>
+                      <param name="value" value="6"/>
+                    </paramset>
+                    <paramset name="item">
+                      <param name="key" value="instrument:instrument"/>
+                      <param name="value" value="GMOS-S"/>
+                    </paramset>
+                    <paramset name="item">
+                      <param name="key" value="instrument:mosPreimaging"/>
+                      <param name="value" value="No"/>
+                    </paramset>
+                    <paramset name="item">
+                      <param name="key" value="instrument:observingWavelength"/>
+                      <param name="value" value="0.630"/>
+                    </paramset>
+                    <paramset name="item">
+                      <param name="key" value="instrument:port"/>
+                      <param name="value" value="side-looking"/>
+                    </paramset>
+                    <paramset name="item">
+                      <param name="key" value="instrument:posAngle"/>
+                      <param name="value" value="114.04643837710438"/>
+                    </paramset>
+                    <paramset name="item">
+                      <param name="key" value="instrument:stageMode"/>
+                      <param name="value" value="Follow in XYZ(focus)"/>
+                    </paramset>
+                    <paramset name="item">
+                      <param name="key" value="instrument:version"/>
+                      <param name="value" value="2009A-1"/>
+                    </paramset>
+                    <paramset name="item">
+                      <param name="key" value="observe:class"/>
+                      <param name="value" value="acq"/>
+                    </paramset>
+                    <paramset name="item">
+                      <param name="key" value="observe:exposureTime"/>
+                      <param name="value" value="30.0"/>
+                    </paramset>
+                    <paramset name="item">
+                      <param name="key" value="observe:object"/>
+                      <param name="value" value="2015 TC25"/>
+                    </paramset>
+                    <paramset name="item">
+                      <param name="key" value="observe:observeType"/>
+                      <param name="value" value="OBJECT"/>
+                    </paramset>
+                    <paramset name="item">
+                      <param name="key" value="observe:sciBand"/>
+                      <param name="value" value="1"/>
+                    </paramset>
+                    <paramset name="item">
+                      <param name="key" value="observe:status"/>
+                      <param name="value" value="ready"/>
+                    </paramset>
+                    <paramset name="item">
+                      <param name="key" value="ocs:obsConditions:CloudCover"/>
+                      <param name="value" value="100"/>
+                    </paramset>
+                    <paramset name="item">
+                      <param name="key" value="ocs:obsConditions:ImageQuality"/>
+                      <param name="value" value="100"/>
+                    </paramset>
+                    <paramset name="item">
+                      <param name="key" value="ocs:obsConditions:MaxAirmass"/>
+                      <param name="value" value="2.0"/>
+                    </paramset>
+                    <paramset name="item">
+                      <param name="key" value="ocs:obsConditions:MinAirmass"/>
+                      <param name="value" value="1.0"/>
+                    </paramset>
+                    <paramset name="item">
+                      <param name="key" value="ocs:obsConditions:SkyBackground"/>
+                      <param name="value" value="100"/>
+                    </paramset>
+                    <paramset name="item">
+                      <param name="key" value="ocs:obsConditions:TimingWindowDuration0"/>
+                      <param name="value" value="172800000"/>
+                    </paramset>
+                    <paramset name="item">
+                      <param name="key" value="ocs:obsConditions:TimingWindowPeriod0"/>
+                      <param name="value" value="0"/>
+                    </paramset>
+                    <paramset name="item">
+                      <param name="key" value="ocs:obsConditions:TimingWindowRepeat0"/>
+                      <param name="value" value="0"/>
+                    </paramset>
+                    <paramset name="item">
+                      <param name="key" value="ocs:obsConditions:TimingWindowStart0"/>
+                      <param name="value" value="1444586400000"/>
+                    </paramset>
+                    <paramset name="item">
+                      <param name="key" value="ocs:obsConditions:WaterVapor"/>
+                      <param name="value" value="100"/>
+                    </paramset>
+                    <paramset name="item">
+                      <param name="key" value="ocs:observationId"/>
+                      <param name="value" value="GS-2015B-Q-1234"/>
+                    </paramset>
+                    <paramset name="item">
+                      <param name="key" value="ocs:programId"/>
+                      <param name="value" value="GS-2015B-Q-1234"/>
+                    </paramset>
+                  </paramset>
+                </paramset>
+              </paramset>
+            </paramset>
+            <paramset name="calibrationSequence">
+              <paramset name="calibration">
+                <param name="class" value="acq"/>
+              </paramset>
+              <paramset name="calibration"/>
+              <paramset name="calibration"/>
+              <paramset name="calibration"/>
+            </paramset>
+          </paramset>
+        </container>
+        <container kind="seqComp" type="Iterator" version="2012A-1" subtype="base" key="a25b455e-3925-4510-aad8-baea2f86f8b5" name="Sequence">
+          <paramset name="Sequence" kind="dataObj"/>
+          <container kind="seqComp" type="Iterator" version="2009A-1" subtype="GMOSSouth" key="438aff39-b6b6-42d2-8f6b-5d1a400c56a9" name="GMOS-S Sequence">
+            <paramset name="GMOS-S Sequence" kind="dataObj">
+              <param name="title" value="GMOS-S: Define the Longslit"/>
+              <param name="fpu" value="LONGSLIT_5"/>
+            </paramset>
+            <container kind="seqComp" type="Iterator" version="2009A-1" subtype="GMOSSouth" key="47620baa-9f35-477f-99b6-5cc49a4d5e00" name="GMOS-S Sequence">
+              <paramset name="GMOS-S Sequence" kind="dataObj">
+                <param name="title" value="GMOS-S: Field image"/>
+                <param name="fpu" value="FPU_NONE"/>
+              </paramset>
+              <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="f8a8691b-8dcd-46f7-a645-4094899b6b7e" name="Offset">
+                <paramset name="Offset" kind="dataObj">
+                  <param name="title" value="(P=0, Q=0)"/>
+                  <paramset name="offsets">
+                    <paramset name="Offset0" sequence="0">
+                      <param name="p" value="0.0"/>
+                      <param name="q" value="0.0"/>
+                      <param name="defaultGuideOption" value="on"/>
+                    </paramset>
+                  </paramset>
+                </paramset>
+                <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="390354e5-5d9a-48ab-b3c6-598690b90e15" name="Observe">
+                  <paramset name="Observe" kind="dataObj">
+                    <param name="repeatCount" value="1"/>
+                    <param name="class" value="ACQ"/>
+                  </paramset>
+                </container>
+              </container>
+            </container>
+          </container>
+          <container kind="seqComp" type="Iterator" version="2009A-1" subtype="GMOSSouth" key="b9062597-7dd5-4555-ac72-eb5c6f962755" name="GMOS-S Sequence">
+            <paramset name="GMOS-S Sequence" kind="dataObj">
+              <param name="title" value="GMOS-S: Slit image"/>
+              <param name="ampReadMode" value="FAST"/>
+              <param name="builtinROI" value="CENTRAL_STAMP"/>
+              <param name="ccdXBinning" value="ONE"/>
+              <param name="ccdYBinning" value="ONE"/>
+              <param name="exposureTime" value="20.0"/>
+            </paramset>
+            <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="cf6eb953-2010-449b-93f9-b00d29271e46" name="Offset">
+              <paramset name="Offset" kind="dataObj">
+                <param name="title" value="(P=10, Q=0)"/>
+                <paramset name="offsets">
+                  <paramset name="Offset0" sequence="0">
+                    <param name="p" value="10.0"/>
+                    <param name="q" value="0.0"/>
+                    <param name="defaultGuideOption" value="on"/>
+                  </paramset>
+                </paramset>
+              </paramset>
+              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="60b2078a-d556-4fd5-aba1-aa1f51dbfa63" name="Observe">
+                <paramset name="Observe" kind="dataObj">
+                  <param name="repeatCount" value="1"/>
+                  <param name="class" value="ACQ"/>
+                </paramset>
+              </container>
+            </container>
+          </container>
+          <container kind="seqComp" type="Iterator" version="2009A-1" subtype="GMOSSouth" key="485aa862-5498-4812-abec-b1637bcae980" name="GMOS-S Sequence">
+            <paramset name="GMOS-S Sequence" kind="dataObj">
+              <param name="title" value="GMOS-S: Through-slit images"/>
+              <param name="ampReadMode">
+                <value sequence="0">FAST</value>
+                <value sequence="1">FAST</value>
+                <value sequence="2">FAST</value>
+                <value sequence="3">FAST</value>
+                <value sequence="4">FAST</value>
+                <value sequence="5">FAST</value>
+                <value sequence="6">FAST</value>
+                <value sequence="7">FAST</value>
+              </param>
+              <param name="builtinROI">
+                <value sequence="0">CENTRAL_STAMP</value>
+                <value sequence="1">CENTRAL_STAMP</value>
+                <value sequence="2">CENTRAL_STAMP</value>
+                <value sequence="3">CENTRAL_STAMP</value>
+                <value sequence="4">CENTRAL_STAMP</value>
+                <value sequence="5">CENTRAL_STAMP</value>
+                <value sequence="6">CENTRAL_STAMP</value>
+                <value sequence="7">CENTRAL_STAMP</value>
+              </param>
+              <param name="ccdXBinning">
+                <value sequence="0">ONE</value>
+                <value sequence="1">ONE</value>
+                <value sequence="2">ONE</value>
+                <value sequence="3">ONE</value>
+                <value sequence="4">ONE</value>
+                <value sequence="5">ONE</value>
+                <value sequence="6">ONE</value>
+                <value sequence="7">ONE</value>
+              </param>
+              <param name="ccdYBinning">
+                <value sequence="0">ONE</value>
+                <value sequence="1">ONE</value>
+                <value sequence="2">ONE</value>
+                <value sequence="3">ONE</value>
+                <value sequence="4">ONE</value>
+                <value sequence="5">ONE</value>
+                <value sequence="6">ONE</value>
+                <value sequence="7">ONE</value>
+              </param>
+              <param name="exposureTime">
+                <value sequence="0">30.0</value>
+                <value sequence="1">30.0</value>
+                <value sequence="2">30.0</value>
+                <value sequence="3">30.0</value>
+                <value sequence="4">30.0</value>
+                <value sequence="5">30.0</value>
+                <value sequence="6">30.0</value>
+                <value sequence="7">30.0</value>
+              </param>
+            </paramset>
+            <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="b7494231-5e82-4ea0-9c7b-9363d13633f6" name="Offset">
+              <paramset name="Offset" kind="dataObj">
+                <param name="title" value="(P=0, Q=0)"/>
+                <paramset name="offsets">
+                  <paramset name="Offset0" sequence="0">
+                    <param name="p" value="0.0"/>
+                    <param name="q" value="0.0"/>
+                    <param name="defaultGuideOption" value="on"/>
+                  </paramset>
+                </paramset>
+              </paramset>
+              <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="5ae023a5-7705-40e4-be57-2f8558c4c10e" name="Observe">
+                <paramset name="Observe" kind="dataObj">
+                  <param name="repeatCount" value="1"/>
+                  <param name="class" value="ACQ"/>
+                </paramset>
+              </container>
+            </container>
+          </container>
+        </container>
+      </container>
+  </container>
+</document>
