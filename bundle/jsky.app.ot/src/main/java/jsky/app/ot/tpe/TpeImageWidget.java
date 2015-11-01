@@ -1,12 +1,7 @@
 package jsky.app.ot.tpe;
 
-import edu.gemini.catalog.api.MagnitudeConstraints;
 import edu.gemini.catalog.ui.QueryResultsFrame;
 import edu.gemini.catalog.ui.tpe.CatalogImageDisplay;
-import edu.gemini.shared.cat.CatalogSearchParameters;
-import edu.gemini.shared.cat.ICatalogAlgorithm;
-import edu.gemini.catalog.api.MagnitudeLimits;
-import edu.gemini.catalog.api.RadiusLimits;
 import edu.gemini.shared.skyobject.SkyObject;
 import edu.gemini.shared.skyobject.coords.HmsDegCoordinates;
 import edu.gemini.shared.util.immutable.*;
@@ -79,9 +74,6 @@ public class TpeImageWidget extends CatalogImageDisplay implements MouseInputLis
 
     // Base pos not visible
     private boolean _baseOutOfView = false;
-
-    // The default algorithm to use for catalog searches
-    private ICatalogAlgorithm _algorithm;
 
     // Dialog for GeMS manual guide star selection
     private GemsGuideStarSearchDialog _gemsGuideStarSearchDialog;
@@ -1011,55 +1003,6 @@ public class TpeImageWidget extends CatalogImageDisplay implements MouseInputLis
             return _basePos;
         }
         return super.getBasePos();
-    }
-
-    /**
-     * Return the default min and max search radius to use for catalog searches, in arcmin.
-     *
-     * @param centerPos    the center position for the radius
-     * @param useImageSize if true, use the image size to get the search radius, otherwise use the
-     *                     current WFS algorithm, if set
-     * @return radius values
-     */
-    @Override
-    public RadiusLimits getDefaultSearchRadius(final WorldCoords centerPos, final boolean useImageSize) {
-        if (useImageSize) {
-            // If the user pressed the "Set from Image" button, then stop using the algorithm
-            _algorithm = null;
-        } else if (_algorithm != null) {
-            final CatalogSearchParameters params = _algorithm.getParameters();
-            return params.getRadiusLimits();
-        }
-        return super.getDefaultSearchRadius(centerPos, useImageSize);
-    }
-
-    /**
-     * Return the default min and max magnitude values to use for catalog searches, or null
-     * if there is no default.
-     *
-     * @return mag values and band
-     */
-    @Override
-    public MagnitudeLimits getDefaultSearchMagRange() {
-        if (_algorithm != null) {
-            final CatalogSearchParameters params = _algorithm.getParameters();
-            _algorithm = null; // XXX hack to reset to default after guide star search
-
-            final SPSiteQuality sq = _ctx.siteQuality().orNull();
-            if (sq != null) {
-                final SPSiteQuality.Conditions conditions = sq.conditions();
-                return MagnitudeConstraints.conditionsAdjustmentForJava(params.getMagnitudeLimits(), conditions);
-            }
-            return params.getMagnitudeLimits();
-        }
-        return super.getDefaultSearchMagRange();
-    }
-
-    /**
-     * Set the default catalog algorithm to use for catalog searches
-     */
-    public void setCatalogAlgorithm(ICatalogAlgorithm algorithm) {
-        _algorithm = algorithm;
     }
 
     // manual guide star selection dialog

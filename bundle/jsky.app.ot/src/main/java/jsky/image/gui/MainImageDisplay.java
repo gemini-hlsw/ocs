@@ -5,8 +5,6 @@ import java.awt.Graphics2D;
 import java.net.URL;
 import javax.swing.event.ChangeListener;
 
-import edu.gemini.catalog.api.MagnitudeLimits;
-import edu.gemini.catalog.api.RadiusLimits;
 import jsky.coords.WorldCoords;
 import jsky.util.gui.GenericToolBarTarget;
 
@@ -97,22 +95,5 @@ public interface MainImageDisplay
      * for any catalog or image server requests.
      */
     WorldCoords getBasePos();
-
-    /**
-     * Return the default min and max search radius values to use for catalog searches, in arcmin.
-     *
-     * @param centerPos the center position for the radius
-     * @param useImageSize if true, use the image size to get the search radius
-     * @return radius values
-     */
-    RadiusLimits getDefaultSearchRadius(WorldCoords centerPos, boolean useImageSize);
-
-    /**
-     * Return the default min and max magnitude values to use for catalog searches, or null
-     * if there is no default.
-     *
-     * @return magnitude limits, including band
-     */
-    MagnitudeLimits getDefaultSearchMagRange();
 
 }

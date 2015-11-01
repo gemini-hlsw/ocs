@@ -3,7 +3,6 @@ package edu.gemini.catalog.ui.tpe
 import java.net.URL
 import javax.swing.event.ChangeListener
 
-import edu.gemini.catalog.api.{MagnitudeLimits, RadiusLimits}
 import jsky.catalog.{Catalog, CatalogDirectory, QueryResult, TableQueryResult}
 import jsky.catalog.gui.{StoreImageServerAction, CatalogNavigator, TablePlotter, BasicTablePlotter}
 import jsky.coords.{WorldCoords, WorldCoordinateConverter, CoordinateConverter}
@@ -62,23 +61,6 @@ trait CatalogDisplay {
     * for any catalog or image server requests.
     */
   def getBasePos: WorldCoords
-
-  /**
-    * Return the default min and max search radius values to use for catalog searches, in arcmin.
-    *
-    * @param centerPos the center position for the radius
-    * @param useImageSize if true, use the image size to get the search radius
-    * @return radius values
-    */
-  def getDefaultSearchRadius(centerPos: WorldCoords, useImageSize: Boolean): RadiusLimits
-
-  /**
-    * Return the default min and max magnitude values to use for catalog searches, or null
-    * if there is no default.
-    *
-    * @return magnitude limits, including band
-    */
-  def getDefaultSearchMagRange: MagnitudeLimits
 
   // TODO, Remove used only by MaskDisplay....
   /**

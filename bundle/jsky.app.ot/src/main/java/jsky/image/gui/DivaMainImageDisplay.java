@@ -2,9 +2,6 @@ package jsky.image.gui;
 
 import com.sun.media.jai.codec.*;
 import diva.canvas.GraphicsPane;
-import edu.gemini.catalog.api.MagnitudeLimits;
-import edu.gemini.catalog.api.RadiusLimits;
-import edu.gemini.skycalc.Angle;
 import jsky.coords.WorldCoordinateConverter;
 import jsky.coords.WorldCoords;
 import jsky.image.ImageChangeEvent;
@@ -1734,34 +1731,4 @@ public class DivaMainImageDisplay extends DivaGraphicsImageDisplay implements Ma
         return new WorldCoords();
     }
 
-
-    /**
-     * Return the default min and max search radius to use for catalog searches, in arcmin.
-     *
-     * @param centerPos    the center position for the radius
-     * @param useImageSize if true, use the image size to get the search radius
-     * @return radius values
-     */
-    @Override
-    public RadiusLimits getDefaultSearchRadius(WorldCoords centerPos, boolean useImageSize) {
-        Point2D.Double p1 = new Point2D.Double(1., 1.);
-        WorldCoordinateConverter wcs = getWCS();
-        wcs.imageToWorldCoords(p1, false);
-        double equinox = wcs.getEquinox();
-        WorldCoords origin = new WorldCoords(p1, equinox);
-
-        double maxRadius = centerPos.dist(origin);
-        return new RadiusLimits(new Angle(maxRadius, Angle.Unit.ARCMINS), Angle.ANGLE_0DEGREES);
-    }
-
-    /**
-     * Return the default min and max magnitude values to use for catalog searches, or null
-     * if there is no default.
-     *
-     * @return magnitude limits including band
-     */
-    @Override
-    public MagnitudeLimits getDefaultSearchMagRange() {
-        return null; // no defaults here
-    }
 }

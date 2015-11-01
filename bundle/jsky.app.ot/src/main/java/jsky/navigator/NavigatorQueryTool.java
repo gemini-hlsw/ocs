@@ -7,8 +7,6 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JPanel;
 
-import edu.gemini.catalog.api.MagnitudeLimits;
-import edu.gemini.catalog.api.RadiusLimits;
 import edu.gemini.catalog.ui.tpe.CatalogDisplay;
 import jsky.catalog.Catalog;
 import jsky.catalog.QueryArgs;
@@ -194,17 +192,19 @@ public class NavigatorQueryTool extends CatalogQueryTool implements SelectedArea
             maxRadius = Math.sqrt(2. * 15. * 15.) / 2.;
         } else {
             // get the min and max radius in arcmin
-            RadiusLimits rad = _imageDisplay.getDefaultSearchRadius(centerPos, buttonPressed);
+            /*RadiusLimits rad = _imageDisplay.getDefaultSearchRadius(centerPos, buttonPressed);
             minRadius = rad.getMinLimit().toArcmins().getMagnitude();
             maxRadius = rad.getMaxLimit().toArcmins().getMagnitude();
-            width = height = 2.0 * Math.sqrt(0.5 * maxRadius * maxRadius);
+            width = height = 2.0 * Math.sqrt(0.5 * maxRadius * maxRadius);*/
         }
 
+        /*
         // Initialize the default mag range
         MagnitudeLimits mag = null;
         if (!useDefaultSize && !buttonPressed) {
             mag = _imageDisplay.getDefaultSearchMagRange();
         }
+
 
         // set the values in the query panel
         CatalogQueryPanel catalogQueryPanel = getCatalogQueryPanel();
@@ -224,6 +224,7 @@ public class NavigatorQueryTool extends CatalogQueryTool implements SelectedArea
             catalogQueryPanel.setQueryArgs(queryArgs);
         } catch (Exception e) {
         }
+        */
     }
 
 
