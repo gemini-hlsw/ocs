@@ -1,15 +1,12 @@
 package edu.gemini.ags.impl
 
-import edu.gemini.ags.api.AgsAnalysis.NoGuideStarForGroup
-import edu.gemini.ags.api.{AgsGuideQuality, AgsAnalysis, AgsStrategy}
-import edu.gemini.ags.api.AgsStrategy.{Assignment, Selection, Estimate}
+import edu.gemini.ags.api.{AgsAnalysis, AgsGuideQuality, AgsStrategy}
+import edu.gemini.ags.api.AgsStrategy.Estimate
 import edu.gemini.ags.conf.ProbeLimitsTable
-import edu.gemini.ags.gems._
+import edu.gemini.ags.gems.{GemsCatalogSearchCriterion, GemsCatalogSearchKey, CatalogSearchCriterion}
 import edu.gemini.catalog.api._
 import edu.gemini.catalog.votable.TestVoTableBackend
 import edu.gemini.shared.util.immutable.{Some => JSome, None => JNone }
-import edu.gemini.spModel.core.MagnitudeBand._
-import edu.gemini.spModel.core.MagnitudeSystem._
 import edu.gemini.spModel.core._
 import edu.gemini.spModel.core.AngleSyntax._
 import edu.gemini.pot.ModelConverters._
@@ -97,19 +94,6 @@ class GemsStrategySpec extends Specification with NoTimeConversions {
 
       val gemsStrategy = TestGemsStrategy("/gems_pal1.xml")
       val selection = Await.result(gemsStrategy.select(ctx, ProbeLimitsTable.loadOrThrow()), 2.minutes)
-//      val expectedSelection = Selection(Angle.fromDegrees(0.0),
-//        List(Assignment(Canopus.Wfs.cwfs2,SiderealTarget("848-004584",Coordinates(RightAscension.fromAngle(Angle.fromDegrees(53.34099083333331)),Declination.fromAngle(Angle.fromDegrees(79.59394500000002)).get),
-//                                              Some(ProperMotion(RightAscensionAngularVelocity(AngularVelocity(2.5)),DeclinationAngularVelocity(AngularVelocity(3.1)),Epoch(2000.0))),Some(Redshift(0.0)),Some(Parallax(0.0)),
-//                                              List(Magnitude(16.212,UC,None,Vega), Magnitude(14.661,J,None,Vega), Magnitude(14.063,H,None,Vega), Magnitude(13.832,K,None,Vega)),None,None)),
-//             Assignment(Canopus.Wfs.cwfs3,SiderealTarget("848-004582",Coordinates(RightAscension.fromAngle(Angle.fromDegrees(53.337232777777785)),Declination.fromAngle(Angle.fromDegrees(79.5824791666667)).get),
-//                                              Some(ProperMotion(RightAscensionAngularVelocity(AngularVelocity(67.0)),DeclinationAngularVelocity(AngularVelocity(14.8)),Epoch(2000.0))),Some(Redshift(0.0)),Some(Parallax(0.0)),
-//                                              List(Magnitude(16.75,B,None,Vega), Magnitude(16.527,_g,None,AB), Magnitude(15.968,V,None,Vega), Magnitude(15.458,UC,None,Vega), Magnitude(15.653,_r,None,AB), Magnitude(15.415,_i,None,AB), Magnitude(14.417,J,None,Vega), Magnitude(13.923,H,None,Vega), Magnitude(13.715,K,None,Vega)),None,None)),
-//             Assignment(GsaoiOdgw.odgw4,SiderealTarget("848-004582",Coordinates(RightAscension.fromAngle(Angle.fromDegrees(53.337232777777785)),Declination.fromAngle(Angle.fromDegrees(79.5824791666667)).get),
-//                                              Some(ProperMotion(RightAscensionAngularVelocity(AngularVelocity(67.0)),DeclinationAngularVelocity(AngularVelocity(14.8)),Epoch(2000.0))),Some(Redshift(0.0)),Some(Parallax(0.0)),
-//                                              List(Magnitude(16.75,B,None,Vega), Magnitude(16.527,_g,None,AB), Magnitude(15.968,V,None,Vega), Magnitude(15.458,UC,None,Vega), Magnitude(15.653,_r,None,AB), Magnitude(15.415,_i,None,AB), Magnitude(14.417,J,None,Vega), Magnitude(13.923,H,None,Vega), Magnitude(13.715,K,None,Vega)),None,None))))
-//      selection should beSome(expectedSelection)
-//      val assignments = ~selection.map(_.assignments)
-//      assignments should be size 3
       selection.map(_.posAngle) should beSome(Angle.zero)
       val assignments = ~selection.map(_.assignments)
       assignments should be size 3
@@ -126,14 +110,11 @@ class GemsStrategySpec extends Specification with NoTimeConversions {
       cwfs3.map(_.name) should beSome("848-004582")
       odgw4.map(_.name) should beSome("848-004582")
 
-      val cwfs2x = Coordinates(RightAscension.fromAngle(Angle.fromDegrees(53.34099083333331)),
-        Declination.fromAngle(Angle.fromDegrees(79.59394500000002)).getOrElse(Declination.zero))
+      val cwfs2x = Coordinates(RightAscension.fromAngle(Angle.fromHMS(3, 33, 21.838).getOrElse(Angle.zero)), Declination.fromAngle(Angle.fromDMS(79, 35, 38.20).getOrElse(Angle.zero)).getOrElse(Declination.zero))
       cwfs2.map(_.coordinates ~= cwfs2x) should beSome(true)
-      val cwfs3x = Coordinates(RightAscension.fromAngle(Angle.fromDegrees(53.337232777777785)),
-        Declination.fromAngle(Angle.fromDegrees(79.5824791666667)).getOrElse(Declination.zero))
+      val cwfs3x = Coordinates(RightAscension.fromAngle(Angle.fromHMS(3, 33, 20.936).getOrElse(Angle.zero)), Declination.fromAngle(Angle.fromDMS(79, 34, 56.93).getOrElse(Angle.zero)).getOrElse(Declination.zero))
       cwfs3.map(_.coordinates ~= cwfs3x) should beSome(true)
-      val odgw4x = Coordinates(RightAscension.fromAngle(Angle.fromDegrees(53.337232777777785)),
-        Declination.fromAngle(Angle.fromDegrees(79.5824791666667)).getOrElse(Declination.zero))
+      val odgw4x = Coordinates(RightAscension.fromAngle(Angle.fromHMS(3, 33, 20.936).getOrElse(Angle.zero)), Declination.fromAngle(Angle.fromDMS(79, 34, 56.93).getOrElse(Angle.zero)).getOrElse(Declination.zero))
       odgw4.map(_.coordinates ~= odgw4x) should beSome(true)
 
       // Check magnitudes are sorted correctly
