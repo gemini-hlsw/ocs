@@ -22,60 +22,60 @@ class CoordinateEditor extends TelescopePosEditor with ReentrancyHack {
     w.setMinimumSize(w.getPreferredSize)
   }
 
-  //  ra.addWatcher(watcher { s =>
-  //    nonreentrant {
-  //      try {
-  //        spt.setRaString(clean(s))
-  //      } catch {
-  //        case _: IllegalArgumentException => spt.setRaDegrees(0)
-  //      }
-  //    }
-  //  })
-  ra.addWatcher(new TextBoxWidgetWatcher {
-    override def textBoxDoneEditing(tbwe: TextBoxWidget): Unit = {
-      val s = tbwe.getValue
+    ra.addWatcher(watcher { s =>
       nonreentrant {
         try {
           spt.setRaString(clean(s))
         } catch {
-          case _: IllegalArgumentException =>
-            spt.setRaDegrees(0)
+          case _: IllegalArgumentException => spt.setRaDegrees(0)
         }
       }
-    }
-  })
-
-//  dec.addWatcher(watcher { s =>
-//    nonreentrant {
-//      clean(s) match {
-//        case "-" | "+" => // nop
-//        case s =>
-//          try {
-//            spt.setDecString(s)
-//          } catch {
-//            case _: IllegalArgumentException =>
-//              spt.setDecDegrees(0)
-//          }
+    })
+//  ra.addWatcher(new TextBoxWidgetWatcher {
+//    override def textBoxDoneEditing(tbwe: TextBoxWidget): Unit = {
+//      val s = tbwe.getValue
+//      nonreentrant {
+//        try {
+//          spt.setRaString(clean(s))
+//        } catch {
+//          case _: IllegalArgumentException =>
+//            spt.setRaDegrees(0)
+//        }
 //      }
 //    }
 //  })
-  dec.addWatcher(new TextBoxWidgetWatcher {
-    override def textBoxDoneEditing(tbwe: TextBoxWidget): Unit = {
-      val s = tbwe.getValue
-      nonreentrant {
-        clean(s) match {
-          case "-" | "+" => // nop
-          case _ =>
-            try {
-              spt.setDecString(s)
-            } catch {
-              case _: IllegalArgumentException =>
-                spt.setDecDegrees(0)
-            }
-        }
+
+  dec.addWatcher(watcher { s =>
+    nonreentrant {
+      clean(s) match {
+        case "-" | "+" => // nop
+        case s =>
+          try {
+            spt.setDecString(s)
+          } catch {
+            case _: IllegalArgumentException =>
+              spt.setDecDegrees(0)
+          }
       }
     }
   })
+//  dec.addWatcher(new TextBoxWidgetWatcher {
+//    override def textBoxDoneEditing(tbwe: TextBoxWidget): Unit = {
+//      val s = tbwe.getValue
+//      nonreentrant {
+//        clean(s) match {
+//          case "-" | "+" => // nop
+//          case _ =>
+//            try {
+//              spt.setDecString(s)
+//            } catch {
+//              case _: IllegalArgumentException =>
+//                spt.setDecDegrees(0)
+//            }
+//        }
+//      }
+//    }
+//  })
 
   def edit(ctx: GOption[ObsContext], target0: SPTarget, node: ISPNode): Unit = {
     spt = target0
