@@ -86,9 +86,6 @@ public class TpePWFSFeature extends WFS_FeatureBase implements PropertyWatcher {
     // The position angle in radians
     private double _posAngle;
 
-    // X,Y offset of the PWFS patrol field, in arcsec, rotated by position angle, based on instrument specific settings
-    private Point2D.Double _patrolFieldOffset = new Point2D.Double(0., 0.);
-
     // Addition Nod/Chop offset to use for the PWFS display.
     private Point2D.Double _nodChopOffset = new Point2D.Double(0., 0.);
 
@@ -124,13 +121,6 @@ public class TpePWFSFeature extends WFS_FeatureBase implements PropertyWatcher {
     public TpePWFSFeature() {
         super("PWFS", "Show the field of view of the PWFS probes.");
         _props.addWatcher(this);
-    }
-
-    /**
-     * Turn on/off the filling of the obscured area.
-     */
-    public void setFillObscuredArea(boolean fill) {
-        getProps().setBoolean(PROP_FILL_OBSCURED, fill);
     }
 
     /**
@@ -176,14 +166,6 @@ public class TpePWFSFeature extends WFS_FeatureBase implements PropertyWatcher {
      */
     public static BasicPropertyList getProps() {
         return _props;
-    }
-
-    /**
-     * Set the science area nod mode.  Must be one of the constants defined in SciAreaFeature:
-     * DEFAULT_NOD, NOD_A_CHOP_B, NOD_B_CHOP_A.
-     */
-    public static void setNodMode(int mode) {
-        _props.setChoice(PROP_DISPLAY_PWFS_AT, mode);
     }
 
     /**
@@ -262,7 +244,7 @@ public class TpePWFSFeature extends WFS_FeatureBase implements PropertyWatcher {
         final double pixelsPerArcsec = tii.getPixelsPerArcsec();
         double radius = (int) (pixelsPerArcsec * PwfsGuideProbe.pwfs1.getRadius() + 0.5);
         final Point2D.Double baseScreenPos = tii.getBaseScreenPos();
-        _patrolFieldOffset = _getPatrolFieldOffset(inst);
+        Point2D.Double _patrolFieldOffset = _getPatrolFieldOffset(inst);
         double pfXOffset = _patrolFieldOffset.x * pixelsPerArcsec;
         double pfYOffset = _patrolFieldOffset.y * pixelsPerArcsec;
 

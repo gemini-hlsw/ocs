@@ -15,7 +15,6 @@ import java.awt.geom.Area;
 import java.awt.geom.Ellipse2D;
 import java.util.Collection;
 
-
 /**
  * Base class for all WFS Feature classes (PWFS and OIWFS).
  */

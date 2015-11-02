@@ -13,16 +13,12 @@ import edu.gemini.shared.util.immutable.PredicateOp;
  * Describes limits for catalog cone search radius values.
  * See OT-17.
  */
+@Deprecated
 public final class RadiusLimits {
     public static final RadiusLimits EMPTY = new RadiusLimits(Angle.ANGLE_0DEGREES.toArcmins(), Angle.ANGLE_0DEGREES.toArcmins());
 
     private final Angle maxLimit;
     private final Angle minLimit;
-
-    public RadiusLimits(Angle maxLimit) {
-        this.maxLimit = maxLimit;
-        minLimit = new Angle(0.0, ARCMINS);
-    }
 
     public RadiusLimits(Angle maxLimit, Angle minLimit) {
         this.maxLimit = maxLimit;
@@ -53,18 +49,16 @@ public final class RadiusLimits {
     }
 
     public PredicateOp<SkyObject> skyObjectFilter(final Coordinates base) {
-        return new PredicateOp<SkyObject>() {
-            @Override public Boolean apply(SkyObject skyObject) {
-                HmsDegCoordinates coords = skyObject.getCoordinates().toHmsDeg(0);
-                Angle ra  = coords.getRa();
-                Angle dec = coords.getDec();
-                Coordinates c = new Coordinates(ra, dec);
-                CoordinateDiff cd = new CoordinateDiff(base, c);
+        return skyObject -> {
+            HmsDegCoordinates coords = skyObject.getCoordinates().toHmsDeg(0);
+            Angle ra  = coords.getRa();
+            Angle dec = coords.getDec();
+            Coordinates c = new Coordinates(ra, dec);
+            CoordinateDiff cd = new CoordinateDiff(base, c);
 
-                Angle distance = cd.getDistance();
-                return (minLimit.compareToAngle(distance) <= 0) &&
-                       (maxLimit.compareToAngle(distance) >= 0);
-            }
+            Angle distance = cd.getDistance();
+            return (minLimit.compareToAngle(distance) <= 0) &&
+                   (maxLimit.compareToAngle(distance) >= 0);
         };
     }
 
@@ -93,7 +87,4 @@ public final class RadiusLimits {
                 '}';
     }
 
-    public static RadiusLimits arcmins(double max, double min) {
-        return new RadiusLimits(new Angle(max, ARCMINS), new Angle(min, ARCMINS));
-    }
 }
