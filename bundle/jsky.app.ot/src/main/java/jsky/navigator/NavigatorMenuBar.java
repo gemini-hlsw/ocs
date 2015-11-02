@@ -10,7 +10,6 @@ package jsky.navigator;
 import javax.swing.JMenu;
 
 import jsky.catalog.gui.CatalogNavigatorMenuBar;
-import jsky.catalog.gui.CatalogTree;
 import jsky.util.I18N;
 
 /**
