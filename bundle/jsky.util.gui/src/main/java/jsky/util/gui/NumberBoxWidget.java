@@ -1,20 +1,11 @@
-// Copyright 1997 Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-// See the file LICENSE for complete details.
-//
-// $Id: NumberBoxWidget.java 6719 2005-11-08 19:35:36Z brighton $
-//
 package jsky.util.gui;
 
-import java.awt.BorderLayout;
-import java.awt.Toolkit;
-import javax.swing.JFrame;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 import javax.swing.text.PlainDocument;
-
-
+import java.awt.*;
+import java.util.regex.Pattern;
 
 /**
  * A text box for entering numerical values.
@@ -23,19 +14,20 @@ import javax.swing.text.PlainDocument;
  */
 public class NumberBoxWidget extends TextBoxWidget {
 
+    // Allow unfinished exponential notation strings like e.g. "1e", "10E-" etc.
+    // which could be the starting sequence of numbers like "1e4", "10E-15".
+    private static Pattern IncompleteExponentialNumber = Pattern.compile("-?[0-9]*?.?([0-9]+[e|E]-?)?");
+
     /** If true, allow negative numbers */
-    boolean _allowNegative = true;
+    private boolean allowNegative = true;
 
     /** Default constructor */
-    public NumberBoxWidget() {
-    }
-
+    public NumberBoxWidget() { }
 
     /** Set to true to allow negative numbers (default), false to disallow them. */
     public void setAllowNegative(boolean b) {
-        _allowNegative = b;
+        allowNegative = b;
     }
-
 
     protected Document createDefaultModel() {
         return new NumericDocument();
@@ -43,27 +35,27 @@ public class NumberBoxWidget extends TextBoxWidget {
 
     class NumericDocument extends PlainDocument {
 
-        public void insertString(int offs, String str, AttributeSet a)
-                throws BadLocationException {
+        public void insertString(int offs, String str, AttributeSet a) throws BadLocationException {
 
             if (str == null) {
                 return;
             }
 
-            String currentText = getText(0, getLength());
-            String beforeOffset = currentText.substring(0, offs);
-            String afterOffset = currentText.substring(offs, currentText.length());
-            String result = beforeOffset + str + afterOffset;
+            final String currentText = getText(0, getLength());
+            final String beforeOffset = currentText.substring(0, offs);
+            final String afterOffset = currentText.substring(offs, currentText.length());
+            final String result = beforeOffset + str + afterOffset;
 
-            if (result.startsWith("-")) {
-                if (_allowNegative)
-                    super.insertString(offs, str, a);
-                else
-                    Toolkit.getDefaultToolkit().beep();
+            // Check if this is a negative number
+            if (!allowNegative && result.startsWith("-")) {
+                Toolkit.getDefaultToolkit().beep();
                 return;
             }
 
-            if (result.equals(".")) {
+            // Allow incomplete exponential numbers; conveniently the DecimalFormatter used
+            // to parse those (incomplete) strings back into doubles just ignores incomplete
+            // exponential parts, e.g. "1.23e" becomes 1.23 .
+            if (IncompleteExponentialNumber.matcher(result).matches()) {
                 super.insertString(offs, str, a);
                 return;
             }
@@ -77,29 +69,4 @@ public class NumberBoxWidget extends TextBoxWidget {
         }
     }
 
-
-    /**
-     * test main
-     */
-    public static void main(String[] args) {
-        JFrame frame = new JFrame("NumberBoxWidget");
-
-        NumberBoxWidget tbw = new NumberBoxWidget();
-        tbw.setAllowNegative(false);
-        tbw.addWatcher(new TextBoxWidgetWatcher() {
-            public void textBoxKeyPress(TextBoxWidget tbwe) {
-                System.out.println("textBoxKeyPress: " + tbwe.getValue());
-            }
-
-            public void textBoxAction(TextBoxWidget tbwe) {
-                System.out.println("textBoxAction: " + tbwe.getValue());
-            }
-        });
-
-        frame.getContentPane().add(tbw, BorderLayout.CENTER);
-        frame.pack();
-        frame.setVisible(true);
-        frame.addWindowListener(new BasicWindowMonitor());
-    }
 }
-
