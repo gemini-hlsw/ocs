@@ -27,7 +27,7 @@ final case class AuxFileSpectrum(programId: String, name: String) extends UserDe
 object AuxFileSpectrum {
   // Place holder for invalid states, e.g. the user has selected "User Defined" for the source distribution
   // but there are no sed files or the selected aux file has been deleted.
-  val Undefined = AuxFileSpectrum("«undefined»", "«undefined»")
+  val Undefined = AuxFileSpectrum("«undefined»", "«No SEDs attached to program»")
 }
 
 /** A library defined spectrum. */
