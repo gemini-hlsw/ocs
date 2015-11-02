@@ -1,9 +1,3 @@
-// Copyright 2003
-// Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-//
-// $Id: PrintableJTable.java 8145 2007-10-01 16:59:26Z swalker $
-
 package jsky.util.gui;
 
 import jsky.util.I18N;
@@ -17,7 +11,6 @@ import java.awt.print.PageFormat;
 import java.awt.print.Printable;
 import java.awt.print.PrinterException;
 import java.util.Vector;
-
 
 /**
  * A JTable that implements the {@link Printable} interface.

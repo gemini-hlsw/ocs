@@ -255,7 +255,6 @@ public class TableDisplay extends JPanel
         _table.showPrintDialog();
     }
 
-
     /** Called when the table is resized */
     public void resize() {
         if (_tableQueryResult == null)
@@ -272,7 +271,6 @@ public class TableDisplay extends JPanel
             }
         }
     }
-
 
     /**
      * Select the given table row.

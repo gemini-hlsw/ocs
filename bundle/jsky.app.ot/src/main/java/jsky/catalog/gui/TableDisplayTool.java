@@ -50,7 +50,7 @@ public class TableDisplayTool extends JPanel
         PrintableWithDialog, Storeable {
     private static final Logger logger = Logger.getLogger(TableDisplayTool.class.getName());
 
-    // Used to access internationalized strings (see i18n/gui*.proprties)
+    // Used to access internationalized strings (see i18n/gui*.properties)
     private static final I18N _I18N = I18N.getInstance(TableDisplayTool.class);
 
     // The catalog to use
@@ -404,6 +404,7 @@ public class TableDisplayTool extends JPanel
             String title = _table.getTitle() + " (" + _table.getRowCount() + (_table.isMore() ? "+)" : ")");
             _tableTitle.setText(title);
             _tableDisplay.setModel(_table);
+            _tableDisplay.resize();
 
             if (_plotter != null)
                 _plotter.plot(_table);

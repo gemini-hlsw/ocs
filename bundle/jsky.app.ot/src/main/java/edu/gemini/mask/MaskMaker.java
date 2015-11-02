@@ -1,7 +1,3 @@
-/**
- * $Id: MaskMaker.java 6543 2005-08-11 18:37:21Z brighton $
- */
-
 package edu.gemini.mask;
 
 // XXX comment is out of date, not valid for java version

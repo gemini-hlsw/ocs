@@ -36,7 +36,7 @@ public final class NavigatorManager {
     /**
      * Create the Navigator window if necessary, and return a reference to it.
      */
-    public static Navigator create() {
+    protected static Navigator create() {
         if (_navigator == null) {
             _navigator = new NavigatorFrame().getNavigator();
         }
