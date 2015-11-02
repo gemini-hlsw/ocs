@@ -144,11 +144,6 @@ public class DivaMainImageDisplay extends DivaGraphicsImageDisplay implements Ma
     private FITSGraphics _fitsGraphics;
 
     /**
-     * Set this to the JDesktopPane, if using internal frames.
-     */
-    private JDesktopPane _desktop = null;
-
-    /**
      * Event passed to change listeners
      */
     private ImageChangeEvent _imageChangeEvent = new ImageChangeEvent(this);
@@ -1126,15 +1121,8 @@ public class DivaMainImageDisplay extends DivaGraphicsImageDisplay implements Ma
         if (_fitsHDUChooser != null) {
             _fitsHDUChooser.updateDisplay(fitsImage);
         } else {
-            if (_desktop != null) {
-                _fitsHDUChooserFrame = new FITSHDUChooserInternalFrame(this, fitsImage);
-                _desktop.add(_fitsHDUChooserFrame, JLayeredPane.POPUP_LAYER);
-                _desktop.moveToFront(_fitsHDUChooserFrame);
-                _fitsHDUChooser = ((FITSHDUChooserInternalFrame) _fitsHDUChooserFrame).getFitsHDUChooser();
-            } else {
-                _fitsHDUChooserFrame = new FITSHDUChooserFrame(this, fitsImage);
-                _fitsHDUChooser = ((FITSHDUChooserFrame) _fitsHDUChooserFrame).getFitsHDUChooser();
-            }
+            _fitsHDUChooserFrame = new FITSHDUChooserFrame(this, fitsImage);
+            _fitsHDUChooser = ((FITSHDUChooserFrame) _fitsHDUChooserFrame).getFitsHDUChooser();
         }
 
         if (skipEmptyPrimary)
@@ -1225,13 +1213,7 @@ public class DivaMainImageDisplay extends DivaGraphicsImageDisplay implements Ma
         if (_imageCutLevelsFrame != null) {
             SwingUtil.showFrame(_imageCutLevelsFrame);
         } else {
-            if (_desktop != null) {
-                _imageCutLevelsFrame = new ImageCutLevelsInternalFrame(this);
-                _desktop.add(_imageCutLevelsFrame, JLayeredPane.POPUP_LAYER);
-                _desktop.moveToFront(_imageCutLevelsFrame);
-            } else {
-                _imageCutLevelsFrame = new ImageCutLevelsFrame(this);
-            }
+            _imageCutLevelsFrame = new ImageCutLevelsFrame(this);
         }
     }
 
@@ -1243,13 +1225,7 @@ public class DivaMainImageDisplay extends DivaGraphicsImageDisplay implements Ma
         if (_imageColorsFrame != null) {
             SwingUtil.showFrame(_imageColorsFrame);
         } else {
-            if (_desktop != null) {
-                _imageColorsFrame = new ImageColorsInternalFrame(this);
-                _desktop.add(_imageColorsFrame, JLayeredPane.POPUP_LAYER);
-                _desktop.moveToFront(_imageColorsFrame);
-            } else {
-                _imageColorsFrame = new ImageColorsFrame(this);
-            }
+            _imageColorsFrame = new ImageColorsFrame(this);
         }
     }
 
@@ -1262,15 +1238,8 @@ public class DivaMainImageDisplay extends DivaGraphicsImageDisplay implements Ma
             SwingUtil.showFrame(_pickObjectFrame);
         } else {
             // create new frame
-            if (_desktop != null) {
-                _pickObjectFrame = new PickObjectInternalFrame(this);
-                _pickObjectPanel = ((PickObjectInternalFrame) _pickObjectFrame).getPickObject();
-                _desktop.add(_pickObjectFrame, JLayeredPane.DEFAULT_LAYER);
-                _desktop.moveToFront(_pickObjectFrame);
-            } else {
-                _pickObjectFrame = new PickObjectFrame(this);
-                _pickObjectPanel = ((PickObjectFrame) _pickObjectFrame).getPickObject();
-            }
+            _pickObjectFrame = new PickObjectFrame(this);
+            _pickObjectPanel = ((PickObjectFrame) _pickObjectFrame).getPickObject();
             _pickObjectPanel.addActionListener(e -> pickedObject());
         }
 
@@ -1292,17 +1261,9 @@ public class DivaMainImageDisplay extends DivaGraphicsImageDisplay implements Ma
             SwingUtil.showFrame(_fitsKeywordsFrame);
             if (_fitsKeywordsFrame instanceof FITSKeywordsFrame) {
                 ((FITSKeywordsFrame) _fitsKeywordsFrame).getFITSKeywords().updateDisplay();
-            } else if (_fitsKeywordsFrame instanceof FITSKeywordsInternalFrame) {
-                ((FITSKeywordsInternalFrame) _fitsKeywordsFrame).getFITSKeywords().updateDisplay();
             }
         } else {
-            if (_desktop != null) {
-                _fitsKeywordsFrame = new FITSKeywordsInternalFrame(this);
-                _desktop.add(_fitsKeywordsFrame, JLayeredPane.POPUP_LAYER);
-                _desktop.moveToFront(_fitsKeywordsFrame);
-            } else {
-                _fitsKeywordsFrame = new FITSKeywordsFrame(this);
-            }
+            _fitsKeywordsFrame = new FITSKeywordsFrame(this);
         }
     }
 
@@ -1318,32 +1279,9 @@ public class DivaMainImageDisplay extends DivaGraphicsImageDisplay implements Ma
                 ((ImagePropertiesInternalFrame) _imagePropertiesFrame).getImageProperties().updateDisplay();
             }
         } else {
-            if (_desktop != null) {
-                _imagePropertiesFrame = new ImagePropertiesInternalFrame(this);
-                _desktop.add(_imagePropertiesFrame, JLayeredPane.POPUP_LAYER);
-                _desktop.moveToFront(_imagePropertiesFrame);
-            } else {
                 _imagePropertiesFrame = new ImagePropertiesFrame(this);
-            }
         }
     }
-
-
-    /**
-     * Return the JDesktopPane, if using internal frames, otherwise null
-     */
-    public JDesktopPane getDesktop() {
-        return _desktop;
-    }
-
-
-    /**
-     * Set the JDesktopPane to use for top level windows, if using internal frames
-     */
-    public void setDesktop(JDesktopPane desktop) {
-        _desktop = desktop;
-    }
-
 
     /**
      * Return the top level parent frame (or internal frame) used to close the window

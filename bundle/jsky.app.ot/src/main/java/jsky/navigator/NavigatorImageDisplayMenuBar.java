@@ -41,6 +41,7 @@ public class NavigatorImageDisplayMenuBar extends ImageDisplayMenuBar {
         // move the Pick Object menu item to the Catalog menu
         JMenuItem pickObjectMenuItem = getPickObjectMenuItem();
         getViewMenu().remove(pickObjectMenuItem);
+        _catalogMenu = new JMenu();
         _catalogMenu.add(pickObjectMenuItem);
 
         _catalogMenu.addSeparator();

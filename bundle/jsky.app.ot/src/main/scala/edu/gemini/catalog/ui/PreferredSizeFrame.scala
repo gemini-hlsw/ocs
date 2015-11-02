@@ -28,7 +28,6 @@ trait PreferredSizeFrame { this: Window =>
     }
 
     // Update location according to the last save position
-    println(SizePreference.getPosition(this.getClass))
     SizePreference.getPosition(this.getClass).fold(this.centerOnScreen())((d:Point) => location = d)
 
     // Save position and dimensions

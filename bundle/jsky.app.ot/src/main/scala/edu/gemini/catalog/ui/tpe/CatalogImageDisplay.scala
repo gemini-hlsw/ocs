@@ -9,7 +9,6 @@ import jsky.coords.{WorldCoords, WorldCoordinateConverter, CoordinateConverter}
 import jsky.graphics.CanvasGraphics
 import jsky.image.fits.codec.FITSImage
 import jsky.image.fits.gui.FITSKeywordsFrame
-import jsky.image.fits.gui.FITSKeywordsInternalFrame
 import jsky.image.gui.ImageDisplayMenuBar
 import jsky.image.gui.ImageDisplayToolBar
 import jsky.image.gui.{ImageGraphicsHandler, DivaMainImageDisplay}
@@ -125,8 +124,6 @@ abstract class CatalogImageDisplay(parent: Component, navigatorPane: NavigatorPa
       val fitsKeywordsFrame = getFitsKeywordsFrame
       Option(fitsKeywordsFrame).foreach {
         case frame: FITSKeywordsFrame =>
-          frame.getFITSKeywords.updateDisplay(hdu)
-        case frame: FITSKeywordsInternalFrame =>
           frame.getFITSKeywords.updateDisplay(hdu)
         case _ =>
       }

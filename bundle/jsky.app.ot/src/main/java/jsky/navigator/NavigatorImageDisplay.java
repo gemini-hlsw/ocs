@@ -19,7 +19,6 @@ import jsky.catalog.gui.CatalogNavigatorOpener;
 import jsky.catalog.gui.TablePlotter;
 import jsky.image.fits.codec.FITSImage;
 import jsky.image.fits.gui.FITSKeywordsFrame;
-import jsky.image.fits.gui.FITSKeywordsInternalFrame;
 import jsky.image.gui.DivaMainImageDisplay;
 import jsky.image.gui.PickObjectStatistics;
 import jsky.util.I18N;
@@ -155,8 +154,6 @@ public class NavigatorImageDisplay extends DivaMainImageDisplay
             if (fitsKeywordsFrame != null) {
                 if (fitsKeywordsFrame instanceof FITSKeywordsFrame) {
                     ((FITSKeywordsFrame) fitsKeywordsFrame).getFITSKeywords().updateDisplay(hdu);
-                } else if (fitsKeywordsFrame instanceof FITSKeywordsInternalFrame) {
-                    ((FITSKeywordsInternalFrame) fitsKeywordsFrame).getFITSKeywords().updateDisplay(hdu);
                 }
             }
         } catch (Exception e) {
