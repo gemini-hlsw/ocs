@@ -60,24 +60,25 @@ final class BagsManager(executor: ScheduledThreadPoolExecutor) {
    * consideration for a BAGS lookup.
    */
   def watch(prog: ISPProgram): Unit = {
-    synchronized {
-      state += prog.getProgramID
-      prog.addStructureChangeListener(StructurePropertyChangeListener)
-      prog.addCompositeChangeListener(CompositePropertyChangeListener)
-    }
-    prog.getAllObservations.asScala.foreach(enqueue(_, 0L, initialEnqueue = true))
+    //    synchronized {
+    //      state += prog.getProgramID
+    //      prog.addStructureChangeListener(StructurePropertyChangeListener)
+    //      prog.addCompositeChangeListener(CompositePropertyChangeListener)
+    //    }
+    //    prog.getAllObservations.asScala.foreach(enqueue(_, 0L, initialEnqueue = true))
   }
 
   /**
    * Atomically remove a program from our watch list and remove listeners. Any queued observations
    * will be discarded as they come up for consideration.
    */
-  def unwatch(prog: ISPProgram): Unit =
-    synchronized {
-      state -= prog.getProgramID
-      prog.removeStructureChangeListener(StructurePropertyChangeListener)
-      prog.removeCompositeChangeListener(CompositePropertyChangeListener)
-    }
+  def unwatch(prog: ISPProgram): Unit = {
+    //    synchronized {
+    //      state -= prog.getProgramID
+    //      prog.removeStructureChangeListener(StructurePropertyChangeListener)
+    //      prog.removeCompositeChangeListener(CompositePropertyChangeListener)
+    //    }
+  }
 
   /**
    * Remove the specified key from the task queue, if present. Return true if the key was present
@@ -200,8 +201,8 @@ final class BagsManager(executor: ScheduledThreadPoolExecutor) {
 
 object BagsManager {
   private val NumThreads = math.max(1, Runtime.getRuntime.availableProcessors - 1)
-  val instance = new BagsManager(new ScheduledThreadPoolExecutor(NumThreads))
-
+  //val instance = new BagsManager(new ScheduledThreadPoolExecutor(NumThreads))
+  val instance = new BagsManager(new ScheduledThreadPoolExecutor(0))
 
   // Check two target environments to see if the BAGS targets match exactly between them.
   def bagsTargetsMatch(oldEnv: TargetEnvironment, newEnv: TargetEnvironment): Boolean = {
