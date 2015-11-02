@@ -1,6 +1,5 @@
 package edu.gemini.catalog.api
 
-import edu.gemini.catalog.api.MagnitudeLimits.{SaturationLimit, FaintnessLimit}
 import edu.gemini.spModel.core._
 import org.specs2.mutable.SpecificationWithJUnit
 
@@ -38,26 +37,6 @@ class MagnitudeConstraintsSpec extends SpecificationWithJUnit {
 
       val mag3 = new Magnitude(4.999, MagnitudeBand.K)
       ml.filter(SiderealTarget.empty.copy(magnitudes = List(mag3))) should beFalse
-    }
-    "behave like the union operation on MagnitudeLimits" in {
-      import edu.gemini.shared.skyobject
-      import edu.gemini.shared.util.immutable
-      val m1 = new MagnitudeLimits(skyobject.Magnitude.Band.R, new FaintnessLimit(10.0), immutable.None.instance[SaturationLimit]())
-      val m2 = new MagnitudeLimits(skyobject.Magnitude.Band.J, new FaintnessLimit(10.0), immutable.None.instance[SaturationLimit]())
-      // Different band
-      m1.union(m2) should beEqualTo(immutable.None.instance[MagnitudeLimits]())
-
-      val m3 = new MagnitudeLimits(skyobject.Magnitude.Band.R, new FaintnessLimit(5.0), immutable.None.instance[SaturationLimit]())
-      m1.union(m3).getValue should beEqualTo(new MagnitudeLimits(skyobject.Magnitude.Band.R, new FaintnessLimit(10.0), immutable.None.instance[SaturationLimit]()))
-
-      val m4 = new MagnitudeLimits(skyobject.Magnitude.Band.R, new FaintnessLimit(15.0), immutable.None.instance[SaturationLimit]())
-      m1.union(m4).getValue should beEqualTo(new MagnitudeLimits  (skyobject.Magnitude.Band.R, new FaintnessLimit(15.0), immutable.None.instance[SaturationLimit]()))
-
-      val m5 = new MagnitudeLimits(skyobject.Magnitude.Band.R, new FaintnessLimit(15.0), new immutable.Some(new SaturationLimit(10.0)))
-      m1.union(m5).getValue should beEqualTo(new MagnitudeLimits(skyobject.Magnitude.Band.R, new FaintnessLimit(15.0), immutable.None.instance[SaturationLimit]()))
-
-      val m6 = new MagnitudeLimits(skyobject.Magnitude.Band.R, new FaintnessLimit(15.0), new immutable.Some(new SaturationLimit(15.0)))
-      m5.union(m6).getValue should beEqualTo(new MagnitudeLimits(skyobject.Magnitude.Band.R, new FaintnessLimit(15.0), new immutable.Some(new SaturationLimit(10.0))))
     }
     "support the union operation" in {
       val m1 = MagnitudeConstraints(RBandsList, FaintnessConstraint(10.0), None)

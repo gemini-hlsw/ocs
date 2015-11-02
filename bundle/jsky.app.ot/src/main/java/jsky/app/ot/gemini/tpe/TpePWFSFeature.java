@@ -300,8 +300,6 @@ public class TpePWFSFeature extends WFS_FeatureBase implements PropertyWatcher {
         Point2D.Double offsetTrans = new Point2D.Double(x, y);
         AffineTransform flipRATransform = AffineTransform.getScaleInstance(_flipRA, 1.0);
         setTransformationToScreen(rotation, pixelsPerArcsec, translation);
-//        addPatrolField(PwfsGuideProbe.pwfs1.getPatrolField(), PWFS1_COLOR);
-//        addPatrolField(PwfsGuideProbe.pwfs2.getPatrolField(), PWFS2_COLOR);
         for (ObsContext obsCtx : _iw.getMinimalObsContext()) {
             try {
                 addRadiusLimits(new RadiusLimits(PwfsGuideProbe.PWFS_RADIUS, PwfsGuideProbe.pwfs1.getVignettingClearance(obsCtx)), PWFS1_COLOR);
