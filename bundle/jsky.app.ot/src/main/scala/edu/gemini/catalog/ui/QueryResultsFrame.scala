@@ -14,7 +14,7 @@ import edu.gemini.catalog.votable._
 import edu.gemini.pot.sp.SPComponentType
 import edu.gemini.pot.ModelConverters._
 import edu.gemini.shared.gui.textComponent.{SelectOnFocus, TextRenderer, NumberField}
-import edu.gemini.shared.gui.{ButtonFlattener, GlassLabel, SizePreference, SortableTable}
+import edu.gemini.shared.gui.{ButtonFlattener, GlassLabel, SortableTable}
 import edu.gemini.spModel.core.SiderealTarget
 import edu.gemini.spModel.gemini.altair.AltairParams
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality
@@ -113,14 +113,6 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
     contents = resultsTable
   }
 
-  private lazy val resultsLabel = new Label("Query") {
-    horizontalAlignment = Alignment.Center
-
-    def updateCount(c: Int): Unit = {
-      text = s"Query results: $c"
-    }
-  }
-
   private lazy val errorLabel = new Label("") {
     horizontalAlignment = Alignment.Left
     foreground = Color.red
@@ -129,18 +121,18 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
   }
 
   title = "Catalog Query Tool"
+  val tableBorder = new BorderPanel() {
+    border = titleBorder(title)
+    add(scrollPane, BorderPanel.Position.Center)
+  }
   QueryForm.buildLayout(Nil)
   contents = new MigPanel(LC().fill().insets(0).gridGap("0px", "0px").debug(0)) {
     // Query Form
     add(QueryForm, CC().alignY(TopAlign).minWidth(320.px))
     // Results Table
-    add(new BorderPanel() {
-      border = titleBorder(title)
-      add(scrollPane, BorderPanel.Position.Center)
-    }, CC().grow().spanX(4).pushY().pushX())
+    add(tableBorder, CC().grow().spanX(3).pushY().pushX())
     // Labels and command buttons at the bottom
-    add(resultsLabel, CC().alignX(LeftAlign).alignY(BaselineAlign).newline().gap(10.px, 10.px, 10.px, 10.px))
-    add(errorLabel, CC().alignX(LeftAlign).alignY(BaselineAlign).gap(10.px, 10.px, 10.px, 10.px))
+    add(errorLabel, CC().alignX(LeftAlign).alignY(BaselineAlign).gap(10.px, 10.px, 10.px, 10.px).newline().skip(1))
     add(unplotButton, CC().alignX(RightAlign).alignY(BaselineAlign).gap(10.px, 10.px, 10.px, 10.px))
     add(closeButton, CC().alignX(RightAlign).alignY(BaselineAlign).gap(10.px, 10.px, 10.px, 10.px))
   }
@@ -220,7 +212,7 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
         resultsTable.adjustColumns(scrollPane.bounds.width - insets.left - insets.right)
 
         // Update the count of rows
-        resultsLabel.updateCount(queryResult.result.targets.rows.length)
+        tableBorder.border = titleBorder(s"$title - ${queryResult.result.targets.rows.length} results found")
 
         // Update the query form
         QueryForm.updateQuery(info, q)

@@ -1,10 +1,3 @@
-/*
- * Copyright 2000 Association for Universities for Research in Astronomy, Inc.,
- * Observatory Control System, Gemini Telescopes Project.
- *
- * $Id: NavigatorImageDisplayControl.java 4414 2004-02-03 16:21:36Z brighton $
- */
-
 package jsky.navigator;
 
 import java.awt.*;
@@ -30,39 +23,6 @@ public class NavigatorImageDisplayControl extends ImageDisplayControl {
      */
     public NavigatorImageDisplayControl(Component parent, int size) {
         super(parent, size);
-    }
-
-    /**
-     * Make a NavigatorImageDisplayControl widget with the default settings.
-     *
-     * @param parent The top level parent frame (or internal frame) used to close the window
-     */
-    public NavigatorImageDisplayControl(Component parent) {
-        super(parent);
-    }
-
-
-    /**
-     * Make a NavigatorImageDisplayControl widget with the default settings and display the contents
-     * of the image file pointed to by the URL.
-     *
-     * @param parent The top level parent frame (or internal frame) used to close the window
-     * @param url The URL for the image to load
-     */
-    public NavigatorImageDisplayControl(Component parent, URL url) {
-        super(parent, url);
-    }
-
-
-    /**
-     * Make a NavigatorImageDisplayControl widget with the default settings and display the contents
-     * of the image file.
-     *
-     * @param parent The top level parent frame (or internal frame) used to close the window
-     * @param filename The image file to load
-     */
-    public NavigatorImageDisplayControl(Component parent, String filename) {
-        super(parent, filename);
     }
 
     /** Make and return the image display window */

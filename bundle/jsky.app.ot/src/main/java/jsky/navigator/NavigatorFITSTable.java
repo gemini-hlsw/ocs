@@ -62,7 +62,7 @@ public class NavigatorFITSTable extends SkycatTable {
         int nrows = hdu.getNRows();
 
         dataVector = new Vector(nrows);
-        columnIdentifiers = new Vector(ncols);
+        columnIdentifiers = new Vector<>(ncols);
 
         Vector columnClasses = new Vector(ncols, 1);
         FieldDesc[] fields = new FieldDescAdapter[ncols];
