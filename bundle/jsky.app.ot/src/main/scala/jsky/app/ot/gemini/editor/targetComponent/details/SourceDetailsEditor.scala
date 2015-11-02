@@ -94,6 +94,7 @@ final class SourceDetailsEditor extends GridBagPanel with TelescopePosEditor wit
   private val emptySedFilesModel = ComboBox.newConstantModel(Seq(AuxFileSpectrum.Undefined))
   private val userDefinedDetails = new ComboBox[AuxFileSpectrum](Seq()) {
     peer.setModel(emptySedFilesModel)
+    tooltip = "SEDs may be added via the File Attachment tab"
     renderer = Renderer(_.name)
     // Selects the given sed file, if it is not available (e.g. because the aux file it represents
     // has been removed from the program) an "Undefined" placeholder is inserted instead.

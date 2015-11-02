@@ -9,7 +9,6 @@ import edu.gemini.itc.gnirs.GnirsRecipe
 import edu.gemini.itc.gsaoi.GsaoiRecipe
 import edu.gemini.itc.nifs.NifsRecipe
 import edu.gemini.itc.niri.NiriRecipe
-import edu.gemini.itc.operation.ImagingS2NMethodACalculation
 import edu.gemini.itc.shared._
 import edu.gemini.spModel.core.{AuxFileSpectrum, UserDefinedSpectrum, SpectralDistribution, SPProgramID}
 
@@ -28,25 +27,33 @@ class ItcServiceImpl extends ItcService {
 
   def calculate(p: ItcParameters): Result = try {
 
-    // Get the SED data from an aux file. For now we can assume that the ITC service is running on the same
-    // machine as the database (localhost). In case this setup changes, we need to change this here, too.
-    def auxFileDistribution(id: String, name: String): SpectralDistribution = {
-      val programId     = SPProgramID.toProgramID(id)
-      val spectrumBytes = new AuxFileClient("localhost", 8443).fetchToMemory(programId, name)
-      val spectrum      = new String(spectrumBytes)
-      UserDefinedSpectrum(name, spectrum)
+    // update parameters sent from client with stuff that needs to be done on the server
+    val updatedParams: ItcParameters = {
+
+      // Get the SED data from an aux file. For now we can assume that the ITC service is running on the same
+      // machine as the database (localhost). In case this setup changes, we need to change this here, too.
+      def readAuxFile(id: String, name: String): SpectralDistribution = {
+        val programId     = SPProgramID.toProgramID(id)
+        val spectrumBytes = new AuxFileClient("localhost", 8443).fetchToMemory(programId, name)
+        val spectrum      = new String(spectrumBytes)
+        UserDefinedSpectrum(name, spectrum)
+      }
+
+      // if a user defined source distribution is involved we need to read the aux file and update the parameters accordingly
+      def updatedSrc(s: SourceDefinition) = s.distribution match {
+        case AuxFileSpectrum.Undefined    => throw new RuntimeException("The user SED is undefined.")   // "User Defined", but no SED file was available
+        case AuxFileSpectrum(anId, aName) => s.copy(distribution = readAuxFile(anId, aName))            // "User Defined", we need to replace placeholder with aux file
+        case _                            => s                                                          // for all other cases we can use what's there
+      }
+
+      // do any updates necessary
+      p.copy(source = updatedSrc(p.source))
     }
 
-    // if a user defined source distribution is involved we need to read the aux file
-    val src = p.source.distribution match {
-      case AuxFileSpectrum.Undefined    => throw new RuntimeException("The user SED is undefined.")       // "User Defined", but no SED file was available
-      case AuxFileSpectrum(anId, aName) => p.source.copy(distribution = auxFileDistribution(anId, aName)) // "User Defined", we need to replace placeholder with aux file
-      case _                            => p.source                                                       // for all other cases we can go ahead
-    }
-
-    p.observation.getMethod match {
-      case _: Imaging       => calculateImaging(p)
-      case _: Spectroscopy  => calculateSpectroscopy(p)
+    // execute ITC service call with updated parameters
+    updatedParams.observation.getMethod match {
+      case _: Imaging       => calculateImaging(updatedParams)
+      case _: Spectroscopy  => calculateSpectroscopy(updatedParams)
     }
 
   } catch {
