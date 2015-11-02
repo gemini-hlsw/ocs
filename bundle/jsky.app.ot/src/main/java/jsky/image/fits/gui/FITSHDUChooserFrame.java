@@ -1,13 +1,3 @@
-/*
- * ESO Archive
- *
- * $Id: FITSHDUChooserFrame.java 6769 2005-11-28 22:53:55Z brighton $
- *
- * who             when        what
- * --------------  ----------  ----------------------------------------
- * Allan Brighton  1999/05/03  Created
- */
-
 package jsky.image.fits.gui;
 
 import java.awt.BorderLayout;
@@ -16,7 +6,6 @@ import javax.swing.JFrame;
 import jsky.image.fits.codec.FITSImage;
 import jsky.image.gui.MainImageDisplay;
 import jsky.util.Preferences;
-
 
 /**
  * Provides a top level window for an FITSHDUChooser panel.

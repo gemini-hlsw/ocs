@@ -56,7 +56,6 @@ public class ImageDisplayMenuBar extends JMenuBar {
     /** View menu items needed externally. **/
     private final JMenuItem _imagePropertiesMenuItem;
     private final JMenuItem _fitsKeywordsMenuItem;
-    private final JMenuItem _fitsExtensionsMenuItem;
     private final JMenuItem _pickObjectMenuItem;
 
 
@@ -78,7 +77,6 @@ public class ImageDisplayMenuBar extends JMenuBar {
         /** VIEW MENU **/
         _imagePropertiesMenuItem = createViewImagePropertiesMenuItem();
         _fitsKeywordsMenuItem    = createViewFitsKeywordsMenuItem();
-        _fitsExtensionsMenuItem  = createViewFitsKeywordsMenuItem();
         _pickObjectMenuItem      = createViewPickObjectMenuItem();
         add(_viewMenu = createViewMenu());
 
@@ -108,12 +106,10 @@ public class ImageDisplayMenuBar extends JMenuBar {
 
                 // enable/disable some items
                 if (imageDisplay.getFitsImage() != null) {
-                    _fitsExtensionsMenuItem.setEnabled(true);
                     _fitsKeywordsMenuItem.setEnabled(true);
                     _pickObjectMenuItem.setEnabled(true);
                     _imagePropertiesMenuItem.setEnabled(false);
                 } else {
-                    _fitsExtensionsMenuItem.setEnabled(false);
                     _fitsKeywordsMenuItem.setEnabled(false);
                     _pickObjectMenuItem.setEnabled(false);
                     _imagePropertiesMenuItem.setEnabled(true);
@@ -200,7 +196,6 @@ public class ImageDisplayMenuBar extends JMenuBar {
         menu.add(_imageDisplay.getColorsAction());
         menu.add(_imageDisplay.getCutLevelsAction());
         menu.add(_pickObjectMenuItem);
-        menu.add(_fitsExtensionsMenuItem);
         menu.add(_fitsKeywordsMenuItem);
         menu.add(_imagePropertiesMenuItem);
         menu.addSeparator();

@@ -188,7 +188,7 @@ public class MaskEdit extends JFrame {
         Theme.install();
 
         // Set the default catalog config file URL
-        SkycatConfigFile.setConfigFile(Resources.getResource("conf/skycat.cfg"));
+        SkycatConfigFile.setConfigFile(SkycatConfigFile.class.getResource("/jsky/catalog/osgi/skycat.cfg"));
 
         SwingUtilities.invokeLater(() -> {
             String imageFile = (args.length > 0 ? args[0] : null);

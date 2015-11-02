@@ -3,7 +3,7 @@ package edu.gemini.catalog.ui.tpe
 import java.net.URL
 import javax.swing.event.ChangeListener
 
-import jsky.catalog.{Catalog, CatalogDirectory, QueryResult, TableQueryResult}
+import jsky.catalog.{Catalog, CatalogDirectory, TableQueryResult}
 import jsky.catalog.gui.{StoreImageServerAction, CatalogNavigator, TablePlotter, BasicTablePlotter}
 import jsky.coords.{WorldCoords, WorldCoordinateConverter, CoordinateConverter}
 import jsky.graphics.CanvasGraphics
@@ -207,10 +207,6 @@ abstract class CatalogImageDisplay(parent: Component, navigatorPane: NavigatorPa
     ???
   }
 
-  /**
-    * Can be overridden in a derived class to filter the result of a catalog query.
-    */
-  def filterQueryResult(queryResult: QueryResult): QueryResult = queryResult
 }
 
 /**
