@@ -1,7 +1,7 @@
 package jsky.app.ot.gemini.obscat
 
 import java.io.File
-import javax.swing.{DefaultComboBoxModel, ImageIcon}
+import javax.swing.{JComponent, JTextField, DefaultComboBoxModel, ImageIcon}
 
 import edu.gemini.catalog.ui.PreferredSizeFrame
 import edu.gemini.shared.gui.textComponent.TextRenderer
@@ -11,7 +11,7 @@ import edu.gemini.shared.util.immutable.ScalaConverters._
 import jsky.app.ot.userprefs.ui.{PreferencePanel, PreferenceDialog}
 import jsky.catalog.{FieldDescAdapter, Catalog}
 import jsky.util.Preferences
-import jsky.util.gui.DialogUtil
+import jsky.util.gui.{MultiSelectComboBox, DialogUtil}
 
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -114,6 +114,17 @@ class OTBrowserQueryPanel(catalog: Catalog) extends ObsCatalogQueryPanel(catalog
           }
       }
     }
+  }
+
+  def reset(): Unit = {
+    val resetFunction:PartialFunction[JComponent, Unit] = {
+      case m: MultiSelectComboBox[_] => m.setSelectedObjects(Array())
+      case t: JTextField             => t.setText("")
+      case _                         => // Do nothing
+    }
+    // Sometimes the values come null :S
+    _panelComponents.toList.filter(_ != null).foreach(c => c.toList.filter(_ != null).foreach(resetFunction))
+    _components.toList.filter(_ != null).foreach(resetFunction)
   }
 }
 
@@ -228,6 +239,15 @@ final class ObsCatalogQueryTool(catalog: Catalog) {
     }
   }
 
+  val resetButton = new Button("Reset") {
+    tooltip = "Reset all the selected values"
+
+    reactions += {
+      case ButtonClicked(_) =>
+        queryPanel.reset()
+    }
+  }
+
   val queryButton: Button = {
     new Button("Query") {
       tooltip = "Start the Query"
@@ -248,6 +268,7 @@ final class ObsCatalogQueryTool(catalog: Catalog) {
   val buttonPanel: Component = new MigPanel(LC().fill().insets(0)) {
       add(toolsButton, CC().alignX(RightAlign))
       add(presetsCB, CC().alignX(RightAlign).growY())
+      add(resetButton, CC().alignX(RightAlign).growY())
       add(remote, CC().alignX(RightAlign).pushX())
       add(queryButton, CC().alignX(RightAlign))
     }

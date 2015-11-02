@@ -36,7 +36,7 @@ public class ObsCatalogQueryPanel extends CatalogQueryPanel {
     protected JComponent[][] _panelComponents;
 
     /** Instrument combo box */
-    private MultiSelectComboBox<String> _instComboBox;
+    protected MultiSelectComboBox<String> _instComboBox;
 
     /**
      * Initialize a query panel for the given catalog.
