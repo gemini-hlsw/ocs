@@ -258,8 +258,8 @@ public class Niri extends Instrument {
 
     @Override public List<WarningRule> warnings() {
         return new ArrayList<WarningRule>() {{
-            add(new LinearityLimitRule(params.wellDepth().depth(), 0.80));
-            add(new SaturationLimitRule(params.wellDepth().linearityLimit(), 0.80));
+            add(new LinearityLimitRule(params.wellDepth().linearityLimit(), 0.80));
+            add(new SaturationLimitRule(params.wellDepth().depth(), 0.80));
         }};
     }
 
