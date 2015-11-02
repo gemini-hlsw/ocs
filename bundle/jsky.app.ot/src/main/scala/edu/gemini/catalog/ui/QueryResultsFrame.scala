@@ -3,7 +3,7 @@ package edu.gemini.catalog.ui
 import java.awt.Color
 import javax.swing.BorderFactory._
 import javax.swing.border.Border
-import javax.swing.{UIManager, DefaultComboBoxModel}
+import javax.swing.{BorderFactory, UIManager, DefaultComboBoxModel}
 
 import edu.gemini.ags.api.AgsMagnitude.MagnitudeTable
 import edu.gemini.ags.api.{AgsGuideQuality, AgsRegistrar}
@@ -25,7 +25,7 @@ import edu.gemini.ui.miglayout.MigPanel
 import edu.gemini.ui.miglayout.constraints._
 import jsky.app.ot.gemini.editor.targetComponent.GuidingIcon
 import jsky.app.ot.tpe.{TpeManager, TpeContext}
-import jsky.app.ot.util.Resources
+import jsky.app.ot.util.{OtColor, Resources}
 import jsky.catalog.gui.{SymbolSelectionEvent, SymbolSelectionListener}
 
 import scala.swing.Reactions.Reaction
@@ -115,9 +115,19 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
 
   private lazy val errorLabel = new Label("") {
     horizontalAlignment = Alignment.Left
-    foreground = Color.red
+    foreground = Color.darkGray
+    background = OtColor.LIGHT_SALMON
+    border = BorderFactory.createEmptyBorder(2, 2, 2, 2)
 
-    def reset(): Unit = text = ""
+    def reset(): Unit = {
+      text = ""
+      opaque = false
+    }
+
+    def show(msg: String):Unit = {
+      text = msg
+      opaque = true
+    }
   }
 
   title = "Catalog Query Tool"
@@ -132,7 +142,7 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
     // Results Table
     add(tableBorder, CC().grow().spanX(3).pushY().pushX())
     // Labels and command buttons at the bottom
-    add(errorLabel, CC().alignX(LeftAlign).alignY(BaselineAlign).gap(10.px, 10.px, 10.px, 10.px).newline().skip(1))
+    add(errorLabel, CC().alignX(LeftAlign).alignY(BaselineAlign).gap(10.px, 10.px, 10.px, 10.px).newline().skip(1).grow())
     add(unplotButton, CC().alignX(RightAlign).alignY(BaselineAlign).gap(10.px, 10.px, 10.px, 10.px))
     add(closeButton, CC().alignX(RightAlign).alignY(BaselineAlign).gap(10.px, 10.px, 10.px, 10.px))
   }
@@ -152,7 +162,7 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
    * Show error message at the bottom line
    */
   def displayError(error: String): Unit = {
-    errorLabel.text = error
+    errorLabel.show(error)
   }
 
   /**
@@ -492,6 +502,8 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
       // Update radius constraint
       radiusStart.updateAngle(query.radiusConstraint.minLimit)
       radiusEnd.updateAngle(query.radiusConstraint.maxLimit)
+
+      errorLabel.reset()
 
       buildLayout(query.filters.list.collect { case q: MagnitudeQueryFilter => q.mc })
     }
