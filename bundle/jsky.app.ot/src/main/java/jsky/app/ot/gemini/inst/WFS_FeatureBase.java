@@ -1,11 +1,6 @@
-// Copyright 2001 Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-//
-// $Id: WFS_FeatureBase.java 40266 2011-12-29 19:43:35Z fnussber $
-//
 package jsky.app.ot.gemini.inst;
 
-import edu.gemini.catalog.api.RadiusLimits;
+import edu.gemini.catalog.api.RadiusConstraint;
 import edu.gemini.skycalc.Offset;
 import edu.gemini.spModel.guide.PatrolField;
 import jsky.app.ot.tpe.TpeImageFeature;
@@ -76,9 +71,9 @@ public abstract class WFS_FeatureBase extends TpeImageFeature {
         }
     }
 
-    public void addRadiusLimits(RadiusLimits radiusLimits, Color color) {
-        Double minLimit = radiusLimits.getMinLimit().toArcsecs().getMagnitude();
-        Double maxLimit = radiusLimits.getMaxLimit().toArcsecs().getMagnitude();
+    public void addRadiusLimits(RadiusConstraint radiusLimits, Color color) {
+        Double minLimit = radiusLimits.minLimit().toArcsecs();
+        Double maxLimit = radiusLimits.maxLimit().toArcsecs();
         addRadiusLimit(minLimit, color, DOTTED_LINE_STROKE);
         addRadiusLimit(maxLimit, color, THICK_DASHED_LINE_STROKE);
     }

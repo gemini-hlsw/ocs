@@ -217,7 +217,6 @@ class CatalogImageDisplayMenuBar(protected val imageDisplay: CatalogImageDisplay
 
   val catalogTreeMenu = new NavigatorCatalogMenu(imageDisplay)
 
-  // TODO These two items don't seem to be used, check if they could be deprecated
   val pickObjectMenuItem = getPickObjectMenuItem
   getViewMenu.remove(pickObjectMenuItem)
   catalogTreeMenu.imageServersMenu.foreach(_catalogMenu.add)

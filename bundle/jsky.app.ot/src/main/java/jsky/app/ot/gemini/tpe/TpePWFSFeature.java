@@ -1,6 +1,7 @@
 package jsky.app.ot.gemini.tpe;
 
-import edu.gemini.catalog.api.RadiusLimits;
+import edu.gemini.catalog.api.RadiusConstraint$;
+import edu.gemini.pot.ModelConverters;
 import edu.gemini.skycalc.Offset;
 import edu.gemini.shared.util.immutable.None;
 import edu.gemini.shared.util.immutable.Option;
@@ -284,8 +285,8 @@ public class TpePWFSFeature extends WFS_FeatureBase implements PropertyWatcher {
         setTransformationToScreen(rotation, pixelsPerArcsec, translation);
         for (ObsContext obsCtx : _iw.getMinimalObsContext()) {
             try {
-                addRadiusLimits(new RadiusLimits(PwfsGuideProbe.PWFS_RADIUS, PwfsGuideProbe.pwfs1.getVignettingClearance(obsCtx)), PWFS1_COLOR);
-                addRadiusLimits(new RadiusLimits(PwfsGuideProbe.PWFS_RADIUS, PwfsGuideProbe.pwfs2.getVignettingClearance(obsCtx)), PWFS2_COLOR);
+                addRadiusLimits(RadiusConstraint$.MODULE$.between(ModelConverters.toNewAngle(PwfsGuideProbe.PWFS_RADIUS), ModelConverters.toNewAngle(PwfsGuideProbe.pwfs1.getVignettingClearance(obsCtx))), PWFS1_COLOR);
+                addRadiusLimits(RadiusConstraint$.MODULE$.between(ModelConverters.toNewAngle(PwfsGuideProbe.PWFS_RADIUS), ModelConverters.toNewAngle(PwfsGuideProbe.pwfs2.getVignettingClearance(obsCtx))), PWFS2_COLOR);
             } catch(IllegalArgumentException e) {
                 // ignore: some instruments don't support PWFS
                 return;
@@ -409,8 +410,6 @@ public class TpePWFSFeature extends WFS_FeatureBase implements PropertyWatcher {
         double y2 = (pwfsMwidth / 2.0) * mm2Pix;
         xyList[i++] = x2;
         xyList[i++] = y2;
-        //xyList[i++] = x2;
-        //xyList[i++] = y2;
 
         // define a point at 45 degs
         double x3 = (pwfsMlength / 2.0 + dr / Math.sqrt(2.0)) * mm2Pix + r;
@@ -428,19 +427,13 @@ public class TpePWFSFeature extends WFS_FeatureBase implements PropertyWatcher {
         double y5 = y4;
         xyList[i++] = x5;
         xyList[i++] = y5;
-        //xyList[i++] = x5;
-        //xyList[i++] = y5;
 
         // Now reflect through the y axis
         xyList[i++] = x5;
         xyList[i++] = -y5;
-        //xyList[i++] = x5;
-        //xyList[i++] = -y5;
 
         xyList[i++] = x4;
         xyList[i++] = -y4;
-        //xyList[i++] = x4;
-        //xyList[i++] = -y4;
 
         xyList[i++] = x3;
         xyList[i++] = -y3;
@@ -450,8 +443,6 @@ public class TpePWFSFeature extends WFS_FeatureBase implements PropertyWatcher {
 
         xyList[i++] = x1;
         xyList[i++] = -y1;
-        //xyList[i++] = x1;
-        //xyList[i++] = -y1;
 
         final Figure pwfsFigure = new Figure(PwfsGuideProbe.buildFigure(pwfsScale, xc, yc, xp, yp, dx, dy, xyList, i, tx, ty), pwfsColor, PARTIAL, new BasicStroke());
 
@@ -473,8 +464,6 @@ public class TpePWFSFeature extends WFS_FeatureBase implements PropertyWatcher {
         y2 = y5;
         xyList[i++] = x2;
         xyList[i++] = y2;
-        //xyList[i++] = x2;
-        //xyList[i++] = y2;
 
         x3 = (-pwfsMlength / 2.0) * mm2Pix + r;
         y3 = (pwfsAwidth / 2.0 + dr) * mm2Pix;
@@ -503,22 +492,16 @@ public class TpePWFSFeature extends WFS_FeatureBase implements PropertyWatcher {
         y5 = y3;
         xyList[i++] = x5;
         xyList[i++] = y5;
-        //xyList[i++] = x5;
-        //xyList[i++] = y5;
 
         double x6 = 0.0;
         double y6 = 0.0;
         xyList[i++] = x6;
         xyList[i++] = y6;
-        //xyList[i++] = x6;
-        //xyList[i++] = y6;
 
         double x7 = x1;
         double y7 = y1;
         xyList[i++] = x7;
         xyList[i++] = y7;
-        //xyList[i++] = x7;
-        //xyList[i++] = y7;
 
         final Figure halfArmFigure = new Figure(PwfsGuideProbe.buildFigure(pwfsScale, xc, yc, xp, yp, dx, dy, xyList, i, tx, ty), pwfsColor, PARTIAL, new BasicStroke());
 
@@ -530,8 +513,6 @@ public class TpePWFSFeature extends WFS_FeatureBase implements PropertyWatcher {
 
         xyList[i++] = x2;
         xyList[i++] = -y2;
-        //xyList[i++] = x2;
-        //xyList[i++] = -y2;
 
         if (wfs == 2) {
             xyList[i++] = x23;
@@ -545,18 +526,12 @@ public class TpePWFSFeature extends WFS_FeatureBase implements PropertyWatcher {
 
         xyList[i++] = x5;
         xyList[i++] = -y5;
-        //xyList[i++] = x5;
-        //xyList[i++] = -y5;
 
         xyList[i++] = x6;
         xyList[i++] = -y6;
-        //xyList[i++] = x6;
-        //xyList[i++] = -y6;
 
         xyList[i++] = x7;
         xyList[i++] = -y7;
-        //xyList[i++] = x7;
-        //xyList[i++] = -y7;
 
         final Figure otherHalfArmFigure = new Figure(PwfsGuideProbe.buildFigure(pwfsScale, xc, yc, xp, yp, dx, dy, xyList, i, tx, ty), pwfsColor, PARTIAL, new BasicStroke());
 
@@ -598,15 +573,11 @@ public class TpePWFSFeature extends WFS_FeatureBase implements PropertyWatcher {
         y2 = y3;
         xyList[i++] = x2;
         xyList[i++] = y2;
-        //xyList[i++] = x2;
-        //xyList[i++] = y2;
 
         x3 = (-pwfsMlength / 2.0) * mm2Pix + r;
         y3 = y2;
         xyList[i++] = x3;
         xyList[i++] = y3;
-        //xyList[i++] = x3;
-        //xyList[i++] = y3;
 
         // Place a couple of points along the arc or line to ensure a smooth curve
         // Calculate the end points first
@@ -642,19 +613,13 @@ public class TpePWFSFeature extends WFS_FeatureBase implements PropertyWatcher {
         y7 = y6;
         xyList[i++] = x7;
         xyList[i++] = y7;
-        //xyList[i++] = x7;
-        //xyList[i++] = y7;
 
         // Now reflect the points through the y axis
         xyList[i++] = x7;
         xyList[i++] = -y7;
-        //xyList[i++] = x7;
-        //xyList[i++] = -y7;
 
         xyList[i++] = x6;
         xyList[i++] = -y6;
-        //xyList[i++] = x6;
-        //xyList[i++] = -y6;
 
         xyList[i++] = x5;
         xyList[i++] = -y5;
@@ -667,13 +632,9 @@ public class TpePWFSFeature extends WFS_FeatureBase implements PropertyWatcher {
 
         xyList[i++] = x2;
         xyList[i++] = -y2;
-        //xyList[i++] = x2;
-        //xyList[i++] = -y2;
 
         xyList[i++] = x1;
         xyList[i++] = -y1;
-        //xyList[i++] = x1;
-        //xyList[i++] = -y1;
 
         final Figure vignettedArm = new Figure(PwfsGuideProbe.buildFigure(pwfsScale, xc, yc, xp, yp, dx, dy, xyList, i, tx, ty), pwfsColor, BLOCKED, new BasicStroke());
 
