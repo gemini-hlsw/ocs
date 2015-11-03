@@ -340,6 +340,12 @@ case class TargetsModel(info: Option[ObservationInfo], base: Coordinates, radius
     }
   }
 
+  def renderAt(row: Int, column: Int):Option[String] = {
+    targets.lift(row).flatMap { t =>
+      columns.lift(column) >>= {c => c.render(t).flatMap(c.displayValue)}
+    }
+  }
+
   // Returns a Table Sorter depending on the available columns
   def sorter =
     new TableRowSorter[TargetsModel](this) <| { _.toggleSortOrder(0) } <| { sorter =>

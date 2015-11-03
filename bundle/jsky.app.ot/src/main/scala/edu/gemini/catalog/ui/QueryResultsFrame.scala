@@ -1,9 +1,11 @@
 package edu.gemini.catalog.ui
 
 import java.awt.Color
+import java.io._
+import java.nio.charset.Charset
 import javax.swing.BorderFactory._
 import javax.swing.border.Border
-import javax.swing.{BorderFactory, UIManager, DefaultComboBoxModel}
+import javax.swing.{JOptionPane, BorderFactory, UIManager, DefaultComboBoxModel}
 
 import edu.gemini.ags.api.AgsMagnitude.MagnitudeTable
 import edu.gemini.ags.api.{AgsGuideQuality, AgsRegistrar}
@@ -27,6 +29,7 @@ import jsky.app.ot.gemini.editor.targetComponent.GuidingIcon
 import jsky.app.ot.tpe.{TpeManager, TpeContext}
 import jsky.app.ot.util.{OtColor, Resources}
 import jsky.catalog.gui.{SymbolSelectionEvent, SymbolSelectionListener}
+import jsky.util.gui.DialogUtil
 
 import scala.swing.Reactions.Reaction
 import scala.swing._
@@ -109,6 +112,27 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
     }
   }
 
+  private lazy val exportButton = new Button("Save as...") {
+    reactions += {
+      case ButtonClicked(_) =>
+        val fc = new FileChooser(new File("."))
+        val r = fc.showSaveDialog(this)
+        def canOverwrite(f: File) = {
+          if (f.exists) {
+            val msg = s"The file ${f.getName} already exists. Do you want to overwrite it?"
+            DialogUtil.confirm(msg) == JOptionPane.YES_OPTION
+          } else {
+            true
+          }
+        }
+        (r, fc.selectedFile) match {
+          case (FileChooser.Result.Approve, file) if canOverwrite(file) =>
+            exportToText(file)
+          case _                          => // Ignore
+        }
+    }
+  }
+
   private lazy val scrollPane = new ScrollPane() {
     contents = resultsTable
   }
@@ -140,10 +164,11 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
     // Query Form
     add(QueryForm, CC().alignY(TopAlign).minWidth(320.px))
     // Results Table
-    add(tableBorder, CC().grow().spanX(3).pushY().pushX())
+    add(tableBorder, CC().grow().spanX(4).pushY().pushX())
     // Labels and command buttons at the bottom
     add(errorLabel, CC().alignX(LeftAlign).alignY(BaselineAlign).gap(10.px, 10.px, 10.px, 10.px).newline().skip(1).grow())
     add(unplotButton, CC().alignX(RightAlign).alignY(BaselineAlign).gap(10.px, 10.px, 10.px, 10.px))
+    add(exportButton, CC().alignX(RightAlign).alignY(BaselineAlign).gap(10.px, 10.px, 10.px, 10.px))
     add(closeButton, CC().alignX(RightAlign).alignY(BaselineAlign).gap(10.px, 10.px, 10.px, 10.px))
   }
 
@@ -168,6 +193,37 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
     }
   }
 
+  def closing[A <: {def close(): Unit}, B](param: A)(f: A => B): B =
+    try f(param) finally param.close()
+
+  private def exportToText(f: File): Unit = {
+    val ColumnSeparator = "\t"
+    val NewLine = System.getProperty("line.separator")
+    val model = resultsTable.model match {
+      case m: TargetsModel => Some(m)
+      case _               => None
+    }
+    model.foreach { m =>
+      // Note that we don't export the guiding quality column
+      val colIds = (0 until m.getColumnCount).collect {
+        case i if resultsTable.model.getColumnClass(i) != classOf[AgsGuideQuality] => i
+      }
+      val header = colIds.map(m.getColumnName)
+      val dashedLine = header.map(i => "-" * i.length)
+
+      val data = for {
+        r <- 0 until m.getRowCount
+      } yield (for {
+        c <- colIds
+      } yield ~m.renderAt(r, c)).mkString(ColumnSeparator)
+
+      val encoder = Charset.forName("UTF-8").newEncoder()
+      val output = List(header.mkString(ColumnSeparator), dashedLine.mkString(ColumnSeparator), data.mkString(NewLine)).mkString(NewLine)
+      closing(new OutputStreamWriter(new FileOutputStream(f), encoder)) { w =>
+        w.write(output)
+      }
+    }
+  }
   private def plotResults(): Unit = {
     resultsTable.model match {
       case t: TargetsModel =>
