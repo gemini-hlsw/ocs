@@ -11,6 +11,8 @@ import edu.gemini.spModel.gemini.trecs.TReCSParams.Mask;
 import edu.gemini.spModel.gemini.trecs.TReCSParams.WindowWheel;
 import scala.Option;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 /**
@@ -234,6 +236,12 @@ public final class TRecs extends Instrument {
 
     @Override public double gain() {
         return 1.0;
+    }
+
+    @Override public List<WarningRule> warnings() {
+        return new ArrayList<WarningRule>() {{
+            add(new SaturationLimitRule(WELL_DEPTH, 0.80));
+        }};
     }
 
 }

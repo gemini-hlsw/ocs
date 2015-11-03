@@ -64,6 +64,7 @@ public final class GnirsPrinter extends PrinterBase {
                 result.observation().getExposureTime() * result.observation().getNumExposures() * result.observation().getSourceFraction()));
 
         _println("");
+        _printPeakPixelInfo(s.ccd(0));
         _printWarnings(s.warnings());
 
         _print("<HR align=left SIZE=3>");
