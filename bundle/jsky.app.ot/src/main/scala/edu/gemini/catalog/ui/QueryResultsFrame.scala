@@ -159,19 +159,12 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
         createEmptyBorder(2, 2, 2, 2)))
 
   /**
-   * Show error message at the bottom line
-   */
-  def displayError(error: String): Unit = {
-    errorLabel.show(error)
-  }
-
-  /**
    * Called after a name search completes
    */
   def updateName(search: String, targets: List[SiderealTarget]): Unit = {
     QueryForm.updateName(targets.headOption)
     targets.headOption.ifNone {
-      errorLabel.text = s"Target '$search' not found..."
+      errorLabel.show(s"Target '$search' not found...")
     }
   }
 
@@ -206,6 +199,7 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
    * Called after  a query completes to update the UI according to the results
    */
   def updateResults(info: Option[ObservationInfo], queryResult: QueryResult): Unit = {
+    errorLabel.reset()
     queryResult.query match {
       case q: ConeSearchCatalogQuery =>
         unplotCurrent()
@@ -632,10 +626,10 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
     VoTableClient.catalog(query, backend).onComplete {
       case scala.util.Failure(f)                           =>
         GlassLabel.hide(peer.getRootPane)
-        displayError(s"Exception: ${f.getMessage}")
+        errorLabel.show(s"Exception: ${f.getMessage}")
       case scala.util.Success(x) if x.result.containsError =>
         GlassLabel.hide(peer.getRootPane)
-        displayError(s"Error: ${x.result.problems.head.displayValue}")
+        errorLabel.show(s"Error: ${x.result.problems.head.displayValue}")
       case scala.util.Success(x)                           =>
         Swing.onEDT {
           GlassLabel.hide(peer.getRootPane)
