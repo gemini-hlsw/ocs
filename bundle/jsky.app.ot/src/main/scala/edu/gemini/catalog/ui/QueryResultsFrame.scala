@@ -393,21 +393,23 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
     var offsets = Set.empty[Offset]
     var originalConditions = ObservationInfo.zero.conditions
 
-    lazy val sbBox = new ComboBox(List(SPSiteQuality.SkyBackground.values(): _*)) with TextRenderer[SPSiteQuality.SkyBackground] {
-      renderer = new ListView.AbstractRenderer[SPSiteQuality.SkyBackground, Label](new Label()) {
-        override def configure(list: ListView[_], isSelected: Boolean, focused: Boolean, a: SPSiteQuality.SkyBackground, index: Int): Unit = {
-          component.text = text(a)
-          component.horizontalAlignment = Alignment.Left
-          (originalConditions.map(_.sb), a) match {
-            case (Some(i), c: SPSiteQuality.SkyBackground) if i.compareTo(a) > 0 =>
-              component.foreground = Color.red
-              foreground = Color.red
-            case _                                                               => //
-              component.foreground = Color.black
-              foreground = Color.black
-          }
+    def conditionsRenderer[A <: Comparable[A]](get: Option[Conditions] => Option[A], text: TextRenderer[A]) = new ListView.AbstractRenderer[A, Label](new Label()) {
+      override def configure(list: ListView[_], isSelected: Boolean, focused: Boolean, a: A, index: Int): Unit = {
+        component.text = text.text(a)
+        component.horizontalAlignment = Alignment.Left
+        get(originalConditions) match {
+          case Some(i) if i.compareTo(a) > 0 =>
+            component.foreground = Color.red
+            foreground = Color.red
+          case _                                                               => //
+            component.foreground = Color.black
+            foreground = Color.black
         }
       }
+    }
+
+    lazy val sbBox = new ComboBox(List(SPSiteQuality.SkyBackground.values(): _*)) with TextRenderer[SPSiteQuality.SkyBackground] {
+      renderer = conditionsRenderer(_.map(_.sb), this)
 
       listenTo(selection)
       reactions += {
@@ -420,9 +422,13 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
       override def text(a: SPSiteQuality.SkyBackground) = a.displayValue()
     }
     lazy val ccBox = new ComboBox(List(SPSiteQuality.CloudCover.values(): _*)) with TextRenderer[SPSiteQuality.CloudCover] {
+      renderer = conditionsRenderer(_.map(_.cc), this)
+
       override def text(a: SPSiteQuality.CloudCover) = a.displayValue()
     }
     lazy val iqBox = new ComboBox(List(SPSiteQuality.ImageQuality.values(): _*)) with TextRenderer[SPSiteQuality.ImageQuality] {
+      renderer = conditionsRenderer(_.map(_.iq), this)
+
       override def text(a: SPSiteQuality.ImageQuality) = a.displayValue()
     }
     lazy val limitsLabel = new Label() {
