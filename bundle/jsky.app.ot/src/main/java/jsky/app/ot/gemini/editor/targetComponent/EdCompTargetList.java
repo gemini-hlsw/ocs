@@ -124,7 +124,8 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
             // other detail editors are swapped in when the target type changes,
             // update them explicitly so they behave as if they were contained
             // in the panel.
-            _w.detailEditor.allEditorsJava().stream().filter(ed -> _w.detailEditor.curDetailEditorJava().forall(cur -> cur != ed)).forEach(ed -> updateEnabledState(new Component[]{ed}, enabled));
+            _w.detailEditor.allEditorsJava().stream().filter(ed -> _w.detailEditor.curDetailEditorJava().forall(cur -> cur != ed)).
+                    forEach(ed -> updateEnabledState(new Component[]{ed}, enabled));
         }
 
         final TargetEnvironment env = getDataObject().getTargetEnvironment();

@@ -19,16 +19,12 @@ public class TextBoxWidget extends JTextField {
 
     final private ArrayList<TextBoxWidgetWatcher> _watchers;
 
-    // The previous contents, used to compare to see whether a textBoxDoneEditing should be triggered on watchers.
-    private String _oldContents;
-
     // if true, ignore changes in the text box content
     private boolean _ignoreChanges = false;
 
     /** Default constructor */
     public TextBoxWidget() {
         _watchers = new ArrayList<>();
-        _oldContents = "";
 
         getDocument().addDocumentListener(new DocumentListener() {
             @Override
@@ -49,7 +45,7 @@ public class TextBoxWidget extends JTextField {
         addActionListener(e -> {
             if (!_ignoreChanges) {
                 _notifyAction();
-                _notifyDoneEditingUpdateContents();
+                _notifyDoneEditing();
             }
         });
 
@@ -57,21 +53,9 @@ public class TextBoxWidget extends JTextField {
             @Override
             public void focusLost(FocusEvent e) {
                 if (!_ignoreChanges)
-                    _notifyDoneEditingUpdateContents();
-            }
-
-            @Override
-            public void focusGained(final FocusEvent e) {
-                _oldContents = getValue().trim();
+                    _notifyDoneEditing();
             }
         });
-    }
-
-    private void _notifyDoneEditingUpdateContents() {
-        final String trimmedContents = getValue().trim();
-        if (!trimmedContents.equals(_oldContents))
-            _notifyDoneEditing();
-        _oldContents = trimmedContents;
     }
 
     /**
@@ -170,7 +154,6 @@ public class TextBoxWidget extends JTextField {
         } catch (Exception e) {
             DialogUtil.error(e);
         }
-        _oldContents = s;
         _ignoreChanges = false;
     }
 
