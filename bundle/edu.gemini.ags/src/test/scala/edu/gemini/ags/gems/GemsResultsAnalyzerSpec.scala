@@ -65,7 +65,7 @@ class GemsResultsAnalyzerSpec extends MascotProgress with Specification with NoT
       }
 
       System.out.println("gems results: size = " + gemsGuideStars.size)
-      gemsGuideStars should have size 164
+      gemsGuideStars should have size 247
 
       val result = gemsGuideStars.head
       result.pa.toDegrees should beCloseTo(0, 0.0001)
@@ -126,7 +126,7 @@ class GemsResultsAnalyzerSpec extends MascotProgress with Specification with NoT
       }
 
       System.out.println("gems results: size = " + gemsGuideStars.size)
-      gemsGuideStars should have size 94
+      gemsGuideStars should have size 135
 
       val result = gemsGuideStars.head
       result.pa.toDegrees should beCloseTo(0, 0.0001)
@@ -146,12 +146,12 @@ class GemsResultsAnalyzerSpec extends MascotProgress with Specification with NoT
       val cwfs2 = group.get(Canopus.Wfs.cwfs2).getValue.getPrimary.getValue.getTarget
       val cwfs3 = group.get(Canopus.Wfs.cwfs3).getValue.getPrimary.getValue.getTarget
       val odgw2 = group.get(GsaoiOdgw.odgw2).getValue.getPrimary.getValue.getTarget
-      cwfs1.getName must beEqualTo("104-014564")
+      cwfs1.getName must beEqualTo("104-014597")
       cwfs2.getName must beEqualTo("104-014608")
       cwfs3.getName must beEqualTo("104-014547")
       odgw2.getName must beEqualTo("104-014556")
 
-      val cwfs1x = Coordinates.create("05:35:24.994", "-69:16:04.77")
+      val cwfs1x = Coordinates.create("05:35:32.630", "-69:15:48.64")
       val cwfs2x = Coordinates.create("05:35:36.409", "-69:16:24.17")
       val cwfs3x = Coordinates.create("05:35:18.423", "-69:16:30.67")
       val odgw2x = Coordinates.create("05:35:23.887", "-69:16:18.20")
@@ -187,7 +187,7 @@ class GemsResultsAnalyzerSpec extends MascotProgress with Specification with NoT
       }
 
       System.out.println("gems results: size = " + gemsGuideStars.size)
-      gemsGuideStars should have size 28
+      gemsGuideStars should have size 98
 
       val result = gemsGuideStars.head
       result.pa.toDegrees should beCloseTo(90, 0.0001)
@@ -207,12 +207,12 @@ class GemsResultsAnalyzerSpec extends MascotProgress with Specification with NoT
       val cwfs2 = group.get(Canopus.Wfs.cwfs2).getValue.getPrimary.getValue.getTarget
       val cwfs3 = group.get(Canopus.Wfs.cwfs3).getValue.getPrimary.getValue.getTarget
       val odgw2 = group.get(GsaoiOdgw.odgw2).getValue.getPrimary.getValue.getTarget
-      cwfs1.getName must beEqualTo("289-128894")
+      cwfs1.getName must beEqualTo("289-128909")
       cwfs2.getName must beEqualTo("289-128878")
       cwfs3.getName must beEqualTo("289-128908")
       odgw2.getName must beEqualTo("289-128891")
 
-      val cwfs1x = Coordinates.create("17:40:19.713", "-32:15:56.77")
+      val cwfs1x = Coordinates.create("17:40:21.743", "-32:14:54.04")
       val cwfs2x = Coordinates.create("17:40:16.855", "-32:15:55.83")
       val cwfs3x = Coordinates.create("17:40:21.594", "-32:15:50.38")
       val odgw2x = Coordinates.create("17:40:19.295", "-32:14:58.34")
@@ -248,15 +248,15 @@ class GemsResultsAnalyzerSpec extends MascotProgress with Specification with NoT
       }
 
       System.out.println("gems results: size = " + gemsGuideStars.size)
-      gemsGuideStars should have size 12
+      gemsGuideStars should have size 54
 
       val result = gemsGuideStars.head
       result.pa.toDegrees should beCloseTo(0, 0.0001)
 
       val group = result.guideGroup
       val set = group.getReferencedGuiders
-      // Found a star on CWFS1, CWFS2, CWFS3 and ODWG2
-      set.contains(Canopus.Wfs.cwfs1) should beFalse
+      // Found a star on CWFS1, CWFS2, CWFS3 and ODWG4
+      set.contains(Canopus.Wfs.cwfs1) should beTrue
       set.contains(Canopus.Wfs.cwfs2) should beTrue
       set.contains(Canopus.Wfs.cwfs3) should beTrue
       set.contains(GsaoiOdgw.odgw1) should beFalse
