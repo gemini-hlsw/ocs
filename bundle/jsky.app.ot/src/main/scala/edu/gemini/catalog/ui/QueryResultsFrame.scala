@@ -391,8 +391,32 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
     // PA and offsets must be mutable, the rest of the model lives on the UI
     var pa = Angle.zero
     var offsets = Set.empty[Offset]
+    var originalConditions = ObservationInfo.zero.conditions
 
     lazy val sbBox = new ComboBox(List(SPSiteQuality.SkyBackground.values(): _*)) with TextRenderer[SPSiteQuality.SkyBackground] {
+      renderer = new ListView.AbstractRenderer[SPSiteQuality.SkyBackground, Label](new Label()) {
+        override def configure(list: ListView[_], isSelected: Boolean, focused: Boolean, a: SPSiteQuality.SkyBackground, index: Int): Unit = {
+          component.text = text(a)
+          component.horizontalAlignment = Alignment.Left
+          (originalConditions.map(_.sb), a) match {
+            case (Some(i), c: SPSiteQuality.SkyBackground) if i.compareTo(a) > 0 =>
+              component.foreground = Color.red
+              foreground = Color.red
+            case _                                                               => //
+              component.foreground = Color.black
+              foreground = Color.black
+          }
+        }
+      }
+
+      listenTo(selection)
+      reactions += {
+        case SelectionChanged(_) =>
+          originalConditions.map(_.sb).map(selection.item.compareTo) match {
+            case Some(i) if i > 0 =>
+            case _        =>
+          }
+      }
       override def text(a: SPSiteQuality.SkyBackground) = a.displayValue()
     }
     lazy val ccBox = new ComboBox(List(SPSiteQuality.CloudCover.values(): _*)) with TextRenderer[SPSiteQuality.CloudCover] {
@@ -536,6 +560,7 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
           updateGuidersModel(s, i.validStrategies)
         }
         // Update conditions
+        i.ctx.map(_.getConditions).foreach(c => originalConditions = Option(c))
         i.conditions.foreach { c =>
           sbBox.selection.item = c.sb
           ccBox.selection.item = c.cc
