@@ -214,13 +214,13 @@ abstract class CatalogImageDisplay(parent: Component, navigatorPane: NavigatorPa
     */
   protected override def pickedObject(): Unit = {
     val stats = getPickObjectPanel.getStatistics
-    if (stats == null) {
+    Option(stats).ifNone {
       DialogUtil.error("No object was selected")
-      return
     }
-    // TODO Support picked objects
-    //_navigator.addPickedObjectToTable(stats, getPickObjectPanel.isUpdate)
-    ???
+    // TODO Support picked objects, adding them to the target environment
+    stats.getCenterPos // Coords
+    stats.getRow.elementAt(0) // Name
+    getPickObjectPanel.isUpdate // is update
   }
 
 }

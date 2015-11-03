@@ -31,16 +31,13 @@ import jsky.util.gui.DialogUtil;
  * Note that GUI here has some catalog related features ("Add" button, "Table Name" field),
  * but the code that implements these features is defined in the jsky.navigator package.
  *
- * @see jsky.navigator.Navigator
- * @see jsky.navigator.NavigatorImageDisplay
- *
  * @version $Revision: 4414 $
  * @author Allan Brighton
  */
 public class PickObject extends PickObjectGUI
         implements ImageGraphicsHandler, ChangeListener {
 
-    // Used to access internationalized strings (see i18n/gui*.proprties)
+    // Used to access internationalized strings (see i18n/gui*.properties)
     private static final I18N _I18N = I18N.getInstance(PickObject.class);
 
     /** Default size (width, height) of the window displaying the image */

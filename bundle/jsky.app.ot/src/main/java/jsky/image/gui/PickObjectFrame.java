@@ -16,7 +16,6 @@ public class PickObjectFrame extends JFrame {
     /** The main panel */
     private PickObject pickObject;
 
-
     /**
      * Create a top level window containing an PickObject panel.
      */
