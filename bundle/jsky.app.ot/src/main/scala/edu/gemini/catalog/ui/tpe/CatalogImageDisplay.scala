@@ -183,23 +183,6 @@ abstract class CatalogImageDisplay(parent: Component, navigatorPane: NavigatorPa
     }
   }
 
-  /**
-    * Called when an object is selected in the Pick Object window.
-    * <p>
-    * Add the currently selected object in the "Pick Object" window to the currently
-    * displayed table, or create a new table if none is being displayed.
-    */
-  protected override def pickedObject(): Unit = {
-    val stats = getPickObjectPanel.getStatistics
-    Option(stats).ifNone {
-      DialogUtil.error("No object was selected")
-    }
-    // TODO Support picked objects, adding them to the target environment
-    stats.getCenterPos // Coords
-    stats.getRow.elementAt(0) // Name
-    getPickObjectPanel.isUpdate // is update
-  }
-
 }
 
 /**

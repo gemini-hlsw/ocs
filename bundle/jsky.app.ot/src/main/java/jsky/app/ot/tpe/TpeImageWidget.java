@@ -10,6 +10,8 @@ import edu.gemini.spModel.obs.SchedulingBlock;
 import edu.gemini.spModel.obs.context.ObsContext;
 import edu.gemini.spModel.obscomp.SPInstObsComp;
 import edu.gemini.spModel.target.*;
+import edu.gemini.spModel.target.env.TargetEnvironment;
+import edu.gemini.spModel.target.obsComp.TargetObsComp;
 import edu.gemini.spModel.target.offset.OffsetPosBase;
 import edu.gemini.spModel.target.system.ITarget;
 import edu.gemini.spModel.util.Angle;
@@ -20,6 +22,8 @@ import jsky.app.ot.util.Resources;
 import jsky.app.ot.util.ScreenMath;
 import jsky.coords.CoordinateConverter;
 import jsky.coords.WorldCoords;
+import jsky.image.gui.PickObject;
+import jsky.image.gui.PickObjectStatistics;
 import jsky.navigator.NavigatorPane;
 import jsky.util.gui.DialogUtil;
 
@@ -1041,6 +1045,29 @@ public class TpeImageWidget extends CatalogImageDisplay implements MouseInputLis
 
     public AbstractAction getSkyImageAction() {
         return _skyImageAction;
+    }
+
+    @Override
+    public void pickedObject() {
+        super.pickedObject();
+        PickObject pickObject = getPickObjectPanel();
+        PickObjectStatistics stats = pickObject.getStatistics();
+        if (stats != null) {
+            WorldCoords coords = stats.getCenterPos();
+            TargetObsComp obsComp = getContext().targets().orNull();
+
+            if (obsComp != null && !pickObject.isUpdate()) {
+                SPTarget newTarget = new SPTarget(coords.getRaDeg(), coords.getDecDeg());
+                if (stats.getRow().size() > 0 && stats.getRow().elementAt(0) != null) {
+                    newTarget.setName(stats.getRow().elementAt(0).toString());
+                }
+                TargetEnvironment te = obsComp.getTargetEnvironment().setUserTargets(obsComp.getTargetEnvironment().getUserTargets().append(newTarget));
+                obsComp.setTargetEnvironment(te);
+                getContext().targets().commit();
+            }
+        } else {
+            DialogUtil.error("No object was selected");
+        }
     }
 }
 
