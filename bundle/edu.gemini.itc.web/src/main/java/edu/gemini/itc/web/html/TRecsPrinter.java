@@ -31,17 +31,18 @@ public final class TRecsPrinter extends PrinterBase {
 
     public void writeOutput() {
         if (isImaging) {
-            final ImagingResult result = recipe.calculateImaging();
-            writeImagingOutput(result);
+            final ImagingResult r = recipe.calculateImaging();
+            final ItcImagingResult s = recipe.serviceResult(r);
+            writeImagingOutput(r, s);
         } else {
             final SpectroscopyResult r = recipe.calculateSpectroscopy();
             final ItcSpectroscopyResult s = recipe.serviceResult(r);
             final UUID id = cache(s);
-            writeSpectroscopyOutput(id, r);
+            writeSpectroscopyOutput(id, r, s);
         }
     }
 
-    private void writeSpectroscopyOutput(final UUID id, final SpectroscopyResult result) {
+    private void writeSpectroscopyOutput(final UUID id, final SpectroscopyResult result, final ItcSpectroscopyResult s) {
 
         final TRecs instrument = (TRecs) result.instrument();
 
@@ -72,6 +73,10 @@ public final class TRecsPrinter extends PrinterBase {
         final double frac_with_source = result.observation().getSourceFraction();
 
         _println(String.format("Requested total integration time = %.2f secs, of which %.2f secs is on source.", exp_time * number_exposures, exp_time * number_exposures * frac_with_source));
+
+        _println("");
+        _printPeakPixelInfo(s.ccd(0));
+        _printWarnings(s.warnings());
 
         _print("<HR align=left SIZE=3>");
 
@@ -104,7 +109,7 @@ public final class TRecsPrinter extends PrinterBase {
 
     }
 
-    private void writeImagingOutput(final ImagingResult result) {
+    private void writeImagingOutput(final ImagingResult result, final ItcImagingResult s) {
 
         final TRecs instrument = (TRecs) result.instrument();
 
@@ -118,14 +123,8 @@ public final class TRecsPrinter extends PrinterBase {
 
         _println(CalculatablePrinter.getTextResult(result.is2nCalc(), result.observation()));
 
-        _println("");
-        _println(String.format("The peak pixel signal + background is %.0f.", result.peakPixelCount()));
-
-        if (result.peakPixelCount() > (instrument.getWellDepth()))
-            _println("Warning: peak pixel may be saturating the imaging deep well setting of "
-                    + instrument.getWellDepth());
-
-        _println("");
+        _printPeakPixelInfo(s.ccd(0));
+        _printWarnings(s.warnings());
 
         _print("<HR align=left SIZE=3>");
         _println("<b>Input Parameters:</b>");

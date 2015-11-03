@@ -79,6 +79,7 @@ public final class Flamingos2Printer extends PrinterBase {
                 totExpTime, totExpTime * result.specS2N()[0].getSpecFracWithSource()));
 
         _println("");
+        _printPeakPixelInfo(s.ccd(0));
         _printWarnings(s.warnings());
 
         _print("<HR align=left SIZE=3>");
@@ -115,10 +116,7 @@ public final class Flamingos2Printer extends PrinterBase {
         _println(CalculatablePrinter.getTextResult(result.iqCalc()));
         _println(CalculatablePrinter.getTextResult(result.is2nCalc(), result.observation()));
 
-        _println(String.format(
-                "The peak pixel signal + background is %d. This is %.0f%% of the full well depth of %.0f.",
-                s.peakPixelFlux(0), result.peakPixelCount() / instrument.wellDepth() * 100, instrument.wellDepth()));
-
+        _printPeakPixelInfo(s.ccd(0));
         _printWarnings(s.warnings());
 
         printConfiguration((Flamingos2) result.instrument(), result.parameters());

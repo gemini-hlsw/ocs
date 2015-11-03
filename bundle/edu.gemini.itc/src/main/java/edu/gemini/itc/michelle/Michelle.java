@@ -8,6 +8,9 @@ import edu.gemini.spModel.core.Site;
 import edu.gemini.spModel.data.YesNoType;
 import edu.gemini.spModel.gemini.michelle.MichelleParams;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Michelle specification class
  */
@@ -228,5 +231,10 @@ public final class Michelle extends Instrument {
         return 1.0;
     }
 
+    @Override public List<WarningRule> warnings() {
+        return new ArrayList<WarningRule>() {{
+            add(new SaturationLimitRule(WELL_DEPTH, 0.80));
+        }};
+    }
 
 }

@@ -32,16 +32,17 @@ public final class MichellePrinter extends PrinterBase {
     public void writeOutput() {
         if (isImaging) {
             final ImagingResult result = recipe.calculateImaging();
-            writeImagingOutput(result);
+            final ItcImagingResult s = recipe.serviceResult(result);
+            writeImagingOutput(result, s);
         } else {
             final SpectroscopyResult r = recipe.calculateSpectroscopy();
             final ItcSpectroscopyResult s = recipe.serviceResult(r);
             final UUID id = cache(s);
-            writeSpectroscopyOutput(id, r);
+            writeSpectroscopyOutput(id, r, s);
         }
     }
 
-    private void writeSpectroscopyOutput(final UUID id, final SpectroscopyResult result) {
+    private void writeSpectroscopyOutput(final UUID id, final SpectroscopyResult result, final ItcSpectroscopyResult s) {
 
         final Michelle instrument = (Michelle) result.instrument();
 
@@ -81,6 +82,10 @@ public final class MichellePrinter extends PrinterBase {
                     exposure_time * number_exposures, exposure_time * number_exposures * frac_with_source));
         }
 
+        _println("");
+        _printPeakPixelInfo(s.ccd(0));
+        _printWarnings(s.warnings());
+
         _print("<HR align=left SIZE=3>");
 
         _println("<p style=\"page-break-inside: never\">");
@@ -111,7 +116,7 @@ public final class MichellePrinter extends PrinterBase {
 
     }
 
-    private void writeImagingOutput(final ImagingResult result) {
+    private void writeImagingOutput(final ImagingResult result, final ItcImagingResult s) {
 
         final Michelle instrument = (Michelle) result.instrument();
 
@@ -145,14 +150,8 @@ public final class MichellePrinter extends PrinterBase {
         }
 
         _println("");
-        _println(String.format("The peak pixel signal + background is %.0f. ", result.peakPixelCount()));
-
-        if (result.peakPixelCount() > (instrument.getWellDepth()))
-            _println("Warning: peak pixel may be saturating the imaging deep well setting of " +
-                    instrument.getWellDepth());
-
-
-        _println("");
+        _printPeakPixelInfo(s.ccd(0));
+        _printWarnings(s.warnings());
 
         _print("<HR align=left SIZE=3>");
         _println("<b>Input Parameters:</b>");

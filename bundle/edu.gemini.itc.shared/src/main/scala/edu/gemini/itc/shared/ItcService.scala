@@ -42,7 +42,7 @@ final case class ItcCcd(
 sealed trait ItcResult extends Serializable {
   def ccds:                         List[ItcCcd]
 
-  def ccd(i: Int)                   = ccds(i % ccds.length)
+  def ccd(i: Int = 0)               = ccds(i % ccds.length)
   def peakPixelFlux(ccdIx: Int = 0) = ccd(ccdIx).peakPixelFlux.toInt
 
   val warnings: List[ItcWarning] = {
