@@ -48,13 +48,16 @@ class CoordinateEditor extends TelescopePosEditor with ReentrancyHack {
   })
 
   def edit(ctx: GOption[ObsContext], target0: SPTarget, node: ISPNode): Unit = {
-    val targetChanged = !target0.equals(spt)
+    val targetChanged = !target0.getTarget.equals(spt.getTarget)
     spt = target0
 
     nonreentrant {
       val when = ctx.asScalaOpt.flatMap(_.getSchedulingBlock.asScalaOpt).map(_.start).map(java.lang.Long.valueOf).asGeminiOpt
 
       // We want to see if the current text in the fields, when formatted properly, is different from what would be assigned.
+      // The targetChanged is not a foolproof catch, since two ITargets could be considered the same if their values are
+      // identical, but this is not really consequential: it is just included to reset a partially completed field to a
+      // fully completed one (e.g. RA: 12 to 12:00:00.000) if the RAs are the same but the targets are different.
       val raFormatted = Try { new HMS(ra.getText).toString }.getOrElse(ra.getText)
       target.getRaString(when).asScalaOpt.filter(_ != raFormatted || ra.getText.isEmpty || targetChanged).foreach(ra.setText)
       val decFormatted = Try { new DMS(dec.getText).toString }.getOrElse(dec.getText)
