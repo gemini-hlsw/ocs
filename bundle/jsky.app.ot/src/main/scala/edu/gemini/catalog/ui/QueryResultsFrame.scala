@@ -261,15 +261,7 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
         unplotCurrent()
 
         val model = TargetsModel(info, q.base, q.radiusConstraint, queryResult.result.targets.rows)
-        resultsTable.model = model
-
-        // The sorting logic may change if the list of magnitudes changes
-        resultsTable.peer.setRowSorter(model.sorter)
-
-        // Adjust the width of the columns
-        val insets = scrollPane.border.getBorderInsets(scrollPane.peer)
-        resultsTable.peer.getColumnModel.getColumn(0).setResizable(false)
-        resultsTable.adjustColumns(scrollPane.bounds.width - insets.left - insets.right)
+        updateResultsModel(model)
 
         // Update the count of rows
         tableBorder.border = titleBorder(s"$title - ${queryResult.result.targets.rows.length} results found")
@@ -281,6 +273,18 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
         plotResults()
       case _ =>
     }
+  }
+
+  private def updateResultsModel(model: TargetsModel): Unit = {
+    resultsTable.model = model
+
+    // The sorting logic may change if the list of magnitudes changes
+    resultsTable.peer.setRowSorter(model.sorter)
+
+    // Adjust the width of the columns
+    val insets = scrollPane.border.getBorderInsets(scrollPane.peer)
+    resultsTable.peer.getColumnModel.getColumn(0).setResizable(false)
+    resultsTable.adjustColumns(scrollPane.bounds.width - insets.left - insets.right)
   }
 
   protected def revalidateFrame(): Unit = {
@@ -401,7 +405,7 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
           case Some(i) if i.compareTo(a) > 0 =>
             component.foreground = Color.red
             foreground = Color.red
-          case _                                                               => //
+          case _                             =>
             component.foreground = Color.black
             foreground = Color.black
         }
@@ -414,20 +418,39 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
       listenTo(selection)
       reactions += {
         case SelectionChanged(_) =>
-          originalConditions.map(_.sb).map(selection.item.compareTo) match {
-            case Some(i) if i > 0 =>
-            case _        =>
+          resultsTable.model match {
+            case t: TargetsModel =>
+              updateResultsModel(t.copy(info = t.info.map(i => i.copy(ctx = None, conditions = i.conditions.map(_.sb(selection.item))))))
           }
       }
+
       override def text(a: SPSiteQuality.SkyBackground) = a.displayValue()
     }
     lazy val ccBox = new ComboBox(List(SPSiteQuality.CloudCover.values(): _*)) with TextRenderer[SPSiteQuality.CloudCover] {
       renderer = conditionsRenderer(_.map(_.cc), this)
 
+      listenTo(selection)
+      reactions += {
+        case SelectionChanged(_) =>
+          resultsTable.model match {
+            case t: TargetsModel =>
+              updateResultsModel(t.copy(info = t.info.map(i => i.copy(ctx = None, conditions = i.conditions.map(_.cc(selection.item))))))
+          }
+      }
+
       override def text(a: SPSiteQuality.CloudCover) = a.displayValue()
     }
     lazy val iqBox = new ComboBox(List(SPSiteQuality.ImageQuality.values(): _*)) with TextRenderer[SPSiteQuality.ImageQuality] {
       renderer = conditionsRenderer(_.map(_.iq), this)
+
+      listenTo(selection)
+      reactions += {
+        case SelectionChanged(_) =>
+          resultsTable.model match {
+            case t: TargetsModel =>
+              updateResultsModel(t.copy(info = t.info.map(i => i.copy(ctx = None, conditions = i.conditions.map(_.iq(selection.item))))))
+          }
+      }
 
       override def text(a: SPSiteQuality.ImageQuality) = a.displayValue()
     }
@@ -567,11 +590,13 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
         }
         // Update conditions
         i.ctx.map(_.getConditions).foreach(c => originalConditions = Option(c))
+        List(sbBox, ccBox, iqBox).foreach(c => c.deafTo(c.selection))
         i.conditions.foreach { c =>
           sbBox.selection.item = c.sb
           ccBox.selection.item = c.cc
           iqBox.selection.item = c.iq
         }
+        List(sbBox, ccBox, iqBox).foreach(c => c.listenTo(c.selection))
         i.ctx.map(_.getPositionAngle).foreach(a => pa = a.toNewModel)
         i.ctx.map(_.getSciencePositions).foreach(o => offsets = o.asScala.map(_.toNewModel).toSet)
         updateGuideSpeedText()
