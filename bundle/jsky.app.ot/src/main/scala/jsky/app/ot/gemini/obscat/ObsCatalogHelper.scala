@@ -65,7 +65,8 @@ object ObsCatalogHelper {
   private def withProgressPanel[A](f: => A): A = {
     val p = ProgressPanel.makeProgressPanel("Searching the science program database ...")
     p.start()
-    p.getStopButton.setVisible(false)
+    p.getStopButton.setVisible(true)
+    //p.addActionListener()
     try f finally p.stop()
   }
 

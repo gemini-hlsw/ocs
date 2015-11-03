@@ -19,8 +19,6 @@ import javax.swing._
 import java.awt._
 import java.awt.event.{ActionListener, ActionEvent}
 import java.awt.geom.AffineTransform
-import java.util.HashSet
-import java.util.Set
 
 import scalaz._
 import Scalaz._
@@ -96,10 +94,6 @@ trait CatalogDisplay {
 abstract class CatalogImageDisplay(parent: Component, navigatorPane: NavigatorPane) extends DivaMainImageDisplay(navigatorPane, parent) with CatalogDisplay {
   val plotter = new BasicTablePlotter(getCanvasGraphics, getCoordinateConverter) <| {navigatorPane.setPlotter}
 
-  // TODO Move to scala collection
-  /** Set of filenames: Used to keep track of the files visited in this session. */
-  private final val _filesVisited: Set[String] = new HashSet[String]
-
   /** Return the Diva pane containing the added catalog symbol layer. */
   override def getNavigatorPane: NavigatorPane = navigatorPane
 
@@ -150,9 +144,8 @@ abstract class CatalogImageDisplay(parent: Component, navigatorPane: NavigatorPa
           //setQueryResult(newTable.getCatalog)
         }
       } catch {
-        case e: Exception => {
+        case e: Exception =>
           DialogUtil.error(this, e)
-        }
       }
     }
   }
@@ -168,22 +161,6 @@ abstract class CatalogImageDisplay(parent: Component, navigatorPane: NavigatorPa
     if (!before) {
       // replot
       Option(plotter).foreach(_.replotAll())
-      // TODO Fix saving the tables
-      /*if (_navigatorFrame != null) {
-        val filename = getFilename
-        val fitsImage = getFitsImage
-        if (fitsImage != null && filename != null) {
-          if (!_filesVisited.contains(filename)) {
-            _filesVisited.add(filename)
-            try {
-              NavigatorFITSTable.plotTables(filename, fitsImage.getFits, _navigator)
-            } catch {
-              case e: Exception =>
-                DialogUtil.error(this, e)
-            }
-          }
-        }
-      }*/
     }
   }
 
