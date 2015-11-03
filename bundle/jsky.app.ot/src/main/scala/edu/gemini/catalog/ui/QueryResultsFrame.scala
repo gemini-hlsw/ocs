@@ -420,7 +420,9 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
         case SelectionChanged(_) =>
           resultsTable.model match {
             case t: TargetsModel =>
+              unplotCurrent()
               updateResultsModel(t.copy(info = t.info.map(i => i.copy(ctx = None, conditions = i.conditions.map(_.sb(selection.item))))))
+              plotResults()
           }
       }
 
@@ -434,7 +436,9 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
         case SelectionChanged(_) =>
           resultsTable.model match {
             case t: TargetsModel =>
+              unplotCurrent()
               updateResultsModel(t.copy(info = t.info.map(i => i.copy(ctx = None, conditions = i.conditions.map(_.cc(selection.item))))))
+              plotResults()
           }
       }
 
@@ -448,7 +452,9 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
         case SelectionChanged(_) =>
           resultsTable.model match {
             case t: TargetsModel =>
+              unplotCurrent()
               updateResultsModel(t.copy(info = t.info.map(i => i.copy(ctx = None, conditions = i.conditions.map(_.iq(selection.item))))))
+              plotResults()
           }
       }
 
