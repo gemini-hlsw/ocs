@@ -33,8 +33,6 @@ trait CatalogDisplay {
 
   def getParentFrame: Component
 
-  def saveFITSTable(table: TableQueryResult): Unit
-
   def getNavigatorPane: NavigatorPane
 
   def getCanvasGraphics: CanvasGraphics
@@ -135,8 +133,29 @@ abstract class CatalogImageDisplay(parent: Component, navigatorPane: NavigatorPa
 
   /**
     * Save (or update) the given table as a FITS table in the current FITS image.
+    * NOTE This function was called from the removed menu "Save Image With Catalog Overlays"
     */
-  override def saveFITSTable(table: TableQueryResult):Unit = throw new UnsupportedOperationException()
+  def saveFITSTable(table: TableQueryResult):Unit = {
+    Option(getFitsImage).ifNone {
+      DialogUtil.error(this, "This operation is only supported on FITS files.")
+    }
+    Option(getFitsImage).foreach { i =>
+      try {
+        val newTable = NavigatorFITSTable.saveWithImage(getFilename, i.getFits, table)
+        Option(newTable).foreach { t =>
+          setSaveNeeded(true)
+          checkExtensions(true)
+          plotter.unplot(table)
+          // TODO Should the table be displaye?
+          //setQueryResult(newTable.getCatalog)
+        }
+      } catch {
+        case e: Exception => {
+          DialogUtil.error(this, e)
+        }
+      }
+    }
+  }
 
   /**
     * This method is called before and after a new image is loaded, each time
@@ -223,21 +242,7 @@ class CatalogImageDisplayMenuBar(protected val imageDisplay: CatalogImageDisplay
   catalogTreeMenu.proxyMenuItem.foreach(_catalogMenu.add)
 
   _catalogMenu.add(pickObjectMenuItem)
-  _catalogMenu.addSeparator()
-  _catalogMenu.add(createSaveCatalogOverlaysWithImageMenuItem)
   add(_catalogMenu)
-
-  /**
-    * Create a menu item for saving the current catalog overlays as a FITS table in the image file.
-    */
-  @Deprecated
-  private def createSaveCatalogOverlaysWithImageMenuItem: JMenuItem = {
-    val menuItem = new JMenuItem("Save Catalog Overlays With Image")
-    menuItem.addActionListener(new ActionListener() {
-      override def actionPerformed(e: ActionEvent): Unit = imageDisplay.saveCatalogOverlaysWithImage()
-    })
-    menuItem
-  }
 
   /** Return the handle for the Catalog menu */
   def getCatalogMenu: JMenu = _catalogMenu

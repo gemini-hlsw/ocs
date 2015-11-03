@@ -1,19 +1,16 @@
 package jsky.navigator;
 
 import java.awt.Component;
-import java.awt.event.ActionEvent;
 import java.awt.geom.AffineTransform;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.swing.AbstractAction;
 import javax.swing.JFrame;
 import javax.swing.JInternalFrame;
 
 import edu.gemini.catalog.ui.tpe.CatalogDisplay;
 import jsky.catalog.Catalog;
 import jsky.catalog.CatalogDirectory;
-import jsky.catalog.TableQueryResult;
 import jsky.catalog.QueryResult;
 import jsky.catalog.gui.CatalogNavigatorOpener;
 import jsky.catalog.gui.TablePlotter;
@@ -22,7 +19,6 @@ import jsky.image.fits.gui.FITSKeywordsFrame;
 import jsky.image.gui.DivaMainImageDisplay;
 import jsky.image.gui.PickObjectStatistics;
 import jsky.util.I18N;
-import jsky.util.Resources;
 import jsky.util.Preferences;
 import jsky.util.gui.DialogUtil;
 import jsky.util.gui.SwingUtil;
@@ -39,9 +35,6 @@ import jsky.catalog.gui.CatalogNavigator;
 public class NavigatorImageDisplay extends DivaMainImageDisplay
     implements CatalogNavigatorOpener, CatalogDisplay {
 
-    // Used to access internationalized strings (see i18n/gui*.proprties)
-    private static final I18N _I18N = I18N.getInstance(NavigatorImageDisplay.class);
-
     /** The instance of the catalog navigator to use with this image display. */
     private Navigator _navigator;
 
@@ -53,20 +46,6 @@ public class NavigatorImageDisplay extends DivaMainImageDisplay
 
     /** Set of filenames: Used to keep track of the files visited in this session. */
     private final Set<String> _filesVisited = new HashSet<>();
-
-    /** Action to use to show the catalog window (Browse catalogs) */
-    private AbstractAction _catalogBrowseAction = new AbstractAction(
-            _I18N.getString("browse") + "...",
-            Resources.getIcon("Catalog24.gif")) {
-        public void actionPerformed(ActionEvent evt) {
-            try {
-                throw new UnsupportedOperationException();
-            } catch (Exception e) {
-                DialogUtil.error(e);
-            }
-        }
-    };
-
 
     /**
      * Construct a NavigatorImageDisplay widget.
@@ -167,38 +146,6 @@ public class NavigatorImageDisplay extends DivaMainImageDisplay
     }
 
     /**
-     * Save (or update) the given table as a FITS table in the current FITS image.
-     */
-    @Override
-    public void saveFITSTable(TableQueryResult table) {
-        FITSImage fitsImage = getFitsImage();
-        if (fitsImage == null) {
-            DialogUtil.error(this, "This operation is only supported on FITS files.");
-            return;
-        }
-
-        try {
-            NavigatorFITSTable newTable = NavigatorFITSTable.saveWithImage(getFilename(), fitsImage.getFits(), table);
-            if (newTable == null)
-                return;
-
-            setSaveNeeded(true);
-            checkExtensions(true);
-
-            // unplot the original table, since the FITS table will be plotted from now on
-            TablePlotter plotter = _navigator.getPlotter();
-            if (plotter != null) {
-                plotter.unplot(table);
-                //plotter.plot(newTable);
-                _navigator.setQueryResult(newTable.getCatalog());
-            }
-        } catch (Exception e) {
-            DialogUtil.error(this, e);
-        }
-    }
-
-
-    /**
      * If the given catalog argument is null, display the catalog window ("Browse" mode),
      * otherwise query the catalog using the default arguments for the current image.
      */
@@ -294,20 +241,6 @@ public class NavigatorImageDisplay extends DivaMainImageDisplay
         }
     }
 
-
-    /** Save any current catalog overlays as a FITS table in the image file. */
-    public void saveCatalogOverlaysWithImage() {
-        if (_navigator != null) {
-            TablePlotter plotter = _navigator.getPlotter();
-            if (plotter != null) {
-                TableQueryResult[] tables = plotter.getTables();
-                if (tables != null) {
-                    for (TableQueryResult table : tables) saveFITSTable(table);
-                }
-            }
-        }
-    }
-
     /**
      * Called when an object is selected in the Pick Object window.
      * <p>
@@ -326,12 +259,6 @@ public class NavigatorImageDisplay extends DivaMainImageDisplay
             return;
         }
         _navigator.addPickedObjectToTable(stats, getPickObjectPanel().isUpdate());
-    }
-
-
-    // Other menu and toolbar actions
-    public AbstractAction getCatalogBrowseAction() {
-        return _catalogBrowseAction;
     }
 
     /**

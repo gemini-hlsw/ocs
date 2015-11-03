@@ -363,7 +363,7 @@ public class Navigator extends CatalogNavigator implements CatalogNavigatorOpene
             DialogUtil.error("No current FITS image.");
         } else {
             TableQueryResult table = ((TableDisplayTool) resultComponent).getTable();
-            _imageDisplay.saveFITSTable(table);
+            //_imageDisplay.saveFITSTable(table);
         }
     }
 

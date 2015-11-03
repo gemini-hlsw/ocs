@@ -76,7 +76,7 @@ object ObsCatalogHelper {
     // Optimization: remove empty array search conditions ... DUH
     val conds = queryArgs.getConditions.filter {
       case ac: ArraySearchCondition => Option(ac.getValues).exists(_.nonEmpty)
-      case _ => true
+      case _                        => true
     }
 
     new ObsQueryFunctor(conds, queryArgs.getInstruments, queryArgs.getInstConditions)
@@ -111,7 +111,7 @@ object ObsCatalogHelper {
         }
 
         // Remote ones via TRPC. Result type ends up the same
-        case db@Remote(peer) => authFuture {
+        case db @ Remote(peer) => authFuture {
           TrpcClient(peer, 10 * 1000, TIMEOUT_MS).withKeyChain(OT.getKeyChain).apply(r => run(db, r[IDBQueryRunner])).fold(QueryFailure(db, _).fail, _.success)
         }
 
@@ -161,7 +161,6 @@ object ObsCatalogHelper {
     }
 
   }
-
 
   case class QueryFailure(db: DB, e: Throwable) {
     val msg = {

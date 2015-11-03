@@ -20,7 +20,6 @@ import nom.tam.fits.FitsFactory;
 import nom.tam.fits.Header;
 import nom.tam.fits.TableHDU;
 
-
 /**
  * Used to read and write FITS binary tables and store catalog query results as
  * FITS tables.

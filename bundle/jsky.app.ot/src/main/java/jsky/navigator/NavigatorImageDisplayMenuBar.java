@@ -54,7 +54,7 @@ public class NavigatorImageDisplayMenuBar extends ImageDisplayMenuBar {
      */
     protected JMenuItem createSaveCatalogOverlaysWithImageMenuItem() {
         JMenuItem menuItem = new JMenuItem(_I18N.getString("saveCatalogWithImage"));
-        menuItem.addActionListener(ae -> ((NavigatorImageDisplay) getImageDisplay()).saveCatalogOverlaysWithImage());
+        //menuItem.addActionListener(ae -> ((NavigatorImageDisplay) getImageDisplay()).saveCatalogOverlaysWithImage());
         return menuItem;
     }
 
