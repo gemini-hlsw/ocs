@@ -5,7 +5,7 @@ import edu.gemini.shared.util.immutable.{ Option => GOption }
 import edu.gemini.shared.util.immutable.ScalaConverters._
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.target.SPTarget
-import edu.gemini.spModel.target.system.{DMS, HMS, ITarget}
+import edu.gemini.spModel.target.system._
 import jsky.app.ot.gemini.editor.targetComponent.TelescopePosEditor
 import jsky.util.gui.TextBoxWidget
 
@@ -58,10 +58,13 @@ class CoordinateEditor extends TelescopePosEditor with ReentrancyHack {
       // The targetChanged is not a foolproof catch, since two ITargets could be considered the same if their values are
       // identical, but this is not really consequential: it is just included to reset a partially completed field to a
       // fully completed one (e.g. RA: 12 to 12:00:00.000) if the RAs are the same but the targets are different.
-      val raFormatted = Try { new HMS(ra.getText).toString }.getOrElse(ra.getText)
-      target.getRaString(when).asScalaOpt.filter(_ != raFormatted || ra.getText.isEmpty || targetChanged).foreach(ra.setText)
-      val decFormatted = Try { new DMS(dec.getText).toString }.getOrElse(dec.getText)
-      target.getDecString(when).asScalaOpt.filter(_ != decFormatted || dec.getText.isEmpty || targetChanged).foreach(dec.setText)
+      def setField[F <: CoordinateFormat](widget: TextBoxWidget, formatter: F, extractor: GOption[java.lang.Long] => GOption[String]): Unit = {
+        val original  = widget.getText
+        val formatted = Try { formatter.format(formatter.parse(original)) }.getOrElse(original)
+        extractor(when).asScalaOpt.filter(_ != formatted || original.isEmpty || targetChanged).foreach(widget.setText)
+      }
+      setField(ra,  HMS.DEFAULT_FORMAT, target.getRaString)
+      setField(dec, DMS.DEFAULT_FORMAT, target.getDecString)
     }
   }
 
