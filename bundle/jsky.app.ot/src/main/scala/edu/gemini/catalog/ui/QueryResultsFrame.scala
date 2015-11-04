@@ -329,6 +329,11 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
           errorLabel.reset()
           foreground = foregroundColor
       }
+
+      def resetName(n: String): Unit = {
+        text = n
+        foreground = foregroundColor
+      }
     }
     lazy val searchByName = new Button("") {
       icon = Resources.getIcon("eclipse/search.gif")
@@ -582,7 +587,7 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
      */
     def updateQuery(info: Option[ObservationInfo], query: ConeSearchCatalogQuery): Unit = {
       info.foreach { i =>
-        objectName.text = ~i.objectName
+        objectName.resetName(~i.objectName)
         // Skip listening or the selection update will trickle down to the other controls
         instrumentBox.deafTo(instrumentBox.selection)
         instrumentBox.selection.item = i.instrument.getOrElse(ObservationInfo.DefaultInstrument)

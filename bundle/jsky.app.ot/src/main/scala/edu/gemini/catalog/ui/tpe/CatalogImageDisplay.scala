@@ -1,17 +1,15 @@
 package edu.gemini.catalog.ui.tpe
 
 import java.net.URL
-import javax.swing.event.ChangeListener
 
 import jsky.catalog.{Catalog, CatalogDirectory, TableQueryResult}
 import jsky.catalog.gui.{StoreImageServerAction, CatalogNavigator, TablePlotter, BasicTablePlotter}
 import jsky.coords.{WorldCoords, WorldCoordinateConverter, CoordinateConverter}
 import jsky.graphics.CanvasGraphics
-import jsky.image.fits.codec.FITSImage
 import jsky.image.fits.gui.FITSKeywordsFrame
 import jsky.image.gui.ImageDisplayMenuBar
 import jsky.image.gui.ImageDisplayToolBar
-import jsky.image.gui.{ImageGraphicsHandler, DivaMainImageDisplay}
+import jsky.image.gui.DivaMainImageDisplay
 import jsky.navigator._
 import jsky.util.Preferences
 import jsky.util.gui.{ProxyServerDialog, DialogUtil}
