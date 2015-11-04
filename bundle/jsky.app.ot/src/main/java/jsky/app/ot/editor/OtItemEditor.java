@@ -24,9 +24,8 @@ import javax.swing.*;
 import javax.swing.plaf.basic.BasicArrowButton;
 import java.awt.Component;
 import java.awt.Container;
-import java.util.HashSet;
-import java.util.Hashtable;
-import java.util.Set;
+import java.util.*;
+import java.util.function.Predicate;
 
 
 /**
@@ -48,27 +47,15 @@ public abstract class OtItemEditor<N extends ISPNode, T extends ISPDataObject> {
     // it.  We use a Set because the property change events are sent later and
     // so multiple edits can be performed before the first one generates a
     // property change.
-    private final Set<PropagationId> _propIdSet = new HashSet<PropagationId>();
+    private final Set<PropagationId> _propIdSet = new HashSet<>();
 
     // used to save and restore previous enabled states of widgets
-    private final Hashtable<Component, Boolean> _enabledTab = new Hashtable<Component, Boolean>();
+    private final Hashtable<Component, Boolean> _enabledTab = new Hashtable<>();
 
     /**
      * Constructor
      */
     public OtItemEditor() {
-        // TODO: enabled state is updated upon a call to init so i'm removing
-        // this code -- if found to be necessary note that the node an
-        // item editor was last editing may no longer be in the program.
-        // for example, when there are offset nodes and GMOS N&S is
-        // enabled any existing offset nodes are removed from the program
-
-//        // arrange to be notified when the OT editable state changes
-//        OT.addEditableStateListener(new PropertyChangeListener() {
-//            public void propertyChange(PropertyChangeEvent evt) {
-//                updateEnabledState(OTOptions.areRootAndCurrentObsIfAnyEditable(getRoot(), getContextObservation()));
-//            }
-//        });
     }
 
     /**
@@ -76,7 +63,7 @@ public abstract class OtItemEditor<N extends ISPNode, T extends ISPDataObject> {
      * The default implementation just enables or disables all components in
      * the editor window.
      */
-    protected void updateEnabledState(boolean enabled) {
+    protected void updateEnabledState(final boolean enabled) {
         if (enabled != isEnabled()) {
             setEnabled(enabled);
             updateEnabledState(getWindow().getComponents(), enabled);
@@ -86,8 +73,8 @@ public abstract class OtItemEditor<N extends ISPNode, T extends ISPDataObject> {
     /**
      * Update the enabled (editable) state of the given components.
      */
-    protected void updateEnabledState(Component[] ar, boolean enabled) {
-        for (Component component : ar) {
+    protected void updateEnabledState(final Component[] ar, final boolean enabled) {
+        for (final Component component : ar) {
             if (!((component instanceof JTabbedPane)
                     || (component instanceof JSplitPane)
                     || (component instanceof JLabel)
@@ -95,17 +82,13 @@ public abstract class OtItemEditor<N extends ISPNode, T extends ISPDataObject> {
                     || (component instanceof BasicArrowButton)
                     || (component instanceof JScrollBar)
                     || (component instanceof JCalendarPopup))) {
-                boolean b = enabled;
-                if (enabled) {
-                    // restore previous enabled setting
-                    final Boolean o = getEnabledTable().get(component);
-                    b = (o == null) ? true : o;
-                } else {
-                    // save current enabled setting and then disable
+
+                // If the enabled state is different from the previous state, change.
+                boolean prevEnabled = Optional.ofNullable(getEnabledTable().get(component)).orElse(true);
+                if (prevEnabled != enabled) {
+                    component.setEnabled(enabled);
                     getEnabledTable().put(component, component.isEnabled());
                 }
-                if (component.isEnabled() != b)
-                    component.setEnabled(b);
             }
 
             if (component instanceof Container && !(component instanceof JComboBox) && !(component instanceof JSpinner)) {
@@ -121,14 +104,18 @@ public abstract class OtItemEditor<N extends ISPNode, T extends ISPDataObject> {
      *
      * @param node the item being edited
      */
+    @SuppressWarnings("unchecked")
     public final void init(PropagationId propId, N node) {
         // If we generated this update as a result of a call to apply(), then
         // skip the reinitialization.
         // TODO: okay maybe we shouldn't just skip it all together (updateEnabledSate regardless?)
-        if ((_node != null) && _propIdSet.remove(propId)) return;
+        if ((_node != null) && _propIdSet.remove(propId))
+            return;
 
         _propIdSet.clear();
-        if (_node != null) cleanup();
+        if (_node != null)
+            cleanup();
+
         this._node = node;
         this._dataObject = (_node != null) ? (T) _node.getDataObject() : null;
         final boolean editable = OTOptions.areRootAndCurrentObsIfAnyEditable(getProgram(), getContextObservation());
@@ -165,7 +152,7 @@ public abstract class OtItemEditor<N extends ISPNode, T extends ISPDataObject> {
     /**
      * Re-initialize this editor, discarding any in-progess edits.
      */
-    public final void reinitialize(PropagationId propId) {
+    public final void reinitialize(final PropagationId propId) {
         init(propId, _node);
     }
 
@@ -188,7 +175,7 @@ public abstract class OtItemEditor<N extends ISPNode, T extends ISPDataObject> {
      * hierarchy).
      */
     public SPViewer getViewer() { return getViewer(getWindow().getParent()); }
-    private SPViewer getViewer(Container c) {
+    private SPViewer getViewer(final Container c) {
         return (c == null) ? null : ((c instanceof SPViewer) ? (SPViewer) c : getViewer(c.getParent()));
     }
 
@@ -220,7 +207,7 @@ public abstract class OtItemEditor<N extends ISPNode, T extends ISPDataObject> {
      */
     protected boolean isLibraryProgram() {
         final ISPProgram p = getProgram();
-        return (p != null) ? ((SPProgram) p.getDataObject()).isLibrary() : false;
+        return (p != null) && ((SPProgram) p.getDataObject()).isLibrary();
     }
 
     /**
@@ -230,7 +217,7 @@ public abstract class OtItemEditor<N extends ISPNode, T extends ISPDataObject> {
         return _enabled;
     }
 
-    protected void setEnabled(boolean enabled) {
+    protected void setEnabled(final boolean enabled) {
         this._enabled = enabled;
     }
 
@@ -243,19 +230,14 @@ public abstract class OtItemEditor<N extends ISPNode, T extends ISPDataObject> {
         return (n != null) ? n.getContextObservation() : null;
     }
 
-    public ISPSeqComponent getContextSeqComponent() {
-        final ISPObservation o = getContextObservation();
-        return (o != null) ? o.getSeqComponent() : null;
+    private Optional<ISPObsComponent> findObsComponent(final Predicate<ISPObsComponent> p) {
+        return Optional.ofNullable(getContextObservation())
+                .map(ISPObservation::getObsComponents).orElse(Collections.emptyList())
+                .stream().filter(p).findFirst();
     }
 
     public ISPObsComponent getContextInstrument() {
-        final ISPObservation o = getContextObservation();
-        if (o != null) {
-            for (ISPObsComponent c : o.getObsComponents())
-                if (c.getType().broadType == SPComponentBroadType.INSTRUMENT)
-                    return c;
-        }
-        return null;
+        return findObsComponent(c -> c.getType().broadType == SPComponentBroadType.INSTRUMENT).orElse(null);
     }
 
     public SPInstObsComp getContextInstrumentDataObject() {
@@ -269,23 +251,12 @@ public abstract class OtItemEditor<N extends ISPNode, T extends ISPDataObject> {
     }
 
     public ISPObsComponent getContextTargetObsComp() {
-        final ISPObservation o = getContextObservation();
-        if (o != null) {
-            for (ISPObsComponent c : o.getObsComponents())
-                if (c.getType() == SPComponentType.TELESCOPE_TARGETENV)
-                    return c;
-        }
-        return null;
+        return findObsComponent(c -> c.getType() == SPComponentType.TELESCOPE_TARGETENV).orElse(null);
     }
 
     public SPSiteQuality getContextSiteQuality() {
-        final ISPObservation o = getContextObservation();
-        if (o != null) {
-            for (ISPObsComponent c : o.getObsComponents())
-                if (c.getType() == SPComponentType.SCHEDULING_CONDITIONS)
-                    return (SPSiteQuality) c.getDataObject();
-        }
-        return null;
+        return findObsComponent(c -> c.getType() == SPComponentType.SCHEDULING_CONDITIONS)
+                .map(s -> (SPSiteQuality) s.getDataObject()).orElse(null);
     }
 
     public TargetObsComp getContextTargetObsCompDataObject() {
