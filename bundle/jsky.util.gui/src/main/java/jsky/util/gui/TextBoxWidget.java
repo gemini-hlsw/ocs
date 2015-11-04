@@ -43,14 +43,17 @@ public class TextBoxWidget extends JTextField {
         });
 
         addActionListener(e -> {
-            _notifyAction();
-            _notifyDoneEditing();
+            if (!_ignoreChanges) {
+                _notifyAction();
+                _notifyDoneEditing();
+            }
         });
 
         addFocusListener(new FocusAdapter() {
             @Override
             public void focusLost(FocusEvent e) {
-                _notifyDoneEditing();
+                if (!_ignoreChanges)
+                    _notifyDoneEditing();
             }
         });
     }
