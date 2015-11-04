@@ -124,8 +124,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
             // other detail editors are swapped in when the target type changes,
             // update them explicitly so they behave as if they were contained
             // in the panel.
-            _w.detailEditor.allEditorsJava().stream().filter(ed -> _w.detailEditor.curDetailEditorJava().forall(cur -> cur != ed)).
-                    forEach(ed -> updateEnabledState(new Component[]{ed}, enabled));
+            updateDetailEditorEnabledState(enabled);
         }
 
         final TargetEnvironment env = getDataObject().getTargetEnvironment();
@@ -135,15 +134,21 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         _w.newMenu.setEnabled(enabled && inst != null);
     }
 
+    protected void updateDetailEditorEnabledState(boolean enabled) {
+        // Update enabled state for all detail widgets.
+        _w.detailEditor.allEditorsJava().stream().forEach(ed -> updateEnabledState(new Component[]{ed}, enabled));
+    }
+
     /**
-     * Private method to update the remove and primary buttons, as this code is used multiple times.
+     * Update the remove and primary buttons as well as the detail editor.
      */
-    private void updateRemovePrimaryButtons(final TargetEnvironment env) {
+    private void updateRemovePrimaryButtonsAndDetailEditor(final TargetEnvironment env) {
         final boolean editable   = OTOptions.areRootAndCurrentObsIfAnyEditable(getProgram(), getContextObservation());
         final boolean curNotBags = !env.getGroups().exists(gg -> gg.getAllContaining(_curPos).exists(gpt -> gpt.getBagsResult().targetAsJava().exists(_curPos::equals)));
         final boolean curNotBase = _curPos != env.getBase();
         _w.removeButton.setEnabled(curNotBase && curNotBags && editable);
         _w.primaryButton.setEnabled(enablePrimary(_curPos, env) && editable);
+        updateDetailEditorEnabledState(curNotBags);
     }
 
     private final ActionListener _tagListener = new ActionListener() {
@@ -163,7 +168,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                     if (_curPos != null) {
                         _curPos.addWatcher(posWatcher);
                         refreshAll();
-                        updateRemovePrimaryButtons(env);
+                        updateRemovePrimaryButtonsAndDetailEditor(env);
                     }
                 }
             }
@@ -275,7 +280,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                 if (_curPos != null) {
                     _curPos.addWatcher(posWatcher);
                     refreshAll();
-                    updateRemovePrimaryButtons(env2);
+                    updateRemovePrimaryButtonsAndDetailEditor(env2);
                 }
             }
         }
@@ -385,7 +390,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                         _curPos = target;
                         _curPos.addWatcher(posWatcher);
                         refreshAll();
-                        updateRemovePrimaryButtons(env1);
+                        updateRemovePrimaryButtonsAndDetailEditor(env1);
                     }
                 }
             } else {
@@ -636,7 +641,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                 if (_curPos != null) {
                     _curPos.addWatcher(posWatcher);
                     refreshAll();
-                    updateRemovePrimaryButtons(env);
+                    updateRemovePrimaryButtonsAndDetailEditor(env);
                 }
             }
         }
