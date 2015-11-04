@@ -1,6 +1,5 @@
 package jsky.image.gui;
 
-import java.awt.Component;
 import java.awt.Graphics2D;
 import java.net.URL;
 import javax.swing.event.ChangeListener;
@@ -59,12 +58,6 @@ public interface MainImageDisplay
      * Stop receiving change events from this object.
      */
     void removeChangeListener(ChangeListener l);
-
-    /**
-     * Return the top level parent frame (or internal frame)
-     * (Used to open and close the window displaying image).
-     */
-    Component getRootComponent();
 
     /** Set to true if the image has been modified and needs saving. */
     void setSaveNeeded(boolean b);

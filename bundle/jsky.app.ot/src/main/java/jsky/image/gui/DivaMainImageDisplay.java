@@ -1284,15 +1284,6 @@ public class DivaMainImageDisplay extends DivaGraphicsImageDisplay implements Ma
     }
 
     /**
-     * Return the top level parent frame (or internal frame) used to close the window
-     */
-    @Override
-    public Component getRootComponent() {
-        return _parent;
-    }
-
-
-    /**
      * Display a file chooser to select a filename to display
      */
     public void open() {

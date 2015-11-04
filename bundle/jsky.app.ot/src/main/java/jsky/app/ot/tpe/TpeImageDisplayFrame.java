@@ -1,10 +1,6 @@
 package jsky.app.ot.tpe;
 
-import jsky.image.gui.DivaMainImageDisplay;
-import jsky.image.gui.ImageDisplayControl;
-import jsky.image.gui.ImageDisplayMenuBar;
-import jsky.image.gui.ImageDisplayToolBar;
-import jsky.navigator.NavigatorImageDisplayFrame;
+import jsky.image.gui.*;
 
 import java.awt.*;
 
@@ -14,7 +10,7 @@ import java.awt.*;
  * @version $Revision: 21408 $
  * @author Allan Brighton
  */
-public class TpeImageDisplayFrame extends NavigatorImageDisplayFrame {
+public class TpeImageDisplayFrame extends ImageDisplayControlFrame {
 
     /** Tool bar with Tpe specific commands */
     private TpeToolBar tpeToolBar;

@@ -1,8 +1,7 @@
 package jsky.app.jskycat;
 
+import jsky.image.gui.ImageDisplayControlFrame;
 import jsky.image.gui.MainImageDisplay;
-import jsky.navigator.NavigatorImageDisplayFrame;
-import jsky.util.I18N;
 import jsky.util.gui.*;
 
 import javax.swing.*;
@@ -12,14 +11,10 @@ import java.io.IOException;
 /**
  * Main class for the JSkyCat application.
  */
-public class JSkyCat extends JFrame {
-
-    // Used to access internationalized strings (see i18n/gui*.proprties)
-    private static final I18N _I18N = I18N.getInstance(JSkyCat.class);
+public abstract class JSkyCat extends JFrame {
 
     /** The main image frame (or internal frame) */
     protected Component imageFrame;
-
 
     /**
      * Create the JSkyCat application class and display the contents of the
@@ -66,27 +61,12 @@ public class JSkyCat extends JFrame {
         this.imageFrame = makeNavigatorImageDisplayFrame(imageFileOrUrl);
     }
 
-    /** Return the name of this application. */
-    protected String getAppName() {
-        return "JSkyCat";
-    }
-
-    /** Return the version number of this application as a String. */
-    protected String getAppVersion() {
-        return JSkyCatVersion.JSKYCAT_VERSION.substring(5);
-    }
-
     /**
      * Make and return a frame for displaying the given image (may be null).
      *
      * @param imageFileOrUrl specifies the iamge file or URL to display
      */
-    protected NavigatorImageDisplayFrame makeNavigatorImageDisplayFrame(String imageFileOrUrl) {
-        NavigatorImageDisplayFrame f = new NavigatorImageDisplayFrame(imageFileOrUrl);
-        f.getImageDisplayControl().getImageDisplay().setTitle(getAppName() + " - version " + getAppVersion());
-        f.setVisible(true);
-        return f;
-    }
+    protected abstract ImageDisplayControlFrame makeNavigatorImageDisplayFrame(String imageFileOrUrl);
 
     /**
      * Exit the application with the given status.
@@ -103,8 +83,8 @@ public class JSkyCat extends JFrame {
 
     /** Return the main image display */
     protected MainImageDisplay getImageDisplay() {
-        if (imageFrame instanceof NavigatorImageDisplayFrame)
-            return ((NavigatorImageDisplayFrame) imageFrame).getImageDisplayControl().getImageDisplay();
+        if (imageFrame instanceof ImageDisplayControlFrame)
+            return ((ImageDisplayControlFrame) imageFrame).getImageDisplayControl().getImageDisplay();
         return null;
     }
 

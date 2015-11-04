@@ -174,6 +174,7 @@ public class DivaImageGraphics implements CanvasGraphics {
      * Make the object that listens for changes in the figure selection and
      * notifies the target figure listeners.
      */
+    @SuppressWarnings("rawtypes")
     private void _makeSelectionListener() {
         _selectionListener = e -> {
             try {
@@ -196,6 +197,7 @@ public class DivaImageGraphics implements CanvasGraphics {
                     }
                 }
             } catch (Exception e3) {
+                // Ignore
             }
         };
     }
@@ -564,6 +566,7 @@ public class DivaImageGraphics implements CanvasGraphics {
     /**
      * Transform all graphics according to the given AffineTransform object.
      */
+    @SuppressWarnings("rawtypes")
     public void transform(AffineTransform trans) {
         // iterate over all figures in the foreground layer
         Iterator it = _figureLayer.figures();

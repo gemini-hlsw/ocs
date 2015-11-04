@@ -1,10 +1,9 @@
 package jsky.app.ot.tpe;
 
 import java.awt.*;
-import java.net.*;
 
+import jsky.image.gui.ImageDisplayControl;
 import jsky.image.gui.ImageDisplayStatusPanel;
-import jsky.navigator.NavigatorImageDisplayControl;
 import jsky.image.gui.DivaMainImageDisplay;
 
 /**
@@ -13,7 +12,7 @@ import jsky.image.gui.DivaMainImageDisplay;
  * @version $Revision: 39998 $
  * @author Allan Brighton
  */
-public class TpeImageDisplayControl extends NavigatorImageDisplayControl {
+public class TpeImageDisplayControl extends ImageDisplayControl {
 
     /**
      * Construct a TpeImageDisplayControl widget.

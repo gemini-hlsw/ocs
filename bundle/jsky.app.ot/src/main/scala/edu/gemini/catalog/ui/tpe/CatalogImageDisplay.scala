@@ -35,8 +35,6 @@ trait CatalogDisplay {
 
   def getCoordinateConverter: CoordinateConverter
 
-  def setNavigator(navigator: Navigator): Unit
-
   def setFilename(fileOrUrl: String, url: URL): Unit
 
   // Used to get the position of the TPE
@@ -65,11 +63,6 @@ abstract class CatalogImageDisplay(parent: Component, navigatorPane: NavigatorPa
 
   /** Return the Diva pane containing the added catalog symbol layer. */
   override def getNavigatorPane: NavigatorPane = navigatorPane
-
-  /**
-    * Set the instance of the catalog navigator to use with this image display.
-    */
-  override def setNavigator(navigator: Navigator):Unit = ???
 
   /**
     * Load the sky image for the current location

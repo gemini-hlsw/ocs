@@ -26,9 +26,8 @@ import jsky.catalog.gui.CatalogNavigator;
 import jsky.catalog.skycat.SkycatCatalog;
 import jsky.coords.CoordinateConverter;
 import jsky.coords.WorldCoords;
-import jsky.navigator.*;
+import jsky.image.gui.ImageDisplayControlFrame;
 import jsky.util.Preferences;
-import jsky.util.gui.DialogUtil;
 
 import java.awt.*;
 import java.awt.event.MouseEvent;
@@ -163,8 +162,8 @@ public class TelescopePosEditor extends JSkyCat implements TpeMouseObserver {
      * @param imageFileOrUrl specifies the image file or URL to display
      */
     @Override
-    protected NavigatorImageDisplayFrame makeNavigatorImageDisplayFrame(final String imageFileOrUrl) {
-        final TpeImageDisplayFrame frame = new TpeImageDisplayFrame(imageFileOrUrl);
+    protected ImageDisplayControlFrame makeNavigatorImageDisplayFrame(final String imageFileOrUrl) {
+        final TpeImageDisplayFrame frame = new  TpeImageDisplayFrame(imageFileOrUrl);
         // Very ugly this sets _iw indirectly on the constructor
         _iw = (TpeImageWidget) frame.getImageDisplayControl().getImageDisplay();
         return frame;
@@ -223,32 +222,6 @@ public class TelescopePosEditor extends JSkyCat implements TpeMouseObserver {
 
     public void selectFeature(TpeImageFeature tif) {
         _featureMan.setSelected(tif, true);
-    }
-
-    /**
-     * Update the position list's base position to coincide with the location
-     * of the center of the current image.
-     */
-    // TPE REFACTOR -- why isn't this used?
-    public void setBasePositionFromImage() {
-        if (_ctx.targets().isEmpty()) {
-            DialogUtil.error("There is no target list!");
-            return;
-        }
-
-        SPTarget tp = _ctx.targets().baseOrNull();
-        if (tp == null) {
-            DialogUtil.error("There is no base position!");
-            return;
-        }
-
-        WorldCoords basePos = getImageCenterLocation();
-        if (basePos == null) {
-            DialogUtil.error("The image does not support world coordinates!");
-            return;
-        }
-
-        tp.setRaDecDegrees(basePos.getRaDeg(), basePos.getDecDeg());
     }
 
     /**
