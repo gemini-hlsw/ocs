@@ -169,7 +169,6 @@ public class NavigatorImageDisplay extends DivaMainImageDisplay
      * on what type of frames are being used.
      */
     protected void makeNavigatorFrame() {
-        _navigator = NavigatorManager.create();
         _navigatorFrame = _navigator.getParentFrame();
         _navigator.setImageDisplay(this);
     }
