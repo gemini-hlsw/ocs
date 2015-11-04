@@ -56,35 +56,6 @@ trait CatalogDisplay {
     * for any catalog or image server requests.
     */
   def getBasePos: WorldCoords
-
-  // TODO, Remove used only by MaskDisplay....
-  /**
-    * Return the width of the source image in pixels
-    */
-  def getImageWidth: Int
-
-  /**
-    * Return the height of the source image in pixels
-    */
-  def getImageHeight: Int
-
-  /**
-    * Register as an image graphics handler.
-    */
-  def addImageGraphicsHandler(igh: ImageGraphicsHandler)
-
-  /**
-    * register to receive change events from this object whenever the
-    * image or cut levels are changed.
-    */
-  def addChangeListener(l: ChangeListener)
-
-  /**
-    * If the current image is in FITS format, return the FITSImage object managing it,
-    * otherwise return null. (The FITSImage object is available via the "#fits_image"
-    * property from the FITS codec, which implements FITS support for JAI.)
-    */
-  def getFitsImage: FITSImage
 }
 
 /**

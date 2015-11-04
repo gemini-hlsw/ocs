@@ -1,4 +1,4 @@
-package edu.gemini.mask;
+package jsky.app.ot.gemini.parallacticangle;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
