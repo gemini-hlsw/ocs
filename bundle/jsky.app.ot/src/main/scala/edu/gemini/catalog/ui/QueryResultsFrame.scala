@@ -25,6 +25,7 @@ import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.core._
 import edu.gemini.ui.miglayout.MigPanel
 import edu.gemini.ui.miglayout.constraints._
+import jsky.app.ot.gemini.editor.targetComponent.GuidingFeedback.ProbeLimits
 import jsky.app.ot.gemini.editor.targetComponent.GuidingIcon
 import jsky.app.ot.tpe.{TpeManager, TpeContext}
 import jsky.app.ot.util.{OtColor, Resources}
@@ -407,7 +408,7 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
         component.text = text.text(a)
         component.horizontalAlignment = Alignment.Left
         get(originalConditions) match {
-          case Some(i) if i.compareTo(a) > 0 =>
+          case Some(i) if i.compareTo(a) != 0 =>
             component.foreground = Color.red
             foreground = Color.red
           case _                             =>
@@ -423,11 +424,13 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
       listenTo(selection)
       reactions += {
         case SelectionChanged(_) =>
+          foreground = originalConditions.map(_.sb).exists(_ == selection.item) ? Color.black | Color.red
           resultsTable.model match {
             case t: TargetsModel =>
               unplotCurrent()
               updateResultsModel(t.copy(info = t.info.map(i => i.copy(ctx = None, conditions = i.conditions.map(_.sb(selection.item))))))
               plotResults()
+              updateGuideSpeedText()
           }
       }
 
@@ -439,11 +442,13 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
       listenTo(selection)
       reactions += {
         case SelectionChanged(_) =>
+          foreground = originalConditions.map(_.cc).exists(_ == selection.item) ? Color.black | Color.red
           resultsTable.model match {
             case t: TargetsModel =>
               unplotCurrent()
               updateResultsModel(t.copy(info = t.info.map(i => i.copy(ctx = None, conditions = i.conditions.map(_.cc(selection.item))))))
               plotResults()
+              updateGuideSpeedText()
           }
       }
 
@@ -455,11 +460,13 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
       listenTo(selection)
       reactions += {
         case SelectionChanged(_) =>
+          foreground = originalConditions.map(_.iq).exists(_ == selection.item) ? Color.black | Color.red
           resultsTable.model match {
             case t: TargetsModel =>
               unplotCurrent()
               updateResultsModel(t.copy(info = t.info.map(i => i.copy(ctx = None, conditions = i.conditions.map(_.iq(selection.item))))))
               plotResults()
+              updateGuideSpeedText()
           }
       }
 
@@ -563,11 +570,15 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
     /**
      * Updates the text containing the limits for the currently selected guider
      */
-    def updateGuideSpeedText(): Unit =
+    def updateGuideSpeedText(): Unit = {
+      val i = observationInfoFromForm
+      val ctx = i.toContext
       for {
-        sel <- guider.selection.item.some
-        probeLimit <- sel.limits
-      } limitsLabel.text = probeLimit.detailRange
+        sel        <- guider.selection.item.some
+        c          <- ctx
+        s          <- sel.strategy.magnitudes(c, i.mt).map(k => ProbeLimits(sel.strategy.probeBands, c, k._2))
+      } limitsLabel.text = ~s.map(_.detailRange)
+    }
 
     /**
       * Updates the magnitude filters when the controls change
@@ -673,7 +684,6 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
         i <- 0 until guider.peer.getModel.getSize
       } yield guider.peer.getModel.getElementAt(i)
 
-      // TODO Change the search query for different conditions OCSADV-416
       val conditions = Conditions.NOMINAL.sb(sbBox.selection.item).cc(ccBox.selection.item).iq(iqBox.selection.item)
 
       val coordinates = Coordinates(ra.value, dec.value)

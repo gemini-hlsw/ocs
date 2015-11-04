@@ -43,7 +43,7 @@ import Scalaz._
 /**
  * Locally describe an ags strategy including its limits and the query that would trigger
  */
-case class SupportedStrategy(strategy: AgsStrategy, limits: Option[ProbeLimits], query: List[CatalogQuery], altairMode: Option[AltairParams.Mode])
+case class SupportedStrategy(strategy: AgsStrategy, query: List[CatalogQuery], altairMode: Option[AltairParams.Mode])
 
 object SupportedStrategy {
   implicit val order:Order[SupportedStrategy] = Order.orderBy(_.strategy.key.id)
@@ -66,7 +66,7 @@ case class ObservationInfo(ctx: Option[ObsContext],
                            catalog: CatalogName,
                            mt: MagnitudeTable) {
   def catalogQuery:List[CatalogQuery] = validStrategies.collect {
-      case SupportedStrategy(s, _, query, _) if s == strategy => query
+      case SupportedStrategy(s, query, _) if s == strategy => query
     }.flatten
 
   /**
@@ -104,7 +104,7 @@ case class ObservationInfo(ctx: Option[ObsContext],
       val env = TargetEnvironment.create(target)
       // To calculate analysis of guide quality, it is required the site, instrument and conditions
       val altair = strategy.collect {
-        case SupportedStrategy(_, _, _, Some(m)) => new InstAltair() <| {_.setMode(m)}
+        case SupportedStrategy(_, _, Some(m)) => new InstAltair() <| {_.setMode(m)}
       }
       ObsContext.create(env, i, new JSome(s), cond, offsets.map(_.toOldModel).asJava, altair.orNull, JNone.instance()).withPositionAngle(positionAngle.toOldModel)
     }
@@ -139,12 +139,11 @@ object ObservationInfo {
    * Converts an AgsStrategy to a simpler description to be stored in the UI model
    */
   def toSupportedStrategy(obsCtx: ObsContext, strategy: AgsStrategy, mt: MagnitudeTable):SupportedStrategy = {
-    val pb = strategy.magnitudes(obsCtx, mt).map(k => ProbeLimits(strategy.probeBands, obsCtx, k._2)).headOption
     val queries = strategy.catalogQueries(obsCtx, mt)
     val mode = obsCtx.getAOComponent.asScalaOpt.collect {
       case a: InstAltair => a.getMode
     }
-    SupportedStrategy(strategy, pb.flatten, queries, mode)
+    SupportedStrategy(strategy, queries, mode)
   }
 
   def expandAltairModes(obsCtx: ObsContext): List[ObsContext] = obsCtx.getAOComponent.asScalaOpt match {
