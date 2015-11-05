@@ -215,7 +215,7 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
         UNBLOCKED_K1("K1 Unblocked", Filter.K1, false, Apodizer.APOD_K1, FPM.SCIENCE, Lyot.LYOT_080m12_06_03, 4.0, 6.5) {
             @Override public ObservingMode correspondingH() { return this; }
         },
-        UNBLOCKED_K2("K2 Unblocked", Filter.K2, false, Apodizer.APOD_K1, FPM.SCIENCE, Lyot.LYOT_080m12_07, 4.0, 6.5) {
+        UNBLOCKED_K2("K2 Unblocked", Filter.K2, false, Apodizer.APOD_K2, FPM.SCIENCE, Lyot.LYOT_080m12_07, 4.0, 6.5) {
             @Override public ObservingMode correspondingH() { return this; }
         },
 
@@ -378,7 +378,9 @@ public class Gpi extends SPInstObsComp implements PropertyProvider, GuideProbeCo
 
         /** returns all direct and modes (OT-136, REL-1741) */
         private static ObservingMode[] noCalModes() {
-            return new ObservingMode[] {DIRECT_H_BAND, DIRECT_J_BAND, DIRECT_K1_BAND, DIRECT_K2_BAND, DIRECT_Y_BAND, NRM_H, NRM_J, NRM_K1, NRM_K2, NRM_Y};
+            return new ObservingMode[] {DIRECT_H_BAND, DIRECT_J_BAND, DIRECT_K1_BAND, DIRECT_K2_BAND, DIRECT_Y_BAND,
+                                        NRM_H, NRM_J, NRM_K1, NRM_K2, NRM_Y,
+                                        UNBLOCKED_H, UNBLOCKED_J, UNBLOCKED_K1, UNBLOCKED_K2, UNBLOCKED_Y};
         }
 
         public static LoggableSpType byName(String value) {
