@@ -1266,7 +1266,7 @@ public final class GmosRule implements IRule {
         public Problem check(Config config, int step, ObservationElements elems, Object state) {
             // apply this rule to GMOS-S
             final SPInstObsComp instrument = elems.getInstrument();
-            if (instrument.getType() == InstGmosSouth.SP_TYPE && elems.getObservationNode() != null && elems.getObservationNode().getObservationID() != null) {
+            if (instrument.getType() == InstGmosSouth.SP_TYPE) {
                 // apply only if semester is known
                 final Option<Semester> semester = semester(elems);
                 if (semester.isDefined()) {
