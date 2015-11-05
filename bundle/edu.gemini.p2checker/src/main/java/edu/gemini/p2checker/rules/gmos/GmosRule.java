@@ -1,6 +1,3 @@
-//
-//$Id: GmosRule.java 47107 2012-08-01 01:23:46Z swalker $
-//
 package edu.gemini.p2checker.rules.gmos;
 
 import edu.gemini.p2checker.api.*;
@@ -10,13 +7,14 @@ import edu.gemini.p2checker.util.AbstractConfigRule;
 import edu.gemini.p2checker.util.MdfConfigRule;
 import edu.gemini.p2checker.util.NoPOffsetWithSlitRule;
 import edu.gemini.p2checker.util.SequenceRule;
+import edu.gemini.pot.sp.ISPObservation;
 import edu.gemini.pot.sp.ISPProgramNode;
 import edu.gemini.pot.sp.SPComponentType;
 import edu.gemini.skycalc.Offset;
 import edu.gemini.spModel.config2.Config;
 import edu.gemini.spModel.config2.ConfigSequence;
 import edu.gemini.spModel.config2.ItemKey;
-import edu.gemini.spModel.core.Site;
+import edu.gemini.spModel.core.*;
 import edu.gemini.spModel.data.YesNoType;
 import edu.gemini.spModel.gemini.gmos.GmosCommonType.*;
 import edu.gemini.spModel.gemini.gmos.GmosNorthType.DisperserNorth;
@@ -105,57 +103,45 @@ public final class GmosRule implements IRule {
     };
 
 
-    private static IConfigMatcher SCIENCE_DAYCAL_MATCHER = new IConfigMatcher() {
-        public boolean matches(Config config, int step, ObservationElements elems) {
-            ObsClass obsClass = SequenceRule.getObsClass(config);
-            return obsClass == ObsClass.SCIENCE || obsClass == ObsClass.DAY_CAL;
-        }
+    private static IConfigMatcher SCIENCE_DAYCAL_MATCHER = (config, step, elems) -> {
+        ObsClass obsClass = SequenceRule.getObsClass(config);
+        return obsClass == ObsClass.SCIENCE || obsClass == ObsClass.DAY_CAL;
     };
 
-    private static IConfigMatcher IMAGING_MATCHER = new IConfigMatcher() {
-        public boolean matches(Config config, int step, ObservationElements elems) {
-            if (!SequenceRule.SCIENCE_MATCHER.matches(config, step, elems))
-                return false;
-            return getDisperser(config).isMirror() && getFPU(config, elems).isImaging();
-        }
+    private static IConfigMatcher IMAGING_MATCHER = (config, step, elems) -> {
+        if (!SequenceRule.SCIENCE_MATCHER.matches(config, step, elems))
+            return false;
+        return getDisperser(config).isMirror() && getFPU(config, elems).isImaging();
     };
 
-    private static IConfigMatcher SPECTROSCOPY_MATCHER = new IConfigMatcher() {
-        public boolean matches(Config config, int step, ObservationElements elems) {
-            if (!SequenceRule.SCIENCE_MATCHER.matches(config, step, elems))
-                return false;
-            if (!isSpecFPUnselected(config, elems)) return false;
-            final Disperser disperser = getDisperser(config);
-            return !disperser.isMirror();
-        }
+    private static IConfigMatcher SPECTROSCOPY_MATCHER = (config, step, elems) -> {
+        if (!SequenceRule.SCIENCE_MATCHER.matches(config, step, elems))
+            return false;
+        if (!isSpecFPUnselected(config, elems)) return false;
+        final Disperser disperser = getDisperser(config);
+        return !disperser.isMirror();
     };
 
-    private static IConfigMatcher N_S_SPECTROSCOPY_MATCHER = new IConfigMatcher() {
-
-        public boolean matches(Config config, int step, ObservationElements elems) {
-            if (!SPECTROSCOPY_MATCHER.matches(config, step, elems))
-                return false;
-            final InstGmosCommon inst = (InstGmosCommon) elems.getInstrument();
-            return inst != null && inst.getUseNS() == UseNS.TRUE;
-        }
+    private static IConfigMatcher N_S_SPECTROSCOPY_MATCHER = (config, step, elems) -> {
+        if (!SPECTROSCOPY_MATCHER.matches(config, step, elems))
+            return false;
+        final InstGmosCommon<?,?,?,?> inst = (InstGmosCommon) elems.getInstrument();
+        return inst != null && inst.getUseNS() == UseNS.TRUE;
     };
 
-    private static IConfigMatcher N_S_SPECTROSCOPY_SCIENCE_DAYCAL__MATCHER = new IConfigMatcher() {
-
-        public boolean matches(Config config, int step, ObservationElements elems) {
-            if (!SCIENCE_DAYCAL_MATCHER.matches(config, step, elems)) {
-                return false;
-            }
-            if (!isSpecFPUnselected(config, elems)) {
-                return false;
-            }
-            final Disperser disperser = getDisperser(config);
-            if (disperser.isMirror()) {
-                return false;
-            }
-            final InstGmosCommon inst = (InstGmosCommon) elems.getInstrument();
-            return inst != null && inst.getUseNS() == UseNS.TRUE;
+    private static IConfigMatcher N_S_SPECTROSCOPY_SCIENCE_DAYCAL__MATCHER = (config, step, elems) -> {
+        if (!SCIENCE_DAYCAL_MATCHER.matches(config, step, elems)) {
+            return false;
         }
+        if (!isSpecFPUnselected(config, elems)) {
+            return false;
+        }
+        final Disperser disperser = getDisperser(config);
+        if (disperser.isMirror()) {
+            return false;
+        }
+        final InstGmosCommon<?,?,?,?> inst = (InstGmosCommon) elems.getInstrument();
+        return inst != null && inst.getUseNS() == UseNS.TRUE;
     };
 
 
@@ -454,7 +440,7 @@ public final class GmosRule implements IRule {
 
         public IConfigMatcher getMatcher() {
             return (config, step, elems) -> {
-                final InstGmosCommon gmos = (InstGmosCommon) elems.getInstrument();
+                final InstGmosCommon<?,?,?,?> gmos = (InstGmosCommon) elems.getInstrument();
                 return gmos.getSite().equals(Site.SET_GS) && (gmos.getDetectorManufacturer() == HAMAMATSU);
             };
         }
@@ -706,7 +692,7 @@ public final class GmosRule implements IRule {
                 public boolean check(Config config, ObservationElements elems) {
                     final Disperser disperser = getDisperser(config);
                     if (disperser == null) return false; //can't check
-                    final InstGmosCommon inst = (InstGmosCommon) elems.getInstrument();
+                    final InstGmosCommon<?,?,?,?> inst = (InstGmosCommon) elems.getInstrument();
                     if (inst == null) return false; //can't check
                     final UseNS useNs = inst.getUseNS();
                     return useNs == UseNS.TRUE && disperser.isMirror() && !isSpecFPUnselected(config, elems);
@@ -949,15 +935,15 @@ public final class GmosRule implements IRule {
                 private static final String MESSAGE = "For Nod and Shuffle a nod distance must be set";
 
                 public boolean check(Config config, ObservationElements elems) {
-                    InstGmosCommon inst = (InstGmosCommon) elems.getInstrument();
+                    InstGmosCommon<?,?,?,?> inst = (InstGmosCommon) elems.getInstrument();
                     //Bryan: I define nod_distance=sqrt((p2-p1)^2 + (q2-q1)^2)
                     if (inst.getPosList().size() < 2)
                         return true; //there is not enough offsets, so there is no nod-distance
 
-                    Iterator it = inst.getPosList().iterator();
-                    OffsetPos current = (OffsetPos) it.next();
+                    final Iterator<OffsetPos> it = inst.getPosList().iterator();
+                    OffsetPos current = it.next();
                     while (it.hasNext()) {
-                        OffsetPos pos = (OffsetPos) it.next();
+                        OffsetPos pos = it.next();
                         //if the nod distance is zero, issue an error
                         if (Double.compare(getSquareNodDistance(current, pos), 0.0) == 0) {
                             return true;
@@ -1000,7 +986,7 @@ public final class GmosRule implements IRule {
                 private static final String MESSAGE = "For Nod and Shuffle a shuffle distance must be set";
 
                 public boolean check(Config config, ObservationElements elems) {
-                    InstGmosCommon inst = (InstGmosCommon) elems.getInstrument();
+                    final InstGmosCommon<?,?,?,?> inst = (InstGmosCommon) elems.getInstrument();
                     if (inst == null) return false;
                     int shuffle_distance = inst.getNsDetectorRows();
                     return shuffle_distance == 0;
@@ -1026,7 +1012,7 @@ public final class GmosRule implements IRule {
                 private static final String MESSAGE = "For Nod and Shuffle > 0 cycles must be set";
 
                 public boolean check(Config config, ObservationElements elems) {
-                    InstGmosCommon inst = (InstGmosCommon) elems.getInstrument();
+                    final InstGmosCommon<?,?,?,?> inst = (InstGmosCommon) elems.getInstrument();
                     return inst != null && inst.getNsNumCycles() == 0;
                 }
 
@@ -1050,15 +1036,15 @@ public final class GmosRule implements IRule {
                 private static final int MAX_NOD_DISTANCE = 2;
 
                 public boolean check(Config config, ObservationElements elems) {
-                    InstGmosCommon inst = (InstGmosCommon) elems.getInstrument();
+                    final InstGmosCommon<?,?,?,?> inst = (InstGmosCommon) elems.getInstrument();
                     if (inst == null) return false;
                     if (!inst.isUseElectronicOffsetting()) return false;
-                    Iterator it = inst.getPosList().iterator();
+                    final Iterator<OffsetPos> it = inst.getPosList().iterator();
                     if (inst.getPosList().size() < 2)
                         return false; //there is not enough offsets, so there is no nod-distance
-                    OffsetPos current = (OffsetPos) it.next();
+                    OffsetPos current = it.next();
                     while (it.hasNext()) {
-                        OffsetPos pos = (OffsetPos) it.next();
+                        final OffsetPos pos = it.next();
                         //if the nod distance is greater than MAX_NOD_DISTANCE, issue an error
                         //notice we get the square of the nod distance
                         if (getSquareNodDistance(current, pos) > MAX_NOD_DISTANCE * MAX_NOD_DISTANCE) {
@@ -1091,7 +1077,7 @@ public final class GmosRule implements IRule {
         // a warning. Returns a formatted message otherwise.
         private String getWarningMessage(Config config, ObservationElements elems) {
             final FPUnit fpu = getFPU(config, elems);
-            final InstGmosCommon inst = (InstGmosCommon) elems.getInstrument();
+            final InstGmosCommon<?,?,?,?> inst = (InstGmosCommon) elems.getInstrument();
             int shuffle_distance = inst.getNsDetectorRows();
             if (fpu.isNSslit()) {
                 final DetectorManufacturer dm = getDetectorManufacturer(config);
@@ -1127,7 +1113,7 @@ public final class GmosRule implements IRule {
                 private static final String MESSAGE = "The shuffle distance must be a multiple of the CCD Y binning";
 
                 public boolean check(Config config, ObservationElements elems) {
-                    final InstGmosCommon inst = (InstGmosCommon) elems.getInstrument();
+                    final InstGmosCommon<?,?,?,?> inst = (InstGmosCommon) elems.getInstrument();
                     if (inst == null) return false;
                     final int shuffle_distance = inst.getNsDetectorRows();
 
@@ -1167,7 +1153,7 @@ public final class GmosRule implements IRule {
 
         @Override
         public Problem check(Config config, int step, ObservationElements elems, Object state) {
-            InstGmosCommon inst = (InstGmosCommon) elems.getInstrument();
+            final InstGmosCommon<?,?,?,?> inst = (InstGmosCommon) elems.getInstrument();
 
             final DetectorManufacturer detectorManufacturer = getDetectorManufacturer(config);
 
@@ -1206,7 +1192,7 @@ public final class GmosRule implements IRule {
 
         @Override
         public Problem check(Config config, int step, ObservationElements elems, Object state) {
-            InstGmosCommon inst = (InstGmosCommon) elems.getInstrument();
+            InstGmosCommon<?,?,?,?> inst = (InstGmosCommon) elems.getInstrument();
             Double expTime = getExposureTime(inst, config);
             if (expTime != null && expTime.doubleValue() != (int) expTime.doubleValue()) {
                 return new Problem(ERROR, PREFIX + "INTEGER_EXPOSURE_TIME_RULE", msg,
@@ -1222,7 +1208,7 @@ public final class GmosRule implements IRule {
         @Override
         public Problem check(Config config, int step, ObservationElements elems, Object state) {
             if (!InstConstants.BIAS_OBSERVE_TYPE.equals(config.getItemValue(GeneralRule.OBSTYPE_KEY))) {
-                InstGmosCommon inst = (InstGmosCommon) elems.getInstrument();
+                InstGmosCommon<?,?,?,?> inst = (InstGmosCommon) elems.getInstrument();
                 Double expTime = getExposureTime(inst, config);
                 if( expTime != null && expTime.doubleValue() <= 0.0 ) {
                     return new Problem(ERROR, PREFIX + "NON_ZERO_EXPOSURE_TIME_RULE", msg,
@@ -1255,6 +1241,48 @@ public final class GmosRule implements IRule {
                 return null;
         }
     }
+
+    /**
+     * ERROR: If GMOS-S is used with E2V after semester 2015B.
+     * This can happen when PIs copy parts of old programs into new ones. PIs will not be able to change the detector
+     * settings themselves and will have to have a staff member help them. This is not ideal, but since this is only
+     * a transitional problem this seems to be the simplest solution.
+     * (Note that very soon we will have to apply this rule to GMOS-N, too.)
+     */
+    private static final Semester SEMESTER_2015B = new Semester(2015, Semester.Half.B);
+    private static IConfigRule POST_2015B_GMOS_S_WITH_E2V = new AbstractConfigRule() {
+        private static final String msg = "Starting with 2016A GMOS-S must use the Hamamatsu CCDs. Please create a new observation or ask your contact scientist to update the CCD settings.";
+
+        private Option<Semester> semester(final ObservationElements elems) {
+            return Optional.ofNullable(elems)                       // null safe access chain
+                    .map(ObservationElements::getObservationNode)
+                    .map(ISPObservation::getProgramID)
+                    .map(RichSpProgramId$.MODULE$::apply)
+                    .map(RichSpProgramId::semester)                 // result of this is a Scala Option
+                    .orElse(Option.empty());                        // turn the Java None result into a Scala None
+        }
+
+        @Override
+        public Problem check(Config config, int step, ObservationElements elems, Object state) {
+            // apply this rule to GMOS-S
+            final SPInstObsComp instrument = elems.getInstrument();
+            if (instrument.getType() == InstGmosSouth.SP_TYPE) {
+                // apply only if semester is known
+                final Option<Semester> semester = semester(elems);
+                if (semester.isDefined()) {
+                    // apply it to observations for 2016A or later
+                    if (semester.get().compareTo(SEMESTER_2015B) > 0) {
+                        // apply if E2V is selected
+                        final DetectorManufacturer ccd = ((InstGmosSouth) instrument).getDetectorManufacturer();
+                        if (ccd == DetectorManufacturer.E2V) {
+                            return new Problem(ERROR, PREFIX + "POST_2015B_GMOS_S_WITH_E2V_RULE", msg, SequenceRule.getInstrumentOrSequenceNode(step, elems));
+                        }
+                    }
+                }
+            }
+            return null;
+        }
+    };
 
     private static final class MultiKey {
         final Filter filter;
@@ -1502,10 +1530,10 @@ public final class GmosRule implements IRule {
 
         @Override
         public Problem check(Config config, int step, ObservationElements elems, Object state) {
-            final InstGmosCommon inst     = (InstGmosCommon) elems.getInstrument();
-            final DetectorManufacturer dm = getDetectorManufacturer(config);
-            final Filter filter           = getFilter(config);
-            final Binning xBinning        = getXBinning(config);//for imaging, binning is 1x1, 2x2 or 4x4
+            final InstGmosCommon<?,?,?,?> inst  = (InstGmosCommon) elems.getInstrument();
+            final DetectorManufacturer dm       = getDetectorManufacturer(config);
+            final Filter filter                 = getFilter(config);
+            final Binning xBinning              = getXBinning(config);//for imaging, binning is 1x1, 2x2 or 4x4
 
             for (SPSiteQuality sq : elems.getSiteQuality()) {
 
@@ -1618,7 +1646,7 @@ public final class GmosRule implements IRule {
 
         @Override
         public Problem check(final Config config, final int step, final ObservationElements elems, final Object state) {
-            final InstGmosCommon inst = (InstGmosCommon) elems.getInstrument();
+            final InstGmosCommon<?,?,?,?> inst = (InstGmosCommon) elems.getInstrument();
             DetectorManufacturer dm = getDetectorManufacturer(config);
             if (dm == null) {
                 dm = inst.getDetectorManufacturer();
@@ -1658,7 +1686,7 @@ public final class GmosRule implements IRule {
 
         @Override
         public Problem check(Config config, int step, ObservationElements elems, Object state) {
-            final InstGmosCommon inst = (InstGmosCommon) elems.getInstrument();
+            final InstGmosCommon<?,?,?,?> inst = (InstGmosCommon) elems.getInstrument();
             BuiltinROI roi = (BuiltinROI) SequenceRule.getInstrumentItem(config, InstGmosCommon.BUILTIN_ROI_PROP);
             if (roi == null) roi = inst.getBuiltinROI();
             if (roi.equals(BuiltinROI.CUSTOM) && inst.getCustomROIs().isEmpty()) {
@@ -1681,7 +1709,7 @@ public final class GmosRule implements IRule {
 
         @Override
         public Problem check(final Config config, final int step, final ObservationElements elems, final Object state) {
-            final InstGmosCommon inst = (InstGmosCommon) elems.getInstrument();
+            final InstGmosCommon<?,?,?,?> inst = (InstGmosCommon) elems.getInstrument();
             final DetectorManufacturer dm = inst.getDetectorManufacturer();
             final boolean overlaps;
             switch (dm) {
@@ -1717,7 +1745,7 @@ public final class GmosRule implements IRule {
 
         @Override
         public Problem check(Config config, int step, ObservationElements elems, Object state) {
-            InstGmosCommon inst = (InstGmosCommon) elems.getInstrument();
+            final InstGmosCommon<?,?,?,?> inst = (InstGmosCommon) elems.getInstrument();
             if (!inst.validateCustomROIs()) {
                 return new Problem(ERROR, PREFIX + "ROI_INVALID_RULE", errMsg,
                         SequenceRule.getInstrumentOrSequenceNode(step, elems));
@@ -1763,7 +1791,7 @@ public final class GmosRule implements IRule {
 
             @Override
             public Problem check(Config config, int step, ObservationElements elems, Object state) {
-                final InstGmosCommon inst = (InstGmosCommon) elems.getInstrument();
+                final InstGmosCommon<?,?,?,?> inst = (InstGmosCommon) elems.getInstrument();
                 BuiltinROI roi = (BuiltinROI) SequenceRule.getInstrumentItem(config, InstGmosCommon.BUILTIN_ROI_PROP);
                 if (roi == null) roi = inst.getBuiltinROI();
                 if (!roi.equals(BuiltinROI.CUSTOM) && !inst.getCustomROIs().isEmpty()) {
@@ -1777,14 +1805,14 @@ public final class GmosRule implements IRule {
 
         @Override
         public IP2Problems check(ObservationElements elements) {
-            List<Problem> probs = new ArrayList<Problem>();
+            final List<Problem> probs = new ArrayList<>();
 
             // Walk through ever config in the sequence, checking each rule.  If
             // a rule matches, remove it from the set so it won't be reported twice.
             int step = 0;
             ConfigSequence seq = elements.getSequence();
-            for (Iterator it = seq.iterator(); it.hasNext(); ++step) {
-                Config config = (Config) it.next();
+            for (Iterator<Config> it = seq.iterator(); it.hasNext(); ++step) {
+                final Config config = it.next();
                 Problem prob = rule.check(config, step, elements, null);
                 if (prob != null) {
                     probs.add(prob);
@@ -1868,6 +1896,7 @@ public final class GmosRule implements IRule {
         GMOS_RULES.add(NO_P_OFFSETS_WITH_SLIT_SPECTROSCOPY_RULE);
         GMOS_RULES.add(new MdfMaskNameRule(Problem.Type.ERROR));
         GMOS_RULES.add(new MdfMaskNameRule(Problem.Type.WARNING));
+        GMOS_RULES.add(POST_2015B_GMOS_S_WITH_E2V);
     }
 
     public IP2Problems check(ObservationElements elems) {
