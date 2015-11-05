@@ -13,9 +13,8 @@ import jsky.catalog.{FieldDescAdapter, Catalog}
 import jsky.util.Preferences
 import jsky.util.gui.{MultiSelectComboBox, DialogUtil}
 
-import scala.concurrent.Future
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.collection.JavaConverters._
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.swing._
 import scala.swing.event.{SelectionChanged, ButtonClicked}
 
@@ -259,10 +258,7 @@ final class ObsCatalogQueryTool(catalog: Catalog) {
   }
 
   protected def doQuery(): Unit = {
-    Future.apply(ObsCatalogHelper.query(queryPanel.getQueryArgs, ObsCatalog.newConfigEntry(), remote.selected)).onSuccess {
-      case r =>
-        queryResults.setQueryResult(r)
-    }
+    ObsCatalogHelper.query(queryPanel.getQueryArgs, ObsCatalog.newConfigEntry(), remote.selected, r => Swing.onEDT(queryResults.setQueryResult(r)))
   }
 
   val buttonPanel: Component = new MigPanel(LC().fill().insets(0)) {
