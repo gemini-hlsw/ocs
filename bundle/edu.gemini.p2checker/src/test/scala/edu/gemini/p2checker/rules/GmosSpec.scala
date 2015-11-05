@@ -18,7 +18,7 @@ import scalaz.syntax.id._
 
 /**
  * Test bed for generic GMOS-N and GMOS-S rules.
- * This can be easily recycled for other instruments by making the rule set confgurable (currently GmosRule is used).
+ * This can be easily recycled for other instruments by making the rule set configurable (currently GmosRule is used).
  */
 class GmosSpec extends Specification {
 
@@ -58,38 +58,44 @@ class GmosSpec extends Specification {
 
     val E2VErrId = "GmosRule_POST_2015B_GMOS_S_WITH_E2V_RULE"
 
-    "give no error for unknown semester" in {
+    "give no error for unknown semester with E2V" in {
       expectNoneOf(E2VErrId) { setup[InstGmosSouth]("", SPComponentType.INSTRUMENT_GMOSSOUTH) { d =>
         d.setDetectorManufacturer(GmosCommonType.DetectorManufacturer.E2V)
       }}
     }
 
-    "give no error for semester 2012A" in {
+    "give no error for semester 2012A with E2V" in {
       expectNoneOf(E2VErrId) { setup[InstGmosSouth]("GS-2012A-Q-34", SPComponentType.INSTRUMENT_GMOSSOUTH) { d =>
         d.setDetectorManufacturer(GmosCommonType.DetectorManufacturer.E2V)
       }}
     }
 
-    "give no error for semester 2015B" in {
+    "give no error for semester 2015B with E2V" in {
       expectNoneOf(E2VErrId) { setup[InstGmosSouth]("GS-2015B-Q-34", SPComponentType.INSTRUMENT_GMOSSOUTH) { d =>
         d.setDetectorManufacturer(GmosCommonType.DetectorManufacturer.E2V)
       }}
     }
 
-    "give an error for semester 2016A" in {
+    "give an error for semester 2016A with E2V" in {
       expectAllOf(E2VErrId) { setup[InstGmosSouth]("GS-2016A-Q-34", SPComponentType.INSTRUMENT_GMOSSOUTH) { d =>
         d.setDetectorManufacturer(GmosCommonType.DetectorManufacturer.E2V)
       }}
     }
 
-    "give an error for semester 2017A" in {
+    "give an error for semester 2017A with E2V" in {
       expectAllOf(E2VErrId) { setup[InstGmosSouth]("GS-2017A-Q-34", SPComponentType.INSTRUMENT_GMOSSOUTH) { d =>
         d.setDetectorManufacturer(GmosCommonType.DetectorManufacturer.E2V)
       }}
     }
 
-    "not affect GMOS-N" in {
-      expectNoneOf(E2VErrId) { setup[InstGmosNorth]("GN-2017A-Q-34", SPComponentType.INSTRUMENT_GMOS) { d =>
+    "give no error for semester 2017A with Hamamatsu" in {
+      expectNoneOf(E2VErrId) { setup[InstGmosSouth]("GS-2017A-Q-34", SPComponentType.INSTRUMENT_GMOSSOUTH) { d =>
+        d.setDetectorManufacturer(GmosCommonType.DetectorManufacturer.HAMAMATSU)
+      }}
+    }
+
+    "not affect GMOS-N for semester 2016A with E2V" in {
+      expectNoneOf(E2VErrId) { setup[InstGmosNorth]("GN-2016A-Q-34", SPComponentType.INSTRUMENT_GMOS) { d =>
         d.setDetectorManufacturer(GmosCommonType.DetectorManufacturer.E2V)
       }}
     }
