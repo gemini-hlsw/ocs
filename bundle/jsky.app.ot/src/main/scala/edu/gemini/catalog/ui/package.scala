@@ -31,7 +31,7 @@ import edu.gemini.spModel.guide.ValidatableGuideProbe
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.target.SPTarget
 import edu.gemini.spModel.target.env.TargetEnvironment
-import jsky.app.ot.gemini.editor.targetComponent.GuidingFeedback.ProbeLimits
+import edu.gemini.spModel.telescope.{PosAngleConstraint, PosAngleConstraintAware}
 import edu.gemini.pot.ModelConverters._
 
 import scala.language.existentials
@@ -62,6 +62,7 @@ case class ObservationInfo(ctx: Option[ObsContext],
                            validStrategies: List[SupportedStrategy],
                            conditions: Option[Conditions],
                            positionAngle: Angle,
+                           allowPAFlip: Boolean,
                            offsets: Set[Offset],
                            catalog: CatalogName,
                            mt: MagnitudeTable) {
@@ -115,7 +116,7 @@ object ObservationInfo {
   val DefaultInstrument = SPComponentType.INSTRUMENT_VISITOR
 
   // Observation context loaded initially with default parameters
-  val zero = new ObservationInfo(None, "".some, Coordinates.zero.some, DefaultInstrument.some, None, Nil, SPSiteQuality.Conditions.BEST.some, Angle.zero, Set.empty, UCAC4, ProbeLimitsTable.loadOrThrow())
+  val zero = new ObservationInfo(None, "".some, Coordinates.zero.some, DefaultInstrument.some, None, Nil, SPSiteQuality.Conditions.BEST.some, Angle.zero, false, Set.empty, UCAC4, ProbeLimitsTable.loadOrThrow())
 
   val InstList = List(
     Flamingos2.INSTRUMENT_NAME_PROP        -> SPComponentType.INSTRUMENT_FLAMINGOS2,
@@ -161,6 +162,7 @@ object ObservationInfo {
     expandAltairModes(ctx).flatMap(c => AgsRegistrar.validStrategies(c).map(toSupportedStrategy(c, _, mt))).sorted,
     ctx.getConditions.some,
     ctx.getPositionAngle.toNewModel,
+    Option(ctx.getInstrument).collect{case p: PosAngleConstraintAware => p.getPosAngleConstraint == PosAngleConstraint.FIXED_180}.getOrElse(false),
     ctx.getSciencePositions.asScala.map(_.toNewModel).toSet,
     UCAC4,
     mt)
@@ -196,15 +198,25 @@ case class IdColumn(title: String) extends CatalogNavigatorColumn[String] {
 }
 
 object GuidingQuality {
-  // Calculate the guiding quality of the target
-  def target2Analysis(info: Option[ObservationInfo], t: Target):Option[AgsAnalysis] = {
+  implicit val analysisOrder:Order[AgsAnalysis] = Order.orderBy(_.quality)
+  // Calculate the guiding quality of the target, allowing for PA flipping
+  def target2Analysis(info: Option[ObservationInfo], t: Target):Option[AgsAnalysis] =
+    if (info.exists(_.allowPAFlip)) {
+      // Note we use min, as AgsGuideQuality is better when the position on the index is lower
+      target2Analysis(info, t, Angle.zero) min target2Analysis(info, t, Angle.fromDegrees(180))
+    } else {
+      target2Analysis(info, t, Angle.zero)
+    }
+
+  // Calculate the guiding quality of the target at a given PA
+  private def target2Analysis(info: Option[ObservationInfo], t: Target, shift: Angle):Option[AgsAnalysis] = {
     (for {
       o                                           <- info
       s                                           <- o.strategy
       gp                                          <- o.guideProbe
       st @ SiderealTarget(_, _, _, _, _, _, _, _) = t
       ctx                                         <- o.toContext
-    } yield s.strategy.analyze(ctx, o.mt, gp, st)).flatten
+    } yield s.strategy.analyze(ctx.withPositionAngle(ctx.getPositionAngle.add(shift.toOldModel)), o.mt, gp, st)).flatten
   }
 }
 

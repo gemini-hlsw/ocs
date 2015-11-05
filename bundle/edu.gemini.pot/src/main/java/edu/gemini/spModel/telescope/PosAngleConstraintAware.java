@@ -20,11 +20,11 @@ public interface PosAngleConstraintAware {
      * The list of valid position angle constraints for this instrument.
      * @return a list of the supported position angle constraints.
      */
-    public ImList<PosAngleConstraint> getSupportedPosAngleConstraints();
+    ImList<PosAngleConstraint> getSupportedPosAngleConstraints();
 
     /**
      * Return true if this instrument and its configuration allows calculation of best position angle,
      * and false otherwise.
      */
-    public boolean allowUnboundedPositionAngle();
+    boolean allowUnboundedPositionAngle();
 }

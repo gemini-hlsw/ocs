@@ -253,7 +253,7 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
   }
 
   /**
-   * Called after  a query completes to update the UI according to the results
+   * Called after a query completes to update the UI according to the results
    */
   def updateResults(info: Option[ObservationInfo], queryResult: QueryResult): Unit = {
     errorLabel.reset()
@@ -400,6 +400,7 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
 
     // PA and offsets must be mutable, the rest of the model lives on the UI
     var pa = Angle.zero
+    var allowPAFlip = false
     var offsets = Set.empty[Offset]
     var originalConditions = ObservationInfo.zero.conditions
 
@@ -687,7 +688,7 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
       val conditions = Conditions.NOMINAL.sb(sbBox.selection.item).cc(ccBox.selection.item).iq(iqBox.selection.item)
 
       val coordinates = Coordinates(ra.value, dec.value)
-      ObservationInfo(None, Option(objectName.text), coordinates.some, Option(instrumentBox.selection.item), Option(guider.selection.item), guiders.toList, conditions.some, pa, offsets, selectedCatalog, ProbeLimitsTable.loadOrThrow())
+      ObservationInfo(None, Option(objectName.text), coordinates.some, Option(instrumentBox.selection.item), Option(guider.selection.item), guiders.toList, conditions.some, pa, allowPAFlip, offsets, selectedCatalog, ProbeLimitsTable.loadOrThrow())
     }
 
     // Make a query out of the form parameters
