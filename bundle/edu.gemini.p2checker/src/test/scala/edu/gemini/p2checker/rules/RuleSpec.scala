@@ -23,7 +23,7 @@ abstract class RuleSpec extends Specification {
   def ruleSet: IRule
 
   // configurable test setup, feel free to adapt as needed for future tests
-  def setup[I <: ISPDataObject](programId: String, instrument: SPComponentType)(mod: I => Unit): ISPObservation = {
+  def setup[I <: ISPDataObject](instrument: SPComponentType, programId: String = "")(mod: I => Unit): ISPObservation = {
     val f = POTUtil.createFactory(UUID.randomUUID())
     val p = f.createProgram(null, SPProgramID.toProgramID(programId))
     val o = f.createObservation(p, null) <| p.addObservation
