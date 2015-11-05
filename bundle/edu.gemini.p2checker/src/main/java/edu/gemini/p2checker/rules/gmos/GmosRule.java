@@ -1275,7 +1275,7 @@ public final class GmosRule implements IRule {
                         // apply if E2V is selected
                         final DetectorManufacturer ccd = ((InstGmosSouth) instrument).getDetectorManufacturer();
                         if (ccd == DetectorManufacturer.E2V) {
-                            return new Problem(ERROR, PREFIX + "POST_2015B_GMOS_S_WITH_E2V", msg, SequenceRule.getInstrumentOrSequenceNode(step, elems));
+                            return new Problem(ERROR, PREFIX + "POST_2015B_GMOS_S_WITH_E2V_RULE", msg, SequenceRule.getInstrumentOrSequenceNode(step, elems));
                         }
                     }
                 }
