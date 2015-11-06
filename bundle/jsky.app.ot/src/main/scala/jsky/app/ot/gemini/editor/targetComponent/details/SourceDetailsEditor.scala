@@ -36,7 +36,7 @@ import scalaz.Scalaz._
 final class SourceDetailsEditor extends GridBagPanel with TelescopePosEditor with ReentrancyHack {
 
   // ==== The current program ID
-  private[this] var programId: Option[SPProgramID] = None    // this is needed for getting the SED aux files list
+  private[this] var programId: SPProgramID = SPProgramID.toProgramID("")  // this is needed for getting the SED aux files list
 
   // ==== The current target
   private[this] var spt: SPTarget = new SPTarget
@@ -217,13 +217,9 @@ final class SourceDetailsEditor extends GridBagPanel with TelescopePosEditor wit
   // react to any kind of target change by updating all UI elements
   def edit(obsContext: GOption[ObsContext], spTarget: SPTarget, node: ISPNode): Unit = nonreentrant {
 
-    // update target
-    spt = spTarget
-
-    // update current program id
-    if (programId.isEmpty) {
-      programId = Some(node.getProgramID)
-    }
+    // update target and program id
+    spt       = spTarget
+    programId = node.getProgramID
 
     // we only show the source editor for the base/science target, and we also only need to update it if visible
     visible = if (obsContext.isDefined) obsContext.getValue.getTargets.getBase == spTarget else false
@@ -288,7 +284,7 @@ final class SourceDetailsEditor extends GridBagPanel with TelescopePosEditor wit
     peer.addPopupMenuListener(new PopupMenuListener {
       // If the program id is known and the popup is about to be displayed we need to update the combobox model
       // with all currently available SED aux files.
-      override def popupMenuWillBecomeVisible(e: PopupMenuEvent): Unit    = { programId.foreach(updateAuxFileModel) }
+      override def popupMenuWillBecomeVisible(e: PopupMenuEvent): Unit    = { updateAuxFileModel(programId) }
       override def popupMenuWillBecomeInvisible(e: PopupMenuEvent): Unit  = {}
       override def popupMenuCanceled(e: PopupMenuEvent): Unit             = {}
     })
