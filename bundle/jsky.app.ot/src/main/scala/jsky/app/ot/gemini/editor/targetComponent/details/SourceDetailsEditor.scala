@@ -1,7 +1,6 @@
 package jsky.app.ot.gemini.editor.targetComponent.details
 
-import java.awt.{Component, GridBagConstraints, Insets}
-import java.util.concurrent.TimeoutException
+import java.awt.{Component, Dimension, GridBagConstraints, Insets}
 import javax.swing.JPanel
 import javax.swing.event.{PopupMenuEvent, PopupMenuListener}
 
@@ -36,10 +35,10 @@ import scalaz.Scalaz._
 
 final class SourceDetailsEditor extends GridBagPanel with TelescopePosEditor with ReentrancyHack {
 
-  // ==== The Program ID
-  private[this] var programId: Option[SPProgramID] = None
+  // ==== The current program ID
+  private[this] var programId: Option[SPProgramID] = None    // this is needed for getting the SED aux files list
 
-  // ==== The Target
+  // ==== The current target
   private[this] var spt: SPTarget = new SPTarget
 
   private def setDistribution(sd: SpectralDistribution): Unit         = setDistribution(Some(sd))
@@ -99,29 +98,7 @@ final class SourceDetailsEditor extends GridBagPanel with TelescopePosEditor wit
   private val powerLawDetails = NumericPropertySheet[PowerLaw](None, powerLawOrDefault,
     Prop("Index",       "",         _.index,                      (a, v) => setDistribution(PowerLaw(v)))
   )
-  private val userDefinedDetails = new ComboBox[AuxFileSpectrum](Seq()) {
-    val filesNotAvailable = ComboBox.newConstantModel(Seq(AuxFileSpectrum.Undefined))
-    tooltip = "SEDs may be added via the File Attachment tab"
-    renderer = Renderer(_.name)
-    peer.setModel(filesNotAvailable)
-    peer.addPopupMenuListener(new PopupMenuListener {
-      override def popupMenuWillBecomeVisible(e: PopupMenuEvent): Unit    = { programId.foreach(updateSedFiles) }
-      override def popupMenuWillBecomeInvisible(e: PopupMenuEvent): Unit  = {}
-      override def popupMenuCanceled(e: PopupMenuEvent): Unit             = {}
-    })
-
-    // Selects the given sed file, if it is not available (e.g. because the aux file it represents
-    // has been removed from the program) an "Undefined" placeholder is inserted instead.
-    def selectItem(s: AuxFileSpectrum) = {
-      // make sure the given value exists in the current model
-      val oldModel = peer.getModel
-      val items    = Range(0, oldModel.getSize).map(oldModel.getElementAt)
-      peer.setModel(ComboBox.newConstantModel((items.toSet + s).toSeq.sortBy(_.name)))
-      // select the given aux value
-      selection.item = s
-    }
-
-  }
+  private val userDefinedDetails = new AuxFileSelector()
 
   private case class DistributionPanel(label: String, panel: Component, value: () => Option[SpectralDistribution])
   private val distributionPanels = List(
@@ -243,10 +220,9 @@ final class SourceDetailsEditor extends GridBagPanel with TelescopePosEditor wit
     // update target
     spt = spTarget
 
-    // very first update of program id
-    if (programId.isEmpty || programId.get == null || !programId.get.equals(node.getProgramID)) {
+    // update current program id
+    if (programId.isEmpty) {
       programId = Some(node.getProgramID)
-      programId.foreach(updateSedFiles)
     }
 
     // we only show the source editor for the base/science target, and we also only need to update it if visible
@@ -295,53 +271,96 @@ final class SourceDetailsEditor extends GridBagPanel with TelescopePosEditor wit
     }
   }
 
-  // update the sed file combo box
-  private def updateSedFiles(programId: SPProgramID): Unit =  {
+  /** UI element that allows to choose from the currently available set of SED aux files for the current program.
+    * Unfortunately there is no simple way to keep in sync with changes to the available aux files. In order to
+    * still be able to present the user with an up-to-date list of available aux files the combobox model is updated
+    * every time when the user opens it (i.e. displays the popup menu). Ideally there would be a simple way to get
+    * notifications when the available set of aux files has changed, but for now this is the best I could come up
+    * with.
+    */
+  final class AuxFileSelector extends ComboBox[AuxFileSpectrum](Seq()) {
+    val filesNotAvailable = ComboBox.newConstantModel(Seq(AuxFileSpectrum.Undefined))
+    tooltip = "SEDs may be added via the File Attachment tab"
+    renderer = Renderer(_.name)
+    minimumSize = new Dimension(250, preferredSize.getHeight.toInt)     // avoid resizing of component every time model changes
+    preferredSize = new Dimension(250, preferredSize.getHeight.toInt)
+    peer.setModel(filesNotAvailable)
+    peer.addPopupMenuListener(new PopupMenuListener {
+      // If the program id is known and the popup is about to be displayed we need to update the combobox model
+      // with all currently available SED aux files.
+      override def popupMenuWillBecomeVisible(e: PopupMenuEvent): Unit    = { programId.foreach(updateAuxFileModel) }
+      override def popupMenuWillBecomeInvisible(e: PopupMenuEvent): Unit  = {}
+      override def popupMenuCanceled(e: PopupMenuEvent): Unit             = {}
+    })
+
+    /** Selects the given SED aux file.
+      * We are taking a short cut here by just simply setting a model with exactly that value. This may seem strange,
+      * but this allows to just simply set and display the current value without having to care about corner cases like:
+      * Is the aux file listing currently available? Has this particular file been deleted? ...
+      */
+    def selectItem(s: AuxFileSpectrum) = {
+      peer.setModel(ComboBox.newConstantModel(Seq(s)))
+    }
+
+    /** Updates the combobox model with the currently available aux files.*/
+    private def updateAuxFileModel(programId: SPProgramID): Unit =  {
 
       def selected = spt.getTarget.getSpectralDistribution match {
         case Some(s: AuxFileSpectrum) => Some(s)
         case _                        => None
       }
 
+      // Update the model and make sure that the currently selected value is one of the available entries.
+      // This allows to keep the current selection in case the aux file listing is currently not available, or if the
+      // currently selected aux file has been removed (we don't want to simply replace an invalid selection with
+      // another value without letting the user know). If the selected file has been removed, calling the ITC will
+      // result in a meaningful error message that tells the user that the selected aux file is not available anymore.
       def setModel(files: Set[AuxFileSpectrum], sel: Option[AuxFileSpectrum]) = {
-        deafTo(editElements:_*)
         val all = sel.fold(files)(s => files + s)
         val all2 = if (all.isEmpty) Set(AuxFileSpectrum.Undefined) else all
         userDefinedDetails.peer.setModel(ComboBox.newConstantModel(all2.toSeq.sortBy(_.name)))
         sel.foreach(s => userDefinedDetails.selection.item = s)
-        listenTo(editElements:_*)
       }
 
-      System.out.println(s"******************* LOADING SED FILES for program ID ${programId} *******************************")
-      // block UI for at most 2 seconds
+      SourceDetailsEditor.this.deafTo(editElements:_*) // don't trigger any events!
+      getAuxFiles(programId) match {
+        case files => setModel(files, selected)
+      }
+      SourceDetailsEditor.this.listenTo(editElements:_*)
+
+    }
+
+    /** Gets a set of all available SED aux files for the given program ID.
+      * The available aux files are filtered and only the ones ending in ".sed" are returned.
+      * This is called in order to update the available aux files in the selection combo box right the moment
+      * when the combobox is expanded to show the selection, therefore if the result is not returned from
+      * the server in a short time, we simply ignore the result.
+      */
+    private def getAuxFiles(programId: SPProgramID): Set[AuxFileSpectrum] = {
+
       try {
-        Await.result(Future { sedFiles(programId) }, 2.seconds) match {
-          case files => setModel(files, selected)
-        }
+        import scala.collection.JavaConversions._
+
+        // block UI for at most 3 seconds, if getting the aux file listing takes longer, the result will be ignored
+        Await.result(Future {
+
+          VcsOtClient.unsafeGetRegistrar.registration(programId).map { peer =>
+
+            val aux = new AuxFileClient(OT.getKeyChain, peer.host, peer.port)
+            val files = aux.listAll(programId)
+            files.
+              filter(AuxFileType.getFileType(_) == AuxFileType.sed).
+              map(f => AuxFileSpectrum(programId.toString, f.getName)).
+              toSet
+
+          }.getOrElse(Set())
+
+        }, 3.seconds)
+
       } catch {
-        case e: TimeoutException => // ignore
+        // Ignore TimeoutException or communication problems
+        case _: Exception => Set()
       }
-  }
-
-  // get a list of all available sed files (aux files ending in ".sed")
-  private def sedFiles(programId: SPProgramID): Set[AuxFileSpectrum] = {
-
-    try {
-      import scala.collection.JavaConversions._
-      VcsOtClient.unsafeGetRegistrar.registration(programId).map { peer =>
-
-        val aux    = new AuxFileClient(OT.getKeyChain, peer.host, peer.port)
-        val files  = aux.listAll(programId)
-        files.
-          filter(AuxFileType.getFileType(_) == AuxFileType.sed).
-          map   (f => AuxFileSpectrum(programId.toString, f.getName)).
-          toSet
-
-      }.getOrElse(Set())
-
-    } catch {
-      case _: Exception => Set()
     }
   }
-
 }
