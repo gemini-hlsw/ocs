@@ -2,6 +2,7 @@ package jsky.app.ot.tpe
 
 import edu.gemini.ags.api.AgsStrategy
 import edu.gemini.spModel.guide.GuideProbe
+import edu.gemini.spModel.target.env.BagsResult
 import jsky.app.ot.ags.BagsManager
 import jsky.app.ot.gemini.altair.Altair_WFS_Feature
 import jsky.app.ot.gemini.inst.OIWFS_Feature
@@ -35,7 +36,7 @@ object GuideStarWorker {
     val oldEnv = ctx.targets.envOrDefault
 
     // Clear out the old BAGS targets
-    val clearedEnv = BagsManager.clearBagsTargets(oldEnv)
+    val clearedEnv = BagsManager.clearBagsTargets(oldEnv, BagsResult.NoTargetFound)
 
     // Apply the new selection.
     val newEnv = selOpt.fold(clearedEnv)(_.applyTo(clearedEnv))

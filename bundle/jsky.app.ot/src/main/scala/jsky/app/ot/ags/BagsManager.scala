@@ -32,28 +32,40 @@ final class BagsManager(executor: ScheduledThreadPoolExecutor) {
 
   /** Syntax for ObsContext. */
   implicit class ObsContextOps(ctx: ObsContext) {
-    def isEligibleForBags: Boolean = {
-      val targets = ctx.getTargets
-      val prgs    = targets.getGuideEnvironment.getPrimaryReferencedGuiders
-      prgs.isEmpty || prgs.asScala.exists { gp =>
-        targets.getPrimaryGuideProbeTargets(gp).asScalaOpt.exists(_.getBagsResult match {
-          case BagsResult.NoSearchPerformed => true
-          case _                            => false
-        })
-      }
+    // Check the primary guide group to see if there are any manual targets. If there are, do not run BAGS.
+    def hasManualPrimary: Boolean = {
+      ctx.getTargets.getGuideEnvironment.getPrimary.asScalaOpt.exists(_.getAll.asScalaList.exists(_.primaryIsManual))
     }
+
+    def isMissingSearch: Boolean = {
+      ctx.getTargets.getGuideEnvironment.getPrimary.asScalaOpt.forall(_.getAll.asScalaList.exists(_.getBagsResult == BagsResult.NoSearchPerformed))
+    }
+//    def isEligibleForBags: Boolean = {
+
+//      val targets = ctx.getTargets
+//      val prgs    = targets.getGuideEnvironment.getPrimaryReferencedGuiders
+//      prgs.isEmpty || prgs.asScala.exists { gp =>
+//        targets.getPrimaryGuideProbeTargets(gp).asScalaOpt.exists(_.getBagsResult match {
+//          case BagsResult.NoSearchPerformed => true
+//          case _                            => false
+//        })
+//      }
+//    }
   }
 
   /** Our state is just a set of programs to watch, and a set of pending keys. */
-  case class BagsState(programs: Set[SPProgramID], keys: Set[SPNodeKey]) {
+  case class BagsState(programs: Set[SPProgramID], keys: Set[SPNodeKey], statuses: Map[SPNodeKey,BagsStatus]) {
     def +(key: SPNodeKey): BagsState = copy(keys = keys + key)
     def -(key: SPNodeKey): BagsState = copy(keys = keys - key)
     def +(pid: SPProgramID): BagsState = copy(programs = programs + pid)
     def -(pid: SPProgramID): BagsState = copy(programs = programs - pid)
+
+    def setStatus(key: SPNodeKey, status: BagsStatus): BagsState = copy(statuses = statuses + ((key, status)))
+    def clearStatus(key: SPNodeKey): BagsState = copy(statuses = statuses - key)
   }
 
   /** Our state. Modifications must be synchronized on `this`. */
-  @volatile private var state: BagsState = BagsState(Set.empty, Set.empty)
+  @volatile private var state: BagsState = BagsState(Set.empty, Set.empty, Map.empty)
 
   /**
    * Atomically add a program to our watch list and attach listeners. Enqueue all observations for
@@ -101,17 +113,39 @@ final class BagsManager(executor: ScheduledThreadPoolExecutor) {
       synchronized {
         val key = obs.getNodeKey
         state += key
+
+        def bagsStatus(status: BagsStatus) = {
+//          val oldState = state.statuses.get(key)
+//          state = state.setStatus(key, status)
+//          notifyBagsStatusListeners(observation, oldState, Some(status))
+        }
+        def bagsClearStatus() = {
+//          val oldState = state.statuses.get(key)
+//          state = state.clearStatus(key)
+//          notifyBagsStatusListeners(observation, oldState, None)
+        }
+        bagsStatus(BagsStatus.Pending)
+
         executor.schedule(new Thread {
           setPriority(Thread.NORM_PRIORITY - 1)
 
           override def run(): Unit =
-
           // If dequeue is false this means that (a) another task scheduled *after* me ended up
           // running before me, so their result is as good as mine would have been and we're done;
           // or (b) we don't care about that program anymore, so we're done.
             if (dequeue(key, obs.getProgramID)) {
+              // The criteria to perform a BAGS lookup is that:
+              // 1. There are no manual primary targets in the primary guide group;
+              // 2a. This is not the initial call to enqueue (i.e. the call was triggered by a change to the TargetEnv); or
+              // 2b. The primary guide group has some active guide probe for which a BAGS search has not been done; and
+              // 3. The observation has not been executed.
+              def obsCtxFilter(obsCtx: ObsContext): Boolean =
+                !obsCtx.hasManualPrimary &&
+                  (!initialEnqueue || obsCtx.isMissingSearch) &&
+                  ObservationStatus.computeFor(obs) != ObservationStatus.OBSERVED
+
               // Otherwise construct an obs context, verify that it's bagworthy, and go
-              ObsContext.create(obs).asScalaOpt.filter(o => !initialEnqueue || o.isEligibleForBags).foreach { ctx =>
+              ObsContext.create(obs).asScalaOpt.filter(obsCtxFilter).foreach { ctx =>
 
                 //   do the lookup
                 //   on success {
@@ -129,37 +163,44 @@ final class BagsManager(executor: ScheduledThreadPoolExecutor) {
                       // was running, so discard the result.
                       if (!state.keys(key)) {
                         LOG.info(s"$bagsIdMsg successful. Results=${optExtract(selOpt) ? "Yes" | "No"}.")
-                        if (ObservationStatus.computeFor(obs) != ObservationStatus.OBSERVED) {
-                          Swing.onEDT {
-                            obs.getProgram.removeCompositeChangeListener(CompositePropertyChangeListener)
-                            obs.getProgram.removeStructureChangeListener(StructurePropertyChangeListener)
-                            worker(TpeContext(obs), selOpt)
-                            obs.getProgram.addStructureChangeListener(StructurePropertyChangeListener)
-                            obs.getProgram.addCompositeChangeListener(CompositePropertyChangeListener)
-                          }
+                        Swing.onEDT {
+                          obs.getProgram.removeCompositeChangeListener(CompositePropertyChangeListener)
+                          obs.getProgram.removeStructureChangeListener(StructurePropertyChangeListener)
+                          worker(TpeContext(obs), selOpt)
+                          obs.getProgram.addStructureChangeListener(StructurePropertyChangeListener)
+                          obs.getProgram.addCompositeChangeListener(CompositePropertyChangeListener)
                         }
+                        bagsClearStatus()
                       }
 
                     // We don't want to print the stack trace if the host is simply unreachable.
                     // This is reported only as a GenericError in a CatalogException, unfortunately.
                     case Failure(CatalogException((e: GenericError) :: _)) =>
                       LOG.warning(s"$bagsIdMsg failed: ${e.msg}")
+                      bagsStatus(BagsStatus.Failed)
+                      Thread.sleep(1000L)
                       enqueue(obs, 5000L)
 
                     // If we timed out, we don't want to delay.
                     case Failure(ex: TimeoutException) =>
                       LOG.warning(s"$bagsIdMsg failed: ${ex.getMessage}")
-                      enqueue(obs, 0L)
+                      bagsStatus(BagsStatus.Failed)
+                      Thread.sleep(1000L)
+                      enqueue(obs, 5000L)
 
                     // For all other exceptions, print the full stack trace.
                     case Failure(ex) =>
                       LOG.log(Level.WARNING, s"$bagsIdMsg} failed.", ex)
+                      bagsStatus(BagsStatus.Failed)
+                      Thread.sleep(1000L)
                       enqueue(obs, 5000L)
                   }
                 }
 
 
                 LOG.info(s"Performing $bagsIdMsg.")
+                bagsStatus(BagsStatus.Running)
+
                 AgsRegistrar.currentStrategy(ctx).foreach { strategy =>
                   if (GuideStarSupport.hasGemsComponent(obs)) {
                     lookup((x: GOption[GemsGuideStars]) => x.asScalaOpt)(GemsGuideStarWorker.applyResults(_, _, true))(Try(GemsGuideStarWorker.findGuideStars(ctx)))
@@ -173,7 +214,10 @@ final class BagsManager(executor: ScheduledThreadPoolExecutor) {
                     if (Try {
                       val futDone = Await.ready(fut, 30.seconds)
                       futDone.onComplete(lookup(identity[Option[AgsStrategy.Selection]])(GuideStarWorker.applyResults))
-                    }.isFailure) enqueue(obs, 5000L)
+                    }.isFailure) {
+                      bagsStatus(BagsStatus.Failed)
+                      enqueue(obs, 5000L)
+                    }
                   }
                 }
               }
@@ -199,8 +243,8 @@ final class BagsManager(executor: ScheduledThreadPoolExecutor) {
   }
 
   /** BAGS status changes. **/
-  def bagsStatus(obs: ISPObservation): Option[BagsStatus] =
-    Some(BagsStatus.Pending)
+  def bagsStatus(key: SPNodeKey): Option[BagsStatus] =
+    synchronized { state.statuses.get(key) }
 
   /** Listeners for BAGS status changes. **/
   private var listeners: List[BagsStatusListener] = Nil
@@ -215,8 +259,8 @@ final class BagsManager(executor: ScheduledThreadPoolExecutor) {
   def clearBagsStatusListeners(): Unit =
     listeners = Nil
 
-  private def notifyBagsStatusListeners(obs: ISPObservation, oldStatus: BagsStatus, newStatus: BagsStatus): Unit = {
-    listeners.foreach(_.bagsStatusChanged(obs, oldStatus, newStatus))
+  private def notifyBagsStatusListeners(obs: ISPObservation, oldStatus: Option[BagsStatus], newStatus: Option[BagsStatus]): Unit = {
+    listeners.foreach(_.bagsStatusChanged(obs, oldStatus.asGeminiOpt, newStatus.asGeminiOpt))
   }
 }
 
@@ -242,12 +286,13 @@ object BagsManager {
   }
 
   // Given a target environment, clear all of the BAGS targets from it.
-  def clearBagsTargets(oldEnv: TargetEnvironment): TargetEnvironment = {
+  // Set the BAGS results to the given result, which is that no search has been performed by default.
+  def clearBagsTargets(oldEnv: TargetEnvironment, clearedBagsResult: BagsResult = GuideProbeTargets.DEFAULT_BAGS_RESULT): TargetEnvironment = {
     val oldGuideEnv = oldEnv.getGuideEnvironment
     val newGuideEnv = oldGuideEnv.getOptions.asScala.foldLeft(oldGuideEnv) { (ge, gg) =>
       // For this guide group, iterate over all GuideProbeTargets and eliminate the BAGS targets. Filter out any
       // GuideProbeTargets that are left empty as a result as we no longer need them.
-      val bagslessGpts = gg.getAll.asScala.map(_.withBagsResult(GuideProbeTargets.DEFAULT_BAGS_RESULT)).filter(_.containsTargets)
+      val bagslessGpts = gg.getAll.asScala.map(_.withBagsResult(clearedBagsResult)).filter(_.containsTargets)
 
       // If there are still any targets left, replace gg in the guide environment with a new guide group.
       // If there are no targets left, remove gg from the guide environment.

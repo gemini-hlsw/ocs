@@ -138,7 +138,7 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
                 final GuideEnvironment guideEnv = oldEnv.getGuideEnvironment();
                 final Option<GuideGroup> bagsGroup = guideEnv.getOptions().find(gg -> gg.getAll().exists(GuideProbeTargets::primaryIsBagsTarget));
                 makeBagsGroupPrimary = guideEnv.getOptions().isEmpty() || bagsGroup.exists(bg -> oldEnv.getGuideEnvironment().getPrimary().exists(bg::equals));
-                clearedEnv = BagsManager.clearBagsTargets(oldEnv);
+                clearedEnv = BagsManager.clearBagsTargets(oldEnv, BagsResult.NoTargetFound$.MODULE$);
             } else {
                 makeBagsGroupPrimary = false;
                 clearedEnv = oldEnv;
