@@ -70,7 +70,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         _w.guidingControls.manualGuideStarButton().peer().addActionListener(manualGuideStarListener);
 
         _w.guidingControls.autoGuideStarGuiderSelector().addSelectionListener(strategy ->
-                AgsStrategyUtil.setSelection(getContextObservation(), strategy)
+                        AgsStrategyUtil.setSelection(getContextObservation(), strategy)
         );
 
         _w.guideGroupName.addWatcher(new TextBoxWidgetWatcher() {
@@ -91,6 +91,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                     _w.guideGroupName.requestFocus(); // otherwise focus is lost during event handling
                 });
             }
+
             public void textBoxAction(TextBoxWidget tbwe) {
             }
         });
@@ -110,6 +111,10 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
 
         _agsPub.subscribe((obs, oldOptions, newOptions) -> updateGuiding());
 
+        BagsManager.instance().addBagsStatusListener((obs, oldStatus, newStatus) -> {
+            if (obs == getContextObservation())
+                updateGuiding();
+        });
     }
 
     @Override protected void updateEnabledState(boolean enabled) {

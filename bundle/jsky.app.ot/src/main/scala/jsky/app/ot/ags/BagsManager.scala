@@ -197,6 +197,27 @@ final class BagsManager(executor: ScheduledThreadPoolExecutor) {
         case _                             => // Ignore
       }
   }
+
+  /** BAGS status changes. **/
+  def bagsStatus(obs: ISPObservation): Option[BagsStatus] =
+    Some(BagsStatus.Pending)
+
+  /** Listeners for BAGS status changes. **/
+  private var listeners: List[BagsStatusListener] = Nil
+
+  def addBagsStatusListener(l: BagsStatusListener): Unit =
+    if (!listeners.contains(l))
+      listeners = l :: listeners
+
+  def removeBagsStatusListener(l: BagsStatusListener): Unit =
+    listeners = listeners.filterNot(_ == l)
+
+  def clearBagsStatusListeners(): Unit =
+    listeners = Nil
+
+  private def notifyBagsStatusListeners(obs: ISPObservation, oldStatus: BagsStatus, newStatus: BagsStatus): Unit = {
+    listeners.foreach(_.bagsStatusChanged(obs, oldStatus, newStatus))
+  }
 }
 
 object BagsManager {
