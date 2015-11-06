@@ -305,7 +305,8 @@ final class SourceDetailsEditor extends GridBagPanel with TelescopePosEditor wit
     /** Updates the combobox model with the currently available aux files.*/
     private def updateAuxFileModel(programId: SPProgramID): Unit =  {
 
-      def selected = spt.getTarget.getSpectralDistribution match {
+      // Determines the currently selected SED aux file (if any)
+      def selectedAuxFile = spt.getTarget.getSpectralDistribution match {
         case Some(s: AuxFileSpectrum) => Some(s)
         case _                        => None
       }
@@ -315,18 +316,18 @@ final class SourceDetailsEditor extends GridBagPanel with TelescopePosEditor wit
       // currently selected aux file has been removed (we don't want to simply replace an invalid selection with
       // another value without letting the user know). If the selected file has been removed, calling the ITC will
       // result in a meaningful error message that tells the user that the selected aux file is not available anymore.
-      def setModel(files: Set[AuxFileSpectrum], sel: Option[AuxFileSpectrum]) = {
-        val all = sel.fold(files)(s => files + s)
-        val all2 = if (all.isEmpty) Set(AuxFileSpectrum.Undefined) else all
-        userDefinedDetails.peer.setModel(ComboBox.newConstantModel(all2.toSeq.sortBy(_.name)))
-        sel.foreach(s => userDefinedDetails.selection.item = s)
+      def setModel(available: Set[AuxFileSpectrum], selected: Option[AuxFileSpectrum]) = {
+        val all1 = selected.fold(available)(s => available + s)               // add current selection to available files if needed
+        val all2 = if (all1.isEmpty) Set(AuxFileSpectrum.Undefined) else all1 // if there isn't anything add a "dummy" element
+        userDefinedDetails.peer.setModel(ComboBox.newConstantModel(all2.toSeq.sortBy(_.name))) // combo box model musn't be empty
+        selected.foreach(s => userDefinedDetails.selection.item = s)
       }
 
-      SourceDetailsEditor.this.deafTo(editElements:_*) // don't trigger any events!
+      SourceDetailsEditor.this.deafTo(editElements:_*)    // DON'T trigger any events!
       getAuxFiles(programId) match {
-        case files => setModel(files, selected)
+        case files => setModel(files, selectedAuxFile)
       }
-      SourceDetailsEditor.this.listenTo(editElements:_*)
+      SourceDetailsEditor.this.listenTo(editElements:_*)  // OK, done with updating UI elements
 
     }
 
