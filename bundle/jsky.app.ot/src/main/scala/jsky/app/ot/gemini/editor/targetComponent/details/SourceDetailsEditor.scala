@@ -1,14 +1,15 @@
 package jsky.app.ot.gemini.editor.targetComponent.details
 
-import java.awt.{Component, GridBagConstraints, Insets}
+import java.awt.{Component, Dimension, GridBagConstraints, Insets}
 import javax.swing.JPanel
+import javax.swing.event.{PopupMenuEvent, PopupMenuListener}
 
 import edu.gemini.auxfile.client.AuxFileClient
 import edu.gemini.auxfile.copier.AuxFileType
 import edu.gemini.pot.sp.ISPNode
 import edu.gemini.shared.util.immutable.{Option => GOption}
-import edu.gemini.spModel.core.{LibraryNonStar, LibraryStar, AuxFileSpectrum, UserDefinedSpectrum, EmissionLine, PowerLaw, BlackBody, SpectralDistribution, GaussianSource, UniformSource, PointSource, SpatialProfile, SPProgramID}
 import edu.gemini.spModel.core.WavelengthConversions._
+import edu.gemini.spModel.core.{AuxFileSpectrum, BlackBody, EmissionLine, GaussianSource, LibraryNonStar, LibraryStar, PointSource, PowerLaw, SPProgramID, SpatialProfile, SpectralDistribution, UniformSource, UserDefinedSpectrum}
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.target._
 import jsky.app.ot.OT
@@ -21,6 +22,10 @@ import squants.radio.IrradianceConversions._
 import squants.radio.SpectralIrradianceConversions._
 import squants.radio.{ErgsPerSecondPerSquareCentimeter, ErgsPerSecondPerSquareCentimeterPerAngstrom, Irradiance, SpectralIrradiance, WattsPerSquareMeter, WattsPerSquareMeterPerMicron}
 
+import scala.collection.immutable.Set
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.duration._
+import scala.concurrent.{Await, Future}
 import scala.swing.GridBagPanel.{Anchor, Fill}
 import scala.swing.ListView.Renderer
 import scala.swing.event.SelectionChanged
@@ -30,8 +35,10 @@ import scalaz.Scalaz._
 
 final class SourceDetailsEditor extends GridBagPanel with TelescopePosEditor with ReentrancyHack {
 
-  // ==== The Target
+  // ==== The current program ID
+  private[this] var programId: SPProgramID = SPProgramID.toProgramID("")  // this is needed for getting the SED aux files list
 
+  // ==== The current target
   private[this] var spt: SPTarget = new SPTarget
 
   private def setDistribution(sd: SpectralDistribution): Unit         = setDistribution(Some(sd))
@@ -91,28 +98,7 @@ final class SourceDetailsEditor extends GridBagPanel with TelescopePosEditor wit
   private val powerLawDetails = NumericPropertySheet[PowerLaw](None, powerLawOrDefault,
     Prop("Index",       "",         _.index,                      (a, v) => setDistribution(PowerLaw(v)))
   )
-  private val emptySedFilesModel = ComboBox.newConstantModel(Seq(AuxFileSpectrum.Undefined))
-  private val userDefinedDetails = new ComboBox[AuxFileSpectrum](Seq()) {
-    peer.setModel(emptySedFilesModel)
-    tooltip = "SEDs may be added via the File Attachment tab"
-    renderer = Renderer(_.name)
-    // Selects the given sed file, if it is not available (e.g. because the aux file it represents
-    // has been removed from the program) an "Undefined" placeholder is inserted instead.
-    def selectItem(s: AuxFileSpectrum) = {
-      // try to select the given aux file
-      selection.item = s
-      // if that fails, the file is not available (anymore)
-      if (peer.getModel.getSelectedItem != s) {
-        // deal with missing files: replace them with our good friend, the "Undefined" place holder
-        val oldModel = peer.getModel
-        val items    = Range(0, oldModel.getSize).map(oldModel.getElementAt)
-        val newModel = ComboBox.newConstantModel(AuxFileSpectrum.Undefined +: items)
-        peer.setModel(newModel)
-        peer.setSelectedItem(AuxFileSpectrum.Undefined)
-        setDistribution(AuxFileSpectrum.Undefined)
-      }
-    }
-  }
+  private val userDefinedDetails = new AuxFileSelector()
 
   private case class DistributionPanel(label: String, panel: Component, value: () => Option[SpectralDistribution])
   private val distributionPanels = List(
@@ -231,17 +217,15 @@ final class SourceDetailsEditor extends GridBagPanel with TelescopePosEditor wit
   // react to any kind of target change by updating all UI elements
   def edit(obsContext: GOption[ObsContext], spTarget: SPTarget, node: ISPNode): Unit = nonreentrant {
 
-    // update target
-    spt = spTarget
+    // update target and program id
+    spt       = spTarget
+    programId = node.getProgramID
 
     // we only show the source editor for the base/science target, and we also only need to update it if visible
     visible = if (obsContext.isDefined) obsContext.getValue.getTargets.getBase == spTarget else false
     if (visible) {
 
       deafTo(editElements:_*)
-
-      // update available user spectras (in case program has changed or files have been added/removed)
-      updateSedFiles(node.getProgramID, sedFiles(node.getProgramID))
 
       // update UI elements to reflect the spatial profile
       spt.getTarget.getSpatialProfile match {
@@ -274,43 +258,106 @@ final class SourceDetailsEditor extends GridBagPanel with TelescopePosEditor wit
   // show/hide UI elements as needed
   private def updateUI(): Unit = {
     if (!profiles.selection.item.panel.isVisible) {
-      profilePanels.foreach(_.panel.setVisible(false))
+      profilePanels.filter(_.panel.isVisible).foreach(_.panel.setVisible(false))
       profiles.selection.item.panel.setVisible(true)
     }
     if (!distributions.selection.item.panel.isVisible) {
-      distributionPanels.foreach(_.panel.setVisible(false))
+      distributionPanels.filter(_.panel.isVisible).foreach(_.panel.setVisible(false))
       distributions.selection.item.panel.setVisible(true)
     }
   }
 
-  // update the sed file combo box
-  private def updateSedFiles(programId: SPProgramID, optFiles: Option[Seq[AuxFileSpectrum]]) = {
-    optFiles match {
-      case Some(files) if files.nonEmpty =>
-        userDefinedDetails.peer.setModel(ComboBox.newConstantModel(files))
-        userDefinedDetails.enabled = true
-      case _                             =>
-        userDefinedDetails.peer.setModel(emptySedFilesModel)
-        userDefinedDetails.enabled = false
+  /** UI element that allows to choose from the currently available set of SED aux files for the current program.
+    * Unfortunately there is no simple way to keep in sync with changes to the available aux files. In order to
+    * still be able to present the user with an up-to-date list of available aux files the combobox model is updated
+    * every time when the user opens it (i.e. displays the popup menu). Ideally there would be a simple way to get
+    * notifications when the available set of aux files has changed, but for now this is the best I could come up
+    * with.
+    */
+  final class AuxFileSelector extends ComboBox[AuxFileSpectrum](Seq()) {
+    val filesNotAvailable = ComboBox.newConstantModel(Seq(AuxFileSpectrum.Undefined))
+    tooltip = "SEDs may be added via the File Attachment tab"
+    renderer = Renderer(_.name)
+    minimumSize = new Dimension(250, preferredSize.getHeight.toInt)     // avoid resizing of component every time model changes
+    preferredSize = new Dimension(250, preferredSize.getHeight.toInt)
+    peer.setModel(filesNotAvailable)
+    peer.addPopupMenuListener(new PopupMenuListener {
+      // If the program id is known and the popup is about to be displayed we need to update the combobox model
+      // with all currently available SED aux files.
+      override def popupMenuWillBecomeVisible(e: PopupMenuEvent): Unit    = { updateAuxFileModel(programId) }
+      override def popupMenuWillBecomeInvisible(e: PopupMenuEvent): Unit  = {}
+      override def popupMenuCanceled(e: PopupMenuEvent): Unit             = {}
+    })
+
+    /** Selects the given SED aux file.
+      * We are taking a short cut here by just simply setting a model with exactly that value. This may seem strange,
+      * but this allows to just simply set and display the current value without having to care about corner cases like:
+      * Is the aux file listing currently available? Has this particular file been deleted? ...
+      */
+    def selectItem(s: AuxFileSpectrum) = {
+      peer.setModel(ComboBox.newConstantModel(Seq(s)))
     }
 
-  }
+    /** Updates the combobox model with the currently available aux files.*/
+    private def updateAuxFileModel(programId: SPProgramID): Unit =  {
 
-  // get a list of all available sed files (aux files ending in ".sed")
-  private def sedFiles(programId: SPProgramID): Option[Seq[AuxFileSpectrum]] = {
-    try {
-      import scala.collection.JavaConversions._
-      VcsOtClient.unsafeGetRegistrar.registration(programId).map { peer =>
-        val aux    = new AuxFileClient(OT.getKeyChain, peer.host, peer.port)
-        val files  = aux.listAll(programId)
-        files.
-          filter(AuxFileType.getFileType(_) == AuxFileType.sed).
-          map   (f => AuxFileSpectrum(programId.toString, f.getName)).
-          toSeq
+      // Determines the currently selected SED aux file (if any)
+      def selectedAuxFile = spt.getTarget.getSpectralDistribution match {
+        case Some(s: AuxFileSpectrum) => Some(s)
+        case _                        => None
       }
-    } catch {
-      case _: Exception => None
+
+      // Update the model and make sure that the currently selected value is one of the available entries.
+      // This allows to keep the current selection in case the aux file listing is currently not available, or if the
+      // currently selected aux file has been removed (we don't want to simply replace an invalid selection with
+      // another value without letting the user know). If the selected file has been removed, calling the ITC will
+      // result in a meaningful error message that tells the user that the selected aux file is not available anymore.
+      def setModel(available: Set[AuxFileSpectrum], selected: Option[AuxFileSpectrum]) = {
+        val all1 = selected.fold(available)(s => available + s)               // add current selection to available files if needed
+        val all2 = if (all1.isEmpty) Set(AuxFileSpectrum.Undefined) else all1 // if there isn't anything add a "dummy" element
+        userDefinedDetails.peer.setModel(ComboBox.newConstantModel(all2.toSeq.sortBy(_.name))) // combo box model musn't be empty
+        selected.foreach(s => userDefinedDetails.selection.item = s)
+      }
+
+      SourceDetailsEditor.this.deafTo(editElements:_*)    // DON'T trigger any events!
+      getAuxFiles(programId) match {
+        case files => setModel(files, selectedAuxFile)
+      }
+      SourceDetailsEditor.this.listenTo(editElements:_*)  // OK, done with updating UI elements
+
+    }
+
+    /** Gets a set of all available SED aux files for the given program ID.
+      * The available aux files are filtered and only the ones ending in ".sed" are returned.
+      * This is called in order to update the available aux files in the selection combo box right the moment
+      * when the combobox is expanded to show the selection, therefore if the result is not returned from
+      * the server in a short time, we simply ignore the result.
+      */
+    private def getAuxFiles(programId: SPProgramID): Set[AuxFileSpectrum] = {
+
+      try {
+        import scala.collection.JavaConversions._
+
+        // block UI for at most 3 seconds, if getting the aux file listing takes longer, the result will be ignored
+        Await.result(Future {
+
+          VcsOtClient.unsafeGetRegistrar.registration(programId).map { peer =>
+
+            val aux = new AuxFileClient(OT.getKeyChain, peer.host, peer.port)
+            val files = aux.listAll(programId)
+            files.
+              filter(AuxFileType.getFileType(_) == AuxFileType.sed).
+              map(f => AuxFileSpectrum(programId.toString, f.getName)).
+              toSet
+
+          }.getOrElse(Set())
+
+        }, 3.seconds)
+
+      } catch {
+        // Ignore TimeoutException or communication problems
+        case _: Exception => Set()
+      }
     }
   }
-
 }
