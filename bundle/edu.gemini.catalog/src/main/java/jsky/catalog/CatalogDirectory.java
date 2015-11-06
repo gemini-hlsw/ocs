@@ -1,9 +1,7 @@
 package jsky.catalog;
 
-import java.net.URL;
 import java.util.List;
 
-import javax.swing.event.ChangeListener;
 import javax.swing.tree.TreeModel;
 
 /**
@@ -41,32 +39,11 @@ public interface CatalogDirectory extends Catalog, TreeModel {
     /** Remove the given catalog from the catalog list. */
     void removeCatalog(Catalog cat);
 
-    /** Replace the given old catalog with the given new catalog in the catalog list. */
-    void replaceCatalog(Catalog oldCat, Catalog newCat);
-
-    /** Move the the given catalog up or down in the list. */
-    void moveCatalog(Catalog cat, boolean up);
-
-    /** Move the the given catalog all the way up or down in the list, as far as possible. */
-    void moveCatalogToEnd(Catalog cat, boolean up);
-
     /**
      * Save the contents of this catalog directory to make it permanent
      * (for example, in a config file under ~/.jsky/...).
      */
     void save();
-
-    /** Reload the catalog directory and return the new (or existing) object for it. */
-    CatalogDirectory reload();
-
-    /**
-     * Attempt to read a catalog subdirectory from the given URL and insert
-     * the object for it in the catalog tree.
-     *
-     * @return the new CatalogDirectory
-     * @throws RuntimeException if the catalog directory could not be created
-     */
-    CatalogDirectory loadSubDir(URL url);
 
     /**
      * Return a list of name servers (Catalogs with type

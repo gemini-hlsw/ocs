@@ -1,10 +1,3 @@
-/*
- * Copyright 2000 Association for Universities for Research in Astronomy, Inc.,
- * Observatory Control System, Gemini Telescopes Project.
- *
- * $Id: CatalogHistoryItem.java 4414 2004-02-03 16:21:36Z brighton $
- */
-
 package jsky.catalog.gui;
 
 import java.awt.event.ActionEvent;
@@ -15,7 +8,6 @@ import javax.swing.JComponent;
 
 import jsky.catalog.URLQueryResult;
 import jsky.util.gui.DialogUtil;
-
 
 /**
  * Local class used to store information about previously viewed catalogs
@@ -66,8 +58,6 @@ public class CatalogHistoryItem extends AbstractAction implements Serializable {
                 navigator.setQueryComponent(_queryComponent);
             } else if (url != null) {
                 navigator.setQueryResult(new URLQueryResult(url));
-            } else if (navigator instanceof CatalogNavigatorOpener) {
-                ((CatalogNavigatorOpener) navigator).openCatalogWindow(_name);
             } else {
                 System.out.println("XXX CatalogHistoryItem.actionPerformed: don't know how to display catalog");
             }

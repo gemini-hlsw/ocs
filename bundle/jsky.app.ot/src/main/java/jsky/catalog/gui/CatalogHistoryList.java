@@ -1,10 +1,3 @@
-/*
- * Copyright 2003 Association for Universities for Research in Astronomy, Inc.,
- * Observatory Control System, Gemini Telescopes Project.
- *
- * $Id: CatalogHistoryList.java 4726 2004-05-14 16:50:12Z brighton $
- */
-
 package jsky.catalog.gui;
 
 import java.util.LinkedList;
@@ -26,17 +19,12 @@ public class CatalogHistoryList {
     // List of CatalogHistoryItem, for previously viewed catalogs or query results.
     private LinkedList<CatalogHistoryItem> _historyList;
 
-    // Max number of items in the history list
-    private int _maxHistoryItems = 20;
-
-
     /**
      * Constructor
      */
     public CatalogHistoryList() {
         _historyList = new LinkedList<>();
     }
-
 
     /**
      * Add the given item to the history stack, removing duplicates.
@@ -51,23 +39,9 @@ public class CatalogHistoryList {
                 _historyList.remove(i);
         }
         _historyList.addFirst(historyItem);
+        int _maxHistoryItems = 20;
         if (_historyList.size() > _maxHistoryItems)
             _historyList.removeLast();
-    }
-
-
-    /**
-     * Return the max number of items in the history list.
-     */
-    public int getMaxHistoryItems() {
-        return _maxHistoryItems;
-    }
-
-    /**
-     * Set the max number of items in the history list.
-     */
-    public void setMaxHistoryItems(int n) {
-        _maxHistoryItems = n;
     }
 
     /**
@@ -135,6 +109,7 @@ public class CatalogHistoryList {
                 l = _historyList;
             Preferences.getPreferences().serialize(HISTORY_LIST_NAME, l);
         } catch (Exception e) {
+            // Ignore
         }
     }
 }

@@ -66,9 +66,6 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
         this.statusLogger = statusLogger;
         this.tpe = TpeManager.create().getImageWidget();
 
-        // TPE REFACTOR -- don't think this is needed
-//        TpeContext ctx = tpe.getContext();
-//        obsNode = ctx.observationShell().isDefined() ? ctx.observationShell().get() : null;
         statusLogger.logMessage("Finding best asterisms...");
     }
 
@@ -92,17 +89,7 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
             DialogUtil.error((Exception) o);
         } else {
             GemsGuideStars gemsGuideStars = (GemsGuideStars) o;
-//            if (progData.getObservationNode() != obsNode) {
-//                // The user selected another observation: Restore previously selected observation, temporarily
-//                ISPNode savedCurrentNode = progData.getCurrentNode();
-//                ISPObservation savedObsNode = progData.getObservationNode();
-//                progData.setCurrentNode(currentNode);
-//                applyResults(gemsGuideStars);
-//                progData.apply();
-//                progData.setCurrentNode(savedCurrentNode);
-//            } else {
             applyResults(gemsGuideStars);
-//            }
         }
     }
 
@@ -254,7 +241,6 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
             interrupted = false;
             startProgress();
 
-            //WorldCoords basePos = tpe.getBasePos();
             final List<GemsCatalogSearchResults> results = searchUnchecked(catalog, tipTiltMode, obsContext, posAngles, nirBand);
             if (interrupted) {
                 throw new CancellationException("Canceled");

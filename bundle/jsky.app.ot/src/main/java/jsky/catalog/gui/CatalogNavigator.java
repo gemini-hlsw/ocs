@@ -65,9 +65,6 @@ public abstract class CatalogNavigator extends JPanel
     // Set this to the JDesktopPane, if using internal frames.
     private JDesktopPane _desktop = null;
 
-    // Set to true to query catalogs automatically when selected
-    private boolean _autoQuery = false;
-
     // Displays the catalog tree and the catalog query widgets
     private JPanel _queryPanel;
 
@@ -116,9 +113,6 @@ public abstract class CatalogNavigator extends JPanel
     // Top level window (or internal frame) for viewing an HTML page
     private Component _htmlViewerFrame;
 
-    // Hash table associating each panel with a tree node
-    private Hashtable<JComponent, Catalog> _panelTreeNodeTable = new Hashtable<>(10);
-
     // Manages a list of previously viewed catalogs or query results.
     private CatalogHistoryList _historyList;
 
@@ -137,9 +131,6 @@ public abstract class CatalogNavigator extends JPanel
             open();
         }
     };
-
-    // May be set to override the default _openAction
-    private AbstractAction _openActionOverride;
 
     // Action to use for the "Save as..." menu and toolbar items
     private AbstractAction _saveAsAction = new AbstractAction(_I18N.getString("saveAs")) {
@@ -296,13 +287,6 @@ public abstract class CatalogNavigator extends JPanel
     }
 
     /**
-     * Set to true to query catalogs automatically when selected
-     */
-    public void setAutoQuery(boolean b) {
-        _autoQuery = b;
-    }
-
-    /**
      * Return the object used to plot table data, or null if none was defined.
      */
     public TablePlotter getPlotter() {
@@ -317,13 +301,6 @@ public abstract class CatalogNavigator extends JPanel
     }
 
     /**
-     * Return the top level parent frame (or internal frame) for this window
-     */
-    public Component getParentFrame() {
-        return _parent;
-    }
-
-    /**
      * Set the query or result component to display. The choice is made based on
      * which interfaces the component implements. If the component implements
      * QueryResultDisplay, it is considered a result component.
@@ -334,8 +311,7 @@ public abstract class CatalogNavigator extends JPanel
         } else {
             setQueryComponent(component);
 
-            if ((component instanceof CatalogQueryTool)
-                    && (_autoQuery || ((CatalogQueryTool) component).getCatalog().isLocal())) {
+            if ((component instanceof CatalogQueryTool) && (((CatalogQueryTool) component).getCatalog().isLocal())) {
                 ((CatalogQueryTool) component).search();
             }
         }
@@ -912,11 +888,6 @@ public abstract class CatalogNavigator extends JPanel
      * Display a file chooser to select a local catalog file to open
      */
     public void open() {
-        if (_openActionOverride != null) {
-            _openActionOverride.actionPerformed(null);
-            return;
-        }
-
         if (_fileChooser == null) {
             _fileChooser = makeFileChooser();
         }
@@ -1035,13 +1006,6 @@ public abstract class CatalogNavigator extends JPanel
         return _openAction;
     }
 
-    /**
-     * Override the default Open action.
-     */
-    public void setOpenAction(AbstractAction openAction) {
-        _openActionOverride = openAction;
-    }
-
     public AbstractAction getSaveAsAction() {
         return _saveAsAction;
     }
@@ -1080,13 +1044,6 @@ public abstract class CatalogNavigator extends JPanel
 
     public AbstractAction getDeleteAllQueryAction() {
         return _deleteAllQueryAction;
-    }
-
-    /**
-     * Return the top level parent frame (or internal frame) for this window
-     */
-    public Component getRootComponent() {
-        return _parent;
     }
 
     /**
@@ -1219,27 +1176,6 @@ public abstract class CatalogNavigator extends JPanel
     }
 
     /**
-     * Return the panel used to display download progress information
-     */
-    protected ProgressPanel getProgressPanel() {
-        return _progressPanel;
-    }
-
-    /**
-     * Return the stack of CatalogHistoryItems, used to go back to a previous panel
-     */
-    protected Stack getBackStack() {
-        return _backStack;
-    }
-
-    /**
-     * Return the stack of CatalogHistoryItems, used to go forward to the next panel
-     */
-    protected Stack getForwStack() {
-        return _forwStack;
-    }
-
-    /**
      * Ask the user for a name, and then store the current query and display settings
      * under that name for later use.
      */
@@ -1303,8 +1239,5 @@ public abstract class CatalogNavigator extends JPanel
         }
     }
 
-    public CatalogQueryList getQueryList() {
-        return _queryList;
-    }
 }
 

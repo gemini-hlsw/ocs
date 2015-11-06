@@ -1,11 +1,8 @@
 package edu.gemini.catalog.ui.tpe
 
-import java.net.URL
-
 import jsky.catalog.{Catalog, CatalogDirectory, TableQueryResult}
 import jsky.catalog.gui.{StoreImageServerAction, CatalogNavigator, TablePlotter, BasicTablePlotter}
-import jsky.coords.{WorldCoords, WorldCoordinateConverter, CoordinateConverter}
-import jsky.graphics.CanvasGraphics
+import jsky.coords.WorldCoords
 import jsky.image.fits.gui.FITSKeywordsFrame
 import jsky.image.gui.ImageDisplayMenuBar
 import jsky.image.gui.ImageDisplayToolBar
@@ -27,23 +24,6 @@ import Scalaz._
 trait CatalogDisplay {
   def plotter: TablePlotter
 
-  def getParentFrame: Component
-
-  def getNavigatorPane: NavigatorPane
-
-  def getCanvasGraphics: CanvasGraphics
-
-  def getCoordinateConverter: CoordinateConverter
-
-  def setFilename(fileOrUrl: String, url: URL): Unit
-
-  // Used to get the position of the TPE
-  /**
-    * Return the object used to convert between image and world coordinates,
-    * or null if none was set.
-    */
-  def getWCS: WorldCoordinateConverter
-
   /**
     * Return the base or center position in world coordinates.
     * If there is no base position, this method returns the center point
@@ -60,9 +40,6 @@ trait CatalogDisplay {
   */
 abstract class CatalogImageDisplay(parent: Component, navigatorPane: NavigatorPane) extends DivaMainImageDisplay(navigatorPane, parent) with CatalogDisplay {
   val plotter = new BasicTablePlotter(getCanvasGraphics, getCoordinateConverter) <| {navigatorPane.setPlotter}
-
-  /** Return the Diva pane containing the added catalog symbol layer. */
-  override def getNavigatorPane: NavigatorPane = navigatorPane
 
   /**
     * Load the sky image for the current location

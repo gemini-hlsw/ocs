@@ -607,10 +607,7 @@ public class TpeImageWidget extends CatalogImageDisplay implements MouseInputLis
     @Override
     public void displayFITSTable(final int hdu) {
         super.displayFITSTable(hdu);
-        // make the navigator window pop up in this case
-        // TODO Check if this is needed
     }
-
 
     /**
      * Reset internal state to view a new observation and position table.
@@ -648,7 +645,6 @@ public class TpeImageWidget extends CatalogImageDisplay implements MouseInputLis
 
         repaint();
     }
-
 
     /**
      * Add the given image feature to the list.
