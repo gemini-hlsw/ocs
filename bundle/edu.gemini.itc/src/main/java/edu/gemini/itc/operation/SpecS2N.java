@@ -16,7 +16,6 @@ public interface SpecS2N {
 
     // TODO: this stuff can be taken from other places, instrument etc, does not need to be on this interface!
     double getImageQuality();
-    double getSpecFracWithSource();
     double getSpecNpix();
 
     default double getPeakPixelCount() {

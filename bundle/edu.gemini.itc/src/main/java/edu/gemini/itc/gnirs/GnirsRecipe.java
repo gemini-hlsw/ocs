@@ -205,7 +205,7 @@ public final class GnirsRecipe implements SpectroscopyRecipe {
 
             final SpecS2N[] specS2Narr = new SpecS2N[ORDERS];
             for (int i = 0; i < ORDERS; i++) {
-                final SpecS2N s2n = new GnirsSpecS2N(im_qual, _obsDetailParameters.getSourceFraction(), ap_diam, signalOrder[i], backGroundOrder[i], null, finalS2NOrder[i]);
+                final SpecS2N s2n = new GnirsSpecS2N(im_qual, ap_diam, signalOrder[i], backGroundOrder[i], null, finalS2NOrder[i]);
                 specS2Narr[i] = s2n;
             }
 
@@ -261,12 +261,10 @@ public final class GnirsRecipe implements SpectroscopyRecipe {
         private final VisitableSampledSpectrum exps2n;
         private final VisitableSampledSpectrum fins2n;
         private final double iq;
-        private final double fracWithSource;
         private final double nPix;
 
-        public GnirsSpecS2N(double iq, double fracWithSource, double nPix, VisitableSampledSpectrum signal, VisitableSampledSpectrum background, VisitableSampledSpectrum exps2n, VisitableSampledSpectrum fins2n) {
+        public GnirsSpecS2N(double iq, double nPix, VisitableSampledSpectrum signal, VisitableSampledSpectrum background, VisitableSampledSpectrum exps2n, VisitableSampledSpectrum fins2n) {
             this.iq = iq;
-            this.fracWithSource = fracWithSource;
             this.nPix = nPix;
             this.signal = signal;
             this.background = background;
@@ -292,10 +290,6 @@ public final class GnirsRecipe implements SpectroscopyRecipe {
 
         @Override public double getImageQuality() {
             return iq;
-        }
-
-        @Override public double getSpecFracWithSource() {
-            return fracWithSource;
         }
 
         @Override public double getSpecNpix() {
