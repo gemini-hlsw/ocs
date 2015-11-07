@@ -1,12 +1,5 @@
-// Copyright 2001 Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-// See the file LICENSE for complete details.
-//
-// $Id: PlannedTimeSummaryService.java 46768 2012-07-16 18:58:53Z rnorris $
-//
 package edu.gemini.spModel.obs.plannedtime;
 
-import edu.gemini.pot.sp.ISPNode;
 import edu.gemini.pot.sp.ISPObservation;
 import edu.gemini.pot.sp.ISPObservationContainer;
 import edu.gemini.spModel.obs.ObsClassService;
@@ -14,7 +7,6 @@ import edu.gemini.spModel.obs.ObsPhase2Status;
 import edu.gemini.spModel.obs.SPObsCache;
 import edu.gemini.spModel.obs.SPObservation;
 import edu.gemini.spModel.obsclass.ObsClass;
-
 
 import java.util.Collection;
 
@@ -27,8 +19,7 @@ import java.util.Collection;
  */
 public final class PlannedTimeSummaryService {
 
-    private PlannedTimeSummaryService() {
-    }
+    private PlannedTimeSummaryService() { }
 
     /**
      * Return the total planned observing time for the given program or group,
@@ -36,7 +27,7 @@ public final class PlannedTimeSummaryService {
      *
      * @param node a program or group node
      */
-    public static PlannedTimeSummary getTotalTime(ISPObservationContainer node) {
+    public static PlannedTimeSummary getTotalTime(final ISPObservationContainer node) {
         return getTotalTime(node, false);
     }
 
@@ -49,16 +40,15 @@ public final class PlannedTimeSummaryService {
      *
      * @return the total planned observing time
      */
-    public static PlannedTimeSummary getTotalTime(ISPObservationContainer node, boolean includeInactive) {
+    public static PlannedTimeSummary getTotalTime(final ISPObservationContainer node, final boolean includeInactive) {
         PlannedTimeSummary totalTime = PlannedTimeSummary.ZERO_PLANNED_TIME;
 
-        Collection<ISPObservation> obsList;
         //noinspection unchecked
-        obsList = node.getAllObservations();
+        final Collection<ISPObservation> obsList = node.getAllObservations();
 
-        for (ISPObservation obs : obsList) {
+        for (final ISPObservation obs : obsList) {
             // If we are inactive and the includeInactive flag is false, we ignore this observation.
-            boolean isInactive = ((SPObservation) obs.getDataObject()).getPhase2Status() == ObsPhase2Status.INACTIVE;
+            final boolean isInactive = ((SPObservation) obs.getDataObject()).getPhase2Status() == ObsPhase2Status.INACTIVE;
             if (includeInactive || !isInactive) {
                 totalTime = totalTime.sum(getTotalTime(obs));
             }
@@ -66,15 +56,7 @@ public final class PlannedTimeSummaryService {
         return totalTime;
     }
 
-    public static boolean shouldCountPlannedExecTime(ISPObservation obs) {
-        ObsClass obsClass = ObsClassService.lookupObsClass(obs);
-        if (obsClass == null) return false;
-
-        return !((obsClass == ObsClass.ACQ) || (obsClass == ObsClass.ACQ_CAL) ||
-                 (obsClass == ObsClass.DAY_CAL));
-    }
-
-    public static PlannedStepSummary getPlannedSteps(ISPObservation obs)  {
+    public static PlannedStepSummary getPlannedSteps(final ISPObservation obs)  {
 
     	// First check the cache.
     	PlannedStepSummary steps = SPObsCache.getPlannedSteps(obs);
@@ -94,10 +76,10 @@ public final class PlannedTimeSummaryService {
      *
      * @return the total planned observing time for the observation
      */
-    public static PlannedTimeSummary getTotalTime(ISPObservation obs) {
+    public static PlannedTimeSummary getTotalTime(final ISPObservation obs) {
 
         // First check the cache.
-        PlannedTimeSummary cachedTime = SPObsCache.getPlannedTime(obs);
+        final PlannedTimeSummary cachedTime = SPObsCache.getPlannedTime(obs);
         if (cachedTime != null) {
             return cachedTime;
         }
@@ -106,8 +88,8 @@ public final class PlannedTimeSummaryService {
         // RCN: this will be a problem if we eventually decide to do queue planning
         // for the observe types that currently have a planned time of zero.
         if (!shouldCountPlannedExecTime(obs)) {// || !(includeInactive || isActive)) {
-            PlannedTimeSummary res = PlannedTimeSummary.ZERO_PLANNED_TIME;
-            PlannedStepSummary steps = PlannedStepSummary.ZERO_PLANNED_STEPS;
+            final PlannedTimeSummary res = PlannedTimeSummary.ZERO_PLANNED_TIME;
+            final PlannedStepSummary steps = PlannedStepSummary.ZERO_PLANNED_STEPS;
             SPObsCache.setPlannedTime(obs, res);
             SPObsCache.setPlannedSteps(obs, steps);
             return res;
@@ -116,20 +98,19 @@ public final class PlannedTimeSummaryService {
         PlannedTime pta = PlannedTimeCalculator.instance.calc(obs);
 
         // Cache the values.
-        PlannedTimeSummary res = pta.toPlannedTimeSummary();
+        final PlannedTimeSummary res = pta.toPlannedTimeSummary();
         SPObsCache.setPlannedTime(obs, res);
         SPObsCache.setPlannedSteps(obs, pta.toPlannedStepSummary());
         return res;
     }
 
-    public static PlannedTimeSummary getTotalTime(ISPNode node) {
-        if (node instanceof ISPObservationContainer) {
-            return getTotalTime((ISPObservationContainer) node);
-        } else if (node instanceof ISPObservation) {
-            return getTotalTime((ISPObservation) node);
-        } else {
-            return PlannedTimeSummary.ZERO_PLANNED_TIME;
-        }
+    private static boolean shouldCountPlannedExecTime(final ISPObservation obs) {
+        final ObsClass obsClass = ObsClassService.lookupObsClass(obs);
+        if (obsClass == null) return false;
+
+        return !((obsClass == ObsClass.ACQ) || (obsClass == ObsClass.ACQ_CAL) ||
+                (obsClass == ObsClass.DAY_CAL));
     }
+
 }
 
