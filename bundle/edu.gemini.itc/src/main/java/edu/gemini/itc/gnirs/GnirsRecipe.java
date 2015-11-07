@@ -254,22 +254,29 @@ public final class GnirsRecipe implements SpectroscopyRecipe {
         return new SpcChartData(S2NChart.instance(), title, xAxis, yAxis, JavaConversions.asScalaBuffer(data).toList());
     }
 
+    // SpecS2N implementation to hold results for GNIRS cross dispersion mode calculations.
     class GnirsSpecS2N implements SpecS2N {
 
+        private final double imgQuality;
+        private final double nPix;
         private final VisitableSampledSpectrum signal;
         private final VisitableSampledSpectrum background;
         private final VisitableSampledSpectrum exps2n;
         private final VisitableSampledSpectrum fins2n;
-        private final double iq;
-        private final double nPix;
 
-        public GnirsSpecS2N(double iq, double nPix, VisitableSampledSpectrum signal, VisitableSampledSpectrum background, VisitableSampledSpectrum exps2n, VisitableSampledSpectrum fins2n) {
-            this.iq = iq;
-            this.nPix = nPix;
-            this.signal = signal;
-            this.background = background;
-            this.exps2n = exps2n;
-            this.fins2n = fins2n;
+        public GnirsSpecS2N(
+                final double imgQuality,
+                final double nPix,
+                final VisitableSampledSpectrum signal,
+                final VisitableSampledSpectrum background,
+                final VisitableSampledSpectrum exps2n,
+                final VisitableSampledSpectrum fins2n) {
+            this.imgQuality   = imgQuality;
+            this.nPix         = nPix;
+            this.signal       = signal;
+            this.background   = background;
+            this.exps2n       = exps2n;
+            this.fins2n       = fins2n;
         }
 
         @Override public VisitableSampledSpectrum getSignalSpectrum() {
@@ -289,7 +296,7 @@ public final class GnirsRecipe implements SpectroscopyRecipe {
         }
 
         @Override public double getImageQuality() {
-            return iq;
+            return imgQuality;
         }
 
         @Override public double getSpecNpix() {
