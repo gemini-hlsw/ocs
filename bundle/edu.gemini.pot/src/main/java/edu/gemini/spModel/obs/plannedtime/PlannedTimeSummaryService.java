@@ -84,10 +84,9 @@ public final class PlannedTimeSummaryService {
             return cachedTime;
         }
 
-        // Figure out if we even count for exec time.
-        // RCN: this will be a problem if we eventually decide to do queue planning
-        // for the observe types that currently have a planned time of zero.
-        if (!shouldCountPlannedExecTime(obs)) {// || !(includeInactive || isActive)) {
+        // Set steps and time to zero for Acq observations.
+        // Having zero steps will automatically exclude them from showing up in QPT.
+        if (!shouldCountPlannedExecTime(obs)) {
             final PlannedTimeSummary res = PlannedTimeSummary.ZERO_PLANNED_TIME;
             final PlannedStepSummary steps = PlannedStepSummary.ZERO_PLANNED_STEPS;
             SPObsCache.setPlannedTime(obs, res);
@@ -95,7 +94,7 @@ public final class PlannedTimeSummaryService {
             return res;
         }
 
-        PlannedTime pta = PlannedTimeCalculator.instance.calc(obs);
+        final PlannedTime pta = PlannedTimeCalculator.instance.calc(obs);
 
         // Cache the values.
         final PlannedTimeSummary res = pta.toPlannedTimeSummary();
@@ -106,10 +105,7 @@ public final class PlannedTimeSummaryService {
 
     private static boolean shouldCountPlannedExecTime(final ISPObservation obs) {
         final ObsClass obsClass = ObsClassService.lookupObsClass(obs);
-        if (obsClass == null) return false;
-
-        return !((obsClass == ObsClass.ACQ) || (obsClass == ObsClass.ACQ_CAL) ||
-                (obsClass == ObsClass.DAY_CAL));
+        return !((obsClass == ObsClass.ACQ) || (obsClass == ObsClass.ACQ_CAL));
     }
 
 }
