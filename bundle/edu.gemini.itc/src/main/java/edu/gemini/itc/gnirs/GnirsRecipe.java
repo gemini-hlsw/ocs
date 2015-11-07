@@ -6,7 +6,6 @@ import edu.gemini.itc.shared.*;
 import edu.gemini.spModel.gemini.gnirs.GNIRSParams;
 import scala.Option;
 import scala.Some;
-import scala.Tuple2;
 import scala.collection.JavaConversions;
 
 import java.util.ArrayList;
@@ -53,8 +52,7 @@ public final class GnirsRecipe implements SpectroscopyRecipe {
         Validation.validate(instrument, _obsDetailParameters, _sdParameters);
     }
 
-    public ItcSpectroscopyResult serviceResult(SpectroscopyResult res) {
-        final GnirsSpectroscopyResult r = (GnirsSpectroscopyResult) res;
+    public ItcSpectroscopyResult serviceResult(final SpectroscopyResult r) {
         final List<SpcChartData> dataSets = new ArrayList<SpcChartData>() {{
             if (instrument.XDisp_IsUsed()) {
                 add(createGnirsSignalChart(r));
@@ -67,7 +65,7 @@ public final class GnirsRecipe implements SpectroscopyRecipe {
         return Recipe$.MODULE$.serviceResult(r, dataSets);
     }
 
-    public GnirsSpectroscopyResult calculateSpectroscopy() {
+    public SpectroscopyResult calculateSpectroscopy() {
         // Module 1b
         // Define the source energy (as function of wavelength).
         //
@@ -140,12 +138,12 @@ public final class GnirsRecipe implements SpectroscopyRecipe {
                 _obsDetailParameters.getSkyApertureDiameter());
 
         if (instrument.XDisp_IsUsed()) {
-            final VisitableSampledSpectrum[] sedOrder = new VisitableSampledSpectrum[6];
+            final VisitableSampledSpectrum[] sedOrder = new VisitableSampledSpectrum[ORDERS];
             for (int i = 0; i < ORDERS; i++) {
                 sedOrder[i] = (VisitableSampledSpectrum) sed.clone();
             }
 
-            final VisitableSampledSpectrum[] skyOrder = new VisitableSampledSpectrum[6];
+            final VisitableSampledSpectrum[] skyOrder = new VisitableSampledSpectrum[ORDERS];
             for (int i = 0; i < ORDERS; i++) {
                 skyOrder[i] = (VisitableSampledSpectrum) sky.clone();
             }
@@ -205,6 +203,14 @@ public final class GnirsRecipe implements SpectroscopyRecipe {
                 finalS2NOrder[i] = (VisitableSampledSpectrum) specS2N.getFinalS2NSpectrum().clone();
             }
 
+            final SpecS2N[] specS2Narr = new SpecS2N[ORDERS];
+            for (int i = 0; i < ORDERS; i++) {
+                final SpecS2N s2n = new GnirsSpecS2N(im_qual, _obsDetailParameters.getSourceFraction(), ap_diam, signalOrder[i], backGroundOrder[i], null, finalS2NOrder[i]);
+                specS2Narr[i] = s2n;
+            }
+
+            return new SpectroscopyResult(p, instrument, SFcalc, IQcalc, specS2Narr, st, Option.<AOSystem>empty());
+
         } else {
 
             sed.accept(instrument.getGratingOrderNTransmission(instrument.getOrder()));
@@ -216,36 +222,85 @@ public final class GnirsRecipe implements SpectroscopyRecipe {
 
             sed.accept(specS2N);
 
+            final SpecS2N[] specS2Narr = new SpecS2N[] {specS2N};
+            return new SpectroscopyResult(p, instrument, SFcalc, IQcalc, specS2Narr, st, Option.<AOSystem>empty());
         }
 
-        final SpecS2N[] specS2Narr = new SpecS2N[] {specS2N};
-        return new GnirsSpectroscopyResult(p, instrument, SFcalc, IQcalc, specS2Narr, st, Option.<AOSystem>empty(), signalOrder, backGroundOrder, finalS2NOrder);
 
     }
 
     // == GNIRS CHARTS
 
-    private static SpcChartData createGnirsSignalChart(final GnirsSpectroscopyResult result) {
+    private static SpcChartData createGnirsSignalChart(final SpectroscopyResult result) {
         final String title = "Signal and Background in software aperture of " + result.specS2N()[0].getSpecNpix() + " pixels";
         final String xAxis = "Wavelength (nm)";
         final String yAxis = "e- per exposure per spectral pixel";
         final List<SpcSeriesData> data = new ArrayList<>();
         for (int i = 0; i < GnirsRecipe.ORDERS; i++) {
-            data.add(new SpcSeriesData(SignalData.instance(),     "Signal Order "           + (i + 3), result.signalOrder()[i].getData(),     new Some<>(ITCChart.colorByIndex(2*i    ))));
-            data.add(new SpcSeriesData(BackgroundData.instance(), "SQRT(Background) Order " + (i + 3), result.backGroundOrder()[i].getData(), new Some<>(ITCChart.colorByIndex(2*i + 1))));
+            data.add(new SpcSeriesData(SignalData.instance(),     "Signal Order "           + (i + 3), result.specS2N()[i].getSignalSpectrum().getData(),     new Some<>(ITCChart.colorByIndex(2*i    ))));
+            data.add(new SpcSeriesData(BackgroundData.instance(), "SQRT(Background) Order " + (i + 3), result.specS2N()[i].getBackgroundSpectrum().getData(), new Some<>(ITCChart.colorByIndex(2*i + 1))));
         }
         return new SpcChartData(SignalChart.instance(), title, xAxis, yAxis, JavaConversions.asScalaBuffer(data).toList());
     }
 
-    private static SpcChartData createGnirsS2NChart(final GnirsSpectroscopyResult result) {
+    private static SpcChartData createGnirsS2NChart(final SpectroscopyResult result) {
         final String title = "Final S/N";
         final String xAxis = "Wavelength (nm)";
         final String yAxis = "Signal / Noise per spectral pixel";
         final List<SpcSeriesData> data = new ArrayList<>();
         for (int i = 0; i < GnirsRecipe.ORDERS; i++) {
-           data.add(new SpcSeriesData(FinalS2NData.instance(),   "Final S/N Order "        + (i + 3), result.finalS2NOrder()[i].getData(),     new Some<>(ITCChart.colorByIndex(2*i))));
+           data.add(new SpcSeriesData(FinalS2NData.instance(),   "Final S/N Order "        + (i + 3), result.specS2N()[i].getFinalS2NSpectrum().getData(),     new Some<>(ITCChart.colorByIndex(2*i))));
         }
         return new SpcChartData(S2NChart.instance(), title, xAxis, yAxis, JavaConversions.asScalaBuffer(data).toList());
+    }
+
+    class GnirsSpecS2N implements SpecS2N {
+
+        private final VisitableSampledSpectrum signal;
+        private final VisitableSampledSpectrum background;
+        private final VisitableSampledSpectrum exps2n;
+        private final VisitableSampledSpectrum fins2n;
+        private final double iq;
+        private final double fracWithSource;
+        private final double nPix;
+
+        public GnirsSpecS2N(double iq, double fracWithSource, double nPix, VisitableSampledSpectrum signal, VisitableSampledSpectrum background, VisitableSampledSpectrum exps2n, VisitableSampledSpectrum fins2n) {
+            this.iq = iq;
+            this.fracWithSource = fracWithSource;
+            this.nPix = nPix;
+            this.signal = signal;
+            this.background = background;
+            this.exps2n = exps2n;
+            this.fins2n = fins2n;
+        }
+
+        @Override public VisitableSampledSpectrum getSignalSpectrum() {
+            return signal;
+        }
+
+        @Override public VisitableSampledSpectrum getBackgroundSpectrum() {
+            return background;
+        }
+
+        @Override public VisitableSampledSpectrum getExpS2NSpectrum() {
+            return exps2n;
+        }
+
+        @Override public VisitableSampledSpectrum getFinalS2NSpectrum() {
+            return fins2n;
+        }
+
+        @Override public double getImageQuality() {
+            return iq;
+        }
+
+        @Override public double getSpecFracWithSource() {
+            return fracWithSource;
+        }
+
+        @Override public double getSpecNpix() {
+            return nPix;
+        }
     }
 
 }

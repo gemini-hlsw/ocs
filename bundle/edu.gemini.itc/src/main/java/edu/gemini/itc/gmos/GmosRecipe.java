@@ -3,15 +3,9 @@ package edu.gemini.itc.gmos;
 import edu.gemini.itc.base.*;
 import edu.gemini.itc.operation.*;
 import edu.gemini.itc.shared.*;
-import edu.gemini.spModel.gemini.gmos.GmosNorthType;
-import edu.gemini.spModel.gemini.gmos.GmosSouthType;
-import edu.gemini.spModel.gemini.gmos.InstGmosNorth;
-import edu.gemini.spModel.gemini.gmos.InstGmosSouth;
+import scala.Option;
 import scala.Some;
-import scala.Tuple2;
 import scala.collection.JavaConversions;
-import scalaz.NonEmptyList;
-import scalaz.NonEmptyList$;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -244,7 +238,7 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
 
         }
 
-        return SpectroscopyResult$.MODULE$.apply(p, instrument, SFcalc, IQcalc, specS2N, st);
+        return new SpectroscopyResult(p, instrument, SFcalc, IQcalc, specS2N, st, Option.empty());
 
     }
 

@@ -177,7 +177,7 @@ public final class NiriRecipe implements ImagingRecipe, SpectroscopyRecipe {
 
         final SpecS2N[] specS2Narr = new SpecS2N[1];
         specS2Narr[0] = specS2N;
-        return new GenericSpectroscopyResult(p, instrument, SFcalc, IQcalc, specS2Narr, st, altair);
+        return new SpectroscopyResult(p, instrument, SFcalc, IQcalc, specS2Narr, st, altair);
     }
 
     public ImagingResult calculateImaging() {

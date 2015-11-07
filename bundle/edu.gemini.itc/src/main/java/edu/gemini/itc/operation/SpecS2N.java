@@ -14,6 +14,7 @@ public interface SpecS2N {
     VisitableSampledSpectrum getExpS2NSpectrum();
     VisitableSampledSpectrum getFinalS2NSpectrum();
 
+    // TODO: this stuff can be taken from other places, instrument etc, does not need to be on this interface!
     double getImageQuality();
     double getSpecFracWithSource();
     double getSpecNpix();
