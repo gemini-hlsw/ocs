@@ -2,6 +2,8 @@ import OcsKeys._
 
 name := "ocs"
 
+organization := "edu.gemini.ocs"
+
 ocsVersion in ThisBuild := OcsVersion("2016A", true, 1, 1, 1)
 
 pitVersion in ThisBuild := OcsVersion("2016A", false, 1, 1, 0)

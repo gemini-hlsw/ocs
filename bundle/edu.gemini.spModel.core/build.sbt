@@ -38,3 +38,17 @@ scalacOptions in (Compile, doc) ++= Seq(
   "-sourcepath", (baseDirectory in LocalRootProject).value.getAbsolutePath, 
   "-doc-source-url", "https://github.com/gemini-hlws/ocs/master€{FILE_PATH}.scala" 
 )
+
+publishArtifact in (ThisBuild, packageSrc) := true
+
+publishMavenStyle in ThisBuild := true
+
+// Add your credentials to the artifactory repository
+publishTo := {
+    val repo = if (isSnapshot.value) {
+      "libs-snapshot-local"
+    } else {
+      "libs-release-local"
+    }
+    Some("Gemini Artifactory" at s"http://sbfosxdev-mp1.cl.gemini.edu:8081/artifactory/$repo")
+  }
