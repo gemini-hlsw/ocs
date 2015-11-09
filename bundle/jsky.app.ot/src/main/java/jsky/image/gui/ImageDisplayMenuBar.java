@@ -1,14 +1,5 @@
-/*
- * Copyright 2002 Association for Universities for Research in Astronomy, Inc.,
- * Observatory Control System, Gemini Telescopes Project.
- */
-
 package jsky.image.gui;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.text.NumberFormat;
 import java.util.Locale;
 
@@ -16,8 +7,6 @@ import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import javax.swing.event.MenuEvent;
 import javax.swing.event.MenuListener;
 
@@ -64,13 +53,9 @@ public class ImageDisplayMenuBar extends JMenuBar {
     private final JMenu _goMenu;
     private final JMenu _graphicsMenu;
 
-    /** File menu items needed externally. **/
-    private final JMenuItem _newWindowMenuItem;
-
     /** View menu items needed externally. **/
     private final JMenuItem _imagePropertiesMenuItem;
     private final JMenuItem _fitsKeywordsMenuItem;
-    private final JMenuItem _fitsExtensionsMenuItem;
     private final JMenuItem _pickObjectMenuItem;
 
 
@@ -86,14 +71,12 @@ public class ImageDisplayMenuBar extends JMenuBar {
         _toolBar = toolBar;
 
         /** FILE MENU **/
-        _newWindowMenuItem = createFileNewWindowMenuItem();
         _fileMenu = createFileMenu();
         add(_fileMenu);
 
         /** VIEW MENU **/
         _imagePropertiesMenuItem = createViewImagePropertiesMenuItem();
         _fitsKeywordsMenuItem    = createViewFitsKeywordsMenuItem();
-        _fitsExtensionsMenuItem  = createViewFitsKeywordsMenuItem();
         _pickObjectMenuItem      = createViewPickObjectMenuItem();
         add(_viewMenu = createViewMenu());
 
@@ -115,25 +98,21 @@ public class ImageDisplayMenuBar extends JMenuBar {
         });
 
         // keep the Go history menu up to date
-        imageDisplay.addChangeListener(new ChangeListener() {
-            public void stateChanged(ChangeEvent ce) {
-                final ImageChangeEvent e = (ImageChangeEvent) ce;
-                if (e.isNewImage() && !e.isBefore()) {
-                    _goMenu.removeAll();
-                    createGoMenu(_goMenu);
+        imageDisplay.addChangeListener(ce -> {
+            final ImageChangeEvent e = (ImageChangeEvent) ce;
+            if (e.isNewImage() && !e.isBefore()) {
+                _goMenu.removeAll();
+                createGoMenu(_goMenu);
 
-                    // enable/disable some items
-                    if (imageDisplay.getFitsImage() != null) {
-                        _fitsExtensionsMenuItem.setEnabled(true);
-                        _fitsKeywordsMenuItem.setEnabled(true);
-                        _pickObjectMenuItem.setEnabled(true);
-                        _imagePropertiesMenuItem.setEnabled(false);
-                    } else {
-                        _fitsExtensionsMenuItem.setEnabled(false);
-                        _fitsKeywordsMenuItem.setEnabled(false);
-                        _pickObjectMenuItem.setEnabled(false);
-                        _imagePropertiesMenuItem.setEnabled(true);
-                    }
+                // enable/disable some items
+                if (imageDisplay.getFitsImage() != null) {
+                    _fitsKeywordsMenuItem.setEnabled(true);
+                    _pickObjectMenuItem.setEnabled(true);
+                    _imagePropertiesMenuItem.setEnabled(false);
+                } else {
+                    _fitsKeywordsMenuItem.setEnabled(false);
+                    _pickObjectMenuItem.setEnabled(false);
+                    _imagePropertiesMenuItem.setEnabled(true);
                 }
             }
         });
@@ -172,7 +151,6 @@ public class ImageDisplayMenuBar extends JMenuBar {
         menu.add(_imageDisplay.getPrintPreviewAction());
         menu.add(_imageDisplay.getPrintAction());
         menu.addSeparator();
-        menu.add(_newWindowMenuItem);
         menu.add(createFileCloseMenuItem());
         return menu;
     }
@@ -183,11 +161,7 @@ public class ImageDisplayMenuBar extends JMenuBar {
      */
     protected JMenuItem createFileOpenURLMenuItem() {
         final JMenuItem menuItem = new JMenuItem(_I18N.getString("openURL"));
-        menuItem.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent ae) {
-                _imageDisplay.openURL();
-            }
-        });
+        menuItem.addActionListener(ae -> _imageDisplay.openURL());
         return menuItem;
     }
 
@@ -196,25 +170,7 @@ public class ImageDisplayMenuBar extends JMenuBar {
      */
     protected JMenuItem createFileClearImageMenuItem() {
         final JMenuItem menuItem = new JMenuItem(_I18N.getString("clearImage"));
-        menuItem.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent ae) {
-                _imageDisplay.clear();
-            }
-        });
-        return menuItem;
-    }
-
-
-    /**
-     * Create the File => "New Window" menu item
-     */
-    protected JMenuItem createFileNewWindowMenuItem() {
-        final JMenuItem menuItem = new JMenuItem(_I18N.getString("newWindow"));
-        menuItem.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent ae) {
-                _imageDisplay.newWindow();
-            }
-        });
+        menuItem.addActionListener(ae -> _imageDisplay.clear());
         return menuItem;
     }
 
@@ -224,11 +180,7 @@ public class ImageDisplayMenuBar extends JMenuBar {
      */
     protected JMenuItem createFileCloseMenuItem() {
         final JMenuItem menuItem = new JMenuItem(_I18N.getString("close"));
-        menuItem.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent ae) {
-                _imageDisplay.close();
-            }
-        });
+        menuItem.addActionListener(ae -> _imageDisplay.close());
         return menuItem;
     }
 
@@ -244,7 +196,6 @@ public class ImageDisplayMenuBar extends JMenuBar {
         menu.add(_imageDisplay.getColorsAction());
         menu.add(_imageDisplay.getCutLevelsAction());
         menu.add(_pickObjectMenuItem);
-        menu.add(_fitsExtensionsMenuItem);
         menu.add(_fitsKeywordsMenuItem);
         menu.add(_imagePropertiesMenuItem);
         menu.addSeparator();
@@ -261,12 +212,10 @@ public class ImageDisplayMenuBar extends JMenuBar {
         final JCheckBoxMenuItem menuItem = new JCheckBoxMenuItem(_I18N.getString("toolbar"));
         final String prefName = getClass().getName() + ".ShowToolBar";
 
-        menuItem.addItemListener(new ItemListener() {
-            public void itemStateChanged(ItemEvent e) {
-                final JCheckBoxMenuItem rb = (JCheckBoxMenuItem) e.getSource();
-                _toolBar.setVisible(rb.getState());
-                Preferences.set(prefName, rb.getState());
-            }
+        menuItem.addItemListener(e -> {
+            final JCheckBoxMenuItem rb = (JCheckBoxMenuItem) e.getSource();
+            _toolBar.setVisible(rb.getState());
+            Preferences.set(prefName, rb.getState());
         });
 
         menuItem.setState(Preferences.get(prefName, true));
@@ -279,11 +228,7 @@ public class ImageDisplayMenuBar extends JMenuBar {
      */
     protected JMenuItem createViewPickObjectMenuItem() {
         final JMenuItem menuItem = new JMenuItem(_I18N.getString("pickObjects"));
-        menuItem.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent ae) {
-                _imageDisplay.pickObject();
-            }
-        });
+        menuItem.addActionListener(ae -> _imageDisplay.pickObject());
         return menuItem;
     }
 
@@ -293,11 +238,7 @@ public class ImageDisplayMenuBar extends JMenuBar {
      */
     protected JMenuItem createViewFitsKeywordsMenuItem() {
         final JMenuItem menuItem = new JMenuItem(_I18N.getString("fitsKeywords"));
-        menuItem.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent ae) {
-                _imageDisplay.viewFitsKeywords();
-            }
-        });
+        menuItem.addActionListener(ae -> _imageDisplay.viewFitsKeywords());
         return menuItem;
     }
 
@@ -307,11 +248,7 @@ public class ImageDisplayMenuBar extends JMenuBar {
      */
     protected JMenuItem createViewImagePropertiesMenuItem() {
         final JMenuItem menuItem = new JMenuItem(_I18N.getString("imageProps"));
-        menuItem.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent ae) {
-                _imageDisplay.viewImageProperties();
-            }
-        });
+        menuItem.addActionListener(ae -> _imageDisplay.viewImageProperties());
         return menuItem;
     }
 
@@ -323,13 +260,11 @@ public class ImageDisplayMenuBar extends JMenuBar {
         final JCheckBoxMenuItem menuItem = new JCheckBoxMenuItem(_I18N.getString("smoothScrolling"));
         final String prefName = getClass().getName() + ".SmoothScrolling";
 
-        menuItem.addItemListener(new ItemListener() {
-            public void itemStateChanged(ItemEvent e) {
-                final JCheckBoxMenuItem rb = (JCheckBoxMenuItem) e.getSource();
-                _imageDisplay.setImmediateMode(rb.getState());
-                _imageDisplay.updateImage();
-                Preferences.set(prefName, rb.getState());
-            }
+        menuItem.addItemListener(e -> {
+            final JCheckBoxMenuItem rb = (JCheckBoxMenuItem) e.getSource();
+            _imageDisplay.setImmediateMode(rb.getState());
+            _imageDisplay.updateImage();
+            Preferences.set(prefName, rb.getState());
         });
 
         menuItem.setState(Preferences.get(prefName, true));
@@ -357,12 +292,10 @@ public class ImageDisplayMenuBar extends JMenuBar {
      */
     protected JMenuItem createGoClearHistoryMenuItem() {
         final JMenuItem menuItem = new JMenuItem(_I18N.getString("clearHistory"));
-        menuItem.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent ae) {
-                _imageDisplay.clearHistory();
-                _goMenu.removeAll();
-                createGoMenu(_goMenu);
-            }
+        menuItem.addActionListener(ae -> {
+            _imageDisplay.clearHistory();
+            _goMenu.removeAll();
+            createGoMenu(_goMenu);
         });
         return menuItem;
     }
@@ -402,11 +335,6 @@ public class ImageDisplayMenuBar extends JMenuBar {
     /** Return the handle for the Graphics menu */
     public JMenu getGraphicsMenu() {
         return _graphicsMenu;
-    }
-
-    /** Return the File => "New Window" menu item */
-    public JMenuItem getNewWindowMenuItem() {
-        return _newWindowMenuItem;
     }
 
     /** Return the Pick Object menu item */

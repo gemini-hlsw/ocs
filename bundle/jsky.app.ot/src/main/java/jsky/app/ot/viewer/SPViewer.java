@@ -1,10 +1,3 @@
-/*
- * Copyright 2003 Association for Universities for Research in Astronomy, Inc.,
- * Observatory Control System, Gemini Telescopes Project.
- *
- * $Id: SPViewer.java 47000 2012-07-26 19:15:10Z swalker $
- */
-
 package jsky.app.ot.viewer;
 
 import edu.gemini.p2checker.api.IP2Problems;

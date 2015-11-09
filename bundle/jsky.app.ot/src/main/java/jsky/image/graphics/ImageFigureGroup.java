@@ -1,19 +1,10 @@
-/*
- * Copyright 2000 Association for Universities for Research in Astronomy, Inc.,
- * Observatory Control System, Gemini Telescopes Project.
- *
- * $Id: ImageFigureGroup.java 4414 2004-02-03 16:21:36Z brighton $
- */
-
 package jsky.image.graphics;
 
 import diva.canvas.CompositeFigure;
 import diva.canvas.Figure;
 import diva.canvas.interactor.Interactor;
 
-import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.ListIterator;
 
@@ -22,7 +13,6 @@ import jsky.graphics.CanvasFigureGroup;
 import jsky.graphics.CanvasFigureListener;
 import jsky.graphics.CanvasFigureListenerManager;
 import diva.canvas.interactor.SelectionInteractor;
-
 
 /**
  * Represents a group of figures, that are treated like a single figure.
@@ -39,7 +29,7 @@ public class ImageFigureGroup extends CompositeFigure implements CanvasFigureGro
     protected CanvasFigureListenerManager listenerManager;
 
     /** Optional linked list of slave figures, which should be moved with this figure. */
-    protected LinkedList slaves;
+    protected final LinkedList<CanvasFigure> slaves = new LinkedList<>();
 
 
     /**
@@ -122,8 +112,6 @@ public class ImageFigureGroup extends CompositeFigure implements CanvasFigureGro
 
     /** Add a slave figure. When this figure is moved, the slaves will also move. */
     public void addSlave(CanvasFigure fig) {
-        if (slaves == null)
-            slaves = new LinkedList();
         slaves.add(fig);
     }
 

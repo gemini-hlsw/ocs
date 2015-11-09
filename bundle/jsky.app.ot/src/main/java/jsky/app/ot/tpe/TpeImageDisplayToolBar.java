@@ -1,12 +1,13 @@
 package jsky.app.ot.tpe;
 
+import jsky.image.gui.ImageDisplayToolBar;
+
 import javax.swing.*;
-import jsky.navigator.NavigatorImageDisplayToolBar;
 
 /**
  * A tool bar for the image display window.
  */
-public class TpeImageDisplayToolBar extends NavigatorImageDisplayToolBar {
+public class TpeImageDisplayToolBar extends ImageDisplayToolBar {
 
     // toolbar buttons
     private JButton skyImageButton;
@@ -22,7 +23,9 @@ public class TpeImageDisplayToolBar extends NavigatorImageDisplayToolBar {
     /**
      * Add the items to the tool bar.
      */
-    protected void addToolBarItems() {
+    @Override
+    public void addToolBarItems() {
+        // This is very poor. This is called during the super constructor, not after the main constructor completes...
         super.addToolBarItems();
 
         addSeparator();
@@ -42,7 +45,7 @@ public class TpeImageDisplayToolBar extends NavigatorImageDisplayToolBar {
      */
     protected JButton makeManualGuideStarButton() {
         if (manualGuideStarButton == null) {
-            final AbstractAction a = ((TpeImageWidget)imageDisplay).getManualGuideStarAction();
+            final AbstractAction a = ((TpeImageWidget)getImageDisplay()).getManualGuideStarAction();
             manualGuideStarButton = makeButton((String)a.getValue(Action.SHORT_DESCRIPTION), a);
         }
 
@@ -60,7 +63,7 @@ public class TpeImageDisplayToolBar extends NavigatorImageDisplayToolBar {
      */
     protected JButton makeImageButton() {
         if (skyImageButton == null) {
-            final AbstractAction a = ((TpeImageWidget)imageDisplay).getSkyImageAction();
+            final AbstractAction a = ((TpeImageWidget)getImageDisplay()).getSkyImageAction();
             skyImageButton = makeButton((String)a.getValue(Action.SHORT_DESCRIPTION), a);
         }
 

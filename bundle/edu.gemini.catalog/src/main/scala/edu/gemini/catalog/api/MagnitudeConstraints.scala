@@ -1,9 +1,7 @@
 package edu.gemini.catalog.api
 
-import edu.gemini.catalog.api.MagnitudeLimits.{SaturationLimit, FaintnessLimit}
 import edu.gemini.spModel.core.SiderealTarget
-import edu.gemini.spModel.core.{SingleBand, BandsList, MagnitudeBand, Magnitude}
-import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.Conditions
+import edu.gemini.spModel.core.{BandsList, MagnitudeBand, Magnitude}
 
 import scalaz._
 import Scalaz._
@@ -95,18 +93,5 @@ case class MagnitudeConstraints(searchBands: BandsList, faintnessConstraint: Fai
     val fl = f(faintnessConstraint.brightness)
     val sl = saturationConstraint.map(_.brightness).map(f)
     MagnitudeConstraints(searchBands, FaintnessConstraint(fl), sl.map(SaturationConstraint.apply))
-  }
-}
-
-object MagnitudeConstraints {
-
-  // Only used when constructing magnitude limits on the TPE. Should not be needed when using the new catalog navigator
-  @Deprecated
-  def conditionsAdjustmentForJava(limits: MagnitudeLimits, conditions: Conditions): MagnitudeLimits = {
-    import edu.gemini.pot.ModelConverters._
-    import edu.gemini.shared.util.immutable.ScalaConverters._
-
-    val mc = conditions.adjust(MagnitudeConstraints(SingleBand(limits.getBand.toNewModel), FaintnessConstraint(limits.getFaintnessLimit.getBrightness), limits.getSaturationLimit.asScalaOpt.map(s => SaturationConstraint(s.getBrightness))))
-    new MagnitudeLimits(limits.getBand, new FaintnessLimit(mc.faintnessConstraint.brightness), mc.saturationConstraint.map(s => new SaturationLimit(s.brightness)).asGeminiOpt)
   }
 }

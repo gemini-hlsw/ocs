@@ -1,13 +1,3 @@
-/*
- * ESO Archive
- *
- * $Id: StatusPanel.java 38711 2011-11-15 13:35:55Z swalker $
- *
- * who             when        what
- * --------------  ----------  ----------------------------------------
- * Allan Brighton  2000/01/23  Created
- */
-
 package jsky.util.gui;
 
 import java.awt.BorderLayout;

@@ -1,12 +1,3 @@
-/*
- * Copyright 2000 Association for Universities for Research in Astronomy, Inc.,
- * Observatory Control System, Gemini Telescopes Project.
- *
- * (Modified from NASA/SEA classes.)
- *
- * $Id: ImagePrintDialog.java 5636 2004-12-07 10:41:29Z brighton $
- */
-
 package jsky.image.gui;
 
 import java.awt.Color;
@@ -34,7 +25,6 @@ import jsky.util.gui.SwingWorker;
 import jsky.util.gui.DialogUtil;
 import jsky.util.gui.PrintPreview;
 import jsky.util.gui.ProgressPanel;
-
 
 /**
  * Displays a print dialog box for printing the current image display
@@ -140,9 +130,9 @@ public class ImagePrintDialog implements Printable, ActionListener {
         String printer = Preferences.get(prefKey);
         if (printer != null) {
             PrintService[] ar = PrintServiceLookup.lookupPrintServices(null, null);
-            for (int i = 0; i < ar.length; i++) {
-                if (printer.equals(ar[i].getName())) {
-                    _printerJob.setPrintService(ar[i]);
+            for (PrintService anAr : ar) {
+                if (printer.equals(anAr.getName())) {
+                    _printerJob.setPrintService(anAr);
                     break;
                 }
             }

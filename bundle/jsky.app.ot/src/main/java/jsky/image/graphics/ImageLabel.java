@@ -1,10 +1,3 @@
-/*
- * Copyright 2000 Association for Universities for Research in Astronomy, Inc.,
- * Observatory Control System, Gemini Telescopes Project.
- *
- * $Id: ImageLabel.java 4414 2004-02-03 16:21:36Z brighton $
- */
-
 package jsky.image.graphics;
 
 import java.awt.AlphaComposite;
@@ -12,7 +5,6 @@ import java.awt.Composite;
 import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.Paint;
-import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.LinkedList;
@@ -45,8 +37,8 @@ public class ImageLabel extends LabelFigure implements CanvasFigure {
     protected CanvasFigureListenerManager listenerManager;
 
     /** Optional linked list of slave figures, which should be moved with this figure. */
-    protected LinkedList slaves;
-
+    protected final LinkedList<CanvasFigure> slaves = new LinkedList<>()
+;
     /** Make sure composites from other figures are not used here */
     protected Composite composite = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1.0F);
 
@@ -136,8 +128,6 @@ public class ImageLabel extends LabelFigure implements CanvasFigure {
 
     /** Add a slave figure. When this figure is moved, the slaves will also move. */
     public void addSlave(CanvasFigure fig) {
-        if (slaves == null)
-            slaves = new LinkedList();
         slaves.add(fig);
     }
 

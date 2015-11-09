@@ -7,10 +7,11 @@ import java.awt.geom.Rectangle2D;
 
 import javax.swing.JPanel;
 
+import edu.gemini.shared.skyobject.SkyObject;
+import edu.gemini.shared.util.immutable.Option;
 import jsky.catalog.TablePlotSymbol;
 import jsky.catalog.TableQueryResult;
 import jsky.coords.CoordinateConverter;
-import jsky.graphics.CanvasGraphics;
 
 /**
  * This defines the interface for plotting the contents of a catalog table.
@@ -38,6 +39,8 @@ public interface TablePlotter {
     /** Select the symbol corresponding to the given table row */
     void selectSymbol(TableQueryResult table, int tableRow);
 
+    void deselectAll(TableQueryResult table);
+
     /** Deselect the symbol corresponding to the given table row */
     void deselectSymbol(TableQueryResult table, int tableRow);
 
@@ -53,28 +56,18 @@ public interface TablePlotter {
      */
     TablePlotSymbol[] getPlotSymbolInfo(TableQueryResult table);
 
-
     /**
      * If the given argument is false, hide all plot symbols managed by this object,
      * otherwise show them again.
      */
     void setVisible(boolean isVisible);
 
-    /** Set the object to use to draw catalog symbols */
-    void setCanvasGraphics(CanvasGraphics canvasGraphics);
-
-    /** Return the object to use to draw catalog symbols */
-    CanvasGraphics getCanvasGraphics();
-
-    /** Set the object used to convert to screen coordinates for drawing */
-    void setCoordinateConverter(CoordinateConverter c);
-
     /**
      * If the given screen coordinates point is within a displayed catalog symbol, set it to
      * point to the center of the symbol and return the name and coordinates
      * from the catalog table row. Otherwise, return null and do nothing.
      */
-    NamedCoordinates getCatalogPosition(Point2D.Double p);
+    Option<SkyObject> getCatalogObjectAt(Point2D.Double p);
 
     /** Return the object used to convert to screen coordinates for drawing */
     CoordinateConverter getCoordinateConverter();

@@ -76,13 +76,6 @@ public class RowCoordinates {
     public RowCoordinates() {
     }
 
-
-    /** Return true if coordinate columns, such as (ra, dec), were defined */
-    public boolean hasCoordinates() {
-        return (isWcs || isPix);
-    }
-
-
     /** Return true if the catalog has RA and DEC coordinate columns */
     public boolean isWCS() {
         return isWcs;
@@ -97,7 +90,6 @@ public class RowCoordinates {
     public boolean isPix() {
         return isPix;
     }
-
 
     /** Return a Coordinates object for the given row vector, or null if not found */
     public Coordinates getCoordinates(Vector<Object> row) {
@@ -130,16 +122,6 @@ public class RowCoordinates {
         return null;
     }
 
-    /** Return the column index for the X coordinate, or -1 if not known. */
-    public int getXCol() {
-        return xCol;
-    }
-
-    /** Return the column index for the Y coordinate, or -1 if not known. */
-    public int getYCol() {
-        return yCol;
-    }
-
     /** Return the column index for the RA coordinate, or -1 if not known. */
     public int getRaCol() {
         return xCol;
@@ -153,11 +135,6 @@ public class RowCoordinates {
     /** Return the value of the equinox for world coordinates, if it is known (default: 2000). */
     public double getEquinox() {
         return equinox;
-    }
-
-    /** Return the Index of a column containing the equnox for each row, or -1 if it is constant. */
-    public int getEquinoxCol() {
-        return equinoxCol;
     }
 
     /** Return the column containing the object id, or -1 if there isn't one. */

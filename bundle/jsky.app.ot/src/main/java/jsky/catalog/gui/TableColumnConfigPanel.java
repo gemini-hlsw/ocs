@@ -1,15 +1,7 @@
-// Copyright 2001 Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-//
-// $Id: TableColumnConfigPanel.java 4414 2004-02-03 16:21:36Z brighton $
-//
-
 package jsky.catalog.gui;
 
 import java.awt.BorderLayout;
 import java.awt.Font;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Vector;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -18,7 +10,6 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 
 import jsky.util.I18N;
-
 
 /**
  * A panel for choosing which table columns to display.

@@ -1,9 +1,3 @@
-// Copyright 1997 Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-// See the file LICENSE for complete details.
-//
-// $Id: TpeMouseEvent.java 23553 2010-01-22 19:24:12Z swalker $
-//
 package jsky.app.ot.tpe;
 
 import edu.gemini.shared.skyobject.SkyObject;
@@ -50,9 +44,6 @@ public class TpeMouseEvent {
     /** Optional object name or id */
     public String name;
 
-    /** Optional string describing the object's brightness */
-    private Option<String> brightness = None.instance();
-
     // Optional details of the object.
     private Option<SkyObject> skyObject = None.instance();
 
@@ -65,15 +56,6 @@ public class TpeMouseEvent {
     /** Default Constructor: initialize all fields to null. */
     public TpeMouseEvent(MouseEvent e) {
         mouseEvent = e;
-    }
-
-    public Option<String> getBrightness() {
-        return brightness;
-    }
-
-    public void setBrightness(Option<String> brightness) {
-        if (brightness == null) throw new IllegalArgumentException();
-        this.brightness = brightness;
     }
 
     public Option<SkyObject> getSkyObject() {
@@ -112,7 +94,6 @@ public class TpeMouseEvent {
                 + ", yWidget=" + yWidget
                 + ", pos=" + pos
                 + ", name=" + (name != null ? name : "<null>")
-                + ", brightness=" + (brightness.isEmpty() ? "<null>" : brightness.getValue())
                 + ", xOffset=" + xOffset
                 + ", yOffset=" + yOffset + "]";
     }

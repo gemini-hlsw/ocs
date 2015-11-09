@@ -20,19 +20,19 @@ import java.awt.geom.Point2D;
  * @version $Revision: 4416 $
  * @author Allan Brighton
  */
-public abstract interface CanvasGraphics {
+public interface CanvasGraphics {
 
     /** Constant indicating that a figure may be selected */
-    public static final int SELECT = 1;
+    int SELECT = 1;
 
     /** Constant indicating that a figure may be moved */
-    public static final int MOVE = 2;
+    int MOVE = 2;
 
     /** Constant indicating that a figure may be resized */
-    public static final int RESIZE = 4;
+    int RESIZE = 4;
 
     /** Constant indicating that a figure may be rotated */
-    public static final int ROTATE = 8;
+    int ROTATE = 8;
 
 
     /**
@@ -53,7 +53,7 @@ public abstract interface CanvasGraphics {
      *
      * @return an object representing the figure
      */
-    public CanvasFigure makeFigure(Shape shape, Paint fill, Paint outline, float lineWidth);
+    CanvasFigure makeFigure(Shape shape, Paint fill, Paint outline, float lineWidth);
 
     /**
      * Make and return a labeled figure with the given shape, fill, outline and
@@ -70,7 +70,7 @@ public abstract interface CanvasGraphics {
      *
      * @return an object representing the figure
      */
-    public CanvasFigure makeLabeledFigure(Shape shape, Paint fill, Paint outline, float lineWidth,
+    CanvasFigure makeLabeledFigure(Shape shape, Paint fill, Paint outline, float lineWidth,
                                           String label, int anchor, Paint labelColor, Font font);
 
     /**
@@ -81,51 +81,51 @@ public abstract interface CanvasGraphics {
      * @param color the paint to use to draw the text
      * @param font the font to use for the label
      */
-    public CanvasFigure makeLabel(Point2D.Double pos, String text, Paint color, Font font);
+    CanvasFigure makeLabel(Point2D.Double pos, String text, Paint color, Font font);
 
     /**
      * Make and return a new CanvasFigureGroup object that can be used as a
      * figure container to hold other figures.
      */
-    public CanvasFigureGroup makeFigureGroup();
+    CanvasFigureGroup makeFigureGroup();
 
     /**
      * Add the given figure to the canvas.
      * The figure will remain until removed again by a call to remove().
      */
-    public void add(CanvasFigure fig);
+    void add(CanvasFigure fig);
 
     /**
      * Remove the given figure from the display.
      */
-    public void remove(CanvasFigure fig);
+    void remove(CanvasFigure fig);
 
     /**
      * Select the given figure.
      */
-    public void select(CanvasFigure fig);
+    void select(CanvasFigure fig);
 
     /**
      * Deselect the given figure.
      */
-    public void deselect(CanvasFigure fig);
+    void deselect(CanvasFigure fig);
 
     /**
      * Schedule the removal of the given figure from the display at a later time.
      * This version may be used to avoid problems with iterators working on a
      * a list of figures that should not be modified inside the loop.
      */
-    public void scheduleRemoval(CanvasFigure fig);
+    void scheduleRemoval(CanvasFigure fig);
 
     /**
      * Return the number of figures.
      */
-    public int getFigureCount();
+    int getFigureCount();
 
     /**
      * Transform all graphics according to the given AffineTransform object.
      */
-    public void transform(AffineTransform trans);
+    void transform(AffineTransform trans);
 
     /**
      * Set the interaction mode for the given figure to an OR'ed combination of
@@ -134,16 +134,16 @@ public abstract interface CanvasGraphics {
      * moved, and resized. (Note that MOVE, RESIZE and ROTATE automatically assume
      * SELECT).
      */
-    public void setInteractionMode(CanvasFigure fig, int mode);
+    void setInteractionMode(CanvasFigure fig, int mode);
 
     /**
      * Wait for the user to drag out an area on the canvas and then
      * notify the listener with the coordinates of the box.
      */
-    public void selectArea(SelectedAreaListener l);
+    void selectArea(SelectedAreaListener l);
 
     /**
      * Schedule a repaint of the window containing the graphics.
      */
-    public void repaint();
+    void repaint();
 }

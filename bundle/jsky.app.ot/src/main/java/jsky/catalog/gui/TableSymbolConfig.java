@@ -2,6 +2,7 @@ package jsky.catalog.gui;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.List;
 import java.util.Vector;
 
 import javax.swing.DefaultListModel;
@@ -9,8 +10,6 @@ import javax.swing.Icon;
 import javax.swing.JList;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
 
 import jsky.catalog.Catalog;
@@ -72,6 +71,9 @@ public class TableSymbolConfig extends TableSymbolConfigGUI implements IApplyCan
     public static final int CONDITION = 6;
     public static final int SIZE = 7;
     public static final int UNITS = 8;
+
+    /** Commonly used constants */
+    public static final String MAG = "mag";
 
     /** Display names for units */
     public static final String[] UNIT_NAMES = {
@@ -260,9 +262,8 @@ public class TableSymbolConfig extends TableSymbolConfigGUI implements IApplyCan
         setListData(useList, used);
 
         // List of column variables not used
-        Vector<String> v = _table.getColumnIdentifiers();
-        int size = v.size();
-        Vector<String> ignore = new Vector<>(size);
+        List<String> v = _table.getColumnIdentifiers();
+        Vector<String> ignore = new Vector<>(v.size());
         for (String s : v) {
             if (used == null) {
                 ignore.add(s);

@@ -7,12 +7,9 @@ import javax.swing.*;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- *
- */
 public abstract class AgsSelectorControl {
     public interface Listener {
-        public void agsStrategyUpdated(Option<AgsStrategy> strategy);
+        void agsStrategyUpdated(Option<AgsStrategy> strategy);
     }
 
     private final List<Listener> listeners = new ArrayList<>();

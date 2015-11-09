@@ -5,14 +5,13 @@ import edu.gemini.ags.gems.GemsGuideStars;
 import edu.gemini.pot.ModelConverters;
 import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.spModel.core.SiderealTarget;
+import edu.gemini.spModel.obs.SchedulingBlock;
+import edu.gemini.spModel.obs.context.ObsContext;
 import edu.gemini.spModel.target.env.TargetEnvironment;
 import edu.gemini.spModel.target.obsComp.TargetObsComp;
 import jsky.app.ot.tpe.GemsGuideStarWorker;
 import jsky.app.ot.tpe.TpeImageWidget;
-import jsky.app.ot.tpe.TpeManager;
-import jsky.catalog.Catalog;
 import jsky.catalog.gui.TablePlotter;
-import jsky.catalog.skycat.SkycatConfigFile;
 import jsky.util.Preferences;
 import jsky.util.gui.SwingWorker;
 import jsky.util.gui.DialogUtil;
@@ -134,46 +133,48 @@ public class GemsGuideStarSearchDialog extends JFrame {
     }
 
     private State _state;
-    private GemsGuideStarSearchModel _model;
-    private GemsGuideStarSearchController _controller;
+    private final GemsGuideStarSearchModel _model;
+    private final GemsGuideStarSearchController _controller;
 
     // Button for Query, Analyze, Add
-    private JButton _actionButton;
+    private final JButton _actionButton = new JButton(_queryAction);
 
     // Context dependent message (title)
-    private JLabel _actionLabel;
+    private final JLabel _actionLabel = new JLabel();
 
-    private JComboBox<CatalogChoice> _catalogComboBox;
-    private JComboBox<NirBandChoice> _nirBandComboBox;
-    private JCheckBox _reviewCandidatesCheckBox;
-    private JComboBox<AnalyseChoice> _analyseComboBox;
-    private JCheckBox _allowPosAngleChangesCheckBox;
-    private JTabbedPane _tabbedPane;
-    private JPanel _candidateGuideStarsPanel;
+    private final JComboBox<CatalogChoice> _catalogComboBox = new JComboBox<>(CatalogChoice.values());
+    private final JComboBox<NirBandChoice> _nirBandComboBox = new JComboBox<>(NirBandChoice.values());
+    private final JCheckBox _reviewCandidatesCheckBox = new JCheckBox("Review candidates before asterism search", true);
+    private final JComboBox<AnalyseChoice> _analyseComboBox = new JComboBox<>(AnalyseChoice.values());
+    private final JCheckBox _allowPosAngleChangesCheckBox = new JCheckBox("Allow position angle adjustments", true);
+    private final JTabbedPane _tabbedPane = new JTabbedPane();
+    private final CandidateGuideStarsTable _candidateGuideStarsTable;
 
-    private CandidateGuideStarsTable _candidateGuideStarsTable;
-    private CandidateAsterismsTreeTable _candidateAsterismsTreeTable;
-    private JLabel _paLabel;
+    private final CandidateAsterismsTreeTable _candidateAsterismsTreeTable = new CandidateAsterismsTreeTable();
+    private final JLabel _paLabel = new JLabel();
+    private final GemsGuideStarWorker _worker;
 
-    private GemsGuideStarWorker _worker;
-    private StatusPanel _statusPanel;
+    private final StatusPanel _statusPanel = new StatusPanel();
+    private final TpeImageWidget _tpe;
+
+    private final TablePlotter _plotter;
+    private final JPanel _candidateGuideStarsPanel = new JPanel(new BorderLayout(5, 5));
 
     // Set to true in selection handling
     private boolean _ignoreSelection;
-
-    private TpeImageWidget _tpe;
-    private TablePlotter _plotter;
-
     private TargetEnvironment _savedTargetEnv;
 
-    private static TargetEnvironment getEnvironment(TpeImageWidget tpe) {
+    private TargetEnvironment getEnvironment(TpeImageWidget tpe) {
         return tpe.getContext().targets().envOrDefault();
     }
 
-    public GemsGuideStarSearchDialog() {
+    public GemsGuideStarSearchDialog(TpeImageWidget tpe) {
         super("GeMS Guide Star Search");
-        _tpe = TpeManager.create().getImageWidget();
-        _plotter = _tpe.getNavigator().getPlotter();
+        _tpe = tpe;
+        _plotter = tpe.plotter();
+
+        _candidateGuideStarsTable = new CandidateGuideStarsTable(_plotter);
+
         // TPE REFACTOR -- i suppose we're assuming this isn't created from
         // scratch, in which case we'd have no environment yet
         _savedTargetEnv = getEnvironment(_tpe);
@@ -185,7 +186,7 @@ public class GemsGuideStarSearchDialog extends JFrame {
         _worker = new GemsGuideStarWorker(_statusPanel);
         _statusPanel.setText("");
 
-        _controller = new GemsGuideStarSearchController(_model, _worker, this);
+        _controller = new GemsGuideStarSearchController(_model, _worker, this, _tpe);
         _candidateAsterismsTreeTable.setController(_controller);
 
         setState(State.PRE_QUERY);
@@ -201,7 +202,6 @@ public class GemsGuideStarSearchDialog extends JFrame {
 
         final Insets labelInsets = new Insets(11, 11, 0, 0);
         final Insets valueInsets = new Insets(11, 3, 0, 0);
-        _actionLabel = new JLabel();
         panel.add(_actionLabel, new GridBagConstraints() {{
             gridx = 0;
             gridy = 0;
@@ -218,7 +218,6 @@ public class GemsGuideStarSearchDialog extends JFrame {
         }});
 
         JPanel catalogPanel = new JPanel();
-        _catalogComboBox = new JComboBox<>(CatalogChoice.values());
         catalogPanel.add(_catalogComboBox);
         panel.add(catalogPanel, new GridBagConstraints() {{
             gridx = 1;
@@ -234,7 +233,6 @@ public class GemsGuideStarSearchDialog extends JFrame {
             anchor = EAST;
         }});
 
-        _nirBandComboBox = new JComboBox<>(NirBandChoice.values());
         panel.add(_nirBandComboBox, new GridBagConstraints() {{
             gridx = 3;
             gridy = 1;
@@ -242,7 +240,6 @@ public class GemsGuideStarSearchDialog extends JFrame {
             insets = valueInsets;
         }});
 
-        _reviewCandidatesCheckBox = new JCheckBox("Review candidates before asterism search", true);
         panel.add(_reviewCandidatesCheckBox, new GridBagConstraints() {{
             gridx = 1;
             gridy = 2;
@@ -258,7 +255,6 @@ public class GemsGuideStarSearchDialog extends JFrame {
             anchor = EAST;
         }});
 
-        _analyseComboBox = new JComboBox<>(AnalyseChoice.values());
         panel.add(_analyseComboBox, new GridBagConstraints() {{
             gridx = 1;
             gridy = 4;
@@ -266,7 +262,6 @@ public class GemsGuideStarSearchDialog extends JFrame {
             anchor = WEST;
         }});
 
-        _allowPosAngleChangesCheckBox = new JCheckBox("Allow position angle adjustments", true);
         panel.add(_allowPosAngleChangesCheckBox, new GridBagConstraints() {{
             gridx = 1;
             gridy = 5;
@@ -275,8 +270,8 @@ public class GemsGuideStarSearchDialog extends JFrame {
             insets = valueInsets;
         }});
 
-        _tabbedPane = new JTabbedPane();
-        _tabbedPane.add(_candidateGuideStarsPanel = makeCandidateGuideStarsPanel());
+        makeCandidateGuideStarsPanel();
+        _tabbedPane.add(_candidateGuideStarsPanel);
         _tabbedPane.add(makeCandidateAsterismsPanel());
         panel.add(_tabbedPane, new GridBagConstraints() {{
             gridx = 0;
@@ -298,7 +293,6 @@ public class GemsGuideStarSearchDialog extends JFrame {
         JPanel panel = new JPanel(new BorderLayout());
         panel.add(makeButtonPanel(), BorderLayout.NORTH);
 
-        _statusPanel = new StatusPanel();
         panel.add(_statusPanel, BorderLayout.SOUTH);
 
         return panel;
@@ -426,20 +420,16 @@ public class GemsGuideStarSearchDialog extends JFrame {
     }
 
 
-    private JPanel makeCandidateGuideStarsPanel() {
-        JPanel panel = new JPanel(new BorderLayout(5, 5));
-        panel.setName("Candidate Guide Stars");
-        _candidateGuideStarsTable = new CandidateGuideStarsTable(_plotter);
-        panel.add(_candidateGuideStarsTable, BorderLayout.CENTER);
-        panel.add(new JLabel("Select to view in position editor. Uncheck to exclude from asterism search."),
+    private void makeCandidateGuideStarsPanel() {
+        _candidateGuideStarsPanel.setName("Candidate Guide Stars");
+        _candidateGuideStarsPanel.add(_candidateGuideStarsTable, BorderLayout.CENTER);
+        _candidateGuideStarsPanel.add(new JLabel("Select to view in position editor. Uncheck to exclude from asterism search."),
                 BorderLayout.SOUTH);
-        return panel;
     }
 
     private JPanel makeCandidateAsterismsPanel() {
         JPanel panel = new JPanel(new BorderLayout(5, 5));
         panel.setName("Candidate Asterisms");
-        _candidateAsterismsTreeTable = new CandidateAsterismsTreeTable();
         panel.add(new JScrollPane(_candidateAsterismsTreeTable), BorderLayout.CENTER);
 
         // Display label at left, PA at right
@@ -447,7 +437,6 @@ public class GemsGuideStarSearchDialog extends JFrame {
         panel.add(panel2, BorderLayout.SOUTH);
         panel2.add(new JLabel("Check to include in target list, double-click to set as primary and view in position editor."),
                 BorderLayout.WEST);
-        _paLabel = new JLabel();
         panel2.add(_paLabel, BorderLayout.EAST);
         return panel;
     }
@@ -460,7 +449,6 @@ public class GemsGuideStarSearchDialog extends JFrame {
         panel.add(right, BorderLayout.EAST);
         left.add(new JButton(_useDefaultsAction));
         right.add(new JButton(_cancelAction));
-        _actionButton = new JButton(_queryAction);
         right.add(_actionButton);
         return panel;
     }
@@ -485,7 +473,7 @@ public class GemsGuideStarSearchDialog extends JFrame {
                 && _allowPosAngleChangesCheckBox.isSelected();
     }
 
-    private void query() throws Exception {
+    public void query() throws Exception {
         setState(State.QUERY);
         CatalogChoice catalogChoice = (CatalogChoice) _catalogComboBox.getSelectedItem();
         _model.setCatalog(catalogChoice);
@@ -527,9 +515,6 @@ public class GemsGuideStarSearchDialog extends JFrame {
     }
 
     private void queryDone() {
-        Catalog cat = SkycatConfigFile.getConfigFile().getCatalog(_model.getCatalog().catalogName());
-        _candidateGuideStarsTable.setCatalog(cat);
-
         CandidateGuideStarsTableModel tableModel = new CandidateGuideStarsTableModel(_model);
         try {
             _candidateGuideStarsTable.setTableModel(tableModel);
@@ -592,7 +577,7 @@ public class GemsGuideStarSearchDialog extends JFrame {
     }
 
     private void analyzeDone() {
-        final Option<Long> when = _tpe.getObsContext().flatMap(c -> c.getSchedulingBlock()).map(b -> b.start());
+        final Option<Long> when = _tpe.getObsContext().flatMap(ObsContext::getSchedulingBlock).map(SchedulingBlock::start);
         CandidateAsterismsTreeTableModel treeTableModel = new CandidateAsterismsTreeTableModel(
                 _model.getGemsGuideStars(), ModelConverters.toOldBand(_model.getBand().getBand()), when);
         _candidateAsterismsTreeTable.setTreeTableModel(treeTableModel);

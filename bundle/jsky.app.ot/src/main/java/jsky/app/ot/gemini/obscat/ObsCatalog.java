@@ -1,14 +1,7 @@
-// Copyright 2001 Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-//
-// $Id: ObsCatalog.java 46733 2012-07-12 20:43:36Z rnorris $
-//
 package jsky.app.ot.gemini.obscat;
 
 import edu.gemini.pot.client.SPDB;
 import edu.gemini.pot.spdb.IDBDatabaseService;
-import edu.gemini.shared.util.immutable.DefaultImList;
-import edu.gemini.shared.util.immutable.ImList;
 import edu.gemini.shared.util.immutable.Pair;
 import edu.gemini.shared.util.immutable.Tuple2;
 import edu.gemini.spModel.ao.AOConstants;
@@ -25,47 +18,34 @@ import edu.gemini.spModel.obscomp.InstConfigInfo;
 import edu.gemini.spModel.too.TooType;
 import edu.gemini.spModel.type.DisplayableSpType;
 import edu.gemini.spModel.type.ObsoletableSpType;
-import edu.gemini.spModel.type.SpType;
 import edu.gemini.spModel.type.SpTypeUtil;
 import jsky.app.ot.shared.gemini.obscat.ObsCatalogInfo;
-import jsky.app.ot.userprefs.ui.PreferenceDialog;
-import jsky.app.ot.userprefs.ui.PreferencePanel;
 import jsky.app.ot.viewer.QueryManager;
 import jsky.app.ot.viewer.ViewerService;
 import jsky.catalog.FieldDescAdapter;
 import jsky.catalog.QueryArgs;
 import jsky.catalog.QueryResult;
-import jsky.catalog.gui.CatalogNavigator;
-import jsky.catalog.gui.CatalogNavigatorMenuBar;
-import jsky.catalog.gui.CatalogUIHandler;
-import jsky.catalog.gui.QueryResultDisplay;
 import jsky.catalog.skycat.SkycatCatalog;
 import jsky.catalog.skycat.SkycatConfigEntry;
 import jsky.catalog.skycat.SkycatConfigFile;
-import jsky.navigator.Navigator;
-import jsky.navigator.NavigatorFrame;
-import jsky.navigator.NavigatorManager;
 import jsky.util.NameValue;
 import jsky.util.gui.DialogUtil;
 
-import javax.swing.*;
-import java.awt.*;
 import java.awt.event.*;
 import java.util.*;
 import java.util.List;
 
-
 /**
  * A class for querying the science program database for observations
  * matching a given set of constraints. This class treats the science
- * program database as a catalog that can be querried in the usual
+ * program database as a catalog that can be queried in the usual
  * way. It extends the SkycatCatalog class so that it fits in with the
  * existing catalogs and so that the base positions of the
  * observations found can be easily plotted on an image.
  *
  * @author Allan Brighton
  */
-public final class ObsCatalog extends SkycatCatalog implements CatalogUIHandler {
+public final class ObsCatalog extends SkycatCatalog {
 
     // A shared instance of this class */
     public static final ObsCatalog INSTANCE = new ObsCatalog();
@@ -80,7 +60,7 @@ public final class ObsCatalog extends SkycatCatalog implements CatalogUIHandler 
     }
 
     // Return the configuration entry for this catalog.
-    private static SkycatConfigEntry newConfigEntry() {
+    public static SkycatConfigEntry newConfigEntry() {
         final SkycatConfigEntry _configEntry;
         final Properties p = new Properties();
         p.setProperty(SkycatConfigFile.SERV_TYPE, "catalog");
@@ -280,21 +260,22 @@ public final class ObsCatalog extends SkycatCatalog implements CatalogUIHandler 
             return null;
         }
 
-        for (InstConfigInfo info: instConfigInfoList) {
-            if (info.isQueryable()) {
-                final FieldDescAdapter p = new FieldDescAdapter(info.getName());
-                p.setDescription("Select the " + info.getDescription());
+        // SCT-295: Bryan requested that we not show obsolete choices
+        // in the browser
+        // 2009B: Inger needs obsolete choices for statistics she makes
+        instConfigInfoList.stream().filter(InstConfigInfo::isQueryable).forEach(info -> {
+            final FieldDescAdapter p = new FieldDescAdapter(info.getName());
+            p.setDescription("Select the " + info.getDescription());
 
-                // SCT-295: Bryan requested that we not show obsolete choices
-                // in the browser
-                // 2009B: Inger needs obsolete choices for statistics she makes
-                final Enum<?>[] types = showObsolete ? info.getAllTypes() : info.getValidTypes();
-                if (types != null) {
-                    p.setOptions(_getEnumOptions(types));
-                }
-                params.add(p);
+            // SCT-295: Bryan requested that we not show obsolete choices
+            // in the browser
+            // 2009B: Inger needs obsolete choices for statistics she makes
+            final Enum<?>[] types = showObsolete ? info.getAllTypes() : info.getValidTypes();
+            if (types != null) {
+                p.setOptions(_getEnumOptions(types));
             }
-        }
+            params.add(p);
+        });
 
         final FieldDescAdapter[] paramDesc = new FieldDescAdapter[params.size()];
         params.toArray(paramDesc);
@@ -346,7 +327,6 @@ public final class ObsCatalog extends SkycatCatalog implements CatalogUIHandler 
         return nv;
     }
 
-
     /**
      * Query the spdb using the given argument and return the resulting table.
      *
@@ -355,7 +335,7 @@ public final class ObsCatalog extends SkycatCatalog implements CatalogUIHandler 
      */
     @Override
     public QueryResult query(QueryArgs args) {
-        return ObsCatalogHelper.query((ObsCatalogQueryArgs) args, getConfigEntry(), queryTool.includeRemote());
+        throw new UnsupportedOperationException();
     }
 
     public static QueryManager QUERY_MANAGER = () -> {
@@ -367,69 +347,17 @@ public final class ObsCatalog extends SkycatCatalog implements CatalogUIHandler 
             return;
         }
 
-        // Make the catalog navigator window the main application window
-        CatalogNavigator.setMainWindow(true);
-
-        // Hide the catalog tree window when this catalog is displayed
-        CatalogNavigatorMenuBar.setCatalogTreeIsVisible(ObsCatalogQueryTool.class, false);
-
-        final Navigator navigator = NavigatorManager.open();
-        if (navigator != null) {
-            navigator.setAutoQuery(false);
-            ViewerService.instance().get().registerView(navigator.getParentFrame());
-
-            // Unregister the catalog window when it is closed/hidden
-            Component w = navigator.getParentFrame();
-            w.addComponentListener(new ComponentAdapter() {
-                @Override
-                public void componentHidden(ComponentEvent e) {
-                    ViewerService.instance().get().unregisterView(navigator.getParentFrame());
-                }
-            });
-
-            // Add the preferences panel.
-            addPreferencesItem();
-
-            navigator.setQueryResult(INSTANCE);
-
-        }
+        //final Navigator navigator = NavigatorManager.open();
+        final scala.swing.Frame browserFrame = ObsCatalogFrame.instance();
+        browserFrame.visible_$eq(true);
+        ViewerService.instance().get().registerView(browserFrame);
+        browserFrame.peer().addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentHidden(ComponentEvent e) {
+                ViewerService.instance().get().unregisterView(browserFrame);
+            }
+        });
     };
-
-
-    private static boolean addedPreferences = false;
-
-    private static synchronized void addPreferencesItem() {
-        if (addedPreferences) return;
-
-        final NavigatorFrame nf = (NavigatorFrame) NavigatorManager.get().getParentFrame();
-        final JMenuBar mb = nf.getJMenuBar();
-        final JMenu menu = mb.getMenu(0);
-
-        final String name = "Preferences ...";
-
-        // Add the "Preferences ..." item
-        final int count = menu.getMenuComponentCount();
-        menu.insert(new JMenuItem(name) {{
-            final ImList<PreferencePanel> lst = DefaultImList.create(
-                    (PreferencePanel) BrowserPreferencesPanel.instance);
-
-            final PreferenceDialog dialog = new PreferenceDialog(lst);
-            addActionListener(e -> dialog.show(nf, BrowserPreferencesPanel.instance));
-        }}, count - 2);
-        menu.insertSeparator(count - 2);
-
-        addedPreferences = true;
-    }
-
-    private ObsCatalogQueryTool queryTool;
-
-    /**
-     * Implement the {@link CatalogUIHandler} interface to get a custom GUI
-     */
-    public JComponent makeComponent(QueryResultDisplay display) {
-        queryTool = new ObsCatalogQueryTool(this, display);
-        return queryTool;
-    }
 
 }
 

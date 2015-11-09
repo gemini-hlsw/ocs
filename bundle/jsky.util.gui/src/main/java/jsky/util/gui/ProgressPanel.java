@@ -1,10 +1,3 @@
-/*
- * Copyright 2000 Association for Universities for Research in Astronomy, Inc.,
- * Observatory Control System, Gemini Telescopes Project.
- *
- * $Id: ProgressPanel.java 38711 2011-11-15 13:35:55Z swalker $
- */
-
 package jsky.util.gui;
 
 import java.awt.BorderLayout;
@@ -91,7 +84,7 @@ public class ProgressPanel extends JPanel implements ActionListener, StatusLogge
 
 
     /**
-     * Initialize the progreass panel. This method may be called from any
+     * Initialize the progress panel. This method may be called from any
      * thread, but will always run in the event dispatching thread.
      */
     protected void init() {

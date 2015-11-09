@@ -1,17 +1,6 @@
-/*
- * ESO Archive
- *
- * $Id: CoordinateRadius.java 4414 2004-02-03 16:21:36Z brighton $
- *
- * who             when        what
- * --------------  ----------  ----------------------------------------
- * Allan Brighton  1999/05/18  Created
- */
-
 package jsky.coords;
 
 import java.io.Serializable;
-
 
 /**
  * Represents a generic center coordinate and radius range (or width

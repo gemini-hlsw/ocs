@@ -1,14 +1,6 @@
-/*
- * Copyright 2000 Association for Universities for Research in Astronomy, Inc.,
- * Observatory Control System, Gemini Telescopes Project.
- *
- * $Id: CoordinateConverter.java 4414 2004-02-03 16:21:36Z brighton $
- */
-
 package jsky.coords;
 
 import java.awt.geom.*;
-
 
 /**
  * This interface may be implemented by classes that display images and can
@@ -49,22 +41,22 @@ import java.awt.geom.*;
  * @version $Revision: 4414 $ $Date: 2004-02-03 08:21:36 -0800 (Tue, 03 Feb 2004) $
  * @author Allan Brighton
  */
-public abstract interface CoordinateConverter extends WorldCoordinateConverter {
+public interface CoordinateConverter extends WorldCoordinateConverter {
 
     /** Constant for image coordinates */
-    public static final int IMAGE = 0;
+    int IMAGE = 0;
 
     /** Constant for screen coordinates */
-    public static final int SCREEN = 1;
+    int SCREEN = 1;
 
     /** Constant for canvas coordinates */
-    public static final int CANVAS = 2;
+    int CANVAS = 2;
 
     /** Constant for user coordinates */
-    public static final int USER = 3;
+    int USER = 3;
 
     /** Constant for world coordinates (deg, in the equinox of the image) */
-    public static final int WORLD = 4;
+    int WORLD = 4;
 
     /**
      * Convert the given coordinates from inType to outType. The inType and
@@ -77,7 +69,7 @@ public abstract interface CoordinateConverter extends WorldCoordinateConverter {
      * @param isDistance True if p should be interpreted as a distance instead
      *                   of a point.
      */
-    public void convertCoords(Point2D.Double p, int inType, int outType, boolean isDistance);
+    void convertCoords(Point2D.Double p, int inType, int outType, boolean isDistance);
 
     /**
      * Convert the given canvas coordinates to image coordinates.
@@ -86,7 +78,7 @@ public abstract interface CoordinateConverter extends WorldCoordinateConverter {
      * @param isDistance True if p should be interpreted as a distance instead
      *                   of a point.
      */
-    public void canvasToImageCoords(Point2D.Double p, boolean isDistance);
+    void canvasToImageCoords(Point2D.Double p, boolean isDistance);
 
     /**
      * Convert the given canvas coordinates to user coordinates.
@@ -95,7 +87,7 @@ public abstract interface CoordinateConverter extends WorldCoordinateConverter {
      * @param isDistance True if p should be interpreted as a distance instead
      *                   of a point.
      */
-    public void canvasToUserCoords(Point2D.Double p, boolean isDistance);
+    void canvasToUserCoords(Point2D.Double p, boolean isDistance);
 
     /**
      * Convert the given user coordinates to image coordinates.
@@ -104,7 +96,7 @@ public abstract interface CoordinateConverter extends WorldCoordinateConverter {
      * @param isDistance True if p should be interpreted as a distance instead
      *                   of a point.
      */
-    public void userToImageCoords(Point2D.Double p, boolean isDistance);
+    void userToImageCoords(Point2D.Double p, boolean isDistance);
 
     /**
      * Convert the given user coordinates to canvas coordinates.
@@ -113,7 +105,7 @@ public abstract interface CoordinateConverter extends WorldCoordinateConverter {
      * @param isDistance True if p should be interpreted as a distance instead
      *                   of a point.
      */
-    public void userToCanvasCoords(Point2D.Double p, boolean isDistance);
+    void userToCanvasCoords(Point2D.Double p, boolean isDistance);
 
     /**
      * Convert the given image coordinates to canvas coordinates.
@@ -122,7 +114,7 @@ public abstract interface CoordinateConverter extends WorldCoordinateConverter {
      * @param isDistance True if p should be interpreted as a distance instead
      *                   of a point.
      */
-    public void imageToCanvasCoords(Point2D.Double p, boolean isDistance);
+    void imageToCanvasCoords(Point2D.Double p, boolean isDistance);
 
     /**
      * Convert the given image coordinates to user coordinates.
@@ -131,7 +123,7 @@ public abstract interface CoordinateConverter extends WorldCoordinateConverter {
      * @param isDistance True if p should be interpreted as a distance instead
      *                   of a point.
      */
-    public void imageToUserCoords(Point2D.Double p, boolean isDistance);
+    void imageToUserCoords(Point2D.Double p, boolean isDistance);
 
     /**
      * Convert the given canvas coordinates to screen coordinates.
@@ -140,7 +132,7 @@ public abstract interface CoordinateConverter extends WorldCoordinateConverter {
      * @param isDistance True if p should be interpreted as a distance instead
      *                   of a point.
      */
-    public void canvasToScreenCoords(Point2D.Double p, boolean isDistance);
+    void canvasToScreenCoords(Point2D.Double p, boolean isDistance);
 
     /**
      * Convert the given screen coordinates to canvas coordinates.
@@ -149,7 +141,7 @@ public abstract interface CoordinateConverter extends WorldCoordinateConverter {
      * @param isDistance True if p should be interpreted as a distance instead
      *                   of a point.
      */
-    public void screenToCanvasCoords(Point2D.Double p, boolean isDistance);
+    void screenToCanvasCoords(Point2D.Double p, boolean isDistance);
 
     /**
      * Convert the given screen coordinates to image coordinates.
@@ -158,7 +150,7 @@ public abstract interface CoordinateConverter extends WorldCoordinateConverter {
      * @param isDistance True if p should be interpreted as a distance instead
      *                   of a point.
      */
-    public void screenToImageCoords(Point2D.Double p, boolean isDistance);
+    void screenToImageCoords(Point2D.Double p, boolean isDistance);
 
     /**
      * Convert the given image coordinates to screen coordinates.
@@ -167,7 +159,7 @@ public abstract interface CoordinateConverter extends WorldCoordinateConverter {
      * @param isDistance True if p should be interpreted as a distance instead
      *                   of a point.
      */
-    public void imageToScreenCoords(Point2D.Double p, boolean isDistance);
+    void imageToScreenCoords(Point2D.Double p, boolean isDistance);
 
 
     /**
@@ -177,7 +169,7 @@ public abstract interface CoordinateConverter extends WorldCoordinateConverter {
      * @param isDistance True if p should be interpreted as a distance instead
      *                   of a point.
      */
-    public void screenToUserCoords(Point2D.Double p, boolean isDistance);
+    void screenToUserCoords(Point2D.Double p, boolean isDistance);
 
     /**
      * Convert the given user coordinates to screen coordinates.
@@ -186,7 +178,7 @@ public abstract interface CoordinateConverter extends WorldCoordinateConverter {
      * @param isDistance True if p should be interpreted as a distance instead
      *                   of a point.
      */
-    public void userToScreenCoords(Point2D.Double p, boolean isDistance);
+    void userToScreenCoords(Point2D.Double p, boolean isDistance);
 
     /**
      * Convert the given screen coordinates to world coordinates degrees in the equinox
@@ -196,7 +188,7 @@ public abstract interface CoordinateConverter extends WorldCoordinateConverter {
      * @param isDistance True if p should be interpreted as a distance instead
      *                   of a point.
      */
-    public void screenToWorldCoords(Point2D.Double p, boolean isDistance);
+    void screenToWorldCoords(Point2D.Double p, boolean isDistance);
 
     /**
      * Convert the given canvas coordinates to world coordinates degrees in the equinox
@@ -206,7 +198,7 @@ public abstract interface CoordinateConverter extends WorldCoordinateConverter {
      * @param isDistance True if p should be interpreted as a distance instead
      *                   of a point.
      */
-    public void canvasToWorldCoords(Point2D.Double p, boolean isDistance);
+    void canvasToWorldCoords(Point2D.Double p, boolean isDistance);
 
     /**
      * Convert the given user coordinates to world coordinates degrees in the equinox
@@ -216,7 +208,7 @@ public abstract interface CoordinateConverter extends WorldCoordinateConverter {
      * @param isDistance True if p should be interpreted as a distance instead
      *                   of a point.
      */
-    public void userToWorldCoords(Point2D.Double p, boolean isDistance);
+    void userToWorldCoords(Point2D.Double p, boolean isDistance);
 
     /**
      * Convert the given world coordinates (degrees, in the equinox of the current image)
@@ -226,7 +218,7 @@ public abstract interface CoordinateConverter extends WorldCoordinateConverter {
      * @param isDistance True if p should be interpreted as a distance instead
      *                   of a point.
      */
-    public void worldToCanvasCoords(Point2D.Double p, boolean isDistance);
+    void worldToCanvasCoords(Point2D.Double p, boolean isDistance);
 
     /**
      * Convert the given world coordinates (degrees, in the equinox of the current image)
@@ -236,7 +228,7 @@ public abstract interface CoordinateConverter extends WorldCoordinateConverter {
      * @param isDistance True if p should be interpreted as a distance instead
      *                   of a point.
      */
-    public void worldToScreenCoords(Point2D.Double p, boolean isDistance);
+    void worldToScreenCoords(Point2D.Double p, boolean isDistance);
 
     /**
      * Convert the given world coordinates (degrees, in the equinox of the current image)
@@ -246,6 +238,6 @@ public abstract interface CoordinateConverter extends WorldCoordinateConverter {
      * @param isDistance True if p should be interpreted as a distance instead
      *                   of a point.
      */
-    public void worldToUserCoords(Point2D.Double p, boolean isDistance);
+    void worldToUserCoords(Point2D.Double p, boolean isDistance);
 }
 

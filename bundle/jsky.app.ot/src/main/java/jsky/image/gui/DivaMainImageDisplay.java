@@ -2,9 +2,6 @@ package jsky.image.gui;
 
 import com.sun.media.jai.codec.*;
 import diva.canvas.GraphicsPane;
-import edu.gemini.catalog.api.MagnitudeLimits;
-import edu.gemini.catalog.api.RadiusLimits;
-import edu.gemini.skycalc.Angle;
 import jsky.coords.WorldCoordinateConverter;
 import jsky.coords.WorldCoords;
 import jsky.image.ImageChangeEvent;
@@ -147,11 +144,6 @@ public class DivaMainImageDisplay extends DivaGraphicsImageDisplay implements Ma
     private FITSGraphics _fitsGraphics;
 
     /**
-     * Set this to the JDesktopPane, if using internal frames.
-     */
-    private JDesktopPane _desktop = null;
-
-    /**
      * Event passed to change listeners
      */
     private ImageChangeEvent _imageChangeEvent = new ImageChangeEvent(this);
@@ -159,7 +151,7 @@ public class DivaMainImageDisplay extends DivaGraphicsImageDisplay implements Ma
     /**
      * Utility object used to control background thread
      */
-    private SwingWorker _worker;
+    private jsky.util.gui.SwingWorker _worker;
 
     /**
      * Stack of ImageHistoryItem, used to go back to a previous image
@@ -372,29 +364,6 @@ public class DivaMainImageDisplay extends DivaGraphicsImageDisplay implements Ma
         this(new GraphicsPane());
         _parent = parent;
     }
-
-    /**
-     * Open up another window like this one and return a reference to it.
-     * <p/>
-     * Note: derived classes should redefine this to return an instance of the
-     * correct class, which should be derived JFrame or JInternalFrame.
-     */
-    public Component newWindow() {
-        if (_desktop != null) {
-            ImageDisplayControlInternalFrame f = new ImageDisplayControlInternalFrame(_desktop);
-            f.getImageDisplayControl().getImageDisplay().setTitle(getTitle());
-            _desktop.add(f, JLayeredPane.DEFAULT_LAYER);
-            _desktop.moveToFront(f);
-            f.setVisible(true);
-            return f;
-        } else {
-            ImageDisplayControlFrame f = new ImageDisplayControlFrame();
-            f.getImageDisplayControl().getImageDisplay().setTitle(getTitle());
-            f.setVisible(true);
-            return f;
-        }
-    }
-
 
     /**
      * Return the object that manages interactive drawing on the image
@@ -1152,15 +1121,8 @@ public class DivaMainImageDisplay extends DivaGraphicsImageDisplay implements Ma
         if (_fitsHDUChooser != null) {
             _fitsHDUChooser.updateDisplay(fitsImage);
         } else {
-            if (_desktop != null) {
-                _fitsHDUChooserFrame = new FITSHDUChooserInternalFrame(this, fitsImage);
-                _desktop.add(_fitsHDUChooserFrame, JLayeredPane.POPUP_LAYER);
-                _desktop.moveToFront(_fitsHDUChooserFrame);
-                _fitsHDUChooser = ((FITSHDUChooserInternalFrame) _fitsHDUChooserFrame).getFitsHDUChooser();
-            } else {
-                _fitsHDUChooserFrame = new FITSHDUChooserFrame(this, fitsImage);
-                _fitsHDUChooser = ((FITSHDUChooserFrame) _fitsHDUChooserFrame).getFitsHDUChooser();
-            }
+            _fitsHDUChooserFrame = new FITSHDUChooserFrame(this, fitsImage);
+            _fitsHDUChooser = ((FITSHDUChooserFrame) _fitsHDUChooserFrame).getFitsHDUChooser();
         }
 
         if (skipEmptyPrimary)
@@ -1251,13 +1213,7 @@ public class DivaMainImageDisplay extends DivaGraphicsImageDisplay implements Ma
         if (_imageCutLevelsFrame != null) {
             SwingUtil.showFrame(_imageCutLevelsFrame);
         } else {
-            if (_desktop != null) {
-                _imageCutLevelsFrame = new ImageCutLevelsInternalFrame(this);
-                _desktop.add(_imageCutLevelsFrame, JLayeredPane.POPUP_LAYER);
-                _desktop.moveToFront(_imageCutLevelsFrame);
-            } else {
-                _imageCutLevelsFrame = new ImageCutLevelsFrame(this);
-            }
+            _imageCutLevelsFrame = new ImageCutLevelsFrame(this);
         }
     }
 
@@ -1269,13 +1225,7 @@ public class DivaMainImageDisplay extends DivaGraphicsImageDisplay implements Ma
         if (_imageColorsFrame != null) {
             SwingUtil.showFrame(_imageColorsFrame);
         } else {
-            if (_desktop != null) {
-                _imageColorsFrame = new ImageColorsInternalFrame(this);
-                _desktop.add(_imageColorsFrame, JLayeredPane.POPUP_LAYER);
-                _desktop.moveToFront(_imageColorsFrame);
-            } else {
-                _imageColorsFrame = new ImageColorsFrame(this);
-            }
+            _imageColorsFrame = new ImageColorsFrame(this);
         }
     }
 
@@ -1288,15 +1238,8 @@ public class DivaMainImageDisplay extends DivaGraphicsImageDisplay implements Ma
             SwingUtil.showFrame(_pickObjectFrame);
         } else {
             // create new frame
-            if (_desktop != null) {
-                _pickObjectFrame = new PickObjectInternalFrame(this);
-                _pickObjectPanel = ((PickObjectInternalFrame) _pickObjectFrame).getPickObject();
-                _desktop.add(_pickObjectFrame, JLayeredPane.DEFAULT_LAYER);
-                _desktop.moveToFront(_pickObjectFrame);
-            } else {
-                _pickObjectFrame = new PickObjectFrame(this);
-                _pickObjectPanel = ((PickObjectFrame) _pickObjectFrame).getPickObject();
-            }
+            _pickObjectFrame = new PickObjectFrame(this);
+            _pickObjectPanel = ((PickObjectFrame) _pickObjectFrame).getPickObject();
             _pickObjectPanel.addActionListener(e -> pickedObject());
         }
 
@@ -1307,6 +1250,7 @@ public class DivaMainImageDisplay extends DivaGraphicsImageDisplay implements Ma
      * Called when an object is selected in the Pick Object window.
      */
     protected void pickedObject() {
+        // Do Nothing
     }
 
     /**
@@ -1317,17 +1261,9 @@ public class DivaMainImageDisplay extends DivaGraphicsImageDisplay implements Ma
             SwingUtil.showFrame(_fitsKeywordsFrame);
             if (_fitsKeywordsFrame instanceof FITSKeywordsFrame) {
                 ((FITSKeywordsFrame) _fitsKeywordsFrame).getFITSKeywords().updateDisplay();
-            } else if (_fitsKeywordsFrame instanceof FITSKeywordsInternalFrame) {
-                ((FITSKeywordsInternalFrame) _fitsKeywordsFrame).getFITSKeywords().updateDisplay();
             }
         } else {
-            if (_desktop != null) {
-                _fitsKeywordsFrame = new FITSKeywordsInternalFrame(this);
-                _desktop.add(_fitsKeywordsFrame, JLayeredPane.POPUP_LAYER);
-                _desktop.moveToFront(_fitsKeywordsFrame);
-            } else {
-                _fitsKeywordsFrame = new FITSKeywordsFrame(this);
-            }
+            _fitsKeywordsFrame = new FITSKeywordsFrame(this);
         }
     }
 
@@ -1343,40 +1279,9 @@ public class DivaMainImageDisplay extends DivaGraphicsImageDisplay implements Ma
                 ((ImagePropertiesInternalFrame) _imagePropertiesFrame).getImageProperties().updateDisplay();
             }
         } else {
-            if (_desktop != null) {
-                _imagePropertiesFrame = new ImagePropertiesInternalFrame(this);
-                _desktop.add(_imagePropertiesFrame, JLayeredPane.POPUP_LAYER);
-                _desktop.moveToFront(_imagePropertiesFrame);
-            } else {
                 _imagePropertiesFrame = new ImagePropertiesFrame(this);
-            }
         }
     }
-
-
-    /**
-     * Return the JDesktopPane, if using internal frames, otherwise null
-     */
-    public JDesktopPane getDesktop() {
-        return _desktop;
-    }
-
-
-    /**
-     * Set the JDesktopPane to use for top level windows, if using internal frames
-     */
-    public void setDesktop(JDesktopPane desktop) {
-        _desktop = desktop;
-    }
-
-
-    /**
-     * Return the top level parent frame (or internal frame) used to close the window
-     */
-    public Component getRootComponent() {
-        return _parent;
-    }
-
 
     /**
      * Display a file chooser to select a filename to display
@@ -1446,6 +1351,7 @@ public class DivaMainImageDisplay extends DivaGraphicsImageDisplay implements Ma
      * @param ra  RA center coordinate in deg J2000
      * @param dec Dec center coordinate in deg J2000
      */
+    @Override
     public void blankImage(double ra, double dec) {
         if (!checkSave())
             return;
@@ -1461,6 +1367,7 @@ public class DivaMainImageDisplay extends DivaGraphicsImageDisplay implements Ma
     /**
      * Set to true if the image file has been modified and needs saving.
      */
+    @Override
     public void setSaveNeeded(boolean b) {
         saveNeeded = b;
 
@@ -1476,7 +1383,7 @@ public class DivaMainImageDisplay extends DivaGraphicsImageDisplay implements Ma
      * @return false if the user pressed Cancel when asked to save the file,
      *         otherwise true
      */
-    protected boolean checkSave() {
+    private boolean checkSave() {
         if (saveNeeded) {
             String s = _filename;
             if (s != null) {
@@ -1518,6 +1425,7 @@ public class DivaMainImageDisplay extends DivaGraphicsImageDisplay implements Ma
      * Pop up a dialog to ask the user for a file name, and then save the image
      * to the selected file.
      */
+    @Override
     public void saveAs() {
         if (_saveDialog == null)
             _saveDialog = new ImageSaveDialog(this);
@@ -1529,6 +1437,7 @@ public class DivaMainImageDisplay extends DivaGraphicsImageDisplay implements Ma
      * based on the file suffix, which should be one of ".fits", ".jpg",
      * ".png", or ".tif".
      */
+    @Override
     public void saveAs(String filename) {
         String s = filename.toLowerCase();
         String tmpFile = filename + ".TMP";
@@ -1607,14 +1516,13 @@ public class DivaMainImageDisplay extends DivaGraphicsImageDisplay implements Ma
         _noStack = false;
     }
 
-
     /**
      * Paint the image and graphics to the given graphics object (for save and print features)
      */
+    @Override
     public void paintImageAndGraphics(Graphics2D g2D) {
         getCanvasPane().paint(g2D);
     }
-
 
     /**
      * Display a preview of the what the printed image view will look like.
@@ -1628,6 +1536,7 @@ public class DivaMainImageDisplay extends DivaGraphicsImageDisplay implements Ma
     /**
      * Pop up a dialog for printing the image.
      */
+    @Override
     public void print() {
         try {
             if (_printDialog == null)
@@ -1742,6 +1651,7 @@ public class DivaMainImageDisplay extends DivaGraphicsImageDisplay implements Ma
      * The position returned here should be used as the base position
      * for any catalog or image server requests.
      */
+    @Override
     public WorldCoords getBasePos() {
         if (isWCS()) {
             WorldCoordinateConverter wcs = getWCS();
@@ -1750,34 +1660,4 @@ public class DivaMainImageDisplay extends DivaGraphicsImageDisplay implements Ma
         return new WorldCoords();
     }
 
-
-    /**
-     * Return the default min and max search radius to use for catalog searches, in arcmin.
-     *
-     * @param centerPos    the center position for the radius
-     * @param useImageSize if true, use the image size to get the search radius
-     * @return radius values
-     */
-    public RadiusLimits getDefaultSearchRadius(WorldCoords centerPos, boolean useImageSize) {
-        Point2D.Double p1 = new Point2D.Double(1., 1.);
-        WorldCoordinateConverter wcs = getWCS();
-        wcs.imageToWorldCoords(p1, false);
-        double equinox = wcs.getEquinox();
-        WorldCoords origin = new WorldCoords(p1, equinox);
-
-        double maxRadius = centerPos.dist(origin);
-        return new RadiusLimits(new Angle(maxRadius, Angle.Unit.ARCMINS), Angle.ANGLE_0DEGREES);
-    }
-
-    /**
-     * Return the default min and max magnitude values to use for catalog searches, or null
-     * if there is no default.
-     *
-     * @return magnitude limits including band
-     */
-    public MagnitudeLimits getDefaultSearchMagRange() {
-        return null; // no defaults here
-    }
 }
-
-

@@ -1,18 +1,6 @@
-/*
- * $Id: SelectionDragger.java 4414 2004-02-03 16:21:36Z brighton $
- *
- * Copyright (c) 1998 The Regents of the University of California.
- * All rights reserved.  See the file LICENSE for details.
- *
- * (Modified from the Diva version to grant access to the selection rectangle).
- */
-
-//package diva.canvas.selection;
-
 package jsky.image.graphics;
 
 import java.awt.geom.Rectangle2D;
-import java.awt.geom.Rectangle2D.Double;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -25,7 +13,6 @@ import diva.canvas.GraphicsPane;
 import diva.canvas.OverlayLayer;
 import diva.canvas.event.EventLayer;
 import diva.canvas.event.LayerEvent;
-import diva.canvas.event.LayerListener;
 import diva.canvas.event.MouseFilter;
 import diva.canvas.interactor.DragInteractor;
 import diva.canvas.interactor.Interactor;
@@ -61,7 +48,7 @@ public class SelectionDragger extends DragInteractor {
 
     /* The set of valid selection interactors
      */
-    private ArrayList _selectionInteractors = new ArrayList();
+    private final ArrayList<SelectionInteractor> _selectionInteractors = new ArrayList<>();
 
     /* The rubber-band
      */
@@ -73,12 +60,12 @@ public class SelectionDragger extends DragInteractor {
 
     /** A hash-set containing those figures
      */
-    private HashSet _currentFigures;
+    private HashSet<Figure> _currentFigures;
 
     /** A hash-set containing figures that overlap the rubber-band
      * but are not "hit"
      */
-    private HashSet _holdovers;
+    private HashSet<Figure> _holdovers = new HashSet<>();
 
     /* The origin points
      */
@@ -97,16 +84,6 @@ public class SelectionDragger extends DragInteractor {
      */
     private boolean _isSelecting;
     private boolean _isToggling;
-
-    ///////////////////////////////////////////////////////////////////
-    ////                         constructors                      ////
-
-    /**
-     * Create a new SelectionDragger
-     */
-    public SelectionDragger() {
-        super();
-    }
 
     /**
      * Create a new SelectionDragger attached to the given graphics
@@ -137,9 +114,7 @@ public class SelectionDragger extends DragInteractor {
      * Clear the selection in all the relevant selection interactors.
      */
     public void clearSelection() {
-        Iterator is = _selectionInteractors.iterator();
-        while (is.hasNext()) {
-            SelectionInteractor i = (SelectionInteractor) is.next();
+        for (SelectionInteractor i : _selectionInteractors) {
             i.getSelectionModel().clearSelection();
         }
     }
@@ -166,48 +141,12 @@ public class SelectionDragger extends DragInteractor {
         }
     }
 
-    /**
-     * Get the layer that drag rectangles are drawn on
-     */
-    public OverlayLayer getOverlayLayer() {
-        return _overlayLayer;
-    }
-
-    /**
-     * Get the layer that drag events are listened on
-     */
-    public EventLayer getEventLayer() {
-        return _eventLayer;
-    }
-
-    /**
-     * Get the layer that figures are selected on
-     */
-    public FigureLayer getFigureLayer() {
-        return _figureLayer;
-    }
-
-    /**
-     * Get the mouse filter that controls when this selection
-     * filter is activated.
-     */
-    public MouseFilter getSelectionFilter() {
-        return _selectionFilter;
-    }
-
-    /**
-     * Get the mouse filter that controls the toggling of
-     * selections
-     */
-    public MouseFilter getToggleFilter() {
-        return _toggleFilter;
-    }
-
     /** Reshape the rubber-band, swapping coordinates if necessary.
      * Any figures that are newly included or excluded from
      * the drag region are added to or removed from the appropriate
      * selection.
      */
+    @SuppressWarnings("unchecked")
     public void mouseDragged(LayerEvent event) {
         if (!isEnabled()) {
             return;
@@ -240,9 +179,9 @@ public class SelectionDragger extends DragInteractor {
 
         // Update the intersected figure set
         _intersectedFigures.setGeometry(_rubberBand);
-        HashSet freshFigures = new HashSet();
-        for (Iterator i = _intersectedFigures.figures(); i.hasNext();) {
-            Figure f = (Figure) i.next();
+        HashSet<Figure> freshFigures = new HashSet<>();
+        for (Iterator<Figure> i = _intersectedFigures.figures(); i.hasNext();) {
+            Figure f = i.next();
             if (f instanceof FigureDecorator) {
                 f = ((FigureDecorator) f).getDecoratedFigure();
             }
@@ -252,15 +191,14 @@ public class SelectionDragger extends DragInteractor {
                 _holdovers.add(f);
             }
         }
-        for (Iterator i = ((HashSet) _holdovers.clone()).iterator();
-             i.hasNext();) {
-            Figure f = (Figure) i.next();
+        for (Object o : ((HashSet) _holdovers.clone())) {
+            Figure f = (Figure) o;
             if (f.hit(_rubberBand)) {
                 freshFigures.add(f);
                 _holdovers.remove(f);
             }
         }
-        HashSet staleFigures = (HashSet) _currentFigures.clone();
+        HashSet<Figure> staleFigures = (HashSet<Figure>)_currentFigures.clone();
         staleFigures.removeAll(freshFigures);
         HashSet temp = (HashSet) freshFigures.clone();
         freshFigures.removeAll(_currentFigures);
@@ -269,9 +207,7 @@ public class SelectionDragger extends DragInteractor {
         // If in selection mode, add and remove figures
         if (_isSelecting) {
             // Add figures to the selection
-            Iterator i = freshFigures.iterator();
-            while (i.hasNext()) {
-                Figure f = (Figure) i.next();
+            for (Figure f: freshFigures) {
                 Interactor r = f.getInteractor();
                 if (r != null &&
                         r instanceof SelectionInteractor &&
@@ -281,9 +217,7 @@ public class SelectionDragger extends DragInteractor {
             }
 
             // Remove figures from the selection
-            i = staleFigures.iterator();
-            while (i.hasNext()) {
-                Figure f = (Figure) i.next();
+            for (Figure f: staleFigures) {
                 Interactor r = f.getInteractor();
                 if (r != null &&
                         r instanceof SelectionInteractor &&
@@ -345,8 +279,8 @@ public class SelectionDragger extends DragInteractor {
 
         _intersectedFigures =
                 _figureLayer.getFigures().getIntersectedFigures(_rubberBand);
-        _currentFigures = new HashSet();
-        _holdovers = new HashSet();
+        _currentFigures = new HashSet<>();
+        _holdovers = new HashSet<>();
 
         // Clear all selections
         if (_isSelecting) {
@@ -370,22 +304,6 @@ public class SelectionDragger extends DragInteractor {
         if (isConsuming()) {
             event.consume();
         }
-    }
-
-    /**
-     * Remove a selection interactor from the list of valid interactors.
-     */
-    public void removeSelectionInteractor(SelectionInteractor i) {
-        if (_selectionInteractors.contains(i)) {
-            _selectionInteractors.remove(i);
-        }
-    }
-
-    /**
-     * Get the selection interactors
-     */
-    public Iterator selectionInteractors() {
-        return _selectionInteractors.iterator();
     }
 
     /**
@@ -413,22 +331,6 @@ public class SelectionDragger extends DragInteractor {
         _figureLayer = l;
     }
 
-    /**
-     * Set the mouse filter that controls when this selection
-     * filter is activated.
-     */
-    public void setSelectionFilter(MouseFilter f) {
-        _selectionFilter = f;
-    }
-
-    /**
-     * Set the mouse filter that controls the toggling of
-     * selections.
-     */
-    public void setToggleFilter(MouseFilter f) {
-        _toggleFilter = f;
-    }
-
     /** Terminate drag-selection operation. This must only be called
      * from events that are triggered during a drag operation.
      */
@@ -453,10 +355,11 @@ public class SelectionDragger extends DragInteractor {
     }
 
     /** Enable/disable drag-selecting */
-    public void setEnabled(boolean enabled) {
-        if (_eventLayer != null)
+    public void setEnabled(final boolean enabled) {
+        if (_eventLayer != null) {
             _eventLayer.removeLayerListener(this);
-        if (enabled)
-            _eventLayer.addLayerListener(this);
+            if (enabled)
+                _eventLayer.addLayerListener(this);
+        }
     }
 }

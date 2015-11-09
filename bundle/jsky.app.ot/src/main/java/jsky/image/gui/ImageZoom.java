@@ -1,13 +1,3 @@
-/*
- * ESO Archive
- *
- * $Id: ImageZoom.java 4414 2004-02-03 16:21:36Z brighton $
- *
- * who             when        what
- * --------------  ----------  ----------------------------------------
- * Allan Brighton  1999/05/03  Created
- */
-
 package jsky.image.gui;
 
 import java.awt.BorderLayout;
@@ -95,10 +85,9 @@ public class ImageZoom extends JComponent
         // Don't use tiles for the zoom window
         _imageDisplay.setScaleHints(ImageUtil.getTileCacheHint(0, _zoomWidth, _zoomHeight));
 
-        JComponent c = (JComponent) _imageDisplay;
-        c.setPreferredSize(new Dimension(_zoomWidth, _zoomHeight));
+        _imageDisplay.setPreferredSize(new Dimension(_zoomWidth, _zoomHeight));
         setLayout(new BorderLayout());
-        add(c, BorderLayout.CENTER);
+        add(_imageDisplay, BorderLayout.CENTER);
 
         setMainImageDisplay(mainImageDisplay);
     }

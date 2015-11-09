@@ -19,7 +19,6 @@ import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
-import java.util.Vector;
 
 /**
  * Represents a catalog as described in a Skycat style catalog
@@ -1127,22 +1126,7 @@ public class SkycatCatalog implements PlotableCatalog {
             QueryArgs queryArgs = new BasicQueryArgs(cat);
             queryArgs.setId("M31");
             queryArgs.setMaxRows(1);
-            if (cat instanceof SkycatCatalog) {
-                SkycatCatalog skycat = (SkycatCatalog) cat;
-                if (skycat.getShortName().contains("simbad")) {
-                    skycat.addCatalogFilter(FullMimeSimbadCatalogFilter.getFilter());
-                    int n = skycat.getConfigEntry().getNumURLs();
-                    String[] urls = new String[n];
-                    originalUrls = new String[n];
-                    for (int i = 0; i < n; i++) {
-                        String urlStr = skycat.getConfigEntry().getURL(i);
-                        originalUrls[i] = urlStr;
-                        urlStr += "/mimetype=full-rec";
-                        urls[i] = urlStr;
-                    }
-                    skycat.getConfigEntry().setURLs(urls);
-                }
-            }
+
             QueryResult r = cat.query(queryArgs);
             if (cat instanceof SkycatCatalog) {
                 SkycatCatalog skycat = (SkycatCatalog) cat;
@@ -1155,7 +1139,7 @@ public class SkycatCatalog implements PlotableCatalog {
                 TableQueryResult tqr = (TableQueryResult) r;
                 if (tqr.getRowCount() > 0) {
                     wc = (WorldCoords) tqr.getCoordinates(0);
-                    Vector<String> v = tqr.getColumnIdentifiers();
+                    List<String> v = tqr.getColumnIdentifiers();
                     for (String s : v) {
                         System.out.println("Column: " + s);
                     }

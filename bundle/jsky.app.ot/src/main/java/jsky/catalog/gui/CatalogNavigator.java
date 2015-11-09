@@ -2,7 +2,6 @@ package jsky.catalog.gui;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
-import java.awt.Dimension;
 import java.awt.Frame;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -21,8 +20,6 @@ import javax.swing.AbstractAction;
 import javax.swing.JComponent;
 import javax.swing.JDesktopPane;
 import javax.swing.JFileChooser;
-import javax.swing.JFrame;
-import javax.swing.JInternalFrame;
 import javax.swing.JLayeredPane;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
@@ -52,6 +49,7 @@ import jsky.util.gui.*;
  * The tree display is based on a top level catalog directory. The details must be defined
  * in a derived class.
  */
+@Deprecated
 public abstract class CatalogNavigator extends JPanel
         implements QueryResultDisplay, GenericToolBarTarget, HTMLQueryResultHandler {
 
@@ -64,23 +62,14 @@ public abstract class CatalogNavigator extends JPanel
     // The root catalog directory to use
     private static CatalogDirectory _catDir;
 
-    // True if this is the main application window (enables exit menu item)
-    private static boolean _mainWindowFlag = false;
-
     // Set this to the JDesktopPane, if using internal frames.
     private JDesktopPane _desktop = null;
-
-    // Set to true to query catalogs automatically when selected
-    private boolean _autoQuery = false;
 
     // Displays the catalog tree and the catalog query widgets
     private JPanel _queryPanel;
 
     // Displays query results, such as tabular data.
     private JPanel _resultPanel;
-
-    // Tree displaying catalog hierarchy
-    private CatalogTree _catalogTree;
 
     // Query panel currently being displayed
     private JComponent _queryComponent;
@@ -124,9 +113,6 @@ public abstract class CatalogNavigator extends JPanel
     // Top level window (or internal frame) for viewing an HTML page
     private Component _htmlViewerFrame;
 
-    // Hash table associating each panel with a tree node
-    private Hashtable<JComponent, Catalog> _panelTreeNodeTable = new Hashtable<>(10);
-
     // Manages a list of previously viewed catalogs or query results.
     private CatalogHistoryList _historyList;
 
@@ -135,9 +121,6 @@ public abstract class CatalogNavigator extends JPanel
 
     // Maps query components to their corresponding result components
     private Hashtable<JComponent, JComponent> _queryResultComponentMap = new Hashtable<>();
-
-    // The pane dividing the catalog tree and the query panel
-    private JSplitPane _querySplitPane;
 
     // The pane dividing the query and the results panel
     private JSplitPane _resultSplitPane;
@@ -148,9 +131,6 @@ public abstract class CatalogNavigator extends JPanel
             open();
         }
     };
-
-    // May be set to override the default _openAction
-    private AbstractAction _openActionOverride;
 
     // Action to use for the "Save as..." menu and toolbar items
     private AbstractAction _saveAsAction = new AbstractAction(_I18N.getString("saveAs")) {
@@ -242,7 +222,7 @@ public abstract class CatalogNavigator extends JPanel
                 className = "jsky.catalog.astrocat.AstroCatConfig";
             }
             try {
-                Class c = Class.forName(className);
+                Class<?> c = Class.forName(className);
                 Object o = c.getMethod("getDirectory").invoke(null);
                 if (o instanceof CatalogDirectory) {
                     _catDir = (CatalogDirectory) o;
@@ -272,17 +252,10 @@ public abstract class CatalogNavigator extends JPanel
      * (Call setQueryResult to set the root catalog to display).
      *
      * @param parent      the parent component
-     * @param catalogTree a CatalogTree (normally a subclass of CatalogTree
-     *                    that knows about certain types of catalogs)
      */
-    public CatalogNavigator(Component parent, CatalogTree catalogTree) {
+    public CatalogNavigator(Component parent) {
         _parent = parent;
         setLayout(new BorderLayout());
-
-        _catalogTree = catalogTree;
-        catalogTree.setQueryResultDisplay(this);
-        catalogTree.setHTMLQueryResultHandler(this);
-        catalogTree.setPreferredSize(new Dimension(256, 0));
 
         _queryPanel = new JPanel();
         _queryPanel.setLayout(new BorderLayout());
@@ -290,10 +263,7 @@ public abstract class CatalogNavigator extends JPanel
         _resultPanel = new JPanel();
         _resultPanel.setLayout(new BorderLayout());
 
-        _querySplitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, catalogTree, _queryPanel);
-        _querySplitPane.setOneTouchExpandable(true);
-
-        _resultSplitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, _querySplitPane, _resultPanel);
+        _resultSplitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, _queryPanel, _resultPanel);
         _resultSplitPane.setOneTouchExpandable(true);
         _resultSplitPane.setDividerLocation(270);
         add(_resultSplitPane, BorderLayout.CENTER);
@@ -308,49 +278,12 @@ public abstract class CatalogNavigator extends JPanel
      * (Call setQueryResult to set the root catalog to display).
      *
      * @param parent      the parent component
-     * @param catalogTree a CatalogTree (normally a subclass of CatalogTree
-     *                    that knows about certain types of catalogs)
      * @param plotter     the object to use to plot catalog table data
      *                    (when the plot button is pressed)
      */
-    public CatalogNavigator(Component parent, CatalogTree catalogTree, TablePlotter plotter) {
-        this(parent, catalogTree);
+    public CatalogNavigator(Component parent, TablePlotter plotter) {
+        this(parent);
         _plotter = plotter;
-    }
-
-    /**
-     * Return the object displaying the catalog tree
-     */
-    public CatalogTree getCatalogTree() {
-        return _catalogTree;
-    }
-
-    /**
-     * The pane dividing the catalog tree and the query panel
-     */
-    protected JSplitPane getQuerySplitPane() {
-        return _querySplitPane;
-    }
-
-    /**
-     * Return the JDesktopPane, if using internal frames, otherwise null
-     */
-    public JDesktopPane getDesktop() {
-        return _desktop;
-    }
-
-    /**
-     * Set the JDesktopPane to use for top level windows, if using internal frames
-     */
-    public void setDesktop(JDesktopPane desktop) {
-        _desktop = desktop;
-    }
-
-    /**
-     * Set to true to query catalogs automatically when selected
-     */
-    public void setAutoQuery(boolean b) {
-        _autoQuery = b;
     }
 
     /**
@@ -368,13 +301,6 @@ public abstract class CatalogNavigator extends JPanel
     }
 
     /**
-     * Return the top level parent frame (or internal frame) for this window
-     */
-    public Component getParentFrame() {
-        return _parent;
-    }
-
-    /**
      * Set the query or result component to display. The choice is made based on
      * which interfaces the component implements. If the component implements
      * QueryResultDisplay, it is considered a result component.
@@ -385,10 +311,7 @@ public abstract class CatalogNavigator extends JPanel
         } else {
             setQueryComponent(component);
 
-            //System.out.println("XXX _autoQuery = " + _autoQuery  + ", component is a " + component.getClass());
-
-            if ((component instanceof CatalogQueryTool)
-                    && (_autoQuery || ((CatalogQueryTool) component).getCatalog().isLocal())) {
+            if ((component instanceof CatalogQueryTool) && (((CatalogQueryTool) component).getCatalog().isLocal())) {
                 ((CatalogQueryTool) component).search();
             }
         }
@@ -406,9 +329,10 @@ public abstract class CatalogNavigator extends JPanel
             _queryComponent = null;
         }
         _queryComponent = component;
+        /*
         Catalog cat = _catalogTree.getSelectedNode();
         if (cat != null)
-            _panelTreeNodeTable.put(_queryComponent, cat);
+            _panelTreeNodeTable.put(_queryComponent, cat);*/
         _queryPanel.add(_queryComponent, BorderLayout.CENTER);
 
         // restore the query result corresponding to this catalog, if known
@@ -655,22 +579,6 @@ public abstract class CatalogNavigator extends JPanel
                 }
             };
             _worker.start();
-        }
-    }
-
-    /**
-     * Update the frame's title to display the name of the given catalog
-     */
-    private void _updateTitle(Catalog catalog) {
-        String title = _I18N.getString("catalogNavigator");
-        String s = catalog.getTitle();
-        if (s != null && s.length() > 0)
-            title += " - " + s;
-        if (_parent != null) {
-            if (_parent instanceof JFrame)
-                ((JFrame) _parent).setTitle(title);
-            else
-                ((JInternalFrame) _parent).setTitle(title);
         }
     }
 
@@ -980,11 +888,6 @@ public abstract class CatalogNavigator extends JPanel
      * Display a file chooser to select a local catalog file to open
      */
     public void open() {
-        if (_openActionOverride != null) {
-            _openActionOverride.actionPerformed(null);
-            return;
-        }
-
         if (_fileChooser == null) {
             _fileChooser = makeFileChooser();
         }
@@ -1017,11 +920,7 @@ public abstract class CatalogNavigator extends JPanel
             setQueryComponent(new EmptyPanel());
             URL url = FileUtil.makeURL(null, fileOrUrl);
             URLQueryResult _queryResult = new URLQueryResult(url);
-            String filename = url.getFile();
-            if (filename.endsWith(".xml"))
-                _catalogTree.setQueryResult(_queryResult);
-            else
-                setQueryResult(_queryResult);
+            setQueryResult(_queryResult);
         } catch (Exception e) {
             DialogUtil.error(e);
         }
@@ -1061,7 +960,6 @@ public abstract class CatalogNavigator extends JPanel
         CatalogHistoryItem historyItem = _backStack.pop();
         if (_backStack.size() == 0)
             _backAction.setEnabled(false);
-        CatalogNavigatorMenuBar.setCurrentCatalogNavigator(this);
         _noStack = true;
         try {
             historyItem.actionPerformed(null);
@@ -1070,12 +968,6 @@ public abstract class CatalogNavigator extends JPanel
         }
         _noStack = false;
 
-        // select the related tree node
-        if (historyItem.getQueryComponent() != null) {
-            Catalog cat = _panelTreeNodeTable.get(historyItem.getQueryComponent());
-            if (cat != null)
-                _catalogTree.selectNode(cat);
-        }
         update();
     }
 
@@ -1098,7 +990,6 @@ public abstract class CatalogNavigator extends JPanel
         CatalogHistoryItem historyItem = _forwStack.pop();
         if (_forwStack.size() == 0)
             _forwAction.setEnabled(false);
-        CatalogNavigatorMenuBar.setCurrentCatalogNavigator(this);
         _noStack = true;
         try {
             historyItem.actionPerformed(null);
@@ -1107,26 +998,12 @@ public abstract class CatalogNavigator extends JPanel
         }
         _noStack = false;
 
-
-        // select the related tree node
-        if (historyItem.getQueryComponent() != null) {
-            Catalog cat = _panelTreeNodeTable.get(historyItem.getQueryComponent());
-            if (cat != null)
-                _catalogTree.selectNode(cat);
-        }
         update();
     }
 
     // These are for the GenericToolBarTarget interface
     public AbstractAction getOpenAction() {
         return _openAction;
-    }
-
-    /**
-     * Override the default Open action.
-     */
-    public void setOpenAction(AbstractAction openAction) {
-        _openActionOverride = openAction;
     }
 
     public AbstractAction getSaveAsAction() {
@@ -1167,13 +1044,6 @@ public abstract class CatalogNavigator extends JPanel
 
     public AbstractAction getDeleteAllQueryAction() {
         return _deleteAllQueryAction;
-    }
-
-    /**
-     * Return the top level parent frame (or internal frame) for this window
-     */
-    public Component getRootComponent() {
-        return _parent;
     }
 
     /**
@@ -1296,20 +1166,6 @@ public abstract class CatalogNavigator extends JPanel
     }
 
     /**
-     * Return true if this is the main application window (enables exit menu item)
-     */
-    public static boolean isMainWindow() {
-        return _mainWindowFlag;
-    }
-
-    /**
-     * Set to true if this is the main application window (enables exit menu item)
-     */
-    public static void setMainWindow(boolean b) {
-        _mainWindowFlag = b;
-    }
-
-    /**
      * Used to identify an empty query or result panel
      */
     public class EmptyPanel extends JPanel implements QueryResultDisplay {
@@ -1317,27 +1173,6 @@ public abstract class CatalogNavigator extends JPanel
         public void setQueryResult(QueryResult queryResult) {
             throw new RuntimeException(_I18N.getString("queryResultDisplayError"));
         }
-    }
-
-    /**
-     * Return the panel used to display download progress information
-     */
-    protected ProgressPanel getProgressPanel() {
-        return _progressPanel;
-    }
-
-    /**
-     * Return the stack of CatalogHistoryItems, used to go back to a previous panel
-     */
-    protected Stack getBackStack() {
-        return _backStack;
-    }
-
-    /**
-     * Return the stack of CatalogHistoryItems, used to go forward to the next panel
-     */
-    protected Stack getForwStack() {
-        return _forwStack;
     }
 
     /**
@@ -1404,8 +1239,5 @@ public abstract class CatalogNavigator extends JPanel
         }
     }
 
-    public CatalogQueryList getQueryList() {
-        return _queryList;
-    }
 }
 

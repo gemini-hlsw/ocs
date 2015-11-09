@@ -1,8 +1,3 @@
-// Copyright 2001 Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-//
-// $Id: ObsCatalogQueryPanel.java 6986 2006-05-01 17:05:49Z shane $
-
 package jsky.app.ot.gemini.obscat;
 
 import jsky.app.ot.shared.gemini.obscat.ObsCatalogInfo;
@@ -15,12 +10,7 @@ import jsky.util.gui.MultiSelectComboBox;
 import javax.swing.*;
 import java.awt.GridBagConstraints;
 import java.awt.Insets;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.Serializable;
-import java.util.Enumeration;
-import java.util.Hashtable;
-
 
 /**
  * Defines the main panel for querying an ObsCatalog. This replaces the default
@@ -28,7 +18,7 @@ import java.util.Hashtable;
  *
  * @author Allan Brighton
  */
-public final class ObsCatalogQueryPanel extends CatalogQueryPanel {
+public class ObsCatalogQueryPanel extends CatalogQueryPanel {
 
     // For choosing instrument specific options
     private JTabbedPane _tabbedPane;
@@ -43,11 +33,10 @@ public final class ObsCatalogQueryPanel extends CatalogQueryPanel {
     private JLabel[][] _panelLabels;
 
     /** Array(InstIndex, row) of components displayed next to the labels */
-    private JComponent[][] _panelComponents;
+    protected JComponent[][] _panelComponents;
 
     /** Instrument combo box */
-    private MultiSelectComboBox _instComboBox;
-
+    protected MultiSelectComboBox<String> _instComboBox;
 
     /**
      * Initialize a query panel for the given catalog.
@@ -59,17 +48,17 @@ public final class ObsCatalogQueryPanel extends CatalogQueryPanel {
         super(catalog, numCols);
     }
 
-
     /**
      * Make the display panel items.
      * (Redefined from the parent class version to add a tabbed pane for the
      * instrument specific items).
      */
+    @Override
+    @SuppressWarnings("unchecked")
     protected void makePanelItems() {
         super.makePanelItems();
 
         _tabbedPane = new JTabbedPane();
-//        ObsCatalog catalog = (ObsCatalog) getCatalog();
         final String[] instruments = ObsCatalogInfo.INSTRUMENTS;
         final int nInst = instruments.length;
         final int nPanels = nInst + 1;
@@ -87,30 +76,30 @@ public final class ObsCatalogQueryPanel extends CatalogQueryPanel {
                 // Instrument specific items
                 _panels[i].setName(instruments[i - 1]);
                 final FieldDescAdapter[] params = ObsCatalog.getInstrumentParamDesc(instruments[i - 1]);
-                final int n = params.length;
-                _panelLabels[i] = new JLabel[n];
-                _panelComponents[i] = new JComponent[n];
+                if (params != null) {
+                    final int n = params.length;
+                    _panelLabels[i] = new JLabel[n];
+                    _panelComponents[i] = new JComponent[n];
 
-                for (int j = 0; j < n; j++) {
-                    _panelLabels[i][j] = makeLabel(params[j].getName());
-                    _panelComponents[i][j] = makeComponent(params[j]);
+                    for (int j = 0; j < n; j++) {
+                        _panelLabels[i][j] = makeLabel(params[j].getName());
+                        _panelComponents[i][j] = makeComponent(params[j]);
+                    }
                 }
             }
         }
 
         // link the instrument combo box with the tabbed pane containing the instrument
         // specific options
-        _instComboBox = (MultiSelectComboBox) getComponentForLabel(ObsCatalogInfo.INSTRUMENT);
-        _instComboBox.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                final int n = _instComboBox.getModel().getSize();
-                for (int i = 0; i < n; i++) {
-                    _tabbedPane.setEnabledAt(i + 1, false);
-                }
-                final int[] indexes = _instComboBox.getSelectedIndexes();
-                for (int indexe : indexes) {
-                    _tabbedPane.setEnabledAt(indexe + 1, true);
-                }
+        _instComboBox = (MultiSelectComboBox<String>) getComponentForLabel(ObsCatalogInfo.INSTRUMENT);
+        _instComboBox.addActionListener(e -> {
+            final int n = _instComboBox.getModel().getSize();
+            for (int i = 0; i < n; i++) {
+                _tabbedPane.setEnabledAt(i + 1, false);
+            }
+            final int[] indexes = _instComboBox.getSelectedIndexes();
+            for (int indexe : indexes) {
+                _tabbedPane.setEnabledAt(indexe + 1, true);
             }
         });
     }
@@ -118,35 +107,29 @@ public final class ObsCatalogQueryPanel extends CatalogQueryPanel {
     /**
      * Make and return a combo box with the values that the given field may have.
      */
+    @Override
     protected JComponent makeComboBox(FieldDesc p) {
         final int n = p.getNumOptions();
 
-//        String[] ar = new String[n];
         final NameValue[] ar = new NameValue[n];
         for (int i = 0; i < n; i++) {
-//            ar[i] = p.getOptionName(i);
             ar[i] = new NameValue(p.getOptionName(i), p.getOptionValue(i));
         }
 
-        final MultiSelectComboBox cb = new MultiSelectComboBox(ar);
-//        cb.setToolTipText(p.getDescription());
+        final MultiSelectComboBox<NameValue> cb = new MultiSelectComboBox<>(ar);
 
         final String s = p.getDescription();
         if (s != null) cb.setToolTipText(s);
 
-        cb.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                fireChange(cb);
-            }
-        });
+        cb.addActionListener(e -> fireChange(cb));
 
         return cb;
     }
 
-
     /**
      * Remove the panel items.
      */
+    @Override
     protected void removePanelItems() {
         super.removePanelItems();
         remove(_tabbedPane);
@@ -164,7 +147,6 @@ public final class ObsCatalogQueryPanel extends CatalogQueryPanel {
         }
     }
 
-
     /**
      * Combine the panel items in a tabbed pane layout, with one
      * "General" pane and instrument specific panes.
@@ -172,6 +154,7 @@ public final class ObsCatalogQueryPanel extends CatalogQueryPanel {
      * @param layout utility object used for the layout
      * @return the number of rows in the layout
      */
+    @Override
     protected int doGridBagLayout(GridBagUtil layout) {
 
         // put the non-instrument specific items in the first pane
@@ -210,7 +193,6 @@ public final class ObsCatalogQueryPanel extends CatalogQueryPanel {
         return 1;
     }
 
-
     /**
      * Return the display component corresponding to the given instrument name and
      * label text, or null if not found.
@@ -233,7 +215,8 @@ public final class ObsCatalogQueryPanel extends CatalogQueryPanel {
      *
      * @return the QueryArgs object to use for a catalog query.
      */
-    public QueryArgs getQueryArgs() {
+    @Override
+    public ObsCatalogQueryArgs getQueryArgs() {
         final ObsCatalog catalog = (ObsCatalog) getCatalog();
         final ObsCatalogQueryArgs queryArgs = new ObsCatalogQueryArgs(catalog);
         initQueryArgs(queryArgs);
@@ -243,27 +226,29 @@ public final class ObsCatalogQueryPanel extends CatalogQueryPanel {
             for (String instrument : instruments) {
                 final int instIndex = ObsCatalogInfo.getInstIndex(instrument) + 1;
                 final FieldDesc[] params = ObsCatalog.getInstrumentParamDesc(instrument);
-                for (int j = 0; j < _panelLabels[instIndex].length; j++) {
-                    final Object value = getValue(params[j], _panelComponents[instIndex][j]);
-                    if (value != null)
-                        queryArgs.setInstParamValue(instrument, j, value);
+                if (params != null) {
+                    for (int j = 0; j < _panelLabels[instIndex].length; j++) {
+                        final Object value = getValue(params[j], _panelComponents[instIndex][j]);
+                        if (value != null)
+                            queryArgs.setInstParamValue(instrument, j, value);
+                    }
                 }
             }
         }
-
         return queryArgs;
     }
-
 
     /**
      * Return the value in the given component, or null if there is no value there.
      * Overrides parent version to allow value ranges (with ">", "<", "<=", ">=") in numerical
      * text fields and to use a MultiSelectComboBox instead of JComboBox for choices.
      */
-    protected Object getValue(FieldDesc p, JComponent c) {
+    @Override
+    @SuppressWarnings("unchecked")
+    protected Serializable getValue(FieldDesc p, JComponent c) {
         if (p.getNumOptions() > 0) {
             // must be a combo box
-            final MultiSelectComboBox cb = (MultiSelectComboBox) c;
+            final MultiSelectComboBox<NameValue> cb = (MultiSelectComboBox<NameValue>) c;
 
             // TODO: here we could convert from the "name" to the value
             // maybe a better idea though is to have the combo box return
@@ -281,29 +266,33 @@ public final class ObsCatalogQueryPanel extends CatalogQueryPanel {
         }
     }
 
-
     /** Set the value in the given component. */
+    @SuppressWarnings("unchecked")
     protected void setValue(JComponent c, Object value) {
         if (c instanceof MultiSelectComboBox) {
-            if (value instanceof Object[])
-                ((MultiSelectComboBox) c).setSelectedObjects((Object[]) value);
-            else
-                ((MultiSelectComboBox) c).setSelectedObjects(new Object[]{value});
+            if (value instanceof Object[]) {
+                ((MultiSelectComboBox<Object>) c).setSelectedObjects((Object[]) value);
+            } else {
+                ((MultiSelectComboBox<Object>) c).setSelectedObjects(new Object[]{value});
+            }
         } else if (c instanceof JTextField) {
             final String s;
-            if (value instanceof Double)
+            if (value instanceof Double) {
                 s = nf.format(((Double) value).doubleValue());
-            else
+            } else if (value == null) {
+                s = "";
+            } else {
                 s = value.toString();
+            }
             ((JTextField) c).setText(s);
         }
     }
-
 
     /**
      * Initialize a QueryArgs object based on the current panel settings
      * so that can be passed to the Catalog.query() method.
      */
+    @Override
     public void initQueryArgs(QueryArgs queryArgs) {
         super.initQueryArgs(queryArgs);
 
@@ -313,67 +302,19 @@ public final class ObsCatalogQueryPanel extends CatalogQueryPanel {
             qArgs.setInstruments(instruments);
     }
 
-
     // Return the index of the selected instruments, or null if none are selected
-    private int[] _getInstIndexes() {
+    protected int[] _getInstIndexes() {
         if (_instComboBox == null || _instComboBox.getSelectionCount() == 0)
             return null;
 
         return _instComboBox.getSelectedIndexes();
     }
 
-
     // Return an array with the names of the selected instruments, or null if none are selected
-    private String[] _getInstruments() {
+    protected String[] _getInstruments() {
         if (_instComboBox == null || _instComboBox.getSelectionCount() == 0)
             return null;
         return _instComboBox.getSelected();
     }
 
-
-    /** Store the current settings in a serializable object and return the object. */
-    public Object storeSettings() {
-        final Hashtable map = (Hashtable) super.storeSettings();
-
-        final Hashtable<String, Hashtable<String,Object>> hashTable = new Hashtable<String, Hashtable<String,Object>>();
-        final int[] instIndexes = _getInstIndexes();
-        if (instIndexes != null) {
-            final String[] instruments = _getInstruments();
-            for (int i = 0; i < instruments.length; i++) {
-                final String inst = instruments[i];
-                final FieldDesc[] params = ObsCatalog.getInstrumentParamDesc(inst);
-                final Hashtable<String,Object> instMap = new Hashtable<String,Object>();
-                for (int j = 0; j < params.length; j++) {
-                    final String name = params[j].getName();
-                    final Object value = getValue(params[j], _panelComponents[instIndexes[i] + 1][j]);
-                    if (name != null && value instanceof Serializable)
-                        instMap.put(name, value);
-                }
-                hashTable.put(inst, instMap);
-            }
-        }
-        return new Hashtable[]{map, hashTable};
-    }
-
-    /** Restore the settings previously stored. */
-    public boolean restoreSettings(Object obj) {
-        if (obj instanceof Hashtable[]) {
-            final Hashtable[] maps = (Hashtable[]) obj;
-            if (maps.length == 2 && super.restoreSettings(maps[0])) {
-                for (Enumeration e = maps[1].keys(); e.hasMoreElements();) {
-                    final String inst = (String) e.nextElement();
-                    final Hashtable instMap = (Hashtable) maps[1].get(inst);
-                    for (e = instMap.keys(); e.hasMoreElements();) {
-                        final String name = (String) e.nextElement();
-                        final Object value = instMap.get(name);
-                        final JComponent c = getInstComponentForLabel(inst, name);
-                        if (c != null)
-                            setValue(c, value);
-                    }
-                }
-                return true;
-            }
-        }
-        return false;
-    }
 }

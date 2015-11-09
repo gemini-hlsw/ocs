@@ -1,7 +1,3 @@
-//
-// $
-//
-
 package edu.gemini.spModel.guide;
 
 import edu.gemini.pot.sp.ISPObsComponent;
@@ -25,6 +21,7 @@ import edu.gemini.spModel.target.obsComp.TargetObsComp;
 
 import java.awt.geom.AffineTransform;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Utility methods for working with guide probes.
@@ -58,9 +55,7 @@ public enum GuideProbeUtil {
     public Set<GuideProbe> getAvailableGuiders(ISPObservation obs) {
         final List<ISPObsComponent> obsComponents = obs.getObsComponents();
         final List<AbstractDataObject> dataObjs = new ArrayList<>(obsComponents.size());
-        for (ISPObsComponent obsComp : obsComponents) {
-            dataObjs.add((AbstractDataObject) obsComp.getDataObject());
-        }
+        dataObjs.addAll(obsComponents.stream().map(obsComp -> (AbstractDataObject) obsComp.getDataObject()).collect(Collectors.toList()));
         return getAvailableGuiders(dataObjs);
     }
 
@@ -144,25 +139,22 @@ public enum GuideProbeUtil {
     }
 
     private boolean inRange(final SPTarget guideStar, final GuideProbe guideProbe, final ObsContext ctx, final Offset offset) {
-        return guideProbe.getCorrectedPatrolField(ctx).exists(new PredicateOp<PatrolField>() {
-            @Override
-            public Boolean apply(PatrolField patrolField) {
-                // offset position -> we must move the corrected patrol field by this offset
-                final double xOffset = -offset.p().toArcsecs().getMagnitude();
-                final double yOffset = -offset.q().toArcsecs().getMagnitude();
-                final PatrolField offsetPatrolField = patrolField.getTransformed(AffineTransform.getTranslateInstance(xOffset, yOffset));
-                // and we must rotate the patrol field according to position angle
-                final PatrolField rotatedPatrolField = offsetPatrolField.getTransformed(AffineTransform.getRotateInstance(-ctx.getPositionAngle().toRadians().getMagnitude()));
-                // find distance of base position to the guide star
-                return ctx.getBaseCoordinates().map(baseCoordinates -> {
-                    final CoordinateDiff diff = new CoordinateDiff(baseCoordinates, guideStar.getTarget().getSkycalcCoordinates());
-                    final Offset dis = diff.getOffset();
-                    final double p = -dis.p().toArcsecs().getMagnitude();
-                    final double q = -dis.q().toArcsecs().getMagnitude();
-                    // and now check if that guide star is inside the correctly transformed/rotated patrol field
-                    return rotatedPatrolField.getArea().contains(p, q);
-                }).getOrElse(false);
-            }
+        return guideProbe.getCorrectedPatrolField(ctx).exists(patrolField -> {
+            // offset position -> we must move the corrected patrol field by this offset
+            final double xOffset = -offset.p().toArcsecs().getMagnitude();
+            final double yOffset = -offset.q().toArcsecs().getMagnitude();
+            final PatrolField offsetPatrolField = patrolField.getTransformed(AffineTransform.getTranslateInstance(xOffset, yOffset));
+            // and we must rotate the patrol field according to position angle
+            final PatrolField rotatedPatrolField = offsetPatrolField.getTransformed(AffineTransform.getRotateInstance(-ctx.getPositionAngle().toRadians().getMagnitude()));
+            // find distance of base position to the guide star
+            return ctx.getBaseCoordinates().map(baseCoordinates -> {
+                final CoordinateDiff diff = new CoordinateDiff(baseCoordinates, guideStar.getTarget().getSkycalcCoordinates());
+                final Offset dis = diff.getOffset();
+                final double p = -dis.p().toArcsecs().getMagnitude();
+                final double q = -dis.q().toArcsecs().getMagnitude();
+                // and now check if that guide star is inside the correctly transformed/rotated patrol field
+                return rotatedPatrolField.getArea().contains(p, q);
+            }).getOrElse(false);
         });
     }
 }

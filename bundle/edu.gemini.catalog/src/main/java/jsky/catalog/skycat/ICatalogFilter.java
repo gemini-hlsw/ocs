@@ -22,5 +22,5 @@ public interface ICatalogFilter {
      * @param is The original Input Stream to Filter
      * @return a new Input Stream, with the original input stream Filtered.
      */
-    public InputStream filterContent(InputStream is) throws IOException;
+    InputStream filterContent(InputStream is) throws IOException;
 }

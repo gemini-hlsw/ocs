@@ -1,10 +1,3 @@
-/*
- * Copyright 2000 Association for Universities for Research in Astronomy, Inc.,
- * Observatory Control System, Gemini Telescopes Project.
- *
- * $Id: BusyWin.java 4414 2004-02-03 16:21:36Z brighton $
- */
-
 package jsky.util.gui;
 
 import java.awt.Component;
@@ -14,11 +7,9 @@ import java.awt.Graphics;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
-import java.lang.Runnable;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
-
 
 /**
  * Utility class used to disable GUI input while work is in progress.
@@ -38,19 +29,7 @@ public class BusyWin {
      */
     public static void setBusy(boolean busy, Component parent) {
 
-        // XXX Note: Glass panes seem to behave differently with internal frames,
-        // XXX so the code commented out below did not work correctly.
-        // XXX If you clicked on an internal frame, the glass pane was hidden,
-        // XXX and when it was supposed to be hidden, it reappeared when the
-        // XXX frame lost the focus (at least under Linux, where I tested it).
-
-        //JDesktopPane desktop = DialogUtil.getDesktop();
-        //if (desktop == null) {
-
-        // using JFrames
-        Frame[] frames = Frame.getFrames();
-        for (int i = 0; i < frames.length; i++) {
-            Component c = frames[i];
+        for (Frame c : Frame.getFrames()) {
             if (c == parent || !(c instanceof JFrame) || !c.isVisible())
                 continue;
             JFrame frame = (JFrame) c;
@@ -70,22 +49,6 @@ public class BusyWin {
             }
         }
 
-        //}
-        //else {
-        // using JInternalFrames
-        //JInternalFrame[] frames = desktop.getAllFrames();
-        //for(int i = 0; i < frames.length; i++) {
-        //Component c = frames[i];
-        //if (c == parent || ! (c instanceof JInternalFrame) || !c.isVisible())
-        //    continue;
-        //JInternalFrame frame = (JInternalFrame)c;
-        //Component glassPane = frame.getGlassPane();
-        //if (! (glassPane instanceof GlassPane)) {
-        //    glassPane = new GlassPane();
-        //    frame.setGlassPane(glassPane);
-        //}
-        //glassPane.setVisible(busy);
-        //}
     }
 
 
@@ -107,12 +70,7 @@ public class BusyWin {
      */
     public static void showBusy(final Component parent) {
         setBusy(true, parent);
-        SwingUtilities.invokeLater(new Runnable() {
-
-            public void run() {
-                setBusy(false, parent);
-            }
-        });
+        SwingUtilities.invokeLater(() -> setBusy(false, parent));
     }
 
 

@@ -56,7 +56,7 @@ public class TpeHorizonsFeature extends TpeImageFeature {
     }
 
     private CoordinateConverter getCoordinateConverter() {
-        return _iw.getNavigator().getPlotter().getCoordinateConverter();
+        return _iw.plotter().getCoordinateConverter();
     }
 
     public void setEphemeris(List<EphemerisEntry> data) {

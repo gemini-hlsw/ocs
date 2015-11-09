@@ -5,11 +5,9 @@ import diva.canvas.DamageRegion;
 import diva.canvas.TransformContext;
 import diva.canvas.event.LayerEvent;
 import diva.canvas.event.LayerListener;
-import edu.gemini.catalog.skycat.table.*;
 import edu.gemini.shared.skyobject.SkyObject;
 import edu.gemini.shared.util.immutable.*;
 import jsky.catalog.*;
-import jsky.catalog.skycat.SkyObjectFactoryRegistrar;
 import jsky.coords.*;
 import jsky.graphics.CanvasGraphics;
 import jsky.image.graphics.DivaImageGraphics;
@@ -29,8 +27,8 @@ import java.awt.geom.Ellipse2D;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Implements basic plotting of catalog tables on in an image window.
@@ -46,10 +44,6 @@ import java.util.logging.Logger;
  */
 public class BasicTablePlotter
         implements TablePlotter, LayerListener, ChangeListener {
-    private static final Logger LOG = Logger.getLogger(BasicTablePlotter.class.getName());
-
-    /** The object to use to draw catalog symbols */
-    private DivaImageGraphics _imageGraphics;
 
     /** The Diva layer to use to draw catalog symbols */
     private CanvasLayer _layer;
@@ -61,13 +55,13 @@ public class BasicTablePlotter
     private double _imageEquinox = 2000.;
 
     /** List of (table, symbolList) pairs, used to keep track of symbols for tables. */
-    private LinkedList<TableListItem> _tableList = new LinkedList<>();
+    private List<TableListItem> _tableList = new LinkedList<>();
 
     /** Array of (symbol, figureList) pairs (for each table, which may have multiple plot symbols) */
     private SymbolListItem[] _symbolAr;
 
     /** List of (shape, rowNum) pairs (for each table/symbol entry). */
-    private LinkedList<FigureListItem> _figureList;
+    private List<FigureListItem> _figureList;
 
     /** If true, catalog symbols are visible, otherwise hidden */
     private boolean _visible = true;
@@ -89,35 +83,25 @@ public class BasicTablePlotter
      * Default Constructor
      * (Note: you need to call setCanvasGraphics() and setCoordinateConverter()
      * before using this object).
+     *
+     * @param canvasGraphics Set the object to use to draw catalog symbols
+     * @param cc             Return the object used to convert to screen coordinates for drawing
      */
-    public BasicTablePlotter() {
-    }
-
-
-    /** Set the object to use to draw catalog symbols */
-    public void setCanvasGraphics(CanvasGraphics canvasGraphics) {
-        _imageGraphics = (DivaImageGraphics) canvasGraphics;
-        NavigatorPane pane = (NavigatorPane) _imageGraphics.getGraphicsPane();
+    public BasicTablePlotter(final CanvasGraphics canvasGraphics, final CoordinateConverter cc) {
+        /* The object to use to draw catalog symbols */
+        // TODO Make the castings safer
+        DivaImageGraphics _imageGraphics = (DivaImageGraphics) canvasGraphics;
+        final NavigatorPane pane = (NavigatorPane) _imageGraphics.getGraphicsPane();
         _layer = pane.getSymbolLayer();
         pane.getBackgroundEventLayer().addLayerListener(this);
+        _coordinateConverter = (ImageCoordinateConverter) cc;
     }
-
-    /** Return the object to use to draw catalog symbols */
-    public CanvasGraphics getCanvasGraphics() {
-        return _imageGraphics;
-    }
-
 
     /** Return the object used to convert to screen coordinates for drwing */
+    @Override
     public CoordinateConverter getCoordinateConverter() {
         return _coordinateConverter;
     }
-
-    /** Set the object used to convert to screen coordinates for drwing */
-    public void setCoordinateConverter(CoordinateConverter c) {
-        _coordinateConverter = (ImageCoordinateConverter) c;
-    }
-
 
     /**
      * Check if there is an image loaded and if so, if it supports world coordinates.
@@ -126,11 +110,11 @@ public class BasicTablePlotter
      * @param table describes the table data
      * @return false if no suitable image could be used or generated, otherwise true
      */
-    public boolean check(TableQueryResult table) {
+    public boolean check(final TableQueryResult table) {
         // If no image is being displayed, try to generate a blank WCS image
-        GraphicsImageDisplay imageDisplay = (GraphicsImageDisplay) _coordinateConverter.getImageDisplay();
+        final GraphicsImageDisplay imageDisplay = (GraphicsImageDisplay) _coordinateConverter.getImageDisplay();
         if (imageDisplay.isClear()) {
-            WorldCoordinates pos = table.getWCSCenter();
+            final WorldCoordinates pos = table.getWCSCenter();
             if (pos != null) {
                 imageDisplay.blankImage(pos.getRaDeg(), pos.getDecDeg());
             }
@@ -145,7 +129,8 @@ public class BasicTablePlotter
      *
      * @param table describes the table data
      */
-    public void plot(TableQueryResult table) {
+    @Override
+    public void plot(final TableQueryResult table) {
         if (_layer == null || _coordinateConverter == null) {
             return;
         }
@@ -154,7 +139,7 @@ public class BasicTablePlotter
             return;
         }
 
-        TablePlotSymbol[] symbols = getPlotSymbolInfo(table);
+        final TablePlotSymbol[] symbols = getPlotSymbolInfo(table);
         if (symbols == null) {
             return;
         }
@@ -196,7 +181,8 @@ public class BasicTablePlotter
 
 
     /** Called when the WCS info changes */
-    public void stateChanged(ChangeEvent e) {
+    @Override
+    public void stateChanged(final ChangeEvent e) {
         replotAll();
     }
 
@@ -207,10 +193,11 @@ public class BasicTablePlotter
      * @param table object representing the catalog table
      * @return an array of TablePlotSymbol objects, one for each plot symbol defined.
      */
-    public TablePlotSymbol[] getPlotSymbolInfo(TableQueryResult table) {
+    @Override
+    public TablePlotSymbol[] getPlotSymbolInfo(final TableQueryResult table) {
         // first see if we have the plot information cached
         Object o = _plotSymbolMap.get(table);
-        Catalog catalog = table.getCatalog();
+        final Catalog catalog = table.getCatalog();
         if (o == null) {
             // also check the catalog where the query originated
             if (catalog != null)
@@ -231,8 +218,9 @@ public class BasicTablePlotter
     }
 
     /** Set the plot symbol info for the given table */
-    public void setPlotSymbolInfo(TableQueryResult table, TablePlotSymbol[] symbols) {
-        Catalog catalog = table.getCatalog();
+    @Override
+    public void setPlotSymbolInfo(final TableQueryResult table, final TablePlotSymbol[] symbols) {
+        final Catalog catalog = table.getCatalog();
         _plotSymbolMap.put(table, symbols);
         if (catalog != null)
             _plotSymbolMap.put(catalog, symbols);
@@ -244,12 +232,11 @@ public class BasicTablePlotter
      * @param table describes the table data
      * @param symbols an array of objects describing the symbols to plot
      */
-    protected void plotSymbols(TableQueryResult table, TablePlotSymbol[] symbols) {
+    private void plotSymbols(final TableQueryResult table, final TablePlotSymbol[] symbols) {
         // for each row in the catalog, evaluate the expressions and plot the symbols
         final int nrows = table.getRowCount();
         final RowCoordinates rowCoords = table.getRowCoordinates();
 
-        //double tableEquinox = rowCoords.getEquinox();  // XXX might be specified in a column?
         final Vector<Vector<Object>> dataVec = table.getDataVector();
 
         final boolean isWCS = rowCoords.isWCS();
@@ -277,6 +264,7 @@ public class BasicTablePlotter
                 // need to keep table values in the image equinox, since the WCS conversion
                 // methods all assume the image equinox
                 double[] radec = ((WorldCoords) pos).getRaDec(_imageEquinox);
+
                 x = radec[0];
                 y = radec[1];
             }
@@ -286,6 +274,7 @@ public class BasicTablePlotter
                 try {
                     plotRow(row, rowVec, x, y, cooSys, symbols[i]);
                 } catch (Exception e) {
+                    //e.printStackTrace();
                     // ignore: may be WCS out of range...
                 }
             }
@@ -293,11 +282,10 @@ public class BasicTablePlotter
     }
 
 
-    /*
+    /**
      * Plot the symbol for the given row.
      * The row data is taken from the given row vector.
      *
-     * @param table describes the table data
      * @param row the row number (first row is 0)
      * @param rowVec a vector containing the row elements
      * @param x the X position coordinate
@@ -305,37 +293,36 @@ public class BasicTablePlotter
      * @param cooSys the coordinate system of X and Y (CoordinateConverter constant)
      * @param symbol an object describing the symbol
      */
-    protected void plotRow(final int row, final Vector<Object> rowVec, final double x, final double y,
+    private void plotRow(final int row, final Vector<Object> rowVec, final double x, final double y,
                            final int cooSys, final TablePlotSymbol symbol) {
         // eval expr to get condition
-        boolean cond = symbol.getCond(rowVec);
+        final boolean cond = symbol.getCond(rowVec);
         if (!cond)
             return;
 
         // eval expr to get radius
-        double radius = symbol.getSize(rowVec);
+        final double radius = symbol.getSize(rowVec);
         if (radius <= 0. || Double.isNaN(radius)) {
             // don't want a neg or 0 radius
             return;
         }
 
         // ratio may be an expression with column name variables
-        double ratio = symbol.getRatio(rowVec);
+        final double ratio = symbol.getRatio(rowVec);
 
         // angle may be an expression with column name variables
-        double angle = symbol.getAngle(rowVec);
+        final double angle = symbol.getAngle(rowVec);
 
         // label may also contain col name vars, but might not be numeric
-        String label = symbol.getLabel(rowVec);
+        final String label = symbol.getLabel(rowVec);
 
         plotSymbol(row, symbol, x, y, cooSys, radius, ratio, angle, label);
     }
 
 
-    /*
+    /**
      * Plot the given symbol.
      *
-     * @param table describes the table data
      * @param row the row number (starting with 0)
      * @param symbol an object describing the symbol
      * @param x the X position coordinate
@@ -346,36 +333,37 @@ public class BasicTablePlotter
      * @param angle the rotation angle
      * @param label the label to display next to the symbol
      */
-    protected void plotSymbol(final int row, final TablePlotSymbol symbol, final double x, final double y,
+    private void plotSymbol(final int row, final TablePlotSymbol symbol, final double x, final double y,
                               final int cooSys, final double radius, final double ratio, final double angle, final String label) {
 
         // convert to screen coordinates
-        Point2D.Double pos = new Point2D.Double(x, y);
+        final Point2D.Double pos = new Point2D.Double(x, y);
         _coordinateConverter.convertCoords(pos, cooSys, CoordinateConverter.USER, false);
 
         // clip to image bounds
-        double w = _coordinateConverter.getWidth();
-        double h = _coordinateConverter.getHeight();
-        if (pos.x < 0. || pos.y < 0. || pos.x >= w || pos.y >= h)
+        final double w = _coordinateConverter.getWidth();
+        final double h = _coordinateConverter.getHeight();
+        if (pos.x < 0. || pos.y < 0. || pos.x >= w || pos.y >= h) {
             return;
+        }
         _coordinateConverter.convertCoords(pos, CoordinateConverter.USER, CoordinateConverter.SCREEN, false);
 
-        Point2D.Double size = new Point2D.Double(radius, radius);
-        int sizeType = getCoordType(symbol.getUnits());
+        final Point2D.Double size = new Point2D.Double(radius, radius);
+        final int sizeType = getCoordType(symbol.getUnits());
         _coordinateConverter.convertCoords(size, sizeType, CoordinateConverter.SCREEN, true);
 
         // get the Shape object for the symbol
-        Shape shape = makeShape(symbol, pos.x, pos.y, Math.max(size.x, size.y), ratio, angle);
+        final Shape shape = makeShape(symbol, pos.x, pos.y, Math.max(size.x, size.y), ratio, angle);
 
         // Add an item for this symbol to the figure list, and store it as client data also
-        FigureListItem item = new FigureListItem(shape, label, row);
+        final FigureListItem item = new FigureListItem(shape, label, row);
         _figureList.add(item);
     }
 
     /**
      * Return the CoordinateConverter type code for the given name.
      */
-    protected int getCoordType(String name) {
+    private int getCoordType(final String name) {
         if (name != null && name.length() != 0) {
             if (name.startsWith("deg"))
                 return CoordinateConverter.WORLD;
@@ -402,10 +390,10 @@ public class BasicTablePlotter
      * @param ratio the x/y ratio (ellipticity ratio) of the symbol
      * @param angle the rotation angle
      */
-    protected Shape makeShape(TablePlotSymbol symbol, double x, double y, double size,
-                              double ratio, double angle) {
+    private Shape makeShape(final TablePlotSymbol symbol, final double x, final double y, final double size,
+                              final double ratio, final double angle) {
 
-        int shape = symbol.getShape();
+        final int shape = symbol.getShape();
 
         // do the simple ones first
         switch (shape) {
@@ -426,9 +414,9 @@ public class BasicTablePlotter
         }
 
         // get center, north and east in screen coords
-        Point2D.Double center = new Point2D.Double(x, y);
-        Point2D.Double north = new Point2D.Double(x, y - size);
-        Point2D.Double east = new Point2D.Double(x - size, y);
+        final Point2D.Double center = new Point2D.Double(x, y);
+        final Point2D.Double north = new Point2D.Double(x, y - size);
+        final Point2D.Double east = new Point2D.Double(x - size, y);
 
         // Get WCS NORTH and EAST, converted to screen coords
         getNorthAndEast(center, size, ratio, angle, north, east);
@@ -454,7 +442,7 @@ public class BasicTablePlotter
     }
 
 
-    /*
+    /**
      * Set x and y in the north and east parameters in screen
      * coordinates, given the center point and radius in screen
      * coordinates, an optional rotation angle, and an x/y ellipticity
@@ -471,18 +459,18 @@ public class BasicTablePlotter
      * @param north on return, contains the screen coordinates of WCS north
      * @param east on return, contains the screen coordinates of WCS east
      */
-    protected void getNorthAndEast(Point2D.Double center,
-                                   double size,
-                                   double ratio,
-                                   double angle,
-                                   Point2D.Double north,
-                                   Point2D.Double east) {
+    private void getNorthAndEast(final Point2D.Double center,
+                                   final double size,
+                                   final double ratio,
+                                   final double angle,
+                                   final Point2D.Double north,
+                                   final Point2D.Double east) {
 
         if (_coordinateConverter.isWCS()) {
             // get center and radius in deg 2000
-            Point2D.Double wcsCenter = new Point2D.Double(center.x, center.y);
+            final Point2D.Double wcsCenter = new Point2D.Double(center.x, center.y);
             _coordinateConverter.screenToWorldCoords(wcsCenter, false);
-            Point2D.Double wcsRadius = new Point2D.Double(size, size);
+            final Point2D.Double wcsRadius = new Point2D.Double(size, size);
             _coordinateConverter.screenToWorldCoords(wcsRadius, true);
 
             // adjust the radius by the ratio
@@ -533,28 +521,29 @@ public class BasicTablePlotter
     }
 
 
-    /*
+    /**
      * Rotate the point p around the center point by the given
      * angle in deg.
      */
-    protected void rotatePoint(Point2D.Double p, Point2D.Double center, double angle) {
+    private void rotatePoint(final Point2D.Double p, final Point2D.Double center, final double angle) {
         p.x -= center.x;
         p.y -= center.y;
-        double tmp = p.x;
-        double rad = angle * Math.PI / 180.;
-        double cosa = Math.cos(rad);
-        double sina = Math.sin(rad);
+        final double tmp = p.x;
+        final double rad = angle * Math.PI / 180.;
+        final double cosa = Math.cos(rad);
+        final double sina = Math.sin(rad);
         p.x = p.x * cosa + p.y * sina + center.x;
         p.y = -tmp * sina + p.y * cosa + center.y;
     }
 
 
     /** Erase the plot of the given table data */
+    @Override
     public void unplot(TableQueryResult table) {
-        ListIterator<TableListItem> it = _tableList.listIterator(0);
+        final ListIterator<TableListItem> it = _tableList.listIterator(0);
         while (it.hasNext()) {
             TableListItem item = it.next();
-            if (item.table == table) {
+            if (item.table.equals(table)) {
                 it.remove();
                 _layer.repaint();
                 break;
@@ -563,6 +552,7 @@ public class BasicTablePlotter
     }
 
     /** Erase all plot symbols */
+    @Override
     public void unplotAll() {
         _tableList = new LinkedList<>();
         _layer.repaint();
@@ -571,12 +561,11 @@ public class BasicTablePlotter
 
     /** Recalculate the coordinates and replot all symbols after a change in the coordinate system. */
     @SuppressWarnings("unchecked")
+    @Override
     public void replotAll() {
-        final LinkedList<TableListItem> list = (LinkedList<TableListItem>) _tableList.clone();
+        final LinkedList<TableListItem> list = new LinkedList<>(_tableList);
         _tableList = new LinkedList<>();
-        final ListIterator<TableListItem> it = list.listIterator(0);
-        while (it.hasNext()) {
-            final TableListItem tli = it.next();
+        for (TableListItem tli: list) {
             tli.inRange = tableInRange(tli.table);
             if (tli.inRange)
                 plot(tli.table);
@@ -587,77 +576,74 @@ public class BasicTablePlotter
     }
 
     /** Return an array containing the tables managed by this object. */
+    @Override
     public TableQueryResult[] getTables() {
-        int n = _tableList.size();
-        if (n == 0)
-            return null;
-        final ListIterator<TableListItem> it = _tableList.listIterator(0);
-        final Vector<TableQueryResult> tableVec = new Vector<>(n);
-        while (it.hasNext()) {
-            final TableListItem item = it.next();
-            if (item.inRange) {
-                tableVec.add(item.table);
+        if (!_tableList.isEmpty()) {
+            final List<TableQueryResult> tableVec = _tableList.stream().filter(item -> item.inRange).map(item -> item.table).collect(Collectors.toList());
+            if (!tableVec.isEmpty()) {
+                final TableQueryResult[] tables = new TableQueryResult[tableVec.size()];
+                tableVec.toArray(tables);
+                return tables;
             }
         }
-        n = tableVec.size();
-        if (n == 0)
-            return null;
-        TableQueryResult[] tables = new TableQueryResult[n];
-        for (int i = 0; i < n; i++)
-            tables[i] = tableVec.get(i);
-        return tables;
+        return null;
     }
 
     /** Schedule a repaint of the area given by the given shape */
-    protected void repaint(Shape shape) {
+    private void repaint(final Shape shape) {
         _layer.repaint(DamageRegion.createDamageRegion(new TransformContext(_layer), shape.getBounds2D()));
     }
 
     /** Set the selection state of the symbol corresponding to the given table row */
-    public void selectSymbol(TableQueryResult table, int tableRow, boolean selected) {
+    private void selectSymbol(final TableQueryResult table, final int tableRow, final boolean selected) {
         // Find the plot symbol for the given row in the given table
-        final ListIterator<TableListItem> tableIt = _tableList.listIterator(0);
-        while (tableIt.hasNext()) {
-            final TableListItem tli = tableIt.next();
-            if (tli.table == table) {
-                for (int i = 0; i < tli.symbolAr.length; i++) {
-                    final SymbolListItem sli = tli.symbolAr[i];
-                    final ListIterator<FigureListItem> figureListIt = sli.figureList.listIterator(0);
-                    while (figureListIt.hasNext()) {
-                        FigureListItem fli = figureListIt.next();
-                        if (fli.row == tableRow) {
-                            if (fli.selected != selected) {
-                                fli.selected = selected;
-                                repaint(fli.shape);
-                            }
-                            continue;  // may be more than one symbol per row
-                        }
-                    }
-                }
+        _tableList.stream().filter(tli -> tli.table.equals(table)).forEach(tli -> {
+            for (SymbolListItem sli : tli.symbolAr) {
+                sli.figureList.stream().filter(fli -> fli.row == tableRow).filter(fli -> fli.selected != selected).forEach(fli -> {
+                    fli.selected = selected;
+                    repaint(fli.shape);
+                });
             }
-        }
+        });
         fireTableSelectionEvent(table, tableRow, selected);
-
     }
 
     /** Select the symbol corresponding to the given table row */
-    public void selectSymbol(TableQueryResult table, int tableRow) {
+    @Override
+    public void selectSymbol(final TableQueryResult table, final int tableRow) {
         selectSymbol(table, tableRow, true);
     }
 
     /** Deselect the symbol corresponding to the given table row */
-    public void deselectSymbol(TableQueryResult table, int tableRow) {
+    @Override
+    public void deselectAll(final TableQueryResult table) {
+        _tableList.stream().filter(tli -> tli.table.equals(table)).forEach(tli -> {
+            for (SymbolListItem sli : tli.symbolAr) {
+                sli.figureList.stream().filter(fli -> fli.selected).forEach(fli -> {
+                    fli.selected = false;
+                    repaint(fli.shape);
+                });
+            }
+        });
+        // TODO Should it fire table selection events?
+    }
+
+    /** Deselect the symbol corresponding to the given table row */
+    @Override
+    public void deselectSymbol(final TableQueryResult table, final int tableRow) {
         selectSymbol(table, tableRow, false);
     }
 
     /** Add a listener for selection events on symbols */
-    public void addSymbolSelectionListener(SymbolSelectionListener listener) {
+    @Override
+    public void addSymbolSelectionListener(final SymbolSelectionListener listener) {
         _listenerList.remove(SymbolSelectionListener.class, listener);
         _listenerList.add(SymbolSelectionListener.class, listener);
     }
 
     /** Remove a listener for selection events on symbols */
-    public void removeSymbolSelectionListener(SymbolSelectionListener listener) {
+    @Override
+    public void removeSymbolSelectionListener(final SymbolSelectionListener listener) {
         _listenerList.remove(SymbolSelectionListener.class, listener);
     }
 
@@ -668,12 +654,12 @@ public class BasicTablePlotter
      * @param row the row index of the selected symbol
      * @param isSelected set to true if the symbol was selected, false if deselected
      */
-    protected void fireSymbolSelectionEvent(TableQueryResult table, int row, boolean isSelected) {
-        SymbolSelectionEvent event = new SymbolSelectionEvent(row, table);
-        Object[] listeners = _listenerList.getListenerList();
+    private void fireSymbolSelectionEvent(final TableQueryResult table, final int row, final boolean isSelected) {
+        final SymbolSelectionEvent event = new SymbolSelectionEvent(row, table);
+        final Object[] listeners = _listenerList.getListenerList();
         for (int i = listeners.length - 2; i >= 0; i -= 2) {
             if (listeners[i] == SymbolSelectionListener.class) {
-                SymbolSelectionListener listener = (SymbolSelectionListener) listeners[i + 1];
+                final SymbolSelectionListener listener = (SymbolSelectionListener) listeners[i + 1];
                 if (isSelected)
                     listener.symbolSelected(event);
                 else
@@ -683,12 +669,14 @@ public class BasicTablePlotter
     }
 
     /** Add a listener for selection events on tables */
-    public void addTableSelectionListener(TableSelectionListener listener) {
+    @Override
+    public void addTableSelectionListener(final TableSelectionListener listener) {
         _tableListenerList.add(TableSelectionListener.class, listener);
     }
 
     /** Remove a listener for selection events on tables */
-    public void removeTableSelectionListener(TableSelectionListener listener) {
+    @Override
+    public void removeTableSelectionListener(final TableSelectionListener listener) {
         _tableListenerList.remove(TableSelectionListener.class, listener);
     }
 
@@ -699,12 +687,12 @@ public class BasicTablePlotter
      * @param row the selected row index
      * @param selected set to true if the row was selected, false if deselected
      */
-    protected void fireTableSelectionEvent(TableQueryResult table, int row, boolean selected) {
-        TableSelectionEvent event = new TableSelectionEvent(row, table);
-        Object[] listeners = _tableListenerList.getListenerList();
+    private void fireTableSelectionEvent(final TableQueryResult table, final int row, final boolean selected) {
+        final TableSelectionEvent event = new TableSelectionEvent(row, table);
+        final Object[] listeners = _tableListenerList.getListenerList();
         for (int i = listeners.length - 2; i >= 0; i -= 2) {
             if (listeners[i] == TableSelectionListener.class) {
-                TableSelectionListener listener = (TableSelectionListener) listeners[i + 1];
+                final TableSelectionListener listener = (TableSelectionListener) listeners[i + 1];
                 if (selected) {
                     listener.tableSelected(event);
                 }
@@ -717,23 +705,18 @@ public class BasicTablePlotter
      * If the given argument is false, hide all plot symbols managed by this object,
      * otherwise show them again.
      */
-    public void setVisible(boolean isVisible) {
+    @Override
+    public void setVisible(final boolean isVisible) {
         _visible = isVisible;
     }
-
-
-    /** Return true if catalog symbols are visible, false if they are hidden. */
-    public boolean isVisible() {
-        return _visible;
-    }
-
 
     /**
      * Return a panel to use to configure the plot symbols for the given table.
      *
      * @param table the result of a query
      */
-    public JPanel getConfigPanel(TableQueryResult table) {
+    @Override
+    public JPanel getConfigPanel(final TableQueryResult table) {
         return new TableSymbolConfig(this, table);
     }
 
@@ -743,42 +726,38 @@ public class BasicTablePlotter
      * @param g2d the graphics context
      * @param region if not null, the region to paint
      */
-    public void paintSymbols(Graphics2D g2d, Rectangle2D region) {
+    @Override
+    public void paintSymbols(final Graphics2D g2d, final Rectangle2D region) {
         if (!_visible)
             return;
 
         // plot each table
         g2d.setPaintMode();
-        final ListIterator<TableListItem> tableIt = _tableList.listIterator(0);
-        while (tableIt.hasNext()) {
-            final TableListItem tli = tableIt.next();
+        for (TableListItem tli: _tableList) {
             if (!tli.inRange) // ignore tables not in image range
                 continue;
             // plot each symbol type in the table
-            for (int i = 0; i < tli.symbolAr.length; i++) {
-                SymbolListItem sli = tli.symbolAr[i];
+            for (SymbolListItem sli: tli.symbolAr) {
                 g2d.setColor(sli.symbol.getFg());
                 // plot each figure
-                final ListIterator<FigureListItem> figureListIt = sli.figureList.listIterator(0);
-                while (figureListIt.hasNext()) {
-                    final FigureListItem fli = figureListIt.next();
-                    if (region == null || fli.shape.intersects(region)) {
-                        if (fli.selected) {
-                            // draw selected symbols with a thicker stroke
-                            Stroke stroke = g2d.getStroke();
-                            g2d.setStroke(_selectedStroke);
-                            g2d.draw(fli.shape);
-                            g2d.setStroke(stroke);
-                        } else {
-                            g2d.draw(fli.shape);
-                        }
-                        // If there is a label for the symbol, draw it too
-                        if (fli.label != null) {
-                            Rectangle2D r = fli.shape.getBounds();
-                            g2d.drawString(fli.label, (float) r.getCenterX(), (float) r.getCenterY());
-                        }
+                // draw selected symbols with a thicker stroke
+                // If there is a label for the symbol, draw it too
+                sli.figureList.stream().filter(fli -> region == null || fli.shape.intersects(region)).forEach(fli -> {
+                    if (fli.selected) {
+                        // draw selected symbols with a thicker stroke
+                        final Stroke stroke = g2d.getStroke();
+                        g2d.setStroke(_selectedStroke);
+                        g2d.draw(fli.shape);
+                        g2d.setStroke(stroke);
+                    } else {
+                        g2d.draw(fli.shape);
                     }
-                }
+                    // If there is a label for the symbol, draw it too
+                    if (fli.label != null) {
+                        final Rectangle2D r = fli.shape.getBounds();
+                        g2d.drawString(fli.label, (float) r.getCenterX(), (float) r.getCenterY());
+                    }
+                });
             }
         }
     }
@@ -788,15 +767,11 @@ public class BasicTablePlotter
      * Transform the plot symbols using the given AffineTransform
      * (called when the image is transformed, to keep the plot symbols up to date).
      */
+    @Override
     public void transformGraphics(AffineTransform trans) {
-        final ListIterator<TableListItem> tableIt = _tableList.listIterator(0);
-        while (tableIt.hasNext()) {
-            final TableListItem tli = tableIt.next();
-            for (int i = 0; i < tli.symbolAr.length; i++) {
-                SymbolListItem sli = tli.symbolAr[i];
-                final ListIterator<FigureListItem> figureListIt = sli.figureList.listIterator(0);
-                while (figureListIt.hasNext()) {
-                    final FigureListItem fli = figureListIt.next();
+        for (TableListItem tli: _tableList) {
+            for (SymbolListItem sli: tli.symbolAr) {
+                for (FigureListItem fli: sli.figureList) {
                     fli.shape = ShapeUtilities.transformModify(fli.shape, trans);
                 }
             }
@@ -809,7 +784,7 @@ public class BasicTablePlotter
      * Return true if the coordinates of the objects in the given table may be in a
      * range where they can be plotted in the current image.
      */
-    protected boolean tableInRange(TableQueryResult table) {
+    private boolean tableInRange(final TableQueryResult table) {
         // get the coordinates of the region that the table covers from the query arguments, if known
         QueryArgs queryArgs = table.getQueryArgs();
         CoordinateRadius region;
@@ -826,7 +801,7 @@ public class BasicTablePlotter
         }
         if (region == null)
             return false;
-        Coordinates centerPosition = region.getCenterPosition();
+        final Coordinates centerPosition = region.getCenterPosition();
         if (!(centerPosition instanceof WorldCoords)) {
             return true;
         }
@@ -838,16 +813,16 @@ public class BasicTablePlotter
         double dec = pos.getDecDeg();
         double w = region.getWidth();     // in arcmin
         double h = region.getHeight();
-        Rectangle2D.Double tableRect = new Rectangle2D.Double(ra, dec, w, h);
+        final Rectangle2D.Double tableRect = new Rectangle2D.Double(ra, dec, w, h);
 
         // get the image coords
-        Point2D.Double p = _coordinateConverter.getWCSCenter();
+        final Point2D.Double p = _coordinateConverter.getWCSCenter();
         pos = new WorldCoords(p.x, p.y, _imageEquinox);
         ra = pos.getRaDeg();
         dec = pos.getDecDeg();
         w = _coordinateConverter.getWidthInDeg() * 60;  // in arcmin
         h = _coordinateConverter.getHeightInDeg() * 60;
-        Rectangle2D.Double imageRect = new Rectangle2D.Double(ra, dec, w, h);
+        final Rectangle2D.Double imageRect = new Rectangle2D.Double(ra, dec, w, h);
 
         return tableRect.intersects(imageRect);
     }
@@ -856,34 +831,34 @@ public class BasicTablePlotter
      * Scan the given table and return an object describing the area of the sky that
      * it covers, or null if not known.
      */
-    protected CoordinateRadius getTableRegion(TableQueryResult table) {
-        int nrows = table.getRowCount();
+    private CoordinateRadius getTableRegion(final TableQueryResult table) {
+        final int nrows = table.getRowCount();
         if (nrows == 0)
             return null;
 
-        RowCoordinates rowCoords = table.getRowCoordinates();
-        double tableEquinox = rowCoords.getEquinox();
+        final RowCoordinates rowCoords = table.getRowCoordinates();
+        final double tableEquinox = rowCoords.getEquinox();
         final Vector<Vector<Object>> dataVec = table.getDataVector();
 
         if (rowCoords.isPix()) {
             // no WCS, just use image center and size
-            Point2D.Double p = _coordinateConverter.getImageCenter();
-            ImageCoords pos = new ImageCoords(p.x, p.y);
-            double w = _coordinateConverter.getWidth();
-            double h = _coordinateConverter.getHeight();
-            double r = Math.sqrt(w * w + h * h);
+            final Point2D.Double p = _coordinateConverter.getImageCenter();
+            final ImageCoords pos = new ImageCoords(p.x, p.y);
+            final double w = _coordinateConverter.getWidth();
+            final double h = _coordinateConverter.getHeight();
+            final double r = Math.sqrt(w * w + h * h);
             return new CoordinateRadius(pos, r, w, h);
         }
 
         if (!rowCoords.isWCS())
             return null;
 
-        // we have world coordinages: find the bounding box of the objects in the table
+        // we have world coordinates: find the bounding box of the objects in the table
         double ra0 = 0., ra1 = 0., dec0 = 0., dec1 = 0.;
         boolean firstTime = true;
         for (int row = 1; row < nrows; row++) {
-            Vector<Object> rowVec = dataVec.get(row);
-            Coordinates pos = rowCoords.getCoordinates(rowVec);
+            final Vector<Object> rowVec = dataVec.get(row);
+            final Coordinates pos = rowCoords.getCoordinates(rowVec);
             if (pos == null)
                 continue;
             if (firstTime) {
@@ -902,8 +877,8 @@ public class BasicTablePlotter
         }
 
         // get the center point and radius
-        WorldCoords centerPos = new WorldCoords((ra0 + ra1) / 2., (dec0 + dec1) / 2., tableEquinox);
-        double d = WorldCoords.dist(ra0, dec0, ra1, dec1);
+        final WorldCoords centerPos = new WorldCoords((ra0 + ra1) / 2., (dec0 + dec1) / 2., tableEquinox);
+        final double d = WorldCoords.dist(ra0, dec0, ra1, dec1);
         return new CoordinateRadius(centerPos, d / 2.);
     }
 
@@ -911,16 +886,16 @@ public class BasicTablePlotter
     // -- Implement the LayerListener interface --
 
     /** Invoked when the mouse moves while the button is still held down. */
-    public void mouseDragged(LayerEvent e) {
-    }
+    @Override
+    public void mouseDragged(LayerEvent e) { }
 
     /** Invoked when the mouse is pressed on a layer or figure. */
-    public void mousePressed(LayerEvent e) {
-    }
+    @Override
+    public void mousePressed(LayerEvent e) { }
 
     /** Invoked when the mouse is released on a layer or figure. */
-    public void mouseReleased(LayerEvent e) {
-    }
+    @Override
+    public void mouseReleased(LayerEvent e) { }
 
     /**
      * Invoked when the mouse is clicked on a layer or figure.
@@ -931,24 +906,20 @@ public class BasicTablePlotter
      * a kind of "snap to catalog symbol" feature for any layer listeners that
      * are added after this instance.
      */
-    public void mouseClicked(LayerEvent e) {
+    @Override
+    public void mouseClicked(final LayerEvent e) {
         if (!_visible)
             return;
 
-        double x = e.getLayerX(), y = e.getLayerY();
-        boolean toggleSel = (e.isShiftDown() || e.isControlDown());
+        final double x = e.getLayerX(), y = e.getLayerY();
+        final boolean toggleSel = (e.isShiftDown() || e.isControlDown());
 
         // Find the plot symbol under the mouse pointer
-        final ListIterator<TableListItem> tableIt = _tableList.listIterator(0);
-        while (tableIt.hasNext()) {
-            final TableListItem tli = tableIt.next();
+        for (TableListItem tli: _tableList) {
             if (!tli.inRange)
                 continue;
-            for (int i = 0; i < tli.symbolAr.length; i++) {
-                SymbolListItem sli = tli.symbolAr[i];
-                final ListIterator<FigureListItem> figureListIt = sli.figureList.listIterator(0);
-                while (figureListIt.hasNext()) {
-                    final FigureListItem fli = figureListIt.next();
+            for (SymbolListItem sli: tli.symbolAr) {
+                for (FigureListItem fli: sli.figureList) {
                     if (sli.symbol.getBoundingShape(fli.shape).contains(x, y)) {
                         if (toggleSel) {
                             fli.selected = !fli.selected;
@@ -973,134 +944,50 @@ public class BasicTablePlotter
         }
     }
 
-    // Creates a CatalogHeader and CatalogRow from the corresponding Collections
-    @SuppressWarnings("varargs")
-    private static Tuple2<CatalogHeader, CatalogRow> wrap(Collection<String> header, Collection<Object> row) {
-        ImList<Tuple2<String,Class<?>>> colLst = DefaultImList.create();
-        for (String col : header) {
-            colLst = colLst.append(new Pair<>(col, String.class));
-        }
-        return new Pair<>(
-                new DefaultCatalogHeader(colLst),
-                new DefaultCatalogRow(DefaultImList.create(row)));
-    }
-
-    // Creates a SkyObject, if possible, using the given table query result
-    // and row of data.
-    private static Option<SkyObject> toSkyObject(TableQueryResult table, Vector<Object> row) {
-        Vector<String> columnIdentifiers = table.getColumnIdentifiers();
-        String catid = table.getId();
-        Option<SkyObjectFactory> fact;
-        fact = SkyObjectFactoryRegistrar.instance.lookup(catid);
-        if (!fact.isEmpty()) {
-            Tuple2<CatalogHeader, CatalogRow> cat = wrap(columnIdentifiers, row);
-            try {
-                return new Some<>(fact.getValue().create(cat._1(), cat._2()));
-            } catch (edu.gemini.catalog.skycat.CatalogException ex) {
-                LOG.log(Level.WARNING, ex.getMessage(), ex);
-            }
-        }
-        return None.instance();
-    }
-
-    // Extracts random, vague, useless "brightness" information from the results.
-    // This is the pre-SkyObject way of doing this.
-    public static Option<String> extractBrightness(TableQueryResult table, Vector<Object> row) {
-        Vector<String> columnIdentifiers = table.getColumnIdentifiers();
-
-        String brightness = "";
-        int numCols = columnIdentifiers.size();
-        for (int col = 0; col < numCols; col++) {
-            String s = columnIdentifiers.get(col);
-            String sl = s.toLowerCase();
-            if (sl.equals("mag")) {
-                Object o = row.get(col);
-                if (o != null) {
-                    brightness = o + " mag";
-                    break;
-                }
-            } else if (sl.endsWith("mag") && !sl.startsWith("e")) {
-                Object o = row.get(col);
-                if (o != null) {
-                    if (brightness.length() != 0)
-                        brightness += ", ";
-                    brightness = brightness + o + s.charAt(0);
-                }
-            }
-        }
-        //noinspection unchecked
-        return "".equals(brightness) ? None.INSTANCE : new Some<>(brightness);
-    }
-
     /**
      * If the given screen coordinates point is within a displayed catalog symbol, set it to
      * point to the center of the symbol and return the name and coordinates (and brightness,
      * if known) from the catalog table row. Otherwise, return null and do nothing.
      */
-    public NamedCoordinates getCatalogPosition(Point2D.Double p) {
+    @Override
+    public Option<SkyObject> getCatalogObjectAt(final Point2D.Double p) {
         // Find the plot symbol under the mouse pointer
-        final ListIterator<TableListItem> tableIt = _tableList.listIterator(0);
-        while (tableIt.hasNext()) {
-            final TableListItem tli = tableIt.next();
+        for (TableListItem tli: _tableList) {
             if (!tli.inRange)
                 continue;
-            for (int i = 0; i < tli.symbolAr.length; i++) {
-                final SymbolListItem sli = tli.symbolAr[i];
-                final ListIterator<FigureListItem> figureListIt = sli.figureList.listIterator(0);
-                while (figureListIt.hasNext()) {
-                    final FigureListItem fli = figureListIt.next();
+            for (SymbolListItem sli: tli.symbolAr) {
+                for (FigureListItem fli: sli.figureList) {
                     // assume symbol has already been selected
                     if (fli.selected && sli.symbol.getBoundingShape(fli.shape).contains(p)) {
-                        RowCoordinates rowCoords = tli.table.getRowCoordinates();
-                        if (!rowCoords.isWCS())
-                            return null;
-                        final Vector<Vector<Object>> dataVec = tli.table.getDataVector();
-                        _imageEquinox = _coordinateConverter.getEquinox();
-                        final Vector<Object> rowVec = dataVec.get(fli.row);
+                        Option<SkyObject> skyObject = tli.table.getSkyObject(fli.row);
+                        skyObject.forEach(s -> {
+                            // This is a bit strange, we convert the incoming parameter to the position of the
+                            // object and it also side-effects setting the equinox
+                            _imageEquinox = _coordinateConverter.getEquinox();
+                            p.x = s.getCoordinates().toHmsDeg(0).getRa().toDegrees().getMagnitude();
+                            p.y = s.getCoordinates().toHmsDeg(0).getDec().toDegrees().getMagnitude();
+                            _coordinateConverter.convertCoords(p, CoordinateConverter.WORLD, CoordinateConverter.SCREEN, false);
 
-                        // get the world coordinates
-                        Coordinates cpos = rowCoords.getCoordinates(rowVec);
-                        if (cpos == null)
-                            return null;
-                        WorldCoords pos = (WorldCoords) cpos;
-
-                        // modify the parameter to point to the center of the symbol
-                        double[] radec = pos.getRaDec(_imageEquinox);
-                        p.x = radec[0];
-                        p.y = radec[1];
-                        _coordinateConverter.convertCoords(p, CoordinateConverter.WORLD, CoordinateConverter.SCREEN, false);
-
-                        // get the id of the catalog symbol
-                        int idCol = rowCoords.getIdCol();
-                        String id = null;
-                        if (idCol != -1) {
-                            Object o = rowVec.get(idCol);
-                            if (o != null) {
-                                id = o.toString();
-                            }
-                        }
-
-                        Option<String>   brightness = extractBrightness(tli.table, rowVec);
-                        Option<SkyObject> skyObject = toSkyObject(tli.table, rowVec);
-                        return new NamedCoordinates(id, pos, brightness, skyObject);
+                        });
+                        return skyObject;
                     }
                 }
             }
         }
-        return null;
+        return None.instance();
     }
 
 
     /**
      * Local class used for tableList elements (one for each table).
      */
-    protected class TableListItem {
+    private class TableListItem {
 
-        public TableQueryResult table;      // a reference to the table to plot
-        public SymbolListItem[] symbolAr;   // array mapping symbol desc to figure list
+        public final TableQueryResult table;      // a reference to the table to plot
+        public final SymbolListItem[] symbolAr;   // array mapping symbol desc to figure list
         public boolean inRange = true;      // set to true if table coords are in image range
 
-        public TableListItem(TableQueryResult t, SymbolListItem[] ar) {
+        public TableListItem(final TableQueryResult t, final SymbolListItem[] ar) {
             table = t;
             symbolAr = ar;
         }
@@ -1110,7 +997,7 @@ public class BasicTablePlotter
      * Local class used for TableListItem.symbolList elements (one for each plot
      * symbol entry, for each table)
      */
-    protected class SymbolListItem {
+    private class SymbolListItem {
 
         public final TablePlotSymbol symbol;                  // plot symbol description
         public final LinkedList<FigureListItem> figureList = new LinkedList<>();   // list of figures to draw using the above symbol
@@ -1123,14 +1010,14 @@ public class BasicTablePlotter
     /**
      * Local class used for SymbolListItem.figureList elements (one for each plot symbol).
      */
-    protected class FigureListItem {
+    private class FigureListItem {
 
         public Shape shape;     // shape of the symbol
-        public String label;    // optional label
-        public int row;         // row index in table
+        public final String label;    // optional label
+        public final int row;         // row index in table
         public boolean selected = false;  // true if selected
 
-        public FigureListItem(Shape s, String lab, int r) {
+        public FigureListItem(final Shape s, final String lab, final int r) {
             shape = s;
             label = lab;
             row = r;

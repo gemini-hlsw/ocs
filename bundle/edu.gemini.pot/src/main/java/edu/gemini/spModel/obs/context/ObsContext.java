@@ -343,6 +343,10 @@ public final class ObsContext {
         return new ObsContext(agsOverride, targets,  inst, site, conds, sciencePositions, new Some<>(aoCompOpt), schedulingBlock);
     }
 
+    public ObsContext withoutAOComponent(){
+        return new ObsContext(agsOverride, targets,  inst, site, conds, sciencePositions, None.instance(), schedulingBlock);
+    }
+
 
     public Set<Offset> getSciencePositions() {
         return sciencePositions;

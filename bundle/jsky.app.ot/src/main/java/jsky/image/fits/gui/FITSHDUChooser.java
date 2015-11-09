@@ -1,13 +1,3 @@
-/*
- * ESO Archive
- *
- * $Id: FITSHDUChooser.java 4414 2004-02-03 16:21:36Z brighton $
- *
- * who             when        what
- * --------------  ----------  ----------------------------------------
- * Allan Brighton  1999/12/10  Created
- */
-
 package jsky.image.fits.gui;
 
 import java.awt.BorderLayout;
@@ -15,8 +5,6 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Point;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
@@ -41,7 +29,6 @@ import nom.tam.fits.BinaryTableHDU;
 import nom.tam.fits.FitsException;
 import nom.tam.fits.Header;
 import nom.tam.fits.ImageHDU;
-
 
 /**
  * Displays a window listing the HDU extensions in the current
@@ -157,15 +144,15 @@ public class FITSHDUChooser extends JPanel {
             Header header = hdu.getHeader();
             int col = 0;
             // keep in sync with columnHeadings
-            _tableData[row][col++] = new Integer(row);
+            _tableData[row][col++] = row;
             _tableData[row][col++] = _getHDUType(hdu);
             _tableData[row][col++] = header.getStringValue("EXTNAME");
-            _tableData[row][col++] = new Integer(header.getIntValue("NAXIS"));
-            _tableData[row][col++] = new Integer(header.getIntValue("NAXIS1"));
-            _tableData[row][col++] = new Integer(header.getIntValue("NAXIS2"));
-            _tableData[row][col++] = new Integer(header.getIntValue("NAXIS3"));
-            _tableData[row][col++] = new Double(header.getDoubleValue("CRPIX1"));
-            _tableData[row][col++] = new Double(header.getDoubleValue("CRPIX2"));
+            _tableData[row][col++] = header.getIntValue("NAXIS");
+            _tableData[row][col++] = header.getIntValue("NAXIS1");
+            _tableData[row][col++] = header.getIntValue("NAXIS2");
+            _tableData[row][col++] = header.getIntValue("NAXIS3");
+            _tableData[row][col++] = header.getDoubleValue("CRPIX1");
+            _tableData[row][col] = header.getDoubleValue("CRPIX2");
         }
 
         _table.setModel(new AbstractTableModel() {
@@ -224,7 +211,7 @@ public class FITSHDUChooser extends JPanel {
             BusyWin.setBusy(true);
             try {
                 TableModel model = _table.getModel();
-                int hdu = ((Integer) model.getValueAt(rowIndex, 0)).intValue();
+                int hdu = (Integer) model.getValueAt(rowIndex, 0);
                 String type = (String) model.getValueAt(rowIndex, 1);
                 if (type.equals("image")) {
                     selectImage(hdu);
@@ -269,32 +256,17 @@ public class FITSHDUChooser extends JPanel {
         JButton openButton = new JButton("Open");
         openButton.setToolTipText("Open and display the selected FITS HDU (header/data unit)");
         panel.add(openButton);
-        openButton.addActionListener(new ActionListener() {
-
-            public void actionPerformed(ActionEvent ev) {
-                _open();
-            }
-        });
+        openButton.addActionListener(ev -> _open());
 
         _deleteButton = new JButton("Delete");
         _deleteButton.setToolTipText("Delete the selected FITS HDU");
         panel.add(_deleteButton);
-        _deleteButton.addActionListener(new ActionListener() {
-
-            public void actionPerformed(ActionEvent ev) {
-                _delete();
-            }
-        });
+        _deleteButton.addActionListener(ev -> _delete());
 
         JButton closeButton = new JButton("Close");
         closeButton.setToolTipText("Hide this window");
         panel.add(closeButton);
-        closeButton.addActionListener(new ActionListener() {
-
-            public void actionPerformed(ActionEvent ev) {
-                _close();
-            }
-        });
+        closeButton.addActionListener(ev -> _close());
 
         return panel;
     }

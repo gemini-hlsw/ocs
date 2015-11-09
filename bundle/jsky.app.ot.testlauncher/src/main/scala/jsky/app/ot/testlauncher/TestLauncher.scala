@@ -3,6 +3,7 @@ package jsky.app.ot.testlauncher
 import edu.gemini.ags.conf.ProbeLimitsTable
 import edu.gemini.qv.plugin.{QvTool, ShowQvToolAction}
 import edu.gemini.sp.vcs2.{VcsServer, Vcs}
+import jsky.app.ot.gemini.obscat.OTBrowserPresetsPersistence
 import jsky.app.ot.vcs.VcsOtClient
 import jsky.app.ot.viewer.plugin.PluginRegistry
 
@@ -52,11 +53,18 @@ object TestLauncher extends App {
     if (keys.isLocked.unsafeRunAndThrow) System.exit(0)
   }
   OT.open(keys, ProbeLimitsTable.loadOrThrow(), reg, new File(dir, "ot-storage"))
+
+  // Initialize query browser history
+  // NOTE must be de done after starting the OT
+  OTBrowserPresetsPersistence.dir = Some(dir)
+  OTBrowserPresetsPersistence.load()
+
   // You can pass an argument -program=PROGID to autolaunch the given program
   // Do simple parsing, errors on argument format or program id will be ignored
   val programArgRegex = "-program=(.*)".r
   args.foreach {
     case programArgRegex(programID) => ViewerService.instance.map(_.loadAndView(SPProgramID.toProgramID(programID)))
+    case _                          =>
   }
 
 }

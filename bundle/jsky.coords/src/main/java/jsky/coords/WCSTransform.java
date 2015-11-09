@@ -77,11 +77,9 @@ public class WCSTransform implements WorldCoordinateConverter {
     double xinc;		// X coordinate increment (deg)
     double yinc;		// Y coordinate increment (deg)
     double rot;		// rotation around opt. axis (deg) (N through E)
-    double crot,srot;	// Cosine and sine of rotation angle
     double cd11,cd12,cd21,cd22; // rotation matrix
     double dc11,dc12,dc21,dc22; // inverse rotation matrix
     double mrot;		// Chip rotation angle (deg) (N through E)
-    double cmrot,smrot;	// Cosine and sine of chip rotation angle
     double xmpix,ympix;	// X and Y center for chip rotation
     double equinox;	// Equinox of coordinates default to 1950.0
     double epoch;		// Epoch of coordinates default to equinox
@@ -113,15 +111,12 @@ public class WCSTransform implements WorldCoordinateConverter {
     int offscl;		// 0 if OK, 1 if offscale
     int plate_fit;	// 1 if plate fit, else 0
     int wcson;		// 1 if WCS is set, else 0
-    int detector;	// Instrument detector number
-    String instrument = "";// Instrument name
     String c1type = "";	//  1st coordinate type code: RA--, GLON, ELON
     String c2type = "";	//  2nd coordinate type code: DEC-, GLAT, ELAT
     String[] ctypes = {"-SIN", "-TAN", "-ARC", "-NCP", "-GLS", "-MER", "-AIT", "-STG"};
     String ptype = "";	//  projection type code (on of the ctype values)
     String radecsys = "";	// Reference frame: FK4, FK4-NO-E, FK5, GAPPT
     String sysout = "";	// Reference frame for output: FK4, FK5
-    String center = "";	// Center coordinates (with frame)
 
     // These fields added for convenience
     double fCenterRa;
@@ -136,7 +131,7 @@ public class WCSTransform implements WorldCoordinateConverter {
 
     /** Message if header does not contain a valid World Coordinate System */
     public static final String NO_WCS_IN_HEADER_MESSAGE // 00/23/06 Added for OPR 41378, jDoggett
-            = "The header does not contain a valid world coordinate system.".intern();
+            = "The header does not contain a valid world coordinate system.";
 
     /** Conversions among hours of RA, degrees and radians. */
     public static double degrad(double x) {
@@ -652,11 +647,6 @@ public class WCSTransform implements WorldCoordinateConverter {
         throw new RuntimeException("No WCS information.");
     }
 
-    /** Set the center RA,Dec coordinates in degrees in the current equinox. */
-    ///public void setWCSCenter(Point2D.Double p) {
-    //wcsshift(p.x, p.y, radecsys);
-    //}
-
     /** Return the center coordinates in image pixels. */
     public Point2D.Double getImageCenter() {
         return new Point2D.Double(0.5 * nxpix, 0.5 * nypix);
@@ -794,13 +784,9 @@ public class WCSTransform implements WorldCoordinateConverter {
 
         // Set coordinate system from keyword, if it is present
         if (head.findKey("RADECSYS")) {
-            wcstemp = this.radecsys;
-
             if (this.radecsys.startsWith("FK4"))
                 this.equinox = 1950.0;
             else if (this.radecsys.startsWith("FK5"))
-                this.equinox = 2000.0;
-            else if (this.radecsys.startsWith("GAL") && ieq == 0)
                 this.equinox = 2000.0;
         }
 
@@ -824,16 +810,10 @@ public class WCSTransform implements WorldCoordinateConverter {
             else
                 this.radecsys = "FK4";
         }
-
-        return;
     }
 
     public boolean isValid() {
-        if (wcson > 0) {
-            return true;
-        } else {
-            return false;
-        }
+        return wcson > 0;
     }
 
     /**
@@ -844,7 +824,7 @@ public class WCSTransform implements WorldCoordinateConverter {
      * @param coorsys FK4 or FK5 coordinates (1950 or 2000)
      */
     public void wcsshift(double rra, double rdec, String coorsys) {
-        if (isValid() == false)
+        if (!isValid())
             return;
 
         // Approximate world coordinate system from a known plate scale
@@ -858,18 +838,16 @@ public class WCSTransform implements WorldCoordinateConverter {
             this.equinox = 1950.0;
         else
             this.equinox = 2000.0;
-
-        return;
     }
 
 
     /** Return RA and Dec of image center, plus size in RA and Dec */
     public void wcssize() {
-        double xpix = 0.0, ypix = 0.0;
-        double width = 0.0, height = 0.0;
+        double xpix, ypix;
+        double width, height;
 
         // Find right ascension and declination of coordinates
-        if (isValid() == true) {
+        if (isValid()) {
             xpix = 0.5 * this.nxpix;
             ypix = 0.5 * this.nypix;
 
@@ -888,7 +866,7 @@ public class WCSTransform implements WorldCoordinateConverter {
                 return;
             }
 
-            if (this.ptype.startsWith("LINEAR") == false && this.ptype.startsWith("PIXEL") == false) {
+            if (!this.ptype.startsWith("LINEAR") && !this.ptype.startsWith("PIXEL")) {
                 width = wcsdist(pos1.x, pos1.y, pos2.x, pos2.y);
                 fHalfWidthRa = ((width * 0.5) / Math.cos(degrad(fCenterDec)));
             } else {
@@ -903,7 +881,7 @@ public class WCSTransform implements WorldCoordinateConverter {
                 return;
             }
 
-            if (this.ptype.startsWith("LINEAR") == false && this.ptype.startsWith("PIXEL") == false) {
+            if (!this.ptype.startsWith("LINEAR") && !this.ptype.startsWith("PIXEL")) {
                 height = wcsdist(pos1.x, pos1.y, pos2.x, pos2.y);
                 fHalfWidthDec = (height * 0.5);
             } else {
@@ -915,11 +893,10 @@ public class WCSTransform implements WorldCoordinateConverter {
 
     /** Set the RA and Dec of the image center, plus size in degrees */
     protected void wcsfull() {
-        double xpix = 0.0, ypix = 0.0, xpos1 = 0.0, xpos2 = 0.0, ypos1 = 0.0, ypos2 = 0.0;
-        double xcent = 0.0, ycent = 0.0;
+        double xpix, ypix;
 
         // Find right ascension and declination of coordinates
-        if (isValid() == true) {
+        if (isValid()) {
             xpix = 0.5 * this.nxpix;
             ypix = 0.5 * this.nypix;
 
@@ -938,8 +915,8 @@ public class WCSTransform implements WorldCoordinateConverter {
                 return;
             }
 
-            if (this.ptype.startsWith("LINEAR") == false &&
-                    this.ptype.startsWith("PIXEL") == false) {
+            if (!this.ptype.startsWith("LINEAR") &&
+                    !this.ptype.startsWith("PIXEL")) {
                 fWidthDeg = wcsdist(pos1.x, pos1.y, pos2.x, pos2.y);
             } else {
                 fWidthDeg = Math.sqrt(((pos2.y - pos1.y) * (pos2.y - pos1.y)) +
@@ -953,8 +930,8 @@ public class WCSTransform implements WorldCoordinateConverter {
                 return;
             }
 
-            if (this.ptype.startsWith("LINEAR") == false &&
-                    this.ptype.startsWith("PIXEL") == false) {
+            if (!this.ptype.startsWith("LINEAR") &&
+                    !this.ptype.startsWith("PIXEL")) {
                 fHeightDeg = wcsdist(pos1.x, pos1.y, pos2.x, pos2.y);
             } else {
                 fHeightDeg = Math.sqrt(((pos2.y - pos1.y) * (pos2.y - pos1.y)) +
@@ -1009,9 +986,9 @@ public class WCSTransform implements WorldCoordinateConverter {
      * Returns null if the WCSTransform is not valid.
      **/
     public Point2D.Double pix2wcs(double xpix, double ypix) {
-        Point2D.Double position = null;
+        Point2D.Double position;
 
-        if (isValid() == false)
+        if (!isValid())
             return null;
 
         this.xpix = xpix;
@@ -1062,9 +1039,9 @@ public class WCSTransform implements WorldCoordinateConverter {
      * WCS position does not fall within the image.
      **/
     public Point2D.Double wcs2pix(double xpos, double ypos) {
-        Point2D.Double pixels = null;
+        Point2D.Double pixels ;
 
-        if (isValid() == false)
+        if (!isValid())
             return null;
 
         this.xpos = xpos;

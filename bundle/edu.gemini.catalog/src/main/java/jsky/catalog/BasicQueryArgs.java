@@ -1,9 +1,3 @@
-// Copyright 2002
-// Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-//
-// $Id: BasicQueryArgs.java 38711 2011-11-15 13:35:55Z swalker $
-
 package jsky.catalog;
 
 import jsky.coords.CoordinateRadius;
@@ -11,14 +5,13 @@ import jsky.util.gui.StatusLogger;
 
 import java.util.Vector;
 
-
 /**
  * Represents the values of the arguments to a catalog query.
  */
 public class BasicQueryArgs implements QueryArgs {
 
     /** Catalog we are accessing */
-    private Catalog _catalog;
+    private final Catalog _catalog;
 
     /** Array of parameter values corresponding to the catalog parameters */
     private Object[] _values;
@@ -58,12 +51,11 @@ public class BasicQueryArgs implements QueryArgs {
         }
     }
 
+    @Override
     public QueryArgs copy() {
         BasicQueryArgs result = new BasicQueryArgs(_catalog);
         int n = _catalog.getNumParams();
-        for (int i = 0; i < n; i++) {
-            result._values[i] = _values[i];
-        }
+        System.arraycopy(_values, 0, result._values, 0, n);
         result._maxRows = _maxRows;
         result._id = _id;
         result._region = _region;
@@ -73,11 +65,13 @@ public class BasicQueryArgs implements QueryArgs {
 
 
     /** Set the value for the ith parameter */
+    @Override
     public void setParamValue(int i, Object value) {
         _values[i] = value;
     }
 
     /** Set the value for the parameter with the given label */
+    @Override
     public void setParamValue(String label, Object value) {
         int n = _catalog.getNumParams();
         for (int i = 0; i < n; i++) {
@@ -94,6 +88,7 @@ public class BasicQueryArgs implements QueryArgs {
     }
 
     /** Set the min and max values for the parameter with the given label */
+    @Override
     public void setParamValueRange(String label, Object minValue, Object maxValue) {
         int n = _catalog.getNumParams();
         for (int i = 0; i < n; i++) {
@@ -113,28 +108,31 @@ public class BasicQueryArgs implements QueryArgs {
     }
 
     /** Set the int value for the parameter with the given label */
+    @Override
     public void setParamValue(String label, int value) {
         setParamValue(label, new Integer(value));
     }
 
     /** Set the double value for the parameter with the given label */
+    @Override
     public void setParamValueRange(String label, double minValue, double maxValue) {
         setParamValueRange(label, new Double(minValue), new Double(maxValue));
     }
 
     /** Set the double value for the parameter with the given label */
+    @Override
     public void setParamValue(String label, double value) {
         setParamValue(label, new Double(value));
     }
 
-
     /** Set the array of parameter values directly. */
+    @Override
     public void setParamValues(Object[] values) {
         _values = values;
     }
 
-
     /** Get the value of the ith parameter */
+    @Override
     public Object getParamValue(int i) {
         return _values[i];
     }
@@ -144,6 +142,7 @@ public class BasicQueryArgs implements QueryArgs {
      * @param label the parameter name or id
      * @return the value of the parameter, or null if not specified
      */
+    @Override
     public Object getParamValue(String label) {
         int n = _catalog.getNumParams();
         for (int i = 0; i < n; i++) {
@@ -158,7 +157,6 @@ public class BasicQueryArgs implements QueryArgs {
         return null;
     }
 
-
     /**
      * Get the value of the named parameter as an integer.
      *
@@ -166,6 +164,7 @@ public class BasicQueryArgs implements QueryArgs {
      * @param defaultValue the default value, if the parameter was not specified
      * @return the value of the parameter
      */
+    @Override
     public int getParamValueAsInt(String label, int defaultValue) {
         Object o = getParamValue(label);
         if (o == null)
@@ -184,6 +183,7 @@ public class BasicQueryArgs implements QueryArgs {
      * @param defaultValue the default value, if the parameter was not specified
      * @return the value of the parameter
      */
+    @Override
     public double getParamValueAsDouble(String label, double defaultValue) {
         Object o = getParamValue(label);
         if (o == null)
@@ -202,6 +202,7 @@ public class BasicQueryArgs implements QueryArgs {
      * @param defaultValue the default value, if the parameter was not specified
      * @return the value of the parameter
      */
+    @Override
     public String getParamValueAsString(String label, String defaultValue) {
         Object o = getParamValue(label);
         if (o == null)
@@ -211,10 +212,10 @@ public class BasicQueryArgs implements QueryArgs {
         return o.toString();
     }
 
-
     /**
      * Return the object id being searched for, or null if none was defined.
      */
+    @Override
     public String getId() {
         return _id;
     }
@@ -222,15 +223,16 @@ public class BasicQueryArgs implements QueryArgs {
     /**
      * Set the object id to search for.
      */
+    @Override
     public void setId(String id) {
         _id = id;
     }
-
 
     /**
      * Return an object describing the query region (center position and
      * radius range), or null if none was defined.
      */
+    @Override
     public CoordinateRadius getRegion() {
         return _region;
     }
@@ -239,12 +241,14 @@ public class BasicQueryArgs implements QueryArgs {
      * Set the query region (center position and radius range) for
      * the search.
      */
+    @Override
     public void setRegion(CoordinateRadius region) {
         _region = region;
     }
 
 
-    /** Return the catalog we are accesing. */
+    /** Return the catalog we are accessing. */
+    @Override
     public Catalog getCatalog() {
         return _catalog;
     }
@@ -254,6 +258,7 @@ public class BasicQueryArgs implements QueryArgs {
      * Return an array of SearchCondition objects indicating the
      * values or range of values to search for.
      */
+    @Override
     public SearchCondition[] getConditions() {
         if (_values == null)
             return null;
@@ -307,27 +312,31 @@ public class BasicQueryArgs implements QueryArgs {
     }
 
     /** Returns the max number of rows to be returned from a table query */
+    @Override
     public int getMaxRows() {
         return _maxRows;
     }
 
     /** Set the max number of rows to be returned from a table query */
+    @Override
     public void setMaxRows(int maxRows) {
         _maxRows = maxRows;
     }
 
-
     /** Returns the query type (an optional string, which may be interpreted by some catalogs) */
+    @Override
     public String getQueryType() {
         return _queryType;
     }
 
     /** Set the query type (an optional string, which may be interpreted by some catalogs) */
+    @Override
     public void setQueryType(String queryType) {
         _queryType = queryType;
     }
 
     /** Return a string of the form: arg=value&arg=value, ...*/
+    @Override
     public String toString() {
         SearchCondition[] sc = getConditions();
         if (sc == null) return "";
@@ -340,11 +349,9 @@ public class BasicQueryArgs implements QueryArgs {
         return sb.toString();
     }
 
+    @Override
     public StatusLogger getStatusLogger() {
         return _statusLogger;
     }
 
-    public void setStatusLogger(StatusLogger statusLogger) {
-        _statusLogger = statusLogger;
-    }
 }

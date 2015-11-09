@@ -128,17 +128,12 @@ public class Complex {
         return sin().divides(cos());
     }
 
-
-
     // a static version of plus
     public static Complex plus(Complex a, Complex b) {
         double real = a.re + b.re;
         double imag = a.im + b.im;
-        Complex sum = new Complex(real, imag);
-        return sum;
+        return new Complex(real, imag);
     }
-
-
 
     // sample client for testing
     public static void main(String[] args) {

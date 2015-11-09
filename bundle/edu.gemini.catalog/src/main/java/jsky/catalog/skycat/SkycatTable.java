@@ -1,10 +1,3 @@
-/*
- * Copyright 2000 Association for Universities for Research in Astronomy, Inc.,
- * Observatory Control System, Gemini Telescopes Project.
- *
- * $Id: SkycatTable.java 23751 2010-02-08 19:13:56Z swalker $
- */
-
 package jsky.catalog.skycat;
 
 import edu.gemini.shared.util.immutable.None;
@@ -19,7 +12,6 @@ import java.io.PrintStream;
 import java.util.Enumeration;
 import java.util.Properties;
 import java.util.Vector;
-
 
 /**
  * Used to read and write Skycat style tab separated
@@ -344,7 +336,7 @@ public class SkycatTable extends MemoryCatalog {
                 SkycatTable table = (SkycatTable) r;
                 System.out.println("Number of result rows: " + table.getRowCount());
                 if (table.getRowCount() != 0)
-                    System.out.println("result: " + ((SkycatTable) r).toString());
+                    System.out.println("result: " + r.toString());
             } else {
                 System.out.println("Failed search by ID");
             }
@@ -359,7 +351,7 @@ public class SkycatTable extends MemoryCatalog {
                 SkycatTable table = (SkycatTable) r;
                 System.out.println("Number of result rows: " + table.getRowCount());
                 if (table.getRowCount() != 0)
-                    System.out.println("result: " + ((SkycatTable) r).toString());
+                    System.out.println("result: " + r.toString());
             } else {
                 System.out.println("Failed search by position");
             }

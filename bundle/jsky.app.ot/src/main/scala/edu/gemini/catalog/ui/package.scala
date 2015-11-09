@@ -1,14 +1,17 @@
 package edu.gemini.catalog.ui
 
+import javax.swing.JTable
 import javax.swing.table._
 
 import edu.gemini.ags.api.AgsMagnitude.MagnitudeTable
 import edu.gemini.ags.api.{AgsAnalysis, AgsGuideQuality, AgsRegistrar, AgsStrategy}
 import edu.gemini.ags.conf.ProbeLimitsTable
-import edu.gemini.catalog.api.{UCAC4, CatalogName, CatalogQuery}
+import edu.gemini.catalog.api._
 import edu.gemini.pot.sp.SPComponentType
 import edu.gemini.shared.util.immutable.{None => JNone, Some => JSome}
+import edu.gemini.shared.util.immutable.ScalaConverters._
 import edu.gemini.spModel.core._
+import edu.gemini.spModel.gemini.altair.{AltairParams, InstAltair}
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2
 import edu.gemini.spModel.gemini.gmos.{InstGmosSouth, InstGmosNorth}
 import edu.gemini.spModel.gemini.gnirs.{GNIRSConstants, InstGNIRS}
@@ -28,7 +31,7 @@ import edu.gemini.spModel.guide.ValidatableGuideProbe
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.target.SPTarget
 import edu.gemini.spModel.target.env.TargetEnvironment
-import jsky.app.ot.gemini.editor.targetComponent.GuidingFeedback.ProbeLimits
+import edu.gemini.spModel.telescope.{PosAngleConstraint, PosAngleConstraintAware}
 import edu.gemini.pot.ModelConverters._
 
 import scala.language.existentials
@@ -40,23 +43,40 @@ import Scalaz._
 /**
  * Locally describe an ags strategy including its limits and the query that would trigger
  */
-case class SupportedStrategy(strategy: AgsStrategy, limits: Option[ProbeLimits], query: List[CatalogQuery])
+case class SupportedStrategy(strategy: AgsStrategy, query: List[CatalogQuery], altairMode: Option[AltairParams.Mode])
+
+object SupportedStrategy {
+  implicit val order:Order[SupportedStrategy] = Order.orderBy(_.strategy.key.id)
+  implicit val ordering:scala.Ordering[SupportedStrategy] = order.toScalaOrdering
+}
 
 /**
- * Describes the observation used to do a Guide Star Search
+ * Describes the observation used to do a Guide Star Search, it is pretty much a copy of ObsContext but it can be built
+ * out of the query fields on the CQT
  */
-case class ObservationInfo(ctx: Option[ObsContext], objectName: Option[String], baseCoordinates: Option[Coordinates], instrument: Option[SPComponentType], strategy: Option[AgsStrategy], validStrategies: List[SupportedStrategy], conditions: Option[Conditions], catalog: CatalogName, mt: MagnitudeTable) {
+case class ObservationInfo(ctx: Option[ObsContext],
+                           objectName: Option[String],
+                           baseCoordinates: Option[Coordinates],
+                           instrument: Option[SPComponentType],
+                           strategy: Option[SupportedStrategy],
+                           validStrategies: List[SupportedStrategy],
+                           conditions: Option[Conditions],
+                           positionAngle: Angle,
+                           allowPAFlip: Boolean,
+                           offsets: Set[Offset],
+                           catalog: CatalogName,
+                           mt: MagnitudeTable) {
   def catalogQuery:List[CatalogQuery] = validStrategies.collect {
-      case SupportedStrategy(s, _, query) if s == strategy => query
+      case SupportedStrategy(s, query, _) if s == strategy => query
     }.flatten
 
   /**
    * Attempts to find the guide probe for the selected strategy
    */
   def guideProbe: Option[ValidatableGuideProbe] =
-    strategy.flatMap(_.guideProbes.headOption.collect {
-                      case v: ValidatableGuideProbe => v
-                    })
+    strategy.flatMap(_.strategy.guideProbes.headOption.collect {
+      case v: ValidatableGuideProbe => v
+    })
 
   /**
    * An obscontext is required for guide quality calculation. The method below will attempt to create a context out of the information on the query form
@@ -83,9 +103,11 @@ case class ObservationInfo(ctx: Option[ObsContext], objectName: Option[String], 
     (baseCoordinates |@| inst |@| site |@| conditions){ (c, i, s, cond) =>
       val target = new SPTarget(c.ra.toAngle.toDegrees, c.dec.toDegrees) <| {_.setName(~objectName)}
       val env = TargetEnvironment.create(target)
-      // To calculate analysis of guide quality, it is required the site, insturment and conditions
-      // TODO Verify if we need offsets, AO info and scheduling block
-      ObsContext.create(env, i, new JSome(s), cond, null, null, JNone.instance())
+      // To calculate analysis of guide quality, it is required the site, instrument and conditions
+      val altair = strategy.collect {
+        case SupportedStrategy(_, _, Some(m)) => new InstAltair() <| {_.setMode(m)}
+      }
+      ObsContext.create(env, i, new JSome(s), cond, offsets.map(_.toOldModel).asJava, altair.orNull, JNone.instance()).withPositionAngle(positionAngle.toOldModel)
     }
   }
 }
@@ -94,7 +116,7 @@ object ObservationInfo {
   val DefaultInstrument = SPComponentType.INSTRUMENT_VISITOR
 
   // Observation context loaded initially with default parameters
-  val zero = new ObservationInfo(None, "".some, Coordinates.zero.some, DefaultInstrument.some, None, Nil, SPSiteQuality.Conditions.BEST.some, UCAC4, ProbeLimitsTable.loadOrThrow())
+  val zero = new ObservationInfo(None, "".some, Coordinates.zero.some, DefaultInstrument.some, None, Nil, SPSiteQuality.Conditions.BEST.some, Angle.zero, false, Set.empty, UCAC4, ProbeLimitsTable.loadOrThrow())
 
   val InstList = List(
     Flamingos2.INSTRUMENT_NAME_PROP        -> SPComponentType.INSTRUMENT_FLAMINGOS2,
@@ -118,19 +140,30 @@ object ObservationInfo {
    * Converts an AgsStrategy to a simpler description to be stored in the UI model
    */
   def toSupportedStrategy(obsCtx: ObsContext, strategy: AgsStrategy, mt: MagnitudeTable):SupportedStrategy = {
-    val pb = strategy.magnitudes(obsCtx, mt).map(k => ProbeLimits(strategy.probeBands, obsCtx, k._2)).headOption
     val queries = strategy.catalogQueries(obsCtx, mt)
-    SupportedStrategy(strategy, pb.flatten, queries)
+    val mode = obsCtx.getAOComponent.asScalaOpt.collect {
+      case a: InstAltair => a.getMode
+    }
+    SupportedStrategy(strategy, queries, mode)
   }
+
+  def expandAltairModes(obsCtx: ObsContext): List[ObsContext] = obsCtx.getAOComponent.asScalaOpt match {
+    case Some(i: InstAltair) => AltairParams.Mode.values().toList.map(m => obsCtx.withAOComponent(new InstAltair() <| {_.setMode(m)})) :+ obsCtx.withoutAOComponent()
+    case _                   => List(obsCtx)
+  }
+  
 
   def apply(ctx: ObsContext, mt: MagnitudeTable):ObservationInfo = ObservationInfo(
     ctx.some,
     Option(ctx.getTargets.getBase).map(_.getTarget.getName),
     Option(ctx.getTargets.getBase).map(_.getTarget.getSkycalcCoordinates.toNewModel),
     Option(ctx.getInstrument.getType),
-    AgsRegistrar.currentStrategy(ctx),
-    AgsRegistrar.validStrategies(ctx).map(toSupportedStrategy(ctx, _, mt)),
+    AgsRegistrar.currentStrategy(ctx).map(toSupportedStrategy(ctx, _, mt)),
+    expandAltairModes(ctx).flatMap(c => AgsRegistrar.validStrategies(c).map(toSupportedStrategy(c, _, mt))).sorted,
     ctx.getConditions.some,
+    ctx.getPositionAngle.toNewModel,
+    Option(ctx.getInstrument).collect{case p: PosAngleConstraintAware => p.getPosAngleConstraint == PosAngleConstraint.FIXED_180}.getOrElse(false),
+    ctx.getSciencePositions.asScala.map(_.toNewModel).toSet,
     UCAC4,
     mt)
 
@@ -164,19 +197,31 @@ case class IdColumn(title: String) extends CatalogNavigatorColumn[String] {
   def ordering = implicitly[scala.math.Ordering[String]]
 }
 
-case class GuidingQuality(info: Option[ObservationInfo], title: String) extends CatalogNavigatorColumn[AgsGuideQuality] {
-  // Calculate the guiding quality of the target
-  def target2Analysis(t: Target):Option[AgsAnalysis] = {
-    (for {
-      o                                     <- info
-      s                                     <- o.strategy
-      gp                                    <- o.guideProbe
-      st @ SiderealTarget(_, _, _, _, _, _, _, _) = t
-      ctx                                   <- o.toContext
-    } yield s.analyze(ctx, o.mt, gp, st)).flatten
-  }
+object GuidingQuality {
+  implicit val analysisOrder:Order[AgsAnalysis] = Order.orderBy(_.quality)
+  // Calculate the guiding quality of the target, allowing for PA flipping
+  def target2Analysis(info: Option[ObservationInfo], t: Target):Option[AgsAnalysis] =
+    if (info.exists(_.allowPAFlip)) {
+      // Note we use min, as AgsGuideQuality is better when the position on the index is lower
+      target2Analysis(info, t, Angle.zero) min target2Analysis(info, t, Angle.fromDegrees(180))
+    } else {
+      target2Analysis(info, t, Angle.zero)
+    }
 
-  val gf: SiderealTarget @?> AgsGuideQuality = PLens(t => target2Analysis(t).map(p => Store(q => sys.error("Not in use"), p.quality)))
+  // Calculate the guiding quality of the target at a given PA
+  private def target2Analysis(info: Option[ObservationInfo], t: Target, shift: Angle):Option[AgsAnalysis] = {
+    (for {
+      o                                           <- info
+      s                                           <- o.strategy
+      gp                                          <- o.guideProbe
+      st @ SiderealTarget(_, _, _, _, _, _, _, _) = t
+      ctx                                         <- o.toContext
+    } yield s.strategy.analyze(ctx.withPositionAngle(ctx.getPositionAngle.add(shift.toOldModel)), o.mt, gp, st)).flatten
+  }
+}
+
+case class GuidingQuality(info: Option[ObservationInfo], title: String) extends CatalogNavigatorColumn[AgsGuideQuality] {
+  val gf: SiderealTarget @?> AgsGuideQuality = PLens(t => GuidingQuality.target2Analysis(info, t).map(p => Store(q => sys.error("Not in use"), p.quality)))
 
   override val lens: Target @?> AgsGuideQuality = PLens(_.fold(
     PLens.nil.run,
@@ -255,7 +300,7 @@ case class MagnitudeColumn(band: MagnitudeBand) extends CatalogNavigatorColumn[M
 /**
  * Data model for the main table of the catalog navigator
  */
-case class TargetsModel(info: Option[ObservationInfo], base: Coordinates, targets: List[SiderealTarget]) extends AbstractTableModel {
+case class TargetsModel(info: Option[ObservationInfo], base: Coordinates, radiusConstraint: RadiusConstraint, targets: List[SiderealTarget]) extends AbstractTableModel {
   // Required to give limits to the existential type list
   type ColumnsList = List[CatalogNavigatorColumn[A] forSome { type A >: Null <: AnyRef}]
 
@@ -287,11 +332,28 @@ case class TargetsModel(info: Option[ObservationInfo], base: Coordinates, target
 
   override def getColumnClass(columnIndex: Int): Class[_] = columns(columnIndex).clazz
 
-  def rendererComponent(value: Any, isSelected: Boolean, hasFocus: Boolean, row: Int, column: Int): Option[Component]= {
+  def rendererComponent(value: Any, isSelected: Boolean, hasFocus: Boolean, row: Int, column: Int, table: JTable): Option[Component]= {
     columns.lift(column).flatMap { c =>
       c.displayValue(value).map(new Label(_) {
         horizontalAlignment = Alignment.Right
+
+        // Required to set the background
+        opaque = true
+
+        if (isSelected) {
+          background = table.getSelectionBackground
+          foreground = table.getSelectionForeground
+        } else {
+          background = table.getBackground
+          foreground = table.getForeground
+        }
       })
+    }
+  }
+
+  def renderAt(row: Int, column: Int):Option[String] = {
+    targets.lift(row).flatMap { t =>
+      columns.lift(column) >>= {c => c.render(t).flatMap(c.displayValue)}
     }
   }
 

@@ -1,7 +1,3 @@
-//
-// $
-//
-
 package edu.gemini.spModel.guide;
 
 import java.util.Collection;

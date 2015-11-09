@@ -50,7 +50,7 @@ public class TableDisplayTool extends JPanel
         PrintableWithDialog, Storeable {
     private static final Logger logger = Logger.getLogger(TableDisplayTool.class.getName());
 
-    // Used to access internationalized strings (see i18n/gui*.proprties)
+    // Used to access internationalized strings (see i18n/gui*.properties)
     private static final I18N _I18N = I18N.getInstance(TableDisplayTool.class);
 
     // The catalog to use
@@ -78,7 +78,6 @@ public class TableDisplayTool extends JPanel
     private JButton _plotButton;
     private JButton _unplotButton;
     private JButton _unplotAllButton;
-    private JButton _configButton;
 
     // JFrame or JInternalFrame for _configPanel
     private Component _configFrame;
@@ -225,7 +224,7 @@ public class TableDisplayTool extends JPanel
         panel.add(_unplotAllButton);
         _unplotAllButton.addActionListener(ev -> unplotAll());
 
-        _configButton = new JButton(_I18N.getString("configure"));
+        JButton _configButton = new JButton(_I18N.getString("configure"));
         _configButton.setToolTipText(_I18N.getString("configureTip"));
         panel.add(_configButton);
         _configButton.addActionListener(ev -> configure());
@@ -249,10 +248,6 @@ public class TableDisplayTool extends JPanel
 
     public JButton getUnplotAllButton() {
         return _unplotAllButton;
-    }
-
-    public JButton getConfigButton() {
-        return _configButton;
     }
 
     /** Plot the contents of the table. */
@@ -377,20 +372,10 @@ public class TableDisplayTool extends JPanel
         _configPanel.getCancelButton().addActionListener(cancelListener);
     }
 
-
     /** Panel used to configure the table and plot symbol display */
     public TabbedPanel getConfigPanel() {
         return _configPanel;
     }
-
-
-    /** Hide any popup windows associated with this window */
-    public void hidePopups() {
-        if (_configFrame != null) {
-            _configFrame.setVisible(false);
-        }
-    }
-
 
     /**
      * Return the name of this component (based on the data being displayed)
@@ -400,7 +385,6 @@ public class TableDisplayTool extends JPanel
             return _table.getName();
         return _I18N.getString("table");
     }
-
 
     /**
      * Display the given query results. Tabular data is displayed in
@@ -420,6 +404,7 @@ public class TableDisplayTool extends JPanel
             String title = _table.getTitle() + " (" + _table.getRowCount() + (_table.isMore() ? "+)" : ")");
             _tableTitle.setText(title);
             _tableDisplay.setModel(_table);
+            _tableDisplay.resize();
 
             if (_plotter != null)
                 _plotter.plot(_table);

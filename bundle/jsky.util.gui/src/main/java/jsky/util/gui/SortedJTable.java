@@ -1,60 +1,3 @@
-//=== File Prolog =============================================================
-//	This code was developed by NASA, Goddard Space Flight Center, Code 588
-//	for the Scientist's Expert Assistant (SEA) project.
-//
-//--- Contents ----------------------------------------------------------------
-//	class SortedJTable
-//
-//--- Description -------------------------------------------------------------
-//	A JTable that allows the user to sort the table by clicking on the
-//	column headers.  An icon is shown in the sort column to indicate the
-//	sort.  Ascending and descending sorting is supported.
-//
-//--- Notes -------------------------------------------------------------------
-//
-//--- Development History -----------------------------------------------------
-//
-//	06/29/99	J. Jones / 588
-//
-//		Original implementation.
-//
-//	10/27/99	J. Jones / 588
-//
-//		Changed to extend PrintableJTable instead of JTable.
-//
-//	07/21/00	Allan Brighton
-//
-//		Added setModel, default constructor, adapted for JDK1.3.
-//              Made performace improvements after checking with OptimizeIt.
-//
-//
-//--- DISCLAIMER---------------------------------------------------------------
-//
-//	This software is provided "as is" without any warranty of any kind, either
-//	express, implied, or statutory, including, but not limited to, any
-//	warranty that the software will conform to specification, any implied
-//	warranties of merchantability, fitness for a particular purpose, and
-//	freedom from infringement, and any warranty that the documentation will
-//	conform to the program, or any warranty that the software will be error
-//	free.
-//
-//	In no event shall NASA be liable for any damages, including, but not
-//	limited to direct, indirect, special or consequential damages, arising out
-//	of, resulting from, or in any way connected with this software, whether or
-//	not based upon warranty, contract, tort or otherwise, whether or not
-//	injury was sustained by persons or property or otherwise, and whether or
-//	not loss was sustained from or arose out of the results of, or use of,
-//	their software or services provided hereunder.
-//
-//=== End File Prolog =========================================================
-
-// Original code:
-// Written by Kong Eu Tak for Swing Connection Article
-// Email: konget@cheerful.com
-// Homepage: http://www.singnet.com.sg/~kongeuta/
-
-//package GOV.nasa.gsfc.sea.util.gui;
-
 package jsky.util.gui;
 
 import java.awt.BorderLayout;
@@ -155,10 +98,6 @@ public class SortedJTable extends PrintableJTable
         getTableHeader().addMouseListener(this);
     }
 
-    public boolean isSortingAllowed() {
-        return _sortingAllowed;
-    }
-
     public void setSortingAllowed(boolean sortingAllowed) {
         _sortingAllowed = sortingAllowed;
     }
@@ -181,21 +120,18 @@ public class SortedJTable extends PrintableJTable
             }
         }
 
-        tableModelListener = new TableModelListener() {
+        tableModelListener = e -> {
+            // Automatically resort since the table data has changed
+            doSort();
 
-            public void tableChanged(TableModelEvent e) {
-                // Automatically resort since the table data has changed
-                doSort();
+            // If number of columns has changed, reinstall the custom column headers
+            if (e.getColumn() > _numColumns || e.getColumn() == TableModelEvent.ALL_COLUMNS) {
+                _numColumns = getColumnCount();
 
-                // If number of columns has changed, reinstall the custom column headers
-                if (e.getColumn() > _numColumns || e.getColumn() == TableModelEvent.ALL_COLUMNS) {
-                    _numColumns = getColumnCount();
-
-                    // Reinstall the header renderers if necessary,
-                    // preserving the tool tip text of the original header renderer
-                    for (int i = 0; i < _numColumns; ++i) {
-                        setCustomHeaderRenderer(i);
-                    }
+                // Reinstall the header renderers if necessary,
+                // preserving the tool tip text of the original header renderer
+                for (int i = 0; i < _numColumns; ++i) {
+                    setCustomHeaderRenderer(i);
                 }
             }
         };
@@ -354,7 +290,7 @@ public class SortedJTable extends PrintableJTable
             if (b instanceof Comparable)
                 return ((Comparable) a).compareTo(b) * _sortType;
             else
-                return 1 * _sortType;
+                return _sortType;
         }
         if (b instanceof Comparable) {
             return -1 * _sortType;
@@ -632,7 +568,7 @@ public class SortedJTable extends PrintableJTable
             }
 
             public Object getValueAt(int row, int col) {
-                return new Integer(row * col);
+                return row * col;
             }
         };
         SortedJTable table = new SortedJTable(dataModel);

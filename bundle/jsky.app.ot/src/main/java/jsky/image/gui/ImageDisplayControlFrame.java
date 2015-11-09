@@ -1,13 +1,3 @@
-/*
- * ESO Archive
- *
- * $Id: ImageDisplayControlFrame.java 5923 2005-03-30 20:24:42Z brighton $
- *
- * who             when        what
- * --------------  ----------  ----------------------------------------
- * Allan Brighton  1999/05/03  Created
- */
-
 package jsky.image.gui;
 
 import java.awt.*;
@@ -68,11 +58,11 @@ public class ImageDisplayControlFrame extends JFrame {
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
         addWindowListener(new WindowAdapter() {
 
-            public void windowClosing(WindowEvent e) {
+            @Override public void windowClosing(WindowEvent e) {
                 mainImageDisplay.close();
             }
 
-            public void windowClosed(WindowEvent e) {
+            @Override public void windowClosed(WindowEvent e) {
                 if (--openFrameCount == 0 && mainImageDisplay.isMainWindow())
                     mainImageDisplay.exit();
             }
@@ -151,8 +141,6 @@ public class ImageDisplayControlFrame extends JFrame {
             fileOrUrl = args[0];
 
         ImageDisplayControlFrame frame = new ImageDisplayControlFrame(size, fileOrUrl);
-
-//        frame.getImageDisplayControl().setImageBackground(Color.white); // test
 
         frame.setVisible(true);
     }

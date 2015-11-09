@@ -41,7 +41,7 @@ object CatalogQueryDemo extends SwingApplication {
     val env = TargetEnvironment.create(target)
     val inst = new InstNIRI <| {_.setPosAngle(0.0)}
 
-    val conditions = SPSiteQuality.Conditions.NOMINAL.sb(SPSiteQuality.SkyBackground.ANY).cc(SPSiteQuality.CloudCover.PERCENT_80).iq(SPSiteQuality.ImageQuality.PERCENT_85)
+    val conditions = SPSiteQuality.Conditions.NOMINAL.sb(SPSiteQuality.SkyBackground.PERCENT_80).cc(SPSiteQuality.CloudCover.PERCENT_80).iq(SPSiteQuality.ImageQuality.PERCENT_85)
     val ctx = ObsContext.create(env, inst, new JSome(Site.GN), conditions, null, null, JNone.instance())
 
     instance.showOn(ctx)

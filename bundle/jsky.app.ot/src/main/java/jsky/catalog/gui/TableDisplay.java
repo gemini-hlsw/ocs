@@ -1,13 +1,3 @@
-/*
- * ESO Archive
- *
- * $Id: TableDisplay.java 7983 2007-07-31 15:20:11Z swalker $
- *
- * who             when        what
- * --------------  ----------  ----------------------------------------
- * Allan Brighton  1999/05/12  Created
- */
-
 package jsky.catalog.gui;
 
 import jsky.catalog.FieldDesc;
@@ -54,7 +44,9 @@ public class TableDisplay extends JPanel
         @Override
         public void setValue(Object value) {
             if (value instanceof Double) {
-                setText(String.format("%.2f", value));
+                setText(String.format("%.2f", (Double)value));
+            } else {
+                setText("");
             }
         }
     };
@@ -88,6 +80,7 @@ public class TableDisplay extends JPanel
         try {
             _showTab = (Hashtable) Preferences.getPreferences().deserialize(SHOW_TAB_FILE_NAME);
         } catch (Exception e) {
+            // Ignore
         }
     }
 
@@ -118,13 +111,11 @@ public class TableDisplay extends JPanel
 
         // handle resize events
         addComponentListener(new ComponentAdapter() {
-
             public void componentResized(ComponentEvent e) {
                 resize();
             }
         });
     }
-
 
     /**
      * Create an empty TableDisplay (Call setModel to set the data to display).
@@ -134,17 +125,6 @@ public class TableDisplay extends JPanel
     public TableDisplay(TableQueryResult tableQueryResult) {
         this(tableQueryResult, null);
     }
-
-
-    /**
-     * Create an empty TableDisplay (Call setModel to set the data to display).
-     *
-     * @param queryResultDisplay used to display any query results (resulting from following links)
-     */
-    public TableDisplay(QueryResultDisplay queryResultDisplay) {
-        this(null, queryResultDisplay);
-    }
-
 
     /**
      * Initialize an empty table. Call setModel() to set the data to display,
@@ -158,22 +138,6 @@ public class TableDisplay extends JPanel
     public SortedJTable getTable() {
         return _table;
     }
-
-    /** Return the JScrollPane used to scroll the table */
-    public JScrollPane getScrollPane() {
-        return _scrollPane;
-    }
-
-    /** Set the object used to display query results (when following links) */
-    public void setQueryResultDisplay(QueryResultDisplay q) {
-        _queryResultDisplay = q;
-    }
-
-    /** Return the object used to display query results (when following links) */
-    public QueryResultDisplay getQueryResultDisplay() {
-        return _queryResultDisplay;
-    }
-
 
     /**
      * If the given query result is a table, display it,
@@ -291,7 +255,6 @@ public class TableDisplay extends JPanel
         _table.showPrintDialog();
     }
 
-
     /** Called when the table is resized */
     public void resize() {
         if (_tableQueryResult == null)
@@ -308,7 +271,6 @@ public class TableDisplay extends JPanel
             }
         }
     }
-
 
     /**
      * Select the given table row.
@@ -406,7 +368,7 @@ public class TableDisplay extends JPanel
                     Component c = r.getTableCellRendererComponent(_table,
                                                                   _table.getValueAt(row, col),
                                                                   false, false, row, col);
-                    String s = null;
+                    String s;
                     if (c instanceof JLabel) {
                         s = ((JLabel) r).getText();
                     } else if (c instanceof AbstractButton) {

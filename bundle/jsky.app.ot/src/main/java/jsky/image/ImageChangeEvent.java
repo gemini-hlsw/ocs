@@ -1,13 +1,3 @@
-/*
- * ESO Archive
- *
- * $Id: ImageChangeEvent.java 4414 2004-02-03 16:21:36Z brighton $
- *
- * who             when        what
- * --------------  ----------  ----------------------------------------
- * Allan Brighton  1999/11/17  Created
- */
-
 package jsky.image;
 
 import javax.swing.event.ChangeEvent;
@@ -25,7 +15,7 @@ public class ImageChangeEvent extends ChangeEvent {
     protected int val;
 
     /** Bit set if a new image was (or will be) loaded */
-    protected static final int NEW_IMAGE = 1 << 0;
+    protected static final int NEW_IMAGE = 1;
 
     /** Bit set before a new image is loaded and cleared afterwards */
     protected static final int BEFORE = 1 << 1;

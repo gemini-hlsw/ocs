@@ -81,10 +81,10 @@ public class DivaGraphicsImageDisplay extends JCanvas implements GraphicsImageDi
     private ColorModel _colorModel;
 
     /** Object used to convert coordinates */
-    private CoordinateConverter _coordinateConverter;
+    private final CoordinateConverter _coordinateConverter;
 
     /** Object used for drawing graphics over the image */
-    private CanvasGraphics _canvasGraphics;
+    private final CanvasGraphics _canvasGraphics;
 
     /** The Diva graphics layer containing the image */
     private ImageLayer _imageLayer;
@@ -181,7 +181,7 @@ public class DivaGraphicsImageDisplay extends JCanvas implements GraphicsImageDi
         imageProcessor.setName(name);
         _coordinateConverter = new ImageCoordinateConverter(this);
         setBackground(Color.black);
-        setPreferredSize(new Dimension(255, 255));	// default size
+        setPreferredSize(new Dimension(255, 255));  // default size
         _canvasGraphics = makeCanvasGraphics();
 
         // handle resize events
@@ -305,10 +305,10 @@ public class DivaGraphicsImageDisplay extends JCanvas implements GraphicsImageDi
         double y = Math.max((dh - ch) / 2.0, 0.);
         Rectangle2D.Double region = new Rectangle2D.Double(x / _scale, y / _scale, cw / _scale, ch / _scale);
 
-        newImage(true);		// call once before loading new image
+        newImage(true); // call once before loading new image
         _imageProcessor.setSourceImage(im, region);
         _imageProcessor.update();
-        newImage(false);	// call once after loading new image
+        newImage(false);    // call once after loading new image
     }
 
 
@@ -372,7 +372,7 @@ public class DivaGraphicsImageDisplay extends JCanvas implements GraphicsImageDi
      * @param before If true, it is before loading the image, otherwise afterwards.
      */
     protected void newImage(boolean before) {
-        if (before) {	       // before loading image
+        if (before) {       // before loading image
             if (_fitsImage != null) {
                 _fitsImage.clearTileCache();
             }
@@ -380,7 +380,7 @@ public class DivaGraphicsImageDisplay extends JCanvas implements GraphicsImageDi
             _centered = true;
             if (!_noInitWCS)
                 _wcs = null;
-        } else {			// after loading image
+        } else {    // after loading image
             _affineTransform = getAffineTransform();
             PlanarImage im = getImage();
             if (im != null) {

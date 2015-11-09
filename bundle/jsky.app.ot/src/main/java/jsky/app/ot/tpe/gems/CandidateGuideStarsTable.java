@@ -1,6 +1,5 @@
 package jsky.app.ot.tpe.gems;
 
-import jsky.catalog.Catalog;
 import jsky.catalog.gui.SymbolSelectionEvent;
 import jsky.catalog.gui.SymbolSelectionListener;
 import jsky.catalog.gui.TableDisplay;
@@ -18,8 +17,7 @@ import javax.swing.table.DefaultTableModel;
 class CandidateGuideStarsTable extends TableDisplay {
 
     private boolean _ignoreSelection;
-    private TablePlotter _plotter;
-    private Catalog _cat;
+    private final TablePlotter _plotter;
     private CandidateGuideStarsTableModel _tableModel;
 
     // Used to select a table row when the symbol is selected
@@ -31,6 +29,7 @@ class CandidateGuideStarsTable extends TableDisplay {
                 try {
                     selectRow(e.getRow());
                 } catch (Exception ex) {
+                    // Ignore
                 }
                 _ignoreSelection = false;
             }
@@ -42,6 +41,7 @@ class CandidateGuideStarsTable extends TableDisplay {
                 try {
                     deselectRow(e.getRow());
                 } catch (Exception ex) {
+                    // Ignore
                 }
                 _ignoreSelection = false;
             }
@@ -76,17 +76,11 @@ class CandidateGuideStarsTable extends TableDisplay {
         getTable().setSortingAllowed(false); // REL-560: Sorting code doesn't seem to handle editable columns correctly
     }
 
-    public void setCatalog(Catalog cat) {
-        _cat = cat;
-    }
-
     public void setTableModel(CandidateGuideStarsTableModel tableModel) {
         unplot();
         _tableModel = tableModel;
-        if (_cat != null) {
-            setModel(_tableModel.getTableQueryResult(_cat));
-            plot();
-        }
+        setModel(_tableModel.getTableQueryResult());
+        plot();
     }
 
     public CandidateGuideStarsTableModel getTableModel() {

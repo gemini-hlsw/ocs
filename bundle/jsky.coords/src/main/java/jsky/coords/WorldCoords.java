@@ -1,13 +1,3 @@
-/*
- * ESO Archive
- *
- * $Id: WorldCoords.java 7518 2007-01-02 20:39:21Z rnorris $
- *
- * who             when        what
- * --------------  ----------  ----------------------------------------
- * Allan Brighton  1999/05/03  Created, based on C++ version
- */
-
 package jsky.coords;
 
 import java.awt.geom.Point2D;
@@ -75,8 +65,8 @@ public class WorldCoords implements WorldCoordinates, Serializable {
      * @param equinox The equinox of the input coordinates.
      */
     public WorldCoords(Double ra, Double dec, double equinox) {
-        this.ra = new HMS(ra.doubleValue() / 15);
-        this.dec = new DMS(dec.doubleValue());
+        this.ra = new HMS(ra / 15);
+        this.dec = new DMS(dec);
         init(equinox);
     }
 
@@ -549,7 +539,6 @@ public class WorldCoords implements WorldCoordinates, Serializable {
      * Internally, ra and dec are converted if needed and stored in J2000.
      */
     private void init(double equinox) {
-        checkRange();
         convertEquinox(equinox, 2000.);
     }
 
@@ -561,41 +550,25 @@ public class WorldCoords implements WorldCoordinates, Serializable {
             return;
 
         double[] q0 = new double[2], q1 = new double[2];
-        q0[0] = ra.getVal() * 15;	// hours to degrees
+        q0[0] = ra.getVal() * 15;    // hours to degrees
         q0[1] = dec.getVal();
         JPrec.prej_q(q0, q1, fromEquinox, toEquinox);
-        ra = new HMS(q1[0] / 15);	// degrees to hours
+        ra = new HMS(q1[0] / 15);    // degrees to hours
         dec = new DMS(q1[1]);
     }
-
-    /** check range of ra,dec values */
-    private void checkRange() {
-        double ra = this.ra.getVal(), dec = this.dec.getVal();
-
-        if (ra < -0.001 || ra >= 25.0) {
-            // System.out.println("XXX RA value " + ra + " out of range (0..24 hours)");
-            // throw new IllegalArgumentException("RA value " + ra + " out of range (0..24 hours)");
-        }
-
-        if (dec < -90. || dec > 90.) {
-            // System.out.println("XXX DEC value " + dec + " out of range (-90..+90 deg)");
-            // throw new IllegalArgumentException("DEC value " + dec + " out of range (-90..+90 deg)");
-        }
-    }
-
     
     @Override
     public boolean equals(Object obj) {
-    	if (obj instanceof WorldCoordinates) {
-    		WorldCoordinates wc = (WorldCoordinates) obj;
-    		return wc.getRA().equals(getRA()) && wc.getDec().equals(getDec());
-    	}
-    	return false;
+        if (obj instanceof WorldCoordinates) {
+            WorldCoordinates wc = (WorldCoordinates) obj;
+            return wc.getRA().equals(getRA()) && wc.getDec().equals(getDec());
+        }
+        return false;
     }
     
     @Override
     public int hashCode() {
-    	return getRA().hashCode() ^ getDec().hashCode();
+        return getRA().hashCode() ^ getDec().hashCode();
     }
     
     

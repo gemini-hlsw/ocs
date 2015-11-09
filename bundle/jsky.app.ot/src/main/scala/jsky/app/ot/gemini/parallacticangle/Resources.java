@@ -1,11 +1,4 @@
-// Copyright 1999 Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-// See the file LICENSE for complete details.
-//
-// $Id: Resources.java 6526 2005-08-03 21:27:13Z brighton $
-//
-
-package edu.gemini.mask;
+package jsky.app.ot.gemini.parallacticangle;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
@@ -16,7 +9,6 @@ import java.util.Properties;
 
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
-
 
 /**
  * Resources provides a central class with methods for accessing
@@ -34,22 +26,12 @@ public final class Resources {
     public static final String IMAGES_SUBPATH = "images";
 
     /**
-     * Path to images, within the resources area.
-     */
-    public static final String IMAGES_PATH = RESOURCE_PATH + "/" + IMAGES_SUBPATH + "/";
-
-    /**
      * Subpath to config files, within the resources area.
      */
     public static final String CONFIG_SUBPATH = "conf";
 
-    /**
-     * Path to config files, within the resources area.
-     */
-    public static final String CONFIG_PATH = RESOURCE_PATH + "/" + CONFIG_SUBPATH + "/";
-
     // ImageCache provides a cache of already present icons.
-    private static Map<String, Icon> _rmap = new HashMap<String, Icon>();
+    private static Map<String, Icon> _rmap = new HashMap<>();
 
     // Disallow instances
     private Resources() {
@@ -62,7 +44,6 @@ public final class Resources {
      */
     public static URL getResource(String fileName) {
         String path = RESOURCE_PATH + '/' + fileName;
-        //System.out.println("getResource: " + path);
         URL u = Resources.class.getResource(path);
         if (u == null) {
             System.out.println("Failed to get: " + path);
@@ -131,6 +112,7 @@ public final class Resources {
                 try {
                     bis.close();
                 } catch (Exception ex) {
+                    // Ignore
                 }
             }
         }

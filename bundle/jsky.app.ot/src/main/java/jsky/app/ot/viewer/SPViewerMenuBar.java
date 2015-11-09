@@ -14,6 +14,7 @@ import edu.gemini.shared.util.immutable.ImList;
 import edu.gemini.util.security.permission.StaffPermission;
 import jsky.app.ot.OT;
 import jsky.app.ot.OTOptions;
+import jsky.app.ot.gemini.obscat.ObsCatalog;
 import jsky.app.ot.plugin.OtActionPlugin;
 import jsky.app.ot.session.SessionQueuePanel;
 import jsky.app.ot.userprefs.general.GeneralPreferencesPanel;
@@ -86,7 +87,7 @@ final class SPViewerMenuBar extends JMenuBar {
         menu.addSeparator();
         menu.add(new FetchLibrariesAction(_viewer));
         menu.addSeparator();
-        menu.add(new QueryAction());
+        menu.add(new QueryAction(ObsCatalog.QUERY_MANAGER));
 
         final ISPProgram r = _viewer.getProgram();
         final SPProgramID id = (r == null) ? null : r.getProgramID();

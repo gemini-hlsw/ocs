@@ -1,19 +1,10 @@
-/*
- * ESO Archive
- *
- * $Id: FieldFormat.java 37934 2011-10-08 00:20:20Z lobrien $
- *
- * who             when        what
- * --------------  ----------  ----------------------------------------
- * Allan Brighton  1999/08/01  Created
- */
-
 package jsky.catalog;
 
 import jsky.coords.DMS;
 import jsky.coords.HMS;
 import jsky.util.gui.DialogUtil;
 
+import java.io.Serializable;
 
 /**
  * This utility class provides a method to scan specially formatted
@@ -28,7 +19,7 @@ public class FieldFormat {
      * @param s         the value in string format
      * @return an object of the given class, or null if it could not be parsed
      */
-    public static Object getValue(FieldDesc fieldDesc, String s) {
+    public static Serializable getValue(FieldDesc fieldDesc, String s) {
         Class<?> c = fieldDesc.getFieldClass();
         s = s.trim();
         if (c == String.class)
@@ -43,13 +34,13 @@ public class FieldFormat {
                 if (c == Double.class)
                     return hms.getVal();
                 else
-                    return new Float(hms.getVal());
+                    return (float) hms.getVal();
             } else if (fieldDesc.isDec()) {
                 DMS dms = new DMS(s);
                 if (c == Double.class)
                     return dms.getVal();
                 else
-                    return new Float(dms.getVal());
+                    return (float) dms.getVal();
             }
         }
 

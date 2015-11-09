@@ -1,44 +1,17 @@
-/*
- * Copyright 2000 Association for Universities for Research in Astronomy, Inc.,
- * Observatory Control System, Gemini Telescopes Project.
- *
- * $Id: MultiSelectComboBox.java 6418 2005-06-17 10:04:15Z brighton $
- */
-
 package jsky.util.gui;
 
-import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.awt.GridBagConstraints;
-import java.awt.Insets;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.lang.StringBuffer;
 
-import javax.swing.BorderFactory;
-import javax.swing.DefaultListModel;
-import javax.swing.DefaultListSelectionModel;
-import javax.swing.JButton;
-import javax.swing.JCheckBoxMenuItem;
-import javax.swing.JComboBox;
-import javax.swing.JComponent;
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
-import javax.swing.ListModel;
-import javax.swing.ListSelectionModel;
-import javax.swing.SwingConstants;
+import javax.swing.*;
 import javax.swing.event.ListDataEvent;
 import javax.swing.event.ListDataListener;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
 import javax.swing.plaf.basic.BasicArrowButton;
-
 
 /**
  * A replacement for JComboBox that supports multiple selections.
@@ -46,13 +19,13 @@ import javax.swing.plaf.basic.BasicArrowButton;
  * @version $Revision: 6418 $
  * @author Allan Brighton
  */
-public class MultiSelectComboBox extends JComponent {
+public class MultiSelectComboBox<T> extends JComponent {
 
     private JButton _button;
     private BasicArrowButton _arrowButton;
     private JPopupMenu _popupMenu;
     private JCheckBoxMenuItem[] _menuItems;
-    private ListModel _model;
+    private ListModel<T> _model;
     private DefaultListSelectionModel _selectionModel;
     private ItemListener _itemListener;
     private ListDataListener _listDataListener;
@@ -61,7 +34,7 @@ public class MultiSelectComboBox extends JComponent {
 
 
     /** Create an empty MultiSelectComboBox */
-    public MultiSelectComboBox() {
+    private MultiSelectComboBox() {
         GridBagUtil layout = new GridBagUtil(this);
 
         MouseListener l = new MouseAdapter() {
@@ -75,9 +48,11 @@ public class MultiSelectComboBox extends JComponent {
         _button.setBorder(null);
         _button.setHorizontalAlignment(SwingConstants.LEFT);
         _button.addMouseListener(l);
+        _button.setOpaque(false);
 
         _arrowButton = new BasicArrowButton(BasicArrowButton.SOUTH);
         _arrowButton.setRequestFocusEnabled(false);
+        _arrowButton.setForeground(Color.black);
         _arrowButton.setBorder(null);
         _arrowButton.addMouseListener(l);
 
@@ -93,18 +68,12 @@ public class MultiSelectComboBox extends JComponent {
                    new Insets(2, 0, 2, 2), 0, 0);
 
         _selectionModel = new DefaultListSelectionModel();
-        _selectionModel.addListSelectionListener(new ListSelectionListener() {
-            public void valueChanged(ListSelectionEvent e) {
-                _updateSelection();
-            }
-        });
+        _selectionModel.addListSelectionListener(e -> _updateSelection());
 
         // called when a menubutton is selected
-        _itemListener = new ItemListener() {
-            public void itemStateChanged(ItemEvent e) {
-                _updateSelectionModel();
-                _fireActionEvent();
-            }
+        _itemListener = e -> {
+            _updateSelectionModel();
+            _fireActionEvent();
         };
 
         // called when the model changes
@@ -123,19 +92,13 @@ public class MultiSelectComboBox extends JComponent {
         };
     }
 
-    /** Create a MultiSelectComboBox based on the given model. */
-    public MultiSelectComboBox(ListModel model) {
-        this();
-        setModel(model);
-    }
 
     /** Create a MultiSelectComboBox containing the given items. */
-    public MultiSelectComboBox(Object[] ar) {
+    public MultiSelectComboBox(T[] ar) {
         this();
 
-        DefaultListModel model = new DefaultListModel();
-        for (int i = 0; i < ar.length; i++)
-            model.addElement(ar[i]);
+        DefaultListModel<T> model = new DefaultListModel<>();
+        for (T anAr : ar) model.addElement(anAr);
         setModel(model);
     }
 
@@ -175,7 +138,7 @@ public class MultiSelectComboBox extends JComponent {
 
 
     /** Set the model describing the contents of the popup menu */
-    public void setModel(ListModel model) {
+    public void setModel(ListModel<T> model) {
         clearSelection();
         _popupMenu = new JPopupMenu();
 
@@ -192,10 +155,9 @@ public class MultiSelectComboBox extends JComponent {
         model.addListDataListener(_listDataListener);
     }
 
-    public ListModel getModel() {
+    public ListModel<T> getModel() {
         return _model;
     }
-
 
     public ListSelectionModel getSelectionModel() {
         return _selectionModel;
@@ -205,8 +167,8 @@ public class MultiSelectComboBox extends JComponent {
     public int getSelectionCount() {
         int result = 0;
         if (_menuItems != null && _menuItems.length != 0) {
-            for (int i = 0; i < _menuItems.length; i++) {
-                if (_menuItems[i].isSelected()) {
+            for (JCheckBoxMenuItem _menuItem : _menuItems) {
+                if (_menuItem.isSelected()) {
                     result++;
                 }
             }
@@ -226,22 +188,6 @@ public class MultiSelectComboBox extends JComponent {
             }
         }
         return result;
-    }
-
-    /** Set the indexes of the selected items */
-    public void setSelectedIndexes(int[] ar) {
-        clearSelection();
-        if (_menuItems != null && _menuItems.length != 0 && ar.length != 0) {
-            for (int i = 0; i < _menuItems.length; i++) {
-                Object item = _model.getElementAt(i);
-                for (int j = 0; j < ar.length; j++) {
-                    if (_model.getElementAt(ar[j]).equals(item)) {
-                        _menuItems[i].setSelected(true);
-                        break;
-                    }
-                }
-            }
-        }
     }
 
     /** Returns an array containing the selected items */
@@ -270,9 +216,9 @@ public class MultiSelectComboBox extends JComponent {
     /** Deselect all items */
     public void clearSelection() {
         if (_menuItems != null && _menuItems.length != 0) {
-            for (int i = 0; i < _menuItems.length; i++) {
-                if (_menuItems[i].isSelected()) {
-                    _menuItems[i].setSelected(false);
+            for (JCheckBoxMenuItem _menuItem : _menuItems) {
+                if (_menuItem.isSelected()) {
+                    _menuItem.setSelected(false);
                 }
             }
         }
@@ -285,8 +231,8 @@ public class MultiSelectComboBox extends JComponent {
         if (_menuItems != null && _menuItems.length != 0 && ar.length != 0) {
             for (int i = 0; i < _menuItems.length; i++) {
                 Object item = _model.getElementAt(i);
-                for (int j = 0; j < ar.length; j++) {
-                    if (ar[j].equals(item)) {
+                for (Object anAr : ar) {
+                    if (anAr.equals(item)) {
                         _menuItems[i].setSelected(true);
                         break;
                     }
@@ -299,14 +245,14 @@ public class MultiSelectComboBox extends JComponent {
     // Update the button to display the text of the selected items
     private void _updateButton() {
         if (_menuItems != null && _menuItems.length != 0) {
-            StringBuffer sb = new StringBuffer();
+            StringBuilder sb = new StringBuilder();
             String sep = "";
             int count = 0;
-            for (int i = 0; i < _menuItems.length; i++) {
-                if (_menuItems[i].isSelected()) {
+            for (JCheckBoxMenuItem _menuItem : _menuItems) {
+                if (_menuItem.isSelected()) {
                     sb.append(sep);
                     sep = ", ";
-                    sb.append(_menuItems[i].getText());
+                    sb.append(_menuItem.getText());
                     count++;
                 }
             }
@@ -366,23 +312,10 @@ public class MultiSelectComboBox extends JComponent {
     /** Test main */
     public static void main(String[] args) {
         String[] ar = new String[]{"Test", "First Item", "Second Item", "Third Item", "Fourth Item", "Fifth Item"};
-        JComboBox cb = new JComboBox(ar);
-        MultiSelectComboBox mscb = new MultiSelectComboBox(ar);
+        JComboBox<String> cb = new JComboBox<>(ar);
+        MultiSelectComboBox<String> mscb = new MultiSelectComboBox<>(ar);
 
-        /*
-        mscb.setSelectedObjects(new String[]{"First Item", "Second Item"});
-        ListSelectionModel selModel = mscb.getSelectionModel();
-        if (selModel.isSelectedIndex(0) || selModel.isSelectedIndex(3))
-            System.out.println("Failed test 1");
-        if (! (selModel.isSelectedIndex(1) && selModel.isSelectedIndex(2)))
-            System.out.println("Failed test 2");
-        */
-
-        mscb.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                System.out.println("XXX MultiSelectComboBox.actionPerformed");
-            }
-        });
+        mscb.addActionListener(e -> System.out.println("XXX MultiSelectComboBox.actionPerformed"));
 
         JFrame f = new JFrame("Test MultiSelectComboBox");
         JPanel p = new JPanel();

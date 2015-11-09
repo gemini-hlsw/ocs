@@ -644,12 +644,11 @@ public class TablePlotSymbol extends DVMap {
             try {
                 return _condExpr.evalBoolean();
             } catch (Throwable t) {
-                t.printStackTrace(); //XXX
+                t.printStackTrace();
             }
         }
         return true;
     }
-
 
     /** Set the symbol's size (may be an expression using column names) */
     public void setSize(String size) {

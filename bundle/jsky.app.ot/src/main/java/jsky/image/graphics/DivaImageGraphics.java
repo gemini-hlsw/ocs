@@ -1,10 +1,3 @@
-/*
- * Copyright 2000 Association for Universities for Research in Astronomy, Inc.,
- * Observatory Control System, Gemini Telescopes Project.
- *
- * $Id: DivaImageGraphics.java 4414 2004-02-03 16:21:36Z brighton $
- */
-
 package jsky.image.graphics;
 
 import java.awt.AlphaComposite;
@@ -36,7 +29,6 @@ import diva.canvas.interactor.BoundsManipulator;
 import diva.canvas.interactor.DragInteractor;
 import diva.canvas.interactor.Interactor;
 import diva.canvas.interactor.PathManipulator;
-import diva.canvas.interactor.SelectionEvent;
 import diva.canvas.interactor.SelectionInteractor;
 import diva.canvas.interactor.SelectionListener;
 import diva.canvas.interactor.SelectionModel;
@@ -49,7 +41,6 @@ import jsky.graphics.SelectedAreaListener;
 import jsky.image.gui.DivaGraphicsImageDisplay;
 import jsky.image.gui.GraphicsImageDisplay;
 import jsky.util.gui.BasicWindowMonitor;
-
 
 /**
  * Implements drawing for image overlays. It is based on the Diva package.
@@ -183,31 +174,30 @@ public class DivaImageGraphics implements CanvasGraphics {
      * Make the object that listens for changes in the figure selection and
      * notifies the target figure listeners.
      */
+    @SuppressWarnings("rawtypes")
     private void _makeSelectionListener() {
-        _selectionListener = new SelectionListener() {
-
-            public void selectionChanged(SelectionEvent e) {
-                try {
-                    Iterator it = e.getSelectionAdditions();
-                    while (it.hasNext()) {
-                        Object o = it.next();
-                        if (o instanceof CanvasFigure) {
-                            ((CanvasFigure) o).fireCanvasFigureEvent(CanvasFigure.SELECTED);
-                        }
+        _selectionListener = e -> {
+            try {
+                Iterator it = e.getSelectionAdditions();
+                while (it.hasNext()) {
+                    Object o = it.next();
+                    if (o instanceof CanvasFigure) {
+                        ((CanvasFigure) o).fireCanvasFigureEvent(CanvasFigure.SELECTED);
                     }
-                } catch (Exception e2) {
-                    // XXX got a null reference in Diva during testing...
                 }
-                try {
-                    Iterator it = e.getSelectionRemovals();
-                    while (it.hasNext()) {
-                        Object o = it.next();
-                        if (o instanceof CanvasFigure) {
-                            ((CanvasFigure) o).fireCanvasFigureEvent(CanvasFigure.DESELECTED);
-                        }
+            } catch (Exception e2) {
+                // XXX got a null reference in Diva during testing...
+            }
+            try {
+                Iterator it = e.getSelectionRemovals();
+                while (it.hasNext()) {
+                    Object o = it.next();
+                    if (o instanceof CanvasFigure) {
+                        ((CanvasFigure) o).fireCanvasFigureEvent(CanvasFigure.DESELECTED);
                     }
-                } catch (Exception e3) {
                 }
+            } catch (Exception e3) {
+                // Ignore
             }
         };
     }
@@ -472,8 +462,7 @@ public class DivaImageGraphics implements CanvasGraphics {
      */
     public CanvasFigure makeLabel(Point2D.Double pos, String text, Paint color,
                                   Font font, Interactor interactor) {
-        ImageLabel imageLabel = new ImageLabel(text, pos, color, font, interactor);
-        return imageLabel;
+        return new ImageLabel(text, pos, color, font, interactor);
     }
 
     /**
@@ -485,8 +474,7 @@ public class DivaImageGraphics implements CanvasGraphics {
      * @param font the font to use for the label
      */
     public CanvasFigure makeLabel(Point2D.Double pos, String text, Paint color, Font font) {
-        ImageLabel imageLabel = new ImageLabel(text, pos, color, font, null);
-        return imageLabel;
+        return new ImageLabel(text, pos, color, font, null);
     }
 
 
@@ -578,6 +566,7 @@ public class DivaImageGraphics implements CanvasGraphics {
     /**
      * Transform all graphics according to the given AffineTransform object.
      */
+    @SuppressWarnings("rawtypes")
     public void transform(AffineTransform trans) {
         // iterate over all figures in the foreground layer
         Iterator it = _figureLayer.figures();
@@ -725,12 +714,7 @@ public class DivaImageGraphics implements CanvasGraphics {
         //g.transform(AffineTransform.getRotateInstance(angle * Math.PI/180., 150, 150));
 
         // test the area selection once
-        g.selectArea(new SelectedAreaListener() {
-
-            public void setSelectedArea(Rectangle2D r) {
-                System.out.println("Selected area: " + r);
-            }
-        });
+        g.selectArea(r -> System.out.println("Selected area: " + r));
 
         frame.getContentPane().add(imageDisplay, BorderLayout.CENTER);
         frame.pack();

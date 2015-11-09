@@ -1,10 +1,3 @@
-/*
- * Copyright 2000 Association for Universities for Research in Astronomy, Inc.,
- * Observatory Control System, Gemini Telescopes Project.
- *
- * $Id: NavigatorFITSTable.java 6525 2005-08-03 21:13:39Z brighton $
- */
-
 package jsky.navigator;
 
 import java.io.IOException;
@@ -26,7 +19,6 @@ import nom.tam.fits.FitsException;
 import nom.tam.fits.FitsFactory;
 import nom.tam.fits.Header;
 import nom.tam.fits.TableHDU;
-
 
 /**
  * Used to read and write FITS binary tables and store catalog query results as
@@ -69,7 +61,7 @@ public class NavigatorFITSTable extends SkycatTable {
         int nrows = hdu.getNRows();
 
         dataVector = new Vector(nrows);
-        columnIdentifiers = new Vector(ncols);
+        columnIdentifiers = new Vector<>(ncols);
 
         Vector columnClasses = new Vector(ncols, 1);
         FieldDesc[] fields = new FieldDescAdapter[ncols];
@@ -428,7 +420,7 @@ public class NavigatorFITSTable extends SkycatTable {
         for (int colIndex = 0; colIndex < ncols; colIndex++) {
             row[colIndex] = "-";
         }
-        data[newRowIndex++] = row;
+        data[newRowIndex] = row;
 
         BinaryTable binTable = new BinaryTable(data);
         FitsFactory.setUseAsciiTables(false);
@@ -441,6 +433,8 @@ public class NavigatorFITSTable extends SkycatTable {
     }
 
 
+    // CQ The methods below have been commented out to remove the class Navigator
+    // These are not in use anymore but eventually may need to be resurrected
     /**
      * Check for any catalog tables saved as FITS binary tables and
      * plot the ones found on the image. Each catalog table should
@@ -451,7 +445,7 @@ public class NavigatorFITSTable extends SkycatTable {
      * @param fits object to use for FITS I/O
      * @param navigator window object managing the table display and plotting
      */
-    public static void plotTables(String filename, Fits fits, Navigator navigator) throws FitsException, IOException {
+    /*public static void plotTables(String filename, Fits fits, Navigator navigator) throws FitsException, IOException {
         BinaryTableHDU hdu = findBinaryTableHDU(fits, CATINFO);
         if (hdu == null)
             return;
@@ -461,7 +455,7 @@ public class NavigatorFITSTable extends SkycatTable {
             String name = (String) row[0];
             plotTable(filename, fits, navigator, name);
         }
-    }
+    }*/
 
     /**
      * Plot the named binary table on the image.
@@ -471,11 +465,11 @@ public class NavigatorFITSTable extends SkycatTable {
      * @param navigator window object managing the table display and plotting
      * @param name the name of the table to plot (FITS keyword EXTNAME)
      */
-    protected static void plotTable(String filename, Fits fits, Navigator navigator, String name) throws FitsException, IOException {
+    /*protected static void plotTable(String filename, Fits fits, Navigator navigator, String name) throws FitsException, IOException {
         NavigatorFITSTable table = NavigatorFITSTable.findTable(filename, fits, name);
         if (table != null)
             navigator.setQueryResult(table.getCatalog());
-    }
+    }*/
 
     /**
      * Find the named FITS binary table, make a NavigatorFITSTable out of it and return it.
@@ -484,11 +478,11 @@ public class NavigatorFITSTable extends SkycatTable {
      * @param fits object to use for FITS I/O
      * @param name the name of the table to plot (FITS keyword EXTNAME)
      */
-    protected static NavigatorFITSTable findTable(String filename, Fits fits, String name) throws FitsException, IOException {
+    /*protected static NavigatorFITSTable findTable(String filename, Fits fits, String name) throws FitsException, IOException {
         BinaryTableHDU hdu = findBinaryTableHDU(fits, name);
         if (hdu == null) {
             return null;
         }
         return new NavigatorFITSTable(filename, fits, hdu);
-    }
+    }*/
 }

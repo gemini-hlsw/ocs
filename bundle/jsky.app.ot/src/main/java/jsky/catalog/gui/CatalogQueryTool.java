@@ -1,13 +1,3 @@
-/*
- * ESO Archive
- *
- * $Id: CatalogQueryTool.java 7122 2006-06-06 16:38:01Z anunez $
- *
- * who             when        what
- * --------------  ----------  ----------------------------------------
- * Allan Brighton  1999/06/02  Created
- */
-
 package jsky.catalog.gui;
 
 import java.awt.FlowLayout;
@@ -44,12 +34,12 @@ public class CatalogQueryTool extends JPanel
     /**
      * The catalog to use
      */
-    private Catalog _catalog;
+    private final Catalog _catalog;
 
     /**
      * Panel containing labels and entries for searching the catalog
      */
-    private CatalogQueryPanel _catalogQueryPanel;
+    private final CatalogQueryPanel _catalogQueryPanel;
 
     /**
      * Used to display query results
@@ -68,12 +58,11 @@ public class CatalogQueryTool extends JPanel
      * @param catalog    The catalog to use.
      * @param scrollable set to true to allow scrolling of the query panel
      */
-    public CatalogQueryTool(Catalog catalog, boolean scrollable) {
+    private CatalogQueryTool(Catalog catalog, boolean scrollable) {
         _catalog = catalog;
         JLabel _catalogTitleLabel = makeCatalogPanelLabel(catalog);
         _catalogQueryPanel = makeCatalogQueryPanel(catalog);
         _catalogQueryPanel.addActionListener(this);
-
 
         GridBagUtil layout = new GridBagUtil(this);
         layout.add(_catalogTitleLabel, 0, 0, 1, 1, 0.0, 0.0,
@@ -140,7 +129,6 @@ public class CatalogQueryTool extends JPanel
         return new CatalogQueryPanel(catalog, 2);
     }
 
-
     /**
      * Make and return the button panel
      */
@@ -172,31 +160,6 @@ public class CatalogQueryTool extends JPanel
         return buttonPanel;
     }
 
-
-    /**
-     * Set the object used to diplay the result of a query
-     */
-    public void setQueryResultDisplay(QueryResultDisplay q) {
-        _queryResultDisplay = q;
-    }
-
-    /**
-     * Return the object used to diplay the result of a query
-     */
-    public QueryResultDisplay getQueryResultDisplay() {
-        return _queryResultDisplay;
-    }
-
-    /**
-     * Stop the background loading thread if it is running
-     */
-    public void interrupt() {
-        if (_worker != null) {
-            _worker.interrupt();
-        }
-        _worker = null;
-    }
-
     /**
      * Return the name of this component (based on the data being displayed)
      */
@@ -206,14 +169,12 @@ public class CatalogQueryTool extends JPanel
         return _I18N.getString("catalog");
     }
 
-
     /**
      * Return the catalog for this object
      */
     public Catalog getCatalog() {
         return _catalog;
     }
-
 
     /**
      * Return the panel containing labels and entries for searching the catalog
@@ -222,15 +183,14 @@ public class CatalogQueryTool extends JPanel
         return _catalogQueryPanel;
     }
 
-
     /**
      * Called when return is typed in one of the query panel text fields
      * to start the query.
      */
+    @Override
     public void actionPerformed(ActionEvent ev) {
         search();
     }
-
 
     /**
      * Query the catalog based on the settings in the query panel and display
@@ -243,6 +203,7 @@ public class CatalogQueryTool extends JPanel
         // run in a separate thread, so the user can monitor progress and cancel it, if needed
         _worker = new SwingWorker() {
 
+            @Override
             public Object construct() {
                 try {
                     QueryArgs queryArgs = _catalogQueryPanel.getQueryArgs();
@@ -252,6 +213,7 @@ public class CatalogQueryTool extends JPanel
                 }
             }
 
+            @Override
             public void finished() {
                 _worker = null;
                 Object o = getValue();
@@ -289,7 +251,6 @@ public class CatalogQueryTool extends JPanel
         _worker.start();
     }
 
-
     /**
      * Display the given query result.
      */
@@ -297,10 +258,10 @@ public class CatalogQueryTool extends JPanel
         _queryResultDisplay.setQueryResult(queryResult);
     }
 
-
     /**
      * Store the current settings in a serializable object and return the object.
      */
+    @Override
     public Object storeSettings() {
         return _catalogQueryPanel.storeSettings();
     }

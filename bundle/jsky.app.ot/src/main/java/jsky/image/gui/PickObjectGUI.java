@@ -14,7 +14,6 @@ import java.util.ResourceBundle;
  * @author Allan Brighton
  * @version 1.0
  */
-
 public class PickObjectGUI extends JPanel {
 
     static ResourceBundle res = ResourceBundle.getBundle("jsky.image.gui.i18n.jb");
@@ -75,47 +74,22 @@ public class PickObjectGUI extends JPanel {
         this.setLayout(gridBagLayout1);
         pickButton.setToolTipText(res.getString("Select_object_in"));
         pickButton.setText(res.getString("Pick"));
-        pickButton.addActionListener(new java.awt.event.ActionListener() {
-
-            public void actionPerformed(ActionEvent e) {
-                pickObject(e);
-            }
-        });
+        pickButton.addActionListener(PickObjectGUI.this::pickObject);
         addButton.setToolTipText(res.getString("Add_a_row_to_the"));
         addButton.setText(res.getString("Add"));
-        addButton.addActionListener(new java.awt.event.ActionListener() {
-
-            public void actionPerformed(ActionEvent e) {
-                add(e);
-            }
-        });
+        addButton.addActionListener(PickObjectGUI.this::add);
 
         closeButton.setToolTipText(res.getString("Close_this_window"));
         closeButton.setText(res.getString("Close"));
-        closeButton.addActionListener(new java.awt.event.ActionListener() {
-
-            public void actionPerformed(ActionEvent e) {
-                close(e);
-            }
-        });
+        closeButton.addActionListener(PickObjectGUI.this::close);
         infoPanel.setBorder(titledBorder2);
         infoPanel.setLayout(gridBagLayout3);
         topPanel.setBorder(titledBorder3);
         topPanel.setLayout(gridBagLayout2);
         zoomInButton.setToolTipText(res.getString("Zoom_in"));
-        zoomInButton.addActionListener(new java.awt.event.ActionListener() {
-
-            public void actionPerformed(ActionEvent e) {
-                zoomIn(e);
-            }
-        });
+        zoomInButton.addActionListener(PickObjectGUI.this::zoomIn);
         zoomOutButton.setToolTipText(res.getString("Zoom_out"));
-        zoomOutButton.addActionListener(new java.awt.event.ActionListener() {
-
-            public void actionPerformed(ActionEvent e) {
-                zoomOut(e);
-            }
-        });
+        zoomOutButton.addActionListener(PickObjectGUI.this::zoomOut);
         magLabel.setBorder(BorderFactory.createEtchedBorder());
         magLabel.setHorizontalAlignment(SwingConstants.CENTER);
         magLabel.setText("10x");

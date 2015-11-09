@@ -1,17 +1,17 @@
 package jsky.app.ot.tpe;
 
-import edu.gemini.catalog.api.MagnitudeConstraints;
 import edu.gemini.catalog.ui.QueryResultsFrame;
-import edu.gemini.shared.cat.CatalogSearchParameters;
-import edu.gemini.shared.cat.ICatalogAlgorithm;
-import edu.gemini.catalog.api.MagnitudeLimits;
-import edu.gemini.catalog.api.RadiusLimits;
+import edu.gemini.catalog.ui.tpe.CatalogImageDisplay;
+import edu.gemini.shared.skyobject.SkyObject;
+import edu.gemini.shared.skyobject.coords.HmsDegCoordinates;
 import edu.gemini.shared.util.immutable.*;
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality;
 import edu.gemini.spModel.obs.SchedulingBlock;
 import edu.gemini.spModel.obs.context.ObsContext;
 import edu.gemini.spModel.obscomp.SPInstObsComp;
 import edu.gemini.spModel.target.*;
+import edu.gemini.spModel.target.env.TargetEnvironment;
+import edu.gemini.spModel.target.obsComp.TargetObsComp;
 import edu.gemini.spModel.target.offset.OffsetPosBase;
 import edu.gemini.spModel.target.system.ITarget;
 import edu.gemini.spModel.util.Angle;
@@ -20,14 +20,11 @@ import jsky.app.ot.util.OtColor;
 import jsky.app.ot.util.PolygonD;
 import jsky.app.ot.util.Resources;
 import jsky.app.ot.util.ScreenMath;
-import jsky.catalog.gui.TablePlotter;
 import jsky.coords.CoordinateConverter;
-import jsky.coords.Coordinates;
-import jsky.catalog.gui.NamedCoordinates;
 import jsky.coords.WorldCoords;
-import jsky.navigator.Navigator;
-import jsky.navigator.NavigatorImageDisplay;
-import jsky.navigator.NavigatorManager;
+import jsky.image.gui.PickObject;
+import jsky.image.gui.PickObjectStatistics;
+import jsky.navigator.NavigatorPane;
 import jsky.util.gui.DialogUtil;
 
 import javax.swing.AbstractAction;
@@ -48,7 +45,7 @@ import java.util.logging.Logger;
 /**
  * This class is concerned with drawing targets, WFS etc., on an image.
  */
-public class TpeImageWidget extends NavigatorImageDisplay implements MouseInputListener,
+public class TpeImageWidget extends CatalogImageDisplay implements MouseInputListener,
         TelescopePosWatcher, PropertyChangeListener {
 
     private static final Logger LOG = Logger.getLogger(TpeImageWidget.class.getName());
@@ -82,9 +79,6 @@ public class TpeImageWidget extends NavigatorImageDisplay implements MouseInputL
     // Base pos not visible
     private boolean _baseOutOfView = false;
 
-    // The default algorithm to use for catalog searches
-    private ICatalogAlgorithm _algorithm;
-
     // Dialog for GeMS manual guide star selection
     private GemsGuideStarSearchDialog _gemsGuideStarSearchDialog;
 
@@ -95,17 +89,8 @@ public class TpeImageWidget extends NavigatorImageDisplay implements MouseInputL
             putValue(Action.SHORT_DESCRIPTION, "Get sky image using default parameters");
         }
 
-        public void actionPerformed(ActionEvent evt) {
-            try {
-                TelescopePosEditor tpe = TpeManager.open();
-                tpe.getSkyImage();
-            } catch (Exception e) {
-                DialogUtil.error(e);
-            } finally {
-                //make sure the navigator is closed properly
-                final Navigator nav = NavigatorManager.get();
-                nav.close();
-            }
+        @Override public void actionPerformed(ActionEvent evt) {
+            loadSkyImage();
         }
     };
 
@@ -117,7 +102,7 @@ public class TpeImageWidget extends NavigatorImageDisplay implements MouseInputL
             putValue(Action.SHORT_DESCRIPTION, "Query a guide star catalog, review candidates, and select");
         }
 
-        public void actionPerformed(ActionEvent evt) {
+        @Override public void actionPerformed(ActionEvent evt) {
             try {
                 manualGuideStarSearch();
             } catch (Exception e) {
@@ -133,8 +118,8 @@ public class TpeImageWidget extends NavigatorImageDisplay implements MouseInputL
      *
      * @param parent the parent frame or internal frame
      */
-    public TpeImageWidget(Component parent) {
-        super(parent);
+    public TpeImageWidget(final Component parent) {
+        super(parent, new NavigatorPane());
 
         addMouseListener(this);
         addMouseMotionListener(this);
@@ -144,6 +129,7 @@ public class TpeImageWidget extends NavigatorImageDisplay implements MouseInputL
     /**
      * Return true if this is the main application window (enables exit menu item)
      */
+    @Override
     public boolean isMainWindow() {
         return false; // grumble
     }
@@ -155,7 +141,8 @@ public class TpeImageWidget extends NavigatorImageDisplay implements MouseInputL
      * @param g      the graphics context
      * @param region if not null, the region to paint
      */
-    public synchronized void paintLayer(Graphics2D g, Rectangle2D region) {
+    @Override
+    public synchronized void paintLayer(final Graphics2D g, final Rectangle2D region) {
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
 
@@ -192,7 +179,7 @@ public class TpeImageWidget extends NavigatorImageDisplay implements MouseInputL
     private static final ImageIcon WARNING_ICON = Resources.getIcon("warn_tsk.gif");
     private static final ImageIcon INFO_ICON = Resources.getIcon("info_tsk.gif");
 
-    private void displayMessages(java.util.List<TpeMessage> messages, Graphics2D g) {
+    private void displayMessages(final java.util.List<TpeMessage> messages, final Graphics2D g) {
         Collections.sort(messages);
         Collections.reverse(messages);
 
@@ -234,7 +221,7 @@ public class TpeImageWidget extends NavigatorImageDisplay implements MouseInputL
         g.setFont(origFont);
     }
 
-    private Color getMessageColor(TpeMessage msg) {
+    private Color getMessageColor(final TpeMessage msg) {
         switch (msg.getMessageType()) {
             case INFO:
                 return OtColor.LIGHT_GREY;
@@ -246,7 +233,7 @@ public class TpeImageWidget extends NavigatorImageDisplay implements MouseInputL
         }
     }
 
-    private ImageIcon getMessageIcon(TpeMessage msg) {
+    private ImageIcon getMessageIcon(final TpeMessage msg) {
         switch (msg.getMessageType()) {
             case INFO:
                 return INFO_ICON;
@@ -258,7 +245,7 @@ public class TpeImageWidget extends NavigatorImageDisplay implements MouseInputL
         }
     }
 
-    public synchronized void addMouseObserver(TpeMouseObserver obs) {
+    public synchronized void addMouseObserver(final TpeMouseObserver obs) {
         if (!_mouseObs.contains(obs)) {
             _mouseObs.addElement(obs);
         }
@@ -267,8 +254,8 @@ public class TpeImageWidget extends NavigatorImageDisplay implements MouseInputL
     /**
      * Tell all the mouse observers about the new mouse event.
      */
-    private void _notifyMouseObs(MouseEvent e) {
-        TpeMouseEvent tme = new TpeMouseEvent(e);
+    private void _notifyMouseObs(final MouseEvent e) {
+        final TpeMouseEvent tme = new TpeMouseEvent(e);
         try {
             _initMouseEvent(e, tme);
         } catch (Exception ex) {
@@ -289,44 +276,54 @@ public class TpeImageWidget extends NavigatorImageDisplay implements MouseInputL
         }
     }
 
-    public synchronized void addViewObserver(TpeViewObserver obs) {
+    public synchronized void addViewObserver(final TpeViewObserver obs) {
         if (!_viewObs.contains(obs)) {
             _viewObs.addElement(obs);
         }
     }
 
-    public synchronized void deleteViewObserver(TpeViewObserver obs) {
+    public synchronized void deleteViewObserver(final TpeViewObserver obs) {
         _viewObs.removeElement(obs);
+    }
+
+    @Override
+    public void loadSkyImage() {
+        try {
+            TelescopePosEditor tpe = TpeManager.open();
+            tpe.getSkyImage(_ctx);
+        } catch (Exception e) {
+            DialogUtil.error(e);
+        }
     }
 
 
     // -- These implement the MouseInputListener interface --
 
-    public void mousePressed(MouseEvent e) {
+    @Override public void mousePressed(final MouseEvent e) {
         _notifyMouseObs(e);
     }
 
-    public void mouseDragged(MouseEvent e) {
+    @Override public void mouseDragged(final MouseEvent e) {
         _notifyMouseObs(e);
     }
 
-    public void mouseReleased(MouseEvent e) {
+    @Override public void mouseReleased(final MouseEvent e) {
         _notifyMouseObs(e);
     }
 
-    public void mouseMoved(MouseEvent e) {
+    @Override public void mouseMoved(final MouseEvent e) {
         _notifyMouseObs(e);
     }
 
-    public void mouseClicked(MouseEvent e) {
+    @Override public void mouseClicked(final MouseEvent e) {
         _notifyMouseObs(e);
     }
 
-    public void mouseEntered(MouseEvent e) {
+    @Override public void mouseEntered(final MouseEvent e) {
         _notifyMouseObs(e);
     }
 
-    public void mouseExited(MouseEvent e) {
+    @Override public void mouseExited(final MouseEvent e) {
         _notifyMouseObs(e);
     }
 
@@ -339,13 +336,13 @@ public class TpeImageWidget extends NavigatorImageDisplay implements MouseInputL
     }
 
 
-    public synchronized void addInfoObserver(TpeImageInfoObserver obs) {
+    public synchronized void addInfoObserver(final TpeImageInfoObserver obs) {
         if (!_infoObs.contains(obs)) {
             _infoObs.addElement(obs);
         }
     }
 
-    public synchronized void deleteInfoObserver(TpeImageInfoObserver obs) {
+    public synchronized void deleteInfoObserver(final TpeImageInfoObserver obs) {
         _infoObs.removeElement(obs);
     }
 
@@ -374,6 +371,7 @@ public class TpeImageWidget extends NavigatorImageDisplay implements MouseInputL
     /**
      * called when the image has changed to update the display
      */
+    @Override
     public synchronized void updateImage() {
         _imgInfoValid = false;
         super.updateImage();
@@ -390,8 +388,8 @@ public class TpeImageWidget extends NavigatorImageDisplay implements MouseInputL
     /**
      * Convert the given user coordinates location to world coordinates.
      */
-    public WorldCoords userToWorldCoords(double x, double y) {
-        Point2D.Double p = new Point2D.Double(x, y);
+    public WorldCoords userToWorldCoords(final double x, final double y) {
+        final Point2D.Double p = new Point2D.Double(x, y);
         getCoordinateConverter().userToWorldCoords(p, false);
         return new WorldCoords(p.x, p.y, getCoordinateConverter().getEquinox());
     }
@@ -399,9 +397,9 @@ public class TpeImageWidget extends NavigatorImageDisplay implements MouseInputL
     /**
      * Convert the given world coordinate position to a user coordinates position.
      */
-    public Point2D.Double worldToUserCoords(WorldCoords pos) {
-        double[] raDec = pos.getRaDec(getCoordinateConverter().getEquinox());
-        Point2D.Double p = new Point2D.Double(raDec[0], raDec[1]);
+    public Point2D.Double worldToUserCoords(final WorldCoords pos) {
+        final double[] raDec = pos.getRaDec(getCoordinateConverter().getEquinox());
+        final Point2D.Double p = new Point2D.Double(raDec[0], raDec[1]);
         getCoordinateConverter().worldToUserCoords(p, false);
         return p;
     }
@@ -409,9 +407,9 @@ public class TpeImageWidget extends NavigatorImageDisplay implements MouseInputL
     /**
      * Convert the given world coordinate position to screen coordinates.
      */
-    public Point2D.Double worldToScreenCoords(WorldCoords pos) {
-        double[] raDec = pos.getRaDec(getCoordinateConverter().getEquinox());
-        Point2D.Double p = new Point2D.Double(raDec[0], raDec[1]);
+    public Point2D.Double worldToScreenCoords(final WorldCoords pos) {
+        final double[] raDec = pos.getRaDec(getCoordinateConverter().getEquinox());
+        final Point2D.Double p = new Point2D.Double(raDec[0], raDec[1]);
         getCoordinateConverter().worldToScreenCoords(p, false);
         return p;
     }
@@ -419,34 +417,34 @@ public class TpeImageWidget extends NavigatorImageDisplay implements MouseInputL
     /**
      * Convert an offset from the base position (in arcsec) to a screen coordinates location.
      */
-    public Point2D.Double offsetToScreenCoords(double xOff, double yOff) {
+    public Point2D.Double offsetToScreenCoords(final double xOff, final double yOff) {
         if (!_checkImgInfo()) {
             return null;
         }
 
-        double ppa = _imgInfo.getPixelsPerArcsec();
-        Point2D.Double baseScreenPos = _imgInfo.getBaseScreenPos();
-        double xPix = baseScreenPos.x - (xOff * ppa * _imgInfo.flipRA());
-        double yPix = baseScreenPos.y - (yOff * ppa);
+        final double ppa = _imgInfo.getPixelsPerArcsec();
+        final Point2D.Double baseScreenPos = _imgInfo.getBaseScreenPos();
+        final double xPix = baseScreenPos.x - (xOff * ppa * _imgInfo.flipRA());
+        final double yPix = baseScreenPos.y - (yOff * ppa);
         return skyRotate(xPix, yPix);
     }
 
     /**
      * Convert the given screen coordinates to an offset from the base position (in arcsec).
      */
-    public double[] screenCoordsToOffset(double x, double y) {
+    public double[] screenCoordsToOffset(final double x, final double y) {
         if (!_checkImgInfo()) {
             return null;
         }
 
         // un-rotate
-        double angle = -_imgInfo.getCorrectedPosAngleRadians();
-        Point2D.Double baseScreenPos = _imgInfo.getBaseScreenPos();
-        double xBase = baseScreenPos.x;
-        double yBase = baseScreenPos.y;
-        Point2D.Double pd = ScreenMath.rotateRadians(x, y, angle, xBase, yBase);
+        final double angle = -_imgInfo.getCorrectedPosAngleRadians();
+        final Point2D.Double baseScreenPos = _imgInfo.getBaseScreenPos();
+        final double xBase = baseScreenPos.x;
+        final double yBase = baseScreenPos.y;
+        final Point2D.Double pd = ScreenMath.rotateRadians(x, y, angle, xBase, yBase);
 
-        double ppa = _imgInfo.getPixelsPerArcsec();
+        final double ppa = _imgInfo.getPixelsPerArcsec();
         double xOff = (baseScreenPos.x - pd.x) / (ppa * _imgInfo.flipRA());
         double yOff = (baseScreenPos.y - pd.y) / ppa;
         xOff = Math.round(xOff * 1000.0) / 1000.0;
@@ -457,22 +455,19 @@ public class TpeImageWidget extends NavigatorImageDisplay implements MouseInputL
     /**
      * Convert a TaggedPos to a screen coordinates.
      */
-    public Point2D.Double taggedPosToScreenCoords(WatchablePos tp) {
-//        if (!tp.isValid()) return null;
-
+    public Point2D.Double taggedPosToScreenCoords(final WatchablePos tp) {
         if (tp instanceof OffsetPosBase) {
-            double x = ((OffsetPosBase) tp).getXaxis();
-            double y = ((OffsetPosBase) tp).getYaxis();
+            final double x = ((OffsetPosBase) tp).getXaxis();
+            final double y = ((OffsetPosBase) tp).getYaxis();
             return offsetToScreenCoords(x, y);
         }
 
         // Get the equinox assumed by the coordinate conversion methods (depends on current image)
-        //double equinox = getCoordinateConverter().getEquinox();
-        ITarget target = ((SPTarget) tp).getTarget();
+        final ITarget target = ((SPTarget) tp).getTarget();
         final Option<Long> when = _ctx.schedulingBlockJava().map(SchedulingBlock::start);
-        double x = target.getRaDegrees(when).getOrElse(0.0);
-        double y = target.getDecDegrees(when).getOrElse(0.0);
-        WorldCoords pos = new WorldCoords(x, y, 2000.);
+        final double x = target.getRaDegrees(when).getOrElse(0.0);
+        final double y = target.getDecDegrees(when).getOrElse(0.0);
+        final WorldCoords pos = new WorldCoords(x, y, 2000.);
         return worldToScreenCoords(pos);
     }
 
@@ -481,15 +476,15 @@ public class TpeImageWidget extends NavigatorImageDisplay implements MouseInputL
      * Rotate a point through the current position angle, relative to
      * the base position, correcting for sky rotation.
      */
-    public Point2D.Double skyRotate(double x, double y) {
+    public Point2D.Double skyRotate(final double x, final double y) {
         if (!_checkImgInfo()) {
             return null;
         }
 
-        double angle = _imgInfo.getCorrectedPosAngleRadians();
-        Point2D.Double baseScreenPos = _imgInfo.getBaseScreenPos();
-        double xBase = baseScreenPos.x;
-        double yBase = baseScreenPos.y;
+        final double angle = _imgInfo.getCorrectedPosAngleRadians();
+        final Point2D.Double baseScreenPos = _imgInfo.getBaseScreenPos();
+        final double xBase = baseScreenPos.x;
+        final double yBase = baseScreenPos.y;
 
         return ScreenMath.rotateRadians(x, y, angle, xBase, yBase);
     }
@@ -498,45 +493,41 @@ public class TpeImageWidget extends NavigatorImageDisplay implements MouseInputL
      * Rotate a polygon through the current position angle, relative to
      * the base position, correcting for sky rotation.
      */
-    public void skyRotate(PolygonD p) {
+    public void skyRotate(final PolygonD p) {
         if (!_checkImgInfo()) {
             return;
         }
 
-        double angle = _imgInfo.getCorrectedPosAngleRadians();
-        Point2D.Double baseScreenPos = _imgInfo.getBaseScreenPos();
-        double xBase = baseScreenPos.x;
-        double yBase = baseScreenPos.y;
+        final double angle = _imgInfo.getCorrectedPosAngleRadians();
+        final Point2D.Double baseScreenPos = _imgInfo.getBaseScreenPos();
+        final double xBase = baseScreenPos.x;
+        final double yBase = baseScreenPos.y;
 
         ScreenMath.rotateRadians(p, angle, xBase, yBase);
     }
 
 
-    protected void _initMouseEvent(MouseEvent evt, TpeMouseEvent tme) {
+    protected void _initMouseEvent(final MouseEvent evt, final TpeMouseEvent tme) {
         if (!_checkImgInfo()) return;
 
-        Point2D.Double mp = new Point2D.Double(evt.getX(), evt.getY());
+        final Point2D.Double mp = new Point2D.Double(evt.getX(), evt.getY());
 
         // snap to catalog symbol position, if user clicked on one
-        NamedCoordinates namedCoords = null; // object id and coordinates of a catalog symbol
-        if (evt.getID() == MouseEvent.MOUSE_CLICKED) {
-            namedCoords = getCatalogPosition(mp);
-        }
-
-        Point2D.Double p = new Point2D.Double(mp.x, mp.y);
+        final Point2D.Double p = new Point2D.Double(mp.x, mp.y);
         getCoordinateConverter().screenToUserCoords(p, false);
-        if (namedCoords == null) {
-            tme.pos = userToWorldCoords(p.x, p.y);
-        } else {
-            Coordinates coords = namedCoords.getCoordinates();
-            if (coords instanceof WorldCoords) {
-                tme.pos = (WorldCoords) coords;
-                tme.name = namedCoords.getName();
-                tme.setBrightness(namedCoords.getBrightness());
-                tme.setSkyObject(namedCoords.getSkyObject());
-            } else {
+        if (evt.getID() == MouseEvent.MOUSE_CLICKED) {
+            Option<SkyObject> skyObject = getCatalogPosition(mp);
+            skyObject.forEach(s -> {
+                final HmsDegCoordinates coords = s.getCoordinates().toHmsDeg(0);
+                tme.pos = new WorldCoords(coords.getRa().toDegrees().getMagnitude(), coords.getDec().toDegrees().getMagnitude());
+                tme.name = s.getName();
+            });
+            tme.setSkyObject(skyObject);
+            if (!skyObject.isDefined()) {
                 tme.pos = userToWorldCoords(p.x, p.y);
             }
+        } else {
+            tme.pos = userToWorldCoords(p.x, p.y);
         }
 
         tme.id = evt.getID();
@@ -546,7 +537,7 @@ public class TpeImageWidget extends NavigatorImageDisplay implements MouseInputL
         tme.xWidget = (int) Math.round(mp.x);
         tme.yWidget = (int) Math.round(mp.y);
 
-        double[] d = screenCoordsToOffset(mp.x, mp.y);
+        final double[] d = screenCoordsToOffset(mp.x, mp.y);
         tme.xOffset = d[0];
         tme.yOffset = d[1];
     }
@@ -557,7 +548,8 @@ public class TpeImageWidget extends NavigatorImageDisplay implements MouseInputL
      *
      * @param before set to true before the image is loaded and false afterwards
      */
-    protected void newImage(boolean before) {
+    @Override
+    public void newImage(final boolean before) {
         super.newImage(before);
         if (!before) {
             try {
@@ -578,21 +570,14 @@ public class TpeImageWidget extends NavigatorImageDisplay implements MouseInputL
      * point to the center of the symbol and return the world coordinates position
      * from the catalog table row. Otherwise, return null and do nothing.
      */
-    protected NamedCoordinates getCatalogPosition(Point2D.Double p) {
-        Navigator nav = getNavigator();
-        if (nav == null) {
-            return null;
-        }
-        TablePlotter plotter = nav.getPlotter();
-        if (plotter == null) {
-            return null;
-        }
-        return plotter.getCatalogPosition(p);
+    private Option<SkyObject> getCatalogPosition(final Point2D.Double p) {
+        return plotter().getCatalogObjectAt(p);
     }
 
     /**
      * Clear the image display.
      */
+    @Override
     public void clear() {
         LOG.finest("TpeImageWidget.clear()");
 
@@ -611,6 +596,7 @@ public class TpeImageWidget extends NavigatorImageDisplay implements MouseInputL
      * generating new blank images when plotting tables, since the blank
      * images are generated by OT code).
      */
+    @Override
     public boolean isClear() {
         return false;
     }
@@ -618,17 +604,15 @@ public class TpeImageWidget extends NavigatorImageDisplay implements MouseInputL
     /**
      * Display the FITS table at the given HDU index.
      */
-    public void displayFITSTable(int hdu) {
+    @Override
+    public void displayFITSTable(final int hdu) {
         super.displayFITSTable(hdu);
-        // make the navigator window pop up in this case
-        super.showNavigatorFrame(null);
     }
-
 
     /**
      * Reset internal state to view a new observation and position table.
      */
-    public void reset(TpeContext ctx) {
+    public void reset(final TpeContext ctx) {
         LOG.finest("TpeImageWidget.reset()");
 
         if (_ctx.instrument().isDefined()) {
@@ -654,7 +638,7 @@ public class TpeImageWidget extends NavigatorImageDisplay implements MouseInputL
         }
 
         if (_ctx.targets().base().isDefined()) {
-            SPTarget base = _ctx.targets().base().get();
+            final SPTarget base = _ctx.targets().base().get();
             base.addWatcher(this);
             basePosUpdate(base.getTarget());
         }
@@ -662,11 +646,10 @@ public class TpeImageWidget extends NavigatorImageDisplay implements MouseInputL
         repaint();
     }
 
-
     /**
      * Add the given image feature to the list.
      */
-    public void addFeature(TpeImageFeature tif) {
+    public void addFeature(final TpeImageFeature tif) {
         if (featureAdded(tif)) {
             return;
         }
@@ -681,14 +664,14 @@ public class TpeImageWidget extends NavigatorImageDisplay implements MouseInputL
     /**
      * Return true if the given image feature has been added already.
      */
-    public final boolean featureAdded(TpeImageFeature tif) {
+    public final boolean featureAdded(final TpeImageFeature tif) {
         return _featureList.contains(tif);
     }
 
     /**
      * Delete the given image feature from the list.
      */
-    public void deleteFeature(TpeImageFeature tif) {
+    public void deleteFeature(final TpeImageFeature tif) {
         if (!featureAdded(tif)) {
             return;
         }
@@ -701,7 +684,7 @@ public class TpeImageWidget extends NavigatorImageDisplay implements MouseInputL
     /**
      * Called when a mouse drag operation starts.
      */
-    public void dragStart(TpeMouseEvent evt) {
+    public void dragStart(final TpeMouseEvent evt) {
         if ((!_imgInfoValid)) return;
 
         Object dragObject = null;
@@ -736,7 +719,7 @@ public class TpeImageWidget extends NavigatorImageDisplay implements MouseInputL
     /**
      * Called while dragging the mouse over the image.
      */
-    public void drag(TpeMouseEvent evt) {
+    public void drag(final TpeMouseEvent evt) {
         if (_dragFeature == null) {
             return;
         }
@@ -746,7 +729,7 @@ public class TpeImageWidget extends NavigatorImageDisplay implements MouseInputL
     /**
      * Called at the end of a mouse drag operation.
      */
-    public void dragStop(TpeMouseEvent evt) {
+    public void dragStop(final TpeMouseEvent evt) {
         if (_dragFeature == null) {
             return;   // Weren't dragging anything
         }
@@ -755,31 +738,27 @@ public class TpeImageWidget extends NavigatorImageDisplay implements MouseInputL
         _dragFeature = null;
 
         // Let anybody who wants to know about this drag know
-        Option<ObsContext> ctxOpt = getObsContext();
+        final Option<ObsContext> ctxOpt = getObsContext();
         if (!ctxOpt.isEmpty()) {
-            ObsContext ctx = ctxOpt.getValue();
-            for (TpeImageFeature tif : _featureList) {
-                if (tif instanceof TpeDragSensitive) {
-                    ((TpeDragSensitive) tif).handleDragStopped(ctx);
-                }
-            }
+            final ObsContext ctx = ctxOpt.getValue();
+            _featureList.stream().filter(tif -> tif instanceof TpeDragSensitive).forEach(tif ->
+                ((TpeDragSensitive) tif).handleDragStopped(ctx)
+            );
         }
 
     }
 
-    public void action(TpeMouseEvent tme) {
+    public void action(final TpeMouseEvent tme) {
         if (!_imgInfoValid) return;
-        for (TpeImageFeature tif : _featureList) {
-            if (tif instanceof TpeActionableFeature) {
-                ((TpeActionableFeature) tif).action(tme);
-            }
-        }
+        _featureList.stream().filter(tif -> tif instanceof TpeActionableFeature).forEach(tif ->
+            ((TpeActionableFeature) tif).action(tme)
+        );
     }
 
     /**
      * Create an image feature item, based on the given arguments, and return true if successful.
      */
-    public void create(TpeMouseEvent tme, TpeCreateableItem item) {
+    public void create(final TpeMouseEvent tme, final TpeCreateableItem item) {
         if (!_imgInfoValid) return;
         item.create(tme, _imgInfo);
     }
@@ -787,7 +766,7 @@ public class TpeImageWidget extends NavigatorImageDisplay implements MouseInputL
     /**
      * Erase the image feature at the mouse position.
      */
-    public boolean erase(TpeMouseEvent tme) {
+    public boolean erase(final TpeMouseEvent tme) {
         if (!_imgInfoValid) return false;
 
         for (final TpeImageFeature tif : _featureList) {
@@ -804,22 +783,24 @@ public class TpeImageWidget extends NavigatorImageDisplay implements MouseInputL
     /**
      * Implements the PropertyChangeListener interface
      */
-    public void propertyChange(PropertyChangeEvent evt) {
+    @Override
+    public void propertyChange(final PropertyChangeEvent evt) {
         _checkPosAngle();
         repaint();
     }
 
-    public void telescopePosUpdate(WatchablePos tp) {
+    @Override
+    public void telescopePosUpdate(final WatchablePos tp) {
         basePosUpdate(((SPTarget) tp).getTarget());
     }
 
     /**
      * The Base position has been updated.
      */
-    public void basePosUpdate(ITarget target) {
+    public void basePosUpdate(final ITarget target) {
         final Option<Long> when = _ctx.schedulingBlockJava().map(SchedulingBlock::start);
-        double x = target.getRaDegrees(when).getOrElse(0.0);
-        double y = target.getDecDegrees(when).getOrElse(0.0);
+        final double x = target.getRaDegrees(when).getOrElse(0.0);
+        final double y = target.getDecDegrees(when).getOrElse(0.0);
         WorldCoords pos = new WorldCoords(x, y, 2000.);
         setBasePos(pos);
         repaint();
@@ -837,7 +818,7 @@ public class TpeImageWidget extends NavigatorImageDisplay implements MouseInputL
      * if not present)
      */
     public Option<ObsContext> getMinimalObsContext() {
-        Option<ObsContext> fullContext = getObsContext();
+        final Option<ObsContext> fullContext = getObsContext();
         // check if "full" context is available
         if (fullContext.isEmpty()) {
             // UX-1012: no -> try to return a context that contains the information needed for drawing only
@@ -883,7 +864,7 @@ public class TpeImageWidget extends NavigatorImageDisplay implements MouseInputL
     /**
      * Set the position angle in degrees.
      */
-    public boolean setPosAngle(double posAngle) {
+    public boolean setPosAngle(final double posAngle) {
         final SPInstObsComp inst = _ctx.instrument().orNull();
         final Double d = _ctx.instrument().posAngleOrZero();
         if ((d != posAngle) && (inst != null)) {
@@ -914,10 +895,10 @@ public class TpeImageWidget extends NavigatorImageDisplay implements MouseInputL
     /**
      * Set the base position to the given coordinates (overrides parent class version).
      */
-    public boolean setBasePos(WorldCoords pos) {
+    public boolean setBasePos(final WorldCoords pos) {
         _basePos = pos;
 
-        CoordinateConverter cc = getCoordinateConverter();
+        final CoordinateConverter cc = getCoordinateConverter();
         if (!cc.isWCS()) {
             _imgInfoValid = false;
             return false;
@@ -931,13 +912,13 @@ public class TpeImageWidget extends NavigatorImageDisplay implements MouseInputL
         }
 
         // Get two points, one at the base and one an arcmin north of the base
-        Point2D.Double temp1 = worldToUserCoords(pos);
-        Point2D.Double temp2 = worldToUserCoords(
+        final Point2D.Double temp1 = worldToUserCoords(pos);
+        final Point2D.Double temp2 = worldToUserCoords(
                 new WorldCoords(pos.getRaDeg(), pos.getDecDeg() + 0.01666667));
 
         // Get the difference in x,y and the distance between the two points
-        double xdPrime = temp2.x - temp1.x;
-        double ydPrime = temp2.y - temp1.y;
+        final double xdPrime = temp2.x - temp1.x;
+        final double ydPrime = temp2.y - temp1.y;
 
         // Measure theta from the y axis:  ie. a cartesian coordinate system
         // rotated by 90 degrees.
@@ -958,19 +939,19 @@ public class TpeImageWidget extends NavigatorImageDisplay implements MouseInputL
         cc.userToScreenCoords(temp2, false);
 
         // Get the difference in x,y pixels between the two points
-        double xiPrime = temp2.x - temp1.x;
-        double yiPrime = temp2.y - temp1.y;
-        double r = Math.sqrt(xiPrime * xiPrime + yiPrime * yiPrime);
+        final double xiPrime = temp2.x - temp1.x;
+        final double yiPrime = temp2.y - temp1.y;
+        final double r = Math.sqrt(xiPrime * xiPrime + yiPrime * yiPrime);
 
         // Divide the 1 min distance by 60 arcsec to get pixels/perArcsec
         _imgInfo.setPixelsPerArcsec(r / 60.0);
 
         // Find out where WCS East is, so that we know which way the position angle increases
-        double angle = Math.PI / 2.;
-        Point2D.Double baseScreenPos = _imgInfo.getBaseScreenPos();
-        double xBase = baseScreenPos.x;
-        double yBase = baseScreenPos.y;
-        Point2D.Double east = ScreenMath.rotateRadians(temp2.x, temp2.y, angle, xBase,
+        final double angle = Math.PI / 2.;
+        final Point2D.Double baseScreenPos = _imgInfo.getBaseScreenPos();
+        final double xBase = baseScreenPos.x;
+        final double yBase = baseScreenPos.y;
+        final Point2D.Double east = ScreenMath.rotateRadians(temp2.x, temp2.y, angle, xBase,
                 yBase);
 
         try {
@@ -1024,68 +1005,30 @@ public class TpeImageWidget extends NavigatorImageDisplay implements MouseInputL
         return super.getBasePos();
     }
 
-    /**
-     * Return the default min and max search radius to use for catalog searches, in arcmin.
-     *
-     * @param centerPos    the center position for the radius
-     * @param useImageSize if true, use the image size to get the search radius, otherwise use the
-     *                     current WFS algorithm, if set
-     * @return radius values
-     */
-    public RadiusLimits getDefaultSearchRadius(WorldCoords centerPos, boolean useImageSize) {
-        if (useImageSize) {
-            // If the user pressed the "Set from Image" button, then stop using the algorithm
-            _algorithm = null;
-        } else if (_algorithm != null) {
-            CatalogSearchParameters params = _algorithm.getParameters();
-            return params.getRadiusLimits();
-        }
-        return super.getDefaultSearchRadius(centerPos, useImageSize);
-    }
-
-    /**
-     * Return the default min and max magnitude values to use for catalog searches, or null
-     * if there is no default.
-     *
-     * @return mag values and band
-     */
-    public MagnitudeLimits getDefaultSearchMagRange() {
-        if (_algorithm != null) {
-            CatalogSearchParameters params = _algorithm.getParameters();
-            _algorithm = null; // XXX hack to reset to default after guide star search
-
-            SPSiteQuality sq = _ctx.siteQuality().orNull();
-            if (sq != null) {
-                final SPSiteQuality.Conditions conditions = sq.conditions();
-                return MagnitudeConstraints.conditionsAdjustmentForJava(params.getMagnitudeLimits(), conditions);
-            }
-            return params.getMagnitudeLimits();
-        }
-        return super.getDefaultSearchMagRange();
-    }
-
-    /**
-     * Set the default catalog algorithm to use for catalog searches
-     */
-    public void setCatalogAlgorithm(ICatalogAlgorithm algorithm) {
-        _algorithm = algorithm;
-    }
-
     // manual guide star selection dialog
     public void manualGuideStarSearch() {
         if (GuideStarSupport.hasGemsComponent(_ctx)) {
             showGemsGuideStarSearchDialog();
         } else {
-            QueryResultsFrame.instance().showOn(_ctx.obsContext());
+            openCatalogNavigator();
         }
+    }
+
+    public void openCatalogNavigator() {
+        QueryResultsFrame.instance().showOn(this, _ctx);
     }
 
     private void showGemsGuideStarSearchDialog() {
         if (_gemsGuideStarSearchDialog == null) {
-            _gemsGuideStarSearchDialog = new GemsGuideStarSearchDialog();
+            _gemsGuideStarSearchDialog = new GemsGuideStarSearchDialog(this);
         } else {
             _gemsGuideStarSearchDialog.reset();
             _gemsGuideStarSearchDialog.setVisible(true);
+        }
+        try {
+            _gemsGuideStarSearchDialog.query();
+        } catch (Exception e) {
+            DialogUtil.error(e);
         }
     }
 
@@ -1098,6 +1041,29 @@ public class TpeImageWidget extends NavigatorImageDisplay implements MouseInputL
 
     public AbstractAction getSkyImageAction() {
         return _skyImageAction;
+    }
+
+    @Override
+    public void pickedObject() {
+        super.pickedObject();
+        PickObject pickObject = getPickObjectPanel();
+        PickObjectStatistics stats = pickObject.getStatistics();
+        if (stats != null) {
+            WorldCoords coords = stats.getCenterPos();
+            TargetObsComp obsComp = getContext().targets().orNull();
+
+            if (obsComp != null && !pickObject.isUpdate()) {
+                SPTarget newTarget = new SPTarget(coords.getRaDeg(), coords.getDecDeg());
+                if (stats.getRow().size() > 0 && stats.getRow().elementAt(0) != null) {
+                    newTarget.setName(stats.getRow().elementAt(0).toString());
+                }
+                TargetEnvironment te = obsComp.getTargetEnvironment().setUserTargets(obsComp.getTargetEnvironment().getUserTargets().append(newTarget));
+                obsComp.setTargetEnvironment(te);
+                getContext().targets().commit();
+            }
+        } else {
+            DialogUtil.error("No object was selected");
+        }
     }
 }
 

@@ -6,7 +6,6 @@ import java.util.Date
 import javax.swing.BorderFactory
 import javax.swing.border.EtchedBorder
 
-import edu.gemini.mask.Resources
 import edu.gemini.pot.sp.ISPObsComponent
 import edu.gemini.skycalc.Angle
 import edu.gemini.spModel.core.Site

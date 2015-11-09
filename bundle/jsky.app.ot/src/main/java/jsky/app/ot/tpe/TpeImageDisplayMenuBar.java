@@ -6,9 +6,9 @@ import java.util.List;
 
 import javax.swing.*;
 
+import edu.gemini.catalog.ui.tpe.CatalogImageDisplayMenuBar;
 import jsky.app.ot.util.BasicPropertyList;
-import jsky.navigator.NavigatorImageDisplayMenuBar;
-import jsky.navigator.NavigatorImageDisplayToolBar;
+import jsky.image.gui.ImageDisplayToolBar;
 
 /**
  * Extends the image display menubar by adding Gemini position editor features.
@@ -16,7 +16,7 @@ import jsky.navigator.NavigatorImageDisplayToolBar;
  * @version $Revision: 38003 $
  * @author Allan Brighton
  */
-public class TpeImageDisplayMenuBar extends NavigatorImageDisplayMenuBar {
+public class TpeImageDisplayMenuBar extends CatalogImageDisplayMenuBar {
 
     // Popup menu displayed over image
     private JPopupMenu _popupMenu;
@@ -27,7 +27,7 @@ public class TpeImageDisplayMenuBar extends NavigatorImageDisplayMenuBar {
      * @param imageDisplay the target image display
      * @param toolBar the toolbar associated with this menubar (shares some actions)
      */
-    public TpeImageDisplayMenuBar(TpeImageWidget imageDisplay, NavigatorImageDisplayToolBar toolBar) {
+    public TpeImageDisplayMenuBar(TpeImageWidget imageDisplay, ImageDisplayToolBar toolBar) {
         super(imageDisplay, toolBar);
 
         // Add the guide star search item to the end of the catalog menu
@@ -103,7 +103,7 @@ public class TpeImageDisplayMenuBar extends NavigatorImageDisplayMenuBar {
     }
 
     /**
-     * Create and return a menu for the given name and choice propery.
+     * Create and return a menu for the given name and choice property.
      */
     private JMenu _createChoicePropertyMenu(final BasicPropertyList.ChoiceProperty cp,
                                             final BasicPropertyList pl) {

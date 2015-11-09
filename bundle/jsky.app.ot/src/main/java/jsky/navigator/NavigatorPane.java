@@ -1,19 +1,8 @@
-/*
- * $Id: NavigatorPane.java 4414 2004-02-03 16:21:36Z brighton $
- *
- * Copyright (c) 1998-2000 The Regents of the University of California.
- * All rights reserved. See the file LICENSE for details.
- */
-
 package jsky.navigator;
 
 import diva.canvas.GraphicsPane;
 import diva.canvas.CanvasLayer;
 import jsky.catalog.gui.TablePlotter;
-
-import java.awt.Graphics2D;
-import java.awt.geom.Rectangle2D;
-
 
 /**
  * A Diva GraphicsPane with a layer added for plotting catalog symbols.
@@ -21,14 +10,13 @@ import java.awt.geom.Rectangle2D;
 public class NavigatorPane extends GraphicsPane {
 
     /** A layer on which to draw catalog symbols */
-    private SymbolLayer _symbolLayer;
+    private final SymbolLayer _symbolLayer = new SymbolLayer();
 
     /**
      * Initialize a new NavigatorPane, which is a Diva GraphicsPane with a layer added
      * for catalog symbols.
      */
     public NavigatorPane() {
-        _symbolLayer = new SymbolLayer();
         _initNewLayer(_symbolLayer);
         _rebuildLayerArray();
     }
@@ -43,21 +31,22 @@ public class NavigatorPane extends GraphicsPane {
     /** Set the object used to draw catalog symbols */
     public void setPlotter(TablePlotter plotter) {
         _symbolLayer.setPlotter(plotter);
+
     }
 
     /**
      * Rebuild the array of layers for use by iterators.
      * Override superclass to include the new layer.
      */
+    @Override
     protected void _rebuildLayerArray() {
-        _layers = new CanvasLayer[6];
-        int cursor = 0;
-        _layers[cursor++] = _foregroundEventLayer;
-        _layers[cursor++] = _symbolLayer;
-        _layers[cursor++] = _overlayLayer;
-        _layers[cursor++] = _foregroundLayer;
-        _layers[cursor++] = _backgroundLayer;
-        _layers[cursor++] = _backgroundEventLayer;
+        _layers = new CanvasLayer[] {
+                _foregroundEventLayer,
+                _symbolLayer,
+                _overlayLayer,
+                _foregroundLayer,
+                _backgroundLayer,
+                _backgroundEventLayer};
     }
 }
 

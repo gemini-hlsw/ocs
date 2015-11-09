@@ -1,10 +1,3 @@
-/*
- * Copyright 2000 Association for Universities for Research in Astronomy, Inc.,
- * Observatory Control System, Gemini Telescopes Project.
- *
- * $Id: SkycatConfigEntry.java 47126 2012-08-01 15:40:43Z swalker $
- */
-
 package jsky.catalog.skycat;
 
 import java.io.File;

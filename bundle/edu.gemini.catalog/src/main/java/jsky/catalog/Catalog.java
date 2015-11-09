@@ -32,8 +32,11 @@ public interface Catalog extends QueryResult, Cloneable {
     /** Value returned by getType() for local catalog files. */
     String LOCAL = "local";
 
-    /** Propery to store user preferences prefences */
+    /** Property to store user preferences preferences */
     String SKY_USER_CATALOG = "jsky.catalog.sky";
+
+    /** Default image server */
+    String DEFAULT_IMAGE_SERVER = "Digitized Sky at Gemini North";
 
     /** Implementation of the clone method (makes a shallow copy). */
     @SuppressWarnings({"CloneDoesntDeclareCloneNotSupportedException"})

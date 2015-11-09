@@ -2,7 +2,6 @@ package jsky.catalog.gui;
 
 import java.awt.event.ActionListener;
 import java.awt.event.ItemListener;
-import java.util.Hashtable;
 
 import javax.swing.ButtonGroup;
 import javax.swing.JCheckBoxMenuItem;
@@ -23,6 +22,7 @@ import jsky.util.gui.GenericToolBar;
 /**
  * Implements a menubar for a CatalogNavigator.
  */
+@Deprecated
 public class CatalogNavigatorMenuBar extends JMenuBar {
 
     // Used to access internationalized strings (see i18n/gui*.proprties)
@@ -32,7 +32,6 @@ public class CatalogNavigatorMenuBar extends JMenuBar {
     private final String _className = getClass().getName();
     private final String _viewToolBarPrefName = _className + ".ShowToolBar";
     private final String _showToolBarAsPrefName = _className + ".ShowToolBarAs";
-    private final String _showCatalogTreePrefName = _className + ".CatalogTree";
 
     // Target panel
     private CatalogNavigator _navigator;
@@ -52,12 +51,6 @@ public class CatalogNavigatorMenuBar extends JMenuBar {
     // The current catalog window (for the Go/history menu, which may be shared by
     // multiple windows)
     private static CatalogNavigator _currentCatalogNavigator;
-
-    // Controls the visibility of the catalog tree
-    private JCheckBoxMenuItem _showCatalogTreeMenuItem;
-
-    // Used to show/hide the catalog tree for certain query components
-    private static Hashtable<Class<?>, Boolean> _catalogTreeIsVisibleMap = new Hashtable<>();
 
 
     /**
@@ -92,9 +85,6 @@ public class CatalogNavigatorMenuBar extends JMenuBar {
         _navigator.addChangeListener(e -> {
             // keep the Go history menu up to date
             _updateGoMenu();
-
-            // Check if the catalog tree should be visible with this catalog
-            updateCatalogTree();
         });
 
         // Keep the query menu up to date
@@ -121,27 +111,6 @@ public class CatalogNavigatorMenuBar extends JMenuBar {
     }
 
 
-    /** Update the catalog tree after a change in the component displayed in the catalog navigator */
-    protected void updateCatalogTree() {
-        // Check if the catalog tree should be visible with this catalog
-        JComponent component = _navigator.getQueryComponent();
-        if (component == null)
-            return;
-        Boolean showTreeObj = _catalogTreeIsVisibleMap.get(component.getClass());
-        boolean showTree;
-        if (showTreeObj != null) {
-            showTree = showTreeObj;
-        } else {
-            showTree = Preferences.get(_showCatalogTreePrefName, true);
-        }
-
-        if (showTree != _showCatalogTreeMenuItem.isSelected()) {
-            _showCatalogTreeMenuItem.setSelected(showTree);
-            _showCatalogTree(showTree, false);
-        }
-    }
-
-
     /**
      * Return the current catalog window (for the Go/history menu, which may be shared by
      * multiple catalog windows);
@@ -149,29 +118,6 @@ public class CatalogNavigatorMenuBar extends JMenuBar {
     public static CatalogNavigator getCurrentCatalogNavigator() {
         return _currentCatalogNavigator;
     }
-
-    /**
-     * Set the current catalog window (for the Go/history menu, which may be shared by
-     * multiple catalog windows);
-     */
-    public static void setCurrentCatalogNavigator(CatalogNavigator navigator) {
-        _currentCatalogNavigator = navigator;
-    }
-
-
-    /**
-     * Control the visibility of the catalog tree component, based on the given component class type.
-     * Whenever a query component with the given class type is displayed in the
-     * catalog navigator window, the tree visibility will be set to the given argument
-     * (and later restored when a different catalog or result is displayed).
-     * <p>
-     * This method is included in this class, so that the state of the associated checkbox
-     * menu item can be kept up to date.
-     */
-    public static void setCatalogTreeIsVisible(Class<?> c, boolean visible) {
-        _catalogTreeIsVisibleMap.put(c, visible);
-    }
-
 
     /**
      * Create the File menu.
@@ -222,7 +168,6 @@ public class CatalogNavigatorMenuBar extends JMenuBar {
         return menuItem;
     }
 
-
     /**
      * Create the View menu.
      */
@@ -230,7 +175,6 @@ public class CatalogNavigatorMenuBar extends JMenuBar {
         JMenu menu = new JMenu(_I18N.getString("view"));
         menu.add(createViewToolBarMenuItem());
         menu.add(createViewShowToolBarAsMenu());
-        menu.add(createViewCatalogTreeMenu());
 
         return menu;
     }
@@ -315,46 +259,12 @@ public class CatalogNavigatorMenuBar extends JMenuBar {
             try {
                 ar[Integer.parseInt(pref)].setSelected(true);
             } catch (Exception e) {
+                // Ignore
             }
         }
 
         return menu;
     }
-
-    /** Create the View => "Catalog Tree" menu item. */
-    protected JCheckBoxMenuItem createViewCatalogTreeMenu() {
-        _showCatalogTreeMenuItem = new JCheckBoxMenuItem(_I18N.getString("catalogTree"));
-
-        _showCatalogTreeMenuItem.addActionListener(e -> _showCatalogTree(_showCatalogTreeMenuItem.isSelected(), true));
-
-        // check for a previous preference setting
-        boolean showTree = Preferences.get(_showCatalogTreePrefName, true);
-        _showCatalogTreeMenuItem.setSelected(showTree);
-        _showCatalogTree(showTree, false);
-
-        return _showCatalogTreeMenuItem;
-    }
-
-    // Set the visible state of the catalog tree subwindow
-    private void _showCatalogTree(boolean show, boolean setPrefs) {
-        if (show) {
-            _navigator.getCatalogTree().setVisible(true);
-            _navigator.getQuerySplitPane().resetToPreferredSizes();
-            _navigator.getQuerySplitPane().setDividerSize(10);
-        } else {
-            _navigator.getCatalogTree().setVisible(false);
-            _navigator.getQuerySplitPane().setDividerSize(0);
-        }
-
-        if (setPrefs) {
-            Preferences.set(_showCatalogTreePrefName, show);
-        } else {
-            _showCatalogTreeMenuItem.setSelected(show);
-        }
-
-    }
-
-
     /**
      * Create the Go menu.
      */

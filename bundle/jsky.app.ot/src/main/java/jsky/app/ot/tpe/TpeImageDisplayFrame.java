@@ -1,11 +1,6 @@
 package jsky.app.ot.tpe;
 
-import jsky.image.gui.DivaMainImageDisplay;
-import jsky.image.gui.ImageDisplayControl;
-import jsky.image.gui.ImageDisplayMenuBar;
-import jsky.image.gui.ImageDisplayToolBar;
-import jsky.navigator.NavigatorImageDisplayFrame;
-import jsky.navigator.NavigatorImageDisplayToolBar;
+import jsky.image.gui.*;
 
 import java.awt.*;
 
@@ -15,38 +10,10 @@ import java.awt.*;
  * @version $Revision: 21408 $
  * @author Allan Brighton
  */
-public class TpeImageDisplayFrame extends NavigatorImageDisplayFrame {
+public class TpeImageDisplayFrame extends ImageDisplayControlFrame {
 
     /** Tool bar with Tpe specific commands */
-    TpeToolBar tpeToolBar;
-
-    /**
-     * Create a top level window containing an ImageDisplayControl panel.
-     *
-     * @param size   the size (width, height) to use for the pan and zoom windows.
-     */
-    public TpeImageDisplayFrame(int size) {
-        super(size);
-    }
-
-    /**
-     * Create a top level window containing an ImageDisplayControl panel
-     * with the default settings.
-     */
-    public TpeImageDisplayFrame() {
-        super();
-    }
-
-
-    /**
-     * Create a top level window containing an ImageDisplayControl panel.
-     *
-     * @param size   the size (width, height) to use for the pan and zoom windows.
-     * @param fileOrUrl The file name or URL of an image to display.
-     */
-    public TpeImageDisplayFrame(int size, String fileOrUrl) {
-        super(size, fileOrUrl);
-    }
+    private TpeToolBar tpeToolBar;
 
     /**
      * Create a top level window containing an ImageDisplayControl panel.
@@ -58,9 +25,9 @@ public class TpeImageDisplayFrame extends NavigatorImageDisplayFrame {
     }
 
     /** Make and return the menubar */
+    @Override
     protected ImageDisplayMenuBar makeMenuBar(DivaMainImageDisplay mainImageDisplay, ImageDisplayToolBar toolBar) {
-        return new TpeImageDisplayMenuBar((TpeImageWidget) mainImageDisplay,
-                                          (NavigatorImageDisplayToolBar) toolBar);
+        return new TpeImageDisplayMenuBar((TpeImageWidget) mainImageDisplay, toolBar);
     }
 
     /**
@@ -68,18 +35,19 @@ public class TpeImageDisplayFrame extends NavigatorImageDisplayFrame {
      *
      * @param size the size (width, height) to use for the pan and zoom windows.
      */
+    @Override
     protected ImageDisplayControl makeImageDisplayControl(int size) {
         return new TpeImageDisplayControl(this, size);
     }
 
     /** Make and return the toolbar */
+    @Override
     protected ImageDisplayToolBar makeToolBar(DivaMainImageDisplay mainImageDisplay) {
         // add the Tpe tool bar while we are at it...
         addTpeToolBar();
 
         // Dragging can cause problems with two tool bars...
-        ImageDisplayToolBar toolBar =
-                new TpeImageDisplayToolBar((TpeImageWidget)mainImageDisplay);
+        ImageDisplayToolBar toolBar = new TpeImageDisplayToolBar((TpeImageWidget)mainImageDisplay);
         toolBar.setFloatable(false);
         return toolBar;
     }
@@ -91,7 +59,7 @@ public class TpeImageDisplayFrame extends NavigatorImageDisplayFrame {
     }
 
     /** Return the Tool bar with OT/TPE specific commands */
-    TpeToolBar getTpeToolBar() {
+    protected TpeToolBar getTpeToolBar() {
         return tpeToolBar;
     }
 

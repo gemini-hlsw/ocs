@@ -42,7 +42,7 @@ public class LabeledImageFigure extends LabelWrapper implements CanvasFigure {
     protected CanvasFigureListenerManager listenerManager;
 
     /** Optional linked list of slave figures, which should be moved with this figure. */
-    protected LinkedList slaves;
+    protected final LinkedList<CanvasFigure> slaves = new LinkedList<>();
 
     /**
      * Create an image figure with the given shape, fill, outline and line width.
@@ -129,8 +129,6 @@ public class LabeledImageFigure extends LabelWrapper implements CanvasFigure {
 
     /** Add a slave figure. When this figure is moved, the slaves will also move. */
     public void addSlave(CanvasFigure fig) {
-        if (slaves == null)
-            slaves = new LinkedList();
         slaves.add(fig);
     }
 

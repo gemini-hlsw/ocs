@@ -232,10 +232,6 @@ public class MeasureBand extends DragInteractor {
         if (!isEnabled() || !dragFilter.accept(event)) {
             return;
         }
-        double x = event.getLayerX();
-        double y = event.getLayerY();
-        double w;
-        double h;
 
         // Figure out the coordinates of the rubber band
         figureLayer.repaint(mband.getBounds());

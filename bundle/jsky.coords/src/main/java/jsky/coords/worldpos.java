@@ -154,8 +154,8 @@ public class worldpos {
         double rot;		/* Optical axis rotation (deg)  (N through E) */
         int itype = wcs.pcode;
 
-        double xpos = 0.0;
-        double ypos = 0.0;
+        double xpos;
+        double ypos;
 
         /* Set local projection parameters */
         xref = wcs.xref;
@@ -164,7 +164,7 @@ public class worldpos {
         yrefpix = wcs.yrefpix;
         xinc = wcs.xinc;
         yinc = wcs.yinc;
-        rot = wcs.degrad(wcs.rot);
+        rot = WCSTransform.degrad(wcs.rot);
         cosr = Math.cos(rot);
         sinr = Math.sin(rot);
 
@@ -204,18 +204,18 @@ public class worldpos {
 
         /* Convert to radians  */
         if (wcs.coorflip > 0) {
-            dec0 = wcs.degrad(xref);
-            ra0 = wcs.degrad(yref);
+            dec0 = WCSTransform.degrad(xref);
+            ra0 = WCSTransform.degrad(yref);
             tx = dx;
             dx = dy;
             dy = tx;
         } else {
-            ra0 = wcs.degrad(xref);
-            dec0 = wcs.degrad(yref);
+            ra0 = WCSTransform.degrad(xref);
+            dec0 = WCSTransform.degrad(yref);
         }
 
-        l = wcs.degrad(dx);
-        m = wcs.degrad(dy);
+        l = WCSTransform.degrad(dx);
+        m = WCSTransform.degrad(dy);
         sins = l * l + m * m;
         decout = 0.0;
         raout = 0.0;
@@ -290,13 +290,13 @@ public class worldpos {
             case 6:   /* -MER mercator*/
                 dt = yinc * cosr + xinc * sinr;
                 if (dt == 0.0) dt = 1.0;
-                dy = wcs.degrad(yref / 2.0 + 45.0);
+                dy = WCSTransform.degrad(yref / 2.0 + 45.0);
                 dx = dy + dt / 2.0 * cond2r;
                 dy = Math.log(Math.tan(dy));
                 dx = Math.log(Math.tan(dx));
-                geo2 = wcs.degrad(dt) / (dx - dy);
+                geo2 = WCSTransform.degrad(dt) / (dx - dy);
                 geo3 = geo2 * dy;
-                geo1 = Math.cos(wcs.degrad(yref));
+                geo1 = Math.cos(WCSTransform.degrad(yref));
                 if (geo1 <= 0.0) geo1 = 1.0;
                 rat = l / geo1 + ra0;
                 if (Math.abs(rat - ra0) > twopi) return null; /* added 10/13/94 DCW/EWG */
@@ -309,15 +309,15 @@ public class worldpos {
             case 7:   /* -AIT Aitoff*/
                 dt = yinc * cosr + xinc * sinr;
                 if (dt == 0.0) dt = 1.0;
-                dt = wcs.degrad(dt);
-                dy = wcs.degrad(yref);
+                dt = WCSTransform.degrad(dt);
+                dy = WCSTransform.degrad(yref);
                 dx = Math.sin(dy + dt) / Math.sqrt((1.0 + Math.cos(dy + dt)) / 2.0) -
                         Math.sin(dy) / Math.sqrt((1.0 + Math.cos(dy)) / 2.0);
                 if (dx == 0.0) dx = 1.0;
                 geo2 = dt / dx;
                 dt = xinc * cosr - yinc * sinr;
                 if (dt == 0.0) dt = 1.0;
-                dt = wcs.degrad(dt);
+                dt = WCSTransform.degrad(dt);
                 dx = 2.0 * Math.cos(dy) * Math.sin(dt / 2.0);
                 if (dx == 0.0) dx = 1.0;
                 geo1 = dt * Math.sqrt((1.0 + Math.cos(dy) * Math.cos(dt / 2.0)) / 2.0) / dx;
@@ -366,8 +366,8 @@ public class worldpos {
         if (raout < 0.0) raout += twopi; /* added by DCW 10/12/94 */
 
         /*  correct units back to degrees  */
-        xpos = wcs.raddeg(raout);
-        ypos = wcs.raddeg(decout);
+        xpos = WCSTransform.raddeg(raout);
+        ypos = WCSTransform.raddeg(decout);
 
         return new Point2D.Double(xpos, ypos);
     }  /* End of worldpos */
@@ -386,7 +386,7 @@ public class worldpos {
     /* x pixel number  (RA or long without rotation) */
     /* y pixel number  (dec or lat without rotation) */
     public static Point2D.Double getPixels(double xpos, double ypos, WCSTransform wcs) {
-        double dx = 0.0, dy = 0.0, ra0 = 0.0, dec0 = 0.0, ra = 0.0, dec = 0.0, coss = 0.0, sins = 0.0, dt = 0.0, da = 0.0, dd = 0.0, sint = 0.0;
+        double dx, dy, ra0 = 0.0, dec0 = 0.0, ra = 0.0, dec = 0.0, coss = 0.0, sins = 0.0, dt, da, dd, sint = 0.0;
         double l = 0.0, m = 0.0, geo1, geo2, geo3, sinr, cosr, tx;
         double cond2r = 1.745329252e-2, deps = 1.0e-5, twopi = 6.28318530717959;
 
@@ -408,7 +408,7 @@ public class worldpos {
         yrefpix = wcs.yrefpix;
         xinc = wcs.xinc;
         yinc = wcs.yinc;
-        rot = wcs.degrad(wcs.rot);
+        rot = WCSTransform.degrad(wcs.rot);
         cosr = Math.cos(rot);
         sinr = Math.sin(rot);
 
@@ -418,12 +418,12 @@ public class worldpos {
         /* Nonlinear position */
         if (itype > 0 && itype < 9) {
             if (wcs.coorflip > 0) {
-                dec0 = wcs.degrad(xref);
-                ra0 = wcs.degrad(yref);
+                dec0 = WCSTransform.degrad(xref);
+                ra0 = WCSTransform.degrad(yref);
                 dt = xpos - yref;
             } else {
-                ra0 = wcs.degrad(xref);
-                dec0 = wcs.degrad(yref);
+                ra0 = WCSTransform.degrad(xref);
+                dec0 = WCSTransform.degrad(yref);
                 dt = xpos - xref;
             }
 
@@ -434,8 +434,8 @@ public class worldpos {
                 /* NOTE: changing input argument xpos is OK (call-by-value in C!) */
             }
 
-            ra = wcs.degrad(xpos);
-            dec = wcs.degrad(ypos);
+            ra = WCSTransform.degrad(xpos);
+            dec = WCSTransform.degrad(ypos);
 
             /* Compute direction cosine */
             coss = Math.cos(dec);
@@ -489,13 +489,13 @@ public class worldpos {
             case 6:   /* -MER mercator*/
                 dt = yinc * cosr + xinc * sinr;
                 if (dt == 0.0) dt = 1.0;
-                dy = wcs.degrad(yref / 2.0 + 45.0);
+                dy = WCSTransform.degrad(yref / 2.0 + 45.0);
                 dx = dy + dt / 2.0 * cond2r;
                 dy = Math.log(Math.tan(dy));
                 dx = Math.log(Math.tan(dx));
-                geo2 = wcs.degrad(dt) / (dx - dy);
+                geo2 = WCSTransform.degrad(dt) / (dx - dy);
                 geo3 = geo2 * dy;
-                geo1 = Math.cos(wcs.degrad(yref));
+                geo1 = Math.cos(WCSTransform.degrad(yref));
                 if (geo1 <= 0.0) geo1 = 1.0;
                 dt = ra - ra0;
                 l = geo1 * dt;
@@ -512,15 +512,15 @@ public class worldpos {
                 if (Math.abs(da) > twopi / 4.0) return null;
                 dt = yinc * cosr + xinc * sinr;
                 if (dt == 0.0) dt = 1.0;
-                dt = wcs.degrad(dt);
-                dy = wcs.degrad(yref);
+                dt = WCSTransform.degrad(dt);
+                dy = WCSTransform.degrad(yref);
                 dx = Math.sin(dy + dt) / Math.sqrt((1.0 + Math.cos(dy + dt)) / 2.0) -
                         Math.sin(dy) / Math.sqrt((1.0 + Math.cos(dy)) / 2.0);
                 if (dx == 0.0) dx = 1.0;
                 geo2 = dt / dx;
                 dt = xinc * cosr - yinc * sinr;
                 if (dt == 0.0) dt = 1.0;
-                dt = wcs.degrad(dt);
+                dt = WCSTransform.degrad(dt);
                 dx = 2.0 * Math.cos(dy) * Math.sin(dt / 2.0);
                 if (dx == 0.0) dx = 1.0;
                 geo1 = dt * Math.sqrt((1.0 + Math.cos(dy) * Math.cos(dt / 2.0)) / 2.0) / dx;
@@ -544,8 +544,8 @@ public class worldpos {
 
         /* Back to degrees  */
         if (itype > 0 && itype < 9) {
-            dx = wcs.raddeg(l);
-            dy = wcs.raddeg(m);
+            dx = WCSTransform.raddeg(l);
+            dy = WCSTransform.raddeg(m);
         }
         /* For linear or pixel projection */
         else {

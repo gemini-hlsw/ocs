@@ -1,7 +1,3 @@
-//
-// $
-//
-
 package jsky.app.ot.gemini.obscat;
 
 import edu.gemini.shared.gui.ThinBorder;
@@ -13,8 +9,6 @@ import jsky.app.ot.util.OtColor;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 /**
  * The UI for editing browser preferences.
@@ -26,7 +20,7 @@ public enum BrowserPreferencesPanel implements PreferencePanel {
 
     private final JPanel panel = new JPanel(new GridBagLayout());
 
-    private BrowserPreferencesPanel() {
+    BrowserPreferencesPanel() {
 
         final JPanel optPanel = new JPanel(new GridBagLayout());
         optPanel.setBorder(BorderFactory.createEmptyBorder(20, 10, 20, 10));
@@ -34,11 +28,7 @@ public enum BrowserPreferencesPanel implements PreferencePanel {
         final JCheckBox showObsolete = new JCheckBox("Show obsolete options") {{
             setSelected(BrowserPreferences.fetch().showObsoleteOptions());
             setFocusable(false);
-            addActionListener(new ActionListener() {
-                public void actionPerformed(ActionEvent e) {
-                    BrowserPreferences.fetch().withShowObsoleteOptions(isSelected()).store();
-                }
-            });
+            addActionListener(e -> BrowserPreferences.fetch().withShowObsoleteOptions(isSelected()).store());
         }};
         optPanel.add(showObsolete, new GridBagConstraints() {{
             gridx=0; gridy=0; anchor=WEST; fill=HORIZONTAL; weightx=1.0;
@@ -69,7 +59,7 @@ public enum BrowserPreferencesPanel implements PreferencePanel {
                          BorderFactory.createEmptyBorder(5, 5 , 5, 5)));
         }};
 
-        final JLabel msg = new JLabel("Restart the OT Browser for changes to take effect.") {{
+        final JLabel msg = new JLabel("Restart the OT for changes to take effect.") {{
             setForeground(Color.black);
             setFont(getFont().deriveFont(getFont().getSize2D()-2));
         }};
@@ -80,18 +70,12 @@ public enum BrowserPreferencesPanel implements PreferencePanel {
         }});
     }
 
-// --Commented out by Inspection START (4/2/13 1:04 PM):
-//    public String getId() {
-//        return "browser";
-//    }
-// --Commented out by Inspection STOP (4/2/13 1:04 PM)
-
     public String getDisplayName() {
         return "Browser";
     }
 
     public Option<String> getToolTip() {
-        return new Some<String>("OT database browser preferences.");
+        return new Some<>("OT database browser preferences.");
     }
 
     public Option<Icon> getIcon() {

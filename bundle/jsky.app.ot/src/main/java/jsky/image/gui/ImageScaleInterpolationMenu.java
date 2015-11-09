@@ -5,7 +5,6 @@ import jsky.util.Preferences;
 
 import javax.media.jai.Interpolation;
 import javax.swing.*;
-import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.util.logging.Logger;
 
@@ -18,16 +17,14 @@ public final class ImageScaleInterpolationMenu extends JMenu {
         super(_I18N.getString("scaleInt"));
         final ButtonGroup group = new ButtonGroup();
 
-        final ItemListener itemListener = new ItemListener() {
-            public void itemStateChanged(ItemEvent e) {
-                final JRadioButtonMenuItem rb = (JRadioButtonMenuItem) e.getSource();
-                if (rb.isSelected()) {
-                    final ScaleInterpolation si = ScaleInterpolation.getScaleInterpolationForButton(rb);
-                    si.storeAsPreference();
+        final ItemListener itemListener = e -> {
+            final JRadioButtonMenuItem rb = (JRadioButtonMenuItem) e.getSource();
+            if (rb.isSelected()) {
+                final ScaleInterpolation si = ScaleInterpolation.getScaleInterpolationForButton(rb);
+                si.storeAsPreference();
 
-                    imageDisplay.setInterpolation(Interpolation.getInstance(si.interpolation));
-                    imageDisplay.updateImage();
-                }
+                imageDisplay.setInterpolation(Interpolation.getInstance(si.interpolation));
+                imageDisplay.updateImage();
             }
         };
 

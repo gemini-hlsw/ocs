@@ -1,13 +1,3 @@
-/*
- * ESO Archive
- *
- * $Id: ImagePanner.java 5923 2005-03-30 20:24:42Z brighton $
- *
- * who             when        what
- * --------------  ----------  ----------------------------------------
- * Allan Brighton  1999/05/03  Created
- */
-
 package jsky.image.gui;
 
 import java.awt.BorderLayout;
@@ -153,7 +143,6 @@ public class ImagePanner extends JComponent
         this(null);
     }
 
-
     /**
      * Return the object used to display the panner image
      */
@@ -226,7 +215,7 @@ public class ImagePanner extends JComponent
         FITSImage.setPreviewSize(_panWidth);
 
         // try to get a prescaled preview image (provided by the FITS codec)
-        float scale = 1.0F;
+        float scale;
         float w = im.getWidth(), h = im.getHeight();
         Object o = im.getProperty("#preview_image");
         if (o != null && o instanceof PlanarImage) {
@@ -306,7 +295,6 @@ public class ImagePanner extends JComponent
         double wcsw = wcs.getWidthInDeg();
         double wcsh = wcs.getHeightInDeg();
         double sizeInDeg = Math.min(wcsw, wcsh) / 4.;
-//        double equinox = wcs.getEquinox();
         Point2D.Double center = wcs.getWCSCenter();
         _north = new Point2D.Double(center.x, center.y);
         _east = new Point2D.Double(center.x, center.y);

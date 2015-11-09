@@ -1,17 +1,6 @@
-/*
- * ESO Archive
- *
- * $Id: ValueRange.java 6156 2005-05-20 13:40:44Z brighton $
- *
- * who             when        what
- * --------------  ----------  ----------------------------------------
- * Allan Brighton  1999/07/07  Created
- */
-
 package jsky.catalog;
 
 import java.io.Serializable;
-
 
 /**
  * Represents a range of values, given by minValue and maxValue,
@@ -34,12 +23,6 @@ public class ValueRange implements Serializable {
     /** Initialize from the given value (tests for equality) */
     public ValueRange(Comparable value) {
         this.minValue = this.maxValue = value;
-    }
-
-    /** Initialize from the given min and max values */
-    public ValueRange(Comparable minValue, Comparable maxValue) {
-        this.minValue = minValue;
-        this.maxValue = maxValue;
     }
 
     /**

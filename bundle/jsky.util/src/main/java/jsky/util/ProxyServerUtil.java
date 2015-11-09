@@ -1,10 +1,3 @@
-/*
- * Copyright 2000 Association for Universities for Research in Astronomy, Inc.,
- * Observatory Control System, Gemini Telescopes Project.
- *
- * $Id: ProxyServerUtil.java 4818 2004-07-08 19:12:01Z brighton $
- */
-
 package jsky.util;
 
 import java.util.Properties;

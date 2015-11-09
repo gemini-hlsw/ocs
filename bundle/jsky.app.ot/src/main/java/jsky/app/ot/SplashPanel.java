@@ -1,12 +1,7 @@
-// Copyright 1997 Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-// See the file LICENSE for complete details.
-//
-// $Id: SplashPanel.java 47001 2012-07-26 19:40:02Z swalker $
-//
 package jsky.app.ot;
 
 import edu.gemini.pot.sp.ISPProgramNode;
+import jsky.app.ot.gemini.obscat.ObsCatalog;
 import jsky.app.ot.plugin.OtActionPlugin;
 import jsky.app.ot.plugin.OtContext;
 import jsky.app.ot.userprefs.observer.ObservingPeer;
@@ -28,7 +23,7 @@ import java.net.URL;
 
 public final class SplashPanel extends JPanel implements PluginConsumer, ActionListener {
 
-    private JComboBox pluginSelector = new JComboBox();
+    private JComboBox<PluginWrapper> pluginSelector = new JComboBox<>();
 
     public SplashPanel(final URL welcomeURL, final boolean quitOnClose) {
 
@@ -99,7 +94,7 @@ public final class SplashPanel extends JPanel implements PluginConsumer, ActionL
             }));
 
             // OT Browser
-            add(new JButton(new QueryAction()));
+            add(new JButton(new QueryAction(ObsCatalog.QUERY_MANAGER)));
 
             // Import XML
             add(new JButton(new ImportAction() {

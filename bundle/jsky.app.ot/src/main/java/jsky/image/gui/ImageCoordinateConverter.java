@@ -1,10 +1,3 @@
-/*
- * Copyright 2002 Association for Universities for Research in Astronomy, Inc.,
- * Observatory Control System, Gemini Telescopes Project.
- *
- * $Id: ImageCoordinateConverter.java 4414 2004-02-03 16:21:36Z brighton $
- */
-
 package jsky.image.gui;
 
 import java.awt.geom.Point2D;
@@ -17,7 +10,6 @@ import javax.swing.event.EventListenerList;
 import jsky.coords.CoordinateConverter;
 import jsky.coords.WorldCoordinateConverter;
 import jsky.image.ImageProcessor;
-
 
 /**
  * This utility class may be used by classes that display images to convert

@@ -1,10 +1,3 @@
-/*
- * Copyright 2001 Association for Universities for Research in Astronomy, Inc.,
- * Observatory Control System, Gemini Telescopes Project.
- *
- * $Id: JSkyCatRemoteControl.java 4414 2004-02-03 16:21:36Z brighton $
- */
-
 package jsky.app.jskycat;
 
 import java.awt.Graphics2D;
@@ -33,6 +26,7 @@ import jsky.image.gui.MainImageDisplay;
  * @version $Revision: 4414 $
  * @author Allan Brighton
  */
+@Deprecated
 public class JSkyCatRemoteControl extends Thread
         implements ImageGraphicsHandler, ChangeListener {
 

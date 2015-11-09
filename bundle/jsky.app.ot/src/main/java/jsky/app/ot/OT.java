@@ -1,9 +1,3 @@
-// Copyright 2000 Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-// See the file LICENSE for complete details.
-//
-// $Id: OT.java 47190 2012-08-02 18:40:21Z swalker $
-//
 package jsky.app.ot;
 
 import edu.gemini.ags.api.AgsMagnitude;
@@ -14,7 +8,6 @@ import edu.gemini.pot.sp.ISPRootNode;
 import edu.gemini.pot.sp.SPNodeKey;
 import edu.gemini.pot.spdb.ProgramEvent;
 import edu.gemini.pot.spdb.ProgramEventListener;
-import edu.gemini.shared.util.immutable.ApplyOp;
 import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.sp.vcs.reg.VcsRegistrar;
 import edu.gemini.spModel.core.Peer;
@@ -28,7 +21,6 @@ import edu.gemini.spModel.smartgcal.repository.CalibrationRemoteRepository;
 import edu.gemini.spModel.smartgcal.repository.CalibrationResourceRepository;
 import edu.gemini.spModel.smartgcal.repository.CalibrationUpdater;
 import edu.gemini.util.security.auth.keychain.KeyChain;
-import jsky.app.ot.gemini.obscat.ObsCatalog;
 import jsky.app.ot.modelconfig.Flamingos2Config;
 import jsky.app.ot.modelconfig.GemsConfig;
 import jsky.app.ot.modelconfig.ModelConfig;
@@ -39,7 +31,7 @@ import jsky.app.ot.userprefs.observer.ObservingSite;
 import jsky.app.ot.util.Resources;
 import jsky.app.ot.vcs.vm.VmUpdater;
 import jsky.app.ot.viewer.*;
-import jsky.app.ot.viewer.action.QueryAction;
+import jsky.util.ProxyServerUtil;
 import jsky.util.gui.BrowserControl;
 import jsky.util.gui.DialogUtil;
 import jsky.util.gui.Theme;
@@ -201,42 +193,28 @@ public final class OT {
      * called once when OT starts.
      */
     private static void initUI() {
-        initUI(ObsCatalog.QUERY_MANAGER);
-    }
-
-
-    /**
-     * For testing it's often useful to forego the obs catalog stuff. so pass null for qm.
-     */
-    private static void initUI(final QueryManager qm) {
-
         initSwing();
-
-        // Add the observatory specific hook for the OT Browser
-        if (qm != null) {
-            QueryAction.setQueryManager(qm);
-        }
 
         // Register the (partly Gemini specific) position editor features.
         // Note that the order of the buttons in the position editor toolbar
         // will correspond to the order in which the features are registered.
-        final String[] features = new String[]{
-                "jsky.app.ot.tpe.feat.TpeBasePosFeature",
-                "jsky.app.ot.tpe.feat.TpeGuidePosFeature",
-                "jsky.app.ot.tpe.feat.TpeTargetPosFeature",
-                "jsky.app.ot.tpe.feat.TpeCatalogFeature",
-                "jsky.app.ot.gemini.tpe.EdIterOffsetFeature",
-                "jsky.app.ot.gemini.acqcam.TpeAcqCameraFeature",
-                "jsky.app.ot.gemini.altair.Altair_WFS_Feature",
-                "jsky.app.ot.gemini.gems.CanopusFeature",
-                "jsky.app.ot.gemini.gsaoi.GsaoiOdgwFeature",
-                "jsky.app.ot.gemini.gems.StrehlFeature",
-                "jsky.app.ot.gemini.inst.OIWFS_Feature",
-                "jsky.app.ot.gemini.tpe.TpePWFSFeature",
-                "jsky.app.ot.gemini.inst.SciAreaFeature",
+        final Class<?>[] features = new Class<?>[]{
+                jsky.app.ot.tpe.feat.TpeBasePosFeature.class,
+                jsky.app.ot.tpe.feat.TpeGuidePosFeature.class,
+                jsky.app.ot.tpe.feat.TpeTargetPosFeature.class,
+                jsky.app.ot.tpe.feat.TpeCatalogFeature.class,
+                jsky.app.ot.gemini.tpe.EdIterOffsetFeature.class,
+                jsky.app.ot.gemini.acqcam.TpeAcqCameraFeature.class,
+                jsky.app.ot.gemini.altair.Altair_WFS_Feature.class,
+                jsky.app.ot.gemini.gems.CanopusFeature.class,
+                jsky.app.ot.gemini.gsaoi.GsaoiOdgwFeature.class,
+                jsky.app.ot.gemini.gems.StrehlFeature.class,
+                jsky.app.ot.gemini.inst.OIWFS_Feature.class,
+                jsky.app.ot.gemini.tpe.TpePWFSFeature.class,
+                jsky.app.ot.gemini.inst.SciAreaFeature.class,
         };
 
-        for (final String featureClass : features) {
+        for (final Class<?> featureClass : features) {
             TelescopePosEditor.registerFeature(featureClass);
         }
 
@@ -279,7 +257,7 @@ public final class OT {
         void updateEditableState();
     }
 
-    private static final List<EditableStateListener> editableStateListeners = new ArrayList<EditableStateListener>();
+    private static final List<EditableStateListener> editableStateListeners = new ArrayList<>();
 
     /**
      * Fires a property change event that causes the editable states to be updated
@@ -290,7 +268,7 @@ public final class OT {
         final SPNodeKey root = src.getProgramKey();
         final List<EditableStateListener> copy;
         synchronized (editableStateListeners) {
-            copy = new ArrayList<EditableStateListener>(editableStateListeners);
+            copy = new ArrayList<>(editableStateListeners);
         }
 
         for (final EditableStateListener esl : copy) {
@@ -333,12 +311,9 @@ public final class OT {
     private static void initModelConfig() {
         try {
             final Option<ModelConfig> mc = ModelConfig.load();
-            mc.foreach(new ApplyOp<ModelConfig>() {
-                @Override
-                public void apply(final ModelConfig modelConfig) {
-                    GemsConfig.instance.apply(modelConfig);
-                    Flamingos2Config.instance.apply(modelConfig);
-                }
+            mc.foreach(modelConfig -> {
+                GemsConfig.instance.apply(modelConfig);
+                Flamingos2Config.instance.apply(modelConfig);
             });
         } catch (IOException ex) {
             LOG.log(Level.WARNING, "Could not load model config.", ex);
@@ -417,16 +392,14 @@ public final class OT {
 
             // If we have an open viewer for this program, replace it.
             @Override public void programReplaced(final ProgramEvent<ISPProgram> pme) {
-                SwingUtilities.invokeLater(new Runnable() {
-                    public void run() {
-                        final ISPProgram newProgram = pme.getNewProgram();
-                        final SPNodeKey  key = newProgram.getNodeKey();
-                        for (SPViewer v : SPViewer.instances()) {
-                            final ISPRootNode root = v.getRoot();
-                            if ((root != null) && root.getNodeKey().equals(key)) {
-                                v.replaceRoot(newProgram);
-                                break;
-                            }
+                SwingUtilities.invokeLater(() -> {
+                    final ISPProgram newProgram = pme.getNewProgram();
+                    final SPNodeKey  key = newProgram.getNodeKey();
+                    for (SPViewer v : SPViewer.instances()) {
+                        final ISPRootNode root = v.getRoot();
+                        if ((root != null) && root.getNodeKey().equals(key)) {
+                            v.replaceRoot(newProgram);
+                            break;
                         }
                     }
                 });
@@ -461,6 +434,7 @@ public final class OT {
     public static void open(final KeyChain auth, final AgsMagnitude.MagnitudeTable magTable, final VcsRegistrar reg, final File storageDir) {
 
         // Init all the things
+        ProxyServerUtil.init();
         initAuth(auth);
         initMagnitudeTable(magTable);
         initLogging();

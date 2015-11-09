@@ -1,8 +1,3 @@
-// Copyright 2001 Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-//
-// $Id: ObsCatalogTableColumnConfigPanel.java 6424 2005-06-18 13:10:34Z brighton $
-//
 package jsky.app.ot.gemini.obscat;
 
 import jsky.app.ot.shared.gemini.obscat.ObsCatalogInfo;
@@ -18,7 +13,6 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.util.*;
-
 
 /**
  * A panel for choosing which table columns to display for the result of an ObsCatalog query.
@@ -49,7 +43,7 @@ public class ObsCatalogTableColumnConfigPanel extends JPanel {
      * @param tableDisplay the widget displaying the table
      */
     public ObsCatalogTableColumnConfigPanel(TableDisplay tableDisplay) {
-        _columnNames = new Vector<String>(2);
+        _columnNames = new Vector<>(2);
         _columnNames.add("Column Name");
         _columnNames.add("Show?");
 
@@ -117,10 +111,10 @@ public class ObsCatalogTableColumnConfigPanel extends JPanel {
     // Set the model for the given table, based on the given column identifiers and show array.
     // showOffset specifies the offset in the show array that is valid for these arguments.
     private void _setModel(JTable table, String[] columnIdentifiers, boolean[] show, int showOffset) {
-        final Vector<Vector<Object>> data = new Vector<Vector<Object>>(columnIdentifiers.length);
+        final Vector<Vector<Object>> data = new Vector<>(columnIdentifiers.length);
 
         for (int i = 0; i < columnIdentifiers.length; i++) {
-            final Vector<Object> row = new Vector<Object>(2);
+            final Vector<Object> row = new Vector<>(2);
             row.add(columnIdentifiers[i]);
 
             final int index = showOffset + i;
@@ -159,7 +153,7 @@ public class ObsCatalogTableColumnConfigPanel extends JPanel {
         }
 
         // hide duplicate column names
-        final Collection<String> map = new HashSet<String>(_numTargetColumns);
+        final Collection<String> map = new HashSet<>(_numTargetColumns);
         final String[] ar = ObsCatalogInfo.getTableColumns();
         for(int i = 0; i < ar.length; i++) {
             if (show[i]) {

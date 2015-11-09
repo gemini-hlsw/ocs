@@ -1,56 +1,44 @@
-/*
- * ESO Archive
- *
- * $Id: WorldCoordinates.java 4414 2004-02-03 16:21:36Z brighton $
- *
- * who             when        what
- * --------------  ----------  ----------------------------------------
- * Allan Brighton  1999/05/03  Created, based on C++ version
- */
-
 package jsky.coords;
-
-import java.awt.geom.*;
 
 /**
  * Interface for representing world coordinates (right-ascension, declination,
  * stored as J2000 internally).
  */
-public abstract interface WorldCoordinates extends Coordinates {
+public interface WorldCoordinates extends Coordinates {
 
     /** return the RA value in J2000 */
-    public HMS getRA();
+    HMS getRA();
 
     /** return the DEC value in J2000 */
-    public DMS getDec();
+    DMS getDec();
 
     /** return the RA value in deg J2000 */
-    public double getRaDeg();
+    double getRaDeg();
 
     /** return the DEC value in deg J2000 */
-    public double getDecDeg();
+    double getDecDeg();
 
     /**
      * Return the coordinates as a string in h:m:s [+-]d:m:s format
      */
-    public String toString();
+    String toString();
 
     /**
      * Format RA and DEC in h:m:s [+-]d:m:s format in the given equinox
      * and return them as a 2 element String array.
      */
-    public String[] format(double equinox);
+    String[] format(double equinox);
 
     /**
      * Format RA and DEC in h:m:s [+-]d:m:s format in J2000
      * and return them as a 2 element String array.
      */
-    public String[] format();
+    String[] format();
 
     /**
      * Return RA and DEC in degrees as an array of 2 doubles {ra, dec} in the given equinox.
      */
-    public double[] getRaDec(double equinox);
+    double[] getRaDec(double equinox);
 
     /**
      * return the distance between this position and the given one in arcmin
@@ -61,7 +49,7 @@ public abstract interface WorldCoordinates extends Coordinates {
      * @return An array of 2 doubles ar[2], where ar[0] is the distance in arcmin and
      *         ar[1] is the position angle in degrees (East of North).
      */
-    public double[] dispos(WorldCoordinates pos);
+    double[] dispos(WorldCoordinates pos);
 
 
     /**
@@ -73,7 +61,7 @@ public abstract interface WorldCoordinates extends Coordinates {
      * @return Array of 2 WorldCoordinates objects that are the endpoints of a box
      *         with the given radius and centered at "this" position.
      */
-    public WorldCoordinates[] box(double radius);
+    WorldCoordinates[] box(double radius);
 
 
     /**
@@ -89,5 +77,5 @@ public abstract interface WorldCoordinates extends Coordinates {
      *         width and height are the size of the box in arcmin,
      *         and radius is the distance from the center to a corner in arcmin.
      */
-    public double[] center(WorldCoordinates pos1, WorldCoordinates pos2);
+    double[] center(WorldCoordinates pos1, WorldCoordinates pos2);
 }
