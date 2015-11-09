@@ -22,10 +22,10 @@ class GuidingFeedbackEditor extends TelescopePosEditor {
     // Construct the rows for the table. Optionally a BAGS row, and then a list of AGS analysis rows.
     val rows = {
       // A lot of nulls can happen here, unfortunately, so proceed with caution.
-      val bagsRow = Option(if (node == null) null else {
-        val obs = node.getContextObservation
-        if (obs == null) null else obs.getNodeKey
-      }).flatMap(BagsManager.instance.bagsStatus).map(BagsStatusRow)
+      val bagsRow = for {
+        n <- Option(node)
+        k <- n.getNodeKey
+      } yield BagsManager.instance.bagsStatus(k).map(BagsStatusRow)
 
       val feedbackRows = ctxOpt.asScalaOpt.map(GuidingFeedback.targetAnalysis(_, mt, target)).getOrElse(Nil)
       bagsRow.fold(feedbackRows)(_ :: feedbackRows)
