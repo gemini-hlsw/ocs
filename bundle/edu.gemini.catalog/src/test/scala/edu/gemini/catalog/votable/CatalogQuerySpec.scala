@@ -34,7 +34,7 @@ class CatalogQuerySpec extends SpecificationWithJUnit {
   def beSuperSetOf(cq: CatalogQuery) =  new Matcher[CatalogQuery] {
     override def apply[S <: CatalogQuery](t: Expectable[S]) = {
       val actual = t.value
-      result(actual.isSuperSetOf(cq) && !cq.isSuperSetOf(actual), s"$actual is a superset of $cq", s"$actual is not a proper superset of $cq", t)
+      result(actual.isSuperSetOf(cq), s"$actual is a superset of $cq", s"$actual is not a proper superset of $cq", t)
     }
   }
 
@@ -46,6 +46,9 @@ class CatalogQuerySpec extends SpecificationWithJUnit {
   }
 
   "CatalogQuerySpec" should {
+    "be a superset of itself" in {
+      par10_10 should beSuperSetOf(par10_10)
+    }
     "be a superset of the same base" in {
       par10_10 should beSuperSetOf(par5_10)
     }

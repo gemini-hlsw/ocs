@@ -78,6 +78,38 @@ class VoTableClientSpec extends SpecificationWithJUnit with VoTableClient with N
       // Depending on timing it could hit all or less than all parallel urls
       counter.get() should be_<=(countingBackend.catalogUrls.size)
     }
+    "cache should widen the search to improve efficiency" in {
+      val counter = new AtomicInteger(0)
+      val countingBackend = CountingCachedBackend(counter, "/votable-ucac4.xml")
+      // query2 has a bit bigger radius but the widening effect should avoid doing another query
+      val query = CatalogQuery(coordinates, RadiusConstraint.between(Angle.fromDegrees(0), Angle.fromArcmin(10)), noMagnitudeConstraint, UCAC4)
+      val query2 = CatalogQuery(coordinates, RadiusConstraint.between(Angle.fromDegrees(0), Angle.fromArcmin(12)), noMagnitudeConstraint, UCAC4)
+      // Backend should be hit at most once per url
+      val r = for {
+          f1 <- VoTableClient.catalog(query, countingBackend)
+          _  <- Future.successful(TimeUnit.SECONDS.sleep(1)) // Give it time to hit the first query
+          f2 <- VoTableClient.catalog(query2, countingBackend)
+        } yield (f1, f2)
+      // Depending on timing it could hit all or less than all parallel urls
+      counter.get() should be_<=(countingBackend.catalogUrls.size)
+    }
+    "cache should widen the search to improve efficiency, part 2" in {
+      val counter = new AtomicInteger(0)
+      val countingBackend = CountingCachedBackend(counter, "/votable-ucac4.xml")
+      // query2 has a bit bigger radius but the widening effect should avoid doing another query
+      val query2 = CatalogQuery(coordinates, RadiusConstraint.between(Angle.fromDegrees(0), Angle.fromDegrees(0.11)), noMagnitudeConstraint, UCAC4)
+      // query3 is wider it should hit the catalog again
+      val query3 = CatalogQuery(coordinates, RadiusConstraint.between(Angle.fromDegrees(0), Angle.fromDegrees(0.2)), noMagnitudeConstraint, UCAC4)
+      // Backend should be hit at most once per url
+      val r = for {
+          f1 <- VoTableClient.catalog(query, countingBackend)
+          _  <- Future.successful(TimeUnit.SECONDS.sleep(1)) // Give it time to hit the first query
+          f2 <- VoTableClient.catalog(query2, countingBackend)
+          f3 <- VoTableClient.catalog(query3, countingBackend)
+        } yield (f1, f2, f3)
+      // Depending on timing it could hit all or less than all parallel urls
+      counter.get() should be_<=(2 * countingBackend.catalogUrls.size)
+    }
     "cache hits should preserve the queries" in {
       val counter = new AtomicInteger(0)
       val countingBackend = CountingCachedBackend(counter, "/votable-ucac4.xml")
