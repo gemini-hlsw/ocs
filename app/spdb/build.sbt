@@ -29,6 +29,7 @@ ocsAppManifest := {
           fnussber(v),
           cquiroz(v),
           sraaphorst(v),
+          anunez(v),
           with_remote_gogo(v),
             odbtest(v),
               gsodbtest(v),
@@ -379,6 +380,29 @@ def abrighton(version: Version) = AppConfig(
     "edu.gemini.util.trpc.name"                  -> "Brightons's ODB (Test)"
   )
 ) extending List(with_gogo(version), abrighton_credentials(version))
+
+// ANUNEZ
+def anunez(version: Version) = AppConfig(
+  id = "anunez",
+  distribution = List(TestDistro),
+  vmargs = List(
+    "-Xmx1024M",
+    "-XX:MaxPermSize=196M",
+    "-Dcom.cosylab.epics.caj.CAJContext.addr_list=172.17.2.255",
+    "-Dedu.gemini.site=south",
+    "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005"
+  ),
+  props = Map(
+    "edu.gemini.auxfile.root"                    -> "/Users/anunez/.auxfile",
+    "edu.gemini.auxfile.fits.dest"               -> "/gemsoft/var/data/ictd/test/GS@SEMESTER@/@PROG_ID@",
+    "edu.gemini.auxfile.other.dest"              -> "/gemsoft/var/data/finder/GSqueue/Finders-Test/@SEMESTER@/@PROG_ID@",
+    "edu.gemini.auxfile.fits.host"               -> "gsconfig.gemini.edu",
+    "edu.gemini.services.server.start"           -> "false",
+    "edu.gemini.smartgcal.host"                  -> "localhost",
+    "edu.gemini.spdb.dir"                        -> "/Users/anunez/.spdb/",
+    "edu.gemini.util.trpc.name"                  -> "Art's ODB (Test)"
+  )
+) extending List(with_gogo(version), anunez_credentials(version))
 
 // ODBTEST
 def odbtest(version: Version) = AppConfig(
