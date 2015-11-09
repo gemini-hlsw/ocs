@@ -6,7 +6,6 @@ package edu.gemini.spModel.gemini.gsaoi;
 
 import edu.gemini.skycalc.Angle;
 import static edu.gemini.skycalc.Angle.Unit.ARCSECS;
-import static edu.gemini.skycalc.Angle.Unit.DEGREES;
 import edu.gemini.skycalc.Coordinates;
 import edu.gemini.shared.util.immutable.ImList;
 import edu.gemini.shared.util.immutable.Option;
@@ -14,7 +13,6 @@ import static edu.gemini.spModel.gemini.gsaoi.GsaoiDetectorArray.DETECTOR_GAP_AR
 import static edu.gemini.spModel.gemini.gsaoi.GsaoiDetectorArray.DETECTOR_SIZE_ARCSEC;
 
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality;
-import edu.gemini.spModel.guide.GuideProbe;
 import edu.gemini.spModel.obs.context.ObsContext;
 import edu.gemini.spModel.target.SPTarget;
 import edu.gemini.spModel.target.env.GuideProbeTargets;
@@ -25,8 +23,6 @@ import org.junit.Test;
 
 import edu.gemini.shared.util.immutable.None;
 import edu.gemini.spModel.core.Site;
-
-import java.util.Set;
 
 /**
  * Test cases for the GsaoiOdgw group.
@@ -129,146 +125,5 @@ public class GsaoiOdgwGroupTest extends TestCase {
         }
     }
 
-    private GuideProbeTargets create(GsaoiOdgw odgw, Coordinates coords) {
-        final SPTarget target = new SPTarget(coords.getRaDeg(), coords.getDecDeg());
-        return GuideProbeTargets.create(odgw, target).withExistingPrimary(target);
-    }
 
-    // Simple test case where an ODGW star ends up in another detector due to
-    // pos angle rotation.
-    @Test
-    public void testOptimizeOne() {
-        // Setup a target in the detector with id 1.
-        final Coordinates coords = new Coordinates(new Angle(midDetector, ARCSECS), new Angle(-midDetector, ARCSECS)); // 1
-        final GuideProbeTargets gt = create(GsaoiOdgw.odgw1, coords);
-        SPTarget target = gt.getTargets().head();
-
-        final TargetEnvironment env = baseContext.getTargets().putPrimaryGuideProbeTargets(gt);
-
-        // Optimize this context when rotated 90 degrees
-        final ObsContext ctx = baseContext.withTargets(env).withPositionAngle(new Angle(90, DEGREES));
-        final Option<TargetEnvironment> optEnv = group.optimize(ctx);
-
-        // Should have moved to Id 4.
-        final TargetEnvironment newEnv = optEnv.getValue();
-        final Set<GuideProbe> guiders = newEnv.getOrCreatePrimaryGuideGroup().getReferencedGuiders();
-        assertEquals(1, guiders.size());
-        assertEquals(GsaoiOdgw.odgw4, guiders.iterator().next());
-
-        final Option<GuideProbeTargets> gtOpt = newEnv.getPrimaryGuideProbeTargets(GsaoiOdgw.odgw4);
-        final GuideProbeTargets gtNew = gtOpt.getValue();
-        assertEquals(1, gtNew.getTargets().size());
-        assertSame(target, gtNew.getTargets().get(0));
-    }
-
-    // Tests that an existing primary guide star is kept when new targets are
-    // added to a detector
-    @Test
-    public void testKeepPrimary() {
-        // Create a target in detector 2, just on the border with 3.
-        final Coordinates coords2 = new Coordinates(new Angle(-midDetector, ARCSECS), new Angle(-DETECTOR_GAP_ARCSEC, ARCSECS));
-        final GuideProbeTargets gt2 = create(GsaoiOdgw.odgw2, coords2);
-
-        // Create a target in detector 3, just on the border with 2.
-        final Coordinates coords3 = new Coordinates(new Angle(-midDetector, ARCSECS), new Angle( DETECTOR_GAP_ARCSEC, ARCSECS));
-        final GuideProbeTargets gt3 = create(GsaoiOdgw.odgw3, coords3);
-
-        // Set up an obs context with these targets, and optimize when rotated 45 degrees.
-        final TargetEnvironment env = baseContext.getTargets().putPrimaryGuideProbeTargets(gt2).putPrimaryGuideProbeTargets(gt3);
-        final ObsContext ctx = baseContext.withTargets(env).withPositionAngle(new Angle(45, DEGREES));
-
-        // This will bring the target in detector 4 into detector 1.
-        final Option<TargetEnvironment> optEnv = group.optimize(ctx);
-
-        // Should have two targets in detector 2.
-        final TargetEnvironment newEnv = optEnv.getValue();
-        final Set<GuideProbe> guiders = newEnv.getOrCreatePrimaryGuideGroup().getReferencedGuiders();
-        assertEquals(1, guiders.size());
-        assertEquals(GsaoiOdgw.odgw2, guiders.iterator().next());
-
-        final Option<GuideProbeTargets> gtOpt = newEnv.getPrimaryGuideProbeTargets(GsaoiOdgw.odgw2);
-        final GuideProbeTargets gt = gtOpt.getValue();
-        assertEquals(2, gt.getTargets().size());
-
-        // Make sure that the primary star is the primary star from gt2.
-        // In other words, it shouldn't change just because a new star was
-        // added.
-        assertEquals(gt.getPrimary().getValue(), gt2.getPrimary().getValue());
-    }
-
-    // Test that when two guide stars from one detector are added to an empty
-    // one, the previously primary one keeps its designation as primary.
-    @Test
-    public void testKeepTransferPrimary() {
-        // Put two guide stars in the same detector (detector 2).
-        final Coordinates coords2a = new Coordinates(new Angle(midDetector, ARCSECS), new Angle(-DETECTOR_GAP_ARCSEC, ARCSECS));
-        final Coordinates coords2b = new Coordinates(new Angle(DETECTOR_GAP_ARCSEC, ARCSECS), new Angle(-midDetector, ARCSECS));
-        final SPTarget target2a = new SPTarget(coords2a.getRaDeg(), coords2a.getDecDeg());
-        final SPTarget target2b = new SPTarget(coords2b.getRaDeg(), coords2b.getDecDeg());
-
-        final GuideProbeTargets gt = GuideProbeTargets.create(GsaoiOdgw.odgw2, target2a, target2b).withExistingPrimary(target2b);
-
-        // Setup the obs context, rotated 90 degrees.
-        final TargetEnvironment env = baseContext.getTargets().putPrimaryGuideProbeTargets(gt);
-        final ObsContext ctx = baseContext.withTargets(env).withPositionAngle(new Angle(90, DEGREES));
-
-        // This will put both targets in detector 1.
-        final Option<TargetEnvironment> optEnv = group.optimize(ctx);
-
-        // Should have two targets in detector 4.
-        final TargetEnvironment newEnv = optEnv.getValue();
-        final Set<GuideProbe> guiders = newEnv.getOrCreatePrimaryGuideGroup().getReferencedGuiders();
-        assertEquals(1, guiders.size());
-        assertEquals(GsaoiOdgw.odgw4, guiders.iterator().next());
-
-        final Option<GuideProbeTargets> gtOpt1 = newEnv.getPrimaryGuideProbeTargets(GsaoiOdgw.odgw4);
-        final GuideProbeTargets gt1 = gtOpt1.getValue();
-        assertEquals(2, gt1.getTargets().size());
-
-        // Make sure that the second star is still primary in the new
-        // environment.
-        final Option<SPTarget> actual = gt1.getPrimary();
-        assertFalse(actual.isEmpty());
-        assertEquals(target2b, actual.getValue());
-    }
-
-    // TODO: GuideProbeTargets.isEnabled
-
-/*
-    // Test that the enabled state is maintaned when optimizing.
-    @Test
-    public void testKeepKeepEnabled() {
-        // Setup a target in the detector with id 1.
-        Coordinates coords = new Coordinates(new Angle(-midDetector, ARCSECS), new Angle(-midDetector, ARCSECS)); // 1
-        GuideProbeTargets gt = create(GsaoiOdgw.odgw1, coords).withEnabled(false);
-        SPTarget target = gt.imList().head();
-
-        TargetEnvironment env = baseContext.getTargets().withGuideTargets(gt);
-        ObsContext ctx = baseContext.withTargets(env);
-
-        // Now, optimize this context when rotated 90 degrees
-        ctx = ctx.withPositionAngle(new Angle(90, DEGREES));
-        Option<TargetEnvironment> optEnv = group.optimize(ctx);
-
-        Option<GuideProbeTargets> gtOpt = optEnv.getValue().getGuideTargets(GsaoiOdgw.odgw2);
-        assertEquals(false, gtOpt.getValue().isEnabled()); // still disabled?
-    }
-/
-    // Test when no updates are made.
-    @Test
-    public void testNoUpdates() {
-        // Setup a target in the detector with id 1.
-        Coordinates coords = new Coordinates(new Angle(-midDetector, ARCSECS), new Angle(-midDetector, ARCSECS)); // 1
-        GuideProbeTargets gt = create(GsaoiOdgw.odgw1, coords).withEnabled(false);
-
-        TargetEnvironment env = baseContext.getTargets().withGuideTargets(gt);
-        ObsContext ctx = baseContext.withTargets(env);
-
-        // Now, optimize this context when rotated 1 degrees
-        ctx = ctx.withPositionAngle(new Angle(1, DEGREES));
-        Option<TargetEnvironment> optEnv = group.optimize(ctx);
-
-        assertTrue(optEnv.isEmpty());
-    }
-*/
 }
