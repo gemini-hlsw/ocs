@@ -393,7 +393,8 @@ public final class GuideProbeTargets implements Serializable, TargetContainer, I
     public GuideProbeTargets withExistingPrimary(final Option<SPTarget> targetOption) {
         if (targetOption.equals(primaryTarget))
             return this;
-        return new GuideProbeTargets(guider, bagsResult, targetOption, manualTargets);
+        final BagsResult bagsResultNew = targetOption.exists(t -> !targetIsBagsTarget(t)) ? DEFAULT_BAGS_RESULT : bagsResult;
+        return new GuideProbeTargets(guider, bagsResultNew, targetOption, manualTargets);
     }
 
     /**
@@ -421,7 +422,7 @@ public final class GuideProbeTargets implements Serializable, TargetContainer, I
             return this;
 
         final ImList<SPTarget> manualTargetsNew = alreadyInList ? manualTargets : manualTargets.append(target);
-        return new GuideProbeTargets(guider, bagsResult, new Some<>(target), manualTargetsNew);
+        return new GuideProbeTargets(guider, DEFAULT_BAGS_RESULT, new Some<>(target), manualTargetsNew);
     }
 
     /**
@@ -470,10 +471,8 @@ public final class GuideProbeTargets implements Serializable, TargetContainer, I
     public GuideProbeTargets withPrimaryByIndex(final int index) {
         if (index == 0 && hasBagsTarget())
             return new GuideProbeTargets(guider, bagsResult, bagsResult.targetAsJava(), manualTargets);
-
-        final int bagsAdjustment = hasBagsTarget() ? 1 : 0;
-        final SPTarget primaryNew = manualTargets.get(index - bagsAdjustment);
-        return new GuideProbeTargets(guider, bagsResult, new Some<>(primaryNew), manualTargets);
+        final SPTarget primaryNew = manualTargets.get(index);
+        return new GuideProbeTargets(guider, DEFAULT_BAGS_RESULT, new Some<>(primaryNew), manualTargets);
     }
 
     /**
@@ -488,7 +487,8 @@ public final class GuideProbeTargets implements Serializable, TargetContainer, I
         if (!getTargets().contains(target))
             throw new IllegalArgumentException("not a member of the list");
         final Option<SPTarget> newPrimary = primaryTarget.exists(target::equals) ? None.instance() : new Some<>(target);
-        return new GuideProbeTargets(guider, bagsResult, newPrimary, manualTargets);
+        final BagsResult bagsResultNew = newPrimary.exists(this::targetIsBagsTarget) ? bagsResult : DEFAULT_BAGS_RESULT;
+        return new GuideProbeTargets(guider, bagsResultNew, newPrimary, manualTargets);
     }
 
     /**
