@@ -54,18 +54,18 @@ final class BagsManager(executor: ScheduledThreadPoolExecutor) {
   }
 
   /** Our state is just a set of programs to watch, and a set of pending keys. */
-  case class BagsState(programs: Set[SPProgramID], keys: Set[SPNodeKey], statuses: Map[SPNodeKey,BagsStatus]) {
+  case class BagsState(programs: Set[SPProgramID], keys: Set[SPNodeKey]) {
     def +(key: SPNodeKey): BagsState = copy(keys = keys + key)
     def -(key: SPNodeKey): BagsState = copy(keys = keys - key)
     def +(pid: SPProgramID): BagsState = copy(programs = programs + pid)
     def -(pid: SPProgramID): BagsState = copy(programs = programs - pid)
-
-    def setStatus(key: SPNodeKey, status: BagsStatus): BagsState = copy(statuses = statuses + ((key, status)))
-    def clearStatus(key: SPNodeKey): BagsState = copy(statuses = statuses - key)
   }
 
+  /** BAGS statuses of observations */
+  @volatile private var bagsStatuses: Map[SPNodeKey,BagsStatus] = Map.empty
+
   /** Our state. Modifications must be synchronized on `this`. */
-  @volatile private var state: BagsState = BagsState(Set.empty, Set.empty, Map.empty)
+  @volatile private var state: BagsState = BagsState(Set.empty, Set.empty)
 
   /**
    * Atomically add a program to our watch list and attach listeners. Enqueue all observations for
@@ -114,17 +114,16 @@ final class BagsManager(executor: ScheduledThreadPoolExecutor) {
         val key = obs.getNodeKey
         state += key
 
-        def bagsStatus(status: BagsStatus) = {
-//          val oldState = state.statuses.get(key)
-//          state = state.setStatus(key, status)
-//          notifyBagsStatusListeners(observation, oldState, Some(status))
+        def bagsStatus(status: BagsStatus) = bagsStatuses.synchronized {
+          val oldState = bagsStatuses.get(key)
+          bagsStatuses += ((key, status))
+          notifyBagsStatusListeners(observation, oldState, Some(status))
         }
-        def bagsClearStatus() = {
-//          val oldState = state.statuses.get(key)
-//          state = state.clearStatus(key)
-//          notifyBagsStatusListeners(observation, oldState, None)
+        def bagsClearStatus() = bagsStatuses.synchronized {
+          val oldState = bagsStatuses.get(key)
+          bagsStatuses -= key
+          notifyBagsStatusListeners(observation, oldState, None)
         }
-        bagsStatus(BagsStatus.Pending)
 
         executor.schedule(new Thread {
           setPriority(Thread.NORM_PRIORITY - 1)
@@ -146,7 +145,7 @@ final class BagsManager(executor: ScheduledThreadPoolExecutor) {
 
               // Otherwise construct an obs context, verify that it's bagworthy, and go
               ObsContext.create(obs).asScalaOpt.filter(obsCtxFilter).foreach { ctx =>
-
+                bagsStatus(BagsStatus.Pending)
                 //   do the lookup
                 //   on success {
                 //      if we're in the queue again, it means something changed while this task was
@@ -178,21 +177,18 @@ final class BagsManager(executor: ScheduledThreadPoolExecutor) {
                     case Failure(CatalogException((e: GenericError) :: _)) =>
                       LOG.warning(s"$bagsIdMsg failed: ${e.msg}")
                       bagsStatus(BagsStatus.Failed)
-                      Thread.sleep(1000L)
                       enqueue(obs, 5000L)
 
                     // If we timed out, we don't want to delay.
                     case Failure(ex: TimeoutException) =>
                       LOG.warning(s"$bagsIdMsg failed: ${ex.getMessage}")
                       bagsStatus(BagsStatus.Failed)
-                      Thread.sleep(1000L)
                       enqueue(obs, 5000L)
 
                     // For all other exceptions, print the full stack trace.
                     case Failure(ex) =>
                       LOG.log(Level.WARNING, s"$bagsIdMsg} failed.", ex)
                       bagsStatus(BagsStatus.Failed)
-                      Thread.sleep(1000L)
                       enqueue(obs, 5000L)
                   }
                 }
@@ -244,7 +240,7 @@ final class BagsManager(executor: ScheduledThreadPoolExecutor) {
 
   /** BAGS status changes. **/
   def bagsStatus(key: SPNodeKey): Option[BagsStatus] =
-    synchronized { state.statuses.get(key) }
+    bagsStatuses.synchronized(bagsStatuses.get(key))
 
   /** Listeners for BAGS status changes. **/
   private var listeners: List[BagsStatusListener] = Nil
