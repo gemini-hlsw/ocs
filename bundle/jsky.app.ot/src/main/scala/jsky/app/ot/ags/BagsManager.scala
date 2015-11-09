@@ -1,7 +1,7 @@
 package jsky.app.ot.ags
 
 import java.beans.{PropertyChangeEvent, PropertyChangeListener}
-import java.util.concurrent.{TimeoutException, TimeUnit, ScheduledThreadPoolExecutor}
+import java.util.concurrent.{ThreadFactory, TimeoutException, TimeUnit, ScheduledThreadPoolExecutor}
 import java.util.logging.{Level, Logger}
 
 import edu.gemini.ags.api.{AgsRegistrar, AgsStrategy}
@@ -131,8 +131,7 @@ final class BagsManager(executor: ScheduledThreadPoolExecutor) {
           // Otherwise construct an obs context, verify that it's bagworthy, and go
           ObsContext.create(obs).asScalaOpt.filter(obsCtxFilter).foreach { ctx =>
             bagsStatus(BagsStatus.Pending)
-            executor.schedule(new Thread {
-              setPriority(Thread.NORM_PRIORITY - 1)
+            executor.schedule(new Runnable {
 
               override def run(): Unit = {
                 //   do the lookup
@@ -255,7 +254,13 @@ final class BagsManager(executor: ScheduledThreadPoolExecutor) {
 
 object BagsManager {
   private val NumThreads = math.max(1, Runtime.getRuntime.availableProcessors - 1)
-  val instance = new BagsManager(new ScheduledThreadPoolExecutor(NumThreads))
+  val instance = new BagsManager(new ScheduledThreadPoolExecutor(NumThreads, new ThreadFactory {
+    override def newThread(r: Runnable): Thread = {
+      val thread = new Thread(r)
+      thread.setPriority(Thread.NORM_PRIORITY-1)
+      thread
+    }
+  }))
 
   // Check two target environments to see if the BAGS targets match exactly between them.
   def bagsTargetsMatch(oldEnv: TargetEnvironment, newEnv: TargetEnvironment): Boolean = {
