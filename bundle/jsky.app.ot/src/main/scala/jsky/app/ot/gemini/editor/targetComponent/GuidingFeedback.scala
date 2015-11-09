@@ -56,9 +56,9 @@ object GuidingFeedback {
 
   case class BagsStatusRow(bagsStatus: BagsStatus) extends Row {
     private val bg = bagsStatus match {
-      case BagsStatus.Pending => HONEY_DEW
-      case BagsStatus.Running => BANANA
-      case BagsStatus.Failed  => LIGHT_SALMON
+      case BagsStatus.Pending    => HONEY_DEW
+      case BagsStatus.Running    => BANANA
+      case BagsStatus.Failed(_)  => LIGHT_SALMON
     }
 
     object feedbackLabel extends Label {

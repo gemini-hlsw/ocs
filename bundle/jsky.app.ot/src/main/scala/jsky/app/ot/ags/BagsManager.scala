@@ -40,17 +40,6 @@ final class BagsManager(executor: ScheduledThreadPoolExecutor) {
     def isMissingSearch: Boolean = {
       ctx.getTargets.getGuideEnvironment.getPrimary.asScalaOpt.forall(_.getAll.asScalaList.exists(_.getBagsResult == BagsResult.NoSearchPerformed))
     }
-//    def isEligibleForBags: Boolean = {
-
-//      val targets = ctx.getTargets
-//      val prgs    = targets.getGuideEnvironment.getPrimaryReferencedGuiders
-//      prgs.isEmpty || prgs.asScala.exists { gp =>
-//        targets.getPrimaryGuideProbeTargets(gp).asScalaOpt.exists(_.getBagsResult match {
-//          case BagsResult.NoSearchPerformed => true
-//          case _                            => false
-//        })
-//      }
-//    }
   }
 
   /** Our state is just a set of programs to watch, and a set of pending keys. */
@@ -125,34 +114,34 @@ final class BagsManager(executor: ScheduledThreadPoolExecutor) {
           notifyBagsStatusListeners(observation, oldState, None)
         }
 
-        executor.schedule(new Thread {
-          setPriority(Thread.NORM_PRIORITY - 1)
+        // The criteria to perform a BAGS lookup is that:
+        // 1. There are no manual primary targets in the primary guide group;
+        // 2a. This is not the initial call to enqueue (i.e. the call was triggered by a change to the TargetEnv); or
+        // 2b. The primary guide group has some active guide probe for which a BAGS search has not been done; and
+        // 3. The observation has not been executed.
+        def obsCtxFilter(obsCtx: ObsContext): Boolean =
+          !obsCtx.hasManualPrimary &&
+            (!initialEnqueue || obsCtx.isMissingSearch) &&
+            ObservationStatus.computeFor(obs) != ObservationStatus.OBSERVED
 
-          override def run(): Unit =
-          // If dequeue is false this means that (a) another task scheduled *after* me ended up
-          // running before me, so their result is as good as mine would have been and we're done;
-          // or (b) we don't care about that program anymore, so we're done.
-            if (dequeue(key, obs.getProgramID)) {
-              // The criteria to perform a BAGS lookup is that:
-              // 1. There are no manual primary targets in the primary guide group;
-              // 2a. This is not the initial call to enqueue (i.e. the call was triggered by a change to the TargetEnv); or
-              // 2b. The primary guide group has some active guide probe for which a BAGS search has not been done; and
-              // 3. The observation has not been executed.
-              def obsCtxFilter(obsCtx: ObsContext): Boolean =
-                !obsCtx.hasManualPrimary &&
-                  (!initialEnqueue || obsCtx.isMissingSearch) &&
-                  ObservationStatus.computeFor(obs) != ObservationStatus.OBSERVED
+        // If dequeue is false this means that (a) another task scheduled *after* me ended up
+        // running before me, so their result is as good as mine would have been and we're done;
+        // or (b) we don't care about that program anymore, so we're done.
+        if (dequeue(key, obs.getProgramID)) {
+          // Otherwise construct an obs context, verify that it's bagworthy, and go
+          ObsContext.create(obs).asScalaOpt.filter(obsCtxFilter).foreach { ctx =>
+            bagsStatus(BagsStatus.Pending)
+            executor.schedule(new Thread {
+              setPriority(Thread.NORM_PRIORITY - 1)
 
-              // Otherwise construct an obs context, verify that it's bagworthy, and go
-              ObsContext.create(obs).asScalaOpt.filter(obsCtxFilter).foreach { ctx =>
-                bagsStatus(BagsStatus.Pending)
+              override def run(): Unit = {
                 //   do the lookup
                 //   on success {
                 //      if we're in the queue again, it means something changed while this task was
                 //      running, so discard this result and do nothing,
                 //      otherwise update the model
                 //   }
-                //   on failure enqueue again, maybe with a delay depending on the failure
+                //   on failure enqueue again
                 val bagsIdMsg = s"BAGS lookup on thread=${Thread.currentThread.getId} for observation=${obs.getObservationID}"
 
                 def lookup[S, T](optExtract: S => Option[T])(worker: (TpeContext, S) => Unit)(results: Try[S]): Unit = {
@@ -172,27 +161,30 @@ final class BagsManager(executor: ScheduledThreadPoolExecutor) {
                         bagsClearStatus()
                       }
 
+                    // NOTE: We sleep for a brief duration BEFORE enqueue to allow the error message to be readable.
                     // We don't want to print the stack trace if the host is simply unreachable.
                     // This is reported only as a GenericError in a CatalogException, unfortunately.
                     case Failure(CatalogException((e: GenericError) :: _)) =>
                       LOG.warning(s"$bagsIdMsg failed: ${e.msg}")
-                      bagsStatus(BagsStatus.Failed)
+                      bagsStatus(BagsStatus.Failed("Catalog lookup failed."))
+                      Thread.sleep(3000)
                       enqueue(obs, 5000L)
 
                     // If we timed out, we don't want to delay.
-                    case Failure(ex: TimeoutException) =>
-                      LOG.warning(s"$bagsIdMsg failed: ${ex.getMessage}")
-                      bagsStatus(BagsStatus.Failed)
+                    case Failure(e: TimeoutException) =>
+                      LOG.warning(s"$bagsIdMsg failed: ${e.getMessage}")
+                      bagsStatus(BagsStatus.Failed("Catalog could not be contacted."))
+                      Thread.sleep(3000)
                       enqueue(obs, 5000L)
 
                     // For all other exceptions, print the full stack trace.
-                    case Failure(ex) =>
-                      LOG.log(Level.WARNING, s"$bagsIdMsg} failed.", ex)
-                      bagsStatus(BagsStatus.Failed)
+                    case Failure(e) =>
+                      LOG.log(Level.WARNING, s"$bagsIdMsg} failed.", e)
+                      bagsStatus(BagsStatus.Failed(s"${e.getMessage}."))
+                      Thread.sleep(3000)
                       enqueue(obs, 5000L)
                   }
                 }
-
 
                 LOG.info(s"Performing $bagsIdMsg.")
                 bagsStatus(BagsStatus.Running)
@@ -211,14 +203,15 @@ final class BagsManager(executor: ScheduledThreadPoolExecutor) {
                       val futDone = Await.ready(fut, 30.seconds)
                       futDone.onComplete(lookup(identity[Option[AgsStrategy.Selection]])(GuideStarWorker.applyResults))
                     }.isFailure) {
-                      bagsStatus(BagsStatus.Failed)
+                      bagsStatus(BagsStatus.Failed("Lookup timed out."))
                       enqueue(obs, 5000L)
                     }
                   }
                 }
               }
-            }
-        }, delay, TimeUnit.MILLISECONDS)
+            }, delay, TimeUnit.MILLISECONDS)
+          }
+        }
       }
     }
 
