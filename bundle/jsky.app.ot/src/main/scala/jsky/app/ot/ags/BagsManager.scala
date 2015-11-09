@@ -13,7 +13,7 @@ import edu.gemini.spModel.core.SPProgramID
 import edu.gemini.spModel.obs.ObservationStatus
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.rich.shared.immutable._
-import edu.gemini.spModel.target.env.{BagsResult, OptionsList, GuideProbeTargets, TargetEnvironment}
+import edu.gemini.spModel.target.env._
 import jsky.app.ot.OT
 import jsky.app.ot.tpe.{TpeContext, GuideStarSupport, GemsGuideStarWorker, GuideStarWorker}
 
@@ -32,14 +32,11 @@ final class BagsManager(executor: ScheduledThreadPoolExecutor) {
 
   /** Syntax for ObsContext. */
   implicit class ObsContextOps(ctx: ObsContext) {
-    // Check the primary guide group to see if there are any manual targets. If there are, do not run BAGS.
-    def hasManualPrimary: Boolean = {
-      ctx.getTargets.getGuideEnvironment.getPrimary.asScalaOpt.exists(_.getAll.asScalaList.exists(_.primaryIsManual))
+    def checkPrimaryGuideGroupTargets(f: Option[GuideGroup] => (GuideGroup => Boolean) => Boolean, g: GuideProbeTargets => Boolean): Boolean = {
+      f(ctx.getTargets.getGuideEnvironment.getPrimary.asScalaOpt)(_.getAll.asScalaList.exists(g))
     }
-
-    def isMissingSearch: Boolean = {
-      ctx.getTargets.getGuideEnvironment.getPrimary.asScalaOpt.forall(_.getAll.asScalaList.exists(_.getBagsResult == BagsResult.NoSearchPerformed))
-    }
+    def hasManualPrimary: Boolean = checkPrimaryGuideGroupTargets(_.exists, _.primaryIsManual)
+    def isMissingSearch: Boolean  = checkPrimaryGuideGroupTargets(_.forall, _.getBagsResult == BagsResult.NoSearchPerformed)
   }
 
   /** Our state is just a set of programs to watch, and a set of pending keys. */
@@ -248,7 +245,7 @@ final class BagsManager(executor: ScheduledThreadPoolExecutor) {
     listeners = Nil
 
   private def notifyBagsStatusListeners(obs: ISPObservation, oldStatus: Option[BagsStatus], newStatus: Option[BagsStatus]): Unit = {
-    listeners.foreach(_.bagsStatusChanged(obs, oldStatus.asGeminiOpt, newStatus.asGeminiOpt))
+    listeners.foreach(l => Try{l.bagsStatusChanged(obs, oldStatus.asGeminiOpt, newStatus.asGeminiOpt)})
   }
 }
 
