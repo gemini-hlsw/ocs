@@ -12,10 +12,12 @@ import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.target.SPTarget
 import edu.gemini.spModel.target.env.TargetEnvironment
 import jsky.app.ot.ags.BagsStatus
-import jsky.app.ot.util.OtColor
+import jsky.app.ot.util.{Resources, OtColor}
 
-import java.awt.Color.DARK_GRAY
+import java.awt.Color._
 import javax.swing.BorderFactory
+
+//import jsky.util.Resources
 
 import scala.collection.JavaConverters._
 import scala.swing._
@@ -55,17 +57,23 @@ object GuidingFeedback {
   }
 
   case class BagsStatusRow(bagsStatus: BagsStatus) extends Row {
-    private val bg = bagsStatus match {
-      case BagsStatus.Pending    => HONEY_DEW
-      case BagsStatus.Running    => BANANA
-      case BagsStatus.Failed(_)  => LIGHT_SALMON
+    private val bgColor = bagsStatus match {
+      case BagsStatus.Pending | BagsStatus.Running => BANANA
+      case BagsStatus.Failed(_)                    => LIGHT_SALMON
     }
+
+    private val statusIcon = bagsStatus match {
+      case BagsStatus.Pending | BagsStatus.Running => Resources.getIcon("ajax-loader.gif")//"eclipse/add_menu.gif")//Resources.getIcon("ajax-loader.gif");
+      case BagsStatus.Failed(_)                    => null
+    }
+    println(s"*** bagsStatus=$bagsStatus, statusIcon=$statusIcon")
 
     object feedbackLabel extends Label {
       border              = labelBorder
       foreground          = DARK_GRAY
-      background          = bg
+      background          = bgColor
       text                = bagsStatus.message
+      icon                = statusIcon
       opaque              = true
       horizontalAlignment = Alignment.Left
     }

@@ -32,26 +32,29 @@ final class BagsManager(executor: ScheduledThreadPoolExecutor) {
 
   /** Syntax for ObsContext. */
   implicit class ObsContextOps(ctx: ObsContext) {
-    def checkPrimaryGuideGroupTargets(f: Option[GuideGroup] => (GuideGroup => Boolean) => Boolean, g: GuideProbeTargets => Boolean): Boolean = {
-      f(ctx.getTargets.getGuideEnvironment.getPrimary.asScalaOpt)(_.getAll.asScalaList.exists(g))
+    private def extractPrimaryGuideGroupTargets(): List[GuideProbeTargets] = {
+      ctx.getTargets.getGuideEnvironment.getPrimary.asScalaOpt.fold(Nil: List[GuideProbeTargets])(_.getAll.asScalaList)
     }
-    def hasManualPrimary: Boolean = checkPrimaryGuideGroupTargets(_.exists, _.primaryIsManual)
-    def isMissingSearch: Boolean  = checkPrimaryGuideGroupTargets(_.forall, _.getBagsResult == BagsResult.NoSearchPerformed)
+
+    def hasManualPrimary: Boolean = extractPrimaryGuideGroupTargets().exists(_.primaryIsManual)
+    def isMissingSearch:  Boolean = {
+      val gpts = extractPrimaryGuideGroupTargets()
+      gpts.isEmpty || gpts.exists(_.getBagsResult == BagsResult.NoSearchPerformed)
+    }
   }
 
-  /** Our state is just a set of programs to watch, and a set of pending keys. */
-  case class BagsState(programs: Set[SPProgramID], keys: Set[SPNodeKey]) {
+  /** Our state is just a set of programs to watch, a set of pending keys, and a map of keys to BAGS status. */
+  case class BagsState(programs: Set[SPProgramID], keys: Set[SPNodeKey], statuses: Map[SPNodeKey,BagsStatus]) {
     def +(key: SPNodeKey): BagsState = copy(keys = keys + key)
     def -(key: SPNodeKey): BagsState = copy(keys = keys - key)
     def +(pid: SPProgramID): BagsState = copy(programs = programs + pid)
     def -(pid: SPProgramID): BagsState = copy(programs = programs - pid)
+    def setStatus(key: SPNodeKey, status: BagsStatus): BagsState = copy(statuses = statuses + ((key, status)))
+    def clearStatus(key: SPNodeKey): BagsState = copy(statuses = statuses - key)
   }
 
-  /** BAGS statuses of observations */
-  @volatile private var bagsStatuses: Map[SPNodeKey,BagsStatus] = Map.empty
-
   /** Our state. Modifications must be synchronized on `this`. */
-  @volatile private var state: BagsState = BagsState(Set.empty, Set.empty)
+  @volatile private var state: BagsState = BagsState(Set.empty, Set.empty, Map.empty)
 
   /**
    * Atomically add a program to our watch list and attach listeners. Enqueue all observations for
@@ -100,14 +103,14 @@ final class BagsManager(executor: ScheduledThreadPoolExecutor) {
         val key = obs.getNodeKey
         state += key
 
-        def bagsStatus(status: BagsStatus) = bagsStatuses.synchronized {
-          val oldState = bagsStatuses.get(key)
-          bagsStatuses += ((key, status))
+        def bagsStatus(status: BagsStatus): Unit = {
+          val oldState = state.statuses.get(key)
+          state = state.setStatus(key, status)
           notifyBagsStatusListeners(observation, oldState, Some(status))
         }
-        def bagsClearStatus() = bagsStatuses.synchronized {
-          val oldState = bagsStatuses.get(key)
-          bagsStatuses -= key
+        def bagsClearStatus(): Unit = {
+          val oldState = state.statuses.get(key)
+          state = state.clearStatus(key)
           notifyBagsStatusListeners(observation, oldState, None)
         }
 
@@ -229,7 +232,7 @@ final class BagsManager(executor: ScheduledThreadPoolExecutor) {
 
   /** BAGS status changes. **/
   def bagsStatus(key: SPNodeKey): Option[BagsStatus] =
-    bagsStatuses.synchronized(bagsStatuses.get(key))
+    synchronized(state.statuses.get(key))
 
   /** Listeners for BAGS status changes. **/
   private var listeners: List[BagsStatusListener] = Nil
