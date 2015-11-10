@@ -99,10 +99,6 @@ public class SpecS2NLargeSlitVisitor implements SampledSpectrumVisitor, SpecS2N 
         return spec_Npix;
     }
 
-    public double getSpecFracWithSource() {
-        return spec_frac_with_source;
-    }
-
     /**
      * Implements the SampledSpectrumVisitor interface
      */

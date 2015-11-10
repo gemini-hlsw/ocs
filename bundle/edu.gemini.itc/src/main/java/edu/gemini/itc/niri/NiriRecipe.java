@@ -125,25 +125,16 @@ public final class NiriRecipe implements ImagingRecipe, SpectroscopyRecipe {
         final double pixel_size = instrument.getPixelSize();
 
         final SlitThroughput st;
-        final SlitThroughput st_halo;
         if (!_obsDetailParameters.isAutoAperture()) {
             st = new SlitThroughput(im_qual,
                     _obsDetailParameters.getApertureDiameter(), pixel_size,
                     instrument.getFPMask());
-            st_halo = new SlitThroughput(IQcalc.getImageQuality(),
-                    _obsDetailParameters.getApertureDiameter(), pixel_size,
-                    instrument.getFPMask());
         } else {
-            st = new SlitThroughput(im_qual, pixel_size,
-                    instrument.getFPMask());
-
-            st_halo = new SlitThroughput(IQcalc.getImageQuality(), pixel_size,
-                    instrument.getFPMask());
+            st = new SlitThroughput(im_qual, pixel_size, instrument.getFPMask());
         }
 
         double ap_diam = st.getSpatialPix();
         double spec_source_frac = st.getSlitThroughput();
-        double halo_spec_source_frac = st_halo.getSlitThroughput();
 
         if (_sdParameters.isUniform()) {
 
@@ -168,16 +159,12 @@ public final class NiriRecipe implements ImagingRecipe, SpectroscopyRecipe {
                 niriParameters.readMode().getReadNoise());
         specS2N.setSourceSpectrum(calcSource.sed);
         specS2N.setBackgroundSpectrum(calcSource.sky);
-        if (altair.isDefined())
-            specS2N.setSpecHaloSourceFraction(halo_spec_source_frac);
-        else
-            specS2N.setSpecHaloSourceFraction(0.0);
 
         calcSource.sed.accept(specS2N);
 
         final SpecS2N[] specS2Narr = new SpecS2N[1];
         specS2Narr[0] = specS2N;
-        return new GenericSpectroscopyResult(p, instrument, SFcalc, IQcalc, specS2Narr, st, altair);
+        return new SpectroscopyResult(p, instrument, SFcalc, IQcalc, specS2Narr, st, altair);
     }
 
     public ImagingResult calculateImaging() {

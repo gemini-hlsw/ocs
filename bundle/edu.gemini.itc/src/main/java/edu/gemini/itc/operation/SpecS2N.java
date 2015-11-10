@@ -9,14 +9,12 @@ import java.util.stream.IntStream;
  */
 public interface SpecS2N {
 
+    double getImageQuality();
+    double getSpecNpix();
     VisitableSampledSpectrum getSignalSpectrum();
     VisitableSampledSpectrum getBackgroundSpectrum();
     VisitableSampledSpectrum getExpS2NSpectrum();
     VisitableSampledSpectrum getFinalS2NSpectrum();
-
-    double getImageQuality();
-    double getSpecFracWithSource();
-    double getSpecNpix();
 
     default double getPeakPixelCount() {
         final double[] sig = getSignalSpectrum().getValues();

@@ -1,13 +1,11 @@
 package edu.gemini.itc.web.html;
 
-import edu.gemini.itc.base.GnirsSpectroscopyResult;
 import edu.gemini.itc.base.SpectroscopyResult;
 import edu.gemini.itc.gnirs.Gnirs;
 import edu.gemini.itc.gnirs.GnirsRecipe;
 import edu.gemini.itc.shared.*;
 import edu.gemini.spModel.core.PointSource$;
 import edu.gemini.spModel.core.UniformSource$;
-import scala.Tuple2;
 
 import java.io.PrintWriter;
 import java.util.UUID;
@@ -27,13 +25,13 @@ public final class GnirsPrinter extends PrinterBase {
     }
 
     public void writeOutput() {
-        final GnirsSpectroscopyResult r = recipe.calculateSpectroscopy();
+        final SpectroscopyResult r = recipe.calculateSpectroscopy();
         final ItcSpectroscopyResult s = recipe.serviceResult(r);
         final UUID id = cache(s);
         writeSpectroscopyOutput(id, r, s);
     }
 
-    private void writeSpectroscopyOutput(final UUID id, final GnirsSpectroscopyResult result, final ItcSpectroscopyResult s) {
+    private void writeSpectroscopyOutput(final UUID id, final SpectroscopyResult result, final ItcSpectroscopyResult s) {
         _println("");
 
         final Gnirs instrument = (Gnirs) result.instrument();
@@ -76,10 +74,10 @@ public final class GnirsPrinter extends PrinterBase {
             _printImageLink(id, SignalChart.instance(), pdp);
             _println("");
 
-            for (int i = 0; i < result.signalOrder().length; i++) {
+            for (int i = 0; i < GnirsRecipe.ORDERS; i++) {
                 _printFileLink(id, SignalData.instance(), 0, i, "Order " + (i+3));
             }
-            for (int i = 0; i < result.backGroundOrder().length; i++) {
+            for (int i = 0; i < GnirsRecipe.ORDERS; i++) {
                 _printFileLink(id, BackgroundData.instance(), 0, i, "Order " + (i+3));
             }
 
@@ -87,7 +85,7 @@ public final class GnirsPrinter extends PrinterBase {
             _println("");
 
 
-            for (int i = 0; i < result.finalS2NOrder().length; i++) {
+            for (int i = 0; i < GnirsRecipe.ORDERS; i++) {
                 _printFileLink(id, FinalS2NData.instance(), 0, i, "Order " + (i+3));
             }
 

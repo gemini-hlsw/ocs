@@ -15,8 +15,9 @@ import scalaz._
 case class Column(label: String, value: (ItcUniqueConfig, String\/ItcParameters, Future[ItcService.Result]) => AnyRef, tooltip: String = "")
 
 object ItcTableModel {
-  val PeakPixelTooltip    = "Peak pixel value = signal + background"
-  val PeakElectronTooltip = "Peak e- per exposure"
+  val PeakPixelETooltip   = "Peak (e): Signal + Background in electrons"
+  val PeakPixelAduTooltip = "Peak (ADU): Signal + Background in ADU"
+  val PeakPixelFWTooltip  = "Peak (%FW): Signal + Background in percent of the detector full well"
 }
 
 /** ITC tables have three types of columns: a series of header columns, then all the dynamic values that change and are
@@ -27,16 +28,16 @@ sealed trait ItcTableModel extends AbstractTableModel {
 
   /// Define some generic columns. Values are rendered as strings in order to have them left aligned, similar to other sequence tables.
   val LabelsColumn  = Column("Data\nLabels",          (c, i, r) => (resultIcon(r).orNull, c.labels))
-  val ImagesColumn  = Column("Images",                (c, i, r) => s"${c.count}",                      tooltip = "Number of exposures used in S/N calculation")
-  val CoaddsColumn  = Column("Coadds",                (c, i, r) => s"${c.coadds.getOrElse(1.0)}",      tooltip = "Number of coadds")
-  val ExpTimeColumn = Column("Exposure\nTime (s)",    (c, i, r) => f"${c.singleExposureTime}%.1f",     tooltip = "Exposure time of each image")
-  val TotTimeColumn = Column("Total Exp.\nTime (s)",  (c, i, r) => f"${c.totalExposureTime}%.1f",      tooltip = "Total exposure time")
-  val SrcMagColumn  = Column("Source\nMag",           (c, i, r) => i.map(sourceMag).toOption,          tooltip = "Source magnitude (mag)")
-  val SrcFracColumn = Column("Source\nFraction",      (c, i, r) => i.map(sourceFraction).toOption,     tooltip = "Fraction of images on source")
+  val ImagesColumn  = Column("Images",                (c, i, r) => s"${c.count}",                     tooltip = "Number of exposures used in S/N calculation")
+  val CoaddsColumn  = Column("Coadds",                (c, i, r) => s"${c.coadds.getOrElse(1.0)}",     tooltip = "Number of coadds")
+  val ExpTimeColumn = Column("Exposure\nTime (s)",    (c, i, r) => f"${c.singleExposureTime}%.1f",    tooltip = "Exposure time of each image")
+  val TotTimeColumn = Column("Total Exp.\nTime (s)",  (c, i, r) => f"${c.totalExposureTime}%.1f",     tooltip = "Total exposure time")
+  val SrcMagColumn  = Column("Source\nMag",           (c, i, r) => i.map(sourceMag).toOption,         tooltip = "Source magnitude (mag)")
+  val SrcFracColumn = Column("Source\nFraction",      (c, i, r) => i.map(sourceFraction).toOption,    tooltip = "Fraction of images on source")
 
-  val PeakPixelColumn     = Column("Peak\n(e-)",       (c, i, r) => peakPixelFlux(r),          tooltip = ItcTableModel.PeakPixelTooltip)
-  val PeakADUColumn       = Column("Peak\n(ADU)",      (c, i, r) => imgAdu(r))
-  val PeakFullWellColumn  = Column("Peak\n(% Full Well)",(c, i, r) => imgPercentWell(r))
+  val PeakPixelColumn     = Column("Peak\n(e-)",      (c, i, r) => peakPixelFlux(r),                  tooltip = ItcTableModel.PeakPixelETooltip)
+  val PeakADUColumn       = Column("Peak\n(ADU)",     (c, i, r) => imgAdu(r),                         tooltip = ItcTableModel.PeakPixelAduTooltip)
+  val PeakFullWellColumn  = Column("Peak\n(%FW)",     (c, i, r) => imgPercentWell(r),                 tooltip = ItcTableModel.PeakPixelFWTooltip)
   val SNSingleColumn      = Column("S/N Single",      (c, i, r) => singleSNRatio(r))
   val SNTotalColumn       = Column("S/N Total",       (c, i, r) => totalSNRatio (r))
 
@@ -158,21 +159,21 @@ class ItcGenericImagingTableModel(val keys: List[ItemKey], val uniqueSteps: List
 class ItcGmosImagingTableModel(val keys: List[ItemKey], val uniqueSteps: List[ItcUniqueConfig], val inputs: List[String\/ItcParameters], val res: List[Future[ItcService.Result]]) extends ItcImagingTableModel {
   val headers = Headers
   val results = List(
-    Column("CCD1 Peak\n(e-)",           (c, i, r) => peakPixelFlux  (r, ccd=0),   tooltip = ItcTableModel.PeakPixelTooltip),
-    Column("CCD1 Peak\n(ADU)",          (c, i, r) => imgAdu         (r, ccd=0)),
-    Column("CCD1 Peak\n(% Full Well)",  (c, i, r) => imgPercentWell (r, ccd=0)),
+    Column("CCD1 Peak\n(e-)",           (c, i, r) => peakPixelFlux  (r, ccd=0),   tooltip = ItcTableModel.PeakPixelETooltip),
+    Column("CCD1 Peak\n(ADU)",          (c, i, r) => imgAdu         (r, ccd=0),   tooltip = ItcTableModel.PeakPixelAduTooltip),
+    Column("CCD1 Peak\n(% Full Well)",  (c, i, r) => imgPercentWell (r, ccd=0),   tooltip = ItcTableModel.PeakPixelFWTooltip),
     Column("CCD1\nS/N Single",          (c, i, r) => singleSNRatio  (r, ccd=0)),
     Column("CCD1\nS/N Total",           (c, i, r) => totalSNRatio   (r, ccd=0)),
 
-    Column("CCD2 Peak\n(e-)",           (c, i, r) => peakPixelFlux  (r, ccd=1),   tooltip = ItcTableModel.PeakPixelTooltip),
-    Column("CCD2 Peak\n(ADU)",          (c, i, r) => imgAdu         (r, ccd=1)),
-    Column("CCD2 Peak\n(% Full Well)",  (c, i, r) => imgPercentWell (r, ccd=1)),
+    Column("CCD2 Peak\n(e-)",           (c, i, r) => peakPixelFlux  (r, ccd=1),   tooltip = ItcTableModel.PeakPixelETooltip),
+    Column("CCD2 Peak\n(ADU)",          (c, i, r) => imgAdu         (r, ccd=1),   tooltip = ItcTableModel.PeakPixelAduTooltip),
+    Column("CCD2 Peak\n(% Full Well)",  (c, i, r) => imgPercentWell (r, ccd=1),   tooltip = ItcTableModel.PeakPixelFWTooltip),
     Column("CCD2\nS/N Single",          (c, i, r) => singleSNRatio  (r, ccd=1)),
     Column("CCD2\nS/N Total",           (c, i, r) => totalSNRatio   (r, ccd=1)),
 
-    Column("CCD3 Peak\n(e-)",           (c, i, r) => peakPixelFlux  (r, ccd=2),   tooltip = ItcTableModel.PeakPixelTooltip),
-    Column("CCD3 Peak\n(ADU)",          (c, i, r) => imgAdu         (r, ccd=2)),
-    Column("CCD3 Peak\n(% Full Well)",  (c, i, r) => imgPercentWell (r, ccd=2)),
+    Column("CCD3 Peak\n(e-)",           (c, i, r) => peakPixelFlux  (r, ccd=2),   tooltip = ItcTableModel.PeakPixelETooltip),
+    Column("CCD3 Peak\n(ADU)",          (c, i, r) => imgAdu         (r, ccd=2),   tooltip = ItcTableModel.PeakPixelAduTooltip),
+    Column("CCD3 Peak\n(% Full Well)",  (c, i, r) => imgPercentWell (r, ccd=2),   tooltip = ItcTableModel.PeakPixelFWTooltip),
     Column("CCD3\nS/N Single",          (c, i, r) => singleSNRatio  (r, ccd=2)),
     Column("CCD3\nS/N Total",           (c, i, r) => totalSNRatio   (r, ccd=2))
   )

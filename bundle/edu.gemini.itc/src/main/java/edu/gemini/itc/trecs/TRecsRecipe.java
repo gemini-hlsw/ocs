@@ -3,6 +3,7 @@ package edu.gemini.itc.trecs;
 import edu.gemini.itc.base.*;
 import edu.gemini.itc.operation.*;
 import edu.gemini.itc.shared.*;
+import scala.Option;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -168,7 +169,7 @@ public final class TRecsRecipe implements ImagingRecipe, SpectroscopyRecipe {
 
         final SpecS2NLargeSlitVisitor[] specS2Narr = new SpecS2NLargeSlitVisitor[1];
         specS2Narr[0] = specS2N;
-        return SpectroscopyResult$.MODULE$.apply(p, instrument, null, IQcalc, specS2Narr, st); // TODO SFCalc not needed!
+        return new SpectroscopyResult(p, instrument, null, IQcalc, specS2Narr, st, Option.empty()); // TODO SFCalc not needed!
     }
 
     public ImagingResult calculateImaging() {

@@ -73,10 +73,10 @@ public final class Flamingos2Printer extends PrinterBase {
         _println(String.format("derived image size(FWHM) for a point source = %.2f arcsec", result.iqCalc().getImageQuality()));
 
         _println("");
-        final double totExpTime = result.parameters().observation().getExposureTime() * result.parameters().observation().getNumExposures();
+        final double totExpTime = result.observation().getExposureTime() * result.observation().getNumExposures();
         _println(String.format(
                 "Requested total integration time = %.2f secs, of which %.2f secs is on source.",
-                totExpTime, totExpTime * result.specS2N()[0].getSpecFracWithSource()));
+                totExpTime, totExpTime * result.observation().getSourceFraction()));
 
         _println("");
         _printPeakPixelInfo(s.ccd(0));

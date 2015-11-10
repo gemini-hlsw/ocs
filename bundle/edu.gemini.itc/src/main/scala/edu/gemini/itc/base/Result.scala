@@ -44,45 +44,16 @@ object ImagingResult {
 
 }
 
-sealed trait SpectroscopyResult extends Result {
-  val sfCalc: SourceFraction
-  val iqCalc: ImageQualityCalculatable
-  val specS2N: Array[SpecS2N]
-  val st: SlitThroughput
-  val aoSystem: Option[AOSystem]
+/* Internal object for generic spectroscopy results. */
+final case class SpectroscopyResult(
+                      parameters:       ItcParameters,
+                      instrument:       Instrument,
+                      sfCalc:           SourceFraction,
+                      iqCalc:           ImageQualityCalculatable,
+                      specS2N:          Array[SpecS2N],
+                      st:               SlitThroughput,
+                      aoSystem:         Option[AOSystem]) extends Result {
   lazy val peakPixelCount: Double = specS2N.map(_.getPeakPixelCount).max
 }
 
-/* Internal object for generic spectroscopy results (all instruments except for GNIRS). */
-final case class GenericSpectroscopyResult(
-                      parameters:       ItcParameters,
-                      instrument:       Instrument,
-                      sfCalc:           SourceFraction,
-                      iqCalc:           ImageQualityCalculatable,
-                      specS2N:          Array[SpecS2N],
-                      st:               SlitThroughput,
-                      aoSystem:         Option[AOSystem]) extends SpectroscopyResult
-
-/* Internal object for GNIRS spectroscopy results.
- * I somehow think it should be possible to unify this in a clever way with the "generic" spectroscopy result
- * used for the other instruments, but right now I don't understand the calculations well enough to figure out
- * how to do that in a meaningful way. */
-final case class GnirsSpectroscopyResult(
-                      parameters:       ItcParameters,
-                      instrument:       Instrument,
-                      sfCalc:           SourceFraction,
-                      iqCalc:           ImageQualityCalculatable,
-                      specS2N:          Array[SpecS2N],
-                      st:               SlitThroughput,
-                      aoSystem:         Option[AOSystem],
-                      signalOrder:      Array[VisitableSampledSpectrum],
-                      backGroundOrder:  Array[VisitableSampledSpectrum],
-                      finalS2NOrder:    Array[VisitableSampledSpectrum]) extends SpectroscopyResult
-
-object SpectroscopyResult {
-
-  def apply(parameters: ItcParameters, instrument: Instrument, sfCalc: SourceFraction, iqCalc: ImageQualityCalculatable, specS2N: Array[SpecS2N], st: SlitThroughput) =
-    new GenericSpectroscopyResult(parameters, instrument, sfCalc, iqCalc, specS2N, st, None)
-
-}
 
