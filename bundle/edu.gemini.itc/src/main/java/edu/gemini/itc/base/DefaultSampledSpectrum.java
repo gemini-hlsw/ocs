@@ -283,14 +283,9 @@ public class DefaultSampledSpectrum implements VisitableSampledSpectrum {
      * @throws Exception If either limit is out of range.
      */
     private double getSum(int startIndex, int endIndex) {
+        assert startIndex <= endIndex;
         assert startIndex >= 0 && startIndex < getLength();
         assert endIndex   >= 0 && endIndex   < getLength();
-
-        if (startIndex > endIndex) {
-            int temp = startIndex;
-            startIndex = endIndex;
-            endIndex = temp;
-        }
 
         double sum = 0.0;
         for (int i = startIndex; i <= endIndex; ++i) {
@@ -306,16 +301,9 @@ public class DefaultSampledSpectrum implements VisitableSampledSpectrum {
      * @throws Exception If either limit is out of range.
      */
     public double getIntegral(double x_start, double x_end) {
+        assert x_start <= x_end;
         assert x_start >= getStart() && x_start <= getEnd();
         assert x_end   >= getStart() && x_end   <= getEnd();
-
-        boolean negative = false;
-        if (x_start > x_end) {
-            double temp = x_start;
-            x_start = x_end;
-            x_end = temp;
-            negative = true;
-        }
 
         // Add up trapezoid areas.
         // x1 and x2 may not be exactly on sampling points so do
@@ -343,7 +331,7 @@ public class DefaultSampledSpectrum implements VisitableSampledSpectrum {
 
         area += getIntegral(start_index, end_index);
 
-        return (negative) ? -area : area;
+        return area;
     }
 
     /**
@@ -351,19 +339,12 @@ public class DefaultSampledSpectrum implements VisitableSampledSpectrum {
      * specified range between specified indices.
      */
     private double getIntegral(int start_index, int end_index) {
+        assert start_index <= end_index;
         assert start_index >= 0 && start_index < getLength();
         assert end_index   >= 0 && end_index   < getLength();
 
         if (start_index == end_index) {
             return 0.0; // REL-478
-        }
-
-        boolean negative = false;
-        if (start_index > end_index) {
-            int temp = start_index;
-            start_index = end_index;
-            end_index = temp;
-            negative = true;
         }
 
         // Add up trapezoidal areas.
@@ -377,7 +358,7 @@ public class DefaultSampledSpectrum implements VisitableSampledSpectrum {
         area += getY(start_index) + getY(end_index);
         area *= getSampling() / 2.0;
 
-        return (negative) ? -area : area;
+        return area;
     }
 
     /**
