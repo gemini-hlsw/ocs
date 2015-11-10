@@ -31,20 +31,4 @@ public interface OptimizableGuideProbeGroup extends GuideProbeGroup {
      */
     TargetEnvironment add(SPTarget guideStar, boolean isBAGS, ObsContext ctx);
 
-    /**
-     * Optimizes the assignment of guide stars to guiders according to the given
-     * {@link edu.gemini.spModel.obs.context.ObsContext context}.  This method
-     * returns a new {@link TargetEnvironment} that contains the
-     * updated assignment of guide stars to guide probes.
-     *
-     * @param ctx the context of the observation, which contains information
-     * needed to assign the best combination of guiders to guide stars
-     *
-     * @return if the target environment can be optimized, a newly optimized
-     * TargetEnvironment suited for the given {@link ObsContext context}
-     * wrapped in a {@link edu.gemini.shared.util.immutable.Some} object;
-     * {@link edu.gemini.shared.util.immutable.None} if there are no updates
-     * to make to the context
-     */
-    Option<TargetEnvironment> optimize(ObsContext ctx);
 }
