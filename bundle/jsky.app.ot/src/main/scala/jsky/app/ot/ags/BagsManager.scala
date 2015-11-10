@@ -33,7 +33,7 @@ final class BagsManager(executor: ScheduledThreadPoolExecutor) {
   /** Syntax for ObsContext. */
   implicit class ObsContextOps(ctx: ObsContext) {
     private def extractPrimaryGuideGroupTargets(): List[GuideProbeTargets] = {
-      ctx.getTargets.getGuideEnvironment.getPrimary.asScalaOpt.fold(Nil: List[GuideProbeTargets])(_.getAll.asScalaList)
+      ctx.getTargets.getGuideEnvironment.getPrimary.asScalaOpt.fold(List.empty[GuideProbeTargets])(_.getAll.asScalaList)
     }
 
     def hasManualPrimary: Boolean = extractPrimaryGuideGroupTargets().exists(_.primaryIsManual)
@@ -130,6 +130,23 @@ final class BagsManager(executor: ScheduledThreadPoolExecutor) {
         if (dequeue(key, obs.getProgramID)) {
           // Otherwise construct an obs context, verify that it's bagworthy, and go
           ObsContext.create(obs).asScalaOpt.filter(obsCtxFilter).foreach { ctx =>
+            // Reset the BAGS result to NoSearchPerformed.
+            // We do this so if the OT is closed before the search is completed, it knows to start the search
+            // again on startup.
+            def resetBagsResult(): Unit = {
+              obs.getProgram.removeCompositeChangeListener(CompositePropertyChangeListener)
+              obs.getProgram.removeStructureChangeListener(StructurePropertyChangeListener)
+              val tpeContext = TpeContext(obs)
+              val newEnv = BagsManager.clearBagsTargets(tpeContext.targets.envOrDefault, BagsResult.NoSearchPerformed)
+              tpeContext.targets.dataObject.foreach { targetComp =>
+                targetComp.setTargetEnvironment(newEnv)
+                tpeContext.targets.commit()
+              }
+              obs.getProgram.addStructureChangeListener(StructurePropertyChangeListener)
+              obs.getProgram.addCompositeChangeListener(CompositePropertyChangeListener)
+            }
+            resetBagsResult()
+
             bagsStatus(BagsStatus.Pending)
             executor.schedule(new Runnable {
 
@@ -151,9 +168,12 @@ final class BagsManager(executor: ScheduledThreadPoolExecutor) {
                       if (!state.keys(key)) {
                         LOG.info(s"$bagsIdMsg successful. Results=${optExtract(selOpt) ? "Yes" | "No"}.")
                         Swing.onEDT {
+                          // Unfortunately, we need a fresh TpeContext here in case any changes were made since scheduling
+                          // with the executor.
+                          val tpeContext = TpeContext(obs)
                           obs.getProgram.removeCompositeChangeListener(CompositePropertyChangeListener)
                           obs.getProgram.removeStructureChangeListener(StructurePropertyChangeListener)
-                          worker(TpeContext(obs), selOpt)
+                          worker(tpeContext, selOpt)
                           obs.getProgram.addStructureChangeListener(StructurePropertyChangeListener)
                           obs.getProgram.addCompositeChangeListener(CompositePropertyChangeListener)
                         }
@@ -300,4 +320,8 @@ object BagsManager {
     }
     oldEnv.setGuideEnvironment(newGuideEnv)
   }
+
+  // Determine if an ObsContext has a primary guide group with a primary guide star.
+  def hasPrimary(ctx: ObsContext): Boolean =
+    ctx.getTargets.getGuideEnvironment.getPrimary.asScalaOpt.exists(_.getAll.asScalaList.forall(_.getPrimary.isDefined))
 }

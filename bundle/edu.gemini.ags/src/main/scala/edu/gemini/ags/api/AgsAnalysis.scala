@@ -65,13 +65,13 @@ object AgsAnalysis {
   case class NoGuideStarForProbe(guideProbe: GuideProbe, probeBands: BandsList) extends AgsAnalysis {
     override def message(withProbe: Boolean): String = {
       val p = if (withProbe) s"${guideProbe.getKey} " else ""
-      s"No ${p}guide star selected."
+      s"No ${p}guide star found."
     }
   }
 
   case class NoGuideStarForGroup(guideGroup: GuideProbeGroup, probeBands: BandsList) extends AgsAnalysis {
     override def message(withProbe: Boolean): String =
-      s"No ${guideGroup.getKey} guide star selected."
+      s"No ${guideGroup.getKey} guide star found."
   }
 
   case class MagnitudeTooFaint(guideProbe: GuideProbe, target: SiderealTarget, probeBands: BandsList) extends AgsAnalysis {

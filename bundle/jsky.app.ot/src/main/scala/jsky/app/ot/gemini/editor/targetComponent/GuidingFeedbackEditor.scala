@@ -27,8 +27,10 @@ class GuidingFeedbackEditor extends TelescopePosEditor {
         s <- BagsManager.instance.bagsStatus(o.getNodeKey)
       } yield BagsStatusRow(s)
 
-      val feedbackRows = ctxOpt.asScalaOpt.map(GuidingFeedback.targetAnalysis(_, mt, target)).getOrElse(Nil)
-      bagsRow.fold(feedbackRows)(_ :: feedbackRows)
+      // If the BAGS row is defined, then use it. If not, create the rows corresponding to the analysis.
+      bagsRow.fold(
+        ctxOpt.asScalaOpt.map(GuidingFeedback.targetAnalysis(_, mt, target)).getOrElse(Nil)
+      )(List(_))
     }
 
     if (rows.isEmpty)

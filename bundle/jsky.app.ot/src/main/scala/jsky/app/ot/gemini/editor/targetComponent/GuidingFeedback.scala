@@ -63,10 +63,9 @@ object GuidingFeedback {
     }
 
     private val statusIcon = bagsStatus match {
-      case BagsStatus.Pending | BagsStatus.Running => Resources.getIcon("ajax-loader.gif")//"eclipse/add_menu.gif")//Resources.getIcon("ajax-loader.gif");
+      case BagsStatus.Pending | BagsStatus.Running => Resources.getIcon("ajax-loader.gif")
       case BagsStatus.Failed(_)                    => null
     }
-    println(s"*** bagsStatus=$bagsStatus, statusIcon=$statusIcon")
 
     object feedbackLabel extends Label {
       border              = labelBorder
