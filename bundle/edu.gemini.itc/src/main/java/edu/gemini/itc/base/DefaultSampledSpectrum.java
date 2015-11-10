@@ -1,8 +1,5 @@
 package edu.gemini.itc.base;
 
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
-
 /**
  * Default implementation of SampledSpectrum interface.
  * This implementation internally has a uniformly-spaced data points.
@@ -60,13 +57,13 @@ public class DefaultSampledSpectrum implements VisitableSampledSpectrum {
     /**
      * Implements the Cloneable interface.
      */
-    public Object clone() {
+    @Override public Object clone() {
         double[] data = new double[getLength()];
         System.arraycopy(getValues(), 0, data, 0, getLength());
         return new DefaultSampledSpectrum(data, getStart(), getSampling());
     }
 
-    public void trim(double newStart, double newEnd) {
+    @Override public void trim(double newStart, double newEnd) {
         if (newStart < getStart()) {
             newStart = getStart();
         }
@@ -90,7 +87,7 @@ public class DefaultSampledSpectrum implements VisitableSampledSpectrum {
      * I don't like a method that sets everything at once, but I inherited
      * this code so I will leave it.
      */
-    public void reset(double[] y, double xStart,
+    @Override public void reset(double[] y, double xStart,
                       double xInterval) {
         _y = new double[y.length];
         // need our own copy so client can't mess with it.
@@ -112,7 +109,7 @@ public class DefaultSampledSpectrum implements VisitableSampledSpectrum {
      * SampledSpectrumVisitor r = new Resample();
      * s.Accept(r);
      */
-    public void accept(SampledSpectrumVisitor v) {
+    @Override public void accept(SampledSpectrumVisitor v) {
         v.visit(this);
     }
 
@@ -125,42 +122,42 @@ public class DefaultSampledSpectrum implements VisitableSampledSpectrum {
      * referenct to actual member data.  The client must not alter this
      * return value.
      */
-    public double[] getValues() {
+    @Override public double[] getValues() {
         return _y;
     }
 
     /**
      * @return starting x
      */
-    public double getStart() {
+    @Override public double getStart() {
         return _xStart;
     }
 
     /**
      * @return ending x
      */
-    public double getEnd() {
+    @Override public double getEnd() {
         return _xEnd;
     }
 
     /**
      * @return x sample size (bin size)
      */
-    public double getSampling() {
+    @Override public double getSampling() {
         return _xInterval;
     }
 
     /**
      * @return flux value in specified bin
      */
-    public double getY(int index) {
+    @Override public double getY(int index) {
         return _y[index];
     }
 
     /**
      * @return x of specified bin
      */
-    public double getX(int index) {
+    @Override public double getX(int index) {
         return getStart() + index * getSampling();
     }
 
@@ -168,7 +165,7 @@ public class DefaultSampledSpectrum implements VisitableSampledSpectrum {
      * @return y value at specified x using linear interpolation.
      * Silently returns zero if x is out of spectrum range.
      */
-    public double getY(double x) {
+    @Override public double getY(double x) {
         if (x < getStart() || x > getEnd()) return 0;
         if (x == getEnd()) return getY(getLength() - 1);
         int low_index = getLowerIndex(x);
@@ -184,14 +181,14 @@ public class DefaultSampledSpectrum implements VisitableSampledSpectrum {
     /**
      * Returns the index of the data point with largest x value less than x
      */
-    public int getLowerIndex(double x) {
+    @Override public int getLowerIndex(double x) {
         return (int) ((x - getStart()) / getSampling());
     }
 
     /**
      * @return number of bins in the histogram (number of data points)
      */
-    public int getLength() {
+    @Override public int getLength() {
         return _y.length;
     }
 
@@ -201,7 +198,7 @@ public class DefaultSampledSpectrum implements VisitableSampledSpectrum {
     //
 
 
-    public void applyWavelengthCorrection() {
+    @Override public void applyWavelengthCorrection() {
         double start = getStart();
         double sampling = getSampling();
 
@@ -214,7 +211,7 @@ public class DefaultSampledSpectrum implements VisitableSampledSpectrum {
      * Sets y value in specified x bin.
      * If specified bin is out of range, this is a no-op.
      */
-    public void setY(int bin, double y) {
+    @Override public void setY(int bin, double y) {
         if (bin < 0 || bin >= getLength()) return;  // no-op
         _y[bin] = y;
     }
@@ -222,7 +219,7 @@ public class DefaultSampledSpectrum implements VisitableSampledSpectrum {
     /**
      * Rescales X axis by specified factor. Doesn't change sampling size.
      */
-    public void rescaleX(double factor) {
+    @Override public void rescaleX(double factor) {
         if (factor == 1.0) return;
         double xStart = getStart() * factor;
         double xEnd = getEnd() * factor;
@@ -239,14 +236,14 @@ public class DefaultSampledSpectrum implements VisitableSampledSpectrum {
     /**
      * Rescales Y axis by specified factor.
      */
-    public void rescaleY(double factor) {
+    @Override public void rescaleY(double factor) {
         if (factor == 1.0) return;
         for (int i = 0; i < getLength(); ++i) {
             _y[i] *= factor;
         }
     }
 
-    public void smoothY(int smoothing_element) {
+    @Override public void smoothY(int smoothing_element) {
         double[] _y_temp;
         _y_temp = new double[_y.length];
 
@@ -273,24 +270,10 @@ public class DefaultSampledSpectrum implements VisitableSampledSpectrum {
     }
 
     /**
-     * Returns the sum of all the y values in the SampledSpectrum
-     */
-    public double getSum() {
-        return getSum(0, getLength() - 1);
-    }
-
-    /**
      * Returns the integral of all the y values in the SampledSpectrum
      */
-    public double getIntegral() {
+    @Override public double getIntegral() {
         return getIntegral(getStart(), getEnd());
-    }
-
-    /**
-     * Returns the average of all the y values in the SampledSpectrum
-     */
-    public double getAverage() {
-        return getAverage(getStart(), getEnd());
     }
 
     /**
@@ -299,15 +282,10 @@ public class DefaultSampledSpectrum implements VisitableSampledSpectrum {
      *
      * @throws Exception If either limit is out of range.
      */
-    public double getSum(int startIndex, int endIndex) {
+    private double getSum(int startIndex, int endIndex) {
+        assert startIndex <= endIndex;
         assert startIndex >= 0 && startIndex < getLength();
         assert endIndex   >= 0 && endIndex   < getLength();
-
-        if (startIndex > endIndex) {
-            int temp = startIndex;
-            startIndex = endIndex;
-            endIndex = temp;
-        }
 
         double sum = 0.0;
         for (int i = startIndex; i <= endIndex; ++i) {
@@ -317,45 +295,15 @@ public class DefaultSampledSpectrum implements VisitableSampledSpectrum {
     }
 
     /**
-     * Returns the sum of y values in the spectrum in
-     * the specified range.
-     *
-     * @throws Exception If either limit is out of range.
-     */
-    public double getSum(double x_start, double x_end) {
-        assert x_start >= getStart() && x_start <= getEnd();
-        assert x_end   >= getStart() && x_end   <= getEnd();
-
-        if (x_start > x_end) {
-            double temp = x_start;
-            x_start = x_end;
-            x_end = temp;
-        }
-
-        int startIndex = getLowerIndex(x_start);
-        int endIndex = getLowerIndex(x_end);
-        if (getX(endIndex) < x_end) endIndex++;
-
-        return getSum(startIndex, endIndex);
-    }
-
-    /**
      * Returns the integral of y values in the spectrum in
      * the specified range.
      *
      * @throws Exception If either limit is out of range.
      */
     public double getIntegral(double x_start, double x_end) {
+        assert x_start <= x_end;
         assert x_start >= getStart() && x_start <= getEnd();
         assert x_end   >= getStart() && x_end   <= getEnd();
-
-        boolean negative = false;
-        if (x_start > x_end) {
-            double temp = x_start;
-            x_start = x_end;
-            x_end = temp;
-            negative = true;
-        }
 
         // Add up trapezoid areas.
         // x1 and x2 may not be exactly on sampling points so do
@@ -383,27 +331,20 @@ public class DefaultSampledSpectrum implements VisitableSampledSpectrum {
 
         area += getIntegral(start_index, end_index);
 
-        return (negative) ? -area : area;
+        return area;
     }
 
     /**
      * Returns the integral of values in the SampledSpectrum in the
      * specified range between specified indices.
      */
-    public double getIntegral(int start_index, int end_index) {
+    private double getIntegral(int start_index, int end_index) {
+        assert start_index <= end_index;
         assert start_index >= 0 && start_index < getLength();
         assert end_index   >= 0 && end_index   < getLength();
 
         if (start_index == end_index) {
             return 0.0; // REL-478
-        }
-
-        boolean negative = false;
-        if (start_index > end_index) {
-            int temp = start_index;
-            start_index = end_index;
-            end_index = temp;
-            negative = true;
         }
 
         // Add up trapezoidal areas.
@@ -417,14 +358,14 @@ public class DefaultSampledSpectrum implements VisitableSampledSpectrum {
         area += getY(start_index) + getY(end_index);
         area *= getSampling() / 2.0;
 
-        return (negative) ? -area : area;
+        return area;
     }
 
     /**
      * Returns the average of values in the SampledSpectrum in
      * the specified range.
      */
-    public double getAverage(double x_start, double x_end) {
+    @Override public double getAverage(double x_start, double x_end) {
         return getIntegral(x_start, x_end) / (x_end - x_start);
     }
 
@@ -432,7 +373,7 @@ public class DefaultSampledSpectrum implements VisitableSampledSpectrum {
      * Returns the average of values in the SampledSpectrum in
      * the specified range.
      */
-    public double getAverage(int indexStart, int indexEnd) {
+    private double getAverage(int indexStart, int indexEnd) {
         return getIntegral(indexStart, indexEnd) /
                 (getX(indexEnd) - getX(indexStart));
     }
@@ -444,7 +385,7 @@ public class DefaultSampledSpectrum implements VisitableSampledSpectrum {
      * data[0][i] = x values
      * data[1][i] = y values
      */
-    public double[][] getData() {
+    @Override public double[][] getData() {
         return getData(_y.length - 1);  // the whole SampledSpectrum
     }
 
@@ -457,7 +398,7 @@ public class DefaultSampledSpectrum implements VisitableSampledSpectrum {
      *
      * @param maxXIndex data is returned up to maximum specified x bin
      */
-    public double[][] getData(int maxXIndex) {
+    @Override public double[][] getData(int maxXIndex) {
         return getData(0, maxXIndex);
     }
 
@@ -471,7 +412,7 @@ public class DefaultSampledSpectrum implements VisitableSampledSpectrum {
      * @param minXIndex data is returned starts at minimum specified x bin
      * @param maxXIndex data is returned up to maximum specified x bin
      */
-    public double[][] getData(int minXIndex, int maxXIndex) {
+    @Override public double[][] getData(int minXIndex, int maxXIndex) {
         if (maxXIndex >= _y.length) maxXIndex = _y.length - 1;
         if (minXIndex < 0) maxXIndex = 0;
         double data[][] = new double[2][maxXIndex - minXIndex + 1];

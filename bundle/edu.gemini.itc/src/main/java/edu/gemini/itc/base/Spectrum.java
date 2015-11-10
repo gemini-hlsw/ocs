@@ -28,25 +28,9 @@ public interface Spectrum extends Cloneable {
     double getY(double x);
 
     /**
-     * Returns the sum of entire spectrum.
-     */
-    double getSum();
-
-    /**
      * Returns the integral of entire spectrum.
      */
     double getIntegral();
-
-    /**
-     * Returns the average of entire spectrum.
-     */
-    double getAverage();
-
-    /**
-     * Returns the Sum of y values in the spectrum in
-     * the specified range.
-     */
-    double getSum(double x_start, double x_end);
 
     /**
      * Returns the average of values in the Spectrum in

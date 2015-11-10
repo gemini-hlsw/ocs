@@ -114,31 +114,9 @@ final class BlackBodySpectrum(spectrum: DefaultSampledSpectrum) extends Visitabl
   }
 
   /**
-   * Returns the sum of all the y values in the SampledSpectrum
-   */
-  def getSum: Double = spectrum.getSum
-
-  /**
    * Returns the integral of all the y values in the SampledSpectrum
    */
   def getIntegral: Double =spectrum.getIntegral
-
-  /**
-   * Returns the average of all the y values in the SampledSpectrum
-   */
-  def getAverage: Double = spectrum.getAverage
-
-  /**
-   * Returns the sum of y values in the spectrum in
-   * the specified index range.
-   */
-  def getSum(startIndex: Int, endIndex: Int): Double = spectrum.getSum(startIndex, endIndex)
-
-  /**
-   * Returns the sum of y values in the spectrum in
-   * the specified range.
-   */
-  def getSum(x_start: Double, x_end: Double): Double = spectrum.getSum(x_start, x_end)
 
   /**
    * Returns the average of values in the SampledSpectrum in
