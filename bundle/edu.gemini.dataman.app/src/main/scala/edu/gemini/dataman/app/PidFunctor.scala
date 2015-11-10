@@ -11,15 +11,11 @@ import java.security.Principal
   * ODB.
   */
 final class PidFunctor extends DBAbstractQueryFunctor {
-  private var pids = List.empty[SPProgramID]
+  private val pids = List.newBuilder[SPProgramID]
 
   override def execute(db: IDBDatabaseService, node: ISPNode, principals: java.util.Set[Principal]): Unit = {
-    val pidOpt = node match {
-      case p: ISPProgram => Option(p.getProgramID)
-      case _             => None
-    }
-    pidOpt.foreach { pid =>
-      pids = pid :: pids
+    Option(node.getProgramID).foreach { pid =>
+      pids += pid
     }
   }
 }
@@ -29,6 +25,6 @@ object PidFunctor {
     tryOp {
       val fun = new PidFunctor
       odb.getQueryRunner(user).queryPrograms(fun)
-      fun.pids
+      fun.pids.result()
     }
 }

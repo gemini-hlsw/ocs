@@ -75,7 +75,7 @@ public class EObslogVisit extends TransferBase {
 
     public SPObservationID getObservationID() {
         if (_dsetRecords.size() ==  0) return null;
-        return _dsetRecords.get(0).getLabel().getObservationId();
+        return _dsetRecords.get(0).label().getObservationId();
     }
 
 }

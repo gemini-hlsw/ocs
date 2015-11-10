@@ -30,7 +30,7 @@ final class RetryFailedRunnable(
       Duration.between(i, Instant.now()).compareTo(minDelay) > 0
 
     Log.info("Dataman retry failed QA updates.")
-    DatasetFunctor.exec(odb, user) {
+    DatasetFunctor.collectExec(odb, user) {
       case DatasetExecRecord(ds, ActiveRequest(_, _, id0, Failed(_), w, _), _) if oldEnough(w) => (ds.getLabel, id0)
     } match {
       case \/-(labs) =>

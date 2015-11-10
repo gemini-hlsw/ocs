@@ -59,7 +59,7 @@ class EventConverter {
         while (_recIndex < _records.length) {
             DatasetRecord rec = _records[_recIndex];
 
-            long datasetTime = rec.exec.dataset().getTimestamp();
+            long datasetTime = rec.exec().dataset().getTimestamp();
 
             if (_timesMatch(datasetTime, eventTime)) {
                 ++_recIndex;
@@ -115,7 +115,7 @@ class EventConverter {
                         time);
                 return null;
             }
-            return new StartDatasetEvent(time, rec.exec.dataset());
+            return new StartDatasetEvent(time, rec.exec().dataset());
         }
 
         LOG.log(Level.WARNING, "Unknown event type, skipping: '" + name + "'");

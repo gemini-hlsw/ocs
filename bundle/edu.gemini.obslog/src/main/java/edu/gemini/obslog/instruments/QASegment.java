@@ -70,13 +70,13 @@ public final class QASegment extends OlBasicSegment implements Serializable {
         for (DatasetRecord dset : evisit.getDatasetRecords()) {
             // Now check to see if the  dataset should be included
             if (_filter != null) {
-                if (!_filter.includeDataset(dset.getLabel())) {
-                    if (LOG.isLoggable(Level.FINE)) LOG.fine("Skipping dataset: " + dset.getLabel());
+                if (!_filter.includeDataset(dset.label())) {
+                    if (LOG.isLoggable(Level.FINE)) LOG.fine("Skipping dataset: " + dset.label());
                     continue;
                 }
             }
             // Add it to the list of datasets
-            _datasetIDs.add(dset.getLabel().toString());
+            _datasetIDs.add(dset.label().toString());
 
             // Create one map and share the EObslogVisit uniqueconfig for all of them
             QAConfigMap map = new QAConfigMap(evisit.getUniqueConfig(), dset, getTableInfo());

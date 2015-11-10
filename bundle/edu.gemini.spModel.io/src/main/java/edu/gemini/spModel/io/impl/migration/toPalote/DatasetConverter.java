@@ -96,7 +96,7 @@ final class DatasetConverter {
     public DatasetRecord toDatasetRecord(ParamSet grilloDset, DatasetQaState qa) {
         DatasetRecord rec = toDatasetRecord(grilloDset);
         if (rec == null) return null;
-        return rec.withQa(rec.qa.withQaState(qa));
+        return rec.withQa(rec.qa().withQaState(qa));
     }
 
     /**

@@ -2,8 +2,6 @@ package edu.gemini.dataman.app
 
 import edu.gemini.dataman.core._
 import edu.gemini.pot.spdb.IDBDatabaseService
-import edu.gemini.spModel.dataset.{QaRequestStatus, DatasetExecRecord}
-import edu.gemini.spModel.dataset.SummitState.ActiveRequest
 import edu.gemini.util.security.principal.StaffPrincipal
 
 import java.security.Principal
@@ -57,14 +55,7 @@ object Dataman {
   private def resetOngoingRequests(config: DmanConfig, odb: IDBDatabaseService): TryDman[Unit] = {
     Log.info("Data Manager resetting incomplete QA requests.")
 
-    val action = for {
-      labs <- DatasetFunctor.exec(odb, User) {
-                case DatasetExecRecord(ds, ActiveRequest(_, _, uid, stat, _, _), _) if stat != QaRequestStatus.Accepted => (ds.getLabel, uid)
-              }.liftDman
-      ups  <- new ObsLogActions(odb).failRequest(labs, "Data Manager was shutdown before request completed.")
-    } yield ups
-
-    action.unsafeRun.map { case (_, ex) =>
+    ResetOngoingAction(odb, User).unsafeRun.map { case (_, ex) =>
       Log.info("Data Manager reset to failed: " + ex.map(_.label).mkString(", "))
     }
   }

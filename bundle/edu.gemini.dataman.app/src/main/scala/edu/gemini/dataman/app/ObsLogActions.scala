@@ -4,7 +4,7 @@ import edu.gemini.dataman.app.ModelActions._
 import edu.gemini.dataman.core._
 import edu.gemini.pot.sp.SPObservationID
 import edu.gemini.pot.spdb.IDBDatabaseService
-import edu.gemini.spModel.dataset.{Dataset, DatasetQaRecord, DatasetLabel, SummitState, DatasetExecRecord, DatasetGsaState}
+import edu.gemini.spModel.dataset.{DatasetQaState, Dataset, DatasetQaRecord, DatasetLabel, SummitState, DatasetExecRecord, DatasetGsaState}
 import edu.gemini.spModel.dataset.Implicits._
 import edu.gemini.spModel.dataset.SummitState.Idle
 import edu.gemini.spModel.obsrecord.ObsExecRecord
@@ -111,10 +111,17 @@ final class ObsLogActions(odb: IDBDatabaseService) {
   /** Resets any outstanding ongoing active requests to failed.  This is used
     * at startup to retry requests that weren't completed.
     */
-  def failRequest(labs: List[(DatasetLabel, UUID)], msg: String): DmanAction[DatasetUpdates] =
+  def failActiveRequest(labs: List[(DatasetLabel, UUID)], msg: String): DmanAction[DatasetUpdates] =
     sequence {
       grouped(labs)(_._1).map { case (oid, ups) =>
           summitStateAction(oid, ups.map { case (lab, id0) => Transition(lab, _.transition.activeToFailed(id0, msg)) })
+      }
+    }
+
+  def failIdleRequest(labs: List[(DatasetLabel, DatasetQaState)], msg: String): DmanAction[DatasetUpdates] =
+    sequence {
+      grouped(labs)(_._1).map { case (oid, ups) =>
+          summitStateAction(oid, ups.map { case (lab, qa) => Transition(lab, _.transition.pendingSyncToFailed(qa, msg)) })
       }
     }
 
@@ -180,7 +187,7 @@ final class ObsLogActions(odb: IDBDatabaseService) {
             _ <- DmanAction {
               // Apply the updates, which requires mutations.
               exUpdates.foreach(up => exRecord.putDatasetExecRecord(up, null))
-              qaUpdates.foreach(up => qaRecord.updated(up))
+              qaUpdates.foreach(qaLog.set)
               if (exUpdates.nonEmpty) exNode.setDataObject(exLog)
               if (qaUpdates.nonEmpty) qaNode.setDataObject(qaLog)
             }

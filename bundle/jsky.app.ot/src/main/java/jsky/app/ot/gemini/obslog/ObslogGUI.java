@@ -341,7 +341,7 @@ public class ObslogGUI extends JPanel {
                     final ListSelectionModel lsm = getSelectionModel();
                     for (int i = lsm.getMinSelectionIndex(); i <= lsm.getMaxSelectionIndex(); i++) {
                         if (lsm.isSelectedIndex(i))
-                            selection.add(prev.records.get(i).getLabel());
+                            selection.add(prev.records.get(i).label());
                     }
 
                     // Swap the model
@@ -351,7 +351,7 @@ public class ObslogGUI extends JPanel {
 
                     // And restore the selection
                     for (int i = 0; i < next.records.size(); i++) {
-                        if (selection.contains(next.records.get(i).getLabel()))
+                        if (selection.contains(next.records.get(i).label()))
                             lsm.addSelectionInterval(i, i);
                     }
                     editArea.setEnabled(!lsm.isSelectionEmpty());

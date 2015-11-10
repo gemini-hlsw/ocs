@@ -184,8 +184,15 @@ sealed trait SummitState { self =>
       * eventually retried.
       */
     def activeToFailed(id: UUID, msg: String): SummitState = self match {
-      case ar@ActiveRequest(gsa, _, `id`, _, _, _) => ar.updated(Failed(msg))
-      case _                                       => self
+      case ar@ActiveRequest(_, _, `id`, _, _, _) => ar.updated(Failed(msg))
+      case _                                     => self
+    }
+
+    /**
+      */
+    def pendingSyncToFailed(qa: DatasetQaState, msg: String): SummitState = self match {
+      case Idle(gsa) => ActiveRequest(gsa, qa, UUID.randomUUID(), Failed(msg), Instant.now(), 1)
+      case _         => self
     }
   }
 }
