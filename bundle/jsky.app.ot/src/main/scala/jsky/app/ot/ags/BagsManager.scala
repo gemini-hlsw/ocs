@@ -124,33 +124,40 @@ final class BagsManager(executor: ScheduledThreadPoolExecutor) {
             (!initialEnqueue || obsCtx.isMissingSearch) &&
             ObservationStatus.computeFor(obs) != ObservationStatus.OBSERVED
 
+        // Unfortunately, we have to create an ObsContext here AND at thread execution time.
+        // This check is to clear the "Pending" status from BAGS if the user creates a primary target during the
+        // time that a BAGS task is scheduled to run.
+        // If no primary is scheduled to run, then a second ObsContext needs to be created during execution to
+        // make sure that the task is still eligible to be run.
+        if (ObsContext.create(obs).asScalaOpt.exists(_.hasManualPrimary))
+          bagsClearStatus()
+
         // If dequeue is false this means that (a) another task scheduled *after* me ended up
         // running before me, so their result is as good as mine would have been and we're done;
         // or (b) we don't care about that program anymore, so we're done.
-        if (dequeue(key, obs.getProgramID)) {
-          // Otherwise construct an obs context, verify that it's bagworthy, and go
-          ObsContext.create(obs).asScalaOpt.filter(obsCtxFilter).foreach { ctx =>
-            // Reset the BAGS result to NoSearchPerformed.
-            // We do this so if the OT is closed before the search is completed, it knows to start the search
-            // again on startup.
-            def resetBagsResult(): Unit = {
-              obs.getProgram.removeCompositeChangeListener(CompositePropertyChangeListener)
-              obs.getProgram.removeStructureChangeListener(StructurePropertyChangeListener)
+        else if (dequeue(key, obs.getProgramID)) {
+          // Reset the BAGS result to NoSearchPerformed.
+          // We do this so if the OT is closed before the search is completed, it knows to start the search
+          // again on startup.
+          def resetBagsResult(): Unit = {
+            def resetAction(): Unit = {
               val tpeContext = TpeContext(obs)
               val newEnv = BagsManager.clearBagsTargets(tpeContext.targets.envOrDefault, BagsResult.NoSearchPerformed)
               tpeContext.targets.dataObject.foreach { targetComp =>
                 targetComp.setTargetEnvironment(newEnv)
                 tpeContext.targets.commit()
               }
-              obs.getProgram.addStructureChangeListener(StructurePropertyChangeListener)
-              obs.getProgram.addCompositeChangeListener(CompositePropertyChangeListener)
             }
-            resetBagsResult()
+            quietAction(obs, resetAction)
+          }
 
-            bagsStatus(BagsStatus.Pending)
-            executor.schedule(new Runnable {
+          resetBagsResult()
+          bagsStatus(BagsStatus.Pending)
 
-              override def run(): Unit = {
+          executor.schedule(new Runnable {
+            override def run(): Unit = {
+              // Otherwise construct an obs context, verify that it's bagworthy, and go
+              ObsContext.create(obs).asScalaOpt.filter(obsCtxFilter).foreach { ctx =>
                 //   do the lookup
                 //   on success {
                 //      if we're in the queue again, it means something changed while this task was
@@ -167,16 +174,7 @@ final class BagsManager(executor: ScheduledThreadPoolExecutor) {
                       // was running, so discard the result.
                       if (!state.keys(key)) {
                         LOG.info(s"$bagsIdMsg successful. Results=${optExtract(selOpt) ? "Yes" | "No"}.")
-                        Swing.onEDT {
-                          // Unfortunately, we need a fresh TpeContext here in case any changes were made since scheduling
-                          // with the executor.
-                          val tpeContext = TpeContext(obs)
-                          obs.getProgram.removeCompositeChangeListener(CompositePropertyChangeListener)
-                          obs.getProgram.removeStructureChangeListener(StructurePropertyChangeListener)
-                          worker(tpeContext, selOpt)
-                          obs.getProgram.addStructureChangeListener(StructurePropertyChangeListener)
-                          obs.getProgram.addCompositeChangeListener(CompositePropertyChangeListener)
-                        }
+                        Swing.onEDT(quietAction(obs, () => worker(TpeContext(obs), selOpt)))
                         bagsClearStatus()
                       }
 
@@ -228,11 +226,21 @@ final class BagsManager(executor: ScheduledThreadPoolExecutor) {
                   }
                 }
               }
-            }, delay, TimeUnit.MILLISECONDS)
-          }
+            }
+          }, delay, TimeUnit.MILLISECONDS)
         }
       }
     }
+
+  // Perform an action without the listeners listening.
+  private def quietAction[T](obs: ISPObservation, action: () => T): T = {
+    obs.getProgram.removeCompositeChangeListener(CompositePropertyChangeListener)
+    obs.getProgram.removeStructureChangeListener(StructurePropertyChangeListener)
+    val result = action()
+    obs.getProgram.addStructureChangeListener(StructurePropertyChangeListener)
+    obs.getProgram.addCompositeChangeListener(CompositePropertyChangeListener)
+    result
+  }
 
   object CompositePropertyChangeListener extends PropertyChangeListener {
     override def propertyChange(evt: PropertyChangeEvent): Unit =
@@ -267,31 +275,29 @@ final class BagsManager(executor: ScheduledThreadPoolExecutor) {
   def clearBagsStatusListeners(): Unit =
     listeners = Nil
 
-  private def notifyBagsStatusListeners(obs: ISPObservation, oldStatus: Option[BagsStatus], newStatus: Option[BagsStatus]): Unit = {
-    listeners.foreach(l => Try{l.bagsStatusChanged(obs, oldStatus.asGeminiOpt, newStatus.asGeminiOpt)})
-  }
+  private def notifyBagsStatusListeners(obs: ISPObservation, oldStatus: Option[BagsStatus], newStatus: Option[BagsStatus]): Unit =
+    listeners.foreach(l => Try { l.bagsStatusChanged(obs, oldStatus.asGeminiOpt, newStatus.asGeminiOpt) } )
 }
 
 object BagsManager {
   private val NumThreads = math.max(1, Runtime.getRuntime.availableProcessors - 1)
   val instance = new BagsManager(new ScheduledThreadPoolExecutor(NumThreads, new ThreadFactory {
-    override def newThread(r: Runnable): Thread = {
-      val thread = new Thread(r)
-      thread.setPriority(Thread.NORM_PRIORITY-1)
-      thread
-    }
+    override def newThread(r: Runnable): Thread =
+      new Thread(r) {
+        setPriority(Thread.NORM_PRIORITY-1)
+      }
   }))
 
   // Check two target environments to see if the BAGS targets match exactly between them.
   def bagsTargetsMatch(oldEnv: TargetEnvironment, newEnv: TargetEnvironment): Boolean = {
-    // Find a group with a BAGS target in it in the old and new envs.
-    val oldGroup = oldEnv.getGroups.asScala.find(gg => gg.getAll.asScala.exists(_.getBagsResult.target.isDefined))
-    val newGroup = newEnv.getGroups.asScala.find(gg => gg.getAll.asScala.exists(_.getBagsResult.target.isDefined))
+    // Find a group with BAGS targets and extract all the GuideProbeTargets from it.
+    def extractGPT(env: TargetEnvironment): List[GuideProbeTargets] = {
+      val guideGroupOpt = env.getGroups.asScala.find(_.getAll.asScala.exists(_.getBagsResult.target.isDefined))
+      guideGroupOpt.toList.flatMap(_.getAll.asScala.filter(_.getBagsResult.target.isDefined))
+    }
 
-    // Now compare the two groups to see if they have the same BAGS targets.
-    // Filter the GuideProbeTargets of the oldGroup to make sure that we are only looking at GPTs with BAGS.
-    val oldGpt = oldGroup.toList.flatMap(gg => gg.getAll.asScala.filter(_.getBagsResult.target.isDefined))
-    val newGpt = newGroup.toList.flatMap(gg => gg.getAll.asScala.filter(_.getBagsResult.target.isDefined))
+    val oldGpt = extractGPT(oldEnv)
+    val newGpt = extractGPT(newEnv)
 
     // Now compare the two lists to make sure they have the same BAGS targets.
     (oldGpt.size == newGpt.size) &&
@@ -320,8 +326,4 @@ object BagsManager {
     }
     oldEnv.setGuideEnvironment(newGuideEnv)
   }
-
-  // Determine if an ObsContext has a primary guide group with a primary guide star.
-  def hasPrimary(ctx: ObsContext): Boolean =
-    ctx.getTargets.getGuideEnvironment.getPrimary.asScalaOpt.exists(_.getAll.asScalaList.forall(_.getPrimary.isDefined))
 }

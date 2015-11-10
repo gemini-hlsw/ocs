@@ -368,7 +368,7 @@ public final class GuideProbeTargets implements Serializable, TargetContainer, I
     /**
      * Determine if the primary guide star exists but is not a BAGS target.
      */
-    public boolean primaryIsManual() { return primaryTarget.exists(manualTargets::contains); }
+    public boolean primaryIsManual() { return primaryTarget.isDefined() && !primaryIsBagsTarget(); }
 
     /**
      * Set the BAGS result. If the primary is the old BAGS result or unset, the the primary is set to the
