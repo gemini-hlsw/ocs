@@ -67,10 +67,10 @@ object To2016A extends Migration {
     val isUnblocked = Set("UNBLOCKED_Y", "UNBLOCKED_H", "UNBLOCKED_J", "UNBLOCKED_K1", "UNBLOCKED_K2")
     for {
       gpi <- d.findContainers(SPComponentType.INSTRUMENT_GPI)
-      ps  <- Option(gpi.getParamSet("GPI")) if Option(ps.getParam("observingMode")).map(_.getValue).exists(isUnblocked)
-    } {
-      Option(ps.getParam("useCal")).foreach(_.setValue("false"))
-    }
+      ps  <- Option(gpi.getParamSet("GPI"))
+      m   <- Option(ps.getParam("observingMode")) if isUnblocked(m.getValue)
+      use <- Option(ps.getParam("useCal"))
+    } use.setValue("false")
   }
 
 
