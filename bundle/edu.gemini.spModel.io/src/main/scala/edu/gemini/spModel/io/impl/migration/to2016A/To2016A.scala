@@ -1,10 +1,11 @@
 package edu.gemini.spModel.io.impl.migration.to2016A
 
+import edu.gemini.pot.sp.SPComponentType
 import edu.gemini.spModel.io.impl.SpIOTags
 import edu.gemini.spModel.io.impl.migration.Migration
 import edu.gemini.spModel.io.impl.migration.PioSyntax._
 import edu.gemini.spModel.pio.{Container, Document, Param, Version}
-import edu.gemini.spModel.pio.xml.{PioXmlUtil}
+import edu.gemini.spModel.pio.xml.PioXmlUtil
 
 import scala.collection.JavaConverters._
 
@@ -31,7 +32,7 @@ object To2016A extends Migration {
 
   // These will be applied in the given order
   private val conversions: List[Document => Unit] = List(
-    addUnitsToELine, demotePluto
+    addUnitsToELine, demotePluto, updateGpiUnblockedModes
   )
 
   // Starting 2016A we store squants quantities with their units, older programs need to have units added
@@ -58,6 +59,20 @@ object To2016A extends Migration {
       ps.removeChild(sys)
       plutoParams.foreach(ps.addParam)
     }
+
+
+  //All unblocked modes in GPI must set useCal = false
+  private def updateGpiUnblockedModes(d: Document): Unit = {
+
+    val isUnblocked = Set("UNBLOCKED_Y", "UNBLOCKED_H", "UNBLOCKED_J", "UNBLOCKED_K1", "UNBLOCKED_K2")
+    for {
+      gpi <- d.findContainers(SPComponentType.INSTRUMENT_GPI)
+      ps  <- Option(gpi.getParamSet("GPI"))
+      m   <- Option(ps.getParam("observingMode")) if isUnblocked(m.getValue)
+      use <- Option(ps.getParam("useCal"))
+    } use.setValue("false")
+  }
+
 
   // Params taken from a program with a properly resolved Pluto (now an asteroid). This includes
   // only the system and orbital elements. Get a FRESH set of params each time! (important)

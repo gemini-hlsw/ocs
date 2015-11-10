@@ -1,5 +1,6 @@
 package edu.gemini.spModel.gemini.gpi;
 
+import edu.gemini.model.p1.mutable.GpiObservingMode;
 import edu.gemini.shared.util.immutable.None;
 import edu.gemini.shared.util.immutable.Some;
 import edu.gemini.spModel.config2.Config;
@@ -215,9 +216,20 @@ public class GpiTest  extends TestCase {
     }
 
     public void testUnblockedModes() {
-        Gpi inst = new Gpi();
-        inst.setObservingMode(new Some<>(Gpi.ObservingMode.UNBLOCKED_H));
-        assertEquals(inst.getFpm(), Gpi.FPM.SCIENCE);
+        Gpi.ObservingMode[] unblockedModes = new Gpi.ObservingMode[] {
+                Gpi.ObservingMode.UNBLOCKED_H,
+                Gpi.ObservingMode.UNBLOCKED_J,
+                Gpi.ObservingMode.UNBLOCKED_K1,
+                Gpi.ObservingMode.UNBLOCKED_K2,
+                Gpi.ObservingMode.UNBLOCKED_Y};
+
+        for (Gpi.ObservingMode obsMode: unblockedModes) {
+            Gpi inst = new Gpi();
+            assertTrue(inst.isUseCal());
+            inst.setObservingMode(new Some<>(obsMode));
+            assertEquals(inst.getFpm(), Gpi.FPM.SCIENCE);
+            assertFalse(inst.isUseCal());
+        }
     }
 
     // REL-2229
