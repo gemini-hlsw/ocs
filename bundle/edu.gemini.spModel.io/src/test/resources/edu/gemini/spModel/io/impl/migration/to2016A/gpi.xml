@@ -1,0 +1,282 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE document PUBLIC "-//Gemini Observatory//DTD for Storage of P1 and P2 Documents//EN" "http://ftp.gemini.edu/Support/xml/dtds/SpXML2.dtd">
+
+<document>
+  <container kind="program" type="Program" version="2015B-1" subtype="basic" key="69c5daf7-95e9-452b-b830-7f9f01693929" name="">
+    <paramset name="Science Program" kind="dataObj">
+      <param name="programMode" value="QUEUE"/>
+      <param name="tooType" value="none"/>
+      <param name="programStatus" value="PHASE2"/>
+      <param name="nextObsId" value="1"/>
+      <paramset name="timeAcct"/>
+      <param name="awardedTime" value="0.0" units="hours"/>
+      <param name="fetched" value="true"/>
+      <param name="completed" value="false"/>
+      <param name="notifyPi" value="YES"/>
+    </paramset>
+    <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="8417a8d7-6e8e-4fbd-8d26-3193ea54983a" name="">
+      <paramset name="Observation" kind="dataObj">
+        <param name="title" value="GPI Observation"/>
+        <param name="libraryId" value=""/>
+        <param name="priority" value="LOW"/>
+        <param name="tooOverrideRapid" value="false"/>
+        <param name="phase2Status" value="PI_TO_COMPLETE"/>
+        <param name="qaState" value="UNDEFINED"/>
+        <param name="overrideQaState" value="false"/>
+      </paramset>
+      <container kind="obsComp" type="Scheduling" version="2009A-1" subtype="conditions" key="1138b5c9-8fd1-4357-ab7d-76969453f30b" name="Observing Conditions">
+        <paramset name="Observing Conditions" kind="dataObj">
+          <param name="CloudCover" value="ANY"/>
+          <param name="ImageQuality" value="ANY"/>
+          <param name="SkyBackground" value="ANY"/>
+          <param name="WaterVapor" value="ANY"/>
+          <param name="ElevationConstraintType" value="NONE"/>
+          <param name="ElevationConstraintMin" value="0.0"/>
+          <param name="ElevationConstraintMax" value="0.0"/>
+          <paramset name="timing-window-list"/>
+        </paramset>
+      </container>
+      <container kind="obsComp" type="Telescope" version="2009B-1" subtype="targetEnv" key="6ab76f1d-2a2b-4f59-aa03-e3861208da20" name="Targets">
+        <paramset name="Targets" kind="dataObj">
+          <paramset name="targetEnv">
+            <paramset name="base">
+              <param name="name" value=""/>
+              <param name="system" value="J2000"/>
+              <param name="epoch" value="2000.0" units="years"/>
+              <param name="c1" value="00:00:00.000"/>
+              <param name="c2" value="00:00:00.00"/>
+              <param name="pm1" value="0.0" units="milli-arcsecs/year"/>
+              <param name="pm2" value="0.0" units="milli-arcsecs/year"/>
+              <param name="parallax" value="0.0" units="mas"/>
+              <param name="z" value="0.0"/>
+            </paramset>
+            <paramset name="guideEnv"/>
+          </paramset>
+        </paramset>
+      </container>
+      <container kind="obsComp" type="Instrument" version="2009A-1" subtype="GPI" key="b5d47a1b-93de-4c28-8394-41b594b1454d" name="GPI">
+        <paramset name="GPI" kind="dataObj">
+          <param name="exposureTime" value="1.49"/>
+          <param name="posAngle" value="0"/>
+          <param name="coadds" value="1"/>
+          <param name="astrometricFieldEnum" value="NO"/>
+          <param name="adc" value="IN"/>
+          <param name="observingMode" value="UNBLOCKED_H"/>
+          <param name="disperser" value="PRISM"/>
+          <param name="detectorStartX" value="0"/>
+          <param name="detectorStartY" value="0"/>
+          <param name="detectorEndX" value="2047"/>
+          <param name="detectorEndY" value="2047"/>
+          <param name="entranceShutter" value="OPEN"/>
+          <param name="scienceArmShutter" value="OPEN"/>
+          <param name="calEntranceShutter" value="OPEN"/>
+          <param name="referenceArmShutter" value="OPEN"/>
+          <param name="irLaserLamp" value="OFF"/>
+          <param name="visibleLaserLamp" value="OFF"/>
+          <param name="superContinuumLamp" value="OFF"/>
+          <param name="artificialSourceAttenuation" value="60.0"/>
+          <param name="pupilCamera" value="OUT"/>
+          <param name="detectorSamplingMode" value="UTR"/>
+          <param name="alwaysRestoreModel" value="false"/>
+          <param name="useAo" value="true"/>
+          <param name="useCal" value="true"/>
+          <param name="aoOptimize" value="true"/>
+          <param name="alignFpmPinholeBias" value="false"/>
+        </paramset>
+      </container>
+      <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="6ed914f6-eb26-4da4-b6ba-8fce00fc3645" name="Observing Log">
+        <paramset name="Observing Log" kind="dataObj">
+          <paramset name="obsQaRecord"/>
+        </paramset>
+      </container>
+      <container kind="obsExecLog" type="ObsLog" version="2009A-1" subtype="exec" key="254785b7-a675-484d-98b0-8f935d6b4471" name="Observation Exec Log">
+        <paramset name="Observation Exec Log" kind="dataObj">
+          <paramset name="obsExecRecord">
+            <paramset name="datasets"/>
+            <paramset name="events"/>
+            <paramset name="configMap"/>
+          </paramset>
+        </paramset>
+      </container>
+      <container kind="seqComp" type="Iterator" version="2012A-1" subtype="base" key="69bd9183-327a-4a6e-9a94-3bf4b253e8ef" name="Sequence">
+        <paramset name="Sequence" kind="dataObj"/>
+      </container>
+    </container>
+    <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="f33a6055-5deb-4cab-8e71-6ebebf030655" name="">
+      <paramset name="Observation" kind="dataObj">
+        <param name="title" value="GPI Observation"/>
+        <param name="libraryId" value=""/>
+        <param name="priority" value="LOW"/>
+        <param name="tooOverrideRapid" value="false"/>
+        <param name="phase2Status" value="PI_TO_COMPLETE"/>
+        <param name="qaState" value="UNDEFINED"/>
+        <param name="overrideQaState" value="false"/>
+      </paramset>
+      <container kind="obsComp" type="Scheduling" version="2009A-1" subtype="conditions" key="4a18af9e-38ce-4367-951e-bc68d68ae4a0" name="Observing Conditions">
+        <paramset name="Observing Conditions" kind="dataObj">
+          <param name="CloudCover" value="ANY"/>
+          <param name="ImageQuality" value="ANY"/>
+          <param name="SkyBackground" value="ANY"/>
+          <param name="WaterVapor" value="ANY"/>
+          <param name="ElevationConstraintType" value="NONE"/>
+          <param name="ElevationConstraintMin" value="0.0"/>
+          <param name="ElevationConstraintMax" value="0.0"/>
+          <paramset name="timing-window-list"/>
+        </paramset>
+      </container>
+      <container kind="obsComp" type="Telescope" version="2009B-1" subtype="targetEnv" key="fd60565a-c1a6-490d-8478-c302b2ca6bfd" name="Targets">
+        <paramset name="Targets" kind="dataObj">
+          <paramset name="targetEnv">
+            <paramset name="base">
+              <param name="name" value=""/>
+              <param name="system" value="J2000"/>
+              <param name="epoch" value="2000.0" units="years"/>
+              <param name="c1" value="00:00:00.000"/>
+              <param name="c2" value="00:00:00.00"/>
+              <param name="pm1" value="0.0" units="milli-arcsecs/year"/>
+              <param name="pm2" value="0.0" units="milli-arcsecs/year"/>
+              <param name="parallax" value="0.0" units="mas"/>
+              <param name="z" value="0.0"/>
+            </paramset>
+            <paramset name="guideEnv"/>
+          </paramset>
+        </paramset>
+      </container>
+      <container kind="obsComp" type="Instrument" version="2009A-1" subtype="GPI" key="97ddc7a3-80b7-4db8-bc5e-710087c7edf0" name="GPI">
+        <paramset name="GPI" kind="dataObj">
+          <param name="exposureTime" value="1.49"/>
+          <param name="posAngle" value="0"/>
+          <param name="coadds" value="1"/>
+          <param name="astrometricFieldEnum" value="NO"/>
+          <param name="adc" value="IN"/>
+          <param name="observingMode" value="UNBLOCKED_K2"/>
+          <param name="disperser" value="PRISM"/>
+          <param name="detectorStartX" value="0"/>
+          <param name="detectorStartY" value="0"/>
+          <param name="detectorEndX" value="2047"/>
+          <param name="detectorEndY" value="2047"/>
+          <param name="entranceShutter" value="OPEN"/>
+          <param name="scienceArmShutter" value="OPEN"/>
+          <param name="calEntranceShutter" value="OPEN"/>
+          <param name="referenceArmShutter" value="OPEN"/>
+          <param name="irLaserLamp" value="OFF"/>
+          <param name="visibleLaserLamp" value="OFF"/>
+          <param name="superContinuumLamp" value="OFF"/>
+          <param name="artificialSourceAttenuation" value="60.0"/>
+          <param name="pupilCamera" value="OUT"/>
+          <param name="detectorSamplingMode" value="UTR"/>
+          <param name="alwaysRestoreModel" value="false"/>
+          <param name="useAo" value="true"/>
+          <param name="useCal" value="true"/>
+          <param name="aoOptimize" value="true"/>
+          <param name="alignFpmPinholeBias" value="false"/>
+        </paramset>
+      </container>
+      <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="afffd723-3954-4a5b-b9b6-926362c5e769" name="Observing Log">
+        <paramset name="Observing Log" kind="dataObj">
+          <paramset name="obsQaRecord"/>
+        </paramset>
+      </container>
+      <container kind="obsExecLog" type="ObsLog" version="2009A-1" subtype="exec" key="50311d65-a279-4966-9535-4102266fc075" name="Observation Exec Log">
+        <paramset name="Observation Exec Log" kind="dataObj">
+          <paramset name="obsExecRecord">
+            <paramset name="datasets"/>
+            <paramset name="events"/>
+            <paramset name="configMap"/>
+          </paramset>
+        </paramset>
+      </container>
+      <container kind="seqComp" type="Iterator" version="2012A-1" subtype="base" key="da987594-5263-4641-a173-0bc69290d15a" name="Sequence">
+        <paramset name="Sequence" kind="dataObj"/>
+      </container>
+    </container>
+    <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="d1e940d0-7300-4639-88b1-edd08cfb27f5" name="">
+      <paramset name="Observation" kind="dataObj">
+        <param name="title" value="GPI Observation"/>
+        <param name="libraryId" value=""/>
+        <param name="priority" value="LOW"/>
+        <param name="tooOverrideRapid" value="false"/>
+        <param name="phase2Status" value="PI_TO_COMPLETE"/>
+        <param name="qaState" value="UNDEFINED"/>
+        <param name="overrideQaState" value="false"/>
+      </paramset>
+      <container kind="obsComp" type="Scheduling" version="2009A-1" subtype="conditions" key="68654ca5-31d7-48c5-ace0-b14dbd128ae6" name="Observing Conditions">
+        <paramset name="Observing Conditions" kind="dataObj">
+          <param name="CloudCover" value="ANY"/>
+          <param name="ImageQuality" value="ANY"/>
+          <param name="SkyBackground" value="ANY"/>
+          <param name="WaterVapor" value="ANY"/>
+          <param name="ElevationConstraintType" value="NONE"/>
+          <param name="ElevationConstraintMin" value="0.0"/>
+          <param name="ElevationConstraintMax" value="0.0"/>
+          <paramset name="timing-window-list"/>
+        </paramset>
+      </container>
+      <container kind="obsComp" type="Telescope" version="2009B-1" subtype="targetEnv" key="489451dd-3411-49a1-9ed8-435af8c27dce" name="Targets">
+        <paramset name="Targets" kind="dataObj">
+          <paramset name="targetEnv">
+            <paramset name="base">
+              <param name="name" value=""/>
+              <param name="system" value="J2000"/>
+              <param name="epoch" value="2000.0" units="years"/>
+              <param name="c1" value="00:00:00.000"/>
+              <param name="c2" value="00:00:00.00"/>
+              <param name="pm1" value="0.0" units="milli-arcsecs/year"/>
+              <param name="pm2" value="0.0" units="milli-arcsecs/year"/>
+              <param name="parallax" value="0.0" units="mas"/>
+              <param name="z" value="0.0"/>
+            </paramset>
+            <paramset name="guideEnv"/>
+          </paramset>
+        </paramset>
+      </container>
+      <container kind="obsComp" type="Instrument" version="2009A-1" subtype="GPI" key="fb2f539f-a50c-4d12-9604-efdfbfddda4c" name="GPI">
+        <paramset name="GPI" kind="dataObj">
+          <param name="exposureTime" value="1.49"/>
+          <param name="posAngle" value="0"/>
+          <param name="coadds" value="1"/>
+          <param name="astrometricFieldEnum" value="NO"/>
+          <param name="adc" value="IN"/>
+          <param name="observingMode" value="CORON_Y_BAND"/>
+          <param name="disperser" value="PRISM"/>
+          <param name="detectorStartX" value="0"/>
+          <param name="detectorStartY" value="0"/>
+          <param name="detectorEndX" value="2047"/>
+          <param name="detectorEndY" value="2047"/>
+          <param name="entranceShutter" value="OPEN"/>
+          <param name="scienceArmShutter" value="OPEN"/>
+          <param name="calEntranceShutter" value="OPEN"/>
+          <param name="referenceArmShutter" value="OPEN"/>
+          <param name="irLaserLamp" value="OFF"/>
+          <param name="visibleLaserLamp" value="OFF"/>
+          <param name="superContinuumLamp" value="OFF"/>
+          <param name="artificialSourceAttenuation" value="60.0"/>
+          <param name="pupilCamera" value="OUT"/>
+          <param name="detectorSamplingMode" value="UTR"/>
+          <param name="alwaysRestoreModel" value="false"/>
+          <param name="useAo" value="true"/>
+          <param name="useCal" value="true"/>
+          <param name="aoOptimize" value="true"/>
+          <param name="alignFpmPinholeBias" value="false"/>
+        </paramset>
+      </container>
+      <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="cd4644d5-4b22-439d-86fb-84651505380f" name="Observing Log">
+        <paramset name="Observing Log" kind="dataObj">
+          <paramset name="obsQaRecord"/>
+        </paramset>
+      </container>
+      <container kind="obsExecLog" type="ObsLog" version="2009A-1" subtype="exec" key="885a2e0f-4686-481a-b22e-37943569aca3" name="Observation Exec Log">
+        <paramset name="Observation Exec Log" kind="dataObj">
+          <paramset name="obsExecRecord">
+            <paramset name="datasets"/>
+            <paramset name="events"/>
+            <paramset name="configMap"/>
+          </paramset>
+        </paramset>
+      </container>
+      <container kind="seqComp" type="Iterator" version="2012A-1" subtype="base" key="b366d0da-0d68-49f9-bd32-53b5aaace18b" name="Sequence">
+        <paramset name="Sequence" kind="dataObj"/>
+      </container>
+    </container>
+  </container>
+\</document>
