@@ -55,12 +55,6 @@ public interface ArraySpectrum extends Spectrum, Cloneable {
     void smoothY(int smoothing_element);
 
     /**
-     * Returns the sum of values in the ArraySpectrum in
-     * the specified range.
-     */
-    double getSum(int indexStart, int indexEnd);
-
-    /**
      * This returns a 2d array of the SED data used to chart the SED
      * using JClass Chart.  The array has the following dimensions
      * double data[][] = new double[2][getLength()];

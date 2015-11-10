@@ -69,21 +69,21 @@ public final class EmissionLineSpectrum implements VisitableSampledSpectrum {
 
 
     //Implements the clonable interface
-    public Object clone() {
+    @Override public Object clone() {
         final DefaultSampledSpectrum spectrum =
                 (DefaultSampledSpectrum) _spectrum.clone();
         return new EmissionLineSpectrum(spectrum);
     }
 
-    public void trim(final double startWavelength, final double endWavelength) {
+    @Override public void trim(final double startWavelength, final double endWavelength) {
         _spectrum.trim(startWavelength, endWavelength);
     }
 
-    public void reset(final double[] s, final double v, final double r) {
+    @Override public void reset(final double[] s, final double v, final double r) {
         _spectrum.reset(s, v, r);
     }
 
-    public void accept(final SampledSpectrumVisitor v) {
+    @Override public void accept(final SampledSpectrumVisitor v) {
         _spectrum.accept(v);
     }
 
@@ -96,42 +96,42 @@ public final class EmissionLineSpectrum implements VisitableSampledSpectrum {
      * referenct to actual member data.  The client must not alter this
      * return value.
      */
-    public double[] getValues() {
+    @Override public double[] getValues() {
         return _spectrum.getValues();
     }
 
     /**
      * @return starting x
      */
-    public double getStart() {
+    @Override public double getStart() {
         return _spectrum.getStart();
     }
 
     /**
      * @return ending x
      */
-    public double getEnd() {
+    @Override public double getEnd() {
         return _spectrum.getEnd();
     }
 
     /**
      * @return x sample size (bin size)
      */
-    public double getSampling() {
+    @Override public double getSampling() {
         return _spectrum.getSampling();
     }
 
     /**
      * @return flux value in specified bin
      */
-    public double getY(final int index) {
+    @Override public double getY(final int index) {
         return _spectrum.getY(index);
     }
 
     /**
      * @return x of specified bin
      */
-    public double getX(final int index) {
+    @Override public double getX(final int index) {
         return _spectrum.getX(index);
     }
 
@@ -140,7 +140,7 @@ public final class EmissionLineSpectrum implements VisitableSampledSpectrum {
      * @return y value at specified x using linear interpolation.
      * Silently returns zero if x is out of spectrum range.
      */
-    public double getY(final double x) {
+    @Override public double getY(final double x) {
         return _spectrum.getY(x);
     }
 
@@ -148,7 +148,7 @@ public final class EmissionLineSpectrum implements VisitableSampledSpectrum {
     /**
      * Returns the index of the data point with largest x value less than x
      */
-    public int getLowerIndex(final double x) {
+    @Override public int getLowerIndex(final double x) {
         return _spectrum.getLowerIndex(x);
     }
 
@@ -156,7 +156,7 @@ public final class EmissionLineSpectrum implements VisitableSampledSpectrum {
     /**
      * @return number of bins in the histogram (number of data points)
      */
-    public int getLength() {
+    @Override public int getLength() {
         return _spectrum.getLength();
     }
 
@@ -166,7 +166,7 @@ public final class EmissionLineSpectrum implements VisitableSampledSpectrum {
     //
 
 
-    public void applyWavelengthCorrection() {
+    @Override public void applyWavelengthCorrection() {
         _spectrum.applyWavelengthCorrection();
     }
 
@@ -174,14 +174,14 @@ public final class EmissionLineSpectrum implements VisitableSampledSpectrum {
      * Sets y value in specified x bin.
      * If specified bin is out of range, this is a no-op.
      */
-    public void setY(final int bin, final double y) {
+    @Override public void setY(final int bin, final double y) {
         _spectrum.setY(bin, y);
     }
 
     /**
      * Rescales X axis by specified factor. Doesn't change sampling size.
      */
-    public void rescaleX(final double factor) {
+    @Override public void rescaleX(final double factor) {
         _spectrum.rescaleX(factor);
     }
 
@@ -189,59 +189,26 @@ public final class EmissionLineSpectrum implements VisitableSampledSpectrum {
     /**
      * Rescales Y axis by specified factor.
      */
-    public void rescaleY(final double factor) {
+    @Override public void rescaleY(final double factor) {
         _spectrum.rescaleY(factor);
     }
 
-    public void smoothY(final int factor) {
+    @Override public void smoothY(final int factor) {
         _spectrum.smoothY(factor);
-    }
-
-    /**
-     * Returns the sum of all the y values in the SampledSpectrum
-     */
-    public double getSum() {
-        return _spectrum.getSum();
     }
 
     /**
      * Returns the integral of all the y values in the SampledSpectrum
      */
-    public double getIntegral() {
+    @Override public double getIntegral() {
         return _spectrum.getIntegral();
-    }
-
-
-    /**
-     * Returns the average of all the y values in the SampledSpectrum
-     */
-    public double getAverage() {
-        return _spectrum.getAverage();
-    }
-
-
-    /**
-     * Returns the sum of y values in the spectrum in
-     * the specified index range.
-     */
-    public double getSum(final int startIndex, final int endIndex) {
-        return _spectrum.getSum(startIndex, endIndex);
-    }
-
-
-    /**
-     * Returns the sum of y values in the spectrum in
-     * the specified range.
-     */
-    public double getSum(final double x_start, final double x_end) {
-        return _spectrum.getSum(x_start, x_end);
     }
 
     /**
      * Returns the average of values in the SampledSpectrum in
      * the specified range.
      */
-    public double getAverage(final double x_start, final double x_end) {
+    @Override public double getAverage(final double x_start, final double x_end) {
         return _spectrum.getAverage(x_start, x_end);
 
     }
@@ -253,7 +220,7 @@ public final class EmissionLineSpectrum implements VisitableSampledSpectrum {
      * data[0][i] = x values
      * data[1][i] = y values
      */
-    public double[][] getData() {
+    @Override public double[][] getData() {
         return _spectrum.getData();
 
     }
@@ -267,7 +234,7 @@ public final class EmissionLineSpectrum implements VisitableSampledSpectrum {
      *
      * @param maxXIndex data is returned up to maximum specified x bin
      */
-    public double[][] getData(final int maxXIndex) {
+    @Override public double[][] getData(final int maxXIndex) {
         return _spectrum.getData(maxXIndex);
     }
 
@@ -281,7 +248,7 @@ public final class EmissionLineSpectrum implements VisitableSampledSpectrum {
      * @param minXIndex data is returned from the minimum specified x bin
      * @param maxXIndex data is returned up to maximum specified x bin
      */
-    public double[][] getData(final int minXIndex, final int maxXIndex) {
+    @Override public double[][] getData(final int minXIndex, final int maxXIndex) {
         return _spectrum.getData(minXIndex, maxXIndex);
     }
 

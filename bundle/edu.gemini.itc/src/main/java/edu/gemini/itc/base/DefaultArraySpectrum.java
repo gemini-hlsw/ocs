@@ -34,7 +34,7 @@ public final class DefaultArraySpectrum implements ArraySpectrum {
     }
 
     /**
-     * Construce a DefaultSpectrum.  Data array must be of this form:
+     * Construct a DefaultSpectrum.  Data array must be of this form:
      * double data[][] = new double[2][length];
      * data[0][i] = x values
      * data[1][i] = y values
@@ -69,7 +69,7 @@ public final class DefaultArraySpectrum implements ArraySpectrum {
     /**
      * Implements Cloneable interface
      */
-    public Object clone() {
+    @Override public Object clone() {
         // constructor will clone the data array
         return new DefaultArraySpectrum(_data);
     }
@@ -77,28 +77,28 @@ public final class DefaultArraySpectrum implements ArraySpectrum {
     /**
      * @return starting x value
      */
-    public double getStart() {
+    @Override public double getStart() {
         return _data[0][0];
     }
 
     /**
      * @return ending x value
      */
-    public double getEnd() {
+    @Override public double getEnd() {
         return _data[0][_data[0].length - 1];
     }
 
     /**
      * Returns x value of specified data point.
      */
-    public double getX(int index) {
+    @Override public double getX(int index) {
         return _data[0][index];
     }
 
     /**
      * Returns y value of specified data point.
      */
-    public double getY(int index) {
+    @Override public double getY(int index) {
         return _data[1][index];
     }
 
@@ -106,7 +106,7 @@ public final class DefaultArraySpectrum implements ArraySpectrum {
      * @return y value at specified x using linear interpolation.
      * Silently returns zero if x is out of spectrum range.
      */
-    public double getY(double x) {
+    @Override public double getY(double x) {
         if (x < getStart() || x > getEnd()) return 0;
         int low_index = getLowerIndex(x);
         int high_index = low_index + 1;
@@ -121,14 +121,14 @@ public final class DefaultArraySpectrum implements ArraySpectrum {
     /**
      * @return number of bins in the histogram (number of data points)
      */
-    public int getLength() {
+    @Override public int getLength() {
         return _data[0].length;
     }
 
     /**
      * Returns the index of the data point with largest x value less than x
      */
-    public int getLowerIndex(double x) {
+    @Override public int getLowerIndex(double x) {
         // In a general spectrum we don't have an idea which bin a particular
         // x value is in.  The only solution is to search for it.
         // Could just walk through, but do a binary search for it.
@@ -145,7 +145,7 @@ public final class DefaultArraySpectrum implements ArraySpectrum {
         return low_index;
     }
 
-    public void applyWavelengthCorrection() {
+    @Override public void applyWavelengthCorrection() {
 
         for (int i = 0; i < getLength(); ++i) {
             _data[1][i] = _data[1][i] * _data[0][i];
@@ -156,7 +156,7 @@ public final class DefaultArraySpectrum implements ArraySpectrum {
      * Sets y value in specified x bin.
      * If specified bin is out of range, this is a no-op.
      */
-    public void setY(int index, double y) {
+    @Override public void setY(int index, double y) {
         if (index < 0 || index >= getLength()) return;  // no-op
         _data[1][index] = y;
     }
@@ -164,7 +164,7 @@ public final class DefaultArraySpectrum implements ArraySpectrum {
     /**
      * Rescales X axis by specified factor.
      */
-    public void rescaleX(double factor) {
+    @Override public void rescaleX(double factor) {
         if (factor == 1.0) return;
         for (int i = 0; i < getLength(); ++i) {
             _data[0][i] *= factor;
@@ -174,14 +174,14 @@ public final class DefaultArraySpectrum implements ArraySpectrum {
     /**
      * Rescales Y axis by specified factor.
      */
-    public void rescaleY(double factor) {
+    @Override public void rescaleY(double factor) {
         if (factor == 1.0) return;
         for (int i = 0; i < getLength(); ++i) {
             _data[1][i] *= factor;
         }
     }
 
-    public void smoothY(int smoothing_element) {
+    @Override public void smoothY(int smoothing_element) {
         if (smoothing_element == 1.0) return;
         for (int i = 0; i < getLength(); ++i) {
             try {
@@ -198,66 +198,10 @@ public final class DefaultArraySpectrum implements ArraySpectrum {
 
 
     /**
-     * Returns the sum of all the y values in the entire spectrum.
-     */
-    public double getSum() {
-        return getSum(0, getLength() - 1);
-    }
-
-    /**
      * Returns the integral of entire spectrum.
      */
-    public double getIntegral() {
+    @Override public double getIntegral() {
         return getIntegral(getStart(), getEnd());
-    }
-
-    /**
-     * Returns the average of all the y values in the entire spectrum
-     */
-    public double getAverage() {
-        return getAverage(getStart(), getEnd());
-    }
-
-    /**
-     * Returns the sum of y values in the spectrum in
-     * the specified index range.
-     */
-    public double getSum(int startIndex, int endIndex) {
-        assert startIndex >= 0 && startIndex < getLength();
-        assert endIndex   >= 0 && endIndex   < getLength();
-
-        if (startIndex > endIndex) {
-            int temp = startIndex;
-            startIndex = endIndex;
-            endIndex = temp;
-        }
-
-        double sum = 0;
-        for (int i = startIndex; i <= endIndex; ++i) {
-            sum += getY(i);
-        }
-        return sum;
-    }
-
-    /**
-     * Returns the sum of y values in the spectrum in
-     * the specified range.
-     */
-    public double getSum(double x_start, double x_end) {
-        assert x_start >= getStart() && x_start <= getEnd();
-        assert x_end   >= getStart() && x_end   <= getEnd();
-
-        if (x_start > x_end) {
-            double temp = x_start;
-            x_start = x_end;
-            x_end = temp;
-        }
-
-        int startIndex = getLowerIndex(x_start);
-        int endIndex = getLowerIndex(x_end);
-        if (getX(endIndex) < x_end) endIndex++;
-
-        return getSum(startIndex, endIndex);
     }
 
     /**
@@ -341,7 +285,7 @@ public final class DefaultArraySpectrum implements ArraySpectrum {
      * Returns the average of values in the SampledSpectrum in
      * the specified range.
      */
-    public double getAverage(double x_start, double x_end) {
+    @Override public double getAverage(double x_start, double x_end) {
         return getIntegral(x_start, x_end) / (x_end - x_start);
     }
 
@@ -349,7 +293,7 @@ public final class DefaultArraySpectrum implements ArraySpectrum {
      * Returns the average of values in the SampledSpectrum in
      * the specified range.
      */
-    public double getAverage(int indexStart, int indexEnd) {
+    private double getAverage(int indexStart, int indexEnd) {
         return getIntegral(indexStart, indexEnd) /
                 (getX(indexEnd) - getX(indexStart));
     }
@@ -363,7 +307,7 @@ public final class DefaultArraySpectrum implements ArraySpectrum {
      * May return reference to member data, so client should not
      * alter the return value.
      */
-    public double[][] getData() {
+    @Override public double[][] getData() {
         return _data;
     }
 
@@ -378,7 +322,7 @@ public final class DefaultArraySpectrum implements ArraySpectrum {
      *                 x bin.  If maxIndex >= number of data points, maxIndex
      *                 will be truncated.
      */
-    public double[][] getData(int maxIndex) {
+    @Override public double[][] getData(int maxIndex) {
         return getData(0, maxIndex);
     }
 
@@ -394,7 +338,7 @@ public final class DefaultArraySpectrum implements ArraySpectrum {
      *                 x bin.  If maxIndex >= number of data points, maxIndex
      *                 will be truncated.
      */
-    public double[][] getData(int minIndex, int maxIndex) {
+    @Override public double[][] getData(int minIndex, int maxIndex) {
         if (minIndex < 0) minIndex = 0;
         if (maxIndex >= _data[0].length) maxIndex = _data[0].length - 1;
         double[][] data = new double[2][maxIndex - minIndex + 1];
