@@ -13,9 +13,9 @@ sealed abstract class MagnitudeBand private (val name: String, val center: Wavel
   private def this(name: String, center: Wavelength, width: Wavelength, description: String, defaultMagnitudeSystem: MagnitudeSystem) =
     this(name, center, width, Some(description), defaultMagnitudeSystem)
 
-  val start: Wavelength = center + width / 2
+  val start: Wavelength = center - width / 2
 
-  val end:   Wavelength = center - width / 2
+  val end:   Wavelength = center + width / 2
 
 }
 
