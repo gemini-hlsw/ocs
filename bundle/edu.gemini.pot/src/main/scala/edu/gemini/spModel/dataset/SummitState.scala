@@ -291,30 +291,24 @@ object SummitState {
 
     private val Z = ZoneId.of("Z")
 
-    implicit val ParamSetCodecActiveRequest =
-      new ParamSetCodec[ActiveRequest] {
-        val pf = new PioXmlFactory
+    // An "empty" element for the purposes of using the ParamSetCodec DSL.
+    val empty = ActiveRequest(
+      DatasetGsaState.empty,
+      DatasetQaState.UNDEFINED,
+      new UUID(0L, 0L),
+      QaRequestStatus.Failed(""),
+      Instant.ofEpochMilli(0),
+      0
+    )
 
-        import DatasetCodecs.paramSetOps
-        override def encode(key: String, a: ActiveRequest): ParamSet =
-          pf.createParamSet(key)
-            .withParamSet("gsa", a.gsa)
-            .withParam("req", a.req)
-            .withParam("id", a.id)(ParamCodecUuid)
-            .withParam("status", a.status)
-            .withParam("when", a.when)(ParamCodecInstant)
-            .withParam("retry", a.retryCount)
-
-        override def decode(ps: ParamSet): PioError \/ ActiveRequest =
-          for {
-            gsa    <- decodeParamSet[DatasetGsaState]("gsa", ps)
-            req    <- decodeParam[DatasetQaState]("req", ps)
-            id     <- decodeParam[UUID]("id", ps)(ParamCodecUuid)
-            status <- decodeParam[QaRequestStatus]("status", ps)
-            when   <- decodeParam[Instant]("when", ps)(ParamCodecInstant)
-            retry  <- decodeParam[Int]("retry", ps)
-          } yield ActiveRequest(gsa, req, id, status, when, retry)
-      }
+    implicit val ParamSetCodecActiveRequest: ParamSetCodec[ActiveRequest] =
+      ParamSetCodec.initial(empty)
+        .withParamSet("gsa", gsa)
+        .withParam("req", req)
+        .withParam("id", id)(ParamCodecUuid)
+        .withParam("status", status)
+        .withParam("when", when)(ParamCodecInstant)
+        .withParam("retry", retryCount)
   }
 
   /** Constructs a `MIssing` instance with static type `SummitState`, which is

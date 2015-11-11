@@ -1,9 +1,10 @@
 package edu.gemini.spModel.dataset
 
+import edu.gemini.pot.sp.SPObservationID
+import edu.gemini.spModel.core.SPProgramID
 import edu.gemini.spModel.dataset.DatasetCodecs._
 import edu.gemini.spModel.dataset.SummitState.{ActiveRequest, Idle, Missing}
-import edu.gemini.spModel.pio.codec.{PioError, ParamSetCodec}
-import edu.gemini.spModel.pio.xml.PioXmlFactory
+import edu.gemini.spModel.pio.codec.ParamSetCodec
 import edu.gemini.spModel.pio.{PioFactory, ParamSet}
 
 import Function.const
@@ -68,23 +69,17 @@ object DatasetExecRecord {
 
   implicit val EqualDatasetExecRecord: Equal[DatasetExecRecord] = Equal.equalA
 
-  implicit val ParamSetCodecDatasetExecRecord =
-    new ParamSetCodec[DatasetExecRecord]() {
-      val pf = new PioXmlFactory
+  private val empty = DatasetExecRecord(
+    new Dataset(new DatasetLabel(new SPObservationID(SPProgramID.toProgramID("GN-0000A-C-0"), 0), 0), "", 0L),
+    SummitState.Missing.empty,
+    None
+  )
 
-      override def encode(key: String, a: DatasetExecRecord): ParamSet =
-        pf.createParamSet(key)
-          .withParamSet("dataset", a.dataset)
-          .withParamSet("summit", a.summit)
-          .withOptionalParamSet("archive", a.archive)
-
-      override def decode(ps: ParamSet): PioError \/ DatasetExecRecord =
-        for {
-          dataset <- decodeParamSet[Dataset]("dataset", ps)
-          summit  <- decodeParamSet[SummitState]("summit", ps)
-          archive <- decodeOptionalParamSet[DatasetGsaState]("archive", ps)
-        } yield DatasetExecRecord(dataset, summit, archive)
-  }
+  implicit val ParamSetCodecDatasetExecRecord: ParamSetCodec[DatasetExecRecord] =
+    ParamSetCodec.initial(empty)
+      .withParamSet("dataset", dataset)
+      .withParamSet("summit", summit)
+      .withOptionalParamSet("archive", archive)
 }
 
 

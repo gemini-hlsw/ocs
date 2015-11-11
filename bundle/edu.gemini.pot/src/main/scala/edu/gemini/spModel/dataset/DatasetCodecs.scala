@@ -13,19 +13,6 @@ import scalaz._, Scalaz._
 
 object DatasetCodecs {
 
-  implicit def paramSetOps(ps: ParamSet) = new Object {
-    def withParam[A](n: String, a: A)(implicit pc: ParamCodec[A]): ParamSet =
-      ps <| (_.addParam(pc.encode(n, a)))
-
-    def withParamSet[A](n: String, a: A)(implicit psc: ParamSetCodec[A]): ParamSet =
-      ps <| (_.addParamSet(psc.encode(n, a)))
-
-    def withOptionalParamSet[A](n: String, aOpt: Option[A])(implicit psc: ParamSetCodec[A]): ParamSet = {
-      aOpt.foreach { a => ps.addParamSet(psc.encode(n, a)) }
-      ps
-    }
-  }
-
   def explainPioError(e: PioError): String = e match {
     case MissingKey(n)       => s"Missing key $n"
     case NullValue(n)        => s"Null value for key $n"
@@ -40,17 +27,6 @@ object DatasetCodecs {
     */
   def unsafeDecode[A](ps: ParamSet)(implicit psc: ParamSetCodec[A]): A =
     psc.decode(ps).valueOr(e => throw new PioParseException(explainPioError(e)))
-
-  def decodeParamSet[A](n: String, ps: ParamSet)(implicit psc: ParamSetCodec[A]): PioError \/ A =
-    (Option(ps.getParamSet(n)) \/> MissingKey(n)).flatMap { psc.decode }
-
-  def decodeOptionalParamSet[A](n: String, ps: ParamSet)(implicit psc: ParamSetCodec[A]): PioError \/ Option[A] =
-    Option(ps.getParamSet(n)).fold(none[A].right[PioError]) { ps =>
-      psc.decode(ps).map(some)
-    }
-
-  def decodeParam[A](n: String, ps: ParamSet)(implicit pc: ParamCodec[A]): PioError \/ A =
-    (Option(ps.getParam(n)) \/> MissingKey(n)).flatMap { pc.decode }
 
   implicit val ParamSetCodecDataset: ParamSetCodec[Dataset] =
     new ParamSetCodec[Dataset] {
