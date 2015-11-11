@@ -199,7 +199,9 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
 
             private static Icon bagsIcon(boolean enabled) {
                 final BufferedImage img = new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB);
-                final Graphics      g2  = img.createGraphics();
+                final Graphics2D    g2  = img.createGraphics();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
                 g2.setColor(enabled ? Color.blue : Color.lightGray);
                 g2.fillRect(0, 0, 16, 16);
                 g2.setColor(Color.white);
