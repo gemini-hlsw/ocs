@@ -7,7 +7,7 @@ import java.util.logging.{Level, Logger}
 import edu.gemini.ags.api.{AgsRegistrar, AgsStrategy}
 import edu.gemini.ags.gems.GemsGuideStars
 import edu.gemini.catalog.votable.{CatalogException, GenericError}
-import edu.gemini.pot.sp.{ISPObservationContainer, ISPNode, ISPProgram, ISPObservation, SPNodeKey}
+import edu.gemini.pot.sp._
 import edu.gemini.shared.util.immutable.{Option => GOption, DefaultImList}
 import edu.gemini.spModel.core.SPProgramID
 import edu.gemini.spModel.obs.ObservationStatus
@@ -41,6 +41,10 @@ final class BagsManager(executor: ScheduledThreadPoolExecutor) {
       val gpts = extractPrimaryGuideGroupTargets()
       gpts.isEmpty || gpts.exists(_.getBagsResult == BagsResult.NoSearchPerformed)
     }
+
+    // Instruments specifically not supporting guide stars.
+    private val NonGSInstruments = List(SPComponentType.INSTRUMENT_GPI)
+    def isGSInstrument:   Boolean = !NonGSInstruments.contains(ctx.getInstrument.getType)
   }
 
   /** Our state is just a set of programs to watch, a set of pending keys, and a map of keys to BAGS status. */
@@ -98,20 +102,26 @@ final class BagsManager(executor: ScheduledThreadPoolExecutor) {
    * a delay of at least `delay` milliseconds.
    */
   def enqueue(observation: ISPObservation, delay: Long, initialEnqueue: Boolean = false): Unit =
-    Option(observation).foreach { obs =>
-      synchronized {
+    Option(observation).foreach { obs => {
+      // We need an ObsContext to perform various checks to see whether the observation CAN be queued up at all.
+      val obsCtxOpt = ObsContext.create(obs).asScalaOpt
+
+      // Only support BAGS instruments.
+      if (obsCtxOpt.exists(_.isGSInstrument)) synchronized {
         val key = obs.getNodeKey
         state += key
 
-        def bagsStatus(status: BagsStatus): Unit = {
-          val oldState = state.statuses.get(key)
-          state = state.setStatus(key, status)
-          notifyBagsStatusListeners(observation, oldState, Some(status))
+        def bagsStatus(status: BagsStatus): Unit = state.statuses.get(key) match {
+          case Some(oldStatus) if !status.equals(oldStatus) =>
+            state = state.setStatus(key, status)
+            notifyBagsStatusListeners(observation, Some(oldStatus), Some(status))
+          case _ => // ignore
         }
-        def bagsClearStatus(): Unit = {
-          val oldState = state.statuses.get(key)
-          state = state.clearStatus(key)
-          notifyBagsStatusListeners(observation, oldState, None)
+        def bagsClearStatus(): Unit = state.statuses.get(key) match {
+          case Some(oldStatus) =>
+            state = state.clearStatus(key)
+            notifyBagsStatusListeners(observation, Some(oldStatus), None)
+          case _ => // Ignore
         }
 
         // The criteria to perform a BAGS lookup is that:
@@ -120,18 +130,21 @@ final class BagsManager(executor: ScheduledThreadPoolExecutor) {
         // 2b. The primary guide group has some active guide probe for which a BAGS search has not been done; and
         // 3. The observation has not been executed.
         def obsCtxFilter(obsCtx: ObsContext): Boolean =
-          !obsCtx.hasManualPrimary &&
+            !obsCtx.hasManualPrimary &&
             (!initialEnqueue || obsCtx.isMissingSearch) &&
             ObservationStatus.computeFor(obs) != ObservationStatus.OBSERVED
 
         // Unfortunately, we have to create an ObsContext here AND at thread execution time.
-        // This check is to clear the "Pending" status from BAGS if the user creates a primary target during the
-        // time that a BAGS task is scheduled to run.
+        // The reason for this is twofold:
+        // 1. To check if the observation instrument here supports BAGS; and
+        // 2. If the observation has a manual primary guide star, clear the BAGS status. (This is done to clear
+        //    the BAGS pending message status if a BAGS lookup is pending for the observation.)
         // If no primary is scheduled to run, then a second ObsContext needs to be created during execution to
         // make sure that the task is still eligible to be run.
-        if (ObsContext.create(obs).asScalaOpt.exists(_.hasManualPrimary))
+        if (obsCtxOpt.exists(_.hasManualPrimary))
           bagsClearStatus()
 
+        // Now, only proceed if the instrument supports BAGS.
         // If dequeue is false this means that (a) another task scheduled *after* me ended up
         // running before me, so their result is as good as mine would have been and we're done;
         // or (b) we don't care about that program anymore, so we're done.
@@ -230,7 +243,8 @@ final class BagsManager(executor: ScheduledThreadPoolExecutor) {
           }, delay, TimeUnit.MILLISECONDS)
         }
       }
-    }
+    }}
+
 
   // Perform an action without the listeners listening.
   private def quietAction[T](obs: ISPObservation, action: () => T): T = {
