@@ -1,7 +1,8 @@
 package edu.gemini.spModel.dataset
 
-import edu.gemini.spModel.pio.Param
-import edu.gemini.spModel.pio.codec.{ParseError, PioError, ParamCodec}
+import edu.gemini.spModel.pio.{Pio, ParamSet}
+import edu.gemini.spModel.pio.codec.{MissingKey, ParamSetCodec, PioError, UnknownTag}
+import edu.gemini.spModel.pio.xml.PioXmlFactory
 
 import scalaz._
 import Scalaz._
@@ -48,20 +49,30 @@ object QaRequestStatus {
 
   implicit val EqualQaRequestStatus: Equal[QaRequestStatus] = Equal.equalA
 
-  implicit val ParamCodecQaRequestStatus =
-    new ParamCodec[QaRequestStatus] {
-      val failed = """Failed\((.*)\)""".r
+  implicit val ParamSetCodecQaRequestStatus: ParamSetCodec[QaRequestStatus] =
+    new ParamSetCodec[QaRequestStatus] {
+      val pf = new PioXmlFactory
 
-      override def encode(key: String, a: QaRequestStatus): Param =
-        ParamCodec[String].encode(key, a.toString)
+      override def encode(key: String, q: QaRequestStatus): ParamSet = {
+        val (tag, msg) = q match {
+          case PendingPost    => ("pending",    none[String])
+          case ProcessingPost => ("processing", none[String])
+          case Accepted       => ("accepted",   none[String])
+          case Failed(m)      => ("failed",     some(m))
+        }
 
-      override def decode(p: Param): PioError \/ QaRequestStatus =
-        ParamCodec[String].decode(p).flatMap {
-          case "PendingPost"    => PendingPost.right
-          case "ProcessingPost" => ProcessingPost.right
-          case "Accepted"       => Accepted.right
-          case failed(msg)      => Failed(msg).right
-          case s                => ParseError(p.getName, s, "QaRequestStatus").left
+        pf.createParamSet(key)                <|
+          (Pio.addParam(pf, _, "tag", tag))   <|
+          (ps => msg.foreach { Pio.addParam(pf, ps, "message", _) })
+      }
+
+      override def decode(ps: ParamSet): PioError \/ QaRequestStatus =
+        Option(ps.getParam("tag")).map(_.getValue) \/> MissingKey("tag") flatMap {
+          case "pending"    => (PendingPost: QaRequestStatus).right
+          case "processing" => (ProcessingPost: QaRequestStatus).right
+          case "accepted"   => (Accepted: QaRequestStatus).right
+          case "failed"     => (Failed(Pio.getValue(ps, "message", "")): QaRequestStatus).right
+          case bah          => UnknownTag(bah, "QaRequestStatus").left
         }
     }
 }

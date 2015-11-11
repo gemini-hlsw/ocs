@@ -306,7 +306,7 @@ object SummitState {
         .withParamSet("gsa", gsa)
         .withParam("req", req)
         .withParam("id", id)(ParamCodecUuid)
-        .withParam("status", status)
+        .withParamSet("status", status)
         .withParam("when", when)(ParamCodecInstant)
         .withParam("retry", retryCount)
   }

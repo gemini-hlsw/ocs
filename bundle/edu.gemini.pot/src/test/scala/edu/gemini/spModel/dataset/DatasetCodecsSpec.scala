@@ -29,7 +29,6 @@ object DatasetCodecsSpec extends Specification with ScalaCheck with Arbitraries 
     param[DatasetMd5]
     param[DatasetQaState]
     param[Instant]
-    param[QaRequestStatus]
     param[UUID]
   }
 
@@ -44,5 +43,6 @@ object DatasetCodecsSpec extends Specification with ScalaCheck with Arbitraries 
     paramSet[DatasetExecRecord]
     paramSet[DatasetGsaState]
     paramSet[SummitState]
+    paramSet[QaRequestStatus]
   }
 }
