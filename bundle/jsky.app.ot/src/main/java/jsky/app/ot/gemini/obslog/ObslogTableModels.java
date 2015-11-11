@@ -107,10 +107,9 @@ public interface ObslogTableModels {
         public static final int COL_FILENAME = 1;
         public static final int COL_QA_STATE = 2;
         public static final int COL_STATUS   = 3;
-        public static final int COL_DETAIL   = 4;
 
         private static final String[] COL_NAMES = new String[]{
-                "Label", "Filename", "QA State", "Dataset Status", "Detail"
+                "Label", "Filename", "QA State", "Dataset Status"
         };
 
         public DatasetAnalysisTableModel(ObsLog log) {
@@ -129,6 +128,10 @@ public interface ObslogTableModels {
             return COL_NAMES[i];
         }
 
+        public DatasetRecord getRecordAt(int row) {
+            return records.get(row);
+        }
+
         public Object getValueAt(int row, int col) {
             final DatasetRecord rec = records.get(row);
             switch (col) {
@@ -143,16 +146,9 @@ public interface ObslogTableModels {
                         return qs.displayValue() + "*";
                     return qs;
 
-                case COL_STATUS: {
+                case COL_STATUS:
                     return DataflowStatus$.MODULE$.derive(rec);
-//                    final DataflowStatus disp = DataflowStatus$.MODULE$.derive(rec);
-//                    return disp.description();
-                }
 
-                case COL_DETAIL: {
-                    final scala.Option<String> detail = DataflowStatus$.MODULE$.detail(rec);
-                    return detail.isEmpty() ? "" : detail.get();
-                }
                 default:
                     throw new IllegalArgumentException("Unknown column: " + col);
             }

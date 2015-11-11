@@ -7,6 +7,7 @@ import edu.gemini.spModel.obsrecord.ObsVisit;
 import edu.gemini.spModel.obsrecord.UniqueConfig;
 import edu.gemini.spModel.type.DisplayableSpType;
 import jsky.app.ot.OTOptions;
+import jsky.app.ot.util.OtColor;
 import jsky.app.ot.util.Resources;
 import jsky.util.gui.DropDownListBoxWidget;
 
@@ -19,6 +20,12 @@ import javax.swing.table.*;
 import java.awt.*;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.time.format.TextStyle;
 import java.util.*;
 import java.util.List;
 
@@ -35,29 +42,32 @@ public class ObslogGUI extends JPanel {
         setTimeZone(TimeZone.getTimeZone("UTC"));
     }};
 
+    private static final Icon BLANK          = Resources.getIcon("eclipse/blank.gif");
+    private static final Icon GREEN_DOT      = Resources.getIcon("bullet/bullet_green.png");
+    private static final Icon GREY_DOT       = Resources.getIcon("bullet/bullet_grey.png");
+    private static final Icon ORANGE_DOT     = Resources.getIcon("bullet/bullet_orange.png");
+    private static final Icon PALE_GREEN_DOT = Resources.getIcon("bullet/bullet_pale_green.gif");
+    private static final Icon RED_DOT        = Resources.getIcon("bullet/bullet_red.png");
+    private static final Icon WHITE_DOT      = Resources.getIcon("bullet/bullet_white.gif");
+
+    private static final Map<DataflowStatus, Icon> STATUS_ICON = new HashMap<>();
+
+    static {
+        STATUS_ICON.put(DataflowStatus.Archived$.MODULE$,         PALE_GREEN_DOT);
+        STATUS_ICON.put(DataflowStatus.NeedsQa$.MODULE$,          WHITE_DOT);
+        STATUS_ICON.put(DataflowStatus.SyncPending$.MODULE$,      GREY_DOT);
+        STATUS_ICON.put(DataflowStatus.CheckRequested$.MODULE$,   ORANGE_DOT);
+        STATUS_ICON.put(DataflowStatus.UpdateFailure$.MODULE$,    RED_DOT);
+        STATUS_ICON.put(DataflowStatus.UpdateInProgress$.MODULE$, GREY_DOT);
+        STATUS_ICON.put(DataflowStatus.SummitOnly$.MODULE$,       GREY_DOT);
+        STATUS_ICON.put(DataflowStatus.Diverged$.MODULE$,         GREY_DOT);
+        STATUS_ICON.put(DataflowStatus.InSync$.MODULE$,           GREEN_DOT);
+    }
+
+    private static final String ZONE_STRING = ZoneId.systemDefault().getDisplayName(TextStyle.SHORT, Locale.getDefault());
+
+
     private static final TableCellRenderer STATUS_RENDERER = new DefaultTableCellRenderer() {
-        private final Icon blank      = Resources.getIcon("eclipse/blank.gif");
-        private final Icon green      = Resources.getIcon("bullet/bullet_green.png");
-        private final Icon grey       = Resources.getIcon("bullet/bullet_grey.png");
-        private final Icon orange     = Resources.getIcon("bullet/bullet_orange.png");
-        private final Icon pale_green = Resources.getIcon("bullet/bullet_pale_green.gif");
-        private final Icon red        = Resources.getIcon("bullet/bullet_red.png");
-        private final Icon white      = Resources.getIcon("bullet/bullet_white.gif");
-
-        private final Map<DataflowStatus, Icon> statusIcon = new HashMap<>();
-
-        {
-            statusIcon.put(DataflowStatus.Archived$.MODULE$,         pale_green);
-            statusIcon.put(DataflowStatus.NeedsQa$.MODULE$,          white);
-            statusIcon.put(DataflowStatus.SyncPending$.MODULE$,      grey);
-            statusIcon.put(DataflowStatus.CheckRequested$.MODULE$,   orange);
-            statusIcon.put(DataflowStatus.UpdateFailure$.MODULE$,    red);
-            statusIcon.put(DataflowStatus.UpdateInProgress$.MODULE$, grey);
-            statusIcon.put(DataflowStatus.SummitOnly$.MODULE$,       grey);
-            statusIcon.put(DataflowStatus.Diverged$.MODULE$,         grey);
-            statusIcon.put(DataflowStatus.InSync$.MODULE$,           green);
-        }
-
         @Override
         public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
             final JLabel lab = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
@@ -65,8 +75,8 @@ public class ObslogGUI extends JPanel {
             final DataflowStatus dfs = (DataflowStatus) value;
             lab.setText(dfs.description());
 
-            final Icon icon = statusIcon.get(dfs);
-            lab.setIcon(icon != null ? icon : blank);
+            final Icon icon = STATUS_ICON.get(dfs);
+            lab.setIcon(icon != null ? icon : BLANK);
 
             return lab;
         }
@@ -159,6 +169,73 @@ public class ObslogGUI extends JPanel {
     }
 
     /**
+     * Functional interface for extracting a value of an arbitrary type A from
+     * a DatasetRecord.
+     */
+    interface DatasetRecordExtractor<A> {
+        A getValue(DatasetRecord r);
+    }
+
+    /**
+     * Information extracted from an ActiveRequest object for formatting and
+     * display.
+     */
+    static final class RequestDetail {
+        final QaRequestStatus status;
+        final Instant when;
+        final int retry;
+
+        public RequestDetail(QaRequestStatus status, Instant when, int retry) {
+            this.status = status;
+            this.when   = when;
+            this.retry  = retry;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            final RequestDetail that = (RequestDetail) o;
+            return Objects.equals(retry, that.retry) &&
+                    Objects.equals(status, that.status) &&
+                    Objects.equals(when, that.when);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(status, when, retry);
+        }
+
+        public String formatWhen() {
+            final ZoneId z = ZoneId.systemDefault();
+            final OffsetDateTime    whenOff = OffsetDateTime.ofInstant(when, z);
+            final OffsetDateTime    nowOff  = OffsetDateTime.ofInstant(Instant.now(), z);
+            final LocalDate        whenDate = whenOff.toLocalDate();
+            final LocalDate         nowDate = nowOff.toLocalDate();
+
+            final DateTimeFormatter dateFmt = DateTimeFormatter.ISO_LOCAL_DATE;
+            final String         timeString = DateTimeFormatter.ISO_LOCAL_TIME.format(whenOff.toLocalTime());
+
+            return (whenDate.equals(nowDate)) ? timeString :
+                    dateFmt.format(whenDate) + " " + timeString;
+        }
+
+        public static RequestDetail fromActiveRequest(SummitState.ActiveRequest ar) {
+            return new RequestDetail(ar.status(), ar.when(), ar.retryCount());
+        }
+
+        public static Optional<RequestDetail> fromSummitState(SummitState ss) {
+            return (ss instanceof SummitState.ActiveRequest) ?
+                Optional.of(fromActiveRequest((SummitState.ActiveRequest) ss)) :
+                Optional.empty();
+        }
+
+        public static Optional<RequestDetail> fromDatasetRecord(DatasetRecord dr) {
+            return fromSummitState(dr.exec().summit());
+        }
+    }
+
+    /**
      * Component that shows a table of {@link edu.gemini.spModel.dataset.DatasetExecRecord}s with
      * editable fields for QA State. Editing is disabled unless the OT is running in on site mode.
      *
@@ -204,17 +281,15 @@ public class ObslogGUI extends JPanel {
         }
 
         private void configureForStaff() {
-            // OT-424: bulk editing support
-            final JPanel panel = new JPanel(new BorderLayout());
-            panel.add(new Header("Select multiple rows for bulk updating."), BorderLayout.NORTH);
-            panel.add(editArea, BorderLayout.CENTER);
-            add(new JSplitPane(JSplitPane.VERTICAL_SPLIT, new JScrollPane(table) {{
+            add(new JScrollPane(table) {{
                 setBorder(BorderFactory.createEmptyBorder());
                 setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-            }}, panel) {{
-                setResizeWeight(1.0);
-                setEnabled(false);
-            }});
+            }}, BorderLayout.CENTER);
+
+            final JPanel editPanel = new JPanel(new BorderLayout());
+            editPanel.add(new Header("Select multiple rows for bulk updating."), BorderLayout.NORTH);
+            editPanel.add(editArea, BorderLayout.CENTER);
+            add(editPanel, BorderLayout.SOUTH);
         }
 
         void setObsLog(final ObsLog obsLog) {
@@ -227,16 +302,31 @@ public class ObslogGUI extends JPanel {
         // OT-424: bulk editing support
         class Editor extends JPanel implements ListSelectionListener {
 
-            final JComboBox qa; // , df;
+            final JComboBox<DatasetQaState> qa;
+            final JTextPane textPane = new JTextPane() {{
+                setBackground(OtColor.BG_GREY);
+                setContentType("text/html");
+                setEditable(false);
+                putClientProperty(JEditorPane.HONOR_DISPLAY_PROPERTIES, Boolean.TRUE);
+            }};
+            final JScrollPane scrollPane = new JScrollPane(textPane) {{
+               setBorder(BorderFactory.createEmptyBorder());
+               setPreferredSize(new Dimension(1, 50));
+            }};
             boolean adjusting; // sigh
 
             public Editor() {
-                super(new FlowLayout());
-                setBorder(BorderFactory.createEmptyBorder());
+                super(new GridBagLayout());
+                setBorder(BorderFactory.createEmptyBorder(10,5,5,5));
 
                 // QA State
-                add(new JLabel("QA State:"));
-                add(qa = new DropDownListBoxWidget() {{
+                add(new JLabel("QA State:"), new GridBagConstraints() {{
+                    gridx  = 0;
+                    gridy  = 0;
+                    insets = new Insets(0, 2, 0, 5);
+                }});
+
+                add(qa = new DropDownListBoxWidget<DatasetQaState>() {{
                     setChoices(DatasetQaState.values());
                     setRenderer(new SpTypeCellRenderer());
                     addActionListener(ae -> {
@@ -244,6 +334,11 @@ public class ObslogGUI extends JPanel {
                             setCommonValue(DatasetAnalysisTableModel.COL_QA_STATE, getSelectedItem());
                         }
                     });
+                }}, new GridBagConstraints() {{
+                    gridx   = 1;
+                    gridy   = 0;
+                    anchor  = WEST;
+                    weightx = 1.0;
                 }});
 
                 table.editArea = this;
@@ -257,6 +352,7 @@ public class ObslogGUI extends JPanel {
                 if (!enable) {
                     adjusting = true;
                     qa.setSelectedItem(null);
+                    textPane.setText(null);
                     adjusting = false;
                 }
             }
@@ -267,30 +363,52 @@ public class ObslogGUI extends JPanel {
                 if (!lsm.isSelectionEmpty()) {
                     setEnabled(true);
                     adjusting = true;
-                    qa.setSelectedItem(getCommonValue(DatasetAnalysisTableModel.COL_QA_STATE));
+                    qa.setSelectedItem(getCommonValue(dr -> dr.qa().qaState).orElse(null));
+
+                    final Optional<RequestDetail> detail = getCommonValue(RequestDetail::fromDatasetRecord).orElse(Optional.empty());
+
+                    remove(scrollPane);
+
+                    detail.ifPresent(d -> {
+                        add(scrollPane, new GridBagConstraints() {{
+                            gridx     = 0;
+                            gridy     = 1;
+                            gridwidth = 2;
+                            fill      = BOTH;
+                            weightx   = 1.0;
+                            weighty   = 1.0;
+                            insets    = new Insets(10, 0, 0, 0);
+                        }});
+
+                        textPane.setText(String.format("<html><body><b>%s (%s)</b> %s</body></html>", d.formatWhen(), ZONE_STRING, d.status.description()));
+                        textPane.setCaretPosition(0);
+                    });
+
+                    revalidate();
                     adjusting = false;
                 } else {
                     setEnabled(false);
                 }
             }
 
-            private Object getCommonValue(int col) {
-                Object ret = null;
+            private <A> Optional<A> getCommonValue(DatasetRecordExtractor<A> ex) {
                 final ListSelectionModel lsm = table.getSelectionModel();
+                A a = null;
                 if (!lsm.isSelectionEmpty()) {
-                    final TableModel model = table.getModel();
+                    final DatasetAnalysisTableModel model = (DatasetAnalysisTableModel) table.getModel();
                     for (int row = lsm.getMinSelectionIndex(); row <= lsm.getMaxSelectionIndex(); row++) {
                         if (lsm.isSelectedIndex(row)) {
-                            final Object val = model.getValueAt(row, col);
-                            if (ret == null) {
-                                ret = val;
-                            } else if (ret != val) {
-                                return null;
+                            final A a0 = ex.getValue(model.getRecordAt(row));
+                            if (a == null) {
+                                a = a0;
+                            } else if (!a.equals(a0)) {
+                                a = null;
+                                break;
                             }
                         }
                     }
                 }
-                return ret;
+                return Optional.ofNullable(a);
             }
 
             private void setCommonValue(int col, Object value) {
@@ -307,8 +425,8 @@ public class ObslogGUI extends JPanel {
 
         }
 
-        class SpTypeCellRenderer extends DefaultListCellRenderer {
-            public Component getListCellRendererComponent(JList arg0, Object o, int arg2, boolean arg3, boolean arg4) {
+        final class SpTypeCellRenderer extends DefaultListCellRenderer {
+            public Component getListCellRendererComponent(JList<?> arg0, Object o, int arg2, boolean arg3, boolean arg4) {
                 if (o != null) {
                     if (o instanceof DisplayableSpType) {
                         o = ((DisplayableSpType) o).displayValue();
@@ -318,7 +436,7 @@ public class ObslogGUI extends JPanel {
             }
         }
 
-        class DataAnalysisTable extends AbstractDatasetRecordTable {
+        final class DataAnalysisTable extends AbstractDatasetRecordTable {
 
             JPanel editArea;
             boolean adjusting = false;
@@ -337,7 +455,7 @@ public class ObslogGUI extends JPanel {
                     final DatasetAnalysisTableModel next = (DatasetAnalysisTableModel) newModel;
 
                     // Collect the set of labels. This may be inefficient but it's safe.
-                    final Collection<DatasetLabel> selection = new TreeSet<DatasetLabel>();
+                    final Collection<DatasetLabel> selection = new TreeSet<>();
                     final ListSelectionModel lsm = getSelectionModel();
                     for (int i = lsm.getMinSelectionIndex(); i <= lsm.getMaxSelectionIndex(); i++) {
                         if (lsm.isSelectedIndex(i))
@@ -384,7 +502,7 @@ public class ObslogGUI extends JPanel {
 
         }
 
-        private class Header extends JLabel {
+        private final class Header extends JLabel {
 
             public Header(String text) {
                 super(text);
@@ -409,7 +527,7 @@ public class ObslogGUI extends JPanel {
      *
      * @author rnorris
      */
-    class CommentsComponent extends JPanel implements ObslogTableModels, ListSelectionListener {
+    final class CommentsComponent extends JPanel implements ObslogTableModels, ListSelectionListener {
 
         private final JTable table;
         private final JTextArea area = new JTextArea();
@@ -566,7 +684,7 @@ public class ObslogGUI extends JPanel {
      *
      * @author rnorris
      */
-    class VisitsComponent extends JScrollPane implements ObslogTableModels {
+    final class VisitsComponent extends JScrollPane implements ObslogTableModels {
 
         private final DateFormat OBSLOG_DATE_FORMAT = ObslogGUI.OBSLOG_DATE_FORMAT;
         private final Box clientArea;

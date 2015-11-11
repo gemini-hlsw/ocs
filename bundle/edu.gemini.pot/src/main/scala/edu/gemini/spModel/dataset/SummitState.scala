@@ -8,8 +8,7 @@ import edu.gemini.spModel.pio.{Pio, ParamSet}
 import edu.gemini.spModel.pio.codec.{UnknownTag, MissingKey, PioError, ParamSetCodec}
 import edu.gemini.spModel.pio.xml.PioXmlFactory
 
-import java.time.{OffsetDateTime, ZoneId, Instant}
-import java.time.format.DateTimeFormatter
+import java.time.Instant
 import java.util.UUID
 
 import scalaz._
@@ -258,27 +257,6 @@ object SummitState {
 
     def reset: ActiveRequest =
       ActiveRequest(gsa, req, UUID.randomUUID(), PendingPost, Instant.now(), retryCount + 1)
-
-    def description: String = {
-      def timeString(when: Instant): String = {
-        // Show the date and time unless "when" is today, in which case just
-        // show the time.
-        val whenOff  = OffsetDateTime.ofInstant(when,          ActiveRequest.Z)
-        val nowOff   = OffsetDateTime.ofInstant(Instant.now(), ActiveRequest.Z)
-        val whenDate = whenOff.toLocalDate
-        val nowDate  = nowOff.toLocalDate
-
-        val dateFmt    = DateTimeFormatter.ISO_LOCAL_DATE
-        val timeString = DateTimeFormatter.ISO_LOCAL_TIME.format(whenOff.toLocalTime)
-
-        (whenDate == nowDate) ? timeString | s"${dateFmt.format(whenDate)} $timeString"
-      }
-
-      def retryString(count: Int): String =
-        if (count === 0) "" else s" (attempt $count)"
-
-      s"${timeString(when)} UTC. ${status.description}${retryString(retryCount)}"
-    }
   }
 
   object ActiveRequest {
@@ -288,8 +266,6 @@ object SummitState {
     val status:     ActiveRequest @> QaRequestStatus = Lens.lensu((a, b) => a.copy(status = b),     _.status)
     val when:       ActiveRequest @> Instant         = Lens.lensu((a, b) => a.copy(when = b),       _.when)
     val retryCount: ActiveRequest @> Int             = Lens.lensu((a, b) => a.copy(retryCount = b), _.retryCount)
-
-    private val Z = ZoneId.of("Z")
 
     // An "empty" element for the purposes of using the ParamSetCodec DSL.
     val empty = ActiveRequest(

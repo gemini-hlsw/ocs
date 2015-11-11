@@ -180,18 +180,6 @@ object DataflowStatus {
     }
   }
 
-  def detail(rec: DatasetRecord): Option[String] =
-    rec.exec.summit match {
-      case ar: ActiveRequest =>
-        derive(rec) match {
-          case UpdateInProgress | UpdateFailure => some(ar.description)
-          case _                                => none
-        }
-
-      case _                 =>
-        none
-    }
-
   /** Returns the highest priority status amongst all the datasets (if any). */
   def rollUp(recs: List[DatasetRecord]): Option[DataflowStatus] =
     recs.map(derive).minimum
