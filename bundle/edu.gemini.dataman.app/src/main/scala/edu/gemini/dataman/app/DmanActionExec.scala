@@ -11,8 +11,8 @@ import java.util.logging.{Logger, Level}
 import scalaz.{-\/, \/-}
 
 sealed trait DmanActionExec {
-  /** Executes the given action in the caller's thread.
-    * DMAN TODO: Or so I claim.  What does runAync actually do?
+  /** Executes the given action in the caller's thread, blocking until
+    * complete.
     */
   def now(action: DmanAction[DatasetUpdates]): Unit
 
@@ -49,7 +49,7 @@ object DmanActionExec {
     }
 
     override def now(action: DmanAction[DatasetUpdates]): Unit =
-      action.run.runAsync { r => completion(DmanAction.mergeFailure(r)) }
+      completion(action.unsafeRun)
 
     override def fork(action: DmanAction[DatasetUpdates]): Unit =
       action.forkAsync(completion)
