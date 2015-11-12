@@ -31,8 +31,6 @@ object Strategy {
   val AltairAowfs          = SingleProbeStrategy(AltairAowfsKey,         AltairAowfsParams)
   val Flamingos2Oiwfs      = SingleProbeStrategy(Flamingos2OiwfsKey,     Flamingos2OiwfsParams)
   val GmosNorthOiwfs       = SingleProbeStrategy(GmosNorthOiwfsKey,      GmosOiwfsParams(Site.GN))
-  val GmosNorthAltairOiwfs = MultiProbeStrategy(GmosNorthAltairOiwfsKey, List(GmosNorthOiwfs, AltairAowfs))
-  val GmosNorthPwfs1Oiwfs  = MultiProbeStrategy(GmosNorthPwfs1OiwfsKey,  List(Pwfs1North, GmosNorthOiwfs))
   val GmosSouthOiwfs       = SingleProbeStrategy(GmosSouthOiwfsKey,      GmosOiwfsParams(Site.GS))
   val GnirsOiwfs           = SingleProbeStrategy(GnirsOiwfsKey,          GnirsOiwfsParams)
   val NifsOiwfs            = SingleProbeStrategy(NifsOiwfsKey,           NifsOiwfsParams)
@@ -44,8 +42,8 @@ object Strategy {
     Flamingos2Oiwfs,
     GemsStrategy,
     GmosNorthOiwfs,
-    GmosNorthAltairOiwfs,
-    GmosNorthPwfs1Oiwfs,
+    GmosNorthOiwfsAltair,
+    GmosNorthOiwfsPwfs1,
     GmosSouthOiwfs,
     GnirsOiwfs,
     NiciOiwfs,
@@ -89,9 +87,9 @@ object Strategy {
       val ao = ctx.getAOComponent.asScalaOpt
       if (ao.exists(_.isInstanceOf[InstAltair])) {
         ao.get.asInstanceOf[InstAltair].getMode match {
-          case AltairParams.Mode.LGS_P1 => List(Pwfs1North, GmosNorthPwfs1Oiwfs)
+          case AltairParams.Mode.LGS_P1 => List(Pwfs1North, GmosNorthOiwfsPwfs1)
           case AltairParams.Mode.LGS_OI => List(GmosNorthOiwfs)
-          case _                        => List(AltairAowfs, GmosNorthAltairOiwfs)
+          case _                        => List(AltairAowfs, GmosNorthOiwfsAltair)
         }
       } else oiStategies(ctx, GmosNorthOiwfs)
     }),
@@ -115,7 +113,7 @@ object Strategy {
     s match {
       case SingleProbeStrategy(_, params, _) => isAvailable(params.guideProbe)
       case ScienceTargetStrategy(_, gp, _)   => isAvailable(gp)
-      case MultiProbeStrategy(_, lst)        => lst.forall(guidersAvailable(ctx))
+      case m: MultiProbeStrategy             => m.strategies.forall(guidersAvailable(ctx))
       case GemsStrategy                      => isAvailable(Canopus.Wfs.cwfs3) // any canopus would serve
       case _                                 => false
     }

@@ -16,14 +16,16 @@ import scala.concurrent.ExecutionContext.Implicits.global
 /**
  * Represents an AGS strategy consisting of multiple substrategies.
  *
- * There are several inherent shortcomings with this:
- * 1. select requires a position angle, and querying each substrategy may return a number of position angles.
- *    In the current implementation, the position angle for the first strategy is returned.
- * 2. probeBands must return one of a fixed number of BandsLists. We currently try to find a common one, or one
- *    that is a subset of all of those of the substrategies. If that is not possible, we try to find a single band
- *    that is a subset of those of the substrategies. If that fails, we just return R.
+ * Currently, this is only used to represent combinations of probes where at most one probe has a patrol field
+ * that is not symmetric with regards to rotations about the base position.
+ *
+ * Since select returns a position angle, this allows us to use the position angle of the paStrategy and ignore
+ * the position angles of the (fully or approximately) rotation-symmetric (around the base pos) strategies returned
+ * by select.
  */
-case class MultiProbeStrategy(key: AgsStrategyKey, strategies: List[AgsStrategy]) extends AgsStrategy {
+sealed abstract class MultiProbeStrategy(val key: AgsStrategyKey, paStrategy: AgsStrategy, paSymmetricStrategies: List[AgsStrategy]) extends AgsStrategy {
+  val strategies = paStrategy :: paSymmetricStrategies
+
   override def magnitudes(ctx: ObsContext, mt: MagnitudeTable): List[(GuideProbe, AgsMagnitude.MagnitudeCalc)] =
     strategies.flatMap(_.magnitudes(ctx, mt))
 
@@ -37,14 +39,14 @@ case class MultiProbeStrategy(key: AgsStrategyKey, strategies: List[AgsStrategy]
     strategies.flatMap(_.catalogQueries(ctx, mt))
 
   override def candidates(ctx: ObsContext, mt: MagnitudeTable): Future[List[(GuideProbe, List[SiderealTarget])]] =
-    Future.sequence(strategies.map(_.candidates(ctx, mt))).map(_.flatten)
+    Future.traverse(strategies)(_.candidates(ctx, mt)).map(_.flatten)
 
   override def estimate(ctx: ObsContext, mt: MagnitudeTable): Future[AgsStrategy.Estimate] =
     Future.fold(strategies.map(_.estimate(ctx, mt)))(1.0)((p,est) => p * est.probability).map(Estimate(_))
 
-  // We pick the position angle of the first assignment. May not want to do this.
+  // As described in the comment for the class, we pick the position angle for the FIRST strategy, since it is the
+  // only one that can have a patrol field that is not (at least approximately) symmetric under rotation around the base.
   override def select(ctx: ObsContext, mt: MagnitudeTable): Future[Option[AgsStrategy.Selection]] = {
-    val selections = Future.sequence(strategies.map(_.select(ctx, mt)))
     Future.fold(strategies.map(_.select(ctx, mt)))(None: Option[AgsStrategy.Selection])((resOpt,curOpt) =>
       curOpt.map(cur => AgsStrategy.Selection(cur.posAngle, resOpt.fold(cur.assignments)(cur.assignments ++ _.assignments))).orElse(resOpt)
     )
@@ -52,19 +54,12 @@ case class MultiProbeStrategy(key: AgsStrategyKey, strategies: List[AgsStrategy]
 
   override val guideProbes: List[GuideProbe] =
     strategies.flatMap(_.guideProbes)
+}
 
-  override val probeBands = {
-    val bandsLL = strategies.map(_.probeBands)
+case object GmosNorthOiwfsAltair extends MultiProbeStrategy(AgsStrategyKey.GmosNorthAltairOiwfsKey, Strategy.GmosNorthOiwfs, List(Strategy.AltairAowfs)) {
+  override val probeBands = RBandsList
+}
 
-    // Find a BandsList that is a subset of the others.
-    bandsLL.find(bL => {
-      val bLSet = Set(bL.bands.list)
-      bandsLL.forall(bL2 => bLSet.subsetOf(Set(bL2.bands.list)))
-    }).getOrElse {
-      // We must have a band, at least, that is a subset of all the bands.
-      // Otherwise bork and return R bands list. Not sure what else to do here.
-      val bandInt = bandsLL.map(bL => bL.bands.list.toSet).reduce((s1,s2) => s1.intersect(s2))
-      bandInt.headOption.map(SingleBand).getOrElse(RBandsList)
-    }
-  }
+case object GmosNorthOiwfsPwfs1 extends MultiProbeStrategy(AgsStrategyKey.GmosNorthPwfs1OiwfsKey, Strategy.GmosNorthOiwfs, List(Strategy.Pwfs1North)) {
+  override val probeBands = RBandsList
 }
