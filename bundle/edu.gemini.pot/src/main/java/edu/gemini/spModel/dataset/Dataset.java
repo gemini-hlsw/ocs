@@ -128,17 +128,11 @@ public final class Dataset implements Comparable, Serializable {
     }
 
     public String toString() {
-        StringBuilder buf = new StringBuilder();
-        buf.append(getClass().getName());
-        buf.append(" [");
-        buf.append("time=");
-        buf.append(new Date(_timestamp));
-        buf.append("label=");
-        buf.append(_label);
-        buf.append(", dhsFilename=");
-        buf.append(_dhsFilename);
-        buf.append("]");
-        return buf.toString();
+        return getClass().getName() + " [" +
+                "time=" + new Date(_timestamp) +
+                ", label=" + _label +
+                ", dhsFilename=" + _dhsFilename +
+             "]";
     }
 
     /**

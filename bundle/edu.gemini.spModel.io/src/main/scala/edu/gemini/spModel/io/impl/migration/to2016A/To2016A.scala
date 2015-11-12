@@ -32,7 +32,7 @@ object To2016A extends Migration {
 
   // These will be applied in the given order
   private val conversions: List[Document => Unit] = List(
-    addUnitsToELine, demotePluto, updateGpiUnblockedModes
+    addUnitsToELine, demotePluto, updateGpiUnblockedModes, GsaMigration.convertDatasetRecords
   )
 
   // Starting 2016A we store squants quantities with their units, older programs need to have units added

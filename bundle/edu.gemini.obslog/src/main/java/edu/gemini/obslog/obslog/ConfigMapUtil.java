@@ -69,7 +69,7 @@ public class ConfigMapUtil {
     static void addStartTime(DatasetRecord dset, ConfigMap m) {
         // Note that the time is being placed as a long value as a String.  It needs to be formatted in the
         // higher layers.  The second raw ut is used for navigation
-        String time = Long.toString(dset.exec.dataset.getTimestamp());
+        String time = Long.toString(dset.exec().dataset().getTimestamp());
         _setStartTime(time, m);
     }
 
@@ -86,13 +86,13 @@ public class ConfigMapUtil {
             return;
         }
 
-        DatasetLabel first = dsetRecords.get(0).getLabel();
+        DatasetLabel first = dsetRecords.get(0).label();
         if (datasetCount == 1) {
             m.put(DATA_LABELS_ITEM_NAME, String.valueOf(first.getIndex()));
             return;
         }
 
-        DatasetLabel last = dsetRecords.get(datasetCount - 1).getLabel();
+        DatasetLabel last = dsetRecords.get(datasetCount - 1).label();
         m.put(DATA_LABELS_ITEM_NAME, String.valueOf(first.getIndex() + FILE_SEP + String.valueOf(last.getIndex())));
     }
 
@@ -103,7 +103,7 @@ public class ConfigMapUtil {
             return;
         }
 
-        DatasetLabel first = dset.getLabel();
+        DatasetLabel first = dset.label();
         m.put(DATA_LABELS_ITEM_NAME, String.valueOf(first));
     }
 
@@ -114,7 +114,7 @@ public class ConfigMapUtil {
             return;
         }
 
-        DatasetQaState qastate = dset.qa.qaState;
+        DatasetQaState qastate = dset.qa().qaState;
         m.put(OBSLOG_DATSETQA_NAME, qastate.displayValue());
     }
 
@@ -128,7 +128,7 @@ public class ConfigMapUtil {
             return;
         }
 
-        String filename = dset.exec.dataset.getDhsFilename();
+        String filename = dset.exec().dataset().getDhsFilename();
         m.put(OBSLOG_FILENAMES_ITEM_NAME, filename);
     }
 
@@ -143,7 +143,7 @@ public class ConfigMapUtil {
             return;
         }
 
-        GeminiFileName first = new GeminiFileName(dsetRecords.get(0).exec.dataset.getDhsFilename());
+        GeminiFileName first = new GeminiFileName(dsetRecords.get(0).exec().dataset().getDhsFilename());
         String firstFileNumber = String.valueOf(first.getSequenceNumber());
         if (datasetCount == 1) {
             m.put(OBSLOG_FILENAMES_ITEM_NAME, firstFileNumber);
@@ -155,7 +155,7 @@ public class ConfigMapUtil {
         m.put(OBSLOG_FILENAMEPREFIX_ITEM_NAME, prefix);
 
         // Add the first to last when there is more than one dataset.  The value after - could be empty
-        GeminiFileName last = new GeminiFileName(dsetRecords.get(datasetCount - 1).exec.dataset.getDhsFilename());
+        GeminiFileName last = new GeminiFileName(dsetRecords.get(datasetCount - 1).exec().dataset().getDhsFilename());
         m.put(OBSLOG_FILENAMES_ITEM_NAME, firstFileNumber + FILE_SEP + last.getSequenceNumber());
     }
 
@@ -166,14 +166,14 @@ public class ConfigMapUtil {
             return;
         }
 
-        String comment = dsets.get(0).qa.comment;
+        String comment = dsets.get(0).qa().comment;
         m.put(OBSLOG_COMMENT_ITEM_NAME, comment);
         // Add the initial step as the configID.   This helps to set the comment later
-        m.put(OBSLOG_UNIQUECONFIG_ID, dsets.get(0).getLabel().toString());
+        m.put(OBSLOG_UNIQUECONFIG_ID, dsets.get(0).label().toString());
     }
 
     static void addDatasetComments(List<DatasetRecord> dsets, ConfigMap m) {
-        List<DatasetRecord> comments = new ArrayList<DatasetRecord>();
+        final List<DatasetRecord> comments = new ArrayList<>();
         // I'm checking for more than one item because the main obslog comment is dataset 0 comment. Only want to add
         // comments that are after that one
         if (dsets == null || dsets.size() <= 1) {
@@ -183,7 +183,7 @@ public class ConfigMapUtil {
         }
         // From 1 inclusive to size exclusive
         for (DatasetRecord dset : dsets.subList(1, dsets.size())) {
-            if (dset.qa.comment.equals(EMPTY_STRING)) continue;
+            if (dset.qa().comment.equals(EMPTY_STRING)) continue;
             comments.add(dset);
         }
         /*

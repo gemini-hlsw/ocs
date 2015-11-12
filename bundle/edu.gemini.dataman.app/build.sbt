@@ -9,7 +9,8 @@ name := "edu.gemini.dataman.app"
 unmanagedJars in Compile ++= Seq(
   new File(baseDirectory.value, "../../lib/bundle/argonaut_2.10-6.0.4.jar"),
   new File(baseDirectory.value, "../../lib/bundle/javax-servlet_2.10-2.5.0.jar"),
-  new File(baseDirectory.value, "../../lib/bundle/osgi.cmpn-4.3.1.jar")
+  new File(baseDirectory.value, "../../lib/bundle/osgi.cmpn-4.3.1.jar"),
+  new File(baseDirectory.value, "../../lib/bundle/scalaz-concurrent_2.10-7.0.5.jar")
 )
 
 osgiSettings
@@ -33,7 +34,7 @@ OsgiKeys.exportPackage := Seq(
   "edu.gemini.datasetrecord.impl.store",
   "edu.gemini.datasetrecord.util")
 
-        
+
 OsgiKeys.privatePackage := Seq(
   "edu.gemini.dataman.*",
   "edu.gemini.datasetfile.*",

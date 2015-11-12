@@ -14,7 +14,7 @@ import java.util.*;
  * immutable ObsQaRecord giving it mutability, standard data object trappings,
  * and listener support.
  */
-public final class ObsQaLog extends AbstractDataObject /* implements ISPMergeable<ObsQaLog>*/ {
+public final class ObsQaLog extends AbstractDataObject {
 
     public static final SPComponentType SP_TYPE = SPComponentType.OBS_QA_LOG;
 
@@ -43,9 +43,8 @@ public final class ObsQaLog extends AbstractDataObject /* implements ISPMergeabl
 
             final Event that = (Event) o;
             if (!newRec.equals(that.newRec)) return false;
-            if (!oldRec.equals(that.oldRec)) return false;
+            return oldRec.equals(that.oldRec);
 
-            return true;
         }
 
         @Override
@@ -57,16 +56,12 @@ public final class ObsQaLog extends AbstractDataObject /* implements ISPMergeabl
 
         @Override
         public String toString() {
-            final StringBuilder sb = new StringBuilder("Event{");
-            sb.append("oldRec=").append(oldRec);
-            sb.append(", newRec=").append(newRec);
-            sb.append('}');
-            return sb.toString();
+            return "Event{" + "oldRec=" + oldRec + ", newRec=" + newRec + '}';
         }
     }
 
     public interface Listener extends EventListener {
-        public void datasetQaUpdate(Event event);
+        void datasetQaUpdate(Event event);
     }
 
     private ObsQaRecord obsQaRecord;
@@ -89,18 +84,13 @@ public final class ObsQaLog extends AbstractDataObject /* implements ISPMergeabl
         return that;
     }
 
-//    @Override public synchronized ObsQaLog mergeOrNull(ObsQaLog that) {
-//        final scala.Option<ObsQaRecord> o = obsQaRecord.merge(that.getRecord());
-//        return (o.isDefined()) ? new ObsQaLog(o.get()) : null;
-//    }
-
     private synchronized List<Listener> getListeners() {
-        if (listeners == null) listeners = new ArrayList<Listener>();
+        if (listeners == null) listeners = new ArrayList<>();
         return listeners;
     }
 
     private synchronized List<Listener> getListenersCopy() {
-        return new ArrayList<Listener>(getListeners());
+        return new ArrayList<>(getListeners());
     }
 
     public synchronized void addDatasetQaRecordListener(Listener l) {

@@ -141,7 +141,7 @@ public final class ObsLog {
         return getExecRecord().getVisits(getQaRecord(), startTime, endTime);
     }
 
-    public DatasetDisposition getMinimumDisposition() {
+    public scala.Option<DataflowStatus> getMinimumDisposition() {
         return getExecRecord().getMinimumDisposition(getQaRecord());
     }
 
@@ -156,7 +156,7 @@ public final class ObsLog {
     }
 
     public List<DatasetRecord> getAllDatasetRecords() {
-        return getQaRecord().datasetRecordsAsJava(getExecRecord().getAllDatasetExecRecords());
+        return getQaRecord().datasetRecordsJava(getExecRecord().getAllDatasetExecRecords());
     }
 
     public boolean isEmpty() {

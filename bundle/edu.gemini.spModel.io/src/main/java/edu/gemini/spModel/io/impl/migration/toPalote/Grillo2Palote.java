@@ -130,7 +130,7 @@ public final class Grillo2Palote {
         // Hash the records by label.
         final Map<DatasetLabel, DatasetRecord> recMap = new HashMap<DatasetLabel, DatasetRecord>();
         for (int i=0; i<records.length; ++i) {
-            recMap.put(records[i].getLabel(), records[i]);
+            recMap.put(records[i].label(), records[i]);
         }
 
         // Go through the old history list, adding corresponding new
@@ -171,8 +171,8 @@ public final class Grillo2Palote {
                 throw new GeminiRuntimeException(msg);
             }
 
-            qaLogDo.setQaState(label, convertedRecord.qa.qaState);
-            qaLogDo.setComment(label, convertedRecord.qa.comment);
+            qaLogDo.setQaState(label, convertedRecord.qa().qaState);
+            qaLogDo.setComment(label, convertedRecord.qa().comment);
 
             // add an end dataset event so that this dataset is marked complete
             obsRec.addEvent(new EndDatasetEvent(evt.getTimestamp(), label), null);

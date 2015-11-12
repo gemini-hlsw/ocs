@@ -7,7 +7,8 @@ import edu.gemini.shared.util.immutable.Tuple2;
 import edu.gemini.spModel.ao.AOConstants;
 import edu.gemini.spModel.core.Affiliate;
 import edu.gemini.spModel.data.YesNoType;
-import edu.gemini.spModel.dataset.DatasetDisposition;
+import edu.gemini.spModel.dataset.DataflowStatus;
+import edu.gemini.spModel.dataset.DataflowStatus$;
 import edu.gemini.spModel.gemini.obscomp.SPProgram;
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality;
 import edu.gemini.spModel.obs.ObsQaState;
@@ -236,8 +237,8 @@ public final class ObsCatalog extends SkycatCatalog {
 
     private static NameValue[] _getDatasetDispositionNameValues() {
         final List<NameValue> res = new ArrayList<>();
-        for (DatasetDisposition dispo : DatasetDisposition.values()) {
-            res.add(new NameValue(dispo.getDisplayString(), dispo.getDisplayString()));
+        for (DataflowStatus dispo : DataflowStatus$.MODULE$.AllJava()) {
+            res.add(new NameValue(dispo.description(), dispo.description()));
         }
         final NameValue[] resA = new NameValue[res.size()];
         return res.toArray(resA);

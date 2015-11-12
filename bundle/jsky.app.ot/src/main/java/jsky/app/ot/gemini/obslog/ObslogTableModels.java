@@ -57,7 +57,7 @@ public interface ObslogTableModels {
                 int row = -1;
                 int i = 0;
                 for (DatasetRecord r : records1) {
-                    if (r.getLabel().equals(l)) {
+                    if (r.label().equals(l)) {
                         row = i;
                         break;
                     }
@@ -72,7 +72,7 @@ public interface ObslogTableModels {
 
         public boolean isUnavailable(int row) {
             final DatasetRecord rec = records.get(row);
-            return obsLog.getExecRecord().isTentative(rec.getLabel()) || rec.exec.fileState != DatasetFileState.OK;
+            return !obsLog.getExecRecord().inSummitStorage(rec.label());
         }
 
         public int getRowCount() {
@@ -103,14 +103,13 @@ public interface ObslogTableModels {
      */
     class DatasetAnalysisTableModel extends AbstractDatasetRecordTableModel {
 
-        public static final int COL_LABEL = 0;
+        public static final int COL_LABEL    = 0;
         public static final int COL_FILENAME = 1;
         public static final int COL_QA_STATE = 2;
-        public static final int COL_GSA_STATE = 3;
-        public static final int COL_NEXT_STEP = 4;
+        public static final int COL_STATUS   = 3;
 
         private static final String[] COL_NAMES = new String[]{
-                "Label", "Filename", "QA State", "GSA State", "Next Step",
+                "Label", "Filename", "QA State", "Dataset Status"
         };
 
         public DatasetAnalysisTableModel(ObsLog log) {
@@ -129,28 +128,27 @@ public interface ObslogTableModels {
             return COL_NAMES[i];
         }
 
+        public DatasetRecord getRecordAt(int row) {
+            return records.get(row);
+        }
+
         public Object getValueAt(int row, int col) {
             final DatasetRecord rec = records.get(row);
             switch (col) {
                 case COL_LABEL:
-                    return rec.getLabel();
+                    return rec.label();
                 case COL_FILENAME:
-                    return rec.exec.dataset.getDhsFilename();
+                    return rec.exec().dataset().getDhsFilename();
 
                 case COL_QA_STATE:
-                    final DatasetQaState qs = rec.qa.qaState;
+                    final DatasetQaState qs = rec.qa().qaState;
                     if (isUnavailable(row))
                         return qs.displayValue() + "*";
                     return qs;
 
-                case COL_GSA_STATE:
-                    final GsaState gs = rec.exec.gsaState;
-                    return (gs == GsaState.NONE) ? null : gs;
+                case COL_STATUS:
+                    return DataflowStatus$.MODULE$.derive(rec);
 
-                case COL_NEXT_STEP: {
-                    final DatasetDisposition disp = DatasetDisposition.derive(rec);
-                    return disp.isAttentionNeeded() ? disp.getDisplayString() : null;
-                }
                 default:
                     throw new IllegalArgumentException("Unknown column: " + col);
             }
@@ -161,11 +159,7 @@ public interface ObslogTableModels {
             switch (col) {
                 case COL_QA_STATE:
                     final DatasetQaState qaState = (DatasetQaState) val;
-                    obsLog.qaLogDataObject.setQaState(rec.getLabel(), qaState);
-
-                    // TODO: what to do here... we cannot change the exec record
-                    // in the client side
-//                    rec.setGsaState(GsaState.NONE);
+                    obsLog.qaLogDataObject.setQaState(rec.label(), qaState);
                     break;
                 default:
                     throw new IllegalArgumentException("Cannot modify value in column: " + col);
@@ -173,7 +167,7 @@ public interface ObslogTableModels {
         }
 
         protected void propertyChange(int row, ObsQaLog.Event event) {
-            if (event.isQaStateUpdated()) fireTableCellUpdated(row, COL_QA_STATE);
+            if (event.isQaStateUpdated())  fireTableRowsUpdated(row, row);
         }
 
     }
@@ -221,11 +215,11 @@ public interface ObslogTableModels {
             final DatasetRecord rec = records.get(row);
             switch (col) {
                 case COL_LABEL:
-                    return rec.getLabel();
+                    return rec.label();
                 case COL_FILENAME:
-                    return rec.exec.dataset.getDhsFilename();
+                    return rec.exec().dataset().getDhsFilename();
                 case COL_COMMENT:
-                    return rec.qa.comment;
+                    return rec.qa().comment;
                 default:
                     throw new IllegalArgumentException("Unknown column: " + col);
             }
@@ -235,7 +229,7 @@ public interface ObslogTableModels {
             final DatasetRecord rec = records.get(row);
             switch (col) {
                 case COL_COMMENT:
-                    obsLog.qaLogDataObject.setComment(rec.getLabel(), (String) value);
+                    obsLog.qaLogDataObject.setComment(rec.label(), (String) value);
                     break;
                 default:
                     throw new IllegalArgumentException("Unknown or immutable column: " + col);

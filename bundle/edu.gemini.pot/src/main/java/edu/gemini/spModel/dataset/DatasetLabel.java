@@ -100,9 +100,7 @@ public final class DatasetLabel implements Comparable<DatasetLabel>, Serializabl
         DatasetLabel that = (DatasetLabel) obj;
 
         if (!_observationId.equals(that._observationId)) return false;
-        if (_index != that._index) return false;
-
-        return true;
+        return _index == that._index;
     }
 
     /**
@@ -117,7 +115,7 @@ public final class DatasetLabel implements Comparable<DatasetLabel>, Serializabl
      * dataset index: <code>obsid-index</code>.
      */
     public String toString() {
-        StringBuffer buf = new StringBuffer(_observationId.toString());
+        StringBuilder buf = new StringBuilder(_observationId.toString());
         buf.append('-');
         if (_index < 100) {
             buf.append("0");

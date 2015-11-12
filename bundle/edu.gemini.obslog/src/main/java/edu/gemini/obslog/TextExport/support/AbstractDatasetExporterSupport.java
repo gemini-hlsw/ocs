@@ -29,7 +29,7 @@ public abstract class AbstractDatasetExporterSupport extends AbstractTextSegment
         if (datasetComments == null) return;
 
         for (DatasetRecord dset : datasetComments) {
-            _printJustifiedMultilineComment(sb, DATASETID_WIDTH, dset.getLabel().toString(), dset.qa.comment);
+            _printJustifiedMultilineComment(sb, DATASETID_WIDTH, dset.label().toString(), dset.qa().comment);
         }
         sb.append(NEWLINE);
     }

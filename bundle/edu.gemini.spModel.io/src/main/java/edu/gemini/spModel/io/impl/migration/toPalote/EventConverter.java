@@ -16,7 +16,6 @@ import java.util.logging.Level;
 
 import java.util.List;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.ArrayList;
 
 /**
@@ -60,7 +59,7 @@ class EventConverter {
         while (_recIndex < _records.length) {
             DatasetRecord rec = _records[_recIndex];
 
-            long datasetTime = rec.exec.dataset.getTimestamp();
+            long datasetTime = rec.exec().dataset().getTimestamp();
 
             if (_timesMatch(datasetTime, eventTime)) {
                 ++_recIndex;
@@ -116,7 +115,7 @@ class EventConverter {
                         time);
                 return null;
             }
-            return new StartDatasetEvent(time, rec.exec.dataset);
+            return new StartDatasetEvent(time, rec.exec().dataset());
         }
 
         LOG.log(Level.WARNING, "Unknown event type, skipping: '" + name + "'");
@@ -124,22 +123,18 @@ class EventConverter {
     }
 
 
-    static List getEventList(SPObservationID obsId, DatasetRecord[] records, Container obsCont) {
-        ParamSet history;
-        history = obsCont.lookupParamSet(new PioPath("Observation/history"));
-        if (history == null) return Collections.EMPTY_LIST;
+    static List<ObsExecEvent> getEventList(SPObservationID obsId, DatasetRecord[] records, Container obsCont) {
+        final ParamSet history = obsCont.lookupParamSet(new PioPath("Observation/history"));
+        if (history == null) return Collections.emptyList();
 
-        List historyItems = history.getParamSets();
-        if (historyItems == null) return Collections.EMPTY_LIST;
+        final List<ParamSet> historyItems = history.getParamSets();
+        if (historyItems == null) return Collections.emptyList();
 
-        EventConverter ec = new EventConverter(obsId, records);
-        List res = new ArrayList();
-        for (Iterator it=historyItems.iterator(); it.hasNext(); ) {
-            ParamSet grilloEvent = (ParamSet) it.next();
-            ObsExecEvent evt = ec.toObsExecEvent(grilloEvent);
-            if (evt != null) {
-                res.add(evt);
-            }
+        final EventConverter ec = new EventConverter(obsId, records);
+        final List<ObsExecEvent> res = new ArrayList<>();
+        for (ParamSet grilloEvent : historyItems) {
+            final ObsExecEvent evt = ec.toObsExecEvent(grilloEvent);
+            if (evt != null) res.add(evt);
         }
         return res;
     }

@@ -88,7 +88,7 @@ final class DatasetConverter {
 
         final Dataset dset = new Dataset(label, dhsFile, timestamp);
         final DatasetQaRecord qa = new DatasetQaRecord(label, DatasetQaState.UNDEFINED, getComment(grilloDset));
-        final DatasetExecRecord exec = new DatasetExecRecord(dset);
+        final DatasetExecRecord exec = DatasetExecRecord.apply(dset);
 
         return new DatasetRecord(qa, exec);
     }
@@ -96,7 +96,7 @@ final class DatasetConverter {
     public DatasetRecord toDatasetRecord(ParamSet grilloDset, DatasetQaState qa) {
         DatasetRecord rec = toDatasetRecord(grilloDset);
         if (rec == null) return null;
-        return rec.withQa(rec.qa.withQaState(qa));
+        return rec.withQa(rec.qa().withQaState(qa));
     }
 
     /**

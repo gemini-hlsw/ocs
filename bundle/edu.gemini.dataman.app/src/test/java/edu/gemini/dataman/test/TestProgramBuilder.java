@@ -52,7 +52,7 @@ public final class TestProgramBuilder {
     }
 
     public void putDataset(DatasetExecRecord record) throws Exception {
-        SPObservationID obsId = record.getLabel().getObservationId();
+        SPObservationID obsId = record.label().getObservationId();
         ISPObservation obs = odb.lookupObservationByID(obsId);
 
         ISPObsExecLog obsLogComp = obs.getObsExecLog();

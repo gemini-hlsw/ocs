@@ -30,13 +30,10 @@ trait OcsBundle {
   lazy val bundle_edu_gemini_dataman_app = 
     project.in(file("bundle/edu.gemini.dataman.app")).dependsOn(
       bundle_edu_gemini_util_file_filter,
-      bundle_edu_gemini_pot,
+      bundle_edu_gemini_pot % "test->test;compile->compile",
       bundle_edu_gemini_shared_util,
       bundle_edu_gemini_spModel_core,
       bundle_edu_gemini_spModel_pio,
-      bundle_edu_gemini_util_fits,
-      bundle_edu_gemini_util_javax_mail,
-      bundle_edu_gemini_util_ssh,
       bundle_edu_gemini_util_security
     )
 

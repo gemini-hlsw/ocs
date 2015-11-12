@@ -38,7 +38,7 @@ public final class ObsExecRecord implements Serializable {
 
 
     // Map from DatasetLabel to DatasetRecord.
-    private final TreeMap<DatasetLabel, DatasetExecRecord> _datasets = new TreeMap<DatasetLabel, DatasetExecRecord>();
+    private final TreeMap<DatasetLabel, DatasetExecRecord> _datasets = new TreeMap<>();
 
     // Events, sorted and separated into distinct visits.
     private final PrivateVisitList _visits;
@@ -58,38 +58,35 @@ public final class ObsExecRecord implements Serializable {
      * configurations.
      */
     public ObsExecRecord() {
-        _visits      = new PrivateVisitList();
-        _configStore = new CompressedConfigStore();
+        this(new PrivateVisitList(), new CompressedConfigStore());
+    }
+
+    private ObsExecRecord(PrivateVisitList visits, CompressedConfigStore configStore) {
+        _visits      = visits;
+        _configStore = configStore;
     }
 
     /**
-     * Creates an ObsRecord that is a copy of <code>that</code>.
-     *
-     * @param that the ObsRecord to copy
+     * Creates an ObsRecord that is a copy of this one.
      */
-    public ObsExecRecord(ObsExecRecord that) {
+    public synchronized ObsExecRecord copy() {
+        final ObsExecRecord that = new ObsExecRecord(new PrivateVisitList(_visits),
+                                                     new CompressedConfigStore(_configStore));
 
-        synchronized (that) {
-            // Copy the datasets.
-            for (Map.Entry<DatasetLabel, DatasetExecRecord> me : that._datasets.entrySet()) {
-                final DatasetLabel label = me.getKey();
-                final DatasetExecRecord dr =  me.getValue();
-                _datasets.put(label, dr); // DatasetExecRec is immutable
-            }
-
-            // Copy the visits.
-            _visits = new PrivateVisitList(that._visits);
-
-            // Copy the configs.
-            _configStore = new CompressedConfigStore(that._configStore);
-
-            // Copy the tentative info
-            _tentativeDataset = that._tentativeDataset;
-            if (that._tentativeConfig != null) {
-                _tentativeConfig  = new DefaultConfig(that._tentativeConfig);
-            }
+        // Copy the datasets.
+        for (Map.Entry<DatasetLabel, DatasetExecRecord> me : _datasets.entrySet()) {
+            final DatasetLabel   label = me.getKey();
+            final DatasetExecRecord dr =  me.getValue();
+            that._datasets.put(label, dr); // DatasetExecRec is immutable
         }
 
+        // Copy the tentative info
+        that._tentativeDataset = _tentativeDataset;
+        if (_tentativeConfig != null) {
+            that._tentativeConfig  = new DefaultConfig(_tentativeConfig);
+        }
+
+        return that;
     }
 
     public boolean isEmpty() {
@@ -110,11 +107,11 @@ public final class ObsExecRecord implements Serializable {
         // Add the dataset records.
         ParamSet datasetsParamSet = paramSet.getParamSet(DATASETS_PARAM_SET);
         if (datasetsParamSet != null) {
-            List lst = datasetsParamSet.getParamSets(DatasetExecRecord.PARAM_SET);
+            List lst = datasetsParamSet.getParamSets(DatasetExecRecord.ParamSet());
             for (Object o : lst) {
                 ParamSet datasetParamSet = (ParamSet) o;
-                DatasetExecRecord dr = new DatasetExecRecord(datasetParamSet);
-                _datasets.put(dr.getDataset().getLabel(), dr);
+                DatasetExecRecord dr = DatasetExecRecord.apply(datasetParamSet);
+                _datasets.put(dr.label(), dr);
             }
         }
 
@@ -152,7 +149,7 @@ public final class ObsExecRecord implements Serializable {
         // Add the dataset records.
         ParamSet datasetsParamSet = factory.createParamSet(DATASETS_PARAM_SET);
         for (DatasetExecRecord dr : _datasets.values()) {
-            datasetsParamSet.addParamSet(dr.toParamSet(factory));
+            datasetsParamSet.addParamSet(dr.pset(factory));
         }
         pSet.addParamSet(datasetsParamSet);
 
@@ -279,7 +276,7 @@ public final class ObsExecRecord implements Serializable {
         if (existingRec == null) {
             // Create the new DatasetRecord.  It will be tentative until
             // confirmed by the Data Manager.
-            final DatasetExecRecord rec = (new DatasetExecRecord(dataset)).withFileState(DatasetFileState.TENTATIVE);
+            final DatasetExecRecord rec = DatasetExecRecord.apply(dataset);
             _datasets.put(label, rec);
             _configStore.addConfigAndLabel(config, label);
         }
@@ -323,9 +320,7 @@ public final class ObsExecRecord implements Serializable {
         try {
             DatasetExecRecord rec = _datasets.get(label);
             if (rec != null) {
-                DatasetFileState dfs = rec.getDatasetFileState();
-                if (!DatasetFileState.TENTATIVE.equals(dfs) &&
-                    !DatasetFileState.MISSING.equals(dfs)) {
+                if (rec.summit().isAvailable()) {
                     // no longer tentative -- must exist in the working store
                     return;
                 }
@@ -429,19 +424,16 @@ public final class ObsExecRecord implements Serializable {
     }
 
     /**
-     * Gets the earliest represented dataset disposition associated with the
+     * Gets the highest priority dataflow status associated with the
      * datasets produced by this observation, if any.  The idea is to determine
      * the minimum amount of dataflow progress that has been made by the
-     * observation's datasets as a whole.  If <i>n</i> datasets have progressed
-     * to an advanced state, say {@link DatasetDisposition#ACCEPTED}, and even
-     * just one is left at an earlier state, say {@link DatasetDisposition#CHECK},
-     * then the earlier state is returned.
+     * observation's datasets as a whole.
      *
      * @return the least advanced dataflow step for any dataset associated with
      * the observation; <code>null</code> if there are no datasets
      */
-    public synchronized DatasetDisposition getMinimumDisposition(ObsQaRecord qaRecord) {
-        return DatasetDisposition.rollUp(qaRecord.datasetRecordsAsJava(_datasets.values()));
+    public synchronized scala.Option<DataflowStatus> getMinimumDisposition(ObsQaRecord qaRecord) {
+        return DataflowStatus$.MODULE$.rollUp(qaRecord.datasetRecordsFromJava(_datasets.values()));
     }
 
     /**
@@ -474,7 +466,7 @@ public final class ObsExecRecord implements Serializable {
      * retained
      */
     public synchronized void putDatasetExecRecord(DatasetExecRecord record, Config config) {
-        DatasetLabel label = record.getDataset().getLabel();
+        DatasetLabel label = record.label();
         _datasets.put(label, record);
 
         if (config == null) {
@@ -511,10 +503,9 @@ public final class ObsExecRecord implements Serializable {
      * @return <code>true</code> if the associated dataset is complete,
      * <code>false</code> otherwise
      */
-    public synchronized boolean isTentative(DatasetLabel label) {
+    public synchronized boolean inSummitStorage(DatasetLabel label) {
         DatasetExecRecord rec = _datasets.get(label);
-        return (rec != null) &&
-                DatasetFileState.TENTATIVE.equals(rec.getDatasetFileState());
+        return (rec != null) && rec.summit().isAvailable();
     }
 
     /**
@@ -535,11 +526,11 @@ public final class ObsExecRecord implements Serializable {
      * observation
      */
     public synchronized List<DatasetExecRecord> getAllDatasetExecRecords() {
-        return new ArrayList<DatasetExecRecord>(_datasets.values());
+        return new ArrayList<>(_datasets.values());
     }
 
     public synchronized SortedSet<DatasetLabel> getDatasetLabels() {
-        return new TreeSet<DatasetLabel>(_datasets.keySet());
+        return new TreeSet<>(_datasets.keySet());
     }
 
     /**
