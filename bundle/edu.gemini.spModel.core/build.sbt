@@ -38,3 +38,8 @@ scalacOptions in (Compile, doc) ++= Seq(
   "-sourcepath", (baseDirectory in LocalRootProject).value.getAbsolutePath, 
   "-doc-source-url", "https://github.com/gemini-hlws/ocs/master€{FILE_PATH}.scala" 
 )
+
+publishArtifact in (ThisBuild, packageSrc) := true
+
+publishMavenStyle in ThisBuild := true
+

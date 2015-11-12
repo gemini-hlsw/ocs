@@ -2,6 +2,8 @@ import OcsKeys._
 
 name := "ocs"
 
+organization in Global := "edu.gemini.ocs"
+
 ocsVersion in ThisBuild := OcsVersion("2016A", true, 1, 1, 1)
 
 pitVersion in ThisBuild := OcsVersion("2016A", false, 1, 1, 0)
@@ -67,6 +69,15 @@ publishArtifact in (ThisBuild, packageDoc) := false
 
 // Don't build package source (for now)
 publishArtifact in (ThisBuild, packageSrc) := false
+
+publishTo in Global := {
+    val repo = if (isSnapshot.value) {
+      "libs-snapshot-local"
+    } else {
+      "libs-release-local"
+    }
+    Some("Gemini Artifactory" at s"http://sbfosxdev-mp1.cl.gemini.edu:8081/artifactory/$repo")
+  }
 
 // No poms
 publishMavenStyle in ThisBuild := false

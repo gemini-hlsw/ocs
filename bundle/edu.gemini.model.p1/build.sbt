@@ -63,3 +63,8 @@ commands += {
     state
   }
 }
+
+publishArtifact in (ThisBuild, packageSrc) := true
+
+publishMavenStyle in ThisBuild := true
+

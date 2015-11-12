@@ -95,8 +95,10 @@ Each project in `app/` defines an application, which is a collection of bundles 
 - The build dependencies declared in `project/OcsApp.scala` and the bundle dependencies declared (and calculated) by the `Application` object in each app's `build.sbt` are independent; the former is simply a convenience that allows you to build the app from sbt, and the latter is used for generating IDEA projects and app distributions.
 - The `all-bundles` app is not computed; if you add a new bundle to the OCS project you will need to add it manually to `all-bundles`.
 
+#### Artifact Publication
 
+At least 2 bundles need to be shared via a maven repository for use on other projects. To publish go to the project and type `publish`. That will create a maven compatible artifact and deploy it
 
+You need to setup your credentials for the repository adding an sbt file, e.g. `artifactory.sbt` to your sbt settings at `~/.sbt/0.13/` with the following content
 
-
-
+`credentials += Credentials("Artifactory Realm", "<artifactory host>", "<username>", "<pwd>")`
