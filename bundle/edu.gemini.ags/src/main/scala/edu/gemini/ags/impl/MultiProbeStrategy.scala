@@ -5,7 +5,7 @@ import edu.gemini.ags.api.AgsStrategy.Estimate
 import edu.gemini.ags.api.{AgsAnalysis, AgsMagnitude, AgsStrategy}
 import edu.gemini.catalog.api.CatalogQuery
 import edu.gemini.spModel.ags.AgsStrategyKey
-import edu.gemini.spModel.core.{SingleBand, RBandsList, SiderealTarget}
+import edu.gemini.spModel.core.{RBandsList, SiderealTarget}
 import edu.gemini.spModel.guide.{ValidatableGuideProbe, GuideProbe}
 import edu.gemini.spModel.obs.context.ObsContext
 
