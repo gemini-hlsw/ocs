@@ -8,7 +8,5 @@ libraryDependencies ++= Seq(
   "org.scalaz" %% "scalaz-effect" % "7.0.4"
 )
 
-
 // TODO: remove this, it's for the inlined sbt-osgi plugin
 libraryDependencies += "biz.aQute.bnd" % "bndlib" % "2.1.0"
-

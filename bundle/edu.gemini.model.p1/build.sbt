@@ -68,12 +68,3 @@ publishArtifact in (ThisBuild, packageSrc) := true
 
 publishMavenStyle in ThisBuild := true
 
-// Add your credentials to the artifactory repository
-publishTo := {
-    val repo = if (isSnapshot.value) {
-      "libs-snapshot-local"
-    } else {
-      "libs-release-local"
-    }
-    Some("Gemini Artifactory" at s"http://sbfosxdev-mp1.cl.gemini.edu:8081/artifactory/$repo")
-  }
