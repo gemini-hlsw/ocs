@@ -359,7 +359,7 @@ Fredrik Rantakyro 20150825
       <container kind="observation" type="Observation" version="2014A-1" subtype="basic" key="82f5155d-433c-4017-978d-8363c562df55" name="GPI-BP-8">
         <paramset name="Observation" kind="dataObj">
           <param name="title" value="GPI Acquisition with embedded ARC"/>
-          <param name="libraryId" value="1"/>
+          <param name="libraryId" value="8"/>
           <param name="priority" value="MEDIUM"/>
           <param name="tooOverrideRapid" value="false"/>
           <param name="phase2Status" value="INACTIVE"/>
