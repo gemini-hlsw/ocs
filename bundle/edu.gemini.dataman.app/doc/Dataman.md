@@ -63,17 +63,21 @@ polls the storage server and applies any necessary changes to ODB records.  The 
 current dataset status in the database and updates the local copy of the program that it is
 editing.
 
-In the OT, the poll period depends upon user privileges and program status.  In particular the
-polling rates are:
+In the OT, the poll period depends upon user privileges and whether the program is currently being
+displayed in an OT window.  In particular the polling rates are:
 
 <table>
   <caption>OT/ODB Poll Periods</caption>
-  <tr><th>Program Status</th><th>Privileges</th><th>Poll Period</th></tr>
-  <tr><td>Active</td><td>Staff</td><td>10 seconds</td></tr>
-  <tr><td>Active</td><td>Non-Staff</td><td>1 hour</td></tr>
-  <tr><td>Inactive</td><td>Staff</td><td>5 minutes</td></tr>
-  <tr><td>Inactive</td><td>Non-Staff</td><td>1 day</td></tr>
+  <tr><th>Displayed?</th><th>Privileges</th><th>Poll Period</th></tr>
+  <tr><td>Yes</td><td>Staff</td><td>10 seconds</td></tr>
+  <tr><td>Yes</td><td>Non-Staff</td><td>1 hour</td></tr>
+  <tr><td>No</td><td>Staff</td><td>5 minutes</td></tr>
+  <tr><td>No</td><td>Non-Staff</td><td>1 day</td></tr>
 </table>
+
+Displayed means that the program is open in an OT window, not just loaded in its history and
+certainly not just in the local database.  Any program not currently visible in an OT window
+is counted as not displayed.
 
 To keep the network load to a minimum, the OT transmits a hash of the expected poll results.
 The ODB checks the hash against the current poll results and if nothing has changed, returns
