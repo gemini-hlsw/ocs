@@ -16,9 +16,7 @@ import edu.gemini.spModel.pio.Pio;
 import edu.gemini.spModel.pio.PioFactory;
 import edu.gemini.spModel.pio.PioParseException;
 import edu.gemini.spModel.seqcomp.IObserveSeqComponent;
-import edu.gemini.spModel.target.SPTarget;
 import edu.gemini.spModel.target.obsComp.TargetObsComp;
-import edu.gemini.spModel.target.system.CoordinateParam;
 import edu.gemini.spModel.target.system.HmsDegTarget;
 import edu.gemini.spModel.target.system.ITarget;
 import edu.gemini.spModel.time.ChargeClass;
@@ -81,7 +79,7 @@ public class SPObservation extends AbstractDataObject implements ISPStaffOnlyFie
     /**
      * Observation user priority.
      */
-    public static enum Priority implements DisplayableSpType {
+    public enum Priority implements DisplayableSpType {
 
         LOW("Low"),
         MEDIUM("Medium"),
@@ -94,7 +92,7 @@ public class SPObservation extends AbstractDataObject implements ISPStaffOnlyFie
 
         private String _displayValue;
 
-        private Priority(String displayVal) {
+        Priority(String displayVal) {
           _displayValue = displayVal;
        }
 
@@ -580,7 +578,6 @@ public class SPObservation extends AbstractDataObject implements ISPStaffOnlyFie
 
     /**
      * Return a parameter set describing the current state of this object.
-     * @param factory
      */
     public ParamSet getParamSet(PioFactory factory) {
         ParamSet paramSet = super.getParamSet(factory);
@@ -654,18 +651,18 @@ public class SPObservation extends AbstractDataObject implements ISPStaffOnlyFie
         }
         v = Pio.getValue(paramSet, EXEC_STATUS_OVERRIDE_PROP);
         if (v == null) {
-            setExecStatusOverride(None.<ObsExecStatus>instance());
+            setExecStatusOverride(None.instance());
         } else {
-            setExecStatusOverride(new Some<ObsExecStatus>(ObsExecStatus.valueOf(v)));
+            setExecStatusOverride(new Some<>(ObsExecStatus.valueOf(v)));
         }
 
         // Set the scheduling block if it exists for both start and duration properties.
         v = Pio.getValue(paramSet, SCHEDULING_BLOCK_START_PROP);
         String v2 = Pio.getValue(paramSet, SCHEDULING_BLOCK_DURATION_PROP);
         if (v == null || v2 == null) {
-            setSchedulingBlock(None.<SchedulingBlock>instance());
+            setSchedulingBlock(None.instance());
         } else {
-            setSchedulingBlock(new Some<SchedulingBlock>(SchedulingBlock$.MODULE$.valueOf(v, v2)));
+            setSchedulingBlock(new Some<>(SchedulingBlock$.MODULE$.valueOf(v, v2)));
         }
 
         v = Pio.getValue(paramSet, QA_STATE_PROP);

@@ -613,13 +613,11 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
         }
         // Update conditions
         i.ctx.map(_.getConditions).foreach(c => originalConditions = Option(c))
-        List(sbBox, ccBox, iqBox).foreach(c => c.deafTo(c.selection))
         i.conditions.foreach { c =>
           sbBox.selection.item = c.sb
           ccBox.selection.item = c.cc
           iqBox.selection.item = c.iq
         }
-        List(sbBox, ccBox, iqBox).foreach(c => c.listenTo(c.selection))
         i.ctx.map(_.getPositionAngle).foreach(a => pa = a.toNewModel)
         i.ctx.map(_.getSciencePositions).foreach(o => offsets = o.asScala.map(_.toNewModel).toSet)
         updateGuideSpeedText()
