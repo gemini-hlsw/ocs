@@ -5,8 +5,11 @@ import javax.swing._
 
 import edu.gemini.itc.shared.PlottingDetails.PlotLimits
 import edu.gemini.itc.shared._
-import edu.gemini.pot.sp.SPComponentType
+import edu.gemini.pot.sp.{SPNodeKey, SPComponentType}
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2
+import edu.gemini.spModel.gemini.gmos.GmosNorthType.FPUnitNorth
+import edu.gemini.spModel.gemini.gmos.GmosSouthType.FPUnitSouth
+import edu.gemini.spModel.gemini.gmos.{InstGmosSouth, InstGmosNorth}
 import edu.gemini.spModel.gemini.gsaoi.Gsaoi
 import edu.gemini.spModel.gemini.niri.InstNIRI
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality.{CloudCover, ImageQuality, SkyBackground, WaterVapor}
@@ -369,9 +372,16 @@ private class ConditionsPanel(owner: EdIteratorFolder) extends GridBagPanel {
 
 }
 
+private object AnalysisMethodPanel {
+  // TODO: The analysis method will have to become part of the observation model and become persistent.
+  // As an intermediate solution (to keep the values available when switching between different
+  // observations for at least as long as the OT is running) we store them here in a local cache.
+  val analysisCache = scala.collection.mutable.Map[SPNodeKey, AnalysisMethod]()
+}
+
 private class AnalysisMethodPanel(owner: EdIteratorFolder) extends GridBagPanel {
 
-  var userSkyValue: Option[Double] = None // temporary, this will go away, see Note regarding OCSADV-345 below
+  val defaultAnalysisMethod = AutoAperture(5.0)
 
   val autoAperture  = new RadioButton("Auto") { focusable = false; selected = true }
   val userAperture  = new RadioButton("User") { focusable = false }
@@ -380,7 +390,7 @@ private class AnalysisMethodPanel(owner: EdIteratorFolder) extends GridBagPanel 
   val sky           = new NumberEdit(skyLabel, skyUnits, 5.0)
   val targetLabel   = new Label("Target Aperture")
   val targetUnits   = new Label("arcsec")
-  val target        = new NumberEdit(targetLabel, targetUnits, 2) { enabled = false; targetLabel.enabled = true }
+  val target        = new NumberEdit(targetLabel, targetUnits, 2) <| {_.peer.setEnabled(false)}
   new ButtonGroup(autoAperture, userAperture)
 
   layout(new Label("Analysis Method:")) = new Constraints { gridx = 0; gridy = 0; anchor = Anchor.West; gridwidth = 5; insets = new Insets(0, 0, 5, 0) }
@@ -395,31 +405,67 @@ private class AnalysisMethodPanel(owner: EdIteratorFolder) extends GridBagPanel 
 
   listenTo(autoAperture, userAperture, target, sky)
   reactions += {
-    case ButtonClicked(`autoAperture`)  => target.enabled = false; targetLabel.enabled = true; publish(new SelectionChanged(this))
-    case ButtonClicked(`userAperture`)  => target.enabled = true;  publish(new SelectionChanged(this))
-    case ValueChanged(_)                => publish(new SelectionChanged(this))
+    case ButtonClicked(`autoAperture`)  => deafTo(userAperture); toggleUserAperture(enabled = false, "");   listenTo(userAperture); updateCache(); publish(new SelectionChanged(this))
+    case ButtonClicked(`userAperture`)  => deafTo(userAperture); toggleUserAperture(enabled = true, "2.0"); listenTo(userAperture); updateCache(); publish(new SelectionChanged(this))
+    case ValueChanged(_)                => updateCache(); publish(new SelectionChanged(this))
   }
 
+  // get current nodeKey (used as lookup key for the observation)
+  def nodeKey = owner.getContextObservation.getNodeKey
+
+  // udpate the value that's currently cached for this observation
+  def updateCache() = analysisMethod.foreach { AnalysisMethodPanel.analysisCache.put(nodeKey, _) }
+
+  // generate a default analysis method for observations for which we don't have anything in the cache yet
+  def defaultMethod: AnalysisMethod = owner.getContextInstrumentDataObject match {
+      case i: InstGmosNorth => i.getFPUnitNorth match {
+        case FPUnitNorth.IFU_1                      => AutoAperture(500)  // GMOS-N IFU-2
+        case FPUnitNorth.IFU_2 | FPUnitNorth.IFU_3  => AutoAperture(250)  // GMOS-N IFU-B / IFU-R
+        case _                                      => AutoAperture(1)    // GMOS-N everything else
+      }
+      case i: InstGmosSouth => i.getFPUnitSouth match {
+        case FPUnitSouth.IFU_1                      => AutoAperture(500)  // GMOS-S IFU-2
+        case FPUnitSouth.IFU_2 | FPUnitSouth.IFU_3  => AutoAperture(250)  // GMOS-S IFU-B / IFU-R
+        case _                                      => AutoAperture(1)    // GMOS-S everything else
+      }
+      case i: InstNIRI                              => AutoAperture(1.0)
+      case i: Flamingos2                            => AutoAperture(1.0)
+      case i: Gsaoi                                 => AutoAperture(1.0)
+      case _                                        => defaultAnalysisMethod
+    }
+
+  // helper to activate/deactivate the user value for the target aperture
+  def toggleUserAperture(enabled: Boolean, v: String) = {
+    target.peer.setEnabled(enabled)
+    targetUnits.enabled = enabled
+    target.peer.setValue(v)
+  }
+
+  // update UI elements and values that are displayed
   def update() = {
-    // OCSADV-345: Don't allow users to change sky aperture for NIRI, F2 and GSAOI, this functionality has not been verified for these instruments.
-    // In the future, those values will be stored in the observation, for now they are not made persistent and are used on-the-fly.
-    // However, out of courtesy to the users, we do keep the value they've entered for the sky aperture and restore it after the value
-    // has been set to 1.0 for NIRI, F2 and GSAOI.
+    AnalysisMethodPanel.analysisCache.getOrElse(nodeKey, defaultMethod) match {
+      case AutoAperture(s) =>
+        autoAperture.selected = true
+        toggleUserAperture(enabled = false, "")
+        sky.peer.setValue(s)
+      case UserAperture(d, s) =>
+        userAperture.selected = true
+        toggleUserAperture(enabled = true, d.toString)
+        sky.peer.setValue(s)
+    }
+
+    // special handling for NIRI, F2 and GSAOI (OCSADV-345)
     Option(owner.getContextInstrumentDataObject).foreach { _.getType match {
       case InstNIRI.SP_TYPE | Flamingos2.SP_TYPE | Gsaoi.SP_TYPE  =>
-        userSkyValue      = Some(sky.peer.getDoubleValue(5.0))
-        sky.tooltip       = "This instrument does not support user defined values for the sky aperture. 1.0 is used."
+        sky.tooltip       = "This instrument does not support user defined values for the sky aperture."
         sky.enabled       = false
-        skyLabel.enabled  = true
-        sky.peer.setValue(1.0)
       case _  =>
         sky.tooltip       = null
         sky.enabled       = true
-        userSkyValue.foreach(sky.peer.setValue) // when coming back from F2, NIRI, GSAOI -> restore user value
-        userSkyValue      = None
     }}
   }
 
+  // create the analysis method for the current user entries
   def analysisMethod: Option[AnalysisMethod] =
     if (autoAperture.selected) autoApertureValue else userApertureValue
 
