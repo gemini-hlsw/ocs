@@ -53,18 +53,8 @@ class CoordinateEditor extends TelescopePosEditor with ReentrancyHack {
 
     nonreentrant {
       val when = ctx.asScalaOpt.flatMap(_.getSchedulingBlock.asScalaOpt).map(_.start).map(java.lang.Long.valueOf).asGeminiOpt
-
-      // We want to see if the current text in the fields, when formatted properly, is different from what would be assigned.
-      // The targetChanged is not a foolproof catch, since two ITargets could be considered the same if their values are
-      // identical, but this is not really consequential: it is just included to reset a partially completed field to a
-      // fully completed one (e.g. RA: 12 to 12:00:00.000) if the RAs are the same but the targets are different.
-      def setField[F <: CoordinateFormat](widget: TextBoxWidget, formatter: F, extractor: GOption[java.lang.Long] => GOption[String]): Unit = {
-        val original  = widget.getText
-        val formatted = Try { formatter.format(formatter.parse(original)) }.getOrElse(original)
-        extractor(when).asScalaOpt.filter(_ != formatted || original.isEmpty || targetChanged).foreach(widget.setText)
-      }
-      setField(ra,  HMS.DEFAULT_FORMAT, target.getRaString)
-      setField(dec, DMS.DEFAULT_FORMAT, target.getDecString)
+      target.getRaString(when).asScalaOpt.foreach(ra.setText)
+      target.getDecString(when).asScalaOpt.foreach(dec.setText)
     }
   }
 
