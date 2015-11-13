@@ -116,17 +116,17 @@ public final class Flamingos2Recipe implements ImagingRecipe, SpectroscopyRecipe
         final double gratDispersion_nmppix = instrument.getSpectralPixelWidth();
         final double gratDispersion_nm = 0.5 / pixel_size * gratDispersion_nmppix;
 
-        specS2N = new SpecS2NLargeSlitVisitor(instrument.getSlitSize() * pixel_size,
-                pixel_size, instrument.getSpectralPixelWidth(),
+        specS2N = new SpecS2NLargeSlitVisitor(
+                instrument.getSlitSize() * pixel_size,
+                pixel_size,
+                instrument.getSpectralPixelWidth(),
                 instrument.getObservingStart(),
                 instrument.getObservingEnd(),
                 gratDispersion_nm,
                 gratDispersion_nmppix,
                 spec_source_frac, im_qual,
                 ap_diam,
-                _obsDetailParameters.getNumExposures(),
-                _obsDetailParameters.getSourceFraction(),
-                _obsDetailParameters.getExposureTime(),
+                _obsDetailParameters.calculationMethod,
                 instrument.getDarkCurrent(),
                 instrument.getReadNoise(),
                 _obsDetailParameters.getSkyApertureDiameter());

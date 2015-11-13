@@ -3,6 +3,8 @@ package edu.gemini.itc.operation;
 import edu.gemini.itc.base.SampledSpectrum;
 import edu.gemini.itc.base.SampledSpectrumVisitor;
 import edu.gemini.itc.base.VisitableSampledSpectrum;
+import edu.gemini.itc.shared.CalculationMethod;
+import edu.gemini.itc.shared.SpectroscopySN;
 
 /**
  * The SpecS2NVisitor is used to calculate the s2n of an observation using
@@ -27,27 +29,29 @@ public class SpecS2NVisitor implements SampledSpectrumVisitor, SpecS2N {
      * pixel_size, Smoothing Element, SlitThroughput, spec_Npix(sw aperture
      * size), ExpNum, frac_with_source, ExpTime .
      */
-    public SpecS2NVisitor(double slit_width, double pixel_size,
+    public SpecS2NVisitor(double pixel_size, double slit_width,
                           double pix_width, double obs_wave_low,
                           double obs_wave_high, double grism_res,
                           double spec_source_fraction, double im_qual,
-                          double spec_Npix, int spec_number_exposures,
-                          double spec_frac_with_source, double spec_exp_time,
+                          double spec_Npix, CalculationMethod calcMethod,
                           double dark_current, double read_noise) {
         this.slit_width = slit_width;
         this.pixel_size = pixel_size;
         this.pix_width = pix_width;
         this.spec_source_fraction = spec_source_fraction;
         this.spec_Npix = spec_Npix;
-        this.spec_frac_with_source = spec_frac_with_source;
-        this.spec_exp_time = spec_exp_time;
         this.obs_wave_low = obs_wave_low;
         this.obs_wave_high = obs_wave_high;
         this.grism_res = grism_res;
         this.im_qual = im_qual;
         this.dark_current = dark_current;
         this.read_noise = read_noise;
-        this.spec_number_exposures = spec_number_exposures;
+
+        // Currently SpectroscopySN is the only supported calculation method for spectroscopy.
+        if (!(calcMethod instanceof SpectroscopySN)) throw new Error("Unsupported calculation method");
+        this.spec_number_exposures = ((SpectroscopySN) calcMethod).exposures();
+        this.spec_frac_with_source = calcMethod.sourceFraction();
+        this.spec_exp_time         = calcMethod.exposureTime();
 
     }
 

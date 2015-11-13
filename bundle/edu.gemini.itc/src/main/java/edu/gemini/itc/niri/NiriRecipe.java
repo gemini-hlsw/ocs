@@ -146,15 +146,16 @@ public final class NiriRecipe implements ImagingRecipe, SpectroscopyRecipe {
             }
         }
 
-        final SpecS2NVisitor specS2N = new SpecS2NVisitor(instrument.getFPMask(),
-                pixel_size, instrument.getSpectralPixelWidth(),
+        final SpecS2NVisitor specS2N = new SpecS2NVisitor(
+                pixel_size,
+                instrument.getFPMask(),
+                instrument.getSpectralPixelWidth(),
                 instrument.getObservingStart(),
                 instrument.getObservingEnd(),
-                instrument.getGrismResolution(), spec_source_frac, im_qual,
+                instrument.getGrismResolution(),
+                spec_source_frac, im_qual,
                 ap_diam,
-                _obsDetailParameters.getNumExposures(),
-                _obsDetailParameters.getSourceFraction(),
-                _obsDetailParameters.getExposureTime(),
+                _obsDetailParameters.calculationMethod,
                 instrument.getDarkCurrent(),
                 niriParameters.readMode().getReadNoise());
         specS2N.setSourceSpectrum(calcSource.sed);

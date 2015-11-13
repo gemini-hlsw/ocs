@@ -108,7 +108,6 @@ public final class TRecsRecipe implements ImagingRecipe, SpectroscopyRecipe {
         // inputs: source morphology specification
 
         double pixel_size = instrument.getPixelSize();
-        double ap_diam = 0;
 
         // Calculate image quality
         final ImageQualityCalculatable IQcalc = ImageQualityCalculationFactory.getCalculationInstance(_sdParameters, _obsConditionParameters, _telescope, instrument);
@@ -117,10 +116,6 @@ public final class TRecsRecipe implements ImagingRecipe, SpectroscopyRecipe {
         // In this version we are bypassing morphology modules 3a-5a.
         // i.e. the output morphology is same as the input morphology.
         // Might implement these modules at a later time.
-        final double exp_time = _obsDetailParameters.getExposureTime();
-        final int number_exposures = _obsDetailParameters.getNumExposures();
-        final double frac_with_source = _obsDetailParameters.getSourceFraction();
-        double spec_source_frac = 0;
 
         final SlitThroughput st;
         if (!_obsDetailParameters.isAutoAperture()) {
@@ -132,8 +127,8 @@ public final class TRecsRecipe implements ImagingRecipe, SpectroscopyRecipe {
         }
 
 
-        ap_diam = st.getSpatialPix();
-        spec_source_frac = st.getSlitThroughput();
+        double ap_diam = st.getSpatialPix();
+        double spec_source_frac = st.getSlitThroughput();
 
         // For the usb case we want the resolution to be determined by the
         // slit width and not the image quality for a point source.
@@ -150,15 +145,18 @@ public final class TRecsRecipe implements ImagingRecipe, SpectroscopyRecipe {
             im_qual = IQcalc.getImageQuality();
         }
 
-        final SpecS2NLargeSlitVisitor specS2N = new SpecS2NLargeSlitVisitor(instrument.getFPMask(),
-                pixel_size, instrument.getSpectralPixelWidth(),
+        final SpecS2NLargeSlitVisitor specS2N = new SpecS2NLargeSlitVisitor(
+                instrument.getFPMask(),
+                pixel_size,
+                instrument.getSpectralPixelWidth(),
                 instrument.getObservingStart(),
                 instrument.getObservingEnd(),
                 instrument.getGratingDispersion_nm(),
                 instrument.getGratingDispersion_nmppix(),
                 spec_source_frac,
-                im_qual, ap_diam, number_exposures, frac_with_source,
-                exp_time,
+                im_qual,
+                ap_diam,
+                _obsDetailParameters.calculationMethod,
                 instrument.getDarkCurrent(),
                 instrument.getReadNoise(),
                 _obsDetailParameters.getSkyApertureDiameter());

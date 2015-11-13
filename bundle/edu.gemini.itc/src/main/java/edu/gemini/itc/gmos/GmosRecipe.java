@@ -133,10 +133,7 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
         // i.e. the output morphology is same as the input morphology.
         // Might implement these modules at a later time.
         double spec_source_frac;
-        final int number_exposures = _obsDetailParameters.getNumExposures();
-        final double frac_with_source = _obsDetailParameters.getSourceFraction();
         final double dark_current = instrument.getDarkCurrent();
-        final double exposure_time = _obsDetailParameters.getExposureTime();
         final double read_noise = instrument.getReadNoise();
 
         // ObservationMode Imaging or spectroscopy
@@ -185,9 +182,7 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
                         spsf,
                         im_qual,
                         ap_diam,
-                        number_exposures,
-                        frac_with_source,
-                        exposure_time,
+                        _obsDetailParameters.calculationMethod,
                         dark_current * instrument.getSpatialBinning() * instrument.getSpectralBinning(),
                         read_noise,
                         _obsDetailParameters.getSkyApertureDiameter());
@@ -217,9 +212,7 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
                     spec_source_frac,
                     im_qual,
                     ap_diam,
-                    number_exposures,
-                    frac_with_source,
-                    exposure_time,
+                    _obsDetailParameters.calculationMethod,
                     dark_current * instrument.getSpatialBinning() * instrument.getSpectralBinning(),
                     read_noise,
                     _obsDetailParameters.getSkyApertureDiameter());

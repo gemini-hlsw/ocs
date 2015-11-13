@@ -130,9 +130,7 @@ public final class GnirsRecipe implements SpectroscopyRecipe {
                 instrument.getGratingDispersion_nmppix(),
                 spec_source_frac,
                 im_qual, ap_diam,
-                _obsDetailParameters.getNumExposures(),
-                _obsDetailParameters.getSourceFraction(),
-                _obsDetailParameters.getExposureTime(),
+                _obsDetailParameters.calculationMethod,
                 instrument.getDarkCurrent(),
                 instrument.getReadNoise(),
                 _obsDetailParameters.getSkyApertureDiameter());

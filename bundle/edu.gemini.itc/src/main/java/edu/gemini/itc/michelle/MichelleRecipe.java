@@ -117,13 +117,6 @@ public final class MichelleRecipe implements ImagingRecipe, SpectroscopyRecipe {
         // In this version we are bypassing morphology modules 3a-5a.
         // i.e. the output morphology is same as the input morphology.
         // Might implement these modules at a later time.
-        final int number_exposures = _obsDetailParameters.getNumExposures();
-        final double frac_with_source = _obsDetailParameters.getSourceFraction();
-        final double exposure_time = _obsDetailParameters.getExposureTime();
-
-        //ObservationMode Imaging or spectroscopy
-
-
         final SlitThroughput st;
         if (!_obsDetailParameters.isAutoAperture()) {
             st = new SlitThroughput(IQcalc.getImageQuality(),
@@ -151,15 +144,17 @@ public final class MichelleRecipe implements ImagingRecipe, SpectroscopyRecipe {
             im_qual = IQcalc.getImageQuality();
         }
 
-        final SpecS2NLargeSlitVisitor specS2N = new SpecS2NLargeSlitVisitor(instrument.getFPMask(), pixel_size,
+        final SpecS2NLargeSlitVisitor specS2N = new SpecS2NLargeSlitVisitor(
+                        instrument.getFPMask(),
+                        pixel_size,
                         instrument.getSpectralPixelWidth(),
                         instrument.getObservingStart(),
                         instrument.getObservingEnd(),
                         instrument.getGratingDispersion_nm(),
                         instrument.getGratingDispersion_nmppix(),
-                spec_source_frac, im_qual,
-                        ap_diam, number_exposures,
-                        frac_with_source, exposure_time,
+                        spec_source_frac, im_qual,
+                        ap_diam,
+                        _obsDetailParameters.calculationMethod,
                         instrument.getDarkCurrent(),
                         instrument.getReadNoise(),
                         _obsDetailParameters.getSkyApertureDiameter());

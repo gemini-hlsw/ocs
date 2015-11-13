@@ -3,8 +3,8 @@ package edu.gemini.itc.operation;
 import edu.gemini.itc.base.SampledSpectrum;
 import edu.gemini.itc.base.SampledSpectrumVisitor;
 import edu.gemini.itc.base.VisitableSampledSpectrum;
-
-import java.util.Optional;
+import edu.gemini.itc.shared.CalculationMethod;
+import edu.gemini.itc.shared.SpectroscopySN;
 
 /**
  * The SpecS2NLargeSlitVisitor is used to calculate the s2n of an observation using
@@ -60,28 +60,29 @@ public class SpecS2NLargeSlitVisitor implements SampledSpectrumVisitor, SpecS2N 
                                    final double spec_source_fraction,
                                    final double im_qual,
                                    final double spec_Npix,
-                                   final int spec_number_exposures,
-                                   final double spec_frac_with_source,
-                                   final double spec_exp_time,
+                                   final CalculationMethod calcMethod,
                                    final double dark_current,
                                    final double read_noise,
                                    final double skyAper) {
-        this.slit_width = slit_width;
-        this.pixel_size = pixel_size;
-        this.pix_width = pix_width;
-        this.spec_source_fraction = spec_source_fraction;
-        this.spec_Npix = spec_Npix;
-        this.spec_frac_with_source = spec_frac_with_source;
-        this.spec_exp_time = spec_exp_time;
-        this.obs_wave_low = obs_wave_low;
-        this.obs_wave_high = obs_wave_high;
-        this.gratingDispersion_nm = gratingDispersion_nm;
+        this.slit_width             = slit_width;
+        this.pixel_size             = pixel_size;
+        this.pix_width              = pix_width;
+        this.spec_source_fraction   = spec_source_fraction;
+        this.spec_Npix              = spec_Npix;
+        this.obs_wave_low           = obs_wave_low;
+        this.obs_wave_high          = obs_wave_high;
+        this.gratingDispersion_nm   = gratingDispersion_nm;
         this.gratingDispersion_nmppix = gratingDispersion_nmppix;
-        this.im_qual = im_qual;
-        this.dark_current = dark_current;
-        this.read_noise = read_noise;
-        this.spec_number_exposures = spec_number_exposures;
-        this.skyAper = skyAper;
+        this.im_qual                = im_qual;
+        this.dark_current           = dark_current;
+        this.read_noise             = read_noise;
+        this.skyAper                = skyAper;
+
+        // Currently SpectroscopySN is the only supported calculation method for spectroscopy.
+        if (!(calcMethod instanceof  SpectroscopySN)) throw new Error("Unsupported calculation method");
+        this.spec_number_exposures  = ((SpectroscopySN) calcMethod).exposures();
+        this.spec_frac_with_source  = calcMethod.sourceFraction();
+        this.spec_exp_time          = calcMethod.exposureTime();
 
     }
 
