@@ -44,7 +44,7 @@ import java.beans.PropertyChangeListener;
 import java.util.List;
 
 /**
- * This is the editor for the GMOS South instrument component.
+ * This is the editor for the GMOS instrument component.
  */
 public abstract class EdCompInstGMOS<T extends InstGmosCommon> extends EdCompInstBase<T>
         implements DropDownListBoxWidgetWatcher, ActionListener,
@@ -166,15 +166,6 @@ public abstract class EdCompInstGMOS<T extends InstGmosCommon> extends EdCompIns
         }
     };
 
-    // Don't do this.  You can't enforce it in subsequent iterator steps
-    // anyway.  If you're in the iterator and you type in 300.1, it is going
-    // to try to apply that to the gmos static component but it won't accept
-    // a fractional exposure time (unless setExposureTime is overridden)
-//    @Override
-//    protected boolean isForceIntegerExposureTime() {
-//        return true;
-//    }
-
     @Override
     protected double getDefaultExposureTime() {
         return 300.;
@@ -264,8 +255,6 @@ public abstract class EdCompInstGMOS<T extends InstGmosCommon> extends EdCompIns
                     (DetectorManufacturer) _w.detectorManufacturerComboBox.getSelectedItem();
             if (selectedDetectorManufacturer != getDataObject().getDetectorManufacturer()) {
                 getDataObject().setDetectorManufacturer((DetectorManufacturer) _w.detectorManufacturerComboBox.getSelectedItem());
-//                    _instGMOS.initializeDetectorManufacturerValues();
-
                 _updateControlVisibility();
                 _updateReadoutCharacteristics();
                 _updateNodAndShuffle();
@@ -307,8 +296,6 @@ public abstract class EdCompInstGMOS<T extends InstGmosCommon> extends EdCompIns
         _w.oiwfsBox.setChoices(StandardGuideOptions.instance.getAll());
         _w.oiwfsBox.addActionListener(oiwfsBoxListener);
 
-//        _w.nsNoRadioButton.addActionListener(this);  // XXX for GmosGUI
-//        _w.nsYesRadioButton.addActionListener(this); // XXX for GmosGUI
         _w.nsCheckButton.addActionListener(this);
 
         _w.electronicOffsetCheckBox.addActionListener(this);
@@ -651,13 +638,11 @@ public abstract class EdCompInstGMOS<T extends InstGmosCommon> extends EdCompIns
             _w.centralWavelength.setEnabled(false);
             _w.centralWavelengthLabel.setEnabled(false);
             _w.preImgCheckButton.setEnabled(true);
-//            _w.centralWavelengthUnits.setEnabled(false); // XXX for GmosGUI
         } else {
             final boolean enabled = OTOptions.areRootAndCurrentObsIfAnyEditable(getProgram(), getContextObservation());
             _w.orderComboBox.setEnabled(enabled);
             _w.orderLabel.setEnabled(enabled);
             _w.centralWavelength.setEnabled(enabled);
-//            _w.centralWavelengthUnits.setEnabled(enabled); // XXX for GmosGUI
             _w.centralWavelengthLabel.setEnabled(enabled);
             _w.preImgCheckButton.setEnabled(false);
             getDataObject().setMosPreimaging(YesNoType.NO);
@@ -699,33 +684,17 @@ public abstract class EdCompInstGMOS<T extends InstGmosCommon> extends EdCompIns
         return 0;
     }
 
-    //
-    // Update the science field of view based upon the camera and mask
-    // settings.
-    //
-    //private void _updateScienceFOV() {
-    /*
-     double[] scienceArea = getDataObject().getScienceArea();
-     _w.scienceFOV.setText(scienceArea[0] + " x " + scienceArea[1]);
-    */
-    //}
-
 
     // Update the nod & shuffle tab with the current values from the data object
     private void _updateNodAndShuffle() {
         if (getDataObject().useNS()) {
             // Nod & Shuffle enabled
-
-//            _w.nsYesRadioButton.setSelected(true); // XXX for GmosGUI
             _w.nsCheckButton.setSelected(true);
 
             _w.tabbedPane.setEnabledAt(_w.tabbedPane.indexOfComponent(_w.nsPanel), true);
 
             // Get the current offset list and fill in the table widget
             _opl = getDataObject().getPosList();
-            if (_opl == null) {
-                _opl = getDataObject().getPosList(); // shouldn't happen, but did after undo...
-            }
 
             _opl.addWatcher(offsetListWatcher);
             _offsetTable.reinit(getNode(), _opl);
@@ -755,8 +724,6 @@ public abstract class EdCompInstGMOS<T extends InstGmosCommon> extends EdCompIns
             _offsetTable.selectPos(_opl.getPositionAt(0));
         } else {
             // Nod & Shuffle disabled
-
-//            _w.nsNoRadioButton.setSelected(true); // XXX for GmosGUI
             _w.nsCheckButton.setSelected(false);
 
             _w.tabbedPane.setEnabledAt(_w.tabbedPane.indexOfComponent(_w.nsPanel), false);
@@ -947,24 +914,21 @@ public abstract class EdCompInstGMOS<T extends InstGmosCommon> extends EdCompIns
             _w.focalPlaneMask.setEnabled(enabled);
             _w.focalPlaneMaskPlotButton.setEnabled(enabled);
             _updateFPU();
+        } else if (w == _w.ccdSlowLowButton) {
             getDataObject().setAmpReadMode(AmpReadMode.SLOW);
             getDataObject().setGainChoice(AmpGain.LOW);
-//            getDataObject().setGainReadCombo(AmpGainReadCombo.SLOW_LOW);
             _updateReadoutCharacteristics();
         } else if (w == _w.ccdSlowHighButton) {
             getDataObject().setAmpReadMode(AmpReadMode.SLOW);
             getDataObject().setGainChoice(AmpGain.HIGH);
-//            getDataObject().setEngineeringGainReadCombo(GmosCommonType.EngineeringAmpGainReadCombo.SLOW_HIGH);
             _updateReadoutCharacteristics();
         } else if (w == _w.ccdFastLowButton) {
             getDataObject().setAmpReadMode(AmpReadMode.FAST);
             getDataObject().setGainChoice(AmpGain.LOW);
-//            getDataObject().setGainReadCombo(AmpGainReadCombo.FAST_LOW);
             _updateReadoutCharacteristics();
         } else if (w == _w.ccdFastHighButton) {
             getDataObject().setAmpReadMode(AmpReadMode.FAST);
             getDataObject().setGainChoice(AmpGain.HIGH);
-//            getDataObject().setGainReadCombo(AmpGainReadCombo.FAST_HIGH);
             _updateReadoutCharacteristics();
         } else if (w == _w.ccd3AmpButton) {
             getDataObject().setAmpCount("Three");
@@ -1002,27 +966,6 @@ public abstract class EdCompInstGMOS<T extends InstGmosCommon> extends EdCompIns
                 _opl.addPosition();
             else
                 _opl.addPosition(_opl.getPositionIndex(_curPos) + 1);
-//        } else if (w == _w.nsNoRadioButton) { // XXX for GmosGUI
-//            getDataObject().setUseNS(false);
-//            try {
-//                _progData.updateOffsetInfoList();
-//            } catch (RemoteException e) {
-//                DialogUtil.error(e);
-//            }
-//            _updateNodAndShuffle();
-//            if (_w.tabbedPane.getSelectedComponent() == _w.nsPanel)
-//                _w.tabbedPane.setSelectedIndex(0);
-//        } else if (w == _w.nsYesRadioButton) { // XXX for GmosGUI
-//            getDataObject().setUseNS(true);
-//            try {
-//                _progData.updateOffsetInfoList();
-//            } catch (RemoteException e) {
-//                DialogUtil.error(e);
-//            }
-//            _removeOffsetNodes();
-//            _updateNodAndShuffle();
-//            if (_w.tabbedPane.getSelectedComponent() != _w.nsPanel)
-//                _w.tabbedPane.setSelectedComponent(_w.nsPanel);
         } else if (w == _w.nsCheckButton) {
             if (_w.nsCheckButton.isSelected()) {
                 getDataObject().setUseNS(true);
@@ -1123,33 +1066,12 @@ public abstract class EdCompInstGMOS<T extends InstGmosCommon> extends EdCompIns
         }
     }
 
-//    /**
-//     * Get the selected position.
-//     */
-//    public OffsetPos getSelectedPos() {
-//        return _offsetTable.getSelectedPos();
-//    }
-
     /**
      * Return the FPUnit for the given index
      */
     protected FPUnit _getFPUnitByIndex(int index) {
         return GmosNorthType.FPUnitNorth.getFPUnitByIndex(index);
     }
-
-//    /**
-//     * Return the Filter for the given index
-//     */
-//    protected Filter _getFilterByIndex(int index) {
-//        return FilterNorth.getFilterByIndex(index);
-//    }
-//
-//    /**
-//     * Return the Disperser for the given index
-//     */
-//    protected Disperser _getDisperserByIndex(int index) {
-//        return DisperserNorth.getDisperserByIndex(index);
-//    }
 
     /**
      * Return the Order for the given index
@@ -1317,7 +1239,6 @@ public abstract class EdCompInstGMOS<T extends InstGmosCommon> extends EdCompIns
             return;
         }
         showPos(_curPos);
-//        _progData.setInstChanged(true);
     }
 
     private final OffsetPosListWatcher<OffsetPos> offsetListWatcher = new OffsetPosListWatcher<OffsetPos>() {
@@ -1326,8 +1247,6 @@ public abstract class EdCompInstGMOS<T extends InstGmosCommon> extends EdCompIns
          * start from scratch.
          */
         public void posListReset(OffsetPosList<OffsetPos> tpl) {
-            // nod offset position list reset
-//            _progData.setInstChanged(true);
             // only allow 2 nod offset positions for now
             _w.newButton.setEnabled(tpl.size() < 2);
             _checkNSValues();
@@ -1346,7 +1265,8 @@ public abstract class EdCompInstGMOS<T extends InstGmosCommon> extends EdCompIns
                 final OffsetPos opNew = tpl.getPositionAt(2);
                 final OffsetPos opOld = tpl.getPositionAt(1);
                 tpl.removePosition(opNew);
-                opOld.setXY(opNew.getXaxis(), opNew.getYaxis(), getContextIssPort());
+                if (opOld != null && opNew != null)
+                    opOld.setXY(opNew.getXaxis(), opNew.getYaxis(), getContextIssPort());
 
                 // TPE REFACTOR -- this won't work unless we commit first
                 final TelescopePosEditor tpe = TpeManager.get();
@@ -1355,8 +1275,6 @@ public abstract class EdCompInstGMOS<T extends InstGmosCommon> extends EdCompIns
         }
 
         public void posListRemovedPosition(OffsetPosList<OffsetPos> tpl, List<OffsetPos> rmPosList) {
-            // removed an instrument nod offset position
-//            _progData.setInstChanged(true);
             // only allow 2 nod offset positions for now
             _w.newButton.setEnabled(tpl.size() < 2);
             _checkNSValues();
