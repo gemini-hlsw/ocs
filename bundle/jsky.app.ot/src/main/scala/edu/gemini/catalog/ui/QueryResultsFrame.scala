@@ -238,7 +238,7 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
     resultsTable.model match {
       case t: TargetsModel =>
         val tpe = TpeManager.get()
-        TpePlotter(tpe.getImageWidget).select(t, selected)
+        Option(tpe).foreach(p => TpePlotter(p.getImageWidget).select(t, selected))
       case _               => // Ignore, it shouldn't happen
     }
   }
@@ -247,7 +247,7 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
     resultsTable.model match {
       case t: TargetsModel =>
         val tpe = TpeManager.get()
-        TpePlotter(tpe.getImageWidget).unplot(t)
+        Option(tpe).foreach(p => TpePlotter(p.getImageWidget).unplot(t))
       case _               => // Ignore, it shouldn't happen
     }
   }
@@ -313,7 +313,8 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
     // Action to disable the query button if there are invalid fields
     val queryButtonEnabling: Reaction = {
       case ValueChanged(a) =>
-        queryButton.enabled = a match {
+        val controls = List(radiusStart, radiusEnd, ra, dec) ++ magnitudeControls.flatMap(f => List(f.faintess, f.saturation))
+        queryButton.enabled = controls.forall {
           case f: AngleTextField[_] => f.valid
           case f: NumberField       => f.valid
           case _                    => true
