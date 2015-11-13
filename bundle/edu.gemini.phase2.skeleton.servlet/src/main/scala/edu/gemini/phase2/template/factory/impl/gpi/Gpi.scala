@@ -53,6 +53,6 @@ case class Gpi(blueprint:SpGpiBlueprint) extends GpiBase[SpGpiBlueprint] {
   }.getOrElse(Nil)
 
   include(incList: _*) in TargetGroup
-  forGroup(TargetGroup)(setObservingMode(observingMode))
+  forObs(incList.filterNot(_ == 4): _*)(setObservingMode(observingMode))
 
 }
