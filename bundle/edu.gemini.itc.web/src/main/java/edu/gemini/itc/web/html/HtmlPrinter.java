@@ -63,7 +63,7 @@ public final class HtmlPrinter {
             sb.append(String.format("S/N ratio with " + odp.getNumExposures() + " exposures of %.2f secs,", odp.getExposureTime()));
             sb.append(String.format(" and %.2f %% of them were on source.\n", odp.getSourceFraction() * 100));
         } else {
-            sb.append(String.format("integration time from a S/N ratio of %.2f for exposures of", odp.getSNRatio()));
+            sb.append(String.format("integration time from a S/N ratio of %.2f for exposures of", ((ImagingInt) odp.calculationMethod).sigma()));
             sb.append(String.format(" %.2f with %.2f %% of them were on source.\n", odp.getExposureTime(), odp.getSourceFraction() * 100));
         }
         sb.append("<LI>Analysis performed for aperture ");

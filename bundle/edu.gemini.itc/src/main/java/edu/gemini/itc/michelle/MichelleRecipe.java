@@ -56,7 +56,7 @@ public final class MichelleRecipe implements ImagingRecipe, SpectroscopyRecipe {
         final int correctedNumExposures = new Double(correctedTotalObservationTime / instrument.getFrameTime() + 0.5).intValue();
         if (odp.getMethod() instanceof ImagingInt) {
             return new ObservationDetails(
-                    new ImagingInt(odp.getSNRatio(), correctedExposureTime, odp.getSourceFraction()),
+                    new ImagingInt(((ImagingInt) odp.calculationMethod).sigma(), correctedExposureTime, odp.getSourceFraction()),
                     odp.getAnalysis()
             );
         } else if (odp.getMethod() instanceof ImagingSN) {
@@ -117,7 +117,6 @@ public final class MichelleRecipe implements ImagingRecipe, SpectroscopyRecipe {
         // In this version we are bypassing morphology modules 3a-5a.
         // i.e. the output morphology is same as the input morphology.
         // Might implement these modules at a later time.
-        double spec_source_frac = 0;
         final int number_exposures = _obsDetailParameters.getNumExposures();
         final double frac_with_source = _obsDetailParameters.getSourceFraction();
         final double exposure_time = _obsDetailParameters.getExposureTime();
@@ -135,7 +134,7 @@ public final class MichelleRecipe implements ImagingRecipe, SpectroscopyRecipe {
         }
 
         double ap_diam = st.getSpatialPix();
-        spec_source_frac = st.getSlitThroughput();
+        double spec_source_frac = st.getSlitThroughput();
 
         //For the usb case we want the resolution to be determined by the
         //slit width and not the image quality for a point source.

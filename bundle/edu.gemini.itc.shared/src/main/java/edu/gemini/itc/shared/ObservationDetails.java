@@ -7,8 +7,8 @@ import java.io.Serializable;
  */
 public final class ObservationDetails implements Serializable {
 
-    private final CalculationMethod calculationMethod;
-    private final AnalysisMethod analysisMethod;
+    public final CalculationMethod calculationMethod;
+    public final AnalysisMethod analysisMethod;
 
     public ObservationDetails(final CalculationMethod calculationMethod, final AnalysisMethod analysisMethod) {
         this.calculationMethod = calculationMethod;
@@ -32,20 +32,11 @@ public final class ObservationDetails implements Serializable {
 
     // TODO: make sure this is only called where applicable!
     public double getExposureTime() {
-        if      (calculationMethod instanceof ImagingSN)      return ((ImagingSN)      calculationMethod).time();
-        else if (calculationMethod instanceof SpectroscopySN) return ((SpectroscopySN) calculationMethod).time();
-        else if (calculationMethod instanceof ImagingInt)     return ((ImagingInt)     calculationMethod).expTime();
-        else    throw new IllegalArgumentException();
+        return calculationMethod.exposureTime();
     }
 
     public double getSourceFraction() {
-        return calculationMethod.fraction();
-    }
-
-    // TODO: make sure this is only called where applicable!
-    public double getSNRatio() {
-        if      (calculationMethod instanceof ImagingInt)     return ((ImagingInt) calculationMethod).sigma();
-        else    return 0.0;
+        return calculationMethod.sourceFraction();
     }
 
     public boolean isAutoAperture() {
@@ -60,22 +51,6 @@ public final class ObservationDetails implements Serializable {
 
     public double getSkyApertureDiameter() {
         return analysisMethod.skyAperture();
-    }
-
-    /**
-     * Return a human-readable string for debugging
-     */
-    public String toString() {
-        StringBuffer sb = new StringBuffer();
-        sb.append("Calculation Method:\t" + getMethod() + "\n");
-        sb.append("Num Exposures:\t\t" + getNumExposures() + "\n");
-        sb.append("Exposure Time:\t\t" + getExposureTime() + "\n");
-        sb.append("Fraction on Source:\t" + getSourceFraction() + "\n");
-        sb.append("SN Ratio:\t\t" + getSNRatio() + "\n");
-        sb.append("Aperture Type:\t\t" + (isAutoAperture() ? "autoAper" : "userAper") + "\n");
-        sb.append("Aperture Diameter:\t" + getApertureDiameter() + "\n");
-        sb.append("\n");
-        return sb.toString();
     }
 
 }

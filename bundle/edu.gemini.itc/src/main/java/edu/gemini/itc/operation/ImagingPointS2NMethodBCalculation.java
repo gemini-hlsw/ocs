@@ -1,6 +1,7 @@
 package edu.gemini.itc.operation;
 
 import edu.gemini.itc.base.Instrument;
+import edu.gemini.itc.shared.ImagingInt;
 import edu.gemini.itc.shared.ObservationDetails;
 
 public final class ImagingPointS2NMethodBCalculation extends ImagingS2NCalculation {
@@ -20,7 +21,7 @@ public final class ImagingPointS2NMethodBCalculation extends ImagingS2NCalculati
         this.exposure_time = obs.getExposureTime();
         this.read_noise = instrument.getReadNoise();
         this.pixel_size = instrument.getPixelSize();
-        this.req_s2n = obs.getSNRatio();
+        this.req_s2n = (obs.calculationMethod instanceof ImagingInt) ? ((ImagingInt) obs.calculationMethod).sigma() : 0.0;
 
     }
 

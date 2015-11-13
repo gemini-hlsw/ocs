@@ -33,10 +33,11 @@ final case class SourceDefinition(
 // TODO: The difference between spectroscopy and imaging can/should be deduced from the instrument settings!
 
 sealed trait CalculationMethod {
-  val fraction: Double
-  val isIntTime: Boolean
+  def exposureTime: Double
+  def sourceFraction: Double
+  def isIntTime: Boolean
   def isS2N: Boolean = !isIntTime
-  val isImaging: Boolean
+  def isImaging: Boolean
   def isSpectroscopy: Boolean = !isImaging
 }
 sealed trait Imaging extends CalculationMethod {
@@ -45,13 +46,13 @@ sealed trait Imaging extends CalculationMethod {
 sealed trait Spectroscopy extends CalculationMethod {
   val isImaging = false
 }
-final case class ImagingSN(exposures: Int, time: Double, fraction: Double) extends Imaging {
+final case class ImagingSN(exposures: Int, exposureTime: Double, sourceFraction: Double) extends Imaging {
   val isIntTime = false
 }
-final case class ImagingInt(sigma: Double, expTime: Double, fraction: Double) extends Imaging {
+final case class ImagingInt(sigma: Double, exposureTime: Double, sourceFraction: Double) extends Imaging {
   val isIntTime = true
 }
-final case class SpectroscopySN(exposures: Int, time: Double, fraction: Double) extends Spectroscopy {
+final case class SpectroscopySN(exposures: Int, exposureTime: Double, sourceFraction: Double) extends Spectroscopy {
   val isIntTime = false
 }
 
