@@ -695,9 +695,6 @@ public abstract class EdCompInstGMOS<T extends InstGmosCommon> extends EdCompIns
 
             // Get the current offset list and fill in the table widget
             _opl = getDataObject().getPosList();
-            if (_opl == null) {
-                _opl = getDataObject().getPosList(); // shouldn't happen, but did after undo...
-            }
 
             _opl.addWatcher(offsetListWatcher);
             _offsetTable.reinit(getNode(), _opl);
