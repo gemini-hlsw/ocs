@@ -1,7 +1,7 @@
 package edu.gemini.dataman.core
 
 import edu.gemini.spModel.core.{ProgramType, Site, SPProgramID}
-import edu.gemini.spModel.dataset.{DatasetGsaState, DatasetLabel}
+import edu.gemini.spModel.dataset.{DatasetQaState, DatasetGsaState, DatasetLabel}
 
 import org.scalacheck._
 import org.scalacheck.Arbitrary._
@@ -41,6 +41,14 @@ trait Arbitraries extends edu.gemini.spModel.dataset.Arbitraries {
 
   implicit val arbPid: Arbitrary[SPProgramID] =
     Arbitrary { Gen.oneOf(scienceId, dailyId) }
+
+  implicit val arbQaRequest: Arbitrary[QaRequest] =
+    Arbitrary {
+      for {
+        label <- arbitrary[DatasetLabel]
+        qa    <- arbitrary[DatasetQaState]
+      } yield QaRequest(label, qa)
+    }
 
   implicit val arbQaResponse: Arbitrary[QaResponse] =
     Arbitrary {

@@ -8,10 +8,10 @@ import java.io.IOException
 sealed trait GsaQueryError {
   def explain: String = {
     val explanation = this match {
-      case InvalidResponse(m)    => s"GSA server returned invalid results: $m."
-      case RequestError(code, m) => s"GSA server rejected the request (http code=$code, message=$m)."
+      case InvalidResponse(m)    => s"Archive returned invalid results: $m."
+      case RequestError(code, m) => s"Archive rejected the request (http code=$code, message=$m)."
       case IoException(_)        => s"A network issue prevented executing the query."
-      case Unexpected(_)         => s"Unexpected exception while working with the GSA server."
+      case Unexpected(_)         => s"Unexpected exception while working with the archive server."
     }
 
     val exMessage = for {
