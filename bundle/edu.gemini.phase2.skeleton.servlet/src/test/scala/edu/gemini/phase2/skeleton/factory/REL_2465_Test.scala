@@ -6,6 +6,7 @@ import edu.gemini.spModel.gemini.gpi.Gpi
 import org.specs2.mutable.Specification
 import edu.gemini.model.p1.immutable.GpiBlueprint
 import edu.gemini.model.p1.mutable.{GpiObservingMode, GpiDisperser}
+import edu.gemini.spModel.rich.pot.sp._
 
 object REL_2465_Test extends TemplateSpec("GPI_BP.xml") with Specification {
   import GpiDisperser._, GpiFilterGroup._
@@ -16,6 +17,20 @@ object REL_2465_Test extends TemplateSpec("GPI_BP.xml") with Specification {
 
         "There should be exactly one template group." in {
           groups(sp).size must_== 1
+        }
+
+        "Library map must be the correct size" in {
+          val m = libsMap(groups(sp).head)
+          m.size must_== incl.size
+        }
+
+        libsMap(groups(sp).head).foreach {
+          case (n, o) =>
+            val m = if (n == 4) Gpi.ObservingMode.DIRECT_H_BAND else Gpi.ObservingMode.valueOf(mode.name)
+            s"Obs $n must have observing mode $m" in {
+              val gpi = o.findObsComponentByType(Gpi.SP_TYPE).get.getDataObject.asInstanceOf[Gpi]
+              gpi.getObservingMode.getValue must_== m
+            }
         }
 
         // Check that the group has the expected inclusions and nothing else

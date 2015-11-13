@@ -2,7 +2,7 @@
 <!DOCTYPE document PUBLIC "-//Gemini Observatory//DTD for Storage of P1 and P2 Documents//EN" "http://ftp.gemini.edu/Support/xml/dtds/SpXML2.dtd">
 
 <document>
-  <container kind="program" type="Program" version="2015B-1" subtype="basic" key="4d64921b-5840-4c5f-aeee-69d713eb8292" name="GPI-BP">
+  <container kind="program" type="Program" version="2016A-1" subtype="basic" key="4d64921b-5840-4c5f-aeee-69d713eb8292" name="GPI-BP">
     <paramset name="Science Program" kind="dataObj">
       <param name="title" value="GPI PHASE I/II MAPPING BPS"/>
       <param name="programMode" value="QUEUE"/>
@@ -102,7 +102,7 @@ Fredrik Rantakyro 20150825
           <paramset name="Sequence" kind="dataObj"/>
           <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="881bca6a-0b13-442f-9ae5-4b3e214e60b7" name="Observe">
             <paramset name="Observe" kind="dataObj">
-              <param name="repeatCount" value="2"/>
+              <param name="repeatCount" value="1"/>
               <param name="class" value="ACQ"/>
             </paramset>
           </container>
@@ -228,6 +228,7 @@ Fredrik Rantakyro 20150825
           <paramset name="Sequence" kind="dataObj"/>
           <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="40940b45-84b2-4b2f-9d4f-fdfd06678012" name="Offset">
             <paramset name="Offset" kind="dataObj">
+              <param name="title" value="Offset Base position 0 0"/>
               <paramset name="offsets">
                 <paramset name="Offset0" sequence="0">
                   <param name="p" value="0.0"/>
@@ -245,16 +246,12 @@ Fredrik Rantakyro 20150825
           </container>
           <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="96ee8f4b-b6fd-44d6-a46a-1111e66ed2a4" name="Offset">
             <paramset name="Offset" kind="dataObj">
+              <param name="title" value="Offset SKY position 0 20"/>
               <paramset name="offsets">
-                <paramset name="Offset0" sequence="0">
-                  <param name="p" value="0.0"/>
-                  <param name="q" value="0.0"/>
-                  <param name="defaultGuideOption" value="on"/>
-                </paramset>
-                <paramset name="Offset1" sequence="1">
+                <paramset name="Offset1" sequence="0">
                   <param name="p" value="20.0"/>
                   <param name="q" value="0.0"/>
-                  <param name="defaultGuideOption" value="on"/>
+                  <param name="defaultGuideOption" value="off"/>
                 </paramset>
               </paramset>
             </paramset>
@@ -438,7 +435,7 @@ Fredrik Rantakyro 20150825
           </container>
           <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="4cdf49f5-c508-42c9-b07b-cad0fead735c" name="Observe">
             <paramset name="Observe" kind="dataObj">
-              <param name="repeatCount" value="2"/>
+              <param name="repeatCount" value="1"/>
               <param name="class" value="ACQ"/>
             </paramset>
           </container>
@@ -506,16 +503,11 @@ Fredrik Rantakyro 20150825
         </container>
         <container kind="seqComp" type="Iterator" version="2012A-1" subtype="base" key="356566e6-5684-4324-bdfc-9de44002e301" name="Sequence">
           <paramset name="Sequence" kind="dataObj"/>
-          <container kind="seqComp" type="Iterator" version="2009A-1" subtype="GPI" key="040dde50-f0ab-43b0-90b5-2b3872a452b8" name="GPI Sequence">
-            <paramset name="GPI Sequence" kind="dataObj">
-              <param name="halfWavePlateAngle" value="0.0"/>
+          <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="53e974e0-7664-4506-84fc-5288c764ecc8" name="Observe">
+            <paramset name="Observe" kind="dataObj">
+              <param name="repeatCount" value="1"/>
+              <param name="class" value="ACQ"/>
             </paramset>
-            <container kind="seqComp" type="Observer" version="2009A-1" subtype="observe" key="53e974e0-7664-4506-84fc-5288c764ecc8" name="Observe">
-              <paramset name="Observe" kind="dataObj">
-                <param name="repeatCount" value="2"/>
-                <param name="class" value="ACQ"/>
-              </paramset>
-            </container>
           </container>
         </container>
       </container>
@@ -681,6 +673,7 @@ Fredrik Rantakyro 20150825
           <paramset name="Sequence" kind="dataObj"/>
           <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="4ff362ab-60f9-4bea-8212-6046ab80fd1a" name="Offset">
             <paramset name="Offset" kind="dataObj">
+              <param name="title" value="Offset Base position 0 0"/>
               <paramset name="offsets">
                 <paramset name="Offset0" sequence="0">
                   <param name="p" value="0.0"/>
@@ -756,13 +749,9 @@ Fredrik Rantakyro 20150825
           </container>
           <container kind="seqComp" type="Iterator" version="2009B-1" subtype="offset" key="fff82cad-a732-4f49-bdd6-c3ba4768e1bb" name="Offset">
             <paramset name="Offset" kind="dataObj">
+              <param name="title" value="Offset SKY position 0 20"/>
               <paramset name="offsets">
-                <paramset name="Offset0" sequence="0">
-                  <param name="p" value="0.0"/>
-                  <param name="q" value="0.0"/>
-                  <param name="defaultGuideOption" value="on"/>
-                </paramset>
-                <paramset name="Offset1" sequence="1">
+                <paramset name="Offset1" sequence="0">
                   <param name="p" value="20.0"/>
                   <param name="q" value="0.0"/>
                   <param name="defaultGuideOption" value="on"/>
@@ -890,6 +879,7 @@ Fredrik Rantakyro 20150825
     <paramset name="node">
       <param name="key" value="4ff362ab-60f9-4bea-8212-6046ab80fd1a"/>
       <param name="3da82fb4-11cc-4fb4-9a43-86c54d94b131" value="1"/>
+      <param name="9b28e968-4b92-4d82-86f1-ff9c3d1ab68d" value="18"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="ce8834cd-119f-4190-b9b6-54ab9dfcb905"/>
@@ -964,6 +954,7 @@ Fredrik Rantakyro 20150825
       <param name="258cf81e-b917-41b0-9709-837c50650dcf" value="1"/>
       <param name="3da82fb4-11cc-4fb4-9a43-86c54d94b131" value="4"/>
       <param name="f310e238-d7fe-411f-8ed5-959934de1f89" value="1"/>
+      <param name="9b28e968-4b92-4d82-86f1-ff9c3d1ab68d" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="2ecc7853-8188-4b9c-b0f5-09a30ce188cb"/>
@@ -978,6 +969,7 @@ Fredrik Rantakyro 20150825
       <param name="3da82fb4-11cc-4fb4-9a43-86c54d94b131" value="2"/>
       <param name="eb75c3e3-5c07-4418-974b-530d2ea4818d" value="1"/>
       <param name="f310e238-d7fe-411f-8ed5-959934de1f89" value="1"/>
+      <param name="9b28e968-4b92-4d82-86f1-ff9c3d1ab68d" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="a2b0434a-b55e-4075-8f13-207f4d644302"/>
@@ -987,6 +979,7 @@ Fredrik Rantakyro 20150825
     <paramset name="node">
       <param name="key" value="fff82cad-a732-4f49-bdd6-c3ba4768e1bb"/>
       <param name="3da82fb4-11cc-4fb4-9a43-86c54d94b131" value="1"/>
+      <param name="9b28e968-4b92-4d82-86f1-ff9c3d1ab68d" value="19"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="75a10f8f-5cc3-4c1c-aac9-22f0f901d9c9"/>
@@ -1038,6 +1031,7 @@ Fredrik Rantakyro 20150825
     <paramset name="node">
       <param name="key" value="4cdf49f5-c508-42c9-b07b-cad0fead735c"/>
       <param name="dcf5e333-0269-448c-823a-1260e0272e64" value="1"/>
+      <param name="9b28e968-4b92-4d82-86f1-ff9c3d1ab68d" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="549a2569-ff3c-4258-b3ce-6ce1b799d80c"/>
@@ -1068,6 +1062,7 @@ Fredrik Rantakyro 20150825
     <paramset name="node">
       <param name="key" value="96ee8f4b-b6fd-44d6-a46a-1111e66ed2a4"/>
       <param name="3da82fb4-11cc-4fb4-9a43-86c54d94b131" value="4"/>
+      <param name="9b28e968-4b92-4d82-86f1-ff9c3d1ab68d" value="9"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="814fc155-f5e8-41cf-9988-43665f1fa0d7"/>
@@ -1131,6 +1126,7 @@ Fredrik Rantakyro 20150825
     <paramset name="node">
       <param name="key" value="040dde50-f0ab-43b0-90b5-2b3872a452b8"/>
       <param name="3da82fb4-11cc-4fb4-9a43-86c54d94b131" value="1"/>
+      <param name="9b28e968-4b92-4d82-86f1-ff9c3d1ab68d" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="3726919e-4c13-456c-aed0-dcbd7daf322c"/>
@@ -1147,6 +1143,7 @@ Fredrik Rantakyro 20150825
     <paramset name="node">
       <param name="key" value="356566e6-5684-4324-bdfc-9de44002e301"/>
       <param name="3da82fb4-11cc-4fb4-9a43-86c54d94b131" value="3"/>
+      <param name="9b28e968-4b92-4d82-86f1-ff9c3d1ab68d" value="2"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="4d64921b-5840-4c5f-aeee-69d713eb8292"/>
@@ -1168,6 +1165,7 @@ Fredrik Rantakyro 20150825
     <paramset name="node">
       <param name="key" value="40940b45-84b2-4b2f-9d4f-fdfd06678012"/>
       <param name="3da82fb4-11cc-4fb4-9a43-86c54d94b131" value="3"/>
+      <param name="9b28e968-4b92-4d82-86f1-ff9c3d1ab68d" value="5"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="e20e6db1-bfce-4b4a-8855-d0e7bc17c07d"/>
