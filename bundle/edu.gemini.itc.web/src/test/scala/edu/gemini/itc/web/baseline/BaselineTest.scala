@@ -12,13 +12,17 @@ import org.junit.{Ignore, Test}
  * instruments against the current baseline from the baseline.txt resource file.
  *
  * Execute {{{create()}}} in order to update the baseline. The file is written to the current output directory
- * (e.g. ../ocs/app/itc/idea/out/test/edu.gemini.itc-2015001.6.1/baseline.txt when working with IntelliJ) and
- * needs to be manually copied from there into the resources folder!
+ * (e.g. ../ocs/app/itc/idea/out/test/edu.gemini.itc.web-2015001.6.1/baseline.txt when working with IntelliJ) and
+ * needs to be manually copied from there into the resources folder! Updating the baseline will be necessary after
+ * any change that impacts the ITC calculation results and the HTML output.
  *
  * Execute {{{checkAll()}}} in order to execute a test with all defined input values. This can be very time
- * consuming but allows for exhaustive testing and test coverage analysis.
+ * consuming but allows for exhaustive testing and test coverage analysis. A small, random subset of the defined
+ * fixtures is executed as part of the default tests by the test spec [[BaselineAllSpec]]. See the code for
+ * more details.
  *
  * Since these tests are very time consuming and only meant to be executed manually they are marked as {{{@Ignore}}}.
+ *
  */
 class BaselineTest {
 
@@ -44,14 +48,14 @@ class BaselineTest {
 
   private def baselines(): Seq[Baseline] =
     executeAll(BaselineAcqCam.Fixtures, executeAcqCamRecipe) ++
-      executeAll(BaselineF2.Fixtures, executeF2Recipe) ++
-      executeAll(BaselineGmos.Fixtures, executeGmosRecipe) ++
-      executeAll(BaselineGnirs.Fixtures, executeGnirsRecipe) ++
-      executeAll(BaselineGsaoi.Fixtures, executeGsaoiRecipe) ++
-      executeAll(BaselineMichelle.Fixtures, executeMichelleRecipe) ++
-      executeAll(BaselineNifs.Fixtures, executeNifsRecipe) ++
-      executeAll(BaselineNiri.Fixtures, executeNiriRecipe) ++
-      executeAll(BaselineTRecs.Fixtures, executeTrecsRecipe)
+    executeAll(BaselineF2.Fixtures, executeF2Recipe) ++
+    executeAll(BaselineGmos.Fixtures, executeGmosRecipe) ++
+    executeAll(BaselineGnirs.Fixtures, executeGnirsRecipe) ++
+    executeAll(BaselineGsaoi.Fixtures, executeGsaoiRecipe) ++
+    executeAll(BaselineMichelle.Fixtures, executeMichelleRecipe) ++
+    executeAll(BaselineNifs.Fixtures, executeNifsRecipe) ++
+    executeAll(BaselineNiri.Fixtures, executeNiriRecipe) ++
+    executeAll(BaselineTRecs.Fixtures, executeTrecsRecipe)
 
   private def executeAll[T <: InstrumentDetails](fs: Seq[Fixture[T]], recipe: (Fixture[T]) => Output): Seq[Baseline] = {
     require(fs.size > 10, "Not enough fixtures " + fs.size) // make sure there's a good number of fixtures
