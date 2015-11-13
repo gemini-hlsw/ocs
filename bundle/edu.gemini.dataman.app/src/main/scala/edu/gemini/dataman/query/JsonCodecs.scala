@@ -138,9 +138,9 @@ private[query] object JsonCodecs {
 
   implicit val EncodeJsonQaResponse: EncodeJson[QaResponse] =
     EncodeJson((r: QaResponse) =>
-      ("error"  :=? r.failure)                            ->?:
-      ("result" :=  r.failure.fold("true")(_ => "false")) ->:
-      ("id"     :=  r.label.toString)                     ->:
+      ("error"  :=? r.failure)                       ->?:
+      ("result", r.failure.fold(jTrue)(_ => jFalse)) ->:
+      ("id"     :=  r.label.toString)                ->:
       jEmptyObject
     )
 
@@ -156,4 +156,47 @@ private[query] object JsonCodecs {
     )
 
   implicit val CodecJsonQaResponse = CodecJson.derived[QaResponse]
+
+  // ** EitherQaResponse
+
+  import GsaQaUpdateQuery.EitherQaResponse  // String \/ QaResponse
+
+  implicit val EncodeJsonEitherQaResponse: EncodeJson[EitherQaResponse] =
+    EncodeJson((ar: EitherQaResponse) =>
+      ar.fold( s =>
+          ("result", jFalse) ->:
+          ("error"  := s)    ->:
+          jEmptyObject
+      , qa =>
+          ("error"  :=? qa.failure)                       ->?:
+          ("result", qa.failure.fold(jTrue)(_ => jFalse)) ->:
+          ("id"     :=  qa.label.toString)                ->:
+          jEmptyObject
+      )
+    )
+
+  implicit val DecodeJsonEitherQaResponse: DecodeJson[EitherQaResponse] = {
+    import DecodeResult.{ok, fail}
+
+    def toResponse(res: Boolean, label: Option[DatasetLabel], failure: Option[String], ch: CursorHistory): DecodeResult[EitherQaResponse] =
+      label match {
+        case None =>
+          failure.filterNot(_ => res).fold(fail[EitherQaResponse]("Archive service returned invalid response", ch)) { msg =>
+            ok(msg.left[QaResponse])
+          }
+        case Some(lab) =>
+          ok(QaResponse(lab, failure).right[String])
+      }
+
+    DecodeJson(c =>
+      for {
+        result   <- (c --\ "result").as[Boolean]
+        label    <- (c --\ "id").focus.fold(DecodeResult.ok(none[DatasetLabel]))(_.as[DatasetLabel].map(some))
+        failure  <- (c --\ "error").focus.fold(DecodeResult.ok(none[String]))(_.as[String].map(some))
+        response <- toResponse(result, label, failure, c.history)
+      } yield response
+    )
+  }
+
+  implicit val CodecJsonEitherQaResponse = CodecJson.derived[EitherQaResponse]
 }

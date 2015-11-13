@@ -8,7 +8,7 @@ import Scalaz._
 
 sealed trait DmanFailure {
   def explain: String = this match {
-    case QueryFailure(e)   => s"GSA query failure: ${e.explain}"
+    case QueryFailure(e)   => e.explain
     case Unexpected(msg)   => s"Unexpected error: $msg"
     case DmanException(ex) => s"Unexpected exception: ${ex.getMessage}"
   }

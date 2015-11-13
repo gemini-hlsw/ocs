@@ -40,7 +40,7 @@ object GsaPostAction {
             // Individual results returned.  Pair them up with their IDs.
             val idMap   = reqs.map { case (r,i) => r.label -> i }.toMap
             val missing = (idMap.keySet &~ rs.map(_.label).toSet).map { label =>
-              (label, idMap(label), s"No response from server for '$label'.".left[Unit])
+              (label, idMap(label), s"No response from archive server for '$label'.".left[Unit])
             }
 
             missing.toList ++ rs.flatMap { r => idMap.get(r.label).map(i => (r.label, i, r.failure <\/(()))) }
