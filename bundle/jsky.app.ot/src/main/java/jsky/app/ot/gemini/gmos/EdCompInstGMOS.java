@@ -947,9 +947,9 @@ public abstract class EdCompInstGMOS<T extends InstGmosCommon> extends EdCompIns
             _w.focalPlaneMask.setEnabled(enabled);
             _w.focalPlaneMaskPlotButton.setEnabled(enabled);
             _updateFPU();
+        } else if (w == _w.ccdSlowLowButton) {
             getDataObject().setAmpReadMode(AmpReadMode.SLOW);
             getDataObject().setGainChoice(AmpGain.LOW);
-//            getDataObject().setGainReadCombo(AmpGainReadCombo.SLOW_LOW);
             _updateReadoutCharacteristics();
         } else if (w == _w.ccdSlowHighButton) {
             getDataObject().setAmpReadMode(AmpReadMode.SLOW);
@@ -1346,7 +1346,8 @@ public abstract class EdCompInstGMOS<T extends InstGmosCommon> extends EdCompIns
                 final OffsetPos opNew = tpl.getPositionAt(2);
                 final OffsetPos opOld = tpl.getPositionAt(1);
                 tpl.removePosition(opNew);
-                opOld.setXY(opNew.getXaxis(), opNew.getYaxis(), getContextIssPort());
+                if (opOld != null && opNew != null)
+                    opOld.setXY(opNew.getXaxis(), opNew.getYaxis(), getContextIssPort());
 
                 // TPE REFACTOR -- this won't work unless we commit first
                 final TelescopePosEditor tpe = TpeManager.get();
