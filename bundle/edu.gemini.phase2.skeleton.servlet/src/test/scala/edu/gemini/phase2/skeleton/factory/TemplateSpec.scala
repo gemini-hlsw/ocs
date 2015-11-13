@@ -7,11 +7,11 @@ import edu.gemini.phase2.core.model.SkeletonShell
 import edu.gemini.phase2.core.odb.SkeletonStoreService
 import edu.gemini.phase2.template.factory.api.TemplateFolderExpansionFactory
 import edu.gemini.phase2.template.factory.impl.{TemplateDb, TemplateFactoryImpl}
-import edu.gemini.pot.sp.{ISPTemplateGroup, ISPProgram}
+import edu.gemini.pot.sp.{ISPObservation, ISPTemplateGroup, ISPProgram}
 import edu.gemini.pot.spdb.DBLocalDatabase
 import edu.gemini.shared.skyobject.Magnitude.Band
 import edu.gemini.spModel.core.{MagnitudeBand, Magnitude, SPProgramID}
-import edu.gemini.spModel.obscomp.SPNote
+import edu.gemini.spModel.obscomp.{SPInstObsComp, SPNote}
 import edu.gemini.spModel.target.SPTarget
 import edu.gemini.spModel.obs.SPObservation
 import edu.gemini.spModel.template.TemplateParameters
@@ -78,6 +78,15 @@ abstract class TemplateSpec(xmlName: String) { this: Specification =>
       .map(_.getLibraryId.parseInt)
       .collect { case Success(n) => n }
       .toSet
+
+  /** Return the set of all integer library IDs that appear in the group. */
+  def libsMap(tg: ISPTemplateGroup): Map[Int, ISPObservation] =
+    tg.getAllObservations.asScala.toList.flatMap { o =>
+      o.getDataObject.asInstanceOf[SPObservation].getLibraryId.parseInt match {
+        case Success(n) => List((n, o))
+        case Failure(_) => Nil
+      }
+    }.toMap
 
   /** Return the list of all `ISPTemplateGroups`s in the given program. */
   def groups(sp: ISPProgram): List[ISPTemplateGroup] =
