@@ -21,7 +21,7 @@ object SubmissionRequestEditor {
     add(Time, BorderPanel.Position.Center)
     add(Units, BorderPanel.Position.East)
 
-    object Time extends NumberField(tu.map(_.value)) {
+    object Time extends NumberField(tu.map(_.value), allowEmpty = false) {
       override def valid(d:Double) = d >= 0
     }
 

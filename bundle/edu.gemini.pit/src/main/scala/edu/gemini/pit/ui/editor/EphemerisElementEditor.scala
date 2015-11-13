@@ -42,7 +42,7 @@ class EphemerisElementEditor(e: EphemerisElement) extends StdModalEditor[Ephemer
   }
   object RA extends RATextField(e.coords.toDegDeg.ra.toDouble)
   object Dec extends DecTextField(e.coords.toDegDeg.dec.toDouble)
-  object Mag extends NumberField(e.magnitude)
+  object Mag extends NumberField(e.magnitude, allowEmpty = false)
 
   // Construct our editor
   def editor = Editor

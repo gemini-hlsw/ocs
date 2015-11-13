@@ -238,7 +238,7 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
     resultsTable.model match {
       case t: TargetsModel =>
         val tpe = TpeManager.get()
-        TpePlotter(tpe.getImageWidget).select(t, selected)
+        Option(tpe).foreach(p => TpePlotter(p.getImageWidget).select(t, selected))
       case _               => // Ignore, it shouldn't happen
     }
   }
@@ -247,7 +247,7 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
     resultsTable.model match {
       case t: TargetsModel =>
         val tpe = TpeManager.get()
-        TpePlotter(tpe.getImageWidget).unplot(t)
+        Option(tpe).foreach(p => TpePlotter(p.getImageWidget).unplot(t))
       case _               => // Ignore, it shouldn't happen
     }
   }
@@ -313,7 +313,8 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
     // Action to disable the query button if there are invalid fields
     val queryButtonEnabling: Reaction = {
       case ValueChanged(a) =>
-        queryButton.enabled = a match {
+        val controls = List(radiusStart, radiusEnd, ra, dec) ++ magnitudeControls.flatMap(f => List(f.faintess, f.saturation))
+        queryButton.enabled = controls.forall {
           case f: AngleTextField[_] => f.valid
           case f: NumberField       => f.valid
           case _                    => true
@@ -493,7 +494,7 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
       }
     }
 
-    lazy val radiusStart, radiusEnd = new NumberField(None) {
+    lazy val radiusStart, radiusEnd = new NumberField(None, allowEmpty = false) {
       reactions += queryButtonEnabling
 
       def updateAngle(angle: Angle): Unit = {
@@ -740,10 +741,10 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
 
     // Make GUI controls for a Magnitude Constraint
     private def filterControls(mc: MagnitudeConstraints, index: Int): List[MagnitudeFilterControls] = {
-      val faint = new NumberField(mc.faintnessConstraint.brightness.some) {
+      val faint = new NumberField(mc.faintnessConstraint.brightness.some, allowEmpty = false) {
         reactions += queryButtonEnabling
       }
-      val sat = new NumberField(mc.saturationConstraint.map(_.brightness)) {
+      val sat = new NumberField(mc.saturationConstraint.map(_.brightness), allowEmpty = false) {
         reactions += queryButtonEnabling
       }
       bandsBoxes(catalogBox.selection.item, mc.searchBands).map(MagnitudeFilterControls(addMagnitudeRowButton(index), faint, new Label("-"), sat, _, removeMagnitudeRowButton(index)))
