@@ -60,6 +60,16 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
     }
 
     /**
+     * Create an instance for one time use.
+     */
+    public GemsGuideStarWorker() {
+        ProgressPanel progressPanel = ProgressPanel.makeProgressPanel("GeMS Strehl Calculations",
+                TpeManager.create().getImageWidget());
+        progressPanel.addActionListener(e -> interrupted = true);
+        init(progressPanel);
+    }
+
+    /**
      * Called by constructors
      */
     public void init(StatusLogger statusLogger) {
