@@ -41,7 +41,7 @@ public final class Flamingos2Recipe implements ImagingRecipe, SpectroscopyRecipe
      * Check input parameters for consistency
      */
     private void validateInputParameters() {
-        if (_obsDetailParameters.getMethod().isSpectroscopy()) {
+        if (_obsDetailParameters.getMethod() instanceof Spectroscopy) {
             switch (_flamingos2Parameters.grism()) {
                 case NONE:          throw new IllegalArgumentException("In spectroscopy mode, a grism must be selected");
             }

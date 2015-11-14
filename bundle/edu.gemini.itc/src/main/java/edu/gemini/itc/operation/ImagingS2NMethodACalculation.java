@@ -1,6 +1,7 @@
 package edu.gemini.itc.operation;
 
 import edu.gemini.itc.base.Instrument;
+import edu.gemini.itc.shared.ImagingSN;
 import edu.gemini.itc.shared.ObservationDetails;
 
 public final class ImagingS2NMethodACalculation extends ImagingS2NCalculation {
@@ -14,11 +15,14 @@ public final class ImagingS2NMethodACalculation extends ImagingS2NCalculation {
                                         final double sed_integral,
                                         final double sky_integral) {
         super(obs, instrument, srcFrac, sed_integral, sky_integral);
-        this.number_exposures = obs.getNumExposures();
-        this.frac_with_source = obs.getSourceFraction();
-        this.exposure_time = obs.getExposureTime();
-        this.read_noise = instrument.getReadNoise();
-        this.pixel_size = instrument.getPixelSize();
+        this.read_noise         = instrument.getReadNoise();
+        this.pixel_size         = instrument.getPixelSize();
+
+        // Currently SpectroscopySN is the only supported calculation method for spectroscopy.
+        if (!(obs.calculationMethod instanceof ImagingSN)) throw new Error("Unsupported calculation method");
+        this.number_exposures   = ((ImagingSN) obs.calculationMethod).exposures();
+        this.frac_with_source   = obs.calculationMethod.sourceFraction();
+        this.exposure_time      = obs.calculationMethod.exposureTime();
     }
 
     public void calculate() {

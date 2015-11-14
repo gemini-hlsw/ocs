@@ -41,7 +41,7 @@ public final class NiriRecipe implements ImagingRecipe, SpectroscopyRecipe {
 
     private void validateInputParameters() {
         if (niriParameters.altair().isDefined()) {
-            if (_obsDetailParameters.getMethod().isSpectroscopy()) {
+            if (_obsDetailParameters.getMethod() instanceof Spectroscopy) {
                 throw new IllegalArgumentException(
                         "Altair cannot currently be used with Spectroscopy mode in the ITC.  Please deselect either altair or spectroscopy and resubmit the form.");
             }

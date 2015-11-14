@@ -26,7 +26,7 @@ public final class GmosPrinter extends PrinterBase {
         super(out);
         this.recipe         = new GmosRecipe(p, instr);
         this.pdp            = pdp;
-        this.isImaging      = p.observation().getMethod().isImaging();
+        this.isImaging      = p.observation().getMethod() instanceof Imaging;
     }
 
     /**
@@ -170,13 +170,13 @@ public final class GmosPrinter extends PrinterBase {
         if (!instrument.getFpMask().equals(GmosNorthType.FPUnitNorth.FPU_NONE) && !instrument.getFpMask().equals(GmosSouthType.FPUnitSouth.FPU_NONE))
             s += "<LI> Focal Plane Mask: " + instrument.getFpMask().displayValue() + "\n";
         s += "\n";
-        if (p.observation().getMethod().isSpectroscopy())
+        if (p.observation().getMethod() instanceof Spectroscopy)
             s += String.format("<L1> Central Wavelength: %.1f nm\n", instrument.getCentralWavelength());
         s += "Spatial Binning: " + instrument.getSpatialBinning() + "\n";
-        if (p.observation().getMethod().isSpectroscopy())
+        if (p.observation().getMethod() instanceof Spectroscopy)
             s += "Spectral Binning: " + instrument.getSpectralBinning() + "\n";
         s += "Pixel Size in Spatial Direction: " + instrument.getPixelSize() + "arcsec\n";
-        if (p.observation().getMethod().isSpectroscopy())
+        if (p.observation().getMethod() instanceof Spectroscopy)
             s += "Pixel Size in Spectral Direction: " + instrument.getGratingDispersion_nmppix() + "nm\n";
         if (instrument.isIfuUsed()) {
             s += "IFU is selected,";

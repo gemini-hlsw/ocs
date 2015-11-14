@@ -3,6 +3,7 @@ package edu.gemini.itc.gnirs;
 import edu.gemini.itc.base.*;
 import edu.gemini.itc.shared.CalculationMethod;
 import edu.gemini.itc.shared.GnirsParameters;
+import edu.gemini.itc.shared.Imaging;
 import edu.gemini.itc.shared.ObservationDetails;
 import edu.gemini.spModel.core.Site;
 import edu.gemini.spModel.gemini.gnirs.GNIRSParams;
@@ -110,7 +111,7 @@ public final class Gnirs extends Instrument {
         addComponent(_camera);
 
         // GNIRS is spectroscopy only
-        if (_mode.isImaging()) {
+        if (_mode instanceof Imaging) {
             throw new RuntimeException("GNIRS does not support imaging.");
         }
 

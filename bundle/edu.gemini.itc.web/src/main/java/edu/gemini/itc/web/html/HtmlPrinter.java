@@ -56,10 +56,10 @@ public final class HtmlPrinter {
 
         sb.append("Calculation and analysis methods:\n");
         sb.append("<LI>mode: ");
-        sb.append((odp.getMethod().isImaging() ? "imaging" : "spectroscopy"));
+        sb.append((odp.getMethod() instanceof Imaging ? "imaging" : "spectroscopy"));
         sb.append("\n");
         sb.append("<LI>Calculation of ");
-        if (odp.getMethod().isS2N()) {
+        if (odp.getMethod() instanceof S2NMethod) {
             sb.append(String.format("S/N ratio with " + odp.getNumExposures() + " exposures of %.2f secs,", odp.getExposureTime()));
             sb.append(String.format(" and %.2f %% of them were on source.\n", odp.getSourceFraction() * 100));
         } else {

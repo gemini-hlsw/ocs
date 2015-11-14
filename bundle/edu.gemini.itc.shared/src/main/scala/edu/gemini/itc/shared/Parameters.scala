@@ -29,32 +29,37 @@ final case class SourceDefinition(
 
 // ==== Calculation method
 
-// TODO: We can probably get away with only IntegrationTime and S2N methods.
-// TODO: The difference between spectroscopy and imaging can/should be deduced from the instrument settings!
+sealed trait Imaging
+sealed trait Spectroscopy
 
 sealed trait CalculationMethod {
   def exposureTime: Double
   def sourceFraction: Double
-  def isIntTime: Boolean
-  def isS2N: Boolean = !isIntTime
-  def isImaging: Boolean
-  def isSpectroscopy: Boolean = !isImaging
 }
-sealed trait Imaging extends CalculationMethod {
-  val isImaging = true
+
+sealed trait S2NMethod extends CalculationMethod {
+  def exposures: Int
 }
-sealed trait Spectroscopy extends CalculationMethod {
-  val isImaging = false
+
+sealed trait IntMethod extends CalculationMethod {
+  def sigma: Double
 }
-final case class ImagingSN(exposures: Int, exposureTime: Double, sourceFraction: Double) extends Imaging {
-  val isIntTime = false
-}
-final case class ImagingInt(sigma: Double, exposureTime: Double, sourceFraction: Double) extends Imaging {
-  val isIntTime = true
-}
-final case class SpectroscopySN(exposures: Int, exposureTime: Double, sourceFraction: Double) extends Spectroscopy {
-  val isIntTime = false
-}
+
+final case class ImagingSN(
+                    exposures: Int,
+                    exposureTime: Double,
+                    sourceFraction:
+                    Double) extends Imaging with S2NMethod
+
+final case class ImagingInt(
+                    sigma: Double,
+                    exposureTime: Double,
+                    sourceFraction: Double) extends Imaging with IntMethod
+
+final case class SpectroscopySN(
+                    exposures: Int,
+                    exposureTime: Double,
+                    sourceFraction: Double) extends Spectroscopy with S2NMethod
 
 
 // ==== Analysis method

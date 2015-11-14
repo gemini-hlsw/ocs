@@ -4,7 +4,7 @@ import edu.gemini.itc.base.SampledSpectrum;
 import edu.gemini.itc.base.SampledSpectrumVisitor;
 import edu.gemini.itc.base.VisitableSampledSpectrum;
 import edu.gemini.itc.shared.CalculationMethod;
-import edu.gemini.itc.shared.SpectroscopySN;
+import edu.gemini.itc.shared.S2NMethod;
 
 /**
  * The SpecS2NVisitor is used to calculate the s2n of an observation using
@@ -48,8 +48,8 @@ public class SpecS2NVisitor implements SampledSpectrumVisitor, SpecS2N {
         this.read_noise = read_noise;
 
         // Currently SpectroscopySN is the only supported calculation method for spectroscopy.
-        if (!(calcMethod instanceof SpectroscopySN)) throw new Error("Unsupported calculation method");
-        this.spec_number_exposures = ((SpectroscopySN) calcMethod).exposures();
+        if (!(calcMethod instanceof S2NMethod)) throw new Error("Unsupported calculation method");
+        this.spec_number_exposures = ((S2NMethod) calcMethod).exposures();
         this.spec_frac_with_source = calcMethod.sourceFraction();
         this.spec_exp_time         = calcMethod.exposureTime();
 

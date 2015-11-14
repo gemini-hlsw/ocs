@@ -270,7 +270,7 @@ public abstract class Gmos extends Instrument implements BinningProvider {
 
     private void validate() {
         //Test to see that all conditions for Spectroscopy are met
-        if (odp.getMethod().isSpectroscopy()) {
+        if (odp.getMethod() instanceof Spectroscopy) {
 
             if (grating.isEmpty())
                 throw new RuntimeException("Spectroscopy calculation method is selected but a grating" +
@@ -295,7 +295,7 @@ public abstract class Gmos extends Instrument implements BinningProvider {
             }
         }
 
-        if (odp.getMethod().isImaging()) {
+        if (odp.getMethod() instanceof Imaging) {
 
             if (filter.isEmpty())
                 throw new RuntimeException("Imaging calculation method is selected but a filter is not.");

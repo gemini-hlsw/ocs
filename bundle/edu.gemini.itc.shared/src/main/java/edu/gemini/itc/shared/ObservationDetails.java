@@ -25,8 +25,7 @@ public final class ObservationDetails implements Serializable {
 
     // TODO: make sure this is only called where applicable!
     public int getNumExposures() {
-        if      (calculationMethod instanceof ImagingSN)      return ((ImagingSN)      calculationMethod).exposures();
-        else if (calculationMethod instanceof SpectroscopySN) return ((SpectroscopySN) calculationMethod).exposures();
+        if      (calculationMethod instanceof S2NMethod) return ((S2NMethod)      calculationMethod).exposures();
         else    return 0;
     }
 

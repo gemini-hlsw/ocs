@@ -1,9 +1,7 @@
 package edu.gemini.itc.niri;
 
 import edu.gemini.itc.base.*;
-import edu.gemini.itc.shared.CalculationMethod;
-import edu.gemini.itc.shared.NiriParameters;
-import edu.gemini.itc.shared.ObservationDetails;
+import edu.gemini.itc.shared.*;
 import edu.gemini.spModel.core.Site;
 import edu.gemini.spModel.gemini.niri.Niri.Disperser;
 import edu.gemini.spModel.gemini.niri.Niri.Mask;
@@ -72,7 +70,7 @@ public class Niri extends Instrument {
 
 
         //Test to see that all conditions for Spectroscopy are met
-        if (_mode.isSpectroscopy()) {
+        if (_mode instanceof Spectroscopy) {
             if (np.grism() == Disperser.NONE)
                 throw new RuntimeException("Spectroscopy calculation method is selected but a grism" +
                         " is not.\nPlease select a grism and a " +
@@ -102,7 +100,7 @@ public class Niri extends Instrument {
             addGrism(_grismOptics);
         }
 
-        if (_mode.isImaging()) {
+        if (_mode instanceof Imaging) {
             if (np.grism() != Disperser.NONE)
                 throw new RuntimeException("Imaging calculation method is selected but a grism" +
                         " is also selected.\nPlease deselect the " +

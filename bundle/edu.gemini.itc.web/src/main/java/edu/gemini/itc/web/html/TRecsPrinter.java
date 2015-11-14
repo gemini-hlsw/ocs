@@ -26,7 +26,7 @@ public final class TRecsPrinter extends PrinterBase {
         super(out);
         this.recipe    = new TRecsRecipe(p, instr);
         this.pdp       = pdp;
-        this.isImaging = p.observation().getMethod().isImaging();
+        this.isImaging = p.observation().getMethod() instanceof Imaging;
     }
 
     public void writeOutput() {
@@ -145,13 +145,13 @@ public final class TRecsPrinter extends PrinterBase {
         if (!mask.equals(TReCSParams.Mask.MASK_IMAGING) && !mask.equals(TReCSParams.Mask.MASK_IMAGING_W))
             s += "<LI> Focal Plane Mask: " + instrument.getFocalPlaneMask().displayValue() + "\n";
         s += "\n";
-        if (p.observation().getMethod().isSpectroscopy())
+        if (p.observation().getMethod() instanceof Spectroscopy)
             s += String.format("<L1> Central Wavelength: %.1f nm\n", instrument.getCentralWavelength());
         s += "Spatial Binning: 1\n";
-        if (p.observation().getMethod().isSpectroscopy())
+        if (p.observation().getMethod() instanceof Spectroscopy)
             s += "Spectral Binning: 1\n";
         s += "Pixel Size in Spatial Direction: " + instrument.getPixelSize() + " arcsec\n";
-        if (p.observation().getMethod().isSpectroscopy())
+        if (p.observation().getMethod() instanceof Spectroscopy)
             s += "Pixel Size in Spectral Direction: " + instrument.getGratingDispersion_nmppix() + " nm\n";
         return s;
     }
