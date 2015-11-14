@@ -145,6 +145,29 @@ public abstract class PrinterBase {
         }
     }
 
+    protected void _printRequestedIntegrationTime(final SpectroscopyResult result) {
+        _printRequestedIntegrationTime(result, 1);
+    }
+
+    // TODO: The correction factor here is only used for Michelle. This is an ancient hack around some special
+    // TODO: behavior for Michelle's polarimetry mode which needs to be corrected.
+    protected void _printRequestedIntegrationTime(final SpectroscopyResult result, final int correction) {
+        if (result.observation().calculationMethod instanceof S2NMethod) {
+            final double numExposures = ((S2NMethod) result.observation().calculationMethod).exposures();
+            final double exposureTime = result.observation().calculationMethod.exposureTime() * correction;
+            _printRequestedIntegrationTime(result, exposureTime, numExposures);
+        } else {
+            throw new Error("Unsupported analysis method");
+        }
+    }
+
+    private void _printRequestedIntegrationTime(final SpectroscopyResult result, final double exposureTime, final double numExposures) {
+        _println(String.format(
+                "Requested total integration time = %.2f secs, of which %.2f secs is on source.",
+                exposureTime * numExposures,
+                exposureTime * numExposures * result.observation().getSourceFraction()));
+    }
+
     private String toPlotLimits(final PlottingDetails pd) {
         if (pd.getPlotLimits() == PlottingDetails.PlotLimits.AUTO) {
             return "";

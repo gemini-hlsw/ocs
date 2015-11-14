@@ -23,13 +23,6 @@ public final class ObservationDetails implements Serializable {
         return analysisMethod;
     }
 
-    // TODO: make sure this is only called where applicable!
-    public int getNumExposures() {
-        if      (calculationMethod instanceof S2NMethod) return ((S2NMethod)      calculationMethod).exposures();
-        else    return 0;
-    }
-
-    // TODO: make sure this is only called where applicable!
     public double getExposureTime() {
         return calculationMethod.exposureTime();
     }

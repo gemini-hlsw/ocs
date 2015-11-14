@@ -6,8 +6,6 @@ import edu.gemini.itc.base.TransmissionElement;
 import edu.gemini.itc.flamingos2.Flamingos2;
 import edu.gemini.itc.flamingos2.Flamingos2Recipe;
 import edu.gemini.itc.shared.*;
-import edu.gemini.spModel.core.PointSource$;
-import edu.gemini.spModel.core.UniformSource$;
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2.FPUnit;
 
 import java.io.PrintWriter;
@@ -61,10 +59,8 @@ public final class Flamingos2Printer extends PrinterBase {
         _println(String.format("derived image size(FWHM) for a point source = %.2f arcsec", result.iqCalc().getImageQuality()));
 
         _println("");
-        final double totExpTime = result.observation().getExposureTime() * result.observation().getNumExposures();
-        _println(String.format(
-                "Requested total integration time = %.2f secs, of which %.2f secs is on source.",
-                totExpTime, totExpTime * result.observation().getSourceFraction()));
+
+        _printRequestedIntegrationTime(result);
 
         _println("");
         _printPeakPixelInfo(s.ccd(0));

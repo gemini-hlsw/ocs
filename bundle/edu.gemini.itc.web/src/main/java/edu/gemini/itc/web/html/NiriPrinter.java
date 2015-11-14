@@ -9,11 +9,7 @@ import edu.gemini.itc.niri.Niri;
 import edu.gemini.itc.niri.NiriRecipe;
 import edu.gemini.itc.shared.*;
 import edu.gemini.spModel.gemini.niri.Niri.Mask;
-import edu.gemini.spModel.core.PointSource$;
-import edu.gemini.spModel.core.UniformSource$;
 import scala.Option;
-import scala.Tuple2;
-import scala.collection.JavaConversions;
 
 import java.io.PrintWriter;
 import java.util.UUID;
@@ -68,10 +64,8 @@ public final class NiriPrinter extends PrinterBase {
         _println(String.format("derived image size(FWHM) for a point source = %.2f arcsec", result.specS2N()[0].getImageQuality()));
 
         _println("");
-        _println(String.format(
-                "Requested total integration time = %.2f secs, of which %.2f secs is on source.",
-                result.observation().getExposureTime() * result.observation().getNumExposures(),
-                result.observation().getExposureTime() * result.observation().getNumExposures() * result.observation().getSourceFraction()));
+
+        _printRequestedIntegrationTime(result);
 
         _println("");
         _printPeakPixelInfo(s.ccd(0));

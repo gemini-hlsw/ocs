@@ -5,8 +5,6 @@ import edu.gemini.itc.base.SpectroscopyResult;
 import edu.gemini.itc.gmos.Gmos;
 import edu.gemini.itc.gmos.GmosRecipe;
 import edu.gemini.itc.shared.*;
-import edu.gemini.spModel.core.PointSource$;
-import edu.gemini.spModel.core.UniformSource$;
 import edu.gemini.spModel.gemini.gmos.GmosNorthType;
 import edu.gemini.spModel.gemini.gmos.GmosSouthType;
 
@@ -53,9 +51,6 @@ public final class GmosPrinter extends PrinterBase {
 
         final Gmos[] ccdArray           = mainInstrument.getDetectorCcdInstruments();
         final SpectroscopyResult result = results[0];
-        final int number_exposures      = results[0].observation().getNumExposures();
-        final double frac_with_source   = results[0].observation().getSourceFraction();
-        final double exposure_time      = results[0].observation().getExposureTime();
 
         _println("Read noise: " + mainInstrument.getReadNoise());
 
@@ -65,7 +60,8 @@ public final class GmosPrinter extends PrinterBase {
         _println(String.format("derived image size(FWHM) for a point source = %.2f arcsec\n", result.iqCalc().getImageQuality()));
         _println("Sky subtraction aperture = " + results[0].observation().getSkyApertureDiameter() + " times the software aperture.");
         _println("");
-        _println(String.format("Requested total integration time = %.2f secs, of which %.2f secs is on source.", exposure_time * number_exposures, exposure_time * number_exposures * frac_with_source));
+
+        _printRequestedIntegrationTime(result);
 
         for (final Gmos instrument : ccdArray) {
             if (ccdArray.length > 1) {

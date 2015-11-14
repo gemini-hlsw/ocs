@@ -4,8 +4,6 @@ import edu.gemini.itc.base.SpectroscopyResult;
 import edu.gemini.itc.gnirs.Gnirs;
 import edu.gemini.itc.gnirs.GnirsRecipe;
 import edu.gemini.itc.shared.*;
-import edu.gemini.spModel.core.PointSource$;
-import edu.gemini.spModel.core.UniformSource$;
 
 import java.io.PrintWriter;
 import java.util.UUID;
@@ -38,20 +36,6 @@ public final class GnirsPrinter extends PrinterBase {
 
         _printSoftwareAperture(result, 1 / 1 / instrument.getFPMask());
 
-//        if (!result.observation().isAutoAperture()) {
-//            _println(String.format("software aperture extent along slit = %.2f arcsec", result.observation().getApertureDiameter()));
-//        } else {
-//            if (result.source().profile() == UniformSource$.MODULE$) {
-//                    _println(String.format("software aperture extent along slit = %.2f arcsec", 1 / instrument.getFPMask()));
-//            } else if (result.source().profile() == PointSource$.MODULE$) {
-//                    _println(String.format("software aperture extent along slit = %.2f arcsec", 1.4 * result.iqCalc().getImageQuality()));
-//            }
-//        }
-//
-//        if (!result.source().isUniform()) {
-//            _println(String.format("fraction of source flux in aperture = %.2f", result.st().getSlitThroughput()));
-//        }
-
         _println(String.format("derived image size(FWHM) for a point source = %.2f arcsec\n", result.iqCalc().getImageQuality()));
 
         _println("Sky subtraction aperture = "
@@ -59,9 +43,8 @@ public final class GnirsPrinter extends PrinterBase {
                 + " times the software aperture.");
 
         _println("");
-        _println(String.format("Requested total integration time = %.2f secs, of which %.2f secs is on source.",
-                result.observation().getExposureTime() * result.observation().getNumExposures(),
-                result.observation().getExposureTime() * result.observation().getNumExposures() * result.observation().getSourceFraction()));
+
+        _printRequestedIntegrationTime(result);
 
         _println("");
         _printPeakPixelInfo(s.ccd(0));

@@ -2,6 +2,7 @@ package edu.gemini.itc.web.html;
 
 import edu.gemini.itc.operation.*;
 import edu.gemini.itc.shared.ObservationDetails;
+import edu.gemini.itc.shared.S2NMethod;
 
 /*
  * A helper class that collects some printing methods that used to be defined on the calculatable objects directly
@@ -76,13 +77,17 @@ public final class CalculatablePrinter {
     }
 
     private static String getTextResult(final ObservationDetails obs, final ImagingS2NMethodACalculation s2n) {
-        final double totExpTime = obs.getExposureTime() * obs.getNumExposures();
-        final double srcFrcTime = totExpTime * obs.getSourceFraction();
-        return
-            CalculatablePrinter.getTextResult(s2n) +
-            String.format("Intermediate S/N for one exposure = %.2f\n\n", s2n.singleSNRatio()) +
-            String.format("S/N for the whole observation = %.2f (including sky subtraction)\n\n", s2n.totalSNRatio()) +
-            String.format("Requested total integration time = %.2f secs, of which %.2f secs is on source.\n", totExpTime, srcFrcTime);
+        if (obs.getMethod() instanceof S2NMethod) {
+            final double totExpTime = obs.getExposureTime() * ((S2NMethod) obs.calculationMethod).exposures();
+            final double srcFrcTime = totExpTime * obs.getSourceFraction();
+            return
+                    CalculatablePrinter.getTextResult(s2n) +
+                            String.format("Intermediate S/N for one exposure = %.2f\n\n", s2n.singleSNRatio()) +
+                            String.format("S/N for the whole observation = %.2f (including sky subtraction)\n\n", s2n.totalSNRatio()) +
+                            String.format("Requested total integration time = %.2f secs, of which %.2f secs is on source.\n", totExpTime, srcFrcTime);
+        } else {
+            throw new Error("Unsupported calculation method");
+        }
     }
 
 

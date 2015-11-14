@@ -56,18 +56,13 @@ public final class MichellePrinter extends PrinterBase {
 
         _println("");
 
-        final int number_exposures = result.observation().getNumExposures();
-        final double frac_with_source = result.observation().getSourceFraction();
-        final double exposure_time = result.observation().getExposureTime();
         if (instrument.polarimetryIsUsed()) {
             //Michelle polarimetry uses 4 waveplate positions so a single observation takes 4 times as long.
             //To the user it should appear as though the time used by the ITC matches thier requested time.
             //hence the x4 factor
-            _println(String.format("Requested total integration time = %.2f secs, of which %.2f secs is on source.",
-                    exposure_time * 4 * number_exposures, exposure_time * 4 * number_exposures * frac_with_source));
+            _printRequestedIntegrationTime(result, 4);
         } else {
-            _println(String.format("Requested total integration time = %.2f secs, of which %.2f secs is on source.",
-                    exposure_time * number_exposures, exposure_time * number_exposures * frac_with_source));
+            _printRequestedIntegrationTime(result);
         }
 
         _println("");

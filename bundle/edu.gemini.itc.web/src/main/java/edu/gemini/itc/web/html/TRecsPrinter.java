@@ -6,9 +6,6 @@ import edu.gemini.itc.shared.*;
 import edu.gemini.itc.trecs.TRecs;
 import edu.gemini.itc.trecs.TRecsRecipe;
 import edu.gemini.spModel.gemini.trecs.TReCSParams;
-import edu.gemini.spModel.core.PointSource$;
-import edu.gemini.spModel.core.UniformSource$;
-import scala.Tuple2;
 
 import java.io.PrintWriter;
 import java.util.UUID;
@@ -56,11 +53,7 @@ public final class TRecsPrinter extends PrinterBase {
 
         _println("");
 
-        final double exp_time = result.observation().getExposureTime();
-        final int number_exposures = result.observation().getNumExposures();
-        final double frac_with_source = result.observation().getSourceFraction();
-
-        _println(String.format("Requested total integration time = %.2f secs, of which %.2f secs is on source.", exp_time * number_exposures, exp_time * number_exposures * frac_with_source));
+        _printRequestedIntegrationTime(result);
 
         _println("");
         _printPeakPixelInfo(s.ccd(0));

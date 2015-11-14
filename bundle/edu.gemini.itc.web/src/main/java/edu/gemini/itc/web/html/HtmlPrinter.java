@@ -60,7 +60,7 @@ public final class HtmlPrinter {
         sb.append("\n");
         sb.append("<LI>Calculation of ");
         if (odp.getMethod() instanceof S2NMethod) {
-            sb.append(String.format("S/N ratio with " + odp.getNumExposures() + " exposures of %.2f secs,", odp.getExposureTime()));
+            sb.append(String.format("S/N ratio with " + ((S2NMethod) odp.getMethod()).exposures() + " exposures of %.2f secs,", odp.getExposureTime()));
             sb.append(String.format(" and %.2f %% of them were on source.\n", odp.getSourceFraction() * 100));
         } else {
             sb.append(String.format("integration time from a S/N ratio of %.2f for exposures of", ((ImagingInt) odp.calculationMethod).sigma()));
