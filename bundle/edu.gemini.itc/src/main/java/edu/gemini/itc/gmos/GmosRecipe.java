@@ -138,11 +138,7 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
 
         // ObservationMode Imaging or spectroscopy
         if (!instrument.isIfuUsed()) {
-            if (!_obsDetailParameters.isAutoAperture()) {
-                st = new SlitThroughput(im_qual, _obsDetailParameters.getApertureDiameter(), pixel_size, instrument.getSlitWidth());
-            } else {
-                st = new SlitThroughput(im_qual, pixel_size, instrument.getSlitWidth());
-            }
+            st = new SlitThroughput(_obsDetailParameters.analysisMethod, im_qual, pixel_size, instrument.getSlitWidth());
             ap_diam = st.getSpatialPix();
             spec_source_frac = st.getSlitThroughput();
         } else {

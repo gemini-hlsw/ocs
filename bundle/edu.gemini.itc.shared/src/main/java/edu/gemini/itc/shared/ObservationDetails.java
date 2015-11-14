@@ -42,12 +42,6 @@ public final class ObservationDetails implements Serializable {
         return analysisMethod instanceof AutoAperture;
     }
 
-    // TODO: make sure this is only called where applicable!
-    public double getApertureDiameter() {
-        if     (analysisMethod instanceof UserAperture)        return (((UserAperture) analysisMethod).diameter());
-        else   return 0.0;
-    }
-
     public double getSkyApertureDiameter() {
         return analysisMethod.skyAperture();
     }

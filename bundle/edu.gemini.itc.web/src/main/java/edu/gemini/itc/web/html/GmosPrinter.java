@@ -58,20 +58,9 @@ public final class GmosPrinter extends PrinterBase {
         final double exposure_time      = results[0].observation().getExposureTime();
 
         _println("Read noise: " + mainInstrument.getReadNoise());
-        if (!mainInstrument.isIfuUsed()) {
-            if (!results[0].observation().isAutoAperture()) {
-                _println(String.format("software aperture extent along slit = %.2f arcsec", results[0].observation().getApertureDiameter()));
-            } else {
-                if (result.source().profile() == UniformSource$.MODULE$) {
-                    _println(String.format("software aperture extent along slit = %.2f arcsec", 1 / mainInstrument.getSlitWidth()));
-                } else if (result.source().profile() == PointSource$.MODULE$) {
-                    _println(String.format("software aperture extent along slit = %.2f arcsec", (1.4 * result.iqCalc().getImageQuality())));
-                }
-            }
 
-            if (!results[0].source().isUniform()) {
-                _println(String.format("fraction of source flux in aperture = %.2f", result.st().getSlitThroughput()));
-            }
+        if (!mainInstrument.isIfuUsed()) {
+            _printSoftwareAperture(results[0], 1 / mainInstrument.getSlitWidth());
         }
         _println(String.format("derived image size(FWHM) for a point source = %.2f arcsec\n", result.iqCalc().getImageQuality()));
         _println("Sky subtraction aperture = " + results[0].observation().getSkyApertureDiameter() + " times the software aperture.");

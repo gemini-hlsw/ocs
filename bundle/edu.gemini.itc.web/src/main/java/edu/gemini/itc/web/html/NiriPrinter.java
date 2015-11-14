@@ -63,19 +63,7 @@ public final class NiriPrinter extends PrinterBase {
             _println(HtmlPrinter.printSummary((Altair) result.aoSystem().get()));
         }
 
-        if (!result.observation().isAutoAperture()) {
-            _println(String.format("software aperture extent along slit = %.2f arcsec", result.observation().getApertureDiameter()));
-        } else {
-            if (result.source().profile() == UniformSource$.MODULE$) {
-                _println(String.format("software aperture extent along slit = %.2f arcsec", 1 / instrument.getFPMask()));
-            } else if (result.source().profile() == PointSource$.MODULE$) {
-                _println(String.format("software aperture extent along slit = %.2f arcsec", 1.4 * result.specS2N()[0].getImageQuality()));
-            }
-        }
-
-        if (!result.source().isUniform()) {
-            _println(String.format("fraction of source flux in aperture = %.2f", result.st().getSlitThroughput()));
-        }
+        _printSoftwareAperture(result, 1 / instrument.getFPMask());
 
         _println(String.format("derived image size(FWHM) for a point source = %.2f arcsec", result.specS2N()[0].getImageQuality()));
 

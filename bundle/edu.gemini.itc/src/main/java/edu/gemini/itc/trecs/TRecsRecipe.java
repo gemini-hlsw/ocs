@@ -116,17 +116,7 @@ public final class TRecsRecipe implements ImagingRecipe, SpectroscopyRecipe {
         // In this version we are bypassing morphology modules 3a-5a.
         // i.e. the output morphology is same as the input morphology.
         // Might implement these modules at a later time.
-
-        final SlitThroughput st;
-        if (!_obsDetailParameters.isAutoAperture()) {
-            st = new SlitThroughput(IQcalc.getImageQuality(),
-                    _obsDetailParameters.getApertureDiameter(), pixel_size,
-                    instrument.getFPMask());
-        } else {
-            st = new SlitThroughput(IQcalc.getImageQuality(), pixel_size, instrument.getFPMask());
-        }
-
-
+        final SlitThroughput st = new SlitThroughput(_obsDetailParameters.analysisMethod, IQcalc.getImageQuality(), pixel_size, instrument.getFPMask());
         double ap_diam = st.getSpatialPix();
         double spec_source_frac = st.getSlitThroughput();
 

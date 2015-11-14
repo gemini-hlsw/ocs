@@ -67,10 +67,12 @@ public final class HtmlPrinter {
             sb.append(String.format(" %.2f with %.2f %% of them were on source.\n", odp.getExposureTime(), odp.getSourceFraction() * 100));
         }
         sb.append("<LI>Analysis performed for aperture ");
-        if (odp.isAutoAperture()) {
+        if (odp.analysisMethod instanceof AutoAperture) {
             sb.append("that gives 'optimum' S/N ");
+        } else if (odp.analysisMethod instanceof UserAperture) {
+            sb.append(String.format("of diameter %.2f ", ((UserAperture) odp.analysisMethod).diameter()));
         } else {
-            sb.append(String.format("of diameter %.2f ", odp.getApertureDiameter()));
+            throw new Error("Unsupported analysis method");
         }
         sb.append(String.format("and a sky aperture that is %.2f times the target aperture.\n", odp.getSkyApertureDiameter()));
 

@@ -93,13 +93,7 @@ public final class Flamingos2Recipe implements ImagingRecipe, SpectroscopyRecipe
 
         final double pixel_size = instrument.getPixelSize();
         final SpecS2NLargeSlitVisitor specS2N;
-        final SlitThroughput st;
-
-        if (!_obsDetailParameters.isAutoAperture()) {
-            st = new SlitThroughput(im_qual, _obsDetailParameters.getApertureDiameter(), pixel_size, instrument.getSlitSize() * pixel_size);
-        } else {
-            st = new SlitThroughput(im_qual, pixel_size, instrument.getSlitSize() * pixel_size);
-        }
+        final SlitThroughput st = new SlitThroughput(_obsDetailParameters.analysisMethod, im_qual, pixel_size, instrument.getSlitSize() * pixel_size);
 
         double ap_diam = st.getSpatialPix();
         double spec_source_frac = st.getSlitThroughput();

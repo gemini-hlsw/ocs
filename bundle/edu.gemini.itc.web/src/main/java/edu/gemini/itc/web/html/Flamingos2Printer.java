@@ -56,19 +56,7 @@ public final class Flamingos2Printer extends PrinterBase {
         _print(CalculatablePrinter.getTextResult(result.sfCalc()));
         _println(CalculatablePrinter.getTextResult(result.iqCalc()));
 
-        if (!result.parameters().observation().isAutoAperture()) {
-            _println(String.format("software aperture extent along slit = %.2f arcsec", result.parameters().observation().getApertureDiameter()));
-        } else {
-            if (result.source().profile() == UniformSource$.MODULE$) {
-                _println(String.format("software aperture extent along slit = %.2f arcsec", 1 / instrument.getSlitSize() * result.instrument().getPixelSize()));
-            } else if (result.source().profile() == PointSource$.MODULE$) {
-                _println(String.format("software aperture extent along slit = %.2f arcsec", 1.4 * result.iqCalc().getImageQuality()));
-            }
-        }
-
-        if (!result.parameters().source().isUniform()) {
-            _println(String.format("fraction of source flux in aperture = %.2f", result.st().getSlitThroughput()));
-        }
+        _printSoftwareAperture(result, 1 / instrument.getSlitSize() * result.instrument().getPixelSize());
 
         _println(String.format("derived image size(FWHM) for a point source = %.2f arcsec", result.iqCalc().getImageQuality()));
 

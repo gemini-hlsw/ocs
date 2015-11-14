@@ -36,19 +36,21 @@ public final class GnirsPrinter extends PrinterBase {
 
         final Gnirs instrument = (Gnirs) result.instrument();
 
-        if (!result.observation().isAutoAperture()) {
-            _println(String.format("software aperture extent along slit = %.2f arcsec", result.observation().getApertureDiameter()));
-        } else {
-            if (result.source().profile() == UniformSource$.MODULE$) {
-                    _println(String.format("software aperture extent along slit = %.2f arcsec", 1 / instrument.getFPMask()));
-            } else if (result.source().profile() == PointSource$.MODULE$) {
-                    _println(String.format("software aperture extent along slit = %.2f arcsec", 1.4 * result.iqCalc().getImageQuality()));
-            }
-        }
+        _printSoftwareAperture(result, 1 / 1 / instrument.getFPMask());
 
-        if (!result.source().isUniform()) {
-            _println(String.format("fraction of source flux in aperture = %.2f", result.st().getSlitThroughput()));
-        }
+//        if (!result.observation().isAutoAperture()) {
+//            _println(String.format("software aperture extent along slit = %.2f arcsec", result.observation().getApertureDiameter()));
+//        } else {
+//            if (result.source().profile() == UniformSource$.MODULE$) {
+//                    _println(String.format("software aperture extent along slit = %.2f arcsec", 1 / instrument.getFPMask()));
+//            } else if (result.source().profile() == PointSource$.MODULE$) {
+//                    _println(String.format("software aperture extent along slit = %.2f arcsec", 1.4 * result.iqCalc().getImageQuality()));
+//            }
+//        }
+//
+//        if (!result.source().isUniform()) {
+//            _println(String.format("fraction of source flux in aperture = %.2f", result.st().getSlitThroughput()));
+//        }
 
         _println(String.format("derived image size(FWHM) for a point source = %.2f arcsec\n", result.iqCalc().getImageQuality()));
 
