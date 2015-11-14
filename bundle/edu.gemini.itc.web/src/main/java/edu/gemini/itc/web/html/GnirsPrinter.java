@@ -39,7 +39,7 @@ public final class GnirsPrinter extends PrinterBase {
         _println(String.format("derived image size(FWHM) for a point source = %.2f arcsec\n", result.iqCalc().getImageQuality()));
 
         _println("Sky subtraction aperture = "
-                + result.observation().getSkyApertureDiameter()
+                + result.observation().skyAperture()
                 + " times the software aperture.");
 
         _println("");
@@ -118,7 +118,7 @@ public final class GnirsPrinter extends PrinterBase {
 
         s += String.format("<L1> Central Wavelength: %.1f nm\n", instrument.getCentralWavelength());
         s += "Pixel Size in Spatial Direction: " + instrument.getPixelSize() + " arcsec\n";
-        if (p.observation().getMethod() instanceof Spectroscopy) {
+        if (p.observation().calculationMethod() instanceof Spectroscopy) {
             if (instrument.XDisp_IsUsed()) {
                 s += String.format("Pixel Size in Spectral Direction(Order 3): %.3f nm\n", instrument.getGratingDispersion_nmppix() / 3);
                 s += String.format("Pixel Size in Spectral Direction(Order 4): %.3f nm\n", instrument.getGratingDispersion_nmppix() / 4);

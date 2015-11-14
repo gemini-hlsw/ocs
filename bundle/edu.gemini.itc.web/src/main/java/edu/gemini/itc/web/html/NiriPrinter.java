@@ -31,7 +31,7 @@ public final class NiriPrinter extends PrinterBase {
         super(out);
         this.instr     = instr;
         this.recipe    = new NiriRecipe(p, instr);
-        this.isImaging = p.observation().getMethod() instanceof Imaging;
+        this.isImaging = p.observation().calculationMethod() instanceof Imaging;
         this.pdp       = pdp;
     }
 

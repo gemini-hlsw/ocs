@@ -24,7 +24,7 @@ public final class GmosPrinter extends PrinterBase {
         super(out);
         this.recipe         = new GmosRecipe(p, instr);
         this.pdp            = pdp;
-        this.isImaging      = p.observation().getMethod() instanceof Imaging;
+        this.isImaging      = p.observation().calculationMethod() instanceof Imaging;
     }
 
     /**
@@ -58,7 +58,7 @@ public final class GmosPrinter extends PrinterBase {
             _printSoftwareAperture(results[0], 1 / mainInstrument.getSlitWidth());
         }
         _println(String.format("derived image size(FWHM) for a point source = %.2f arcsec\n", result.iqCalc().getImageQuality()));
-        _println("Sky subtraction aperture = " + results[0].observation().getSkyApertureDiameter() + " times the software aperture.");
+        _println("Sky subtraction aperture = " + results[0].observation().skyAperture() + " times the software aperture.");
         _println("");
 
         _printRequestedIntegrationTime(result);
@@ -101,7 +101,7 @@ public final class GmosPrinter extends PrinterBase {
         _print(CalculatablePrinter.getTextResult(results[0].sfCalc()));
         _println(CalculatablePrinter.getTextResult(results[0].iqCalc()));
         _println("Sky subtraction aperture = "
-                + results[0].observation().getSkyApertureDiameter()
+                + results[0].observation().skyAperture()
                 + " times the software aperture.\n");
         _println("Read noise: " + instrument.getReadNoise());
 
@@ -155,13 +155,13 @@ public final class GmosPrinter extends PrinterBase {
         if (!instrument.getFpMask().equals(GmosNorthType.FPUnitNorth.FPU_NONE) && !instrument.getFpMask().equals(GmosSouthType.FPUnitSouth.FPU_NONE))
             s += "<LI> Focal Plane Mask: " + instrument.getFpMask().displayValue() + "\n";
         s += "\n";
-        if (p.observation().getMethod() instanceof Spectroscopy)
+        if (p.observation().calculationMethod() instanceof Spectroscopy)
             s += String.format("<L1> Central Wavelength: %.1f nm\n", instrument.getCentralWavelength());
         s += "Spatial Binning: " + instrument.getSpatialBinning() + "\n";
-        if (p.observation().getMethod() instanceof Spectroscopy)
+        if (p.observation().calculationMethod() instanceof Spectroscopy)
             s += "Spectral Binning: " + instrument.getSpectralBinning() + "\n";
         s += "Pixel Size in Spatial Direction: " + instrument.getPixelSize() + "arcsec\n";
-        if (p.observation().getMethod() instanceof Spectroscopy)
+        if (p.observation().calculationMethod() instanceof Spectroscopy)
             s += "Pixel Size in Spectral Direction: " + instrument.getGratingDispersion_nmppix() + "nm\n";
         if (instrument.isIfuUsed()) {
             s += "IFU is selected,";

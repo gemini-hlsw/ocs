@@ -41,7 +41,7 @@ public final class Flamingos2Recipe implements ImagingRecipe, SpectroscopyRecipe
      * Check input parameters for consistency
      */
     private void validateInputParameters() {
-        if (_obsDetailParameters.getMethod() instanceof Spectroscopy) {
+        if (_obsDetailParameters.calculationMethod() instanceof Spectroscopy) {
             switch (_flamingos2Parameters.grism()) {
                 case NONE:          throw new IllegalArgumentException("In spectroscopy mode, a grism must be selected");
             }
@@ -93,7 +93,7 @@ public final class Flamingos2Recipe implements ImagingRecipe, SpectroscopyRecipe
 
         final double pixel_size = instrument.getPixelSize();
         final SpecS2NLargeSlitVisitor specS2N;
-        final SlitThroughput st = new SlitThroughput(_obsDetailParameters.analysisMethod, im_qual, pixel_size, instrument.getSlitSize() * pixel_size);
+        final SlitThroughput st = new SlitThroughput(_obsDetailParameters.analysisMethod(), im_qual, pixel_size, instrument.getSlitSize() * pixel_size);
 
         double ap_diam = st.getSpatialPix();
         double spec_source_frac = st.getSlitThroughput();
@@ -120,10 +120,10 @@ public final class Flamingos2Recipe implements ImagingRecipe, SpectroscopyRecipe
                 gratDispersion_nmppix,
                 spec_source_frac, im_qual,
                 ap_diam,
-                _obsDetailParameters.calculationMethod,
+                _obsDetailParameters.calculationMethod(),
                 instrument.getDarkCurrent(),
                 instrument.getReadNoise(),
-                _obsDetailParameters.getSkyApertureDiameter());
+                _obsDetailParameters.skyAperture());
 
         specS2N.setSourceSpectrum(src.sed);
         specS2N.setBackgroundSpectrum(src.sky);

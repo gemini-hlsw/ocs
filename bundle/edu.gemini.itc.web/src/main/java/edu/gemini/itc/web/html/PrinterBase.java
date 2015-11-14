@@ -130,8 +130,8 @@ public abstract class PrinterBase {
     }
 
     protected void _printSoftwareAperture(final SpectroscopyResult result, final double slitWidth) {
-        if (result.observation().analysisMethod instanceof UserAperture) {
-            _println(String.format("software aperture extent along slit = %.2f arcsec", ((UserAperture) result.observation().analysisMethod).diameter()));
+        if (result.observation().analysisMethod() instanceof UserAperture) {
+            _println(String.format("software aperture extent along slit = %.2f arcsec", ((UserAperture) result.observation().analysisMethod()).diameter()));
         } else {
             if (result.source().profile() == UniformSource$.MODULE$) {
                 _println(String.format("software aperture extent along slit = %.2f arcsec", slitWidth));
@@ -152,9 +152,9 @@ public abstract class PrinterBase {
     // TODO: The correction factor here is only used for Michelle. This is an ancient hack around some special
     // TODO: behavior for Michelle's polarimetry mode which needs to be corrected.
     protected void _printRequestedIntegrationTime(final SpectroscopyResult result, final int correction) {
-        if (result.observation().calculationMethod instanceof S2NMethod) {
-            final double numExposures = ((S2NMethod) result.observation().calculationMethod).exposures();
-            final double exposureTime = result.observation().calculationMethod.exposureTime() * correction;
+        if (result.observation().calculationMethod() instanceof S2NMethod) {
+            final double numExposures = ((S2NMethod) result.observation().calculationMethod()).exposures();
+            final double exposureTime = result.observation().calculationMethod().exposureTime() * correction;
             _printRequestedIntegrationTime(result, exposureTime, numExposures);
         } else {
             throw new Error("Unsupported analysis method");
@@ -165,7 +165,7 @@ public abstract class PrinterBase {
         _println(String.format(
                 "Requested total integration time = %.2f secs, of which %.2f secs is on source.",
                 exposureTime * numExposures,
-                exposureTime * numExposures * result.observation().getSourceFraction()));
+                exposureTime * numExposures * result.observation().sourceFraction()));
     }
 
     private String toPlotLimits(final PlottingDetails pd) {

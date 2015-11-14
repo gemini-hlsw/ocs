@@ -51,7 +51,7 @@ public final class TRecs extends Instrument {
         _focalPlaneMask = tp.mask();
         _grating = tp.grating();
         _centralWavelength = tp.centralWavelength().toNanometers();
-        _mode = odp.getMethod();
+        _mode = odp.calculationMethod();
 
         final TReCSParams.WindowWheel instrumentWindow = tp.instrumentWindow();
         final String file = getDirectory() + "/" + getPrefix() + instrumentWindow.name() + Instrument.getSuffix();

@@ -42,7 +42,7 @@ public abstract class ImagingS2NCalculation implements ImagingS2NCalculatable {
                 instrument.getDarkCurrent();
         // TODO: Why 1 for NIRI/GSAOI?? Is this a bug or is there a reason why in the original code those instruments did not
         // TODO: set the aperture and used a (default) value of 1?
-        this.skyAper         = (instrument instanceof Niri || instrument instanceof Gsaoi) ? 1 : obs.getSkyApertureDiameter();
+        this.skyAper         = (instrument instanceof Niri || instrument instanceof Gsaoi) ? 1 : obs.skyAperture();
         // TODO: marker interface like for binning?
         this.elfinParam      = (instrument instanceof TRecs) ? ((TRecs) instrument).getExtraLowFreqNoise() : 1; // default 1 will have no effect
     }

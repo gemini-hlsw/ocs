@@ -86,7 +86,7 @@ sealed trait ItcTableModel extends AbstractTableModel {
 
   protected def sourceMag       (i: ItcParameters) = f"${i.source.norm}%.2f ${i.source.normBand.name}"
 
-  protected def sourceFraction  (i: ItcParameters) = f"${i.observation.getSourceFraction}%.2f"
+  protected def sourceFraction  (i: ItcParameters) = f"${i.observation.sourceFraction}%.2f"
 
   protected def peakPixelFlux(result: Future[ItcService.Result], ccd: Int = 0) = serviceResult(result).map(_.peakPixelFlux(ccd))
 

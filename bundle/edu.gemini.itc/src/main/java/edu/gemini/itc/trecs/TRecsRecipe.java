@@ -53,24 +53,24 @@ public final class TRecsRecipe implements ImagingRecipe, SpectroscopyRecipe {
         // TODO : so the ObservationDetailsParameters object can become immutable. Basically this calculates
         // TODO : some missing parameters and/or turns the total exposure time into a single exposure time.
         // TODO : This is a temporary hack. There needs to be a better solution for this.
-        // NOTE : odp.getExposureTime() carries the TOTAL exposure time (as opposed to exp time for a single frame)
+        // NOTE : odp.exposureTime() carries the TOTAL exposure time (as opposed to exp time for a single frame)
         final TRecs instrument = new TRecs(tp, odp); // TODO: Avoid creating an instrument instance twice.
         final double correctedExposureTime = instrument.getFrameTime();
-        final int correctedNumExposures = new Double(odp.getExposureTime() / instrument.getFrameTime() + 0.5).intValue();
-        if (odp.getMethod() instanceof ImagingInt) {
+        final int correctedNumExposures = new Double(odp.exposureTime() / instrument.getFrameTime() + 0.5).intValue();
+        if (odp.calculationMethod() instanceof ImagingInt) {
             return new ObservationDetails(
-                    new ImagingInt(((ImagingInt) odp.calculationMethod).sigma(), correctedExposureTime, odp.getSourceFraction()),
-                    odp.getAnalysis()
+                    new ImagingInt(((ImagingInt) odp.calculationMethod()).sigma(), correctedExposureTime, odp.sourceFraction()),
+                    odp.analysisMethod()
             );
-        } else if (odp.getMethod() instanceof ImagingSN) {
+        } else if (odp.calculationMethod() instanceof ImagingS2N) {
             return new ObservationDetails(
-                    new ImagingSN(correctedNumExposures, correctedExposureTime, odp.getSourceFraction()),
-                    odp.getAnalysis()
+                    new ImagingS2N(correctedNumExposures, correctedExposureTime, odp.sourceFraction()),
+                    odp.analysisMethod()
             );
-        } else if (odp.getMethod() instanceof SpectroscopySN) {
+        } else if (odp.calculationMethod() instanceof SpectroscopyS2N) {
             return new ObservationDetails(
-                    new SpectroscopySN(correctedNumExposures, correctedExposureTime, odp.getSourceFraction()),
-                    odp.getAnalysis()
+                    new SpectroscopyS2N(correctedNumExposures, correctedExposureTime, odp.sourceFraction()),
+                    odp.analysisMethod()
             );
         } else {
             throw new IllegalArgumentException();
@@ -116,7 +116,7 @@ public final class TRecsRecipe implements ImagingRecipe, SpectroscopyRecipe {
         // In this version we are bypassing morphology modules 3a-5a.
         // i.e. the output morphology is same as the input morphology.
         // Might implement these modules at a later time.
-        final SlitThroughput st = new SlitThroughput(_obsDetailParameters.analysisMethod, IQcalc.getImageQuality(), pixel_size, instrument.getFPMask());
+        final SlitThroughput st = new SlitThroughput(_obsDetailParameters.analysisMethod(), IQcalc.getImageQuality(), pixel_size, instrument.getFPMask());
         double ap_diam = st.getSpatialPix();
         double spec_source_frac = st.getSlitThroughput();
 
@@ -146,10 +146,10 @@ public final class TRecsRecipe implements ImagingRecipe, SpectroscopyRecipe {
                 spec_source_frac,
                 im_qual,
                 ap_diam,
-                _obsDetailParameters.calculationMethod,
+                _obsDetailParameters.calculationMethod(),
                 instrument.getDarkCurrent(),
                 instrument.getReadNoise(),
-                _obsDetailParameters.getSkyApertureDiameter());
+                _obsDetailParameters.skyAperture());
 
         specS2N.setSourceSpectrum(sed);
         specS2N.setBackgroundSpectrum(sky);

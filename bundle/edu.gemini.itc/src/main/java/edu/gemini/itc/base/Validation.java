@@ -17,10 +17,10 @@ public final class Validation {
     public static void validate(final Instrument instrument, final ObservationDetails obs, final SourceDefinition source) {
         checkElineWidth(instrument, source);
         checkGaussianFwhm(source.profile());
-        checkSkyAperture(obs.getAnalysis());
+        checkSkyAperture(obs.analysisMethod());
 
-        if (obs.calculationMethod instanceof S2NMethod) {
-            checkSourceFraction(((S2NMethod) obs.calculationMethod).exposures(), obs.calculationMethod.sourceFraction());
+        if (obs.calculationMethod() instanceof S2NMethod) {
+            checkSourceFraction(((S2NMethod) obs.calculationMethod()).exposures(), obs.calculationMethod().sourceFraction());
         }
 
     }

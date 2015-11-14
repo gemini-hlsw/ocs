@@ -64,7 +64,7 @@ public final class Nifs extends Instrument {
         _sampling = super.getSampling();
 
         _centralWavelength = gp.centralWavelength().toNanometers();
-        _mode = odp.getMethod();
+        _mode = odp.calculationMethod();
 
         if (_centralWavelength < 1000 || _centralWavelength > 6000) {
             throw new RuntimeException("Central wavelength must be between 1.00um and 6.0um.");

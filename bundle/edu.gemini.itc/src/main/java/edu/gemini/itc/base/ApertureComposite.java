@@ -40,7 +40,7 @@ public final class ApertureComposite extends ApertureComponent {
         }
     }
 
-    //Methods for distributing a getSourceFraction query to multiple apertures
+    //Methods for distributing a sourceFraction query to multiple apertures
     public List<Double> getFractionOfSourceInAperture() {
         final List<Double> sourceFractionsList = new ArrayList<>();
         for (final ApertureComponent ac : apertureList) {

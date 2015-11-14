@@ -4,7 +4,7 @@ import edu.gemini.itc.base.SampledSpectrum;
 import edu.gemini.itc.base.SampledSpectrumVisitor;
 import edu.gemini.itc.base.VisitableSampledSpectrum;
 import edu.gemini.itc.shared.CalculationMethod;
-import edu.gemini.itc.shared.SpectroscopySN;
+import edu.gemini.itc.shared.SpectroscopyS2N;
 
 /**
  * The SpecS2NLargeSlitVisitor is used to calculate the s2n of an observation using
@@ -79,8 +79,8 @@ public class SpecS2NLargeSlitVisitor implements SampledSpectrumVisitor, SpecS2N 
         this.skyAper                = skyAper;
 
         // Currently SpectroscopySN is the only supported calculation method for spectroscopy.
-        if (!(calcMethod instanceof  SpectroscopySN)) throw new Error("Unsupported calculation method");
-        this.spec_number_exposures  = ((SpectroscopySN) calcMethod).exposures();
+        if (!(calcMethod instanceof SpectroscopyS2N)) throw new Error("Unsupported calculation method");
+        this.spec_number_exposures  = ((SpectroscopyS2N) calcMethod).exposures();
         this.spec_frac_with_source  = calcMethod.sourceFraction();
         this.spec_exp_time          = calcMethod.exposureTime();
 

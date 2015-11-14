@@ -23,7 +23,7 @@ public final class TRecsPrinter extends PrinterBase {
         super(out);
         this.recipe    = new TRecsRecipe(p, instr);
         this.pdp       = pdp;
-        this.isImaging = p.observation().getMethod() instanceof Imaging;
+        this.isImaging = p.observation().calculationMethod() instanceof Imaging;
     }
 
     public void writeOutput() {
@@ -49,7 +49,7 @@ public final class TRecsPrinter extends PrinterBase {
 
         _println(String.format("derived image size(FWHM) for a point source = %.2f arcsec\n", result.iqCalc().getImageQuality()));
 
-        _println("Sky subtraction aperture = " + result.observation().getSkyApertureDiameter() + " times the software aperture.");
+        _println("Sky subtraction aperture = " + result.observation().skyAperture() + " times the software aperture.");
 
         _println("");
 
@@ -99,7 +99,7 @@ public final class TRecsPrinter extends PrinterBase {
         _print(CalculatablePrinter.getTextResult(result.sfCalc()));
         _println(CalculatablePrinter.getTextResult(result.iqCalc()));
         _println("Sky subtraction aperture = "
-                + result.observation().getSkyApertureDiameter()
+                + result.observation().skyAperture()
                 + " times the software aperture.\n");
 
         _println(CalculatablePrinter.getTextResult(result.is2nCalc(), result.observation()));
@@ -126,13 +126,13 @@ public final class TRecsPrinter extends PrinterBase {
         if (!mask.equals(TReCSParams.Mask.MASK_IMAGING) && !mask.equals(TReCSParams.Mask.MASK_IMAGING_W))
             s += "<LI> Focal Plane Mask: " + instrument.getFocalPlaneMask().displayValue() + "\n";
         s += "\n";
-        if (p.observation().getMethod() instanceof Spectroscopy)
+        if (p.observation().calculationMethod() instanceof Spectroscopy)
             s += String.format("<L1> Central Wavelength: %.1f nm\n", instrument.getCentralWavelength());
         s += "Spatial Binning: 1\n";
-        if (p.observation().getMethod() instanceof Spectroscopy)
+        if (p.observation().calculationMethod() instanceof Spectroscopy)
             s += "Spectral Binning: 1\n";
         s += "Pixel Size in Spatial Direction: " + instrument.getPixelSize() + " arcsec\n";
-        if (p.observation().getMethod() instanceof Spectroscopy)
+        if (p.observation().calculationMethod() instanceof Spectroscopy)
             s += "Pixel Size in Spectral Direction: " + instrument.getGratingDispersion_nmppix() + " nm\n";
         return s;
     }

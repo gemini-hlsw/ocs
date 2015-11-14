@@ -138,7 +138,7 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
 
         // ObservationMode Imaging or spectroscopy
         if (!instrument.isIfuUsed()) {
-            st = new SlitThroughput(_obsDetailParameters.analysisMethod, im_qual, pixel_size, instrument.getSlitWidth());
+            st = new SlitThroughput(_obsDetailParameters.analysisMethod(), im_qual, pixel_size, instrument.getSlitWidth());
             ap_diam = st.getSpatialPix();
             spec_source_frac = st.getSlitThroughput();
         } else {
@@ -178,10 +178,10 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
                         spsf,
                         im_qual,
                         ap_diam,
-                        _obsDetailParameters.calculationMethod,
+                        _obsDetailParameters.calculationMethod(),
                         dark_current * instrument.getSpatialBinning() * instrument.getSpectralBinning(),
                         read_noise,
-                        _obsDetailParameters.getSkyApertureDiameter());
+                        _obsDetailParameters.skyAperture());
 
                 specS2N[i].setCcdPixelRange(firstCcdIndex, lastCcdIndex);
                 specS2N[i].setSourceSpectrum(src.sed);
@@ -208,10 +208,10 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
                     spec_source_frac,
                     im_qual,
                     ap_diam,
-                    _obsDetailParameters.calculationMethod,
+                    _obsDetailParameters.calculationMethod(),
                     dark_current * instrument.getSpatialBinning() * instrument.getSpectralBinning(),
                     read_noise,
-                    _obsDetailParameters.getSkyApertureDiameter());
+                    _obsDetailParameters.skyAperture());
 
 
             specS2N[0].setCcdPixelRange(firstCcdIndex, lastCcdIndex);

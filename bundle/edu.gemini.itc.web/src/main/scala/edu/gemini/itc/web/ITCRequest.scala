@@ -250,13 +250,13 @@ object ITCRequest {
           r.doubleParameter("fracOnSourceC")
         )
       case "s2n"      if InstrumentDetails.isImaging(i)     =>
-        ImagingSN(
+        ImagingS2N(
           r.intParameter("numExpA"),
           r.doubleParameter("expTimeA"),
           r.doubleParameter("fracOnSourceA")
         )
       case "s2n"      if InstrumentDetails.isSpectroscopy(i) =>
-        SpectroscopySN(
+        SpectroscopyS2N(
           r.intParameter("numExpA"),
           r.doubleParameter("expTimeA"),
           r.doubleParameter("fracOnSourceA")

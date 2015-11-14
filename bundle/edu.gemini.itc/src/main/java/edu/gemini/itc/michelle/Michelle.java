@@ -54,7 +54,7 @@ public final class Michelle extends Instrument {
         _sampling = super.getSampling();
         _centralWavelength = mp.centralWavelength().toNanometers();
 
-        _mode = odp.getMethod();
+        _mode = odp.calculationMethod();
 
         final InstrumentWindow michelleInstrumentWindow =
                 new InstrumentWindow(getDirectory() + "/" + getPrefix() +

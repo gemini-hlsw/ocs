@@ -55,11 +55,11 @@ object Fixture {
   // ==== IMAGING ANALYSIS MODES
   lazy val ImagingModes = List(
     new ObservationDetails(
-      ImagingSN(10, 200.0, 0.5),
+      ImagingS2N(10, 200.0, 0.5),
       AutoAperture(5.0)
     ),
     new ObservationDetails(
-      ImagingSN(10, 200.0, 0.5),
+      ImagingS2N(10, 200.0, 0.5),
       UserAperture(2.0, 5.0)
     ),
     new ObservationDetails(
@@ -75,11 +75,11 @@ object Fixture {
   // ==== SPECTROSCOPY ANALYSIS MODES
   lazy val SpectroscopyModes = List(
     new ObservationDetails(
-      SpectroscopySN(6, 300.0, 0.5),
+      SpectroscopyS2N(6, 300.0, 0.5),
       AutoAperture(4.5)
     ),
     new ObservationDetails(
-      SpectroscopySN(6, 300.0, 1.0),
+      SpectroscopyS2N(6, 300.0, 1.0),
       UserAperture(2.5, 6.0)
     )
   )

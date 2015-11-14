@@ -51,7 +51,7 @@ class ItcServiceImpl extends ItcService {
     }
 
     // execute ITC service call with updated parameters
-    updatedParams.observation.getMethod match {
+    updatedParams.observation.calculationMethod match {
       case _: Imaging       => calculateImaging(updatedParams)
       case _: Spectroscopy  => calculateSpectroscopy(updatedParams)
     }

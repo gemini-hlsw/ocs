@@ -68,7 +68,7 @@ public final class Gnirs extends Instrument {
         params = gp;
         _grating = gp.grating();
         _centralWavelength = correctedCentralWavelength(); // correct central wavelength if cross dispersion is used
-        _mode = odp.getMethod();
+        _mode = odp.calculationMethod();
         _XDisp = isXDispUsed();
 
         if (_centralWavelength < 1030 || _centralWavelength > 6000) {
@@ -76,7 +76,7 @@ public final class Gnirs extends Instrument {
         }
 
         //set read noise by exporsure time
-        if (odp.getExposureTime() <= 1.0) {
+        if (odp.exposureTime() <= 1.0) {
             _wellDepth      = DEEP_WELL;
             _linearityLimit = DEEP_WELL_LINEARTY_LIMIT;
         } else {

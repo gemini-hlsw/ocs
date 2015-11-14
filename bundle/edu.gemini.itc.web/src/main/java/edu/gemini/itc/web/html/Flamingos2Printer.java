@@ -24,7 +24,7 @@ public final class Flamingos2Printer extends PrinterBase {
         super(out);
         this.pdp       = pdp;
         this.recipe    = new Flamingos2Recipe(p, instr);
-        this.isImaging = p.observation().getMethod() instanceof Imaging;
+        this.isImaging = p.observation().calculationMethod() instanceof Imaging;
     }
 
     /**

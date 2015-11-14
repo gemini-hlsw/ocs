@@ -42,7 +42,7 @@ public class Niri extends Instrument {
 
         this.params = np;
 
-        _mode = odp.getMethod();
+        _mode = odp.calculationMethod();
 
 
         _Filter = Filter.fromFile(getPrefix(), np.filter().name(), getDirectory() + "/");

@@ -45,7 +45,7 @@ sealed trait IntMethod extends CalculationMethod {
   def sigma: Double
 }
 
-final case class ImagingSN(
+final case class ImagingS2N(
                     exposures: Int,
                     exposureTime: Double,
                     sourceFraction:
@@ -56,7 +56,7 @@ final case class ImagingInt(
                     exposureTime: Double,
                     sourceFraction: Double) extends Imaging with IntMethod
 
-final case class SpectroscopySN(
+final case class SpectroscopyS2N(
                     exposures: Int,
                     exposureTime: Double,
                     sourceFraction: Double) extends Spectroscopy with S2NMethod
@@ -78,3 +78,13 @@ sealed trait IfuMethod
 final case class IfuSingle(offset: Double) extends IfuMethod
 final case class IfuRadial(minOffset: Double, maxOffset: Double) extends IfuMethod
 final case class IfuSummed(numX: Int, numY: Int, centerX: Double, centerY: Double) extends IfuMethod
+
+
+// === Observation Details
+
+final case class ObservationDetails(calculationMethod: CalculationMethod, analysisMethod: AnalysisMethod) {
+  def exposureTime   = calculationMethod.exposureTime
+  def sourceFraction = calculationMethod.sourceFraction
+  def isAutoAperture = analysisMethod.isInstanceOf[AutoAperture]
+  def skyAperture    = analysisMethod.skyAperture
+}

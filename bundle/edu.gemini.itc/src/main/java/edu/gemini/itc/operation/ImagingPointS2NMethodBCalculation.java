@@ -17,11 +17,11 @@ public final class ImagingPointS2NMethodBCalculation extends ImagingS2NCalculati
                                              final double sed_integral,
                                              final double sky_integral) {
         super(obs, instrument, srcFrac, sed_integral, sky_integral);
-        this.frac_with_source = obs.getSourceFraction();
-        this.exposure_time = obs.getExposureTime();
+        this.frac_with_source = obs.sourceFraction();
+        this.exposure_time = obs.exposureTime();
         this.read_noise = instrument.getReadNoise();
         this.pixel_size = instrument.getPixelSize();
-        this.req_s2n = (obs.calculationMethod instanceof ImagingInt) ? ((ImagingInt) obs.calculationMethod).sigma() : 0.0;
+        this.req_s2n = (obs.calculationMethod() instanceof ImagingInt) ? ((ImagingInt) obs.calculationMethod()).sigma() : 0.0;
 
     }
 
