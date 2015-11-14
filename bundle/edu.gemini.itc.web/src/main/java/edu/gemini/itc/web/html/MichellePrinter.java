@@ -49,7 +49,7 @@ public final class MichellePrinter extends PrinterBase {
 
         _println(String.format("derived image size(FWHM) for a point source = %.2farcsec\n", result.iqCalc().getImageQuality()));
 
-        _println("Sky subtraction aperture = " + result.observation().skyAperture() + " times the software aperture.");
+        _printSkyAperture(result);
 
         _println("");
 
@@ -104,7 +104,7 @@ public final class MichellePrinter extends PrinterBase {
 
         _print(CalculatablePrinter.getTextResult(result.sfCalc()));
         _println(CalculatablePrinter.getTextResult(result.iqCalc()));
-        _println("Sky subtraction aperture = " + result.observation().skyAperture() + " times the software aperture.\n");
+        _printlnSkyAperture(result);
 
         if (!instrument.polarimetryIsUsed()) {
             _println(CalculatablePrinter.getTextResult(result.is2nCalc(), result.observation()));

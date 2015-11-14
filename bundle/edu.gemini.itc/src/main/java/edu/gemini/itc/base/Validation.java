@@ -26,7 +26,7 @@ public final class Validation {
     }
 
     private static void checkSkyAperture(final AnalysisMethod am) {
-        if (am.skyAperture() < 1.0) {
+        if (((ApertureMethod) am).skyAperture() < 1.0) {
             throw new IllegalArgumentException("The sky aperture must be 1.0 or greater.");
         }
     }

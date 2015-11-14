@@ -146,10 +146,9 @@ public final class MichelleRecipe implements ImagingRecipe, SpectroscopyRecipe {
                         instrument.getGratingDispersion_nmppix(),
                         spec_source_frac, im_qual,
                         ap_diam,
-                        _obsDetailParameters.calculationMethod(),
-                        instrument.getDarkCurrent(),
                         instrument.getReadNoise(),
-                        _obsDetailParameters.skyAperture());
+                        instrument.getDarkCurrent(),
+                        _obsDetailParameters);
 
         specS2N.setSourceSpectrum(sed);
         specS2N.setBackgroundSpectrum(sky);

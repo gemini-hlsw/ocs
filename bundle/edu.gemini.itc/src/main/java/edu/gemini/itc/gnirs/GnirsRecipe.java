@@ -122,10 +122,9 @@ public final class GnirsRecipe implements SpectroscopyRecipe {
                 instrument.getGratingDispersion_nmppix(),
                 spec_source_frac,
                 im_qual, ap_diam,
-                _obsDetailParameters.calculationMethod(),
-                instrument.getDarkCurrent(),
                 instrument.getReadNoise(),
-                _obsDetailParameters.skyAperture());
+                instrument.getDarkCurrent(),
+                _obsDetailParameters);
 
         if (instrument.XDisp_IsUsed()) {
             final VisitableSampledSpectrum[] sedOrder = new VisitableSampledSpectrum[ORDERS];

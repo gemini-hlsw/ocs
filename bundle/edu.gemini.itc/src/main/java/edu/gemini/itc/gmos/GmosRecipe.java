@@ -178,10 +178,9 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
                         spsf,
                         im_qual,
                         ap_diam,
-                        _obsDetailParameters.calculationMethod(),
-                        dark_current * instrument.getSpatialBinning() * instrument.getSpectralBinning(),
                         read_noise,
-                        _obsDetailParameters.skyAperture());
+                        dark_current * instrument.getSpatialBinning() * instrument.getSpectralBinning(),
+                        _obsDetailParameters);
 
                 specS2N[i].setCcdPixelRange(firstCcdIndex, lastCcdIndex);
                 specS2N[i].setSourceSpectrum(src.sed);
@@ -208,10 +207,9 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
                     spec_source_frac,
                     im_qual,
                     ap_diam,
-                    _obsDetailParameters.calculationMethod(),
-                    dark_current * instrument.getSpatialBinning() * instrument.getSpectralBinning(),
                     read_noise,
-                    _obsDetailParameters.skyAperture());
+                    dark_current * instrument.getSpatialBinning() * instrument.getSpectralBinning(),
+                    _obsDetailParameters);
 
 
             specS2N[0].setCcdPixelRange(firstCcdIndex, lastCcdIndex);

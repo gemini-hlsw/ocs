@@ -3,8 +3,7 @@ package edu.gemini.itc.operation;
 import edu.gemini.itc.base.SampledSpectrum;
 import edu.gemini.itc.base.SampledSpectrumVisitor;
 import edu.gemini.itc.base.VisitableSampledSpectrum;
-import edu.gemini.itc.shared.CalculationMethod;
-import edu.gemini.itc.shared.SpectroscopyS2N;
+import edu.gemini.itc.shared.*;
 
 /**
  * The SpecS2NLargeSlitVisitor is used to calculate the s2n of an observation using
@@ -60,10 +59,9 @@ public class SpecS2NLargeSlitVisitor implements SampledSpectrumVisitor, SpecS2N 
                                    final double spec_source_fraction,
                                    final double im_qual,
                                    final double spec_Npix,
-                                   final CalculationMethod calcMethod,
-                                   final double dark_current,
                                    final double read_noise,
-                                   final double skyAper) {
+                                   final double dark_current,
+                                   final ObservationDetails odp) {
         this.slit_width             = slit_width;
         this.pixel_size             = pixel_size;
         this.pix_width              = pix_width;
@@ -76,9 +74,13 @@ public class SpecS2NLargeSlitVisitor implements SampledSpectrumVisitor, SpecS2N 
         this.im_qual                = im_qual;
         this.dark_current           = dark_current;
         this.read_noise             = read_noise;
-        this.skyAper                = skyAper;
+
+        final AnalysisMethod analysisMethod = odp.analysisMethod();
+        if (!(analysisMethod instanceof ApertureMethod)) throw new Error("Unsuported analysis method");
+        this.skyAper                = ((ApertureMethod) analysisMethod).skyAperture();
 
         // Currently SpectroscopySN is the only supported calculation method for spectroscopy.
+        final CalculationMethod calcMethod = odp.calculationMethod();
         if (!(calcMethod instanceof SpectroscopyS2N)) throw new Error("Unsupported calculation method");
         this.spec_number_exposures  = ((SpectroscopyS2N) calcMethod).exposures();
         this.spec_frac_with_source  = calcMethod.sourceFraction();

@@ -58,7 +58,7 @@ public final class GmosPrinter extends PrinterBase {
             _printSoftwareAperture(results[0], 1 / mainInstrument.getSlitWidth());
         }
         _println(String.format("derived image size(FWHM) for a point source = %.2f arcsec\n", result.iqCalc().getImageQuality()));
-        _println("Sky subtraction aperture = " + results[0].observation().skyAperture() + " times the software aperture.");
+        _printSkyAperture(result);
         _println("");
 
         _printRequestedIntegrationTime(result);
@@ -100,9 +100,7 @@ public final class GmosPrinter extends PrinterBase {
         _println("");
         _print(CalculatablePrinter.getTextResult(results[0].sfCalc()));
         _println(CalculatablePrinter.getTextResult(results[0].iqCalc()));
-        _println("Sky subtraction aperture = "
-                + results[0].observation().skyAperture()
-                + " times the software aperture.\n");
+        _printlnSkyAperture(results[0]);
         _println("Read noise: " + instrument.getReadNoise());
 
         final Gmos[] ccdArray = instrument.getDetectorCcdInstruments();

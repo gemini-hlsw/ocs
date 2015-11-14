@@ -38,9 +38,7 @@ public final class GnirsPrinter extends PrinterBase {
 
         _println(String.format("derived image size(FWHM) for a point source = %.2f arcsec\n", result.iqCalc().getImageQuality()));
 
-        _println("Sky subtraction aperture = "
-                + result.observation().skyAperture()
-                + " times the software aperture.");
+        _printSkyAperture(result);
 
         _println("");
 

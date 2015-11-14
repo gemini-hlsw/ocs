@@ -1,6 +1,7 @@
 package edu.gemini.itc.web.html;
 
 import edu.gemini.itc.base.Instrument;
+import edu.gemini.itc.base.Result;
 import edu.gemini.itc.base.SpectroscopyResult;
 import edu.gemini.itc.shared.*;
 import edu.gemini.itc.web.servlets.FilesServlet;
@@ -159,6 +160,14 @@ public abstract class PrinterBase {
         } else {
             throw new Error("Unsupported analysis method");
         }
+    }
+
+    protected void _printSkyAperture(final Result result) {
+        _println("Sky subtraction aperture = " + ((ApertureMethod) result.observation().analysisMethod()).skyAperture() + " times the software aperture.");
+    }
+
+    protected void _printlnSkyAperture(final Result result) {
+        _println("Sky subtraction aperture = " + ((ApertureMethod) result.observation().analysisMethod()).skyAperture() + " times the software aperture.\n");
     }
 
     private void _printRequestedIntegrationTime(final SpectroscopyResult result, final double exposureTime, final double numExposures) {

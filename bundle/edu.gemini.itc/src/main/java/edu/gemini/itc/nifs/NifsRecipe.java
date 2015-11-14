@@ -159,10 +159,9 @@ public final class NifsRecipe implements SpectroscopyRecipe {
                     spec_source_frac,
                     im_qual,
                     ap_diam,
-                    _obsDetailParameters.calculationMethod(),
-                    instrument.getDarkCurrent(),
                     instrument.getReadNoise(),
-                    _obsDetailParameters.skyAperture());
+                    instrument.getDarkCurrent(),
+                    _obsDetailParameters);
 
             specS2N.setSourceSpectrum(calcSource.sed);
             specS2N.setBackgroundSpectrum(calcSource.sky);

@@ -29,6 +29,10 @@ final case class SourceDefinition(
 
 // ==== Calculation method
 
+// The calculation method denotes if we are doing spectroscopy or imaging and if we do integration (only for imaging)
+// or signal to noise calculations. The difference between imaging and spectroscopy is defined by the instrument
+// parameters and should/could be derived from there in the future.
+
 sealed trait Imaging
 sealed trait Spectroscopy
 
@@ -64,17 +68,22 @@ final case class SpectroscopyS2N(
 
 // ==== Analysis method
 
-sealed trait AnalysisMethod {
+// TODO: GMOS and NIFS use an AnalysisMethod *and* an IfuMethod object in their ITC parameters. Andy S. and I
+// TODO: agree that (at least on a conceptional level) IfuMethods should just be another set of AnalysisMethods
+// TODO: and should be used as such. While the trait hierarchy here reflects this, we should also get rid of the
+// TODO: additional IfuMethod parameters in GmosParameters and NifsParameters and use the AnalysisMethod from
+// TODO: the ObservationDetails instead to pass around the IfuMethod parameters as needed.
+
+sealed trait AnalysisMethod
+
+sealed trait ApertureMethod extends AnalysisMethod {
   val skyAperture: Double
 }
-final case class AutoAperture(skyAperture: Double) extends AnalysisMethod
-final case class UserAperture(diameter: Double, skyAperture: Double) extends AnalysisMethod
+final case class AutoAperture(skyAperture: Double) extends ApertureMethod
+final case class UserAperture(diameter: Double, skyAperture: Double) extends ApertureMethod
 
-
-// ===== IFU (GMOS & NIFS)
-
-// TODO: Is this an analysis method (instead of the ones above?). If so, should this be reflected here?
-sealed trait IfuMethod
+// IFU analysis is currently supported by GMOS and NIFS
+sealed trait IfuMethod extends AnalysisMethod
 final case class IfuSingle(offset: Double) extends IfuMethod
 final case class IfuRadial(minOffset: Double, maxOffset: Double) extends IfuMethod
 final case class IfuSummed(numX: Int, numY: Int, centerX: Double, centerY: Double) extends IfuMethod
@@ -86,5 +95,4 @@ final case class ObservationDetails(calculationMethod: CalculationMethod, analys
   def exposureTime   = calculationMethod.exposureTime
   def sourceFraction = calculationMethod.sourceFraction
   def isAutoAperture = analysisMethod.isInstanceOf[AutoAperture]
-  def skyAperture    = analysisMethod.skyAperture
 }
