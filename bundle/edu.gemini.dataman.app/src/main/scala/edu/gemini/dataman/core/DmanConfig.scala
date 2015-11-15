@@ -13,7 +13,8 @@ final case class DmanConfig(
                    site: Site,
                    tonightPeriod: PollPeriod.Tonight,
                    thisWeekPeriod: PollPeriod.ThisWeek,
-                   allPeriod: PollPeriod.AllPrograms) {
+                   allPeriod: PollPeriod.AllPrograms,
+                   obsRefreshPeriod: PollPeriod.ObsRefresh) {
 
   def show: String =
     s"""
@@ -26,6 +27,7 @@ final case class DmanConfig(
       | Tonight      = ${tonightPeriod.time}
       | This Week    = ${thisWeekPeriod.time}
       | All Programs = ${allPeriod.time}
+      | Obs Refresh  = ${obsRefreshPeriod.time}
      """.stripMargin
 }
 

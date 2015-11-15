@@ -15,6 +15,7 @@ object PollPeriod {
   final case class Tonight(time: Duration)     extends PollPeriod
   final case class ThisWeek(time: Duration)    extends PollPeriod
   final case class AllPrograms(time: Duration) extends PollPeriod
+  final case class ObsRefresh(time: Duration)  extends PollPeriod
 
   implicit val EqualPollPeriod: Equal[PollPeriod] = Equal.equalA
 }

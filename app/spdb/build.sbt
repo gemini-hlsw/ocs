@@ -62,6 +62,7 @@ def common(version: Version) = AppConfig(
     "edu.gemini.dataman.poll.tonight"                  -> "PT1M",
     "edu.gemini.dataman.poll.thisWeek"                 -> "PT15M",
     "edu.gemini.dataman.poll.allPrograms"              -> "P1D",
+    "edu.gemini.dataman.poll.obsRefresh"               -> "PT2M",
     "edu.gemini.filefilter.excludes"                   -> "tmp.*",
     "edu.gemini.filefilter.excludes.2"                 -> ".*b\\.fits",
     "edu.gemini.filefilter.includes"                   -> ".*\\.fits",

@@ -42,9 +42,13 @@ final class Activator extends BundleActivator {
         tracker = Some(Tracker.track[IDBDatabaseService, Dataman](ctx) { odb =>
           gsaCommandsReg = Some(registerCommands(ctx, config, odb))
 
-          Dataman.start(config, odb) <| { _.swap.foreach { f =>
+          val dman = Dataman.start(config, odb)
+
+          dman.swap.foreach { f =>
             Log.log(Level.SEVERE, s"Could not start Data Manager: ${f.explain}", f.exception.orNull)
-          }} | sys.error("Could not start Data Manager")
+          }
+
+          dman | sys.error("Could not start Data Manager")
 
         }(stopDataman))
 
@@ -80,6 +84,7 @@ object Activator {
   val TonightPeriod     = "edu.gemini.dataman.poll.tonight"
   val ThisWeekPeriod    = "edu.gemini.dataman.poll.thisWeek"
   val AllProgramsPeriod = "edu.gemini.dataman.poll.allPrograms"
+  val ObsRefreshPeriod  = "edu.gemini.dataman.poll.obsRefresh"
 
   private def readConfig(ctx: BundleContext): ValidationNel[String, DmanConfig] = {
     def lookup(name: String): ValidationNel[String, String] =
@@ -99,11 +104,12 @@ object Activator {
     val auth    = lookup(GsaAuth).map(a => new GsaAuth(a))
     val site    = Option(SiteProperty.get(ctx)).toSuccess(s"Missing or unparseable '${SiteProperty.NAME}' property.".wrapNel)
 
-    val tonight  = lookupPollPeriod(TonightPeriod)(PollPeriod.Tonight)
-    val thisWeek = lookupPollPeriod(ThisWeekPeriod)(PollPeriod.ThisWeek)
-    val allProgs = lookupPollPeriod(AllProgramsPeriod)(PollPeriod.AllPrograms)
+    val tonight    = lookupPollPeriod(TonightPeriod)(PollPeriod.Tonight)
+    val thisWeek   = lookupPollPeriod(ThisWeekPeriod)(PollPeriod.ThisWeek)
+    val allProgs   = lookupPollPeriod(AllProgramsPeriod)(PollPeriod.AllPrograms)
+    val obsRefresh = lookupPollPeriod(ObsRefreshPeriod)(PollPeriod.ObsRefresh)
 
-    val config = (archive |@| summit |@| auth |@| site |@| tonight |@| thisWeek |@| allProgs) { DmanConfig.apply }
+    val config = (archive |@| summit |@| auth |@| site |@| tonight |@| thisWeek |@| allProgs |@| obsRefresh) { DmanConfig.apply }
 
     // DMAN TODO: we don't have a GS GSA test server or GS data so fix to GN for now
     config.map(_.copy(site = Site.GN))
