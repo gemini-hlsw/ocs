@@ -730,7 +730,7 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
         FPU_PROP.setDisplayName("Focal Plane Unit");
         FPU_MASK_PROP = initProp("fpuCustomMask", query_no, iter_yes);
         FPU_MASK_PROP.setDisplayName("Custom MDF");
-        CUSTOM_SLIT_WIDTH_PROP = initProp(CustomSlitWidth.KEY.getName(), query_no, iter_yes);
+        CUSTOM_SLIT_WIDTH_PROP = initProp(CustomSlitWidth.KEY.getName(), query_no, iter_no);
         CUSTOM_SLIT_WIDTH_PROP.setDisplayName("Slit Width");
         PORT_PROP = initProp(IssPortProvider.PORT_PROPERTY_NAME, query_no, iter_no);
         MOS_PREIMAGING_PROP = initProp("mosPreimaging", query_yes, iter_no);
