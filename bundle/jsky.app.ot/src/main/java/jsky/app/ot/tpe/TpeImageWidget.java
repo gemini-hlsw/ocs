@@ -1,5 +1,6 @@
 package jsky.app.ot.tpe;
 
+import edu.gemini.ags.api.AgsRegistrar;
 import edu.gemini.ags.api.AgsStrategy;
 import edu.gemini.catalog.ui.QueryResultsFrame;
 import edu.gemini.catalog.ui.tpe.CatalogImageDisplay;
@@ -1054,7 +1055,10 @@ public class TpeImageWidget extends CatalogImageDisplay implements MouseInputLis
                 DialogUtil.error(String.format("%s component is missing. It is not possible to select a guide star.", missingComponent));
             } else {
                 if (GuideStarSupport.supportsAutoGuideStarSelection(_ctx)) {
-                    final Option<AgsStrategy> ass = AgsStrategyUtil.currentStrategy(maybeObsContext);
+                    // TODO: ******************************
+                    // TODO: Ask Carlos if this is correct.
+                    // TODO: ******************************
+                    final Option<AgsStrategy> ass = maybeObsContext.flatMap(AgsRegistrar::currentStrategyForJava);
                     if (!ass.isEmpty()) {
                         if (ass.getValue().key() == AgsStrategyKey.GemsKey$.MODULE$ && GuideStarSupport.hasGemsComponent(_ctx)) {
                             gemsGuideStarSearch();
@@ -1112,6 +1116,16 @@ public class TpeImageWidget extends CatalogImageDisplay implements MouseInputLis
      */
     public AbstractAction getManualGuideStarAction() {
         return _manualGuideStarAction;
+    }
+
+    public AbstractAction getAutoGuideStarAction() {
+        return _autoGuideStarAction;
+    }
+
+    // Called from GemsGuideStarWorker when finished
+    void setGemsGuideStarWorkerFinished() {
+        _autoGuideStarAction.putValue(Action.NAME, "Auto GS");
+        _gemsGuideStarWorker = null;
     }
 
     public AbstractAction getSkyImageAction() {

@@ -12,6 +12,7 @@ public class TpeImageDisplayToolBar extends ImageDisplayToolBar {
     // toolbar buttons
     private JButton skyImageButton;
     private JButton manualGuideStarButton;
+    private JButton autoGuideStarButton;
 
     /**
      * Create the toolbar for the given window
@@ -35,6 +36,8 @@ public class TpeImageDisplayToolBar extends ImageDisplayToolBar {
         addSeparator();
 
         add(makeManualGuideStarButton());
+
+        add(makeAutoGuideStarButton());
     }
 
     /**
@@ -50,11 +53,28 @@ public class TpeImageDisplayToolBar extends ImageDisplayToolBar {
         }
 
         updateButton(manualGuideStarButton,
-                     "Manual GS",
-                     jsky.util.Resources.getIcon("gsmanual.png", this.getClass()));
+                "Manual GS",
+                jsky.util.Resources.getIcon("gsmanual.png", this.getClass()));
         return manualGuideStarButton;
     }
 
+    /**
+     * Make the guide star search button, if it does not yet exists. Otherwise update the display
+     * using the current options for displaying text or icons.
+     *
+     * @return the guide star button
+     */
+    protected JButton makeAutoGuideStarButton() {
+        if (autoGuideStarButton == null) {
+            final AbstractAction a = ((TpeImageWidget)getImageDisplay()).getAutoGuideStarAction();
+            autoGuideStarButton = makeButton((String)a.getValue(Action.SHORT_DESCRIPTION), a);
+        }
+
+        updateButton(autoGuideStarButton,
+                "Auto GS",
+                jsky.util.Resources.getIcon("gsauto.png", this.getClass()));
+        return autoGuideStarButton;
+    }
 
     /**
      * Make the default Image search button, if it does not yet exists.
