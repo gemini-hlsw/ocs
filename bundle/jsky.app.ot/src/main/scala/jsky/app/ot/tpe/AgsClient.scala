@@ -199,7 +199,9 @@ class AgsClient(ctx: TpeContext) extends Dialog {
     listenTo(acceptButton)
     reactions += {
       case ButtonClicked(`acceptButton`) =>
-        TpeManager.open.getImageWidget.guideStarSearch(true)
+        val tpe = TpeManager.open
+        ctx.node.foreach(tpe.reset)
+        tpe.getImageWidget.guideStarSearch(true)
         quit()
     }
   }

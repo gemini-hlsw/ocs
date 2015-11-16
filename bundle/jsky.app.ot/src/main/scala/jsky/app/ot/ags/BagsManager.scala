@@ -162,7 +162,7 @@ final class BagsManager(executor: ScheduledThreadPoolExecutor) {
                 LOG.info(s"Performing $bagsIdMsg.")
                 AgsRegistrar.currentStrategy(ctx).foreach { strategy =>
                   if (GuideStarSupport.hasGemsComponent(obs)) {
-                    lookup((x: GOption[GemsGuideStars]) => x.asScalaOpt)(GemsGuideStarWorker.applyResults(_, _, true))(Try(GemsGuideStarWorker.findGuideStars(ctx)))
+//                    lookup((x: GOption[GemsGuideStars]) => x.asScalaOpt)(GemsGuideStarWorker.applyResults(_, _, true))(Try(GemsGuideStarWorker.findGuideStars(ctx)))
                   } else {
                     val fut = strategy.select(ctx, OT.getMagnitudeTable)
 

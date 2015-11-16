@@ -71,11 +71,9 @@ public enum GsaoiOdgw implements ValidatableGuideProbe {
             if (gptOpt.exists(gpt -> gpt.containsTarget(guideStar)))
                 return env;
 
-            final GuideProbeTargets gptNew = gptOpt.map(gpt -> isBags
-                    ? gpt.withBagsResult(BagsResult.WithTarget$.MODULE$.apply(guideStar))
-                    : gpt.addManualTarget(guideStar)).
-                    getOrElse(GuideProbeTargets.create(probe, guideStar)).
-                    withExistingPrimary(guideStar);
+            final GuideProbeTargets gptNew = gptOpt.map(gpt -> gpt.addManualTarget(guideStar))
+                    .getOrElse(GuideProbeTargets.create(probe, guideStar))
+                    .withExistingPrimary(guideStar);
             final GuideGroup grpNew = grp.put(gptNew);
             return env.setPrimaryGuideGroup(grpNew);
         }
