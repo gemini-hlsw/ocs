@@ -89,7 +89,7 @@ object AgsStrategy {
       (env /: assignments) { (curEnv, ass) =>
         val target = new SPTarget(HmsDegTarget.fromSkyObject(ass.guideStar.toOldModel))
         val oldGpt = curEnv.getPrimaryGuideProbeTargets(ass.guideProbe).asScalaOpt
-        val newGpt = oldGpt.getOrElse(GuideProbeTargets.create(ass.guideProbe)).withBagsResult(BagsResult.WithTarget(target))
+        val newGpt = oldGpt.getOrElse(GuideProbeTargets.create(ass.guideProbe)).withManualPrimary(target)
         curEnv.putPrimaryGuideProbeTargets(newGpt)
       }
   }

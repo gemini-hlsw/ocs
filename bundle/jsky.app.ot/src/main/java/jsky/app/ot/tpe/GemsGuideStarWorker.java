@@ -60,6 +60,16 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
     }
 
     /**
+     * Create an instance for one time use.
+     */
+    public GemsGuideStarWorker() {
+        ProgressPanel progressPanel = ProgressPanel.makeProgressPanel("GeMS Strehl Calculations",
+                TpeManager.create().getImageWidget());
+        progressPanel.addActionListener(e -> interrupted = true);
+        init(progressPanel);
+    }
+
+    /**
      * Called by constructors
      */
     public void init(StatusLogger statusLogger) {
@@ -78,6 +88,7 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
     }
 
     public void finished() {
+        tpe.setGemsGuideStarWorkerFinished();
         Object o = getValue();
         if (o instanceof CancellationException) {
             DialogUtil.message("The guide star search was canceled.");
@@ -114,7 +125,57 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
     }
 
     public static void applyResults(final TpeContext ctx, final GemsGuideStars gemsGuideStars) {
-        applyResults(ctx, new Some<>(gemsGuideStars), false);
+        SPInstObsComp inst = ctx.instrument().orNull();
+        if (inst != null) {
+            inst.setPosAngleDegrees(gemsGuideStars.pa().toDegrees());
+            ctx.instrument().commit();
+        }
+
+        TargetObsComp targetObsComp = ctx.targets().orNull();
+        if (targetObsComp != null) {
+            TargetEnvironment env = targetObsComp.getTargetEnvironment();
+            targetObsComp.setTargetEnvironment(env.setPrimaryGuideGroup(gemsGuideStars.guideGroup()));
+            ctx.targets().commit();
+        }
+    }
+
+    /**
+     * Apply the results of the guide star search to the current observation,
+     * setting the selected position angle and guide probes.
+     *
+     * @param selectedAsterisms information used to create the guide groups
+     * @param primaryIndex      if more than one item in list, the index of the primary guide group
+     */
+    public void applyResults(final List<GemsGuideStars> selectedAsterisms, final int primaryIndex) {
+        applyResults(tpe.getContext(), selectedAsterisms, primaryIndex);
+    }
+
+    public static void applyResults(final TpeContext ctx, final List<GemsGuideStars> selectedAsterisms, final int primaryIndex) {
+        final TargetObsComp targetObsComp = ctx.targets().orNull();
+        if (targetObsComp != null) {
+            final TargetEnvironment env = targetObsComp.getTargetEnvironment();
+            final List<GuideGroup> guideGroupList = new ArrayList<>();
+            int i = 0;
+            for (final GemsGuideStars gemsGuideStars : selectedAsterisms) {
+                if (i++ == 0) {
+                    // Set position angle only for first (primary) group
+                    final SPInstObsComp inst = ctx.instrument().orNull();
+                    if (inst != null) {
+                        inst.setPosAngle(gemsGuideStars.pa().toDegrees());
+                        ctx.instrument().commit();
+                    }
+                }
+                guideGroupList.add(gemsGuideStars.guideGroup());
+            }
+            if (guideGroupList.size() == 0) {
+                targetObsComp.setTargetEnvironment(env.setGuideEnvironment(env.getGuideEnvironment().setOptions(
+                        DefaultImList.create(guideGroupList))));
+            } else {
+                targetObsComp.setTargetEnvironment(env.setGuideEnvironment(env.getGuideEnvironment().setOptions(
+                        DefaultImList.create(guideGroupList)).setPrimaryIndex(primaryIndex)));
+            }
+            ctx.targets().commit();
+        }
     }
 
     public static void applyResults(final TpeContext ctx, final Option<GemsGuideStars> gemsGuideStarsOpt, boolean isBags) {
@@ -168,45 +229,6 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
                 targetObsComp.setTargetEnvironment(finalEnv);
                 ctx.targets().commit();
             }
-        }
-    }
-
-    /**
-     * Apply the results of the guide star search to the current observation,
-     * setting the selected position angle and guide probes.
-     *
-     * @param selectedAsterisms information used to create the guide groups
-     * @param primaryIndex      if more than one item in list, the index of the primary guide group
-     */
-    public void applyResults(final List<GemsGuideStars> selectedAsterisms, final int primaryIndex) {
-        applyResults(tpe.getContext(), selectedAsterisms, primaryIndex);
-    }
-
-    public static void applyResults(final TpeContext ctx, final List<GemsGuideStars> selectedAsterisms, final int primaryIndex) {
-        final TargetObsComp targetObsComp = ctx.targets().orNull();
-        if (targetObsComp != null) {
-            final TargetEnvironment env = targetObsComp.getTargetEnvironment();
-            final List<GuideGroup> guideGroupList = new ArrayList<>();
-            int i = 0;
-            for (final GemsGuideStars gemsGuideStars : selectedAsterisms) {
-                if (i++ == 0) {
-                    // Set position angle only for first (primary) group
-                    final SPInstObsComp inst = ctx.instrument().orNull();
-                    if (inst != null) {
-                        inst.setPosAngle(gemsGuideStars.pa().toDegrees());
-                        ctx.instrument().commit();
-                    }
-                }
-                guideGroupList.add(gemsGuideStars.guideGroup());
-            }
-            if (guideGroupList.size() == 0) {
-                targetObsComp.setTargetEnvironment(env.setGuideEnvironment(env.getGuideEnvironment().setOptions(
-                        DefaultImList.create(guideGroupList))));
-            } else {
-                targetObsComp.setTargetEnvironment(env.setGuideEnvironment(env.getGuideEnvironment().setOptions(
-                        DefaultImList.create(guideGroupList)).setPrimaryIndex(primaryIndex)));
-            }
-            ctx.targets().commit();
         }
     }
 

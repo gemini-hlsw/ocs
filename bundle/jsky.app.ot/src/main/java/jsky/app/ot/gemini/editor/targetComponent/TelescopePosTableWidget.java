@@ -290,20 +290,13 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
                     final GuideProbe guideProbe = gt.getGuider();
                     final boolean isActive = ctx.exists(c -> GuideProbeUtil.instance.isAvailable(c, guideProbe));
                     final Option<SPTarget> primary = gt.getPrimary();
-                    final Option<SPTarget> bagsTarget = gt.getBagsResult().targetAsJava();
-
-                    // If the first target is a bags target, we do not add to the index.
-                    final int bagsIndexModifier = bagsTarget.isDefined() ? 0 : 1;
 
                     gt.getTargets().zipWithIndex().foreach(tup -> {
                         final SPTarget target = tup._1();
                         final Option<AgsGuideQuality> quality = guideQuality(ags, guideProbe, target);
                         final boolean isPrimary = primary.exists(target::equals);
-                        final boolean isBagsTarget = bagsTarget.exists(target::equals);
 
-                        final Row row = isBagsTarget ?
-                                new BagsTargetRow(isActive, quality, isPrimary, guideProbe, target, baseCoords, when) :
-                                new GuideTargetRow(isActive, quality, isPrimary, guideProbe, tup._2() + bagsIndexModifier, target, baseCoords, when);
+                        final Row row = new GuideTargetRow(isActive, quality, isPrimary, guideProbe, tup._2(), target, baseCoords, when);
                         tmp.add(row);
                     });
                 }
@@ -316,20 +309,13 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
                         final GuideProbe guideProbe = gt.getGuider();
                         final boolean isActive = ctx.exists(c -> GuideProbeUtil.instance.isAvailable(c, guideProbe));
                         final Option<SPTarget> primary = gt.getPrimary();
-                        final Option<SPTarget> bagsTarget = gt.getBagsResult().targetAsJava();
-
-                        // If the first target is a bags target, we do not add to the index.
-                        final int bagsIndexModifier = bagsTarget.isDefined() ? 0 : 1;
 
                         gt.getTargets().zipWithIndex().foreach(tup -> {
                             final SPTarget target = tup._1();
                             final Option<AgsGuideQuality> quality = guideQuality(ags, guideProbe, target);
                             final boolean enabled = isPrimaryGroup && primary.exists(target::equals);
-                            final boolean isBagsTarget = bagsTarget.exists(target::equals);
 
-                            final Row row = isBagsTarget ?
-                                    new BagsTargetRow(isActive, quality, enabled, guideProbe, target, baseCoords, when) :
-                                    new GuideTargetRow(isActive, quality, enabled, guideProbe, tup._2() + bagsIndexModifier, target, baseCoords, when);
+                            final Row row = new GuideTargetRow(isActive, quality, enabled, guideProbe, tup._2(), target, baseCoords, when);
                             rowList.add(row);
                         });
                     }

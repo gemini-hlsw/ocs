@@ -62,7 +62,7 @@ public final class AgsStrategyCombo extends AgsSelectorControl implements Action
 
         final Option<ComboEntry> defaultEntry = opts.defaultStrategy.map(agsStrategy -> {
             final String name = String.format("Auto (%s)", agsStrategy.key().displayName());
-            return new ComboEntry(name, None.<AgsStrategy>instance());
+            return new ComboEntry(name, None.instance());
         });
 
         final ImList<ComboEntry> allEntries = defaultEntry.isEmpty() ? validEntries : validEntries.cons(defaultEntry.getValue());
