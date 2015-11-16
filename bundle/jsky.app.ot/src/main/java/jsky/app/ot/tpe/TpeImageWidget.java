@@ -18,6 +18,7 @@ import edu.gemini.spModel.target.obsComp.TargetObsComp;
 import edu.gemini.spModel.target.offset.OffsetPosBase;
 import edu.gemini.spModel.target.system.ITarget;
 import edu.gemini.spModel.util.Angle;
+import jsky.app.ot.ags.AgsStrategyUtil;
 import jsky.app.ot.tpe.gems.GemsGuideStarSearchDialog;
 import jsky.app.ot.util.OtColor;
 import jsky.app.ot.util.PolygonD;
@@ -110,7 +111,7 @@ public class TpeImageWidget extends CatalogImageDisplay implements MouseInputLis
 
         @Override public void actionPerformed(ActionEvent evt) {
             try {
-                guideStarSearch(true);
+                manualGuideStarSearch();
             } catch (Exception e) {
                 DialogUtil.error(e);
             }
@@ -126,7 +127,7 @@ public class TpeImageWidget extends CatalogImageDisplay implements MouseInputLis
 
         @Override public void actionPerformed(ActionEvent actionEvent) {
             try {
-                guideStarSearch(false);
+                autoGuideStarSearch();
             } catch (Exception e) {
                 DialogUtil.error(e);
             }
@@ -774,7 +775,7 @@ public class TpeImageWidget extends CatalogImageDisplay implements MouseInputLis
     public void action(final TpeMouseEvent tme) {
         if (!_imgInfoValid) return;
         _featureList.stream().filter(tif -> tif instanceof TpeActionableFeature).forEach(tif ->
-            ((TpeActionableFeature) tif).action(tme)
+                        ((TpeActionableFeature) tif).action(tme)
         );
     }
 
@@ -1028,47 +1029,37 @@ public class TpeImageWidget extends CatalogImageDisplay implements MouseInputLis
         return super.getBasePos();
     }
 
-    /**
-     * Do a manual guide star search if manual is true, otherwise, if supported, do an automatic search.
-     *
-     * @param manual true for manual search
-     */
-    public void guideStarSearch(boolean manual) {
-        if (manual) {
-            manualGuideStarSearch();
-        } else {
-            Option<ObsContext> maybeObsContext = _ctx.obsContextJava();
-            if (maybeObsContext.isEmpty()) {
-                // UX-1012: there's no obsContext which means some vital information is missing
-                // in this case do not allow an automated guide star search to be launched
-                final String missingComponent;
-                if (_ctx.targets().isEmpty()) {
-                    missingComponent = "Target";
-                } else if (_ctx.instrument().isEmpty()) {
-                    missingComponent = "Instrument";
-                } else if (_ctx.siteQuality().isEmpty()) {
-                    missingComponent = "Site Quality";
-                } else {
-                    missingComponent = "Some";
-                }
-                DialogUtil.error(String.format("%s component is missing. It is not possible to select a guide star.", missingComponent));
+    // Perform an AGS lookup.
+    public void autoGuideStarSearch() {
+        Option<ObsContext> maybeObsContext = _ctx.obsContextJava();
+        if (maybeObsContext.isEmpty()) {
+            // UX-1012: there's no obsContext which means some vital information is missing
+            // in this case do not allow an automated guide star search to be launched
+            final String missingComponent;
+            if (_ctx.targets().isEmpty()) {
+                missingComponent = "Target";
+            } else if (_ctx.instrument().isEmpty()) {
+                missingComponent = "Instrument";
+            } else if (_ctx.siteQuality().isEmpty()) {
+                missingComponent = "Site Quality";
             } else {
-                if (GuideStarSupport.supportsAutoGuideStarSelection(_ctx)) {
-                    final Option<AgsStrategy> ass = maybeObsContext.flatMap(AgsRegistrar::currentStrategyForJava);
-                    if (!ass.isEmpty()) {
-                        if (ass.getValue().key() == AgsStrategyKey.GemsKey$.MODULE$ && GuideStarSupport.hasGemsComponent(_ctx)) {
-                            gemsGuideStarSearch();
-                        } else {
-                            AgsClient.launch(_ctx, this);
-                        }
-                    }
-                }
+                missingComponent = "Some";
+            }
+            DialogUtil.error(String.format("%s component is missing. It is not possible to select a guide star.", missingComponent));
+        } else {
+            if (GuideStarSupport.supportsAutoGuideStarSelection(_ctx)) {
+                maybeObsContext.flatMap(AgsRegistrar::currentStrategyForJava).foreach(strategy -> {
+                    if (strategy.key() == AgsStrategyKey.GemsKey$.MODULE$ && GuideStarSupport.hasGemsComponent(_ctx))
+                        gemsGuideStarSearch();
+                    else
+                        AgsClient.launch(_ctx, this);
+                });
             }
         }
     }
 
     // manual guide star selection dialog
-    private  void manualGuideStarSearch() {
+    public void manualGuideStarSearch() {
         if (GuideStarSupport.hasGemsComponent(_ctx)) {
             showGemsGuideStarSearchDialog();
         } else {

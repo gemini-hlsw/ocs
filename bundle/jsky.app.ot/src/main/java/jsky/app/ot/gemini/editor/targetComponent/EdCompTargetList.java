@@ -652,7 +652,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         try {
             final TelescopePosEditor tpe = TpeManager.open();
             tpe.reset(getNode());
-            tpe.getImageWidget().guideStarSearch(true);
+            tpe.getImageWidget().manualGuideStarSearch();
         } catch (Exception e) {
             DialogUtil.error(e);
         }
@@ -665,7 +665,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
                 if (GuideStarSupport.hasGemsComponent(getNode())) {
                     final TelescopePosEditor tpe = TpeManager.open();
                     tpe.reset(getNode());
-                    tpe.getImageWidget().guideStarSearch(false);
+                    tpe.getImageWidget().autoGuideStarSearch();
                 } else {
                     // In general, we don't want to pop open the TPE just to
                     // pick a guide star.
