@@ -16,6 +16,8 @@ import edu.gemini.spModel.target.system.ITarget;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * A class for telescope observation component items.  Maintains a
@@ -34,14 +36,22 @@ public final class TargetObsComp extends AbstractDataObject implements GuideProb
     public static final String TARGET_ENV_PROP = "TargetEnvironment";
     public static final String TARGET_POS_PROP = "TargetPos";
 
+    // A map from ITarget tags to strings used to create the title prefix for this node.
+    private static Map<ITarget.Tag,String> targetPrefixes = new HashMap<ITarget.Tag,String>() {{
+        put(ITarget.Tag.JPL_MINOR_BODY,   "Comet: ");
+        put(ITarget.Tag.MPC_MINOR_PLANET, "Minor Planet: ");
+        put(ITarget.Tag.NAMED,            "Solar System: ");
+        put(ITarget.Tag.SIDEREAL,         "Target: ");
+    }};
+
     private static TargetEnvironment createEmptyEnvironment() {
-        SPTarget base = new SPTarget();
+        final SPTarget base = new SPTarget();
         return TargetEnvironment.create(base);
     }
 
     private final class PcePropagator implements TelescopePosWatcher {
 
-        @Override public void telescopePosUpdate(WatchablePos tp) {
+        @Override public void telescopePosUpdate(final WatchablePos tp) {
             firePropertyChange(TARGET_POS_PROP, null, tp);
         }
 
@@ -76,22 +86,14 @@ public final class TargetObsComp extends AbstractDataObject implements GuideProb
         // By default, append the name of the base position.  If a title
         // has been directly set though, use that instead.
         final String title = super.getTitle();
-        if (!isTitleChanged() || title.startsWith("Targets") && title.endsWith(")")) {
-            // assume user did not edit title manually
-            TargetEnvironment env = getTargetEnvironment();
-            SPTarget tp = env.getBase();
+        if (!isTitleChanged() || targetPrefixes.values().stream().anyMatch(title::startsWith)) {
+            final TargetEnvironment env = getTargetEnvironment();
+            final SPTarget tp = env.getBase();
             if (tp != null) {
-                ITarget t = tp.getTarget();
-                String name = t.getName();
-                if (name == null || name.trim().length() == 0) {
-                    name = "<Untitled>";
-                }
-                switch (t.getTag()) {
-                    case JPL_MINOR_BODY:   return "Comet: " + name;
-                    case MPC_MINOR_PLANET: return "Minor Planet: " + name;
-                    case NAMED:            return "Solar System: " + name;
-                    case SIDEREAL:         return "Target: " + name;
-                }
+                final ITarget t = tp.getTarget();
+                final String initName  = t.getName();
+                final String finalName = initName == null || initName.trim().isEmpty() ? "<Untitled>" : initName;
+                return targetPrefixes.getOrDefault(t.getTag(), "") + finalName;
             }
         }
 
@@ -108,12 +110,12 @@ public final class TargetObsComp extends AbstractDataObject implements GuideProb
     /**
      * Set the TargetEnvironment.
      */
-    public void setTargetEnvironment(TargetEnvironment env) {
-        if (env == null) env = createEmptyEnvironment();
-        if (targetEnv == env) return;
+    public void setTargetEnvironment(final TargetEnvironment env) {
+        final TargetEnvironment envNotNull = env == null ? createEmptyEnvironment() : env;
+        if (targetEnv == envNotNull) return;
 
         final TargetEnvironment orig = targetEnv;
-        targetEnv = env;
+        targetEnv = envNotNull;
         watchTargets();
 
         // Notify listeners that the env has been updated.
@@ -127,13 +129,6 @@ public final class TargetObsComp extends AbstractDataObject implements GuideProb
         });
     }
 
-    // I'm so sorry.
-    public void copyPropertyChangeListenersFrom(TargetObsComp that) {
-        if ((that == null) || (that == this)) return;
-        super.copyPropertyChangeListenersFrom(that);
-        super.copyPropertyChangeListenersFrom(TARGET_ENV_PROP, that);
-    }
-
     /**
      * Convenience method to access the base position.
      */
@@ -145,8 +140,8 @@ public final class TargetObsComp extends AbstractDataObject implements GuideProb
      * Return a parameter set describing the current state of this object.
      * @param factory the PioFactory to use
      */
-    public ParamSet getParamSet(PioFactory factory) {
-        ParamSet paramSet = super.getParamSet(factory);
+    public ParamSet getParamSet(final PioFactory factory) {
+        final ParamSet paramSet = super.getParamSet(factory);
         paramSet.addParamSet(targetEnv.getParamSet(factory));
         return paramSet;
     }
@@ -154,10 +149,10 @@ public final class TargetObsComp extends AbstractDataObject implements GuideProb
     /**
      * Set the state of this object from the given parameter set.
      */
-    public void setParamSet(ParamSet paramSet) {
+    public void setParamSet(final ParamSet paramSet) {
         super.setParamSet(paramSet);
 
-        ParamSet targetEnv = paramSet.getParamSet(TargetEnvironment.PARAM_SET_NAME);
+        final ParamSet targetEnv = paramSet.getParamSet(TargetEnvironment.PARAM_SET_NAME);
         if (targetEnv == null) {
             setTargetEnvironment(createEmptyEnvironment());
         } else {
@@ -171,7 +166,7 @@ public final class TargetObsComp extends AbstractDataObject implements GuideProb
         return GUIDE_PROBES;
     }
 
-    private void readObject(ObjectInputStream is) throws IOException, ClassNotFoundException {
+    private void readObject(final ObjectInputStream is) throws IOException, ClassNotFoundException {
         is.defaultReadObject();
         prop = new PcePropagator();
         watchTargets();
