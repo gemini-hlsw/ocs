@@ -79,7 +79,10 @@ abstract class TemplateSpec(xmlName: String) { this: Specification =>
       .collect { case Success(n) => n }
       .toSet
 
-  /** Return the set of all integer library IDs that appear in the group. */
+  /**
+   * Return a map from integer library ID to observation, for all library observations in the
+   * specified target group.
+   */
   def libsMap(tg: ISPTemplateGroup): Map[Int, ISPObservation] =
     tg.getAllObservations.asScala.toList.flatMap { o =>
       o.getDataObject.asInstanceOf[SPObservation].getLibraryId.parseInt match {
