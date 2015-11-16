@@ -200,8 +200,9 @@ final class BagsManager(executor: ScheduledThreadPoolExecutor) {
 }
 
 object BagsManager {
-  private val NumThreads = math.max(1, Runtime.getRuntime.availableProcessors - 1)
-  val instance = new BagsManager(new ScheduledThreadPoolExecutor(NumThreads))
+  //private val NumThreads = math.max(1, Runtime.getRuntime.availableProcessors - 1)
+  //val instance = new BagsManager(new ScheduledThreadPoolExecutor(NumThreads))
+  val instance = new BagsManager(new ScheduledThreadPoolExecutor(0))
 
   // Check two target environments to see if the BAGS targets match exactly between them.
   def bagsTargetsMatch(oldEnv: TargetEnvironment, newEnv: TargetEnvironment): Boolean = {
