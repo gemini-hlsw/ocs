@@ -1054,9 +1054,6 @@ public class TpeImageWidget extends CatalogImageDisplay implements MouseInputLis
                 DialogUtil.error(String.format("%s component is missing. It is not possible to select a guide star.", missingComponent));
             } else {
                 if (GuideStarSupport.supportsAutoGuideStarSelection(_ctx)) {
-                    // TODO: ******************************
-                    // TODO: Ask Carlos if this is correct.
-                    // TODO: ******************************
                     final Option<AgsStrategy> ass = maybeObsContext.flatMap(AgsRegistrar::currentStrategyForJava);
                     if (!ass.isEmpty()) {
                         if (ass.getValue().key() == AgsStrategyKey.GemsKey$.MODULE$ && GuideStarSupport.hasGemsComponent(_ctx)) {
