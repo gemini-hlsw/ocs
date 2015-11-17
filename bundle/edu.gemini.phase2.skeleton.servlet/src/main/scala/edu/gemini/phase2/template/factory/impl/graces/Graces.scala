@@ -73,4 +73,7 @@ case class Graces(blueprint: SpGracesBlueprint, exampleTarget: Option[SPTarget])
 
   include(sci : _*) in TargetGroup
 
+  // these should be in top level, but will appear in each template group for now
+  addNote("How to prepare your program", "GRACES set-up") in TopLevel
+
 }
