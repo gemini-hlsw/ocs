@@ -73,7 +73,7 @@ object Dataman {
     val pollArchive  = GsaPollActions(config.archiveHost, config.site, odb)
     val allPolls     = List(pollSummit, pollArchive)
 
-    val pollService  = PollService(25) { id =>
+    val pollService  = PollService(workerCount = 25) { id =>
       val actions = id match {
         case Prog(pid) => allPolls.map(_.program(pid))
         case Obs(oid)  => allPolls.map(_.observation(oid))
