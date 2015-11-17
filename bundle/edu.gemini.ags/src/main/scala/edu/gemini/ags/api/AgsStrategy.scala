@@ -90,7 +90,7 @@ object AgsStrategy {
         def name(t: SPTarget): Option[String] =
           Option(t.getTarget.getName).map(_.trim)
 
-        name(target).flatMap(n => gpt.getTargets.asScalaList.find(name(_).exists(_ == n.trim)))
+        name(target).flatMap(n => gpt.getTargets.asScalaList.find(name(_).exists(_ == n)))
       }
 
       (env /: assignments) { (curEnv, ass) =>
