@@ -19,6 +19,7 @@ import edu.gemini.spModel.gemini.gnirs.{GnirsOiwfsGuideProbe, InstGNIRS}
 import edu.gemini.spModel.gemini.niri.{NiriOiwfsGuideProbe, InstNIRI}
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality
 import edu.gemini.spModel.gemini.phoenix.InstPhoenix
+import edu.gemini.spModel.gemini.visitor.VisitorInstrument
 import edu.gemini.spModel.guide.{ValidatableGuideProbe, GuideProbe}
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.target.SPTarget
@@ -431,6 +432,28 @@ class SingleProbeStrategySpec extends Specification with NoTimeConversions {
 
       val selection = Await.result(strategy.select(ctx, magTable), 10.seconds)
       selection should beNone
+    }
+    "find a guide star for Visitor even if the site is not defined, REL-2476" in {
+      // Beta-Pictoris target
+      val ra = Angle.fromHMS(5, 47, 17.088).getOrElse(Angle.zero)
+      val dec = Declination.fromAngle(Angle.zero - Angle.fromDMS(51, 3, 59.441).getOrElse(Angle.zero)).getOrElse(Declination.zero)
+      val target = new SPTarget(ra.toDegrees, dec.toDegrees)
+      val env = TargetEnvironment.create(target)
+      val inst = new VisitorInstrument <| {_.setPosAngle(0.0)}
+
+      val strategy = SingleProbeStrategy(Pwfs2SouthKey, SingleProbeStrategyParams.PwfsParams(Site.GS, PwfsGuideProbe.pwfs2), TestVoTableBackend("/beta_pictoris.xml"))
+
+      val conditions = SPSiteQuality.Conditions.WORST.cc(SPSiteQuality.CloudCover.PERCENT_70).iq(SPSiteQuality.ImageQuality.PERCENT_85)
+      // Note, no site defined
+      val ctx = ObsContext.create(env, inst, JNone.instance(), conditions, null, null, JNone.instance())
+
+      val estimate = Await.result(strategy.estimate(ctx, magTable), 10.seconds)
+
+      estimate should beEqualTo(Estimate.GuaranteedSuccess)
+
+      val selection = Await.result(strategy.select(ctx, magTable), 10.seconds)
+
+      verifyGuideStarSelection(strategy, ctx.withSite(new Some(Site.GS)), selection, "195-006563", PwfsGuideProbe.pwfs2)
     }
   }
 

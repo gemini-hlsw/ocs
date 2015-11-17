@@ -21,7 +21,6 @@ public enum Site {
     public final String abbreviation;
     public final String mountain;
 
-
     /** Longitude in degrees. */
     public final double longitude;
 
@@ -33,7 +32,7 @@ public enum Site {
 
     private final TimeZone timezone;
 
-    private Site(String displayName, String abbreviation, String mountain, double longitude, double latitude, double altitude, TimeZone timezone) {
+    Site(String displayName, String abbreviation, String mountain, double longitude, double latitude, double altitude, TimeZone timezone) {
         this.displayName  = displayName;
         this.abbreviation = abbreviation;
         this.mountain     = mountain;
@@ -93,7 +92,6 @@ public enum Site {
 
     /**
      * Same as parse, but returns null on failure.
-     * @param site
      * @return a Site, or null
      */
     public static Site tryParse(String site) {
