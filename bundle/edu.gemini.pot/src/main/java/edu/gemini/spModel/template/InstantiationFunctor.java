@@ -28,8 +28,7 @@ public class InstantiationFunctor extends DBAbstractFunctor {
 
     private static final Logger LOGGER = Logger.getLogger(InstantiationFunctor.class.getName());
 
-    private final Map<ISPTemplateGroup, Set<ISPTemplateParameters>> selection =
-            new HashMap<ISPTemplateGroup, Set<ISPTemplateParameters>>();
+    private final Map<ISPTemplateGroup, Set<ISPTemplateParameters>> selection = new HashMap<>();
 
     /**
      * Add a group/params pair to the set of instantiations to be performed.
@@ -39,7 +38,7 @@ public class InstantiationFunctor extends DBAbstractFunctor {
     public void add(ISPTemplateGroup group, ISPTemplateParameters params) {
         Set<ISPTemplateParameters> list = selection.get(group);
         if (list == null) {
-            list = new HashSet<ISPTemplateParameters>();
+            list = new HashSet<>();
             selection.put(group, list);
         }
         list.add(params);
@@ -47,7 +46,7 @@ public class InstantiationFunctor extends DBAbstractFunctor {
 
     public void execute(IDBDatabaseService db, ISPNode node, Set<Principal> principals) {
         try {
-            List<ISPGroup> newGroups = new ArrayList<ISPGroup>();
+            List<ISPGroup> newGroups = new ArrayList<>();
             final ISPProgram prog = db.lookupProgram(node.getProgramKey());
             for (Map.Entry<ISPTemplateGroup, Set<ISPTemplateParameters>> e : selection.entrySet()) {
                 for (ISPTemplateParameters ps : e.getValue()) {
@@ -75,7 +74,7 @@ public class InstantiationFunctor extends DBAbstractFunctor {
     // Instantiate a given config, conditions, target triple
     private static ISPGroup instantiate(ISPFactory fact, ISPProgram prog, ISPTemplateGroup templateGroup, SPSiteQuality siteQualityData, SPTarget targetData) throws Exception {
         final TemplateGroup templateGroupData = (TemplateGroup) templateGroup.getDataObject();
-        final ISPGroup group = createGroup(fact, prog, siteQualityData, targetData, templateGroupData);
+        final ISPGroup group = createGroup(fact, prog, targetData, templateGroupData);
         copyNotes(fact, prog, templateGroup, group);
         copyObservations(fact, prog, templateGroup, siteQualityData, targetData, group);
         return group;
@@ -131,17 +130,17 @@ public class InstantiationFunctor extends DBAbstractFunctor {
     }
 
     // Create a scheduling group based on the specified targetData
-    private static ISPGroup createGroup(ISPFactory fact, ISPProgram prog, SPSiteQuality siteQualityData, SPTarget targetData, TemplateGroup templateGroupData) throws SPUnknownIDException, SPNodeNotLocalException, SPTreeStateException {
+    private static ISPGroup createGroup(ISPFactory fact, ISPProgram prog, SPTarget targetData, TemplateGroup templateGroupData) throws SPUnknownIDException, SPNodeNotLocalException, SPTreeStateException {
         final ISPGroup group = fact.createGroup(prog, null);
         final SPGroup groupData = (SPGroup) group.getDataObject();
-        groupData.setTitle(createGroupTitle(templateGroupData, siteQualityData, targetData));
+        groupData.setTitle(createGroupTitle(templateGroupData, targetData));
         groupData.setGroupType(SPGroup.GroupType.TYPE_SCHEDULING);
         group.setDataObject(groupData);
         return group;
     }
 
     // Get a group name from the given config, conditions, target triple
-    private static String createGroupTitle(TemplateGroup templateGroupData, SPSiteQuality siteQualityData, SPTarget targetData) {
+    private static String createGroupTitle(TemplateGroup templateGroupData, SPTarget targetData) {
         return String.format("%s - [%s] %s",
                 targetData.getTarget().getName(),
                 templateGroupData.getVersionToken(),
