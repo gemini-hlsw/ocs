@@ -296,7 +296,7 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
                         final Option<AgsGuideQuality> quality = guideQuality(ags, guideProbe, target);
                         final boolean isPrimary = primary.exists(target::equals);
 
-                        final Row row = new GuideTargetRow(isActive, quality, isPrimary, guideProbe, tup._2(), target, baseCoords, when);
+                        final Row row = new GuideTargetRow(isActive, quality, isPrimary, guideProbe, tup._2() + 1, target, baseCoords, when);
                         tmp.add(row);
                     });
                 }
@@ -315,7 +315,7 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
                             final Option<AgsGuideQuality> quality = guideQuality(ags, guideProbe, target);
                             final boolean enabled = isPrimaryGroup && primary.exists(target::equals);
 
-                            final Row row = new GuideTargetRow(isActive, quality, enabled, guideProbe, tup._2(), target, baseCoords, when);
+                            final Row row = new GuideTargetRow(isActive, quality, enabled, guideProbe, tup._2() + 1, target, baseCoords, when);
                             rowList.add(row);
                         });
                     }

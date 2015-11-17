@@ -419,6 +419,14 @@ public final class GuideProbeTargets implements Serializable, TargetContainer, I
         return new GuideProbeTargets(guider, bagsResult, new Some<>(target), manualTargetsNew);
     }
 
+    public GuideProbeTargets setPrimary(final SPTarget primary) {
+        final Option<Integer> primaryIndex = getPrimaryIndex();
+        return primaryIndex.map(idx -> {
+            final ImList<SPTarget> manualTargetsNew = manualTargets.updated(idx, primary);
+            return GuideProbeTargets.create(guider, bagsResult, new Some<>(primary), manualTargetsNew);
+        }).getOrElse(withManualPrimary(primary));
+    }
+
     /**
      * Return the index of the primary target, if one exists, or None if there is no primary target.
      * Note that if a BAGS target exists, we count the BAGS target as index 0 and then begin counting the manual targets at index 1.
