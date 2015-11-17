@@ -26,8 +26,7 @@ ELSE IF DISPERSER == WOLLASTON:
   IF FILTER == {K1 or K2}:    # Sky required
     INCLUDE {5} {7}
 
-SET OBSERVING MODE FROM PI (all included observations)
+SET OBSERVING MODE FROM PI for all observations EXCEPT {4} (H Direct) which should NOT change. 
 
 # {4} has a fixed Observing Mode (H Direct) and this should NOT change.
-
 
