@@ -85,12 +85,30 @@ object AgsStrategy {
      * Creates a new TargetEnvironment with guide stars for each assignment in
      * the Selection.
      */
-    def applyTo(env: TargetEnvironment): TargetEnvironment =
+    def applyTo(env: TargetEnvironment): TargetEnvironment = {
+      def findMatching(gpt: GuideProbeTargets, target: SPTarget): Option[SPTarget] =
+        Option(target.getTarget.getName).flatMap { n =>
+          gpt.getTargets.asScalaList.find { t =>
+            Option(t.getTarget.getName).map(_.trim).exists(_ == n.trim)
+          }
+        }
+
       (env /: assignments) { (curEnv, ass) =>
         val target = new SPTarget(HmsDegTarget.fromSkyObject(ass.guideStar.toOldModel))
         val oldGpt = curEnv.getPrimaryGuideProbeTargets(ass.guideProbe).asScalaOpt
-        val newGpt = oldGpt.getOrElse(GuideProbeTargets.create(ass.guideProbe)).withManualPrimary(target)
+
+        val newGpt = oldGpt.fold(GuideProbeTargets.create(ass.guideProbe, target).withExistingPrimary(target)) { gpt =>
+          // We already have guide probe targets for guide probe.
+          // Does one with the same target name already exist? If so, mark it as
+          // primary and replace it with the target we just made.  If not, add the
+          // target and mark it as primary.
+          findMatching(gpt, target).fold(gpt.withManualPrimary(target)) { existing =>
+            gpt.withExistingPrimary(existing).setPrimary(target)
+          }
+        }
+
         curEnv.putPrimaryGuideProbeTargets(newGpt)
       }
+    }
   }
 }
