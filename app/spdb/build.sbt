@@ -208,7 +208,7 @@ def swalker(version: Version) = AppConfig(
     "edu.gemini.auxfile.fits.host"               -> "gsconfig.gemini.edu",
     "edu.gemini.auxfile.other.dest"              -> "/gemsoft/var/data/finder/GSqueue/Finders-Test/@SEMESTER@/@PROG_ID@",
     "edu.gemini.auxfile.root"                    -> "/Users/swalker/.auxfile",
-    "edu.gemini.dataman.gsa.summit.host"         -> "hbffits2.hi.gemini.edu",
+    "edu.gemini.dataman.gsa.summit.host"         -> "cpofits-lv1new.cl.gemini.edu",
     "edu.gemini.services.server.start"           -> "false",
     "edu.gemini.smartgcal.host"                  -> "localhost",
     "edu.gemini.spdb.dir"                        -> "/Users/swalker/.spdb/",
@@ -266,7 +266,7 @@ def sraaphorst(version: Version) = AppConfig(
     "edu.gemini.auxfile.fits.dest"         -> "/gemsoft/var/data/ictd/test/GS@SEMESTER@/@PROG_ID@",
     "edu.gemini.auxfile.other.dest"        -> "/gemsoft/var/data/finder/GSqueue/Finders-Test/@SEMESTER@/@PROG_ID@",
     "edu.gemini.auxfile.fits.host"         -> "gsconfig.gemini.edu",
-    "edu.gemini.dataman.gsa.summit.host"   -> "hbffits2.hi.gemini.edu",
+    "edu.gemini.dataman.gsa.summit.host"   -> "cpofits-lv1new.cl.gemini.edu",
     "edu.gemini.dbTools.archive.directory" -> "/Users/sraaphor/tmp/archiver"
   )
 ) extending List(with_gogo(version), sraaphorst_credentials(version))
@@ -283,7 +283,7 @@ def cquiroz(version: Version) = AppConfig(
   props = Map(
     "edu.gemini.spdb.dir"                  -> "/Users/cquiroz/.spdb/",
     "edu.gemini.auxfile.root"              -> "/Users/cquiroz/.auxfile",
-    "edu.gemini.dataman.gsa.summit.host"   -> "hbffits2.hi.gemini.edu",
+    "edu.gemini.dataman.gsa.summit.host"   -> "cpofits-lv1new.cl.gemini.edu",
     "edu.gemini.util.trpc.name"            -> "Carlos's ODB (Test)",
     "edu.gemini.auxfile.fits.dest"         -> "/gemsoft/var/data/ictd/test/GS@SEMESTER@/@PROG_ID@",
     "edu.gemini.auxfile.other.dest"        -> "/gemsoft/var/data/finder/GSqueue/Finders-Test/@SEMESTER@/@PROG_ID@",
@@ -303,7 +303,7 @@ def jluhrs(version: Version) = AppConfig(
   props = Map(
     "edu.gemini.spdb.dir"                -> "/home1/jluhrs/.spdb/",
     "edu.gemini.auxfile.root"            -> "/home1/jluhrs/.auxfile",
-    "edu.gemini.dataman.gsa.summit.host" -> "hbffits2.hi.gemini.edu",
+    "edu.gemini.dataman.gsa.summit.host" -> "cpofits-lv1new.cl.gemini.edu",
     "edu.gemini.util.trpc.name"          -> "Javier's ODB (Test)",
     "edu.gemini.auxfile.fits.dest"       -> "/gemsoft/var/data/ictd/test/GS@SEMESTER@/@PROG_ID@",
     "edu.gemini.auxfile.other.dest"      -> "/gemsoft/var/data/finder/GSqueue/Finders-Test/@SEMESTER@/@PROG_ID@",
@@ -473,7 +473,7 @@ def gsodbtest(version: Version) = AppConfig(
     "edu.gemini.auxfile.fits.dest"       -> "/gemsoft/var/data/ictd/test/GS@SEMESTER@/@PROG_ID@",
     "edu.gemini.auxfile.fits.host"       -> "gsconfig.gemini.edu",
     "edu.gemini.auxfile.other.dest"      -> "/gemsoft/var/data/finder/GSqueue/Finders-Test/@SEMESTER@/@PROG_ID@",
-    "edu.gemini.dataman.gsa.summit.host" -> "sbffits2.cl.gemini.edu",
+    "edu.gemini.dataman.gsa.summit.host" -> "cpofits-lv1new.cl.gemini.edu",
     "edu.gemini.oodb.mail.smtpHost"      -> "smtp.cl.gemini.edu",
     "edu.gemini.util.trpc.name"          -> "Gemini South ODB (Test)",
     "osgi.shell.telnet.ip"               -> "172.17.55.81"

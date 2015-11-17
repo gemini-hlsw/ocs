@@ -3,7 +3,6 @@ package edu.gemini.dataman.osgi
 import edu.gemini.dataman.app.Dataman
 import edu.gemini.dataman.core.{PollPeriod, DmanConfig, GsaAuth, GsaHost}
 import edu.gemini.pot.spdb.IDBDatabaseService
-import edu.gemini.spModel.core.Site
 import edu.gemini.spModel.core.osgi.SiteProperty
 import edu.gemini.util.osgi.Tracker
 import org.osgi.framework.{ServiceRegistration, BundleContext, BundleActivator}
@@ -109,10 +108,9 @@ object Activator {
     val allProgs   = lookupPollPeriod(AllProgramsPeriod)(PollPeriod.AllPrograms)
     val obsRefresh = lookupPollPeriod(ObsRefreshPeriod)(PollPeriod.ObsRefresh)
 
-    val config = (archive |@| summit |@| auth |@| site |@| tonight |@| thisWeek |@| allProgs |@| obsRefresh) { DmanConfig.apply }
-
-    // DMAN TODO: we don't have a GS GSA test server or GS data so fix to GN for now
-    config.map(_.copy(site = Site.GN))
+    (archive |@| summit |@| auth |@| site |@| tonight |@| thisWeek |@| allProgs |@| obsRefresh) {
+      DmanConfig.apply
+    }
   }
 
   private def registerCommands(ctx: BundleContext, config: DmanConfig, odb: IDBDatabaseService): ServiceRegistration[GsaCommands] = {
