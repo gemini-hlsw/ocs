@@ -102,18 +102,15 @@ object PollService {
         ids.map(add).foldMap(Tags.Disjunction)
       }
 
-      def next: Option[(mutable.LinkedHashSet[DmanId], DmanId)] = synchronized {
-        for {
-          q  <- pendingQueues.find(_.nonEmpty)
-          id <- q.headOption
-        } yield (q, id)
+      def next: Option[mutable.LinkedHashSet[DmanId]] = synchronized {
+        pendingQueues.find(_.nonEmpty)
       }
 
       override def doNext[A](body: DmanId => A): A = {
         def blockingTake(): DmanId = synchronized {
           while (next.isEmpty) wait()
 
-          val (queue, id) = next.get
+          val queue = next.get
           queue.head <| queue.remove <| activeSet.add
         }
 
