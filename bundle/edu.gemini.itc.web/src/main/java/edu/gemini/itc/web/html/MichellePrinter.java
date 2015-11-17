@@ -104,7 +104,7 @@ public final class MichellePrinter extends PrinterBase {
 
         _print(CalculatablePrinter.getTextResult(result.sfCalc()));
         _println(CalculatablePrinter.getTextResult(result.iqCalc()));
-        _printlnSkyAperture(result);
+        _printSkyAperture(result);
 
         if (!instrument.polarimetryIsUsed()) {
             _println(CalculatablePrinter.getTextResult(result.is2nCalc(), result.observation()));

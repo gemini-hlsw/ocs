@@ -76,8 +76,13 @@ public class SpecS2NLargeSlitVisitor implements SampledSpectrumVisitor, SpecS2N 
         this.read_noise             = read_noise;
 
         final AnalysisMethod analysisMethod = odp.analysisMethod();
-        if (!(analysisMethod instanceof ApertureMethod)) throw new Error("Unsuported analysis method");
-        this.skyAper                = ((ApertureMethod) analysisMethod).skyAperture();
+        if (analysisMethod instanceof ApertureMethod) {
+            this.skyAper = ((ApertureMethod) analysisMethod).skyAperture();
+        } else if (analysisMethod instanceof IfuMethod) {
+            this.skyAper = ((IfuMethod) analysisMethod).skyFibres();
+        } else {
+            throw new Error();
+        }
 
         // Currently SpectroscopySN is the only supported calculation method for spectroscopy.
         final CalculationMethod calcMethod = odp.calculationMethod();

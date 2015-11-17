@@ -163,11 +163,12 @@ public abstract class PrinterBase {
     }
 
     protected void _printSkyAperture(final Result result) {
-        _println("Sky subtraction aperture = " + ((ApertureMethod) result.observation().analysisMethod()).skyAperture() + " times the software aperture.");
-    }
-
-    protected void _printlnSkyAperture(final Result result) {
-        _println("Sky subtraction aperture = " + ((ApertureMethod) result.observation().analysisMethod()).skyAperture() + " times the software aperture.\n");
+        final AnalysisMethod method = result.observation().analysisMethod();
+        final double aperture;
+        if      (method instanceof ApertureMethod) aperture = ((ApertureMethod) method).skyAperture();
+        else if (method instanceof IfuMethod)      aperture = ((IfuMethod) method).skyFibres();
+        else throw new Error();
+        _println("Sky subtraction aperture = " + aperture + " times the software aperture.");
     }
 
     private void _printRequestedIntegrationTime(final SpectroscopyResult result, final double exposureTime, final double numExposures) {

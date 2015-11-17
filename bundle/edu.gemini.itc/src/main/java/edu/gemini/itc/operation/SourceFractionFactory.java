@@ -1,10 +1,7 @@
 package edu.gemini.itc.operation;
 
 import edu.gemini.itc.base.Instrument;
-import edu.gemini.itc.shared.AutoAperture;
-import edu.gemini.itc.shared.ObservationDetails;
-import edu.gemini.itc.shared.SourceDefinition;
-import edu.gemini.itc.shared.UserAperture;
+import edu.gemini.itc.shared.*;
 
 public final class SourceFractionFactory {
 
@@ -23,11 +20,18 @@ public final class SourceFractionFactory {
                     0.0,
                     instrument.getPixelSize(),
                     im_qual);
-        } else if (odp.analysisMethod() instanceof UserAperture){
+        } else if (odp.analysisMethod() instanceof UserAperture) {
             return calculate(
                     sdp.isUniform(),
                     false,
                     (((UserAperture) odp.analysisMethod()).diameter()),
+                    instrument.getPixelSize(),
+                    im_qual);
+        } else if (odp.analysisMethod() instanceof IfuMethod) {
+            return calculate(
+                    sdp.isUniform(),
+                    true,
+                    0.0,
                     instrument.getPixelSize(),
                     im_qual);
         } else {

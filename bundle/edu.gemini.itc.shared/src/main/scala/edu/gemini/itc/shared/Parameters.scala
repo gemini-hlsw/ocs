@@ -68,25 +68,21 @@ final case class SpectroscopyS2N(
 
 // ==== Analysis method
 
-// TODO: GMOS and NIFS use an AnalysisMethod *and* an IfuMethod object in their ITC parameters. Andy S. and I
-// TODO: agree that (at least on a conceptional level) IfuMethods should just be another set of AnalysisMethods
-// TODO: and should be used as such. While the trait hierarchy here reflects this, we should also get rid of the
-// TODO: additional IfuMethod parameters in GmosParameters and NifsParameters and use the AnalysisMethod from
-// TODO: the ObservationDetails instead to pass around the IfuMethod parameters as needed.
-
 sealed trait AnalysisMethod
 
 sealed trait ApertureMethod extends AnalysisMethod {
-  val skyAperture: Double
+  val skyAperture: Double   // area assumed to be on sky
 }
 final case class AutoAperture(skyAperture: Double) extends ApertureMethod
 final case class UserAperture(diameter: Double, skyAperture: Double) extends ApertureMethod
 
 // IFU analysis is currently supported by GMOS and NIFS
-sealed trait IfuMethod extends AnalysisMethod
-final case class IfuSingle(offset: Double) extends IfuMethod
-final case class IfuRadial(minOffset: Double, maxOffset: Double) extends IfuMethod
-final case class IfuSummed(numX: Int, numY: Int, centerX: Double, centerY: Double) extends IfuMethod
+sealed trait IfuMethod extends AnalysisMethod {
+  val skyFibres: Int        // # fibres (area) assumed to be on sky
+}
+final case class IfuSingle(skyFibres: Int, offset: Double) extends IfuMethod
+final case class IfuRadial(skyFibres: Int, minOffset: Double, maxOffset: Double) extends IfuMethod
+final case class IfuSummed(skyFibres: Int, numX: Int, numY: Int, centerX: Double, centerY: Double) extends IfuMethod
 
 
 // === Observation Details

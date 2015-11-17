@@ -325,13 +325,17 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
             for (int i = 0; i < result.specS2N().length; i++) {
                 switch (index) {
                     case 0:
-                        data.add(new SpcSeriesData(SignalData.instance(),     "Signal "           + ccdName, result.specS2N()[i].getSignalSpectrum().getData(first, lastWithGap),     new Some<>(lightColor)));
-                        data.add(new SpcSeriesData(BackgroundData.instance(), "SQRT(Background) " + ccdName, result.specS2N()[i].getBackgroundSpectrum().getData(first, lastWithGap), new Some<>(darkColor)));
+                        final String sigTitle = getTitle(result.observation(), "Signal", ccdName, i);
+                        final String bkgTitle = getTitle(result.observation(), "SQRT(Background)", ccdName, i);
+                        data.add(new SpcSeriesData(SignalData.instance(),     sigTitle, result.specS2N()[i].getSignalSpectrum().getData(first, lastWithGap),     new Some<>(lightColor)));
+                        data.add(new SpcSeriesData(BackgroundData.instance(), bkgTitle, result.specS2N()[i].getBackgroundSpectrum().getData(first, lastWithGap), new Some<>(darkColor)));
                         break;
 
                     case 1:
-                        data.add(new SpcSeriesData(SingleS2NData.instance(),  "Single Exp S/N "   + ccdName, result.specS2N()[i].getExpS2NSpectrum().getData(first, lastWithGap),     new Some<>(lightColor)));
-                        data.add(new SpcSeriesData(FinalS2NData.instance(),   "Final S/N "        + ccdName, result.specS2N()[i].getFinalS2NSpectrum().getData(first, lastWithGap),   new Some<>(darkColor)));
+                        final String s2nTitle = getTitle(result.observation(), "Single Exp S/N", ccdName, i);
+                        final String finTitle = getTitle(result.observation(), "Final S/N", ccdName, i);
+                        data.add(new SpcSeriesData(SingleS2NData.instance(), s2nTitle, result.specS2N()[i].getExpS2NSpectrum().getData(first, lastWithGap),     new Some<>(lightColor)));
+                        data.add(new SpcSeriesData(FinalS2NData.instance(),  finTitle, result.specS2N()[i].getFinalS2NSpectrum().getData(first, lastWithGap),   new Some<>(darkColor)));
                         break;
 
                     default:
@@ -341,6 +345,14 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
         }
 
         return new SpcChartData(type, title, "Wavelength (nm)", yAxis, JavaConversions.asScalaBuffer(data).toList());
+    }
+
+    // TODO: This is a lame and cheap fix to get different chart series titles for the IFU case (series must have unique names).
+    // A less lame solution would be to have either more meaningful series titles or separate charts like NIFS has.
+    private static String getTitle(ObservationDetails obs, String title, String ccdName, int ifuIndex) {
+        if      (obs.analysisMethod() instanceof ApertureMethod)    return title + " " + ccdName;
+        else if (obs.analysisMethod() instanceof IfuMethod)         return title + " " + ccdName + " IFU=" + ifuIndex;
+        else throw new Error();
     }
 
 

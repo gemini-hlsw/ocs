@@ -127,12 +127,12 @@ public final class NifsRecipe implements SpectroscopyRecipe {
         final Iterator<Double> halo_src_frac_it = halo_sf_list.iterator();
 
         int i = 0;
-        final SpecS2N[] specS2Narr = new SpecS2N[_nifsParameters.ifuMethod() instanceof IfuSummed ? 1 : sf_list.size()];
+        final SpecS2N[] specS2Narr = new SpecS2N[_obsDetailParameters.analysisMethod() instanceof IfuSummed ? 1 : sf_list.size()];
 
         while (src_frac_it.hasNext()) {
             double ap_diam = 1;
 
-            if (_nifsParameters.ifuMethod()  instanceof IfuSummed) {
+            if (_obsDetailParameters.analysisMethod()  instanceof IfuSummed) {
                 while (src_frac_it.hasNext()) {
                     spec_source_frac = spec_source_frac + src_frac_it.next();
                     halo_spec_source_frac = halo_spec_source_frac + halo_src_frac_it.next();

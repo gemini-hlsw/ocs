@@ -100,7 +100,7 @@ public final class GmosPrinter extends PrinterBase {
         _println("");
         _print(CalculatablePrinter.getTextResult(results[0].sfCalc()));
         _println(CalculatablePrinter.getTextResult(results[0].iqCalc()));
-        _printlnSkyAperture(results[0]);
+        _printSkyAperture(results[0]);
         _println("Read noise: " + instrument.getReadNoise());
 
         final Gmos[] ccdArray = instrument.getDetectorCcdInstruments();

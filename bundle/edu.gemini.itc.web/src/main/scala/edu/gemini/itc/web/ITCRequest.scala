@@ -39,6 +39,8 @@ import squants.radio.SpectralIrradianceConversions._
  * how currently validation and error handling is done throughout the code.
  */
 sealed abstract class ITCRequest {
+
+  /** Gets the value of the parameter with this name. */
   def parameter(name: String): String
 
   /** Gets the named value as an enum of type {{{Class[T]}}} using the simple name of the class as the parameter name. */
@@ -149,10 +151,9 @@ object ITCRequest {
     val ccdType     = r.enumParameter(classOf[DetectorManufacturer])
     val centralWl   = r.centralWavelengthInNanometers()
     val fpMask      = if (site.equals(Site.GN)) r.enumParameter(classOf[FPUnitNorth],    "instrumentFPMask")   else r.enumParameter(classOf[FPUnitSouth],      "instrumentFPMask")
-    val ifuMethod   = if (fpMask.isIFU) Some(ifuMethodParameters(r)) else None
     val ampGain     = r.enumParameter(classOf[AmpGain])
     val ampReadMode = r.enumParameter(classOf[AmpReadMode])
-    GmosParameters(filter, grating, centralWl, fpMask, ampGain, ampReadMode, None, spatBinning, specBinning, ifuMethod, ccdType, site)
+    GmosParameters(filter, grating, centralWl, fpMask, ampGain, ampReadMode, None, spatBinning, specBinning, ccdType, site)
   }
 
   def gnirsParameters(r: ITCRequest): GnirsParameters = {
@@ -197,9 +198,8 @@ object ITCRequest {
     val grating     = r.enumParameter(classOf[NIFSParams.Disperser])
     val readNoise   = r.enumParameter(classOf[NIFSParams.ReadMode])
     val centralWl   = r.centralWavelengthInMicrons()
-    val ifuMethod   = ifuMethodParameters(r)
-    val altair = altairParameters(r)
-    NifsParameters(filter, grating, readNoise, centralWl, ifuMethod, altair)
+    val altair      = altairParameters(r)
+    NifsParameters(filter, grating, readNoise, centralWl, altair)
    }
 
   def trecsParameters(r: ITCRequest): TRecsParameters = {
@@ -264,14 +264,7 @@ object ITCRequest {
       case _ => throw new IllegalArgumentException("Total integration time to achieve a specific \nS/N ratio is not supported in spectroscopy mode.  \nPlease select the Total S/N method.")
     }
 
-    val analysisMethodName = r.parameter("aperType")
-    val analysisMethod = analysisMethodName match {
-      case "autoAper" => AutoAperture(r.doubleParameter("autoSkyAper"))
-      case "userAper" => UserAperture(r.doubleParameter("userAperDiam"), r.doubleParameter("userSkyAper"))
-      case _          => throw new NoSuchElementException(s"Unknown AnalysisMethod $analysisMethodName")
-    }
-
-    new ObservationDetails(calculationMethod, analysisMethod)
+    new ObservationDetails(calculationMethod, analysisMethod(r))
 
   }
 
@@ -353,11 +346,13 @@ object ITCRequest {
     new SourceDefinition(spatialProfile, sourceDefinition, norm, units, normBand, redshift)
   }
 
-  def ifuMethodParameters(r: ITCRequest): IfuMethod = r.parameter("ifuMethod") match {
-      case "singleIFU"  => IfuSingle(r.doubleParameter("ifuOffset"))
-      case "radialIFU"  => IfuRadial(r.doubleParameter("ifuMinOffset"), r.doubleParameter("ifuMaxOffset"))
-      case "summedIFU"  => IfuSummed(r.intParameter("ifuNumX"), r.intParameter("ifuNumY"), r.doubleParameter("ifuCenterX"), r.doubleParameter("ifuCenterY"))
-      case _            => throw new NoSuchElementException(s"Unknown IfuMethod ${r.parameter("ifuMethod")}")
+  def analysisMethod(r: ITCRequest): AnalysisMethod = r.parameter("analysisMethod") match {
+    case "autoAper"   => AutoAperture(r.doubleParameter("autoSkyAper"))
+    case "userAper"   => UserAperture(r.doubleParameter("userAperDiam"), r.doubleParameter("userSkyAper"))
+    case "singleIFU"  => IfuSingle(r.intParameter("ifuSkyFibres"), r.doubleParameter("ifuOffset"))
+    case "radialIFU"  => IfuRadial(r.intParameter("ifuSkyFibres"), r.doubleParameter("ifuMinOffset"), r.doubleParameter("ifuMaxOffset"))
+    case "summedIFU"  => IfuSummed(r.intParameter("ifuSkyFibres"), r.intParameter("ifuNumX"), r.intParameter("ifuNumY"), r.doubleParameter("ifuCenterX"), r.doubleParameter("ifuCenterY"))
+    case _            => throw new NoSuchElementException(s"Unknown analysis method ${r.parameter("analysisMethod")}")
   }
 
   def parameters(r: ITCRequest, i: InstrumentDetails): ItcParameters = {

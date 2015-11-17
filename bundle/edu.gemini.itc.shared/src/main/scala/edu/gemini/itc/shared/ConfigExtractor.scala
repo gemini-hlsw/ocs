@@ -134,10 +134,6 @@ object ConfigExtractor {
     def extractCustomSlit: String \/ Option[CustomSlitWidth] =
       if (c.containsItem(FpuKey)) None.right else extract[CustomSlitWidth](c, CustomSlitWidthKey).map(Some(_))
 
-    // Note: In the future we will support more options, for now only single on-axis is supported.
-    def extractIfu(mask: GmosCommonType.FPUnit): Option[IfuMethod] =
-      if (mask.isIFU) Some(IfuSingle(0.0)) else None
-
     for {
       site        <- extractSite
       mask        <- extractMask(site)
@@ -151,8 +147,7 @@ object ConfigExtractor {
       ccdType     <- extract[DetectorManufacturer](c, CcdManufacturerKey)
       wavelen     <- extractObservingWavelength(c)
     } yield {
-      val ifuMethod = extractIfu(mask)
-      GmosParameters(filter, grating, wavelen, mask, gain, readMode, customSlit, spatBin.getValue, specBin.getValue, ifuMethod, ccdType, site)
+      GmosParameters(filter, grating, wavelen, mask, gain, readMode, customSlit, spatBin.getValue, specBin.getValue, ccdType, site)
     }
 
   }
@@ -209,10 +204,7 @@ object ConfigExtractor {
       altair      <- extractAltair          (targetEnv, probe, c)
       wavelen     <- extractObservingWavelength(c)
     } yield {
-      // Note: In the future we will support more options, for now only single on-axis is supported.
-      val ifu = IfuSingle(0.0)
-
-      NifsParameters(filter, grating, readMode, wavelen, ifu, altair)
+      NifsParameters(filter, grating, readMode, wavelen, altair)
     }
   }
 

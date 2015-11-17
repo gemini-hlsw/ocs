@@ -5,7 +5,9 @@ import javax.swing._
 
 import edu.gemini.itc.shared._
 import edu.gemini.pot.sp.SPComponentType
-import jsky.app.ot.itc.{AnalysisMethodPanel, ConditionsPanel, PlotDetailsPanel}
+import edu.gemini.spModel.gemini.gmos.{InstGmosSouth, InstGmosNorth}
+import edu.gemini.spModel.gemini.nifs.InstNIFS
+import jsky.app.ot.itc._
 import jsky.app.ot.util.OtColor
 import org.jfree.chart.{ChartPanel, JFreeChart}
 
@@ -41,8 +43,12 @@ sealed trait ItcPanel extends GridBagPanel {
   def visibleFor(t: SPComponentType): Boolean
 
   private val currentConditions = new ConditionsPanel(owner)
-  private val analysisMethod    = new AnalysisMethodPanel(owner)
+  private val analysisApertureMethod    = new AnalysisApertureMethodPanel(owner)
+  private val analysisIfuMethod         = new AnalysisIfuMethodPanel(owner)
+  private val analysisIfuGmosMethod     = new AnalysisIfuMethodPanel(owner, summedAllowed = false)
   private val message           = new ItcFeedbackPanel(table)
+
+  private var analysisMethod: AnalysisMethodPanel = analysisApertureMethod
 
   border = BorderFactory.createEmptyBorder(5, 10, 5, 10)
   layout(currentConditions) = new Constraints {
@@ -79,12 +85,12 @@ sealed trait ItcPanel extends GridBagPanel {
 
   listenTo(currentConditions, analysisMethod)
   reactions += {
-    case SelectionChanged(`currentConditions`)  => table.update()
-    case SelectionChanged(`analysisMethod`)     => table.update()
+    case SelectionChanged(_) => table.update()
   }
 
   def update(): Unit = {
     deafTo(currentConditions, analysisMethod)
+    updateAnalysisPanel()
     currentConditions.update()
     analysisMethod.update()
     table.update()
@@ -94,6 +100,24 @@ sealed trait ItcPanel extends GridBagPanel {
   def analysis: Option[AnalysisMethod] = analysisMethod.analysisMethod
 
   def conditions: ObservingConditions = currentConditions.conditions
+
+  private def updateAnalysisPanel() = {
+    peer.remove(analysisMethod.peer)
+    analysisMethod = owner.getContextInstrumentDataObject match {
+      case _: InstNIFS                            => analysisIfuMethod
+      case i: InstGmosNorth if i.getFPUnit.isIFU  => analysisIfuGmosMethod
+      case i: InstGmosSouth if i.getFPUnit.isIFU  => analysisIfuGmosMethod
+      case _                                      => analysisApertureMethod
+    }
+    layout(analysisMethod) = new Constraints {
+      anchor    = Anchor.NorthWest
+      gridx     = 1
+      gridy     = 0
+      weightx   = 1
+      insets    = new Insets(5, 0, 5, 0)
+    }
+    revalidate()
+  }
 
 }
 
