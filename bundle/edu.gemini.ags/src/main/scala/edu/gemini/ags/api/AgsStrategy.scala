@@ -86,12 +86,12 @@ object AgsStrategy {
      * the Selection.
      */
     def applyTo(env: TargetEnvironment): TargetEnvironment = {
-      def findMatching(gpt: GuideProbeTargets, target: SPTarget): Option[SPTarget] =
-        Option(target.getTarget.getName).flatMap { n =>
-          gpt.getTargets.asScalaList.find { t =>
-            Option(t.getTarget.getName).map(_.trim).exists(_ == n.trim)
-          }
-        }
+      def findMatching(gpt: GuideProbeTargets, target: SPTarget): Option[SPTarget] = {
+        def name(t: SPTarget): Option[String] =
+          Option(t.getTarget.getName).map(_.trim)
+
+        name(target).flatMap(n => gpt.getTargets.asScalaList.find(name(_).exists(_ == n.trim)))
+      }
 
       (env /: assignments) { (curEnv, ass) =>
         val target = new SPTarget(HmsDegTarget.fromSkyObject(ass.guideStar.toOldModel))
