@@ -3,7 +3,7 @@ package edu.gemini.spModel.dataflow
 import edu.gemini.pot.sp.ISPProgram
 import edu.gemini.spModel.config.ConfigBridge
 import edu.gemini.spModel.config.map.ConfigValMapInstances
-import edu.gemini.spModel.core.SPProgramID
+import edu.gemini.spModel.core.{ProgramType, SPProgramID}
 import edu.gemini.spModel.data.config.DefaultParameter
 import edu.gemini.spModel.dataflow.GsaAspect.Visibility
 import edu.gemini.spModel.dataflow.GsaAspect.Visibility.{PUBLIC, PRIVATE}
@@ -50,10 +50,13 @@ class ProprietaryTest extends InstrumentSequenceTestBase[Flamingos2, SeqConfigFl
     (visibility, months)
   }
 
-  private def doTest(vis: GsaAspect.Visibility, months: Int*): Unit = {
-    val p = getFactory.copyWithNewKeys(getProgram, SPProgramID.toProgramID("GS-2015B-Q-1"))
+  private def doTest(pid: SPProgramID, vis: GsaAspect.Visibility, months: Int*): Unit = {
+    val p = getFactory.copyWithNewKeys(getProgram, pid)
     assertEquals((vis, months.toList), extractGsaInfo(p))
   }
+
+  private def doTest(vis: GsaAspect.Visibility, months: Int*): Unit =
+    doTest(SPProgramID.toProgramID("GS-2015B-Q-1"), vis, months: _*)
 
   @Test def testDefaultSetup(): Unit =
     doTest(PUBLIC, 18)
@@ -73,4 +76,11 @@ class ProprietaryTest extends InstrumentSequenceTestBase[Flamingos2, SeqConfigFl
     o2.dataObject = new SeqRepeatObserve <| (_.setObsClass(ObsClass.DAY_CAL))
     doTest(PUBLIC, 18, 0)
   }
+
+  @Test def testDefaultPeriods(): Unit =
+    ProgramType.All.foreach { pt =>
+      val pid = pt.isScience ? s"GS-2015B-${pt.abbreviation}-1" | s"GS-${pt.abbreviation}20150102"
+      val gsa = GsaAspect.getDefaultAspect(pt)
+      doTest(SPProgramID.toProgramID(pid), PUBLIC, gsa.getProprietaryMonths)
+    }
 }
