@@ -18,7 +18,7 @@ public final class Validation {
         checkElineWidth(instrument, source);
         checkGaussianFwhm(source.profile());
 
-        if (obs.calculationMethod() instanceof ApertureMethod) {
+        if (obs.analysisMethod() instanceof ApertureMethod) {
             checkSkyAperture((ApertureMethod) obs.analysisMethod());
         }
         if (obs.calculationMethod() instanceof S2NMethod) {
