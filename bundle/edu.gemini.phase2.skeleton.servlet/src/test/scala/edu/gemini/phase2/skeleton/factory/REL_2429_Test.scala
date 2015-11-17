@@ -57,6 +57,12 @@ class REL_2429_Test extends TemplateSpec("GRACES_BP.xml") with Specification wit
           (None :: Bucket.all.map(Some(_))).forall(found)
         }
 
+        List("How to prepare your program", "GRACES set-up") foreach { note =>
+          s"Note '$note' should be included" in {
+            groups(sp).forall(existsNote(_, note))
+          }
+        }
+
         // Exclude can be computed in this case
         val excl = (1 to 8).toSet - inclA - inclB
 

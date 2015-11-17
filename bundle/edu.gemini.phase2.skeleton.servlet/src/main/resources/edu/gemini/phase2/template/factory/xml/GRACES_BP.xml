@@ -23,6 +23,45 @@
       <param name="completed" value="false"/>
       <param name="notifyPi" value="YES"/>
     </paramset>
+    <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="160566f7-eb0d-4e8a-b6dc-6fc2a53115e7" name="Note">
+      <paramset name="Note" kind="dataObj">
+        <param name="title" value="How to prepare your program"/>
+        <param name="NoteText">
+          <value>
+Acquisition:
+ 1. In the "GMOS-N" component, write the exposure time for your science and set the Position Angle (PA).
+ 2. Go to "GMOS-N: Set Exp. Time, Filter and Ctrl Wvl". It is under "Sequence" -&gt; "GMOS-N: GRACES Acquisition" -&gt; "Offset".
+ 3. In the field "Filter", select the filter for the acquisition.
+ 4. In the field "Exposure time", set the exposure time for the acquisition that corresponds to the magnitude of your target. 
+     In case of targets brighter than 11 mag  (in V or R), the exposure time is 2s. In case of fainter targets, read the nore "Acquisition exposure times".
+ 5. In the field "Ctrl Wvl", set the central wavelength for your science.
+
+Science:
+ 6. Now, go under "GMOS-N: GRACES Science" -&gt; "Offset" (itself under "Sequence").
+ 7. In the component "Observe", set the number of frames you want to observe.
+
+Other:
+ 8. If you want a ThAr spectrum to be observed during the night together with your science spectrum, please add a "GMOS-N: ThAr" component (see the EXAMPLES).
+     Make sure to use the ThAr component that corresponds to your choice of spectral mode.
+ 9. Please fill the GRACES set-up note.
+
+DO NOT EDIT ANYTHING ELSE
+
+ANC - 3 Sept 2015.</value>
+        </param>
+      </paramset>
+    </container>
+    <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="d0676f33-f723-4ab6-a38c-c99b0256111f" name="Note">
+      <paramset name="Note" kind="dataObj">
+        <param name="title" value="GRACES set-up"/>
+        <param name="NoteText">
+          <value>Spectral mode : 1/2 fiber mode.
+readout mode: Normal/Slow
+Central wavelength: XXXXA / XXXnm
+</value>
+        </param>
+      </paramset>
+    </container>
     <container kind="group" type="Group" version="2009A-1" subtype="group" key="6fb1917a-cbd5-4785-9193-96d9cf480fe9" name="Group">
       <paramset name="Group" kind="dataObj">
         <param name="title" value="GRACES"/>
@@ -671,6 +710,27 @@
             <param name="mosPreimaging" value="NO"/>
           </paramset>
         </container>
+        <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="9af89e52-4f81-42fd-bc0c-df329d821a5e" name="Note">
+          <paramset name="Note" kind="dataObj">
+            <param name="title" value="Acquisition exposure times"/>
+            <param name="NoteText">
+              <value>V/R      exp. time
+(mag)        (s)
+ 11            2
+ 12            5
+ 13            5
+ 14            5
+ 15            5
+ 16          10
+ 17          25
+ 18          50
+ 19        110
+ 20        240
+&gt;21        blind offset
+</value>
+            </param>
+          </paramset>
+        </container>
         <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="93a4ceb6-cddb-4b1a-a9f9-096eb56dc397" name="Observing Log">
           <paramset name="Observing Log" kind="dataObj">
             <paramset name="obsQaRecord"/>
@@ -807,27 +867,6 @@
             </paramset>
             <param name="useNS" value="FALSE"/>
             <param name="mosPreimaging" value="NO"/>
-          </paramset>
-        </container>
-        <container kind="obsComp" type="Info" version="2009A-1" subtype="note" key="9af89e52-4f81-42fd-bc0c-df329d821a5e" name="Note">
-          <paramset name="Note" kind="dataObj">
-            <param name="title" value="Acquisition exposure times"/>
-            <param name="NoteText">
-              <value>V/R      exp. time
-(mag)        (s)
- 11            2
- 12            5
- 13            5
- 14            5
- 15            5
- 16          10
- 17          25
- 18          50
- 19        110
- 20        240
-&gt;21        blind offset
-</value>
-            </param>
           </paramset>
         </container>
         <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="3976edfb-71ee-4c4e-bd90-a1742b8d1e87" name="Observing Log">
@@ -1279,6 +1318,7 @@
     <paramset name="node">
       <param name="key" value="b450ad05-73b7-4547-8a0e-f24876635500"/>
       <param name="2acf86f3-b398-4aaf-b1dc-39c55f96ace2" value="58"/>
+      <param name="ee939b46-90bf-4ff5-bf1f-f58d3f8b1faa" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="44ac7e29-f368-4f55-bd1a-6099ea023e52"/>
@@ -1287,6 +1327,7 @@
     <paramset name="node">
       <param name="key" value="e9123279-cbbd-49d2-a609-188cc0c208d0"/>
       <param name="2acf86f3-b398-4aaf-b1dc-39c55f96ace2" value="2"/>
+      <param name="ee939b46-90bf-4ff5-bf1f-f58d3f8b1faa" value="2"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="b279ac95-1083-4558-8b23-59204ead1137"/>
@@ -1307,6 +1348,7 @@
     <paramset name="node">
       <param name="key" value="c5fa9a67-18de-40fd-b8c4-689f69e609a5"/>
       <param name="2acf86f3-b398-4aaf-b1dc-39c55f96ace2" value="54"/>
+      <param name="ee939b46-90bf-4ff5-bf1f-f58d3f8b1faa" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="d9b4279b-fe46-438a-86d4-c09eb32f0b12"/>
@@ -1681,8 +1723,16 @@
       <param name="2acf86f3-b398-4aaf-b1dc-39c55f96ace2" value="55"/>
     </paramset>
     <paramset name="node">
+      <param name="key" value="160566f7-eb0d-4e8a-b6dc-6fc2a53115e7"/>
+      <param name="ee939b46-90bf-4ff5-bf1f-f58d3f8b1faa" value="1"/>
+    </paramset>
+    <paramset name="node">
       <param name="key" value="5c0ccef2-c88a-4cee-b57e-35df213bb00c"/>
       <param name="2acf86f3-b398-4aaf-b1dc-39c55f96ace2" value="1"/>
+    </paramset>
+    <paramset name="node">
+      <param name="key" value="d0676f33-f723-4ab6-a38c-c99b0256111f"/>
+      <param name="ee939b46-90bf-4ff5-bf1f-f58d3f8b1faa" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="cb2dad44-a2e0-4d4c-bf6b-be02071f42b4"/>
