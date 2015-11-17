@@ -26,7 +26,6 @@ object Hash {
       p.ccdType.name,
       p.fpMask.name,
       p.grating.name,
-      p.ifuMethod.toString,
       f"${p.centralWavelength.toNanometers}%.0f",
       p.site.name,
       p.spatialBinning,
@@ -65,7 +64,6 @@ object Hash {
       p.grating.name,
       p.readMode.name,
       f"${p.centralWavelength.toNanometers}%.0f",
-      p.ifuMethod,
       calc(p.altair)
     )
 
