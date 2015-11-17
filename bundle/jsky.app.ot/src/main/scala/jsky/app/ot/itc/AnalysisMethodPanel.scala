@@ -139,7 +139,7 @@ final class AnalysisApertureMethodPanel(owner: EdIteratorFolder) extends Analysi
 /**
  * UI element that allows to enter ITC analysis method parameters for ifu analysis methods.
  */
-final class AnalysisIfuMethodPanel(owner: EdIteratorFolder, summedAllowed: Boolean = true) extends AnalysisMethodPanel(owner) {
+final class AnalysisIfuMethodPanel(owner: EdIteratorFolder, summedAllowed: Boolean = true, skyEditable: Boolean = true) extends AnalysisMethodPanel(owner) {
 
   val summed = new RadioButton() { focusable = false; selected = true }
   val single = new RadioButton() { focusable = false }
@@ -188,6 +188,10 @@ final class AnalysisIfuMethodPanel(owner: EdIteratorFolder, summedAllowed: Boole
   layout(radial)                        = new Constraints { gridx = 0; gridy = 4; anchor = Anchor.West; insets = new Insets(0, 0, 0, 10) }
   layout(radialPanel)                   = new Constraints { gridx = 1; gridy = 4; anchor = Anchor.West }
 
+  // NIFS does not allow to edit sky fibres (always 1)
+  if (!skyEditable) {
+    onSkyPanel.visible  = false
+  }
   // GMOS only supports two of the three IFU modes
   if (!summedAllowed) {
     summed.visible      = false

@@ -44,7 +44,7 @@ sealed trait ItcPanel extends GridBagPanel {
 
   private val currentConditions = new ConditionsPanel(owner)
   private val analysisApertureMethod    = new AnalysisApertureMethodPanel(owner)
-  private val analysisIfuMethod         = new AnalysisIfuMethodPanel(owner)
+  private val analysisIfuNifsMethod     = new AnalysisIfuMethodPanel(owner, skyEditable = false)
   private val analysisIfuGmosMethod     = new AnalysisIfuMethodPanel(owner, summedAllowed = false)
   private val message           = new ItcFeedbackPanel(table)
 
@@ -104,7 +104,7 @@ sealed trait ItcPanel extends GridBagPanel {
   private def updateAnalysisPanel() = {
     peer.remove(analysisMethod.peer)
     analysisMethod = owner.getContextInstrumentDataObject match {
-      case _: InstNIFS                            => analysisIfuMethod
+      case _: InstNIFS                            => analysisIfuNifsMethod
       case i: InstGmosNorth if i.getFPUnit.isIFU  => analysisIfuGmosMethod
       case i: InstGmosSouth if i.getFPUnit.isIFU  => analysisIfuGmosMethod
       case _                                      => analysisApertureMethod
