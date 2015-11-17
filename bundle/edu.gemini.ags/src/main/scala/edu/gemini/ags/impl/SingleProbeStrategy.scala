@@ -32,22 +32,22 @@ case class SingleProbeStrategy(key: AgsStrategyKey, params: SingleProbeStrategyP
   import SingleProbeStrategy._
 
   override def magnitudes(ctx: ObsContext, mt: MagnitudeTable): List[(GuideProbe, AgsMagnitude.MagnitudeCalc)] =
-    params.magnitudeCalc(ctx, mt).toList.map(params.guideProbe -> _)
+    params.magnitudeCalc(withCorrectedSite(ctx), mt).toList.map(params.guideProbe -> _)
 
   override def analyze(ctx: ObsContext, mt: MagnitudeTable): List[AgsAnalysis] =
-    AgsAnalysis.analysis(ctx, mt, params.guideProbe, probeBands).toList
+    AgsAnalysis.analysis(withCorrectedSite(ctx), mt, params.guideProbe, probeBands).toList
 
   override def analyze(ctx: ObsContext, mt: MagnitudeTable, guideProbe: ValidatableGuideProbe, guideStar: SiderealTarget): Option[AgsAnalysis] =
-    AgsAnalysis.analysis(ctx, mt, guideProbe, guideStar, probeBands)
+    AgsAnalysis.analysis(withCorrectedSite(ctx), mt, guideProbe, guideStar, probeBands)
 
   override def catalogQueries(ctx: ObsContext, mt: MagnitudeTable): List[CatalogQuery] =
-    params.catalogQueries(ctx, mt).toList
+    params.catalogQueries(withCorrectedSite(ctx), mt).toList
 
   override def candidates(ctx: ObsContext, mt: MagnitudeTable): Future[List[(GuideProbe, List[SiderealTarget])]] = {
     val empty = Future.successful(List((params.guideProbe: GuideProbe, List.empty[SiderealTarget])))
 
     // We cannot let VoTableClient to filter targets as usual, instead we provide an empty magnitude constraint and filter locally
-    catalogQueries(ctx, mt).strengthR(backend).headOption.map(Function.tupled(VoTableClient.catalog)).map(_.flatMap {
+    catalogQueries(withCorrectedSite(ctx), mt).strengthR(backend).headOption.map(Function.tupled(VoTableClient.catalog)).map(_.flatMap {
         case r if r.result.containsError => Future.failed(CatalogException(r.result.problems))
         case r                           => Future.successful(List((params.guideProbe, r.result.targets.rows)))
     }).getOrElse(empty)
@@ -61,10 +61,12 @@ case class SingleProbeStrategy(key: AgsStrategyKey, params: SingleProbeStrategyP
       lst.headOption.foldMap(_._2)
     }
 
-  override def estimate(ctx: ObsContext, mt: MagnitudeTable): Future[AgsStrategy.Estimate] =
-    catalogResult(ctx, mt).map(estimate(ctx, mt, _))
+  override def estimate(ctx: ObsContext, mt: MagnitudeTable): Future[AgsStrategy.Estimate] = {
+    val ct = withCorrectedSite(ctx)
+    catalogResult(ct, mt).map(estimate(ct, mt, _))
+  }
 
-  def estimate(ctx: ObsContext, mt: MagnitudeTable, candidates: List[SiderealTarget]): AgsStrategy.Estimate = {
+  private def estimate(ctx: ObsContext, mt: MagnitudeTable, candidates: List[SiderealTarget]): AgsStrategy.Estimate = {
     // If we are unbounded and there are any candidates, we are guaranteed success.
     val pac   = ctx.getPosAngleConstraint(UNBOUNDED)
     val cv    = CandidateValidator(params, mt, candidates)
@@ -74,10 +76,15 @@ case class SingleProbeStrategy(key: AgsStrategyKey, params: SingleProbeStrategyP
     AgsStrategy.Estimate.toEstimate(successProbability)
   }
 
-  override def select(ctx: ObsContext, mt: MagnitudeTable): Future[Option[AgsStrategy.Selection]] =
-    catalogResult(ctx, mt).map(select(ctx, mt, _))
+  override def select(ctx: ObsContext, mt: MagnitudeTable): Future[Option[AgsStrategy.Selection]] = {
+    val ct = withCorrectedSite(ctx)
+    catalogResult(ct, mt).map(select(ct, mt, _))
+  }
 
-  def select(ctx: ObsContext, mt: MagnitudeTable, candidates: List[SiderealTarget]): Option[AgsStrategy.Selection] = {
+  private def withCorrectedSite(ctx: ObsContext): ObsContext =
+    ctx.getSite.isDefined ? ctx | ctx.withSite(Option(params.site).asGeminiOpt)
+
+  protected [ags] def select(ctx: ObsContext, mt: MagnitudeTable, candidates: List[SiderealTarget]): Option[AgsStrategy.Selection] = {
 
     // Temporary for Andy's tests.
     def feedback(feedback: => String): Unit =
