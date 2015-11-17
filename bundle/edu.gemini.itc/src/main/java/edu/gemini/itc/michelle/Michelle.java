@@ -1,9 +1,7 @@
 package edu.gemini.itc.michelle;
 
 import edu.gemini.itc.base.*;
-import edu.gemini.itc.shared.CalculationMethod;
-import edu.gemini.itc.shared.MichelleParameters;
-import edu.gemini.itc.shared.ObservationDetails;
+import edu.gemini.itc.shared.*;
 import edu.gemini.spModel.core.Site;
 import edu.gemini.spModel.data.YesNoType;
 import edu.gemini.spModel.gemini.michelle.MichelleParams;
@@ -56,7 +54,7 @@ public final class Michelle extends Instrument {
         _sampling = super.getSampling();
         _centralWavelength = mp.centralWavelength().toNanometers();
 
-        _mode = odp.getMethod();
+        _mode = odp.calculationMethod();
 
         final InstrumentWindow michelleInstrumentWindow =
                 new InstrumentWindow(getDirectory() + "/" + getPrefix() +
@@ -81,7 +79,7 @@ public final class Michelle extends Instrument {
 
 
         //Test to see that all conditions for Spectroscopy are met
-        if (_mode.isSpectroscopy()) {
+        if (_mode instanceof Spectroscopy) {
             if (params.grating().equals(MichelleParams.Disperser.MIRROR))
                 throw new RuntimeException("Spectroscopy mode is selected but a grating" +
                         " is not.\nPlease select a grating and a " +
@@ -100,7 +98,7 @@ public final class Michelle extends Instrument {
             }
         }
 
-        if (_mode.isImaging()) {
+        if (_mode instanceof Imaging) {
             if (params.filter().equals(MichelleParams.Filter.NONE))
                 throw new RuntimeException("Imaging mode is selected but a filter" +
                         " is not.\n  Please select a filter and resubmit the " +
@@ -164,7 +162,7 @@ public final class Michelle extends Instrument {
     }
 
     public double getPixelSize() {
-        if (_mode.isSpectroscopy()) {
+        if (_mode instanceof Spectroscopy) {
             return SPECTROSCOPY_PIXEL_SIZE;
         } else
             return super.getPixelSize();
@@ -183,7 +181,7 @@ public final class Michelle extends Instrument {
     }
 
     public double getFrameTime() {
-        if (_mode.isSpectroscopy()) {
+        if (_mode instanceof Spectroscopy) {
             return _gratingOptics.getFrameTime();
         } else {
             return IMAGING_FRAME_TIME;

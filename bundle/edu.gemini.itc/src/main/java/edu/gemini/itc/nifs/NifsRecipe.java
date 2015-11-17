@@ -122,20 +122,17 @@ public final class NifsRecipe implements SpectroscopyRecipe {
         // Might implement these modules at a later time.
         double spec_source_frac = 0;
         double halo_spec_source_frac = 0;
-        final int number_exposures = _obsDetailParameters.getNumExposures();
-        final double frac_with_source = _obsDetailParameters.getSourceFraction();
-        final double exposure_time = _obsDetailParameters.getExposureTime();
 
         final Iterator<Double> src_frac_it = sf_list.iterator();
         final Iterator<Double> halo_src_frac_it = halo_sf_list.iterator();
 
         int i = 0;
-        final SpecS2N[] specS2Narr = new SpecS2N[_nifsParameters.ifuMethod() instanceof IfuSummed ? 1 : sf_list.size()];
+        final SpecS2N[] specS2Narr = new SpecS2N[_obsDetailParameters.analysisMethod() instanceof IfuSummed ? 1 : sf_list.size()];
 
         while (src_frac_it.hasNext()) {
             double ap_diam = 1;
 
-            if (_nifsParameters.ifuMethod()  instanceof IfuSummed) {
+            if (_obsDetailParameters.analysisMethod()  instanceof IfuSummed) {
                 while (src_frac_it.hasNext()) {
                     spec_source_frac = spec_source_frac + src_frac_it.next();
                     halo_spec_source_frac = halo_spec_source_frac + halo_src_frac_it.next();
@@ -151,18 +148,20 @@ public final class NifsRecipe implements SpectroscopyRecipe {
             // fp mask is fixed as 0.15
             final double fpMask = 0.15;
 
-            final SpecS2NLargeSlitVisitor specS2N = new SpecS2NLargeSlitVisitor(fpMask, pixel_size,
+            final SpecS2NLargeSlitVisitor specS2N = new SpecS2NLargeSlitVisitor(
+                    fpMask,
+                    pixel_size,
                     instrument.getSpectralPixelWidth(),
                     instrument.getObservingStart(),
                     instrument.getObservingEnd(),
                     instrument.getGratingDispersion_nm(),
                     instrument.getGratingDispersion_nmppix(),
-                    spec_source_frac, im_qual,
-                    ap_diam, number_exposures,
-                    frac_with_source, exposure_time,
-                    instrument.getDarkCurrent(),
+                    spec_source_frac,
+                    im_qual,
+                    ap_diam,
                     instrument.getReadNoise(),
-                    _obsDetailParameters.getSkyApertureDiameter());
+                    instrument.getDarkCurrent(),
+                    _obsDetailParameters);
 
             specS2N.setSourceSpectrum(calcSource.sed);
             specS2N.setBackgroundSpectrum(calcSource.sky);

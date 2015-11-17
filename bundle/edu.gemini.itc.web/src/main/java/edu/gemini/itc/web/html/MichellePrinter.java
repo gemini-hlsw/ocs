@@ -5,10 +5,7 @@ import edu.gemini.itc.base.SpectroscopyResult;
 import edu.gemini.itc.michelle.Michelle;
 import edu.gemini.itc.michelle.MichelleRecipe;
 import edu.gemini.itc.shared.*;
-import edu.gemini.spModel.core.PointSource$;
-import edu.gemini.spModel.core.UniformSource$;
 import edu.gemini.spModel.gemini.michelle.MichelleParams;
-import scala.Tuple2;
 
 import java.io.PrintWriter;
 import java.util.UUID;
@@ -26,7 +23,7 @@ public final class MichellePrinter extends PrinterBase {
         super(out);
         this.recipe    = new MichelleRecipe(p, instr);
         this.pdp       = pdp;
-        this.isImaging = p.observation().getMethod().isImaging();
+        this.isImaging = p.observation().calculationMethod() instanceof Imaging;
     }
 
     public void writeOutput() {
@@ -48,38 +45,21 @@ public final class MichellePrinter extends PrinterBase {
 
         _println("");
 
-        if (!result.observation().isAutoAperture()) {
-            _println(String.format("software aperture extent along slit = %.2f arcsec", result.observation().getApertureDiameter()));
-        } else {
-            if (result.source().profile() == UniformSource$.MODULE$) {
-                _println(String.format("software aperture extent along slit = %.2f arcsec", 1 / instrument.getFPMask()));
-            } else if (result.source().profile() == PointSource$.MODULE$) {
-                _println(String.format("software aperture extent along slit = %.2f arcsec", 1.4 * result.iqCalc().getImageQuality()));
-            }
-        }
-
-        if (!result.source().isUniform()) {
-            _println(String.format("fraction of source flux in aperture = %.2f", result.st().getSlitThroughput()));
-        }
+        _printSoftwareAperture(result, 1 / instrument.getFPMask());
 
         _println(String.format("derived image size(FWHM) for a point source = %.2farcsec\n", result.iqCalc().getImageQuality()));
 
-        _println("Sky subtraction aperture = " + result.observation().getSkyApertureDiameter() + " times the software aperture.");
+        _printSkyAperture(result);
 
         _println("");
 
-        final int number_exposures = result.observation().getNumExposures();
-        final double frac_with_source = result.observation().getSourceFraction();
-        final double exposure_time = result.observation().getExposureTime();
         if (instrument.polarimetryIsUsed()) {
             //Michelle polarimetry uses 4 waveplate positions so a single observation takes 4 times as long.
             //To the user it should appear as though the time used by the ITC matches thier requested time.
             //hence the x4 factor
-            _println(String.format("Requested total integration time = %.2f secs, of which %.2f secs is on source.",
-                    exposure_time * 4 * number_exposures, exposure_time * 4 * number_exposures * frac_with_source));
+            _printRequestedIntegrationTime(result, 4);
         } else {
-            _println(String.format("Requested total integration time = %.2f secs, of which %.2f secs is on source.",
-                    exposure_time * number_exposures, exposure_time * number_exposures * frac_with_source));
+            _printRequestedIntegrationTime(result);
         }
 
         _println("");
@@ -124,7 +104,7 @@ public final class MichellePrinter extends PrinterBase {
 
         _print(CalculatablePrinter.getTextResult(result.sfCalc()));
         _println(CalculatablePrinter.getTextResult(result.iqCalc()));
-        _println("Sky subtraction aperture = " + result.observation().getSkyApertureDiameter() + " times the software aperture.\n");
+        _printSkyAperture(result);
 
         if (!instrument.polarimetryIsUsed()) {
             _println(CalculatablePrinter.getTextResult(result.is2nCalc(), result.observation()));
@@ -190,13 +170,13 @@ public final class MichellePrinter extends PrinterBase {
         }
         s += "\n";
         s += "\n";
-        if (p.observation().getMethod().isSpectroscopy())
+        if (p.observation().calculationMethod() instanceof Spectroscopy)
             s += String.format("<L1> Central Wavelength: %.1f nm\n", instrument.getCentralWavelength());
         s += "Spatial Binning: 1\n";
-        if (p.observation().getMethod().isSpectroscopy())
+        if (p.observation().calculationMethod() instanceof Spectroscopy)
             s += "Spectral Binning: 1\n";
         s += "Pixel Size in Spatial Direction: " + instrument.getPixelSize() + "arcsec\n";
-        if (p.observation().getMethod().isSpectroscopy())
+        if (p.observation().calculationMethod() instanceof Spectroscopy)
             s += "Pixel Size in Spectral Direction: " + instrument.getGratingDispersion_nmppix() + "nm\n";
         return s;
     }

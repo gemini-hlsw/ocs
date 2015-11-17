@@ -14,7 +14,7 @@ import edu.gemini.spModel.core.WavelengthConversions._
 object BaselineGmos {
 
 
-  lazy val Fixtures = RBandImaging ++ KBandSpectroscopy
+  lazy val Fixtures = RBandImaging ++ KBandSpectroscopy ++ KBandIfuSpectroscopy
 
   // === IMAGING
 
@@ -31,7 +31,6 @@ object BaselineGmos {
       None,
       1,
       1,
-      None,                         // IFU method
       DetectorManufacturer.E2V,
       Site.GN),
     GmosParameters(
@@ -44,7 +43,6 @@ object BaselineGmos {
       None,
       2,
       2,
-      None,                         // IFU method
       DetectorManufacturer.HAMAMATSU,
       Site.GN),
 
@@ -59,7 +57,6 @@ object BaselineGmos {
       None,
       2,
       4,
-      None,
       DetectorManufacturer.E2V,
       Site.GS),
     GmosParameters(
@@ -72,7 +69,6 @@ object BaselineGmos {
       None,
       4,
       4,
-      None,
       DetectorManufacturer.HAMAMATSU,
       Site.GS)
 
@@ -93,34 +89,7 @@ object BaselineGmos {
       None,
       1,
       1,
-      None,
       DetectorManufacturer.E2V,
-      Site.GN),
-    GmosParameters(
-      FilterNorth.g_G0301,
-      DisperserNorth.R400_G5305,
-      500.nm,
-      FPUnitNorth.IFU_2,
-      AmpGain.HIGH,
-      AmpReadMode.SLOW,
-      None,
-      2,
-      2,
-      Some(IfuSingle(0.0)),
-      DetectorManufacturer.HAMAMATSU,
-      Site.GN),
-    GmosParameters(
-      FilterNorth.g_G0301,
-      DisperserNorth.R400_G5305,
-      500.nm,
-      FPUnitNorth.IFU_3,
-      AmpGain.HIGH,
-      AmpReadMode.SLOW,
-      None,
-      2,
-      2,
-      Some(IfuSingle(0.3)),
-      DetectorManufacturer.HAMAMATSU,
       Site.GN),
 
     // GMOS-S
@@ -134,25 +103,53 @@ object BaselineGmos {
       None,
       2,
       4,
-      None,
       DetectorManufacturer.E2V,
       Site.GS)
 
-// Radial IFU is currently not supported
-//    GmosParameters(
-//      FilterSouth.g_G0325,
-//      DisperserSouth.R400_G5325,
-//      500.nm,
-//      FPUnitSouth.IFU_1,
-//      AmpGain.HIGH,
-//      AmpReadMode.FAST,
-//      None,
-//      4,
-//      4,
-//      Some(IfuRadial(0.0, 0.3)),
-//      DetectorManufacturer.HAMAMATSU,
-//      Site.GS)
   ))
 
+  // === IFU SPECTROSCOPY
+
+  private lazy val KBandIfuSpectroscopy = Fixture.kBandIfuGmosFixtures(List(
+
+    // GMOS-N
+    GmosParameters(
+      FilterNorth.g_G0301,
+      DisperserNorth.R150_G5306,
+      500.nm,
+      FPUnitNorth.IFU_2,
+      AmpGain.HIGH,
+      AmpReadMode.SLOW,
+      None,
+      1,
+      1,
+      DetectorManufacturer.E2V,
+      Site.GN),
+    GmosParameters(
+      FilterNorth.g_G0301,
+      DisperserNorth.R400_G5305,
+      500.nm,
+      FPUnitNorth.IFU_2,
+      AmpGain.HIGH,
+      AmpReadMode.SLOW,
+      None,
+      2,
+      2,
+      DetectorManufacturer.HAMAMATSU,
+      Site.GN),
+    // GMOS-S
+    GmosParameters(
+      FilterNorth.g_G0301,
+      DisperserNorth.R400_G5305,
+      500.nm,
+      FPUnitNorth.IFU_3,
+      AmpGain.HIGH,
+      AmpReadMode.SLOW,
+      None,
+      2,
+      2,
+      DetectorManufacturer.HAMAMATSU,
+      Site.GN)
+  ))
 }
 

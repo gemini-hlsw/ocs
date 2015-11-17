@@ -42,12 +42,9 @@ public final class NifsPrinter extends PrinterBase {
             _println(HtmlPrinter.printSummary((Altair) result.aoSystem().get()));
         }
 
-        final int number_exposures = result.observation().getNumExposures();
-        final double frac_with_source = result.observation().getSourceFraction();
-        final double exposure_time = result.observation().getExposureTime();
-
         _println(String.format("derived image halo size (FWHM) for a point source = %.2f arcsec\n", result.iqCalc().getImageQuality()));
-        _println(String.format("Requested total integration time = %.2f secs, of which %.2f secs is on source.", exposure_time * number_exposures, exposure_time * number_exposures * frac_with_source));
+
+        _printRequestedIntegrationTime(result);
 
         _println("");
         _printPeakPixelInfo(s.ccd(0));

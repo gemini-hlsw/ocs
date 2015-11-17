@@ -496,31 +496,29 @@
 				<td colspan="2"><input value="s2n" name="calcMethod" type="hidden" />Total S/N ratio resulting from <input name="numExpA" size="5" value="30" type="text" />
 				exposures each having an exposure time of <input name="expTimeA" size="5" value="120" type="text" /> secs and with a fraction <input name="fracOnSourceA" size="4" value="1.0" type="text" /> of exposures that observe the source</td>
 			</tr>
-			<!----><!---->
-			<input value="1" name="autoSkyAper" type="hidden" />
-			<input value="1" name="userSkyAper" type="hidden" />
-			<input value="autoAper" name="aperType" type="hidden" />
-			<tr>
-				<td colspan="2"><input value="userAper" name="aperType" type="hidden" />  <input name="userAperDiam" size="4" value="2" type="hidden" /> </td>
-			</tr>
-			<tr>
-				<td colspan="2" height="50" valign="bottom">For Integral Field Unit (IFU) spectroscopy only ...</td>
-			</tr>
 
 			<tr>
-				<td><input value="summedIFU" name="ifuMethod" checked="checked" type="radio" /></td>
+				<td colspan="2" height="50" valign="bottom"><b>Analysis Method:</b></td>
+			</tr>
+
+			<!-- NIFS only allows sky fibres = 1 -->
+			<input name="ifuSkyFibres" size="5" value="1" type="hidden">
+
+			<tr>
+				<td><input value="summedIFU" name="analysisMethod" checked="checked" type="radio" /></td>
 				<td>Select multiple IFU elements to be summed : <input name="ifuNumX" size="5" value="2" type="text" /> by  
-				<input name="ifuNumY" size="5" value="5" type="text" /> apertures(each one 0.103x0.042 arcsec)  
-				<input name="ifuCenterX" size="5" value="0.0" type="hidden" /> 
-				<input name="ifuCenterY" size="5" value="0.0" type="hidden" /></td>
+					<input name="ifuNumY" size="5" value="5" type="text" /> apertures(each one 0.103x0.042 arcsec)
+					<input name="ifuCenterX" size="5" value="0.0" type="hidden" />
+					<input name="ifuCenterY" size="5" value="0.0" type="hidden" />
+				</td>
 			</tr>
 			<tr>
-				<td><input value="singleIFU" name="ifuMethod" type="radio" /></td>
+				<td><input value="singleIFU" name="analysisMethod" type="radio" /></td>
 
 				<td>Select an individual IFU element offset by <input name="ifuOffset" size="5" value="0.0" type="text" /> arcsec from the center</td>
 			</tr>
 			<tr>
-				<td><input value="radialIFU" name="ifuMethod" type="radio" /></td>
+				<td><input value="radialIFU" name="analysisMethod" type="radio" /></td>
 				<td>Select multiple IFU elements along a radius with offsets of <input name="ifuMinOffset" size="5" value="0.0" type="text" />  to 
 				<input name="ifuMaxOffset" size="5" value="1.0" type="text" /> arcsec </td>
 

@@ -9,11 +9,7 @@ import edu.gemini.itc.niri.Niri;
 import edu.gemini.itc.niri.NiriRecipe;
 import edu.gemini.itc.shared.*;
 import edu.gemini.spModel.gemini.niri.Niri.Mask;
-import edu.gemini.spModel.core.PointSource$;
-import edu.gemini.spModel.core.UniformSource$;
 import scala.Option;
-import scala.Tuple2;
-import scala.collection.JavaConversions;
 
 import java.io.PrintWriter;
 import java.util.UUID;
@@ -35,7 +31,7 @@ public final class NiriPrinter extends PrinterBase {
         super(out);
         this.instr     = instr;
         this.recipe    = new NiriRecipe(p, instr);
-        this.isImaging = p.observation().getMethod().isImaging();
+        this.isImaging = p.observation().calculationMethod() instanceof Imaging;
         this.pdp       = pdp;
     }
 
@@ -63,27 +59,13 @@ public final class NiriPrinter extends PrinterBase {
             _println(HtmlPrinter.printSummary((Altair) result.aoSystem().get()));
         }
 
-        if (!result.observation().isAutoAperture()) {
-            _println(String.format("software aperture extent along slit = %.2f arcsec", result.observation().getApertureDiameter()));
-        } else {
-            if (result.source().profile() == UniformSource$.MODULE$) {
-                _println(String.format("software aperture extent along slit = %.2f arcsec", 1 / instrument.getFPMask()));
-            } else if (result.source().profile() == PointSource$.MODULE$) {
-                _println(String.format("software aperture extent along slit = %.2f arcsec", 1.4 * result.specS2N()[0].getImageQuality()));
-            }
-        }
-
-        if (!result.source().isUniform()) {
-            _println(String.format("fraction of source flux in aperture = %.2f", result.st().getSlitThroughput()));
-        }
+        _printSoftwareAperture(result, 1 / instrument.getFPMask());
 
         _println(String.format("derived image size(FWHM) for a point source = %.2f arcsec", result.specS2N()[0].getImageQuality()));
 
         _println("");
-        _println(String.format(
-                "Requested total integration time = %.2f secs, of which %.2f secs is on source.",
-                result.observation().getExposureTime() * result.observation().getNumExposures(),
-                result.observation().getExposureTime() * result.observation().getNumExposures() * result.observation().getSourceFraction()));
+
+        _printRequestedIntegrationTime(result);
 
         _println("");
         _printPeakPixelInfo(s.ccd(0));

@@ -6,8 +6,6 @@ import edu.gemini.itc.base.TransmissionElement;
 import edu.gemini.itc.flamingos2.Flamingos2;
 import edu.gemini.itc.flamingos2.Flamingos2Recipe;
 import edu.gemini.itc.shared.*;
-import edu.gemini.spModel.core.PointSource$;
-import edu.gemini.spModel.core.UniformSource$;
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2.FPUnit;
 
 import java.io.PrintWriter;
@@ -26,7 +24,7 @@ public final class Flamingos2Printer extends PrinterBase {
         super(out);
         this.pdp       = pdp;
         this.recipe    = new Flamingos2Recipe(p, instr);
-        this.isImaging = p.observation().getMethod().isImaging();
+        this.isImaging = p.observation().calculationMethod() instanceof Imaging;
     }
 
     /**
@@ -56,27 +54,13 @@ public final class Flamingos2Printer extends PrinterBase {
         _print(CalculatablePrinter.getTextResult(result.sfCalc()));
         _println(CalculatablePrinter.getTextResult(result.iqCalc()));
 
-        if (!result.parameters().observation().isAutoAperture()) {
-            _println(String.format("software aperture extent along slit = %.2f arcsec", result.parameters().observation().getApertureDiameter()));
-        } else {
-            if (result.source().profile() == UniformSource$.MODULE$) {
-                _println(String.format("software aperture extent along slit = %.2f arcsec", 1 / instrument.getSlitSize() * result.instrument().getPixelSize()));
-            } else if (result.source().profile() == PointSource$.MODULE$) {
-                _println(String.format("software aperture extent along slit = %.2f arcsec", 1.4 * result.iqCalc().getImageQuality()));
-            }
-        }
-
-        if (!result.parameters().source().isUniform()) {
-            _println(String.format("fraction of source flux in aperture = %.2f", result.st().getSlitThroughput()));
-        }
+        _printSoftwareAperture(result, 1 / instrument.getSlitSize() * result.instrument().getPixelSize());
 
         _println(String.format("derived image size(FWHM) for a point source = %.2f arcsec", result.iqCalc().getImageQuality()));
 
         _println("");
-        final double totExpTime = result.observation().getExposureTime() * result.observation().getNumExposures();
-        _println(String.format(
-                "Requested total integration time = %.2f secs, of which %.2f secs is on source.",
-                totExpTime, totExpTime * result.observation().getSourceFraction()));
+
+        _printRequestedIntegrationTime(result);
 
         _println("");
         _printPeakPixelInfo(s.ccd(0));

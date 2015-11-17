@@ -41,7 +41,7 @@ public final class NiriRecipe implements ImagingRecipe, SpectroscopyRecipe {
 
     private void validateInputParameters() {
         if (niriParameters.altair().isDefined()) {
-            if (_obsDetailParameters.getMethod().isSpectroscopy()) {
+            if (_obsDetailParameters.calculationMethod() instanceof Spectroscopy) {
                 throw new IllegalArgumentException(
                         "Altair cannot currently be used with Spectroscopy mode in the ITC.  Please deselect either altair or spectroscopy and resubmit the form.");
             }
@@ -124,15 +124,7 @@ public final class NiriRecipe implements ImagingRecipe, SpectroscopyRecipe {
 
         final double pixel_size = instrument.getPixelSize();
 
-        final SlitThroughput st;
-        if (!_obsDetailParameters.isAutoAperture()) {
-            st = new SlitThroughput(im_qual,
-                    _obsDetailParameters.getApertureDiameter(), pixel_size,
-                    instrument.getFPMask());
-        } else {
-            st = new SlitThroughput(im_qual, pixel_size, instrument.getFPMask());
-        }
-
+        final SlitThroughput st = new SlitThroughput(_obsDetailParameters.analysisMethod(), im_qual, pixel_size, instrument.getFPMask());
         double ap_diam = st.getSpatialPix();
         double spec_source_frac = st.getSlitThroughput();
 
@@ -146,15 +138,16 @@ public final class NiriRecipe implements ImagingRecipe, SpectroscopyRecipe {
             }
         }
 
-        final SpecS2NVisitor specS2N = new SpecS2NVisitor(instrument.getFPMask(),
-                pixel_size, instrument.getSpectralPixelWidth(),
+        final SpecS2NVisitor specS2N = new SpecS2NVisitor(
+                pixel_size,
+                instrument.getFPMask(),
+                instrument.getSpectralPixelWidth(),
                 instrument.getObservingStart(),
                 instrument.getObservingEnd(),
-                instrument.getGrismResolution(), spec_source_frac, im_qual,
+                instrument.getGrismResolution(),
+                spec_source_frac, im_qual,
                 ap_diam,
-                _obsDetailParameters.getNumExposures(),
-                _obsDetailParameters.getSourceFraction(),
-                _obsDetailParameters.getExposureTime(),
+                _obsDetailParameters.calculationMethod(),
                 instrument.getDarkCurrent(),
                 niriParameters.readMode().getReadNoise());
         specS2N.setSourceSpectrum(calcSource.sed);

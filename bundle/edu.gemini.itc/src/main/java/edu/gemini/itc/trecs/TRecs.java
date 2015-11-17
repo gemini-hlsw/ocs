@@ -1,9 +1,7 @@
 package edu.gemini.itc.trecs;
 
 import edu.gemini.itc.base.*;
-import edu.gemini.itc.shared.CalculationMethod;
-import edu.gemini.itc.shared.ObservationDetails;
-import edu.gemini.itc.shared.TRecsParameters;
+import edu.gemini.itc.shared.*;
 import edu.gemini.spModel.core.Site;
 import edu.gemini.spModel.gemini.trecs.TReCSParams;
 import edu.gemini.spModel.gemini.trecs.TReCSParams.Disperser;
@@ -53,7 +51,7 @@ public final class TRecs extends Instrument {
         _focalPlaneMask = tp.mask();
         _grating = tp.grating();
         _centralWavelength = tp.centralWavelength().toNanometers();
-        _mode = odp.getMethod();
+        _mode = odp.calculationMethod();
 
         final TReCSParams.WindowWheel instrumentWindow = tp.instrumentWindow();
         final String file = getDirectory() + "/" + getPrefix() + instrumentWindow.name() + Instrument.getSuffix();
@@ -75,7 +73,7 @@ public final class TRecs extends Instrument {
 
 
         //Test to see that all conditions for Spectroscopy are met
-        if (_mode.isSpectroscopy()) {
+        if (_mode instanceof Spectroscopy) {
             if (_grating.equals(Disperser.MIRROR))
                 throw new RuntimeException("Spectroscopy calculation method is selected but a grating" +
                         " is not.\nPlease select a grating and a " +
@@ -89,7 +87,7 @@ public final class TRecs extends Instrument {
                         "configuration section.");
         }
 
-        if (_mode.isImaging()) {
+        if (_mode instanceof Imaging) {
             if (tp.filter().equals(TReCSParams.Filter.NONE))
                 throw new RuntimeException("Imaging calculation method is selected but a filter" +
                         " is not.\n  Please select a filter and resubmit the " +
@@ -184,7 +182,7 @@ public final class TRecs extends Instrument {
     }
 
     public double getFrameTime() {
-        if (_mode.isSpectroscopy()) {
+        if (_mode instanceof Spectroscopy) {
             if (getGrating().equals(Disperser.HIGH_RES)) {
                 return SPECTROSCOPY_HI_RES_FRAME_TIME;
             } else {
@@ -196,7 +194,7 @@ public final class TRecs extends Instrument {
     }
 
     public int getExtraLowFreqNoise() {
-        if (_mode.isSpectroscopy())
+        if (_mode instanceof Spectroscopy)
             return elfn_param * 3;
         else
             return elfn_param;

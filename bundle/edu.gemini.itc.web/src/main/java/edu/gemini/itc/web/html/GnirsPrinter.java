@@ -4,8 +4,6 @@ import edu.gemini.itc.base.SpectroscopyResult;
 import edu.gemini.itc.gnirs.Gnirs;
 import edu.gemini.itc.gnirs.GnirsRecipe;
 import edu.gemini.itc.shared.*;
-import edu.gemini.spModel.core.PointSource$;
-import edu.gemini.spModel.core.UniformSource$;
 
 import java.io.PrintWriter;
 import java.util.UUID;
@@ -36,30 +34,15 @@ public final class GnirsPrinter extends PrinterBase {
 
         final Gnirs instrument = (Gnirs) result.instrument();
 
-        if (!result.observation().isAutoAperture()) {
-            _println(String.format("software aperture extent along slit = %.2f arcsec", result.observation().getApertureDiameter()));
-        } else {
-            if (result.source().profile() == UniformSource$.MODULE$) {
-                    _println(String.format("software aperture extent along slit = %.2f arcsec", 1 / instrument.getFPMask()));
-            } else if (result.source().profile() == PointSource$.MODULE$) {
-                    _println(String.format("software aperture extent along slit = %.2f arcsec", 1.4 * result.iqCalc().getImageQuality()));
-            }
-        }
-
-        if (!result.source().isUniform()) {
-            _println(String.format("fraction of source flux in aperture = %.2f", result.st().getSlitThroughput()));
-        }
+        _printSoftwareAperture(result, 1 / instrument.getFPMask());
 
         _println(String.format("derived image size(FWHM) for a point source = %.2f arcsec\n", result.iqCalc().getImageQuality()));
 
-        _println("Sky subtraction aperture = "
-                + result.observation().getSkyApertureDiameter()
-                + " times the software aperture.");
+        _printSkyAperture(result);
 
         _println("");
-        _println(String.format("Requested total integration time = %.2f secs, of which %.2f secs is on source.",
-                result.observation().getExposureTime() * result.observation().getNumExposures(),
-                result.observation().getExposureTime() * result.observation().getNumExposures() * result.observation().getSourceFraction()));
+
+        _printRequestedIntegrationTime(result);
 
         _println("");
         _printPeakPixelInfo(s.ccd(0));
@@ -133,7 +116,7 @@ public final class GnirsPrinter extends PrinterBase {
 
         s += String.format("<L1> Central Wavelength: %.1f nm\n", instrument.getCentralWavelength());
         s += "Pixel Size in Spatial Direction: " + instrument.getPixelSize() + " arcsec\n";
-        if (p.observation().getMethod().isSpectroscopy()) {
+        if (p.observation().calculationMethod() instanceof Spectroscopy) {
             if (instrument.XDisp_IsUsed()) {
                 s += String.format("Pixel Size in Spectral Direction(Order 3): %.3f nm\n", instrument.getGratingDispersion_nmppix() / 3);
                 s += String.format("Pixel Size in Spectral Direction(Order 4): %.3f nm\n", instrument.getGratingDispersion_nmppix() / 4);

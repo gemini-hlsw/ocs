@@ -53,24 +53,24 @@ public final class TRecsRecipe implements ImagingRecipe, SpectroscopyRecipe {
         // TODO : so the ObservationDetailsParameters object can become immutable. Basically this calculates
         // TODO : some missing parameters and/or turns the total exposure time into a single exposure time.
         // TODO : This is a temporary hack. There needs to be a better solution for this.
-        // NOTE : odp.getExposureTime() carries the TOTAL exposure time (as opposed to exp time for a single frame)
+        // NOTE : odp.exposureTime() carries the TOTAL exposure time (as opposed to exp time for a single frame)
         final TRecs instrument = new TRecs(tp, odp); // TODO: Avoid creating an instrument instance twice.
         final double correctedExposureTime = instrument.getFrameTime();
-        final int correctedNumExposures = new Double(odp.getExposureTime() / instrument.getFrameTime() + 0.5).intValue();
-        if (odp.getMethod() instanceof ImagingInt) {
+        final int correctedNumExposures = new Double(odp.exposureTime() / instrument.getFrameTime() + 0.5).intValue();
+        if (odp.calculationMethod() instanceof ImagingInt) {
             return new ObservationDetails(
-                    new ImagingInt(odp.getSNRatio(), correctedExposureTime, odp.getSourceFraction()),
-                    odp.getAnalysis()
+                    new ImagingInt(((ImagingInt) odp.calculationMethod()).sigma(), correctedExposureTime, odp.sourceFraction()),
+                    odp.analysisMethod()
             );
-        } else if (odp.getMethod() instanceof ImagingSN) {
+        } else if (odp.calculationMethod() instanceof ImagingS2N) {
             return new ObservationDetails(
-                    new ImagingSN(correctedNumExposures, correctedExposureTime, odp.getSourceFraction()),
-                    odp.getAnalysis()
+                    new ImagingS2N(correctedNumExposures, correctedExposureTime, odp.sourceFraction()),
+                    odp.analysisMethod()
             );
-        } else if (odp.getMethod() instanceof SpectroscopySN) {
+        } else if (odp.calculationMethod() instanceof SpectroscopyS2N) {
             return new ObservationDetails(
-                    new SpectroscopySN(correctedNumExposures, correctedExposureTime, odp.getSourceFraction()),
-                    odp.getAnalysis()
+                    new SpectroscopyS2N(correctedNumExposures, correctedExposureTime, odp.sourceFraction()),
+                    odp.analysisMethod()
             );
         } else {
             throw new IllegalArgumentException();
@@ -108,7 +108,6 @@ public final class TRecsRecipe implements ImagingRecipe, SpectroscopyRecipe {
         // inputs: source morphology specification
 
         double pixel_size = instrument.getPixelSize();
-        double ap_diam = 0;
 
         // Calculate image quality
         final ImageQualityCalculatable IQcalc = ImageQualityCalculationFactory.getCalculationInstance(_sdParameters, _obsConditionParameters, _telescope, instrument);
@@ -117,23 +116,9 @@ public final class TRecsRecipe implements ImagingRecipe, SpectroscopyRecipe {
         // In this version we are bypassing morphology modules 3a-5a.
         // i.e. the output morphology is same as the input morphology.
         // Might implement these modules at a later time.
-        final double exp_time = _obsDetailParameters.getExposureTime();
-        final int number_exposures = _obsDetailParameters.getNumExposures();
-        final double frac_with_source = _obsDetailParameters.getSourceFraction();
-        double spec_source_frac = 0;
-
-        final SlitThroughput st;
-        if (!_obsDetailParameters.isAutoAperture()) {
-            st = new SlitThroughput(IQcalc.getImageQuality(),
-                    _obsDetailParameters.getApertureDiameter(), pixel_size,
-                    instrument.getFPMask());
-        } else {
-            st = new SlitThroughput(IQcalc.getImageQuality(), pixel_size, instrument.getFPMask());
-        }
-
-
-        ap_diam = st.getSpatialPix();
-        spec_source_frac = st.getSlitThroughput();
+        final SlitThroughput st = new SlitThroughput(_obsDetailParameters.analysisMethod(), IQcalc.getImageQuality(), pixel_size, instrument.getFPMask());
+        double ap_diam = st.getSpatialPix();
+        double spec_source_frac = st.getSlitThroughput();
 
         // For the usb case we want the resolution to be determined by the
         // slit width and not the image quality for a point source.
@@ -150,18 +135,20 @@ public final class TRecsRecipe implements ImagingRecipe, SpectroscopyRecipe {
             im_qual = IQcalc.getImageQuality();
         }
 
-        final SpecS2NLargeSlitVisitor specS2N = new SpecS2NLargeSlitVisitor(instrument.getFPMask(),
-                pixel_size, instrument.getSpectralPixelWidth(),
+        final SpecS2NLargeSlitVisitor specS2N = new SpecS2NLargeSlitVisitor(
+                instrument.getFPMask(),
+                pixel_size,
+                instrument.getSpectralPixelWidth(),
                 instrument.getObservingStart(),
                 instrument.getObservingEnd(),
                 instrument.getGratingDispersion_nm(),
                 instrument.getGratingDispersion_nmppix(),
                 spec_source_frac,
-                im_qual, ap_diam, number_exposures, frac_with_source,
-                exp_time,
-                instrument.getDarkCurrent(),
+                im_qual,
+                ap_diam,
                 instrument.getReadNoise(),
-                _obsDetailParameters.getSkyApertureDiameter());
+                instrument.getDarkCurrent(),
+                _obsDetailParameters);
 
         specS2N.setSourceSpectrum(sed);
         specS2N.setBackgroundSpectrum(sky);

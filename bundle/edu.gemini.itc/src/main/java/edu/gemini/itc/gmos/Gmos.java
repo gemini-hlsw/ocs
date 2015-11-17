@@ -110,11 +110,11 @@ public abstract class Gmos extends Instrument implements BinningProvider {
                     getDirectory() + "/" + getPrefix() + "ccdpix" + Instrument.getSuffix());
         }
 
-        if (isIfuUsed()) {
-            if (gp.ifuMethod().get() instanceof IfuSingle) {
-                _IFU = new IFUComponent(getPrefix(), ((IfuSingle) gp.ifuMethod().get()).offset());
-            } else if (gp.ifuMethod().get() instanceof IfuRadial) {
-                final IfuRadial ifu = (IfuRadial) gp.ifuMethod().get();
+        if (isIfuUsed() && getIfuMethod().isDefined()) {
+            if (getIfuMethod().get() instanceof IfuSingle) {
+                _IFU = new IFUComponent(getPrefix(), ((IfuSingle) getIfuMethod().get()).offset());
+            } else if (getIfuMethod().get() instanceof IfuRadial) {
+                final IfuRadial ifu = (IfuRadial) getIfuMethod().get();
                 _IFU = new IFUComponent(getPrefix(), ifu.minOffset(), ifu.maxOffset());
             } else {
                 throw new Error("invalid IFU type");
@@ -247,7 +247,7 @@ public abstract class Gmos extends Instrument implements BinningProvider {
     }
 
     public Option<IfuMethod> getIfuMethod() {
-        return gp.ifuMethod();
+        return (odp.analysisMethod() instanceof IfuMethod) ? Option.apply((IfuMethod) odp.analysisMethod()): Option.empty();
     }
 
     public GmosCommonType.FPUnit getFpMask() {
@@ -270,7 +270,7 @@ public abstract class Gmos extends Instrument implements BinningProvider {
 
     private void validate() {
         //Test to see that all conditions for Spectroscopy are met
-        if (odp.getMethod().isSpectroscopy()) {
+        if (odp.calculationMethod() instanceof Spectroscopy) {
 
             if (grating.isEmpty())
                 throw new RuntimeException("Spectroscopy calculation method is selected but a grating" +
@@ -295,7 +295,7 @@ public abstract class Gmos extends Instrument implements BinningProvider {
             }
         }
 
-        if (odp.getMethod().isImaging()) {
+        if (odp.calculationMethod() instanceof Imaging) {
 
             if (filter.isEmpty())
                 throw new RuntimeException("Imaging calculation method is selected but a filter is not.");
@@ -313,13 +313,17 @@ public abstract class Gmos extends Instrument implements BinningProvider {
             if (gp.customSlitWidth().isDefined())
                 throw new RuntimeException("Imaging calculation method is selected but a Custom" +
                         " Slit Width is also selected.\n");
-
-            if (isIfuUsed())
-                throw new RuntimeException("Imaging calculation method is selected but an IFU" +
-                        " is also selected.\nPlease deselect the IFU or" +
-                        " change the method to spectroscopy.");
         }
 
+        if (isIfuUsed() && getIfuMethod().isEmpty()) {
+            throw new RuntimeException("IFU is selected but no IFU analysis method is selected.\nPlease deselect the IFU or" +
+                    " select an IFU analysis method.");
+        }
+
+        if (!isIfuUsed() && getIfuMethod().isDefined()) {
+            throw new RuntimeException("An IFU analysis method is selected but no IFU is selected.\nPlease select the IFU or" +
+                    " select another analysis method.");
+        }
     }
 
     @Override

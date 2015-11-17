@@ -3,6 +3,7 @@ package edu.gemini.itc.gnirs;
 import edu.gemini.itc.base.*;
 import edu.gemini.itc.shared.CalculationMethod;
 import edu.gemini.itc.shared.GnirsParameters;
+import edu.gemini.itc.shared.Imaging;
 import edu.gemini.itc.shared.ObservationDetails;
 import edu.gemini.spModel.core.Site;
 import edu.gemini.spModel.gemini.gnirs.GNIRSParams;
@@ -67,7 +68,7 @@ public final class Gnirs extends Instrument {
         params = gp;
         _grating = gp.grating();
         _centralWavelength = correctedCentralWavelength(); // correct central wavelength if cross dispersion is used
-        _mode = odp.getMethod();
+        _mode = odp.calculationMethod();
         _XDisp = isXDispUsed();
 
         if (_centralWavelength < 1030 || _centralWavelength > 6000) {
@@ -75,7 +76,7 @@ public final class Gnirs extends Instrument {
         }
 
         //set read noise by exporsure time
-        if (odp.getExposureTime() <= 1.0) {
+        if (odp.exposureTime() <= 1.0) {
             _wellDepth      = DEEP_WELL;
             _linearityLimit = DEEP_WELL_LINEARTY_LIMIT;
         } else {
@@ -110,7 +111,7 @@ public final class Gnirs extends Instrument {
         addComponent(_camera);
 
         // GNIRS is spectroscopy only
-        if (_mode.isImaging()) {
+        if (_mode instanceof Imaging) {
             throw new RuntimeException("GNIRS does not support imaging.");
         }
 

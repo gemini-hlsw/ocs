@@ -34,6 +34,10 @@ object Fixture {
 
   def kBandSpcFixtures[T <: InstrumentDetails](configs: List[T], conds: List[ObservingConditions] = ObservingConditions) = fixtures(KBandSources, SpectroscopyModes, configs, conds)
 
+  def kBandIfuFixtures[T <: InstrumentDetails](configs: List[T], conds: List[ObservingConditions] = ObservingConditions) = fixtures(KBandSources, IfuModes,          configs, conds)
+
+  def kBandIfuGmosFixtures[T <: InstrumentDetails](configs: List[T], conds: List[ObservingConditions] = ObservingConditions) = fixtures(KBandSources, IfuSingleModes, configs, conds)
+
   def kBandImgFixtures[T <: InstrumentDetails](configs: List[T], conds: List[ObservingConditions] = ObservingConditions) = fixtures(KBandSources, ImagingModes,      configs, conds)
 
   def nBandSpcFixtures[T <: InstrumentDetails](configs: List[T], conds: List[ObservingConditions] = ObservingConditions) = fixtures(NBandSources, SpectroscopyModes, configs, conds)
@@ -55,11 +59,11 @@ object Fixture {
   // ==== IMAGING ANALYSIS MODES
   lazy val ImagingModes = List(
     new ObservationDetails(
-      ImagingSN(10, 200.0, 0.5),
+      ImagingS2N(10, 200.0, 0.5),
       AutoAperture(5.0)
     ),
     new ObservationDetails(
-      ImagingSN(10, 200.0, 0.5),
+      ImagingS2N(10, 200.0, 0.5),
       UserAperture(2.0, 5.0)
     ),
     new ObservationDetails(
@@ -75,12 +79,46 @@ object Fixture {
   // ==== SPECTROSCOPY ANALYSIS MODES
   lazy val SpectroscopyModes = List(
     new ObservationDetails(
-      SpectroscopySN(6, 300.0, 0.5),
+      SpectroscopyS2N(6, 300.0, 0.5),
       AutoAperture(4.5)
     ),
     new ObservationDetails(
-      SpectroscopySN(6, 300.0, 1.0),
+      SpectroscopyS2N(6, 300.0, 1.0),
       UserAperture(2.5, 6.0)
+    )
+  )
+
+  // ==== IFU ANALYSIS MODES
+  lazy val IfuModes = IfuSingleModes ++ IfuSummedModes ++ IfuRadialModes
+
+  lazy val IfuSingleModes = List(
+    new ObservationDetails(
+      SpectroscopyS2N(10, 150.0, 0.5),
+      IfuSingle(1, 0.5)
+    )
+  )
+  lazy val IfuSummedModes = List(
+    new ObservationDetails(
+      SpectroscopyS2N(6, 300.0, 1.0),
+      IfuSummed(1, 2, 5, 0.0, 0.0)
+    )
+  )
+  lazy val IfuRadialModes = List(
+    new ObservationDetails(
+      SpectroscopyS2N(3, 400.0, 1.0),
+      IfuRadial(1, 0.0, 0.0)
+    ),
+    new ObservationDetails(
+      SpectroscopyS2N(3, 400.0, 1.0),
+      IfuRadial(1, 0.5, 1.0)
+    ),
+    new ObservationDetails(
+      SpectroscopyS2N(6, 300.0, 1.0),
+      IfuRadial(5, 0.0, 1.0)
+    ),
+    new ObservationDetails(
+      SpectroscopyS2N(6, 300.0, 1.0),
+      IfuRadial(5, 1.0, 1.0)
     )
   )
 

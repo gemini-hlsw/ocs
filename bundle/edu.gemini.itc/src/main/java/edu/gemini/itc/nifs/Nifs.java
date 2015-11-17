@@ -64,7 +64,7 @@ public final class Nifs extends Instrument {
         _sampling = super.getSampling();
 
         _centralWavelength = gp.centralWavelength().toNanometers();
-        _mode = odp.getMethod();
+        _mode = odp.calculationMethod();
 
         if (_centralWavelength < 1000 || _centralWavelength > 6000) {
             throw new RuntimeException("Central wavelength must be between 1.00um and 6.0um.");
@@ -89,25 +89,25 @@ public final class Nifs extends Instrument {
         _detector = new Detector(getDirectory() + "/", getPrefix(), "hawaii2_HgCdTe", "2K x 2K HgCdTe HAWAII-2 CCD");
         _detector.setDetectorPixels(DETECTOR_PIXELS);
 
-        _IFUMethod = gp.ifuMethod();
-        if (gp.ifuMethod() instanceof IfuSingle) {
-            _IFUOffset      = ((IfuSingle) gp.ifuMethod()).offset();
+        _IFUMethod = (IfuMethod) odp.analysisMethod();
+        if (odp.analysisMethod() instanceof IfuSingle) {
+            _IFUOffset      = ((IfuSingle) odp.analysisMethod()).offset();
             _IFU            = new IFUComponent(_IFUOffset, getPixelSize());
         }
-        else if (gp.ifuMethod() instanceof IfuRadial) {
-            _IFUMinOffset   = ((IfuRadial) gp.ifuMethod()).minOffset();
-            _IFUMaxOffset   = ((IfuRadial) gp.ifuMethod()).maxOffset();
+        else if (odp.analysisMethod() instanceof IfuRadial) {
+            _IFUMinOffset   = ((IfuRadial) odp.analysisMethod()).minOffset();
+            _IFUMaxOffset   = ((IfuRadial) odp.analysisMethod()).maxOffset();
             _IFU            = new IFUComponent(_IFUMinOffset, _IFUMaxOffset, getPixelSize());
         }
-        else if (gp.ifuMethod() instanceof IfuSummed) {
-            _IFUNumX        = ((IfuSummed) gp.ifuMethod()).numX();
-            _IFUNumY        = ((IfuSummed) gp.ifuMethod()).numY();
-            _IFUCenterX     = ((IfuSummed) gp.ifuMethod()).centerX();
-            _IFUCenterY     = ((IfuSummed) gp.ifuMethod()).centerY();
+        else if (odp.analysisMethod() instanceof IfuSummed) {
+            _IFUNumX        = ((IfuSummed) odp.analysisMethod()).numX();
+            _IFUNumY        = ((IfuSummed) odp.analysisMethod()).numY();
+            _IFUCenterX     = ((IfuSummed) odp.analysisMethod()).centerX();
+            _IFUCenterY     = ((IfuSummed) odp.analysisMethod()).centerY();
             _IFU            = new IFUComponent(_IFUNumX, _IFUNumY, _IFUCenterX, _IFUCenterY, getPixelSize());
         }
         else {
-            throw new IllegalArgumentException("ifu method is missing");
+            throw new IllegalArgumentException("Unknown IFU method");
         }
         addComponent(_IFU);
 

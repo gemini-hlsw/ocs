@@ -41,7 +41,6 @@ final case class GmosParameters(
                      customSlitWidth:   Option[GmosCommonType.CustomSlitWidth],
                      spatialBinning:    Int,
                      spectralBinning:   Int,
-                     ifuMethod:         Option[IfuMethod],
                      ccdType:           GmosCommonType.DetectorManufacturer,
                      site:              Site) extends InstrumentDetails
 
@@ -70,7 +69,6 @@ final case class NifsParameters(
                      grating:           NIFSParams.Disperser,
                      readMode:          NIFSParams.ReadMode,
                      centralWavelength: Wavelength,
-                     ifuMethod:         IfuMethod,
                      altair:            Option[AltairParameters]) extends InstrumentDetails
 
 final case class NiriParameters(

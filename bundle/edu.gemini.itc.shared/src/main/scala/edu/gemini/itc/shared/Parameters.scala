@@ -29,46 +29,66 @@ final case class SourceDefinition(
 
 // ==== Calculation method
 
-// TODO: We can probably get away with only IntegrationTime and S2N methods.
-// TODO: The difference between spectroscopy and imaging can/should be deduced from the instrument settings!
+// The calculation method denotes if we are doing spectroscopy or imaging and if we do integration (only for imaging)
+// or signal to noise calculations. The difference between imaging and spectroscopy is defined by the instrument
+// parameters and should/could be derived from there in the future.
+
+sealed trait Imaging
+sealed trait Spectroscopy
 
 sealed trait CalculationMethod {
-  val fraction: Double
-  val isIntTime: Boolean
-  def isS2N: Boolean = !isIntTime
-  val isImaging: Boolean
-  def isSpectroscopy: Boolean = !isImaging
+  def exposureTime: Double
+  def sourceFraction: Double
 }
-sealed trait Imaging extends CalculationMethod {
-  val isImaging = true
+
+sealed trait S2NMethod extends CalculationMethod {
+  def exposures: Int
 }
-sealed trait Spectroscopy extends CalculationMethod {
-  val isImaging = false
+
+sealed trait IntMethod extends CalculationMethod {
+  def sigma: Double
 }
-final case class ImagingSN(exposures: Int, time: Double, fraction: Double) extends Imaging {
-  val isIntTime = false
-}
-final case class ImagingInt(sigma: Double, expTime: Double, fraction: Double) extends Imaging {
-  val isIntTime = true
-}
-final case class SpectroscopySN(exposures: Int, time: Double, fraction: Double) extends Spectroscopy {
-  val isIntTime = false
-}
+
+final case class ImagingS2N(
+                    exposures: Int,
+                    exposureTime: Double,
+                    sourceFraction:
+                    Double) extends Imaging with S2NMethod
+
+final case class ImagingInt(
+                    sigma: Double,
+                    exposureTime: Double,
+                    sourceFraction: Double) extends Imaging with IntMethod
+
+final case class SpectroscopyS2N(
+                    exposures: Int,
+                    exposureTime: Double,
+                    sourceFraction: Double) extends Spectroscopy with S2NMethod
 
 
 // ==== Analysis method
 
-sealed trait AnalysisMethod {
-  val skyAperture: Double
+sealed trait AnalysisMethod
+
+sealed trait ApertureMethod extends AnalysisMethod {
+  val skyAperture: Double   // area assumed to be on sky
 }
-final case class AutoAperture(skyAperture: Double) extends AnalysisMethod
-final case class UserAperture(diameter: Double, skyAperture: Double) extends AnalysisMethod
+final case class AutoAperture(skyAperture: Double) extends ApertureMethod
+final case class UserAperture(diameter: Double, skyAperture: Double) extends ApertureMethod
+
+// IFU analysis is currently supported by GMOS and NIFS
+sealed trait IfuMethod extends AnalysisMethod {
+  val skyFibres: Int        // # fibres (area) assumed to be on sky
+}
+final case class IfuSingle(skyFibres: Int, offset: Double) extends IfuMethod
+final case class IfuRadial(skyFibres: Int, minOffset: Double, maxOffset: Double) extends IfuMethod
+final case class IfuSummed(skyFibres: Int, numX: Int, numY: Int, centerX: Double, centerY: Double) extends IfuMethod
 
 
-// ===== IFU (GMOS & NIFS)
+// === Observation Details
 
-// TODO: Is this an analysis method (instead of the ones above?). If so, should this be reflected here?
-sealed trait IfuMethod
-final case class IfuSingle(offset: Double) extends IfuMethod
-final case class IfuRadial(minOffset: Double, maxOffset: Double) extends IfuMethod
-final case class IfuSummed(numX: Int, numY: Int, centerX: Double, centerY: Double) extends IfuMethod
+final case class ObservationDetails(calculationMethod: CalculationMethod, analysisMethod: AnalysisMethod) {
+  def exposureTime   = calculationMethod.exposureTime
+  def sourceFraction = calculationMethod.sourceFraction
+  def isAutoAperture = analysisMethod.isInstanceOf[AutoAperture]
+}

@@ -1,8 +1,6 @@
 package edu.gemini.itc.base;
 
-import edu.gemini.itc.shared.AnalysisMethod;
-import edu.gemini.itc.shared.ObservationDetails;
-import edu.gemini.itc.shared.SourceDefinition;
+import edu.gemini.itc.shared.*;
 import edu.gemini.spModel.core.EmissionLine;
 import edu.gemini.spModel.core.GaussianSource;
 import edu.gemini.spModel.core.SpatialProfile;
@@ -18,12 +16,18 @@ public final class Validation {
 
     public static void validate(final Instrument instrument, final ObservationDetails obs, final SourceDefinition source) {
         checkElineWidth(instrument, source);
-        checkSourceFraction(obs.getNumExposures(), obs.getSourceFraction());
         checkGaussianFwhm(source.profile());
-        checkSkyAperture(obs.getAnalysis());
+
+        if (obs.analysisMethod() instanceof ApertureMethod) {
+            checkSkyAperture((ApertureMethod) obs.analysisMethod());
+        }
+        if (obs.calculationMethod() instanceof S2NMethod) {
+            checkSourceFraction(((S2NMethod) obs.calculationMethod()).exposures(), obs.calculationMethod().sourceFraction());
+        }
+
     }
 
-    private static void checkSkyAperture(final AnalysisMethod am) {
+    private static void checkSkyAperture(final ApertureMethod am) {
         if (am.skyAperture() < 1.0) {
             throw new IllegalArgumentException("The sky aperture must be 1.0 or greater.");
         }

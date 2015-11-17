@@ -1,9 +1,13 @@
 package edu.gemini.itc.web.html;
 
 import edu.gemini.itc.base.Instrument;
+import edu.gemini.itc.base.Result;
+import edu.gemini.itc.base.SpectroscopyResult;
 import edu.gemini.itc.shared.*;
 import edu.gemini.itc.web.servlets.FilesServlet;
 import edu.gemini.itc.web.servlets.ServerInfo;
+import edu.gemini.spModel.core.PointSource$;
+import edu.gemini.spModel.core.UniformSource$;
 import scala.collection.JavaConversions;
 
 import java.io.PrintWriter;
@@ -124,6 +128,54 @@ public abstract class PrinterBase {
             _print("Warning: " + w.msg());
         }
         _println("");
+    }
+
+    protected void _printSoftwareAperture(final SpectroscopyResult result, final double slitWidth) {
+        if (result.observation().analysisMethod() instanceof UserAperture) {
+            _println(String.format("software aperture extent along slit = %.2f arcsec", ((UserAperture) result.observation().analysisMethod()).diameter()));
+        } else {
+            if (result.source().profile() == UniformSource$.MODULE$) {
+                _println(String.format("software aperture extent along slit = %.2f arcsec", slitWidth));
+            } else if (result.source().profile() == PointSource$.MODULE$) {
+                _println(String.format("software aperture extent along slit = %.2f arcsec", 1.4 * result.iqCalc().getImageQuality()));
+            }
+        }
+
+        if (!result.parameters().source().isUniform()) {
+            _println(String.format("fraction of source flux in aperture = %.2f", result.st().getSlitThroughput()));
+        }
+    }
+
+    protected void _printRequestedIntegrationTime(final SpectroscopyResult result) {
+        _printRequestedIntegrationTime(result, 1);
+    }
+
+    // TODO: The correction factor here is only used for Michelle. This is an ancient hack around some special
+    // TODO: behavior for Michelle's polarimetry mode which needs to be corrected.
+    protected void _printRequestedIntegrationTime(final SpectroscopyResult result, final int correction) {
+        if (result.observation().calculationMethod() instanceof S2NMethod) {
+            final double numExposures = ((S2NMethod) result.observation().calculationMethod()).exposures();
+            final double exposureTime = result.observation().calculationMethod().exposureTime() * correction;
+            _printRequestedIntegrationTime(result, exposureTime, numExposures);
+        } else {
+            throw new Error("Unsupported analysis method");
+        }
+    }
+
+    protected void _printSkyAperture(final Result result) {
+        final AnalysisMethod method = result.observation().analysisMethod();
+        final double aperture;
+        if      (method instanceof ApertureMethod) aperture = ((ApertureMethod) method).skyAperture();
+        else if (method instanceof IfuMethod)      aperture = ((IfuMethod) method).skyFibres();
+        else throw new Error();
+        _println("Sky subtraction aperture = " + aperture + " times the software aperture.");
+    }
+
+    private void _printRequestedIntegrationTime(final SpectroscopyResult result, final double exposureTime, final double numExposures) {
+        _println(String.format(
+                "Requested total integration time = %.2f secs, of which %.2f secs is on source.",
+                exposureTime * numExposures,
+                exposureTime * numExposures * result.observation().sourceFraction()));
     }
 
     private String toPlotLimits(final PlottingDetails pd) {

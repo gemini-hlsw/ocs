@@ -56,23 +56,29 @@ public final class HtmlPrinter {
 
         sb.append("Calculation and analysis methods:\n");
         sb.append("<LI>mode: ");
-        sb.append((odp.getMethod().isImaging() ? "imaging" : "spectroscopy"));
+        sb.append((odp.calculationMethod() instanceof Imaging ? "imaging" : "spectroscopy"));
         sb.append("\n");
         sb.append("<LI>Calculation of ");
-        if (odp.getMethod().isS2N()) {
-            sb.append(String.format("S/N ratio with " + odp.getNumExposures() + " exposures of %.2f secs,", odp.getExposureTime()));
-            sb.append(String.format(" and %.2f %% of them were on source.\n", odp.getSourceFraction() * 100));
+        if (odp.calculationMethod() instanceof S2NMethod) {
+            sb.append(String.format("S/N ratio with " + ((S2NMethod) odp.calculationMethod()).exposures() + " exposures of %.2f secs,", odp.exposureTime()));
+            sb.append(String.format(" and %.2f %% of them were on source.\n", odp.sourceFraction() * 100));
         } else {
-            sb.append(String.format("integration time from a S/N ratio of %.2f for exposures of", odp.getSNRatio()));
-            sb.append(String.format(" %.2f with %.2f %% of them were on source.\n", odp.getExposureTime(), odp.getSourceFraction() * 100));
+            sb.append(String.format("integration time from a S/N ratio of %.2f for exposures of", ((ImagingInt) odp.calculationMethod()).sigma()));
+            sb.append(String.format(" %.2f with %.2f %% of them were on source.\n", odp.exposureTime(), odp.sourceFraction() * 100));
         }
         sb.append("<LI>Analysis performed for aperture ");
-        if (odp.isAutoAperture()) {
+        if (odp.analysisMethod() instanceof AutoAperture) {
             sb.append("that gives 'optimum' S/N ");
+            sb.append(String.format("and a sky aperture that is %.2f times the target aperture.\n", ((AutoAperture) odp.analysisMethod()).skyAperture()));
+        } else if (odp.analysisMethod() instanceof UserAperture) {
+            sb.append(String.format("of diameter %.2f ", ((UserAperture) odp.analysisMethod()).diameter()));
+            sb.append(String.format("and a sky aperture that is %.2f times the target aperture.\n", ((UserAperture) odp.analysisMethod()).skyAperture()));
+        } else if (odp.analysisMethod() instanceof IfuMethod) {
+            sb.append("that gives 'optimum' S/N ");
+            sb.append(String.format("and %d fibres on sky.\n", ((IfuMethod) odp.analysisMethod()).skyFibres()));
         } else {
-            sb.append(String.format("of diameter %.2f ", odp.getApertureDiameter()));
+            throw new Error("Unsupported analysis method");
         }
-        sb.append(String.format("and a sky aperture that is %.2f times the target aperture.\n", odp.getSkyApertureDiameter()));
 
         return sb.toString();
     }

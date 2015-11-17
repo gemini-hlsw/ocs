@@ -6,9 +6,6 @@ import edu.gemini.itc.shared.*;
 import edu.gemini.itc.trecs.TRecs;
 import edu.gemini.itc.trecs.TRecsRecipe;
 import edu.gemini.spModel.gemini.trecs.TReCSParams;
-import edu.gemini.spModel.core.PointSource$;
-import edu.gemini.spModel.core.UniformSource$;
-import scala.Tuple2;
 
 import java.io.PrintWriter;
 import java.util.UUID;
@@ -26,7 +23,7 @@ public final class TRecsPrinter extends PrinterBase {
         super(out);
         this.recipe    = new TRecsRecipe(p, instr);
         this.pdp       = pdp;
-        this.isImaging = p.observation().getMethod().isImaging();
+        this.isImaging = p.observation().calculationMethod() instanceof Imaging;
     }
 
     public void writeOutput() {
@@ -48,31 +45,15 @@ public final class TRecsPrinter extends PrinterBase {
 
         _println("");
 
-        if (!result.observation().isAutoAperture()) {
-            _println(String.format("software aperture extent along slit = %.2f arcsec", result.observation().getApertureDiameter()));
-        } else {
-            if (result.source().profile() == UniformSource$.MODULE$) {
-                _println(String.format("software aperture extent along slit = %.2f arcsec", 1 / instrument.getFPMask()));
-            } else if (result.source().profile() == PointSource$.MODULE$) {
-                _println(String.format("software aperture extent along slit = %.2f arcsec", 1.4 * result.iqCalc().getImageQuality()));
-            }
-        }
-
-        if (!result.source().isUniform()) {
-            _println(String.format("fraction of source flux in aperture = %.2f", result.st().getSlitThroughput()));
-        }
+        _printSoftwareAperture(result, 1 / instrument.getFPMask());
 
         _println(String.format("derived image size(FWHM) for a point source = %.2f arcsec\n", result.iqCalc().getImageQuality()));
 
-        _println("Sky subtraction aperture = " + result.observation().getSkyApertureDiameter() + " times the software aperture.");
+        _printSkyAperture(result);
 
         _println("");
 
-        final double exp_time = result.observation().getExposureTime();
-        final int number_exposures = result.observation().getNumExposures();
-        final double frac_with_source = result.observation().getSourceFraction();
-
-        _println(String.format("Requested total integration time = %.2f secs, of which %.2f secs is on source.", exp_time * number_exposures, exp_time * number_exposures * frac_with_source));
+        _printRequestedIntegrationTime(result);
 
         _println("");
         _printPeakPixelInfo(s.ccd(0));
@@ -117,9 +98,8 @@ public final class TRecsPrinter extends PrinterBase {
 
         _print(CalculatablePrinter.getTextResult(result.sfCalc()));
         _println(CalculatablePrinter.getTextResult(result.iqCalc()));
-        _println("Sky subtraction aperture = "
-                + result.observation().getSkyApertureDiameter()
-                + " times the software aperture.\n");
+
+        _printSkyAperture(result);
 
         _println(CalculatablePrinter.getTextResult(result.is2nCalc(), result.observation()));
 
@@ -145,13 +125,13 @@ public final class TRecsPrinter extends PrinterBase {
         if (!mask.equals(TReCSParams.Mask.MASK_IMAGING) && !mask.equals(TReCSParams.Mask.MASK_IMAGING_W))
             s += "<LI> Focal Plane Mask: " + instrument.getFocalPlaneMask().displayValue() + "\n";
         s += "\n";
-        if (p.observation().getMethod().isSpectroscopy())
+        if (p.observation().calculationMethod() instanceof Spectroscopy)
             s += String.format("<L1> Central Wavelength: %.1f nm\n", instrument.getCentralWavelength());
         s += "Spatial Binning: 1\n";
-        if (p.observation().getMethod().isSpectroscopy())
+        if (p.observation().calculationMethod() instanceof Spectroscopy)
             s += "Spectral Binning: 1\n";
         s += "Pixel Size in Spatial Direction: " + instrument.getPixelSize() + " arcsec\n";
-        if (p.observation().getMethod().isSpectroscopy())
+        if (p.observation().calculationMethod() instanceof Spectroscopy)
             s += "Pixel Size in Spectral Direction: " + instrument.getGratingDispersion_nmppix() + " nm\n";
         return s;
     }

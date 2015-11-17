@@ -26,7 +26,6 @@ object Hash {
       p.ccdType.name,
       p.fpMask.name,
       p.grating.name,
-      p.ifuMethod.toString,
       f"${p.centralWavelength.toNanometers}%.0f",
       p.site.name,
       p.spatialBinning,
@@ -65,7 +64,6 @@ object Hash {
       p.grating.name,
       p.readMode.name,
       f"${p.centralWavelength.toNanometers}%.0f",
-      p.ifuMethod,
       calc(p.altair)
     )
 
@@ -105,15 +103,8 @@ object Hash {
 
   def calc(odp: ObservationDetails): Int =
     hash(
-      odp.isAutoAperture,
-      odp.getMethod.isS2N,
-      odp.getMethod.isImaging,
-      f"${odp.getExposureTime}%.2f",
-      odp.getNumExposures,
-      f"${odp.getApertureDiameter}%.2f",
-      f"${odp.getSkyApertureDiameter}%.2f",
-      f"${odp.getSNRatio}%.2f",
-      f"${odp.getSourceFraction}%.2f"
+      odp.calculationMethod,
+      odp.analysisMethod
     )
 
   def calc(src: SourceDefinition): Int =

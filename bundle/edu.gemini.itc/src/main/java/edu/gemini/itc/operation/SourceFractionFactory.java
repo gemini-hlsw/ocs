@@ -1,8 +1,7 @@
 package edu.gemini.itc.operation;
 
 import edu.gemini.itc.base.Instrument;
-import edu.gemini.itc.shared.ObservationDetails;
-import edu.gemini.itc.shared.SourceDefinition;
+import edu.gemini.itc.shared.*;
 
 public final class SourceFractionFactory {
 
@@ -14,12 +13,30 @@ public final class SourceFractionFactory {
             final Instrument instrument,
             final double im_qual) {
 
-        return calculate(
-                sdp.isUniform(),
-                odp.isAutoAperture(),
-                odp.getApertureDiameter(),
-                instrument.getPixelSize(),
-                im_qual);
+        if (odp.analysisMethod() instanceof AutoAperture) {
+            return calculate(
+                    sdp.isUniform(),
+                    true,
+                    0.0,
+                    instrument.getPixelSize(),
+                    im_qual);
+        } else if (odp.analysisMethod() instanceof UserAperture) {
+            return calculate(
+                    sdp.isUniform(),
+                    false,
+                    (((UserAperture) odp.analysisMethod()).diameter()),
+                    instrument.getPixelSize(),
+                    im_qual);
+        } else if (odp.analysisMethod() instanceof IfuMethod) {
+            return calculate(
+                    sdp.isUniform(),
+                    true,
+                    0.0,
+                    instrument.getPixelSize(),
+                    im_qual);
+        } else {
+            throw new Error("Unsupported analysis method");
+        }
     }
 
     public static SourceFraction calculate(
@@ -31,20 +48,17 @@ public final class SourceFractionFactory {
 
 
         if (isUniform) {
-            // Case B if sdParams.getExtendedSourceType = UNIFORM
-            // This means the User has selected USB Calc
-            return new USBSourceFraction(
-                    isAuto,
-                    ap_diam,
-                    pixSize);
+            if (isAuto) {
+                return new USBSourceFraction(pixSize);
+            } else {
+                return new USBSourceFraction(ap_diam, pixSize);
+            }
         } else {
-            //Case A if a point Source or a Gaussian use the same code
-            // Creates a PointSourceFractionCalculation object
-            return new PointSourceFraction(
-                    isAuto,
-                    ap_diam,
-                    pixSize,
-                    im_qual);
+            if (isAuto) {
+                return new PointSourceFraction(pixSize, im_qual);
+            } else {
+                return new PointSourceFraction(ap_diam, pixSize, im_qual);
+            }
         }
 
     }

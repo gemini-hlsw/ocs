@@ -93,15 +93,7 @@ public final class GnirsRecipe implements SpectroscopyRecipe {
         // i.e. the output morphology is same as the input morphology.
         // Might implement these modules at a later time.
 
-        final SlitThroughput st;
-        if (!_obsDetailParameters.isAutoAperture()) {
-            st = new SlitThroughput(IQcalc.getImageQuality(),
-                    _obsDetailParameters.getApertureDiameter(),
-                    pixel_size, instrument.getFPMask());
-        } else {
-            st = new SlitThroughput(IQcalc.getImageQuality(), pixel_size, instrument.getFPMask());
-        }
-
+        final SlitThroughput st = new SlitThroughput(_obsDetailParameters.analysisMethod(), IQcalc.getImageQuality(), pixel_size, instrument.getFPMask());
         ap_diam = st.getSpatialPix(); // ap_diam really Spec_Npix on
 
         double spec_source_frac = st.getSlitThroughput();
@@ -130,12 +122,9 @@ public final class GnirsRecipe implements SpectroscopyRecipe {
                 instrument.getGratingDispersion_nmppix(),
                 spec_source_frac,
                 im_qual, ap_diam,
-                _obsDetailParameters.getNumExposures(),
-                _obsDetailParameters.getSourceFraction(),
-                _obsDetailParameters.getExposureTime(),
-                instrument.getDarkCurrent(),
                 instrument.getReadNoise(),
-                _obsDetailParameters.getSkyApertureDiameter());
+                instrument.getDarkCurrent(),
+                _obsDetailParameters);
 
         if (instrument.XDisp_IsUsed()) {
             final VisitableSampledSpectrum[] sedOrder = new VisitableSampledSpectrum[ORDERS];

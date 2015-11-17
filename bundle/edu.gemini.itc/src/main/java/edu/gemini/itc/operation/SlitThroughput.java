@@ -2,6 +2,9 @@ package edu.gemini.itc.operation;
 
 import edu.gemini.itc.base.DatFile;
 import edu.gemini.itc.base.ITCConstants;
+import edu.gemini.itc.shared.AnalysisMethod;
+import edu.gemini.itc.shared.AutoAperture;
+import edu.gemini.itc.shared.UserAperture;
 
 import java.util.Scanner;
 
@@ -42,15 +45,9 @@ public final class SlitThroughput {
     private final double slit_width;
     private final double slit_ap;
 
-    // constructor for the optimum aperture case
-    public SlitThroughput(final double im_qual, final double pixel_size, final double slit_width) {
-        this(im_qual, 1.4 * im_qual, pixel_size, slit_width);
-    }
-
-    //constructor for the user defined aperture case.
-    public SlitThroughput(final double im_qual, final double user_def_ap, final double pixel_size, final double slit_width) {
+    public SlitThroughput(final AnalysisMethod method, final double im_qual, final double pixel_size, final double slit_width) {
         this.im_qual = im_qual;
-        this.slit_ap = user_def_ap;
+        this.slit_ap = (method instanceof UserAperture) ? ((UserAperture) method).diameter() : 1.4 * im_qual;
         this.pixel_size = pixel_size;
         this.slit_width = slit_width;
     }

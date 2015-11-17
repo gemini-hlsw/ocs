@@ -73,6 +73,10 @@ public class IFUComponent extends TransmissionElement {
 
         super(ITCConstants.LIB + "/" + Nifs.INSTR_DIR + "/" + Nifs.INSTR_PREFIX + "ifu_trans" + Instrument.DATA_SUFFIX);
 
+        // make sure there is at least one IFU element in the final result
+        numX = (numX < 1) ? 1 : numX;
+        numY = (numY < 1) ? 1 : numY;
+
         double xStart;            //starting/ending positions in arcsecs for apertures
         double yStart;            //starting/ending positions in arcsecs for apertures
 

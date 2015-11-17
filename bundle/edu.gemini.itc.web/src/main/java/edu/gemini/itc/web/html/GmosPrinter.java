@@ -5,8 +5,6 @@ import edu.gemini.itc.base.SpectroscopyResult;
 import edu.gemini.itc.gmos.Gmos;
 import edu.gemini.itc.gmos.GmosRecipe;
 import edu.gemini.itc.shared.*;
-import edu.gemini.spModel.core.PointSource$;
-import edu.gemini.spModel.core.UniformSource$;
 import edu.gemini.spModel.gemini.gmos.GmosNorthType;
 import edu.gemini.spModel.gemini.gmos.GmosSouthType;
 
@@ -26,7 +24,7 @@ public final class GmosPrinter extends PrinterBase {
         super(out);
         this.recipe         = new GmosRecipe(p, instr);
         this.pdp            = pdp;
-        this.isImaging      = p.observation().getMethod().isImaging();
+        this.isImaging      = p.observation().calculationMethod() instanceof Imaging;
     }
 
     /**
@@ -53,30 +51,17 @@ public final class GmosPrinter extends PrinterBase {
 
         final Gmos[] ccdArray           = mainInstrument.getDetectorCcdInstruments();
         final SpectroscopyResult result = results[0];
-        final int number_exposures      = results[0].observation().getNumExposures();
-        final double frac_with_source   = results[0].observation().getSourceFraction();
-        final double exposure_time      = results[0].observation().getExposureTime();
 
         _println("Read noise: " + mainInstrument.getReadNoise());
-        if (!mainInstrument.isIfuUsed()) {
-            if (!results[0].observation().isAutoAperture()) {
-                _println(String.format("software aperture extent along slit = %.2f arcsec", results[0].observation().getApertureDiameter()));
-            } else {
-                if (result.source().profile() == UniformSource$.MODULE$) {
-                    _println(String.format("software aperture extent along slit = %.2f arcsec", 1 / mainInstrument.getSlitWidth()));
-                } else if (result.source().profile() == PointSource$.MODULE$) {
-                    _println(String.format("software aperture extent along slit = %.2f arcsec", (1.4 * result.iqCalc().getImageQuality())));
-                }
-            }
 
-            if (!results[0].source().isUniform()) {
-                _println(String.format("fraction of source flux in aperture = %.2f", result.st().getSlitThroughput()));
-            }
+        if (!mainInstrument.isIfuUsed()) {
+            _printSoftwareAperture(results[0], 1 / mainInstrument.getSlitWidth());
         }
         _println(String.format("derived image size(FWHM) for a point source = %.2f arcsec\n", result.iqCalc().getImageQuality()));
-        _println("Sky subtraction aperture = " + results[0].observation().getSkyApertureDiameter() + " times the software aperture.");
+        _printSkyAperture(result);
         _println("");
-        _println(String.format("Requested total integration time = %.2f secs, of which %.2f secs is on source.", exposure_time * number_exposures, exposure_time * number_exposures * frac_with_source));
+
+        _printRequestedIntegrationTime(result);
 
         for (final Gmos instrument : ccdArray) {
             if (ccdArray.length > 1) {
@@ -115,9 +100,7 @@ public final class GmosPrinter extends PrinterBase {
         _println("");
         _print(CalculatablePrinter.getTextResult(results[0].sfCalc()));
         _println(CalculatablePrinter.getTextResult(results[0].iqCalc()));
-        _println("Sky subtraction aperture = "
-                + results[0].observation().getSkyApertureDiameter()
-                + " times the software aperture.\n");
+        _printSkyAperture(results[0]);
         _println("Read noise: " + instrument.getReadNoise());
 
         final Gmos[] ccdArray = instrument.getDetectorCcdInstruments();
@@ -170,13 +153,13 @@ public final class GmosPrinter extends PrinterBase {
         if (!instrument.getFpMask().equals(GmosNorthType.FPUnitNorth.FPU_NONE) && !instrument.getFpMask().equals(GmosSouthType.FPUnitSouth.FPU_NONE))
             s += "<LI> Focal Plane Mask: " + instrument.getFpMask().displayValue() + "\n";
         s += "\n";
-        if (p.observation().getMethod().isSpectroscopy())
+        if (p.observation().calculationMethod() instanceof Spectroscopy)
             s += String.format("<L1> Central Wavelength: %.1f nm\n", instrument.getCentralWavelength());
         s += "Spatial Binning: " + instrument.getSpatialBinning() + "\n";
-        if (p.observation().getMethod().isSpectroscopy())
+        if (p.observation().calculationMethod() instanceof Spectroscopy)
             s += "Spectral Binning: " + instrument.getSpectralBinning() + "\n";
         s += "Pixel Size in Spatial Direction: " + instrument.getPixelSize() + "arcsec\n";
-        if (p.observation().getMethod().isSpectroscopy())
+        if (p.observation().calculationMethod() instanceof Spectroscopy)
             s += "Pixel Size in Spectral Direction: " + instrument.getGratingDispersion_nmppix() + "nm\n";
         if (instrument.isIfuUsed()) {
             s += "IFU is selected,";
