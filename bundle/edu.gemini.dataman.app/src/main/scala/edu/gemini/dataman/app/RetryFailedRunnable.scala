@@ -16,10 +16,10 @@ import Scalaz._
   * forks an action to retry posting the requests to the FITS storage server.
   */
 final class RetryFailedRunnable(
+              odb: IDBDatabaseService,
               user: java.util.Set[Principal],
               minDelay: Duration,
-              exec: DmanActionExec,
-              odb: IDBDatabaseService) extends Runnable {
+              exec: DmanActionExec) extends Runnable {
 
   private val Log = Logger.getLogger(getClass.getName)
 

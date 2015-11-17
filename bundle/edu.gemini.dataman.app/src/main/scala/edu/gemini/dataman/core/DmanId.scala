@@ -20,7 +20,8 @@ object DmanId {
   }
 
   final case class Dset(label: DatasetLabel) extends DmanId {
-    def pid: SPProgramID = label.getObservationId.getProgramID
+    def pid: SPProgramID     = oid.getProgramID
+    def oid: SPObservationID = label.getObservationId
   }
 
   implicit val EqualDmanId: Equal[DmanId] = Equal.equalA

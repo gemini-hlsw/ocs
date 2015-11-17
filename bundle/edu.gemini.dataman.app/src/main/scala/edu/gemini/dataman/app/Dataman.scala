@@ -1,5 +1,6 @@
 package edu.gemini.dataman.app
 
+import edu.gemini.dataman.core.DmanId.{Dset, Obs, Prog}
 import edu.gemini.dataman.core._
 import edu.gemini.pot.spdb.IDBDatabaseService
 import edu.gemini.util.security.principal.StaffPrincipal
@@ -27,19 +28,23 @@ sealed trait Dataman {
 
 
 object Dataman {
-  /** Minimum time that must pass after a dataset is marked failed before it
-    * can be retried.
-    */
-  val retryMinDelay = Duration.ofMinutes(1)
-
-  /** How long between retry attempts for failed datasets.
-    */
-  val retryPeriod   = Duration.ofMinutes(15)
-
   /** How long to wait before the initial program sync tasks are placed in the
     * pool.
     */
-  val progSyncDelay = Duration.ofMinutes(1)
+  val progSyncDelay   = Duration.ofMinutes(1)
+
+  /** How long to wait before the initial observation refresh task runs.
+    */
+  val obsRefreshDelay = Duration.ofSeconds(30)
+
+  /** Minimum time that must pass after a dataset is marked failed before it
+    * can be retried.
+    */
+  val retryMinDelay   = Duration.ofMinutes(1)
+
+  /** How long between retry attempts for failed datasets.
+    */
+  val retryPeriod     = Duration.ofMinutes(15)
 
   private val Log  = Logger.getLogger(getClass.getName)
   private val User = java.util.Collections.singleton[Principal](StaffPrincipal.Gemini)
@@ -66,14 +71,24 @@ object Dataman {
 
     val pollSummit   = GsaPollActions(config.summitHost, config.site, odb)
     val pollArchive  = GsaPollActions(config.archiveHost, config.site, odb)
+    val allPolls     = List(pollSummit, pollArchive)
 
-    val progSync     = new ProgramSyncRunnable(User, pollArchive.program, pollSummit.program, exec, odb)
-    val trigger      = new QaRequestTrigger(odb, (qaRequest: List[QaRequest]) => {
+    val pollService  = PollService(workerCount = 25) { id =>
+      val actions = id match {
+        case Prog(pid) => allPolls.map(_.program(pid))
+        case Obs(oid)  => allPolls.map(_.observation(oid))
+        case Dset(lab) => allPolls.map(_.dataset(lab))
+      }
+      actions.foreach(exec.now)
+    }
+
+    val progSync = new ProgramSyncRunnable(odb, User, pollService)
+    val trigger  = new QaRequestTrigger(odb, (qaRequest: List[QaRequest]) => {
       exec.fork(obsLogAction.setQa(qaRequest))
     })
 
     val pool = Executors.newScheduledThreadPool(5, new ThreadFactory() {
-      override def newThread(r: Runnable) =
+      override def newThread(r: Runnable): Thread =
         new Thread(r, "GSA Poll Thread: " + UUID.randomUUID().toString) <|
           (_.setDaemon(true))                                           <|
           (_.setPriority(Thread.NORM_PRIORITY - 1))
@@ -81,7 +96,7 @@ object Dataman {
 
     def shutdownNow(): Unit = {
       trigger.stop()
-      progSync.shutdownNow()
+      pollService.shutdown()
       pool.shutdownNow()
     }
 
@@ -98,7 +113,8 @@ object Dataman {
       schedulePoll(pollArchive.thisWeek, config.thisWeekPeriod)
 
       schedule(progSync, progSyncDelay, config.allPeriod.time)
-      schedule(new RetryFailedRunnable(User, retryMinDelay, exec, odb), retryMinDelay.plusMillis(1), retryPeriod)
+      schedule(new ObsRefreshRunnable(odb, User, pollService), obsRefreshDelay, config.obsRefreshPeriod.time)
+      schedule(new RetryFailedRunnable(odb, User, retryMinDelay, exec), retryMinDelay.plusMillis(1), retryPeriod)
 
       trigger.start()
 

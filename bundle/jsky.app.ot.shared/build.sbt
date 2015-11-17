@@ -30,4 +30,3 @@ OsgiKeys.exportPackage := Seq(
   "jsky.app.ot.shared.spModel.util",
   "jsky.app.ot.shared.vcs")
 
-        
