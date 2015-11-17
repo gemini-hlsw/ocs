@@ -2,7 +2,7 @@
 <!DOCTYPE document PUBLIC "-//Gemini Observatory//DTD for Storage of P1 and P2 Documents//EN" "http://ftp.gemini.edu/Support/xml/dtds/SpXML2.dtd">
 
 <document>
-  <container kind="program" type="Program" version="2015B-1" subtype="basic" key="8025163c-02be-440b-b921-2c422e718721" name="">
+  <container kind="program" type="Program" version="2016A-1" subtype="basic" key="8025163c-02be-440b-b921-2c422e718721" name="">
     <paramset name="Science Program" kind="dataObj">
       <param name="title" value="PHOENIX PHASE I/II MAPPING BPS"/>
       <param name="programMode" value="QUEUE"/>
@@ -81,7 +81,7 @@ Please see the note "Darks, Flats, and Arcs" about wavelength calibrators
         <param name="libraryId" value="1"/>
         <param name="priority" value="LOW"/>
         <param name="tooOverrideRapid" value="false"/>
-        <param name="phase2Status" value="PI_TO_COMPLETE"/>
+        <param name="phase2Status" value="INACTIVE"/>
         <param name="qaState" value="UNDEFINED"/>
         <param name="overrideQaState" value="false"/>
       </paramset>
@@ -157,7 +157,7 @@ Please see the note "Darks, Flats, and Arcs" about wavelength calibrators
         <param name="libraryId" value="2"/>
         <param name="priority" value="LOW"/>
         <param name="tooOverrideRapid" value="false"/>
-        <param name="phase2Status" value="PI_TO_COMPLETE"/>
+        <param name="phase2Status" value="INACTIVE"/>
         <param name="qaState" value="UNDEFINED"/>
         <param name="overrideQaState" value="false"/>
       </paramset>
@@ -170,6 +170,18 @@ Please see the note "Darks, Flats, and Arcs" about wavelength calibrators
           <param name="mask" value="MASK_3"/>
           <param name="gratingWavelength" value="2.2789"/>
           <param name="gratingWavenumber" value="4386.9"/>
+        </paramset>
+      </container>
+      <container kind="obsComp" type="Scheduling" version="2009A-1" subtype="conditions" key="f67bbe7f-50c1-4eb1-9c75-e2ad486e93e2" name="Observing Conditions">
+        <paramset name="Observing Conditions" kind="dataObj">
+          <param name="CloudCover" value="ANY"/>
+          <param name="ImageQuality" value="ANY"/>
+          <param name="SkyBackground" value="ANY"/>
+          <param name="WaterVapor" value="ANY"/>
+          <param name="ElevationConstraintType" value="NONE"/>
+          <param name="ElevationConstraintMin" value="0.0"/>
+          <param name="ElevationConstraintMax" value="0.0"/>
+          <paramset name="timing-window-list"/>
         </paramset>
       </container>
       <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="d0a2543a-2a36-4465-af56-63312db32642" name="Observing Log">
@@ -269,7 +281,7 @@ There are no arc calibrators in the L and M regions - the thermal emission from 
           <param name="libraryId" value="3"/>
           <param name="priority" value="LOW"/>
           <param name="tooOverrideRapid" value="false"/>
-          <param name="phase2Status" value="PI_TO_COMPLETE"/>
+          <param name="phase2Status" value="INACTIVE"/>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
         </paramset>
@@ -285,14 +297,9 @@ There are no arc calibrators in the L and M regions - the thermal emission from 
                 <param name="pm1" value="0.0" units="milli-arcsecs/year"/>
                 <param name="pm2" value="0.0" units="milli-arcsecs/year"/>
                 <param name="parallax" value="0.0" units="arcsecs"/>
-                <param name="rv" value="0.0" units="km/sec"/>
+                <param name="z" value="0.0"/>
               </paramset>
-              <paramset name="guideEnv">
-                <param name="active">
-                  <value sequence="0">PWFS1</value>
-                  <value sequence="1">PWFS2</value>
-                </param>
-              </paramset>
+              <paramset name="guideEnv"/>
             </paramset>
           </paramset>
         </container>
@@ -301,10 +308,10 @@ There are no arc calibrators in the L and M regions - the thermal emission from 
             <param name="exposureTime" value="1.0"/>
             <param name="posAngle" value="90"/>
             <param name="coadds" value="1"/>
-            <param name="filter" value="H6420"/>
+            <param name="filter" value="K4396"/>
             <param name="mask" value="MASK_3"/>
-            <param name="gratingWavelength" value="1.555"/>
-            <param name="gratingWavenumber" value="6429.13"/>
+            <param name="gratingWavelength" value="2.2789"/>
+            <param name="gratingWavenumber" value="4386.9"/>
           </paramset>
         </container>
         <container kind="obsComp" type="Scheduling" version="2009A-1" subtype="conditions" key="a42bd36d-fcf4-4c46-b00c-270d15676b80" name="Observing Conditions">
@@ -351,7 +358,7 @@ There are no arc calibrators in the L and M regions - the thermal emission from 
           <param name="libraryId" value="4"/>
           <param name="priority" value="LOW"/>
           <param name="tooOverrideRapid" value="false"/>
-          <param name="phase2Status" value="PI_TO_COMPLETE"/>
+          <param name="phase2Status" value="INACTIVE"/>
           <param name="qaState" value="UNDEFINED"/>
           <param name="overrideQaState" value="false"/>
         </paramset>
@@ -367,14 +374,9 @@ There are no arc calibrators in the L and M regions - the thermal emission from 
                 <param name="pm1" value="0.0" units="milli-arcsecs/year"/>
                 <param name="pm2" value="0.0" units="milli-arcsecs/year"/>
                 <param name="parallax" value="0.0" units="arcsecs"/>
-                <param name="rv" value="0.0" units="km/sec"/>
+                <param name="z" value="0.0"/>
               </paramset>
-              <paramset name="guideEnv">
-                <param name="active">
-                  <value sequence="0">PWFS1</value>
-                  <value sequence="1">PWFS2</value>
-                </param>
-              </paramset>
+              <paramset name="guideEnv"/>
             </paramset>
           </paramset>
         </container>
@@ -383,10 +385,10 @@ There are no arc calibrators in the L and M regions - the thermal emission from 
             <param name="exposureTime" value="1.0"/>
             <param name="posAngle" value="90"/>
             <param name="coadds" value="1"/>
-            <param name="filter" value="H6420"/>
+            <param name="filter" value="K4396"/>
             <param name="mask" value="MASK_3"/>
-            <param name="gratingWavelength" value="1.555"/>
-            <param name="gratingWavenumber" value="6429.13"/>
+            <param name="gratingWavelength" value="2.2789"/>
+            <param name="gratingWavenumber" value="4386.9"/>
           </paramset>
         </container>
         <container kind="obsComp" type="Scheduling" version="2009A-1" subtype="conditions" key="5574c54d-e59c-435f-968a-e23cb1b431f9" name="Observing Conditions">
@@ -501,6 +503,7 @@ There are no arc calibrators in the L and M regions - the thermal emission from 
     <paramset name="node">
       <param name="key" value="195e00fe-a627-46c9-8c19-d3d1f8285327"/>
       <param name="60c518c0-8fcf-46e7-a014-13bd36f2f346" value="33"/>
+      <param name="b9ea9a6d-87ec-4369-8e93-21130320caf3" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="9a52f326-483f-431f-8bcc-b89747188878"/>
@@ -527,6 +530,10 @@ There are no arc calibrators in the L and M regions - the thermal emission from 
       <param name="60c518c0-8fcf-46e7-a014-13bd36f2f346" value="50"/>
     </paramset>
     <paramset name="node">
+      <param name="key" value="f67bbe7f-50c1-4eb1-9c75-e2ad486e93e2"/>
+      <param name="b9ea9a6d-87ec-4369-8e93-21130320caf3" value="1"/>
+    </paramset>
+    <paramset name="node">
       <param name="key" value="bda269c4-f2ec-4d74-9fed-b7c2745f5780"/>
       <param name="60c518c0-8fcf-46e7-a014-13bd36f2f346" value="1"/>
     </paramset>
@@ -549,10 +556,12 @@ There are no arc calibrators in the L and M regions - the thermal emission from 
     <paramset name="node">
       <param name="key" value="c98b2b2b-3ed5-444d-957a-403b3308f226"/>
       <param name="60c518c0-8fcf-46e7-a014-13bd36f2f346" value="5"/>
+      <param name="b9ea9a6d-87ec-4369-8e93-21130320caf3" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="f9313614-c317-4d2e-8e1b-35ff018be805"/>
       <param name="60c518c0-8fcf-46e7-a014-13bd36f2f346" value="26"/>
+      <param name="b9ea9a6d-87ec-4369-8e93-21130320caf3" value="2"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="9229c496-5148-4a08-9f41-ee2e7c0136e4"/>
@@ -573,6 +582,7 @@ There are no arc calibrators in the L and M regions - the thermal emission from 
     <paramset name="node">
       <param name="key" value="3e4e5408-74ee-44d9-bec2-f8a139099ee2"/>
       <param name="60c518c0-8fcf-46e7-a014-13bd36f2f346" value="5"/>
+      <param name="b9ea9a6d-87ec-4369-8e93-21130320caf3" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="7d5eddb1-0f34-45b5-a3b1-544a2065c205"/>
@@ -581,6 +591,7 @@ There are no arc calibrators in the L and M regions - the thermal emission from 
     <paramset name="node">
       <param name="key" value="be7fdcd3-4a6b-46be-97c9-6b061440541b"/>
       <param name="60c518c0-8fcf-46e7-a014-13bd36f2f346" value="1"/>
+      <param name="b9ea9a6d-87ec-4369-8e93-21130320caf3" value="3"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="c8697868-c207-4e59-8765-b438ece77e38"/>
@@ -589,6 +600,7 @@ There are no arc calibrators in the L and M regions - the thermal emission from 
     <paramset name="node">
       <param name="key" value="d8589841-0a52-4a8b-b9b1-ee70813d3810"/>
       <param name="60c518c0-8fcf-46e7-a014-13bd36f2f346" value="1"/>
+      <param name="b9ea9a6d-87ec-4369-8e93-21130320caf3" value="3"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="a3bba7f9-4bb6-445e-8c1f-cd1e7ede0ea2"/>

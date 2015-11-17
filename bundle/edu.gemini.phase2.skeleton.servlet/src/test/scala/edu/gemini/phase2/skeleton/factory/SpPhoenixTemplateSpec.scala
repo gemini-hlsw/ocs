@@ -32,6 +32,10 @@ object SpPhoenixTemplateSpec extends TemplateSpec("PHOENIX_BP.xml") with Specifi
           groups(sp).size must_== 1
         }
 
+        "Group should have human-readable name" in {
+          groups(sp).forall(_.getDataObject.getTitle startsWith "Phoenix")
+        }
+
         "It should contain all four observations." in {
           libs(group) == Set(1, 2, 3, 4)
         }

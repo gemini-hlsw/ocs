@@ -30,6 +30,9 @@ case class SpPhoenixBlueprint(fpu: Mask, filter: Filter) extends SpBlueprint {
   def toParamSet(factory: PioFactory): ParamSet =
     ParamSetCodec[SpPhoenixBlueprint].encode(paramSetName, this)
 
+  override def toString =
+    s"Phoenix ${fpu.displayValue()} ${filter.displayValue()}"
+
 }
 
 object SpPhoenixBlueprint {

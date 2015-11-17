@@ -1,6 +1,6 @@
 Instrument : PHOENIX
 Blueprints : PHOENIX_BP.xml
-Version July 6, 2015 - updated by Bryan M
+Version Nov 17, 2016 - updated by Bryan M
 
 Observations identified by LibraryIDs indicated with {}.
 
