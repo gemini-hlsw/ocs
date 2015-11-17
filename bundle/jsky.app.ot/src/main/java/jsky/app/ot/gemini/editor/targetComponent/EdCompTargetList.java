@@ -150,7 +150,7 @@ public final class EdCompTargetList extends OtItemEditor<ISPObsComponent, Target
         final boolean curNotBase = _curPos != env.getBase();
         _w.removeButton.setEnabled(curNotBase && curNotBags && editable);
         _w.primaryButton.setEnabled(enablePrimary(_curPos, env) && editable);
-        updateDetailEditorEnabledState(curNotBags);
+        updateDetailEditorEnabledState(curNotBags && editable);
     }
 
     private final ActionListener _tagListener = new ActionListener() {
