@@ -42,6 +42,8 @@ object Strategy {
     Flamingos2Oiwfs,
     GemsStrategy,
     GmosNorthOiwfs,
+    GmosNorthOiwfsAltair,
+    GmosNorthOiwfsPwfs1,
     GmosSouthOiwfs,
     GnirsOiwfs,
     NiciOiwfs,
@@ -85,9 +87,9 @@ object Strategy {
       val ao = ctx.getAOComponent.asScalaOpt
       if (ao.exists(_.isInstanceOf[InstAltair])) {
         ao.get.asInstanceOf[InstAltair].getMode match {
-          case AltairParams.Mode.LGS_P1 => List(Pwfs1North)
+          case AltairParams.Mode.LGS_P1 => List(Pwfs1North, GmosNorthOiwfsPwfs1)
           case AltairParams.Mode.LGS_OI => List(GmosNorthOiwfs)
-          case _                        => List(AltairAowfs, Pwfs1North, GmosNorthOiwfs)
+          case _                        => List(AltairAowfs, GmosNorthOiwfsAltair)
         }
       } else oiStategies(ctx, GmosNorthOiwfs)
     }),
@@ -111,6 +113,7 @@ object Strategy {
     s match {
       case SingleProbeStrategy(_, params, _) => isAvailable(params.guideProbe)
       case ScienceTargetStrategy(_, gp, _)   => isAvailable(gp)
+      case m: MultiProbeStrategy             => m.strategies.forall(guidersAvailable(ctx))
       case GemsStrategy                      => isAvailable(Canopus.Wfs.cwfs3) // any canopus would serve
       case _                                 => false
     }
