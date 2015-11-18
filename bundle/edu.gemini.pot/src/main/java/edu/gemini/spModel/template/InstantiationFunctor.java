@@ -92,10 +92,14 @@ public class InstantiationFunctor extends DBAbstractFunctor {
             newObsData.setOriginatingTemplate(templateObs.getNodeKey());
             newObs.setDataObject(newObsData);
 
-            // Copy target/conds for relevant obs classes
+            // Copy target/conds for relevant obs classes.  Note, if the
+            // template obs has an explicitly defined target or conditions node,
+            // it is not replaced with template values.
             final ObsClass newObsClass = ObsClassService.lookupObsClass(newObs);
-            if (newObsClass == ObsClass.SCIENCE || newObsClass == ObsClass.ACQ) {
+            if (newObsClass != ObsClass.DAY_CAL) {
                 copySiteQuality(fact, prog, siteQualityData, newObs);
+            }
+            if (newObsClass == ObsClass.SCIENCE || newObsClass == ObsClass.ACQ) {
                 copyTarget(fact, prog, targetData, newObs);
             }
 
