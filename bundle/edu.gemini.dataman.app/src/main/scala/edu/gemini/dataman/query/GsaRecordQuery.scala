@@ -42,7 +42,7 @@ object GsaRecordQuery {
     new GsaRecordQuery {
       val prefix = s"${host.protocol}://${host.host}/jsonqastate/${gsaSite(site)}/present"
 
-      def url(filter: String): URL = new URL(s"$prefix/$filter")
+      def url(filter: String): URL = new URL(s"$prefix/RAW/$filter")
 
       override def program(pid: SPProgramID): GsaResponse[List[GsaRecord]] =
         GsaQuery.get(url(s"progid=${pid.stringValue}"))
