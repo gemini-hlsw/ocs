@@ -12,7 +12,8 @@ import java.time.Instant
 import java.time.format.DateTimeParseException
 import java.time.temporal.{TemporalAccessor, TemporalQuery}
 
-import scalaz.Scalaz._
+import scalaz._
+import Scalaz._
 
 /** A collection of JSON codecs for existing Gemini Java types, as they are
   * encoded by the GSA server.
@@ -114,7 +115,7 @@ private[query] object JsonCodecs {
   implicit val DecodeJsonGsaRecord: DecodeJson[GsaRecord] =
     DecodeJson { c =>
       for {
-        l <- (c --\ "data_label").as[DatasetLabel]
+        l <- (c --\ "data_label").as[DatasetLabel].map(some) ||| DecodeResult.ok(none[DatasetLabel])
         f <- (c --\ "filename").as[String]
         s <- implicitly[DecodeJson[DatasetGsaState]].decode(c)
       } yield GsaRecord(l, f, s)

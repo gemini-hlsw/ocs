@@ -107,7 +107,7 @@ object GsaPollActions {
           } yield log.getRecord.getAllDatasetExecRecords.asScala.map(_.label).toSet) | Set.empty
 
         def diff(inProgram: Set[DatasetLabel]): List[DatasetLabel] =
-          (inProgram &~ inGsa.map(_.label).toSet).toList
+          (inProgram &~ inGsa.flatMap(_.label).toSet).toList
 
         did match {
           case DmanId.Prog(_)   =>
