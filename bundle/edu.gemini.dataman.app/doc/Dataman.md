@@ -75,9 +75,8 @@ displayed in an OT window.  In particular the polling rates are:
   <tr><td>No</td><td>Non-Staff</td><td>1 day</td></tr>
 </table>
 
-Displayed means that the program is open in an OT window, not just loaded in its history and
-certainly not just in the local database.  Any program not currently visible in an OT window
-is counted as not displayed.
+Displayed means that the program is open and visible in an OT window, not just loaded in its
+history or available in a local copy.
 
 To keep the network load to a minimum, the OT transmits a hash of the expected poll results.
 The ODB checks the hash against the current poll results and if nothing has changed, returns
@@ -92,12 +91,20 @@ information. Like the OT, the poll period is variable.  The polling rates are:
   <tr><td>Tonight's Datasets</td><td>1 minute</td></tr>
   <tr><td>This Week's Datasets</td><td>15 minutes</td></tr>
   <tr><td>All Datasets</td><td>1 day</td></tr>
+  <tr><td>Pending Updates</td><td>2 minutes</td></tr>
 </table>
 
 The polling rates are somewhat arbitrary but configurable in case they prove to be inadequate.
 For the purposes of polling "tonight" is defined as the current observing night which begins at
 2PM local time.  This "week" is a period of 7 observing nights.  All datasets are updated on a
 daily basis but one program at a time.  That is, one query per program.
+
+Finally, the Data Manager makes a periodic sweep of all the observations in the ODB looking for
+any with a dataset whose status is expected to change soon.  For all of these, it requests
+updates from the summit storage service and public archive.  A dataset is "expected to change
+soon" if its QA state is in the process of updating, or if the summit and public versions differ.
+This feature covers QA state updates initiated from the OT for older datasets not included in the
+nightly or weekly polls. 
 
 > ![](images/lightbulb.gif) It is assumed that the archive will never cut off the results for a poll
 query, even if the response is large, because otherwise the Data Manager will believe that the
