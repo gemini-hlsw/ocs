@@ -48,7 +48,7 @@ sealed trait ItcPanel extends GridBagPanel {
 
   private val conditionsPanel        = new ConditionsPanel(owner)
   private val aperturePanel          = new AnalysisApertureMethodPanel(owner)
-  private val apertureFixedSkyPanel  = new AnalysisApertureMethodPanel(owner, fixedSkyValue = Some(1.0))
+  private val apertureFixedSkyPanel  = new AnalysisApertureMethodPanel(owner, fixedSkyValue = true)
   private val ifuNifsPanel           = new AnalysisIfuMethodPanel(owner, skyEditable = false)
   private val ifuGmosPanel           = new AnalysisIfuMethodPanel(owner, summedAllowed = false)
   private val messagePanel           = new ItcFeedbackPanel(table)

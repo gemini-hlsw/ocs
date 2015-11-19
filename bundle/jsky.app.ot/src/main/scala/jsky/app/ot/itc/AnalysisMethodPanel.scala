@@ -46,7 +46,7 @@ abstract class AnalysisMethodPanel(owner: EdIteratorFolder) extends GridBagPanel
 /**
   * UI element that allows to enter ITC analysis method parameters for aperture analysis methods.
   */
-final class AnalysisApertureMethodPanel(owner: EdIteratorFolder, fixedSkyValue: Option[Double] = None) extends AnalysisMethodPanel(owner) {
+final class AnalysisApertureMethodPanel(owner: EdIteratorFolder, fixedSkyValue: Boolean = false) extends AnalysisMethodPanel(owner) {
 
   val autoAperture  = new RadioButton("Auto") { focusable = false; selected = true }
   val userAperture  = new RadioButton("User") { focusable = false }
@@ -68,10 +68,9 @@ final class AnalysisApertureMethodPanel(owner: EdIteratorFolder, fixedSkyValue: 
   layout(sky)                           = new Constraints { gridx = 3; gridy = 2; anchor = Anchor.West; insets = new Insets(0, 0, 0, 3) }
   layout(skyUnits)                      = new Constraints { gridx = 4; gridy = 2; anchor = Anchor.West }
 
-  // IR instruments (GNIRS, NIRI, F2 and GSAOI) use a fixed sky value (1.0) (OCSADV-345)
-  fixedSkyValue.foreach { s =>
+  // IR instruments (GNIRS, NIRI, F2 and GSAOI) don't allow the user to change the sky value (OCSADV-345)
+  if (fixedSkyValue) {
     List(sky, skyLabel, skyUnits).foreach(_.visible = false)
-    sky.peer.setValue(s)
   }
 
   listenTo(autoAperture, userAperture, target, sky)
@@ -115,11 +114,11 @@ final class AnalysisApertureMethodPanel(owner: EdIteratorFolder, fixedSkyValue: 
 
   // generate a default analysis method for observations for which we don't have anything in the cache yet
   private def defaultMethod: ApertureMethod = owner.getContextInstrumentDataObject match {
-    case _: InstNIRI   => AutoAperture(1.0)
+    case _: InstNIRI   => AutoAperture(1.0)   // IR instruments use default of 1 for sky aperture
     case _: Flamingos2 => AutoAperture(1.0)
     case _: Gsaoi      => AutoAperture(1.0)
     case _: InstGNIRS  => AutoAperture(1.0)
-    case _             => AutoAperture(5.0)
+    case _             => AutoAperture(5.0)   // default for everything else is 5
   }
 
   // helper to activate/deactivate the user value for the target aperture
