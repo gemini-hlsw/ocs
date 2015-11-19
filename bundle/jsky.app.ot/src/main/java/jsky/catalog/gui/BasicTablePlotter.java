@@ -163,8 +163,8 @@ public class BasicTablePlotter
         final ListIterator<TableListItem> it = _tableList.listIterator(0);
         while (it.hasNext()) {
             final TableListItem item = it.next();
-            if (item.table == table || item.table.getName().equals(table.getName())) {
-                if (item.table.getCatalog() == table.getCatalog()) {
+            if (item.table.equals(table) || item.table.getName().equals(table.getName())) {
+                if (item.table.getCatalog().equals(table.getCatalog())) {
                     it.remove();
                     break;
                 }
