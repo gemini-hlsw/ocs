@@ -72,12 +72,12 @@ object Dataman {
     val pollSummit   = GsaPollActions(config.summitHost, config.site, odb)
     val pollArchive  = GsaPollActions(config.archiveHost, config.site, odb)
 
-    val pollServices = List(pollSummit, pollArchive).map { pa =>
-      PollService(workerCount = 10) { id =>
+    val pollServices = List(("Summit", pollSummit), ("Archive", pollArchive)).map { case (name, act) =>
+      PollService(name, workerCount = 10) { id =>
         exec.now(id match {
-          case Prog(pid) => pa.program(pid)
-          case Obs(oid)  => pa.observation(oid)
-          case Dset(lab) => pa.dataset(lab)
+          case Prog(pid) => act.program(pid)
+          case Obs(oid)  => act.observation(oid)
+          case Dset(lab) => act.dataset(lab)
         })
       }
     }

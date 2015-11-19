@@ -135,7 +135,7 @@ object PollServiceSpec extends Specification with ScalaCheck with Arbitraries {
 
       val log = List.newBuilder[(DmanId, String)]
 
-      val ps = PollService(2) { id =>
+      val ps = PollService("Test", 2) { id =>
         Thread.`yield`()
         log.synchronized {
           log += ((id, Thread.currentThread().getName))
