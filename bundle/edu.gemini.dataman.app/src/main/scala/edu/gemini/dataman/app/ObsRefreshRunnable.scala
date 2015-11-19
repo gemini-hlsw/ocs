@@ -1,6 +1,7 @@
 package edu.gemini.dataman.app
 
 import edu.gemini.dataman.core.DmanId
+import edu.gemini.dataman.core.DmanId.Obs
 import edu.gemini.pot.spdb.IDBDatabaseService
 import edu.gemini.spModel.dataset.DataflowStatus.{Diverged, SummitOnly, UpdateInProgress, SyncPending}
 import edu.gemini.spModel.dataset.{DatasetLabel, DataflowStatus, DatasetRecord}
@@ -17,7 +18,7 @@ import scalaz._
 final class ObsRefreshRunnable(
               odb: IDBDatabaseService,
               user: java.util.Set[Principal],
-              pollService: PollService) extends Runnable {
+              refresh: List[Obs] => Unit) extends Runnable {
 
   private val Log = Logger.getLogger(getClass.getName)
 
@@ -42,7 +43,7 @@ final class ObsRefreshRunnable(
           val obs = obsIds(labs)
           val (prefix, suffix) = obs.splitAt(50)
           Log.info("Refreshing expected updates: " + prefix.mkString(", ") + (suffix.isEmpty ? "" | " ..."))
-          pollService.addAll(obs)
+          refresh(obs)
         }
       case -\/(f)   =>
         Log.log(Level.WARNING, f.explain, f.exception.orNull)
