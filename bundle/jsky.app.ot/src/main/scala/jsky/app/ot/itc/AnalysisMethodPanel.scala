@@ -46,7 +46,7 @@ abstract class AnalysisMethodPanel(owner: EdIteratorFolder) extends GridBagPanel
 /**
   * UI element that allows to enter ITC analysis method parameters for aperture analysis methods.
   */
-final class AnalysisApertureMethodPanel(owner: EdIteratorFolder) extends AnalysisMethodPanel(owner) {
+final class AnalysisApertureMethodPanel(owner: EdIteratorFolder, fixedSkyValue: Boolean = false) extends AnalysisMethodPanel(owner) {
 
   val autoAperture  = new RadioButton("Auto") { focusable = false; selected = true }
   val userAperture  = new RadioButton("User") { focusable = false }
@@ -68,6 +68,11 @@ final class AnalysisApertureMethodPanel(owner: EdIteratorFolder) extends Analysi
   layout(sky)                           = new Constraints { gridx = 3; gridy = 2; anchor = Anchor.West; insets = new Insets(0, 0, 0, 3) }
   layout(skyUnits)                      = new Constraints { gridx = 4; gridy = 2; anchor = Anchor.West }
 
+  // IR instruments (GNIRS, NIRI, F2 and GSAOI) don't allow the user to change the sky value (OCSADV-345)
+  if (fixedSkyValue) {
+    List(sky, skyLabel, skyUnits).foreach(_.visible = false)
+  }
+
   listenTo(autoAperture, userAperture, target, sky)
   reactions += {
     case ButtonClicked(`autoAperture`)  => toggleUserAperture(enabled = false, "");   updateCache(); publish(new SelectionChanged(this))
@@ -81,15 +86,6 @@ final class AnalysisApertureMethodPanel(owner: EdIteratorFolder) extends Analysi
       case Some(m: ApertureMethod) => setMethod(m)              // use cached method if it is an IFU method
       case _                       => setMethod(defaultMethod)  // otherwise fall back to default
     }
-
-    // special handling for IR instruments: GNIRS, NIRI, F2 and GSAOI (OCSADV-345)
-    Option(owner.getContextInstrumentDataObject).foreach { _.getType match {
-      case InstNIRI.SP_TYPE | Flamingos2.SP_TYPE | Gsaoi.SP_TYPE  | InstGNIRS.SP_TYPE =>
-        // IR instruments use a fixed sky aperture = 1
-        sky.visible       = false
-      case _  =>
-        sky.visible       = true
-    }}
   }
 
   // create the analysis method for the current user entries
@@ -118,11 +114,11 @@ final class AnalysisApertureMethodPanel(owner: EdIteratorFolder) extends Analysi
 
   // generate a default analysis method for observations for which we don't have anything in the cache yet
   private def defaultMethod: ApertureMethod = owner.getContextInstrumentDataObject match {
-    case i: InstNIRI   => AutoAperture(1.0)
-    case i: Flamingos2 => AutoAperture(1.0)
-    case i: Gsaoi      => AutoAperture(1.0)
-    case i: InstGNIRS  => AutoAperture(1.0)
-    case _             => AutoAperture(5.0)
+    case _: InstNIRI   => AutoAperture(1.0)   // IR instruments use default of 1 for sky aperture
+    case _: Flamingos2 => AutoAperture(1.0)
+    case _: Gsaoi      => AutoAperture(1.0)
+    case _: InstGNIRS  => AutoAperture(1.0)
+    case _             => AutoAperture(5.0)   // default for everything else is 5
   }
 
   // helper to activate/deactivate the user value for the target aperture
@@ -276,7 +272,7 @@ final class AnalysisIfuMethodPanel(owner: EdIteratorFolder, summedAllowed: Boole
       case FPUnitSouth.IFU_2 | FPUnitSouth.IFU_3  => IfuSingle(250, 0.0)  // GMOS-S IFU-B / IFU-R
       case _                                      => sys.error("not IFU")
     }
-    case i: InstNIFS                              => IfuSingle(  1, 0.0)  // everything else (currently NIFS only)
+    case _: InstNIFS                              => IfuSingle(  1, 0.0)  // everything else (currently NIFS only)
     case _                                        => sys.error("not IFU")
   }
 
