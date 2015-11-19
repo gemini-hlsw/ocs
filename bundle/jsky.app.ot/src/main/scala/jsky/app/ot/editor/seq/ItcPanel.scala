@@ -62,13 +62,6 @@ sealed trait ItcPanel extends GridBagPanel {
     gridy     = 0
     insets    = new Insets(5, 0, 5, 20)
   }
-  layout(analysisMethod) = new Constraints {
-    anchor    = Anchor.NorthWest
-    gridx     = 1
-    gridy     = 0
-    weightx   = 1
-    insets    = new Insets(5, 0, 5, 0)
-  }
   layout(display) = new Constraints {
     gridx     = 0
     gridy     = 2
@@ -112,10 +105,10 @@ sealed trait ItcPanel extends GridBagPanel {
       case _: InstNIFS                            => ifuNifsPanel          // NIFS ifu method
       case i: InstGmosNorth if i.getFPUnit.isIFU  => ifuGmosPanel          // GMOS ifu method (without summed)
       case i: InstGmosSouth if i.getFPUnit.isIFU  => ifuGmosPanel
-      case i: Flamingos2                          => apertureFixedSkyPanel // for IR instruments always use sky aperture = 1.0
-      case i: InstGNIRS                           => apertureFixedSkyPanel
-      case i: Gsaoi                               => apertureFixedSkyPanel
-      case i: InstNIRI                            => apertureFixedSkyPanel
+      case _: Flamingos2                          => apertureFixedSkyPanel // for IR instruments always use sky aperture = 1.0
+      case _: InstGNIRS                           => apertureFixedSkyPanel
+      case _: Gsaoi                               => apertureFixedSkyPanel
+      case _: InstNIRI                            => apertureFixedSkyPanel
       case _                                      => aperturePanel         // as default use aperture method
     }
     layout(analysisMethod) = new Constraints {

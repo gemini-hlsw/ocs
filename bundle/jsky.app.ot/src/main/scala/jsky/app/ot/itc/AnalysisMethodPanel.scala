@@ -115,10 +115,10 @@ final class AnalysisApertureMethodPanel(owner: EdIteratorFolder, fixedSkyValue: 
 
   // generate a default analysis method for observations for which we don't have anything in the cache yet
   private def defaultMethod: ApertureMethod = owner.getContextInstrumentDataObject match {
-    case i: InstNIRI   => AutoAperture(1.0)
-    case i: Flamingos2 => AutoAperture(1.0)
-    case i: Gsaoi      => AutoAperture(1.0)
-    case i: InstGNIRS  => AutoAperture(1.0)
+    case _: InstNIRI   => AutoAperture(1.0)
+    case _: Flamingos2 => AutoAperture(1.0)
+    case _: Gsaoi      => AutoAperture(1.0)
+    case _: InstGNIRS  => AutoAperture(1.0)
     case _             => AutoAperture(5.0)
   }
 
@@ -273,7 +273,7 @@ final class AnalysisIfuMethodPanel(owner: EdIteratorFolder, summedAllowed: Boole
       case FPUnitSouth.IFU_2 | FPUnitSouth.IFU_3  => IfuSingle(250, 0.0)  // GMOS-S IFU-B / IFU-R
       case _                                      => sys.error("not IFU")
     }
-    case i: InstNIFS                              => IfuSingle(  1, 0.0)  // everything else (currently NIFS only)
+    case _: InstNIFS                              => IfuSingle(  1, 0.0)  // everything else (currently NIFS only)
     case _                                        => sys.error("not IFU")
   }
 
