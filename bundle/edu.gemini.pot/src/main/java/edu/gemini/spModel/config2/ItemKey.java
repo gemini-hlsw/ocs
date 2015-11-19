@@ -46,7 +46,7 @@ public final class ItemKey implements Comparable, Serializable {
      *
      * @param path encoded hierarchy of config key names (or a single root
      * config key name); names may not contain the {@link #SEPARATOR_CHAR}
-     * since this will be interpeted as a separator between two distinct
+     * since this will be interpreted as a separator between two distinct
      * names
      */
     public ItemKey(String path) {

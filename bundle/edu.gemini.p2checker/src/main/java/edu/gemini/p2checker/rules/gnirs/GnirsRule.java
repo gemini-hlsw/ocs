@@ -391,8 +391,12 @@ public class GnirsRule implements IRule {
 
         @Override
         public Problem check(Config config, int step, ObservationElements elems, Object state) {
-            final InstGNIRS inst = (InstGNIRS) elems.getInstrument();
-            if (inst.getAcquisitionMirror() == AcquisitionMirror.OUT && inst.getDecker() == Decker.ACQUISITION)
+            //final InstGNIRS inst = (InstGNIRS) elems.getInstrument();
+            final GNIRSParams.Decker decker = ((GNIRSParams.Decker) SequenceRule.getInstrumentItem(config, InstGNIRS.DECKER_PROP));
+            final GNIRSParams.AcquisitionMirror mirror =
+                    ((GNIRSParams.AcquisitionMirror) SequenceRule.getInstrumentItem(config, InstGNIRS.ACQUISITION_MIRROR_PROP));
+            //if (inst.getAcquisitionMirror() == AcquisitionMirror.OUT && inst.getDecker() == Decker.ACQUISITION)
+            if (mirror == AcquisitionMirror.OUT && decker == Decker.ACQUISITION)
                 return new Problem(WARNING, PREFIX + NAME, M_DECKER_ACQ_OUT, SequenceRule.getInstrumentOrSequenceNode(step, elems));
             return null;
         }
