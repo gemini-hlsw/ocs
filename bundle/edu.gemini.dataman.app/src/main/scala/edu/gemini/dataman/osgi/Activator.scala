@@ -3,6 +3,7 @@ package edu.gemini.dataman.osgi
 import edu.gemini.dataman.app.Dataman
 import edu.gemini.dataman.core.{PollPeriod, DmanConfig, GsaAuth, GsaHost}
 import edu.gemini.pot.spdb.IDBDatabaseService
+import edu.gemini.spModel.core.catchingNonFatal
 import edu.gemini.spModel.core.osgi.SiteProperty
 import edu.gemini.util.osgi.Tracker
 import org.osgi.framework.{ServiceRegistration, BundleContext, BundleActivator}
@@ -91,7 +92,7 @@ object Activator {
 
     def lookupPollPeriod[A](name: String)(f: Duration => A): ValidationNel[String, A] =
       lookup(name).flatMap { timeString =>
-        \/.fromTryCatch(Duration.parse(timeString)).leftMap { _ =>
+        catchingNonFatal(Duration.parse(timeString)).leftMap { _ =>
           s"Couldn't parse $name property value '$timeString' as an ISO-8601 time duration."
         }.ensure(s"$name time value must be greater than zero.") { d =>
           !(d.isNegative || d.isZero)

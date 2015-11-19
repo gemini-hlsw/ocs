@@ -1,13 +1,16 @@
 package edu.gemini.dataman
 
 import edu.gemini.dataman.core.DmanFailure.DmanException
+import edu.gemini.spModel.core.catchingNonFatal
 import edu.gemini.spModel.dataset.{DatasetExecRecord, DatasetQaRecord}
+
+import scalaz.concurrent._
 
 import scalaz._
 import Scalaz._
-import scalaz.concurrent._
 
 package object core {
+
   /** When an action is applied, it may update one or more QA and/or exec
     * records.
     */
@@ -33,7 +36,10 @@ package object core {
     def fail(f: => DmanFailure): DmanAction[Nothing] = EitherT(Task.delay(f.left))
 
     def mergeFailure[A](result: Throwable \/ TryDman[A]): TryDman[A] =
-      result.fold(ex => DmanFailure.DmanException(ex).left, identity)
+      result.fold({
+        case ie: InterruptedException => throw ie
+        case ex                       => DmanFailure.DmanException(ex).left
+      }, identity)
   }
 
   implicit class DmanActionOps[A](a: DmanAction[A]) {
@@ -57,5 +63,5 @@ package object core {
   }
 
   def tryOp[A](a: => A): TryDman[A] =
-    \/.fromTryCatch(a).leftMap(t => DmanException(t): DmanFailure)
+    catchingNonFatal(a).leftMap(t => DmanException(t): DmanFailure)
 }

@@ -1,5 +1,6 @@
 package edu.gemini.spModel.dataset
 
+import edu.gemini.spModel.core.catchingNonFatal
 import edu.gemini.spModel.pio.xml.PioXmlFactory
 import edu.gemini.spModel.pio.{PioParseException, ParamSet, Param}
 import edu.gemini.spModel.pio.codec._
@@ -36,7 +37,7 @@ object DatasetCodecs {
         a.toParamSet(pf) <| (_.setName(key))
 
       def decode(ps: ParamSet): PioError \/ Dataset =
-        \/.fromTryCatch {
+        catchingNonFatal {
           new Dataset(ps)
         }.leftMap(ex => ParseError(ps.getName, ex.getMessage, "Dataset"))
     }
@@ -61,7 +62,7 @@ object DatasetCodecs {
 
       def decode(p: Param): PioError \/ Instant =
         ParamCodec[String].decode(p).flatMap { s =>
-          \/.fromTryCatch {
+          catchingNonFatal {
             dtf.parse(s, new TemporalQuery[Instant]() {
                         override def queryFrom(ta: TemporalAccessor): Instant = Instant.from(ta)
                       })
@@ -76,7 +77,7 @@ object DatasetCodecs {
 
       def decode(p: Param): PioError \/ UUID =
         ParamCodec[String].decode(p).flatMap { s =>
-          \/.fromTryCatch {
+          catchingNonFatal {
             UUID.fromString(s)
           }.leftMap(_ => ParseError(p.getName, s, "UUID"))
         }
