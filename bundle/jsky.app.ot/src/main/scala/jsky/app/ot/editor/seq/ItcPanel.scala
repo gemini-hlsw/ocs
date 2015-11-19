@@ -5,8 +5,12 @@ import javax.swing._
 
 import edu.gemini.itc.shared._
 import edu.gemini.pot.sp.SPComponentType
+import edu.gemini.spModel.gemini.flamingos2.Flamingos2
 import edu.gemini.spModel.gemini.gmos.{InstGmosSouth, InstGmosNorth}
+import edu.gemini.spModel.gemini.gnirs.InstGNIRS
+import edu.gemini.spModel.gemini.gsaoi.Gsaoi
 import edu.gemini.spModel.gemini.nifs.InstNIFS
+import edu.gemini.spModel.gemini.niri.InstNIRI
 import jsky.app.ot.itc._
 import jsky.app.ot.util.OtColor
 import org.jfree.chart.{ChartPanel, JFreeChart}
@@ -42,16 +46,17 @@ sealed trait ItcPanel extends GridBagPanel {
   def display: Component
   def visibleFor(t: SPComponentType): Boolean
 
-  private val currentConditions = new ConditionsPanel(owner)
-  private val analysisApertureMethod    = new AnalysisApertureMethodPanel(owner)
-  private val analysisIfuNifsMethod     = new AnalysisIfuMethodPanel(owner, skyEditable = false)
-  private val analysisIfuGmosMethod     = new AnalysisIfuMethodPanel(owner, summedAllowed = false)
-  private val message           = new ItcFeedbackPanel(table)
+  private val conditionsPanel        = new ConditionsPanel(owner)
+  private val aperturePanel          = new AnalysisApertureMethodPanel(owner)
+  private val apertureFixedSkyPanel  = new AnalysisApertureMethodPanel(owner, fixedSkyValue = Some(1.0))
+  private val ifuNifsPanel           = new AnalysisIfuMethodPanel(owner, skyEditable = false)
+  private val ifuGmosPanel           = new AnalysisIfuMethodPanel(owner, summedAllowed = false)
+  private val messagePanel           = new ItcFeedbackPanel(table)
 
-  private var analysisMethod: AnalysisMethodPanel = analysisApertureMethod
+  private var analysisMethod: AnalysisMethodPanel = aperturePanel
 
   border = BorderFactory.createEmptyBorder(5, 10, 5, 10)
-  layout(currentConditions) = new Constraints {
+  layout(conditionsPanel) = new Constraints {
     anchor    = Anchor.NorthWest
     gridx     = 0
     gridy     = 0
@@ -73,7 +78,7 @@ sealed trait ItcPanel extends GridBagPanel {
     fill      = Fill.Both
     insets    = new Insets(10, 0, 0, 0)
   }
-  layout(message) = new Constraints {
+  layout(messagePanel) = new Constraints {
     anchor    = Anchor.West
     gridx     = 0
     gridy     = 3
@@ -83,31 +88,35 @@ sealed trait ItcPanel extends GridBagPanel {
     insets    = new Insets(10, 0, 0, 0)
   }
 
-  listenTo(currentConditions, analysisMethod)
+  listenTo(conditionsPanel, analysisMethod)
   reactions += {
     case SelectionChanged(_) => table.update()
   }
 
   def update(): Unit = {
-    deafTo(currentConditions, analysisMethod)
+    deafTo(conditionsPanel, analysisMethod)
     updateAnalysisPanel()
-    currentConditions.update()
+    conditionsPanel.update()
     analysisMethod.update()
     table.update()
-    listenTo(currentConditions, analysisMethod)
+    listenTo(conditionsPanel, analysisMethod)
   }
 
   def analysis: Option[AnalysisMethod] = analysisMethod.analysisMethod
 
-  def conditions: ObservingConditions = currentConditions.conditions
+  def conditions: ObservingConditions = conditionsPanel.conditions
 
   private def updateAnalysisPanel() = {
     peer.remove(analysisMethod.peer)
     analysisMethod = owner.getContextInstrumentDataObject match {
-      case _: InstNIFS                            => analysisIfuNifsMethod
-      case i: InstGmosNorth if i.getFPUnit.isIFU  => analysisIfuGmosMethod
-      case i: InstGmosSouth if i.getFPUnit.isIFU  => analysisIfuGmosMethod
-      case _                                      => analysisApertureMethod
+      case _: InstNIFS                            => ifuNifsPanel          // NIFS ifu method
+      case i: InstGmosNorth if i.getFPUnit.isIFU  => ifuGmosPanel          // GMOS ifu method (without summed)
+      case i: InstGmosSouth if i.getFPUnit.isIFU  => ifuGmosPanel
+      case i: Flamingos2                          => apertureFixedSkyPanel // for IR instruments always use sky aperture = 1.0
+      case i: InstGNIRS                           => apertureFixedSkyPanel
+      case i: Gsaoi                               => apertureFixedSkyPanel
+      case i: InstNIRI                            => apertureFixedSkyPanel
+      case _                                      => aperturePanel         // as default use aperture method
     }
     layout(analysisMethod) = new Constraints {
       anchor    = Anchor.NorthWest
