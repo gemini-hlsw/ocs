@@ -10,7 +10,7 @@ import scalaz.Equal
   * The `time` parameter is the GSA ingestion instant which, lacking a more
   * explicit alternative, is used as a version number.
   */
-final case class GsaRecord(label: DatasetLabel, filename: String, state: DatasetGsaState)
+final case class GsaRecord(label: Option[DatasetLabel], filename: String, state: DatasetGsaState)
 
 object GsaRecord {
   implicit val EqualGsaRecord: Equal[GsaRecord] = Equal.equalA

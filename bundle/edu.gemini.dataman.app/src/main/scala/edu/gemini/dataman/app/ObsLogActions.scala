@@ -41,13 +41,18 @@ final class ObsLogActions(odb: IDBDatabaseService) {
     * and/or creating datasets as necessary.
     */
   def updateSummit(files: List[GsaRecord]): DmanAction[DatasetUpdates] = {
-    val fMap = files.map(f => f.label -> f).toMap
+    val validFiles = files.collect {
+      case r@GsaRecord(Some(lab), _, _) => lab -> r
+    }
+    val fMap = validFiles.toMap
 
     // A constructor that creates Dataset instances when the poll results refer
     // to datasets that were not added to the obs log via the normal mechanism
     // (i.e., via seq exec events in the WDBA).
     val cons: DatasetLabel => Option[Dataset] = (lab) => {
-      val dsetOpt = fMap.get(lab).map { f => new Dataset(f.label, f.filename, System.currentTimeMillis) }
+      val dsetOpt = fMap.get(lab).map { f =>
+        new Dataset(lab, f.filename, System.currentTimeMillis)
+      }
 
       dsetOpt.foreach { ds =>
         Log.warning(s"Creating missing dataset record for ${ds.getLabel}, ${ds.getDhsFilename}")
@@ -57,8 +62,8 @@ final class ObsLogActions(odb: IDBDatabaseService) {
     }
 
     sequence {
-      grouped(files)(_.label).map { case (oid, ups) =>
-        summitStateAction(oid, ups.map { f => Transition(f.label, _.transition.gsaState(some(f.state))) }, cons)
+      grouped(validFiles)(_._1).map { case (oid, ups) =>
+        summitStateAction(oid, ups.map { case (lab, f) => Transition(lab, _.transition.gsaState(some(f.state))) }, cons)
       }
     }
   }
@@ -200,7 +205,9 @@ final class ObsLogActions(odb: IDBDatabaseService) {
   /** Returns an action that records archive state poll results.
     */
   def updateArchive(files: List[GsaRecord]): DmanAction[DatasetUpdates] =
-    archiveStateAction(files.map(file => (file.label, some(file.state))))
+    archiveStateAction(files.collect {
+      case GsaRecord(Some(lab), _, state) => (lab, some(state))
+    })
 
   /** Returns an action that records missing dataset label results.
     */

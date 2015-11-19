@@ -9,11 +9,14 @@ import org.scalacheck.Arbitrary._
 import java.time.{LocalDate, ZoneId}
 import java.time.format.DateTimeFormatter
 
+import scalaz._
+import Scalaz._
+
 trait Arbitraries extends edu.gemini.spModel.dataset.Arbitraries {
   implicit val arbGsaRecord: Arbitrary[GsaRecord] =
     Arbitrary {
       for {
-        label <- arbitrary[DatasetLabel]
+        label <- Gen.frequency((95, arbDatasetLabel.arbitrary.map(some)), (5, none[DatasetLabel]))
         file  <- arbitrary[String]
         state <- arbitrary[DatasetGsaState]
       } yield GsaRecord(label, file, state)
