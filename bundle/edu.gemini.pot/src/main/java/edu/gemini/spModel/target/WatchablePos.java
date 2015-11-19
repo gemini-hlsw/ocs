@@ -1,43 +1,32 @@
 package edu.gemini.spModel.target;
 
 import java.io.Serializable;
-import java.util.Vector;
+import java.util.Set;
+import java.util.HashSet;
 
 public class WatchablePos implements Cloneable, Serializable {
 
-    private transient Vector<TelescopePosWatcher> _watchers;
+    private transient Set<TelescopePosWatcher> _watchers;
 
-    public final synchronized void addWatcher(final TelescopePosWatcher tpw) {
+    public final synchronized boolean addWatcher(final TelescopePosWatcher tpw) {
         if (_watchers == null) {
-            _watchers = new Vector<>();
-        } else if (_watchers.contains(tpw)) {
-            return;
+            _watchers = new HashSet<>();
         }
-        _watchers.addElement(tpw);
+        return _watchers.add(tpw);
     }
 
-    public final synchronized void deleteWatcher(final TelescopePosWatcher tpw) {
-        if (_watchers == null) {
-            return;
-        }
-        _watchers.removeElement(tpw);
+    public final synchronized boolean deleteWatcher(final TelescopePosWatcher tpw) {
+        return _watchers != null && _watchers.remove(tpw);
     }
 
-    protected final synchronized Vector _getWatchers() {
-        if (_watchers == null) {
-            return null;
-        }
-
-        return (Vector) _watchers.clone();
+    public final synchronized Set<TelescopePosWatcher> getWatchers() {
+        return _watchers == null ? null : new HashSet<>(_watchers);
     }
 
     protected final void _notifyOfUpdate() {
-        final Vector v = _getWatchers();
-        if (v == null) return;
-        for (int i = 0; i < v.size(); ++i) {
-            final TelescopePosWatcher tpw;
-            tpw = (TelescopePosWatcher) v.elementAt(i);
-            tpw.telescopePosUpdate(this);
+        final Set<TelescopePosWatcher> v = getWatchers();
+        if (v != null) {
+            v.forEach(tpw -> tpw.telescopePosUpdate(this));
         }
     }
 
