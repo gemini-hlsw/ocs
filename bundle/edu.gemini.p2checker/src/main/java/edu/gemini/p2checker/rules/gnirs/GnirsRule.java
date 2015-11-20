@@ -385,15 +385,17 @@ public class GnirsRule implements IRule {
     /**
      * REL-2167: Warn if acq mirror is out and decker is acq.
      */
-    private static IConfigRule DECKER_ACQ_MIRROR_OUT = new IConfigRule() {
-        private final static String NAME = "M_DECKER_ACQ_OUT";
-        private final static String M_DECKER_ACQ_OUT = "The Decker is set to acquisition but the Acquisition Mirror is out.";
+    private static IConfigRule DECKER_ACQ_MIRROR_OUT_RULE = new IConfigRule() {
+        private final static String NAME = "M_DECKER_ACQ_MIRROR_OUT";
+        private final static String M_DECKER_ACQ_MIRROR_OUT = "The Decker is set to acquisition but the Acquisition Mirror is out.";
 
         @Override
-        public Problem check(Config config, int step, ObservationElements elems, Object state) {
-            final InstGNIRS inst = (InstGNIRS) elems.getInstrument();
-            if (inst.getAcquisitionMirror() == AcquisitionMirror.OUT && inst.getDecker() == Decker.ACQUISITION)
-                return new Problem(WARNING, PREFIX + NAME, M_DECKER_ACQ_OUT, SequenceRule.getInstrumentOrSequenceNode(step, elems));
+        public Problem check(final Config config, final int step, final ObservationElements elems, final Object state) {
+            final GNIRSParams.Decker decker = ((GNIRSParams.Decker) SequenceRule.getInstrumentItem(config, InstGNIRS.DECKER_PROP));
+            final GNIRSParams.AcquisitionMirror mirror =
+                    ((GNIRSParams.AcquisitionMirror) SequenceRule.getInstrumentItem(config, InstGNIRS.ACQUISITION_MIRROR_PROP));
+            if (mirror == AcquisitionMirror.OUT && decker == Decker.ACQUISITION)
+                return new Problem(WARNING, PREFIX + NAME, M_DECKER_ACQ_MIRROR_OUT, elems.getSeqComponentNode());
             return null;
         }
 
@@ -422,7 +424,7 @@ public class GnirsRule implements IRule {
         GNIRS_RULES.add(ACQUISITION_FILTER_RULE);
         GNIRS_RULES.add(ALTAIR_RULE);
         GNIRS_RULES.add(NO_P_OFFSETS_WITH_SLIT_SPECTROSCOPY_RULE);
-        GNIRS_RULES.add(DECKER_ACQ_MIRROR_OUT);
+        GNIRS_RULES.add(DECKER_ACQ_MIRROR_OUT_RULE);
     }
 
     public IP2Problems check(final ObservationElements elements)  {
