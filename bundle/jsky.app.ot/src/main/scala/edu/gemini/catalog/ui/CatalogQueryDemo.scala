@@ -34,10 +34,10 @@ object CatalogQueryDemo extends SwingApplication {
 
     UIManager.put("Button.defaultButtonFollowsFocus", true)
 
-    val ra = Angle.fromHMS(0, 12, 30.286).getOrElse(Angle.zero)
-    val dec = Declination.fromAngle(Angle.zero - Angle.fromDMS(22, 4, 2.34).getOrElse(Angle.zero)).getOrElse(Declination.zero)
+    val ra = Angle.fromHMS(16, 17, 2.410).getOrElse(Angle.zero)
+    val dec = Declination.fromAngle(Angle.zero - Angle.fromDMS(22, 58, 33.888).getOrElse(Angle.zero)).getOrElse(Declination.zero)
     val guiders = Set[GuideProbe](NiriOiwfsGuideProbe.instance, PwfsGuideProbe.pwfs1, PwfsGuideProbe.pwfs2)
-    val target = new SPTarget(ra.toDegrees, dec.toDegrees) <| {_.setName("HIP 1000")}
+    val target = new SPTarget(ra.toDegrees, dec.toDegrees) <| {_.setName("Messier 80")}
     val env = TargetEnvironment.create(target)
     val inst = new InstNIRI <| {_.setPosAngle(0.0)}
 
