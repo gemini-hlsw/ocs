@@ -180,7 +180,7 @@ def rnorris(version: Version) = AppConfig(
   props = Map(
     "edu.gemini.auxfile.fits.host"               -> "gsconfig.gemini.edu",
     "edu.gemini.auxfile.root"                    -> "/Users/rnorris/.auxfile",
-    "edu.gemini.dataman.gsa.summit.host"         -> "hbffits2.hi.gemini.edu",
+    "edu.gemini.dataman.gsa.summit.host"         -> "mkofits-lv1new.hi.gemini.edu",
     "edu.gemini.spdb.dir"                        -> "/Users/rnorris/.spdb/",
     "edu.gemini.util.trpc.name"                  -> "Rob's ODB (Test)"
   )
@@ -235,7 +235,7 @@ def fnussber(version: Version) = AppConfig(
     "edu.gemini.smartgcal.host"          -> "localhost",
     "edu.gemini.spdb.dir"                -> "/Users/fnussber/.spdb/",
     "edu.gemini.auxfile.root"            -> "/Users/fnussber/.auxfile",
-    "edu.gemini.dataman.gsa.summit.host" -> "hbffits2.hi.gemini.edu",
+    "edu.gemini.dataman.gsa.summit.host" -> "mkofits-lv1new.hi.gemini.edu",
     "edu.gemini.util.trpc.name"          -> "Florian's ODB (Test)",
     "edu.gemini.auxfile.fits.dest"       -> "/gemsoft/var/data/ictd/test/GS@SEMESTER@/@PROG_ID@",
     "edu.gemini.auxfile.other.dest"      -> "/gemsoft/var/data/finder/GSqueue/Finders-Test/@SEMESTER@/@PROG_ID@",
@@ -333,7 +333,7 @@ def abrighton(version: Version) = AppConfig(
     "edu.gemini.auxfile.fits.host"               -> "gsconfig.gemini.edu",
     "edu.gemini.auxfile.other.dest"              -> "/gemsoft/var/data/finder/GSqueue/Finders-Test/@SEMESTER@/@PROG_ID@",
     "edu.gemini.auxfile.root"                    -> "/Users/abrighto/.auxfile",
-    "edu.gemini.dataman.gsa.summit.host"         -> "hbffits2.hi.gemini.edu",
+    "edu.gemini.dataman.gsa.summit.host"         -> "mkofits-lv1new.hi.gemini.edu",
     "edu.gemini.smartgcal.host"                  -> "localhost",
     "edu.gemini.spdb.dir"                        -> "/Users/abrighto/.spdb/",
     "edu.gemini.util.trpc.name"                  -> "Brightons's ODB (Test)"
@@ -428,7 +428,7 @@ def gnodbtest(version: Version) = AppConfig(
     "edu.gemini.auxfile.fits.dest"       -> "/gemsoft/var/data/ictd/test/GN@SEMESTER@/@PROG_ID@",
     "edu.gemini.auxfile.fits.host"       -> "gnconfig.gemini.edu",
     "edu.gemini.auxfile.other.dest"      -> "/gemsoft/var/data/finder/GNqueue/Finders-Test/@SEMESTER@/@PROG_ID@",
-    "edu.gemini.dataman.gsa.summit.host" -> "hbffits2.hi.gemini.edu",
+    "edu.gemini.dataman.gsa.summit.host" -> "mkofits-lv1new.hi.gemini.edu",
     "edu.gemini.oodb.mail.smtpHost"      -> "smtp.hi.gemini.edu",
     "edu.gemini.util.trpc.name"          -> "Gemini North ODB (Test)",
     "osgi.shell.telnet.ip"               -> "10.1.5.83"
