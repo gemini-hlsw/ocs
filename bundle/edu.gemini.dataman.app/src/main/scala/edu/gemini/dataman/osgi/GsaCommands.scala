@@ -4,6 +4,7 @@ import edu.gemini.dataman.app.{DmanActionExec, GsaPollActions}
 import edu.gemini.dataman.core._
 import edu.gemini.dataman.query.{GsaRecordQuery, GsaQaUpdateQuery, GsaResponse, TimeFormat}
 import edu.gemini.pot.spdb.IDBDatabaseService
+import edu.gemini.spModel.core.catchingNonFatal
 import edu.gemini.spModel.dataset.{DatasetQaState, DatasetLabel}
 
 import scalaz._
@@ -99,7 +100,7 @@ object GsaCommands {
         // Parse the arguments into List[GsaQaUpdate.Request] if possible.
         val requests = for {
           qa <- DatasetQaState.values.find(_.displayValue.toLowerCase == qaString.toLowerCase) \/> s"Could not parse `$qaString` as a QA state."
-          ls <- labelStrings.map { s => \/.fromTryCatch(new DatasetLabel(s)).leftMap(_ => s"Could not parse `$s` as a dataset label.") }.sequenceU
+          ls <- labelStrings.map { s => catchingNonFatal(new DatasetLabel(s)).leftMap(_ => s"Could not parse `$s` as a dataset label.") }.sequenceU
         } yield ls.map { lab => QaRequest(lab, qa) }
 
         // Send the update request to the server.

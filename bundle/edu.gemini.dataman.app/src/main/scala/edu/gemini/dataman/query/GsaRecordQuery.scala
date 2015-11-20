@@ -45,10 +45,10 @@ object GsaRecordQuery {
       def url(filter: String): URL = new URL(s"$prefix/RAW/$filter")
 
       override def program(pid: SPProgramID): GsaResponse[List[GsaRecord]] =
-        GsaQuery.get(url(pid.stringValue))
+        GsaQuery.get(url(s"progid=${pid.stringValue}"))
 
       override def observation(oid: SPObservationID): GsaResponse[List[GsaRecord]] =
-        GsaQuery.get(url(oid.stringValue))
+        GsaQuery.get(url(s"obsid=${oid.stringValue}"))
 
       override def dataset(label: DatasetLabel): GsaResponse[Option[GsaRecord]] =
         GsaQuery.get[List[GsaRecord]](url(label.toString)).map(_.headOption)

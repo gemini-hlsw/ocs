@@ -1,7 +1,7 @@
 package edu.gemini.dataman.core
 
 import edu.gemini.pot.sp.SPObservationID
-import edu.gemini.spModel.core.SPProgramID
+import edu.gemini.spModel.core.{SPProgramID, catchingNonFatal}
 import edu.gemini.spModel.dataset.DatasetLabel
 
 import scalaz._
@@ -28,7 +28,7 @@ object DmanId {
 
   def parse(s: String): Option[DmanId] = {
     def parse[A](c: String => A): Option[A] =
-      \/.fromTryCatch { c(s) }.toOption
+      catchingNonFatal { c(s) }.toOption
 
     parse(s => Dset(new DatasetLabel(s)))     orElse
      parse(s => Obs(new SPObservationID(s)))  orElse

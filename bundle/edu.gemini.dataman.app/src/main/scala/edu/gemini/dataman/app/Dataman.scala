@@ -71,18 +71,18 @@ object Dataman {
 
     val pollSummit   = GsaPollActions(config.summitHost, config.site, odb)
     val pollArchive  = GsaPollActions(config.archiveHost, config.site, odb)
-    val allPolls     = List(pollSummit, pollArchive)
 
-    val pollService  = PollService(workerCount = 25) { id =>
-      val actions = id match {
-        case Prog(pid) => allPolls.map(_.program(pid))
-        case Obs(oid)  => allPolls.map(_.observation(oid))
-        case Dset(lab) => allPolls.map(_.dataset(lab))
+    val pollServices = List(("Summit", pollSummit), ("Archive", pollArchive)).map { case (name, act) =>
+      PollService(name, workerCount = 10) { id =>
+        exec.now(id match {
+          case Prog(pid) => act.program(pid)
+          case Obs(oid)  => act.observation(oid)
+          case Dset(lab) => act.dataset(lab)
+        })
       }
-      actions.foreach(exec.now)
     }
 
-    val progSync = new ProgramSyncRunnable(odb, User, pollService)
+    val progSync = new ProgramSyncRunnable(odb, User, pids => pollServices.foreach(_.addAll(pids)))
     val trigger  = new QaRequestTrigger(odb, (qaRequest: List[QaRequest]) => {
       exec.fork(obsLogAction.setQa(qaRequest))
     })
@@ -96,7 +96,7 @@ object Dataman {
 
     def shutdownNow(): Unit = {
       trigger.stop()
-      pollService.shutdown()
+      pollServices.foreach(_.shutdown())
       pool.shutdownNow()
     }
 
@@ -113,7 +113,10 @@ object Dataman {
       schedulePoll(pollArchive.thisWeek, config.thisWeekPeriod)
 
       schedule(progSync, progSyncDelay, config.allPeriod.time)
-      schedule(new ObsRefreshRunnable(odb, User, pollService), obsRefreshDelay, config.obsRefreshPeriod.time)
+      val orr = new ObsRefreshRunnable(odb, User, oids =>
+        pollServices.foreach(_.addAll(oids))
+      )
+      schedule(orr, obsRefreshDelay, config.obsRefreshPeriod.time)
       schedule(new RetryFailedRunnable(odb, User, retryMinDelay, exec), retryMinDelay.plusMillis(1), retryPeriod)
 
       trigger.start()

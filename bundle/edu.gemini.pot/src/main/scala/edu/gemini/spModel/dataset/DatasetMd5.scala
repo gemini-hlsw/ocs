@@ -1,5 +1,6 @@
 package edu.gemini.spModel.dataset
 
+import edu.gemini.spModel.core.catchingNonFatal
 import edu.gemini.spModel.pio.Param
 import edu.gemini.spModel.pio.codec.{ParseError, PioError, ParamCodec}
 
@@ -32,7 +33,7 @@ object DatasetMd5 {
   val empty = new DatasetMd5(Array.fill[Byte](16)(0))
 
   def parse(hexString: String): Option[DatasetMd5] =
-    \/.fromTryCatch {
+    catchingNonFatal {
       new DatasetMd5(DatatypeConverter.parseHexBinary(hexString))
     }.toOption
 

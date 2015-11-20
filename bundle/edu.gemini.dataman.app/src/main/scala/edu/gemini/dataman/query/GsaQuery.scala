@@ -2,6 +2,7 @@ package edu.gemini.dataman.query
 
 import edu.gemini.dataman.core.GsaAuth
 import edu.gemini.dataman.query.GsaQueryError._
+import edu.gemini.spModel.core.catchingNonFatal
 
 import argonaut._
 import Argonaut._
@@ -58,7 +59,7 @@ private[query] object GsaQuery {
     logIf(LogLevel) { s"Start GSA query: ${url.toString}" }
 
     val startTime = Instant.now()
-    val result    = \/.fromTryCatch { unsafeDoQuery[A](url, prep) }.fold({
+    val result    = catchingNonFatal { unsafeDoQuery[A](url, prep) }.fold({
       case io: IOException => IoException(io).left
       case t: Throwable    => Unexpected(t).left
     }, identity)

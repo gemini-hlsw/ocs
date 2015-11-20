@@ -14,7 +14,7 @@ import scalaz._
 final class ProgramSyncRunnable(
               odb: IDBDatabaseService,
               user: java.util.Set[Principal],
-              poller: PollService) extends Runnable {
+              sync: List[Prog] => Unit) extends Runnable {
 
   private val Log = Logger.getLogger(getClass.getName)
 
@@ -22,7 +22,7 @@ final class ProgramSyncRunnable(
     PidFunctor.exec(odb, user) match {
       case \/-(pids) =>
         Log.info(s"Dataman synchronizing ${pids.length} programs.")
-        poller.addAll(pids.map(Prog))
+        sync(pids.map(Prog))
 
       case -\/(e)    =>
         Log.log(Level.WARNING, e.explain, e.exception.orNull)
