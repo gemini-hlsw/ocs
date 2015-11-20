@@ -64,6 +64,7 @@ public final class TargetObsComp extends AbstractDataObject implements GuideProb
         super(SP_TYPE);
         setVersion(_VERSION);
         targetEnv = createEmptyEnvironment();
+        watchTargets();
     }
 
 
@@ -115,6 +116,7 @@ public final class TargetObsComp extends AbstractDataObject implements GuideProb
         if (targetEnv == envNotNull) return;
 
         final TargetEnvironment orig = targetEnv;
+        unwatchTargets();
         targetEnv = envNotNull;
         watchTargets();
 
@@ -122,9 +124,14 @@ public final class TargetObsComp extends AbstractDataObject implements GuideProb
         firePropertyChange(TARGET_ENV_PROP, orig, targetEnv);
     }
 
-    private void watchTargets() {
+    private void unwatchTargets() {
         targetEnv.getTargets().foreach(target -> {
             target.deleteWatcher(prop);
+        });
+    }
+
+    private void watchTargets() {
+        targetEnv.getTargets().foreach(target -> {
             target.addWatcher(prop);
         });
     }
