@@ -172,18 +172,6 @@ Please see the note "Darks, Flats, and Arcs" about wavelength calibrators
           <param name="gratingWavenumber" value="4386.9"/>
         </paramset>
       </container>
-      <container kind="obsComp" type="Scheduling" version="2009A-1" subtype="conditions" key="f67bbe7f-50c1-4eb1-9c75-e2ad486e93e2" name="Observing Conditions">
-        <paramset name="Observing Conditions" kind="dataObj">
-          <param name="CloudCover" value="ANY"/>
-          <param name="ImageQuality" value="ANY"/>
-          <param name="SkyBackground" value="ANY"/>
-          <param name="WaterVapor" value="ANY"/>
-          <param name="ElevationConstraintType" value="NONE"/>
-          <param name="ElevationConstraintMin" value="0.0"/>
-          <param name="ElevationConstraintMax" value="0.0"/>
-          <paramset name="timing-window-list"/>
-        </paramset>
-      </container>
       <container kind="obsQaLog" type="ObsLog" version="2009A-1" subtype="qa" key="d0a2543a-2a36-4465-af56-63312db32642" name="Observing Log">
         <paramset name="Observing Log" kind="dataObj">
           <paramset name="obsQaRecord"/>
@@ -562,6 +550,7 @@ There are no arc calibrators in the L and M regions - the thermal emission from 
       <param name="key" value="f9313614-c317-4d2e-8e1b-35ff018be805"/>
       <param name="60c518c0-8fcf-46e7-a014-13bd36f2f346" value="26"/>
       <param name="b9ea9a6d-87ec-4369-8e93-21130320caf3" value="2"/>
+      <param name="a18862e2-6002-4b83-bd36-2a2e6e12da30" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="9229c496-5148-4a08-9f41-ee2e7c0136e4"/>
