@@ -3,6 +3,7 @@ package jsky.app.ot.editor.seq
 import java.awt.Color
 import javax.swing._
 
+import com.jgoodies.forms.factories.DefaultComponentFactory
 import edu.gemini.itc.shared._
 import edu.gemini.pot.sp.SPComponentType
 import edu.gemini.spModel.gemini.flamingos2.Flamingos2
@@ -56,15 +57,31 @@ sealed trait ItcPanel extends GridBagPanel {
   private var analysisMethod: AnalysisMethodPanel = aperturePanel
 
   border = BorderFactory.createEmptyBorder(5, 10, 5, 10)
-  layout(conditionsPanel) = new Constraints {
-    anchor    = Anchor.NorthWest
+  layout(separator("Conditions:")) = new Constraints {
+    anchor    = Anchor.West
     gridx     = 0
     gridy     = 0
-    insets    = new Insets(5, 0, 5, 20)
+    weightx   = 1
+    fill      = Fill.Horizontal
+    insets    = new Insets(10, 0, 0, 0)
+  }
+  layout(conditionsPanel) = new Constraints {
+    anchor    = Anchor.West
+    gridx     = 0
+    gridy     = 1
+    insets    = new Insets(5, 20, 0, 0)
+  }
+  layout(separator("Analysis Method:")) = new Constraints {
+    anchor    = Anchor.West
+    gridx     = 0
+    gridy     = 2
+    weightx   = 1
+    fill      = Fill.Horizontal
+    insets    = new Insets(10, 0, 0, 0)
   }
   layout(display) = new Constraints {
     gridx     = 0
-    gridy     = 2
+    gridy     = 4
     weightx   = 1
     weighty   = 1
     gridwidth = 2
@@ -74,7 +91,7 @@ sealed trait ItcPanel extends GridBagPanel {
   layout(messagePanel) = new Constraints {
     anchor    = Anchor.West
     gridx     = 0
-    gridy     = 3
+    gridy     = 5
     gridwidth = 2
     weightx   = 1
     fill      = Fill.Horizontal
@@ -112,13 +129,16 @@ sealed trait ItcPanel extends GridBagPanel {
       case _                                      => aperturePanel         // as default use aperture method
     }
     layout(analysisMethod) = new Constraints {
-      anchor    = Anchor.NorthWest
-      gridx     = 1
-      gridy     = 0
-      weightx   = 1
-      insets    = new Insets(5, 0, 5, 0)
+      anchor    = Anchor.West
+      gridx     = 0
+      gridy     = 3
+      insets    = new Insets(5, 20, 5, 0)
     }
     revalidate()
+  }
+
+  private def separator(label: String) = new Component {
+    override lazy val peer = DefaultComponentFactory.getInstance.createSeparator(label)
   }
 
 }

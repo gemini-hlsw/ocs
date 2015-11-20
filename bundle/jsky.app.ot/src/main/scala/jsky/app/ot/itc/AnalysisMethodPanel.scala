@@ -50,23 +50,22 @@ final class AnalysisApertureMethodPanel(owner: EdIteratorFolder, fixedSkyValue: 
 
   val autoAperture  = new RadioButton("Auto") { focusable = false; selected = true }
   val userAperture  = new RadioButton("User") { focusable = false }
-  val skyLabel      = new Label("Sky Aperture")
-  val skyUnits      = new Label("x target aperture")
+  val skyLabel      = new Label("Sky Area")
+  val skyUnits      = new Label("x target area")
   val sky           = new NumberEdit(skyLabel, skyUnits, 5.0)
   val targetLabel   = new Label("Target Aperture")
   val targetUnits   = new Label("arcsec")
   val target        = new NumberEdit(targetLabel, targetUnits, 2) <| {_.peer.setEnabled(false)}
   new ButtonGroup(autoAperture, userAperture)
 
-  layout(new Label("Analysis Method:")) = new Constraints { gridx = 0; gridy = 0; anchor = Anchor.West; gridwidth = 5; insets = new Insets(0, 0, 5, 0) }
-  layout(targetLabel)                   = new Constraints { gridx = 0; gridy = 1; anchor = Anchor.West; insets = new Insets(0, 0, 0, 10) }
-  layout(autoAperture)                  = new Constraints { gridx = 1; gridy = 1; insets = new Insets(0, 0, 0, 3) }
-  layout(userAperture)                  = new Constraints { gridx = 2; gridy = 1; insets = new Insets(0, 0, 0, 5) }
-  layout(target)                        = new Constraints { gridx = 3; gridy = 1; anchor = Anchor.West;  insets = new Insets(0, 0, 0, 3) }
-  layout(targetUnits)                   = new Constraints { gridx = 4; gridy = 1; anchor = Anchor.West }
-  layout(skyLabel)                      = new Constraints { gridx = 0; gridy = 2; anchor = Anchor.West; insets = new Insets(0, 0, 0, 10) }
-  layout(sky)                           = new Constraints { gridx = 3; gridy = 2; anchor = Anchor.West; insets = new Insets(0, 0, 0, 3) }
-  layout(skyUnits)                      = new Constraints { gridx = 4; gridy = 2; anchor = Anchor.West }
+  layout(targetLabel)                   = new Constraints { gridx = 0; gridy = 0; anchor = Anchor.West; insets = new Insets(0, 0, 0, 10) }
+  layout(autoAperture)                  = new Constraints { gridx = 1; gridy = 0; insets = new Insets(0, 0, 0, 3) }
+  layout(userAperture)                  = new Constraints { gridx = 2; gridy = 0; insets = new Insets(0, 0, 0, 5) }
+  layout(target)                        = new Constraints { gridx = 3; gridy = 0; anchor = Anchor.West;  insets = new Insets(0, 0, 0, 3) }
+  layout(targetUnits)                   = new Constraints { gridx = 4; gridy = 0; anchor = Anchor.West }
+  layout(skyLabel)                      = new Constraints { gridx = 0; gridy = 1; anchor = Anchor.West; insets = new Insets(0, 0, 0, 10) }
+  layout(sky)                           = new Constraints { gridx = 3; gridy = 1; anchor = Anchor.West; insets = new Insets(0, 0, 0, 3) }
+  layout(skyUnits)                      = new Constraints { gridx = 4; gridy = 1; anchor = Anchor.West }
 
   // IR instruments (GNIRS, NIRI, F2 and GSAOI) don't allow the user to change the sky value (OCSADV-345)
   if (fixedSkyValue) {
@@ -175,14 +174,13 @@ final class AnalysisIfuMethodPanel(owner: EdIteratorFolder, summedAllowed: Boole
     contents += new Label("arcsecs.")
   }
 
-  layout(new Label("Analysis Method:")) = new Constraints { gridx = 0; gridy = 0; anchor = Anchor.West; gridwidth = 2; insets = new Insets(0, 0, 5, 0) }
-  layout(onSkyPanel)                    = new Constraints { gridx = 0; gridy = 1; anchor = Anchor.West; gridwidth = 2 }
-  layout(summed)                        = new Constraints { gridx = 0; gridy = 2; anchor = Anchor.West; insets = new Insets(0, 0, 0, 10) }
-  layout(summedPanel)                   = new Constraints { gridx = 1; gridy = 2; anchor = Anchor.West }
-  layout(single)                        = new Constraints { gridx = 0; gridy = 3; anchor = Anchor.West; insets = new Insets(0, 0, 0, 10) }
-  layout(singlePanel)                   = new Constraints { gridx = 1; gridy = 3; anchor = Anchor.West }
-  layout(radial)                        = new Constraints { gridx = 0; gridy = 4; anchor = Anchor.West; insets = new Insets(0, 0, 0, 10) }
-  layout(radialPanel)                   = new Constraints { gridx = 1; gridy = 4; anchor = Anchor.West }
+  layout(onSkyPanel)                    = new Constraints { gridx = 0; gridy = 0; anchor = Anchor.West; gridwidth = 2 }
+  layout(summed)                        = new Constraints { gridx = 0; gridy = 1; anchor = Anchor.West; insets = new Insets(0, 0, 0, 10) }
+  layout(summedPanel)                   = new Constraints { gridx = 1; gridy = 1; anchor = Anchor.West }
+  layout(single)                        = new Constraints { gridx = 0; gridy = 2; anchor = Anchor.West; insets = new Insets(0, 0, 0, 10) }
+  layout(singlePanel)                   = new Constraints { gridx = 1; gridy = 2; anchor = Anchor.West }
+  layout(radial)                        = new Constraints { gridx = 0; gridy = 3; anchor = Anchor.West; insets = new Insets(0, 0, 0, 10) }
+  layout(radialPanel)                   = new Constraints { gridx = 1; gridy = 3; anchor = Anchor.West }
 
   // NIFS does not allow to edit sky fibres (always 1)
   if (!skyEditable) {

@@ -80,36 +80,29 @@ final class ConditionsPanel(owner: EdIteratorFolder) extends GridBagPanel {
 
   tooltip = ttMsg
 
-  layout(new Label("Conditions for ITC calculations:"))  = new Constraints {
-    anchor    = Anchor.West
-    gridx     = 0
-    gridy     = 0
-    gridwidth = 5
-    insets    = new Insets(0, 0, 5, 0)
-  }
   layout(sb)  = new Constraints {
     gridx     = 0
-    gridy     = 1
+    gridy     = 0
     insets    = new Insets(0, 0, 0, 0)
   }
   layout(cc) = new Constraints {
     gridx     = 1
-    gridy     = 1
+    gridy     = 0
     insets    = new Insets(0, 3, 0, 0)
   }
   layout(iq) = new Constraints {
     gridx     = 2
-    gridy     = 1
+    gridy     = 0
     insets    = new Insets(0, 3, 0, 0)
   }
   layout(wv) = new Constraints {
     gridx     = 3
-    gridy     = 1
+    gridy     = 0
     insets    = new Insets(0, 3, 0, 0)
   }
   layout(am) = new Constraints {
     gridx     = 4
-    gridy     = 1
+    gridy     = 0
     insets    = new Insets(0, 3, 0, 0)
   }
 
