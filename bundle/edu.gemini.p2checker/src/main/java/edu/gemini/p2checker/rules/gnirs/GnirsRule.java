@@ -387,7 +387,7 @@ public class GnirsRule implements IRule {
      */
     private static IConfigRule DECKER_ACQ_MIRROR_OUT_RULE = new IConfigRule() {
         private final static String NAME = "M_DECKER_ACQ_MIRROR_OUT";
-        private final static String M_DECKER_ACQ_OUT = "The Decker is set to acquisition but the Acquisition Mirror is out.";
+        private final static String M_DECKER_ACQ_MIRROR_OUT = "The Decker is set to acquisition but the Acquisition Mirror is out.";
 
         @Override
         public Problem check(final Config config, final int step, final ObservationElements elems, final Object state) {
@@ -395,7 +395,7 @@ public class GnirsRule implements IRule {
             final GNIRSParams.AcquisitionMirror mirror =
                     ((GNIRSParams.AcquisitionMirror) SequenceRule.getInstrumentItem(config, InstGNIRS.ACQUISITION_MIRROR_PROP));
             if (mirror == AcquisitionMirror.OUT && decker == Decker.ACQUISITION)
-                return new Problem(WARNING, PREFIX + NAME, M_DECKER_ACQ_OUT, elems.getSeqComponentNode());
+                return new Problem(WARNING, PREFIX + NAME, M_DECKER_ACQ_MIRROR_OUT, elems.getSeqComponentNode());
             return null;
         }
 
