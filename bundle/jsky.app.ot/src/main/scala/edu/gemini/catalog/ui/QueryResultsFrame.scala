@@ -272,6 +272,9 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
 
         // Plot the results when they arrive
         plotResults()
+
+        // Reset the state of the plot button
+        unplotButton.text = PlottedState.flipAction
       case _ =>
     }
   }
