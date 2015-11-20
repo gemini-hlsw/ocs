@@ -105,11 +105,6 @@ public abstract class Gmos extends Instrument implements BinningProvider {
                 throw new Error("invalid ccd type");
         }
 
-        if (detectorCcdIndex == 0) {
-            _dtv = new DetectorsTransmissionVisitor(gp.spectralBinning(),
-                    getDirectory() + "/" + getPrefix() + "ccdpix" + Instrument.getSuffix());
-        }
-
         if (isIfuUsed() && getIfuMethod().isDefined()) {
             if (getIfuMethod().get() instanceof IfuSingle) {
                 _IFU = new IFUComponent(getPrefix(), ((IfuSingle) getIfuMethod().get()).offset());
@@ -131,6 +126,12 @@ public abstract class Gmos extends Instrument implements BinningProvider {
                     gp.spectralBinning());
             _sampling = _gratingOptics.getGratingDispersion_nmppix();
             addGrating(_gratingOptics);
+
+            // we only need the detector transmission visitor for the spectroscopy case (i.e. if there is a grating)
+            if (detectorCcdIndex == 0) {
+                final double nmppx = _gratingOptics.getGratingDispersion_nmppix();
+                _dtv = new DetectorsTransmissionVisitor(gp, nmppx, getDirectory() + "/" + getPrefix() + "ccdpix" + Instrument.getSuffix());
+            }
         }
 
 
@@ -263,6 +264,7 @@ public abstract class Gmos extends Instrument implements BinningProvider {
         return _dtv;
     }
 
+    public abstract boolean isIfu2();
     protected abstract Gmos[] createCcdArray();
     protected abstract String getPrefix();
     protected abstract String[] getCcdFiles();
@@ -292,6 +294,10 @@ public abstract class Gmos extends Instrument implements BinningProvider {
 
                 if (gp.customSlitWidth().get().equals(GmosCommonType.CustomSlitWidth.OTHER))
                     throw new RuntimeException("Slit width for the custom mask is not known.");
+            }
+
+            if (isIfu2() && gp.ccdType() == GmosCommonType.DetectorManufacturer.HAMAMATSU) {
+                throw new Error("Currently IFU-2 is not supported for Hamamatsu CCD.");
             }
         }
 
@@ -328,10 +334,10 @@ public abstract class Gmos extends Instrument implements BinningProvider {
 
     @Override
     public List<ItcWarning> spectroscopyWarnings(final SpectroscopyResult r) {
-        final boolean isIfu2 = getFpMask() == GmosNorthType.FPUnitNorth.IFU_1 || getFpMask() == GmosSouthType.FPUnitSouth.IFU_1;
         return new ArrayList<ItcWarning>() {{
-            // OCSADV-361: warn that results produced for 2 slit IFUs are not entirely correct
-            if (isIfu2) add(new ItcWarning("Warning: chip gaps are shown at the wrong wavelengths in IFU-2 mode."));
+            // How to display gaps in proper location for IFU-2 case? Currently we don't display them at all
+            // in the wavelength charts. They are displayed in the pixel space chart for IFU-2 only.
+            if (isIfu2()) add(new ItcWarning("Chip gaps are not shown in wavelength charts in IFU-2 mode."));
         }};
     }
 

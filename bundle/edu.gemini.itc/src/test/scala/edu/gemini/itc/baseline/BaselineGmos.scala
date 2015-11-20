@@ -117,7 +117,7 @@ object BaselineGmos {
       FilterNorth.g_G0301,
       DisperserNorth.R150_G5306,
       500.nm,
-      FPUnitNorth.IFU_2,
+      FPUnitNorth.IFU_1,
       AmpGain.HIGH,
       AmpReadMode.SLOW,
       None,
