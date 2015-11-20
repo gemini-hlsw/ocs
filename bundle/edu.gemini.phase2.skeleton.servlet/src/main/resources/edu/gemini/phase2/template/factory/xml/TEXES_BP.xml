@@ -2,7 +2,7 @@
 <!DOCTYPE document PUBLIC "-//Gemini Observatory//DTD for Storage of P1 and P2 Documents//EN" "http://ftp.gemini.edu/Support/xml/dtds/SpXML2.dtd">
 
 <document>
-  <container kind="program" type="Program" version="2014A-1" subtype="basic" key="638d91fe-a7aa-4aa8-a1b5-bf044ecf26fd" name="GN-TEXES-BP">
+  <container kind="program" type="Program" version="2016A-1" subtype="basic" key="638d91fe-a7aa-4aa8-a1b5-bf044ecf26fd" name="GN-TEXES-BP">
     <paramset name="Science Program" kind="dataObj">
       <param name="title" value="TEXES PHASE I/II MAPPING BPS"/>
       <param name="programMode" value="QUEUE"/>
@@ -101,18 +101,6 @@ for planning such observations.  Such details are not indicated in the OT templa
 you need to work with John Lacy or Matt Richter or others of the TEXES team to specify the 
 slit angle(s) that you want.</value>
           </param>
-        </paramset>
-      </container>
-      <container kind="obsComp" type="Scheduling" version="2009A-1" subtype="conditions" key="bb57b165-e535-4597-9255-d7e5fa4586e0" name="Observing Conditions">
-        <paramset name="Observing Conditions" kind="dataObj">
-          <param name="CloudCover" value="ANY"/>
-          <param name="ImageQuality" value="ANY"/>
-          <param name="SkyBackground" value="ANY"/>
-          <param name="WaterVapor" value="ANY"/>
-          <param name="ElevationConstraintType" value="NONE"/>
-          <param name="ElevationConstraintMin" value="0.0"/>
-          <param name="ElevationConstraintMax" value="0.0"/>
-          <paramset name="timing-window-list"/>
         </paramset>
       </container>
       <container kind="obsComp" type="Instrument" version="2009A-1" subtype="Texes" key="75b860df-8ea2-42d5-8839-5a87a50b85cf" name="Texes">
@@ -243,18 +231,6 @@ slit angle(s) that you want.</value>
           </param>
         </paramset>
       </container>
-      <container kind="obsComp" type="Scheduling" version="2009A-1" subtype="conditions" key="def60064-25c9-4240-9b72-36f927cb768d" name="Observing Conditions">
-        <paramset name="Observing Conditions" kind="dataObj">
-          <param name="CloudCover" value="ANY"/>
-          <param name="ImageQuality" value="ANY"/>
-          <param name="SkyBackground" value="ANY"/>
-          <param name="WaterVapor" value="ANY"/>
-          <param name="ElevationConstraintType" value="NONE"/>
-          <param name="ElevationConstraintMin" value="0.0"/>
-          <param name="ElevationConstraintMax" value="0.0"/>
-          <paramset name="timing-window-list"/>
-        </paramset>
-      </container>
       <container kind="obsComp" type="Instrument" version="2009A-1" subtype="Texes" key="8145edc0-22eb-4324-9e3e-2420d9bdf67f" name="Texes">
         <paramset name="Texes" kind="dataObj">
           <param name="exposureTime" value="10.0"/>
@@ -304,6 +280,7 @@ slit angle(s) that you want.</value>
     <paramset name="node">
       <param name="key" value="f2827259-20d0-42fc-b7b6-5416d0b9c539"/>
       <param name="b4d8423d-b884-4942-bd96-2a259da0c8fa" value="3"/>
+      <param name="86b53e01-0ef0-43af-aabe-84811c995e5b" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="7828a67b-e26c-4ed9-9e49-8832478c41c7"/>
@@ -352,6 +329,7 @@ slit angle(s) that you want.</value>
     <paramset name="node">
       <param name="key" value="4873ed44-47c6-4d9e-8558-d10c0ca7a182"/>
       <param name="b4d8423d-b884-4942-bd96-2a259da0c8fa" value="3"/>
+      <param name="86b53e01-0ef0-43af-aabe-84811c995e5b" value="1"/>
     </paramset>
     <paramset name="node">
       <param name="key" value="a18a12ee-8191-41c7-a1d2-17845cc08c16"/>
