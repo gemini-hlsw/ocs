@@ -263,15 +263,14 @@ final class AnalysisIfuMethodPanel(owner: EdIteratorFolder, summedAllowed: Boole
     case i: InstGmosNorth => i.getFPUnitNorth match {
       case FPUnitNorth.IFU_1                      => IfuSingle(500, 0.0)  // GMOS-N IFU-2
       case FPUnitNorth.IFU_2 | FPUnitNorth.IFU_3  => IfuSingle(250, 0.0)  // GMOS-N IFU-B / IFU-R
-      case _                                      => sys.error("not IFU")
+      case _                                      => IfuSingle(  1, 0.0)
     }
     case i: InstGmosSouth => i.getFPUnitSouth match {
       case FPUnitSouth.IFU_1                      => IfuSingle(500, 0.0)  // GMOS-S IFU-2
       case FPUnitSouth.IFU_2 | FPUnitSouth.IFU_3  => IfuSingle(250, 0.0)  // GMOS-S IFU-B / IFU-R
-      case _                                      => sys.error("not IFU")
+      case _                                      => IfuSingle(  1, 0.0)  // GMOS-S IFU N&S
     }
-    case _: InstNIFS                              => IfuSingle(  1, 0.0)  // everything else (currently NIFS only)
-    case _                                        => sys.error("not IFU")
+    case _                                        => IfuSingle(  1, 0.0)  // everything else (currently NIFS only)
   }
 
 
