@@ -67,15 +67,16 @@ final case class ItcImagingResult(ccds: List[ItcCcd]) extends ItcResult
 
 // There are two different types of charts
 sealed trait SpcChartType
-case object SignalChart    extends SpcChartType { val instance = this } // signal and background over wavelength [nm]
-case object S2NChart       extends SpcChartType { val instance = this } // single and final S2N over wavelength [nm]
+case object SignalChart       extends SpcChartType { val instance = this } // signal and background over wavelength [nm]
+case object S2NChart          extends SpcChartType { val instance = this } // single and final S2N over wavelength [nm]
+case object SignalPixelChart  extends SpcChartType { val instance = this } // single and final S2N over wavelength [nm]
 
 // There are four different data sets
 sealed trait SpcDataType
-case object SignalData     extends SpcDataType { val instance = this }  // signal over wavelength [nm]
-case object BackgroundData extends SpcDataType { val instance = this }  // background over wavelength [nm]
-case object SingleS2NData  extends SpcDataType { val instance = this }  // single S2N over wavelength [nm]
-case object FinalS2NData   extends SpcDataType { val instance = this }  // final S2N over wavelength [nm]
+case object SignalData        extends SpcDataType { val instance = this }  // signal over wavelength [nm]
+case object BackgroundData    extends SpcDataType { val instance = this }  // background over wavelength [nm]
+case object SingleS2NData     extends SpcDataType { val instance = this }  // single S2N over wavelength [nm]
+case object FinalS2NData      extends SpcDataType { val instance = this }  // final S2N over wavelength [nm]
 
 /** Series of (x,y) data points used to create charts and text data files. */
 final case class SpcSeriesData(dataType: SpcDataType, title: String, data: Array[Array[Double]], color: Option[Color] = None) {
@@ -85,8 +86,16 @@ final case class SpcSeriesData(dataType: SpcDataType, title: String, data: Array
   def yValues: Array[Double] = data(1)
 }
 
+final case class ChartAxisRange(start: Double, end: Double)
+final case class ChartAxis(label: String, inverted: Boolean = false, range: Option[ChartAxisRange] = None)
+
+object ChartAxis {
+  // Java helper
+  def apply(label: String) = new ChartAxis(label)
+}
+
 /** Charts are made up of a set of data series which are all plotted in the same XY-plot. */
-final case class SpcChartData(chartType: SpcChartType, title: String, xAxisLabel: String, yAxisLabel: String, series: List[SpcSeriesData]) {
+final case class SpcChartData(chartType: SpcChartType, title: String, xAxis: ChartAxis, yAxis: ChartAxis, series: List[SpcSeriesData], axes: List[ChartAxis] = List()) {
   // JFreeChart requires a unique name for each series
   require(series.map(_.title).distinct.size == series.size, "titles of series are not unique")
 
@@ -113,6 +122,11 @@ final case class ItcSpectroscopyResult(ccds: List[ItcCcd], charts: List[SpcChart
     */
   def allSeries(ct: SpcChartType, dt: SpcDataType): List[SpcSeriesData] = chart(ct).allSeries(dt)
 
+}
+
+object SpcChartData {
+  def apply(chartType: SpcChartType, title: String, xAxisLabel: String, yAxisLabel: String, series: List[SpcSeriesData]) =
+    new SpcChartData(chartType, title, ChartAxis(xAxisLabel), ChartAxis(yAxisLabel), series, List())
 }
 
 object ItcResult {

@@ -62,6 +62,11 @@ public abstract class PrinterBase {
         _printFileLink(id, type, 0, Optional.empty(), Optional.empty());
     }
 
+    /** Adds a file link with a concatenation of all series of the given data type and chart. */
+    protected void _printFileLinkAllSeries(final UUID id, final SpcDataType type, final int chartIndex) {
+        _printFileLink(id, type, chartIndex, Optional.empty(), Optional.empty());
+    }
+
     /** Adds a file link with series 0 of the given data type of chart 0. */
     protected void _printFileLink(final UUID id, final SpcDataType type) {
         _printFileLink(id, type, 0, Optional.of(0), Optional.empty());
@@ -188,16 +193,17 @@ public abstract class PrinterBase {
     }
 
     private String toImgAlt(final SpcChartType type) {
-        if      (type == SignalChart.instance())    return "Signal/Background Chart";
-        else if (type == S2NChart.instance())       return "Signal to Noise Chart";
+        if      (type == SignalChart.instance())        return "Signal/Background Chart";
+        else if (type == S2NChart.instance())           return "Signal to Noise Chart";
+        else if (type == SignalPixelChart.instance())   return "Signal/Background Pixel Chart";
         else    throw new Error();
     }
 
     private String toFileLabel(final SpcDataType type) {
-        if      (type == SignalData.instance())     return "ASCII signal spectrum";
-        else if (type == BackgroundData.instance()) return "ASCII background spectrum";
-        else if (type == SingleS2NData.instance())  return "Single Exposure S/N ASCII data";
-        else if (type == FinalS2NData.instance())   return "Final S/N ASCII data";
+        if      (type == SignalData.instance())         return "ASCII signal spectrum";
+        else if (type == BackgroundData.instance())     return "ASCII background spectrum";
+        else if (type == SingleS2NData.instance())      return "Single Exposure S/N ASCII data";
+        else if (type == FinalS2NData.instance())       return "Final S/N ASCII data";
         else    throw new Error();
     }
 

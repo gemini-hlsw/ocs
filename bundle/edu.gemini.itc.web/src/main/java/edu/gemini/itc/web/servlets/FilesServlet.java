@@ -125,8 +125,9 @@ public final class FilesServlet extends HttpServlet {
         final ItcSpectroscopyResult results = result(id);
         final ITCChart chart;
         switch (filename) {
-            case "SignalChart": chart = ITCChart.forSpcDataSet(results.chart(SignalChart.instance(), index), pd); break;
-            case "S2NChart":    chart = ITCChart.forSpcDataSet(results.chart(S2NChart.instance(),    index), pd); break;
+            case "SignalChart":       chart = ITCChart.forSpcDataSet(results.chart(SignalChart.instance(),      index), pd); break;
+            case "S2NChart":          chart = ITCChart.forSpcDataSet(results.chart(S2NChart.instance(),         index), pd); break;
+            case "SignalPixelChart":  chart = ITCChart.forSpcDataSet(results.chart(SignalPixelChart.instance(), index), pd); break;
             default:            throw new Error();
         }
         return chart.getBufferedImage(800, 600);

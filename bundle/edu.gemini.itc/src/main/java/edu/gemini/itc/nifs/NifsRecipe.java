@@ -52,6 +52,7 @@ public final class NifsRecipe implements SpectroscopyRecipe {
      */
     public ItcSpectroscopyResult serviceResult(final SpectroscopyResult r) {
         final List<SpcChartData> dataSets = new ArrayList<>();
+        // The array specS2N models the different IFUs, for each one we produce a separate output.
         for (int i = 0; i < r.specS2N().length; i++) {
             dataSets.add(createNifsSignalChart(r, i));
             dataSets.add(createNifsS2NChart(r, i));

@@ -1,8 +1,11 @@
 package edu.gemini.itc.operation;
 
 import edu.gemini.itc.base.*;
+import edu.gemini.itc.gmos.CCDGapCalc;
+import edu.gemini.itc.shared.GmosParameters;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -11,13 +14,30 @@ import java.util.List;
  * a file read in.
  */
 public class DetectorsTransmissionVisitor implements SampledSpectrumVisitor {
+
+    // ======
+    // TODO: This is GMOS specific, in order to support future instruments with different CCD layouts
+    // TODO: we will have to make this more generic.
+    // Full size of GMOS array:
+    public static final double fullArrayPix = 6218.0;
+    // GMOS gap locations:
+    public static final double gap1a = 2048.0;
+    public static final double gap1b = 2086.0;
+    public static final double gap2a = 4133.0;
+    public static final double gap2b = 4171.0;
+    // ======
+
     private final int spectralBinning;
+    private final double centralWavelength;
+    private final double nmppx;
     private VisitableSampledSpectrum detectorsTransmissionValues;
     private List<Integer> detectorCcdIndexes;
 
-    public DetectorsTransmissionVisitor(int spectralBinning, String filename) {
-        this.spectralBinning = spectralBinning;
-        final double[][] data = DatFile.arrays().apply(filename);
+    public DetectorsTransmissionVisitor(final GmosParameters p, final double nmppx, final String filename) {
+        this.spectralBinning    = p.spectralBinning();
+        this.centralWavelength  = p.centralWavelength().toNanometers();
+        this.nmppx              = nmppx;
+        final double[][] data   = DatFile.arrays().apply(filename);
         initialize(data);
     }
 
@@ -35,6 +55,9 @@ public class DetectorsTransmissionVisitor implements SampledSpectrumVisitor {
     }
 
     private void initialize(final double[][] data) {
+        // TODO: This can probably be simplified by using the gap positions for GMOS above instead of reading them from a file.
+        // TODO: The CCD gaps are not really expected to change very often... if we do that we also need to abstract out all
+        // TODO: the other GMOS specific stuff from this class so that it works for any CCD array layout.
         // need to sample the file at regular interval pixel values
         int finalPixelValue = (int) data[0][data[0].length - 1];
         double[] pixelData = new double[finalPixelValue];
@@ -89,6 +112,65 @@ public class DetectorsTransmissionVisitor implements SampledSpectrumVisitor {
         }
         return detectorCcdIndexes.get(detectorIndex * 2 + 1) / spectralBinning;
     }
+
+    // ======== CRAZY TRANSFORMATION STUFF
+    // TODO: The code here is GMOS IFU-2 specific. Currently this class is only used for GMOS.
+    // TODO: If we add other instruments to ITC with multiple CCDs we will have to revisit this.
+
+    /** Calculates the shift for the given IFU-2 configuration in nm. */
+    public double ifu2shift() {
+        return 0.5 * nmppx * CCDGapCalc.calcIfu2Shift(centralWavelength, nmppx);
+    }
+
+    /** The start of the "red" area in wavelength space. */
+    public double ifu2RedStart() {
+        return centralWavelength - (nmppx * (fullArrayPix / 2)) - ifu2shift();    // in nm
+    }
+
+    /** The end of the "red" area in wavelength space. */
+    public double ifu2RedEnd() {
+        return centralWavelength + (nmppx * (fullArrayPix / 2)) - ifu2shift();    // in nm
+    }
+
+    /** The start of the "blue" area in wavelength space. */
+    public double ifu2BlueStart() {
+        return centralWavelength - (nmppx * (fullArrayPix / 2)) + ifu2shift();    // in nm
+    }
+
+    /** The end of the "blue" area in wavelength space. */
+    public double ifu2BlueEnd() {
+        return centralWavelength + (nmppx * (fullArrayPix / 2)) + ifu2shift();    // in nm
+    }
+
+    /** Transforms the given nm value from wavelength space to pixel space. */
+    public double toPixelSpace(double data, double shift) {
+        return (fullArrayPix/2)-(data-centralWavelength+shift)/nmppx;
+    }
+
+    /** Transforms data from wavelength into pixel space and add the CCD gaps.
+      * Note: It could be useful for future use to separate the transformation and the operation
+      * that adds the gaps to be more flexible.
+      */
+    public double[][] toPixelSpace(double[][] data, double shift) {
+        double[][] array = new double[2][];
+        array[0] = Arrays.copyOf(data[0], data[0].length);
+        array[1] = Arrays.copyOf(data[1], data[1].length);
+
+        // transform wavelength values (nm) to pixel
+        for (int i=0; i < array[0].length; ++i) {
+            array[0][i] = toPixelSpace(array[0][i], shift);
+        }
+
+        // add gaps (pull signal to zero in gaps)
+        for (int i = 0; i < array[0].length; i++) {
+            final double pixel = array[0][i];
+            if (pixel >= gap1a && pixel <= gap1b) array[1][i] = 0.0;
+            if (pixel >= gap2a && pixel <= gap2b) array[1][i] = 0.0;
+        }
+
+        return array;
+    }
+
 
     /**
      * @return Human-readable representation of this class.

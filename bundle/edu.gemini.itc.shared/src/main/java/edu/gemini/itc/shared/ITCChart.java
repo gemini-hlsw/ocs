@@ -2,6 +2,8 @@ package edu.gemini.itc.shared;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.axis.AxisLocation;
+import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYItemRenderer;
@@ -76,7 +78,7 @@ public final class ITCChart {
 
     public ITCChart(final SpcChartData s, final PlottingDetails plotParams) {
 
-        chart = ChartFactory.createXYLineChart(s.title(), s.xAxisLabel(), s.yAxisLabel(), this.seriesData, PlotOrientation.VERTICAL, true, false, false);
+        chart = ChartFactory.createXYLineChart(s.title(), s.xAxis().label(), s.yAxis().label(), this.seriesData, PlotOrientation.VERTICAL, true, false, false);
         chart.getLegend().setPosition(RectangleEdge.TOP);
         chart.setBackgroundPaint(Color.white);
 
@@ -87,12 +89,42 @@ public final class ITCChart {
         plot.setDomainGridlinePaint(Color.gray);
         plot.setRangeGridlinePaint(Color.gray);
 
-        if (plotParams.getPlotLimits().equals(PlottingDetails.PlotLimits.USER)) {
-            setDomainMinMax(plotParams.getPlotWaveL(), plotParams.getPlotWaveU());
-        } else {
-            autoscale();
+        // invert domain axis if needed
+        if (s.xAxis().inverted()) {
+            final NumberAxis axis0 = new NumberAxis(s.xAxis().label());
+            axis0.setInverted(true);
+            plot.setDomainAxisLocation(0, AxisLocation.BOTTOM_OR_LEFT);
+            plot.setDomainAxis(0, axis0);
+            plot.mapDatasetToDomainAxis(0, 0);
         }
 
+        // scale xAxis - domain axis
+        if (plotParams.getPlotLimits().equals(PlottingDetails.PlotLimits.USER)) {
+            setDomainMinMax(plotParams.getPlotWaveL(), plotParams.getPlotWaveU());
+        } else if (s.xAxis().range().isDefined()) {
+            final ChartAxisRange range = s.xAxis().range().get();
+            setDomainMinMax(range.start(), range.end());
+        }
+
+        // scale yAxis - range axis
+        if (s.yAxis().range().isDefined()) {
+            final ChartAxisRange range = s.xAxis().range().get();
+            chart.getXYPlot().getRangeAxis().setRange(range.start(), range.end());
+        }
+
+        // additional axes as needed
+        for (int i = 0; i < s.axes().size(); i++) {
+            final ChartAxis  a = s.axes().apply(i);
+            final NumberAxis axis = new NumberAxis(a.label());
+            if (a.range().isDefined()) {
+                // TODO: additional axes MUST have a range, while for x and y axis it is optional
+                axis.setRange(a.range().get().start(), a.range().get().end());
+            }
+            plot.setDomainAxis(i + 1, axis);
+            plot.setDomainAxisLocation(i + 1, AxisLocation.TOP_OR_LEFT);
+        }
+
+        // add all the data
         for (final SpcSeriesData d : JavaConversions.seqAsJavaList(s.series())) {
             addArray(d.data(), d.title(), d.color());
         }
@@ -118,11 +150,6 @@ public final class ITCChart {
         final XYItemRenderer renderer = chart.getXYPlot().getRenderer();
         renderer.setSeriesPaint(ix, color.isDefined() ? color.get() : colorByIndex(ix));
         renderer.setSeriesStroke(ix, new BasicStroke(2));
-    }
-
-    private void autoscale() {
-        chart.getXYPlot().getDomainAxis().setAutoRange(true);
-        chart.getXYPlot().getRangeAxis().setAutoRange(true);
     }
 
     private void setDomainMinMax(final double lower, final double upper) {

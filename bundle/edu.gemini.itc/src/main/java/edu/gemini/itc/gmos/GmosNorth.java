@@ -5,6 +5,7 @@ import edu.gemini.itc.base.WarningRule;
 import edu.gemini.itc.shared.GmosParameters;
 import edu.gemini.itc.shared.ObservationDetails;
 import edu.gemini.spModel.gemini.gmos.InstGmosNorth;
+import edu.gemini.spModel.gemini.gmos.GmosNorthType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,6 +38,10 @@ public final class GmosNorth extends Gmos {
 
     public GmosNorth(final GmosParameters gp, final ObservationDetails odp, final int detectorCcdIndex) {
         super(gp, odp, FILENAME, detectorCcdIndex);
+    }
+
+    public boolean isIfu2() {
+        return getFpMask() == GmosNorthType.FPUnitNorth.IFU_1;
     }
 
     protected Gmos[] createCcdArray() {

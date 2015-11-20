@@ -75,18 +75,24 @@ public final class GmosPrinter extends PrinterBase {
         _print("<HR align=left SIZE=3>");
 
         // For IFUs we can have more than one S2N result.
+        // Print links for all data files and the charts for each IFU.
+        // For the non IFU case specS2N will have only one entry.
         for (int i = 0; i < result.specS2N().length; i++) {
             _println("<p style=\"page-break-inside: never\">");
-            _printFileLinkAllSeries(id, SignalData.instance());
-            _printFileLinkAllSeries(id, BackgroundData.instance());
-            _printFileLinkAllSeries(id, SingleS2NData.instance());
-            _printFileLinkAllSeries(id, FinalS2NData.instance());
-        }
+            _printFileLinkAllSeries(id, SignalData.instance(),     i);
+            _printFileLinkAllSeries(id, BackgroundData.instance(), i);
+            _printFileLinkAllSeries(id, SingleS2NData.instance(),  i);
+            _printFileLinkAllSeries(id, FinalS2NData.instance(),  i);
 
-        _printImageLink(id, SignalChart.instance(), pdp);
-        _println("");
-        _printImageLink(id, S2NChart.instance(), pdp);
-        _println("");
+            _printImageLink(id, SignalChart.instance(), i, pdp);
+            _println("");
+            _printImageLink(id, S2NChart.instance(),    i, pdp);
+            _println("");
+            if (mainInstrument.isIfu2()) {
+                _printImageLink(id, SignalPixelChart.instance(), i, pdp);
+                _println("");
+            }
+        }
 
         printConfiguration(results[0].parameters(), mainInstrument);
     }
