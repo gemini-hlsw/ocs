@@ -274,7 +274,7 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
         final Gmos[] ccdArray     = mainInstrument.getDetectorCcdInstruments();
         final DetectorsTransmissionVisitor tv = mainInstrument.getDetectorTransmision();
 
-        final boolean ifuMultiple = mainInstrument.getIFU().getApertureOffsetList().size() > 1;
+        final boolean ifuMultiple = mainInstrument.isIfuUsed() && mainInstrument.getIFU().getApertureOffsetList().size() > 1;
         final double  ifuOffset   = ifuMultiple ? mainInstrument.getIFU().getApertureOffsetList().get(i) : 0.0;
 
         final List<ChartAxis> axes = new ArrayList<>();
@@ -304,7 +304,7 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
         final Gmos[] ccdArray      = mainInstrument.getDetectorCcdInstruments();
         final DetectorsTransmissionVisitor tv = mainInstrument.getDetectorTransmision();
 
-        final boolean ifuMultiple  = mainInstrument.getIFU().getApertureOffsetList().size() > 1;
+        final boolean ifuMultiple  = mainInstrument.isIfuUsed() && mainInstrument.getIFU().getApertureOffsetList().size() > 1;
         final double  ifuOffset    = ifuMultiple ? mainInstrument.getIFU().getApertureOffsetList().get(i) : 0.0;
         final List<ChartAxis> axes = new ArrayList<>();
 
@@ -334,7 +334,7 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
         final Gmos[] ccdArray     = mainInstrument.getDetectorCcdInstruments();
         final DetectorsTransmissionVisitor tv = mainInstrument.getDetectorTransmision();
 
-        final boolean ifuMultiple = mainInstrument.getIFU().getApertureOffsetList().size() > 1;
+        final boolean ifuMultiple = mainInstrument.isIfuUsed() && mainInstrument.getIFU().getApertureOffsetList().size() > 1;
         final double  ifuOffset   = ifuMultiple ? mainInstrument.getIFU().getApertureOffsetList().get(i) : 0.0;
 
         final List<ChartAxis> axes = new ArrayList<>();
