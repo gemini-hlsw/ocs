@@ -297,7 +297,7 @@ public abstract class Gmos extends Instrument implements BinningProvider {
             }
 
             if (isIfu2() && gp.ccdType() == GmosCommonType.DetectorManufacturer.HAMAMATSU) {
-                throw new Error("Currently IFU-2 is not supported for Hamamatsu CCD.");
+                throw new RuntimeException("Currently IFU-2 is not supported for Hamamatsu CCD.");
             }
         }
 
