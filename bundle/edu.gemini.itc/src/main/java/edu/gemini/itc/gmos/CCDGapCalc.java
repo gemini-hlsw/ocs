@@ -12,7 +12,7 @@ public class CCDGapCalc {
 
         // TODO: Some of the values here (e.g. plate scale) are different for Hamamatsu and E2V CCDs.
         // TODO: We currently only support E2V CCDs for the GMOS IFU-2 case, so we are using the E2V values here.
-        final double scale  = 0.080778;   // plaste scale in arcsecs per pixel (E2V only!)
+        final double scale  = 0.073;      // plate scale in arcsecs per pixel (E2V only!)
         final double asecmm = 1.611444;   // Arcsecs per mm
         final double sepmm  = 175.;       // Physical separation between IFU-2 slits, in mm.
 
