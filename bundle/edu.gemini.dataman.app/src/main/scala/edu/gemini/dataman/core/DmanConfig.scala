@@ -11,10 +11,9 @@ final case class DmanConfig(
                    summitHost: GsaHost.Summit,
                    gsaAuth: GsaAuth,
                    site: Site,
-                   tonightPeriod: PollPeriod.Tonight,
-                   thisWeekPeriod: PollPeriod.ThisWeek,
-                   allPeriod: PollPeriod.AllPrograms,
-                   obsRefreshPeriod: PollPeriod.ObsRefresh) {
+                   obsRefreshPeriod: PollPeriod.ObsRefresh,
+                   archivePoll: PollPeriod.Archive,
+                   summitPoll: PollPeriod.Summit) {
 
   def show: String =
     s"""
@@ -23,11 +22,15 @@ final case class DmanConfig(
       | Summit Host  = ${summitHost.host}
       | GSA Auth     = ${gsaAuth.value}
       | Site         = ${site.abbreviation}
-      | Poll Periods ------------------------
-      | Tonight      = ${tonightPeriod.time}
-      | This Week    = ${thisWeekPeriod.time}
-      | All Programs = ${allPeriod.time}
       | Obs Refresh  = ${obsRefreshPeriod.time}
+      | Archive Poll Periods ------------------------
+      | Tonight      = ${archivePoll.tonight.time}
+      | This Week    = ${archivePoll.thisWeek.time}
+      | All Programs = ${archivePoll.allPrograms.time}
+      | Summit Poll Periods -------------------------
+      | Tonight      = ${summitPoll.tonight.time}
+      | This Week    = ${summitPoll.thisWeek.time}
+      | All Programs = ${summitPoll.allPrograms.time}
      """.stripMargin
 }
 
