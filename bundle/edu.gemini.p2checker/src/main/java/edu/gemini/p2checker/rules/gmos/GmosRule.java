@@ -1243,15 +1243,15 @@ public final class GmosRule implements IRule {
     }
 
     /**
-     * ERROR: If GMOS-S is used with E2V after semester 2015B.
+     * ERROR: If GMOS-S is used with E2V after semester 2014A.
      * This can happen when PIs copy parts of old programs into new ones. PIs will not be able to change the detector
      * settings themselves and will have to have a staff member help them. This is not ideal, but since this is only
      * a transitional problem this seems to be the simplest solution.
      * (Note that very soon we will have to apply this rule to GMOS-N, too.)
      */
-    private static final Semester SEMESTER_2015B = new Semester(2015, Semester.Half.B);
-    private static IConfigRule POST_2015B_GMOS_S_WITH_E2V = new AbstractConfigRule() {
-        private static final String msg = "Starting with 2016A GMOS-S must use the Hamamatsu CCDs. Please create a new observation or ask your contact scientist to update the CCD settings.";
+    private static final Semester SEMESTER_2014A = new Semester(2014, Semester.Half.A);
+    private static IConfigRule POST_2014A_GMOS_S_WITH_E2V = new AbstractConfigRule() {
+        private static final String msg = "Starting with 2014B GMOS-S must use the Hamamatsu CCDs. Please create a new observation or ask your contact scientist to update the CCD settings.";
 
         private Option<Semester> semester(final ObservationElements elems) {
             return Optional.ofNullable(elems)                       // null safe access chain
@@ -1262,8 +1262,7 @@ public final class GmosRule implements IRule {
                     .orElse(Option.empty());                        // turn the Java None result into a Scala None
         }
 
-        @Override
-        public Problem check(Config config, int step, ObservationElements elems, Object state) {
+        @Override public Problem check(Config config, int step, ObservationElements elems, Object state) {
             // apply this rule to GMOS-S
             final SPInstObsComp instrument = elems.getInstrument();
             if (instrument.getType() == InstGmosSouth.SP_TYPE) {
@@ -1271,11 +1270,11 @@ public final class GmosRule implements IRule {
                 final Option<Semester> semester = semester(elems);
                 if (semester.isDefined()) {
                     // apply it to observations for 2016A or later
-                    if (semester.get().compareTo(SEMESTER_2015B) > 0) {
+                    if (semester.get().compareTo(SEMESTER_2014A) > 0) {
                         // apply if E2V is selected
                         final DetectorManufacturer ccd = ((InstGmosSouth) instrument).getDetectorManufacturer();
                         if (ccd == DetectorManufacturer.E2V) {
-                            return new Problem(ERROR, PREFIX + "POST_2015B_GMOS_S_WITH_E2V_RULE", msg, SequenceRule.getInstrumentOrSequenceNode(step, elems));
+                            return new Problem(ERROR, PREFIX + "POST_2014A_GMOS_S_WITH_E2V_RULE", msg, SequenceRule.getInstrumentOrSequenceNode(step, elems));
                         }
                     }
                 }
@@ -1896,7 +1895,7 @@ public final class GmosRule implements IRule {
         GMOS_RULES.add(NO_P_OFFSETS_WITH_SLIT_SPECTROSCOPY_RULE);
         GMOS_RULES.add(new MdfMaskNameRule(Problem.Type.ERROR));
         GMOS_RULES.add(new MdfMaskNameRule(Problem.Type.WARNING));
-        GMOS_RULES.add(POST_2015B_GMOS_S_WITH_E2V);
+        GMOS_RULES.add(POST_2014A_GMOS_S_WITH_E2V);
     }
 
     public IP2Problems check(ObservationElements elems) {
