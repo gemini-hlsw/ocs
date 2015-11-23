@@ -8,7 +8,7 @@ import edu.gemini.pot.sp.ISPNode
 import edu.gemini.pot.ModelConverters._
 import edu.gemini.shared.gui.GlassLabel
 import edu.gemini.shared.util.immutable.ScalaConverters._
-import edu.gemini.shared.util.immutable.{ Option => GOption }
+import edu.gemini.shared.util.immutable.{Option => GOption, DefaultImList}
 import edu.gemini.spModel.core.{Redshift, Epoch, SiderealTarget}
 import edu.gemini.spModel.obs.context.ObsContext
 import edu.gemini.spModel.target.SPTarget
@@ -113,9 +113,7 @@ final class SiderealNameEditor(mags: MagnitudeEditor) extends TelescopePosEditor
       i.redshift.ifNone {
         t.setRedshift(Redshift.zero)
       }
-      if (i.magnitudes.nonEmpty) {
-        mags.replaceMagnitudes(i.magnitudes.map(_.toOldModel).asImList)
-      }
+      mags.replaceMagnitudes(i.magnitudes.map(_.toOldModel).asImList)
     }
 
     spt.notifyOfGenericUpdate()
