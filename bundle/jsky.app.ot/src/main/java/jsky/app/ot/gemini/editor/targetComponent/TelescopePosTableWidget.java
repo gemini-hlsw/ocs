@@ -269,7 +269,7 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
 
         TableData(final Option<ObsContext> ctx, final TargetEnvironment env, JXTreeTable treeTable) {
             super(new ArrayList<Row>());
-            @SuppressWarnings("unchecked") final List<Row> tmp = (List<Row>)getRoot();
+            @SuppressWarnings("unchecked") final List<Row> tableRows = (List<Row>)getRoot();
 
             this.env       = env;
             this.treeTable = treeTable;
@@ -280,71 +280,74 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
             final SPTarget base = env.getBase();
             final Option<Long> when = ctx.flatMap(c -> c.getSchedulingBlock().map(SchedulingBlock::start));
             final Option<WorldCoords> baseCoords = getWorldCoords(base, when);
-            tmp.add(new BaseTargetRow(base, when));
+            tableRows.add(new BaseTargetRow(base, when));
 
             // Add all the guide groups and targets.
             final Option<Tuple2<ObsContext, AgsMagnitude.MagnitudeTable>> ags = ctx.map(oc -> new Pair<>(oc, OT.getMagnitudeTable()));
             final GuideEnvironment ge = env.getGuideEnvironment();
             final ImList<GuideGroup> groups = ge.getOptions();
             final GuideGroup primaryGroup = env.getOrCreatePrimaryGuideGroup();
-            if (groups.size() < 2) {
-                for (final GuideProbeTargets gt : primaryGroup.getAll()) {
-                    final GuideProbe guideProbe = gt.getGuider();
-                    final boolean isActive = ctx.exists(c -> GuideProbeUtil.instance.isAvailable(c, guideProbe));
-                    final Option<SPTarget> primary = gt.getPrimary();
-                    final Option<SPTarget> bagsTarget = gt.getBagsResult().targetAsJava();
 
-                    // If the first target is a bags target, we do not add to the index.
-                    final int bagsIndexModifier = bagsTarget.isDefined() ? 0 : 1;
+            groups.zipWithIndex().foreach(gpInfo -> {
+                final GuideGroup group = gpInfo._1();
+                final int groupIndex   = gpInfo._2() + 1;
 
-                    gt.getTargets().zipWithIndex().foreach(tup -> {
-                        final SPTarget target = tup._1();
-                        final Option<AgsGuideQuality> quality = guideQuality(ags, guideProbe, target);
-                        final boolean isPrimary = primary.exists(target::equals);
-                        final boolean isBagsTarget = bagsTarget.exists(target::equals);
+                // Create the rows for this group.
+                final List<Row> rows = createRowsForGroup(group, ctx, ags, baseCoords, when);
 
-                        final Row row = isBagsTarget ?
-                                new BagsTargetRow(isActive, quality, isPrimary, guideProbe, target, baseCoords, when) :
-                                new GuideTargetRow(isActive, quality, isPrimary, guideProbe, tup._2() + bagsIndexModifier, target, baseCoords, when);
-                        tmp.add(row);
-                    });
+                // If this is the only guide group, then we add directly to tableRows.
+                // Otherwise, we create a GroupRow to collect them, and add that to the tableRows.
+                if (groups.size() == 1) {
+                    tableRows.addAll(rows);
                 }
-            } else {
-                int groupIndex = 1;
-                for (final GuideGroup group : groups) {
-                    final boolean isPrimaryGroup = group == primaryGroup;
-                    final List<Row> rowList = new ArrayList<>();
-                    for (final GuideProbeTargets gt : group.getAll()) {
-                        final GuideProbe guideProbe = gt.getGuider();
-                        final boolean isActive = ctx.exists(c -> GuideProbeUtil.instance.isAvailable(c, guideProbe));
-                        final Option<SPTarget> primary = gt.getPrimary();
-                        final Option<SPTarget> bagsTarget = gt.getBagsResult().targetAsJava();
-
-                        // If the first target is a bags target, we do not add to the index.
-                        final int bagsIndexModifier = bagsTarget.isDefined() ? 0 : 1;
-
-                        gt.getTargets().zipWithIndex().foreach(tup -> {
-                            final SPTarget target = tup._1();
-                            final Option<AgsGuideQuality> quality = guideQuality(ags, guideProbe, target);
-                            final boolean enabled = isPrimaryGroup && primary.exists(target::equals);
-                            final boolean isBagsTarget = bagsTarget.exists(target::equals);
-
-                            final Row row = isBagsTarget ?
-                                    new BagsTargetRow(isActive, quality, enabled, guideProbe, target, baseCoords, when) :
-                                    new GuideTargetRow(isActive, quality, enabled, guideProbe, tup._2() + bagsIndexModifier, target, baseCoords, when);
-                            rowList.add(row);
-                        });
-                    }
-
-                    tmp.add(new GroupRow(isPrimaryGroup, groupIndex++, group, rowList));
+                else {
+                    tableRows.add(new GroupRow(group == primaryGroup, groupIndex, group, rows));
                 }
-            }
+            });
 
             // Add the user positions.
-            env.getUserTargets().zipWithIndex().foreach(tup -> tmp.add(new UserTargetRow(tup._2(), tup._1(), baseCoords, when)));
+            env.getUserTargets().zipWithIndex().foreach(tup -> {
+                final SPTarget target = tup._1();
+                final int index       = tup._2();
+                tableRows.add(new UserTargetRow(index, target, baseCoords, when));
+            });
 
             // Finally, initialize the rows
-            rows = DefaultImList.create(tmp);
+            rows = DefaultImList.create(tableRows);
+        }
+
+        private List<Row> createRowsForGroup(final GuideGroup group,
+                                             final Option<ObsContext> ctx,
+                                             final Option<Tuple2<ObsContext, AgsMagnitude.MagnitudeTable>> ags,
+                                             final Option<WorldCoords> baseCoords,
+                                             final Option<Long> when) {
+            final GuideGroup primaryGroup = env.getOrCreatePrimaryGuideGroup();
+            final boolean groupIsPrimary  = group == primaryGroup;
+
+            return group.getAll().foldLeft(new ArrayList<>(), (lst, gpt) -> {
+                final GuideProbe guideProbe = gpt.getGuider();
+                final boolean isActive = ctx.exists(c -> GuideProbeUtil.instance.isAvailable(c, guideProbe));
+                final Option<SPTarget> primaryTarget = gpt.getPrimary();
+                final Option<SPTarget> bagsTarget = gpt.getBagsResult().targetAsJava();
+
+                // If the first target is a bags target, we do not add to the index.
+                final int bagsIndexModifier = bagsTarget.isDefined() ? 0 : 1;
+
+                gpt.getTargets().zipWithIndex().foreach(tup -> {
+                    final SPTarget target = tup._1();
+                    final int index = tup._2() + bagsIndexModifier;
+                    final Option<AgsGuideQuality> quality = guideQuality(ags, guideProbe, target);
+                    final boolean enabled = groupIsPrimary && primaryTarget.exists(target::equals);
+                    final boolean isBagsTarget = bagsTarget.exists(target::equals);
+
+                    final Row row = isBagsTarget ?
+                            new BagsTargetRow(isActive, quality, enabled, guideProbe, target, baseCoords, when) :
+                            new GuideTargetRow(isActive, quality, enabled, guideProbe, index, target, baseCoords, when);
+                    lst.add(row);
+                });
+
+                return lst;
+            });
         }
 
         // Gets all the magnitude bands used by targets in the target
