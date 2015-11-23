@@ -18,4 +18,14 @@ object PollPeriod {
   final case class ObsRefresh(time: Duration)  extends PollPeriod
 
   implicit val EqualPollPeriod: Equal[PollPeriod] = Equal.equalA
+
+  /** Collection of recurring time-based poll periods. */
+  sealed trait Group {
+    def tonight: Tonight
+    def thisWeek: ThisWeek
+    def allPrograms: AllPrograms
+  }
+
+  final case class Archive(tonight: Tonight, thisWeek: ThisWeek, allPrograms: AllPrograms) extends Group
+  final case class Summit(tonight: Tonight, thisWeek: ThisWeek, allPrograms: AllPrograms) extends Group
 }

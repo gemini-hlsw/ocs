@@ -37,7 +37,7 @@ directly and leaves database record maintenance to the Data Manager.
 There are two ways that a user can modify QA states:
 
 1. Use the OT and its Observing Log GUI.
-2. Work directly with FITS files in the summit storage system.  
+2. Work directly with FITS files in the summit storage system.
 
 We'll cover the second alternative below in the discussion on polling.  Using the Observing Log GUI
 in the OT works just like updating anything else in the science program.  Namely, the user edits the
@@ -48,7 +48,7 @@ they will not be forwarded on to the FITS Storage server.
 The Data Manager monitors the ODB for updates to QA state.  When it detects a change, it posts
 a corresponding request to the FITS storage server.  The storage server in turn immediately accepts
 the request and updates the dataset file on disk, or else responds with an error.  Acceptance of an
-update request is a promise on the part of the storage server to eventually update its internal 
+update request is a promise on the part of the storage server to eventually update its internal
 records to match.  Until that promise is fulfilled, a query for the current QA state of the
 dataset will continue to report the value it had *before* the update took place.  Presumably at
 some later point, the storage server records are updated and the modified dataset is forwarded on to
@@ -86,9 +86,10 @@ The Data Manager polls both the local FITS storage server and the public archive
 information. Like the OT, the poll period is variable.  The polling rates are:
 
 <table>
-  <caption>Data Manager/Archive Poll Periods</caption>
+  <caption>Data Manager Poll Periods</caption>
   <tr><th>Category</th><th>Poll Period</th></tr>
-  <tr><td>Tonight's Datasets</td><td>1 minute</td></tr>
+  <tr><td>Tonight's Datasets (Archive)</td><td>1 minute</td></tr>
+  <tr><td>Tonight's Datasets (Summit)</td><td>15 seconds</td></tr>
   <tr><td>This Week's Datasets</td><td>15 minutes</td></tr>
   <tr><td>All Datasets</td><td>1 day</td></tr>
   <tr><td>Pending Updates</td><td>2 minutes</td></tr>
@@ -104,7 +105,7 @@ any with a dataset whose status is expected to change soon.  For all of these, i
 updates from the summit storage service and public archive.  A dataset is "expected to change
 soon" if its QA state is in the process of updating, or if the summit and public versions differ.
 This feature covers QA state updates initiated from the OT for older datasets not included in the
-nightly or weekly polls. 
+nightly or weekly polls.
 
 > ![](images/lightbulb.gif) It is assumed that the archive will never cut off the results for a poll
 query, even if the response is large, because otherwise the Data Manager will believe that the

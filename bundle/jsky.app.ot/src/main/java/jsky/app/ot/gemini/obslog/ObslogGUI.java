@@ -245,51 +245,33 @@ public class ObslogGUI extends JPanel {
 
         private final DataAnalysisTable table = new DataAnalysisTable();
         private final JPanel editArea = new Editor();
+        private Optional<Boolean> isStaffMode = Optional.empty();
 
         public DataAnalysisComponent(String name) {
             super(new BorderLayout());
             setName(name);
-
-            if (OTOptions.isStaffGlobally()) {
-                configureForStaff();
-            } else {
-                configureForPi();
-            }
-        }
-
-        private boolean isConfiguredForStaffEditing() {
-            for (Component c : getComponents())
-                if (c instanceof JSplitPane) return true;
-            return false;
         }
 
         private void reconfigure() {
-            if (isConfiguredForStaffEditing() != OTOptions.isStaffGlobally()) {
+            final boolean isStaff = OTOptions.isStaffGlobally();
+
+            // if (isStaffMode.forall(_ =/= isStaff)) {
+            if (!isStaffMode.isPresent() || isStaffMode.get() != isStaff) {
+                isStaffMode = Optional.of(isStaff);
+
                 removeAll();
-                if (OTOptions.isStaffGlobally()) {
-                    configureForStaff();
-                } else {
-                    configureForPi();
+                add(new JScrollPane(table) {{
+                    if (isStaff) setBorder(BorderFactory.createEmptyBorder());
+                    setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+                }}, BorderLayout.CENTER);
+
+                if (isStaff) {
+                    final JPanel editPanel = new JPanel(new BorderLayout());
+                    editPanel.add(new Header("Select multiple rows for bulk updating."), BorderLayout.NORTH);
+                    editPanel.add(editArea, BorderLayout.CENTER);
+                    add(editPanel, BorderLayout.SOUTH);
                 }
             }
-        }
-
-        private void configureForPi() {
-            add(new JScrollPane(table) {{
-                setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-            }}, BorderLayout.CENTER);
-        }
-
-        private void configureForStaff() {
-            add(new JScrollPane(table) {{
-                setBorder(BorderFactory.createEmptyBorder());
-                setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-            }}, BorderLayout.CENTER);
-
-            final JPanel editPanel = new JPanel(new BorderLayout());
-            editPanel.add(new Header("Select multiple rows for bulk updating."), BorderLayout.NORTH);
-            editPanel.add(editArea, BorderLayout.CENTER);
-            add(editPanel, BorderLayout.SOUTH);
         }
 
         void setObsLog(final ObsLog obsLog) {
@@ -329,6 +311,7 @@ public class ObslogGUI extends JPanel {
                 add(qa = new DropDownListBoxWidget<DatasetQaState>() {{
                     setChoices(DatasetQaState.values());
                     setRenderer(new SpTypeCellRenderer());
+                    setSelectedItem(null);
                     addActionListener(ae -> {
                         if (!adjusting) {
                             setCommonValue(DatasetAnalysisTableModel.COL_QA_STATE, getSelectedItem());

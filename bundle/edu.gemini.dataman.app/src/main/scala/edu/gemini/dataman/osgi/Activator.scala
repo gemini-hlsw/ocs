@@ -75,16 +75,16 @@ final class Activator extends BundleActivator {
 object Activator {
   val Log = Logger.getLogger(Activator.getClass.getName)
 
-  val CommandScope      = "osgi.command.scope"
-  val CommandFunction   = "osgi.command.Function"
+  val CommandScope     = "osgi.command.scope"
+  val CommandFunction  = "osgi.command.Function"
 
-  val SummitHost        = "edu.gemini.dataman.gsa.summit.host"
-  val ArchiveHost       = "edu.gemini.dataman.gsa.archive.host"
-  val GsaAuth           = "edu.gemini.dataman.gsa.auth"
-  val TonightPeriod     = "edu.gemini.dataman.poll.tonight"
-  val ThisWeekPeriod    = "edu.gemini.dataman.poll.thisWeek"
-  val AllProgramsPeriod = "edu.gemini.dataman.poll.allPrograms"
-  val ObsRefreshPeriod  = "edu.gemini.dataman.poll.obsRefresh"
+  val SummitHost       = "edu.gemini.dataman.gsa.summit.host"
+  val ArchiveHost      = "edu.gemini.dataman.gsa.archive.host"
+  val GsaAuth          = "edu.gemini.dataman.gsa.auth"
+  val ObsRefreshPeriod = "edu.gemini.dataman.poll.obsRefresh"
+
+  val ArchivePeriods   = "edu.gemini.dataman.poll.archive"
+  val SummitPeriods    = "edu.gemini.dataman.poll.summit"
 
   private def readConfig(ctx: BundleContext): ValidationNel[String, DmanConfig] = {
     def lookup(name: String): ValidationNel[String, String] =
@@ -99,17 +99,24 @@ object Activator {
         }.leftMap(_.wrapNel).map(f).validation
       }
 
-    val archive = lookup(ArchiveHost).map(GsaHost.Archive)
-    val summit  = lookup(SummitHost).map(GsaHost.Summit)
-    val auth    = lookup(GsaAuth).map(a => new GsaAuth(a))
-    val site    = Option(SiteProperty.get(ctx)).toSuccess(s"Missing or unparseable '${SiteProperty.NAME}' property.".wrapNel)
-
-    val tonight    = lookupPollPeriod(TonightPeriod)(PollPeriod.Tonight)
-    val thisWeek   = lookupPollPeriod(ThisWeekPeriod)(PollPeriod.ThisWeek)
-    val allProgs   = lookupPollPeriod(AllProgramsPeriod)(PollPeriod.AllPrograms)
+    val archive    = lookup(ArchiveHost).map(GsaHost.Archive)
+    val summit     = lookup(SummitHost).map(GsaHost.Summit)
+    val auth       = lookup(GsaAuth).map(a => new GsaAuth(a))
+    val site       = Option(SiteProperty.get(ctx)).toSuccess(s"Missing or unparseable '${SiteProperty.NAME}' property.".wrapNel)
     val obsRefresh = lookupPollPeriod(ObsRefreshPeriod)(PollPeriod.ObsRefresh)
 
-    (archive |@| summit |@| auth |@| site |@| tonight |@| thisWeek |@| allProgs |@| obsRefresh) {
+    import PollPeriod.{Tonight, ThisWeek, AllPrograms}
+    def pollGroup[G <: PollPeriod.Group](prefix: String, ctor: (Tonight, ThisWeek, AllPrograms) => G): ValidationNel[String, G] = {
+      val tonight  = lookupPollPeriod(s"$prefix.tonight")(PollPeriod.Tonight)
+      val thisWeek = lookupPollPeriod(s"$prefix.thisWeek")(PollPeriod.ThisWeek)
+      val allProgs = lookupPollPeriod(s"$prefix.allPrograms")(PollPeriod.AllPrograms)
+      (tonight |@| thisWeek |@| allProgs) { ctor }
+    }
+
+    val archivePoll = pollGroup(ArchivePeriods, PollPeriod.Archive.apply)
+    val summitPoll  = pollGroup(SummitPeriods, PollPeriod.Summit.apply)
+
+    (archive |@| summit |@| auth |@| site |@| obsRefresh |@| archivePoll |@| summitPoll) {
       DmanConfig.apply
     }
   }
