@@ -159,12 +159,28 @@ class ProgTableModel(filter: DBProgramChooserFilter, db: IDBDatabaseService, aut
 
   /** Recompute table contents. */
   def refresh(full: Boolean): Unit = {
+    // The peer associated with the currently selected key, if any.
+    val selectedPeer = auth.selection.unsafeRun.toOption.flatten.map(_._1)
 
     // Refresh local programs from local DB, and from VCS
     def refreshLocal(ignored: Any = null): Unit = {
       val func  = new DBProgramListFunctor(DBProgramListFunctor.EMPTY_PROGRAM_ID_OR_READABLE)
       val func0 = db.getQueryRunner(OT.getUser).queryPrograms(func)
-      locals.set(func0.getList.asScala.toVector.map { info =>
+
+      // We've already filtered out local programs associated with the selected
+      // peer's database for which the current key doesn't provide access.
+      // Additionally filter out local programs associated with other peers.
+      val progs = func0.getList.asScala.toVector.filter { info =>
+        val programPeer = for {
+          pid  <- Option(info.programID)
+          reg  <- vcs
+          peer <- reg.registration(pid)
+        } yield peer
+
+        programPeer.forall(p => selectedPeer.exists(_ == p))
+      }
+      
+      locals.set(progs.map { info =>
         db.lookupProgram(info.nodeKey)
       })
 
