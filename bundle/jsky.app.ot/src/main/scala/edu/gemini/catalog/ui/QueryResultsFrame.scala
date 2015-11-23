@@ -415,10 +415,8 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
         get(originalConditions) match {
           case Some(i) if i.compareTo(a) != 0 =>
             component.foreground = Color.red
-            foreground = Color.red
           case _                             =>
             component.foreground = Color.black
-            foreground = Color.black
         }
       }
     }
