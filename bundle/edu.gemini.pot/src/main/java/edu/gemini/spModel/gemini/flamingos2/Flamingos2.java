@@ -135,7 +135,7 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
         J_LOW("J-low (1.15 um)", "J-low", new Some<>(1.15)),
         J("J (1.25 um)", "J", new Some<>(1.25)),
         H("H (1.65 um)", "H", new Some<>(1.65)),
-        K_LONG("K-long (2.00 um)", "K-long", new Some<>(2.00)),
+        K_LONG("K-long (2.20 um)", "K-long", new Some<>(2.20)),
         K_SHORT("K-short (2.15 um)", "K-short", new Some<>(2.15)),
         JH("JH (spectroscopic)", "JH", new Some<>(1.39)),
         HK("HK (spectroscopic)", "HK", new Some<>(1.871)),
