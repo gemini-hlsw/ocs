@@ -1217,7 +1217,7 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
         Pio.addParam(factory, paramSet, FPU_PROP, _fpu.name());
         if (_fpu == FPUnit.CUSTOM_MASK) {
             Pio.addParam(factory, paramSet, FPU_MASK_PROP, _fpuMaskLabel);
-            Pio.addParam(factory, paramSet, CUSTOM_SLIT_WIDTH_PROP, customSlitWidth.name());
+            Pio.addParam(factory, paramSet, CUSTOM_SLIT_WIDTH_PROP.getName(), customSlitWidth.name());
         }
 
         Pio.addParam(factory, paramSet, MOS_PREIMAGING_PROP.getName(), getMosPreimaging().name());
@@ -1279,7 +1279,7 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
         v = Pio.getValue(paramSet, FPU_MASK_PROP);
         if (v != null) setFpuCustomMask(v);
 
-        v = Pio.getValue(paramSet, CUSTOM_SLIT_WIDTH_PROP);
+        v = Pio.getValue(paramSet, CUSTOM_SLIT_WIDTH_PROP.getName());
         if (v != null) setCustomSlitWidth(CustomSlitWidth.valueOf(v));
 
         setUseElectronicOffsetting(Pio.getBooleanValue(paramSet, USE_ELECTRONIC_OFFSETTING_PROP.getName(), false));
@@ -1324,9 +1324,9 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
         sc.putParameter(DefaultParameter.getInstance(PORT_PROP, getIssPort()));
 
         sc.putParameter(DefaultParameter.getInstance(FPU_PROP, getFpu()));
+        sc.putParameter(DefaultParameter.getInstance(CUSTOM_SLIT_WIDTH_PROP.getName(), getCustomSlitWidth()));
         if (getFpu() == FPUnit.CUSTOM_MASK) {
             sc.putParameter(DefaultParameter.getInstance(FPU_MASK_PROP, getFpuCustomMask()));
-            sc.putParameter(DefaultParameter.getInstance(CUSTOM_SLIT_WIDTH_PROP.getName(), getCustomSlitWidth()));
         }
 
         sc.putParameter(DefaultParameter.getInstance(MOS_PREIMAGING_PROP.getName(), getMosPreimaging()));
@@ -1385,7 +1385,7 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
         final FPUnit fpUnit = (FPUnit) get(instrument, FPU_PROP);
         final FPUnit gcalLookupUnit;
         if (fpUnit == FPUnit.CUSTOM_MASK) {
-            gcalLookupUnit = ((CustomSlitWidth) get(instrument, CUSTOM_SLIT_WIDTH_PROP)).smartgcalFPUnit();
+            gcalLookupUnit = ((CustomSlitWidth) get(instrument, CUSTOM_SLIT_WIDTH_PROP.getName())).smartgcalFPUnit();
         } else {
             gcalLookupUnit = fpUnit;
         }
