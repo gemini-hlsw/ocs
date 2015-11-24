@@ -84,6 +84,9 @@ object Recipe {
 
   // === Spectroscopy
 
+  /** Collects the relevant information from the internal result in a simplified data object and collects some additional
+    * information from the data series like e.g. the max signal to noise. For each individual CCD ITC basically
+    * does a full analysis and gives us a separate result. */
   def toCcdData(r: SpectroscopyResult, charts: List[SpcChartData]): ItcCcd = {
     val s2nChart: SpcChartData = charts.find(_.chartType == S2NChart).get
     val singleSNRatioVals: List[Double] = s2nChart.allSeries(SingleS2NData).map(_.yValues.max)
@@ -93,11 +96,20 @@ object Recipe {
     ItcCcd(singleSNRatio, totalSNRatio, r.peakPixelCount, r.instrument.wellDepth, r.instrument.gain, Warning.collectWarnings(r))
   }
 
-  def serviceResult(r: SpectroscopyResult, charts: java.util.List[SpcChartData]): ItcSpectroscopyResult =
-    ItcSpectroscopyResult(List(toCcdData(r, charts.toList)), charts.toList)
+  // === Java helpers
 
-  def serviceResult(rs: Array[SpectroscopyResult], charts: java.util.List[SpcChartData]): ItcSpectroscopyResult =
-    ItcSpectroscopyResult(rs.map(r => toCcdData(r, charts.toList)).toList, charts.toList)
+  // One result (CCD) and a simple set of charts, this covers most cases.
+  def serviceResult(r: SpectroscopyResult, charts: java.util.List[SpcChartData]): ItcSpectroscopyResult =
+    ItcSpectroscopyResult(List(toCcdData(r, charts.toList)), List(SpcChartGroup(charts.toList)))
+
+  // One result (CCD) and a set of groups of charts, this covers NIFS (1 CCD and separate groups for IFU cases).
+  def serviceGroupedResult(r: SpectroscopyResult, charts: java.util.List[java.util.List[SpcChartData]]): ItcSpectroscopyResult =
+    ItcSpectroscopyResult(List(toCcdData(r, charts.toList.flatten)), charts.toList.map(l => SpcChartGroup(l.toList)))
+
+  // A set of results and a set of groups of charts, this covers GMOS (3 CCDs and potentially separate groups
+  // for IFU cases, if IFU is activated).
+  def serviceGroupedResult(rs: Array[SpectroscopyResult], charts: java.util.List[java.util.List[SpcChartData]]): ItcSpectroscopyResult =
+    ItcSpectroscopyResult(rs.map(r => toCcdData(r, charts.toList.flatten)).toList, charts.toList.map(l => SpcChartGroup(l.toList)))
 
 }
 
