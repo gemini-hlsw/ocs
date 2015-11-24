@@ -145,16 +145,18 @@ public final class GmosPrinter extends PrinterBase {
         _println("<b>Input Parameters:</b>");
         _println("Instrument: " + mainInstrument.getName() + "\n");
         _println(HtmlPrinter.printParameterSummary(p.source()));
-        _println(gmosToString(mainInstrument, p));
+        _println(gmosToString(mainInstrument, p, (GmosParameters) p.instrument()));
         _println(HtmlPrinter.printParameterSummary(p.telescope()));
         _println(HtmlPrinter.printParameterSummary(p.conditions()));
         _println(HtmlPrinter.printParameterSummary(p.observation()));
     }
 
-    private String gmosToString(final Gmos instrument, final ItcParameters p) {
+    private String gmosToString(final Gmos instrument, final ItcParameters p, final GmosParameters config) {
 
         String s = "Instrument configuration: \n";
         s += HtmlPrinter.opticalComponentsToString(instrument);
+
+        s += String.format("Amp gain: %s, Amp read mode: %s\n",config.ampGain().displayValue() ,config.ampReadMode().displayValue());
 
         if (!instrument.getFpMask().equals(GmosNorthType.FPUnitNorth.FPU_NONE) && !instrument.getFpMask().equals(GmosSouthType.FPUnitSouth.FPU_NONE))
             s += "<LI> Focal Plane Mask: " + instrument.getFpMask().displayValue() + "\n";
