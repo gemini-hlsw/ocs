@@ -99,15 +99,18 @@ case class ObservationInfo(ctx: Option[ObsContext],
       case SPComponentType.INSTRUMENT_TRECS      => new InstTReCS()
       case SPComponentType.INSTRUMENT_VISITOR    => new VisitorInstrument()
     }
-    val site = inst.flatMap(_.getSite.asScala.headOption)
-    (baseCoordinates |@| inst |@| site |@| conditions){ (c, i, s, cond) =>
+    val site = instrument.collect {
+      case SPComponentType.INSTRUMENT_VISITOR    => None // Setting the site as None will make the CatalogQueryTool select the site from the selected probe
+      case _                                     => inst.flatMap(_.getSite.asScala.headOption)
+    }
+    (baseCoordinates |@| inst |@| conditions){ (c, i, cond) =>
       val target = new SPTarget(c.ra.toAngle.toDegrees, c.dec.toDegrees) <| {_.setName(~objectName)}
       val env = TargetEnvironment.create(target)
       // To calculate analysis of guide quality, it is required the site, instrument and conditions
       val altair = strategy.collect {
         case SupportedStrategy(_, _, Some(m)) => new InstAltair() <| {_.setMode(m)}
       }
-      ObsContext.create(env, i, new JSome(s), cond, offsets.map(_.toOldModel).asJava, altair.orNull, JNone.instance()).withPositionAngle(positionAngle.toOldModel)
+      ObsContext.create(env, i, site.flatten.asGeminiOpt, cond, offsets.map(_.toOldModel).asJava, altair.orNull, JNone.instance()).withPositionAngle(positionAngle.toOldModel)
     }
   }
 }
