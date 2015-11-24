@@ -155,8 +155,10 @@ def with_gogo(version: Version) = AppConfig(
 def with_remote_gogo(version: Version) = AppConfig(
   id = "with-remote-gogo",
   props = Map(
-    "gosh.args"              -> "--nointeractive",
-    "osgi.shell.telnet.port" -> "8224"
+    "gosh.args"                       -> "--nointeractive",
+    "osgi.shell.telnet.port"          -> "8224",
+    "osgi.shell.telnet.maxconn"       -> "4",
+    "osgi.shell.telnet.socketTimeout" -> "30000"
   ),
   bundles = List(
     BundleSpec(10, "org.apache.felix.shell.remote", Version(1, 1, 2))
