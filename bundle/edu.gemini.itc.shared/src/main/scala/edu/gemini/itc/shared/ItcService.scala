@@ -94,6 +94,12 @@ object ChartAxis {
   def apply(label: String) = new ChartAxis(label)
 }
 
+/** Multiple charts can be grouped.
+  * This is for example useful to stack IFU results for different offsets on top of each other in the OT.
+  * (At a later stage we maybe also want to add group labels like IFU offsets etc instead of repeating that
+  * information in every chart title.)*/
+final case class SpcChartGroup(charts: List[SpcChartData])
+
 /** Charts are made up of a set of data series which are all plotted in the same XY-plot. */
 final case class SpcChartData(chartType: SpcChartType, title: String, xAxis: ChartAxis, yAxis: ChartAxis, series: List[SpcSeriesData], axes: List[ChartAxis] = List()) {
   // JFreeChart requires a unique name for each series
@@ -106,16 +112,16 @@ final case class SpcChartData(chartType: SpcChartType, title: String, xAxis: Cha
   def allSeriesAsJava(t: SpcDataType): java.util.List[SpcSeriesData] = series.filter(_.dataType == t)
 }
 
-/** The result of a spectroscopy ITC calculation is some numbers per CCD and a set of charts.
-  * Individual charts and data series can be referenced by their types and an index. For most instruments there
-  * is only one chart and data series of each type, however for NIFS for example there will be several charts
-  * of each type in case of multiple IFU elements. */
-final case class ItcSpectroscopyResult(ccds: List[ItcCcd], charts: List[SpcChartData]) extends ItcResult {
+/** The result of a spectroscopy ITC calculation contains some numbers per CCD and a set of groups of charts.
+  * Individual charts and data series can be referenced by their types and group index. For most instruments there
+  * is only one chart and data series of each type, however for NIFS and GMOS there will be several charts
+  * of each type for each IFU element. */
+final case class ItcSpectroscopyResult(ccds: List[ItcCcd], chartGroups: List[SpcChartGroup]) extends ItcResult {
 
-  /** Gets chart data by type and index.
+  /** Gets chart data by type and its group index.
     * This method will fail if the result you're looking for does not exist.
     */
-  def chart(t: SpcChartType, i: Int = 0): SpcChartData      = charts.filter(_.chartType == t)(i)
+  def chart(t: SpcChartType, i: Int = 0): SpcChartData = chartGroups(i).charts.filter(_.chartType == t).head
 
   /** Gets all data series by chart type and data type.
     * This method will fail if the result (chart/data) you're looking for does not exist.

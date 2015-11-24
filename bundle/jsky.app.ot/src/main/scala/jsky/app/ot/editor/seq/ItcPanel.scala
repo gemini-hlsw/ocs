@@ -251,8 +251,6 @@ private class ItcChartsPanel(table: ItcSpectroscopyTable) extends GridBagPanel {
 
   private val limitsPanel = new PlotDetailsPanel
 
-  private var charts = Seq[Component]()
-
   background = Color.WHITE
 
   listenTo(table.selection, limitsPanel)
@@ -263,8 +261,7 @@ private class ItcChartsPanel(table: ItcSpectroscopyTable) extends GridBagPanel {
 
   private def update(): Unit = {
     // remove all current charts and the limits panel
-    peer.remove(limitsPanel.peer)
-    charts.map(_.peer).foreach(peer.remove)
+    peer.getComponents.foreach(peer.remove)
     // add new ones (if any)
     table.selectedResult().foreach(update)
     // revalidate and repaint everything
@@ -273,26 +270,31 @@ private class ItcChartsPanel(table: ItcSpectroscopyTable) extends GridBagPanel {
   }
 
   private def update(result: ItcSpectroscopyResult): Unit = {
-    charts = result.charts.map { ds =>
-      val chart = ITCChart.forSpcDataSet(ds, limitsPanel.plottingDetails).getChart
-      new JFChartComponent(chart)
-    }
+
+    // get the count of the largest chart group and use it as the width
+    val width = result.chartGroups.map(_.charts.length).max
     layout(limitsPanel) = new Constraints {
       gridx     = 0
       gridy     = 0
-      gridwidth = charts.size
+      gridwidth = width
       insets    = new Insets(20, 0, 20, 0)
     }
-    charts.zipWithIndex.foreach { case (c, x) =>
-      layout(c) = new Constraints {
-        gridx   = x
-        gridy   = 1
-        weightx = 1
-        weighty = 1
-        fill    = Fill.Both
-        insets  = new Insets(10, 25, 10, 25)
+
+    // iterate on chart groups and their charts and add them
+    result.chartGroups.zipWithIndex.foreach { case (g, y) =>
+      g.charts.zipWithIndex.foreach { case (c, x) =>
+        val chart = ITCChart.forSpcDataSet(c, limitsPanel.plottingDetails).getChart
+        layout(new JFChartComponent(chart)) = new Constraints {
+          gridx   = x
+          gridy   = y + 1 // 0 is used by limits panel
+          weightx = 1
+          weighty = 1
+          fill    = Fill.Both
+          insets  = new Insets(10, 25, 10, 25)
+        }
       }
     }
+
   }
 
   // a very simple Scala wrapper for JFreeChart charts

@@ -45,19 +45,21 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
     }
 
     public ItcSpectroscopyResult serviceResult(final SpectroscopyResult[] r) {
-        final List<SpcChartData> dataSets = new ArrayList<SpcChartData>() {{
-            // The array specS2N models the different IFUs, for each one we produce a separate set of charts.
-            // For completeness: The result array holds the results for the different CCDs. For each CCD
-            // the specS2N array holds the single result or the different IFU results. This needs to be modelled differently..
-            for (int i = 0; i < r[0].specS2N().length; i++) {
-                add(createSignalChart(r, i));
-                add(createS2NChart(r, i));
-                if (((Gmos) r[0].instrument()).isIfu2()) {
-                    add(createSignalPixelChart(r, i));
-                }
+        final List<List<SpcChartData>> groups = new ArrayList<>();
+        // The array specS2N represents the different IFUs, for each one we produce a separate set of charts.
+        // For completeness: The result array holds the results for the different CCDs. For each CCD
+        // the specS2N array holds the single result or the different IFU results. This should be made more obvious.
+        for (int i = 0; i < r[0].specS2N().length; i++) {
+            final List<SpcChartData> charts = new ArrayList<>();
+            charts.add(createSignalChart(r, i));
+            charts.add(createS2NChart(r, i));
+            // IFU-2 case has an additional chart with signal in pixel space
+            if (((Gmos) r[0].instrument()).isIfu2()) {
+                charts.add(createSignalPixelChart(r, i));
             }
-        }};
-        return Recipe$.MODULE$.serviceResult(r, dataSets);
+            groups.add(charts);
+        }
+        return Recipe$.MODULE$.serviceGroupedResult(r, groups);
     }
 
     public SpectroscopyResult[] calculateSpectroscopy() {
