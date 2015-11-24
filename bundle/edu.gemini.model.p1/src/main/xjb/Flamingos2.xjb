@@ -22,7 +22,7 @@
             <jxb:bindings node="./xsd:enumeration[@value='Ks (2.157 um)']">
                 <jxb:typesafeEnumMember name="K_SHORT"/>
             </jxb:bindings>
-            <jxb:bindings node="./xsd:enumeration[@value='K-long (2.20 um)']">
+            <jxb:bindings node="./xsd:enumeration[@value='K-long (2.00 um)']">
                 <jxb:typesafeEnumMember name="K_LONG"/>
             </jxb:bindings>
             <jxb:bindings node="./xsd:enumeration[@value='JH (1.390 um)']">
