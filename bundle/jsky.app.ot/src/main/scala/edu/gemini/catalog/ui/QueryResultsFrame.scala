@@ -441,7 +441,7 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
 
       override def text(a: SPSiteQuality.SkyBackground) = a.displayValue()
     }
-    lazy val ccBox = new ComboBox(List(SPSiteQuality.CloudCover.values(): _*)) with TextRenderer[SPSiteQuality.CloudCover] {
+    lazy val ccBox = new ComboBox(List(SPSiteQuality.CloudCover.values().filter(!_.isObsolete): _*)) with TextRenderer[SPSiteQuality.CloudCover] {
       renderer = conditionsRenderer(_.map(_.cc), this)
 
       listenTo(selection)
