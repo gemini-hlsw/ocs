@@ -33,6 +33,7 @@ final class Keys {
     static final ItemKey INST_VERSION_KEY    = new ItemKey("instrument:version");
     static final ItemKey INST_INSTRUMENT_KEY = new ItemKey("instrument:instrument");
     static final ItemKey INST_DISPERSER_KEY  = new ItemKey("instrument:disperser");
+    static final ItemKey INST_ACQ_MIRROR     = new ItemKey("instrument:acquisitionMirror");
 
     static final ItemKey SP_NODE_KEY = new ItemKey(MetaDataConfig.NAME + ":" + MetaDataConfig.SP_NODE);
 }
