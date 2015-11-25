@@ -1,7 +1,3 @@
-//
-// $
-//
-
 package edu.gemini.shared.gui.bean;
 
 import edu.gemini.shared.util.immutable.None;
@@ -13,11 +9,8 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.DefaultFormatter;
 import javax.swing.text.Document;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.beans.PropertyDescriptor;
 import java.text.*;
-import java.util.logging.Logger;
 
 /**
  * A PropertyCtrl implementation for text fields.  Currently support is
@@ -26,7 +19,6 @@ import java.util.logging.Logger;
  * @param <T> property type
  */
 public final class TextFieldPropertyCtrl<B, T> extends PropertyCtrl<B, T> {
-    private static final Logger LOG = Logger.getLogger(TextFieldPropertyCtrl.class.getName());
 
     /**
      * An encapsulation of all the information required in order to format and
@@ -70,7 +62,7 @@ public final class TextFieldPropertyCtrl<B, T> extends PropertyCtrl<B, T> {
             }
         };
 
-        return new TextFieldPropertyCtrl<B, String>(fs, desc);
+        return new TextFieldPropertyCtrl<>(fs, desc);
     }
 
     /**
@@ -99,7 +91,7 @@ public final class TextFieldPropertyCtrl<B, T> extends PropertyCtrl<B, T> {
                 return val;
             }
         };
-        return new TextFieldPropertyCtrl<B, Integer>(fs, desc);
+        return new TextFieldPropertyCtrl<>(fs, desc);
     }
 
     /**
@@ -125,7 +117,7 @@ public final class TextFieldPropertyCtrl<B, T> extends PropertyCtrl<B, T> {
             if ((source == null) || "".equals(source)) return None.instance();
             Object res = nf.parseObject(source, pos);
             if (res == null) return None.instance();
-            return new Some<Integer>(((Number)res).intValue());
+            return new Some<>(((Number)res).intValue());
         }
 
         public Object parseObject(String source) throws ParseException {
@@ -163,7 +155,7 @@ public final class TextFieldPropertyCtrl<B, T> extends PropertyCtrl<B, T> {
                 return val;
             }
         };
-        return new TextFieldPropertyCtrl<B, Option<Integer>>(fs, desc);
+        return new TextFieldPropertyCtrl<>(fs, desc);
     }
 
     /**
@@ -195,7 +187,7 @@ public final class TextFieldPropertyCtrl<B, T> extends PropertyCtrl<B, T> {
                 return val;
             }
         };
-        return new TextFieldPropertyCtrl<B, Double>(fs, desc);
+        return new TextFieldPropertyCtrl<>(fs, desc);
     }
 
     /**
@@ -230,7 +222,7 @@ public final class TextFieldPropertyCtrl<B, T> extends PropertyCtrl<B, T> {
                 return val;
             }
         };
-        return new TextFieldPropertyCtrl<B, Double>(fs, desc);
+        return new TextFieldPropertyCtrl<>(fs, desc);
     }
 
     /**
@@ -258,7 +250,7 @@ public final class TextFieldPropertyCtrl<B, T> extends PropertyCtrl<B, T> {
             if ((source == null) || "".equals(source)) return None.instance();
             Object res = df.parseObject(source, pos);
             if (res == null) return None.instance();
-            return new Some<Double>(((Number)res).doubleValue());
+            return new Some<>(((Number)res).doubleValue());
         }
 
         public Object parseObject(String source) throws ParseException {
@@ -289,7 +281,7 @@ public final class TextFieldPropertyCtrl<B, T> extends PropertyCtrl<B, T> {
                 return val;
             }
         };
-        return new TextFieldPropertyCtrl<B, Option<Double>>(fs, desc);
+        return new TextFieldPropertyCtrl<>(fs, desc);
     }
 
     private final JFormattedTextField field;
@@ -322,23 +314,21 @@ public final class TextFieldPropertyCtrl<B, T> extends PropertyCtrl<B, T> {
         ((DefaultFormatter) field.getFormatter()).setOverwriteMode(false);
 
 
-        field.addPropertyChangeListener("value", new PropertyChangeListener() {
-            public void propertyChange(PropertyChangeEvent evt) {
-                Object oldValObject = evt.getOldValue();
-                Object newValObject = evt.getNewValue();
+        field.addPropertyChangeListener("value", evt -> {
+            Object oldValObject = evt.getOldValue();
+            Object newValObject = evt.getNewValue();
 
-                T oldValue = null;
-                if (oldValObject != null) {
-                    oldValue = formatSupport.toType(oldValObject);
-                }
-
-                T newValue = null;
-                if (newValObject != null) {
-                    newValue = formatSupport.toType(newValObject);
-                }
-
-                fireEditEvent(oldValue, newValue);
+            T oldValue = null;
+            if (oldValObject != null) {
+                oldValue = formatSupport.toType(oldValObject);
             }
+
+            T newValue = null;
+            if (newValObject != null) {
+                newValue = formatSupport.toType(newValObject);
+            }
+
+            fireEditEvent(oldValue, newValue);
         });
     }
 
