@@ -288,9 +288,9 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
 
         for (final Gmos instrument : ccdArray) {
             final String ccdName = results.length > 1 ? instrument.getDetectorCcdName() : "";
-            final int ccdIndex  = instrument.getDetectorCcdIndex();
-            final int first     = tv.getDetectorCcdStartIndex(ccdIndex);
-            final int last      = lastWithGap(ccdIndex, ccdArray, tv);
+            final int ccdIndex   = instrument.getDetectorCcdIndex();
+            final int first      = tv.getDetectorCcdStartIndex(ccdIndex);
+            final int last       = tv.getDetectorCcdEndIndex(ccdIndex, ccdArray.length);
             final SpectroscopyResult result = results[ccdIndex];
             data.addAll(sigChartSeries(mainInstrument, ccdIndex, result.specS2N()[i], first, last, tv, ccdName));
         }
@@ -320,7 +320,7 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
             final String ccdName = results.length > 1 ? instrument.getDetectorCcdName() : "";
             final int ccdIndex   = instrument.getDetectorCcdIndex();
             final int first      = tv.getDetectorCcdStartIndex(ccdIndex);
-            final int last       = lastWithGap(ccdIndex, ccdArray, tv);
+            final int last       = tv.getDetectorCcdEndIndex(ccdIndex, ccdArray.length);
             final SpectroscopyResult result = results[ccdIndex];
             data.addAll(s2nChartSeries(mainInstrument, ccdIndex, result.specS2N()[i], first, last, tv, ccdName));
         }
@@ -353,7 +353,7 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
             final String ccdName = results.length > 1 ? " " + instrument.getDetectorCcdName() : "";
             final int ccdIndex   = instrument.getDetectorCcdIndex();
             final int first      = tv.getDetectorCcdStartIndex(ccdIndex);
-            final int last       = lastWithGap(ccdIndex, ccdArray, tv);
+            final int last       = tv.getDetectorCcdEndIndex(ccdIndex, ccdArray.length);
             final SpectroscopyResult result = results[ccdIndex];
             data.addAll(signalPixelChartSeries(result.specS2N()[i], first, last, tv, ccdName));
         }
@@ -379,9 +379,19 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
             bkg.accept(tv);
         }
 
+        final double[][] signalWithGaps = sig.getData(start, end);
+        final double[][] backgrWithGaps = bkg.getData(start, end);
+
+        // ===== fix gap borders to avoid signal/s2n spikes
+        if (mainInstrument.getDetectorCcdInstruments().length > 1) {
+            fixGapBorders(signalWithGaps);
+            fixGapBorders(backgrWithGaps);
+        }
+        // =====
+
         final List<SpcSeriesData> series = new ArrayList<>();
-        series.add(new SpcSeriesData(SignalData.instance(),     sigTitle, sig.getData(start, end), new Some<>(ccdDarkColor(ccdIndex))));
-        series.add(new SpcSeriesData(BackgroundData.instance(), bkgTitle, bkg.getData(start, end), new Some<>(ccdLightColor(ccdIndex))));
+        series.add(new SpcSeriesData(SignalData.instance(),     sigTitle, signalWithGaps, new Some<>(ccdDarkColor(ccdIndex))));
+        series.add(new SpcSeriesData(BackgroundData.instance(), bkgTitle, backgrWithGaps, new Some<>(ccdLightColor(ccdIndex))));
 
         return series;
     }
@@ -401,6 +411,13 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
 
         final double[][] s2n = result.getExpS2NSpectrum().getData(start, end);
         final double[][] fin = result.getFinalS2NSpectrum().getData(start, end);
+
+        // ===== fix gap borders to avoid signal/s2n spikes
+        if (mainInstrument.getDetectorCcdInstruments().length > 1) {
+            fixGapBorders(s2n);
+            fixGapBorders(fin);
+        }
+        // =====
 
         final List<SpcSeriesData> series = new ArrayList<>();
         series.add(new SpcSeriesData(SingleS2NData.instance(), s2nTitle, s2n,   new Some<>(ccdDarkColor(ccdIndex))));
@@ -437,16 +454,6 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
         return series;
     }
 
-    /** Gets the last index of the given CCD plus the gap between this and the next CCD. */
-    private static int lastWithGap(final int ccdIndex, final Gmos[] ccdArray, final DetectorsTransmissionVisitor tv) {
-        final int last = tv.getDetectorCcdEndIndex(ccdIndex, ccdArray.length);
-        tv.getDetectorCcdEndIndex(ccdIndex, ccdArray.length);
-        // REL-478: include the gaps in the text data output
-        return (ccdIndex < 2 && ccdArray.length > 1)
-                ? tv.getDetectorCcdStartIndex(ccdIndex + 1)
-                : last;
-    }
-
     /** Gets the light color for the given CCD. */
     private static Color ccdLightColor(final int ccdIndex) {
         switch(ccdIndex) {
@@ -465,5 +472,13 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
             case 2:  return ITCChart.DarkRed;
             default: throw new Error();
         }
+    }
+
+    // In the multi-CCD case we have to force the first and last y values to 0 to cancel out signal and s2n spikes
+    // caused by interpolation, resampling or some other effect of how data is calculated around CCD gaps.
+    // TODO: DetectorTransmissionVisitor needs a serious overhaul so that this behavior becomes more predictable.
+    private static void fixGapBorders(double[][] data) {
+        data[1][0]                  = 0.0;
+        data[1][data[1].length - 1] = 0.0;
     }
 }
