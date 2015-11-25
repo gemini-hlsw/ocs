@@ -55,12 +55,17 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
     override val flipAction = "Plot"
   }
 
+  private object GuidingFeedbackRenderer {
+    val icons = AgsGuideQuality.All.map(q => q -> GuidingIcon(q, enabled = true)).toMap
+    val dimensions = new Dimension(GuidingIcon.sideLength + 2, GuidingIcon.sideLength + 2)
+  }
+
   private class GuidingFeedbackRenderer extends Table.AbstractRenderer[AgsGuideQuality, Label](new Label) {
     override def configure(t: Table, sel: Boolean, foc: Boolean, value: AgsGuideQuality, row: Int, col: Int): Unit = {
-      component.icon = GuidingIcon(value, enabled = true)
+      component.icon = GuidingFeedbackRenderer.icons.get(value).orNull
       component.text = ""
-      component.preferredSize = new Dimension(GuidingIcon.sideLength + 2, GuidingIcon.sideLength + 2)
-      component.maximumSize = new Dimension(GuidingIcon.sideLength  + 2, GuidingIcon.sideLength + 2)
+      component.preferredSize = GuidingFeedbackRenderer.dimensions
+      component.maximumSize = GuidingFeedbackRenderer.dimensions
     }
   }
 
@@ -89,7 +94,7 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
           new GuidingFeedbackRenderer().componentFor(this, isSelected, focused, q, row, column)
         case (m: TargetsModel, value) =>
           // Delegate rendering to the model
-          m.rendererComponent(value ,isSelected, focused, row, column, this.peer).getOrElse(super.rendererComponent(isSelected, focused, row, column))
+          m.rendererComponent(value, isSelected, focused, row, column, this.peer).getOrElse(super.rendererComponent(isSelected, focused, row, column))
       }
   }
 
@@ -228,7 +233,7 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
   private def plotResults(): Unit = {
     resultsTable.model match {
       case t: TargetsModel =>
-        Option(TpeManager.get()).foreach(p => TpePlotter(p.getImageWidget).plot(t))
+        Option(TpeManager.open()).foreach(p => TpePlotter(p.getImageWidget).plot(t))
       case _               => // Ignore, it shouldn't happen
     }
   }
