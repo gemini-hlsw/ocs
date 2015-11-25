@@ -87,7 +87,7 @@
             <xsd:enumeration value="J-lo (1.122 um)"/>
             <xsd:enumeration value="J (1.255 um)"/>
             <xsd:enumeration value="H (1.631 um)"/>
-            <xsd:enumeration value="K-long (2.20 um)"/>
+            <xsd:enumeration value="K-long (2.00 um)"/>
             <xsd:enumeration value="Ks (2.157 um)"/>
             <xsd:enumeration value="JH (1.390 um)"/>
             <xsd:enumeration value="HK (1.871 um)"/>
