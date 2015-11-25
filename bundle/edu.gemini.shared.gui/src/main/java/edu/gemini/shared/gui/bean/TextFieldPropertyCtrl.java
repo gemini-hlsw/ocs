@@ -319,6 +319,8 @@ public final class TextFieldPropertyCtrl<B, T> extends PropertyCtrl<B, T> {
         
         field = new JFormattedTextField(formatSupport.getFormat());
         ((DefaultFormatter) field.getFormatter()).setCommitsOnValidEdit(true);
+        ((DefaultFormatter) field.getFormatter()).setOverwriteMode(false);
+
 
         field.addPropertyChangeListener("value", new PropertyChangeListener() {
             public void propertyChange(PropertyChangeEvent evt) {
