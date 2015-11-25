@@ -82,7 +82,7 @@ case class ObservationInfo(ctx: Option[ObsContext],
    * An obscontext is required for guide quality calculation. The method below will attempt to create a context out of the information on the query form
    * TODO: Review if this is the best way to proceed
    */
-  def toContext: Option[ObsContext] = ctx.orElse {
+  val toContext: Option[ObsContext] = ctx.orElse {
     val inst = instrument.collect {
       case SPComponentType.INSTRUMENT_FLAMINGOS2 => new Flamingos2()
       case SPComponentType.INSTRUMENT_GMOS       => new InstGmosNorth()

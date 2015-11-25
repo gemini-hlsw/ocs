@@ -228,8 +228,7 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
   private def plotResults(): Unit = {
     resultsTable.model match {
       case t: TargetsModel =>
-        val tpe = TpeManager.open()
-        TpePlotter(tpe.getImageWidget).plot(t)
+        Option(TpeManager.get()).foreach(p => TpePlotter(p.getImageWidget).plot(t))
       case _               => // Ignore, it shouldn't happen
     }
   }
@@ -621,11 +620,24 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
         }
         // Update conditions
         i.ctx.map(_.getConditions).foreach(c => originalConditions = Option(c))
+        // Don't listen to updates or we'll replot foreach selection
+        List(sbBox, ccBox, iqBox).foreach(i => i.deafTo(i.selection))
+        // Reset the foreground color if it matches the original
+        if (originalConditions.map(_.sb) == i.conditions.map(_.sb)) {
+          sbBox.foreground = Color.black
+        }
+        if (originalConditions.map(_.cc) == i.conditions.map(_.cc)) {
+          ccBox.foreground = Color.black
+        }
+        if (originalConditions.map(_.iq) == i.conditions.map(_.iq)) {
+          iqBox.foreground = Color.black
+        }
         i.conditions.foreach { c =>
           sbBox.selection.item = c.sb
           ccBox.selection.item = c.cc
           iqBox.selection.item = c.iq
         }
+        List(sbBox, ccBox, iqBox).foreach(i => i.listenTo(i.selection))
         i.ctx.map(_.getPositionAngle).foreach(a => pa = a.toNewModel)
         i.ctx.map(_.getSciencePositions).foreach(o => offsets = o.asScala.map(_.toNewModel).toSet)
         updateGuideSpeedText()
