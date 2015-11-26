@@ -1,5 +1,6 @@
 package edu.gemini.dataman.app
 
+import edu.gemini.dataman.DetailLevel
 import edu.gemini.dataman.core.DmanId.{Dset, Obs, Prog}
 import edu.gemini.dataman.core._
 import edu.gemini.pot.spdb.IDBDatabaseService
@@ -58,10 +59,10 @@ object Dataman {
     } yield d
 
   private def resetOngoingRequests(config: DmanConfig, odb: IDBDatabaseService): TryDman[Unit] = {
-    Log.info("Data Manager resetting incomplete QA requests.")
+    Log.log(DetailLevel, "Data Manager resetting incomplete QA requests.")
 
     ResetOngoingAction(odb, User).unsafeRun.map { case (_, ex) =>
-      Log.info("Data Manager reset to failed: " + ex.map(_.label).mkString(", "))
+      Log.log(DetailLevel, "Data Manager reset to failed: " + ex.map(_.label).mkString(", "))
     }
   }
 

@@ -1,5 +1,6 @@
 package edu.gemini.dataman.app
 
+import edu.gemini.dataman.DetailLevel
 import edu.gemini.dataman.core.DmanId
 import edu.gemini.dataman.core.DmanId.Obs
 import edu.gemini.pot.spdb.IDBDatabaseService
@@ -32,17 +33,17 @@ final class ObsRefreshRunnable(
     def obsIds(labs: List[DatasetLabel]): List[DmanId.Obs] =
       labs.map(_.getObservationId).distinct.map(DmanId.Obs)
 
-    Log.info("Dataman dataflow update.")
+    Log.log(DetailLevel, "Dataman dataflow update.")
     DatasetFunctor.collect(odb, user) {
       case dr if updateExpected(dr) => dr.label
     } match {
       case \/-(labs) =>
         if (labs.isEmpty) {
-          Log.info("No expected updates.")
+          Log.log(DetailLevel, "No expected updates.")
         } else {
           val obs = obsIds(labs)
           val (prefix, suffix) = obs.splitAt(50)
-          Log.info("Refreshing expected updates: " + prefix.mkString(", ") + (suffix.isEmpty ? "" | " ..."))
+          Log.log(DetailLevel, "Refreshing expected updates: " + prefix.mkString(", ") + (suffix.isEmpty ? "" | " ..."))
           refresh(obs)
         }
       case -\/(f)   =>

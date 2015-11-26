@@ -1,5 +1,6 @@
 package edu.gemini.dataman.app
 
+import edu.gemini.dataman.DetailLevel
 import edu.gemini.pot.spdb.IDBDatabaseService
 import edu.gemini.spModel.dataset.DatasetExecRecord
 import edu.gemini.spModel.dataset.QaRequestStatus.Failed
@@ -29,13 +30,13 @@ final class RetryFailedRunnable(
     def oldEnough(i: Instant): Boolean =
       Duration.between(i, Instant.now()).compareTo(minDelay) > 0
 
-    Log.info("Dataman retry failed QA updates.")
+    Log.log(DetailLevel, "Dataman retry failed QA updates.")
     DatasetFunctor.collectExec(odb, user) {
       case DatasetExecRecord(ds, ActiveRequest(_, _, id0, Failed(_), w, _), _) if oldEnough(w) => (ds.getLabel, id0)
     } match {
       case \/-(labs) =>
         if (labs.isEmpty) {
-          Log.info("No failed QA updates.")
+          Log.log(DetailLevel, "No failed QA updates.")
         } else {
           val (prefix, suffix) = labs.splitAt(50)
           Log.info("Retrying failed datasets: " + prefix.mkString(", ") + (suffix.isEmpty ? "" | " ..."))

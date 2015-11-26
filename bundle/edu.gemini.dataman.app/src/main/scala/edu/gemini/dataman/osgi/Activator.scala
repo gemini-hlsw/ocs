@@ -22,6 +22,7 @@ import Scalaz._
   */
 final class Activator extends BundleActivator {
 
+  var dmanCommandsReg: Option[ServiceRegistration[DatamanCommands]] = None
   var gsaCommandsReg: Option[ServiceRegistration[GsaCommands]] = None
   var tracker: Option[ServiceTracker[IDBDatabaseService, Dataman]] = None
 
@@ -40,7 +41,8 @@ final class Activator extends BundleActivator {
         Log.info(config.show)
 
         tracker = Some(Tracker.track[IDBDatabaseService, Dataman](ctx) { odb =>
-          gsaCommandsReg = Some(registerCommands(ctx, config, odb))
+          dmanCommandsReg = Some(registerCommands(ctx, "dataman", classOf[DatamanCommands], DatamanCommands()))
+          gsaCommandsReg  = Some(registerCommands(ctx, "gsa", classOf[GsaCommands], GsaCommands(config, odb)))
 
           val dman = Dataman.start(config, odb)
 
@@ -69,6 +71,9 @@ final class Activator extends BundleActivator {
 
     gsaCommandsReg.foreach(_.unregister())
     gsaCommandsReg = None
+
+    dmanCommandsReg.foreach(_.unregister())
+    dmanCommandsReg = None
   }
 }
 
@@ -121,11 +126,11 @@ object Activator {
     }
   }
 
-  private def registerCommands(ctx: BundleContext, config: DmanConfig, odb: IDBDatabaseService): ServiceRegistration[GsaCommands] = {
+  private def registerCommands[C](ctx: BundleContext, name: String, clazz: Class[C], c: C): ServiceRegistration[C] = {
     val dict = new java.util.Hashtable[String, Object]() <|
-      (_.put(CommandScope, "gsa"))                       <|
-      (_.put(CommandFunction, Array("gsa")))
+      (_.put(CommandScope, name))                       <|
+      (_.put(CommandFunction, Array(name)))
 
-    ctx.registerService(classOf[GsaCommands], GsaCommands(config, odb), dict)
+    ctx.registerService(clazz, c, dict)
   }
 }

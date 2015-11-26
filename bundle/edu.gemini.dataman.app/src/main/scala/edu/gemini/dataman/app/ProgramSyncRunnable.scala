@@ -1,5 +1,6 @@
 package edu.gemini.dataman.app
 
+import edu.gemini.dataman.DetailLevel
 import edu.gemini.dataman.core.DmanId.Prog
 import edu.gemini.pot.spdb.IDBDatabaseService
 
@@ -21,7 +22,7 @@ final class ProgramSyncRunnable(
   override def run(): Unit =
     PidFunctor.exec(odb, user) match {
       case \/-(pids) =>
-        Log.info(s"Dataman synchronizing ${pids.length} programs.")
+        Log.log(DetailLevel, s"Dataman synchronizing ${pids.length} programs.")
         sync(pids.map(Prog))
 
       case -\/(e)    =>
