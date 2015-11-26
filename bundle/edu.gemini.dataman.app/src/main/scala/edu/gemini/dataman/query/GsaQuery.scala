@@ -1,5 +1,6 @@
 package edu.gemini.dataman.query
 
+import edu.gemini.dataman.{DetailLevel, JsonLevel}
 import edu.gemini.dataman.core.GsaAuth
 import edu.gemini.dataman.query.GsaQueryError._
 import edu.gemini.spModel.core.catchingNonFatal
@@ -26,7 +27,6 @@ import Scalaz._
   * thing. */
 private[query] object GsaQuery {
   private val Log      = Logger.getLogger(GsaRecordQuery.getClass.getName)
-  private val LogLevel = Level.INFO
   private val Cset     = "UTF-8"
 
   val ConnectTimeout   =  30000
@@ -46,7 +46,7 @@ private[query] object GsaQuery {
       con.setRequestProperty("Cookie",       s"gemini_api_authorization=${auth.value}")
 
       val json = a.asJson.spaces2
-      logIf(Level.FINE) { s"GSA QA state update post:\n$json" }
+      logIf(JsonLevel) { s"GSA QA state update post:\n$json" }
       val data = json.getBytes(Cset)
       con.setRequestProperty("Content-Length", data.length.toString)
       con.setFixedLengthStreamingMode(data.length)
@@ -56,7 +56,7 @@ private[query] object GsaQuery {
     }
 
   private def query[A : DecodeJson](url: URL)(prep: HttpURLConnection => Unit): GsaResponse[A] = {
-    logIf(LogLevel) { s"Start GSA query: ${url.toString}" }
+    logIf(DetailLevel) { s"Start GSA query: ${url.toString}" }
 
     val startTime = Instant.now()
     val result    = catchingNonFatal { unsafeDoQuery[A](url, prep) }.fold({
@@ -64,13 +64,13 @@ private[query] object GsaQuery {
       case t: Throwable    => Unexpected(t).left
     }, identity)
 
-    if (Log.isLoggable(LogLevel)) {
+    if (Log.isLoggable(DetailLevel)) {
       val duration       = Duration.between(startTime, Instant.now())
       val (message, ex)  = result match {
         case \/-(_)     => (s"Retrieved result from GSA.", none[Throwable])
         case -\/(error) => (error.explain, error.exception)
       }
-      Log.log(LogLevel, s"End GSA query (${duration.toMillis} ms) ${url.toString}. " + message, ex.orNull)
+      Log.log(DetailLevel, s"End GSA query (${duration.toMillis} ms) ${url.toString}. " + message, ex.orNull)
     }
 
     result
@@ -93,7 +93,7 @@ private[query] object GsaQuery {
       con.getResponseCode match {
         case HTTP_OK   =>
           val s = read(con.getInputStream)
-          logIf(Level.FINE) { s"GSA query response:\n$s" }
+          logIf(JsonLevel) { s"GSA response ($url):\n$s" }
           Parse.decodeEither[A](s).leftMap { _ =>
             InvalidResponse(s"Could not parse GSA server response:\n$s")
           }

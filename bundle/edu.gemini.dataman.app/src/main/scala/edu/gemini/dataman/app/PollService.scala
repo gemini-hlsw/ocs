@@ -1,5 +1,6 @@
 package edu.gemini.dataman.app
 
+import edu.gemini.dataman.DetailLevel
 import edu.gemini.dataman.core.DmanId
 import edu.gemini.dataman.core.DmanId.{Prog, Obs, Dset}
 
@@ -140,14 +141,14 @@ object PollService {
           breakable {
             while (true) {
               try {
-                Log.fine(s"$name waiting for job")
+                Log.log(DetailLevel, s"$name waiting for job")
                 queue.doNext { id =>
-                  Log.info(s"$name polling $id")
+                  Log.log(DetailLevel, s"$name polling $id")
                   poll(id)
                 }
               } catch {
                 case _: InterruptedException =>
-                  Log.log(Level.INFO, s"$name stopped")
+                  Log.log(DetailLevel, s"$name stopped")
                   break()
                 case t: Throwable =>
                   Log.log(Level.SEVERE, s"$name exception in poll task", t)
@@ -157,7 +158,7 @@ object PollService {
         }
       }
 
-      Log.info(s"Dataman startup PollService.")
+      Log.log(DetailLevel, s"Dataman startup PollService.")
 
       val workers = (0 until (workerCount max 1)).toList.map { n =>
         val threadName = s"$name PollService Worker $n"
@@ -173,7 +174,7 @@ object PollService {
       override def addAll(ids: List[DmanId]): Boolean = queue.addAll(ids)
 
       override def shutdown(): Unit = {
-        Log.info(s"Dataman shutdown PollService.")
+        Log.log(DetailLevel, s"Dataman shutdown PollService.")
         queue.clearPending()
         workers.foreach(_.interrupt())
       }
