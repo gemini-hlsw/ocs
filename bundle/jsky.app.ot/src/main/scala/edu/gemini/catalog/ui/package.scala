@@ -8,7 +8,7 @@ import edu.gemini.ags.api.{AgsAnalysis, AgsGuideQuality, AgsRegistrar, AgsStrate
 import edu.gemini.ags.conf.ProbeLimitsTable
 import edu.gemini.catalog.api._
 import edu.gemini.pot.sp.SPComponentType
-import edu.gemini.shared.util.immutable.{None => JNone, Some => JSome}
+import edu.gemini.shared.util.immutable.{None => JNone}
 import edu.gemini.shared.util.immutable.ScalaConverters._
 import edu.gemini.spModel.core._
 import edu.gemini.spModel.gemini.altair.{AltairParams, InstAltair}
@@ -82,7 +82,7 @@ case class ObservationInfo(ctx: Option[ObsContext],
    * An obscontext is required for guide quality calculation. The method below will attempt to create a context out of the information on the query form
    * TODO: Review if this is the best way to proceed
    */
-  def toContext: Option[ObsContext] = ctx.orElse {
+  val toContext: Option[ObsContext] = ctx.orElse {
     val inst = instrument.collect {
       case SPComponentType.INSTRUMENT_FLAMINGOS2 => new Flamingos2()
       case SPComponentType.INSTRUMENT_GMOS       => new InstGmosNorth()
@@ -202,11 +202,13 @@ case class IdColumn(title: String) extends CatalogNavigatorColumn[String] {
 
 object GuidingQuality {
   implicit val analysisOrder:Order[AgsAnalysis] = Order.orderBy(_.quality)
+  val paFlip = Angle.fromDegrees(180)
+
   // Calculate the guiding quality of the target, allowing for PA flipping
   def target2Analysis(info: Option[ObservationInfo], t: Target):Option[AgsAnalysis] =
     if (info.exists(_.allowPAFlip)) {
       // Note we use min, as AgsGuideQuality is better when the position on the index is lower
-      target2Analysis(info, t, Angle.zero) min target2Analysis(info, t, Angle.fromDegrees(180))
+      target2Analysis(info, t, Angle.zero) min target2Analysis(info, t, paFlip)
     } else {
       target2Analysis(info, t, Angle.zero)
     }
@@ -326,7 +328,7 @@ case class TargetsModel(info: Option[ObservationInfo], base: Coordinates, radius
   override def getColumnCount = columns.size
 
   override def getColumnName(column: Int): String =
-    columns(column).title
+    ~columns.lift(column).map(_.title)
 
   override def getValueAt(rowIndex: Int, columnIndex: Int):AnyRef =
     targets.lift(rowIndex).flatMap { t =>
@@ -335,22 +337,27 @@ case class TargetsModel(info: Option[ObservationInfo], base: Coordinates, radius
 
   override def getColumnClass(columnIndex: Int): Class[_] = columns(columnIndex).clazz
 
+  // The control can be reused by the renderer
+  val label = new Label("")
+
   def rendererComponent(value: Any, isSelected: Boolean, hasFocus: Boolean, row: Int, column: Int, table: JTable): Option[Component]= {
     columns.lift(column).flatMap { c =>
-      c.displayValue(value).map(new Label(_) {
-        horizontalAlignment = Alignment.Right
+      c.displayValue(value).map { v =>
+        label.text = v
+        label.horizontalAlignment = Alignment.Right
 
         // Required to set the background
-        opaque = true
+        label.opaque = true
 
         if (isSelected) {
-          background = table.getSelectionBackground
-          foreground = table.getSelectionForeground
+          label.background = table.getSelectionBackground
+          label.foreground = table.getSelectionForeground
         } else {
-          background = table.getBackground
-          foreground = table.getForeground
+          label.background = table.getBackground
+          label.foreground = table.getForeground
         }
-      })
+        label
+      }
     }
   }
 
