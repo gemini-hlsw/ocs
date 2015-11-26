@@ -56,7 +56,7 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
   }
 
   private object GuidingFeedbackRenderer {
-    val icons = AgsGuideQuality.All.map(q => q -> GuidingIcon(q, enabled = true)).toMap
+    val icons = AgsGuideQuality.All.fproduct(GuidingIcon(_, enabled = true)).toMap
     val dimensions = new Dimension(GuidingIcon.sideLength + 2, GuidingIcon.sideLength + 2)
   }
 
