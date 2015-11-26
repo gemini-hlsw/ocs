@@ -1,13 +1,6 @@
-// Copyright 2003
-// Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-//
-// $Id: AbstractSearchCondition.java 35363 2011-06-05 09:22:23Z abrighton $
-
 package jsky.catalog;
 
 import java.io.Serializable;
-
 
 /**
  * An abstract base class for SearchConditions. The derived classes determine
@@ -23,11 +16,6 @@ public abstract class AbstractSearchCondition implements SearchCondition, Serial
      */
     public AbstractSearchCondition(FieldDesc fieldDesc) {
         _fieldDesc = fieldDesc;
-    }
-
-    /** Return the column or parameter description. */
-    public FieldDesc getFieldDesc() {
-        return _fieldDesc;
     }
 
     /** Return the column or parameter name. */

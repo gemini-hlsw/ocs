@@ -1,9 +1,3 @@
-// Copyright 2003
-// Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-//
-// $Id: ArraySearchCondition.java 35363 2011-06-05 09:22:23Z abrighton $
-
 package jsky.catalog;
 
 import jsky.util.NameValue;

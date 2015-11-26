@@ -1,15 +1,4 @@
-/*
- * ESO Archive
- *
- * $Id: SearchCondition.java 35363 2011-06-05 09:22:23Z abrighton $
- *
- * who             when        what
- * --------------  ----------  ----------------------------------------
- * Allan Brighton  1999/05/17  Created
- */
-
 package jsky.catalog;
-
 
 /**
  * An interface representing a search condition for values in a given table column,
@@ -34,9 +23,6 @@ public interface SearchCondition {
      * @return true if the value satisfies the condition.
      */
     boolean isTrueFor(double val);
-
-    /** Return the column or parameter description. */
-    FieldDesc getFieldDesc();
 
     /** Return the column or parameter name. */
     String getName();

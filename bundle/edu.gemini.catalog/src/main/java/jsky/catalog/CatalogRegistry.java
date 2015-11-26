@@ -1,17 +1,6 @@
-/*
- * ESO Archive
- *
- * $Id: CatalogRegistry.java 23553 2010-01-22 19:24:12Z swalker $
- *
- * who             when        what
- * --------------  ----------  ----------------------------------------
- * Allan Brighton  1999/05/17  Created
- */
-
 package jsky.catalog;
 
 import java.util.*;
-
 
 /**
  * Used to manage access to a known list of catalogs.
@@ -22,16 +11,12 @@ public enum CatalogRegistry implements Iterable<Catalog> {
 
 
     // Sorted list of known catalogs
-    private TreeSet<Catalog> _catalogSet = new TreeSet<Catalog>(
-        new Comparator<Catalog>() {
-            public int compare(Catalog c1, Catalog c2) {
-                return (c1.getName().compareTo(c2.getName()));
-            }
-        }
+    private TreeSet<Catalog> _catalogSet = new TreeSet<>(
+            (c1, c2) -> (c1.getName().compareTo(c2.getName()))
     );
 
     // The list of catalogs, unsorted, in the order they were registered
-    private List<Catalog> _catalogList = new ArrayList<Catalog>();
+    private List<Catalog> _catalogList = new ArrayList<>();
 
 
     /**
@@ -87,7 +72,7 @@ public enum CatalogRegistry implements Iterable<Catalog> {
      * @return the list of Catalog objects found
      */
     public List<Catalog> getCatalogsByType(String type) {
-        List<Catalog> l = new ArrayList<Catalog>();
+        List<Catalog> l = new ArrayList<>();
         for (Catalog catalog : _catalogList) {
             String s = catalog.getType();
             if (s != null && s.equals(type)) {

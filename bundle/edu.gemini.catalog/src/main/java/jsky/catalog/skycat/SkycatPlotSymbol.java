@@ -3,8 +3,6 @@ package jsky.catalog.skycat;
 import jsky.catalog.RowCoordinates;
 import jsky.catalog.TablePlotSymbol;
 import jsky.catalog.TableQueryResult;
-import jsky.util.TclUtil;
-
 
 /**
  * Represents the contents of a plot symbol definition,
@@ -27,28 +25,6 @@ public class SkycatPlotSymbol extends TablePlotSymbol {
      */
     public SkycatPlotSymbol(SkycatTable table, String cols, String symbol, String expr) {
         super(table, cols, symbol, expr);
-    }
-
-
-    /**
-     * Initialize a SkycatPlotSymbol from the given values.
-     *
-     * @param table contains the table data and information
-     * @param colNames an array of column headings used as variables
-     * @param shapeName the name of the plot symbol shape
-     * @param fg the name of the foreground color of the plot symbol
-     * @param bg the name of the background color of the plot symbol
-     * @param ratio the x/y ratio expression (stretch)
-     * @param angle the angle expression
-     * @param label the label expression
-     * @param cond the condition expression
-     * @param size the symbol size expression
-     * @param units the units of the symbol size
-     */
-    public SkycatPlotSymbol(SkycatTable table, String[] colNames, String shapeName,
-                            String fg, String bg, String ratio, String angle, String label,
-                            String cond, String size, String units) {
-        super(table, colNames, shapeName, fg, bg, ratio, angle, label, cond, size, units);
     }
 
     /** Return an object storing the column indexes where RA and Dec are found */

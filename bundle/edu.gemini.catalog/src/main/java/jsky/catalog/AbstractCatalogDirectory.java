@@ -149,40 +149,6 @@ public abstract class AbstractCatalogDirectory implements CatalogDirectory {
         CatalogRegistry.instance.unregister(cat);
     }
 
-    /** Replace the given old catalog with the given new catalog in the catalog list. */
-    public void replaceCatalog(Catalog oldCat, Catalog newCat) {
-        int i = _catalogs.indexOf(oldCat);
-        if (i != -1) {
-            _catalogs.set(i, newCat);
-            newCat.setParent(this);
-            _fireTreeNodesChanged(_getTreeModelEvent(newCat));
-        }
-    }
-
-    /** Move the the given catalog up or down in the tree. */
-    public void moveCatalog(Catalog cat, boolean up) {
-        int i = _catalogs.indexOf(cat);
-        if (i == -1 || up && i == 0 || !up && i == _catalogs.size() - 1)
-            return;
-
-        removeCatalog(cat);
-        addCatalog(i + (up ? -1 : 1), cat);
-    }
-
-    /** Move the the given catalog all the way up or down in the tree, as far as possible. */
-    public void moveCatalogToEnd(Catalog cat, boolean up) {
-        int i = _catalogs.indexOf(cat);
-        if (i == -1 || up && i == 0 || !up && i == _catalogs.size() - 1)
-            return;
-
-        removeCatalog(cat);
-        if (up)
-            addCatalog(0, cat);
-        else
-            addCatalog(cat);
-    }
-
-
     /** Return the named catalog, if found in this directory */
     public Catalog getCatalog(String catalogName) {
         for (Catalog cat: _catalogs) {
