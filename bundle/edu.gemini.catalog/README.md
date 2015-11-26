@@ -1,7 +1,7 @@
 
 ## edu.gemini.catalog
 
-Guide Star Catalog Access, based on skycat.
+Guide Star Catalog Access, based on votable.
 
 ### Provenance
 

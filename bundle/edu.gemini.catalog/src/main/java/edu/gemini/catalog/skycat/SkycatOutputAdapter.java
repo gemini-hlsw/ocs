@@ -1,7 +1,3 @@
-//
-// $
-//
-
 package edu.gemini.catalog.skycat;
 
 import java.io.Closeable;
