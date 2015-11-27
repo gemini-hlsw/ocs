@@ -2,6 +2,7 @@ package edu.gemini.catalog.ui.tpe
 
 import java.io._
 import java.net.URL
+import java.util.logging.Logger
 
 import jsky.util.Preferences
 import jsky.util.gui._
@@ -37,6 +38,7 @@ object ImageCatalogLoader {
   * Class able to retrieve images from the old catalog and put them on display
   */
 class ImageCatalogLoader {
+  val Log = Logger.getLogger(this.getClass.getName)
 
   /**
     * Download the given image URL to a temporary file and return the file
@@ -45,7 +47,7 @@ class ImageCatalogLoader {
   private def imageToTmpFile(url: URL, contentType: String, in: ProgressBarFilterInputStream): Throwable \/ (File, URL) = {
     val dir = Preferences.getPreferences.getCacheDir.getPath
     val suffix = Option(contentType) match {
-      case Some(s) if s.endsWith("hfits")                        =>  ".hfits"
+      case Some(s) if s.endsWith("hfits")                        => ".hfits"
       case Some(s) if s.endsWith("zfits") || s == "image/x-fits" => ".fits.gz"
       case Some(s) if s.endsWith("fits")                         => ".fits"
       case _                                                     => ".tmp"
@@ -74,6 +76,8 @@ class ImageCatalogLoader {
     * Retrieve image query and pass it to the display
     */
   def queryImage(url: URL):Future[Throwable \/ (File, URL)] = {
+    Log.info(s"Reading image from $url")
+
     // This isn't very nice, we are mixing UI with IO but the ProgressPanel is required for now
     val progress = ProgressPanel.makeProgressPanel("Accessing catalog server ...")
 
