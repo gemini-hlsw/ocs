@@ -51,7 +51,11 @@ package object app {
         write(f) { os =>
           stream(is, os)
         }
-        if (src.canExecute) f.setExecutable(true)
+        if (src.canExecute) {
+          // Make it executable for owner, group, and world.
+          // executable = true, ownerOnly = false
+          f.setExecutable(true, false)
+        }
       }
     } else {
       val dir = mkdir(dest, src.getName)
