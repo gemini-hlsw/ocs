@@ -170,11 +170,6 @@ public class ProgressPanel extends JPanel implements ActionListener, StatusLogge
         _stopButton.addActionListener(l);
     }
 
-    /** Return the status panel (displays the progress bar and text field). */
-    public StatusPanel getStatusPanel() {
-        return _statusPanel;
-    }
-
     /**
      * Called when the Stop button is pressed.
      */
