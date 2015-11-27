@@ -6,26 +6,34 @@ import edu.gemini.spModel.core.{Angle, Coordinates}
 import jsky.util.Preferences
 
 sealed abstract class ImageCatalog(val id: String, displayName: String) {
-  def queryUrl(c: Coordinates, w: Angle): URL
+  def baseUrl: String
+  def extraParams: String = ""
+  def queryUrl(c: Coordinates): URL = new URL(s"$baseUrl?ra=${c.ra.toAngle.formatHMS}&dec=${c.dec.formatDMS}&mime-type=appilcation/x-fits&x=${ImageCatalog.defaultSize.toArcmins}&y=${ImageCatalog.defaultSize.toArcmins}${extraParams}")
 }
 
 object DssGeminiNorth extends ImageCatalog("dss@GeminiNorth", "Digitized Sky at Gemini North") {
-  def queryUrl(c: Coordinates, w: Angle): URL = new URL("http://mkocatalog.gemini.edu/cgi-bin/dss_search?ra=%ra&dec =% dec & mime - type =% mime - type & x =% w & y =% h")
+  override val baseUrl: String = "http://mkocatalog.gemini.edu/cgi-bin/dss_search"
 }
 object DssGeminiSouth extends ImageCatalog("dss@GeminiSouth", "Digitized Sky at Gemini South") {
-  def queryUrl(c: Coordinates, w: Angle): URL = new URL("http://cpocatalog.gemini.edu/cgi-bin/dss_search?ra=%ra&dec=%dec&mime-type=%mime-type&x=%w&y=%h")
+  override val baseUrl: String = "http://cpocatalog.gemini.edu/cgi-bin/dss_search"
 }
 object DssESO extends ImageCatalog("dss@eso", "Digitized Sky at ESO") {
-  def queryUrl(c: Coordinates, w: Angle): URL = new URL("http://archive.eso.org/dss/dss?ra=%ra&dec=%dec&mime-type=%mime-type&x=%w&y=%h")
+  override val baseUrl: String = "http://archive.eso.org/dss/dss"
 }
 object Dss2ESO extends ImageCatalog("dss2@eso", "Digitized Sky (Version II) at ESO") {
-  def queryUrl(c: Coordinates, w: Angle): URL = new URL("http://archive.eso.org/dss/dss?ra=%ra&dec=%dec&mime-type=application/x-fits&x=%w&y=%h&Sky-Survey=DSS2")
+  override val baseUrl: String = "http://archive.eso.org/dss/dss"
+  override val extraParams = "&Sky-Survey=DSS2"
 }
-object Dss2iESO extends ImageCatalog("dss2_i@GeminiNorth", "Digitized Sky (Version II infrared) at ESO") {
-  def queryUrl(c: Coordinates, w: Angle): URL = new URL("http://archive.eso.org/dss/dss?ra=%ra&dec=%dec&mime-type=application/x-fits&x=%w&y=%h&Sky-Survey=DSS2")
+object Dss2iESO extends ImageCatalog("dss2_i@eso", "Digitized Sky (Version II infrared) at ESO") {
+  override val baseUrl: String = "http://archive.eso.org/dss/dss"
+  override val extraParams = "&Sky-Survey=DSS2-infrared"
 }
 
 object ImageCatalog {
+  val instance = this
+
+  val defaultSize = Angle.fromArcmin(15.0)
+
   private val SKY_USER_CATALOG = "jsky.catalog.sky"
 
   val all = List(DssGeminiNorth, DssGeminiSouth, DssESO, Dss2ESO, Dss2iESO)

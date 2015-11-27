@@ -203,17 +203,14 @@ public class HMS extends CoordinateParam
      * the right type and the values are the same.
      */
     public boolean equals(Object obj) {
-        if (!(obj instanceof HMS)) {
-            return false;
-        }
-        return super.equals(obj);
+        return obj instanceof HMS && super.equals(obj);
     }
 
     /**
      * Provides clone support.
      */
     public Object clone() {
-        return (HMS) super.clone();
+        return super.clone();
     }
 
 

@@ -1,8 +1,13 @@
 package jsky.app.ot.tpe;
 
+import edu.gemini.catalog.image.ImageCatalog;
 import edu.gemini.catalog.ui.tpe.ImageCatalogLoader;
+import edu.gemini.pot.ModelConverters;
 import edu.gemini.pot.sp.*;
+import edu.gemini.shared.skyobject.coords.HmsDegCoordinates;
 import edu.gemini.shared.util.immutable.Option;
+import edu.gemini.skycalc.Angle;
+import edu.gemini.spModel.core.Coordinates;
 import edu.gemini.spModel.data.ISPDataObject;
 import edu.gemini.spModel.gemini.nici.SeqRepeatNiciOffset;
 import edu.gemini.spModel.gemini.obscomp.SPSiteQuality;
@@ -18,16 +23,10 @@ import jsky.app.jskycat.JSkyCat;
 import jsky.app.ot.OT;
 import jsky.app.ot.ags.*;
 import jsky.app.ot.util.BasicPropertyList;
-import jsky.catalog.BasicQueryArgs;
-import jsky.catalog.Catalog;
 import jsky.catalog.CatalogException;
-import jsky.catalog.QueryArgs;
-import jsky.catalog.gui.CatalogNavigator;
-import jsky.catalog.skycat.SkycatCatalog;
 import jsky.coords.CoordinateConverter;
 import jsky.coords.WorldCoords;
 import jsky.image.gui.ImageDisplayControlFrame;
-import jsky.util.Preferences;
 
 import java.awt.*;
 import java.awt.event.MouseEvent;
@@ -35,6 +34,7 @@ import java.awt.geom.Point2D;
 import java.beans.PropertyChangeListener;
 import java.io.IOException;
 
+import java.net.URL;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -358,45 +358,21 @@ public class TelescopePosEditor extends JSkyCat implements TpeMouseObserver {
      * @throws CatalogException if a Catalog Problem is found
      */
     public void getSkyImage(TpeContext ctx) throws IOException, CatalogException {
-        String catalogProperties = Preferences.get(Catalog.SKY_USER_CATALOG, Catalog.DEFAULT_IMAGE_SERVER);
-
-        String args[] = catalogProperties.split("\\*");
-
-        if (args.length <= 0) return;
-        Catalog c = CatalogNavigator.getCatalogDirectory().getCatalog(args[0]);
-
-        if (c == null || !c.isImageServer()) return;
-
-        final QueryArgs queryArgs = new BasicQueryArgs(c);
-        queryArgs.setParamValue(0, null);
-        queryArgs.setParamValue(1, c.getName());
-
         final SPTarget _baseTarget = ctx.targets().baseOrNull();
         if (_baseTarget == null) return;
 
+        ImageCatalog imageCatalog = ImageCatalog.instance().user();
+
         final Option<Long> when = ctx.schedulingBlockJava().map(SchedulingBlock::start);
-        final boolean go = // true if coords are known
-            _baseTarget.getTarget().getRaString(when).flatMap(ra ->
-            _baseTarget.getTarget().getDecString(when).map(dec -> {
-                queryArgs.setParamValue(2, ra);
-                queryArgs.setParamValue(3, dec);
-                queryArgs.setParamValue(4, _baseTarget.getTarget().getTag().tccName);
-                if (args.length > 2) {
-                    //first argument must be a Double, it represent the size on AstroCatalogs
-                    queryArgs.setParamValue(5, Double.valueOf(args[1]));
-                    queryArgs.setParamValue(6, args[2]);
-                } else { //use default parameters
-                    queryArgs.setParamValue(5, 15.0);
-                    // REL-269: don't set the mag band here
-                    if (c instanceof SkycatCatalog) {
-                        queryArgs.setParamValue(6, 15.0);
-                    }
-                }
-                return true;
-            })).getOrElse(false);
-        if (go) {
-            ImageCatalogLoader.instance().display4Java(getImageWidget(), c.query(queryArgs));
-        }
+
+        _baseTarget.getTarget().getRaDegrees(when).flatMap(ra ->
+            _baseTarget.getTarget().getDecDegrees(when).flatMap( dec -> {
+                HmsDegCoordinates hmsDegCoordinates = new HmsDegCoordinates.Builder(new Angle(ra, Angle.Unit.DEGREES), new Angle(dec, Angle.Unit.DEGREES)).build();
+                Coordinates coordinates = ModelConverters.toCoordinates(hmsDegCoordinates);
+                URL queryUrl = imageCatalog.queryUrl(coordinates);
+                ImageCatalogLoader.instance().display4Java(getImageWidget(), queryUrl);
+                return null;
+            }));
     }
 
 

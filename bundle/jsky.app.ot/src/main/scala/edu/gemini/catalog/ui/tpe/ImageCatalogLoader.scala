@@ -19,8 +19,8 @@ object ImageCatalogLoader {
   /**
     * Load an image and display it on the TPE or display an error
     */
-  def display4Java(display: CatalogImageDisplay, queryResult: QueryResult):Unit = {
-    val f = new ImageCatalogLoader().queryImage(queryResult)
+  def display4Java(display: CatalogImageDisplay, url: URL):Unit = {
+    val f = new ImageCatalogLoader().queryImage(url)
     f.onComplete {
       case Failure(t) =>
         DialogUtil.error(t)
@@ -49,7 +49,7 @@ class ImageCatalogLoader {
       case Some(s) if s.endsWith("hfits")                        =>  ".hfits"
       case Some(s) if s.endsWith("zfits") || s == "image/x-fits" => ".fits.gz"
       case Some(s) if s.endsWith("fits")                         => ".fits"
-      case _                                               => ".tmp"
+      case _                                                     => ".tmp"
     }
 
     def openTmpFile(): (File, OutputStream) = {
@@ -74,9 +74,8 @@ class ImageCatalogLoader {
   /**
     * Retrieve image query and pass it to the display
     */
-  def queryImage(queryResult: QueryResult):Future[Throwable \/ (File, URL)] = {
+  def queryImage(url: URL):Future[Throwable \/ (File, URL)] = {
     // This isn't very nice, we are mixing UI with IO but the ProgressPanel is required for now
-    // TODO ProgressPanel.makeProgressPanel(_I18N.getString("accessingCatalogServer"))
     val progress = ProgressPanel.makeProgressPanel("Accessing catalog server ...")
 
     def imageLoad(url: URL): Future[Throwable \/ (File, URL)] = Future.apply {
@@ -85,10 +84,7 @@ class ImageCatalogLoader {
       imageToTmpFile(url, connection.getContentType, in)
     }
 
-    val f = queryResult match {
-      case u: URLQueryResult => imageLoad(u.getURL)
-      case _                 => Future.failed(new UnsupportedOperationException())
-    }
+    val f = imageLoad(url)
     // Always stop the progress panel
     f.onComplete(_ => progress.stop())
     f
