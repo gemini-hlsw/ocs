@@ -3,7 +3,6 @@ package edu.gemini.catalog.ui.tpe
 import java.io._
 import java.net.URL
 
-import jsky.catalog.{URLQueryResult, QueryResult}
 import jsky.util.Preferences
 import jsky.util.gui._
 
