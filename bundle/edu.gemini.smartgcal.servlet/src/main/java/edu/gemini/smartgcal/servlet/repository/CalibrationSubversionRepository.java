@@ -42,8 +42,8 @@ public class CalibrationSubversionRepository implements CalibrationRepository {
         try {
             LOG.info("Trying to execute svn --version to validate svn availability");
             final CmdLineClientAdapter12 cmd = new CmdLineClientAdapter12(new CmdLineNotificationHandler());
-            cmd.getVersion();
-            LOG.info("svn --version: OK");
+            final String version = cmd.getVersion();
+            LOG.info("svn --version: OK, version=" + version);
         } catch (final Exception e) {
             LOG.log(Level.WARNING, "svn --version: FAILED", e);
         }
