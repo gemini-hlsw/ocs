@@ -5,11 +5,13 @@ import edu.gemini.spModel.gemini.calunit.smartgcal.CalibrationFile;
 import edu.gemini.spModel.gemini.calunit.smartgcal.CalibrationRepository;
 import edu.gemini.spModel.gemini.calunit.smartgcal.Version;
 import org.tigris.subversion.svnclientadapter.*;
-import org.tigris.subversion.svnclientadapter.commandline.CmdLineClientAdapterFactory;
+import org.tigris.subversion.svnclientadapter.commandline.*;
 
 import java.io.*;
 import java.net.MalformedURLException;
 import java.util.Date;
+import java.util.logging.Logger;
+import java.util.logging.Level;
 
 /**
  * A simple repository for calibration files that uses a subversion server as its backend
@@ -17,21 +19,12 @@ import java.util.Date;
  */
 public class CalibrationSubversionRepository implements CalibrationRepository {
 
+    private static final Logger LOG = Logger.getLogger(CalibrationSubversionRepository.class.getName());
+
     private static final String CALIBRATION_FILE_POSTFIX = ".csv";
 
-    private static ISVNClientAdapter svnClient;
+    private final ISVNClientAdapter svnClient;
     private final String svnRootUrl;
-
-    // one-time setup of subversion adapter
-    static {
-        try {
-            // we are using the cmd line setup; svn cmd line client has to be installed locally to make this work
-            CmdLineClientAdapterFactory.setup();
-            svnClient = SVNClientAdapterFactory.createSVNClient(SVNClientAdapterFactory.getPreferredSVNClientType());
-        } catch (SVNClientException e) {
-            throw new RuntimeException(e);
-        }
-    }
 
     /**
      * Constructs an calibration repository that accesses a subversion repository.
@@ -40,6 +33,33 @@ public class CalibrationSubversionRepository implements CalibrationRepository {
         if (url      == null) throw new IllegalArgumentException("url must not be null");
         if (user     == null) throw new IllegalArgumentException("user must not be null");
         if (password == null) throw new IllegalArgumentException("password must not be null");
+
+        // If svn is not available CmdLineClientAdapterFactory.setup() will fail with an exception.
+        // Unfortunately the original exception is swallowed and the one thrown by setup() does not have a
+        // case and is generic and therefore gives no clues as to what went wrong. This additional code tries
+        // to execute "svn --version" manually (which is what the setup() function is doing) and log the exception,
+        // hopefully giving us some additional information.
+        try {
+            LOG.info("Trying to execute svn --version to validate svn availability");
+            final CmdLineClientAdapter12 cmd = new CmdLineClientAdapter12(new CmdLineNotificationHandler());
+            cmd.getVersion();
+            LOG.info("svn --version: OK");
+        } catch (final Exception e) {
+            LOG.log(Level.WARNING, "svn --version: FAILED", e);
+        }
+
+        // Try to properly set things up.
+        try {
+            // NOTE: We are using the cmd line setup; svn cmd line client has to be installed locally to make this work.
+            LOG.info("Trying to setup svn cmd line support");
+            CmdLineClientAdapterFactory.setup();
+            svnClient = SVNClientAdapterFactory.createSVNClient(SVNClientAdapterFactory.getPreferredSVNClientType());
+            LOG.info("svn command line setup: OK");
+        } catch (final Exception e) {
+            LOG.log(Level.SEVERE, "svn command line setup: FAILED", e);
+            throw new RuntimeException(e);
+        }
+
         this.svnRootUrl = url;
         svnClient.setUsername(user);
         svnClient.setPassword(password);
