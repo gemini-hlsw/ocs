@@ -92,15 +92,6 @@ public abstract class CatalogNavigator extends JPanel
     // list of listeners for change events
     private EventListenerList _listenerList = new EventListenerList();
 
-    // Stack of CatalogHistoryItems, used to go back to a previous panel
-    private Stack<CatalogHistoryItem> _backStack = new Stack<>();
-
-    // Stack of CatalogHistoryItems, used to go forward to the next panel
-    private Stack<CatalogHistoryItem> _forwStack = new Stack<>();
-
-    // Set when the back or forward actions are active to avoid the normal history stack handling
-    private boolean _noStack = false;
-
     // Saved query result (set in background thread)
     private QueryResult _queryResult;
 
@@ -112,9 +103,6 @@ public abstract class CatalogNavigator extends JPanel
 
     // Top level window (or internal frame) for viewing an HTML page
     private Component _htmlViewerFrame;
-
-    // Manages a list of previously viewed catalogs or query results.
-    private CatalogHistoryList _historyList;
 
     // Manages a list of settings for stored querries, so that you can repeat the query later on
     private CatalogQueryList _queryList;
@@ -160,20 +148,6 @@ public abstract class CatalogNavigator extends JPanel
         }
     };
 
-    // Action to use for the "Back" menu and toolbar items
-    private AbstractAction _backAction = new AbstractAction(_I18N.getString("back")) {
-        public void actionPerformed(ActionEvent evt) {
-            back();
-        }
-    };
-
-    // Action to use for the "Forward" menu and toolbar items
-    private AbstractAction _forwAction = new AbstractAction(_I18N.getString("forward")) {
-        public void actionPerformed(ActionEvent evt) {
-            forward();
-        }
-    };
-
     // Action to use for the "Add Row" menu item
     private AbstractAction _addRowAction = new AbstractAction(_I18N.getString("addRow")) {
         public void actionPerformed(ActionEvent evt) {
@@ -202,51 +176,6 @@ public abstract class CatalogNavigator extends JPanel
         }
     };
 
-
-    /**
-     * Return the top level catalog directory to use based on the value of the
-     * <em>jsky.catalog.directory</em> system property, which may be set to the name of
-     * the class implementing the CatalogDirectory interface. The default is
-     * to use the {@link jsky.catalog.astrocat.AstroCatConfig} class (The
-     * {@link jsky.catalog.skycat.SkycatConfigFile} class is another alternative).
-     * The static method in the given class named <em>getDirectory()</em> is called to
-     * return a reference to the top level CatalogDirectory.
-     */
-    public static CatalogDirectory getCatalogDirectory() {
-        if (_catDir == null) {
-            String className = System.getProperty("jsky.catalog.directory");
-            if (className == null) {
-                className = System.getProperty("jnlp.jsky.catalog.directory");
-            }
-            if (className == null) {
-                className = "jsky.catalog.astrocat.AstroCatConfig";
-            }
-            try {
-                Class<?> c = Class.forName(className);
-                Object o = c.getMethod("getDirectory").invoke(null);
-                if (o instanceof CatalogDirectory) {
-                    _catDir = (CatalogDirectory) o;
-                    _catDir.setName("My Catalogs");
-                } else {
-                    throw new RuntimeException("Error: call to " + className +
-                            ".getDirectory() returned: " + o);
-                }
-            } catch (InvocationTargetException e1) {
-                Throwable t = e1.getTargetException();
-                t.printStackTrace();
-                throw new RuntimeException("Error calling " + className +
-                        ".getDirectory(): " + t);
-            } catch (Exception e2) {
-                e2.printStackTrace();
-                throw new RuntimeException("Error calling " + className +
-                        ".getDirectory(): " + e2);
-            }
-        }
-
-        return _catDir;
-    }
-
-
     /**
      * Construct a CatalogNavigator using the given CatalogTree widget
      * (Call setQueryResult to set the root catalog to display).
@@ -268,7 +197,6 @@ public abstract class CatalogNavigator extends JPanel
         _resultSplitPane.setDividerLocation(270);
         add(_resultSplitPane, BorderLayout.CENTER);
 
-        _historyList = new CatalogHistoryList();
         _queryList = new CatalogQueryList();
     }
 
@@ -324,7 +252,6 @@ public abstract class CatalogNavigator extends JPanel
         if (component == null || component == _queryComponent)
             return;
         if (_queryComponent != null) {
-            addToHistory();
             _queryPanel.remove(_queryComponent);
             _queryComponent = null;
         }
@@ -427,86 +354,12 @@ public abstract class CatalogNavigator extends JPanel
     }
 
     /**
-     * Add the current catalog to the history stack, removing duplicates.
-     */
-    protected void addToHistory() {
-        if (_queryComponent == null)
-            return;
-        CatalogHistoryItem historyItem = makeCatalogHistoryItem();
-        if (historyItem == null)
-            return;
-        if (!_noStack) {
-            _backStack.push(historyItem);
-            _backAction.setEnabled(true);
-            if (_forwStack.size() != 0) {
-                _cleanupHistoryStack(_forwStack);
-                _forwStack.clear();
-                _forwAction.setEnabled(false);
-            }
-        }
-        _historyList.add(historyItem);
-    }
-
-    /**
-     * Return a new CatalogHistoryItem for the currently displayed catalog.
-     */
-    protected CatalogHistoryItem makeCatalogHistoryItem() {
-        String s = _queryComponent.getName();
-        if (s != null) {
-            return new CatalogHistoryItem(s, _origURL, _queryComponent);
-        }
-        return null;
-    }
-
-    /**
-     * Add history items (for previously displayed components) to the given menu
-     */
-    public void addHistoryMenuItems(JMenu menu) {
-        Iterator it = _historyList.iterator();
-        while (it.hasNext()) {
-            menu.add((CatalogHistoryItem) it.next());
-        }
-    }
-
-    // This method may be redefined in subclasses to do cleanup work before components are
-    // removed from the given history stack (_backStack or _forwStack).
-    private void _cleanupHistoryStack(Stack stack) {
-        unplot(stack);
-    }
-
-    /**
-     * Clear out the history and back/forward stacks
-     */
-    protected void clearHistory() {
-        _backAction.setEnabled(false);
-        _backStack.clear();
-        _forwAction.setEnabled(false);
-        _forwStack.clear();
-        _historyList.clear();
-    }
-
-    /**
      * Set the original URL for the current catalog or table.
      *
      * @param url the URL of the catalog, table or FITS file
      */
     public void setOrigURL(URL url) {
         _origURL = url;
-    }
-
-    /**
-     * Remove any plot symbols or graphics managed by any of the display
-     * components in the given stack
-     */
-    protected void unplot(Stack stack) {
-        // Unplot any catalog symbols before loosing the information
-        for (Object aStack : stack) {
-            CatalogHistoryItem item = (CatalogHistoryItem) aStack;
-            Object resultComp = _queryResultComponentMap.get(item.getQueryComponent());
-            if (resultComp instanceof TableDisplayTool) {
-                ((TableDisplayTool) resultComp).unplot();
-            }
-        }
     }
 
     /**
@@ -517,10 +370,6 @@ public abstract class CatalogNavigator extends JPanel
         _queryPanel.revalidate();
         _resultPanel.revalidate();
         _parent.repaint();
-    }
-
-    public QueryResult getQueryResult() {
-        return _queryResult;
     }
 
     /**
@@ -941,66 +790,6 @@ public abstract class CatalogNavigator extends JPanel
             _parent.setVisible(false);
     }
 
-    /**
-     * Go back to the previous component in the history list
-     */
-    public void back() {
-        if (_backStack.size() == 0)
-            return;
-        if (_queryComponent != null) {
-            _queryPanel.remove(_queryComponent);
-            URL url = _origURL;  // save and restore this
-            CatalogHistoryItem item = makeCatalogHistoryItem();
-            _origURL = url;
-            if (item != null) {
-                _forwStack.push(item);
-                _forwAction.setEnabled(true);
-            }
-        }
-        CatalogHistoryItem historyItem = _backStack.pop();
-        if (_backStack.size() == 0)
-            _backAction.setEnabled(false);
-        _noStack = true;
-        try {
-            historyItem.actionPerformed(null);
-        } catch (Exception e) {
-            DialogUtil.error(e);
-        }
-        _noStack = false;
-
-        update();
-    }
-
-    /**
-     * Go forward to the next component in the history list
-     */
-    public void forward() {
-        if (_forwStack.size() == 0)
-            return;
-        if (_queryComponent != null) {
-            _queryPanel.remove(_queryComponent);
-            URL url = _origURL;  // save and restore this
-            CatalogHistoryItem item = makeCatalogHistoryItem();
-            _origURL = url;
-            if (item != null) {
-                _backStack.push(item);
-                _backAction.setEnabled(true);
-            }
-        }
-        CatalogHistoryItem historyItem = _forwStack.pop();
-        if (_forwStack.size() == 0)
-            _forwAction.setEnabled(false);
-        _noStack = true;
-        try {
-            historyItem.actionPerformed(null);
-        } catch (Exception e) {
-            DialogUtil.error(e);
-        }
-        _noStack = false;
-
-        update();
-    }
-
     // These are for the GenericToolBarTarget interface
     public AbstractAction getOpenAction() {
         return _openAction;
@@ -1020,14 +809,6 @@ public abstract class CatalogNavigator extends JPanel
 
     public AbstractAction getPrintAction() {
         return _printAction;
-    }
-
-    public AbstractAction getBackAction() {
-        return _backAction;
-    }
-
-    public AbstractAction getForwAction() {
-        return _forwAction;
     }
 
     public AbstractAction getAddRowAction() {

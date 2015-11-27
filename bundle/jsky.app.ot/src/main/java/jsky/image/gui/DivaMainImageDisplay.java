@@ -664,6 +664,7 @@ public class DivaMainImageDisplay extends DivaGraphicsImageDisplay implements Ma
                     try {
                         file.delete();
                     } catch (Exception e) {
+                        // Ignore
                     }
                 }
             }
@@ -692,6 +693,7 @@ public class DivaMainImageDisplay extends DivaGraphicsImageDisplay implements Ma
                 l = _historyList;
             Preferences.getPreferences().serialize(HISTORY_LIST_DATA_NAME, ImageHistoryItem.map(l));
         } catch (Exception e) {
+            // Ignore
         }
     }
 
@@ -1583,13 +1585,6 @@ public class DivaMainImageDisplay extends DivaGraphicsImageDisplay implements Ma
      */
     public Component getParentFrame() {
         return _parent;
-    }
-
-    /**
-     * Set the top level parent frame (or internal frame) used to close the window
-     */
-    public void setParentFrame(Component p) {
-        _parent = p;
     }
 
     // These are for the GenericToolBarTarget interface

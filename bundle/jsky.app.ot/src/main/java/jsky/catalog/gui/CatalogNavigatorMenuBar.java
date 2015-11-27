@@ -275,7 +275,6 @@ public class CatalogNavigatorMenuBar extends JMenuBar {
         menu.add(_navigator.getBackAction());
         menu.add(_navigator.getForwAction());
         menu.addSeparator();
-        _navigator.addHistoryMenuItems(menu);
         menu.addSeparator();
         menu.add(createGoClearHistoryMenuItem());
 
@@ -288,7 +287,6 @@ public class CatalogNavigatorMenuBar extends JMenuBar {
     protected JMenuItem createGoClearHistoryMenuItem() {
         JMenuItem menuItem = new JMenuItem(_I18N.getString("clearHistory"));
         menuItem.addActionListener(ae -> {
-            _navigator.clearHistory();
             _goMenu.removeAll();
             createGoMenu(_goMenu);
         });
