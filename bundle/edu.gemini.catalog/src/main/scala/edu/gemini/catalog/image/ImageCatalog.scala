@@ -5,10 +5,10 @@ import java.net.URL
 import edu.gemini.spModel.core.{Angle, Coordinates}
 import jsky.util.Preferences
 
-sealed abstract class ImageCatalog(val id: String, displayName: String) {
+sealed abstract class ImageCatalog(val id: String, val displayName: String) {
   def baseUrl: String
   def extraParams: String = ""
-  def queryUrl(c: Coordinates): URL = new URL(s"$baseUrl?ra=${c.ra.toAngle.formatHMS}&dec=${c.dec.formatDMS}&mime-type=appilcation/x-fits&x=${ImageCatalog.defaultSize.toArcmins}&y=${ImageCatalog.defaultSize.toArcmins}${extraParams}")
+  def queryUrl(c: Coordinates): URL = new URL(s"$baseUrl?ra=${c.ra.toAngle.formatHMS}&dec=${c.dec.formatDMS}&mime-type=application/x-fits&x=${ImageCatalog.defaultSize.toArcmins}&y=${ImageCatalog.defaultSize.toArcmins}${extraParams}")
 }
 
 object DssGeminiNorth extends ImageCatalog("dss@GeminiNorth", "Digitized Sky at Gemini North") {

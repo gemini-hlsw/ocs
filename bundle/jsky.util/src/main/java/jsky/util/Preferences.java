@@ -1,10 +1,3 @@
-/*
- * Copyright 2000 Association for Universities for Research in Astronomy, Inc.,
- * Observatory Control System, Gemini Telescopes Project.
- *
- * $Id: Preferences.java 7758 2007-05-11 14:21:30Z anunez $
- */
-
 package jsky.util;
 
 import java.awt.*;
@@ -32,34 +25,32 @@ public class Preferences {
     private Properties _properties = new Properties();
 
     /** Name of the directory to use to store the preferences */
-    private File _dir;
+    private final File _dir;
 
     /** Directory used to cache downloaded files. */
-    private File _cacheDir;
-
-    /** The system path separator */
-    private String _sep;
+    private final File _cacheDir;
 
     /** File to use to store the preferences */
-    private File _file;
+    private final File _file;
 
     /** A single, global instance of this class. */
     private static Preferences _preferences;
 
-
     /** Load the preferences from the default location (~/.jsky/jsky.properties) */
     public Preferences() {
         String home = System.getProperty("user.home");
-        _sep = System.getProperty("file.separator");
-        String dirName = home + _sep + ".jsky";
-        _dir = new File(dirName);
-        _cacheDir = new File(dirName + _sep + "cache");
-        _file = new File(dirName + _sep + "jsky.properties");
+        _dir = new File(home, ".jsky");
+        _cacheDir = new File(_dir, "cache");
+        _file = new File(_dir, "jsky.properties");
         try {
             if (!_dir.isDirectory())
-                _dir.mkdirs();
+                if (!_dir.mkdirs()) {
+                    LOG.log(Level.WARNING, "Problem setting up Preferences directory");
+                }
             if (!_cacheDir.isDirectory())
-                _cacheDir.mkdir();
+                if (!_cacheDir.mkdir()) {
+                    LOG.log(Level.WARNING, "Problem setting up cache directory");
+                }
         } catch (Exception e) {
             LOG.log(Level.WARNING, "Problem setting up Preferences directory");
         }
@@ -70,6 +61,7 @@ public class Preferences {
     public Preferences(String filename) {
         _file = new File(filename);
         _dir = _file.getParentFile();
+        _cacheDir = new File(_dir, "cache");
         _load();
     }
 
@@ -81,11 +73,6 @@ public class Preferences {
     /** Return the name of the directory to use to save downloaded files. */
     public File getCacheDir() {
         return _cacheDir;
-    }
-
-    /** Return the system path separator. */
-    public String getSep() {
-        return _sep;
     }
 
     /** Return the full path name of the file to use to store the preferences */
@@ -226,7 +213,7 @@ public class Preferences {
      * plus the name plus the suffix ".ser".
      */
     public void serialize(String name, Object object) throws IOException {
-        String filename = _dir + _sep + name + ".ser";
+        File filename = new File(_dir, name + ".ser");
         ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(filename));
         out.writeObject(object);
         out.close();
@@ -239,7 +226,7 @@ public class Preferences {
      * does not exist or is corrupt.
      */
     public Object deserialize(String name) throws ClassNotFoundException, IOException {
-        String filename = _dir + _sep + name + ".ser";
+        File filename = new File(_dir, name + ".ser");
         ObjectInputStream in = new ObjectInputStream(new FileInputStream(filename));
         Object object = in.readObject();
         in.close();
