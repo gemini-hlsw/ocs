@@ -51,15 +51,4 @@ public class StoreImageServerAction extends AbstractAction {
         return action;
     }
 
-    @SuppressWarnings("unchecked")
-    public void appendValue(String key, AbstractButton b) {
-        List<AbstractButton> l = (List<AbstractButton>)getValue(key);
-        if (l == null) {
-            l = new ArrayList<>();
-            putValue(key, l);
-        }
-        l.add(b);
-    }
-
-
 }
