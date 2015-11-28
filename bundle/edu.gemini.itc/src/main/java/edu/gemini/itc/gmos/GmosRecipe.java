@@ -276,11 +276,11 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
         final Gmos[] ccdArray     = mainInstrument.getDetectorCcdInstruments();
         final DetectorsTransmissionVisitor tv = mainInstrument.getDetectorTransmision();
 
-        final boolean ifuMultiple = mainInstrument.isIfuUsed() && mainInstrument.getIFU().getApertureOffsetList().size() > 1;
-        final double  ifuOffset   = ifuMultiple ? mainInstrument.getIFU().getApertureOffsetList().get(i) : 0.0;
+        final boolean ifuUsed   = mainInstrument.isIfuUsed();
+        final double  ifuOffset = ifuUsed ? mainInstrument.getIFU().getApertureOffsetList().get(i) : 0.0;
 
         final List<ChartAxis> axes = new ArrayList<>();
-        final String title    = "Signal and Background " + (ifuMultiple ? "(IFU element offset: " + String.format("%.2f", ifuOffset) + " arcsec)" : "");
+        final String title    = "Signal and SQRT(Background)" + (ifuUsed ? "\nIFU element offset: " + String.format("%.2f", ifuOffset) + " arcsec" : "");
         final ChartAxis xAxis = ChartAxis.apply("Wavelength (nm)");
         final ChartAxis yAxis = ChartAxis.apply("e- per exposure per spectral pixel");
 
@@ -306,11 +306,11 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
         final Gmos[] ccdArray      = mainInstrument.getDetectorCcdInstruments();
         final DetectorsTransmissionVisitor tv = mainInstrument.getDetectorTransmision();
 
-        final boolean ifuMultiple  = mainInstrument.isIfuUsed() && mainInstrument.getIFU().getApertureOffsetList().size() > 1;
-        final double  ifuOffset    = ifuMultiple ? mainInstrument.getIFU().getApertureOffsetList().get(i) : 0.0;
+        final boolean ifuUsed   = mainInstrument.isIfuUsed();
+        final double  ifuOffset = ifuUsed ? mainInstrument.getIFU().getApertureOffsetList().get(i) : 0.0;
         final List<ChartAxis> axes = new ArrayList<>();
 
-        final String title    = "Intermediate Single Exp and Final S/N" + (ifuMultiple ? " (IFU element offset: " + String.format("%.2f", ifuOffset) + " arcsec)" : "");
+        final String title    = "Intermediate Single Exp and Final S/N" + (ifuUsed ? "\nIFU element offset: " + String.format("%.2f", ifuOffset) + " arcsec" : "");
         final ChartAxis xAxis = ChartAxis.apply("Wavelength (nm)");
         final ChartAxis yAxis = ChartAxis.apply("Signal / Noise per spectral pixel");
 
@@ -336,11 +336,11 @@ public final class GmosRecipe implements ImagingArrayRecipe, SpectroscopyArrayRe
         final Gmos[] ccdArray     = mainInstrument.getDetectorCcdInstruments();
         final DetectorsTransmissionVisitor tv = mainInstrument.getDetectorTransmision();
 
-        final boolean ifuMultiple = mainInstrument.isIfuUsed() && mainInstrument.getIFU().getApertureOffsetList().size() > 1;
-        final double  ifuOffset   = ifuMultiple ? mainInstrument.getIFU().getApertureOffsetList().get(i) : 0.0;
+        final boolean ifuUsed   = mainInstrument.isIfuUsed();
+        final double  ifuOffset = ifuUsed ? mainInstrument.getIFU().getApertureOffsetList().get(i) : 0.0;
 
         final List<ChartAxis> axes = new ArrayList<>();
-        final String title    = "Pixel Signal and Background" + (ifuMultiple ? " (IFU element offset: " + String.format("%.2f", ifuOffset) + " arcsec)" : "");
+        final String title    = "Pixel Signal and SQRT(Background)" + (ifuUsed ? "\nIFU element offset: " + String.format("%.2f", ifuOffset) + " arcsec" : "");
         final ChartAxis xAxis = new ChartAxis("Pixels", true, new Some<>(new ChartAxisRange(0, 6218)));
         final ChartAxis yAxis = ChartAxis.apply("e- per exposure per spectral pixel");
 

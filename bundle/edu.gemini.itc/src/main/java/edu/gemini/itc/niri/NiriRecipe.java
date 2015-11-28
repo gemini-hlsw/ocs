@@ -58,7 +58,7 @@ public final class NiriRecipe implements ImagingRecipe, SpectroscopyRecipe {
 
     public ItcSpectroscopyResult serviceResult(final SpectroscopyResult r) {
         final List<SpcChartData> dataSets = new ArrayList<SpcChartData>() {{
-            add(Recipe$.MODULE$.createSignalChart(r, 0));
+            add(Recipe$.MODULE$.createSignalChartWithApInTitle(r, 0));
             add(Recipe$.MODULE$.createS2NChart(r, 0));
         }};
         return Recipe$.MODULE$.serviceResult(r, dataSets);

@@ -60,7 +60,7 @@ public final class Flamingos2Recipe implements ImagingRecipe, SpectroscopyRecipe
 
     public ItcSpectroscopyResult serviceResult(final SpectroscopyResult r) {
         final List<SpcChartData> dataSets = new ArrayList<SpcChartData>() {{
-            add(Recipe$.MODULE$.createSignalChart(r));
+            add(Recipe$.MODULE$.createSignalChartWithApInTitle(r, 0));
             add(Recipe$.MODULE$.createS2NChart(r));
         }};
         return Recipe$.MODULE$.serviceResult(r, dataSets);

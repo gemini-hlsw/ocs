@@ -58,7 +58,7 @@ public final class GnirsRecipe implements SpectroscopyRecipe {
                 add(createGnirsSignalChart(r));
                 add(createGnirsS2NChart(r));
             } else {
-                add(Recipe$.MODULE$.createSigSwAppChart(r, 0));
+                add(Recipe$.MODULE$.createSignalChartWithApInTitle(r, 0));
                 add(Recipe$.MODULE$.createS2NChart(r));
             }
         }};
@@ -221,7 +221,7 @@ public final class GnirsRecipe implements SpectroscopyRecipe {
     // == GNIRS CHARTS
 
     private static SpcChartData createGnirsSignalChart(final SpectroscopyResult result) {
-        final String title = "Signal and Background in software aperture of " + result.specS2N()[0].getSpecNpix() + " pixels";
+        final String title = "Signal and SQRT(Background)\nSummed in an aperture of " + result.specS2N()[0].getSpecNpix() + " pix diameter";
         final String xAxis = "Wavelength (nm)";
         final String yAxis = "e- per exposure per spectral pixel";
         final List<SpcSeriesData> data = new ArrayList<>();
