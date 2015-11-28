@@ -31,7 +31,8 @@ public class GmosCommonType {
 
     public interface Disperser extends DisplayableSpType, LoggableSpType, SequenceableSpType {
         boolean isMirror();
-        int getLinesPerMm();
+        // The dispersers "ruling density" in lines/mm.
+        int rulingDensity();
     }
 
     public static interface DisperserBridge<D extends Enum<D> & Disperser> {

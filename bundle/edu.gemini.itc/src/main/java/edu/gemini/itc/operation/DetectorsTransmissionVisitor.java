@@ -30,7 +30,7 @@ public class DetectorsTransmissionVisitor implements SampledSpectrumVisitor {
     private final int spectralBinning;
     private final double centralWavelength;
     private final double nmppx;
-    private final int linesPerMm;
+    private final int rulingDensity; // [lines/mm]
     private VisitableSampledSpectrum detectorsTransmissionValues;
     private List<Integer> detectorCcdIndexes;
 
@@ -38,7 +38,7 @@ public class DetectorsTransmissionVisitor implements SampledSpectrumVisitor {
         this.spectralBinning    = p.spectralBinning();
         this.centralWavelength  = p.centralWavelength().toNanometers();
         this.nmppx              = nmppx;
-        this.linesPerMm         = p.grating().getLinesPerMm();
+        this.rulingDensity      = p.grating().rulingDensity();
         final double[][] data   = DatFile.arrays().apply(filename);
         initialize(data);
     }
@@ -121,7 +121,7 @@ public class DetectorsTransmissionVisitor implements SampledSpectrumVisitor {
 
     /** Calculates the shift for the given IFU-2 configuration in nm. */
     public double ifu2shift() {
-        return 0.5 * nmppx * CCDGapCalc.calcIfu2Shift(centralWavelength, linesPerMm);
+        return 0.5 * nmppx * CCDGapCalc.calcIfu2Shift(centralWavelength, rulingDensity);
     }
 
     /** The start of the "red" area in wavelength space. */

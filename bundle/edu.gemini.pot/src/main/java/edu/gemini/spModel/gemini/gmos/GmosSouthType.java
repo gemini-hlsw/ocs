@@ -1,16 +1,6 @@
-//
-// $Id: GmosSouthType.java 44720 2012-04-24 15:45:03Z nbarriga $
-//
-
 package edu.gemini.spModel.gemini.gmos;
 
 import edu.gemini.spModel.type.SpTypeUtil;
-import edu.gemini.spModel.gemini.gmos.GmosCommonType.DetectorManufacturer;
-
-import java.util.Set;
-import java.util.HashSet;
-import java.util.Arrays;
-import java.util.Collections;
 
 /**
  *
@@ -93,26 +83,26 @@ public class GmosSouthType {
         /** The default Disperser value **/
         public static DisperserSouth DEFAULT = MIRROR;
 
-        private final String _displayValue;
-        private final String _logValue;
-        private final int _linesPerMm;
+        private final String displayValue;
+        private final String logValue;
+        private final int    rulingDensity;        // [lines/mm]
 
-        DisperserSouth(final String displayValue, final String logValue, final int linesPerMm) {
-            _displayValue = displayValue;
-            _logValue     = logValue;
-            _linesPerMm   = linesPerMm;
+        DisperserSouth(final String displayValue, final String logValue, final int rulingDensity) {
+            this.displayValue  = displayValue;
+            this.logValue      = logValue;
+            this.rulingDensity = rulingDensity;
         }
 
         public String displayValue() {
-            return _displayValue;
+            return displayValue;
         }
 
         public String logValue() {
-            return _logValue;
+            return logValue;
         }
 
         public String sequenceValue() {
-            return _displayValue;
+            return displayValue;
         }
 
         public String toString() {
@@ -123,8 +113,8 @@ public class GmosSouthType {
             return (this == MIRROR);
         }
 
-        public int getLinesPerMm() {
-            return _linesPerMm;
+        public int rulingDensity() {
+            return rulingDensity;
         }
 
         /** Return a Disperser by index **/
