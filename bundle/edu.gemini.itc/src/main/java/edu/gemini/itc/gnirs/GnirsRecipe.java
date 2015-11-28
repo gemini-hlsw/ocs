@@ -58,7 +58,7 @@ public final class GnirsRecipe implements SpectroscopyRecipe {
                 add(createGnirsSignalChart(r));
                 add(createGnirsS2NChart(r));
             } else {
-                add(Recipe$.MODULE$.createSignalChartWithApInTitle(r, 0));
+                add(Recipe$.MODULE$.createSignalChart(r, 0));
                 add(Recipe$.MODULE$.createS2NChart(r));
             }
         }};
