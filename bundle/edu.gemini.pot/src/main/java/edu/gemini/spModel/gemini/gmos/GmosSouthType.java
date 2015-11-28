@@ -80,25 +80,27 @@ public class GmosSouthType {
     };
 
 
-    public static enum DisperserSouth implements GmosCommonType.Disperser {
-        MIRROR("Mirror", "mirror"),
-        B1200_G5321("B1200_G5321", "B1200"),
-        R831_G5322("R831_G5322", "R831"),
-        B600_G5323("B600_G5323", "B600"),
-        R600_G5324("R600_G5324", "R600"),
-        R400_G5325("R400_G5325", "R400"),
-        R150_G5326("R150_G5326", "R150"),
+    public enum DisperserSouth implements GmosCommonType.Disperser {
+        MIRROR("Mirror", "mirror", 0),
+        B1200_G5321("B1200_G5321", "B1200", 1200),
+        R831_G5322("R831_G5322", "R831", 831),
+        B600_G5323("B600_G5323", "B600", 600),
+        R600_G5324("R600_G5324", "R600", 600),
+        R400_G5325("R400_G5325", "R400", 400),
+        R150_G5326("R150_G5326", "R150", 150),
         ;
 
         /** The default Disperser value **/
         public static DisperserSouth DEFAULT = MIRROR;
 
-        private String _displayValue;
-        private String _logValue;
+        private final String _displayValue;
+        private final String _logValue;
+        private final int _linesPerMm;
 
-        private DisperserSouth(String displayValue, String logValue) {
+        DisperserSouth(final String displayValue, final String logValue, final int linesPerMm) {
             _displayValue = displayValue;
-            _logValue = logValue;
+            _logValue     = logValue;
+            _linesPerMm   = linesPerMm;
         }
 
         public String displayValue() {
@@ -119,6 +121,10 @@ public class GmosSouthType {
 
         public boolean isMirror() {
             return (this == MIRROR);
+        }
+
+        public int getLinesPerMm() {
+            return _linesPerMm;
         }
 
         /** Return a Disperser by index **/

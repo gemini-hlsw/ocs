@@ -80,27 +80,29 @@ public class GmosNorthType {
         }
     };
 
-    public static enum DisperserNorth implements GmosCommonType.Disperser, ObsoletableSpType {
-        MIRROR("Mirror", "mirror"),
-        B1200_G5301("B1200_G5301", "B1200"),
-        R831_G5302("R831_G5302", "R831"),
-        B600_G5303("B600_G5303", "B600") {public boolean isObsolete() {return true;}},
-        B600_G5307("B600_G5307", "B600"),
-        R600_G5304("R600_G5304", "R600"),
-        R400_G5305("R400_G5305", "R400"),
-        R150_G5306("R150_G5306", "R150"),
-        R150_G5308("R150_G5308", "R150"),
+    public enum DisperserNorth implements GmosCommonType.Disperser, ObsoletableSpType {
+        MIRROR("Mirror", "mirror", 0),
+        B1200_G5301("B1200_G5301", "B1200", 1200),
+        R831_G5302("R831_G5302", "R831", 831),
+        B600_G5303("B600_G5303", "B600", 600) {public boolean isObsolete() {return true;}},
+        B600_G5307("B600_G5307", "B600", 600),
+        R600_G5304("R600_G5304", "R600", 600),
+        R400_G5305("R400_G5305", "R400", 400),
+        R150_G5306("R150_G5306", "R150", 150),
+        R150_G5308("R150_G5308", "R150", 150),
         ;
 
         /** The default Disperser value **/
         public static DisperserNorth DEFAULT = MIRROR;
 
-        private String _displayValue;
-        private String _logValue;
+        private final String _displayValue;
+        private final String _logValue;
+        private final int _linesPerMm;
 
-        private DisperserNorth(String displayValue, String logValue) {
+        DisperserNorth(final String displayValue, final String logValue, final int linesPerMm) {
             _displayValue = displayValue;
-            _logValue = logValue;
+            _logValue     = logValue;
+            _linesPerMm   = linesPerMm;
         }
 
         public String displayValue() {
@@ -117,6 +119,10 @@ public class GmosNorthType {
 
         public boolean isMirror() {
             return (this == MIRROR);
+        }
+
+        public int getLinesPerMm() {
+            return _linesPerMm;
         }
 
         public String toString() {
