@@ -15,6 +15,7 @@ import edu.gemini.catalog.ui.tpe.CatalogImageDisplay
 import edu.gemini.catalog.votable._
 import edu.gemini.pot.sp.SPComponentType
 import edu.gemini.pot.ModelConverters._
+import edu.gemini.shared.util.immutable.ScalaConverters._
 import edu.gemini.shared.gui.textComponent.{SelectOnFocus, TextRenderer, NumberField}
 import edu.gemini.shared.gui.{ButtonFlattener, GlassLabel, SortableTable}
 import edu.gemini.spModel.core.SiderealTarget
@@ -316,6 +317,13 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
           buildQuery.foreach(Function.tupled(reloadSearchData))
       }
     }
+    lazy val fromImageButton = new Button("Sync from Obs.") {
+      reactions += {
+        case ButtonClicked(_) =>
+          // Reload target info from the OT
+          Option(TpeManager.get()).flatMap(_.getImageWidget.getObsContext.asScalaOpt).foreach(QueryResultsFrame.instance.showOn)
+      }
+    }
 
     // Action to disable the query button if there are invalid fields
     val queryButtonEnabling: Reaction = {
@@ -577,7 +585,8 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
         }
       }
 
-      add(queryButton, CC().newline().span(7).pushX().alignX(RightAlign).gapTop(10.px))
+      add(fromImageButton, CC().newline().alignX(LeftAlign).gapTop(10.px))
+      add(queryButton, CC().span(7).pushX().alignX(RightAlign).gapTop(10.px))
     }
 
     /**
