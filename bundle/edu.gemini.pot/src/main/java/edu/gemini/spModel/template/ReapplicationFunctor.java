@@ -27,7 +27,7 @@ import static edu.gemini.spModel.template.FunctorHelpers.lookupNode;
  * (whose templates don't contain targets) the re-application preserves the target environment and position angle
  * (if any). Note that the target node for execute() is ignored.
  */
-public class ReapplicationFunctor extends DBAbstractFunctor {
+public final class ReapplicationFunctor extends DBAbstractFunctor {
 
     private static final Logger LOGGER = Logger.getLogger(ReapplicationFunctor.class.getName());
 
@@ -109,9 +109,10 @@ public class ReapplicationFunctor extends DBAbstractFunctor {
         templateObs.setChildren(Collections.<ISPNode>emptyList()); // must detach children first
         obs.setChildren(children);
 
-        // If it's a science observation, restore the target and position angle
+        // Unless it is a DAY_CAL, restore the target, conditions and position angle.
+        // See REL-2165.
         final ObsClass newObsClass = ObsClassService.lookupObsClass(obs);
-        if (newObsClass == ObsClass.SCIENCE || newObsClass == ObsClass.ACQ) {
+        if (newObsClass != ObsClass.DAY_CAL) {
             restoreScienceDetails(obs, oldTarget, oldConditions, oldInstrument);
         }
     }
