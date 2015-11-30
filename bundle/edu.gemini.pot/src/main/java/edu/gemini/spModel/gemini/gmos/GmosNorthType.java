@@ -1,16 +1,6 @@
-//
-// $Id: GmosNorthType.java 44720 2012-04-24 15:45:03Z nbarriga $
-//
-
 package edu.gemini.spModel.gemini.gmos;
 
 import edu.gemini.spModel.type.*;
-import edu.gemini.spModel.gemini.gmos.GmosCommonType.DetectorManufacturer;
-
-import java.util.Set;
-import java.util.HashSet;
-import java.util.Arrays;
-import java.util.Collections;
 
 /**
  *
@@ -80,43 +70,49 @@ public class GmosNorthType {
         }
     };
 
-    public static enum DisperserNorth implements GmosCommonType.Disperser, ObsoletableSpType {
-        MIRROR("Mirror", "mirror"),
-        B1200_G5301("B1200_G5301", "B1200"),
-        R831_G5302("R831_G5302", "R831"),
-        B600_G5303("B600_G5303", "B600") {public boolean isObsolete() {return true;}},
-        B600_G5307("B600_G5307", "B600"),
-        R600_G5304("R600_G5304", "R600"),
-        R400_G5305("R400_G5305", "R400"),
-        R150_G5306("R150_G5306", "R150"),
-        R150_G5308("R150_G5308", "R150"),
+    public enum DisperserNorth implements GmosCommonType.Disperser, ObsoletableSpType {
+        MIRROR("Mirror", "mirror", 0),
+        B1200_G5301("B1200_G5301", "B1200", 1200),
+        R831_G5302("R831_G5302", "R831", 831),
+        B600_G5303("B600_G5303", "B600", 600) {public boolean isObsolete() {return true;}},
+        B600_G5307("B600_G5307", "B600", 600),
+        R600_G5304("R600_G5304", "R600", 600),
+        R400_G5305("R400_G5305", "R400", 400),
+        R150_G5306("R150_G5306", "R150", 150),
+        R150_G5308("R150_G5308", "R150", 150),
         ;
 
         /** The default Disperser value **/
         public static DisperserNorth DEFAULT = MIRROR;
 
-        private String _displayValue;
-        private String _logValue;
+        private final String displayValue;
+        private final String logValue;
+        private final int    rulingDensity;
 
-        private DisperserNorth(String displayValue, String logValue) {
-            _displayValue = displayValue;
-            _logValue = logValue;
+        DisperserNorth(final String displayValue, final String logValue, final int rulingDensity) {
+            this.displayValue  = displayValue;
+            this.logValue      = logValue;
+            this.rulingDensity = rulingDensity;     // [lines/mm]
         }
 
         public String displayValue() {
-            return _displayValue;
+            return displayValue;
         }
 
         public String logValue() {
-            return _logValue;
+            return logValue;
         }
 
         public String sequenceValue() {
-            return _displayValue;
+            return displayValue;
         }
 
         public boolean isMirror() {
             return (this == MIRROR);
+        }
+
+        public int rulingDensity() {
+            return rulingDensity;
         }
 
         public String toString() {

@@ -1,16 +1,6 @@
-//
-// $Id: GmosSouthType.java 44720 2012-04-24 15:45:03Z nbarriga $
-//
-
 package edu.gemini.spModel.gemini.gmos;
 
 import edu.gemini.spModel.type.SpTypeUtil;
-import edu.gemini.spModel.gemini.gmos.GmosCommonType.DetectorManufacturer;
-
-import java.util.Set;
-import java.util.HashSet;
-import java.util.Arrays;
-import java.util.Collections;
 
 /**
  *
@@ -80,37 +70,39 @@ public class GmosSouthType {
     };
 
 
-    public static enum DisperserSouth implements GmosCommonType.Disperser {
-        MIRROR("Mirror", "mirror"),
-        B1200_G5321("B1200_G5321", "B1200"),
-        R831_G5322("R831_G5322", "R831"),
-        B600_G5323("B600_G5323", "B600"),
-        R600_G5324("R600_G5324", "R600"),
-        R400_G5325("R400_G5325", "R400"),
-        R150_G5326("R150_G5326", "R150"),
+    public enum DisperserSouth implements GmosCommonType.Disperser {
+        MIRROR("Mirror", "mirror", 0),
+        B1200_G5321("B1200_G5321", "B1200", 1200),
+        R831_G5322("R831_G5322", "R831", 831),
+        B600_G5323("B600_G5323", "B600", 600),
+        R600_G5324("R600_G5324", "R600", 600),
+        R400_G5325("R400_G5325", "R400", 400),
+        R150_G5326("R150_G5326", "R150", 150),
         ;
 
         /** The default Disperser value **/
         public static DisperserSouth DEFAULT = MIRROR;
 
-        private String _displayValue;
-        private String _logValue;
+        private final String displayValue;
+        private final String logValue;
+        private final int    rulingDensity;        // [lines/mm]
 
-        private DisperserSouth(String displayValue, String logValue) {
-            _displayValue = displayValue;
-            _logValue = logValue;
+        DisperserSouth(final String displayValue, final String logValue, final int rulingDensity) {
+            this.displayValue  = displayValue;
+            this.logValue      = logValue;
+            this.rulingDensity = rulingDensity;
         }
 
         public String displayValue() {
-            return _displayValue;
+            return displayValue;
         }
 
         public String logValue() {
-            return _logValue;
+            return logValue;
         }
 
         public String sequenceValue() {
-            return _displayValue;
+            return displayValue;
         }
 
         public String toString() {
@@ -119,6 +111,10 @@ public class GmosSouthType {
 
         public boolean isMirror() {
             return (this == MIRROR);
+        }
+
+        public int rulingDensity() {
+            return rulingDensity;
         }
 
         /** Return a Disperser by index **/
