@@ -37,22 +37,15 @@ object Recipe {
   // GENERIC CHART CREATION
   // Utility functions that create generic signal and signal to noise charts for several instruments.
 
-  def createSignalChart(result: SpectroscopyResult): SpcChartData = {
-    createSignalChart(result, 0)
-  }
-
+  // create signal/background chart
   def createSignalChart(result: SpectroscopyResult, index: Int): SpcChartData = {
-    createSignalChart(result, "Signal and Background ", index)
-  }
-
-  def createSigSwAppChart(result: SpectroscopyResult, index: Int): SpcChartData = {
-    createSignalChart(result, "Signal and SQRT(Background) in software aperture of " + result.specS2N(index).getSpecNpix + " pixels", index)
+    createSignalChart(result, "Signal & SQRT(Background)\nSummed in an aperture of " + result.specS2N(index).getSpecNpix + " pix diameter", index)
   }
 
   def createSignalChart(result: SpectroscopyResult, title: String, index: Int): SpcChartData = {
     val data: java.util.List[SpcSeriesData] = new java.util.ArrayList[SpcSeriesData]()
-    data.add(new SpcSeriesData(SignalData,     "Signal ",            result.specS2N(index).getSignalSpectrum.getData))
-    data.add(new SpcSeriesData(BackgroundData, "SQRT(Background)  ", result.specS2N(index).getBackgroundSpectrum.getData))
+    data.add(new SpcSeriesData(SignalData,     "Signal",               result.specS2N(index).getSignalSpectrum.getData))
+    data.add(new SpcSeriesData(BackgroundData, "SQRT(Background)",     result.specS2N(index).getBackgroundSpectrum.getData))
     new SpcChartData(SignalChart, title, ChartAxis("Wavelength (nm)"), ChartAxis("e- per exposure per spectral pixel"), data.toList)
   }
 

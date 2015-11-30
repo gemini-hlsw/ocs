@@ -190,11 +190,11 @@ public final class NifsRecipe implements SpectroscopyRecipe {
         final Nifs instrument = (Nifs) result.instrument();
         final List<Double> ap_offset_list = instrument.getIFU().getApertureOffsetList();
         final String title = instrument.getIFUMethod() instanceof IfuSummed ?
-                "Signal and Background (IFU summed apertures: " +
+                "Signal and SQRT(Background)\nIFU summed apertures: " +
                         instrument.getIFUNumX() + "x" + instrument.getIFUNumY() +
                         ", " + String.format("%.3f", instrument.getIFUNumX() * IFUComponent.IFU_LEN_X) + "\"x" +
-                        String.format("%.3f", instrument.getIFUNumY() * IFUComponent.IFU_LEN_Y) + "\")" :
-                "Signal and Background (IFU element offset: " + String.format("%.3f", ap_offset_list.get(index)) + " arcsec)";
+                        String.format("%.3f", instrument.getIFUNumY() * IFUComponent.IFU_LEN_Y) + "\"" :
+                "Signal and SQRT(Background)\nIFU element offset: " + String.format("%.3f", ap_offset_list.get(index)) + " arcsec";
         return Recipe$.MODULE$.createSignalChart(result, title, index);
     }
 
@@ -202,11 +202,11 @@ public final class NifsRecipe implements SpectroscopyRecipe {
         final Nifs instrument = (Nifs) result.instrument();
         final List<Double> ap_offset_list = instrument.getIFU().getApertureOffsetList();
         final String title = instrument.getIFUMethod() instanceof IfuSummed ?
-                "Intermediate Single Exp and Final S/N \n(IFU apertures:" +
+                "Intermediate Single Exp and Final S/N\nIFU apertures: " +
                         instrument.getIFUNumX() + "x" + instrument.getIFUNumY() +
                         ", " + String.format("%.3f", instrument.getIFUNumX() * IFUComponent.IFU_LEN_X) + "\"x" +
-                        String.format("%.3f", instrument.getIFUNumY() * IFUComponent.IFU_LEN_Y) + "\")" :
-                "Intermediate Single Exp and Final S/N (IFU element offset: " + String.format("%.3f", ap_offset_list.get(index)) + " arcsec)";
+                        String.format("%.3f", instrument.getIFUNumY() * IFUComponent.IFU_LEN_Y) + "\"" :
+                "Intermediate Single Exp and Final S/N\nIFU element offset: " + String.format("%.3f", ap_offset_list.get(index)) + " arcsec";
         return Recipe$.MODULE$.createS2NChart(result, title, index);
     }
 
