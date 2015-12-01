@@ -42,9 +42,7 @@ sealed trait ItcTableModel extends AbstractTableModel {
   val SNTotalColumn       = Column("S/N Total",       (c, i, r) => totalSNRatio (r))
 
   // Define different sets of columns as headers
-// TODO: REL-2576: Reactivate peak pixel columns for March 2016 release
-//  val PeakColumns       = List(PeakPixelColumn, PeakADUColumn, PeakFullWellColumn)
-  val PeakColumns       = List()
+  val PeakColumns       = List(PeakPixelColumn, PeakADUColumn, PeakFullWellColumn)
   val SNColumns         = List(SNSingleColumn, SNTotalColumn)
   val Headers           = List(LabelsColumn, ImagesColumn, ExpTimeColumn, TotTimeColumn, SrcMagColumn, SrcFracColumn)
   val HeadersWithCoadds = List(LabelsColumn, ImagesColumn, CoaddsColumn, ExpTimeColumn, TotTimeColumn, SrcMagColumn, SrcFracColumn)
@@ -161,24 +159,21 @@ class ItcGenericImagingTableModel(val keys: List[ItemKey], val uniqueSteps: List
 class ItcGmosImagingTableModel(val keys: List[ItemKey], val uniqueSteps: List[ItcUniqueConfig], val inputs: List[String\/ItcParameters], val res: List[Future[ItcService.Result]]) extends ItcImagingTableModel {
   val headers = Headers
   val results = List(
-// TODO: REL-2576: Reactivate peak pixel columns for March 2016 release
-//    Column("CCD1 Peak\n(e-)",           (c, i, r) => peakPixelFlux  (r, ccd=0),   tooltip = ItcTableModel.PeakPixelETooltip),
-//    Column("CCD1 Peak\n(ADU)",          (c, i, r) => imgAdu         (r, ccd=0),   tooltip = ItcTableModel.PeakPixelAduTooltip),
-//    Column("CCD1 Peak\n(% Full Well)",  (c, i, r) => imgPercentWell (r, ccd=0),   tooltip = ItcTableModel.PeakPixelFWTooltip),
+    Column("CCD1 Peak\n(e-)",           (c, i, r) => peakPixelFlux  (r, ccd=0),   tooltip = ItcTableModel.PeakPixelETooltip),
+    Column("CCD1 Peak\n(ADU)",          (c, i, r) => imgAdu         (r, ccd=0),   tooltip = ItcTableModel.PeakPixelAduTooltip),
+    Column("CCD1 Peak\n(% Full Well)",  (c, i, r) => imgPercentWell (r, ccd=0),   tooltip = ItcTableModel.PeakPixelFWTooltip),
     Column("CCD1\nS/N Single",          (c, i, r) => singleSNRatio  (r, ccd=0)),
     Column("CCD1\nS/N Total",           (c, i, r) => totalSNRatio   (r, ccd=0)),
 
-// TODO: REL-2576: Reactivate peak pixel columns for March 2016 release
-//    Column("CCD2 Peak\n(e-)",           (c, i, r) => peakPixelFlux  (r, ccd=1),   tooltip = ItcTableModel.PeakPixelETooltip),
-//    Column("CCD2 Peak\n(ADU)",          (c, i, r) => imgAdu         (r, ccd=1),   tooltip = ItcTableModel.PeakPixelAduTooltip),
-//    Column("CCD2 Peak\n(% Full Well)",  (c, i, r) => imgPercentWell (r, ccd=1),   tooltip = ItcTableModel.PeakPixelFWTooltip),
+    Column("CCD2 Peak\n(e-)",           (c, i, r) => peakPixelFlux  (r, ccd=1),   tooltip = ItcTableModel.PeakPixelETooltip),
+    Column("CCD2 Peak\n(ADU)",          (c, i, r) => imgAdu         (r, ccd=1),   tooltip = ItcTableModel.PeakPixelAduTooltip),
+    Column("CCD2 Peak\n(% Full Well)",  (c, i, r) => imgPercentWell (r, ccd=1),   tooltip = ItcTableModel.PeakPixelFWTooltip),
     Column("CCD2\nS/N Single",          (c, i, r) => singleSNRatio  (r, ccd=1)),
     Column("CCD2\nS/N Total",           (c, i, r) => totalSNRatio   (r, ccd=1)),
 
-// TODO: REL-2576: Reactivate peak pixel columns for March 2016 release
-//    Column("CCD3 Peak\n(e-)",           (c, i, r) => peakPixelFlux  (r, ccd=2),   tooltip = ItcTableModel.PeakPixelETooltip),
-//    Column("CCD3 Peak\n(ADU)",          (c, i, r) => imgAdu         (r, ccd=2),   tooltip = ItcTableModel.PeakPixelAduTooltip),
-//    Column("CCD3 Peak\n(% Full Well)",  (c, i, r) => imgPercentWell (r, ccd=2),   tooltip = ItcTableModel.PeakPixelFWTooltip),
+    Column("CCD3 Peak\n(e-)",           (c, i, r) => peakPixelFlux  (r, ccd=2),   tooltip = ItcTableModel.PeakPixelETooltip),
+    Column("CCD3 Peak\n(ADU)",          (c, i, r) => imgAdu         (r, ccd=2),   tooltip = ItcTableModel.PeakPixelAduTooltip),
+    Column("CCD3 Peak\n(% Full Well)",  (c, i, r) => imgPercentWell (r, ccd=2),   tooltip = ItcTableModel.PeakPixelFWTooltip),
     Column("CCD3\nS/N Single",          (c, i, r) => singleSNRatio  (r, ccd=2)),
     Column("CCD3\nS/N Total",           (c, i, r) => totalSNRatio   (r, ccd=2))
   )
@@ -203,11 +198,15 @@ sealed trait ItcSpectroscopyTableModel extends ItcTableModel
 
 class ItcGenericSpectroscopyTableModel(val keys: List[ItemKey], val uniqueSteps: List[ItcUniqueConfig], val inputs: List[String\/ItcParameters], val res: List[Future[ItcService.Result]], showCoadds: Boolean = false) extends ItcSpectroscopyTableModel {
   val headers = if (showCoadds) HeadersWithCoadds else Headers
-  val results = PeakColumns ++ SNColumns
+// TODO: REL-2576: Reactivate peak pixel columns for March 2016 release
+//  val results = PeakColumns ++ SNColumns
+  val results = SNColumns
 }
 
 class ItcGnirsSpectroscopyTableModel(val keys: List[ItemKey], val uniqueSteps: List[ItcUniqueConfig], val inputs: List[String\/ItcParameters], val res: List[Future[ItcService.Result]], xDisp: Boolean) extends ItcSpectroscopyTableModel {
   val headers = HeadersWithCoadds
   // ITC does not provide S/N Single values for cross dispersion
-  val results = if (xDisp) PeakColumns :+ SNTotalColumn else PeakColumns ++ SNColumns
+// TODO: REL-2576: Reactivate peak pixel columns for March 2016 release
+//  val results = if (xDisp) PeakColumns :+ SNTotalColumn else PeakColumns ++ SNColumns
+  val results = if (xDisp) List(SNTotalColumn) else SNColumns
 }
