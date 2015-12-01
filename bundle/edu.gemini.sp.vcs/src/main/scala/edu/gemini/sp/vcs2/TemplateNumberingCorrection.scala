@@ -21,8 +21,14 @@ class TemplateNumberingCorrection(lifespanId: LifespanId, nodeMap: Map[SPNodeKey
     def correct(tokens: List[(VersionToken, SPNodeKey)]): TryVcs[MergePlan] = {
       def updateToken(tgLoc: TreeLoc[MergeNode], vt: VersionToken): TryVcs[TreeLoc[MergeNode]] =
         tgLoc.getLabel match {
-          case m@Modified(_, _, tg: TemplateGroup, _, _) =>
-            TryVcs(tgLoc.modifyLabel(_ => m.copy(dob = tg.copy <| (_.setVersionToken(vt)))))
+          case m@Modified(_, nv, tg: TemplateGroup, _, _) =>
+            if (tg.getVersionToken == vt)
+              TryVcs(tgLoc)
+            else {
+              val newDob = tg.copy <| (_.setVersionToken(vt))
+              val newNv  = nv.incr(lifespanId)
+              TryVcs(tgLoc.modifyLabel(_ => m.copy(nv = newNv, dob = newDob)))
+            }
           case _                                         =>
             TryVcs.fail(s"Expected a TemplateGroup for node ${tgLoc.key}")
         }
@@ -33,8 +39,7 @@ class TemplateNumberingCorrection(lifespanId: LifespanId, nodeMap: Map[SPNodeKey
             tg0 <- mp.update.loc.find(_.key === k).toTryVcs(s"Missing template group $k")
             tg1 <- tg0.asModified(nodeMap)
             tg2 <- updateToken(tg1, vt)
-            tg3 <- tg2.incr(lifespanId)
-          } yield mp.copy(update = tg3.toTree)
+          } yield mp.copy(update = tg2.toTree)
       }
     }
 
