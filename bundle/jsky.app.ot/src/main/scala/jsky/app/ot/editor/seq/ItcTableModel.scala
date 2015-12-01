@@ -198,15 +198,11 @@ sealed trait ItcSpectroscopyTableModel extends ItcTableModel
 
 class ItcGenericSpectroscopyTableModel(val keys: List[ItemKey], val uniqueSteps: List[ItcUniqueConfig], val inputs: List[String\/ItcParameters], val res: List[Future[ItcService.Result]], showCoadds: Boolean = false) extends ItcSpectroscopyTableModel {
   val headers = if (showCoadds) HeadersWithCoadds else Headers
-// TODO: REL-2576: Reactivate peak pixel columns for March 2016 release
-//  val results = PeakColumns ++ SNColumns
-  val results = SNColumns
+  val results = PeakColumns ++ SNColumns
 }
 
 class ItcGnirsSpectroscopyTableModel(val keys: List[ItemKey], val uniqueSteps: List[ItcUniqueConfig], val inputs: List[String\/ItcParameters], val res: List[Future[ItcService.Result]], xDisp: Boolean) extends ItcSpectroscopyTableModel {
   val headers = HeadersWithCoadds
   // ITC does not provide S/N Single values for cross dispersion
-// TODO: REL-2576: Reactivate peak pixel columns for March 2016 release
-//  val results = if (xDisp) PeakColumns :+ SNTotalColumn else PeakColumns ++ SNColumns
-  val results = if (xDisp) List(SNTotalColumn) else SNColumns
+  val results = if (xDisp) PeakColumns :+ SNTotalColumn else PeakColumns ++ SNColumns
 }
