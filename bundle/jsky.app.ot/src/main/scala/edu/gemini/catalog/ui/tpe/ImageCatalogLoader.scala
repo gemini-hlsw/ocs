@@ -2,16 +2,14 @@ package edu.gemini.catalog.ui.tpe
 
 import java.io._
 import java.net.URL
+import java.util.logging.Logger
 
-import jsky.catalog.{URLQueryResult, QueryResult}
 import jsky.util.Preferences
 import jsky.util.gui._
 
-import scala.concurrent.Future
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.swing.Swing
-import scala.util.{Success, Failure}
-import scalaz.{-\/, \/-, \/}
+import scalaz.concurrent.Task
+import scalaz.{-\/, \/-}
 
 object ImageCatalogLoader {
   val instance = this
@@ -19,15 +17,15 @@ object ImageCatalogLoader {
   /**
     * Load an image and display it on the TPE or display an error
     */
-  def display4Java(display: CatalogImageDisplay, queryResult: QueryResult):Unit = {
-    val f = new ImageCatalogLoader().queryImage(queryResult)
-    f.onComplete {
-      case Failure(t) =>
+  def display4Java(display: CatalogImageDisplay, url: URL):Unit = {
+    val (p, f) = new ImageCatalogLoader().queryImage(url)
+    f.runAsync {
+      case -\/(t) =>
+        p.stop()
         DialogUtil.error(t)
-      case Success(-\/(t)) =>
-        DialogUtil.error(t)
-      case Success(\/-(t)) =>
+      case \/-(t) =>
         Swing.onEDT {
+          p.stop()
           display.setFilename(t._1.getAbsolutePath, t._2)
         }
     }
@@ -38,18 +36,19 @@ object ImageCatalogLoader {
   * Class able to retrieve images from the old catalog and put them on display
   */
 class ImageCatalogLoader {
+  val Log = Logger.getLogger(this.getClass.getName)
 
   /**
     * Download the given image URL to a temporary file and return the file
     * Note that to support the legacy progress bar we explicitly expect a ProgressBarFilterInputStream
     */
-  private def imageToTmpFile(url: URL, contentType: String, in: ProgressBarFilterInputStream): Throwable \/ (File, URL) = {
+  private def imageToTmpFile(url: URL, contentType: String, in: ProgressBarFilterInputStream): (File, URL) = {
     val dir = Preferences.getPreferences.getCacheDir.getPath
     val suffix = Option(contentType) match {
-      case Some(s) if s.endsWith("hfits")                        =>  ".hfits"
+      case Some(s) if s.endsWith("hfits")                        => ".hfits"
       case Some(s) if s.endsWith("zfits") || s == "image/x-fits" => ".fits.gz"
       case Some(s) if s.endsWith("fits")                         => ".fits"
-      case _                                               => ".tmp"
+      case _                                                     => ".tmp"
     }
 
     def openTmpFile(): (File, OutputStream) = {
@@ -65,32 +64,27 @@ class ImageCatalogLoader {
         .foreach(read => out.write(buffer, 0, read))
     }
 
-    for {
-      f <- \/.fromTryCatch(openTmpFile())
-      i <- \/.fromTryCatch(readFile(in, f._2))
-    } yield (f._1, url)
+    val f = openTmpFile()
+    readFile(in, f._2)
+    (f._1, url)
   }
 
   /**
     * Retrieve image query and pass it to the display
     */
-  def queryImage(queryResult: QueryResult):Future[Throwable \/ (File, URL)] = {
+  def queryImage(url: URL):(ProgressPanel, Task[(File, URL)]) = {
+    Log.info(s"Reading image from $url")
+
     // This isn't very nice, we are mixing UI with IO but the ProgressPanel is required for now
-    // TODO ProgressPanel.makeProgressPanel(_I18N.getString("accessingCatalogServer"))
     val progress = ProgressPanel.makeProgressPanel("Accessing catalog server ...")
 
-    def imageLoad(url: URL): Future[Throwable \/ (File, URL)] = Future.apply {
+    def imageLoad(url: URL): Task[(File, URL)] = Task {
       val connection = progress.openConnection(url)
       val in = progress.getLoggedInputStream(url)
       imageToTmpFile(url, connection.getContentType, in)
     }
 
-    val f = queryResult match {
-      case u: URLQueryResult => imageLoad(u.getURL)
-      case _                 => Future.failed(new UnsupportedOperationException())
-    }
-    // Always stop the progress panel
-    f.onComplete(_ => progress.stop())
-    f
+    val f = imageLoad(url)
+    (progress, f)
   }
 }
