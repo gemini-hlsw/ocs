@@ -16,7 +16,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
 
@@ -52,12 +51,6 @@ public class SkycatCatalog implements PlotableCatalog {
      * Used to assign a unique name to query results
      */
     private int _queryCount = 0;
-
-    /**
-     * List of Filters to be applied over the catalog result
-     */
-
-    private List<ICatalogFilter> catFilterList;
 
     /**
      * Initialize the catalog from the given catalog configuration entry.
@@ -499,7 +492,7 @@ public class SkycatCatalog implements PlotableCatalog {
                 // might be an HTML error from the catalog server
                 return new URLQueryResult(queryUrl);
             }
-            InputStream ins = _applyFilters(connection.getInputStream());
+            InputStream ins = connection.getInputStream();
             in = statusLogger.getLoggedInputStream(ins, connection.getContentLength());
             SkycatTable cat = new SkycatTable(this, in, queryArgs);
             cat.setConfigEntry(_entry);
@@ -525,7 +518,7 @@ public class SkycatCatalog implements PlotableCatalog {
                 // might be an HTML error from the catalog server
                 return new URLQueryResult(queryUrl);
             }
-            ins = _applyFilters(con.getInputStream());
+            ins = con.getInputStream();
             SkycatTable cat = new SkycatTable(this, ins, queryArgs);
             cat.setConfigEntry(_entry);
             return cat;
@@ -563,7 +556,7 @@ public class SkycatCatalog implements PlotableCatalog {
                     // might be an HTML error from the catalog server
                     return new URLQueryResult(queryUrl);
                 }
-                ins = _applyFilters(con.getInputStream());
+                ins = con.getInputStream();
                 SkycatTable cat = new SkycatTable(this, ins, queryArgs);
                 cat.setConfigEntry(_entry);
                 return cat;
@@ -1069,39 +1062,6 @@ public class SkycatCatalog implements PlotableCatalog {
             queryArgs.setParamValue(SkycatConfigEntry.WIDTH, region.getWidth());
             queryArgs.setParamValue(SkycatConfigEntry.HEIGHT, region.getHeight());
         }
-    }
-
-    /**
-     * Add a <code>ICatalogFilter</code> to the list of filters to be applied to
-     * the query result. Filters will be applied in the order they are added.
-     *
-     * @param filter the <code>ICatalogFilter</code> to be added.
-     */
-    public void addCatalogFilter(ICatalogFilter filter) {
-        if (filter == null) return;
-        if (catFilterList == null) {
-            catFilterList = new ArrayList<>();
-        }
-        //avoid duplicate filters
-        if (!catFilterList.contains(filter)) {
-            catFilterList.add(filter);
-        }
-    }
-
-    /**
-     * Apply the filters (if any) to the InputStream.
-     *
-     * @param is The original Input stream
-     * @return a filtered InputStream after applying the set of filters
-     * @throws IOException in case of I/O error while processing the InputStream
-     */
-
-    private InputStream _applyFilters(InputStream is) throws IOException {
-        if (catFilterList == null) return is;
-        for (ICatalogFilter filter : catFilterList) {
-            is = filter.filterContent(is);
-        }
-        return is;
     }
 
     /**

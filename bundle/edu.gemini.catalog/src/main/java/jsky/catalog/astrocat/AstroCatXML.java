@@ -1,12 +1,5 @@
-// Copyright 2002
-// Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-//
-// $Id: AstroCatXML.java 39360 2011-11-25 13:02:23Z swalker $
-
 package jsky.catalog.astrocat;
 
-import edu.gemini.catalog.votable.FieldDescriptor;
 import jsky.catalog.*;
 import jsky.util.NameValue;
 import jsky.util.Resources;
@@ -25,10 +18,8 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
-
 
 /**
  * Parses an XML stream conforming to the document type

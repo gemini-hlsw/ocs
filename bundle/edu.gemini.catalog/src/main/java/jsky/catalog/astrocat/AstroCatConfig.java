@@ -11,7 +11,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
 
-
 /**
  * Reads an AstroCat XML catalog description file and stores
  * information about the catalogs defined there. Since catalog

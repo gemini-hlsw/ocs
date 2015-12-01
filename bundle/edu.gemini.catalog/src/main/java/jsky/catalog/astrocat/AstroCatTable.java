@@ -1,9 +1,3 @@
-// Copyright 2002
-// Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-//
-// $Id: AstroCatTable.java 23751 2010-02-08 19:13:56Z swalker $
-
 package jsky.catalog.astrocat;
 
 import edu.gemini.shared.util.immutable.None;
@@ -15,7 +9,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Vector;
-
 
 /**
  * Used to read and write Skycat style tab separated

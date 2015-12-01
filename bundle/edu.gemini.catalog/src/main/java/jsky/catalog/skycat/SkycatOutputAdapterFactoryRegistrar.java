@@ -1,7 +1,3 @@
-//
-// $
-//
-
 package jsky.catalog.skycat;
 
 import edu.gemini.catalog.skycat.SkycatOutputAdapter;

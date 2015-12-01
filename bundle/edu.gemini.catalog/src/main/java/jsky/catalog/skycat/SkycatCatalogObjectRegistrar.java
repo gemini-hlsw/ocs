@@ -1,7 +1,3 @@
-//
-// $
-//
-
 package jsky.catalog.skycat;
 
 import edu.gemini.shared.util.immutable.*;
@@ -70,14 +66,4 @@ public final class SkycatCatalogObjectRegistrar<T> {
         return (res == null) ? None.INSTANCE : new Some<T>(res);
     }
 
-    /**
-     * @return a list of tuples(key, factory) for each known factory
-     */
-    public List<Tuple2<String,T>> allFactories() {
-        List<Tuple2<String,T>> result = new ArrayList<>();
-        for(String key : factoryMap.keySet()) {
-            result.add(new Pair<>(key, factoryMap.get(key)));
-        }
-        return result;
-    }
 }

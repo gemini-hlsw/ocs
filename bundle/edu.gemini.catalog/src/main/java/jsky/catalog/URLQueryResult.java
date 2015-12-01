@@ -1,13 +1,3 @@
-/*
- * ESO Archive
- *
- * $Id: URLQueryResult.java 4414 2004-02-03 16:21:36Z brighton $
- *
- * who             when        what
- * --------------  ----------  ----------------------------------------
- * Allan Brighton  1999/05/10  Created
- */
-
 package jsky.catalog;
 
 import java.net.*;
@@ -30,15 +20,6 @@ public class URLQueryResult implements QueryResult {
     public URLQueryResult(URL url) {
         this.url = url;
     }
-
-    /**
-     * Create a URLQueryResult from the given URL.
-     */
-    public URLQueryResult(URL url, int hdu) {
-        this.url = url;
-        this.hdu = hdu;
-    }
-
 
     /** Return the URL  */
     public URL getURL() {

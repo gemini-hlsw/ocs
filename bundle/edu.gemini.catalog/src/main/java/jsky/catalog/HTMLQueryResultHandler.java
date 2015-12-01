@@ -1,11 +1,3 @@
-/*
- * Copyright 2000 Association for Universities for Research in Astronomy, Inc.,
- * Observatory Control System, Gemini Telescopes Project.
- *
- * $Id: HTMLQueryResultHandler.java 4414 2004-02-03 16:21:36Z brighton $
- */
-
-
 package jsky.catalog;
 
 import java.net.*;
@@ -18,5 +10,5 @@ import java.net.*;
 public interface HTMLQueryResultHandler {
 
     /** Display the contents of the HTML page given by the the URL */
-    public void displayHTMLPage(URL url);
+    void displayHTMLPage(URL url);
 }
