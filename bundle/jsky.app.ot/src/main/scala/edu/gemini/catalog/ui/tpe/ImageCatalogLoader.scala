@@ -18,12 +18,14 @@ object ImageCatalogLoader {
     * Load an image and display it on the TPE or display an error
     */
   def display4Java(display: CatalogImageDisplay, url: URL):Unit = {
-    val f = new ImageCatalogLoader().queryImage(url)
+    val (p, f) = new ImageCatalogLoader().queryImage(url)
     f.runAsync {
       case -\/(t) =>
+        p.stop()
         DialogUtil.error(t)
       case \/-(t) =>
         Swing.onEDT {
+          p.stop()
           display.setFilename(t._1.getAbsolutePath, t._2)
         }
     }
@@ -70,7 +72,7 @@ class ImageCatalogLoader {
   /**
     * Retrieve image query and pass it to the display
     */
-  def queryImage(url: URL):Task[(File, URL)] = {
+  def queryImage(url: URL):(ProgressPanel, Task[(File, URL)]) = {
     Log.info(s"Reading image from $url")
 
     // This isn't very nice, we are mixing UI with IO but the ProgressPanel is required for now
@@ -83,8 +85,6 @@ class ImageCatalogLoader {
     }
 
     val f = imageLoad(url)
-    // Always stop the progress panel
-    f.onFinish(_ => Task.now(progress.stop()))
-    f
+    (progress, f)
   }
 }
