@@ -123,9 +123,10 @@ public abstract class PrinterBase {
     }
 
     protected void _printPeakPixelInfo(final ItcCcd ccd) {
-        _println(
-            String.format("The peak pixel signal + background is %.0f e- (%d ADU). This is %.0f%% of the full well depth of %.0f e-.",
-            ccd.peakPixelFlux(), ccd.adu(), ccd.percentFullWell(), ccd.wellDepth()));
+// TODO: REL-2576: Reactivate peak pixel information for March 2016 release
+//        _println(
+//            String.format("The peak pixel signal + background is %.0f e- (%d ADU). This is %.0f%% of the full well depth of %.0f e-.",
+//            ccd.peakPixelFlux(), ccd.adu(), ccd.percentFullWell(), ccd.wellDepth()));
     }
 
     protected void _printWarnings(final scala.collection.immutable.Seq<ItcWarning> warnings) {

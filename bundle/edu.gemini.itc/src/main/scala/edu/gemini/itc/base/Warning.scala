@@ -33,6 +33,9 @@ trait LimitRule extends WarningRule {
  * Limits for the peak pixel count of the ITC calculation result (imaging & spectroscopy).
  */
 trait PeakPixelLimitRule extends LimitRule {
+// TODO: REL-2576: Reactivate peak pixel warnings for March 2016 release
+  override def warn(value: Double): Boolean = false // for now: never warn
+
   def value(r: Result): Double = r.peakPixelCount
 }
 
