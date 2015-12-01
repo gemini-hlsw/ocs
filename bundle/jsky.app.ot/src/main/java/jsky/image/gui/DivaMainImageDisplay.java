@@ -30,6 +30,8 @@ import java.net.URL;
 import java.util.LinkedList;
 import java.util.ListIterator;
 import java.util.Stack;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Implements the main image display window and provides methods
@@ -39,6 +41,7 @@ import java.util.Stack;
  * @version $Revision: 47126 $
  */
 public class DivaMainImageDisplay extends DivaGraphicsImageDisplay implements MainImageDisplay {
+    private static final Logger LOG = Logger.getLogger(DivaMainImageDisplay.class.getName());
 
     // Used to access internationalized strings (see i18n/gui*.properties)
     private static final I18N _I18N = I18N.getInstance(DivaMainImageDisplay.class);
@@ -662,9 +665,11 @@ public class DivaMainImageDisplay extends DivaGraphicsImageDisplay implements Ma
                 File file = new File(historyItem.data.filename);
                 if (file.exists()) {
                     try {
-                        file.delete();
+                        if (!file.delete()) {
+                            LOG.warning("Cannot delete history file " + file.getAbsolutePath());
+                        }
                     } catch (Exception e) {
-                        // Ignore
+                        LOG.log(Level.SEVERE, "Exception deleting file " + file.getAbsolutePath(), e);
                     }
                 }
             }
@@ -723,7 +728,9 @@ public class DivaMainImageDisplay extends DivaGraphicsImageDisplay implements Ma
             File[] files = dir.listFiles(filter);
             for (File file : files) {
                 if (!fileInHistoryList(file)) {
-                    file.delete();
+                    if (!file.delete()) {
+                        LOG.warning("Cannot delete file " + file.getAbsolutePath());
+                    }
                 }
 
             }

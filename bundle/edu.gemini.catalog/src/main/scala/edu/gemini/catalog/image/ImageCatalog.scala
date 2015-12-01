@@ -45,18 +45,30 @@ object MassImgK extends AstroCatalog("2massK", "2MASS Quick-Look Image Retrieval
   override val band = MagnitudeBand.K
 }
 
+/**
+  * Contains definitions for ImageCatalogs including a list of all the available image servers
+  */
 object ImageCatalog {
+  // For Java usage
   val instance = this
 
-  val defaultSize = Angle.fromArcmin(15.0)
+  protected [image] val defaultSize = Angle.fromArcmin(15.0)
 
   private val SKY_USER_CATALOG = "jsky.catalog.sky"
 
+  /** List of all known image server in preference order */
   val all = List(DssGeminiNorth, DssGeminiSouth, DssESO, Dss2ESO, Dss2iESO, MassImgJ, MassImgH, MassImgK)
 
+  /** Default image server */
   val defaultImageServer = DssGeminiNorth
 
-  def user = all.find(_.id == Preferences.get(SKY_USER_CATALOG, defaultImageServer.id)).getOrElse(defaultImageServer)
+  /**
+    * Indicates the user preferred Image Server
+    */
+  def user():ImageCatalog = all.find(_.id == Preferences.get(SKY_USER_CATALOG, defaultImageServer.id)).getOrElse(defaultImageServer)
 
-  def user(is: ImageCatalog) = Preferences.set(SKY_USER_CATALOG, is.id)
+  /**
+    * Stores the user preferred image catalog
+    */
+  def user(ic: ImageCatalog):Unit = Preferences.set(SKY_USER_CATALOG, ic.id)
 }

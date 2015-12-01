@@ -1,7 +1,6 @@
 package jsky.app.ot.tpe;
 
 import edu.gemini.ags.api.AgsRegistrar;
-import edu.gemini.ags.api.AgsStrategy;
 import edu.gemini.catalog.ui.QueryResultsFrame;
 import edu.gemini.catalog.ui.tpe.CatalogImageDisplay;
 import edu.gemini.shared.skyobject.SkyObject;
@@ -18,7 +17,6 @@ import edu.gemini.spModel.target.obsComp.TargetObsComp;
 import edu.gemini.spModel.target.offset.OffsetPosBase;
 import edu.gemini.spModel.target.system.ITarget;
 import edu.gemini.spModel.util.Angle;
-import jsky.app.ot.ags.AgsStrategyUtil;
 import jsky.app.ot.tpe.gems.GemsGuideStarSearchDialog;
 import jsky.app.ot.util.OtColor;
 import jsky.app.ot.util.PolygonD;
