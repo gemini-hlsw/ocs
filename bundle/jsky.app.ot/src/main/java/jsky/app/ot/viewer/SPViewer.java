@@ -1,5 +1,6 @@
 package jsky.app.ot.viewer;
 
+import edu.gemini.catalog.ui.image.BackgroundImageLoader;
 import edu.gemini.p2checker.api.IP2Problems;
 import edu.gemini.p2checker.api.Problem;
 import edu.gemini.pot.sp.*;
@@ -668,6 +669,7 @@ public final class SPViewer extends SPViewerGUI implements PropertyChangeListene
 
             // If there was an old root, clean up
             if (getRoot() != null) {
+                BagsManager.unwatch(getRoot());
                 getDatabase().checkpoint();
                 getRoot().removePropertyChangeListener(ISPProgram.DATA_OBJECT_KEY, authListener);
                 updateEngToolWindow(null);
@@ -712,6 +714,7 @@ public final class SPViewer extends SPViewerGUI implements PropertyChangeListene
                     _checker.check(getRoot(), getTree(), OT.getMagnitudeTable());
                 }
                 BagsManager.watch(getRoot());
+                BackgroundImageLoader.watch(getRoot());
             }
 
             // Finally, update title and actions
@@ -877,6 +880,7 @@ public final class SPViewer extends SPViewerGUI implements PropertyChangeListene
         }
         if (p != null) {
             BagsManager.unwatch(p);
+            BackgroundImageLoader.unwatch(p);
             treeSnapshots.remove(p.getNodeKey());
         }
         tryNavigate(_history.delete());
@@ -885,6 +889,7 @@ public final class SPViewer extends SPViewerGUI implements PropertyChangeListene
     public void closeProgram(ISPProgram node) {
         if (node != null) {
             BagsManager.unwatch(node);
+            BackgroundImageLoader.unwatch(node);
             treeSnapshots.remove(node.getNodeKey());
         }
         tryNavigate(_history.delete(node));
