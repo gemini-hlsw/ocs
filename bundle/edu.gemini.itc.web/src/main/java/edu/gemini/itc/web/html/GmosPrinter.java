@@ -63,14 +63,15 @@ public final class GmosPrinter extends PrinterBase {
 
         _printRequestedIntegrationTime(result);
 
-        for (final Gmos instrument : ccdArray) {
-            if (ccdArray.length > 1) {
-                printCcdTitle(instrument);
-            }
-            final int ccdIndex = instrument.getDetectorCcdIndex();
-            _printPeakPixelInfo(s.ccd(ccdIndex));
-            _printWarnings(s.ccd(ccdIndex).warnings());
-        }
+// TODO: REL-2576: Reactivate peak pixel information and related warnings for March 2016 release
+//        for (final Gmos instrument : ccdArray) {
+//            if (ccdArray.length > 1) {
+//                printCcdTitle(instrument);
+//            }
+//            final int ccdIndex = instrument.getDetectorCcdIndex();
+//            _printPeakPixelInfo(s.ccd(ccdIndex));
+//            _printWarnings(s.ccd(ccdIndex).warnings());
+//        }
 
         _print("<HR align=left SIZE=3>");
 
