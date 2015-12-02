@@ -1,10 +1,3 @@
-/*
- * Copyright 2000 Association for Universities for Research in Astronomy, Inc.,
- * Observatory Control System, Gemini Telescopes Project.
- *
- * $Id: ImageHistogram.java 4414 2004-02-03 16:21:36Z brighton $
- */
-
 package jsky.image;
 
 import javax.media.jai.Histogram;
@@ -12,7 +5,6 @@ import javax.media.jai.PlanarImage;
 import javax.media.jai.ROI;
 
 import jsky.image.operator.ImageOps;
-
 
 /**
  * Utility class used to avoid creating the same Histogram twice
@@ -33,8 +25,7 @@ public class ImageHistogram {
     private int _yPeriod;
 
     /** Default Constructor */
-    public ImageHistogram() {
-    }
+    public ImageHistogram() { }
 
     /**
      * Return a histogram for the given image with the given size (number of bins).

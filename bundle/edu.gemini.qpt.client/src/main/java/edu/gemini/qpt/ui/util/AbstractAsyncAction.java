@@ -17,46 +17,46 @@ public abstract class AbstractAsyncAction extends AbstractAction {
 
     protected final KeyChain authClient;
 
-	public AbstractAsyncAction(KeyChain authClient) {
-		super();
+    public AbstractAsyncAction(KeyChain authClient) {
+        super();
         this.authClient = authClient;
-	}
+    }
 
-	public AbstractAsyncAction(String name, Icon icon, KeyChain authClient) {
-		super(name, icon);
+    public AbstractAsyncAction(String name, Icon icon, KeyChain authClient) {
+        super(name, icon);
         this.authClient = authClient;
-	}
+    }
 
-	public AbstractAsyncAction(String name, KeyChain authClient) {
-		super(name);
+    public AbstractAsyncAction(String name, KeyChain authClient) {
+        super(name);
         this.authClient = authClient;
-	}
+    }
 
-	public final void actionPerformed(final ActionEvent e) {
-		new Thread(getName() + " Thread") {
-			public void run() {
+    public final void actionPerformed(final ActionEvent e) {
+        new Thread(getName() + " Thread") {
+            public void run() {
                 try {
-					try {
-						Thread.sleep(100);
-					} catch (InterruptedException ie) {
-					}
-					asyncActionPerformed(e);
-				} catch (Throwable t) {
-					t.printStackTrace(); // TODO: something
-				}
-			}
-		}.start();
-	}
+                    try {
+                        Thread.sleep(100);
+                    } catch (InterruptedException ie) {
+                    }
+                    asyncActionPerformed(e);
+                } catch (Throwable t) {
+                    t.printStackTrace(); // TODO: something
+                }
+            }
+        }.start();
+    }
 
-	protected String getName() {
-		return (String) getValue(AbstractAction.NAME);
-	}
+    protected String getName() {
+        return (String) getValue(AbstractAction.NAME);
+    }
 
-	/**
-	 * Subclasses should put their implementation here. The method will be invoked from a
-	 * non-UI thread.
-	 * @param e
-	 */
-	protected abstract void asyncActionPerformed(ActionEvent e);
+    /**
+     * Subclasses should put their implementation here. The method will be invoked from a
+     * non-UI thread.
+     * @param e
+     */
+    protected abstract void asyncActionPerformed(ActionEvent e);
 
 }

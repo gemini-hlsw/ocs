@@ -156,8 +156,6 @@ public class FITSImage extends jsky.image.SimpleRenderedImage {
                 //e2.printStackTrace();
                 if (e instanceof FitsException)
                     throw (FitsException) e;
-                if (e instanceof IOException)
-                    throw (IOException) e;
                 throw new RuntimeException(e);
             }
         }
@@ -446,12 +444,11 @@ public class FITSImage extends jsky.image.SimpleRenderedImage {
      * @return an array of Strings containing valid property names.
      */
     public String[] getPropertyNames() {
-        String[] names = new String[]{
+        return new String[]{
             "#num_pages",
             "#preview_image",
             "#fits_image"
         };
-        return names;
     }
 
 
@@ -604,9 +601,9 @@ public class FITSImage extends jsky.image.SimpleRenderedImage {
         try {
             raster = _fitsData.getPreviewImage(raster, factor);
         } catch (EOFException e) {
-            //System.out.println("XXX FITSImage._getPreviewImage(): warning: " + e.toString());
+            // Ignore
         } catch (IndexOutOfBoundsException e) {
-            //System.out.println("XXX FITSImage._getPreviewImage(): warning: " + e.toString());
+            // Ignore
         } catch (IOException e) {
             e.printStackTrace();
             throw new RuntimeException(e);
@@ -710,12 +707,8 @@ public class FITSImage extends jsky.image.SimpleRenderedImage {
         int[] bandOffsets = new int[1];
         bandOffsets[0] = 0;
         int pixelStride = 1;
-        int scanlineStride = tileWidth;
         return RasterFactory.createPixelInterleavedSampleModel(_dataType,
-                                                               tileWidth, tileHeight,
-                                                               pixelStride,
-                                                               scanlineStride,
-                                                               bandOffsets);
+            tileWidth, tileHeight, pixelStride, tileWidth, bandOffsets);
     }
 
 
@@ -724,18 +717,13 @@ public class FITSImage extends jsky.image.SimpleRenderedImage {
     private void _initByteBuffer() throws IOException {
         ArrayDataInput arrayDataInput = _fits.getStream();
         if (arrayDataInput instanceof BufferedFile) {
-            //System.out.println("XXX FITSImage: using BufferedFile");
             long headerSize = _header.getSize();
             long offset = _hdu.getFileOffset() + headerSize;
             long size = _hdu.getSize() - headerSize;
-            //System.out.println("XXX FITSImage: HDU offset = " + offset + ", size = " + size);
             BufferedFile bufferedFile = (BufferedFile) arrayDataInput;
             FileChannel channel = bufferedFile.getChannel();
             System.gc(); // XXX got out of memory errors here
             _byteBuffer = channel.map(FileChannel.MapMode.READ_ONLY, offset, size);
-            //System.out.println("XXX FITSImage: got byteBuffer");
-        } else {
-            //System.out.println("XXX FITSImage: no byteBuffer access");
         }
     }
 

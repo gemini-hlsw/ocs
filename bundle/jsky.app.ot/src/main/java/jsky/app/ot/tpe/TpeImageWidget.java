@@ -77,9 +77,6 @@ public class TpeImageWidget extends CatalogImageDisplay implements MouseInputLis
     // Base pos not visible
     private boolean _baseOutOfView = false;
 
-    // Background task to automatically select GEMS guide stars
-    private GemsGuideStarWorker _gemsGuideStarWorker;
-
     // Dialog for GeMS manual guide star selection
     private GemsGuideStarSearchDialog _gemsGuideStarSearchDialog;
 

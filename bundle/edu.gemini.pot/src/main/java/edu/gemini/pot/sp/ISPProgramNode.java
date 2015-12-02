@@ -1,9 +1,4 @@
-//
-// $Id: ISPProgramNode.java 46768 2012-07-16 18:58:53Z rnorris $
-//
 package edu.gemini.pot.sp;
-
-
 
 /**
  * An interface that indicates that the {@link ISPNode} is a

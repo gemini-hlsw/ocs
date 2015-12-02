@@ -92,7 +92,6 @@ public class GemsGuideStarWorker extends SwingWorker implements MascotProgress {
     }
 
     public void finished() {
-        tpe.setGemsGuideStarWorkerFinished();
         Object o = getValue();
         if (o instanceof CancellationException) {
             DialogUtil.message("The guide star search was canceled.");

@@ -7,16 +7,15 @@ import javax.swing.*;
 /**
  * A tool bar for the image display window.
  */
-public class TpeImageDisplayToolBar extends ImageDisplayToolBar {
+class TpeImageDisplayToolBar extends ImageDisplayToolBar {
 
     // toolbar buttons
-    private JButton skyImageButton;
     private JButton manualGuideStarButton;
 
     /**
      * Create the toolbar for the given window
      */
-    public TpeImageDisplayToolBar(TpeImageWidget imageDisplay) {
+    TpeImageDisplayToolBar(TpeImageWidget imageDisplay) {
         super(imageDisplay);
     }
 
@@ -43,7 +42,7 @@ public class TpeImageDisplayToolBar extends ImageDisplayToolBar {
      *
      * @return the guide star button
      */
-    protected JButton makeManualGuideStarButton() {
+    private JButton makeManualGuideStarButton() {
         if (manualGuideStarButton == null) {
             final AbstractAction a = ((TpeImageWidget)getImageDisplay()).getManualGuideStarAction();
             manualGuideStarButton = makeButton((String)a.getValue(Action.SHORT_DESCRIPTION), a);

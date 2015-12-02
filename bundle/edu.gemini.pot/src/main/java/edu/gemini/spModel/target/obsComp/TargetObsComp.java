@@ -108,15 +108,11 @@ public final class TargetObsComp extends AbstractDataObject implements GuideProb
     }
 
     private void unwatchTargets() {
-        targetEnv.getTargets().foreach(target -> {
-            target.deleteWatcher(prop);
-        });
+        targetEnv.getTargets().foreach(target -> target.deleteWatcher(prop));
     }
 
     private void watchTargets() {
-        targetEnv.getTargets().foreach(target -> {
-            target.addWatcher(prop);
-        });
+        targetEnv.getTargets().foreach(target -> target.addWatcher(prop));
     }
 
     /**
