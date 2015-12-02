@@ -163,7 +163,7 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
 
   title = "Catalog Query Tool"
   val tableBorder = new BorderPanel() {
-    border = titleBorder(title)
+    border = titleBorder("Results")
     add(scrollPane, BorderPanel.Position.Center)
   }
   QueryForm.buildLayout(Nil)
@@ -270,7 +270,7 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
         updateResultsModel(model)
 
         // Update the count of rows
-        tableBorder.border = titleBorder(s"$title - ${queryResult.result.targets.rows.length} results found")
+        tableBorder.border = titleBorder(s"Results - ${queryResult.result.targets.rows.length} results found")
 
         // Update the query form
         QueryForm.updateQuery(info, q)
@@ -308,7 +308,7 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
     // Represents a magnitude filter containing the controls that make the row
     case class MagnitudeFilterControls(addButton: Button, faintess: NumberField, separator: Label, saturation: NumberField, bandCB: ComboBox[MagnitudeBand], removeButton: Button)
 
-    border = titleBorder("Query Params")
+    border = titleBorder("Query Parameters")
 
     lazy val queryButton = new Button("Query") {
       reactions += {
@@ -317,7 +317,7 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
           buildQuery.foreach(Function.tupled(reloadSearchData))
       }
     }
-    lazy val fromImageButton = new Button("Sync from Obs.") {
+    lazy val fromImageButton = new Button("Reset") {
       reactions += {
         case ButtonClicked(_) =>
           // Reload target info from the OT
@@ -585,8 +585,9 @@ object QueryResultsFrame extends Frame with PreferredSizeFrame {
         }
       }
 
-      add(fromImageButton, CC().newline().alignX(LeftAlign).gapTop(10.px))
-      add(queryButton, CC().span(7).pushX().alignX(RightAlign).gapTop(10.px))
+      add(new Separator(Orientation.Horizontal), CC().spanX(7).growX().newline())
+      add(fromImageButton, CC().newline().span(6).pushX().alignX(RightAlign).gapTop(10.px))
+      add(queryButton, CC().alignX(RightAlign).gapTop(10.px))
     }
 
     /**
