@@ -1,6 +1,7 @@
 package edu.gemini.sp.vcs2
 
 
+import edu.gemini.pot.sp.version.NodeVersions
 import edu.gemini.sp.vcs2.ProgramLocation.Remote
 import edu.gemini.sp.vcs2.ProgramLocationSet.{RemoteOnly, LocalOnly, Both}
 import edu.gemini.spModel.template.{TemplateGroup, TemplateFolder}
@@ -15,7 +16,7 @@ class TemplateNumberCorrectionSpec extends MergeCorrectionSpec {
   def vt(segs: Int*)(next: Int): VersionToken =
     VersionToken.apply(segs.toArray, next)
 
-  def test(expected: List[VersionToken], merged: (VersionToken, ProgramLocationSet)*): Boolean = {
+  def test(expectedToks: List[VersionToken], merged: (VersionToken, ProgramLocationSet)*): Boolean = {
     val tgList = merged.map { case (tok,_) => templateGroup(tok).leaf }
 
     val mergeTree = prog.node(Tree.node(templateFolder, tgList.toStream))
@@ -24,20 +25,42 @@ class TemplateNumberCorrectionSpec extends MergeCorrectionSpec {
       case (locs, key) if locs.toSet.contains(Remote) => key
     }.toSet
 
-    def tgNumbers(t: Tree[MergeNode]): List[VersionToken] = {
+    def versions(t: Tree[MergeNode]): List[(NodeVersions, VersionToken)] = {
       val tf = t.subForest.find(_.rootLabel match {
         case Modified(_, _, _: TemplateFolder, _, _) => true
         case _                                       => false
       })
 
       tf.toList.flatMap { _.subForest.toList.map { _.rootLabel } }.collect {
-        case Modified(_, _, tg: TemplateGroup, _, _) => tg.getVersionToken
+        case Modified(_, nv, tg: TemplateGroup, _, _) => (nv, tg.getVersionToken)
       }
     }
 
     val plan = MergePlan(mergeTree, Set.empty)
     val tnc  = new TemplateNumberingCorrection(lifespanId, Map.empty, known.contains)
-    tnc(plan).map(mp => tgNumbers(mp.update)) shouldEqual \/-(expected)
+
+    val result = tnc(plan).map { correctedPlan =>
+      // Get the original NodeVersions and VersionTokens before the correction
+      // is applied.
+      val (originalNvs, originalToks)   = versions(plan.update).unzip
+
+      // Get the corrected NodeVersions and the corrected VersionTokens.
+      val (correctedNvs, correctedToks) = versions(correctedPlan.update).unzip
+
+      // For each original VersionToken, record whether it matches the
+      // corrected VersionToken.
+      val toksMatch   = originalToks.zip(correctedToks).map { case (a, b) => a == b }
+
+      // For all expected updates, increment the original NodeVersions to get
+      // the expected node versions.
+      val expectedNvs = originalNvs.zip(toksMatch).map { case (nv, matching) =>
+        if (matching) nv else nv.incr(lifespanId)
+      }
+
+      expectedNvs == correctedNvs && expectedToks == correctedToks
+    }
+
+    result shouldEqual \/-(true)
   }
 
   "TemplateNumberingCorrection" should {
