@@ -4,6 +4,8 @@ import java.io._
 import java.net.{URL, URLConnection}
 import java.util.logging.Logger
 
+import edu.gemini.catalog.image.ImageCatalog
+import edu.gemini.spModel.core.Coordinates
 import jsky.util.Preferences
 import jsky.util.gui._
 
@@ -13,6 +15,24 @@ import scalaz.concurrent.Task
 
 object ImageCatalogLoader {
   val instance = this
+
+  val Log = Logger.getLogger(this.getClass.getName)
+
+  val imageMemo = Memo.mutableHashMapMemo[URL, File](imageLoad)
+
+  def imageLoad(url: URL): File = {
+    // TODO run this asynchronously and support retry
+    Task {
+      val connection = url.openConnection()
+      val in = url.openStream()
+      ImageCatalogLoader.imageToTmpFile(url, connection.getContentType, in)
+    }.run._1
+  }
+
+  def loadImage(c: Coordinates) = {
+    val url = ImageCatalog.user().queryUrl(c)
+    imageMemo(url)
+  }
 
   /**
     * Load an image and display it on the TPE or display an error
@@ -30,13 +50,6 @@ object ImageCatalogLoader {
         }
     }
   }
-}
-
-/**
-  * Class able to retrieve images from the old catalog and put them on display
-  */
-class ImageCatalogLoader {
-  val Log = Logger.getLogger(this.getClass.getName)
 
   /**
     * Download the given image URL to a temporary file and return the file
@@ -79,11 +92,16 @@ class ImageCatalogLoader {
     } yield (t, url)
   }
 
+/**
+  * Class able to retrieve images from the old catalog and put them on display
+  */
+class ImageCatalogLoader {
+
+
   /**
     * Retrieve image query and pass it to the display
     */
   def queryImage(url: URL):(ProgressPanel, Task[(File, URL)]) = {
-    Log.info(s"Reading image from $url")
 
     // This isn't very nice, we are mixing UI with IO but the ProgressPanel is required for now
     val progress = ProgressPanel.makeProgressPanel("Accessing catalog server ...")

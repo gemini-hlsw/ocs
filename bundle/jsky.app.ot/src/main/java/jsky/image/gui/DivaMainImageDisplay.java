@@ -388,7 +388,6 @@ public class DivaMainImageDisplay extends DivaGraphicsImageDisplay implements Ma
         if (!checkSave())
             return;
 
-
         addToHistory();
         _filename = fileOrUrl;
         _url = _origURL = FileUtil.makeURL(null, fileOrUrl);
