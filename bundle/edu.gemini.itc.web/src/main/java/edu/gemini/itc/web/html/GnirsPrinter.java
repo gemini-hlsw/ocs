@@ -45,8 +45,7 @@ public final class GnirsPrinter extends PrinterBase {
         _printRequestedIntegrationTime(result);
 
         _println("");
-// TODO: REL-2576: Reactivate peak pixel columns for March 2016 release
-        //_printPeakPixelInfo(s.ccd(0));
+        _printPeakPixelInfo(s.ccd(0));
         _printWarnings(s.warnings());
 
         _print("<HR align=left SIZE=3>");
