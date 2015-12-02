@@ -41,8 +41,11 @@ final class CaCommandSenderImpl implements CaCommandSender {
         this.epicsWriter = new EpicsWriterImpl(epicsService);
 
         if (cadName != null) {
-            dirChannel = epicsWriter.getEnumChannel(cadName + DIR_SUFFIX,
-                    CadDirective.class);
+            try {
+                dirChannel = epicsWriter.getEnumChannel(cadName + DIR_SUFFIX, CadDirective.class);
+            } catch(Throwable e) {
+                LOG.warning(e.getMessage());
+            }
         }
 
         stringParameters = new HashMap<>();

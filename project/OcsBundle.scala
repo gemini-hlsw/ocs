@@ -242,6 +242,7 @@ trait OcsBundle {
       bundle_edu_gemini_spModel_core,
       bundle_edu_gemini_spModel_pio,
       bundle_edu_gemini_util_trpc,
+      bundle_edu_gemini_epics_acm,
       bundle_jsky_coords,
       bundle_jsky_util
     )

@@ -119,6 +119,27 @@ public interface CaStatusAcceptor {
             throws CaException, CAException;
 
     /**
+     * Adds an attribute of type <code>Enum</code> to this status acceptor. If
+     * the attribute already exists, the existing object is used. CaException is
+     * thrown if the existing attribute is of a different type or uses a
+     * different EPICS channel.
+     *
+     * @param name
+     *            the name of the attribute.
+     * @param channel
+     *            the full EPICS channel name for the attribute.
+     * @param description
+     *            optional description of the attribute.
+     * @return the attribute.
+     * @throws CaException
+     * @throws CAException
+     */
+    <T extends Enum<T>> CaAttribute<T> addEnum(String name, String channel, Class<T> enumType, String description)
+            throws CaException, CAException;
+    <T extends Enum<T>> CaAttribute<T> addEnum(String name, String channel, Class<T> enumType)
+            throws CaException, CAException;
+
+    /**
      * Removes and existing attribute (optional operation).
      * 
      * @param name

@@ -24,7 +24,11 @@ final class CaParameterImpl<T> implements CaParameter<T> {
         this.channel = channel;
         this.description = description;
         this.epicsWriter = epicsWriter;
-        this.rwChannel = epicsWriter.getStringChannel(channel);
+        try {
+            this.rwChannel = epicsWriter.getStringChannel(channel);
+        } catch(Throwable e) {
+            LOG.warning(e.getMessage());
+        }
     }
 
     @Override
@@ -46,12 +50,18 @@ final class CaParameterImpl<T> implements CaParameter<T> {
     public void set(T value) throws CAException, TimeoutException {
         this.value = value;
 
-        rwChannel.setValue(value.toString());
+        if(rwChannel!=null) {
+            rwChannel.setValue(value.toString());
+        } else {
+            LOG.warning("Tried to set value to unbound channel " + channel);
+        }
     }
 
     public void unbind() {
         try {
-            epicsWriter.destroyChannel(rwChannel);
+            if(rwChannel!=null) {
+                epicsWriter.destroyChannel(rwChannel);
+            }
         } catch (CAException e) {
             LOG.warning(e.getMessage());
         }
@@ -60,7 +70,11 @@ final class CaParameterImpl<T> implements CaParameter<T> {
     }
 
     public void write() throws CAException, TimeoutException {
-        rwChannel.setValue(value.toString());
+        if(rwChannel!=null) {
+            rwChannel.setValue(value.toString());
+        } else {
+            LOG.warning("Tried to set value to unbound channel " + channel);
+        }
     }
 
     static public CaParameterImpl<Double> createDoubleParameter(
