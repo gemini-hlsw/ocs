@@ -4,9 +4,14 @@ name := "edu.gemini.spModel.core"
 
 unmanagedJars in Compile ++= Seq(
   new File(baseDirectory.value, "../../lib/bundle/osgi.core-4.3.1.jar"),
-  new File(baseDirectory.value, "../../lib/bundle/scalaz-core_2.10-7.1.6.jar"),
-  new File(baseDirectory.value, "../../lib/bundle/squants_2.10-0.5.3.jar")
+  new File(baseDirectory.value, "../../lib/bundle/scalaz-core_2.11-7.0.6.jar"),
+  new File(baseDirectory.value, "../../lib/bundle/scalaz-effect_2.11-7.0.6.jar"),
+  new File(baseDirectory.value, "../../lib/bundle/squants_2.11-0.6.1.jar")
 )
+
+libraryDependencies += "org.scala-lang.modules" %% "scala-xml" % "1.0.5"
+
+libraryDependencies += "org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.4"
 
 osgiSettings
 

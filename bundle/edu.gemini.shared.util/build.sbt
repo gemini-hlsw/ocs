@@ -7,9 +7,12 @@ name := "edu.gemini.shared.util"
 // version set in ThisBuild
 
 unmanagedJars in Compile ++= Seq(
-  new File(baseDirectory.value, "../../lib/bundle/scala-library-2.10.5.jar"),
-  new File(baseDirectory.value, "../../lib/bundle/scalaz-core_2.10-7.1.6.jar")
+  new File(baseDirectory.value, "../../lib/bundle/scalaz-core_2.11-7.0.6.jar")
 )
+
+libraryDependencies ++= Seq(
+  "org.scala-lang.modules" %% "scala-xml" % "1.0.5",
+  "org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.4")
 
 osgiSettings
 
@@ -29,4 +32,3 @@ OsgiKeys.exportPackage := Seq(
   "edu.gemini.shared.util.test",
   "edu.gemini.shared.util.immutable")
 
-        
