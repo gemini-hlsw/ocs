@@ -1,6 +1,6 @@
 package edu.gemini.spModel.core
 
-import org.specs2.matcher.Matcher
+import org.specs2.matcher.{MatchResult, Matcher}
 import org.specs2.mutable.Specification
 import AngleSyntax._
 
@@ -37,26 +37,27 @@ class CoordinatesDifferenceSpec extends Specification {
       val distance = ~Angle.fromDMS(0, 0, 10)
       val dec = Declination.fromAngle(Angle.fromDegrees(90) - distance).getOrElse(Declination.zero)
 
-      for {
+      val matches = for {
         i   <- 0 to 4
         a    = Angle.fromDegrees(45.0 * i)
         c    = Coordinates(RightAscension.fromAngle(a), dec)
         ref  = Angle.fromDegrees(180) - a
       } yield Coordinates.difference(base, c) should beCloseDifference(Coordinates.Difference(ref, distance), errorDelta)
+      matches.reduce(_ and _)
     }
     "calculate offsets on Z0" in {
       val base = Coordinates(RightAscension.fromDegrees(0), Declination.fromAngle(Angle.fromDegrees(90)).getOrElse(Declination.zero))
       val dec = Declination.fromAngle(Angle.fromDegrees(90) - ~Angle.fromDMS(0, 0, 10)).getOrElse(Declination.zero)
 
       val results = List((0.0, -10.0), (7.071068, -7.071068), (10.0, 0.0), (7.071068, 7.071068), (0.0, 10.0))
-      for {
+      val matches = for {
         i     <- 0 to 4
         r      = results(i)
         a      = Angle.fromDegrees(45.0 * i)
         c      = Coordinates(RightAscension.fromAngle(a), dec)
         offset = Coordinates.difference(base, c).offset
-      } yield offset should beCloseOffset((r._1).arcsecs[OffsetP], (r._2).arcsecs[OffsetQ], errorDelta)
-
+      } yield offset should beCloseOffset(r._1.arcsecs[OffsetP], r._2.arcsecs[OffsetQ], errorDelta)
+      matches.reduce(_ and _)
     }
     "calculate difference close to the equator" in {
       val base = Coordinates.zero

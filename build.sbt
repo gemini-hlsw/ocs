@@ -60,9 +60,9 @@ libraryDependencies in ThisBuild ++= Seq(
   "junit"           % "junit"           % "4.11"   % "test",
   "com.novocode"    % "junit-interface" % "0.9"    % "test",
   "org.scalacheck" %% "scalacheck"      % "1.11.0" % "test",
-  "org.specs2"     %% "specs2-core"     % "3.6.6"  % "test",
-  "org.specs2"     %% "specs2-matcher-extra" % "3.6.6" % "test",
-  "org.specs2"     %% "specs2-scalacheck"    % "3.6.6" % "test",
+  "org.specs2"     %% "specs2-core"     % "2.3.12"  % "test",
+  "org.specs2"     %% "specs2-matcher-extra" % "2.3.12" % "test",
+  "org.specs2"     %% "specs2-scalacheck"    % "2.3.12" % "test",
   "org.scalatest"  %% "scalatest"  % "2.2.5"    % "test"
 )
 

@@ -3,7 +3,7 @@ package edu.gemini.model.p1.immutable
 import org.specs2.mutable._
 import java.io.InputStreamReader
 
-class SemesterSpec extends SpecificationWithJUnit {
+class SemesterSpec extends Specification {
   "The Semester class" should {
     "have a default" in {
       Semester.current must beEqualTo(Semester(2016, SemesterOption.B))

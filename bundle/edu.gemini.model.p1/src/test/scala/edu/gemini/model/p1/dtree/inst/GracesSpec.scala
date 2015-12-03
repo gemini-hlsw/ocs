@@ -1,9 +1,9 @@
 package edu.gemini.model.p1.dtree.inst
 
-import org.specs2.mutable.SpecificationWithJUnit
+import org.specs2.mutable.Specification
 import edu.gemini.model.p1.immutable.{GracesReadMode, GracesFiberMode}
 
-class GracesSpec extends SpecificationWithJUnit {
+class GracesSpec extends Specification {
   "The Graces decision tree" should {
     "includes Graces fiber modes" in {
       val graces = Graces()

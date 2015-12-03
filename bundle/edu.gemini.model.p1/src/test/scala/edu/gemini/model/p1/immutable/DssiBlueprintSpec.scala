@@ -1,10 +1,11 @@
 package edu.gemini.model.p1.immutable
 
 import java.io.InputStreamReader
+import org.specs2.matcher.XmlMatchers
 import org.specs2.mutable._
 import xml.XML
 
-class DssiBlueprintSpec extends SpecificationWithJUnit with SemesterProperties {
+class DssiBlueprintSpec extends Specification with SemesterProperties with XmlMatchers {
 
   "The Dssi Blueprint" should {
     "not use Ao" in {

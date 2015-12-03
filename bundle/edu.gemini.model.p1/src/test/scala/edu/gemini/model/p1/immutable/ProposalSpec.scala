@@ -1,10 +1,11 @@
 package edu.gemini.model.p1.immutable
 
+import org.specs2.matcher.XmlMatchers
 import org.specs2.mutable._
 import xml.XML
 import java.io.{File, InputStreamReader}
 
-class ProposalSpec extends SpecificationWithJUnit with SemesterProperties {
+class ProposalSpec extends Specification with SemesterProperties with XmlMatchers {
 
   "The Proposal class" should {
     "support a free text scheduling field, REL-687" in {

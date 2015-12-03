@@ -3,11 +3,12 @@ package edu.gemini.model.p1.immutable
 import java.io.InputStreamReader
 
 import edu.gemini.model.p1.{mutable => M}
+import org.specs2.matcher.XmlMatchers
 import org.specs2.mutable._
 
 import scala.xml.XML
 
-class PhoenixBlueprintSpec extends SpecificationWithJUnit with SemesterProperties {
+class PhoenixBlueprintSpec extends Specification with SemesterProperties with XmlMatchers {
 
   "The Phoenix Blueprint" should {
     "has an FPU and a filter" in {

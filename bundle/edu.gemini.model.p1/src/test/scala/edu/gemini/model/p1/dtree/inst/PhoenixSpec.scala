@@ -2,9 +2,9 @@ package edu.gemini.model.p1.dtree.inst
 
 import edu.gemini.model.p1.immutable.Site
 import edu.gemini.model.p1.mutable.{PhoenixFocalPlaneUnit, PhoenixFilter}
-import org.specs2.mutable.SpecificationWithJUnit
+import org.specs2.mutable.Specification
 
-class PhoenixSpec extends SpecificationWithJUnit {
+class PhoenixSpec extends Specification {
   "The Phoenix decision tree" should {
     "includes a Site" in {
       val phoenix = Phoenix()

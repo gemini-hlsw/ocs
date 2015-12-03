@@ -1,13 +1,14 @@
 package edu.gemini.model.p1.pdf
 
-import org.specs2.mutable.SpecificationWithJUnit
+import org.specs2.matcher.XmlMatchers
+import org.specs2.mutable.Specification
 import javax.xml.transform.stream.{StreamResult, StreamSource}
 import java.io.StringWriter
 import javax.xml.transform.TransformerFactory
 import edu.gemini.model.p1.pdf.P1PDF.{Template, P1PdfUriResolver}
 import scala.xml.XML
 
-class P1TemplatesSpec extends SpecificationWithJUnit {
+class P1TemplatesSpec extends Specification with XmlMatchers {
   // These test transform the proposal files using the templates
   // and validate the output of the transformation
   //

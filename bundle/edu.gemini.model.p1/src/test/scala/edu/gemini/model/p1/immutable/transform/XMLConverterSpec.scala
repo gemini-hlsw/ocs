@@ -1,6 +1,7 @@
 package edu.gemini.model.p1.immutable.transform
 
-import org.specs2.mutable.SpecificationWithJUnit
+import org.specs2.matcher.XmlMatchers
+import org.specs2.mutable.Specification
 import edu.gemini.model.p1.immutable.transform.XMLConverter._
 import org.specs2.scalaz.ValidationMatchers._
 import xml.Atom
@@ -9,7 +10,7 @@ import edu.gemini.model.p1.immutable.{SemesterProperties, Semester}
 import scalaz._
 import Scalaz._
 
-class XMLConverterSpec extends SpecificationWithJUnit with SemesterProperties {
+class XMLConverterSpec extends Specification with SemesterProperties with XmlMatchers {
   "StepResult" should {
     "have  a zero" in {
       mzero[StepResult] must beEqualTo(StepResult(Nil, StepResult.ZeroNode))

@@ -3,7 +3,7 @@ package edu.gemini.model.p1.immutable
 import edu.gemini.model.p1.{mutable => M}
 import org.specs2.mutable._
 
-class GmosSBlueprintSpec extends SpecificationWithJUnit with SemesterProperties {
+class GmosSBlueprintSpec extends Specification with SemesterProperties {
 
   "The GmosS Blueprint" should {
     "include the Lya395 filter, REL-1236" in {

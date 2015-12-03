@@ -1,11 +1,12 @@
 package edu.gemini.model.p1.immutable
 
+import org.specs2.matcher.XmlMatchers
 import org.specs2.mutable._
 import edu.gemini.model.p1.{mutable => M}
 import scala.xml.XML
 import java.io.InputStreamReader
 
-class GpiBlueprintSpec extends SpecificationWithJUnit with SemesterProperties {
+class GpiBlueprintSpec extends Specification with SemesterProperties with XmlMatchers {
 
   "The Gpi Blueprint" should {
     "has an observing mode and a disperser" in {

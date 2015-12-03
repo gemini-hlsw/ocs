@@ -2,7 +2,7 @@ package edu.gemini.model.p1.immutable
 
 import org.specs2.mutable._
 
-class PartnersSpec extends SpecificationWithJUnit {
+class PartnersSpec extends Specification {
 
   "The Partners object" should {
     "not include the UK, REL-622" in {
