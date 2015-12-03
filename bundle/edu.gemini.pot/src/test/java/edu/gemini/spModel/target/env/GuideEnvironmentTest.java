@@ -41,7 +41,7 @@ public class GuideEnvironmentTest {
     @Test
     public void testGetReferencedGuiders() {
         final Set<GuideProbe> expected = new HashSet<>();
-        assertEquals(expected, GuideEnvironment.EMPTY.getReferencedGuiders());
+        assertEquals(expected, GuideEnvironment$.MODULE$.Initial().getReferencedGuiders());
 
         final Set<GuideProbe> actual = env.getReferencedGuiders();
         expected.add(pwfs1);
@@ -53,7 +53,7 @@ public class GuideEnvironmentTest {
     @Test
     public void testGetTargets() {
         final ImList<SPTarget> empty = ImCollections.emptyList();
-        assertEquals(empty, GuideEnvironment.EMPTY.getTargets());
+        assertEquals(empty, GuideEnvironment$.MODULE$.Initial().getTargets());
 
         // sorted in the order they are encountered in the groups
         final ImList<SPTarget> expected = DefaultImList.create(t_pwfs1_1, t_pwfs1_2, t_pwfs1_1, t_pwfs1_2, t_pwfs2, t_gmos);
@@ -66,7 +66,7 @@ public class GuideEnvironmentTest {
         assertTrue(env.containsTarget(t_gmos));
         assertFalse(env.containsTarget(new SPTarget(6, 6)));
 
-        assertFalse(GuideEnvironment.EMPTY.containsTarget(t_pwfs1_1));
+        assertFalse(GuideEnvironment$.MODULE$.Initial().containsTarget(t_pwfs1_1));
     }
 
     @Test
@@ -104,7 +104,7 @@ public class GuideEnvironmentTest {
         final GuideEnvironment env4 = env.setPrimaryIndex(new Some<>(1));
 
         // Empty
-        final GuideEnvironment env5 = GuideEnvironment.EMPTY;
+        final GuideEnvironment env5 = GuideEnvironment$.MODULE$.Initial();
 
         final ImList<GuideEnvironment> lst = DefaultImList.create(env, env3, env4, env5);
         final PioFactory fact = new PioXmlFactory();

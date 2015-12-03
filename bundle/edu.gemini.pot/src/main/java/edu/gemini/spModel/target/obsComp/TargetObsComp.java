@@ -1,6 +1,7 @@
 package edu.gemini.spModel.target.obsComp;
 
 import edu.gemini.pot.sp.SPComponentType;
+import edu.gemini.shared.util.immutable.ImList;
 import edu.gemini.spModel.data.AbstractDataObject;
 import edu.gemini.spModel.guide.GuideProbe;
 import edu.gemini.spModel.guide.GuideProbeProvider;
@@ -10,11 +11,14 @@ import edu.gemini.spModel.pio.PioFactory;
 import edu.gemini.spModel.target.SPTarget;
 import edu.gemini.spModel.target.TelescopePosWatcher;
 import edu.gemini.spModel.target.WatchablePos;
+import edu.gemini.spModel.target.env.GuideEnv;
+import edu.gemini.spModel.target.env.GuideEnvironment;
 import edu.gemini.spModel.target.env.TargetEnvironment;
 import edu.gemini.spModel.target.system.ITarget;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -57,7 +61,7 @@ public final class TargetObsComp extends AbstractDataObject implements GuideProb
 
     }
 
-    private TargetEnvironment targetEnv;
+    private transient TargetEnvironment targetEnv;
     private transient PcePropagator prop = new PcePropagator();
 
     public TargetObsComp() {
@@ -173,9 +177,29 @@ public final class TargetObsComp extends AbstractDataObject implements GuideProb
         return GUIDE_PROBES;
     }
 
-    private void readObject(final ObjectInputStream is) throws IOException, ClassNotFoundException {
-        is.defaultReadObject();
+    private void readObject(final ObjectInputStream in) throws IOException, ClassNotFoundException {
+        in.defaultReadObject();
+
+        final TargetEnvironment env;
+        try {
+            final SPTarget base         = (SPTarget) in.readObject();
+            final GuideEnvironment gEnv = new GuideEnvironment(GuideEnv.readObject(in));
+            @SuppressWarnings("unchecked")
+            final ImList<SPTarget> user = (ImList<SPTarget>) in.readObject();
+            env = TargetEnvironment.create(base, gEnv, user);
+        } catch (ClassCastException ex) {
+            throw new IOException(ex);
+        }
+
+        targetEnv = env;
         prop = new PcePropagator();
         watchTargets();
+    }
+
+    private void writeObject(ObjectOutputStream out) throws IOException {
+        out.defaultWriteObject();
+        out.writeObject(targetEnv.getBase());
+        targetEnv.getGuideEnvironment().guideEnv().writeObject(out);
+        out.writeObject(targetEnv.getUserTargets());
     }
 }

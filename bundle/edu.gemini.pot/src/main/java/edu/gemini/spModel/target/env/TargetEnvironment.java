@@ -6,7 +6,6 @@ import edu.gemini.spModel.pio.ParamSet;
 import edu.gemini.spModel.pio.PioFactory;
 import edu.gemini.spModel.target.SPTarget;
 
-import java.io.Serializable;
 import java.lang.ref.SoftReference;
 import java.util.*;
 
@@ -25,7 +24,7 @@ import java.util.*;
  * <p>A TargetEnvironment is immutable, but the {@link SPTarget}s it contains
  * are unfortunately mutable.
  */
-public final class TargetEnvironment implements Serializable, Iterable<SPTarget>, TargetContainer {
+public final class TargetEnvironment implements Iterable<SPTarget>, TargetContainer {
 
     public static final String BASE_NAME = "Base";
     public static final String USER_NAME = "User";
@@ -38,7 +37,7 @@ public final class TargetEnvironment implements Serializable, Iterable<SPTarget>
      */
     public static TargetEnvironment create(SPTarget base) {
         ImList<SPTarget> user = ImCollections.emptyList();
-        return create(base, GuideEnvironment.EMPTY, user);
+        return create(base, GuideEnvironment$.MODULE$.Initial(), user);
     }
 
     /**
@@ -99,7 +98,7 @@ public final class TargetEnvironment implements Serializable, Iterable<SPTarget>
      * <code>getGuideEnvironment().getPrimary().getOrElse(GuideGroup.EMPTY)</code>.
      */
     public GuideGroup getOrCreatePrimaryGuideGroup() {
-        return guide.getPrimary().getOrElse(GuideGroup.EMPTY);
+        return guide.getPrimary().getOrElse(GuideGroup.EMPTY());
     }
 
     /**
@@ -338,14 +337,14 @@ public final class TargetEnvironment implements Serializable, Iterable<SPTarget>
 
     private static GuideEnvironment parseGuideEnvironment(ParamSet parent) {
         // Add guide information
-        ParamSet guidePset = parent.getParamSet(GuideEnvironment.PARAM_SET_NAME);
+        ParamSet guidePset = parent.getParamSet(GuideEnvironment.ParamSetName());
         if (guidePset != null) return GuideEnvironment.fromParamSet(guidePset);
 
         // Check for pre-2010B guide probe targets
         List<ParamSet> guideProbeTargets = parent.getParamSets("guider");
         if (guideProbeTargets.isEmpty()) {
             // nothing there, return a default empty guide environment
-            return GuideEnvironment.EMPTY;
+            return GuideEnvironment.Initial();
         }
 
         // Parse the old pre-2010B information into a GuideEnvironment

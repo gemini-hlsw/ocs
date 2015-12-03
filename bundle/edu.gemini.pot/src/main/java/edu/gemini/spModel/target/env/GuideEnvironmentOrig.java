@@ -29,27 +29,27 @@ import java.util.*;
 
 
 /**
- * A GuideEnvironment tracks the active guiders and a collection of
+ * A GuideEnvironmentOrig tracks the active guiders and a collection of
  * {@link GuideGroup} options.  It is meant to contain all target information
  * related to guiding.
  */
-public final class GuideEnvironment implements Serializable, TargetContainer, OptionsList<GuideGroup> {
+public final class GuideEnvironmentOrig implements Serializable, TargetContainer, OptionsList<GuideGroupOrig> {
 
     /**
-     * An empty GuideEnvironment.
+     * An empty GuideEnvironmentOrig.
      */
-    public static GuideEnvironment EMPTY = create(OptionsListImpl.create(GuideGroup.EMPTY_LIST));
+    public static GuideEnvironmentOrig EMPTY = create(OptionsListImpl.create(GuideGroupOrig.EMPTY_LIST));
 
     /**
-     * Creates a GuideEnvironment with the given set of GuideGroups.
+     * Creates a GuideEnvironmentOrig with the given set of GuideGroups.
      */
-    public static GuideEnvironment create(OptionsList<GuideGroup> guideGroups) {
-        return new GuideEnvironment(guideGroups);
+    public static GuideEnvironmentOrig create(OptionsList<GuideGroupOrig> guideGroups) {
+        return new GuideEnvironmentOrig(guideGroups);
     }
 
-    private final OptionsList<GuideGroup> guideGroups;
+    private final OptionsList<GuideGroupOrig> guideGroups;
 
-    private GuideEnvironment(OptionsList<GuideGroup> guideGroups) {
+    private GuideEnvironmentOrig(OptionsList<GuideGroupOrig> guideGroups) {
         if (guideGroups == null) {
             throw new IllegalArgumentException("guideGroups == null");
         }
@@ -72,7 +72,7 @@ public final class GuideEnvironment implements Serializable, TargetContainer, Op
      * Gets the subset of referenced guiders that are actually selected, if any.
      */
     public SortedSet<GuideProbe> getPrimaryReferencedGuiders() {
-        return guideGroups.getPrimary().map(GuideGroup::getPrimaryReferencedGuiders).getOrElse(new TreeSet<>());
+        return guideGroups.getPrimary().map(GuideGroupOrig::getPrimaryReferencedGuiders).getOrElse(new TreeSet<>());
     }
 
     @Override
@@ -85,49 +85,49 @@ public final class GuideEnvironment implements Serializable, TargetContainer, Op
         return guideGroups.getOptions().exists(gg -> gg.containsTarget(target));
     }
 
-    private GuideEnvironment updateGuideGroups(UpdateOp<GuideGroup> f) {
-        final ImList<GuideGroup> updatedList = guideGroups.getOptions().map(f);
+    private GuideEnvironmentOrig updateGuideGroups(UpdateOp<GuideGroupOrig> f) {
+        final ImList<GuideGroupOrig> updatedList = guideGroups.getOptions().map(f);
         final Option<Integer> primary = guideGroups.getPrimaryIndex();
-        return new GuideEnvironment(OptionsListImpl.create(primary, updatedList));
+        return new GuideEnvironmentOrig(OptionsListImpl.create(primary, updatedList));
     }
 
     @Override
-    public GuideEnvironment cloneTargets() {
-        return updateGuideGroups(GuideGroup::cloneTargets);
+    public GuideEnvironmentOrig cloneTargets() {
+        return updateGuideGroups(GuideGroupOrig::cloneTargets);
     }
 
     @Override
-    public GuideEnvironment removeTarget(SPTarget target) {
+    public GuideEnvironmentOrig removeTarget(SPTarget target) {
         return updateGuideGroups(g -> g.removeTarget(target));
     }
 
-    public GuideEnvironment removeGroup(GuideGroup group) {
+    public GuideEnvironmentOrig removeGroup(GuideGroupOrig group) {
         return setOptions(getOptions().remove(group));
     }
 
     @Override
-    public Iterator<GuideGroup> iterator() {
+    public Iterator<GuideGroupOrig> iterator() {
         return guideGroups.iterator();
     }
 
     @Override
-    public Option<GuideGroup> getPrimary() {
+    public Option<GuideGroupOrig> getPrimary() {
         return guideGroups.getPrimary();
     }
 
     @Override
-    public GuideEnvironment selectPrimary(Option<GuideGroup> primary) {
-        return new GuideEnvironment(guideGroups.selectPrimary(primary));
+    public GuideEnvironmentOrig selectPrimary(Option<GuideGroupOrig> primary) {
+        return new GuideEnvironmentOrig(guideGroups.selectPrimary(primary));
     }
 
     @Override
-    public GuideEnvironment selectPrimary(GuideGroup primary) {
-        return new GuideEnvironment(guideGroups.selectPrimary(primary));
+    public GuideEnvironmentOrig selectPrimary(GuideGroupOrig primary) {
+        return new GuideEnvironmentOrig(guideGroups.selectPrimary(primary));
     }
 
     @Override
-    public GuideEnvironment setPrimary(GuideGroup primary) {
-        return new GuideEnvironment(guideGroups.setPrimary(primary));
+    public GuideEnvironmentOrig setPrimary(GuideGroupOrig primary) {
+        return new GuideEnvironmentOrig(guideGroups.setPrimary(primary));
     }
 
     @Override
@@ -136,33 +136,33 @@ public final class GuideEnvironment implements Serializable, TargetContainer, Op
     }
 
     @Override
-    public GuideEnvironment setPrimaryIndex(Option<Integer> primary) {
-        return new GuideEnvironment(guideGroups.setPrimaryIndex(primary));
+    public GuideEnvironmentOrig setPrimaryIndex(Option<Integer> primary) {
+        return new GuideEnvironmentOrig(guideGroups.setPrimaryIndex(primary));
     }
 
     @Override
-    public GuideEnvironment setPrimaryIndex(int primary) {
-        return new GuideEnvironment(guideGroups.setPrimaryIndex(primary));
+    public GuideEnvironmentOrig setPrimaryIndex(int primary) {
+        return new GuideEnvironmentOrig(guideGroups.setPrimaryIndex(primary));
     }
 
     @Override
-    public ImList<GuideGroup> getOptions() {
+    public ImList<GuideGroupOrig> getOptions() {
         return guideGroups.getOptions();
     }
 
     @Override
-    public GuideEnvironment setOptions(ImList<GuideGroup> newList) {
-        return new GuideEnvironment(guideGroups.setOptions(newList));
+    public GuideEnvironmentOrig setOptions(ImList<GuideGroupOrig> newList) {
+        return new GuideEnvironmentOrig(guideGroups.setOptions(newList));
     }
 
     @Override
-    public GuideEnvironment update(Option<Integer> primaryIndex, ImList<GuideGroup> options) {
-        return new GuideEnvironment(guideGroups.update(primaryIndex, options));
+    public GuideEnvironmentOrig update(Option<Integer> primaryIndex, ImList<GuideGroupOrig> options) {
+        return new GuideEnvironmentOrig(guideGroups.update(primaryIndex, options));
     }
 
     @Override
-    public GuideEnvironment update(Op<GuideGroup> op) {
-        return new GuideEnvironment(guideGroups.update(op));
+    public GuideEnvironmentOrig update(Op<GuideGroupOrig> op) {
+        return new GuideEnvironmentOrig(guideGroups.update(op));
     }
 
     public String mkString(String prefix, String sep, String suffix) {
@@ -176,10 +176,10 @@ public final class GuideEnvironment implements Serializable, TargetContainer, Op
 
     /**
      * A convenience method for updating a guide group's GuideProbeTargets.
-     * Returns a copy of this GuideEnvironment after having included or updated
+     * Returns a copy of this GuideEnvironmentOrig after having included or updated
      * the given GuideProbeTargets in the indicated GuideGroup.
      */
-    public GuideEnvironment putGuideProbeTargets(GuideGroup grp, GuideProbeTargets gpt) {
+    public GuideEnvironmentOrig putGuideProbeTargets(GuideGroupOrig grp, GuideProbeTargets gpt) {
         // Find the index of the group in the list of options, if it exists in
         // the guide environment.  Otherwise, will be -1.
         int index = getOptions().indexOf(grp);
@@ -202,21 +202,21 @@ public final class GuideEnvironment implements Serializable, TargetContainer, Op
         if (!primary.isEmpty()) {
             Pio.addIntParam(factory, paramSet, "primary", primary.getValue());
         }
-        for (GuideGroup grp : guideGroups) {
+        for (GuideGroupOrig grp : guideGroups) {
             paramSet.addParamSet(grp.getParamSet(factory));
         }
 
         return paramSet;
     }
 
-    public static GuideEnvironment fromParamSet(ParamSet parent) {
+    public static GuideEnvironmentOrig fromParamSet(ParamSet parent) {
         // Guide groups.
         final int primary = Pio.getIntValue(parent, "primary", -1);
         final Option<Integer> primaryOpt = (primary < 0) ? None.INTEGER : new Some<>(primary);
 
-        final List<GuideGroup> groups = new ArrayList<>();
+        final List<GuideGroupOrig> groups = new ArrayList<>();
         for (ParamSet gps : parent.getParamSets()) {
-            groups.add(GuideGroup.fromParamSet(gps));
+            groups.add(GuideGroupOrig.fromParamSet(gps));
         }
 
         return create(OptionsListImpl.create(primaryOpt, DefaultImList.create(groups)));
