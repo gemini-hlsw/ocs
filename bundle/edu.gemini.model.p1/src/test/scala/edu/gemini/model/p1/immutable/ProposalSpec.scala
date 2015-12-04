@@ -1,11 +1,8 @@
 package edu.gemini.model.p1.immutable
 
 import org.specs2.mutable._
-import edu.gemini.model.p1.{mutable => M}
 import xml.XML
 import java.io.{File, InputStreamReader}
-import org.specs2.scalaz.ValidationMatchers._
-import scala.Some
 
 class ProposalSpec extends SpecificationWithJUnit with SemesterProperties {
 
@@ -16,7 +13,7 @@ class ProposalSpec extends SpecificationWithJUnit with SemesterProperties {
     }
     "use a schema version read from System properties" in {
       val proposal = Proposal.empty
-      proposal.schemaVersion must beEqualTo("2016.1.1")
+      proposal.schemaVersion must beEqualTo("2016.2.1")
     }
     "set the band3optionChosen by default to false" in {
       val proposal = Proposal.empty
@@ -51,7 +48,7 @@ class ProposalSpec extends SpecificationWithJUnit with SemesterProperties {
       val xml = XML.loadString(ProposalIo.writeToString(proposal))
 
       // verify the exported value is set to the current semester
-      xml must \\("semester", "year" -> "2016", "half" -> "A")
+      xml must \\("semester", "year" -> "2016", "half" -> "B")
     }
     "set the schemaVersion to current upon saving a new proposal" in {
       val proposal = Proposal.empty
@@ -59,7 +56,7 @@ class ProposalSpec extends SpecificationWithJUnit with SemesterProperties {
       val xml = XML.loadString(ProposalIo.writeToString(proposal))
 
       // verify the exported value is set to the current semester
-      xml must \\("proposal", "schemaVersion" -> "2016.1.1")
+      xml must \\("proposal", "schemaVersion" -> "2016.2.1")
     }
     "be able to open latin1 encoded files" in {
       val proposal = ProposalIo.read(new InputStreamReader(getClass.getResourceAsStream("proposal_with_latin1_encoding.xml")))
@@ -127,13 +124,13 @@ class ProposalSpec extends SpecificationWithJUnit with SemesterProperties {
         val xml = XML.loadString(ProposalIo.writeToString(proposal))
 
         // verify the exported xml preserves the guiding estimation
-        xml must \\("meta") \("guiding") \("percentage") \> "69"
+        xml must \\("meta") \"guiding" \"percentage" \> "69"
         // verify the exported xml preserves the guiding evaluation
-        xml must \\("meta") \("guiding") \("evaluation") \> "Caution"
+        xml must \\("meta") \"guiding" \"evaluation" \> "Caution"
         // verify the exported xml preserves the visibility estimation
-        xml must \\("meta") \("visibility") \> "Good"
+        xml must \\("meta") \"visibility" \> "Good"
         // verify the exported xml preserves the GSA
-        xml must \\("meta") \("gsa") \> "0"
+        xml must \\("meta") \"gsa" \> "0"
       }
     }
 }
