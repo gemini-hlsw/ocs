@@ -95,6 +95,12 @@ public interface CaCommandSender {
     CaParameter<Integer> addInteger(String name, String channel)
             throws CaException;
 
+    CaParameter<Integer> addInteger(String name, String channel,
+                                    String description, boolean isCADParameter) throws CaException;
+
+    CaParameter<Integer> addInteger(String name, String channel, boolean isCADParameter)
+            throws CaException;
+
     /**
      * Adds a parameter of type <code>Double</code> to this command sender. If
      * the parameter already exist, the existing object is used. CaException is
@@ -114,6 +120,12 @@ public interface CaCommandSender {
                                   String description) throws CaException;
 
     CaParameter<Double> addDouble(String name, String channel)
+            throws CaException;
+
+    CaParameter<Double> addDouble(String name, String channel,
+                                  String description, boolean isCADParameter) throws CaException;
+
+    CaParameter<Double> addDouble(String name, String channel, boolean isCADParameter)
             throws CaException;
 
     /**
@@ -137,6 +149,12 @@ public interface CaCommandSender {
     CaParameter<Float> addFloat(String name, String channel)
             throws CaException;
 
+    CaParameter<Float> addFloat(String name, String channel,
+                                String description, boolean isCADParameter) throws CaException;
+
+    CaParameter<Float> addFloat(String name, String channel, boolean isCADParameter)
+            throws CaException;
+
     /**
      * Adds a parameter of type <code>String</code> to this command sender. If
      * the parameter already exist, the existing object is used. CaException is
@@ -156,6 +174,12 @@ public interface CaCommandSender {
                                   String description) throws CaException;
 
     CaParameter<String> addString(String name, String channel)
+            throws CaException;
+
+    CaParameter<String> addString(String name, String channel,
+                                  String description, boolean isCADParameter) throws CaException;
+
+    CaParameter<String> addString(String name, String channel, boolean isCADParameter)
             throws CaException;
 
     /**

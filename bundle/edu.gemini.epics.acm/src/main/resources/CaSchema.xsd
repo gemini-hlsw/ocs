@@ -79,6 +79,8 @@
 						<xs:element name="type" type="tns:DataType" />
 						<xs:element name="description" type="xs:string"
 							minOccurs="0" />
+						<xs:element name="isCAD" type="xs:boolean" default="true"
+							minOccurs="0" />
 					</xs:sequence>
 					<xs:attribute name="name" type="xs:string"/>
 				</xs:complexType>

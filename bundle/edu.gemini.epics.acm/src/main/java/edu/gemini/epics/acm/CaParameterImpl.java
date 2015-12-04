@@ -7,7 +7,7 @@ import edu.gemini.epics.ReadWriteClientEpicsChannel;
 import gov.aps.jca.CAException;
 import gov.aps.jca.TimeoutException;
 
-final class CaParameterImpl<T> implements CaParameter<T> {
+abstract class CaParameterImpl<T> implements CaParameter<T> {
     
     private static final Logger LOG = Logger.getLogger(CaParameterImpl.class.getName()); 
 
@@ -15,7 +15,7 @@ final class CaParameterImpl<T> implements CaParameter<T> {
     private final String channel;
     private final String description;
     private EpicsWriter epicsWriter;
-    private ReadWriteClientEpicsChannel<String> rwChannel;
+//    private ReadWriteClientEpicsChannel<String> rwChannel;
     private T value;
 
     private CaParameterImpl(String name, String channel, String description,
@@ -24,11 +24,6 @@ final class CaParameterImpl<T> implements CaParameter<T> {
         this.channel = channel;
         this.description = description;
         this.epicsWriter = epicsWriter;
-        try {
-            this.rwChannel = epicsWriter.getStringChannel(channel);
-        } catch(Throwable e) {
-            LOG.warning(e.getMessage());
-        }
     }
 
     @Override
@@ -47,59 +42,176 @@ final class CaParameterImpl<T> implements CaParameter<T> {
     }
 
     @Override
+    public String description() {
+        return description;
+    }
+
+    @Override
     public void set(T value) throws CAException, TimeoutException {
         this.value = value;
 
-        if(rwChannel!=null) {
-            rwChannel.setValue(value.toString());
-        } else {
-            LOG.warning("Tried to set value to unbound channel " + channel);
-        }
+        write(value);
     }
 
     public void unbind() {
-        try {
-            if(rwChannel!=null) {
-                epicsWriter.destroyChannel(rwChannel);
-            }
-        } catch (CAException e) {
-            LOG.warning(e.getMessage());
-        }
-        rwChannel = null;
+        unbindChannel();
         epicsWriter = null;
     }
 
-    public void write() throws CAException, TimeoutException {
-        if(rwChannel!=null) {
-            rwChannel.setValue(value.toString());
-        } else {
-            LOG.warning("Tried to set value to unbound channel " + channel);
+    protected EpicsWriter epicsWriter() { return epicsWriter; }
+
+    protected abstract void write(T value) throws CAException, TimeoutException;
+
+    protected abstract void unbindChannel();
+
+
+    // The type of CAD inputs is always DBR_STRING. But some systems don't use CAD inputs to set configuration
+    // parameters, and there is at least one instrument (I'm looking at you, Flamingos-2) where CAD records were
+    // recreated with typed inputs. Therefore, I need two implementations for CaParameter.
+    static private final class CaTypedParameter<T> extends CaParameterImpl<T> {
+        private ReadWriteClientEpicsChannel<T> rwChannel;
+
+        private CaTypedParameter(String name, String channel, String description,
+                                    EpicsWriter epicsWriter) {
+            super(name, channel, description, epicsWriter);
+        }
+
+        protected void bind(ReadWriteClientEpicsChannel<T> rwChannel) {
+            this.rwChannel = rwChannel;
+        }
+
+        protected void unbindChannel() {
+            try {
+                if(rwChannel!=null) {
+                    epicsWriter().destroyChannel(rwChannel);
+                }
+            } catch (CAException e) {
+                LOG.warning(e.getMessage());
+            }
+            rwChannel = null;
+        }
+
+        protected void write(T value) throws CAException, TimeoutException {
+            if(rwChannel!=null) {
+                rwChannel.setValue(value);
+            } else {
+                LOG.warning("Tried to set value to unbound channel " + channel());
+            }
+        }
+    }
+
+    static private final class CaCADParameter<T> extends CaParameterImpl<T> {
+        private ReadWriteClientEpicsChannel<String> rwChannel;
+
+        private CaCADParameter(String name, String channel, String description,
+                                            EpicsWriter epicsWriter) {
+            super(name, channel, description, epicsWriter);
+
+            try {
+                rwChannel = epicsWriter.getStringChannel(channel);
+            } catch(Throwable e) {
+                LOG.warning(e.getMessage());
+            }
+        }
+
+        protected void unbindChannel() {
+            try {
+                if(rwChannel!=null) {
+                    epicsWriter().destroyChannel(rwChannel);
+                }
+            } catch (CAException e) {
+                LOG.warning(e.getMessage());
+            }
+            rwChannel = null;
+        }
+
+        protected void write(T value) throws CAException, TimeoutException {
+            if(rwChannel!=null) {
+                rwChannel.setValue(value.toString());
+            } else {
+                LOG.warning("Tried to set value to unbound channel " + channel());
+            }
         }
     }
 
     static public CaParameterImpl<Double> createDoubleParameter(
             String name, String channel, String description, EpicsWriter epicsWriter) {
-        return new CaParameterImpl<>(name, channel, description, epicsWriter);
+        return createDoubleParameter(name, channel, description, epicsWriter, true);
+    }
+    static public CaParameterImpl<Double> createDoubleParameter(
+            String name, String channel, String description, EpicsWriter epicsWriter, boolean isCADParameter) {
+        if(isCADParameter) {
+            return new CaCADParameter<>(name, channel, description, epicsWriter);
+        } else {
+            CaTypedParameter<Double> param = new CaTypedParameter<>(name, channel, description, epicsWriter);
+            try {
+                param.bind(epicsWriter.getDoubleChannel(channel));
+            } catch(Throwable e) {
+                LOG.warning(e.getMessage());
+            }
+            return param;
+        }
     }
 
     static public CaParameterImpl<Integer> createIntegerParameter(
             String name, String channel, String description, EpicsWriter epicsWriter) {
-        return new CaParameterImpl<>(name, channel, description, epicsWriter);
+        return createIntegerParameter(name, channel, description, epicsWriter, true);
+    }
+    static public CaParameterImpl<Integer> createIntegerParameter(
+            String name, String channel, String description, EpicsWriter epicsWriter, boolean isCADParameter) {
+        if(isCADParameter) {
+            return new CaCADParameter<>(name, channel, description, epicsWriter);
+        } else {
+            CaTypedParameter<Integer> param = new CaTypedParameter<>(name, channel, description, epicsWriter);
+            try {
+                param.bind(epicsWriter.getIntegerChannel(channel));
+            } catch(Throwable e) {
+                LOG.warning(e.getMessage());
+            }
+            return param;
+        }
     }
 
     static public CaParameterImpl<Float> createFloatParameter(
             String name, String channel, String description, EpicsWriter epicsWriter) {
-        return new CaParameterImpl<>(name, channel, description, epicsWriter);
+        return createFloatParameter(name, channel, description, epicsWriter, true);
+    }
+    static public CaParameterImpl<Float> createFloatParameter(
+            String name, String channel, String description, EpicsWriter epicsWriter, boolean isCADParameter) {
+        if(isCADParameter) {
+            return new CaCADParameter<>(name, channel, description, epicsWriter);
+        } else {
+            CaTypedParameter<Float> param = new CaTypedParameter<>(name, channel, description, epicsWriter);
+            try {
+                param.bind(epicsWriter.getFloatChannel(channel));
+            } catch(Throwable e) {
+                LOG.warning(e.getMessage());
+            }
+            return param;
+        }
     }
 
     static public CaParameterImpl<String> createStringParameter(
             String name, String channel, String description, EpicsWriter epicsWriter) {
-        return new CaParameterImpl<>(name, channel, description, epicsWriter);
+        return createStringParameter(name, channel, description, epicsWriter, true);
+    }
+    static public CaParameterImpl<String> createStringParameter(
+            String name, String channel, String description, EpicsWriter epicsWriter, boolean isCADParameter) {
+        // If the parameter is of type String there is no need to make a difference between CAD and non CAD
+        // parameters. But I will keep the differentiation, just in case I need to specialize CaCADParameter even
+        // more in the future.
+        if(isCADParameter) {
+            return new CaCADParameter<>(name, channel, description, epicsWriter);
+        } else {
+            CaTypedParameter<String> param = new CaTypedParameter<>(name, channel, description, epicsWriter);
+            try {
+                param.bind(epicsWriter.getStringChannel(channel));
+            } catch(Throwable e) {
+                LOG.warning(e.getMessage());
+            }
+            return param;
+        }
     }
 
-    @Override
-    public String description() {
-        return description;
-    }
 
 }

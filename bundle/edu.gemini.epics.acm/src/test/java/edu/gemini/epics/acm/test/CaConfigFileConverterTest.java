@@ -1,10 +1,6 @@
 package edu.gemini.epics.acm.test;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
+import java.io.*;
 
 import org.custommonkey.xmlunit.Diff;
 import org.custommonkey.xmlunit.Difference;
@@ -27,8 +23,8 @@ public final class CaConfigFileConverterTest {
     public void testFileConversion() throws Exception {
         File testFile = File.createTempFile("test", ".xml");
 
-        CaConfigFileConverter.convert(new BufferedReader(new FileReader(this
-                .getClass().getResource(CONFIG_FILE).getPath())),
+        CaConfigFileConverter.convert(new BufferedReader(new InputStreamReader(this
+                .getClass().getResourceAsStream(CONFIG_FILE))),
                 new BufferedWriter(new FileWriter(testFile)));
 
         XMLUnit.setIgnoreWhitespace(true);

@@ -221,20 +221,20 @@ public final class XMLBuilder {
                     switch (par.getType()) {
                     case DOUBLE:
                         cs.addDouble(par.getName(), top + par.getChannel(),
-                                par.getDescription());
+                                par.getDescription(), par.isIsCAD()==null || par.isIsCAD());
                         break;
                     case FLOAT:
                         cs.addFloat(par.getName(), top + par.getChannel(),
-                                par.getDescription());
+                                par.getDescription(), par.isIsCAD()==null || par.isIsCAD());
                         break;
                     case INTEGER:
                         cs.addInteger(par.getName(), top + par.getChannel(),
-                                par.getDescription());
+                                par.getDescription(), par.isIsCAD()==null || par.isIsCAD());
                         break;
                     case STRING:
                     default:
                         cs.addString(par.getName(), top + par.getChannel(),
-                                par.getDescription());
+                                par.getDescription(), par.isIsCAD()==null || par.isIsCAD());
                         break;
 
                     }

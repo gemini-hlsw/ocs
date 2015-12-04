@@ -13,7 +13,7 @@ import edu.gemini.epics.api.ChannelListener;
 import gov.aps.jca.CAException;
 
 final class CaAttributeImpl<T> implements CaAttribute<T> {
-    private static final Logger LOG = Logger.getLogger(CaParameterImpl.class.getName());
+    private static final Logger LOG = Logger.getLogger(CaAttributeImpl.class.getName());
 
     private EpicsReader epicsReader;
     private ChannelListener<T> channelListener;
