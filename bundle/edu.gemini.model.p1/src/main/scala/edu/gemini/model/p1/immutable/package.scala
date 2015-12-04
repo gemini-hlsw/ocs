@@ -401,6 +401,7 @@ package object immutable {
       case MagnitudeSystem.AB   => M.MagnitudeSystem.AB
       case MagnitudeSystem.Jy   => M.MagnitudeSystem.JY
       case MagnitudeSystem.Vega => M.MagnitudeSystem.VEGA
+      case _                    => sys.error("Should not happen")
     }
   }
 

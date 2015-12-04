@@ -34,6 +34,7 @@ object UpConverter {
   }
 
   // Sequence of conversions for proposals from a given semester
+  val from2016A:List[SemesterConverter]     = List(SemesterConverterToCurrent, LastStepConverter(Semester(2016, SemesterOption.A)))
   val from2015B:List[SemesterConverter]     = List(SemesterConverterToCurrent, SemesterConverter2015BTo2016A, LastStepConverter(Semester(2015, SemesterOption.B)))
   val from2015A:List[SemesterConverter]     = List(SemesterConverterToCurrent, SemesterConverter2015BTo2016A, SemesterConverter2015ATo2015B, LastStepConverter(Semester(2015, SemesterOption.A)))
   val from2015AToKR:List[SemesterConverter] = List(SemesterConverterToCurrent, SemesterConverter2015BTo2016A, SemesterConverter2015ATo2015B, LastStepConverter(Semester(2015, SemesterOption.A)))
@@ -53,6 +54,8 @@ object UpConverter {
   def convert(node: XMLNode):Result = node match {
     case p @ <proposal>{ns @ _*}</proposal> if (p \ "@schemaVersion").text == Proposal.currentSchemaVersion =>
       StepResult(Nil, node).successNel[String]
+    case p @ <proposal>{ns @ _*}</proposal> if (p \ "@schemaVersion").text == "2016.1.1"                    =>
+      from2016A.concatenate.convert(node)
     case p @ <proposal>{ns @ _*}</proposal> if (p \ "@schemaVersion").text == "2015.2.1"                    =>
       from2015B.concatenate.convert(node)
     case p @ <proposal>{ns @ _*}</proposal> if (p \ "@schemaVersion").text == "2015.1.1"                    =>
