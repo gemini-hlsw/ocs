@@ -34,16 +34,16 @@ object UpConverter {
   }
 
   // Sequence of conversions for proposals from a given semester
-  val from2016A:List[SemesterConverter]     = List(SemesterConverterToCurrent, LastStepConverter(Semester(2016, SemesterOption.A)))
-  val from2015B:List[SemesterConverter]     = List(SemesterConverterToCurrent, SemesterConverter2015BTo2016A, LastStepConverter(Semester(2015, SemesterOption.B)))
-  val from2015A:List[SemesterConverter]     = List(SemesterConverterToCurrent, SemesterConverter2015BTo2016A, SemesterConverter2015ATo2015B, LastStepConverter(Semester(2015, SemesterOption.A)))
-  val from2015AToKR:List[SemesterConverter] = List(SemesterConverterToCurrent, SemesterConverter2015BTo2016A, SemesterConverter2015ATo2015B, LastStepConverter(Semester(2015, SemesterOption.A)))
-  val from2014BSV:List[SemesterConverter]   = List(SemesterConverterToCurrent, SemesterConverter2015BTo2016A, SemesterConverter2015ATo2015B, SemesterConverter2014BTo2015A, SemesterConverter2014BTo2014BSV, LastStepConverter(Semester(2014, SemesterOption.B)))
-  val from2014BToSV:List[SemesterConverter] = List(SemesterConverterToCurrent, SemesterConverter2015BTo2016A, SemesterConverter2015ATo2015B, SemesterConverter2014BTo2015A, SemesterConverter2014BTo2014BSV, SemesterConverter2014ATo2014B, LastStepConverter(Semester(2014, SemesterOption.B)))
-  val from2014A:List[SemesterConverter]     = List(SemesterConverterToCurrent, SemesterConverter2015BTo2016A, SemesterConverter2015ATo2015B, SemesterConverter2014BTo2015A, SemesterConverter2014BTo2014BSV, SemesterConverter2014ATo2014B, LastStepConverter(Semester(2014, SemesterOption.A)))
-  val from2013B:List[SemesterConverter]     = List(SemesterConverterToCurrent, SemesterConverter2015BTo2016A, SemesterConverter2015ATo2015B, SemesterConverter2014BTo2015A, SemesterConverter2014BTo2014BSV, SemesterConverter2013BTo2014A, SemesterConverter2014ATo2014B, LastStepConverter(Semester(2013, SemesterOption.B)))
-  val from2013A:List[SemesterConverter]     = List(SemesterConverterToCurrent, SemesterConverter2015BTo2016A, SemesterConverter2015ATo2015B, SemesterConverter2014BTo2015A, SemesterConverter2014BTo2014BSV, SemesterConverter2013ATo2013B, SemesterConverter2013BTo2014A, SemesterConverter2014ATo2014B, LastStepConverter(Semester(2013, SemesterOption.A)))
-  val from2012B:List[SemesterConverter]     = List(SemesterConverterToCurrent, SemesterConverter2015BTo2016A, SemesterConverter2015ATo2015B, SemesterConverter2014BTo2015A, SemesterConverter2014BTo2014BSV, SemesterConverter2012BTo2013A, SemesterConverter2013ATo2013B, SemesterConverter2013BTo2014A, SemesterConverter2014ATo2014B, LastStepConverter(Semester(2012, SemesterOption.B)))
+  val from2016A:List[SemesterConverter]     = List(SemesterConverterToCurrent, SemesterConverter2016ATo2016B, LastStepConverter(Semester(2016, SemesterOption.A)))
+  val from2015B:List[SemesterConverter]     = List(SemesterConverterToCurrent, SemesterConverter2016ATo2016B, SemesterConverter2015BTo2016A, LastStepConverter(Semester(2015, SemesterOption.B)))
+  val from2015A:List[SemesterConverter]     = List(SemesterConverterToCurrent, SemesterConverter2016ATo2016B, SemesterConverter2015ATo2015B, LastStepConverter(Semester(2015, SemesterOption.A)))
+  val from2015AToKR:List[SemesterConverter] = List(SemesterConverterToCurrent, SemesterConverter2016ATo2016B, SemesterConverter2015ATo2015B, LastStepConverter(Semester(2015, SemesterOption.A)))
+  val from2014BSV:List[SemesterConverter]   = List(SemesterConverterToCurrent, SemesterConverter2016ATo2016B, SemesterConverter2015ATo2015B, SemesterConverter2014BTo2015A, SemesterConverter2014BTo2014BSV, LastStepConverter(Semester(2014, SemesterOption.B)))
+  val from2014BToSV:List[SemesterConverter] = List(SemesterConverterToCurrent, SemesterConverter2016ATo2016B, SemesterConverter2015ATo2015B, SemesterConverter2014BTo2015A, SemesterConverter2014BTo2014BSV, SemesterConverter2014ATo2014B, LastStepConverter(Semester(2014, SemesterOption.B)))
+  val from2014A:List[SemesterConverter]     = List(SemesterConverterToCurrent, SemesterConverter2016ATo2016B, SemesterConverter2015ATo2015B, SemesterConverter2014BTo2015A, SemesterConverter2014BTo2014BSV, SemesterConverter2014ATo2014B, LastStepConverter(Semester(2014, SemesterOption.A)))
+  val from2013B:List[SemesterConverter]     = List(SemesterConverterToCurrent, SemesterConverter2016ATo2016B, SemesterConverter2015ATo2015B, SemesterConverter2014BTo2015A, SemesterConverter2014BTo2014BSV, SemesterConverter2013BTo2014A, SemesterConverter2014ATo2014B, LastStepConverter(Semester(2013, SemesterOption.B)))
+  val from2013A:List[SemesterConverter]     = List(SemesterConverterToCurrent, SemesterConverter2016ATo2016B, SemesterConverter2015ATo2015B, SemesterConverter2014BTo2015A, SemesterConverter2014BTo2014BSV, SemesterConverter2013ATo2013B, SemesterConverter2013BTo2014A, SemesterConverter2014ATo2014B, LastStepConverter(Semester(2013, SemesterOption.A)))
+  val from2012B:List[SemesterConverter]     = List(SemesterConverterToCurrent, SemesterConverter2016ATo2016B, SemesterConverter2015ATo2015B, SemesterConverter2014BTo2015A, SemesterConverter2014BTo2014BSV, SemesterConverter2012BTo2013A, SemesterConverter2013ATo2013B, SemesterConverter2013BTo2014A, SemesterConverter2014ATo2014B, LastStepConverter(Semester(2012, SemesterOption.B)))
 
   /**
    * Converts one version of a proposal node to the next
@@ -125,6 +125,30 @@ case class LastStepConverter(semester: Semester) extends SemesterConverter {
       StepResult(s"Please use the PIT from semester ${semester.display} to view the unmodified proposal", n).successNel
   }
   override val transformers = List(notifyToUseOlderPIT)
+}
+
+/**
+ * This converter will upgrade to 2016B
+ */
+case object SemesterConverter2016ATo2016B extends SemesterConverter {
+  val oldKLongFilter           = "K-long (2.00 um)"
+  val replacementFilter = "K-long (2.20 um)"
+
+  val replaceKLongFilter: TransformFunction = {
+      case p @ <flamingos2>{ns @ _*}</flamingos2> if (p \\ "filter").text == oldKLongFilter =>
+        val defaultFilter     = <filter>{replacementFilter}</filter>
+
+        object KLongFilterTransformer extends BasicTransformer {
+          override def transform(n: xml.Node): xml.NodeSeq = n match {
+            case <name>{name}</name>                                        => <name>{name.text.replace(oldKLongFilter, replacementFilter)}</name>
+            case <filter>{filter}</filter> if filter.text == oldKLongFilter => defaultFilter
+            case elem: xml.Elem                                             => elem.copy(child=elem.child.flatMap(transform))
+            case _                                                          => n
+          }
+        }
+        StepResult("The Flamingos2 filter K-long (2.00 um) has been converted to K-long (2.20 um).", <flamingos2>{KLongFilterTransformer.transform(ns)}</flamingos2>).successNel
+    }
+  val transformers = List(replaceKLongFilter)
 }
 
 /**

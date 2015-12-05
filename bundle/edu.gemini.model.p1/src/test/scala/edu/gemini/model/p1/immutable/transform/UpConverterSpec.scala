@@ -524,6 +524,21 @@ class UpConverterSpec extends SpecificationWithJUnit with SemesterProperties {
 
       testF2R3KYConversion(xml)
     }
+    "proposal with F2 K-long filter must use the new name, REL-2565" in {
+      val xml = XML.load(new InputStreamReader(getClass.getResourceAsStream("proposal_with_f2_old_longslit.xml")))
+
+      val converted = UpConverter.convert(xml)
+      converted must beSuccessful.like {
+        case StepResult(changes, result) =>
+          changes must have length 4
+          changes must contain("The Flamingos2 filter K-long (2.00 um) has been converted to K-long (2.20 um).")
+          // Check that the filter node is added and the name updated
+          result \\ "flamingos2" must \\("filter") \> "K-long (2.20 um)"
+          result \\ "flamingos2" must \\("name") \>~ ".* K-long .2.20 um.*"
+          // The gmosN blueprint must remain
+          result must \\("gmosN")
+      }
+    }
     "proposal with GmosN blueprint and no altair should produce an Altair None option, REL-1257" in {
       val xml = XML.load(new InputStreamReader(getClass.getResourceAsStream("proposal_with_gmosn_ver_2014.2.1.xml")))
 
