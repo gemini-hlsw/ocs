@@ -18,7 +18,7 @@ import javax.swing.event.EventListenerList;
  * never overlapping DiscreteRange.
  * Don't try to mix types of Ranges.
  */
-public abstract class AbstractDiscreteRangeModel implements DiscreteRangeModel, Serializable {
+public abstract class AbstractDiscreteRangeModel<T> implements DiscreteRangeModel<T>, Serializable {
 
     protected EventListenerList listenerList = new EventListenerList();
 

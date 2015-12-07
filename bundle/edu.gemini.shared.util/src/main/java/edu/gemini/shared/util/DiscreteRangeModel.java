@@ -1,10 +1,3 @@
-// Copyright 1997 Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-// See the file LICENSE for complete details.
-//
-// $Id: DiscreteRangeModel.java 4392 2004-01-30 06:40:18Z gillies $
-//
-
 package edu.gemini.shared.util;
 
 import java.util.Set;
@@ -19,10 +12,10 @@ import java.util.Set;
  * than ListModel because the data involved here is time and time
  * doesn't need to be modeled.
  */
-public interface DiscreteRangeModel extends DiscreteRangeModelPublisher {
+public interface DiscreteRangeModel<T> extends DiscreteRangeModelPublisher {
 
     // These selection mode constants are taken from ListSelectionModel
-    // to provice some familiarity.
+    // to provide some familiarity.
     /**
      * A value for the rangeSelectionMode property: select one contiguous
      * range of indices at a time.
@@ -63,42 +56,37 @@ public interface DiscreteRangeModel extends DiscreteRangeModelPublisher {
      * Gets the actual DiscreteRange collection so the client can search, etc.
      * @return An unmodifiable Set of the ranges.
      */
-    public Set getDiscreteRanges();
-
-    /**
-     * Sets the actual DiscreteRange collection so the client can search, etc.
-     */
-    public void setDiscreteRanges(Set ranges);
+    Set<T> getDiscreteRanges();
 
     /**
      * Returns true if collection is empty.
      */
-    public boolean isEmpty();
+    boolean isEmpty();
 
     /**
      * Returns true if the specified object is within any range in the collection.
      */
-    public boolean contains(Object o);
+    boolean contains(Object o);
 
     /**
      * If the specified object is within any range in the collection,
      * that range is returned.
      */
-    public DiscreteRange findContainingRange(Object o);
+    DiscreteRange findContainingRange(Object o);
 
     /**
      * Returns the minimum of all the ranges in the collection.
      * For example, if the ranges were date ranges, this would return
      * the earliest date in the first range.
      */
-    public Object getMin();
+    Object getMin();
 
     /**
      * Returns the maximum of all the ranges in the collection.
      * For example, if the ranges were date ranges, this would return
      * the latest date in the last range.
      */
-    public Object getMax();
+    Object getMax();
 
     /**
      * Adds the specified DiscreteRange to the collection of Ranges keeping the
@@ -112,7 +100,7 @@ public interface DiscreteRangeModel extends DiscreteRangeModelPublisher {
      * collection then this method will return true without changing the
      * collection.
      */
-    public boolean add(DiscreteRange newRange);
+    boolean add(DiscreteRange newRange);
 
     /**
      * Removes the specified DiscreteRange from the collection.
@@ -121,21 +109,21 @@ public interface DiscreteRangeModel extends DiscreteRangeModelPublisher {
      * Any parts of any ranges that intersect specified range
      * will be removed.
      */
-    public void remove(DiscreteRange range);
+    void remove(DiscreteRange range);
 
     /**
      * Removes the all DiscreteRanges from the collection.
      */
-    public void clear();
+    void clear();
 
     /**
      * Adds a DiscreteRangeModelListener to the listener list.
      */
-    public void addDiscreteRangeModelListener(DiscreteRangeModelListener l);
+    void addDiscreteRangeModelListener(DiscreteRangeModelListener l);
 
     /**
      * Removes a DiscreteRangeModelListener from the listener list.
      */
-    public void removeDiscreteRangeModelListener(DiscreteRangeModelListener l);
+    void removeDiscreteRangeModelListener(DiscreteRangeModelListener l);
 
 }

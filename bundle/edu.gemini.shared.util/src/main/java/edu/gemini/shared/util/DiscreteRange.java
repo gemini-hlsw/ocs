@@ -1,9 +1,3 @@
-// Copyright 1997 Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-// See the file LICENSE for complete details.
-//
-//
-
 package edu.gemini.shared.util;
 
 /**
@@ -17,24 +11,19 @@ package edu.gemini.shared.util;
  * be joined into one range.  With continuous ranges, there is no
  * distance small enough where the ranges can be joined.
  */
-public interface DiscreteRange extends Comparable {
+public interface DiscreteRange {
 
-    public abstract Object clone();
+    Object clone();
 
     /**
      * Gets the object at the start of the range.
      */
-    public abstract Object getStart();
+    Object getStart();
 
     /**
      * Gets the object at the end of the range.
      */
-    public abstract Object getEnd();
-
-    /**
-     * This method supports sorting in collections.
-     */
-    public abstract int compareTo(Object o);
+    Object getEnd();
 
     /**
      * Returns true if the argument object is of the right class
@@ -42,7 +31,7 @@ public interface DiscreteRange extends Comparable {
      * @param o An object of the set enumerated by the DiscreteRange data type.
      * For example, with a DateRange, o would be a Date.
      */
-    public abstract boolean contains(Object o);
+    boolean contains(Object o);
 
     /**
      * Gets a "normalized" Range, which is the same as this date range
@@ -52,7 +41,7 @@ public interface DiscreteRange extends Comparable {
      * @return this if the Range is already normalized, otherwise a new
      * Range with the start and end dates swapped
      */
-    public abstract DiscreteRange normalize();
+    DiscreteRange normalize();
 
     /**
      * Returns true if this range contains specified range
@@ -64,20 +53,7 @@ public interface DiscreteRange extends Comparable {
      *
      * </pre>
      */
-    public abstract boolean contains(DiscreteRange arg);
-
-    /**
-     * Returns true if this range is contained by specified range
-     * <pre>
-     *
-     *             this
-     *      *---------------*
-     * *--------------------------*
-     *             arg
-     *
-     * </pre>
-     */
-    public abstract boolean containedBy(DiscreteRange arg);
+    boolean contains(DiscreteRange arg);
 
     /**
      * Returns true if this range's end is after the argument range
@@ -89,7 +65,7 @@ public interface DiscreteRange extends Comparable {
      *
      * </pre>
      */
-    public abstract boolean after(DiscreteRange arg);
+    boolean after(DiscreteRange arg);
 
     /**
      * Returns true if this range's start is before the argument range
@@ -101,7 +77,7 @@ public interface DiscreteRange extends Comparable {
      *
      * </pre>
      */
-    public abstract boolean before(DiscreteRange arg);
+    boolean before(DiscreteRange arg);
 
     /**
      * Returns true if this range contains at least one unit that is also
@@ -120,7 +96,7 @@ public interface DiscreteRange extends Comparable {
      *
      * </pre>
      */
-    public abstract boolean intersects(DiscreteRange arg);
+    boolean intersects(DiscreteRange arg);
 
     /**
      * If two ranges "touch" they can be combined into one range.
@@ -138,7 +114,7 @@ public interface DiscreteRange extends Comparable {
      *
      * </pre>
      */
-    public abstract boolean touches(DiscreteRange arg);
+    boolean touches(DiscreteRange arg);
 
     /**
      * If this range touches the argument range, this method returns
@@ -168,7 +144,7 @@ public interface DiscreteRange extends Comparable {
      *
      * </pre>
      */
-    public abstract DiscreteRange union(DiscreteRange arg);
+    DiscreteRange union(DiscreteRange arg);
 
     /**
      * Returns the intersection of the ranges, i.e. the range consisting
@@ -196,7 +172,7 @@ public interface DiscreteRange extends Comparable {
      *
      * </pre>
      */
-    public abstract DiscreteRange intersection(DiscreteRange arg);
+    DiscreteRange intersection(DiscreteRange arg);
 
     /**
      * Returns the difference of the ranges, i.e. the range consisting
@@ -213,7 +189,7 @@ public interface DiscreteRange extends Comparable {
      *
      * </pre>
      */
-    public abstract DiscreteRange difference(DiscreteRange arg);
+    DiscreteRange difference(DiscreteRange arg);
 
 }
 

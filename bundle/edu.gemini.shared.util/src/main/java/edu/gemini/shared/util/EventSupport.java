@@ -1,10 +1,3 @@
-// Copyright 1997 Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-// See the file LICENSE for complete details.
-//
-// $Id: EventSupport.java 4392 2004-01-30 06:40:18Z gillies $
-//
-
 package edu.gemini.shared.util;
 
 import java.util.logging.Logger;
@@ -21,24 +14,24 @@ public class EventSupport {
 
     private static final Logger LOG = Logger.getLogger(EventSupport.class.getName());
 
-    private Class _listenerClass;
+    private Class<?> _listenerClass;
 
-    private Class _eventClass;
+    private Class<?> _eventClass;
 
-    private List _listeners;
+    private List<EventListener> _listeners;
 
-    private Map _methodTable;   // Caches Methods by name so reflection
+    private Map<String, Method> _methodTable;   // Caches Methods by name so reflection
     // is not required each time.
 
     /**
      * Construct with the class of the listeners that will be added and the
      * event that will be fired.
      */
-    public EventSupport(Class listenerClass, Class eventClass) {
+    public EventSupport(Class<?> listenerClass, Class<?> eventClass) {
         _listenerClass = listenerClass;
         _eventClass = eventClass;
-        _listeners = new ArrayList();
-        _methodTable = new HashMap();
+        _listeners = new ArrayList<>();
+        _methodTable = new HashMap<>();
     }
 
     /**
@@ -58,19 +51,12 @@ public class EventSupport {
     }
 
     /**
-     * Remove all listeners.
-     */
-    public synchronized void removeAllListeners() {
-        _listeners.clear();
-    }
-
-    /**
      * Gets the listeners in a newly created array.  Clients may modify the
      * array without invalidating or changing the set of listeners.
      */
     public synchronized EventListener[] getListeners() {
         EventListener[] evA = new EventListener[_listeners.size()];
-        return (EventListener[]) _listeners.toArray(evA);
+        return _listeners.toArray(evA);
     }
 
     /**
@@ -81,30 +67,19 @@ public class EventSupport {
     }
 
     /**
-     * Print all the listeners to stdout.  This is just a debugging method.
-     */
-    public synchronized void showListeners(String title) {
-        System.out.println("--- " + title + " ---");
-        for (int i = 0; i < _listeners.size(); ++i) {
-            System.out.println(i + ") " + _listeners.get(i));
-        }
-        System.out.println("------------------------------");
-    }
-
-    /**
      * Get the named method of the listener class.  Uses the cached value if
      * available, or else reflection to lookup the method.
      */
     protected Method getMethod(String methodName) {
         // See if there is a cached value.
-        Method meth = (Method) _methodTable.get(methodName);
+        Method meth = _methodTable.get(methodName);
         if (meth != null) {
             return meth;
         }
 
         // Use reflection to get the method.
         try {
-            meth = _listenerClass.getMethod(methodName, new Class[]{_eventClass});
+            meth = _listenerClass.getMethod(methodName, _eventClass);
         }
         catch (Exception ex) {
             System.out.println("Couldn't find the method: " + methodName);
@@ -125,12 +100,12 @@ public class EventSupport {
     public void fireEvent(EventObject eo, String methodName) {
         // Make a copy of the listeners so that the event can be fired without
         // holding a lock.
-        List v;
+        List<EventListener> v;
         synchronized (this) {
             if (_listeners.size() == 0) {
                 return;  // No listeners, so nothing to do.
             }
-            v = (List) ((ArrayList) _listeners).clone();
+            v = new ArrayList<>(_listeners);
         }
 
         // Lookup the listener method that will be called.
@@ -141,23 +116,10 @@ public class EventSupport {
         Object[] params = new Object[]{eo};
 
         // Fire the event to each listener.
-        Iterator it = v.iterator();
-        while (it.hasNext()) {
-            Object target = it.next();
+        for (Object target : v) {
             try {
                 meth.invoke(target, params);
-
-                //} catch (InvocationTargetException ite) {
-                //    System.err.println("Couldn't invoke method " + methodName +
-                //                       "() on " + target);
-                //    //ite.getTargetException().printStackTrace();
-                //    //System.err.println("target exception: " + ite.getTargetException().getMessage());
-                //    //System.err.println("actual exception: ");
-                //    //ite.printStackTrace();
-            }
-            catch (Exception ex) {
-                //System.err.println("Couldn't invoke method " + methodName +
-                //                   "() on " + target + ": " + ex);
+            } catch (Exception ex) {
                 LOG.log(Level.WARNING, "Couldn't invoke method " + methodName + "() on " + target, ex);
             }
         }
