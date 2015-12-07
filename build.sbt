@@ -55,15 +55,17 @@ javacOptions in ThisBuild ++= Seq(
   "-Xlint:all,-serial,-path,-deprecation,-unchecked,-fallthrough" // TOOD: turn all on except maybe -serial and -path
 )
 
+val specs2Version = "2.3.12"
+
 // Use managed dependencies for tests; everyone gets JUnit, ScalaCheck, and Specs2
 libraryDependencies in ThisBuild ++= Seq(
-  "junit"           % "junit"           % "4.11"   % "test",
-  "com.novocode"    % "junit-interface" % "0.9"    % "test",
-  "org.scalacheck" %% "scalacheck"      % "1.11.0" % "test",
-  "org.specs2"     %% "specs2-core"     % "2.3.12"  % "test",
-  "org.specs2"     %% "specs2-matcher-extra" % "2.3.12" % "test",
-  "org.specs2"     %% "specs2-scalacheck"    % "2.3.12" % "test",
-  "org.scalatest"  %% "scalatest"  % "2.2.5"    % "test"
+  "junit"           % "junit"                % "4.11"        % "test",
+  "com.novocode"    % "junit-interface"      % "0.9"         % "test",
+  "org.scalacheck" %% "scalacheck"           % "1.11.0"      % "test",
+  "org.specs2"     %% "specs2-core"          % specs2Version % "test",
+  "org.specs2"     %% "specs2-matcher-extra" % specs2Version % "test",
+  "org.specs2"     %% "specs2-scalacheck"    % specs2Version % "test",
+  "org.scalatest"  %% "scalatest"            % "2.2.4"       % "test"
 )
 
 // Required for specs2
