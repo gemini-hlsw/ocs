@@ -1,5 +1,6 @@
 package edu.gemini.model.p1.pdf
 
+import scala.util.Try
 import xml.{Node, XML}
 import java.io._
 import javax.xml.transform.URIResolver
@@ -49,13 +50,7 @@ object P1PDF {
    * This method also merges the attached pdf file to the end of the resulting pdf.
    */
   def createFromFile (xmlFile: File, template: Template, pdfFile: File) {
-    try {
-      createFromNode (XML.loadFile(xmlFile), template, pdfFile, Option(xmlFile.getParentFile))
-    } catch {
-      case ex:Exception => try {
-        createFromNode (XML.loadString(Source.fromFile(xmlFile, "latin1").mkString), template, pdfFile, Option(xmlFile.getParentFile))
-      }
-    }
+    Try(createFromNode (XML.loadFile(xmlFile), template, pdfFile, Option(xmlFile.getParentFile))).getOrElse(createFromNode (XML.loadString(Source.fromFile(xmlFile, "latin1").mkString), template, pdfFile, Option(xmlFile.getParentFile)))
   }
 
   /**

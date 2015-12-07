@@ -18,7 +18,7 @@ public class P1PdfMaker {
     private static final StringBuffer partnerNames;
     static {
         // get templates lookup map
-        templatesMap = JavaConversions.asJavaMap(P1PDF.templatesMap());
+        templatesMap = JavaConversions.mapAsJavaMap(P1PDF.templatesMap());
 
         // create list of valid partner/country names
         partnerNames = new StringBuffer();
