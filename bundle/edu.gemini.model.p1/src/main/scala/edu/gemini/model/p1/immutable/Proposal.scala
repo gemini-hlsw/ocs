@@ -53,14 +53,6 @@ object Proposal {
 
   }
 
-  // find the target of opportunity of the proposal if possible
-  def toOChoice(p: Option[Proposal]): Option[ToOChoice] = p.map(proposalClass.get) match {
-    case Some(q: QueueProposalClass)         => q.tooOption.some
-    case Some(l: LargeProgramClass)          => l.tooOption.some
-    case Some(f: FastTurnaroundProgramClass) => f.tooOption.some
-    case _                                   => none
-  }
-
   private val validate = Option(System.getProperty("edu.gemini.model.p1.validate")).isDefined
   private val logger = Logger.getLogger(getClass.getName)
 
