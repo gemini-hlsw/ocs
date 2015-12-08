@@ -1,8 +1,10 @@
 package edu.gemini.ags.client.api
 
 import edu.gemini.model.p1.immutable.Observation
-import actors.Actor._
 import java.net.URL
+
+import scala.concurrent.Future
+import scala.concurrent.ExecutionContext.Implicits.global
 
 /**
  * Base trait for AGS client implementations.
@@ -21,7 +23,7 @@ trait AgsClient {
    * given callback function when available.
    */
   def estimate(obs: Observation, time: Long)(callback: Callback) {
-    actor { callback(estimateNow(obs, time)) }
+    Future.apply { callback(estimateNow(obs, time)) }
   }
 
   /**
