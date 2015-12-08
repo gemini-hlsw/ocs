@@ -1,18 +1,9 @@
-// Copyright 1997 Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-// See the file LICENSE for complete details.
-//
-// $Id: RowManipulateTableWidget.java 18053 2009-02-20 20:16:23Z swalker $
-//
 package jsky.util.gui;
 
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumnModel;
 import java.util.Arrays;
 import java.util.Vector;
-
-
-
 
 /**
  * A TableWidget subclass that supports manipulation of table rows

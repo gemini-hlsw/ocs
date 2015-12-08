@@ -242,20 +242,22 @@ public class SortedJTable extends PrintableJTable
      * The argument may be null, in which case an empty row is inserted
      *  (that can be edited by the user).
      */
-    public void addRow(Vector row) {
+    public void addRow(final Vector<Object> row) {
         if (!(_realModel instanceof DefaultTableModel)) {
             throw new RuntimeException("addRow() requires a DefaultTableModel");
         }
-        DefaultTableModel model = (DefaultTableModel) _realModel;
+        final DefaultTableModel model = (DefaultTableModel) _realModel;
         if (row == null) {
             // generate a dummy row
-            int n = model.getColumnCount();
-            row = new Vector(n);
+            final int n = model.getColumnCount();
+            final Vector<Object> emptyRow = new Vector<>(n);
             for (int i = 0; i < n; i++) {
-                row.add(null);
+                emptyRow.add(null);
             }
+            model.addRow(emptyRow);
+        } else {
+            model.addRow(row);
         }
-        model.addRow(row);
         setModel(model);
     }
 
@@ -285,6 +287,7 @@ public class SortedJTable extends PrintableJTable
 
 
     /** Compare two objects, which may or may not be Comparables, or nulls */
+    @SuppressWarnings("unchecked")
     protected int compareObjects(Object a, Object b) {
         if (a instanceof Comparable) {
             if (b instanceof Comparable)
@@ -469,7 +472,7 @@ public class SortedJTable extends PrintableJTable
             _realModel.addTableModelListener(l);
         }
 
-        public Class getColumnClass(int index) {
+        public Class<?> getColumnClass(int index) {
             return _realModel.getColumnClass(index);
         }
 
