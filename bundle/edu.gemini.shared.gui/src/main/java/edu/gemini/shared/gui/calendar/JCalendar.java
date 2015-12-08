@@ -1,10 +1,3 @@
-// Copyright 1999 Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-// See the file LICENSE for complete details.
-//
-// $Id: JCalendar.java 4392 2004-01-30 06:40:18Z gillies $
-//
-
 package edu.gemini.shared.gui.calendar;
 
 import java.awt.*;
@@ -12,9 +5,7 @@ import java.util.*;
 import java.awt.event.*;
 import javax.swing.*;
 import javax.swing.event.*;
-import javax.swing.border.*;
 import javax.swing.plaf.basic.*;
-import javax.swing.DefaultListSelectionModel;
 import java.io.Serializable;
 
 import edu.gemini.shared.gui.ThinBorder;
@@ -53,37 +44,8 @@ public class JCalendar extends JPanel implements ActionListener, CalendarDisplay
 
     private TimeZone _tz = TimeZone.getDefault();
 
-    public JCalendar() {
-        this(new CalendarMonth());
-    }
-
-    public JCalendar(Date date) {
-        this(new CalendarMonth(date));
-    }
-
-    public JCalendar(Date date, boolean prev, boolean next, boolean pageBack, boolean pageForward) {
-        this(new CalendarMonth(date), prev, next, pageBack, pageForward);
-    }
-
-    public JCalendar(CalendarModel model) {
-        this(new CalendarMonth(model));
-    }
-
-    public JCalendar(CalendarMonth month) {
-        _initialize(true, true, false, false, month, new DefaultCalendarHeaderRenderer(), new CalendarGroup());
-    }
-
     public JCalendar(CalendarMonth month, boolean prev, boolean next, boolean pageBack, boolean pageForward) {
         _initialize(prev, next, pageBack, pageForward, month, new DefaultCalendarHeaderRenderer(), new CalendarGroup());
-    }
-
-    /**
-     * Constructs a JCalendar which holds the month title,
-     * CalendarMonth, CalendarHeader, and optional navigation buttons.
-     * @param date JCalendar will show month containing this date.
-     */
-    public JCalendar(boolean prev, boolean next, boolean pageBack, boolean pageForward, CalendarCellRenderer headRenderer, CalendarMonth month, CalendarGroup group) {
-        _initialize(prev, next, pageBack, pageForward, month, headRenderer, group);
     }
 
     private void _initialize(boolean prev, boolean next, boolean pageBack, boolean pageForward, CalendarMonth month, CalendarCellRenderer headRenderer, CalendarGroup group) {
@@ -103,11 +65,7 @@ public class JCalendar extends JPanel implements ActionListener, CalendarDisplay
             } else {
                 westPanel.add(westArrow = new ArrowButton(BasicArrowButton.WEST), BorderLayout.CENTER);
             }
-            westArrow.addActionListener(new ActionListener() {
-                public void actionPerformed(ActionEvent e) {
-                    JCalendar.this.group.prevMonth();
-                }
-            });
+            westArrow.addActionListener(e -> JCalendar.this.group.prevMonth());
         }
         if (pageBack) {
             if (prev) {
@@ -115,11 +73,7 @@ public class JCalendar extends JPanel implements ActionListener, CalendarDisplay
             } else {
                 westPanel.add(westDoubleArrow = new DoubleArrowButton(DoubleArrowButton.WEST), BorderLayout.CENTER);
             }
-            westDoubleArrow.addActionListener(new ActionListener() {
-                public void actionPerformed(ActionEvent e) {
-                    JCalendar.this.group.pageBackward();
-                }
-            });
+            westDoubleArrow.addActionListener(e -> JCalendar.this.group.pageBackward());
         }
         nav.add(westPanel, BorderLayout.WEST);
         if (pageForward) {
@@ -128,11 +82,7 @@ public class JCalendar extends JPanel implements ActionListener, CalendarDisplay
             } else {
                 eastPanel.add(eastDoubleArrow = new DoubleArrowButton(BasicArrowButton.EAST), BorderLayout.CENTER);
             }
-            eastDoubleArrow.addActionListener(new ActionListener() {
-                public void actionPerformed(ActionEvent e) {
-                    JCalendar.this.group.pageForward();
-                }
-            });
+            eastDoubleArrow.addActionListener(e -> JCalendar.this.group.pageForward());
         }
         if (next) {
             if (pageForward) {
@@ -140,11 +90,7 @@ public class JCalendar extends JPanel implements ActionListener, CalendarDisplay
             } else {
                 eastPanel.add(eastArrow = new ArrowButton(BasicArrowButton.EAST), BorderLayout.CENTER);
             }
-            eastArrow.addActionListener(new ActionListener() {
-                public void actionPerformed(ActionEvent e) {
-                    JCalendar.this.group.nextMonth();
-                }
-            });
+            eastArrow.addActionListener(e -> JCalendar.this.group.nextMonth());
         }
         nav.add(eastPanel, BorderLayout.EAST);
         JPanel header = new JPanel();
@@ -169,26 +115,6 @@ public class JCalendar extends JPanel implements ActionListener, CalendarDisplay
             s = CalendarUtil.getMonthName(month.getFrom().month) + " " + month.getFrom().year;
         }
         return s;
-    }
-
-    public BasicArrowButton getWestArrow() {
-        return westArrow;
-    }
-
-    public BasicArrowButton getEastArrow() {
-        return eastArrow;
-    }
-
-    public void nextMonth() {
-        group.nextMonth();
-        title.setText(formatLabel(month));
-        repaint();
-    }
-
-    public void prevMonth() {
-        group.prevMonth();
-        title.setText(formatLabel(month));
-        repaint();
     }
 
     public void actionPerformed(ActionEvent event) {
@@ -306,17 +232,6 @@ public class JCalendar extends JPanel implements ActionListener, CalendarDisplay
     }
 
     /**
-     * Remove a listener from the list that's notified each time a
-     * selection is made.
-     *
-     * @param listener The ListSelectionListener to remove.
-     * @see #addListSelectionListener
-     */
-    public void removeListSelectionListener(ListSelectionListener listener) {
-        listenerList.remove(ListSelectionListener.class, listener);
-    }
-
-    /**
      * A ListSelectionListener that forwards ListSelectionEvents from
      * the CalendarMonth to the calendar ListSelectionListeners.
      * The forwarded events only differ from the originals in that their
@@ -361,17 +276,6 @@ public class JCalendar extends JPanel implements ActionListener, CalendarDisplay
             getCalendarMonth().addCalendarSelectionListener(_calendarSelectionListener);
         }
         listenerList.add(CalendarSelectionListener.class, listener);
-    }
-
-    /**
-     * Remove a listener from the list that's notified each time a
-     * selection is made.
-     *
-     * @param listener The CalendarSelectionListener to remove.
-     * @see #addCalendarSelectionListener
-     */
-    public void removeCalendarSelectionListener(CalendarSelectionListener listener) {
-        listenerList.remove(CalendarSelectionListener.class, listener);
     }
 
     /**
@@ -425,9 +329,9 @@ public class JCalendar extends JPanel implements ActionListener, CalendarDisplay
         Calendar c = new GregorianCalendar();
         c.clear();
         c.setTimeZone(_tz);
-        c.set(c.YEAR, ymd.year);
-        c.set(c.MONTH, ymd.month);
-        c.set(c.DAY_OF_MONTH, ymd.day);
+        c.set(Calendar.YEAR, ymd.year);
+        c.set(Calendar.MONTH, ymd.month);
+        c.set(Calendar.DAY_OF_MONTH, ymd.day);
         return c.getTime();
     }
 
@@ -449,15 +353,11 @@ public class JCalendar extends JPanel implements ActionListener, CalendarDisplay
         CalendarMonth cm = new CalendarMonth(model);
         DefaultCalendarCellRenderer r = (DefaultCalendarCellRenderer) cm.getCellRenderer();
         cm.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
-        cm.setDisplayMode(cm.MULTI_MONTH_MODE);
-        r.setBackground1(r.DEFAULT_MULTI_MONTH_BACKGROUND1);
-        r.setBackground2(r.DEFAULT_MULTI_MONTH_BACKGROUND2);
+        cm.setDisplayMode(CalendarMonth.MULTI_MONTH_MODE);
+        r.setBackground1(AbstractCalendarRenderer.DEFAULT_MULTI_MONTH_BACKGROUND1);
+        r.setBackground2(AbstractCalendarRenderer.DEFAULT_MULTI_MONTH_BACKGROUND2);
         JCalendar jcal = new JCalendar(cm, true, true, true, true);
-        jcal.addListSelectionListener(new ListSelectionListener() {
-            public void valueChanged(ListSelectionEvent e) {
-                System.out.println("Got selection event: " + e.toString());
-            };
-        });
+        jcal.addListSelectionListener(e -> System.out.println("Got selection event: " + e.toString()));
         pan.add(jcal);
         frame.getContentPane().add("Center", pan);
 

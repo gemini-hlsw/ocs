@@ -1,10 +1,3 @@
-// Copyright 1999 Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-// See the file LICENSE for complete details.
-//
-// $Id: LunarDateSymbolSupplier.java 4392 2004-01-30 06:40:18Z gillies $
-//
-
 package edu.gemini.shared.gui.calendar;
 
 import edu.gemini.shared.util.CalendarUtil;
@@ -18,21 +11,18 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.List;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.awt.Component;
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.geom.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.util.stream.Collectors;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.ListSelectionModel;
-import javax.swing.event.ListSelectionListener;
-import javax.swing.event.ListSelectionEvent;
 
 /**
  * This class supplies icons for drawing lunar phase symbols.
@@ -58,12 +48,10 @@ public class LunarDateSymbolSupplier implements DateSymbolSupplier, Icon {
 
     private int _phase = FULL_MOON;
 
-    private Color _color;
-
     private DateSymbolIndex _index;
 
     // This class encapsulates a symbol and the day it corresponds to.
-    private class DateSymbol implements Comparable {
+    private class DateSymbol implements Comparable<DateSymbol> {
 
         private int _symbol;
 
@@ -76,15 +64,6 @@ public class LunarDateSymbolSupplier implements DateSymbolSupplier, Icon {
         public DateSymbol(int symbol, int year, int month, int day) {
             _symbol = symbol;
             _date = new YearMonthDay(year, month, day);
-        }
-
-        /**
-         * Copy Constructor.
-         * @param dateSymbol - copy the contents of this object
-         */
-        public DateSymbol(DateSymbol dateSymbol) {
-            _symbol = dateSymbol.getSymbol();
-            _date = dateSymbol.getDate();
         }
 
         /** Gets the symbol number. */
@@ -110,10 +89,8 @@ public class LunarDateSymbolSupplier implements DateSymbolSupplier, Icon {
         /**
          * This method is needed for sorting in containers.
          */
-        public int compareTo(Object o) {
-            if (!(o instanceof DateSymbol))
-                return 0;
-            DateSymbol d = (DateSymbol) o;
+        @Override
+        public int compareTo(DateSymbol d) {
             return getDate().compareTo(d.getDate());
         }
     }
@@ -128,20 +105,20 @@ public class LunarDateSymbolSupplier implements DateSymbolSupplier, Icon {
 
         int _yearCount;
 
-        List _years;  // each entry is a List of Months
+        List<List<List<DateSymbol>>> _years;  // each entry is a List of Months
 
         public void setRange(int startYear, int startMonth, int endYear, int endMonth) {
             _startYear = startYear;
             _yearCount = endYear - startYear + 1;
         }
 
-        public void createIndex(Set dateSymbols) {
+        public void createIndex(Set<DateSymbol> dateSymbols) {
             // create the index and fill it with null pointers
-            _years = new ArrayList();
+            _years = new ArrayList<>();
             for (int year = 0; year < _yearCount; ++year) {
-                List months = new ArrayList();
+                List<List<DateSymbol>> months = new ArrayList<>();
                 for (int m = 0; m < 12; ++m) {
-                    List days = new ArrayList();
+                    List<DateSymbol> days = new ArrayList<>();
                     for (int i = 0; i <= 31; ++i) {
                         days.add(null);
                     }
@@ -151,11 +128,10 @@ public class LunarDateSymbolSupplier implements DateSymbolSupplier, Icon {
             }
 
             // now walk through the dateSymbols Set and set index elements
-            for (Iterator itr = dateSymbols.iterator(); itr.hasNext();) {
-                DateSymbol ds = (DateSymbol) itr.next();
+            for (DateSymbol ds : dateSymbols) {
                 YearMonthDay ymd = ds.getDate();
-                List yearList = (List) _years.get(ymd.year - _startYear);
-                List monthList = (List) yearList.get(ymd.month);
+                List<List<DateSymbol>> yearList = _years.get(ymd.year - _startYear);
+                List<DateSymbol> monthList = yearList.get(ymd.month);
                 monthList.set(ymd.day, ds);
             }
         }
@@ -165,9 +141,9 @@ public class LunarDateSymbolSupplier implements DateSymbolSupplier, Icon {
          * no symbol on that day.
          */
         DateSymbol getDateSymbol(int year, int month, int day) {
-            List months = (List) _years.get(year - _startYear);
-            List days = (List) months.get(month);
-            return (DateSymbol) days.get(day);
+            List<List<DateSymbol>> months = _years.get(year - _startYear);
+            List<DateSymbol> days = months.get(month);
+            return days.get(day);
         }
     }
 
@@ -177,16 +153,6 @@ public class LunarDateSymbolSupplier implements DateSymbolSupplier, Icon {
      */
     public LunarDateSymbolSupplier() {
         _calendarModel = new DefaultCalendarModel();
-        _index = new DateSymbolIndex();
-        _cacheSymbols();
-    }
-
-    /**
-     * Constructs a LunarDateSymbolSupplier DateSymbolSupplier that will
-     * create DateSymbols for phases of the moon.
-     */
-    public LunarDateSymbolSupplier(int startYear, int startMonth, int endYear, int endMonth) {
-        _calendarModel = new DefaultCalendarModel(startYear, startMonth, endYear, endMonth);
         _index = new DateSymbolIndex();
         _cacheSymbols();
     }
@@ -246,31 +212,18 @@ public class LunarDateSymbolSupplier implements DateSymbolSupplier, Icon {
         end.set(Calendar.DAY_OF_MONTH, 1);  // first day of last month
         end.add(Calendar.MONTH, 1);         // first day of month after last
         end.add(Calendar.DAY_OF_MONTH, -1); // last day of last month
-        List fullMoons = _getMoonSymbols(start, end, FULL_MOON);
-        List firstQuarterMoons = _getMoonSymbols(start, end, FIRST_QUARTER_MOON);
-        List newMoons = _getMoonSymbols(start, end, NEW_MOON);
-        List lastQuarterMoons = _getMoonSymbols(start, end, LAST_QUARTER_MOON);
+        List<DateSymbol> fullMoons = _getMoonSymbols(start, end, FULL_MOON);
+        List<DateSymbol> firstQuarterMoons = _getMoonSymbols(start, end, FIRST_QUARTER_MOON);
+        List<DateSymbol> newMoons = _getMoonSymbols(start, end, NEW_MOON);
+        List<DateSymbol> lastQuarterMoons = _getMoonSymbols(start, end, LAST_QUARTER_MOON);
 
         // now collate these lists by adding them to a TreeSet that will
         // sort them (based on compareTo() method of DateSymbol.
 
-        Set sortedDateSymbols = new TreeSet();
-        for (Iterator itr = fullMoons.iterator(); itr.hasNext();) {
-            DateSymbol d = (DateSymbol) itr.next();
-            sortedDateSymbols.add(d);
-        }
-        for (Iterator itr = newMoons.iterator(); itr.hasNext();) {
-            DateSymbol d = (DateSymbol) itr.next();
-            sortedDateSymbols.add(d);
-        }
-        for (Iterator itr = firstQuarterMoons.iterator(); itr.hasNext();) {
-            DateSymbol d = (DateSymbol) itr.next();
-            sortedDateSymbols.add(d);
-        }
-        for (Iterator itr = lastQuarterMoons.iterator(); itr.hasNext();) {
-            DateSymbol d = (DateSymbol) itr.next();
-            sortedDateSymbols.add(d);
-        }
+        Set<DateSymbol> sortedDateSymbols = fullMoons.stream().collect(Collectors.toCollection(TreeSet::new));
+        sortedDateSymbols.addAll(newMoons.stream().collect(Collectors.toList()));
+        sortedDateSymbols.addAll(firstQuarterMoons.stream().collect(Collectors.toList()));
+        sortedDateSymbols.addAll(lastQuarterMoons.stream().collect(Collectors.toList()));
         _index.setRange(_calendarModel.getStartYear(), _calendarModel.getStartMonth(), _calendarModel.getEndYear(), _calendarModel.getEndMonth());
         _index.createIndex(sortedDateSymbols);
     }
@@ -278,12 +231,12 @@ public class LunarDateSymbolSupplier implements DateSymbolSupplier, Icon {
     /**
      * Returns a list of DateSymbols for a particular phase of the moon.
      * @param start Start calculating from this date.
-     * @param start Stop calculating at this date.
+     * @param end Stop calculating at this date.
      * @param type  The phase.
      * @return A list of DateSymbol objects for the specified lunar phase.
      */
-    private List _getMoonSymbols(Calendar start, Calendar end, int type) {
-        List dateSymbols = new ArrayList();
+    private List<DateSymbol> _getMoonSymbols(Calendar start, Calendar end, int type) {
+        List<DateSymbol> dateSymbols = new ArrayList<>();
         Calendar c = (Calendar) start.clone();  // we will alter c
         // roll back a few moon phases before the start of the time range
         c.add(Calendar.MONTH, -2);  // two months should do it
@@ -379,16 +332,11 @@ public class LunarDateSymbolSupplier implements DateSymbolSupplier, Icon {
         CalendarMonth cm = new CalendarMonth(model);
         DefaultCalendarCellRenderer r = (DefaultCalendarCellRenderer) cm.getCellRenderer();
         cm.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
-        cm.setDisplayMode(cm.MULTI_MONTH_MODE);
-        r.setBackground1(r.DEFAULT_MULTI_MONTH_BACKGROUND1);
-        r.setBackground2(r.DEFAULT_MULTI_MONTH_BACKGROUND2);
+        cm.setDisplayMode(CalendarMonth.MULTI_MONTH_MODE);
+        r.setBackground1(AbstractCalendarRenderer.DEFAULT_MULTI_MONTH_BACKGROUND1);
+        r.setBackground2(AbstractCalendarRenderer.DEFAULT_MULTI_MONTH_BACKGROUND2);
         r.setDateSymbolSupplier(l);
         JCalendar jcal = new JCalendar(cm, true, true, true, true);
-        jcal.addListSelectionListener(new ListSelectionListener() {
-            public void valueChanged(ListSelectionEvent e) {
-                System.out.println("Got selection event: " + e.toString());
-            };
-        });
         pan.add(jcal);
         frame.getContentPane().add("Center", pan);
 
