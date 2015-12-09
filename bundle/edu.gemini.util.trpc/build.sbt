@@ -9,16 +9,8 @@ name := "edu.gemini.util.trpc"
 unmanagedJars in Compile ++= Seq(
   new File(baseDirectory.value, "../../lib/bundle/javax-servlet_2.10-2.5.0.jar"),
   new File(baseDirectory.value, "../../lib/bundle/osgi.cmpn-4.3.1.jar"),
-  // new File(baseDirectory.value, "../../lib/bundle/org.apache.felix-4.2.1.jar"),
-  // new File(baseDirectory.value, "../../lib/bundle/org.apache.felix.http.jetty-2.2.0.jar"),
-  // new File(baseDirectory.value, "../../lib/bundle/org.eclipse.osgi.services_3.2.0.v20090520-1800.jar"),
-  // new File(baseDirectory.value, "../../lib/bundle/org.osgi.compendium-4.2.0.jar"),
-  // new File(baseDirectory.value, "../../lib/bundle/osgi.cmpn-4.3.1.jar"),
-  // new File(baseDirectory.value, "../../lib/bundle/org.osgi.enterprise-5.0.0.jar"),
-  // new File(baseDirectory.value, "../../lib/bundle/scala-library-2.10.5.jar"),
-  // new File(baseDirectory.value, "../../lib/bundle/pax-web-jetty-bundle-1.1.13.jar"),
-  new File(baseDirectory.value, "../../lib/bundle/scalaz-core_2.10-7.1.6.jar"),
-  new File(baseDirectory.value, "../../lib/bundle/scalaz-effect_2.10-7.1.6.jar"))
+  new File(baseDirectory.value, "../../lib/bundle/scalaz-core_2.11-7.0.6.jar"),
+  new File(baseDirectory.value, "../../lib/bundle/scalaz-effect_2.11-7.0.6.jar"))
 
 osgiSettings
 

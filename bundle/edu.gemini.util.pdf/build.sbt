@@ -22,5 +22,3 @@ OsgiKeys.exportPackage := Seq(
 
 OsgiKeys.additionalHeaders += 
   ("Import-Package" -> "!javax.media.jai.*,!com.apple.*,!com.sun.*,!org.apache.*,!org.bouncycastle.*,!org.mozilla.*,!org.w3c.dom.*,*")
-
-

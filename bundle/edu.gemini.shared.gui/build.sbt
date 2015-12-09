@@ -8,8 +8,9 @@ name := "edu.gemini.shared.gui"
 
 unmanagedJars in Compile ++= Seq(
   new File(baseDirectory.value, "../../lib/bundle/com-jgoodies-looks_2.10-2.4.1.jar"),
-  new File(baseDirectory.value, "../../lib/bundle/org-jdesktop-swingx_2.10-1.6.4.jar"),
-  new File(baseDirectory.value, "../../lib/bundle/scala-swing_2.10-2.0.0-SNAPSHOT.jar"))
+  new File(baseDirectory.value, "../../lib/bundle/org-jdesktop-swingx_2.10-1.6.4.jar"))
+
+libraryDependencies += "org.scala-lang.modules" %% "scala-swing" % "2.0.0-M2"
 
 osgiSettings
 

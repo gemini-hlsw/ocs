@@ -1,12 +1,12 @@
 package edu.gemini.pit.util
 
-import org.specs2.mutable.{After, SpecificationWithJUnit}
+import org.specs2.mutable.{After, Specification}
 import java.io.{FileInputStream, FileOutputStream, File}
 
 import scalaz._
 import Scalaz._
 
-class PDFSpec extends SpecificationWithJUnit {
+class PDFSpec extends Specification {
   val tempDir = System.getProperty("java.io.tmp")
 
   "The PDF Object" should {
