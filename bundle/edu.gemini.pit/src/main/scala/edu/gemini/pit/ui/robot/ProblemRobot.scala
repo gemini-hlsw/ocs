@@ -80,11 +80,12 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
 
     lazy val all = {
       val ps =
-        List(noObs, nonUpdatedInvestigatorName, titleCheck, band3option, abstractCheck, tacCategoryCheck, keywordCheck, attachmentCheck, attachmentValidityCheck, attachmentSizeCheck, missingObsDetailsCheck, duplicateInvestigatorCheck, ftReviewerOrMentor, ftAffiliationMismatch).flatten ++
+        List(noObs, nonUpdatedInvestigatorName, titleCheck, band3option, abstractCheck, tacCategoryCheck, keywordCheck, attachmentCheck, attachmentValidityCheck,
+          attachmentSizeCheck, missingObsDetailsCheck, duplicateInvestigatorCheck, ftReviewerOrMentor, ftAffiliationMismatch).flatten ++
           TimeProblems(p, s).all ++
           TimeProblems.partnerZeroTimeRequest(p, s) ++
           TacProblems(p, s).all ++
-          List(incompleteInvestigator, missingObsElementCheck, cfCheck, emptyTargetCheck, emptyEphemerisCheck, initialEphemerisCheck, finalEphemerisCheck, tooTargetsAndNoActivation,
+          List(incompleteInvestigator, missingObsElementCheck, cfCheck, emptyTargetCheck, emptyEphemerisCheck, initialEphemerisCheck, finalEphemerisCheck,
             badGuiding, badVisibility, iffyVisibility, singlePointEphemerisCheck, minTimeCheck, wrongSite, band3Orphan2, gpiCheck).flatten
       ps.sorted
     }
@@ -161,12 +162,6 @@ class ProblemRobot(s: ShellAdvisor) extends Robot {
       if t.isEmpty
       if !s.catalogHandler.state.contains(t)
       msg = s"""Target "${t.name}" appears to be empty."""
-    } yield new Problem(Severity.Error, msg, "Targets", s.inTargetsView(_.edit(t)))
-
-    private lazy val tooTargetsAndNoActivation = for {
-      t @ TooTarget(_, _) <- p.targets
-      if Proposal.toOChoice(p.some).exists(_ == ToOChoice.None)
-      msg = "ToO targets not allowed in non-ToO proposals. Please remove them or select a ToO Activation mode"
     } yield new Problem(Severity.Error, msg, "Targets", s.inTargetsView(_.edit(t)))
 
     lazy val utc = new SimpleDateFormat("dd-MMM-yyyy")

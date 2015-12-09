@@ -208,8 +208,7 @@ class ObsListView(shellAdvisor:ShellAdvisor, band:Band, queueLookup: Target => U
     lazy val addTarget = ToolButton(ICON_SIDEREAL, ICON_SIDEREAL_DIS, "Add Target") {
       for {
         p            <- panel.model
-        isTooDefined  = Proposal.toOChoice(ObsListView.this.model).exists(_ != ToOChoice.None)
-        t            <- TargetEditor.open(p.semester, None, canEdit, isTooDefined, panel)
+        t            <- TargetEditor.open(p.semester, None, canEdit, panel)
       } {
         val p0 = Proposal.targets.mod(ts => t :: ts, p)
         val p1 = Proposal.observations.mod(os => templateObs.copy(target = Some(t)) :: os, p0)
@@ -351,8 +350,7 @@ class ObsListView(shellAdvisor:ShellAdvisor, band:Band, queueLookup: Target => U
         for {
           m            <- panel.model
           olm          <- model
-          isTooDefined  = Proposal.toOChoice(ObsListView.this.model).exists(_ != ToOChoice.None)
-          newT         <- TargetEditor.open(Semester.current, tg.t, canEdit, isTooDefined, panel)
+          newT         <- TargetEditor.open(Semester.current, tg.t, canEdit, panel)
         } {
 
           val included = ~model.map(_.childrenOf(tg))

@@ -49,8 +49,7 @@ class TargetView(val shellAdvisor:ShellAdvisor) extends BorderPanel with BoundVi
   def edit(t:Target) {
     for {
       m            <- model
-      isTooDefined  = Proposal.toOChoice(model.map(_.proposal)).exists(_ != ToOChoice.None)
-      t0           <- TargetEditor.open(semesterLens.get(m), Some(t), canEdit, isTooDefined, panel)
+      t0           <- TargetEditor.open(semesterLens.get(m), Some(t), canEdit, panel)
     } {
       val ts = targetLens.get(m)
       val i = ts.indexOf(t)
@@ -260,8 +259,7 @@ class TargetView(val shellAdvisor:ShellAdvisor) extends BorderPanel with BoundVi
       def apply() {
         for {
           m             <- model
-          isTooDefined   = Proposal.toOChoice(model.map(_.proposal)).exists(_ != ToOChoice.None)
-          t             <- TargetEditor.open(semester, None, canEdit, isTooDefined, panel)
+          t             <- TargetEditor.open(semester, None, canEdit, panel)
           ts             = targetLens.get(m)
         } model = Some(targetLens.set(m, t :: ts))
       }
