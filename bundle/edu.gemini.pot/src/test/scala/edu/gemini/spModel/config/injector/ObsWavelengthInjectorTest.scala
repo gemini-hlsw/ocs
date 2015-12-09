@@ -5,7 +5,7 @@ import org.junit.Test
 import org.junit.Assert._
 import java.beans.PropertyDescriptor
 
-import scala.reflect.BeanProperty
+import scala.beans.BeanProperty
 import edu.gemini.spModel.obscomp.InstConstants.OBSERVING_WAVELENGTH_PROP
 import edu.gemini.spModel.seqcomp.SeqConfigNames.INSTRUMENT_CONFIG_NAME
 import edu.gemini.spModel.data.config._
@@ -41,7 +41,7 @@ class ObsWavelengthInjectorTest {
     val cur  = new DefaultConfig
     val prev = new DefaultConfig
 
-    insert(Filter(1.0), Disperser(2.0, true), cur)
+    insert(Filter(1.0), Disperser(2.0, useFilter = true), cur)
 
     SimpleInstrument.injector.inject(cur, prev)
     verify(1.0, cur)  // use the filter value

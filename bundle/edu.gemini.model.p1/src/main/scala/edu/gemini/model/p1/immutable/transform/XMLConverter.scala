@@ -41,12 +41,12 @@ object XMLConverter {
     // Merge two step results as parent/children
     val parentGrouping = (p:StepResult, ch:StepResult) => StepResult(List(p.change, ch.change).flatten, Elem(p.node.head.prefix, p.node.head.label, p.node.head.attributes, p.node.head.scope, false, ch.node:_*))
 
-    def flatten(s:List[Result]):Result =  {
+    def flatten(s:List[Result]):Result = {
       val vl = s.sequence[({type λ[α]=ValidationNel[String, α]})#λ, StepResult]
       vl.map(_.foldLeft(zeroStepResult)(_ |+| _))
     }
 
-    def join(s:List[Result]):Result =  {
+    def join(s:List[Result]):Result = {
       val vl = s.sequence[({type λ[α]=ValidationNel[String, α]})#λ, StepResult]
       vl.map(_.foldLeft(zeroStepResult)(siblingGrouping))
     }
