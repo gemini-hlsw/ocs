@@ -1,8 +1,8 @@
-package edu.gemini.dataman.query
+package edu.gemini.gsa.query
 
 import argonaut.Argonaut._
 import argonaut._
-import edu.gemini.dataman.query.JsonCodecs._
+import edu.gemini.gsa.query.JsonCodecs._
 import edu.gemini.spModel.dataset.DatasetQaState
 import edu.gemini.spModel.dataset.DatasetQaState._
 import org.specs2.mutable.Specification

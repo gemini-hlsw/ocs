@@ -1,7 +1,7 @@
 package edu.gemini.dataman.core
 
 import edu.gemini.dataman.core.DmanFailure._
-import edu.gemini.dataman.query.GsaQueryError
+import edu.gemini.gsa.query.GsaQueryError
 
 import scalaz._
 import Scalaz._

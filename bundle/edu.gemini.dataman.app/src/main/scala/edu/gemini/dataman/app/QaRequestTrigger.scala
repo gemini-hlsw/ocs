@@ -1,6 +1,7 @@
 package edu.gemini.dataman.app
 
 import edu.gemini.dataman.core._
+import edu.gemini.gsa.core.QaRequest
 import edu.gemini.pot.sp.{ISPProgram, SPCompositeChange}
 import edu.gemini.pot.spdb.{ProgramEvent, ProgramEventListener, IDBTriggerAction, IDBTriggerCondition, IDBDatabaseService}
 import edu.gemini.spModel.dataset.{DatasetQaState, DatasetLabel}

@@ -1,9 +1,11 @@
 package edu.gemini.dataman.app
 
 import edu.gemini.dataman.app.ModelActions._
-import edu.gemini.dataman.core.GsaHost.{Archive, Summit}
+import edu.gemini.dataman._
+import edu.gemini.gsa.core.GsaRecord
+import edu.gemini.gsa.query.{GsaRecordQuery, GsaResponse, GsaHost}
+import GsaHost.{Archive, Summit}
 import edu.gemini.dataman.core._
-import edu.gemini.dataman.query.{GsaRecordQuery, GsaResponse}
 import edu.gemini.pot.sp.{SPObservationID, ISPObservation, ISPProgram}
 import edu.gemini.pot.spdb.IDBDatabaseService
 import edu.gemini.spModel.core.{Site, SPProgramID}
@@ -14,7 +16,6 @@ import scala.collection.JavaConverters._
 
 import scalaz._
 import Scalaz._
-
 
 /** A factory for GSA server poll actions.
   */

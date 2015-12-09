@@ -1,4 +1,4 @@
-package edu.gemini.dataman.core
+package edu.gemini.gsa.core
 
 import edu.gemini.spModel.dataset.DatasetLabel
 

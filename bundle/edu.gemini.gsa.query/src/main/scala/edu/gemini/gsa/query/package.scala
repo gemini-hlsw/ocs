@@ -1,6 +1,9 @@
-package edu.gemini.dataman
+package edu.gemini.gsa
 
-import edu.gemini.dataman.core.{DmanAction, DmanFailure}
+import java.util.concurrent.atomic.AtomicReference
+import java.util.logging.Level
+
+//import edu.gemini.dataman.core.{DmanAction, DmanFailure}
 
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -8,6 +11,15 @@ import java.time.format.DateTimeFormatter
 import scalaz.\/
 
 package object query {
+
+  protected [query] val DetailLevelRef = new AtomicReference(Level.INFO)
+  protected [query] val JsonLevelRef   = new AtomicReference(Level.FINE)
+
+  def DetailLevel: Level                = DetailLevelRef.get
+  def DetailLevel_=(level: Level): Unit = DetailLevelRef.set(level)
+
+  def JsonLevel: Level                = JsonLevelRef.get
+  def JsonLevel_=(level: Level): Unit = JsonLevelRef.set(level)
 
   type GsaResponse[A] = GsaQueryError \/ A
 
@@ -20,8 +32,4 @@ package object query {
   val TimeParse  = DateTimeFormatter.ofPattern("uuuu-MM-dd HH:mm:ss.SSSSSSxxx")
   val TimeFormat = TimeParse.withZone(ZoneId.of("Z"))
 
-  implicit class DmanOps[A](r: => GsaResponse[A]) {
-    def liftDman: DmanAction[A] =
-      r.leftMap(DmanFailure.QueryFailure).liftDman
-  }
 }

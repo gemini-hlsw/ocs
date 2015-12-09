@@ -1,5 +1,7 @@
 package edu.gemini.dataman.core
 
+import edu.gemini.gsa.query.GsaHost
+import edu.gemini.gsa.query.GsaAuth
 import edu.gemini.spModel.core.Site
 
 import scalaz._

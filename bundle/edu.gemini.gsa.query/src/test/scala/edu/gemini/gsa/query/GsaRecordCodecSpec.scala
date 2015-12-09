@@ -1,9 +1,9 @@
-package edu.gemini.dataman.query
+package edu.gemini.gsa.query
 
 import argonaut.Argonaut._
 import argonaut._
-import edu.gemini.dataman.core.GsaRecord
-import edu.gemini.dataman.query.JsonCodecs._
+import edu.gemini.gsa.core.GsaRecord
+import edu.gemini.gsa.query.JsonCodecs._
 import edu.gemini.spModel.dataset.DatasetQaState._
 import edu.gemini.spModel.dataset.{DatasetGsaState, DatasetLabel, DatasetMd5}
 import org.specs2.mutable.Specification
@@ -11,7 +11,6 @@ import org.specs2.mutable.Specification
 import java.time.Instant
 
 import scalaz._
-
 
 object GsaRecordCodecSpec extends Specification {
   val json0 =

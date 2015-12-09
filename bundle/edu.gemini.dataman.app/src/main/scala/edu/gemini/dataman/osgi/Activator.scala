@@ -1,7 +1,9 @@
 package edu.gemini.dataman.osgi
 
 import edu.gemini.dataman.app.Dataman
-import edu.gemini.dataman.core.{PollPeriod, DmanConfig, GsaAuth, GsaHost}
+import edu.gemini.gsa.query.GsaHost
+import edu.gemini.gsa.query.GsaAuth
+import edu.gemini.dataman.core.{PollPeriod, DmanConfig}
 import edu.gemini.pot.spdb.IDBDatabaseService
 import edu.gemini.spModel.core.catchingNonFatal
 import edu.gemini.spModel.core.osgi.SiteProperty

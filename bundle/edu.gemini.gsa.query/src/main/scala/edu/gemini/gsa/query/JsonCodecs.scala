@@ -1,7 +1,4 @@
-package edu.gemini.dataman.query
-
-import edu.gemini.dataman.core.{GsaRecord, QaRequest, QaResponse}
-import edu.gemini.spModel.dataset.{DatasetGsaState, DatasetLabel, DatasetMd5, DatasetQaState}
+package edu.gemini.gsa.query
 
 import argonaut._
 import argonaut.Argonaut._
@@ -12,13 +9,17 @@ import java.time.Instant
 import java.time.format.DateTimeParseException
 import java.time.temporal.{TemporalAccessor, TemporalQuery}
 
+import edu.gemini.spModel.dataset.{DatasetMd5, DatasetLabel, DatasetQaState, DatasetGsaState}
+
+import edu.gemini.gsa.core.{GsaRecord, QaRequest, QaResponse}
+
 import scalaz._
 import Scalaz._
 
 /** A collection of JSON codecs for existing Gemini Java types, as they are
   * encoded by the GSA server.
   */
-private[query] object JsonCodecs {
+object JsonCodecs {
 
   // *** DatasetMd5 ***
 

@@ -3,6 +3,7 @@ package edu.gemini.dataman.app
 import edu.gemini.dataman.DetailLevel
 import edu.gemini.dataman.core.DmanId.{Dset, Obs, Prog}
 import edu.gemini.dataman.core._
+import edu.gemini.gsa.core.QaRequest
 import edu.gemini.pot.spdb.IDBDatabaseService
 import edu.gemini.util.security.principal.StaffPrincipal
 

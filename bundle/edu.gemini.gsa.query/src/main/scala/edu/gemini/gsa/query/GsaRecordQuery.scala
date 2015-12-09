@@ -1,11 +1,12 @@
-package edu.gemini.dataman.query
+package edu.gemini.gsa.query
 
-import edu.gemini.dataman.core.{GsaHost, GsaRecord}
-import edu.gemini.dataman.query.JsonCodecs._
+import edu.gemini.gsa.query.JsonCodecs._
 import edu.gemini.pot.sp.SPObservationID
 import edu.gemini.skycalc.ObservingNight
 import edu.gemini.spModel.core.{SPProgramID, Site}
 import edu.gemini.spModel.dataset.DatasetLabel
+
+import edu.gemini.gsa.core.GsaRecord
 
 import java.net.URL
 import java.util.{Calendar, GregorianCalendar}

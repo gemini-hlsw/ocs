@@ -1,7 +1,8 @@
 package edu.gemini.dataman.app
 
 import edu.gemini.dataman.core.DmanId.{Obs, Dset, Prog}
-import edu.gemini.dataman.core.{DmanId, Arbitraries}
+import edu.gemini.dataman.core.DmanId
+import edu.gemini.gsa.core.Arbitraries
 import edu.gemini.pot.sp.SPObservationID
 import edu.gemini.spModel.core.SPProgramID
 import edu.gemini.spModel.dataset.DatasetLabel

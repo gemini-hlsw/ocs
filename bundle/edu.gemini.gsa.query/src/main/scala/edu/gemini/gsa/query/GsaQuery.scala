@@ -1,9 +1,7 @@
-package edu.gemini.dataman.query
+package edu.gemini.gsa.query
 
-import edu.gemini.dataman.{DetailLevel, JsonLevel}
-import edu.gemini.dataman.core.GsaAuth
-import edu.gemini.dataman.query.GsaQueryError._
 import edu.gemini.spModel.core.catchingNonFatal
+import edu.gemini.gsa.query.GsaQueryError._
 
 import argonaut._
 import Argonaut._
@@ -25,7 +23,7 @@ import Scalaz._
   *
   * Someday, we'd like to use the http4s client code to do this type of
   * thing. */
-private[query] object GsaQuery {
+private [query] object GsaQuery {
   private val Log      = Logger.getLogger(GsaRecordQuery.getClass.getName)
   private val Cset     = "UTF-8"
 
