@@ -74,8 +74,8 @@ trait ParamSetCodec[A] { outer =>
       def decode(ps: ParamSet): PioError \/ A =
         outer.decode(ps).flatMap { a =>
           Option(ps.getParamSet(key)) match {
-            case None     => \/-(lens.set(a, none))
-            case Some(ps) => psc.decode(ps).map(b => lens.set(a, some(b)))
+            case None    => \/-(lens.set(a, none))
+            case Some(p) => psc.decode(p).map(b => lens.set(a, some(b)))
           }
         }
     }
