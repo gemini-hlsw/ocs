@@ -163,5 +163,3 @@ trait Arbitraries {
     Arbitrary(arbitrary[Short].map(n => Math.abs(n).nm))
 
 }
-
-

@@ -6,7 +6,6 @@ name := "edu.gemini.shared.skyobject"
 
 // version set in ThisBuild
 
-
 osgiSettings
 
 ocsBundleSettings
@@ -20,4 +19,3 @@ OsgiKeys.dynamicImportPackage := Seq("")
 OsgiKeys.exportPackage := Seq(
   "edu.gemini.shared.skyobject",
   "edu.gemini.shared.skyobject.coords")
-        
