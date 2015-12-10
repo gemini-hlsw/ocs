@@ -29,7 +29,7 @@ object DatasetQaStateCodecSpec extends Specification {
     "fail for invalid qa states" in {
       Parse.decodeEither[DatasetQaState](s""""FOO"""") match {
         case -\/(m) => m.startsWith(invalidDatasetQaState("FOO"))
-        case _      => failure("expected to fail on input `FOO`")
+        case _      => sys.error("expected to fail on input `FOO`")
       }
     }
   }

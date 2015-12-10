@@ -31,7 +31,7 @@ object TimeInstanceCodecSpec extends Specification {
     "fail for invalid time strings" in {
       Parse.decodeEither[Instant](""""2011-12-03 10:15:30"""") match {
         case -\/(m) => m.startsWith(invalidTimeInstance("2011-12-03 10:15:30"))
-        case _      => failure("expected to fail on input `2011-12-03 10:15:30`")
+        case _      => sys.error("expected to fail on input `2011-12-03 10:15:30`")
       }
     }
   }
