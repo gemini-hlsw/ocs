@@ -43,8 +43,11 @@ object GsaColumn {
     }
   }
 
-  abstract class CoordinateColumn[T](f: String => T) extends GsaColumn[T] {
-    def parse(value: String) = parseVal(f, value.replace(' ', ':'))
+  abstract class CoordinateColumn[T](f: String => Option[T]) extends GsaColumn[T] {
+    def parse(value: String) = f(value.replace(' ', ':')) match {
+      case Some(x) => Right(x)
+      case None    => Left(couldntParse(value))
+    }
   }
 
   abstract class OptionalValueColumn[T](f: String => T) extends GsaColumn[Option[T]] {
@@ -55,8 +58,8 @@ object GsaColumn {
       }
   }
 
-  def string2Ra(s: String):RightAscension = RightAscension.fromAngle(Angle.parseHMS(s).getOrElse(Angle.zero))
-  def string2Dec(s: String):Declination = Declination.fromAngle(Angle.parseDMS(s).getOrElse(Angle.zero)).getOrElse(Declination.zero)
+  def string2Ra(s: String):Option[RightAscension] = Angle.parseHMS(s).toOption.map(RightAscension.fromAngle)
+  def string2Dec(s: String):Option[Declination] = Angle.parseDMS(s).toOption.flatMap(Declination.fromAngle)
 
   case object DSET_NAME extends RequiredStringColumn {
     val name = "Data Superset Name"
