@@ -41,8 +41,11 @@ final class CaCommandSenderImpl implements CaCommandSender {
         this.epicsWriter = new EpicsWriterImpl(epicsService);
 
         if (cadName != null) {
-            dirChannel = epicsWriter.getEnumChannel(cadName + DIR_SUFFIX,
-                    CadDirective.class);
+            try {
+                dirChannel = epicsWriter.getEnumChannel(cadName + DIR_SUFFIX, CadDirective.class);
+            } catch(Throwable e) {
+                LOG.warning(e.getMessage());
+            }
         }
 
         stringParameters = new HashMap<>();
@@ -116,12 +119,22 @@ final class CaCommandSenderImpl implements CaCommandSender {
     @Override
     public CaParameter<Integer> addInteger(String name, String channel)
             throws CaException {
-        return addInteger(name, channel, null);
+        return addInteger(name, channel, null, true);
+    }
+
+    @Override
+    public CaParameter<Integer> addInteger(String name, String channel, boolean isCADParameter) throws CaException {
+        return addInteger(name, channel, null, isCADParameter);
     }
 
     @Override
     public CaParameter<Integer> addInteger(String name, String channel,
             String description) throws CaException {
+        return addInteger(name, channel, description, true);
+    }
+
+    @Override
+    public CaParameter<Integer> addInteger(String name, String channel, String description, boolean isCADParameter) throws CaException {
         CaParameterImpl<Integer> param = integerParameters.get(name);
         if (param == null) {
             if (alreadyExist(name)) {
@@ -129,7 +142,7 @@ final class CaCommandSenderImpl implements CaCommandSender {
                         "Parameter already exists with a different type.");
             } else {
                 param = CaParameterImpl.createIntegerParameter(name, channel,
-                        description, epicsWriter);
+                        description, epicsWriter, isCADParameter);
                 integerParameters.put(name, param);
             }
         } else {
@@ -144,12 +157,22 @@ final class CaCommandSenderImpl implements CaCommandSender {
     @Override
     public CaParameter<Double> addDouble(String name, String channel)
             throws CaException {
-        return addDouble(name, channel, null);
+        return addDouble(name, channel, null, true);
+    }
+
+    @Override
+    public CaParameter<Double> addDouble(String name, String channel, boolean isCADParameter) throws CaException {
+        return addDouble(name, channel, null, isCADParameter);
     }
 
     @Override
     public CaParameter<Double> addDouble(String name, String channel,
             String description) throws CaException {
+        return addDouble(name, channel, description, true);
+    }
+
+    @Override
+    public CaParameter<Double> addDouble(String name, String channel, String description, boolean isCADParameter) throws CaException {
         CaParameterImpl<Double> param = doubleParameters.get(name);
         if (param == null) {
             if (alreadyExist(name)) {
@@ -157,7 +180,7 @@ final class CaCommandSenderImpl implements CaCommandSender {
                         "Parameter already exists with a different type.");
             } else {
                 param = CaParameterImpl.createDoubleParameter(name, channel,
-                        description, epicsWriter);
+                        description, epicsWriter, isCADParameter);
                 doubleParameters.put(name, param);
             }
         } else {
@@ -172,12 +195,22 @@ final class CaCommandSenderImpl implements CaCommandSender {
     @Override
     public CaParameter<Float> addFloat(String name, String channel)
             throws CaException {
-        return addFloat(name, channel, null);
+        return addFloat(name, channel, null, true);
+    }
+
+    @Override
+    public CaParameter<Float> addFloat(String name, String channel, boolean isCADParameter) throws CaException {
+        return addFloat(name, channel, null, isCADParameter);
     }
 
     @Override
     public CaParameter<Float> addFloat(String name, String channel,
             String description) throws CaException {
+        return addFloat(name, channel, description, true);
+    }
+
+    @Override
+    public CaParameter<Float> addFloat(String name, String channel, String description, boolean isCADParameter) throws CaException {
         CaParameterImpl<Float> param = floatParameters.get(name);
         if (param == null) {
             if (alreadyExist(name)) {
@@ -185,7 +218,7 @@ final class CaCommandSenderImpl implements CaCommandSender {
                         "Parameter already exists with a different type.");
             } else {
                 param = CaParameterImpl.createFloatParameter(name, channel,
-                        description, epicsWriter);
+                        description, epicsWriter, isCADParameter);
                 floatParameters.put(name, param);
             }
         } else {
@@ -200,12 +233,22 @@ final class CaCommandSenderImpl implements CaCommandSender {
     @Override
     public CaParameter<String> addString(String name, String channel)
             throws CaException {
-        return addString(name, channel, null);
+        return addString(name, channel, null, true);
+    }
+
+    @Override
+    public CaParameter<String> addString(String name, String channel, boolean isCADParameter) throws CaException {
+        return addString(name, channel, null, isCADParameter);
     }
 
     @Override
     public CaParameter<String> addString(String name, String channel,
             String description) throws CaException {
+        return addString(name, channel, description, true);
+    }
+
+    @Override
+    public CaParameter<String> addString(String name, String channel, String description, boolean isCADParameter) throws CaException {
         CaParameterImpl<String> param = stringParameters.get(name);
         if (param == null) {
             if (alreadyExist(name)) {

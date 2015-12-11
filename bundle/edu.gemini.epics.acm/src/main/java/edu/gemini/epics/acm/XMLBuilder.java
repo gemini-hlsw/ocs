@@ -41,6 +41,7 @@ public final class XMLBuilder {
     private static final String XMLSCHEMA_URL = "http://www.w3.org/2001/XMLSchema";
 
     public XMLBuilder() {
+        LOG.info("XMLBuilder created");
         tops = new HashMap<>();
         service = CaService.getInstance();
     }
@@ -74,6 +75,7 @@ public final class XMLBuilder {
             um.setSchema(schema); // to enable validation
             records = (Records) um.unmarshal(iStream);
         } catch (Exception ex) {
+            LOG.warning("XMLBuilder.fromStream: Problem parsing XML");
             throw new IllegalArgumentException("Problem parsing XML", ex);
         }
 
@@ -219,20 +221,20 @@ public final class XMLBuilder {
                     switch (par.getType()) {
                     case DOUBLE:
                         cs.addDouble(par.getName(), top + par.getChannel(),
-                                par.getDescription());
+                                par.getDescription(), par.isIsCAD()==null || par.isIsCAD());
                         break;
                     case FLOAT:
                         cs.addFloat(par.getName(), top + par.getChannel(),
-                                par.getDescription());
+                                par.getDescription(), par.isIsCAD()==null || par.isIsCAD());
                         break;
                     case INTEGER:
                         cs.addInteger(par.getName(), top + par.getChannel(),
-                                par.getDescription());
+                                par.getDescription(), par.isIsCAD()==null || par.isIsCAD());
                         break;
                     case STRING:
                     default:
                         cs.addString(par.getName(), top + par.getChannel(),
-                                par.getDescription());
+                                par.getDescription(), par.isIsCAD()==null || par.isIsCAD());
                         break;
 
                     }

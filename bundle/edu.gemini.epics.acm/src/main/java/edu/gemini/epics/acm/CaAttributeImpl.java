@@ -3,6 +3,7 @@ package edu.gemini.epics.acm;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.logging.Logger;
 
 import com.google.common.collect.ImmutableList;
 
@@ -12,6 +13,7 @@ import edu.gemini.epics.api.ChannelListener;
 import gov.aps.jca.CAException;
 
 final class CaAttributeImpl<T> implements CaAttribute<T> {
+    private static final Logger LOG = Logger.getLogger(CaAttributeImpl.class.getName());
 
     private EpicsReader epicsReader;
     private ChannelListener<T> channelListener;
@@ -36,35 +38,39 @@ final class CaAttributeImpl<T> implements CaAttribute<T> {
 
     void bind(ReadOnlyClientEpicsChannel<T> epicsChannel)
             throws CAException {
-        this.epicsChannel = epicsChannel;
-        channelListener = new ChannelListener<T>() {
+        if(epicsChannel!=null) {
+            this.epicsChannel = epicsChannel;
+            channelListener = new ChannelListener<T>() {
 
-            @Override
-            public void valueChanged(String arg0, List<T> arg1) {
-                if (arg1 != null) {
-                    if (arg1.isEmpty()) {
-                        setValues(new ArrayList<T>());
-                        setValidity(true);
-                    } else {
-                        if (CaAttributeImpl.this.type.isInstance(arg1.get(0))) {
-                            List<T> vals = new ArrayList<>();
-                            for (T v : arg1) {
-                                vals.add(v);
-                            }
-
-                            setValues(vals);
+                @Override
+                public void valueChanged(String arg0, List<T> arg1) {
+                    if (arg1 != null) {
+                        if (arg1.isEmpty()) {
+                            setValues(new ArrayList<T>());
                             setValidity(true);
                         } else {
-                            setValidity(false);
-                        }
-                    }
-                } else {
-                    setValidity(false);
-                }
+                            if (CaAttributeImpl.this.type.isInstance(arg1.get(0))) {
+                                List<T> vals = new ArrayList<>();
+                                for (T v : arg1) {
+                                    vals.add(v);
+                                }
 
-            }
-        };
-        this.epicsChannel.registerListener(channelListener);
+                                setValues(vals);
+                                setValidity(true);
+                            } else {
+                                setValidity(false);
+                            }
+                        }
+                    } else {
+                        setValidity(false);
+                    }
+
+                }
+            };
+            this.epicsChannel.registerListener(channelListener);
+        } else {
+            LOG.warning("Unable to bind to channel " + channel);
+        }
     }
 
     synchronized private void setValues(List<T> newVals) {
@@ -145,12 +151,13 @@ final class CaAttributeImpl<T> implements CaAttribute<T> {
 
     public void unbind() throws CAException {
         assert (epicsReader != null);
-        assert (epicsChannel != null);
         assert (channelListener != null);
 
-        epicsChannel.unRegisterListener(channelListener);
+        if(epicsChannel!=null) {
+            epicsChannel.unRegisterListener(channelListener);
+            epicsChannel = null;
+        }
         channelListener = null;
-        epicsChannel = null;
         epicsReader = null;
     }
 
@@ -159,7 +166,12 @@ final class CaAttributeImpl<T> implements CaAttribute<T> {
             throws CAException {
         CaAttributeImpl<Double> attr = new CaAttributeImpl<>(name,
                 channel, Double.class, description, epicsReader);
-        attr.bind(epicsReader.getDoubleChannel(channel));
+        try {
+            attr.bind(epicsReader.getDoubleChannel(channel));
+        } catch(Throwable e) {
+            LOG.warning(e.getMessage());
+        }
+
         return attr;
     }
 
@@ -168,7 +180,12 @@ final class CaAttributeImpl<T> implements CaAttribute<T> {
             throws CAException {
         CaAttributeImpl<Float> attr = new CaAttributeImpl<>(name, channel,
                 Float.class, description, epicsReader);
-        attr.bind(epicsReader.getFloatChannel(channel));
+        try {
+            attr.bind(epicsReader.getFloatChannel(channel));
+        } catch(Throwable e) {
+            LOG.warning(e.getMessage());
+        }
+
         return attr;
     }
 
@@ -177,7 +194,12 @@ final class CaAttributeImpl<T> implements CaAttribute<T> {
             throws CAException {
         CaAttributeImpl<Integer> attr = new CaAttributeImpl<>(name,
                 channel, Integer.class, description, epicsReader);
-        attr.bind(epicsReader.getIntegerChannel(channel));
+        try {
+            attr.bind(epicsReader.getIntegerChannel(channel));
+        } catch(Throwable e) {
+            LOG.warning(e.getMessage());
+        }
+
         return attr;
     }
 
@@ -186,7 +208,12 @@ final class CaAttributeImpl<T> implements CaAttribute<T> {
             throws CAException {
         CaAttributeImpl<String> attr = new CaAttributeImpl<>(name,
                 channel, String.class, description, epicsReader);
-        attr.bind(epicsReader.getStringChannel(channel));
+        try {
+            attr.bind(epicsReader.getStringChannel(channel));
+        } catch(Throwable e) {
+            LOG.warning(e.getMessage());
+        }
+
         return attr;
     }
 
@@ -195,7 +222,12 @@ final class CaAttributeImpl<T> implements CaAttribute<T> {
             EpicsReader epicsReader) throws CAException {
         CaAttributeImpl<T> attr = new CaAttributeImpl<>(name, channel,
                 enumType, description, epicsReader);
-        attr.bind(epicsReader.getEnumChannel(channel, enumType));
+        try {
+            attr.bind(epicsReader.getEnumChannel(channel, enumType));
+        } catch(Throwable e) {
+            LOG.warning(e.getMessage());
+        }
+
         return attr;
     }
 
