@@ -120,15 +120,15 @@ class ShellAdvisor(
     // Add root listeners. Note that the robots don't affect undo status when they manipulate the model.
     addRoot(targetImportAction)
     addRoot(targetExportAction)
-    addRoot(AgsRobot, false)
-    addRoot(VisibilityRobot, false)
-    addRoot(GsaRobot, false)
-    addRoot(catalogHandler, false)
-    addRoot(problemHandler, false)
+    addRoot(AgsRobot, undoable = false)
+    addRoot(VisibilityRobot, undoable = false)
+    addRoot(GsaRobot, undoable = false)
+    addRoot(catalogHandler, undoable = false)
+    addRoot(problemHandler, undoable = false)
 
     // Update the title bar if the mode or model change
-    shell.listen(updateTitle)
-    AppPreferences.addListener(_ => updateTitle)
+    shell.listen(updateTitle())
+    AppPreferences.addListener(_ => updateTitle())
 
     // Set the frame icon, useful for Windows and Linux
     if (!Platform.IS_MAC) {
@@ -226,11 +226,12 @@ class ShellAdvisor(
 
     context.actionManager.add(helpMenu,
       Some(new BrowseAction("http://www.gemini.edu/node/11760", "Phase I Tool Help")),
-      Some(new BrowseAction(URLConstants.GET_TEMPLATES._1, URLConstants.GET_TEMPLATES._2))
+      Some(new BrowseAction(URLConstants.GET_TEMPLATES._1, URLConstants.GET_TEMPLATES._2)),
+      Some(new BrowseAction(URLConstants.OPEN_ITC._1, URLConstants.OPEN_ITC._2))
     )
 
     // Debug Menu -- for developers only
-    Option(System.getProperty("edu.gemini.pit.test")).map {
+    Option(System.getProperty("edu.gemini.pit.test")).foreach {
       _ =>
         val debugMenu = Menu("Debug", NextSiblingOf, Some(helpMenu))
         context.actionManager.add(debugMenu,
