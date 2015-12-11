@@ -41,6 +41,7 @@ public final class XMLBuilder {
     private static final String XMLSCHEMA_URL = "http://www.w3.org/2001/XMLSchema";
 
     public XMLBuilder() {
+        LOG.info("XMLBuilder created");
         tops = new HashMap<>();
         service = CaService.getInstance();
     }
@@ -74,6 +75,7 @@ public final class XMLBuilder {
             um.setSchema(schema); // to enable validation
             records = (Records) um.unmarshal(iStream);
         } catch (Exception ex) {
+            LOG.warning("XMLBuilder.fromStream: Problem parsing XML");
             throw new IllegalArgumentException("Problem parsing XML", ex);
         }
 
