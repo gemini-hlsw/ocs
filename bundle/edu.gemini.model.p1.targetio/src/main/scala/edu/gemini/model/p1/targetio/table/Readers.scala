@@ -1,8 +1,6 @@
 package edu.gemini.model.p1.targetio.table
 
-import edu.gemini.model.p1.immutable._
-import edu.gemini.model.p1.{mutable => M}
-import edu.gemini.spModel.core.{MagnitudeSystem, MagnitudeBand, Magnitude}
+import edu.gemini.spModel.core._
 
 object Readers {
   def readNone[T]: PartialFunction[Any, Option[T]] = {
@@ -34,8 +32,8 @@ object Readers {
   val DecimalNumber = """([-+]?\d+(?:\.\d*)?)""".r
   val readFloating: PartialFunction[Any, Double] = {
     case DecimalNumber(s) => s.toDouble
-    case d: Double   => d
-    case f: Float    => f.toDouble
+    case d: Double        => d
+    case f: Float         => f.toDouble
   }
 
   val readDouble = readFloating orElse (readInt andThen { _.toDouble })
@@ -48,10 +46,15 @@ object Readers {
   }
 
   def readDegrees[T](f: Double => T): PartialFunction[Any, T] = readDouble andThen { f(_) }
+  def parseDegrees(d: Double): Angle = Angle.fromDegrees(d)
+  def parseSexigesimal(s: String): Angle = Angle.parseSexigesimal(s).getOrElse(Angle.zero)
+  val readRa: PartialFunction[Any, RightAscension] = (readSexigesimal(parseSexigesimal) orElse readDegrees(parseDegrees)) andThen (a => RightAscension.fromAngle(a))
+  val readDec: PartialFunction[Any, Declination] = (readSexigesimal(parseSexigesimal) orElse readDegrees(parseDegrees)) andThen (a => Declination.fromAngle(a).getOrElse(Declination.zero))
 
-  val readRa: PartialFunction[Any, HMS]  = readSexigesimal(HMS(_)) orElse readDegrees(HMS(_))
-  val readDec: PartialFunction[Any, DMS] = readSexigesimal(DMS(_)) orElse readDegrees(DMS(_))
+  //val readDec: PartialFunction[Any, Declination] = readSexigesimal(Angle.parseSexigesimal) orElse readDegrees(Angle.fromDegrees)
 
+  //val readRa: PartialFunction[Any, HMS]  = readSexigesimal(HMS(_)) orElse readDegrees(HMS(_))
+  //val readDec: PartialFunction[Any, DMS] = readSexigesimal(DMS(_)) orElse readDegrees(DMS(_))
 
   def readOptionalMagnitude(band: MagnitudeBand): PartialFunction[Any, Option[Magnitude]] =
     readOptionalDouble andThen { _.map(new Magnitude(_, band)) }

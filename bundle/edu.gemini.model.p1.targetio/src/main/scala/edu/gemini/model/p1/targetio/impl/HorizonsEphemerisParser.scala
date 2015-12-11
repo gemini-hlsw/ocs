@@ -6,6 +6,8 @@ import edu.gemini.model.p1.immutable.CoordinatesEpoch.J_2000
 
 import java.text.SimpleDateFormat
 
+import edu.gemini.spModel.core.{Angle, Coordinates, Declination, RightAscension}
+
 import util.parsing.combinator.JavaTokenParsers
 import io.Source
 import java.io.{InputStream, File}
@@ -65,14 +67,17 @@ object HorizonsEphemerisParser extends JavaTokenParsers {
 
   def sign: Parser[String] = """[-+]?""".r
 
-  def ra: Parser[HMS]        = coord(HMS(_,_,_,_))
-  def dec: Parser[DMS]       = coord(DMS(_,_,_,_))
+  val toRa: String => RightAscension = s => RightAscension.fromAngle(Angle.parseHMS(s).getOrElse(Angle.zero))
+  val toDec: String => Declination   = s => Declination.fromAngle(Angle.parseDMS(s).getOrElse(Angle.zero)).getOrElse(Declination.zero)
 
-  def coords: Parser[HmsDms] = ra~dec ^^ { case r~d => HmsDms(r, d) }
+  def ra: Parser[RightAscension]        = coord(toRa)
+  def dec: Parser[Declination]       = coord(toDec)
+
+  def coords: Parser[Coordinates] = ra~dec ^^ { case r~d => Coordinates(r, d) }
   def mag: Parser[Double]    = decimalNumber ^^ { _.toDouble }
 
-  private def coord[T](f: (Sign, Int, Int, Double) => T): Parser[T] =
-    sign~wholeNumber~wholeNumber~decimalNumber ^^ { case sn~h~m~s => f(Sign(sn), h.toInt, m.toInt, s.toDouble)}
+  private def coord[T](f: String => T): Parser[T] =
+    sign~wholeNumber~wholeNumber~decimalNumber ^^ { case sn~h~m~s => f(sn + h + m + s)}
 
   def element: Parser[EphemerisElement] = utc~coords~mag ^^ {
     case d~c~m => EphemerisElement(c, Some(m), d)

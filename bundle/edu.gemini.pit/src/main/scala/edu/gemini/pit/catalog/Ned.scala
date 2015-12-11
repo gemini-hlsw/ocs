@@ -5,6 +5,7 @@ import edu.gemini.model.p1.{ immutable => I, mutable => M }
 import java.net.URL
 import java.net.URLEncoder.{ encode => urlencode }
 
+import edu.gemini.spModel.core.{Declination, Angle, RightAscension, Coordinates}
 import votable._
 import java.util.UUID
 
@@ -36,17 +37,17 @@ class Ned private (val host: String) extends VOTableCatalog {
     kvs = table.fields.zip(row)
 
     // Local find function
-    find = (s: String) => kvs.find(_._1.ucd == Some(s)).map(_._2)
+    find = (s: String) => kvs.find(_._1.ucd.exists(_ == s)).map(_._2)
 
     // Switch to Option here to pull out data
     epoch                                   <- vot.definitions.map(_.cooSys.id) collect {
                                                 case "J2000" => M.CoordinatesEpoch.J_2000
                                               }
     name                                    <- find("meta.id;meta.main")
-    ra                                      <- find("pos.eq.ra;meta.main").flatMap(_.toDoubleOption)
-    dec                                     <- find("pos.eq.dec;meta.main").flatMap(_.toDoubleOption)
+    ra                                      <- find("pos.eq.ra;meta.main").flatMap(_.toDoubleOption).map(d => RightAscension.fromAngle(Angle.fromDegrees(d)))
+    dec                                     <- find("pos.eq.dec;meta.main").flatMap(_.toDoubleOption).flatMap(d => Declination.fromAngle(Angle.fromDegrees(d)))
 
-  } yield I.SiderealTarget(UUID.randomUUID(), name, I.DegDeg(ra, dec), epoch, None, List())
+  } yield I.SiderealTarget(UUID.randomUUID(), name, Coordinates(ra, dec), epoch, None, List())
 
 }
 

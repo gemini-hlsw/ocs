@@ -4,6 +4,7 @@ import edu.gemini.model.p1.immutable._
 import edu.gemini.model.p1.immutable.SemesterOption.{A, B}
 import edu.gemini.model.p1.mutable.Band.BAND_1_2
 import edu.gemini.model.p1.mutable.GnirsFilter.ORDER_3
+import edu.gemini.spModel.core.{Declination, Angle, RightAscension, Coordinates}
 
 import org.junit.Test
 import org.junit.Assert._
@@ -13,12 +14,12 @@ import java.util.UUID
 
 class TestTargetVisibilityTest {
 
-  val gnLgs = GnirsBlueprintImaging(AltairLGS(false), GnirsPixelScale.PS_005, ORDER_3)
+  val gnLgs = GnirsBlueprintImaging(AltairLGS(pwfs1 = false), GnirsPixelScale.PS_005, ORDER_3)
   val gnNgs = gnLgs.copy(altair = AltairNone)
   val gsNgs = GmosSBlueprintImaging(Nil)
   val gsLgs = GsaoiBlueprint(Nil)
 
-  val baseTarget   = SiderealTarget(UUID.randomUUID(), "x", HmsDms("0:00:00", "0:00:00"), CoordinatesEpoch.J_2000, None, Nil)
+  val baseTarget   = SiderealTarget(UUID.randomUUID(), "x", Coordinates.zero, CoordinatesEpoch.J_2000, None, Nil)
   val baseObsGNNgs = Observation(Some(gnNgs), None, Some(baseTarget), BAND_1_2, None)
   val baseObsGNLgs = Observation(Some(gnLgs), None, Some(baseTarget), BAND_1_2, None)
   val baseObsGSNgs = Observation(Some(gsNgs), None, Some(baseTarget), BAND_1_2, None)
@@ -26,6 +27,8 @@ class TestTargetVisibilityTest {
 
   val semA = Semester(2012, A)
   val semB = Semester(2012, B)
+
+  def coordinates(raStr: String, decStr: String): Coordinates = Coordinates(RightAscension.fromAngle(Angle.parseHMS(raStr).getOrElse(Angle.zero)), Declination.fromAngle(Angle.parseDMS(decStr).getOrElse(Angle.zero)).getOrElse(Declination.zero))
 
   @Test def testMissingBlueprint() {
     val obs = baseObsGNNgs.copy(blueprint = None)
@@ -54,9 +57,9 @@ class TestTargetVisibilityTest {
   }
 
   private def ngs(expected: TargetVisibility, observation: Observation, semester: Semester, coords: (String, String)*) {
-    coords foreach { tup =>
+    coords.foreach { tup =>
       val (raStr, decStr) = tup
-      val target = baseTarget.copy(coords = HmsDms(raStr, decStr))
+      val target = baseTarget.copy(coords = coordinates(raStr, decStr))
       val obs    = observation.copy(target = Some(target))
       assertEquals(Some(expected), TargetVisibilityCalc.get(semester, obs))
     }
@@ -81,7 +84,7 @@ class TestTargetVisibilityTest {
   private def lgs(expected: TargetVisibility, observation: Observation, semester: Semester, coords: (String, String)*) {
     coords foreach { tup =>
       val (raStr, decStr) = tup
-      val target = baseTarget.copy(coords = HmsDms(raStr, decStr))
+      val target = baseTarget.copy(coords = coordinates(raStr, decStr))
       val obs    = observation.copy(target = Some(target))
       assertEquals(Some(expected), TargetVisibilityCalc.get(semester, obs))
     }
@@ -313,9 +316,9 @@ class TestTargetVisibilityTest {
   }
 
   @Test def testRaWrap() {
-    val t0 = baseTarget.copy(coords = HmsDms("23:00:00", "20:00:00"))
-    val t1 = baseTarget.copy(coords = HmsDms("00:00:00", "20:00:00"))
-    val t2 = baseTarget.copy(coords = HmsDms("00:30:00", "20:00:00"))
+    val t0 = baseTarget.copy(coords = coordinates("23:00:00", "20:00:00"))
+    val t1 = baseTarget.copy(coords = coordinates("00:00:00", "20:00:00"))
+    val t2 = baseTarget.copy(coords = coordinates("00:30:00", "20:00:00"))
 
     List(t0, t1, t2) foreach { t =>
       assertEquals(Some(Limited), TargetVisibilityCalc.get(semA, baseObsGNNgs.copy(target = Some(t))))
@@ -324,9 +327,9 @@ class TestTargetVisibilityTest {
   }
 
   @Test def testRaForSpecialCases() {
-    val t0 = baseTarget.copy(coords = HmsDms("23:00:00", "20:00:00"))
-    val t1 = baseTarget.copy(coords = HmsDms("00:00:00", "20:00:00"))
-    val t2 = baseTarget.copy(coords = HmsDms("00:30:00", "20:00:00"))
+    val t0 = baseTarget.copy(coords = coordinates("23:00:00", "20:00:00"))
+    val t1 = baseTarget.copy(coords = coordinates("00:00:00", "20:00:00"))
+    val t2 = baseTarget.copy(coords = coordinates("00:30:00", "20:00:00"))
 
     List(t0, t1, t2) foreach { t =>
       assertEquals(Some(Good), TargetVisibilityCalc.getOnDec(semA, baseObsGNNgs.copy(target = Some(t))))
@@ -335,9 +338,9 @@ class TestTargetVisibilityTest {
   }
 
   @Test def testDecWrap() {
-    val t0 = baseTarget.copy(coords = HmsDms("10:00:00", "-38:00:00"))
-    val t1 = baseTarget.copy(coords = HmsDms("10:00:00", "-90:00:00"))
-    val t2 = baseTarget.copy(coords = HmsDms("10:00:00",  "-50:00:00"))
+    val t0 = baseTarget.copy(coords = coordinates("10:00:00", "-38:00:00"))
+    val t1 = baseTarget.copy(coords = coordinates("10:00:00", "-90:00:00"))
+    val t2 = baseTarget.copy(coords = coordinates("10:00:00",  "-50:00:00"))
 
     List(t0, t1, t2) foreach { t =>
       assertEquals(Some(Bad), TargetVisibilityCalc.get(semA, baseObsGNNgs.copy(target = Some(t))))
@@ -346,9 +349,9 @@ class TestTargetVisibilityTest {
   }
 
   @Test def testDecWrapForSpecialCases() {
-    val t0 = baseTarget.copy(coords = HmsDms("10:00:00", "-38:00:00"))
-    val t1 = baseTarget.copy(coords = HmsDms("10:00:00", "-90:00:00"))
-    val t2 = baseTarget.copy(coords = HmsDms("10:00:00",  "-50:00:00"))
+    val t0 = baseTarget.copy(coords = coordinates("10:00:00", "-38:00:00"))
+    val t1 = baseTarget.copy(coords = coordinates("10:00:00", "-90:00:00"))
+    val t2 = baseTarget.copy(coords = coordinates("10:00:00",  "-50:00:00"))
 
     List(t0, t1, t2) foreach { t =>
       assertEquals(Some(Bad), TargetVisibilityCalc.get(semA, baseObsGNNgs.copy(target = Some(t))))

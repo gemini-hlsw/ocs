@@ -1,7 +1,6 @@
 package edu.gemini.model.p1.targetio.table
 
-import edu.gemini.model.p1.immutable.{DMS, HMS}
-import edu.gemini.spModel.core.{MagnitudeSystem, Magnitude}
+import edu.gemini.spModel.core.{Declination, RightAscension, MagnitudeSystem, Magnitude}
 
 object Serializers {
   implicit object StringWriter extends StilSerializer[String] {
@@ -16,16 +15,16 @@ object Serializers {
     def asText(value: Int) = value.toString
   }
 
-  implicit object HmsWriter extends StilSerializer[HMS] {
-    def asBinary(value: HMS) = value.toDegrees
+  implicit object RaWriter extends StilSerializer[RightAscension] {
+    def asBinary(value: RightAscension) = value.toAngle.toDegrees
     def primitiveClass = classOf[java.lang.Double]
-    def asText(value: HMS) = value.toString
+    def asText(value: RightAscension) = value.toString
   }
 
-  implicit object DmsWriter extends StilSerializer[DMS] {
-    def asBinary(value: DMS) = value.toDegrees
+  implicit object DecWriter extends StilSerializer[Declination] {
+    def asBinary(value: Declination) = value.toDegrees
     def primitiveClass = classOf[java.lang.Double]
-    def asText(value: DMS) = value.toString
+    def asText(value: Declination) = value.toString
   }
 
   implicit object OptionalDoubleWriter extends StilSerializer[Option[Double]] {

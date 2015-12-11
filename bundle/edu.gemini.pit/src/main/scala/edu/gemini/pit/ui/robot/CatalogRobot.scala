@@ -7,6 +7,8 @@ import BooleanToolPreference.{SIMBAD, NED, HORIZONS}
 import java.awt.Component
 import javax.swing.JOptionPane
 import java.util.UUID
+import edu.gemini.spModel.core.Coordinates
+
 import scala.swing.Swing
 import edu.gemini.pit.model.Model
 
@@ -131,15 +133,15 @@ class CatalogRobot(parent: Component) extends Robot {
       override def toString = item match {
 
         case Left(target: SiderealTarget) =>
-          target.coords(sem.midPoint).map(_.toDegDeg) match {
-            case Some(dd) => s"${target.name} (${dd.ra}, ${dd.dec}) ${target.magnitudes.map(_.band.name).mkString(" ")}"
-            case None     => s"${target.name} (--, --) ${target.magnitudes.map(_.band.name).mkString(" ")}"
+          target.coords(sem.midPoint) match {
+            case Some(Coordinates(ra, dec)) => s"${target.name} (${ra}, ${dec}) ${target.magnitudes.map(_.band.name).mkString(" ")}"
+            case None                       => s"${target.name} (--, --) ${target.magnitudes.map(_.band.name).mkString(" ")}"
           }
 
         case Left(target: NonSiderealTarget) =>
-          target.coords(sem.midPoint).map(_.toDegDeg) match {
-            case Some(dd) => s"${target.name} (${dd.ra}, ${dd.dec})"
-            case None     => s"${target.name} (--, --)"
+          target.coords(sem.midPoint) match {
+            case Some(Coordinates(ra, dec)) => s"${target.name} (${ra}, ${dec})"
+            case None                       => s"${target.name} (--, --)"
           }
 
         case Left(target: TooTarget) => "???" // can't happen

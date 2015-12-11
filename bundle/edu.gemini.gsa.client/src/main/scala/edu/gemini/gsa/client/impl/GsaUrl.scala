@@ -1,8 +1,9 @@
 package edu.gemini.gsa.client.impl
 
 import edu.gemini.gsa.client.api.{GsaNonSiderealParams, GsaSiderealParams, GsaParams}
-import edu.gemini.model.p1.immutable.Coordinates
 import java.net.{URL, URLEncoder}
+
+import edu.gemini.spModel.core.Coordinates
 
 object GsaUrl {
   val ROOT = "http://www.cadc-ccda.hia-iha.nrc-cnrc.gc.ca/cadcbin/gsa/wdbi.cgi/gsa/gsa_science/query"
@@ -54,13 +55,13 @@ object GsaUrl {
     def format(p: GsaParams): Option[String] =
       p match {
         case s: GsaSiderealParams => Some(f(s.coords).replace(':', ' '))
-        case _ => None
+        case _                    => None
       }
   }
-  case object RA_PARAM extends CoordParam(_.toHmsDms.ra.toString) {
+  case object RA_PARAM extends CoordParam(_.ra.toAngle.formatHMS) {
     def name = "ra2000"
   }
-  case object DEC_PARAM extends CoordParam(_.toHmsDms.dec.toString) {
+  case object DEC_PARAM extends CoordParam(_.dec.formatDMS) {
     def name = "dec2000"
   }
 

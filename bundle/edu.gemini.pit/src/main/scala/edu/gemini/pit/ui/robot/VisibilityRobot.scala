@@ -1,6 +1,7 @@
 package edu.gemini.pit.ui.robot
 
 import edu.gemini.pit.model.Model
+import edu.gemini.spModel.core.Coordinates
 
 import scalaz.Lens
 import edu.gemini.model.p1.visibility.TargetVisibilityCalc

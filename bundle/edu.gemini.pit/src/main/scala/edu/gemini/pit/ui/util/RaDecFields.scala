@@ -1,8 +1,9 @@
 package edu.gemini.pit.ui.util
 
 import MultiFormatTextField.Formatter
-import edu.gemini.model.p1.immutable.{ HMS, DMS }
 import java.text.{ParseException, DecimalFormat}
+
+import edu.gemini.spModel.core.{Declination, RightAscension, Angle}
 
 private trait RaDecFields // for ant
 
@@ -28,23 +29,13 @@ object DegreeFormatter {
 }
 
 class HMSFormatter(caption: String) extends Formatter[Double](caption) {
-  def toString(d: Double) = HMS(d).toString
-  def fromString(s: String) = try {
-    Some(HMS(s).toDegrees)
-  } catch {
-    case e:ParseException => None
-    case e:Exception => e.printStackTrace(); None
-  }
+  def toString(d: Double) = Angle.fromDegrees(d).formatHMS
+  def fromString(s: String) = Angle.parseHMS(s).toOption.map(_.toDegrees)
 }
 
 class DMSFormatter(caption: String) extends Formatter[Double](caption) {
-  def toString(d: Double) = DMS(d).toString
-  def fromString(s: String) = try {
-    Some(DMS(s).toDegrees)
-  } catch {
-    case e:ParseException => None
-    case e:Exception => e.printStackTrace(); None
-  }
+  def toString(d: Double) = Angle.fromDegrees(d).formatDMS
+  def fromString(s: String) = Angle.parseDMS(s).toOption.map(_.toDegrees)
 }
 
 class DecFormatter(caption: String) extends Formatter[Double](caption) {
@@ -55,6 +46,7 @@ class DecFormatter(caption: String) extends Formatter[Double](caption) {
 
 class RATextField(initialValue: Double) extends MultiFormatTextField(
   initialValue, new HMSFormatter("HMS"), DegreeFormatter.ra("DEG")) {
+  def toRightAscension: RightAscension = RightAscension.fromAngle(Angle.fromDegrees(value))
   DegreePreference.BOX.get match {
     case DegreePreference.DEGREES => selectFormat("DEG")
     case DegreePreference.HMSDMS  => selectFormat("HMS")
@@ -63,6 +55,7 @@ class RATextField(initialValue: Double) extends MultiFormatTextField(
 
 class DecTextField(initialValue: Double) extends MultiFormatTextField(
   initialValue, new DecFormatter("DMS"), DegreeFormatter.dec("DEG")) {
+  def toDeclination: Declination = Declination.fromAngle(Angle.fromDegrees(value)).get
   DegreePreference.BOX.get match {
     case DegreePreference.DEGREES => selectFormat("DEG")
     case DegreePreference.HMSDMS  => selectFormat("DMS")

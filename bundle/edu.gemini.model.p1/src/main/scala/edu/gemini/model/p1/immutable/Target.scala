@@ -1,7 +1,8 @@
 package edu.gemini.model.p1.immutable
 
+import edu.gemini.model.p1.mutable.{HmsDmsCoordinates, DegDegCoordinates}
 import edu.gemini.model.p1.{ mutable => M }
-import edu.gemini.spModel.core.Magnitude
+import edu.gemini.spModel.core._
 
 import scala.collection.JavaConverters._
 import scalaz._
@@ -29,6 +30,20 @@ sealed trait Target {
 }
 
 object Target {
+
+  implicit class DegDeg(val c: DegDegCoordinates) extends AnyVal {
+    def toCoordinates:NumberFormatException \/ Coordinates = for {
+      dec <- Declination.fromAngle(Angle.fromDegrees(c.getDec.doubleValue())) \/> new NumberFormatException()
+    } yield Coordinates(RightAscension.fromDegrees(c.getRa.doubleValue()), dec)
+  }
+
+  implicit class HmsDms(val c: HmsDmsCoordinates) extends AnyVal {
+    def toCoordinates:NumberFormatException \/ Coordinates = for {
+      raHms  <- Angle.parseHMS(c.getRa)
+      decDms <- Angle.parseDMS(c.getDec)
+      dec    <- Declination.fromAngle(decDms) \/> new NumberFormatException()
+    } yield Coordinates(RightAscension.fromAngle(raHms), dec)
+  }
 
   def apply(m: M.Target): Target = m match {
     case m: M.SiderealTarget    => SiderealTarget(m)
@@ -61,14 +76,15 @@ case class TooTarget private (uuid:UUID, name: String) extends Target {
 }
 
 object SiderealTarget extends UuidCache[M.SiderealTarget] {
+  import Target._
 
-  def empty = apply(UUID.randomUUID(), "Untitled", Coordinates.empty, CoordinatesEpoch.J_2000, None, List.empty)
+  def empty = apply(UUID.randomUUID(), "Untitled", Coordinates.zero, CoordinatesEpoch.J_2000, None, List.empty)
 
   def apply(m: M.SiderealTarget): SiderealTarget =
     new SiderealTarget(
     uuid(m),
     m.getName,
-    Coordinates(Option(m.getDegDeg).getOrElse(m.getHmsDms)),
+    Option(m.getDegDeg).map(_.toCoordinates).getOrElse(m.getHmsDms.toCoordinates).getOrElse(Coordinates.zero),
     m.getEpoch,
     Option(m.getProperMotion).map(ProperMotion(_)),
     ~Option(m.getMagnitudes).map(_.getMagnitude.asScala.map(m => new Magnitude(m.getValue.doubleValue(), m.getBand.toBand)).toList))
@@ -82,13 +98,16 @@ case class SiderealTarget (
   properMotion: Option[ProperMotion],
   magnitudes: List[Magnitude]) extends Target {
 
-  def isEmpty = coords == Coordinates.empty && properMotion.isEmpty && magnitudes.isEmpty
+  def isEmpty = coords == Coordinates.zero && properMotion.isEmpty && magnitudes.isEmpty
 
   def mutable(n:Namer) = {
     val m = Factory.createSiderealTarget
     m.setId(n.nameOf(this))
     m.setName(name)
-    m.setDegDeg(coords.toDegDeg.mutable)
+    val degDeg = Factory.createDegDegCoordinates()
+    degDeg.setRa(new java.math.BigDecimal(coords.ra.toAngle.toDegrees))
+    degDeg.setDec(new java.math.BigDecimal(coords.dec.toDegrees))
+    m.setDegDeg(degDeg)
     m.setEpoch(epoch)
     m.setProperMotion(properMotion.map(_.mutable).orNull)
     m.setMagnitudes {
@@ -137,11 +156,12 @@ case class NonSiderealTarget(
     m
   }
 
-  def coords(date: Long) = for {
+  def coords(date: Long): Option[Coordinates] = for {
     (a, b, f) <- find(date, ephemeris)
-    cA = a.coords.toDegDeg
-    cB = b.coords.toDegDeg
-  } yield DegDeg(f(cA.ra.doubleValue(), cB.ra.doubleValue()), f(cA.dec.doubleValue(), cB.dec.doubleValue()))
+    cA        = a.coords
+    cB        = b.coords
+    dec       <- Declination.fromAngle(Angle.fromDegrees(f(cA.dec.toDegrees, cB.dec.toDegrees)))
+  } yield Coordinates(RightAscension.fromAngle(Angle.fromDegrees(f(cA.ra.toAngle.toDegrees, cB.ra.toAngle.toDegrees))), dec)
 
   def magnitude(date: Long) = for {
     (a, b, f) <- find(date, ephemeris)

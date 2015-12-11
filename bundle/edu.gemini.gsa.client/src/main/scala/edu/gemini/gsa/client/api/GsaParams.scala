@@ -1,6 +1,7 @@
 package edu.gemini.gsa.client.api
 
 import edu.gemini.model.p1.immutable._
+import edu.gemini.spModel.core.Coordinates
 
 sealed trait GsaParams {
   /** Instrument used to take the datasets. */

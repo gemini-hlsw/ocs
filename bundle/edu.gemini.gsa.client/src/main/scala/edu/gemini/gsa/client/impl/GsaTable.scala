@@ -1,7 +1,7 @@
 package edu.gemini.gsa.client.impl
 
 import edu.gemini.gsa.client.api._
-import edu.gemini.model.p1.immutable._
+import edu.gemini.spModel.core.{Declination, RightAscension, Coordinates}
 
 object GsaTable {
   /**
@@ -61,11 +61,11 @@ class GsaTable private (table: GsaMap) {
       case (rae, dece) => for {
         ra  <- rae.right
         dec <- dece.right
-      } yield HmsDms(ra, dec)
+      } yield Coordinates(ra, dec)
     }
 
-  def ras:  List[Either[String, HMS]] = parseCol(RA)
-  def decs: List[Either[String, DMS]] = parseCol(DEC)
+  def ras:  List[Either[String, RightAscension]] = parseCol(RA)
+  def decs: List[Either[String, Declination]] = parseCol(DEC)
 
   def instruments: List[Either[String, String]] = parseCol(INSTRUMENT)
 

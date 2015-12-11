@@ -2,7 +2,8 @@ package edu.gemini.gsa.client.impl
 
 import java.text.SimpleDateFormat
 import java.util.TimeZone
-import edu.gemini.model.p1.immutable.{DMS, HMS}
+
+import edu.gemini.spModel.core.{Declination, Angle, RightAscension}
 
 /**
  * Column definition with name and a method to parse a String value into a
@@ -12,7 +13,7 @@ sealed trait GsaColumn[T] {
   def name: String
   def parse(value: String): Either[String, T]
 
-  protected def parseVal[T](f: String => T, s: String): Either[String, T] =
+  protected def parseVal[A](f: String => A, s: String): Either[String, A] =
     try {
       Right(f(s))
     } catch {
@@ -54,6 +55,9 @@ object GsaColumn {
       }
   }
 
+  def string2Ra(s: String):RightAscension = RightAscension.fromAngle(Angle.parseHMS(s).getOrElse(Angle.zero))
+  def string2Dec(s: String):Declination = Declination.fromAngle(Angle.parseDMS(s).getOrElse(Angle.zero)).getOrElse(Declination.zero)
+
   case object DSET_NAME extends RequiredStringColumn {
     val name = "Data Superset Name"
   }
@@ -72,10 +76,10 @@ object GsaColumn {
   case object TARGET_NAME extends RequiredStringColumn {
     val name = "Target Name"
   }
-  case object RA extends CoordinateColumn(HMS.apply) {
+  case object RA extends CoordinateColumn(string2Ra) {
     val name = "RA (J2000)"
   }
-  case object DEC extends CoordinateColumn(DMS.apply) {
+  case object DEC extends CoordinateColumn(string2Dec) {
     val name = "DEC (J2000)"
   }
   case object INSTRUMENT extends RequiredStringColumn {

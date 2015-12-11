@@ -9,6 +9,8 @@ import NonSiderealColumns._
 import java.io.{InputStream, File}
 import java.util.UUID
 
+import edu.gemini.spModel.core.Coordinates
+
 object NonSiderealReader extends TargetReader[NonSiderealTarget] {
   def read(file: File): Result      = targets(TableReader(file, REQUIRED))
   def read(is: InputStream): Result = targets(TableReader(is,   REQUIRED))
@@ -60,5 +62,5 @@ object NonSiderealReader extends TargetReader[NonSiderealTarget] {
       ra   <- row(RA).right
       dec  <- row(DEC).right
       mag  <- row.get(MAG).right
-    } yield NamedEphemeris(id, name, EphemerisElement(HmsDms(ra, dec), mag, utc))
+    } yield NamedEphemeris(id, name, EphemerisElement(Coordinates(ra, dec), mag, utc))
 }
