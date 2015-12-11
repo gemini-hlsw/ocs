@@ -21,6 +21,7 @@ final class CaStatusAcceptorImpl implements CaStatusAcceptor {
     private final Map<String, CaAttributeImpl<Double>> doubleAttributes;
     private final Map<String, CaAttributeImpl<Float>> floatAttributes;
     private final Map<String, CaAttributeImpl<Integer>> integerAttributes;
+    private final Map<String, Object> enumAttributes;
     private EpicsReader epicsReader;
 
     public CaStatusAcceptorImpl(String name, String description,
@@ -32,6 +33,7 @@ final class CaStatusAcceptorImpl implements CaStatusAcceptor {
         doubleAttributes = new HashMap<>();
         floatAttributes = new HashMap<>();
         integerAttributes = new HashMap<>();
+        enumAttributes = new HashMap<>();
         epicsReader = new EpicsReaderImpl(epicsService);
     }
 
@@ -123,6 +125,41 @@ final class CaStatusAcceptorImpl implements CaStatusAcceptor {
     public CaAttribute<String> addString(String name, String channel)
             throws CaException, CAException {
         return addString(name, channel, null);
+    }
+
+    @Override
+    public <T extends Enum<T> > CaAttribute<T> addEnum(String name, String channel, Class<T> enumType,
+                                                      String description) throws CaException, CAException {
+        return addEnum(name, channel, enumType, CaAttributeImpl.class, description);
+    }
+
+    private <T extends Enum<T>, A extends CaAttributeImpl<T> > CaAttribute<T> addEnum(String name, String channel,
+                                                                                      Class<T> enumType,
+                                                                                      Class<A> attrType,
+                                                                                      String description)
+            throws CaException, CAException {
+        CaAttributeImpl<T> attr = attrType.cast(enumAttributes.get(name));
+        if (attr == null) {
+            if (alreadyExist(name)) {
+                throw new CaException(
+                        "Attribute already exists with a different type.");
+            } else {
+                attr = CaAttributeImpl.createEnumAttribute(name, channel, description, enumType,
+                        epicsReader);
+                enumAttributes.put(name, attr);
+            }
+        } else {
+            if (!channel.equals(attr.channel())) {
+                throw new CaException(
+                        "Attribute already exists for a different channel.");
+            }
+        }
+        return attr;
+    }
+
+    @Override
+    public <T extends Enum<T>> CaAttribute<T> addEnum(String name, String channel, Class<T> enumType) throws CaException, CAException {
+        return addEnum(name, channel, enumType, null);
     }
 
     @Override
