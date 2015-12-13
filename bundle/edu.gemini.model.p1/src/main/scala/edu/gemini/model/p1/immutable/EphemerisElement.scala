@@ -11,9 +11,9 @@ object EphemerisElement {
   private lazy val df = javax.xml.datatype.DatatypeFactory.newInstance
 
   private[immutable] def mkCoords(m: M.EphemerisElement): Coordinates = {
-    val hd = Option(m.getHmsDms).map(_.toCoordinates)
-    val dd = Option(m.getDegDeg).map(_.toCoordinates)
-    hd.orElse(dd).get.getOrElse(Coordinates.zero)
+    val hd = Option(m.getHmsDms).flatMap(_.toCoordinates.toOption)
+    val dd = Option(m.getDegDeg).flatMap(_.toCoordinates.toOption)
+    hd.orElse(dd).get
   }
 
   private implicit val long2xgc = (ms: Long) => {

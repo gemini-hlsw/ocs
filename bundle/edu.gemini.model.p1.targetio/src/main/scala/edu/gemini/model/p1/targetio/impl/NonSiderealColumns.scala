@@ -12,8 +12,8 @@ private[targetio] object NonSiderealColumns {
   val ID     = col("ID",       readInt,            _.ord)
   val NAME   = col("Name",     readString,         _.name)
   val UTC    = col("UTC",      readUtc,            _.element.validAt)(UtcSerializer)
-  val RA     = col("RAJ2000",  readRa,             _.element.coords.ra)
-  val DEC    = col("DecJ2000", readDec,            _.element.coords.dec)
+  val RA     = col("RAJ2000",  readRa,             a => Some(a.element.coords.ra))
+  val DEC    = col("DecJ2000", readDec,            a => Some(a.element.coords.dec))
   val MAG    = col("Mag",      readOptionalDouble, _.element.magnitude)
 
   val REQUIRED: List[Column[NamedEphemeris, _]] = List(ID, NAME, UTC, RA, DEC)

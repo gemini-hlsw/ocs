@@ -15,16 +15,16 @@ object Serializers {
     def asText(value: Int) = value.toString
   }
 
-  implicit object RaWriter extends StilSerializer[RightAscension] {
-    def asBinary(value: RightAscension) = value.toAngle.toDegrees
+  implicit object OptionRaWriter extends StilSerializer[Option[RightAscension]] {
+    def asBinary(value: Option[RightAscension]) = value.map(_.toAngle.toDegrees).orNull
     def primitiveClass = classOf[java.lang.Double]
-    def asText(value: RightAscension) = value.toAngle.formatHMS
+    def asText(value: Option[RightAscension]) = value.map(_.toAngle.formatHMS).getOrElse("INDEF")
   }
 
-  implicit object DecWriter extends StilSerializer[Declination] {
-    def asBinary(value: Declination) = value.toDegrees
+  implicit object OptionDecWriter extends StilSerializer[Option[Declination]] {
+    def asBinary(value: Option[Declination]) = value.map(_.toDegrees).orNull
     def primitiveClass = classOf[java.lang.Double]
-    def asText(value: Declination) = value.formatDMS
+    def asText(value: Option[Declination]) = value.map(_.formatDMS).getOrElse("INDEF")
   }
 
   implicit object OptionalDoubleWriter extends StilSerializer[Option[Double]] {
