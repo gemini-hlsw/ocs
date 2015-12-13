@@ -8,7 +8,6 @@ import edu.gemini.model.p1.immutable.EphemerisElement
 import org.junit.Test
 import org.junit.Assert._
 
-
 class HorizonsEphemerisParserTest {
 
   @Test def testMissingName() {
@@ -88,6 +87,15 @@ $$EOE
 Target body name: Ceres (1)    {xxx}
 $$SOE
  2011-Dec-30 00:00     23 52 00.00 -11 20 00.0   9.00   6.98 2.98469607736702  22.6989658  77.0713 /T  19.1192
+$$EOE
+""")
+  }
+
+  @Test def testBadCoordinates() {
+    badEphemeris("""
+Target body name: Ceres (1)    {xxx}
+$$SOE
+ 2011-Dec-30 00:00     -2 -52 00.00 21 20 00.0   9.00   6.98 2.98469607736702  22.6989658  77.0713 /T  19.1192
 $$EOE
 """)
   }

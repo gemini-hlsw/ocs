@@ -48,9 +48,9 @@ object TargetUtil {
   def validateElement(expected: EphemerisElement, actual: EphemerisElement) {
     validateCoords(expected.coords, actual.coords)
     (expected.magnitude, actual.magnitude) match {
-      case (None, None) => // ok
+      case (None, None)         => // ok
       case (Some(ex), Some(ac)) => assertEquals(ex, ac, DELTA)
-      case _ => fail()
+      case _                    => fail()
     }
     assertEquals(expected.validAt, actual.validAt)
   }
@@ -72,11 +72,11 @@ object TargetUtil {
 
   def validateProperMotion(expected: Option[ProperMotion], actual: Option[ProperMotion]) {
     (expected, actual) match {
-      case (None, None) =>
+      case (None, None)         =>
       case (Some(ex), Some(ac)) =>
         validateBigDecimal(ex.deltaRA,  ac.deltaRA)
         validateBigDecimal(ex.deltaDec, ac.deltaDec)
-      case _ => fail()
+      case _                    => fail()
     }
   }
 

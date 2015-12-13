@@ -67,17 +67,31 @@ object HorizonsEphemerisParser extends JavaTokenParsers {
 
   def sign: Parser[String] = """[-+]?""".r
 
-  val toRa: String => RightAscension = s => RightAscension.fromAngle(Angle.parseHMS(s).getOrElse(Angle.zero))
-  val toDec: String => Declination   = s => Declination.fromAngle(Angle.parseDMS(s).getOrElse(Angle.zero)).getOrElse(Declination.zero)
+  def toRa(sign: String, h: Int, m: Int, s: Double):Option[RightAscension] = {
+    val sig = sign match {
+      case "-" => -1
+      case _   => 1
+    }
+    Angle.fromHMS(sig * h, m, s).map(RightAscension.fromAngle)
+  }
+  def toDec(sign: String, d: Int, m: Int, s: Double):Option[Declination] = {
+    sign match {
+      case "-" => Angle.fromDMS(d, m, s).flatMap(x => Declination.fromAngle(Angle.zero - x))
+      case _   => Angle.fromDMS(d, m, s).flatMap(Declination.fromAngle)
+    }
+  }
 
-  def ra: Parser[RightAscension]        = coord(toRa)
-  def dec: Parser[Declination]       = coord(toDec)
+  def ra: Parser[Option[RightAscension]] = coord(toRa)
+  def dec: Parser[Option[Declination]]   = coord(toDec)
 
-  def coords: Parser[Coordinates] = ra~dec ^^ { case r~d => Coordinates(r, d) }
+  def coords: Parser[Coordinates] = ra~dec ^? {
+    case Some(r)~Some(d) => Coordinates(r, d)
+  }
+
   def mag: Parser[Double]    = decimalNumber ^^ { _.toDouble }
 
-  private def coord[T](f: String => T): Parser[T] =
-    sign~wholeNumber~wholeNumber~decimalNumber ^^ { case sn~h~m~s => f(sn + h + m + s)}
+  private def coord[T](f: (String, Int, Int, Double) => Option[T]): Parser[Option[T]] =
+    sign~wholeNumber~wholeNumber~decimalNumber ^^ { case sn~h~m~s => f(sn, h.toInt, m.toInt, s.toDouble) }
 
   def element: Parser[EphemerisElement] = utc~coords~mag ^^ {
     case d~c~m => EphemerisElement(c, Some(m), d)
