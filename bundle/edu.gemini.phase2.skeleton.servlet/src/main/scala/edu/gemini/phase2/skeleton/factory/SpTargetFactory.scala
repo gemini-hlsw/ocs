@@ -3,7 +3,7 @@ package edu.gemini.phase2.skeleton.factory
 import edu.gemini.model.p1.immutable._
 import edu.gemini.shared.{skyobject => SO}
 import edu.gemini.shared.util.immutable.DefaultImList
-import edu.gemini.spModel.core.{MagnitudeSystem, MagnitudeBand, Magnitude}
+import edu.gemini.spModel.core.{Coordinates, MagnitudeSystem, MagnitudeBand, Magnitude}
 import edu.gemini.spModel.{target => SP}
 import edu.gemini.spModel.target.system.CoordinateTypes.{PM1 => SPProperMotionRA}
 import edu.gemini.spModel.target.system.CoordinateTypes.{PM2 => SPProperMotionDec}
@@ -86,8 +86,7 @@ object SpTargetFactory {
     }
 
   private def setRaDec(spt: SP.SPTarget, c: Coordinates) {
-    val degDeg = c.toDegDeg
-    spt.setRaDecDegrees(degDeg.ra.toDouble, degDeg.dec.toDouble)
+    spt.setRaDecDegrees(c.ra.toAngle.toDegrees, c.dec.toDegrees)
   }
 
   private def siderealMags(sid: SiderealTarget): Either[String, List[SO.Magnitude]] = {
