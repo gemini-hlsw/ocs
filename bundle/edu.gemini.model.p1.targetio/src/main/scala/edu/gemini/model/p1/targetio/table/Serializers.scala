@@ -18,13 +18,13 @@ object Serializers {
   implicit object RaWriter extends StilSerializer[RightAscension] {
     def asBinary(value: RightAscension) = value.toAngle.toDegrees
     def primitiveClass = classOf[java.lang.Double]
-    def asText(value: RightAscension) = value.toString
+    def asText(value: RightAscension) = value.toAngle.formatHMS
   }
 
   implicit object DecWriter extends StilSerializer[Declination] {
     def asBinary(value: Declination) = value.toDegrees
     def primitiveClass = classOf[java.lang.Double]
-    def asText(value: Declination) = value.toString
+    def asText(value: Declination) = value.formatDMS
   }
 
   implicit object OptionalDoubleWriter extends StilSerializer[Option[Double]] {

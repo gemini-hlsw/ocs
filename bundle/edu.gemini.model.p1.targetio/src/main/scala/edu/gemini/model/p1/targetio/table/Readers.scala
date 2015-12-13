@@ -47,14 +47,12 @@ object Readers {
 
   def readDegrees[T](f: Double => T): PartialFunction[Any, T] = readDouble andThen { f(_) }
   def parseDegrees(d: Double): Angle = Angle.fromDegrees(d)
-  def parseSexigesimal(s: String): Angle = Angle.parseSexigesimal(s).getOrElse(Angle.zero)
-  val readRa: PartialFunction[Any, RightAscension] = (readSexigesimal(parseSexigesimal) orElse readDegrees(parseDegrees)) andThen (a => RightAscension.fromAngle(a))
+
+  private def parseSexigesimal(s: String): Angle = Angle.parseSexigesimal(s).getOrElse(Angle.zero)
+  private def parseHMS(s: String): Angle = Angle.parseHMS(s).getOrElse(Angle.zero)
+
+  val readRa: PartialFunction[Any, RightAscension] = (readSexigesimal(parseHMS) orElse readDegrees(parseDegrees)) andThen (a => RightAscension.fromAngle(a))
   val readDec: PartialFunction[Any, Declination] = (readSexigesimal(parseSexigesimal) orElse readDegrees(parseDegrees)) andThen (a => Declination.fromAngle(a).getOrElse(Declination.zero))
-
-  //val readDec: PartialFunction[Any, Declination] = readSexigesimal(Angle.parseSexigesimal) orElse readDegrees(Angle.fromDegrees)
-
-  //val readRa: PartialFunction[Any, HMS]  = readSexigesimal(HMS(_)) orElse readDegrees(HMS(_))
-  //val readDec: PartialFunction[Any, DMS] = readSexigesimal(DMS(_)) orElse readDegrees(DMS(_))
 
   def readOptionalMagnitude(band: MagnitudeBand): PartialFunction[Any, Option[Magnitude]] =
     readOptionalDouble andThen { _.map(new Magnitude(_, band)) }
