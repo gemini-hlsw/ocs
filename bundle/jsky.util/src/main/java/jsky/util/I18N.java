@@ -25,7 +25,7 @@ public class I18N {
     // The base name of the I18N properties files
     private String _baseName;
 
-    private Class _class;
+    private Class<?> _class;
 
     // Current Locale
     private Locale _locale = Locale.getDefault();

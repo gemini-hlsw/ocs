@@ -119,14 +119,6 @@ public abstract class ListenerHandler {
      * sends the event to all listeners.  Calls the abstract class fireEvent( listener, event) for each item
      * in the listener list
      */
-    public void sendEvent(Object evt) {
-        sendEvent(null, evt);
-    }
-
-    /**
-     * sends the event to all listeners.  Calls the abstract class fireEvent( listener, event) for each item
-     * in the listener list
-     */
     public void sendEvent(String eventKey, Object evt) {
         Object[] localListeners = fListeners;
         if (localListeners == null) return;
@@ -139,7 +131,7 @@ public abstract class ListenerHandler {
     /**
      * returns an iterator to each listener in the list
      */
-    public Iterator listeners() {
+    public Iterator<Object> listeners() {
         return Arrays.asList(fListeners).iterator();
     }
 

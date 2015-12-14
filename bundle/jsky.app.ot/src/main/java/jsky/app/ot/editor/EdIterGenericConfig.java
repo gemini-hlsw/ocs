@@ -52,6 +52,7 @@ import java.beans.PropertyEditorManager;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 
 /**
@@ -1018,7 +1019,6 @@ public class EdIterGenericConfig<T extends SeqConfigComp> extends OtItemEditor<I
                 _choicesLBW.setValue(-1);
             } else {
                 _choicesLBW.setValue(curValue);
-                _choicesLBW.focusAtSelectedItem();
             }
             _choicesLBW.addWatcher(this);
         }
@@ -1035,11 +1035,9 @@ public class EdIterGenericConfig<T extends SeqConfigComp> extends OtItemEditor<I
         private List<Object> getOptionActiveElements(Class c) {
             List<Object> underlyingChoices = getActiveElements(c);
 
-            List<Object> res = new ArrayList<Object>(underlyingChoices.size() + 1);
+            List<Object> res = new ArrayList<>(underlyingChoices.size() + 1);
             res.add(None.instance());
-            for (Object choice : underlyingChoices) {
-                res.add(new Some<Object>(choice));
-            }
+            res.addAll(underlyingChoices.stream().map(Some::new).collect(Collectors.toList()));
             return res;
         }
 
@@ -1266,7 +1264,7 @@ public class EdIterGenericConfig<T extends SeqConfigComp> extends OtItemEditor<I
             // noinspection unchecked
             return (List<Object>) list;
         }
-        List<Object> result = new ArrayList<Object>(list.size());
+        List<Object> result = new ArrayList<>(list.size());
         for (Object o : list) {
             if (o instanceof PartiallyEngineeringSpType) {
                 if (!((PartiallyEngineeringSpType) o).isEngineering()) {
