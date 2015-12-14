@@ -1,24 +1,8 @@
-/*
- * @(#)ExampleFileFilter.java	1.8 98/08/26
- *
- * Copyright 1998 by Sun Microsystems, Inc.,
- * 901 San Antonio Road, Palo Alto, California, 94303, U.S.A.
- * All rights reserved.
- *
- * This software is the confidential and proprietary information
- * of Sun Microsystems, Inc. ("Confidential Information").  You
- * shall not disclose such Confidential Information and shall use
- * it only in accordance with the terms of the license agreement
- * you entered into with Sun.
- */
-
-
 package jsky.util.gui;
 
 import java.io.File;
 import java.util.Hashtable;
 import java.util.Enumeration;
-import javax.swing.*;
 import javax.swing.filechooser.*;
 
 /**
@@ -42,10 +26,7 @@ import javax.swing.filechooser.*;
  */
 public class ExampleFileFilter extends FileFilter {
 
-    private static String TYPE_UNKNOWN = "Type Unknown";
-    private static String HIDDEN_FILE = "Hidden File";
-
-    private Hashtable filters = null;
+    private Hashtable<String, FileFilter> filters = null;
     private String description = null;
     private String fullDescription = null;
     private boolean useExtensionsInDescription = true;
@@ -56,16 +37,7 @@ public class ExampleFileFilter extends FileFilter {
      *
      */
     public ExampleFileFilter() {
-        this.filters = new Hashtable();
-    }
-
-    /**
-     * Creates a file filter that accepts files with the given extension.
-     * Example: new ExampleFileFilter("jpg");
-     *
-     */
-    public ExampleFileFilter(String extension) {
-        this(extension, null);
+        this.filters = new Hashtable<>();
     }
 
     /**
@@ -83,18 +55,6 @@ public class ExampleFileFilter extends FileFilter {
     }
 
     /**
-     * Creates a file filter from the given string array.
-     * Example: new ExampleFileFilter(String {"gif", "jpg"});
-     *
-     * Note that the "." before the extension is not needed adn
-     * will be ignored.
-     *
-     */
-    public ExampleFileFilter(String[] filters) {
-        this(filters, null);
-    }
-
-    /**
      * Creates a file filter from the given string array and description.
      * Example: new ExampleFileFilter(String {"gif", "jpg"}, "Gif and JPG Images");
      *
@@ -103,9 +63,9 @@ public class ExampleFileFilter extends FileFilter {
      */
     public ExampleFileFilter(String[] filters, String description) {
         this();
-        for (int i = 0; i < filters.length; i++) {
+        for (String filter : filters) {
             // add filters one by one
-            addExtension(filters[i]);
+            addExtension(filter);
         }
         if (description != null) setDescription(description);
     }
@@ -126,7 +86,6 @@ public class ExampleFileFilter extends FileFilter {
             if (extension != null && filters.get(getExtension(f)) != null) {
                 return true;
             }
-            ;
         }
         return false;
     }
@@ -142,7 +101,6 @@ public class ExampleFileFilter extends FileFilter {
             if (i > 0 && i < filename.length() - 1) {
                 return filename.substring(i + 1).toLowerCase();
             }
-            ;
         }
         return null;
     }
@@ -161,7 +119,7 @@ public class ExampleFileFilter extends FileFilter {
      */
     public void addExtension(String extension) {
         if (filters == null) {
-            filters = new Hashtable(5);
+            filters = new Hashtable<>(5);
         }
         filters.put(extension.toLowerCase(), this);
         fullDescription = null;
@@ -178,11 +136,11 @@ public class ExampleFileFilter extends FileFilter {
             if (description == null || isExtensionListInDescription()) {
                 fullDescription = description == null ? "(" : description + " (";
                 // build the description from the extension list
-                Enumeration extensions = filters.keys();
+                Enumeration<String> extensions = filters.keys();
                 if (extensions != null) {
-                    fullDescription += "." + (String) extensions.nextElement();
+                    fullDescription += "." + extensions.nextElement();
                     while (extensions.hasMoreElements()) {
-                        fullDescription += ", " + (String) extensions.nextElement();
+                        fullDescription += ", " + extensions.nextElement();
                     }
                 }
                 fullDescription += ")";
@@ -200,19 +158,6 @@ public class ExampleFileFilter extends FileFilter {
      */
     public void setDescription(String description) {
         this.description = description;
-        fullDescription = null;
-    }
-
-    /**
-     * Determines whether the extension list (.jpg, .gif, etc) should
-     * show up in the human readable description.
-     *
-     * Only relevent if a description was provided in the constructor
-     * or using setDescription();
-     *
-     */
-    public void setExtensionListInDescription(boolean b) {
-        useExtensionsInDescription = b;
         fullDescription = null;
     }
 

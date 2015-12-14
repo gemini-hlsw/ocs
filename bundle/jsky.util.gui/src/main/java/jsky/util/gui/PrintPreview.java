@@ -1,5 +1,3 @@
-//package GOV.nasa.gsfc.util.gui;
-
 package jsky.util.gui;
 
 //=== File Prolog===========================================================
@@ -55,13 +53,9 @@ public class PrintPreview extends JFrame {
     protected int fPageWidth;
     protected int fPageHeight;
     protected Printable fTarget;
-    protected JComboBox fComboBoxScale;
+    protected JComboBox<String> fComboBoxScale;
     protected PreviewContainer fPanelPreview;
     protected ActionListener fPrintListener;
-
-    public PrintPreview(Printable target) {
-        this(null, target, "Print Preview");
-    }
 
     public PrintPreview(ActionListener printListener, Printable target, String title) {
         super(title);
@@ -76,21 +70,18 @@ public class PrintPreview extends JFrame {
         buttonPrint.setMnemonic('p');
         buttonPrint.setToolTipText("Print the preview contents");
         if (printListener == null) {
-            fPrintListener = new ActionListener() {
-
-                public void actionPerformed(ActionEvent e) {
-                    try {
-                        // Use default printer, no dialog
-                        PrinterJob prnJob = PrinterJob.getPrinterJob();
-                        prnJob.setPrintable(fTarget);
-                        setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-                        prnJob.print();
-                        setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
-                        dispose();
-                    } catch (PrinterException ex) {
-                        ex.printStackTrace();
-                        System.err.println("Printing error: " + ex.toString());
-                    }
+            fPrintListener = e -> {
+                try {
+                    // Use default printer, no dialog
+                    PrinterJob prnJob = PrinterJob.getPrinterJob();
+                    prnJob.setPrintable(fTarget);
+                    setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+                    prnJob.print();
+                    setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+                    dispose();
+                } catch (PrinterException ex) {
+                    ex.printStackTrace();
+                    System.err.println("Printing error: " + ex.toString());
                 }
             };
         } else {
@@ -102,55 +93,46 @@ public class PrintPreview extends JFrame {
         JButton buttonClose = new JButton("Close");
         buttonClose.setMnemonic('c');
         buttonClose.setToolTipText("Close Preview");
-        ActionListener lst = new ActionListener() {
-
-            public void actionPerformed(ActionEvent e) {
-                dispose();
-            }
-        };
+        ActionListener lst = e -> dispose();
         buttonClose.addActionListener(lst);
         toolbar.add(buttonClose);
 
         String[] scales = {"10 %", "25 %", "50 %", "100 %"};
-        fComboBoxScale = new JComboBox(scales);
+        fComboBoxScale = new JComboBox<>(scales);
         fComboBoxScale.setToolTipText("Zoom");
 
         int scale = 100;
         fComboBoxScale.setSelectedItem("100 %");
 
-        lst = new ActionListener() {
+        lst = e -> {
+            Thread runner = new Thread() {
 
-            public void actionPerformed(ActionEvent e) {
-                Thread runner = new Thread() {
+                public void run() {
+                    String str = fComboBoxScale.getSelectedItem().toString();
+                    if (str.endsWith("%")) str = str.substring(0, str.length() - 1);
+                    str = str.trim();
 
-                    public void run() {
-                        String str = fComboBoxScale.getSelectedItem().toString();
-                        if (str.endsWith("%")) str = str.substring(0, str.length() - 1);
-                        str = str.trim();
-
-                        int sc;
-                        try {
-                            sc = Integer.parseInt(str);
-                        } catch (NumberFormatException ex) {
-                            return;
-                        }
-
-                        int w = (fPageWidth * sc / 100);
-                        int h = (fPageHeight * sc / 100);
-
-                        Component[] comps = fPanelPreview.getComponents();
-                        for (Component comp : comps) {
-                            if (!(comp instanceof PagePreview)) continue;
-                            PagePreview pp = (PagePreview) comp;
-                            pp.setScaledSize(w, h);
-                        }
-                        fPanelPreview.doLayout();
-                        fPanelPreview.getParent().getParent().validate();
+                    int sc;
+                    try {
+                        sc = Integer.parseInt(str);
+                    } catch (NumberFormatException ex) {
+                        return;
                     }
-                };
-                runner.start();
-            }
 
+                    int w = (fPageWidth * sc / 100);
+                    int h = (fPageHeight * sc / 100);
+
+                    Component[] comps = fPanelPreview.getComponents();
+                    for (Component comp : comps) {
+                        if (!(comp instanceof PagePreview)) continue;
+                        PagePreview pp = (PagePreview) comp;
+                        pp.setScaledSize(w, h);
+                    }
+                    fPanelPreview.doLayout();
+                    fPanelPreview.getParent().getParent().validate();
+                }
+            };
+            runner.start();
         };
 
         fComboBoxScale.addActionListener(lst);
