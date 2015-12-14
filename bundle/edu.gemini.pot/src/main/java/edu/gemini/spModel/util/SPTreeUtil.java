@@ -167,8 +167,8 @@ public class SPTreeUtil {
      * The return value will be a list containing the instrument (if found) and an
      * Altair component (if found).
      */
-    public static List findInstruments(ISPObservation o) {
-        List result = new ArrayList();
+    public static List<ISPObsComponent> findInstruments(ISPObservation o) {
+        List<ISPObsComponent> result = new ArrayList<>();
         if (o != null) {
             Iterator iter = o.getObsComponents().iterator();
             while (iter.hasNext()) {

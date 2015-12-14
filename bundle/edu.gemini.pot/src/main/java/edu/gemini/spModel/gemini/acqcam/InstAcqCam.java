@@ -522,8 +522,8 @@ public final class InstAcqCam extends SPInstObsComp implements PropertyProvider 
      * Return a list of InstConfigInfo objects describing the instrument's
      * queryable configuration parameters.
      */
-    public static List getInstConfigInfo() {
-        List<InstConfigInfo> configInfo = new LinkedList<InstConfigInfo>();
+    public static List<InstConfigInfo> getInstConfigInfo() {
+        List<InstConfigInfo> configInfo = new LinkedList<>();
 
         configInfo.add(new InstConfigInfo(COLOR_FILTER_PROP));
         configInfo.add(new InstConfigInfo(ND_FILTER_PROP));

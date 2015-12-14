@@ -1,9 +1,3 @@
-// Copyright 2001 Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-//
-// $Id: ObsQueryFunctor.java 46768 2012-07-16 18:58:53Z rnorris $
-//
-
 package jsky.app.ot.shared.gemini.obscat;
 
 import edu.gemini.pot.sp.*;
@@ -53,7 +47,6 @@ import java.security.AccessControlException;
 import java.security.Principal;
 import java.util.*;
 
-
 /**
  * An <code>edu.gemini.pot.spdb.IDBQueryFunctor</code>
  * implementation that can be used by clients to query the science
@@ -66,10 +59,10 @@ public class ObsQueryFunctor extends DBAbstractQueryFunctor {
     // Holds the result of the query, in table format (the result is a
     // vector of rows, which are vectors of columns corresponding to the
     // columns defined in the ObsCatalog class).
-    private Vector _result;
+    private Vector<Vector<Object>> _result;
 
     // Holds additional information (progID, ObsID) corresponding to each row in the result
-    private Vector _ids;
+    private Vector<Vector<Object>> _ids;
 
     // local copies of the constructor arguments
 
@@ -105,8 +98,8 @@ public class ObsQueryFunctor extends DBAbstractQueryFunctor {
      * to initialize itself on the server.
      */
     public void init() {
-        if (_result == null) _result = new Vector();
-        if (_ids == null) _ids = new Vector();
+        if (_result == null) _result = new Vector<>();
+        if (_ids == null) _ids = new Vector<>();
     }
 
 
@@ -120,14 +113,14 @@ public class ObsQueryFunctor extends DBAbstractQueryFunctor {
     /**
      * Return the result of the query as an array of ObsInfo objects.
      */
-    public Vector getResult() {
+    public Vector<Vector<Object>> getResult() {
         return _result;
     }
 
     /**
      * Return a vector of (progId, obsId) corresponding to the displayed result.
      */
-    public Vector getIds() {
+    public Vector<Vector<Object>> getIds() {
         return _ids;
     }
 
@@ -143,7 +136,7 @@ public class ObsQueryFunctor extends DBAbstractQueryFunctor {
             if (prog.getProgramID() != null)
                 ImplicitPolicyForJava.checkPermission(database, principals, new ProgramPermission.Read(prog.getProgramID()));
 
-            // check for program related contraints, such as AFFILIATES and PI Last Name
+            // check for program related constraints, such as AFFILIATES and PI Last Name
             if (_match(prog)) {
                 // check each observation and add a row to the result vector for any matches
                 for (ISPObservation o : prog.getAllObservations()) {
@@ -235,15 +228,15 @@ public class ObsQueryFunctor extends DBAbstractQueryFunctor {
 
     // Add any matching observations to the query results.
     private void _match(ISPProgram prog, ISPObservation o) {
-        final List instruments = _getInstruments(o);
-        final Iterator it = instruments.iterator();
+        final List<ISPDataObject> instruments = _getInstruments(o);
+        final Iterator<ISPDataObject> it = instruments.iterator();
         final PioFactory factory = new PioXmlFactory();
         while (it.hasNext()) {
-            final ISPDataObject inst = (ISPDataObject) it.next();
-            final List instConfigInfoList = ObsCatalogInfo.getInstConfigInfoList(inst.getType().readableStr);
+            final ISPDataObject inst = it.next();
+            final List<InstConfigInfo> instConfigInfoList = ObsCatalogInfo.getInstConfigInfoList(inst.getType().readableStr);
             final ParamSet instParamSet = inst.getParamSet(factory);
             if (_match(o, inst, instConfigInfoList, instParamSet)) {
-                final ISPDataObject mainInst = (ISPDataObject) instruments.get(0);
+                final ISPDataObject mainInst = instruments.get(0);
                 _result.add(_makeRow(prog, o, mainInst, instConfigInfoList, instParamSet));
                 _ids.add(_makeIdRow(prog, o));
                 break;
@@ -259,7 +252,7 @@ public class ObsQueryFunctor extends DBAbstractQueryFunctor {
      * @param instConfigInfoList maps instrument specific column names to map keys
      * @param instParamSet       describes the instrument settings
      */
-    private boolean _match(ISPObservation o, ISPDataObject inst, List instConfigInfoList,
+    private boolean _match(ISPObservation o, ISPDataObject inst, List<InstConfigInfo> instConfigInfoList,
                            ParamSet instParamSet) {
         final SPObservation obs = (SPObservation) o.getDataObject();
         final SPSiteQuality siteQuality = _getSiteQuality(o);
@@ -462,30 +455,8 @@ public class ObsQueryFunctor extends DBAbstractQueryFunctor {
      * Return true if any of the requested values match the given SiteQuality value.
      */
     private static boolean _matchSiteQuality(SearchCondition sc, String current) {
-        //Object[] values = ((ArraySearchCondition)sc).getValues();
-        //if (values == null || values.length == 0)
-        //   return true;
-
-        //for(int i = 0; i < values.length; i++) {
-        //   if (_getSiteQualityValue((String)values[i]) <= _getSiteQualityValue(current));
-        //	return true;
-        //}
-        //return false;
-
         return sc.isTrueFor(current);
     }
-
-
-    /**
-     * Return the numerical percent value from the given site quality string.
-     * The string should be something like "20%" or "Any" (counts as 100%).
-     */
-//    private static int _getSiteQualityValue(String s) {
-//        if (s.startsWith("Any"))
-//            return 100;
-//        return Integer.parseInt(s.substring(0, 2));
-//    }
-
 
     /**
      * Return true if one of the instrument specific options match for the given
@@ -497,18 +468,13 @@ public class ObsQueryFunctor extends DBAbstractQueryFunctor {
      * @param instParamSet       describes the instrument settings
      */
     private boolean _matchInstOptions(String paramName, SearchCondition sc,
-                                      List instConfigInfoList, ParamSet instParamSet) {
+                                      List<InstConfigInfo> instConfigInfoList, ParamSet instParamSet) {
         for (Object anInstConfigInfoList : instConfigInfoList) {
             final InstConfigInfo info = (InstConfigInfo) anInstConfigInfoList;
             if (paramName.equals(info.getName())) {
                 final String value = Pio.getValue(instParamSet, info.getPropertyName());
 
                 if ((value != null) || info.isOptional()) {
-//                    if (value.equals("true")) {
-//                        value = "Yes";
-//                    } else if (value.equals("false")) {
-//                        value = "No";
-//                    }
                     if (!sc.isTrueFor(value)) {
                         return false;
                     }
@@ -523,12 +489,11 @@ public class ObsQueryFunctor extends DBAbstractQueryFunctor {
      * Return a list containing the instrument and Altair data objects for the
      * given observation.
      */
-    private List _getInstruments(ISPObservation o) {
-        final List result = new ArrayList();
-        final List l = SPTreeUtil.findInstruments(o);
-        for (Object aL : l) {
-            final ISPObsComponent obsComp = (ISPObsComponent) aL;
-            result.add(obsComp.getDataObject());
+    private List<ISPDataObject> _getInstruments(ISPObservation o) {
+        final List<ISPDataObject> result = new ArrayList<>();
+        final List<ISPObsComponent> l = SPTreeUtil.findInstruments(o);
+        for (ISPObsComponent aL : l) {
+            result.add(aL.getDataObject());
         }
         return result;
     }
@@ -608,8 +573,8 @@ public class ObsQueryFunctor extends DBAbstractQueryFunctor {
      * @param instConfigInfoList maps instrument specific column names to map keys
      * @param instParamSet       describes the instrument settings
      */
-    private Vector _makeRow(ISPProgram prog, ISPObservation o, ISPDataObject inst,
-                            List instConfigInfoList, ParamSet instParamSet) {
+    private Vector<Object> _makeRow(ISPProgram prog, ISPObservation o, ISPDataObject inst,
+                            List<InstConfigInfo> instConfigInfoList, ParamSet instParamSet) {
 
         final SPProgram spProg = (SPProgram) prog.getDataObject();
         final SPObservation obs = (SPObservation) o.getDataObject();
@@ -724,9 +689,9 @@ public class ObsQueryFunctor extends DBAbstractQueryFunctor {
 
         final String[] ar = ObsCatalogInfo.getTableColumns();
         final int n = ar.length;
-        final Vector row = new Vector(n);
+        final Vector<Object> row = new Vector<>(n);
 
-        final Map<String,Object> map = new TreeMap<String, Object>();
+        final Map<String,Object> map = new TreeMap<>();
         map.put(ObsCatalogInfo.TARGET_NAME, targetName);
         map.put(ObsCatalogInfo.RA, ra);
         map.put(ObsCatalogInfo.DEC, dec);
@@ -765,15 +730,15 @@ public class ObsQueryFunctor extends DBAbstractQueryFunctor {
                 String s = null;
                 if (inst != null && instConfigInfoList != null && instParamSet != null) {
                     // instrument specific columns
-                    for (Object anInstConfigInfoList : instConfigInfoList) {
-                        final InstConfigInfo info = (InstConfigInfo) anInstConfigInfoList;
+                    for (InstConfigInfo info: instConfigInfoList) {
                         if (name.equals(info.getName())) {
                             s = Pio.getValue(instParamSet, info.getPropertyName());
                             //if this is an enum type, and it has a display value, use it
+                            @SuppressWarnings("rawtypes")
                             final Class c = info.getEnumType();
                             if ((c != null) && (s != null)) {
                                 //noinspection unchecked
-                                final Enum x = Enum.valueOf(c, s);
+                                final Enum<?> x = Enum.valueOf(c, s);
                                 if (x instanceof DisplayableSpType) {
                                     final DisplayableSpType d = (DisplayableSpType) x;
                                     s = d.displayValue();
@@ -804,11 +769,11 @@ public class ObsQueryFunctor extends DBAbstractQueryFunctor {
      * @param prog the program node
      * @param o    the observation node
      */
-    private Vector _makeIdRow(ISPProgram prog, ISPObservation o) {
+    private Vector<Object> _makeIdRow(ISPProgram prog, ISPObservation o) {
         final SPNodeKey obsId = o.getNodeKey();
         final SPNodeKey progId = prog.getNodeKey();
 
-        final Vector row = new Vector(2);
+        final Vector<Object> row = new Vector<>(2);
         row.add(progId);
         row.add(obsId);
 

@@ -28,11 +28,11 @@ import java.util.*;
 
 public final class InstBHROS extends SPInstObsComp implements PropertyProvider {
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
     public static final SPComponentType SP_TYPE = SPComponentType.INSTRUMENT_BHROS;
 
-    private static final Map<String, PropertyDescriptor> PRIVATE_PROP_MAP = new TreeMap<String, PropertyDescriptor>();
+    private static final Map<String, PropertyDescriptor> PRIVATE_PROP_MAP = new TreeMap<>();
     public static final Map<String, PropertyDescriptor> PROPERTY_MAP = Collections.unmodifiableMap(PRIVATE_PROP_MAP);
 
     //Properties
@@ -104,35 +104,35 @@ public final class InstBHROS extends SPInstObsComp implements PropertyProvider {
 
 
     private double centralWavelength = 0.4334; // microns
-	private double ccdCentreX = 0.0;
-	private double ccdCentreY = HROSHardwareConstants.BLUE_YCENTRE;
-	private PostSlitFilter postSlitFilter = PostSlitFilter.DEFAULT;
-	private HartmannFlap hartmannFlap = HartmannFlap.DEFAULT;
-	private EntranceFibre entranceFibre = EntranceFibre.DEFAULT;
-	private CCDXBinning ccdXBinning = CCDXBinning.DEFAULT;
-	private CCDYBinning ccdYBinning = CCDYBinning.DEFAULT;
-	private CCDSpeed ccdSpeed = CCDSpeed.DEFAULT;
-	private CCDReadoutPorts ccdAmplifiers = CCDReadoutPorts.DEFAULT;
-	private CCDGain ccdGain = CCDGain.DEFAULT;
-	private ROI roi = ROI.DEFAULT;
-	private ISSPort issPort = ISSPort.DEFAULT;
-	private ExposureMeterFilter exposureMeterFilter = ExposureMeterFilter.DEFAULT;
+    private double ccdCentreX = 0.0;
+    private double ccdCentreY = HROSHardwareConstants.BLUE_YCENTRE;
+    private PostSlitFilter postSlitFilter = PostSlitFilter.DEFAULT;
+    private HartmannFlap hartmannFlap = HartmannFlap.DEFAULT;
+    private EntranceFibre entranceFibre = EntranceFibre.DEFAULT;
+    private CCDXBinning ccdXBinning = CCDXBinning.DEFAULT;
+    private CCDYBinning ccdYBinning = CCDYBinning.DEFAULT;
+    private CCDSpeed ccdSpeed = CCDSpeed.DEFAULT;
+    private CCDReadoutPorts ccdAmplifiers = CCDReadoutPorts.DEFAULT;
+    private CCDGain ccdGain = CCDGain.DEFAULT;
+    private ROI roi = ROI.DEFAULT;
+    private ISSPort issPort = ISSPort.DEFAULT;
+    private ExposureMeterFilter exposureMeterFilter = ExposureMeterFilter.DEFAULT;
 
-	private transient double echelleAz;
-	private transient double echelleAlt;
-	private transient double goniAng;
-	private transient boolean initializedEchelle;
+    private transient double echelleAz;
+    private transient double echelleAlt;
+    private transient double goniAng;
+    private transient boolean initializedEchelle;
 
     private static final String VERSION =  "2006B-1";
 
     public InstBHROS() {
-		super(SP_TYPE);
+        super(SP_TYPE);
         setVersion(VERSION);
     }
 
-	public Object clone() {
+    public Object clone() {
         return super.clone();
-	}
+    }
 
     @Override
     public Set<Site> getSite() {
@@ -140,42 +140,42 @@ public final class InstBHROS extends SPInstObsComp implements PropertyProvider {
     }
 
     public String getPhaseIResourceName() {
-		return "gembHROS"; //matches what GeminiData.xml has for the Phase1Resource
-	}
+        return "gembHROS"; //matches what GeminiData.xml has for the Phase1Resource
+    }
 
-	public double getSetupTime(ISPObservation obs) {
-		// OT-427: setup time should be 30 minutes
-		return 60 * 30;
-	}
+    public double getSetupTime(ISPObservation obs) {
+        // OT-427: setup time should be 30 minutes
+        return 60 * 30;
+    }
 
-	public double[] getScienceArea() {
-		return entranceFibre.getScienceArea();
-	}
+    public double[] getScienceArea() {
+        return entranceFibre.getScienceArea();
+    }
 
     public ParamSet getParamSet(final PioFactory factory) {
-		final ParamSet paramSet = super.getParamSet(factory);
-		Pio.addParam(factory, paramSet, CCD_AMPLIFIERS_PROP, ccdAmplifiers.name());
-		Pio.addParam(factory, paramSet, CCD_CENTRE_X_PROP, Double.toString(ccdCentreX));
-		Pio.addParam(factory, paramSet, CCD_CENTRE_Y_PROP, Double.toString(ccdCentreY));
-		Pio.addParam(factory, paramSet, CCD_GAIN_PROP, ccdGain.name());
-		Pio.addParam(factory, paramSet, CCD_SPEED_PROP, ccdSpeed.name());
-		Pio.addParam(factory, paramSet, CCD_XBINNING_PROP, ccdXBinning.name());
-		Pio.addParam(factory, paramSet, CCD_YBINNING_PROP, ccdYBinning.name());
-		Pio.addParam(factory, paramSet, CENTRAL_WAVELENGTH_PROP, Double.toString(centralWavelength));
-		Pio.addParam(factory, paramSet, ECHELLE_ALT_PROP, Double.toString(echelleAlt));
-		Pio.addParam(factory, paramSet, ECHELLE_AZ_PROP, Double.toString(echelleAz));
-		Pio.addParam(factory, paramSet, ENTRANCE_FIBRE_PROP, entranceFibre.name());
-		Pio.addParam(factory, paramSet, EXPOSURE_METER_FILTER_PROP, exposureMeterFilter.name());
-		Pio.addParam(factory, paramSet, GONI_ANG_PROP, Double.toString(goniAng));
-		Pio.addParam(factory, paramSet, HARTMANN_FLAP_PROP, hartmannFlap.name());
-		Pio.addParam(factory, paramSet, ISS_PORT_PROP, issPort.name());
-		Pio.addParam(factory, paramSet, POST_SLIT_FILTER_PROP, postSlitFilter.name());
-		Pio.addParam(factory, paramSet, ROI_PROP, roi.name());
-		return paramSet;
-	}
+        final ParamSet paramSet = super.getParamSet(factory);
+        Pio.addParam(factory, paramSet, CCD_AMPLIFIERS_PROP, ccdAmplifiers.name());
+        Pio.addParam(factory, paramSet, CCD_CENTRE_X_PROP, Double.toString(ccdCentreX));
+        Pio.addParam(factory, paramSet, CCD_CENTRE_Y_PROP, Double.toString(ccdCentreY));
+        Pio.addParam(factory, paramSet, CCD_GAIN_PROP, ccdGain.name());
+        Pio.addParam(factory, paramSet, CCD_SPEED_PROP, ccdSpeed.name());
+        Pio.addParam(factory, paramSet, CCD_XBINNING_PROP, ccdXBinning.name());
+        Pio.addParam(factory, paramSet, CCD_YBINNING_PROP, ccdYBinning.name());
+        Pio.addParam(factory, paramSet, CENTRAL_WAVELENGTH_PROP, Double.toString(centralWavelength));
+        Pio.addParam(factory, paramSet, ECHELLE_ALT_PROP, Double.toString(echelleAlt));
+        Pio.addParam(factory, paramSet, ECHELLE_AZ_PROP, Double.toString(echelleAz));
+        Pio.addParam(factory, paramSet, ENTRANCE_FIBRE_PROP, entranceFibre.name());
+        Pio.addParam(factory, paramSet, EXPOSURE_METER_FILTER_PROP, exposureMeterFilter.name());
+        Pio.addParam(factory, paramSet, GONI_ANG_PROP, Double.toString(goniAng));
+        Pio.addParam(factory, paramSet, HARTMANN_FLAP_PROP, hartmannFlap.name());
+        Pio.addParam(factory, paramSet, ISS_PORT_PROP, issPort.name());
+        Pio.addParam(factory, paramSet, POST_SLIT_FILTER_PROP, postSlitFilter.name());
+        Pio.addParam(factory, paramSet, ROI_PROP, roi.name());
+        return paramSet;
+    }
 
-	public void setParamSet(ParamSet paramSet) {
-		super.setParamSet(paramSet);
+    public void setParamSet(ParamSet paramSet) {
+        super.setParamSet(paramSet);
         String v;
         v = Pio.getValue(paramSet, CCD_AMPLIFIERS_PROP);
         if (v != null) {
@@ -261,300 +261,300 @@ public final class InstBHROS extends SPInstObsComp implements PropertyProvider {
         if (v != null) {
             setROI(BHROSParams.ROI.getROI(v, roi));
         }
-	}
+    }
 
-	public ISysConfig getSysConfig() {
-		ISysConfig sc = new DefaultSysConfig(SeqConfigNames.INSTRUMENT_CONFIG_NAME);
-		sc.putParameter(DefaultParameter.getInstance(ISPDataObject.VERSION_PROP, getVersion()));
-		sc.putParameter(DefaultParameter.getInstance(EXPOSURE_TIME_PROP, getExposureTime()));
-		sc.putParameter(DefaultParameter.getInstance(CCD_AMPLIFIERS_PROP, ccdAmplifiers));
-		sc.putParameter(DefaultParameter.getInstance(CCD_CENTRE_X_PROP, ccdCentreX));
-		sc.putParameter(DefaultParameter.getInstance(CCD_CENTRE_Y_PROP, ccdCentreY));
-		sc.putParameter(DefaultParameter.getInstance(CCD_GAIN_PROP, ccdGain));
-		sc.putParameter(DefaultParameter.getInstance(CCD_SPEED_PROP, ccdSpeed));
-		sc.putParameter(DefaultParameter.getInstance(CCD_XBINNING_PROP, ccdXBinning));
-		sc.putParameter(DefaultParameter.getInstance(CCD_YBINNING_PROP, ccdYBinning));
-		sc.putParameter(DefaultParameter.getInstance(CENTRAL_WAVELENGTH_PROP, centralWavelength));
-		sc.putParameter(DefaultParameter.getInstance(ENTRANCE_FIBRE_PROP, entranceFibre));
-		sc.putParameter(DefaultParameter.getInstance(HARTMANN_FLAP_PROP, hartmannFlap));
-		sc.putParameter(DefaultParameter.getInstance(ISS_PORT_PROP, issPort));
-		sc.putParameter(DefaultParameter.getInstance(POST_SLIT_FILTER_PROP, postSlitFilter));
-		sc.putParameter(DefaultParameter.getInstance(EXPOSURE_METER_FILTER_PROP, exposureMeterFilter));
+    public ISysConfig getSysConfig() {
+        ISysConfig sc = new DefaultSysConfig(SeqConfigNames.INSTRUMENT_CONFIG_NAME);
+        sc.putParameter(DefaultParameter.getInstance(ISPDataObject.VERSION_PROP, getVersion()));
+        sc.putParameter(DefaultParameter.getInstance(EXPOSURE_TIME_PROP, getExposureTime()));
+        sc.putParameter(DefaultParameter.getInstance(CCD_AMPLIFIERS_PROP, ccdAmplifiers));
+        sc.putParameter(DefaultParameter.getInstance(CCD_CENTRE_X_PROP, ccdCentreX));
+        sc.putParameter(DefaultParameter.getInstance(CCD_CENTRE_Y_PROP, ccdCentreY));
+        sc.putParameter(DefaultParameter.getInstance(CCD_GAIN_PROP, ccdGain));
+        sc.putParameter(DefaultParameter.getInstance(CCD_SPEED_PROP, ccdSpeed));
+        sc.putParameter(DefaultParameter.getInstance(CCD_XBINNING_PROP, ccdXBinning));
+        sc.putParameter(DefaultParameter.getInstance(CCD_YBINNING_PROP, ccdYBinning));
+        sc.putParameter(DefaultParameter.getInstance(CENTRAL_WAVELENGTH_PROP, centralWavelength));
+        sc.putParameter(DefaultParameter.getInstance(ENTRANCE_FIBRE_PROP, entranceFibre));
+        sc.putParameter(DefaultParameter.getInstance(HARTMANN_FLAP_PROP, hartmannFlap));
+        sc.putParameter(DefaultParameter.getInstance(ISS_PORT_PROP, issPort));
+        sc.putParameter(DefaultParameter.getInstance(POST_SLIT_FILTER_PROP, postSlitFilter));
+        sc.putParameter(DefaultParameter.getInstance(EXPOSURE_METER_FILTER_PROP, exposureMeterFilter));
 
 // Not configurable yet.
 //		sc.putParameter(DefaultParameter.getInstance(BHROSConstants.ROI_PROP, roi));
 
-		return sc;
-	}
+        return sc;
+    }
 
     /** This method is called by the OT Browser to determine how to query the instrument */
-	public static List getInstConfigInfo() {
-		List<InstConfigInfo> configInfo = new LinkedList<InstConfigInfo>();
+    public static List<InstConfigInfo> getInstConfigInfo() {
+        List<InstConfigInfo> configInfo = new LinkedList<>();
 
-		configInfo.add(new InstConfigInfo(CCD_AMPLIFIERS_PROP));
-		configInfo.add(new InstConfigInfo(CCD_GAIN_PROP));
-		configInfo.add(new InstConfigInfo(CCD_SPEED_PROP));
-		configInfo.add(new InstConfigInfo(CCD_XBINNING_PROP));
-		configInfo.add(new InstConfigInfo(CCD_YBINNING_PROP));
-		configInfo.add(new InstConfigInfo(ENTRANCE_FIBRE_PROP));
-		configInfo.add(new InstConfigInfo(EXPOSURE_METER_FILTER_PROP));
-		configInfo.add(new InstConfigInfo(HARTMANN_FLAP_PROP));
-		configInfo.add(new InstConfigInfo(ISS_PORT_PROP));
-		configInfo.add(new InstConfigInfo(POST_SLIT_FILTER_PROP));
-		configInfo.add(new InstConfigInfo(ROI_PROP));
+        configInfo.add(new InstConfigInfo(CCD_AMPLIFIERS_PROP));
+        configInfo.add(new InstConfigInfo(CCD_GAIN_PROP));
+        configInfo.add(new InstConfigInfo(CCD_SPEED_PROP));
+        configInfo.add(new InstConfigInfo(CCD_XBINNING_PROP));
+        configInfo.add(new InstConfigInfo(CCD_YBINNING_PROP));
+        configInfo.add(new InstConfigInfo(ENTRANCE_FIBRE_PROP));
+        configInfo.add(new InstConfigInfo(EXPOSURE_METER_FILTER_PROP));
+        configInfo.add(new InstConfigInfo(HARTMANN_FLAP_PROP));
+        configInfo.add(new InstConfigInfo(ISS_PORT_PROP));
+        configInfo.add(new InstConfigInfo(POST_SLIT_FILTER_PROP));
+        configInfo.add(new InstConfigInfo(ROI_PROP));
 
-		return configInfo;
-	}
+        return configInfo;
+    }
 
-	public CCDReadoutPorts getCCDAmplifiers() {
-		return ccdAmplifiers;
-	}
+    public CCDReadoutPorts getCCDAmplifiers() {
+        return ccdAmplifiers;
+    }
 
-	public void setCCDAmplifiers(CCDReadoutPorts ccdAmplifiers) {
-		Object prev = this.ccdAmplifiers;
-		this.ccdAmplifiers = ccdAmplifiers;
-		firePropertyChange(CCD_AMPLIFIERS_PROP, prev, this.ccdAmplifiers);
-	}
+    public void setCCDAmplifiers(CCDReadoutPorts ccdAmplifiers) {
+        Object prev = this.ccdAmplifiers;
+        this.ccdAmplifiers = ccdAmplifiers;
+        firePropertyChange(CCD_AMPLIFIERS_PROP, prev, this.ccdAmplifiers);
+    }
 
-	public double getCCDCentreX() {
-		return ccdCentreX;
-	}
+    public double getCCDCentreX() {
+        return ccdCentreX;
+    }
 
-	/**
-	 * Sets the CCD target X position and updates the echelle settings.
-	 * @param ccdCentreX CCD X offset
-	 */
-	public void setCCDCentreX(double ccdCentreX) {
-		double prev = this.ccdCentreX;
-		this.ccdCentreX = ccdCentreX;
-		try {
-			updateEchelleSettings();
-			firePropertyChange(CCD_CENTRE_X_PROP, prev, this.ccdCentreX);
-		} catch (IllegalArgumentException iae) {
-			this.ccdCentreX = prev;
-			throw iae;
-		}
-	}
+    /**
+     * Sets the CCD target X position and updates the echelle settings.
+     * @param ccdCentreX CCD X offset
+     */
+    public void setCCDCentreX(double ccdCentreX) {
+        double prev = this.ccdCentreX;
+        this.ccdCentreX = ccdCentreX;
+        try {
+            updateEchelleSettings();
+            firePropertyChange(CCD_CENTRE_X_PROP, prev, this.ccdCentreX);
+        } catch (IllegalArgumentException iae) {
+            this.ccdCentreX = prev;
+            throw iae;
+        }
+    }
 
-	public double getCCDCentreY() {
-		return ccdCentreY;
-	}
+    public double getCCDCentreY() {
+        return ccdCentreY;
+    }
 
-	public void setCCDCentreY(double ccdCentreY) {
-		double prev = this.ccdCentreY;
-		this.ccdCentreY = ccdCentreY;
-		try {
-			updateEchelleSettings();
-			firePropertyChange(CCD_CENTRE_Y_PROP, prev, this.ccdCentreY);
-		} catch (IllegalArgumentException iae) {
-			this.ccdCentreY = prev;
-			throw iae;
-		}
-	}
+    public void setCCDCentreY(double ccdCentreY) {
+        double prev = this.ccdCentreY;
+        this.ccdCentreY = ccdCentreY;
+        try {
+            updateEchelleSettings();
+            firePropertyChange(CCD_CENTRE_Y_PROP, prev, this.ccdCentreY);
+        } catch (IllegalArgumentException iae) {
+            this.ccdCentreY = prev;
+            throw iae;
+        }
+    }
 
-	public CCDGain getCCDGain() {
-		return ccdGain;
-	}
+    public CCDGain getCCDGain() {
+        return ccdGain;
+    }
 
-	public void setCCDGain(CCDGain ccdGain) {
-		Object prev = this.ccdGain;
-		this.ccdGain = ccdGain;
-		firePropertyChange(CCD_GAIN_PROP, prev, this.ccdGain);
-	}
+    public void setCCDGain(CCDGain ccdGain) {
+        Object prev = this.ccdGain;
+        this.ccdGain = ccdGain;
+        firePropertyChange(CCD_GAIN_PROP, prev, this.ccdGain);
+    }
 
-	public CCDSpeed getCCDSpeed() {
-		return ccdSpeed;
-	}
+    public CCDSpeed getCCDSpeed() {
+        return ccdSpeed;
+    }
 
-	public void setCCDSpeed(CCDSpeed ccdSpeed) {
-		Object prev = this.ccdSpeed;
-		this.ccdSpeed = ccdSpeed;
-		firePropertyChange(CCD_SPEED_PROP, prev, this.ccdSpeed);
-	}
+    public void setCCDSpeed(CCDSpeed ccdSpeed) {
+        Object prev = this.ccdSpeed;
+        this.ccdSpeed = ccdSpeed;
+        firePropertyChange(CCD_SPEED_PROP, prev, this.ccdSpeed);
+    }
 
-	public double getCentralWavelength() {
-		return centralWavelength;
-	}
+    public double getCentralWavelength() {
+        return centralWavelength;
+    }
 
-	/**
-	 * Sets the central wavelength and updates the echelle settings.
-	 * @param lambdaNm wavelength in nanometers
-	 */
-	public void setCentralWavelength(double lambdaNm) {
-		double prev = this.centralWavelength;
-		this.centralWavelength = lambdaNm;
-		try {
-			updateEchelleSettings();
-			firePropertyChange(CENTRAL_WAVELENGTH_PROP, prev, this.centralWavelength);
-		} catch (IllegalArgumentException iae) {
-			this.centralWavelength = prev;
-			throw iae;
-		}
-	}
+    /**
+     * Sets the central wavelength and updates the echelle settings.
+     * @param lambdaNm wavelength in nanometers
+     */
+    public void setCentralWavelength(double lambdaNm) {
+        double prev = this.centralWavelength;
+        this.centralWavelength = lambdaNm;
+        try {
+            updateEchelleSettings();
+            firePropertyChange(CENTRAL_WAVELENGTH_PROP, prev, this.centralWavelength);
+        } catch (IllegalArgumentException iae) {
+            this.centralWavelength = prev;
+            throw iae;
+        }
+    }
 
-	public EntranceFibre getEntranceFibre() {
-		return entranceFibre;
-	}
+    public EntranceFibre getEntranceFibre() {
+        return entranceFibre;
+    }
 
-	public void setEntranceFibre(EntranceFibre entranceFibre) {
-		Object prev = this.entranceFibre;
-		this.entranceFibre = entranceFibre;
-		firePropertyChange(ENTRANCE_FIBRE_PROP, prev, this.entranceFibre);
+    public void setEntranceFibre(EntranceFibre entranceFibre) {
+        Object prev = this.entranceFibre;
+        this.entranceFibre = entranceFibre;
+        firePropertyChange(ENTRANCE_FIBRE_PROP, prev, this.entranceFibre);
 
-		// fibre switch changes the goni angle
-		double prevGoni = goniAng;
-		updateEchelleSettings();
-		firePropertyChange(GONI_ANG_PROP, prevGoni, goniAng);
-	}
+        // fibre switch changes the goni angle
+        double prevGoni = goniAng;
+        updateEchelleSettings();
+        firePropertyChange(GONI_ANG_PROP, prevGoni, goniAng);
+    }
 
-	public ExposureMeterFilter getExposureMeterFilter() {
-		return exposureMeterFilter;
-	}
+    public ExposureMeterFilter getExposureMeterFilter() {
+        return exposureMeterFilter;
+    }
 
-	public void setExposureMeterFilter(ExposureMeterFilter exposureMeterFilter) {
-		Object prev = this.exposureMeterFilter;
-		this.exposureMeterFilter = exposureMeterFilter;
-		firePropertyChange(EXPOSURE_METER_FILTER_PROP, prev, this.exposureMeterFilter);
-	}
+    public void setExposureMeterFilter(ExposureMeterFilter exposureMeterFilter) {
+        Object prev = this.exposureMeterFilter;
+        this.exposureMeterFilter = exposureMeterFilter;
+        firePropertyChange(EXPOSURE_METER_FILTER_PROP, prev, this.exposureMeterFilter);
+    }
 
-	public HartmannFlap getHartmannFlap() {
-		return hartmannFlap;
-	}
+    public HartmannFlap getHartmannFlap() {
+        return hartmannFlap;
+    }
 
-	public void setHartmannFlap(HartmannFlap hartmannFlap) {
-		Object prev = this.hartmannFlap;
-		this.hartmannFlap = hartmannFlap;
-		firePropertyChange(HARTMANN_FLAP_PROP, prev, this.hartmannFlap);
-	}
+    public void setHartmannFlap(HartmannFlap hartmannFlap) {
+        Object prev = this.hartmannFlap;
+        this.hartmannFlap = hartmannFlap;
+        firePropertyChange(HARTMANN_FLAP_PROP, prev, this.hartmannFlap);
+    }
 
-	public ISSPort getISSPort() {
-		return issPort;
-	}
+    public ISSPort getISSPort() {
+        return issPort;
+    }
 
-	public void setISSPort(ISSPort issPort) {
-		Object prev = this.issPort;
-		this.issPort = issPort;
-		firePropertyChange(ISS_PORT_PROP, prev, this.issPort);
-	}
+    public void setISSPort(ISSPort issPort) {
+        Object prev = this.issPort;
+        this.issPort = issPort;
+        firePropertyChange(ISS_PORT_PROP, prev, this.issPort);
+    }
 
-	public PostSlitFilter getPostSlitFilter() {
-		return postSlitFilter;
-	}
+    public PostSlitFilter getPostSlitFilter() {
+        return postSlitFilter;
+    }
 
-	public void setPostSlitFilter(PostSlitFilter postSlitFilter) {
-		Object prev = this.postSlitFilter;
-		this.postSlitFilter = postSlitFilter;
-		firePropertyChange(POST_SLIT_FILTER_PROP, prev, this.postSlitFilter);
-	}
+    public void setPostSlitFilter(PostSlitFilter postSlitFilter) {
+        Object prev = this.postSlitFilter;
+        this.postSlitFilter = postSlitFilter;
+        firePropertyChange(POST_SLIT_FILTER_PROP, prev, this.postSlitFilter);
+    }
 
-	public ROI getROI() {
-		return roi;
-	}
+    public ROI getROI() {
+        return roi;
+    }
 
-	public void setROI(ROI roi) {
-		Object prev = this.roi;
-		this.roi = roi;
-		firePropertyChange(ROI_PROP, prev, this.roi);
-	}
+    public void setROI(ROI roi) {
+        Object prev = this.roi;
+        this.roi = roi;
+        firePropertyChange(ROI_PROP, prev, this.roi);
+    }
 
-	public CCDXBinning getCCDXBinning() {
-		return ccdXBinning;
-	}
+    public CCDXBinning getCCDXBinning() {
+        return ccdXBinning;
+    }
 
-	public void setCCDXBinning(CCDXBinning binning) {
-		Object prev = ccdXBinning;
-		ccdXBinning = binning;
-		firePropertyChange(CCD_XBINNING_PROP, prev, ccdXBinning);
-	}
+    public void setCCDXBinning(CCDXBinning binning) {
+        Object prev = ccdXBinning;
+        ccdXBinning = binning;
+        firePropertyChange(CCD_XBINNING_PROP, prev, ccdXBinning);
+    }
 
-	public CCDYBinning getCCDYBinning() {
-		return ccdYBinning;
-	}
+    public CCDYBinning getCCDYBinning() {
+        return ccdYBinning;
+    }
 
-	public void setCCDYBinning(CCDYBinning binning) {
-		Object prev = ccdYBinning;
-		ccdYBinning = binning;
-		firePropertyChange(CCD_XBINNING_PROP, prev, ccdYBinning);
-	}
+    public void setCCDYBinning(CCDYBinning binning) {
+        Object prev = ccdYBinning;
+        ccdYBinning = binning;
+        firePropertyChange(CCD_XBINNING_PROP, prev, ccdYBinning);
+    }
 
-	public double getEchelleALT() {
-		if (!initializedEchelle)
-			updateEchelleSettings();
-		return echelleAlt;
-	}
+    public double getEchelleALT() {
+        if (!initializedEchelle)
+            updateEchelleSettings();
+        return echelleAlt;
+    }
 
-	public void setEchelleALT(double echelleAlt) {
-		double prev = this.echelleAlt;
-		this.echelleAlt = echelleAlt;
-		firePropertyChange(ECHELLE_ALT_PROP, prev, this.echelleAlt);
-	}
+    public void setEchelleALT(double echelleAlt) {
+        double prev = this.echelleAlt;
+        this.echelleAlt = echelleAlt;
+        firePropertyChange(ECHELLE_ALT_PROP, prev, this.echelleAlt);
+    }
 
-	public double getEchelleAz() {
-		if (!initializedEchelle)
-			updateEchelleSettings();
-		return echelleAz;
-	}
+    public double getEchelleAz() {
+        if (!initializedEchelle)
+            updateEchelleSettings();
+        return echelleAz;
+    }
 
-	public void setEchelleAz(double echelleAz) {
-		double prev = this.echelleAz;
-		this.echelleAz = echelleAz;
-		firePropertyChange(ECHELLE_AZ_PROP, prev, this.echelleAz);
-	}
+    public void setEchelleAz(double echelleAz) {
+        double prev = this.echelleAz;
+        this.echelleAz = echelleAz;
+        firePropertyChange(ECHELLE_AZ_PROP, prev, this.echelleAz);
+    }
 
-	public double getGoniAng() {
-		if (!initializedEchelle)
-			updateEchelleSettings();
-		return goniAng;
-	}
+    public double getGoniAng() {
+        if (!initializedEchelle)
+            updateEchelleSettings();
+        return goniAng;
+    }
 
-	public void setGoniAng(double goniAng) {
-		double prev = this.goniAng;
-		this.goniAng = goniAng;
-		firePropertyChange(GONI_ANG_PROP, prev, this.goniAng);
-	}
+    public void setGoniAng(double goniAng) {
+        double prev = this.goniAng;
+        this.goniAng = goniAng;
+        firePropertyChange(GONI_ANG_PROP, prev, this.goniAng);
+    }
 
-	private double getDoubleValue(PioNodeParent context, String path, double nValue) {
-		String val = Pio.getValue(context, path);
-		return val != null ? Double.parseDouble(val) : nValue;
-	}
+    private double getDoubleValue(PioNodeParent context, String path, double nValue) {
+        String val = Pio.getValue(context, path);
+        return val != null ? Double.parseDouble(val) : nValue;
+    }
 
-	private void updateEchelleSettings() {
-		double[] settings = BRayLib.echellePos(centralWavelength, Echellogram.getOrder(centralWavelength), ccdCentreX, ccdCentreY, entranceFibre.getGoniometerOffset());
-		echelleAlt = settings[0];
-		echelleAz = settings[1];
-		goniAng = settings[2];
-		initializedEchelle = true;
-	}
+    private void updateEchelleSettings() {
+        double[] settings = BRayLib.echellePos(centralWavelength, Echellogram.getOrder(centralWavelength), ccdCentreX, ccdCentreY, entranceFibre.getGoniometerOffset());
+        echelleAlt = settings[0];
+        echelleAz = settings[1];
+        goniAng = settings[2];
+        initializedEchelle = true;
+    }
 
-	// Ultimately this is just an ADT and needs to have equality defined in terms of
-	// the equality of all fields. At least for now. This is important for Undo and
-	// possibly for other things.
+    // Ultimately this is just an ADT and needs to have equality defined in terms of
+    // the equality of all fields. At least for now. This is important for Undo and
+    // possibly for other things.
     /*
-	public boolean equals(Object obj) {
-		if ((obj instanceof InstBHROS) && super.equals(obj)) {
-			InstBHROS other = (InstBHROS) obj;
-			return
-				other.ccdAmplifiers == ccdAmplifiers &&
-				other.ccdCentreX == ccdCentreX &&
-				other.ccdCentreY == ccdCentreY &&
-				other.ccdGain == ccdGain &&
-				other.ccdSpeed == ccdSpeed &&
-				other.ccdXBinning == ccdXBinning &&
-				other.ccdYBinning == ccdYBinning &&
-				other.centralWavelength == centralWavelength &&
+    public boolean equals(Object obj) {
+        if ((obj instanceof InstBHROS) && super.equals(obj)) {
+            InstBHROS other = (InstBHROS) obj;
+            return
+                other.ccdAmplifiers == ccdAmplifiers &&
+                other.ccdCentreX == ccdCentreX &&
+                other.ccdCentreY == ccdCentreY &&
+                other.ccdGain == ccdGain &&
+                other.ccdSpeed == ccdSpeed &&
+                other.ccdXBinning == ccdXBinning &&
+                other.ccdYBinning == ccdYBinning &&
+                other.centralWavelength == centralWavelength &&
 //				other.echelleAlt == echelleAlt &&
 //				other.echelleAz == echelleAz &&
-				other.entranceFibre == entranceFibre &&
-				other.exposureMeterFilter == exposureMeterFilter &&
+                other.entranceFibre == entranceFibre &&
+                other.exposureMeterFilter == exposureMeterFilter &&
 //				other.goniAng == goniAng &&
-				other.hartmannFlap == hartmannFlap &&
-				other.issPort == issPort &&
-				other.postSlitFilter == postSlitFilter &&
-				other.roi == roi;
-		}
-		return false;
-	}
-	*/
+                other.hartmannFlap == hartmannFlap &&
+                other.issPort == issPort &&
+                other.postSlitFilter == postSlitFilter &&
+                other.roi == roi;
+        }
+        return false;
+    }
+    */
 
     public Map<String, PropertyDescriptor> getProperties() {
         return PROPERTY_MAP;
