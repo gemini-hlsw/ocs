@@ -1,10 +1,3 @@
-// Copyright 1997 Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-// See the file LICENSE for complete details.
-//
-// $Id: EdCompInstTReCS.java 7408 2006-11-10 19:49:19Z anunez $
-//
-
 package jsky.app.ot.gemini.trecs;
 
 import edu.gemini.spModel.gemini.trecs.InstTReCS;
@@ -22,7 +15,6 @@ import javax.swing.JPanel;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
-
 
 /**
  * This is the editor for the TReCS instrument component.
@@ -361,8 +353,9 @@ public final class EdCompInstTReCS extends EdCompInstBase<InstTReCS>
      * Just an auxiliary method to fill up the combo boxes with the
      * appropriate enum types an renderers
      */
-    private <T extends Enum<T>> void _initComboBox(Class<T> c, JComboBox cb) {
-        final ComboBoxModel model = new SpTypeComboBoxModel<T>(c);
+    @SuppressWarnings("unchecked")
+    private <T extends Enum<T>> void _initComboBox(Class<T> c, JComboBox<T> cb) {
+        final ComboBoxModel<T> model = new SpTypeComboBoxModel<>(c);
         cb.setModel(model);
         cb.setRenderer(new SpTypeComboBoxRenderer());
         cb.setMaximumRowCount(c.getEnumConstants().length);

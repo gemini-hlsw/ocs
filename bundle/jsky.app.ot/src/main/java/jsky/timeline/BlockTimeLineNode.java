@@ -1,43 +1,3 @@
-//=== File Prolog =============================================================
-//	This code was developed by NASA, Goddard Space Flight Center, Code 588
-//	for the Scientist's Expert Assistant (SEA) project.
-//
-//--- Contents ----------------------------------------------------------------
-//	TimeLineNode
-//
-//--- Description -------------------------------------------------------------
-//	A class for a block on the time line that is uneditable by a user
-//
-//--- Notes -------------------------------------------------------------------
-//
-//--- Development History -----------------------------------------------------
-//
-//	05/19/99	M. Fishman
-//
-//		Original implementation.
-//
-//
-//--- DISCLAIMER---------------------------------------------------------------
-//
-//	This software is provided "as is" without any warranty of any kind, either
-//	express, implied, or statutory, including, but not limited to, any
-//	warranty that the software will conform to specification, any implied
-//	warranties of merchantability, fitness for a particular purpose, and
-//	freedom from infringement, and any warranty that the documentation will
-//	conform to the program, or any warranty that the software will be error
-//	free.
-//
-//	In no event shall NASA be liable for any damages, including, but not
-//	limited to direct, indirect, special or consequential damages, arising out
-//	of, resulting from, or in any way connected with this software, whether or
-//	not based upon warranty, contract, tort or otherwise, whether or not
-//	injury was sustained by persons or property or otherwise, and whether or
-//	not loss was sustained from or arose out of the results of, or use of,
-//	their software or services provided hereunder.
-//
-//=== End File Prolog =========================================================
-//package gov.nasa.gsfc.util.gui;
-
 package jsky.timeline;
 
 import jsky.science.Time;
@@ -54,7 +14,6 @@ import java.beans.VetoableChangeListener;
 import java.beans.VetoableChangeSupport;
 import java.text.DecimalFormat;
 
-
 /**
  * An interface for a single node on the time line.
  *
@@ -65,8 +24,6 @@ import java.text.DecimalFormat;
  * @author		M. Fishman
  **/
 public class BlockTimeLineNode implements TimeLineNode {
-
-    private static float sThumbHeight = 12;
 
     protected VetoableChangeSupport fChangeSupport = null;
     private DefaultVetoableTimeLineNodeModel fModel;
@@ -82,29 +39,13 @@ public class BlockTimeLineNode implements TimeLineNode {
     private TimeLine fTimeLine = null;
     protected Rectangle2D.Float fThumb = new Rectangle2D.Float();
 
-    /**
-     *
-     * constructor
-     *
-     **/
-    public BlockTimeLineNode(Time start, Time end) {
-        this(start, end, "unknown");
-    }
-
     public BlockTimeLineNode(Time startTime, Time endTime, String name) {
 
         fModel = new DefaultVetoableTimeLineNodeModel(startTime, endTime, name, true);
         fChangeSupport = new VetoableChangeSupport(this);
-        fModel.addVetoableChangeListener(new VetoableChangeListener() {
-
-            public void vetoableChange(PropertyChangeEvent evt)
-                    throws PropertyVetoException {
-                fChangeSupport.fireVetoableChange(evt.getPropertyName(),
-                                                  evt.getOldValue(),
-                                                  evt.getNewValue());
-            }
-
-        });
+        fModel.addVetoableChangeListener(evt -> fChangeSupport.fireVetoableChange(evt.getPropertyName(),
+                                          evt.getOldValue(),
+                                          evt.getNewValue()));
     }
 
     /**
@@ -194,8 +135,6 @@ public class BlockTimeLineNode implements TimeLineNode {
         } catch (DetailedPropertyVetoException ex) {
             calculateNodeDimensions();
             throw ex;
-        } catch (PropertyVetoException ex) {
-            ex.printStackTrace();
         }
 
     }
@@ -212,8 +151,6 @@ public class BlockTimeLineNode implements TimeLineNode {
         } catch (DetailedPropertyVetoException ex) {
             calculateNodeDimensions();
             throw ex;
-        } catch (PropertyVetoException ex) {
-            ex.printStackTrace();
         }
     }
 
@@ -237,8 +174,6 @@ public class BlockTimeLineNode implements TimeLineNode {
         } catch (DetailedPropertyVetoException ex) {
             calculateNodeDimensions();
             throw ex;
-        } catch (PropertyVetoException ex) {
-            ex.printStackTrace();
         }
     }
 
@@ -264,8 +199,6 @@ public class BlockTimeLineNode implements TimeLineNode {
         } catch (DetailedPropertyVetoException ex) {
             calculateNodeDimensions();
             throw ex;
-        } catch (PropertyVetoException ex) {
-            ex.printStackTrace();
         }
     }
 
@@ -290,6 +223,7 @@ public class BlockTimeLineNode implements TimeLineNode {
 
 
             // draw the thumb
+            float sThumbHeight = 12;
             fThumb.height = sThumbHeight;
             fThumb.width = thumbWidth;
             fThumb.x = fThumbBegin;
@@ -533,7 +467,7 @@ public class BlockTimeLineNode implements TimeLineNode {
     }
 
     public void vetoableChange(PropertyChangeEvent evt) throws DetailedPropertyVetoException {
-        if ((evt.getPropertyName() != TimeLine.NODE_REMOVED) && (evt.getSource() instanceof TimeLineNode)) {
+        if (!TimeLine.NODE_REMOVED.equals(evt.getPropertyName()) && (evt.getSource() instanceof TimeLineNode)) {
             TimeLineNode node = (TimeLineNode) evt.getSource();
 
             if ((node != this) && (intersects(node) || node.intersects(this))) {
@@ -544,7 +478,6 @@ public class BlockTimeLineNode implements TimeLineNode {
             }
         }
     }
-
 
     /**
      *
@@ -565,8 +498,7 @@ public class BlockTimeLineNode implements TimeLineNode {
      *
      **/
     public boolean intersects(TimeLineNode node) {
-        boolean result = fModel.intersects(node.getModel());
-        return result;
+        return fModel.intersects(node.getModel());
     }
 
 
@@ -581,8 +513,7 @@ public class BlockTimeLineNode implements TimeLineNode {
         Time centerTime = new Time(value);
         float x = fTimeLine.getPointForTime(centerTime);
         float y = fTimeLine.getHeight() / 2f;
-        Point pt = new Point(Math.round(x), Math.round(y));
-        return pt;
+        return new Point(Math.round(x), Math.round(y));
     }
 
 

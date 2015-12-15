@@ -1,43 +1,3 @@
-//=== File Prolog =============================================================
-//	This code was developed by NASA, Goddard Space Flight Center, Code 588
-//	for the Scientist's Expert Assistant (SEA) project.
-//
-//--- Contents ----------------------------------------------------------------
-//	TimeLineNodeModel
-//
-//--- Description -------------------------------------------------------------
-//	The model for a time line node
-//
-//--- Notes -------------------------------------------------------------------
-//
-//--- Development History -----------------------------------------------------
-//
-//	12/10/99	M. Fishman
-//
-//		Original implementation.
-//
-//
-//--- DISCLAIMER---------------------------------------------------------------
-//
-//	This software is provided "as is" without any warranty of any kind, either
-//	express, implied, or statutory, including, but not limited to, any
-//	warranty that the software will conform to specification, any implied
-//	warranties of merchantability, fitness for a particular purpose, and
-//	freedom from infringement, and any warranty that the documentation will
-//	conform to the program, or any warranty that the software will be error
-//	free.
-//
-//	In no event shall NASA be liable for any damages, including, but not
-//	limited to direct, indirect, special or consequential damages, arising out
-//	of, resulting from, or in any way connected with this software, whether or
-//	not based upon warranty, contract, tort or otherwise, whether or not
-//	injury was sustained by persons or property or otherwise, and whether or
-//	not loss was sustained from or arose out of the results of, or use of,
-//	their software or services provided hereunder.
-//
-//=== End File Prolog =========================================================
-//package gov.nasa.gsfc.util.gui;
-
 package jsky.timeline;
 
 import jsky.science.Time;
@@ -58,12 +18,11 @@ import java.util.Comparator;
 public interface TimeLineNodeModel {
 
     // property types
-    public static final String MODE = "Mode";
-    public static final String START_TIME = "StartTime";
-    public static final String END_TIME = "EndTime";
-    public static final String NODE = "Node";
-    public static final String NAME = "Name";
-    public static final String PARENT = "Parent";
+    String START_TIME = "StartTime";
+    String END_TIME = "EndTime";
+    String NODE = "Node";
+    String NAME = "Name";
+    String PARENT = "Parent";
 
 
     /**
@@ -71,42 +30,42 @@ public interface TimeLineNodeModel {
      * get the time that this node starts
      *
      **/
-    public Time getStartTime();
+    Time getStartTime();
 
     /**
      *
      * set the point on the time line that this node starts
      *
      **/
-    public void setStartTime(Time time);
+    void setStartTime(Time time);
 
     /**
      *
      * get the time that this node ends
      *
      **/
-    public Time getEndTime();
+    Time getEndTime();
 
     /**
      *
      * set the time that this node ends
      *
      **/
-    public void setEndTime(Time time);
+    void setEndTime(Time time);
 
     /**
      *
      * move node by specified time
      *
      **/
-    public void moveTimeLineNodeBy(Time time);
+    void moveTimeLineNodeBy(Time time);
 
     /**
      *
      * get the duration of the time line node
      *
      **/
-    public Time getDuration();
+    Time getDuration();
 
 
     /**
@@ -114,7 +73,7 @@ public interface TimeLineNodeModel {
      * set the duration of the time line node
      *
      **/
-    public void setDuration(Time durationLength);
+    void setDuration(Time durationLength);
 
 
     /**
@@ -122,21 +81,21 @@ public interface TimeLineNodeModel {
      * give the time line node a name
      *
      **/
-    public void setTimeLineNodeName(String name);
+    void setTimeLineNodeName(String name);
 
     /**
      *
      * get the name of the time line node
      *
      **/
-    public String getTimeLineNodeName();
+    String getTimeLineNodeName();
 
     /**
      *
      * returns whether the node intersects the passed in node
      *
      **/
-    public boolean intersects(TimeLineNodeModel node);
+    boolean intersects(TimeLineNodeModel node);
 
 
     /**
@@ -144,57 +103,49 @@ public interface TimeLineNodeModel {
      * move node to a specified location
      *
      **/
-    public void setTimeLineNode(Time start, Time end);
+    void setTimeLineNode(Time start, Time end);
 
     /**
      *
      * add a property change listener to the model
      *
      **/
-    public void addPropertyChangeListener(PropertyChangeListener listener);
+    void addPropertyChangeListener(PropertyChangeListener listener);
 
     /**
      *
      * remove a property change listener from the model
      *
      **/
-    public void removePropertyChangeListener(PropertyChangeListener listener);
+    void removePropertyChangeListener(PropertyChangeListener listener);
 
     /**
      *
      * get the time line node's parent
      *
      */
-    public TimeLineModel getParent();
+    TimeLineModel getParent();
 
     /**
      *
      * set the time line node's parent
      *
      */
-    public void setParent(TimeLineModel parent);
+    void setParent(TimeLineModel parent);
 
     /**
      *
      * is the node considered a constant
      *
      */
-    public boolean isConstant();
+    boolean isConstant();
 
     /**
      *
      * set whether or not the node is considered a constant or not
      *
      */
-    public void setConstant(boolean isConstant);
-
-
-    /**
-     *
-     * get the gui node class for this model
-     *
-     */
-    public Class getGUIClass();
+    void setConstant(boolean isConstant);
 
 
     /**
@@ -202,18 +153,15 @@ public interface TimeLineNodeModel {
      * inner class used for sorting time line nodes
      *
      **/
-    public class TimeLineNodeComparator implements Comparator {
+    class TimeLineNodeComparator implements Comparator<TimeLineNodeModel> {
 
-        public int compare(Object o1,
-                           Object o2) {
-            double start1 = ((TimeLineNodeModel) o1).getStartTime().getValue(Time.SECOND);
-            double start2 = ((TimeLineNodeModel) o2).getStartTime().getValue(Time.SECOND);
+        @Override
+        public int compare(TimeLineNodeModel o1,
+                    TimeLineNodeModel o2) {
+            double start1 = o1.getStartTime().getValue(Time.SECOND);
+            double start2 = o2.getStartTime().getValue(Time.SECOND);
             return (int) Math.round(start1 - start2);
 
-        }
-
-        public boolean equals(Object obj) {
-            return super.equals(obj);
         }
 
     }

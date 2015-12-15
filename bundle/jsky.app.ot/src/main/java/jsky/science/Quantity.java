@@ -83,7 +83,7 @@ public abstract class Quantity extends AbstractScienceObject {
      * Map contains one element per subclass, where the subclass is the key and the
      * listener objects are Lists
      */
-    private static final Map<Class, Set<PropertyChangeListener>> sListeners = new HashMap<Class, Set<PropertyChangeListener>>();
+    private static final Map<Class<?>, Set<PropertyChangeListener>> sListeners = new HashMap<>();
 
     /**
      * Map containing
@@ -91,7 +91,7 @@ public abstract class Quantity extends AbstractScienceObject {
      * Map contains one element per subclass, where the subclass is the key and the
      * units objects are Lists
      */
-    private static final Map<Class, List<String>> sUnits = new HashMap<Class, List<String>>();
+    private static final Map<Class<?>, List<String>> sUnits = new HashMap<>();
 
     /**
      * Map containing
@@ -99,7 +99,7 @@ public abstract class Quantity extends AbstractScienceObject {
      * Map contains one element per subclass, where the subclass is the key and the
      * units objects are Lists
      */
-    private static final Map<Class, List<String>> sAbbrev = new HashMap<Class, List<String>>();
+    private static final Map<Class<?>, List<String>> sAbbrev = new HashMap<>();
 
     /**
      * Map containing
@@ -107,7 +107,7 @@ public abstract class Quantity extends AbstractScienceObject {
      * Map contains one element per subclass, where the subclass is the key and the
      * units objects are Strings
      */
-    private static final Map<Class, String> sDefaults = new HashMap<Class, String>();
+    private static final Map<Class<?>, String> sDefaults = new HashMap<>();
 
     /**
      * Map containing
@@ -116,7 +116,7 @@ public abstract class Quantity extends AbstractScienceObject {
      * objects are Strings containing the property name to be fired when
      * the default units change.
      */
-    private static final Map<Class, String> sUnitsProperties = new HashMap<Class, String>();
+    private static final Map<Class<?>, String> sUnitsProperties = new HashMap<>();
 
     /**
      * The Stream Unique Identifier for this class.
@@ -128,13 +128,6 @@ public abstract class Quantity extends AbstractScienceObject {
      * subclasses and should support all units supported by the subclass
      **/
     public abstract double getValue(String units);
-
-    /**
-     * Returns a new instance an object with same value as creating instance.
-     * <P>Note this method is only expected to be called by
-     * QuantityPanel.actionPerformed()
-     **/
-    public abstract Quantity newInstance(double inValue);
 
     /**
      * Sets the value of the Quantity in specified units
@@ -151,7 +144,7 @@ public abstract class Quantity extends AbstractScienceObject {
      * @param defaultUnitsChangeProperty the bound propertyName to be specified
      * in PropertyChangeEvents when the default units are changed
      **/
-    public static void initializeSubClass(Class cl,
+    public static void initializeSubClass(Class<?> cl,
                                           List<String> unitNames,
                                           List<String> abbrevStrings,
                                           String defaultUnits,
@@ -169,7 +162,7 @@ public abstract class Quantity extends AbstractScienceObject {
         sUnits.put(cl, unitNames);
         sAbbrev.put(cl, abbrevStrings);
         sDefaults.put(cl, defaultUnits);
-        sListeners.put(cl, new HashSet<PropertyChangeListener>(10));
+        sListeners.put(cl, new HashSet<>(10));
         sUnitsProperties.put(cl, defaultUnitsChangeProperty);
     }
 
@@ -177,14 +170,14 @@ public abstract class Quantity extends AbstractScienceObject {
      * returns true if the a specified Class has been initialized as a Quantity
      * subclass
      */
-    public static boolean isInitialized(Class thisClass) {
+    public static boolean isInitialized(Class<?> thisClass) {
         return (sUnits.get(thisClass) != null);
     }
 
     /**
      * Returns the current default units for the specified Class
      **/
-    public static String getDefaultUnitsAbbrev(Class cl) {
+    public static String getDefaultUnitsAbbrev(Class<?> cl) {
         String def = getDefaultUnits(cl);
         return getUnitsAbbrev(cl, def);
     }
@@ -194,15 +187,15 @@ public abstract class Quantity extends AbstractScienceObject {
      * @param cl Class reference to the desired Quantity subclass
      * @param def the long name of the units for which the abbreviation is desired.
      **/
-    public static String getUnitsAbbrev(Class cl, String def) {
+    public static String getUnitsAbbrev(Class<?> cl, String def) {
         if (def == null) return null;
 
-        List units = (List) sUnits.get(cl);
+        List<String> units = sUnits.get(cl);
         int index = units.indexOf(def);
 
         if (index >= 0) {
-            List abbrev = (List) sAbbrev.get(cl);
-            return (String) abbrev.get(index);
+            List<String> abbrev = sAbbrev.get(cl);
+            return abbrev.get(index);
         } else {
             return null;
         }
@@ -211,21 +204,21 @@ public abstract class Quantity extends AbstractScienceObject {
     /**
      * Returns the current default units for the specified Quantity subclass
      **/
-    public static String getDefaultUnits(Class cl) {
+    public static String getDefaultUnits(Class<?> cl) {
         return sDefaults.get(cl);
     }
 
     /**
      * Returns the current default propertyName for the specified Quantity subclass
      **/
-    public static String getDefaultUnitsProperty(Class cl) {
+    public static String getDefaultUnitsProperty(Class<?> cl) {
         return sUnitsProperties.get(cl);
     }
 
     /**
      * Sets the default units, for the specified Quantity subclass
      **/
-    public static void setDefaultUnits(Class cl, String inUnits) {
+    public static void setDefaultUnits(Class<?> cl, String inUnits) {
         String oldDefault = sDefaults.get(cl);
         if (oldDefault == null || !oldDefault.equals(inUnits)) {
             sDefaults.remove(cl);
@@ -293,33 +286,8 @@ public abstract class Quantity extends AbstractScienceObject {
      *
      * @param cl Quantity subclass
      */
-    public static List getAllUnits(Class cl) {
-        return (List) sUnits.get(cl);
-    }
-
-    /**
-     * Returns the list of string labels for this instance's class
-     */
-    public List<String> getAllUnits() {
-        return sUnits.get(this.getClass());
-    }
-
-    /**
-     *
-     * Returns the list of abbreviations for specified Quantity subclass
-     *
-     **/
-    public static List<String> getAllUnitsAbbrev(Class cl) {
-        return sAbbrev.get(cl);
-    }
-
-    /**
-     *
-     * Returns the list of abbreviations for this instance's class
-     *
-     **/
-    public List<String> getAllUnitsAbbrev() {
-        return sAbbrev.get(this.getClass());
+    public static List<String> getAllUnits(Class<?> cl) {
+        return sUnits.get(cl);
     }
 
     /**
@@ -331,7 +299,7 @@ public abstract class Quantity extends AbstractScienceObject {
      * @param inUnits the units string to be searched for
      *
      **/
-    public static String getUnitsIgnoreCase(Class cl, String inUnits) {
+    public static String getUnitsIgnoreCase(Class<?> cl, String inUnits) {
         for (String u : sUnits.get(cl)) {
             if (inUnits.equalsIgnoreCase(u)) return u;
         }
@@ -345,7 +313,7 @@ public abstract class Quantity extends AbstractScienceObject {
      *  @param listener to add
      *
      **/
-    public static void addDefaultUnitsChangeListener(Class cl, PropertyChangeListener listener) {
+    public static void addDefaultUnitsChangeListener(Class<?> cl, PropertyChangeListener listener) {
         Collection<PropertyChangeListener> myListeners = sListeners.get(cl);
 
         if (!myListeners.contains(listener)) {
@@ -374,7 +342,7 @@ public abstract class Quantity extends AbstractScienceObject {
      *  @param listener to remove
      *
      **/
-    public static void removeDefaultUnitsChangeListener(Class cl, PropertyChangeListener listener) {
+    public static void removeDefaultUnitsChangeListener(Class<?> cl, PropertyChangeListener listener) {
         Collection<PropertyChangeListener> myListeners = sListeners.get(cl);
 
         if (myListeners.contains(listener)) {
@@ -388,7 +356,7 @@ public abstract class Quantity extends AbstractScienceObject {
      * the specified Quantity subclass
      *
      **/
-    protected static void fireDefaultUnitsChange(Class cl, PropertyChangeEvent evt) {
+    protected static void fireDefaultUnitsChange(Class<?> cl, PropertyChangeEvent evt) {
         Collection<PropertyChangeListener> listeners;
         synchronized (sListeners) {
             listeners = sListeners.get(cl);
@@ -399,14 +367,5 @@ public abstract class Quantity extends AbstractScienceObject {
         }
     }
 
-    /**
-     *
-     * Fire a property change event to all listeners of the default unit type
-     * of this instance's class
-     *
-     **/
-    protected void fireDefaultUnitsChange(PropertyChangeEvent evt) {
-        fireDefaultUnitsChange(this.getClass(), evt);
-    }
 
 }

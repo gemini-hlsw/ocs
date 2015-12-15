@@ -1,9 +1,3 @@
-// Copyright 1997 Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-// See the file LICENSE for complete details.
-//
-// $Id: EdIterFlatObs.java 47001 2012-07-26 19:40:02Z swalker $
-//
 package jsky.app.ot.gemini.editor;
 
 import edu.gemini.pot.sp.ISPSeqComponent;
@@ -18,24 +12,21 @@ import jsky.app.ot.editor.OtItemEditor;
 import jsky.app.ot.editor.SpinnerEditor;
 import jsky.app.ot.editor.type.SpTypeUIUtil;
 import jsky.util.gui.DialogUtil;
-import jsky.util.gui.DropDownListBoxWidget;
 import jsky.util.gui.TextBoxWidget;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-
 /**
  * This is the editor for the Flat Observation iterator.
  */
 public final class EdIterFlatObs extends OtItemEditor<ISPSeqComponent, SeqRepeatFlatObs>
-        implements jsky.util.gui.DropDownListBoxWidgetWatcher, jsky.util.gui.TextBoxWidgetWatcher {
+        implements jsky.util.gui.TextBoxWidgetWatcher {
 
     // the GUI layout panel
     private final IterFlatObsForm _w = new IterFlatObsForm();
@@ -55,13 +46,9 @@ public final class EdIterFlatObs extends OtItemEditor<ISPSeqComponent, SeqRepeat
 
     private static final String LAMP_PROPERTY = "Lamp";
 
-    private final ActionListener lampListener = new ActionListener() {
-        public void actionPerformed(ActionEvent e) { _lampSelected(); }
-    };
+    private final ActionListener lampListener = e -> _lampSelected();
 
-    private final ItemListener arcListener = new ItemListener() {
-        public void itemStateChanged(ItemEvent e) { _arcSelected(); }
-    };
+    private final ItemListener arcListener = e -> _arcSelected();
 
     private final SpinnerEditor sped;
 
@@ -112,10 +99,19 @@ public final class EdIterFlatObs extends OtItemEditor<ISPSeqComponent, SeqRepeat
 
         _w.exposureTime.addWatcher(this);
         _w.coadds.addWatcher(this);
-        _w.shutter.addWatcher(this);
+        _w.shutter.addWatcher((ddlbwe, index, val) -> {
+            getDataObject().setShutter(Shutter.getShutterByIndex(index));
+            _updateEnabledStates();
+        });
 
-        _w.diffuser.addWatcher(this);
-        _w.obsClass.addWatcher(this);
+        _w.diffuser.addWatcher((ddlbwe, index, val) -> {
+            getDataObject().setDiffuser(Diffuser.getDiffuserByIndex(index));
+            _updateEnabledStates();
+        });
+        _w.obsClass.addWatcher((ddlbwe, index, val) -> {
+            getDataObject().setObsClass(ObsClass.values()[index]);
+            _updateEnabledStates();
+        });
     }
 
     /**
@@ -192,20 +188,6 @@ public final class EdIterFlatObs extends OtItemEditor<ISPSeqComponent, SeqRepeat
     public void textBoxAction(TextBoxWidget tbwe) {
     }
 
-    /**
-     * Called when an item in a DropDownListBoxWidget is selected.
-     */
-    public void dropDownListBoxAction(DropDownListBoxWidget ddlbw, int index, String val) {
-        if (ddlbw == _w.shutter) {
-            getDataObject().setShutter(Shutter.getShutterByIndex(index));
-        } else if (ddlbw == _w.diffuser) {
-            getDataObject().setDiffuser(Diffuser.getDiffuserByIndex(index));
-        } else if (ddlbw == _w.obsClass) {
-            getDataObject().setObsClass(ObsClass.values()[index]);
-        }
-        _updateEnabledStates();
-    }
-
     private boolean isIrGreyBody() {
         final Set<Lamp> lamps = getDataObject().getLamps();
         return lamps.contains(Lamp.IR_GREY_BODY_HIGH) || lamps.contains(Lamp.IR_GREY_BODY_LOW);
@@ -256,7 +238,7 @@ public final class EdIterFlatObs extends OtItemEditor<ISPSeqComponent, SeqRepeat
         if (ignoreActions) {
             return;
         }
-        final ArrayList<Lamp> arcs = new ArrayList<Lamp>(_arcButtons.length);
+        final ArrayList<Lamp> arcs = new ArrayList<>(_arcButtons.length);
         boolean foundCuAR = false;  // See OT-426
         for (int i = 0; i < _arcButtons.length; i++) {
             if (_arcButtons[i].isSelected()) {

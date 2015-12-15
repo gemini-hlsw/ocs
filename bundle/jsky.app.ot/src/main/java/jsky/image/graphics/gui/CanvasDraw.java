@@ -1,12 +1,4 @@
-/*
- * Copyright 2000 Association for Universities for Research in Astronomy, Inc.,
- * Observatory Control System, Gemini Telescopes Project.
- *
- * $Id: CanvasDraw.java 6013 2005-05-02 20:55:16Z brighton $
- */
-
 package jsky.image.graphics.gui;
-
 
 import java.awt.AlphaComposite;
 import java.awt.Color;
@@ -42,7 +34,6 @@ import diva.canvas.toolbox.BasicFigure;
 import diva.canvas.toolbox.LabelFigure;
 import diva.util.java2d.Polygon2D;
 import diva.util.java2d.Polyline2D;
-
 
 /**
  * This class defines a set of AbstractAction objects for drawing on the image.
@@ -90,8 +81,7 @@ public class CanvasDraw implements MouseInputListener {
     protected AbstractFigure figure;
 
     /** List of figures created by this instance */
-    protected LinkedList figureList = new LinkedList();
-
+    protected LinkedList<CanvasFigure> figureList = new LinkedList<>();
 
     // Drawing modes
 
@@ -375,22 +365,9 @@ public class CanvasDraw implements MouseInputListener {
 
         // apply change to any selected figures
         SelectionModel sm = graphics.getSelectionInteractor().getSelectionModel();
-        ListIterator it = figureList.listIterator(0);
-        while (it.hasNext()) {
-            CanvasFigure fig = (CanvasFigure) it.next();
-            if (sm.containsSelection(fig)) {
-                if (fig instanceof BasicFigure)
-                    ((BasicFigure) fig).setLineWidth(lineWidth);
-            }
-        }
+        figureList.stream().filter(fig -> sm.containsSelection(fig)).filter(fig -> fig instanceof BasicFigure).forEach(fig -> ((BasicFigure) fig).setLineWidth(lineWidth));
 
         fireChange();
-    }
-
-
-    /** Return the current line width for drawing. */
-    public int getLineWidth() {
-        return lineWidth;
     }
 
     /** Return the action for the given line width */
@@ -407,14 +384,7 @@ public class CanvasDraw implements MouseInputListener {
 
         // apply change to any selected figures
         SelectionModel sm = graphics.getSelectionInteractor().getSelectionModel();
-        ListIterator it = figureList.listIterator(0);
-        while (it.hasNext()) {
-            CanvasFigure fig = (CanvasFigure) it.next();
-            if (sm.containsSelection(fig)) {
-                if (fig instanceof BasicFigure)
-                    ((BasicFigure) fig).setStrokePaint(outline);
-            }
-        }
+        figureList.stream().filter(sm::containsSelection).filter(fig -> fig instanceof BasicFigure).forEach(fig -> ((BasicFigure) fig).setStrokePaint(outline));
 
         fireChange();
     }
@@ -439,16 +409,12 @@ public class CanvasDraw implements MouseInputListener {
 
         // apply change to any selected figures
         SelectionModel sm = graphics.getSelectionInteractor().getSelectionModel();
-        ListIterator it = figureList.listIterator(0);
-        while (it.hasNext()) {
-            CanvasFigure fig = (CanvasFigure) it.next();
-            if (sm.containsSelection(fig)) {
-                if (fig instanceof BasicFigure)
-                    ((BasicFigure) fig).setFillPaint(fill);
-                else if (fig instanceof LabelFigure)
-                    ((LabelFigure) fig).setFillPaint(fill);
-            }
-        }
+        figureList.stream().filter(sm::containsSelection).forEach(fig -> {
+            if (fig instanceof BasicFigure)
+                ((BasicFigure) fig).setFillPaint(fill);
+            else if (fig instanceof LabelFigure)
+                ((LabelFigure) fig).setFillPaint(fill);
+        });
 
         fireChange();
     }
@@ -473,14 +439,8 @@ public class CanvasDraw implements MouseInputListener {
 
         // apply change to any selected figures
         SelectionModel sm = graphics.getSelectionInteractor().getSelectionModel();
-        ListIterator it = figureList.listIterator(0);
-        while (it.hasNext()) {
-            CanvasFigure fig = (CanvasFigure) it.next();
-            if (sm.containsSelection(fig)) {
-                if (fig instanceof BasicFigure)
-                    ((BasicFigure) fig).setComposite((AlphaComposite) composite); // XXX cast for diva-28Jan02
-            }
-        }
+        // XXX cast for diva-28Jan02
+        figureList.stream().filter(sm::containsSelection).filter(fig -> fig instanceof BasicFigure).forEach(fig -> ((BasicFigure) fig).setComposite((AlphaComposite) composite));
 
         fireChange();
     }
@@ -505,14 +465,7 @@ public class CanvasDraw implements MouseInputListener {
 
         // apply change to any selected figures
         SelectionModel sm = graphics.getSelectionInteractor().getSelectionModel();
-        ListIterator it = figureList.listIterator(0);
-        while (it.hasNext()) {
-            CanvasFigure fig = (CanvasFigure) it.next();
-            if (sm.containsSelection(fig)) {
-                if (fig instanceof LabelFigure)
-                    ((LabelFigure) fig).setFont(font);
-            }
-        }
+        figureList.stream().filter(sm::containsSelection).filter(fig -> fig instanceof LabelFigure).forEach(fig -> ((LabelFigure) fig).setFont(font));
 
         fireChange();
     }
@@ -647,7 +600,7 @@ public class CanvasDraw implements MouseInputListener {
         if (shape != null) {
             figure = (AbstractFigure) graphics.makeFigure(shape, fill, outline, lineWidth, interactor);
             graphics.add((CanvasFigure) figure);
-            figureList.add(figure);
+            figureList.add((CanvasFigure) figure);
         }
     }
 
@@ -756,9 +709,9 @@ public class CanvasDraw implements MouseInputListener {
 
     /** Remove all figures created by this instance. */
     public void clear() {
-        ListIterator it = figureList.listIterator(0);
+        ListIterator<CanvasFigure> it = figureList.listIterator(0);
         while (it.hasNext()) {
-            CanvasFigure fig = (CanvasFigure) it.next();
+            CanvasFigure fig = it.next();
             graphics.remove(fig);
             it.remove();
         }
@@ -767,9 +720,9 @@ public class CanvasDraw implements MouseInputListener {
     /** Delete the selected figures. */
     public void deleteSelected() {
         SelectionModel sm = graphics.getSelectionInteractor().getSelectionModel();
-        ListIterator it = figureList.listIterator(0);
+        ListIterator<CanvasFigure> it = figureList.listIterator(0);
         while (it.hasNext()) {
-            CanvasFigure fig = (CanvasFigure) it.next();
+            CanvasFigure fig = it.next();
             if (sm.containsSelection(fig)) {
                 graphics.remove(fig);
                 it.remove();
@@ -780,15 +733,13 @@ public class CanvasDraw implements MouseInputListener {
     /** Toggle the visibility all figures created by this instance. */
     public void hideGraphics() {
         visible = !visible;
-        ListIterator it = figureList.listIterator(0);
-        while (it.hasNext()) {
-            CanvasFigure fig = (CanvasFigure) it.next();
+        for (CanvasFigure fig: figureList) {
             fig.setVisible(visible);
         }
     }
 
     /** Return a list of figures managed by this instance. */
-    public LinkedList getFigureList() {
+    public LinkedList<CanvasFigure> getFigureList() {
         return figureList;
     }
 

@@ -28,7 +28,7 @@ public final class EdCompInstTexes extends EdCompInstBase<InstTexes>
 
         _w = new TexesForm();
 
-        final ComboBoxModel disperserModel = new SpTypeComboBoxModel<TexesParams.Disperser>(TexesParams.Disperser.class);
+        final ComboBoxModel<TexesParams.Disperser> disperserModel = new SpTypeComboBoxModel<>(TexesParams.Disperser.class);
         _w.getSelectedDisperser().setModel(disperserModel);
         _w.getSelectedDisperser().setRenderer(new SpTypeComboBoxRenderer());
         _w.getSelectedDisperser().addWatcher(this);

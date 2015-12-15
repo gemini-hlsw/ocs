@@ -1,9 +1,3 @@
-// Copyright 1997 Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-// See the file LICENSE for complete details.
-//
-// $Id: EdIterGenericConfig.java 47001 2012-07-26 19:40:02Z swalker $
-//
 package jsky.app.ot.editor;
 
 import edu.gemini.pot.sp.*;
@@ -35,8 +29,6 @@ import jsky.util.gui.*;
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.text.Document;
 import java.awt.BorderLayout;
@@ -53,7 +45,6 @@ import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-
 
 /**
  * This class implements an editor for "configuration editor" subclasses.
@@ -84,7 +75,7 @@ import java.util.stream.Collectors;
  * values for the two steps.
  */
 public class EdIterGenericConfig<T extends SeqConfigComp> extends OtItemEditor<ISPSeqComponent, T> implements CellSelectTableWatcher,
-        ListBoxWidgetWatcher, ActionListener, TextBoxWidgetWatcher {
+        ListBoxWidgetWatcher<PropertyDescriptor>, ActionListener, TextBoxWidgetWatcher {
 
     private static final Logger LOG = Logger.getLogger(EdIterGenericConfig.class.getName());
 
@@ -105,7 +96,7 @@ public class EdIterGenericConfig<T extends SeqConfigComp> extends OtItemEditor<I
     private ICTextBoxValueEditor _numberBoxVE;
 
     // The list box that contains the available items.
-    private ListBoxWidget _itemsLBW;
+    private ListBoxWidget<PropertyDescriptor> _itemsLBW;
 
     // Used to ignore events when adding items
     private boolean _ignoreEvents;
@@ -176,11 +167,9 @@ public class EdIterGenericConfig<T extends SeqConfigComp> extends OtItemEditor<I
             }
         });
 
-        _iterTab.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
-            @Override public void valueChanged(ListSelectionEvent e) {
-                _w.addStep.setEnabled(isEnabled() && _iterTab.getColumnCount() > 0);
-                _w.deleteStep.setEnabled(isEnabled() && _iterTab.getSelectedRow() >= 0);
-            }
+        _iterTab.getSelectionModel().addListSelectionListener(e -> {
+            _w.addStep.setEnabled(isEnabled() && _iterTab.getColumnCount() > 0);
+            _w.deleteStep.setEnabled(isEnabled() && _iterTab.getSelectedRow() >= 0);
         });
 
         // Watch for selection of available items.
@@ -401,14 +390,14 @@ public class EdIterGenericConfig<T extends SeqConfigComp> extends OtItemEditor<I
     private Set<PropertyDescriptor> getEditablePropertySet(Map<String, PropertyDescriptor> allPropertyMap) {
 
         if (OTOptions.isStaff(getProgram().getProgramID())) {
-            return new HashSet<PropertyDescriptor>(allPropertyMap.values());
+            return new HashSet<>(allPropertyMap.values());
         }
 
         // Not onsite so get rid of expert properties.
         PropertyFilter filter = new PropertyFilter.Not(PropertyFilter.EXPERT_FILTER);
         filter = new PropertyFilter.And(filter,
                                new PropertyFilter.Not(PropertyFilter.ENGINEERING_FILTER));
-        return new HashSet<PropertyDescriptor>(PropertySupport.filter(filter, allPropertyMap).values());
+        return new HashSet<>(PropertySupport.filter(filter, allPropertyMap).values());
     }
 
     // If this is the first instrument iterator in the sequence, return the current parameter
@@ -666,7 +655,7 @@ public class EdIterGenericConfig<T extends SeqConfigComp> extends OtItemEditor<I
     private ICValueEditor getValueEditor(PropertyDescriptor pd) {
         if (pd == null) return _textBoxVE;
 
-        Class propertyType = pd.getPropertyType();
+        Class<?> propertyType = pd.getPropertyType();
         if (Option.class.isAssignableFrom(propertyType)) {
             propertyType = PropertySupport.getWrappedType(pd);
         }
@@ -674,7 +663,7 @@ public class EdIterGenericConfig<T extends SeqConfigComp> extends OtItemEditor<I
         return getValueEditor(propertyType);
     }
 
-    private ICValueEditor getValueEditor(Class propertyType) {
+    private ICValueEditor getValueEditor(Class<?> propertyType) {
         ICValueEditor res;
         if (propertyType.isEnum()) {
             res = _listBoxVE;
@@ -705,9 +694,9 @@ public class EdIterGenericConfig<T extends SeqConfigComp> extends OtItemEditor<I
     //
     // Initialize the list box containing the available items.
     //
+    @SuppressWarnings({"unchecked", "rawtypes"})
     private void _initAvailableItems() {
-        Vector<PropertyDescriptor> v;
-        v = new Vector<PropertyDescriptor>(getEditablePropertySet(_allPropertyMap));
+        Vector<PropertyDescriptor> v = new Vector<>(getEditablePropertySet(_allPropertyMap));
 
         Collections.sort(v, new Comparator<PropertyDescriptor>() {
             private boolean isEngineering(PropertyDescriptor pd) {
@@ -729,7 +718,8 @@ public class EdIterGenericConfig<T extends SeqConfigComp> extends OtItemEditor<I
         });
 
         ListCellRenderer rend = new DefaultListCellRenderer() {
-            public Component getListCellRendererComponent(JList list,
+            @Override
+            public Component getListCellRendererComponent(JList<?> list,
                                                           Object value, int index, boolean isSelected, boolean hasFocus) {
                 PropertyDescriptor pd = (PropertyDescriptor) value;
                 JLabel lab = (JLabel) super.getListCellRendererComponent(list, pd.getDisplayName(), index, isSelected, hasFocus);
@@ -759,7 +749,7 @@ public class EdIterGenericConfig<T extends SeqConfigComp> extends OtItemEditor<I
      *
      * @see jsky.util.gui.ListBoxWidgetWatcher
      */
-    public void listBoxSelect(ListBoxWidget w, int index, Object val) {
+    public void listBoxSelect(ListBoxWidget<PropertyDescriptor> w, int index, Object val) {
         if (w != _itemsLBW) {
             // Something odd happened
             throw new RuntimeException("weird listBoxSelect error: " + w);
@@ -796,7 +786,7 @@ public class EdIterGenericConfig<T extends SeqConfigComp> extends OtItemEditor<I
      *
      * @see jsky.util.gui.ListBoxWidgetWatcher
      */
-    public void listBoxAction(ListBoxWidget w, int index, Object val) {
+    public void listBoxAction(ListBoxWidget<PropertyDescriptor> w, int index, Object val) {
         // Don't care ...
     }
 
@@ -925,11 +915,11 @@ public class EdIterGenericConfig<T extends SeqConfigComp> extends OtItemEditor<I
     // Each ICValueEditor subclass appears in its own JPanel.
     abstract class ICValueEditor {
 
-        protected EdIterGenericConfig _ci;
+        protected EdIterGenericConfig<T> _ci;
         protected JPanel _container;
         protected JLabel _title;
 
-        ICValueEditor(EdIterGenericConfig ci, JPanel panel, JLabel title) {
+        ICValueEditor(EdIterGenericConfig<T> ci, JPanel panel, JLabel title) {
             _ci = ci;
             _container = panel;
             _title = title;
@@ -951,11 +941,11 @@ public class EdIterGenericConfig<T extends SeqConfigComp> extends OtItemEditor<I
         abstract void setEnabled(boolean enabled);
     }
 
-    private static final ListCellRenderer LIST_BOX_OPTION_RENDERER = new DefaultListCellRenderer() {
+    private static final ListCellRenderer<Object> LIST_BOX_OPTION_RENDERER = new DefaultListCellRenderer() {
         @Override
-        public Component getListCellRendererComponent(JList jList, Object obj, int i, boolean b, boolean b1) {
+        public Component getListCellRendererComponent(JList<?> jList, Object obj, int i, boolean b, boolean b1) {
             if (obj == null) {
-                return super.getListCellRendererComponent(jList, obj, i, b, b1);
+                return super.getListCellRendererComponent(jList, null, i, b, b1);
             }
 
             int style = Font.PLAIN;
@@ -989,13 +979,13 @@ public class EdIterGenericConfig<T extends SeqConfigComp> extends OtItemEditor<I
     //
     // An ICValueEditor for ListBoxes.
     //
-    class ICListBoxValueEditor extends ICValueEditor implements ListBoxWidgetWatcher {
+    private class ICListBoxValueEditor extends ICValueEditor implements ListBoxWidgetWatcher<Object> {
 
-        ListBoxWidget _choicesLBW;
+        ListBoxWidget<Object> _choicesLBW;
         PropertyDescriptor _lastProp;
 
-        ICListBoxValueEditor(EdIterGenericConfig ci, JPanel panel, JLabel label,
-                             ListBoxWidget lbw) {
+        ICListBoxValueEditor(EdIterGenericConfig<T> ci, JPanel panel, JLabel label,
+                             ListBoxWidget<Object> lbw) {
             super(ci, panel, label);
             _choicesLBW = lbw;
             _choicesLBW.addWatcher(this);
@@ -1024,7 +1014,7 @@ public class EdIterGenericConfig<T extends SeqConfigComp> extends OtItemEditor<I
         }
 
         private List<Object> getChoices(PropertyDescriptor pd) {
-            Class propertyType = pd.getPropertyType();
+            Class<?> propertyType = pd.getPropertyType();
             if (Option.class.isAssignableFrom(propertyType)) {
                 propertyType = PropertySupport.getWrappedType(pd);
                 return getOptionActiveElements(propertyType);
@@ -1032,7 +1022,7 @@ public class EdIterGenericConfig<T extends SeqConfigComp> extends OtItemEditor<I
             return getActiveElements(propertyType);
         }
 
-        private List<Object> getOptionActiveElements(Class c) {
+        private List<Object> getOptionActiveElements(Class<?> c) {
             List<Object> underlyingChoices = getActiveElements(c);
 
             List<Object> res = new ArrayList<>(underlyingChoices.size() + 1);
@@ -1041,6 +1031,7 @@ public class EdIterGenericConfig<T extends SeqConfigComp> extends OtItemEditor<I
             return res;
         }
 
+        @SuppressWarnings("rawtypes")
         private List<Object> getActiveElements(Class c) {
             //noinspection unchecked
             return engineeringFilter(SpTypeUtil.getSelectableItems(c));
@@ -1060,7 +1051,8 @@ public class EdIterGenericConfig<T extends SeqConfigComp> extends OtItemEditor<I
 
         // Called when the user selects an option from the list box.  The
         // EdIterGenericConfig instance is informed of the new value.
-        public void listBoxSelect(ListBoxWidget w, int index, Object val) {
+        @Override
+        public void listBoxSelect(ListBoxWidget<Object> w, int index, Object val) {
             // There is a new value for the current attribute, but the user
             // may not be finished editing.
             _ci.cellValueChanged(val, false);
@@ -1068,7 +1060,8 @@ public class EdIterGenericConfig<T extends SeqConfigComp> extends OtItemEditor<I
 
         // Called when the user double-clicks an option from the list box.
         // The EdIterGenericConfig instance is informed of the new value.
-        public void listBoxAction(ListBoxWidget w, int index, Object val) {
+        @Override
+        public void listBoxAction(ListBoxWidget<Object> w, int index, Object val) {
             // There is a new value for the current attribute, and the user
             // is finished editing.
             _ci.cellValueChanged(val, true);
@@ -1080,15 +1073,15 @@ public class EdIterGenericConfig<T extends SeqConfigComp> extends OtItemEditor<I
     //
     class ICComboBoxValueEditor extends ICValueEditor {
 
-        DropDownListBoxWidget _comboBox;
+        DropDownListBoxWidget<Object> _comboBox;
         PropertyDescriptor _lastProp;
         // Flag used to ignore events in combobox
         private boolean _ignoreUpdate = false;
 
         private String _lastValidValue;
 
-        ICComboBoxValueEditor(EdIterGenericConfig ci, JPanel panel, JLabel label,
-                              DropDownListBoxWidget comboBox) {
+        ICComboBoxValueEditor(EdIterGenericConfig<T> ci, JPanel panel, JLabel label,
+                              DropDownListBoxWidget<Object> comboBox) {
             super(ci, panel, label);
             _comboBox = comboBox;
             // Also need to update on keystrokes in the editor
@@ -1187,7 +1180,7 @@ public class EdIterGenericConfig<T extends SeqConfigComp> extends OtItemEditor<I
                 return ((SuggestibleString) curValue).getEnumConstants();
             }
 
-            Class c = pd.getPropertyType();
+            Class<?> c = pd.getPropertyType();
             try {
                 SuggestibleString ss = (SuggestibleString) c.newInstance();
                 return ss.getEnumConstants();
@@ -1212,7 +1205,7 @@ public class EdIterGenericConfig<T extends SeqConfigComp> extends OtItemEditor<I
         TextBoxWidget _textBox;
         private PropertyDescriptor _pd;
 
-        ICTextBoxValueEditor(EdIterGenericConfig ci, JPanel panel, JLabel label,
+        ICTextBoxValueEditor(EdIterGenericConfig<T> ci, JPanel panel, JLabel label,
                              TextBoxWidget tbw) {
             super(ci, panel, label);
             _textBox = tbw;
@@ -1259,13 +1252,13 @@ public class EdIterGenericConfig<T extends SeqConfigComp> extends OtItemEditor<I
     }
 
     // OT-50: If the OT is not running on-site, remove any expert/engineering options from the returned array
-    private List<Object> engineeringFilter(List list) {
+    private <A extends Enum<A>> List<A> engineeringFilter(List<A> list) {
         if (OTOptions.isStaff(getProgram().getProgramID())) {
             // noinspection unchecked
-            return (List<Object>) list;
+            return list;
         }
-        List<Object> result = new ArrayList<>(list.size());
-        for (Object o : list) {
+        List<A> result = new ArrayList<>(list.size());
+        for (A o : list) {
             if (o instanceof PartiallyEngineeringSpType) {
                 if (!((PartiallyEngineeringSpType) o).isEngineering()) {
                     result.add(o);
