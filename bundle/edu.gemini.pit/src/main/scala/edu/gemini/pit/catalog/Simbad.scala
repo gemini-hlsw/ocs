@@ -5,7 +5,7 @@ import edu.gemini.model.p1.{immutable => I}
 import java.net.URL
 import java.net.URLEncoder.{encode => urlencode}
 
-import edu.gemini.spModel.core.{MagnitudeBand, Magnitude}
+import edu.gemini.spModel.core._
 import votable._
 import java.util.UUID
 
@@ -52,8 +52,8 @@ class Simbad private (val host:String) extends VOTableCatalog {
                                          case s       => I.CoordinatesEpoch.forName(s)
                                        }
     name                             <- str("meta.id;meta.main")
-    ra                               <- num("pos.eq.ra;meta.main")
-    dec                              <- num("pos.eq.dec;meta.main")
+    ra                               <- num("pos.eq.ra;meta.main").map(d => RightAscension.fromAngle(Angle.fromDegrees(d)))
+    dec                              <- num("pos.eq.dec;meta.main").flatMap(d => Declination.fromAngle(Angle.fromDegrees(d)))
 
     // Mags get pulled out into a list
     mags                              = for {
@@ -78,7 +78,7 @@ class Simbad private (val host:String) extends VOTableCatalog {
                                           dDec <- num("pos.pm;pos.eq.dec")
                                         } yield I.ProperMotion(dRa, dDec) // TODO: are these correct?
 
-  } yield I.SiderealTarget(UUID.randomUUID(), cleanName(name), I.DegDeg(ra, dec), epoch, pm, mags.toList)
+  } yield I.SiderealTarget(UUID.randomUUID(), cleanName(name), Coordinates(ra, dec), epoch, pm, mags.toList)
 
   private def cleanName(s:String) = if (s.startsWith("NAME ")) s.substring(5) else s
 

@@ -8,9 +8,8 @@ import scala.actors.Actor._
 import scala.collection.JavaConverters._
 import java.io.IOException
 import java.util.logging.Level
-import org.apache.xmlrpc.XmlRpcException
 import java.util.{UUID, Date}
-import edu.gemini.spModel.core.Site
+import edu.gemini.spModel.core._
 
 object Horizons {
 
@@ -105,10 +104,12 @@ class Horizons private (/*host: String, port: Int,*/ site: Site, start: Date, en
   }
 
   def decode(name: String, hr: HorizonsReply): Option[I.Target] = if (hr.hasEphemeris) {
-    val ephem = hr.getEphemeris.asScala.toList.map { e =>
+    val ephem = hr.getEphemeris.asScala.toList.flatMap { e =>
       val coords = e.getCoordinates
-      val mag = Option(e.getMagnitude).filter(_ > 0)
-      I.EphemerisElement(I.DegDeg(coords.getRaDeg, coords.getDecDeg), mag, e.getDate.getTime)
+      val mag    = Option(e.getMagnitude).filter(_ > 0)
+      val ra     = RightAscension.fromAngle(Angle.fromDegrees(coords.getRaDeg))
+      val dec    = Declination.fromAngle(Angle.fromDegrees(coords.getDecDeg))
+      dec.map(d => I.EphemerisElement(Coordinates(ra, d), mag, e.getDate.getTime))
     }
     println("Got " + ephem.length + " ephemeris entries.")
     Some(I.NonSiderealTarget(UUID.randomUUID(), name, ephem, I.CoordinatesEpoch.J_2000))

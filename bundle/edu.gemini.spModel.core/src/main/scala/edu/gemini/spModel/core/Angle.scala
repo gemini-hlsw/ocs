@@ -291,7 +291,7 @@ object Angle {
         for {
           s <- parseSign(a)
           a <- fromSexigesimal(b.toInt, c.toInt, d.toDouble)
-        } yield (if (s == -1) zero - a else a)
+        } yield if (s == -1) zero - a else a
       case _ => None
     } \/> new NumberFormatException(s)
 
@@ -314,7 +314,7 @@ object Angle {
         for {
           s <- parseSign(a)
           a <- fromHourAngle(b.toInt, c.toInt, d.toDouble)
-        } yield (if (s == -1) zero - a else a)
+        } yield if (s == -1) zero - a else a
       case _ => None
     } \/> new NumberFormatException(s)
 

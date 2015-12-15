@@ -5,6 +5,7 @@ import edu.gemini.model.p1.immutable.TargetVisibility._
 import edu.gemini.model.p1.immutable.AoLgs
 import edu.gemini.model.p1.immutable.SemesterOption.{A, B}
 import edu.gemini.model.p1.immutable.Site._
+import edu.gemini.spModel.core.Coordinates
 
 object TargetVisibilityCalc {
   /**
@@ -24,7 +25,7 @@ object TargetVisibilityCalc {
       bp     <- obs.blueprint
       target <- obs.target
       coords <- target.coords(sem.midPoint)
-    } yield decVisibility(Key(sem.half, geminiSite(bp), GuideType(bp)), coords.toHmsDms)
+    } yield decVisibility(Key(sem.half, geminiSite(bp), GuideType(bp)), coords)
 
   // Treat Keck and Subaru the same as GN.
   private def geminiSite(bp: BlueprintBase): Site = bp.site match {
@@ -36,8 +37,7 @@ object TargetVisibilityCalc {
   }
 
   private def visibility(key: Key, coords: Coordinates): TargetVisibility = {
-    val c = coords.toHmsDms
-    raVisibility(key, c) & decVisibility(key, c)
+    raVisibility(key, coords) & decVisibility(key, coords)
   }
 
   // REL-2284 For Non sidereal targets, reduce errors into warnings
@@ -48,9 +48,9 @@ object TargetVisibilityCalc {
      }
   }
 
-  private def decVisibility(key: Key, c: HmsDms): TargetVisibility = decMap(key).visibility(c.dec)
+  private def decVisibility(key: Key, c: Coordinates): TargetVisibility = decMap(key).visibility(c.dec)
 
-  private def raVisibility(key: Key, c: HmsDms): TargetVisibility = raMap(key).visibility(c.ra)
+  private def raVisibility(key: Key, c: Coordinates): TargetVisibility = raMap(key).visibility(c.ra)
 
   private sealed trait GuideType
   private case object Lgs extends GuideType

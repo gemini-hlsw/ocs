@@ -9,6 +9,11 @@ import NonSiderealColumns._
 import java.io.{InputStream, File}
 import java.util.UUID
 
+import edu.gemini.spModel.core.Coordinates
+
+import scalaz._
+import Scalaz._
+
 object NonSiderealReader extends TargetReader[NonSiderealTarget] {
   def read(file: File): Result      = targets(TableReader(file, REQUIRED))
   def read(is: InputStream): Result = targets(TableReader(is,   REQUIRED))
@@ -49,10 +54,14 @@ object NonSiderealReader extends TargetReader[NonSiderealTarget] {
 
   private def elements(table: TableReader): List[Either[ParseError, NamedEphemeris]] =
     table.rows map { row =>
-      element(row).left map { msg => ParseError(msg, name(table, row), row.data) }
+      val p = element(row).left map { msg => ParseError(msg, name(table, row), row.data) }
+      p.right.flatMap {
+        case None    => Left(ParseError("Cannot parse non-sidereal target", name(table, row), row.data))
+        case Some(v) => Right(v)
+      }
     }
 
-  private def element(row: TableReader#Row): Either[String, NamedEphemeris] =
+  private def element(row: TableReader#Row): Either[String, Option[NamedEphemeris]] =
     for {
       id   <- row(ID).right
       name <- row(NAME).right
@@ -60,5 +69,5 @@ object NonSiderealReader extends TargetReader[NonSiderealTarget] {
       ra   <- row(RA).right
       dec  <- row(DEC).right
       mag  <- row.get(MAG).right
-    } yield NamedEphemeris(id, name, EphemerisElement(HmsDms(ra, dec), mag, utc))
+    } yield (ra |@| dec) {(r, d) => NamedEphemeris(id, name, EphemerisElement(Coordinates(r, d), mag, utc))}
 }

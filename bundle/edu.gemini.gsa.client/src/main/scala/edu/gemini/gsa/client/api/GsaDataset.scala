@@ -1,6 +1,6 @@
 package edu.gemini.gsa.client.api
 
-import edu.gemini.model.p1.immutable.Coordinates
+import edu.gemini.spModel.core.Coordinates
 
 /**
  * Relevant information returned for each dataset by the GSA query.

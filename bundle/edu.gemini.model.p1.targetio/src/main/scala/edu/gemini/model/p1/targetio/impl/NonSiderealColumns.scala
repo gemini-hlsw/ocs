@@ -6,15 +6,14 @@ import edu.gemini.model.p1.targetio.table.{StilSerializer, Column}
 
 import HorizonsEphemerisParser.parseTimeString
 
-
 private[targetio] object NonSiderealColumns {
   private val readUtc = readString andThen parseTimeString
 
   val ID     = col("ID",       readInt,            _.ord)
   val NAME   = col("Name",     readString,         _.name)
   val UTC    = col("UTC",      readUtc,            _.element.validAt)(UtcSerializer)
-  val RA     = col("RAJ2000",  readRa,             _.element.coords.toHmsDms.ra)
-  val DEC    = col("DecJ2000", readDec,            _.element.coords.toHmsDms.dec)
+  val RA     = col("RAJ2000",  readRa,             a => Some(a.element.coords.ra))
+  val DEC    = col("DecJ2000", readDec,            a => Some(a.element.coords.dec))
   val MAG    = col("Mag",      readOptionalDouble, _.element.magnitude)
 
   val REQUIRED: List[Column[NamedEphemeris, _]] = List(ID, NAME, UTC, RA, DEC)

@@ -9,8 +9,8 @@ import edu.gemini.spModel.core.{MagnitudeBand, Magnitude}
 
 private [targetio] object SiderealColumns {
   val NAME   = col("Name",     readString,         _.name)
-  val RA     = col("RAJ2000",  readRa,             _.coords.toHmsDms.ra)
-  val DEC    = col("DecJ2000", readDec,            _.coords.toHmsDms.dec)
+  val RA     = col("RAJ2000",  readRa,             a => Some(a.coords.ra))
+  val DEC    = col("DecJ2000", readDec,            a => Some(a.coords.dec))
   val PM_RA  = col("pmRA",     readOptionalDouble, _.properMotion.map(_.deltaRA))
   val PM_DEC = col("pmDec",    readOptionalDouble, _.properMotion.map(_.deltaDec))
 

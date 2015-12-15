@@ -1,6 +1,6 @@
 package edu.gemini.model.p1.targetio.impl
 
-import edu.gemini.model.p1.immutable.{ProperMotion, HmsDms, SiderealTarget}
+import edu.gemini.model.p1.immutable.{ProperMotion, SiderealTarget}
 import edu.gemini.model.p1.mutable.CoordinatesEpoch.J_2000
 
 import edu.gemini.model.p1.targetio.api._
@@ -10,7 +10,10 @@ import SiderealColumns._
 import java.io.{InputStream, File}
 import java.util.UUID
 
-import edu.gemini.spModel.core.{MagnitudeSystem, MagnitudeBand, Magnitude}
+import edu.gemini.spModel.core.{Coordinates, MagnitudeSystem, MagnitudeBand, Magnitude}
+
+import scalaz._
+import Scalaz._
 
 object SiderealReader extends TargetReader[SiderealTarget] {
   def read(file: File): Result      = targets(TableReader(file, REQUIRED))
@@ -27,18 +30,22 @@ object SiderealReader extends TargetReader[SiderealTarget] {
     if (table.has(NAME)) row(NAME).right.toOption else None
 
   private def targets(table: TableReader): List[TargetResult] =
-    table.rows map { row =>
-      target(row).left map { msg => ParseError(msg, name(table, row), row.data) }
+    table.rows.map { row =>
+      val p = target(row).left.map { msg => ParseError(msg, name(table, row), row.data) }
+      p.right.flatMap {
+        case None    => Left(ParseError("Cannot parse sidereal target", name(table, row), row.data))
+        case Some(v) => Right(v)
+      }
     }
 
-  private def target(row: TableReader#Row): Either[String, SiderealTarget] =
+  private def target(row: TableReader#Row): Either[String, Option[SiderealTarget]] =
     for {
       name <- row(NAME).right
       ra   <- row(RA).right
       dec  <- row(DEC).right
       pm   <- pm(row).right
       mag  <- magList(row).right
-    } yield SiderealTarget(UUID.randomUUID(), name, HmsDms(ra, dec), J_2000, pm, mag)
+    } yield (ra |@| dec) {(r, d) => SiderealTarget(UUID.randomUUID(), name, Coordinates(r, d), J_2000, pm, mag)}
 
   private def pm(row: TableReader#Row): Either[String, Option[ProperMotion]] =
     for {

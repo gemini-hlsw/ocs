@@ -4,6 +4,7 @@ import edu.gemini.model.p1.immutable._
 import edu.gemini.pit.ui.util._
 import edu.gemini.pit.model.Model
 import edu.gemini.pit.catalog._
+import edu.gemini.spModel.core.Coordinates
 import scala.swing._
 import scalaz._
 import Scalaz._
@@ -86,9 +87,9 @@ class TargetView(val shellAdvisor:ShellAdvisor) extends BorderPanel with BoundVi
       // Abstract a few things out (used below)
       // TODO: continue abstraction; duplicated logic in places below
       lazy val date = semesterLens.get(m).midPoint
-      def coord(t:Target, f:DegDeg => BigDecimal) = ~t.coords(date).map(c => f(c.toDegDeg).toDouble)
-      def ra(t:Target) = coord(t, _.ra)
-      def dec(t:Target) = coord(t, _.dec)
+      def coord(t:Target, f:Coordinates => BigDecimal) = ~t.coords(date).map(c => f(c).toDouble)
+      def ra(t:Target) = coord(t, c => BigDecimal(c.ra.toAngle.toDegrees))
+      def dec(t:Target) = coord(t, c => BigDecimal(c.dec.toDegrees))
       def txt(t:Target) = ~text(t).lift(c)
 
       // Probably a better way to do this
@@ -114,8 +115,8 @@ class TargetView(val shellAdvisor:ShellAdvisor) extends BorderPanel with BoundVi
     def text(e:Target) =
       if (!e.isEmpty) {
         case Name => e.name
-        case RA   => e.coords(semester.midPoint).map(_.toDegDeg.ra.toDouble).map(raFormat.toString).orNull
-        case Dec  => e.coords(semester.midPoint).map(_.toDegDeg.dec.toDouble).map(decFormat.toString).orNull
+        case RA   => e.coords(semester.midPoint).map(_.ra.toAngle.toDegrees).map(raFormat.toString).orNull
+        case Dec  => e.coords(semester.midPoint).map(_.dec.toDegrees).map(decFormat.toString).orNull
         case PM   => e match {
           case SiderealTarget(_, _, _, _, Some(_), _) => "*"
           case _                                      => null

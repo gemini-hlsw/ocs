@@ -33,9 +33,6 @@ ngc007,00:00:07.00
     onebadrow(RA, "x", csvHeader + """
 ngc007,x,2:00:00,1.0,2.0
 """)
-    onebadrow(RA, "24:00:00.00", csvHeader + """
-ngc007,24:00:00.00,2:00:00,1.0,2.0
-""")
     onebadrow(DEC, "", csvHeader + """
 ngc007,1:00:00.00,,1.0,2.0
 """)

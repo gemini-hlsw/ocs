@@ -143,7 +143,7 @@ object TableReader {
     } yield res
 
   private def missingColumns(table: TableReader, requiredColumns: Traversable[Column[_,_]]): Set[Column[_,_]] =
-    requiredColumns.filterNot(table.has(_)).toSet
+    requiredColumns.filterNot(table.has).toSet
 
   private def missingColumns(tables: List[TableReader], requiredColumns: Traversable[Column[_,_]]): Set[Column[_,_]] =
     (Set.empty[Column[_,_]]/:tables) {

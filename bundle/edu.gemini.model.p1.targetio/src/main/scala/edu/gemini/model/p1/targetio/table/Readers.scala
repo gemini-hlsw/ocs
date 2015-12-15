@@ -1,8 +1,6 @@
 package edu.gemini.model.p1.targetio.table
 
-import edu.gemini.model.p1.immutable._
-import edu.gemini.model.p1.{mutable => M}
-import edu.gemini.spModel.core.{MagnitudeSystem, MagnitudeBand, Magnitude}
+import edu.gemini.spModel.core._
 
 object Readers {
   def readNone[T]: PartialFunction[Any, Option[T]] = {
@@ -34,8 +32,8 @@ object Readers {
   val DecimalNumber = """([-+]?\d+(?:\.\d*)?)""".r
   val readFloating: PartialFunction[Any, Double] = {
     case DecimalNumber(s) => s.toDouble
-    case d: Double   => d
-    case f: Float    => f.toDouble
+    case d: Double        => d
+    case f: Float         => f.toDouble
   }
 
   val readDouble = readFloating orElse (readInt andThen { _.toDouble })
@@ -47,11 +45,14 @@ object Readers {
     case s: String if s.contains(":") => f(s)
   }
 
-  def readDegrees[T](f: Double => T): PartialFunction[Any, T] = readDouble andThen { f(_) }
+  def readDegrees[T](f: Double => T): PartialFunction[Any, T] = readDouble andThen f
+  def parseDegrees(d: Double): Option[Angle] = Some(Angle.fromDegrees(d))
 
-  val readRa: PartialFunction[Any, HMS]  = readSexigesimal(HMS(_)) orElse readDegrees(HMS(_))
-  val readDec: PartialFunction[Any, DMS] = readSexigesimal(DMS(_)) orElse readDegrees(DMS(_))
+  private def parseDMS(s: String): Option[Angle] = Angle.parseDMS(s).toOption
+  private def parseHMS(s: String): Option[Angle] = Angle.parseHMS(s).toOption
 
+  val readRa: PartialFunction[Any, Option[RightAscension]] = (readSexigesimal(parseHMS) orElse readDegrees(parseDegrees)) andThen (a => a.map(RightAscension.fromAngle))
+  val readDec: PartialFunction[Any, Option[Declination]] = (readSexigesimal(parseDMS) orElse readDegrees(parseDegrees)) andThen (a => a.flatMap(Declination.fromAngle))
 
   def readOptionalMagnitude(band: MagnitudeBand): PartialFunction[Any, Option[Magnitude]] =
     readOptionalDouble andThen { _.map(new Magnitude(_, band)) }

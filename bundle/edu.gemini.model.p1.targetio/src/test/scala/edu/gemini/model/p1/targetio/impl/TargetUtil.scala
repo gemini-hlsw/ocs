@@ -1,10 +1,14 @@
 package edu.gemini.model.p1.targetio.impl
 
+import edu.gemini.model.p1.immutable.NonSiderealTarget
+import edu.gemini.model.p1.immutable.ProperMotion
+import edu.gemini.model.p1.immutable.SiderealTarget
 import edu.gemini.model.p1.immutable._
 import edu.gemini.model.p1.immutable.CoordinatesEpoch.J_2000
 
 import java.util.Calendar._
-import edu.gemini.spModel.core.{Magnitude, MagnitudeSystem, MagnitudeBand}
+import edu.gemini.spModel.core.{Angle, Coordinates, RightAscension, Declination}
+import edu.gemini.spModel.core.{Magnitude, MagnitudeBand, MagnitudeSystem}
 import org.junit.Assert._
 import java.util.{UUID, TimeZone, GregorianCalendar}
 
@@ -19,7 +23,7 @@ object TargetUtil {
   val DELTA = 0.00001
 
   def mkEp(ra: String, dec: String, mag: Double, year: Int, month: Int, day: Int, hour: Int = 0, min: Int = 0): EphemerisElement =
-    EphemerisElement(HmsDms(HMS(ra), DMS(dec)), Some(mag), utc(year, month, day, hour, min))
+    EphemerisElement(Coordinates(RightAscension.fromAngle(Angle.parseHMS(ra).getOrElse(Angle.zero)), Declination.fromAngle(Angle.parseDMS(dec).getOrElse(Angle.zero)).getOrElse(Declination.zero)), Some(mag), utc(year, month, day, hour, min))
 
   def mkTarget(name: String, elements: List[EphemerisElement]): NonSiderealTarget =
     NonSiderealTarget(UUID.randomUUID(), name, elements, J_2000)
@@ -28,13 +32,13 @@ object TargetUtil {
     new Magnitude(value, band, system)
 
   def mkTarget(name: String, ra: String, dec: String): SiderealTarget =
-    SiderealTarget(UUID.randomUUID(), name, HmsDms(ra, dec), J_2000, None, Nil)
+    SiderealTarget(UUID.randomUUID(), name, Coordinates(RightAscension.fromAngle(Angle.parseHMS(ra).getOrElse(Angle.zero)), Declination.fromAngle(Angle.parseDMS(dec).getOrElse(Angle.zero)).getOrElse(Declination.zero)), J_2000, None, Nil)
 
   def mkTarget(name: String, ra: String, dec: String, pmRa: Double, pmDec: Double): SiderealTarget =
     mkTarget(name, ra, dec).copy(properMotion = Some(ProperMotion(pmRa, pmDec)))
 
-  def ra(coords: Coordinates): Double  = coords.toHmsDms.ra.toDegrees
-  def dec(coords: Coordinates): Double = coords.toHmsDms.dec.toDegrees
+  def ra(coords: Coordinates): Double  = coords.ra.toAngle.toDegrees
+  def dec(coords: Coordinates): Double = coords.dec.toDegrees
 
   def validateCoords(expected: Coordinates, actual: Coordinates) {
     assertEquals(ra(expected), ra(actual), DELTA)
@@ -44,9 +48,9 @@ object TargetUtil {
   def validateElement(expected: EphemerisElement, actual: EphemerisElement) {
     validateCoords(expected.coords, actual.coords)
     (expected.magnitude, actual.magnitude) match {
-      case (None, None) => // ok
+      case (None, None)         => // ok
       case (Some(ex), Some(ac)) => assertEquals(ex, ac, DELTA)
-      case _ => fail()
+      case _                    => fail()
     }
     assertEquals(expected.validAt, actual.validAt)
   }
@@ -68,11 +72,11 @@ object TargetUtil {
 
   def validateProperMotion(expected: Option[ProperMotion], actual: Option[ProperMotion]) {
     (expected, actual) match {
-      case (None, None) =>
+      case (None, None)         =>
       case (Some(ex), Some(ac)) =>
         validateBigDecimal(ex.deltaRA,  ac.deltaRA)
         validateBigDecimal(ex.deltaDec, ac.deltaDec)
-      case _ => fail()
+      case _                    => fail()
     }
   }
 

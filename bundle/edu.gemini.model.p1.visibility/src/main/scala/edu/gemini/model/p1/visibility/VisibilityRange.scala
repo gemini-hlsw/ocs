@@ -1,7 +1,8 @@
 package edu.gemini.model.p1.visibility
 
-import edu.gemini.model.p1.immutable.{DMS, HMS}
 import edu.gemini.model.p1.immutable.TargetVisibility
+import edu.gemini.spModel.core.Angle.{DMS, HMS}
+import edu.gemini.spModel.core.{Declination, RightAscension}
 
 private case class Degrees(raw: Double) extends Ordered[Degrees] {
   val deg: Double = ((raw % 360.0) + 360.0) % 360.0  // [0, 360)
@@ -13,11 +14,11 @@ private sealed trait CoordinateDegrees[T] {
 }
 
 private object CoordinateDegrees {
-  implicit object HmsDegrees extends CoordinateDegrees[HMS] {
-    def toDegrees(hms: HMS) = Degrees(hms.toDegrees)
+  implicit object RaDegrees extends CoordinateDegrees[RightAscension] {
+    def toDegrees(hms: RightAscension) = Degrees(hms.toAngle.toDegrees)
   }
-  implicit object DmsDegrees extends CoordinateDegrees[DMS] {
-    def toDegrees(dms: DMS) = Degrees(dms.toDegrees)
+  implicit object DecDegrees extends CoordinateDegrees[Declination] {
+    def toDegrees(dms: Declination) = Degrees(dms.toDegrees)
   }
 }
 
@@ -57,7 +58,7 @@ private[visibility] object VisibilityRangeList {
             F(range :: f.lst, curDeg, curVis)
           }
         }
-        VisibilityRangeList((VisibilityRange(res.vis, new DegRange(res.start, startDeg)) :: res.lst))
+        VisibilityRangeList(VisibilityRange(res.vis, new DegRange(res.start, startDeg)) :: res.lst)
     }
 
   /**

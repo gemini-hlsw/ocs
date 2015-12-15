@@ -22,8 +22,8 @@ object QueryArgs {
     for {
       target <- obs.target.toRight("Missing Target").right
       coords <- target.coords(time).toRight("Missing Coordinates").right
-      ttype <- targetType(target).right
-    } yield Seq("ra" -> coords.toHmsDms.ra.toString, "dec" -> coords.toHmsDms.dec.toString, "targetType" -> ttype)
+      ttype  <- targetType(target).right
+    } yield Seq("ra" -> coords.ra.toAngle.formatHMS, "dec" -> coords.dec.formatDMS, "targetType" -> ttype)
 
   def conditionArgs(obs:Observation):Either[String, Seq[Arg]] =
     for {
