@@ -1,7 +1,3 @@
-//
-// $
-//
-
 package edu.gemini.shared.util.immutable;
 
 import java.io.Serializable;
@@ -12,7 +8,7 @@ import java.util.NoSuchElementException;
  * The Option implementation that represents the lack of a value.
  */
 public final class None<T> implements Option<T>, Serializable {
-    public static None INSTANCE = new None();
+    public static None INSTANCE = new None<>();
 
     public static <T> None<T> instance() {
         //noinspection unchecked

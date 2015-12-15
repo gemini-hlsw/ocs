@@ -1,50 +1,9 @@
-//=== File Prolog =============================================================
-//	This code was developed by NASA, Goddard Space Flight Center, Code 588
-//	for the Scientist's Expert Assistant (SEA) project.
-//
-//--- Contents ----------------------------------------------------------------
-//	DefaultTimeLineNodeModel
-//
-//--- Description -------------------------------------------------------------
-//	default version of the time line node model
-//
-//--- Notes -------------------------------------------------------------------
-//
-//--- Development History -----------------------------------------------------
-//
-//	12/10/99	M. Fishman
-//
-//		Original implementation.
-//
-//
-//--- DISCLAIMER---------------------------------------------------------------
-//
-//	This software is provided "as is" without any warranty of any kind, either
-//	express, implied, or statutory, including, but not limited to, any
-//	warranty that the software will conform to specification, any implied
-//	warranties of merchantability, fitness for a particular purpose, and
-//	freedom from infringement, and any warranty that the documentation will
-//	conform to the program, or any warranty that the software will be error
-//	free.
-//
-//	In no event shall NASA be liable for any damages, including, but not
-//	limited to direct, indirect, special or consequential damages, arising out
-//	of, resulting from, or in any way connected with this software, whether or
-//	not based upon warranty, contract, tort or otherwise, whether or not
-//	injury was sustained by persons or property or otherwise, and whether or
-//	not loss was sustained from or arose out of the results of, or use of,
-//	their software or services provided hereunder.
-//
-//=== End File Prolog =========================================================
-//package gov.nasa.gsfc.util.gui;
-
 package jsky.timeline;
 
 import jsky.science.Time;
 
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
-
 
 /**
  * Default version of the time line node model.
@@ -63,19 +22,6 @@ public class DefaultTimeLineNodeModel implements TimeLineNodeModel {
     private Time fEndTime = new Time(0.0);
     private PropertyChangeSupport fChangeSupport = null;
     private TimeLineModel fParent;
-
-    /**
-     *
-     * constructor
-     *
-     **/
-    public DefaultTimeLineNodeModel(Time start, Time end) {
-        this(start, end, "unknown", false);
-    }
-
-    public DefaultTimeLineNodeModel(Time startTime, Time endTime, String name) {
-        this(startTime, endTime, name, false);
-    }
 
     public DefaultTimeLineNodeModel(Time startTime, Time endTime, String name, boolean isConstant) {
         fChangeSupport = new PropertyChangeSupport(this);
@@ -174,8 +120,6 @@ public class DefaultTimeLineNodeModel implements TimeLineNodeModel {
      **/
     public void setDuration(Time durationLength) {
         if (durationLength != null) {
-            Time val = getStartTime();
-
             setEndTime(new Time(fStartTime.getValue(Time.SECOND) +
                                 durationLength.getValue(Time.SECOND), Time.SECOND));
         }
@@ -208,7 +152,7 @@ public class DefaultTimeLineNodeModel implements TimeLineNodeModel {
      *
      **/
     public void setTimeLineNodeName(String name) {
-        if (fTimeLineNodeName != name) {
+        if (!fTimeLineNodeName.equals(name)) {
             String oldName = fTimeLineNodeName;
             fTimeLineNodeName = name;
             fChangeSupport.firePropertyChange(TimeLineNodeModel.NAME, oldName, name);
@@ -306,15 +250,6 @@ public class DefaultTimeLineNodeModel implements TimeLineNodeModel {
         fIsConstant = isConstant;
     }
 
-
-    /**
-     *
-     * get the gui node class for this model
-     *
-     */
-    public Class getGUIClass() {
-        return DefaultTimeLineNode.class;
-    }
 
     public String toString() {
         String str = getTimeLineNodeName() + ":\n";

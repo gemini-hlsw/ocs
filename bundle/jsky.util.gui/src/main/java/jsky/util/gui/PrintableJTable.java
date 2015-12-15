@@ -3,14 +3,12 @@ package jsky.util.gui;
 import jsky.util.I18N;
 
 import javax.swing.*;
-import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
 import javax.print.attribute.standard.OrientationRequested;
 import java.awt.*;
 import java.awt.print.PageFormat;
 import java.awt.print.Printable;
 import java.awt.print.PrinterException;
-import java.util.Vector;
 
 /**
  * A JTable that implements the {@link Printable} interface.
@@ -19,11 +17,6 @@ public class PrintableJTable extends JTable implements Printable {
 
     // Used to access internationalized strings (see i18n/gui*.proprties)
     private static final I18N _I18N = I18N.getInstance(PrintableJTable.class);
-
-    // The maximum number of pages for a given print job.
-    // This number is computed when a print is started,
-    // but defaults to 1.
-    private int _maxNumPage = 1;
 
     // The title for printing
     private String _title = "Table Contents";
@@ -37,34 +30,9 @@ public class PrintableJTable extends JTable implements Printable {
         super();
     }
 
-    /** Initialize a printable table with the given number of rows and columns */
-    public PrintableJTable(int numRows, int numColumns) {
-        super(numRows, numColumns);
-    }
-
-    /** Initialize a printable table with the given data and column headers */
-    public PrintableJTable(Object[][] rowData, Object[] columnNames) {
-        super(rowData, columnNames);
-    }
-
     /** Initialize a printable table with the given table model */
     public PrintableJTable(TableModel dm) {
         super(dm);
-    }
-
-    /** Initialize a printable table with the given table and column models */
-    public PrintableJTable(TableModel dm, TableColumnModel cm) {
-        super(dm, cm);
-    }
-
-    /** Initialize a printable table with the given table, column, and selection models */
-    public PrintableJTable(TableModel dm, TableColumnModel cm, ListSelectionModel sm) {
-        super(dm, cm, sm);
-    }
-
-    /** Initialize a printable table with the given row data and column vector */
-    public PrintableJTable(Vector rowData, Vector columnNames) {
-        super(rowData, columnNames);
     }
 
 

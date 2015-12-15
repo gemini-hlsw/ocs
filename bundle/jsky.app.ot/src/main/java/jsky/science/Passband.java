@@ -1,55 +1,6 @@
-//=== File Prolog========================================================================
-//    This code was developed by NASA, Goddard Space Flight Center, Code 587
-//    for the Scientist's Expert Assistant (SEA) project for Next Generation
-//    Space Telescope (NGST).
-//
-//--- Notes------------------------------------------------------------------------------
-//
-//--- Development History----------------------------------------------------------------
-//    Date              Author          Reference
-//    04/05/98          T. Brooks
-//      Initial packaging of class
-//
-//    06/10/98          S. Grosvenor
-//          Added more standard ranges and a "central" wavelength, reconfigured standard
-//      list to contain passband objects.  Added support via more generic Wavelengths
-//      to avoid future problems with units
-//          Added some documentation and renamed to align with coding standards
-//    01/28/99          S. Grosvenor
-//      First release of spectroscopy support
-//
-//    05/03/00    S. Grosvenor / 588 Booz-Allen
-//      ScienceObject overhaul
-//
-//  10/10/00    S.  Grosvenor / 588 Booz Allen
-//
-//      Changed to descend from AbstractScienceObject not the more-complex,
-//      higher overhead AbstractScienceObjectNode
-//
-//--- DISCLAIMER---------------------------------------------------------------
-//
-//	This software is provided "as is" without any warranty of any kind, either
-//	express, implied, or statutory, including, but not limited to, any
-//	warranty that the software will conform to specification, any implied
-//	warranties of merchantability, fitness for a particular purpose, and
-//	freedom from infringement, and any warranty that the documentation will
-//	conform to the program, or any warranty that the software will be error
-//	free.
-//
-//	In no event shall NASA be liable for any damages, including, but not
-//	limited to direct, indirect, special or consequential damages, arising out
-//	of, resulting from, or in any way connected with this software, whether or
-//	not based upon warranty, contract, tort or otherwise, whether or not
-//	injury was sustained by persons or property or otherwise, and whether or
-//	not loss was sustained from or arose out of the results of, or use of,
-//	their software or services provided hereunder.
-//=== End File Prolog====================================================================
-
 package jsky.science;
 
 import java.util.*;
-
-import jsky.science.util.FormatUtilities;
 
 /**
  * Passband class provides support for range of wavelengths.  Including a static
@@ -98,7 +49,7 @@ public class Passband extends AbstractScienceObject {
      */
     public static final String HIGH_PROPERTY = "High";
 
-    private static Map sStandardPassbands = new HashMap();
+    private static Map<String, Passband> sStandardPassbands = new HashMap<>();
 
     static {
         sStandardPassbands.put("H-Alpha",
@@ -153,33 +104,6 @@ public class Passband extends AbstractScienceObject {
         //sStandardPassbands.put( "Q", new Passband( "Q", new Wavelength( 15000, Wavelength.NANOMETER)));
     }
 
-    public Passband() {
-        this("H-Alpha");
-    }
-
-    /**
-     * Creates a new Passband with low and high values specified in Wavelengths.
-     * Name is set to string of "inLow-inHigh"
-     **/
-    public Passband(Wavelength inLowWL, Wavelength inHighWL) {
-        this(FormatUtilities.formatDouble(inLowWL.getValue(), 0) + "-" +
-             FormatUtilities.formatDouble(inHighWL.getValue(), 0),
-             inLowWL, inHighWL,
-             new Wavelength((inLowWL.getValue() + (inHighWL.getValue() - inLowWL.getValue()) / 2)));
-    }
-
-    /**
-     * Creates a new Passband with low, high and middle values specified in Wavelengths.
-     * Name is set to string of "inLowNano-inHighNano"
-     **/
-    public Passband(Wavelength inLowWL, Wavelength inHighWL, Wavelength inMiddleWL) {
-        this(FormatUtilities.formatDouble(inLowWL.getValue(Wavelength.NANOMETER), 0) + "-" +
-             FormatUtilities.formatDouble(inHighWL.getValue(Wavelength.NANOMETER), 0) +
-             " (" + FormatUtilities.formatDouble(inMiddleWL.getValue(Wavelength.NANOMETER), 0) + ")",
-             inLowWL, inHighWL, inMiddleWL);
-
-    }
-
     /**
      * Creates a new Passband with low, high and middle values specified in Wavelengths.
      * Name is taken from first parameter
@@ -205,7 +129,7 @@ public class Passband extends AbstractScienceObject {
         double middle;
         double high;
 
-        Passband findBand = (Passband) sStandardPassbands.get(val);
+        Passband findBand = sStandardPassbands.get(val);
 
         if (findBand != null) {
             pLow = findBand.getLowWavelength();
@@ -213,15 +137,13 @@ public class Passband extends AbstractScienceObject {
             pHigh = findBand.getHighWavelength();
         } else {
             // input name is not in standard list, parse it for min/max numbers
-            String band = val;
-
-            int locDash = band.indexOf('-');
+            int locDash = val.indexOf('-');
 
             if (locDash >= 0) {
                 // has dash is this a negative exponent?
                 if (locDash > 0) {
-                    String lowStr = (band.substring(0, locDash)).trim();
-                    String highStr = (band.substring(locDash + 1)).trim();
+                    String lowStr = (val.substring(0, locDash)).trim();
+                    String highStr = (val.substring(locDash + 1)).trim();
 
                     if (lowStr.endsWith("e") || lowStr.endsWith("E")) {
                         // have dash immediately after an exponent, assume is minus for exponent
@@ -233,8 +155,8 @@ public class Passband extends AbstractScienceObject {
 
             if (locDash >= 0) {
                 // has a dash, assume is 'low-high'
-                String lowStr = (band.substring(0, locDash)).trim();
-                String highStr = (band.substring(locDash + 1)).trim();
+                String lowStr = (val.substring(0, locDash)).trim();
+                String highStr = (val.substring(locDash + 1)).trim();
 
                 if (lowStr.length() == 0) {
                     lowStr = "0";
@@ -243,12 +165,12 @@ public class Passband extends AbstractScienceObject {
                 if (highStr.length() == 0) {
                     highStr = "10000";
                 }
-                low = (new Double(lowStr)).doubleValue();
-                high = (new Double(highStr)).doubleValue();
+                low = new Double(lowStr);
+                high = new Double(highStr);
                 middle = (high - low) / 2;
             } else {
                 // no dash, assume a single value
-                low = new Double(band).doubleValue();
+                low = new Double(val);
                 middle = low;
                 high = low;
             }
@@ -274,11 +196,11 @@ public class Passband extends AbstractScienceObject {
      * Returns String array containing the names of the defined standard passbands
      **/
     public static String[] getStdBands() {
-        Iterator iter = sStandardPassbands.keySet().iterator();
+        Iterator<String> iter = sStandardPassbands.keySet().iterator();
         String[] bandList = new String[sStandardPassbands.size()];
 
         for (int i = 0; i < sStandardPassbands.size(); i++)
-            bandList[i] = (String) iter.next();
+            bandList[i] = iter.next();
 
         return bandList;
     }
@@ -288,11 +210,11 @@ public class Passband extends AbstractScienceObject {
      * Passbands where the length of the name is a single character
      **/
     public static String[] getStandardBroadBands() {
-        Iterator iter = sStandardPassbands.keySet().iterator();
+        Iterator<String> iter = sStandardPassbands.keySet().iterator();
         int len = 0;
 
         while (iter.hasNext()) {
-            String b = (String) iter.next();
+            String b = iter.next();
             if (b.length() == 1) len++;
         }
         String[] bandList = new String[len];
@@ -300,7 +222,7 @@ public class Passband extends AbstractScienceObject {
         iter = sStandardPassbands.keySet().iterator();
         len = 0;
         while (iter.hasNext()) {
-            String b = (String) iter.next();
+            String b = iter.next();
             if (b.length() == 1) bandList[len++] = b;
         }
 
@@ -325,7 +247,7 @@ public class Passband extends AbstractScienceObject {
      * Returns the Passband in the standard list by name.  Returns null if bandname is not found
      **/
     public static Passband getStandardPassband(String pName) {
-        return (Passband) sStandardPassbands.get(pName);
+        return sStandardPassbands.get(pName);
     }
 
     /**
@@ -333,9 +255,7 @@ public class Passband extends AbstractScienceObject {
      * specified wavelength.  Returns null if no match is found.
      **/
     public static Passband findStandardContaining(Wavelength inWL) {
-        Iterator iter = sStandardPassbands.values().iterator();
-        while (iter.hasNext()) {
-            Passband p = (Passband) iter.next();
+        for (Passband p : sStandardPassbands.values()) {
             if (p.contains(inWL)) return p;
         }
         return null;

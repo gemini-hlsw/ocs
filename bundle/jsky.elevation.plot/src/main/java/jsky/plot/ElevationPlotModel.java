@@ -1,20 +1,11 @@
-// Copyright 2003
-// Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-//
-// $Id: ElevationPlotModel.java 42349 2012-03-01 13:03:51Z swalker $
-
 package jsky.plot;
 
-import edu.gemini.shared.util.immutable.None;
 import edu.gemini.shared.util.immutable.Option;
 import edu.gemini.shared.util.immutable.Some;
 import edu.gemini.skycalc.ImprovedSkyCalcMethods;
 import edu.gemini.skycalc.SunRiseSet;
 import edu.gemini.spModel.core.Site;
 import jsky.coords.TargetDesc;
-import jsky.coords.WorldCoordinates;
-import jsky.coords.WorldCoords;
 import jsky.plot.util.CalendarUtil;
 import jsky.util.Preferences;
 import jsky.util.StringUtil;
@@ -29,7 +20,6 @@ import javax.swing.event.*;
 import javax.swing.table.TableModel;
 import java.text.SimpleDateFormat;
 import java.util.*;
-
 
 /**
  * A model class for plotting elevation vs local sidereal time for a given list of target
@@ -81,7 +71,7 @@ public class ElevationPlotModel {
     // the secondary Y axis values are airmass
     private double[][] _yDataAirmass;
 
-    // the other secondary Y axis values are the parallectic angles
+    // the other secondary Y axis values are the parallactic angles
     private double[][] _yDataPa;
 
     // For each target index, contains the approximate max elevation
@@ -135,18 +125,6 @@ public class ElevationPlotModel {
     }
 
     /**
-     * Initialize an elevation plot model for the given date, location, and target coordinates.
-     *
-     * @param site the name and location of the observatory site
-     * @param date the date for which the plot should be calculated
-     * @param targets an array of target object descriptions
-     */
-    public ElevationPlotModel(Site site, Date date, TargetDesc[] targets) {
-        this(site, date, targets, UT, UT);
-    }
-
-
-    /**
      * Set the sample interval for the plot.
      */
     public void setSampleInterval(int minutes) {
@@ -170,12 +148,6 @@ public class ElevationPlotModel {
     public static double getObsThreshold() {
         return _obsThreshold;
     }
-
-    /** Set the threshold in degrees above the horizon where targets are considered observable */
-    public static void setObsThreshold(double d) {
-        _obsThreshold = d;
-    }
-
 
     // Update the model data based on the current settings
     private void _updateModel() {
@@ -347,8 +319,6 @@ public class ElevationPlotModel {
         return _tableModels[targetIndex];
     }
 
-
-
     /** Return an XYDataset for this model that shows altitude against time */
     public XYDataset getXYDataset() {
         TimeSeriesCollection tsc = new TimeSeriesCollection(_timeZone);
@@ -479,7 +449,7 @@ public class ElevationPlotModel {
 
     /** Return an array of the available categories */
     public String[] getCategories() {
-        TreeSet<String> set = new TreeSet<String>();
+        TreeSet<String> set = new TreeSet<>();
         for (TargetDesc _target : _targets) {
             set.add(_target.getCategory());
         }
@@ -587,14 +557,6 @@ public class ElevationPlotModel {
         return cal.getTime();
     }
 
-    /** Return the official sunset time in the selected time zone */
-    public Long getSunset() { return _sunRiseSet.sunset; }
-
-    /** Return the official sunrise time in the selected time zone */
-    public Long getSunrise() {
-        return _sunRiseSet.sunrise;
-    }
-
     /** Return the start time of nautical twilight in the selected time zone */
     public Long getNauticalTwilightStart() {
         return _sunRiseSet.nauticalTwilightStart;
@@ -638,7 +600,7 @@ public class ElevationPlotModel {
         // used to get times in increasing order
         int offset = _getOffset(times);
 
-        List<Date> l = new ArrayList<Date>();
+        List<Date> l = new ArrayList<>();
         boolean started = false;
 
         // start interval
@@ -728,7 +690,7 @@ public class ElevationPlotModel {
             throw new IndexOutOfBoundsException("columnIndex");
         }
 
-        public Class getColumnClass(int columnIndex) {
+        public Class<?> getColumnClass(int columnIndex) {
             if (columnIndex == 0) {
                 return String.class;
             }

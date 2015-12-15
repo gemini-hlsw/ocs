@@ -1,9 +1,3 @@
-// Copyright 2003
-// Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-//
-// $Id: ElevationPanel.java 42349 2012-03-01 13:03:51Z swalker $
-
 package jsky.plot;
 
 import jsky.coords.TargetDesc;
@@ -29,8 +23,6 @@ import org.jfree.ui.RectangleEdge;
 
 import javax.print.attribute.standard.OrientationRequested;
 import javax.swing.*;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import java.awt.*;
 import java.awt.geom.Rectangle2D;
 import java.awt.print.PrinterException;
@@ -39,8 +31,8 @@ import java.text.FieldPosition;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Map;
 import java.util.TreeMap;
-
 
 /**
  * A panel for displaying an elevation plot for given target positions.
@@ -294,11 +286,7 @@ public class ElevationPanel extends JPanel implements PrintableWithDialog, Savea
     public void setModel(ElevationPlotModel model) {
         _model = model;
         _update();
-        _model.addChangeListener(new ChangeListener() {
-            public void stateChanged(ChangeEvent e) {
-                _update();
-            }
-        });
+        _model.addChangeListener(e -> _update());
     }
 
     /**
@@ -553,12 +541,12 @@ public class ElevationPanel extends JPanel implements PrintableWithDialog, Savea
         TargetDesc[] targets = _model.getTargets();
         int colorIndex = 0;
         Paint[] colors = new Paint[targets.length];
-        TreeMap paintMap = new TreeMap();
+        Map<String, Paint> paintMap = new TreeMap<>();
         LegendItemCollection lic = new LegendItemCollection();
 
         for (int i = 0; i < targets.length; i++) {
             String name = targets[i].getName();
-            if ((colors[i] = (Paint)paintMap.get(name)) == null) {
+            if ((colors[i] = paintMap.get(name)) == null) {
                 Paint color = _COLORS[colorIndex++ % _COLORS.length];
                 paintMap.put(name, color);
                 colors[i] = color;

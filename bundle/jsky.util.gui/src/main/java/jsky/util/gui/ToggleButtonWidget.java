@@ -1,22 +1,13 @@
-// Copyright 1997 Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-// See the file LICENSE for complete details.
-//
-// $Id: ToggleButtonWidget.java 21355 2009-08-04 18:28:07Z swalker $
-//
 package jsky.util.gui;
 
-
-
-import javax.swing.ImageIcon;
 import javax.swing.JToggleButton;
 import javax.swing.border.BevelBorder;
 import java.awt.Font;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.util.Collections;
 import java.util.List;
 import java.util.Vector;
-
 
 /**
  * A toggle button widget originally based on Bongo, but now ported to Swing.
@@ -29,27 +20,14 @@ public class ToggleButtonWidget extends JToggleButton implements ItemListener {
     protected boolean booleanValue = false;
 
     // The list of watchers.
-    private List<ToggleButtonWidgetWatcher> _watchers = new Vector<ToggleButtonWidgetWatcher>();
+    private final List<ToggleButtonWidgetWatcher> _watchers = new Vector<>();
 
     /** If true, multiple buttons may be selected, otherwise only one */
     private boolean enableMultipleSelection;
 
-
-    /** The default constructor. */
-    public ToggleButtonWidget(boolean enableMultipleSelection) {
-        super();
-        init(enableMultipleSelection);
-    }
-
     /** Constructor with label. */
     public ToggleButtonWidget(String label, boolean enableMultipleSelection) {
         super(label);
-        init(enableMultipleSelection);
-    }
-
-    /** Constructor with icon. */
-    public ToggleButtonWidget(ImageIcon icon, boolean enableMultipleSelection) {
-        super(icon);
         init(enableMultipleSelection);
     }
 
@@ -96,29 +74,19 @@ public class ToggleButtonWidget extends JToggleButton implements ItemListener {
         _watchers.remove(watcher);
     }
 
-    /**
-     * Delete all watchers.
-     */
-    public synchronized final void deleteWatchers() {
-        _watchers.clear();
-    }
-
     //
     // Get a copy of the _watchers Vector.
     //
-    private synchronized List _getWatchers() {
-        return (List) ((Vector) _watchers).clone();
+    private synchronized List<ToggleButtonWidgetWatcher> _getWatchers() {
+        return Collections.unmodifiableList(_watchers);
     }
 
     /**
      * Notify watchers of an action event.
      */
     public void action() {
-        List v = _getWatchers();
-        int cnt = v.size();
-        for (int i = 0; i < cnt; ++i) {
-            ToggleButtonWidgetWatcher watcher;
-            watcher = (ToggleButtonWidgetWatcher) v.get(i);
+        List<ToggleButtonWidgetWatcher> v = _getWatchers();
+        for (ToggleButtonWidgetWatcher watcher: v) {
             watcher.toggleButtonAction(this);
         }
     }

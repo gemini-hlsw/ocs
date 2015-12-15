@@ -1,10 +1,3 @@
-/*
- * Copyright 2000 Association for Universities for Research in Astronomy, Inc.,
- * Observatory Control System, Gemini Telescopes Project.
- *
- * $Id: FITSGraphics.java 4414 2004-02-03 16:21:36Z brighton $
- */
-
 package jsky.image.graphics.gui;
 
 import java.awt.AlphaComposite;
@@ -42,7 +35,6 @@ import nom.tam.fits.TableHDU;
 import diva.canvas.interactor.SelectionInteractor;
 import diva.util.java2d.Polygon2D;
 import diva.util.java2d.Polyline2D;
-
 
 /**
  * This class allows you to save the current image graphics to a FITS binary table and
@@ -95,7 +87,7 @@ public class FITSGraphics {
             return;
         }
 
-        LinkedList figureList = canvasDraw.getFigureList();
+        LinkedList<CanvasFigure> figureList = canvasDraw.getFigureList();
         if (figureList.size() == 0) {
             return;
         }
@@ -105,10 +97,8 @@ public class FITSGraphics {
         String[] coords = new String[n];
         String[] config = new String[n];
 
-        ListIterator it = figureList.listIterator(0);
         int i = 0;
-        while (it.hasNext()) {
-            CanvasFigure cfig = (CanvasFigure) it.next();
+        for (CanvasFigure cfig: figureList) {
             if (cfig instanceof ImageFigure) {
                 ImageFigure fig = (ImageFigure) cfig;
                 Shape shape = fig.getShape();
@@ -213,8 +203,8 @@ public class FITSGraphics {
             String text = null;
 
             // parse the configuration options: {-opt arg} {-opt arg} ...
-            for (int i = 0; i < config.length; i++) {
-                String[] optArg = TclUtil.splitList(config[i]);
+            for (String aConfig : config) {
+                String[] optArg = TclUtil.splitList(aConfig);
                 if (optArg.length != 2)
                     continue;
                 if (optArg[0].equals("-fill")) {
@@ -413,7 +403,7 @@ public class FITSGraphics {
      * for the given screen coordinate shape.
      */
     protected String getCoords(Shape shape) {
-        double[] c = null;
+        double[] c;
         if (shape instanceof RectangularShape) {
             RectangularShape r = (RectangularShape) shape;
             c = new double[4];
@@ -452,9 +442,9 @@ public class FITSGraphics {
         }
 
         // convert to Tcl list format
-        StringBuffer buf = new StringBuffer();
-        for (int i = 0; i < c.length; i++) {
-            buf.append(Double.toString(c[i]));
+        StringBuilder buf = new StringBuilder();
+        for (double aC : c) {
+            buf.append(Double.toString(aC));
             buf.append(' ');
         }
         return buf.toString();
@@ -480,7 +470,7 @@ public class FITSGraphics {
      * such as -composite.
      */
     protected String getConfig(Paint fill, Paint outline, int lineWidth, Composite composite) {
-        StringBuffer buf = new StringBuffer();
+        StringBuilder buf = new StringBuilder();
         if (fill != null) {
             buf.append("{-fill ");
             buf.append(getColorName((Color) fill));
@@ -511,7 +501,7 @@ public class FITSGraphics {
      * Example "{-text {some text}} {-font Dialog-italic-14} {-fill white}"
      */
     protected String getConfig(String text, Font font, Paint fill) {
-        StringBuffer buf = new StringBuffer();
+        StringBuilder buf = new StringBuilder();
         if (text != null) {
             buf.append("{-text {");
             buf.append(text);
@@ -520,7 +510,7 @@ public class FITSGraphics {
         if (font != null) {
             buf.append("{-font {");
             String style = font.isItalic() ? "italic" : (font.isBold() ? "bold" : "plain");
-            buf.append(font.getFontName() + "-" + style + "-" + font.getSize());
+            buf.append(font.getFontName()).append("-").append(style).append("-").append(font.getSize());
             buf.append("}} ");
         }
         if (fill != null) {

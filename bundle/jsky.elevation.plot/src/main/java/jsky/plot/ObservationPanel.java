@@ -1,9 +1,3 @@
-// Copyright 2003
-// Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-//
-// $Id: ObservationPanel.java 42349 2012-03-01 13:03:51Z swalker $
-
 package jsky.plot;
 
 import org.jfree.chart.ChartPanel;
@@ -23,15 +17,11 @@ import org.jfree.data.category.IntervalCategoryDataset;
 
 import java.awt.geom.Rectangle2D;
 import java.awt.print.PrinterException;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.Hashtable;
+import java.util.*;
 
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 
 import jsky.coords.TargetDesc;
 import jsky.util.I18N;
@@ -43,7 +33,6 @@ import jsky.util.gui.PrintUtil;
 import java.awt.*;
 import java.text.FieldPosition;
 import java.text.SimpleDateFormat;
-
 
 /**
  * A panel for displaying an observation chart for given target positions.
@@ -95,7 +84,7 @@ public class ObservationPanel extends JPanel implements PrintableWithDialog, Sav
     };
 
     // Used to configure the paint/color to use for the different target priorities
-    private Hashtable _priorityPaintMap;
+    private Map<String, Paint> _priorityPaintMap;
 
     // Provides the model data for the graph and tables
     private ElevationPlotModel _model;
@@ -124,7 +113,7 @@ public class ObservationPanel extends JPanel implements PrintableWithDialog, Sav
             TargetDesc[] targets = _model.getTargets();
             if (column < targets.length) {
                 String prio = targets[column].getPriority();
-                Paint paint = (Paint) _priorityPaintMap.get(prio);
+                Paint paint = _priorityPaintMap.get(prio);
                 if (paint != null)
                     return paint;
             }
@@ -161,7 +150,7 @@ public class ObservationPanel extends JPanel implements PrintableWithDialog, Sav
         add(_tabbedPane, BorderLayout.CENTER);
 
         // initialize the default priority colors
-        _priorityPaintMap = new Hashtable();
+        _priorityPaintMap = new HashMap<>();
         _priorityLegendItemCollection = new LegendItemCollection();
         for (int i = 0; i < _availablePriorities.length; i++) {
             _priorityPaintMap.put(_availablePriorities[i], _availablePriorityColors[i]);
@@ -171,23 +160,13 @@ public class ObservationPanel extends JPanel implements PrintableWithDialog, Sav
 
     }
 
-    /** Set the array of available priorities and the corresponding colors */
-    public static void setAvailablePriorities(String[] priorities, Paint[] colors) {
-        _availablePriorities = priorities;
-        _availablePriorityColors = colors;
-    }
-
     /**
      * Set the model containing the elevation plot data and update the display.
      */
     public void setModel(ElevationPlotModel model) {
         _model = model;
         _update();
-        _model.addChangeListener(new ChangeListener() {
-            public void stateChanged(ChangeEvent e) {
-                _update();
-            }
-        });
+        _model.addChangeListener(e -> _update());
     }
 
     /**
@@ -393,12 +372,12 @@ public class ObservationPanel extends JPanel implements PrintableWithDialog, Sav
         _showLegend = show;
         if (_chart != null) {
             if (show) {
-                for (int i = 0; i < _chart.length; i++) {
-                    _chart[i].addSubtitle(new LegendTitle(_chart[i].getPlot()));
+                for (JFreeChart a_chart : _chart) {
+                    a_chart.addSubtitle(new LegendTitle(a_chart.getPlot()));
                 }
             } else {
-                for (int i = 0; i < _chart.length; i++) {
-                    _chart[i].removeLegend();
+                for (JFreeChart a_chart : _chart) {
+                    a_chart.removeLegend();
                 }
             }
         }

@@ -1,7 +1,3 @@
-//
-// $Id: SpTypeComboBoxRenderer.java 21842 2009-09-11 20:24:34Z swalker $
-//
-
 package jsky.app.ot.editor.type;
 
 import edu.gemini.spModel.type.DisplayableSpType;

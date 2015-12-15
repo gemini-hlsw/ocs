@@ -1,10 +1,3 @@
-/*
- * Copyright 2000 Association for Universities for Research in Astronomy, Inc.,
- * Observatory Control System, Gemini Telescopes Project.
- *
- * $Id: ArrayTableCellRenderer.java 6525 2005-08-03 21:13:39Z brighton $
- */
-
 package jsky.util.gui;
 
 import java.awt.Component;
@@ -23,15 +16,7 @@ public class ArrayTableCellRenderer extends DefaultTableCellRenderer {
      *
      * @param arrayClass the type of the array
      */
-    public ArrayTableCellRenderer(Class arrayClass) {
-//        Class c = arrayClass.getComponentType();
-//        if (c != null && (c == int.class
-//                || c == double.class
-//                || c == float.class
-//                || c == Integer.class
-//                || c == Double.class
-//                || c == Float.class))
-//            setHorizontalAlignment(RIGHT);
+    public ArrayTableCellRenderer(Class<?> arrayClass) {
         setHorizontalAlignment(JLabel.CENTER);
     }
 
@@ -61,9 +46,9 @@ public class ArrayTableCellRenderer extends DefaultTableCellRenderer {
                                                    int row, int column) {
         Component component = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
         if (value != null) {
-            Class c = value.getClass();
+            Class<?> c = value.getClass();
             if (c.isArray()) {
-                String s = null;
+                String s;
                 int n = Array.getLength(value);
                 if (n >= 1) {
                     s = Array.get(value, 0).toString();

@@ -1,8 +1,3 @@
-// Copyright 1997 Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-// See the file LICENSE for complete details.
-//
-//
 
 package edu.gemini.shared.gui.calendar;
 
@@ -24,7 +19,7 @@ import edu.gemini.shared.util.CalendarUtil;
  * CalendarUtil.newGregorianCalendarInstance() which zeroes out everything
  * but the days, months, years.
  */
-public class YearMonthDayRange implements DiscreteRange, Comparable, Serializable {
+public class YearMonthDayRange implements DiscreteRange, Comparable<YearMonthDayRange>, Serializable {
 
     private YearMonthDay _start;
 
@@ -42,54 +37,9 @@ public class YearMonthDayRange implements DiscreteRange, Comparable, Serializabl
     }
 
     /**
-     * Constructs a YearMonthDayRange between specified Dates.
-     * They do not have to be in any order.  But operations on
-     * ranges generally expect normalized ranges.
-     */
-    /*public YearMonthDayRange(Date startDate, Date endDate)
- {
-   this(CalendarUtil.newGregorianCalendarInstance(startDate),
-        CalendarUtil.newGregorianCalendarInstance(endDate));
-        }*/
-
-    /**
-     * Constructs a YearMonthDayRange equivalent to specified DateRange.
-     */
-    /*public YearMonthDayRange(DateRange dr)
-    {
-       this(dr.getStartDate(), dr.getEndDate());
-       }*/
-
-    /**
-     * Returns the equivalent DateRange to this YearMonthDayRange
-     */
-    public DateRange getDateRange() {
-        return getDateRange(TimeZone.getDefault());
-    }
-
-    /**
-     * Returns the equivalent DateRange to this YearMonthDayRange
-     * using the specified TimeZone.
-     */
-    public DateRange getDateRange(TimeZone tz) {
-        Calendar c = CalendarUtil.newGregorianCalendarInstance(_start.year, _start.month, _start.day);
-        Date start = c.getTime();
-        c = CalendarUtil.newGregorianCalendarInstance(_end.year, _end.month, _end.day);
-        Date end = c.getTime();
-        return new DateRange(start, end);
-    }
-
-    public YearMonthDay getStartYearMonthDay() {
-        return _start;
-    }
-
-    public YearMonthDay getEndYearMonthDay() {
-        return _end;
-    }
-
-    /**
      * Gets the object at the start of the range.
      */
+    @Override
     public Object getStart() {
         return _start;
     }
@@ -97,6 +47,7 @@ public class YearMonthDayRange implements DiscreteRange, Comparable, Serializabl
     /**
      * Gets the object at the end of the range.
      */
+    @Override
     public Object getEnd() {
         return _end;
     }
@@ -105,26 +56,13 @@ public class YearMonthDayRange implements DiscreteRange, Comparable, Serializabl
      * This method is required for sorting in a collection.
      * DiscreteRanges will be sorted according to their start date.
      */
-    public int compareTo(Object o) {
-        if (!(o instanceof YearMonthDayRange))
-            return -1;
-        YearMonthDayRange r = (YearMonthDayRange) o;
-        int i = _start.compareTo(r._start);
+    @Override
+    public int compareTo(YearMonthDayRange o) {
+        int i = _start.compareTo(o._start);
         if (i != 0)
             return i;
-        return _end.compareTo(r._end);
+        return _end.compareTo(o._end);
     }
-
-    /*
-    public Calendar _start {return _start;}
-    public Calendar _end {return _end;}
-    public int getStartYear() {return _start.get(Calendar.YEAR);}
-    public int getStartMonth() {return _start.get(Calendar.MONTH);}
-    public int getStartDay() {return _start.get(Calendar.DAY_OF_MONTH);}
-    public int getEndYear() {return _end.get(Calendar.YEAR);}
-    public int getEndMonth() {return _end.get(Calendar.MONTH);}
-    public int getEndDay() {return _end.get(Calendar.DAY_OF_MONTH);}
-    */
 
     /**
      * Overrides to return true if and only if the object is a YearMonthDayRange
@@ -144,6 +82,15 @@ public class YearMonthDayRange implements DiscreteRange, Comparable, Serializabl
     }
 
     /**
+     * Override the clone() method to allow cloning of YearMonthDayRange objects.
+     */
+    @SuppressWarnings("CloneDoesntCallSuperClone")
+    @Override
+    public Object clone() {
+        return new YearMonthDayRange(_start, _end);
+    }
+
+    /**
      * Returns true if this DiscreteRange contains the specified object.
      * YearMonthDayRange contains() supports argument types of Calendar or Date.
      * Returns false if object is not in range or object class is not supported.
@@ -153,13 +100,6 @@ public class YearMonthDayRange implements DiscreteRange, Comparable, Serializabl
             return false;
         YearMonthDay arg = (YearMonthDay) o;
         return (!(arg.before(_start) || arg.after(_end)));
-    }
-
-    /**
-     * Override the clone() method to allow cloning of YearMonthDayRange objects.
-     */
-    public Object clone() {
-        return new YearMonthDayRange(_start, _end);
     }
 
     /**
@@ -283,14 +223,14 @@ public class YearMonthDayRange implements DiscreteRange, Comparable, Serializabl
         if (before(arg)) {
             Calendar c1 = CalendarUtil.newGregorianCalendarInstance(_end.year, _end.month, _end.day);
             Calendar c2 = CalendarUtil.newGregorianCalendarInstance(arg._start.year, arg._start.month, arg._start.day);
-            c1.add(c1.DAY_OF_MONTH, 1);
-            c1.add(c1.SECOND, 1); // just to make sure
+            c1.add(Calendar.DAY_OF_MONTH, 1);
+            c1.add(Calendar.SECOND, 1); // just to make sure
             return (!CalendarUtil.before(c1, c2));
         } else {
             Calendar c1 = CalendarUtil.newGregorianCalendarInstance(_start.year, _start.month, _start.day);
             Calendar c2 = CalendarUtil.newGregorianCalendarInstance(arg._end.year, arg._end.month, arg._end.day);
-            c2.add(c1.DAY_OF_MONTH, 1);
-            c2.add(c1.SECOND, 1); // just to make sure
+            c2.add(Calendar.DAY_OF_MONTH, 1);
+            c2.add(Calendar.SECOND, 1); // just to make sure
             return (!CalendarUtil.before(c2, c1));
         }
     }
@@ -427,28 +367,6 @@ public class YearMonthDayRange implements DiscreteRange, Comparable, Serializabl
             r = new YearMonthDayRange(_end, _start);
         }
         return r;
-    }
-
-    /**
-     * Returns the first point of intersection between two YearMonthDayRanges
-     * or null if they do not intersect.
-     */
-    public YearMonthDay intersectionStart(YearMonthDayRange arg) {
-        if (!intersects(arg))
-            return null;
-        // they do overlap, return the latest "from"
-        return (_start.before(arg._start)) ? arg._start : _start;
-    }
-
-    /**
-     * Returns the last point of intersection between two YearMonthDayRanges
-     * or null if they do not intersect.
-     */
-    public YearMonthDay intersectionEnd(YearMonthDayRange arg) {
-        if (!intersects(arg))
-            return null;
-        // they do overlap, return the earliest "to"
-        return (_end.after(arg._end)) ? arg._end : _end;
     }
 
     /**

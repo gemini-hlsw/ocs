@@ -176,7 +176,7 @@ public class VisitorInstrument extends SPInstObsComp
      * Return a list of InstConfigInfo objects describing the instrument's
      * queryable configuration parameters.
      */
-    public static List getInstConfigInfo() {
+    public static List<InstConfigInfo> getInstConfigInfo() {
         return new LinkedList<InstConfigInfo>();
     }
 

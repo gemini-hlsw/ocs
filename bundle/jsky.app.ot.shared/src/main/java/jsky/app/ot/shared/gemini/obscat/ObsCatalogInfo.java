@@ -1,8 +1,3 @@
-// Copyright 2001 Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-//
-// $Id: ObsCatalogInfo.java 21891 2009-09-16 19:31:14Z swalker $
-//
 package jsky.app.ot.shared.gemini.obscat;
 
 import edu.gemini.spModel.gemini.acqcam.InstAcqCam;
@@ -24,10 +19,9 @@ import edu.gemini.spModel.gemini.visitor.VisitorInstrument;
 import edu.gemini.spModel.obscomp.InstConfigInfo;
 import jsky.catalog.FieldDescAdapter;
 
-import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
-
+import java.util.stream.Collectors;
 
 /**
  * Contains static definitions related to the ObsCatalog class.
@@ -331,14 +325,12 @@ public final class ObsCatalogInfo {
         if (instName == null)
             return TABLE_COLUMNS;
 
-        Vector<String> v = new Vector<String>();
+        Vector<String> v = new Vector<>();
         for (String inst : INSTRUMENTS) {
             if (inst.equals(instName)) {
                 List<InstConfigInfo> l = getInstConfigInfoList(inst);
-                Iterator it = l.listIterator();
-                while (it.hasNext()) {
-                    String name = ((InstConfigInfo) it.next()).getName();
-                    v.add(name);
+                for (InstConfigInfo info: l) {
+                    v.add(info.getName());
                 }
                 String[] ar = new String[v.size()];
                 return v.toArray(ar);
@@ -394,7 +386,7 @@ public final class ObsCatalogInfo {
 
         for (String inst : INSTRUMENTS) {
             if (inst.equals(instName)) {
-                List l = getInstConfigInfoList(inst);
+                List<InstConfigInfo> l = getInstConfigInfoList(inst);
                 return l.size();
             }
         }
@@ -417,14 +409,10 @@ public final class ObsCatalogInfo {
      * Determine the instrument specific table columns (all instruments combined)
      */
     private static void _getInstTableColumns() {
-        Vector<String> instColName = new Vector<String>();
+        Vector<String> instColName = new Vector<>();
         for (String inst : INSTRUMENTS) {
             List<InstConfigInfo> l = getInstConfigInfoList(inst);
-            Iterator it = l.listIterator();
-            while (it.hasNext()) {
-                String name = ((InstConfigInfo) it.next()).getName();
-                instColName.add(name);
-            }
+            instColName.addAll(l.stream().map(InstConfigInfo::getName).collect(Collectors.toList()));
         }
         String[] ar = new String[instColName.size()];
         _instTableColumns = instColName.toArray(ar);

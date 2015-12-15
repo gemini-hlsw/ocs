@@ -1,7 +1,6 @@
 package edu.gemini.shared.gui.calendar;
 
 import javax.swing.*;
-import java.util.*;
 import java.awt.*;
 import java.awt.event.*;
 
@@ -18,16 +17,12 @@ public class RangeCalendarTest {
             }
         });
         RangeCalendar cm = new RangeCalendar(new DefaultCalendarModel(1999, 0, 1999, 8), 3);
-        cm.setDisplayMode(cm.MULTI_MONTH_MODE);
+        cm.setDisplayMode(CalendarMonth.MULTI_MONTH_MODE);
         DefaultRangeCellRenderer r = new DefaultRangeCellRenderer(cm.getRangeCount());
-        r.setBackground1(r.DEFAULT_MULTI_MONTH_BACKGROUND1);
-        r.setBackground2(r.DEFAULT_MULTI_MONTH_BACKGROUND2);
+        r.setBackground1(AbstractCalendarRenderer.DEFAULT_MULTI_MONTH_BACKGROUND1);
+        r.setBackground2(AbstractCalendarRenderer.DEFAULT_MULTI_MONTH_BACKGROUND2);
         cm.setCellRenderer(r);
         JCalendar cv = new JCalendar(cm, true, true, true, true);
-        /*cm.addListSelectionListener(new ListSelectionListener() {
-              public void valueChanged(ListSelectionEvent e) {
-                 //System.out.println("Got selection event: " + e.toString());
-              }; });*/
 
         JPanel pan = new JPanel(new BorderLayout());
         pan.add(cv);

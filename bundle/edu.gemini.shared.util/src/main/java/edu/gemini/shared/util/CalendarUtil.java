@@ -1,12 +1,5 @@
-// Copyright 1997 Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-// See the file LICENSE for complete details.
-//
-//
-
 package edu.gemini.shared.util;
 
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
 import java.util.Calendar;
@@ -133,25 +126,25 @@ public class CalendarUtil {
     public static Calendar setPrecision(Calendar c, int calendarField) {
         Calendar clone = (Calendar) c.clone();
         c.clear();
-        c.set(c.YEAR, clone.get(c.YEAR));
+        c.set(Calendar.YEAR, clone.get(Calendar.YEAR));
         if (calendarField == Calendar.YEAR)
             return c;
-        c.set(c.MONTH, clone.get(c.MONTH));
+        c.set(Calendar.MONTH, clone.get(Calendar.MONTH));
         if (calendarField == Calendar.MONTH)
             return c;
-        c.set(c.DAY_OF_MONTH, clone.get(c.DAY_OF_MONTH));
+        c.set(Calendar.DAY_OF_MONTH, clone.get(Calendar.DAY_OF_MONTH));
         if (calendarField == Calendar.DAY_OF_MONTH)
             return c;
-        c.set(c.HOUR, clone.get(c.HOUR));
+        c.set(Calendar.HOUR, clone.get(Calendar.HOUR));
         if (calendarField == Calendar.HOUR)
             return c;
-        c.set(c.MINUTE, clone.get(c.MINUTE));
+        c.set(Calendar.MINUTE, clone.get(Calendar.MINUTE));
         if (calendarField == Calendar.MINUTE)
             return c;
-        c.set(c.SECOND, clone.get(c.SECOND));
+        c.set(Calendar.SECOND, clone.get(Calendar.SECOND));
         if (calendarField == Calendar.SECOND)
             return c;
-        c.set(c.MILLISECOND, clone.get(c.MILLISECOND));
+        c.set(Calendar.MILLISECOND, clone.get(Calendar.MILLISECOND));
         if (calendarField == Calendar.MILLISECOND)
             return c;
         // Unrecognized Calendar field.  Just return the calendar like it was.
@@ -387,13 +380,13 @@ public class CalendarUtil {
      * This is useful for debugging.
      */
     public static String toDebugString(Calendar c) {
-        String s = "year: " + c.get(c.YEAR) + "\n";
-        s += "month: " + c.get(c.MONTH) + "\n";
-        s += "day_of_month: " + c.get(c.DAY_OF_MONTH) + "\n";
-        s += "hour: " + c.get(c.HOUR_OF_DAY) + "\n";
-        s += "minute: " + c.get(c.MINUTE) + "\n";
-        s += "second: " + c.get(c.SECOND) + "\n";
-        s += "millisecond: " + c.get(c.MILLISECOND) + "\n";
+        String s = "year: " + c.get(Calendar.YEAR) + "\n";
+        s += "month: " + c.get(Calendar.MONTH) + "\n";
+        s += "day_of_month: " + c.get(Calendar.DAY_OF_MONTH) + "\n";
+        s += "hour: " + c.get(Calendar.HOUR_OF_DAY) + "\n";
+        s += "minute: " + c.get(Calendar.MINUTE) + "\n";
+        s += "second: " + c.get(Calendar.SECOND) + "\n";
+        s += "millisecond: " + c.get(Calendar.MILLISECOND) + "\n";
         s += "total milliseconds: " + c.getTime().getTime();
         return s;
     }

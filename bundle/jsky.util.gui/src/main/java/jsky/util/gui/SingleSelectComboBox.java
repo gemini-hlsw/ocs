@@ -1,20 +1,10 @@
-/*
- * Copyright 2000 Association for Universities for Research in Astronomy, Inc.,
- * Observatory Control System, Gemini Telescopes Project.
- *
- * $Id: SingleSelectComboBox.java 8331 2007-12-05 19:16:40Z anunez $
- */
-
 package jsky.util.gui;
 
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.Vector;
 import java.util.HashSet;
 
 import javax.swing.*;
-
 
 /**
  * A replacement for JComboBox that allows disabling individual items.
@@ -22,14 +12,15 @@ import javax.swing.*;
  * @version $Revision: 8331 $
  * @author Allan Brighton
  */
-public class SingleSelectComboBox extends JComboBox {
+public class SingleSelectComboBox<T> extends JComboBox<T> {
 
     // Set of disabled items
-    private HashSet _disabledSet = new HashSet();
+    private HashSet<T> _disabledSet = new HashSet<>();
 
     // used to enable/disable individual items
-    private ListCellRenderer _renderer = new DefaultListCellRenderer() {
-        public Component getListCellRendererComponent(JList list,
+    private ListCellRenderer<Object> _renderer = new DefaultListCellRenderer() {
+        @SuppressWarnings("SuspiciousMethodCalls")
+        public Component getListCellRendererComponent(JList<?> list,
                                                       Object value,
                                                       int index,
                                                       boolean isSelected,
@@ -56,19 +47,19 @@ public class SingleSelectComboBox extends JComboBox {
     }
 
     /** Create a SingleSelectComboBox based on the given model. */
-    public SingleSelectComboBox(ComboBoxModel model) {
+    public SingleSelectComboBox(ComboBoxModel<T> model) {
         super(model);
         setRenderer(_renderer);
     }
 
     /** Create a SingleSelectComboBox containing the given items. */
-    public SingleSelectComboBox(Object[] ar) {
+    public SingleSelectComboBox(T[] ar) {
         super(ar);
         setRenderer(_renderer);
     }
 
     /** Create a SingleSelectComboBox containing the given items. */
-    public SingleSelectComboBox(Vector v) {
+    public SingleSelectComboBox(Vector<T> v) {
         super(v);
         setRenderer(_renderer);
     }
@@ -79,7 +70,7 @@ public class SingleSelectComboBox extends JComboBox {
     }
 
     /** Set the enabled state of the given item */
-    public void setEnabledObject(Object o, boolean enabled) {
+    public void setEnabledObject(T o, boolean enabled) {
         if (enabled) {
             _disabledSet.remove(o);
         } else {
@@ -89,10 +80,10 @@ public class SingleSelectComboBox extends JComboBox {
 
     /** Set the enabled state of the given item */
     public void setEnabled(String s, boolean enabled) {
-        ListModel model = getModel();
+        ListModel<T> model = getModel();
         int n = model.getSize();
         for (int i = 0; i < n; i++) {
-            Object o = model.getElementAt(i);
+            T o = model.getElementAt(i);
             if (o != null && o.toString().equals(s)) {
                 setEnabledObject(o, enabled);
                 break;
@@ -101,18 +92,16 @@ public class SingleSelectComboBox extends JComboBox {
     }
 
     /** Set the choices by specifying a Vector containing the choices. */
-    public void setChoices(Vector v) {
-        DefaultComboBoxModel model = new DefaultComboBoxModel();
-        for (int i = 0; i < v.size(); i++)
-            model.addElement(v.get(i));
+    public void setChoices(final Vector<T> v) {
+        final DefaultComboBoxModel<T> model = new DefaultComboBoxModel<>();
+        v.forEach(model::addElement);
         super.setModel(model);
     }
 
     /** Set the choices to the given objects. */
-    public void setChoices(Object[] ar) {
-        DefaultComboBoxModel model = new DefaultComboBoxModel();
-        for (int i = 0; i < ar.length; i++)
-            model.addElement(ar[i]);
+    public void setChoices(T[] ar) {
+        DefaultComboBoxModel<T> model = new DefaultComboBoxModel<>();
+        for (T anAr : ar) model.addElement(anAr);
         super.setModel(model);
     }
 
@@ -126,8 +115,9 @@ public class SingleSelectComboBox extends JComboBox {
     }
 
     /** Stop actions for disabled items */
+    @SuppressWarnings("unchecked")
     protected void fireActionEvent() {
-        Object o = getSelectedItem();
+        T o = (T)getSelectedItem();
         if (!_disabledSet.contains(o)) {
             super.fireActionEvent();
         }
@@ -135,7 +125,7 @@ public class SingleSelectComboBox extends JComboBox {
 
     /** Disallow selecting disabled items */
     public void setSelectedIndex(int anIndex) {
-        Object o = getModel().getElementAt(anIndex);
+        T o = getModel().getElementAt(anIndex);
         if (o != null && _disabledSet.contains(o)) {
             return;
         }
@@ -146,13 +136,9 @@ public class SingleSelectComboBox extends JComboBox {
     public static void main(String[] args) {
         String[] ar = new String[]{"Test", "First Item", "Second Item", "Third Item", "Fourth Item", "Fifth Item"};
 
-        final SingleSelectComboBox sscb = new SingleSelectComboBox(ar);
+        final SingleSelectComboBox<String> sscb = new SingleSelectComboBox<>(ar);
 
-        sscb.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                System.out.println("XXX selected " + sscb.getSelectedItem());
-            }
-        });
+        sscb.addActionListener(e -> System.out.println("XXX selected " + sscb.getSelectedItem()));
 
         //sscb.setSelectedObject("Third Item");
         sscb.setSelectedIndex(3);

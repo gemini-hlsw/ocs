@@ -1,21 +1,13 @@
-/*
- * Copyright 2002 Association for Universities for Research in Astronomy, Inc.,
- * Observatory Control System, Gemini Telescopes Project.
- *
- * $Id: ElevationPlotMenuBar.java 5900 2005-03-16 09:29:04Z brighton $
- */
-
 package jsky.plot;
 
-import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.*;
 
 import jsky.util.I18N;
 import jsky.util.Preferences;
-
 
 /**
  * Implements a menubar for an ElevationPlotPanel.
@@ -86,13 +78,11 @@ public class ElevationPlotMenuBar extends JMenuBar {
             _plotPanel.setShowLegend(false);
         menuItem.setSelected(showNow);
 
-        menuItem.addItemListener(new ItemListener() {
-            public void itemStateChanged(ItemEvent e) {
-                JCheckBoxMenuItem cb = (JCheckBoxMenuItem) e.getSource();
-                boolean show = cb.isSelected();
-                _plotPanel.setShowLegend(show);
-                Preferences.set(SHOW_LEGEND_PREF_KEY, show);
-            }
+        menuItem.addItemListener(e -> {
+            JCheckBoxMenuItem cb = (JCheckBoxMenuItem) e.getSource();
+            boolean show = cb.isSelected();
+            _plotPanel.setShowLegend(show);
+            Preferences.set(SHOW_LEGEND_PREF_KEY, show);
         });
         return menuItem;
     }
@@ -112,28 +102,26 @@ public class ElevationPlotMenuBar extends JMenuBar {
             "15 minutes",
             "30 minutes"
         };
-        final ArrayList l = new ArrayList(choices.length);
+        final List<JRadioButtonMenuItem> l = new ArrayList<>(choices.length);
         JRadioButtonMenuItem[] ar = new JRadioButtonMenuItem[choices.length];
         for(int i = 0; i < choices.length; i++) {
             l.add(ar[i] = new JRadioButtonMenuItem(choices[i]));
         }
         ar[1].setSelected(true);
 
-        ItemListener itemListener = new ItemListener() {
-            public void itemStateChanged(ItemEvent e) {
-                JRadioButtonMenuItem rb = (JRadioButtonMenuItem) e.getSource();
-                if (rb.isSelected()) {
-                    int i = l.indexOf(rb);
-                    if (i != -1) {
-                        int minutes = Integer.parseInt(choices[i].substring(0,2).trim());
-                        ElevationPlotModel model = _plotPanel.getModel();
-                        if (model != null) {
-                            model.setSampleInterval(minutes);
-                        } else {
-                            ElevationPlotUtil.setDefaultNumSteps((24*60)/minutes);
-                        }
-                        Preferences.set(prefName, choices[i]);
+        ItemListener itemListener = e -> {
+            JRadioButtonMenuItem rb = (JRadioButtonMenuItem) e.getSource();
+            if (rb.isSelected()) {
+                int i = l.indexOf(rb);
+                if (i != -1) {
+                    int minutes = Integer.parseInt(choices[i].substring(0,2).trim());
+                    ElevationPlotModel model = _plotPanel.getModel();
+                    if (model != null) {
+                        model.setSampleInterval(minutes);
+                    } else {
+                        ElevationPlotUtil.setDefaultNumSteps((24*60)/minutes);
                     }
+                    Preferences.set(prefName, choices[i]);
                 }
             }
         };
@@ -158,11 +146,6 @@ public class ElevationPlotMenuBar extends JMenuBar {
 
          return menu;
      }
-
-    /** Return the handle for the File menu */
-    public JMenu getFileMenu() {
-        return _fileMenu;
-    }
 
     /** Return the handle for the View menu */
     public JMenu getViewMenu() {

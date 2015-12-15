@@ -1,9 +1,3 @@
-// Copyright 1997 Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-// See the file LICENSE for complete details.
-//
-// $Id: EdObservation2.java 47001 2012-07-26 19:40:02Z swalker $
-//
 package jsky.app.ot.gemini.editor;
 
 import edu.gemini.pot.client.SPDB;
@@ -45,7 +39,6 @@ import javax.swing.table.TableColumn;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -56,7 +49,6 @@ import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-
 /**
  * This is the editor for the Observation item.
  */
@@ -66,7 +58,7 @@ public final class EdObservation2 extends OtItemEditor<ISPObservation, SPObserva
     private static final Logger LOGGER = Logger.getLogger(Logger.class.getName());
 
     // Time summary table heading
-    private static final Vector<String> _timeSummaryTableHead = new Vector<String>(5);
+    private static final Vector<String> _timeSummaryTableHead = new Vector<>(5);
 
     static {
         _timeSummaryTableHead.add(" ");
@@ -77,7 +69,7 @@ public final class EdObservation2 extends OtItemEditor<ISPObservation, SPObserva
     }
 
     // Correction table heading
-    private static final Vector<String> _correctionTableHead = new Vector<String>(4);
+    private static final Vector<String> _correctionTableHead = new Vector<>(4);
 
     static {
         _correctionTableHead.add("Timestamp");
@@ -103,17 +95,18 @@ public final class EdObservation2 extends OtItemEditor<ISPObservation, SPObserva
     private static final String CARD_RAPID_TOO_KEY = "RADIO_BUTTON";
     private static final String CARD_NO_TOO_KEY = "EMPTY_PANEL";
 
-    private static final class ExecStatusComboBoxModel extends DefaultComboBoxModel {
+    private static final class ExecStatusComboBoxModel extends DefaultComboBoxModel<Option<ObsExecStatus>> {
         ExecStatusComboBoxModel() {
             removeAllElements();
-            addElement(None.<ObsExecStatus>instance());
+            addElement(None.instance());
             int i = 1;
             for (ObsExecStatus s : ObsExecStatus.values()) {
-                insertElementAt(new Some<ObsExecStatus>(s), i++);
+                insertElementAt(new Some<>(s), i++);
             }
         }
     }
 
+    @SuppressWarnings("rawtypes")
     private static final class ExecStatusComboBoxRenderer extends BasicComboBoxRenderer implements ListCellRenderer {
         private Option<ObsExecStatus> autoStatus = None.instance();
 
@@ -121,11 +114,11 @@ public final class EdObservation2 extends OtItemEditor<ISPObservation, SPObserva
             if (status == null) {
                 autoStatus = None.instance();
             } else {
-                autoStatus = new Some<ObsExecStatus>(status);
+                autoStatus = new Some<>(status);
             }
         }
 
-        @SuppressWarnings("unchecked")
+        @SuppressWarnings({"unchecked", "rawtypes"})
         public Component getListCellRendererComponent(JList jList, Object value, int index, boolean isSelected, boolean hasFocus) {
             final String text;
             if (value instanceof Some) {
@@ -138,8 +131,9 @@ public final class EdObservation2 extends OtItemEditor<ISPObservation, SPObserva
         }
     }
 
+    @SuppressWarnings("unchecked")
     private final class ExecOverrideEditor {
-        private final JComboBox combo;
+        private final JComboBox<Option<ObsExecStatus>> combo;
         private final ExecStatusComboBoxRenderer renderer = new ExecStatusComboBoxRenderer();
 
         ExecOverrideEditor(JPanel pan) {
@@ -148,13 +142,13 @@ public final class EdObservation2 extends OtItemEditor<ISPObservation, SPObserva
                 gridx=0; insets=new Insets(0,10,0,5);
             }});
 
-            combo = new JComboBox() {{
+            combo = new JComboBox<Option<ObsExecStatus>>() {{
                 setModel(new ExecStatusComboBoxModel());
                 addActionListener(new ActionListener() {
                     @Override
                     public void actionPerformed(ActionEvent e) {
                         final SPObservation obs = getDataObject();
-                        @SuppressWarnings("unchecked") final Option<ObsExecStatus> s = (Option<ObsExecStatus>) combo.getSelectedItem();
+                        final Option<ObsExecStatus> s = (Option<ObsExecStatus>) combo.getSelectedItem();
                         if (obs != null) {
                             obs.setExecStatusOverride(s);
                             ExecOverrideEditor.this.update();
@@ -231,7 +225,7 @@ public final class EdObservation2 extends OtItemEditor<ISPObservation, SPObserva
         _editorPanel.tooCardPanel.add(_editorPanel.tooRadioButtonPanel, CARD_RAPID_TOO_KEY);
         _editorPanel.tooCardPanel.add(new JPanel(), CARD_NO_TOO_KEY);
 
-        _editorPanel.phase2StatusBox.setModel(new DefaultComboBoxModel(ObsPhase2Status.values()));
+        _editorPanel.phase2StatusBox.setModel(new DefaultComboBoxModel<>(ObsPhase2Status.values()));
         _editorPanel.phase2StatusBox.setMaximumRowCount(ObsPhase2Status.values().length);
         _editorPanel.phase2StatusBox.addActionListener(this);
 
@@ -304,11 +298,9 @@ public final class EdObservation2 extends OtItemEditor<ISPObservation, SPObserva
         return _editorPanel;
     }
 
-    private final PropertyChangeListener _statusListener = new PropertyChangeListener() {
-        @Override public void propertyChange(PropertyChangeEvent evt) {
-            if ((evt.getSource() instanceof ISPObsExecLog) && getDataObject().getExecStatusOverride().isEmpty()) {
-                _execOverrideEditor.update();
-            }
+    private final PropertyChangeListener _statusListener = evt -> {
+        if ((evt.getSource() instanceof ISPObsExecLog) && getDataObject().getExecStatusOverride().isEmpty()) {
+            _execOverrideEditor.update();
         }
     };
 
@@ -342,24 +334,22 @@ public final class EdObservation2 extends OtItemEditor<ISPObservation, SPObserva
         // node, we may need to give the events a chance to be handled, to make
         // sure this value is updated before it is displayed.
         final ISPObservation obs = getNode();
-        SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
-                // First make sure we're still editing the same node in the
-                // tree.  The user can click on another node which could
-                // insert an event before this Runnable is executed.
-                ISPNode node = null;
-                try {
-                    node = getViewer().getTree().getSelectedNode();
-                } catch (NullPointerException ex) {
-                }
-                if (obs == node) { // we're still looking at the same node
-                    _updateTotalPlannedTime();
-                    _updateObsClass();
+        SwingUtilities.invokeLater(() -> {
+            // First make sure we're still editing the same node in the
+            // tree.  The user can click on another node which could
+            // insert an event before this Runnable is executed.
+            ISPNode node = null;
+            try {
+                node = getViewer().getTree().getSelectedNode();
+            } catch (NullPointerException ex) {
+            }
+            if (obs == node) { // we're still looking at the same node
+                _updateTotalPlannedTime();
+                _updateObsClass();
 
-                    // Sadly this has to be dona later, which can cause a flicker. It's probably
-                    // possible to do this hack more effectively but I can't figure out how.
-                    _updateOuterTitleStuff();
-                }
+                // Sadly this has to be dona later, which can cause a flicker. It's probably
+                // possible to do this hack more effectively but I can't figure out how.
+                _updateOuterTitleStuff();
             }
         });
 
@@ -448,7 +438,7 @@ public final class EdObservation2 extends OtItemEditor<ISPObservation, SPObserva
     // update the total used time display
     private void _updateTotalUsedTime(boolean localCorrections) {
         final ISPObservation obs = getNode();
-        final Vector<Vector> tableRows = new Vector<Vector>();
+        final Vector<Vector<String>> tableRows = new Vector<>();
         final DateFormat dateFmt = new SimpleDateFormat("yyyy-MM-dd");
         dateFmt.setTimeZone(UTC);
 
@@ -460,7 +450,7 @@ public final class EdObservation2 extends OtItemEditor<ISPObservation, SPObserva
             final ObsTimeCharges charges = times.getTimeCharges();
 
             // A row contains: date, programTime, partnerTime, nonCharged, elapsed
-            final Vector<String> row = new Vector<String>(5);
+            final Vector<String> row = new Vector<>(5);
             // Want the UTC date at the end of the night, but note that
             // ObservingNight.getEndTime() returns 1 ms after the end of
             // the night.  It is just outside of the night boundary.
@@ -477,7 +467,7 @@ public final class EdObservation2 extends OtItemEditor<ISPObservation, SPObserva
         final long partnerCorrections = getDataObject().getTotalObsTimeCorrection(ChargeClass.PARTNER);
         final long nonChargedCorrections = getDataObject().getTotalObsTimeCorrection(ChargeClass.NONCHARGED);
         if (programCorrections != 0 || partnerCorrections != 0 || nonChargedCorrections != 0) {
-            final Vector<String> row = new Vector<String>(5);
+            final Vector<String> row = new Vector<>(5);
             row.add("Corrections");
             row.add(TimeAmountFormatter.getHMSFormat(programCorrections));
             row.add(TimeAmountFormatter.getHMSFormat(partnerCorrections));
@@ -489,7 +479,7 @@ public final class EdObservation2 extends OtItemEditor<ISPObservation, SPObserva
         // Add a row for the totals
         final ObsTimes obsTimes = _getObsTimes(localCorrections);
         final ObsTimeCharges otc = obsTimes.getTimeCharges();
-        final Vector<String> row = new Vector<String>(5);
+        final Vector<String> row = new Vector<>(5);
         row.add("Total");
         row.add(TimeAmountFormatter.getHMSFormat(otc.getTime(ChargeClass.PROGRAM)));
         row.add(TimeAmountFormatter.getHMSFormat(otc.getTime(ChargeClass.PARTNER)));
@@ -505,7 +495,7 @@ public final class EdObservation2 extends OtItemEditor<ISPObservation, SPObserva
             }
 
             // right justify (it doesn't matter that the values are not Integer...)
-            public Class getColumnClass(int col) {
+            public Class<?> getColumnClass(int col) {
                 if (col > 0) return Integer.class;
                 return String.class;
             }
@@ -703,13 +693,13 @@ public final class EdObservation2 extends OtItemEditor<ISPObservation, SPObserva
     // Update the time correction table from the data object
     private void _updateObsTimeCorrectionTable() {
         final ObsTimeCorrection[] items = getDataObject().getObsTimeCorrections();
-        final Vector<Vector<String>> tableRows = new Vector<Vector<String>>(items.length);
+        final Vector<Vector<String>> tableRows = new Vector<>(items.length);
 
         final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         dateFormat.setTimeZone(UTC);
 
         for (ObsTimeCorrection item : items) {
-            final Vector<String> row = new Vector<String>(4);
+            final Vector<String> row = new Vector<>(4);
             row.add(dateFormat.format(new Date(item.getTimestamp())));
             final long timeAmount = item.getCorrection().getMilliseconds();
             row.add(TimeAmountFormatter.getDescriptiveFormat(timeAmount));

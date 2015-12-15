@@ -1,9 +1,3 @@
-// Copyright 1997 Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-// See the file LICENSE for complete details.
-//
-// $Id: EdIterSmartGcalObs.java 47001 2012-07-26 19:40:02Z swalker $
-//
 package jsky.app.ot.gemini.editor;
 
 import edu.gemini.pot.client.SPDB;
@@ -37,7 +31,6 @@ import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-
 /**
  * This is the editor for the Flat Observation iterator.
  */
@@ -46,9 +39,9 @@ public final class EdIterSmartGcalObs extends OtItemEditor<ISPSeqComponent, SeqR
 
     private static final String AUTOMATIC_OBS_CLASS = "Automatic";
 
-    private static final Vector obsClassValues = new Stack() {{
+    private static final Vector<Object> obsClassValues = new Stack<Object>() {{
         // add an automatic option to the obs class values in the obs class combo box
-        for (Object o : ObsClass.values()) {
+        for (ObsClass o : ObsClass.values()) {
             add(o);
         }
         add(AUTOMATIC_OBS_CLASS);
@@ -60,14 +53,10 @@ public final class EdIterSmartGcalObs extends OtItemEditor<ISPSeqComponent, SeqR
 
     private static class UI extends JPanel {
         final SequenceTableUI seq = new SequenceTableUI();
-        final JComboBox obsClass = new JComboBox(obsClassValues);
+        final JComboBox<Object
+                > obsClass = new JComboBox<>(obsClassValues);
         final JCheckBox showAll = new JCheckBox("Show full execution sequence") {{
-            addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent evt) {
-                    updateSequence();
-                }
-            });
+            addActionListener(evt -> updateSequence());
             setToolTipText("Select to show all steps, not just those for the selected calibration node");
             setFocusable(false);
         }};
@@ -135,29 +124,27 @@ public final class EdIterSmartGcalObs extends OtItemEditor<ISPSeqComponent, SeqR
     // the GUI layout panel
     private final UI ui = new UI();
 
-    private final ActionListener obsClassActionListener = new ActionListener() {
-        @Override
-        public void actionPerformed(ActionEvent evt) {
-            final SeqRepeatSmartGcalObs o = getDataObject();
-            if (o == null) return;
-            final Object oc = ui.obsClass.getSelectedItem();
-            // check for the currently selected obs class - if it is not a obs class enum object
-            // "Automatic" (represented by a string) was selected in the combo box
-            if (oc instanceof ObsClass) {
-                // manual obs class mode
-                o.setObsClass((ObsClass) oc);
-            } else {
-                // automatic mode
-                o.setObsClass(null);
-            }
-            //-- in order to update the GUI we need to set the data object (i.e. "save" the change)
-            getNode().setDataObject(o);
-            //-- done
-            ui.updateSequence();
+    private final ActionListener obsClassActionListener = evt -> {
+        final SeqRepeatSmartGcalObs o = getDataObject();
+        if (o == null) return;
+        final Object oc = ui.obsClass.getSelectedItem();
+        // check for the currently selected obs class - if it is not a obs class enum object
+        // "Automatic" (represented by a string) was selected in the combo box
+        if (oc instanceof ObsClass) {
+            // manual obs class mode
+            o.setObsClass((ObsClass) oc);
+        } else {
+            // automatic mode
+            o.setObsClass(null);
         }
+        //-- in order to update the GUI we need to set the data object (i.e. "save" the change)
+        getNode().setDataObject(o);
+        //-- done
+        ui.updateSequence();
     };
 
 
+    @SuppressWarnings("unchecked")
     private SeqRepeatFlatObs createFlatObsFromConfig(Config c, int observeCnt) {
         final SeqRepeatFlatObs newDataObject = new SeqRepeatFlatObs();
         final Set<CalUnitParams.Lamp> lamps = (Set<CalUnitParams.Lamp>) c.getItemValue(new ItemKey("calibration:lamp"));
@@ -166,7 +153,7 @@ public final class EdIterSmartGcalObs extends OtItemEditor<ISPSeqComponent, SeqR
         newDataObject.setShutter((CalUnitParams.Shutter) c.getItemValue(new ItemKey("calibration:shutter")));
         newDataObject.setExposureTime((Double) c.getItemValue(new ItemKey("calibration:exposureTime")));
         newDataObject.setCoaddsCount((Integer) c.getItemValue(new ItemKey("calibration:coadds")));
-        newDataObject.setLamps(new ArrayList(lamps));
+        newDataObject.setLamps(new ArrayList<>(lamps));
         newDataObject.setObsClass(ObsClass.parseType((String) c.getItemValue(new ItemKey("observe:class"))));
         newDataObject.setStepCount(observeCnt);
         return newDataObject;

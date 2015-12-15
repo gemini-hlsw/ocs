@@ -1,44 +1,3 @@
-//=== File Prolog =============================================================
-//	This code was developed by NASA, Goddard Space Flight Center, Code 588
-//	for the Scientist's Expert Assistant (SEA) project.
-//
-//--- Contents ----------------------------------------------------------------
-//	TimeLine
-//
-//--- Description -------------------------------------------------------------
-//	A time line which can contain nodes that can be adjusted by time and duration
-//
-//--- Notes -------------------------------------------------------------------
-//
-//--- Development History -----------------------------------------------------
-//
-//	05/19/99	M. Fishman
-//
-//		Original implementation.
-//
-//--- DISCLAIMER---------------------------------------------------------------
-//
-//	This software is provided "as is" without any warranty of any kind, either
-//	express, implied, or statutory, including, but not limited to, any
-//	warranty that the software will conform to specification, any implied
-//	warranties of merchantability, fitness for a particular purpose, and
-//	freedom from infringement, and any warranty that the documentation will
-//	conform to the program, or any warranty that the software will be error
-//	free.
-//
-//	In no event shall NASA be liable for any damages, including, but not
-//	limited to direct, indirect, special or consequential damages, arising out
-//	of, resulting from, or in any way connected with this software, whether or
-//	not based upon warranty, contract, tort or otherwise, whether or not
-//	injury was sustained by persons or property or otherwise, and whether or
-//	not loss was sustained from or arose out of the results of, or use of,
-//	their software or services provided hereunder.
-//
-//=== End File Prolog =========================================================
-// $Id: TimeLine.java 38398 2011-11-06 15:42:11Z swalker $
-
-//package gov.nasa.gsfc.util.gui;
-
 package jsky.timeline;
 
 import java.awt.*;
@@ -46,13 +5,13 @@ import java.awt.event.*;
 import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
 import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.beans.PropertyVetoException;
 import java.beans.VetoableChangeListener;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.util.*;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.swing.*;
 import javax.swing.event.MouseInputAdapter;
@@ -89,13 +48,13 @@ public class TimeLine extends JPanel {
     protected static final double MIN_DISPLAY_WINDOW = 10.0;
     public static final Cursor DEFAULT_CURSOR = Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR);
 
-    protected Comparator _comparator = new TimeLineNodeComparator();
+    protected Comparator<TimeLineNode> _comparator = new TimeLineNodeComparator();
     protected float _handleHeight = 6;
     protected float _verticalSpacer = 18;
     protected Line2D.Float _centerLine = new Line2D.Float();
 
-    protected TreeSet<TimeLineNode> _nodes;
-    protected List _vetoableListeners;
+    protected Set<TimeLineNode> _nodes;
+    protected List<VetoableChangeListener> _vetoableListeners;
     protected int _intervalCount;
     protected String _mode = SELECTION_MODE;
     protected String _unitType = Time.MINUTE;
@@ -107,7 +66,6 @@ public class TimeLine extends JPanel {
 
     // If true, draw the timeline start and end labels at the top, otherwise at the bottom
     protected boolean _labelsAtTop = false;
-
 
     /**
      *
@@ -130,7 +88,6 @@ public class TimeLine extends JPanel {
 
     };
 
-
     /**
      *
      * an adapter used to handle mouse drag events
@@ -140,8 +97,7 @@ public class TimeLine extends JPanel {
 
         public void mouseDragged(MouseEvent evt) {
             // propogate event to nodes
-            for (Iterator listIterator = _nodes.iterator(); listIterator.hasNext();) {
-                TimeLineNode node = (TimeLineNode) listIterator.next();
+            for (TimeLineNode node : _nodes) {
                 node.handleMouseDragEvent(evt);
             }
             repaint();
@@ -149,8 +105,7 @@ public class TimeLine extends JPanel {
 
         public void mouseMoved(MouseEvent evt) {
             // propogate event to nodes
-            for (Iterator listIterator = _nodes.iterator(); listIterator.hasNext();) {
-                TimeLineNode node = (TimeLineNode) listIterator.next();
+            for (TimeLineNode node : _nodes) {
                 node.handleMouseMoveEvent(evt);
             }
             repaint();
@@ -165,48 +120,9 @@ public class TimeLine extends JPanel {
 
     };
 
-    protected VetoableChangeListener _myChildListener = new VetoableChangeListener() {
-        public void vetoableChange(PropertyChangeEvent evt) throws DetailedPropertyVetoException {
-            validatePropertyChange(evt);
-            repaint();
-        }
-    };
-
-    protected PropertyChangeListener _myModelListener = new PropertyChangeListener() {
-        public void propertyChange(PropertyChangeEvent evt) {
-            if (evt.getPropertyName() == TimeLineModel.NODE_ADDED) {
-                TimeLineNodeModel model = (TimeLineNodeModel) evt.getNewValue();
-                boolean found = false;
-                for (Iterator iter = getTimeLineNodesIterator(); iter.hasNext();) {
-                    TimeLineNode node = (TimeLineNode) iter.next();
-                    if (node.getModel() == model) {
-                        found = true;
-                        break;
-                    }
-                }
-                if (!found) {
-                    Class nodeClass = model.getGUIClass();
-                    try {
-                        TimeLineNode node = (TimeLineNode) nodeClass.newInstance();
-                        node.setModel(model);
-                        addSilentTimeLineNode(node);
-                    } catch (Exception ex) {
-                        ex.printStackTrace();
-                    }
-                }
-            } else if (evt.getPropertyName() == TimeLineModel.NODE_REMOVED) {
-                TimeLineNodeModel model = (TimeLineNodeModel) evt.getOldValue();
-                for (Iterator iter = getTimeLineNodesIterator(); iter.hasNext();) {
-                    TimeLineNode node = (TimeLineNode) iter.next();
-                    if (node.getModel() == model) {
-                        removeTimeLineNode(node);
-                        break;
-                    }
-                }
-            } else if (evt.getPropertyName() == TimeLineModel.ALL_NODES_REMOVED) {
-                removeAllTimeLineNodes();
-            }
-        }
+    protected VetoableChangeListener _myChildListener = evt -> {
+        validatePropertyChange(evt);
+        repaint();
     };
 
     /**
@@ -284,8 +200,7 @@ public class TimeLine extends JPanel {
 
             private void setCursor(MouseEvent e) {
                 Cursor cursor = DEFAULT_CURSOR;
-                for (Iterator iter = _nodes.iterator(); iter.hasNext();) {
-                    TimeLineNode node = (TimeLineNode) iter.next();
+                for (TimeLineNode node : _nodes) {
                     if (node.containsPoint(e.getPoint())) {
                         cursor = node.getCursor(e);
                         break;
@@ -302,7 +217,6 @@ public class TimeLine extends JPanel {
         _displayStart = start;
         _displayEnd = end;
         _model = model;
-        //_model.addPropertyChangeListener(_myModelListener);
         _intervalCount = intervals;
         double intervalsInTime = (end.getValue(Time.SECOND) - start.getValue(Time.SECOND)) /
                 (double) _intervalCount;
@@ -312,9 +226,9 @@ public class TimeLine extends JPanel {
         addMouseListener(_mouseListener);
         addMouseMotionListener(_mouseDragListener);
         addKeyListener(_keyListener);
-        _nodes = new TreeSet(_comparator);
+        _nodes = new TreeSet<>(_comparator);
 
-        _vetoableListeners = Collections.synchronizedList(new ArrayList(5));
+        _vetoableListeners = Collections.synchronizedList(new ArrayList<>(5));
         setBorder(BorderFactory.createEmptyBorder(20, 0, 70, 0));
     }
 
@@ -381,65 +295,15 @@ public class TimeLine extends JPanel {
         _displayStart = start;
         _displayEnd = end;
         _model = model;
-        //_model.addPropertyChangeListener(_myModelListener);
         _intervalCount = intervals;
         double intervalsInTime = (end.getValue(Time.SECOND) - start.getValue(Time.SECOND)) /
                 (double) _intervalCount;
         _intervalInTime = new Time(intervalsInTime, Time.SECOND);
-        _nodes = new TreeSet(_comparator);
+        _nodes = new TreeSet<>(_comparator);
 
-        _vetoableListeners = Collections.synchronizedList(new ArrayList(5));
+        _vetoableListeners = Collections.synchronizedList(new ArrayList<>(5));
         repaint();
     }
-
-    /**
-     *
-     * add a time line node to the time line without checking its legality
-     *
-     **/
-    protected void addSilentTimeLineNode(TimeLineNode node) {
-        if (!_nodes.contains(node)) {
-            node.setParent(this);
-            _nodes.add(node);
-            node.addVetoableChangeListener(_myChildListener);
-            addVetoableChangeListener(node);
-            _model.addTimeLineNode(node.getModel());
-        }
-    }
-
-    /**
-     *
-     * Set the unit types to display in the timeline.
-     *
-     **/
-    public void setUnitsType(String unitType) {
-        _unitType = unitType;
-    }
-
-    public boolean isLabelsAtTop() {
-        return _labelsAtTop;
-    }
-
-    public void setLabelsAtTop(boolean b) {
-        _labelsAtTop = b;
-    }
-
-    public float getHandleHeight() {
-        return _handleHeight;
-    }
-
-    public void setHandleHeight(float f) {
-        _handleHeight = f;
-    }
-
-    public float getVerticalSpacer() {
-        return _verticalSpacer;
-    }
-
-    public void setVerticalSpacer(float f) {
-        _verticalSpacer = f;
-    }
-
 
     /**
      *
@@ -523,39 +387,11 @@ public class TimeLine extends JPanel {
 
     /**
      *
-     * remove all time line nodes from time line
-     *
-     **/
-    public void removeAllTimeLineNodes() {
-        if (_nodes.size() > 0) {
-            for (Iterator iter = _nodes.iterator(); iter.hasNext();) {
-                TimeLineNode node = (TimeLineNode) iter.next();
-                node.setParent(null);
-                node.removeVetoableChangeListener(_myChildListener);
-                removeVetoableChangeListener(node);
-                iter.remove();
-            }
-            _model.removeAllTimeLineNodes();
-        }
-    }
-
-    /**
-     *
      * get the time value of a single interval in the timeline
      *
      **/
     public Time getIntervalTime() {
         return _intervalInTime;
-    }
-
-
-    /**
-     *
-     * get the number of intervals in the time line
-     *
-     **/
-    public int getIntervalCount() {
-        return _model.getIntervalCount();
     }
 
     /**
@@ -614,12 +450,12 @@ public class TimeLine extends JPanel {
      **/
     protected void paintStartLabel(Graphics2D g2) {
         Dimension dim = getSize();
-        String startStr = "";
+        String startStr;
 
-        if (_unitType == DATE_VIEW) {
+        if (DATE_VIEW.equals(_unitType)) {
             DateFormat format = DateFormat.getDateInstance(DateFormat.SHORT);
             startStr = format.format(getDateForTime(_displayStart));
-        } else if (_unitType == TIME_VIEW) {
+        } else if (TIME_VIEW.equals(_unitType)) {
             HMS hms = new HMS(_displayStart.getValue(Time.HOUR));
             startStr = hms.toString();
         } else {
@@ -632,9 +468,6 @@ public class TimeLine extends JPanel {
         g2.setColor(Color.black);
 
         float textX = _centerLine.x1 - (float) (1.0 + nameBounds.getWidth() / 2.0);
-        //if (textX < clip.getX()) {
-        //   textX = (float) clip.getX();
-        //}
 
         float textY;
         if (_labelsAtTop)
@@ -652,12 +485,12 @@ public class TimeLine extends JPanel {
      **/
     protected void paintEndLabel(Graphics2D g2) {
         Dimension dim = getSize();
-        String endStr = "";
+        String endStr;
 
-        if (_unitType == DATE_VIEW) {
+        if (DATE_VIEW.equals(_unitType)) {
             DateFormat format = DateFormat.getDateInstance(DateFormat.SHORT);
             endStr = format.format(getDateForTime(_displayEnd));
-        } else if (_unitType == TIME_VIEW) {
+        } else if (TIME_VIEW.equals(_unitType)) {
             HMS hms = new HMS(_displayEnd.getValue(Time.HOUR));
             endStr = hms.toString();
         } else {
@@ -670,10 +503,6 @@ public class TimeLine extends JPanel {
         g2.setColor(Color.black);
 
         float textX = _centerLine.x2 + (float) (1.0 - nameBounds.getWidth() / 2.0);
-        //if (((double) textX + nameBounds.getWidth()) > (clip.getX() + clip.getWidth())) {
-        //   textX = (float) (clip.getX() + clip.getWidth() - nameBounds.getWidth());
-        //}
-
         float textY;
         if (_labelsAtTop)
             textY = (float) nameBounds.getHeight();
@@ -684,7 +513,7 @@ public class TimeLine extends JPanel {
 
         g2.drawString(endStr, textX, textY);
 
-        if (_unitType != TimeLine.DATE_VIEW && _unitType != TimeLine.TIME_VIEW) {
+        if (!TimeLine.DATE_VIEW.equals(_unitType) && !TimeLine.TIME_VIEW.equals(_unitType)) {
             String unitAbbrev = Time.getUnitsAbbrev(_unitType);
             nameBounds = g2.getFontMetrics().getStringBounds(unitAbbrev, g2);
             textX = _centerLine.x2 + (float) (1.0 - nameBounds.getWidth() / 2.0);
@@ -697,8 +526,7 @@ public class TimeLine extends JPanel {
      * paint the timeline nodes.
      **/
     protected void paintNodes(Graphics2D g2) {
-        for (Iterator listIterator = _nodes.iterator(); listIterator.hasNext();) {
-            TimeLineNode node = (TimeLineNode) listIterator.next();
+        for (TimeLineNode node : _nodes) {
             node.paintTimeLineNode(g2);
         }
     }
@@ -722,34 +550,20 @@ public class TimeLine extends JPanel {
         return _displayEnd;
     }
 
-
-    /**
-     *
-     * get an iterator for the time line nodes
-     *
-     **/
-    public Iterator getTimeLineNodesIterator() {
-        return _nodes.iterator();
-    }
-
     /**
      *
      * this method handles any key events received by the panel.
      *
      **/
     public void handleKeyEvent(KeyEvent evt) {
-        List procList = Collections.synchronizedList(new ArrayList(_nodes.size()));
+        List<TimeLineNode> procList = Collections.synchronizedList(new ArrayList<>(_nodes.size()));
         try {
-            for (Iterator listIterator = _nodes.iterator(); listIterator.hasNext();) {
-                TimeLineNode node = (TimeLineNode) listIterator.next();
+            for (TimeLineNode node : _nodes) {
                 node.handleKeyEvent(evt);
                 procList.add(node);
             }
         } catch (DetailedPropertyVetoException ex) {
-            for (Iterator listIterator = procList.iterator(); listIterator.hasNext();) {
-                TimeLineNode node = (TimeLineNode) listIterator.next();
-                node.revertToPrevious();
-            }
+            procList.forEach(TimeLineNode::revertToPrevious);
         }
 
     }
@@ -799,9 +613,7 @@ public class TimeLine extends JPanel {
                 ((double) getSize().width - (2.0 * _verticalSpacer));
         time = time + _displayStart.getValue(Time.SECOND);
         return new Time(time, Time.SECOND);
-
     }
-
 
     /**
      *
@@ -824,36 +636,6 @@ public class TimeLine extends JPanel {
      **/
     public Date getDateForTime(Time time) {
         return _model.getDateForTime(time);
-    }
-
-    /**
-     *
-     * takes a date and convert it to a time where the new time is
-     * equal to the date - start date
-     *
-     **/
-    public Time getTimeForDate(Date date) {
-        return _model.getTimeForDate(date);
-    }
-
-    /**
-     *
-     * set the date from which the timeline should start
-     *
-     *  Note: if the date is not null then all time values are considered offsets from it
-     *
-     **/
-    public void setStartDate(Date date) {
-        _model.setStartDate(date);
-    }
-
-    /**
-     *
-     * get the start date
-     *
-     **/
-    public Date getStartDate() {
-        return _model.getStartDate();
     }
 
 
@@ -881,15 +663,8 @@ public class TimeLine extends JPanel {
      * get the list of nodes in the timeline which are currently selected
      *
      **/
-    public List getSelectedNodes() {
-        ArrayList list = new ArrayList();
-        for (Iterator listIterator = _nodes.iterator(); listIterator.hasNext();) {
-            TimeLineNode node = (TimeLineNode) listIterator.next();
-            if (node.isSelected()) {
-                list.add(node);
-            }
-        }
-        return list;
+    public List<TimeLineNode> getSelectedNodes() {
+        return _nodes.stream().filter(TimeLineNode::isSelected).collect(Collectors.toList());
     }
 
     /**
@@ -941,8 +716,8 @@ public class TimeLine extends JPanel {
      *
      **/
     protected void fireVetoableChange(PropertyChangeEvent evt) throws DetailedPropertyVetoException {
-        for (Iterator listIterator = _vetoableListeners.iterator(); listIterator.hasNext();) {
-            VetoableChangeListener listener = (VetoableChangeListener) listIterator.next();
+        for (Object _vetoableListener : _vetoableListeners) {
+            VetoableChangeListener listener = (VetoableChangeListener) _vetoableListener;
             if (listener != evt.getSource()) {
                 try {
                     listener.vetoableChange(evt);
@@ -977,8 +752,6 @@ public class TimeLine extends JPanel {
     protected void handleMousePressed(MouseEvent evt) {
         if (_mode.equals(SELECTION_MODE)) {
             handleSelectionEvent(evt);
-        } else if (_mode.equals(ZOOM_MODE)) {
-            //do nothing
         }
     }
 
@@ -1102,8 +875,7 @@ public class TimeLine extends JPanel {
      *
      **/
     private void handleSelectionEvent(MouseEvent evt) {
-        for (Iterator listIterator = _nodes.iterator(); listIterator.hasNext();) {
-            TimeLineNode node = (TimeLineNode) listIterator.next();
+        for (TimeLineNode node : _nodes) {
             node.handleMouseEvent(evt);
         }
     }
@@ -1113,12 +885,12 @@ public class TimeLine extends JPanel {
      * inner class used for sorting time line nodes
      *
      **/
-    private static class TimeLineNodeComparator implements Comparator {
+    private static class TimeLineNodeComparator implements Comparator<TimeLineNode> {
 
-        public int compare(Object o1,
-                           Object o2) {
-            double start1 = ((TimeLineNode) o1).getStartTime().getValue(Time.SECOND);
-            double start2 = ((TimeLineNode) o2).getStartTime().getValue(Time.SECOND);
+        public int compare(TimeLineNode o1,
+                           TimeLineNode o2) {
+            double start1 = o1.getStartTime().getValue(Time.SECOND);
+            double start2 = o2.getStartTime().getValue(Time.SECOND);
             return (int) Math.round(start1 - start2);
 
         }
@@ -1127,8 +899,7 @@ public class TimeLine extends JPanel {
     public String getToolTipText(MouseEvent event) {
         String result = null;
         Point pt = event.getPoint();
-        for (Iterator iter = _nodes.iterator(); iter.hasNext();) {
-            TimeLineNode node = (TimeLineNode) iter.next();
+        for (TimeLineNode node : _nodes) {
             if (node.containsPoint(pt)) {
                 result = node.getDescription(pt);
                 break;
@@ -1167,12 +938,7 @@ public class TimeLine extends JPanel {
                 }
             };
             timeLine.addTimeLineNode(node1);
-            node1.addVetoableChangeListener(new VetoableChangeListener() {
-
-                public void vetoableChange(PropertyChangeEvent evt) throws PropertyVetoException {
-                    System.out.println("XXX node 1 changed: " + evt);
-                }
-            });
+            node1.addVetoableChangeListener(evt -> System.out.println("XXX node 1 changed: " + evt));
 
             String label2 = "Label 2";
             DefaultTimeLineNode node2 = new DefaultTimeLineNode(new Time(24.0 * 60.0), new Time(30.0 * 60.0), label2) {
@@ -1182,12 +948,7 @@ public class TimeLine extends JPanel {
                 }
             };
             timeLine.addTimeLineNode(node2);
-            node2.addVetoableChangeListener(new VetoableChangeListener() {
-
-                public void vetoableChange(PropertyChangeEvent evt) throws PropertyVetoException {
-                    System.out.println("XXX node 2 changed: " + evt);
-                }
-            });
+            node2.addVetoableChangeListener(evt -> System.out.println("XXX node 2 changed: " + evt));
 
             // Note: to reset the timeline to empty, you could do this:
             //TimeLineModel model = new DefaultTimeLineModel(10);

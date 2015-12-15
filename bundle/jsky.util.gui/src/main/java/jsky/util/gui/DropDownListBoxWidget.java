@@ -3,8 +3,8 @@ package jsky.util.gui;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import java.awt.BorderLayout;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Vector;
 
 /**
  * A non-editable combo box with watchers.
@@ -15,7 +15,7 @@ import java.util.Vector;
 public class DropDownListBoxWidget<T> extends JComboBox<T>  {
 
     // Observers
-    private Vector<DropDownListBoxWidgetWatcher> _watchers = new Vector<>();
+    private List<DropDownListBoxWidgetWatcher<T>> _watchers = new ArrayList<>();
 
     /** If true, don't fire any action events */
     protected boolean actionsEnabled = true;
@@ -30,33 +30,26 @@ public class DropDownListBoxWidget<T> extends JComboBox<T>  {
     /**
      * Add a watcher.  Watchers are notified when an item is selected.
      */
-    public synchronized final void addWatcher(DropDownListBoxWidgetWatcher watcher) {
+    public synchronized final void addWatcher(DropDownListBoxWidgetWatcher<T> watcher) {
         if (_watchers.contains(watcher)) {
             return;
         }
-        _watchers.addElement(watcher);
+        _watchers.add(watcher);
     }
 
     /**
      * Delete a watcher.
      */
-    public synchronized final void deleteWatcher(DropDownListBoxWidgetWatcher watcher) {
-        _watchers.removeElement(watcher);
-    }
-
-    /**
-     * Delete all watchers.
-     */
-    public synchronized final void deleteWatchers() {
-        _watchers.removeAllElements();
+    public synchronized final void deleteWatcher(DropDownListBoxWidgetWatcher<T> watcher) {
+        _watchers.remove(watcher);
     }
 
     //
     // Get a copy of the _watchers Vector.
     //
     @SuppressWarnings("unchecked")
-    private synchronized Vector<DropDownListBoxWidgetWatcher> _getWatchers() {
-        return (Vector<DropDownListBoxWidgetWatcher>) _watchers.clone();
+    private synchronized List<DropDownListBoxWidgetWatcher<T>> _getWatchers() {
+        return new ArrayList<>(_watchers);
     }
 
     //
@@ -66,10 +59,8 @@ public class DropDownListBoxWidget<T> extends JComboBox<T>  {
         if (!actionsEnabled)
             return;
 
-        Vector v = _getWatchers();
-        int cnt = v.size();
-        for (int i = 0; i < cnt; ++i) {
-            DropDownListBoxWidgetWatcher watcher = (DropDownListBoxWidgetWatcher) v.elementAt(i);
+        List<DropDownListBoxWidgetWatcher<T>> v = _getWatchers();
+        for (DropDownListBoxWidgetWatcher<T> watcher : v) {
             watcher.dropDownListBoxAction(this, index, getStringValue());
         }
     }
@@ -108,11 +99,6 @@ public class DropDownListBoxWidget<T> extends JComboBox<T>  {
     /** Return the selected value. */
     public String getStringValue() {
         return getSelectedItem().toString();
-    }
-
-    /** Add the given object to the list of choices */
-    public void addChoice(T o) {
-        addItem(o);
     }
 
     /** Set the choices by specifying a Vector containing the strings that represent the choices. */

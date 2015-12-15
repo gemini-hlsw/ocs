@@ -1,7 +1,6 @@
 package edu.gemini.shared.gui.calendar;
 
 import java.util.Calendar;
-import java.util.Date;
 
 import edu.gemini.shared.util.CalendarUtil;
 
@@ -14,16 +13,7 @@ import edu.gemini.shared.util.CalendarUtil;
  * of months.
  * Day is 1-based day of month.
  */
-
-public class YearMonthDay implements Comparable {
-
-    static final int YEAR = 0;
-
-    static final int MONTH = 1;
-
-    static final int DAY = 2;
-
-    static final int MONTHS_IN_YEAR = 12;
+public class YearMonthDay implements Comparable<YearMonthDay> {
 
     public int year;
 
@@ -38,15 +28,8 @@ public class YearMonthDay implements Comparable {
     /**
      * Constructs a YearMonthDay for the month containing specified date.
      */
-    public YearMonthDay(Date d) {
-        this(CalendarUtil.newGregorianCalendarInstance(d));
-    }
-
-    /**
-     * Constructs a YearMonthDay for the month containing specified date.
-     */
     public YearMonthDay(Calendar c) {
-        this(c.get(c.YEAR), c.get(c.MONTH), c.get(c.DAY_OF_MONTH));
+        this(c.get(Calendar.YEAR), c.get(Calendar.MONTH), c.get(Calendar.DAY_OF_MONTH));
     }
 
     public YearMonthDay(int year, int month, int day) {
@@ -55,15 +38,11 @@ public class YearMonthDay implements Comparable {
         this.day = day;
     }
 
-    public YearMonthDay(YearMonthDay m) {
-        this.year = m.year;
-        this.month = m.month;
-        this.day = m.day;
-    }
-
     /**
      * Override the clone() method to allow cloning.
      */
+    @Override
+    @SuppressWarnings("CloneDoesntCallSuperClone")
     public Object clone() {
         return new YearMonthDay(year, month, day);
     }
@@ -71,6 +50,7 @@ public class YearMonthDay implements Comparable {
     /**
      * Returns true if a equals b.
      */
+    @Override
     public boolean equals(Object o) {
         if (!(o instanceof YearMonthDay))
             return false;
@@ -81,10 +61,8 @@ public class YearMonthDay implements Comparable {
     /**
      * Implements the Comparable interface.
      */
-    public int compareTo(Object o) {
-        if (!(o instanceof YearMonthDay))
-            return -1;
-        YearMonthDay arg = (YearMonthDay) o;
+    @Override
+    public int compareTo(YearMonthDay arg) {
         if (year > arg.year)
             return 1;
         if (year < arg.year)
@@ -138,8 +116,9 @@ public class YearMonthDay implements Comparable {
         return false;  // they are equal
     }
 
+    @Override
     public String toString() {
-        return new String(day + "-" + CalendarUtil.getMonthName(month) + "-" + year);
+        return day + "-" + CalendarUtil.getMonthName(month) + "-" + year;
     }
 
 }

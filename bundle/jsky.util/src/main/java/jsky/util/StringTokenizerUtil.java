@@ -73,7 +73,7 @@ import java.lang.*;
  * @version 1.19, 03/18/98
  * @since   JDK1.0
  */
-public class StringTokenizerUtil implements Enumeration {
+public class StringTokenizerUtil implements Enumeration<String> {
 
     private int currentPosition;
     private int maxPosition;
@@ -117,20 +117,6 @@ public class StringTokenizerUtil implements Enumeration {
      */
     public StringTokenizerUtil(String str, String delim) {
         this(str, delim, false);
-    }
-
-    /**
-     * Constructs a string tokenizer for the specified string. The
-     * tokenizer uses the default delimiter set, which is
-     * <code>"&#92;t&#92;n&#92;r&#92;f"</code>: the space character, the tab
-     * character, the newline character, the carriage-return character,
-     * and the form-feed character. Delimiter characters themselves will
-     * not be treated as tokens.
-     *
-     * @param   str   a string to be parsed.
-     */
-    public StringTokenizerUtil(String str) {
-        this(str, " \t\n\r\f", false);
     }
 
     /**
@@ -227,7 +213,7 @@ public class StringTokenizerUtil implements Enumeration {
      * @exception  NoSuchElementException  if there are no more tokens in this
      *               tokenizer's string.
      */
-    public Object nextElement() {
+    public String nextElement() {
         return nextToken();
     }
 
@@ -245,9 +231,9 @@ public class StringTokenizerUtil implements Enumeration {
 
         while (currpos < maxPosition) {
             /*
-	     * This is just skipDelimiters(); but it does not affect
-	     * currentPosition.
-	     */
+             * This is just skipDelimiters(); but it does not affect
+             * currentPosition.
+             */
             if (!retTokens &&
                     (currpos < maxPosition) &&
                     (delimiters.indexOf(str.charAt(currpos)) >= 0)) {

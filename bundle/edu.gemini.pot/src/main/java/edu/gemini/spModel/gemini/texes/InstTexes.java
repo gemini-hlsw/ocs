@@ -211,8 +211,8 @@ public final class InstTexes extends SPInstObsComp implements PropertyProvider {
      * Return a list of InstConfigInfo objects describing the instrument's
      * queryable configuration parameters.
      */
-    public static List getInstConfigInfo() {
-        List<InstConfigInfo> configInfo = new LinkedList<InstConfigInfo>();
+    public static List<InstConfigInfo> getInstConfigInfo() {
+        List<InstConfigInfo> configInfo = new LinkedList<>();
         configInfo.add(new InstConfigInfo(DISPERSER_PROP));
         return configInfo;
     }

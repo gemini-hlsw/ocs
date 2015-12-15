@@ -1,9 +1,3 @@
-// Copyright 2003
-// Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-//
-// $Id: ElevationPlotUtil.java 42349 2012-03-01 13:03:51Z swalker $
-
 package jsky.plot;
 
 import edu.gemini.shared.util.immutable.Option;
@@ -18,7 +12,6 @@ import jsky.coords.WorldCoords;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
-
 
 /**
  * A utility class for calculating elevation vs time for a given list of target
@@ -104,7 +97,7 @@ public class ElevationPlotUtil {
         for (int j = 0; j < numSteps; j++) {
             for (int i = 0; i < _targets.length; i++) {
                 Date utTime = cal.getTime();
-                Option<WorldCoords> pos = _targets[i].getCoordinates(new Some(utTime.getTime()));
+                Option<WorldCoords> pos = _targets[i].getCoordinates(new Some<>(utTime.getTime()));
                 _xData[i][j] = utTime;
                 if (pos.isDefined()) {
                     _skyCalc.calculate(pos.getValue(), utTime, false);
@@ -123,15 +116,6 @@ public class ElevationPlotUtil {
      */
     public int getNumSteps() {
         return _numSteps;
-    }
-
-    /**
-     * Set the number of steps to calculate for the plot.
-     */
-    public void setNumSteps(int numSteps) {
-        _numSteps = numSteps;
-        _stepIncrement = 24*60/_numSteps;
-        _init();
     }
 
     /**

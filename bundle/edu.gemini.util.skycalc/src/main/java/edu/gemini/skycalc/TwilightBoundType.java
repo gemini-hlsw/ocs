@@ -1,7 +1,3 @@
-//
-// $Id: TwilightBoundType.java 6519 2005-07-24 00:39:18Z shane $
-//
-
 package edu.gemini.skycalc;
 
 import java.io.Serializable;
@@ -12,7 +8,7 @@ import java.io.Serializable;
  * begins and ends which are represented as static constants in side this
  * class.
  */
-public final class TwilightBoundType implements Comparable, Serializable {
+public final class TwilightBoundType implements Comparable<TwilightBoundType>, Serializable {
 
     private static final long serialVersionUID = 1;
 
@@ -55,9 +51,7 @@ public final class TwilightBoundType implements Comparable, Serializable {
         TwilightBoundType that = (TwilightBoundType) o;
 
         if (!_name.equals(that._name)) return false;
-        if (_horizAngle != that._horizAngle) return false;
-
-        return true;
+        return _horizAngle == that._horizAngle;
     }
 
     public int hashCode() {
@@ -72,9 +66,9 @@ public final class TwilightBoundType implements Comparable, Serializable {
     /**
      * Sorts first by angle below the horizon, then by name.
      */
-    public int compareTo(Object o) {
-        TwilightBoundType that = (TwilightBoundType) o;
-        double diff = _horizAngle - that._horizAngle;
+    @Override
+    public int compareTo(final TwilightBoundType that) {
+        final double diff = _horizAngle - that._horizAngle;
         if (diff != 0) {
             return (diff < 0) ? -1 : 1;
         }
