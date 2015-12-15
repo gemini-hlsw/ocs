@@ -13,7 +13,7 @@ import edu.gemini.spModel.target.obsComp.TargetObsCompConstants._
 import scala.language.implicitConversions
 import scala.reflect.ClassTag
 import scalaz.concurrent.Task
-import scalaz.{EitherT, \/}
+import scalaz._, Scalaz._
 import squants.space.{Millimeters, LengthConversions}
 
 /**
@@ -22,21 +22,35 @@ import squants.space.{Millimeters, LengthConversions}
 final case class TCS(tcsController: TcsController) extends System {
 
   import TCS._
+  import MountGuideOption._
 
   override val name: String = TELESCOPE_CONFIG_NAME
 
   private def computeGuideOff(s0: TcsConfig, s1: Requested[TcsConfig]): GuideConfig = {
 
-    val g0 = if (!s1.self.gc.mountGuide.active) s0.gc.setMountGuide(MountGuideOff) else s0.gc
-    val g1 = if (!s1.self.gc.m1Guide.active) g0.setM1Guide(M1GuideOff) else g0
-    if (!s1.self.gc.m2Guide.active) g1.setM2Guide(M2GuideOff) else g1
+    val g0 = s1.self.gc.mountGuide match {
+      case MountGuideOff => s0.gc.setMountGuide(MountGuideOff)
+      case _             => s0.gc
+    }
+    
+    val g1 = s1.self.gc.m1Guide match {
+      case M1GuideOff => g0.setM1Guide(M1GuideOff)
+      case _          => g0
+    }
+
+    val g2 = s1.self.gc.m2Guide match {
+      case M2GuideOff => g1.setM2Guide(M2GuideOff)
+      case _          => g1
+    }
+
+    g2 // final result
 
   }
 
   private def guideOff(s0: TcsConfig, s1: Requested[TcsConfig]): SeqAction[Unit] =
-    TcsController.telescopeConfigDelta(s0.tc, s1.self.tc).offsetA match {
-      case Change(_, _) => tcsController.guide(GuideConfig(MountGuideOff, M1GuideOff, M2GuideOff))
-      case _            => tcsController.guide(computeGuideOff(s0, s1))
+    tcsController.guide {
+      if (s0.tc.offsetA === s1.self.tc.offsetA) computeGuideOff(s0, s1)
+      else GuideConfig(MountGuideOff, M1GuideOff, M2GuideOff)
     }
 
   private def configure(config: Config, tcsState: TcsConfig): SeqAction[ConfigResult] = {
