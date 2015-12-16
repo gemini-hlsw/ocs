@@ -1,7 +1,3 @@
-//
-// $
-//
-
 package edu.gemini.shared.util.immutable;
 
 import java.io.Serializable;
@@ -18,34 +14,34 @@ public class ImCollections {
     private static class EmptyList implements ImList<Object>, Serializable {
 
         @Override
-        public ImList<Object> cons(Object o) {
-            List<Object> lst = new ArrayList<Object>();
+        public ImList<Object> cons(final Object o) {
+            final List<Object> lst = new ArrayList<>();
             lst.add(o);
-            return new DefaultImList<Object>(lst);
+            return new DefaultImList<>(lst);
         }
 
         @Override
-        public ImList<Object> append(ImList<?> tail) {
+        public ImList<Object> append(final ImList<?> tail) {
             return (ImList<Object>) tail;
         }
 
         @Override
-        public ImList<Object> append(Object o) {
+        public ImList<Object> append(final Object o) {
             return cons(o);
         }
 
         @Override
-        public ImList<Object> remove(Object o) {
+        public ImList<Object> remove(final Object o) {
             return this;
         }
 
         @Override
-        public ImList<Object> remove(Function1<? super Object, Boolean> f) {
+        public ImList<Object> remove(final Function1<? super Object, Boolean> f) {
             return this;
         }
 
         @Override
-        public ImList<Object> updated(int index, Object o) {
+        public ImList<Object> updated(final int index, final Object o) {
             throw new IndexOutOfBoundsException(String.valueOf(index));
         }
 
@@ -56,7 +52,7 @@ public class ImCollections {
 
         @Override
         public Option<Object> headOption() {
-            return None.INSTANCE;
+            return None.instance();
         }
 
         @Override
@@ -75,22 +71,22 @@ public class ImCollections {
         }
 
         @Override
-        public boolean contains(Object o) {
+        public boolean contains(final Object o) {
             return false;
         }
 
         @Override
-        public boolean containsAll(ImList<?> c) {
+        public boolean containsAll(final ImList<?> c) {
             return c.size() == 0;
         }
 
         @Override
-        public Object get(int index) {
+        public Object get(final int index) {
             throw new IndexOutOfBoundsException(String.valueOf(index));
         }
 
         @Override
-        public int indexOf(Object o) {
+        public int indexOf(final Object o) {
             return -1;
         }
 
@@ -115,51 +111,51 @@ public class ImCollections {
         }
 
         @Override
-        public <U> ImList<U> map(Function1<? super Object, U> op) {
+        public <U> ImList<U> map(final Function1<? super Object, U> op) {
             return (ImList<U>) this;
         }
 
         @Override
-        public <U> ImList<U> flatMap(Function1<? super Object, ImList<U>> op) {
+        public <U> ImList<U> flatMap(final Function1<? super Object, ImList<U>> op) {
             return (ImList<U>) this;
         }
 
         @Override
-        public void foreach(ApplyOp<? super Object> op) {
+        public void foreach(final ApplyOp<? super Object> op) {
         }
 
         @Override
-        public Option<Object> find(Function1<? super Object, Boolean> op) {
+        public Option<Object> find(final Function1<? super Object, Boolean> op) {
             return None.instance();
         }
 
         @Override
-        public ImList<Object> filter(Function1<? super Object, Boolean> op) {
+        public ImList<Object> filter(final Function1<? super Object, Boolean> op) {
             return this;
         }
 
         @Override
-        public Tuple2<ImList<Object>, ImList<Object>> partition(Function1<? super Object, Boolean> op) {
+        public Tuple2<ImList<Object>, ImList<Object>> partition(final Function1<? super Object, Boolean> op) {
             return new Pair(this, this);
         }
 
         @Override
-        public boolean forall(Function1<? super Object, Boolean> op) {
+        public boolean forall(final Function1<? super Object, Boolean> op) {
             return true;
         }
 
         @Override
-        public boolean exists(Function1<? super Object, Boolean> op) {
+        public boolean exists(final Function1<? super Object, Boolean> op) {
             return false;
         }
 
         @Override
-        public String mkString(String prefix, String separator, String suffix) {
+        public String mkString(final String prefix, final String separator, final String suffix) {
             return prefix + suffix;
         }
 
         @Override
-        public <U> ImList<Tuple2<Object, U>> zip(ImList<U> list) {
+        public <U> ImList<Tuple2<Object, U>> zip(final ImList<U> list) {
             return emptyList();
         }
 
@@ -169,17 +165,17 @@ public class ImCollections {
         }
 
         @Override
-        public ImList<Object> sort(Comparator<? super Object> c) {
+        public ImList<Object> sort(final Comparator<? super Object> c) {
             return this;
         }
 
         @Override
-        public Object min(Comparator<? super Object> c) {
+        public Object min(final Comparator<? super Object> c) {
             throw new NoSuchElementException();
         }
 
         @Override
-        public Object max(Comparator<? super Object> c) {
+        public Object max(final Comparator<? super Object> c) {
             throw new NoSuchElementException();
         }
 
@@ -193,7 +189,7 @@ public class ImCollections {
          * combine it with
          */
         @Override
-        public <U> U foldLeft(U start, Function2<U, ? super Object, U> op) {
+        public <U> U foldLeft(final U start, final Function2<U, ? super Object, U> op) {
             return start;
         }
 
@@ -202,7 +198,7 @@ public class ImCollections {
          * combine it with
          */
         @Override
-        public <U> U foldRight(U start, Function2<? super Object, U, U> op) {
+        public <U> U foldRight(final U start, final Function2<? super Object, U, U> op) {
             return start;
         }
 
@@ -216,11 +212,11 @@ public class ImCollections {
         }
 
         @Override
-        public boolean equals(Object o) {
+        public boolean equals(final Object o) {
             if (o == this) return true;
             if (!(o instanceof ImList)) return false;
 
-            ImList that = (ImList) o;
+            final ImList that = (ImList) o;
             return (that.size() == 0);
         }
 
@@ -251,7 +247,7 @@ public class ImCollections {
      *
      * @return a list consisting of a single element
      */
-    public static <T> ImList<T> singletonList(T item) {
+    public static <T> ImList<T> singletonList(final T item) {
         return DefaultImList.create(Collections.singletonList(item));
     }
 
@@ -267,15 +263,11 @@ public class ImCollections {
      * @return a tuple containing two lists, one for each element of the
      * tuples contained in the input list
      */
-    public static <T, U> Tuple2<ImList<T>, ImList<U>> unzip(ImList<Tuple2<T, U>> list) {
+    public static <T, U> Tuple2<ImList<T>, ImList<U>> unzip(final ImList<Tuple2<T, U>> list) {
 
         // Kind of inefficient to go through the list twice ...
-        ImList<T> uz1 = list.map(new MapOp<Tuple2<T, U>, T>() {
-            @Override public T apply(Tuple2<T, U> tup) { return tup._1(); }
-        });
-        ImList<U> uz2 = list.map(new MapOp<Tuple2<T, U>, U>() {
-            @Override public U apply(Tuple2<T, U> tup) { return tup._2(); }
-        });
-        return new Pair<ImList<T>, ImList<U>>(uz1, uz2);
+        final ImList<T> uz1 = list.map(Tuple2::_1);
+        final ImList<U> uz2 = list.map(Tuple2::_2);
+        return new Pair<>(uz1, uz2);
     }
 }

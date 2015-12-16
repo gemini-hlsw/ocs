@@ -1,7 +1,3 @@
-//
-// $
-//
-
 package edu.gemini.shared.util.immutable;
 
 /**
@@ -11,5 +7,6 @@ package edu.gemini.shared.util.immutable;
  *
  * <p>PredicateOp simply pins the return type of a {@link Function1} to Boolean.
  */
+@FunctionalInterface
 public interface PredicateOp<T> extends Function1<T, Boolean> {
 }

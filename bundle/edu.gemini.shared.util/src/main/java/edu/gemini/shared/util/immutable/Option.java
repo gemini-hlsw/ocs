@@ -1,7 +1,3 @@
-//
-// $
-//
-
 package edu.gemini.shared.util.immutable;
 
 import java.util.NoSuchElementException;

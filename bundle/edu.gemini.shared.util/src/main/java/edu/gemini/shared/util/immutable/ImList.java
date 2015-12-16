@@ -1,7 +1,3 @@
-//
-// $
-//
-
 package edu.gemini.shared.util.immutable;
 
 import java.util.Comparator;
@@ -193,7 +189,7 @@ public interface ImList<T> extends Iterable<T> {
      * the provided <code>op</code>, and the resulting objects are collected
      * and returned in an immutable list.
      *
-     * <p>For example, a {@link Function1<String, Integer>} that maps a string
+     * <p>For example, a {@link Function1}<String,Integer> that maps a string
      * to its corresponding integer could map a list
      * <code>{"1", "2", "3"}</code> to <code>{1, 2, 3}</code>.
      *

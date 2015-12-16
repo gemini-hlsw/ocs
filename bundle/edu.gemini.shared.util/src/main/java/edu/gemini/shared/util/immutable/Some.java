@@ -1,7 +1,3 @@
-//
-// $
-//
-
 package edu.gemini.shared.util.immutable;
 
 import java.util.Iterator;
@@ -13,7 +9,7 @@ import java.util.NoSuchElementException;
 public final class Some<T> implements Option<T> {
     private final T val;
 
-    public Some(T val) {
+    public Some(final T val) {
         this.val = val;
     }
 
@@ -23,12 +19,12 @@ public final class Some<T> implements Option<T> {
     }
 
     @Override
-    public T getOrElse(T defaultValue) {
+    public T getOrElse(final T defaultValue) {
         return val;
     }
 
     @Override
-    public Option<T> orElse(Option<T> that) {
+    public Option<T> orElse(final Option<T> that) {
         return this;
     }
 
@@ -53,34 +49,34 @@ public final class Some<T> implements Option<T> {
     }
 
     @Override
-    public Option<T> filter(Function1<? super T, Boolean> p) {
+    public Option<T> filter(final Function1<? super T, Boolean> p) {
         if (p.apply(val)) return this;
         return None.instance();
     }
 
     @Override
-    public void foreach(ApplyOp<? super T> op) {
+    public void foreach(final ApplyOp<? super T> op) {
         op.apply(val);
     }
 
     @Override
-    public boolean exists(Function1<? super T, Boolean> op) {
+    public boolean exists(final Function1<? super T, Boolean> op) {
         return op.apply(val);
     }
 
     @Override
-    public boolean forall(Function1<? super T, Boolean> op) {
+    public boolean forall(final Function1<? super T, Boolean> op) {
         return op.apply(val);
     }
 
     @Override
-    public <U> Option<U> map(Function1<? super T, U> op) {
-        U res = op.apply(val);
-        return new Some<U>(res);
+    public <U> Option<U> map(final Function1<? super T, U> op) {
+        final U res = op.apply(val);
+        return new Some<>(res);
     }
 
     @Override
-    public <U> Option<U> flatMap(Function1<? super T, Option<U>> op) {
+    public <U> Option<U> flatMap(final Function1<? super T, Option<U>> op) {
         return op.apply(val);
     }
 
@@ -109,7 +105,7 @@ public final class Some<T> implements Option<T> {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(final Object o) {
         if (!(o instanceof Some)) return false;
         return val.equals(((Some) o).val);
     }
