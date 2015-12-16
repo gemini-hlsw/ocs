@@ -1,7 +1,3 @@
-//
-// $
-//
-
 package edu.gemini.shared.util.immutable;
 
 /**
@@ -10,6 +6,7 @@ package edu.gemini.shared.util.immutable;
  *
  * <p>This is just a renaming of Function1 and may be removed.
  */
+@FunctionalInterface
 public interface MapOp<T, U> extends Function1<T, U> {
 //    U apply(T t);
 }

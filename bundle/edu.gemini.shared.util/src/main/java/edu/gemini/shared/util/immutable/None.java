@@ -63,12 +63,12 @@ public final class None<T> implements Option<T>, Serializable {
     }
 
     @Override
-    public T getOrElse(T defaultValue) {
+    public T getOrElse(final T defaultValue) {
         return defaultValue;
     }
 
     @Override
-    public Option<T> orElse(Option<T> that) {
+    public Option<T> orElse(final Option<T> that) {
         return that;
     }
 
@@ -93,28 +93,28 @@ public final class None<T> implements Option<T>, Serializable {
     }
 
     @Override
-    public Option<T> filter(Function1<? super T, Boolean> p) {
+    public Option<T> filter(final Function1<? super T, Boolean> p) {
         return instance();
     }
 
     @Override
-    public void foreach(ApplyOp<? super T> tApplyOp) {
+    public void foreach(final ApplyOp<? super T> tApplyOp) {
         // do nothing
     }
 
     @Override
-    public boolean exists(Function1<? super T, Boolean> op) { return false; }
+    public boolean exists(final Function1<? super T, Boolean> op) { return false; }
 
     @Override
-    public boolean forall(Function1<? super T, Boolean> op) { return true; }
+    public boolean forall(final Function1<? super T, Boolean> op) { return true; }
 
     @Override
-    public <U> Option<U> map(Function1<? super T, U> tuMapOp) {
+    public <U> Option<U> map(final Function1<? super T, U> tuMapOp) {
         return instance();
     }
 
     @Override
-    public <U> Option<U> flatMap(Function1<? super T, Option<U>> tOptionMapOp) {
+    public <U> Option<U> flatMap(final Function1<? super T, Option<U>> tOptionMapOp) {
         return instance();
     }
 
@@ -128,7 +128,7 @@ public final class None<T> implements Option<T>, Serializable {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(final Object o) {
         return (o instanceof None);
     }
 

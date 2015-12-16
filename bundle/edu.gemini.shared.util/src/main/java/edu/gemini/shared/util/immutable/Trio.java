@@ -1,7 +1,3 @@
-//
-// $
-//
-
 package edu.gemini.shared.util.immutable;
 
 import java.io.Serializable;
@@ -15,7 +11,7 @@ public final class Trio<T, U, V> implements Tuple3<T, U, V>, Serializable {
     private final U _2;
     private final V _3;
 
-    public Trio(T left, U middle, V right) {
+    public Trio(final T left, final U middle, final V right) {
         _1 = left;
         _2 = middle;
         _3 = right;
@@ -34,11 +30,11 @@ public final class Trio<T, U, V> implements Tuple3<T, U, V>, Serializable {
     }
 
 
-    public boolean equals(Object o) {
+    public boolean equals(final Object o) {
         if (o == this) return true;
         if (!(o instanceof Tuple3)) return false;
 
-        Tuple3 that = (Tuple3) o;
+        final Tuple3 that = (Tuple3) o;
         if (_1 == null) {
             if (that._1() != null) return false;
         } else {
@@ -66,15 +62,8 @@ public final class Trio<T, U, V> implements Tuple3<T, U, V>, Serializable {
         return res;
     }
 
-    public String mkString(String prefix, String sep, String suffix) {
-        StringBuilder buf = new StringBuilder(prefix);
-        buf.append(_1);
-        buf.append(sep);
-        buf.append(_2);
-        buf.append(sep);
-        buf.append(_3);
-        buf.append(suffix);
-        return buf.toString();
+    public String mkString(final String prefix, final String sep, final String suffix) {
+        return prefix + _1 + sep + _2 + sep + _3 + suffix;
     }
 
     public String toString() {
