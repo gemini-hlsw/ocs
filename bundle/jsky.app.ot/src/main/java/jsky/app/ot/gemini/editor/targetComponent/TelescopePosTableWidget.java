@@ -708,7 +708,7 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
             _resetTable(newEnv);
 
             // Update the selection.
-            if ((rmTargets.size() == 0) && (addTargets.size() == 1)) {
+            if (rmTargets.isEmpty() && (addTargets.size() == 1)) {
                 // A single position was added, so just select it.
                 selectPos(addTargets.iterator().next());
                 return;
@@ -873,7 +873,7 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
         if (srcGrp == null) return;
 
         final ImList<GuideProbeTargets> targetList = srcGrp.getAllContaining(target);
-        if (targetList.size() == 0) return;
+        if (targetList.isEmpty()) return;
         final GuideProbeTargets src = targetList.get(0);
 
         final GuideProbe guideprobe = src.getGuider();
@@ -1005,7 +1005,7 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
     // the operation.
     boolean confirmGroupChange(final GuideGroup oldPrimary, final GuideGroup newPrimary) {
         final List<OffsetPosList<OffsetPosBase>> posLists = OffsetUtil.allOffsetPosLists(owner.getNode());
-        if (posLists.size() > 0) {
+        if (!posLists.isEmpty()) {
             final SortedSet<GuideProbe> oldGuideProbes = oldPrimary.getReferencedGuiders();
             final SortedSet<GuideProbe> newGuideProbes = newPrimary.getReferencedGuiders();
             final Set<String> warnSet = new TreeSet<>();
@@ -1022,7 +1022,7 @@ public final class TelescopePosTableWidget extends JXTreeTable implements Telesc
                     }
                 }
             }
-            if (warnSet.size() != 0) {
+            if (!warnSet.isEmpty()) {
                 return confirmGroupChangeDialog(warnSet);
             }
         }
