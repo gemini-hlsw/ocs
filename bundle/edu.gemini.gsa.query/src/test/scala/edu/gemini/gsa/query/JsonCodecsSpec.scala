@@ -1,9 +1,7 @@
-package edu.gemini.dataman.query
+package edu.gemini.gsa.query
 
-import edu.gemini.dataman.core.{QaResponse, GsaRecord, Arbitraries}
-import edu.gemini.dataman.query.JsonCodecs._
+import edu.gemini.gsa.query.JsonCodecs._
 import edu.gemini.spModel.dataset.{DatasetQaState, DatasetLabel, DatasetMd5, DatasetGsaState}
-
 
 import argonaut.{CodecJson, DecodeResult}
 
@@ -15,7 +13,6 @@ import org.specs2.mutable.Specification
 import java.time.Instant
 
 import scalaz.syntax.id._
-
 
 object JsonCodecsSpec extends Specification with ScalaCheck with Arbitraries {
 

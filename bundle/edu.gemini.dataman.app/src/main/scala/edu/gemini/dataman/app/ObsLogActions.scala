@@ -2,6 +2,7 @@ package edu.gemini.dataman.app
 
 import edu.gemini.dataman.app.ModelActions._
 import edu.gemini.dataman.core._
+import edu.gemini.gsa.query.{QaRequest, GsaRecord}
 import edu.gemini.pot.sp.SPObservationID
 import edu.gemini.pot.spdb.IDBDatabaseService
 import edu.gemini.spModel.dataset.{DatasetQaState, Dataset, DatasetQaRecord, DatasetLabel, SummitState, DatasetExecRecord, DatasetGsaState}

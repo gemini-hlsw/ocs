@@ -1,16 +1,14 @@
-package edu.gemini.dataman.core
+package edu.gemini.gsa.query
 
-import edu.gemini.spModel.core.{ProgramType, Site, SPProgramID}
-import edu.gemini.spModel.dataset.{DatasetQaState, DatasetGsaState, DatasetLabel}
-
-import org.scalacheck._
-import org.scalacheck.Arbitrary._
-
-import java.time.{LocalDate, ZoneId}
 import java.time.format.DateTimeFormatter
+import java.time.{LocalDate, ZoneId}
 
-import scalaz._
-import Scalaz._
+import edu.gemini.spModel.core.{ProgramType, SPProgramID, Site}
+import edu.gemini.spModel.dataset.{DatasetGsaState, DatasetLabel, DatasetQaState}
+import org.scalacheck.Arbitrary._
+import org.scalacheck._
+
+import scalaz.Scalaz._
 
 trait Arbitraries extends edu.gemini.spModel.dataset.Arbitraries {
   implicit val arbGsaRecord: Arbitrary[GsaRecord] =

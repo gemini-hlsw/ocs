@@ -1,6 +1,6 @@
 package edu.gemini.dataman.app
 
-import edu.gemini.dataman.core.Arbitraries
+import edu.gemini.gsa.query.Arbitraries
 import edu.gemini.pot.sp.{ISPFactory, ISPProgram, ProgramGen}
 import edu.gemini.pot.spdb.{DBLocalDatabase, IDBDatabaseService}
 import edu.gemini.spModel.dataset.{DatasetRecord, DatasetGsaState, SummitState, DatasetQaState, Dataset, DatasetExecRecord, DatasetQaRecord, DatasetLabel}

@@ -1,7 +1,7 @@
-package edu.gemini.dataman.core
+package edu.gemini.gsa.query
 
+import scalaz.Scalaz._
 import scalaz._
-import Scalaz._
 
 /** Provides a value class wrapper for the GSA authentication cookie value.
   * When post requests are made to update the QA state, a cookie with this value

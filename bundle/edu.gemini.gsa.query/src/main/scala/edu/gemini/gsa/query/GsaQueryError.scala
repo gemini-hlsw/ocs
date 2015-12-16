@@ -1,8 +1,8 @@
-package edu.gemini.dataman.query
-
-import edu.gemini.dataman.query.GsaQueryError._
+package edu.gemini.gsa.query
 
 import java.io.IOException
+
+import edu.gemini.gsa.query.GsaQueryError._
 
 /** Types of errors that may occur while processing a GSA query. */
 sealed trait GsaQueryError {

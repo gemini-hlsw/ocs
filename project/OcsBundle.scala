@@ -34,7 +34,14 @@ trait OcsBundle {
       bundle_edu_gemini_shared_util,
       bundle_edu_gemini_spModel_core,
       bundle_edu_gemini_spModel_pio,
-      bundle_edu_gemini_util_security
+      bundle_edu_gemini_util_security,
+      bundle_edu_gemini_gsa_query % "test->test;compile->compile"
+    )
+
+  lazy val bundle_edu_gemini_gsa_query = 
+    project.in(file("bundle/edu.gemini.gsa.query")).dependsOn(
+      bundle_edu_gemini_pot % "test->test;compile->compile",
+      bundle_edu_gemini_spModel_core
     )
 
   lazy val bundle_edu_gemini_horizons_api = 

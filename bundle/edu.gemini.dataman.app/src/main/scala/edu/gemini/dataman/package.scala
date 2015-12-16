@@ -3,6 +3,9 @@ package edu.gemini
 import java.util.concurrent.atomic.AtomicReference
 import java.util.logging.{Logger, Level}
 
+import edu.gemini.dataman.core.{DmanFailure, DmanAction}
+import edu.gemini.gsa.query.GsaResponse
+
 package object dataman {
   val DatamanLogger = Logger.getLogger("edu.gemini.dataman")
 
@@ -14,4 +17,10 @@ package object dataman {
 
   def JsonLevel: Level                = JsonLevelRef.get
   def JsonLevel_=(level: Level): Unit = JsonLevelRef.set(level)
+
+  implicit class DmanOps[A](r: => GsaResponse[A]) {
+    def liftDman: DmanAction[A] =
+      r.leftMap(DmanFailure.QueryFailure).liftDman
+  }
+
 }

@@ -1,6 +1,6 @@
-package edu.gemini.dataman.core
+package edu.gemini.gsa.query
 
-import edu.gemini.spModel.dataset.{DatasetQaState, DatasetLabel}
+import edu.gemini.spModel.dataset.{DatasetLabel, DatasetQaState}
 
 import scalaz.Equal
 

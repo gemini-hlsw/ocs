@@ -1,11 +1,9 @@
-package edu.gemini.dataman.query
-
-import edu.gemini.dataman.core.{GsaAuth, GsaHost, QaRequest, QaResponse}
-import edu.gemini.dataman.query.JsonCodecs._
-import edu.gemini.spModel.core.Site
-import edu.gemini.spModel.dataset.{DatasetLabel, DatasetQaState}
+package edu.gemini.gsa.query
 
 import java.net.URL
+import edu.gemini.spModel.core.Site
+import edu.gemini.spModel.dataset.{DatasetLabel, DatasetQaState}
+import edu.gemini.gsa.query.JsonCodecs._
 
 import scalaz.\/
 
