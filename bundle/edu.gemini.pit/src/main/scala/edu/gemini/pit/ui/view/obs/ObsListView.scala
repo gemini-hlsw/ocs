@@ -245,9 +245,6 @@ class ObsListView(shellAdvisor:ShellAdvisor, band:Band, queueLookup: Target => U
     }
 
     object checkGsa extends ToolButton(ICON_GSA, ICON_GSA_DIS, "GSA Dataset Check") {
-// UX-1201
-//      text = "GSA"
-//      foreground = Color.DARK_GRAY
       enabled = false
 
       viewer.onSelectionChanged {s =>

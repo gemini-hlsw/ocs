@@ -91,11 +91,11 @@ object ObsPresentation {
 
     def inst: String = obs.blueprint.get match {
       case g: GeminiBlueprintBase => g.instrument.display
-      case _ => "" // shouldn't happen
+      case _                      => "" // shouldn't happen
     }
 
     (dsetCount collect {
-      case 0 => Green(tooltip = "There are no %s datasets in the GSA within 30\" of this target.".format(inst))
+      case 0 => Green(tooltip = s"""There are no $inst datasets in the GSA within 30" of this target.""")
       case c => Yellow(tooltip = "There are %d%s %s datasets in the GSA within 30\" of this target.".format(
                   c, if (c < 50) "" else " or more", inst
                 ))

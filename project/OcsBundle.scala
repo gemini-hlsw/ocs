@@ -676,6 +676,7 @@ trait OcsBundle {
 
   lazy val bundle_edu_gemini_gsa_client = 
     project.in(file("bundle/edu.gemini.gsa.client")).dependsOn(
+      bundle_edu_gemini_gsa_query,
       bundle_edu_gemini_model_p1
     )
 

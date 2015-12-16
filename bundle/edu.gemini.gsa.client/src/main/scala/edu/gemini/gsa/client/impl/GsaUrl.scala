@@ -43,7 +43,7 @@ object GsaUrl {
 
   case object INST_PARAM extends Param {
     def name = "instrument"
-    def format(p: GsaParams) = Some(p.instrument.gsa)
+    def format(p: GsaParams) = None
   }
 
   case object LIMIT_PARAM extends Param {

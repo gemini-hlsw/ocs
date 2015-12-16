@@ -2,6 +2,8 @@ package edu.gemini.gsa.client.api
 
 import java.net.URL
 
+import edu.gemini.gsa.query.GsaFile
+
 /**
  * Base trait for the results of a GSA dataset search.
  */
@@ -21,7 +23,7 @@ object GsaResult {
   /**
    * Indicates a successful query (whether or not any datasets were found).
    */
-  case class Success(url: URL, datasets: List[GsaDataset]) extends GsaResult
+  case class Success(url: URL, datasets: List[GsaFile]) extends GsaResult
 
   /**
    * A trait for all failure cases.
