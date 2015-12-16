@@ -8,17 +8,14 @@ import java.awt.*;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.dnd.*;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.io.IOException;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.IntStream;
 
 
-/**
- * Drag&Drop target for the position table.
- *
- * @author Allan Brighton
- */
-class TelescopePosTableDropTarget implements DropTargetListener, PropertyChangeListener {
+// Drag & Drop target for the position table.
+class TelescopePosTableDropTarget implements DropTargetListener {
 
     /** The position table (treetable) widget */
     private final TelescopePosTableWidget _tree;
@@ -29,19 +26,16 @@ class TelescopePosTableDropTarget implements DropTargetListener, PropertyChangeL
     /** Indicates whether data is acceptable */
     private boolean _acceptableType;
 
-    /** Initially selected rows */
-    private TreePath[] _selections;
+    /** Initially selected row. */
+    private Optional<TreePath> _selection;
 
     private boolean editable = false;
 
     /**
      * Constructor
      */
-    public TelescopePosTableDropTarget(TelescopePosTableWidget tree) {
-        _tree = tree;
-
-        // Listen for changes in the enabled property
-        _tree.addPropertyChangeListener(this);
+    public TelescopePosTableDropTarget(final TelescopePosTableWidget tree) {
+        _tree = Objects.requireNonNull(tree);
 
         // Create the DropTarget and register
         // it with the SPTree.
@@ -49,69 +43,47 @@ class TelescopePosTableDropTarget implements DropTargetListener, PropertyChangeL
                                      DnDConstants.ACTION_COPY_OR_MOVE,
                                      this,
                                      _tree.isEnabled(), null);
+
+        // Enable the drop target if the SPTree is enabled
+        // and vice versa.
+        _tree.addPropertyChangeListener(evt -> {
+            if (evt.getPropertyName().equals("enabled"))
+                _dropTarget.setActive(_tree.isEnabled());
+        });
     }
 
-    void setEditable(boolean editable) { this.editable = editable; }
+    void setEditable(final boolean editable) {
+        this.editable = editable;
+    }
 
-
-    /** Implementation of the DropTargetListener interface */
-    public void dragEnter(DropTargetDragEvent dtde) {
-        DnDUtils.debugPrintln("dragEnter, drop action = "
-                + DnDUtils.showActions(dtde.getDropAction()));
-
-        // Save the list of selected items
+    public void dragEnter(final DropTargetDragEvent dtde) {
+        DnDUtils.debugPrintln("dragEnter, drop action = " + DnDUtils.showActions(dtde.getDropAction()));
         saveTreeSelection();
-
-        // Get the type of object being transferred and determine
-        // whether it is appropriate.
         checkTransferType(dtde);
-
-        // Accept or reject the drag.
         final boolean acceptedDrag = acceptOrRejectDrag(dtde);
-
-        // Do drag-under feedback
         dragUnderFeedback(dtde, acceptedDrag);
     }
 
-    /** Implementation of the DropTargetListener interface */
-    public void dragExit(DropTargetEvent dte) {
+    public void dragExit(final DropTargetEvent dte) {
         DnDUtils.debugPrintln("DropTarget dragExit");
-
-        // Do drag-under feedback
         dragUnderFeedback(null, false);
-
-        // Restore the original selections
         restoreTreeSelection();
     }
 
-    /** Implementation of the DropTargetListener interface */
-    public void dragOver(DropTargetDragEvent dtde) {
-        DnDUtils.debugPrintln("DropTarget dragOver, drop action = "
-                              + DnDUtils.showActions(dtde.getDropAction()));
-
-        // Accept or reject the drag
+    public void dragOver(final DropTargetDragEvent dtde) {
+        DnDUtils.debugPrintln("DropTarget dragOver, drop action = " + DnDUtils.showActions(dtde.getDropAction()));
         final boolean acceptedDrag = acceptOrRejectDrag(dtde);
-
-        // Do drag-under feedback
         dragUnderFeedback(dtde, acceptedDrag);
     }
 
-    /** Implementation of the DropTargetListener interface */
-    public void dropActionChanged(DropTargetDragEvent dtde) {
-        DnDUtils.debugPrintln("DropTarget dropActionChanged, drop action = "
-                              + DnDUtils.showActions(dtde.getDropAction()));
-
-        // Accept or reject the drag
+    public void dropActionChanged(final DropTargetDragEvent dtde) {
+        DnDUtils.debugPrintln("DropTarget dropActionChanged, drop action = " + DnDUtils.showActions(dtde.getDropAction()));
         final boolean acceptedDrag = acceptOrRejectDrag(dtde);
-
-        // Do drag-under feedback
         dragUnderFeedback(dtde, acceptedDrag);
     }
 
-    /** Implementation of the DropTargetListener interface */
-    public void drop(DropTargetDropEvent dtde) {
-        DnDUtils.debugPrintln("DropTarget drop, drop action = "
-                              + DnDUtils.showActions(dtde.getDropAction()));
+    public void drop(final DropTargetDropEvent dtde) {
+        DnDUtils.debugPrintln("DropTarget drop, drop action = " + DnDUtils.showActions(dtde.getDropAction()));
 
         // Check the drop action
         if ((dtde.getDropAction() & DnDConstants.ACTION_COPY_OR_MOVE) != 0) {
@@ -124,19 +96,18 @@ class TelescopePosTableDropTarget implements DropTargetListener, PropertyChangeL
                 _tree.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 
                 // Save the user's selections
-                saveTreeSelection();
+                //saveTreeSelection();
 
                 dropSucceeded = dropNodes(dtde.getDropAction(), transferable, dtde.getLocation());
-
-                DnDUtils.debugPrintln("Drop completed, success: "
-                                      + dropSucceeded);
+                DnDUtils.debugPrintln("Drop completed, success: " + dropSucceeded);
             } catch (Exception e) {
                 DnDUtils.debugPrintln("Exception while handling drop " + e);
             } finally {
                 _tree.setCursor(Cursor.getDefaultCursor());
 
                 // Restore the user's selections
-                restoreTreeSelection();
+                //restoreTreeSelection();
+
                 dtde.dropComplete(dropSucceeded);
             }
         } else {
@@ -145,201 +116,123 @@ class TelescopePosTableDropTarget implements DropTargetListener, PropertyChangeL
         }
     }
 
-    /** PropertyChangeListener interface */
-    public void propertyChange(PropertyChangeEvent evt) {
-        final String propertyName = evt.getPropertyName();
-        if (propertyName.equals("enabled")) {
-            // Enable the drop target if the SPTree is enabled
-            // and vice versa.
-            _dropTarget.setActive(_tree.isEnabled());
-        }
-    }
-
     // Internal methods start here
-    private boolean acceptOrRejectDrag(DropTargetDragEvent dtde) {
+    private boolean acceptOrRejectDrag(final DropTargetDragEvent dtde) {
         if (!editable) return false;
-
         if (!_tree.isEnabled()) {
             dtde.rejectDrag();
             return false;
         }
 
-        final int dropAction = dtde.getDropAction();
         final int sourceActions = dtde.getSourceActions();
-        boolean acceptedDrag = false;
-
-        DnDUtils.debugPrintln("\tSource actions are " +
-                              DnDUtils.showActions(sourceActions) +
-                              ", drop action is " +
-                              DnDUtils.showActions(dropAction));
-
-        final boolean acceptableDropLocation = isAcceptableDropLocation(dtde);
+        final int dropAction = dtde.getDropAction();
+        DnDUtils.debugPrintln("\tSource actions are " + DnDUtils.showActions(sourceActions) +
+                              ", drop action is " + DnDUtils.showActions(dropAction));
 
         // Reject if the object being transferred
         // or the operations available are not acceptable.
         if (!_acceptableType || (sourceActions & DnDConstants.ACTION_COPY_OR_MOVE) == 0) {
             DnDUtils.debugPrintln("Drop target rejecting drag: acceptableType = " + _acceptableType);
             dtde.rejectDrag();
-        } else if (!acceptableDropLocation) {
+            return false;
+        } else if (!isAcceptableDropLocation(dtde)) {
             // Can only drag to writable directory
             DnDUtils.debugPrintln("Drop target rejecting drag: no acceptable drop location");
             dtde.rejectDrag();
+            return false;
         } else {
             // Offering an acceptable operation: accept
             DnDUtils.debugPrintln("Drop target accepting drag");
             dtde.acceptDrag(dropAction);
-            acceptedDrag = true;
+            return true;
         }
-
-        return acceptedDrag;
     }
 
-    private void dragUnderFeedback(DropTargetDragEvent dtde, boolean acceptedDrag) {
+    // Perform an action while turning off the tree selection listening.
+    private void treeIgnoreSelectionAction(final Runnable action) {
+        _tree.setIgnoreSelection(true);
+        action.run();
+        _tree.setIgnoreSelection(false);
+    }
+
+    private void dragUnderFeedback(final DropTargetDragEvent dtde, final boolean acceptedDrag) {
         if (dtde != null) {
             if (acceptedDrag && isAcceptableDropLocation(dtde)) {
                 final Point location = dtde.getLocation();
-                _tree.setIgnoreSelection(true);
-                _tree.setSelectedNode(location);
-                _tree.setIgnoreSelection(false);
+                treeIgnoreSelectionAction(() -> _tree.setSelectedNode(location));
                 _tree.setCursor(DragSource.DefaultCopyDrop);
 
             } else {
-                _tree.setIgnoreSelection(true);
-                _tree.clearSelection();
-                _tree.setIgnoreSelection(false);
-                // SW: removing this for now because on Linux, the no drop
-                // sign is always displayed regardless of whether the drop is
-                // accepted or not.
-//                _tree.setCursor(DragSource.DefaultMoveNoDrop);
+                treeIgnoreSelectionAction(_tree::clearSelection);
                 _tree.setCursor(Cursor.getDefaultCursor());
             }
         } else {
             _tree.setCursor(Cursor.getDefaultCursor());
-            _tree.setIgnoreSelection(true);
-            _tree.clearSelection();
-            _tree.setIgnoreSelection(false);
+            treeIgnoreSelectionAction(_tree::clearSelection);
         }
     }
 
-    private void checkTransferType(DropTargetDragEvent dtde) {
+    // NOTE: This method sets the object variable _acceptableType if the transfer type is permissible.
+    private void checkTransferType(final DropTargetDragEvent dtde) {
         // Accept a list of files
         _acceptableType = dtde.isDataFlavorSupported(TelescopePosTableDragDropObject.DATA_FLAVOR);
         DnDUtils.debugPrintln("Data type acceptable - " + _acceptableType);
     }
 
     // This method handles a drop for a list of files
-    private boolean dropNodes(int action, Transferable transferable, Point location)
+    private boolean dropNodes(final int action, final Transferable transferable, final Point location)
             throws IOException, UnsupportedFlavorException {
-
-        final TelescopePosTableDragDropObject ddo = (TelescopePosTableDragDropObject) transferable.getTransferData(TelescopePosTableDragDropObject.DATA_FLAVOR);
-        final TelescopePosTableWidget ownerTW = ddo.getOwner();
-        final TelescopePosTableWidget.TableData.Row[] items = ddo.getNodes();
-
         final TelescopePosTableWidget.TableData.Row parent = _tree.getNode(location);
         if (parent == null)
             return false;
 
+        final TelescopePosTableDragDropObject ddo = (TelescopePosTableDragDropObject) transferable.getTransferData(TelescopePosTableDragDropObject.DATA_FLAVOR);
+        final TelescopePosTableWidget ownerTW = ddo.getOwner();
+        final TelescopePosTableWidget.TableData.Row item = ddo.getNode();
+
         DnDUtils.debugPrintln((action == DnDConstants.ACTION_COPY ? "Copy" : "Move") +
-                              " item " + ddo.getNode() +
-                              " to targetNode " + parent);
+                              " item " + ddo.getNode() + " to targetNode " + parent);
 
         // Highlight the drop location while we perform the drop
-        _tree.setIgnoreSelection(true);
-        _tree.setSelectedNode(location);
-        _tree.setIgnoreSelection(false);
-
-        if (items != null) {
-            for (TelescopePosTableWidget.TableData.Row item : items) {
-                if (!_tree.isOkayToAdd(item, parent)) {
-                    return false;
-                }
-            }
-        }
+        treeIgnoreSelectionAction(() -> _tree.setSelectedNode(location));
 
         try {
-            if (ownerTW == _tree) {
-                // The dragged item was owned by this tree, so just move it, if allowed
-                for (TelescopePosTableWidget.TableData.Row item : items) {
-                    if (!_tree.isOkayToMove(item, parent)) {
-                        return false;
-                    }
-                }
-                _tree.moveTo(items, parent);
-            } else {
-                return false;
+            if (ownerTW == _tree && _tree.isOkayToMove(item, parent)) {
+                _tree.moveTo(item, parent);
+                return true;
             }
-        } catch (Exception e) {
+        } catch (final Exception e) {
             DialogUtil.error(e);
         }
-        return true;
+        return false;
     }
 
     /** Return true if its okay to drop the item(s) here */
-    private boolean isAcceptableDropLocation(DropTargetDragEvent dtde) {
+    private boolean isAcceptableDropLocation(final DropTargetDragEvent dtde) {
         if (!_tree.isEnabled()) {
             return false;
         }
 
-        final TelescopePosTableDragDropObject ddo = TelescopePosTableDragSource._dragObject;
-        if (ddo == null) {
-            return false;
-        }
-
-        final TelescopePosTableWidget.TableData.Row[] newItems = ddo.getNodes();
-
-        // get the node under the mouse
+        // Get the node under the mouse.
         final TelescopePosTableWidget.TableData.Row parent = _tree.getNode(dtde.getLocation());
         if (parent == null) {
             return false;
         }
 
-        // get the items to be dropped
-        if (newItems != null) {
-            // Reject if it would move a node that should not be deleted
-            if (ddo.getOwner() == _tree) {
-                for (TelescopePosTableWidget.TableData.Row newItem : newItems) {
-                    if (!_tree.isOkayToMove(newItem, parent)) {
-                        return false;
-                    }
-                }
-            } else {
-                return false;
-            }
-        }
-        return true;
+        // Reject if it would move a node that should not be deleted.
+        final TelescopePosTableDragDropObject ddo = TelescopePosTableDragSource._dragObject;
+        return (ddo != null) && (ddo.getOwner() == _tree) && _tree.isOkayToMove(ddo.getNode(), parent);
     }
 
-    /** Save the current tree selection */
+    /** Save the current tree selection: we only allow one node to be selected. */
     private void saveTreeSelection() {
-        final int[] rows = _tree.getSelectedRows();
-        _selections = new TreePath[rows.length];
-        for(int i = 0; i < rows.length; i++) {
-            _selections[i] = _tree.getPathForRow(rows[i]);
-        }
-//        _leadSelection = _tree.getLeadSelectionPath();
-        _tree.setIgnoreSelection(true);
-        _tree.clearSelection();
-        _tree.setIgnoreSelection(false);
+        _selection = IntStream.of(_tree.getSelectedRows()).mapToObj(_tree::getPathForRow).findFirst();
+        treeIgnoreSelectionAction(_tree::clearSelection);
     }
 
-    /** Restore the tree selection */
+    /** Restore the tree selection: we only allow one node to be selected. */
     private void restoreTreeSelection() {
-        _tree.setIgnoreSelection(true);
-        final int[] rows = new int[_selections.length];
-        for(int i = 0; i < rows.length; i++) {
-            rows[i] = _tree.getRowForPath(_selections[i]);
-        }
-        if (rows.length > 0) {
-            // only single select for now
-            _tree.selectRowAt(rows[0]);
-        }
-
-//        // Restore the lead selection
-//        if (_leadSelection != null) {
-//            _tree.removeSelectionPath(_leadSelection);
-//            _tree.addSelectionPath(_leadSelection);
-//        }
-        _tree.setIgnoreSelection(false);
+        treeIgnoreSelectionAction(() -> _selection.map(_tree::getRowForPath).ifPresent(_tree::selectRowAt));
     }
 }
 

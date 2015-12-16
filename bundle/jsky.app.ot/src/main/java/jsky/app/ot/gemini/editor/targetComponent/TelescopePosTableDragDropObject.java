@@ -2,6 +2,7 @@ package jsky.app.ot.gemini.editor.targetComponent;
 
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
+import java.util.Objects;
 
 /**
  * This class ties an item to the position table widget in which its associated
@@ -19,61 +20,24 @@ final class TelescopePosTableDragDropObject implements Transferable {
         DATA_FLAVOR, DataFlavor.stringFlavor
     };
 
-    // The treetable that owns the node being dragged.  Will be
-    // null if this item is new and is not in any tree.
+    // The treetable that owns the node being dragged. Will be null if this item is new and is not in any tree.
     private TelescopePosTableWidget _currentOwner;
 
     // The item(s) being dragged.
-    private final TelescopePosTableWidget.TableData.Row[] _nodes;
-
-    /**
-     * This constructor should be used when dragging a newly created object
-     * that hasn't been inserted in any tree.
-     */
-    private TelescopePosTableDragDropObject(TelescopePosTableWidget.TableData.Row node) {
-        _nodes = new TelescopePosTableWidget.TableData.Row[1];
-        _nodes[0] = node;
-    }
+    private final TelescopePosTableWidget.TableData.Row _node;
 
     /**
      * This constructor should be used when dragging an object that currently
      * exists in a tree.
      */
-    private TelescopePosTableDragDropObject(TelescopePosTableWidget.TableData.Row node, TelescopePosTableWidget tree) {
-        this(node);
+    TelescopePosTableDragDropObject(TelescopePosTableWidget.TableData.Row node, TelescopePosTableWidget tree) {
+        _node = Objects.requireNonNull(node);
         _currentOwner = tree;
     }
 
-    /**
-     * This constructor should be used when dragging a newly created set
-     * of items that haven't been inserted in any tree.
-     */
-    private TelescopePosTableDragDropObject(TelescopePosTableWidget.TableData.Row[] nodes) {
-        _nodes = nodes;
-    }
-
-    /**
-     * This constructor should be used when dragging a set of objects
-     * that currently exists in a tree.
-     */
-    TelescopePosTableDragDropObject(TelescopePosTableWidget.TableData.Row[] nodes, TelescopePosTableWidget tree) {
-        this(nodes);
-        _currentOwner = tree;
-    }
-
-    /** Get the first TelescopePosTableWidget.TableData.Row. */
+    /** Get the TelescopePosTableWidget.TableData.Row. */
     TelescopePosTableWidget.TableData.Row getNode() {
-        return getNode(0);
-    }
-
-    /** Get the nth TelescopePosTableWidget.TableData.Row. */
-    TelescopePosTableWidget.TableData.Row getNode(int i) {
-        return _nodes[i];
-    }
-
-    /** Get the set of TelescopePosTableWidget.TableData.Rows. */
-    TelescopePosTableWidget.TableData.Row[] getNodes() {
-        return _nodes;
+        return _node;
     }
 
     /** Get the owner, the SPTree that contains the items being dragged. */
@@ -81,7 +45,6 @@ final class TelescopePosTableDragDropObject implements Transferable {
         return _currentOwner;
     }
 
-    // Implementation of the Transferable interface
 
     public DataFlavor[] getTransferDataFlavors() {
         return _transferDataFlavors;
@@ -95,7 +58,6 @@ final class TelescopePosTableDragDropObject implements Transferable {
         if (!isDataFlavorSupported(fl)) {
             return null;
         }
-
         return this;
     }
 }
