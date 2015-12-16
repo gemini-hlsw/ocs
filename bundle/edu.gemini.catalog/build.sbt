@@ -30,6 +30,7 @@ OsgiKeys.privatePackage := Seq(
 OsgiKeys.exportPackage := Seq(
   "edu.gemini.catalog.api",
   "edu.gemini.catalog.impl",
+  "edu.gemini.catalog.image",
   "edu.gemini.catalog.votable",
   "edu.gemini.catalog.skycat",
   "jsky.catalog",
