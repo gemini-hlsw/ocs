@@ -11,8 +11,6 @@ import java.time.temporal.{TemporalAccessor, TemporalQuery}
 
 import edu.gemini.spModel.dataset.{DatasetMd5, DatasetLabel, DatasetQaState, DatasetGsaState}
 
-import edu.gemini.gsa.core.{GsaRecord, QaRequest, QaResponse}
-
 import scalaz._
 import Scalaz._
 

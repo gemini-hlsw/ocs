@@ -23,7 +23,6 @@ OsgiKeys.bundleSymbolicName := name.value
 OsgiKeys.dynamicImportPackage := Seq("")
 
 OsgiKeys.exportPackage := Seq(
-  "edu.gemin.gsa.query",
-  "edu.gemin.gsa.core")
+  "edu.gemin.gsa.query")
 
 OsgiKeys.privatePackage := Seq()

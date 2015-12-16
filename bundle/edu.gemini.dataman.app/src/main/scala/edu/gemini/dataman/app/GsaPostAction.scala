@@ -1,9 +1,8 @@
 package edu.gemini.dataman.app
 
 import edu.gemini.dataman.core._
-import edu.gemini.gsa.core.{QaResponse, QaRequest}
 
-import edu.gemini.gsa.query.{GsaResponse, GsaAuth, GsaQaUpdateQuery, GsaHost}
+import edu.gemini.gsa.query._
 import edu.gemini.pot.spdb.IDBDatabaseService
 import edu.gemini.spModel.core.Site
 import edu.gemini.spModel.dataset.QaRequestStatus.ProcessingPost

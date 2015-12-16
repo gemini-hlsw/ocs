@@ -1,7 +1,7 @@
 package edu.gemini.dataman.app
 
 import edu.gemini.dataman.core._
-import edu.gemini.gsa.core.QaRequest
+import edu.gemini.gsa.query.QaRequest
 import edu.gemini.pot.sp.{ISPProgram, SPCompositeChange}
 import edu.gemini.pot.spdb.{ProgramEvent, ProgramEventListener, IDBTriggerAction, IDBTriggerCondition, IDBDatabaseService}
 import edu.gemini.spModel.dataset.{DatasetQaState, DatasetLabel}
@@ -85,7 +85,6 @@ object QaRequestTrigger {
       * `null` otherwise (as required by the `IDBTriggerCondition` contract).
       *
       * @param change event fired because of a modification to a program node
-      *
       * @return List[QaRequest] if the given change should generate a trigger,
       *         `null` otherwise
       */

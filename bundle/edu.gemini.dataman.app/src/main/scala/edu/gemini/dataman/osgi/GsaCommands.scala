@@ -2,8 +2,7 @@ package edu.gemini.dataman.osgi
 
 import edu.gemini.dataman.app.{DmanActionExec, GsaPollActions}
 import edu.gemini.dataman.core._
-import edu.gemini.gsa.query.{GsaRecordQuery, GsaQaUpdateQuery, GsaResponse, TimeFormat}
-import edu.gemini.gsa.core.{QaResponse, QaRequest, GsaRecord}
+import edu.gemini.gsa.query._
 import edu.gemini.pot.spdb.IDBDatabaseService
 import edu.gemini.spModel.core.catchingNonFatal
 import edu.gemini.spModel.dataset.{DatasetQaState, DatasetLabel}

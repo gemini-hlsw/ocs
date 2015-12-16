@@ -2,7 +2,6 @@ package edu.gemini.gsa.query
 
 import argonaut.Argonaut._
 import argonaut._
-import edu.gemini.gsa.core.GsaRecord
 import edu.gemini.gsa.query.JsonCodecs._
 import edu.gemini.spModel.dataset.DatasetQaState._
 import edu.gemini.spModel.dataset.{DatasetGsaState, DatasetLabel, DatasetMd5}

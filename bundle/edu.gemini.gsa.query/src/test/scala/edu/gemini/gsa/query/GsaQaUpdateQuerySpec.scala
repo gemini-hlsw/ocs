@@ -1,6 +1,5 @@
 package edu.gemini.gsa.query
 
-import edu.gemini.gsa.core.{QaResponse, QaRequest, Arbitraries}
 import edu.gemini.spModel.dataset.DatasetLabel
 import org.scalacheck._
 import org.scalacheck.Arbitrary._

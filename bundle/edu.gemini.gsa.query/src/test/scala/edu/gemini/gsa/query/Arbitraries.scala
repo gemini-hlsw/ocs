@@ -1,4 +1,4 @@
-package edu.gemini.gsa.core
+package edu.gemini.gsa.query
 
 import java.time.format.DateTimeFormatter
 import java.time.{LocalDate, ZoneId}
@@ -9,7 +9,6 @@ import org.scalacheck.Arbitrary._
 import org.scalacheck._
 
 import scalaz.Scalaz._
-import scalaz._
 
 trait Arbitraries extends edu.gemini.spModel.dataset.Arbitraries {
   implicit val arbGsaRecord: Arbitrary[GsaRecord] =

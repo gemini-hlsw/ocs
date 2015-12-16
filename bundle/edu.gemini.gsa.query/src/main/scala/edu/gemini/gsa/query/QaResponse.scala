@@ -1,4 +1,4 @@
-package edu.gemini.gsa.core
+package edu.gemini.gsa.query
 
 import edu.gemini.spModel.dataset.DatasetLabel
 

@@ -1,8 +1,6 @@
 package edu.gemini.gsa.query
 
 import java.net.URL
-
-import edu.gemini.gsa.core.{QaRequest, QaResponse}
 import edu.gemini.spModel.core.Site
 import edu.gemini.spModel.dataset.{DatasetLabel, DatasetQaState}
 import edu.gemini.gsa.query.JsonCodecs._

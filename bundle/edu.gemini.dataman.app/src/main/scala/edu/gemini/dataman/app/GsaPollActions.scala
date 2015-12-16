@@ -2,8 +2,7 @@ package edu.gemini.dataman.app
 
 import edu.gemini.dataman.app.ModelActions._
 import edu.gemini.dataman._
-import edu.gemini.gsa.core.GsaRecord
-import edu.gemini.gsa.query.{GsaRecordQuery, GsaResponse, GsaHost}
+import edu.gemini.gsa.query.{GsaRecord, GsaRecordQuery, GsaResponse, GsaHost}
 import GsaHost.{Archive, Summit}
 import edu.gemini.dataman.core._
 import edu.gemini.pot.sp.{SPObservationID, ISPObservation, ISPProgram}

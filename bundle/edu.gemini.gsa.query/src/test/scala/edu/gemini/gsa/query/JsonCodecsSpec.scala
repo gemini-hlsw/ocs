@@ -1,6 +1,5 @@
 package edu.gemini.gsa.query
 
-import edu.gemini.gsa.core.{QaResponse, GsaRecord, Arbitraries}
 import edu.gemini.gsa.query.JsonCodecs._
 import edu.gemini.spModel.dataset.{DatasetQaState, DatasetLabel, DatasetMd5, DatasetGsaState}
 

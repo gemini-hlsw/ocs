@@ -3,8 +3,6 @@ package edu.gemini.gsa
 import java.util.concurrent.atomic.AtomicReference
 import java.util.logging.Level
 
-//import edu.gemini.dataman.core.{DmanAction, DmanFailure}
-
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 

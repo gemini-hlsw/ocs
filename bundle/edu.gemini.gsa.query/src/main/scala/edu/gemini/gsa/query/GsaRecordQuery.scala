@@ -6,8 +6,6 @@ import edu.gemini.skycalc.ObservingNight
 import edu.gemini.spModel.core.{SPProgramID, Site}
 import edu.gemini.spModel.dataset.DatasetLabel
 
-import edu.gemini.gsa.core.GsaRecord
-
 import java.net.URL
 import java.util.{Calendar, GregorianCalendar}
 
