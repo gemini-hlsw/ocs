@@ -35,6 +35,7 @@ object JsonCodecsSpec extends Specification with ScalaCheck with Arbitraries {
     roundTrip[DatasetMd5]
     roundTrip[DatasetQaState]
     roundTrip[GsaRecord]
+    roundTrip[GsaFile]
     roundTrip[Instant]
     roundTrip[QaResponse]
     roundTrip[EitherQaResponse]

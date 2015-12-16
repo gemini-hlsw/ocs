@@ -11,6 +11,11 @@ import org.scalacheck._
 import scalaz.Scalaz._
 
 trait Arbitraries extends edu.gemini.spModel.dataset.Arbitraries {
+  implicit val arbGsaFile: Arbitrary[GsaFile] =
+    Arbitrary {
+      arbitrary[String].map(GsaFile.apply)
+    }
+
   implicit val arbGsaRecord: Arbitrary[GsaRecord] =
     Arbitrary {
       for {
