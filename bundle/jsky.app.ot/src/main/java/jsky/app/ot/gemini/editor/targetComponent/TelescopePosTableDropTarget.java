@@ -94,20 +94,12 @@ class TelescopePosTableDropTarget implements DropTargetListener {
 
             try {
                 _tree.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-
-                // Save the user's selections
-                //saveTreeSelection();
-
                 dropSucceeded = dropNodes(dtde.getDropAction(), transferable, dtde.getLocation());
                 DnDUtils.debugPrintln("Drop completed, success: " + dropSucceeded);
             } catch (Exception e) {
                 DnDUtils.debugPrintln("Exception while handling drop " + e);
             } finally {
                 _tree.setCursor(Cursor.getDefaultCursor());
-
-                // Restore the user's selections
-                //restoreTreeSelection();
-
                 dtde.dropComplete(dropSucceeded);
             }
         } else {
