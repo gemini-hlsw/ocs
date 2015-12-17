@@ -1,10 +1,3 @@
-// Copyright 1997-2000
-// Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-// See the file LICENSE for complete details.
-//
-// $Id: HMSFormat.java 21620 2009-08-20 19:41:32Z swalker $
-//
 package edu.gemini.spModel.target.system;
 
 import java.util.StringTokenizer;
@@ -109,7 +102,7 @@ public final class HMSFormat extends CoordinateFormat
      */
     public double parse(String s)
             throws NumberFormatException {
-        if (s == null) throw new NumberFormatException(s);
+        if (s == null) throw new NumberFormatException();
 
         // Determine the sign from the (trimmed) string
         s = s.trim();
@@ -162,8 +155,13 @@ public final class HMSFormat extends CoordinateFormat
      * Overrides <code>equals</code> to return true if the object is
      * the right type and the values are the same.
      */
+    @Override
     public boolean equals(Object obj) {
-        if (!(obj instanceof HMSFormat)) return false;
-        return super.equals(obj);
+        return obj instanceof HMSFormat && super.equals(obj);
+    }
+
+    @Override
+    public int hashCode() {
+        return super.hashCode();
     }
 }

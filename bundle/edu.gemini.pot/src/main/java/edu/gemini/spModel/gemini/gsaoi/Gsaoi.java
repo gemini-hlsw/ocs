@@ -803,7 +803,7 @@ public final class Gsaoi extends SPInstObsComp implements PropertyProvider, Guid
         return GUIDERS;
     }
 
-    public static final ConfigInjector WAVELENGTH_INJECTOR = ConfigInjector.create(
+    public static final ConfigInjector<String> WAVELENGTH_INJECTOR = ConfigInjector.create(
             new ObsWavelengthCalc1<Filter>() {
                 @Override
                 public PropertyDescriptor descriptor1() {

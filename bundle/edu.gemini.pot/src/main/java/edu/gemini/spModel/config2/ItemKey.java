@@ -1,6 +1,3 @@
-//
-// $Id: ItemKey.java 38078 2011-10-18 15:15:29Z swalker $
-//
 package edu.gemini.spModel.config2;
 
 import edu.gemini.shared.util.immutable.DefaultImList;
@@ -8,7 +5,6 @@ import edu.gemini.shared.util.immutable.ImList;
 //import edu.gemini.shared.util.immutable.PredicateOp;
 
 import java.io.Serializable;
-//import java.util.regex.Pattern;
 
 /**
  * The (immutable) ItemKey is used to refer to either a single item, or a
@@ -22,7 +18,7 @@ import java.io.Serializable;
  * In the same way, a ItemKey may refer to a collection of ItemKeys or
  * a particular item.
  */
-public final class ItemKey implements Comparable, Serializable {
+public final class ItemKey implements Comparable<ItemKey>, Serializable {
     public static final ItemKey[] EMPTY_ARRAY = new ItemKey[0];
 
     /**
@@ -112,8 +108,8 @@ public final class ItemKey implements Comparable, Serializable {
         return DefaultImList.create(_path.split(SEPARATOR));
     }
 
-    public int compareTo(Object o) {
-        ItemKey that = (ItemKey) o;
+    @Override
+    public int compareTo(ItemKey that) {
         return getPath().compareTo(that.getPath());
     }
 

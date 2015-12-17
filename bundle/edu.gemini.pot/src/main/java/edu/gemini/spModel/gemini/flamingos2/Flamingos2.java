@@ -66,7 +66,6 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
     // for serialization
     private static final long serialVersionUID = 3L;
 
-
     /**
       * Flamingos2 Dispersers.
       */
@@ -960,7 +959,7 @@ public final class Flamingos2 extends ParallacticAngleSupportInst
         return f.getWavelength();
     }
 
-    public static final ConfigInjector WAVELENGTH_INJECTOR = ConfigInjector.create(
+    public static final ConfigInjector<String> WAVELENGTH_INJECTOR = ConfigInjector.create(
         new ObsWavelengthCalc2<Disperser, Filter>() {
             @Override public PropertyDescriptor descriptor1() { return DISPERSER_PROP; }
             @Override public PropertyDescriptor descriptor2() { return FILTER_PROP; }

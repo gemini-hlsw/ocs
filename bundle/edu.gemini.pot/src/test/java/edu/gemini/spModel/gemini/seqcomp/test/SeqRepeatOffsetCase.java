@@ -1,9 +1,3 @@
-/* Copyright 2000 Association for Universities for Research in Astronomy, Inc.,
- * Observatory Control System, Gemini Telescopes Project.
- * See the file LICENSE for complete details.
- *
- * $Id: SeqRepeatOffsetCase.java 18053 2009-02-20 20:16:23Z swalker $
- */
 package edu.gemini.spModel.gemini.seqcomp.test;
 
 import junit.framework.Test;
@@ -23,8 +17,6 @@ import edu.gemini.spModel.pio.xml.PioXmlFactory;
 public class SeqRepeatOffsetCase extends TestCase {
     private SeqRepeatOffset _i1;
     private OffsetPosList<OffsetPos> _l1;
-
-//    static final private double _ERROR = .00001;
 
     public SeqRepeatOffsetCase(String message) {
         super(message);
@@ -75,14 +67,13 @@ public class SeqRepeatOffsetCase extends TestCase {
 
         i2.setParamSet(p);
 
-        OffsetPosList l1 = _i1.getPosList();
-        OffsetPosList l2 = i2.getPosList();
+        OffsetPosList<OffsetPos> l1 = _i1.getPosList();
+        OffsetPosList<OffsetPos> l2 = i2.getPosList();
         assertEquals("Two poslists equal", l1.toString(), l2.toString());
     }
 
     public static Test suite() {
-        TestSuite suite = new TestSuite(SeqRepeatOffsetCase.class);
-        return suite;
+        return new TestSuite(SeqRepeatOffsetCase.class);
     }
 
 }

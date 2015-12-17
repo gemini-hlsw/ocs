@@ -1,7 +1,3 @@
-//
-// $Id: ConfigBridge.java 46768 2012-07-16 18:58:53Z rnorris $
-//
-
 package edu.gemini.spModel.config;
 
 import edu.gemini.pot.sp.ISPObsComponent;
@@ -24,9 +20,8 @@ import java.util.Map;
  * an observation and extracts a {@link ConfigSequence} from it.
  */
 public final class ConfigBridge {
-    private static void _addItems(ItemKey rootKey, Config config, Collection params) {
-        for (Object param1 : params) {
-            final IParameter param = (IParameter) param1;
+    private static void _addItems(ItemKey rootKey, Config config, Collection<IParameter> params) {
+        for (IParameter param : params) {
             final String paramName = param.getName();
 
             final Object val = param.getValue();

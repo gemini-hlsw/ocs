@@ -78,10 +78,9 @@ public abstract class MemAbstractBase implements ISPNode, Serializable {
 
         // Copy the client data.  Clone the objects that are cloneable, add a
         // reference to the ones that aren't.
-        Set nameSet = node.getClientDataKeys();
+        Set<String> nameSet = node.getClientDataKeys();
         if (nameSet != null) {
-            for (Object aNameSet : nameSet) {
-                String key = (String) aNameSet;
+            for (String key : nameSet) {
                 Object value = node.getClientData(key);
                 if (value instanceof ISPCloneable) {
                     value = ((ISPCloneable) value).clone();

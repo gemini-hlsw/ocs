@@ -1,10 +1,3 @@
-// Copyright 1999 Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-// See the file LICENSE for complete details.
-//
-// $Id: MemAbstractContainer.java 46999 2012-07-26 16:44:58Z swalker $
-//
-
 package edu.gemini.pot.sp.memImpl;
 
 import edu.gemini.pot.sp.*;
@@ -52,16 +45,16 @@ public abstract class MemAbstractContainer extends MemProgramNodeBase implements
      * upon the child type.
      */
     protected static class TypedChildren {
-        private Map<Class<?>, List<ISPNode>> _typedChildren = new HashMap<Class<?>, List<ISPNode>>();
+        private Map<Class<?>, List<ISPNode>> _typedChildren = new HashMap<>();
 
         private TypedChildren() {
         }
 
         private void addChild(ISPNode child) {
-            Class type = child.getClass();
+            Class<?> type = child.getClass();
             List<ISPNode> childList = _typedChildren.get(type);
             if (childList == null) {
-                childList = new ArrayList<ISPNode>();
+                childList = new ArrayList<>();
                 _typedChildren.put(type, childList);
             }
             childList.add(child);

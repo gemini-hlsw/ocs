@@ -1,14 +1,7 @@
-// Copyright 2000
-// Association for Universities for Research in Astronomy, Inc.
-// Observatory Control System, Gemini Telescopes Project.
-// See the file LICENSE for complete details.
-//
-// $Id: DefaultConfig.java 19014 2009-03-26 19:39:27Z swalker $
-//
 package edu.gemini.spModel.data.config;
 
 import java.util.*;
-
+import java.util.stream.Collectors;
 
 /**
  * A straight-forward implementation of the <code>IConfig</code>
@@ -17,7 +10,7 @@ import java.util.*;
  * <p><b>Note that this implementation is not synchronized.</b>
  */
 public class DefaultConfig implements IConfig {
-    private LinkedList<ISysConfig> _sysConfigList = new LinkedList<ISysConfig>();
+    private LinkedList<ISysConfig> _sysConfigList = new LinkedList<>();
 
     public DefaultConfig() {
     }
@@ -39,13 +32,9 @@ public class DefaultConfig implements IConfig {
             return null;
         }
 
-        res._sysConfigList = new LinkedList<ISysConfig>();
+        res._sysConfigList = new LinkedList<>();
 
-        Iterator it = _sysConfigList.listIterator();
-        while (it.hasNext()) {
-            ISysConfig sysConfig = (ISysConfig) it.next();
-            res._sysConfigList.add((ISysConfig) sysConfig.clone());
-        }
+        res._sysConfigList.addAll(_sysConfigList.stream().map(sysConfig -> (ISysConfig) sysConfig.clone()).collect(Collectors.toList()));
 
         return res;
     }
@@ -80,9 +69,7 @@ public class DefaultConfig implements IConfig {
     public int getParameterCount() {
         int count = 0;
 
-        Iterator it = _sysConfigList.listIterator();
-        while (it.hasNext()) {
-            ISysConfig sysConfig = (ISysConfig) it.next();
+        for (ISysConfig sysConfig : _sysConfigList) {
             count += sysConfig.getParameterCount();
         }
 
@@ -94,9 +81,7 @@ public class DefaultConfig implements IConfig {
     }
 
     public ISysConfig getSysConfig(String systemName) {
-        Iterator it = _sysConfigList.listIterator();
-        while (it.hasNext()) {
-            ISysConfig sysConfig = (ISysConfig) it.next();
+        for (ISysConfig sysConfig : _sysConfigList) {
             if (sysConfig.getSystemName().equals(systemName))
                 return sysConfig;
         }
@@ -105,8 +90,7 @@ public class DefaultConfig implements IConfig {
 
     public boolean containsParameter(String systemName, String paramName) {
         ISysConfig sc = getSysConfig(systemName);
-        if (sc == null) return false;
-        return sc.containsParameter(paramName);
+        return sc != null && sc.containsParameter(paramName);
     }
 
     public boolean containsSysConfig(String systemName) {
@@ -130,19 +114,6 @@ public class DefaultConfig implements IConfig {
         if (sc == null) return defaultValue;
         return sc.getParameterValue(paramName, defaultValue);
     }
-
-/*
-   public void putParameterValue(String systemName,
-				 String paramName, Object value)
-   {
-      ISysConfig sc = getSysConfig(systemName);
-      if (sc == null) {
-	 sc = new DefaultSysConfig(systemName);
-	 appendSysConfig(sc);
-      }
-      sc.putParameterValue(paramName, value);
-   }
-*/
 
     public void putParameter(String systemName, IParameter ip) {
         ISysConfig sc = getSysConfig(systemName);
@@ -179,12 +150,8 @@ public class DefaultConfig implements IConfig {
     }
 
     public Set<String> getSystemNames() {
-        Set<String> set = new HashSet<String>(_sysConfigList.size());
-        Iterator it = _sysConfigList.listIterator();
-        while (it.hasNext()) {
-            ISysConfig sysConfig = (ISysConfig) it.next();
-            set.add(sysConfig.getSystemName());
-        }
+        Set<String> set = new HashSet<>(_sysConfigList.size());
+        set.addAll(_sysConfigList.stream().map(ISysConfig::getSystemName).collect(Collectors.toList()));
         return set;
     }
 
@@ -194,10 +161,7 @@ public class DefaultConfig implements IConfig {
 
     public void putSysConfigs(Collection<ISysConfig> sysConfigs) {
         removeSysConfigs();
-
-        for (ISysConfig sc : sysConfigs) {
-            _sysConfigList.add(sc);
-        }
+        _sysConfigList.addAll(sysConfigs.stream().collect(Collectors.toList()));
     }
 
     public void mergeSysConfigs(Collection<ISysConfig> sysConfigs) {
@@ -222,15 +186,6 @@ public class DefaultConfig implements IConfig {
 
     public void removeSysConfigs() {
         _sysConfigList.clear();
-    }
-
-    public void dumpState() {
-        System.out.println("****** Configuration ******");
-        Iterator it = _sysConfigList.listIterator();
-        while (it.hasNext()) {
-            DefaultSysConfig dsc = (DefaultSysConfig) it.next();
-            dsc.dumpState();
-        }
     }
 
 }

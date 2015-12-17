@@ -33,16 +33,13 @@ public class InstNICICB extends AbstractObsComponentCB {
     }
 
     protected boolean thisHasConfiguration() {
-        if (sysConfig == null)
-            return false;
-        return (sysConfig.getParameterCount() > 0);
+        return sysConfig != null && (sysConfig.getParameterCount() > 0);
     }
 
     protected void thisApplyNext(IConfig config, IConfig prevFull) {
         String systemName = sysConfig.getSystemName();
-        Collection sysConfigParams = sysConfig.getParameters();
-        for (Object sysConfigParam : sysConfigParams) {
-            IParameter param = (IParameter) sysConfigParam;
+        Collection<IParameter> sysConfigParams = sysConfig.getParameters();
+        for (IParameter param : sysConfigParams) {
             config.putParameter(systemName, DefaultParameter.getInstance(
                     param.getName(),
                     param.getValue()));

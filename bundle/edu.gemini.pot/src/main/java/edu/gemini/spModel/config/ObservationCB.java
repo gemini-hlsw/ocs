@@ -1,11 +1,3 @@
-// Copyright 2000
-// Association for Universities for Research in Astronomy, Inc.
-// Observatory Control System, Gemini Telescopes Project.
-// See the file LICENSE for complete details.
-//
-// $Id: ObservationCB.java 46768 2012-07-16 18:58:53Z rnorris $
-//
-
 package edu.gemini.spModel.config;
 
 import edu.gemini.pot.sp.ISPObsComponent;
@@ -20,7 +12,6 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 
 import java.util.*;
-
 
 /**
  * The {@link IConfigBuilder configuration builder} for an observation node.

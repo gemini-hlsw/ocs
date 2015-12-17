@@ -299,7 +299,7 @@ public final class InstNIRI extends SPInstObsComp implements PropertyProvider, G
         final ROIDescription roi = _builtinROI.getROIDescription();
         final Mask m = getMask();
         final double height = _getCorrectHeight(m, roi);
-        double width = height   ;
+        double width = height;
         if (m != Mask.MASK_IMAGING && m != Mask.PINHOLE_MASK) {
             // must be a slit
             width = m.getWidth();
@@ -712,7 +712,7 @@ public final class InstNIRI extends SPInstObsComp implements PropertyProvider, G
         return GUIDE_PROBES;
     }
 
-    public static final ConfigInjector WAVELENGTH_INJECTOR = ConfigInjector.create(
+    public static final ConfigInjector<String> WAVELENGTH_INJECTOR = ConfigInjector.create(
             new ObsWavelengthCalc2<Disperser, Filter>() {
                 public PropertyDescriptor descriptor1() {
                     return DISPERSER_PROP;

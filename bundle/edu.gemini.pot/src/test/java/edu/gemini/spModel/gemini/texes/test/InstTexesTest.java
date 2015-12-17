@@ -11,6 +11,7 @@ import java.io.*;
 import java.util.Collection;
 import java.util.ArrayList;
 import java.lang.reflect.Method;
+import java.util.Collections;
 
 public class InstTexesTest extends TestCase {
 
@@ -25,12 +26,10 @@ public class InstTexesTest extends TestCase {
         }
     }
 
-
     public void testDefaultsValues() {
         InstTexes texes = new InstTexes();
         InstTexesTest.assertEquals(texes.getDisperser(), TexesParams.Disperser.DEFAULT);
     }
-
 
     public void testSlitModeUpdating() throws IOException, ClassNotFoundException {
         InstTexes inst = new InstTexes();
@@ -43,7 +42,6 @@ public class InstTexesTest extends TestCase {
         assertEquals(inst.getScienceArea(), new double[]{0.5, 1.7});
     }
 
-
     public void testProperties() throws Exception {
         InstTexes texes = new InstTexes();
 
@@ -54,7 +52,6 @@ public class InstTexesTest extends TestCase {
         testProperty(texes, InstTexes.WAVELENGTH_PROP.getName(), new double []{1.1});
 
     }
-
 
     public void testParamSetIO() {
         InstTexes inst = new InstTexes();
@@ -75,12 +72,11 @@ public class InstTexesTest extends TestCase {
         assertEquals(copy.getWavelength(), inst.getWavelength());
     }
 
-
     /**
      * Test to see that simple set/get works, as well as serialization of the property,
      * persistence to/from a ParamSet.
      */
-    private void testProperty(InstTexes target, String propName, Class type, Collection values) throws Exception {
+    private <E> void testProperty(InstTexes target, String propName, Class<?> type, Collection<E> values) throws Exception {
 
         String propertyName = Character.toUpperCase(propName.charAt(0)) + "";
         if (propName.length() > 1) {
@@ -88,7 +84,7 @@ public class InstTexesTest extends TestCase {
         }
         Method get = target.getClass().getMethod("get" + propertyName);
         Method set = target.getClass().getMethod("set" + propertyName, type);
-        for (Object val : values) {
+        for (E val : values) {
             // Simple get/set
             set.invoke(target, val);
             InstTexesTest.assertEquals(get.invoke(target, new Object[0]), val);
@@ -115,17 +111,16 @@ public class InstTexesTest extends TestCase {
     }
 
     private void testProperty(InstTexes target, String propName, double[] values) throws Exception {
-        Collection<Double> vals = new ArrayList<Double>(values.length);
+        Collection<Double> vals = new ArrayList<>(values.length);
         for (double value : values) vals.add(value);
         testProperty(target, propName, Double.TYPE, vals);
     }
 
     private void testProperty(InstTexes target, String propName, TexesParams.Disperser[] values) throws Exception {
-            Collection<TexesParams.Disperser> vals = new ArrayList<TexesParams.Disperser>(values.length);
-            for (TexesParams.Disperser value : values) vals.add(value);
-            testProperty(target, propName, TexesParams.Disperser.class, vals);
-        }
-
+        Collection<TexesParams.Disperser> vals = new ArrayList<>(values.length);
+        Collections.addAll(vals, values);
+        testProperty(target, propName, TexesParams.Disperser.class, vals);
+    }
 
     private Object serializeDeserialize(Object o) throws IOException, ClassNotFoundException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();

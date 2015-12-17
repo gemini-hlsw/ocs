@@ -1,7 +1,3 @@
-//
-// $Id: ObsRecord.java 15646 2008-11-25 20:28:34Z swalker $
-//
-
 package edu.gemini.spModel.obsrecord;
 
 import edu.gemini.shared.util.GeminiRuntimeException;
@@ -107,9 +103,8 @@ public final class ObsExecRecord implements Serializable {
         // Add the dataset records.
         ParamSet datasetsParamSet = paramSet.getParamSet(DATASETS_PARAM_SET);
         if (datasetsParamSet != null) {
-            List lst = datasetsParamSet.getParamSets(DatasetExecRecord.ParamSet());
-            for (Object o : lst) {
-                ParamSet datasetParamSet = (ParamSet) o;
+            List<ParamSet> lst = datasetsParamSet.getParamSets(DatasetExecRecord.ParamSet());
+            for (ParamSet datasetParamSet : lst) {
                 DatasetExecRecord dr = DatasetExecRecord.apply(datasetParamSet);
                 _datasets.put(dr.label(), dr);
             }
@@ -123,9 +118,8 @@ public final class ObsExecRecord implements Serializable {
         _visits = new PrivateVisitList();
         ParamSet eventsParamSet = paramSet.getParamSet(EVENTS_PARAM_SET);
         if (eventsParamSet != null) {
-            List lst = eventsParamSet.getParamSets(ObsExecEvent.PARAM_SET);
-            for (Object o : lst) {
-                final ParamSet eventParamSet = (ParamSet) o;
+            List<ParamSet> lst = eventsParamSet.getParamSets(ObsExecEvent.PARAM_SET);
+            for (ParamSet eventParamSet : lst) {
                 final ExecEvent evt = ExecEvent.create(eventParamSet);
                 if (!(evt instanceof ObsExecEvent)) {
                     throw new PioParseException("unexpected event type: " + evt.getClass());
@@ -154,10 +148,9 @@ public final class ObsExecRecord implements Serializable {
         pSet.addParamSet(datasetsParamSet);
 
         // Add the events.
-        List events = _visits.getAllEventList();
+        List<ObsExecEvent> events = _visits.getAllEventList();
         ParamSet eventsParamSet = factory.createParamSet(EVENTS_PARAM_SET);
-        for (Object o : events) {
-            ObsExecEvent evt = (ObsExecEvent) o;
+        for (ObsExecEvent evt : events) {
             eventsParamSet.addParamSet(evt.toParamSet(factory));
         }
         pSet.addParamSet(eventsParamSet);
@@ -514,8 +507,7 @@ public final class ObsExecRecord implements Serializable {
      * but not the end dataset event.
      */
     public synchronized boolean isInProgress(DatasetLabel label) {
-        if (_tentativeDataset == null) return false;
-        return label.equals(_tentativeDataset.getLabel());
+        return _tentativeDataset != null && label.equals(_tentativeDataset.getLabel());
     }
 
     /**

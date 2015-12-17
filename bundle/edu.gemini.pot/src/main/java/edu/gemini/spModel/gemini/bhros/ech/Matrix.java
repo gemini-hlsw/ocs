@@ -62,20 +62,18 @@ public final class Matrix {
         pcells[5] = f;
     }
 
-	/**
-	 * Set values by copying them from another matrix, starting at the specified cell.
-	 * Probably only makes sense for 1-dimensional matrices.
-	 * @param other
-	 * @param pos
-	 */
+    /**
+     * Set values by copying them from another matrix, starting at the specified cell.
+     * Probably only makes sense for 1-dimensional matrices.
+     */
     public void set(Matrix other, int pos) {
-		for (int i = 0; i < pcells.length; i++)
-			pcells[i] = other.pcells[pos++];
+        for (int i = 0; i < pcells.length; i++)
+            pcells[i] = other.pcells[pos++];
     }
 
     public void set(Matrix other) {
-		if (other.nRows != nRows || other.nCols != nCols)
-			throw new IllegalArgumentException("Can't copy an array of different size.");
+        if (other.nRows != nRows || other.nCols != nCols)
+            throw new IllegalArgumentException("Can't copy an array of different size.");
         System.arraycopy(other.pcells, 0, pcells, 0, pcells.length);
     }
     
@@ -124,7 +122,7 @@ public final class Matrix {
     
     public synchronized void read(InputStream is) {
         currentReadRow = 0;
-	    new ArrayReader() {
+        new ArrayReader<Object>() {
             public Object build(String args) {
                 String[] parts = args.split("\\s+");
                 if (parts.length != nCols)
@@ -139,13 +137,5 @@ public final class Matrix {
         if (currentReadRow != nRows)
             throw new RuntimeException("Expected " +nRows + " rows; found " + currentReadRow);
     }
-
-	public int nRows() {
-		return nRows;
-	}
-
-	public int nCols() {
-		return nCols;
-	}
 
 }

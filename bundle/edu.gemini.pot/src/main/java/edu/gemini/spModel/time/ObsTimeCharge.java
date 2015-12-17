@@ -1,7 +1,3 @@
-//
-// $Id: ObsTimeCharge.java 6304 2005-06-05 15:53:54Z shane $
-//
-
 package edu.gemini.spModel.time;
 
 import java.io.Serializable;
@@ -10,7 +6,7 @@ import java.io.Serializable;
  * An association of a long time value and a {@link ChargeClass}.  This is an
  * immutable value object.
  */
-public final class ObsTimeCharge implements Comparable, Serializable {
+public final class ObsTimeCharge implements Comparable<ObsTimeCharge>, Serializable {
     private static final long serialVersionUID = 1L;
 
     private long _time;
@@ -50,8 +46,8 @@ public final class ObsTimeCharge implements Comparable, Serializable {
         return _class;
     }
 
-    public int compareTo(Object other) {
-        ObsTimeCharge that = (ObsTimeCharge) other;
+    @Override
+    public int compareTo(ObsTimeCharge that) {
         int res = _class.compareTo(that._class);
         if (res != 0) return res;
 

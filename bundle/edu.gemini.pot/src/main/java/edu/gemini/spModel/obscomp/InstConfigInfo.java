@@ -1,9 +1,3 @@
-// Copyright 2001
-// Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-//
-// $Id: InstConfigInfo.java 21893 2009-09-16 19:53:37Z swalker $
-//
 package edu.gemini.spModel.obscomp;
 
 import edu.gemini.spModel.type.ObsoletableSpType;
@@ -14,7 +8,6 @@ import java.beans.PropertyDescriptor;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
-
 
 /**
  * Simple class describing instrument specific configuration options.
@@ -33,7 +26,7 @@ public final class InstConfigInfo {
     private final boolean _optional;
 
     // The list of posible values for the parameter, or null if not known
-    private final Class _enumType;
+    private final Class<?> _enumType;
 
     // If true, item can be used as a query parameter, otherwise only in the results
     private final boolean _queryable;
@@ -47,7 +40,7 @@ public final class InstConfigInfo {
         _propertyName = pd.getName();
         _description  = pd.getShortDescription();
 
-        Class c = pd.getPropertyType();
+        Class<?> c = pd.getPropertyType();
         _optional     = Option.class.isAssignableFrom(c);
         _enumType     = getEnumType(pd);
         _queryable    = queryable;
@@ -61,15 +54,15 @@ public final class InstConfigInfo {
         this(pd, true);
     }
 
-    private static Class getEnumType(PropertyDescriptor pd) {
-        Class c = pd.getPropertyType();
+    private static Class<?> getEnumType(PropertyDescriptor pd) {
+        Class<?> c = pd.getPropertyType();
         if (Option.class.isAssignableFrom(c)) {
             c = PropertySupport.getWrappedType(pd);
         }
         return c.isEnum() ? c : null;
     }
 
-    public Class getEnumType() {
+    public Class<?> getEnumType() {
         return _enumType;
     }
 
@@ -88,27 +81,27 @@ public final class InstConfigInfo {
         return _propertyName;
     }
 
-    public Enum[] getAllTypes() {
+    public Enum<?>[] getAllTypes() {
         if (_enumType == null) return null;
-        return (Enum[]) _enumType.getEnumConstants();
+        return (Enum<?>[]) _enumType.getEnumConstants();
     }
 
-    public Enum[] getValidTypes() {
+    public Enum<?>[] getValidTypes() {
         if (_enumType == null) return null;
 
         if (!ObsoletableSpType.class.isAssignableFrom(_enumType)) {
             return getAllTypes();
         }
 
-        Enum[] consts = (Enum[]) _enumType.getEnumConstants();
-        List<Enum> res = new ArrayList<Enum>(consts.length);
+        Enum<?>[] consts = (Enum<?>[]) _enumType.getEnumConstants();
+        List<Enum<?>> res = new ArrayList<>(consts.length);
 
-        for (Enum val : consts) {
+        for (Enum<?> val : consts) {
             if (((ObsoletableSpType) val).isObsolete()) continue;
             res.add(val);
         }
 
-        return res.toArray((Enum[]) Array.newInstance(_enumType, res.size()));
+        return res.toArray((Enum<?>[]) Array.newInstance(_enumType, res.size()));
     }
 
     /**

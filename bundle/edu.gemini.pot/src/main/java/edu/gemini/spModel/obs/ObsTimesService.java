@@ -1,7 +1,3 @@
-//
-// $Id: ObsTimesService.java 46768 2012-07-16 18:58:53Z rnorris $
-//
-
 package edu.gemini.spModel.obs;
 
 import edu.gemini.spModel.obsclass.ObsClass;
@@ -11,16 +7,13 @@ import edu.gemini.spModel.obslog.ObsLog;
 import edu.gemini.spModel.time.ObsTimeCharges;
 import edu.gemini.spModel.time.ObsTimes;
 
-import java.util.List;
-
 /**
  * A service used to determine both raw and corrected {@link ObsTimes} for
  * particular observations.
  */
 public final class ObsTimesService {
 
-    private ObsTimesService() {
-    }
+    private ObsTimesService() {}
 
     /**
      * Gets raw, uncorrected observation times as calculated from the events
@@ -98,10 +91,7 @@ public final class ObsTimesService {
         ObsTimeCharges charges = ObsTimeCharges.ZERO_CHARGES;
         long elapsedTime = 0;
 
-        List obsList = container.getAllObservations();
-
-        for (Object anObsList : obsList) {
-            ISPObservation obs = (ISPObservation) anObsList;
+        for (ISPObservation obs : container.getAllObservations()) {
             ObsTimes cur = getCorrectedObsTimes(obs);
 
             charges = charges.addTimeCharges(cur.getTimeCharges());

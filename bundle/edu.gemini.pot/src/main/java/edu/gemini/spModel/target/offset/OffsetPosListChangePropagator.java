@@ -1,7 +1,6 @@
 package edu.gemini.spModel.target.offset;
 
 import edu.gemini.spModel.target.TelescopePosWatcher;
-import edu.gemini.spModel.target.WatchablePos;
 
 import java.util.List;
 
@@ -15,7 +14,7 @@ public final class OffsetPosListChangePropagator<P extends OffsetPosBase> implem
      * event.
      */
     public interface Notifier {
-        public void apply();
+        void apply();
     }
 
     private final Notifier notifier;
@@ -30,11 +29,7 @@ public final class OffsetPosListChangePropagator<P extends OffsetPosBase> implem
         resetPosWatcher(posList.getAllPositions());
     }
 
-    private final TelescopePosWatcher posWatcher = new TelescopePosWatcher() {
-        @Override public void telescopePosUpdate(WatchablePos tp) {
-            propagate();
-        }
-    };
+    private final TelescopePosWatcher posWatcher = tp -> propagate();
 
     private void propagate() {
         notifier.apply();

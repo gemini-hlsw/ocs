@@ -1,7 +1,3 @@
-//
-// $Id$
-//
-
 package edu.gemini.spModel.seqcomp;
 
 import edu.gemini.spModel.gemini.calunit.smartgcal.CalibrationProvider;

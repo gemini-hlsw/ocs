@@ -1,9 +1,3 @@
-// Copyright 1997 Association for Universities for Research in Astronomy, Inc.,
-// Observatory Control System, Gemini Telescopes Project.
-// See the file LICENSE for complete details.
-//
-// $Id: SeqConfigGNIRSCB.java 27568 2010-10-25 18:03:42Z swalker $
-//
 package edu.gemini.spModel.gemini.gnirs;
 
 import edu.gemini.pot.sp.ISPSeqComponent;
@@ -15,8 +9,6 @@ import edu.gemini.spModel.data.config.StringParameter;
 import edu.gemini.spModel.data.config.IConfig;
 import edu.gemini.spModel.data.config.IParameter;
 import edu.gemini.spModel.data.config.ISysConfig;
-
-import java.util.Iterator;
 
 /**
  * A configuration builder for the GNIRS iterator.
@@ -44,13 +36,11 @@ public final class SeqConfigGNIRSCB extends HelperSeqCompCB {
                 StringParameter.getInstance(InstConstants.INSTRUMENT_NAME_PROP, GNIRSConstants.INSTRUMENT_NAME_PROP));
 
         ISysConfig sysConfig = config.getSysConfig(SeqConfigNames.INSTRUMENT_CONFIG_NAME);
-        Iterator it = sysConfig.getParameters().iterator();
-        while (it.hasNext()) {
-            IParameter param = (IParameter) it.next();
+        for (IParameter param : sysConfig.getParameters()) {
             String name = param.getName();
 
             if ((name != null) && name.equals(GNIRSConstants.CENTRAL_WAVELENGTH_PROP)) {
-                GNIRSParams.Wavelength w = (GNIRSParams.Wavelength)param.getValue();
+                GNIRSParams.Wavelength w = (GNIRSParams.Wavelength) param.getValue();
                 String obsWave = (w == null) ? "" : w.getStringValue();
                 config.putParameter(SeqConfigNames.INSTRUMENT_CONFIG_NAME,
                         StringParameter.getInstance(GNIRSConstants.OBSERVING_WAVELENGTH_PROP, obsWave));

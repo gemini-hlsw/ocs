@@ -1,6 +1,3 @@
-//
-// $Id: ItemEntry.java 7173 2006-06-13 21:00:26Z shane $
-//
 package edu.gemini.spModel.config2;
 
 import java.io.Serializable;
@@ -11,7 +8,7 @@ import java.io.Serializable;
  * items such as {@link Config#itemEntries()}.  This class is comparable to
  * Map.Entry in form and purpose.
  */
-public final class ItemEntry implements Comparable, Serializable {
+public final class ItemEntry implements Comparable<ItemEntry>, Serializable {
     public static final ItemEntry[] EMPTY_ARRAY = new ItemEntry[0];
 
     private ItemKey _key;
@@ -34,9 +31,8 @@ public final class ItemEntry implements Comparable, Serializable {
         return _item;
     }
 
-    public int compareTo(Object other) {
-        ItemEntry that = (ItemEntry) other;
-
+    @Override
+    public int compareTo(ItemEntry that) {
         int res;
 
         res = _key.compareTo(that._key);
@@ -84,8 +80,6 @@ public final class ItemEntry implements Comparable, Serializable {
     }
 
     @Override public String toString() {
-        final StringBuilder buf = new StringBuilder();
-        buf.append(_key).append(" => ").append(_item);
-        return buf.toString();
+        return String.valueOf(_key) + " => " + _item;
     }
 }

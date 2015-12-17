@@ -1,7 +1,3 @@
-//
-// $Id: ObsTimeCharges.java 7011 2006-05-04 16:12:21Z shane $
-//
-
 package edu.gemini.spModel.time;
 
 import java.io.Serializable;
@@ -10,8 +6,8 @@ import java.io.Serializable;
  * A collection of time values (in milliseconds) and their associated
  * {@link ChargeClass}.  This is an immutable value object.
  */
-public final class ObsTimeCharges implements Comparable, Serializable {
-    private static final long serialVersionUID = 1l;
+public final class ObsTimeCharges implements Comparable<ObsTimeCharges>, Serializable {
+    private static final long serialVersionUID = 1L;
 
     private long[] _times = new long[ChargeClass.values().length];
 
@@ -115,8 +111,8 @@ public final class ObsTimeCharges implements Comparable, Serializable {
         return res;
     }
 
-    public int compareTo(Object o) {
-        ObsTimeCharges that = (ObsTimeCharges) o;
+    @Override
+    public int compareTo(ObsTimeCharges that) {
         for (int i=0; i<_times.length; ++i) {
             long thisTime = _times[i];
             long thatTime = that._times[i];
@@ -140,9 +136,8 @@ public final class ObsTimeCharges implements Comparable, Serializable {
     public int hashCode() {
         int res = 0;
 
-        for (int i=0; i<_times.length; ++i) {
-            long val = _times[i];
-            res = 37*res + (int) (val ^ (val>>>32));
+        for (long val : _times) {
+            res = 37 * res + (int) (val ^ (val >>> 32));
         }
 
         return res;
