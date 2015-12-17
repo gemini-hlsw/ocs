@@ -35,9 +35,6 @@ object GSAInstrument {
 sealed trait GsaParams {
   /** Instrument used to take the datasets. */
   def instrument: GSAInstrument
-
-  /** Maximum number of results to return. */
-  def limit: Int
 }
 
 object GsaParams {
@@ -73,9 +70,9 @@ object GsaParams {
 /**
  * Sidereal target search params take a fixed ra/dec coordinate.
  */
-case class GsaSiderealParams(coords: Coordinates, instrument: GSAInstrument, limit: Int = 50) extends GsaParams
+case class GsaSiderealParams(coords: Coordinates, instrument: GSAInstrument) extends GsaParams
 
 /**
  * Non-sidereal target search params just take the target name.
  */
-case class GsaNonSiderealParams(targetName: String, instrument: GSAInstrument, limit: Int = 50) extends GsaParams
+case class GsaNonSiderealParams(targetName: String, instrument: GSAInstrument) extends GsaParams
