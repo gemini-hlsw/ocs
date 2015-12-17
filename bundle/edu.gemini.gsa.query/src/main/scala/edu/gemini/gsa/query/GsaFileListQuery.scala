@@ -26,8 +26,8 @@ object GsaFileListQuery {
 
   def apply(host: GsaHost, site: Site): GsaFileListQuery =
     new GsaFileListQuery {
-      val siderealPrefix = s"${host.protocol}://${host.host}/jsonfilelist/notengineering/science/NotFail/OBJECT"
-      val nonSiderealPrefix = s"${host.protocol}://${host.host}/jsonfilelist/summary"
+      val siderealPrefix = s"${host.baseUrl}/jsonfilelist/notengineering/science/NotFail/OBJECT"
+      val nonSiderealPrefix = s"${host.baseUrl}/jsonfilelist/summary"
 
       private def siderealUrl(filter: String, instrumentName: String): URL = new URL(s"$siderealPrefix/$instrumentName/$filter")
       private def nonSiderealUrl(filter: String, instrumentName: String): URL = new URL(s"$nonSiderealPrefix/$instrumentName/$filter")

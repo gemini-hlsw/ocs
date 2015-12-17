@@ -256,10 +256,10 @@ class ObsListView(shellAdvisor:ShellAdvisor, band:Band, queueLookup: Target => U
       }
 
       def apply() {
-        viewer.selection flatMap {
+        viewer.selection.flatMap {
           case ObsElem(o) => GsaParams.get(o).map(p => GsaUrl(p))
           case _          => None
-        } foreach {url =>
+        }.foreach {url =>
           try {
             Browser.open(url)
           } catch {

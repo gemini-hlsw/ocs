@@ -15,7 +15,7 @@ import Scalaz._
 object GsaClientImpl extends GsaClient {
   val gsaQuery = GsaFileListQuery(GsaUrl.ROOT, Site.GN)
 
-  override def query(params: GsaParams, timeout: Int = GSA_TIMEOUT): GsaResult = {
+  override def query(params: GsaParams, timeout: Int = GSA_TIMEOUT): GsaResult =
     params match {
       case s: GsaSiderealParams    =>
         gsaQuery.files(s.coords, params.instrument.name) match {
@@ -28,5 +28,4 @@ object GsaClientImpl extends GsaClient {
           case -\/(e) => GsaResult.Error(gsaQuery.url(n.targetName, params.instrument.name), e.explain)
         }
     }
-  }
 }
