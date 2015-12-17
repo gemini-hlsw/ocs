@@ -6,9 +6,6 @@ name := "edu.gemini.gsa.client"
 
 version := pitVersion.value.toOsgiVersion
 
-unmanagedJars in Compile ++= Seq(
-  new File(baseDirectory.value, "../../lib/bundle/jsoup-1.6.1.jar"))
-
 ocsBundleSettings // defined in top-level project/ folder
 
 osgiSettings // from the sbt-osgi plugin
@@ -22,5 +19,3 @@ OsgiKeys.dynamicImportPackage := Seq("")
 OsgiKeys.exportPackage := Seq(
   "edu.gemini.gsa.client.api",
   "edu.gemini.gsa.client.impl")
-
-        
