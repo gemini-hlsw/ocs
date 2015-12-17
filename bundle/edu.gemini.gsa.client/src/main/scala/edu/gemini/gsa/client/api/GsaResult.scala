@@ -43,7 +43,7 @@ object GsaResult {
   case class Error(url: URL, msg: String) extends Failure
 
   /**
-   * Indicates an unknown and unexpected problem happend while attempting the
+   * Indicates an unknown and unexpected problem happened while attempting the
    * query.
    */
   case class Other(url: URL, ex: Exception) extends Failure

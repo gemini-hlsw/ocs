@@ -1,5 +1,6 @@
 package edu.gemini.pit.ui.view.obs
 
+import edu.gemini.gsa.client.impl.GsaUrl
 import edu.gemini.model.p1.immutable._
 import edu.gemini.pit.model._
 import edu.gemini.pit.ui.editor._

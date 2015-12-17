@@ -14,19 +14,32 @@ sealed trait GsaFileListQuery {
 
   /** Builds the URL to be searched for the given coordinates */
   def url(c: Coordinates, instrumentName: String): URL
+
+  /** `GsaFile`s corresponding to the given name. */
+  def files(n: String, instrumentName: String): GsaResponse[List[GsaFile]]
+
+  /** Builds the URL to be searched for the given coordinates */
+  def url(n: String, instrumentName: String): URL
 }
 
 object GsaFileListQuery {
 
   def apply(host: GsaHost, site: Site): GsaFileListQuery =
     new GsaFileListQuery {
-      val prefix = s"${host.protocol}://${host.host}/jsonfilelist/notengineering/science/NotFail/OBJECT"
+      val siderealPrefix = s"${host.protocol}://${host.host}/jsonfilelist/notengineering/science/NotFail/OBJECT"
+      val nonSiderealPrefix = s"${host.protocol}://${host.host}/jsonfilelist/summary"
 
-      private def url(filter: String, instrumentName: String): URL = new URL(s"$prefix/$instrumentName/$filter")
+      private def siderealUrl(filter: String, instrumentName: String): URL = new URL(s"$siderealPrefix/$instrumentName/$filter")
+      private def nonSiderealUrl(filter: String, instrumentName: String): URL = new URL(s"$nonSiderealPrefix/$instrumentName/$filter")
 
       override def files(c: Coordinates, instrumentName: String): GsaResponse[List[GsaFile]] =
         GsaQuery.get(url(c, instrumentName))
 
-      override def url(c: Coordinates, instrumentName: String): URL = url(s"ra=${c.ra.toAngle.toDegrees}/dec=${c.dec.toDegrees}/sr=60", instrumentName)
+      override def files(n: String, instrumentName: String): GsaResponse[List[GsaFile]] =
+        GsaQuery.get(url(n, instrumentName))
+
+      override def url(c: Coordinates, instrumentName: String): URL = siderealUrl(s"ra=${c.ra.toAngle.toDegrees}/dec=${c.dec.toDegrees}/sr=60", instrumentName)
+
+      override def url(n: String, instrumentName: String): URL = nonSiderealUrl(s"object=$n/sr=60", instrumentName)
     }
 }

@@ -3,10 +3,11 @@ package edu.gemini.gsa.client.impl
 import edu.gemini.gsa.client.api.{GsaNonSiderealParams, GsaSiderealParams, GsaParams}
 import java.net.{URL, URLEncoder}
 
+import edu.gemini.gsa.query.GsaHost
 import edu.gemini.spModel.core.Coordinates
 
 object GsaUrl {
-  val ROOT = "http://www.cadc-ccda.hia-iha.nrc-cnrc.gc.ca/cadcbin/gsa/wdbi.cgi/gsa/gsa_science/query"
+  val ROOT = GsaHost.Archive("archive.gemini.edu")
 
   /**
    * Converts the GsaParams into a URL that can be used to query the GSA.
