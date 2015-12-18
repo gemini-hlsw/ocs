@@ -5,6 +5,7 @@ import edu.gemini.pit.ui.util.MultiFormatTextField.Formatter
 import java.text.ParseException
 
 import edu.gemini.shared.gui.textComponent.SelectOnFocus
+import edu.gemini.spModel.core.Declination
 
 import scala.swing._
 import scala.swing.BorderPanel.Position._
@@ -149,7 +150,7 @@ object MFTFTest extends SwingApplication {
         }
       }, North)
 
-      add(new DecTextField(0) {
+      add(new DecTextField(Declination.zero) {
         reactions += {
           case ValueChanged(_) =>
             println("Valid? " + valid)

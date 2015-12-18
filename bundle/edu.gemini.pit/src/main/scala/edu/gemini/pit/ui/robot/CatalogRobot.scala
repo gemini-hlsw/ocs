@@ -134,13 +134,13 @@ class CatalogRobot(parent: Component) extends Robot {
 
         case Left(target: SiderealTarget) =>
           target.coords(sem.midPoint) match {
-            case Some(Coordinates(ra, dec)) => s"${target.name} (${ra}, ${dec}) ${target.magnitudes.map(_.band.name).mkString(" ")}"
+            case Some(Coordinates(ra, dec)) => s"${target.name} (${ra.toAngle.formatHMS}, ${dec.formatDMS}) ${target.magnitudes.map(_.band.name).mkString(" ")}"
             case None                       => s"${target.name} (--, --) ${target.magnitudes.map(_.band.name).mkString(" ")}"
           }
 
         case Left(target: NonSiderealTarget) =>
           target.coords(sem.midPoint) match {
-            case Some(Coordinates(ra, dec)) => s"${target.name} (${ra}, ${dec})"
+            case Some(Coordinates(ra, dec)) => s"${target.name} (${ra.toAngle.formatHMS}, ${dec.formatDMS})"
             case None                       => s"${target.name} (--, --)"
           }
 

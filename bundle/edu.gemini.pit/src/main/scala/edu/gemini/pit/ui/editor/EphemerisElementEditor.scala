@@ -1,16 +1,18 @@
 package edu.gemini.pit.ui.editor
 
-
 import edu.gemini.model.p1.immutable.EphemerisElement
 
 import edu.gemini.pit.ui.util._
 import edu.gemini.shared.gui.textComponent.NumberField
-import edu.gemini.spModel.core.{Declination, Angle, RightAscension, Coordinates}
+import edu.gemini.spModel.core.Coordinates
 
 import scala.swing._
 import scala.swing.event.ValueChanged
 import java.util.{TimeZone, Date}
 import javax.swing.{JSpinner, SpinnerDateModel}
+
+import scalaz._
+import Scalaz._
 
 /**
  * Modal editor for an EphemerisElement.
@@ -41,22 +43,14 @@ class EphemerisElementEditor(e: EphemerisElement) extends StdModalEditor[Ephemer
     setValue(new Date(e.validAt))
   }
   object RA extends RATextField(e.coords.ra.toAngle.toDegrees)
-  object Dec extends DecTextField(e.coords.dec.toDegrees)
+  object Dec extends DecTextField(e.coords.dec)
   object Mag extends NumberField(e.magnitude, allowEmpty = false)
 
   // Construct our editor
   def editor = Editor
 
-  implicit def pimpString(s:String) = new Object {
-    def toDoubleOption = try {
-      Some(s.toDouble)
-    } catch {
-      case _ : NumberFormatException => None
-    }
-  }
-
   // Construct a new value
-  def value = EphemerisElement(Coordinates(RA.toRightAscension, Dec.toDeclination), Mag.text.toDoubleOption, Cal.getValue.asInstanceOf[Date].getTime)
+  def value = EphemerisElement(Coordinates(RA.toRightAscension, Dec.value), parseDouble(Mag.text).toOption, Cal.getValue.asInstanceOf[Date].getTime)
 
 }
 

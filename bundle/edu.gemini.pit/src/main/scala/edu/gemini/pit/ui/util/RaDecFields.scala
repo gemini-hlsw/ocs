@@ -5,7 +5,8 @@ import java.text.{ParseException, DecimalFormat}
 
 import edu.gemini.spModel.core.{Declination, RightAscension, Angle}
 
-private trait RaDecFields // for ant
+import scalaz._
+import Scalaz._
 
 class DegreeFormatter(caption: String, inRange: Option[Double => Boolean] = None) extends Formatter[Double](caption) {
   val raDecFormat = new DecimalFormat("##0.000###")
@@ -23,9 +24,23 @@ class DegreeFormatter(caption: String, inRange: Option[Double => Boolean] = None
   }
 }
 
+class DecDegreeFormatter(caption: String, inRange: Option[Double => Boolean] = None) extends Formatter[Declination](caption) {
+  val raDecFormat = new DecimalFormat("##0.000###")
+  def toString(d: Declination) = raDecFormat.format(d.toDegrees)
+
+  def fromString(s: String):Option[Declination] = try {
+    s.toDouble match {
+      case d if inRange.forall(f => f(d)) => Declination.fromAngle(Angle.fromDegrees(d))
+      case _                              => None
+    }
+  } catch {
+    case e:Exception             => None
+  }
+}
+
 object DegreeFormatter {
   def ra(c: String)  = new DegreeFormatter(c, Some(_.abs < 360))
-  def dec(c: String) = new DegreeFormatter(c, Some(_.abs <= 90))
+  def dec(c: String) = new DecDegreeFormatter(c, Some(_.abs <= 90))
 }
 
 class HMSFormatter(caption: String) extends Formatter[Double](caption) {
@@ -38,10 +53,10 @@ class DMSFormatter(caption: String) extends Formatter[Double](caption) {
   def fromString(s: String) = Angle.parseDMS(s).toOption.map(_.toDegrees)
 }
 
-class DecFormatter(caption: String) extends Formatter[Double](caption) {
+class DecFormatter(caption: String) extends Formatter[Declination](caption) {
   val dms = new DMSFormatter(caption)
-  def toString(d: Double)   = dms.toString(d)
-  def fromString(s: String) = dms.fromString(s) filter { _.abs <= 90 }
+  def toString(d: Declination) = ~Option(d).map(_.formatDMS)
+  def fromString(s: String) = Angle.parseDMS(s).toOption.flatMap(Declination.fromAngle)
 }
 
 class RATextField(initialValue: Double) extends MultiFormatTextField(
@@ -53,9 +68,8 @@ class RATextField(initialValue: Double) extends MultiFormatTextField(
   }
 }
 
-class DecTextField(initialValue: Double) extends MultiFormatTextField(
+class DecTextField(initialValue: Declination) extends MultiFormatTextField(
   initialValue, new DecFormatter("DMS"), DegreeFormatter.dec("DEG")) {
-  def toDeclination: Declination = Declination.fromAngle(Angle.fromDegrees(value)).get
   DegreePreference.BOX.get match {
     case DegreePreference.DEGREES => selectFormat("DEG")
     case DegreePreference.HMSDMS  => selectFormat("DMS")
