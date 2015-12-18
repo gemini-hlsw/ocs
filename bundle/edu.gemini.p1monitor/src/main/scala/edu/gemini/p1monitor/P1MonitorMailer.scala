@@ -6,7 +6,6 @@ import java.util.logging.{Level, Logger}
 import java.util.Properties
 import javax.mail.{Transport, Message, Session}
 import edu.gemini.model.p1.immutable._
-import edu.gemini.model.p1.immutable
 import edu.gemini.p1monitor.P1Monitor._
 
 import scalaz._
@@ -25,41 +24,38 @@ class P1MonitorMailer(cfg: P1MonitorConfig) {
       }.getOrElse("")
 
     //construct email body
-    var body = ""
-    proposal foreach {
-      prop => {
-        body += "A new "
-        body += getTypeString(prop.proposalClass)
-        body += " proposal has been received"
-        body += " (" + getReferenceString(prop.proposalClass) + ")"
-        body += ":\n\n"
-
-        body += "\t" + prop.title + "\n"
-        body += "\t" + prop.investigators.pi + "\n\n"
-
-        body += "\t" + getInstrumentsString(prop) + "\n"
-        body += "\t" + prop.proposalClass.requestedTime.format() + " requested\n\n"
-
+    val preBody = proposal.map { prop =>
         val proposalVariable = getReferenceString(prop.proposalClass).split("-").tail.mkString("_")
-        body += "Review the PDF summary at:\n"
-        body += "\thttp://" + cfg.getHost + ":" + cfg.getPort + "/fetch?dir=" + dirName + "&type=" + getTypeName(prop.proposalClass) + "&proposal=" + proposalVariable + "&format=pdf\n\n"
 
-        body += "Download the proposal from:\n"
-        body += "\thttp://" + cfg.getHost + ":" + cfg.getPort + "/fetch?dir=" + dirName + "&type=" + getTypeName(prop.proposalClass) + "&proposal=" + proposalVariable + "&format=xml\n\n"
-
-        body += "Download the proposal's attachment from:\n"
-        body += "\thttp://" + cfg.getHost + ":" + cfg.getPort + "/fetch?dir=" + dirName + "&type=" + getTypeName(prop.proposalClass) + "&proposal=" + proposalVariable + "&format=attachment\n\n"
-      }
+        s"""
+          |A new ${getTypeString(prop.proposalClass)} proposal has been received (${getReferenceString(prop.proposalClass)})
+          |
+          |    ${prop.title}
+          |    ${prop.investigators.pi}
+          |
+          |    ${getInstrumentsString(prop)}
+          |    ${prop.proposalClass.requestedTime.format()} requested
+          |
+          |Review the PDF summary at
+          |https://${cfg.getHost}/fetch/${Semester.current.display}/fetch?dir=$dirName&type=${getTypeName(prop.proposalClass)}&proposal=$proposalVariable&format=pdf
+          |
+          |Download the proposal from:
+          |https://${cfg.getHost}/fetch/${Semester.current.display}/fetch?dir=$dirName&type=${getTypeName(prop.proposalClass)}&proposal=$proposalVariable&format=xml
+          |
+          |Download the proposal's attachment from:
+          |https://${cfg.getHost}/fetch/${Semester.current.display}/fetch?dir=$dirName&type=${getTypeName(prop.proposalClass)}&proposal=$proposalVariable&format=attachment
+          |
+        """.stripMargin
     }
-    files.xml foreach {
-      xml => {
-        body += "Find it in the backend server at:\n"
-        body += "\t" + xml.getAbsolutePath + "\n"
+    val body = files.xml.map { x =>
+        s"""
+          |Find it in the backend server at:
+          |    ${x.getAbsolutePath}
+          |""".stripMargin
       }
-    }
 
     //send email
-    sendMail(dirName, subject, body)
+    (body |+| preBody).foreach(sendMail(dirName, subject, _))
 
   }
 
@@ -98,9 +94,9 @@ class P1MonitorMailer(cfg: P1MonitorConfig) {
     }
   }
 
-  private def getSiteString(observations: List[Observation]): String = observations.map { obs =>
-      obs.blueprint.map(_.site)
-    }.flatten.distinct.mkString(", ")
+  private def getSiteString(observations: List[Observation]): String = observations.flatMap { obs =>
+    obs.blueprint.map(_.site)
+  }.distinct.mkString(", ")
 
   private def getReferenceString(propClass: ProposalClass): String = {
     val string = propClass match {

@@ -96,7 +96,6 @@ class P1MonitorConfig(ctx: BundleContext) {
 
   }
 
-
   def getDirectories: Traversable[MonitoredDirectory] = map.values
 
   def getDirectory(name: String) = map(name)
