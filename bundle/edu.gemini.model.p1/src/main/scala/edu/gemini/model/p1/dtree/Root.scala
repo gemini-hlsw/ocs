@@ -23,7 +23,7 @@ class Root(sem:Semester) extends SingleSelectNode[Semester, Instrument, Any](sem
     case Nifs       => Left(inst.Nifs())
     case Niri       => Left(inst.Niri())
     case Phoenix    => Left(inst.Phoenix())
-    case Dssi       => Right(DssiBlueprint())
+    case Dssi       => Left(inst.Dssi())
     case Texes      => Left(inst.Texes())
     case Trecs      => Left(inst.Trecs())
     case Visitor    => Left(inst.Visitor())

@@ -12,7 +12,7 @@ class QueryArgsSpec extends SpecificationWithJUnit {
       }
     }
     "should map Speckle to Nifs. REL-1061" in {
-      QueryArgs.instId(new DssiBlueprint()) must beRight.like {
+      QueryArgs.instId(new DssiBlueprint(Site.GN)) must beRight.like {
         case i => i must beEqualTo(Instrument.Nifs.id)
       }
     }
@@ -20,7 +20,7 @@ class QueryArgsSpec extends SpecificationWithJUnit {
       QueryArgs.instId(new VisitorBlueprint(Site.GN, "name")) must beRight.like {
         case i => i must beEqualTo(Instrument.Niri.id)
       }
-      QueryArgs.instSpecificArgs(new VisitorBlueprint(Site.GN, "name")) must contain(("niriCamera" -> "F6"))
+      QueryArgs.instSpecificArgs(new VisitorBlueprint(Site.GN, "name")) must contain("niriCamera" -> "F6")
     }
   }
 }

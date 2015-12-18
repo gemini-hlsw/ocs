@@ -437,6 +437,19 @@ class UpConverterSpec extends SpecificationWithJUnit with SemesterProperties {
           result must \\("Texes")
       }
     }
+    "proposal with dssi blueprints must have a site, REL-2463" in {
+      val xml = XML.load(new InputStreamReader(getClass.getResourceAsStream("proposal_with_dssi_no_site.xml")))
+
+      val converted = UpConverter.convert(xml)
+      converted must beSuccessful.like {
+        case StepResult(changes, result) =>
+          changes must have length 4
+          changes must contain("Dssi proposal has been assigned to Gemini North.")
+          // The dssi blueprint must remain and include a site
+          result must \\("Dssi")
+          result must \\("Dssi") \\ "site" \> "Gemini North"
+      }
+    }
     /*
     "proposal with dssi blueprints must be removed, REL-1350" in {
       val xml = XML.load(new InputStreamReader(getClass.getResourceAsStream("proposal_with_dssi.xml")))
@@ -626,7 +639,7 @@ class UpConverterSpec extends SpecificationWithJUnit with SemesterProperties {
       val converted = UpConverter.convert(xml)
       converted must beSuccessful.like {
         case StepResult(changes, result) =>
-          changes must have length 4
+          changes must have length 5
           changes must contain(s"Updated schema version to ${Proposal.currentSchemaVersion}")
           changes must contain(s"Updated semester to ${Semester.current.display}")
           changes must contain("Please use the PIT from semester 2014B to view the unmodified proposal")

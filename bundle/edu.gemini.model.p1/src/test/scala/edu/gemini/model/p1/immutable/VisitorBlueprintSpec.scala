@@ -3,9 +3,7 @@ package edu.gemini.model.p1.immutable
 import java.io.InputStreamReader
 import org.specs2.mutable._
 import scala.xml.XML
-import org.specs2.scalaz.ValidationMatchers._
 import scala.Some
-
 
 class VisitorBlueprintSpec extends SpecificationWithJUnit with SemesterProperties {
 
@@ -35,21 +33,21 @@ class VisitorBlueprintSpec extends SpecificationWithJUnit with SemesterPropertie
 
       // verify the exported value
       xml must \\("visitor")
-      xml must \\("visitor") \\("visitor")
-      xml must \\("name") \> ("Visitor - Gemini South - Instrument name")
-      xml must \\("visitor") \("visitor") \> "true"
+      xml must \\("visitor") \\"visitor"
+      xml must \\("name") \> "Visitor - Gemini South - Instrument name"
+      xml must \\("visitor") \"visitor" \> "true"
       xml must \\("site") \> "Gemini South"
       xml must \\("custom-name") \> "Instrument name"
     }
     "can be deserialized with site GS" in {
       val proposal = ProposalIo.read(new InputStreamReader(getClass.getResourceAsStream("proposal_with_visitor_gs.xml")))
 
-      proposal.blueprints(0) must beEqualTo(VisitorBlueprint(Site.GS, "My instrument"))
+      proposal.blueprints.head must beEqualTo(VisitorBlueprint(Site.GS, "My instrument"))
     }
     "can be deserialized with site GN" in {
       val proposal = ProposalIo.read(new InputStreamReader(getClass.getResourceAsStream("proposal_with_visitor_gn.xml")))
 
-      proposal.blueprints(0) must beEqualTo(VisitorBlueprint(Site.GN, "My instrument"))
+      proposal.blueprints.head must beEqualTo(VisitorBlueprint(Site.GN, "My instrument"))
     }
   }
 

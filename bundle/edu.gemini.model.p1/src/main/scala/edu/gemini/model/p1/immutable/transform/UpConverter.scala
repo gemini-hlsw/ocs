@@ -5,7 +5,7 @@ import xml.{Node => XMLNode, Text}
 import scalaz._
 import Scalaz._
 
-import edu.gemini.model.p1.immutable.{SemesterOption, Proposal, Semester}
+import edu.gemini.model.p1.immutable.{Site, SemesterOption, Proposal, Semester}
 import edu.gemini.model.p1.immutable.transform.XMLConverter._
 import scala.xml.transform.BasicTransformer
 
@@ -131,7 +131,7 @@ case class LastStepConverter(semester: Semester) extends SemesterConverter {
  * This converter will upgrade to 2016B
  */
 case object SemesterConverter2016ATo2016B extends SemesterConverter {
-  val oldKLongFilter           = "K-long (2.00 um)"
+  val oldKLongFilter    = "K-long (2.00 um)"
   val replacementFilter = "K-long (2.20 um)"
 
   val replaceKLongFilter: TransformFunction = {
@@ -148,7 +148,18 @@ case object SemesterConverter2016ATo2016B extends SemesterConverter {
         }
         StepResult("The Flamingos2 filter K-long (2.00 um) has been converted to K-long (2.20 um).", <flamingos2>{KLongFilterTransformer.transform(ns)}</flamingos2>).successNel
     }
-  val transformers = List(replaceKLongFilter)
+  val dssSite: TransformFunction = {
+    case p @ <dssi>{ns @ _*}</dssi> =>
+      object DssiSiteTransformer extends BasicTransformer {
+        override def transform(n: xml.Node): xml.NodeSeq = n match {
+            case <Dssi>{q @ _*}</Dssi> => <Dssi>{q +: <site>{Site.GN.name}</site>}</Dssi>
+            case elem: xml.Elem        => elem.copy(child = elem.child.flatMap(transform))
+            case _                     => n
+          }
+      }
+      StepResult("Dssi proposal has been assigned to Gemini North.", <dssi>{DssiSiteTransformer.transform(ns)}</dssi>).successNel
+  }
+  val transformers = List(replaceKLongFilter, dssSite)
 }
 
 /**
